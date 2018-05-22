@@ -603,6 +603,44 @@ struct readahead_cache
   ULONGEST miss_count = 0;
 };
 
+/* Description of the remote protocol for a given architecture.  */
+
+struct packet_reg
+{
+  long offset; /* Offset into G packet.  */
+  long regnum; /* GDB's internal register number.  */
+  LONGEST pnum; /* Remote protocol register number.  */
+  int in_g_packet; /* Always part of G packet.  */
+  /* long size in bytes;  == register_size (target_gdbarch (), regnum);
+     at present.  */
+  /* char *name; == gdbarch_register_name (target_gdbarch (), regnum);
+     at present.  */
+};
+
+struct remote_arch_state
+{
+  explicit remote_arch_state (struct gdbarch *gdbarch);
+
+  /* Description of the remote protocol registers.  */
+  long sizeof_g_packet;
+
+  /* Description of the remote protocol registers indexed by REGNUM
+     (making an array gdbarch_num_regs in size).  */
+  std::unique_ptr<packet_reg[]> regs;
+
+  /* This is the size (in chars) of the first response to the ``g''
+     packet.  It is used as a heuristic when determining the maximum
+     size of memory-read and memory-write packets.  A target will
+     typically only reserve a buffer large enough to hold the ``g''
+     packet.  The size does not include packet overhead (headers and
+     trailers).  */
+  long actual_register_packet_size;
+
+  /* This is the maximum size (in chars) of a non read/write packet.
+     It is also used as a cap on the size of read/write packets.  */
+  long remote_packet_size;
+};
+
 /* Description of the remote protocol state for the currently
    connected target.  This is per-target state, and independent of the
    selected architecture.  */
@@ -749,8 +787,7 @@ private:
   /* Mapping of remote protocol data for each gdbarch.  Usually there
      is only one entry here, though we may see more with stubs that
      support multi-process.  */
-  std::unordered_map<struct gdbarch *,
-		     std::unique_ptr<struct remote_arch_state>>
+  std::unordered_map<struct gdbarch *, remote_arch_state>
     m_arch_states;
 };
 
@@ -819,44 +856,6 @@ get_remote_state_raw (void)
 {
   return remote_state;
 }
-
-/* Description of the remote protocol for a given architecture.  */
-
-struct packet_reg
-{
-  long offset; /* Offset into G packet.  */
-  long regnum; /* GDB's internal register number.  */
-  LONGEST pnum; /* Remote protocol register number.  */
-  int in_g_packet; /* Always part of G packet.  */
-  /* long size in bytes;  == register_size (target_gdbarch (), regnum);
-     at present.  */
-  /* char *name; == gdbarch_register_name (target_gdbarch (), regnum);
-     at present.  */
-};
-
-struct remote_arch_state
-{
-  explicit remote_arch_state (struct gdbarch *gdbarch);
-
-  /* Description of the remote protocol registers.  */
-  long sizeof_g_packet;
-
-  /* Description of the remote protocol registers indexed by REGNUM
-     (making an array gdbarch_num_regs in size).  */
-  std::unique_ptr<packet_reg[]> regs;
-
-  /* This is the size (in chars) of the first response to the ``g''
-     packet.  It is used as a heuristic when determining the maximum
-     size of memory-read and memory-write packets.  A target will
-     typically only reserve a buffer large enough to hold the ``g''
-     packet.  The size does not include packet overhead (headers and
-     trailers).  */
-  long actual_register_packet_size;
-
-  /* This is the maximum size (in chars) of a non read/write packet.
-     It is also used as a cap on the size of read/write packets.  */
-  long remote_packet_size;
-};
 
 /* Utility: generate error from an incoming stub packet.  */
 static void
@@ -958,10 +957,15 @@ remote_get_noisy_reply ()
 struct remote_arch_state *
 remote_state::get_remote_arch_state (struct gdbarch *gdbarch)
 {
-  auto &rsa = this->m_arch_states[gdbarch];
-  if (rsa == nullptr)
+  remote_arch_state *rsa;
+
+  auto it = this->m_arch_states.find (gdbarch);
+  if (it == this->m_arch_states.end ())
     {
-      rsa.reset (new remote_arch_state (gdbarch));
+      auto p = this->m_arch_states.emplace (std::piecewise_construct,
+					    std::forward_as_tuple (gdbarch),
+					    std::forward_as_tuple (gdbarch));
+      rsa = &p.first->second;
 
       /* Make sure that the packet buffer is plenty big enough for
 	 this architecture.  */
@@ -971,7 +975,10 @@ remote_state::get_remote_arch_state (struct gdbarch *gdbarch)
 	  this->buf = (char *) xrealloc (this->buf, this->buf_size);
 	}
     }
-  return rsa.get ();
+  else
+    rsa = &it->second;
+
+  return rsa;
 }
 
 /* Fetch the global remote target state.  */

@@ -1,5 +1,13 @@
 2018-05-22  Pedro Alves  <palves@redhat.com>
 
+	* remote.c (struct packet_reg, struct remote_arch_state):
+	Move higher up in the file.
+	(remote_state) <m_arch_states>: Store remote_arch_state values
+	instead of remote_arch_state pointers.
+	(remote_state::get_remote_arch_state): Adjust.
+
+2018-05-22  Pedro Alves  <palves@redhat.com>
+
 	* remote.c: Include <unordered_map>.
 	(remote_state): Now a class.
 	(remote_state) <get_remote_arch_state>: Declare method.
