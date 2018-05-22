@@ -1,5 +1,18 @@
 2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
 
+	* arch/ppc-linux-common.h (PPC_LINUX_SIZEOF_VRREGSET)
+	(PPC_LINUX_SIZEOF_VSXREGSET): Define.
+	* ppc-linux-nat.c (SIZEOF_VSXREGS, SIZEOF_VRREGS): Remove.
+	(gdb_vrregset_t): Change array type size to
+	PPC_LINUX_SIZEOF_VRREGSET.
+	(gdb_vsxregset_t): Change array type size to
+	PPC_LINUX_SIZEOF_VSXREGSET.
+	* ppc-linux-tdep.c (ppc_linux_iterate_over_regset_sections):
+	Change integer literals to PPC_LINUX_SIZEOF_VRREGSET and
+	PPC_LINUX_SIZEOF_VSXREGSET.
+
+2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
+
 	* configure.nat <linux powerpc>: Add ppc-linux.o to NATDEPFILES.
 	* ppc-linux-nat.c (ppc_linux_target_wordsize): Move to
 	nat/ppc-linux.c.

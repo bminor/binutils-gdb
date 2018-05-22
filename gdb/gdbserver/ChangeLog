@@ -1,5 +1,11 @@
 2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
 
+	* linux-ppc-low.c (SIZEOF_VSXREGS, SIZEOF_VRREGS): Remove.
+	(ppc_arch_setup): Change SIZEOF_VRREGS and SIZEOF_VSXREGS to
+	PPC_LINUX_SIZEOF_VRREGSET and PPC_LINUX_SIZEOF_VSXREGSET.
+
+2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
+
 	* linux-ppc-low.c (ppc_fill_vsxregset): Remove ppc_hwcap check.
 	(ppc_store_vsxregset): Likewise.
 	(ppc_fill_vrregset): Likewise.

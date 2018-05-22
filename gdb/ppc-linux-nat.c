@@ -174,9 +174,7 @@ struct ppc_hw_breakpoint
 */
 /* *INDENT-ON* */
 
-#define SIZEOF_VRREGS 33*16+4
-
-typedef char gdb_vrregset_t[SIZEOF_VRREGS];
+typedef char gdb_vrregset_t[PPC_LINUX_SIZEOF_VRREGSET];
 
 /* This is the layout of the POWER7 VSX registers and the way they overlap
    with the existing FPR and VMX registers.
@@ -210,9 +208,7 @@ typedef char gdb_vrregset_t[SIZEOF_VRREGS];
    the FP registers (doubleword 0) and hence extend them with additional
    64 bits (doubleword 1).  The other 32 regs overlap with the VMX
    registers.  */
-#define SIZEOF_VSXREGS 32*8
-
-typedef char gdb_vsxregset_t[SIZEOF_VSXREGS];
+typedef char gdb_vsxregset_t[PPC_LINUX_SIZEOF_VSXREGSET];
 
 /* On PPC processors that support the Signal Processing Extension
    (SPE) APU, the general-purpose registers are 64 bits long.

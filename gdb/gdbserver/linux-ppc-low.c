@@ -459,8 +459,6 @@ static void ppc_fill_gregset (struct regcache *regcache, void *buf)
     ppc_collect_ptrace_register (regcache, i, (char *) buf + ppc_regmap[i]);
 }
 
-#define SIZEOF_VSXREGS 32*8
-
 static void
 ppc_fill_vsxregset (struct regcache *regcache, void *buf)
 {
@@ -482,8 +480,6 @@ ppc_store_vsxregset (struct regcache *regcache, const void *buf)
   for (i = 0; i < 32; i++)
     supply_register (regcache, base + i, &regset[i * 8]);
 }
-
-#define SIZEOF_VRREGS 33*16+4
 
 static void
 ppc_fill_vrregset (struct regcache *regcache, void *buf)
@@ -660,10 +656,10 @@ ppc_arch_setup (void)
     switch (regset->get_request)
       {
       case PTRACE_GETVRREGS:
-	regset->size = features.altivec ? SIZEOF_VRREGS : 0;
+	regset->size = features.altivec ? PPC_LINUX_SIZEOF_VRREGSET : 0;
 	break;
       case PTRACE_GETVSXREGS:
-	regset->size = features.vsx ? SIZEOF_VSXREGS : 0;
+	regset->size = features.vsx ? PPC_LINUX_SIZEOF_VSXREGSET : 0;
 	break;
       case PTRACE_GETEVRREGS:
 	if (ppc_hwcap & PPC_FEATURE_HAS_SPE)

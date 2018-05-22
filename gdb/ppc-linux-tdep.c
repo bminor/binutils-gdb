@@ -557,10 +557,12 @@ ppc_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
   cb (".reg2", 264, &ppc32_linux_fpregset, NULL, cb_data);
 
   if (have_altivec)
-    cb (".reg-ppc-vmx", 544, &ppc32_linux_vrregset, "ppc Altivec", cb_data);
+    cb (".reg-ppc-vmx", PPC_LINUX_SIZEOF_VRREGSET, &ppc32_linux_vrregset,
+	"ppc Altivec", cb_data);
 
   if (have_vsx)
-    cb (".reg-ppc-vsx", 256, &ppc32_linux_vsxregset, "POWER7 VSX", cb_data);
+    cb (".reg-ppc-vsx", PPC_LINUX_SIZEOF_VSXREGSET,
+	&ppc32_linux_vsxregset, "POWER7 VSX", cb_data);
 }
 
 static void

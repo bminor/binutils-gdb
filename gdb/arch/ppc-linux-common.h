@@ -22,6 +22,15 @@
 
 struct target_desc;
 
+/* The core file VMX regset has 34 16-byte fields (32 16-byte vector
+   registers, plus two fields containing 4-byte registers, VSCR and
+   VRSAVE), while the ptrace calls return or read 33 16-byte fields
+   plus a 4-byte field for VRSAVE. For simplicity we use the longer
+   length for both cases.  */
+#define PPC_LINUX_SIZEOF_VRREGSET 544
+
+#define PPC_LINUX_SIZEOF_VSXREGSET 256
+
 /* Check if the hwcap auxv entry indicates that isa205 is supported.  */
 bool ppc_linux_has_isa205 (unsigned long hwcap);
 
