@@ -1,5 +1,17 @@
 2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
 
+	* linux-ppc-low.c (ppc_fill_vsxregset): Remove ppc_hwcap check.
+	(ppc_store_vsxregset): Likewise.
+	(ppc_fill_vrregset): Likewise.
+	(ppc_store_vrregset): Likewise.
+	(ppc_fill_evrregset): Likewise.
+	(ppc_store_evrregset): Likewise.
+	(ppc_regsets): Set VSX/VR/EVR regset sizes to 0.
+	(ppc_arch_setup): Iterate through ppc_regsets and set sizes when
+	needed.
+
+2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
+
 	* linux-ppc-low.c (ppc_arch_setup): Remove code for getting the
 	wordsize of the inferior. Call ppc_linux_target_wordsize.
 

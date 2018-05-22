@@ -467,9 +467,6 @@ ppc_fill_vsxregset (struct regcache *regcache, void *buf)
   int i, base;
   char *regset = (char *) buf;
 
-  if (!(ppc_hwcap & PPC_FEATURE_HAS_VSX))
-    return;
-
   base = find_regno (regcache->tdesc, "vs0h");
   for (i = 0; i < 32; i++)
     collect_register (regcache, base + i, &regset[i * 8]);
@@ -480,9 +477,6 @@ ppc_store_vsxregset (struct regcache *regcache, const void *buf)
 {
   int i, base;
   const char *regset = (const char *) buf;
-
-  if (!(ppc_hwcap & PPC_FEATURE_HAS_VSX))
-    return;
 
   base = find_regno (regcache->tdesc, "vs0h");
   for (i = 0; i < 32; i++)
@@ -497,9 +491,6 @@ ppc_fill_vrregset (struct regcache *regcache, void *buf)
   int i, base;
   char *regset = (char *) buf;
 
-  if (!(ppc_hwcap & PPC_FEATURE_HAS_ALTIVEC))
-    return;
-
   base = find_regno (regcache->tdesc, "vr0");
   for (i = 0; i < 32; i++)
     collect_register (regcache, base + i, &regset[i * 16]);
@@ -513,9 +504,6 @@ ppc_store_vrregset (struct regcache *regcache, const void *buf)
 {
   int i, base;
   const char *regset = (const char *) buf;
-
-  if (!(ppc_hwcap & PPC_FEATURE_HAS_ALTIVEC))
-    return;
 
   base = find_regno (regcache->tdesc, "vr0");
   for (i = 0; i < 32; i++)
@@ -538,9 +526,6 @@ ppc_fill_evrregset (struct regcache *regcache, void *buf)
   int i, ev0;
   struct gdb_evrregset_t *regset = (struct gdb_evrregset_t *) buf;
 
-  if (!(ppc_hwcap & PPC_FEATURE_HAS_SPE))
-    return;
-
   ev0 = find_regno (regcache->tdesc, "ev0h");
   for (i = 0; i < 32; i++)
     collect_register (regcache, ev0 + i, &regset->evr[i]);
@@ -554,9 +539,6 @@ ppc_store_evrregset (struct regcache *regcache, const void *buf)
 {
   int i, ev0;
   const struct gdb_evrregset_t *regset = (const struct gdb_evrregset_t *) buf;
-
-  if (!(ppc_hwcap & PPC_FEATURE_HAS_SPE))
-    return;
 
   ev0 = find_regno (regcache->tdesc, "ev0h");
   for (i = 0; i < 32; i++)
@@ -579,11 +561,11 @@ static struct regset_info ppc_regsets[] = {
      fetch them every time, but still fall back to PTRACE_PEEKUSER for the
      general registers.  Some kernels support these, but not the newer
      PPC_PTRACE_GETREGS.  */
-  { PTRACE_GETVSXREGS, PTRACE_SETVSXREGS, 0, SIZEOF_VSXREGS, EXTENDED_REGS,
+  { PTRACE_GETVSXREGS, PTRACE_SETVSXREGS, 0, 0, EXTENDED_REGS,
   ppc_fill_vsxregset, ppc_store_vsxregset },
-  { PTRACE_GETVRREGS, PTRACE_SETVRREGS, 0, SIZEOF_VRREGS, EXTENDED_REGS,
+  { PTRACE_GETVRREGS, PTRACE_SETVRREGS, 0, 0, EXTENDED_REGS,
     ppc_fill_vrregset, ppc_store_vrregset },
-  { PTRACE_GETEVRREGS, PTRACE_SETEVRREGS, 0, 32 * 4 + 8 + 4, EXTENDED_REGS,
+  { PTRACE_GETEVRREGS, PTRACE_SETEVRREGS, 0, 0, EXTENDED_REGS,
     ppc_fill_evrregset, ppc_store_evrregset },
   { 0, 0, 0, 0, GENERAL_REGS, ppc_fill_gregset, NULL },
   NULL_REGSET
@@ -619,7 +601,9 @@ static void
 ppc_arch_setup (void)
 {
   const struct target_desc *tdesc;
+  struct regset_info *regset;
   struct ppc_linux_features features = ppc_linux_no_features;
+
   int tid = lwpid_of (current_thread);
 
   features.wordsize = ppc_linux_target_wordsize (tid);
@@ -671,6 +655,25 @@ ppc_arch_setup (void)
 #endif
 
   current_process ()->tdesc = tdesc;
+
+  for (regset = ppc_regsets; regset->size >= 0; regset++)
+    switch (regset->get_request)
+      {
+      case PTRACE_GETVRREGS:
+	regset->size = features.altivec ? SIZEOF_VRREGS : 0;
+	break;
+      case PTRACE_GETVSXREGS:
+	regset->size = features.vsx ? SIZEOF_VSXREGS : 0;
+	break;
+      case PTRACE_GETEVRREGS:
+	if (ppc_hwcap & PPC_FEATURE_HAS_SPE)
+	  regset->size = 32 * 4 + 8 + 4;
+	else
+	  regset->size = 0;
+	break;
+      default:
+	break;
+      }
 }
 
 /* Implementation of linux_target_ops method "supports_tracepoints".  */
