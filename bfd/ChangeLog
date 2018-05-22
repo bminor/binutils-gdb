@@ -1,6 +1,15 @@
 2018-05-22  Alan Modra  <amodra@gmail.com>
 
 	PR 23207
+	* elf32-hppa.c (hppa_get_stub_entry): Return NULL when link_sec
+	is NULL.
+	(elf32_hppa_size_stubs): Only create stubs for load, alloc, code
+	sections.
+	(final_link_relocate): Revert last change.
+
+2018-05-22  Alan Modra  <amodra@gmail.com>
+
+	PR 23207
 	* elf32-hppa.c (final_link_relocate): Don't look for plt call
 	stubs in non-alloc sections.
 

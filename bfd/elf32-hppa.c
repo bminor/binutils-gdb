@@ -503,6 +503,8 @@ hppa_get_stub_entry (const asection *input_section,
      more than one stub used to reach say, printf, and we need to
      distinguish between them.  */
   id_sec = htab->stub_group[input_section->id].link_sec;
+  if (id_sec == NULL)
+    return NULL;
 
   if (hh != NULL && hh->hsh_cache != NULL
       && hh->hsh_cache->hh == hh
@@ -2795,6 +2797,9 @@ elf32_hppa_size_stubs
 	      /* If there aren't any relocs, then there's nothing more
 		 to do.  */
 	      if ((section->flags & SEC_RELOC) == 0
+		  || (section->flags & SEC_ALLOC) == 0
+		  || (section->flags & SEC_LOAD) == 0
+		  || (section->flags & SEC_CODE) == 0
 		  || section->reloc_count == 0)
 		continue;
 
@@ -3267,16 +3272,15 @@ final_link_relocate (asection *input_section,
     case R_PARISC_PCREL22F:
       /* If this call should go via the plt, find the import stub in
 	 the stub hash.  */
-      if ((input_section->flags & SEC_ALLOC) != 0
-	  && (sym_sec == NULL
-	      || sym_sec->output_section == NULL
-	      || (hh != NULL
-		  && hh->eh.plt.offset != (bfd_vma) -1
-		  && hh->eh.dynindx != -1
-		  && !hh->plabel
-		  && (bfd_link_pic (info)
-		      || !hh->eh.def_regular
-		      || hh->eh.root.type == bfd_link_hash_defweak))))
+      if (sym_sec == NULL
+	  || sym_sec->output_section == NULL
+	  || (hh != NULL
+	      && hh->eh.plt.offset != (bfd_vma) -1
+	      && hh->eh.dynindx != -1
+	      && !hh->plabel
+	      && (bfd_link_pic (info)
+		  || !hh->eh.def_regular
+		  || hh->eh.root.type == bfd_link_hash_defweak)))
 	{
 	  hsh = hppa_get_stub_entry (input_section, sym_sec,
 				     hh, rela, htab);
