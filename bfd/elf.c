@@ -711,7 +711,15 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 			  break;
 			}
 		      if (idx < shnum)
-			dest->shdr = elf_elfsections (abfd)[idx];
+			{
+			  dest->shdr = elf_elfsections (abfd)[idx];
+			  /* PR binutils/23199: All sections in a
+			     section group should be marked with
+			     SHF_GROUP.  But some tools generate
+			     broken objects without SHF_GROUP.  Fix
+			     them up here.  */
+			  dest->shdr->sh_flags |= SHF_GROUP;
+			}
 		      if (idx >= shnum
 			  || dest->shdr->sh_type == SHT_GROUP)
 			{
