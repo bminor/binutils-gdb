@@ -1,5 +1,22 @@
 2018-05-22  Pedro Alves  <palves@redhat.com>
 
+	* remote.c (struct readahead_cache) <invalidate, invalidate_fd,
+	pread>: New method declarations.
+	(remote_target::open_1): Adjust.
+	(readahead_cache_invalidate): Rename to ...
+	(readahead_cache::invalidate): ... this, and adjust to be a class
+	method.
+	(readahead_cache_invalidate_fd): Rename to ...
+	(readahead_cache::invalidate_fd): ... this, and adjust to be a
+	class method.
+	(remote_hostio_pwrite): Adjust.
+	(remote_hostio_pread_from_cache): Rename to ...
+	(readahead_cache::pread): ... this, and adjust to be a class
+	method.
+	(remote_hostio_close): Adjust.
+
+2018-05-22  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (remote_hostio_close_cleanup): Delete.
 	(class scoped_remote_fd): New.
 	(remote_file_put, remote_file_get): Use it.
