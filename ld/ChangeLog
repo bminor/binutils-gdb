@@ -1,6 +1,23 @@
 2018-05-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23201
+	* testsuite/ld-tic6x/shlib-1.rd: Adjusted.
+	* testsuite/ld-tic6x/shlib-1b.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-1r.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-1rb.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1b.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1r.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1rb.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-noindex.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1b.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1r.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1rb.rd: Likewise.
+
+2018-05-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23201
 	* ldexp.c (exp_fold_tree_1): Call bfd_link_hide_symbol to hide
 	a symbol.
 	* testsuite/ld-elf/provide-hidden-dynabs.nd: Removed.
