@@ -1,5 +1,35 @@
 2018-07-20  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.c: Include buildsym.h.
+	(struct dwarf2_cu) <builder>: New method.
+	(fixup_go_packaging): Update.
+	(process_full_comp_unit, process_full_type_unit): Update.  Don't
+	use scoped_free_pendings.
+	(using_directives): Add "cu" parameter, remove "language".
+	(read_import_statement, setup_type_unit_groups, )
+	(read_func_scope, read_lexical_block_scope)
+	(dwarf2_record_block_ranges, read_namespace): Update.
+	(lnp_state_machine::lnp_state_machine): Add cu parameter.
+	(lnp_state_machine::handle_end_sequence): Update.
+	(class lnp_state_machine) <m_cu>: New member.
+	<m_record_line_callback>: Remove.
+	<m_currently_recording_lines>: New member.
+	(lnp_state_machine::handle_set_file): Update.
+	(noop_record_line): Remove.
+	(dwarf_record_line_p): Add cu parameter.
+	(dwarf_record_line_1, dwarf_finish_line): Likewise.
+	(lnp_state_machine::record_line)
+	(lnp_state_machine::lnp_state_machine)
+	(lnp_state_machine::check_line_address, dwarf_decode_lines_1)
+	(dwarf_decode_lines): Update.
+	(dwarf2_start_subfile): Add cu parameter.
+	(dwarf2_start_symtab, new_symbol): Update.
+	(macro_start_file, dwarf_decode_macro_bytes): Add cu parameter.
+	Remove dwarf2_per_objfile parameter.
+	(dwarf_decode_macros): Update.
+
+2018-07-20  Tom Tromey  <tom@tromey.com>
+
 	* stabsread.c (define_symbol): Update.
 	* buildsym-legacy.h (get_buildsym_compunit): Declare.
 	* dwarf2read.c (new_symbol): Update.
