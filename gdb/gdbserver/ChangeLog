@@ -1,3 +1,11 @@
+2018-05-22  Maciej W. Rozycki  <macro@mips.com>
+
+	* linux-mips-low.c [HAVE_PTRACE_GETREGS] (mips_collect_register)
+	(mips_supply_register): Move outside HAVE_PTRACE_GETREGS.
+	(mips_collect_ptrace_register, mips_supply_ptrace_register): New
+	functions.
+	(the_low_target): Wire them.
+
 2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
 
 	* linux-ppc-low.c (ppc_fill_vrregset): Add vscr_offset variable.
