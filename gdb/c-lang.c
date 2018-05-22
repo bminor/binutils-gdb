@@ -25,6 +25,7 @@
 #include "language.h"
 #include "varobj.h"
 #include "c-lang.h"
+#include "c-support.h"
 #include "valprint.h"
 #include "macroscope.h"
 #include "charset.h"
@@ -382,7 +383,7 @@ convert_ucn (char *p, char *limit, const char *dest_charset,
   gdb_byte data[4];
   int i;
 
-  for (i = 0; i < length && p < limit && isxdigit (*p); ++i, ++p)
+  for (i = 0; i < length && p < limit && ISXDIGIT (*p); ++i, ++p)
     result = (result << 4) + host_hex_value (*p);
 
   for (i = 3; i >= 0; --i)
@@ -424,7 +425,7 @@ convert_octal (struct type *type, char *p,
   unsigned long value = 0;
 
   for (i = 0;
-       i < 3 && p < limit && isdigit (*p) && *p != '8' && *p != '9';
+       i < 3 && p < limit && ISDIGIT (*p) && *p != '8' && *p != '9';
        ++i)
     {
       value = 8 * value + host_hex_value (*p);
@@ -447,7 +448,7 @@ convert_hex (struct type *type, char *p,
 {
   unsigned long value = 0;
 
-  while (p < limit && isxdigit (*p))
+  while (p < limit && ISXDIGIT (*p))
     {
       value = 16 * value + host_hex_value (*p);
       ++p;
@@ -488,7 +489,7 @@ convert_escape (struct type *type, const char *dest_charset,
 
     case 'x':
       ADVANCE;
-      if (!isxdigit (*p))
+      if (!ISXDIGIT (*p))
 	error (_("\\x used with no following hex digits."));
       p = convert_hex (type, p, limit, output);
       break;
@@ -510,7 +511,7 @@ convert_escape (struct type *type, const char *dest_charset,
 	int length = *p == 'u' ? 4 : 8;
 
 	ADVANCE;
-	if (!isxdigit (*p))
+	if (!ISXDIGIT (*p))
 	  error (_("\\u used with no following hex digits"));
 	p = convert_ucn (p, limit, dest_charset, output, length);
       }

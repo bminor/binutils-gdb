@@ -1,3 +1,9 @@
+2018-05-22  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/22973
+	* gdb.base/utf8-identifiers.c: New file.
+	* gdb.base/utf8-identifiers.exp: New file.
+
 2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
 
 	* gdb.arch/powerpc-fpscr-gcore.exp: New file.

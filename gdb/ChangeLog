@@ -1,3 +1,20 @@
+2018-05-22  Pedro Alves  <palves@redhat.com>
+	    張俊芝  <zjz@zjz.name>
+
+	PR gdb/22973
+	* c-exp.y: Include "c-support.h".
+	(parse_number, c_parse_escape, lex_one_token): Use TOLOWER instead
+	of tolower.  Use c_ident_is_alpha to scan names.
+	* c-lang.c: Include "c-support.h".
+	(convert_ucn, convert_octal, convert_hex, convert_escape): Use
+	ISXDIGIT instead of isxdigit and ISDIGIT instead of isdigit.
+	* c-support.h: New file, with bits factored out from ...
+	* cp-name-parser.y: ... this file.
+	Include "c-support.h".
+	(cp_ident_is_alpha, cp_ident_is_alnum): Deleted, moved to
+	c-support.h and renamed.
+	(symbol_end, yylex): Adjust.
+
 2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
 
 	* arch/ppc-linux-common.c (ppc_linux_has_isa205): Change the

@@ -35,6 +35,7 @@
 #include "safe-ctype.h"
 #include "demangle.h"
 #include "cp-support.h"
+#include "c-support.h"
 
 /* Bison does not make it easy to create a parser without global
    state, unfortunately.  Here are all the global variables used
@@ -1304,28 +1305,6 @@ d_binary (const char *name, struct demangle_component *lhs, struct demangle_comp
 		      fill_comp (DEMANGLE_COMPONENT_BINARY_ARGS, lhs, rhs));
 }
 
-/* Like ISALPHA, but also returns true for the union of all UTF-8
-   multi-byte sequence bytes and non-ASCII characters in
-   extended-ASCII charsets (e.g., Latin1).  I.e., returns true if the
-   high bit is set.  Note that not all UTF-8 ranges are allowed in C++
-   identifiers, but we don't need to be pedantic so for simplicity we
-   ignore that here.  Plus this avoids the complication of actually
-   knowing what was the right encoding.  */
-
-static inline bool
-cp_ident_is_alpha (unsigned char ch)
-{
-  return ISALPHA (ch) || ch >= 0x80;
-}
-
-/* Similarly, but Like ISALNUM.  */
-
-static inline bool
-cp_ident_is_alnum (unsigned char ch)
-{
-  return ISALNUM (ch) || ch >= 0x80;
-}
-
 /* Find the end of a symbol name starting at LEXPTR.  */
 
 static const char *
@@ -1333,7 +1312,7 @@ symbol_end (const char *lexptr)
 {
   const char *p = lexptr;
 
-  while (*p && (cp_ident_is_alnum (*p) || *p == '_' || *p == '$' || *p == '.'))
+  while (*p && (c_ident_is_alnum (*p) || *p == '_' || *p == '$' || *p == '.'))
     p++;
 
   return p;
@@ -1813,7 +1792,7 @@ yylex (void)
       return ERROR;
     }
 
-  if (!(c == '_' || c == '$' || cp_ident_is_alpha (c)))
+  if (!(c == '_' || c == '$' || c_ident_is_alpha (c)))
     {
       /* We must have come across a bad character (e.g. ';').  */
       yyerror (_("invalid character"));
@@ -1824,7 +1803,7 @@ yylex (void)
   namelen = 0;
   do
     c = tokstart[++namelen];
-  while (cp_ident_is_alnum (c) || c == '_' || c == '$');
+  while (c_ident_is_alnum (c) || c == '_' || c == '$');
 
   lexptr += namelen;
 

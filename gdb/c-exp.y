@@ -42,6 +42,7 @@
 #include "parser-defs.h"
 #include "language.h"
 #include "c-lang.h"
+#include "c-support.h"
 #include "bfd.h" /* Required by objfiles.h.  */
 #include "symfile.h" /* Required by objfiles.h.  */
 #include "objfiles.h" /* For have_full_symbols and have_partial_symbols */
@@ -1806,13 +1807,13 @@ parse_number (struct parser_state *par_state,
 	  len -= 2;
 	}
       /* Handle suffixes: 'f' for float, 'l' for long double.  */
-      else if (len >= 1 && tolower (p[len - 1]) == 'f')
+      else if (len >= 1 && TOLOWER (p[len - 1]) == 'f')
 	{
 	  putithere->typed_val_float.type
 	    = parse_type (par_state)->builtin_float;
 	  len -= 1;
 	}
-      else if (len >= 1 && tolower (p[len - 1]) == 'l')
+      else if (len >= 1 && TOLOWER (p[len - 1]) == 'l')
 	{
 	  putithere->typed_val_float.type
 	    = parse_type (par_state)->builtin_long_double;
@@ -2023,9 +2024,9 @@ c_parse_escape (const char **ptr, struct obstack *output)
       if (output)
 	obstack_grow_str (output, "\\x");
       ++tokptr;
-      if (!isxdigit (*tokptr))
+      if (!ISXDIGIT (*tokptr))
 	error (_("\\x escape without a following hex digit"));
-      while (isxdigit (*tokptr))
+      while (ISXDIGIT (*tokptr))
 	{
 	  if (output)
 	    obstack_1grow (output, *tokptr);
@@ -2048,7 +2049,7 @@ c_parse_escape (const char **ptr, struct obstack *output)
 	if (output)
 	  obstack_grow_str (output, "\\");
 	for (i = 0;
-	     i < 3 && isdigit (*tokptr) && *tokptr != '8' && *tokptr != '9';
+	     i < 3 && ISDIGIT (*tokptr) && *tokptr != '8' && *tokptr != '9';
 	     ++i)
 	  {
 	    if (output)
@@ -2073,9 +2074,9 @@ c_parse_escape (const char **ptr, struct obstack *output)
 	    obstack_1grow (output, *tokptr);
 	  }
 	++tokptr;
-	if (!isxdigit (*tokptr))
+	if (!ISXDIGIT (*tokptr))
 	  error (_("\\%c escape without a following hex digit"), c);
-	for (i = 0; i < len && isxdigit (*tokptr); ++i)
+	for (i = 0; i < len && ISXDIGIT (*tokptr); ++i)
 	  {
 	    if (output)
 	      obstack_1grow (output, *tokptr);
@@ -2668,7 +2669,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 	    size_t len = strlen ("selector");
 
 	    if (strncmp (p, "selector", len) == 0
-		&& (p[len] == '\0' || isspace (p[len])))
+		&& (p[len] == '\0' || ISSPACE (p[len])))
 	      {
 		lexptr = p + len;
 		return SELECTOR;
@@ -2677,9 +2678,9 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 	      goto parse_string;
 	  }
 
-	while (isspace (*p))
+	while (ISSPACE (*p))
 	  p++;
-	if (strncmp (p, "entry", len) == 0 && !isalnum (p[len])
+	if (strncmp (p, "entry", len) == 0 && !c_ident_is_alnum (p[len])
 	    && p[len] != '_')
 	  {
 	    lexptr = &p[len];
@@ -2741,16 +2742,14 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
       }
     }
 
-  if (!(c == '_' || c == '$'
-	|| (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')))
+  if (!(c == '_' || c == '$' || c_ident_is_alpha (c)))
     /* We must have come across a bad character (e.g. ';').  */
     error (_("Invalid character '%c' in expression."), c);
 
   /* It's a name.  See how long it is.  */
   namelen = 0;
   for (c = tokstart[namelen];
-       (c == '_' || c == '$' || (c >= '0' && c <= '9')
-	|| (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '<');)
+       (c == '_' || c == '$' || c_ident_is_alnum (c) || c == '<');)
     {
       /* Template parameter lists are part of the name.
 	 FIXME: This mishandles `print $a<4&&$a>3'.  */
