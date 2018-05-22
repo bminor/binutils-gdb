@@ -46,7 +46,7 @@
 #include "filenames.h"
 #include "objfiles.h"
 #include "gdb_obstack.h"
-#include "buildsym.h"
+#include "buildsym-legacy.h"
 #include "stabsread.h"
 #include "complaints.h"
 #include "demangle.h"

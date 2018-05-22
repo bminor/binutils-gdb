@@ -41,7 +41,7 @@
 /* FIXME: ezannoni/2004-02-13 Verify if the include below is really needed.  */
 #include "symfile.h"
 #include "objfiles.h"
-#include "buildsym.h"
+#include "buildsym-legacy.h"
 #include "stabsread.h"
 #include "expression.h"
 #include "complaints.h"

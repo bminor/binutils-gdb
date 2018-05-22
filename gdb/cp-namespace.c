@@ -29,7 +29,7 @@
 #include "dictionary.h"
 #include "command.h"
 #include "frame.h"
-#include "buildsym.h"
+#include "buildsym-legacy.h"
 #include "language.h"
 #include "namespace.h"
 #include <string>

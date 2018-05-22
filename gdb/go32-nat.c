@@ -94,7 +94,7 @@
 #include "command.h"
 #include "gdbcmd.h"
 #include "floatformat.h"
-#include "buildsym.h"
+#include "buildsym-legacy.h"
 #include "i387-tdep.h"
 #include "i386-tdep.h"
 #include "nat/x86-cpuid.h"

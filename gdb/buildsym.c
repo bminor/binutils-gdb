@@ -16,53 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* This module provides subroutines used for creating and adding to
-   the symbol table.  These routines are called from various symbol-
-   file-reading routines.
-
-   Routines to support specific debugging information formats (stabs,
-   DWARF, etc) belong somewhere else.
-
-   The basic way this module is used is as follows:
-
-   scoped_free_pendings free_pending;
-   cust = start_symtab (...);
-   ... read debug info ...
-   cust = end_symtab (...);
-
-   The compunit symtab pointer ("cust") is returned from both start_symtab
-   and end_symtab to simplify the debug info readers.
-
-   There are minor variations on this, e.g., dwarf2read.c splits end_symtab
-   into two calls: end_symtab_get_static_block, end_symtab_from_static_block,
-   but all debug info readers follow this basic flow.
-
-   Reading DWARF Type Units is another variation:
-
-   scoped_free_pendings free_pending;
-   cust = start_symtab (...);
-   ... read debug info ...
-   cust = end_expandable_symtab (...);
-
-   And then reading subsequent Type Units within the containing "Comp Unit"
-   will use a second flow:
-
-   scoped_free_pendings free_pending;
-   cust = restart_symtab (...);
-   ... read debug info ...
-   cust = augment_type_symtab (...);
-
-   dbxread.c and xcoffread.c use another variation:
-
-   scoped_free_pendings free_pending;
-   cust = start_symtab (...);
-   ... read debug info ...
-   cust = end_symtab (...);
-   ... start_symtab + read + end_symtab repeated ...
-*/
-
 #include "defs.h"
-#include "buildsym.h"
+#include "buildsym-legacy.h"
 #include "bfd.h"
 #include "gdb_obstack.h"
 #include "symtab.h"
@@ -85,11 +40,6 @@
 
 #include "stabsread.h"
 
-/* The work-in-progress of the compunit we are building.
-   This is created first, before any subfiles by start_symtab.  */
-
-static struct buildsym_compunit *buildsym_compunit;
-
 /* List of blocks already made (lexical contexts already closed).
    This is used at the end to make the blockvector.  */
 
@@ -98,8 +48,6 @@ struct pending_block
     struct pending_block *next;
     struct block *block;
   };
-
-static void free_buildsym_compunit (void);
 
 static int compare_line_numbers (const void *ln1p, const void *ln2p);
 
@@ -228,17 +176,6 @@ find_symbol_in_list (struct pending *list, char *name, int length)
       list = list->next;
     }
   return (NULL);
-}
-
-/* At end of reading syms, or in case of quit, ensure everything
-   associated with building symtabs is freed.
-
-   N.B. This is *not* intended to be used when building psymtabs.  Some debug
-   info readers call this anyway, which is harmless if confusing.  */
-
-scoped_free_pendings::~scoped_free_pendings ()
-{
-  free_buildsym_compunit ();
 }
 
 /* Record BLOCK on the list of all blocks in the file.  Put it after
@@ -661,17 +598,6 @@ buildsym_compunit::start_subfile (const char *name)
     }
 }
 
-/* Delete the buildsym compunit.  */
-
-static void
-free_buildsym_compunit (void)
-{
-  if (buildsym_compunit == NULL)
-    return;
-  delete buildsym_compunit;
-  buildsym_compunit = NULL;
-}
-
 /* For stabs readers, the first N_SO symbol is assumed to be the
    source file name, and the subfile struct is initialized using that
    assumption.  If another N_SO symbol is later seen, immediately
@@ -824,79 +750,6 @@ compare_line_numbers (const void *ln1p, const void *ln2p)
   return ln1->line - ln2->line;
 }
 
-/* See buildsym.h.  */
-
-struct compunit_symtab *
-buildsym_compunit_symtab (void)
-{
-  gdb_assert (buildsym_compunit != NULL);
-
-  return buildsym_compunit->get_compunit_symtab ();
-}
-
-/* See buildsym.h.  */
-
-struct macro_table *
-get_macro_table (void)
-{
-  struct objfile *objfile;
-
-  gdb_assert (buildsym_compunit != NULL);
-  return buildsym_compunit->get_macro_table ();
-}
-
-/* Start a new symtab for a new source file in OBJFILE.  Called, for example,
-   when a stabs symbol of type N_SO is seen, or when a DWARF
-   TAG_compile_unit DIE is seen.  It indicates the start of data for
-   one original source file.
-
-   NAME is the name of the file (cannot be NULL).  COMP_DIR is the
-   directory in which the file was compiled (or NULL if not known).
-   START_ADDR is the lowest address of objects in the file (or 0 if
-   not known).  LANGUAGE is the language of the source file, or
-   language_unknown if not known, in which case it'll be deduced from
-   the filename.  */
-
-struct compunit_symtab *
-start_symtab (struct objfile *objfile, const char *name, const char *comp_dir,
-	      CORE_ADDR start_addr, enum language language)
-{
-  /* These should have been reset either by successful completion of building
-     a symtab, or by the scoped_free_pendings destructor.  */
-  gdb_assert (buildsym_compunit == nullptr);
-
-  buildsym_compunit = new struct buildsym_compunit (objfile, name, comp_dir,
-						    language, start_addr);
-
-  return buildsym_compunit->get_compunit_symtab ();
-}
-
-/* Restart compilation for a symtab.
-   CUST is the result of end_expandable_symtab.
-   NAME, START_ADDR are the source file we are resuming with.
-
-   This is used when a symtab is built from multiple sources.
-   The symtab is first built with start_symtab/end_expandable_symtab
-   and then for each additional piece call restart_symtab/augment_*_symtab.
-   Note: At the moment there is only augment_type_symtab.  */
-
-void
-restart_symtab (struct compunit_symtab *cust,
-		const char *name, CORE_ADDR start_addr)
-{
-  /* These should have been reset either by successful completion of building
-     a symtab, or by the scoped_free_pendings destructor.  */
-  gdb_assert (buildsym_compunit == nullptr);
-
-  buildsym_compunit
-    = new struct buildsym_compunit (COMPUNIT_OBJFILE (cust),
-				    name,
-				    COMPUNIT_DIRNAME (cust),
-				    compunit_language (cust),
-				    start_addr,
-				    cust);
-}
-
 /* Subroutine of end_symtab to simplify it.  Look for a subfile that
    matches the main source file's basename.  If there is only one, and
    if the main source file doesn't have any symbol or line number
@@ -1408,263 +1261,4 @@ buildsym_compunit::pop_context ()
   struct context_stack result = m_context_stack.back ();
   m_context_stack.pop_back ();
   return result;
-}
-
-
-
-void
-record_debugformat (const char *format)
-{
-  buildsym_compunit->record_debugformat (format);
-}
-
-void
-record_producer (const char *producer)
-{
-  buildsym_compunit->record_producer (producer);
-}
-
-
-
-/* See buildsym.h.  */
-
-void
-set_last_source_file (const char *name)
-{
-  gdb_assert (buildsym_compunit != nullptr || name == nullptr);
-  if (buildsym_compunit != nullptr)
-    buildsym_compunit->set_last_source_file (name);
-}
-
-/* See buildsym.h.  */
-
-const char *
-get_last_source_file ()
-{
-  if (buildsym_compunit == nullptr)
-    return nullptr;
-  return buildsym_compunit->get_last_source_file ();
-}
-
-/* See buildsym.h.  */
-
-void
-set_last_source_start_addr (CORE_ADDR addr)
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  buildsym_compunit->set_last_source_start_addr (addr);
-}
-
-/* See buildsym.h.  */
-
-CORE_ADDR
-get_last_source_start_addr ()
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  return buildsym_compunit->get_last_source_start_addr ();
-}
-
-/* See buildsym.h.  */
-
-struct using_direct **
-get_local_using_directives ()
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  return buildsym_compunit->get_local_using_directives ();
-}
-
-/* See buildsym.h.  */
-
-void
-set_local_using_directives (struct using_direct *new_local)
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  buildsym_compunit->set_local_using_directives (new_local);
-}
-
-/* See buildsym.h.  */
-
-struct using_direct **
-get_global_using_directives ()
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  return buildsym_compunit->get_global_using_directives ();
-}
-
-/* See buildsym.h.  */
-
-bool
-outermost_context_p ()
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  return buildsym_compunit->outermost_context_p ();
-}
-
-/* See buildsym.h.  */
-
-struct context_stack *
-get_current_context_stack ()
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  return buildsym_compunit->get_current_context_stack ();
-}
-
-/* See buildsym.h.  */
-
-int
-get_context_stack_depth ()
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  return buildsym_compunit->get_context_stack_depth ();
-}
-
-/* See buildsym.h.  */
-
-struct subfile *
-get_current_subfile ()
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  return buildsym_compunit->get_current_subfile ();
-}
-
-/* See buildsym.h.  */
-
-struct pending **
-get_local_symbols ()
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  return buildsym_compunit->get_local_symbols ();
-}
-
-/* See buildsym.h.  */
-
-struct pending **
-get_file_symbols ()
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  return buildsym_compunit->get_file_symbols ();
-}
-
-/* See buildsym.h.  */
-
-struct pending **
-get_global_symbols ()
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  return buildsym_compunit->get_global_symbols ();
-}
-
-void
-start_subfile (const char *name)
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  buildsym_compunit->start_subfile (name);
-}
-
-void
-patch_subfile_names (struct subfile *subfile, const char *name)
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  buildsym_compunit->patch_subfile_names (subfile, name);
-}
-
-void
-push_subfile ()
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  buildsym_compunit->push_subfile ();
-}
-
-const char *
-pop_subfile ()
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  return buildsym_compunit->pop_subfile ();
-}
-
-struct block *
-end_symtab_get_static_block (CORE_ADDR end_addr, int expandable, int required)
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  return buildsym_compunit->end_symtab_get_static_block (end_addr, expandable,
-							 required);
-}
-
-struct compunit_symtab *
-end_symtab_from_static_block (struct block *static_block,
-			      int section, int expandable)
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  struct compunit_symtab *result
-    = buildsym_compunit->end_symtab_from_static_block (static_block,
-						       section, expandable);
-  free_buildsym_compunit ();
-  return result;
-}
-
-struct compunit_symtab *
-end_symtab (CORE_ADDR end_addr, int section)
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  struct compunit_symtab *result
-    = buildsym_compunit->end_symtab (end_addr, section);
-  free_buildsym_compunit ();
-  return result;
-}
-
-struct compunit_symtab *
-end_expandable_symtab (CORE_ADDR end_addr, int section)
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  struct compunit_symtab *result
-    = buildsym_compunit->end_expandable_symtab (end_addr, section);
-  free_buildsym_compunit ();
-  return result;
-}
-
-void
-augment_type_symtab ()
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  buildsym_compunit->augment_type_symtab ();
-  free_buildsym_compunit ();
-}
-
-struct context_stack *
-push_context (int desc, CORE_ADDR valu)
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  return buildsym_compunit->push_context (desc, valu);
-}
-
-struct context_stack
-pop_context ()
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  return buildsym_compunit->pop_context ();
-}
-
-struct block *
-finish_block (struct symbol *symbol, struct pending_block *old_blocks,
-	      const struct dynamic_prop *static_link,
-	      CORE_ADDR start, CORE_ADDR end)
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  return buildsym_compunit->finish_block (symbol, old_blocks, static_link,
-					  start, end);
-}
-
-void
-record_block_range (struct block *block, CORE_ADDR start,
-		    CORE_ADDR end_inclusive)
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  buildsym_compunit->record_block_range (block, start, end_inclusive);
-}
-
-void
-record_line (struct subfile *subfile, int line, CORE_ADDR pc)
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  buildsym_compunit->record_line (subfile, line, pc);
 }

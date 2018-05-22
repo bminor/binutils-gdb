@@ -44,7 +44,7 @@
 #endif
 #include <algorithm>
 
-#include "buildsym.h"
+#include "buildsym-legacy.h"
 #include "filenames.h"
 #include "symfile.h"
 #include "objfiles.h"

@@ -932,6 +932,7 @@ COMMON_SFILES = \
 	breakpoint.c \
 	btrace.c \
 	build-id.c \
+	buildsym-legacy.c \
 	buildsym.c \
 	c-lang.c \
 	c-typeprint.c \
@@ -1194,6 +1195,7 @@ HFILES_NO_SRCDIR = \
 	bsd-kvm.h \
 	bsd-uthread.h \
 	build-id.h \
+	buildsym-legacy.h \
 	buildsym.h \
 	c-lang.h \
 	charset.h \

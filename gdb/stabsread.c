@@ -36,7 +36,7 @@
 #include "libaout.h"
 #include "aout/aout64.h"
 #include "gdb-stabs.h"
-#include "buildsym.h"
+#include "buildsym-legacy.h"
 #include "complaints.h"
 #include "demangle.h"
 #include "gdb-demangle.h"

@@ -45,7 +45,7 @@
 #include "libaout.h"		/* FIXME Secret internal BFD stuff for a.out */
 #include "filenames.h"
 #include "objfiles.h"
-#include "buildsym.h"
+#include "buildsym-legacy.h"
 #include "stabsread.h"
 #include "gdb-stabs.h"
 #include "demangle.h"

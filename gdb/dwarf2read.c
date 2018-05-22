@@ -37,7 +37,7 @@
 #include "gdbtypes.h"
 #include "objfiles.h"
 #include "dwarf2.h"
-#include "buildsym.h"
+#include "buildsym-legacy.h"
 #include "demangle.h"
 #include "gdb-demangle.h"
 #include "expression.h"

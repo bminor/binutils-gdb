@@ -1,5 +1,23 @@
 2018-07-20  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c: Include buildsym-legacy.h.
+	* windows-nat.c: Include buildsym-legacy.h.
+	* stabsread.c: Include buildsym-legacy.h.
+	* mdebugread.c: Include buildsym-legacy.h.
+	* buildsym-legacy.h: New file.
+	* buildsym-legacy.c: New file, from buildsym.c.
+	* go32-nat.c: Include buildsym-legacy.h.
+	* dwarf2read.c: Include buildsym-legacy.h.
+	* dbxread.c: Include buildsym-legacy.h.
+	* cp-namespace.c: Include buildsym-legacy.h.
+	* coffread.c: Include buildsym-legacy.h.
+	* buildsym.h: Move some contents to buildsym-legacy.h.
+	* buildsym.c: Include buildsym-legacy.h.  Move many functions to
+	buildsym-legacy.c.
+	* Makefile.in (HFILES_NO_SRCDIR): Add buildsym-legacy.h.
+
+2018-07-20  Tom Tromey  <tom@tromey.com>
+
 	* buildsym.h (struct buildsym_compunit): Move from buildsym.c.
 	* buildsym.c (struct buildsym_compunit): Move to buildsym.h.
 	(buildsym_compunit::buildsym_compunit)
