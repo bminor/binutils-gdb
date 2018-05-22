@@ -75,6 +75,7 @@
 #include "common/scoped_restore.h"
 #include "environ.h"
 #include "common/byte-vector.h"
+#include <unordered_map>
 
 /* The remote target.  */
 
@@ -606,10 +607,17 @@ struct readahead_cache
    connected target.  This is per-target state, and independent of the
    selected architecture.  */
 
-struct remote_state
+class remote_state
 {
+public:
+
   remote_state ();
   ~remote_state ();
+
+  /* Get the remote arch state for GDBARCH.  */
+  struct remote_arch_state *get_remote_arch_state (struct gdbarch *gdbarch);
+
+public: /* data */
 
   /* A buffer to use for incoming packets, and its current size.  The
      buffer is grown dynamically for larger incoming packets.
@@ -736,6 +744,14 @@ struct remote_state
      request/reply nature of the RSP.  We only cache data for a single
      file descriptor at a time.  */
   struct readahead_cache readahead_cache;
+
+private:
+  /* Mapping of remote protocol data for each gdbarch.  Usually there
+     is only one entry here, though we may see more with stubs that
+     support multi-process.  */
+  std::unordered_map<struct gdbarch *,
+		     std::unique_ptr<struct remote_arch_state>>
+    m_arch_states;
 };
 
 /* Private data that we'll store in (struct thread_info)->priv.  */
@@ -820,12 +836,14 @@ struct packet_reg
 
 struct remote_arch_state
 {
+  explicit remote_arch_state (struct gdbarch *gdbarch);
+
   /* Description of the remote protocol registers.  */
   long sizeof_g_packet;
 
   /* Description of the remote protocol registers indexed by REGNUM
      (making an array gdbarch_num_regs in size).  */
-  struct packet_reg *regs;
+  std::unique_ptr<packet_reg[]> regs;
 
   /* This is the size (in chars) of the first response to the ``g''
      packet.  It is used as a heuristic when determining the maximum
@@ -937,15 +955,23 @@ remote_get_noisy_reply ()
   while (1);
 }
 
-/* Handle for retreving the remote protocol data from gdbarch.  */
-static struct gdbarch_data *remote_gdbarch_data_handle;
-
-static struct remote_arch_state *
-get_remote_arch_state (struct gdbarch *gdbarch)
+struct remote_arch_state *
+remote_state::get_remote_arch_state (struct gdbarch *gdbarch)
 {
-  gdb_assert (gdbarch != NULL);
-  return ((struct remote_arch_state *)
-	  gdbarch_data (gdbarch, remote_gdbarch_data_handle));
+  auto &rsa = this->m_arch_states[gdbarch];
+  if (rsa == nullptr)
+    {
+      rsa.reset (new remote_arch_state (gdbarch));
+
+      /* Make sure that the packet buffer is plenty big enough for
+	 this architecture.  */
+      if (this->buf_size < rsa->remote_packet_size)
+	{
+	  this->buf_size = 2 * rsa->remote_packet_size;
+	  this->buf = (char *) xrealloc (this->buf, this->buf_size);
+	}
+    }
+  return rsa.get ();
 }
 
 /* Fetch the global remote target state.  */
@@ -953,14 +979,16 @@ get_remote_arch_state (struct gdbarch *gdbarch)
 static struct remote_state *
 get_remote_state (void)
 {
+  struct remote_state *rs = get_remote_state_raw ();
+
   /* Make sure that the remote architecture state has been
      initialized, because doing so might reallocate rs->buf.  Any
      function which calls getpkt also needs to be mindful of changes
      to rs->buf, but this call limits the number of places which run
      into trouble.  */
-  get_remote_arch_state (target_gdbarch ());
+  rs->get_remote_arch_state (target_gdbarch ());
 
-  return get_remote_state_raw ();
+  return rs;
 }
 
 /* Cleanup routine for the remote module's pspace data.  */
@@ -1102,23 +1130,16 @@ remote_register_number_and_offset (struct gdbarch *gdbarch, int regnum,
   return *pnum != -1;
 }
 
-static void *
-init_remote_state (struct gdbarch *gdbarch)
+remote_arch_state::remote_arch_state (struct gdbarch *gdbarch)
 {
-  struct remote_state *rs = get_remote_state_raw ();
-  struct remote_arch_state *rsa;
-
-  rsa = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct remote_arch_state);
-
   /* Use the architecture to build a regnum<->pnum table, which will be
      1:1 unless a feature set specifies otherwise.  */
-  rsa->regs = GDBARCH_OBSTACK_CALLOC (gdbarch,
-				      gdbarch_num_regs (gdbarch),
-				      struct packet_reg);
+  this->regs.reset (new packet_reg [gdbarch_num_regs (gdbarch)] ());
 
   /* Record the maximum possible size of the g packet - it may turn out
      to be smaller.  */
-  rsa->sizeof_g_packet = map_regcache_remote_table (gdbarch, rsa->regs);
+  this->sizeof_g_packet
+    = map_regcache_remote_table (gdbarch, this->regs.get ());
 
   /* Default maximum number of characters in a packet body.  Many
      remote stubs have a hardwired buffer size of 400 bytes
@@ -1127,10 +1148,10 @@ init_remote_state (struct gdbarch *gdbarch)
      NUL character can always fit in the buffer.  This stops GDB
      trashing stubs that try to squeeze an extra NUL into what is
      already a full buffer (As of 1999-12-04 that was most stubs).  */
-  rsa->remote_packet_size = 400 - 1;
+  this->remote_packet_size = 400 - 1;
 
   /* This one is filled in when a ``g'' packet is received.  */
-  rsa->actual_register_packet_size = 0;
+  this->actual_register_packet_size = 0;
 
   /* Should rsa->sizeof_g_packet needs more space than the
      default, adjust the size accordingly.  Remember that each byte is
@@ -1138,18 +1159,8 @@ init_remote_state (struct gdbarch *gdbarch)
      header / footer.  NOTE: cagney/1999-10-26: I suspect that 8
      (``$NN:G...#NN'') is a better guess, the below has been padded a
      little.  */
-  if (rsa->sizeof_g_packet > ((rsa->remote_packet_size - 32) / 2))
-    rsa->remote_packet_size = (rsa->sizeof_g_packet * 2 + 32);
-
-  /* Make sure that the packet buffer is plenty big enough for
-     this architecture.  */
-  if (rs->buf_size < rsa->remote_packet_size)
-    {
-      rs->buf_size = 2 * rsa->remote_packet_size;
-      rs->buf = (char *) xrealloc (rs->buf, rs->buf_size);
-    }
-
-  return rsa;
+  if (this->sizeof_g_packet > ((this->remote_packet_size - 32) / 2))
+    this->remote_packet_size = (this->sizeof_g_packet * 2 + 32);
 }
 
 /* Return the current allowed size of a remote packet.  This is
@@ -1159,7 +1170,7 @@ static long
 get_remote_packet_size (void)
 {
   struct remote_state *rs = get_remote_state ();
-  remote_arch_state *rsa = get_remote_arch_state (target_gdbarch ());
+  remote_arch_state *rsa = rs->get_remote_arch_state (target_gdbarch ());
 
   if (rs->explicit_packet_size)
     return rs->explicit_packet_size;
@@ -1327,7 +1338,7 @@ static long
 get_memory_packet_size (struct memory_packet_config *config)
 {
   struct remote_state *rs = get_remote_state ();
-  remote_arch_state *rsa = get_remote_arch_state (target_gdbarch ());
+  remote_arch_state *rsa = rs->get_remote_arch_state (target_gdbarch ());
 
   long what_they_get;
   if (config->fixed_p)
@@ -7249,7 +7260,7 @@ Packet: '%s'\n"),
 			}
 
 		      event->arch = inf->gdbarch;
-		      rsa = get_remote_arch_state (event->arch);
+		      rsa = event->rs->get_remote_arch_state (event->arch);
 		    }
 
 		  packet_reg *reg
@@ -7843,7 +7854,7 @@ process_g_packet (struct regcache *regcache)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   struct remote_state *rs = get_remote_state ();
-  remote_arch_state *rsa = get_remote_arch_state (gdbarch);
+  remote_arch_state *rsa = rs->get_remote_arch_state (gdbarch);
   int i, buf_len;
   char *p;
   char *regs;
@@ -7977,7 +7988,8 @@ void
 remote_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  remote_arch_state *rsa = get_remote_arch_state (gdbarch);
+  struct remote_state *rs = get_remote_state ();
+  remote_arch_state *rsa = rs->get_remote_arch_state (gdbarch);
   int i;
 
   set_remote_traceframe ();
@@ -8027,7 +8039,8 @@ remote_target::fetch_registers (struct regcache *regcache, int regnum)
 void
 remote_target::prepare_to_store (struct regcache *regcache)
 {
-  remote_arch_state *rsa = get_remote_arch_state (regcache->arch ());
+  struct remote_state *rs = get_remote_state ();
+  remote_arch_state *rsa = rs->get_remote_arch_state (regcache->arch ());
   int i;
 
   /* Make sure the entire registers array is valid.  */
@@ -8093,7 +8106,7 @@ static void
 store_registers_using_G (const struct regcache *regcache)
 {
   struct remote_state *rs = get_remote_state ();
-  remote_arch_state *rsa = get_remote_arch_state (regcache->arch ());
+  remote_arch_state *rsa = rs->get_remote_arch_state (regcache->arch ());
   gdb_byte *regs;
   char *p;
 
@@ -8132,7 +8145,8 @@ void
 remote_target::store_registers (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  remote_arch_state *rsa = get_remote_arch_state (gdbarch);
+  struct remote_state *rs = get_remote_state ();
+  remote_arch_state *rsa = rs->get_remote_arch_state (gdbarch);
   int i;
 
   set_remote_traceframe ();
@@ -12918,7 +12932,7 @@ remote_target::get_trace_status (struct trace_status *ts)
     return -1;
 
   trace_regblock_size
-    = get_remote_arch_state (target_gdbarch ())->sizeof_g_packet;
+    = rs->get_remote_arch_state (target_gdbarch ())->sizeof_g_packet;
 
   putpkt ("qTStatus");
 
@@ -14038,8 +14052,6 @@ _initialize_remote (void)
   const char *cmd_name;
 
   /* architecture specific data */
-  remote_gdbarch_data_handle =
-    gdbarch_data_register_post_init (init_remote_state);
   remote_g_packet_data_handle =
     gdbarch_data_register_pre_init (remote_g_packet_data_init);
 

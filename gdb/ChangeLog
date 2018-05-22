@@ -1,5 +1,28 @@
 2018-05-22  Pedro Alves  <palves@redhat.com>
 
+	* remote.c: Include <unordered_map>.
+	(remote_state): Now a class.
+	(remote_state) <get_remote_arch_state>: Declare method.
+	<get_remote_arch_state>: New field.
+	(remote_arch_state) <remote_arch_state>: Declare ctor.
+	<regs>: Now a unique_ptr.
+	(remote_gdbarch_data_handle): Delete.
+	(get_remote_arch_state): Delete.
+	(remote_state::get_remote_arch_state): New.
+	(get_remote_state): Adjust to call remote_state's
+	get_remote_arch_state method.
+	(init_remote_state): Delete, bits factored out to ...
+	(remote_arch_state::remote_arch_state): ... this new method.
+	(get_remote_packet_size, get_memory_packet_size)
+	(process_g_packet, remote_target::fetch_registers)
+	(remote_target::prepare_to_store, store_registers_using_G)
+	(remote_target::store_registers, remote_target::get_trace_status):
+	Adjust to call remote_state's method.
+	(_initialize_remote): Remove reference to
+	remote_gdbarch_data_handle.
+
+2018-05-22  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (struct readahead_cache) <invalidate, invalidate_fd,
 	pread>: New method declarations.
 	(remote_target::open_1): Adjust.
