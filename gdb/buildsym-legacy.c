@@ -375,3 +375,12 @@ scoped_free_pendings::~scoped_free_pendings ()
 {
   free_buildsym_compunit ();
 }
+
+/* See buildsym-legacy.h.  */
+
+struct buildsym_compunit *
+get_buildsym_compunit ()
+{
+  gdb_assert (buildsym_compunit != nullptr);
+  return buildsym_compunit;
+}

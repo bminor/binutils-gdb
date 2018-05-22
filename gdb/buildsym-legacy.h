@@ -207,4 +207,8 @@ extern struct pending **get_file_symbols ();
 
 extern struct pending **get_global_symbols ();
 
+/* Return the current buildsym_compunit.  */
+
+extern struct buildsym_compunit *get_buildsym_compunit ();
+
 #endif /* defined (LEGACY_BUILDSYM_H) */

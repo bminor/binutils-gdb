@@ -1,5 +1,15 @@
 2018-07-20  Tom Tromey  <tom@tromey.com>
 
+	* stabsread.c (define_symbol): Update.
+	* buildsym-legacy.h (get_buildsym_compunit): Declare.
+	* dwarf2read.c (new_symbol): Update.
+	* cp-support.h (cp_scan_for_anonymous_namespaces): Update.
+	* cp-namespace.c: Include buildsym.h.
+	(cp_scan_for_anonymous_namespaces): Add "compunit" parameter.
+	* buildsym-legacy.c (get_buildsym_compunit): New function.
+
+2018-07-20  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c: Include buildsym-legacy.h.
 	* windows-nat.c: Include buildsym-legacy.h.
 	* stabsread.c: Include buildsym-legacy.h.

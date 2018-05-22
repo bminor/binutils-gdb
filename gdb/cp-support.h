@@ -33,6 +33,7 @@
 
 struct symbol;
 struct block;
+struct buildsym_compunit;
 struct objfile;
 struct type;
 struct demangle_component;
@@ -132,7 +133,8 @@ extern symbol_name_matcher_ftype *cp_get_symbol_name_matcher
 
 extern int cp_is_in_anonymous (const char *symbol_name);
 
-extern void cp_scan_for_anonymous_namespaces (const struct symbol *symbol,
+extern void cp_scan_for_anonymous_namespaces (struct buildsym_compunit *,
+					      const struct symbol *symbol,
 					      struct objfile *objfile);
 
 extern struct block_symbol cp_lookup_symbol_nonlocal

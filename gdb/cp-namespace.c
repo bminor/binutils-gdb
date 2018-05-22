@@ -29,7 +29,7 @@
 #include "dictionary.h"
 #include "command.h"
 #include "frame.h"
-#include "buildsym-legacy.h"
+#include "buildsym.h"
 #include "language.h"
 #include "namespace.h"
 #include <string>
@@ -50,7 +50,8 @@ static struct type *cp_lookup_transparent_type_loop (const char *name,
    anonymous namespace; if so, add an appropriate using directive.  */
 
 void
-cp_scan_for_anonymous_namespaces (const struct symbol *const symbol,
+cp_scan_for_anonymous_namespaces (struct buildsym_compunit *compunit,
+				  const struct symbol *const symbol,
 				  struct objfile *const objfile)
 {
   if (SYMBOL_DEMANGLED_NAME (symbol) != NULL)
@@ -94,9 +95,9 @@ cp_scan_for_anonymous_namespaces (const struct symbol *const symbol,
 		 namespace given by the previous component if there is
 		 one, or to the global namespace if there isn't.  */
 	      std::vector<const char *> excludes;
-	      add_using_directive (get_local_using_directives (),
-				   dest, src, NULL, NULL, excludes, 1,
-				   &objfile->objfile_obstack);
+	      add_using_directive (compunit->get_local_using_directives (),
+				   dest, src, NULL, NULL, excludes,
+				   1, &objfile->objfile_obstack);
 	    }
 	  /* The "+ 2" is for the "::".  */
 	  previous_component = next_component + 2;

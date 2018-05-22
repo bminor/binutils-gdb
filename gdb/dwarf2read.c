@@ -21476,7 +21476,8 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	 namespaces based on the demangled name.  */
       if (!cu->processing_has_namespace_info
 	  && cu->language == language_cplus)
-	cp_scan_for_anonymous_namespaces (sym, objfile);
+	cp_scan_for_anonymous_namespaces (get_buildsym_compunit (), sym,
+					  objfile);
     }
   return (sym);
 }
