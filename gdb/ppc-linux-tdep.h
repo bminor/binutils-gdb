@@ -30,6 +30,7 @@ const struct regset *ppc_linux_fpregset (void);
 
 /* Get the vector regset that matches the target byte order.  */
 const struct regset *ppc_linux_vrregset (struct gdbarch *gdbarch);
+const struct regset *ppc_linux_vsxregset (void);
 
 /* Extra register number constants.  The Linux kernel stores a
    "trap" code and the original value of r3 into special "registers";

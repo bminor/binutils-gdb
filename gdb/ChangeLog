@@ -1,5 +1,29 @@
 2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
 
+	* ppc-linux-tdep.c (ppc_linux_vsxregset): New function.
+	(ppc32_linux_vsxregmap): New global.
+	(ppc32_linux_vsxregset): Initialize with ppc32_linux_vsxregmap,
+	regcache_supply_regset, and regcache_collect_regset.
+	* ppc-linux-tdep.h (ppc_linux_vsxregset): Declare.
+	* ppc-linux-nat.c (supply_vsxregset, fill_vsxregset): Remove.
+	(fetch_vsx_register, store_vsx_register): Remove.
+	(fetch_vsx_registers): Add regno parameter. Get regset using
+	ppc_linux_vsxregset. Use regset to supply registers.
+	(store_vsx_registers): Add regno parameter. Get regset using
+	ppc_linux_vsxregset. Use regset to collect registers.
+	(fetch_register): Call fetch_vsx_registers instead of
+	fetch_vsx_register.
+	(store_register): Call store_vsx_registers instead of
+	store_vsx_register.
+	(fetch_ppc_registers): Call fetch_vsx_registers with -1 for the
+	new regno parameter.
+	(store_ppc_registers): Call store_vsx_registers with -1 for the
+	new regno parameter.
+	* rs6000-tdep.c (ppc_vsx_support_p, ppc_supply_vsxreget)
+	(ppc_collect_vsxregset): Remove.
+
+2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
+
 	* ppc-tdep.h (struct ppc_reg_offsets): Remove vector register
 	offset fields.
 	* ppc-fbsd-tdep.c (ppc32_fbsd_reg_offsets): Remove initializers

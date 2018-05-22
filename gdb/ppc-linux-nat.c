@@ -409,13 +409,11 @@ ppc_register_u_addr (struct gdbarch *gdbarch, int regno)
    registers set mechanism, as opposed to the interface for all the
    other registers, that stores/fetches each register individually.  */
 static void
-fetch_vsx_register (struct regcache *regcache, int tid, int regno)
+fetch_vsx_registers (struct regcache *regcache, int tid, int regno)
 {
   int ret;
   gdb_vsxregset_t regs;
-  struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  int vsxregsize = register_size (gdbarch, tdep->ppc_vsr0_upper_regnum);
+  const struct regset *vsxregset = ppc_linux_vsxregset ();
 
   ret = ptrace (PTRACE_GETVSXREGS, tid, 0, &regs);
   if (ret < 0)
@@ -425,12 +423,11 @@ fetch_vsx_register (struct regcache *regcache, int tid, int regno)
 	  have_ptrace_getsetvsxregs = 0;
 	  return;
 	}
-      perror_with_name (_("Unable to fetch VSX register"));
+      perror_with_name (_("Unable to fetch VSX registers"));
     }
 
-  regcache_raw_supply (regcache, regno,
-		       regs + (regno - tdep->ppc_vsr0_upper_regnum)
-		       * vsxregsize);
+  vsxregset->supply_regset (vsxregset, regcache, regno, &regs,
+			    PPC_LINUX_SIZEOF_VSXREGSET);
 }
 
 /* The Linux kernel ptrace interface for AltiVec registers uses the
@@ -563,7 +560,7 @@ fetch_register (struct regcache *regcache, int tid, int regno)
     {
       if (have_ptrace_getsetvsxregs)
 	{
-	  fetch_vsx_register (regcache, tid, regno);
+	  fetch_vsx_registers (regcache, tid, regno);
 	  return;
 	}
     }
@@ -622,40 +619,6 @@ fetch_register (struct regcache *regcache, int tid, int regno)
     internal_error (__FILE__, __LINE__,
                     _("fetch_register: unexpected byte order: %d"),
                     gdbarch_byte_order (gdbarch));
-}
-
-static void
-supply_vsxregset (struct regcache *regcache, gdb_vsxregset_t *vsxregsetp)
-{
-  int i;
-  struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  int vsxregsize = register_size (gdbarch, tdep->ppc_vsr0_upper_regnum);
-
-  for (i = 0; i < ppc_num_vshrs; i++)
-    {
-	regcache_raw_supply (regcache, tdep->ppc_vsr0_upper_regnum + i,
-			     *vsxregsetp + i * vsxregsize);
-    }
-}
-
-static void
-fetch_vsx_registers (struct regcache *regcache, int tid)
-{
-  int ret;
-  gdb_vsxregset_t regs;
-
-  ret = ptrace (PTRACE_GETVSXREGS, tid, 0, &regs);
-  if (ret < 0)
-    {
-      if (errno == EIO)
-	{
-	  have_ptrace_getsetvsxregs = 0;
-	  return;
-	}
-      perror_with_name (_("Unable to fetch VSX registers"));
-    }
-  supply_vsxregset (regcache, &regs);
 }
 
 /* This function actually issues the request to ptrace, telling
@@ -799,7 +762,7 @@ fetch_ppc_registers (struct regcache *regcache, int tid)
       fetch_altivec_registers (regcache, tid, -1);
   if (have_ptrace_getsetvsxregs)
     if (tdep->ppc_vsr0_upper_regnum != -1)
-      fetch_vsx_registers (regcache, tid);
+      fetch_vsx_registers (regcache, tid, -1);
   if (tdep->ppc_ev0_upper_regnum >= 0)
     fetch_spe_register (regcache, tid, -1);
 }
@@ -818,15 +781,12 @@ ppc_linux_nat_target::fetch_registers (struct regcache *regcache, int regno)
     fetch_register (regcache, tid, regno);
 }
 
-/* Store one VSX register.  */
 static void
-store_vsx_register (const struct regcache *regcache, int tid, int regno)
+store_vsx_registers (const struct regcache *regcache, int tid, int regno)
 {
   int ret;
   gdb_vsxregset_t regs;
-  struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  int vsxregsize = register_size (gdbarch, tdep->ppc_vsr0_upper_regnum);
+  const struct regset *vsxregset = ppc_linux_vsxregset ();
 
   ret = ptrace (PTRACE_GETVSXREGS, tid, 0, &regs);
   if (ret < 0)
@@ -836,15 +796,15 @@ store_vsx_register (const struct regcache *regcache, int tid, int regno)
 	  have_ptrace_getsetvsxregs = 0;
 	  return;
 	}
-      perror_with_name (_("Unable to fetch VSX register"));
+      perror_with_name (_("Unable to fetch VSX registers"));
     }
 
-  regcache_raw_collect (regcache, regno, regs +
-			(regno - tdep->ppc_vsr0_upper_regnum) * vsxregsize);
+  vsxregset->collect_regset (vsxregset, regcache, regno, &regs,
+			     PPC_LINUX_SIZEOF_VSXREGSET);
 
   ret = ptrace (PTRACE_SETVSXREGS, tid, 0, &regs);
   if (ret < 0)
-    perror_with_name (_("Unable to store VSX register"));
+    perror_with_name (_("Unable to store VSX registers"));
 }
 
 static void
@@ -980,7 +940,7 @@ store_register (const struct regcache *regcache, int tid, int regno)
     }
   if (vsx_register_p (gdbarch, regno))
     {
-      store_vsx_register (regcache, tid, regno);
+      store_vsx_registers (regcache, tid, regno);
       return;
     }
   else if (spe_register_p (gdbarch, regno))
@@ -1036,42 +996,6 @@ store_register (const struct regcache *regcache, int tid, int regno)
 	  perror_with_name (message);
 	}
     }
-}
-
-static void
-fill_vsxregset (const struct regcache *regcache, gdb_vsxregset_t *vsxregsetp)
-{
-  int i;
-  struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  int vsxregsize = register_size (gdbarch, tdep->ppc_vsr0_upper_regnum);
-
-  for (i = 0; i < ppc_num_vshrs; i++)
-    regcache_raw_collect (regcache, tdep->ppc_vsr0_upper_regnum + i,
-			  *vsxregsetp + i * vsxregsize);
-}
-
-static void
-store_vsx_registers (const struct regcache *regcache, int tid)
-{
-  int ret;
-  gdb_vsxregset_t regs;
-
-  ret = ptrace (PTRACE_GETVSXREGS, tid, 0, &regs);
-  if (ret < 0)
-    {
-      if (errno == EIO)
-	{
-	  have_ptrace_getsetvsxregs = 0;
-	  return;
-	}
-      perror_with_name (_("Couldn't get VSX registers"));
-    }
-
-  fill_vsxregset (regcache, &regs);
-
-  if (ptrace (PTRACE_SETVSXREGS, tid, 0, &regs) < 0)
-    perror_with_name (_("Couldn't write VSX registers"));
 }
 
 /* This function actually issues the request to ptrace, telling
@@ -1235,7 +1159,7 @@ store_ppc_registers (const struct regcache *regcache, int tid)
       store_altivec_registers (regcache, tid, -1);
   if (have_ptrace_getsetvsxregs)
     if (tdep->ppc_vsr0_upper_regnum != -1)
-      store_vsx_registers (regcache, tid);
+      store_vsx_registers (regcache, tid, -1);
   if (tdep->ppc_ev0_upper_regnum >= 0)
     store_spe_register (regcache, tid, -1);
 }

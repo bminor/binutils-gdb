@@ -224,16 +224,6 @@ ppc_floating_point_unit_p (struct gdbarch *gdbarch)
 }
 
 /* Return non-zero if the architecture described by GDBARCH has
-   VSX registers (vsr0 --- vsr63).  */
-static int
-ppc_vsx_support_p (struct gdbarch *gdbarch)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  return tdep->ppc_vsr0_regnum >= 0;
-}
-
-/* Return non-zero if the architecture described by GDBARCH has
    Altivec registers (vr0 --- vr31, vrsave and vscr).  */
 int
 ppc_altivec_support_p (struct gdbarch *gdbarch)
@@ -573,37 +563,6 @@ ppc_supply_fpregset (const struct regset *regset, struct regcache *regcache,
 		  regnum == tdep->ppc_fpscr_regnum ? offsets->fpscr_size : 8);
 }
 
-/* Supply register REGNUM in the VSX register set REGSET
-   from the buffer specified by VSXREGS and LEN to register cache
-   REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
-
-void
-ppc_supply_vsxregset (const struct regset *regset, struct regcache *regcache,
-		     int regnum, const void *vsxregs, size_t len)
-{
-  struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep;
-
-  if (!ppc_vsx_support_p (gdbarch))
-    return;
-
-  tdep = gdbarch_tdep (gdbarch);
-
-  if (regnum == -1)
-    {
-      int i;
-
-      for (i = tdep->ppc_vsr0_upper_regnum;
-	   i < tdep->ppc_vsr0_upper_regnum + 32;
-	   i++)
-	ppc_supply_reg (regcache, i, (const gdb_byte *) vsxregs, 0, 8);
-
-      return;
-    }
-  else
-    ppc_supply_reg (regcache, regnum, (const gdb_byte *) vsxregs, 0, 8);
-}
-
 /* Collect register REGNUM in the general-purpose register set
    REGSET from register cache REGCACHE into the buffer specified by
    GREGS and LEN.  If REGNUM is -1, do this for all registers in
@@ -693,39 +652,6 @@ ppc_collect_fpregset (const struct regset *regset,
   offset = ppc_fpreg_offset (tdep, offsets, regnum);
   ppc_collect_reg (regcache, regnum, (gdb_byte *) fpregs, offset,
 		   regnum == tdep->ppc_fpscr_regnum ? offsets->fpscr_size : 8);
-}
-
-/* Collect register REGNUM in the VSX register set
-   REGSET from register cache REGCACHE into the buffer specified by
-   VSXREGS and LEN.  If REGNUM is -1, do this for all registers in
-   REGSET.  */
-
-void
-ppc_collect_vsxregset (const struct regset *regset,
-		      const struct regcache *regcache,
-		      int regnum, void *vsxregs, size_t len)
-{
-  struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep;
-
-  if (!ppc_vsx_support_p (gdbarch))
-    return;
-
-  tdep = gdbarch_tdep (gdbarch);
-
-  if (regnum == -1)
-    {
-      int i;
-
-      for (i = tdep->ppc_vsr0_upper_regnum;
-	   i < tdep->ppc_vsr0_upper_regnum + 32;
-	   i++)
-	ppc_collect_reg (regcache, i, (gdb_byte *) vsxregs, 0, 8);
-
-      return;
-    }
-  else
-    ppc_collect_reg (regcache, regnum, (gdb_byte *) vsxregs, 0, 8);
 }
 
 static int

@@ -1,3 +1,7 @@
+2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
+
+	* gdb.arch/powerpc-vsx-gcore.exp: New file.
+
 2018-05-18  Tom Tromey  <tom@tromey.com>
 
 	* gdb.base/ptype-offsets.exp: Update.

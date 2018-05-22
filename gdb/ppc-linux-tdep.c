@@ -553,10 +553,16 @@ static const struct regset ppc32_be_linux_vrregset = {
   ppc_linux_collect_vrregset
 };
 
+static const struct regcache_map_entry ppc32_linux_vsxregmap[] =
+  {
+      { 32, PPC_VSR0_UPPER_REGNUM, 8 },
+      { 0 }
+  };
+
 static const struct regset ppc32_linux_vsxregset = {
-  &ppc32_linux_reg_offsets,
-  ppc_supply_vsxregset,
-  ppc_collect_vsxregset
+  ppc32_linux_vsxregmap,
+  regcache_supply_regset,
+  regcache_collect_regset
 };
 
 const struct regset *
@@ -578,6 +584,12 @@ ppc_linux_vrregset (struct gdbarch *gdbarch)
     return &ppc32_be_linux_vrregset;
   else
     return &ppc32_le_linux_vrregset;
+}
+
+const struct regset *
+ppc_linux_vsxregset (void)
+{
+  return &ppc32_linux_vsxregset;
 }
 
 /* Iterate over supported core file register note sections. */
