@@ -21,14 +21,17 @@ if {[target_info gdb_protocol] != "remote"
 
 standard_testfile .c
 
-gdb_start
-
 set result [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}]
 if {$result != "" } then {
     untested "failed to compile"
     return -1
 }
 
+gdb_start
+
+# Make sure we're disconnected, in case we're testing with an
+# extended-remote board, therefore already connected.
+gdb_test "disconnect" ".*"
 
 #
 # Part ONE: Check the down load commands
@@ -125,6 +128,8 @@ proc gdb_load_timed {executable class writesize} {
     verbose "$test - time [expr ($load_end_time - $load_begin_time) / 1000] ms"
     pass $test
 }
+
+clean_restart $binfile
 
 # These download tests won't actually download anything on !is_remote
 # target boards, but we run them anyway because it's simpler, and

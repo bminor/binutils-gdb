@@ -1,5 +1,11 @@
 2018-05-22  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/remote.exp: Only gdb_start after compiling the
+	testcase.  Issue "disconnect" before testing "set remote" command
+	defaults.  Issue clean_restart before running to main.
+
+2018-05-22  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/remote.exp: Adjust expected output of "show remote
 	memory-write-packet-size".  Add tests for "set remote
 	memory-write-packet-size 0" and "set remote
