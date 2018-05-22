@@ -1,5 +1,11 @@
 2018-05-22  Pedro Alves  <palves@redhat.com>
 
+	* remote.c (remote_hostio_close_cleanup): Delete.
+	(class scoped_remote_fd): New.
+	(remote_file_put, remote_file_get): Use it.
+
+2018-05-22  Pedro Alves  <palves@redhat.com>
+
 	(struct vCont_action_support): Use bool and initialize all fields.
 	(struct readahead_cache): Initialize all fields.
 	(remote_state): Use bool and initialize all fields.

@@ -12201,20 +12201,61 @@ remote_hostio_error (int errnum)
     error (_("Remote I/O error: %s"), safe_strerror (host_error));
 }
 
-static void
-remote_hostio_close_cleanup (void *opaque)
-{
-  int fd = *(int *) opaque;
-  int remote_errno;
+/* A RAII wrapper around a remote file descriptor.  */
 
-  remote_hostio_close (find_target_at (process_stratum), fd, &remote_errno);
-}
+class scoped_remote_fd
+{
+public:
+  explicit scoped_remote_fd (int fd)
+    : m_fd (fd)
+  {
+  }
+
+  ~scoped_remote_fd ()
+  {
+    if (m_fd != -1)
+      {
+	try
+	  {
+	    int remote_errno;
+	    remote_hostio_close (find_target_at (process_stratum),
+				 m_fd, &remote_errno);
+	  }
+	catch (...)
+	  {
+	    /* Swallow exception before it escapes the dtor.  If
+	       something goes wrong, likely the connection is gone,
+	       and there's nothing else that can be done.  */
+	  }
+      }
+  }
+
+  DISABLE_COPY_AND_ASSIGN (scoped_remote_fd);
+
+  /* Release ownership of the file descriptor, and return it.  */
+  int release () noexcept
+  {
+    int fd = m_fd;
+    m_fd = -1;
+    return fd;
+  }
+
+  /* Return the owned file descriptor.  */
+  int get () const noexcept
+  {
+    return m_fd;
+  }
+
+private:
+  /* The owned remote I/O file descriptor.  */
+  int m_fd;
+};
 
 void
 remote_file_put (const char *local_file, const char *remote_file, int from_tty)
 {
-  struct cleanup *back_to, *close_cleanup;
-  int retcode, fd, remote_errno, bytes, io_size;
+  struct cleanup *back_to;
+  int retcode, remote_errno, bytes, io_size;
   gdb_byte *buffer;
   int bytes_in_buffer;
   int saw_eof;
@@ -12228,11 +12269,12 @@ remote_file_put (const char *local_file, const char *remote_file, int from_tty)
   if (file == NULL)
     perror_with_name (local_file);
 
-  fd = remote_hostio_open (find_target_at (process_stratum), NULL,
-			   remote_file, (FILEIO_O_WRONLY | FILEIO_O_CREAT
-					 | FILEIO_O_TRUNC),
-			   0700, 0, &remote_errno);
-  if (fd == -1)
+  scoped_remote_fd fd
+    (remote_hostio_open (find_target_at (process_stratum), NULL,
+			 remote_file, (FILEIO_O_WRONLY | FILEIO_O_CREAT
+				       | FILEIO_O_TRUNC),
+			 0700, 0, &remote_errno));
+  if (fd.get () == -1)
     remote_hostio_error (remote_errno);
 
   /* Send up to this many bytes at once.  They won't all fit in the
@@ -12240,8 +12282,6 @@ remote_file_put (const char *local_file, const char *remote_file, int from_tty)
   io_size = get_remote_packet_size ();
   buffer = (gdb_byte *) xmalloc (io_size);
   back_to = make_cleanup (xfree, buffer);
-
-  close_cleanup = make_cleanup (remote_hostio_close_cleanup, &fd);
 
   bytes_in_buffer = 0;
   saw_eof = 0;
@@ -12274,7 +12314,7 @@ remote_file_put (const char *local_file, const char *remote_file, int from_tty)
       bytes_in_buffer = 0;
 
       retcode = remote_hostio_pwrite (find_target_at (process_stratum),
-				      fd, buffer, bytes,
+				      fd.get (), buffer, bytes,
 				      offset, &remote_errno);
 
       if (retcode < 0)
@@ -12292,8 +12332,8 @@ remote_file_put (const char *local_file, const char *remote_file, int from_tty)
       offset += retcode;
     }
 
-  discard_cleanups (close_cleanup);
-  if (remote_hostio_close (find_target_at (process_stratum), fd, &remote_errno))
+  if (remote_hostio_close (find_target_at (process_stratum),
+			   fd.release (), &remote_errno))
     remote_hostio_error (remote_errno);
 
   if (from_tty)
@@ -12304,8 +12344,8 @@ remote_file_put (const char *local_file, const char *remote_file, int from_tty)
 void
 remote_file_get (const char *remote_file, const char *local_file, int from_tty)
 {
-  struct cleanup *back_to, *close_cleanup;
-  int fd, remote_errno, bytes, io_size;
+  struct cleanup *back_to;
+  int remote_errno, bytes, io_size;
   gdb_byte *buffer;
   ULONGEST offset;
   struct remote_state *rs = get_remote_state ();
@@ -12313,10 +12353,11 @@ remote_file_get (const char *remote_file, const char *local_file, int from_tty)
   if (!rs->remote_desc)
     error (_("command can only be used with remote target"));
 
-  fd = remote_hostio_open (find_target_at (process_stratum), NULL,
-			   remote_file, FILEIO_O_RDONLY, 0, 0,
-			   &remote_errno);
-  if (fd == -1)
+  scoped_remote_fd fd
+    (remote_hostio_open (find_target_at (process_stratum), NULL,
+			 remote_file, FILEIO_O_RDONLY, 0, 0,
+			 &remote_errno));
+  if (fd.get () == -1)
     remote_hostio_error (remote_errno);
 
   gdb_file_up file = gdb_fopen_cloexec (local_file, "wb");
@@ -12329,13 +12370,12 @@ remote_file_get (const char *remote_file, const char *local_file, int from_tty)
   buffer = (gdb_byte *) xmalloc (io_size);
   back_to = make_cleanup (xfree, buffer);
 
-  close_cleanup = make_cleanup (remote_hostio_close_cleanup, &fd);
-
   offset = 0;
   while (1)
     {
       bytes = remote_hostio_pread (find_target_at (process_stratum),
-				   fd, buffer, io_size, offset, &remote_errno);
+				   fd.get (), buffer, io_size, offset,
+				   &remote_errno);
       if (bytes == 0)
 	/* Success, but no bytes, means end-of-file.  */
 	break;
@@ -12349,8 +12389,8 @@ remote_file_get (const char *remote_file, const char *local_file, int from_tty)
 	perror_with_name (local_file);
     }
 
-  discard_cleanups (close_cleanup);
-  if (remote_hostio_close (find_target_at (process_stratum), fd, &remote_errno))
+  if (remote_hostio_close (find_target_at (process_stratum),
+			   fd.release (), &remote_errno))
     remote_hostio_error (remote_errno);
 
   if (from_tty)
