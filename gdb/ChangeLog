@@ -1,5 +1,11 @@
 2018-07-20  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.c (process_full_comp_unit): Do not set list_in_scope.
+	(process_full_type_unit): Likewise.
+	(dwarf2_start_symtab): Set list_in_scope.
+
+2018-07-20  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.c (process_psymtab_comp_unit_reader)
 	(build_type_psymtabs_reader): Do not set list_in_scope.
 

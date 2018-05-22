@@ -10247,8 +10247,6 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
   /* Clear the list here in case something was left over.  */
   cu->method_list.clear ();
 
-  cu->list_in_scope = &file_symbols;
-
   cu->language = pretend_language;
   cu->language_defn = language_def (cu->language);
 
@@ -10351,8 +10349,6 @@ process_full_type_unit (struct dwarf2_per_cu_data *per_cu,
 
   /* Clear the list here in case something was left over.  */
   cu->method_list.clear ();
-
-  cu->list_in_scope = &file_symbols;
 
   cu->language = pretend_language;
   cu->language_defn = language_def (cu->language);
@@ -21018,6 +21014,8 @@ dwarf2_start_symtab (struct dwarf2_cu *cu,
   struct compunit_symtab *cust
     = start_symtab (cu->per_cu->dwarf2_per_objfile->objfile, name, comp_dir,
 		    low_pc, cu->language);
+
+  cu->list_in_scope = &file_symbols;
 
   record_debugformat ("DWARF 2");
   record_producer (cu->producer);
