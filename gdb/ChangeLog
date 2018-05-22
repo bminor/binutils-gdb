@@ -1,5 +1,10 @@
 2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
 
+	* rs6000-tdep.c (rs6000_gdbarch_init): Assign 1 to have_dfp only
+	if the size of fpscr is larger than 32 bits.
+
+2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
+
 	* ppc-linux-tdep.c (ppc_linux_vsxregset): New function.
 	(ppc32_linux_vsxregmap): New global.
 	(ppc32_linux_vsxregset): Initialize with ppc32_linux_vsxregmap,

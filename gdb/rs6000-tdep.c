@@ -5981,13 +5981,15 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	      return NULL;
 	    }
 	  have_fpu = 1;
+
+	  /* The fpscr register was expanded in isa 2.05 to 64 bits
+	     along with the addition of the decimal floating point
+	     facility.  */
+	  if (tdesc_register_size (feature, "fpscr") > 32)
+	    have_dfp = 1;
 	}
       else
 	have_fpu = 0;
-
-      /* The DFP pseudo-registers will be available when there are floating
-         point registers.  */
-      have_dfp = have_fpu;
 
       feature = tdesc_find_feature (tdesc,
 				    "org.gnu.gdb.power.altivec");
