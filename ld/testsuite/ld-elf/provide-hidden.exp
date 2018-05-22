@@ -86,7 +86,9 @@ run_ld_link_tests [list \
 	"$LFLAGS -T provide-hidden-1.ld" "tmpdir/provide-hidden-s.so" \
 	"" \
 	[list provide-hidden-3.s] \
-	[list "readelf -s provide-hidden-dynsec.nd"] \
+	[list \
+	    [list readelf -s provide-hidden-sec.nd] \
+	    [list readelf -s provide-hidden-dyn.nd]] \
 	"provide-hidden-4"] \
     [list \
 	"$testname 5" \
@@ -138,7 +140,9 @@ run_ld_link_tests [list \
 	"$LFLAGS -T provide-hidden-2.ld" "tmpdir/provide-hidden-s.so" \
 	"" \
 	[list provide-hidden-3.s] \
-	[list "readelf -s provide-hidden-dynabs.nd"] \
+	[list \
+	    [list readelf -s provide-hidden-abs.nd] \
+	    [list readelf -s provide-hidden-dyn.nd]] \
 	"provide-hidden-10"] \
     [list \
 	"$testname 11" \

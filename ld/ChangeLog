@@ -1,3 +1,17 @@
+2018-05-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23201
+	* ldexp.c (exp_fold_tree_1): Call bfd_link_hide_symbol to hide
+	a symbol.
+	* testsuite/ld-elf/provide-hidden-dynabs.nd: Removed.
+	* testsuite/ld-elf/provide-hidden-dynsec.nd: Likewise.
+	* testsuite/ld-elf/provide-hidden.exp: Replace
+	provide-hidden-dynsec.nd with provide-hidden-sec.nd and
+	provide-hidden-dyn.nd.  Replace provide-hidden-dynabs.nd with
+	provide-hidden-abs.nd and provide-hidden-dyn.nd.
+	* testsuite/ld-i386/pr23189.d: Expect no dynamic relocation.
+	* testsuite/ld-x86-64/pr23189.d: Likewise.
+
 2018-05-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23194

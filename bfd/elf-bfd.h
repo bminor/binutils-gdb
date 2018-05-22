@@ -2086,6 +2086,8 @@ extern void _bfd_elf_link_hash_copy_indirect
    struct elf_link_hash_entry *);
 extern void _bfd_elf_link_hash_hide_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *, bfd_boolean);
+extern void _bfd_elf_link_hide_symbol
+  (bfd *, struct bfd_link_info *, struct bfd_link_hash_entry *);
 extern bfd_boolean _bfd_elf_link_hash_fixup_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *);
 extern bfd_boolean _bfd_elf_link_hash_table_init

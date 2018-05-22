@@ -512,6 +512,9 @@ MY_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 #ifndef MY_bfd_define_common_symbol
 #define MY_bfd_define_common_symbol bfd_generic_define_common_symbol
 #endif
+#ifndef MY_bfd_link_hide_symbol
+#define MY_bfd_link_hide_symbol _bfd_generic_link_hide_symbol
+#endif
 #ifndef MY_bfd_define_start_stop
 #define MY_bfd_define_start_stop bfd_generic_define_start_stop
 #endif

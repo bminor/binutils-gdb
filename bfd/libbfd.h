@@ -539,6 +539,8 @@ extern bfd_boolean _bfd_nolink_section_already_linked
 extern bfd_boolean _bfd_nolink_bfd_define_common_symbol
   (bfd *, struct bfd_link_info *, struct bfd_link_hash_entry *)
   ATTRIBUTE_HIDDEN;
+#define _bfd_nolink_bfd_link_hide_symbol \
+  _bfd_generic_link_hide_symbol
 extern struct bfd_link_hash_entry *_bfd_nolink_bfd_define_start_stop
   (struct bfd_link_info *, const char *, asection *) ATTRIBUTE_HIDDEN;
 #define _bfd_nolink_bfd_link_check_relocs \

@@ -5749,6 +5749,10 @@ static bfd_coff_backend_data bigobj_swap_table =
 #define coff_bfd_define_common_symbol	    bfd_generic_define_common_symbol
 #endif
 
+#ifndef coff_bfd_link_hide_symbol
+#define coff_bfd_link_hide_symbol	    _bfd_generic_link_hide_symbol
+#endif
+
 #ifndef coff_bfd_define_start_stop
 #define coff_bfd_define_start_stop	    bfd_generic_define_start_stop
 #endif

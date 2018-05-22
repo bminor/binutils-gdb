@@ -720,6 +720,7 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
        || h->ref_dynamic
        || bfd_link_dll (info)
        || elf_hash_table (info)->is_relocatable_executable)
+      && !h->forced_local
       && h->dynindx == -1)
     {
       if (! bfd_elf_link_record_dynamic_symbol (info, h))
@@ -7426,6 +7427,26 @@ _bfd_elf_link_hash_hide_symbol (struct bfd_link_info *info,
 	  h->dynindx = -1;
 	  h->dynstr_index = 0;
 	}
+    }
+}
+
+/* Hide a symbol. */
+
+void
+_bfd_elf_link_hide_symbol (bfd *output_bfd,
+			   struct bfd_link_info *info,
+			   struct bfd_link_hash_entry *h)
+{
+  if (is_elf_hash_table (info->hash))
+    {
+      const struct elf_backend_data *bed
+	= get_elf_backend_data (output_bfd);
+      struct elf_link_hash_entry *eh
+	= (struct elf_link_hash_entry *) h;
+      bed->elf_backend_hide_symbol (info, eh, TRUE);
+      eh->def_dynamic = 0;
+      eh->ref_dynamic = 0;
+      eh->dynamic_def = 0;
     }
 }
 

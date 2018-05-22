@@ -3112,6 +3112,32 @@ bfd_generic_define_common_symbol (bfd *output_bfd,
 
 /*
 FUNCTION
+	_bfd_generic_link_hide_symbol
+
+SYNOPSIS
+	void _bfd_generic_link_hide_symbol
+	  (bfd *output_bfd, struct bfd_link_info *info,
+	   struct bfd_link_hash_entry *h);
+
+DESCRIPTION
+	Hide symbol @var{h}.
+	This is an internal function.  It should not be called from
+	outside the BFD library.
+
+.#define bfd_link_hide_symbol(output_bfd, info, h) \
+.	BFD_SEND (output_bfd, _bfd_link_hide_symbol, (output_bfd, info, h))
+.
+*/
+
+void
+_bfd_generic_link_hide_symbol (bfd *output_bfd ATTRIBUTE_UNUSED,
+			       struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			       struct bfd_link_hash_entry *h ATTRIBUTE_UNUSED)
+{
+}
+
+/*
+FUNCTION
 	bfd_generic_define_start_stop
 
 SYNOPSIS

@@ -205,6 +205,10 @@
 #define bfd_elfNN_bfd_define_common_symbol bfd_generic_define_common_symbol
 #endif
 
+#ifndef bfd_elfNN_bfd_link_hide_symbol
+#define bfd_elfNN_bfd_link_hide_symbol _bfd_elf_link_hide_symbol
+#endif
+
 #ifndef bfd_elfNN_bfd_lookup_section_flags
 #define bfd_elfNN_bfd_lookup_section_flags bfd_elf_lookup_section_flags
 #endif

@@ -230,6 +230,7 @@ msdos_set_section_contents (bfd *abfd,
 #define msdos_section_already_linked \
   _bfd_generic_section_already_linked
 #define msdos_bfd_define_common_symbol bfd_generic_define_common_symbol
+#define msdos_bfd_link_hide_symbol _bfd_generic_link_hide_symbol
 #define msdos_bfd_define_start_stop bfd_generic_define_start_stop
 #define msdos_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define msdos_bfd_link_add_symbols _bfd_generic_link_add_symbols

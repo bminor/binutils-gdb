@@ -1,5 +1,46 @@
 2018-05-21  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/23201
+	* aout-target.h (MY_bfd_link_hide_symbol): New.
+	* aout-tic30.c (MY_bfd_link_hide_symbol): Likewise.
+	* binary.c (binary_bfd_link_hide_symbol): Likewise.
+	* coff-alpha.c (_bfd_ecoff_bfd_link_hide_symbol): Likewise.
+	* coff-mips.c (_bfd_ecoff_bfd_link_hide_symbol): Likewise.
+	* coff-rs6000.c (_bfd_xcoff_bfd_link_hide_symbol): Likewise.
+	* coffcode.h (coff_bfd_link_hide_symbol): Likewise.
+	* elf-bfd.h (_bfd_elf_link_hide_symbol): Likewise.
+	* elfxx-target.h (bfd_elfNN_bfd_link_hide_symbol): Likewise.
+	* i386msdos.c (msdos_bfd_link_hide_symbol): Likewise.
+	* ihex.c (ihex_bfd_link_hide_symbol): Likewise.
+	* libbfd-in.h (_bfd_nolink_bfd_link_hide_symbol): Likewise.
+	* linker.c (_bfd_generic_link_hide_symbol): Likewise.
+	(bfd_link_hide_symbol): Likewise.
+	* mach-o-target.c (bfd_mach_o_bfd_link_hide_symbol): Likewise.
+	* mmo.c (mmo_bfd_link_hide_symbol): Likewise.
+	* pef.c (bfd_pef_bfd_link_hide_symbol): Likewise.
+	* plugin.c (bfd_plugin_bfd_link_hide_symbol): Likewise.
+	* ppcboot.c (ppcboot_bfd_link_hide_symbol): Likewise.
+	* som.c (som_bfd_link_hide_symbol): Likewise.
+	* srec.c (srec_bfd_link_hide_symbol): Likewise.
+	* tekhex.c (tekhex_bfd_link_hide_symbol): Likewise.
+	* vms-alpha.c (vms_bfd_link_hide_symbol): Likewise.
+	(alpha_vms_bfd_link_hide_symbol): Likewise.
+	* xsym.c (bfd_sym_bfd_link_hide_symbol): Likewise.
+	* coff64-rs6000.c (rs6000_xcoff64_vec): Add
+	_bfd_generic_link_hide_symbol.
+	(rs6000_xcoff64_aix_vec): Likewise.
+	* elflink.c (bfd_elf_record_link_assignment): Don't make forced
+	local symbol dynamic.
+	(_bfd_elf_link_hide_symbol): New function.
+	* elfxx-x86.c (_bfd_x86_elf_link_symbol_references_local): Don't
+	check root.ldscript_def.
+	* targets.c (bfd_target): Add _bfd_link_hide_symbol.
+	(BFD_JUMP_TABLE_LINK): Add NAME##_bfd_link_hide_symbol.
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Likewise.
+
+2018-05-21  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/23199
 	* elf.c (setup_group): Mark section in a section group with
 	SHF_GROUP.

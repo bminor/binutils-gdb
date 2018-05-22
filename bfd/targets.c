@@ -465,6 +465,7 @@ BFD_JUMP_TABLE macros.
 .  NAME##_bfd_discard_group, \
 .  NAME##_section_already_linked, \
 .  NAME##_bfd_define_common_symbol, \
+.  NAME##_bfd_link_hide_symbol, \
 .  NAME##_bfd_define_start_stop
 .
 .  int	       (*_bfd_sizeof_headers) (bfd *, struct bfd_link_info *);
@@ -530,6 +531,10 @@ BFD_JUMP_TABLE macros.
 .  {* Define a common symbol.  *}
 .  bfd_boolean (*_bfd_define_common_symbol) (bfd *, struct bfd_link_info *,
 .					     struct bfd_link_hash_entry *);
+.
+.  {* Hide a symbol.  *}
+.  void (*_bfd_link_hide_symbol) (bfd *, struct bfd_link_info *,
+.				  struct bfd_link_hash_entry *);
 .
 .  {* Define a __start, __stop, .startof. or .sizeof. symbol.  *}
 .  struct bfd_link_hash_entry *

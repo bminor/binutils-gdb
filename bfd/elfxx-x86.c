@@ -2047,12 +2047,10 @@ _bfd_x86_elf_link_symbol_references_local (struct bfd_link_info *info,
       return TRUE;
     }
 
-  /* Symbols created by HIDDEN and PROVIDE_HIDDEN assignments in linker
-     script aren't forced local here yet.  bfd_hide_sym_by_version
-     can't be used to check if a versioned symbol is hidden.  It has to
-     be syncd with _bfd_elf_link_assign_sym_version to get the correct
-     answer.  */
-  if (!h->root.ldscript_def && h->versioned == unversioned)
+  /* bfd_hide_sym_by_version can't be used to check if a versioned symbol
+     is hidden.  It has to be syncd with _bfd_elf_link_assign_sym_version
+     to get the correct answer.  */
+  if (h->versioned == unversioned)
     eh->local_ref = 1;
 
   return FALSE;
