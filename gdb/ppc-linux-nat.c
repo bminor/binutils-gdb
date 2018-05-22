@@ -2368,35 +2368,17 @@ fill_fpregset (const struct regcache *regcache,
 			fpregsetp, sizeof (*fpregsetp));
 }
 
-static int
-ppc_linux_target_wordsize (void)
-{
-  int wordsize = 4;
-
-  /* Check for 64-bit inferior process.  This is the case when the host is
-     64-bit, and in addition the top bit of the MSR register is set.  */
-#ifdef __powerpc64__
-  long msr;
-
-  int tid = ptid_get_lwp (inferior_ptid);
-  if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid);
-
-  errno = 0;
-  msr = (long) ptrace (PTRACE_PEEKUSER, tid, PT_MSR * 8, 0);
-  if (errno == 0 && ppc64_64bit_inferior_p (msr))
-    wordsize = 8;
-#endif
-
-  return wordsize;
-}
-
 int
 ppc_linux_nat_target::auxv_parse (gdb_byte **readptr,
 				  gdb_byte *endptr, CORE_ADDR *typep,
 				  CORE_ADDR *valp)
 {
-  int sizeof_auxv_field = ppc_linux_target_wordsize ();
+  int tid = ptid_get_lwp (inferior_ptid);
+  if (tid == 0)
+    tid = ptid_get_pid (inferior_ptid);
+
+  int sizeof_auxv_field = ppc_linux_target_wordsize (tid);
+
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   gdb_byte *ptr = *readptr;
 
@@ -2437,7 +2419,7 @@ ppc_linux_nat_target::read_description ()
 
   struct ppc_linux_features features = ppc_linux_no_features;
 
-  features.wordsize = ppc_linux_target_wordsize ();
+  features.wordsize = ppc_linux_target_wordsize (tid);
 
   unsigned long hwcap = ppc_linux_get_hwcap ();
 

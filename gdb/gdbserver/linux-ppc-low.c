@@ -620,36 +620,16 @@ ppc_arch_setup (void)
 {
   const struct target_desc *tdesc;
   struct ppc_linux_features features = ppc_linux_no_features;
+  int tid = lwpid_of (current_thread);
 
-  features.wordsize = 4;
-
-#ifdef __powerpc64__
-  long msr;
-  struct regcache *regcache;
-
-  /* On a 64-bit host, assume 64-bit inferior process with no
-     AltiVec registers.  Reset ppc_hwcap to ensure that the
-     collect_register call below does not fail.  */
-  tdesc = tdesc_powerpc_64l;
-  current_process ()->tdesc = tdesc;
-  ppc_hwcap = 0;
-
-  regcache = new_register_cache (tdesc);
-  fetch_inferior_registers (regcache, find_regno (tdesc, "msr"));
-  collect_register_by_name (regcache, "msr", &msr);
-  free_register_cache (regcache);
-  if (ppc64_64bit_inferior_p (msr))
-    {
-      features.wordsize = 8;
-    }
-#endif
+  features.wordsize = ppc_linux_target_wordsize (tid);
 
   if (features.wordsize == 4)
-    {
-      /* OK, we have a 32-bit inferior.  */
       tdesc = tdesc_powerpc_32l;
-      current_process ()->tdesc = tdesc;
-    }
+  else
+      tdesc = tdesc_powerpc_64l;
+
+  current_process ()->tdesc = tdesc;
 
   /* The value of current_process ()->tdesc needs to be set for this
      call.  */

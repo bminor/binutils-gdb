@@ -264,7 +264,7 @@ case ${gdb_host} in
 		;;
 	    powerpc)
 		# Host: PowerPC, running Linux
-		NATDEPFILES="${NATDEPFILES} ppc-linux-nat.o"
+		NATDEPFILES="${NATDEPFILES} ppc-linux-nat.o ppc-linux.o"
 		;;
 	    s390)
 		# Host: S390, running Linux

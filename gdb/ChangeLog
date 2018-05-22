@@ -1,5 +1,21 @@
 2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
 
+	* configure.nat <linux powerpc>: Add ppc-linux.o to NATDEPFILES.
+	* ppc-linux-nat.c (ppc_linux_target_wordsize): Move to
+	nat/ppc-linux.c.
+	(ppc_linux_nat_target::auxv_parse): Get thread id tid. Call
+	ppc_linux_target_wordsize with tid.
+	(ppc_linux_nat_target::read_description): Call ppc_linux_target
+	wordsize with tid.
+	* nat/ppc-linux.c: Include nat/gdb_ptrace.h.
+	(ppc64_64bit_inferior_p): Add static and inline specifiers.
+	(ppc_linux_target_wordsize): Move here from ppc-linux-nat.c. Add
+	tid parameter. Remove static specifier.
+	* nat/ppc-linux.h (ppc64_64bit_inferior_p): Remove declaration.
+	(ppc_linux_target_wordsize): New declaration.
+
+2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
+
 	* arch/ppc-linux-common.c: New file.
 	* arch/ppc-linux-common.h: New file.
 	* arch/ppc-linux-tdesc.h: New file.

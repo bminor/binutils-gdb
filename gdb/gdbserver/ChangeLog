@@ -1,5 +1,10 @@
 2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
 
+	* linux-ppc-low.c (ppc_arch_setup): Remove code for getting the
+	wordsize of the inferior. Call ppc_linux_target_wordsize.
+
+2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
+
 	* configure.srv (srv_tgtobj): Add arch/ppc-linux-common.o.
 	* Makefile.in (SFILES): Add arch/ppc-linux-common.c.
 	* linux-ppc-tdesc.h: Rename to linux-ppc-tdesc-init.h.

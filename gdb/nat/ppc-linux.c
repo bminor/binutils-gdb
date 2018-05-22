@@ -17,6 +17,7 @@
 
 #include "common-defs.h"
 #include "ppc-linux.h"
+#include "nat/gdb_ptrace.h"
 #include <elf.h>
 
 #ifdef HAVE_GETAUXVAL
@@ -53,7 +54,7 @@ ppc64_host_hwcap (unsigned long *valp)
 #endif /* HAVE_GETAUXVAL */
 }
 
-int
+static inline int
 ppc64_64bit_inferior_p (long msr)
 {
   unsigned long ppc_host_hwcap = 0;
@@ -73,3 +74,22 @@ ppc64_64bit_inferior_p (long msr)
 }
 
 #endif
+
+int
+ppc_linux_target_wordsize (int tid)
+{
+  int wordsize = 4;
+
+  /* Check for 64-bit inferior process.  This is the case when the host is
+     64-bit, and in addition the top bit of the MSR register is set.  */
+#ifdef __powerpc64__
+  long msr;
+
+  errno = 0;
+  msr = (long) ptrace (PTRACE_PEEKUSER, tid, PT_MSR * 8, 0);
+  if (errno == 0 && ppc64_64bit_inferior_p (msr))
+    wordsize = 8;
+#endif
+
+  return wordsize;
+}
