@@ -32,7 +32,7 @@ struct target_desc;
 #define PPC_LINUX_SIZEOF_VSXREGSET 256
 
 /* Check if the hwcap auxv entry indicates that isa205 is supported.  */
-bool ppc_linux_has_isa205 (unsigned long hwcap);
+bool ppc_linux_has_isa205 (CORE_ADDR hwcap);
 
 /* Features used to determine the target description.  */
 struct ppc_linux_features

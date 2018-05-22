@@ -1,5 +1,20 @@
 2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
 
+	* arch/ppc-linux-common.c (ppc_linux_has_isa205): Change the
+	parameter type to CORE_ADDR.
+	* arch/ppc-linux-common.h (ppc_linux_has_isa205): Change the
+	parameter type in declaration to CORE_ADDR.
+	* ppc-linux-tdep.c (ppc_linux_core_read_description): Call
+	target_auxv_search to get AT_HWCAP and use the result to get the
+	target description.
+	* ppc-linux-nat.c (ppc_linux_get_hwcap): Change the return type
+	to CORE_ADDR. Remove the cast of the return value to unsigned
+	long. Fix error predicate of target_auxv_search.
+	(ppc_linux_nat_target::read_description): Change the type of the
+	hwcap variable to CORE_ADDR.
+
+2018-05-22  Pedro Franco de Carvalho  <pedromfc@linux.vnet.ibm.com>
+
 	* rs6000-tdep.c (rs6000_gdbarch_init): Assign 1 to have_dfp only
 	if the size of fpscr is larger than 32 bits.
 

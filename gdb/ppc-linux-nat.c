@@ -1165,15 +1165,15 @@ store_ppc_registers (const struct regcache *regcache, int tid)
 }
 
 /* Fetch the AT_HWCAP entry from the aux vector.  */
-static unsigned long
+static CORE_ADDR
 ppc_linux_get_hwcap (void)
 {
   CORE_ADDR field;
 
-  if (target_auxv_search (target_stack, AT_HWCAP, &field))
-    return (unsigned long) field;
+  if (target_auxv_search (target_stack, AT_HWCAP, &field) != 1)
+    return 0;
 
-  return 0;
+  return field;
 }
 
 /* The cached DABR value, to install in new threads.
@@ -2236,7 +2236,7 @@ ppc_linux_nat_target::read_description ()
 
   features.wordsize = ppc_linux_target_wordsize (tid);
 
-  unsigned long hwcap = ppc_linux_get_hwcap ();
+  CORE_ADDR hwcap = ppc_linux_get_hwcap ();
 
   if (have_ptrace_getsetvsxregs
       && (hwcap & PPC_FEATURE_HAS_VSX))

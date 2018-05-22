@@ -31,7 +31,7 @@
 #endif
 
 bool
-ppc_linux_has_isa205 (unsigned long hwcap)
+ppc_linux_has_isa205 (CORE_ADDR hwcap)
 {
   /* Power ISA 2.05 (implemented by Power 6 and newer processors)
      increases the FPSCR from 32 bits to 64 bits.  Even though Power 7
