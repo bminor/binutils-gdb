@@ -1354,7 +1354,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
   gdb_byte *p, *regs = (gdb_byte *) xsave;
   gdb_byte raw[I386_MAX_REGISTER_SIZE];
   ULONGEST initial_xstate_bv, clear_bv, xstate_bv = 0;
-  int i;
+  unsigned int i;
   enum
     {
       x87_ctrl_or_mxcsr = 0x1,

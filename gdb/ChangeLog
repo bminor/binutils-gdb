@@ -1,3 +1,7 @@
+2018-05-22  Maciej W. Rozycki  <macro@mips.com>
+
+	* i387-tdep.c (i387_collect_xsave): Make `i' unsigned.
+
 2018-05-22  Pedro Alves  <palves@redhat.com>
 
 	* remote-fileio.c (remote_fileio_reply, remote_fileio_ioerror)
