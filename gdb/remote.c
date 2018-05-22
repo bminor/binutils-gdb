@@ -6096,45 +6096,57 @@ get_remote_inferior (inferior *inf)
   return static_cast<remote_inferior *> (inf->priv.get ());
 }
 
-/* Structure used to track the construction of a vCont packet in the
+/* Class used to track the construction of a vCont packet in the
    outgoing packet buffer.  This is used to send multiple vCont
    packets if we have more actions than would fit a single packet.  */
 
-struct vcont_builder
+class vcont_builder
 {
+public:
+  vcont_builder ()
+  {
+    restart ();
+  }
+
+  void flush ();
+  void push_action (ptid_t ptid, bool step, gdb_signal siggnal);
+
+private:
+  void restart ();
+
   /* Pointer to the first action.  P points here if no action has been
      appended yet.  */
-  char *first_action;
+  char *m_first_action;
 
   /* Where the next action will be appended.  */
-  char *p;
+  char *m_p;
 
   /* The end of the buffer.  Must never write past this.  */
-  char *endp;
+  char *m_endp;
 };
 
 /* Prepare the outgoing buffer for a new vCont packet.  */
 
-static void
-vcont_builder_restart (struct vcont_builder *builder)
+void
+vcont_builder::restart ()
 {
   struct remote_state *rs = get_remote_state ();
 
-  builder->p = rs->buf;
-  builder->endp = rs->buf + get_remote_packet_size ();
-  builder->p += xsnprintf (builder->p, builder->endp - builder->p, "vCont");
-  builder->first_action = builder->p;
+  m_p = rs->buf;
+  m_endp = rs->buf + get_remote_packet_size ();
+  m_p += xsnprintf (m_p, m_endp - m_p, "vCont");
+  m_first_action = m_p;
 }
 
 /* If the vCont packet being built has any action, send it to the
    remote end.  */
 
-static void
-vcont_builder_flush (struct vcont_builder *builder)
+void
+vcont_builder::flush ()
 {
   struct remote_state *rs;
 
-  if (builder->p == builder->first_action)
+  if (m_p == m_first_action)
     return;
 
   rs = get_remote_state ();
@@ -6155,33 +6167,30 @@ vcont_builder_flush (struct vcont_builder *builder)
    what we've got so far to the remote end and start over a new vCont
    packet (with the new action).  */
 
-static void
-vcont_builder_push_action (struct vcont_builder *builder,
-			   ptid_t ptid, int step, enum gdb_signal siggnal)
+void
+vcont_builder::push_action (ptid_t ptid, bool step, gdb_signal siggnal)
 {
   char buf[MAX_ACTION_SIZE + 1];
-  char *endp;
-  size_t rsize;
 
-  endp = append_resumption (buf, buf + sizeof (buf),
-			    ptid, step, siggnal);
+  char *endp = append_resumption (buf, buf + sizeof (buf),
+				  ptid, step, siggnal);
 
   /* Check whether this new action would fit in the vCont packet along
      with previous actions.  If not, send what we've got so far and
      start a new vCont packet.  */
-  rsize = endp - buf;
-  if (rsize > builder->endp - builder->p)
+  size_t rsize = endp - buf;
+  if (rsize > m_endp - m_p)
     {
-      vcont_builder_flush (builder);
-      vcont_builder_restart (builder);
+      flush ();
+      restart ();
 
       /* Should now fit.  */
-      gdb_assert (rsize <= builder->endp - builder->p);
+      gdb_assert (rsize <= m_endp - m_p);
     }
 
-  memcpy (builder->p, buf, rsize);
-  builder->p += rsize;
-  *builder->p = '\0';
+  memcpy (m_p, buf, rsize);
+  m_p += rsize;
+  *m_p = '\0';
 }
 
 /* to_commit_resume implementation.  */
@@ -6193,7 +6202,6 @@ remote_target::commit_resume ()
   struct thread_info *tp;
   int any_process_wildcard;
   int may_global_wildcard_vcont;
-  struct vcont_builder vcont_builder;
 
   /* If connected in all-stop mode, we'd send the remote resume
      request directly from remote_resume.  Likewise if
@@ -6291,7 +6299,7 @@ remote_target::commit_resume ()
      we end up with too many actions for a single packet vcont_builder
      flushes the current vCont packet to the remote side and starts a
      new one.  */
-  vcont_builder_restart (&vcont_builder);
+  struct vcont_builder vcont_builder;
 
   /* Threads first.  */
   ALL_NON_EXITED_THREADS (tp)
@@ -6312,7 +6320,7 @@ remote_target::commit_resume ()
 	  continue;
 	}
 
-      vcont_builder_push_action (&vcont_builder, tp->ptid,
+      vcont_builder.push_action (tp->ptid,
 				 remote_thr->last_resume_step,
 				 remote_thr->last_resume_sig);
       remote_thr->vcont_resumed = 1;
@@ -6339,8 +6347,8 @@ remote_target::commit_resume ()
 	 continue action for each running process, if any.  */
       if (may_global_wildcard_vcont)
 	{
-	  vcont_builder_push_action (&vcont_builder, minus_one_ptid,
-				     0, GDB_SIGNAL_0);
+	  vcont_builder.push_action (minus_one_ptid,
+				     false, GDB_SIGNAL_0);
 	}
       else
 	{
@@ -6348,15 +6356,14 @@ remote_target::commit_resume ()
 	    {
 	      if (get_remote_inferior (inf)->may_wildcard_vcont)
 		{
-		  vcont_builder_push_action (&vcont_builder,
-					     pid_to_ptid (inf->pid),
-					     0, GDB_SIGNAL_0);
+		  vcont_builder.push_action (pid_to_ptid (inf->pid),
+					     false, GDB_SIGNAL_0);
 		}
 	    }
 	}
     }
 
-  vcont_builder_flush (&vcont_builder);
+  vcont_builder.flush ();
 }
 
 

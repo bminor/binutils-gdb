@@ -1,5 +1,19 @@
 2018-05-22  Pedro Alves  <palves@redhat.com>
 
+	* remote.c (vcont_builder): Now a class.  Make all data members
+	private.
+	(vcont_builder) <vcont_builder, restart, flush, push_action>:
+	Declare methods.
+	(vcont_builder_restart): Rename to ...
+	(vcont_builder::restart): ... this.
+	(vcont_builder_flush): Rename to ...
+	(vcont_builder::flush): ... this.
+	(vcont_builder_push_action): Rename to ...
+	(vcont_builder::push_action): ... this.
+	(remote_target::commit_resume): Adjust.
+
+2018-05-22  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (DEFAULT_MAX_MEMORY_PACKET_SIZE): Rename to ...
 	(DEFAULT_MAX_MEMORY_PACKET_SIZE_FIXED): ... this.
 	(get_fixed_memory_packet_size): New.
