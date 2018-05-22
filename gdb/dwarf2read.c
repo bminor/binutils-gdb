@@ -7908,8 +7908,6 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
 
   prepare_one_comp_unit (cu, comp_unit_die, info->pretend_language);
 
-  cu->list_in_scope = &file_symbols;
-
   /* Allocate a new partial symbol table structure.  */
   filename = dwarf2_string_attr (comp_unit_die, DW_AT_name, cu);
   if (filename == NULL)
@@ -8077,7 +8075,6 @@ build_type_psymtabs_reader (const struct die_reader_specs *reader,
   VEC_safe_push (sig_type_ptr, tu_group->tus, sig_type);
 
   prepare_one_comp_unit (cu, type_unit_die, language_minimal);
-  cu->list_in_scope = &file_symbols;
   pst = create_partial_symtab (per_cu, "");
   pst->anonymous = 1;
 
