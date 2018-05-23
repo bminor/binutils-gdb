@@ -637,6 +637,9 @@ static bfd_boolean enforce_three_byte_loop_align = FALSE;
 
 static bfd_boolean workaround_all_short_loops = FALSE;
 
+/* Generate individual property section for every section.
+   This option is defined in BDF library.  */
+extern bfd_boolean elf32xtensa_separate_props;
 
 static void
 xtensa_setup_hw_workarounds (int earliest, int latest)
@@ -722,6 +725,9 @@ enum
   option_auto_litpools,
   option_no_auto_litpools,
   option_auto_litpool_limit,
+
+  option_separate_props,
+  option_no_separate_props,
 };
 
 const char *md_shortopts = "";
@@ -800,6 +806,8 @@ struct option md_longopts[] =
   { "auto-litpools", no_argument, NULL, option_auto_litpools },
   { "no-auto-litpools", no_argument, NULL, option_no_auto_litpools },
   { "auto-litpool-limit", required_argument, NULL, option_auto_litpool_limit },
+
+  { "separate-prop-tables", no_argument, NULL, option_separate_props },
 
   { NULL, no_argument, NULL, 0 }
 };
@@ -1021,6 +1029,14 @@ md_parse_option (int c, const char *arg)
 	return 1;
       }
 
+    case option_separate_props:
+      elf32xtensa_separate_props = TRUE;
+      return 1;
+
+    case option_no_separate_props:
+      elf32xtensa_separate_props = FALSE;
+      return 1;
+
     default:
       return 0;
     }
@@ -1051,7 +1067,11 @@ Xtensa options:\n\
   --auto-litpool-limit=<value>\n\
                           (range 100-10000) Maximum number of blocks of\n\
                           instructions to emit between literal pool\n\
-                          locations; implies --auto-litpools flag\n", stream);
+                          locations; implies --auto-litpools flag\n\
+  --[no-]separate-prop-tables\n\
+                          [Do not] place Xtensa property records into\n\
+                          individual property sections for each section.\n\
+                          Default is to generate single property section.\n", stream);
 }
 
 

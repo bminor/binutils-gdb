@@ -1,3 +1,17 @@
+2018-06-04  Volodymyr Arbatov  <arbatov@cadence.com>
+
+	* elf32-xtensa.c (elf32xtensa_separate_props): New global
+	variable.
+	(xtensa_add_names): New function.
+	(xtensa_property_section_name): Add new parameter
+	separate_sections, use it to choose property section name.
+	(xtensa_get_separate_property_section): New function.
+	(xtensa_get_property_section): Invoke
+	xtensa_get_separate_property_section to get individual property
+	section if it exists, common property section otherwise.
+	(xtensa_make_property_section): Pass elf32xtensa_separate_props
+	to xtensa_property_section_name.
+
 2018-06-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/23146

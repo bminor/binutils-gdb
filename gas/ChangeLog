@@ -1,3 +1,14 @@
+2018-06-04  Volodymyr Arbatov  <arbatov@cadence.com>
+
+	* config/tc-xtensa.c (elf32xtensa_separate_props): New
+	declaration.
+	(option_separate_props, option_no_separate_props): New
+	enumeration constants.
+	(md_longopts): Add separate-prop-tables option.
+	(md_parse_option): Add cases for option_separate_props and
+	option_no_separate_props.
+	(md_show_usage): Add help for [no-]separate-prop-tables options.
+
 2018-06-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.

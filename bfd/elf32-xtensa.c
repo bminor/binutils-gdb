@@ -154,6 +154,11 @@ static bfd_boolean relaxing_section = FALSE;
 
 int elf32xtensa_no_literal_movement = 1;
 
+/* Place property records for a section into individual property section
+   with xt.prop. prefix.  */
+
+bfd_boolean elf32xtensa_separate_props = FALSE;
+
 /* Rename one of the generic section flags to better document how it
    is used here.  */
 /* Whether relocations have been processed.  */
@@ -10987,10 +10992,30 @@ match_section_group (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
 }
 
 
+static char *
+xtensa_add_names (const char *base, const char *suffix)
+{
+  if (suffix)
+    {
+      size_t base_len = strlen (base);
+      size_t suffix_len = strlen (suffix);
+      char *str = bfd_malloc (base_len + suffix_len + 1);
+
+      memcpy (str, base, base_len);
+      memcpy (str + base_len, suffix, suffix_len + 1);
+      return str;
+    }
+  else
+    {
+      return strdup (base);
+    }
+}
+
 static int linkonce_len = sizeof (".gnu.linkonce.") - 1;
 
 static char *
-xtensa_property_section_name (asection *sec, const char *base_name)
+xtensa_property_section_name (asection *sec, const char *base_name,
+			      bfd_boolean separate_sections)
 {
   const char *suffix, *group_name;
   char *prop_sec_name;
@@ -11001,11 +11026,7 @@ xtensa_property_section_name (asection *sec, const char *base_name)
       suffix = strrchr (sec->name, '.');
       if (suffix == sec->name)
 	suffix = 0;
-      prop_sec_name = (char *) bfd_malloc (strlen (base_name) + 1
-					   + (suffix ? strlen (suffix) : 0));
-      strcpy (prop_sec_name, base_name);
-      if (suffix)
-	strcat (prop_sec_name, suffix);
+      prop_sec_name = xtensa_add_names (base_name, suffix);
     }
   else if (strncmp (sec->name, ".gnu.linkonce.", linkonce_len) == 0)
     {
@@ -11033,23 +11054,43 @@ xtensa_property_section_name (asection *sec, const char *base_name)
       strcat (prop_sec_name + linkonce_len, suffix);
     }
   else
-    prop_sec_name = strdup (base_name);
+    {
+      prop_sec_name = xtensa_add_names (base_name,
+					separate_sections ? sec->name : NULL);
+    }
 
   return prop_sec_name;
 }
 
 
 static asection *
-xtensa_get_property_section (asection *sec, const char *base_name)
+xtensa_get_separate_property_section (asection *sec, const char *base_name,
+				      bfd_boolean separate_section)
 {
   char *prop_sec_name;
   asection *prop_sec;
 
-  prop_sec_name = xtensa_property_section_name (sec, base_name);
+  prop_sec_name = xtensa_property_section_name (sec, base_name,
+						separate_section);
   prop_sec = bfd_get_section_by_name_if (sec->owner, prop_sec_name,
 					 match_section_group,
 					 (void *) elf_group_name (sec));
   free (prop_sec_name);
+  return prop_sec;
+}
+
+static asection *
+xtensa_get_property_section (asection *sec, const char *base_name)
+{
+  asection *prop_sec;
+
+  /* Try individual property section first.  */
+  prop_sec = xtensa_get_separate_property_section (sec, base_name, TRUE);
+
+  /* Refer to a common property section if individual is not present.  */
+  if (!prop_sec)
+    prop_sec = xtensa_get_separate_property_section (sec, base_name, FALSE);
+
   return prop_sec;
 }
 
@@ -11061,7 +11102,8 @@ xtensa_make_property_section (asection *sec, const char *base_name)
   asection *prop_sec;
 
   /* Check if the section already exists.  */
-  prop_sec_name = xtensa_property_section_name (sec, base_name);
+  prop_sec_name = xtensa_property_section_name (sec, base_name,
+						elf32xtensa_separate_props);
   prop_sec = bfd_get_section_by_name_if (sec->owner, prop_sec_name,
 					 match_section_group,
 					 (void *) elf_group_name (sec));
