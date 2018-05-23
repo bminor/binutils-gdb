@@ -79,7 +79,7 @@ extern struct context_stack *push_context (int desc, CORE_ADDR valu);
 
 extern struct context_stack pop_context ();
 
-extern record_line_ftype record_line;
+extern void record_line (struct subfile *subfile, int line, CORE_ADDR pc);
 
 extern struct compunit_symtab *start_symtab (struct objfile *objfile,
 					     const char *name,

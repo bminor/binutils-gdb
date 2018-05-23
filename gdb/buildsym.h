@@ -396,10 +396,6 @@ private:
   struct pending *m_local_symbols = nullptr;
 };
 
-/* The type of the record_line function.  */
-typedef void (record_line_ftype) (struct subfile *subfile, int line,
-				  CORE_ADDR pc);
-
 
 
 extern void add_symbol_to_list (struct symbol *symbol,

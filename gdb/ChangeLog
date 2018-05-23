@@ -1,5 +1,10 @@
 2018-07-20  Tom Tromey  <tom@tromey.com>
 
+	* buildsym-legacy.h (record_line): Don't use record_line_ftype.
+	* buildsym.h (record_line_ftype): Remove typedef.
+
+2018-07-20  Tom Tromey  <tom@tromey.com>
+
 	* buildsym-legacy.h (augment_type_symtab): Don't declare.
 	(end_expandable_symtab): Likewise.
 	(end_symtab_get_static_block): Likewise.
