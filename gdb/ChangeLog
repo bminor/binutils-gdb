@@ -2,6 +2,14 @@
 	    Stephen Roberts  <stephen.roberts@arm.com>
 
 	PR gdb/22882
+	* infrun.c (fetch_inferior_event): If GDB is not proceeding then
+	run INF_EXEC_COMPLETE handler, even when not calling normal_stop.
+	Move should_notify_stop local into more inner scope.
+
+2018-06-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Stephen Roberts  <stephen.roberts@arm.com>
+
+	PR gdb/22882
 	* infrun.c (resume_1): Add call to mark_async_event_handler.
 
 2018-06-12  Andrew Burgess  <andrew.burgess@embecosm.com>
