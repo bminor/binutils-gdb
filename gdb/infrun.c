@@ -2408,7 +2408,11 @@ resume_1 (enum gdb_signal sig)
       tp->suspend.stop_signal = GDB_SIGNAL_0;
 
       if (target_can_async_p ())
-	target_async (1);
+	{
+	  target_async (1);
+	  /* Tell the event loop we have an event to process. */
+	  mark_async_event_handler (infrun_async_inferior_event_token);
+	}
       return;
     }
 

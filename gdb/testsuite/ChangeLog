@@ -1,3 +1,10 @@
+2018-06-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Stephen Roberts  <stephen.roberts@arm.com>
+
+	* gdb.threads/multiple-successive-infcall.exp: Remove kfail case,
+	rewrite test to describe action performed, rather than possible
+	failure.
+
 2018-06-08  Gary Benson <gbenson@redhat.com>
 
 	* gdb.threads/check-libthread-db.exp: New file.

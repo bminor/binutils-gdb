@@ -56,17 +56,6 @@ gdb_test "show scheduler-locking" \
 
 foreach_with_prefix thread {5 4 3 2 1}  {
   gdb_test "thread ${thread}" "Switching to .*"
-  set command "call get_value()"
-  set hang_message "testing if ${command} hangs"
-  gdb_test_multiple "${command}" "${hang_message}" {
-    -re "= ${thread}\[\r\n]+${gdb_prompt} $" {
-      pass "${hang_message}"
-    }
-    timeout {
-      kfail "gdb/22882" "${hang_message}"
-      # Exit. The debugger has hung, so there is no point in wasting
-      # time timing out on further calls to get_value().
-      return 0
-    }
-  }
+  gdb_test "call get_value()" "= ${thread}" \
+      "call inferior function"
 }

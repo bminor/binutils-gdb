@@ -1,4 +1,10 @@
 2018-06-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Stephen Roberts  <stephen.roberts@arm.com>
+
+	PR gdb/22882
+	* infrun.c (resume_1): Add call to mark_async_event_handler.
+
+2018-06-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* infrun.c (do_target_wait): Change old version of $pc printed.
 
