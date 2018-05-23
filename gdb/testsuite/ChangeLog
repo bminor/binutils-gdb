@@ -1,3 +1,8 @@
+2018-05-23  Gary Benson <gbenson@redhat.com>
+
+	* gdb.threads/check-libthread-db.exp: New file.
+	* gdb.threads/check-libthread-db.c: Likewise.
+
 2018-05-18  Tom Tromey  <tom@tromey.com>
 
 	* gdb.base/ptype-offsets.exp: Update.
