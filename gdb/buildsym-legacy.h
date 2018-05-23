@@ -37,25 +37,6 @@
    The compunit symtab pointer ("cust") is returned from both start_symtab
    and end_symtab to simplify the debug info readers.
 
-   There are minor variations on this, e.g., dwarf2read.c splits end_symtab
-   into two calls: end_symtab_get_static_block, end_symtab_from_static_block,
-   but all debug info readers follow this basic flow.
-
-   Reading DWARF Type Units is another variation:
-
-   scoped_free_pendings free_pending;
-   cust = start_symtab (...);
-   ... read debug info ...
-   cust = end_expandable_symtab (...);
-
-   And then reading subsequent Type Units within the containing "Comp Unit"
-   will use a second flow:
-
-   scoped_free_pendings free_pending;
-   cust = restart_symtab (...);
-   ... read debug info ...
-   cust = augment_type_symtab (...);
-
    dbxread.c and xcoffread.c use another variation:
 
    scoped_free_pendings free_pending;
@@ -92,20 +73,7 @@ extern void push_subfile ();
 
 extern const char *pop_subfile ();
 
-extern struct block *end_symtab_get_static_block (CORE_ADDR end_addr,
-						  int expandable,
-						  int required);
-
-extern struct compunit_symtab *
-  end_symtab_from_static_block (struct block *static_block,
-				int section, int expandable);
-
 extern struct compunit_symtab *end_symtab (CORE_ADDR end_addr, int section);
-
-extern struct compunit_symtab *end_expandable_symtab (CORE_ADDR end_addr,
-						      int section);
-
-extern void augment_type_symtab (void);
 
 extern struct context_stack *push_context (int desc, CORE_ADDR valu);
 

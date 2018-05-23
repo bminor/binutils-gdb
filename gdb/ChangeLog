@@ -1,5 +1,16 @@
 2018-07-20  Tom Tromey  <tom@tromey.com>
 
+	* buildsym-legacy.h (augment_type_symtab): Don't declare.
+	(end_expandable_symtab): Likewise.
+	(end_symtab_get_static_block): Likewise.
+	(end_symtab_from_static_block): Likewise.
+	* buildsym-legacy.c (augment_type_symtab): Remove.
+	(end_expandable_symtab): Remove.
+	(end_symtab_get_static_block): Remove.
+	(end_symtab_from_static_block): Remove.
+
+2018-07-20  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.c: Include buildsym.h.
 	(struct dwarf2_cu) <builder>: New method.
 	(fixup_go_packaging): Update.

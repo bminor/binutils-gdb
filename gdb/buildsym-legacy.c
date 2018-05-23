@@ -194,14 +194,6 @@ pop_subfile ()
   return buildsym_compunit->pop_subfile ();
 }
 
-struct block *
-end_symtab_get_static_block (CORE_ADDR end_addr, int expandable, int required)
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  return buildsym_compunit->end_symtab_get_static_block (end_addr, expandable,
-							 required);
-}
-
 /* Delete the buildsym compunit.  */
 
 static void
@@ -214,18 +206,6 @@ free_buildsym_compunit (void)
 }
 
 struct compunit_symtab *
-end_symtab_from_static_block (struct block *static_block,
-			      int section, int expandable)
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  struct compunit_symtab *result
-    = buildsym_compunit->end_symtab_from_static_block (static_block,
-						       section, expandable);
-  free_buildsym_compunit ();
-  return result;
-}
-
-struct compunit_symtab *
 end_symtab (CORE_ADDR end_addr, int section)
 {
   gdb_assert (buildsym_compunit != nullptr);
@@ -233,24 +213,6 @@ end_symtab (CORE_ADDR end_addr, int section)
     = buildsym_compunit->end_symtab (end_addr, section);
   free_buildsym_compunit ();
   return result;
-}
-
-struct compunit_symtab *
-end_expandable_symtab (CORE_ADDR end_addr, int section)
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  struct compunit_symtab *result
-    = buildsym_compunit->end_expandable_symtab (end_addr, section);
-  free_buildsym_compunit ();
-  return result;
-}
-
-void
-augment_type_symtab ()
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  buildsym_compunit->augment_type_symtab ();
-  free_buildsym_compunit ();
 }
 
 struct context_stack *
