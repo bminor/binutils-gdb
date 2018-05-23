@@ -3533,7 +3533,7 @@ do_target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
 	    fprintf_unfiltered (gdb_stdlog,
 				"infrun: PC of %s changed.  was=%s, now=%s\n",
 				target_pid_to_str (tp->ptid),
-				paddress (gdbarch, tp->prev_pc),
+				paddress (gdbarch, tp->suspend.stop_pc),
 				paddress (gdbarch, pc));
 	  discard = 1;
 	}

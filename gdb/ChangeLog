@@ -1,3 +1,7 @@
+2018-06-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* infrun.c (do_target_wait): Change old version of $pc printed.
+
 2018-06-11  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* dwarf2read.c (read_index_from_section): Rename to...
