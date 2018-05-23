@@ -1,3 +1,9 @@
+2018-05-23  Erik Kurzinger  <ekurzinger@nvidia.com>
+
+	PR server/23198
+	* hostio.c (require_int): Do not report overflow for integers
+	between 0xfffffff and 0x7fffffff.
+
 2018-05-22  Maciej W. Rozycki  <macro@mips.com>
 
 	* linux-mips-low.c [HAVE_PTRACE_GETREGS] (mips_collect_register)

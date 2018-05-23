@@ -96,22 +96,27 @@ static int
 require_int (char **pp, int *value)
 {
   char *p;
-  int count;
+  int count, firstdigit;
 
   p = *pp;
   *value = 0;
   count = 0;
+  firstdigit = -1;
 
   while (*p && *p != ',')
     {
       int nib;
 
-      /* Don't allow overflow.  */
-      if (count >= 7)
-	return -1;
-
       if (safe_fromhex (p[0], &nib))
 	return -1;
+
+      if (firstdigit == -1)
+	firstdigit = nib;
+
+      /* Don't allow overflow.  */
+      if (count >= 8 || (count == 7 && firstdigit >= 0x8))
+	return -1;
+
       *value = *value * 16 + nib;
       p++;
       count++;
