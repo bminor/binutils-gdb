@@ -802,7 +802,7 @@ property_table_matches (const void *ap, const void *bp)
    section.  Sets TABLE_P and returns the number of entries.  On
    error, returns a negative value.  */
 
-static int
+int
 xtensa_read_table_entries (bfd *abfd,
 			   asection *section,
 			   property_table_entry **table_p,
@@ -6730,7 +6730,6 @@ static bfd_boolean check_section_ebb_pcrels_fit
 static bfd_boolean check_section_ebb_reduces (const ebb_constraint *);
 static void text_action_add_proposed
   (text_action_list *, const ebb_constraint *, asection *);
-static int compute_fill_extra_space (property_table_entry *);
 
 /* First pass: */
 static bfd_boolean compute_removed_literals
@@ -8136,7 +8135,7 @@ compute_ebb_actions (ebb_constraint *ebb_table)
       BFD_ASSERT (action->action == ta_fill);
       BFD_ASSERT (ebb->ends_unreachable->flags & XTENSA_PROP_UNREACHABLE);
 
-      extra_space = compute_fill_extra_space (ebb->ends_unreachable);
+      extra_space = xtensa_compute_fill_extra_space (ebb->ends_unreachable);
       br = action->removed_bytes + removed_bytes + extra_space;
       br = br & ((1 << ebb->sec->alignment_power ) - 1);
 
@@ -8560,7 +8559,7 @@ text_action_add_proposed (text_action_list *l,
 
 
 int
-compute_fill_extra_space (property_table_entry *entry)
+xtensa_compute_fill_extra_space (property_table_entry *entry)
 {
   int fill_extra_space;
 
@@ -8841,7 +8840,7 @@ remove_dead_literal (bfd *abfd,
 	 do not add fill.  */
       the_add_entry = elf_xtensa_find_property_entry (prop_table, ptblsize,
 						      entry_sec_offset);
-      fill_extra_space = compute_fill_extra_space (the_add_entry);
+      fill_extra_space = xtensa_compute_fill_extra_space (the_add_entry);
 
       fa = find_fill_action (&relax_info->action_list, sec, entry_sec_offset);
       removed_diff = compute_removed_action_diff (fa, sec, entry_sec_offset,

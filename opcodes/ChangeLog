@@ -1,3 +1,15 @@
+2018-06-04  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* xtensa-dis.c (bfd.h, elf/xtensa.h): New includes.
+	(dis_private): Add new fields for property section tracking.
+	(xtensa_coalesce_insn_tables, xtensa_find_table_entry)
+	(xtensa_instruction_fits): New functions.
+	(fetch_data): Bump minimal fetch size to 4.
+	(print_insn_xtensa): Make struct dis_private static.
+	Load and prepare property table on section change.
+	Don't disassemble literals. Don't disassemble instructions that
+	cross property table boundaries.
+
 2018-06-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.

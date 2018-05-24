@@ -1,3 +1,8 @@
+2018-06-04  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* elf/xtensa.h (xtensa_read_table_entries)
+	(xtensa_compute_fill_extra_space): New declarations.
+
 2018-06-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* diagnostics.h (DIAGNOSTIC_IGNORE_STRINGOP_TRUNCATION): Always
