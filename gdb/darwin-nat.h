@@ -27,7 +27,7 @@ class darwin_nat_target : public inf_child_target
 {
   void create_inferior (const char *exec_file,
 			const std::string &allargs,
-			char **env, int from_tty);
+			char **env, int from_tty) override;
 
   void attach (const char *, int) override;
 

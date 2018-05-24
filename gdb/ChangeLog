@@ -1,3 +1,8 @@
+2018-05-24  Pedro Alves  <palves@redhat.com>
+
+	* darwin-nat.h (darwin_nat_target::create_inferior): Mark with
+	override.
+
 2018-05-23  Tom Tromey  <tom@tromey.com>
 
 	* complaints.c (struct complaints): Remove.
