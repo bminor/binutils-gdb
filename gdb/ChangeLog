@@ -1,3 +1,11 @@
+2018-06-01  Tom Tromey  <tom@tromey.com>
+
+	* python/py-type.c (typy_legacy_template_argument): Update.
+	* cp-support.h (cp_demangled_name_to_comp): Update.
+	* cp-name-parser.y (cp_demangled_name_to_comp): Change errmsg
+	parameter to be a "std::string *".
+	(main): Update.
+
 2018-06-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ada-lex.l: Include "diagnostics.h" instead of

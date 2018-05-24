@@ -859,7 +859,7 @@ typy_legacy_template_argument (struct type *type, const struct block *block,
   int i;
   struct demangle_component *demangled;
   std::unique_ptr<demangle_parse_info> info;
-  const char *err;
+  std::string err;
   struct type *argtype;
 
   if (TYPE_NAME (type) == NULL)
@@ -881,7 +881,7 @@ typy_legacy_template_argument (struct type *type, const struct block *block,
 
   if (! info)
     {
-      PyErr_SetString (PyExc_RuntimeError, err);
+      PyErr_SetString (PyExc_RuntimeError, err.c_str ());
       return NULL;
     }
   demangled = info->tree;
