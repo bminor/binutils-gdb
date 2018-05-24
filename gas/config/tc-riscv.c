@@ -2756,11 +2756,11 @@ riscv_frag_align_code (int n)
   if (bytes <= insn_alignment)
     return TRUE;
 
-  nops = frag_more (worst_case_bytes);
-
   /* When not relaxing, riscv_handle_align handles code alignment.  */
   if (!riscv_opts.relax)
     return FALSE;
+
+  nops = frag_more (worst_case_bytes);
 
   ex.X_op = O_constant;
   ex.X_add_number = worst_case_bytes;
@@ -2784,15 +2784,27 @@ riscv_handle_align (fragS *fragP)
       /* When relaxing, riscv_frag_align_code handles code alignment.  */
       if (!riscv_opts.relax)
 	{
-	  bfd_signed_vma count = fragP->fr_next->fr_address
-				 - fragP->fr_address - fragP->fr_fix;
+	  bfd_signed_vma bytes = (fragP->fr_next->fr_address
+				  - fragP->fr_address - fragP->fr_fix);
+	  /* We have 4 byte uncompressed nops.  */
+	  bfd_signed_vma size = 4;
+	  bfd_signed_vma excess = bytes % size;
+	  char *p = fragP->fr_literal + fragP->fr_fix;
 
-	  if (count <= 0)
+	  if (bytes <= 0)
 	    break;
 
-	  count &= MAX_MEM_FOR_RS_ALIGN_CODE;
-	  riscv_make_nops (fragP->fr_literal + fragP->fr_fix, count);
-	  fragP->fr_var = count;
+	  /* Insert zeros or compressed nops to get 4 byte alignment.  */
+	  if (excess)
+	    {
+	      riscv_make_nops (p, excess);
+	      fragP->fr_fix += excess;
+	      p += excess;
+	    }
+
+	  /* Insert variable number of 4 byte uncompressed nops.  */
+	  riscv_make_nops (p, size);
+	  fragP->fr_var = size;
 	}
       break;
 

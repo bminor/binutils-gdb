@@ -1,3 +1,15 @@
+2018-05-24  Jim Wilson  <jimw@sifive.com>
+
+	PR gas/23219
+	* config/tc-riscv.c (riscv_frag_align_code): Move frag_more call after
+	!riscv_opts.relax check.
+	(riscv_handle_align): Rewrite !riscv_opts.relax support.
+	* config/tc-riscv (MAX_MEM_FOR_RS_ALIGN_CODE): Update.
+	* testsuite/gas/riscv/no-relax-align.d: New
+	* testsuite/gas/riscv/no-relax-align.s: New
+	* testsuite/gas/riscv/no-relax-align-2.d: New
+	* testsuite/gas/riscv/no-relax-align-2.s: New
+
 2018-05-21  Peter Bergner  <bergner@vnet.ibm.com.com>
 
 	* config/tc-ppc.c (md_assemble): Delete handling of fake operands.
