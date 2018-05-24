@@ -16,12 +16,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <pthread.h>
+#include <stdlib.h>
 
 int __thread foo = 0xdeadbeef;
 
 static void *
 thread_proc (void *arg)
 {
+  abort ();
   return arg;
 }
 

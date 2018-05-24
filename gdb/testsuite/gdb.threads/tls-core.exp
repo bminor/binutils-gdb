@@ -20,37 +20,58 @@ if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
     return -1
 }
 
+# Generate a native core file.
+
+set corefile [core_find $binfile]
+set core_supported [expr {$corefile != ""}]
+
+# Generate a core file with "gcore".
 
 clean_restart ${binfile}
 
 runto thread_proc
 
+set gcorefile [standard_output_file gcore.test]
+set gcore_supported [gdb_gcore_cmd "$gcorefile" "gcore"]
+
+# Restart gdb and load COREFILE as a core file.  SUPPORTED is true iff
+# the core was generated successfully; otherwise, the tests are marked
+# unsupported.
 #
-# Generate corefile.
-#
-set corefile [standard_output_file gcore.test]
-set core_supported [gdb_gcore_cmd "$corefile" "save a corefile"]
-if {!$core_supported} {
-    return 0
+proc tls_core_test {supported corefile} {
+    upvar target_triplet target_triplet
+    upvar host_triplet host_triplet
+    upvar binfile binfile
+
+    clean_restart ${binfile}
+
+    set test "load core file"
+    if {$supported} {
+	set core_loaded [gdb_core_cmd $corefile $test]
+    } else {
+	set core_loaded 0
+	unsupported $test
+    }
+
+    set test "print thread-local storage variable"
+    if { $core_loaded == 1 } {
+	# This fails in cross-debugging due to the use of native
+	# `libthread_db'.
+	if {![string match $host_triplet $target_triplet]} {
+	    setup_kfail "threads/22381" "*-*-*"
+	}
+	gdb_test "p/x foo" "\\$\[0-9]+ = 0xdeadbeef" $test
+    } else {
+	unsupported $test
+    }
 }
 
-#
-# Restart gdb and load generated corefile.
-#
-clean_restart ${binfile}
-
-set core_loaded [gdb_core_cmd "$corefile" "load generated corefile"]
-if { $core_loaded != 1 } {
-    # No use proceeding from here.
-    return 0
+with_test_prefix "native" {
+    tls_core_test $core_supported $corefile
 }
 
-# This fails in cross-debugging due to the use of native `libthread_db'.
-if {![string match $host_triplet $target_triplet]} {
-    setup_kfail "threads/22381" "*-*-*"
+with_test_prefix "gcore" {
+    tls_core_test $gcore_supported $gcorefile
 }
-gdb_test "p/x foo" \
-	"\\$\[0-9]+ = 0xdeadbeef" \
-	"print thread-local storage variable"
 
 gdb_exit

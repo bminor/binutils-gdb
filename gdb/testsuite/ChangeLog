@@ -1,3 +1,12 @@
+2018-05-24  Maciej W. Rozycki  <macro@mips.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/tls-core.c: Include <stdlib.h>
+	(thread_proc): Call `abort'.
+	* gdb.threads/tls-core.exp: Generate a core with core_find too.
+	(tls_core_test): New procedure, bits factored out from ...
+	(top level): ... here.  Test both native cores and gcore cores.
+
 2018-05-23  Tom Tromey  <tom@tromey.com>
 
 	* gdb.gdb/complaints.exp (test_initial_complaints): Simplify.
