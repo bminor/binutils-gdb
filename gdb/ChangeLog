@@ -1,5 +1,25 @@
 2018-06-01  Tom Tromey  <tom@tromey.com>
 
+	* cp-name-parser.y: Use %pure-parser, %lex-param, and
+	%parse-param.
+	(lexptr, prev_lexptr, error_lexptr, global_errmsg, demangle_info)
+	(global_result): Remove globals.
+	(struct cpname_state): New.
+	(yyparse): Don't declare.
+	(yylex, yyerror): Move declarations after %union.
+	(d_grab, fill_comp, make_operator, make_dtor, make_builtin_type)
+	(make_name): Add state parameter.
+	Update all callers.
+	(d_qualify, d_int_type, d_unary, d_binary, parse_number) Add state
+	parameter.
+	(HANDLE_QUAL, HANDLE_SPECIAL, HANDLE_TOKEN2, HANDLE_TOKEN3):
+	Update.
+	(yylex): Add lvalp, state parameters.
+	(yyerror): Add state parameter.
+	(cp_demangled_name_to_comp): Update.
+
+2018-06-01  Tom Tromey  <tom@tromey.com>
+
 	* cp-name-parser.y (parser_fprintf): Declare.
 	(GDB_YY_REMAP_PREFIX): Define.
 	Include yy-remap.h.  Don't redefine yy* identifiers.
