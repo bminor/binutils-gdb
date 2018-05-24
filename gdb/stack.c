@@ -2059,9 +2059,7 @@ info_locals_command (const char *args, int from_tty)
 			  0, gdb_stdout);
 }
 
-/* Iterate over all the argument variables in block B.
-
-   Returns 1 if any argument was walked; 0 otherwise.  */
+/* Iterate over all the argument variables in block B.  */
 
 void
 iterate_over_block_arg_vars (const struct block *b,
@@ -2121,7 +2119,7 @@ print_frame_arg_vars (struct frame_info *frame, struct ui_file *stream)
 
   cb_data.frame_id = get_frame_id (frame);
   cb_data.num_tabs = 0;
-  cb_data.stream = gdb_stdout;
+  cb_data.stream = stream;
   cb_data.values_printed = 0;
 
   iterate_over_block_arg_vars (SYMBOL_BLOCK_VALUE (func),

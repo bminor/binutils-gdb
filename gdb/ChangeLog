@@ -1,3 +1,8 @@
+2018-05-24  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* stack.c (iterate_over_block_arg_vars): Fix comment.
+	(print_frame_arg_vars): Pass stream in cb_data, not gdb_stdout.
+
 2018-05-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR gdb/23203
