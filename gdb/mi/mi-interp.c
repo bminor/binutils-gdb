@@ -130,13 +130,13 @@ mi_interp::init (bool top_level)
 
   /* INTERP_MI selects the most recent released version.  "mi2" was
      released as part of GDB 6.0.  */
-  if (strcmp (name, INTERP_MI) == 0)
+  if (strcmp (name (), INTERP_MI) == 0)
     mi_version = 2;
-  else if (strcmp (name, INTERP_MI1) == 0)
+  else if (strcmp (name (), INTERP_MI1) == 0)
     mi_version = 1;
-  else if (strcmp (name, INTERP_MI2) == 0)
+  else if (strcmp (name (), INTERP_MI2) == 0)
     mi_version = 2;
-  else if (strcmp (name, INTERP_MI3) == 0)
+  else if (strcmp (name (), INTERP_MI3) == 0)
     mi_version = 3;
   else
     gdb_assert_not_reached ("unhandled MI version");

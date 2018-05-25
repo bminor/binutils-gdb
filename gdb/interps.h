@@ -74,8 +74,13 @@ public:
   virtual bool supports_command_editing ()
   { return false; }
 
+  const char *name () const
+  {
+    return m_name;
+  }
+
   /* This is the name in "-i=" and "set interpreter".  */
-  const char *name;
+  const char *m_name;
 
   /* Interpreters are stored in a linked list, this is the next
      one...  */
@@ -111,7 +116,7 @@ public:
 
   ~scoped_restore_interp ()
   {
-    set_interp (m_interp->name);
+    set_interp (m_interp->name ());
   }
 
   scoped_restore_interp (const scoped_restore_interp &) = delete;

@@ -78,8 +78,8 @@ static struct interp *interp_lookup_existing (struct ui *ui,
 					      const char *name);
 
 interp::interp (const char *name)
+  : m_name (xstrdup (name))
 {
-  this->name = xstrdup (name);
   this->inited = false;
 }
 
@@ -129,7 +129,7 @@ interp_add (struct ui *ui, struct interp *interp)
 {
   struct ui_interp_info *ui_interp = get_interp_info (ui);
 
-  gdb_assert (interp_lookup_existing (ui, interp->name) == NULL);
+  gdb_assert (interp_lookup_existing (ui, interp->name ()) == NULL);
 
   interp->next = ui_interp->interp_list;
   ui_interp->interp_list = interp;
@@ -170,11 +170,11 @@ interp_set (struct interp *interp, bool top_level)
   /* We use interpreter_p for the "set interpreter" variable, so we need
      to make sure we have a malloc'ed copy for the set command to free.  */
   if (interpreter_p != NULL
-      && strcmp (interp->name, interpreter_p) != 0)
+      && strcmp (interp->name (), interpreter_p) != 0)
     {
       xfree (interpreter_p);
 
-      interpreter_p = xstrdup (interp->name);
+      interpreter_p = xstrdup (interp->name ());
     }
 
   /* Run the init proc.  */
@@ -206,7 +206,7 @@ interp_lookup_existing (struct ui *ui, const char *name)
        interp != NULL;
        interp = interp->next)
     {
-      if (strcmp (interp->name, name) == 0)
+      if (strcmp (interp->name (), name) == 0)
 	return interp;
     }
 
@@ -282,7 +282,7 @@ current_interp_named_p (const char *interp_name)
   struct interp *interp = ui_interp->current_interpreter;
 
   if (interp != NULL)
-    return (strcmp (interp->name, interp_name) == 0);
+    return (strcmp (interp->name (), interp_name) == 0);
 
   return 0;
 }
