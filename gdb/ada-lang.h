@@ -232,7 +232,8 @@ extern const char *ada_decode (const char*);
 extern enum language ada_update_initial_language (enum language);
 
 extern int ada_lookup_symbol_list (const char *, const struct block *,
-                                   domain_enum, struct block_symbol**);
+                                   domain_enum,
+				   std::vector<struct block_symbol> *);
 
 extern char *ada_fold_name (const char *);
 

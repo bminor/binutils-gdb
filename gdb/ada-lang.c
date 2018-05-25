@@ -3266,7 +3266,6 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
   struct value **argvec;        /* Vector of operand types (alloca'ed).  */
   int nargs;                    /* Number of operands.  */
   int oplen;
-  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
 
   argvec = NULL;
   nargs = 0;
@@ -3431,7 +3430,7 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
     case OP_VAR_VALUE:
       if (SYMBOL_DOMAIN (exp->elts[pc + 2].symbol) == UNDEF_DOMAIN)
         {
-          struct block_symbol *candidates;
+          std::vector<struct block_symbol> candidates;
           int n_candidates;
 
           n_candidates =
@@ -3439,7 +3438,6 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
                                     (exp->elts[pc + 2].symbol),
                                     exp->elts[pc + 1].block, VAR_DOMAIN,
                                     &candidates);
-	  make_cleanup (xfree, candidates);
 
           if (n_candidates > 1)
             {
@@ -3483,10 +3481,10 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
           else if (n_candidates == 1)
             i = 0;
           else if (deprocedure_p
-                   && !is_nonfunction (candidates, n_candidates))
+                   && !is_nonfunction (candidates.data (), n_candidates))
             {
               i = ada_resolve_function
-                (candidates, n_candidates, NULL, 0,
+                (candidates.data (), n_candidates, NULL, 0,
                  SYMBOL_LINKAGE_NAME (exp->elts[pc + 2].symbol),
                  context_type);
               if (i < 0)
@@ -3497,7 +3495,7 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
             {
               printf_filtered (_("Multiple matches for %s\n"),
                                SYMBOL_PRINT_NAME (exp->elts[pc + 2].symbol));
-              user_select_syms (candidates, n_candidates, 1);
+              user_select_syms (candidates.data (), n_candidates, 1);
               i = 0;
             }
 
@@ -3522,7 +3520,7 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
         if (exp->elts[pc + 3].opcode == OP_VAR_VALUE
             && SYMBOL_DOMAIN (exp->elts[pc + 5].symbol) == UNDEF_DOMAIN)
           {
-            struct block_symbol *candidates;
+	    std::vector<struct block_symbol> candidates;
             int n_candidates;
 
             n_candidates =
@@ -3530,14 +3528,13 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
                                       (exp->elts[pc + 5].symbol),
                                       exp->elts[pc + 4].block, VAR_DOMAIN,
                                       &candidates);
-	    make_cleanup (xfree, candidates);
 
             if (n_candidates == 1)
               i = 0;
             else
               {
                 i = ada_resolve_function
-                  (candidates, n_candidates,
+                  (candidates.data (), n_candidates,
                    argvec, nargs,
                    SYMBOL_LINKAGE_NAME (exp->elts[pc + 5].symbol),
                    context_type);
@@ -3575,17 +3572,16 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
     case UNOP_ABS:
       if (possible_user_operator_p (op, argvec))
         {
-          struct block_symbol *candidates;
+	  std::vector<struct block_symbol> candidates;
           int n_candidates;
 
           n_candidates =
             ada_lookup_symbol_list (ada_decoded_op_name (op),
                                     (struct block *) NULL, VAR_DOMAIN,
                                     &candidates);
-	  make_cleanup (xfree, candidates);
 
-          i = ada_resolve_function (candidates, n_candidates, argvec, nargs,
-                                    ada_decoded_op_name (op), NULL);
+          i = ada_resolve_function (candidates.data (), n_candidates, argvec,
+				    nargs, ada_decoded_op_name (op), NULL);
           if (i < 0)
             break;
 
@@ -3598,12 +3594,10 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
 
     case OP_TYPE:
     case OP_REGISTER:
-      do_cleanups (old_chain);
       return NULL;
     }
 
   *pos = pc;
-  do_cleanups (old_chain);
   if (exp->elts[pc].opcode == OP_VAR_MSYM_VALUE)
     return evaluate_var_msym_value (EVAL_AVOID_SIDE_EFFECTS,
 				    exp->elts[pc + 1].objfile,
@@ -5049,7 +5043,7 @@ ada_identical_enum_types_p (struct type *type1, struct type *type2)
    So, for practical purposes, we consider them as the same.  */
 
 static int
-symbols_are_identical_enums (struct block_symbol *syms, int nsyms)
+symbols_are_identical_enums (const std::vector<struct block_symbol> &syms)
 {
   int i;
 
@@ -5061,17 +5055,17 @@ symbols_are_identical_enums (struct block_symbol *syms, int nsyms)
      (see ada_identical_enum_types_p).  */
 
   /* Quick check: All symbols should have an enum type.  */
-  for (i = 0; i < nsyms; i++)
+  for (i = 0; i < syms.size (); i++)
     if (TYPE_CODE (SYMBOL_TYPE (syms[i].symbol)) != TYPE_CODE_ENUM)
       return 0;
 
   /* Quick check: They should all have the same value.  */
-  for (i = 1; i < nsyms; i++)
+  for (i = 1; i < syms.size (); i++)
     if (SYMBOL_VALUE (syms[i].symbol) != SYMBOL_VALUE (syms[0].symbol))
       return 0;
 
   /* Quick check: They should all have the same number of enumerals.  */
-  for (i = 1; i < nsyms; i++)
+  for (i = 1; i < syms.size (); i++)
     if (TYPE_NFIELDS (SYMBOL_TYPE (syms[i].symbol))
         != TYPE_NFIELDS (SYMBOL_TYPE (syms[0].symbol)))
       return 0;
@@ -5079,7 +5073,7 @@ symbols_are_identical_enums (struct block_symbol *syms, int nsyms)
   /* All the sanity checks passed, so we might have a set of
      identical enumeration types.  Perform a more complete
      comparison of the type of each symbol.  */
-  for (i = 1; i < nsyms; i++)
+  for (i = 1; i < syms.size (); i++)
     if (!ada_identical_enum_types_p (SYMBOL_TYPE (syms[i].symbol),
                                      SYMBOL_TYPE (syms[0].symbol)))
       return 0;
@@ -5087,7 +5081,7 @@ symbols_are_identical_enums (struct block_symbol *syms, int nsyms)
   return 1;
 }
 
-/* Remove any non-debugging symbols in SYMS[0 .. NSYMS-1] that definitely
+/* Remove any non-debugging symbols in SYMS that definitely
    duplicate other symbols in the list (The only case I know of where
    this happens is when object files containing stabs-in-ecoff are
    linked with files containing ordinary ecoff debugging symbols (or no
@@ -5095,34 +5089,34 @@ symbols_are_identical_enums (struct block_symbol *syms, int nsyms)
    Returns the number of items in the modified list.  */
 
 static int
-remove_extra_symbols (struct block_symbol *syms, int nsyms)
+remove_extra_symbols (std::vector<struct block_symbol> *syms)
 {
   int i, j;
 
   /* We should never be called with less than 2 symbols, as there
      cannot be any extra symbol in that case.  But it's easy to
      handle, since we have nothing to do in that case.  */
-  if (nsyms < 2)
-    return nsyms;
+  if (syms->size () < 2)
+    return syms->size ();
 
   i = 0;
-  while (i < nsyms)
+  while (i < syms->size ())
     {
       int remove_p = 0;
 
       /* If two symbols have the same name and one of them is a stub type,
          the get rid of the stub.  */
 
-      if (TYPE_STUB (SYMBOL_TYPE (syms[i].symbol))
-          && SYMBOL_LINKAGE_NAME (syms[i].symbol) != NULL)
+      if (TYPE_STUB (SYMBOL_TYPE ((*syms)[i].symbol))
+          && SYMBOL_LINKAGE_NAME ((*syms)[i].symbol) != NULL)
         {
-          for (j = 0; j < nsyms; j++)
+          for (j = 0; j < syms->size (); j++)
             {
               if (j != i
-                  && !TYPE_STUB (SYMBOL_TYPE (syms[j].symbol))
-                  && SYMBOL_LINKAGE_NAME (syms[j].symbol) != NULL
-                  && strcmp (SYMBOL_LINKAGE_NAME (syms[i].symbol),
-                             SYMBOL_LINKAGE_NAME (syms[j].symbol)) == 0)
+                  && !TYPE_STUB (SYMBOL_TYPE ((*syms)[j].symbol))
+                  && SYMBOL_LINKAGE_NAME ((*syms)[j].symbol) != NULL
+                  && strcmp (SYMBOL_LINKAGE_NAME ((*syms)[i].symbol),
+                             SYMBOL_LINKAGE_NAME ((*syms)[j].symbol)) == 0)
                 remove_p = 1;
             }
         }
@@ -5130,30 +5124,26 @@ remove_extra_symbols (struct block_symbol *syms, int nsyms)
       /* Two symbols with the same name, same class and same address
          should be identical.  */
 
-      else if (SYMBOL_LINKAGE_NAME (syms[i].symbol) != NULL
-          && SYMBOL_CLASS (syms[i].symbol) == LOC_STATIC
-          && is_nondebugging_type (SYMBOL_TYPE (syms[i].symbol)))
+      else if (SYMBOL_LINKAGE_NAME ((*syms)[i].symbol) != NULL
+          && SYMBOL_CLASS ((*syms)[i].symbol) == LOC_STATIC
+          && is_nondebugging_type (SYMBOL_TYPE ((*syms)[i].symbol)))
         {
-          for (j = 0; j < nsyms; j += 1)
+          for (j = 0; j < syms->size (); j += 1)
             {
               if (i != j
-                  && SYMBOL_LINKAGE_NAME (syms[j].symbol) != NULL
-                  && strcmp (SYMBOL_LINKAGE_NAME (syms[i].symbol),
-                             SYMBOL_LINKAGE_NAME (syms[j].symbol)) == 0
-                  && SYMBOL_CLASS (syms[i].symbol)
-		       == SYMBOL_CLASS (syms[j].symbol)
-                  && SYMBOL_VALUE_ADDRESS (syms[i].symbol)
-                  == SYMBOL_VALUE_ADDRESS (syms[j].symbol))
+                  && SYMBOL_LINKAGE_NAME ((*syms)[j].symbol) != NULL
+                  && strcmp (SYMBOL_LINKAGE_NAME ((*syms)[i].symbol),
+                             SYMBOL_LINKAGE_NAME ((*syms)[j].symbol)) == 0
+                  && SYMBOL_CLASS ((*syms)[i].symbol)
+		       == SYMBOL_CLASS ((*syms)[j].symbol)
+                  && SYMBOL_VALUE_ADDRESS ((*syms)[i].symbol)
+                  == SYMBOL_VALUE_ADDRESS ((*syms)[j].symbol))
                 remove_p = 1;
             }
         }
       
       if (remove_p)
-        {
-          for (j = i + 1; j < nsyms; j += 1)
-            syms[j - 1] = syms[j];
-          nsyms -= 1;
-        }
+	syms->erase (syms->begin () + i);
 
       i += 1;
     }
@@ -5170,10 +5160,10 @@ remove_extra_symbols (struct block_symbol *syms, int nsyms)
      to ask the user to disambiguate anyways.  And if we have to
      present a multiple-choice menu, it's less confusing if the list
      isn't missing some choices that were identical and yet distinct.  */
-  if (symbols_are_identical_enums (syms, nsyms))
-    nsyms = 1;
+  if (symbols_are_identical_enums (*syms))
+    syms->resize (1);
 
-  return nsyms;
+  return syms->size ();
 }
 
 /* Given a type that corresponds to a renaming entity, use the type name
@@ -5301,8 +5291,8 @@ old_renaming_is_invisible (const struct symbol *sym, const char *function_name)
         the user will be unable to print such rename entities.  */
 
 static int
-remove_irrelevant_renamings (struct block_symbol *syms,
-			     int nsyms, const struct block *current_block)
+remove_irrelevant_renamings (std::vector<struct block_symbol> *syms,
+			     const struct block *current_block)
 {
   struct symbol *current_function;
   const char *current_function_name;
@@ -5313,10 +5303,10 @@ remove_irrelevant_renamings (struct block_symbol *syms,
      a simple variable foo in the same block, discard the latter.
      First, zero out such symbols, then compress.  */
   is_new_style_renaming = 0;
-  for (i = 0; i < nsyms; i += 1)
+  for (i = 0; i < syms->size (); i += 1)
     {
-      struct symbol *sym = syms[i].symbol;
-      const struct block *block = syms[i].block;
+      struct symbol *sym = (*syms)[i].symbol;
+      const struct block *block = (*syms)[i].block;
       const char *name;
       const char *suffix;
 
@@ -5331,22 +5321,22 @@ remove_irrelevant_renamings (struct block_symbol *syms,
 	  int j;
 
 	  is_new_style_renaming = 1;
-	  for (j = 0; j < nsyms; j += 1)
-	    if (i != j && syms[j].symbol != NULL
-		&& strncmp (name, SYMBOL_LINKAGE_NAME (syms[j].symbol),
+	  for (j = 0; j < syms->size (); j += 1)
+	    if (i != j && (*syms)[j].symbol != NULL
+		&& strncmp (name, SYMBOL_LINKAGE_NAME ((*syms)[j].symbol),
 			    name_len) == 0
-		&& block == syms[j].block)
-	      syms[j].symbol = NULL;
+		&& block == (*syms)[j].block)
+	      (*syms)[j].symbol = NULL;
 	}
     }
   if (is_new_style_renaming)
     {
       int j, k;
 
-      for (j = k = 0; j < nsyms; j += 1)
-	if (syms[j].symbol != NULL)
+      for (j = k = 0; j < syms->size (); j += 1)
+	if ((*syms)[j].symbol != NULL)
 	    {
-	      syms[k] = syms[j];
+	      (*syms)[k] = (*syms)[j];
 	      k += 1;
 	    }
       return k;
@@ -5356,38 +5346,33 @@ remove_irrelevant_renamings (struct block_symbol *syms,
      Abort if unable to do so.  */
 
   if (current_block == NULL)
-    return nsyms;
+    return syms->size ();
 
   current_function = block_linkage_function (current_block);
   if (current_function == NULL)
-    return nsyms;
+    return syms->size ();
 
   current_function_name = SYMBOL_LINKAGE_NAME (current_function);
   if (current_function_name == NULL)
-    return nsyms;
+    return syms->size ();
 
   /* Check each of the symbols, and remove it from the list if it is
      a type corresponding to a renaming that is out of the scope of
      the current block.  */
 
   i = 0;
-  while (i < nsyms)
+  while (i < syms->size ())
     {
-      if (ada_parse_renaming (syms[i].symbol, NULL, NULL, NULL)
+      if (ada_parse_renaming ((*syms)[i].symbol, NULL, NULL, NULL)
           == ADA_OBJECT_RENAMING
-          && old_renaming_is_invisible (syms[i].symbol, current_function_name))
-        {
-          int j;
-
-          for (j = i + 1; j < nsyms; j += 1)
-            syms[j - 1] = syms[j];
-          nsyms -= 1;
-        }
+          && old_renaming_is_invisible ((*syms)[i].symbol,
+					current_function_name))
+	syms->erase (syms->begin () + i);
       else
         i += 1;
     }
 
-  return nsyms;
+  return syms->size ();
 }
 
 /* Add to OBSTACKP all symbols from BLOCK (and its super-blocks)
@@ -5779,10 +5764,9 @@ ada_add_all_symbols (struct obstack *obstackp,
 /* Find symbols in DOMAIN matching LOOKUP_NAME, in BLOCK and, if FULL_SEARCH
    is non-zero, enclosing scope and in global scopes, returning the number of
    matches.
-   Sets *RESULTS to point to a newly allocated vector of (SYM,BLOCK) tuples,
-   indicating the symbols found and the blocks and symbol tables (if
-   any) in which they were found.  This vector should be freed when
-   no longer useful.
+   Fills *RESULTS with (SYM,BLOCK) tuples, indicating the symbols
+   found and the blocks and symbol tables (if any) in which they were
+   found.
 
    When full_search is non-zero, any non-function/non-enumeral
    symbol match within the nest of blocks whose innermost member is BLOCK,
@@ -5797,7 +5781,7 @@ static int
 ada_lookup_symbol_list_worker (const lookup_name_info &lookup_name,
 			       const struct block *block,
 			       domain_enum domain,
-			       struct block_symbol **results,
+			       std::vector<struct block_symbol> *results,
 			       int full_search)
 {
   int syms_from_global_search;
@@ -5810,11 +5794,11 @@ ada_lookup_symbol_list_worker (const lookup_name_info &lookup_name,
 
   ndefns = num_defns_collected (&obstack);
 
-  results_size = obstack_object_size (&obstack);
-  *results = (struct block_symbol *) malloc (results_size);
-  memcpy (*results, defns_collected (&obstack, 1), results_size);
+  struct block_symbol *base = defns_collected (&obstack, 1);
+  for (int i = 0; i < ndefns; ++i)
+    results->push_back (base[i]);
 
-  ndefns = remove_extra_symbols (*results, ndefns);
+  ndefns = remove_extra_symbols (results);
 
   if (ndefns == 0 && full_search && syms_from_global_search)
     cache_symbol (ada_lookup_name (lookup_name), domain, NULL, NULL);
@@ -5823,21 +5807,21 @@ ada_lookup_symbol_list_worker (const lookup_name_info &lookup_name,
     cache_symbol (ada_lookup_name (lookup_name), domain,
 		  (*results)[0].symbol, (*results)[0].block);
 
-  ndefns = remove_irrelevant_renamings (*results, ndefns, block);
+  ndefns = remove_irrelevant_renamings (results, block);
 
   return ndefns;
 }
 
 /* Find symbols in DOMAIN matching NAME, in BLOCK and enclosing scope and
-   in global scopes, returning the number of matches, and setting *RESULTS
-   to a newly-allocated vector of (SYM,BLOCK) tuples.  This newly-allocated
-   vector should be freed when no longer useful.
+   in global scopes, returning the number of matches, and filling *RESULTS
+   with (SYM,BLOCK) tuples.
 
    See ada_lookup_symbol_list_worker for further details.  */
 
 int
 ada_lookup_symbol_list (const char *name, const struct block *block,
-			domain_enum domain, struct block_symbol **results)
+			domain_enum domain,
+			std::vector<struct block_symbol> *results)
 {
   symbol_name_match_type name_match_type = name_match_type_from_name (name);
   lookup_name_info lookup_name (name, name_match_type);
@@ -5854,19 +5838,15 @@ ada_iterate_over_symbols
    gdb::function_view<symbol_found_callback_ftype> callback)
 {
   int ndefs, i;
-  struct block_symbol *results;
-  struct cleanup *old_chain;
+  std::vector<struct block_symbol> results;
 
   ndefs = ada_lookup_symbol_list_worker (name, block, domain, &results, 0);
-  old_chain = make_cleanup (xfree, results);
 
   for (i = 0; i < ndefs; ++i)
     {
       if (!callback (results[i].symbol))
 	break;
     }
-
-  do_cleanups (old_chain);
 }
 
 /* The result is as for ada_lookup_symbol_list with FULL_SEARCH set
@@ -5906,24 +5886,16 @@ ada_lookup_symbol (const char *name, const struct block *block0,
   if (is_a_field_of_this != NULL)
     *is_a_field_of_this = 0;
 
-  struct block_symbol *candidates;
+  std::vector<struct block_symbol> candidates;
   int n_candidates;
-  struct cleanup *old_chain;
 
   n_candidates = ada_lookup_symbol_list (name, block0, domain, &candidates);
-  old_chain = make_cleanup (xfree, candidates);
 
   if (n_candidates == 0)
-    {
-      do_cleanups (old_chain);
-      return {};
-    }
+    return {};
 
   block_symbol info = candidates[0];
   info.symbol = fixup_symbol_section (info.symbol, NULL);
-
-  do_cleanups (old_chain);
-
   return info;
 }
 
@@ -11766,24 +11738,20 @@ get_var_value (const char *name, const char *err_msg)
 {
   lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
 
-  struct block_symbol *syms;
+  std::vector<struct block_symbol> syms;
   int nsyms = ada_lookup_symbol_list_worker (lookup_name,
 					     get_selected_block (0),
 					     VAR_DOMAIN, &syms, 1);
-  struct cleanup *old_chain = make_cleanup (xfree, syms);
 
   if (nsyms != 1)
     {
-      do_cleanups (old_chain);
       if (err_msg == NULL)
         return 0;
       else
         error (("%s"), err_msg);
     }
 
-  struct value *result = value_of_variable (syms[0].symbol, syms[0].block);
-  do_cleanups (old_chain);
-  return result;
+  return value_of_variable (syms[0].symbol, syms[0].block);
 }
 
 /* Value of integer variable named NAME in the current environment.
