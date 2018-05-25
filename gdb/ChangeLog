@@ -1,5 +1,12 @@
 2018-05-25  Tom Tromey  <tom@tromey.com>
 
+	* coff-pe-read.c (struct read_pe_section_data) <section_name>: Now
+	a std::string.
+	(get_pe_section_index, add_pe_exported_sym): Update.
+	(read_pe_exported_syms): Use gdb::def_vector.
+
+2018-05-25  Tom Tromey  <tom@tromey.com>
+
 	* frame.c (remove_prev_frame): Remove.
 	(get_prev_frame_if_no_cycle): Use TRY/CATCH.
 
