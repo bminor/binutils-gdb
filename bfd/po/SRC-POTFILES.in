@@ -98,6 +98,7 @@ cpu-riscv.c
 cpu-rl78.c
 cpu-rs6000.c
 cpu-rx.c
+cpu-s12z.c
 cpu-s390.c
 cpu-score.c
 cpu-sh.c
@@ -185,6 +186,7 @@ elf32-ppc.c
 elf32-pru.c
 elf32-rl78.c
 elf32-rx.c
+elf32-s12z.c
 elf32-s390.c
 elf32-score.c
 elf32-score7.c

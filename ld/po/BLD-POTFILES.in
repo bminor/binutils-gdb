@@ -242,6 +242,7 @@ em68hc12elf.c
 em68hc12elfb.c
 em68kelf.c
 em68kelfnbsd.c
+em9s12zelf.c
 emcorepe.c
 emmo.c
 emn10200.c

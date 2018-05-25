@@ -1,3 +1,7 @@
+2018-05-25  Alan Modra  <amodra@gmail.com>
+
+	* po/POTFILES.in: Regenerate.
+
 2018-05-24  Jim Wilson  <jimw@sifive.com>
 
 	PR gas/23219

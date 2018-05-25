@@ -1,5 +1,10 @@
 2018-05-25  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.in: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
+2018-05-25  Alan Modra  <amodra@gmail.com>
+
 	* configure.ac (bfd_cv_hidden): Run test with -Werror in CFLAGS.
 	* configure: Regenerate.
 

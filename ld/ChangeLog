@@ -1,3 +1,7 @@
+2018-05-25  Alan Modra  <amodra@gmail.com>
+
+	* po/BLD-POTFILES.in: Regenerate.
+
 2018-05-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23201

@@ -1,3 +1,8 @@
+2018-05-25  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2018-05-21  Peter Bergner  <bergner@vnet.ibm.com.com>
 
 	* ppc-opc.c (insert_bat, extract_bat, insert_bba, extract_bba,
