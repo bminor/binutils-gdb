@@ -256,12 +256,15 @@ AC_CHECK_DECLS(strnlen)
 # This is used only by compress.c.
 AM_ZLIB
 
+save_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -Werror"
 AC_CACHE_CHECK([compiler support for hidden visibility], bfd_cv_hidden,
 [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 const char hw[] __attribute__ ((__visibility__ ("hidden"))) = "Hello, World\n";
 extern void print (const char *) __attribute__ ((__visibility__ ("hidden")));]],
 	[[print (hw);]])],
   [bfd_cv_hidden=yes], [bfd_cv_hidden=no])])
+CFLAGS="$save_CFLAGS"
 if test $bfd_cv_hidden = yes; then
   AC_DEFINE(HAVE_HIDDEN, 1,
 	    [Define if your compiler supports hidden visibility.])
