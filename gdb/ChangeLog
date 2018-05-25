@@ -1,5 +1,18 @@
 2018-05-25  Tom Tromey  <tom@tromey.com>
 
+	* dbxread.c (init_bincl_list): Remove.
+	(bincl_list): Now a std::vector.
+	(bincls_allocated, next_bincl): Remove.
+	(free_bincl_list, do_free_bincl_list_cleanup)
+	(make_cleanup_free_bincl_list): Remove.
+	(dbx_read_symtab, elfstab_build_psymtabs): Use scoped_restore,
+	unique_xmalloc_ptr.
+	(find_corresponding_bincl_psymtab, read_dbx_symtab): Update.
+	(struct header_file_location): Add constructor.
+	(add_bincl_to_list): Remove.
+
+2018-05-25  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui.c (tui_enable): Update.
 	* mi/mi-interp.c (mi_interp::init): Update.
 	* interps.h (class interp) <name>: New method.

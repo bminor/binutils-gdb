@@ -236,15 +236,22 @@ find_text_range (bfd * sym_bfd, struct objfile *objfile)
 
 struct header_file_location
 {
+  header_file_location (const char *name_, int instance_,
+			struct partial_symtab *pst_)
+    : name (name_),
+      instance (instance_),
+      pst (pst_)
+  {
+  }
+
   const char *name;		/* Name of header file */
   int instance;			/* See above */
   struct partial_symtab *pst;	/* Partial symtab that has the
 				   BINCL/EINCL defs for this file.  */
 };
 
-/* The actual list and controling variables.  */
-static struct header_file_location *bincl_list, *next_bincl;
-static int bincls_allocated;
+/* The list of bincls.  */
+static std::vector<struct header_file_location> *bincl_list;
 
 /* Local function prototypes.  */
 
@@ -257,14 +264,8 @@ static void dbx_psymtab_to_symtab_1 (struct objfile *, struct partial_symtab *);
 
 static void read_dbx_symtab (minimal_symbol_reader &, struct objfile *);
 
-static void free_bincl_list (struct objfile *);
-
 static struct partial_symtab *find_corresponding_bincl_psymtab (const char *,
 								int);
-
-static void add_bincl_to_list (struct partial_symtab *, const char *, int);
-
-static void init_bincl_list (int, struct objfile *);
 
 static const char *dbx_next_symbol_text (struct objfile *);
 
@@ -855,36 +856,6 @@ dbx_next_symbol_text (struct objfile *objfile)
   return nlist.n_strx + stringtab_global + file_string_table_offset;
 }
 
-/* Initialize the list of bincls to contain none and have some
-   allocated.  */
-
-static void
-init_bincl_list (int number, struct objfile *objfile)
-{
-  bincls_allocated = number;
-  next_bincl = bincl_list = XNEWVEC (struct header_file_location,
-				     bincls_allocated);
-}
-
-/* Add a bincl to the list.  */
-
-static void
-add_bincl_to_list (struct partial_symtab *pst, const char *name, int instance)
-{
-  if (next_bincl >= bincl_list + bincls_allocated)
-    {
-      int offset = next_bincl - bincl_list;
-
-      bincls_allocated *= 2;
-      bincl_list = (struct header_file_location *)
-	xrealloc ((char *) bincl_list,
-		  bincls_allocated * sizeof (struct header_file_location));
-      next_bincl = bincl_list + offset;
-    }
-  next_bincl->pst = pst;
-  next_bincl->instance = instance;
-  next_bincl++->name = name;
-}
 
 /* Given a name, value pair, find the corresponding
    bincl in the list.  Return the partial symtab associated
@@ -893,36 +864,13 @@ add_bincl_to_list (struct partial_symtab *pst, const char *name, int instance)
 static struct partial_symtab *
 find_corresponding_bincl_psymtab (const char *name, int instance)
 {
-  struct header_file_location *bincl;
-
-  for (bincl = bincl_list; bincl < next_bincl; bincl++)
-    if (bincl->instance == instance
-	&& strcmp (name, bincl->name) == 0)
-      return bincl->pst;
+  for (struct header_file_location &bincl : *bincl_list)
+    if (bincl.instance == instance
+	&& strcmp (name, bincl.name) == 0)
+      return bincl.pst;
 
   repeated_header_complaint (name, symnum);
   return (struct partial_symtab *) 0;
-}
-
-/* Free the storage allocated for the bincl list.  */
-
-static void
-free_bincl_list (struct objfile *objfile)
-{
-  xfree (bincl_list);
-  bincls_allocated = 0;
-}
-
-static void
-do_free_bincl_list_cleanup (void *objfile)
-{
-  free_bincl_list ((struct objfile *) objfile);
-}
-
-static struct cleanup *
-make_cleanup_free_bincl_list (struct objfile *objfile)
-{
-  return make_cleanup (do_free_bincl_list_cleanup, objfile);
 }
 
 /* Set namestring based on nlist.  If the string table index is invalid, 
@@ -1019,7 +967,6 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
   int nsl;
   int past_first_source_file = 0;
   CORE_ADDR last_function_start = 0;
-  struct cleanup *back_to;
   bfd *abfd;
   int textlow_not_set;
   int data_sect_index;
@@ -1060,8 +1007,9 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 				       sizeof (struct partial_symtab *));
 
   /* Init bincl list */
-  init_bincl_list (20, objfile);
-  back_to = make_cleanup_free_bincl_list (objfile);
+  std::vector<struct header_file_location> bincl_storage;
+  scoped_restore restore_bincl_global
+    = make_scoped_restore (&bincl_list, &bincl_storage);
 
   set_last_source_file (NULL);
 
@@ -1390,7 +1338,7 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 			   namestring, symnum);
 		continue;
 	      }
-	    add_bincl_to_list (pst, namestring, nlist.n_value);
+	    bincl_list->emplace_back (namestring, nlist.n_value, pst);
 
 	    /* Mark down an include file in the current psymtab.  */
 
@@ -1977,8 +1925,6 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 		       text_end > pst->texthigh ? text_end : pst->texthigh,
 		       dependency_list, dependencies_used, textlow_not_set);
     }
-
-  do_cleanups (back_to);
 }
 
 /* Allocate and partially fill a partial symtab.  It will be
@@ -2240,8 +2186,6 @@ dbx_read_symtab (struct partial_symtab *self, struct objfile *objfile)
 
   if (LDSYMLEN (self) || self->number_of_dependencies)
     {
-      struct cleanup *back_to;
-
       /* Print the message now, before reading the string table,
          to avoid disconcerting pauses.  */
       if (info_verbose)
@@ -2252,22 +2196,20 @@ dbx_read_symtab (struct partial_symtab *self, struct objfile *objfile)
 
       next_symbol_text_func = dbx_next_symbol_text;
 
-      back_to = make_cleanup (null_cleanup, NULL);
+      {
+	scoped_restore restore_stabs_data = make_scoped_restore (&stabs_data);
+	gdb::unique_xmalloc_ptr<gdb_byte> data_holder;
+	if (DBX_STAB_SECTION (objfile))
+	  {
+	    stabs_data
+	      = symfile_relocate_debug_section (objfile,
+						DBX_STAB_SECTION (objfile),
+						NULL);
+	    data_holder.reset (stabs_data);
+	  }
 
-      if (DBX_STAB_SECTION (objfile))
-	{
-	  stabs_data
-	    = symfile_relocate_debug_section (objfile,
-					      DBX_STAB_SECTION (objfile),
-					      NULL);
-
-	  if (stabs_data)
-	    make_cleanup (free_current_contents, (void *) &stabs_data);
-	}
-
-      dbx_psymtab_to_symtab_1 (objfile, self);
-
-      do_cleanups (back_to);
+	dbx_psymtab_to_symtab_1 (objfile, self);
+      }
 
       /* Match with global symbols.  This only needs to be done once,
          after all of the symtabs and dependencies have been read in.   */
@@ -3146,7 +3088,6 @@ elfstab_build_psymtabs (struct objfile *objfile, asection *stabsect,
   int val;
   bfd *sym_bfd = objfile->obfd;
   char *name = bfd_get_filename (sym_bfd);
-  struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
 
   /* Find the first and last text address.  dbx_symfile_read seems to
      want this.  */
@@ -3184,9 +3125,13 @@ elfstab_build_psymtabs (struct objfile *objfile, asection *stabsect,
 
   symbuf_read = 0;
   symbuf_left = bfd_section_size (objfile->obfd, stabsect);
+
+  scoped_restore restore_stabs_data = make_scoped_restore (&stabs_data);
+  gdb::unique_xmalloc_ptr<gdb_byte> data_holder;
+
   stabs_data = symfile_relocate_debug_section (objfile, stabsect, NULL);
   if (stabs_data)
-    make_cleanup (free_current_contents, (void *) &stabs_data);
+    data_holder.reset (stabs_data);
 
   /* In an elf file, we've already installed the minimal symbols that came
      from the elf (non-stab) symbol table, so always act like an
@@ -3195,8 +3140,6 @@ elfstab_build_psymtabs (struct objfile *objfile, asection *stabsect,
      table and normal symbol entries won't be in the ".stab" section; but in
      case it does, it will install them itself.  */
   dbx_symfile_read (objfile, 0);
-
-  do_cleanups (back_to);
 }
 
 /* Scan and build partial symbols for a file with special sections for stabs
