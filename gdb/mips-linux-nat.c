@@ -224,22 +224,14 @@ fill_gregset (const struct regcache *regcache,
 void
 supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregsetp)
 {
-  if (mips_isa_regsize (regcache->arch ()) == 4)
-    mips_supply_fpregset (regcache, (const mips_elf_fpregset_t *) fpregsetp);
-  else
-    mips64_supply_fpregset (regcache,
-			    (const mips64_elf_fpregset_t *) fpregsetp);
+  mips64_supply_fpregset (regcache, (const mips64_elf_fpregset_t *) fpregsetp);
 }
 
 void
 fill_fpregset (const struct regcache *regcache,
 	       gdb_fpregset_t *fpregsetp, int regno)
 {
-  if (mips_isa_regsize (regcache->arch ()) == 4)
-    mips_fill_fpregset (regcache, (mips_elf_fpregset_t *) fpregsetp, regno);
-  else
-    mips64_fill_fpregset (regcache,
-			  (mips64_elf_fpregset_t *) fpregsetp, regno);
+  mips64_fill_fpregset (regcache, (mips64_elf_fpregset_t *) fpregsetp, regno);
 }
 
 

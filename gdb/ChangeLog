@@ -1,3 +1,20 @@
+2018-05-25  Maciej W. Rozycki  <macro@mips.com>
+
+	* mips-linux-tdep.h (mips_supply_fpregset, mips_fill_fpregset):
+	Remove prototypes.
+	* mips-linux-nat.c (supply_fpregset): Always call
+	`mips64_supply_fpregset' rather than `mips_supply_fpregset'.
+	(fill_fpregset): Always call `mips64_fill_fpregset' rather than
+	`mips_fill_fpregset'.
+	* mips-linux-tdep.c (mips_supply_fpregset)
+	(mips_supply_fpregset_wrapper, mips_fill_fpregset)
+	(mips_fill_fpregset_wrapper): Remove functions.
+	(mips64_supply_fpregset, mips64_fill_fpregset): Update comments.
+	(mips_linux_fpregset): Remove variable.
+	(mips_linux_iterate_over_regset_sections): Use
+	`mips64_linux_fpregset' in place of `mips_linux_fpregset'.
+	(mips_linux_o32_sigframe_init): Remove comment.
+
 2018-05-25  Pedro Alves  <palves@redhat.com>
 
 	* remote.c (struct vCont_action_support, MAXTHREADLISTRESULTS)

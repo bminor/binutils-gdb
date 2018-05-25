@@ -1,3 +1,8 @@
+2018-05-25  Maciej W. Rozycki  <macro@mips.com>
+
+	* gdb.arch/mips-fpregset-core.exp: New test.
+	* gdb.arch/mips-fpregset-core.c: New test source.
+
 2018-05-23  Erik Kurzinger  <ekurzinger@nvidia.com>
 
 	PR server/23198

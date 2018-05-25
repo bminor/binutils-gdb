@@ -52,8 +52,6 @@ typedef mips_elf_fpreg_t mips_elf_fpregset_t[ELF_NFPREG];
 
 void mips_supply_gregset (struct regcache *, const mips_elf_gregset_t *);
 void mips_fill_gregset (const struct regcache *, mips_elf_gregset_t *, int);
-void mips_supply_fpregset (struct regcache *, const mips_elf_fpregset_t *);
-void mips_fill_fpregset (const struct regcache *, mips_elf_fpregset_t *, int);
 
 /* 64-bit support.  */
 

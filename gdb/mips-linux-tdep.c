@@ -233,82 +233,6 @@ mips_fill_gregset_wrapper (const struct regset *regset,
   mips_fill_gregset (regcache, (mips_elf_gregset_t *)gregs, regnum);
 }
 
-/* Likewise, unpack an elf_fpregset_t.  */
-
-void
-mips_supply_fpregset (struct regcache *regcache,
-		      const mips_elf_fpregset_t *fpregsetp)
-{
-  struct gdbarch *gdbarch = regcache->arch ();
-  int regi;
-
-  for (regi = 0; regi < 32; regi++)
-    regcache_raw_supply (regcache,
-			 gdbarch_fp0_regnum (gdbarch) + regi,
-			 *fpregsetp + regi);
-
-  regcache_raw_supply (regcache,
-		       mips_regnum (gdbarch)->fp_control_status,
-		       *fpregsetp + 32);
-
-  /* FIXME: how can we supply FCRIR?  The ABI doesn't tell us.  */
-  regcache->raw_supply_zeroed
-    (mips_regnum (gdbarch)->fp_implementation_revision);
-}
-
-static void
-mips_supply_fpregset_wrapper (const struct regset *regset,
-			      struct regcache *regcache,
-			      int regnum, const void *gregs, size_t len)
-{
-  gdb_assert (len >= sizeof (mips_elf_fpregset_t));
-
-  mips_supply_fpregset (regcache, (const mips_elf_fpregset_t *)gregs);
-}
-
-/* Likewise, pack one or all floating point registers into an
-   elf_fpregset_t.  */
-
-void
-mips_fill_fpregset (const struct regcache *regcache,
-		    mips_elf_fpregset_t *fpregsetp, int regno)
-{
-  struct gdbarch *gdbarch = regcache->arch ();
-  char *to;
-
-  if ((regno >= gdbarch_fp0_regnum (gdbarch))
-      && (regno < gdbarch_fp0_regnum (gdbarch) + 32))
-    {
-      to = (char *) (*fpregsetp + regno - gdbarch_fp0_regnum (gdbarch));
-      regcache_raw_collect (regcache, regno, to);
-    }
-  else if (regno == mips_regnum (gdbarch)->fp_control_status)
-    {
-      to = (char *) (*fpregsetp + 32);
-      regcache_raw_collect (regcache, regno, to);
-    }
-  else if (regno == -1)
-    {
-      int regi;
-
-      for (regi = 0; regi < 32; regi++)
-	mips_fill_fpregset (regcache, fpregsetp,
-			    gdbarch_fp0_regnum (gdbarch) + regi);
-      mips_fill_fpregset (regcache, fpregsetp,
-			  mips_regnum (gdbarch)->fp_control_status);
-    }
-}
-
-static void
-mips_fill_fpregset_wrapper (const struct regset *regset,
-			    const struct regcache *regcache,
-			    int regnum, void *gregs, size_t len)
-{
-  gdb_assert (len >= sizeof (mips_elf_fpregset_t));
-
-  mips_fill_fpregset (regcache, (mips_elf_fpregset_t *)gregs, regnum);
-}
-
 /* Support for 64-bit ABIs.  */
 
 /* Figure out where the longjmp will land.
@@ -473,7 +397,16 @@ mips64_fill_gregset_wrapper (const struct regset *regset,
   mips64_fill_gregset (regcache, (mips64_elf_gregset_t *)gregs, regnum);
 }
 
-/* Likewise, unpack an elf_fpregset_t.  */
+/* Likewise, unpack an elf_fpregset_t.  Linux only uses even-numbered
+   FPR slots in the Status.FR=0 mode, storing even-odd FPR pairs as the
+   SDC1 instruction would.  When run on MIPS I architecture processors
+   all FPR slots used to be used, unusually, holding the respective FPRs
+   in the first 4 bytes, but that was corrected for consistency, with
+   `linux-mips.org' (LMO) commit 42533948caac ("Major pile of FP emulator
+   changes."), the fix corrected with LMO commit 849fa7a50dff ("R3k FPU
+   ptrace() handling fixes."), and then broken and fixed over and over
+   again, until last time fixed with commit 80cbfad79096 ("MIPS: Correct
+   MIPS I FP context layout").  */
 
 void
 mips64_supply_fpregset (struct regcache *regcache,
@@ -482,8 +415,6 @@ mips64_supply_fpregset (struct regcache *regcache,
   struct gdbarch *gdbarch = regcache->arch ();
   int regi;
 
-  /* See mips_linux_o32_sigframe_init for a description of the
-     peculiar FP register layout.  */
   if (register_size (gdbarch, gdbarch_fp0_regnum (gdbarch)) == 4)
     for (regi = 0; regi < 32; regi++)
       {
@@ -523,7 +454,8 @@ mips64_supply_fpregset_wrapper (const struct regset *regset,
 }
 
 /* Likewise, pack one or all floating point registers into an
-   elf_fpregset_t.  */
+   elf_fpregset_t.  See `mips_supply_fpregset' for an explanation
+   of the layout.  */
 
 void
 mips64_fill_fpregset (const struct regcache *regcache,
@@ -535,8 +467,6 @@ mips64_fill_fpregset (const struct regcache *regcache,
   if ((regno >= gdbarch_fp0_regnum (gdbarch))
       && (regno < gdbarch_fp0_regnum (gdbarch) + 32))
     {
-      /* See mips_linux_o32_sigframe_init for a description of the
-	 peculiar FP register layout.  */
       if (register_size (gdbarch, regno) == 4)
 	{
 	  int regi = regno - gdbarch_fp0_regnum (gdbarch);
@@ -597,11 +527,6 @@ static const struct regset mips64_linux_gregset =
     NULL, mips64_supply_gregset_wrapper, mips64_fill_gregset_wrapper
   };
 
-static const struct regset mips_linux_fpregset =
-  {
-    NULL, mips_supply_fpregset_wrapper, mips_fill_fpregset_wrapper
-  };
-
 static const struct regset mips64_linux_fpregset =
   {
     NULL, mips64_supply_fpregset_wrapper, mips64_fill_fpregset_wrapper
@@ -617,7 +542,7 @@ mips_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
     {
       cb (".reg", sizeof (mips_elf_gregset_t), &mips_linux_gregset,
 	  NULL, cb_data);
-      cb (".reg2", sizeof (mips_elf_fpregset_t), &mips_linux_fpregset,
+      cb (".reg2", sizeof (mips64_elf_fpregset_t), &mips64_linux_fpregset,
 	  NULL, cb_data);
     }
   else
@@ -1076,14 +1001,6 @@ mips_linux_o32_sigframe_init (const struct tramp_frame *self,
 			     (regs_base + SIGCONTEXT_REGS
 			      + ireg * SIGCONTEXT_REG_SIZE));
 
-  /* The way that floating point registers are saved, unfortunately,
-     depends on the architecture the kernel is built for.  For the r3000 and
-     tx39, four bytes of each register are at the beginning of each of the
-     32 eight byte slots.  For everything else, the registers are saved
-     using double precision; only the even-numbered slots are initialized,
-     and the high bits are the odd-numbered register.  Assume the latter
-     layout, since we can't tell, and it's much more common.  Which bits are
-     the "high" bits depends on endianness.  */
   for (ireg = 0; ireg < 32; ireg++)
     if ((gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG) != (ireg & 1))
       trad_frame_set_reg_addr (this_cache,
