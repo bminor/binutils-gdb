@@ -12599,9 +12599,7 @@ void
 remote_target::remote_file_put (const char *local_file, const char *remote_file,
 				int from_tty)
 {
-  struct cleanup *back_to;
   int retcode, remote_errno, bytes, io_size;
-  gdb_byte *buffer;
   int bytes_in_buffer;
   int saw_eof;
   ULONGEST offset;
@@ -12621,8 +12619,7 @@ remote_target::remote_file_put (const char *local_file, const char *remote_file,
   /* Send up to this many bytes at once.  They won't all fit in the
      remote packet limit, so we'll transfer slightly fewer.  */
   io_size = get_remote_packet_size ();
-  buffer = (gdb_byte *) xmalloc (io_size);
-  back_to = make_cleanup (xfree, buffer);
+  gdb::byte_vector buffer (io_size);
 
   bytes_in_buffer = 0;
   saw_eof = 0;
@@ -12631,7 +12628,7 @@ remote_target::remote_file_put (const char *local_file, const char *remote_file,
     {
       if (!saw_eof)
 	{
-	  bytes = fread (buffer + bytes_in_buffer, 1,
+	  bytes = fread (buffer.data () + bytes_in_buffer, 1,
 			 io_size - bytes_in_buffer,
 			 file.get ());
 	  if (bytes == 0)
@@ -12654,7 +12651,7 @@ remote_target::remote_file_put (const char *local_file, const char *remote_file,
       bytes += bytes_in_buffer;
       bytes_in_buffer = 0;
 
-      retcode = remote_hostio_pwrite (fd.get (), buffer, bytes,
+      retcode = remote_hostio_pwrite (fd.get (), buffer.data (), bytes,
 				      offset, &remote_errno);
 
       if (retcode < 0)
@@ -12666,7 +12663,7 @@ remote_target::remote_file_put (const char *local_file, const char *remote_file,
 	  /* Short write.  Save the rest of the read data for the next
 	     write.  */
 	  bytes_in_buffer = bytes - retcode;
-	  memmove (buffer, buffer + retcode, bytes_in_buffer);
+	  memmove (buffer.data (), buffer.data () + retcode, bytes_in_buffer);
 	}
 
       offset += retcode;
@@ -12677,7 +12674,6 @@ remote_target::remote_file_put (const char *local_file, const char *remote_file,
 
   if (from_tty)
     printf_filtered (_("Successfully sent file \"%s\".\n"), local_file);
-  do_cleanups (back_to);
 }
 
 void
@@ -12695,9 +12691,7 @@ void
 remote_target::remote_file_get (const char *remote_file, const char *local_file,
 				int from_tty)
 {
-  struct cleanup *back_to;
   int remote_errno, bytes, io_size;
-  gdb_byte *buffer;
   ULONGEST offset;
 
   scoped_remote_fd fd
@@ -12714,13 +12708,12 @@ remote_target::remote_file_get (const char *remote_file, const char *local_file,
   /* Send up to this many bytes at once.  They won't all fit in the
      remote packet limit, so we'll transfer slightly fewer.  */
   io_size = get_remote_packet_size ();
-  buffer = (gdb_byte *) xmalloc (io_size);
-  back_to = make_cleanup (xfree, buffer);
+  gdb::byte_vector buffer (io_size);
 
   offset = 0;
   while (1)
     {
-      bytes = remote_hostio_pread (fd.get (), buffer, io_size, offset,
+      bytes = remote_hostio_pread (fd.get (), buffer.data (), io_size, offset,
 				   &remote_errno);
       if (bytes == 0)
 	/* Success, but no bytes, means end-of-file.  */
@@ -12730,7 +12723,7 @@ remote_target::remote_file_get (const char *remote_file, const char *local_file,
 
       offset += bytes;
 
-      bytes = fwrite (buffer, 1, bytes, file.get ());
+      bytes = fwrite (buffer.data (), 1, bytes, file.get ());
       if (bytes == 0)
 	perror_with_name (local_file);
     }
@@ -12740,7 +12733,6 @@ remote_target::remote_file_get (const char *remote_file, const char *local_file,
 
   if (from_tty)
     printf_filtered (_("Successfully fetched file \"%s\".\n"), remote_file);
-  do_cleanups (back_to);
 }
 
 void

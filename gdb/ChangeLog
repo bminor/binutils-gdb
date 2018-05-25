@@ -1,5 +1,11 @@
 2018-05-25  Tom Tromey  <tom@tromey.com>
 
+	* remote.c (remote_target::remote_file_get): Use
+	gdb::byte_vector.
+	(remote_target::remote_file_put): Likewise.
+
+2018-05-25  Tom Tromey  <tom@tromey.com>
+
 	* coff-pe-read.c (struct read_pe_section_data) <section_name>: Now
 	a std::string.
 	(get_pe_section_index, add_pe_exported_sym): Update.
