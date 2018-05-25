@@ -1,3 +1,12 @@
+2018-05-25  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (struct vCont_action_support, MAXTHREADLISTRESULTS)
+	(struct readahead_cache, struct packet_reg, struct
+	remote_arch_state, class remote_state): Move higher up in the
+	file.
+	(remote_target::m_remote_state): Now an object instead of a pointer.
+	(remote_target::get_remote_state): Adjust.
+
 2018-05-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* stack.c (select_and_print_frame): Delete.

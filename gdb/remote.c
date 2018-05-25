@@ -123,7 +123,273 @@ enum packet_result
 };
 
 struct threads_listing_context;
-struct remote_state;
+
+/* Stub vCont actions support.
+
+   Each field is a boolean flag indicating whether the stub reports
+   support for the corresponding action.  */
+
+struct vCont_action_support
+{
+  /* vCont;t */
+  bool t = false;
+
+  /* vCont;r */
+  bool r = false;
+
+  /* vCont;s */
+  bool s = false;
+
+  /* vCont;S */
+  bool S = false;
+};
+
+/* About this many threadisds fit in a packet.  */
+
+#define MAXTHREADLISTRESULTS 32
+
+/* Data for the vFile:pread readahead cache.  */
+
+struct readahead_cache
+{
+  /* Invalidate the readahead cache.  */
+  void invalidate ();
+
+  /* Invalidate the readahead cache if it is holding data for FD.  */
+  void invalidate_fd (int fd);
+
+  /* Serve pread from the readahead cache.  Returns number of bytes
+     read, or 0 if the request can't be served from the cache.  */
+  int pread (int fd, gdb_byte *read_buf, size_t len, ULONGEST offset);
+
+  /* The file descriptor for the file that is being cached.  -1 if the
+     cache is invalid.  */
+  int fd = -1;
+
+  /* The offset into the file that the cache buffer corresponds
+     to.  */
+  ULONGEST offset = 0;
+
+  /* The buffer holding the cache contents.  */
+  gdb_byte *buf = nullptr;
+  /* The buffer's size.  We try to read as much as fits into a packet
+     at a time.  */
+  size_t bufsize = 0;
+
+  /* Cache hit and miss counters.  */
+  ULONGEST hit_count = 0;
+  ULONGEST miss_count = 0;
+};
+
+/* Description of the remote protocol for a given architecture.  */
+
+struct packet_reg
+{
+  long offset; /* Offset into G packet.  */
+  long regnum; /* GDB's internal register number.  */
+  LONGEST pnum; /* Remote protocol register number.  */
+  int in_g_packet; /* Always part of G packet.  */
+  /* long size in bytes;  == register_size (target_gdbarch (), regnum);
+     at present.  */
+  /* char *name; == gdbarch_register_name (target_gdbarch (), regnum);
+     at present.  */
+};
+
+struct remote_arch_state
+{
+  explicit remote_arch_state (struct gdbarch *gdbarch);
+
+  /* Description of the remote protocol registers.  */
+  long sizeof_g_packet;
+
+  /* Description of the remote protocol registers indexed by REGNUM
+     (making an array gdbarch_num_regs in size).  */
+  std::unique_ptr<packet_reg[]> regs;
+
+  /* This is the size (in chars) of the first response to the ``g''
+     packet.  It is used as a heuristic when determining the maximum
+     size of memory-read and memory-write packets.  A target will
+     typically only reserve a buffer large enough to hold the ``g''
+     packet.  The size does not include packet overhead (headers and
+     trailers).  */
+  long actual_register_packet_size;
+
+  /* This is the maximum size (in chars) of a non read/write packet.
+     It is also used as a cap on the size of read/write packets.  */
+  long remote_packet_size;
+};
+
+/* Description of the remote protocol state for the currently
+   connected target.  This is per-target state, and independent of the
+   selected architecture.  */
+
+class remote_state
+{
+public:
+
+  remote_state ();
+  ~remote_state ();
+
+  /* Get the remote arch state for GDBARCH.  */
+  struct remote_arch_state *get_remote_arch_state (struct gdbarch *gdbarch);
+
+public: /* data */
+
+  /* A buffer to use for incoming packets, and its current size.  The
+     buffer is grown dynamically for larger incoming packets.
+     Outgoing packets may also be constructed in this buffer.
+     BUF_SIZE is always at least REMOTE_PACKET_SIZE;
+     REMOTE_PACKET_SIZE should be used to limit the length of outgoing
+     packets.  */
+  char *buf;
+  long buf_size;
+
+  /* True if we're going through initial connection setup (finding out
+     about the remote side's threads, relocating symbols, etc.).  */
+  bool starting_up = false;
+
+  /* If we negotiated packet size explicitly (and thus can bypass
+     heuristics for the largest packet size that will not overflow
+     a buffer in the stub), this will be set to that packet size.
+     Otherwise zero, meaning to use the guessed size.  */
+  long explicit_packet_size = 0;
+
+  /* remote_wait is normally called when the target is running and
+     waits for a stop reply packet.  But sometimes we need to call it
+     when the target is already stopped.  We can send a "?" packet
+     and have remote_wait read the response.  Or, if we already have
+     the response, we can stash it in BUF and tell remote_wait to
+     skip calling getpkt.  This flag is set when BUF contains a
+     stop reply packet and the target is not waiting.  */
+  int cached_wait_status = 0;
+
+  /* True, if in no ack mode.  That is, neither GDB nor the stub will
+     expect acks from each other.  The connection is assumed to be
+     reliable.  */
+  bool noack_mode = false;
+
+  /* True if we're connected in extended remote mode.  */
+  bool extended = false;
+
+  /* True if we resumed the target and we're waiting for the target to
+     stop.  In the mean time, we can't start another command/query.
+     The remote server wouldn't be ready to process it, so we'd
+     timeout waiting for a reply that would never come and eventually
+     we'd close the connection.  This can happen in asynchronous mode
+     because we allow GDB commands while the target is running.  */
+  bool waiting_for_stop_reply = false;
+
+  /* The status of the stub support for the various vCont actions.  */
+  vCont_action_support supports_vCont;
+
+  /* True if the user has pressed Ctrl-C, but the target hasn't
+     responded to that.  */
+  bool ctrlc_pending_p = false;
+
+  /* True if we saw a Ctrl-C while reading or writing from/to the
+     remote descriptor.  At that point it is not safe to send a remote
+     interrupt packet, so we instead remember we saw the Ctrl-C and
+     process it once we're done with sending/receiving the current
+     packet, which should be shortly.  If however that takes too long,
+     and the user presses Ctrl-C again, we offer to disconnect.  */
+  bool got_ctrlc_during_io = false;
+
+  /* Descriptor for I/O to remote machine.  Initialize it to NULL so that
+     remote_open knows that we don't have a file open when the program
+     starts.  */
+  struct serial *remote_desc = nullptr;
+
+  /* These are the threads which we last sent to the remote system.  The
+     TID member will be -1 for all or -2 for not sent yet.  */
+  ptid_t general_thread = null_ptid;
+  ptid_t continue_thread = null_ptid;
+
+  /* This is the traceframe which we last selected on the remote system.
+     It will be -1 if no traceframe is selected.  */
+  int remote_traceframe_number = -1;
+
+  char *last_pass_packet = nullptr;
+
+  /* The last QProgramSignals packet sent to the target.  We bypass
+     sending a new program signals list down to the target if the new
+     packet is exactly the same as the last we sent.  IOW, we only let
+     the target know about program signals list changes.  */
+  char *last_program_signals_packet = nullptr;
+
+  gdb_signal last_sent_signal = GDB_SIGNAL_0;
+
+  bool last_sent_step = false;
+
+  /* The execution direction of the last resume we got.  */
+  exec_direction_kind last_resume_exec_dir = EXEC_FORWARD;
+
+  char *finished_object = nullptr;
+  char *finished_annex = nullptr;
+  ULONGEST finished_offset = 0;
+
+  /* Should we try the 'ThreadInfo' query packet?
+
+     This variable (NOT available to the user: auto-detect only!)
+     determines whether GDB will use the new, simpler "ThreadInfo"
+     query or the older, more complex syntax for thread queries.
+     This is an auto-detect variable (set to true at each connect,
+     and set to false when the target fails to recognize it).  */
+  bool use_threadinfo_query = false;
+  bool use_threadextra_query = false;
+
+  threadref echo_nextthread {};
+  threadref nextthread {};
+  threadref resultthreadlist[MAXTHREADLISTRESULTS] {};
+
+  /* The state of remote notification.  */
+  struct remote_notif_state *notif_state = nullptr;
+
+  /* The branch trace configuration.  */
+  struct btrace_config btrace_config {};
+
+  /* The argument to the last "vFile:setfs:" packet we sent, used
+     to avoid sending repeated unnecessary "vFile:setfs:" packets.
+     Initialized to -1 to indicate that no "vFile:setfs:" packet
+     has yet been sent.  */
+  int fs_pid = -1;
+
+  /* A readahead cache for vFile:pread.  Often, reading a binary
+     involves a sequence of small reads.  E.g., when parsing an ELF
+     file.  A readahead cache helps mostly the case of remote
+     debugging on a connection with higher latency, due to the
+     request/reply nature of the RSP.  We only cache data for a single
+     file descriptor at a time.  */
+  struct readahead_cache readahead_cache;
+
+  /* The list of already fetched and acknowledged stop events.  This
+     queue is used for notification Stop, and other notifications
+     don't need queue for their events, because the notification
+     events of Stop can't be consumed immediately, so that events
+     should be queued first, and be consumed by remote_wait_{ns,as}
+     one per time.  Other notifications can consume their events
+     immediately, so queue is not needed for them.  */
+  QUEUE (stop_reply_p) *stop_reply_queue;
+
+  /* Asynchronous signal handle registered as event loop source for
+     when we have pending events ready to be passed to the core.  */
+  struct async_event_handler *remote_async_inferior_event_token = nullptr;
+
+  /* FIXME: cagney/1999-09-23: Even though getpkt was called with
+     ``forever'' still use the normal timeout mechanism.  This is
+     currently used by the ASYNC code to guarentee that target reads
+     during the initial connect always time-out.  Once getpkt has been
+     modified to return a timeout indication and, in turn
+     remote_wait()/wait_for_inferior() have gained a timeout parameter
+     this can go away.  */
+  int wait_forever_enabled_p = 1;
+
+private:
+  /* Mapping of remote protocol data for each gdbarch.  Usually there
+     is only one entry here, though we may see more with stubs that
+     support multi-process.  */
+  std::unordered_map<struct gdbarch *, remote_arch_state>
+    m_arch_states;
+};
 
 static const target_info remote_target_info = {
   "remote",
@@ -671,7 +937,9 @@ public: /* Remote specific methods.  */
 
 private: /* data fields */
 
-  std::unique_ptr<struct remote_state> m_remote_state;
+  /* The remote state.  Don't reference this directly.  Use the
+     get_remote_state method instead.  */
+  remote_state m_remote_state;
 };
 
 static const target_info extended_remote_target_info = {
@@ -775,281 +1043,14 @@ static struct cmd_list_element *remote_cmdlist;
 static struct cmd_list_element *remote_set_cmdlist;
 static struct cmd_list_element *remote_show_cmdlist;
 
-/* Stub vCont actions support.
-
-   Each field is a boolean flag indicating whether the stub reports
-   support for the corresponding action.  */
-
-struct vCont_action_support
-{
-  /* vCont;t */
-  bool t = false;
-
-  /* vCont;r */
-  bool r = false;
-
-  /* vCont;s */
-  bool s = false;
-
-  /* vCont;S */
-  bool S = false;
-};
-
 /* Controls whether GDB is willing to use range stepping.  */
 
 static int use_range_stepping = 1;
-
-/* About this many threadisds fit in a packet.  */
-
-#define MAXTHREADLISTRESULTS 32
 
 /* The max number of chars in debug output.  The rest of chars are
    omitted.  */
 
 #define REMOTE_DEBUG_MAX_CHAR 512
-
-/* Data for the vFile:pread readahead cache.  */
-
-struct readahead_cache
-{
-  /* Invalidate the readahead cache.  */
-  void invalidate ();
-
-  /* Invalidate the readahead cache if it is holding data for FD.  */
-  void invalidate_fd (int fd);
-
-  /* Serve pread from the readahead cache.  Returns number of bytes
-     read, or 0 if the request can't be served from the cache.  */
-  int pread (int fd, gdb_byte *read_buf, size_t len, ULONGEST offset);
-
-  /* The file descriptor for the file that is being cached.  -1 if the
-     cache is invalid.  */
-  int fd = -1;
-
-  /* The offset into the file that the cache buffer corresponds
-     to.  */
-  ULONGEST offset = 0;
-
-  /* The buffer holding the cache contents.  */
-  gdb_byte *buf = nullptr;
-  /* The buffer's size.  We try to read as much as fits into a packet
-     at a time.  */
-  size_t bufsize = 0;
-
-  /* Cache hit and miss counters.  */
-  ULONGEST hit_count = 0;
-  ULONGEST miss_count = 0;
-};
-
-/* Description of the remote protocol for a given architecture.  */
-
-struct packet_reg
-{
-  long offset; /* Offset into G packet.  */
-  long regnum; /* GDB's internal register number.  */
-  LONGEST pnum; /* Remote protocol register number.  */
-  int in_g_packet; /* Always part of G packet.  */
-  /* long size in bytes;  == register_size (target_gdbarch (), regnum);
-     at present.  */
-  /* char *name; == gdbarch_register_name (target_gdbarch (), regnum);
-     at present.  */
-};
-
-struct remote_arch_state
-{
-  explicit remote_arch_state (struct gdbarch *gdbarch);
-
-  /* Description of the remote protocol registers.  */
-  long sizeof_g_packet;
-
-  /* Description of the remote protocol registers indexed by REGNUM
-     (making an array gdbarch_num_regs in size).  */
-  std::unique_ptr<packet_reg[]> regs;
-
-  /* This is the size (in chars) of the first response to the ``g''
-     packet.  It is used as a heuristic when determining the maximum
-     size of memory-read and memory-write packets.  A target will
-     typically only reserve a buffer large enough to hold the ``g''
-     packet.  The size does not include packet overhead (headers and
-     trailers).  */
-  long actual_register_packet_size;
-
-  /* This is the maximum size (in chars) of a non read/write packet.
-     It is also used as a cap on the size of read/write packets.  */
-  long remote_packet_size;
-};
-
-/* Description of the remote protocol state for the currently
-   connected target.  This is per-target state, and independent of the
-   selected architecture.  */
-
-class remote_state
-{
-public:
-
-  remote_state ();
-  ~remote_state ();
-
-  /* Get the remote arch state for GDBARCH.  */
-  struct remote_arch_state *get_remote_arch_state (struct gdbarch *gdbarch);
-
-public: /* data */
-
-  /* A buffer to use for incoming packets, and its current size.  The
-     buffer is grown dynamically for larger incoming packets.
-     Outgoing packets may also be constructed in this buffer.
-     BUF_SIZE is always at least REMOTE_PACKET_SIZE;
-     REMOTE_PACKET_SIZE should be used to limit the length of outgoing
-     packets.  */
-  char *buf;
-  long buf_size;
-
-  /* True if we're going through initial connection setup (finding out
-     about the remote side's threads, relocating symbols, etc.).  */
-  bool starting_up = false;
-
-  /* If we negotiated packet size explicitly (and thus can bypass
-     heuristics for the largest packet size that will not overflow
-     a buffer in the stub), this will be set to that packet size.
-     Otherwise zero, meaning to use the guessed size.  */
-  long explicit_packet_size = 0;
-
-  /* remote_wait is normally called when the target is running and
-     waits for a stop reply packet.  But sometimes we need to call it
-     when the target is already stopped.  We can send a "?" packet
-     and have remote_wait read the response.  Or, if we already have
-     the response, we can stash it in BUF and tell remote_wait to
-     skip calling getpkt.  This flag is set when BUF contains a
-     stop reply packet and the target is not waiting.  */
-  int cached_wait_status = 0;
-
-  /* True, if in no ack mode.  That is, neither GDB nor the stub will
-     expect acks from each other.  The connection is assumed to be
-     reliable.  */
-  bool noack_mode = false;
-
-  /* True if we're connected in extended remote mode.  */
-  bool extended = false;
-
-  /* True if we resumed the target and we're waiting for the target to
-     stop.  In the mean time, we can't start another command/query.
-     The remote server wouldn't be ready to process it, so we'd
-     timeout waiting for a reply that would never come and eventually
-     we'd close the connection.  This can happen in asynchronous mode
-     because we allow GDB commands while the target is running.  */
-  bool waiting_for_stop_reply = false;
-
-  /* The status of the stub support for the various vCont actions.  */
-  vCont_action_support supports_vCont;
-
-  /* True if the user has pressed Ctrl-C, but the target hasn't
-     responded to that.  */
-  bool ctrlc_pending_p = false;
-
-  /* True if we saw a Ctrl-C while reading or writing from/to the
-     remote descriptor.  At that point it is not safe to send a remote
-     interrupt packet, so we instead remember we saw the Ctrl-C and
-     process it once we're done with sending/receiving the current
-     packet, which should be shortly.  If however that takes too long,
-     and the user presses Ctrl-C again, we offer to disconnect.  */
-  bool got_ctrlc_during_io = false;
-
-  /* Descriptor for I/O to remote machine.  Initialize it to NULL so that
-     remote_open knows that we don't have a file open when the program
-     starts.  */
-  struct serial *remote_desc = nullptr;
-
-  /* These are the threads which we last sent to the remote system.  The
-     TID member will be -1 for all or -2 for not sent yet.  */
-  ptid_t general_thread = null_ptid;
-  ptid_t continue_thread = null_ptid;
-
-  /* This is the traceframe which we last selected on the remote system.
-     It will be -1 if no traceframe is selected.  */
-  int remote_traceframe_number = -1;
-
-  char *last_pass_packet = nullptr;
-
-  /* The last QProgramSignals packet sent to the target.  We bypass
-     sending a new program signals list down to the target if the new
-     packet is exactly the same as the last we sent.  IOW, we only let
-     the target know about program signals list changes.  */
-  char *last_program_signals_packet = nullptr;
-
-  gdb_signal last_sent_signal = GDB_SIGNAL_0;
-
-  bool last_sent_step = false;
-
-  /* The execution direction of the last resume we got.  */
-  exec_direction_kind last_resume_exec_dir = EXEC_FORWARD;
-
-  char *finished_object = nullptr;
-  char *finished_annex = nullptr;
-  ULONGEST finished_offset = 0;
-
-  /* Should we try the 'ThreadInfo' query packet?
-
-     This variable (NOT available to the user: auto-detect only!)
-     determines whether GDB will use the new, simpler "ThreadInfo"
-     query or the older, more complex syntax for thread queries.
-     This is an auto-detect variable (set to true at each connect,
-     and set to false when the target fails to recognize it).  */
-  bool use_threadinfo_query = false;
-  bool use_threadextra_query = false;
-
-  threadref echo_nextthread {};
-  threadref nextthread {};
-  threadref resultthreadlist[MAXTHREADLISTRESULTS] {};
-
-  /* The state of remote notification.  */
-  struct remote_notif_state *notif_state = nullptr;
-
-  /* The branch trace configuration.  */
-  struct btrace_config btrace_config {};
-
-  /* The argument to the last "vFile:setfs:" packet we sent, used
-     to avoid sending repeated unnecessary "vFile:setfs:" packets.
-     Initialized to -1 to indicate that no "vFile:setfs:" packet
-     has yet been sent.  */
-  int fs_pid = -1;
-
-  /* A readahead cache for vFile:pread.  Often, reading a binary
-     involves a sequence of small reads.  E.g., when parsing an ELF
-     file.  A readahead cache helps mostly the case of remote
-     debugging on a connection with higher latency, due to the
-     request/reply nature of the RSP.  We only cache data for a single
-     file descriptor at a time.  */
-  struct readahead_cache readahead_cache;
-
-  /* The list of already fetched and acknowledged stop events.  This
-     queue is used for notification Stop, and other notifications
-     don't need queue for their events, because the notification
-     events of Stop can't be consumed immediately, so that events
-     should be queued first, and be consumed by remote_wait_{ns,as}
-     one per time.  Other notifications can consume their events
-     immediately, so queue is not needed for them.  */
-  QUEUE (stop_reply_p) *stop_reply_queue;
-
-  /* Asynchronous signal handle registered as event loop source for
-     when we have pending events ready to be passed to the core.  */
-  struct async_event_handler *remote_async_inferior_event_token = nullptr;
-
-  /* FIXME: cagney/1999-09-23: Even though getpkt was called with
-     ``forever'' still use the normal timeout mechanism.  This is
-     currently used by the ASYNC code to guarentee that target reads
-     during the initial connect always time-out.  Once getpkt has been
-     modified to return a timeout indication and, in turn
-     remote_wait()/wait_for_inferior() have gained a timeout parameter
-     this can go away.  */
-  int wait_forever_enabled_p = 1;
-
-private:
-  /* Mapping of remote protocol data for each gdbarch.  Usually there
-     is only one entry here, though we may see more with stubs that
-     support multi-process.  */
-  std::unordered_map<struct gdbarch *, remote_arch_state>
-    m_arch_states;
-};
 
 /* Private data that we'll store in (struct thread_info)->priv.  */
 struct remote_thread_info : public private_thread_info
@@ -1237,17 +1238,14 @@ remote_state::get_remote_arch_state (struct gdbarch *gdbarch)
 remote_state *
 remote_target::get_remote_state ()
 {
-  if (m_remote_state == nullptr)
-    m_remote_state.reset (new remote_state ());
-
   /* Make sure that the remote architecture state has been
      initialized, because doing so might reallocate rs->buf.  Any
      function which calls getpkt also needs to be mindful of changes
      to rs->buf, but this call limits the number of places which run
      into trouble.  */
-  m_remote_state->get_remote_arch_state (target_gdbarch ());
+  m_remote_state.get_remote_arch_state (target_gdbarch ());
 
-  return m_remote_state.get ();
+  return &m_remote_state;
 }
 
 /* Cleanup routine for the remote module's pspace data.  */
