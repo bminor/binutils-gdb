@@ -619,8 +619,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of stabs_argument_has_addr, invalid_p == 0 */
   /* Skip verify of convert_from_func_ptr_addr, invalid_p == 0 */
   /* Skip verify of addr_bits_remove, invalid_p == 0 */
-  if (gdbarch->significant_addr_bit == 0)
-    gdbarch->significant_addr_bit = gdbarch_addr_bit (gdbarch);
+  /* Skip verify of significant_addr_bit, invalid_p == 0 */
   /* Skip verify of software_single_step, has predicate.  */
   /* Skip verify of single_step_through_delay, has predicate.  */
   /* Skip verify of print_insn, invalid_p == 0 */
@@ -3225,6 +3224,7 @@ int
 gdbarch_significant_addr_bit (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
+  /* Skip verify of significant_addr_bit, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_significant_addr_bit called\n");
   return gdbarch->significant_addr_bit;
