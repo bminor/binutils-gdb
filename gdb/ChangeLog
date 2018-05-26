@@ -1,3 +1,11 @@
+2018-05-31  Omair Javaid  <omair.javaid@linaro.org>
+
+	PR gdb/23210
+	* gdbarch.sh (significant_addr_bit): Default to zero when
+	not set by target architecture.
+	* gdbarch.c: Re-generated.
+	* utils.c (address_significant): Update.
+
 2018-05-30  Joel Brobecker  <brobecker@adacore.com>
 
 	* stack.c (func_command): Remove trailing newline in call to error.
