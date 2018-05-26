@@ -3,10 +3,11 @@
 	.globl	foo
 	.type	foo, @function
 foo:
-	ret
+	movq foobar@GOTPCREL(%rip), %rax
 	.size	foo, .-foo
 	.globl	bar
 	.type	bar, @function
 bar:
 	jmp	*foo@GOTPCREL(%rip)
 	.size	bar, .-bar
+	.comm foobar,30,4

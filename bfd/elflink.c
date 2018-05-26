@@ -2222,6 +2222,115 @@ _bfd_elf_link_find_version_dependencies (struct elf_link_hash_entry *h,
   return TRUE;
 }
 
+/* Return TRUE and set *HIDE to TRUE if the versioned symbol is
+   hidden.  Set *T_P to NULL if there is no match.  */
+
+static bfd_boolean
+_bfd_elf_link_hide_versioned_symbol (struct bfd_link_info *info,
+				     struct elf_link_hash_entry *h,
+				     const char *version_p,
+				     struct bfd_elf_version_tree **t_p,
+				     bfd_boolean *hide)
+{
+  struct bfd_elf_version_tree *t;
+
+  /* Look for the version.  If we find it, it is no longer weak.  */
+  for (t = info->version_info; t != NULL; t = t->next)
+    {
+      if (strcmp (t->name, version_p) == 0)
+	{
+	  size_t len;
+	  char *alc;
+	  struct bfd_elf_version_expr *d;
+
+	  len = version_p - h->root.root.string;
+	  alc = (char *) bfd_malloc (len);
+	  if (alc == NULL)
+	    return FALSE;
+	  memcpy (alc, h->root.root.string, len - 1);
+	  alc[len - 1] = '\0';
+	  if (alc[len - 2] == ELF_VER_CHR)
+	    alc[len - 2] = '\0';
+
+	  h->verinfo.vertree = t;
+	  t->used = TRUE;
+	  d = NULL;
+
+	  if (t->globals.list != NULL)
+	    d = (*t->match) (&t->globals, NULL, alc);
+
+	  /* See if there is anything to force this symbol to
+	     local scope.  */
+	  if (d == NULL && t->locals.list != NULL)
+	    {
+	      d = (*t->match) (&t->locals, NULL, alc);
+	      if (d != NULL
+		  && h->dynindx != -1
+		  && ! info->export_dynamic)
+		*hide = TRUE;
+	    }
+
+	  free (alc);
+	  break;
+	}
+    }
+
+  *t_p = t;
+
+  return TRUE;
+}
+
+/* Return TRUE if the symbol H is hidden by version script.  */
+
+bfd_boolean
+_bfd_elf_link_hide_sym_by_version (struct bfd_link_info *info,
+				   struct elf_link_hash_entry *h)
+{
+  const char *p;
+  bfd_boolean hide = FALSE;
+  const struct elf_backend_data *bed
+    = get_elf_backend_data (info->output_bfd);
+
+  /* Version script only hides symbols defined in regular objects.  */
+  if (!h->def_regular && !ELF_COMMON_DEF_P (h))
+    return TRUE;
+
+  p = strchr (h->root.root.string, ELF_VER_CHR);
+  if (p != NULL && h->verinfo.vertree == NULL)
+    {
+      struct bfd_elf_version_tree *t;
+
+      ++p;
+      if (*p == ELF_VER_CHR)
+	++p;
+
+      if (*p != '\0'
+	  && _bfd_elf_link_hide_versioned_symbol (info, h, p, &t, &hide)
+	  && hide)
+	{
+	  if (hide)
+	    (*bed->elf_backend_hide_symbol) (info, h, TRUE);
+	  return TRUE;
+	}
+    }
+
+  /* If we don't have a version for this symbol, see if we can find
+     something.  */
+  if (h->verinfo.vertree == NULL && info->version_info != NULL)
+    {
+      h->verinfo.vertree
+	= bfd_find_version_for_sym (info->version_info,
+				    h->root.root.string, &hide);
+      if (h->verinfo.vertree != NULL && hide)
+	{
+	  (*bed->elf_backend_hide_symbol) (info, h, TRUE);
+	  return TRUE;
+	}
+    }
+
+  return FALSE;
+}
+
 /* Figure out appropriate versions for all the symbols.  We may not
    have the version number script until we have read all of the input
    files, so until that point we don't know which symbols should be
@@ -2235,6 +2344,7 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
   const struct elf_backend_data *bed;
   struct elf_info_failed eif;
   char *p;
+  bfd_boolean hide;
 
   sinfo = (struct elf_info_failed *) data;
   info = sinfo->info;
@@ -2254,6 +2364,7 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
   if (!h->def_regular)
     return TRUE;
 
+  hide = FALSE;
   bed = get_elf_backend_data (info->output_bfd);
   p = strchr (h->root.root.string, ELF_VER_CHR);
   if (p != NULL && h->verinfo.vertree == NULL)
@@ -2268,49 +2379,14 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
       if (*p == '\0')
 	return TRUE;
 
-      /* Look for the version.  If we find it, it is no longer weak.  */
-      for (t = sinfo->info->version_info; t != NULL; t = t->next)
+      if (!_bfd_elf_link_hide_versioned_symbol (info, h, p, &t, &hide))
 	{
-	  if (strcmp (t->name, p) == 0)
-	    {
-	      size_t len;
-	      char *alc;
-	      struct bfd_elf_version_expr *d;
-
-	      len = p - h->root.root.string;
-	      alc = (char *) bfd_malloc (len);
-	      if (alc == NULL)
-		{
-		  sinfo->failed = TRUE;
-		  return FALSE;
-		}
-	      memcpy (alc, h->root.root.string, len - 1);
-	      alc[len - 1] = '\0';
-	      if (alc[len - 2] == ELF_VER_CHR)
-		alc[len - 2] = '\0';
-
-	      h->verinfo.vertree = t;
-	      t->used = TRUE;
-	      d = NULL;
-
-	      if (t->globals.list != NULL)
-		d = (*t->match) (&t->globals, NULL, alc);
-
-	      /* See if there is anything to force this symbol to
-		 local scope.  */
-	      if (d == NULL && t->locals.list != NULL)
-		{
-		  d = (*t->match) (&t->locals, NULL, alc);
-		  if (d != NULL
-		      && h->dynindx != -1
-		      && ! info->export_dynamic)
-		    (*bed->elf_backend_hide_symbol) (info, h, TRUE);
-		}
-
-	      free (alc);
-	      break;
-	    }
+	  sinfo->failed = TRUE;
+	  return FALSE;
 	}
+
+      if (hide)
+	(*bed->elf_backend_hide_symbol) (info, h, TRUE);
 
       /* If we are building an application, we need to create a
 	 version node for this version.  */
@@ -2367,10 +2443,10 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
 
   /* If we don't have a version for this symbol, see if we can find
      something.  */
-  if (h->verinfo.vertree == NULL && sinfo->info->version_info != NULL)
+  if (!hide
+      && h->verinfo.vertree == NULL
+      && sinfo->info->version_info != NULL)
     {
-      bfd_boolean hide;
-
       h->verinfo.vertree
 	= bfd_find_version_for_sym (sinfo->info->version_info,
 				    h->root.root.string, &hide);

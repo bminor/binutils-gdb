@@ -2038,21 +2038,14 @@ _bfd_x86_elf_link_symbol_references_local (struct bfd_link_info *info,
 		  && htab->interp == NULL)
 	      || info->dynamic_undefined_weak == 0))
       || ((h->def_regular || ELF_COMMON_DEF_P (h))
-	  && h->versioned == unversioned
 	  && info->version_info != NULL
-	  && bfd_hide_sym_by_version (info->version_info,
-				      h->root.root.string)))
+	  && _bfd_elf_link_hide_sym_by_version (info, h)))
     {
       eh->local_ref = 2;
       return TRUE;
     }
 
-  /* bfd_hide_sym_by_version can't be used to check if a versioned symbol
-     is hidden.  It has to be syncd with _bfd_elf_link_assign_sym_version
-     to get the correct answer.  */
-  if (h->versioned == unversioned)
-    eh->local_ref = 1;
-
+  eh->local_ref = 1;
   return FALSE;
 }
 

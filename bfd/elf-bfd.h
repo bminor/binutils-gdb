@@ -2186,6 +2186,9 @@ extern const struct bfd_elf_special_section *_bfd_elf_get_special_section
 extern const struct bfd_elf_special_section *_bfd_elf_get_sec_type_attr
   (bfd *, asection *);
 
+extern bfd_boolean _bfd_elf_link_hide_sym_by_version
+  (struct bfd_link_info *, struct elf_link_hash_entry *);
+
 /* If the target doesn't have reloc handling written yet:  */
 extern bfd_boolean _bfd_elf_no_info_to_howto
   (bfd *, arelent *, Elf_Internal_Rela *);

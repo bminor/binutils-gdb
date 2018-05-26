@@ -1,3 +1,16 @@
+2018-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23194
+	* elf-bfd.h (_bfd_elf_link_hide_sym_by_version): New.
+	* elflink.c (_bfd_elf_link_hide_versioned_symbol): New function.
+	Extracted from _bfd_elf_link_assign_sym_version.
+	(_bfd_elf_link_hide_sym_by_version): New function.
+	(_bfd_elf_link_assign_sym_version): Use
+	_bfd_elf_link_hide_versioned_symbol.
+	* elfxx-x86.c (_bfd_x86_elf_link_symbol_references_local): Call
+	_bfd_elf_link_hide_sym_by_version instead of
+	bfd_hide_sym_by_version.  Don't check unversioned symbol.
+
 2018-05-25  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.in: Regenerate.

@@ -1,3 +1,15 @@
+2018-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23194
+	* testsuite/ld-i386/pr23194.d: Expect only R_386_GLOB_DAT
+	against foobar.
+	* testsuite/ld-i386/pr23194.map: Add foobar.
+	* testsuite/ld-x86-64/pr23194.map: Likewise.
+	* testsuite/ld-i386/pr23194.s: Add a common foobar symbol.
+	* testsuite/ld-x86-64/pr23194.s: Likewise.
+	* testsuite/ld-x86-64/pr23194.d: Expect only R_X86_64_GLOB_DAT
+	against foobar.
+
 2018-05-25  Alan Modra  <amodra@gmail.com>
 
 	* po/BLD-POTFILES.in: Regenerate.
