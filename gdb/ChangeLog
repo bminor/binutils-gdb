@@ -1,5 +1,11 @@
 2018-06-18  Tom Tromey  <tom@tromey.com>
 
+	* solib-aix.c (solib_aix_get_section_offsets): Return
+	unique_xmalloc_ptr.
+	(solib_aix_solib_create_inferior_hook): Update.
+
+2018-06-18  Tom Tromey  <tom@tromey.com>
+
 	* solib-darwin.c (darwin_current_sos): Use unique_xmalloc_ptr.
 
 2018-06-18  Tom Tromey  <tom@tromey.com>

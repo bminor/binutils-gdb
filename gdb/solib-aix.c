@@ -439,14 +439,14 @@ solib_aix_clear_solib (void)
    The resulting array is computed on the heap and must be
    deallocated after use.  */
 
-static struct section_offsets *
+static gdb::unique_xmalloc_ptr<struct section_offsets>
 solib_aix_get_section_offsets (struct objfile *objfile,
 			       lm_info_aix *info)
 {
-  struct section_offsets *offsets;
   bfd *abfd = objfile->obfd;
 
-  offsets = XCNEWVEC (struct section_offsets, objfile->num_sections);
+  gdb::unique_xmalloc_ptr<struct section_offsets> offsets
+    (XCNEWVEC (struct section_offsets, objfile->num_sections));
 
   /* .text */
 
@@ -515,12 +515,10 @@ solib_aix_solib_create_inferior_hook (int from_tty)
 
   if (symfile_objfile != NULL)
     {
-      struct section_offsets *offsets
+      gdb::unique_xmalloc_ptr<struct section_offsets> offsets
 	= solib_aix_get_section_offsets (symfile_objfile, exec_info);
-      struct cleanup *cleanup = make_cleanup (xfree, offsets);
 
-      objfile_relocate (symfile_objfile, offsets);
-      do_cleanups (cleanup);
+      objfile_relocate (symfile_objfile, offsets.get ());
     }
 }
 
