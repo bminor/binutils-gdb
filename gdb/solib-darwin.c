@@ -263,8 +263,6 @@ darwin_current_sos (void)
       unsigned long hdr_val;
       gdb::unique_xmalloc_ptr<char> file_path;
       int errcode;
-      struct so_list *newobj;
-      struct cleanup *old_chain;
 
       /* Read image info from inferior.  */
       if (target_read_memory (iinfo, buf, image_info_size))
@@ -293,8 +291,7 @@ darwin_current_sos (void)
 	break;
 
       /* Create and fill the new so_list element.  */
-      newobj = XCNEW (struct so_list);
-      old_chain = make_cleanup (xfree, newobj);
+      gdb::unique_xmalloc_ptr<struct so_list> newobj (XCNEW (struct so_list));
 
       lm_info_darwin *li = new lm_info_darwin;
       newobj->lm_info = li;
@@ -305,12 +302,10 @@ darwin_current_sos (void)
       li->lm_addr = load_addr;
 
       if (head == NULL)
-	head = newobj;
+	head = newobj.get ();
       else
-	tail->next = newobj;
-      tail = newobj;
-
-      discard_cleanups (old_chain);
+	tail->next = newobj.get ();
+      tail = newobj.release ();
     }
 
   return head;
