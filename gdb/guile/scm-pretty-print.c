@@ -668,18 +668,16 @@ ppscm_print_string_repr (SCM printer, enum display_hint hint,
     }
   else if (scm_is_string (str_scm))
     {
-      struct cleanup *cleanup;
       size_t length;
-      char *string
+      gdb::unique_xmalloc_ptr<char> string
 	= gdbscm_scm_to_string (str_scm, &length,
 				target_charset (gdbarch), 0 /*!strict*/, NULL);
 
-      cleanup = make_cleanup (xfree, string);
       if (hint == HINT_STRING)
 	{
 	  struct type *type = builtin_type (gdbarch)->builtin_char;
 	  
-	  LA_PRINT_STRING (stream, type, (gdb_byte *) string,
+	  LA_PRINT_STRING (stream, type, (gdb_byte *) string.get (),
 			   length, NULL, 0, options);
 	}
       else
@@ -690,14 +688,13 @@ ppscm_print_string_repr (SCM printer, enum display_hint hint,
 
 	  for (i = 0; i < length; ++i)
 	    {
-	      if (string[i] == '\0')
+	      if (string.get ()[i] == '\0')
 		fputs_filtered ("\\000", stream);
 	      else
-		fputc_filtered (string[i], stream);
+		fputc_filtered (string.get ()[i], stream);
 	    }
 	}
       result = STRING_REPR_OK;
-      do_cleanups (cleanup);
     }
   else if (lsscm_is_lazy_string (str_scm))
     {

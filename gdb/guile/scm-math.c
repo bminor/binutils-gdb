@@ -826,7 +826,6 @@ vlscm_convert_typed_value_from_scheme (const char *func_name,
 	}
       else if (scm_is_string (obj))
 	{
-	  char *s;
 	  size_t len;
 	  struct cleanup *cleanup;
 
@@ -840,19 +839,15 @@ vlscm_convert_typed_value_from_scheme (const char *func_name,
 	  else
 	    {
 	      /* TODO: Provide option to specify conversion strategy.  */
-	      s = gdbscm_scm_to_string (obj, &len,
+	      gdb::unique_xmalloc_ptr<char> s
+		= gdbscm_scm_to_string (obj, &len,
 					target_charset (gdbarch),
 					0 /*non-strict*/,
 					&except_scm);
 	      if (s != NULL)
-		{
-		  cleanup = make_cleanup (xfree, s);
-		  value
-		    = value_cstring (s, len,
-				     language_string_char_type (language,
-								gdbarch));
-		  do_cleanups (cleanup);
-		}
+		value = value_cstring (s.get (), len,
+				       language_string_char_type (language,
+								  gdbarch));
 	      else
 		value = NULL;
 	    }

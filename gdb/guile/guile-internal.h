@@ -526,14 +526,14 @@ extern SCM gdbscm_scm_from_c_string (const char *string);
 extern SCM gdbscm_scm_from_printf (const char *format, ...)
     ATTRIBUTE_PRINTF (1, 2);
 
-extern char *gdbscm_scm_to_string (SCM string, size_t *lenp,
-				   const char *charset,
-				   int strict, SCM *except_scmp);
+extern gdb::unique_xmalloc_ptr<char> gdbscm_scm_to_string
+  (SCM string, size_t *lenp, const char *charset, int strict, SCM *except_scmp);
 
 extern SCM gdbscm_scm_from_string (const char *string, size_t len,
 				   const char *charset, int strict);
 
-extern char *gdbscm_scm_to_host_string (SCM string, size_t *lenp, SCM *except);
+extern gdb::unique_xmalloc_ptr<char> gdbscm_scm_to_host_string
+  (SCM string, size_t *lenp, SCM *except);
 
 extern SCM gdbscm_scm_from_host_string (const char *string, size_t len);
 

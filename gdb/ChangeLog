@@ -1,5 +1,20 @@
 2018-07-17  Tom Tromey  <tom@tromey.com>
 
+	* guile/scm-param.c (pascm_set_func, pascm_show_func)
+	(compute_enum_list, pascm_set_param_value_x)
+	(gdbscm_parameter_value): Update.
+	* guile/guile-internal.h (gdbscm_scm_to_string): Update.
+	(gdbscm_scm_to_host_string): Update.
+	* guile/scm-math.c (vlscm_convert_typed_value_from_scheme):
+	Update.
+	* guile/scm-cmd.c (cmdscm_add_completion): Update.
+	* guile/scm-pretty-print.c (ppscm_print_string_repr): Update.
+	* guile/scm-string.c (gdbscm_scm_to_string): Return
+	unique_xmalloc_ptr.
+	(gdbscm_scm_to_host_string): Likewise.
+
+2018-07-17  Tom Tromey  <tom@tromey.com>
+
 	* guile/guile.c (gdbscm_eval_from_control_command): Update.
 	* guile/guile-internal.h (gdbscm_safe_eval_string): Update.
 	* guile/scm-objfile.c (gdbscm_execute_objfile_script): Update.

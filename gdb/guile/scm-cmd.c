@@ -362,8 +362,8 @@ cmdscm_add_completion (SCM completion, completion_tracker &tracker)
     }
 
   gdb::unique_xmalloc_ptr<char> item
-    (gdbscm_scm_to_string (completion, NULL, host_charset (), 1,
-			   &except_scm));
+    = gdbscm_scm_to_string (completion, NULL, host_charset (), 1,
+			    &except_scm);
   if (item == NULL)
     {
       /* Inform the user, but otherwise ignore the entire result.  */
