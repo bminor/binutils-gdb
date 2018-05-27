@@ -362,7 +362,8 @@ extern void gdbscm_print_exception_with_stack (SCM port, SCM stack,
 
 extern void gdbscm_print_gdb_exception (SCM port, SCM exception);
 
-extern char *gdbscm_exception_message_to_string (SCM exception);
+extern gdb::unique_xmalloc_ptr<char> gdbscm_exception_message_to_string
+    (SCM exception);
 
 extern excp_matcher_func gdbscm_memory_error_p;
 

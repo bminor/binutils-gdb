@@ -316,10 +316,10 @@ cmdscm_function (struct cmd_list_element *command,
 	 itself.  */
       if (gdbscm_user_error_p (gdbscm_exception_key (result)))
 	{
-	  char *msg = gdbscm_exception_message_to_string (result);
+	  gdb::unique_xmalloc_ptr<char> msg
+	    = gdbscm_exception_message_to_string (result);
 
-	  make_cleanup (xfree, msg);
-	  error ("%s", msg);
+	  error ("%s", msg.get ());
 	}
       else
 	{

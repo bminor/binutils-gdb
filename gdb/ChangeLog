@@ -1,5 +1,16 @@
 2018-07-17  Tom Tromey  <tom@tromey.com>
 
+	* guile/scm-param.c (pascm_signal_setshow_error): Update.
+	* guile/guile-internal.h (gdbscm_exception_message_to_string):
+	Update.
+	* guile/scm-cmd.c (cmdscm_function): Update.
+	* guile/scm-pretty-print.c
+	(ppscm_print_exception_unless_memory_error): Update.
+	* guile/scm-exception.c (gdbscm_exception_message_to_string):
+	Return unique_xmalloc_ptr.
+
+2018-07-17  Tom Tromey  <tom@tromey.com>
+
 	* guile/scm-pretty-print.c (ppscm_make_pp_type_error_exception):
 	Use string_printf.
 

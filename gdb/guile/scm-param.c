@@ -251,10 +251,10 @@ pascm_signal_setshow_error (SCM exception, const char *msg)
      itself.  */
   if (gdbscm_user_error_p (gdbscm_exception_key (exception)))
     {
-      char *excp_text = gdbscm_exception_message_to_string (exception);
+      gdb::unique_xmalloc_ptr<char> excp_text
+	= gdbscm_exception_message_to_string (exception);
 
-      make_cleanup (xfree, excp_text);
-      error ("%s", excp_text);
+      error ("%s", excp_text.get ());
     }
   else
     {

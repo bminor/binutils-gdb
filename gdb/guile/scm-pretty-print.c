@@ -614,25 +614,24 @@ ppscm_print_exception_unless_memory_error (SCM exception,
 {
   if (gdbscm_memory_error_p (gdbscm_exception_key (exception)))
     {
-      char *msg = gdbscm_exception_message_to_string (exception);
-      struct cleanup *cleanup = make_cleanup (xfree, msg);
+      gdb::unique_xmalloc_ptr<char> msg
+	= gdbscm_exception_message_to_string (exception);
 
       /* This "shouldn't happen", but play it safe.  */
-      if (msg == NULL || *msg == '\0')
+      if (msg == NULL || msg.get ()[0] == '\0')
 	fprintf_filtered (stream, _("<error reading variable>"));
       else
 	{
 	  /* Remove the trailing newline.  We could instead call a special
 	     routine for printing memory error messages, but this is easy
 	     enough for now.  */
-	  size_t len = strlen (msg);
+	  char *msg_text = msg.get ();
+	  size_t len = strlen (msg_text);
 
-	  if (msg[len - 1] == '\n')
-	    msg[len - 1] = '\0';
-	  fprintf_filtered (stream, _("<error reading variable: %s>"), msg);
+	  if (msg_text[len - 1] == '\n')
+	    msg_text[len - 1] = '\0';
+	  fprintf_filtered (stream, _("<error reading variable: %s>"), msg_text);
 	}
-
-      do_cleanups (cleanup);
     }
   else
     gdbscm_print_gdb_exception (SCM_BOOL_F, exception);
