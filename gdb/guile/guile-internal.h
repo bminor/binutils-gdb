@@ -402,7 +402,8 @@ extern SCM gdbscm_safe_apply_1 (SCM proc, SCM arg0, SCM args,
 
 extern SCM gdbscm_unsafe_call_1 (SCM proc, SCM arg0);
 
-extern char *gdbscm_safe_eval_string (const char *string, int display_result);
+extern gdb::unique_xmalloc_ptr<char> gdbscm_safe_eval_string
+  (const char *string, int display_result);
 
 extern char *gdbscm_safe_source_script (const char *filename);
 

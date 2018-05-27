@@ -197,15 +197,10 @@ guile_command (const char *arg, int from_tty)
 
   if (arg && *arg)
     {
-      char *msg = gdbscm_safe_eval_string (arg, 1);
+      gdb::unique_xmalloc_ptr<char> msg = gdbscm_safe_eval_string (arg, 1);
 
       if (msg != NULL)
-	{
-	  /* It is ok that this is a "dangling cleanup" because we
-	     throw immediately.  */
-	  make_cleanup (xfree, msg);
-	  error ("%s", msg);
-	}
+	error ("%s", msg.get ());
     }
   else
     {
@@ -253,24 +248,16 @@ static void
 gdbscm_eval_from_control_command
   (const struct extension_language_defn *extlang, struct command_line *cmd)
 {
-  char *script, *msg;
-  struct cleanup *cleanup;
+  char *script;
 
   if (cmd->body_list_1 != nullptr)
     error (_("Invalid \"guile\" block structure."));
 
-  cleanup = make_cleanup (null_cleanup, NULL);
-
   script = compute_scheme_string (cmd->body_list_0.get ());
-  msg = gdbscm_safe_eval_string (script, 0);
+  gdb::unique_xmalloc_ptr<char> msg = gdbscm_safe_eval_string (script, 0);
   xfree (script);
   if (msg != NULL)
-    {
-      make_cleanup (xfree, msg);
-      error ("%s", msg);
-    }
-
-  do_cleanups (cleanup);
+    error ("%s", msg.get ());
 }
 
 /* Read a file as Scheme code.

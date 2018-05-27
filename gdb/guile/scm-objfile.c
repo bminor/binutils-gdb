@@ -336,16 +336,12 @@ gdbscm_execute_objfile_script (const struct extension_language_defn *extlang,
 			       struct objfile *objfile, const char *name,
 			       const char *script)
 {
-  char *msg;
-
   ofscm_current_objfile = objfile;
 
-  msg = gdbscm_safe_eval_string (script, 0 /* display_result */);
+  gdb::unique_xmalloc_ptr<char> msg
+    = gdbscm_safe_eval_string (script, 0 /* display_result */);
   if (msg != NULL)
-    {
-      fprintf_filtered (gdb_stderr, "%s", msg);
-      xfree (msg);
-    }
+    fprintf_filtered (gdb_stderr, "%s", msg.get ());
 
   ofscm_current_objfile = NULL;
 }
