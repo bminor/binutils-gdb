@@ -327,16 +327,10 @@ gdbscm_pretty_printer_worker_p (SCM scm)
 static SCM
 ppscm_make_pp_type_error_exception (const char *message, SCM object)
 {
-  char *msg = xstrprintf ("%s: ~S", message);
-  struct cleanup *cleanup = make_cleanup (xfree, msg);
-  SCM exception
-    = gdbscm_make_error (pp_type_error_symbol,
-			 NULL /* func */, msg,
-			 scm_list_1 (object), scm_list_1 (object));
-
-  do_cleanups (cleanup);
-
-  return exception;
+  std::string msg = string_printf ("%s: ~S", message);
+  return gdbscm_make_error (pp_type_error_symbol,
+			    NULL /* func */, msg.c_str (),
+			    scm_list_1 (object), scm_list_1 (object));
 }
 
 /* Print MESSAGE as an exception (meaning it is controlled by

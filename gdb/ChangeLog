@@ -1,3 +1,8 @@
+2018-07-17  Tom Tromey  <tom@tromey.com>
+
+	* guile/scm-pretty-print.c (ppscm_make_pp_type_error_exception):
+	Use string_printf.
+
 2018-07-17  Jim Wilson  <jimw@sifive.com>
 
 	* riscv-tdep.c (riscv_has_feature): Delete comment that refers to
