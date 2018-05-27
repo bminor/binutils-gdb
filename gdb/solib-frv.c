@@ -769,8 +769,6 @@ frv_relocate_main_executable (void)
   int status;
   CORE_ADDR exec_addr, interp_addr;
   struct int_elf32_fdpic_loadmap *ldm;
-  struct cleanup *old_chain;
-  struct section_offsets *new_offsets;
   int changed;
   struct obj_section *osect;
 
@@ -792,9 +790,8 @@ frv_relocate_main_executable (void)
   main_executable_lm_info = new lm_info_frv;
   main_executable_lm_info->map = ldm;
 
-  new_offsets = XCNEWVEC (struct section_offsets,
-			  symfile_objfile->num_sections);
-  old_chain = make_cleanup (xfree, new_offsets);
+  gdb::unique_xmalloc_ptr<struct section_offsets> new_offsets
+    (XCNEWVEC (struct section_offsets, symfile_objfile->num_sections));
   changed = 0;
 
   ALL_OBJFILE_OSECTIONS (symfile_objfile, osect)
@@ -828,9 +825,7 @@ frv_relocate_main_executable (void)
     }
 
   if (changed)
-    objfile_relocate (symfile_objfile, new_offsets);
-
-  do_cleanups (old_chain);
+    objfile_relocate (symfile_objfile, new_offsets.get ());
 
   /* Now that symfile_objfile has been relocated, we can compute the
      GOT value and stash it away.  */

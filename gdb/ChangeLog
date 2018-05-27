@@ -1,5 +1,12 @@
 2018-06-18  Tom Tromey  <tom@tromey.com>
 
+	* solib-frv.c (frv_relocate_main_executable): Use
+	unique_xmalloc_ptr.
+	* solib-dsbt.c (dsbt_relocate_main_executable): Use
+	unique_xmalloc_ptr.
+
+2018-06-18  Tom Tromey  <tom@tromey.com>
+
 	* objfiles.h (inhibit_section_map_updates): Update.
 	(resume_section_map_updates, resume_section_map_updates_cleanup):
 	Remove.
