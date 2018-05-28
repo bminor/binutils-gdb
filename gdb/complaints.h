@@ -21,10 +21,6 @@
 #if !defined (COMPLAINTS_H)
 #define COMPLAINTS_H
 
-/* Opaque object used to track the number of complaints of a
-   particular category.  */
-struct complaints;
-
 /* Helper for complaint.  */
 extern void complaint_internal (const char *fmt, ...)
   ATTRIBUTE_PRINTF (1, 2);
