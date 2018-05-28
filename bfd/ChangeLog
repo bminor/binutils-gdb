@@ -1,3 +1,32 @@
+2018-05-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_lazy_plt): Add plt_tlsdesc_entry,
+	plt_tlsdesc_entry_size, plt_tlsdesc_got1_offset,
+	plt_tlsdesc_got2_offset, plt_tlsdesc_got1_insn_end and
+	plt_tlsdesc_got2_insn_end for TLSDESC entry.
+	(elf_i386_lazy_ibt_plt): Likewise.
+	(elf_i386_nacl_plt): Likewise.
+	* elf64-x86-64.c (tlsdesc_plt_entry): Moved and renamed to ...
+	(elf_x86_64_tlsdesc_plt_entry): This.
+	(elf_x86_64_lazy_plt): Add plt_tlsdesc_entry,
+	plt_tlsdesc_entry_size, plt_tlsdesc_got1_offset,
+	plt_tlsdesc_got2_offset, plt_tlsdesc_got1_insn_end and
+	plt_tlsdesc_got2_insn_end for TLSDESC entry.
+	(elf_x86_64_lazy_bnd_plt): Likewise.
+	(elf_x86_64_lazy_ibt_plt): Likewise.
+	(elf_x32_lazy_ibt_plt): Likewise.
+	(elf_x86_64_nacl_plt): Likewise.
+	(elf_x86_64_finish_dynamic_sections): Use plt_tlsdesc_entry,
+	plt_tlsdesc_entry_size, plt_tlsdesc_got1_offset,
+	plt_tlsdesc_got2_offset, plt_tlsdesc_got1_insn_end and
+	plt_tlsdesc_got2_insn_end to update TLSDESC entry.
+	* elfxx-x86.h (elf_x86_lazy_plt_layout): Update comments.
+	Add plt_tlsdesc_entry, plt_tlsdesc_entry_size,
+	plt_tlsdesc_got1_offset, plt_tlsdesc_got2_offset,
+	plt_tlsdesc_got1_insn_end and plt_tlsdesc_got2_insn_end.
+	(elf_x86_non_lazy_plt_layout): Update comments.
+	(elf_x86_plt_layout): Likewise.
+
 2018-05-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/23199

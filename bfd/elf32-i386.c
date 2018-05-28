@@ -762,6 +762,12 @@ static const struct elf_x86_lazy_plt_layout elf_i386_lazy_plt =
     sizeof (elf_i386_lazy_plt0_entry),	/* plt0_entry_size */
     elf_i386_lazy_plt_entry,		/* plt_entry */
     LAZY_PLT_ENTRY_SIZE,		/* plt_entry_size */
+    NULL,				/* plt_tlsdesc_entry */
+    0,					/* plt_tlsdesc_entry_size*/
+    0,					/* plt_tlsdesc_got1_offset */
+    0,					/* plt_tlsdesc_got2_offset */
+    0,					/* plt_tlsdesc_got1_insn_end */
+    0,					/* plt_tlsdesc_got2_insn_end */
     2,					/* plt0_got1_offset */
     8,					/* plt0_got2_offset */
     0,					/* plt0_got2_insn_end */
@@ -794,6 +800,12 @@ static const struct elf_x86_lazy_plt_layout elf_i386_lazy_ibt_plt =
     sizeof (elf_i386_lazy_ibt_plt0_entry), /* plt0_entry_size */
     elf_i386_lazy_ibt_plt_entry,	/* plt_entry */
     LAZY_PLT_ENTRY_SIZE,		/* plt_entry_size */
+    NULL,				/* plt_tlsdesc_entry */
+    0,					/* plt_tlsdesc_entry_size*/
+    0,					/* plt_tlsdesc_got1_offset */
+    0,					/* plt_tlsdesc_got2_offset */
+    0,					/* plt_tlsdesc_got1_insn_end */
+    0,					/* plt_tlsdesc_got2_insn_end */
     2,					/* plt0_got1_offset */
     8,					/* plt0_got2_offset */
     0,					/* plt0_got2_insn_end */
@@ -4715,6 +4727,12 @@ static const struct elf_x86_lazy_plt_layout elf_i386_nacl_plt =
     sizeof (elf_i386_nacl_plt0_entry),	/* plt0_entry_size */
     elf_i386_nacl_plt_entry,		/* plt_entry */
     NACL_PLT_ENTRY_SIZE,		/* plt_entry_size */
+    NULL,				/* plt_tlsdesc_entry */
+    0,					/* plt_tlsdesc_entry_size*/
+    0,					/* plt_tlsdesc_got1_offset */
+    0,					/* plt_tlsdesc_got2_offset */
+    0,					/* plt_tlsdesc_got1_insn_end */
+    0,					/* plt_tlsdesc_got2_insn_end */
     2,					/* plt0_got1_offset */
     8,					/* plt0_got2_offset */
     0,					/* plt0_got2_insn_end */
