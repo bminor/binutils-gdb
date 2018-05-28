@@ -40,14 +40,9 @@ extern void complaint_internal (const char *fmt, ...)
   while (0)
 
 /* Clear out / initialize all complaint counters that have ever been
-   incremented.  If LESS_VERBOSE is 1, be less verbose about
-   successive complaints, since the messages are appearing all
-   together during a command that is reporting a contiguous block of
-   complaints (rather than being interleaved with other messages).  If
-   noisy is 1, we are in a noisy command, and our caller will print
-   enough context for the user to figure it out.  */
+   incremented.  */
 
-extern void clear_complaints (int less_verbose);
+extern void clear_complaints ();
 
 
 #endif /* !defined (COMPLAINTS_H) */

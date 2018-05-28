@@ -62,37 +62,17 @@ proc test_initial_complaints { } {
     # Prime the system
     gdb_test_stdio \
 	"call complaint_internal (\$cstr)" \
-	"During symbol reading, Register a complaint."
+	"During symbol reading: Register a complaint"
 
     # Re-issue the first message #1
     gdb_test_stdio \
 	"call complaint_internal (\$cstr)" \
-	"During symbol reading, Register a complaint."
+	"During symbol reading: Register a complaint"
 
     # Add a second complaint, expect it
     gdb_test_stdio \
 	"call complaint_internal (\"Testing! Testing! Testing!\")" \
-	"During symbol reading, Testing. Testing. Testing.."
-
-    return 0
-}
-
-# For short complaints, all are the same
-
-proc test_short_complaints { } {
-    gdb_test_exact "call clear_complaints (1)" "" "short start"
-
-    # Prime the system
-    test_complaint \
-	"call complaint_internal (\"short line 1\")" \
-	"short line 1" \
-	"short line 1"
-
-    # Add a second complaint, expect it
-    test_complaint \
-	"call complaint_internal (\"short line 2\")" \
-	"short line 2" \
-	"short line 2"
+	"During symbol reading: Testing. Testing. Testing."
 
     return 0
 }
@@ -123,16 +103,13 @@ proc test_empty_complaint { cmd msg } {
 
 proc test_empty_complaints { } {
 
-    test_empty_complaint "call clear_complaints(0)" \
-	    "empty non-verbose clear"
-    test_empty_complaint "call clear_complaints(1)" \
-	    "empty verbose clear"
+    test_empty_complaint "call clear_complaints()" \
+	    "clear complaints"
 
     return 0
 }
 
 do_self_tests captured_command_loop {
     test_initial_complaints
-    test_short_complaints
     test_empty_complaints
 }

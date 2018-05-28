@@ -51,7 +51,7 @@ proc test_single_component {name} {
 proc test_invalid_name {name} {
     set matchname [string_to_regexp "$name"]
     gdb_test "maint cp first_component $name" \
-	"During symbol reading, unexpected demangled name '$matchname'.\r\n$matchname"
+	"During symbol reading: unexpected demangled name '$matchname'\r\n$matchname"
 }
 
 proc test_first_component {} {

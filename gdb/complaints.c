@@ -23,25 +23,9 @@
 #include "gdbcmd.h"
 #include <unordered_map>
 
-/* Should each complaint message be self explanatory, or should we
-   assume that a series of complaints is being produced?  */
-
-enum complaint_series {
-  /* Isolated self explanatory message.  */
-  ISOLATED_MESSAGE,
-
-  /* First message of a series, but does not need to include any sort
-     of explanation.  */
-  SHORT_FIRST_MESSAGE,
-};
-
 /* Map format strings to counters.  */
 
 static std::unordered_map<const char *, int> counters;
-
-/* How to print the next complaint.  */
-
-static complaint_series series;
 
 /* How many complaints about a particular thing should be printed
    before we stop whining about it?  Default is no whining at all,
@@ -65,39 +49,20 @@ complaint_internal (const char *fmt, ...)
     (*deprecated_warning_hook) (fmt, args);
   else
     {
-      std::string msg = string_vprintf (fmt, args);
-      wrap_here ("");
-      begin_line ();
-      if (series == ISOLATED_MESSAGE)
-	fprintf_filtered (gdb_stderr, "During symbol reading, %s.\n",
-			  msg.c_str ());
-      else
-	fprintf_filtered (gdb_stderr, "%s\n", msg.c_str ());
+      fputs_filtered (_("During symbol reading: "), gdb_stderr);
+      vfprintf_filtered (gdb_stderr, fmt, args);
+      fputs_filtered ("\n", gdb_stderr);
     }
 
-  /* If GDB dumps core, we'd like to see the complaints first.
-     Presumably GDB will not be sending so many complaints that this
-     becomes a performance hog.  */
-
-  gdb_flush (gdb_stderr);
   va_end (args);
 }
 
-/* Clear out / initialize all complaint counters that have ever been
-   incremented.  If LESS_VERBOSE is 1, be less verbose about
-   successive complaints, since the messages are appearing all
-   together during a command that is reporting a contiguous block of
-   complaints (rather than being interleaved with other messages).  */
+/* See complaints.h.  */
 
 void
-clear_complaints (int less_verbose)
+clear_complaints ()
 {
   counters.clear ();
-
-  if (!less_verbose)
-    series = ISOLATED_MESSAGE;
-  else
-    series = SHORT_FIRST_MESSAGE;
 }
 
 static void

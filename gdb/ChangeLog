@@ -1,5 +1,15 @@
 2018-10-04  Tom Tromey  <tom@tromey.com>
 
+	* symfile.c (syms_from_objfile_1, finish_new_objfile)
+	(reread_symbols): Update.
+	* complaints.h (clear_complaints): Remove argument.
+	* complaints.c (enum complaint_series): Remove.
+	(series): Remove global.
+	(complaint_internal): Update.
+	(clear_complaints): Remove argument.
+
+2018-10-04  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (symbol_file_add_with_addrs): Do not print "no
 	debugging symbols" message if there is a separate debug objfile.
 

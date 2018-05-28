@@ -1,5 +1,12 @@
 2018-10-04  Tom Tromey  <tom@tromey.com>
 
+	* gdb.cp/maint.exp (test_invalid_name): Update expected output.
+	* gdb.gdb/complaints.exp (test_short_complaints): Remove.
+	(test_initial_complaints, test_empty_complaints): Update.
+	* gdb.dwarf2/dw2-stack-boundary.exp: Update.
+
+2018-10-04  Tom Tromey  <tom@tromey.com>
+
 	PR cli/19551:
 	* lib/mi-support.exp (mi_gdb_file_cmd): Update.
 	* lib/gdb.exp (gdb_file_cmd): Update.
