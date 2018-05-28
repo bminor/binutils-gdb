@@ -1128,7 +1128,12 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name,
 	objfile->sf->qf->expand_all_symtabs (objfile);
     }
 
-  if (should_print && !objfile_has_symbols (objfile))
+  /* Note that we only print a message if we have no symbols and have
+     no separate debug file.  If there is a separate debug file which
+     does not have symbols, we'll have emitted this message for that
+     file, and so printing it twice is just redundant.  */
+  if (should_print && !objfile_has_symbols (objfile)
+      && objfile->separate_debug_objfile == nullptr)
     printf_filtered (_("(No debugging symbols found in %s)\n"), name);
 
   if (should_print)
