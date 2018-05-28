@@ -330,7 +330,7 @@ reg_buffer::get_register_status (int regnum) const
 }
 
 void
-detached_regcache::invalidate (int regnum)
+reg_buffer::invalidate (int regnum)
 {
   assert_regnum (regnum);
   m_register_status[regnum] = REG_UNKNOWN;
@@ -881,7 +881,7 @@ regcache::cooked_write_part (int regnum, int offset, int len,
 }
 
 void
-detached_regcache::raw_supply (int regnum, const void *buf)
+reg_buffer::raw_supply (int regnum, const void *buf)
 {
   void *regbuf;
   size_t size;
@@ -913,8 +913,8 @@ detached_regcache::raw_supply (int regnum, const void *buf)
    most significant bytes of the integer will be truncated.  */
 
 void
-detached_regcache::raw_supply_integer (int regnum, const gdb_byte *addr,
-				   int addr_len, bool is_signed)
+reg_buffer::raw_supply_integer (int regnum, const gdb_byte *addr,
+				int addr_len, bool is_signed)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (m_descr->gdbarch);
   gdb_byte *regbuf;
@@ -935,7 +935,7 @@ detached_regcache::raw_supply_integer (int regnum, const gdb_byte *addr,
    unavailable).  */
 
 void
-detached_regcache::raw_supply_zeroed (int regnum)
+reg_buffer::raw_supply_zeroed (int regnum)
 {
   void *regbuf;
   size_t size;
@@ -950,7 +950,7 @@ detached_regcache::raw_supply_zeroed (int regnum)
 }
 
 void
-regcache::raw_collect (int regnum, void *buf) const
+reg_buffer::raw_collect (int regnum, void *buf) const
 {
   const void *regbuf;
   size_t size;
@@ -974,8 +974,8 @@ regcache::raw_collect (int regnum, void *buf) const
    most significant bytes of the integer will be truncated.  */
 
 void
-regcache::raw_collect_integer (int regnum, gdb_byte *addr, int addr_len,
-			       bool is_signed) const
+reg_buffer::raw_collect_integer (int regnum, gdb_byte *addr, int addr_len,
+				 bool is_signed) const
 {
   enum bfd_endian byte_order = gdbarch_byte_order (m_descr->gdbarch);
   const gdb_byte *regbuf;
