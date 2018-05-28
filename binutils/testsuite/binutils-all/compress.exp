@@ -692,7 +692,7 @@ proc test_gnu_debuglink {} {
     }
 
     if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog exectuable debug] != "" } {
-	fail "$test (build)"
+	unsupported "$test (build)"
 	return
     }
     set got [remote_exec host "$OBJDUMP -S tmpdir/testprog" "" "/dev/null" "tmpdir/testprog.dump"]

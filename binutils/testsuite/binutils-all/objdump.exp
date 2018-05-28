@@ -363,14 +363,21 @@ proc test_build_id_debuglink {} {
     }
 
     # Use a fixed build-id.
+    if { [info exists CFLAGS_FOR_TARGET] } {
+	set save_CFLAGS_FOR_TARGET $CFLAGS_FOR_TARGET
+    }
     set CFLAGS_FOR_TARGET "-g -Wl,--build-id=0x12345678abcdef01"
 
     if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog exectuable debug] != "" } {
-	fail "$test (build)"
+	unsupported "$test (build)"
 	return
     }
 
-    # FIXME: Do we need to restore CFLAGS_FOR_TARGET to its old value ?
+    if { [info exists save_CFLAGS_FOR_TARGET] } {
+	set CFLAGS_FOR_TARGET $save_CFLAGS_FOR_TARGET
+    } else {
+	unset CFLAGS_FOR_TARGET
+    }
 
     if { [binutils_run $STRIP "--strip-debug --remove-section=.comment tmpdir/testprog -o tmpdir/testprog.strip"] != "" } {
 	fail "$test (strip debug info)"

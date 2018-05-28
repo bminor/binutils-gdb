@@ -1,3 +1,11 @@
+2018-05-28  Alan Modra  <amodra@gmail.com>
+
+	PR 23235
+	* testsuite/binutils-all/compress.exp (test_gnu_debuglink): Return
+	unsupported rather than fail on compile errors.
+	* testsuite/binutils-all/objdump.exp (test_build_id_debuglink):
+	Likewise.  Save and restore CFLAGS_FOR_TARGET.
+
 2018-05-18  Kito Cheng  <kito.cheng@gmail.com>
 
 	* readelf.c (get_machine_flags): Handle EF_RISCV_RVE.
