@@ -1,5 +1,10 @@
 2018-10-04  Tom Tromey  <tom@tromey.com>
 
+	* complaints.c (complaint_internal): Correctly check complaint
+	count.
+
+2018-10-04  Tom Tromey  <tom@tromey.com>
+
 	* complaints.h (struct complaints): Remove declaration.
 	* complaints.c (clear_complaints): Remove an unused variable.
 

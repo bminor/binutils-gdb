@@ -56,7 +56,7 @@ complaint_internal (const char *fmt, ...)
 {
   va_list args;
 
-  if (counters[fmt]++ > stop_whining)
+  if (++counters[fmt] > stop_whining)
     return;
 
   va_start (args, fmt);
