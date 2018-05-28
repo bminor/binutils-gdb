@@ -22,7 +22,7 @@
 
 /* This header is a stopgap until we have an independent regcache.  */
 
-enum register_status
+enum register_status : signed char
   {
     /* The register value is not in the cache, and we don't know yet
        whether it's available in the target (or traceframe).  */
