@@ -1,5 +1,13 @@
 2018-05-28  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/23238
+	* testsuite/ld-ifunc/ifunc-26.d: New file.
+	* testsuite/ld-ifunc/ifunc-26.s: Likewise.
+	* testsuite/ld-ifunc/ifunc.exp: Run *.d tests without a
+	working compiler.
+
+2018-05-28  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-ifunc/ifunc-10-i386.d: Skip NaCl targets.
 	* testsuite/ld-ifunc/ifunc-10-x86-64.d: Likewise.
 	* testsuite/ld-ifunc/ifunc-11-i386.d: Likewise.

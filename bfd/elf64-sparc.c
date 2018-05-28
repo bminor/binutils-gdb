@@ -444,11 +444,6 @@ elf64_sparc_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 {
   static const char *const stt_types[] = { "NOTYPE", "OBJECT", "FUNCTION" };
 
-  if (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC
-      && (abfd->flags & DYNAMIC) == 0
-      && bfd_get_flavour (info->output_bfd) == bfd_target_elf_flavour)
-    elf_tdata (info->output_bfd)->has_gnu_symbols |= elf_gnu_symbol_ifunc;
-
   if (ELF_ST_TYPE (sym->st_info) == STT_REGISTER)
     {
       int reg;

@@ -558,25 +558,6 @@ _bfd_aarch64_elf_resolve_relocation (bfd_reloc_code_real_type r_type,
   return value;
 }
 
-/* Hook called by the linker routine which adds symbols from an object
-   file.  */
-
-bfd_boolean
-_bfd_aarch64_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
-				  Elf_Internal_Sym *sym,
-				  const char **namep ATTRIBUTE_UNUSED,
-				  flagword *flagsp ATTRIBUTE_UNUSED,
-				  asection **secp ATTRIBUTE_UNUSED,
-				  bfd_vma *valp ATTRIBUTE_UNUSED)
-{
-  if (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC
-      && (abfd->flags & DYNAMIC) == 0
-      && bfd_get_flavour (info->output_bfd) == bfd_target_elf_flavour)
-    elf_tdata (info->output_bfd)->has_gnu_symbols |= elf_gnu_symbol_ifunc;
-
-  return TRUE;
-}
-
 /* Support for core dump NOTE sections.  */
 
 bfd_boolean

@@ -4049,7 +4049,6 @@ elf32_s390_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 #define elf_backend_grok_psinfo		      elf_s390_grok_psinfo
 #define elf_backend_write_core_note	      elf_s390_write_core_note
 #define elf_backend_plt_sym_val		      elf_s390_plt_sym_val
-#define elf_backend_add_symbol_hook	      elf_s390_add_symbol_hook
 #define elf_backend_sort_relocs_p	      elf_s390_elf_sort_relocs_p
 
 #define bfd_elf32_mkobject		elf_s390_mkobject

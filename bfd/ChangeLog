@@ -1,3 +1,26 @@
+2018-05-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23238
+	* elf-s390-common.c (elf_s390_add_symbol_hook): Removed.
+	* elf32-arc.c (elf_arc_add_symbol_hook): Likewise.
+	(elf_backend_add_symbol_hook): Likewise.
+	* elf32-m68k.c (elf_m68k_add_symbol_hook): Likewise.
+	(elf_backend_add_symbol_hook): Likewise.
+	* elf32-s390.c (elf_backend_add_symbol_hook): Likewise.
+	* elf32-sparc.c (elf32_sparc_add_symbol_hook): Likewise.
+	(elf_backend_add_symbol_hook): Likewise.
+	* elf64-s390.c (elf_backend_add_symbol_hook): Likewise.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_add_symbol_hook): Likewise.
+	* elfxx-aarch64.h (_bfd_aarch64_elf_add_symbol_hook): Likewise.
+	(elf_backend_add_symbol_hook): Likewise.
+	* elf32-arm.c (elf32_arm_add_symbol_hook): Remove STT_GNU_IFUNC
+	handling.
+	* elf32-ppc.c (ppc_elf_add_symbol_hook): Likewise.
+	* elf64-ppc.c (ppc64_elf_add_symbol_hook): Likewise.
+	* elf64-sparc.c (elf64_sparc_add_symbol_hook): Likewise.
+	* elflink.c (elf_link_add_object_symbols): Set
+	elf_gnu_symbol_ifunc for STT_GNU_IFUNC symbols.
+
 2018-05-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23194

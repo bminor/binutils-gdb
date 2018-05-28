@@ -2797,26 +2797,6 @@ const struct elf_size_info arc_elf32_size_info =
 
 #define elf_backend_size_info		arc_elf32_size_info
 
-/* Hook called by the linker routine which adds symbols from an object
-   file.  */
-
-static bfd_boolean
-elf_arc_add_symbol_hook (bfd * abfd,
-			 struct bfd_link_info * info,
-			 Elf_Internal_Sym * sym,
-			 const char ** namep ATTRIBUTE_UNUSED,
-			 flagword * flagsp ATTRIBUTE_UNUSED,
-			 asection ** secp ATTRIBUTE_UNUSED,
-			 bfd_vma * valp ATTRIBUTE_UNUSED)
-{
-  if (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC
-      && (abfd->flags & DYNAMIC) == 0
-      && bfd_get_flavour (info->output_bfd) == bfd_target_elf_flavour)
-    elf_tdata (info->output_bfd)->has_gnu_symbols |= elf_gnu_symbol_ifunc;
-
-  return TRUE;
-}
-
 /* GDB expects general purpose registers to be in section .reg.  However Linux
    kernel doesn't create this section and instead writes registers to NOTE
    section.  It is up to the binutils to create a pseudo-section .reg from the
@@ -2946,7 +2926,6 @@ elf32_arc_section_from_shdr (bfd *abfd,
 
 #define elf_backend_finish_dynamic_sections  elf_arc_finish_dynamic_sections
 #define elf_backend_size_dynamic_sections    elf_arc_size_dynamic_sections
-#define elf_backend_add_symbol_hook	     elf_arc_add_symbol_hook
 
 #define elf_backend_can_gc_sections	1
 #define elf_backend_want_got_plt	1

@@ -223,25 +223,6 @@ elf_s390_allocate_local_syminfo (bfd *abfd, Elf_Internal_Shdr *symtab_hdr)
   return TRUE;
 }
 
-/* Pick ELFOSABI_GNU if IFUNC symbols are used.  */
-
-static bfd_boolean
-elf_s390_add_symbol_hook (bfd *abfd,
-			  struct bfd_link_info *info,
-			  Elf_Internal_Sym *sym,
-			  const char **namep ATTRIBUTE_UNUSED,
-			  flagword *flagsp ATTRIBUTE_UNUSED,
-			  asection **secp ATTRIBUTE_UNUSED,
-			  bfd_vma *valp ATTRIBUTE_UNUSED)
-{
-  if (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC
-      && (abfd->flags & DYNAMIC) == 0
-      && bfd_get_flavour (info->output_bfd) == bfd_target_elf_flavour)
-    elf_tdata (info->output_bfd)->has_gnu_symbols |= elf_gnu_symbol_ifunc;
-
-  return TRUE;
-}
-
 /* Whether to sort relocs output by ld -r or ld --emit-relocs, by
    r_offset.  Don't do so for code sections.  We want to keep ordering
    of GDCALL / PLT32DBL for TLS optimizations as is.  On the other
