@@ -285,15 +285,29 @@ struct elf_x86_link_hash_entry
 
 struct elf_x86_lazy_plt_layout
 {
-  /* The first entry in an absolute lazy procedure linkage table looks
-     like this.  */
+  /* The first entry in a lazy procedure linkage table looks like this.  */
   const bfd_byte *plt0_entry;
   unsigned int plt0_entry_size;		 /* Size of PLT0 entry.  */
 
-  /* Later entries in an absolute lazy procedure linkage table look
-     like this.  */
+  /* Later entries in a lazy procedure linkage table look like this.  */
   const bfd_byte *plt_entry;
   unsigned int plt_entry_size;		/* Size of each PLT entry.  */
+
+  /* The TLSDESC entry in a lazy procedure linkage table looks like
+     this.  This is for x86-64 only.  */
+  const bfd_byte *plt_tlsdesc_entry;
+  unsigned int plt_tlsdesc_entry_size;	 /* Size of TLSDESC entry.  */
+
+  /* Offsets into the TLSDESC entry that are to be replaced with
+     GOT+8 and GOT+TDG.  These are for x86-64 only.  */
+  unsigned int plt_tlsdesc_got1_offset;
+  unsigned int plt_tlsdesc_got2_offset;
+
+  /* Offset of the end of the PC-relative instructions containing
+     plt_tlsdesc_got1_offset and plt_tlsdesc_got2_offset.  These
+     are for x86-64 only.  */
+  unsigned int plt_tlsdesc_got1_insn_end;
+  unsigned int plt_tlsdesc_got2_insn_end;
 
   /* Offsets into plt0_entry that are to be replaced with GOT[1] and
      GOT[2].  */
@@ -336,10 +350,11 @@ struct elf_x86_lazy_plt_layout
 
 struct elf_x86_non_lazy_plt_layout
 {
-  /* Entries in an absolute non-lazy procedure linkage table look like
-     this.  */
+  /* Entries in a non-lazy procedure linkage table look like this.  */
   const bfd_byte *plt_entry;
-  /* Entries in a PIC non-lazy procedure linkage table look like this.  */
+  /* Entries in a PIC non-lazy procedure linkage table look like this.
+     This is only used for i386 where absolute PLT and PIC PLT are
+     different.  */
   const bfd_byte *pic_plt_entry;
 
   unsigned int plt_entry_size;		/* Size of each PLT entry.  */
@@ -358,9 +373,7 @@ struct elf_x86_non_lazy_plt_layout
 
 struct elf_x86_plt_layout
 {
-  /* The first entry in a lazy procedure linkage table looks like this.
-     This is only used for i386 where absolute PLT0 and PIC PLT0 are
-     different.  */
+  /* The first entry in a lazy procedure linkage table looks like this.  */
   const bfd_byte *plt0_entry;
   /* Entries in a procedure linkage table look like this.  */
   const bfd_byte *plt_entry;

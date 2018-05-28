@@ -660,6 +660,14 @@ static const bfd_byte elf_x32_non_lazy_ibt_plt_entry[LAZY_PLT_ENTRY_SIZE] =
   0x66, 0x0f, 0x1f, 0x44, 0x00, 0x00 /* nopw 0x0(%rax,%rax,1)  */
 };
 
+/* The TLSDESC entry in a lazy procedure linkage table.  */
+static const bfd_byte elf_x86_64_tlsdesc_plt_entry[LAZY_PLT_ENTRY_SIZE] =
+{
+  0xf3, 0x0f, 0x1e, 0xfa,	     /* endbr64		       */
+  0xff, 0x35, 8, 0, 0, 0,	     /* pushq GOT+8(%rip)	*/
+  0xff, 0x25, 16, 0, 0, 0	     /* jmpq *GOT+TDG(%rip)	*/
+};
+
 /* .eh_frame covering the lazy .plt section.  */
 
 static const bfd_byte elf_x86_64_eh_frame_lazy_plt[] =
@@ -834,6 +842,12 @@ static const struct elf_x86_lazy_plt_layout elf_x86_64_lazy_plt =
     LAZY_PLT_ENTRY_SIZE,		/* plt0_entry_size */
     elf_x86_64_lazy_plt_entry,		/* plt_entry */
     LAZY_PLT_ENTRY_SIZE,		/* plt_entry_size */
+    elf_x86_64_tlsdesc_plt_entry,	/* plt_tlsdesc_entry */
+    LAZY_PLT_ENTRY_SIZE,		/* plt_tlsdesc_entry_size */
+    6,					/* plt_tlsdesc_got1_offset */
+    12,					/* plt_tlsdesc_got2_offset */
+    10,					/* plt_tlsdesc_got1_insn_end */
+    16,					/* plt_tlsdesc_got2_insn_end */
     2,					/* plt0_got1_offset */
     8,					/* plt0_got2_offset */
     12,					/* plt0_got2_insn_end */
@@ -866,6 +880,12 @@ static const struct elf_x86_lazy_plt_layout elf_x86_64_lazy_bnd_plt =
     LAZY_PLT_ENTRY_SIZE,		/* plt0_entry_size */
     elf_x86_64_lazy_bnd_plt_entry,	/* plt_entry */
     LAZY_PLT_ENTRY_SIZE,		/* plt_entry_size */
+    elf_x86_64_tlsdesc_plt_entry,	/* plt_tlsdesc_entry */
+    LAZY_PLT_ENTRY_SIZE,		/* plt_tlsdesc_entry_size */
+    6,					/* plt_tlsdesc_got1_offset */
+    12,					/* plt_tlsdesc_got2_offset */
+    10,					/* plt_tlsdesc_got1_insn_end */
+    16,					/* plt_tlsdesc_got2_insn_end */
     2,					/* plt0_got1_offset */
     1+8,				/* plt0_got2_offset */
     1+12,				/* plt0_got2_insn_end */
@@ -898,6 +918,12 @@ static const struct elf_x86_lazy_plt_layout elf_x86_64_lazy_ibt_plt =
     LAZY_PLT_ENTRY_SIZE,		/* plt0_entry_size */
     elf_x86_64_lazy_ibt_plt_entry,	/* plt_entry */
     LAZY_PLT_ENTRY_SIZE,		/* plt_entry_size */
+    elf_x86_64_tlsdesc_plt_entry,	/* plt_tlsdesc_entry */
+    LAZY_PLT_ENTRY_SIZE,		/* plt_tlsdesc_entry_size */
+    6,					/* plt_tlsdesc_got1_offset */
+    12,					/* plt_tlsdesc_got2_offset */
+    10,					/* plt_tlsdesc_got1_insn_end */
+    16,					/* plt_tlsdesc_got2_insn_end */
     2,					/* plt0_got1_offset */
     1+8,				/* plt0_got2_offset */
     1+12,				/* plt0_got2_insn_end */
@@ -919,6 +945,12 @@ static const struct elf_x86_lazy_plt_layout elf_x32_lazy_ibt_plt =
     LAZY_PLT_ENTRY_SIZE,		/* plt0_entry_size */
     elf_x32_lazy_ibt_plt_entry,		/* plt_entry */
     LAZY_PLT_ENTRY_SIZE,		/* plt_entry_size */
+    elf_x86_64_tlsdesc_plt_entry,	/* plt_tlsdesc_entry */
+    LAZY_PLT_ENTRY_SIZE,		/* plt_tlsdesc_entry_size */
+    6,					/* plt_tlsdesc_got1_offset */
+    12,					/* plt_tlsdesc_got2_offset */
+    10,					/* plt_tlsdesc_got1_insn_end */
+    16,					/* plt_tlsdesc_got2_insn_end */
     2,					/* plt0_got1_offset */
     8,					/* plt0_got2_offset */
     12,					/* plt0_got2_insn_end */
@@ -4417,19 +4449,12 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
 
       if (htab->tlsdesc_plt)
 	{
-	  /* The TLSDESC entry in a lazy procedure linkage table.  */
-	  static const bfd_byte tlsdesc_plt_entry[LAZY_PLT_ENTRY_SIZE] =
-	    {
-	      0xf3, 0x0f, 0x1e, 0xfa,	/* endbr64		*/
-	      0xff, 0x35, 8, 0, 0, 0,	/* pushq GOT+8(%rip)	*/
-	      0xff, 0x25, 16, 0, 0, 0	/* jmpq *GOT+TDG(%rip)	*/
-	    };
-
 	  bfd_put_64 (output_bfd, (bfd_vma) 0,
 		      htab->elf.sgot->contents + htab->tlsdesc_got);
 
 	  memcpy (htab->elf.splt->contents + htab->tlsdesc_plt,
-		  tlsdesc_plt_entry, LAZY_PLT_ENTRY_SIZE);
+		  htab->lazy_plt->plt_tlsdesc_entry,
+		  htab->lazy_plt->plt_tlsdesc_entry_size);
 
 	  /* Add offset for pushq GOT+8(%rip), since ENDBR64 uses 4
 	     bytes and the instruction uses 6 bytes, subtract these
@@ -4441,10 +4466,10 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
 		       - htab->elf.splt->output_section->vma
 		       - htab->elf.splt->output_offset
 		       - htab->tlsdesc_plt
-		       - 4 - 6),
+		       - htab->lazy_plt->plt_tlsdesc_got1_insn_end),
 		      (htab->elf.splt->contents
 		       + htab->tlsdesc_plt
-		       + 4 + 2));
+		       + htab->lazy_plt->plt_tlsdesc_got1_offset));
 	  /* Add offset for indirect branch via GOT+TDG, where TDG
 	     stands for htab->tlsdesc_got, subtracting the offset
 	     to the end of that instruction.  */
@@ -4455,9 +4480,10 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
 		       - htab->elf.splt->output_section->vma
 		       - htab->elf.splt->output_offset
 		       - htab->tlsdesc_plt
-		       - 4 - 6 - 6),
+		       - htab->lazy_plt->plt_tlsdesc_got2_insn_end),
 		      (htab->elf.splt->contents
-		       + htab->tlsdesc_plt + 4 + 6 + 2));
+		       + htab->tlsdesc_plt
+		       + htab->lazy_plt->plt_tlsdesc_got2_offset));
 	}
     }
 
@@ -5246,6 +5272,12 @@ static const struct elf_x86_lazy_plt_layout elf_x86_64_nacl_plt =
     NACL_PLT_ENTRY_SIZE,		     /* plt0_entry_size */
     elf_x86_64_nacl_plt_entry,		     /* plt_entry */
     NACL_PLT_ENTRY_SIZE,		     /* plt_entry_size */
+    elf_x86_64_nacl_plt0_entry,		     /* plt_tlsdesc_entry */
+    NACL_PLT_ENTRY_SIZE,		     /* plt_tlsdesc_entry_size */
+    2,					     /* plt_tlsdesc_got1_offset */
+    9,					     /* plt_tlsdesc_got2_offset */
+    6,					     /* plt_tlsdesc_got1_insn_end */
+    13,					     /* plt_tlsdesc_got2_insn_end */
     2,					     /* plt0_got1_offset */
     9,					     /* plt0_got2_offset */
     13,					     /* plt0_got2_insn_end */
