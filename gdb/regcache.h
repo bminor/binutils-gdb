@@ -153,11 +153,8 @@ public:
      buffer.  */
   enum register_status get_register_status (int regnum) const;
 
-  virtual ~reg_buffer ()
-  {
-    xfree (m_registers);
-    xfree (m_register_status);
-  }
+  virtual ~reg_buffer () = 0;
+
 protected:
   /* Assert on the range of REGNUM.  */
   void assert_regnum (int regnum) const;
@@ -175,9 +172,9 @@ protected:
 
   bool m_has_pseudo;
   /* The register buffers.  */
-  gdb_byte *m_registers;
+  std::unique_ptr<gdb_byte[]> m_registers;
   /* Register cache status.  */
-  register_status *m_register_status;
+  std::unique_ptr<register_status[]> m_register_status;
 
   friend class regcache;
   friend class detached_regcache;
