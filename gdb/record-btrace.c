@@ -2391,9 +2391,13 @@ record_btrace_single_step_forward (struct thread_info *tp)
     return btrace_step_stopped ();
 
   /* Skip gaps during replay.  If we end up at a gap (at the end of the trace),
-     jump back to the instruction at which we started.  */
+     jump back to the instruction at which we started.  If we're stepping a
+     BTRACE_INSN_AUX instruction, print the auxiliary data and skip the
+     instruction.  */
+
   start = *replay;
-  do
+
+  for (;;)
     {
       unsigned int steps;
 
@@ -2405,8 +2409,23 @@ record_btrace_single_step_forward (struct thread_info *tp)
 	  *replay = start;
 	  return btrace_step_no_history ();
 	}
+
+      const struct btrace_insn *insn = btrace_insn_get (replay);
+      if (insn == nullptr)
+	continue;
+
+      /* If we're stepping a BTRACE_INSN_AUX instruction, print the auxiliary
+	 data and skip the instruction.  */
+      if (insn->iclass == BTRACE_INSN_AUX)
+	{
+	  gdb_printf ("[%s]\n",
+		      btinfo->aux_data.at (insn->aux_data_index).c_str ());
+	  continue;
+	}
+
+      /* We have an instruction, we are done.  */
+      break;
     }
-  while (btrace_insn_get (replay) == NULL);
 
   /* Determine the end of the instruction trace.  */
   btrace_insn_end (&end, btinfo);
@@ -2437,9 +2456,12 @@ record_btrace_single_step_backward (struct thread_info *tp)
 
   /* If we can't step any further, we reached the end of the history.
      Skip gaps during replay.  If we end up at a gap (at the beginning of
-     the trace), jump back to the instruction at which we started.  */
+     the trace), jump back to the instruction at which we started.
+     If we're stepping a BTRACE_INSN_AUX instruction, print the auxiliary
+     data and skip the instruction.  */
   start = *replay;
-  do
+
+  for (;;)
     {
       unsigned int steps;
 
@@ -2449,8 +2471,22 @@ record_btrace_single_step_backward (struct thread_info *tp)
 	  *replay = start;
 	  return btrace_step_no_history ();
 	}
+
+      const struct btrace_insn *insn = btrace_insn_get (replay);
+      if (insn == nullptr)
+	continue;
+
+      /* Check if we're stepping a BTRACE_INSN_AUX instruction and skip it.  */
+      if (insn->iclass == BTRACE_INSN_AUX)
+	{
+	  gdb_printf ("[%s]\n",
+		      btinfo->aux_data.at (insn->aux_data_index).c_str ());
+	  continue;
+	}
+
+      /* We have an instruction, we are done.  */
+      break;
     }
-  while (btrace_insn_get (replay) == NULL);
 
   /* Check if we're stepping a breakpoint.
 
@@ -2872,26 +2908,33 @@ record_btrace_target::goto_record_end ()
 /* The goto_record method of target record-btrace.  */
 
 void
-record_btrace_target::goto_record (ULONGEST insn)
+record_btrace_target::goto_record (ULONGEST insn_number)
 {
   struct thread_info *tp;
   struct btrace_insn_iterator it;
   unsigned int number;
   int found;
 
-  number = insn;
+  number = insn_number;
 
   /* Check for wrap-arounds.  */
-  if (number != insn)
+  if (number != insn_number)
     error (_("Instruction number out of range."));
 
   tp = require_btrace_thread ();
 
   found = btrace_find_insn_by_number (&it, &tp->btrace, number);
 
-  /* Check if the instruction could not be found or is a gap.  */
-  if (found == 0 || btrace_insn_get (&it) == NULL)
+  /* Check if the instruction could not be found or is a gap or an
+     auxiliary instruction.  */
+  if (found == 0)
     error (_("No such instruction."));
+
+  const struct btrace_insn *insn = btrace_insn_get (&it);
+  if (insn == NULL)
+    error (_("No such instruction."));
+  if (insn->iclass == BTRACE_INSN_AUX)
+    error (_("Can't go to an auxiliary instruction."));
 
   record_btrace_set_replay (tp, &it);
 }
