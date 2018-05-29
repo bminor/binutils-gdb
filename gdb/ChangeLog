@@ -1,5 +1,14 @@
 2018-05-29  Tom Tromey  <tom@tromey.com>
 
+	* progspace.h (so_list_ptr): Remove typedef.  Don't declare VEC.
+	(struct program_space) <added_solibs>: Now a std::vector.
+	* breakpoint.c (print_solib_event): Update.
+	(check_status_catch_solib): Update.
+	* progspace.c (clear_program_space_solib_cache): Update.
+	* solib.c (update_solib_list): Update.
+
+2018-05-29  Tom Tromey  <tom@tromey.com>
+
 	* python/py-type.c (typy_richcompare): Update.
 	* guile/scm-type.c (tyscm_equal_p_type_smob): Update.
 	* gdbtypes.h (types_deeply_equal): Return bool.

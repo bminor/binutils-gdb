@@ -862,7 +862,7 @@ update_solib_list (int from_tty)
 	{
 
 	  i->pspace = current_program_space;
-	  VEC_safe_push (so_list_ptr, current_program_space->added_solibs, i);
+	  current_program_space->added_solibs.push_back (i);
 
 	  TRY
 	    {

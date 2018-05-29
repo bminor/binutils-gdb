@@ -400,8 +400,7 @@ update_address_spaces (void)
 void
 clear_program_space_solib_cache (struct program_space *pspace)
 {
-  VEC_free (so_list_ptr, pspace->added_solibs);
-
+  pspace->added_solibs.clear ();
   pspace->deleted_solibs.clear ();
 }
 

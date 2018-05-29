@@ -4580,8 +4580,7 @@ static void
 print_solib_event (int is_catchpoint)
 {
   bool any_deleted = !current_program_space->deleted_solibs.empty ();
-  int any_added
-    = !VEC_empty (so_list_ptr, current_program_space->added_solibs);
+  bool any_added = !current_program_space->added_solibs.empty ();
 
   if (!is_catchpoint)
     {
@@ -4613,18 +4612,14 @@ print_solib_event (int is_catchpoint)
 
   if (any_added)
     {
-      struct so_list *iter;
-      int ix;
-
       current_uiout->text (_("  Inferior loaded "));
       ui_out_emit_list list_emitter (current_uiout, "added");
-      for (ix = 0;
-	   VEC_iterate (so_list_ptr, current_program_space->added_solibs,
-			ix, iter);
-	   ++ix)
+      bool first = true;
+      for (struct so_list *iter : current_program_space->added_solibs)
 	{
-	  if (ix > 0)
+	  if (!first)
 	    current_uiout->text ("    ");
+	  first = false;
 	  current_uiout->field_string ("library", iter->so_name);
 	  current_uiout->text ("\n");
 	}
@@ -8009,12 +8004,7 @@ check_status_catch_solib (struct bpstats *bs)
 
   if (self->is_load)
     {
-      struct so_list *iter;
-
-      for (int ix = 0;
-	   VEC_iterate (so_list_ptr, current_program_space->added_solibs,
-			ix, iter);
-	   ++ix)
+      for (struct so_list *iter : current_program_space->added_solibs)
 	{
 	  if (!self->regex
 	      || self->compiled->exec (iter->so_name, 0, NULL, 0) == 0)
