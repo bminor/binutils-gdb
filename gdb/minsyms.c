@@ -990,24 +990,6 @@ static const struct gnu_ifunc_fns stub_gnu_ifunc_fns =
 
 const struct gnu_ifunc_fns *gnu_ifunc_fns_p = &stub_gnu_ifunc_fns;
 
-/* See minsyms.h.  */
-
-struct bound_minimal_symbol
-lookup_minimal_symbol_and_objfile (const char *name)
-{
-  struct bound_minimal_symbol result;
-  struct objfile *objfile;
-
-  ALL_OBJFILES (objfile)
-    {
-      result = lookup_minimal_symbol (name, NULL, objfile);
-      if (result.minsym != NULL)
-        return result;
-    }
-
-  memset (&result, 0, sizeof (result));
-  return result;
-}
 
 
 /* Return leading symbol character for a BFD.  If BFD is NULL,

@@ -1041,7 +1041,7 @@ jit_breakpoint_re_set_internal (struct gdbarch *gdbarch,
     {
       /* Lookup the registration symbol.  If it is missing, then we
 	 assume we are not attached to a JIT.  */
-      reg_symbol = lookup_minimal_symbol_and_objfile (jit_break_name);
+      reg_symbol = lookup_bound_minimal_symbol (jit_break_name);
       if (reg_symbol.minsym == NULL
 	  || BMSYMBOL_VALUE_ADDRESS (reg_symbol) == 0)
 	return 1;

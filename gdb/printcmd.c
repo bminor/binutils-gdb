@@ -1549,7 +1549,7 @@ info_address_command (const char *exp, int from_tty)
       {
 	struct bound_minimal_symbol msym;
 
-	msym = lookup_minimal_symbol_and_objfile (SYMBOL_LINKAGE_NAME (sym));
+	msym = lookup_bound_minimal_symbol (SYMBOL_LINKAGE_NAME (sym));
 	if (msym.minsym == NULL)
 	  printf_filtered ("unresolved");
 	else

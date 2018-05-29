@@ -202,11 +202,6 @@ struct bound_minimal_symbol lookup_minimal_symbol (const char *,
 
 struct bound_minimal_symbol lookup_bound_minimal_symbol (const char *);
 
-/* Find the minimal symbol named NAME, and return both the minsym
-   struct and its objfile.  */
-
-struct bound_minimal_symbol lookup_minimal_symbol_and_objfile (const char *);
-
 /* Look through all the current minimal symbol tables and find the
    first minimal symbol that matches NAME and has text type.  If OBJF
    is non-NULL, limit the search to that objfile.  Returns a bound

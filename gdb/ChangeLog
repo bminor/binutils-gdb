@@ -1,3 +1,13 @@
+2018-05-29  Weimin Pan  <weimin.pan@oracle.com>
+
+	* minsyms.h (lookup_minimal_symbol_and_objfile): Remove declaration.
+	* minsyms.c (lookup_minimal_symbol_and_objfile): Remove definition.
+	* coff-pe-read.c (add_pe_forwarded_sym): Replace
+	lookup_minimal_symbol_and_objfile with lookup_bound_minimal_symbol.
+	* glibc-tdep.c (glibc_skip_solib_resolver): Likewise.
+	* jit.c (jit_breakpoint_re_set_internal): Likewise.
+	* printcmd.c (info_address_command): Likewise.
+
 2018-05-29  Tom Tromey  <tom@tromey.com>
 
 	* windows-nat.c (handle_exception): Update fall-through comment.
