@@ -1,5 +1,23 @@
 2018-05-29  Tom Tromey  <tom@tromey.com>
 
+	* python/py-type.c (typy_richcompare): Update.
+	* guile/scm-type.c (tyscm_equal_p_type_smob): Update.
+	* gdbtypes.h (types_deeply_equal): Return bool.
+	(types_equal): Likewise.
+	* gdbtypes.c (type_equality_entry_d): Remove typedef.  Don't
+	declare VEC.
+	(check_types_equal): Change worklist to std::vector.  Return
+	bool.
+	(struct type_equality_entry): Add constructor.
+	(compare_maybe_null_strings): Return bool.
+	(check_types_worklist): Return bool.  Change worklist to
+	std::vector.
+	(types_deeply_equal): Use std::vector.
+	(types_equal): Return bool.
+	(compare_maybe_null_strings): Simplify.
+
+2018-05-29  Tom Tromey  <tom@tromey.com>
+
 	* record-btrace.c (tp_t): Remove typedef.  Don't declare VEC.
 
 2018-05-29  Tom Tromey  <tom@tromey.com>

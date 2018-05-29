@@ -2092,9 +2092,9 @@ extern struct type *copy_type_recursive (struct objfile *objfile,
 
 extern struct type *copy_type (const struct type *type);
 
-extern int types_equal (struct type *, struct type *);
+extern bool types_equal (struct type *, struct type *);
 
-extern int types_deeply_equal (struct type *, struct type *);
+extern bool types_deeply_equal (struct type *, struct type *);
 
 extern int type_not_allocated (const struct type *type);
 

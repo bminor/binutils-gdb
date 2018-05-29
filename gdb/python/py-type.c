@@ -1008,7 +1008,7 @@ typy_str (PyObject *self)
 static PyObject *
 typy_richcompare (PyObject *self, PyObject *other, int op)
 {
-  int result = Py_NE;
+  bool result = false;
   struct type *type1 = type_object_to_type (self);
   struct type *type2 = type_object_to_type (other);
 
@@ -1021,7 +1021,7 @@ typy_richcompare (PyObject *self, PyObject *other, int op)
     }
 
   if (type1 == type2)
-    result = Py_EQ;
+    result = true;
   else
     {
       TRY

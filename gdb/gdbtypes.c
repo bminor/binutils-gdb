@@ -3551,10 +3551,10 @@ integer_types_same_name_p (const char *first, const char *second)
   return 1;
 }
 
-/* Compares type A to type B returns 1 if the represent the same type
-   0 otherwise.  */
+/* Compares type A to type B.  Returns true if they represent the same
+   type, false otherwise.  */
 
-int
+bool
 types_equal (struct type *a, struct type *b)
 {
   /* Identical type pointers.  */
@@ -3562,7 +3562,7 @@ types_equal (struct type *a, struct type *b)
      and a.  The reason is that builtin types are different from
      the same ones constructed from the object.  */
   if (a == b)
-    return 1;
+    return true;
 
   /* Resolve typedefs */
   if (TYPE_CODE (a) == TYPE_CODE_TYPEDEF)
@@ -3573,7 +3573,7 @@ types_equal (struct type *a, struct type *b)
   /* If after resolving typedefs a and b are not of the same type
      code then they are not equal.  */
   if (TYPE_CODE (a) != TYPE_CODE (b))
-    return 0;
+    return false;
 
   /* If a and b are both pointers types or both reference types then
      they are equal of the same type iff the objects they refer to are
@@ -3590,11 +3590,11 @@ types_equal (struct type *a, struct type *b)
 
   if (TYPE_NAME (a) && TYPE_NAME (b)
       && strcmp (TYPE_NAME (a), TYPE_NAME (b)) == 0)
-    return 1;
+    return true;
 
   /* Check if identical after resolving typedefs.  */
   if (a == b)
-    return 1;
+    return true;
 
   /* Two function types are equal if their argument and return types
      are equal.  */
@@ -3603,60 +3603,60 @@ types_equal (struct type *a, struct type *b)
       int i;
 
       if (TYPE_NFIELDS (a) != TYPE_NFIELDS (b))
-	return 0;
+	return false;
       
       if (!types_equal (TYPE_TARGET_TYPE (a), TYPE_TARGET_TYPE (b)))
-	return 0;
+	return false;
 
       for (i = 0; i < TYPE_NFIELDS (a); ++i)
 	if (!types_equal (TYPE_FIELD_TYPE (a, i), TYPE_FIELD_TYPE (b, i)))
-	  return 0;
+	  return false;
 
-      return 1;
+      return true;
     }
 
-  return 0;
+  return false;
 }
 
 /* Deep comparison of types.  */
 
 /* An entry in the type-equality bcache.  */
 
-typedef struct type_equality_entry
+struct type_equality_entry
 {
+  type_equality_entry (struct type *t1, struct type *t2)
+    : type1 (t1),
+      type2 (t2)
+  {
+  }
+
   struct type *type1, *type2;
-} type_equality_entry_d;
+};
 
-DEF_VEC_O (type_equality_entry_d);
+/* A helper function to compare two strings.  Returns true if they are
+   the same, false otherwise.  Handles NULLs properly.  */
 
-/* A helper function to compare two strings.  Returns 1 if they are
-   the same, 0 otherwise.  Handles NULLs properly.  */
-
-static int
+static bool
 compare_maybe_null_strings (const char *s, const char *t)
 {
-  if (s == NULL && t != NULL)
-    return 0;
-  else if (s != NULL && t == NULL)
-    return 0;
-  else if (s == NULL && t== NULL)
-    return 1;
+  if (s == NULL || t == NULL)
+    return s == t;
   return strcmp (s, t) == 0;
 }
 
 /* A helper function for check_types_worklist that checks two types for
-   "deep" equality.  Returns non-zero if the types are considered the
-   same, zero otherwise.  */
+   "deep" equality.  Returns true if the types are considered the
+   same, false otherwise.  */
 
-static int
+static bool
 check_types_equal (struct type *type1, struct type *type2,
-		   VEC (type_equality_entry_d) **worklist)
+		   std::vector<type_equality_entry> *worklist)
 {
   type1 = check_typedef (type1);
   type2 = check_typedef (type2);
 
   if (type1 == type2)
-    return 1;
+    return true;
 
   if (TYPE_CODE (type1) != TYPE_CODE (type2)
       || TYPE_LENGTH (type1) != TYPE_LENGTH (type2)
@@ -3667,18 +3667,18 @@ check_types_equal (struct type *type1, struct type *type2,
       || TYPE_NOTTEXT (type1) != TYPE_NOTTEXT (type2)
       || TYPE_INSTANCE_FLAGS (type1) != TYPE_INSTANCE_FLAGS (type2)
       || TYPE_NFIELDS (type1) != TYPE_NFIELDS (type2))
-    return 0;
+    return false;
 
   if (!compare_maybe_null_strings (TYPE_TAG_NAME (type1),
 				   TYPE_TAG_NAME (type2)))
-    return 0;
+    return false;
   if (!compare_maybe_null_strings (TYPE_NAME (type1), TYPE_NAME (type2)))
-    return 0;
+    return false;
 
   if (TYPE_CODE (type1) == TYPE_CODE_RANGE)
     {
       if (*TYPE_RANGE_DATA (type1) != *TYPE_RANGE_DATA (type2))
-	return 0;
+	return false;
     }
   else
     {
@@ -3688,34 +3688,33 @@ check_types_equal (struct type *type1, struct type *type2,
 	{
 	  const struct field *field1 = &TYPE_FIELD (type1, i);
 	  const struct field *field2 = &TYPE_FIELD (type2, i);
-	  struct type_equality_entry entry;
 
 	  if (FIELD_ARTIFICIAL (*field1) != FIELD_ARTIFICIAL (*field2)
 	      || FIELD_BITSIZE (*field1) != FIELD_BITSIZE (*field2)
 	      || FIELD_LOC_KIND (*field1) != FIELD_LOC_KIND (*field2))
-	    return 0;
+	    return false;
 	  if (!compare_maybe_null_strings (FIELD_NAME (*field1),
 					   FIELD_NAME (*field2)))
-	    return 0;
+	    return false;
 	  switch (FIELD_LOC_KIND (*field1))
 	    {
 	    case FIELD_LOC_KIND_BITPOS:
 	      if (FIELD_BITPOS (*field1) != FIELD_BITPOS (*field2))
-		return 0;
+		return false;
 	      break;
 	    case FIELD_LOC_KIND_ENUMVAL:
 	      if (FIELD_ENUMVAL (*field1) != FIELD_ENUMVAL (*field2))
-		return 0;
+		return false;
 	      break;
 	    case FIELD_LOC_KIND_PHYSADDR:
 	      if (FIELD_STATIC_PHYSADDR (*field1)
 		  != FIELD_STATIC_PHYSADDR (*field2))
-		return 0;
+		return false;
 	      break;
 	    case FIELD_LOC_KIND_PHYSNAME:
 	      if (!compare_maybe_null_strings (FIELD_STATIC_PHYSNAME (*field1),
 					       FIELD_STATIC_PHYSNAME (*field2)))
-		return 0;
+		return false;
 	      break;
 	    case FIELD_LOC_KIND_DWARF_BLOCK:
 	      {
@@ -3726,7 +3725,7 @@ check_types_equal (struct type *type1, struct type *type2,
 		if (block1->per_cu != block2->per_cu
 		    || block1->size != block2->size
 		    || memcmp (block1->data, block2->data, block1->size) != 0)
-		  return 0;
+		  return false;
 	      }
 	      break;
 	    default:
@@ -3735,43 +3734,37 @@ check_types_equal (struct type *type1, struct type *type2,
 			      FIELD_LOC_KIND (*field1));
 	    }
 
-	  entry.type1 = FIELD_TYPE (*field1);
-	  entry.type2 = FIELD_TYPE (*field2);
-	  VEC_safe_push (type_equality_entry_d, *worklist, &entry);
+	  worklist->emplace_back (FIELD_TYPE (*field1), FIELD_TYPE (*field2));
 	}
     }
 
   if (TYPE_TARGET_TYPE (type1) != NULL)
     {
-      struct type_equality_entry entry;
-
       if (TYPE_TARGET_TYPE (type2) == NULL)
-	return 0;
+	return false;
 
-      entry.type1 = TYPE_TARGET_TYPE (type1);
-      entry.type2 = TYPE_TARGET_TYPE (type2);
-      VEC_safe_push (type_equality_entry_d, *worklist, &entry);
+      worklist->emplace_back (TYPE_TARGET_TYPE (type1),
+			      TYPE_TARGET_TYPE (type2));
     }
   else if (TYPE_TARGET_TYPE (type2) != NULL)
-    return 0;
+    return false;
 
-  return 1;
+  return true;
 }
 
-/* Check types on a worklist for equality.  Returns zero if any pair
-   is not equal, non-zero if they are all considered equal.  */
+/* Check types on a worklist for equality.  Returns false if any pair
+   is not equal, true if they are all considered equal.  */
 
-static int
-check_types_worklist (VEC (type_equality_entry_d) **worklist,
+static bool
+check_types_worklist (std::vector<type_equality_entry> *worklist,
 		      struct bcache *cache)
 {
-  while (!VEC_empty (type_equality_entry_d, *worklist))
+  while (!worklist->empty ())
     {
-      struct type_equality_entry entry;
       int added;
 
-      entry = *VEC_last (type_equality_entry_d, *worklist);
-      VEC_pop (type_equality_entry_d, *worklist);
+      struct type_equality_entry entry = std::move (worklist->back ());
+      worklist->pop_back ();
 
       /* If the type pair has already been visited, we know it is
 	 ok.  */
@@ -3779,36 +3772,33 @@ check_types_worklist (VEC (type_equality_entry_d) **worklist,
       if (!added)
 	continue;
 
-      if (check_types_equal (entry.type1, entry.type2, worklist) == 0)
-	return 0;
+      if (!check_types_equal (entry.type1, entry.type2, worklist))
+	return false;
     }
 
-  return 1;
+  return true;
 }
 
-/* Return non-zero if types TYPE1 and TYPE2 are equal, as determined by a
-   "deep comparison".  Otherwise return zero.  */
+/* Return true if types TYPE1 and TYPE2 are equal, as determined by a
+   "deep comparison".  Otherwise return false.  */
 
-int
+bool
 types_deeply_equal (struct type *type1, struct type *type2)
 {
   struct gdb_exception except = exception_none;
-  int result = 0;
+  bool result = false;
   struct bcache *cache;
-  VEC (type_equality_entry_d) *worklist = NULL;
-  struct type_equality_entry entry;
+  std::vector<type_equality_entry> worklist;
 
   gdb_assert (type1 != NULL && type2 != NULL);
 
   /* Early exit for the simple case.  */
   if (type1 == type2)
-    return 1;
+    return true;
 
   cache = bcache_xmalloc (NULL, NULL);
 
-  entry.type1 = type1;
-  entry.type2 = type2;
-  VEC_safe_push (type_equality_entry_d, worklist, &entry);
+  worklist.emplace_back (type1, type2);
 
   /* check_types_worklist calls several nested helper functions, some
      of which can raise a GDB exception, so we just check and rethrow
@@ -3825,7 +3815,6 @@ types_deeply_equal (struct type *type1, struct type *type2)
   END_CATCH
 
   bcache_xfree (cache);
-  VEC_free (type_equality_entry_d, worklist);
 
   /* Rethrow if there was a problem.  */
   if (except.reason < 0)
