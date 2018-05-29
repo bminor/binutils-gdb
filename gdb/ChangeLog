@@ -1,5 +1,10 @@
 2018-06-01  Tom Tromey  <tom@tromey.com>
 
+	* cp-name-parser.y: Include parser-defs.h.
+	(parser_fprintf): Remove declaration.
+
+2018-06-01  Tom Tromey  <tom@tromey.com>
+
 	* cp-name-parser.y: Use %pure-parser, %lex-param, and
 	%parse-param.
 	(lexptr, prev_lexptr, error_lexptr, global_errmsg, demangle_info)
