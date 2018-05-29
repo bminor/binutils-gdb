@@ -1858,7 +1858,7 @@ svr4_handle_solib_event (void)
   struct svr4_info *info = get_svr4_info ();
   struct probe_and_action *pa;
   enum probe_action action;
-  struct cleanup *old_chain, *usm_chain;
+  struct cleanup *old_chain;
   struct value *val = NULL;
   CORE_ADDR pc, debug_base, lm = 0;
   struct frame_info *frame = get_current_frame ();
@@ -1902,72 +1902,73 @@ svr4_handle_solib_event (void)
      so we can guarantee that the dynamic linker's sections are in the
      section map.  We can therefore inhibit section map updates across
      these calls to evaluate_argument and save a lot of time.  */
-  inhibit_section_map_updates (current_program_space);
-  usm_chain = make_cleanup (resume_section_map_updates_cleanup,
-			    current_program_space);
+  {
+    scoped_restore inhibit_updates
+      = inhibit_section_map_updates (current_program_space);
 
-  TRY
-    {
-      val = pa->prob->evaluate_argument (1, frame);
-    }
-  CATCH (ex, RETURN_MASK_ERROR)
-    {
-      exception_print (gdb_stderr, ex);
-      val = NULL;
-    }
-  END_CATCH
+    TRY
+      {
+	val = pa->prob->evaluate_argument (1, frame);
+      }
+    CATCH (ex, RETURN_MASK_ERROR)
+      {
+	exception_print (gdb_stderr, ex);
+	val = NULL;
+      }
+    END_CATCH
 
-  if (val == NULL)
-    {
-      do_cleanups (old_chain);
-      return;
-    }
+    if (val == NULL)
+      {
+	do_cleanups (old_chain);
+	return;
+      }
 
-  debug_base = value_as_address (val);
-  if (debug_base == 0)
-    {
-      do_cleanups (old_chain);
-      return;
-    }
+    debug_base = value_as_address (val);
+    if (debug_base == 0)
+      {
+	do_cleanups (old_chain);
+	return;
+      }
 
-  /* Always locate the debug struct, in case it moved.  */
-  info->debug_base = 0;
-  if (locate_base (info) == 0)
-    {
-      do_cleanups (old_chain);
-      return;
-    }
+    /* Always locate the debug struct, in case it moved.  */
+    info->debug_base = 0;
+    if (locate_base (info) == 0)
+      {
+	do_cleanups (old_chain);
+	return;
+      }
 
-  /* GDB does not currently support libraries loaded via dlmopen
-     into namespaces other than the initial one.  We must ignore
-     any namespace other than the initial namespace here until
-     support for this is added to GDB.  */
-  if (debug_base != info->debug_base)
-    action = DO_NOTHING;
+    /* GDB does not currently support libraries loaded via dlmopen
+       into namespaces other than the initial one.  We must ignore
+       any namespace other than the initial namespace here until
+       support for this is added to GDB.  */
+    if (debug_base != info->debug_base)
+      action = DO_NOTHING;
 
-  if (action == UPDATE_OR_RELOAD)
-    {
-      TRY
-	{
-	  val = pa->prob->evaluate_argument (2, frame);
-	}
-      CATCH (ex, RETURN_MASK_ERROR)
-	{
-	  exception_print (gdb_stderr, ex);
-	  do_cleanups (old_chain);
-	  return;
-	}
-      END_CATCH
+    if (action == UPDATE_OR_RELOAD)
+      {
+	TRY
+	  {
+	    val = pa->prob->evaluate_argument (2, frame);
+	  }
+	CATCH (ex, RETURN_MASK_ERROR)
+	  {
+	    exception_print (gdb_stderr, ex);
+	    do_cleanups (old_chain);
+	    return;
+	  }
+	END_CATCH
 
-      if (val != NULL)
-	lm = value_as_address (val);
+	if (val != NULL)
+	  lm = value_as_address (val);
 
-      if (lm == 0)
-	action = FULL_RELOAD;
-    }
+	if (lm == 0)
+	  action = FULL_RELOAD;
+      }
 
-  /* Resume section map updates.  */
-  do_cleanups (usm_chain);
+    /* Resume section map updates.  Closing the scope is
+       sufficient.  */
+  }
 
   if (action == UPDATE_OR_RELOAD)
     {

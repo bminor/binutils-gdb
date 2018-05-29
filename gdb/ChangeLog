@@ -1,5 +1,16 @@
 2018-06-18  Tom Tromey  <tom@tromey.com>
 
+	* objfiles.h (inhibit_section_map_updates): Update.
+	(resume_section_map_updates, resume_section_map_updates_cleanup):
+	Remove.
+	* solib-svr4.c (svr4_handle_solib_event): Update.
+	* objfiles.c (inhibit_section_map_updates): Return
+	scoped_restore_tmpl<int>.
+	(resume_section_map_updates, resume_section_map_updates_cleanup):
+	Remove.
+
+2018-06-18  Tom Tromey  <tom@tromey.com>
+
 	* valprint.h (read_string): Update.
 	* valprint.c (read_string): Change type of "buffer".
 	(val_print_string): Update.

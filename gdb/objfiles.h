@@ -551,18 +551,13 @@ DECLARE_REGISTRY(objfile);
 /* In normal use, the section map will be rebuilt by find_pc_section
    if objfiles have been added, removed or relocated since it was last
    called.  Calling inhibit_section_map_updates will inhibit this
-   behavior until resume_section_map_updates is called.  If you call
-   inhibit_section_map_updates you must ensure that every call to
-   find_pc_section in the inhibited region relates to a section that
-   is already in the section map and has not since been removed or
-   relocated.  */
-extern void inhibit_section_map_updates (struct program_space *pspace);
-
-/* Resume automatically rebuilding the section map as required.  */
-extern void resume_section_map_updates (struct program_space *pspace);
-
-/* Version of the above suitable for use as a cleanup.  */
-extern void resume_section_map_updates_cleanup (void *arg);
+   behavior until the returned scoped_restore object is destroyed.  If
+   you call inhibit_section_map_updates you must ensure that every
+   call to find_pc_section in the inhibited region relates to a
+   section that is already in the section map and has not since been
+   removed or relocated.  */
+extern scoped_restore_tmpl<int> inhibit_section_map_updates
+    (struct program_space *pspace);
 
 extern void default_iterate_over_objfiles_in_search_order
   (struct gdbarch *gdbarch,

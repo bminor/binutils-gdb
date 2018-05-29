@@ -1455,26 +1455,11 @@ objfiles_changed (void)
 
 /* See comments in objfiles.h.  */
 
-void
+scoped_restore_tmpl<int>
 inhibit_section_map_updates (struct program_space *pspace)
 {
-  get_objfile_pspace_data (pspace)->inhibit_updates = 1;
-}
-
-/* See comments in objfiles.h.  */
-
-void
-resume_section_map_updates (struct program_space *pspace)
-{
-  get_objfile_pspace_data (pspace)->inhibit_updates = 0;
-}
-
-/* See comments in objfiles.h.  */
-
-void
-resume_section_map_updates_cleanup (void *arg)
-{
-  resume_section_map_updates ((struct program_space *) arg);
+  return scoped_restore_tmpl<int>
+    (&get_objfile_pspace_data (pspace)->inhibit_updates, 1);
 }
 
 /* Return 1 if ADDR maps into one of the sections of OBJFILE and 0
