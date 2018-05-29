@@ -1,5 +1,11 @@
 2018-06-01  Tom Tromey  <tom@tromey.com>
 
+	* cp-name-parser.y (parser_fprintf): Declare.
+	(GDB_YY_REMAP_PREFIX): Define.
+	Include yy-remap.h.  Don't redefine yy* identifiers.
+
+2018-06-01  Tom Tromey  <tom@tromey.com>
+
 	* python/py-type.c (typy_legacy_template_argument): Update.
 	* cp-support.h (cp_demangled_name_to_comp): Update.
 	* cp-name-parser.y (cp_demangled_name_to_comp): Change errmsg
