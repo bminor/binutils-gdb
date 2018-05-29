@@ -2519,11 +2519,6 @@ record_btrace_step_thread (struct thread_info *tp)
   return status;
 }
 
-/* A vector of threads.  */
-
-typedef struct thread_info * tp_t;
-DEF_VEC_P (tp_t);
-
 /* Announce further events if necessary.  */
 
 static void
