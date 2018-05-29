@@ -20,8 +20,6 @@
 #if !defined(OBJC_LANG_H)
 #define OBJC_LANG_H
 
-#include "cp-support.h"		/* For VEC (const_char_ptr) */
-
 struct stoken;
 
 struct value;

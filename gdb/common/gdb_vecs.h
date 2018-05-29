@@ -22,10 +22,6 @@
 
 #include "vec.h"
 
-typedef const char *const_char_ptr;
-
-DEF_VEC_P (const_char_ptr);
-
 /* Split STR, a list of DELIMITER-separated fields, into a char pointer vector.
 
    You may modify the returned strings.  */
