@@ -347,20 +347,12 @@ proc test_build_id_debuglink {} {
     global srcdir
     global subdir
     global env
-    global CC_FOR_TARGET
     global STRIP
     global OBJCOPY
     global OBJDUMP
     global CFLAGS_FOR_TARGET
     
     set test "build-id-debuglink"
-    if {![info exists CC_FOR_TARGET]} {
-	set CC_FOR_TARGET $env(CC)
-    }
-    if { $CC_FOR_TARGET == "" } {
-	unsupported $test
-	return
-    }
 
     # Use a fixed build-id.
     if { [info exists CFLAGS_FOR_TARGET] } {
@@ -427,7 +419,7 @@ proc test_build_id_debuglink {} {
     }
 }
 
-if {[isnative] && [is_elf_format]} then {
+if {[is_elf_format]} then {
     test_build_id_debuglink
 }
 
@@ -509,7 +501,7 @@ proc test_follow_debuglink {} {
     set got [remote_exec host "rm tmpdir/linkdebug.debug"]
 }
 
-if {[isnative] && [is_elf_format]} then {
+if {[is_elf_format]} then {
     test_follow_debuglink
 }
 

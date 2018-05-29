@@ -1,3 +1,11 @@
+2018-05-31  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/compress.exp (test_gnu_debuglink): Don't
+	set CC_FOR_TARGET.  Run test non-native.
+	* testsuite/binutils-all/objdump.exp (test_build_id_debuglink):
+	Likewise.
+	(test_follow_debuglink): Run test non-native.
+
 2018-05-30  Ant Bikeneev  <ant.bikineev@gmail.com>
 
 	PR 23107
