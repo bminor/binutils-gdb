@@ -1253,7 +1253,8 @@ handle_exception (struct target_waitstatus *ourstatus)
 	  result = HANDLE_EXCEPTION_IGNORED;
 	  break;
 	}
-	/* treat improperly formed exception as unknown, fallthrough */
+	/* treat improperly formed exception as unknown */
+	/* FALLTHROUGH */
     default:
       /* Treat unhandled first chance exceptions specially.  */
       if (current_event.u.Exception.dwFirstChance)

@@ -1,5 +1,9 @@
 2018-05-29  Tom Tromey  <tom@tromey.com>
 
+	* windows-nat.c (handle_exception): Update fall-through comment.
+
+2018-05-29  Tom Tromey  <tom@tromey.com>
+
 	* progspace.h (so_list_ptr): Remove typedef.  Don't declare VEC.
 	(struct program_space) <added_solibs>: Now a std::vector.
 	* breakpoint.c (print_solib_event): Update.
