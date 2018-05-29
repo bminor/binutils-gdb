@@ -2653,6 +2653,14 @@ pt_print_packet (const struct pt_packet *packet)
     case ppt_mnt:
       gdb_printf (("mnt %" PRIx64 ""), packet->payload.mnt.payload);
       break;
+
+#if (LIBIPT_VERSION >= 0x200)
+    case ppt_ptw:
+      gdb_printf (("ptw %u: 0x%" PRIx64 "%s"), packet->payload.ptw.plc,
+		  packet->payload.ptw.payload,
+		  packet->payload.ptw.ip ? (" ip") : (""));
+      break;
+#endif /* defined (LIBIPT_VERSION >= 0x200)  */
     }
 }
 

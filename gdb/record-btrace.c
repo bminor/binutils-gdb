@@ -3306,4 +3306,9 @@ to see the actual buffer size."), NULL, show_record_pt_buffer_size_value,
 
   record_btrace_conf.bts.size = 64 * 1024;
   record_btrace_conf.pt.size = 16 * 1024;
+#if (LIBIPT_VERSION >= 0x200)
+  record_btrace_conf.pt.ptwrite = true;
+#else
+  record_btrace_conf.pt.ptwrite = false;
+#endif
 }
