@@ -780,7 +780,7 @@ mips_pseudo_register_write (struct gdbarch *gdbarch,
 	   register_size (gdbarch, cookednum))
     {
       if (gdbarch_tdep (gdbarch)->mips64_transfers_32bit_regs_p)
-	regcache_raw_write_part (regcache, rawnum, 0, 4, buf);
+	regcache->raw_write_part (rawnum, 0, 4, buf);
       else
 	{
 	  /* Sign extend the shortened version of the register prior

@@ -331,7 +331,7 @@ amd64_windows_return_value (struct gdbarch *gdbarch, struct value *function,
       if (readbuf)
 	regcache->raw_read_part (regnum, 0, len, readbuf);
       if (writebuf)
-	regcache_raw_write_part (regcache, regnum, 0, len, writebuf);
+	regcache->raw_write_part (regnum, 0, len, writebuf);
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
 }

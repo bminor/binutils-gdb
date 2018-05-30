@@ -50,13 +50,6 @@ extern void regcache_raw_write_unsigned (struct regcache *regcache,
 extern LONGEST regcache_raw_get_signed (struct regcache *regcache,
 					int regnum);
 
-/* Partial transfer of raw registers.  These perform read, modify,
-   write style operations.  The read variant returns the status of the
-   register.  */
-
-void regcache_raw_write_part (struct regcache *regcache, int regnum,
-			      int offset, int len, const gdb_byte *buf);
-
 void regcache_invalidate (struct regcache *regcache, int regnum);
 
 /* Transfer of pseudo-registers.  The read variants return a register
@@ -333,6 +326,8 @@ public:
   void raw_collect_integer (int regnum, gdb_byte *addr, int addr_len,
 			    bool is_signed) const;
 
+  /* Partial transfer of raw registers.  Perform read, modify, write style
+     operations.  */
   void raw_write_part (int regnum, int offset, int len, const gdb_byte *buf);
 
   void cooked_write_part (int regnum, int offset, int len,

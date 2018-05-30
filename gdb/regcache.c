@@ -873,12 +873,7 @@ readable_regcache::raw_read_part (int regnum, int offset, int len, gdb_byte *buf
   return read_part (regnum, offset, len, buf, true);
 }
 
-void
-regcache_raw_write_part (struct regcache *regcache, int regnum,
-			 int offset, int len, const gdb_byte *buf)
-{
-  regcache->raw_write_part (regnum, offset, len, buf);
-}
+/* See regcache.h.  */
 
 void
 regcache::raw_write_part (int regnum, int offset, int len,

@@ -2880,12 +2880,12 @@ i386_store_return_value (struct gdbarch *gdbarch, struct type *type,
       int high_size = register_size (gdbarch, HIGH_RETURN_REGNUM);
 
       if (len <= low_size)
-	regcache_raw_write_part (regcache, LOW_RETURN_REGNUM, 0, len, valbuf);
+	regcache->raw_write_part (LOW_RETURN_REGNUM, 0, len, valbuf);
       else if (len <= (low_size + high_size))
 	{
 	  regcache->raw_write (LOW_RETURN_REGNUM, valbuf);
-	  regcache_raw_write_part (regcache, HIGH_RETURN_REGNUM, 0,
-				   len - low_size, valbuf + low_size);
+	  regcache->raw_write_part (HIGH_RETURN_REGNUM, 0, len - low_size,
+				    valbuf + low_size);
 	}
       else
 	internal_error (__FILE__, __LINE__,

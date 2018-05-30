@@ -2744,9 +2744,8 @@ efpr_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
   int offset = gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG ? 0 : 8;
 
   /* Write the portion that overlaps the VMX register.  */
-  regcache_raw_write_part (regcache, tdep->ppc_vr0_regnum + reg_index,
-			   offset, register_size (gdbarch, reg_nr),
-			   buffer);
+  regcache->raw_write_part (tdep->ppc_vr0_regnum + reg_index, offset,
+			    register_size (gdbarch, reg_nr), buffer);
 }
 
 static enum register_status

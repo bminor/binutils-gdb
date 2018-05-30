@@ -1259,11 +1259,10 @@ m68hc11_store_return_value (struct type *type, struct regcache *regcache,
 
   /* First argument is passed in D and X registers.  */
   if (len <= 2)
-    regcache_raw_write_part (regcache, HARD_D_REGNUM, 2 - len, len, valbuf);
+    regcache->raw_write_part (HARD_D_REGNUM, 2 - len, len, valbuf);
   else if (len <= 4)
     {
-      regcache_raw_write_part (regcache, HARD_X_REGNUM, 4 - len,
-                               len - 2, valbuf);
+      regcache->raw_write_part (HARD_X_REGNUM, 4 - len, len - 2, valbuf);
       regcache->raw_write (HARD_D_REGNUM, valbuf + (len - 2));
     }
   else

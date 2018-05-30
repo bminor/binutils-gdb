@@ -847,8 +847,8 @@ amd64_return_value (struct gdbarch *gdbarch, struct value *function,
 	regcache->raw_read_part (regnum, offset, std::min (len, 8),
 				 readbuf + i * 8);
       if (writebuf)
-	regcache_raw_write_part (regcache, regnum, offset, std::min (len, 8),
-				 writebuf + i * 8);
+	regcache->raw_write_part (regnum, offset, std::min (len, 8),
+				  writebuf + i * 8);
     }
 
   return RETURN_VALUE_REGISTER_CONVENTION;
@@ -956,7 +956,7 @@ amd64_push_arguments (struct regcache *regcache, int nargs,
 	      gdb_assert (regnum != -1);
 	      memset (buf, 0, sizeof buf);
 	      memcpy (buf, valbuf + j * 8, std::min (len, 8));
-	      regcache_raw_write_part (regcache, regnum, offset, 8, buf);
+	      regcache->raw_write_part (regnum, offset, 8, buf);
 	    }
 	}
     }

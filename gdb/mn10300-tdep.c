@@ -182,13 +182,12 @@ mn10300_store_return_value (struct gdbarch *gdbarch, struct type *type,
   regsz = register_size (gdbarch, reg);
 
   if (len <= regsz)
-    regcache_raw_write_part (regcache, reg, 0, len, valbuf);
+    regcache->raw_write_part (reg, 0, len, valbuf);
   else if (len <= 2 * regsz)
     {
       regcache->raw_write (reg, valbuf);
       gdb_assert (regsz == register_size (gdbarch, reg + 1));
-      regcache_raw_write_part (regcache, reg+1, 0,
-			       len - regsz, valbuf + regsz);
+      regcache->raw_write_part (reg + 1, 0, len - regsz, valbuf + regsz);
     }
   else
     internal_error (__FILE__, __LINE__,
