@@ -1,5 +1,9 @@
 2018-06-01  Tom Tromey  <tom@tromey.com>
 
+	* cp-name-parser.y (backslashable, represented): Now const.
+
+2018-06-01  Tom Tromey  <tom@tromey.com>
+
 	* cp-name-parser.y: Include parser-defs.h.
 	(parser_fprintf): Remove declaration.
 

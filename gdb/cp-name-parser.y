@@ -1396,8 +1396,8 @@ parse_number (cpname_state *state, const char *p, int len, int parsed_float,
    return INT;
 }
 
-static char backslashable[] = "abefnrtv";
-static char represented[] = "\a\b\e\f\n\r\t\v";
+static const char backslashable[] = "abefnrtv";
+static const char represented[] = "\a\b\e\f\n\r\t\v";
 
 /* Translate the backslash the way we would in the host character set.  */
 static int
