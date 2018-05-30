@@ -35,10 +35,6 @@ extern struct regcache *get_thread_arch_aspace_regcache (ptid_t,
 							 struct gdbarch *,
 							 struct address_space *);
 
-/* Make certain that the register REGNUM in REGCACHE is up-to-date.  */
-
-void regcache_raw_update (struct regcache *regcache, int regnum);
-
 /* Transfer a raw register [0..NUM_REGS) between core-gdb and the
    regcache.  The read variants return the status of the register.  */
 
@@ -257,6 +253,7 @@ public:
   enum register_status raw_read_part (int regnum, int offset, int len,
 				      gdb_byte *buf);
 
+  /* Make certain that the register REGNUM is up-to-date.  */
   virtual void raw_update (int regnum) = 0;
 
   enum register_status cooked_read (int regnum, gdb_byte *buf);

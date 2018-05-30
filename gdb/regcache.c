@@ -489,14 +489,6 @@ registers_changed (void)
 }
 
 void
-regcache_raw_update (struct regcache *regcache, int regnum)
-{
-  gdb_assert (regcache != NULL);
-
-  regcache->raw_update (regnum);
-}
-
-void
 regcache::raw_update (int regnum)
 {
   assert_regnum (regnum);

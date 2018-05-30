@@ -8339,7 +8339,7 @@ remote_target::prepare_to_store (struct regcache *regcache)
       /* Make sure all the necessary registers are cached.  */
       for (i = 0; i < gdbarch_num_regs (regcache->arch ()); i++)
 	if (rsa->regs[i].in_g_packet)
-	  regcache_raw_update (regcache, rsa->regs[i].regnum);
+	  regcache->raw_update (rsa->regs[i].regnum);
       break;
     case PACKET_ENABLE:
       break;
