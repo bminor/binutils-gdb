@@ -54,9 +54,6 @@ extern LONGEST regcache_raw_get_signed (struct regcache *regcache,
    write style operations.  The read variant returns the status of the
    register.  */
 
-extern enum register_status
-  regcache_raw_read_part (struct regcache *regcache, int regnum,
-			  int offset, int len, gdb_byte *buf);
 void regcache_raw_write_part (struct regcache *regcache, int regnum,
 			      int offset, int len, const gdb_byte *buf);
 
@@ -243,6 +240,7 @@ public:
   template<typename T, typename = RequireLongest<T>>
   enum register_status raw_read (int regnum, T *val);
 
+  /* Partial transfer of raw registers.  Return the status of the register.  */
   enum register_status raw_read_part (int regnum, int offset, int len,
 				      gdb_byte *buf);
 

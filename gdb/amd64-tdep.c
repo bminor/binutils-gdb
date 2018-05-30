@@ -844,8 +844,8 @@ amd64_return_value (struct gdbarch *gdbarch, struct value *function,
       gdb_assert (regnum != -1);
 
       if (readbuf)
-	regcache_raw_read_part (regcache, regnum, offset, std::min (len, 8),
-				readbuf + i * 8);
+	regcache->raw_read_part (regnum, offset, std::min (len, 8),
+				 readbuf + i * 8);
       if (writebuf)
 	regcache_raw_write_part (regcache, regnum, offset, std::min (len, 8),
 				 writebuf + i * 8);

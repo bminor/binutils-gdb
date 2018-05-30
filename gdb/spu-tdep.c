@@ -1655,7 +1655,7 @@ spu_software_single_step (struct regcache *regcache)
 	target += SPUADDR_ADDR (pc);
       else if (reg != -1)
       {
-	regcache_raw_read_part (regcache, reg, 0, 4, buf);
+	regcache->raw_read_part (reg, 0, 4, buf);
 	target += extract_unsigned_integer (buf, 4, byte_order) & -4;
       }
 
