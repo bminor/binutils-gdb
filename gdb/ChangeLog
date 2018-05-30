@@ -1,3 +1,7 @@
+2018-05-30  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Add or1k-tdep.o.
+
 2018-05-30  Pedro Alves  <palves@redhat.com>
 
 	* common/common-exceptions.h (exception_rethrow): Use
