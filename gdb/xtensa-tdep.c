@@ -848,38 +848,37 @@ xtensa_supply_gregset (const struct regset *regset,
   DEBUGTRACE ("xtensa_supply_gregset (..., regnum==%d, ...)\n", regnum);
 
   if (regnum == gdbarch_pc_regnum (gdbarch) || regnum == -1)
-    regcache_raw_supply (rc, gdbarch_pc_regnum (gdbarch), (char *) &regs->pc);
+    rc->raw_supply (gdbarch_pc_regnum (gdbarch), (char *) &regs->pc);
   if (regnum == gdbarch_ps_regnum (gdbarch) || regnum == -1)
-    regcache_raw_supply (rc, gdbarch_ps_regnum (gdbarch), (char *) &regs->ps);
+    rc->raw_supply (gdbarch_ps_regnum (gdbarch), (char *) &regs->ps);
   if (regnum == gdbarch_tdep (gdbarch)->wb_regnum || regnum == -1)
-    regcache_raw_supply (rc, gdbarch_tdep (gdbarch)->wb_regnum,
-			 (char *) &regs->windowbase);
+    rc->raw_supply (gdbarch_tdep (gdbarch)->wb_regnum,
+		    (char *) &regs->windowbase);
   if (regnum == gdbarch_tdep (gdbarch)->ws_regnum || regnum == -1)
-    regcache_raw_supply (rc, gdbarch_tdep (gdbarch)->ws_regnum,
-			 (char *) &regs->windowstart);
+    rc->raw_supply (gdbarch_tdep (gdbarch)->ws_regnum,
+		    (char *) &regs->windowstart);
   if (regnum == gdbarch_tdep (gdbarch)->lbeg_regnum || regnum == -1)
-    regcache_raw_supply (rc, gdbarch_tdep (gdbarch)->lbeg_regnum,
-			 (char *) &regs->lbeg);
+    rc->raw_supply (gdbarch_tdep (gdbarch)->lbeg_regnum,
+		    (char *) &regs->lbeg);
   if (regnum == gdbarch_tdep (gdbarch)->lend_regnum || regnum == -1)
-    regcache_raw_supply (rc, gdbarch_tdep (gdbarch)->lend_regnum,
-			 (char *) &regs->lend);
+    rc->raw_supply (gdbarch_tdep (gdbarch)->lend_regnum,
+		    (char *) &regs->lend);
   if (regnum == gdbarch_tdep (gdbarch)->lcount_regnum || regnum == -1)
-    regcache_raw_supply (rc, gdbarch_tdep (gdbarch)->lcount_regnum,
-			 (char *) &regs->lcount);
+    rc->raw_supply (gdbarch_tdep (gdbarch)->lcount_regnum,
+		    (char *) &regs->lcount);
   if (regnum == gdbarch_tdep (gdbarch)->sar_regnum || regnum == -1)
-    regcache_raw_supply (rc, gdbarch_tdep (gdbarch)->sar_regnum,
-			 (char *) &regs->sar);
+    rc->raw_supply (gdbarch_tdep (gdbarch)->sar_regnum,
+		    (char *) &regs->sar);
   if (regnum >=gdbarch_tdep (gdbarch)->ar_base
       && regnum < gdbarch_tdep (gdbarch)->ar_base
 		    + gdbarch_tdep (gdbarch)->num_aregs)
-    regcache_raw_supply (rc, regnum,
-			 (char *) &regs->ar[regnum - gdbarch_tdep
-			   (gdbarch)->ar_base]);
+    rc->raw_supply
+      (regnum, (char *) &regs->ar[regnum - gdbarch_tdep (gdbarch)->ar_base]);
   else if (regnum == -1)
     {
       for (i = 0; i < gdbarch_tdep (gdbarch)->num_aregs; ++i)
-	regcache_raw_supply (rc, gdbarch_tdep (gdbarch)->ar_base + i,
-			     (char *) &regs->ar[i]);
+	rc->raw_supply (gdbarch_tdep (gdbarch)->ar_base + i,
+			(char *) &regs->ar[i]);
     }
 }
 

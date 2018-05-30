@@ -123,13 +123,13 @@ i386fbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
     return 0;
 
   pcb->pcb_esp += 4;
-  regcache_raw_supply (regcache, I386_EDI_REGNUM, &pcb->pcb_edi);
-  regcache_raw_supply (regcache, I386_ESI_REGNUM, &pcb->pcb_esi);
-  regcache_raw_supply (regcache, I386_EBP_REGNUM, &pcb->pcb_ebp);
-  regcache_raw_supply (regcache, I386_ESP_REGNUM, &pcb->pcb_esp);
-  regcache_raw_supply (regcache, I386_EBX_REGNUM, &pcb->pcb_ebx);
-  regcache_raw_supply (regcache, I386_EIP_REGNUM, &pcb->pcb_eip);
-  regcache_raw_supply (regcache, I386_GS_REGNUM, &pcb->pcb_gs);
+  regcache->raw_supply (I386_EDI_REGNUM, &pcb->pcb_edi);
+  regcache->raw_supply (I386_ESI_REGNUM, &pcb->pcb_esi);
+  regcache->raw_supply (I386_EBP_REGNUM, &pcb->pcb_ebp);
+  regcache->raw_supply (I386_ESP_REGNUM, &pcb->pcb_esp);
+  regcache->raw_supply (I386_EBX_REGNUM, &pcb->pcb_ebx);
+  regcache->raw_supply (I386_EIP_REGNUM, &pcb->pcb_eip);
+  regcache->raw_supply (I386_GS_REGNUM, &pcb->pcb_gs);
 
   return 1;
 }

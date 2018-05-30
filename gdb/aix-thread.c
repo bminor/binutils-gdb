@@ -1116,8 +1116,8 @@ supply_gprs64 (struct regcache *regcache, uint64_t *vals)
   int regno;
 
   for (regno = 0; regno < ppc_num_gprs; regno++)
-    regcache_raw_supply (regcache, tdep->ppc_gp0_regnum + regno,
-			 (char *) (vals + regno));
+    regcache->raw_supply (tdep->ppc_gp0_regnum + regno,
+			  (char *) (vals + regno));
 }
 
 /* Record that 32-bit register REGNO contains VAL.  */
@@ -1125,7 +1125,7 @@ supply_gprs64 (struct regcache *regcache, uint64_t *vals)
 static void
 supply_reg32 (struct regcache *regcache, int regno, uint32_t val)
 {
-  regcache_raw_supply (regcache, regno, (char *) &val);
+  regcache->raw_supply (regno, (char *) &val);
 }
 
 /* Record that the floating-point registers contain VALS.  */
@@ -1144,8 +1144,8 @@ supply_fprs (struct regcache *regcache, double *vals)
   for (regno = tdep->ppc_fp0_regnum;
        regno < tdep->ppc_fp0_regnum + ppc_num_fprs;
        regno++)
-    regcache_raw_supply (regcache, regno,
-			 (char *) (vals + regno - tdep->ppc_fp0_regnum));
+    regcache->raw_supply (regno,
+			  (char *) (vals + regno - tdep->ppc_fp0_regnum));
 }
 
 /* Predicate to test whether given register number is a "special" register.  */
@@ -1177,16 +1177,14 @@ supply_sprs64 (struct regcache *regcache,
   struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  regcache_raw_supply (regcache, gdbarch_pc_regnum (gdbarch),
-		       (char *) &iar);
-  regcache_raw_supply (regcache, tdep->ppc_ps_regnum, (char *) &msr);
-  regcache_raw_supply (regcache, tdep->ppc_cr_regnum, (char *) &cr);
-  regcache_raw_supply (regcache, tdep->ppc_lr_regnum, (char *) &lr);
-  regcache_raw_supply (regcache, tdep->ppc_ctr_regnum, (char *) &ctr);
-  regcache_raw_supply (regcache, tdep->ppc_xer_regnum, (char *) &xer);
+  regcache->raw_supply (gdbarch_pc_regnum (gdbarch), (char *) &iar);
+  regcache->raw_supply (tdep->ppc_ps_regnum, (char *) &msr);
+  regcache->raw_supply (tdep->ppc_cr_regnum, (char *) &cr);
+  regcache->raw_supply (tdep->ppc_lr_regnum, (char *) &lr);
+  regcache->raw_supply (tdep->ppc_ctr_regnum, (char *) &ctr);
+  regcache->raw_supply (tdep->ppc_xer_regnum, (char *) &xer);
   if (tdep->ppc_fpscr_regnum >= 0)
-    regcache_raw_supply (regcache, tdep->ppc_fpscr_regnum,
-			 (char *) &fpscr);
+    regcache->raw_supply (tdep->ppc_fpscr_regnum, (char *) &fpscr);
 }
 
 /* Record that the special registers contain the specified 32-bit
@@ -1201,16 +1199,14 @@ supply_sprs32 (struct regcache *regcache,
   struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  regcache_raw_supply (regcache, gdbarch_pc_regnum (gdbarch),
-		       (char *) &iar);
-  regcache_raw_supply (regcache, tdep->ppc_ps_regnum, (char *) &msr);
-  regcache_raw_supply (regcache, tdep->ppc_cr_regnum, (char *) &cr);
-  regcache_raw_supply (regcache, tdep->ppc_lr_regnum, (char *) &lr);
-  regcache_raw_supply (regcache, tdep->ppc_ctr_regnum, (char *) &ctr);
-  regcache_raw_supply (regcache, tdep->ppc_xer_regnum, (char *) &xer);
+  regcache->raw_supply (gdbarch_pc_regnum (gdbarch), (char *) &iar);
+  regcache->raw_supply (tdep->ppc_ps_regnum, (char *) &msr);
+  regcache->raw_supply (tdep->ppc_cr_regnum, (char *) &cr);
+  regcache->raw_supply (tdep->ppc_lr_regnum, (char *) &lr);
+  regcache->raw_supply (tdep->ppc_ctr_regnum, (char *) &ctr);
+  regcache->raw_supply (tdep->ppc_xer_regnum, (char *) &xer);
   if (tdep->ppc_fpscr_regnum >= 0)
-    regcache_raw_supply (regcache, tdep->ppc_fpscr_regnum,
-			 (char *) &fpscr);
+    regcache->raw_supply (tdep->ppc_fpscr_regnum, (char *) &fpscr);
 }
 
 /* Fetch all registers from pthread PDTID, which doesn't have a kernel
@@ -1349,8 +1345,7 @@ fetch_regs_kernel_thread (struct regcache *regcache, int regno,
 			 sprs32.pt_fpscr);
 
 	  if (tdep->ppc_mq_regnum >= 0)
-	    regcache_raw_supply (regcache, tdep->ppc_mq_regnum,
-				 (char *) &sprs32.pt_mq);
+	    regcache->raw_supply (tdep->ppc_mq_regnum, (char *) &sprs32.pt_mq);
 	}
     }
 }

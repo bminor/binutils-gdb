@@ -101,11 +101,11 @@ supply_gregset (struct regcache *regcache, const elf_gregset_t * gregsetp)
 	}
 
       if (i != M32R_SP_REGNUM)
-	regcache_raw_supply (regcache, i, &regval);
+	regcache->raw_supply (i, &regval);
       else if (psw & 0x8000)
-	regcache_raw_supply (regcache, i, regp + SPU_REGMAP);
+	regcache->raw_supply (i, regp + SPU_REGMAP);
       else
-	regcache_raw_supply (regcache, i, regp + SPI_REGMAP);
+	regcache->raw_supply (i, regp + SPI_REGMAP);
     }
 }
 

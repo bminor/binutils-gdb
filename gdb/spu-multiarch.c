@@ -207,7 +207,7 @@ spu_multiarch_target::fetch_registers (struct regcache *regcache, int regno)
     {
       gdb_byte buf[4];
       store_unsigned_integer (buf, 4, byte_order, spufs_fd);
-      regcache_raw_supply (regcache, SPU_ID_REGNUM, buf);
+      regcache->raw_supply (SPU_ID_REGNUM, buf);
     }
 
   /* The NPC register is found in PPC memory at SPUFS_ADDR.  */
@@ -217,7 +217,7 @@ spu_multiarch_target::fetch_registers (struct regcache *regcache, int regno)
 
       if (target_read (ops_beneath, TARGET_OBJECT_MEMORY, NULL,
 		       buf, spufs_addr, sizeof buf) == sizeof buf)
-	regcache_raw_supply (regcache, SPU_PC_REGNUM, buf);
+	regcache->raw_supply (SPU_PC_REGNUM, buf);
     }
 
   /* The GPRs are found in the "regs" spufs file.  */
@@ -231,7 +231,7 @@ spu_multiarch_target::fetch_registers (struct regcache *regcache, int regno)
       if (target_read (ops_beneath, TARGET_OBJECT_SPU, annex,
 		       buf, 0, sizeof buf) == sizeof buf)
 	for (i = 0; i < SPU_NUM_GPRS; i++)
-	  regcache_raw_supply (regcache, i, buf + i*16);
+	  regcache->raw_supply (i, buf + i*16);
     }
 }
 

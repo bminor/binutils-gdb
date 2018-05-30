@@ -394,7 +394,7 @@ tracefile_fetch_registers (struct regcache *regcache, int regno)
   /* We get here if no register data has been found.  Mark registers
      as unavailable.  */
   for (regn = 0; regn < gdbarch_num_regs (gdbarch); regn++)
-    regcache_raw_supply (regcache, regn, NULL);
+    regcache->raw_supply (regn, NULL);
 
   /* We can often usefully guess that the PC is going to be the same
      as the address of the tracepoint.  */

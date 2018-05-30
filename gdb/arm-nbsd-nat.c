@@ -50,22 +50,18 @@ arm_supply_gregset (struct regcache *regcache, struct reg *gregset)
 
   /* Integer registers.  */
   for (regno = ARM_A1_REGNUM; regno < ARM_SP_REGNUM; regno++)
-    regcache_raw_supply (regcache, regno, (char *) &gregset->r[regno]);
+    regcache->raw_supply (regno, (char *) &gregset->r[regno]);
 
-  regcache_raw_supply (regcache, ARM_SP_REGNUM,
-		       (char *) &gregset->r_sp);
-  regcache_raw_supply (regcache, ARM_LR_REGNUM,
-		       (char *) &gregset->r_lr);
+  regcache->raw_supply (ARM_SP_REGNUM, (char *) &gregset->r_sp);
+  regcache->raw_supply (ARM_LR_REGNUM, (char *) &gregset->r_lr);
   /* This is ok: we're running native...  */
   r_pc = gdbarch_addr_bits_remove (regcache->arch (), gregset->r_pc);
-  regcache_raw_supply (regcache, ARM_PC_REGNUM, (char *) &r_pc);
+  regcache->raw_supply (ARM_PC_REGNUM, (char *) &r_pc);
 
   if (arm_apcs_32)
-    regcache_raw_supply (regcache, ARM_PS_REGNUM,
-			 (char *) &gregset->r_cpsr);
+    regcache->raw_supply (ARM_PS_REGNUM, (char *) &gregset->r_cpsr);
   else
-    regcache_raw_supply (regcache, ARM_PS_REGNUM,
-			 (char *) &gregset->r_pc);
+    regcache->raw_supply (ARM_PS_REGNUM, (char *) &gregset->r_pc);
 }
 
 static void
@@ -74,11 +70,10 @@ arm_supply_fparegset (struct regcache *regcache, struct fpreg *fparegset)
   int regno;
 
   for (regno = ARM_F0_REGNUM; regno <= ARM_F7_REGNUM; regno++)
-    regcache_raw_supply (regcache, regno,
-			 (char *) &fparegset->fpr[regno - ARM_F0_REGNUM]);
+    regcache->raw_supply (regno,
+			  (char *) &fparegset->fpr[regno - ARM_F0_REGNUM]);
 
-  regcache_raw_supply (regcache, ARM_FPS_REGNUM,
-		       (char *) &fparegset->fpr_fpsr);
+  regcache->raw_supply (ARM_FPS_REGNUM, (char *) &fparegset->fpr_fpsr);
 }
 
 static void
@@ -99,13 +94,11 @@ fetch_register (struct regcache *regcache, int regno)
   switch (regno)
     {
     case ARM_SP_REGNUM:
-      regcache_raw_supply (regcache, ARM_SP_REGNUM,
-			   (char *) &inferior_registers.r_sp);
+      regcache->raw_supply (ARM_SP_REGNUM, (char *) &inferior_registers.r_sp);
       break;
 
     case ARM_LR_REGNUM:
-      regcache_raw_supply (regcache, ARM_LR_REGNUM,
-			   (char *) &inferior_registers.r_lr);
+      regcache->raw_supply (ARM_LR_REGNUM, (char *) &inferior_registers.r_lr);
       break;
 
     case ARM_PC_REGNUM:
@@ -113,22 +106,20 @@ fetch_register (struct regcache *regcache, int regno)
       inferior_registers.r_pc = gdbarch_addr_bits_remove
 				  (regcache->arch (),
 				   inferior_registers.r_pc);
-      regcache_raw_supply (regcache, ARM_PC_REGNUM,
-			   (char *) &inferior_registers.r_pc);
+      regcache->raw_supply (ARM_PC_REGNUM, (char *) &inferior_registers.r_pc);
       break;
 
     case ARM_PS_REGNUM:
       if (arm_apcs_32)
-	regcache_raw_supply (regcache, ARM_PS_REGNUM,
-			     (char *) &inferior_registers.r_cpsr);
+	regcache->raw_supply (ARM_PS_REGNUM,
+			      (char *) &inferior_registers.r_cpsr);
       else
-	regcache_raw_supply (regcache, ARM_PS_REGNUM,
-			     (char *) &inferior_registers.r_pc);
+	regcache->raw_supply (ARM_PS_REGNUM,
+			      (char *) &inferior_registers.r_pc);
       break;
 
     default:
-      regcache_raw_supply (regcache, regno,
-			   (char *) &inferior_registers.r[regno]);
+      regcache->raw_supply (regno, (char *) &inferior_registers.r[regno]);
       break;
     }
 }
@@ -170,13 +161,13 @@ fetch_fp_register (struct regcache *regcache, int regno)
   switch (regno)
     {
     case ARM_FPS_REGNUM:
-      regcache_raw_supply (regcache, ARM_FPS_REGNUM,
-			   (char *) &inferior_fp_registers.fpr_fpsr);
+      regcache->raw_supply (ARM_FPS_REGNUM,
+			    (char *) &inferior_fp_registers.fpr_fpsr);
       break;
 
     default:
-      regcache_raw_supply (regcache, regno,
-			   (char *) &inferior_fp_registers.fpr[regno - ARM_F0_REGNUM]);
+      regcache->raw_supply
+	(regno, (char *) &inferior_fp_registers.fpr[regno - ARM_F0_REGNUM]);
       break;
     }
 }

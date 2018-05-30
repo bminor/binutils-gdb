@@ -133,7 +133,7 @@ fetch_register (struct regcache *regcache, int regno)
 	       gdbarch_register_name (gdbarch, regno),
 	       regno, safe_strerror (errno));
     }
-  regcache_raw_supply (regcache, regno, buf);
+  regcache->raw_supply (regno, buf);
 }
 
 /* Fetch register values from the inferior.
@@ -224,11 +224,9 @@ supply_gregset (struct regcache *regcache, const elf_gregset_t *gregsetp)
   for (regi = M68K_D0_REGNUM;
        regi <= gdbarch_sp_regnum (gdbarch);
        regi++)
-    regcache_raw_supply (regcache, regi, &regp[regmap[regi]]);
-  regcache_raw_supply (regcache, gdbarch_ps_regnum (gdbarch),
-		       &regp[PT_SR]);
-  regcache_raw_supply (regcache,
-		       gdbarch_pc_regnum (gdbarch), &regp[PT_PC]);
+    regcache->raw_supply (regi, &regp[regmap[regi]]);
+  regcache->raw_supply (gdbarch_ps_regnum (gdbarch), &regp[PT_SR]);
+  regcache->raw_supply (gdbarch_pc_regnum (gdbarch), &regp[PT_PC]);
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in
@@ -318,12 +316,11 @@ supply_fpregset (struct regcache *regcache, const elf_fpregset_t *fpregsetp)
 
   for (regi = gdbarch_fp0_regnum (gdbarch);
        regi < gdbarch_fp0_regnum (gdbarch) + 8; regi++)
-    regcache_raw_supply (regcache, regi,
-			 FPREG_ADDR (fpregsetp,
-				     regi - gdbarch_fp0_regnum (gdbarch)));
-  regcache_raw_supply (regcache, M68K_FPC_REGNUM, &fpregsetp->fpcntl[0]);
-  regcache_raw_supply (regcache, M68K_FPS_REGNUM, &fpregsetp->fpcntl[1]);
-  regcache_raw_supply (regcache, M68K_FPI_REGNUM, &fpregsetp->fpcntl[2]);
+    regcache->raw_supply
+      (regi, FPREG_ADDR (fpregsetp, regi - gdbarch_fp0_regnum (gdbarch)));
+  regcache->raw_supply (M68K_FPC_REGNUM, &fpregsetp->fpcntl[0]);
+  regcache->raw_supply (M68K_FPS_REGNUM, &fpregsetp->fpcntl[1]);
+  regcache->raw_supply (M68K_FPI_REGNUM, &fpregsetp->fpcntl[2]);
 }
 
 /* Fill register REGNO (if it is a floating-point register) in

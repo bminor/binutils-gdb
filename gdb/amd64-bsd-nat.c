@@ -64,7 +64,7 @@ amd64bsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
       if (ptrace (PT_GETFSBASE, pid, (PTRACE_TYPE_ARG3) &base, 0) == -1)
 	perror_with_name (_("Couldn't get segment register fs_base"));
 
-      regcache_raw_supply (regcache, AMD64_FSBASE_REGNUM, &base);
+      regcache->raw_supply (AMD64_FSBASE_REGNUM, &base);
       if (regnum != -1)
 	return;
     }
@@ -77,7 +77,7 @@ amd64bsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
       if (ptrace (PT_GETGSBASE, pid, (PTRACE_TYPE_ARG3) &base, 0) == -1)
 	perror_with_name (_("Couldn't get segment register gs_base"));
 
-      regcache_raw_supply (regcache, AMD64_GSBASE_REGNUM, &base);
+      regcache->raw_supply (AMD64_GSBASE_REGNUM, &base);
       if (regnum != -1)
 	return;
     }

@@ -58,7 +58,7 @@ m68kbsd_supply_gregset (struct regcache *regcache, const void *gregs)
   int regnum;
 
   for (regnum = M68K_D0_REGNUM; regnum <= M68K_PC_REGNUM; regnum++)
-    regcache_raw_supply (regcache, regnum, regs + regnum * 4);
+    regcache->raw_supply (regnum, regs + regnum * 4);
 }
 
 /* Supply the floating-point registers stored in FPREGS to REGCACHE.  */
@@ -71,8 +71,8 @@ m68kbsd_supply_fpregset (struct regcache *regcache, const void *fpregs)
   int regnum;
 
   for (regnum = M68K_FP0_REGNUM; regnum <= M68K_FPI_REGNUM; regnum++)
-    regcache_raw_supply (regcache, regnum,
-			 regs + m68kbsd_fpreg_offset (gdbarch, regnum));
+    regcache->raw_supply (regnum,
+			  regs + m68kbsd_fpreg_offset (gdbarch, regnum));
 }
 
 /* Collect the general-purpose registers from REGCACHE and store them
@@ -209,15 +209,15 @@ m68kbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
     return 0;
 
   for (regnum = M68K_D2_REGNUM; regnum <= M68K_D7_REGNUM; regnum++)
-    regcache_raw_supply (regcache, regnum, &pcb->pcb_regs[i++]);
+    regcache->raw_supply (regnum, &pcb->pcb_regs[i++]);
   for (regnum = M68K_A2_REGNUM; regnum <= M68K_SP_REGNUM; regnum++)
-    regcache_raw_supply (regcache, regnum, &pcb->pcb_regs[i++]);
+    regcache->raw_supply (regnum, &pcb->pcb_regs[i++]);
 
   tmp = pcb->pcb_ps & 0xffff;
-  regcache_raw_supply (regcache, M68K_PS_REGNUM, &tmp);
+  regcache->raw_supply (M68K_PS_REGNUM, &tmp);
 
   read_memory (pcb->pcb_regs[PCB_REGS_FP] + 4, (char *) &tmp, sizeof tmp);
-  regcache_raw_supply (regcache, M68K_PC_REGNUM, &tmp);
+  regcache->raw_supply (M68K_PC_REGNUM, &tmp);
 
   return 1;
 }

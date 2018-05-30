@@ -67,10 +67,10 @@ i386obsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
       /* Yes, we have a frame that matches cpu_switch().  */
       read_memory (pcb->pcb_esp, (gdb_byte *) &sf, sizeof sf);
       pcb->pcb_esp += sizeof (struct switchframe);
-      regcache_raw_supply (regcache, I386_EDI_REGNUM, &sf.sf_edi);
-      regcache_raw_supply (regcache, I386_ESI_REGNUM, &sf.sf_esi);
-      regcache_raw_supply (regcache, I386_EBX_REGNUM, &sf.sf_ebx);
-      regcache_raw_supply (regcache, I386_EIP_REGNUM, &sf.sf_eip);
+      regcache->raw_supply (I386_EDI_REGNUM, &sf.sf_edi);
+      regcache->raw_supply (I386_ESI_REGNUM, &sf.sf_esi);
+      regcache->raw_supply (I386_EBX_REGNUM, &sf.sf_ebx);
+      regcache->raw_supply (I386_EIP_REGNUM, &sf.sf_eip);
     }
   else
 #endif
@@ -79,11 +79,11 @@ i386obsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
       pcb->pcb_esp = pcb->pcb_ebp;
       pcb->pcb_ebp = read_memory_integer(pcb->pcb_esp, 4, byte_order);
       sf.sf_eip = read_memory_integer(pcb->pcb_esp + 4, 4, byte_order);
-      regcache_raw_supply (regcache, I386_EIP_REGNUM, &sf.sf_eip);
+      regcache->raw_supply (I386_EIP_REGNUM, &sf.sf_eip);
     }
 
-  regcache_raw_supply (regcache, I386_EBP_REGNUM, &pcb->pcb_ebp);
-  regcache_raw_supply (regcache, I386_ESP_REGNUM, &pcb->pcb_esp);
+  regcache->raw_supply (I386_EBP_REGNUM, &pcb->pcb_ebp);
+  regcache->raw_supply (I386_ESP_REGNUM, &pcb->pcb_esp);
 
   return 1;
 }

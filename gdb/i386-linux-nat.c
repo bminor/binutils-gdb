@@ -112,7 +112,7 @@ fetch_register (struct regcache *regcache, int regno)
   gdb_assert (!have_ptrace_getregs);
   if (i386_linux_gregset_reg_offset[regno] == -1)
     {
-      regcache_raw_supply (regcache, regno, NULL);
+      regcache->raw_supply (regno, NULL);
       return;
     }
 
@@ -126,7 +126,7 @@ fetch_register (struct regcache *regcache, int regno)
 	   gdbarch_register_name (regcache->arch (), regno),
 	   regno, safe_strerror (errno));
 
-  regcache_raw_supply (regcache, regno, &val);
+  regcache->raw_supply (regno, &val);
 }
 
 /* Store one register.  */
@@ -167,13 +167,13 @@ supply_gregset (struct regcache *regcache, const elf_gregset_t *gregsetp)
   int i;
 
   for (i = 0; i < I386_NUM_GREGS; i++)
-    regcache_raw_supply (regcache, i,
-			 regp + i386_linux_gregset_reg_offset[i]);
+    regcache->raw_supply (i, regp + i386_linux_gregset_reg_offset[i]);
 
   if (I386_LINUX_ORIG_EAX_REGNUM
 	< gdbarch_num_regs (regcache->arch ()))
-    regcache_raw_supply (regcache, I386_LINUX_ORIG_EAX_REGNUM, regp
-			 + i386_linux_gregset_reg_offset[I386_LINUX_ORIG_EAX_REGNUM]);
+    regcache->raw_supply
+      (I386_LINUX_ORIG_EAX_REGNUM,
+       regp + i386_linux_gregset_reg_offset[I386_LINUX_ORIG_EAX_REGNUM]);
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in

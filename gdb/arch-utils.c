@@ -946,7 +946,7 @@ default_guess_tracepoint_registers (struct gdbarch *gdbarch,
   regs = (gdb_byte *) alloca (register_size (gdbarch, pc_regno));
   store_unsigned_integer (regs, register_size (gdbarch, pc_regno),
 			  gdbarch_byte_order (gdbarch), addr);
-  regcache_raw_supply (regcache, pc_regno, regs);
+  regcache->raw_supply (pc_regno, regs);
 }
 
 int

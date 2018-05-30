@@ -52,10 +52,10 @@ mips64obsd_supply_gregset (struct regcache *regcache, const void *gregs)
   int regnum;
 
   for (regnum = MIPS_ZERO_REGNUM; regnum <= MIPS_PC_REGNUM; regnum++)
-    regcache_raw_supply (regcache, regnum, regs + regnum * 8);
+    regcache->raw_supply (regnum, regs + regnum * 8);
 
   for (regnum = MIPS_FP0_REGNUM; regnum <= MIPS_FSR_REGNUM; regnum++)
-    regcache_raw_supply (regcache, regnum, regs + (regnum + 2) * 8);
+    regcache->raw_supply (regnum, regs + (regnum + 2) * 8);
 }
 
 /* Collect the general-purpose registers from REGCACHE and store them

@@ -2175,8 +2175,8 @@ sh_corefile_supply_regset (const struct regset *regset,
     {
       if ((regnum == -1 || regnum == regmap[i].regnum)
 	  && regmap[i].offset + 4 <= len)
-	regcache_raw_supply (regcache, regmap[i].regnum,
-			     (char *)regs + regmap[i].offset);
+	regcache->raw_supply
+	  (regmap[i].regnum, (char *) regs + regmap[i].offset);
     }
 }
 

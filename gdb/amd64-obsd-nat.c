@@ -106,22 +106,22 @@ amd64obsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
     {
       /* Yes, we have a frame that matches cpu_switch().  */
       pcb->pcb_rsp += sizeof (struct switchframe);
-      regcache_raw_supply (regcache, 12, &sf.sf_r12);
-      regcache_raw_supply (regcache, 13, &sf.sf_r13);
-      regcache_raw_supply (regcache, 14, &sf.sf_r14);
-      regcache_raw_supply (regcache, 15, &sf.sf_r15);
-      regcache_raw_supply (regcache, AMD64_RBX_REGNUM, &sf.sf_rbx);
-      regcache_raw_supply (regcache, AMD64_RIP_REGNUM, &sf.sf_rip);
+      regcache->raw_supply (12, &sf.sf_r12);
+      regcache->raw_supply (13, &sf.sf_r13);
+      regcache->raw_supply (14, &sf.sf_r14);
+      regcache->raw_supply (15, &sf.sf_r15);
+      regcache->raw_supply (AMD64_RBX_REGNUM, &sf.sf_rbx);
+      regcache->raw_supply (AMD64_RIP_REGNUM, &sf.sf_rip);
     }
   else
     {
       /* No, the pcb must have been last updated by savectx().  */
       pcb->pcb_rsp += 8;
-      regcache_raw_supply (regcache, AMD64_RIP_REGNUM, &sf);
+      regcache->raw_supply (AMD64_RIP_REGNUM, &sf);
     }
 
-  regcache_raw_supply (regcache, AMD64_RSP_REGNUM, &pcb->pcb_rsp);
-  regcache_raw_supply (regcache, AMD64_RBP_REGNUM, &pcb->pcb_rbp);
+  regcache->raw_supply (AMD64_RSP_REGNUM, &pcb->pcb_rsp);
+  regcache->raw_supply (AMD64_RBP_REGNUM, &pcb->pcb_rbp);
 
   return 1;
 }

@@ -95,11 +95,11 @@ sparc64obsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
       read_memory(pcb->pcb_sp + BIAS - 176 + (11 * 8), 
 		  (gdb_byte *)&pcb->pcb_pc, sizeof pcb->pcb_pc);
 
-  regcache_raw_supply (regcache, SPARC_SP_REGNUM, &pcb->pcb_sp);
-  regcache_raw_supply (regcache, SPARC64_PC_REGNUM, &pcb->pcb_pc);
+  regcache->raw_supply (SPARC_SP_REGNUM, &pcb->pcb_sp);
+  regcache->raw_supply (SPARC64_PC_REGNUM, &pcb->pcb_pc);
 
   state = pcb->pcb_pstate << 8 | pcb->pcb_cwp;
-  regcache_raw_supply (regcache, SPARC64_STATE_REGNUM, &state);
+  regcache->raw_supply (SPARC64_STATE_REGNUM, &state);
 
   sparc_supply_rwindow (regcache, pcb->pcb_sp, -1);
 

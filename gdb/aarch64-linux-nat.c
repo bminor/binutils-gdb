@@ -227,7 +227,7 @@ fetch_gregs_from_thread (struct regcache *regcache)
       int regno;
 
       for (regno = AARCH64_X0_REGNUM; regno <= AARCH64_CPSR_REGNUM; regno++)
-	regcache_raw_supply (regcache, regno, &regs[regno - AARCH64_X0_REGNUM]);
+	regcache->raw_supply (regno, &regs[regno - AARCH64_X0_REGNUM]);
     }
 }
 
@@ -314,11 +314,10 @@ fetch_fpregs_from_thread (struct regcache *regcache)
 	perror_with_name (_("Unable to fetch vFP/SIMD registers."));
 
       for (regno = AARCH64_V0_REGNUM; regno <= AARCH64_V31_REGNUM; regno++)
-	regcache_raw_supply (regcache, regno,
-			     &regs.vregs[regno - AARCH64_V0_REGNUM]);
+	regcache->raw_supply (regno, &regs.vregs[regno - AARCH64_V0_REGNUM]);
 
-      regcache_raw_supply (regcache, AARCH64_FPSR_REGNUM, &regs.fpsr);
-      regcache_raw_supply (regcache, AARCH64_FPCR_REGNUM, &regs.fpcr);
+      regcache->raw_supply (AARCH64_FPSR_REGNUM, &regs.fpsr);
+      regcache->raw_supply (AARCH64_FPCR_REGNUM, &regs.fpcr);
     }
 }
 

@@ -229,7 +229,7 @@ fetch_register (struct regcache *regcache, int regno)
 
   if (gdbarch_cannot_fetch_register (gdbarch, regno))
     {
-      regcache_raw_supply (regcache, regno, NULL);
+      regcache->raw_supply (regno, NULL);
       return;
     }
 
@@ -242,7 +242,7 @@ fetch_register (struct regcache *regcache, int regno)
 	   gdbarch_register_name (gdbarch, regno),
 	   regno, safe_strerror (errno));
 
-  regcache_raw_supply (regcache, regno, &val);
+  regcache->raw_supply (regno, &val);
 }
 
 /* Store one register.  */
@@ -321,7 +321,7 @@ supply_gregset (struct regcache *regcache, const gdb_gregset_t *gregsetp)
   for (i = 0; i < sizeof (greg_map) / sizeof (greg_map[0]); i++, regp++)
     {
       int regno = greg_map[i];
-      regcache_raw_supply (regcache, regno, regp);
+      regcache->raw_supply (regno, regp);
     }
 }
 
@@ -359,8 +359,8 @@ supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregsetp)
   for (regi = 0; regi <= 31; regi++)
     {
       from = (const char *) &((*fpregsetp)[regi]);
-      regcache_raw_supply (regcache, 2*regi + HPPA_FP0_REGNUM, from);
-      regcache_raw_supply (regcache, 2*regi + HPPA_FP0_REGNUM + 1, from + 4);
+      regcache->raw_supply (2*regi + HPPA_FP0_REGNUM, from);
+      regcache->raw_supply (2*regi + HPPA_FP0_REGNUM + 1, from + 4);
     }
 }
 

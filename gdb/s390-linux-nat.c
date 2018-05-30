@@ -170,10 +170,10 @@ supply_gregset (struct regcache *regcache, const gregset_t *regp)
       pswa = extract_unsigned_integer ((const gdb_byte *) regp
 				       + S390_PSWA_OFFSET, 8, byte_order);
       store_unsigned_integer (buf, 4, byte_order, (pswm >> 32) | 0x80000);
-      regcache_raw_supply (regcache, S390_PSWM_REGNUM, buf);
+      regcache->raw_supply (S390_PSWM_REGNUM, buf);
       store_unsigned_integer (buf, 4, byte_order,
 			      (pswa & 0x7fffffff) | (pswm & 0x80000000));
-      regcache_raw_supply (regcache, S390_PSWA_REGNUM, buf);
+      regcache->raw_supply (S390_PSWA_REGNUM, buf);
       return;
     }
 #endif

@@ -200,7 +200,7 @@ amd64_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 	    if (ptrace (PTRACE_ARCH_PRCTL, tid, &base, ARCH_GET_FS) < 0)
 	      perror_with_name (_("Couldn't get segment register fs_base"));
 
-	    regcache_raw_supply (regcache, AMD64_FSBASE_REGNUM, &base);
+	    regcache->raw_supply (AMD64_FSBASE_REGNUM, &base);
 	  }
 
 	if (regnum == -1 || regnum == AMD64_GSBASE_REGNUM)
@@ -208,7 +208,7 @@ amd64_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 	    if (ptrace (PTRACE_ARCH_PRCTL, tid, &base, ARCH_GET_GS) < 0)
 	      perror_with_name (_("Couldn't get segment register gs_base"));
 
-	    regcache_raw_supply (regcache, AMD64_GSBASE_REGNUM, &base);
+	    regcache->raw_supply (AMD64_GSBASE_REGNUM, &base);
 	  }
       }
 #endif

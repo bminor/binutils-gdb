@@ -97,7 +97,7 @@ i386bsd_supply_gregset (struct regcache *regcache, const void *gregs)
       int offset = i386bsd_r_reg_offset[regnum];
 
       if (offset != -1)
-	regcache_raw_supply (regcache, regnum, regs + offset);
+	regcache->raw_supply (regnum, regs + offset);
     }
 }
 

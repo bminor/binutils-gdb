@@ -184,9 +184,9 @@ ia64_linux_supply_fpregset (const struct regset *regset,
      did the same.  So ignore whatever might be recorded in fpregset_t
      for fr0/fr1 and always supply their expected values.  */
   if (regnum == -1 || regnum == IA64_FR0_REGNUM)
-    regcache_raw_supply (regcache, IA64_FR0_REGNUM, f_zero);
+    regcache->raw_supply (IA64_FR0_REGNUM, f_zero);
   if (regnum == -1 || regnum == IA64_FR1_REGNUM)
-    regcache_raw_supply (regcache, IA64_FR1_REGNUM, f_one);
+    regcache->raw_supply (IA64_FR1_REGNUM, f_one);
 }
 
 static const struct regset ia64_linux_gregset =

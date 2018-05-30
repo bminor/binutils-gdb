@@ -61,12 +61,12 @@ i386nbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 
   read_memory (pcb->pcb_esp, (gdb_byte *)&sf, sizeof sf);
   pcb->pcb_esp += sizeof (struct switchframe);
-  regcache_raw_supply (regcache, I386_EDI_REGNUM, &sf.sf_edi);
-  regcache_raw_supply (regcache, I386_ESI_REGNUM, &sf.sf_esi);
-  regcache_raw_supply (regcache, I386_EBP_REGNUM, &pcb->pcb_ebp);
-  regcache_raw_supply (regcache, I386_ESP_REGNUM, &pcb->pcb_esp);
-  regcache_raw_supply (regcache, I386_EBX_REGNUM, &sf.sf_ebx);
-  regcache_raw_supply (regcache, I386_EIP_REGNUM, &sf.sf_eip);
+  regcache->raw_supply (I386_EDI_REGNUM, &sf.sf_edi);
+  regcache->raw_supply (I386_ESI_REGNUM, &sf.sf_esi);
+  regcache->raw_supply (I386_EBP_REGNUM, &pcb->pcb_ebp);
+  regcache->raw_supply (I386_ESP_REGNUM, &pcb->pcb_esp);
+  regcache->raw_supply (I386_EBX_REGNUM, &sf.sf_ebx);
+  regcache->raw_supply (I386_EIP_REGNUM, &sf.sf_eip);
 
   return 1;
 }

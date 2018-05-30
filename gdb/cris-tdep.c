@@ -3809,7 +3809,7 @@ cris_supply_gregset (struct regcache *regcache, cris_elf_gregset_t *gregsetp)
      knows about the actual size of each register so that's no problem.  */
   for (i = 0; i < NUM_GENREGS + NUM_SPECREGS; i++)
     {
-      regcache_raw_supply (regcache, i, (char *)&regp[i]);
+      regcache->raw_supply (i, (char *)&regp[i]);
     }
 
   if (tdep->cris_version == 32)
@@ -3817,8 +3817,8 @@ cris_supply_gregset (struct regcache *regcache, cris_elf_gregset_t *gregsetp)
       /* Needed to set pseudo-register PC for CRISv32.  */
       /* FIXME: If ERP is in a delay slot at this point then the PC will
 	 be wrong.  Issue a warning to alert the user.  */
-      regcache_raw_supply (regcache, gdbarch_pc_regnum (gdbarch),
-			   (char *)&regp[ERP_REGNUM]);
+      regcache->raw_supply (gdbarch_pc_regnum (gdbarch),
+			    (char *)&regp[ERP_REGNUM]);
 
       if (*(char *)&regp[ERP_REGNUM] & 0x1)
 	fprintf_unfiltered (gdb_stderr, "Warning: PC in delay slot\n");

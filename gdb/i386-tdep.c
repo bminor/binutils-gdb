@@ -3815,7 +3815,7 @@ i386_supply_gregset (const struct regset *regset, struct regcache *regcache,
     {
       if ((regnum == i || regnum == -1)
 	  && tdep->gregset_reg_offset[i] != -1)
-	regcache_raw_supply (regcache, i, regs + tdep->gregset_reg_offset[i]);
+	regcache->raw_supply (i, regs + tdep->gregset_reg_offset[i]);
     }
 }
 

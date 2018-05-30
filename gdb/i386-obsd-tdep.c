@@ -210,7 +210,7 @@ i386obsd_supply_uthread (struct regcache *regcache,
          returned from _thread_machdep_switch.  */
       offset = i386obsd_uthread_reg_offset[I386_EIP_REGNUM] + 4;
       store_unsigned_integer (buf, 4, byte_order, sp + offset);
-      regcache_raw_supply (regcache, I386_ESP_REGNUM, buf);
+      regcache->raw_supply (I386_ESP_REGNUM, buf);
     }
 
   for (i = 0; i < ARRAY_SIZE (i386obsd_uthread_reg_offset); i++)
@@ -225,7 +225,7 @@ i386obsd_supply_uthread (struct regcache *regcache,
 
 	  /* Read the saved register from the stack frame.  */
 	  read_memory (sp + i386obsd_uthread_reg_offset[i], buf, 4);
-	  regcache_raw_supply (regcache, i, buf);
+	  regcache->raw_supply (i, buf);
 	}
     }
 }

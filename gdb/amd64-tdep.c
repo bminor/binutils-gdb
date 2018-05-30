@@ -3349,9 +3349,9 @@ amd64_supply_fxsave (struct regcache *regcache, int regnum,
       const gdb_byte *regs = (const gdb_byte *) fxsave;
 
       if (regnum == -1 || regnum == I387_FISEG_REGNUM (tdep))
-	regcache_raw_supply (regcache, I387_FISEG_REGNUM (tdep), regs + 12);
+	regcache->raw_supply (I387_FISEG_REGNUM (tdep), regs + 12);
       if (regnum == -1 || regnum == I387_FOSEG_REGNUM (tdep))
-	regcache_raw_supply (regcache, I387_FOSEG_REGNUM (tdep), regs + 20);
+	regcache->raw_supply (I387_FOSEG_REGNUM (tdep), regs + 20);
     }
 }
 
@@ -3381,11 +3381,9 @@ amd64_supply_xsave (struct regcache *regcache, int regnum,
       if (!(clear_bv & X86_XSTATE_X87))
 	{
 	  if (regnum == -1 || regnum == I387_FISEG_REGNUM (tdep))
-	    regcache_raw_supply (regcache, I387_FISEG_REGNUM (tdep),
-				 regs + 12);
+	    regcache->raw_supply (I387_FISEG_REGNUM (tdep), regs + 12);
 	  if (regnum == -1 || regnum == I387_FOSEG_REGNUM (tdep))
-	    regcache_raw_supply (regcache, I387_FOSEG_REGNUM (tdep),
-				 regs + 20);
+	    regcache->raw_supply (I387_FOSEG_REGNUM (tdep), regs + 20);
 	}
     }
 }

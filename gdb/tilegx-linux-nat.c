@@ -88,7 +88,7 @@ supply_gregset (struct regcache* regcache,
 
   for (i = 0; i < sizeof (regmap) / sizeof (regmap[0]); i++)
     if (regmap[i] >= 0)
-      regcache_raw_supply (regcache, i, regp + regmap[i]);
+      regcache->raw_supply (i, regp + regmap[i]);
 }
 
 /* Fill registers in *GREGSETPS with the values in GDB's

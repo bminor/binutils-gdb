@@ -512,22 +512,20 @@ fetch_spe_register (struct regcache *regcache, int tid, int regno)
       int i;
 
       for (i = 0; i < ppc_num_gprs; i++)
-        regcache_raw_supply (regcache, tdep->ppc_ev0_upper_regnum + i,
-                             &evrregs.evr[i]);
+        regcache->raw_supply (tdep->ppc_ev0_upper_regnum + i, &evrregs.evr[i]);
     }
   else if (tdep->ppc_ev0_upper_regnum <= regno
            && regno < tdep->ppc_ev0_upper_regnum + ppc_num_gprs)
-    regcache_raw_supply (regcache, regno,
-                         &evrregs.evr[regno - tdep->ppc_ev0_upper_regnum]);
+    regcache->raw_supply (regno,
+			  &evrregs.evr[regno - tdep->ppc_ev0_upper_regnum]);
 
   if (regno == -1
       || regno == tdep->ppc_acc_regnum)
-    regcache_raw_supply (regcache, tdep->ppc_acc_regnum, &evrregs.acc);
+    regcache->raw_supply (tdep->ppc_acc_regnum, &evrregs.acc);
 
   if (regno == -1
       || regno == tdep->ppc_spefscr_regnum)
-    regcache_raw_supply (regcache, tdep->ppc_spefscr_regnum,
-                         &evrregs.spefscr);
+    regcache->raw_supply (tdep->ppc_spefscr_regnum, &evrregs.spefscr);
 }
 
 static void
@@ -573,7 +571,7 @@ fetch_register (struct regcache *regcache, int tid, int regno)
   if (regaddr == -1)
     {
       memset (buf, '\0', register_size (gdbarch, regno));   /* Supply zeroes */
-      regcache_raw_supply (regcache, regno, buf);
+      regcache->raw_supply (regno, buf);
       return;
     }
 
@@ -606,14 +604,14 @@ fetch_register (struct regcache *regcache, int tid, int regno)
     {
       /* Little-endian values are always found at the left end of the
          bytes transferred.  */
-      regcache_raw_supply (regcache, regno, buf);
+      regcache->raw_supply (regno, buf);
     }
   else if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
     {
       /* Big-endian values are found at the right end of the bytes
          transferred.  */
       size_t padding = (bytes_transferred - register_size (gdbarch, regno));
-      regcache_raw_supply (regcache, regno, buf + padding);
+      regcache->raw_supply (regno, buf + padding);
     }
   else 
     internal_error (__FILE__, __LINE__,

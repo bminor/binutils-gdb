@@ -158,7 +158,7 @@ sparc_fetch_inferior_registers (struct regcache *regcache, int regnum)
     {
       gdb_byte zero[8] = { 0 };
 
-      regcache_raw_supply (regcache, SPARC_G0_REGNUM, &zero);
+      regcache->raw_supply (SPARC_G0_REGNUM, &zero);
       return;
     }
 

@@ -46,7 +46,7 @@ vaxbsd_supply_gregset (struct regcache *regcache, const void *gregs)
   int regnum;
 
   for (regnum = 0; regnum < VAX_NUM_REGS; regnum++)
-    regcache_raw_supply (regcache, regnum, regs + regnum * 4);
+    regcache->raw_supply (regnum, regs + regnum * 4);
 }
 
 /* Collect the general-purpose registers from REGCACHE and store them
@@ -122,12 +122,12 @@ vaxbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
     return 0;
 
   for (regnum = VAX_R0_REGNUM; regnum < VAX_AP_REGNUM; regnum++)
-    regcache_raw_supply (regcache, regnum, &pcb->R[regnum - VAX_R0_REGNUM]);
-  regcache_raw_supply (regcache, VAX_AP_REGNUM, &pcb->AP);
-  regcache_raw_supply (regcache, VAX_FP_REGNUM, &pcb->FP);
-  regcache_raw_supply (regcache, VAX_SP_REGNUM, &pcb->KSP);
-  regcache_raw_supply (regcache, VAX_PC_REGNUM, &pcb->PC);
-  regcache_raw_supply (regcache, VAX_PS_REGNUM, &pcb->PSL);
+    regcache->raw_supply (regnum, &pcb->R[regnum - VAX_R0_REGNUM]);
+  regcache->raw_supply (VAX_AP_REGNUM, &pcb->AP);
+  regcache->raw_supply (VAX_FP_REGNUM, &pcb->FP);
+  regcache->raw_supply (VAX_SP_REGNUM, &pcb->KSP);
+  regcache->raw_supply (VAX_PC_REGNUM, &pcb->PC);
+  regcache->raw_supply (VAX_PS_REGNUM, &pcb->PSL);
 
   return 1;
 }

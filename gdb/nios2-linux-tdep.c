@@ -67,10 +67,9 @@ nios2_supply_gregset (const struct regset *regset,
     if (regnum == -1 || regnum == regno)
       {
 	if (reg_offsets[regno] != -1)
-	  regcache_raw_supply (regcache, regno,
-			       gregs + 4 * reg_offsets[regno]);
+	  regcache->raw_supply (regno, gregs + 4 * reg_offsets[regno]);
 	else
-	  regcache_raw_supply (regcache, regno, zero_buf);
+	  regcache->raw_supply (regno, zero_buf);
       }
 }
 

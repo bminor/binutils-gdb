@@ -192,11 +192,11 @@ ppcfbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
   if (pcb->pcb_sp == 0)
     return 0;
 
-  regcache_raw_supply (regcache, gdbarch_sp_regnum (gdbarch), &pcb->pcb_sp);
-  regcache_raw_supply (regcache, tdep->ppc_cr_regnum, &pcb->pcb_cr);
-  regcache_raw_supply (regcache, tdep->ppc_lr_regnum, &pcb->pcb_lr);
+  regcache->raw_supply (gdbarch_sp_regnum (gdbarch), &pcb->pcb_sp);
+  regcache->raw_supply (tdep->ppc_cr_regnum, &pcb->pcb_cr);
+  regcache->raw_supply (tdep->ppc_lr_regnum, &pcb->pcb_lr);
   for (i = 0, regnum = tdep->ppc_gp0_regnum + 14; i < 20; i++, regnum++)
-    regcache_raw_supply (regcache, regnum, &pcb->pcb_context[i]);
+    regcache->raw_supply (regnum, &pcb->pcb_context[i]);
 
   return 1;
 }

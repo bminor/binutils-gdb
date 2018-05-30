@@ -231,7 +231,7 @@ fetch_register (struct regcache *regcache, int regno)
     }
 
   if (!errno)
-    regcache_raw_supply (regcache, regno, (char *) addr);
+    regcache->raw_supply (regno, (char *) addr);
   else
     {
 #if 0

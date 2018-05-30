@@ -879,15 +879,6 @@ regcache::cooked_write_part (int regnum, int offset, int len,
   write_part (regnum, offset, len, buf, false);
 }
 
-/* Supply register REGNUM, whose contents are stored in BUF, to REGCACHE.  */
-
-void
-regcache_raw_supply (struct regcache *regcache, int regnum, const void *buf)
-{
-  gdb_assert (regcache != NULL);
-  regcache->raw_supply (regnum, buf);
-}
-
 void
 detached_regcache::raw_supply (int regnum, const void *buf)
 {

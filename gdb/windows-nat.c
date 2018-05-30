@@ -555,12 +555,12 @@ do_windows_fetch_inferior_registers (struct regcache *regcache,
   if (r == I387_FISEG_REGNUM (tdep))
     {
       l = *((long *) context_offset) & 0xffff;
-      regcache_raw_supply (regcache, r, (char *) &l);
+      regcache->raw_supply (r, (char *) &l);
     }
   else if (r == I387_FOP_REGNUM (tdep))
     {
       l = (*((long *) context_offset) >> 16) & ((1 << 11) - 1);
-      regcache_raw_supply (regcache, r, (char *) &l);
+      regcache->raw_supply (r, (char *) &l);
     }
   else if (segment_register_p (r))
     {
@@ -568,10 +568,10 @@ do_windows_fetch_inferior_registers (struct regcache *regcache,
 	 in fact only 16 bits long.  Make sure we do not read extra
 	 bits from our source buffer.  */
       l = *((long *) context_offset) & 0xffff;
-      regcache_raw_supply (regcache, r, (char *) &l);
+      regcache->raw_supply (r, (char *) &l);
     }
   else if (r >= 0)
-    regcache_raw_supply (regcache, r, context_offset);
+    regcache->raw_supply (r, context_offset);
   else
     {
       for (r = 0; r < gdbarch_num_regs (gdbarch); r++)

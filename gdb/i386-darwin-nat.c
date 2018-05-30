@@ -132,9 +132,8 @@ i386_darwin_nat_target::fetch_registers (struct regcache *regcache, int regno)
 	      MACH_CHECK_ERROR (ret);
 	    }
 	  for (i = 0; i < I386_NUM_GREGS; i++)
-	    regcache_raw_supply
-	      (regcache, i,
-	       (char *)&gp_regs + i386_darwin_thread_state_reg_offset[i]);
+	    regcache->raw_supply
+	      (i, (char *) &gp_regs + i386_darwin_thread_state_reg_offset[i]);
 
           fetched++;
         }
@@ -164,7 +163,7 @@ i386_darwin_nat_target::fetch_registers (struct regcache *regcache, int regno)
   if (! fetched)
     {
       warning (_("unknown register %d"), regno);
-      regcache_raw_supply (regcache, regno, NULL);
+      regcache->raw_supply (regno, NULL);
     }
 }
 

@@ -898,12 +898,12 @@ tfile_target::fetch_registers (struct regcache *regcache, int regno)
 	    {
 	      if (regno == regn)
 		{
-		  regcache_raw_supply (regcache, regno, regs + offset);
+		  regcache->raw_supply (regno, regs + offset);
 		  break;
 		}
 	      else if (regno == -1)
 		{
-		  regcache_raw_supply (regcache, regn, regs + offset);
+		  regcache->raw_supply (regn, regs + offset);
 		}
 	    }
 	}

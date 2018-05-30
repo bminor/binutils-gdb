@@ -44,11 +44,11 @@ sparc32nbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
   if (pcb->pcb_sp == 0)
     return 0;
 
-  regcache_raw_supply (regcache, SPARC_SP_REGNUM, &pcb->pcb_sp);
-  regcache_raw_supply (regcache, SPARC_O7_REGNUM, &pcb->pcb_pc);
-  regcache_raw_supply (regcache, SPARC32_PSR_REGNUM, &pcb->pcb_psr);
-  regcache_raw_supply (regcache, SPARC32_WIM_REGNUM, &pcb->pcb_wim);
-  regcache_raw_supply (regcache, SPARC32_PC_REGNUM, &pcb->pcb_pc);
+  regcache->raw_supply (SPARC_SP_REGNUM, &pcb->pcb_sp);
+  regcache->raw_supply (SPARC_O7_REGNUM, &pcb->pcb_pc);
+  regcache->raw_supply (SPARC32_PSR_REGNUM, &pcb->pcb_psr);
+  regcache->raw_supply (SPARC32_WIM_REGNUM, &pcb->pcb_wim);
+  regcache->raw_supply (SPARC32_PC_REGNUM, &pcb->pcb_pc);
 
   sparc_supply_rwindow (regcache, pcb->pcb_sp, -1);
 

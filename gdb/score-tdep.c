@@ -1428,9 +1428,8 @@ score7_linux_supply_gregset(const struct regset *regset,
      collect function will store the PC in that slot.  */
   if ((regnum == -1 || regnum == SCORE_EPC_REGNUM)
       && size >= SCORE7_LINUX_EPC_OFFSET + 4)
-    regcache_raw_supply (regcache, SCORE_EPC_REGNUM,
-			 (const gdb_byte *) buf
-			 + SCORE7_LINUX_EPC_OFFSET);
+    regcache->raw_supply
+      (SCORE_EPC_REGNUM, (const gdb_byte *) buf + SCORE7_LINUX_EPC_OFFSET);
 }
 
 static const struct regset score7_linux_gregset =

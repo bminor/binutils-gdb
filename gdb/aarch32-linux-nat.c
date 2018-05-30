@@ -34,20 +34,20 @@ aarch32_gp_regcache_supply (struct regcache *regcache, uint32_t *regs,
   int regno;
 
   for (regno = ARM_A1_REGNUM; regno < ARM_PC_REGNUM; regno++)
-    regcache_raw_supply (regcache, regno, &regs[regno]);
+    regcache->raw_supply (regno, &regs[regno]);
 
   if (arm_apcs_32)
     {
       /* Clear reserved bits bit 20 to bit 23.  */
       regs[ARM_CPSR_GREGNUM] &= 0xff0fffff;
-      regcache_raw_supply (regcache, ARM_PS_REGNUM, &regs[ARM_CPSR_GREGNUM]);
+      regcache->raw_supply (ARM_PS_REGNUM, &regs[ARM_CPSR_GREGNUM]);
     }
   else
-    regcache_raw_supply (regcache, ARM_PS_REGNUM, &regs[ARM_PC_REGNUM]);
+    regcache->raw_supply (ARM_PS_REGNUM, &regs[ARM_PC_REGNUM]);
 
   regs[ARM_PC_REGNUM] = gdbarch_addr_bits_remove
 			  (regcache->arch (), regs[ARM_PC_REGNUM]);
-  regcache_raw_supply (regcache, ARM_PC_REGNUM, &regs[ARM_PC_REGNUM]);
+  regcache->raw_supply (ARM_PC_REGNUM, &regs[ARM_PC_REGNUM]);
 }
 
 /* Collect GP registers from REGCACHE to buffer REGS.  ARM_APCS_32 is
@@ -88,11 +88,9 @@ aarch32_vfp_regcache_supply (struct regcache *regcache, gdb_byte *regs,
   int regno;
 
   for (regno = 0; regno < vfp_register_count; regno++)
-    regcache_raw_supply (regcache, regno + ARM_D0_REGNUM,
-			 regs + regno * 8);
+    regcache->raw_supply (regno + ARM_D0_REGNUM, regs + regno * 8);
 
-  regcache_raw_supply (regcache, ARM_FPSCR_REGNUM,
-		       regs + 32 * 8);
+  regcache->raw_supply (ARM_FPSCR_REGNUM, regs + 32 * 8);
 }
 
 /* Collect VFP registers from REGCACHE to buffer REGS.

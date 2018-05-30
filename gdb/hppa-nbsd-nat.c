@@ -63,19 +63,19 @@ hppanbsd_supply_gregset (struct regcache *regcache, const void *gregs)
   int regnum;
 
   for (regnum = HPPA_R1_REGNUM; regnum <= HPPA_R31_REGNUM; regnum++)
-    regcache_raw_supply (regcache, regnum, regs + regnum * 4);
+    regcache->raw_supply (regnum, regs + regnum * 4);
 
-  regcache_raw_supply (regcache, HPPA_SAR_REGNUM, regs + 32 * 4);
-  regcache_raw_supply (regcache, HPPA_PCSQ_HEAD_REGNUM, regs + 33 * 4);
-  regcache_raw_supply (regcache, HPPA_PCSQ_TAIL_REGNUM, regs + 34 * 4);
-  regcache_raw_supply (regcache, HPPA_PCOQ_HEAD_REGNUM, regs + 35 * 4);
-  regcache_raw_supply (regcache, HPPA_PCOQ_TAIL_REGNUM, regs + 36 * 4);
-  regcache_raw_supply (regcache, HPPA_IPSW_REGNUM, regs);
-  regcache_raw_supply (regcache, HPPA_SR4_REGNUM, regs + 41 * 4);
-  regcache_raw_supply (regcache, HPPA_SR4_REGNUM + 1, regs + 37 * 4);
-  regcache_raw_supply (regcache, HPPA_SR4_REGNUM + 2, regs + 38 * 4);
-  regcache_raw_supply (regcache, HPPA_SR4_REGNUM + 3, regs + 39 * 4);
-  regcache_raw_supply (regcache, HPPA_SR4_REGNUM + 4, regs + 40 * 4);
+  regcache->raw_supply (HPPA_SAR_REGNUM, regs + 32 * 4);
+  regcache->raw_supply (HPPA_PCSQ_HEAD_REGNUM, regs + 33 * 4);
+  regcache->raw_supply (HPPA_PCSQ_TAIL_REGNUM, regs + 34 * 4);
+  regcache->raw_supply (HPPA_PCOQ_HEAD_REGNUM, regs + 35 * 4);
+  regcache->raw_supply (HPPA_PCOQ_TAIL_REGNUM, regs + 36 * 4);
+  regcache->raw_supply (HPPA_IPSW_REGNUM, regs);
+  regcache->raw_supply (HPPA_SR4_REGNUM, regs + 41 * 4);
+  regcache->raw_supply (HPPA_SR4_REGNUM + 1, regs + 37 * 4);
+  regcache->raw_supply (HPPA_SR4_REGNUM + 2, regs + 38 * 4);
+  regcache->raw_supply (HPPA_SR4_REGNUM + 3, regs + 39 * 4);
+  regcache->raw_supply (HPPA_SR4_REGNUM + 4, regs + 40 * 4);
 }
 
 /* Supply the floating-point registers stored in FPREGS to REGCACHE.  */
@@ -89,8 +89,8 @@ hppanbsd_supply_fpregset (struct regcache *regcache, const void *fpregs)
   for (regnum = HPPA_FP0_REGNUM; regnum <= HPPA_FP31R_REGNUM;
        regnum += 2, regs += 8)
     {
-      regcache_raw_supply (regcache, regnum, regs);
-      regcache_raw_supply (regcache, regnum + 1, regs + 4);
+      regcache->raw_supply (regnum, regs);
+      regcache->raw_supply (regnum + 1, regs + 4);
     }
 }
 

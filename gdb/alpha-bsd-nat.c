@@ -182,12 +182,11 @@ alphabsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
   if (pcb->pcb_hw.apcb_ksp == 0)
     return 0;
 
-  regcache_raw_supply (regcache, ALPHA_SP_REGNUM, &pcb->pcb_hw.apcb_ksp);
+  regcache->raw_supply (ALPHA_SP_REGNUM, &pcb->pcb_hw.apcb_ksp);
 
   for (regnum = ALPHA_S0_REGNUM; regnum < ALPHA_A0_REGNUM; regnum++)
-    regcache_raw_supply (regcache, regnum,
-			 &pcb->pcb_context[regnum - ALPHA_S0_REGNUM]);
-  regcache_raw_supply (regcache, ALPHA_RA_REGNUM, &pcb->pcb_context[7]);
+    regcache->raw_supply (regnum, &pcb->pcb_context[regnum - ALPHA_S0_REGNUM]);
+  regcache->raw_supply (ALPHA_RA_REGNUM, &pcb->pcb_context[7]);
 
   return 1;
 }

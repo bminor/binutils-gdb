@@ -76,7 +76,7 @@ vax_supply_gregset (const struct regset *regset, struct regcache *regcache,
   for (i = 0; i < VAX_NUM_REGS; i++)
     {
       if (regnum == i || regnum == -1)
-	regcache_raw_supply (regcache, i, regs + i * 4);
+	regcache->raw_supply (i, regs + i * 4);
     }
 }
 

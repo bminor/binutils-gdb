@@ -46,12 +46,12 @@ sparc64fbsd_kvm_supply_pcb (struct regcache *regcache, struct pcb *pcb)
   if (pcb->pcb_sp == 0)
     return 0;
 
-  regcache_raw_supply (regcache, SPARC_SP_REGNUM, &pcb->pcb_sp);
-  regcache_raw_supply (regcache, SPARC64_PC_REGNUM, &pcb->pcb_pc);
+  regcache->raw_supply (SPARC_SP_REGNUM, &pcb->pcb_sp);
+  regcache->raw_supply (SPARC64_PC_REGNUM, &pcb->pcb_pc);
 
   /* Synthesize %npc.  */
   pcb->pcb_pc += 4;
-  regcache_raw_supply (regcache, SPARC64_NPC_REGNUM, &pcb->pcb_pc);
+  regcache->raw_supply (SPARC64_NPC_REGNUM, &pcb->pcb_pc);
 
   /* Read `local' and `in' registers from the stack.  */
   sparc_supply_rwindow (regcache, pcb->pcb_sp, -1);

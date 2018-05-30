@@ -171,7 +171,7 @@ hppanbsd_supply_gregset (const struct regset *regset,
   for (i = 0; i < ARRAY_SIZE (hppanbsd_reg_offset); i++)
     if (hppanbsd_reg_offset[i] != -1)
       if (regnum == -1 || regnum == i)
-	regcache_raw_supply (regcache, i, regs + hppanbsd_reg_offset[i]);
+	regcache->raw_supply (i, regs + hppanbsd_reg_offset[i]);
 }
 
 /* NetBSD/hppa register set.  */

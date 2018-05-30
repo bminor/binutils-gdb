@@ -541,8 +541,8 @@ fetch_register (struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   if (regno < gdbarch_fp0_regnum (gdbarch))
-    regcache_raw_supply (regcache, regno,
-			 (char *) &a_tss + regno_mapping[regno].tss_ofs);
+    regcache->raw_supply (regno,
+			  (char *) &a_tss + regno_mapping[regno].tss_ofs);
   else if (i386_fp_regnum_p (gdbarch, regno) || i386_fpc_regnum_p (gdbarch,
 								   regno))
     i387_supply_fsave (regcache, regno, &npx);

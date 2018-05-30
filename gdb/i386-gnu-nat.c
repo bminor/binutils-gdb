@@ -138,7 +138,7 @@ gnu_fetch_registers (struct target_ops *ops,
 	  proc_debug (thread, "fetching all register");
 
 	  for (i = 0; i < I386_NUM_GREGS; i++)
-	    regcache_raw_supply (regcache, i, REG_ADDR (state, i));
+	    regcache->raw_supply (i, REG_ADDR (state, i));
 	  thread->fetched_regs = ~0;
 	}
       else
@@ -147,8 +147,7 @@ gnu_fetch_registers (struct target_ops *ops,
 		      gdbarch_register_name (regcache->arch (),
 					     regno));
 
-	  regcache_raw_supply (regcache, regno,
-			       REG_ADDR (state, regno));
+	  regcache->raw_supply (regno, REG_ADDR (state, regno));
 	  thread->fetched_regs |= (1 << regno);
 	}
     }
@@ -250,8 +249,8 @@ gnu_store_registers (struct target_ops *ops,
 			 gdbarch_register_name (gdbarch, check_regno));
 		if (regno >= 0 && regno != check_regno)
 		  /* Update GDB's copy of the register.  */
-		  regcache_raw_supply (regcache, check_regno,
-				       REG_ADDR (state, check_regno));
+		  regcache->raw_supply (check_regno,
+					REG_ADDR (state, check_regno));
 		else
 		  warning (_("... also writing this register!  "
 			     "Suspicious..."));

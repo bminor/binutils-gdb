@@ -41,7 +41,7 @@ linux_nat_trad_target::fetch_register (struct regcache *regcache, int regnum)
   if (addr == (CORE_ADDR)-1
       || gdbarch_cannot_fetch_register (gdbarch, regnum))
     {
-      regcache_raw_supply (regcache, regnum, NULL);
+      regcache->raw_supply (regnum, NULL);
       return;
     }
 
@@ -66,7 +66,7 @@ linux_nat_trad_target::fetch_register (struct regcache *regcache, int regnum)
 
       addr += sizeof (PTRACE_TYPE_RET);
     }
-  regcache_raw_supply (regcache, regnum, buf);
+  regcache->raw_supply (regnum, buf);
 }
 
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this

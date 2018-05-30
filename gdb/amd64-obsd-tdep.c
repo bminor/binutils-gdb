@@ -241,7 +241,7 @@ amd64obsd_supply_uthread (struct regcache *regcache,
          returned from _thread_machdep_switch.  */
       offset = amd64obsd_uthread_reg_offset[AMD64_RIP_REGNUM] + 8;
       store_unsigned_integer (buf, 8, byte_order, sp + offset);
-      regcache_raw_supply (regcache, AMD64_RSP_REGNUM, buf);
+      regcache->raw_supply (AMD64_RSP_REGNUM, buf);
     }
 
   for (i = 0; i < ARRAY_SIZE (amd64obsd_uthread_reg_offset); i++)
@@ -256,7 +256,7 @@ amd64obsd_supply_uthread (struct regcache *regcache,
 
 	  /* Read the saved register from the stack frame.  */
 	  read_memory (sp + amd64obsd_uthread_reg_offset[i], buf, 8);
-	  regcache_raw_supply (regcache, i, buf);
+	  regcache->raw_supply (i, buf);
 	}
     }
 }

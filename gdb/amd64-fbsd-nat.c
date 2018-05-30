@@ -131,24 +131,24 @@ amd64fbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
     return 0;
 
   pcb->pcb_rsp += 8;
-  regcache_raw_supply (regcache, AMD64_RIP_REGNUM, &pcb->pcb_rip);
-  regcache_raw_supply (regcache, AMD64_RBX_REGNUM, &pcb->pcb_rbx);
-  regcache_raw_supply (regcache, AMD64_RSP_REGNUM, &pcb->pcb_rsp);
-  regcache_raw_supply (regcache, AMD64_RBP_REGNUM, &pcb->pcb_rbp);
-  regcache_raw_supply (regcache, 12, &pcb->pcb_r12);
-  regcache_raw_supply (regcache, 13, &pcb->pcb_r13);
-  regcache_raw_supply (regcache, 14, &pcb->pcb_r14);
-  regcache_raw_supply (regcache, 15, &pcb->pcb_r15);
+  regcache->raw_supply (AMD64_RIP_REGNUM, &pcb->pcb_rip);
+  regcache->raw_supply (AMD64_RBX_REGNUM, &pcb->pcb_rbx);
+  regcache->raw_supply (AMD64_RSP_REGNUM, &pcb->pcb_rsp);
+  regcache->raw_supply (AMD64_RBP_REGNUM, &pcb->pcb_rbp);
+  regcache->raw_supply (12, &pcb->pcb_r12);
+  regcache->raw_supply (13, &pcb->pcb_r13);
+  regcache->raw_supply (14, &pcb->pcb_r14);
+  regcache->raw_supply (15, &pcb->pcb_r15);
 #if (__FreeBSD_version < 800075) && (__FreeBSD_kernel_version < 800075)
   /* struct pcb provides the pcb_ds/pcb_es/pcb_fs/pcb_gs fields only
      up until __FreeBSD_version 800074: The removal of these fields
      occurred on 2009-04-01 while the __FreeBSD_version number was
      bumped to 800075 on 2009-04-06.  So 800075 is the closest version
      number where we should not try to access these fields.  */
-  regcache_raw_supply (regcache, AMD64_DS_REGNUM, &pcb->pcb_ds);
-  regcache_raw_supply (regcache, AMD64_ES_REGNUM, &pcb->pcb_es);
-  regcache_raw_supply (regcache, AMD64_FS_REGNUM, &pcb->pcb_fs);
-  regcache_raw_supply (regcache, AMD64_GS_REGNUM, &pcb->pcb_gs);
+  regcache->raw_supply (AMD64_DS_REGNUM, &pcb->pcb_ds);
+  regcache->raw_supply (AMD64_ES_REGNUM, &pcb->pcb_es);
+  regcache->raw_supply (AMD64_FS_REGNUM, &pcb->pcb_fs);
+  regcache->raw_supply (AMD64_GS_REGNUM, &pcb->pcb_gs);
 #endif
 
   return 1;

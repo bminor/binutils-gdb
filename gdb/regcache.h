@@ -71,8 +71,6 @@ extern void regcache_write_pc (struct regcache *regcache, CORE_ADDR pc);
    target.  These functions are called by the target in response to a
    target_fetch_registers() or target_store_registers().  */
 
-extern void regcache_raw_supply (struct regcache *regcache,
-				 int regnum, const void *buf);
 extern void regcache_raw_collect (const struct regcache *regcache,
 				  int regnum, void *buf);
 
@@ -243,6 +241,7 @@ public:
     : readable_regcache (gdbarch, has_pseudo)
   {}
 
+  /* Supply register REGNUM, whose contents are stored in BUF, to REGCACHE.  */
   void raw_supply (int regnum, const void *buf);
 
   void raw_supply (int regnum, const reg_buffer &src)
