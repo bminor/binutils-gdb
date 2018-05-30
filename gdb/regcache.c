@@ -864,14 +864,6 @@ regcache::raw_write_part (int regnum, int offset, int len,
 }
 
 enum register_status
-regcache_cooked_read_part (struct regcache *regcache, int regnum,
-			   int offset, int len, gdb_byte *buf)
-{
-  return regcache->cooked_read_part (regnum, offset, len, buf);
-}
-
-
-enum register_status
 readable_regcache::cooked_read_part (int regnum, int offset, int len,
 				     gdb_byte *buf)
 {

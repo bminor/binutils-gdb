@@ -1805,8 +1805,8 @@ ppc64_sysv_abi_return_value_base (struct gdbarch *gdbarch, struct type *valtype,
 	regcache_cooked_write_part (regcache, regnum,
 				    offset, TYPE_LENGTH (valtype), writebuf);
       if (readbuf != NULL)
-	regcache_cooked_read_part (regcache, regnum,
-				   offset, TYPE_LENGTH (valtype), readbuf);
+	regcache->cooked_read_part (regnum, offset, TYPE_LENGTH (valtype),
+				    readbuf);
       return 1;
     }
 
@@ -1881,8 +1881,8 @@ ppc64_sysv_abi_return_value_base (struct gdbarch *gdbarch, struct type *valtype,
 	regcache_cooked_write_part (regcache, regnum,
 				    offset, TYPE_LENGTH (valtype), writebuf);
       if (readbuf != NULL)
-	regcache_cooked_read_part (regcache, regnum,
-				   offset, TYPE_LENGTH (valtype), readbuf);
+	regcache->cooked_read_part (regnum, offset, TYPE_LENGTH (valtype),
+				    readbuf);
       return 1;
     }
 
@@ -1986,8 +1986,8 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
 	regcache_cooked_write_part (regcache, regnum,
 				    offset, TYPE_LENGTH (valtype), writebuf);
       if (readbuf != NULL)
-	regcache_cooked_read_part (regcache, regnum,
-				   offset, TYPE_LENGTH (valtype), readbuf);
+	regcache->cooked_read_part (regnum, offset, TYPE_LENGTH (valtype),
+				    readbuf);
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
 

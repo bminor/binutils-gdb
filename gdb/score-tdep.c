@@ -442,8 +442,8 @@ score_xfer_register (struct regcache *regcache, int regnum, int length,
     }
 
   if (readbuf != NULL)
-    regcache_cooked_read_part (regcache, regnum, reg_offset, length,
-                               readbuf + buf_offset);
+    regcache->cooked_read_part (regnum, reg_offset, length,
+				readbuf + buf_offset);
   if (writebuf != NULL)
     regcache_cooked_write_part (regcache, regnum, reg_offset, length,
                                 writebuf + buf_offset);

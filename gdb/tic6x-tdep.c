@@ -722,8 +722,7 @@ tic6x_extract_return_value (struct type *valtype, struct regcache *regcache,
 	 register and the second byte occupies byte 0.
 	 so, we read the contents in VAL from the LSBs of register.  */
       if (len < 3 && byte_order == BFD_ENDIAN_BIG)
-	regcache_cooked_read_part (regcache, TIC6X_A4_REGNUM, 4 - len, len,
-				   valbuf);
+	regcache->cooked_read_part (TIC6X_A4_REGNUM, 4 - len, len, valbuf);
       else
 	regcache->cooked_read (TIC6X_A4_REGNUM, valbuf);
     }

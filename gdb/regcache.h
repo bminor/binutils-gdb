@@ -65,9 +65,6 @@ extern void regcache_cooked_write_unsigned (struct regcache *regcache,
 /* Partial transfer of a cooked register.  These perform read, modify,
    write style operations.  */
 
-enum register_status regcache_cooked_read_part (struct regcache *regcache,
-						int regnum, int offset,
-						int len, gdb_byte *buf);
 void regcache_cooked_write_part (struct regcache *regcache, int regnum,
 				 int offset, int len, const gdb_byte *buf);
 
@@ -230,6 +227,7 @@ public:
   template<typename T, typename = RequireLongest<T>>
   enum register_status cooked_read (int regnum, T *val);
 
+  /* Partial transfer of a cooked register.  */
   enum register_status cooked_read_part (int regnum, int offset, int len,
 					 gdb_byte *buf);
 

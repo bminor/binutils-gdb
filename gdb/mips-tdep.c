@@ -510,8 +510,7 @@ mips_xfer_register (struct gdbarch *gdbarch, struct regcache *regcache,
 	fprintf_unfiltered (gdb_stdlog, "%02x", out[buf_offset + i]);
     }
   if (in != NULL)
-    regcache_cooked_read_part (regcache, reg_num, reg_offset, length,
-			       in + buf_offset);
+    regcache->cooked_read_part (reg_num, reg_offset, length, in + buf_offset);
   if (out != NULL)
     regcache_cooked_write_part (regcache, reg_num, reg_offset, length,
 				out + buf_offset);
