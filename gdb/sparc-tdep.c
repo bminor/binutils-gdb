@@ -547,8 +547,8 @@ sparc32_pseudo_register_write (struct gdbarch *gdbarch,
   gdb_assert (regnum >= SPARC32_D0_REGNUM && regnum <= SPARC32_D30_REGNUM);
 
   regnum = SPARC_F0_REGNUM + 2 * (regnum - SPARC32_D0_REGNUM);
-  regcache_raw_write (regcache, regnum, buf);
-  regcache_raw_write (regcache, regnum + 1, buf + 4);
+  regcache->raw_write (regnum, buf);
+  regcache->raw_write (regnum + 1, buf + 4);
 }
 
 /* Implement the stack_frame_destroyed_p gdbarch method.  */

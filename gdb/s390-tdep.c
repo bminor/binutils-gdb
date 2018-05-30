@@ -1402,8 +1402,8 @@ s390_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
   if (regnum_is_vxr_full (tdep, regnum))
     {
       regnum -= tdep->v0_full_regnum;
-      regcache_raw_write (regcache, S390_F0_REGNUM + regnum, buf);
-      regcache_raw_write (regcache, S390_V0_LOWER_REGNUM + regnum, buf + 8);
+      regcache->raw_write (S390_F0_REGNUM + regnum, buf);
+      regcache->raw_write (S390_V0_LOWER_REGNUM + regnum, buf + 8);
       return;
     }
 

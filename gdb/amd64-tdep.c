@@ -426,8 +426,7 @@ amd64_pseudo_register_write (struct gdbarch *gdbarch,
 	  /* ... Modify ... (always little endian).  */
 	  memcpy (raw_buf + 1, buf, 1);
 	  /* ... Write.  */
-	  regcache_raw_write (regcache,
-			      gpnum - AMD64_NUM_LOWER_BYTE_REGS, raw_buf);
+	  regcache->raw_write (gpnum - AMD64_NUM_LOWER_BYTE_REGS, raw_buf);
 	}
       else
 	{
@@ -436,7 +435,7 @@ amd64_pseudo_register_write (struct gdbarch *gdbarch,
 	  /* ... Modify ... (always little endian).  */
 	  memcpy (raw_buf, buf, 1);
 	  /* ... Write.  */
-	  regcache_raw_write (regcache, gpnum, raw_buf);
+	  regcache->raw_write (gpnum, raw_buf);
 	}
     }
   else if (i386_dword_regnum_p (gdbarch, regnum))
@@ -448,7 +447,7 @@ amd64_pseudo_register_write (struct gdbarch *gdbarch,
       /* ... Modify ... (always little endian).  */
       memcpy (raw_buf, buf, 4);
       /* ... Write.  */
-      regcache_raw_write (regcache, gpnum, raw_buf);
+      regcache->raw_write (gpnum, raw_buf);
     }
   else
     i386_pseudo_register_write (gdbarch, regcache, regnum, buf);
@@ -777,8 +776,8 @@ amd64_return_value (struct gdbarch *gdbarch, struct value *function,
       if (writebuf)
 	{
 	  i387_return_value (gdbarch, regcache);
-	  regcache_raw_write (regcache, AMD64_ST0_REGNUM, writebuf);
-	  regcache_raw_write (regcache, AMD64_ST1_REGNUM, writebuf + 16);
+	  regcache->raw_write (AMD64_ST0_REGNUM, writebuf);
+	  regcache->raw_write (AMD64_ST1_REGNUM, writebuf + 16);
 
 	  /* Fix up the tag word such that both %st(0) and %st(1) are
 	     marked as valid.  */

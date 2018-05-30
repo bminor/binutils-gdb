@@ -181,7 +181,7 @@ xstormy16_store_return_value (struct type *type, struct regcache *regcache,
       gdb_byte buf[xstormy16_reg_size];
       memset (buf, 0, xstormy16_reg_size);
       memcpy (buf, valbuf, 1);
-      regcache_raw_write (regcache, E_1ST_ARG_REGNUM, buf);
+      regcache->raw_write (E_1ST_ARG_REGNUM, buf);
     }
   else
     {
@@ -189,7 +189,7 @@ xstormy16_store_return_value (struct type *type, struct regcache *regcache,
       int i, regnum = E_1ST_ARG_REGNUM;
 
       for (i = 0; i < len; i += xstormy16_reg_size)
-        regcache_raw_write (regcache, regnum++, valbuf + i);
+        regcache->raw_write (regnum++, valbuf + i);
     }
 }
 

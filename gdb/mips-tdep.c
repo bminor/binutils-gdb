@@ -775,7 +775,7 @@ mips_pseudo_register_write (struct gdbarch *gdbarch,
   gdb_assert (cookednum >= gdbarch_num_regs (gdbarch)
 	      && cookednum < 2 * gdbarch_num_regs (gdbarch));
   if (register_size (gdbarch, rawnum) == register_size (gdbarch, cookednum))
-    regcache_raw_write (regcache, rawnum, buf);
+    regcache->raw_write (rawnum, buf);
   else if (register_size (gdbarch, rawnum) >
 	   register_size (gdbarch, cookednum))
     {

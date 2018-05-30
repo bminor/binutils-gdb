@@ -1264,7 +1264,7 @@ m68hc11_store_return_value (struct type *type, struct regcache *regcache,
     {
       regcache_raw_write_part (regcache, HARD_X_REGNUM, 4 - len,
                                len - 2, valbuf);
-      regcache_raw_write (regcache, HARD_D_REGNUM, valbuf + (len - 2));
+      regcache->raw_write (HARD_D_REGNUM, valbuf + (len - 2));
     }
   else
     error (_("return of value > 4 is not supported."));

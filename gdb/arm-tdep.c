@@ -8765,9 +8765,9 @@ arm_neon_quad_write (struct gdbarch *gdbarch, struct regcache *regcache,
   else
     offset = 0;
 
-  regcache_raw_write (regcache, double_regnum, buf + offset);
+  regcache->raw_write (double_regnum, buf + offset);
   offset = 8 - offset;
-  regcache_raw_write (regcache, double_regnum + 1, buf + offset);
+  regcache->raw_write (double_regnum + 1, buf + offset);
 }
 
 static void
@@ -8802,7 +8802,7 @@ arm_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
 
       regcache->raw_read (double_regnum, reg_buf);
       memcpy (reg_buf + offset, buf, 4);
-      regcache_raw_write (regcache, double_regnum, reg_buf);
+      regcache->raw_write (double_regnum, reg_buf);
     }
 }
 

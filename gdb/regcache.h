@@ -35,11 +35,6 @@ extern struct regcache *get_thread_arch_aspace_regcache (ptid_t,
 							 struct gdbarch *,
 							 struct address_space *);
 
-/* Transfer a raw register [0..NUM_REGS) between core-gdb and the
-   regcache.  The read variants return the status of the register.  */
-
-void regcache_raw_write (struct regcache *regcache, int rawnum,
-			 const gdb_byte *buf);
 extern enum register_status
   regcache_raw_read_signed (struct regcache *regcache,
 			    int regnum, LONGEST *val);
@@ -322,6 +317,9 @@ public:
   void restore (readonly_detached_regcache *src);
 
   void cooked_write (int regnum, const gdb_byte *buf);
+
+  /* Update the value of raw register REGNUM (in the range [0..NUM_REGS)) and
+     transfer its value to core-gdb.  */
 
   void raw_write (int regnum, const gdb_byte *buf);
 

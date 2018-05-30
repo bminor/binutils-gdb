@@ -1374,7 +1374,7 @@ sh_store_return_value_nofpu (struct type *type, struct regcache *regcache,
     {
       int i, regnum = R0_REGNUM;
       for (i = 0; i < len; i += 4)
-	regcache_raw_write (regcache, regnum++, valbuf + i);
+	regcache->raw_write (regnum++, valbuf + i);
     }
 }
 
@@ -1389,10 +1389,10 @@ sh_store_return_value_fpu (struct type *type, struct regcache *regcache,
       int i, regnum = gdbarch_fp0_regnum (gdbarch);
       for (i = 0; i < len; i += 4)
 	if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
-	  regcache_raw_write (regcache, regnum++,
+	  regcache->raw_write (regnum++,
 			      valbuf + len - 4 - i);
 	else
-	  regcache_raw_write (regcache, regnum++, valbuf + i);
+	  regcache->raw_write (regnum++, valbuf + i);
     }
   else
     sh_store_return_value_nofpu (type, regcache, valbuf);
@@ -1701,7 +1701,7 @@ sh_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 	 so that a re-read happens next time it's necessary.  */
       int bregnum;
 
-      regcache_raw_write (regcache, BANK_REGNUM, buffer);
+      regcache->raw_write (BANK_REGNUM, buffer);
       for (bregnum = R0_BANK0_REGNUM; bregnum < MACLB_REGNUM; ++bregnum)
         regcache_invalidate (regcache, bregnum);
     }
@@ -1717,7 +1717,7 @@ sh_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 
       /* Write the real regs for which this one is an alias.  */
       for (portion = 0; portion < 2; portion++)
-	regcache_raw_write (regcache, base_regnum + portion,
+	regcache->raw_write (base_regnum + portion,
 			    (temp_buffer
 			     + register_size (gdbarch,
 					      base_regnum) * portion));
@@ -1728,7 +1728,7 @@ sh_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 
       /* Write the real regs for which this one is an alias.  */
       for (portion = 0; portion < 4; portion++)
-	regcache_raw_write (regcache, base_regnum + portion,
+	regcache->raw_write (base_regnum + portion,
 			    (buffer
 			     + register_size (gdbarch,
 					      base_regnum) * portion));

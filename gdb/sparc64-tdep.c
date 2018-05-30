@@ -988,27 +988,27 @@ sparc64_pseudo_register_write (struct gdbarch *gdbarch,
   if (regnum >= SPARC64_D0_REGNUM && regnum <= SPARC64_D30_REGNUM)
     {
       regnum = SPARC_F0_REGNUM + 2 * (regnum - SPARC64_D0_REGNUM);
-      regcache_raw_write (regcache, regnum, buf);
-      regcache_raw_write (regcache, regnum + 1, buf + 4);
+      regcache->raw_write (regnum, buf);
+      regcache->raw_write (regnum + 1, buf + 4);
     }
   else if (regnum >= SPARC64_D32_REGNUM && regnum <= SPARC64_D62_REGNUM)
     {
       regnum = SPARC64_F32_REGNUM + (regnum - SPARC64_D32_REGNUM);
-      regcache_raw_write (regcache, regnum, buf);
+      regcache->raw_write (regnum, buf);
     }
   else if (regnum >= SPARC64_Q0_REGNUM && regnum <= SPARC64_Q28_REGNUM)
     {
       regnum = SPARC_F0_REGNUM + 4 * (regnum - SPARC64_Q0_REGNUM);
-      regcache_raw_write (regcache, regnum, buf);
-      regcache_raw_write (regcache, regnum + 1, buf + 4);
-      regcache_raw_write (regcache, regnum + 2, buf + 8);
-      regcache_raw_write (regcache, regnum + 3, buf + 12);
+      regcache->raw_write (regnum, buf);
+      regcache->raw_write (regnum + 1, buf + 4);
+      regcache->raw_write (regnum + 2, buf + 8);
+      regcache->raw_write (regnum + 3, buf + 12);
     }
   else if (regnum >= SPARC64_Q32_REGNUM && regnum <= SPARC64_Q60_REGNUM)
     {
       regnum = SPARC64_F32_REGNUM + 2 * (regnum - SPARC64_Q32_REGNUM);
-      regcache_raw_write (regcache, regnum, buf);
-      regcache_raw_write (regcache, regnum + 1, buf + 8);
+      regcache->raw_write (regnum, buf);
+      regcache->raw_write (regnum + 1, buf + 8);
     }
   else if (regnum == SPARC64_CWP_REGNUM
 	   || regnum == SPARC64_PSTATE_REGNUM

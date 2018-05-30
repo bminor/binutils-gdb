@@ -2552,7 +2552,7 @@ e500_move_ev_register (move_ev_register_func move,
 static enum register_status
 do_regcache_raw_write (struct regcache *regcache, int regnum, void *buffer)
 {
-  regcache_raw_write (regcache, regnum, (const gdb_byte *) buffer);
+  regcache->raw_write (regnum, (const gdb_byte *) buffer);
 
   return REG_VALID;
 }
@@ -2640,16 +2640,16 @@ dfp_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
     {
       /* Write each half of the dl register into a separate
       FP register.  */
-      regcache_raw_write (regcache, tdep->ppc_fp0_regnum +
+      regcache->raw_write (tdep->ppc_fp0_regnum +
 			  2 * reg_index, buffer);
-      regcache_raw_write (regcache, tdep->ppc_fp0_regnum +
+      regcache->raw_write (tdep->ppc_fp0_regnum +
 			  2 * reg_index + 1, buffer + 8);
     }
   else
     {
-      regcache_raw_write (regcache, tdep->ppc_fp0_regnum +
+      regcache->raw_write (tdep->ppc_fp0_regnum +
 			  2 * reg_index + 1, buffer);
-      regcache_raw_write (regcache, tdep->ppc_fp0_regnum +
+      regcache->raw_write (tdep->ppc_fp0_regnum +
 			  2 * reg_index, buffer + 8);
     }
 }
@@ -2699,22 +2699,22 @@ vsx_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 
   /* Write the portion that overlaps the VMX registers.  */
   if (reg_index > 31)
-    regcache_raw_write (regcache, tdep->ppc_vr0_regnum +
+    regcache->raw_write (tdep->ppc_vr0_regnum +
 			reg_index - 32, buffer);
   else
     /* Write the portion that overlaps the FPR registers.  */
     if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
       {
-	regcache_raw_write (regcache, tdep->ppc_fp0_regnum +
+	regcache->raw_write (tdep->ppc_fp0_regnum +
 			reg_index, buffer);
-	regcache_raw_write (regcache, tdep->ppc_vsr0_upper_regnum +
+	regcache->raw_write (tdep->ppc_vsr0_upper_regnum +
 			reg_index, buffer + 8);
       }
     else
       {
-	regcache_raw_write (regcache, tdep->ppc_fp0_regnum +
+	regcache->raw_write (tdep->ppc_fp0_regnum +
 			reg_index, buffer + 8);
-	regcache_raw_write (regcache, tdep->ppc_vsr0_upper_regnum +
+	regcache->raw_write (tdep->ppc_vsr0_upper_regnum +
 			reg_index, buffer);
       }
 }

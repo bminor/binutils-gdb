@@ -1962,6 +1962,6 @@ i387_reset_bnd_regs (struct gdbarch *gdbarch, struct regcache *regcache)
 
       memset (bnd_buf, 0, 16);
       for (int i = 0; i < I387_NUM_BND_REGS; i++)
-	regcache_raw_write (regcache, I387_BND0R_REGNUM (tdep) + i, bnd_buf);
+	regcache->raw_write (I387_BND0R_REGNUM (tdep) + i, bnd_buf);
     }
 }

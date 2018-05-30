@@ -189,8 +189,7 @@ i386_darwin_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
               if (write_pass)
                 {
                   const gdb_byte *val = value_contents_all (args[i]);
-                  regcache_raw_write
-                    (regcache, I387_MM0_REGNUM(tdep) + num_m128, val);
+                  regcache->raw_write (I387_MM0_REGNUM(tdep) + num_m128, val);
                 }
               num_m128++;
             }

@@ -236,7 +236,7 @@ tilegx_store_return_value (struct type *type, struct regcache *regcache,
       gdb_byte buf[tilegx_reg_size] = { 0 };
 
       memcpy (buf, valbuf, TYPE_LENGTH (type));
-      regcache_raw_write (regcache, TILEGX_R0_REGNUM, buf);
+      regcache->raw_write (TILEGX_R0_REGNUM, buf);
     }
   else
     {
@@ -244,7 +244,7 @@ tilegx_store_return_value (struct type *type, struct regcache *regcache,
       int i, regnum = TILEGX_R0_REGNUM;
 
       for (i = 0; i < len; i += tilegx_reg_size)
-	regcache_raw_write (regcache, regnum++, (gdb_byte *) valbuf + i);
+	regcache->raw_write (regnum++, (gdb_byte *) valbuf + i);
     }
 }
 

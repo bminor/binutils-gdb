@@ -752,14 +752,6 @@ regcache_cooked_write_unsigned (struct regcache *regcache, int regnum,
 }
 
 void
-regcache_raw_write (struct regcache *regcache, int regnum,
-		    const gdb_byte *buf)
-{
-  gdb_assert (regcache != NULL && buf != NULL);
-  regcache->raw_write (regnum, buf);
-}
-
-void
 regcache::raw_write (int regnum, const gdb_byte *buf)
 {
 

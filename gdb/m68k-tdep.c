@@ -334,7 +334,7 @@ m68k_store_return_value (struct type *type, struct regcache *regcache,
     {
       regcache_raw_write_part (regcache, M68K_D0_REGNUM, 8 - len,
 			       len - 4, valbuf);
-      regcache_raw_write (regcache, M68K_D1_REGNUM, valbuf + (len - 4));
+      regcache->raw_write (M68K_D1_REGNUM, valbuf + (len - 4));
     }
   else
     internal_error (__FILE__, __LINE__,
@@ -353,12 +353,12 @@ m68k_svr4_store_return_value (struct type *type, struct regcache *regcache,
       struct type *fpreg_type = register_type (gdbarch, M68K_FP0_REGNUM);
       gdb_byte buf[M68K_MAX_REGISTER_SIZE];
       target_float_convert (valbuf, type, buf, fpreg_type);
-      regcache_raw_write (regcache, M68K_FP0_REGNUM, buf);
+      regcache->raw_write (M68K_FP0_REGNUM, buf);
     }
   else if (TYPE_CODE (type) == TYPE_CODE_PTR && TYPE_LENGTH (type) == 4)
     {
-      regcache_raw_write (regcache, M68K_A0_REGNUM, valbuf);
-      regcache_raw_write (regcache, M68K_D0_REGNUM, valbuf);
+      regcache->raw_write (M68K_A0_REGNUM, valbuf);
+      regcache->raw_write (M68K_D0_REGNUM, valbuf);
     }
   else
     m68k_store_return_value (type, regcache, valbuf);

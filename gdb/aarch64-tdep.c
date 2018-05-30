@@ -2342,7 +2342,7 @@ aarch64_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
 
       v_regnum = AARCH64_V0_REGNUM + regnum - AARCH64_Q0_REGNUM;
       memcpy (reg_buf, buf, Q_REGISTER_SIZE);
-      regcache_raw_write (regcache, v_regnum, reg_buf);
+      regcache->raw_write (v_regnum, reg_buf);
       return;
     }
 
@@ -2353,7 +2353,7 @@ aarch64_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
 
       v_regnum = AARCH64_V0_REGNUM + regnum - AARCH64_D0_REGNUM;
       memcpy (reg_buf, buf, D_REGISTER_SIZE);
-      regcache_raw_write (regcache, v_regnum, reg_buf);
+      regcache->raw_write (v_regnum, reg_buf);
       return;
     }
 
@@ -2363,7 +2363,7 @@ aarch64_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
 
       v_regnum = AARCH64_V0_REGNUM + regnum - AARCH64_S0_REGNUM;
       memcpy (reg_buf, buf, S_REGISTER_SIZE);
-      regcache_raw_write (regcache, v_regnum, reg_buf);
+      regcache->raw_write (v_regnum, reg_buf);
       return;
     }
 
@@ -2374,7 +2374,7 @@ aarch64_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
 
       v_regnum = AARCH64_V0_REGNUM + regnum - AARCH64_H0_REGNUM;
       memcpy (reg_buf, buf, H_REGISTER_SIZE);
-      regcache_raw_write (regcache, v_regnum, reg_buf);
+      regcache->raw_write (v_regnum, reg_buf);
       return;
     }
 
@@ -2385,7 +2385,7 @@ aarch64_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
 
       v_regnum = AARCH64_V0_REGNUM + regnum - AARCH64_B0_REGNUM;
       memcpy (reg_buf, buf, B_REGISTER_SIZE);
-      regcache_raw_write (regcache, v_regnum, reg_buf);
+      regcache->raw_write (v_regnum, reg_buf);
       return;
     }
 
