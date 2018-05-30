@@ -1310,12 +1310,12 @@ sparc64_extract_floating_fields (struct regcache *regcache, struct type *type,
       if (len < 4)
         {
           gdb_byte buf[4];
-          regcache_cooked_read (regcache, regnum, buf);
+          regcache->cooked_read (regnum, buf);
           memcpy (valbuf, buf + 4 - len, len);
         }
       else
         for (int i = 0; i < (len + 3) / 4; i++)
-          regcache_cooked_read (regcache, regnum + i, valbuf + i * 4);
+          regcache->cooked_read (regnum + i, valbuf + i * 4);
     }
   else if (sparc64_floating_p (type))
     {
@@ -1328,14 +1328,14 @@ sparc64_extract_floating_fields (struct regcache *regcache, struct type *type,
 
 	  regnum = gdbarch_num_regs (gdbarch) + SPARC64_Q0_REGNUM
                    + bitpos / 128;
-	  regcache_cooked_read (regcache, regnum, valbuf + (bitpos / 8));
+	  regcache->cooked_read (regnum, valbuf + (bitpos / 8));
 	}
       else if (len == 8)
 	{
 	  gdb_assert (bitpos % 64 == 0 && bitpos >= 0 && bitpos < 256);
 
 	  regnum = gdbarch_num_regs (gdbarch) + SPARC64_D0_REGNUM + bitpos / 64;
-	  regcache_cooked_read (regcache, regnum, valbuf + (bitpos / 8));
+	  regcache->cooked_read (regnum, valbuf + (bitpos / 8));
 	}
       else
 	{
@@ -1343,7 +1343,7 @@ sparc64_extract_floating_fields (struct regcache *regcache, struct type *type,
 	  gdb_assert (bitpos % 32 == 0 && bitpos >= 0 && bitpos < 256);
 
 	  regnum = SPARC_F0_REGNUM + bitpos / 32;
-	  regcache_cooked_read (regcache, regnum, valbuf + (bitpos / 8));
+	  regcache->cooked_read (regnum, valbuf + (bitpos / 8));
 	}
     }
   else if (sparc64_structure_or_union_p (type))
@@ -1660,7 +1660,7 @@ sparc64_extract_return_value (struct type *type, struct regcache *regcache,
       gdb_assert (len <= 32);
 
       for (i = 0; i < ((len + 7) / 8); i++)
-	regcache_cooked_read (regcache, SPARC_O0_REGNUM + i, buf + i * 8);
+	regcache->cooked_read (SPARC_O0_REGNUM + i, buf + i * 8);
       if (TYPE_CODE (type) != TYPE_CODE_UNION)
 	sparc64_extract_floating_fields (regcache, type, buf, 0);
       memcpy (valbuf, buf, len);
@@ -1669,7 +1669,7 @@ sparc64_extract_return_value (struct type *type, struct regcache *regcache,
     {
       /* Floating return values.  */
       for (i = 0; i < len / 4; i++)
-	regcache_cooked_read (regcache, SPARC_F0_REGNUM + i, buf + i * 4);
+	regcache->cooked_read (SPARC_F0_REGNUM + i, buf + i * 4);
       memcpy (valbuf, buf, len);
     }
   else if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
@@ -1678,7 +1678,7 @@ sparc64_extract_return_value (struct type *type, struct regcache *regcache,
       gdb_assert (len <= 32);
 
       for (i = 0; i < ((len + 7) / 8); i++)
-	regcache_cooked_read (regcache, SPARC_O0_REGNUM + i, buf + i * 8);
+	regcache->cooked_read (SPARC_O0_REGNUM + i, buf + i * 8);
       memcpy (valbuf, buf, len);
     }
   else
@@ -1688,7 +1688,7 @@ sparc64_extract_return_value (struct type *type, struct regcache *regcache,
 
       /* Just stripping off any unused bytes should preserve the
          signed-ness just fine.  */
-      regcache_cooked_read (regcache, SPARC_O0_REGNUM, buf);
+      regcache->cooked_read (SPARC_O0_REGNUM, buf);
       memcpy (valbuf, buf + 8 - len, len);
     }
 }

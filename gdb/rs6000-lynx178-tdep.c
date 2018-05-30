@@ -281,7 +281,7 @@ rs6000_lynx178_return_value (struct gdbarch *gdbarch, struct value *function,
       && TYPE_LENGTH (valtype) == 16)
     {
       if (readbuf)
-	regcache_cooked_read (regcache, tdep->ppc_vr0_regnum + 2, readbuf);
+	regcache->cooked_read (tdep->ppc_vr0_regnum + 2, readbuf);
       if (writebuf)
 	regcache_cooked_write (regcache, tdep->ppc_vr0_regnum + 2, writebuf);
 
@@ -313,7 +313,7 @@ rs6000_lynx178_return_value (struct gdbarch *gdbarch, struct value *function,
 
       if (readbuf)
 	{
-	  regcache_cooked_read (regcache, tdep->ppc_fp0_regnum + 1, regval);
+	  regcache->cooked_read (tdep->ppc_fp0_regnum + 1, regval);
 	  target_float_convert (regval, regtype, readbuf, valtype);
 	}
       if (writebuf)
@@ -365,9 +365,8 @@ rs6000_lynx178_return_value (struct gdbarch *gdbarch, struct value *function,
 	{
 	  gdb_byte regval[8];
 
-	  regcache_cooked_read (regcache, tdep->ppc_gp0_regnum + 3, regval);
-	  regcache_cooked_read (regcache, tdep->ppc_gp0_regnum + 4,
-				regval + 4);
+	  regcache->cooked_read (tdep->ppc_gp0_regnum + 3, regval);
+	  regcache->cooked_read (tdep->ppc_gp0_regnum + 4, regval + 4);
 	  memcpy (readbuf, regval, 8);
 	}
       if (writebuf)

@@ -547,7 +547,7 @@ i386_linux_get_syscall_number_from_regcache (struct regcache *regcache)
   /* Getting the system call number from the register.
      When dealing with x86 architecture, this information
      is stored at %eax register.  */
-  regcache_cooked_read (regcache, I386_LINUX_ORIG_EAX_REGNUM, buf);
+  regcache->cooked_read (I386_LINUX_ORIG_EAX_REGNUM, buf);
 
   ret = extract_signed_integer (buf, 4, byte_order);
 

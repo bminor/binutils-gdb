@@ -140,7 +140,7 @@ bfin_linux_get_syscall_number (struct gdbarch *gdbarch,
   /* Getting the system call number from the register.
      When dealing with Blackfin architecture, this information
      is stored at %p0 register.  */
-  regcache_cooked_read (regcache, BFIN_P0_REGNUM, buf);
+  regcache->cooked_read (BFIN_P0_REGNUM, buf);
 
   ret = extract_signed_integer (buf, 4, byte_order);
 

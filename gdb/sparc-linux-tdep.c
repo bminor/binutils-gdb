@@ -286,7 +286,7 @@ sparc32_linux_get_syscall_number (struct gdbarch *gdbarch,
   /* Getting the system call number from the register.
      When dealing with the sparc architecture, this information
      is stored at the %g1 register.  */
-  regcache_cooked_read (regcache, SPARC_G1_REGNUM, buf);
+  regcache->cooked_read (SPARC_G1_REGNUM, buf);
 
   ret = extract_signed_integer (buf, 4, byte_order);
 

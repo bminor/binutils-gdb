@@ -818,7 +818,7 @@ ppc_linux_get_syscall_number (struct gdbarch *gdbarch,
   /* Getting the system call number from the register.
      When dealing with PowerPC architecture, this information
      is stored at 0th register.  */
-  regcache_cooked_read (regcache, tdep->ppc_gp0_regnum, buf.data ());
+  regcache->cooked_read (tdep->ppc_gp0_regnum, buf.data ());
 
   return extract_signed_integer (buf.data (), tdep->wordsize, byte_order);
 }

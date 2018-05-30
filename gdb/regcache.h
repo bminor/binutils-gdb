@@ -67,9 +67,6 @@ void regcache_invalidate (struct regcache *regcache, int regnum);
    constructed from valid, invalid or unavailable ``raw''
    registers.  */
 
-/* Transfer a cooked register [0..NUM_REGS+NUM_PSEUDO_REGS).  */
-enum register_status regcache_cooked_read (struct regcache *regcache,
-					   int rawnum, gdb_byte *buf);
 void regcache_cooked_write (struct regcache *regcache, int rawnum,
 			    const gdb_byte *buf);
 
@@ -252,6 +249,8 @@ public:
   /* Make certain that the register REGNUM is up-to-date.  */
   virtual void raw_update (int regnum) = 0;
 
+  /* Transfer a raw register [0..NUM_REGS+NUM_PSEUDO_REGS) from core-gdb to
+     this regcache, return its value in *BUF and return its availability status.  */
   enum register_status cooked_read (int regnum, gdb_byte *buf);
   template<typename T, typename = RequireLongest<T>>
   enum register_status cooked_read (int regnum, T *val);

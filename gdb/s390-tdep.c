@@ -2024,9 +2024,8 @@ s390_register_return_value (struct gdbarch *gdbarch, struct type *type,
 	}
       else
 	{
-	  regcache_cooked_read (regcache, S390_R2_REGNUM, out);
-	  regcache_cooked_read (regcache, S390_R3_REGNUM,
-				out + word_size);
+	  regcache->cooked_read (S390_R2_REGNUM, out);
+	  regcache->cooked_read (S390_R3_REGNUM, out + word_size);
 	}
     }
   else
@@ -2814,7 +2813,7 @@ s390_record_calc_disp_vsce (struct gdbarch *gdbarch, struct regcache *regcache,
   if (tdep->v0_full_regnum == -1 || el * es >= 16)
     return -1;
   if (vx < 16)
-    regcache_cooked_read (regcache, tdep->v0_full_regnum + vx, buf);
+    regcache->cooked_read (tdep->v0_full_regnum + vx, buf);
   else
     regcache->raw_read (S390_V16_REGNUM + vx - 16, buf);
   x = extract_unsigned_integer (buf + el * es, es, byte_order);

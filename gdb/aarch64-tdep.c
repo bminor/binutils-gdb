@@ -1792,7 +1792,7 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
       bfd_byte buf[V_REGISTER_SIZE];
       int len = TYPE_LENGTH (type);
 
-      regcache_cooked_read (regs, AARCH64_V0_REGNUM, buf);
+      regs->cooked_read (AARCH64_V0_REGNUM, buf);
       memcpy (valbuf, buf, len);
     }
   else if (TYPE_CODE (type) == TYPE_CODE_INT
@@ -1828,10 +1828,10 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
       struct type *target_type = check_typedef (TYPE_TARGET_TYPE (type));
       int len = TYPE_LENGTH (target_type);
 
-      regcache_cooked_read (regs, regno, buf);
+      regs->cooked_read (regno, buf);
       memcpy (valbuf, buf, len);
       valbuf += len;
-      regcache_cooked_read (regs, regno + 1, buf);
+      regs->cooked_read (regno + 1, buf);
       memcpy (valbuf, buf, len);
       valbuf += len;
     }
@@ -1853,7 +1853,7 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
 			    i + 1,
 			    gdbarch_register_name (gdbarch, regno));
 	    }
-	  regcache_cooked_read (regs, regno, buf);
+	  regs->cooked_read (regno, buf);
 
 	  memcpy (valbuf, buf, len);
 	  valbuf += len;
@@ -1865,7 +1865,7 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
       /* Short vector is returned in V register.  */
       gdb_byte buf[V_REGISTER_SIZE];
 
-      regcache_cooked_read (regs, AARCH64_V0_REGNUM, buf);
+      regs->cooked_read (AARCH64_V0_REGNUM, buf);
       memcpy (valbuf, buf, TYPE_LENGTH (type));
     }
   else
@@ -1879,7 +1879,7 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
 
       while (len > 0)
 	{
-	  regcache_cooked_read (regs, regno++, buf);
+	  regs->cooked_read (regno++, buf);
 	  memcpy (valbuf, buf, len > X_REGISTER_SIZE ? X_REGISTER_SIZE : len);
 	  len -= X_REGISTER_SIZE;
 	  valbuf += X_REGISTER_SIZE;

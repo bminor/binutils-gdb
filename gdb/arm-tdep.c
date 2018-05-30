@@ -7893,7 +7893,7 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
 	       internal type.  */
 	    bfd_byte tmpbuf[FP_REGISTER_SIZE];
 
-	    regcache_cooked_read (regs, ARM_F0_REGNUM, tmpbuf);
+	    regs->cooked_read (ARM_F0_REGNUM, tmpbuf);
 	    target_float_convert (tmpbuf, arm_ext_type (gdbarch),
 				  valbuf, type);
 	  }
@@ -7904,10 +7904,9 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
 	  /* ARM_FLOAT_VFP can arise if this is a variadic function so
 	     not using the VFP ABI code.  */
 	case ARM_FLOAT_VFP:
-	  regcache_cooked_read (regs, ARM_A1_REGNUM, valbuf);
+	  regs->cooked_read (ARM_A1_REGNUM, valbuf);
 	  if (TYPE_LENGTH (type) > 4)
-	    regcache_cooked_read (regs, ARM_A1_REGNUM + 1,
-				  valbuf + INT_REGISTER_SIZE);
+	    regs->cooked_read (ARM_A1_REGNUM + 1, valbuf + INT_REGISTER_SIZE);
 	  break;
 
 	default:
@@ -7955,7 +7954,7 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
 
       while (len > 0)
 	{
-	  regcache_cooked_read (regs, regno++, tmpbuf);
+	  regs->cooked_read (regno++, tmpbuf);
 	  memcpy (valbuf, tmpbuf,
 		  len > INT_REGISTER_SIZE ? INT_REGISTER_SIZE : len);
 	  len -= INT_REGISTER_SIZE;
@@ -8217,8 +8216,7 @@ arm_return_value (struct gdbarch *gdbarch, struct value *function,
 		regcache_cooked_write (regcache, regnum,
 				       writebuf + i * unit_length);
 	      if (readbuf)
-		regcache_cooked_read (regcache, regnum,
-				      readbuf + i * unit_length);
+		regcache->cooked_read (regnum, readbuf + i * unit_length);
 	    }
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;

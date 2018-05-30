@@ -376,7 +376,7 @@ aarch64_linux_get_syscall_number (struct gdbarch *gdbarch,
   LONGEST ret;
 
   /* Getting the system call number from the register x8.  */
-  regcache_cooked_read (regs, AARCH64_DWARF_X0 + 8, buf);
+  regs->cooked_read (AARCH64_DWARF_X0 + 8, buf);
 
   ret = extract_signed_integer (buf, X_REGISTER_SIZE, byte_order);
 

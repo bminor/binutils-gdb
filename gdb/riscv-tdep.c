@@ -2248,7 +2248,7 @@ riscv_return_value (struct gdbarch  *gdbarch,
 	      regnum = info.argloc[0].loc_data.regno;
 
 	      if (readbuf)
-		regcache_cooked_read (regcache, regnum, readbuf);
+		regcache->cooked_read (regnum, readbuf);
 
 	      if (writebuf)
 		regcache_cooked_write (regcache, regnum, writebuf);
@@ -2265,7 +2265,7 @@ riscv_return_value (struct gdbarch  *gdbarch,
 		      if (readbuf)
 			{
 			  readbuf += info.argloc[1].c_offset;
-			  regcache_cooked_read (regcache, regnum, readbuf);
+			  regcache->cooked_read (regnum, readbuf);
 			}
 
 		      if (writebuf)

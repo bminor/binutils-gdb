@@ -1409,20 +1409,20 @@ sparc32_extract_return_value (struct type *type, struct regcache *regcache,
       || TYPE_CODE (type) == TYPE_CODE_ARRAY)
     {
       /* Floating return values.  */
-      regcache_cooked_read (regcache, SPARC_F0_REGNUM, buf);
+      regcache->cooked_read (SPARC_F0_REGNUM, buf);
       if (len > 4)
-	regcache_cooked_read (regcache, SPARC_F1_REGNUM, buf + 4);
+	regcache->cooked_read (SPARC_F1_REGNUM, buf + 4);
       if (len > 8)
 	{
-	  regcache_cooked_read (regcache, SPARC_F2_REGNUM, buf + 8);
-	  regcache_cooked_read (regcache, SPARC_F3_REGNUM, buf + 12);
+	  regcache->cooked_read (SPARC_F2_REGNUM, buf + 8);
+	  regcache->cooked_read (SPARC_F3_REGNUM, buf + 12);
 	}
       if (len > 16)
 	{
-	  regcache_cooked_read (regcache, SPARC_F4_REGNUM, buf + 16);
-	  regcache_cooked_read (regcache, SPARC_F5_REGNUM, buf + 20);
-	  regcache_cooked_read (regcache, SPARC_F6_REGNUM, buf + 24);
-	  regcache_cooked_read (regcache, SPARC_F7_REGNUM, buf + 28);
+	  regcache->cooked_read (SPARC_F4_REGNUM, buf + 16);
+	  regcache->cooked_read (SPARC_F5_REGNUM, buf + 20);
+	  regcache->cooked_read (SPARC_F6_REGNUM, buf + 24);
+	  regcache->cooked_read (SPARC_F7_REGNUM, buf + 28);
 	}
       memcpy (valbuf, buf, len);
     }
@@ -1431,10 +1431,10 @@ sparc32_extract_return_value (struct type *type, struct regcache *regcache,
       /* Integral and pointer return values.  */
       gdb_assert (sparc_integral_or_pointer_p (type));
 
-      regcache_cooked_read (regcache, SPARC_O0_REGNUM, buf);
+      regcache->cooked_read (SPARC_O0_REGNUM, buf);
       if (len > 4)
 	{
-	  regcache_cooked_read (regcache, SPARC_O1_REGNUM, buf + 4);
+	  regcache->cooked_read (SPARC_O1_REGNUM, buf + 4);
 	  gdb_assert (len == 8);
 	  memcpy (valbuf, buf, 8);
 	}

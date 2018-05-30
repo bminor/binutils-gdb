@@ -1165,7 +1165,7 @@ hppa32_return_value (struct gdbarch *gdbarch, struct value *function,
       for (b = part; b < TYPE_LENGTH (type); b += 4)
 	{
 	  if (readbuf != NULL)
-	    regcache_cooked_read (regcache, reg, readbuf + b);
+	    regcache->cooked_read (reg, readbuf + b);
 	  if (writebuf != NULL)
 	    regcache_cooked_write (regcache, reg, writebuf + b);
 	  reg++;

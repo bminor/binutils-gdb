@@ -227,9 +227,9 @@ vax_return_value (struct gdbarch *gdbarch, struct value *function,
   if (readbuf)
     {
       /* Read the contents of R0 and (if necessary) R1.  */
-      regcache_cooked_read (regcache, VAX_R0_REGNUM, buf);
+      regcache->cooked_read (VAX_R0_REGNUM, buf);
       if (len > 4)
-	regcache_cooked_read (regcache, VAX_R1_REGNUM, buf + 4);
+	regcache->cooked_read (VAX_R1_REGNUM, buf + 4);
       memcpy (readbuf, buf, len);
     }
   if (writebuf)

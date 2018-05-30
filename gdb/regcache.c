@@ -209,7 +209,7 @@ do_cooked_read (void *src, int regnum, gdb_byte *buf)
 {
   struct regcache *regcache = (struct regcache *) src;
 
-  return regcache_cooked_read (regcache, regnum, buf);
+  return regcache->cooked_read (regnum, buf);
 }
 
 readonly_detached_regcache::readonly_detached_regcache (const regcache &src)
@@ -598,12 +598,6 @@ regcache_raw_get_signed (struct regcache *regcache, int regnum)
     throw_error (NOT_AVAILABLE_ERROR,
 		 _("Register %d is not available"), regnum);
   return value;
-}
-
-enum register_status
-regcache_cooked_read (struct regcache *regcache, int regnum, gdb_byte *buf)
-{
-  return regcache->cooked_read (regnum, buf);
 }
 
 enum register_status

@@ -2616,7 +2616,7 @@ ia64_access_rse_fpreg (unw_addr_space_t as, unw_regnum_t uw_regnum,
   /* We never call any libunwind routines that need to write registers.  */
   gdb_assert (!write);
 
-  regcache_cooked_read (regcache, regnum, (gdb_byte *) val);
+  regcache->cooked_read (regnum, (gdb_byte *) val);
 
   return 0;
 }
@@ -3210,7 +3210,7 @@ ia64_extract_return_value (struct type *type, struct regcache *regcache,
 
       while (n-- > 0)
 	{
-	  regcache_cooked_read (regcache, regnum, from);
+	  regcache->cooked_read (regnum, from);
 	  target_float_convert (from, ia64_ext_type (gdbarch),
 				valbuf + offset, float_elt_type);
 	  offset += TYPE_LENGTH (float_elt_type);

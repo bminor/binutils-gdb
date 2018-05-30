@@ -959,7 +959,7 @@ avr_return_value (struct gdbarch *gdbarch, struct value *function,
   if (readbuf != NULL)
     {
       for (i = 0; i < TYPE_LENGTH (valtype); i++)
-        regcache_cooked_read (regcache, lsb_reg + i, readbuf + i);
+	regcache->cooked_read (lsb_reg + i, readbuf + i);
     }
 
   return RETURN_VALUE_REGISTER_CONVENTION;

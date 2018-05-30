@@ -725,7 +725,7 @@ tic6x_extract_return_value (struct type *valtype, struct regcache *regcache,
 	regcache_cooked_read_part (regcache, TIC6X_A4_REGNUM, 4 - len, len,
 				   valbuf);
       else
-	regcache_cooked_read (regcache, TIC6X_A4_REGNUM, valbuf);
+	regcache->cooked_read (TIC6X_A4_REGNUM, valbuf);
     }
   else if (len <= 8)
     {
@@ -736,13 +736,13 @@ tic6x_extract_return_value (struct type *valtype, struct regcache *regcache,
 	 lower (even) register.  */
       if (byte_order == BFD_ENDIAN_BIG)
 	{
-	  regcache_cooked_read (regcache, TIC6X_A4_REGNUM, valbuf + 4);
-	  regcache_cooked_read (regcache, TIC6X_A5_REGNUM, valbuf);
+	  regcache->cooked_read (TIC6X_A4_REGNUM, valbuf + 4);
+	  regcache->cooked_read (TIC6X_A5_REGNUM, valbuf);
 	}
       else
 	{
-	  regcache_cooked_read (regcache, TIC6X_A4_REGNUM, valbuf);
-	  regcache_cooked_read (regcache, TIC6X_A5_REGNUM, valbuf + 4);
+	  regcache->cooked_read (TIC6X_A4_REGNUM, valbuf);
+	  regcache->cooked_read (TIC6X_A5_REGNUM, valbuf + 4);
 	}
     }
 }

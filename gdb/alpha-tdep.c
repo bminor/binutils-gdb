@@ -483,12 +483,12 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
       switch (TYPE_LENGTH (valtype))
 	{
 	case 4:
-	  regcache_cooked_read (regcache, ALPHA_FP0_REGNUM, raw_buffer);
+	  regcache->cooked_read (ALPHA_FP0_REGNUM, raw_buffer);
 	  alpha_sts (gdbarch, valbuf, raw_buffer);
 	  break;
 
 	case 8:
-	  regcache_cooked_read (regcache, ALPHA_FP0_REGNUM, valbuf);
+	  regcache->cooked_read (ALPHA_FP0_REGNUM, valbuf);
 	  break;
 
 	case 16:
@@ -507,12 +507,12 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
 	{
 	case 8:
 	  /* ??? This isn't correct wrt the ABI, but it's what GCC does.  */
-	  regcache_cooked_read (regcache, ALPHA_FP0_REGNUM, valbuf);
+	  regcache->cooked_read (ALPHA_FP0_REGNUM, valbuf);
 	  break;
 
 	case 16:
-	  regcache_cooked_read (regcache, ALPHA_FP0_REGNUM, valbuf);
-	  regcache_cooked_read (regcache, ALPHA_FP0_REGNUM + 1, valbuf + 8);
+	  regcache->cooked_read (ALPHA_FP0_REGNUM, valbuf);
+	  regcache->cooked_read (ALPHA_FP0_REGNUM + 1, valbuf + 8);
 	  break;
 
 	case 32:

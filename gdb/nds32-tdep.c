@@ -1740,9 +1740,9 @@ nds32_extract_return_value (struct gdbarch *gdbarch, struct type *type,
   if (abi_use_fpr && calling_use_fpr)
     {
       if (len == 4)
-	regcache_cooked_read (regcache, tdep->fs0_regnum, valbuf);
+	regcache->cooked_read (tdep->fs0_regnum, valbuf);
       else if (len == 8)
-	regcache_cooked_read (regcache, NDS32_FD0_REGNUM, valbuf);
+	regcache->cooked_read (NDS32_FD0_REGNUM, valbuf);
       else
 	internal_error (__FILE__, __LINE__,
 			_("Cannot extract return value of %d bytes "
@@ -1788,7 +1788,7 @@ nds32_extract_return_value (struct gdbarch *gdbarch, struct type *type,
 	}
       else if (len == 4)
 	{
-	  regcache_cooked_read (regcache, NDS32_R0_REGNUM, valbuf);
+	  regcache->cooked_read (NDS32_R0_REGNUM, valbuf);
 	}
       else if (len < 8)
 	{
@@ -1805,8 +1805,8 @@ nds32_extract_return_value (struct gdbarch *gdbarch, struct type *type,
 	}
       else
 	{
-	  regcache_cooked_read (regcache, NDS32_R0_REGNUM, valbuf);
-	  regcache_cooked_read (regcache, NDS32_R0_REGNUM + 1, valbuf + 4);
+	  regcache->cooked_read (NDS32_R0_REGNUM, valbuf);
+	  regcache->cooked_read (NDS32_R0_REGNUM + 1, valbuf + 4);
 	}
     }
 }

@@ -1337,7 +1337,7 @@ mips_linux_get_syscall_number (struct gdbarch *gdbarch,
 
   /* Getting the system call number from the register.
      syscall number is in v0 or $2.  */
-  regcache_cooked_read (regcache, MIPS_V0_REGNUM, buf);
+  regcache->cooked_read (MIPS_V0_REGNUM, buf);
 
   ret = extract_signed_integer (buf, regsize, byte_order);
 

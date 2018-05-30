@@ -1387,7 +1387,7 @@ spu_regcache_to_value (struct regcache *regcache, int regnum,
     {
       while (len >= 16)
 	{
-	  regcache_cooked_read (regcache, regnum++, out);
+	  regcache->cooked_read (regnum++, out);
 	  out += 16;
 	  len -= 16;
 	}
@@ -1480,7 +1480,7 @@ spu_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   sp -= 32;
 
   /* Store stack back chain.  */
-  regcache_cooked_read (regcache, SPU_RAW_SP_REGNUM, buf);
+  regcache->cooked_read (SPU_RAW_SP_REGNUM, buf);
   target_write_memory (sp, buf, 16);
 
   /* Finally, update all slots of the SP register.  */
