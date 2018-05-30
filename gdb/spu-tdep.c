@@ -278,7 +278,7 @@ spu_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
   switch (regnum)
     {
     case SPU_SP_REGNUM:
-      regcache_raw_read (regcache, SPU_RAW_SP_REGNUM, reg);
+      regcache->raw_read (SPU_RAW_SP_REGNUM, reg);
       memcpy (reg, buf, 4);
       regcache_raw_write (regcache, SPU_RAW_SP_REGNUM, reg);
       break;

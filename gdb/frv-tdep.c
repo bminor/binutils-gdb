@@ -349,7 +349,7 @@ frv_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       int byte_num = (reg - accg0_regnum) % 4;
       gdb_byte buf[4];
 
-      regcache_raw_read (regcache, raw_regnum, buf);
+      regcache->raw_read (raw_regnum, buf);
       buf[byte_num] = ((bfd_byte *) buffer)[0];
       regcache_raw_write (regcache, raw_regnum, buf);
     }

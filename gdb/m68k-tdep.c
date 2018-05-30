@@ -286,14 +286,14 @@ m68k_extract_return_value (struct type *type, struct regcache *regcache,
 
   if (len <= 4)
     {
-      regcache_raw_read (regcache, M68K_D0_REGNUM, buf);
+      regcache->raw_read (M68K_D0_REGNUM, buf);
       memcpy (valbuf, buf + (4 - len), len);
     }
   else if (len <= 8)
     {
-      regcache_raw_read (regcache, M68K_D0_REGNUM, buf);
+      regcache->raw_read (M68K_D0_REGNUM, buf);
       memcpy (valbuf, buf + (8 - len), len - 4);
-      regcache_raw_read (regcache, M68K_D1_REGNUM, valbuf + (len - 4));
+      regcache->raw_read (M68K_D1_REGNUM, valbuf + (len - 4));
     }
   else
     internal_error (__FILE__, __LINE__,
@@ -311,11 +311,11 @@ m68k_svr4_extract_return_value (struct type *type, struct regcache *regcache,
   if (tdep->float_return && TYPE_CODE (type) == TYPE_CODE_FLT)
     {
       struct type *fpreg_type = register_type (gdbarch, M68K_FP0_REGNUM);
-      regcache_raw_read (regcache, M68K_FP0_REGNUM, buf);
+      regcache->raw_read (M68K_FP0_REGNUM, buf);
       target_float_convert (buf, fpreg_type, valbuf, type);
     }
   else if (TYPE_CODE (type) == TYPE_CODE_PTR && TYPE_LENGTH (type) == 4)
-    regcache_raw_read (regcache, M68K_A0_REGNUM, valbuf);
+    regcache->raw_read (M68K_A0_REGNUM, valbuf);
   else
     m68k_extract_return_value (type, regcache, valbuf);
 }

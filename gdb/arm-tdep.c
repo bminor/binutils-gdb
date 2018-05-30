@@ -8800,7 +8800,7 @@ arm_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
       double_regnum = user_reg_map_name_to_regnum (gdbarch, name_buf,
 						   strlen (name_buf));
 
-      regcache_raw_read (regcache, double_regnum, reg_buf);
+      regcache->raw_read (double_regnum, reg_buf);
       memcpy (reg_buf + offset, buf, 4);
       regcache_raw_write (regcache, double_regnum, reg_buf);
     }

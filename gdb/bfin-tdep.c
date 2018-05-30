@@ -719,7 +719,7 @@ bfin_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 		    _("invalid register number %d"), regnum);
 
   /* Overlay the CC bit in the ASTAT register.  */
-  regcache_raw_read (regcache, BFIN_ASTAT_REGNUM, buf);
+  regcache->raw_read (BFIN_ASTAT_REGNUM, buf);
   buf[0] = (buf[0] & ~ASTAT_CC) | ((buffer[0] & 1) << ASTAT_CC_POS);
   regcache_raw_write (regcache, BFIN_ASTAT_REGNUM, buf);
 }

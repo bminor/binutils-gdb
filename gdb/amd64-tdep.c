@@ -422,8 +422,7 @@ amd64_pseudo_register_write (struct gdbarch *gdbarch,
       if (gpnum >= AMD64_NUM_LOWER_BYTE_REGS)
 	{
 	  /* Read ... AH, BH, CH, DH.  */
-	  regcache_raw_read (regcache,
-			     gpnum - AMD64_NUM_LOWER_BYTE_REGS, raw_buf);
+	  regcache->raw_read (gpnum - AMD64_NUM_LOWER_BYTE_REGS, raw_buf);
 	  /* ... Modify ... (always little endian).  */
 	  memcpy (raw_buf + 1, buf, 1);
 	  /* ... Write.  */
@@ -433,7 +432,7 @@ amd64_pseudo_register_write (struct gdbarch *gdbarch,
       else
 	{
 	  /* Read ...  */
-	  regcache_raw_read (regcache, gpnum, raw_buf);
+	  regcache->raw_read (gpnum, raw_buf);
 	  /* ... Modify ... (always little endian).  */
 	  memcpy (raw_buf, buf, 1);
 	  /* ... Write.  */
@@ -445,7 +444,7 @@ amd64_pseudo_register_write (struct gdbarch *gdbarch,
       int gpnum = regnum - tdep->eax_regnum;
 
       /* Read ...  */
-      regcache_raw_read (regcache, gpnum, raw_buf);
+      regcache->raw_read (gpnum, raw_buf);
       /* ... Modify ... (always little endian).  */
       memcpy (raw_buf, buf, 4);
       /* ... Write.  */
@@ -771,8 +770,8 @@ amd64_return_value (struct gdbarch *gdbarch, struct value *function,
     {
       if (readbuf)
 	{
-	  regcache_raw_read (regcache, AMD64_ST0_REGNUM, readbuf);
-	  regcache_raw_read (regcache, AMD64_ST1_REGNUM, readbuf + 16);
+	  regcache->raw_read (AMD64_ST0_REGNUM, readbuf);
+	  regcache->raw_read (AMD64_ST1_REGNUM, readbuf + 16);
 	}
 
       if (writebuf)

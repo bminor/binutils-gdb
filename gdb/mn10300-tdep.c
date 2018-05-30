@@ -212,15 +212,15 @@ mn10300_extract_return_value (struct gdbarch *gdbarch, struct type *type,
   gdb_assert (regsz <= MN10300_MAX_REGISTER_SIZE);
   if (len <= regsz)
     {
-      regcache_raw_read (regcache, reg, buf);
+      regcache->raw_read (reg, buf);
       memcpy (valbuf, buf, len);
     }
   else if (len <= 2 * regsz)
     {
-      regcache_raw_read (regcache, reg, buf);
+      regcache->raw_read (reg, buf);
       memcpy (valbuf, buf, regsz);
       gdb_assert (regsz == register_size (gdbarch, reg + 1));
-      regcache_raw_read (regcache, reg + 1, buf);
+      regcache->raw_read (reg + 1, buf);
       memcpy ((char *) valbuf + regsz, buf, len - regsz);
     }
   else

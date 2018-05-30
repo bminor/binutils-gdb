@@ -1324,7 +1324,7 @@ sh_extract_return_value_nofpu (struct type *type, struct regcache *regcache,
     {
       int i, regnum = R0_REGNUM;
       for (i = 0; i < len; i += 4)
-	regcache_raw_read (regcache, regnum++, valbuf + i);
+	regcache->raw_read (regnum++, valbuf + i);
     }
   else
     error (_("bad size for return value"));
@@ -1341,10 +1341,10 @@ sh_extract_return_value_fpu (struct type *type, struct regcache *regcache,
       int i, regnum = gdbarch_fp0_regnum (gdbarch);
       for (i = 0; i < len; i += 4)
 	if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
-	  regcache_raw_read (regcache, regnum++,
+	  regcache->raw_read (regnum++,
 			     valbuf + len - 4 - i);
 	else
-	  regcache_raw_read (regcache, regnum++, valbuf + i);
+	  regcache->raw_read (regnum++, valbuf + i);
     }
   else
     sh_extract_return_value_nofpu (type, regcache, valbuf);

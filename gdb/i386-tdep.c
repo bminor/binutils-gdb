@@ -2802,7 +2802,7 @@ i386_extract_return_value (struct gdbarch *gdbarch, struct type *type,
 	 its contents to the desired type.  This is probably not
 	 exactly how it would happen on the target itself, but it is
 	 the best we can do.  */
-      regcache_raw_read (regcache, I386_ST0_REGNUM, buf);
+      regcache->raw_read (I386_ST0_REGNUM, buf);
       target_float_convert (buf, i387_ext_type (gdbarch), valbuf, type);
     }
   else
@@ -2812,14 +2812,14 @@ i386_extract_return_value (struct gdbarch *gdbarch, struct type *type,
 
       if (len <= low_size)
 	{
-	  regcache_raw_read (regcache, LOW_RETURN_REGNUM, buf);
+	  regcache->raw_read (LOW_RETURN_REGNUM, buf);
 	  memcpy (valbuf, buf, len);
 	}
       else if (len <= (low_size + high_size))
 	{
-	  regcache_raw_read (regcache, LOW_RETURN_REGNUM, buf);
+	  regcache->raw_read (LOW_RETURN_REGNUM, buf);
 	  memcpy (valbuf, buf, low_size);
-	  regcache_raw_read (regcache, HIGH_RETURN_REGNUM, buf);
+	  regcache->raw_read (HIGH_RETURN_REGNUM, buf);
 	  memcpy (valbuf + low_size, buf, len - low_size);
 	}
       else
@@ -3474,7 +3474,7 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       int fpnum = i386_mmx_regnum_to_fp_regnum (regcache, regnum);
 
       /* Read ...  */
-      regcache_raw_read (regcache, fpnum, raw_buf);
+      regcache->raw_read (fpnum, raw_buf);
       /* ... Modify ... (always little endian).  */
       memcpy (raw_buf, buf, register_size (gdbarch, regnum));
       /* ... Write.  */
@@ -3496,9 +3496,8 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 	  upper = extract_unsigned_integer (buf + size, size, byte_order);
 
 	  /* Fetching register buffer.  */
-	  regcache_raw_read (regcache,
-			     I387_BND0R_REGNUM (tdep) + regnum,
-			     raw_buf);
+	  regcache->raw_read (I387_BND0R_REGNUM (tdep) + regnum,
+			      raw_buf);
 
 	  upper = ~upper;
 
@@ -3583,7 +3582,7 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 	  int gpnum = regnum - tdep->ax_regnum;
 
 	  /* Read ...  */
-	  regcache_raw_read (regcache, gpnum, raw_buf);
+	  regcache->raw_read (gpnum, raw_buf);
 	  /* ... Modify ... (always little endian).  */
 	  memcpy (raw_buf, buf, 2);
 	  /* ... Write.  */
@@ -3594,7 +3593,7 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 	  int gpnum = regnum - tdep->al_regnum;
 
 	  /* Read ...  We read both lower and upper registers.  */
-	  regcache_raw_read (regcache, gpnum % 4, raw_buf);
+	  regcache->raw_read (gpnum % 4, raw_buf);
 	  /* ... Modify ... (always little endian).  */
 	  if (gpnum >= 4)
 	    memcpy (raw_buf + 1, buf, 1);

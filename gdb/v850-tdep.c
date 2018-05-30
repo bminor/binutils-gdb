@@ -1128,7 +1128,7 @@ v850_extract_return_value (struct type *type, struct regcache *regcache,
       gdb_byte buf[v850_reg_size];
       for (i = 0; len > 0; i += 4, len -= 4)
 	{
-	  regcache_raw_read (regcache, regnum++, buf);
+	  regcache->raw_read (regnum++, buf);
 	  memcpy (valbuf + i, buf, len > 4 ? 4 : len);
 	}
     }

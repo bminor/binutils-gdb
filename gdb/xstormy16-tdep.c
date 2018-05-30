@@ -163,7 +163,7 @@ xstormy16_extract_return_value (struct type *type, struct regcache *regcache,
   int i, regnum = E_1ST_ARG_REGNUM;
 
   for (i = 0; i < len; i += xstormy16_reg_size)
-    regcache_raw_read (regcache, regnum++, valbuf + i);
+    regcache->raw_read (regnum++, valbuf + i);
 }
 
 /* Function: xstormy16_store_return_value

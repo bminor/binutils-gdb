@@ -511,12 +511,6 @@ regcache::raw_update (int regnum)
 }
 
 enum register_status
-regcache_raw_read (struct regcache *regcache, int regnum, gdb_byte *buf)
-{
-  return regcache->raw_read (regnum, buf);
-}
-
-enum register_status
 readable_regcache::raw_read (int regnum, gdb_byte *buf)
 {
   gdb_assert (buf != NULL);

@@ -1598,7 +1598,7 @@ xtensa_extract_return_value (struct type *type,
       if (len < 4)
 	regcache_raw_read_part (regcache, areg, offset, len, valbuf);
       else
-	regcache_raw_read (regcache, areg, valbuf);
+	regcache->raw_read (areg, valbuf);
     }
 }
 
@@ -1928,7 +1928,7 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 	 to modify WINDOWSTART register to make it look like there
 	 is only one register window corresponding to WINDOWEBASE.  */
 
-      regcache_raw_read (regcache, gdbarch_tdep (gdbarch)->wb_regnum, buf);
+      regcache->raw_read (gdbarch_tdep (gdbarch)->wb_regnum, buf);
       regcache_cooked_write_unsigned
 	(regcache, gdbarch_tdep (gdbarch)->ws_regnum,
 	 1 << extract_unsigned_integer (buf, 4, byte_order));

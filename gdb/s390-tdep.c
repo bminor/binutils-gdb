@@ -2816,7 +2816,7 @@ s390_record_calc_disp_vsce (struct gdbarch *gdbarch, struct regcache *regcache,
   if (vx < 16)
     regcache_cooked_read (regcache, tdep->v0_full_regnum + vx, buf);
   else
-    regcache_raw_read (regcache, S390_V16_REGNUM + vx - 16, buf);
+    regcache->raw_read (S390_V16_REGNUM + vx - 16, buf);
   x = extract_unsigned_integer (buf + el * es, es, byte_order);
   *res = s390_record_calc_disp_common (gdbarch, regcache, x, bd, dh);
   return 0;

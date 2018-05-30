@@ -38,8 +38,6 @@ extern struct regcache *get_thread_arch_aspace_regcache (ptid_t,
 /* Transfer a raw register [0..NUM_REGS) between core-gdb and the
    regcache.  The read variants return the status of the register.  */
 
-enum register_status regcache_raw_read (struct regcache *regcache,
-					int rawnum, gdb_byte *buf);
 void regcache_raw_write (struct regcache *regcache, int rawnum,
 			 const gdb_byte *buf);
 extern enum register_status
@@ -245,6 +243,9 @@ public:
   readable_regcache (gdbarch *gdbarch, bool has_pseudo)
     : reg_buffer (gdbarch, has_pseudo)
   {}
+
+  /* Transfer a raw register [0..NUM_REGS) from core-gdb to this regcache,
+     return its value in *BUF and return its availability status.  */
 
   enum register_status raw_read (int regnum, gdb_byte *buf);
   template<typename T, typename = RequireLongest<T>>
