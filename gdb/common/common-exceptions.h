@@ -146,7 +146,7 @@ extern int exceptions_state_mc_catch (struct gdb_exception *, int);
 #if GDB_XCPT != GDB_XCPT_SJMP
 extern void *exception_try_scope_entry (void);
 extern void exception_try_scope_exit (void *saved_state);
-extern void exception_rethrow (void);
+extern void exception_rethrow (void) ATTRIBUTE_NORETURN;
 #endif
 
 /* Macro to wrap up standard try/catch behavior.
