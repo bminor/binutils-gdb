@@ -541,7 +541,7 @@ addr_info_make_relative (section_addr_info *addrs, bfd *abfd)
 
   std::vector<const struct other_sections *>::iterator abfd_sorted_iter
     = abfd_addrs_sorted.begin ();
-  for (const struct other_sections *sect : addrs_sorted)
+  for (const other_sections *sect : addrs_sorted)
     {
       const char *sect_name = addr_section_name (sect->name.c_str ());
 

@@ -1,3 +1,15 @@
+2018-05-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* breakpoint.c (print_solib_event, check_status_catch_solib):
+	Remove struct keyword in range-based for loops.
+	* dbxread.c (find_corresponding_bincl_psymtab): Likewise.
+	* dwarf2read.c (compute_delayed_physnames, rust_union_quirks);
+	Likewise.
+	* linespec.c (find_superclass_methods, search_minsyms_for_name):
+	Likewise.
+	* symfile.c (addr_info_make_relative): Likewise.
+	* thread.c (value_in_thread_stack_temporaries): Likewise.
+
 2018-05-29  Weimin Pan  <weimin.pan@oracle.com>
 
 	* minsyms.h (lookup_minimal_symbol_and_objfile): Remove declaration.

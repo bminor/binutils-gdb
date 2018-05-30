@@ -4615,7 +4615,7 @@ print_solib_event (int is_catchpoint)
       current_uiout->text (_("  Inferior loaded "));
       ui_out_emit_list list_emitter (current_uiout, "added");
       bool first = true;
-      for (struct so_list *iter : current_program_space->added_solibs)
+      for (so_list *iter : current_program_space->added_solibs)
 	{
 	  if (!first)
 	    current_uiout->text ("    ");
@@ -8004,7 +8004,7 @@ check_status_catch_solib (struct bpstats *bs)
 
   if (self->is_load)
     {
-      for (struct so_list *iter : current_program_space->added_solibs)
+      for (so_list *iter : current_program_space->added_solibs)
 	{
 	  if (!self->regex
 	      || self->compiled->exec (iter->so_name, 0, NULL, 0) == 0)

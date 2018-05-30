@@ -3697,7 +3697,7 @@ find_superclass_methods (std::vector<struct type *> &&superclasses,
     {
       std::vector<struct type *> new_supers;
 
-      for (struct type *t : superclasses)
+      for (type *t : superclasses)
 	find_methods (t, name_lang, name, result_names, &new_supers);
 
       if (result_names->size () != old_len || new_supers.empty ())
@@ -4464,7 +4464,7 @@ search_minsyms_for_name (struct collect_info *info,
 	 classification as the very first minsym in the list.  */
       classification = classify_mtype (MSYMBOL_TYPE (minsyms[0].minsym));
 
-      for (const struct bound_minimal_symbol &item : minsyms)
+      for (const bound_minimal_symbol &item : minsyms)
 	{
 	  if (classify_mtype (MSYMBOL_TYPE (item.minsym)) != classification)
 	    break;

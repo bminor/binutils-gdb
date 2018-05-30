@@ -783,7 +783,7 @@ value_in_thread_stack_temporaries (struct value *val, ptid_t ptid)
   struct thread_info *tp = find_thread_ptid (ptid);
 
   gdb_assert (tp != NULL && tp->stack_temporaries_enabled);
-  for (struct value *v : tp->stack_temporaries)
+  for (value *v : tp->stack_temporaries)
     if (v == val)
       return true;
 

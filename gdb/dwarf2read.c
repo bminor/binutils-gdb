@@ -9667,7 +9667,7 @@ compute_delayed_physnames (struct dwarf2_cu *cu)
     return;
   gdb_assert (cu->language == language_cplus);
 
-  for (struct delayed_method_info &mi : cu->method_list)
+  for (const delayed_method_info &mi : cu->method_list)
     {
       const char *physname;
       struct fn_fieldlist *fn_flp
@@ -10086,8 +10086,8 @@ static void
 rust_union_quirks (struct dwarf2_cu *cu)
 {
   gdb_assert (cu->language == language_rust);
-  for (struct type *type : cu->rust_unions)
-    quirk_rust_enum (type, cu->per_cu->dwarf2_per_objfile->objfile);
+  for (type *type_ : cu->rust_unions)
+    quirk_rust_enum (type_, cu->per_cu->dwarf2_per_objfile->objfile);
   /* We don't need this any more.  */
   cu->rust_unions.clear ();
 }

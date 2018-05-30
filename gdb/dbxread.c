@@ -864,7 +864,7 @@ dbx_next_symbol_text (struct objfile *objfile)
 static struct partial_symtab *
 find_corresponding_bincl_psymtab (const char *name, int instance)
 {
-  for (struct header_file_location &bincl : *bincl_list)
+  for (const header_file_location &bincl : *bincl_list)
     if (bincl.instance == instance
 	&& strcmp (name, bincl.name) == 0)
       return bincl.pst;
