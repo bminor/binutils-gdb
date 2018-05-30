@@ -50,12 +50,6 @@ extern void regcache_raw_write_unsigned (struct regcache *regcache,
 extern LONGEST regcache_raw_get_signed (struct regcache *regcache,
 					int regnum);
 
-/* Read register REGNUM from REGCACHE and return a new value.  This
-   will call mark_value_bytes_unavailable as appropriate.  */
-
-struct value *regcache_cooked_read_value (struct regcache *regcache,
-					  int regnum);
-
 /* Read a register as a signed/unsigned quantity.  */
 extern enum register_status
   regcache_cooked_read_signed (struct regcache *regcache,
@@ -239,6 +233,8 @@ public:
   enum register_status cooked_read_part (int regnum, int offset, int len,
 					 gdb_byte *buf);
 
+  /* Read register REGNUM from the regcache and return a new value.  This
+     will call mark_value_bytes_unavailable as appropriate.  */
   struct value *cooked_read_value (int regnum);
 
 protected:

@@ -639,12 +639,6 @@ readable_regcache::cooked_read (int regnum, gdb_byte *buf)
 }
 
 struct value *
-regcache_cooked_read_value (struct regcache *regcache, int regnum)
-{
-  return regcache->cooked_read_value (regnum);
-}
-
-struct value *
 readable_regcache::cooked_read_value (int regnum)
 {
   gdb_assert (regnum >= 0);
