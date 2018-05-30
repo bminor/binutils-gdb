@@ -2486,7 +2486,7 @@ func_command (const char *arg, int from_tty)
 
   struct frame_info *frame = find_frame_for_function (arg);
   if (frame == NULL)
-    error (_("'%s' not within current stack frame.\n"), arg);
+    error (_("'%s' not within current stack frame."), arg);
   if (frame != get_selected_frame (NULL))
     {
       select_frame (frame);

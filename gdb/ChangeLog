@@ -1,3 +1,7 @@
+2018-05-30  Joel Brobecker  <brobecker@adacore.com>
+
+	* stack.c (func_command): Remove trailing newline in call to error.
+
 2018-05-30  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* regcache.h (regcache_raw_collect): Remove, update callers to
