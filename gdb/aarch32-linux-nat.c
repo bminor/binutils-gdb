@@ -61,12 +61,12 @@ aarch32_gp_regcache_collect (const struct regcache *regcache, uint32_t *regs,
 
   for (regno = ARM_A1_REGNUM; regno <= ARM_PC_REGNUM; regno++)
     {
-      if (REG_VALID == regcache_register_status (regcache, regno))
+      if (REG_VALID == regcache->get_register_status (regno))
 	regcache_raw_collect (regcache, regno, &regs[regno]);
     }
 
   if (arm_apcs_32
-      && REG_VALID == regcache_register_status (regcache, ARM_PS_REGNUM))
+      && REG_VALID == regcache->get_register_status (ARM_PS_REGNUM))
     {
       uint32_t cpsr = regs[ARM_CPSR_GREGNUM];
 

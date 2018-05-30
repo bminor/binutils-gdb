@@ -321,13 +321,6 @@ regcache::restore (readonly_detached_regcache *src)
 }
 
 enum register_status
-regcache_register_status (const struct regcache *regcache, int regnum)
-{
-  gdb_assert (regcache != NULL);
-  return regcache->get_register_status (regnum);
-}
-
-enum register_status
 reg_buffer::get_register_status (int regnum) const
 {
   assert_regnum (regnum);

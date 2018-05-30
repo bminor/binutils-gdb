@@ -264,7 +264,7 @@ store_gregs_to_thread (const struct regcache *regcache)
       int regno;
 
       for (regno = AARCH64_X0_REGNUM; regno <= AARCH64_CPSR_REGNUM; regno++)
-	if (REG_VALID == regcache_register_status (regcache, regno))
+	if (REG_VALID == regcache->get_register_status (regno))
 	  regcache_raw_collect (regcache, regno,
 				&regs[regno - AARCH64_X0_REGNUM]);
     }
@@ -361,14 +361,14 @@ store_fpregs_to_thread (const struct regcache *regcache)
 	perror_with_name (_("Unable to fetch FP/SIMD registers."));
 
       for (regno = AARCH64_V0_REGNUM; regno <= AARCH64_V31_REGNUM; regno++)
-	if (REG_VALID == regcache_register_status (regcache, regno))
+	if (REG_VALID == regcache->get_register_status (regno))
 	  regcache_raw_collect (regcache, regno,
 				(char *) &regs.vregs[regno - AARCH64_V0_REGNUM]);
 
-      if (REG_VALID == regcache_register_status (regcache, AARCH64_FPSR_REGNUM))
+      if (REG_VALID == regcache->get_register_status (AARCH64_FPSR_REGNUM))
 	regcache_raw_collect (regcache, AARCH64_FPSR_REGNUM,
 			      (char *) &regs.fpsr);
-      if (REG_VALID == regcache_register_status (regcache, AARCH64_FPCR_REGNUM))
+      if (REG_VALID == regcache->get_register_status (AARCH64_FPCR_REGNUM))
 	regcache_raw_collect (regcache, AARCH64_FPCR_REGNUM,
 			      (char *) &regs.fpcr);
     }

@@ -265,7 +265,7 @@ gnu_store_registers (struct target_ops *ops,
 	  proc_debug (thread, "storing all registers");
 
 	  for (i = 0; i < I386_NUM_GREGS; i++)
-	    if (REG_VALID == regcache_register_status (regcache, i))
+	    if (REG_VALID == regcache->get_register_status (i))
 	      regcache_raw_collect (regcache, i, REG_ADDR (state, i));
 	}
       else
@@ -273,7 +273,7 @@ gnu_store_registers (struct target_ops *ops,
 	  proc_debug (thread, "storing register %s",
 		      gdbarch_register_name (gdbarch, regno));
 
-	  gdb_assert (REG_VALID == regcache_register_status (regcache, regno));
+	  gdb_assert (REG_VALID == regcache->get_register_status (regno));
 	  regcache_raw_collect (regcache, regno, REG_ADDR (state, regno));
 	}
 

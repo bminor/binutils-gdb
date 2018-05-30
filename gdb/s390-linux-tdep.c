@@ -295,8 +295,8 @@ s390_iterate_over_regset_sections (struct gdbarch *gdbarch,
      available.  */
   if (tdep->have_tdb
       && (regcache == NULL
-	  || REG_VALID == regcache_register_status (regcache,
-						    S390_TDB_DWORD0_REGNUM)))
+	  || (REG_VALID
+	      == regcache->get_register_status (S390_TDB_DWORD0_REGNUM))))
     cb (".reg-s390-tdb", s390_sizeof_tdbregset, &s390_tdb_regset,
 	"s390 TDB", cb_data);
 
@@ -313,14 +313,12 @@ s390_iterate_over_regset_sections (struct gdbarch *gdbarch,
   if (tdep->have_gs)
     {
       if (regcache == NULL
-	  || REG_VALID == regcache_register_status (regcache,
-						    S390_GSD_REGNUM))
+	  || REG_VALID == regcache->get_register_status (S390_GSD_REGNUM))
 	cb (".reg-s390-gs-cb", 4 * 8, &s390_gs_regset,
 	    "s390 guarded-storage registers", cb_data);
 
       if (regcache == NULL
-	  || REG_VALID == regcache_register_status (regcache,
-						    S390_BC_GSD_REGNUM))
+	  || REG_VALID == regcache->get_register_status (S390_BC_GSD_REGNUM))
 	cb (".reg-s390-gs-bc", 4 * 8, &s390_gsbc_regset,
 	    "s390 guarded-storage broadcast control", cb_data);
     }

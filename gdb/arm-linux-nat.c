@@ -176,12 +176,12 @@ store_fpregs (const struct regcache *regcache)
     perror_with_name (_("Unable to fetch the floating point registers."));
 
   /* Store fpsr.  */
-  if (REG_VALID == regcache_register_status (regcache, ARM_FPS_REGNUM))
+  if (REG_VALID == regcache->get_register_status (ARM_FPS_REGNUM))
     regcache_raw_collect (regcache, ARM_FPS_REGNUM, fp + NWFPE_FPSR_OFFSET);
 
   /* Store the floating point registers.  */
   for (regno = ARM_F0_REGNUM; regno <= ARM_F7_REGNUM; regno++)
-    if (REG_VALID == regcache_register_status (regcache, regno))
+    if (REG_VALID == regcache->get_register_status (regno))
       collect_nwfpe_register (regcache, regno, fp);
 
   if (have_ptrace_getregset == TRIBOOL_TRUE)
@@ -318,20 +318,17 @@ store_wmmx_regs (const struct regcache *regcache)
     perror_with_name (_("Unable to fetch WMMX registers."));
 
   for (regno = 0; regno < 16; regno++)
-    if (REG_VALID == regcache_register_status (regcache,
-					       regno + ARM_WR0_REGNUM))
+    if (REG_VALID == regcache->get_register_status (regno + ARM_WR0_REGNUM))
       regcache_raw_collect (regcache, regno + ARM_WR0_REGNUM,
 			    &regbuf[regno * 8]);
 
   for (regno = 0; regno < 2; regno++)
-    if (REG_VALID == regcache_register_status (regcache,
-					       regno + ARM_WCSSF_REGNUM))
+    if (REG_VALID == regcache->get_register_status (regno + ARM_WCSSF_REGNUM))
       regcache_raw_collect (regcache, regno + ARM_WCSSF_REGNUM,
 			    &regbuf[16 * 8 + regno * 4]);
 
   for (regno = 0; regno < 4; regno++)
-    if (REG_VALID == regcache_register_status (regcache,
-					       regno + ARM_WCGR0_REGNUM))
+    if (REG_VALID == regcache->get_register_status (regno + ARM_WCGR0_REGNUM))
       regcache_raw_collect (regcache, regno + ARM_WCGR0_REGNUM,
 			    &regbuf[16 * 8 + 2 * 4 + regno * 4]);
 

@@ -35,9 +35,6 @@ extern struct regcache *get_thread_arch_aspace_regcache (ptid_t,
 							 struct gdbarch *,
 							 struct address_space *);
 
-enum register_status regcache_register_status (const struct regcache *regcache,
-					       int regnum);
-
 /* Make certain that the register REGNUM in REGCACHE is up-to-date.  */
 
 void regcache_raw_update (struct regcache *regcache, int regnum);
@@ -210,6 +207,8 @@ public:
   /* Return regcache's architecture.  */
   gdbarch *arch () const;
 
+  /* Get the availability status of the value of register REGNUM in this
+     buffer.  */
   enum register_status get_register_status (int regnum) const;
 
   virtual ~reg_buffer ()
