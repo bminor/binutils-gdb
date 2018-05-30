@@ -488,7 +488,7 @@ sol_thread_target::fetch_registers (struct regcache *regcache, int regnum)
   gdb_gregset_t *gregset_p = &gregset;
   gdb_fpregset_t *fpregset_p = &fpregset;
   struct target_ops *beneath = find_target_beneath (this);
-  ptid_t ptid = regcache_get_ptid (regcache);
+  ptid_t ptid = regcache->ptid ();
 
   if (!ptid_tid_p (ptid))
     {
@@ -540,7 +540,7 @@ sol_thread_target::store_registers (struct regcache *regcache, int regnum)
   td_err_e val;
   prgregset_t gregset;
   prfpregset_t fpregset;
-  ptid_t ptid = regcache_get_ptid (regcache);
+  ptid_t ptid = regcache->ptid ();
 
   if (!ptid_tid_p (ptid))
     {

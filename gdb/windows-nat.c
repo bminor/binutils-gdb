@@ -582,7 +582,7 @@ do_windows_fetch_inferior_registers (struct regcache *regcache,
 void
 windows_nat_target::fetch_registers (struct regcache *regcache, int r)
 {
-  DWORD pid = ptid_get_tid (regcache_get_ptid (regcache));
+  DWORD pid = ptid_get_tid (regcache->ptid ());
   windows_thread_info *th = thread_rec (pid, TRUE);
 
   /* Check if TH exists.  Windows sometimes uses a non-existent
@@ -611,7 +611,7 @@ do_windows_store_inferior_registers (const struct regcache *regcache,
 void
 windows_nat_target::store_registers (struct regcache *regcache, int r)
 {
-  DWORD pid = ptid_get_tid (regcache_get_ptid (regcache));
+  DWORD pid = ptid_get_tid (regcache->ptid ());
   windows_thread_info *th = thread_rec (pid, TRUE);
 
   /* Check if TH exists.  Windows sometimes uses a non-existent

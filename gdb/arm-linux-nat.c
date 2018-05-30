@@ -119,7 +119,7 @@ fetch_fpregs (struct regcache *regcache)
   gdb_byte fp[ARM_LINUX_SIZEOF_NWFPE];
 
   /* Get the thread id for the ptrace call.  */
-  tid = ptid_get_lwp (regcache_get_ptid (regcache));
+  tid = ptid_get_lwp (regcache->ptid ());
 
   /* Read the floating point state.  */
   if (have_ptrace_getregset == TRIBOOL_TRUE)
@@ -156,7 +156,7 @@ store_fpregs (const struct regcache *regcache)
   gdb_byte fp[ARM_LINUX_SIZEOF_NWFPE];
 
   /* Get the thread id for the ptrace call.  */
-  tid = ptid_get_lwp (regcache_get_ptid (regcache));
+  tid = ptid_get_lwp (regcache->ptid ());
 
   /* Read the floating point state.  */
   if (have_ptrace_getregset == TRIBOOL_TRUE)
@@ -210,7 +210,7 @@ fetch_regs (struct regcache *regcache)
   elf_gregset_t regs;
 
   /* Get the thread id for the ptrace call.  */
-  tid = ptid_get_lwp (regcache_get_ptid (regcache));
+  tid = ptid_get_lwp (regcache->ptid ());
 
   if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
@@ -237,7 +237,7 @@ store_regs (const struct regcache *regcache)
   elf_gregset_t regs;
 
   /* Get the thread id for the ptrace call.  */
-  tid = ptid_get_lwp (regcache_get_ptid (regcache));
+  tid = ptid_get_lwp (regcache->ptid ());
 
   /* Fetch the general registers.  */
   if (have_ptrace_getregset == TRIBOOL_TRUE)
@@ -285,7 +285,7 @@ fetch_wmmx_regs (struct regcache *regcache)
   int ret, regno, tid;
 
   /* Get the thread id for the ptrace call.  */
-  tid = ptid_get_lwp (regcache_get_ptid (regcache));
+  tid = ptid_get_lwp (regcache->ptid ());
 
   ret = ptrace (PTRACE_GETWMMXREGS, tid, 0, regbuf);
   if (ret < 0)
@@ -311,7 +311,7 @@ store_wmmx_regs (const struct regcache *regcache)
   int ret, regno, tid;
 
   /* Get the thread id for the ptrace call.  */
-  tid = ptid_get_lwp (regcache_get_ptid (regcache));
+  tid = ptid_get_lwp (regcache->ptid ());
 
   ret = ptrace (PTRACE_GETWMMXREGS, tid, 0, regbuf);
   if (ret < 0)
@@ -350,7 +350,7 @@ fetch_vfp_regs (struct regcache *regcache)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* Get the thread id for the ptrace call.  */
-  tid = ptid_get_lwp (regcache_get_ptid (regcache));
+  tid = ptid_get_lwp (regcache->ptid ());
 
   if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
@@ -379,7 +379,7 @@ store_vfp_regs (const struct regcache *regcache)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* Get the thread id for the ptrace call.  */
-  tid = ptid_get_lwp (regcache_get_ptid (regcache));
+  tid = ptid_get_lwp (regcache->ptid ());
 
   if (have_ptrace_getregset == TRIBOOL_TRUE)
     {

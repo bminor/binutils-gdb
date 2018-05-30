@@ -223,16 +223,6 @@ reg_buffer::arch () const
   return m_descr->gdbarch;
 }
 
-/* See regcache.h.  */
-
-ptid_t
-regcache_get_ptid (const struct regcache *regcache)
-{
-  gdb_assert (!ptid_equal (regcache->ptid (), minus_one_ptid));
-
-  return regcache->ptid ();
-}
-
 /* Cleanup class for invalidating a register.  */
 
 class regcache_invalidator

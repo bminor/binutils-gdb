@@ -42,7 +42,7 @@ void
 amd64bsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  pid_t pid = get_ptrace_pid (regcache_get_ptid (regcache));
+  pid_t pid = get_ptrace_pid (regcache->ptid ());
 
   if (regnum == -1 || amd64_native_gregset_supplies_p (gdbarch, regnum))
     {
@@ -115,7 +115,7 @@ void
 amd64bsd_store_inferior_registers (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  pid_t pid = get_ptrace_pid (regcache_get_ptid (regcache));
+  pid_t pid = get_ptrace_pid (regcache->ptid ());
 
   if (regnum == -1 || amd64_native_gregset_supplies_p (gdbarch, regnum))
     {

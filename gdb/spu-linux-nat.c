@@ -516,7 +516,7 @@ spu_linux_nat_target::fetch_registers (struct regcache *regcache, int regno)
   /* Since we use functions that rely on inferior_ptid, we need to set and
      restore it.  */
   scoped_restore save_ptid
-    = make_scoped_restore (&inferior_ptid, regcache_get_ptid (regcache));
+    = make_scoped_restore (&inferior_ptid, regcache->ptid ());
 
   /* We must be stopped on a spu_run system call.  */
   if (!parse_spufs_run (&fd, &addr))
@@ -567,7 +567,7 @@ spu_linux_nat_target::store_registers (struct regcache *regcache, int regno)
   /* Since we use functions that rely on inferior_ptid, we need to set and
      restore it.  */
   scoped_restore save_ptid
-    = make_scoped_restore (&inferior_ptid, regcache_get_ptid (regcache));
+    = make_scoped_restore (&inferior_ptid, regcache->ptid ());
 
   /* We must be stopped on a spu_run system call.  */
   if (!parse_spufs_run (&fd, &addr))

@@ -59,7 +59,7 @@ static struct i386_darwin_nat_target darwin_target;
 void
 i386_darwin_nat_target::fetch_registers (struct regcache *regcache, int regno)
 {
-  thread_t current_thread = ptid_get_tid (regcache_get_ptid (regcache));
+  thread_t current_thread = ptid_get_tid (regcache->ptid ());
   int fetched = 0;
   struct gdbarch *gdbarch = regcache->arch ();
 
@@ -176,7 +176,7 @@ void
 i386_darwin_nat_target::store_registers (struct regcache *regcache,
 					 int regno)
 {
-  thread_t current_thread = ptid_get_tid (regcache_get_ptid (regcache));
+  thread_t current_thread = ptid_get_tid (regcache->ptid ());
   struct gdbarch *gdbarch = regcache->arch ();
 
 #ifdef BFD64

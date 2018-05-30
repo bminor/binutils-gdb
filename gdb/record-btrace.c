@@ -1536,7 +1536,7 @@ record_btrace_target::fetch_registers (struct regcache *regcache, int regno)
   struct btrace_insn_iterator *replay;
   struct thread_info *tp;
 
-  tp = find_thread_ptid (regcache_get_ptid (regcache));
+  tp = find_thread_ptid (regcache->ptid ());
   gdb_assert (tp != NULL);
 
   replay = tp->btrace.replay;
@@ -1572,7 +1572,7 @@ record_btrace_target::store_registers (struct regcache *regcache, int regno)
   struct target_ops *t;
 
   if (!record_btrace_generating_corefile
-      && record_is_replaying (regcache_get_ptid (regcache)))
+      && record_is_replaying (regcache->ptid ()))
     error (_("Cannot write registers while replaying."));
 
   gdb_assert (may_write_registers != 0);
@@ -1586,7 +1586,7 @@ void
 record_btrace_target::prepare_to_store (struct regcache *regcache)
 {
   if (!record_btrace_generating_corefile
-      && record_is_replaying (regcache_get_ptid (regcache)))
+      && record_is_replaying (regcache->ptid ()))
     return;
 
   this->beneath->prepare_to_store (regcache);

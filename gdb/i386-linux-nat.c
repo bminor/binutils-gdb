@@ -116,7 +116,7 @@ fetch_register (struct regcache *regcache, int regno)
       return;
     }
 
-  tid = get_ptrace_pid (regcache_get_ptid (regcache));
+  tid = get_ptrace_pid (regcache->ptid ());
 
   errno = 0;
   val = ptrace (PTRACE_PEEKUSER, tid,
@@ -141,7 +141,7 @@ store_register (const struct regcache *regcache, int regno)
   if (i386_linux_gregset_reg_offset[regno] == -1)
     return;
 
-  tid = get_ptrace_pid (regcache_get_ptid (regcache));
+  tid = get_ptrace_pid (regcache->ptid ());
 
   errno = 0;
   regcache_raw_collect (regcache, regno, &val);
@@ -475,7 +475,7 @@ i386_linux_nat_target::fetch_registers (struct regcache *regcache, int regno)
       return;
     }
 
-  tid = get_ptrace_pid (regcache_get_ptid (regcache));
+  tid = get_ptrace_pid (regcache->ptid ());
 
   /* Use the PTRACE_GETFPXREGS request whenever possible, since it
      transfers more registers in one system call, and we'll cache the
@@ -552,7 +552,7 @@ i386_linux_nat_target::store_registers (struct regcache *regcache, int regno)
       return;
     }
 
-  tid = get_ptrace_pid (regcache_get_ptid (regcache));
+  tid = get_ptrace_pid (regcache->ptid ());
 
   /* Use the PTRACE_SETFPXREGS requests whenever possible, since it
      transfers more registers in one system call.  But remember that

@@ -416,7 +416,7 @@ void
 ravenscar_thread_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   struct target_ops *beneath = find_target_beneath (this);
-  ptid_t ptid = regcache_get_ptid (regcache);
+  ptid_t ptid = regcache->ptid ();
 
   if (ravenscar_runtime_initialized ()
       && is_ravenscar_task (ptid)
@@ -437,7 +437,7 @@ ravenscar_thread_target::store_registers (struct regcache *regcache,
 					  int regnum)
 {
   target_ops *beneath = find_target_beneath (this);
-  ptid_t ptid = regcache_get_ptid (regcache);
+  ptid_t ptid = regcache->ptid ();
 
   if (ravenscar_runtime_initialized ()
       && is_ravenscar_task (ptid)
@@ -457,7 +457,7 @@ void
 ravenscar_thread_target::prepare_to_store (struct regcache *regcache)
 {
   target_ops *beneath = find_target_beneath (this);
-  ptid_t ptid = regcache_get_ptid (regcache);
+  ptid_t ptid = regcache->ptid ();
 
   if (ravenscar_runtime_initialized ()
       && is_ravenscar_task (ptid)

@@ -1365,11 +1365,11 @@ aix_thread_target::fetch_registers (struct regcache *regcache, int regno)
   pthdb_tid_t tid;
   struct target_ops *beneath = find_target_beneath (this);
 
-  if (!PD_TID (regcache_get_ptid (regcache)))
+  if (!PD_TID (regcache->ptid ()))
     beneath->fetch_registers (regcache, regno);
   else
     {
-      thread = find_thread_ptid (regcache_get_ptid (regcache));
+      thread = find_thread_ptid (regcache->ptid ());
       aix_thread_info *priv = get_aix_thread_info (thread);
       tid = priv->tid;
 
@@ -1719,11 +1719,11 @@ aix_thread_target::store_registers (struct regcache *regcache, int regno)
   pthdb_tid_t tid;
   struct target_ops *beneath = find_target_beneath (this);
 
-  if (!PD_TID (regcache_get_ptid (regcache)))
+  if (!PD_TID (regcache->ptid ()))
     beneath->store_registers (regcache, regno);
   else
     {
-      thread = find_thread_ptid (regcache_get_ptid (regcache));
+      thread = find_thread_ptid (regcache->ptid ());
       aix_thread_info *priv = get_aix_thread_info (thread);
       tid = priv->tid;
 

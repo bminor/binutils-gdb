@@ -233,7 +233,7 @@ fetch_register (struct regcache *regcache, int regno)
       return;
     }
 
-  tid = get_ptrace_pid (regcache_get_ptid (regcache));
+  tid = get_ptrace_pid (regcache->ptid ());
 
   errno = 0;
   val = ptrace (PTRACE_PEEKUSER, tid, hppa_linux_register_addr (regno, 0), 0);
@@ -257,7 +257,7 @@ store_register (const struct regcache *regcache, int regno)
   if (gdbarch_cannot_store_register (gdbarch, regno))
     return;
 
-  tid = get_ptrace_pid (regcache_get_ptid (regcache));
+  tid = get_ptrace_pid (regcache->ptid ());
 
   errno = 0;
   regcache_raw_collect (regcache, regno, &val);

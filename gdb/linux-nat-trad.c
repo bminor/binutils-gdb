@@ -45,7 +45,7 @@ linux_nat_trad_target::fetch_register (struct regcache *regcache, int regnum)
       return;
     }
 
-  pid = get_ptrace_pid (regcache_get_ptid (regcache));
+  pid = get_ptrace_pid (regcache->ptid ());
 
   size = register_size (gdbarch, regnum);
   buf = (gdb_byte *) alloca (size);
@@ -104,7 +104,7 @@ linux_nat_trad_target::store_register (const struct regcache *regcache,
       || gdbarch_cannot_store_register (gdbarch, regnum))
     return;
 
-  pid = get_ptrace_pid (regcache_get_ptid (regcache));
+  pid = get_ptrace_pid (regcache->ptid ());
 
   size = register_size (gdbarch, regnum);
   buf = (gdb_byte *) alloca (size);

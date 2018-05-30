@@ -779,7 +779,7 @@ ia64_linux_fetch_register (struct regcache *regcache, int regnum)
       return;
     }
 
-  pid = get_ptrace_pid (regcache_get_ptid (regcache));
+  pid = get_ptrace_pid (regcache->ptid ());
 
   /* This isn't really an address, but ptrace thinks of it as one.  */
   addr = ia64_register_addr (gdbarch, regnum);
@@ -833,7 +833,7 @@ ia64_linux_store_register (const struct regcache *regcache, int regnum)
   if (ia64_cannot_store_register (gdbarch, regnum))
     return;
 
-  pid = get_ptrace_pid (regcache_get_ptid (regcache));
+  pid = get_ptrace_pid (regcache->ptid ());
 
   /* This isn't really an address, but ptrace thinks of it as one.  */
   addr = ia64_register_addr (gdbarch, regnum);

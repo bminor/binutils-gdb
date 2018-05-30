@@ -137,7 +137,7 @@ tilegx_linux_nat_target::fetch_registers (struct regcache *regcache,
 					  int regnum)
 {
   elf_gregset_t regs;
-  pid_t tid = get_ptrace_pid (regcache_get_ptid (regcache));
+  pid_t tid = get_ptrace_pid (regcache->ptid ());
 
   if (ptrace (PTRACE_GETREGS, tid, 0, (PTRACE_TYPE_ARG3) &regs) < 0)
     perror_with_name (_("Couldn't get registers"));
@@ -153,7 +153,7 @@ tilegx_linux_nat_target::store_registers (struct regcache *regcache,
 					  int regnum)
 {
   elf_gregset_t regs;
-  pid_t tid = get_ptrace_pid (regcache_get_ptid (regcache));
+  pid_t tid = get_ptrace_pid (regcache->ptid ());
 
   if (ptrace (PTRACE_GETREGS, tid, 0, (PTRACE_TYPE_ARG3) &regs) < 0)
     perror_with_name (_("Couldn't get registers"));

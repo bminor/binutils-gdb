@@ -35,10 +35,6 @@ extern struct regcache *get_thread_arch_aspace_regcache (ptid_t,
 							 struct gdbarch *,
 							 struct address_space *);
 
-/* Return REGCACHE's ptid.  */
-
-extern ptid_t regcache_get_ptid (const struct regcache *regcache);
-
 enum register_status regcache_register_status (const struct regcache *regcache,
 					       int regnum);
 
@@ -357,8 +353,12 @@ public:
   void collect_regset (const struct regset *regset, int regnum,
 		       void *buf, size_t size) const;
 
+  /* Return REGCACHE's ptid.  */
+
   ptid_t ptid () const
   {
+    gdb_assert (m_ptid != minus_one_ptid);
+
     return m_ptid;
   }
 

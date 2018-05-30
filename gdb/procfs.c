@@ -2063,7 +2063,7 @@ procfs_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   gdb_gregset_t *gregs;
   procinfo *pi;
-  ptid_t ptid = regcache_get_ptid (regcache);
+  ptid_t ptid = regcache->ptid ();
   int pid = ptid_get_pid (ptid);
   int tid = ptid_get_lwp (ptid);
   struct gdbarch *gdbarch = regcache->arch ();
@@ -2112,7 +2112,7 @@ procfs_target::store_registers (struct regcache *regcache, int regnum)
 {
   gdb_gregset_t *gregs;
   procinfo *pi;
-  ptid_t ptid = regcache_get_ptid (regcache);
+  ptid_t ptid = regcache->ptid ();
   int pid = ptid_get_pid (ptid);
   int tid = ptid_get_lwp (ptid);
   struct gdbarch *gdbarch = regcache->arch ();

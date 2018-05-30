@@ -321,7 +321,7 @@ bsd_uthread_target::fetch_registers (struct regcache *regcache, int regnum)
   struct gdbarch *gdbarch = regcache->arch ();
   struct bsd_uthread_ops *uthread_ops
     = (struct bsd_uthread_ops *) gdbarch_data (gdbarch, bsd_uthread_data);
-  ptid_t ptid = regcache_get_ptid (regcache);
+  ptid_t ptid = regcache->ptid ();
   CORE_ADDR addr = ptid_get_tid (ptid);
   struct target_ops *beneath = find_target_beneath (this);
   CORE_ADDR active_addr;
@@ -355,7 +355,7 @@ bsd_uthread_target::store_registers (struct regcache *regcache, int regnum)
   struct bsd_uthread_ops *uthread_ops
     = (struct bsd_uthread_ops *) gdbarch_data (gdbarch, bsd_uthread_data);
   struct target_ops *beneath = find_target_beneath (this);
-  ptid_t ptid = regcache_get_ptid (regcache);
+  ptid_t ptid = regcache->ptid ();
   CORE_ADDR addr = ptid_get_tid (ptid);
   CORE_ADDR active_addr;
   scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);

@@ -270,7 +270,7 @@ mips_linux_nat_target::mips64_regsets_fetch_registers
   else
     is_dsp = 0;
 
-  tid = get_ptrace_pid (regcache_get_ptid (regcache));
+  tid = get_ptrace_pid (regcache->ptid ());
 
   if (regno == -1 || (!is_fp && !is_dsp))
     {
@@ -357,7 +357,7 @@ mips_linux_nat_target::mips64_regsets_store_registers
   else
     is_dsp = 0;
 
-  tid = get_ptrace_pid (regcache_get_ptid (regcache));
+  tid = get_ptrace_pid (regcache->ptid ());
 
   if (regno == -1 || (!is_fp && !is_dsp))
     {

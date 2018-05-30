@@ -8281,7 +8281,7 @@ remote_target::fetch_registers (struct regcache *regcache, int regnum)
   int i;
 
   set_remote_traceframe ();
-  set_general_thread (regcache_get_ptid (regcache));
+  set_general_thread (regcache->ptid ());
 
   if (regnum >= 0)
     {
@@ -8438,7 +8438,7 @@ remote_target::store_registers (struct regcache *regcache, int regnum)
   int i;
 
   set_remote_traceframe ();
-  set_general_thread (regcache_get_ptid (regcache));
+  set_general_thread (regcache->ptid ());
 
   if (regnum >= 0)
     {

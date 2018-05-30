@@ -202,7 +202,7 @@ fill_fpregset (const struct regcache *regcache,
 void
 m32r_linux_nat_target::fetch_registers (struct regcache *regcache, int regno)
 {
-  pid_t tid = get_ptrace_pid (regcache_get_ptid (regcache));
+  pid_t tid = get_ptrace_pid (regcache->ptid ());
 
   /* Use the PTRACE_GETREGS request whenever possible, since it
      transfers more registers in one system call, and we'll cache the
@@ -223,7 +223,7 @@ m32r_linux_nat_target::fetch_registers (struct regcache *regcache, int regno)
 void
 m32r_linux_nat_target::store_registers (struct regcache *regcache, int regno)
 {
-  pid_t tid = get_ptrace_pid (regcache_get_ptid (regcache));
+  pid_t tid = get_ptrace_pid (regcache->ptid ());
 
   /* Use the PTRACE_SETREGS request whenever possible, since it
      transfers more registers in one system call.  */

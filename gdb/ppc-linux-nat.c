@@ -773,7 +773,7 @@ fetch_ppc_registers (struct regcache *regcache, int tid)
 void
 ppc_linux_nat_target::fetch_registers (struct regcache *regcache, int regno)
 {
-  pid_t tid = get_ptrace_pid (regcache_get_ptid (regcache));
+  pid_t tid = get_ptrace_pid (regcache->ptid ());
 
   if (regno == -1)
     fetch_ppc_registers (regcache, tid);
@@ -2131,7 +2131,7 @@ ppc_linux_nat_target::masked_watch_num_registers (CORE_ADDR addr, CORE_ADDR mask
 void
 ppc_linux_nat_target::store_registers (struct regcache *regcache, int regno)
 {
-  pid_t tid = get_ptrace_pid (regcache_get_ptid (regcache));
+  pid_t tid = get_ptrace_pid (regcache->ptid ());
 
   if (regno >= 0)
     store_register (regcache, tid, regno);

@@ -130,7 +130,7 @@ i386bsd_collect_gregset (const struct regcache *regcache,
 void
 i386bsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
 {
-  pid_t pid = get_ptrace_pid (regcache_get_ptid (regcache));
+  pid_t pid = get_ptrace_pid (regcache->ptid ());
 
   if (regnum == -1 || GETREGS_SUPPLIES (regnum))
     {
@@ -193,7 +193,7 @@ i386bsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
 void
 i386bsd_store_inferior_registers (struct regcache *regcache, int regnum)
 {
-  pid_t pid = get_ptrace_pid (regcache_get_ptid (regcache));
+  pid_t pid = get_ptrace_pid (regcache->ptid ());
 
   if (regnum == -1 || GETREGS_SUPPLIES (regnum))
     {

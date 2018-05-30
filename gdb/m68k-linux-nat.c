@@ -119,7 +119,7 @@ fetch_register (struct regcache *regcache, int regno)
   long regaddr, val;
   int i;
   gdb_byte buf[M68K_MAX_REGISTER_SIZE];
-  pid_t tid = get_ptrace_pid (regcache_get_ptid (regcache));
+  pid_t tid = get_ptrace_pid (regcache->ptid ());
 
   regaddr = 4 * regmap[regno];
   for (i = 0; i < register_size (gdbarch, regno); i += sizeof (long))
@@ -167,7 +167,7 @@ store_register (const struct regcache *regcache, int regno)
   long regaddr, val;
   int i;
   gdb_byte buf[M68K_MAX_REGISTER_SIZE];
-  pid_t tid = get_ptrace_pid (regcache_get_ptid (regcache));
+  pid_t tid = get_ptrace_pid (regcache->ptid ());
 
   regaddr = 4 * regmap[regno];
 
@@ -416,7 +416,7 @@ m68k_linux_nat_target::fetch_registers (struct regcache *regcache, int regno)
       return;
     }
 
-  tid = get_ptrace_pid (regcache_get_ptid (regcache));
+  tid = get_ptrace_pid (regcache->ptid ());
 
   /* Use the PTRACE_GETFPXREGS request whenever possible, since it
      transfers more registers in one system call, and we'll cache the
@@ -469,7 +469,7 @@ m68k_linux_nat_target::store_registers (struct regcache *regcache, int regno)
       return;
     }
 
-  tid = get_ptrace_pid (regcache_get_ptid (regcache));
+  tid = get_ptrace_pid (regcache->ptid ());
 
   /* Use the PTRACE_SETFPREGS requests whenever possible, since it
      transfers more registers in one system call.  But remember that

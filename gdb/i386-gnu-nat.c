@@ -108,7 +108,7 @@ gnu_fetch_registers (struct target_ops *ops,
 		     struct regcache *regcache, int regno)
 {
   struct proc *thread;
-  ptid_t ptid = regcache_get_ptid (regcache);
+  ptid_t ptid = regcache->ptid ();
 
   /* Make sure we know about new threads.  */
   inf_update_procs (gnu_current_inf);
@@ -201,7 +201,7 @@ gnu_store_registers (struct target_ops *ops,
 {
   struct proc *thread;
   struct gdbarch *gdbarch = regcache->arch ();
-  ptid_t ptid = regcache_get_ptid (regcache);
+  ptid_t ptid = regcache->ptid ();
 
   /* Make sure we know about new threads.  */
   inf_update_procs (gnu_current_inf);

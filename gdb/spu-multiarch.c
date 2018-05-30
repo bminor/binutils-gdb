@@ -189,7 +189,7 @@ spu_multiarch_target::fetch_registers (struct regcache *regcache, int regno)
   /* Since we use functions that rely on inferior_ptid, we need to set and
      restore it.  */
   scoped_restore save_ptid
-    = make_scoped_restore (&inferior_ptid, regcache_get_ptid (regcache));
+    = make_scoped_restore (&inferior_ptid, regcache->ptid ());
 
   /* This version applies only if we're currently in spu_run.  */
   if (gdbarch_bfd_arch_info (gdbarch)->arch != bfd_arch_spu)
@@ -248,7 +248,7 @@ spu_multiarch_target::store_registers (struct regcache *regcache, int regno)
   /* Since we use functions that rely on inferior_ptid, we need to set and
      restore it.  */
   scoped_restore save_ptid
-    = make_scoped_restore (&inferior_ptid, regcache_get_ptid (regcache));
+    = make_scoped_restore (&inferior_ptid, regcache->ptid ());
 
   /* This version applies only if we're currently in spu_run.  */
   if (gdbarch_bfd_arch_info (gdbarch)->arch != bfd_arch_spu)

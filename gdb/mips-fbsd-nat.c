@@ -63,7 +63,7 @@ getfpregs_supplies (struct gdbarch *gdbarch, int regnum)
 void
 mips_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 {
-  pid_t pid = get_ptrace_pid (regcache_get_ptid (regcache));
+  pid_t pid = get_ptrace_pid (regcache->ptid ());
 
   struct gdbarch *gdbarch = regcache->arch ();
   if (regnum == -1 || getregs_supplies (gdbarch, regnum))
@@ -94,7 +94,7 @@ mips_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 void
 mips_fbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
 {
-  pid_t pid = get_ptrace_pid (regcache_get_ptid (regcache));
+  pid_t pid = get_ptrace_pid (regcache->ptid ());
 
   struct gdbarch *gdbarch = regcache->arch ();
   if (regnum == -1 || getregs_supplies (gdbarch, regnum))

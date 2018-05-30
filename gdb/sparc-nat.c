@@ -152,7 +152,7 @@ sparc_fetch_inferior_registers (struct regcache *regcache, int regnum)
      These functions should instead be paramaterized with an explicit
      object (struct regcache, struct thread_info?) into which the LWPs
      registers can be written.  */
-  pid = get_ptrace_pid (regcache_get_ptid (regcache));
+  pid = get_ptrace_pid (regcache->ptid ());
 
   if (regnum == SPARC_G0_REGNUM)
     {
@@ -193,7 +193,7 @@ sparc_store_inferior_registers (struct regcache *regcache, int regnum)
 
   /* NOTE: cagney/2002-12-02: See comment in fetch_inferior_registers
      about threaded assumptions.  */
-  pid = get_ptrace_pid (regcache_get_ptid (regcache));
+  pid = get_ptrace_pid (regcache->ptid ());
 
   if (regnum == -1 || sparc_gregset_supplies_p (gdbarch, regnum))
     {

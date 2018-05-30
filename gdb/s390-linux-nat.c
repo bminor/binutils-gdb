@@ -408,7 +408,7 @@ check_regset (int tid, int regset, int regsize)
 void
 s390_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 {
-  pid_t tid = get_ptrace_pid (regcache_get_ptid (regcache));
+  pid_t tid = get_ptrace_pid (regcache->ptid ());
 
   if (regnum == -1 || S390_IS_GREGSET_REGNUM (regnum))
     fetch_regs (regcache, tid);
@@ -462,7 +462,7 @@ s390_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 void
 s390_linux_nat_target::store_registers (struct regcache *regcache, int regnum)
 {
-  pid_t tid = get_ptrace_pid (regcache_get_ptid (regcache));
+  pid_t tid = get_ptrace_pid (regcache->ptid ());
 
   if (regnum == -1 || S390_IS_GREGSET_REGNUM (regnum))
     store_regs (regcache, tid, regnum);
