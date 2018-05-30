@@ -176,7 +176,7 @@ store_fpregs (const struct regcache *regcache)
 
   /* Store fpsr.  */
   if (REG_VALID == regcache->get_register_status (ARM_FPS_REGNUM))
-    regcache_raw_collect (regcache, ARM_FPS_REGNUM, fp + NWFPE_FPSR_OFFSET);
+    regcache->raw_collect (ARM_FPS_REGNUM, fp + NWFPE_FPSR_OFFSET);
 
   /* Store the floating point registers.  */
   for (regno = ARM_F0_REGNUM; regno <= ARM_F7_REGNUM; regno++)
@@ -317,18 +317,17 @@ store_wmmx_regs (const struct regcache *regcache)
 
   for (regno = 0; regno < 16; regno++)
     if (REG_VALID == regcache->get_register_status (regno + ARM_WR0_REGNUM))
-      regcache_raw_collect (regcache, regno + ARM_WR0_REGNUM,
-			    &regbuf[regno * 8]);
+      regcache->raw_collect (regno + ARM_WR0_REGNUM, &regbuf[regno * 8]);
 
   for (regno = 0; regno < 2; regno++)
     if (REG_VALID == regcache->get_register_status (regno + ARM_WCSSF_REGNUM))
-      regcache_raw_collect (regcache, regno + ARM_WCSSF_REGNUM,
-			    &regbuf[16 * 8 + regno * 4]);
+      regcache->raw_collect (regno + ARM_WCSSF_REGNUM,
+			     &regbuf[16 * 8 + regno * 4]);
 
   for (regno = 0; regno < 4; regno++)
     if (REG_VALID == regcache->get_register_status (regno + ARM_WCGR0_REGNUM))
-      regcache_raw_collect (regcache, regno + ARM_WCGR0_REGNUM,
-			    &regbuf[16 * 8 + 2 * 4 + regno * 4]);
+      regcache->raw_collect (regno + ARM_WCGR0_REGNUM,
+			     &regbuf[16 * 8 + 2 * 4 + regno * 4]);
 
   ret = ptrace (PTRACE_SETWMMXREGS, tid, 0, regbuf);
 

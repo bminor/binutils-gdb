@@ -577,7 +577,7 @@ spu_linux_nat_target::store_registers (struct regcache *regcache, int regno)
   if (regno == -1 || regno == SPU_PC_REGNUM)
     {
       gdb_byte buf[4];
-      regcache_raw_collect (regcache, SPU_PC_REGNUM, buf);
+      regcache->raw_collect (SPU_PC_REGNUM, buf);
       store_ppc_memory (addr, buf, 4);
     }
 
@@ -590,7 +590,7 @@ spu_linux_nat_target::store_registers (struct regcache *regcache, int regno)
       ULONGEST len;
 
       for (i = 0; i < SPU_NUM_GPRS; i++)
-	regcache_raw_collect (regcache, i, buf + i*16);
+	regcache->raw_collect (i, buf + i*16);
 
       xsnprintf (annex, sizeof annex, "%d/regs", fd);
       spu_proc_xfer_spu (annex, NULL, buf, 0, sizeof buf, &len);

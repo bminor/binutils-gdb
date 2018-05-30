@@ -197,7 +197,7 @@ ppc_ravenscar_generic_store_registers
   else
     return;
 
-  regcache_raw_collect (regcache, regnum, buf);
+  regcache->raw_collect (regnum, buf);
   write_memory (register_address,
                 buf,
                 buf_size);

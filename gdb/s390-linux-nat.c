@@ -210,14 +210,14 @@ fill_gregset (const struct regcache *regcache, gregset_t *regp, int regno)
 	  if (regno == -1 || regno == S390_PSWM_REGNUM)
 	    {
 	      pswm &= 0x80000000;
-	      regcache_raw_collect (regcache, S390_PSWM_REGNUM, buf);
+	      regcache->raw_collect (S390_PSWM_REGNUM, buf);
 	      pswm |= (extract_unsigned_integer (buf, 4, byte_order)
 		       & 0xfff7ffff) << 32;
 	    }
 
 	  if (regno == -1 || regno == S390_PSWA_REGNUM)
 	    {
-	      regcache_raw_collect (regcache, S390_PSWA_REGNUM, buf);
+	      regcache->raw_collect (S390_PSWA_REGNUM, buf);
 	      pswa = extract_unsigned_integer (buf, 4, byte_order);
 	      pswm ^= (pswm ^ pswa) & 0x80000000;
 	      pswa &= 0x7fffffff;

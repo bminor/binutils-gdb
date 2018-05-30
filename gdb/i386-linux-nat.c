@@ -144,7 +144,7 @@ store_register (const struct regcache *regcache, int regno)
   tid = get_ptrace_pid (regcache->ptid ());
 
   errno = 0;
-  regcache_raw_collect (regcache, regno, &val);
+  regcache->raw_collect (regno, &val);
   ptrace (PTRACE_POKEUSER, tid,
 	  i386_linux_gregset_reg_offset[regno], val);
   if (errno != 0)
@@ -189,14 +189,14 @@ fill_gregset (const struct regcache *regcache,
 
   for (i = 0; i < I386_NUM_GREGS; i++)
     if (regno == -1 || regno == i)
-      regcache_raw_collect (regcache, i,
-			    regp + i386_linux_gregset_reg_offset[i]);
+      regcache->raw_collect (i, regp + i386_linux_gregset_reg_offset[i]);
 
   if ((regno == -1 || regno == I386_LINUX_ORIG_EAX_REGNUM)
       && I386_LINUX_ORIG_EAX_REGNUM
 	   < gdbarch_num_regs (regcache->arch ()))
-    regcache_raw_collect (regcache, I386_LINUX_ORIG_EAX_REGNUM, regp
-			  + i386_linux_gregset_reg_offset[I386_LINUX_ORIG_EAX_REGNUM]);
+    regcache->raw_collect
+      (I386_LINUX_ORIG_EAX_REGNUM,
+       regp + i386_linux_gregset_reg_offset[I386_LINUX_ORIG_EAX_REGNUM]);
 }
 
 #ifdef HAVE_PTRACE_GETREGS

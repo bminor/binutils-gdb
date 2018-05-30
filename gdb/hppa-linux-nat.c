@@ -260,7 +260,7 @@ store_register (const struct regcache *regcache, int regno)
   tid = get_ptrace_pid (regcache->ptid ());
 
   errno = 0;
-  regcache_raw_collect (regcache, regno, &val);
+  regcache->raw_collect (regno, &val);
   ptrace (PTRACE_POKEUSER, tid, hppa_linux_register_addr (regno, 0), val);
   if (errno != 0)
     error (_("Couldn't write register %s (#%d): %s."),
@@ -340,9 +340,7 @@ fill_gregset (const struct regcache *regcache,
       int mregno = greg_map[i];
 
       if (regno == -1 || regno == mregno)
-	{
-          regcache_raw_collect(regcache, mregno, &(*gregsetp)[i]);
-	}
+	regcache->raw_collect (mregno, &(*gregsetp)[i]);
     }
 }
 
@@ -382,7 +380,7 @@ fill_fpregset (const struct regcache *regcache,
       char *to = (char *) &((*fpregsetp)[(i - HPPA_FP0_REGNUM) / 2]);
       if ((i - HPPA_FP0_REGNUM) & 1)
 	to += 4;
-      regcache_raw_collect (regcache, i, to);
+      regcache->raw_collect (i, to);
    }
 }
 

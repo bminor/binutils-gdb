@@ -71,13 +71,13 @@ mips64obsd_collect_gregset (const struct regcache *regcache,
   for (i = MIPS_ZERO_REGNUM; i <= MIPS_PC_REGNUM; i++)
     {
       if (regnum == -1 || regnum == i)
-	regcache_raw_collect (regcache, i, regs + i * 8);
+	regcache->raw_collect (i, regs + i * 8);
     }
 
   for (i = MIPS_FP0_REGNUM; i <= MIPS_FSR_REGNUM; i++)
     {
       if (regnum == -1 || regnum == i)
-	regcache_raw_collect (regcache, i, regs + (i + 2) * 8);
+	regcache->raw_collect (i, regs + (i + 2) * 8);
     }
 }
 

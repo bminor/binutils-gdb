@@ -265,8 +265,7 @@ store_gregs_to_thread (const struct regcache *regcache)
 
       for (regno = AARCH64_X0_REGNUM; regno <= AARCH64_CPSR_REGNUM; regno++)
 	if (REG_VALID == regcache->get_register_status (regno))
-	  regcache_raw_collect (regcache, regno,
-				&regs[regno - AARCH64_X0_REGNUM]);
+	  regcache->raw_collect (regno, &regs[regno - AARCH64_X0_REGNUM]);
     }
 
   ret = ptrace (PTRACE_SETREGSET, tid, NT_PRSTATUS, &iovec);
@@ -361,15 +360,13 @@ store_fpregs_to_thread (const struct regcache *regcache)
 
       for (regno = AARCH64_V0_REGNUM; regno <= AARCH64_V31_REGNUM; regno++)
 	if (REG_VALID == regcache->get_register_status (regno))
-	  regcache_raw_collect (regcache, regno,
-				(char *) &regs.vregs[regno - AARCH64_V0_REGNUM]);
+	  regcache->raw_collect
+	    (regno, (char *) &regs.vregs[regno - AARCH64_V0_REGNUM]);
 
       if (REG_VALID == regcache->get_register_status (AARCH64_FPSR_REGNUM))
-	regcache_raw_collect (regcache, AARCH64_FPSR_REGNUM,
-			      (char *) &regs.fpsr);
+	regcache->raw_collect (AARCH64_FPSR_REGNUM, (char *) &regs.fpsr);
       if (REG_VALID == regcache->get_register_status (AARCH64_FPCR_REGNUM))
-	regcache_raw_collect (regcache, AARCH64_FPCR_REGNUM,
-			      (char *) &regs.fpcr);
+	regcache->raw_collect (AARCH64_FPCR_REGNUM, (char *) &regs.fpcr);
     }
 
   if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)

@@ -2201,7 +2201,7 @@ sh_corefile_collect_regset (const struct regset *regset,
     {
       if ((regnum == -1 || regnum == regmap[i].regnum)
 	  && regmap[i].offset + 4 <= len)
-	regcache_raw_collect (regcache, regmap[i].regnum,
+	regcache->raw_collect (regmap[i].regnum,
 			      (char *)regs + regmap[i].offset);
     }
 }

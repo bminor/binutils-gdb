@@ -1434,7 +1434,7 @@ nto_procfs_target::store_registers (struct regcache *regcache, int regno)
       if (len < 1)
 	return;
 
-      regcache_raw_collect (regcache, regno, (char *) &reg + off);
+      regcache->raw_collect (regno, (char *) &reg + off);
 
       err = devctl (ctl_fd, dev_set, &reg, regsize, 0);
       if (err != EOK)

@@ -253,7 +253,7 @@ store_register (struct regcache *regcache, int regno)
   pid_t pid = ptid_get_pid (regcache->ptid ());
 
   /* Fetch the register's value from the register cache.  */
-  regcache_raw_collect (regcache, regno, addr);
+  regcache->raw_collect (regno, addr);
 
   /* -1 can be a successful return value, so infer errors from errno.  */
   errno = 0;

@@ -895,26 +895,23 @@ store_spe_register (const struct regcache *regcache, int tid, int regno)
       int i;
 
       for (i = 0; i < ppc_num_gprs; i++)
-        regcache_raw_collect (regcache,
-                              tdep->ppc_ev0_upper_regnum + i,
-                              &evrregs.evr[i]);
+	regcache->raw_collect (tdep->ppc_ev0_upper_regnum + i,
+			       &evrregs.evr[i]);
     }
   else if (tdep->ppc_ev0_upper_regnum <= regno
            && regno < tdep->ppc_ev0_upper_regnum + ppc_num_gprs)
-    regcache_raw_collect (regcache, regno,
-                          &evrregs.evr[regno - tdep->ppc_ev0_upper_regnum]);
+    regcache->raw_collect (regno,
+			   &evrregs.evr[regno - tdep->ppc_ev0_upper_regnum]);
 
   if (regno == -1
       || regno == tdep->ppc_acc_regnum)
-    regcache_raw_collect (regcache,
-                          tdep->ppc_acc_regnum,
-                          &evrregs.acc);
+    regcache->raw_collect (tdep->ppc_acc_regnum,
+			   &evrregs.acc);
 
   if (regno == -1
       || regno == tdep->ppc_spefscr_regnum)
-    regcache_raw_collect (regcache,
-                          tdep->ppc_spefscr_regnum,
-                          &evrregs.spefscr);
+    regcache->raw_collect (tdep->ppc_spefscr_regnum,
+			   &evrregs.spefscr);
 
   /* Write back the modified register set.  */
   set_spe_registers (tid, &evrregs);
@@ -958,13 +955,13 @@ store_register (const struct regcache *regcache, int tid, int regno)
   if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
     {
       /* Little-endian values always sit at the left end of the buffer.  */
-      regcache_raw_collect (regcache, regno, buf);
+      regcache->raw_collect (regno, buf);
     }
   else if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
     {
       /* Big-endian values sit at the right end of the buffer.  */
       size_t padding = (bytes_to_transfer - register_size (gdbarch, regno));
-      regcache_raw_collect (regcache, regno, buf + padding);
+      regcache->raw_collect (regno, buf + padding);
     }
 
   for (i = 0; i < bytes_to_transfer; i += sizeof (long))

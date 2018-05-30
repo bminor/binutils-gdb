@@ -244,9 +244,8 @@ i386_darwin_nat_target::store_registers (struct regcache *regcache,
 
 	  for (i = 0; i < I386_NUM_GREGS; i++)
 	    if (regno == -1 || regno == i)
-	      regcache_raw_collect
-		(regcache, i,
-		 (char *)&gp_regs + i386_darwin_thread_state_reg_offset[i]);
+	      regcache->raw_collect
+		(i, (char *) &gp_regs + i386_darwin_thread_state_reg_offset[i]);
 
           ret = thread_set_state (current_thread, x86_THREAD_STATE32,
                                   (thread_state_t) &gp_regs,

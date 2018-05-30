@@ -450,7 +450,7 @@ fill_gregset (const struct regcache *regcache, gregset_t *gregsetp, int regno)
 
 #define COPY_REG(_idx_,_regi_) \
   if ((regno == -1) || regno == _regi_) \
-    regcache_raw_collect (regcache, _regi_, regp + _idx_)
+    regcache->raw_collect (_regi_, regp + _idx_)
 
   for (regi = IA64_GR0_REGNUM; regi <= IA64_GR31_REGNUM; regi++)
     {
@@ -524,8 +524,7 @@ fill_fpregset (const struct regcache *regcache,
   for (regi = IA64_FR0_REGNUM; regi <= IA64_FR127_REGNUM; regi++)
     {
       if ((regno == -1) || (regno == regi))
-	regcache_raw_collect (regcache, regi,
-			      &((*fpregsetp)[regi - IA64_FR0_REGNUM]));
+	regcache->raw_collect (regi, &((*fpregsetp)[regi - IA64_FR0_REGNUM]));
     }
 }
 
@@ -842,7 +841,7 @@ ia64_linux_store_register (const struct regcache *regcache, int regnum)
   buf = (PTRACE_TYPE_RET *) alloca (size);
 
   /* Write the register contents into the inferior a chunk at a time.  */
-  regcache_raw_collect (regcache, regnum, buf);
+  regcache->raw_collect (regnum, buf);
   for (i = 0; i < size / sizeof (PTRACE_TYPE_RET); i++)
     {
       errno = 0;

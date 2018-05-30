@@ -3840,7 +3840,7 @@ i386_collect_gregset (const struct regset *regset,
     {
       if ((regnum == i || regnum == -1)
 	  && tdep->gregset_reg_offset[i] != -1)
-	regcache_raw_collect (regcache, i, regs + tdep->gregset_reg_offset[i]);
+	regcache->raw_collect (i, regs + tdep->gregset_reg_offset[i]);
     }
 }
 

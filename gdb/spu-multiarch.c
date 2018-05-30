@@ -265,7 +265,7 @@ spu_multiarch_target::store_registers (struct regcache *regcache, int regno)
   if (regno == -1 || regno == SPU_PC_REGNUM)
     {
       gdb_byte buf[4];
-      regcache_raw_collect (regcache, SPU_PC_REGNUM, buf);
+      regcache->raw_collect (SPU_PC_REGNUM, buf);
 
       target_write (ops_beneath, TARGET_OBJECT_MEMORY, NULL,
 		    buf, spufs_addr, sizeof buf);
@@ -279,7 +279,7 @@ spu_multiarch_target::store_registers (struct regcache *regcache, int regno)
       int i;
 
       for (i = 0; i < SPU_NUM_GPRS; i++)
-	regcache_raw_collect (regcache, i, buf + i*16);
+	regcache->raw_collect (i, buf + i*16);
 
       xsnprintf (annex, sizeof annex, "%d/regs", spufs_fd);
       target_write (ops_beneath, TARGET_OBJECT_SPU, annex,

@@ -1386,8 +1386,7 @@ fill_gprs64 (const struct regcache *regcache, uint64_t *vals)
   for (regno = 0; regno < ppc_num_gprs; regno++)
     if (REG_VALID == regcache->get_register_status
 		       (tdep->ppc_gp0_regnum + regno))
-      regcache_raw_collect (regcache, tdep->ppc_gp0_regnum + regno,
-			    vals + regno);
+      regcache->raw_collect (tdep->ppc_gp0_regnum + regno, vals + regno);
 }
 
 static void 
@@ -1399,8 +1398,7 @@ fill_gprs32 (const struct regcache *regcache, uint32_t *vals)
   for (regno = 0; regno < ppc_num_gprs; regno++)
     if (REG_VALID == regcache->get_register_status
 		       (tdep->ppc_gp0_regnum + regno))
-      regcache_raw_collect (regcache, tdep->ppc_gp0_regnum + regno,
-			    vals + regno);
+      regcache->raw_collect (tdep->ppc_gp0_regnum + regno, vals + regno);
 }
 
 /* Store the floating point registers into a double array.  */
@@ -1419,8 +1417,7 @@ fill_fprs (const struct regcache *regcache, double *vals)
        regno < tdep->ppc_fp0_regnum + ppc_num_fprs;
        regno++)
     if (REG_VALID == regcache->get_register_status (regno))
-      regcache_raw_collect (regcache, regno,
-			    vals + regno - tdep->ppc_fp0_regnum);
+      regcache->raw_collect (regno, vals + regno - tdep->ppc_fp0_regnum);
 }
 
 /* Store the special registers into the specified 64-bit and 32-bit
@@ -1444,20 +1441,20 @@ fill_sprs64 (const struct regcache *regcache,
 				 (gdbarch, gdbarch_pc_regnum (gdbarch)));
 
   if (REG_VALID == regcache->get_register_status (gdbarch_pc_regnum (gdbarch)))
-    regcache_raw_collect (regcache, gdbarch_pc_regnum (gdbarch), iar);
+    regcache->raw_collect (gdbarch_pc_regnum (gdbarch), iar);
   if (REG_VALID == regcache->get_register_status (tdep->ppc_ps_regnum))
-    regcache_raw_collect (regcache, tdep->ppc_ps_regnum, msr);
+    regcache->raw_collect (tdep->ppc_ps_regnum, msr);
   if (REG_VALID == regcache->get_register_status (tdep->ppc_cr_regnum))
-    regcache_raw_collect (regcache, tdep->ppc_cr_regnum, cr);
+    regcache->raw_collect (tdep->ppc_cr_regnum, cr);
   if (REG_VALID == regcache->get_register_status (tdep->ppc_lr_regnum))
-    regcache_raw_collect (regcache, tdep->ppc_lr_regnum, lr);
+    regcache->raw_collect (tdep->ppc_lr_regnum, lr);
   if (REG_VALID == regcache->get_register_status (tdep->ppc_ctr_regnum))
-    regcache_raw_collect (regcache, tdep->ppc_ctr_regnum, ctr);
+    regcache->raw_collect (tdep->ppc_ctr_regnum, ctr);
   if (REG_VALID == regcache->get_register_status (tdep->ppc_xer_regnum))
-    regcache_raw_collect (regcache, tdep->ppc_xer_regnum, xer);
+    regcache->raw_collect (tdep->ppc_xer_regnum, xer);
   if (tdep->ppc_fpscr_regnum >= 0
       && REG_VALID == regcache->get_register_status (tdep->ppc_fpscr_regnum))
-    regcache_raw_collect (regcache, tdep->ppc_fpscr_regnum, fpscr);
+    regcache->raw_collect (tdep->ppc_fpscr_regnum, fpscr);
 }
 
 static void
@@ -1478,20 +1475,20 @@ fill_sprs32 (const struct regcache *regcache,
 					      gdbarch_pc_regnum (gdbarch)));
 
   if (REG_VALID == regcache->get_register_status (gdbarch_pc_regnum (gdbarch)))
-    regcache_raw_collect (regcache, gdbarch_pc_regnum (gdbarch), iar);
+    regcache->raw_collect (gdbarch_pc_regnum (gdbarch), iar);
   if (REG_VALID == regcache->get_register_status (tdep->ppc_ps_regnum))
-    regcache_raw_collect (regcache, tdep->ppc_ps_regnum, msr);
+    regcache->raw_collect (tdep->ppc_ps_regnum, msr);
   if (REG_VALID == regcache->get_register_status (tdep->ppc_cr_regnum))
-    regcache_raw_collect (regcache, tdep->ppc_cr_regnum, cr);
+    regcache->raw_collect (tdep->ppc_cr_regnum, cr);
   if (REG_VALID == regcache->get_register_status (tdep->ppc_lr_regnum))
-    regcache_raw_collect (regcache, tdep->ppc_lr_regnum, lr);
+    regcache->raw_collect (tdep->ppc_lr_regnum, lr);
   if (REG_VALID == regcache->get_register_status (tdep->ppc_ctr_regnum))
-    regcache_raw_collect (regcache, tdep->ppc_ctr_regnum, ctr);
+    regcache->raw_collect (tdep->ppc_ctr_regnum, ctr);
   if (REG_VALID == regcache->get_register_status (tdep->ppc_xer_regnum))
-    regcache_raw_collect (regcache, tdep->ppc_xer_regnum, xer);
+    regcache->raw_collect (tdep->ppc_xer_regnum, xer);
   if (tdep->ppc_fpscr_regnum >= 0
       && REG_VALID == regcache->get_register_status (tdep->ppc_fpscr_regnum))
-    regcache_raw_collect (regcache, tdep->ppc_fpscr_regnum, fpscr);
+    regcache->raw_collect (tdep->ppc_fpscr_regnum, fpscr);
 }
 
 /* Store all registers into pthread PDTID, which doesn't have a kernel
@@ -1529,14 +1526,12 @@ store_regs_user_thread (const struct regcache *regcache, pthdb_pthread_t pdtid)
       {
 	if (arch64)
 	  {
-	    regcache_raw_collect (regcache, tdep->ppc_gp0_regnum + i,
-				  (void *) &int64);
+	    regcache->raw_collect (tdep->ppc_gp0_regnum + i, (void *) &int64);
 	    ctx.gpr[i] = int64;
 	  }
 	else
 	  {
-	    regcache_raw_collect (regcache, tdep->ppc_gp0_regnum + i,
-				  (void *) &int32);
+	    regcache->raw_collect (tdep->ppc_gp0_regnum + i, (void *) &int32);
 	    ctx.gpr[i] = int32;
 	  }
       }
@@ -1689,8 +1684,7 @@ store_regs_kernel_thread (const struct regcache *regcache, int regno,
 	  if (tdep->ppc_mq_regnum >= 0)
 	    if (REG_VALID == regcache->get_register_status
 			       (tdep->ppc_mq_regnum))
-	      regcache_raw_collect (regcache, tdep->ppc_mq_regnum,
-				    &sprs32.pt_mq);
+	      regcache->raw_collect (tdep->ppc_mq_regnum, &sprs32.pt_mq);
 
 	  ptrace32 (PTT_WRITE_SPRS, tid, (uintptr_t) &sprs32, 0, NULL);
 	}

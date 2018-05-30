@@ -110,7 +110,7 @@ linux_nat_trad_target::store_register (const struct regcache *regcache,
   buf = (gdb_byte *) alloca (size);
 
   /* Write the register contents into the inferior a chunk at a time.  */
-  regcache_raw_collect (regcache, regnum, buf);
+  regcache->raw_collect (regnum, buf);
   for (i = 0; i < size; i += sizeof (PTRACE_TYPE_RET))
     {
       size_t chunk = std::min (sizeof (PTRACE_TYPE_RET), size - i);

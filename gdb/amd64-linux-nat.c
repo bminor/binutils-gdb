@@ -287,7 +287,7 @@ amd64_linux_nat_target::store_registers (struct regcache *regcache, int regnum)
 
 	if (regnum == -1 || regnum == AMD64_FSBASE_REGNUM)
 	  {
-	    regcache_raw_collect (regcache, AMD64_FSBASE_REGNUM, &base);
+	    regcache->raw_collect (AMD64_FSBASE_REGNUM, &base);
 
 	    if (ptrace (PTRACE_ARCH_PRCTL, tid, base, ARCH_SET_FS) < 0)
 	      perror_with_name (_("Couldn't write segment register fs_base"));
@@ -295,7 +295,7 @@ amd64_linux_nat_target::store_registers (struct regcache *regcache, int regnum)
 	if (regnum == -1 || regnum == AMD64_GSBASE_REGNUM)
 	  {
 
-	    regcache_raw_collect (regcache, AMD64_GSBASE_REGNUM, &base);
+	    regcache->raw_collect (AMD64_GSBASE_REGNUM, &base);
 	    if (ptrace (PTRACE_ARCH_PRCTL, tid, base, ARCH_SET_GS) < 0)
 	      perror_with_name (_("Couldn't write segment register gs_base"));
 	  }

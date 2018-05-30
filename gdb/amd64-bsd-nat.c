@@ -138,7 +138,7 @@ amd64bsd_store_inferior_registers (struct regcache *regcache, int regnum)
     {
       register_t base;
 
-      regcache_raw_collect (regcache, AMD64_FSBASE_REGNUM, &base);
+      regcache->raw_collect (AMD64_FSBASE_REGNUM, &base);
 
       if (ptrace (PT_SETFSBASE, pid, (PTRACE_TYPE_ARG3) &base, 0) == -1)
 	perror_with_name (_("Couldn't write segment register fs_base"));
@@ -151,7 +151,7 @@ amd64bsd_store_inferior_registers (struct regcache *regcache, int regnum)
     {
       register_t base;
 
-      regcache_raw_collect (regcache, AMD64_GSBASE_REGNUM, &base);
+      regcache->raw_collect (AMD64_GSBASE_REGNUM, &base);
 
       if (ptrace (PT_SETGSBASE, pid, (PTRACE_TYPE_ARG3) &base, 0) == -1)
 	perror_with_name (_("Couldn't write segment register gs_base"));

@@ -250,7 +250,7 @@ i386obsd_collect_uthread (const struct regcache *regcache,
       /* Calculate the stack pointer (frame pointer) that will be
          stored into the thread structure.  */
       offset = i386obsd_uthread_reg_offset[I386_EIP_REGNUM] + 4;
-      regcache_raw_collect (regcache, I386_ESP_REGNUM, buf);
+      regcache->raw_collect (I386_ESP_REGNUM, buf);
       sp = extract_unsigned_integer (buf, 4, byte_order) - offset;
 
       /* Store the stack pointer.  */
@@ -272,7 +272,7 @@ i386obsd_collect_uthread (const struct regcache *regcache,
 	    sp = read_memory_unsigned_integer (sp_addr, 4, byte_order);
 
 	  /* Write the register into the stack frame.  */
-	  regcache_raw_collect (regcache, i, buf);
+	  regcache->raw_collect (i, buf);
 	  write_memory (sp + i386obsd_uthread_reg_offset[i], buf, 4);
 	}
     }

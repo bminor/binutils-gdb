@@ -161,8 +161,7 @@ mipsnbsd_fill_reg (const struct regcache *regcache, char *regs, int regno)
   for (i = 0; i <= gdbarch_pc_regnum (gdbarch); i++)
     if ((regno == i || regno == -1)
 	&& ! gdbarch_cannot_store_register (gdbarch, i))
-      regcache_raw_collect (regcache, i,
-			    regs + (i * mips_isa_regsize (gdbarch)));
+      regcache->raw_collect (i, regs + (i * mips_isa_regsize (gdbarch)));
 }
 
 void
@@ -200,9 +199,9 @@ mipsnbsd_fill_fpreg (const struct regcache *regcache, char *fpregs, int regno)
        i++)
     if ((regno == i || regno == -1) 
 	&& ! gdbarch_cannot_store_register (gdbarch, i))
-      regcache_raw_collect (regcache, i,
-			    fpregs + ((i - gdbarch_fp0_regnum (gdbarch))
-			      * mips_isa_regsize (gdbarch)));
+      regcache->raw_collect
+	(i, (fpregs + ((i - gdbarch_fp0_regnum (gdbarch))
+	     * mips_isa_regsize (gdbarch))));
 }
 
 #if 0

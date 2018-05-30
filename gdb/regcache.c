@@ -948,15 +948,6 @@ detached_regcache::raw_supply_zeroed (int regnum)
   m_register_status[regnum] = REG_VALID;
 }
 
-/* Collect register REGNUM from REGCACHE and store its contents in BUF.  */
-
-void
-regcache_raw_collect (const struct regcache *regcache, int regnum, void *buf)
-{
-  gdb_assert (regcache != NULL && buf != NULL);
-  regcache->raw_collect (regnum, buf);
-}
-
 void
 regcache::raw_collect (int regnum, void *buf) const
 {

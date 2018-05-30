@@ -150,11 +150,11 @@ fill_gregset (const struct regcache *regcache,
 	continue;
 
       if (i != M32R_SP_REGNUM)
-	regcache_raw_collect (regcache, i, regp + regmap[i]);
+	regcache->raw_collect (i, regp + regmap[i]);
       else if (psw & 0x8000)
-	regcache_raw_collect (regcache, i, regp + SPU_REGMAP);
+	regcache->raw_collect (i, regp + SPU_REGMAP);
       else
-	regcache_raw_collect (regcache, i, regp + SPI_REGMAP);
+	regcache->raw_collect (i, regp + SPI_REGMAP);
     }
 }
 

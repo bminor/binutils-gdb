@@ -87,8 +87,7 @@ nios2_collect_gregset (const struct regset *regset,
     if (regnum == -1 || regnum == regno)
       {
 	if (reg_offsets[regno] != -1)
-	  regcache_raw_collect (regcache, regno,
-				gregs + 4 * reg_offsets[regno]);
+	  regcache->raw_collect (regno, gregs + 4 * reg_offsets[regno]);
       }
 }
 

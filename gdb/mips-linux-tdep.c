@@ -194,7 +194,7 @@ mips_fill_gregset (const struct regcache *regcache,
   if (regno > 0 && regno < 32)
     {
       dst = regp + regno + EF_REG0;
-      regcache_raw_collect (regcache, regno, dst);
+      regcache->raw_collect (regno, dst);
       return;
     }
 
@@ -219,7 +219,7 @@ mips_fill_gregset (const struct regcache *regcache,
   if (regaddr != -1)
     {
       dst = regp + regaddr;
-      regcache_raw_collect (regcache, regno, dst);
+      regcache->raw_collect (regno, dst);
     }
 }
 
@@ -471,13 +471,13 @@ mips64_fill_fpregset (const struct regcache *regcache,
 	  to = (gdb_byte *) (*fpregsetp + (regi & ~1));
 	  if ((gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG) != (regi & 1))
 	    to += 4;
-	  regcache_raw_collect (regcache, regno, to);
+	  regcache->raw_collect (regno, to);
 	}
       else
 	{
 	  to = (gdb_byte *) (*fpregsetp + regno
 			     - gdbarch_fp0_regnum (gdbarch));
-	  regcache_raw_collect (regcache, regno, to);
+	  regcache->raw_collect (regno, to);
 	}
     }
   else if (regno == mips_regnum (gdbarch)->fp_control_status)

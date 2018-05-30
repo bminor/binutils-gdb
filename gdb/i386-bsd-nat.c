@@ -119,7 +119,7 @@ i386bsd_collect_gregset (const struct regcache *regcache,
 	  int offset = i386bsd_r_reg_offset[i];
 
 	  if (offset != -1)
-	    regcache_raw_collect (regcache, i, regs + offset);
+	    regcache->raw_collect (i, regs + offset);
 	}
     }
 }

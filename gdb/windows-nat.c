@@ -596,8 +596,7 @@ do_windows_store_inferior_registers (const struct regcache *regcache,
 				     windows_thread_info *th, int r)
 {
   if (r >= 0)
-    regcache_raw_collect (regcache, r,
-			  ((char *) &th->context) + mappings[r]);
+    regcache->raw_collect (r, ((char *) &th->context) + mappings[r]);
   else
     {
       for (r = 0; r < gdbarch_num_regs (regcache->arch ()); r++)

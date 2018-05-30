@@ -520,22 +520,22 @@ arm_linux_collect_gregset (const struct regset *regset,
 
   for (regno = ARM_A1_REGNUM; regno < ARM_PC_REGNUM; regno++)
     if (regnum == -1 || regnum == regno)
-      regcache_raw_collect (regcache, regno,
+      regcache->raw_collect (regno,
 			    gregs + INT_REGISTER_SIZE * regno);
 
   if (regnum == ARM_PS_REGNUM || regnum == -1)
     {
       if (arm_apcs_32)
-	regcache_raw_collect (regcache, ARM_PS_REGNUM,
+	regcache->raw_collect (ARM_PS_REGNUM,
 			      gregs + INT_REGISTER_SIZE * ARM_CPSR_GREGNUM);
       else
-	regcache_raw_collect (regcache, ARM_PS_REGNUM,
+	regcache->raw_collect (ARM_PS_REGNUM,
 			      gregs + INT_REGISTER_SIZE * ARM_PC_REGNUM);
     }
 
   if (regnum == ARM_PC_REGNUM || regnum == -1)
-    regcache_raw_collect (regcache, ARM_PC_REGNUM,
-			  gregs + INT_REGISTER_SIZE * ARM_PC_REGNUM);
+    regcache->raw_collect (ARM_PC_REGNUM,
+			   gregs + INT_REGISTER_SIZE * ARM_PC_REGNUM);
 }
 
 /* Support for register format used by the NWFPE FPA emulator.  */
@@ -588,7 +588,7 @@ collect_nwfpe_register (const struct regcache *regcache, int regno,
   gdb_byte reg_tag;
   gdb_byte buf[FP_REGISTER_SIZE];
 
-  regcache_raw_collect (regcache, regno, buf);
+  regcache->raw_collect (regno, buf);
 
   /* NOTE drow/2006-06-07: This code uses the tag already in the
      register buffer.  I've preserved that when moving the code
@@ -647,8 +647,8 @@ arm_linux_collect_nwfpe (const struct regset *regset,
       collect_nwfpe_register (regcache, regno, regs);
 
   if (regnum == ARM_FPS_REGNUM || regnum == -1)
-    regcache_raw_collect (regcache, ARM_FPS_REGNUM,
-			  regs + INT_REGISTER_SIZE * ARM_FPS_REGNUM);
+    regcache->raw_collect (ARM_FPS_REGNUM,
+			   regs + INT_REGISTER_SIZE * ARM_FPS_REGNUM);
 }
 
 /* Support VFP register format.  */
@@ -680,12 +680,11 @@ arm_linux_collect_vfp (const struct regset *regset,
   int regno;
 
   if (regnum == ARM_FPSCR_REGNUM || regnum == -1)
-    regcache_raw_collect (regcache, ARM_FPSCR_REGNUM, regs + 32 * 8);
+    regcache->raw_collect (ARM_FPSCR_REGNUM, regs + 32 * 8);
 
   for (regno = ARM_D0_REGNUM; regno <= ARM_D31_REGNUM; regno++)
     if (regnum == -1 || regnum == regno)
-      regcache_raw_collect (regcache, regno,
-			    regs + (regno - ARM_D0_REGNUM) * 8);
+      regcache->raw_collect (regno, regs + (regno - ARM_D0_REGNUM) * 8);
 }
 
 static const struct regset arm_linux_gregset =

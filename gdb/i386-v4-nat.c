@@ -123,7 +123,7 @@ fill_gregset (const struct regcache *regcache,
 
   for (i = 0; i < I386_NUM_GREGS; i++)
     if (regnum == -1 || regnum == i)
-      regcache_raw_collect (regcache, i, regp + regmap[i]);
+      regcache->raw_collect (i, regp + regmap[i]);
 }
 
 #endif /* HAVE_GREGSET_T */

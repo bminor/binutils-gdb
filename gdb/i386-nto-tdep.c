@@ -250,7 +250,7 @@ i386nto_regset_fill (const struct regcache *regcache, int regset, char *data)
 	{
 	  int offset = nto_reg_offset (regno);
 	  if (offset != -1)
-	    regcache_raw_collect (regcache, regno, data + offset);
+	    regcache->raw_collect (regno, data + offset);
 	}
     }
   else if (regset == NTO_REG_FLOAT)

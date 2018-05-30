@@ -103,7 +103,7 @@ fill_gregset (const struct regcache* regcache,
 
   for (i = 0; i < sizeof (regmap) / sizeof (regmap[0]); i++)
     if (regmap[i] >= 0)
-      regcache_raw_collect (regcache, i, regp + regmap[i]);
+      regcache->raw_collect (i, regp + regmap[i]);
 }
 
 /* Transfering floating-point registers between GDB, inferiors and cores.  */

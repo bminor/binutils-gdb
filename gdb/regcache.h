@@ -67,13 +67,6 @@ extern void regcache_cooked_write_unsigned (struct regcache *regcache,
 /* For regcache_read_pc see common/common-regcache.h.  */
 extern void regcache_write_pc (struct regcache *regcache, CORE_ADDR pc);
 
-/* Transfer a raw register [0..NUM_REGS) between the regcache and the
-   target.  These functions are called by the target in response to a
-   target_fetch_registers() or target_store_registers().  */
-
-extern void regcache_raw_collect (const struct regcache *regcache,
-				  int regnum, void *buf);
-
 /* Mapping between register numbers and offsets in a buffer, for use
    in the '*regset' functions below.  In an array of
    'regcache_map_entry' each element is interpreted like follows:
@@ -299,6 +292,7 @@ public:
 
   void raw_update (int regnum) override;
 
+  /* Collect register REGNUM from REGCACHE and store its contents in BUF.  */
   void raw_collect (int regnum, void *buf) const;
 
   void raw_collect_integer (int regnum, gdb_byte *addr, int addr_len,

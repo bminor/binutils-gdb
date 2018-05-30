@@ -571,8 +571,8 @@ store_register (const struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   if (regno < gdbarch_fp0_regnum (gdbarch))
-    regcache_raw_collect (regcache, regno,
-			  (char *) &a_tss + regno_mapping[regno].tss_ofs);
+    regcache->raw_collect (regno,
+			   (char *) &a_tss + regno_mapping[regno].tss_ofs);
   else if (i386_fp_regnum_p (gdbarch, regno) || i386_fpc_regnum_p (gdbarch,
 								   regno))
     i387_collect_fsave (regcache, regno, &npx);

@@ -508,7 +508,7 @@ i387_collect_fsave (const struct regcache *regcache, int regnum, void *fsave)
 	  {
 	    gdb_byte buf[4];
 
-	    regcache_raw_collect (regcache, i, buf);
+	    regcache->raw_collect (i, buf);
 
 	    if (i == I387_FOP_REGNUM (tdep))
 	      {
@@ -520,7 +520,7 @@ i387_collect_fsave (const struct regcache *regcache, int regnum, void *fsave)
 	    memcpy (FSAVE_ADDR (tdep, regs, i), buf, 2);
 	  }
 	else
-	  regcache_raw_collect (regcache, i, FSAVE_ADDR (tdep, regs, i));
+	  regcache->raw_collect (i, FSAVE_ADDR (tdep, regs, i));
       }
 }
 
@@ -685,7 +685,7 @@ i387_collect_fxsave (const struct regcache *regcache, int regnum, void *fxsave)
 	  {
 	    gdb_byte buf[4];
 
-	    regcache_raw_collect (regcache, i, buf);
+	    regcache->raw_collect (i, buf);
 
 	    if (i == I387_FOP_REGNUM (tdep))
 	      {
@@ -716,11 +716,11 @@ i387_collect_fxsave (const struct regcache *regcache, int regnum, void *fxsave)
 	    memcpy (FXSAVE_ADDR (tdep, regs, i), buf, 2);
 	  }
 	else
-	  regcache_raw_collect (regcache, i, FXSAVE_ADDR (tdep, regs, i));
+	  regcache->raw_collect (i, FXSAVE_ADDR (tdep, regs, i));
       }
 
   if (regnum == I387_MXCSR_REGNUM (tdep) || regnum == -1)
-    regcache_raw_collect (regcache, I387_MXCSR_REGNUM (tdep),
+    regcache->raw_collect (I387_MXCSR_REGNUM (tdep),
 			  FXSAVE_MXCSR_ADDR (regs));
 }
 
@@ -1505,7 +1505,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	for (i = I387_PKRU_REGNUM (tdep);
 	     i < I387_PKEYSEND_REGNUM (tdep); i++)
 	  {
-	    regcache_raw_collect (regcache, i, raw);
+	    regcache->raw_collect (i, raw);
 	    p = XSAVE_PKEYS_ADDR (tdep, regs, i);
 	    if (memcmp (raw, p, 4) != 0)
 	      {
@@ -1519,7 +1519,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	for (i = I387_ZMM0H_REGNUM (tdep);
 	     i < I387_ZMMENDH_REGNUM (tdep); i++)
 	  {
-	    regcache_raw_collect (regcache, i, raw);
+	    regcache->raw_collect (i, raw);
 	    p = XSAVE_AVX512_ZMM_H_ADDR (tdep, regs, i);
 	    if (memcmp (raw, p, 32) != 0)
 	      {
@@ -1533,7 +1533,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	for (i = I387_K0_REGNUM (tdep);
 	     i < I387_KEND_REGNUM (tdep); i++)
 	  {
-	    regcache_raw_collect (regcache, i, raw);
+	    regcache->raw_collect (i, raw);
 	    p = XSAVE_AVX512_K_ADDR (tdep, regs, i);
 	    if (memcmp (raw, p, 8) != 0)
 	      {
@@ -1548,7 +1548,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	  for (i = I387_YMM16H_REGNUM (tdep);
 	       i < I387_YMMH_AVX512_END_REGNUM (tdep); i++)
 	    {
-	      regcache_raw_collect (regcache, i, raw);
+	      regcache->raw_collect (i, raw);
 	      p = XSAVE_YMM_AVX512_ADDR (tdep, regs, i);
 	      if (memcmp (raw, p, 16) != 0)
 		{
@@ -1559,7 +1559,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	  for (i = I387_XMM16_REGNUM (tdep);
 	       i < I387_XMM_AVX512_END_REGNUM (tdep); i++)
 	    {
-	      regcache_raw_collect (regcache, i, raw);
+	      regcache->raw_collect (i, raw);
 	      p = XSAVE_XMM_AVX512_ADDR (tdep, regs, i);
 	      if (memcmp (raw, p, 16) != 0)
 		{
@@ -1574,7 +1574,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	for (i = I387_BND0R_REGNUM (tdep);
 	     i < I387_BNDCFGU_REGNUM (tdep); i++)
 	  {
-	    regcache_raw_collect (regcache, i, raw);
+	    regcache->raw_collect (i, raw);
 	    p = XSAVE_MPX_ADDR (tdep, regs, i);
 	    if (memcmp (raw, p, 16))
 	      {
@@ -1588,7 +1588,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	for (i = I387_BNDCFGU_REGNUM (tdep);
 	     i < I387_MPXEND_REGNUM (tdep); i++)
 	  {
-	    regcache_raw_collect (regcache, i, raw);
+	    regcache->raw_collect (i, raw);
 	    p = XSAVE_MPX_ADDR (tdep, regs, i);
 	    if (memcmp (raw, p, 8))
 	      {
@@ -1602,7 +1602,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	for (i = I387_YMM0H_REGNUM (tdep);
 	     i < I387_YMMENDH_REGNUM (tdep); i++)
 	  {
-	    regcache_raw_collect (regcache, i, raw);
+	    regcache->raw_collect (i, raw);
 	    p = XSAVE_AVXH_ADDR (tdep, regs, i);
 	    if (memcmp (raw, p, 16))
 	      {
@@ -1616,7 +1616,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	for (i = I387_XMM0_REGNUM (tdep);
 	     i < I387_MXCSR_REGNUM (tdep); i++)
 	  {
-	    regcache_raw_collect (regcache, i, raw);
+	    regcache->raw_collect (i, raw);
 	    p = FXSAVE_ADDR (tdep, regs, i);
 	    if (memcmp (raw, p, 16))
 	      {
@@ -1628,7 +1628,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
       if ((tdep->xcr0 & X86_XSTATE_AVX) || (tdep->xcr0 & X86_XSTATE_SSE))
 	{
 	  i = I387_MXCSR_REGNUM (tdep);
-	  regcache_raw_collect (regcache, i, raw);
+	  regcache->raw_collect (i, raw);
 	  p = FXSAVE_MXCSR_ADDR (regs);
 	  if (memcmp (raw, p, 4))
 	    {
@@ -1649,7 +1649,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	for (i = I387_ST0_REGNUM (tdep);
 	     i < I387_FCTRL_REGNUM (tdep); i++)
 	  {
-	    regcache_raw_collect (regcache, i, raw);
+	    regcache->raw_collect (i, raw);
 	    p = FXSAVE_ADDR (tdep, regs, i);
 	    if (memcmp (raw, p, 10))
 	      {
@@ -1661,7 +1661,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
   else
     {
       /* Check if REGNUM is changed.  */
-      regcache_raw_collect (regcache, regnum, raw);
+      regcache->raw_collect (regnum, raw);
 
       switch (regclass)
 	{
@@ -1731,7 +1731,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	case mpx:
 	  if (regnum < I387_BNDCFGU_REGNUM (tdep))
 	    {
-	      regcache_raw_collect (regcache, regnum, raw);
+	      regcache->raw_collect (regnum, raw);
 	      p = XSAVE_MPX_ADDR (tdep, regs, regnum);
 	      if (memcmp (raw, p, 16))
 		{
@@ -1801,7 +1801,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	  {
 	    gdb_byte buf[4];
 
-	    regcache_raw_collect (regcache, i, buf);
+	    regcache->raw_collect (i, buf);
 
 	    if (i == I387_FOP_REGNUM (tdep))
 	      {
@@ -1840,7 +1840,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	  {
 	    int regsize;
 
-	    regcache_raw_collect (regcache, i, raw);
+	    regcache->raw_collect (i, raw);
 	    regsize = regcache_register_size (regcache, i);
 	    p = FXSAVE_ADDR (tdep, regs, i);
 	    if (memcmp (raw, p, regsize))
