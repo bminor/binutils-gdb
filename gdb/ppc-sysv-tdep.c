@@ -1286,9 +1286,8 @@ ppc64_sysv_abi_push_val (struct gdbarch *gdbarch,
   if (len > 0)
     {
       if (argpos->regcache && argpos->greg <= 10)
-	regcache_cooked_write_part (argpos->regcache,
-				    tdep->ppc_gp0_regnum + argpos->greg,
-				    offset, len, val);
+	argpos->regcache->cooked_write_part
+	  (tdep->ppc_gp0_regnum + argpos->greg, offset, len, val);
       argpos->greg++;
     }
 }
@@ -1352,8 +1351,8 @@ ppc64_sysv_abi_push_freg (struct gdbarch *gdbarch,
 	  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
 	    offset = 8 - TYPE_LENGTH (type);
 
-	  regcache_cooked_write_part (argpos->regcache, regnum,
-				      offset, TYPE_LENGTH (type), val);
+	  argpos->regcache->cooked_write_part (regnum, offset,
+					       TYPE_LENGTH (type), val);
 	}
 
       argpos->freg++;
@@ -1802,8 +1801,8 @@ ppc64_sysv_abi_return_value_base (struct gdbarch *gdbarch, struct type *valtype,
 	offset = 8 - TYPE_LENGTH (valtype);
 
       if (writebuf != NULL)
-	regcache_cooked_write_part (regcache, regnum,
-				    offset, TYPE_LENGTH (valtype), writebuf);
+	regcache->cooked_write_part (regnum, offset, TYPE_LENGTH (valtype),
+				     writebuf);
       if (readbuf != NULL)
 	regcache->cooked_read_part (regnum, offset, TYPE_LENGTH (valtype),
 				    readbuf);
@@ -1878,8 +1877,8 @@ ppc64_sysv_abi_return_value_base (struct gdbarch *gdbarch, struct type *valtype,
 	offset = 8 - TYPE_LENGTH (valtype);
 
       if (writebuf != NULL)
-	regcache_cooked_write_part (regcache, regnum,
-				    offset, TYPE_LENGTH (valtype), writebuf);
+	regcache->cooked_write_part (regnum, offset, TYPE_LENGTH (valtype),
+				     writebuf);
       if (readbuf != NULL)
 	regcache->cooked_read_part (regnum, offset, TYPE_LENGTH (valtype),
 				    readbuf);
@@ -1983,8 +1982,8 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
       int offset = (register_size (gdbarch, regnum) - TYPE_LENGTH (valtype));
 
       if (writebuf != NULL)
-	regcache_cooked_write_part (regcache, regnum,
-				    offset, TYPE_LENGTH (valtype), writebuf);
+	regcache->cooked_write_part (regnum, offset, TYPE_LENGTH (valtype),
+				     writebuf);
       if (readbuf != NULL)
 	regcache->cooked_read_part (regnum, offset, TYPE_LENGTH (valtype),
 				    readbuf);

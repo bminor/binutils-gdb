@@ -760,8 +760,7 @@ tic6x_store_return_value (struct type *valtype, struct regcache *regcache,
   if (len <= 4)
     {
       if (len < 3 && byte_order == BFD_ENDIAN_BIG)
-	regcache_cooked_write_part (regcache, TIC6X_A4_REGNUM, 4 - len, len,
-				    valbuf);
+	regcache->cooked_write_part (TIC6X_A4_REGNUM, 4 - len, len, valbuf);
       else
 	regcache->cooked_write (TIC6X_A4_REGNUM, valbuf);
     }
@@ -957,8 +956,8 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		     so, we write the contents in VAL to the lsp of
 		     register.  */
 		  if (len < 3 && byte_order == BFD_ENDIAN_BIG)
-		    regcache_cooked_write_part (regcache, arg_regs[argreg],
-						4 - len, len, val);
+		    regcache->cooked_write_part (arg_regs[argreg], 4 - len, len,
+						 val);
 		  else
 		    regcache->cooked_write (arg_regs[argreg], val);
 		}
@@ -988,16 +987,14 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      if (byte_order == BFD_ENDIAN_BIG)
 			{
 			  regcache->cooked_write (arg_regs[argreg] + 1, val);
-			  regcache_cooked_write_part (regcache,
-						      arg_regs[argreg], 0,
-						      len - 4, val + 4);
+			  regcache->cooked_write_part (arg_regs[argreg], 0,
+						       len - 4, val + 4);
 			}
 		      else
 			{
 			  regcache->cooked_write (arg_regs[argreg], val);
-			  regcache_cooked_write_part (regcache,
-						      arg_regs[argreg] + 1, 0,
-						      len - 4, val + 4);
+			  regcache->cooked_write_part (arg_regs[argreg] + 1, 0,
+						       len - 4, val + 4);
 			}
 		    }
 		  else

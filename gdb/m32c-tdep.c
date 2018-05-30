@@ -463,7 +463,7 @@ m32c_part_write (struct m32c_reg *reg, struct regcache *cache,
   int offset, len;
 
   m32c_find_part (reg, &offset, &len);
-  regcache_cooked_write_part (cache, reg->rx->num, offset, len, buf);
+  cache->cooked_write_part (reg->rx->num, offset, len, buf);
 
   return REG_VALID;
 }

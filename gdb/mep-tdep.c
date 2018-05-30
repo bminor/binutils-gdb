@@ -2139,9 +2139,8 @@ mep_store_return_value (struct gdbarch *arch,
       else
         offset = 0;
 
-      regcache_cooked_write_part (regcache, MEP_R0_REGNUM,
-                                  offset, TYPE_LENGTH (type),
-                                  valbuf);
+      regcache->cooked_write_part (MEP_R0_REGNUM, offset, TYPE_LENGTH (type),
+				   valbuf);
     }
 
   /* Return values larger than a single register are returned in

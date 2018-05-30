@@ -62,12 +62,6 @@ extern void regcache_cooked_write_signed (struct regcache *regcache,
 extern void regcache_cooked_write_unsigned (struct regcache *regcache,
 					    int regnum, ULONGEST val);
 
-/* Partial transfer of a cooked register.  These perform read, modify,
-   write style operations.  */
-
-void regcache_cooked_write_part (struct regcache *regcache, int regnum,
-				 int offset, int len, const gdb_byte *buf);
-
 /* Special routines to read/write the PC.  */
 
 /* For regcache_read_pc see common/common-regcache.h.  */
@@ -315,6 +309,8 @@ public:
      operations.  */
   void raw_write_part (int regnum, int offset, int len, const gdb_byte *buf);
 
+  /* Partial transfer of a cooked register.  Perform read, modify, write style
+     operations.  */
   void cooked_write_part (int regnum, int offset, int len,
 			  const gdb_byte *buf);
 

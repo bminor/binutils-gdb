@@ -1356,7 +1356,7 @@ spu_value_to_regcache (struct regcache *regcache, int regnum,
   if (spu_scalar_value_p (type))
     {
       int preferred_slot = len < 4 ? 4 - len : 0;
-      regcache_cooked_write_part (regcache, regnum, preferred_slot, len, in);
+      regcache->cooked_write_part (regnum, preferred_slot, len, in);
     }
   else
     {
@@ -1368,7 +1368,7 @@ spu_value_to_regcache (struct regcache *regcache, int regnum,
 	}
 
       if (len > 0)
-	regcache_cooked_write_part (regcache, regnum, 0, len, in);
+	regcache->cooked_write_part (regnum, 0, len, in);
     }
 }
 
@@ -1540,7 +1540,7 @@ spu_return_value (struct gdbarch *gdbarch, struct value *function,
 	{
 	case RETURN_VALUE_REGISTER_CONVENTION:
 	  if (opencl_vector && TYPE_LENGTH (type) == 2)
-	    regcache_cooked_write_part (regcache, SPU_ARG1_REGNUM, 2, 2, in);
+	    regcache->cooked_write_part (SPU_ARG1_REGNUM, 2, 2, in);
 	  else
 	    spu_value_to_regcache (regcache, SPU_ARG1_REGNUM, type, in);
 	  break;

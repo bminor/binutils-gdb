@@ -872,13 +872,6 @@ readable_regcache::cooked_read_part (int regnum, int offset, int len,
 }
 
 void
-regcache_cooked_write_part (struct regcache *regcache, int regnum,
-			    int offset, int len, const gdb_byte *buf)
-{
-  regcache->cooked_write_part (regnum, offset, len, buf);
-}
-
-void
 regcache::cooked_write_part (int regnum, int offset, int len,
 			     const gdb_byte *buf)
 {
