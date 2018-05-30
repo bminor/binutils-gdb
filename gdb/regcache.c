@@ -238,7 +238,7 @@ public:
   ~regcache_invalidator ()
   {
     if (m_regcache != nullptr)
-      regcache_invalidate (m_regcache, m_regnum);
+      m_regcache->invalidate (m_regnum);
   }
 
   DISABLE_COPY_AND_ASSIGN (regcache_invalidator);
@@ -326,13 +326,6 @@ reg_buffer::get_register_status (int regnum) const
   assert_regnum (regnum);
 
   return (enum register_status) m_register_status[regnum];
-}
-
-void
-regcache_invalidate (struct regcache *regcache, int regnum)
-{
-  gdb_assert (regcache != NULL);
-  regcache->invalidate (regnum);
 }
 
 void

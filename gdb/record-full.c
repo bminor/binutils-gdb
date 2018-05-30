@@ -1609,10 +1609,10 @@ record_full_target::store_registers (struct regcache *regcache, int regno)
 		  for (i = 0;
 		       i < gdbarch_num_regs (regcache->arch ());
 		       i++)
-		    regcache_invalidate (regcache, i);
+		    regcache->invalidate (i);
 		}
 	      else
-		regcache_invalidate (regcache, regno);
+		regcache->invalidate (regno);
 
 	      error (_("Process record canceled the operation."));
 	    }

@@ -50,8 +50,6 @@ extern void regcache_raw_write_unsigned (struct regcache *regcache,
 extern LONGEST regcache_raw_get_signed (struct regcache *regcache,
 					int regnum);
 
-void regcache_invalidate (struct regcache *regcache, int regnum);
-
 /* Transfer of pseudo-registers.  The read variants return a register
    status, as an indication of when a ``cooked'' register was
    constructed from valid, invalid or unavailable ``raw''
