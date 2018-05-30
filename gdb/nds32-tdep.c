@@ -1587,13 +1587,11 @@ nds32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      switch (len)
 		{
 		case 4:
-		  regcache_cooked_write (regcache,
-					 tdep->fs0_regnum + foff, val);
+		  regcache->cooked_write (tdep->fs0_regnum + foff, val);
 		  foff++;
 		  break;
 		case 8:
-		  regcache_cooked_write (regcache,
-					 NDS32_FD0_REGNUM + (foff >> 1), val);
+		  regcache->cooked_write (NDS32_FD0_REGNUM + (foff >> 1), val);
 		  foff += 2;
 		  break;
 		default:
@@ -1830,9 +1828,9 @@ nds32_store_return_value (struct gdbarch *gdbarch, struct type *type,
   if (abi_use_fpr && calling_use_fpr)
     {
       if (len == 4)
-	regcache_cooked_write (regcache, tdep->fs0_regnum, valbuf);
+	regcache->cooked_write (tdep->fs0_regnum, valbuf);
       else if (len == 8)
-	regcache_cooked_write (regcache, NDS32_FD0_REGNUM, valbuf);
+	regcache->cooked_write (NDS32_FD0_REGNUM, valbuf);
       else
 	internal_error (__FILE__, __LINE__,
 			_("Cannot store return value of %d bytes "
@@ -1849,7 +1847,7 @@ nds32_store_return_value (struct gdbarch *gdbarch, struct type *type,
 	}
       else if (len == 4)
 	{
-	  regcache_cooked_write (regcache, NDS32_R0_REGNUM, valbuf);
+	  regcache->cooked_write (NDS32_R0_REGNUM, valbuf);
 	}
       else if (len < 8)
 	{
@@ -1867,8 +1865,8 @@ nds32_store_return_value (struct gdbarch *gdbarch, struct type *type,
 	}
       else
 	{
-	  regcache_cooked_write (regcache, NDS32_R0_REGNUM, valbuf);
-	  regcache_cooked_write (regcache, NDS32_R0_REGNUM + 1, valbuf + 4);
+	  regcache->cooked_write (NDS32_R0_REGNUM, valbuf);
+	  regcache->cooked_write (NDS32_R0_REGNUM + 1, valbuf + 4);
 	}
     }
 }

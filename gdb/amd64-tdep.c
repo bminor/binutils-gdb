@@ -1010,7 +1010,7 @@ amd64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   if (struct_return)
     {
       store_unsigned_integer (buf, 8, byte_order, struct_addr);
-      regcache_cooked_write (regcache, AMD64_RDI_REGNUM, buf);
+      regcache->cooked_write (AMD64_RDI_REGNUM, buf);
     }
 
   /* Store return address.  */
@@ -1020,10 +1020,10 @@ amd64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Finally, update the stack pointer...  */
   store_unsigned_integer (buf, 8, byte_order, sp);
-  regcache_cooked_write (regcache, AMD64_RSP_REGNUM, buf);
+  regcache->cooked_write (AMD64_RSP_REGNUM, buf);
 
   /* ...and fake a frame pointer.  */
-  regcache_cooked_write (regcache, AMD64_RBP_REGNUM, buf);
+  regcache->cooked_write (AMD64_RBP_REGNUM, buf);
 
   return sp + 16;
 }

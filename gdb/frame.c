@@ -1365,7 +1365,7 @@ put_frame_register (struct frame_info *frame, int regnum,
 	break;
       }
     case lval_register:
-      regcache_cooked_write (get_current_regcache (), realnum, buf);
+      get_current_regcache ()->cooked_write (realnum, buf);
       break;
     default:
       error (_("Attempt to assign to an unmodifiable value."));

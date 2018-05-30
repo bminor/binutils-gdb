@@ -849,7 +849,7 @@ cris_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
           /* Data passed by value.  Fits in available register(s).  */
           for (i = 0; i < reg_demand; i++)
             {
-              regcache_cooked_write (regcache, argreg, val);
+              regcache->cooked_write (argreg, val);
               argreg++;
               val += 4;
             }
@@ -862,7 +862,7 @@ cris_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
             {
               if (argreg <= ARG4_REGNUM)
                 {
-		  regcache_cooked_write (regcache, argreg, val);
+        	  regcache->cooked_write (argreg, val);
                   argreg++;
                   val += 4;
                 }

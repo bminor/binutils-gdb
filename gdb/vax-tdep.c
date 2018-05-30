@@ -133,7 +133,7 @@ vax_store_arguments (struct regcache *regcache, int nargs,
 
   /* Update the argument pointer.  */
   store_unsigned_integer (buf, 4, byte_order, sp);
-  regcache_cooked_write (regcache, VAX_AP_REGNUM, buf);
+  regcache->cooked_write (VAX_AP_REGNUM, buf);
 
   return sp;
 }
@@ -180,8 +180,8 @@ vax_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Update the stack pointer and frame pointer.  */
   store_unsigned_integer (buf, 4, byte_order, sp);
-  regcache_cooked_write (regcache, VAX_SP_REGNUM, buf);
-  regcache_cooked_write (regcache, VAX_FP_REGNUM, buf);
+  regcache->cooked_write (VAX_SP_REGNUM, buf);
+  regcache->cooked_write (VAX_FP_REGNUM, buf);
 
   /* Return the saved (fake) frame pointer.  */
   return fp;
@@ -236,9 +236,9 @@ vax_return_value (struct gdbarch *gdbarch, struct value *function,
     {
       /* Read the contents to R0 and (if necessary) R1.  */
       memcpy (buf, writebuf, len);
-      regcache_cooked_write (regcache, VAX_R0_REGNUM, buf);
+      regcache->cooked_write (VAX_R0_REGNUM, buf);
       if (len > 4)
-	regcache_cooked_write (regcache, VAX_R1_REGNUM, buf + 4);
+	regcache->cooked_write (VAX_R1_REGNUM, buf + 4);
     }
 
   return RETURN_VALUE_REGISTER_CONVENTION;

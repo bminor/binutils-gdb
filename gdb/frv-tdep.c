@@ -1327,12 +1327,12 @@ frv_store_return_value (struct type *type, struct regcache *regcache,
       bfd_byte val[4];
       memset (val, 0, sizeof (val));
       memcpy (val + (4 - len), valbuf, len);
-      regcache_cooked_write (regcache, 8, val);
+      regcache->cooked_write (8, val);
     }
   else if (len == 8)
     {
-      regcache_cooked_write (regcache, 8, valbuf);
-      regcache_cooked_write (regcache, 9, (bfd_byte *) valbuf + 4);
+      regcache->cooked_write (8, valbuf);
+      regcache->cooked_write (9, (bfd_byte *) valbuf + 4);
     }
   else
     internal_error (__FILE__, __LINE__,

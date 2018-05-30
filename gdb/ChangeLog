@@ -1,5 +1,11 @@
 2018-05-30  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* regcache.h (regcache_cooked_write): Remove, update callers to
+	use regcache::cooked_write.
+	* regcache.c (regcache_cooked_write): Remove.
+
+2018-05-30  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* regcache.h (regcache_invalidate): Remove, update callers to
 	use detached_regcache::invalidate instead.
 	* regcache.c (regcache_invalidate): Remove.

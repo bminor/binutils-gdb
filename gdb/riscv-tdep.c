@@ -2103,7 +2103,7 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
       gdb_byte buf[sizeof (LONGEST)];
 
       store_unsigned_integer (buf, call_info.xlen, byte_order, struct_addr);
-      regcache_cooked_write (regcache, RISCV_A0_REGNUM, buf);
+      regcache->cooked_write (RISCV_A0_REGNUM, buf);
     }
 
   for (i = 0; i < nargs; ++i)
@@ -2124,9 +2124,7 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 	    gdb_assert (info->argloc[0].c_length <= info->length);
 	    memset (tmp, 0, sizeof (tmp));
 	    memcpy (tmp, info->contents, info->argloc[0].c_length);
-	    regcache_cooked_write (regcache,
-				   info->argloc[0].loc_data.regno,
-				   tmp);
+	    regcache->cooked_write (info->argloc[0].loc_data.regno, tmp);
 	    second_arg_length =
 	      ((info->argloc[0].c_length < info->length)
 	       ? info->argloc[1].c_length : 0);
@@ -2163,9 +2161,7 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 		gdb_assert (second_arg_length <= call_info.xlen);
 		memset (tmp, 0, sizeof (tmp));
 		memcpy (tmp, second_arg_data, second_arg_length);
-		regcache_cooked_write (regcache,
-				       info->argloc[1].loc_data.regno,
-				       tmp);
+		regcache->cooked_write (info->argloc[1].loc_data.regno, tmp);
 	      }
 	      break;
 
@@ -2251,7 +2247,7 @@ riscv_return_value (struct gdbarch  *gdbarch,
 		regcache->cooked_read (regnum, readbuf);
 
 	      if (writebuf)
-		regcache_cooked_write (regcache, regnum, writebuf);
+		regcache->cooked_write (regnum, writebuf);
 
 	      /* A return value in register can have a second part in a
 		 second register.  */
@@ -2271,7 +2267,7 @@ riscv_return_value (struct gdbarch  *gdbarch,
 		      if (writebuf)
 			{
 			  writebuf += info.argloc[1].c_offset;
-			  regcache_cooked_write (regcache, regnum, writebuf);
+			  regcache->cooked_write (regnum, writebuf);
 			}
 		      break;
 

@@ -50,14 +50,6 @@ extern void regcache_raw_write_unsigned (struct regcache *regcache,
 extern LONGEST regcache_raw_get_signed (struct regcache *regcache,
 					int regnum);
 
-/* Transfer of pseudo-registers.  The read variants return a register
-   status, as an indication of when a ``cooked'' register was
-   constructed from valid, invalid or unavailable ``raw''
-   registers.  */
-
-void regcache_cooked_write (struct regcache *regcache, int rawnum,
-			    const gdb_byte *buf);
-
 /* Read register REGNUM from REGCACHE and return a new value.  This
    will call mark_value_bytes_unavailable as appropriate.  */
 
@@ -304,8 +296,6 @@ public:
      read-only register cache.  */
   void restore (readonly_detached_regcache *src);
 
-  void cooked_write (int regnum, const gdb_byte *buf);
-
   /* Update the value of raw register REGNUM (in the range [0..NUM_REGS)) and
      transfer its value to core-gdb.  */
 
@@ -313,6 +303,9 @@ public:
 
   template<typename T, typename = RequireLongest<T>>
   void raw_write (int regnum, T val);
+
+  /* Transfer of pseudo-registers.  */
+  void cooked_write (int regnum, const gdb_byte *buf);
 
   template<typename T, typename = RequireLongest<T>>
   void cooked_write (int regnum, T val);

@@ -1800,12 +1800,10 @@ s390_handle_arg (struct s390_arg_state *as, struct value *arg,
 	{
 	  if (write_mode)
 	    {
-	      regcache_cooked_write (as->regcache,
-				     S390_R0_REGNUM + as->gr,
-				     value_contents (arg));
-	      regcache_cooked_write (as->regcache,
-				     S390_R0_REGNUM + as->gr + 1,
-				     value_contents (arg) + word_size);
+	      as->regcache->cooked_write (S390_R0_REGNUM + as->gr,
+					  value_contents (arg));
+	      as->regcache->cooked_write (S390_R0_REGNUM + as->gr + 1,
+					  value_contents (arg) + word_size);
 	    }
 	  as->gr += 2;
 	}
@@ -2018,9 +2016,8 @@ s390_register_return_value (struct gdbarch *gdbarch, struct type *type,
       /* Double word: in r2 and r3.  */
       if (in != NULL)
 	{
-	  regcache_cooked_write (regcache, S390_R2_REGNUM, in);
-	  regcache_cooked_write (regcache, S390_R3_REGNUM,
-				 in + word_size);
+	  regcache->cooked_write (S390_R2_REGNUM, in);
+	  regcache->cooked_write (S390_R3_REGNUM, in + word_size);
 	}
       else
 	{

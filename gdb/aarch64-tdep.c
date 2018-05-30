@@ -1271,7 +1271,7 @@ pass_in_v (struct gdbarch *gdbarch,
       /* PCS C.1, the argument is allocated to the least significant
 	 bits of V register.  */
       memcpy (reg, buf, len);
-      regcache_cooked_write (regcache, regnum, reg);
+      regcache->cooked_write (regnum, reg);
 
       if (aarch64_debug)
 	{
@@ -1931,7 +1931,7 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
       int len = TYPE_LENGTH (type);
 
       memcpy (buf, valbuf, len > V_REGISTER_SIZE ? V_REGISTER_SIZE : len);
-      regcache_cooked_write (regs, AARCH64_V0_REGNUM, buf);
+      regs->cooked_write (AARCH64_V0_REGNUM, buf);
     }
   else if (TYPE_CODE (type) == TYPE_CODE_INT
 	   || TYPE_CODE (type) == TYPE_CODE_CHAR
@@ -1948,7 +1948,7 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 	  LONGEST val = unpack_long (type, valbuf);
 
 	  store_signed_integer (tmpbuf, X_REGISTER_SIZE, byte_order, val);
-	  regcache_cooked_write (regs, AARCH64_X0_REGNUM, tmpbuf);
+	  regs->cooked_write (AARCH64_X0_REGNUM, tmpbuf);
 	}
       else
 	{
@@ -1960,7 +1960,7 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 
 	  while (len > 0)
 	    {
-	      regcache_cooked_write (regs, regno++, valbuf);
+	      regs->cooked_write (regno++, valbuf);
 	      len -= X_REGISTER_SIZE;
 	      valbuf += X_REGISTER_SIZE;
 	    }
@@ -1986,7 +1986,7 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 	    }
 
 	  memcpy (tmpbuf, valbuf, len);
-	  regcache_cooked_write (regs, regno, tmpbuf);
+	  regs->cooked_write (regno, tmpbuf);
 	  valbuf += len;
 	}
     }
@@ -1997,7 +1997,7 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
       gdb_byte buf[V_REGISTER_SIZE];
 
       memcpy (buf, valbuf, TYPE_LENGTH (type));
-      regcache_cooked_write (regs, AARCH64_V0_REGNUM, buf);
+      regs->cooked_write (AARCH64_V0_REGNUM, buf);
     }
   else
     {
@@ -2012,7 +2012,7 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 	{
 	  memcpy (tmpbuf, valbuf,
 		  len > X_REGISTER_SIZE ? X_REGISTER_SIZE : len);
-	  regcache_cooked_write (regs, regno++, tmpbuf);
+	  regs->cooked_write (regno++, tmpbuf);
 	  len -= X_REGISTER_SIZE;
 	  valbuf += X_REGISTER_SIZE;
 	}

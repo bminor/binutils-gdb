@@ -1362,7 +1362,7 @@ spu_value_to_regcache (struct regcache *regcache, int regnum,
     {
       while (len >= 16)
 	{
-	  regcache_cooked_write (regcache, regnum++, in);
+	  regcache->cooked_write (regnum++, in);
 	  in += 16;
 	  len -= 16;
 	}
@@ -1413,7 +1413,7 @@ spu_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Set the return address.  */
   memset (buf, 0, sizeof buf);
   store_unsigned_integer (buf, 4, byte_order, SPUADDR_ADDR (bp_addr));
-  regcache_cooked_write (regcache, SPU_LR_REGNUM, buf);
+  regcache->cooked_write (SPU_LR_REGNUM, buf);
 
   /* If STRUCT_RETURN is true, then the struct return address (in
      STRUCT_ADDR) will consume the first argument-passing register.
@@ -1422,7 +1422,7 @@ spu_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       memset (buf, 0, sizeof buf);
       store_unsigned_integer (buf, 4, byte_order, SPUADDR_ADDR (struct_addr));
-      regcache_cooked_write (regcache, regnum++, buf);
+      regcache->cooked_write (regnum++, buf);
     }
 
   /* Fill in argument registers.  */
@@ -1490,7 +1490,7 @@ spu_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       CORE_ADDR sp_slot = extract_unsigned_integer (buf + 4*i, 4, byte_order);
       store_unsigned_integer (buf + 4*i, 4, byte_order, sp_slot + sp_delta);
     }
-  regcache_cooked_write (regcache, SPU_RAW_SP_REGNUM, buf);
+  regcache->cooked_write (SPU_RAW_SP_REGNUM, buf);
 
   return sp;
 }

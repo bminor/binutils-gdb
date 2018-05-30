@@ -647,7 +647,7 @@ bfin_store_return_value (struct type *type,
 
   while (len > 0)
     {
-      regcache_cooked_write (regs, regno++, valbuf);
+      regs->cooked_write (regno++, valbuf);
       len -= 4;
       valbuf += 4;
     }

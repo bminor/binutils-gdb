@@ -573,13 +573,13 @@ microblaze_store_return_value (struct type *type, struct regcache *regcache,
     {
        gdb_assert (len == 8);
        memcpy (buf, valbuf, 8);
-       regcache_cooked_write (regcache, MICROBLAZE_RETVAL_REGNUM+1, buf + 4);
+       regcache->cooked_write (MICROBLAZE_RETVAL_REGNUM+1, buf + 4);
     }
   else
     /* ??? Do we need to do any sign-extension here?  */
     memcpy (buf + 4 - len, valbuf, len);
 
-  regcache_cooked_write (regcache, MICROBLAZE_RETVAL_REGNUM, buf);
+  regcache->cooked_write (MICROBLAZE_RETVAL_REGNUM, buf);
 }
 
 static enum return_value_convention

@@ -250,7 +250,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  gdb_assert (len <= 8);
 
 	  target_float_convert (value_contents (arg), type, reg_val, reg_type);
-	  regcache_cooked_write (regcache, fp_regnum, reg_val);
+	  regcache->cooked_write (fp_regnum, reg_val);
 	  ++f_argno;
 	}
 
@@ -266,9 +266,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      ((char *) value_contents (arg)) + argbytes,
 		      (len - argbytes) > reg_size
 		        ? reg_size : len - argbytes);
-	      regcache_cooked_write (regcache,
-	                            tdep->ppc_gp0_regnum + 3 + ii,
-				    word);
+	      regcache->cooked_write (tdep->ppc_gp0_regnum + 3 + ii, word);
 	      ++ii, argbytes += reg_size;
 
 	      if (ii >= 8)
@@ -284,7 +282,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 	  memset (word, 0, reg_size);
 	  memcpy (word, value_contents (arg), len);
-	  regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 3 +ii, word);
+	  regcache->cooked_write (tdep->ppc_gp0_regnum + 3 +ii, word);
 	}
       ++argno;
     }
@@ -366,9 +364,8 @@ ran_out_of_registers_for_arguments:
 
 	      gdb_assert (len <= 8);
 
-	      regcache_cooked_write (regcache,
-				     tdep->ppc_fp0_regnum + 1 + f_argno,
-				     value_contents (arg));
+	      regcache->cooked_write (tdep->ppc_fp0_regnum + 1 + f_argno,
+				      value_contents (arg));
 	      ++f_argno;
 	    }
 
@@ -422,7 +419,7 @@ rs6000_return_value (struct gdbarch *gdbarch, struct value *function,
       if (readbuf)
 	regcache->cooked_read (tdep->ppc_vr0_regnum + 2, readbuf);
       if (writebuf)
-	regcache_cooked_write (regcache, tdep->ppc_vr0_regnum + 2, writebuf);
+	regcache->cooked_write (tdep->ppc_vr0_regnum + 2, writebuf);
 
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
@@ -458,7 +455,7 @@ rs6000_return_value (struct gdbarch *gdbarch, struct value *function,
       if (writebuf)
 	{
 	  target_float_convert (writebuf, valtype, regval, regtype);
-	  regcache_cooked_write (regcache, tdep->ppc_fp0_regnum + 1, regval);
+	  regcache->cooked_write (tdep->ppc_fp0_regnum + 1, regval);
 	}
 
       return RETURN_VALUE_REGISTER_CONVENTION;
@@ -510,9 +507,8 @@ rs6000_return_value (struct gdbarch *gdbarch, struct value *function,
 	}
       if (writebuf)
 	{
-	  regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 3, writebuf);
-	  regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 4,
-				 writebuf + 4);
+	  regcache->cooked_write (tdep->ppc_gp0_regnum + 3, writebuf);
+	  regcache->cooked_write (tdep->ppc_gp0_regnum + 4, writebuf + 4);
 	}
 
       return RETURN_VALUE_REGISTER_CONVENTION;

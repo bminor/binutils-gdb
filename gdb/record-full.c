@@ -834,8 +834,7 @@ record_full_exec_insn (struct regcache *regcache,
                               entry->u.reg.num);
 
         regcache->cooked_read (entry->u.reg.num, reg.data ());
-        regcache_cooked_write (regcache, entry->u.reg.num, 
-			       record_full_get_loc (entry));
+        regcache->cooked_write (entry->u.reg.num, record_full_get_loc (entry));
         memcpy (record_full_get_loc (entry), reg.data (), entry->u.reg.len);
       }
       break;

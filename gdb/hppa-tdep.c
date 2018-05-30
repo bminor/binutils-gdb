@@ -820,17 +820,15 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  int fpLreg = 72 + (param_ptr - 36) / 4 * 2;
 		  int fpreg = 74 + (param_ptr - 32) / 8 * 4;
 
-		  regcache_cooked_write (regcache, grreg, param_val);
-		  regcache_cooked_write (regcache, fpLreg, param_val);
+		  regcache->cooked_write (grreg, param_val);
+		  regcache->cooked_write (fpLreg, param_val);
 
 		  if (param_len > 4)
 		    {
-		      regcache_cooked_write (regcache, grreg + 1, 
-					     param_val + 4);
+		      regcache->cooked_write (grreg + 1, param_val + 4);
 
-		      regcache_cooked_write (regcache, fpreg, param_val);
-		      regcache_cooked_write (regcache, fpreg + 1, 
-					     param_val + 4);
+		      regcache->cooked_write (fpreg, param_val);
+		      regcache->cooked_write (fpreg + 1, param_val + 4);
 		    }
 		}
 	    }
@@ -1167,7 +1165,7 @@ hppa32_return_value (struct gdbarch *gdbarch, struct value *function,
 	  if (readbuf != NULL)
 	    regcache->cooked_read (reg, readbuf + b);
 	  if (writebuf != NULL)
-	    regcache_cooked_write (regcache, reg, writebuf + b);
+	    regcache->cooked_write (reg, writebuf + b);
 	  reg++;
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;

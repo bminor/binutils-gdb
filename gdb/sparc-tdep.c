@@ -685,9 +685,9 @@ sparc32_store_arguments (struct regcache *regcache, int nargs,
 	{
 	  int regnum = SPARC_O0_REGNUM + element;
 
-	  regcache_cooked_write (regcache, regnum, valbuf);
+	  regcache->cooked_write (regnum, valbuf);
 	  if (len > 4 && element < 5)
-	    regcache_cooked_write (regcache, regnum + 1, valbuf + 4);
+	    regcache->cooked_write (regnum + 1, valbuf + 4);
 	}
 
       /* Always store the argument in memory.  */
@@ -1463,20 +1463,20 @@ sparc32_store_return_value (struct type *type, struct regcache *regcache,
     {
       /* Floating return values.  */
       memcpy (buf, valbuf, len);
-      regcache_cooked_write (regcache, SPARC_F0_REGNUM, buf);
+      regcache->cooked_write (SPARC_F0_REGNUM, buf);
       if (len > 4)
-	regcache_cooked_write (regcache, SPARC_F1_REGNUM, buf + 4);
+	regcache->cooked_write (SPARC_F1_REGNUM, buf + 4);
       if (len > 8)
 	{
-	  regcache_cooked_write (regcache, SPARC_F2_REGNUM, buf + 8);
-	  regcache_cooked_write (regcache, SPARC_F3_REGNUM, buf + 12);
+	  regcache->cooked_write (SPARC_F2_REGNUM, buf + 8);
+	  regcache->cooked_write (SPARC_F3_REGNUM, buf + 12);
 	}
       if (len > 16)
 	{
-	  regcache_cooked_write (regcache, SPARC_F4_REGNUM, buf + 16);
-	  regcache_cooked_write (regcache, SPARC_F5_REGNUM, buf + 20);
-	  regcache_cooked_write (regcache, SPARC_F6_REGNUM, buf + 24);
-	  regcache_cooked_write (regcache, SPARC_F7_REGNUM, buf + 28);
+	  regcache->cooked_write (SPARC_F4_REGNUM, buf + 16);
+	  regcache->cooked_write (SPARC_F5_REGNUM, buf + 20);
+	  regcache->cooked_write (SPARC_F6_REGNUM, buf + 24);
+	  regcache->cooked_write (SPARC_F7_REGNUM, buf + 28);
 	}
     }
   else
@@ -1488,14 +1488,14 @@ sparc32_store_return_value (struct type *type, struct regcache *regcache,
 	{
 	  gdb_assert (len == 8);
 	  memcpy (buf, valbuf, 8);
-	  regcache_cooked_write (regcache, SPARC_O1_REGNUM, buf + 4);
+	  regcache->cooked_write (SPARC_O1_REGNUM, buf + 4);
 	}
       else
 	{
 	  /* ??? Do we need to do any sign-extension here?  */
 	  memcpy (buf + 4 - len, valbuf, len);
 	}
-      regcache_cooked_write (regcache, SPARC_O0_REGNUM, buf);
+      regcache->cooked_write (SPARC_O0_REGNUM, buf);
     }
 }
 

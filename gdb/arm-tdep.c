@@ -3804,8 +3804,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 				 reg_char, reg_scaled + i);
 		      regnum = user_reg_map_name_to_regnum (gdbarch, name_buf,
 							    strlen (name_buf));
-		      regcache_cooked_write (regcache, regnum,
-					     val + i * unit_length);
+		      regcache->cooked_write (regnum, val + i * unit_length);
 		    }
 		}
 	      continue;
@@ -8099,7 +8098,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	case ARM_FLOAT_FPA:
 
 	  target_float_convert (valbuf, type, buf, arm_ext_type (gdbarch));
-	  regcache_cooked_write (regs, ARM_F0_REGNUM, buf);
+	  regs->cooked_write (ARM_F0_REGNUM, buf);
 	  break;
 
 	case ARM_FLOAT_SOFT_FPA:
@@ -8107,10 +8106,9 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	  /* ARM_FLOAT_VFP can arise if this is a variadic function so
 	     not using the VFP ABI code.  */
 	case ARM_FLOAT_VFP:
-	  regcache_cooked_write (regs, ARM_A1_REGNUM, valbuf);
+	  regs->cooked_write (ARM_A1_REGNUM, valbuf);
 	  if (TYPE_LENGTH (type) > 4)
-	    regcache_cooked_write (regs, ARM_A1_REGNUM + 1, 
-				   valbuf + INT_REGISTER_SIZE);
+	    regs->cooked_write (ARM_A1_REGNUM + 1, valbuf + INT_REGISTER_SIZE);
 	  break;
 
 	default:
@@ -8135,7 +8133,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	  LONGEST val = unpack_long (type, valbuf);
 
 	  store_signed_integer (tmpbuf, INT_REGISTER_SIZE, byte_order, val);
-	  regcache_cooked_write (regs, ARM_A1_REGNUM, tmpbuf);
+	  regs->cooked_write (ARM_A1_REGNUM, tmpbuf);
 	}
       else
 	{
@@ -8147,7 +8145,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 
 	  while (len > 0)
 	    {
-	      regcache_cooked_write (regs, regno++, valbuf);
+	      regs->cooked_write (regno++, valbuf);
 	      len -= INT_REGISTER_SIZE;
 	      valbuf += INT_REGISTER_SIZE;
 	    }
@@ -8166,7 +8164,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	{
 	  memcpy (tmpbuf, valbuf,
 		  len > INT_REGISTER_SIZE ? INT_REGISTER_SIZE : len);
-	  regcache_cooked_write (regs, regno++, tmpbuf);
+	  regs->cooked_write (regno++, tmpbuf);
 	  len -= INT_REGISTER_SIZE;
 	  valbuf += INT_REGISTER_SIZE;
 	}
@@ -8213,8 +8211,7 @@ arm_return_value (struct gdbarch *gdbarch, struct value *function,
 	      regnum = user_reg_map_name_to_regnum (gdbarch, name_buf,
 						    strlen (name_buf));
 	      if (writebuf)
-		regcache_cooked_write (regcache, regnum,
-				       writebuf + i * unit_length);
+		regcache->cooked_write (regnum, writebuf + i * unit_length);
 	      if (readbuf)
 		regcache->cooked_read (regnum, readbuf + i * unit_length);
 	    }

@@ -145,7 +145,7 @@ amd64_windows_store_arg_in_reg (struct regcache *regcache,
   gdb_assert (TYPE_LENGTH (type) <= 8);
   memset (buf, 0, sizeof buf);
   memcpy (buf, valbuf, std::min (TYPE_LENGTH (type), (unsigned int) 8));
-  regcache_cooked_write (regcache, regno, buf);
+  regcache->cooked_write (regno, buf);
 }
 
 /* Push the arguments for an inferior function call, and return
@@ -262,7 +262,7 @@ amd64_windows_push_dummy_call
       const int arg_regnum = amd64_windows_dummy_call_integer_regs[0];
 
       store_unsigned_integer (buf, 8, byte_order, struct_addr);
-      regcache_cooked_write (regcache, arg_regnum, buf);
+      regcache->cooked_write (arg_regnum, buf);
     }
 
   /* Reserve some memory on the stack for the integer-parameter
@@ -276,10 +276,10 @@ amd64_windows_push_dummy_call
 
   /* Update the stack pointer...  */
   store_unsigned_integer (buf, 8, byte_order, sp);
-  regcache_cooked_write (regcache, AMD64_RSP_REGNUM, buf);
+  regcache->cooked_write (AMD64_RSP_REGNUM, buf);
 
   /* ...and fake a frame pointer.  */
-  regcache_cooked_write (regcache, AMD64_RBP_REGNUM, buf);
+  regcache->cooked_write (AMD64_RBP_REGNUM, buf);
 
   return sp + 16;
 }

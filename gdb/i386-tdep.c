@@ -2755,10 +2755,10 @@ i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Finally, update the stack pointer...  */
   store_unsigned_integer (buf, 4, byte_order, sp);
-  regcache_cooked_write (regcache, I386_ESP_REGNUM, buf);
+  regcache->cooked_write (I386_ESP_REGNUM, buf);
 
   /* ...and fake a frame pointer.  */
-  regcache_cooked_write (regcache, I386_EBP_REGNUM, buf);
+  regcache->cooked_write (I386_EBP_REGNUM, buf);
 
   /* MarkK wrote: This "+ 8" is all over the place:
      (i386_frame_this_id, i386_sigtramp_frame_this_id,

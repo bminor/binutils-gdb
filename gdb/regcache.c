@@ -772,13 +772,6 @@ regcache::raw_write (int regnum, const gdb_byte *buf)
 }
 
 void
-regcache_cooked_write (struct regcache *regcache, int regnum,
-		       const gdb_byte *buf)
-{
-  regcache->cooked_write (regnum, buf);
-}
-
-void
 regcache::cooked_write (int regnum, const gdb_byte *buf)
 {
   gdb_assert (regnum >= 0);

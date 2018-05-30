@@ -297,7 +297,7 @@ or1k_return_value (struct gdbarch *gdbarch, struct value *functype,
 	  else
 	    memcpy (buf, writebuf, rv_size);
 
-	  regcache_cooked_write (regcache, OR1K_RV_REGNUM, buf);
+	  regcache->cooked_write (OR1K_RV_REGNUM, buf);
 
 	  free (buf);
 	}
@@ -330,8 +330,8 @@ or1k_return_value (struct gdbarch *gdbarch, struct value *functype,
 	  memcpy (buf_hi, writebuf, rv_size - bpw);
 	  memcpy (buf_lo, writebuf + bpw, bpw);
 
-	  regcache_cooked_write (regcache, OR1K_RV_REGNUM, buf_hi);
-	  regcache_cooked_write (regcache, OR1K_RV_REGNUM + 1, buf_lo);
+	  regcache->cooked_write (OR1K_RV_REGNUM, buf_hi);
+	  regcache->cooked_write (OR1K_RV_REGNUM + 1, buf_lo);
 
 	  free (buf_lo);
 	  free (buf_hi);
