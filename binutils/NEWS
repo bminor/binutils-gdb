@@ -10,6 +10,8 @@
 * The AArch64 port now emits warnings when a combination of an instruction and
   a named register could be invalid.
 
+* Added O modifier to ar to display member offsets inside an archive
+
 Changes in 2.30:
 
 * Add --debug-dump=links option to readelf and --dwarf=links option to objdump

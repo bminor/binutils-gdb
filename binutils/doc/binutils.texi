@@ -361,9 +361,10 @@ modifier.  In either case it does the same thing.
 @cindex contents of archive
 Display a @emph{table} listing the contents of @var{archive}, or those
 of the files listed in @var{member}@dots{} that are present in the
-archive.  Normally only the member name is shown; if you also want to
-see the modes (permissions), timestamp, owner, group, and size, you can
-request that by also specifying the @samp{v} modifier.
+archive.  Normally only the member name is shown, but if the modifier
+@samp{O} is specified, then the corresponding offset of the member is also
+displayed.  Finally, in order to see the modes (permissions), timestamp,
+owner, group, and size the @samp{v} modifier should be included.
 
 If you do not specify a @var{member}, all files in the archive
 are listed.
@@ -455,6 +456,11 @@ entries in the archive with the same name.  Extract or delete instance
 Preserve the @emph{original} dates of members when extracting them.  If
 you do not specify this modifier, files extracted from the archive
 are stamped with the time of extraction.
+
+@item O
+@cindex offsets of files
+Display member offsets inside the archive. Use together with the @samp{t}
+option.
 
 @item P
 Use the full path name when matching names in the archive.  @sc{gnu}

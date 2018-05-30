@@ -1,3 +1,19 @@
+2018-05-30  Ant Bikeneev  <ant.bikineev@gmail.com>
+
+	PR 23107
+	* ar.c (display_offsets): New variable.
+	(usage): Add description of 'O' operator.
+	(decode_option): Handle 'O' operator.
+	(print_descr): Pass display_offsets to print_arelt_descr.
+	* arsup.c: Update call to printy_arelt_descr.
+	* objdump.c: Likewise.
+	* bucomm.c (print_arelt_descr): If offsets parameter is true then
+	display offset of archive element within the archive.
+	* bucomm.h: Update prototype for print_arelt_descr.
+	* doc/binutils.texi: Update description of ar command.
+	* NEWS: Mention the new feature.
+	* testsuite/binutils-all/ar.exp: Add text of new feature.
+
 2018-05-28  Alan Modra  <amodra@gmail.com>
 
 	PR 23235
