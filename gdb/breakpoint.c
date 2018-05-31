@@ -14220,6 +14220,8 @@ enable_disable_bp_num_loc (int bp_num, int loc_num, bool enable)
 	target_disable_tracepoint (loc);
     }
   update_global_location_list (UGLL_DONT_INSERT);
+
+  gdb::observers::breakpoint_modified.notify (loc->owner);
 }
 
 /* Enable or disable a range of breakpoint locations.  BP_NUM is the

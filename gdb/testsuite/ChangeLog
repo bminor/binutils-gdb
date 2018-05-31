@@ -1,3 +1,8 @@
+2018-07-25  Jan Vrany  <jan.vrany@fit.cvut.cz>
+
+	* gdb.mi/mi-breakpoint-location-ena-dis.cc: New file.
+	* gdb.mi/mi-breakpoint-location-ena-dis.exp: New file.
+
 2018-07-20  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/vla-optimized-out.c: Make noclone attribute conditional on

@@ -1,3 +1,7 @@
+2018-07-25  Jan Vrany  <jan.vrany@fit.cvut.cz>
+
+	* breakpoint.c (enable_disable_bp_num_loc): Notify observers.
+
 2018-07-25  Joel Brobecker  <brobecker@adacore.com>
 
 	* MAINTAINERS (Global Maintainers): Add Tom Tromey.
