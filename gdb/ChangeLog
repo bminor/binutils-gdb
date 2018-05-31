@@ -1,3 +1,9 @@
+2018-05-31  Uros Bizjak  <ubizjak@gmail.com>
+
+	* nat/linux-ptrace.h [__alpha__]
+	(GDB_ARCH_IS_TRAP_BRKPT, GDB_ARCH_IS_TRAP_HWBKPT): Remove
+	definitions.
+
 2018-05-31  Maciej W. Rozycki  <macro@mips.com>
 
 	* arch-utils.c (gdbarch_info_fill): Set `default_byte_order' to
