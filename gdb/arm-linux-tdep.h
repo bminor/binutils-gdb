@@ -44,7 +44,7 @@ void arm_linux_collect_gregset (const struct regset *regset,
 				const struct regcache *regcache,
 				int regnum, void *gregs_buf, size_t len);
 
-void supply_nwfpe_register (struct regcache *regcache, int regno,
+void supply_nwfpe_register (reg_buffer *regcache, int regno,
 			    const gdb_byte *regs);
 void collect_nwfpe_register (const struct regcache *regcache, int regno,
 			     gdb_byte *regs);

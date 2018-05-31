@@ -25,7 +25,7 @@
 #include "ravenscar-thread.h"
 #include "sparc-ravenscar-thread.h"
 
-static void sparc_ravenscar_fetch_registers (struct regcache *regcache,
+static void sparc_ravenscar_fetch_registers (ptid_t ptid, reg_buffer *regcache,
                                              int regnum);
 static void sparc_ravenscar_store_registers (struct regcache *regcache,
                                              int regnum);
@@ -59,8 +59,8 @@ static const int sparc_register_offsets[] =
    regcache.  */
 
 static void
-supply_register_at_address (struct regcache *regcache, int regnum,
-                            CORE_ADDR register_addr)
+supply_register_at_address (reg_buffer *regcache, int regnum,
+			    CORE_ADDR register_addr)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   int buf_size = register_size (gdbarch, regnum);
@@ -101,7 +101,7 @@ register_in_thread_descriptor_p (int regnum)
    thread.  */
 
 static void
-sparc_ravenscar_fetch_registers (struct regcache *regcache, int regnum)
+sparc_ravenscar_fetch_registers (ptid_t ptid, reg_buffer *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   const int sp_regnum = gdbarch_sp_regnum (gdbarch);
@@ -110,6 +110,7 @@ sparc_ravenscar_fetch_registers (struct regcache *regcache, int regnum)
   CORE_ADDR current_address;
   CORE_ADDR thread_descriptor_address;
   ULONGEST stack_address;
+  gdb_byte buf[register_size (gdbarch, sp_regnum)];
 
   /* The tid is the thread_id field, which is a pointer to the thread.  */
   thread_descriptor_address = (CORE_ADDR) ptid_get_tid (inferior_ptid);
@@ -118,7 +119,10 @@ sparc_ravenscar_fetch_registers (struct regcache *regcache, int regnum)
   current_address = thread_descriptor_address
     + sparc_register_offsets [sp_regnum];
   supply_register_at_address (regcache, sp_regnum, current_address);
-  regcache_cooked_read_unsigned (regcache, sp_regnum, &stack_address);
+  regcache->raw_collect (sp_regnum, buf);
+  stack_address
+    = extract_unsigned_integer (buf, register_size (gdbarch, sp_regnum),
+				gdbarch_byte_order (gdbarch));
 
   /* Read registers.  */
   for (current_regnum = 0; current_regnum < num_regs; current_regnum ++)

@@ -95,24 +95,6 @@ enum
     REGCACHE_MAP_SKIP = -1,
   };
 
-/* Transfer a set of registers (as described by REGSET) between
-   REGCACHE and BUF.  If REGNUM == -1, transfer all registers
-   belonging to the regset, otherwise just the register numbered
-   REGNUM.  The REGSET's 'regmap' field must point to an array of
-   'struct regcache_map_entry'.
-
-   These functions are suitable for the 'regset_supply' and
-   'regset_collect' fields in a regset structure.  */
-
-extern void regcache_supply_regset (const struct regset *regset,
-				    struct regcache *regcache,
-				    int regnum, const void *buf,
-				    size_t size);
-extern void regcache_collect_regset (const struct regset *regset,
-				     const struct regcache *regcache,
-				     int regnum, void *buf, size_t size);
-
-
 /* The type of a register.  This function is slightly more efficient
    then its gdbarch vector counterpart since it returns a precomputed
    value stored in a table.  */
@@ -153,10 +135,14 @@ public:
      buffer.  */
   enum register_status get_register_status (int regnum) const;
 
+  /* Collect register REGNUM from REGCACHE and store its contents in BUF.  */
   void raw_collect (int regnum, void *buf) const;
 
   void raw_collect_integer (int regnum, gdb_byte *addr, int addr_len,
 			    bool is_signed) const;
+
+  void collect_regset (const struct regset *regset, int regnum,
+		       void *buf, size_t size) const;
 
   /* Supply register REGNUM, whose contents are stored in BUF, to REGCACHE.  */
   void raw_supply (int regnum, const void *buf);
@@ -171,7 +157,14 @@ public:
 
   void raw_supply_zeroed (int regnum);
 
+  void supply_regset (const struct regset *regset,
+		      int regnum, const void *buf, size_t size);
+
   void invalidate (int regnum);
+
+  /* Dump the contents of a register from the register cache to the target
+     debug.  */
+  void debug_print_register (const char *func, int regno);
 
   virtual ~reg_buffer () = 0;
 
@@ -188,6 +181,11 @@ protected:
      zero iff the register's value can't be returned.  */
   void save (regcache_cooked_read_ftype *cooked_read, void *src);
 
+  void transfer_regset (const struct regset *regset,
+			struct reg_buffer *out_regcache,
+			int regnum, const void *in_buf,
+			void *out_buf, size_t size) const;
+
   struct regcache_descr *m_descr;
 
   bool m_has_pseudo;
@@ -199,6 +197,23 @@ protected:
   friend class regcache;
   friend class detached_regcache;
 };
+
+/* Transfer a set of registers (as described by REGSET) between
+   REGCACHE and BUF.  If REGNUM == -1, transfer all registers
+   belonging to the regset, otherwise just the register numbered
+   REGNUM.  The REGSET's 'regmap' field must point to an array of
+   'struct regcache_map_entry'.
+
+   These functions are suitable for the 'regset_supply' and
+   'regset_collect' fields in a regset structure.  */
+
+extern void regcache_supply_regset (const struct regset *regset,
+				    reg_buffer *regcache,
+				    int regnum, const void *buf,
+				    size_t size);
+extern void regcache_collect_regset (const struct regset *regset,
+				     const struct regcache *regcache,
+				     int regnum, void *buf, size_t size);
 
 /* An abstract class which only has methods doing read.  */
 
@@ -304,13 +319,6 @@ public:
   void cooked_write_part (int regnum, int offset, int len,
 			  const gdb_byte *buf);
 
-  void supply_regset (const struct regset *regset,
-		      int regnum, const void *buf, size_t size);
-
-
-  void collect_regset (const struct regset *regset, int regnum,
-		       void *buf, size_t size) const;
-
   /* Return REGCACHE's ptid.  */
 
   ptid_t ptid () const
@@ -325,21 +333,12 @@ public:
     this->m_ptid = ptid;
   }
 
-/* Dump the contents of a register from the register cache to the target
-   debug.  */
-  void debug_print_register (const char *func, int regno);
-
   static void regcache_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid);
 protected:
   regcache (gdbarch *gdbarch, const address_space *aspace_);
   static std::forward_list<regcache *> current_regcache;
 
 private:
-
-  void transfer_regset (const struct regset *regset,
-			struct regcache *out_regcache,
-			int regnum, const void *in_buf,
-			void *out_buf, size_t size) const;
 
   enum register_status write_part (int regnum, int offset, int len,
 				   const void *out, bool is_raw);

@@ -72,7 +72,7 @@ public:
 
   void close () override;
   void detach (inferior *, int) override;
-  void fetch_registers (struct regcache *, int) override;
+  void fetch_registers (ptid_t, reg_buffer *, int) override;
 
   enum target_xfer_status xfer_partial (enum target_object object,
 					const char *annex,
@@ -103,7 +103,8 @@ public:
   }
 
   /* See definition.  */
-  void get_core_register_section (struct regcache *regcache,
+  void get_core_register_section (ptid_t ptid,
+				  struct reg_buffer *regcache,
 				  const struct regset *regset,
 				  const char *name,
 				  int min_size,
@@ -517,7 +518,7 @@ core_target_open (const char *arg, int from_tty)
     }
 
   /* Fetch all registers from core file.  */
-  target_fetch_registers (get_current_regcache (), -1);
+  target_fetch_registers (inferior_ptid, get_current_regcache (), -1);
 
   /* Now, set up the frame cache, and print the top of stack.  */
   reinit_frame_cache ();
@@ -569,7 +570,8 @@ core_target::detach (inferior *inf, int from_tty)
    section by the appropriate name.  Otherwise, just do nothing.  */
 
 void
-core_target::get_core_register_section (struct regcache *regcache,
+core_target::get_core_register_section (ptid_t ptid,
+					struct reg_buffer *regcache,
 					const struct regset *regset,
 					const char *name,
 					int min_size,
@@ -583,7 +585,7 @@ core_target::get_core_register_section (struct regcache *regcache,
   bool variable_size_section = (regset != NULL
 				&& regset->flags & REGSET_VARIABLE_SIZE);
 
-  thread_section_name section_name (name, regcache->ptid ());
+  thread_section_name section_name (name, ptid);
 
   section = bfd_get_section_by_name (core_bfd, section_name.c_str ());
   if (! section)
@@ -632,7 +634,8 @@ core_target::get_core_register_section (struct regcache *regcache,
 struct get_core_registers_cb_data
 {
   core_target *target;
-  struct regcache *regcache;
+  ptid_t ptid;
+  reg_buffer *regcache;
 };
 
 /* Callback for get_core_registers that handles a single core file
@@ -660,8 +663,9 @@ get_core_registers_cb (const char *sect_name, int size,
 
   /* The 'which' parameter is only used when no regset is provided.
      Thus we just set it to -1. */
-  data->target->get_core_register_section (data->regcache, regset, sect_name,
-					   size, -1, human_name, required);
+  data->target->get_core_register_section (data->ptid, data->regcache, regset,
+					   sect_name, size, -1, human_name,
+					   required);
 }
 
 /* Get the registers out of a core file.  This is the machine-
@@ -672,7 +676,7 @@ get_core_registers_cb (const char *sect_name, int size,
 /* We just get all the registers, so we don't use regno.  */
 
 void
-core_target::fetch_registers (struct regcache *regcache, int regno)
+core_target::fetch_registers (ptid_t ptid, reg_buffer *regcache, int regno)
 {
   int i;
   struct gdbarch *gdbarch;
@@ -689,16 +693,16 @@ core_target::fetch_registers (struct regcache *regcache, int regno)
   gdbarch = regcache->arch ();
   if (gdbarch_iterate_over_regset_sections_p (gdbarch))
     {
-      get_core_registers_cb_data data = { this, regcache };
+      get_core_registers_cb_data data = { this, ptid, regcache };
       gdbarch_iterate_over_regset_sections (gdbarch,
 					    get_core_registers_cb,
 					    (void *) &data, NULL);
     }
   else
     {
-      get_core_register_section (regcache, NULL,
+      get_core_register_section (ptid, regcache, NULL,
 				 ".reg", 0, 0, "general-purpose", 1);
-      get_core_register_section (regcache, NULL,
+      get_core_register_section (ptid, regcache, NULL,
 				 ".reg2", 0, 2, "floating-point", 0);
     }
 

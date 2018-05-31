@@ -52,7 +52,7 @@
 
 static void
 mipsnbsd_supply_fpregset (const struct regset *regset,
-			  struct regcache *regcache,
+			  reg_buffer *regcache,
 			  int regnum, const void *fpregs, size_t len)
 {
   size_t regsize = mips_isa_regsize (regcache->arch ());
@@ -74,7 +74,7 @@ mipsnbsd_supply_fpregset (const struct regset *regset,
 
 static void
 mipsnbsd_supply_gregset (const struct regset *regset,
-			 struct regcache *regcache, int regnum,
+			 reg_buffer *regcache, int regnum,
 			 const void *gregs, size_t len)
 {
   size_t regsize = mips_isa_regsize (regcache->arch ());

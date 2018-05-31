@@ -40,7 +40,7 @@
 
 static void
 hppaobsd_supply_gregset (const struct regset *regset,
-			 struct regcache *regcache,
+			 reg_buffer *regcache,
 			 int regnum, const void *gregs, size_t len)
 {
   gdb_byte zero[4] = { 0 };
@@ -110,7 +110,7 @@ hppaobsd_supply_gregset (const struct regset *regset,
 
 static void
 hppaobsd_supply_fpregset (const struct regset *regset,
-			  struct regcache *regcache,
+			  reg_buffer *regcache,
 			  int regnum, const void *fpregs, size_t len)
 {
   const gdb_byte *regs = (const gdb_byte *) fpregs;

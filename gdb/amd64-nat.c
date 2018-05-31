@@ -92,7 +92,7 @@ amd64_native_gregset_supplies_p (struct gdbarch *gdbarch, int regnum)
    REGCACHE.  If REGNUM is -1, supply all appropriate registers.  */
 
 void
-amd64_supply_native_gregset (struct regcache *regcache,
+amd64_supply_native_gregset (reg_buffer *regcache,
 			     const void *gregs, int regnum)
 {
   const char *regs = (const char *) gregs;

@@ -505,7 +505,7 @@ fbsd_corefile_thread (struct thread_info *info,
 
   regcache = get_thread_arch_regcache (info->ptid, args->gdbarch);
 
-  target_fetch_registers (regcache, -1);
+  target_fetch_registers (info->ptid, regcache, -1);
 
   args->note_data = fbsd_collect_thread_registers
     (regcache, info->ptid, args->obfd, args->note_data,

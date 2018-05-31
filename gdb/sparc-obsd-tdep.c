@@ -149,7 +149,7 @@ static const struct frame_unwind sparc32obsd_sigtramp_frame_unwind =
 #define SPARC32OBSD_UTHREAD_PC_OFFSET	132
 
 static void
-sparc32obsd_supply_uthread (struct regcache *regcache,
+sparc32obsd_supply_uthread (reg_buffer *regcache,
 			    int regnum, CORE_ADDR addr)
 {
   struct gdbarch *gdbarch = regcache->arch ();

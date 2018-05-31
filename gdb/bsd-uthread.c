@@ -51,7 +51,7 @@ struct bsd_uthread_target final : public target_ops
 
   void mourn_inferior () override;
 
-  void fetch_registers (struct regcache *, int) override;
+  void fetch_registers (ptid_t, reg_buffer *, int) override;
   void store_registers (struct regcache *, int) override;
 
   ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
@@ -77,7 +77,7 @@ static struct gdbarch_data *bsd_uthread_data;
 struct bsd_uthread_ops
 {
   /* Supply registers for an inactive thread to a register cache.  */
-  void (*supply_uthread)(struct regcache *, int, CORE_ADDR);
+  void (*supply_uthread)(reg_buffer *, int, CORE_ADDR);
 
   /* Collect registers for an inactive thread from a register cache.  */
   void (*collect_uthread)(const struct regcache *, int, CORE_ADDR);
@@ -97,8 +97,8 @@ bsd_uthread_init (struct obstack *obstack)
 
 void
 bsd_uthread_set_supply_uthread (struct gdbarch *gdbarch,
-				void (*supply_uthread) (struct regcache *,
-							int, CORE_ADDR))
+				void (*supply_uthread) (reg_buffer *, int,
+							CORE_ADDR))
 {
   struct bsd_uthread_ops *ops
     = (struct bsd_uthread_ops *) gdbarch_data (gdbarch, bsd_uthread_data);
@@ -316,12 +316,11 @@ bsd_uthread_target::mourn_inferior ()
 }
 
 void
-bsd_uthread_target::fetch_registers (struct regcache *regcache, int regnum)
+bsd_uthread_target::fetch_registers (ptid_t ptid, reg_buffer *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   struct bsd_uthread_ops *uthread_ops
     = (struct bsd_uthread_ops *) gdbarch_data (gdbarch, bsd_uthread_data);
-  ptid_t ptid = regcache->ptid ();
   CORE_ADDR addr = ptid_get_tid (ptid);
   struct target_ops *beneath = find_target_beneath (this);
   CORE_ADDR active_addr;
@@ -332,7 +331,7 @@ bsd_uthread_target::fetch_registers (struct regcache *regcache, int regnum)
   inferior_ptid = ptid;
 
   /* Always fetch the appropriate registers from the layer beneath.  */
-  beneath->fetch_registers (regcache, regnum);
+  beneath->fetch_registers (ptid, regcache, regnum);
 
   /* FIXME: That might have gotten us more than we asked for.  Make
      sure we overwrite all relevant registers with values from the

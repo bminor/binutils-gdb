@@ -1875,7 +1875,7 @@ sparc64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
 void
 sparc64_supply_gregset (const struct sparc_gregmap *gregmap,
-			struct regcache *regcache,
+			reg_buffer *regcache,
 			int regnum, const void *gregs)
 {
   struct gdbarch *gdbarch = regcache->arch ();
@@ -1969,8 +1969,12 @@ sparc64_supply_gregset (const struct sparc_gregmap *gregmap,
       if (gregmap->r_l0_offset == -1)
 	{
 	  ULONGEST sp;
+	  struct gdbarch *gdbarch = regcache->arch ();
+	  int sz = register_size (gdbarch, SPARC_SP_REGNUM);
+	  gdb_byte buf[sz];
 
-	  regcache_cooked_read_unsigned (regcache, SPARC_SP_REGNUM, &sp);
+	  regcache->raw_collect (SPARC_SP_REGNUM, buf);
+	  sp = extract_unsigned_integer (buf, sz, gdbarch_byte_order (gdbarch));
 	  sparc_supply_rwindow (regcache, sp, regnum);
 	}
       else

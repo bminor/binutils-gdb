@@ -409,7 +409,7 @@ static const struct regcache_map_entry frv_linux_fpregmap[] =
 
 static void 
 frv_linux_supply_gregset (const struct regset *regset,
-                          struct regcache *regcache,
+			  reg_buffer *regcache,
 			  int regnum, const void *gregs, size_t len)
 {
   int regi;

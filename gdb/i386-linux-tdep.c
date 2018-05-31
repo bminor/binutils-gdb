@@ -723,7 +723,7 @@ i386_linux_core_read_description (struct gdbarch *gdbarch,
 
 static void
 i386_linux_supply_xstateregset (const struct regset *regset,
-				struct regcache *regcache, int regnum,
+				reg_buffer *regcache, int regnum,
 				const void *xstateregs, size_t len)
 {
   i387_supply_xsave (regcache, regnum, xstateregs);

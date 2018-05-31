@@ -3798,7 +3798,7 @@ typedef cris_elf_greg_t crisv32_elf_gregset_t[CRISV32_ELF_NGREG];
 /* Unpack a cris_elf_gregset_t into GDB's register cache.  */
 
 static void 
-cris_supply_gregset (struct regcache *regcache, cris_elf_gregset_t *gregsetp)
+cris_supply_gregset (reg_buffer *regcache, cris_elf_gregset_t *gregsetp)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -3829,7 +3829,7 @@ cris_supply_gregset (struct regcache *regcache, cris_elf_gregset_t *gregsetp)
     regsets, until multi-arch core support is ready.  */
 
 static void
-fetch_core_registers (struct regcache *regcache,
+fetch_core_registers (reg_buffer *regcache,
 		      char *core_reg_sect, unsigned core_reg_size,
                       int which, CORE_ADDR reg_addr)
 {

@@ -102,6 +102,8 @@
   target_debug_do_print (plongest (*(X)))
 #define target_debug_print_struct_regcache_p(X) \
   target_debug_do_print (host_address_to_string (X))
+#define target_debug_print_reg_buffer_p(X) \
+  target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_struct_thread_info_p(X)	\
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_struct_ui_file_p(X)	\

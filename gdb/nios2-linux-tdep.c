@@ -56,7 +56,7 @@ static const int reg_offsets[NIOS2_NUM_REGS] =
 
 static void
 nios2_supply_gregset (const struct regset *regset,
-		      struct regcache *regcache,
+		      reg_buffer *regcache,
 		      int regnum, const void *gregs_buf, size_t len)
 {
   const gdb_byte *gregs = (const gdb_byte *) gregs_buf;

@@ -160,7 +160,7 @@ alpha_linux_sigcontext_addr (struct frame_info *this_frame)
 
 static void
 alpha_linux_supply_gregset (const struct regset *regset,
-			    struct regcache *regcache,
+			    reg_buffer *regcache,
 			    int regnum, const void *gregs, size_t len)
 {
   const gdb_byte *regs = (const gdb_byte *) gregs;
@@ -193,7 +193,7 @@ alpha_linux_collect_gregset (const struct regset *regset,
 
 static void
 alpha_linux_supply_fpregset (const struct regset *regset,
-			     struct regcache *regcache,
+			     reg_buffer *regcache,
 			     int regnum, const void *fpregs, size_t len)
 {
   const gdb_byte *regs = (const gdb_byte *) fpregs;

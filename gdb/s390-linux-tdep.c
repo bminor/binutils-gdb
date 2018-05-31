@@ -183,15 +183,23 @@ static const struct regcache_map_entry s390_regmap_gsbc[] =
    the TDB registers unless the TDB format field is valid.  */
 
 static void
-s390_supply_tdb_regset (const struct regset *regset, struct regcache *regcache,
-		    int regnum, const void *regs, size_t len)
+s390_supply_tdb_regset (const struct regset *regset, reg_buffer *regcache,
+			int regnum, const void *regs, size_t len)
 {
   ULONGEST tdw;
   enum register_status ret;
+  gdb_byte buf[register_size (regcache->arch (), S390_TDB_DWORD0_REGNUM)];
 
   regcache_supply_regset (regset, regcache, regnum, regs, len);
-  ret = regcache_cooked_read_unsigned (regcache, S390_TDB_DWORD0_REGNUM, &tdw);
-  if (ret != REG_VALID || (tdw >> 56) != 1)
+  if (regcache->get_register_status (S390_TDB_DWORD0_REGNUM) != REG_VALID)
+    {
+      regcache_supply_regset (regset, regcache, regnum, NULL, len);
+      return;
+    }
+
+  regcache->raw_collect (S390_TDB_DWORD0_REGNUM, buf);
+  tdw = extract_unsigned_integer(buf, register_size (regcache->arch (), S390_TDB_DWORD0_REGNUM), gdbarch_byte_order (regcache->arch ()));
+  if ((tdw >> 56) != 1)
     regcache_supply_regset (regset, regcache, regnum, NULL, len);
 }
 

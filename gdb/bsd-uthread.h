@@ -24,7 +24,7 @@
    architecture GDBARCH to SUPPLY_UTHREAD.  */
 
 extern void bsd_uthread_set_supply_uthread (struct gdbarch *gdbarch,
-				    void (*supply_uthread) (struct regcache *,
+				    void (*supply_uthread) (reg_buffer *,
 							    int, CORE_ADDR));
 
 

@@ -110,11 +110,11 @@ extern CORE_ADDR alpha_after_prologue (CORE_ADDR pc);
 extern void alpha_mdebug_init_abi (struct gdbarch_info, struct gdbarch *);
 extern void alpha_dwarf2_init_abi (struct gdbarch_info, struct gdbarch *);
 
-extern void alpha_supply_int_regs (struct regcache *, int, const void *,
+extern void alpha_supply_int_regs (reg_buffer *, int, const void *,
 				   const void *, const void *);
 extern void alpha_fill_int_regs (const struct regcache *, int,
 				 void *, void *, void *);
-extern void alpha_supply_fp_regs (struct regcache *, int,
+extern void alpha_supply_fp_regs (reg_buffer *, int,
 				  const void *, const void *);
 extern void alpha_fill_fp_regs (const struct regcache *,
 				int, void *, void *);

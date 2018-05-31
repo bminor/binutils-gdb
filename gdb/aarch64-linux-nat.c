@@ -53,7 +53,7 @@ class aarch64_linux_nat_target final : public linux_nat_target
 {
 public:
   /* Add our register access methods.  */
-  void fetch_registers (struct regcache *, int) override;
+  void fetch_registers (ptid_t, reg_buffer *, int) override;
   void store_registers (struct regcache *, int) override;
 
   const struct target_desc *read_description () override;
@@ -197,7 +197,7 @@ aarch64_get_debug_reg_state (pid_t pid)
    from the current thread.  */
 
 static void
-fetch_gregs_from_thread (struct regcache *regcache)
+fetch_gregs_from_thread (ptid_t ptid, reg_buffer *regcache)
 {
   int ret, tid;
   struct gdbarch *gdbarch = regcache->arch ();
@@ -208,7 +208,7 @@ fetch_gregs_from_thread (struct regcache *regcache)
      and arm.  */
   gdb_static_assert (sizeof (regs) >= 18 * 4);
 
-  tid = ptid_get_lwp (regcache->ptid ());
+  tid = ptid.lwp ();
 
   iovec.iov_base = &regs;
   if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
@@ -277,7 +277,7 @@ store_gregs_to_thread (const struct regcache *regcache)
    from the current thread.  */
 
 static void
-fetch_fpregs_from_thread (struct regcache *regcache)
+fetch_fpregs_from_thread (ptid_t ptid, reg_buffer *regcache)
 {
   int ret, tid;
   elf_fpregset_t regs;
@@ -288,7 +288,7 @@ fetch_fpregs_from_thread (struct regcache *regcache)
      and arm.  */
   gdb_static_assert (sizeof regs >= VFP_REGS_SIZE);
 
-  tid = ptid_get_lwp (regcache->ptid ());
+  tid = ptid.lwp ();
 
   iovec.iov_base = &regs;
 
@@ -386,18 +386,18 @@ store_fpregs_to_thread (const struct regcache *regcache)
 /* Implement the "fetch_registers" target_ops method.  */
 
 void
-aarch64_linux_nat_target::fetch_registers (struct regcache *regcache,
+aarch64_linux_nat_target::fetch_registers (ptid_t ptid, reg_buffer *regcache,
 					   int regno)
 {
   if (regno == -1)
     {
-      fetch_gregs_from_thread (regcache);
-      fetch_fpregs_from_thread (regcache);
+      fetch_gregs_from_thread (ptid, regcache);
+      fetch_fpregs_from_thread (ptid, regcache);
     }
   else if (regno < AARCH64_V0_REGNUM)
-    fetch_gregs_from_thread (regcache);
+    fetch_gregs_from_thread (ptid, regcache);
   else
-    fetch_fpregs_from_thread (regcache);
+    fetch_fpregs_from_thread (ptid, regcache);
 }
 
 /* Implement the "store_registers" target_ops method.  */

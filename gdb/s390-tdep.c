@@ -1050,7 +1050,7 @@ s390_register_call_saved (struct gdbarch *gdbarch, int regnum)
 
 static void
 s390_guess_tracepoint_registers (struct gdbarch *gdbarch,
-				 struct regcache *regcache,
+				 reg_buffer *regcache,
 				 CORE_ADDR addr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);

@@ -836,7 +836,7 @@ xtensa_register_reggroup_p (struct gdbarch *gdbarch,
 
 static void
 xtensa_supply_gregset (const struct regset *regset,
-		       struct regcache *rc,
+		       reg_buffer *rc,
 		       int regnum,
 		       const void *gregs,
 		       size_t len)

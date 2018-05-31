@@ -101,13 +101,13 @@ extern void sparc64_init_abi (struct gdbarch_info info,
 			      struct gdbarch *gdbarch);
 
 extern void sparc64_supply_gregset (const struct sparc_gregmap *gregmap,
-				    struct regcache *regcache,
+				    reg_buffer *regcache,
 				    int regnum, const void *gregs);
 extern void sparc64_collect_gregset (const struct sparc_gregmap *gregmap,
 				     const struct regcache *regcache,
 				     int regnum, void *gregs);
 extern void sparc64_supply_fpregset (const struct sparc_fpregmap *fpregmap,
-				     struct regcache *regcache,
+				     reg_buffer *regcache,
 				     int regnum, const void *fpregs);
 extern void sparc64_collect_fpregset (const struct sparc_fpregmap *fpregmap,
 				      const struct regcache *regcache,

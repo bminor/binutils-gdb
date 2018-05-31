@@ -218,7 +218,7 @@ static int amd64obsd_uthread_reg_offset[] =
 #define AMD64OBSD_UTHREAD_RSP_OFFSET	400
 
 static void
-amd64obsd_supply_uthread (struct regcache *regcache,
+amd64obsd_supply_uthread (reg_buffer *regcache,
 			  int regnum, CORE_ADDR addr)
 {
   struct gdbarch *gdbarch = regcache->arch ();

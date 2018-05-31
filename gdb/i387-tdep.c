@@ -435,7 +435,7 @@ static int fsave_offset[] =
    *FSAVE.  */
 
 void
-i387_supply_fsave (struct regcache *regcache, int regnum, const void *fsave)
+i387_supply_fsave (reg_buffer *regcache, int regnum, const void *fsave)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -583,7 +583,7 @@ static int i387_tag (const gdb_byte *raw);
    masks off any of the reserved bits in *FXSAVE.  */
 
 void
-i387_supply_fxsave (struct regcache *regcache, int regnum, const void *fxsave)
+i387_supply_fxsave (reg_buffer *regcache, int regnum, const void *fxsave)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
   const gdb_byte *regs = (const gdb_byte *) fxsave;
@@ -916,7 +916,7 @@ i387_xsave_get_clear_bv (struct gdbarch *gdbarch, const void *xsave)
 /* Similar to i387_supply_fxsave, but use XSAVE extended state.  */
 
 void
-i387_supply_xsave (struct regcache *regcache, int regnum,
+i387_supply_xsave (reg_buffer *regcache, int regnum,
 		   const void *xsave)
 {
   struct gdbarch *gdbarch = regcache->arch ();

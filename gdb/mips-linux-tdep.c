@@ -119,7 +119,7 @@ mips_linux_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
    is 8.  */
 
 static void
-supply_32bit_reg (struct regcache *regcache, int regnum, const void *addr)
+supply_32bit_reg (reg_buffer *regcache, int regnum, const void *addr)
 {
   regcache->raw_supply_integer (regnum, (const gdb_byte *) addr, 4, true);
 }
@@ -127,7 +127,7 @@ supply_32bit_reg (struct regcache *regcache, int regnum, const void *addr)
 /* Unpack an elf_gregset_t into GDB's register cache.  */
 
 void
-mips_supply_gregset (struct regcache *regcache,
+mips_supply_gregset (reg_buffer *regcache,
 		     const mips_elf_gregset_t *gregsetp)
 {
   int regi;
@@ -157,7 +157,7 @@ mips_supply_gregset (struct regcache *regcache,
 
 static void
 mips_supply_gregset_wrapper (const struct regset *regset,
-			     struct regcache *regcache,
+			     reg_buffer *regcache,
 			     int regnum, const void *gregs, size_t len)
 {
   gdb_assert (len >= sizeof (mips_elf_gregset_t));
@@ -276,7 +276,7 @@ mips64_linux_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 /* Supply a 64-bit register.  */
 
 static void
-supply_64bit_reg (struct regcache *regcache, int regnum,
+supply_64bit_reg (reg_buffer *regcache, int regnum,
 		  const gdb_byte *buf)
 {
   struct gdbarch *gdbarch = regcache->arch ();
@@ -290,7 +290,7 @@ supply_64bit_reg (struct regcache *regcache, int regnum,
 /* Unpack a 64-bit elf_gregset_t into GDB's register cache.  */
 
 void
-mips64_supply_gregset (struct regcache *regcache,
+mips64_supply_gregset (reg_buffer *regcache,
 		       const mips64_elf_gregset_t *gregsetp)
 {
   int regi;
@@ -325,7 +325,7 @@ mips64_supply_gregset (struct regcache *regcache,
 
 static void
 mips64_supply_gregset_wrapper (const struct regset *regset,
-			       struct regcache *regcache,
+			       reg_buffer *regcache,
 			       int regnum, const void *gregs, size_t len)
 {
   gdb_assert (len >= sizeof (mips64_elf_gregset_t));
@@ -409,7 +409,7 @@ mips64_fill_gregset_wrapper (const struct regset *regset,
    MIPS I FP context layout").  */
 
 void
-mips64_supply_fpregset (struct regcache *regcache,
+mips64_supply_fpregset (reg_buffer *regcache,
 			const mips64_elf_fpregset_t *fpregsetp)
 {
   struct gdbarch *gdbarch = regcache->arch ();
@@ -442,7 +442,7 @@ mips64_supply_fpregset (struct regcache *regcache,
 
 static void
 mips64_supply_fpregset_wrapper (const struct regset *regset,
-				struct regcache *regcache,
+				reg_buffer *regcache,
 				int regnum, const void *gregs, size_t len)
 {
   gdb_assert (len >= sizeof (mips64_elf_fpregset_t));

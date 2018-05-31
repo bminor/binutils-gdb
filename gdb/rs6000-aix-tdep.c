@@ -100,7 +100,7 @@ static struct ppc_reg_offsets rs6000_aix64_reg_offsets =
 
 static void
 rs6000_aix_supply_regset (const struct regset *regset,
-			  struct regcache *regcache, int regnum,
+			  reg_buffer *regcache, int regnum,
 			  const void *gregs, size_t len)
 {
   ppc_supply_gregset (regset, regcache, regnum, gregs, len);

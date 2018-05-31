@@ -187,7 +187,7 @@ static int i386obsd_uthread_reg_offset[] =
 #define I386OBSD_UTHREAD_ESP_OFFSET	176
 
 static void
-i386obsd_supply_uthread (struct regcache *regcache,
+i386obsd_supply_uthread (reg_buffer *regcache,
 			 int regnum, CORE_ADDR addr)
 {
   struct gdbarch *gdbarch = regcache->arch ();

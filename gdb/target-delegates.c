@@ -16,7 +16,7 @@ struct dummy_target : public target_ops
   void resume (ptid_t arg0, int arg1, enum gdb_signal arg2) override;
   void commit_resume () override;
   ptid_t wait (ptid_t arg0, struct target_waitstatus *arg1, int arg2) override;
-  void fetch_registers (struct regcache *arg0, int arg1) override;
+  void fetch_registers (ptid_t arg0, reg_buffer *arg1, int arg2) override;
   void store_registers (struct regcache *arg0, int arg1) override;
   void prepare_to_store (struct regcache *arg0) override;
   void files_info () override;
@@ -184,7 +184,7 @@ struct debug_target : public target_ops
   void resume (ptid_t arg0, int arg1, enum gdb_signal arg2) override;
   void commit_resume () override;
   ptid_t wait (ptid_t arg0, struct target_waitstatus *arg1, int arg2) override;
-  void fetch_registers (struct regcache *arg0, int arg1) override;
+  void fetch_registers (ptid_t arg0, reg_buffer *arg1, int arg2) override;
   void store_registers (struct regcache *arg0, int arg1) override;
   void prepare_to_store (struct regcache *arg0) override;
   void files_info () override;
@@ -485,25 +485,27 @@ debug_target::wait (ptid_t arg0, struct target_waitstatus *arg1, int arg2)
 }
 
 void
-target_ops::fetch_registers (struct regcache *arg0, int arg1)
+target_ops::fetch_registers (ptid_t arg0, reg_buffer *arg1, int arg2)
 {
-  this->beneath->fetch_registers (arg0, arg1);
+  this->beneath->fetch_registers (arg0, arg1, arg2);
 }
 
 void
-dummy_target::fetch_registers (struct regcache *arg0, int arg1)
+dummy_target::fetch_registers (ptid_t arg0, reg_buffer *arg1, int arg2)
 {
 }
 
 void
-debug_target::fetch_registers (struct regcache *arg0, int arg1)
+debug_target::fetch_registers (ptid_t arg0, reg_buffer *arg1, int arg2)
 {
   fprintf_unfiltered (gdb_stdlog, "-> %s->fetch_registers (...)\n", this->beneath->shortname ());
-  this->beneath->fetch_registers (arg0, arg1);
+  this->beneath->fetch_registers (arg0, arg1, arg2);
   fprintf_unfiltered (gdb_stdlog, "<- %s->fetch_registers (", this->beneath->shortname ());
-  target_debug_print_struct_regcache_p (arg0);
+  target_debug_print_ptid_t (arg0);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_int (arg1);
+  target_debug_print_reg_buffer_p (arg1);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_int (arg2);
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 

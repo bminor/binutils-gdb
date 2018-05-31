@@ -214,7 +214,7 @@ extern int
 
 
 
-extern void sparc_supply_rwindow (struct regcache *regcache,
+extern void sparc_supply_rwindow (reg_buffer *regcache,
 				  CORE_ADDR sp, int regnum);
 extern void sparc_collect_rwindow (const struct regcache *regcache,
 				   CORE_ADDR sp, int regnum);
@@ -225,13 +225,13 @@ extern const struct sparc_fpregmap sparc32_sunos4_fpregmap;
 extern const struct sparc_fpregmap sparc32_bsd_fpregmap;
 
 extern void sparc32_supply_gregset (const struct sparc_gregmap *gregmap,
-				    struct regcache *regcache,
+				    reg_buffer *regcache,
 				    int regnum, const void *gregs);
 extern void sparc32_collect_gregset (const struct sparc_gregmap *gregmap,
 				     const struct regcache *regcache,
 				     int regnum, void *gregs);
 extern void sparc32_supply_fpregset (const struct sparc_fpregmap *fpregmap,
-				     struct regcache *regcache,
+				     reg_buffer *regcache,
 				     int regnum, const void *fpregs);
 extern void sparc32_collect_fpregset (const struct sparc_fpregmap *fpregmap,
 				      const struct regcache *regcache,

@@ -2161,7 +2161,7 @@ sh_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 
 void
 sh_corefile_supply_regset (const struct regset *regset,
-			   struct regcache *regcache,
+			   reg_buffer *regcache,
 			   int regnum, const void *regs, size_t len)
 {
   struct gdbarch *gdbarch = regcache->arch ();

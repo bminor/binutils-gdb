@@ -1940,7 +1940,7 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 /* Helper functions for dealing with register windows.  */
 
 void
-sparc_supply_rwindow (struct regcache *regcache, CORE_ADDR sp, int regnum)
+sparc_supply_rwindow (reg_buffer *regcache, CORE_ADDR sp, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -2085,7 +2085,7 @@ sparc_collect_rwindow (const struct regcache *regcache,
 
 void
 sparc32_supply_gregset (const struct sparc_gregmap *gregmap,
-			struct regcache *regcache,
+			reg_buffer *regcache,
 			int regnum, const void *gregs)
 {
   const gdb_byte *regs = (const gdb_byte *) gregs;
@@ -2126,8 +2126,12 @@ sparc32_supply_gregset (const struct sparc_gregmap *gregmap,
       if (gregmap->r_l0_offset == -1)
 	{
 	  ULONGEST sp;
+	  struct gdbarch *gdbarch = regcache->arch ();
+	  int sz = register_size (gdbarch, SPARC_SP_REGNUM);
+	  gdb_byte buf[sz];
 
-	  regcache_cooked_read_unsigned (regcache, SPARC_SP_REGNUM, &sp);
+	  regcache->raw_collect (SPARC_SP_REGNUM, buf);
+	  sp = extract_unsigned_integer (buf, sz, gdbarch_byte_order (gdbarch));
 	  sparc_supply_rwindow (regcache, sp, regnum);
 	}
       else

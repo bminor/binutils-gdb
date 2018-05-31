@@ -52,7 +52,7 @@ const struct sparc_gregmap sparc32nbsd_gregmap =
 
 static void
 sparc32nbsd_supply_gregset (const struct regset *regset,
-			    struct regcache *regcache,
+			    reg_buffer *regcache,
 			    int regnum, const void *gregs, size_t len)
 {
   sparc32_supply_gregset (&sparc32nbsd_gregmap, regcache, regnum, gregs);
@@ -67,7 +67,7 @@ sparc32nbsd_supply_gregset (const struct regset *regset,
 
 static void
 sparc32nbsd_supply_fpregset (const struct regset *regset,
-			     struct regcache *regcache,
+			     reg_buffer *regcache,
 			     int regnum, const void *fpregs, size_t len)
 {
   sparc32_supply_fpregset (&sparc32_bsd_fpregmap, regcache, regnum, fpregs);

@@ -1418,7 +1418,7 @@ static const struct regcache_map_entry score7_linux_gregmap[] =
 
 static void
 score7_linux_supply_gregset(const struct regset *regset,
-			    struct regcache *regcache,
+			    reg_buffer *regcache,
 			    int regnum, const void *buf,
 			    size_t size)
 {

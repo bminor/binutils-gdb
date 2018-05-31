@@ -3801,7 +3801,7 @@ i386_value_to_register (struct frame_info *frame, int regnum,
    REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
 
 void
-i386_supply_gregset (const struct regset *regset, struct regcache *regcache,
+i386_supply_gregset (const struct regset *regset, reg_buffer *regcache,
 		     int regnum, const void *gregs, size_t len)
 {
   struct gdbarch *gdbarch = regcache->arch ();
@@ -3849,7 +3849,7 @@ i386_collect_gregset (const struct regset *regset,
    REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
 
 static void
-i386_supply_fpregset (const struct regset *regset, struct regcache *regcache,
+i386_supply_fpregset (const struct regset *regset, reg_buffer *regcache,
 		      int regnum, const void *fpregs, size_t len)
 {
   struct gdbarch *gdbarch = regcache->arch ();

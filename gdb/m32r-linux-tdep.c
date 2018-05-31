@@ -348,7 +348,7 @@ static int m32r_pt_regs_offset[] = {
 
 static void
 m32r_linux_supply_gregset (const struct regset *regset,
-			   struct regcache *regcache, int regnum,
+			   reg_buffer *regcache, int regnum,
 			   const void *gregs, size_t size)
 {
   const gdb_byte *regs = (const gdb_byte *) gregs;

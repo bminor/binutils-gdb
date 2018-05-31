@@ -47,7 +47,7 @@ armbsd_fpreg_offset (int regnum)
 
 static void
 armbsd_supply_fpregset (const struct regset *regset,
-			struct regcache *regcache,
+			reg_buffer *regcache,
 			int regnum, const void *fpregs, size_t len)
 {
   const gdb_byte *regs = (const gdb_byte *) fpregs;
@@ -68,7 +68,7 @@ armbsd_supply_fpregset (const struct regset *regset,
 
 static void
 armbsd_supply_gregset (const struct regset *regset,
-		       struct regcache *regcache,
+		       reg_buffer *regcache,
 		       int regnum, const void *gregs, size_t len)
 {
   const gdb_byte *regs = (const gdb_byte *) gregs;

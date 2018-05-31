@@ -376,7 +376,7 @@ rs6000_register_sim_regno (struct gdbarch *gdbarch, int reg)
    Write the register to REGCACHE.  */
 
 void
-ppc_supply_reg (struct regcache *regcache, int regnum, 
+ppc_supply_reg (reg_buffer *regcache, int regnum,
 		const gdb_byte *regs, size_t offset, int regsize)
 {
   if (regnum != -1 && offset != -1)
@@ -480,7 +480,7 @@ ppc_fpreg_offset (struct gdbarch_tdep *tdep,
    REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
 
 void
-ppc_supply_gregset (const struct regset *regset, struct regcache *regcache,
+ppc_supply_gregset (const struct regset *regset, reg_buffer *regcache,
 		    int regnum, const void *gregs, size_t len)
 {
   struct gdbarch *gdbarch = regcache->arch ();
@@ -530,7 +530,7 @@ ppc_supply_gregset (const struct regset *regset, struct regcache *regcache,
    REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
 
 void
-ppc_supply_fpregset (const struct regset *regset, struct regcache *regcache,
+ppc_supply_fpregset (const struct regset *regset, reg_buffer *regcache,
 		     int regnum, const void *fpregs, size_t len)
 {
   struct gdbarch *gdbarch = regcache->arch ();

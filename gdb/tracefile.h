@@ -129,6 +129,6 @@ public:
   bool thread_alive (ptid_t ptid) override;
 };
 
-extern void tracefile_fetch_registers (struct regcache *regcache, int regno);
+extern void tracefile_fetch_registers (reg_buffer *regcache, int regno);
 
 #endif /* TRACEFILE_H */

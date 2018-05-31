@@ -1491,7 +1491,7 @@ alpha_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
    targets don't supply this value in their core files.  */
 
 void
-alpha_supply_int_regs (struct regcache *regcache, int regno,
+alpha_supply_int_regs (reg_buffer *regcache, int regno,
 		       const void *r0_r30, const void *pc, const void *unique)
 {
   const gdb_byte *regs = (const gdb_byte *) r0_r30;
@@ -1534,7 +1534,7 @@ alpha_fill_int_regs (const struct regcache *regcache,
 }
 
 void
-alpha_supply_fp_regs (struct regcache *regcache, int regno,
+alpha_supply_fp_regs (reg_buffer *regcache, int regno,
 		      const void *f0_f30, const void *fpcr)
 {
   const gdb_byte *regs = (const gdb_byte *) f0_f30;

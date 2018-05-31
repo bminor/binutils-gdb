@@ -120,7 +120,7 @@ extern void i387_value_to_register (struct frame_info *frame, int regnum,
    *FSAVE.  This function masks off any of the reserved bits in
    *FSAVE.  */
 
-extern void i387_supply_fsave (struct regcache *regcache, int regnum,
+extern void i387_supply_fsave (reg_buffer *regcache, int regnum,
 			       const void *fsave);
 
 /* Fill register REGNUM (if it is a floating-point register) in *FSAVE
@@ -135,12 +135,12 @@ extern void i387_collect_fsave (const struct regcache *regcache, int regnum,
    floating-point or SSE register value from *FXSAVE.  This function
    masks off any of the reserved bits in *FXSAVE.  */
 
-extern void i387_supply_fxsave (struct regcache *regcache, int regnum,
+extern void i387_supply_fxsave (reg_buffer *regcache, int regnum,
 				const void *fxsave);
 
 /* Similar to i387_supply_fxsave, but use XSAVE extended state.  */
 
-extern void i387_supply_xsave (struct regcache *regcache, int regnum,
+extern void i387_supply_xsave (reg_buffer *regcache, int regnum,
 			       const void *xsave);
 
 /* Fill register REGNUM (if it is a floating-point or SSE register) in

@@ -2959,7 +2959,7 @@ amd64_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
    REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
 
 static void
-amd64_supply_fpregset (const struct regset *regset, struct regcache *regcache,
+amd64_supply_fpregset (const struct regset *regset, reg_buffer *regcache,
 		       int regnum, const void *fpregs, size_t len)
 {
   struct gdbarch *gdbarch = regcache->arch ();
@@ -3335,7 +3335,7 @@ _initialize_amd64_tdep (void)
    reserved bits in *FXSAVE.  */
 
 void
-amd64_supply_fxsave (struct regcache *regcache, int regnum,
+amd64_supply_fxsave (reg_buffer *regcache, int regnum,
 		     const void *fxsave)
 {
   struct gdbarch *gdbarch = regcache->arch ();
@@ -3358,7 +3358,7 @@ amd64_supply_fxsave (struct regcache *regcache, int regnum,
 /* Similar to amd64_supply_fxsave, but use XSAVE extended state.  */
 
 void
-amd64_supply_xsave (struct regcache *regcache, int regnum,
+amd64_supply_xsave (reg_buffer *regcache, int regnum,
 		    const void *xsave)
 {
   struct gdbarch *gdbarch = regcache->arch ();

@@ -135,7 +135,7 @@ ps_lgetregs (struct ps_prochandle *ph, lwpid_t lwpid, prgregset_t gregset)
   struct regcache *regcache
     = get_thread_arch_regcache (ptid, target_gdbarch ());
 
-  target_fetch_registers (regcache, -1);
+  target_fetch_registers (ptid, regcache, -1);
   fill_gregset (regcache, (gdb_gregset_t *) gregset, -1);
 
   return PS_OK;
@@ -167,7 +167,7 @@ ps_lgetfpregs (struct ps_prochandle *ph, lwpid_t lwpid, gdb_prfpregset_t *fpregs
   struct regcache *regcache
     = get_thread_arch_regcache (ptid, target_gdbarch ());
 
-  target_fetch_registers (regcache, -1);
+  target_fetch_registers (ptid, regcache, -1);
   fill_fpregset (regcache, (gdb_fpregset_t *) fpregset, -1);
 
   return PS_OK;

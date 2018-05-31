@@ -43,7 +43,7 @@
 
 static void
 mips64obsd_supply_gregset (const struct regset *regset,
-			   struct regcache *regcache, int regnum,
+			   reg_buffer *regcache, int regnum,
 			   const void *gregs, size_t len)
 {
   const char *regs = (const char *) gregs;

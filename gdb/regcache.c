@@ -494,7 +494,7 @@ regcache::raw_update (int regnum)
 
   if (get_register_status (regnum) == REG_UNKNOWN)
     {
-      target_fetch_registers (this, regnum);
+      target_fetch_registers (this->ptid (), this, regnum);
 
       /* A number of targets can't access the whole set of raw
 	 registers (because the debug API provides no means to get at
@@ -991,10 +991,10 @@ reg_buffer::raw_collect_integer (int regnum, gdb_byte *addr, int addr_len,
 }
 
 void
-regcache::transfer_regset (const struct regset *regset,
-			   struct regcache *out_regcache,
-			   int regnum, const void *in_buf,
-			   void *out_buf, size_t size) const
+reg_buffer::transfer_regset (const struct regset *regset,
+			     struct reg_buffer *out_regcache,
+			     int regnum, const void *in_buf,
+			     void *out_buf, size_t size) const
 {
   const struct regcache_map_entry *map;
   int offs = 0, count;
@@ -1051,15 +1051,15 @@ regcache::transfer_regset (const struct regset *regset,
 
 void
 regcache_supply_regset (const struct regset *regset,
-			struct regcache *regcache,
+			reg_buffer *regcache,
 			int regnum, const void *buf, size_t size)
 {
   regcache->supply_regset (regset, regnum, buf, size);
 }
 
 void
-regcache::supply_regset (const struct regset *regset,
-			 int regnum, const void *buf, size_t size)
+reg_buffer::supply_regset (const struct regset *regset,
+			   int regnum, const void *buf, size_t size)
 {
   transfer_regset (regset, this, regnum, buf, NULL, size);
 }
@@ -1077,7 +1077,7 @@ regcache_collect_regset (const struct regset *regset,
 }
 
 void
-regcache::collect_regset (const struct regset *regset,
+reg_buffer::collect_regset (const struct regset *regset,
 			 int regnum, void *buf, size_t size) const
 {
   transfer_regset (regset, NULL, regnum, NULL, buf, size);
@@ -1139,7 +1139,7 @@ reg_buffer::num_raw_registers () const
 }
 
 void
-regcache::debug_print_register (const char *func,  int regno)
+reg_buffer::debug_print_register (const char *func,  int regno)
 {
   struct gdbarch *gdbarch = arch ();
 
@@ -1388,7 +1388,7 @@ public:
     xfer_partial_called = 0;
   }
 
-  void fetch_registers (regcache *regs, int regno) override;
+  void fetch_registers (ptid_t ptid, reg_buffer *regs, int regno) override;
   void store_registers (regcache *regs, int regno) override;
 
   enum target_xfer_status xfer_partial (enum target_object object,
@@ -1403,7 +1403,8 @@ public:
 };
 
 void
-target_ops_no_register::fetch_registers (regcache *regs, int regno)
+target_ops_no_register::fetch_registers (ptid_t ptid, reg_buffer *regs,
+					 int regno)
 {
   /* Mark register available.  */
   regs->raw_supply_zeroed (regno);

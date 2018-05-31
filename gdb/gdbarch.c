@@ -4668,7 +4668,7 @@ set_gdbarch_fast_tracepoint_valid_at (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_guess_tracepoint_registers (struct gdbarch *gdbarch, struct regcache *regcache, CORE_ADDR addr)
+gdbarch_guess_tracepoint_registers (struct gdbarch *gdbarch, reg_buffer *regcache, CORE_ADDR addr)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->guess_tracepoint_registers != NULL);

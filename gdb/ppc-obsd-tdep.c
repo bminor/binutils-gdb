@@ -45,7 +45,7 @@ struct ppc_reg_offsets ppcobsd_fpreg_offsets;
 
 void
 ppcobsd_supply_gregset (const struct regset *regset,
-			struct regcache *regcache, int regnum,
+			reg_buffer *regcache, int regnum,
 			const void *gregs, size_t len)
 {
   ppc_supply_gregset (regset, regcache, regnum, gregs, len);

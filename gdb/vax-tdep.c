@@ -67,7 +67,7 @@ vax_register_type (struct gdbarch *gdbarch, int regnum)
    REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
 
 static void
-vax_supply_gregset (const struct regset *regset, struct regcache *regcache,
+vax_supply_gregset (const struct regset *regset, reg_buffer *regcache,
 		    int regnum, const void *gregs, size_t len)
 {
   const gdb_byte *regs = (const gdb_byte *) gregs;

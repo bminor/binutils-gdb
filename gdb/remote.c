@@ -424,7 +424,7 @@ public:
   void resume (ptid_t, int, enum gdb_signal) override;
   ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
 
-  void fetch_registers (struct regcache *, int) override;
+  void fetch_registers (ptid_t, reg_buffer *, int) override;
   void store_registers (struct regcache *, int) override;
   void prepare_to_store (struct regcache *) override;
 
@@ -839,11 +839,10 @@ public: /* Remote specific methods.  */
 
   void remote_notif_get_pending_events (notif_client *nc);
 
-  int fetch_register_using_p (struct regcache *regcache,
-			      packet_reg *reg);
+  int fetch_register_using_p (reg_buffer *regcache, packet_reg *reg);
   int send_g_packet ();
-  void process_g_packet (struct regcache *regcache);
-  void fetch_registers_using_g (struct regcache *regcache);
+  void process_g_packet (reg_buffer *regcache);
+  void fetch_registers_using_g (reg_buffer *regcache);
   int store_register_using_P (const struct regcache *regcache,
 			      packet_reg *reg);
   void store_registers_using_G (const struct regcache *regcache);
@@ -8040,7 +8039,7 @@ remote_target::wait (ptid_t ptid, struct target_waitstatus *status, int options)
 /* Fetch a single register using a 'p' packet.  */
 
 int
-remote_target::fetch_register_using_p (struct regcache *regcache,
+remote_target::fetch_register_using_p (reg_buffer *regcache,
 				       packet_reg *reg)
 {
   struct gdbarch *gdbarch = regcache->arch ();
@@ -8138,7 +8137,7 @@ remote_target::send_g_packet ()
 }
 
 void
-remote_target::process_g_packet (struct regcache *regcache)
+remote_target::process_g_packet (reg_buffer *regcache)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   struct remote_state *rs = get_remote_state ();
@@ -8242,7 +8241,7 @@ remote_target::process_g_packet (struct regcache *regcache)
 }
 
 void
-remote_target::fetch_registers_using_g (struct regcache *regcache)
+remote_target::fetch_registers_using_g (reg_buffer *regcache)
 {
   send_g_packet ();
   process_g_packet (regcache);
@@ -8272,7 +8271,7 @@ remote_target::set_remote_traceframe ()
 }
 
 void
-remote_target::fetch_registers (struct regcache *regcache, int regnum)
+remote_target::fetch_registers (ptid_t ptid, reg_buffer *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   struct remote_state *rs = get_remote_state ();
@@ -8280,7 +8279,7 @@ remote_target::fetch_registers (struct regcache *regcache, int regnum)
   int i;
 
   set_remote_traceframe ();
-  set_general_thread (regcache->ptid ());
+  set_general_thread (ptid);
 
   if (regnum >= 0)
     {

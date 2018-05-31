@@ -473,7 +473,7 @@ struct target_ops
     virtual ptid_t wait (ptid_t, struct target_waitstatus *,
 			 int TARGET_DEBUG_PRINTER (target_debug_print_options))
       TARGET_DEFAULT_FUNC (default_target_wait);
-    virtual void fetch_registers (struct regcache *, int)
+    virtual void fetch_registers (ptid_t, reg_buffer *, int)
       TARGET_DEFAULT_IGNORE ();
     virtual void store_registers (struct regcache *, int)
       TARGET_DEFAULT_NORETURN (noprocess ());
@@ -1377,7 +1377,7 @@ extern ptid_t default_target_wait (struct target_ops *ops,
 
 /* Fetch at least register REGNO, or all regs if regno == -1.  No result.  */
 
-extern void target_fetch_registers (struct regcache *regcache, int regno);
+extern void target_fetch_registers (ptid_t ptid, reg_buffer *regcache, int regno);
 
 /* Store at least register REGNO, or all regs if REGNO == -1.
    It can store as many registers as it wants to, so target_prepare_to_store

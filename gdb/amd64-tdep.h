@@ -113,11 +113,11 @@ extern const struct target_desc *amd64_target_description (uint64_t xcr0);
    -1, do this for all registers.  This function masks off any of the
    reserved bits in *FXSAVE.  */
 
-extern void amd64_supply_fxsave (struct regcache *regcache, int regnum,
+extern void amd64_supply_fxsave (reg_buffer *regcache, int regnum,
 				 const void *fxsave);
 
 /* Similar to amd64_supply_fxsave, but use XSAVE extended state.  */
-extern void amd64_supply_xsave (struct regcache *regcache, int regnum,
+extern void amd64_supply_xsave (reg_buffer *regcache, int regnum,
 				const void *xsave);
 
 /* Fill register REGNUM (if it is a floating-point or SSE register) in

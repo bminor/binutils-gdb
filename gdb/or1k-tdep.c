@@ -610,7 +610,7 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   struct type *func_type = value_type (function);
 
   /* Return address */
-  regcache_cooked_write_unsigned (regcache, OR1K_LR_REGNUM, bp_addr);
+  regcache->cooked_write (OR1K_LR_REGNUM, bp_addr);
 
   /* Register for the next argument.  */
   argreg = OR1K_FIRST_ARG_REGNUM;
@@ -619,8 +619,7 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      argument.  */
   if (struct_return)
     {
-      regcache_cooked_write_unsigned (regcache, OR1K_FIRST_ARG_REGNUM,
-				      struct_addr);
+      regcache->cooked_write (OR1K_FIRST_ARG_REGNUM, struct_addr);
       argreg++;
     }
 
@@ -685,8 +684,8 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      ULONGEST lo = regval & mask;
 	      ULONGEST hi = regval >> bits_per_word;
 
-	      regcache_cooked_write_unsigned (regcache, argreg, hi);
-	      regcache_cooked_write_unsigned (regcache, argreg + 1, lo);
+	      regcache->cooked_write (argreg, hi);
+	      regcache->cooked_write (argreg + 1, lo);
 	      argreg += 2;
 	    }
 	  else
@@ -698,9 +697,8 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       else if (argreg <= OR1K_LAST_ARG_REGNUM)
 	{
 	  /* Smaller scalars fit in a single register.  */
-	  regcache_cooked_write_unsigned
-	    (regcache, argreg, extract_unsigned_integer (val, len,
-							 byte_order));
+	  regcache->cooked_write
+	    (argreg, extract_unsigned_integer (val, len, byte_order));
 	  argreg++;
 	}
       else
@@ -781,7 +779,7 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     }
 
   /* Save the updated stack pointer.  */
-  regcache_cooked_write_unsigned (regcache, OR1K_SP_REGNUM, sp);
+  regcache->cooked_write (OR1K_SP_REGNUM, sp);
 
   if (heap_offset > 0)
     sp = heap_sp;

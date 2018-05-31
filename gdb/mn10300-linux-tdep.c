@@ -83,7 +83,7 @@ typedef struct
 
 static void
 am33_supply_gregset_method (const struct regset *regset, 
-			    struct regcache *regcache, 
+			    reg_buffer *regcache,
 			    int regnum, const void *gregs, size_t len)
 {
   const mn10300_elf_greg_t *regp = (const mn10300_elf_greg_t *) gregs;
@@ -233,7 +233,7 @@ am33_supply_gregset_method (const struct regset *regset,
 
 static void
 am33_supply_fpregset_method (const struct regset *regset, 
-			     struct regcache *regcache, 
+			     reg_buffer *regcache,
 			     int regnum, const void *fpregs, size_t len)
 {
   const mn10300_elf_fpregset_t *fpregset

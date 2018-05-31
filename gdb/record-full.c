@@ -304,7 +304,7 @@ public:
   void resume (ptid_t, int, enum gdb_signal) override;
   void disconnect (const char *, int) override;
   void kill () override;
-  void fetch_registers (struct regcache *regcache, int regno) override;
+  void fetch_registers (ptid_t ptid, reg_buffer *regcache, int regno) override;
   void prepare_to_store (struct regcache *regcache) override;
   void store_registers (struct regcache *, int) override;
   enum target_xfer_status xfer_partial (enum target_object object,
@@ -919,7 +919,7 @@ record_full_core_open_1 (const char *name, int from_tty)
   int i;
 
   /* Get record_full_core_regbuf.  */
-  target_fetch_registers (regcache, -1);
+  target_fetch_registers (regcache->ptid (), regcache, -1);
   record_full_core_regbuf = new detached_regcache (regcache->arch (), false);
 
   for (i = 0; i < regnum; i ++)
@@ -2099,7 +2099,7 @@ record_full_core_target::kill ()
 /* "fetch_registers" method for prec over corefile.  */
 
 void
-record_full_core_target::fetch_registers (struct regcache *regcache,
+record_full_core_target::fetch_registers (ptid_t ptid, reg_buffer *regcache,
 					  int regno)
 {
   if (regno < 0)

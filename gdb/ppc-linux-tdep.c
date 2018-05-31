@@ -390,7 +390,7 @@ ppc_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 
 static void
 ppc_linux_supply_gregset (const struct regset *regset,
-			  struct regcache *regcache,
+			  reg_buffer *regcache,
 			  int regnum, const void *gregs, size_t len)
 {
   const struct ppc_reg_offsets *offsets

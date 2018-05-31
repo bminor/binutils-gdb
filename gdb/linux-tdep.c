@@ -1689,7 +1689,7 @@ linux_corefile_thread (struct thread_info *info,
 
   regcache = get_thread_arch_regcache (info->ptid, args->gdbarch);
 
-  target_fetch_registers (regcache, -1);
+  target_fetch_registers (info->ptid, regcache, -1);
   gdb::byte_vector siginfo_data = linux_get_siginfo_data (info, args->gdbarch);
 
   args->note_data = linux_collect_thread_registers

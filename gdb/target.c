@@ -3516,9 +3516,9 @@ target_options_to_string (int target_options)
 }
 
 void
-target_fetch_registers (struct regcache *regcache, int regno)
+target_fetch_registers (ptid_t ptid, reg_buffer *regcache, int regno)
 {
-  target_stack->fetch_registers (regcache, regno);
+  target_stack->fetch_registers (ptid, regcache, regno);
   if (targetdebug)
     regcache->debug_print_register ("target_fetch_registers", regno);
 }

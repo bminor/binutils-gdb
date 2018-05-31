@@ -171,7 +171,7 @@ static const struct regcache_map_entry ia64_linux_fpregmap[] =
 
 static void
 ia64_linux_supply_fpregset (const struct regset *regset,
-			    struct regcache *regcache,
+			    reg_buffer *regcache,
 			    int regnum, const void *regs, size_t len)
 {
   const gdb_byte f_zero[16] = { 0 };
