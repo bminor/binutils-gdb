@@ -20308,6 +20308,15 @@ Display @value{GDBN}'s current idea of the target byte order.
 
 @end table
 
+If the @code{set endian auto} mode is in effect and no executable has
+been selected, then the endianness used is the last one chosen either
+by one of the @code{set endian big} and @code{set endian little}
+commands or by inferring from the last executable used.  If no
+endianness has been previously chosen, then the default for this mode
+is inferred from the target @value{GDBN} has been built for, and is
+@code{little} if the name of the target CPU has an @code{el} suffix
+and @code{big} otherwise.
+
 Note that these commands merely adjust interpretation of symbolic
 data on the host, and that they have absolutely no effect on the
 target system.

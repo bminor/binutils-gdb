@@ -3,6 +3,12 @@
 
 *** Changes since GDB 8.1
 
+* The endianness used with the 'set endian auto' mode in the absence of
+  an executable selected for debugging is now the last endianness chosen
+  either by one of the 'set endian big' and 'set endian little' commands
+  or by inferring from the last executable used, rather than the startup
+  default.
+
 * The commands 'info variables/functions/types' now show the source line
   numbers of symbol definitions when available.
 

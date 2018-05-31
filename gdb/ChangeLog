@@ -1,3 +1,9 @@
+2018-05-31  Maciej W. Rozycki  <macro@mips.com>
+
+	* arch-utils.c (gdbarch_info_fill): Set `default_byte_order' to
+	the endianness selected.
+	* NEWS: Document `set endian auto' mode operation update.
+
 2018-05-31  Alan Hayward  <alan.hayward@arm.com>
 
 	* Makefile.in: Add new header.
