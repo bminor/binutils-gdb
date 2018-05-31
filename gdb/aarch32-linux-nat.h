@@ -23,12 +23,12 @@
 void aarch32_gp_regcache_supply (reg_buffer *regcache, uint32_t *regs,
 				 int arm_apcs_32);
 
-void aarch32_gp_regcache_collect (const struct regcache *regcache,
+void aarch32_gp_regcache_collect (const reg_buffer *regcache,
 				  uint32_t *regs, int arm_apcs_32);
 
 void aarch32_vfp_regcache_supply (reg_buffer *regcache, gdb_byte *regs,
 				  const int vfp_register_count);
 
-void aarch32_vfp_regcache_collect (const struct regcache *regcache,
+void aarch32_vfp_regcache_collect (const reg_buffer *regcache,
 				   gdb_byte *regs,
 				   const int vfp_register_count);

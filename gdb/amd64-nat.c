@@ -123,7 +123,7 @@ amd64_supply_native_gregset (reg_buffer *regcache,
    registers.  */
 
 void
-amd64_collect_native_gregset (const struct regcache *regcache,
+amd64_collect_native_gregset (const reg_buffer *regcache,
 			      void *gregs, int regnum)
 {
   char *regs = (char *) gregs;

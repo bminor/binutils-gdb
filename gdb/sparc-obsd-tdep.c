@@ -194,8 +194,8 @@ sparc32obsd_supply_uthread (reg_buffer *regcache,
 }
 
 static void
-sparc32obsd_collect_uthread(const struct regcache *regcache,
-			    int regnum, CORE_ADDR addr)
+sparc32obsd_collect_uthread (const reg_buffer *regcache, int regnum,
+			     CORE_ADDR addr)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);

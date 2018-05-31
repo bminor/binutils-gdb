@@ -52,7 +52,7 @@ struct bsd_uthread_target final : public target_ops
   void mourn_inferior () override;
 
   void fetch_registers (ptid_t, reg_buffer *, int) override;
-  void store_registers (struct regcache *, int) override;
+  void store_registers (ptid_t, reg_buffer *, int) override;
 
   ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
   void resume (ptid_t, int, enum gdb_signal) override;
@@ -80,7 +80,7 @@ struct bsd_uthread_ops
   void (*supply_uthread)(reg_buffer *, int, CORE_ADDR);
 
   /* Collect registers for an inactive thread from a register cache.  */
-  void (*collect_uthread)(const struct regcache *, int, CORE_ADDR);
+  void (*collect_uthread)(const reg_buffer *, int, CORE_ADDR);
 };
 
 static void *
@@ -111,8 +111,8 @@ bsd_uthread_set_supply_uthread (struct gdbarch *gdbarch,
 
 void
 bsd_uthread_set_collect_uthread (struct gdbarch *gdbarch,
-			 void (*collect_uthread) (const struct regcache *,
-						  int, CORE_ADDR))
+				 void (*collect_uthread) (const reg_buffer *,
+							  int, CORE_ADDR))
 {
   struct bsd_uthread_ops *ops
     = (struct bsd_uthread_ops *) gdbarch_data (gdbarch, bsd_uthread_data);
@@ -348,13 +348,13 @@ bsd_uthread_target::fetch_registers (ptid_t ptid, reg_buffer *regcache, int regn
 }
 
 void
-bsd_uthread_target::store_registers (struct regcache *regcache, int regnum)
+bsd_uthread_target::store_registers (ptid_t ptid, reg_buffer *regcache,
+				     int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   struct bsd_uthread_ops *uthread_ops
     = (struct bsd_uthread_ops *) gdbarch_data (gdbarch, bsd_uthread_data);
   struct target_ops *beneath = find_target_beneath (this);
-  ptid_t ptid = regcache->ptid ();
   CORE_ADDR addr = ptid_get_tid (ptid);
   CORE_ADDR active_addr;
   scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
@@ -374,7 +374,7 @@ bsd_uthread_target::store_registers (struct regcache *regcache, int regnum)
     {
       /* Updating the thread that is currently running; pass the
          request to the layer beneath.  */
-      beneath->store_registers (regcache, regnum);
+      beneath->store_registers (ptid, regcache, regnum);
     }
 }
 

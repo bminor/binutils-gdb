@@ -49,7 +49,7 @@ struct amd64_linux_nat_target final : public x86_linux_nat_target
 {
   /* Add our register access methods.  */
   void fetch_registers (ptid_t, reg_buffer *, int) override;
-  void store_registers (struct regcache *, int) override;
+  void store_registers (ptid_t, reg_buffer *, int) override;
 
   bool low_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
     override;
@@ -216,15 +216,11 @@ amd64_linux_nat_target::fetch_registers (ptid_t ptid, reg_buffer *regcache,
    registers).  */
 
 void
-amd64_linux_nat_target::store_registers (struct regcache *regcache, int regnum)
+amd64_linux_nat_target::store_registers (ptid_t ptid,
+					 reg_buffer *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  int tid;
-
-  /* GNU/Linux LWP ID's are process ID's.  */
-  tid = ptid_get_lwp (regcache->ptid ());
-  if (tid == 0)
-    tid = ptid_get_pid (regcache->ptid ()); /* Not a threaded program.  */
+  int tid = get_ptrace_pid (ptid);
 
   if (regnum == -1 || amd64_native_gregset_supplies_p (gdbarch, regnum))
     {

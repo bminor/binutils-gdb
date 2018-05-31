@@ -394,7 +394,7 @@ ran_out_of_registers_for_arguments:
   regcache_raw_write_signed (regcache, tdep->ppc_toc_regnum,
 			     solib_aix_get_toc_value (func_addr));
 
-  target_store_registers (regcache, -1);
+  target_store_registers (regcache->ptid (), regcache, -1);
   return sp;
 }
 

@@ -46,7 +46,7 @@ extern void amd64_supply_native_gregset (reg_buffer *regcache,
    GREGS.  If REGNUM is -1, collect and store all appropriate
    registers.  */
 
-extern void amd64_collect_native_gregset (const struct regcache *regcache,
+extern void amd64_collect_native_gregset (const reg_buffer *regcache,
 					  void *gregs, int regnum);
 
 #endif /* amd64-nat.h */

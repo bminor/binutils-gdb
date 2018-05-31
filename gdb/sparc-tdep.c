@@ -2013,7 +2013,7 @@ sparc_supply_rwindow (reg_buffer *regcache, CORE_ADDR sp, int regnum)
 }
 
 void
-sparc_collect_rwindow (const struct regcache *regcache,
+sparc_collect_rwindow (const reg_buffer *regcache,
 		       CORE_ADDR sp, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
@@ -2201,7 +2201,7 @@ sparc32_collect_gregset (const struct sparc_gregmap *gregmap,
 
 void
 sparc32_supply_fpregset (const struct sparc_fpregmap *fpregmap,
-			 struct regcache *regcache,
+			 reg_buffer *regcache,
 			 int regnum, const void *fpregs)
 {
   const gdb_byte *regs = (const gdb_byte *) fpregs;

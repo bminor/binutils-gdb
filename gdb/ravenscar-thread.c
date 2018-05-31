@@ -91,7 +91,7 @@ struct ravenscar_thread_target final : public target_ops
   void resume (ptid_t, int, enum gdb_signal) override;
 
   void fetch_registers (ptid_t, reg_buffer *, int) override;
-  void store_registers (struct regcache *, int) override;
+  void store_registers (ptid_t, reg_buffer *, int) override;
 
   void prepare_to_store (struct regcache *) override;
 
@@ -433,11 +433,11 @@ ravenscar_thread_target::fetch_registers (ptid_t ptid, reg_buffer *regcache,
 }
 
 void
-ravenscar_thread_target::store_registers (struct regcache *regcache,
+ravenscar_thread_target::store_registers (ptid_t ptid,
+					  reg_buffer *regcache,
 					  int regnum)
 {
   target_ops *beneath = find_target_beneath (this);
-  ptid_t ptid = regcache->ptid ();
 
   if (ravenscar_runtime_initialized ()
       && is_ravenscar_task (ptid)
@@ -447,10 +447,10 @@ ravenscar_thread_target::store_registers (struct regcache *regcache,
       struct ravenscar_arch_ops *arch_ops
 	= gdbarch_ravenscar_ops (gdbarch);
 
-      beneath->store_registers (regcache, regnum);
+      beneath->store_registers (ptid, regcache, regnum);
     }
   else
-    beneath->store_registers (regcache, regnum);
+    beneath->store_registers (ptid, regcache, regnum);
 }
 
 void

@@ -53,7 +53,7 @@ struct spu_multiarch_target final : public target_ops
   void mourn_inferior () override;
 
   void fetch_registers (ptid_t, reg_buffer *, int) override;
-  void store_registers (struct regcache *, int) override;
+  void store_registers (ptid_t, reg_buffer *, int) override;
 
   enum target_xfer_status xfer_partial (enum target_object object,
 					const char *annex,
@@ -238,7 +238,8 @@ spu_multiarch_target::fetch_registers (ptid_t ptid, reg_buffer *regcache, int re
 /* Override the to_store_registers routine.  */
 
 void
-spu_multiarch_target::store_registers (struct regcache *regcache, int regno)
+spu_multiarch_target::store_registers (ptid_t ptid, reg_buffer *regcache,
+				       int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   struct target_ops *ops_beneath = find_target_beneath (this);
@@ -248,12 +249,12 @@ spu_multiarch_target::store_registers (struct regcache *regcache, int regno)
   /* Since we use functions that rely on inferior_ptid, we need to set and
      restore it.  */
   scoped_restore save_ptid
-    = make_scoped_restore (&inferior_ptid, regcache->ptid ());
+    = make_scoped_restore (&inferior_ptid, ptid);
 
   /* This version applies only if we're currently in spu_run.  */
   if (gdbarch_bfd_arch_info (gdbarch)->arch != bfd_arch_spu)
     {
-      ops_beneath->store_registers (regcache, regno);
+      ops_beneath->store_registers (ptid, regcache, regno);
       return;
     }
 

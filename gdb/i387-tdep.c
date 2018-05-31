@@ -666,7 +666,7 @@ i387_supply_fxsave (reg_buffer *regcache, int regnum, const void *fxsave)
    bits in *FXSAVE.  */
 
 void
-i387_collect_fxsave (const struct regcache *regcache, int regnum, void *fxsave)
+i387_collect_fxsave (const reg_buffer *regcache, int regnum, void *fxsave)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
   gdb_byte *regs = (gdb_byte *) fxsave;
@@ -1331,7 +1331,7 @@ i387_supply_xsave (reg_buffer *regcache, int regnum,
 /* Similar to i387_collect_fxsave, but use XSAVE extended state.  */
 
 void
-i387_collect_xsave (const struct regcache *regcache, int regnum,
+i387_collect_xsave (const reg_buffer *regcache, int regnum,
 		    void *xsave, int gcore)
 {
   struct gdbarch *gdbarch = regcache->arch ();
@@ -1493,7 +1493,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 					byte_order, I387_FCTRL_INIT_VAL);
 	      else
 		memset (FXSAVE_ADDR (tdep, regs, i), 0,
-			regcache_register_size (regcache, i));
+			register_size (gdbarch, i));
 	    }
 	}
     }
@@ -1841,7 +1841,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	    int regsize;
 
 	    regcache->raw_collect (i, raw);
-	    regsize = regcache_register_size (regcache, i);
+	    regsize = register_size (gdbarch, i);
 	    p = FXSAVE_ADDR (tdep, regs, i);
 	    if (memcmp (raw, p, regsize))
 	      {

@@ -2106,7 +2106,7 @@ sparc64_collect_gregset (const struct sparc_gregmap *gregmap,
 
 void
 sparc64_supply_fpregset (const struct sparc_fpregmap *fpregmap,
-			 struct regcache *regcache,
+			 reg_buffer *regcache,
 			 int regnum, const void *fpregs)
 {
   int sparc32 = (gdbarch_ptr_bit (regcache->arch ()) == 32);

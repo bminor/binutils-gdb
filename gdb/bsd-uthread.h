@@ -32,7 +32,7 @@ extern void bsd_uthread_set_supply_uthread (struct gdbarch *gdbarch,
    architecture GDBARCH to SUPPLY_UTHREAD.  */
 
 extern void bsd_uthread_set_collect_uthread (struct gdbarch *gdbarch,
-			     void (*collect_uthread) (const struct regcache *,
+			     void (*collect_uthread) (const reg_buffer *,
 						      int, CORE_ADDR));
 
 #endif /* bsd-uthread.h */

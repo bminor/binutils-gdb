@@ -273,7 +273,7 @@ public:
   void detach (inferior *, int) override;
   void mourn_inferior () override;
   void kill () override;
-  void store_registers (struct regcache *, int) override;
+  void store_registers (ptid_t, reg_buffer *, int) override;
   enum target_xfer_status xfer_partial (enum target_object object,
 					const char *annex,
 					gdb_byte *readbuf,
@@ -306,7 +306,7 @@ public:
   void kill () override;
   void fetch_registers (ptid_t ptid, reg_buffer *regcache, int regno) override;
   void prepare_to_store (struct regcache *regcache) override;
-  void store_registers (struct regcache *, int) override;
+  void store_registers (ptid_t, reg_buffer *, int) override;
   enum target_xfer_status xfer_partial (enum target_object object,
 					const char *annex,
 					gdb_byte *readbuf,
@@ -384,7 +384,7 @@ static void record_full_goto_insn (struct record_full_entry *entry,
 /* Alloc a record_full_reg record entry.  */
 
 static inline struct record_full_entry *
-record_full_reg_alloc (struct regcache *regcache, int regnum)
+record_full_reg_alloc (reg_buffer *regcache, int regnum)
 {
   struct record_full_entry *rec;
   struct gdbarch *gdbarch = regcache->arch ();
@@ -608,7 +608,7 @@ record_full_get_loc (struct record_full_entry *rec)
 /* Record the value of a register NUM to record_full_arch_list.  */
 
 int
-record_full_arch_list_add_reg (struct regcache *regcache, int regnum)
+record_full_arch_list_add_reg (reg_buffer *regcache, int regnum)
 {
   struct record_full_entry *rec;
 
@@ -620,7 +620,7 @@ record_full_arch_list_add_reg (struct regcache *regcache, int regnum)
 
   rec = record_full_reg_alloc (regcache, regnum);
 
-  regcache->raw_read (regnum, record_full_get_loc (rec));
+  regcache->raw_collect (regnum, record_full_get_loc (rec));
 
   record_full_arch_list_add (rec);
 
@@ -1527,7 +1527,7 @@ record_full_base_target::supports_stopped_by_hw_breakpoint ()
 /* Record registers change (by user or by GDB) to list as an instruction.  */
 
 static void
-record_full_registers_change (struct regcache *regcache, int regnum)
+record_full_registers_change (reg_buffer *regcache, int regnum)
 {
   /* Check record_full_insn_num.  */
   record_full_check_insn_num ();
@@ -1574,7 +1574,8 @@ record_full_registers_change (struct regcache *regcache, int regnum)
 /* "store_registers" method for process record target.  */
 
 void
-record_full_target::store_registers (struct regcache *regcache, int regno)
+record_full_target::store_registers (ptid_t ptid, reg_buffer *regcache,
+				     int regno)
 {
   if (!record_full_gdb_operation_disable)
     {
@@ -1622,7 +1623,7 @@ record_full_target::store_registers (struct regcache *regcache, int regno)
 
       record_full_registers_change (regcache, regno);
     }
-  this->beneath->store_registers (regcache, regno);
+  this->beneath->store_registers (ptid, regcache, regno);
 }
 
 /* "xfer_partial" method.  Behavior is conditional on
@@ -2124,7 +2125,7 @@ record_full_core_target::prepare_to_store (struct regcache *regcache)
 /* "store_registers" method for prec over corefile.  */
 
 void
-record_full_core_target::store_registers (struct regcache *regcache,
+record_full_core_target::store_registers (ptid_t ptid, reg_buffer *regcache,
 					  int regno)
 {
   if (record_full_gdb_operation_disable)

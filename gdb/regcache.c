@@ -172,7 +172,7 @@ register_size (struct gdbarch *gdbarch, int regnum)
 /* See common/common-regcache.h.  */
 
 int
-regcache_register_size (const struct regcache *regcache, int n)
+regcache_register_size (const regcache *regcache, int n)
 {
   return register_size (regcache->arch (), n);
 }
@@ -759,7 +759,7 @@ regcache::raw_write (int regnum, const gdb_byte *buf)
      failure.  */
   regcache_invalidator invalidator (this, regnum);
 
-  target_store_registers (this, regnum);
+  target_store_registers (ptid (), this, regnum);
 
   /* The target did not throw an error so we can discard invalidating
      the register.  */
@@ -1389,7 +1389,7 @@ public:
   }
 
   void fetch_registers (ptid_t ptid, reg_buffer *regs, int regno) override;
-  void store_registers (regcache *regs, int regno) override;
+  void store_registers (ptid_t ptid, reg_buffer *regs, int regno) override;
 
   enum target_xfer_status xfer_partial (enum target_object object,
 					const char *annex, gdb_byte *readbuf,
@@ -1412,7 +1412,8 @@ target_ops_no_register::fetch_registers (ptid_t ptid, reg_buffer *regs,
 }
 
 void
-target_ops_no_register::store_registers (regcache *regs, int regno)
+target_ops_no_register::store_registers (ptid_t ptid, reg_buffer *regs,
+					 int regno)
 {
   this->store_registers_called++;
 }

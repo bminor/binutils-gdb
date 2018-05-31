@@ -253,7 +253,7 @@ ran_out_of_registers_for_arguments:
      breakpoint.  */
   regcache_raw_write_signed (regcache, tdep->ppc_lr_regnum, bp_addr);
 
-  target_store_registers (regcache, -1);
+  target_store_registers (regcache->ptid (), regcache, -1);
   return sp;
 }
 

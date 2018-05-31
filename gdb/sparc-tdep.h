@@ -216,7 +216,7 @@ extern int
 
 extern void sparc_supply_rwindow (reg_buffer *regcache,
 				  CORE_ADDR sp, int regnum);
-extern void sparc_collect_rwindow (const struct regcache *regcache,
+extern void sparc_collect_rwindow (const reg_buffer *regcache,
 				   CORE_ADDR sp, int regnum);
 
 /* Register offsets for SunOS 4.  */

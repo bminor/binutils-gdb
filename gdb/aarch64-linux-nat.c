@@ -54,7 +54,7 @@ class aarch64_linux_nat_target final : public linux_nat_target
 public:
   /* Add our register access methods.  */
   void fetch_registers (ptid_t, reg_buffer *, int) override;
-  void store_registers (struct regcache *, int) override;
+  void store_registers (ptid_t, reg_buffer *, int) override;
 
   const struct target_desc *read_description () override;
 
@@ -235,7 +235,7 @@ fetch_gregs_from_thread (ptid_t ptid, reg_buffer *regcache)
    values in the GDB's register array.  */
 
 static void
-store_gregs_to_thread (const struct regcache *regcache)
+store_gregs_to_thread (ptid_t ptid, const reg_buffer *regcache)
 {
   int ret, tid;
   elf_gregset_t regs;
@@ -245,7 +245,7 @@ store_gregs_to_thread (const struct regcache *regcache)
   /* Make sure REGS can hold all registers contents on both aarch64
      and arm.  */
   gdb_static_assert (sizeof (regs) >= 18 * 4);
-  tid = ptid_get_lwp (regcache->ptid ());
+  tid = ptid.lwp ();
 
   iovec.iov_base = &regs;
   if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
@@ -324,7 +324,7 @@ fetch_fpregs_from_thread (ptid_t ptid, reg_buffer *regcache)
    values in the GDB's register array.  */
 
 static void
-store_fpregs_to_thread (const struct regcache *regcache)
+store_fpregs_to_thread (ptid_t ptid, const reg_buffer *regcache)
 {
   int ret, tid;
   elf_fpregset_t regs;
@@ -334,7 +334,7 @@ store_fpregs_to_thread (const struct regcache *regcache)
   /* Make sure REGS can hold all VFP registers contents on both aarch64
      and arm.  */
   gdb_static_assert (sizeof regs >= VFP_REGS_SIZE);
-  tid = ptid_get_lwp (regcache->ptid ());
+  tid = ptid.lwp ();
 
   iovec.iov_base = &regs;
 
@@ -403,18 +403,18 @@ aarch64_linux_nat_target::fetch_registers (ptid_t ptid, reg_buffer *regcache,
 /* Implement the "store_registers" target_ops method.  */
 
 void
-aarch64_linux_nat_target::store_registers (struct regcache *regcache,
+aarch64_linux_nat_target::store_registers (ptid_t ptid, reg_buffer *regcache,
 					   int regno)
 {
   if (regno == -1)
     {
-      store_gregs_to_thread (regcache);
-      store_fpregs_to_thread (regcache);
+      store_gregs_to_thread (ptid, regcache);
+      store_fpregs_to_thread (ptid, regcache);
     }
   else if (regno < AARCH64_V0_REGNUM)
-    store_gregs_to_thread (regcache);
+    store_gregs_to_thread (ptid, regcache);
   else
-    store_fpregs_to_thread (regcache);
+    store_fpregs_to_thread (ptid, regcache);
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in

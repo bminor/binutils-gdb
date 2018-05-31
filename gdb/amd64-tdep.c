@@ -3394,7 +3394,7 @@ amd64_supply_xsave (reg_buffer *regcache, int regnum,
    bits in *FXSAVE.  */
 
 void
-amd64_collect_fxsave (const struct regcache *regcache, int regnum,
+amd64_collect_fxsave (const reg_buffer *regcache, int regnum,
 		      void *fxsave)
 {
   struct gdbarch *gdbarch = regcache->arch ();
@@ -3415,7 +3415,7 @@ amd64_collect_fxsave (const struct regcache *regcache, int regnum,
 /* Similar to amd64_collect_fxsave, but use XSAVE extended state.  */
 
 void
-amd64_collect_xsave (const struct regcache *regcache, int regnum,
+amd64_collect_xsave (const reg_buffer *regcache, int regnum,
 		     void *xsave, int gcore)
 {
   struct gdbarch *gdbarch = regcache->arch ();

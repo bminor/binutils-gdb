@@ -106,7 +106,7 @@ public:
 
   void fetch_registers (ptid_t, reg_buffer *, int) override;
 
-  void store_registers (struct regcache *, int) override;
+  void store_registers (ptid_t, reg_buffer *, int) override;
   void prepare_to_store (struct regcache *) override;
 
   const struct frame_unwind *get_unwinder () override;
@@ -1567,17 +1567,18 @@ record_btrace_target::fetch_registers (ptid_t ptid, reg_buffer *regcache, int re
 /* The store_registers method of target record-btrace.  */
 
 void
-record_btrace_target::store_registers (struct regcache *regcache, int regno)
+record_btrace_target::store_registers (ptid_t ptid, reg_buffer *regcache,
+				       int regno)
 {
   struct target_ops *t;
 
   if (!record_btrace_generating_corefile
-      && record_is_replaying (regcache->ptid ()))
+      && record_is_replaying (ptid))
     error (_("Cannot write registers while replaying."));
 
   gdb_assert (may_write_registers != 0);
 
-  this->beneath->store_registers (regcache, regno);
+  this->beneath->store_registers (ptid, regcache, regno);
 }
 
 /* The prepare_to_store method of target record-btrace.  */

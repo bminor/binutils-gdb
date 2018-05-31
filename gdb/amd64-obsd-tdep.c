@@ -262,7 +262,7 @@ amd64obsd_supply_uthread (reg_buffer *regcache,
 }
 
 static void
-amd64obsd_collect_uthread (const struct regcache *regcache,
+amd64obsd_collect_uthread (const reg_buffer *regcache,
 			   int regnum, CORE_ADDR addr)
 {
   struct gdbarch *gdbarch = regcache->arch ();

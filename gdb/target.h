@@ -475,7 +475,7 @@ struct target_ops
       TARGET_DEFAULT_FUNC (default_target_wait);
     virtual void fetch_registers (ptid_t, reg_buffer *, int)
       TARGET_DEFAULT_IGNORE ();
-    virtual void store_registers (struct regcache *, int)
+    virtual void store_registers (ptid_t, reg_buffer *, int)
       TARGET_DEFAULT_NORETURN (noprocess ());
     virtual void prepare_to_store (struct regcache *)
       TARGET_DEFAULT_NORETURN (noprocess ());
@@ -1377,13 +1377,15 @@ extern ptid_t default_target_wait (struct target_ops *ops,
 
 /* Fetch at least register REGNO, or all regs if regno == -1.  No result.  */
 
-extern void target_fetch_registers (ptid_t ptid, reg_buffer *regcache, int regno);
+extern void target_fetch_registers (ptid_t ptid, reg_buffer *regcache,
+				    int regno);
 
 /* Store at least register REGNO, or all regs if REGNO == -1.
    It can store as many registers as it wants to, so target_prepare_to_store
    must have been previously called.  Calls error() if there are problems.  */
 
-extern void target_store_registers (struct regcache *regcache, int regs);
+extern void target_store_registers (ptid_t ptid, reg_buffer *regcache,
+				    int regs);
 
 /* Get ready to modify the registers array.  On machines which store
    individual registers, this doesn't need to do anything.  On machines
@@ -2537,7 +2539,7 @@ public:
   {
   }
 
-  void store_registers (regcache *regs, int regno) override
+  void store_registers (ptid_t ptid, reg_buffer *regs, int regno) override
   {
   }
 };

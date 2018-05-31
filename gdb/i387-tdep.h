@@ -148,12 +148,12 @@ extern void i387_supply_xsave (reg_buffer *regcache, int regnum,
    all registers.  This function doesn't touch any of the reserved
    bits in *FXSAVE.  */
 
-extern void i387_collect_fxsave (const struct regcache *regcache, int regnum,
+extern void i387_collect_fxsave (const reg_buffer *regcache, int regnum,
 				 void *fxsave);
 
 /* Similar to i387_collect_fxsave, but use XSAVE extended state.  */
 
-extern void i387_collect_xsave (const struct regcache *regcache,
+extern void i387_collect_xsave (const reg_buffer *regcache,
 				int regnum, void *xsave, int gcore);
 
 /* Extract a bitset from XSAVE indicating which features are available in
