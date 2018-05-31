@@ -233,7 +233,8 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
       NULL, cb_data);
 }
 
-/* Implement the "core_read_description" gdbarch method.  */
+/* Implement the "core_read_description" gdbarch method.  SVE not yet
+   supported.  */
 
 static const struct target_desc *
 aarch64_linux_core_read_description (struct gdbarch *gdbarch,
@@ -244,7 +245,7 @@ aarch64_linux_core_read_description (struct gdbarch *gdbarch,
   if (target_auxv_search (target, AT_HWCAP, &aarch64_hwcap) != 1)
     return NULL;
 
-  return aarch64_read_description ();
+  return aarch64_read_description (0);
 }
 
 /* Implementation of `gdbarch_stap_is_single_operand', as defined in

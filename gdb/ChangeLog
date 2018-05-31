@@ -1,3 +1,19 @@
+2018-05-31  Alan Hayward  <alan.hayward@arm.com>
+
+	* aarch64-linux-nat.c (aarch64_linux_read_description):
+	Add parmeter zero.
+	* aarch64-linux-tdep.c (aarch64_linux_core_read_description):
+	Likewise.
+	* aarch64-tdep.c (tdesc_aarch64_list): Add.
+	(aarch64_read_description): Use VQ to index tdesc_aarch64_list.
+	(aarch64_gdbarch_init): Add parmeter zero.
+	* aarch64-tdep.h (aarch64_read_description): Add VQ parmeter.
+	* arch/aarch64.c (aarch64_create_target_description): Check VQ.
+	* arch/aarch64.h (aarch64_create_target_description): Add VQ.
+	parmeter.
+	* doc/gdb.texinfo: Describe SVE feature
+	* features/aarch64-sve.c: New file.
+
 2018-05-31  Omair Javaid  <omair.javaid@linaro.org>
 
 	PR gdb/23210

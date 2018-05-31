@@ -42137,6 +42137,10 @@ The @samp{org.gnu.gdb.aarch64.fpu} feature is optional.  If present,
 it should contain registers @samp{v0} through @samp{v31}, @samp{fpsr},
 and @samp{fpcr}.
 
+The @samp{org.gnu.gdb.aarch64.sve} feature is optional.  If present,
+it should contain registers @samp{z0} through @samp{z31}, @samp{p0}
+through @samp{p15}, @samp{ffr} and @samp{vg}.
+
 @node ARC Features
 @subsection ARC Features
 @cindex target descriptions, ARC Features

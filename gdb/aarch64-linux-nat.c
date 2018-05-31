@@ -537,7 +537,8 @@ aarch64_linux_nat_target::read_description ()
   if (ret == 0)
     return tdesc_arm_with_neon;
   else
-    return aarch64_read_description ();
+    /* SVE not yet supported.  */
+    return aarch64_read_description (0);
 }
 
 /* Convert a native/host siginfo object, into/from the siginfo in the

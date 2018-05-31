@@ -70,6 +70,9 @@
 #define AARCH64_H0_REGNUM (AARCH64_S0_REGNUM + 32)
 #define AARCH64_B0_REGNUM (AARCH64_H0_REGNUM + 32)
 
+/* All possible aarch64 target descriptors.  */
+struct target_desc *tdesc_aarch64_list[AARCH64_MAX_SVE_VQ + 1];
+
 /* The standard register names, and all the valid aliases for them.  */
 static const struct
 {
@@ -2827,18 +2830,26 @@ aarch64_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
   return 1;
 }
 
-/* Get the correct target description.  */
+/* Get the correct target description for the given VQ value.
+   If VQ is zero then it is assumed SVE is not supported.
+   (It is not possible to set VQ to zero on an SVE system).  */
 
 const target_desc *
-aarch64_read_description ()
+aarch64_read_description (long vq)
 {
-  static target_desc *aarch64_tdesc = NULL;
-  target_desc **tdesc = &aarch64_tdesc;
+  if (vq > AARCH64_MAX_SVE_VQ)
+    error (_("VQ is %ld, maximum supported value is %d"), vq,
+	   AARCH64_MAX_SVE_VQ);
 
-  if (*tdesc == NULL)
-    *tdesc = aarch64_create_target_description ();
+  struct target_desc *tdesc = tdesc_aarch64_list[vq];
 
-  return *tdesc;
+  if (tdesc == NULL)
+    {
+      tdesc = aarch64_create_target_description (vq);
+      tdesc_aarch64_list[vq] = tdesc;
+    }
+
+  return tdesc;
 }
 
 /* Initialize the current architecture based on INFO.  If possible,
@@ -2864,7 +2875,10 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Ensure we always have a target descriptor.  */
   if (!tdesc_has_registers (tdesc))
-    tdesc = aarch64_read_description ();
+    {
+      /* SVE is not yet supported.  */
+      tdesc = aarch64_read_description (0);
+    }
 
   gdb_assert (tdesc);
 
@@ -3072,7 +3086,7 @@ When on, AArch64 specific debugging is enabled."),
   selftests::register_test ("aarch64-process-record",
 			    selftests::aarch64_process_record_test);
   selftests::record_xml_tdesc ("aarch64.xml",
-			       aarch64_create_target_description ());
+			       aarch64_create_target_description (0));
 #endif
 }
 

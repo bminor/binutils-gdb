@@ -22,7 +22,11 @@
 
 #include "common/tdesc.h"
 
-target_desc *aarch64_create_target_description ();
+/* Create the aarch64 target description.  A non zero VQ value indicates both
+   the presence of SVE and the Vector Quotient - the number of 128bit chunks in
+   an SVE Z register.  */
+
+target_desc *aarch64_create_target_description (long vq);
 
 /* Register numbers of various important registers.  */
 enum aarch64_regnum
@@ -47,5 +51,8 @@ enum aarch64_regnum
 #define AARCH64_X_REGS_NUM 31
 #define AARCH64_V_REGS_NUM 32
 #define AARCH64_NUM_REGS AARCH64_FPCR_REGNUM + 1
+
+/* Maximum supported VQ value.  Increase if required.  */
+#define AARCH64_MAX_SVE_VQ  16
 
 #endif /* ARCH_AARCH64_H */

@@ -32,7 +32,8 @@ aarch64_linux_read_description ()
 
   if (*tdesc == NULL)
     {
-      *tdesc = aarch64_create_target_description ();
+      /* SVE not yet supported.  */
+      *tdesc = aarch64_create_target_description (0);
 
       static const char *expedite_regs_aarch64[] = { "x29", "sp", "pc", NULL };
       init_target_desc (*tdesc, expedite_regs_aarch64);
