@@ -52,6 +52,23 @@ enum aarch64_regnum
 #define AARCH64_V_REGS_NUM 32
 #define AARCH64_NUM_REGS AARCH64_FPCR_REGNUM + 1
 
+/* There are a number of ways of expressing the current SVE vector size:
+
+   VL : Vector Length.
+	The number of bytes in an SVE Z register.
+   VQ : Vector Quotient.
+	The number of 128bit chunks in an SVE Z register.
+   VG : Vector Gradient.
+	The number of 64bit chunks in an SVE Z register.  */
+
+#define sve_vg_from_vl(vl)	((vl) / 8)
+#define sve_vl_from_vg(vg)	((vg) * 8)
+#define sve_vq_from_vl(vl)	((vl) / 0x10)
+#define sve_vl_from_vq(vq)	((vq) * 0x10)
+#define sve_vq_from_vg(vg)	(sve_vq_from_vl (sve_vl_from_vg (vg)))
+#define sve_vg_from_vq(vq)	(sve_vg_from_vl (sve_vl_from_vq (vq)))
+
+
 /* Maximum supported VQ value.  Increase if required.  */
 #define AARCH64_MAX_SVE_VQ  16
 

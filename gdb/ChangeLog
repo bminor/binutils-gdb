@@ -1,5 +1,18 @@
 2018-05-31  Alan Hayward  <alan.hayward@arm.com>
 
+	* Makefile.in: Add new header.
+	* gdb/arch/aarch64.h (sve_vg_from_vl): New macro.
+	(sve_vl_from_vg): Likewise.
+	(sve_vq_from_vl): Likewise.
+	(sve_vl_from_vq): Likewise.
+	(sve_vq_from_vg): Likewise.
+	(sve_vg_from_vq): Likewise.
+	* configure.nat: Add new c file.
+	* nat/aarch64-sve-linux-ptrace.c: New file.
+	* nat/aarch64-sve-linux-ptrace.h: New file.
+
+2018-05-31  Alan Hayward  <alan.hayward@arm.com>
+
 	* aarch64-linux-nat.c (aarch64_linux_read_description):
 	Add parmeter zero.
 	* aarch64-linux-tdep.c (aarch64_linux_core_read_description):
