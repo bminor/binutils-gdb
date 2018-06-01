@@ -1,3 +1,13 @@
+2018-06-01  Jan Beulich  <jbeulich@suse.com>
+
+	*  testsuite/gas/i386/invpcid.s,
+	testsuite/gas/i386/x86-64-invpcid.s: Add test with explicit
+	"oword ptr".
+	* testsuite/gas/i386/invpcid.d,
+	testsuite/gas/i386/invpcid-intel.d,
+	testsuite/gas/i386/x86-64-invpcid.d,
+	testsuite/gas/i386/x86-64-invpcid-intel.d: Adjust expectations.
+
 2018-05-30  Amit Pawar  <amit.pawar@amd.com>
 
 	* config/tc-i386.c (cpu_flag_init): Add CPU_ZNVER2_FLAGS.
