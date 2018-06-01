@@ -516,11 +516,11 @@ sgdt, 1, 0xf01, 0x0, 2, Cpu286|CpuNo64, Modrm|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, 
 sgdt, 1, 0xf01, 0x0, 2, Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, { Tbyte|Unspecified|BaseIndex }
 sidt, 1, 0xf01, 0x1, 2, Cpu286|CpuNo64, Modrm|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Fword|Unspecified|BaseIndex }
 sidt, 1, 0xf01, 0x1, 2, Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, { Tbyte|Unspecified|BaseIndex }
-sldt, 1, 0xf00, 0x0, 2, Cpu286, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64 }
+sldt, 1, 0xf00, 0x0, 2, Cpu286, Modrm|No_bSuf|No_sSuf|No_ldSuf|NoRex64, { Reg16|Reg32|Reg64 }
 sldt, 1, 0xf00, 0x0, 2, Cpu286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Word|Unspecified|BaseIndex }
 smsw, 1, 0xf01, 0x4, 2, Cpu286, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64 }
 smsw, 1, 0xf01, 0x4, 2, Cpu286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Word|Unspecified|BaseIndex }
-str, 1, 0xf00, 0x1, 2, Cpu286, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64 }
+str, 1, 0xf00, 0x1, 2, Cpu286, Modrm|No_bSuf|No_sSuf|No_ldSuf|NoRex64, { Reg16|Reg32|Reg64 }
 str, 1, 0xf00, 0x1, 2, Cpu286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Word|Unspecified|BaseIndex }
 
 verr, 1, 0xf00, 0x4, 2, Cpu286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg16|Word|Unspecified|BaseIndex }
