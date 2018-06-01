@@ -1,5 +1,10 @@
 2018-06-01  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (mov, movq): Fold to/from SReg* forms.
+	* i386-tbl.h: Re-generate.
+
+2018-06-01  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (sldt, str): Add NoRex64.
 	* i386-tbl.h: Re-generate.
 
