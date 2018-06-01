@@ -6894,12 +6894,11 @@ build_modrm_byte (void)
 	  if ((i.op[source].regs->reg_flags & RegVRex) != 0)
 	    i.vrex |= REX_R;
 	}
-      if (flag_code != CODE_64BIT && (i.rex & (REX_R | REX_B)))
+      if (flag_code != CODE_64BIT && (i.rex & REX_R))
 	{
-	  if (!i.types[0].bitfield.control
-	      && !i.types[1].bitfield.control)
+	  if (!i.types[i.tm.operand_types[0].bitfield.regmem].bitfield.control)
 	    abort ();
-	  i.rex &= ~(REX_R | REX_B);
+	  i.rex &= ~REX_R;
 	  add_prefix (LOCK_PREFIX_OPCODE);
 	}
     }

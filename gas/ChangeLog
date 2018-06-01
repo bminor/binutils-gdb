@@ -1,5 +1,11 @@
 2018-06-01  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (build_modrm_byte): Drop REX_B from condition
+	checking for the need of emitting LOCK. Check "control" bit just
+	once.
+
+2018-06-01  Jan Beulich  <jbeulich@suse.com>
+
 	*  testsuite/gas/i386/invpcid.s,
 	testsuite/gas/i386/x86-64-invpcid.s: Add test with explicit
 	"oword ptr".
