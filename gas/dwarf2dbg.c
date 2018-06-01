@@ -624,6 +624,7 @@ dwarf2_consume_line_info (void)
 		     | DWARF2_FLAG_PROLOGUE_END
 		     | DWARF2_FLAG_EPILOGUE_BEGIN);
   current.discriminator = 0;
+  current.view = NULL;
 }
 
 /* Called for each (preferably code) label.  If dwarf2_loc_mark_labels
