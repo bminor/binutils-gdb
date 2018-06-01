@@ -123,9 +123,6 @@ extern void *bfd_realloc2
 extern void *bfd_zmalloc2
   (bfd_size_type, bfd_size_type) ATTRIBUTE_HIDDEN;
 
-extern void _bfd_error_handler (const char *s, ...)
-  ATTRIBUTE_PRINTF_1 ATTRIBUTE_HIDDEN;
-
 /* These routines allocate and free things on the BFD's objalloc.  */
 
 extern void *bfd_alloc2

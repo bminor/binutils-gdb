@@ -1087,14 +1087,6 @@ _bfd_doprnt_scan (const char *format, union _bfd_doprnt_args *args)
   return arg_count;
 }
 
-/* This is the default routine to handle BFD error messages.
-   Like fprintf (stderr, ...), but also handles some extra format specifiers.
-
-   %pA section name from section.  For group components, prints group name too.
-   %pB file name from bfd.  For archive components, prints archive too.
-
-   Beware: Only supports a maximum of 9 format arguments.  */
-
 static void
 error_handler_internal (const char *fmt, va_list ap)
 {
@@ -1155,6 +1147,26 @@ error_handler_internal (const char *fmt, va_list ap)
    the messages and deal with them itself.  */
 
 static bfd_error_handler_type _bfd_error_internal = error_handler_internal;
+
+/*
+FUNCTION
+	_bfd_error_handler
+
+SYNOPSIS
+	void _bfd_error_handler (const char *fmt, ...) ATTRIBUTE_PRINTF_1;
+
+DESCRIPTION
+	This is the default routine to handle BFD error messages.
+	Like fprintf (stderr, ...), but also handles some extra format
+	specifiers.
+
+	%pA section name from section.  For group components, prints
+	group name too.
+	%pB file name from bfd.  For archive components, prints
+	archive too.
+
+	Beware: Only supports a maximum of 9 format arguments.
+*/
 
 void
 _bfd_error_handler (const char *fmt, ...)

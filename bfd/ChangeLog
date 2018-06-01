@@ -1,3 +1,11 @@
+2018-06-01  Alan Modra  <amodra@gmail.com>
+
+	* bfd.c (_bfd_error_handler): Arrange for this function to be
+	declared in bfd-in2.h.
+	* libbfd-in.h (_bfd_error_handler): Don't declare.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
 2018-05-30  Amaan Cheval <amaan.cheval@gmail.com>
 
 	* config.bfd (x86_64-*-*): Add pei-x86-64 target to x86_64-*-rtems*

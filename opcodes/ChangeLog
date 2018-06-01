@@ -1,3 +1,11 @@
+2018-06-01  Alan Modra  <amodra@gmail.com>
+
+	* sysdep.h (_bfd_error_handler): Don't declare.
+	* msp430-decode.opc: Include bfd.h.  Don't include ansidecl.h here.
+	* rl78-decode.opc: Likewise.
+	* msp430-decode.c: Regenerate.
+	* rl78-decode.c: Regenerate.
+
 2018-05-30  Amit Pawar <Amit.Pawar@amd.com>
 
 	* i386-gen.c (cpu_flag_init): Add CPU_ZNVER2_FLAGS.
