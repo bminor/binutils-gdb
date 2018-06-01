@@ -1,3 +1,8 @@
+2018-06-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* breakpoint.c (breakpoint_re_set): Temporarily force language_mode
+	to language_mode_manual while calling breakpoint_re_set_one.
+
 2018-06-01  Tom Tromey  <tom@tromey.com>
 
 	* valops.c (value_cast_structs, destructor_name_p): Update.

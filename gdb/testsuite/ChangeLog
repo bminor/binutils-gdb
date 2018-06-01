@@ -1,3 +1,7 @@
+2018-06-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/bp_fun_addr: New testcase.
+
 2018-06-01  Tom Tromey  <tom@tromey.com>
 
 	* gdb.xml/tdesc-regs.exp (load_description): Update expected

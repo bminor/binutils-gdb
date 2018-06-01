@@ -13868,6 +13868,19 @@ breakpoint_re_set (void)
     scoped_restore save_input_radix = make_scoped_restore (&input_radix);
     scoped_restore_current_pspace_and_thread restore_pspace_thread;
 
+    /* breakpoint_re_set_one sets the current_language to the language
+       of the breakpoint it is resetting (see prepare_re_set_context)
+       before re-evaluating the breakpoint's location.  This change can
+       unfortunately get undone by accident if the language_mode is set
+       to auto, and we either switch frames, or more likely in this context,
+       we select the current frame.
+
+       We prevent this by temporarily turning the language_mode to
+       language_mode_manual.  We restore it once all breakpoints
+       have been reset.  */
+    scoped_restore save_language_mode = make_scoped_restore (&language_mode);
+    language_mode = language_mode_manual;
+
     /* Note: we must not try to insert locations until after all
        breakpoints have been re-set.  Otherwise, e.g., when re-setting
        breakpoint 1, we'd insert the locations of breakpoint 2, which
