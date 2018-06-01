@@ -1,5 +1,13 @@
 2018-06-01  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (add_prefix): Check REX bits individually.
+	* testsuite/gas/i386/rex.s: Add tests for overriding individual
+	REX bits, including when others are already set.
+	* testsuite/gas/i386/ilp32/rex.d, testsuite/gas/i386/rex.d:
+	Adjust expectations.
+
+2018-06-01  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (control): Delete.
 	(parse_real_register): Simply check "control" bit. Re-wrap.
 
