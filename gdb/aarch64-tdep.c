@@ -156,6 +156,27 @@ static const char *const aarch64_v_register_names[] =
   "fpcr"
 };
 
+/* The SVE 'Z' and 'P' registers.  */
+static const char *const aarch64_sve_register_names[] =
+{
+  /* These registers must appear in consecutive RAW register number
+     order and they must begin with AARCH64_SVE_Z0_REGNUM! */
+  "z0", "z1", "z2", "z3",
+  "z4", "z5", "z6", "z7",
+  "z8", "z9", "z10", "z11",
+  "z12", "z13", "z14", "z15",
+  "z16", "z17", "z18", "z19",
+  "z20", "z21", "z22", "z23",
+  "z24", "z25", "z26", "z27",
+  "z28", "z29", "z30", "z31",
+  "fpsr", "fpcr",
+  "p0", "p1", "p2", "p3",
+  "p4", "p5", "p6", "p7",
+  "p8", "p9", "p10", "p11",
+  "p12", "p13", "p14", "p15",
+  "ffr", "vg"
+};
+
 /* AArch64 prologue cache structure.  */
 struct aarch64_prologue_cache
 {

@@ -1,3 +1,12 @@
+2018-06-01  Alan Hayward  <alan.hayward@arm.com>
+
+	* aarch64-tdep.c (aarch64_sve_register_names): New const
+	var.
+	* arch/aarch64.h (enum aarch64_regnum): Add SVE entries.
+	(AARCH64_SVE_Z_REGS_NUM): New define.
+	(AARCH64_SVE_P_REGS_NUM): Likewise.
+	(AARCH64_SVE_NUM_REGS): Likewise.
+
 2018-05-31  Uros Bizjak  <ubizjak@gmail.com>
 
 	* nat/linux-ptrace.h [__alpha__]
