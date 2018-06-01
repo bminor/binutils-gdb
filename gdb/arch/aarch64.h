@@ -26,7 +26,7 @@
    the presence of SVE and the Vector Quotient - the number of 128bit chunks in
    an SVE Z register.  */
 
-target_desc *aarch64_create_target_description (long vq);
+target_desc *aarch64_create_target_description (uint64_t vq);
 
 /* Register numbers of various important registers.
    Note that on SVE, the Z registers reuse the V register numbers and the V

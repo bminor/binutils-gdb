@@ -27,7 +27,7 @@
 
 /* See nat/aarch64-sve-linux-ptrace.h.  */
 
-unsigned long
+uint64_t
 aarch64_sve_get_vq (int tid)
 {
   struct iovec iovec;

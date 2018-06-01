@@ -1,3 +1,13 @@
+2018-06-01  Alan Hayward  <alan.hayward@arm.com>
+
+	* aarch64-tdep.c (aarch64_read_description): Use uint64_t for VQ.
+	* aarch64-tdep.h (aarch64_read_description): Likewise.
+	* arch/aarch64.c (aarch64_create_target_description): Likewise.
+	* arch/aarch64.h (aarch64_create_target_description): Likewise.
+	* features/aarch64-sve.c (create_feature_aarch64_sve): Likewise.
+	* nat/aarch64-sve-linux-ptrace.c(aarch64_sve_get_vq): Likewise.
+	* nat/aarch64-sve-linux-ptrace.h (aarch64_sve_get_vq): Likewise.
+
 2018-06-02  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* value.c (value_fetch_lazy_bitfield): New.

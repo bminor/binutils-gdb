@@ -23,7 +23,7 @@
 
 static int
 create_feature_aarch64_sve (struct target_desc *result, long regnum,
-			    int scale)
+			    uint64_t scale)
 {
   struct tdesc_feature *feature;
   tdesc_type *element_type, *field_type;

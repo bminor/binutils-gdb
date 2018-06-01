@@ -2856,10 +2856,10 @@ aarch64_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
    (It is not possible to set VQ to zero on an SVE system).  */
 
 const target_desc *
-aarch64_read_description (long vq)
+aarch64_read_description (uint64_t vq)
 {
   if (vq > AARCH64_MAX_SVE_VQ)
-    error (_("VQ is %ld, maximum supported value is %d"), vq,
+    error (_("VQ is %" PRIu64 ", maximum supported value is %d"), vq,
 	   AARCH64_MAX_SVE_VQ);
 
   struct target_desc *tdesc = tdesc_aarch64_list[vq];

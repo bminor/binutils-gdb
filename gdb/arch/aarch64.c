@@ -26,7 +26,7 @@
 /* See arch/aarch64.h.  */
 
 target_desc *
-aarch64_create_target_description (long vq)
+aarch64_create_target_description (uint64_t vq)
 {
   target_desc *tdesc = allocate_target_description ();
 

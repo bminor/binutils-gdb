@@ -32,7 +32,7 @@
 /* Read VQ for the given tid using ptrace.  If SVE is not supported then zero
    is returned (on a system that supports SVE, then VQ cannot be zero).  */
 
-extern unsigned long aarch64_sve_get_vq (int tid);
+uint64_t aarch64_sve_get_vq (int tid);
 
 /* Structures and defines taken from sigcontext.h.  */
 
