@@ -1,3 +1,8 @@
+2018-06-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* version.m4: Bump version to 2.30.52
+	* configure: Regenerated.
+
 2018-06-01  Alan Modra  <amodra@gmail.com>
 
 	* bfd.c (_bfd_error_handler): Arrange for this function to be
