@@ -1,3 +1,10 @@
+2018-06-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ada-lex.l: Include "diagnostics.h" instead of
+	"common/diagnostics.h".
+	* unittests/environ-selftests.c: Likewise.
+	* common/diagnostics.h: Moved to ../include.
+
 2018-06-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* breakpoint.c (breakpoint_re_set): Temporarily force language_mode

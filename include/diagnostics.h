@@ -1,7 +1,5 @@
 /* Copyright (C) 2017-2018 Free Software Foundation, Inc.
 
-   This file is part of GDB.
-
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
@@ -15,10 +13,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef COMMON_DIAGNOSTICS_H
-#define COMMON_DIAGNOSTICS_H
-
-#include "common/preprocessor.h"
+#ifndef DIAGNOSTICS_H
+#define DIAGNOSTICS_H
 
 #ifdef __GNUC__
 # define DIAGNOSTIC_PUSH _Pragma ("GCC diagnostic push")
@@ -61,4 +57,4 @@
 
 #endif
 
-#endif /* COMMON_DIAGNOSTICS_H */
+#endif /* DIAGNOSTICS_H */

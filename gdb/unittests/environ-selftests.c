@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "selftest.h"
 #include "common/environ.h"
-#include "common/diagnostics.h"
+#include "diagnostics.h"
 
 static const char gdb_selftest_env_var[] = "GDB_SELFTEST_ENVIRON";
 

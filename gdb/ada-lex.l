@@ -41,7 +41,7 @@ POSEXP  (e"+"?{NUM10})
 
 %{
 
-#include "common/diagnostics.h"
+#include "diagnostics.h"
 
 /* Some old versions of flex generate code that uses the "register" keyword,
    which clang warns about.  This was observed for example with flex 2.5.35,
