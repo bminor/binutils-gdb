@@ -1,5 +1,10 @@
 2018-06-01  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (control): Delete.
+	(parse_real_register): Simply check "control" bit. Re-wrap.
+
+2018-06-01  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (build_modrm_byte): Drop REX_B from condition
 	checking for the need of emitting LOCK. Check "control" bit just
 	once.

@@ -1832,7 +1832,6 @@ operand_type_xor (i386_operand_type x, i386_operand_type y)
 
 static const i386_operand_type acc32 = OPERAND_TYPE_ACC32;
 static const i386_operand_type acc64 = OPERAND_TYPE_ACC64;
-static const i386_operand_type control = OPERAND_TYPE_CONTROL;
 static const i386_operand_type inoutportreg
   = OPERAND_TYPE_INOUTPORTREG;
 static const i386_operand_type reg16_inoutportreg
@@ -10274,10 +10273,8 @@ parse_real_register (char *reg_string, char **end_op)
       i.vec_encoding = vex_encoding_evex;
     }
 
-  if (((r->reg_flags & (RegRex64 | RegRex))
-       || r->reg_type.bitfield.qword)
-      && (!cpu_arch_flags.bitfield.cpulm
-	  || !operand_type_equal (&r->reg_type, &control))
+  if (((r->reg_flags & (RegRex64 | RegRex)) || r->reg_type.bitfield.qword)
+      && (!cpu_arch_flags.bitfield.cpulm || !r->reg_type.bitfield.control)
       && flag_code != CODE_64BIT)
     return (const reg_entry *) NULL;
 
