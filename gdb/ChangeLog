@@ -1,3 +1,14 @@
+2018-06-04  Tom Tromey  <tom@tromey.com>
+
+	* cp-name-parser.y (cpname_state): Add method declarations.
+	(HANDLE_QUAL): Update.
+	(cpname_state::d_grab, cpname_state::fill_comp)
+	(cpname_state::make_operator, cpname_state::make_dtor)
+	(cpname_state::make_builtin_type, cpname_state::make_name)
+	(cpname_state::d_qualify, cpname_state::d_int_type)
+	(cpname_state::d_unary, cpname_state::d_binary): Now methods.
+	(%union): Move earlier.
+
 2018-06-04  Alan Hayward  <alan.hayward@arm.com>
 
 	* aarch64-tdep.c (aarch64_pseudo_read_value_1): New helper func.
