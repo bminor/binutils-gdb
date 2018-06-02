@@ -14360,7 +14360,6 @@ extern const struct language_defn ada_language_defn = {
   ada_extensions,
   &ada_exp_descriptor,
   parse,
-  ada_yyerror,
   resolve,
   ada_printchar,                /* Print a character constant */
   ada_printstr,                 /* Function to print string constant */

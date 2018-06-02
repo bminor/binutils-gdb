@@ -70,6 +70,7 @@ struct set_field
 typedef std::vector<set_field> rust_set_vector;
 
 static int rustyylex (void);
+static void rustyyerror (const char *msg);
 static void rust_push_back (char c);
 static const char *rust_copy_name (const char *, int);
 static struct stoken rust_concat3 (const char *, const char *, const char *);
@@ -2538,11 +2539,11 @@ rust_parse (struct parser_state *state)
 
 /* The parser error handler.  */
 
-void
+static void
 rustyyerror (const char *msg)
 {
   const char *where = prev_lexptr ? prev_lexptr : lexptr;
-  error (_("%s in expression, near `%s'."), (msg ? msg : "Error"), where);
+  error (_("%s in expression, near `%s'."), msg, where);
 }
 
 

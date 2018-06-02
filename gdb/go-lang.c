@@ -577,7 +577,6 @@ extern const struct language_defn go_language_defn =
   NULL,
   &exp_descriptor_c,
   go_parse,
-  go_yyerror,
   null_post_parser,
   c_printchar,			/* Print a character constant.  */
   c_printstr,			/* Function to print string constant.  */

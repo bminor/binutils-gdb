@@ -172,10 +172,6 @@ struct language_defn
 
     int (*la_parser) (struct parser_state *);
 
-    /* Parser error function.  */
-
-    void (*la_error) (const char *);
-
     /* Given an expression *EXPP created by prefixifying the result of
        la_parser, perform any remaining processing necessary to complete
        its translation.  *EXPP may change; la_post_parser is responsible 

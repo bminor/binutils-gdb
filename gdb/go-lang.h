@@ -60,8 +60,6 @@ enum go_type
 
 extern int go_parse (struct parser_state *);
 
-extern void go_yyerror (const char *);
-
 /* Defined in go-lang.c.  */
 
 extern const char *go_main_name (void);

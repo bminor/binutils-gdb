@@ -77,7 +77,7 @@ int yyparse (void);
 
 static int yylex (void);
 
-void yyerror (const char *);
+static void yyerror (const char *);
 
 static void write_int (struct parser_state *, LONGEST, struct type *);
 
@@ -742,7 +742,7 @@ ada_parse (struct parser_state *par_state)
   return yyparse ();
 }
 
-void
+static void
 yyerror (const char *msg)
 {
   error (_("Error in expression, near `%s'."), lexptr);

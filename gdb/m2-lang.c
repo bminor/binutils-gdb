@@ -365,7 +365,6 @@ extern const struct language_defn m2_language_defn =
   NULL,
   &exp_descriptor_modula2,
   m2_parse,			/* parser */
-  m2_yyerror,			/* parser error function */
   null_post_parser,
   m2_printchar,			/* Print character constant */
   m2_printstr,			/* function to print string constant */

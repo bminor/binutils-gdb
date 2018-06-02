@@ -257,7 +257,6 @@ extern const struct language_defn f_language_defn =
   f_extensions,
   &exp_descriptor_standard,
   f_parse,			/* parser */
-  f_yyerror,			/* parser error function */
   null_post_parser,
   f_printchar,			/* Print character constant */
   f_printstr,			/* function to print string constant */

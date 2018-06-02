@@ -1202,8 +1202,7 @@ parse_exp_in_context_1 (const char **stringptr, CORE_ADDR pc,
 
   TRY
     {
-      if (lang->la_parser (&ps))
-        lang->la_error (NULL);
+      lang->la_parser (&ps);
     }
   CATCH (except, RETURN_MASK_ALL)
     {

@@ -1,3 +1,37 @@
+2018-06-18  Tom Tromey  <tom@tromey.com>
+
+	* rust-lang.h (rust_yyerror): Don't declare.
+	* rust-lang.c (rust_language_defn): Update.
+	* rust-exp.y (yyerror): Now static.
+	* parse.c (parse_exp_in_context_1): Update.
+	* p-lang.h (p_yyerror): Don't declare.
+	* p-lang.c (p_language_defn): Update.
+	* p-exp.y (yyerror): Now static.
+	* opencl-lang.c (opencl_language_defn): Update.
+	* objc-lang.c (objc_language_defn): Update.
+	* m2-lang.h (m2_yyerror): Don't declare.
+	* m2-lang.c (m2_language_defn): Update.
+	* m2-exp.y (yyerror): Now static.
+	* language.h (struct language_defn) <la_error>: Remove.
+	* language.c (unk_lang_error): Remove.
+	(unknown_language_defn, auto_language_defn): Remove.
+	* go-lang.h (go_yyerror): Don't declare.
+	* go-lang.c (go_language_defn): Update.
+	* go-exp.y (yyerror): Now static.
+	* f-lang.h (f_yyerror): Don't declare.
+	* f-lang.c (f_language_defn): Update.
+	* f-exp.y (yyerror): Now static.
+	* d-lang.h (d_yyerror): Don't declare.
+	* d-lang.c (d_language_defn): Update.
+	* d-exp.y (yyerror): Now static.
+	* c-lang.h (c_yyerror): Don't declare.
+	* c-lang.c (c_language_defn, cplus_language_defn)
+	(asm_language_defn, minimal_language_defn): Update.
+	* c-exp.y (yyerror): Now static.
+	* ada-lang.h (ada_yyerror): Don't declare.
+	* ada-lang.c (ada_language_defn): Update.
+	* ada-exp.y (yyerror): Now static.
+
 2018-06-18  Alan Hayward  <alan.hayward@arm.com>
 
 	* aarch64-linux-nat.c (fetch_sveregs_from_thread): New function.

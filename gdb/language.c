@@ -46,8 +46,6 @@
 #include "c-lang.h"
 #include <algorithm>
 
-static void unk_lang_error (const char *);
-
 static int unk_lang_parser (struct parser_state *);
 
 static void set_range_case (void);
@@ -751,12 +749,6 @@ unk_lang_parser (struct parser_state *ps)
 }
 
 static void
-unk_lang_error (const char *msg)
-{
-  error (_("Attempted to parse an expression with unknown language"));
-}
-
-static void
 unk_lang_emit_char (int c, struct type *type, struct ui_file *stream,
 		    int quoter)
 {
@@ -852,7 +844,6 @@ const struct language_defn unknown_language_defn =
   NULL,
   &exp_descriptor_standard,
   unk_lang_parser,
-  unk_lang_error,
   null_post_parser,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
@@ -904,7 +895,6 @@ const struct language_defn auto_language_defn =
   NULL,
   &exp_descriptor_standard,
   unk_lang_parser,
-  unk_lang_error,
   null_post_parser,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,

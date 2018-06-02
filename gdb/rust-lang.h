@@ -26,9 +26,6 @@ struct type;
 /* The la_parser implementation for Rust.  */
 extern int rust_parse (struct parser_state *);
 
-/* The la_error implementation for Rust.  */
-extern void rustyyerror (const char *);
-
 /* Return true if TYPE is a tuple type; otherwise false.  */
 extern bool rust_tuple_type_p (struct type *type);
 

@@ -216,7 +216,6 @@ extern const struct language_defn d_language_defn =
   d_extensions,
   &exp_descriptor_c,
   d_parse,
-  d_yyerror,
   null_post_parser,
   c_printchar,			/* Print a character constant.  */
   c_printstr,			/* Function to print string constant.  */

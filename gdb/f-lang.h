@@ -25,8 +25,6 @@ struct parser_state;
 
 extern int f_parse (struct parser_state *);
 
-extern void f_yyerror (const char *);	/* Defined in f-exp.y */
-
 extern void f_print_type (struct type *, const char *, struct ui_file *, int,
 			  int, const struct type_print_options *);
 

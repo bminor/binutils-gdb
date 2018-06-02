@@ -843,7 +843,6 @@ extern const struct language_defn c_language_defn =
   c_extensions,
   &exp_descriptor_c,
   c_parse,
-  c_yyerror,
   null_post_parser,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
@@ -989,7 +988,6 @@ extern const struct language_defn cplus_language_defn =
   cplus_extensions,
   &exp_descriptor_c,
   c_parse,
-  c_yyerror,
   null_post_parser,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
@@ -1044,7 +1042,6 @@ extern const struct language_defn asm_language_defn =
   asm_extensions,
   &exp_descriptor_c,
   c_parse,
-  c_yyerror,
   null_post_parser,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
@@ -1099,7 +1096,6 @@ extern const struct language_defn minimal_language_defn =
   NULL,
   &exp_descriptor_c,
   c_parse,
-  c_yyerror,
   null_post_parser,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
