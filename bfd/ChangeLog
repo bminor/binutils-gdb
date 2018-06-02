@@ -1,3 +1,8 @@
+2018-06-07  Alan Modra  <amodra@gmail.com>
+
+	* elf32-tic6x.c (elf32_tic6x_check_relocs): Reference
+	__c6xabi_DSBT_BASE explicitly for R_C6000_SBR_* relocs.
+
 2018-06-05  Alan Modra  <amodra@gmail.com>
 
 	* bfd.c (struct bfd): Update comment on "where" usage.

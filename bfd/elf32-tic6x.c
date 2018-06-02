@@ -2972,6 +2972,19 @@ elf32_tic6x_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_C6000_SBR_H16_B:
 	case R_C6000_SBR_H16_H:
 	case R_C6000_SBR_H16_W:
+	  {
+	    /* These relocations implicitly reference __c6xabi_DSBT_BASE.
+	       Add an explicit reference so that the symbol will be
+	       provided by a linker script.  */
+	    struct bfd_link_hash_entry *bh = NULL;
+	    if (!_bfd_generic_link_add_one_symbol (info, abfd,
+						   "__c6xabi_DSBT_BASE",
+						   BSF_GLOBAL,
+						   bfd_und_section_ptr, 0,
+						   NULL, FALSE, FALSE, &bh))
+	      return FALSE;
+	    ((struct elf_link_hash_entry *) bh)->non_elf = 0;
+	  }
 	  if (h != NULL && bfd_link_executable (info))
 	    {
 	      /* For B14-relative addresses, we might need a copy
