@@ -1,5 +1,14 @@
 2018-06-07  Alan Modra  <amodra@gmail.com>
 
+	* emulparams/elf64bmip.sh (EXECUTABLE_SYMBOLS): Don't define.
+	(OTHER_SYMBOLS): Define this instead.
+	* emulparams/elf32bmipn32.sh (EXECUTABLE_SYMBOLS): Don't define.
+	(OTHER_SYMBOLS): Define similarly to elf64bmip.sh.
+	* emulparams/elf64hppa.sh (EXECUTABLE_SYMBOLS): Don't define.
+	(OTHER_SYMBOLS): Define instead.
+
+2018-06-07  Alan Modra  <amodra@gmail.com>
+
 	* emulparams/elf32_tic6x_le.sh (EXECUTABLE_SYMBOLS): Don't define.
 
 2018-06-06  Alan Modra  <amodra@gmail.com>
