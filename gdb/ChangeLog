@@ -1,3 +1,26 @@
+2018-07-20  Tom Tromey  <tom@tromey.com>
+
+	* rust-exp.y: Now a pure parser.  Update all rules.
+	(%union): Move earlier.
+	(current_parser, work_obstack): Remove globals.
+	(rust_parser, ~rust_parser): Update.
+	(class rust_parser) <copy_name, concat3, crate_name, super_name,
+	lex_character, lex_number, lex_string, lex_identifier,
+	rust_lookup_type, convert_params_to_types, convert_ast_to_type,
+	convert_name, convert_params_to_expression,
+	convert_ast_to_expression, ast_basic_type, ast_operation,
+	ast_compound_assignment, rust_op, ast_literal, ast_dliteral,
+	ast_structop, ast_structop_anonymous, ast_unary, ast_cast,
+	ast_call_ish, ast_path, ast_string, ast_struct, ast_range,
+	ast_array_type, ast_slice_type, ast_reference_type,
+	ast_pointer_type, ast_function_type, ast_tuple_type>: New methods.
+	(rust_parse): Update.
+	(rustyyerror, rustyylex): Add parser parameter.
+	(rust_lex_test_one, rust_lex_int_test, rust_lex_exception_test)
+	(rust_lex_stringish_test, rust_lex_test_sequence)
+	(rust_lex_test_trailing_dot, rust_lex_test_completion)
+	(rust_lex_test_push_back, rust_lex_tests): Update.
+
 2018-07-19  Pedro Alves  <palves@redhat.com>
 
 	* guile/guile-internal.h (gdbscm_scm_to_c_string): Now returns a

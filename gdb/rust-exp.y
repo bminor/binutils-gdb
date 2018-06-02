@@ -16,6 +16,14 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* The Bison manual says that %pure-parser is deprecated, but we use
+   it anyway because it also works with Byacc.  That is also why
+   this uses %lex-param and %parse-param rather than the simpler
+   %param -- Byacc does not support the latter.  */
+%pure-parser
+%lex-param {struct rust_parser *parser}
+%parse-param {struct rust_parser *parser}
+
 /* Removing the last conflict seems difficult.  */
 %expect 1
 
@@ -69,65 +77,51 @@ struct set_field
 
 typedef std::vector<set_field> rust_set_vector;
 
-static int rustyylex (void);
-static void rustyyerror (const char *msg);
+%}
+
+%union
+{
+  /* A typed integer constant.  */
+  struct typed_val_int typed_val_int;
+
+  /* A typed floating point constant.  */
+  struct typed_val_float typed_val_float;
+
+  /* An identifier or string.  */
+  struct stoken sval;
+
+  /* A token representing an opcode, like "==".  */
+  enum exp_opcode opcode;
+
+  /* A list of expressions; for example, the arguments to a function
+     call.  */
+  rust_op_vector *params;
+
+  /* A list of field initializers.  */
+  rust_set_vector *field_inits;
+
+  /* A single field initializer.  */
+  struct set_field one_field_init;
+
+  /* An expression.  */
+  const struct rust_op *op;
+
+  /* A plain integer, for example used to count the number of
+     "super::" prefixes on a path.  */
+  unsigned int depth;
+}
+
+%{
+
+struct rust_parser;
+static int rustyylex (YYSTYPE *, rust_parser *);
+static void rustyyerror (rust_parser *parser, const char *msg);
+
 static void rust_push_back (char c);
-static const char *rust_copy_name (const char *, int);
-static struct stoken rust_concat3 (const char *, const char *, const char *);
 static struct stoken make_stoken (const char *);
 static struct block_symbol rust_lookup_symbol (const char *name,
 					       const struct block *block,
 					       const domain_enum domain);
-static struct type *rust_lookup_type (const char *name,
-				      const struct block *block);
-static struct type *rust_type (const char *name);
-
-static const struct rust_op *crate_name (const struct rust_op *name);
-static const struct rust_op *super_name (const struct rust_op *name,
-					 unsigned int n_supers);
-
-static const struct rust_op *ast_operation (enum exp_opcode opcode,
-					    const struct rust_op *left,
-					    const struct rust_op *right);
-static const struct rust_op *ast_compound_assignment
-  (enum exp_opcode opcode, const struct rust_op *left,
-   const struct rust_op *rust_op);
-static const struct rust_op *ast_literal (struct typed_val_int val);
-static const struct rust_op *ast_dliteral (struct typed_val_float val);
-static const struct rust_op *ast_structop (const struct rust_op *left,
-					   const char *name,
-					   int completing);
-static const struct rust_op *ast_structop_anonymous
-  (const struct rust_op *left, struct typed_val_int number);
-static const struct rust_op *ast_unary (enum exp_opcode opcode,
-					const struct rust_op *expr);
-static const struct rust_op *ast_cast (const struct rust_op *expr,
-				       const struct rust_op *type);
-static const struct rust_op *ast_call_ish (enum exp_opcode opcode,
-					   const struct rust_op *expr,
-					   rust_op_vector *params);
-static const struct rust_op *ast_path (struct stoken name,
-				       rust_op_vector *params);
-static const struct rust_op *ast_string (struct stoken str);
-static const struct rust_op *ast_struct (const struct rust_op *name,
-					 rust_set_vector *fields);
-static const struct rust_op *ast_range (const struct rust_op *lhs,
-					const struct rust_op *rhs,
-					bool inclusive);
-static const struct rust_op *ast_array_type (const struct rust_op *lhs,
-					     struct typed_val_int val);
-static const struct rust_op *ast_slice_type (const struct rust_op *type);
-static const struct rust_op *ast_reference_type (const struct rust_op *type);
-static const struct rust_op *ast_pointer_type (const struct rust_op *type,
-					       int is_mut);
-static const struct rust_op *ast_function_type (const struct rust_op *result,
-						rust_op_vector *params);
-static const struct rust_op *ast_tuple_type (rust_op_vector *params);
-
-/* The current rust parser.  */
-
-struct rust_parser;
-static rust_parser *current_parser;
 
 /* A regular expression for matching Rust numbers.  This is split up
    since it is very long and this gives us a way to comment the
@@ -175,12 +169,6 @@ static const char *number_regex_text =
 
 static regex_t number_regex;
 
-/* Obstack for data temporarily allocated during parsing.  Points to
-   the obstack in the rust_parser, or to a temporary obstack during
-   unit testing.  */
-
-static auto_obstack *work_obstack;
-
 /* An instance of this is created before parsing, and destroyed when
    parsing is finished.  */
 
@@ -190,16 +178,10 @@ struct rust_parser
     : rust_ast (nullptr),
       pstate (state)
   {
-    gdb_assert (current_parser == nullptr);
-    current_parser = this;
-    work_obstack = &obstack;
   }
 
   ~rust_parser ()
   {
-    /* Clean up the globals we set.  */
-    current_parser = nullptr;
-    work_obstack = nullptr;
   }
 
   /* Create a new rust_set_vector.  The storage for the new vector is
@@ -232,6 +214,80 @@ struct rust_parser
     return parse_gdbarch (pstate);
   }
 
+  /* A helper to look up a Rust type, or fail.  This only works for
+     types defined by rust_language_arch_info.  */
+
+  struct type *get_type (const char *name)
+  {
+    struct type *type;
+
+    type = language_lookup_primitive_type (language (), arch (), name);
+    if (type == NULL)
+      error (_("Could not find Rust type %s"), name);
+    return type;
+  }
+
+  const char *copy_name (const char *name, int len);
+  struct stoken concat3 (const char *s1, const char *s2, const char *s3);
+  const struct rust_op *crate_name (const struct rust_op *name);
+  const struct rust_op *super_name (const struct rust_op *ident,
+				    unsigned int n_supers);
+
+  int lex_character (YYSTYPE *lvalp);
+  int lex_number (YYSTYPE *lvalp);
+  int lex_string (YYSTYPE *lvalp);
+  int lex_identifier (YYSTYPE *lvalp);
+
+  struct type *rust_lookup_type (const char *name, const struct block *block);
+  std::vector<struct type *> convert_params_to_types (rust_op_vector *params);
+  struct type *convert_ast_to_type (const struct rust_op *operation);
+  const char *convert_name (const struct rust_op *operation);
+  void convert_params_to_expression (rust_op_vector *params,
+				     const struct rust_op *top);
+  void convert_ast_to_expression (const struct rust_op *operation,
+				  const struct rust_op *top,
+				  bool want_type = false);
+
+  struct rust_op *ast_basic_type (enum type_code typecode);
+  const struct rust_op *ast_operation (enum exp_opcode opcode,
+				       const struct rust_op *left,
+				       const struct rust_op *right);
+  const struct rust_op *ast_compound_assignment
+  (enum exp_opcode opcode, const struct rust_op *left,
+   const struct rust_op *rust_op);
+  const struct rust_op *ast_literal (struct typed_val_int val);
+  const struct rust_op *ast_dliteral (struct typed_val_float val);
+  const struct rust_op *ast_structop (const struct rust_op *left,
+				      const char *name,
+				      int completing);
+  const struct rust_op *ast_structop_anonymous
+  (const struct rust_op *left, struct typed_val_int number);
+  const struct rust_op *ast_unary (enum exp_opcode opcode,
+				   const struct rust_op *expr);
+  const struct rust_op *ast_cast (const struct rust_op *expr,
+				  const struct rust_op *type);
+  const struct rust_op *ast_call_ish (enum exp_opcode opcode,
+				      const struct rust_op *expr,
+				      rust_op_vector *params);
+  const struct rust_op *ast_path (struct stoken name,
+				  rust_op_vector *params);
+  const struct rust_op *ast_string (struct stoken str);
+  const struct rust_op *ast_struct (const struct rust_op *name,
+				    rust_set_vector *fields);
+  const struct rust_op *ast_range (const struct rust_op *lhs,
+				   const struct rust_op *rhs,
+				   bool inclusive);
+  const struct rust_op *ast_array_type (const struct rust_op *lhs,
+					struct typed_val_int val);
+  const struct rust_op *ast_slice_type (const struct rust_op *type);
+  const struct rust_op *ast_reference_type (const struct rust_op *type);
+  const struct rust_op *ast_pointer_type (const struct rust_op *type,
+					  int is_mut);
+  const struct rust_op *ast_function_type (const struct rust_op *result,
+					   rust_op_vector *params);
+  const struct rust_op *ast_tuple_type (rust_op_vector *params);
+
+
   /* A pointer to this is installed globally.  */
   auto_obstack obstack;
 
@@ -246,44 +302,8 @@ struct rust_parser
   struct parser_state *pstate;
 };
 
-%}
-
-%union
-{
-  /* A typed integer constant.  */
-  struct typed_val_int typed_val_int;
-
-  /* A typed floating point constant.  */
-  struct typed_val_float typed_val_float;
-
-  /* An identifier or string.  */
-  struct stoken sval;
-
-  /* A token representing an opcode, like "==".  */
-  enum exp_opcode opcode;
-
-  /* A list of expressions; for example, the arguments to a function
-     call.  */
-  rust_op_vector *params;
-
-  /* A list of field initializers.  */
-  rust_set_vector *field_inits;
-
-  /* A single field initializer.  */
-  struct set_field one_field_init;
-
-  /* An expression.  */
-  const struct rust_op *op;
-
-  /* A plain integer, for example used to count the number of
-     "super::" prefixes on a path.  */
-  unsigned int depth;
-}
-
-%{
-
-  /* Rust AST operations.  We build a tree of these; then lower them
-     to gdb expressions when parsing has completed.  */
+/* Rust AST operations.  We build a tree of these; then lower them to
+   gdb expressions when parsing has completed.  */
 
 struct rust_op
 {
@@ -413,8 +433,8 @@ start:
 		{
 		  /* If we are completing and see a valid parse,
 		     rust_ast will already have been set.  */
-		  if (current_parser->rust_ast == NULL)
-		    current_parser->rust_ast = $1;
+		  if (parser->rust_ast == NULL)
+		    parser->rust_ast = $1;
 		}
 ;
 
@@ -453,10 +473,10 @@ unit_expr:
 
 		  val.type
 		    = (language_lookup_primitive_type
-		       (current_parser->language (), current_parser->arch (),
+		       (parser->language (), parser->arch (),
 			"()"));
 		  val.val = 0;
-		  $$ = ast_literal (val);
+		  $$ = parser->ast_literal (val);
 		}
 ;
 
@@ -465,7 +485,7 @@ unit_expr:
    AST.  */
 struct_expr:
 	path_for_expr '{' struct_expr_list '}'
-		{ $$ = ast_struct ($1, $3); }
+		{ $$ = parser->ast_struct ($1, $3); }
 ;
 
 struct_expr_tail:
@@ -492,7 +512,7 @@ struct_expr_tail:
 		  struct set_field sf;
 
 		  sf.name = $1;
-		  sf.init = ast_path ($1, NULL);
+		  sf.init = parser->ast_path ($1, NULL);
 		  $$ = sf;
 		}
 ;
@@ -500,11 +520,11 @@ struct_expr_tail:
 struct_expr_list:
 	/* %empty */
 		{
-		  $$ = current_parser->new_set_vector ();
+		  $$ = parser->new_set_vector ();
 		}
 |	struct_expr_tail
 		{
-		  rust_set_vector *result = current_parser->new_set_vector ();
+		  rust_set_vector *result = parser->new_set_vector ();
 		  result->push_back ($1);
 		  $$ = result;
 		}
@@ -522,7 +542,7 @@ struct_expr_list:
 		  struct set_field sf;
 
 		  sf.name = $1;
-		  sf.init = ast_path ($1, NULL);
+		  sf.init = parser->ast_path ($1, NULL);
 		  $3->push_back (sf);
 		  $$ = $3;
 		}
@@ -530,109 +550,111 @@ struct_expr_list:
 
 array_expr:
 	'[' KW_MUT expr_list ']'
-		{ $$ = ast_call_ish (OP_ARRAY, NULL, $3); }
+		{ $$ = parser->ast_call_ish (OP_ARRAY, NULL, $3); }
 |	'[' expr_list ']'
-		{ $$ = ast_call_ish (OP_ARRAY, NULL, $2); }
+		{ $$ = parser->ast_call_ish (OP_ARRAY, NULL, $2); }
 |	'[' KW_MUT expr ';' expr ']'
-		{ $$ = ast_operation (OP_RUST_ARRAY, $3, $5); }
+		{ $$ = parser->ast_operation (OP_RUST_ARRAY, $3, $5); }
 |	'[' expr ';' expr ']'
-		{ $$ = ast_operation (OP_RUST_ARRAY, $2, $4); }
+		{ $$ = parser->ast_operation (OP_RUST_ARRAY, $2, $4); }
 ;
 
 range_expr:
 	expr DOTDOT
-		{ $$ = ast_range ($1, NULL, false); }
+		{ $$ = parser->ast_range ($1, NULL, false); }
 |	expr DOTDOT expr
-		{ $$ = ast_range ($1, $3, false); }
+		{ $$ = parser->ast_range ($1, $3, false); }
 |	expr DOTDOTEQ expr
-		{ $$ = ast_range ($1, $3, true); }
+		{ $$ = parser->ast_range ($1, $3, true); }
 |	DOTDOT expr
-		{ $$ = ast_range (NULL, $2, false); }
+		{ $$ = parser->ast_range (NULL, $2, false); }
 |	DOTDOTEQ expr
-		{ $$ = ast_range (NULL, $2, true); }
+		{ $$ = parser->ast_range (NULL, $2, true); }
 |	DOTDOT
-		{ $$ = ast_range (NULL, NULL, false); }
+		{ $$ = parser->ast_range (NULL, NULL, false); }
 ;
 
 literal:
 	INTEGER
-		{ $$ = ast_literal ($1); }
+		{ $$ = parser->ast_literal ($1); }
 |	DECIMAL_INTEGER
-		{ $$ = ast_literal ($1); }
+		{ $$ = parser->ast_literal ($1); }
 |	FLOAT
-		{ $$ = ast_dliteral ($1); }
+		{ $$ = parser->ast_dliteral ($1); }
 |	STRING
 		{
-		  const struct rust_op *str = ast_string ($1);
+		  const struct rust_op *str = parser->ast_string ($1);
 		  struct set_field field;
 		  struct typed_val_int val;
 		  struct stoken token;
 
-		  rust_set_vector *fields = current_parser->new_set_vector ();
+		  rust_set_vector *fields = parser->new_set_vector ();
 
 		  /* Wrap the raw string in the &str struct.  */
 		  field.name.ptr = "data_ptr";
 		  field.name.length = strlen (field.name.ptr);
-		  field.init = ast_unary (UNOP_ADDR, ast_string ($1));
+		  field.init = parser->ast_unary (UNOP_ADDR,
+						  parser->ast_string ($1));
 		  fields->push_back (field);
 
-		  val.type = rust_type ("usize");
+		  val.type = parser->get_type ("usize");
 		  val.val = $1.length;
 
 		  field.name.ptr = "length";
 		  field.name.length = strlen (field.name.ptr);
-		  field.init = ast_literal (val);
+		  field.init = parser->ast_literal (val);
 		  fields->push_back (field);
 
 		  token.ptr = "&str";
 		  token.length = strlen (token.ptr);
-		  $$ = ast_struct (ast_path (token, NULL), fields);
+		  $$ = parser->ast_struct (parser->ast_path (token, NULL),
+					   fields);
 		}
 |	BYTESTRING
-		{ $$ = ast_string ($1); }
+		{ $$ = parser->ast_string ($1); }
 |	KW_TRUE
 		{
 		  struct typed_val_int val;
 
-		  val.type = language_bool_type (current_parser->language (),
-						 current_parser->arch ());
+		  val.type = language_bool_type (parser->language (),
+						 parser->arch ());
 		  val.val = 1;
-		  $$ = ast_literal (val);
+		  $$ = parser->ast_literal (val);
 		}
 |	KW_FALSE
 		{
 		  struct typed_val_int val;
 
-		  val.type = language_bool_type (current_parser->language (),
-						 current_parser->arch ());
+		  val.type = language_bool_type (parser->language (),
+						 parser->arch ());
 		  val.val = 0;
-		  $$ = ast_literal (val);
+		  $$ = parser->ast_literal (val);
 		}
 ;
 
 field_expr:
 	expr '.' IDENT
-		{ $$ = ast_structop ($1, $3.ptr, 0); }
+		{ $$ = parser->ast_structop ($1, $3.ptr, 0); }
 |	expr '.' COMPLETE
 		{
-		  $$ = ast_structop ($1, $3.ptr, 1);
-		  current_parser->rust_ast = $$;
+		  $$ = parser->ast_structop ($1, $3.ptr, 1);
+		  parser->rust_ast = $$;
 		}
 |	expr '.' DECIMAL_INTEGER
-		{ $$ = ast_structop_anonymous ($1, $3); }
+		{ $$ = parser->ast_structop_anonymous ($1, $3); }
 ;
 
 idx_expr:
 	expr '[' expr ']'
-		{ $$ = ast_operation (BINOP_SUBSCRIPT, $1, $3); }
+		{ $$ = parser->ast_operation (BINOP_SUBSCRIPT, $1, $3); }
 ;
 
 unop_expr:
 	'+' expr	%prec UNARY
-		{ $$ = ast_unary (UNOP_PLUS, $2); }
+		{ $$ = parser->ast_unary (UNOP_PLUS, $2); }
 
 |	'-' expr	%prec UNARY
-		{ $$ = ast_unary (UNOP_NEG, $2); }
+		{ $$ = parser->ast_unary (UNOP_NEG, $2); }
 
 |	'!' expr	%prec UNARY
 		{
@@ -640,19 +662,19 @@ unop_expr:
 		     override for UNOP_COMPLEMENT, so it can do the
 		     right thing for both bool and integral
 		     values.  */
-		  $$ = ast_unary (UNOP_COMPLEMENT, $2);
+		  $$ = parser->ast_unary (UNOP_COMPLEMENT, $2);
 		}
 
 |	'*' expr	%prec UNARY
-		{ $$ = ast_unary (UNOP_IND, $2); }
+		{ $$ = parser->ast_unary (UNOP_IND, $2); }
 
 |	'&' expr	%prec UNARY
-		{ $$ = ast_unary (UNOP_ADDR, $2); }
+		{ $$ = parser->ast_unary (UNOP_ADDR, $2); }
 
 |	'&' KW_MUT expr	%prec UNARY
-		{ $$ = ast_unary (UNOP_ADDR, $3); }
+		{ $$ = parser->ast_unary (UNOP_ADDR, $3); }
 |	KW_SIZEOF '(' expr ')' %prec UNARY
-		{ $$ = ast_unary (UNOP_SIZEOF, $3); }
+		{ $$ = parser->ast_unary (UNOP_SIZEOF, $3); }
 ;
 
 binop_expr:
@@ -664,76 +686,76 @@ binop_expr:
 
 binop_expr_expr:
 	expr '*' expr
-		{ $$ = ast_operation (BINOP_MUL, $1, $3); }
+		{ $$ = parser->ast_operation (BINOP_MUL, $1, $3); }
 
 |	expr '@' expr
-		{ $$ = ast_operation (BINOP_REPEAT, $1, $3); }
+		{ $$ = parser->ast_operation (BINOP_REPEAT, $1, $3); }
 
 |	expr '/' expr
-		{ $$ = ast_operation (BINOP_DIV, $1, $3); }
+		{ $$ = parser->ast_operation (BINOP_DIV, $1, $3); }
 
 |	expr '%' expr
-		{ $$ = ast_operation (BINOP_REM, $1, $3); }
+		{ $$ = parser->ast_operation (BINOP_REM, $1, $3); }
 
 |	expr '<' expr
-		{ $$ = ast_operation (BINOP_LESS, $1, $3); }
+		{ $$ = parser->ast_operation (BINOP_LESS, $1, $3); }
 
 |	expr '>' expr
-		{ $$ = ast_operation (BINOP_GTR, $1, $3); }
+		{ $$ = parser->ast_operation (BINOP_GTR, $1, $3); }
 
 |	expr '&' expr
-		{ $$ = ast_operation (BINOP_BITWISE_AND, $1, $3); }
+		{ $$ = parser->ast_operation (BINOP_BITWISE_AND, $1, $3); }
 
 |	expr '|' expr
-		{ $$ = ast_operation (BINOP_BITWISE_IOR, $1, $3); }
+		{ $$ = parser->ast_operation (BINOP_BITWISE_IOR, $1, $3); }
 
 |	expr '^' expr
-		{ $$ = ast_operation (BINOP_BITWISE_XOR, $1, $3); }
+		{ $$ = parser->ast_operation (BINOP_BITWISE_XOR, $1, $3); }
 
 |	expr '+' expr
-		{ $$ = ast_operation (BINOP_ADD, $1, $3); }
+		{ $$ = parser->ast_operation (BINOP_ADD, $1, $3); }
 
 |	expr '-' expr
-		{ $$ = ast_operation (BINOP_SUB, $1, $3); }
+		{ $$ = parser->ast_operation (BINOP_SUB, $1, $3); }
 
 |	expr OROR expr
-		{ $$ = ast_operation (BINOP_LOGICAL_OR, $1, $3); }
+		{ $$ = parser->ast_operation (BINOP_LOGICAL_OR, $1, $3); }
 
 |	expr ANDAND expr
-		{ $$ = ast_operation (BINOP_LOGICAL_AND, $1, $3); }
+		{ $$ = parser->ast_operation (BINOP_LOGICAL_AND, $1, $3); }
 
 |	expr EQEQ expr
-		{ $$ = ast_operation (BINOP_EQUAL, $1, $3); }
+		{ $$ = parser->ast_operation (BINOP_EQUAL, $1, $3); }
 
 |	expr NOTEQ expr
-		{ $$ = ast_operation (BINOP_NOTEQUAL, $1, $3); }
+		{ $$ = parser->ast_operation (BINOP_NOTEQUAL, $1, $3); }
 
 |	expr LTEQ expr
-		{ $$ = ast_operation (BINOP_LEQ, $1, $3); }
+		{ $$ = parser->ast_operation (BINOP_LEQ, $1, $3); }
 
 |	expr GTEQ expr
-		{ $$ = ast_operation (BINOP_GEQ, $1, $3); }
+		{ $$ = parser->ast_operation (BINOP_GEQ, $1, $3); }
 
 |	expr LSH expr
-		{ $$ = ast_operation (BINOP_LSH, $1, $3); }
+		{ $$ = parser->ast_operation (BINOP_LSH, $1, $3); }
 
 |	expr RSH expr
-		{ $$ = ast_operation (BINOP_RSH, $1, $3); }
+		{ $$ = parser->ast_operation (BINOP_RSH, $1, $3); }
 ;
 
 type_cast_expr:
 	expr KW_AS type
-		{ $$ = ast_cast ($1, $3); }
+		{ $$ = parser->ast_cast ($1, $3); }
 ;
 
 assignment_expr:
 	expr '=' expr
-		{ $$ = ast_operation (BINOP_ASSIGN, $1, $3); }
+		{ $$ = parser->ast_operation (BINOP_ASSIGN, $1, $3); }
 ;
 
 compound_assignment_expr:
 	expr COMPOUND_ASSIGN expr
-		{ $$ = ast_compound_assignment ($2, $1, $3); }
+		{ $$ = parser->ast_compound_assignment ($2, $1, $3); }
 
 ;
 
@@ -745,7 +767,7 @@ paren_expr:
 expr_list:
 	expr
 		{
-		  $$ = current_parser->new_op_vector ();
+		  $$ = parser->new_op_vector ();
 		  $$->push_back ($1);
 		}
 |	expr_list ',' expr
@@ -759,7 +781,7 @@ maybe_expr_list:
 	/* %empty */
 		{
 		  /* The result can't be NULL.  */
-		  $$ = current_parser->new_op_vector ();
+		  $$ = parser->new_op_vector ();
 		}
 |	expr_list
 		{ $$ = $1; }
@@ -772,7 +794,7 @@ paren_expr_list:
 
 call_expr:
 	expr paren_expr_list
-		{ $$ = ast_call_ish (OP_FUNCALL, $1, $2); }
+		{ $$ = parser->ast_call_ish (OP_FUNCALL, $1, $2); }
 ;
 
 maybe_self_path:
@@ -791,44 +813,46 @@ path_expr:
 	path_for_expr
 		{ $$ = $1; }
 |	GDBVAR
-		{ $$ = ast_path ($1, NULL); }
+		{ $$ = parser->ast_path ($1, NULL); }
 |	KW_SELF
-		{ $$ = ast_path (make_stoken ("self"), NULL); }
+		{ $$ = parser->ast_path (make_stoken ("self"), NULL); }
 ;
 
 path_for_expr:
 	identifier_path_for_expr
 |	KW_SELF COLONCOLON identifier_path_for_expr
-		{ $$ = super_name ($3, 0); }
+		{ $$ = parser->super_name ($3, 0); }
 |	maybe_self_path super_path identifier_path_for_expr
-		{ $$ = super_name ($3, $2); }
+		{ $$ = parser->super_name ($3, $2); }
 |	COLONCOLON identifier_path_for_expr
-		{ $$ = crate_name ($2); }
+		{ $$ = parser->crate_name ($2); }
 |	KW_EXTERN identifier_path_for_expr
 		{
 		  /* This is a gdb extension to make it possible to
 		     refer to items in other crates.  It just bypasses
 		     adding the current crate to the front of the
 		     name.  */
-		  $$ = ast_path (rust_concat3 ("::", $2->left.sval.ptr, NULL),
-				 $2->right.params);
+		  $$ = parser->ast_path (parser->concat3 ("::",
+							  $2->left.sval.ptr,
+							  NULL),
+					 $2->right.params);
 		}
 ;
 
 identifier_path_for_expr:
 	IDENT
-		{ $$ = ast_path ($1, NULL); }
+		{ $$ = parser->ast_path ($1, NULL); }
 |	identifier_path_for_expr COLONCOLON IDENT
 		{
-		  $$ = ast_path (rust_concat3 ($1->left.sval.ptr, "::",
-					       $3.ptr),
-				 NULL);
+		  $$ = parser->ast_path (parser->concat3 ($1->left.sval.ptr,
+							  "::", $3.ptr),
+					 NULL);
 		}
 |	identifier_path_for_expr COLONCOLON '<' type_list '>'
-		{ $$ = ast_path ($1->left.sval, $4); }
+		{ $$ = parser->ast_path ($1->left.sval, $4); }
 |	identifier_path_for_expr COLONCOLON '<' type_list RSH
 		{
-		  $$ = ast_path ($1->left.sval, $4);
+		  $$ = parser->ast_path ($1->left.sval, $4);
 		  rust_push_back ('>');
 		}
 ;
@@ -836,40 +860,42 @@ identifier_path_for_expr:
 path_for_type:
 	identifier_path_for_type
 |	KW_SELF COLONCOLON identifier_path_for_type
-		{ $$ = super_name ($3, 0); }
+		{ $$ = parser->super_name ($3, 0); }
 |	maybe_self_path super_path identifier_path_for_type
-		{ $$ = super_name ($3, $2); }
+		{ $$ = parser->super_name ($3, $2); }
 |	COLONCOLON identifier_path_for_type
-		{ $$ = crate_name ($2); }
+		{ $$ = parser->crate_name ($2); }
 |	KW_EXTERN identifier_path_for_type
 		{
 		  /* This is a gdb extension to make it possible to
 		     refer to items in other crates.  It just bypasses
 		     adding the current crate to the front of the
 		     name.  */
-		  $$ = ast_path (rust_concat3 ("::", $2->left.sval.ptr, NULL),
-				 $2->right.params);
+		  $$ = parser->ast_path (parser->concat3 ("::",
+							  $2->left.sval.ptr,
+							  NULL),
+					 $2->right.params);
 		}
 ;
 
 just_identifiers_for_type:
 	IDENT
-		{ $$ = ast_path ($1, NULL); }
+		{ $$ = parser->ast_path ($1, NULL); }
 |	just_identifiers_for_type COLONCOLON IDENT
 		{
-		  $$ = ast_path (rust_concat3 ($1->left.sval.ptr, "::",
-					       $3.ptr),
-				 NULL);
+		  $$ = parser->ast_path (parser->concat3 ($1->left.sval.ptr,
+							  "::", $3.ptr),
+					 NULL);
 		}
 ;
 
 identifier_path_for_type:
 	just_identifiers_for_type
 |	just_identifiers_for_type '<' type_list '>'
-		{ $$ = ast_path ($1->left.sval, $3); }
+		{ $$ = parser->ast_path ($1->left.sval, $3); }
 |	just_identifiers_for_type '<' type_list RSH
 		{
-		  $$ = ast_path ($1->left.sval, $3);
+		  $$ = parser->ast_path ($1->left.sval, $3);
 		  rust_push_back ('>');
 		}
 ;
@@ -877,21 +903,21 @@ identifier_path_for_type:
 type:
 	path_for_type
 |	'[' type ';' INTEGER ']'
-		{ $$ = ast_array_type ($2, $4); }
+		{ $$ = parser->ast_array_type ($2, $4); }
 |	'[' type ';' DECIMAL_INTEGER ']'
-		{ $$ = ast_array_type ($2, $4); }
+		{ $$ = parser->ast_array_type ($2, $4); }
 |	'&' '[' type ']'
-		{ $$ = ast_slice_type ($3); }
+		{ $$ = parser->ast_slice_type ($3); }
 |	'&' type
-		{ $$ = ast_reference_type ($2); }
+		{ $$ = parser->ast_reference_type ($2); }
 |	'*' KW_MUT type
-		{ $$ = ast_pointer_type ($3, 1); }
+		{ $$ = parser->ast_pointer_type ($3, 1); }
 |	'*' KW_CONST type
-		{ $$ = ast_pointer_type ($3, 0); }
+		{ $$ = parser->ast_pointer_type ($3, 0); }
 |	KW_FN '(' maybe_type_list ')' ARROW type
-		{ $$ = ast_function_type ($6, $3); }
+		{ $$ = parser->ast_function_type ($6, $3); }
 |	'(' maybe_type_list ')'
-		{ $$ = ast_tuple_type ($2); }
+		{ $$ = parser->ast_tuple_type ($2); }
 ;
 
 maybe_type_list:
@@ -904,7 +930,7 @@ maybe_type_list:
 type_list:
 	type
 		{
-		  rust_op_vector *result = current_parser->new_op_vector ();
+		  rust_op_vector *result = parser->new_op_vector ();
 		  result->push_back ($1);
 		  $$ = result;
 		}
@@ -975,10 +1001,10 @@ static const struct token_info operator_tokens[] =
 
 /* Helper function to copy to the name obstack.  */
 
-static const char *
-rust_copy_name (const char *name, int len)
+const char *
+rust_parser::copy_name (const char *name, int len)
 {
-  return (const char *) obstack_copy0 (work_obstack, name, len);
+  return (const char *) obstack_copy0 (&obstack, name, len);
 }
 
 /* Helper function to make an stoken from a C string.  */
@@ -996,17 +1022,17 @@ make_stoken (const char *p)
 /* Helper function to concatenate three strings on the name
    obstack.  */
 
-static struct stoken
-rust_concat3 (const char *s1, const char *s2, const char *s3)
+struct stoken
+rust_parser::concat3 (const char *s1, const char *s2, const char *s3)
 {
-  return make_stoken (obconcat (work_obstack, s1, s2, s3, (char *) NULL));
+  return make_stoken (obconcat (&obstack, s1, s2, s3, (char *) NULL));
 }
 
 /* Return an AST node referring to NAME, but relative to the crate's
    name.  */
 
-static const struct rust_op *
-crate_name (const struct rust_op *name)
+const struct rust_op *
+rust_parser::crate_name (const struct rust_op *name)
 {
   std::string crate = rust_crate_for_block (expression_context_block);
   struct stoken result;
@@ -1015,7 +1041,7 @@ crate_name (const struct rust_op *name)
 
   if (crate.empty ())
     error (_("Could not find crate for current location"));
-  result = make_stoken (obconcat (work_obstack, "::", crate.c_str (), "::",
+  result = make_stoken (obconcat (&obstack, "::", crate.c_str (), "::",
 				  name->left.sval.ptr, (char *) NULL));
 
   return ast_path (result, name->right.params);
@@ -1025,8 +1051,8 @@ crate_name (const struct rust_op *name)
    is the base name and N_SUPERS is how many "super::"s were
    provided.  N_SUPERS can be zero.  */
 
-static const struct rust_op *
-super_name (const struct rust_op *ident, unsigned int n_supers)
+const struct rust_op *
+rust_parser::super_name (const struct rust_op *ident, unsigned int n_supers)
 {
   const char *scope = block_scope (expression_context_block);
   int offset;
@@ -1062,12 +1088,12 @@ super_name (const struct rust_op *ident, unsigned int n_supers)
   else
     offset = strlen (scope);
 
-  obstack_grow (work_obstack, "::", 2);
-  obstack_grow (work_obstack, scope, offset);
-  obstack_grow (work_obstack, "::", 2);
-  obstack_grow0 (work_obstack, ident->left.sval.ptr, ident->left.sval.length);
+  obstack_grow (&obstack, "::", 2);
+  obstack_grow (&obstack, scope, offset);
+  obstack_grow (&obstack, "::", 2);
+  obstack_grow0 (&obstack, ident->left.sval.ptr, ident->left.sval.length);
 
-  return ast_path (make_stoken ((const char *) obstack_finish (work_obstack)),
+  return ast_path (make_stoken ((const char *) obstack_finish (&obstack)),
 		   ident->right.params);
 }
 
@@ -1078,22 +1104,6 @@ update_innermost_block (struct block_symbol sym)
 {
   if (symbol_read_needs_frame (sym.symbol))
     innermost_block.update (sym);
-}
-
-/* A helper to look up a Rust type, or fail.  This only works for
-   types defined by rust_language_arch_info.  */
-
-static struct type *
-rust_type (const char *name)
-{
-  struct type *type;
-
-  type = language_lookup_primitive_type (current_parser->language (),
-					 current_parser->arch (),
-					 name);
-  if (type == NULL)
-    error (_("Could not find Rust type %s"), name);
-  return type;
 }
 
 /* Lex a hex number with at least MIN digits and at most MAX
@@ -1203,8 +1213,8 @@ lex_escape (int is_byte)
 
 /* Lex a character constant.  */
 
-static int
-lex_character (void)
+int
+rust_parser::lex_character (YYSTYPE *lvalp)
 {
   int is_byte = 0;
   uint32_t value;
@@ -1229,8 +1239,8 @@ lex_character (void)
     error (_("Unterminated character literal"));
   ++lexptr;
 
-  rustyylval.typed_val_int.val = value;
-  rustyylval.typed_val_int.type = rust_type (is_byte ? "u8" : "char");
+  lvalp->typed_val_int.val = value;
+  lvalp->typed_val_int.type = get_type (is_byte ? "u8" : "char");
 
   return INTEGER;
 }
@@ -1270,8 +1280,8 @@ ends_raw_string (const char *str, int n)
 
 /* Lex a string constant.  */
 
-static int
-lex_string (void)
+int
+rust_parser::lex_string (YYSTYPE *lvalp)
 {
   int is_byte = lexptr[0] == 'b';
   int raw_length;
@@ -1301,7 +1311,7 @@ lex_string (void)
 	  value = lexptr[0] & 0xff;
 	  if (is_byte && value > 127)
 	    error (_("Non-ASCII value in raw byte string"));
-	  obstack_1grow (work_obstack, value);
+	  obstack_1grow (&obstack, value);
 
 	  ++lexptr;
 	}
@@ -1316,11 +1326,11 @@ lex_string (void)
 	  value = lex_escape (is_byte);
 
 	  if (is_byte)
-	    obstack_1grow (work_obstack, value);
+	    obstack_1grow (&obstack, value);
 	  else
 	    convert_between_encodings ("UTF-32", "UTF-8", (gdb_byte *) &value,
 				       sizeof (value), sizeof (value),
-				       work_obstack, translit_none);
+				       &obstack, translit_none);
 	}
       else if (lexptr[0] == '\0')
 	error (_("Unexpected EOF in string"));
@@ -1329,13 +1339,13 @@ lex_string (void)
 	  value = lexptr[0] & 0xff;
 	  if (is_byte && value > 127)
 	    error (_("Non-ASCII value in byte string"));
-	  obstack_1grow (work_obstack, value);
+	  obstack_1grow (&obstack, value);
 	  ++lexptr;
 	}
     }
 
-  rustyylval.sval.length = obstack_object_size (work_obstack);
-  rustyylval.sval.ptr = (const char *) obstack_finish (work_obstack);
+  lvalp->sval.length = obstack_object_size (&obstack);
+  lvalp->sval.ptr = (const char *) obstack_finish (&obstack);
   return is_byte ? BYTESTRING : STRING;
 }
 
@@ -1367,8 +1377,8 @@ rust_identifier_start_p (char c)
 
 /* Lex an identifier.  */
 
-static int
-lex_identifier (void)
+int
+rust_parser::lex_identifier (YYSTYPE *lvalp)
 {
   const char *start = lexptr;
   unsigned int length;
@@ -1423,7 +1433,7 @@ lex_identifier (void)
     }
 
   if (token == NULL || (parse_completion && lexptr[0] == '\0'))
-    rustyylval.sval = make_stoken (rust_copy_name (start, length));
+    lvalp->sval = make_stoken (copy_name (start, length));
 
   if (parse_completion && lexptr[0] == '\0')
     {
@@ -1442,7 +1452,7 @@ lex_identifier (void)
 /* Lex an operator.  */
 
 static int
-lex_operator (void)
+lex_operator (YYSTYPE *lvalp)
 {
   const struct token_info *token = NULL;
   int i;
@@ -1460,7 +1470,7 @@ lex_operator (void)
 
   if (token != NULL)
     {
-      rustyylval.opcode = token->opcode;
+      lvalp->opcode = token->opcode;
       return token->value;
     }
 
@@ -1469,8 +1479,8 @@ lex_operator (void)
 
 /* Lex a number.  */
 
-static int
-lex_number (void)
+int
+rust_parser::lex_number (YYSTYPE *lvalp)
 {
   regmatch_t subexps[NUM_SUBEXPRESSIONS];
   int match;
@@ -1554,7 +1564,7 @@ lex_number (void)
     }
 
   /* Look up the type.  */
-  type = rust_type (type_name);
+  type = get_type (type_name);
 
   /* Copy the text of the number and remove the "_"s.  */
   std::string number;
@@ -1593,17 +1603,17 @@ lex_number (void)
 
       value = strtoul (number.c_str () + offset, NULL, radix);
       if (implicit_i32 && value >= ((uint64_t) 1) << 31)
-	type = rust_type ("i64");
+	type = get_type ("i64");
 
-      rustyylval.typed_val_int.val = value;
-      rustyylval.typed_val_int.type = type;
+      lvalp->typed_val_int.val = value;
+      lvalp->typed_val_int.type = type;
     }
   else
     {
-      rustyylval.typed_val_float.type = type;
+      lvalp->typed_val_float.type = type;
       bool parsed = parse_float (number.c_str (), number.length (),
-				 rustyylval.typed_val_float.type,
-				 rustyylval.typed_val_float.val);
+				 lvalp->typed_val_float.type,
+				 lvalp->typed_val_float.val);
       gdb_assert (parsed);
     }
 
@@ -1613,7 +1623,7 @@ lex_number (void)
 /* The lexer.  */
 
 static int
-rustyylex (void)
+rustyylex (YYSTYPE *lvalp, rust_parser *parser)
 {
   /* Skip all leading whitespace.  */
   while (lexptr[0] == ' ' || lexptr[0] == '\t' || lexptr[0] == '\r'
@@ -1630,28 +1640,28 @@ rustyylex (void)
     {
       if (parse_completion)
 	{
-	  rustyylval.sval = make_stoken ("");
+	  lvalp->sval = make_stoken ("");
 	  return COMPLETE;
 	}
       return 0;
     }
 
   if (lexptr[0] >= '0' && lexptr[0] <= '9')
-    return lex_number ();
+    return parser->lex_number (lvalp);
   else if (lexptr[0] == 'b' && lexptr[1] == '\'')
-    return lex_character ();
+    return parser->lex_character (lvalp);
   else if (lexptr[0] == 'b' && lexptr[1] == '"')
-    return lex_string ();
+    return parser->lex_string (lvalp);
   else if (lexptr[0] == 'b' && starts_raw_string (lexptr + 1))
-    return lex_string ();
+    return parser->lex_string (lvalp);
   else if (starts_raw_string (lexptr))
-    return lex_string ();
+    return parser->lex_string (lvalp);
   else if (rust_identifier_start_p (lexptr[0]))
-    return lex_identifier ();
+    return parser->lex_identifier (lvalp);
   else if (lexptr[0] == '"')
-    return lex_string ();
+    return parser->lex_string (lvalp);
   else if (lexptr[0] == '\'')
-    return lex_character ();
+    return parser->lex_character (lvalp);
   else if (lexptr[0] == '}' || lexptr[0] == ']')
     {
       /* Falls through to lex_operator.  */
@@ -1665,7 +1675,7 @@ rustyylex (void)
   else if (lexptr[0] == ',' && comma_terminates && paren_depth == 0)
     return 0;
 
-  return lex_operator ();
+  return lex_operator (lvalp);
 }
 
 /* Push back a single character to be re-lexed.  */
@@ -1684,11 +1694,11 @@ rust_push_back (char c)
 
 /* Make an arbitrary operation and fill in the fields.  */
 
-static const struct rust_op *
-ast_operation (enum exp_opcode opcode, const struct rust_op *left,
-		const struct rust_op *right)
+const struct rust_op *
+rust_parser::ast_operation (enum exp_opcode opcode, const struct rust_op *left,
+			    const struct rust_op *right)
 {
-  struct rust_op *result = OBSTACK_ZALLOC (work_obstack, struct rust_op);
+  struct rust_op *result = OBSTACK_ZALLOC (&obstack, struct rust_op);
 
   result->opcode = opcode;
   result->left.op = left;
@@ -1699,11 +1709,12 @@ ast_operation (enum exp_opcode opcode, const struct rust_op *left,
 
 /* Make a compound assignment operation.  */
 
-static const struct rust_op *
-ast_compound_assignment (enum exp_opcode opcode, const struct rust_op *left,
-			  const struct rust_op *right)
+const struct rust_op *
+rust_parser::ast_compound_assignment (enum exp_opcode opcode,
+				      const struct rust_op *left,
+				      const struct rust_op *right)
 {
-  struct rust_op *result = OBSTACK_ZALLOC (work_obstack, struct rust_op);
+  struct rust_op *result = OBSTACK_ZALLOC (&obstack, struct rust_op);
 
   result->opcode = opcode;
   result->compound_assignment = 1;
@@ -1715,10 +1726,10 @@ ast_compound_assignment (enum exp_opcode opcode, const struct rust_op *left,
 
 /* Make a typed integer literal operation.  */
 
-static const struct rust_op *
-ast_literal (struct typed_val_int val)
+const struct rust_op *
+rust_parser::ast_literal (struct typed_val_int val)
 {
-  struct rust_op *result = OBSTACK_ZALLOC (work_obstack, struct rust_op);
+  struct rust_op *result = OBSTACK_ZALLOC (&obstack, struct rust_op);
 
   result->opcode = OP_LONG;
   result->left.typed_val_int = val;
@@ -1728,10 +1739,10 @@ ast_literal (struct typed_val_int val)
 
 /* Make a typed floating point literal operation.  */
 
-static const struct rust_op *
-ast_dliteral (struct typed_val_float val)
+const struct rust_op *
+rust_parser::ast_dliteral (struct typed_val_float val)
 {
-  struct rust_op *result = OBSTACK_ZALLOC (work_obstack, struct rust_op);
+  struct rust_op *result = OBSTACK_ZALLOC (&obstack, struct rust_op);
 
   result->opcode = OP_FLOAT;
   result->left.typed_val_float = val;
@@ -1741,18 +1752,18 @@ ast_dliteral (struct typed_val_float val)
 
 /* Make a unary operation.  */
 
-static const struct rust_op *
-ast_unary (enum exp_opcode opcode, const struct rust_op *expr)
+const struct rust_op *
+rust_parser::ast_unary (enum exp_opcode opcode, const struct rust_op *expr)
 {
   return ast_operation (opcode, expr, NULL);
 }
 
 /* Make a cast operation.  */
 
-static const struct rust_op *
-ast_cast (const struct rust_op *expr, const struct rust_op *type)
+const struct rust_op *
+rust_parser::ast_cast (const struct rust_op *expr, const struct rust_op *type)
 {
-  struct rust_op *result = OBSTACK_ZALLOC (work_obstack, struct rust_op);
+  struct rust_op *result = OBSTACK_ZALLOC (&obstack, struct rust_op);
 
   result->opcode = UNOP_CAST;
   result->left.op = expr;
@@ -1765,11 +1776,11 @@ ast_cast (const struct rust_op *expr, const struct rust_op *type)
    when lowering we may discover that it actually represents the
    creation of a tuple struct.  */
 
-static const struct rust_op *
-ast_call_ish (enum exp_opcode opcode, const struct rust_op *expr,
-	      rust_op_vector *params)
+const struct rust_op *
+rust_parser::ast_call_ish (enum exp_opcode opcode, const struct rust_op *expr,
+			   rust_op_vector *params)
 {
-  struct rust_op *result = OBSTACK_ZALLOC (work_obstack, struct rust_op);
+  struct rust_op *result = OBSTACK_ZALLOC (&obstack, struct rust_op);
 
   result->opcode = opcode;
   result->left.op = expr;
@@ -1780,10 +1791,10 @@ ast_call_ish (enum exp_opcode opcode, const struct rust_op *expr,
 
 /* Make a structure creation operation.  */
 
-static const struct rust_op *
-ast_struct (const struct rust_op *name, rust_set_vector *fields)
+const struct rust_op *
+rust_parser::ast_struct (const struct rust_op *name, rust_set_vector *fields)
 {
-  struct rust_op *result = OBSTACK_ZALLOC (work_obstack, struct rust_op);
+  struct rust_op *result = OBSTACK_ZALLOC (&obstack, struct rust_op);
 
   result->opcode = OP_AGGREGATE;
   result->left.op = name;
@@ -1794,10 +1805,10 @@ ast_struct (const struct rust_op *name, rust_set_vector *fields)
 
 /* Make an identifier path.  */
 
-static const struct rust_op *
-ast_path (struct stoken path, rust_op_vector *params)
+const struct rust_op *
+rust_parser::ast_path (struct stoken path, rust_op_vector *params)
 {
-  struct rust_op *result = OBSTACK_ZALLOC (work_obstack, struct rust_op);
+  struct rust_op *result = OBSTACK_ZALLOC (&obstack, struct rust_op);
 
   result->opcode = OP_VAR_VALUE;
   result->left.sval = path;
@@ -1808,10 +1819,10 @@ ast_path (struct stoken path, rust_op_vector *params)
 
 /* Make a string constant operation.  */
 
-static const struct rust_op *
-ast_string (struct stoken str)
+const struct rust_op *
+rust_parser::ast_string (struct stoken str)
 {
-  struct rust_op *result = OBSTACK_ZALLOC (work_obstack, struct rust_op);
+  struct rust_op *result = OBSTACK_ZALLOC (&obstack, struct rust_op);
 
   result->opcode = OP_STRING;
   result->left.sval = str;
@@ -1821,10 +1832,11 @@ ast_string (struct stoken str)
 
 /* Make a field expression.  */
 
-static const struct rust_op *
-ast_structop (const struct rust_op *left, const char *name, int completing)
+const struct rust_op *
+rust_parser::ast_structop (const struct rust_op *left, const char *name,
+			   int completing)
 {
-  struct rust_op *result = OBSTACK_ZALLOC (work_obstack, struct rust_op);
+  struct rust_op *result = OBSTACK_ZALLOC (&obstack, struct rust_op);
 
   result->opcode = STRUCTOP_STRUCT;
   result->completing = completing;
@@ -1836,11 +1848,11 @@ ast_structop (const struct rust_op *left, const char *name, int completing)
 
 /* Make an anonymous struct operation, like 'x.0'.  */
 
-static const struct rust_op *
-ast_structop_anonymous (const struct rust_op *left,
-			 struct typed_val_int number)
+const struct rust_op *
+rust_parser::ast_structop_anonymous (const struct rust_op *left,
+				     struct typed_val_int number)
 {
-  struct rust_op *result = OBSTACK_ZALLOC (work_obstack, struct rust_op);
+  struct rust_op *result = OBSTACK_ZALLOC (&obstack, struct rust_op);
 
   result->opcode = STRUCTOP_ANONYMOUS;
   result->left.op = left;
@@ -1851,11 +1863,11 @@ ast_structop_anonymous (const struct rust_op *left,
 
 /* Make a range operation.  */
 
-static const struct rust_op *
-ast_range (const struct rust_op *lhs, const struct rust_op *rhs,
-	   bool inclusive)
+const struct rust_op *
+rust_parser::ast_range (const struct rust_op *lhs, const struct rust_op *rhs,
+			bool inclusive)
 {
-  struct rust_op *result = OBSTACK_ZALLOC (work_obstack, struct rust_op);
+  struct rust_op *result = OBSTACK_ZALLOC (&obstack, struct rust_op);
 
   result->opcode = OP_RANGE;
   result->inclusive = inclusive;
@@ -1867,10 +1879,10 @@ ast_range (const struct rust_op *lhs, const struct rust_op *rhs,
 
 /* A helper function to make a type-related AST node.  */
 
-static struct rust_op *
-ast_basic_type (enum type_code typecode)
+struct rust_op *
+rust_parser::ast_basic_type (enum type_code typecode)
 {
-  struct rust_op *result = OBSTACK_ZALLOC (work_obstack, struct rust_op);
+  struct rust_op *result = OBSTACK_ZALLOC (&obstack, struct rust_op);
 
   result->opcode = OP_TYPE;
   result->typecode = typecode;
@@ -1879,8 +1891,9 @@ ast_basic_type (enum type_code typecode)
 
 /* Create an AST node describing an array type.  */
 
-static const struct rust_op *
-ast_array_type (const struct rust_op *lhs, struct typed_val_int val)
+const struct rust_op *
+rust_parser::ast_array_type (const struct rust_op *lhs,
+			     struct typed_val_int val)
 {
   struct rust_op *result = ast_basic_type (TYPE_CODE_ARRAY);
 
@@ -1891,8 +1904,8 @@ ast_array_type (const struct rust_op *lhs, struct typed_val_int val)
 
 /* Create an AST node describing a reference type.  */
 
-static const struct rust_op *
-ast_slice_type (const struct rust_op *type)
+const struct rust_op *
+rust_parser::ast_slice_type (const struct rust_op *type)
 {
   /* Use TYPE_CODE_COMPLEX just because it is handy.  */
   struct rust_op *result = ast_basic_type (TYPE_CODE_COMPLEX);
@@ -1903,8 +1916,8 @@ ast_slice_type (const struct rust_op *type)
 
 /* Create an AST node describing a reference type.  */
 
-static const struct rust_op *
-ast_reference_type (const struct rust_op *type)
+const struct rust_op *
+rust_parser::ast_reference_type (const struct rust_op *type)
 {
   struct rust_op *result = ast_basic_type (TYPE_CODE_REF);
 
@@ -1914,8 +1927,8 @@ ast_reference_type (const struct rust_op *type)
 
 /* Create an AST node describing a pointer type.  */
 
-static const struct rust_op *
-ast_pointer_type (const struct rust_op *type, int is_mut)
+const struct rust_op *
+rust_parser::ast_pointer_type (const struct rust_op *type, int is_mut)
 {
   struct rust_op *result = ast_basic_type (TYPE_CODE_PTR);
 
@@ -1926,8 +1939,9 @@ ast_pointer_type (const struct rust_op *type, int is_mut)
 
 /* Create an AST node describing a function type.  */
 
-static const struct rust_op *
-ast_function_type (const struct rust_op *rtype, rust_op_vector *params)
+const struct rust_op *
+rust_parser::ast_function_type (const struct rust_op *rtype,
+				rust_op_vector *params)
 {
   struct rust_op *result = ast_basic_type (TYPE_CODE_FUNC);
 
@@ -1938,8 +1952,8 @@ ast_function_type (const struct rust_op *rtype, rust_op_vector *params)
 
 /* Create an AST node describing a tuple type.  */
 
-static const struct rust_op *
-ast_tuple_type (rust_op_vector *params)
+const struct rust_op *
+rust_parser::ast_tuple_type (rust_op_vector *params)
 {
   struct rust_op *result = ast_basic_type (TYPE_CODE_STRUCT);
 
@@ -1981,8 +1995,8 @@ rust_lookup_symbol (const char *name, const struct block *block,
 
 /* Look up a type, following Rust namespace conventions.  */
 
-static struct type *
-rust_lookup_type (const char *name, const struct block *block)
+struct type *
+rust_parser::rust_lookup_type (const char *name, const struct block *block)
 {
   struct block_symbol result;
   struct type *type;
@@ -1996,34 +2010,26 @@ rust_lookup_type (const char *name, const struct block *block)
       return SYMBOL_TYPE (result.symbol);
     }
 
-  type = lookup_typename (current_parser->language (), current_parser->arch (),
-			  name, NULL, 1);
+  type = lookup_typename (language (), arch (), name, NULL, 1);
   if (type != NULL)
     return type;
 
   /* Last chance, try a built-in type.  */
-  return language_lookup_primitive_type (current_parser->language (),
-					 current_parser->arch (),
-					 name);
+  return language_lookup_primitive_type (language (), arch (), name);
 }
-
-static struct type *convert_ast_to_type (struct parser_state *state,
-					 const struct rust_op *operation);
-static const char *convert_name (struct parser_state *state,
-				 const struct rust_op *operation);
 
 /* Convert a vector of rust_ops representing types to a vector of
    types.  */
 
-static std::vector<struct type *>
-convert_params_to_types (struct parser_state *state, rust_op_vector *params)
+std::vector<struct type *>
+rust_parser::convert_params_to_types (rust_op_vector *params)
 {
   std::vector<struct type *> result;
 
   if (params != nullptr)
     {
       for (const rust_op *op : *params)
-        result.push_back (convert_ast_to_type (state, op));
+        result.push_back (convert_ast_to_type (op));
     }
 
   return result;
@@ -2031,15 +2037,14 @@ convert_params_to_types (struct parser_state *state, rust_op_vector *params)
 
 /* Convert a rust_op representing a type to a struct type *.  */
 
-static struct type *
-convert_ast_to_type (struct parser_state *state,
-		     const struct rust_op *operation)
+struct type *
+rust_parser::convert_ast_to_type (const struct rust_op *operation)
 {
   struct type *type, *result = NULL;
 
   if (operation->opcode == OP_VAR_VALUE)
     {
-      const char *varname = convert_name (state, operation);
+      const char *varname = convert_name (operation);
 
       result = rust_lookup_type (varname, expression_context_block);
       if (result == NULL)
@@ -2052,7 +2057,7 @@ convert_ast_to_type (struct parser_state *state,
   switch (operation->typecode)
     {
     case TYPE_CODE_ARRAY:
-      type = convert_ast_to_type (state, operation->left.op);
+      type = convert_ast_to_type (operation->left.op);
       if (operation->right.typed_val_int.val < 0)
 	error (_("Negative array length"));
       result = lookup_array_range_type (type, 0,
@@ -2061,9 +2066,9 @@ convert_ast_to_type (struct parser_state *state,
 
     case TYPE_CODE_COMPLEX:
       {
-	struct type *usize = rust_type ("usize");
+	struct type *usize = get_type ("usize");
 
-	type = convert_ast_to_type (state, operation->left.op);
+	type = convert_ast_to_type (operation->left.op);
 	result = rust_slice_type ("&[*gdb*]", type, usize);
       }
       break;
@@ -2071,17 +2076,17 @@ convert_ast_to_type (struct parser_state *state,
     case TYPE_CODE_REF:
     case TYPE_CODE_PTR:
       /* For now we treat &x and *x identically.  */
-      type = convert_ast_to_type (state, operation->left.op);
+      type = convert_ast_to_type (operation->left.op);
       result = lookup_pointer_type (type);
       break;
 
     case TYPE_CODE_FUNC:
       {
 	std::vector<struct type *> args
-	  (convert_params_to_types (state, operation->right.params));
+	  (convert_params_to_types (operation->right.params));
 	struct type **argtypes = NULL;
 
-	type = convert_ast_to_type (state, operation->left.op);
+	type = convert_ast_to_type (operation->left.op);
 	if (!args.empty ())
 	  argtypes = args.data ();
 
@@ -2095,22 +2100,22 @@ convert_ast_to_type (struct parser_state *state,
     case TYPE_CODE_STRUCT:
       {
 	std::vector<struct type *> args
-	  (convert_params_to_types (state, operation->left.params));
+	  (convert_params_to_types (operation->left.params));
 	int i;
 	const char *name;
 
-	obstack_1grow (work_obstack, '(');
+	obstack_1grow (&obstack, '(');
 	for (i = 0; i < args.size (); ++i)
 	  {
 	    std::string type_name = type_to_string (args[i]);
 
 	    if (i > 0)
-	      obstack_1grow (work_obstack, ',');
-	    obstack_grow_str (work_obstack, type_name.c_str ());
+	      obstack_1grow (&obstack, ',');
+	    obstack_grow_str (&obstack, type_name.c_str ());
 	  }
 
-	obstack_grow_str0 (work_obstack, ")");
-	name = (const char *) obstack_finish (work_obstack);
+	obstack_grow_str0 (&obstack, ")");
+	name = (const char *) obstack_finish (&obstack);
 
 	/* We don't allow creating new tuple types (yet), but we do
 	   allow looking up existing tuple types.  */
@@ -2132,8 +2137,8 @@ convert_ast_to_type (struct parser_state *state,
    name.  This applies generic arguments as needed.  The returned name
    is allocated on the work obstack.  */
 
-static const char *
-convert_name (struct parser_state *state, const struct rust_op *operation)
+const char *
+rust_parser::convert_name (const struct rust_op *operation)
 {
   int i;
 
@@ -2143,39 +2148,33 @@ convert_name (struct parser_state *state, const struct rust_op *operation)
     return operation->left.sval.ptr;
 
   std::vector<struct type *> types
-    (convert_params_to_types (state, operation->right.params));
+    (convert_params_to_types (operation->right.params));
 
-  obstack_grow_str (work_obstack, operation->left.sval.ptr);
-  obstack_1grow (work_obstack, '<');
+  obstack_grow_str (&obstack, operation->left.sval.ptr);
+  obstack_1grow (&obstack, '<');
   for (i = 0; i < types.size (); ++i)
     {
       std::string type_name = type_to_string (types[i]);
 
       if (i > 0)
-	obstack_1grow (work_obstack, ',');
+	obstack_1grow (&obstack, ',');
 
-      obstack_grow_str (work_obstack, type_name.c_str ());
+      obstack_grow_str (&obstack, type_name.c_str ());
     }
-  obstack_grow_str0 (work_obstack, ">");
+  obstack_grow_str0 (&obstack, ">");
 
-  return (const char *) obstack_finish (work_obstack);
+  return (const char *) obstack_finish (&obstack);
 }
-
-static void convert_ast_to_expression (struct parser_state *state,
-				       const struct rust_op *operation,
-				       const struct rust_op *top,
-				       bool want_type = false);
 
 /* A helper function that converts a vec of rust_ops to a gdb
    expression.  */
 
-static void
-convert_params_to_expression (struct parser_state *state,
-			      rust_op_vector *params,
-			      const struct rust_op *top)
+void
+rust_parser::convert_params_to_expression (rust_op_vector *params,
+					   const struct rust_op *top)
 {
   for (const rust_op *elem : *params)
-    convert_ast_to_expression (state, elem, top);
+    convert_ast_to_expression (elem, top);
 }
 
 /* Lower a rust_op to a gdb expression.  STATE is the parser state.
@@ -2187,53 +2186,52 @@ convert_params_to_expression (struct parser_state *state,
    erroring).  If WANT_TYPE is set, then the similar TOP handling is
    not done.  */
 
-static void
-convert_ast_to_expression (struct parser_state *state,
-			   const struct rust_op *operation,
-			   const struct rust_op *top,
-			   bool want_type)
+void
+rust_parser::convert_ast_to_expression (const struct rust_op *operation,
+					const struct rust_op *top,
+					bool want_type)
 {
   switch (operation->opcode)
     {
     case OP_LONG:
-      write_exp_elt_opcode (state, OP_LONG);
-      write_exp_elt_type (state, operation->left.typed_val_int.type);
-      write_exp_elt_longcst (state, operation->left.typed_val_int.val);
-      write_exp_elt_opcode (state, OP_LONG);
+      write_exp_elt_opcode (pstate, OP_LONG);
+      write_exp_elt_type (pstate, operation->left.typed_val_int.type);
+      write_exp_elt_longcst (pstate, operation->left.typed_val_int.val);
+      write_exp_elt_opcode (pstate, OP_LONG);
       break;
 
     case OP_FLOAT:
-      write_exp_elt_opcode (state, OP_FLOAT);
-      write_exp_elt_type (state, operation->left.typed_val_float.type);
-      write_exp_elt_floatcst (state, operation->left.typed_val_float.val);
-      write_exp_elt_opcode (state, OP_FLOAT);
+      write_exp_elt_opcode (pstate, OP_FLOAT);
+      write_exp_elt_type (pstate, operation->left.typed_val_float.type);
+      write_exp_elt_floatcst (pstate, operation->left.typed_val_float.val);
+      write_exp_elt_opcode (pstate, OP_FLOAT);
       break;
 
     case STRUCTOP_STRUCT:
       {
-	convert_ast_to_expression (state, operation->left.op, top);
+	convert_ast_to_expression (operation->left.op, top);
 
 	if (operation->completing)
-	  mark_struct_expression (state);
-	write_exp_elt_opcode (state, STRUCTOP_STRUCT);
-	write_exp_string (state, operation->right.sval);
-	write_exp_elt_opcode (state, STRUCTOP_STRUCT);
+	  mark_struct_expression (pstate);
+	write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
+	write_exp_string (pstate, operation->right.sval);
+	write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
       }
       break;
 
     case STRUCTOP_ANONYMOUS:
       {
-	convert_ast_to_expression (state, operation->left.op, top);
+	convert_ast_to_expression (operation->left.op, top);
 
-	write_exp_elt_opcode (state, STRUCTOP_ANONYMOUS);
-	write_exp_elt_longcst (state, operation->right.typed_val_int.val);
-	write_exp_elt_opcode (state, STRUCTOP_ANONYMOUS);
+	write_exp_elt_opcode (pstate, STRUCTOP_ANONYMOUS);
+	write_exp_elt_longcst (pstate, operation->right.typed_val_int.val);
+	write_exp_elt_opcode (pstate, STRUCTOP_ANONYMOUS);
       }
       break;
 
     case UNOP_SIZEOF:
-      convert_ast_to_expression (state, operation->left.op, top, true);
-      write_exp_elt_opcode (state, UNOP_SIZEOF);
+      convert_ast_to_expression (operation->left.op, top, true);
+      write_exp_elt_opcode (pstate, UNOP_SIZEOF);
       break;
 
     case UNOP_PLUS:
@@ -2241,8 +2239,8 @@ convert_ast_to_expression (struct parser_state *state,
     case UNOP_COMPLEMENT:
     case UNOP_IND:
     case UNOP_ADDR:
-      convert_ast_to_expression (state, operation->left.op, top);
-      write_exp_elt_opcode (state, operation->opcode);
+      convert_ast_to_expression (operation->left.op, top);
+      write_exp_elt_opcode (pstate, operation->opcode);
       break;
 
     case BINOP_SUBSCRIPT:
@@ -2267,43 +2265,43 @@ convert_ast_to_expression (struct parser_state *state,
     case BINOP_RSH:
     case BINOP_ASSIGN:
     case OP_RUST_ARRAY:
-      convert_ast_to_expression (state, operation->left.op, top);
-      convert_ast_to_expression (state, operation->right.op, top);
+      convert_ast_to_expression (operation->left.op, top);
+      convert_ast_to_expression (operation->right.op, top);
       if (operation->compound_assignment)
 	{
-	  write_exp_elt_opcode (state, BINOP_ASSIGN_MODIFY);
-	  write_exp_elt_opcode (state, operation->opcode);
-	  write_exp_elt_opcode (state, BINOP_ASSIGN_MODIFY);
+	  write_exp_elt_opcode (pstate, BINOP_ASSIGN_MODIFY);
+	  write_exp_elt_opcode (pstate, operation->opcode);
+	  write_exp_elt_opcode (pstate, BINOP_ASSIGN_MODIFY);
 	}
       else
-	write_exp_elt_opcode (state, operation->opcode);
+	write_exp_elt_opcode (pstate, operation->opcode);
 
       if (operation->compound_assignment
 	  || operation->opcode == BINOP_ASSIGN)
 	{
 	  struct type *type;
 
-	  type = language_lookup_primitive_type (parse_language (state),
-						 parse_gdbarch (state),
+	  type = language_lookup_primitive_type (parse_language (pstate),
+						 parse_gdbarch (pstate),
 						 "()");
 
-	  write_exp_elt_opcode (state, OP_LONG);
-	  write_exp_elt_type (state, type);
-	  write_exp_elt_longcst (state, 0);
-	  write_exp_elt_opcode (state, OP_LONG);
+	  write_exp_elt_opcode (pstate, OP_LONG);
+	  write_exp_elt_type (pstate, type);
+	  write_exp_elt_longcst (pstate, 0);
+	  write_exp_elt_opcode (pstate, OP_LONG);
 
-	  write_exp_elt_opcode (state, BINOP_COMMA);
+	  write_exp_elt_opcode (pstate, BINOP_COMMA);
 	}
       break;
 
     case UNOP_CAST:
       {
-	struct type *type = convert_ast_to_type (state, operation->right.op);
+	struct type *type = convert_ast_to_type (operation->right.op);
 
-	convert_ast_to_expression (state, operation->left.op, top);
-	write_exp_elt_opcode (state, UNOP_CAST);
-	write_exp_elt_type (state, type);
-	write_exp_elt_opcode (state, UNOP_CAST);
+	convert_ast_to_expression (operation->left.op, top);
+	write_exp_elt_opcode (pstate, UNOP_CAST);
+	write_exp_elt_type (pstate, type);
+	write_exp_elt_opcode (pstate, UNOP_CAST);
       }
       break;
 
@@ -2312,7 +2310,7 @@ convert_ast_to_expression (struct parser_state *state,
 	if (operation->left.op->opcode == OP_VAR_VALUE)
 	  {
 	    struct type *type;
-	    const char *varname = convert_name (state, operation->left.op);
+	    const char *varname = convert_name (operation->left.op);
 
 	    type = rust_lookup_type (varname, expression_context_block);
 	    if (type != NULL)
@@ -2331,36 +2329,36 @@ convert_ast_to_expression (struct parser_state *state,
 			char *cell = get_print_cell ();
 
 			xsnprintf (cell, PRINT_CELL_SIZE, "__%d", i);
-			write_exp_elt_opcode (state, OP_NAME);
-			write_exp_string (state, make_stoken (cell));
-			write_exp_elt_opcode (state, OP_NAME);
+			write_exp_elt_opcode (pstate, OP_NAME);
+			write_exp_string (pstate, make_stoken (cell));
+			write_exp_elt_opcode (pstate, OP_NAME);
 
-			convert_ast_to_expression (state, (*params)[i], top);
+			convert_ast_to_expression ((*params)[i], top);
 		      }
 
-		    write_exp_elt_opcode (state, OP_AGGREGATE);
-		    write_exp_elt_type (state, type);
-		    write_exp_elt_longcst (state, 2 * params->size ());
-		    write_exp_elt_opcode (state, OP_AGGREGATE);
+		    write_exp_elt_opcode (pstate, OP_AGGREGATE);
+		    write_exp_elt_type (pstate, type);
+		    write_exp_elt_longcst (pstate, 2 * params->size ());
+		    write_exp_elt_opcode (pstate, OP_AGGREGATE);
 		    break;
 		  }
 	      }
 	  }
-	convert_ast_to_expression (state, operation->left.op, top);
-	convert_params_to_expression (state, operation->right.params, top);
-	write_exp_elt_opcode (state, OP_FUNCALL);
-	write_exp_elt_longcst (state, operation->right.params->size ());
-	write_exp_elt_longcst (state, OP_FUNCALL);
+	convert_ast_to_expression (operation->left.op, top);
+	convert_params_to_expression (operation->right.params, top);
+	write_exp_elt_opcode (pstate, OP_FUNCALL);
+	write_exp_elt_longcst (pstate, operation->right.params->size ());
+	write_exp_elt_longcst (pstate, OP_FUNCALL);
       }
       break;
 
     case OP_ARRAY:
       gdb_assert (operation->left.op == NULL);
-      convert_params_to_expression (state, operation->right.params, top);
-      write_exp_elt_opcode (state, OP_ARRAY);
-      write_exp_elt_longcst (state, 0);
-      write_exp_elt_longcst (state, operation->right.params->size () - 1);
-      write_exp_elt_longcst (state, OP_ARRAY);
+      convert_params_to_expression (operation->right.params, top);
+      write_exp_elt_opcode (pstate, OP_ARRAY);
+      write_exp_elt_longcst (pstate, 0);
+      write_exp_elt_longcst (pstate, operation->right.params->size () - 1);
+      write_exp_elt_longcst (pstate, OP_ARRAY);
       break;
 
     case OP_VAR_VALUE:
@@ -2370,19 +2368,19 @@ convert_ast_to_expression (struct parser_state *state,
 
 	if (operation->left.sval.ptr[0] == '$')
 	  {
-	    write_dollar_variable (state, operation->left.sval);
+	    write_dollar_variable (pstate, operation->left.sval);
 	    break;
 	  }
 
-	varname = convert_name (state, operation);
+	varname = convert_name (operation);
 	sym = rust_lookup_symbol (varname, expression_context_block,
 				  VAR_DOMAIN);
 	if (sym.symbol != NULL && SYMBOL_CLASS (sym.symbol) != LOC_TYPEDEF)
 	  {
-	    write_exp_elt_opcode (state, OP_VAR_VALUE);
-	    write_exp_elt_block (state, sym.block);
-	    write_exp_elt_sym (state, sym.symbol);
-	    write_exp_elt_opcode (state, OP_VAR_VALUE);
+	    write_exp_elt_opcode (pstate, OP_VAR_VALUE);
+	    write_exp_elt_block (pstate, sym.block);
+	    write_exp_elt_sym (pstate, sym.symbol);
+	    write_exp_elt_opcode (pstate, OP_VAR_VALUE);
 	  }
 	else
 	  {
@@ -2403,16 +2401,16 @@ convert_ast_to_expression (struct parser_state *state,
 		&& TYPE_NFIELDS (type) == 0)
 	      {
 		/* A unit-like struct.  */
-		write_exp_elt_opcode (state, OP_AGGREGATE);
-		write_exp_elt_type (state, type);
-		write_exp_elt_longcst (state, 0);
-		write_exp_elt_opcode (state, OP_AGGREGATE);
+		write_exp_elt_opcode (pstate, OP_AGGREGATE);
+		write_exp_elt_type (pstate, type);
+		write_exp_elt_longcst (pstate, 0);
+		write_exp_elt_opcode (pstate, OP_AGGREGATE);
 	      }
 	    else if (want_type || operation == top)
 	      {
-		write_exp_elt_opcode (state, OP_TYPE);
-		write_exp_elt_type (state, type);
-		write_exp_elt_opcode (state, OP_TYPE);
+		write_exp_elt_opcode (pstate, OP_TYPE);
+		write_exp_elt_type (pstate, type);
+		write_exp_elt_opcode (pstate, OP_TYPE);
 	      }
 	    else
 	      error (_("Found type '%s', which can't be "
@@ -2434,24 +2432,24 @@ convert_ast_to_expression (struct parser_state *state,
 	  {
 	    if (init.name.ptr != NULL)
 	      {
-		write_exp_elt_opcode (state, OP_NAME);
-		write_exp_string (state, init.name);
-		write_exp_elt_opcode (state, OP_NAME);
+		write_exp_elt_opcode (pstate, OP_NAME);
+		write_exp_string (pstate, init.name);
+		write_exp_elt_opcode (pstate, OP_NAME);
 		++length;
 	      }
 
-	    convert_ast_to_expression (state, init.init, top);
+	    convert_ast_to_expression (init.init, top);
 	    ++length;
 
 	    if (init.name.ptr == NULL)
 	      {
 		/* This is handled differently from Ada in our
 		   evaluator.  */
-		write_exp_elt_opcode (state, OP_OTHERS);
+		write_exp_elt_opcode (pstate, OP_OTHERS);
 	      }
 	  }
 
-	name = convert_name (state, operation->left.op);
+	name = convert_name (operation->left.op);
 	type = rust_lookup_type (name, expression_context_block);
 	if (type == NULL)
 	  error (_("Could not find type '%s'"), operation->left.sval.ptr);
@@ -2461,18 +2459,18 @@ convert_ast_to_expression (struct parser_state *state,
 	    || rust_tuple_struct_type_p (type))
 	  error (_("Struct expression applied to non-struct type"));
 
-	write_exp_elt_opcode (state, OP_AGGREGATE);
-	write_exp_elt_type (state, type);
-	write_exp_elt_longcst (state, length);
-	write_exp_elt_opcode (state, OP_AGGREGATE);
+	write_exp_elt_opcode (pstate, OP_AGGREGATE);
+	write_exp_elt_type (pstate, type);
+	write_exp_elt_longcst (pstate, length);
+	write_exp_elt_opcode (pstate, OP_AGGREGATE);
       }
       break;
 
     case OP_STRING:
       {
-	write_exp_elt_opcode (state, OP_STRING);
-	write_exp_string (state, operation->left.sval);
-	write_exp_elt_opcode (state, OP_STRING);
+	write_exp_elt_opcode (pstate, OP_STRING);
+	write_exp_string (pstate, operation->left.sval);
+	write_exp_elt_opcode (pstate, OP_STRING);
       }
       break;
 
@@ -2482,12 +2480,12 @@ convert_ast_to_expression (struct parser_state *state,
 
 	if (operation->left.op != NULL)
 	  {
-	    convert_ast_to_expression (state, operation->left.op, top);
+	    convert_ast_to_expression (operation->left.op, top);
 	    kind = HIGH_BOUND_DEFAULT;
 	  }
 	if (operation->right.op != NULL)
 	  {
-	    convert_ast_to_expression (state, operation->right.op, top);
+	    convert_ast_to_expression (operation->right.op, top);
 	    if (kind == BOTH_BOUND_DEFAULT)
 	      kind = (operation->inclusive
 		      ? LOW_BOUND_DEFAULT : LOW_BOUND_DEFAULT_EXCLUSIVE);
@@ -2505,9 +2503,9 @@ convert_ast_to_expression (struct parser_state *state,
 	    gdb_assert (!operation->inclusive);
 	  }
 
-	write_exp_elt_opcode (state, OP_RANGE);
-	write_exp_elt_longcst (state, kind);
-	write_exp_elt_opcode (state, OP_RANGE);
+	write_exp_elt_opcode (pstate, OP_RANGE);
+	write_exp_elt_longcst (pstate, kind);
+	write_exp_elt_opcode (pstate, OP_RANGE);
       }
       break;
 
@@ -2529,10 +2527,10 @@ rust_parse (struct parser_state *state)
      destruction.  */
   rust_parser parser (state);
 
-  result = rustyyparse ();
+  result = rustyyparse (&parser);
 
   if (!result || (parse_completion && parser.rust_ast != NULL))
-    convert_ast_to_expression (state, parser.rust_ast, parser.rust_ast);
+    parser.convert_ast_to_expression (parser.rust_ast, parser.rust_ast);
 
   return result;
 }
@@ -2540,7 +2538,7 @@ rust_parse (struct parser_state *state)
 /* The parser error handler.  */
 
 static void
-rustyyerror (const char *msg)
+rustyyerror (rust_parser *parser, const char *msg)
 {
   const char *where = prev_lexptr ? prev_lexptr : lexptr;
   error (_("%s in expression, near `%s'."), msg, where);
@@ -2564,20 +2562,20 @@ rust_lex_test_init (const char *input)
    returns the lexer data for this token.  */
 
 static RUSTSTYPE
-rust_lex_test_one (const char *input, int expected)
+rust_lex_test_one (rust_parser *parser, const char *input, int expected)
 {
   int token;
   RUSTSTYPE result;
 
   rust_lex_test_init (input);
 
-  token = rustyylex ();
+  token = rustyylex (&result, parser);
   SELF_CHECK (token == expected);
-  result = rustyylval;
 
   if (token)
     {
-      token = rustyylex ();
+      RUSTSTYPE ignore;
+      token = rustyylex (&ignore, parser);
       SELF_CHECK (token == 0);
     }
 
@@ -2587,21 +2585,22 @@ rust_lex_test_one (const char *input, int expected)
 /* Test that INPUT lexes as the integer VALUE.  */
 
 static void
-rust_lex_int_test (const char *input, int value, int kind)
+rust_lex_int_test (rust_parser *parser, const char *input, int value, int kind)
 {
-  RUSTSTYPE result = rust_lex_test_one (input, kind);
+  RUSTSTYPE result = rust_lex_test_one (parser, input, kind);
   SELF_CHECK (result.typed_val_int.val == value);
 }
 
 /* Test that INPUT throws an exception with text ERR.  */
 
 static void
-rust_lex_exception_test (const char *input, const char *err)
+rust_lex_exception_test (rust_parser *parser, const char *input,
+			 const char *err)
 {
   TRY
     {
       /* The "kind" doesn't matter.  */
-      rust_lex_test_one (input, DECIMAL_INTEGER);
+      rust_lex_test_one (parser, input, DECIMAL_INTEGER);
       SELF_CHECK (0);
     }
   CATCH (except, RETURN_MASK_ERROR)
@@ -2615,9 +2614,10 @@ rust_lex_exception_test (const char *input, const char *err)
    VALUE.  KIND holds the expected token kind.  */
 
 static void
-rust_lex_stringish_test (const char *input, const char *value, int kind)
+rust_lex_stringish_test (rust_parser *parser, const char *input,
+			 const char *value, int kind)
 {
-  RUSTSTYPE result = rust_lex_test_one (input, kind);
+  RUSTSTYPE result = rust_lex_test_one (parser, input, kind);
   SELF_CHECK (result.sval.length == strlen (value));
   SELF_CHECK (strncmp (result.sval.ptr, value, result.sval.length) == 0);
 }
@@ -2625,7 +2625,8 @@ rust_lex_stringish_test (const char *input, const char *value, int kind)
 /* Helper to test that a string parses as a given token sequence.  */
 
 static void
-rust_lex_test_sequence (const char *input, int len, const int expected[])
+rust_lex_test_sequence (rust_parser *parser, const char *input, int len,
+			const int expected[])
 {
   int i;
 
@@ -2634,7 +2635,8 @@ rust_lex_test_sequence (const char *input, int len, const int expected[])
 
   for (i = 0; i < len; ++i)
     {
-      int token = rustyylex ();
+      RUSTSTYPE ignore;
+      int token = rustyylex (&ignore, parser);
 
       SELF_CHECK (token == expected[i]);
     }
@@ -2643,30 +2645,34 @@ rust_lex_test_sequence (const char *input, int len, const int expected[])
 /* Tests for an integer-parsing corner case.  */
 
 static void
-rust_lex_test_trailing_dot (void)
+rust_lex_test_trailing_dot (rust_parser *parser)
 {
   const int expected1[] = { DECIMAL_INTEGER, '.', IDENT, '(', ')', 0 };
   const int expected2[] = { INTEGER, '.', IDENT, '(', ')', 0 };
   const int expected3[] = { FLOAT, EQEQ, '(', ')', 0 };
   const int expected4[] = { DECIMAL_INTEGER, DOTDOT, DECIMAL_INTEGER, 0 };
 
-  rust_lex_test_sequence ("23.g()", ARRAY_SIZE (expected1), expected1);
-  rust_lex_test_sequence ("23_0.g()", ARRAY_SIZE (expected2), expected2);
-  rust_lex_test_sequence ("23.==()", ARRAY_SIZE (expected3), expected3);
-  rust_lex_test_sequence ("23..25", ARRAY_SIZE (expected4), expected4);
+  rust_lex_test_sequence (parser, "23.g()", ARRAY_SIZE (expected1), expected1);
+  rust_lex_test_sequence (parser, "23_0.g()", ARRAY_SIZE (expected2),
+			  expected2);
+  rust_lex_test_sequence (parser, "23.==()", ARRAY_SIZE (expected3),
+			  expected3);
+  rust_lex_test_sequence (parser, "23..25", ARRAY_SIZE (expected4), expected4);
 }
 
 /* Tests of completion.  */
 
 static void
-rust_lex_test_completion (void)
+rust_lex_test_completion (rust_parser *parser)
 {
   const int expected[] = { IDENT, '.', COMPLETE, 0 };
 
   parse_completion = 1;
 
-  rust_lex_test_sequence ("something.wha", ARRAY_SIZE (expected), expected);
-  rust_lex_test_sequence ("something.", ARRAY_SIZE (expected), expected);
+  rust_lex_test_sequence (parser, "something.wha", ARRAY_SIZE (expected),
+			  expected);
+  rust_lex_test_sequence (parser, "something.", ARRAY_SIZE (expected),
+			  expected);
 
   parse_completion = 0;
 }
@@ -2674,22 +2680,23 @@ rust_lex_test_completion (void)
 /* Test pushback.  */
 
 static void
-rust_lex_test_push_back (void)
+rust_lex_test_push_back (rust_parser *parser)
 {
   int token;
+  RUSTSTYPE lval;
 
   rust_lex_test_init (">>=");
 
-  token = rustyylex ();
+  token = rustyylex (&lval, parser);
   SELF_CHECK (token == COMPOUND_ASSIGN);
-  SELF_CHECK (rustyylval.opcode == BINOP_RSH);
+  SELF_CHECK (lval.opcode == BINOP_RSH);
 
   rust_push_back ('=');
 
-  token = rustyylex ();
+  token = rustyylex (&lval, parser);
   SELF_CHECK (token == '=');
 
-  token = rustyylex ();
+  token = rustyylex (&lval, parser);
   SELF_CHECK (token == 0);
 }
 
@@ -2700,101 +2707,101 @@ rust_lex_tests (void)
 {
   int i;
 
-  auto_obstack test_obstack;
-  scoped_restore obstack_holder = make_scoped_restore (&work_obstack,
-						       &test_obstack);
-
   // Set up dummy "parser", so that rust_type works.
   struct parser_state ps (0, &rust_language_defn, target_gdbarch ());
   rust_parser parser (&ps);
 
-  rust_lex_test_one ("", 0);
-  rust_lex_test_one ("    \t  \n \r  ", 0);
-  rust_lex_test_one ("thread 23", 0);
-  rust_lex_test_one ("task 23", 0);
-  rust_lex_test_one ("th 104", 0);
-  rust_lex_test_one ("ta 97", 0);
+  rust_lex_test_one (&parser, "", 0);
+  rust_lex_test_one (&parser, "    \t  \n \r  ", 0);
+  rust_lex_test_one (&parser, "thread 23", 0);
+  rust_lex_test_one (&parser, "task 23", 0);
+  rust_lex_test_one (&parser, "th 104", 0);
+  rust_lex_test_one (&parser, "ta 97", 0);
 
-  rust_lex_int_test ("'z'", 'z', INTEGER);
-  rust_lex_int_test ("'\\xff'", 0xff, INTEGER);
-  rust_lex_int_test ("'\\u{1016f}'", 0x1016f, INTEGER);
-  rust_lex_int_test ("b'z'", 'z', INTEGER);
-  rust_lex_int_test ("b'\\xfe'", 0xfe, INTEGER);
-  rust_lex_int_test ("b'\\xFE'", 0xfe, INTEGER);
-  rust_lex_int_test ("b'\\xfE'", 0xfe, INTEGER);
+  rust_lex_int_test (&parser, "'z'", 'z', INTEGER);
+  rust_lex_int_test (&parser, "'\\xff'", 0xff, INTEGER);
+  rust_lex_int_test (&parser, "'\\u{1016f}'", 0x1016f, INTEGER);
+  rust_lex_int_test (&parser, "b'z'", 'z', INTEGER);
+  rust_lex_int_test (&parser, "b'\\xfe'", 0xfe, INTEGER);
+  rust_lex_int_test (&parser, "b'\\xFE'", 0xfe, INTEGER);
+  rust_lex_int_test (&parser, "b'\\xfE'", 0xfe, INTEGER);
 
   /* Test all escapes in both modes.  */
-  rust_lex_int_test ("'\\n'", '\n', INTEGER);
-  rust_lex_int_test ("'\\r'", '\r', INTEGER);
-  rust_lex_int_test ("'\\t'", '\t', INTEGER);
-  rust_lex_int_test ("'\\\\'", '\\', INTEGER);
-  rust_lex_int_test ("'\\0'", '\0', INTEGER);
-  rust_lex_int_test ("'\\''", '\'', INTEGER);
-  rust_lex_int_test ("'\\\"'", '"', INTEGER);
+  rust_lex_int_test (&parser, "'\\n'", '\n', INTEGER);
+  rust_lex_int_test (&parser, "'\\r'", '\r', INTEGER);
+  rust_lex_int_test (&parser, "'\\t'", '\t', INTEGER);
+  rust_lex_int_test (&parser, "'\\\\'", '\\', INTEGER);
+  rust_lex_int_test (&parser, "'\\0'", '\0', INTEGER);
+  rust_lex_int_test (&parser, "'\\''", '\'', INTEGER);
+  rust_lex_int_test (&parser, "'\\\"'", '"', INTEGER);
 
-  rust_lex_int_test ("b'\\n'", '\n', INTEGER);
-  rust_lex_int_test ("b'\\r'", '\r', INTEGER);
-  rust_lex_int_test ("b'\\t'", '\t', INTEGER);
-  rust_lex_int_test ("b'\\\\'", '\\', INTEGER);
-  rust_lex_int_test ("b'\\0'", '\0', INTEGER);
-  rust_lex_int_test ("b'\\''", '\'', INTEGER);
-  rust_lex_int_test ("b'\\\"'", '"', INTEGER);
+  rust_lex_int_test (&parser, "b'\\n'", '\n', INTEGER);
+  rust_lex_int_test (&parser, "b'\\r'", '\r', INTEGER);
+  rust_lex_int_test (&parser, "b'\\t'", '\t', INTEGER);
+  rust_lex_int_test (&parser, "b'\\\\'", '\\', INTEGER);
+  rust_lex_int_test (&parser, "b'\\0'", '\0', INTEGER);
+  rust_lex_int_test (&parser, "b'\\''", '\'', INTEGER);
+  rust_lex_int_test (&parser, "b'\\\"'", '"', INTEGER);
 
-  rust_lex_exception_test ("'z", "Unterminated character literal");
-  rust_lex_exception_test ("b'\\x0'", "Not enough hex digits seen");
-  rust_lex_exception_test ("b'\\u{0}'", "Unicode escape in byte literal");
-  rust_lex_exception_test ("'\\x0'", "Not enough hex digits seen");
-  rust_lex_exception_test ("'\\u0'", "Missing '{' in Unicode escape");
-  rust_lex_exception_test ("'\\u{0", "Missing '}' in Unicode escape");
-  rust_lex_exception_test ("'\\u{0000007}", "Overlong hex escape");
-  rust_lex_exception_test ("'\\u{}", "Not enough hex digits seen");
-  rust_lex_exception_test ("'\\Q'", "Invalid escape \\Q in literal");
-  rust_lex_exception_test ("b'\\Q'", "Invalid escape \\Q in literal");
+  rust_lex_exception_test (&parser, "'z", "Unterminated character literal");
+  rust_lex_exception_test (&parser, "b'\\x0'", "Not enough hex digits seen");
+  rust_lex_exception_test (&parser, "b'\\u{0}'",
+			   "Unicode escape in byte literal");
+  rust_lex_exception_test (&parser, "'\\x0'", "Not enough hex digits seen");
+  rust_lex_exception_test (&parser, "'\\u0'", "Missing '{' in Unicode escape");
+  rust_lex_exception_test (&parser, "'\\u{0", "Missing '}' in Unicode escape");
+  rust_lex_exception_test (&parser, "'\\u{0000007}", "Overlong hex escape");
+  rust_lex_exception_test (&parser, "'\\u{}", "Not enough hex digits seen");
+  rust_lex_exception_test (&parser, "'\\Q'", "Invalid escape \\Q in literal");
+  rust_lex_exception_test (&parser, "b'\\Q'", "Invalid escape \\Q in literal");
 
-  rust_lex_int_test ("23", 23, DECIMAL_INTEGER);
-  rust_lex_int_test ("2_344__29", 234429, INTEGER);
-  rust_lex_int_test ("0x1f", 0x1f, INTEGER);
-  rust_lex_int_test ("23usize", 23, INTEGER);
-  rust_lex_int_test ("23i32", 23, INTEGER);
-  rust_lex_int_test ("0x1_f", 0x1f, INTEGER);
-  rust_lex_int_test ("0b1_101011__", 0x6b, INTEGER);
-  rust_lex_int_test ("0o001177i64", 639, INTEGER);
+  rust_lex_int_test (&parser, "23", 23, DECIMAL_INTEGER);
+  rust_lex_int_test (&parser, "2_344__29", 234429, INTEGER);
+  rust_lex_int_test (&parser, "0x1f", 0x1f, INTEGER);
+  rust_lex_int_test (&parser, "23usize", 23, INTEGER);
+  rust_lex_int_test (&parser, "23i32", 23, INTEGER);
+  rust_lex_int_test (&parser, "0x1_f", 0x1f, INTEGER);
+  rust_lex_int_test (&parser, "0b1_101011__", 0x6b, INTEGER);
+  rust_lex_int_test (&parser, "0o001177i64", 639, INTEGER);
 
-  rust_lex_test_trailing_dot ();
+  rust_lex_test_trailing_dot (&parser);
 
-  rust_lex_test_one ("23.", FLOAT);
-  rust_lex_test_one ("23.99f32", FLOAT);
-  rust_lex_test_one ("23e7", FLOAT);
-  rust_lex_test_one ("23E-7", FLOAT);
-  rust_lex_test_one ("23e+7", FLOAT);
-  rust_lex_test_one ("23.99e+7f64", FLOAT);
-  rust_lex_test_one ("23.82f32", FLOAT);
+  rust_lex_test_one (&parser, "23.", FLOAT);
+  rust_lex_test_one (&parser, "23.99f32", FLOAT);
+  rust_lex_test_one (&parser, "23e7", FLOAT);
+  rust_lex_test_one (&parser, "23E-7", FLOAT);
+  rust_lex_test_one (&parser, "23e+7", FLOAT);
+  rust_lex_test_one (&parser, "23.99e+7f64", FLOAT);
+  rust_lex_test_one (&parser, "23.82f32", FLOAT);
 
-  rust_lex_stringish_test ("hibob", "hibob", IDENT);
-  rust_lex_stringish_test ("hibob__93", "hibob__93", IDENT);
-  rust_lex_stringish_test ("thread", "thread", IDENT);
+  rust_lex_stringish_test (&parser, "hibob", "hibob", IDENT);
+  rust_lex_stringish_test (&parser, "hibob__93", "hibob__93", IDENT);
+  rust_lex_stringish_test (&parser, "thread", "thread", IDENT);
 
-  rust_lex_stringish_test ("\"string\"", "string", STRING);
-  rust_lex_stringish_test ("\"str\\ting\"", "str\ting", STRING);
-  rust_lex_stringish_test ("\"str\\\"ing\"", "str\"ing", STRING);
-  rust_lex_stringish_test ("r\"str\\ing\"", "str\\ing", STRING);
-  rust_lex_stringish_test ("r#\"str\\ting\"#", "str\\ting", STRING);
-  rust_lex_stringish_test ("r###\"str\\\"ing\"###", "str\\\"ing", STRING);
+  rust_lex_stringish_test (&parser, "\"string\"", "string", STRING);
+  rust_lex_stringish_test (&parser, "\"str\\ting\"", "str\ting", STRING);
+  rust_lex_stringish_test (&parser, "\"str\\\"ing\"", "str\"ing", STRING);
+  rust_lex_stringish_test (&parser, "r\"str\\ing\"", "str\\ing", STRING);
+  rust_lex_stringish_test (&parser, "r#\"str\\ting\"#", "str\\ting", STRING);
+  rust_lex_stringish_test (&parser, "r###\"str\\\"ing\"###", "str\\\"ing",
+			   STRING);
 
-  rust_lex_stringish_test ("b\"string\"", "string", BYTESTRING);
-  rust_lex_stringish_test ("b\"\x73tring\"", "string", BYTESTRING);
-  rust_lex_stringish_test ("b\"str\\\"ing\"", "str\"ing", BYTESTRING);
-  rust_lex_stringish_test ("br####\"\\x73tring\"####", "\\x73tring",
+  rust_lex_stringish_test (&parser, "b\"string\"", "string", BYTESTRING);
+  rust_lex_stringish_test (&parser, "b\"\x73tring\"", "string", BYTESTRING);
+  rust_lex_stringish_test (&parser, "b\"str\\\"ing\"", "str\"ing", BYTESTRING);
+  rust_lex_stringish_test (&parser, "br####\"\\x73tring\"####", "\\x73tring",
 			   BYTESTRING);
 
   for (i = 0; i < ARRAY_SIZE (identifier_tokens); ++i)
-    rust_lex_test_one (identifier_tokens[i].name, identifier_tokens[i].value);
+    rust_lex_test_one (&parser, identifier_tokens[i].name,
+		       identifier_tokens[i].value);
 
   for (i = 0; i < ARRAY_SIZE (operator_tokens); ++i)
-    rust_lex_test_one (operator_tokens[i].name, operator_tokens[i].value);
+    rust_lex_test_one (&parser, operator_tokens[i].name,
+		       operator_tokens[i].value);
 
-  rust_lex_test_completion ();
-  rust_lex_test_push_back ();
+  rust_lex_test_completion (&parser);
+  rust_lex_test_push_back (&parser);
 }
 
 #endif /* GDB_SELF_TEST */
