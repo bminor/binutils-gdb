@@ -3714,6 +3714,165 @@ value_initialized (const struct value *val)
   return val->initialized;
 }
 
+/* Helper for value_fetch_lazy when the value is a bitfield.  */
+
+static void
+value_fetch_lazy_bitfield (struct value *val)
+{
+  gdb_assert (value_bitsize (val) != 0);
+
+  /* To read a lazy bitfield, read the entire enclosing value.  This
+     prevents reading the same block of (possibly volatile) memory once
+     per bitfield.  It would be even better to read only the containing
+     word, but we have no way to record that just specific bits of a
+     value have been fetched.  */
+  struct type *type = check_typedef (value_type (val));
+  struct value *parent = value_parent (val);
+
+  if (value_lazy (parent))
+    value_fetch_lazy (parent);
+
+  unpack_value_bitfield (val, value_bitpos (val), value_bitsize (val),
+			 value_contents_for_printing (parent),
+			 value_offset (val), parent);
+}
+
+/* Helper for value_fetch_lazy when the value is in memory.  */
+
+static void
+value_fetch_lazy_memory (struct value *val)
+{
+  gdb_assert (VALUE_LVAL (val) == lval_memory);
+
+  CORE_ADDR addr = value_address (val);
+  struct type *type = check_typedef (value_enclosing_type (val));
+
+  if (TYPE_LENGTH (type))
+      read_value_memory (val, 0, value_stack (val),
+			 addr, value_contents_all_raw (val),
+			 type_length_units (type));
+}
+
+/* Helper for value_fetch_lazy when the value is in a register.  */
+
+static void
+value_fetch_lazy_register (struct value *val)
+{
+  struct frame_info *next_frame;
+  int regnum;
+  struct type *type = check_typedef (value_type (val));
+  struct value *new_val = val, *mark = value_mark ();
+
+  /* Offsets are not supported here; lazy register values must
+     refer to the entire register.  */
+  gdb_assert (value_offset (val) == 0);
+
+  while (VALUE_LVAL (new_val) == lval_register && value_lazy (new_val))
+    {
+      struct frame_id next_frame_id = VALUE_NEXT_FRAME_ID (new_val);
+
+      next_frame = frame_find_by_id (next_frame_id);
+      regnum = VALUE_REGNUM (new_val);
+
+      gdb_assert (next_frame != NULL);
+
+      /* Convertible register routines are used for multi-register
+	 values and for interpretation in different types
+	 (e.g. float or int from a double register).  Lazy
+	 register values should have the register's natural type,
+	 so they do not apply.  */
+      gdb_assert (!gdbarch_convert_register_p (get_frame_arch (next_frame),
+					       regnum, type));
+
+      /* FRAME was obtained, above, via VALUE_NEXT_FRAME_ID.
+	 Since a "->next" operation was performed when setting
+	 this field, we do not need to perform a "next" operation
+	 again when unwinding the register.  That's why
+	 frame_unwind_register_value() is called here instead of
+	 get_frame_register_value().  */
+      new_val = frame_unwind_register_value (next_frame, regnum);
+
+      /* If we get another lazy lval_register value, it means the
+	 register is found by reading it from NEXT_FRAME's next frame.
+	 frame_unwind_register_value should never return a value with
+	 the frame id pointing to NEXT_FRAME.  If it does, it means we
+	 either have two consecutive frames with the same frame id
+	 in the frame chain, or some code is trying to unwind
+	 behind get_prev_frame's back (e.g., a frame unwind
+	 sniffer trying to unwind), bypassing its validations.  In
+	 any case, it should always be an internal error to end up
+	 in this situation.  */
+      if (VALUE_LVAL (new_val) == lval_register
+	  && value_lazy (new_val)
+	  && frame_id_eq (VALUE_NEXT_FRAME_ID (new_val), next_frame_id))
+	internal_error (__FILE__, __LINE__,
+			_("infinite loop while fetching a register"));
+    }
+
+  /* If it's still lazy (for instance, a saved register on the
+     stack), fetch it.  */
+  if (value_lazy (new_val))
+    value_fetch_lazy (new_val);
+
+  /* Copy the contents and the unavailability/optimized-out
+     meta-data from NEW_VAL to VAL.  */
+  set_value_lazy (val, 0);
+  value_contents_copy (val, value_embedded_offset (val),
+		       new_val, value_embedded_offset (new_val),
+		       type_length_units (type));
+
+  if (frame_debug)
+    {
+      struct gdbarch *gdbarch;
+      struct frame_info *frame;
+      /* VALUE_FRAME_ID is used here, instead of VALUE_NEXT_FRAME_ID,
+	 so that the frame level will be shown correctly.  */
+      frame = frame_find_by_id (VALUE_FRAME_ID (val));
+      regnum = VALUE_REGNUM (val);
+      gdbarch = get_frame_arch (frame);
+
+      fprintf_unfiltered (gdb_stdlog,
+			  "{ value_fetch_lazy "
+			  "(frame=%d,regnum=%d(%s),...) ",
+			  frame_relative_level (frame), regnum,
+			  user_reg_map_regnum_to_name (gdbarch, regnum));
+
+      fprintf_unfiltered (gdb_stdlog, "->");
+      if (value_optimized_out (new_val))
+	{
+	  fprintf_unfiltered (gdb_stdlog, " ");
+	  val_print_optimized_out (new_val, gdb_stdlog);
+	}
+      else
+	{
+	  int i;
+	  const gdb_byte *buf = value_contents (new_val);
+
+	  if (VALUE_LVAL (new_val) == lval_register)
+	    fprintf_unfiltered (gdb_stdlog, " register=%d",
+				VALUE_REGNUM (new_val));
+	  else if (VALUE_LVAL (new_val) == lval_memory)
+	    fprintf_unfiltered (gdb_stdlog, " address=%s",
+				paddress (gdbarch,
+					  value_address (new_val)));
+	  else
+	    fprintf_unfiltered (gdb_stdlog, " computed");
+
+	  fprintf_unfiltered (gdb_stdlog, " bytes=");
+	  fprintf_unfiltered (gdb_stdlog, "[");
+	  for (i = 0; i < register_size (gdbarch, regnum); i++)
+	    fprintf_unfiltered (gdb_stdlog, "%02x", buf[i]);
+	  fprintf_unfiltered (gdb_stdlog, "]");
+	}
+
+      fprintf_unfiltered (gdb_stdlog, " }\n");
+    }
+
+  /* Dispose of the intermediate values.  This prevents
+     watchpoints from trying to watch the saved frame pointer.  */
+  value_free_to_mark (mark);
+}
+
 /* Load the actual content of a lazy value.  Fetch the data from the
    user's process and clear the lazy flag to indicate that the data in
    the buffer is valid.
@@ -3733,149 +3892,11 @@ value_fetch_lazy (struct value *val)
   gdb_assert (val->optimized_out.empty ());
   gdb_assert (val->unavailable.empty ());
   if (value_bitsize (val))
-    {
-      /* To read a lazy bitfield, read the entire enclosing value.  This
-	 prevents reading the same block of (possibly volatile) memory once
-         per bitfield.  It would be even better to read only the containing
-         word, but we have no way to record that just specific bits of a
-         value have been fetched.  */
-      struct type *type = check_typedef (value_type (val));
-      struct value *parent = value_parent (val);
-
-      if (value_lazy (parent))
-	value_fetch_lazy (parent);
-
-      unpack_value_bitfield (val,
-			     value_bitpos (val), value_bitsize (val),
-			     value_contents_for_printing (parent),
-			     value_offset (val), parent);
-    }
+    value_fetch_lazy_bitfield (val);
   else if (VALUE_LVAL (val) == lval_memory)
-    {
-      CORE_ADDR addr = value_address (val);
-      struct type *type = check_typedef (value_enclosing_type (val));
-
-      if (TYPE_LENGTH (type))
-	read_value_memory (val, 0, value_stack (val),
-			   addr, value_contents_all_raw (val),
-			   type_length_units (type));
-    }
+    value_fetch_lazy_memory (val);
   else if (VALUE_LVAL (val) == lval_register)
-    {
-      struct frame_info *next_frame;
-      int regnum;
-      struct type *type = check_typedef (value_type (val));
-      struct value *new_val = val, *mark = value_mark ();
-
-      /* Offsets are not supported here; lazy register values must
-	 refer to the entire register.  */
-      gdb_assert (value_offset (val) == 0);
-
-      while (VALUE_LVAL (new_val) == lval_register && value_lazy (new_val))
-	{
-	  struct frame_id next_frame_id = VALUE_NEXT_FRAME_ID (new_val);
-
-	  next_frame = frame_find_by_id (next_frame_id);
-	  regnum = VALUE_REGNUM (new_val);
-
-	  gdb_assert (next_frame != NULL);
-
-	  /* Convertible register routines are used for multi-register
-	     values and for interpretation in different types
-	     (e.g. float or int from a double register).  Lazy
-	     register values should have the register's natural type,
-	     so they do not apply.  */
-	  gdb_assert (!gdbarch_convert_register_p (get_frame_arch (next_frame),
-						   regnum, type));
-
-	  /* FRAME was obtained, above, via VALUE_NEXT_FRAME_ID. 
-	     Since a "->next" operation was performed when setting
-	     this field, we do not need to perform a "next" operation
-	     again when unwinding the register.  That's why
-	     frame_unwind_register_value() is called here instead of
-	     get_frame_register_value().  */
-	  new_val = frame_unwind_register_value (next_frame, regnum);
-
-	  /* If we get another lazy lval_register value, it means the
-	     register is found by reading it from NEXT_FRAME's next frame.
-	     frame_unwind_register_value should never return a value with
-	     the frame id pointing to NEXT_FRAME.  If it does, it means we
-	     either have two consecutive frames with the same frame id
-	     in the frame chain, or some code is trying to unwind
-	     behind get_prev_frame's back (e.g., a frame unwind
-	     sniffer trying to unwind), bypassing its validations.  In
-	     any case, it should always be an internal error to end up
-	     in this situation.  */
-	  if (VALUE_LVAL (new_val) == lval_register
-	      && value_lazy (new_val)
-	      && frame_id_eq (VALUE_NEXT_FRAME_ID (new_val), next_frame_id))
-	    internal_error (__FILE__, __LINE__,
-			    _("infinite loop while fetching a register"));
-	}
-
-      /* If it's still lazy (for instance, a saved register on the
-	 stack), fetch it.  */
-      if (value_lazy (new_val))
-	value_fetch_lazy (new_val);
-
-      /* Copy the contents and the unavailability/optimized-out
-	 meta-data from NEW_VAL to VAL.  */
-      set_value_lazy (val, 0);
-      value_contents_copy (val, value_embedded_offset (val),
-			   new_val, value_embedded_offset (new_val),
-			   type_length_units (type));
-
-      if (frame_debug)
-	{
-	  struct gdbarch *gdbarch;
-	  struct frame_info *frame;
-	  /* VALUE_FRAME_ID is used here, instead of VALUE_NEXT_FRAME_ID,
-	     so that the frame level will be shown correctly.  */
-	  frame = frame_find_by_id (VALUE_FRAME_ID (val));
-	  regnum = VALUE_REGNUM (val);
-	  gdbarch = get_frame_arch (frame);
-
-	  fprintf_unfiltered (gdb_stdlog,
-			      "{ value_fetch_lazy "
-			      "(frame=%d,regnum=%d(%s),...) ",
-			      frame_relative_level (frame), regnum,
-			      user_reg_map_regnum_to_name (gdbarch, regnum));
-
-	  fprintf_unfiltered (gdb_stdlog, "->");
-	  if (value_optimized_out (new_val))
-	    {
-	      fprintf_unfiltered (gdb_stdlog, " ");
-	      val_print_optimized_out (new_val, gdb_stdlog);
-	    }
-	  else
-	    {
-	      int i;
-	      const gdb_byte *buf = value_contents (new_val);
-
-	      if (VALUE_LVAL (new_val) == lval_register)
-		fprintf_unfiltered (gdb_stdlog, " register=%d",
-				    VALUE_REGNUM (new_val));
-	      else if (VALUE_LVAL (new_val) == lval_memory)
-		fprintf_unfiltered (gdb_stdlog, " address=%s",
-				    paddress (gdbarch,
-					      value_address (new_val)));
-	      else
-		fprintf_unfiltered (gdb_stdlog, " computed");
-
-	      fprintf_unfiltered (gdb_stdlog, " bytes=");
-	      fprintf_unfiltered (gdb_stdlog, "[");
-	      for (i = 0; i < register_size (gdbarch, regnum); i++)
-		fprintf_unfiltered (gdb_stdlog, "%02x", buf[i]);
-	      fprintf_unfiltered (gdb_stdlog, "]");
-	    }
-
-	  fprintf_unfiltered (gdb_stdlog, " }\n");
-	}
-
-      /* Dispose of the intermediate values.  This prevents
-	 watchpoints from trying to watch the saved frame pointer.  */
-      value_free_to_mark (mark);
-    }
+    value_fetch_lazy_register (val);
   else if (VALUE_LVAL (val) == lval_computed
 	   && value_computed_funcs (val)->read != NULL)
     value_computed_funcs (val)->read (val);

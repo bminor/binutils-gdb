@@ -1,3 +1,10 @@
+2018-06-02  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* value.c (value_fetch_lazy_bitfield): New.
+	(value_fetch_lazy_memory): New.
+	(value_fetch_lazy_register): New.
+	(value_fetch_lazy): Factor out to smaller functions.
+
 2018-06-01  Tom Tromey  <tom@tromey.com>
 
 	* cp-name-parser.y (backslashable, represented): Now const.
