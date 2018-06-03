@@ -1,3 +1,14 @@
+2018-06-03  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+	    Jim Wilson  <jimw@sifive.com>
+
+	PR ld/23244
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Run new weak ref tests.
+	* testsuite/ld-riscv-elf/weakref.ld: New.
+	* testsuite/ld-riscv-elf/weakref32.d: New.
+	* testsuite/ld-riscv-elf/weakref32.s: New.
+	* testsuite/ld-riscv-elf/weakref64.d: New.
+	* testsuite/ld-riscv-elf/weakref64.s: New.
+
 2018-06-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.

@@ -1,5 +1,9 @@
 2018-06-03  Jim Wilson  <jimw@sifive.com>
 
+	PR ld/23244
+	* elfnn-riscv.c (riscv_elf_relocate_section) <R_RISCV_CALL>: Check
+	for and handle an undefined weak with no PLT.
+
 	PR ld/22756
 	* elfnn-riscv.c (riscv_relax_delete_bytes): Add versioned_hidden check
 	to code that ignores duplicate symbols.
