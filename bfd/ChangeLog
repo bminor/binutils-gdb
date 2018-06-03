@@ -1,3 +1,9 @@
+2018-06-03  Jim Wilson  <jimw@sifive.com>
+
+	PR ld/22756
+	* elfnn-riscv.c (riscv_relax_delete_bytes): Add versioned_hidden check
+	to code that ignores duplicate symbols.
+
 2018-06-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* version.m4: Bump version to 2.30.52

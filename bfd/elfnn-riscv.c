@@ -2708,9 +2708,12 @@ riscv_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, size_t count,
 	 call to SYMBOL as well. Since both __wrap_SYMBOL and SYMBOL reference
 	 the same symbol (which is __wrap_SYMBOL), but still exist as two
 	 different symbols in 'sym_hashes', we don't want to adjust
-	 the global symbol __wrap_SYMBOL twice.
-	 This check is only relevant when symbols are being wrapped.  */
-      if (link_info->wrap_hash != NULL)
+	 the global symbol __wrap_SYMBOL twice.  */
+      /* The same problem occurs with symbols that are versioned_hidden, as
+	 foo becomes an alias for foo@BAR, and hence they need the same
+	 treatment.  */
+      if (link_info->wrap_hash != NULL
+	  || sym_hash->versioned == versioned_hidden)
 	{
 	  struct elf_link_hash_entry **cur_sym_hashes;
 
