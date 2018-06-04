@@ -34,6 +34,7 @@ extern "C" {
 
 #include "ansidecl.h"
 #include "symcat.h"
+#include "diagnostics.h"
 #include <stdarg.h>
 #include <sys/stat.h>
 

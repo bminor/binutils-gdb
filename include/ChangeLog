@@ -1,5 +1,10 @@
 2018-06-04  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* diagnostics.h (DIAGNOSTIC_IGNORE_STRINGOP_TRUNCATION): Always
+	define for GCC.
+
+2018-06-04  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* diagnostics.h (DIAGNOSTIC_STRINGIFY_1): New.
 	(DIAGNOSTIC_STRINGIFY): Likewise.
 	(DIAGNOSTIC_IGNORE): Replace STRINGIFY with DIAGNOSTIC_STRINGIFY.

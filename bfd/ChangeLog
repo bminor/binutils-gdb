@@ -1,3 +1,18 @@
+2018-06-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/23146
+	* bfd-in.h: Include "diagnostics.h".
+	* bfd-in2.h: Regenerated.
+	* elf32-arm.c (elf32_arm_nabi_write_core_note): Use
+	DIAGNOSTIC_PUSH, DIAGNOSTIC_IGNORE_STRINGOP_TRUNCATION and
+	DIAGNOSTIC_POP to silence GCC 8.1 warnings with
+	-Wstringop-truncation.
+	* elf32-ppc.c (ppc_elf_write_core_note): Likewse.
+	* elf32-s390.c (elf_s390_write_core_note): Likewse.
+	* elf64-ppc.c (ppc64_elf_write_core_note): Likewse.
+	* elf64-s390.c (elf_s390_write_core_note): Likewse.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_write_core_note): Likewse.
+
 2018-06-03  Jim Wilson  <jimw@sifive.com>
 
 	PR ld/23244

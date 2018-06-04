@@ -2174,7 +2174,16 @@ elf32_arm_nabi_write_core_note (bfd *abfd, char *buf, int *bufsiz,
 	va_start (ap, note_type);
 	memset (data, 0, sizeof (data));
 	strncpy (data + 28, va_arg (ap, const char *), 16);
+	DIAGNOSTIC_PUSH;
+	/* GCC 8.1 warns about 80 equals destination size with
+	   -Wstringop-truncation:
+	   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=85643
+	 */
+#if GCC_VERSION == 8001
+	DIAGNOSTIC_IGNORE_STRINGOP_TRUNCATION;
+#endif
 	strncpy (data + 44, va_arg (ap, const char *), 80);
+	DIAGNOSTIC_POP;
 	va_end (ap);
 
 	return elfcore_write_note (abfd, buf, bufsiz,

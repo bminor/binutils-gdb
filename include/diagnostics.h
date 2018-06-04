@@ -48,10 +48,8 @@
 # define DIAGNOSTIC_IGNORE_UNUSED_FUNCTION \
   DIAGNOSTIC_IGNORE ("-Wunused-function")
 
-# if __GNUC__ == 8 && __GNUC_MINOR__ < 2
-#  define DIAGNOSTIC_IGNORE_STRINGOP_TRUNCATION \
+# define DIAGNOSTIC_IGNORE_STRINGOP_TRUNCATION \
   DIAGNOSTIC_IGNORE ("-Wstringop-truncation")
-# endif
 #endif
 
 #ifndef DIAGNOSTIC_IGNORE_SELF_MOVE
