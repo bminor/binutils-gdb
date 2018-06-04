@@ -2875,7 +2875,7 @@ aarch64_read_description (uint64_t vq)
 
 /* Return the VQ used when creating the target description TDESC.  */
 
-static long
+static uint64_t
 aarch64_get_tdesc_vq (const struct target_desc *tdesc)
 {
   const struct tdesc_feature *feature_sve;
@@ -2888,7 +2888,8 @@ aarch64_get_tdesc_vq (const struct target_desc *tdesc)
   if (feature_sve == nullptr)
     return 0;
 
-  long vl = tdesc_register_size (feature_sve, aarch64_sve_register_names[0]);
+  uint64_t vl = tdesc_register_size (feature_sve,
+				     aarch64_sve_register_names[0]);
   return sve_vq_from_vl (vl);
 }
 
