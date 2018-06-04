@@ -2873,6 +2873,26 @@ aarch64_read_description (uint64_t vq)
   return tdesc;
 }
 
+/* Return the VQ used when creating the target description TDESC.  */
+
+static long
+aarch64_get_tdesc_vq (const struct target_desc *tdesc)
+{
+  const struct tdesc_feature *feature_sve;
+
+  if (!tdesc_has_registers (tdesc))
+    return 0;
+
+  feature_sve = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.sve");
+
+  if (feature_sve == nullptr)
+    return 0;
+
+  long vl = tdesc_register_size (feature_sve, aarch64_sve_register_names[0]);
+  return sve_vq_from_vl (vl);
+}
+
+
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
@@ -2890,48 +2910,67 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   const struct target_desc *tdesc = info.target_desc;
   int i;
   int valid_p = 1;
-  const struct tdesc_feature *feature;
+  const struct tdesc_feature *feature_core;
+  const struct tdesc_feature *feature_fpu;
+  const struct tdesc_feature *feature_sve;
   int num_regs = 0;
   int num_pseudo_regs = 0;
 
-  /* Ensure we always have a target descriptor.  */
+  /* Ensure we always have a target description.  */
   if (!tdesc_has_registers (tdesc))
-    {
-      /* SVE is not yet supported.  */
-      tdesc = aarch64_read_description (0);
-    }
-
+    tdesc = aarch64_read_description (0);
   gdb_assert (tdesc);
 
-  feature = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.core");
+  feature_core = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.core");
+  feature_fpu = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.fpu");
+  feature_sve = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.sve");
 
-  if (feature == NULL)
+  if (feature_core == NULL)
     return NULL;
 
   tdesc_data = tdesc_data_alloc ();
 
-  /* Validate the descriptor provides the mandatory core R registers
+  /* Validate the description provides the mandatory core R registers
      and allocate their numbers.  */
   for (i = 0; i < ARRAY_SIZE (aarch64_r_register_names); i++)
-    valid_p &=
-      tdesc_numbered_register (feature, tdesc_data, AARCH64_X0_REGNUM + i,
-			       aarch64_r_register_names[i]);
+    valid_p &= tdesc_numbered_register (feature_core, tdesc_data,
+					AARCH64_X0_REGNUM + i,
+					aarch64_r_register_names[i]);
 
   num_regs = AARCH64_X0_REGNUM + i;
 
-  /* Look for the V registers.  */
-  feature = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.fpu");
-  if (feature)
+  /* Add the V registers.  */
+  if (feature_fpu != NULL)
     {
-      /* Validate the descriptor provides the mandatory V registers
-         and allocate their numbers.  */
+      if (feature_sve != NULL)
+	error (_("Program contains both fpu and SVE features."));
+
+      /* Validate the description provides the mandatory V registers
+	 and allocate their numbers.  */
       for (i = 0; i < ARRAY_SIZE (aarch64_v_register_names); i++)
-	valid_p &=
-	  tdesc_numbered_register (feature, tdesc_data, AARCH64_V0_REGNUM + i,
-				   aarch64_v_register_names[i]);
+	valid_p &= tdesc_numbered_register (feature_fpu, tdesc_data,
+					    AARCH64_V0_REGNUM + i,
+					    aarch64_v_register_names[i]);
 
       num_regs = AARCH64_V0_REGNUM + i;
+    }
 
+  /* Add the SVE registers.  */
+  if (feature_sve != NULL)
+    {
+      /* Validate the description provides the mandatory SVE registers
+	 and allocate their numbers.  */
+      for (i = 0; i < ARRAY_SIZE (aarch64_sve_register_names); i++)
+	valid_p &= tdesc_numbered_register (feature_sve, tdesc_data,
+					    AARCH64_SVE_Z0_REGNUM + i,
+					    aarch64_sve_register_names[i]);
+
+      num_regs = AARCH64_SVE_Z0_REGNUM + i;
+      num_pseudo_regs += 32;	/* add the Vn register pseudos.  */
+    }
+
+  if (feature_fpu != NULL || feature_sve != NULL)
+    {
       num_pseudo_regs += 32;	/* add the Qn scalar register pseudos */
       num_pseudo_regs += 32;	/* add the Dn scalar register pseudos */
       num_pseudo_regs += 32;	/* add the Sn scalar register pseudos */
@@ -2971,6 +3010,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->lowest_pc = 0x20;
   tdep->jb_pc = -1;		/* Longjump support not enabled by default.  */
   tdep->jb_elt_size = 8;
+  tdep->vq = aarch64_get_tdesc_vq (tdesc);
 
   set_gdbarch_push_dummy_call (gdbarch, aarch64_push_dummy_call);
   set_gdbarch_frame_align (gdbarch, aarch64_frame_align);

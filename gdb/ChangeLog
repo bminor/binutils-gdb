@@ -1,4 +1,11 @@
-2018-06-01  Alan Hayward  <alan.hayward@arm.com>
+2018-06-04  Alan Hayward  <alan.hayward@arm.com>
+
+	* aarch64-linux-nat.c (aarch64_linux_read_description): Support SVE.
+	* aarch64-tdep.c (aarch64_get_tdesc_vq): New function.
+	(aarch64_gdbarch_init): Check for SVE.
+	* aarch64-tdep.h (gdbarch_tdep::has_sve): New function.
+
+2018-06-04  Alan Hayward  <alan.hayward@arm.com>
 
 	* aarch64-tdep.c (aarch64_read_description): Use uint64_t for VQ.
 	* aarch64-tdep.h (aarch64_read_description): Likewise.
