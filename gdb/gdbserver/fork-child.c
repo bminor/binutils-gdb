@@ -44,6 +44,7 @@ restore_old_foreground_pgrp (void)
 void
 prefork_hook (const char *args)
 {
+  client_state &cs = get_client_state ();
   if (debug_threads)
     {
       debug_printf ("args: %s\n", args);
@@ -57,7 +58,7 @@ prefork_hook (const char *args)
 
   /* Clear this so the backend doesn't get confused, thinking
      CONT_THREAD died, and it needs to resume all threads.  */
-  cont_thread = null_ptid;
+  cs.cont_thread = null_ptid;
 }
 
 /* See nat/fork-inferior.h.  */
@@ -96,6 +97,7 @@ gdb_flush_out_err ()
 void
 post_fork_inferior (int pid, const char *program)
 {
+  client_state &cs = get_client_state ();
 #ifdef SIGTTOU
   signal (SIGTTOU, SIG_IGN);
   signal (SIGTTIN, SIG_IGN);
@@ -106,9 +108,9 @@ post_fork_inferior (int pid, const char *program)
 #endif
 
   startup_inferior (pid, START_INFERIOR_TRAPS_EXPECTED,
-		    &last_status, &last_ptid);
+		    &cs.last_status, &cs.last_ptid);
   current_thread->last_resume_kind = resume_stop;
-  current_thread->last_status = last_status;
+  current_thread->last_status = cs.last_status;
   signal_pid = pid;
   target_post_create_inferior ();
   fprintf (stderr, "Process %s created; pid = %d\n", program, pid);

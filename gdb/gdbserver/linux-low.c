@@ -475,6 +475,7 @@ linux_arch_setup_thread (struct thread_info *thread)
 static int
 handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 {
+  client_state &cs = get_client_state ();
   struct lwp_info *event_lwp = *orig_event_lwp;
   int event = linux_ptrace_get_extended_event (wstat);
   struct thread_info *event_thr = get_lwp_thread (event_lwp);
@@ -655,7 +656,7 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 	  new_lwp->status_pending_p = 1;
 	  new_lwp->status_pending = status;
 	}
-      else if (report_thread_events)
+      else if (cs.report_thread_events)
 	{
 	  new_lwp->waitstatus.kind = TARGET_WAITKIND_THREAD_CREATED;
 	  new_lwp->status_pending_p = 1;
@@ -683,7 +684,7 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
       /* Report the event.  */
       return 0;
     }
-  else if (event == PTRACE_EVENT_EXEC && report_exec_events)
+  else if (event == PTRACE_EVENT_EXEC && cs.report_exec_events)
     {
       struct process_info *proc;
       std::vector<int> syscalls_to_catch;
@@ -998,13 +999,14 @@ static int
 linux_create_inferior (const char *program,
 		       const std::vector<char *> &program_args)
 {
+  client_state &cs = get_client_state ();
   struct lwp_info *new_lwp;
   int pid;
   ptid_t ptid;
 
   {
     maybe_disable_address_space_randomization restore_personality
-      (disable_randomization);
+      (cs.disable_randomization);
     std::string str_program_args = stringify_argv (program_args);
 
     pid = fork_inferior (program,
@@ -1429,6 +1431,7 @@ linux_kill (int pid)
 static int
 get_detach_signal (struct thread_info *thread)
 {
+  client_state &cs = get_client_state ();
   enum gdb_signal signo = GDB_SIGNAL_0;
   int status;
   struct lwp_info *lp = get_thread_lwp (thread);
@@ -1469,7 +1472,7 @@ get_detach_signal (struct thread_info *thread)
 
   signo = gdb_signal_from_host (WSTOPSIG (status));
 
-  if (program_signals_p && !program_signals[signo])
+  if (cs.program_signals_p && !cs.program_signals[signo])
     {
       if (debug_threads)
 	debug_printf ("GPS: lwp %s had signal %s, but it is in nopass state\n",
@@ -1477,7 +1480,7 @@ get_detach_signal (struct thread_info *thread)
 		      gdb_signal_to_string (signo));
       return 0;
     }
-  else if (!program_signals_p
+  else if (!cs.program_signals_p
 	   /* If we have no way to know which signals GDB does not
 	      want to have passed to the program, assume
 	      SIGTRAP/SIGINT, which is GDB's default.  */
@@ -2328,18 +2331,19 @@ check_stopped_by_watchpoint (struct lwp_info *child)
 static int
 linux_low_ptrace_options (int attached)
 {
+  client_state &cs = get_client_state ();
   int options = 0;
 
   if (!attached)
     options |= PTRACE_O_EXITKILL;
 
-  if (report_fork_events)
+  if (cs.report_fork_events)
     options |= PTRACE_O_TRACEFORK;
 
-  if (report_vfork_events)
+  if (cs.report_vfork_events)
     options |= (PTRACE_O_TRACEVFORK | PTRACE_O_TRACEVFORKDONE);
 
-  if (report_exec_events)
+  if (cs.report_exec_events)
     options |= PTRACE_O_TRACEEXEC;
 
   options |= PTRACE_O_TRACESYSGOOD;
@@ -2354,6 +2358,7 @@ linux_low_ptrace_options (int attached)
 static struct lwp_info *
 linux_low_filter_event (int lwpid, int wstat)
 {
+  client_state &cs = get_client_state ();
   struct lwp_info *child;
   struct thread_info *thread;
   int have_stop_pc = 0;
@@ -2425,7 +2430,7 @@ linux_low_filter_event (int lwpid, int wstat)
       /* If there is at least one more LWP, then the exit signal was
 	 not the end of the debugged application and should be
 	 ignored, unless GDB wants to hear about thread exits.  */
-      if (report_thread_events
+      if (cs.report_thread_events
 	  || last_thread_of_process_p (pid_of (thread)))
 	{
 	  /* Since events are serialized to GDB core, and we can't
@@ -3049,12 +3054,13 @@ static ptid_t
 filter_exit_event (struct lwp_info *event_child,
 		   struct target_waitstatus *ourstatus)
 {
+  client_state &cs = get_client_state ();
   struct thread_info *thread = get_lwp_thread (event_child);
   ptid_t ptid = ptid_of (thread);
 
   if (!last_thread_of_process_p (pid_of (thread)))
     {
-      if (report_thread_events)
+      if (cs.report_thread_events)
 	ourstatus->kind = TARGET_WAITKIND_THREAD_EXITED;
       else
 	ourstatus->kind = TARGET_WAITKIND_IGNORE;
@@ -3106,6 +3112,7 @@ static ptid_t
 linux_wait_1 (ptid_t ptid,
 	      struct target_waitstatus *ourstatus, int target_options)
 {
+  client_state &cs = get_client_state ();
   int w;
   struct lwp_info *event_child;
   int options;
@@ -3475,7 +3482,7 @@ linux_wait_1 (ptid_t ptid,
 	       || WSTOPSIG (w) == __SIGRTMIN + 1))
 	  ||
 #endif
-	  (pass_signals[gdb_signal_from_host (WSTOPSIG (w))]
+	  (cs.pass_signals[gdb_signal_from_host (WSTOPSIG (w))]
 	   && !(WSTOPSIG (w) == SIGSTOP
 		&& current_thread->last_resume_kind == resume_stop)
 	   && !linux_wstatus_maybe_breakpoint (w))))
@@ -3782,7 +3789,7 @@ linux_wait_1 (ptid_t ptid,
      it was a software breakpoint, and the client doesn't know we can
      adjust the breakpoint ourselves.  */
   if (event_child->stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT
-      && !swbreak_feature)
+      && !cs.swbreak_feature)
     {
       int decr_pc = the_low_target.decr_pc_after_break;
 

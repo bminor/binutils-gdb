@@ -26,7 +26,8 @@ struct target_ops *the_target;
 int
 set_desired_thread ()
 {
-  thread_info *found = find_thread_ptid (general_thread);
+  client_state &cs = get_client_state ();
+  thread_info *found = find_thread_ptid (cs.general_thread);
 
   current_thread = found;
   return (current_thread != NULL);
@@ -42,6 +43,8 @@ static ptid_t prev_general_thread;
 int
 prepare_to_access_memory (void)
 {
+  client_state &cs = get_client_state ();
+
   /* The first thread found.  */
   struct thread_info *first = NULL;
   /* The first stopped thread found.  */
@@ -51,7 +54,7 @@ prepare_to_access_memory (void)
 
   /* Save the general thread value, since prepare_to_access_memory could change
      it.  */
-  prev_general_thread = general_thread;
+  prev_general_thread = cs.general_thread;
 
   if (the_target->prepare_to_access_memory != NULL)
     {
@@ -98,7 +101,7 @@ prepare_to_access_memory (void)
     }
 
   current_thread = thread;
-  general_thread = ptid_of (thread);
+  cs.general_thread = ptid_of (thread);
 
   return 0;
 }
@@ -108,12 +111,14 @@ prepare_to_access_memory (void)
 void
 done_accessing_memory (void)
 {
+  client_state &cs = get_client_state ();
+
   if (the_target->done_accessing_memory != NULL)
     the_target->done_accessing_memory ();
 
   /* Restore the previous selected thread.  */
-  general_thread = prev_general_thread;
-  switch_to_thread (general_thread);
+  cs.general_thread = prev_general_thread;
+  switch_to_thread (cs.general_thread);
 }
 
 int

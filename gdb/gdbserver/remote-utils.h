@@ -20,8 +20,6 @@
 #define REMOTE_UTILS_H
 
 extern int remote_debug;
-extern int noack_mode;
-extern int transport_is_reliable;
 
 int gdb_connected (void);
 

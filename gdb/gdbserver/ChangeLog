@@ -1,3 +1,20 @@
+2018-06-04  Stan Cox  <scox@redhat.com>
+
+	* server.h (struct client_state): New.
+	* server.c (cont_thread, general_thread, multi_process)
+	(report_fork_events, report_vfork_events, report_exec_events)
+	(report_thread_events, swbreak_feature, hwbreak_feature)
+	(vCont_supported, disable_randomization, pass_signals)
+	(program_signals, program_signals_p, last_status, last_ptid, own_buf):
+	Moved to client_state.
+	* remote-utils.c (remote_debug, noack_mode)
+	(transport_is_reliable): Moved to client_state.
+	* tracepoint.c (current_traceframe): Moved to client_state.
+
+	Update all callers.
+	* server.c, remote-utils.c, tracepoint.c, fork-child.c,
+	linux-low.c, remote-utils.h, target.c: Use client_state.
+
 2018-05-31  Alan Hayward  <alan.hayward@arm.com>
 
 	* configure.srv: Add new c/h file.
