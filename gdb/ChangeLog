@@ -16,6 +16,10 @@
 
 2018-06-04  Alan Hayward  <alan.hayward@arm.com>
 
+	* elfread.c (elf_symfile_segments): Use ELF_SECTION_IN_SEGMENT.
+
+2018-06-04  Alan Hayward  <alan.hayward@arm.com>
+
 	* aarch64-tdep.c (aarch64_pseudo_read_value_1): New helper func.
 	(aarch64_pseudo_write_1): Likewise.
 	(aarch64_pseudo_read_value): Use helper.

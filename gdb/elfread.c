@@ -120,17 +120,14 @@ elf_symfile_segments (bfd *abfd)
   for (i = 0, sect = abfd->sections; sect != NULL; i++, sect = sect->next)
     {
       int j;
-      CORE_ADDR vma;
 
       if ((bfd_get_section_flags (abfd, sect) & SEC_ALLOC) == 0)
 	continue;
 
-      vma = bfd_get_section_vma (abfd, sect);
+      Elf_Internal_Shdr *this_hdr = &elf_section_data (sect)->this_hdr;
 
       for (j = 0; j < num_segments; j++)
-	if (segments[j]->p_memsz > 0
-	    && vma >= segments[j]->p_vaddr
-	    && (vma - segments[j]->p_vaddr) < segments[j]->p_memsz)
+	if (ELF_SECTION_IN_SEGMENT (this_hdr, segments[j]))
 	  {
 	    data->segment_info[i] = j + 1;
 	    break;
