@@ -97,9 +97,6 @@ static void darwin_deallocate_exception_ports (darwin_inferior *inf);
 static void darwin_setup_exceptions (struct inferior *inf);
 static void darwin_deallocate_threads (struct inferior *inf);
 
-/* Target operations for Darwin.  */
-static struct target_ops *darwin_ops;
-
 /* Task identifier of gdb.  */
 static task_t gdb_task;
 
@@ -1656,6 +1653,7 @@ darwin_attach_pid (struct inferior *inf)
 
   darwin_setup_exceptions (inf);
 
+  target_ops *darwin_ops = get_native_target ();
   if (!target_is_pushed (darwin_ops))
     push_target (darwin_ops);
 }

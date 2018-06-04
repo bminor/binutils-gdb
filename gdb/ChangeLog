@@ -1,3 +1,8 @@
+2018-06-04  Pedro Alves  <palves@redhat.com>
+
+	* darwin-nat.c (darwin_ops): Delete.
+	(darwin_attach_pid): Use get_native_target.
+
 2018-06-04  Alan Hayward  <alan.hayward@arm.com>
 
 	* aarch64-tdep.c (aarch64_get_tdesc_vq): Use uint64_t for VQ.
