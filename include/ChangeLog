@@ -1,3 +1,14 @@
+2018-06-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* diagnostics.h (DIAGNOSTIC_STRINGIFY_1): New.
+	(DIAGNOSTIC_STRINGIFY): Likewise.
+	(DIAGNOSTIC_IGNORE): Replace STRINGIFY with DIAGNOSTIC_STRINGIFY.
+	(DIAGNOSTIC_IGNORE_SELF_MOVE): Define empty if not defined.
+	(DIAGNOSTIC_IGNORE_DEPRECATED_REGISTER): Likewise.
+	(DIAGNOSTIC_IGNORE_UNUSED_FUNCTION): Likewise.
+	(DIAGNOSTIC_IGNORE_SWITCH_DIFFERENT_ENUM_TYPES): Likewise.
+	(DIAGNOSTIC_IGNORE_STRINGOP_TRUNCATION): New.
+
 2018-06-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* diagnostics.h: Moved from ../gdb/common/diagnostics.h.
