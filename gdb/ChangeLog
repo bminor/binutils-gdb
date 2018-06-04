@@ -1,3 +1,8 @@
+2018-06-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.in (config.status): Add configure.nat as a
+	dependency.
+
 2018-06-04  Tom Tromey  <tom@tromey.com>
 
 	* cp-name-parser.y (cpname_state): Add method declarations.
