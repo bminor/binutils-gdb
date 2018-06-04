@@ -1602,7 +1602,9 @@ Define a new command name.  Command name is argument.\n\
 Definition appears on following lines, one command per line.\n\
 End with a line of just \"end\".\n\
 Use the \"document\" command to give documentation for the new command.\n\
-Commands defined in this way may have up to ten arguments."));
+Commands defined in this way may accept an unlimited number of arguments\n\
+accessed via $arg0 .. $argN.  $argc tells how many arguments have\n\
+been passed."));
 
   add_com ("while", class_support, while_command, _("\
 Execute nested commands WHILE the conditional expression is non zero.\n\

@@ -1,3 +1,8 @@
+2018-06-14  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* cli/cli-script.c (_initialize_cli_script): Fix online documentation
+	of 'define' command.
+
 2018-06-14  Tom de Vries  <tdevries@suse.de>
 
 	PR cli/22573
