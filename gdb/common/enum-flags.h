@@ -32,7 +32,7 @@
        flag_val3 = 1 << 3,
        flag_val4 = 1 << 4,
     };
-    DEF_ENUM_FLAGS_TYPE(enum some_flag, some_flags)
+    DEF_ENUM_FLAGS_TYPE(enum some_flag, some_flags);
 
     some_flags f = flag_val1 | flag_val2;
     f |= flag_val3;
