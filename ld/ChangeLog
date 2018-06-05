@@ -1,3 +1,8 @@
+2018-06-05  Flavio Ceolin  <flavio.ceolin@intel.com>
+
+	* testsuite/ld-elf/elf.exp Run new test.
+	* testsuite/ld-elf/stack-noexec.rd New file: Expected readelf output.
+
 2018-06-03  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 	    Jim Wilson  <jimw@sifive.com>
 

@@ -165,6 +165,8 @@ if { [istarget *-*-*linux*]
     run_ld_link_tests {
 	{"stack exec" "-z execstack" "" "" {stack.s}
 	    {{readelf {-Wl} stack-exec.rd}} "stack-exec.exe"}
+	{"stack noexec" "-z noexecstack" "" "" {stack.s}
+	    {{readelf {-Wl} stack-noexec.rd}} "stack-noexec.exe"}
 	{"stack size" "-z stack-size=0x123400" "" "" {stack.s}
 	    {{readelf {-Wl} stack-size.rd}} "stack-size.exe"}
     }
