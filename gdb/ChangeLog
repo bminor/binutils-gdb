@@ -1,3 +1,13 @@
+2018-07-10  Tom Tromey  <tom@tromey.com>
+
+	* breakpoint.c (moribund_locations): Now static and a
+	std::vector.
+	(breakpoint_init_inferior, moribund_breakpoint_here_p)
+	(build_bpstat_chain, update_global_location_list)
+	(breakpoint_retire_moribund): Update.
+	* breakpoint.h (bp_location_p): Remove typedef.  Don't declare
+	VEC.
+
 2018-07-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* riscv-tdep.c (riscv_is_fp_regno_p): New function.

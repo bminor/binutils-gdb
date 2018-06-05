@@ -560,7 +560,7 @@ static CORE_ADDR bp_locations_shadow_len_after_address_max;
 /* The locations that no longer correspond to any breakpoint, unlinked
    from the bp_locations array, but for which a hit may still be
    reported by a target.  */
-VEC(bp_location_p) *moribund_locations = NULL;
+static std::vector<bp_location *> moribund_locations;
 
 /* Number of last breakpoint made.  */
 
@@ -3860,8 +3860,6 @@ void
 breakpoint_init_inferior (enum inf_context context)
 {
   struct breakpoint *b, *b_tmp;
-  struct bp_location *bl;
-  int ix;
   struct program_space *pspace = current_program_space;
 
   /* If breakpoint locations are shared across processes, then there's
@@ -3951,9 +3949,9 @@ breakpoint_init_inferior (enum inf_context context)
   }
 
   /* Get rid of the moribund locations.  */
-  for (ix = 0; VEC_iterate (bp_location_p, moribund_locations, ix, bl); ++ix)
+  for (bp_location *bl : moribund_locations)
     decref_bp_location (&bl);
-  VEC_free (bp_location_p, moribund_locations);
+  moribund_locations.clear ();
 }
 
 /* These functions concern about actual breakpoints inserted in the
@@ -4041,10 +4039,7 @@ breakpoint_in_range_p (const address_space *aspace,
 int
 moribund_breakpoint_here_p (const address_space *aspace, CORE_ADDR pc)
 {
-  struct bp_location *loc;
-  int ix;
-
-  for (ix = 0; VEC_iterate (bp_location_p, moribund_locations, ix, loc); ++ix)
+  for (bp_location *loc : moribund_locations)
     if (breakpoint_location_address_match (loc, aspace, pc))
       return 1;
 
@@ -5372,10 +5367,7 @@ build_bpstat_chain (const address_space *aspace, CORE_ADDR bp_addr,
   if (!target_supports_stopped_by_sw_breakpoint ()
       || !target_supports_stopped_by_hw_breakpoint ())
     {
-      bp_location *loc;
-
-      for (int ix = 0;
-	   VEC_iterate (bp_location_p, moribund_locations, ix, loc); ++ix)
+      for (bp_location *loc : moribund_locations)
 	{
 	  if (breakpoint_location_address_match (loc, aspace, bp_addr)
 	      && need_moribund_for_location_type (loc))
@@ -12012,7 +12004,7 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
 	      old_loc->events_till_retirement = 3 * (thread_count () + 1);
 	      old_loc->owner = NULL;
 
-	      VEC_safe_push (bp_location_p, moribund_locations, old_loc);
+	      moribund_locations.push_back (old_loc);
 	    }
 	  else
 	    {
@@ -12115,16 +12107,16 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
 void
 breakpoint_retire_moribund (void)
 {
-  struct bp_location *loc;
-  int ix;
-
-  for (ix = 0; VEC_iterate (bp_location_p, moribund_locations, ix, loc); ++ix)
-    if (--(loc->events_till_retirement) == 0)
-      {
-	decref_bp_location (&loc);
-	VEC_unordered_remove (bp_location_p, moribund_locations, ix);
-	--ix;
-      }
+  for (int ix = 0; ix < moribund_locations.size (); ++ix)
+    {
+      struct bp_location *loc = moribund_locations[ix];
+      if (--(loc->events_till_retirement) == 0)
+	{
+	  decref_bp_location (&loc);
+	  unordered_remove (moribund_locations, ix);
+	  --ix;
+	}
+    }
 }
 
 static void

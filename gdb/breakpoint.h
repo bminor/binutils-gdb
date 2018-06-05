@@ -667,9 +667,6 @@ enum watchpoint_triggered
   watch_triggered_yes  
 };
 
-typedef struct bp_location *bp_location_p;
-DEF_VEC_P(bp_location_p);
-
 /* Some targets (e.g., embedded PowerPC) need two debug registers to set
    a watchpoint over a memory region.  If this flag is true, GDB will use
    only one register per watchpoint, thus assuming that all acesses that
