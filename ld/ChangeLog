@@ -1,3 +1,9 @@
+2018-06-05  Alan Modra  <amodra@gmail.com>
+
+	PR 23254
+	* plugin.c (plugin_call_claim_file): Revert 2016-07-19 patch.
+	(plugin_object_p): Don't dup file descriptor.
+
 2018-06-05  Flavio Ceolin  <flavio.ceolin@intel.com>
 
 	* testsuite/ld-elf/elf.exp Run new test.

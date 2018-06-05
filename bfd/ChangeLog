@@ -1,3 +1,12 @@
+2018-06-05  Alan Modra  <amodra@gmail.com>
+
+	PR 23254
+	* plugin.c (bfd_plugin_open_input): Allow for possibility of
+	nested archives.  Open file again for plugin.
+	(try_claim): Don't save and restore file position.  Close file
+	if not claimed.
+	* sysdep.h (O_BINARY): Define.
+
 2018-06-04  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* elf32-xtensa.c (xtensa_read_table_entries): Make global.

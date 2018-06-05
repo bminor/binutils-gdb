@@ -1053,14 +1053,10 @@ plugin_call_claim_file (const struct ld_plugin_input_file *file, int *claimed)
     {
       if (curplug->claim_file_handler)
 	{
-	  off_t cur_offset;
 	  enum ld_plugin_status rv;
 
 	  called_plugin = curplug;
-	  cur_offset = lseek (file->fd, 0, SEEK_CUR);
 	  rv = (*curplug->claim_file_handler) (file, claimed);
-	  if (!*claimed)
-	    lseek (file->fd, cur_offset, SEEK_SET);
 	  called_plugin = NULL;
 	  if (rv != LDPS_OK)
 	    set_plugin_error (curplug->name);
@@ -1126,12 +1122,6 @@ plugin_object_p (bfd *ibfd)
     }
 
   file.handle = input;
-  /* The plugin API expects that the file descriptor won't be closed
-     and reused as done by the bfd file cache.  So dup one.  */
-  file.fd = dup (file.fd);
-  if (file.fd < 0)
-    return NULL;
-
   input->abfd = abfd;
   input->view_buffer.addr = NULL;
   input->view_buffer.filesize = 0;
