@@ -1,3 +1,7 @@
+2018-06-05  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.in: Regenerate.
+
 2018-06-04  Volodymyr Arbatov  <arbatov@cadence.com>
 
 	* config/tc-xtensa.c (elf32xtensa_separate_props): New
