@@ -1,5 +1,34 @@
 2018-06-05  Alan Modra  <amodra@gmail.com>
 
+	* bfd.c (struct bfd): Update comment on "where" usage.
+	* bfdio.c (bfd_bwrite, bfd_stat): Use and update "iovec",
+	"iostream", and "where" from containing archive file.  Return
+	error on NULL iovec.
+	(bfd_bread): Similarly, and return error attempted out of
+	bounds archive element access.
+	(bfd_tell, bfd_flush): Use and update "iovec", "iostream", and
+	"where" from containing archive file.
+	(bfd_seek): Likewise.  Return error on NULL iovec.  Don't
+	attempt to optimize away seeks.  Don't paper over errors by
+	calling bfd_tell.
+	(bfd_get_mtime): Call bfd_stat rather than iovec->bstat.
+	(bfd_get_size): Likewise.
+	(bfd_mmap): Operate on and use iovec of containing archive
+	file.  Return error on NULL iovec.
+	* cache.c (bfd_cache_lookup_worker): Abort if working on
+	archive element bfd.
+	(cache_bread_1): Delete bfd parameter, add FILE* parameter.
+	Don't ignore zero byte reads.
+	(cache_bread): Look up FILE* in cache here.  Error on NULL
+	lookup.
+	(cache_bwrite): Rename "where" to "from".
+	(cache_bmmap): Don't handle archive elements.
+	* coffcode.h (coff_slurp_line_table): Exit early on zero
+	lineno count.
+	* bfd-in2.h: Regenerate.
+
+2018-06-05  Alan Modra  <amodra@gmail.com>
+
 	PR 23254
 	* plugin.c (bfd_plugin_open_input): Allow for possibility of
 	nested archives.  Open file again for plugin.

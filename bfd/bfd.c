@@ -74,8 +74,9 @@ CODE_FRAGMENT
 .     least-recently-used list of BFDs.  *}
 .  struct bfd *lru_prev, *lru_next;
 .
-.  {* When a file is closed by the caching routines, BFD retains
-.     state information on the file here...  *}
+.  {* Track current file position (or current buffer offset for
+.     in-memory BFDs).  When a file is closed by the caching routines,
+.     BFD retains state information on the file here.  *}
 .  ufile_ptr where;
 .
 .  {* File modified time, if mtime_set is TRUE.  *}

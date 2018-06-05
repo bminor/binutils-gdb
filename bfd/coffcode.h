@@ -4265,6 +4265,9 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
   bfd_boolean have_func;
   bfd_boolean ret = TRUE;
 
+  if (asect->lineno_count == 0)
+    return TRUE;
+
   BFD_ASSERT (asect->lineno == NULL);
 
   if (asect->lineno_count > asect->size)
