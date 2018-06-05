@@ -1495,15 +1495,11 @@ collection_list::add_aexpr (agent_expr_up aexpr)
 static void
 process_tracepoint_on_disconnect (void)
 {
-  VEC(breakpoint_p) *tp_vec = NULL;
-  int ix;
-  struct breakpoint *b;
   int has_pending_p = 0;
 
   /* Check whether we still have pending tracepoint.  If we have, warn the
      user that pending tracepoint will no longer work.  */
-  tp_vec = all_tracepoints ();
-  for (ix = 0; VEC_iterate (breakpoint_p, tp_vec, ix, b); ix++)
+  for (breakpoint *b : all_tracepoints ())
     {
       if (b->loc == NULL)
 	{
@@ -1527,7 +1523,6 @@ process_tracepoint_on_disconnect (void)
 	    break;
 	}
     }
-  VEC_free (breakpoint_p, tp_vec);
 
   if (has_pending_p)
     warning (_("Pending tracepoints will not be resolved while"
@@ -1548,23 +1543,17 @@ trace_reset_local_state (void)
 void
 start_tracing (const char *notes)
 {
-  VEC(breakpoint_p) *tp_vec = NULL;
-  int ix;
-  struct breakpoint *b;
   struct trace_state_variable *tsv;
   int any_enabled = 0, num_to_download = 0;
   int ret;
 
-  tp_vec = all_tracepoints ();
+  std::vector<breakpoint *> tp_vec = all_tracepoints ();
 
   /* No point in tracing without any tracepoints...  */
-  if (VEC_length (breakpoint_p, tp_vec) == 0)
-    {
-      VEC_free (breakpoint_p, tp_vec);
-      error (_("No tracepoints defined, not starting trace"));
-    }
+  if (tp_vec.empty ())
+    error (_("No tracepoints defined, not starting trace"));
 
-  for (ix = 0; VEC_iterate (breakpoint_p, tp_vec, ix, b); ix++)
+  for (breakpoint *b : tp_vec)
     {
       if (b->enable_state == bp_enabled)
 	any_enabled = 1;
@@ -1586,20 +1575,16 @@ start_tracing (const char *notes)
 	{
 	  /* No point in tracing with only disabled tracepoints that
 	     cannot be re-enabled.  */
-	  VEC_free (breakpoint_p, tp_vec);
 	  error (_("No tracepoints enabled, not starting trace"));
 	}
     }
 
   if (num_to_download <= 0)
-    {
-      VEC_free (breakpoint_p, tp_vec);
-      error (_("No tracepoints that may be downloaded, not starting trace"));
-    }
+    error (_("No tracepoints that may be downloaded, not starting trace"));
 
   target_trace_init ();
 
-  for (ix = 0; VEC_iterate (breakpoint_p, tp_vec, ix, b); ix++)
+  for (breakpoint *b : tp_vec)
     {
       struct tracepoint *t = (struct tracepoint *) b;
       struct bp_location *loc;
@@ -1638,7 +1623,6 @@ start_tracing (const char *notes)
       if (bp_location_downloaded)
 	gdb::observers::breakpoint_modified.notify (b);
     }
-  VEC_free (breakpoint_p, tp_vec);
 
   /* Send down all the trace state variables too.  */
   for (const trace_state_variable &tsv : tvariables)
@@ -1705,14 +1689,10 @@ void
 stop_tracing (const char *note)
 {
   int ret;
-  VEC(breakpoint_p) *tp_vec = NULL;
-  int ix;
-  struct breakpoint *t;
 
   target_trace_stop ();
 
-  tp_vec = all_tracepoints ();
-  for (ix = 0; VEC_iterate (breakpoint_p, tp_vec, ix, t); ix++)
+  for (breakpoint *t : all_tracepoints ())
     {
       struct bp_location *loc;
 
@@ -1733,8 +1713,6 @@ stop_tracing (const char *note)
 	}
     }
 
-  VEC_free (breakpoint_p, tp_vec);
-
   if (!note)
     note = trace_stop_notes;
   ret = target_set_trace_notes (NULL, NULL, note);
@@ -1751,9 +1729,7 @@ static void
 tstatus_command (const char *args, int from_tty)
 {
   struct trace_status *ts = current_trace_status ();
-  int status, ix;
-  VEC(breakpoint_p) *tp_vec = NULL;
-  struct breakpoint *t;
+  int status;
   
   status = target_get_trace_status (ts);
 
@@ -1896,12 +1872,8 @@ tstatus_command (const char *args, int from_tty)
 		     (long int) (ts->stop_time % 1000000));
 
   /* Now report any per-tracepoint status available.  */
-  tp_vec = all_tracepoints ();
-
-  for (ix = 0; VEC_iterate (breakpoint_p, tp_vec, ix, t); ix++)
+  for (breakpoint *t : all_tracepoints ())
     target_get_tracepoint_status (t, NULL);
-
-  VEC_free (breakpoint_p, tp_vec);
 }
 
 /* Report the trace status to uiout, in a way suitable for MI, and not
@@ -3058,12 +3030,9 @@ cond_string_is_same (char *str1, char *str2)
 static struct bp_location *
 find_matching_tracepoint_location (struct uploaded_tp *utp)
 {
-  VEC(breakpoint_p) *tp_vec = all_tracepoints ();
-  int ix;
-  struct breakpoint *b;
   struct bp_location *loc;
 
-  for (ix = 0; VEC_iterate (breakpoint_p, tp_vec, ix, b); ix++)
+  for (breakpoint *b : all_tracepoints ())
     {
       struct tracepoint *t = (struct tracepoint *) b;
 
@@ -3094,9 +3063,7 @@ merge_uploaded_tracepoints (struct uploaded_tp **uploaded_tps)
 {
   struct uploaded_tp *utp;
   /* A set of tracepoints which are modified.  */
-  VEC(breakpoint_p) *modified_tp = NULL;
-  int ix;
-  struct breakpoint *b;
+  std::vector<breakpoint *> modified_tp;
 
   /* Look for GDB tracepoints that match up with our uploaded versions.  */
   for (utp = *uploaded_tps; utp; utp = utp->next)
@@ -3122,16 +3089,14 @@ merge_uploaded_tracepoints (struct uploaded_tp **uploaded_tps)
 	     MODIFIED_TP if not there yet.  The 'breakpoint-modified'
 	     observers will be notified later once for each tracepoint
 	     saved in MODIFIED_TP.  */
-	  for (ix = 0;
-	       VEC_iterate (breakpoint_p, modified_tp, ix, b);
-	       ix++)
+	  for (breakpoint *b : modified_tp)
 	    if (b == loc->owner)
 	      {
 		found = 1;
 		break;
 	      }
 	  if (!found)
-	    VEC_safe_push (breakpoint_p, modified_tp, loc->owner);
+	    modified_tp.push_back (loc->owner);
 	}
       else
 	{
@@ -3156,10 +3121,9 @@ merge_uploaded_tracepoints (struct uploaded_tp **uploaded_tps)
 
   /* Notify 'breakpoint-modified' observer that at least one of B's
      locations was changed.  */
-  for (ix = 0; VEC_iterate (breakpoint_p, modified_tp, ix, b); ix++)
+  for (breakpoint *b : modified_tp)
     gdb::observers::breakpoint_modified.notify (b);
 
-  VEC_free (breakpoint_p, modified_tp);
   free_uploaded_tps (uploaded_tps);
 }
 
@@ -3643,12 +3607,12 @@ print_one_static_tracepoint_marker (int count,
   char wrap_indent[80];
   char extra_field_indent[80];
   struct ui_out *uiout = current_uiout;
-  VEC(breakpoint_p) *tracepoints;
 
   symtab_and_line sal;
   sal.pc = marker.address;
 
-  tracepoints = static_tracepoints_here (marker.address);
+  std::vector<breakpoint *> tracepoints
+    = static_tracepoints_here (marker.address);
 
   ui_out_emit_tuple tuple_emitter (uiout, "marker");
 
@@ -3659,7 +3623,7 @@ print_one_static_tracepoint_marker (int count,
   uiout->field_string ("marker-id", marker.str_id.c_str ());
 
   uiout->field_fmt ("enabled", "%c",
-		    !VEC_empty (breakpoint_p, tracepoints) ? 'y' : 'n');
+		    !tracepoints.empty () ? 'y' : 'n');
   uiout->spaces (2);
 
   strcpy (wrap_indent, "                                   ");
@@ -3715,7 +3679,7 @@ print_one_static_tracepoint_marker (int count,
   uiout->field_string ("extra-data", marker.extra.c_str ());
   uiout->text ("\"\n");
 
-  if (!VEC_empty (breakpoint_p, tracepoints))
+  if (!tracepoints.empty ())
     {
       int ix;
       struct breakpoint *b;
@@ -3725,22 +3689,20 @@ print_one_static_tracepoint_marker (int count,
 
 	uiout->text (extra_field_indent);
 	uiout->text (_("Probed by static tracepoints: "));
-	for (ix = 0; VEC_iterate(breakpoint_p, tracepoints, ix, b); ix++)
+	for (ix = 0; ix < tracepoints.size (); ix++)
 	  {
 	    if (ix > 0)
 	      uiout->text (", ");
 	    uiout->text ("#");
-	    uiout->field_int ("tracepoint-id", b->number);
+	    uiout->field_int ("tracepoint-id", tracepoints[ix]->number);
 	  }
       }
 
       if (uiout->is_mi_like_p ())
-	uiout->field_int ("number-of-tracepoints",
-			  VEC_length(breakpoint_p, tracepoints));
+	uiout->field_int ("number-of-tracepoints", tracepoints.size ());
       else
 	uiout->text ("\n");
     }
-  VEC_free (breakpoint_p, tracepoints);
 }
 
 static void

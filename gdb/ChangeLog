@@ -1,5 +1,17 @@
 2018-07-03  Tom Tromey  <tom@tromey.com>
 
+	* tracepoint.c (process_tracepoint_on_disconnect, start_tracing)
+	(stop_tracing, tstatus_command)
+	(find_matching_tracepoint_location, merge_uploaded_tracepoints)
+	(print_one_static_tracepoint_marker): Update.
+	* breakpoint.c (static_tracepoints_here, all_tracepoints): Return
+	std::vector.
+	* breakpoint.h (breakpoint_p): Remove typedef.  Don't declare
+	VEC.
+	(all_tracepoints, static_tracepoints_here): Return std::vector.
+
+2018-07-03  Tom Tromey  <tom@tromey.com>
+
 	* common/ptid.c (ptid_equal): Remove.
 	* common/ptid.h (ptid_equal): Don't declare.
 	* ada-tasks.c: Update.

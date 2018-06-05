@@ -1145,11 +1145,11 @@ validate_commands_for_breakpoint (struct breakpoint *b,
 /* Return a vector of all the static tracepoints set at ADDR.  The
    caller is responsible for releasing the vector.  */
 
-VEC(breakpoint_p) *
+std::vector<breakpoint *>
 static_tracepoints_here (CORE_ADDR addr)
 {
   struct breakpoint *b;
-  VEC(breakpoint_p) *found = 0;
+  std::vector<breakpoint *> found;
   struct bp_location *loc;
 
   ALL_BREAKPOINTS (b)
@@ -1157,7 +1157,7 @@ static_tracepoints_here (CORE_ADDR addr)
       {
 	for (loc = b->loc; loc; loc = loc->next)
 	  if (loc->address == addr)
-	    VEC_safe_push(breakpoint_p, found, b);
+	    found.push_back (b);
       }
 
   return found;
@@ -15166,15 +15166,15 @@ save_tracepoints_command (const char *args, int from_tty)
 
 /* Create a vector of all tracepoints.  */
 
-VEC(breakpoint_p) *
+std::vector<breakpoint *>
 all_tracepoints (void)
 {
-  VEC(breakpoint_p) *tp_vec = 0;
+  std::vector<breakpoint *> tp_vec;
   struct breakpoint *tp;
 
   ALL_TRACEPOINTS (tp)
   {
-    VEC_safe_push (breakpoint_p, tp_vec, tp);
+    tp_vec.push_back (tp);
   }
 
   return tp_vec;

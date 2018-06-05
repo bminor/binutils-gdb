@@ -904,8 +904,6 @@ struct tracepoint : public breakpoint
   int static_trace_marker_id_idx;
 };
 
-typedef struct breakpoint *breakpoint_p;
-DEF_VEC_P(breakpoint_p);
 
 /* The following stuff is an abstract data type "bpstat" ("breakpoint
    status").  This provides the ability to determine whether we have
@@ -1626,16 +1624,13 @@ extern struct tracepoint *
   get_tracepoint_by_number (const char **arg,
 			    number_or_range_parser *parser);
 
-/* Return a vector of all tracepoints currently defined.  The vector
-   is newly allocated; the caller should free when done with it.  */
-extern VEC(breakpoint_p) *all_tracepoints (void);
+/* Return a vector of all tracepoints currently defined.  */
+extern std::vector<breakpoint *> all_tracepoints (void);
 
 extern int is_tracepoint (const struct breakpoint *b);
 
-/* Return a vector of all static tracepoints defined at ADDR.  The
-   vector is newly allocated; the caller should free when done with
-   it.  */
-extern VEC(breakpoint_p) *static_tracepoints_here (CORE_ADDR addr);
+/* Return a vector of all static tracepoints defined at ADDR.  */
+extern std::vector<breakpoint *> static_tracepoints_here (CORE_ADDR addr);
 
 /* Create an instance of this to start registering breakpoint numbers
    for a later "commands" command.  */
