@@ -1,5 +1,16 @@
 2018-06-27  Tom Tromey  <tom@tromey.com>
 
+	* python/py-unwind.c (unwind_info_object) <saved_regs>: Now a
+	std::vector.
+	(unwind_infopy_str, pyuw_create_unwind_info)
+	(unwind_infopy_add_saved_register, pyuw_sniffer)
+	(unwind_infopy_dealloc, unwind_infopy_add_saved_register):
+	Update.
+	(struct saved_reg): Add constructor.
+	<value>: Now a gdbpy_ref<>.
+
+2018-06-27  Tom Tromey  <tom@tromey.com>
+
 	* machoread.c (macho_symfile_read): Define "symbol_table" earlier.
 
 2018-06-27  Simon Marchi  <simon.marchi@ericsson.com>
