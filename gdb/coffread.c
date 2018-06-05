@@ -766,8 +766,6 @@ coff_symfile_finish (struct objfile *objfile)
 {
   /* Let stabs reader clean up.  */
   stabsread_clear_cache ();
-
-  dwarf2_free_objfile (objfile);
 }
 
 

@@ -1,3 +1,13 @@
+2018-06-28  Tom Tromey  <tom@tromey.com>
+
+	* coffread.c (coff_symfile_finish): Update.
+	* xcoffread.c (xcoff_symfile_finish): Update.
+	* elfread.c (elf_symfile_finish): Update.
+	* symfile.h (dwarf2_free_objfile): Don't declare.
+	* dwarf2read.c (_initialize_dwarf2_read): Use
+	register_objfile_data_with_cleanup.
+	(dwarf2_free_objfile): Now static.  Change signature.
+
 2018-06-28  Petr Tesarik  <ptesarik@suse.cz>
 
 	* symfile.c (add_symbol_file_command, _initialize_symfile): Add

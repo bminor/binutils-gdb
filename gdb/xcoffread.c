@@ -1959,8 +1959,6 @@ xcoff_symfile_finish (struct objfile *objfile)
       inclTable = NULL;
     }
   inclIndx = inclLength = inclDepth = 0;
-
-  dwarf2_free_objfile (objfile);
 }
 
 

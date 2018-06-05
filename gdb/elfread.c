@@ -1336,7 +1336,6 @@ elf_new_init (struct objfile *ignore)
 static void
 elf_symfile_finish (struct objfile *objfile)
 {
-  dwarf2_free_objfile (objfile);
 }
 
 /* ELF specific initialization routine for reading symbols.  */
