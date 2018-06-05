@@ -76,8 +76,12 @@ enum aarch64_regnum
 
 #define sve_vg_from_vl(vl)	((vl) / 8)
 #define sve_vl_from_vg(vg)	((vg) * 8)
+#ifndef sve_vq_from_vl
 #define sve_vq_from_vl(vl)	((vl) / 0x10)
+#endif
+#ifndef sve_vl_from_vq
 #define sve_vl_from_vq(vq)	((vq) * 0x10)
+#endif
 #define sve_vq_from_vg(vg)	(sve_vq_from_vl (sve_vl_from_vg (vg)))
 #define sve_vg_from_vq(vq)	(sve_vg_from_vl (sve_vl_from_vq (vq)))
 
