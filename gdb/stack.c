@@ -2556,8 +2556,8 @@ on this backtrace."));
 
   if (dbx_commands)
     add_com ("func", class_stack, func_command, _("\
-Select the stack frame that contains <func>.\n\
-Usage: func <name>"));
+Select the stack frame that contains NAME.\n\
+Usage: func NAME"));
 
   add_setshow_enum_cmd ("frame-arguments", class_stack,
 			print_frame_arguments_choices, &print_frame_arguments,

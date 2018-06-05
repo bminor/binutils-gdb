@@ -1,5 +1,9 @@
 2018-06-27  Tom Tromey  <tom@tromey.com>
 
+	* stack.c (_initialize_stack): Update "func" help text.
+
+2018-06-27  Tom Tromey  <tom@tromey.com>
+
 	* python/py-unwind.c (unwind_info_object) <saved_regs>: Now a
 	std::vector.
 	(unwind_infopy_str, pyuw_create_unwind_info)
