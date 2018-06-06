@@ -259,7 +259,7 @@ print_insn_xtensa (bfd_vma memaddr, struct disassemble_info *info)
   static bfd_byte *byte_buf = NULL;
   static xtensa_insnbuf insn_buffer = NULL;
   static xtensa_insnbuf slot_buffer = NULL;
-  int first, first_slot, valid_insn = 0;
+  int first, first_slot, valid_insn;
   property_table_entry *insn_block;
 
   if (!xtensa_default_isa)
@@ -338,16 +338,17 @@ print_insn_xtensa (bfd_vma memaddr, struct disassemble_info *info)
       /* Error return.  */
       return -1;
 
-  /* Don't set "isa" before the setjmp to keep the compiler from griping.  */
-  isa = xtensa_default_isa;
-  size = 0;
-  nslots = 0;
-
   /* Fetch the maximum size instruction.  */
   bytes_fetched = fetch_data (info, memaddr);
 
   insn_block = xtensa_find_table_entry (memaddr, info);
 
+  /* Don't set "isa" before the setjmp to keep the compiler from griping.  */
+  isa = xtensa_default_isa;
+  size = 0;
+  nslots = 0;
+  valid_insn = 0;
+  fmt = 0;
   if (!insn_block || (insn_block->flags & XTENSA_PROP_INSN))
     {
       /* Copy the bytes into the decode buffer.  */
