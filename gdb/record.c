@@ -491,6 +491,9 @@ get_insn_history_modifiers (const char **arg)
 
 	  switch (*args)
 	    {
+	    case 'a':
+	      modifiers |= DISASSEMBLY_OMIT_AUX_INSN;
+	      break;
 	    case 'm':
 	    case 's':
 	      modifiers |= DISASSEMBLY_SOURCE;
@@ -859,6 +862,8 @@ With a /m or /s modifier, source lines are included (if available).\n\
 With a /r modifier, raw instructions in hex are included.\n\
 With a /f modifier, function names are omitted.\n\
 With a /p modifier, current position markers are omitted.\n\
+With a /a modifier, omits output of auxiliary data, which is enabled \
+by default.\n\
 With no argument, disassembles ten more instructions after the previous \
 disassembly.\n\
 \"record instruction-history -\" disassembles ten instructions before a \
