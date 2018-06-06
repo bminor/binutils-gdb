@@ -1,3 +1,8 @@
+2018-06-06  Sameera Deshpande  <sameera.deshpande@linaro.org>
+
+	* config/tc-aarch64.c (aarch64_cpus): Add support of ARMv8.4 in
+	saphira.
+
 2018-06-05  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.in: Regenerate.
