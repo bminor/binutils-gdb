@@ -693,7 +693,7 @@ earmelf.c: $(srcdir)/emulparams/armelf.sh \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 earmelf_fbsd.c: $(srcdir)/emulparams/armelf_fbsd.sh \
-  $(srcdir)/emulparams/armelf.sh \
+  $(srcdir)/emulparams/armelf.sh $(srcdir)/emulparams/elf_fbsd.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
@@ -743,10 +743,12 @@ earmelfb.c: $(srcdir)/emulparams/armelfb.sh $(srcdir)/emulparams/armelf.sh \
 
 earmelfb_fbsd.c: $(srcdir)/emulparams/armelfb_fbsd.sh \
   $(srcdir)/emulparams/armelf_fbsd.sh \
+  $(srcdir)/emulparams/armelf.sh $(srcdir)/emulparams/elf_fbsd.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 earmelfb_fuchsia.c: $(srcdir)/emulparams/armelfb_fuchsia.sh \
+  $(srcdir)/emulparams/armelf_fuchsia.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
