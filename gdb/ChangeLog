@@ -1,5 +1,12 @@
 2018-06-18  Tom Tromey  <tom@tromey.com>
 
+	* ser-mingw.c (struct pipe_state_destroyer): New.
+	(pipe_state_up): New typedef.
+	(cleanup_pipe_state): Remove.
+	(pipe_windows_open): Use pipe_state_up.  Don't release argv.
+
+2018-06-18  Tom Tromey  <tom@tromey.com>
+
 	* rust-lang.h (rust_yyerror): Don't declare.
 	* rust-lang.c (rust_language_defn): Update.
 	* rust-exp.y (yyerror): Now static.
