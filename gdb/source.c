@@ -1539,10 +1539,8 @@ static void
 forward_search_command (const char *regex, int from_tty)
 {
   int c;
-  int desc;
   int line;
   char *msg;
-  struct cleanup *cleanups;
 
   line = last_line_listed + 1;
 
@@ -1553,22 +1551,21 @@ forward_search_command (const char *regex, int from_tty)
   if (current_source_symtab == 0)
     select_source_symtab (0);
 
-  desc = open_source_file (current_source_symtab);
-  if (desc < 0)
+  scoped_fd desc (open_source_file (current_source_symtab));
+  if (desc.get () < 0)
     perror_with_name (symtab_to_filename_for_display (current_source_symtab));
-  cleanups = make_cleanup_close (desc);
 
   if (current_source_symtab->line_charpos == 0)
-    find_source_lines (current_source_symtab, desc);
+    find_source_lines (current_source_symtab, desc.get ());
 
   if (line < 1 || line > current_source_symtab->nlines)
     error (_("Expression not found"));
 
-  if (lseek (desc, current_source_symtab->line_charpos[line - 1], 0) < 0)
+  if (lseek (desc.get (), current_source_symtab->line_charpos[line - 1], 0)
+      < 0)
     perror_with_name (symtab_to_filename_for_display (current_source_symtab));
 
-  discard_cleanups (cleanups);
-  gdb_file_up stream (fdopen (desc, FDOPEN_MODE));
+  gdb_file_up stream (fdopen (desc.release (), FDOPEN_MODE));
   clearerr (stream.get ());
   while (1)
     {
@@ -1624,10 +1621,8 @@ static void
 reverse_search_command (const char *regex, int from_tty)
 {
   int c;
-  int desc;
   int line;
   char *msg;
-  struct cleanup *cleanups;
 
   line = last_line_listed - 1;
 
@@ -1638,22 +1633,21 @@ reverse_search_command (const char *regex, int from_tty)
   if (current_source_symtab == 0)
     select_source_symtab (0);
 
-  desc = open_source_file (current_source_symtab);
-  if (desc < 0)
+  scoped_fd desc (open_source_file (current_source_symtab));
+  if (desc.get () < 0)
     perror_with_name (symtab_to_filename_for_display (current_source_symtab));
-  cleanups = make_cleanup_close (desc);
 
   if (current_source_symtab->line_charpos == 0)
-    find_source_lines (current_source_symtab, desc);
+    find_source_lines (current_source_symtab, desc.get ());
 
   if (line < 1 || line > current_source_symtab->nlines)
     error (_("Expression not found"));
 
-  if (lseek (desc, current_source_symtab->line_charpos[line - 1], 0) < 0)
+  if (lseek (desc.get (), current_source_symtab->line_charpos[line - 1], 0)
+      < 0)
     perror_with_name (symtab_to_filename_for_display (current_source_symtab));
 
-  discard_cleanups (cleanups);
-  gdb_file_up stream (fdopen (desc, FDOPEN_MODE));
+  gdb_file_up stream (fdopen (desc.release (), FDOPEN_MODE));
   clearerr (stream.get ());
   while (line > 1)
     {
