@@ -1700,6 +1700,15 @@ record_full_target::xfer_partial (enum target_object object,
 
 struct record_full_breakpoint
 {
+  record_full_breakpoint (struct address_space *address_space_,
+			  CORE_ADDR addr_,
+			  bool in_target_beneath_)
+    : address_space (address_space_),
+      addr (addr_),
+      in_target_beneath (in_target_beneath_)
+  {
+  }
+
   /* The address and address space the breakpoint was set at.  */
   struct address_space *address_space;
   CORE_ADDR addr;
@@ -1707,15 +1716,12 @@ struct record_full_breakpoint
   /* True when the breakpoint has been also installed in the target
      beneath.  This will be false for breakpoints set during replay or
      when recording.  */
-  int in_target_beneath;
+  bool in_target_beneath;
 };
-
-typedef struct record_full_breakpoint *record_full_breakpoint_p;
-DEF_VEC_P(record_full_breakpoint_p);
 
 /* The list of breakpoints inserted while the record target is
    active.  */
-VEC(record_full_breakpoint_p) *record_full_breakpoints = NULL;
+static std::vector<record_full_breakpoint> record_full_breakpoints;
 
 static void
 record_full_sync_record_breakpoints (struct bp_location *loc, void *data)
@@ -1725,14 +1731,10 @@ record_full_sync_record_breakpoints (struct bp_location *loc, void *data)
 
   if (loc->inserted)
     {
-      struct record_full_breakpoint *bp = XNEW (struct record_full_breakpoint);
-
-      bp->addr = loc->target_info.placed_address;
-      bp->address_space = loc->target_info.placed_address_space;
-
-      bp->in_target_beneath = 1;
-
-      VEC_safe_push (record_full_breakpoint_p, record_full_breakpoints, bp);
+      record_full_breakpoints.emplace_back
+	(loc->target_info.placed_address_space,
+	 loc->target_info.placed_address,
+	 1);
     }
 }
 
@@ -1741,7 +1743,7 @@ record_full_sync_record_breakpoints (struct bp_location *loc, void *data)
 static void
 record_full_init_record_breakpoints (void)
 {
-  VEC_free (record_full_breakpoint_p, record_full_breakpoints);
+  record_full_breakpoints.clear ();
 
   iterate_over_bp_locations (record_full_sync_record_breakpoints);
 }
@@ -1754,9 +1756,7 @@ int
 record_full_target::insert_breakpoint (struct gdbarch *gdbarch,
 				       struct bp_target_info *bp_tgt)
 {
-  struct record_full_breakpoint *bp;
-  int in_target_beneath = 0;
-  int ix;
+  bool in_target_beneath = false;
 
   if (!RECORD_FULL_IS_REPLAY)
     {
@@ -1773,30 +1773,25 @@ record_full_target::insert_breakpoint (struct gdbarch *gdbarch,
       if (ret != 0)
 	return ret;
 
-      in_target_beneath = 1;
+      in_target_beneath = true;
     }
 
   /* Use the existing entries if found in order to avoid duplication
      in record_full_breakpoints.  */
 
-  for (ix = 0;
-       VEC_iterate (record_full_breakpoint_p,
-		    record_full_breakpoints, ix, bp);
-       ++ix)
+  for (struct record_full_breakpoint &bp : record_full_breakpoints)
     {
-      if (bp->addr == bp_tgt->placed_address
-	  && bp->address_space == bp_tgt->placed_address_space)
+      if (bp.addr == bp_tgt->placed_address
+	  && bp.address_space == bp_tgt->placed_address_space)
 	{
-	  gdb_assert (bp->in_target_beneath == in_target_beneath);
+	  gdb_assert (bp.in_target_beneath == in_target_beneath);
 	  return 0;
 	}
     }
 
-  bp = XNEW (struct record_full_breakpoint);
-  bp->addr = bp_tgt->placed_address;
-  bp->address_space = bp_tgt->placed_address_space;
-  bp->in_target_beneath = in_target_beneath;
-  VEC_safe_push (record_full_breakpoint_p, record_full_breakpoints, bp);
+  record_full_breakpoints.emplace_back (bp_tgt->placed_address_space,
+					bp_tgt->placed_address,
+					in_target_beneath);
   return 0;
 }
 
@@ -1807,18 +1802,16 @@ record_full_target::remove_breakpoint (struct gdbarch *gdbarch,
 				       struct bp_target_info *bp_tgt,
 				       enum remove_bp_reason reason)
 {
-  struct record_full_breakpoint *bp;
-  int ix;
-
-  for (ix = 0;
-       VEC_iterate (record_full_breakpoint_p,
-		    record_full_breakpoints, ix, bp);
-       ++ix)
+  for (auto iter = record_full_breakpoints.begin ();
+       iter != record_full_breakpoints.end ();
+       ++iter)
     {
-      if (bp->addr == bp_tgt->placed_address
-	  && bp->address_space == bp_tgt->placed_address_space)
+      struct record_full_breakpoint &bp = *iter;
+
+      if (bp.addr == bp_tgt->placed_address
+	  && bp.address_space == bp_tgt->placed_address_space)
 	{
-	  if (bp->in_target_beneath)
+	  if (bp.in_target_beneath)
 	    {
 	      scoped_restore restore_operation_disable
 		= record_full_gdb_operation_disable_set ();
@@ -1830,10 +1823,7 @@ record_full_target::remove_breakpoint (struct gdbarch *gdbarch,
 	    }
 
 	  if (reason == REMOVE_BREAKPOINT)
-	    {
-	      VEC_unordered_remove (record_full_breakpoint_p,
-				    record_full_breakpoints, ix);
-	    }
+	    unordered_remove (record_full_breakpoints, iter);
 	  return 0;
 	}
     }

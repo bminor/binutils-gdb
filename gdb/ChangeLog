@@ -1,3 +1,14 @@
+2018-06-10  Tom Tromey  <tom@tromey.com>
+
+	* record-full.c (record_full_breakpoint_p): Remove typedef.  Don't
+	declare VEC.  Add constructor.
+	<in_target_beneath>: Now bool.
+	(record_full_breakpoints): Now a std::vector, static.
+	(record_full_sync_record_breakpoints)
+	(record_full_init_record_breakpoints)
+	(record_full_target::insert_breakpoint)
+	(record_full_target::remove_breakpoint): Update.  Don't use XNEW.
+
 2018-06-10  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* dwarf2read.c (process_cu_includes): Remove struct keyword.
