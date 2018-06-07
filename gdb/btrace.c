@@ -2056,8 +2056,7 @@ static void
 parse_xml_raw (struct gdb_xml_parser *parser, const char *body_text,
 	       gdb_byte **pdata, size_t *psize)
 {
-  struct cleanup *cleanup;
-  gdb_byte *data, *bin;
+  gdb_byte *bin;
   size_t len, size;
 
   len = strlen (body_text);
@@ -2066,8 +2065,8 @@ parse_xml_raw (struct gdb_xml_parser *parser, const char *body_text,
 
   size = len / 2;
 
-  bin = data = (gdb_byte *) xmalloc (size);
-  cleanup = make_cleanup (xfree, data);
+  gdb::unique_xmalloc_ptr<gdb_byte> data ((gdb_byte *) xmalloc (size));
+  bin = data.get ();
 
   /* We use hex encoding - see common/rsp-low.h.  */
   while (len > 0)
@@ -2084,9 +2083,7 @@ parse_xml_raw (struct gdb_xml_parser *parser, const char *body_text,
       len -= 2;
     }
 
-  discard_cleanups (cleanup);
-
-  *pdata = data;
+  *pdata = data.release ();
   *psize = size;
 }
 

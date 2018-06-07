@@ -1,5 +1,9 @@
 2018-06-08  Tom Tromey  <tom@tromey.com>
 
+	* btrace.c (parse_xml_raw): Use gdb::unique_xmalloc_ptr.
+
+2018-06-08  Tom Tromey  <tom@tromey.com>
+
 	* common/btrace-common.h (struct btrace_data): Add constructor,
 	destructor, move assignment operator.
 	<empty, clear, fini>: New methods.
