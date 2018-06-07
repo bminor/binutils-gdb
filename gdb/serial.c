@@ -27,12 +27,9 @@
 
 static unsigned int global_serial_debug_p;
 
-typedef const struct serial_ops *serial_ops_p;
-DEF_VEC_P (serial_ops_p);
-
 /* Serial I/O handlers.  */
 
-VEC (serial_ops_p) *serial_ops_list = NULL;
+static std::vector<const struct serial_ops *> serial_ops_list;
 
 /* Pointer to list of scb's.  */
 
@@ -146,10 +143,7 @@ serial_log_command (struct target_ops *self, const char *cmd)
 static const struct serial_ops *
 serial_interface_lookup (const char *name)
 {
-  const struct serial_ops *ops;
-  int i;
-
-  for (i = 0; VEC_iterate (serial_ops_p, serial_ops_list, i, ops); ++i)
+  for (const struct serial_ops *ops : serial_ops_list)
     if (strcmp (name, ops->name) == 0)
       return ops;
 
@@ -159,7 +153,7 @@ serial_interface_lookup (const char *name)
 void
 serial_add_interface (const struct serial_ops *optable)
 {
-  VEC_safe_push (serial_ops_p, serial_ops_list, optable);
+  serial_ops_list.push_back (optable);
 }
 
 /* Return the open serial device for FD, if found, or NULL if FD is

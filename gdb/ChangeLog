@@ -1,5 +1,11 @@
 2018-06-09  Tom Tromey  <tom@tromey.com>
 
+	* serial.c (serial_ops_p): Remove typedef.  Don't declare VEC.
+	(serial_ops_list): Now static, std::vector.
+	(serial_interface_lookup, serial_add_interface): Update.
+
+2018-06-09  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.c (process_cu_includes): Update.
 	(process_full_comp_unit): Update.
 	* dwarf2read.h (struct dwarf2_per_objfile) <just_read_cus>: Now a
