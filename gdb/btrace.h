@@ -105,7 +105,11 @@ enum btrace_function_flag
 
   /* The 'up' link points to a tail call.  This obviously only makes sense
      if bfun_up_links_to_ret is clear.  */
-  BFUN_UP_LINKS_TO_TAILCALL = (1 << 1)
+  BFUN_UP_LINKS_TO_TAILCALL = (1 << 1),
+
+  /* Indicates that at least one auxiliary instruction is in the current
+     function segment.  */
+  BFUN_CONTAINS_AUX = (1 << 2)
 };
 DEF_ENUM_FLAGS_TYPE (enum btrace_function_flag, btrace_function_flags);
 

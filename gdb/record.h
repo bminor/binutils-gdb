@@ -62,7 +62,10 @@ enum record_print_flag
   RECORD_PRINT_INSN_RANGE = (1 << 1),
 
   /* Indent based on call stack depth (if applicable).  */
-  RECORD_PRINT_INDENT_CALLS = (1 << 2)
+  RECORD_PRINT_INDENT_CALLS = (1 << 2),
+
+  /* Deactivate printing auxiliary data (if applicable).  */
+  RECORD_DONT_PRINT_AUX = (1 << 3)
 };
 DEF_ENUM_FLAGS_TYPE (enum record_print_flag, record_print_flags);
 

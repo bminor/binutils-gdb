@@ -644,6 +644,9 @@ get_call_history_modifiers (const char **arg)
 	    case 'c':
 	      modifiers |= RECORD_PRINT_INDENT_CALLS;
 	      break;
+	    case 'a':
+	      modifiers |= RECORD_DONT_PRINT_AUX;
+	      break;
 	    default:
 	      error (_("Invalid modifier: %c."), *args);
 	    }
@@ -886,6 +889,8 @@ Without modifiers, it prints the function name.\n\
 With a /l modifier, the source file and line number range is included.\n\
 With a /i modifier, the instruction number range is included.\n\
 With a /c modifier, the output is indented based on the call stack depth.\n\
+With a /a modifier, omits output of auxiliary data, which is enabled \
+by default.\n\
 With no argument, prints ten more lines after the previous ten-line print.\n\
 \"record function-call-history -\" prints ten lines before a previous ten-line \
 print.\n\

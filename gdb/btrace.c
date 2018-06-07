@@ -664,6 +664,9 @@ ftrace_update_insns (struct btrace_function *bfun, const btrace_insn &insn)
 {
   bfun->insn.push_back (insn);
 
+  if (insn.iclass == BTRACE_INSN_AUX)
+    bfun->flags |= BFUN_CONTAINS_AUX;
+
   if (record_debug > 1)
     ftrace_debug (bfun, "update insn");
 }

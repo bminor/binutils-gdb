@@ -8258,8 +8258,9 @@ that function, the source lines for this instruction sequence (if the
 @code{/l} modifier is specified), and the instructions numbers that form
 the sequence (if the @code{/i} modifier is specified).  The function names
 are indented to reflect the call stack depth if the @code{/c} modifier is
-specified.  The @code{/l}, @code{/i}, and @code{/c} modifiers can be given
-together.
+specified.  Printing auxiliary information is enabled by default and can be
+omitted with the @code{/a} modifier.  The @code{/l}, @code{/i}, @code{/a},
+and @code{/c} modifiers can be given together.
 
 @smallexample
 (@value{GDBP}) @b{list 1, 10}
