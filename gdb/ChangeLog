@@ -1,5 +1,29 @@
 2018-06-10  Tom Tromey  <tom@tromey.com>
 
+	* remote.c (stop_reply_p): Remove typedef.  Don't declare queue.
+	(class remote_state) <stop_reply_queue>: Now std::vector.
+	(remote_state::~remote_state)
+	(remote_target::stop_reply_queue_length): Update.
+	(struct queue_iter_param, remove_child_of_pending_fork)
+	(struct check_pending_event_prevents_wildcard_vcont_callback_data)
+	(check_pending_event_prevents_wildcard_vcont_callback)
+	(remove_stop_reply_for_inferior)
+	(remove_stop_reply_of_remote_state)
+	(remote_notif_remove_once_on_match)
+	(stop_reply_match_ptid_and_ws)
+	(remote_kill_child_of_pending_fork): Remove.
+	(remote_target::remove_new_fork_children)
+	(remote_target::check_pending_events_prevent_wildcard_vcont)
+	(remote_target::discard_pending_stop_replies)
+	(remote_target::discard_pending_stop_replies_in_queue)
+	(remote_target::remote_notif_remove_queued_reply)
+	(remote_target::queued_stop_reply)
+	(remote_target::push_stop_reply, remote_target::peek_stop_reply)
+	(remote_target::wait, remote_target::kill_new_fork_children)
+	(remote_target::async): Update.
+
+2018-06-10  Tom Tromey  <tom@tromey.com>
+
 	* record-full.c (record_full_arch_list_cleanups): Remove.
 	(record_full_message): Use try/catch.
 	(record_full_wait_cleanups): Remove.

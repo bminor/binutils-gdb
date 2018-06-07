@@ -96,10 +96,17 @@ struct protocol_feature;
 struct packet_reg;
 
 struct stop_reply;
-typedef struct stop_reply *stop_reply_p;
+static void stop_reply_xfree (struct stop_reply *);
 
-DECLARE_QUEUE_P (stop_reply_p);
-DEFINE_QUEUE_P (stop_reply_p);
+struct stop_reply_deleter
+{
+  void operator() (stop_reply *r) const
+  {
+    stop_reply_xfree (r);
+  }
+};
+
+typedef std::unique_ptr<stop_reply, stop_reply_deleter> stop_reply_up;
 
 /* Generic configuration support for packets the stub optionally
    supports.  Allows the user to specify the use of the packet as well
@@ -368,7 +375,7 @@ public: /* data */
      should be queued first, and be consumed by remote_wait_{ns,as}
      one per time.  Other notifications can consume their events
      immediately, so queue is not needed for them.  */
-  QUEUE (stop_reply_p) *stop_reply_queue;
+  std::vector<stop_reply_up> stop_reply_queue;
 
   /* Asynchronous signal handle registered as event loop source for
      when we have pending events ready to be passed to the core.  */
@@ -1021,9 +1028,6 @@ static void show_remote_protocol_packet_cmd (struct ui_file *file,
 
 static ptid_t read_ptid (const char *buf, const char **obuf);
 
-struct stop_reply;
-static void stop_reply_xfree (struct stop_reply *);
-
 static void remote_async_inferior_event_handler (gdb_client_data);
 
 static int remote_read_description_p (struct target_ops *target);
@@ -1095,8 +1099,6 @@ remote_state::remote_state ()
      whenever a larger buffer is needed. */
   this->buf_size = 400;
   this->buf = (char *) xmalloc (this->buf_size);
-
-  this->stop_reply_queue = QUEUE_alloc (stop_reply_p, stop_reply_xfree);
 }
 
 remote_state::~remote_state ()
@@ -1106,7 +1108,6 @@ remote_state::~remote_state ()
   xfree (this->buf);
   xfree (this->finished_object);
   xfree (this->finished_annex);
-  QUEUE_free (stop_reply_p, this->stop_reply_queue);
 }
 
 /* Utility: generate error from an incoming stub packet.  */
@@ -6846,7 +6847,7 @@ int
 remote_target::stop_reply_queue_length ()
 {
   remote_state *rs = get_remote_state ();
-  return QUEUE_length (stop_reply_p, rs->stop_reply_queue);
+  return rs->stop_reply_queue.size ();
 }
 
 void
@@ -6929,15 +6930,6 @@ struct notif_client notif_client_stop =
   REMOTE_NOTIF_STOP,
 };
 
-/* A parameter to pass data in and out.  */
-
-struct queue_iter_param
-{
-  remote_target *remote;
-  void *input;
-  struct stop_reply *output;
-};
-
 /* Determine if THREAD_PTID is a pending fork parent thread.  ARG contains
    the pid of the process that owns the threads we want to check, or
    -1 if we want to check all threads.  */
@@ -6979,27 +6971,6 @@ is_pending_fork_parent_thread (struct thread_info *thread)
   return is_pending_fork_parent (ws, pid, thread->ptid);
 }
 
-/* Check whether EVENT is a fork event, and if it is, remove the
-   fork child from the context list passed in DATA.  */
-
-static int
-remove_child_of_pending_fork (QUEUE (stop_reply_p) *q,
-			      QUEUE_ITER (stop_reply_p) *iter,
-			      stop_reply_p event,
-			      void *data)
-{
-  struct queue_iter_param *param = (struct queue_iter_param *) data;
-  struct threads_listing_context *context
-    = (struct threads_listing_context *) param->input;
-
-  if (event->ws.kind == TARGET_WAITKIND_FORKED
-      || event->ws.kind == TARGET_WAITKIND_VFORKED
-      || event->ws.kind == TARGET_WAITKIND_THREAD_EXITED)
-    context->remove_thread (event->ws.value.related_pid);
-
-  return 1;
-}
-
 /* If CONTEXT contains any fork child threads that have not been
    reported yet, remove them from the CONTEXT list.  If such a
    thread exists it is because we are stopped at a fork catchpoint
@@ -7012,7 +6983,6 @@ remote_target::remove_new_fork_children (threads_listing_context *context)
   struct thread_info * thread;
   int pid = -1;
   struct notif_client *notif = &notif_client_stop;
-  struct queue_iter_param param;
 
   /* For any threads stopped at a fork event, remove the corresponding
      fork child threads from the CONTEXT list.  */
@@ -7028,55 +6998,11 @@ remote_target::remove_new_fork_children (threads_listing_context *context)
      in process PID and remove those fork child threads from the
      CONTEXT list as well.  */
   remote_notif_get_pending_events (notif);
-  param.remote = this;
-  param.input = context;
-  param.output = NULL;
-  QUEUE_iterate (stop_reply_p, get_remote_state ()->stop_reply_queue,
-		 remove_child_of_pending_fork, &param);
-}
-
-/* Callback data for
-   check_pending_event_prevents_wildcard_vcont_callback.  */
-struct check_pending_event_prevents_wildcard_vcont_callback_data
-{
-  /* The remote target.  */
-  remote_target *remote;
-
-  /* Whether we can do a global wildcard (vCont;c)  */
-  int *may_global_wildcard_vcont;
-};
-
-/* Check whether EVENT would prevent a global or process wildcard
-   vCont action.  */
-
-static int
-check_pending_event_prevents_wildcard_vcont_callback
-  (QUEUE (stop_reply_p) *q,
-   QUEUE_ITER (stop_reply_p) *iter,
-   stop_reply_p event,
-   void *data)
-{
-  struct inferior *inf;
-  auto *cb_data = (check_pending_event_prevents_wildcard_vcont_callback_data *) data;
-
-  if (event->ws.kind == TARGET_WAITKIND_NO_RESUMED
-      || event->ws.kind == TARGET_WAITKIND_NO_HISTORY)
-    return 1;
-
-  if (event->ws.kind == TARGET_WAITKIND_FORKED
-      || event->ws.kind == TARGET_WAITKIND_VFORKED)
-    *cb_data->may_global_wildcard_vcont = 0;
-
-  inf = find_inferior_ptid (event->ptid);
-
-  /* This may be the first time we heard about this process.
-     Regardless, we must not do a global wildcard resume, otherwise
-     we'd resume this process too.  */
-  *cb_data->may_global_wildcard_vcont = 0;
-  if (inf != NULL)
-    get_remote_inferior (inf)->may_wildcard_vcont = false;
-
-  return 1;
+  for (auto &event : get_remote_state ()->stop_reply_queue)
+    if (event->ws.kind == TARGET_WAITKIND_FORKED
+	|| event->ws.kind == TARGET_WAITKIND_VFORKED
+	|| event->ws.kind == TARGET_WAITKIND_THREAD_EXITED)
+      context->remove_thread (event->ws.value.related_pid);
 }
 
 /* Check whether any event pending in the vStopped queue would prevent
@@ -7090,34 +7016,27 @@ remote_target::check_pending_events_prevent_wildcard_vcont
   (int *may_global_wildcard)
 {
   struct notif_client *notif = &notif_client_stop;
-  check_pending_event_prevents_wildcard_vcont_callback_data cb_data
-    {this, may_global_wildcard};
 
   remote_notif_get_pending_events (notif);
-  QUEUE_iterate (stop_reply_p, get_remote_state ()->stop_reply_queue,
-		 check_pending_event_prevents_wildcard_vcont_callback,
-		 &cb_data);
-}
-
-/* Remove stop replies in the queue if its pid is equal to the given
-   inferior's pid.  */
-
-static int
-remove_stop_reply_for_inferior (QUEUE (stop_reply_p) *q,
-				QUEUE_ITER (stop_reply_p) *iter,
-				stop_reply_p event,
-				void *data)
-{
-  struct queue_iter_param *param = (struct queue_iter_param *) data;
-  struct inferior *inf = (struct inferior *) param->input;
-
-  if (ptid_get_pid (event->ptid) == inf->pid)
+  for (auto &event : get_remote_state ()->stop_reply_queue)
     {
-      stop_reply_xfree (event);
-      QUEUE_remove_elem (stop_reply_p, q, iter);
-    }
+      if (event->ws.kind == TARGET_WAITKIND_NO_RESUMED
+	  || event->ws.kind == TARGET_WAITKIND_NO_HISTORY)
+	continue;
 
-  return 1;
+      if (event->ws.kind == TARGET_WAITKIND_FORKED
+	  || event->ws.kind == TARGET_WAITKIND_VFORKED)
+	*may_global_wildcard = 0;
+
+      struct inferior *inf = find_inferior_ptid (event->ptid);
+
+      /* This may be the first time we heard about this process.
+	 Regardless, we must not do a global wildcard resume, otherwise
+	 we'd resume this process too.  */
+      *may_global_wildcard = 0;
+      if (inf != NULL)
+	get_remote_inferior (inf)->may_wildcard_vcont = false;
+    }
 }
 
 /* Discard all pending stop replies of inferior INF.  */
@@ -7125,7 +7044,6 @@ remove_stop_reply_for_inferior (QUEUE (stop_reply_p) *q,
 void
 remote_target::discard_pending_stop_replies (struct inferior *inf)
 {
-  struct queue_iter_param param;
   struct stop_reply *reply;
   struct remote_state *rs = get_remote_state ();
   struct remote_notif_state *rns = rs->notif_state;
@@ -7144,34 +7062,15 @@ remote_target::discard_pending_stop_replies (struct inferior *inf)
       rns->pending_event[notif_client_stop.id] = NULL;
     }
 
-  param.remote = this;
-  param.input = inf;
-  param.output = NULL;
   /* Discard the stop replies we have already pulled with
      vStopped.  */
-  QUEUE_iterate (stop_reply_p, rs->stop_reply_queue,
-		 remove_stop_reply_for_inferior, &param);
-}
-
-/* If its remote state is equal to the given remote state,
-   remove EVENT from the stop reply queue.  */
-
-static int
-remove_stop_reply_of_remote_state (QUEUE (stop_reply_p) *q,
-				   QUEUE_ITER (stop_reply_p) *iter,
-				   stop_reply_p event,
-				   void *data)
-{
-  struct queue_iter_param *param = (struct queue_iter_param *) data;
-  struct remote_state *rs = (struct remote_state *) param->input;
-
-  if (event->rs == rs)
-    {
-      stop_reply_xfree (event);
-      QUEUE_remove_elem (stop_reply_p, q, iter);
-    }
-
-  return 1;
+  auto iter = std::remove_if (rs->stop_reply_queue.begin (),
+			      rs->stop_reply_queue.end (),
+			      [=] (const stop_reply_up &event)
+			      {
+				return event->ptid.pid () == inf->pid;
+			      });
+  rs->stop_reply_queue.erase (iter, rs->stop_reply_queue.end ());
 }
 
 /* Discard the stop replies for RS in stop_reply_queue.  */
@@ -7180,36 +7079,16 @@ void
 remote_target::discard_pending_stop_replies_in_queue ()
 {
   remote_state *rs = get_remote_state ();
-  struct queue_iter_param param;
 
-  param.remote = this;
-  param.input = rs;
-  param.output = NULL;
   /* Discard the stop replies we have already pulled with
      vStopped.  */
-  QUEUE_iterate (stop_reply_p, rs->stop_reply_queue,
-		 remove_stop_reply_of_remote_state, &param);
-}
-
-/* A parameter to pass data in and out.  */
-
-static int
-remote_notif_remove_once_on_match (QUEUE (stop_reply_p) *q,
-				   QUEUE_ITER (stop_reply_p) *iter,
-				   stop_reply_p event,
-				   void *data)
-{
-  struct queue_iter_param *param = (struct queue_iter_param *) data;
-  ptid_t *ptid = (ptid_t *) param->input;
-
-  if (ptid_match (event->ptid, *ptid))
-    {
-      param->output = event;
-      QUEUE_remove_elem (stop_reply_p, q, iter);
-      return 0;
-    }
-
-  return 1;
+  auto iter = std::remove_if (rs->stop_reply_queue.begin (),
+			      rs->stop_reply_queue.end (),
+			      [=] (const stop_reply_up &event)
+			      {
+				return event->rs == rs;
+			      });
+  rs->stop_reply_queue.erase (iter, rs->stop_reply_queue.end ());
 }
 
 /* Remove the first reply in 'stop_reply_queue' which matches
@@ -7218,20 +7097,29 @@ remote_notif_remove_once_on_match (QUEUE (stop_reply_p) *q,
 struct stop_reply *
 remote_target::remote_notif_remove_queued_reply (ptid_t ptid)
 {
-  struct queue_iter_param param;
+  remote_state *rs = get_remote_state ();
 
-  param.remote = this;
-  param.input = &ptid;
-  param.output = NULL;
+  auto iter = std::find_if (rs->stop_reply_queue.begin (),
+			    rs->stop_reply_queue.end (),
+			    [=] (const stop_reply_up &event)
+			    {
+			      return event->ptid.matches (ptid);
+			    });
+  struct stop_reply *result;
+  if (iter == rs->stop_reply_queue.end ())
+    result = nullptr;
+  else
+    {
+      result = iter->release ();
+      rs->stop_reply_queue.erase (iter);
+    }
 
-  QUEUE_iterate (stop_reply_p, get_remote_state ()->stop_reply_queue,
-		 remote_notif_remove_once_on_match, &param);
   if (notif_debug)
     fprintf_unfiltered (gdb_stdlog,
 			"notif: discard queued event: 'Stop' in %s\n",
 			target_pid_to_str (ptid));
 
-  return param.output;
+  return result;
 }
 
 /* Look for a queued stop reply belonging to PTID.  If one is found,
@@ -7242,11 +7130,11 @@ remote_target::remote_notif_remove_queued_reply (ptid_t ptid)
 struct stop_reply *
 remote_target::queued_stop_reply (ptid_t ptid)
 {
+  remote_state *rs = get_remote_state ();
   struct stop_reply *r = remote_notif_remove_queued_reply (ptid);
 
-  if (!QUEUE_is_empty (stop_reply_p, get_remote_state ()->stop_reply_queue))
+  if (!rs->stop_reply_queue.empty ())
     {
-      remote_state *rs = get_remote_state ();
       /* There's still at least an event left.  */
       mark_async_event_handler (rs->remote_async_inferior_event_token);
     }
@@ -7262,28 +7150,15 @@ void
 remote_target::push_stop_reply (struct stop_reply *new_event)
 {
   remote_state *rs = get_remote_state ();
-  QUEUE_enque (stop_reply_p, rs->stop_reply_queue, new_event);
+  rs->stop_reply_queue.push_back (stop_reply_up (new_event));
 
   if (notif_debug)
     fprintf_unfiltered (gdb_stdlog,
 			"notif: push 'Stop' %s to queue %d\n",
 			target_pid_to_str (new_event->ptid),
-			QUEUE_length (stop_reply_p,
-				      rs->stop_reply_queue));
+			int (rs->stop_reply_queue.size ()));
 
   mark_async_event_handler (rs->remote_async_inferior_event_token);
-}
-
-static int
-stop_reply_match_ptid_and_ws (QUEUE (stop_reply_p) *q,
-			      QUEUE_ITER (stop_reply_p) *iter,
-			      struct stop_reply *event,
-			      void *data)
-{
-  ptid_t *ptid = (ptid_t *) data;
-
-  return !(ptid_equal (*ptid, event->ptid)
-	   && event->ws.kind == TARGET_WAITKIND_STOPPED);
 }
 
 /* Returns true if we have a stop reply for PTID.  */
@@ -7292,8 +7167,11 @@ int
 remote_target::peek_stop_reply (ptid_t ptid)
 {
   remote_state *rs = get_remote_state ();
-  return !QUEUE_iterate (stop_reply_p, rs->stop_reply_queue,
-			 stop_reply_match_ptid_and_ws, &ptid);
+  for (auto &event : rs->stop_reply_queue)
+    if (ptid == event->ptid
+	&& event->ws.kind == TARGET_WAITKIND_STOPPED)
+      return 1;
+  return 0;
 }
 
 /* Helper for remote_parse_stop_reply.  Return nonzero if the substring
@@ -8030,7 +7908,7 @@ remote_target::wait (ptid_t ptid, struct target_waitstatus *status, int options)
 
       /* If there are are events left in the queue tell the event loop
 	 to return here.  */
-      if (!QUEUE_is_empty (stop_reply_p, rs->stop_reply_queue))
+      if (!rs->stop_reply_queue.empty ())
 	mark_async_event_handler (rs->remote_async_inferior_event_token);
     }
 
@@ -9793,32 +9671,6 @@ remote_target::getpkt_or_notif_sane (char **buf, long *sizeof_buf, int forever,
 				 is_notif);
 }
 
-/* Check whether EVENT is a fork event for the process specified
-   by the pid passed in DATA, and if it is, kill the fork child.  */
-
-int
-remote_kill_child_of_pending_fork (QUEUE (stop_reply_p) *q,
-				   QUEUE_ITER (stop_reply_p) *iter,
-				   stop_reply_p event,
-				   void *data)
-{
-  struct queue_iter_param *param = (struct queue_iter_param *) data;
-  int parent_pid = *(int *) param->input;
-
-  if (is_pending_fork_parent (&event->ws, parent_pid, event->ptid))
-    {
-      remote_target *remote = param->remote;
-      int child_pid = ptid_get_pid (event->ws.value.related_pid);
-      int res;
-
-      res = remote->remote_vkill (child_pid);
-      if (res != 0)
-	error (_("Can't kill fork child process %d"), child_pid);
-    }
-
-  return 1;
-}
-
 /* Kill any new fork children of process PID that haven't been
    processed by follow_fork.  */
 
@@ -9828,7 +9680,6 @@ remote_target::kill_new_fork_children (int pid)
   remote_state *rs = get_remote_state ();
   struct thread_info *thread;
   struct notif_client *notif = &notif_client_stop;
-  struct queue_iter_param param;
 
   /* Kill the fork child threads of any threads in process PID
      that are stopped at a fork event.  */
@@ -9838,7 +9689,7 @@ remote_target::kill_new_fork_children (int pid)
 
       if (is_pending_fork_parent (ws, pid, thread->ptid))
 	{
-	  int child_pid = ptid_get_pid (ws->value.related_pid);
+	  int child_pid = ws->value.related_pid.pid ();
 	  int res;
 
 	  res = remote_vkill (child_pid);
@@ -9850,11 +9701,16 @@ remote_target::kill_new_fork_children (int pid)
   /* Check for any pending fork events (not reported or processed yet)
      in process PID and kill those fork child threads as well.  */
   remote_notif_get_pending_events (notif);
-  param.remote = this;
-  param.input = &pid;
-  param.output = NULL;
-  QUEUE_iterate (stop_reply_p, rs->stop_reply_queue,
-		 remote_kill_child_of_pending_fork, &param);
+  for (auto &event : rs->stop_reply_queue)
+    if (is_pending_fork_parent (&event->ws, pid, event->ptid))
+      {
+	int child_pid = event->ws.value.related_pid.pid ();
+	int res;
+
+	res = remote_vkill (child_pid);
+	if (res != 0)
+	  error (_("Can't kill fork child process %d"), child_pid);
+      }
 }
 
 
@@ -14188,7 +14044,7 @@ remote_target::async (int enable)
 
       /* If there are pending events in the stop reply queue tell the
 	 event loop to process them.  */
-      if (!QUEUE_is_empty (stop_reply_p, rs->stop_reply_queue))
+      if (!rs->stop_reply_queue.empty ())
 	mark_async_event_handler (rs->remote_async_inferior_event_token);
       /* For simplicity, below we clear the pending events token
 	 without remembering whether it is marked, so here we always
