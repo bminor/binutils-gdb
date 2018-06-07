@@ -11794,7 +11794,7 @@ remote_target::read_description ()
   /* Do not try this during initial connection, when we do not know
      whether there is a running but stopped thread.  */
   if (!target_has_execution || ptid_equal (inferior_ptid, null_ptid))
-    return beneath->read_description ();
+    return beneath ()->read_description ();
 
   if (!VEC_empty (remote_g_packet_guess_s, data->guesses))
     {
@@ -11813,7 +11813,7 @@ remote_target::read_description ()
 	 an architecture, but it's too tricky to do safely.  */
     }
 
-  return beneath->read_description ();
+  return beneath ()->read_description ();
 }
 
 /* Remote file transfer support.  This is host-initiated I/O, not

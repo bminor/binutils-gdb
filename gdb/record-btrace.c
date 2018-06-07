@@ -423,7 +423,7 @@ void
 record_btrace_target::disconnect (const char *args,
 				  int from_tty)
 {
-  struct target_ops *beneath = this->beneath;
+  struct target_ops *beneath = this->beneath ();
 
   /* Do not stop recording, just clean up GDB side.  */
   unpush_target (this);
@@ -462,7 +462,7 @@ record_btrace_target::async (int enable)
   else
     clear_async_event_handler (record_btrace_async_inferior_event_handler);
 
-  this->beneath->async (enable);
+  this->beneath ()->async (enable);
 }
 
 /* Adjusts the size and returns a human readable size suffix.  */
@@ -1463,8 +1463,8 @@ record_btrace_target::xfer_partial (enum target_object object,
     }
 
   /* Forward the request.  */
-  return this->beneath->xfer_partial (object, annex, readbuf, writebuf,
-				      offset, len, xfered_len);
+  return this->beneath ()->xfer_partial (object, annex, readbuf, writebuf,
+					 offset, len, xfered_len);
 }
 
 /* The insert_breakpoint method of target record-btrace.  */
@@ -1484,7 +1484,7 @@ record_btrace_target::insert_breakpoint (struct gdbarch *gdbarch,
   ret = 0;
   TRY
     {
-      ret = this->beneath->insert_breakpoint (gdbarch, bp_tgt);
+      ret = this->beneath ()->insert_breakpoint (gdbarch, bp_tgt);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -1515,7 +1515,7 @@ record_btrace_target::remove_breakpoint (struct gdbarch *gdbarch,
   ret = 0;
   TRY
     {
-      ret = this->beneath->remove_breakpoint (gdbarch, bp_tgt, reason);
+      ret = this->beneath ()->remove_breakpoint (gdbarch, bp_tgt, reason);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -1561,7 +1561,7 @@ record_btrace_target::fetch_registers (struct regcache *regcache, int regno)
       regcache->raw_supply (regno, &insn->pc);
     }
   else
-    this->beneath->fetch_registers (regcache, regno);
+    this->beneath ()->fetch_registers (regcache, regno);
 }
 
 /* The store_registers method of target record-btrace.  */
@@ -1577,7 +1577,7 @@ record_btrace_target::store_registers (struct regcache *regcache, int regno)
 
   gdb_assert (may_write_registers != 0);
 
-  this->beneath->store_registers (regcache, regno);
+  this->beneath ()->store_registers (regcache, regno);
 }
 
 /* The prepare_to_store method of target record-btrace.  */
@@ -1589,7 +1589,7 @@ record_btrace_target::prepare_to_store (struct regcache *regcache)
       && record_is_replaying (regcache->ptid ()))
     return;
 
-  this->beneath->prepare_to_store (regcache);
+  this->beneath ()->prepare_to_store (regcache);
 }
 
 /* The branch trace frame cache.  */
@@ -2161,7 +2161,7 @@ record_btrace_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
   if ((::execution_direction != EXEC_REVERSE)
       && !record_is_replaying (minus_one_ptid))
     {
-      this->beneath->resume (ptid, step, signal);
+      this->beneath ()->resume (ptid, step, signal);
       return;
     }
 
@@ -2216,7 +2216,7 @@ record_btrace_target::commit_resume ()
 {
   if ((::execution_direction != EXEC_REVERSE)
       && !record_is_replaying (minus_one_ptid))
-    beneath->commit_resume ();
+    beneath ()->commit_resume ();
 }
 
 /* Cancel resuming TP.  */
@@ -2556,7 +2556,7 @@ record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
   if ((::execution_direction != EXEC_REVERSE)
       && !record_is_replaying (minus_one_ptid))
     {
-      return this->beneath->wait (ptid, status, options);
+      return this->beneath ()->wait (ptid, status, options);
     }
 
   /* Keep a work list of moving threads.  */
@@ -2685,7 +2685,7 @@ record_btrace_target::stop (ptid_t ptid)
   if ((::execution_direction != EXEC_REVERSE)
       && !record_is_replaying (minus_one_ptid))
     {
-      this->beneath->stop (ptid);
+      this->beneath ()->stop (ptid);
     }
   else
     {
@@ -2720,7 +2720,7 @@ record_btrace_target::stopped_by_sw_breakpoint ()
       return tp->btrace.stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT;
     }
 
-  return this->beneath->stopped_by_sw_breakpoint ();
+  return this->beneath ()->stopped_by_sw_breakpoint ();
 }
 
 /* The supports_stopped_by_sw_breakpoint method of target
@@ -2732,7 +2732,7 @@ record_btrace_target::supports_stopped_by_sw_breakpoint ()
   if (record_is_replaying (minus_one_ptid))
     return true;
 
-  return this->beneath->supports_stopped_by_sw_breakpoint ();
+  return this->beneath ()->supports_stopped_by_sw_breakpoint ();
 }
 
 /* The stopped_by_sw_breakpoint method of target record-btrace.  */
@@ -2747,7 +2747,7 @@ record_btrace_target::stopped_by_hw_breakpoint ()
       return tp->btrace.stop_reason == TARGET_STOPPED_BY_HW_BREAKPOINT;
     }
 
-  return this->beneath->stopped_by_hw_breakpoint ();
+  return this->beneath ()->stopped_by_hw_breakpoint ();
 }
 
 /* The supports_stopped_by_hw_breakpoint method of target
@@ -2759,7 +2759,7 @@ record_btrace_target::supports_stopped_by_hw_breakpoint ()
   if (record_is_replaying (minus_one_ptid))
     return true;
 
-  return this->beneath->supports_stopped_by_hw_breakpoint ();
+  return this->beneath ()->supports_stopped_by_hw_breakpoint ();
 }
 
 /* The update_thread_list method of target record-btrace.  */
@@ -2772,7 +2772,7 @@ record_btrace_target::update_thread_list ()
     return;
 
   /* Forward the request.  */
-  this->beneath->update_thread_list ();
+  this->beneath ()->update_thread_list ();
 }
 
 /* The thread_alive method of target record-btrace.  */
@@ -2785,7 +2785,7 @@ record_btrace_target::thread_alive (ptid_t ptid)
     return find_thread_ptid (ptid) != NULL;
 
   /* Forward the request.  */
-  return this->beneath->thread_alive (ptid);
+  return this->beneath ()->thread_alive (ptid);
 }
 
 /* Set the replay branch trace instruction iterator.  If IT is NULL, replay

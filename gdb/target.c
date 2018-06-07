@@ -268,9 +268,7 @@ default_child_has_execution (ptid_t the_ptid)
 int
 target_has_all_memory_1 (void)
 {
-  struct target_ops *t;
-
-  for (t = current_top_target (); t != NULL; t = t->beneath)
+  for (target_ops *t = current_top_target (); t != NULL; t = t->beneath ())
     if (t->has_all_memory ())
       return 1;
 
@@ -280,9 +278,7 @@ target_has_all_memory_1 (void)
 int
 target_has_memory_1 (void)
 {
-  struct target_ops *t;
-
-  for (t = current_top_target (); t != NULL; t = t->beneath)
+  for (target_ops *t = current_top_target (); t != NULL; t = t->beneath ())
     if (t->has_memory ())
       return 1;
 
@@ -292,9 +288,7 @@ target_has_memory_1 (void)
 int
 target_has_stack_1 (void)
 {
-  struct target_ops *t;
-
-  for (t = current_top_target (); t != NULL; t = t->beneath)
+  for (target_ops *t = current_top_target (); t != NULL; t = t->beneath ())
     if (t->has_stack ())
       return 1;
 
@@ -304,9 +298,7 @@ target_has_stack_1 (void)
 int
 target_has_registers_1 (void)
 {
-  struct target_ops *t;
-
-  for (t = current_top_target (); t != NULL; t = t->beneath)
+  for (target_ops *t = current_top_target (); t != NULL; t = t->beneath ())
     if (t->has_registers ())
       return 1;
 
@@ -316,9 +308,7 @@ target_has_registers_1 (void)
 int
 target_has_execution_1 (ptid_t the_ptid)
 {
-  struct target_ops *t;
-
-  for (t = current_top_target (); t != NULL; t = t->beneath)
+  for (target_ops *t = current_top_target (); t != NULL; t = t->beneath ())
     if (t->has_execution (the_ptid))
       return 1;
 
@@ -654,7 +644,7 @@ push_target (struct target_ops *t)
   struct target_ops **cur;
 
   /* Find the proper stratum to install this target in.  */
-  for (cur = &g_current_top_target; (*cur) != NULL; cur = &(*cur)->beneath)
+  for (cur = &g_current_top_target; (*cur) != NULL; cur = &(*cur)->m_beneath)
     {
       if ((int) (t->to_stratum) >= (int) (*cur)->to_stratum)
 	break;
@@ -669,13 +659,13 @@ push_target (struct target_ops *t)
          and un-hook it from the stack.  */
       struct target_ops *tmp = (*cur);
 
-      (*cur) = (*cur)->beneath;
-      tmp->beneath = NULL;
+      (*cur) = (*cur)->m_beneath;
+      tmp->m_beneath = NULL;
       target_close (tmp);
     }
 
   /* We have removed all targets in our stratum, now add the new one.  */
-  t->beneath = (*cur);
+  t->m_beneath = (*cur);
   (*cur) = t;
 }
 
@@ -695,7 +685,7 @@ unpush_target (struct target_ops *t)
   /* Look for the specified target.  Note that we assume that a target
      can only occur once in the target stack.  */
 
-  for (cur = &g_current_top_target; (*cur) != NULL; cur = &(*cur)->beneath)
+  for (cur = &g_current_top_target; (*cur) != NULL; cur = &(*cur)->m_beneath)
     {
       if ((*cur) == t)
 	break;
@@ -708,8 +698,8 @@ unpush_target (struct target_ops *t)
 
   /* Unchain the target.  */
   tmp = (*cur);
-  (*cur) = (*cur)->beneath;
-  tmp->beneath = NULL;
+  (*cur) = (*cur)->m_beneath;
+  tmp->m_beneath = NULL;
 
   /* Finally close the target.  Note we do this after unchaining, so
      any target method calls from within the target_close
@@ -761,9 +751,9 @@ pop_all_targets (void)
 int
 target_is_pushed (struct target_ops *t)
 {
-  struct target_ops *cur;
-
-  for (cur = current_top_target (); cur != NULL; cur = cur->beneath)
+  for (target_ops *cur = current_top_target ();
+       cur != NULL;
+       cur = cur->beneath ())
     if (cur == t)
       return 1;
 
@@ -1060,7 +1050,7 @@ raw_memory_xfer_partial (struct target_ops *ops, gdb_byte *readbuf,
       if (ops->has_all_memory ())
 	break;
 
-      ops = ops->beneath;
+      ops = ops->beneath ();
     }
   while (ops != NULL);
 
@@ -1968,14 +1958,13 @@ target_remove_breakpoint (struct gdbarch *gdbarch,
 static void
 info_target_command (const char *args, int from_tty)
 {
-  struct target_ops *t;
   int has_all_mem = 0;
 
   if (symfile_objfile != NULL)
     printf_unfiltered (_("Symbols from \"%s\".\n"),
 		       objfile_name (symfile_objfile));
 
-  for (t = current_top_target (); t != NULL; t = t->beneath)
+  for (target_ops *t = current_top_target (); t != NULL; t = t->beneath ())
     {
       if (!t->has_memory ())
 	continue;
@@ -2405,9 +2394,7 @@ target_search_memory (CORE_ADDR start_addr, ULONGEST search_space_len,
 void
 target_require_runnable (void)
 {
-  struct target_ops *t;
-
-  for (t = current_top_target (); t != NULL; t = t->beneath)
+  for (target_ops *t = current_top_target (); t != NULL; t = t->beneath ())
     {
       /* If this target knows how to create a new program, then
 	 assume we will still be able to after killing the current
@@ -2497,7 +2484,7 @@ struct target_ops *
 find_attach_target (void)
 {
   /* If a target on the current stack can attach, use it.  */
-  for (target_ops *t = current_top_target (); t != NULL; t = t->beneath)
+  for (target_ops *t = current_top_target (); t != NULL; t = t->beneath ())
     {
       if (t->can_attach ())
 	return t;
@@ -2513,7 +2500,7 @@ struct target_ops *
 find_run_target (void)
 {
   /* If a target on the current stack can run, use it.  */
-  for (target_ops *t = current_top_target (); t != NULL; t = t->beneath)
+  for (target_ops *t = current_top_target (); t != NULL; t = t->beneath ())
     {
       if (t->can_create_inferior ())
 	return t;
@@ -2543,7 +2530,7 @@ target_info_proc (const char *args, enum info_proc_what what)
   if (t == NULL)
     t = find_default_run_target (NULL);
 
-  for (; t != NULL; t = t->beneath)
+  for (; t != NULL; t = t->beneath ())
     {
       if (t->info_proc (args, what))
 	{
@@ -2633,6 +2620,14 @@ target_thread_address_space (ptid_t ptid)
   return aspace;
 }
 
+/* See target.h.  */
+
+target_ops *
+target_ops::beneath () const
+{
+  return m_beneath;
+}
+
 void
 target_ops::close ()
 {
@@ -2672,9 +2667,7 @@ target_ops::can_run ()
 int
 target_can_run ()
 {
-  struct target_ops *t;
-
-  for (t = current_top_target (); t != NULL; t = t->beneath)
+  for (target_ops *t = current_top_target (); t != NULL; t = t->beneath ())
     {
       if (t->can_run ())
 	return 1;
@@ -2856,9 +2849,7 @@ target_fileio_open_1 (struct inferior *inf, const char *filename,
 		      int flags, int mode, int warn_if_slow,
 		      int *target_errno)
 {
-  struct target_ops *t;
-
-  for (t = default_fileio_target (); t != NULL; t = t->beneath)
+  for (target_ops *t = default_fileio_target (); t != NULL; t = t->beneath ())
     {
       int fd = t->fileio_open (inf, filename, flags, mode,
 			       warn_if_slow, target_errno);
@@ -3014,9 +3005,7 @@ int
 target_fileio_unlink (struct inferior *inf, const char *filename,
 		      int *target_errno)
 {
-  struct target_ops *t;
-
-  for (t = default_fileio_target (); t != NULL; t = t->beneath)
+  for (target_ops *t = default_fileio_target (); t != NULL; t = t->beneath ())
     {
       int ret = t->fileio_unlink (inf, filename, target_errno);
 
@@ -3042,9 +3031,7 @@ gdb::optional<std::string>
 target_fileio_readlink (struct inferior *inf, const char *filename,
 			int *target_errno)
 {
-  struct target_ops *t;
-
-  for (t = default_fileio_target (); t != NULL; t = t->beneath)
+  for (target_ops *t = default_fileio_target (); t != NULL; t = t->beneath ())
     {
       gdb::optional<std::string> ret
 	= t->fileio_readlink (inf, filename, target_errno);
@@ -3231,7 +3218,7 @@ default_thread_architecture (struct target_ops *ops, ptid_t ptid)
 struct target_ops *
 find_target_beneath (struct target_ops *t)
 {
-  return t->beneath;
+  return t->beneath ();
 }
 
 /* See target.h.  */
@@ -3239,9 +3226,7 @@ find_target_beneath (struct target_ops *t)
 struct target_ops *
 find_target_at (enum strata stratum)
 {
-  struct target_ops *t;
-
-  for (t = current_top_target (); t != NULL; t = t->beneath)
+  for (target_ops *t = current_top_target (); t != NULL; t = t->beneath ())
     if (t->to_stratum == stratum)
       return t;
 
@@ -3370,7 +3355,7 @@ dummy_target::info () const
 const target_info &
 debug_target::info () const
 {
-  return beneath->info ();
+  return beneath ()->info ();
 }
 
 
@@ -3906,11 +3891,9 @@ flash_erase_command (const char *cmd, int from_tty)
 static void
 maintenance_print_target_stack (const char *cmd, int from_tty)
 {
-  struct target_ops *t;
-
   printf_filtered (_("The current target stack is:\n"));
 
-  for (t = current_top_target (); t != NULL; t = t->beneath)
+  for (target_ops *t = current_top_target (); t != NULL; t = t->beneath ())
     {
       if (t->to_stratum == debug_stratum)
 	continue;

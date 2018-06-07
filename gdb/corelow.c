@@ -950,9 +950,9 @@ core_target::xfer_partial (enum target_object object, const char *annex,
       return TARGET_XFER_E_IO;
 
     default:
-      return this->beneath->xfer_partial (object, annex, readbuf,
-					  writebuf, offset, len,
-					  xfered_len);
+      return this->beneath ()->xfer_partial (object, annex, readbuf,
+					     writebuf, offset, len,
+					     xfered_len);
     }
 }
 
@@ -987,7 +987,7 @@ core_target::read_description ()
 	return result;
     }
 
-  return this->beneath->read_description ();
+  return this->beneath ()->read_description ();
 }
 
 const char *

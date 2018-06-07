@@ -1,5 +1,20 @@
 2018-06-07  Pedro Alves  <palves@redhat.com>
 
+	* target.h (target_ops) <beneath>: Now a method.  All references
+	updated.
+	(target_ops) <m_beneath>: New.
+	* target.c (target_ops::beneath): New.
+	* corelow.c: Adjust all references to target_ops::beneath.
+	* linux-thread-db.c: Likewise.
+	* make-target-delegates: Likewise.
+	* record-btrace.c: Likewise.
+	* record-full.c: Likewise.
+	* remote.c: Likewise.
+	* target.c: Likewise.
+	* target-delegates.c: Regenerate.
+
+2018-06-07  Pedro Alves  <palves@redhat.com>
+
 	* target.h (target_stack): Delete.
 	(current_top_target): Declare function.
 	* target.c (target_stack): Delete.

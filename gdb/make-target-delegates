@@ -225,7 +225,7 @@ sub write_delegator($$@) {
     if ($return_type ne 'void') {
 	print "return ";
     }
-    print "this->beneath->" . $name . " (";
+    print "this->beneath ()->" . $name . " (";
     print join (', ', @names);
     print ");\n";
     print "}\n\n";
@@ -309,19 +309,19 @@ sub write_debugmethod($$$@) {
 	print "  $return_type result;\n";
     }
 
-    print "  fprintf_unfiltered (gdb_stdlog, \"-> %s->$name (...)\\n\", this->beneath->shortname ());\n";
+    print "  fprintf_unfiltered (gdb_stdlog, \"-> %s->$name (...)\\n\", this->beneath ()->shortname ());\n";
 
     # Delegate to the beneath target.
     print "  ";
     if ($return_type ne 'void') {
 	print "result = ";
     }
-    print "this->beneath->" . $name . " (";
+    print "this->beneath ()->" . $name . " (";
     print join (', ', @names);
     print ");\n";
 
     # Now print the arguments.
-    print "  fprintf_unfiltered (gdb_stdlog, \"<- %s->$name (\", this->beneath->shortname ());\n";
+    print "  fprintf_unfiltered (gdb_stdlog, \"<- %s->$name (\", this->beneath ()->shortname ());\n";
     for my $i (0 .. $#argtypes) {
 	if ($i > 0) {
 	    print "  fputs_unfiltered (\", \", gdb_stdlog);\n"

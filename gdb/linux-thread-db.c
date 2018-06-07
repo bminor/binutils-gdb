@@ -1369,7 +1369,7 @@ thread_db_target::update_thread_list ()
     }
 
   /* Give the beneath target a chance to do extra processing.  */
-  this->beneath->update_thread_list ();
+  this->beneath ()->update_thread_list ();
 }
 
 const char *

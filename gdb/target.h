@@ -424,7 +424,9 @@ struct target_info
 
 struct target_ops
   {
-    struct target_ops *beneath;	/* To the target under this one.  */
+    /* To the target under this one.  */
+    target_ops *m_beneath;
+    target_ops *beneath () const;
 
     /* Free resources associated with the target.  Note that singleton
        targets, like e.g., native targets, are global objects, not
