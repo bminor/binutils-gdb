@@ -291,7 +291,7 @@ target_auxv_parse (gdb_byte **readptr,
   if (gdbarch_auxv_parse_p (gdbarch))
     return gdbarch_auxv_parse (gdbarch, readptr, endptr, typep, valp);
 
-  return target_stack->auxv_parse (readptr, endptr, typep, valp);
+  return current_top_target ()->auxv_parse (readptr, endptr, typep, valp);
 }
 
 
@@ -549,7 +549,7 @@ info_auxv_command (const char *cmd, int from_tty)
     error (_("The program has no auxiliary information now."));
   else
     {
-      int ents = fprint_target_auxv (gdb_stdout, target_stack);
+      int ents = fprint_target_auxv (gdb_stdout, current_top_target ());
 
       if (ents < 0)
 	error (_("No auxiliary vector found, or failed reading it."));

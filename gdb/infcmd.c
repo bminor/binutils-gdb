@@ -660,7 +660,7 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
 
   /* Pass zero for FROM_TTY, because at this point the "run" command
      has done its thing; now we are setting up the running program.  */
-  post_create_inferior (target_stack, 0);
+  post_create_inferior (current_top_target (), 0);
 
   /* Queue a pending event so that the program stops immediately.  */
   if (run_how == RUN_STOP_AT_FIRST_INSN)
@@ -896,7 +896,7 @@ continue_command (const char *args, int from_tty)
       ensure_not_running ();
     }
 
-  prepare_execution_command (target_stack, async_exec);
+  prepare_execution_command (current_top_target (), async_exec);
 
   if (from_tty)
     printf_filtered (_("Continuing.\n"));
@@ -1043,7 +1043,7 @@ step_1 (int skip_subroutines, int single_inst, const char *count_string)
     = strip_bg_char (count_string, &async_exec);
   count_string = stripped.get ();
 
-  prepare_execution_command (target_stack, async_exec);
+  prepare_execution_command (current_top_target (), async_exec);
 
   count = count_string ? parse_and_eval_long (count_string) : 1;
 
@@ -1232,7 +1232,7 @@ jump_command (const char *arg, int from_tty)
   gdb::unique_xmalloc_ptr<char> stripped = strip_bg_char (arg, &async_exec);
   arg = stripped.get ();
 
-  prepare_execution_command (target_stack, async_exec);
+  prepare_execution_command (current_top_target (), async_exec);
 
   if (!arg)
     error_no_arg (_("starting address"));
@@ -1312,7 +1312,7 @@ signal_command (const char *signum_exp, int from_tty)
     = strip_bg_char (signum_exp, &async_exec);
   signum_exp = stripped.get ();
 
-  prepare_execution_command (target_stack, async_exec);
+  prepare_execution_command (current_top_target (), async_exec);
 
   if (!signum_exp)
     error_no_arg (_("signal number"));
@@ -1585,7 +1585,7 @@ until_command (const char *arg, int from_tty)
   gdb::unique_xmalloc_ptr<char> stripped = strip_bg_char (arg, &async_exec);
   arg = stripped.get ();
 
-  prepare_execution_command (target_stack, async_exec);
+  prepare_execution_command (current_top_target (), async_exec);
 
   if (arg)
     until_break_command (arg, from_tty, 0);
@@ -1610,7 +1610,7 @@ advance_command (const char *arg, int from_tty)
   gdb::unique_xmalloc_ptr<char> stripped = strip_bg_char (arg, &async_exec);
   arg = stripped.get ();
 
-  prepare_execution_command (target_stack, async_exec);
+  prepare_execution_command (current_top_target (), async_exec);
 
   until_break_command (arg, from_tty, 1);
 }
@@ -1990,7 +1990,7 @@ finish_command (const char *arg, int from_tty)
   gdb::unique_xmalloc_ptr<char> stripped = strip_bg_char (arg, &async_exec);
   arg = stripped.get ();
 
-  prepare_execution_command (target_stack, async_exec);
+  prepare_execution_command (current_top_target (), async_exec);
 
   if (arg)
     error (_("The \"finish\" command does not take any arguments."));
@@ -2686,7 +2686,7 @@ setup_inferior (int from_tty)
   /* Take any necessary post-attaching actions for this platform.  */
   target_post_attach (ptid_get_pid (inferior_ptid));
 
-  post_create_inferior (target_stack, from_tty);
+  post_create_inferior (current_top_target (), from_tty);
 }
 
 /* What to do after the first program stops after attaching.  */

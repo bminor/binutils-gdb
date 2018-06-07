@@ -1,3 +1,60 @@
+2018-06-07  Pedro Alves  <palves@redhat.com>
+
+	* target.h (target_stack): Delete.
+	(current_top_target): Declare function.
+	* target.c (target_stack): Delete.
+	(g_current_top_target): New.
+	(current_top_target): New function.
+	* auxv.c: Use current_top_target instead of target_stack
+	throughout.
+	* avr-tdep.c: Likewise.
+	* breakpoint.c: Likewise.
+	* corefile.c: Likewise.
+	* elfread.c: Likewise.
+	* eval.c: Likewise.
+	* exceptions.c: Likewise.
+	* frame.c: Likewise.
+	* gdbarch-selftests.c: Likewise.
+	* gnu-v3-abi.c: Likewise.
+	* ia64-tdep.c: Likewise.
+	* ia64-vms-tdep.c: Likewise.
+	* infcall.c: Likewise.
+	* infcmd.c: Likewise.
+	* infrun.c: Likewise.
+	* linespec.c: Likewise.
+	* linux-tdep.c: Likewise.
+	* minsyms.c: Likewise.
+	* ppc-linux-nat.c: Likewise.
+	* ppc-linux-tdep.c: Likewise.
+	* procfs.c: Likewise.
+	* regcache.c: Likewise.
+	* remote.c: Likewise.
+	* rs6000-tdep.c: Likewise.
+	* s390-linux-nat.c: Likewise.
+	* s390-tdep.c: Likewise.
+	* solib-aix.c: Likewise.
+	* solib-darwin.c: Likewise.
+	* solib-dsbt.c: Likewise.
+	* solib-spu.c: Likewise.
+	* solib-svr4.c: Likewise.
+	* solib-target.c: Likewise.
+	* sparc-tdep.c: Likewise.
+	* sparc64-tdep.c: Likewise.
+	* spu-tdep.c: Likewise.
+	* symfile.c: Likewise.
+	* symtab.c: Likewise.
+	* target-descriptions.c: Likewise.
+	* target-memory.c: Likewise.
+	* target.c: Likewise.
+	* target.h: Likewise.
+	* tracefile-tfile.c: Likewise.
+	* tracepoint.c: Likewise.
+	* valops.c: Likewise.
+	* valprint.c: Likewise.
+	* value.c: Likewise.
+	* windows-tdep.c: Likewise.
+	* mi/mi-main.c: Likewise.
+
 2018-06-07  Tom Tromey  <tom@tromey.com>
 
 	* valprint.h (build_address_symbolic): Declare.

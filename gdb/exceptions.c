@@ -43,7 +43,7 @@ print_flush (void)
      stack, the NULL check is needed here because we can get here very
      early during startup, before the target stack is first
      initialized.  */
-  if (target_stack != NULL && target_supports_terminal_ours ())
+  if (current_top_target () != NULL && target_supports_terminal_ours ())
     {
       term_state.emplace ();
       target_terminal::ours_for_output ();

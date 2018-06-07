@@ -1019,7 +1019,7 @@ s390_linux_nat_target::read_description ()
   {
     CORE_ADDR hwcap = 0;
 
-    target_auxv_search (target_stack, AT_HWCAP, &hwcap);
+    target_auxv_search (current_top_target (), AT_HWCAP, &hwcap);
     have_regset_tdb = (hwcap & HWCAP_S390_TE)
       && check_regset (tid, NT_S390_TDB, s390_sizeof_tdbregset);
 

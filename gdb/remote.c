@@ -4924,7 +4924,7 @@ remote_target::remote_check_symbols ()
 	     instead of any data function descriptor.  */
 	  sym_addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch (),
 							 sym_addr,
-							 target_stack);
+							 current_top_target ());
 
 	  xsnprintf (msg, get_remote_packet_size (), "qSymbol:%s:%s",
 		     phex_nz (sym_addr, addr_size), &reply[8]);
@@ -11391,7 +11391,7 @@ remote_target::memory_map ()
 {
   std::vector<mem_region> result;
   gdb::optional<gdb::char_vector> text
-    = target_read_stralloc (target_stack, TARGET_OBJECT_MEMORY_MAP, NULL);
+    = target_read_stralloc (current_top_target (), TARGET_OBJECT_MEMORY_MAP, NULL);
 
   if (text)
     result = parse_memory_map (text->data ());
@@ -13580,7 +13580,7 @@ traceframe_info_up
 remote_target::traceframe_info ()
 {
   gdb::optional<gdb::char_vector> text
-    = target_read_stralloc (target_stack, TARGET_OBJECT_TRACEFRAME_INFO,
+    = target_read_stralloc (current_top_target (), TARGET_OBJECT_TRACEFRAME_INFO,
 			    NULL);
   if (text)
     return parse_traceframe_info (text->data ());
@@ -13809,7 +13809,7 @@ static void
 btrace_read_config (struct btrace_config *conf)
 {
   gdb::optional<gdb::char_vector> xml
-    = target_read_stralloc (target_stack, TARGET_OBJECT_BTRACE_CONF, "");
+    = target_read_stralloc (current_top_target (), TARGET_OBJECT_BTRACE_CONF, "");
   if (xml)
     parse_xml_btrace_conf (conf, xml->data ());
 }
@@ -14005,7 +14005,7 @@ remote_target::read_btrace (struct btrace_data *btrace,
     }
 
   gdb::optional<gdb::char_vector> xml
-    = target_read_stralloc (target_stack, TARGET_OBJECT_BTRACE, annex);
+    = target_read_stralloc (current_top_target (), TARGET_OBJECT_BTRACE, annex);
   if (!xml)
     return BTRACE_ERR_UNKNOWN;
 
@@ -14062,7 +14062,7 @@ remote_target::pid_to_exec_file (int pid)
       xsnprintf (annex, annex_size, "%x", pid);
     }
 
-  filename = target_read_stralloc (target_stack,
+  filename = target_read_stralloc (current_top_target (),
 				   TARGET_OBJECT_EXEC_FILE, annex);
 
   return filename ? filename->data () : nullptr;

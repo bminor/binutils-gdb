@@ -402,8 +402,8 @@ linux_is_uclinux (void)
 {
   CORE_ADDR dummy;
 
-  return (target_auxv_search (target_stack, AT_NULL, &dummy) > 0
-	  && target_auxv_search (target_stack, AT_PAGESZ, &dummy) == 0);
+  return (target_auxv_search (current_top_target (), AT_NULL, &dummy) > 0
+	  && target_auxv_search (current_top_target (), AT_PAGESZ, &dummy) == 0);
 }
 
 static int
@@ -1423,7 +1423,8 @@ linux_spu_make_corefile_notes (bfd *obfd, char *note_data, int *note_size)
 
   /* Determine list of SPU ids.  */
   gdb::optional<gdb::byte_vector>
-    spu_ids = target_read_alloc (target_stack, TARGET_OBJECT_SPU, NULL);
+    spu_ids = target_read_alloc (current_top_target (),
+				 TARGET_OBJECT_SPU, NULL);
 
   if (!spu_ids)
     return note_data;
@@ -1439,7 +1440,7 @@ linux_spu_make_corefile_notes (bfd *obfd, char *note_data, int *note_size)
 
 	  xsnprintf (annex, sizeof annex, "%d/%s", fd, spu_files[j]);
 	  gdb::optional<gdb::byte_vector> spu_data
-	    = target_read_alloc (target_stack, TARGET_OBJECT_SPU, annex);
+	    = target_read_alloc (current_top_target (), TARGET_OBJECT_SPU, annex);
 
 	  if (spu_data && !spu_data->empty ())
 	    {
@@ -1661,7 +1662,7 @@ linux_get_siginfo_data (thread_info *thread, struct gdbarch *gdbarch)
 
   gdb::byte_vector buf (TYPE_LENGTH (siginfo_type));
 
-  bytes_read = target_read (target_stack, TARGET_OBJECT_SIGNAL_INFO, NULL,
+  bytes_read = target_read (current_top_target (), TARGET_OBJECT_SIGNAL_INFO, NULL,
 			    buf.data (), 0, TYPE_LENGTH (siginfo_type));
   if (bytes_read != TYPE_LENGTH (siginfo_type))
     buf.clear ();
@@ -1970,7 +1971,7 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
 
   /* Auxillary vector.  */
   gdb::optional<gdb::byte_vector> auxv =
-    target_read_alloc (target_stack, TARGET_OBJECT_AUXV, NULL);
+    target_read_alloc (current_top_target (), TARGET_OBJECT_AUXV, NULL);
   if (auxv && !auxv->empty ())
     {
       note_data = elfcore_write_note (obfd, note_data, note_size,
@@ -2253,7 +2254,7 @@ linux_vsyscall_range_raw (struct gdbarch *gdbarch, struct mem_range *range)
   char filename[100];
   long pid;
 
-  if (target_auxv_search (target_stack, AT_SYSINFO_EHDR, &range->start) <= 0)
+  if (target_auxv_search (current_top_target (), AT_SYSINFO_EHDR, &range->start) <= 0)
     return 0;
 
   /* It doesn't make sense to access the host's /proc when debugging a
@@ -2443,14 +2444,14 @@ linux_displaced_step_location (struct gdbarch *gdbarch)
      local-store address and is thus not usable as displaced stepping
      location.  The auxiliary vector gets us the PowerPC-side entry
      point address instead.  */
-  if (target_auxv_search (target_stack, AT_ENTRY, &addr) <= 0)
+  if (target_auxv_search (current_top_target (), AT_ENTRY, &addr) <= 0)
     throw_error (NOT_SUPPORTED_ERROR,
 		 _("Cannot find AT_ENTRY auxiliary vector entry."));
 
   /* Make certain that the address points at real code, and not a
      function descriptor.  */
   addr = gdbarch_convert_from_func_ptr_addr (gdbarch, addr,
-					     target_stack);
+					     current_top_target ());
 
   /* Inferior calls also use the entry point as a breakpoint location.
      We don't want displaced stepping to interfere with those

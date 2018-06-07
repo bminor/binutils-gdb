@@ -3894,7 +3894,7 @@ procfs_target::make_corefile_notes (bfd *obfd, int *note_size)
 			     &thread_args);
   note_data = thread_args.note_data;
 
-  auxv_len = target_read_alloc (target_stack, TARGET_OBJECT_AUXV,
+  auxv_len = target_read_alloc (current_top_target (), TARGET_OBJECT_AUXV,
 				NULL, &auxv);
   if (auxv_len > 0)
     {

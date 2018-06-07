@@ -1269,12 +1269,12 @@ extern target_ops *get_native_target ();
 /* The ops structure for our "current" target process.  This should
    never be NULL.  If there is no target, it points to the dummy_target.  */
 
-extern struct target_ops *target_stack;
+extern target_ops *current_top_target ();
 
 /* Define easy words for doing these operations on our current target.  */
 
-#define	target_shortname	(target_stack->shortname ())
-#define	target_longname		(target_stack->longname ())
+#define	target_shortname	(current_top_target ()->shortname ())
+#define	target_longname		(current_top_target ()->longname ())
 
 /* Does whatever cleanup is required for a target that we are no
    longer going to be calling.  This routine is automatically always
@@ -1302,7 +1302,7 @@ extern struct target_ops *find_run_target (void);
    These targets must set to_attach_no_wait.  */
 
 #define target_attach_no_wait() \
-  (target_stack->attach_no_wait ())
+  (current_top_target ()->attach_no_wait ())
 
 /* The target_attach operation places a process under debugger control,
    and stops the process.
@@ -1310,7 +1310,7 @@ extern struct target_ops *find_run_target (void);
    This operation provides a target-specific hook that allows the
    necessary bookkeeping to be performed after an attach completes.  */
 #define target_post_attach(pid) \
-     (target_stack->post_attach) (pid)
+     (current_top_target ()->post_attach) (pid)
 
 /* Display a message indicating we're about to detach from the current
    inferior process.  */
@@ -1392,7 +1392,7 @@ extern void target_store_registers (struct regcache *regcache, int regs);
    debugged.  */
 
 #define	target_prepare_to_store(regcache)	\
-     (target_stack->prepare_to_store) (regcache)
+     (current_top_target ()->prepare_to_store) (regcache)
 
 /* Determine current address space of thread PTID.  */
 
@@ -1413,22 +1413,22 @@ int target_supports_disable_randomization (void);
    while a trace experiment is running.  */
 
 #define target_supports_enable_disable_tracepoint() \
-  (target_stack->supports_enable_disable_tracepoint) ()
+  (current_top_target ()->supports_enable_disable_tracepoint) ()
 
 #define target_supports_string_tracing() \
-  (target_stack->supports_string_tracing) ()
+  (current_top_target ()->supports_string_tracing) ()
 
 /* Returns true if this target can handle breakpoint conditions
    on its end.  */
 
 #define target_supports_evaluation_of_breakpoint_conditions() \
-  (target_stack->supports_evaluation_of_breakpoint_conditions) ()
+  (current_top_target ()->supports_evaluation_of_breakpoint_conditions) ()
 
 /* Returns true if this target can handle breakpoint commands
    on its end.  */
 
 #define target_can_run_breakpoint_commands() \
-  (target_stack->can_run_breakpoint_commands) ()
+  (current_top_target ()->can_run_breakpoint_commands) ()
 
 extern int target_read_string (CORE_ADDR, gdb::unique_xmalloc_ptr<char> *,
 			       int, int *);
@@ -1511,7 +1511,7 @@ int target_write_memory_blocks
 /* Print a line about the current target.  */
 
 #define	target_files_info()	\
-     (target_stack->files_info) ()
+     (current_top_target ()->files_info) ()
 
 /* Insert a breakpoint at address BP_TGT->placed_address in
    the target machine.  Returns 0 for success, and returns non-zero or
@@ -1561,7 +1561,7 @@ extern void target_load (const char *arg, int from_tty);
    Such targets will supply an appropriate definition for this function.  */
 
 #define target_post_startup_inferior(ptid) \
-     (target_stack->post_startup_inferior) (ptid)
+     (current_top_target ()->post_startup_inferior) (ptid)
 
 /* On some targets, we can catch an inferior fork or vfork event when
    it occurs.  These functions insert/remove an already-created
@@ -1569,16 +1569,16 @@ extern void target_load (const char *arg, int from_tty);
    catchpoint type is not supported and -1 for failure.  */
 
 #define target_insert_fork_catchpoint(pid) \
-     (target_stack->insert_fork_catchpoint) (pid)
+     (current_top_target ()->insert_fork_catchpoint) (pid)
 
 #define target_remove_fork_catchpoint(pid) \
-     (target_stack->remove_fork_catchpoint) (pid)
+     (current_top_target ()->remove_fork_catchpoint) (pid)
 
 #define target_insert_vfork_catchpoint(pid) \
-     (target_stack->insert_vfork_catchpoint) (pid)
+     (current_top_target ()->insert_vfork_catchpoint) (pid)
 
 #define target_remove_vfork_catchpoint(pid) \
-     (target_stack->remove_vfork_catchpoint) (pid)
+     (current_top_target ()->remove_vfork_catchpoint) (pid)
 
 /* If the inferior forks or vforks, this function will be called at
    the next resume in order to perform any bookkeeping and fiddling
@@ -1601,10 +1601,10 @@ void target_follow_exec (struct inferior *inf, char *execd_pathname);
    catchpoint type is not supported and -1 for failure.  */
 
 #define target_insert_exec_catchpoint(pid) \
-     (target_stack->insert_exec_catchpoint) (pid)
+     (current_top_target ()->insert_exec_catchpoint) (pid)
 
 #define target_remove_exec_catchpoint(pid) \
-     (target_stack->remove_exec_catchpoint) (pid)
+     (current_top_target ()->remove_exec_catchpoint) (pid)
 
 /* Syscall catch.
 
@@ -1623,7 +1623,7 @@ void target_follow_exec (struct inferior *inf, char *execd_pathname);
    for failure.  */
 
 #define target_set_syscall_catchpoint(pid, needed, any_count, syscall_counts) \
-     (target_stack->set_syscall_catchpoint) (pid, needed, any_count, \
+     (current_top_target ()->set_syscall_catchpoint) (pid, needed, any_count, \
 					     syscall_counts)
 
 /* The debugger has completed a blocking wait() call.  There is now
@@ -1707,7 +1707,7 @@ extern void default_target_pass_ctrlc (struct target_ops *ops);
    placed in OUTBUF.  */
 
 #define target_rcmd(command, outbuf) \
-     (target_stack->rcmd) (command, outbuf)
+     (current_top_target ()->rcmd) (command, outbuf)
 
 
 /* Does the target include all of memory, or only part of it?  This
@@ -1762,16 +1762,16 @@ extern int default_child_has_execution (ptid_t the_ptid);
    Can it lock the thread scheduler?  */
 
 #define target_can_lock_scheduler \
-  (target_stack->get_thread_control_capabilities () & tc_schedlock)
+  (current_top_target ()->get_thread_control_capabilities () & tc_schedlock)
 
 /* Controls whether async mode is permitted.  */
 extern int target_async_permitted;
 
 /* Can the target support asynchronous execution?  */
-#define target_can_async_p() (target_stack->can_async_p ())
+#define target_can_async_p() (current_top_target ()->can_async_p ())
 
 /* Is the target in asynchronous execution mode?  */
-#define target_is_async_p() (target_stack->is_async_p ())
+#define target_is_async_p() (current_top_target ()->is_async_p ())
 
 /* Enables/disabled async target events.  */
 extern void target_async (int enable);
@@ -1789,7 +1789,7 @@ extern enum auto_boolean target_non_stop_enabled;
 extern int target_is_non_stop_p (void);
 
 #define target_execution_direction() \
-  (target_stack->execution_direction ())
+  (current_top_target ()->execution_direction ())
 
 /* Converts a process id to a string.  Usually, the string just contains
    `process xyz', but on some systems it may contain
@@ -1804,7 +1804,7 @@ extern const char *normal_pid_to_str (ptid_t ptid);
    is okay.  */
 
 #define target_extra_thread_info(TP) \
-     (target_stack->extra_thread_info (TP))
+     (current_top_target ()->extra_thread_info (TP))
 
 /* Return the thread's name, or NULL if the target is unable to determine it.
    The returned value must not be freed by the caller.  */
@@ -1830,12 +1830,12 @@ extern struct thread_info *target_thread_handle_to_thread_info
    it must persist.  */
 
 #define target_pid_to_exec_file(pid) \
-     (target_stack->pid_to_exec_file) (pid)
+     (current_top_target ()->pid_to_exec_file) (pid)
 
 /* See the to_thread_architecture description in struct target_ops.  */
 
 #define target_thread_architecture(ptid) \
-     (target_stack->thread_architecture (ptid))
+     (current_top_target ()->thread_architecture (ptid))
 
 /*
  * Iterator function for target memory regions.
@@ -1845,21 +1845,21 @@ extern struct thread_info *target_thread_handle_to_thread_info
  */
 
 #define target_find_memory_regions(FUNC, DATA) \
-     (target_stack->find_memory_regions) (FUNC, DATA)
+     (current_top_target ()->find_memory_regions) (FUNC, DATA)
 
 /*
  * Compose corefile .note section.
  */
 
 #define target_make_corefile_notes(BFD, SIZE_P) \
-     (target_stack->make_corefile_notes) (BFD, SIZE_P)
+     (current_top_target ()->make_corefile_notes) (BFD, SIZE_P)
 
 /* Bookmark interfaces.  */
 #define target_get_bookmark(ARGS, FROM_TTY) \
-     (target_stack->get_bookmark) (ARGS, FROM_TTY)
+     (current_top_target ()->get_bookmark) (ARGS, FROM_TTY)
 
 #define target_goto_bookmark(ARG, FROM_TTY) \
-     (target_stack->goto_bookmark) (ARG, FROM_TTY)
+     (current_top_target ()->goto_bookmark) (ARG, FROM_TTY)
 
 /* Hardware watchpoint interfaces.  */
 
@@ -1867,32 +1867,32 @@ extern struct thread_info *target_thread_handle_to_thread_info
    write).  Only the INFERIOR_PTID task is being queried.  */
 
 #define target_stopped_by_watchpoint()		\
-  ((target_stack->stopped_by_watchpoint) ())
+  ((current_top_target ()->stopped_by_watchpoint) ())
 
 /* Returns non-zero if the target stopped because it executed a
    software breakpoint instruction.  */
 
 #define target_stopped_by_sw_breakpoint()		\
-  ((target_stack->stopped_by_sw_breakpoint) ())
+  ((current_top_target ()->stopped_by_sw_breakpoint) ())
 
 #define target_supports_stopped_by_sw_breakpoint() \
-  ((target_stack->supports_stopped_by_sw_breakpoint) ())
+  ((current_top_target ()->supports_stopped_by_sw_breakpoint) ())
 
 #define target_stopped_by_hw_breakpoint()				\
-  ((target_stack->stopped_by_hw_breakpoint) ())
+  ((current_top_target ()->stopped_by_hw_breakpoint) ())
 
 #define target_supports_stopped_by_hw_breakpoint() \
-  ((target_stack->supports_stopped_by_hw_breakpoint) ())
+  ((current_top_target ()->supports_stopped_by_hw_breakpoint) ())
 
 /* Non-zero if we have steppable watchpoints  */
 
 #define target_have_steppable_watchpoint \
-  (target_stack->have_steppable_watchpoint ())
+  (current_top_target ()->have_steppable_watchpoint ())
 
 /* Non-zero if we have continuable watchpoints  */
 
 #define target_have_continuable_watchpoint \
-  (target_stack->have_continuable_watchpoint ())
+  (current_top_target ()->have_continuable_watchpoint ())
 
 /* Provide defaults for hardware watchpoint functions.  */
 
@@ -1909,18 +1909,18 @@ extern struct thread_info *target_thread_handle_to_thread_info
    this one used so far.  */
 
 #define target_can_use_hardware_watchpoint(TYPE,CNT,OTHERTYPE) \
- (target_stack->can_use_hw_breakpoint) ( \
+ (current_top_target ()->can_use_hw_breakpoint) ( \
 					     TYPE, CNT, OTHERTYPE)
 
 /* Returns the number of debug registers needed to watch the given
    memory region, or zero if not supported.  */
 
 #define target_region_ok_for_hw_watchpoint(addr, len) \
-    (target_stack->region_ok_for_hw_watchpoint) (addr, len)
+    (current_top_target ()->region_ok_for_hw_watchpoint) (addr, len)
 
 
 #define target_can_do_single_step() \
-  (target_stack->can_do_single_step) ()
+  (current_top_target ()->can_do_single_step) ()
 
 /* Set/clear a hardware watchpoint starting at ADDR, for LEN bytes.
    TYPE is 0 for write, 1 for read, and 2 for read/write accesses.
@@ -1929,10 +1929,10 @@ extern struct thread_info *target_thread_handle_to_thread_info
    -1 for failure.  */
 
 #define	target_insert_watchpoint(addr, len, type, cond) \
-     (target_stack->insert_watchpoint) (addr, len, type, cond)
+     (current_top_target ()->insert_watchpoint) (addr, len, type, cond)
 
 #define	target_remove_watchpoint(addr, len, type, cond) \
-     (target_stack->remove_watchpoint) (addr, len, type, cond)
+     (current_top_target ()->remove_watchpoint) (addr, len, type, cond)
 
 /* Insert a new masked watchpoint at ADDR using the mask MASK.
    RW may be hw_read for a read watchpoint, hw_write for a write watchpoint
@@ -1956,10 +1956,10 @@ extern int target_remove_mask_watchpoint (CORE_ADDR, CORE_ADDR,
    message) otherwise.  */
 
 #define target_insert_hw_breakpoint(gdbarch, bp_tgt) \
-     (target_stack->insert_hw_breakpoint) (gdbarch, bp_tgt)
+     (current_top_target ()->insert_hw_breakpoint) (gdbarch, bp_tgt)
 
 #define target_remove_hw_breakpoint(gdbarch, bp_tgt) \
-     (target_stack->remove_hw_breakpoint) (gdbarch, bp_tgt)
+     (current_top_target ()->remove_hw_breakpoint) (gdbarch, bp_tgt)
 
 /* Return number of debug registers needed for a ranged breakpoint,
    or -1 if ranged breakpoints are not supported.  */
@@ -1988,7 +1988,7 @@ extern int target_ranged_break_num_registers (void);
    For this reason, GDB will still evaluate the condition expression when
    the watchpoint triggers.  */
 #define target_can_accel_watchpoint_condition(addr, len, type, cond) \
-  (target_stack->can_accel_watchpoint_condition) (addr, len, type, cond)
+  (current_top_target ()->can_accel_watchpoint_condition) (addr, len, type, cond)
 
 /* Return number of debug registers needed for a masked watchpoint,
    -1 if masked watchpoints are not supported or -2 if the given address
@@ -1998,12 +1998,12 @@ extern int target_masked_watch_num_registers (CORE_ADDR addr, CORE_ADDR mask);
 
 /* Target can execute in reverse?  */
 #define target_can_execute_reverse \
-      target_stack->can_execute_reverse ()
+      current_top_target ()->can_execute_reverse ()
 
 extern const struct target_desc *target_read_description (struct target_ops *);
 
 #define target_get_ada_task_ptid(lwp, tid) \
-     (target_stack->get_ada_task_ptid) (lwp,tid)
+     (current_top_target ()->get_ada_task_ptid) (lwp,tid)
 
 /* Utility implementation of searching memory.  */
 extern int simple_search_memory (struct target_ops* ops,
@@ -2025,7 +2025,7 @@ extern int target_search_memory (CORE_ADDR start_addr,
 /* Return nonzero if the filesystem seen by the current inferior
    is the local filesystem, zero otherwise.  */
 #define target_filesystem_is_local() \
-  target_stack->filesystem_is_local ()
+  current_top_target ()->filesystem_is_local ()
 
 /* Open FILENAME on the target, in the filesystem as seen by INF,
    using FLAGS and MODE.  If INF is NULL, use the filesystem seen
@@ -2112,100 +2112,100 @@ extern gdb::unique_xmalloc_ptr<char> target_fileio_read_stralloc
 /* Tracepoint-related operations.  */
 
 #define target_trace_init() \
-  (target_stack->trace_init) ()
+  (current_top_target ()->trace_init) ()
 
 #define target_download_tracepoint(t) \
-  (target_stack->download_tracepoint) (t)
+  (current_top_target ()->download_tracepoint) (t)
 
 #define target_can_download_tracepoint() \
-  (target_stack->can_download_tracepoint) ()
+  (current_top_target ()->can_download_tracepoint) ()
 
 #define target_download_trace_state_variable(tsv) \
-  (target_stack->download_trace_state_variable) (tsv)
+  (current_top_target ()->download_trace_state_variable) (tsv)
 
 #define target_enable_tracepoint(loc) \
-  (target_stack->enable_tracepoint) (loc)
+  (current_top_target ()->enable_tracepoint) (loc)
 
 #define target_disable_tracepoint(loc) \
-  (target_stack->disable_tracepoint) (loc)
+  (current_top_target ()->disable_tracepoint) (loc)
 
 #define target_trace_start() \
-  (target_stack->trace_start) ()
+  (current_top_target ()->trace_start) ()
 
 #define target_trace_set_readonly_regions() \
-  (target_stack->trace_set_readonly_regions) ()
+  (current_top_target ()->trace_set_readonly_regions) ()
 
 #define target_get_trace_status(ts) \
-  (target_stack->get_trace_status) (ts)
+  (current_top_target ()->get_trace_status) (ts)
 
 #define target_get_tracepoint_status(tp,utp)		\
-  (target_stack->get_tracepoint_status) (tp, utp)
+  (current_top_target ()->get_tracepoint_status) (tp, utp)
 
 #define target_trace_stop() \
-  (target_stack->trace_stop) ()
+  (current_top_target ()->trace_stop) ()
 
 #define target_trace_find(type,num,addr1,addr2,tpp) \
-  (target_stack->trace_find) (\
+  (current_top_target ()->trace_find) (\
 				   (type), (num), (addr1), (addr2), (tpp))
 
 #define target_get_trace_state_variable_value(tsv,val) \
-  (target_stack->get_trace_state_variable_value) ((tsv), (val))
+  (current_top_target ()->get_trace_state_variable_value) ((tsv), (val))
 
 #define target_save_trace_data(filename) \
-  (target_stack->save_trace_data) (filename)
+  (current_top_target ()->save_trace_data) (filename)
 
 #define target_upload_tracepoints(utpp) \
-  (target_stack->upload_tracepoints) (utpp)
+  (current_top_target ()->upload_tracepoints) (utpp)
 
 #define target_upload_trace_state_variables(utsvp) \
-  (target_stack->upload_trace_state_variables) (utsvp)
+  (current_top_target ()->upload_trace_state_variables) (utsvp)
 
 #define target_get_raw_trace_data(buf,offset,len) \
-  (target_stack->get_raw_trace_data) ((buf), (offset), (len))
+  (current_top_target ()->get_raw_trace_data) ((buf), (offset), (len))
 
 #define target_get_min_fast_tracepoint_insn_len() \
-  (target_stack->get_min_fast_tracepoint_insn_len) ()
+  (current_top_target ()->get_min_fast_tracepoint_insn_len) ()
 
 #define target_set_disconnected_tracing(val) \
-  (target_stack->set_disconnected_tracing) (val)
+  (current_top_target ()->set_disconnected_tracing) (val)
 
 #define	target_set_circular_trace_buffer(val)	\
-  (target_stack->set_circular_trace_buffer) (val)
+  (current_top_target ()->set_circular_trace_buffer) (val)
 
 #define	target_set_trace_buffer_size(val)	\
-  (target_stack->set_trace_buffer_size) (val)
+  (current_top_target ()->set_trace_buffer_size) (val)
 
 #define	target_set_trace_notes(user,notes,stopnotes)		\
-  (target_stack->set_trace_notes) ((user), (notes), (stopnotes))
+  (current_top_target ()->set_trace_notes) ((user), (notes), (stopnotes))
 
 #define target_get_tib_address(ptid, addr) \
-  (target_stack->get_tib_address) ((ptid), (addr))
+  (current_top_target ()->get_tib_address) ((ptid), (addr))
 
 #define target_set_permissions() \
-  (target_stack->set_permissions) ()
+  (current_top_target ()->set_permissions) ()
 
 #define target_static_tracepoint_marker_at(addr, marker) \
-  (target_stack->static_tracepoint_marker_at) (addr, marker)
+  (current_top_target ()->static_tracepoint_marker_at) (addr, marker)
 
 #define target_static_tracepoint_markers_by_strid(marker_id) \
-  (target_stack->static_tracepoint_markers_by_strid) (marker_id)
+  (current_top_target ()->static_tracepoint_markers_by_strid) (marker_id)
 
 #define target_traceframe_info() \
-  (target_stack->traceframe_info) ()
+  (current_top_target ()->traceframe_info) ()
 
 #define target_use_agent(use) \
-  (target_stack->use_agent) (use)
+  (current_top_target ()->use_agent) (use)
 
 #define target_can_use_agent() \
-  (target_stack->can_use_agent) ()
+  (current_top_target ()->can_use_agent) ()
 
 #define target_augmented_libraries_svr4_read() \
-  (target_stack->augmented_libraries_svr4_read) ()
+  (current_top_target ()->augmented_libraries_svr4_read) ()
 
 /* Command logging facility.  */
 
 #define target_log_command(p)					\
-  (target_stack->log_command) (p)
+  (current_top_target ()->log_command) (p)
 
 
 extern int target_core_of_thread (ptid_t ptid);

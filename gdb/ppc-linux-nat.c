@@ -1165,7 +1165,7 @@ ppc_linux_get_hwcap (void)
 {
   CORE_ADDR field;
 
-  if (target_auxv_search (target_stack, AT_HWCAP, &field) != 1)
+  if (target_auxv_search (current_top_target (), AT_HWCAP, &field) != 1)
     return 0;
 
   return field;

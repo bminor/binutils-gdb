@@ -4983,9 +4983,10 @@ find_gnu_ifunc (const symbol *sym)
 	  if (MSYMBOL_TYPE (minsym) == mst_data_gnu_ifunc)
 	    {
 	      struct gdbarch *gdbarch = get_objfile_arch (objfile);
-	      msym_addr = gdbarch_convert_from_func_ptr_addr (gdbarch,
-							      msym_addr,
-							      target_stack);
+	      msym_addr
+		= gdbarch_convert_from_func_ptr_addr (gdbarch,
+						      msym_addr,
+						      current_top_target ());
 	    }
 	  if (msym_addr == address)
 	    {

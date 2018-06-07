@@ -2303,7 +2303,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 				= (gdbarch_convert_from_func_ptr_addr
 				   (gdbarch,
 				    msym_addr,
-				    target_stack));
+				    current_top_target ()));
 			    }
 
 			  if (msym_addr == addr)

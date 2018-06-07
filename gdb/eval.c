@@ -1748,7 +1748,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	    /* The address might point to a function descriptor;
 	       resolve it to the actual code address instead.  */
 	    addr = gdbarch_convert_from_func_ptr_addr (exp->gdbarch, addr,
-						       target_stack);
+						       current_top_target ());
 
 	    /* Is it a high_level symbol?  */
 	    sym = find_pc_function (addr);

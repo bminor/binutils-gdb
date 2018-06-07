@@ -1444,7 +1444,7 @@ cooked_read_test (struct gdbarch *gdbarch)
 {
   /* Error out if debugging something, because we're going to push the
      test target, which would pop any existing target.  */
-  if (target_stack->to_stratum >= process_stratum)
+  if (current_top_target ()->to_stratum >= process_stratum)
     error (_("target already pushed"));
 
   /* Create a mock environment.  An inferior with a thread, with a
@@ -1618,7 +1618,7 @@ cooked_write_test (struct gdbarch *gdbarch)
 {
   /* Error out if debugging something, because we're going to push the
      test target, which would pop any existing target.  */
-  if (target_stack->to_stratum >= process_stratum)
+  if (current_top_target ()->to_stratum >= process_stratum)
     error (_("target already pushed"));
 
   /* Create a mock environment.  A process_stratum target pushed.  */
