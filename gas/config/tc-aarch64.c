@@ -4400,6 +4400,7 @@ record_operand_error (const aarch64_opcode *opcode, int idx,
   info.index = idx;
   info.kind = kind;
   info.error = error;
+  info.non_fatal = FALSE;
   record_operand_error_info (opcode, &info);
 }
 
@@ -4415,6 +4416,7 @@ record_operand_error_with_data (const aarch64_opcode *opcode, int idx,
   info.data[0] = extra_data[0];
   info.data[1] = extra_data[1];
   info.data[2] = extra_data[2];
+  info.non_fatal = FALSE;
   record_operand_error_info (opcode, &info);
 }
 
