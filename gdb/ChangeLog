@@ -118,6 +118,11 @@
         (aarch64_pseudo_write): Add V regs for SVE.
         * aarch64-tdep.h (struct gdbarch_tdep): Add vnv_type.
 
+2018-06-06  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+        * arch/aarch64.h (sve_vq_from_vl): Guard with #ifndef.
+        (sve_vl_from_vq): Likewise.
+
 2018-06-05  Tom Tromey  <tom@tromey.com>
 
 	* cli/cli-cmds.c (show_version): Update.
