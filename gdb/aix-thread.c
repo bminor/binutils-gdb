@@ -1023,7 +1023,7 @@ aix_thread_inferior_created (struct target_ops *ops, int from_tty)
 void
 aix_thread_target::detach (inferior *inf, int from_tty)
 {
-  struct target_ops *beneath = find_target_beneath (this);
+  target_ops *beneath = this->beneath ();
 
   pd_disable ();
   beneath->detach (inf, from_tty);
@@ -1041,10 +1041,9 @@ aix_thread_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
   if (!PD_TID (ptid))
     {
       scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
-      struct target_ops *beneath = find_target_beneath (this);
       
       inferior_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
-      beneath->resume (ptid, step, sig);
+      beneath ()->resume (ptid, step, sig);
     }
   else
     {
@@ -1078,15 +1077,13 @@ ptid_t
 aix_thread_target::wait (ptid_t ptid, struct target_waitstatus *status,
 			 int options)
 {
-  struct target_ops *beneath = find_target_beneath (this);
-
   {
     scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
     pid_to_prc (&ptid);
 
     inferior_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
-    ptid = beneath->wait (ptid, status, options);
+    ptid = beneath ()->wait (ptid, status, options);
   }
 
   if (ptid_get_pid (ptid) == -1)
@@ -1358,10 +1355,9 @@ aix_thread_target::fetch_registers (struct regcache *regcache, int regno)
 {
   struct thread_info *thread;
   pthdb_tid_t tid;
-  struct target_ops *beneath = find_target_beneath (this);
 
   if (!PD_TID (regcache->ptid ()))
-    beneath->fetch_registers (regcache, regno);
+    beneath ()->fetch_registers (regcache, regno);
   else
     {
       thread = find_thread_ptid (regcache->ptid ());
@@ -1699,10 +1695,9 @@ aix_thread_target::store_registers (struct regcache *regcache, int regno)
 {
   struct thread_info *thread;
   pthdb_tid_t tid;
-  struct target_ops *beneath = find_target_beneath (this);
 
   if (!PD_TID (regcache->ptid ()))
-    beneath->store_registers (regcache, regno);
+    beneath ()->store_registers (regcache, regno);
   else
     {
       thread = find_thread_ptid (regcache->ptid ());
@@ -1726,11 +1721,10 @@ aix_thread_target::xfer_partial (enum target_object object,
 				 ULONGEST *xfered_len)
 {
   scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
-  struct target_ops *beneath = find_target_beneath (this);
 
   inferior_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
-  return beneath->xfer_partial (object, annex, readbuf,
-				writebuf, offset, len, xfered_len);
+  return beneath ()->xfer_partial (object, annex, readbuf,
+				   writebuf, offset, len, xfered_len);
 }
 
 /* Clean up after the inferior exits.  */
@@ -1738,7 +1732,7 @@ aix_thread_target::xfer_partial (enum target_object object,
 void
 aix_thread_target::mourn_inferior ()
 {
-  struct target_ops *beneath = find_target_beneath (this);
+  target_ops *beneath = beneath ();
 
   pd_deactivate ();
   beneath->mourn_inferior ();
@@ -1749,10 +1743,8 @@ aix_thread_target::mourn_inferior ()
 bool
 aix_thread_target::thread_alive (ptid_t ptid)
 {
-  struct target_ops *beneath = find_target_beneath (this);
-
   if (!PD_TID (ptid))
-    return beneath->thread_alive (ptid);
+    return beneath ()->thread_alive (ptid);
 
   /* We update the thread list every time the child stops, so all
      valid threads should be in the thread list.  */
@@ -1766,10 +1758,9 @@ const char *
 aix_thread_target::pid_to_str (ptid_t ptid)
 {
   static char *ret = NULL;
-  struct target_ops *beneath = find_target_beneath (this);
 
   if (!PD_TID (ptid))
-    return beneath->pid_to_str (ptid);
+    return beneath ()->pid_to_str (ptid);
 
   /* Free previous return value; a new one will be allocated by
      xstrprintf().  */

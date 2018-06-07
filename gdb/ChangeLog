@@ -1,5 +1,17 @@
 2018-06-07  Pedro Alves  <palves@redhat.com>
 
+	* target.h (find_target_beneath): Delete declaration.
+	* target.c (find_target_beneath): Delete definition.
+	* aix-thread.c: All callers of find_target_beneath adjusted to
+	call target_ops::beneath instead.
+	* bsd-uthread.c: Likewise.
+	* linux-thread-db.c: Likewise.
+	* ravenscar-thread.c: Likewise.
+	* sol-thread.c: Likewise.
+	* spu-multiarch.c: Likewise.
+
+2018-06-07  Pedro Alves  <palves@redhat.com>
+
 	* target.h (target_ops) <beneath>: Now a method.  All references
 	updated.
 	(target_ops) <m_beneath>: New.

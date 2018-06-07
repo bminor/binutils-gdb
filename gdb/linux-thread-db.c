@@ -1094,11 +1094,9 @@ record_thread (struct thread_db_info *info,
 void
 thread_db_target::detach (inferior *inf, int from_tty)
 {
-  struct target_ops *target_beneath = find_target_beneath (this);
-
   delete_thread_db_info (inf->pid);
 
-  target_beneath->detach (inf, from_tty);
+  beneath ()->detach (inf, from_tty);
 
   /* NOTE: From this point on, inferior_ptid is null_ptid.  */
 
@@ -1113,9 +1111,8 @@ thread_db_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 			int options)
 {
   struct thread_db_info *info;
-  struct target_ops *beneath = find_target_beneath (this);
 
-  ptid = beneath->wait (ptid, ourstatus, options);
+  ptid = beneath ()->wait (ptid, ourstatus, options);
 
   switch (ourstatus->kind)
     {
@@ -1152,11 +1149,9 @@ thread_db_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 void
 thread_db_target::mourn_inferior ()
 {
-  struct target_ops *target_beneath = find_target_beneath (this);
-
   delete_thread_db_info (ptid_get_pid (inferior_ptid));
 
-  target_beneath->mourn_inferior ();
+  beneath ()->mourn_inferior ();
 
   /* Detach thread_db target ops.  */
   if (!thread_db_list)
@@ -1376,7 +1371,6 @@ const char *
 thread_db_target::pid_to_str (ptid_t ptid)
 {
   struct thread_info *thread_info = find_thread_ptid (ptid);
-  struct target_ops *beneath;
 
   if (thread_info != NULL && thread_info->priv != NULL)
     {
@@ -1389,8 +1383,7 @@ thread_db_target::pid_to_str (ptid_t ptid)
       return buf;
     }
 
-  beneath = find_target_beneath (this);
-  return beneath->pid_to_str (ptid);
+  return beneath ()->pid_to_str (ptid);
 }
 
 /* Return a string describing the state of the thread specified by
@@ -1451,7 +1444,6 @@ thread_db_target::get_thread_local_address (ptid_t ptid,
 					    CORE_ADDR offset)
 {
   struct thread_info *thread_info;
-  struct target_ops *beneath;
 
   /* Find the matching thread.  */
   thread_info = find_thread_ptid (ptid);
@@ -1523,8 +1515,7 @@ thread_db_target::get_thread_local_address (ptid_t ptid,
 	      : (CORE_ADDR) (uintptr_t) address);
     }
 
-  beneath = find_target_beneath (this);
-  return beneath->get_thread_local_address (ptid, lm, offset);
+  return beneath ()->get_thread_local_address (ptid, lm, offset);
 }
 
 /* Implement the to_get_ada_task_ptid target method for this target.  */
@@ -1539,7 +1530,6 @@ thread_db_target::get_ada_task_ptid (long lwp, long thread)
 void
 thread_db_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 {
-  struct target_ops *beneath = find_target_beneath (this);
   struct thread_db_info *info;
 
   if (ptid_equal (ptid, minus_one_ptid))
@@ -1553,7 +1543,7 @@ thread_db_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
   if (info)
     info->need_stale_parent_threads_check = 0;
 
-  beneath->resume (ptid, step, signo);
+  beneath ()->resume (ptid, step, signo);
 }
 
 /* std::sort helper function for info_auto_load_libthread_db, sort the

@@ -310,8 +310,7 @@ bsd_uthread_solib_unloaded (struct so_list *so)
 void
 bsd_uthread_target::mourn_inferior ()
 {
-  struct target_ops *beneath = find_target_beneath (this);
-  beneath->mourn_inferior ();
+  beneath ()->mourn_inferior ();
   bsd_uthread_deactivate ();
 }
 
@@ -323,7 +322,6 @@ bsd_uthread_target::fetch_registers (struct regcache *regcache, int regnum)
     = (struct bsd_uthread_ops *) gdbarch_data (gdbarch, bsd_uthread_data);
   ptid_t ptid = regcache->ptid ();
   CORE_ADDR addr = ptid_get_tid (ptid);
-  struct target_ops *beneath = find_target_beneath (this);
   CORE_ADDR active_addr;
   scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
@@ -332,7 +330,7 @@ bsd_uthread_target::fetch_registers (struct regcache *regcache, int regnum)
   inferior_ptid = ptid;
 
   /* Always fetch the appropriate registers from the layer beneath.  */
-  beneath->fetch_registers (regcache, regnum);
+  beneath ()->fetch_registers (regcache, regnum);
 
   /* FIXME: That might have gotten us more than we asked for.  Make
      sure we overwrite all relevant registers with values from the
@@ -354,7 +352,6 @@ bsd_uthread_target::store_registers (struct regcache *regcache, int regnum)
   struct gdbarch *gdbarch = regcache->arch ();
   struct bsd_uthread_ops *uthread_ops
     = (struct bsd_uthread_ops *) gdbarch_data (gdbarch, bsd_uthread_data);
-  struct target_ops *beneath = find_target_beneath (this);
   ptid_t ptid = regcache->ptid ();
   CORE_ADDR addr = ptid_get_tid (ptid);
   CORE_ADDR active_addr;
@@ -375,7 +372,7 @@ bsd_uthread_target::store_registers (struct regcache *regcache, int regnum)
     {
       /* Updating the thread that is currently running; pass the
          request to the layer beneath.  */
-      beneath->store_registers (regcache, regnum);
+      beneath ()->store_registers (regcache, regnum);
     }
 }
 
@@ -385,10 +382,9 @@ bsd_uthread_target::wait (ptid_t ptid, struct target_waitstatus *status,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   CORE_ADDR addr;
-  struct target_ops *beneath = find_target_beneath (this);
 
   /* Pass the request to the layer beneath.  */
-  ptid = beneath->wait (ptid, status, options);
+  ptid = beneath ()->wait (ptid, status, options);
 
   /* If the process is no longer alive, there's no point in figuring
      out the thread ID.  It will fail anyway.  */
@@ -433,15 +429,13 @@ void
 bsd_uthread_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
 {
   /* Pass the request to the layer beneath.  */
-  struct target_ops *beneath = find_target_beneath (this);
-  beneath->resume (ptid, step, sig);
+  beneath ()->resume (ptid, step, sig);
 }
 
 bool
 bsd_uthread_target::thread_alive (ptid_t ptid)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
-  struct target_ops *beneath = find_target_beneath (this);
   CORE_ADDR addr = ptid_get_tid (ptid);
 
   if (addr != 0)
@@ -456,7 +450,7 @@ bsd_uthread_target::thread_alive (ptid_t ptid)
 	return false;
     }
 
-  return beneath->thread_alive (ptid);
+  return beneath ()->thread_alive (ptid);
 }
 
 void

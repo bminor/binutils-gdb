@@ -2377,8 +2377,6 @@ extern void noprocess (void) ATTRIBUTE_NORETURN;
 
 extern void target_require_runnable (void);
 
-extern struct target_ops *find_target_beneath (struct target_ops *);
-
 /* Find the target at STRATUM.  If no target is at that stratum,
    return NULL.  */
 

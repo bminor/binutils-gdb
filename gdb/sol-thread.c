@@ -384,7 +384,7 @@ lwp_to_thread (ptid_t lwp)
 void
 sol_thread_target::detach (inferior *inf, int from_tty)
 {
-  struct target_ops *beneath = find_target_beneath (this);
+  target_ops *beneath = this->beneath ();
 
   sol_thread_active = 0;
   inferior_ptid = pid_to_ptid (ptid_get_pid (main_ph.ptid));
@@ -400,8 +400,6 @@ sol_thread_target::detach (inferior *inf, int from_tty)
 void
 sol_thread_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 {
-  struct target_ops *beneath = find_target_beneath (this);
-
   scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
   inferior_ptid = thread_to_lwp (inferior_ptid, ptid_get_pid (main_ph.ptid));
@@ -420,7 +418,7 @@ sol_thread_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 		 ptid_get_tid (save_ptid));
     }
 
-  beneath->resume (ptid, step, signo);
+  beneath ()->resume (ptid, step, signo);
 }
 
 /* Wait for any threads to stop.  We may have to convert PTID from a
@@ -432,7 +430,6 @@ sol_thread_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 {
   ptid_t rtnval;
   ptid_t save_ptid;
-  struct target_ops *beneath = find_target_beneath (this);
 
   save_ptid = inferior_ptid;
   scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
@@ -453,7 +450,7 @@ sol_thread_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 		 ptid_get_tid (save_ptid));
     }
 
-  rtnval = beneath->wait (ptid, ourstatus, options);
+  rtnval = beneath ()->wait (ptid, ourstatus, options);
 
   if (ourstatus->kind != TARGET_WAITKIND_EXITED)
     {
@@ -487,13 +484,12 @@ sol_thread_target::fetch_registers (struct regcache *regcache, int regnum)
   prfpregset_t fpregset;
   gdb_gregset_t *gregset_p = &gregset;
   gdb_fpregset_t *fpregset_p = &fpregset;
-  struct target_ops *beneath = find_target_beneath (this);
   ptid_t ptid = regcache->ptid ();
 
   if (!ptid_tid_p (ptid))
     {
       /* It's an LWP; pass the request on to the layer beneath.  */
-      beneath->fetch_registers (regcache, regnum);
+      beneath ()->fetch_registers (regcache, regnum);
       return;
     }
 
@@ -544,10 +540,8 @@ sol_thread_target::store_registers (struct regcache *regcache, int regnum)
 
   if (!ptid_tid_p (ptid))
     {
-      struct target_ops *beneath = find_target_beneath (this);
-
       /* It's an LWP; pass the request on to the layer beneath.  */
-      beneath->store_registers (regcache, regnum);
+      beneath ()->store_registers (regcache, regnum);
       return;
     }
 
@@ -595,8 +589,6 @@ sol_thread_target::xfer_partial (enum target_object object,
 				 ULONGEST offset, ULONGEST len,
 				 ULONGEST *xfered_len)
 {
-  struct target_ops *beneath = find_target_beneath (this);
-
   scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
   if (ptid_tid_p (inferior_ptid) || !target_thread_alive (inferior_ptid))
@@ -609,8 +601,8 @@ sol_thread_target::xfer_partial (enum target_object object,
       inferior_ptid = procfs_first_available ();
     }
 
-  return beneath->xfer_partial (object, annex, readbuf,
-				writebuf, offset, len, xfered_len);
+  return beneath ()->xfer_partial (object, annex, readbuf,
+				   writebuf, offset, len, xfered_len);
 }
 
 static void
@@ -691,7 +683,7 @@ sol_thread_new_objfile (struct objfile *objfile)
 void
 sol_thread_target::mourn_inferior ()
 {
-  struct target_ops *beneath = find_target_beneath (this);
+  target_ops *beneath = this->beneath ();
 
   sol_thread_active = 0;
 
@@ -721,10 +713,8 @@ sol_thread_target::thread_alive (ptid_t ptid)
     }
   else
     {
-      struct target_ops *beneath = find_target_beneath (this);
-
       /* It's an LPW; pass the request on to the layer below.  */
-      return beneath->thread_alive (ptid);
+      return beneath ()->thread_alive (ptid);
     }
 }
 
@@ -1062,13 +1052,11 @@ sol_update_thread_list_callback (const td_thrhandle_t *th, void *ignored)
 void
 sol_thread_target::update_thread_list ()
 {
-  struct target_ops *beneath = find_target_beneath (this);
-
   /* Delete dead threads.  */
   prune_threads ();
 
   /* Find any new LWP's.  */
-  beneath->update_thread_list ();
+  beneath ()->update_thread_list ();
 
   /* Then find any new user-level threads.  */
   p_td_ta_thr_iter (main_ta, sol_update_thread_list_callback, (void *) 0,

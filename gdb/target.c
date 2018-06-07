@@ -3211,16 +3211,6 @@ default_thread_architecture (struct target_ops *ops, ptid_t ptid)
   return inf->gdbarch;
 }
 
-/*
- * Find the next target down the stack from the specified target.
- */
-
-struct target_ops *
-find_target_beneath (struct target_ops *t)
-{
-  return t->beneath ();
-}
-
 /* See target.h.  */
 
 struct target_ops *
