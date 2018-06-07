@@ -36,16 +36,21 @@
 #define TRACE_WRITE_V_BLOCK(writer, num, val)	\
   writer->ops->frame_ops->write_v_block ((writer), (num), (val))
 
-/* Free trace file writer.  */
+/* A unique pointer policy class for trace_file_writer.  */
 
-static void
-trace_file_writer_xfree (void *arg)
+struct trace_file_writer_deleter
 {
-  struct trace_file_writer *writer = (struct trace_file_writer *) arg;
+  void operator() (struct trace_file_writer *writer)
+  {
+    writer->ops->dtor (writer);
+    xfree (writer);
+  }
+};
 
-  writer->ops->dtor (writer);
-  xfree (writer);
-}
+/* A unique_ptr specialization for trace_file_writer.  */
+
+typedef std::unique_ptr<trace_file_writer, trace_file_writer_deleter>
+    trace_file_writer_up;
 
 /* Save tracepoint data to file named FILENAME through WRITER.  WRITER
    determines the trace file format.  If TARGET_DOES_SAVE is non-zero,
@@ -311,9 +316,7 @@ tsave_command (const char *args, int from_tty)
   int target_does_save = 0;
   char **argv;
   char *filename = NULL;
-  struct cleanup *back_to;
   int generate_ctf = 0;
-  struct trace_file_writer *writer = NULL;
 
   if (args == NULL)
     error_no_arg (_("file in which to save trace data"));
@@ -337,19 +340,13 @@ tsave_command (const char *args, int from_tty)
     error_no_arg (_("file in which to save trace data"));
 
   if (generate_ctf)
-    writer = ctf_trace_file_writer_new ();
+    trace_save_ctf (filename, target_does_save);
   else
-    writer = tfile_trace_file_writer_new ();
-
-  back_to = make_cleanup (trace_file_writer_xfree, writer);
-
-  trace_save (filename, writer, target_does_save);
+    trace_save_tfile (filename, target_does_save);
 
   if (from_tty)
     printf_filtered (_("Trace data saved to %s '%s'.\n"),
 		     generate_ctf ? "directory" : "file", filename);
-
-  do_cleanups (back_to);
 }
 
 /* Save the trace data to file FILENAME of tfile format.  */
@@ -357,13 +354,8 @@ tsave_command (const char *args, int from_tty)
 void
 trace_save_tfile (const char *filename, int target_does_save)
 {
-  struct trace_file_writer *writer;
-  struct cleanup *back_to;
-
-  writer = tfile_trace_file_writer_new ();
-  back_to = make_cleanup (trace_file_writer_xfree, writer);
-  trace_save (filename, writer, target_does_save);
-  do_cleanups (back_to);
+  trace_file_writer_up writer (tfile_trace_file_writer_new ());
+  trace_save (filename, writer.get (), target_does_save);
 }
 
 /* Save the trace data to dir DIRNAME of ctf format.  */
@@ -371,14 +363,8 @@ trace_save_tfile (const char *filename, int target_does_save)
 void
 trace_save_ctf (const char *dirname, int target_does_save)
 {
-  struct trace_file_writer *writer;
-  struct cleanup *back_to;
-
-  writer = ctf_trace_file_writer_new ();
-  back_to = make_cleanup (trace_file_writer_xfree, writer);
-
-  trace_save (dirname, writer, target_does_save);
-  do_cleanups (back_to);
+  trace_file_writer_up writer (ctf_trace_file_writer_new ());
+  trace_save (dirname, writer.get (), target_does_save);
 }
 
 /* Fetch register data from tracefile, shared for both tfile and

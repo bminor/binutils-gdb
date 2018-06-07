@@ -1,3 +1,10 @@
+2018-06-10  Tom Tromey  <tom@tromey.com>
+
+	* tracefile.c (struct trace_file_writer_deleter): New.
+	<operator()>: Rename from trace_file_writer_xfree.
+	(trace_file_writer_up): New typedef.
+	(tsave_command, trace_save_tfile, trace_save_ctf): Update.
+
 2018-06-09  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* regcache.h (reg_buffer) <~reg_buffer>: Use default destructor.
