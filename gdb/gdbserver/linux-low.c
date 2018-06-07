@@ -7250,8 +7250,6 @@ linux_low_read_btrace (struct btrace_target_info *tinfo, struct buffer *buffer,
   enum btrace_error err;
   int i;
 
-  btrace_data_init (&btrace);
-
   err = linux_read_btrace (&btrace, tinfo, type);
   if (err != BTRACE_ERR_NONE)
     {
@@ -7260,14 +7258,14 @@ linux_low_read_btrace (struct btrace_target_info *tinfo, struct buffer *buffer,
       else
 	buffer_grow_str0 (buffer, "E.Generic Error.");
 
-      goto err;
+      return -1;
     }
 
   switch (btrace.format)
     {
     case BTRACE_FORMAT_NONE:
       buffer_grow_str0 (buffer, "E.No Trace.");
-      goto err;
+      return -1;
 
     case BTRACE_FORMAT_BTS:
       buffer_grow_str (buffer, "<!DOCTYPE btrace SYSTEM \"btrace.dtd\">\n");
@@ -7298,15 +7296,10 @@ linux_low_read_btrace (struct btrace_target_info *tinfo, struct buffer *buffer,
 
     default:
       buffer_grow_str0 (buffer, "E.Unsupported Trace Format.");
-      goto err;
+      return -1;
     }
 
-  btrace_data_fini (&btrace);
   return 0;
-
-err:
-  btrace_data_fini (&btrace);
-  return -1;
 }
 
 /* See to_btrace_conf target method.  */

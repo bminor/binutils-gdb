@@ -1,3 +1,22 @@
+2018-06-08  Tom Tromey  <tom@tromey.com>
+
+	* common/btrace-common.h (struct btrace_data): Add constructor,
+	destructor, move assignment operator.
+	<empty, clear, fini>: New methods.
+	<format>: Initialize.
+	(btrace_data_init, btrace_data_fini, btrace_data_clear)
+	(btrace_data_empty): Don't declare.
+	* common/btrace-common.c (btrace_data_init): Remove.
+	(btrace_data::fini): Rename from btrace_data_fini.
+	(btrace_data::empty): Rename from btrace_data_empty.
+	(btrace_data::clear): Rename from btrace_data_clear.  Return
+	bool.
+	* btrace.h (make_cleanup_btrace_data): Don't declare.
+	* btrace.c (btrace_add_pc, btrace_stitch_trace, btrace_clear)
+	(parse_xml_btrace): Update.
+	(do_btrace_data_cleanup, make_cleanup_btrace_data): Remove.
+	(maint_btrace_clear_packet_history_cmd): Update.
+
 2018-06-07  Pedro Alves  <palves@redhat.com>
 
 	* target.h (target_ops) <beneath>: Now a method.  All references

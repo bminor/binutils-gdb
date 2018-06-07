@@ -1,3 +1,7 @@
+2018-06-08  Tom Tromey  <tom@tromey.com>
+
+	* linux-low.c (linux_low_read_btrace): Update.
+
 2018-06-04  Stan Cox  <scox@redhat.com>
 
 	* server.h (struct client_state): New.

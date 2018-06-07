@@ -1565,25 +1565,19 @@ btrace_add_pc (struct thread_info *tp)
   struct btrace_data btrace;
   struct btrace_block *block;
   struct regcache *regcache;
-  struct cleanup *cleanup;
   CORE_ADDR pc;
 
   regcache = get_thread_regcache (tp->ptid);
   pc = regcache_read_pc (regcache);
 
-  btrace_data_init (&btrace);
   btrace.format = BTRACE_FORMAT_BTS;
   btrace.variant.bts.blocks = NULL;
-
-  cleanup = make_cleanup_btrace_data (&btrace);
 
   block = VEC_safe_push (btrace_block_s, btrace.variant.bts.blocks, NULL);
   block->begin = pc;
   block->end = pc;
 
   btrace_compute_ftrace (tp, &btrace, NULL);
-
-  do_cleanups (cleanup);
 }
 
 /* See btrace.h.  */
@@ -1777,7 +1771,7 @@ static int
 btrace_stitch_trace (struct btrace_data *btrace, struct thread_info *tp)
 {
   /* If we don't have trace, there's nothing to do.  */
-  if (btrace_data_empty (btrace))
+  if (btrace->empty ())
     return 0;
 
   switch (btrace->format)
@@ -1894,7 +1888,6 @@ btrace_fetch (struct thread_info *tp, const struct btrace_cpu *cpu)
   struct btrace_thread_info *btinfo;
   struct btrace_target_info *tinfo;
   struct btrace_data btrace;
-  struct cleanup *cleanup;
   int errcode;
 
   DEBUG ("fetch thread %s (%s)", print_thread_id (tp),
@@ -1920,9 +1913,6 @@ btrace_fetch (struct thread_info *tp, const struct btrace_cpu *cpu)
   /* We should not be called on running or exited threads.  */
   gdb_assert (can_access_registers_ptid (tp->ptid));
 
-  btrace_data_init (&btrace);
-  cleanup = make_cleanup_btrace_data (&btrace);
-
   /* Let's first try to extend the trace we already have.  */
   if (!btinfo->functions.empty ())
     {
@@ -1938,7 +1928,7 @@ btrace_fetch (struct thread_info *tp, const struct btrace_cpu *cpu)
 	  errcode = target_read_btrace (&btrace, tinfo, BTRACE_READ_NEW);
 
 	  /* If we got any new trace, discard what we have.  */
-	  if (errcode == 0 && !btrace_data_empty (&btrace))
+	  if (errcode == 0 && !btrace.empty ())
 	    btrace_clear (tp);
 	}
 
@@ -1957,7 +1947,7 @@ btrace_fetch (struct thread_info *tp, const struct btrace_cpu *cpu)
     error (_("Failed to read branch trace."));
 
   /* Compute the trace, provided we have any.  */
-  if (!btrace_data_empty (&btrace))
+  if (!btrace.empty ())
     {
       /* Store the raw trace data.  The stored data will be cleared in
 	 btrace_clear, so we always append the new trace.  */
@@ -1967,8 +1957,6 @@ btrace_fetch (struct thread_info *tp, const struct btrace_cpu *cpu)
       btrace_clear_history (btinfo);
       btrace_compute_ftrace (tp, &btrace, cpu);
     }
-
-  do_cleanups (cleanup);
 }
 
 /* See btrace.h.  */
@@ -1992,7 +1980,7 @@ btrace_clear (struct thread_info *tp)
 
   /* Must clear the maint data before - it depends on BTINFO->DATA.  */
   btrace_maint_clear (btinfo);
-  btrace_data_clear (&btinfo->data);
+  btinfo->data.clear ();
   btrace_clear_history (btinfo);
 }
 
@@ -2217,21 +2205,20 @@ static const struct gdb_xml_element btrace_elements[] = {
 void
 parse_xml_btrace (struct btrace_data *btrace, const char *buffer)
 {
-  struct cleanup *cleanup;
   int errcode;
 
 #if defined (HAVE_LIBEXPAT)
 
-  btrace->format = BTRACE_FORMAT_NONE;
+  btrace_data result;
+  result.format = BTRACE_FORMAT_NONE;
 
-  cleanup = make_cleanup_btrace_data (btrace);
   errcode = gdb_xml_parse_quick (_("btrace"), "btrace.dtd", btrace_elements,
-				 buffer, btrace);
+				 buffer, &result);
   if (errcode != 0)
     error (_("Error parsing branch trace."));
 
   /* Keep parse results.  */
-  discard_cleanups (cleanup);
+  *btrace = std::move (result);
 
 #else  /* !defined (HAVE_LIBEXPAT) */
 
@@ -2844,22 +2831,6 @@ btrace_is_empty (struct thread_info *tp)
   return btrace_insn_cmp (&begin, &end) == 0;
 }
 
-/* Forward the cleanup request.  */
-
-static void
-do_btrace_data_cleanup (void *arg)
-{
-  btrace_data_fini ((struct btrace_data *) arg);
-}
-
-/* See btrace.h.  */
-
-struct cleanup *
-make_cleanup_btrace_data (struct btrace_data *data)
-{
-  return make_cleanup (do_btrace_data_cleanup, data);
-}
-
 #if defined (HAVE_LIBIPT)
 
 /* Print a single packet.  */
@@ -3381,7 +3352,7 @@ maint_btrace_clear_packet_history_cmd (const char *args, int from_tty)
 
   /* Must clear the maint data before - it depends on BTINFO->DATA.  */
   btrace_maint_clear (btinfo);
-  btrace_data_clear (&btinfo->data);
+  btinfo->data.clear ();
 }
 
 /* The "maintenance btrace clear" command.  */

@@ -507,7 +507,4 @@ extern int btrace_is_replaying (struct thread_info *tp);
 /* Return non-zero if the branch trace for TP is empty; zero otherwise.  */
 extern int btrace_is_empty (struct thread_info *tp);
 
-/* Create a cleanup for DATA.  */
-extern struct cleanup *make_cleanup_btrace_data (struct btrace_data *data);
-
 #endif /* BTRACE_H */
