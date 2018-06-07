@@ -1,5 +1,13 @@
 2018-06-10  Tom Tromey  <tom@tromey.com>
 
+	* record-full.c (record_full_arch_list_cleanups): Remove.
+	(record_full_message): Use try/catch.
+	(record_full_wait_cleanups): Remove.
+	(record_full_wait_1): Use try/catch.
+	(record_full_restore): Likewise.
+
+2018-06-10  Tom Tromey  <tom@tromey.com>
+
 	* record-full.c (record_full_breakpoint_p): Remove typedef.  Don't
 	declare VEC.  Add constructor.
 	<in_target_beneath>: Now bool.
