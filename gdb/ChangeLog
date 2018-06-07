@@ -1,5 +1,18 @@
 2018-06-07  Pedro Alves  <palves@redhat.com>
 
+	* target.h (target_ops) <beneath>: Now a method.  All references
+	updated.
+	(class target_stack): New.
+	* target.c (g_target_stack): New.
+	(g_current_top_target): Delete.
+	(current_top_target): Get the top target out of g_target_stack.
+	(target_stack::push, target_stack::unpush): New.
+	(push_target, unpush_target): Reimplement.
+	(target_is_pushed): Reimplement in terms of g_target_stack.
+	(target_ops::beneath, target_stack::find_beneath): New.
+
+2018-06-07  Pedro Alves  <palves@redhat.com>
+
 	* target.h (find_target_beneath): Delete declaration.
 	* target.c (find_target_beneath): Delete definition.
 	* aix-thread.c: All callers of find_target_beneath adjusted to

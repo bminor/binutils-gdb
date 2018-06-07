@@ -61,7 +61,11 @@ struct inferior;
    of variables any more (the file target is handling them and they
    never get to the process target).  So when you push a file target,
    it goes into the file stratum, which is always below the process
-   stratum.  */
+   stratum.
+
+   Note that rather than allow an empty stack, we always have the
+   dummy target at the bottom stratum, so we can call the target
+   methods without checking them.  */
 
 #include "target/target.h"
 #include "target/resume.h"
@@ -425,7 +429,6 @@ struct target_info
 struct target_ops
   {
     /* To the target under this one.  */
-    target_ops *m_beneath;
     target_ops *beneath () const;
 
     /* Free resources associated with the target.  Note that singleton
@@ -1267,6 +1270,46 @@ extern void set_native_target (target_ops *target);
 /* Get the registered native target, if there's one.  Otherwise return
    NULL.  */
 extern target_ops *get_native_target ();
+
+/* Type that manages a target stack.  See description of target stacks
+   and strata at the top of the file.  */
+
+class target_stack
+{
+public:
+  target_stack () = default;
+  DISABLE_COPY_AND_ASSIGN (target_stack);
+
+  /* Push a new target into the stack of the existing target
+     accessors, possibly superseding some existing accessor.  */
+  void push (target_ops *t);
+
+  /* Remove a target from the stack, wherever it may be.  Return true
+     if it was removed, false otherwise.  */
+  bool unpush (target_ops *t);
+
+  /* Returns true if T is pushed on the target stack.  */
+  bool is_pushed (target_ops *t) const
+  { return at (t->to_stratum) == t; }
+
+  /* Return the target at STRATUM.  */
+  target_ops *at (strata stratum) const { return m_stack[stratum]; }
+
+  /* Return the target at the top of the stack.  */
+  target_ops *top () const { return at (m_top); }
+
+  /* Find the next target down the stack from the specified target.  */
+  target_ops *find_beneath (const target_ops *t) const;
+
+private:
+  /* The stratum of the top target.  */
+  enum strata m_top {};
+
+  /* The stack, represented as an array, with one slot per stratum.
+     If no target is pushed at some stratum, the corresponding slot is
+     null.  */
+  target_ops *m_stack[(int) debug_stratum + 1] {};
+};
 
 /* The ops structure for our "current" target process.  This should
    never be NULL.  If there is no target, it points to the dummy_target.  */
