@@ -1,3 +1,11 @@
+2018-06-09  Tom Tromey  <tom@tromey.com>
+
+	* event-loop.c (gdb_event, gdb_event_p): Remove typedefs.  Don't
+	declare queue.
+	(event_queue): Use std::queue.
+	(gdb_event_xfree): Remove.
+	(initialize_event_loop, process_event, wait_for_event): Update.
+
 2018-06-08  Stan Cox  <scox@redhat.com>
 
 	* win32-low.c (win32_create_inferior):  last_ptid and last_status
