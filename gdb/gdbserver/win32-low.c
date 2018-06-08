@@ -627,6 +627,7 @@ static int
 win32_create_inferior (const char *program,
 		       const std::vector<char *> &program_args)
 {
+  client_state &cs = get_client_state ();
 #ifndef USE_WIN32API
   char real_path[PATH_MAX];
   char *orig_path, *new_path, *path_ptr;
@@ -706,7 +707,7 @@ win32_create_inferior (const char *program,
 
   /* Wait till we are at 1st instruction in program, return new pid
      (assuming success).  */
-  last_ptid = win32_wait (pid_to_ptid (current_process_id), &last_status, 0);
+  cs.last_ptid = win32_wait (pid_to_ptid (current_process_id), &cs.last_status, 0);
 
   return current_process_id;
 }

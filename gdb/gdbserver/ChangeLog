@@ -1,3 +1,8 @@
+2018-06-08  Stan Cox  <scox@redhat.com>
+
+	* win32-low.c (win32_create_inferior):  last_ptid and last_status
+	moved to client_state.
+
 2018-06-08  Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (GDBREPLAY_OBS): Add common/cleanups.o,
