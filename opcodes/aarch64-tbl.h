@@ -295,6 +295,13 @@
   QLF2(S_S,X),			\
 }
 
+/* e.g. FMOV <Dd>, <Xn>.  */
+#define QL_INT2FP_FMOV		\
+{				\
+  QLF2(S_S,W),			\
+  QLF2(S_D,X),			\
+}
+
 /* e.g. SCVTF <Hd>, <Wn>.  */
 #define QL_INT2FP_H			\
 {					\
@@ -309,6 +316,13 @@
   QLF2(W,S_S),			\
   QLF2(X,S_D),			\
   QLF2(X,S_S),			\
+}
+
+/* e.g. FMOV <Xd>, <Dn>.  */
+#define QL_FP2INT_FMOV		\
+{				\
+  QLF2(W,S_S),			\
+  QLF2(X,S_D),			\
 }
 
 /* e.g. FCVTNS <Hd>, <Wn>.  */
@@ -3038,9 +3052,9 @@ struct aarch64_opcode aarch64_opcode_table[] =
   FF16_INSN ("fcvtas",0x1ee40000, 0x7f3ffc00, float2int, OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF),
   __FP_INSN ("fcvtau",0x1e250000, 0x7f3ffc00, float2int, 0, OP2 (Rd, Fn), QL_FP2INT, F_FPTYPE | F_SF),
   FF16_INSN ("fcvtau",0x1ee50000, 0x7f3ffc00, float2int, OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF),
-  __FP_INSN ("fmov",  0x1e260000, 0x7f3ffc00, float2int, 0, OP2 (Rd, Fn), QL_FP2INT, F_FPTYPE | F_SF),
+  __FP_INSN ("fmov",  0x1e260000, 0x7f3ffc00, float2int, 0, OP2 (Rd, Fn), QL_FP2INT_FMOV, F_FPTYPE | F_SF),
   FF16_INSN ("fmov",  0x1ee60000, 0x7f3ffc00, float2int, OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF),
-  __FP_INSN ("fmov",  0x1e270000, 0x7f3ffc00, float2int, 0, OP2 (Fd, Rn), QL_INT2FP, F_FPTYPE | F_SF),
+  __FP_INSN ("fmov",  0x1e270000, 0x7f3ffc00, float2int, 0, OP2 (Fd, Rn), QL_INT2FP_FMOV, F_FPTYPE | F_SF),
   FF16_INSN ("fmov",  0x1ee70000, 0x7f3ffc00, float2int, OP2 (Fd, Rn), QL_INT2FP_H, F_FPTYPE | F_SF),
   __FP_INSN ("fcvtps",0x1e280000, 0x7f3ffc00, float2int, 0, OP2 (Rd, Fn), QL_FP2INT, F_FPTYPE | F_SF),
   FF16_INSN ("fcvtps",0x1ee80000, 0x7f3ffc00, float2int, OP2 (Rd, Fn), QL_FP2INT_H, F_FPTYPE | F_SF),

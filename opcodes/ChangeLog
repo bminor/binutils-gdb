@@ -1,3 +1,9 @@
+2018-06-08  Egeyar Bagcioglu  <egeyar.bagcioglu@oracle.com>
+
+	PR 20319
+	* aarch64-tbl.h: Introduce QL_INT2FP_FMOV and QL_FP2INT_FMOV.
+	(aarch64_opcode_table) : Use QL_INT2FP_FMOV and QL_FP2INT_FMOV.
+
 2018-06-06  Alan Modra  <amodra@gmail.com>
 
 	* xtensa-dis.c (print_insn_xtensa): Init fmt and valid_insn after

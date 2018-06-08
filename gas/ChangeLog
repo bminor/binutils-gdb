@@ -1,3 +1,14 @@
+2018-06-08  Egeyar Bagcioglu  <egeyar.bagcioglu@oracle.com>
+
+	PR 20319
+	* testsuite/gas/aarch64/illegal-3.s: Test if unallocated FMOV encodings
+	are detected as undefined.
+	* testsuite/gas/aarch64/illegal-3.d: Likewise.
+	* testsuite/gas/aarch64/illegal.s: Test if FMOV instructions that are
+	changing the size from 32 bits to 64 bits and vice versa trigger an
+	error.
+	* testsuite/gas/aarch64/illegal.l: Likewise.
+
 2018-06-08  Tamar Christina  <tamar.christina@arm.com>
 
 	PR binutils/21446

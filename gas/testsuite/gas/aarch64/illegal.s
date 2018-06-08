@@ -584,4 +584,9 @@ one_label:
 	fcmgt	v0.2d, v0.2d, #0 // OK
 	fcmgt	v0.2d, v0.2d, #-0.0
 
+	# PR 20319: FMOV instructions changing the size from 32 bits
+	# to 64 bits and vice versa are illegal.
+	fmov 	s9, x0
+	fmov	d7, w1
+
 	// End (for errors during literal pool generation)
