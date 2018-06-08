@@ -1,3 +1,8 @@
+2018-06-08  Gary Benson <gbenson@redhat.com>
+
+	* gdb.threads/check-libthread-db.exp: New file.
+	* gdb.threads/check-libthread-db.c: Likewise.
+
 2018-06-05  Tom Tromey  <tom@tromey.com>
 
 	* gdb.base/default.exp: Update expected "show version" output.

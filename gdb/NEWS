@@ -36,6 +36,16 @@ set|show record btrace cpu
   Controls the processor to be used for enabling errata workarounds for
   branch trace decode.
 
+maint check libthread-db
+  Run integrity checks on the current inferior's thread debugging
+  library
+
+maint set check-libthread-db (on|off)
+maint show check-libthread-db
+  Control whether to run integrity checks on inferior specific thread
+  debugging libraries as they are loaded.  The default is not to
+  perform such checks.
+
 * Python API
 
   ** Type alignment is now exposed via the "align" attribute of a gdb.Type.
