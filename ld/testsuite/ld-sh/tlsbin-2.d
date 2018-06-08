@@ -72,6 +72,4 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
 .* FUNC +GLOBAL +DEFAULT +UND __tls_get_addr
 #...
 .* TLS +GLOBAL +DEFAULT +UND sG1
-#...
-
 #pass

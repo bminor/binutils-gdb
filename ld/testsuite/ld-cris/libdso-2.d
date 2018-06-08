@@ -36,7 +36,7 @@ Symbol table '\.dynsym' contains 4 entries:
  +2: 0+ +0 +OBJECT +GLOBAL +DEFAULT +ABS TST1
  +3: 0+154 +0 +FUNC +GLOBAL +DEFAULT +7 export_1@@TST1
 
-Symbol table '\.symtab' contains 18 entries:
+Symbol table '\.symtab' contains 15 entries:
  +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
  +0: 0+ +0 +NOTYPE +LOCAL +DEFAULT +UND 
  +1: [0-9a-f]+ +0 +SECTION +LOCAL +DEFAULT +1 
@@ -49,10 +49,7 @@ Symbol table '\.symtab' contains 18 entries:
  +8: [0-9a-f]+ +0 +SECTION +LOCAL +DEFAULT +8 
  +9: [0-9a-f]+ +0 +SECTION +LOCAL +DEFAULT +9 
  +10: 0+2..[046c] +0 +OBJECT +LOCAL +DEFAULT +ABS _DYNAMIC
- +11: 0+2..[046c] +0 +NOTYPE +LOCAL +DEFAULT +9 __bss_start
- +12: 0+2..[046c] +0 +NOTYPE +LOCAL +DEFAULT +9 _edata
- +13: 0+2..[046c] +0 +OBJECT +LOCAL +DEFAULT +ABS _GLOBAL_OFFSET_TABLE_
- +14: 0+2..[046c] +0 +NOTYPE +LOCAL +DEFAULT +9 _end
- +15: 0+150 +2 +FUNC +LOCAL +DEFAULT +7 dsofn
- +16: 0+ +0 +OBJECT +GLOBAL +DEFAULT +ABS TST1
- +17: 0+154 +0 +FUNC +GLOBAL +DEFAULT +7 export_1
+ +11: 0+2..[046c] +0 +OBJECT +LOCAL +DEFAULT +ABS _GLOBAL_OFFSET_TABLE_
+ +12: 0+150 +2 +FUNC +LOCAL +DEFAULT +7 dsofn
+ +13: 0+ +0 +OBJECT +GLOBAL +DEFAULT +ABS TST1
+ +14: 0+154 +0 +FUNC +GLOBAL +DEFAULT +7 export_1

@@ -22,7 +22,7 @@ Relocation section '\.rela\.dyn' at offset 0x[0-9a-f]+ contains 1 entry:
 #...
 [0-9a-f]+  0+c R_CRIS_RELATIVE +[0-9a-f]+
 #...
-Symbol table '\.dynsym' contains 6 entries:
+Symbol table '\.dynsym' contains 3 entries:
 #...
-Symbol table '\.symtab' contains 18 entries:
+Symbol table '\.symtab' contains 15 entries:
 #pass

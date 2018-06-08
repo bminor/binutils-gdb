@@ -21,8 +21,8 @@ EMBEDDED=yes
 # not matter.
 NOP=0x0e0e0e0e
 
-OTHER_BSS_SYMBOLS="__bss_start__ = . ;"
-OTHER_BSS_END_SYMBOLS="__bss_end__ = . ;"
+OTHER_BSS_SYMBOLS="${CREATE_SHLIB+PROVIDE (}__bss_start__ = .${CREATE_SHLIB+)};"
+OTHER_BSS_END_SYMBOLS="${CREATE_SHLIB+PROVIDE (}__bss_end__ = .${CREATE_SHLIB+)};"
 
 # This sets the stack to the top of the simulator memory (2^19 bytes).
 STACK_ADDR=0x80000

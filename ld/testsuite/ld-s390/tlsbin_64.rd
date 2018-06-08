@@ -68,11 +68,8 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
 .* TLS +GLOBAL +DEFAULT +UND sG3
 .* TLS +GLOBAL +DEFAULT +UND sG2
 .* FUNC +GLOBAL +DEFAULT +UND __tls_get_offset
-.* NOTYPE +GLOBAL +DEFAULT +12 __bss_start
 .* TLS +GLOBAL +DEFAULT +UND sG6
 .* TLS +GLOBAL +DEFAULT +UND sG1
-.* NOTYPE +GLOBAL +DEFAULT +12 _edata
-.* NOTYPE +GLOBAL +DEFAULT +12 _end
 
 Symbol table '\.symtab' contains [0-9]+ entries:
  +Num: +Value +Size +Type +Bind +Vis +Ndx +Name

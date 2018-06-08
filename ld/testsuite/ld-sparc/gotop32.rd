@@ -42,10 +42,7 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
 .* NOTYPE +LOCAL +DEFAULT +UND *
 .* SECTION +LOCAL +DEFAULT +5 *
 .* SECTION +LOCAL +DEFAULT +7 *
-.* NOTYPE +GLOBAL +DEFAULT +8 __bss_start
 .* FUNC +GLOBAL +DEFAULT +5 foo
-.* NOTYPE +GLOBAL +DEFAULT +8 _edata
-.* NOTYPE +GLOBAL +DEFAULT +8 _end
 .* NOTYPE +GLOBAL +DEFAULT +8 sym
 
 Symbol table '\.symtab' contains [0-9]+ entries:
@@ -65,9 +62,6 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* OBJECT +LOCAL +DEFAULT +ABS _DYNAMIC
 .* OBJECT +LOCAL +DEFAULT +ABS _PROCEDURE_LINKAGE_TABLE_
 .* OBJECT +LOCAL +DEFAULT +ABS _GLOBAL_OFFSET_TABLE_
-.* NOTYPE +GLOBAL +DEFAULT +8 __bss_start
 .* FUNC +GLOBAL +DEFAULT +5 foo
-.* NOTYPE +GLOBAL +DEFAULT +8 _edata
-.* NOTYPE +GLOBAL +DEFAULT +8 _end
 .* NOTYPE +GLOBAL +DEFAULT +8 sym
 

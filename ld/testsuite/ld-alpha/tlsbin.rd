@@ -59,10 +59,7 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
 [0-9 ]+: [0-9a-f]+ +0 +NOTYPE +LOCAL +DEFAULT +UND *
 [0-9 ]+: [0-9a-f]+ +0 +TLS +GLOBAL +DEFAULT +UND sG2
 [0-9 ]+: [0-9a-f]+ +0 +FUNC +GLOBAL +DEFAULT +UND __tls_get_addr
-[0-9 ]+: [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +13 __bss_start
 [0-9 ]+: [0-9a-f]+ +0 +TLS +GLOBAL +DEFAULT +UND sG1
-[0-9 ]+: [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +13 _edata
-[0-9 ]+: [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +13 _end
 
 Symbol table '\.symtab' contains [0-9]+ entries:
  +Num: +Value +Size +Type +Bind +Vis +Ndx +Name

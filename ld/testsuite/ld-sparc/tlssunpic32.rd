@@ -72,12 +72,9 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
 .* NOTYPE +GLOBAL +DEFAULT +UND __tls_get_addr
 .* TLS +GLOBAL +DEFAULT +7 sg1
 .* FUNC +GLOBAL +DEFAULT +6 fn1
-.* NOTYPE +GLOBAL +DEFAULT +11 __bss_start
 .* TLS +GLOBAL +DEFAULT +7 sg2
 .* TLS +GLOBAL +DEFAULT +7 sg6
 .* TLS +GLOBAL +DEFAULT +7 sg7
-.* NOTYPE +GLOBAL +DEFAULT +11 _edata
-.* NOTYPE +GLOBAL +DEFAULT +11 _end
 
 Symbol table '\.symtab' contains [0-9]+ entries:
  +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
@@ -129,9 +126,6 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* NOTYPE +GLOBAL +DEFAULT +UND __tls_get_addr
 .* TLS +GLOBAL +DEFAULT +7 sg1
 .* FUNC +GLOBAL +DEFAULT +6 fn1
-.* NOTYPE +GLOBAL +DEFAULT +11 __bss_start
 .* TLS +GLOBAL +DEFAULT +7 sg2
 .* TLS +GLOBAL +DEFAULT +7 sg6
 .* TLS +GLOBAL +DEFAULT +7 sg7
-.* NOTYPE +GLOBAL +DEFAULT +11 _edata
-.* NOTYPE +GLOBAL +DEFAULT +11 _end

@@ -9,5 +9,5 @@
 
 DYNAMIC SYMBOL TABLE:
 #...
-00000[12].[02468ace] g    DF .text	0+2 dsofn
+000000.[02468ace] g    DF .text	0+2 dsofn
 #pass

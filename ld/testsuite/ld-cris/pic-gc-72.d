@@ -19,11 +19,11 @@ Contents of section .dynsym:
 Contents of section .dynstr:
 #...
 Contents of section .text:
- 016e 0f050f05                             .*
+ 0121 0f050f05                             .*
 Contents of section .dynamic:
- 2174 .*
+ 2128 .*
 #...
 Contents of section .got:
- 21cc 74210000 00000000 00000000           .*
+ 2180 28210000 00000000 00000000           .*
 Contents of section .data:
- 21d8 00000000                             .*
+ 218c 00000000                             .*

@@ -15,9 +15,9 @@
 Dynamic section at offset 0x[0-9a-f][0-9a-f][0-9a-f] contains 11 entries:
   Tag[ 	]+Type[ 	]+Name/Value
  0x0+4 \(HASH\)[ 	]+0x94
- 0x0+5 \(STRTAB\)[ 	]+0x[12][0-9a-f][0-9a-f]
+ 0x0+5 \(STRTAB\)[ 	]+0x[0-9a-f][0-9a-f]
  0x0+6 \(SYMTAB\)[ 	]+0x[0-9a-f][0-9a-f]
- 0x0+a \(STRSZ\)[ 	]+38 \(bytes\)
+ 0x0+a \(STRSZ\)[ 	]+14 \(bytes\)
  0x0+b \(SYMENT\)[ 	]+16 \(bytes\)
  0x0+7 \(RELA\)[ 	]+0x[12][0-9a-f][0-9a-f]
  0x0+8 \(RELASZ\)[ 	]+12 \(bytes\)

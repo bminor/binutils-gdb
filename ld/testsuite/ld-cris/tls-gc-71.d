@@ -15,18 +15,15 @@
          filesz 0x0+80 memsz 0x0+80 flags r--
 #...
 DYNAMIC SYMBOL TABLE:
-0+18e l    d  \.text	0+ \.text
-0+2194 l    d  \.tdata	0+ \.tdata
-0+18e g    DF \.text	0+2 _init
-0+2280 g    D  \.got	0+ __bss_start
+0+132 l    d  \.text	0+ \.text
+0+2138 l    d  \.tdata	0+ \.tdata
+0+132 g    DF \.text	0+2 _init
 0+ g    D  .tdata	0+80 tls128
-0+2280 g    D  \.got	0+ _edata
-0+2280 g    D  \.got	0+ _end
 
 DYNAMIC RELOCATION RECORDS \(none\)
 #...
 Contents of section \.text:
- 018e 0f050000                             .*
+ 0132 0f050000                             .*
 #...
 Contents of section \.got:
- 2274 14220000 00000000 00000000           .*
+ 2218 b8210000 00000000 00000000           .*

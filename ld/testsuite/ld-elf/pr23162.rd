@@ -1,12 +1,5 @@
 There are no relocations in this file\.
 
-Symbol table '\.dynsym' contains [0-9]+ entries:
+Symbol table '\.dynsym' contains 1 entry:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
  +0: 0+ +0 +NOTYPE +LOCAL +DEFAULT +UND +
-#...
- +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +_edata
-#...
- +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +_end
-#...
- +[0-9]+: +[a-f0-9]+ +0 +NOTYPE +GLOBAL +DEFAULT +[0-9]+ +__bss_start
-#...

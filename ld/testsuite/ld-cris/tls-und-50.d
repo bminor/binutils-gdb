@@ -11,7 +11,7 @@
 #...
 Relocation section '.rela.dyn' at offset 0x.* contains 1 entry:
  Offset +Info +Type +Sym.Value +Sym. Name \+ Addend
-000021ec +0000021c R_CRIS_32_TPREL +0+ +x \+ 0
+00002190 +0000021c R_CRIS_32_TPREL +0+ +x \+ 0
 
 The decoding of unwind sections for machine type Axis Communications 32-bit embedded processor is not currently supported.
 
@@ -23,4 +23,4 @@ Symbol table '.dynsym' contains . entries:
 Symbol table '.symtab' contains .. entries:
 #...
 Hex dump of section '.got':
-  0x0+21e0 68210000 00000000 00000000 00000000 .*
+  0x0+2184 0c210000 00000000 00000000 00000000 .*

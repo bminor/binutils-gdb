@@ -1393,5 +1393,65 @@ if { ([istarget "i?86-*-*"]
 	    "pr23162b" \
 	    "-fPIC -O0" \
 	] \
+	[list \
+	    "Build libpr23161a.so" \
+	    "-shared" \
+	    "" \
+	    "$AFLAGS_PIC" \
+	    { pr23161a.c } \
+	    {{readelf {--dyn-syms -rW} pr23161a.rd}} \
+	    "libpr23161a.so" \
+	    "-fPIC -O2" \
+	] \
+	[list \
+	    "Build pr23161a" \
+	    "-pie --no-as-needed tmpdir/libpr23161a.so" \
+	    "" \
+	    "-mrelax-relocations=yes" \
+	    { pr23161b.c } \
+	    {{readelf {--dyn-syms -rW} pr23161b.rd}} \
+	    "pr23161a" \
+	    "-fPIC -O0" \
+	] \
+	[list \
+	    "Build libpr23161b.so" \
+	    "-shared --version-script=pr23161.map" \
+	    "" \
+	    "$AFLAGS_PIC" \
+	    { pr23161a.c } \
+	    {{readelf {--dyn-syms -rW} pr23161a.rd}} \
+	    "libpr23161b.so" \
+	    "-fPIC -O2" \
+	] \
+	[list \
+	    "Build pr23161b" \
+	    "-pie --no-as-needed tmpdir/libpr23161b.so" \
+	    "" \
+	    "-mrelax-relocations=yes" \
+	    { pr23161b.c } \
+	    {{readelf {--dyn-syms -rW} pr23161b.rd}} \
+	    "pr23161b" \
+	    "-fPIC -O0" \
+	] \
+	[list \
+	    "Build libpr23161c.so" \
+	    "-shared" \
+	    "" \
+	    "$AFLAGS_PIC" \
+	    { pr23161c.c } \
+	    {{readelf {--dyn-syms -rW} pr23161c.rd}} \
+	    "libpr23161c.so" \
+	    "-fPIC -O2" \
+	] \
+	[list \
+	    "Build pr23161c" \
+	    "-pie --no-as-needed tmpdir/libpr23161c.so" \
+	    "" \
+	    "-mrelax-relocations=yes" \
+	    { pr23161b.c } \
+	    {{readelf {--dyn-syms -rW} pr23161d.rd}} \
+	    "pr23161c" \
+	    "-fPIC -O0" \
+	] \
     ]
 }

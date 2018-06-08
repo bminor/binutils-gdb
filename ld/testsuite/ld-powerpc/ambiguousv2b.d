@@ -14,7 +14,7 @@ Relocation section .* contains 1 entry:
 .*
 .* R_PPC64_JMP_SLOT .* my_func \+ 0
 
-Symbol table '\.dynsym' contains 5 entries:
+Symbol table '\.dynsym' contains 2 entries:
 #...
 .*: 0*[1-9a-f][0-9a-f]*     0 FUNC    GLOBAL DEFAULT  UND my_func
 #...
