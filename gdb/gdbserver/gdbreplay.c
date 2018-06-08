@@ -17,11 +17,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "config.h"
-#include "build-gnulib-gdbserver/config.h"
+#include "common-defs.h"
 #include "version.h"
 
-#include <stdio.h>
 #if HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
@@ -32,9 +30,6 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#include <errno.h>
-#include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -48,8 +43,6 @@
 #if HAVE_NETINET_TCP_H
 #include <netinet/tcp.h>
 #endif
-
-#include <alloca.h>
 
 #if USE_WIN32API
 #include <winsock2.h>
@@ -114,32 +107,6 @@ strerror (DWORD error)
 }
 
 #endif /* __MINGW32CE__ */
-
-/* Print the system error message for errno, and also mention STRING
-   as the file name for which the error was encountered.
-   Then return to command level.  */
-
-static void
-perror_with_name (const char *string)
-{
-#ifndef STDC_HEADERS
-  extern int errno;
-#endif
-  const char *err;
-  char *combined;
-
-  err = strerror (errno);
-  if (err == NULL)
-    err = "unknown error";
-
-  combined = (char *) alloca (strlen (err) + strlen (string) + 3);
-  strcpy (combined, string);
-  strcat (combined, ": ");
-  strcat (combined, err);
-  fprintf (stderr, "\n%s.\n", combined);
-  fflush (stderr);
-  exit (1);
-}
 
 static void
 sync_error (FILE *fp, const char *desc, int expect, int got)
@@ -422,8 +389,11 @@ gdbreplay_usage (FILE *stream)
     fprintf (stream, "Report bugs to \"%s\".\n", REPORT_BUGS_TO);
 }
 
-int
-main (int argc, char *argv[])
+/* Main function.  This is called by the real "main" function,
+   wrapped in a TRY_CATCH that handles any uncaught exceptions.  */
+
+static void ATTRIBUTE_NORETURN
+captured_main (int argc, char *argv[])
 {
   FILE *fp;
   int ch;
@@ -470,4 +440,26 @@ main (int argc, char *argv[])
     }
   remote_close ();
   exit (0);
+}
+
+int
+main (int argc, char *argv[])
+{
+  TRY
+    {
+      captured_main (argc, argv);
+    }
+  CATCH (exception, RETURN_MASK_ALL)
+    {
+      if (exception.reason == RETURN_ERROR)
+	{
+	  fflush (stdout);
+	  fprintf (stderr, "%s\n", exception.message);
+	}
+
+      exit (1);
+    }
+  END_CATCH
+
+  gdb_assert_not_reached ("captured_main should never return");
 }

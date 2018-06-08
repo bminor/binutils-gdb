@@ -1,3 +1,17 @@
+2018-06-08  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (GDBREPLAY_OBS): Add common/cleanups.o,
+	common/common-exceptions.o, common/common-utils.o,
+	common/errors.o, common/print-utils.o and utils.o.
+	* gdbreplay.c: Include "common-defs.h" instead of the two
+	'config.h's here.  Don't include stdio.h, errno.h, stdlib.h,
+	string.h or alloca.h.
+	(perror_with_name): Delete.
+	(remote_open): Use xstrdup instead of strdup.
+	(main): Rename to ...
+	(captured_main): ... this.
+	(main): New.
+
 2018-06-08  Tom Tromey  <tom@tromey.com>
 
 	* linux-low.c (linux_low_read_btrace): Update.

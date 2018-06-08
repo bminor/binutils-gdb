@@ -284,7 +284,16 @@ OBS = \
 	$(LIBOBJS) \
 	$(XML_BUILTIN)
 
-GDBREPLAY_OBS = gdbreplay.o version.o
+GDBREPLAY_OBS = \
+	common/cleanups.o \
+	common/common-exceptions.o \
+	common/common-utils.o \
+	common/errors.o \
+	common/print-utils.o \
+	gdbreplay.o \
+	utils.o \
+	version.o
+
 GDBSERVER_LIBS = @GDBSERVER_LIBS@
 XM_CLIBS = @LIBS@
 CDEPS = $(srcdir)/proc-service.list
