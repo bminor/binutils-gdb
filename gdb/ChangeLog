@@ -1,3 +1,18 @@
+2018-06-26  Tom Tromey  <tom@tromey.com>
+
+	* typeprint.h (struct print_offset_data) <update, finish,
+	maybe_print_hole>: New methods.
+	<indentation>: New constant.
+	* typeprint.c (print_offset_data::indentation): Define.
+	(print_offset_data::maybe_print_hole, print_offset_data::update)
+	(print_offset_data::finish): Move from c-typeprint.c and rename.
+	* c-typeprint.c (OFFSET_SPC_LEN): Remove.
+	(print_spaces_filtered_with_print_options): Update.
+	(c_print_type_union_field_offset, maybe_print_hole)
+	(c_print_type_struct_field_offset): Move to typeprint.c and
+	rename.
+	(c_type_print_base_struct_union): Update.
+
 2018-06-25  Pedro Alves  <palves@redhat.com>
 
 	* gdbthread.h (thread_info_ref, delete_thread)

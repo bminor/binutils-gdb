@@ -65,6 +65,130 @@ static struct type_print_options default_ptype_flags =
 
 
 
+/* See typeprint.h.  */
+
+const int print_offset_data::indentation = 23;
+
+
+/* See typeprint.h.  */
+
+void
+print_offset_data::maybe_print_hole (struct ui_file *stream,
+				     unsigned int bitpos,
+				     const char *for_what)
+{
+  /* We check for END_BITPOS > 0 because there is a specific
+     scenario when END_BITPOS can be zero and BITPOS can be >
+     0: when we are dealing with a struct/class with a virtual method.
+     Because of the vtable, the first field of the struct/class will
+     have an offset of sizeof (void *) (the size of the vtable).  If
+     we do not check for END_BITPOS > 0 here, GDB will report
+     a hole before the first field, which is not accurate.  */
+  if (end_bitpos > 0 && end_bitpos < bitpos)
+    {
+      /* If END_BITPOS is smaller than the current type's
+	 bitpos, it means there's a hole in the struct, so we report
+	 it here.  */
+      unsigned int hole = bitpos - end_bitpos;
+      unsigned int hole_byte = hole / TARGET_CHAR_BIT;
+      unsigned int hole_bit = hole % TARGET_CHAR_BIT;
+
+      if (hole_bit > 0)
+	fprintf_filtered (stream, "/* XXX %2u-bit %s  */\n", hole_bit,
+			  for_what);
+
+      if (hole_byte > 0)
+	fprintf_filtered (stream, "/* XXX %2u-byte %s */\n", hole_byte,
+			  for_what);
+    }
+}
+
+/* See typeprint.h.  */
+
+void
+print_offset_data::update (struct type *type, unsigned int field_idx,
+			   struct ui_file *stream)
+{
+  if (field_is_static (&TYPE_FIELD (type, field_idx)))
+    {
+      print_spaces_filtered (indentation, stream);
+      return;
+    }
+
+  struct type *ftype = check_typedef (TYPE_FIELD_TYPE (type, field_idx));
+  if (TYPE_CODE (type) == TYPE_CODE_UNION)
+    {
+      /* Since union fields don't have the concept of offsets, we just
+	 print their sizes.  */
+      fprintf_filtered (stream, "/*              %4u */", TYPE_LENGTH (ftype));
+      return;
+    }
+
+  unsigned int bitpos = TYPE_FIELD_BITPOS (type, field_idx);
+  unsigned int fieldsize_byte = TYPE_LENGTH (ftype);
+  unsigned int fieldsize_bit = fieldsize_byte * TARGET_CHAR_BIT;
+
+  maybe_print_hole (stream, bitpos, "hole");
+
+  if (TYPE_FIELD_PACKED (type, field_idx))
+    {
+      /* We're dealing with a bitfield.  Print how many bits are left
+	 to be used.  */
+      unsigned int bitsize = TYPE_FIELD_BITSIZE (type, field_idx);
+      /* The bitpos relative to the beginning of our container
+	 field.  */
+      unsigned int relative_bitpos;
+
+      /* The following was copied from
+	 value.c:value_primitive_field.  */
+      if ((bitpos % fieldsize_bit) + bitsize <= fieldsize_bit)
+	relative_bitpos = bitpos % fieldsize_bit;
+      else
+	relative_bitpos = bitpos % TARGET_CHAR_BIT;
+
+      /* This is the exact offset (in bits) of this bitfield.  */
+      unsigned int bit_offset
+	= (bitpos - relative_bitpos) + offset_bitpos;
+
+      /* The position of the field, relative to the beginning of the
+	 struct, and how many bits are left to be used in this
+	 container.  */
+      fprintf_filtered (stream, "/* %4u:%2u", bit_offset / TARGET_CHAR_BIT,
+			fieldsize_bit - (relative_bitpos + bitsize));
+      fieldsize_bit = bitsize;
+    }
+  else
+    {
+      /* The position of the field, relative to the beginning of the
+	 struct.  */
+      fprintf_filtered (stream, "/* %4u",
+			(bitpos + offset_bitpos) / TARGET_CHAR_BIT);
+
+      fprintf_filtered (stream, "   ");
+    }
+
+  fprintf_filtered (stream, "   |  %4u */", fieldsize_byte);
+
+  end_bitpos = bitpos + fieldsize_bit;
+}
+
+/* See typeprint.h.  */
+
+void
+print_offset_data::finish (struct type *type, int level,
+			   struct ui_file *stream)
+{
+  unsigned int bitpos = TYPE_LENGTH (type) * TARGET_CHAR_BIT;
+  maybe_print_hole (stream, bitpos, "padding");
+
+  fputs_filtered ("\n", stream);
+  print_spaces_filtered (level + 4 + print_offset_data::indentation, stream);
+  fprintf_filtered (stream, "/* total size (bytes): %4u */\n",
+		    TYPE_LENGTH (type));
+}
+
+
+
 /* A hash function for a typedef_field.  */
 
 static hashval_t

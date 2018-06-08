@@ -32,14 +32,6 @@
 #include "cp-abi.h"
 #include "cp-support.h"
 
-/* When printing the offsets of a struct and its fields (i.e., 'ptype
-   /o'; type_print_options::print_offsets), we use this many
-   characters when printing the offset information at the beginning of
-   the line.  This is needed in order to generate the correct amount
-   of whitespaces when no offset info should be printed for a certain
-   field.  */
-#define OFFSET_SPC_LEN 23
-
 /* A list of access specifiers used for printing.  */
 
 enum access_specifier
@@ -913,7 +905,7 @@ print_spaces_filtered_with_print_options
   if (!flags->print_offsets)
     print_spaces_filtered (level, stream);
   else
-    print_spaces_filtered (level + OFFSET_SPC_LEN, stream);
+    print_spaces_filtered (level + print_offset_data::indentation, stream);
 }
 
 /* Output an access specifier to STREAM, if needed.  LAST_ACCESS is the
@@ -954,127 +946,6 @@ output_access_specifier (struct ui_file *stream,
     }
 
   return last_access;
-}
-
-/* Print information about field at index FIELD_IDX of the union type
-   TYPE.  Since union fields don't have the concept of offsets, we
-   just print their sizes.
-
-   The output is strongly based on pahole(1).  */
-
-static void
-c_print_type_union_field_offset (struct type *type, unsigned int field_idx,
-				 struct ui_file *stream)
-{
-  struct type *ftype = check_typedef (TYPE_FIELD_TYPE (type, field_idx));
-
-  fprintf_filtered (stream, "/*              %4u */", TYPE_LENGTH (ftype));
-}
-
-/* Helper function for ptype/o implementation that prints information
-   about a hole, if necessary.  STREAM is where to print.  BITPOS is
-   the bitpos of the current field.  PODATA is the offset-printing
-   state.  FOR_WHAT is a string describing the purpose of the
-   hole.  */
-
-static void
-maybe_print_hole (struct ui_file *stream, unsigned int bitpos,
-		  struct print_offset_data *podata, const char *for_what)
-{
-  /* We check for PODATA->END_BITPOS > 0 because there is a specific
-     scenario when PODATA->END_BITPOS can be zero and BITPOS can be >
-     0: when we are dealing with a struct/class with a virtual method.
-     Because of the vtable, the first field of the struct/class will
-     have an offset of sizeof (void *) (the size of the vtable).  If
-     we do not check for PODATA->END_BITPOS > 0 here, GDB will report
-     a hole before the first field, which is not accurate.  */
-  if (podata->end_bitpos > 0 && podata->end_bitpos < bitpos)
-    {
-      /* If PODATA->END_BITPOS is smaller than the current type's
-	 bitpos, it means there's a hole in the struct, so we report
-	 it here.  */
-      unsigned int hole = bitpos - podata->end_bitpos;
-      unsigned int hole_byte = hole / TARGET_CHAR_BIT;
-      unsigned int hole_bit = hole % TARGET_CHAR_BIT;
-
-      if (hole_bit > 0)
-	fprintf_filtered (stream, "/* XXX %2u-bit %s  */\n", hole_bit,
-			  for_what);
-
-      if (hole_byte > 0)
-	fprintf_filtered (stream, "/* XXX %2u-byte %s */\n", hole_byte,
-			  for_what);
-    }
-}
-
-/* Print information about field at index FIELD_IDX of the struct type
-   TYPE.
-
-   PODATA->END_BITPOS is the one-past-the-end bit position of the
-   previous field (where we expect this field to be if there is no
-   hole).  At the end, ENDPOS is updated to the one-past-the-end bit
-   position of the current field.
-
-   PODATA->OFFSET_BITPOS is the offset value we carry over when we are
-   printing a struct that is inside another struct; this is useful so
-   that the offset is constantly incremented (if we didn't carry it
-   over, the offset would be reset to zero when printing the inner
-   struct).
-
-   The output is strongly based on pahole(1).  */
-
-static void
-c_print_type_struct_field_offset (struct type *type, unsigned int field_idx,
-				  struct ui_file *stream,
-				  struct print_offset_data *podata)
-{
-  struct type *ftype = check_typedef (TYPE_FIELD_TYPE (type, field_idx));
-  unsigned int bitpos = TYPE_FIELD_BITPOS (type, field_idx);
-  unsigned int fieldsize_byte = TYPE_LENGTH (ftype);
-  unsigned int fieldsize_bit = fieldsize_byte * TARGET_CHAR_BIT;
-
-  maybe_print_hole (stream, bitpos, podata, "hole");
-
-  if (TYPE_FIELD_PACKED (type, field_idx))
-    {
-      /* We're dealing with a bitfield.  Print how many bits are left
-	 to be used.  */
-      unsigned int bitsize = TYPE_FIELD_BITSIZE (type, field_idx);
-      /* The bitpos relative to the beginning of our container
-	 field.  */
-      unsigned int relative_bitpos;
-
-      /* The following was copied from
-	 value.c:value_primitive_field.  */
-      if ((bitpos % fieldsize_bit) + bitsize <= fieldsize_bit)
-	relative_bitpos = bitpos % fieldsize_bit;
-      else
-	relative_bitpos = bitpos % TARGET_CHAR_BIT;
-
-      /* This is the exact offset (in bits) of this bitfield.  */
-      unsigned int bit_offset
-	= (bitpos - relative_bitpos) + podata->offset_bitpos;
-
-      /* The position of the field, relative to the beginning of the
-	 struct, and how many bits are left to be used in this
-	 container.  */
-      fprintf_filtered (stream, "/* %4u:%2u", bit_offset / TARGET_CHAR_BIT,
-			fieldsize_bit - (relative_bitpos + bitsize));
-      fieldsize_bit = bitsize;
-    }
-  else
-    {
-      /* The position of the field, relative to the beginning of the
-	 struct.  */
-      fprintf_filtered (stream, "/* %4u",
-			(bitpos + podata->offset_bitpos) / TARGET_CHAR_BIT);
-
-      fprintf_filtered (stream, "   ");
-    }
-
-  fprintf_filtered (stream, "   |  %4u */", fieldsize_byte);
-
-  podata->end_bitpos = bitpos + fieldsize_bit;
 }
 
 /* Return true if an access label (i.e., "public:", "private:",
@@ -1289,20 +1160,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	  bool is_static = field_is_static (&TYPE_FIELD (type, i));
 
 	  if (flags->print_offsets)
-	    {
-	      if (!is_static)
-		{
-		  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
-		    {
-		      c_print_type_struct_field_offset
-			(type, i, stream, podata);
-		    }
-		  else if (TYPE_CODE (type) == TYPE_CODE_UNION)
-		    c_print_type_union_field_offset (type, i, stream);
-		}
-	      else
-		print_spaces_filtered (OFFSET_SPC_LEN, stream);
-	    }
+	    podata->update (type, i, stream);
 
 	  print_spaces_filtered (level + 4, stream);
 	  if (is_static)
@@ -1560,19 +1418,9 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
       if (flags->print_offsets)
 	{
 	  if (show > 0)
-	    {
-	      unsigned int bitpos = TYPE_LENGTH (type) * TARGET_CHAR_BIT;
-	      maybe_print_hole (stream, bitpos, podata, "padding");
+	    podata->finish (type, level, stream);
 
-	      fputs_filtered ("\n", stream);
-	      print_spaces_filtered_with_print_options (level + 4,
-							stream,
-							flags);
-	      fprintf_filtered (stream, "/* total size (bytes): %4u */\n",
-				TYPE_LENGTH (type));
-	    }
-
-	  print_spaces_filtered (OFFSET_SPC_LEN, stream);
+	  print_spaces_filtered (print_offset_data::indentation, stream);
 	  if (level == 0)
 	    print_spaces_filtered (2, stream);
 	}

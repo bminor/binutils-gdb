@@ -38,6 +38,39 @@ struct print_offset_data
      field (where we expect the current field to be if there is no
      hole).  */
   unsigned int end_bitpos = 0;
+
+  /* Print information about field at index FIELD_IDX of the struct type
+     TYPE and update this object.
+
+     If the field is static, it simply prints the correct number of
+     spaces.
+
+     The output is strongly based on pahole(1).  */
+  void update (struct type *type, unsigned int field_idx,
+	       struct ui_file *stream);
+
+  /* Call when all fields have been printed.  This will print
+     information about any padding that may exist.  LEVEL is the
+     desired indentation level.  */
+  void finish (struct type *type, int level, struct ui_file *stream);
+
+  /* When printing the offsets of a struct and its fields (i.e.,
+     'ptype /o'; type_print_options::print_offsets), we use this many
+     characters when printing the offset information at the beginning
+     of the line.  This is needed in order to generate the correct
+     amount of whitespaces when no offset info should be printed for a
+     certain field.  */
+  static const int indentation;
+
+private:
+
+  /* Helper function for ptype/o implementation that prints
+     information about a hole, if necessary.  STREAM is where to
+     print.  BITPOS is the bitpos of the current field.  FOR_WHAT is a
+     string describing the purpose of the hole.  */
+
+  void maybe_print_hole (struct ui_file *stream, unsigned int bitpos,
+			 const char *for_what);
 };
 
 struct type_print_options
