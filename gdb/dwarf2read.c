@@ -10217,19 +10217,13 @@ compute_compunit_symtab_includes (struct dwarf2_per_cu_data *per_cu)
 static void
 process_cu_includes (struct dwarf2_per_objfile *dwarf2_per_objfile)
 {
-  int ix;
-  struct dwarf2_per_cu_data *iter;
-
-  for (ix = 0;
-       VEC_iterate (dwarf2_per_cu_ptr, dwarf2_per_objfile->just_read_cus,
-		    ix, iter);
-       ++ix)
+  for (struct dwarf2_per_cu_data *iter : dwarf2_per_objfile->just_read_cus)
     {
       if (! iter->is_debug_types)
 	compute_compunit_symtab_includes (iter);
     }
 
-  VEC_free (dwarf2_per_cu_ptr, dwarf2_per_objfile->just_read_cus);
+  dwarf2_per_objfile->just_read_cus.clear ();
 }
 
 /* Generate full symbol information for PER_CU, whose DIEs have
@@ -10337,7 +10331,7 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
     }
 
   /* Push it for inclusion processing later.  */
-  VEC_safe_push (dwarf2_per_cu_ptr, dwarf2_per_objfile->just_read_cus, per_cu);
+  dwarf2_per_objfile->just_read_cus.push_back (per_cu);
 }
 
 /* Generate full symbol information for type unit PER_CU, whose DIEs have

@@ -1,3 +1,10 @@
+2018-06-09  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2read.c (process_cu_includes): Update.
+	(process_full_comp_unit): Update.
+	* dwarf2read.h (struct dwarf2_per_objfile) <just_read_cus>: Now a
+	std::vector.
+
 2018-06-08  Paul Koning  <paul_koning@dell.com>
 
 	PR gdb/23252

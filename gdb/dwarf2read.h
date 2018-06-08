@@ -233,7 +233,7 @@ public:
   htab_t die_type_hash {};
 
   /* The CUs we recently read.  */
-  VEC (dwarf2_per_cu_ptr) *just_read_cus = NULL;
+  std::vector<dwarf2_per_cu_data *> just_read_cus;
 
   /* Table containing line_header indexed by offset and offset_in_dwz.  */
   htab_t line_header_hash {};
