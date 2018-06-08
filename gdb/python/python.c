@@ -1667,6 +1667,17 @@ finalize_python (void *ignore)
   restore_active_ext_lang (previous_active);
 }
 
+#ifdef IS_PY3K
+/* This is called via the PyImport_AppendInittab mechanism called
+   during initialization, to make the built-in _gdb module known to
+   Python.  */
+PyMODINIT_FUNC
+init__gdb_module (void)
+{
+  return PyModule_Create (&python_GdbModuleDef);
+}
+#endif
+
 static bool
 do_start_initialization ()
 {
@@ -1707,6 +1718,9 @@ do_start_initialization ()
      remain alive for the duration of the program's execution, so
      it is not freed after this call.  */
   Py_SetProgramName (progname_copy);
+
+  /* Define _gdb as a built-in module.  */
+  PyImport_AppendInittab ("_gdb", init__gdb_module);
 #else
   Py_SetProgramName (progname.release ());
 #endif
@@ -1716,9 +1730,7 @@ do_start_initialization ()
   PyEval_InitThreads ();
 
 #ifdef IS_PY3K
-  gdb_module = PyModule_Create (&python_GdbModuleDef);
-  /* Add _gdb module to the list of known built-in modules.  */
-  _PyImport_FixupBuiltin (gdb_module, "_gdb");
+  gdb_module = PyImport_ImportModule ("_gdb");
 #else
   gdb_module = Py_InitModule ("_gdb", python_GdbMethods);
 #endif
