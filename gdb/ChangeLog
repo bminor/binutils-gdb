@@ -1,3 +1,9 @@
+2018-06-14  Tom de Vries  <tdevries@suse.de>
+
+	PR cli/22573
+	* infcmd.c (print_return_value_1): Use get_user_print_options instead of
+	get_no_prettyformat_print_options.
+
 2018-06-13  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* sparc-nat.h: Include target.h.

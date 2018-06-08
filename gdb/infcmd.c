@@ -1687,7 +1687,7 @@ print_return_value_1 (struct ui_out *uiout, struct return_value_info *rv)
       uiout->field_fmt ("gdb-result-var", "$%d",
 			 rv->value_history_index);
       uiout->text (" = ");
-      get_no_prettyformat_print_options (&opts);
+      get_user_print_options (&opts);
 
       string_file stb;
 

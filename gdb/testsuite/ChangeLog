@@ -1,3 +1,9 @@
+2018-06-14  Tom de Vries  <tdevries@suse.de>
+
+	PR cli/22573
+	* gdb.base/finish-pretty.c: New test.
+	* gdb.base/finish-pretty.exp: New file.
+
 2018-06-14  Pedro Alves  <palves@redhat.com>
 
 	* gdb.gdb/selftest.exp (test_with_self): Use multi_line to build
