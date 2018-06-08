@@ -1,4 +1,10 @@
 2018-06-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23161
+	* testsuite/ld-elf/pr23161d.rd: Remove local _edata, __bss_start,
+	and _end from dynamic symbol table.
+
+2018-06-08  H.J. Lu  <hongjiu.lu@intel.com>
 	    Alan Modra  <amodra@gmail.com>
 
 	PR ld/23161

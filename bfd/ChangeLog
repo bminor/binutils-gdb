@@ -1,3 +1,10 @@
+2018-06-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23161
+	* elfxx-x86.c (elf_x86_hide_linker_defined): New function.
+	(_bfd_x86_elf_link_check_relocs): Use it to hide hidden
+	__bss_start, _end and _edata in shared libraries.
+
 2018-06-07  Alan Modra  <amodra@gmail.com>
 
 	* elf32-tic6x.c (elf32_tic6x_check_relocs): Reference

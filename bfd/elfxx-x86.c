@@ -876,6 +876,27 @@ elf_x86_linker_defined (struct bfd_link_info *info, const char *name)
     }
 }
 
+/* Hide a linker-defined symbol, NAME, with hidden visibility.  */
+
+static void
+elf_x86_hide_linker_defined (struct bfd_link_info *info,
+			     const char *name)
+{
+  struct elf_link_hash_entry *h;
+
+  h = elf_link_hash_lookup (elf_hash_table (info), name,
+			    FALSE, FALSE, FALSE);
+  if (h == NULL)
+    return;
+
+  while (h->root.type == bfd_link_hash_indirect)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+  if (ELF_ST_VISIBILITY (h->other) == STV_INTERNAL
+      || ELF_ST_VISIBILITY (h->other) == STV_HIDDEN)
+    _bfd_elf_link_hash_hide_symbol (info, h, TRUE);
+}
+
 bfd_boolean
 _bfd_x86_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
 {
@@ -915,6 +936,14 @@ _bfd_x86_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
 	      elf_x86_linker_defined (info, "__bss_start");
 	      elf_x86_linker_defined (info, "_end");
 	      elf_x86_linker_defined (info, "_edata");
+	    }
+	  else
+	    {
+	      /* Hide hidden __bss_start, _end and _edata in shared
+		 libraries.  */
+	      elf_x86_hide_linker_defined (info, "__bss_start");
+	      elf_x86_hide_linker_defined (info, "_end");
+	      elf_x86_hide_linker_defined (info, "_edata");
 	    }
 	}
     }
