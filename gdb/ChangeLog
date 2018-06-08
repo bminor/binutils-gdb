@@ -1,5 +1,14 @@
 2018-06-26  Tom Tromey  <tom@tromey.com>
 
+	PR rust/22574:
+	* typeprint.c (whatis_exp): Allow ptype/o for Rust.
+	* rust-lang.c (rust_print_struct_def): Add podata parameter.
+	Update.
+	(rust_internal_print_type): Add podata parameter.
+	(rust_print_type): Update.
+
+2018-06-26  Tom Tromey  <tom@tromey.com>
+
 	* typeprint.h (struct print_offset_data) <update, finish,
 	maybe_print_hole>: New methods.
 	<indentation>: New constant.

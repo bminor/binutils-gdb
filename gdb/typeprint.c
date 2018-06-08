@@ -490,7 +490,8 @@ whatis_exp (const char *exp, int show)
 		       feature.  */
 		    if (show > 0
 			&& (current_language->la_language == language_c
-			    || current_language->la_language == language_cplus))
+			    || current_language->la_language == language_cplus
+			    || current_language->la_language == language_rust))
 		      {
 			flags.print_offsets = 1;
 			flags.print_typedefs = 0;

@@ -1,3 +1,9 @@
+2018-06-26  Tom Tromey  <tom@tromey.com>
+
+	PR rust/22574:
+	* gdb.rust/simple.exp (test_one_slice): Add ptype/o tests.
+	* gdb.rust/simple.rs (struct SimpleLayout): New.
+
 2018-06-22  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.base/jit-reader.exp (jit_reader_test): Expect spaces in

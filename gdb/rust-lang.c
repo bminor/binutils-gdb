@@ -31,8 +31,10 @@
 #include "objfiles.h"
 #include "psymtab.h"
 #include "rust-lang.h"
+#include "typeprint.h"
 #include "valprint.h"
 #include "varobj.h"
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -616,14 +618,14 @@ static void
 rust_internal_print_type (struct type *type, const char *varstring,
 			  struct ui_file *stream, int show, int level,
 			  const struct type_print_options *flags,
-			  bool for_rust_enum);
+			  bool for_rust_enum, print_offset_data *podata);
 
 /* Print a struct or union typedef.  */
 static void
 rust_print_struct_def (struct type *type, const char *varstring,
 		       struct ui_file *stream, int show, int level,
 		       const struct type_print_options *flags,
-		       bool for_rust_enum)
+		       bool for_rust_enum, print_offset_data *podata)
 {
   /* Print a tuple type simply.  */
   if (rust_tuple_type_p (type))
@@ -635,6 +637,13 @@ rust_print_struct_def (struct type *type, const char *varstring,
   /* If we see a base class, delegate to C.  */
   if (TYPE_N_BASECLASSES (type) > 0)
     c_print_type (type, varstring, stream, show, level, flags);
+
+  if (flags->print_offsets)
+    {
+      /* Temporarily bump the level so that the output lines up
+	 correctly.  */
+      level += 2;
+    }
 
   /* Compute properties of TYPE here because, in the enum case, the
      rest of the code ends up looking only at the variant part.  */
@@ -674,16 +683,41 @@ rust_print_struct_def (struct type *type, const char *varstring,
 
   if (TYPE_NFIELDS (type) == 0 && !is_tuple)
     return;
-  if (for_rust_enum)
+  if (for_rust_enum && !flags->print_offsets)
     fputs_filtered (is_tuple_struct ? "(" : "{", stream);
   else
     fputs_filtered (is_tuple_struct ? " (\n" : " {\n", stream);
 
+  /* When printing offsets, we rearrange the fields into storage
+     order.  This lets us show holes more clearly.  We work using
+     field indices here because it simplifies calls to
+     print_offset_data::update below.  */
+  std::vector<int> fields;
   for (int i = 0; i < TYPE_NFIELDS (type); ++i)
     {
-      QUIT;
       if (field_is_static (&TYPE_FIELD (type, i)))
 	continue;
+      if (is_enum && i == enum_discriminant_index)
+	continue;
+      fields.push_back (i);
+    }
+  if (flags->print_offsets)
+    std::sort (fields.begin (), fields.end (),
+	       [&] (int a, int b)
+	       {
+		 return (TYPE_FIELD_BITPOS (type, a)
+			 < TYPE_FIELD_BITPOS (type, b));
+	       });
+
+  for (int i : fields)
+    {
+      QUIT;
+
+      gdb_assert (!field_is_static (&TYPE_FIELD (type, i)));
+      gdb_assert (! (is_enum && i == enum_discriminant_index));
+
+      if (flags->print_offsets)
+	podata->update (type, i, stream);
 
       /* We'd like to print "pub" here as needed, but rustc
 	 doesn't emit the debuginfo, and our types don't have
@@ -691,27 +725,35 @@ rust_print_struct_def (struct type *type, const char *varstring,
 
       /* For a tuple struct we print the type but nothing
 	 else.  */
-      if (!for_rust_enum)
+      if (!for_rust_enum || flags->print_offsets)
 	print_spaces_filtered (level + 2, stream);
       if (is_enum)
-	{
-	  if (i == enum_discriminant_index)
-	    continue;
-	  fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
-	}
+	fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
       else if (!is_tuple_struct)
 	fprintf_filtered (stream, "%s: ", TYPE_FIELD_NAME (type, i));
 
       rust_internal_print_type (TYPE_FIELD_TYPE (type, i), NULL,
 				stream, (is_enum ? show : show - 1),
-				level + 2, flags, is_enum);
-      if (!for_rust_enum)
+				level + 2, flags, is_enum, podata);
+      if (!for_rust_enum || flags->print_offsets)
 	fputs_filtered (",\n", stream);
+      /* Note that this check of "I" is ok because we only sorted the
+	 fields by offset when print_offsets was set, so we won't take
+	 this branch in that case.  */
       else if (i + 1 < TYPE_NFIELDS (type))
 	fputs_filtered (", ", stream);
     }
 
-  if (!for_rust_enum)
+  if (flags->print_offsets)
+    {
+      /* Undo the temporary level increase we did above.  */
+      level -= 2;
+      podata->finish (type, level, stream);
+      print_spaces_filtered (print_offset_data::indentation, stream);
+      if (level == 0)
+	print_spaces_filtered (2, stream);
+    }
+  if (!for_rust_enum || flags->print_offsets)
     print_spaces_filtered (level, stream);
   fputs_filtered (is_tuple_struct ? ")" : "}", stream);
 }
@@ -735,7 +777,7 @@ static void
 rust_internal_print_type (struct type *type, const char *varstring,
 			  struct ui_file *stream, int show, int level,
 			  const struct type_print_options *flags,
-			  bool for_rust_enum)
+			  bool for_rust_enum, print_offset_data *podata)
 {
   int i;
 
@@ -778,7 +820,7 @@ rust_internal_print_type (struct type *type, const char *varstring,
 	  if (i > 0)
 	    fputs_filtered (", ", stream);
 	  rust_internal_print_type (TYPE_FIELD_TYPE (type, i), "", stream,
-				    -1, 0, flags, false);
+				    -1, 0, flags, false, podata);
 	}
       fputs_filtered (")", stream);
       /* If it returns unit, we can omit the return type.  */
@@ -786,7 +828,7 @@ rust_internal_print_type (struct type *type, const char *varstring,
         {
           fputs_filtered (" -> ", stream);
           rust_internal_print_type (TYPE_TARGET_TYPE (type), "", stream,
-				    -1, 0, flags, false);
+				    -1, 0, flags, false, podata);
         }
       break;
 
@@ -796,7 +838,8 @@ rust_internal_print_type (struct type *type, const char *varstring,
 
 	fputs_filtered ("[", stream);
 	rust_internal_print_type (TYPE_TARGET_TYPE (type), NULL,
-				  stream, show - 1, level, flags, false);
+				  stream, show - 1, level, flags, false,
+				  podata);
 
 	if (TYPE_HIGH_BOUND_KIND (TYPE_INDEX_TYPE (type)) == PROP_LOCEXPR
 	    || TYPE_HIGH_BOUND_KIND (TYPE_INDEX_TYPE (type)) == PROP_LOCLIST)
@@ -811,7 +854,7 @@ rust_internal_print_type (struct type *type, const char *varstring,
     case TYPE_CODE_UNION:
     case TYPE_CODE_STRUCT:
       rust_print_struct_def (type, varstring, stream, show, level, flags,
-			     for_rust_enum);
+			     for_rust_enum, podata);
       break;
 
     case TYPE_CODE_ENUM:
@@ -856,8 +899,9 @@ rust_print_type (struct type *type, const char *varstring,
 		 struct ui_file *stream, int show, int level,
 		 const struct type_print_options *flags)
 {
+  print_offset_data podata;
   rust_internal_print_type (type, varstring, stream, show, level,
-			    flags, false);
+			    flags, false, &podata);
 }
 
 

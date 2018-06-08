@@ -285,6 +285,24 @@ gdb_test "print parametrized" \
 
 gdb_test "print u" " = simple::Union {f1: -1, f2: 255}"
 
+gdb_test_sequence "ptype/o Union" "" {
+    "/\\* offset    |  size \\*/  type = union simple::Union {"
+    "/\\*                 1 \\*/    f1: i8,"
+    "/\\*                 1 \\*/    f2: u8,"
+    ""
+    "                           /\\* total size \\(bytes\\):    1 \\*/"
+    "                         }"
+}
+
+gdb_test_sequence "ptype/o SimpleLayout" "" {
+    "/\\* offset    |  size \\*/  type = struct simple::SimpleLayout {"
+    "/\\*    0      |     2 \\*/    f1: u16,"
+    "/\\*    2      |     2 \\*/    f2: u16,"
+    ""
+    "                           /\\* total size \\(bytes\\):    4 \\*/"
+    "                         }"
+}
+
 load_lib gdb-python.exp
 if {[skip_python_tests]} {
     continue
