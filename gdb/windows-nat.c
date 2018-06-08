@@ -2953,8 +2953,8 @@ windows_xfer_shared_libraries (struct target_ops *ops,
 enum target_xfer_status
 windows_nat_target::xfer_partial (enum target_object object,
 				  const char *annex, gdb_byte *readbuf,
-				  const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
-				  ULONGEST *xfered_len)
+				  const gdb_byte *writebuf, ULONGEST offset,
+				  ULONGEST len, ULONGEST *xfered_len)
 {
   switch (object)
     {
@@ -2966,16 +2966,16 @@ windows_nat_target::xfer_partial (enum target_object object,
 					    writebuf, offset, len, xfered_len);
 
     default:
-      if (beneath == NULL)
+      if (beneath () == NULL)
 	{
 	  /* This can happen when requesting the transfer of unsupported
 	     objects before a program has been started (and therefore
 	     with the current_target having no target beneath).  */
 	  return TARGET_XFER_E_IO;
 	}
-      return beneath->xfer_partial (object, annex,
-				    readbuf, writebuf, offset, len,
-				    xfered_len);
+      return beneath ()->xfer_partial (object, annex,
+				       readbuf, writebuf, offset, len,
+				       xfered_len);
     }
 }
 

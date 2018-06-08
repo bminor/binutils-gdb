@@ -1,5 +1,10 @@
 2018-06-08  Tom Tromey  <tom@tromey.com>
 
+	* windows-nat.c (windows_nat_target::xfer_partial): "beneath" is
+	now a method.
+
+2018-06-08  Tom Tromey  <tom@tromey.com>
+
 	* btrace.c (parse_xml_raw): Use gdb::unique_xmalloc_ptr.
 
 2018-06-08  Tom Tromey  <tom@tromey.com>
