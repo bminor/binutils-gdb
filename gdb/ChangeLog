@@ -1,3 +1,11 @@
+2018-06-09  Paul Koning  <paul_koning@dell.com>
+
+	PR gdb/23252
+
+	* python/python.c (do_start_initialization):
+	Avoid call to internal Python API.
+	(init__gdb_module): New function.
+
 2018-05-31  Omair Javaid  <omair.javaid@linaro.org>
 
 	PR gdb/23210
