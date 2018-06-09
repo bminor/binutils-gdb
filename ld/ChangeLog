@@ -1,5 +1,30 @@
 2018-06-09  Maciej W. Rozycki  <macro@mips.com>
 
+	* testsuite/ld-mips-elf/stub-dynsym-micromips-1-7fff.d: New
+	test.
+	* testsuite/ld-mips-elf/stub-dynsym-micromips-1-8000.d: New
+	test.
+	* testsuite/ld-mips-elf/stub-dynsym-micromips-1-fff0.d: New
+	test.
+	* testsuite/ld-mips-elf/stub-dynsym-micromips-1-10000.d: New
+	test.
+	* testsuite/ld-mips-elf/stub-dynsym-micromips-1-2fe80.d: New
+	test.
+	* testsuite/ld-mips-elf/stub-dynsym-micromips-insn32-1-7fff.d:
+	New test.
+	* testsuite/ld-mips-elf/stub-dynsym-micromips-insn32-1-8000.d:
+	New test.
+	* testsuite/ld-mips-elf/stub-dynsym-micromips-insn32-1-fff0.d:
+	New test.
+	* testsuite/ld-mips-elf/stub-dynsym-micromips-insn32-1-10000.d:
+	New test.
+	* testsuite/ld-mips-elf/stub-dynsym-micromips-insn32-1-2fe80.d:
+	New test.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.  Fix
+	indentation.
+
+2018-06-09  Maciej W. Rozycki  <macro@mips.com>
+
 	* testsuite/ld-mips-elf/mips-elf.exp: Update symbol count in the
 	comment associated with lazy binding stub tests.
 
