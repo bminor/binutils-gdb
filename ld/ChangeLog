@@ -1,3 +1,8 @@
+2018-06-09  Maciej W. Rozycki  <macro@mips.com>
+
+	* Makefile.am (eelf32mipswindiss.c): Add `mipself.em' dependency.
+	* Makefile.in: Regenerate.
+
 2018-06-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23161
