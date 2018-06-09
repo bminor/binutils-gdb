@@ -783,7 +783,7 @@ run_dump_test "hash1c"
 
 if {[istarget mips*-*-linux*]} {
      # The number of symbols that are always included in the symbol table
-     # for these tests.  The 4 are:
+     # for these tests.  The 2 are:
      #
      #     the null symbol entry
      #     the .MIPS.stubs section symbol

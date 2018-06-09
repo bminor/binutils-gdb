@@ -1,5 +1,10 @@
 2018-06-09  Maciej W. Rozycki  <macro@mips.com>
 
+	* testsuite/ld-mips-elf/mips-elf.exp: Update symbol count in the
+	comment associated with lazy binding stub tests.
+
+2018-06-09  Maciej W. Rozycki  <macro@mips.com>
+
 	* Makefile.am (eelf32mipswindiss.c): Add `mipself.em' dependency.
 	* Makefile.in: Regenerate.
 
