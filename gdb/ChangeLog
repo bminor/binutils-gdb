@@ -1,5 +1,13 @@
 2018-06-09  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* regcache.h (reg_buffer) <~reg_buffer>: Use default destructor.
+	<m_registers, m_register_status>: Change type to
+	std::unique_ptr.
+	* regcache.c (reg_buffer::reg_buffer): Use new instead of
+	XCNEWVEC.
+
+2018-06-09  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* common/common-regcache.h (enum register_status): Add
 	underlying type "signed char".
 	* regcache.h (reg_buffer) <m_register_status>: Change type to

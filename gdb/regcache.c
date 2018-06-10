@@ -185,15 +185,15 @@ reg_buffer::reg_buffer (gdbarch *gdbarch, bool has_pseudo)
 
   if (has_pseudo)
     {
-      m_registers = XCNEWVEC (gdb_byte, m_descr->sizeof_cooked_registers);
-      m_register_status
-	= XCNEWVEC (register_status, m_descr->nr_cooked_registers);
+      m_registers.reset (new gdb_byte[m_descr->sizeof_cooked_registers] ());
+      m_register_status.reset
+	(new register_status[m_descr->nr_cooked_registers] ());
     }
   else
     {
-      m_registers = XCNEWVEC (gdb_byte, m_descr->sizeof_raw_registers);
-      m_register_status
-	= XCNEWVEC (register_status, gdbarch_num_regs (gdbarch));
+      m_registers.reset (new gdb_byte[m_descr->sizeof_raw_registers] ());
+      m_register_status.reset
+	(new register_status[gdbarch_num_regs (gdbarch)] ());
     }
 }
 
@@ -260,7 +260,7 @@ private:
 gdb_byte *
 reg_buffer::register_buffer (int regnum) const
 {
-  return m_registers + m_descr->register_offset[regnum];
+  return m_registers.get () + m_descr->register_offset[regnum];
 }
 
 void
@@ -273,8 +273,8 @@ reg_buffer::save (regcache_cooked_read_ftype *cooked_read,
   /* It should have pseudo registers.  */
   gdb_assert (m_has_pseudo);
   /* Clear the dest.  */
-  memset (m_registers, 0, m_descr->sizeof_cooked_registers);
-  memset (m_register_status, REG_UNKNOWN, m_descr->nr_cooked_registers);
+  memset (m_registers.get (), 0, m_descr->sizeof_cooked_registers);
+  memset (m_register_status.get (), REG_UNKNOWN, m_descr->nr_cooked_registers);
   /* Copy over any registers (identified by their membership in the
      save_reggroup) and mark them as valid.  The full [0 .. gdbarch_num_regs +
      gdbarch_num_pseudo_regs) range is checked since some architectures need
