@@ -1,3 +1,7 @@
+2018-06-14  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.texinfo (Background Execution): Add @cindex for '&'.
+
 2018-06-11  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Maintenance Commands): Add a missing @anchor.
