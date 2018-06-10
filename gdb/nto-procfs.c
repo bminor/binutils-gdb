@@ -995,9 +995,9 @@ nto_procfs_target::xfer_partial (enum target_object object,
 	}
 	/* Fallthru */
     default:
-      return this->beneath->xfer_partial (object, annex,
-					  readbuf, writebuf, offset, len,
-					  xfered_len);
+      return this->beneath ()->xfer_partial (object, annex,
+					     readbuf, writebuf, offset, len,
+					     xfered_len);
     }
 }
 

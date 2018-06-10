@@ -141,7 +141,7 @@ arm_fbsd_nat_target::read_description ()
 
   desc = arm_fbsd_read_description_auxv (this);
   if (desc == NULL)
-    desc = this->beneath->read_description ();
+    desc = this->beneath ()->read_description ();
   return desc;
 }
 

@@ -1,5 +1,18 @@
 2018-06-10  Tom Tromey  <tom@tromey.com>
 
+	* procfs.c (procfs_target::xfer_partial): Use "beneath" as a
+	method.
+	* nto-procfs.c (nto_procfs_target::xfer_partial): Use "beneath" as
+	a method.
+	* go32-nat.c (go32_nat_target::xfer_partial): Use "beneath" as a
+	method.
+	* arm-linux-nat.c (arm_linux_nat_target::read_description): Use
+	"beneath" as a method.
+	* arm-fbsd-nat.c (arm_fbsd_nat_target::read_description):
+	Use "beneath" as a method.
+
+2018-06-10  Tom Tromey  <tom@tromey.com>
+
 	* tracefile.c (struct trace_file_writer_deleter): New.
 	<operator()>: Rename from trace_file_writer_xfree.
 	(trace_file_writer_up): New typedef.

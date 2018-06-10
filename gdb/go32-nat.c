@@ -655,9 +655,9 @@ go32_nat_target::xfer_partial (enum target_object object,
       return go32_xfer_memory (readbuf, writebuf, offset, len, xfered_len);
 
     default:
-      return this->beneath->xfer_partial (object, annex,
-					  readbuf, writebuf, offset, len,
-					  xfered_len);
+      return this->beneath ()->xfer_partial (object, annex,
+					     readbuf, writebuf, offset, len,
+					     xfered_len);
     }
 }
 

@@ -553,7 +553,7 @@ arm_linux_nat_target::read_description ()
 
   if (target_auxv_search (this, AT_HWCAP, &arm_hwcap) != 1)
     {
-      return this->beneath->read_description ();
+      return this->beneath ()->read_description ();
     }
 
   if (arm_hwcap & HWCAP_IWMMXT)
@@ -586,7 +586,7 @@ arm_linux_nat_target::read_description ()
       return result;
     }
 
-  return this->beneath->read_description ();
+  return this->beneath ()->read_description ();
 }
 
 /* Information describing the hardware breakpoint capabilities.  */
