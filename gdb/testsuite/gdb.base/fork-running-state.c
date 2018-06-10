@@ -27,6 +27,9 @@ int save_parent;
 static int
 fork_child (void)
 {
+  /* Don't run forever.  */
+  alarm (180);
+
   while (1)
     pause ();
 
@@ -38,6 +41,9 @@ fork_child (void)
 static int
 fork_parent (void)
 {
+  /* Don't run forever.  */
+  alarm (180);
+
   while (1)
     pause ();
 
@@ -50,9 +56,6 @@ main (void)
   pid_t pid;
 
   save_parent = getpid ();
-
-  /* Don't run forever.  */
-  alarm (180);
 
   /* The parent and child should basically run forever without
      tripping on any debug event.  We want to check that GDB updates
