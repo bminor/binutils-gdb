@@ -1,3 +1,16 @@
+2018-06-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/common-regcache.h (enum register_status): Add
+	underlying type "signed char".
+	* regcache.h (reg_buffer) <m_register_status>: Change type to
+	register_status *.
+	* regcache.c (reg_buffer::reg_buffer): Alocate arrays of
+	register_status instead of signed char.
+	(reg_buffer::save): Use REG_UNKNOWN instead of 0.
+	(reg_buffer::get_register_status): Remove cast.
+	(readable_regcache::raw_read): Remove cast.
+	(readable_regcache::cooked_read): Remove cast.
+
 2018-06-09  Tom Tromey  <tom@tromey.com>
 
 	* source.c (reverse_search_command, forward_search_command): Use

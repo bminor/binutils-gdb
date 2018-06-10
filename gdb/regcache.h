@@ -177,7 +177,7 @@ protected:
   /* The register buffers.  */
   gdb_byte *m_registers;
   /* Register cache status.  */
-  signed char *m_register_status;
+  register_status *m_register_status;
 
   friend class regcache;
   friend class detached_regcache;
