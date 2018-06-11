@@ -143,7 +143,7 @@ serial_log_command (struct target_ops *self, const char *cmd)
 static const struct serial_ops *
 serial_interface_lookup (const char *name)
 {
-  for (const struct serial_ops *ops : serial_ops_list)
+  for (const serial_ops *ops : serial_ops_list)
     if (strcmp (name, ops->name) == 0)
       return ops;
 

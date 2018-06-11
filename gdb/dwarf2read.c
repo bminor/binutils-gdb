@@ -10217,7 +10217,7 @@ compute_compunit_symtab_includes (struct dwarf2_per_cu_data *per_cu)
 static void
 process_cu_includes (struct dwarf2_per_objfile *dwarf2_per_objfile)
 {
-  for (struct dwarf2_per_cu_data *iter : dwarf2_per_objfile->just_read_cus)
+  for (dwarf2_per_cu_data *iter : dwarf2_per_objfile->just_read_cus)
     {
       if (! iter->is_debug_types)
 	compute_compunit_symtab_includes (iter);
