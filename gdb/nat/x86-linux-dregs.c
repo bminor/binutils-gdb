@@ -43,7 +43,7 @@ x86_linux_dr_get (ptid_t ptid, int regnum)
   int tid;
   unsigned long value;
 
-  gdb_assert (ptid_lwp_p (ptid));
+  gdb_assert (ptid.lwp_p ());
   tid = ptid.lwp ();
 
   errno = 0;
@@ -61,7 +61,7 @@ x86_linux_dr_set (ptid_t ptid, int regnum, unsigned long value)
 {
   int tid;
 
-  gdb_assert (ptid_lwp_p (ptid));
+  gdb_assert (ptid.lwp_p ());
   tid = ptid.lwp ();
 
   errno = 0;

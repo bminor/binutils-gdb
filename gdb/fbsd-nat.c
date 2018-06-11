@@ -810,7 +810,7 @@ show_fbsd_nat_debug (struct ui_file *file, int from_tty,
 bool
 fbsd_nat_target::thread_alive (ptid_t ptid)
 {
-  if (ptid_lwp_p (ptid))
+  if (ptid.lwp_p ())
     {
       struct ptrace_lwpinfo pl;
 
@@ -1102,7 +1102,7 @@ fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 			"FLWP: fbsd_resume for ptid (%d, %ld, %ld)\n",
 			ptid.pid (), ptid.lwp (),
 			ptid.tid ());
-  if (ptid_lwp_p (ptid))
+  if (ptid.lwp_p ())
     {
       /* If ptid is a specific LWP, suspend all other LWPs in the process.  */
       struct thread_info *tp;

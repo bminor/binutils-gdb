@@ -300,7 +300,7 @@ thread_to_lwp (ptid_t thread_id, int default_lwp)
   td_thrhandle_t th;
   td_err_e val;
 
-  if (ptid_lwp_p (thread_id))
+  if (thread_id.lwp_p ())
     return thread_id;		/* It's already an LWP ID.  */
 
   /* It's a thread.  Convert to LWP.  */

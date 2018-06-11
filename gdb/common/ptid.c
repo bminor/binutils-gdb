@@ -36,14 +36,6 @@ ptid_equal (const ptid_t &ptid1, const ptid_t &ptid2)
 /* See ptid.h.  */
 
 int
-ptid_lwp_p (const ptid_t &ptid)
-{
-  return ptid.lwp_p ();
-}
-
-/* See ptid.h.  */
-
-int
 ptid_tid_p (const ptid_t &ptid)
 {
   return ptid.tid_p ();

@@ -1,5 +1,15 @@
 2018-07-03  Tom Tromey  <tom@tromey.com>
 
+	* common/ptid.c (ptid_lwp_p): Remove.
+	* common/ptid.h (ptid_lwp_p): Don't declare.
+	* fbsd-nat.c: Update.
+	* linux-nat.c: Update.
+	* nat/linux-procfs.c: Update.
+	* nat/x86-linux-dregs.c: Update.
+	* sol-thread.c: Update.
+
+2018-07-03  Tom Tromey  <tom@tromey.com>
+
 	* common/ptid.c (ptid_is_pid): Remove.
 	* common/ptid.h (ptid_is_pid): Don't declare.
 	* infrun.c: Update.

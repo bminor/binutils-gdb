@@ -858,7 +858,7 @@ add_initial_lwp (ptid_t ptid)
 {
   struct lwp_info *lp;
 
-  gdb_assert (ptid_lwp_p (ptid));
+  gdb_assert (ptid.lwp_p ());
 
   lp = XNEW (struct lwp_info);
 
@@ -935,7 +935,7 @@ find_lwp_pid (ptid_t ptid)
   int lwp;
   struct lwp_info dummy;
 
-  if (ptid_lwp_p (ptid))
+  if (ptid.lwp_p ())
     lwp = ptid.lwp ();
   else
     lwp = ptid.pid ();
@@ -3933,7 +3933,7 @@ linux_nat_target::pid_to_str (ptid_t ptid)
 {
   static char buf[64];
 
-  if (ptid_lwp_p (ptid)
+  if (ptid.lwp_p ()
       && (ptid.pid () != ptid.lwp ()
 	  || num_lwps (ptid.pid ()) > 1))
     {
@@ -4663,7 +4663,7 @@ linux_nat_get_siginfo (ptid_t ptid, siginfo_t *siginfo)
 ptid_t
 current_lwp_ptid (void)
 {
-  gdb_assert (ptid_lwp_p (inferior_ptid));
+  gdb_assert (inferior_ptid.lwp_p ());
   return inferior_ptid;
 }
 
