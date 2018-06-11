@@ -35547,6 +35547,7 @@ modify XML target descriptions.
 Check that the target descriptions dynamically created by @value{GDBN}
 equal the descriptions created from XML files found in @var{dir}.
 
+@anchor{maint check libthread-db}
 @kindex maint check libthread-db
 @item maint check libthread-db
 Run integrity checks on the current inferior's thread debugging
