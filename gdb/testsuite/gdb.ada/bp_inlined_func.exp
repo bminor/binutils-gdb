@@ -29,10 +29,10 @@ if ![runto_main] then {
 }
 
 # Check that inserting breakpoint on read_small inlined function inserts
-# 4 breakpoints.
+# 4 breakpoints (or possibly 5, including the read_small function itself).
 
 gdb_test "break read_small" \
-         "Breakpoint $decimal at $hex: read_small\\. \\(4 locations\\)" \
+         "Breakpoint $decimal at $hex: read_small\\. \\(\[45\] locations\\)" \
          "set breakpoint at read_small"
 
 # We do not verify each breakpoint info, but use continue commands instead

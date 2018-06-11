@@ -1,3 +1,7 @@
+2018-06-18  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.ada/bp_inlined_func.exp: Allow 5 breakpoint locations.
+
 2018-06-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 	    Richard Bunt <Richard.Bunt@arm.com>
 
