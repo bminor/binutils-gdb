@@ -1691,7 +1691,7 @@ linux_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 
   /* A specific PTID means `step only this process id'.  */
   resume_many = (ptid_equal (minus_one_ptid, ptid)
-		 || ptid_is_pid (ptid));
+		 || ptid.is_pid ());
 
   /* Mark the lwps we're resuming as resumed.  */
   iterate_over_lwps (ptid, resume_set_callback, NULL);
@@ -3255,7 +3255,7 @@ linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
   /* The first time we get here after starting a new inferior, we may
      not have added it to the LWP list yet - this is the earliest
      moment at which we know its PID.  */
-  if (ptid_is_pid (inferior_ptid))
+  if (inferior_ptid.is_pid ())
     {
       /* Upgrade the main thread's ptid.  */
       thread_change_ptid (inferior_ptid,
@@ -3389,7 +3389,7 @@ linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
   /* If we're not waiting for a specific LWP, choose an event LWP from
      among those that have had events.  Giving equal priority to all
      LWPs that have had events helps prevent starvation.  */
-  if (ptid_equal (ptid, minus_one_ptid) || ptid_is_pid (ptid))
+  if (ptid_equal (ptid, minus_one_ptid) || ptid.is_pid ())
     select_event_lwp (ptid, &lp, &status);
 
   gdb_assert (lp != NULL);

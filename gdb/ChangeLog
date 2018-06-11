@@ -1,5 +1,15 @@
 2018-07-03  Tom Tromey  <tom@tromey.com>
 
+	* common/ptid.c (ptid_is_pid): Remove.
+	* common/ptid.h (ptid_is_pid): Don't declare.
+	* infrun.c: Update.
+	* linux-nat.c: Update.
+	* mi/mi-interp.c: Update.
+	* remote.c: Update.
+	* thread.c: Update.
+
+2018-07-03  Tom Tromey  <tom@tromey.com>
+
 	* common/ptid.c (ptid_get_tid): Remove.
 	* common/ptid.h (ptid_get_tid): Don't declare.
 	* ada-tasks.c: Update.

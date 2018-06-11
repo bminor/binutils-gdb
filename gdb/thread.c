@@ -799,7 +799,7 @@ set_resumed (ptid_t ptid, int resumed)
   struct thread_info *tp;
   int all = ptid == minus_one_ptid;
 
-  if (all || ptid_is_pid (ptid))
+  if (all || ptid.is_pid ())
     {
       for (tp = thread_list; tp; tp = tp->next)
 	if (all || tp->ptid.pid () == ptid.pid ())
@@ -856,7 +856,7 @@ set_running (ptid_t ptid, int running)
   /* We try not to notify the observer if no thread has actually changed
      the running state -- merely to reduce the number of messages to
      frontend.  Frontend is supposed to handle multiple *running just fine.  */
-  if (all || ptid_is_pid (ptid))
+  if (all || ptid.is_pid ())
     {
       for (tp = thread_list; tp; tp = tp->next)
 	if (all || tp->ptid.pid () == ptid.pid ())
@@ -936,7 +936,7 @@ set_executing (ptid_t ptid, int executing)
   struct thread_info *tp;
   int all = ptid == minus_one_ptid;
 
-  if (all || ptid_is_pid (ptid))
+  if (all || ptid.is_pid ())
     {
       for (tp = thread_list; tp; tp = tp->next)
 	if (all || tp->ptid.pid () == ptid.pid ())
@@ -972,7 +972,7 @@ set_stop_requested (ptid_t ptid, int stop)
   struct thread_info *tp;
   int all = ptid == minus_one_ptid;
 
-  if (all || ptid_is_pid (ptid))
+  if (all || ptid.is_pid ())
     {
       for (tp = thread_list; tp; tp = tp->next)
 	if (all || tp->ptid.pid () == ptid.pid ())
@@ -1000,7 +1000,7 @@ finish_thread_state (ptid_t ptid)
 
   all = ptid == minus_one_ptid;
 
-  if (all || ptid_is_pid (ptid))
+  if (all || ptid.is_pid ())
     {
       for (tp = thread_list; tp; tp = tp->next)
 	{

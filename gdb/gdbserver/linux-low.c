@@ -2635,7 +2635,7 @@ linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
 
   /* Check for a lwp with a pending status.  */
 
-  if (ptid_equal (filter_ptid, minus_one_ptid) || ptid_is_pid (filter_ptid))
+  if (ptid_equal (filter_ptid, minus_one_ptid) || filter_ptid.is_pid ())
     {
       event_thread = find_thread_in_random ([&] (thread_info *thread)
 	{
@@ -4547,7 +4547,7 @@ linux_set_resume_request (thread_info *thread, thread_resume *resume, size_t n)
 	  /* Handle both 'pPID' and 'pPID.-1' as meaning 'all threads
 	     of PID'.  */
 	  || (ptid.pid () == pid_of (thread)
-	      && (ptid_is_pid (ptid)
+	      && (ptid.is_pid ()
 		  || ptid.lwp () == -1)))
 	{
 	  if (resume[ndx].kind == resume_stop

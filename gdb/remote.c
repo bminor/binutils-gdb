@@ -2435,7 +2435,7 @@ remote_target::remote_notice_new_inferior (ptid_t currthread, int executing)
       struct inferior *inf = NULL;
       int pid = currthread.pid ();
 
-      if (ptid_is_pid (inferior_ptid)
+      if (inferior_ptid.is_pid ()
 	  && pid == inferior_ptid.pid ())
 	{
 	  /* inferior_ptid has no thread member yet.  This can happen
@@ -5998,7 +5998,7 @@ remote_target::append_resumption (char *p, char *endp,
 	      threads with a wildcard (though the protocol allows it,
 	      so stubs shouldn't make an active effort to forbid
 	      it).  */
-	   && !(remote_multi_process_p (rs) && ptid_is_pid (ptid)))
+	   && !(remote_multi_process_p (rs) && ptid.is_pid ()))
     {
       struct thread_info *tp;
 
@@ -6032,7 +6032,7 @@ remote_target::append_resumption (char *p, char *endp,
   else
     p += xsnprintf (p, endp - p, ";c");
 
-  if (remote_multi_process_p (rs) && ptid_is_pid (ptid))
+  if (remote_multi_process_p (rs) && ptid.is_pid ())
     {
       ptid_t nptid;
 
@@ -6185,7 +6185,7 @@ remote_target::remote_resume_with_vcont (ptid_t ptid, int step,
 	 a TID.  */
       append_resumption (p, endp, minus_one_ptid, step, siggnal);
     }
-  else if (ptid_equal (ptid, minus_one_ptid) || ptid_is_pid (ptid))
+  else if (ptid_equal (ptid, minus_one_ptid) || ptid.is_pid ())
     {
       /* Resume all threads (of all processes, or of a single
 	 process), with preference for INFERIOR_PTID.  This assumes
@@ -6244,7 +6244,7 @@ remote_target::resume (ptid_t ptid, int step, enum gdb_signal siggnal)
     {
       remote_thread_info *remote_thr;
 
-      if (ptid_equal (minus_one_ptid, ptid) || ptid_is_pid (ptid))
+      if (ptid_equal (minus_one_ptid, ptid) || ptid.is_pid ())
 	remote_thr = get_remote_thread_info (inferior_ptid);
       else
 	remote_thr = get_remote_thread_info (ptid);
@@ -6605,7 +6605,7 @@ remote_target::remote_stop_ns (ptid_t ptid)
     error (_("Remote server does not support stopping threads"));
 
   if (ptid_equal (ptid, minus_one_ptid)
-      || (!remote_multi_process_p (rs) && ptid_is_pid (ptid)))
+      || (!remote_multi_process_p (rs) && ptid.is_pid ()))
     p += xsnprintf (p, endp - p, "vCont;t");
   else
     {
@@ -6613,7 +6613,7 @@ remote_target::remote_stop_ns (ptid_t ptid)
 
       p += xsnprintf (p, endp - p, "vCont;t:");
 
-      if (ptid_is_pid (ptid))
+      if (ptid.is_pid ())
 	  /* All (-1) threads of process.  */
 	nptid = ptid_t (ptid.pid (), -1, 0);
       else
@@ -11442,7 +11442,7 @@ remote_target::pid_to_str (ptid_t ptid)
 
   if (ptid_equal (ptid, null_ptid))
     return normal_pid_to_str (ptid);
-  else if (ptid_is_pid (ptid))
+  else if (ptid.is_pid ())
     {
       /* Printing an inferior target id.  */
 

@@ -160,10 +160,6 @@ extern ptid_t minus_one_ptid;
 
 extern int ptid_equal (const ptid_t &ptid1, const ptid_t &ptid2);
 
-/* See ptid_t::is_pid.  */
-
-extern int ptid_is_pid (const ptid_t &ptid);
-
 /* See ptid_t::lwp_p.  */
 
 extern int ptid_lwp_p (const ptid_t &ptid);

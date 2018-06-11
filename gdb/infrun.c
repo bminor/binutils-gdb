@@ -3493,7 +3493,7 @@ do_target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
 
   /* First check if there is a resumed thread with a wait status
      pending.  */
-  if (ptid_equal (ptid, minus_one_ptid) || ptid_is_pid (ptid))
+  if (ptid_equal (ptid, minus_one_ptid) || ptid.is_pid ())
     {
       tp = random_pending_event_thread (ptid);
     }

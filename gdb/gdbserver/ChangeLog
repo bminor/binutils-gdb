@@ -1,5 +1,9 @@
 2018-07-03  Tom Tromey  <tom@tromey.com>
 
+	* linux-low.c: Update.
+
+2018-07-03  Tom Tromey  <tom@tromey.com>
+
 	* target.c: Update.
 
 2018-07-03  Tom Tromey  <tom@tromey.com>
