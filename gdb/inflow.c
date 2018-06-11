@@ -718,7 +718,7 @@ child_terminal_info (struct target_ops *self, const char *args, int from_tty)
       return;
     }
 
-  if (ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid == null_ptid)
     return;
 
   inf = current_inferior ();

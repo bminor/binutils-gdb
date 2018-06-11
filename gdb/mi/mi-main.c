@@ -566,7 +566,7 @@ mi_cmd_thread_select (const char *command, char **argv, int argc)
 			       USER_SELECTED_THREAD | USER_SELECTED_FRAME);
 
   /* Notify if the thread has effectively changed.  */
-  if (!ptid_equal (inferior_ptid, previous_ptid))
+  if (inferior_ptid != previous_ptid)
     {
       gdb::observers::user_selected_context_changed.notify
 	(USER_SELECTED_THREAD | USER_SELECTED_FRAME);
@@ -2004,11 +2004,11 @@ mi_execute_command (const char *cmd, int from_tty)
 
 	  if (command->thread == -1)
 	    {
-	      report_change = (!ptid_equal (previous_ptid, null_ptid)
-			       && !ptid_equal (inferior_ptid, previous_ptid)
-			       && !ptid_equal (inferior_ptid, null_ptid));
+	      report_change = (previous_ptid != null_ptid
+			       && inferior_ptid != previous_ptid
+			       && inferior_ptid != null_ptid);
 	    }
-	  else if (!ptid_equal (inferior_ptid, null_ptid))
+	  else if (inferior_ptid != null_ptid)
 	    {
 	      struct thread_info *ti = inferior_thread ();
 

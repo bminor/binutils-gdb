@@ -1100,7 +1100,7 @@ inf_validate_procs (struct inf *inf)
 
 	    /* Tell GDB's generic thread code.  */
 
-	    if (ptid_equal (inferior_ptid, ptid_t (inf->pid)))
+	    if (inferior_ptid == ptid_t (inf->pid))
 	      /* This is the first time we're hearing about thread
 		 ids, after a fork-child.  */
 	      thread_change_ptid (inferior_ptid, ptid);
@@ -1617,7 +1617,7 @@ rewait:
   thread = inf->wait.thread;
   if (thread)
     ptid = ptid_t (inf->pid, thread->tid, 0);
-  else if (ptid_equal (ptid, minus_one_ptid))
+  else if (ptid == minus_one_ptid)
     thread = inf_tid_to_thread (inf, -1);
   else
     thread = inf_tid_to_thread (inf, ptid.lwp ());
@@ -1634,7 +1634,7 @@ rewait:
     }
 
   if (thread
-      && !ptid_equal (ptid, minus_one_ptid)
+      && ptid != minus_one_ptid
       && status->kind != TARGET_WAITKIND_SPURIOUS
       && inf->pause_sc == 0 && thread->pause_sc == 0)
     /* If something actually happened to THREAD, make sure we
@@ -2036,7 +2036,7 @@ gnu_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
   inf_update_procs (inf);
 
   /* A specific PTID means `step only this process id'.  */
-  resume_all = ptid_equal (ptid, minus_one_ptid);
+  resume_all = ptid == minus_one_ptid;
 
   if (resume_all)
     /* Allow all threads to run, except perhaps single-stepping one.  */

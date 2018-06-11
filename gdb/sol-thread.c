@@ -461,7 +461,7 @@ sol_thread_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
       /* See if we have a new thread.  */
       if (rtnval.tid_p ()
-	  && !ptid_equal (rtnval, save_ptid)
+	  && rtnval != save_ptid
 	  && (!in_thread_list (rtnval)
 	      || is_exited (rtnval)))
 	add_thread (rtnval);

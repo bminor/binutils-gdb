@@ -1128,7 +1128,7 @@ follow_exec (ptid_t ptid, char *exec_file_target)
      stop provides a nicer sequence of events for user and MI
      notifications.  */
   ALL_THREADS_SAFE (th, tmp)
-    if (th->ptid.pid () == pid && !ptid_equal (th->ptid, ptid))
+    if (th->ptid.pid () == pid && th->ptid != ptid)
       delete_thread (th);
 
   /* We also need to clear any left over stale state for the
@@ -2176,7 +2176,7 @@ infrun_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
 {
   struct displaced_step_inferior_state *displaced;
 
-  if (ptid_equal (inferior_ptid, old_ptid))
+  if (inferior_ptid == old_ptid)
     inferior_ptid = new_ptid;
 }
 
@@ -2883,7 +2883,7 @@ clear_proceed_status (int step)
 	}
     }
 
-  if (!ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid != null_ptid)
     {
       struct inferior *inferior;
 
@@ -3336,7 +3336,7 @@ infrun_thread_stop_requested (ptid_t ptid)
 static void
 infrun_thread_thread_exit (struct thread_info *tp, int silent)
 {
-  if (ptid_equal (target_last_wait_ptid, tp->ptid))
+  if (target_last_wait_ptid == tp->ptid)
     nullify_last_target_wait_ptid ();
 }
 
@@ -3361,7 +3361,7 @@ typedef void (*for_each_just_stopped_thread_callback_func)
 static void
 for_each_just_stopped_thread (for_each_just_stopped_thread_callback_func func)
 {
-  if (!target_has_execution || ptid_equal (inferior_ptid, null_ptid))
+  if (!target_has_execution || inferior_ptid == null_ptid)
     return;
 
   if (target_is_non_stop_p ())
@@ -3493,7 +3493,7 @@ do_target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
 
   /* First check if there is a resumed thread with a wait status
      pending.  */
-  if (ptid_equal (ptid, minus_one_ptid) || ptid.is_pid ())
+  if (ptid == minus_one_ptid || ptid.is_pid ())
     {
       tp = random_pending_event_thread (ptid);
     }
@@ -5735,7 +5735,7 @@ handle_signal_stop (struct execution_control_state *ecs)
 
   /* See if something interesting happened to the non-current thread.  If
      so, then switch to that thread.  */
-  if (!ptid_equal (ecs->ptid, inferior_ptid))
+  if (ecs->ptid != inferior_ptid)
     {
       if (debug_infrun)
 	fprintf_unfiltered (gdb_stdlog, "infrun: context switch\n");
@@ -7673,7 +7673,7 @@ stop_waiting (struct execution_control_state *ecs)
 static void
 keep_going_pass_signal (struct execution_control_state *ecs)
 {
-  gdb_assert (ptid_equal (ecs->event_thread->ptid, inferior_ptid));
+  gdb_assert (ecs->event_thread->ptid == inferior_ptid);
   gdb_assert (!ecs->event_thread->resumed);
 
   /* Save the pc before execution, to compare with pc after stop.  */
@@ -8125,7 +8125,7 @@ save_stop_context (void)
   sc->ptid = inferior_ptid;
   sc->inf_num = current_inferior ()->num;
 
-  if (!ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid != null_ptid)
     {
       /* Take a strong reference so that the thread can't be deleted
 	 yet.  */
@@ -8157,7 +8157,7 @@ release_stop_context_cleanup (void *arg)
 static int
 stop_context_changed (struct stop_context *prev)
 {
-  if (!ptid_equal (prev->ptid, inferior_ptid))
+  if (prev->ptid != inferior_ptid)
     return 1;
   if (prev->inf_num != current_inferior ()->num)
     return 1;
@@ -8338,7 +8338,7 @@ normal_stop (void)
 
   /* Notify observers about the stop.  This is where the interpreters
      print the stop event.  */
-  if (!ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid != null_ptid)
     gdb::observers::normal_stop.notify (inferior_thread ()->control.stop_bpstat,
 				 stop_print_frame);
   else
@@ -8790,7 +8790,7 @@ siginfo_make_value (struct gdbarch *gdbarch, struct internalvar *var,
 		    void *ignore)
 {
   if (target_has_stack
-      && !ptid_equal (inferior_ptid, null_ptid)
+      && inferior_ptid != null_ptid
       && gdbarch_get_siginfo_type_p (gdbarch))
     {
       struct type *type = gdbarch_get_siginfo_type (gdbarch);

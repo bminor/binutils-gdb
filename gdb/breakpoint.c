@@ -1546,8 +1546,8 @@ static int
 watchpoint_in_thread_scope (struct watchpoint *b)
 {
   return (b->pspace == current_program_space
-	  && (ptid_equal (b->watchpoint_thread, null_ptid)
-	      || (ptid_equal (inferior_ptid, b->watchpoint_thread)
+	  && (b->watchpoint_thread == null_ptid
+	      || (inferior_ptid == b->watchpoint_thread
 		  && !inferior_thread ()->executing)));
 }
 
@@ -2904,7 +2904,7 @@ update_inserted_breakpoint_locations (void)
 	 if we aren't attached to any process yet, we should still
 	 insert breakpoints.  */
       if (!gdbarch_has_global_breakpoints (target_gdbarch ())
-	  && ptid_equal (inferior_ptid, null_ptid))
+	  && inferior_ptid == null_ptid)
 	continue;
 
       val = insert_bp_location (bl, &tmp_error_stream, &disabled_breaks,
@@ -2960,7 +2960,7 @@ insert_breakpoint_locations (void)
 	 if we aren't attached to any process yet, we should still
 	 insert breakpoints.  */
       if (!gdbarch_has_global_breakpoints (target_gdbarch ())
-	  && ptid_equal (inferior_ptid, null_ptid))
+	  && inferior_ptid == null_ptid)
 	continue;
 
       val = insert_bp_location (bl, &tmp_error_stream, &disabled_breaks,
@@ -4346,7 +4346,7 @@ bpstat_clear_actions (void)
 static void
 breakpoint_about_to_proceed (void)
 {
-  if (!ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid != null_ptid)
     {
       struct thread_info *tp = inferior_thread ();
 
@@ -7785,7 +7785,7 @@ print_one_catch_fork (struct breakpoint *b, struct bp_location **last_loc)
     uiout->field_skip ("addr");
   annotate_field (5);
   uiout->text ("fork");
-  if (!ptid_equal (c->forked_inferior_pid, null_ptid))
+  if (c->forked_inferior_pid != null_ptid)
     {
       uiout->text (", process ");
       uiout->field_int ("what", c->forked_inferior_pid.pid ());
@@ -7900,7 +7900,7 @@ print_one_catch_vfork (struct breakpoint *b, struct bp_location **last_loc)
     uiout->field_skip ("addr");
   annotate_field (5);
   uiout->text ("vfork");
-  if (!ptid_equal (c->forked_inferior_pid, null_ptid))
+  if (c->forked_inferior_pid != null_ptid)
     {
       uiout->text (", process ");
       uiout->field_int ("what", c->forked_inferior_pid.pid ());

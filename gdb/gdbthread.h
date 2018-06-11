@@ -217,7 +217,7 @@ public:
   {
     /* If this is the current thread, or there's code out there that
        relies on it existing (refcount > 0) we can't delete yet.  */
-    return (refcount () == 0 && !ptid_equal (ptid, inferior_ptid));
+    return (refcount () == 0 && ptid != inferior_ptid);
   }
 
   /* Mark this thread as running and notify observers.  */

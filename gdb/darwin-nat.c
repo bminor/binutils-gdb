@@ -942,7 +942,7 @@ darwin_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
     ptid = inferior_ptid;
 
   /* minus_one_ptid is RESUME_ALL.  */
-  if (ptid_equal (ptid, minus_one_ptid))
+  if (ptid == minus_one_ptid)
     {
       struct resume_inferior_threads_param param;
 
@@ -1244,7 +1244,7 @@ darwin_wait (ptid_t ptid, struct target_waitstatus *status)
 	darwin_dump_message (hdr, darwin_debug_flag > 11);
 
       res = darwin_decode_message (hdr, &thread, &inf, status);
-      if (ptid_equal (res, minus_one_ptid))
+      if (res == minus_one_ptid)
 	continue;
 
       /* Early return in case an inferior has exited.  */
@@ -1517,7 +1517,7 @@ darwin_nat_target::kill ()
   int status;
   int res;
 
-  if (ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid == null_ptid)
     return;
 
   gdb_assert (inf != NULL);
@@ -2223,7 +2223,7 @@ static void
 set_enable_mach_exceptions (const char *args, int from_tty,
 			    struct cmd_list_element *c)
 {
-  if (!ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid != null_ptid)
     {
       struct inferior *inf = current_inferior ();
       darwin_inferior *priv = get_darwin_inferior (inf);

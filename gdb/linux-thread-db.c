@@ -1792,7 +1792,7 @@ thread_db_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 {
   struct thread_db_info *info;
 
-  if (ptid_equal (ptid, minus_one_ptid))
+  if (ptid == minus_one_ptid)
     info = get_thread_db_info (inferior_ptid.pid ());
   else
     info = get_thread_db_info (ptid.pid ());

@@ -1089,7 +1089,7 @@ fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
   pid_t pid;
 
   /* Don't PT_CONTINUE a process which has a pending vfork done event.  */
-  if (ptid_equal (minus_one_ptid, ptid))
+  if (minus_one_ptid == ptid)
     pid = inferior_ptid.pid ();
   else
     pid = ptid.pid ();
@@ -1236,7 +1236,7 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
     {
 #ifndef PTRACE_VFORK
       wptid = fbsd_next_vfork_done ();
-      if (!ptid_equal (wptid, null_ptid))
+      if (wptid != null_ptid)
 	{
 	  ourstatus->kind = TARGET_WAITKIND_VFORK_DONE;
 	  return wptid;
@@ -1345,7 +1345,7 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
 	      /* Make sure the other end of the fork is stopped too.  */
 	      child_ptid = fbsd_is_child_pending (child);
-	      if (ptid_equal (child_ptid, null_ptid))
+	      if (child_ptid == null_ptid)
 		{
 		  pid = waitpid (child, &status, 0);
 		  if (pid == -1)

@@ -778,7 +778,7 @@ dtrace_probe::enable ()
 
   /* Enabling a dtrace probe implies patching the text section of the
      running process, so make sure the inferior is indeed running.  */
-  if (ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid == null_ptid)
     error (_("No inferior running"));
 
   /* Fast path.  */
@@ -802,7 +802,7 @@ dtrace_probe::disable ()
 
   /* Disabling a dtrace probe implies patching the text section of the
      running process, so make sure the inferior is indeed running.  */
-  if (ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid == null_ptid)
     error (_("No inferior running"));
 
   /* Fast path.  */

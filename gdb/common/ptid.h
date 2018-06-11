@@ -152,12 +152,4 @@ extern ptid_t null_ptid;
 
 extern ptid_t minus_one_ptid;
 
-
-/* The following functions are kept for backwards compatibility.  The use of
-   the ptid_t methods is preferred.  */
-
-/* See ptid_t::operator== and ptid_t::operator!=.  */
-
-extern int ptid_equal (const ptid_t &ptid1, const ptid_t &ptid2);
-
 #endif

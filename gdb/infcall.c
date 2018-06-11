@@ -1271,7 +1271,7 @@ When the function is done executing, GDB will silently stop."),
 	     name);
     }
 
-  if (! ptid_equal (call_thread_ptid, inferior_ptid))
+  if (call_thread_ptid != inferior_ptid)
     {
       const char *name = get_function_name (funaddr,
 					    name_buf, sizeof (name_buf));

@@ -2635,7 +2635,7 @@ linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
 
   /* Check for a lwp with a pending status.  */
 
-  if (ptid_equal (filter_ptid, minus_one_ptid) || filter_ptid.is_pid ())
+  if (filter_ptid == minus_one_ptid || filter_ptid.is_pid ())
     {
       event_thread = find_thread_in_random ([&] (thread_info *thread)
 	{
@@ -2647,7 +2647,7 @@ linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
       if (debug_threads && event_thread)
 	debug_printf ("Got a pending child %ld\n", lwpid_of (event_thread));
     }
-  else if (!ptid_equal (filter_ptid, null_ptid))
+  else if (filter_ptid != null_ptid)
     {
       requested_child = find_lwp_pid (filter_ptid);
 
@@ -3159,7 +3159,7 @@ linux_wait_1 (ptid_t ptid,
   else
     any_resumed = 0;
 
-  if (ptid_equal (step_over_bkpt, null_ptid))
+  if (step_over_bkpt == null_ptid)
     pid = linux_wait_for_event (ptid, &w, options);
   else
     {
@@ -3248,7 +3248,7 @@ linux_wait_1 (ptid_t ptid,
      if it's not the single_step_breakpoint we are hitting.
      This avoids that a program would keep trapping a permanent breakpoint
      forever.  */
-  if (!ptid_equal (step_over_bkpt, null_ptid)
+  if (step_over_bkpt != null_ptid
       && event_child->stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT
       && (event_child->stepping
 	  || !single_step_breakpoint_inserted_here (event_child->stop_pc)))
@@ -3736,7 +3736,7 @@ linux_wait_1 (ptid_t ptid,
 	 from among those that have had events.  Giving equal priority
 	 to all LWPs that have had events helps prevent
 	 starvation.  */
-      if (ptid_equal (ptid, minus_one_ptid))
+      if (ptid == minus_one_ptid)
 	{
 	  event_child->status_pending_p = 1;
 	  event_child->status_pending = w;
@@ -3827,7 +3827,7 @@ linux_wait_1 (ptid_t ptid,
       ourstatus->value.sig = gdb_signal_from_host (WSTOPSIG (w));
     }
 
-  gdb_assert (ptid_equal (step_over_bkpt, null_ptid));
+  gdb_assert (step_over_bkpt == null_ptid);
 
   if (debug_threads)
     {
@@ -3886,14 +3886,14 @@ linux_wait (ptid_t ptid,
       event_ptid = linux_wait_1 (ptid, ourstatus, target_options);
     }
   while ((target_options & TARGET_WNOHANG) == 0
-	 && ptid_equal (event_ptid, null_ptid)
+	 && event_ptid == null_ptid
 	 && ourstatus->kind == TARGET_WAITKIND_IGNORE);
 
   /* If at least one stop was reported, there may be more.  A single
      SIGCHLD can signal more than one child stop.  */
   if (target_is_async_p ()
       && (target_options & TARGET_WNOHANG) != 0
-      && !ptid_equal (event_ptid, null_ptid))
+      && event_ptid != null_ptid)
     async_file_mark ();
 
   return event_ptid;
@@ -4542,7 +4542,7 @@ linux_set_resume_request (thread_info *thread, thread_resume *resume, size_t n)
   for (int ndx = 0; ndx < n; ndx++)
     {
       ptid_t ptid = resume[ndx].thread;
-      if (ptid_equal (ptid, minus_one_ptid)
+      if (ptid == minus_one_ptid
 	  || ptid == thread->id
 	  /* Handle both 'pPID' and 'pPID.-1' as meaning 'all threads
 	     of PID'.  */
@@ -4899,7 +4899,7 @@ finish_step_over (struct lwp_info *lwp)
 static void
 complete_ongoing_step_over (void)
 {
-  if (!ptid_equal (step_over_bkpt, null_ptid))
+  if (step_over_bkpt != null_ptid)
     {
       struct lwp_info *lwp;
       int wstat;

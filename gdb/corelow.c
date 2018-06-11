@@ -444,7 +444,7 @@ core_target_open (const char *arg, int from_tty)
   bfd_map_over_sections (core_bfd, add_to_thread_list,
 			 bfd_get_section_by_name (core_bfd, ".reg"));
 
-  if (ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid == null_ptid)
     {
       /* Either we found no .reg/NN section, and hence we have a
 	 non-threaded core (single-threaded, from gdb's perspective),

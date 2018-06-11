@@ -94,8 +94,8 @@ nto_set_thread (ptid_t ptid)
   TRACE ("%s pid: %d tid: %ld\n", __func__, ptid.pid (),
 	 ptid.lwp ());
   if (nto_inferior.ctl_fd != -1
-      && !ptid_equal (ptid, null_ptid)
-      && !ptid_equal (ptid, minus_one_ptid))
+      && ptid != null_ptid
+      && ptid != minus_one_ptid)
     {
       pthread_t tid = ptid.lwp ();
 

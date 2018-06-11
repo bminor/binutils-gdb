@@ -1690,7 +1690,7 @@ linux_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 			target_pid_to_str (inferior_ptid));
 
   /* A specific PTID means `step only this process id'.  */
-  resume_many = (ptid_equal (minus_one_ptid, ptid)
+  resume_many = (minus_one_ptid == ptid
 		 || ptid.is_pid ());
 
   /* Mark the lwps we're resuming as resumed.  */
@@ -3389,7 +3389,7 @@ linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
   /* If we're not waiting for a specific LWP, choose an event LWP from
      among those that have had events.  Giving equal priority to all
      LWPs that have had events helps prevent starvation.  */
-  if (ptid_equal (ptid, minus_one_ptid) || ptid.is_pid ())
+  if (ptid == minus_one_ptid || ptid.is_pid ())
     select_event_lwp (ptid, &lp, &status);
 
   gdb_assert (lp != NULL);
@@ -3583,7 +3583,7 @@ linux_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
   if (target_is_async_p ()
       && ((ourstatus->kind != TARGET_WAITKIND_IGNORE
 	   && ourstatus->kind != TARGET_WAITKIND_NO_RESUMED)
-	  || !ptid_equal (ptid, minus_one_ptid)))
+	  || ptid != minus_one_ptid))
     async_file_mark ();
 
   return event_ptid;
@@ -3857,7 +3857,7 @@ linux_nat_target::xfer_partial (enum target_object object,
   /* The target is connected but no live inferior is selected.  Pass
      this request down to a lower stratum (e.g., the executable
      file).  */
-  if (object == TARGET_OBJECT_MEMORY && ptid_equal (inferior_ptid, null_ptid))
+  if (object == TARGET_OBJECT_MEMORY && inferior_ptid == null_ptid)
     return TARGET_XFER_EOF;
 
   if (object == TARGET_OBJECT_AUXV)

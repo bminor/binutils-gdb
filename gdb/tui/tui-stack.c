@@ -72,7 +72,7 @@ tui_make_status_line (struct tui_locator_element *loc)
   int pid_width;
   int line_width;
 
-  if (ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid == null_ptid)
     pid_name = "No process";
   else
     pid_name = target_pid_to_str (inferior_ptid);

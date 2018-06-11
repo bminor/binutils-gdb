@@ -342,14 +342,14 @@ lynx_resume (struct thread_resume *resume_info, size_t n)
      LynxOS 178 is a little more sensitive, and triggers some
      unexpected signals (Eg SIG61) when we resume the inferior
      using a different thread.  */
-  if (ptid_equal (ptid, minus_one_ptid))
+  if (ptid == minus_one_ptid)
     ptid = current_process()->priv->last_wait_event_ptid;
 
   /* The ptid might still be minus_one_ptid; this can happen between
      the moment we create the inferior or attach to a process, and
      the moment we resume its execution for the first time.  It is
      fine to use the current_thread's ptid in those cases.  */
-  if (ptid_equal (ptid, minus_one_ptid))
+  if (ptid == minus_one_ptid)
     ptid = ptid_of (current_thread);
 
   regcache_invalidate_pid (ptid.pid ());
@@ -422,7 +422,7 @@ lynx_wait_1 (ptid_t ptid, struct target_waitstatus *status, int options)
   int wstat;
   ptid_t new_ptid;
 
-  if (ptid_equal (ptid, minus_one_ptid))
+  if (ptid == minus_one_ptid)
     pid = lynx_ptid_get_pid (ptid_of (current_thread));
   else
     pid = BUILDPID (lynx_ptid_get_pid (ptid), lynx_ptid_get_tid (ptid));

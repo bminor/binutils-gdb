@@ -341,7 +341,7 @@ inf_ptrace_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
   pid_t pid;
   int request;
 
-  if (ptid_equal (minus_one_ptid, ptid))
+  if (minus_one_ptid == ptid)
     /* Resume all threads.  Traditionally ptrace() only supports
        single-threaded processes, so simply resume the inferior.  */
     pid = inferior_ptid.pid ();

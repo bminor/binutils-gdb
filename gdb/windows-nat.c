@@ -1385,7 +1385,7 @@ windows_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
   DWORD continue_status = DBG_CONTINUE;
 
   /* A specific PTID means `step only this thread id'.  */
-  int resume_all = ptid_equal (ptid, minus_one_ptid);
+  int resume_all = ptid == minus_one_ptid;
 
   /* If we're continuing all threads, it's the current inferior that
      should be handled specially.  */

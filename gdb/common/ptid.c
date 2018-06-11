@@ -24,11 +24,3 @@
 
 ptid_t null_ptid = ptid_t::make_null ();
 ptid_t minus_one_ptid = ptid_t::make_minus_one ();
-
-/* See ptid.h.  */
-
-int
-ptid_equal (const ptid_t &ptid1, const ptid_t &ptid2)
-{
-  return ptid1 == ptid2;
-}

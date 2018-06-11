@@ -1269,7 +1269,7 @@ ppc_linux_spe_context (int wordsize, enum bfd_endian byte_order,
     return 0;
 
   /* Look up cached address of thread-local variable.  */
-  if (!ptid_equal (spe_context_cache_ptid, inferior_ptid))
+  if (spe_context_cache_ptid != inferior_ptid)
     {
       struct target_ops *target = current_top_target ();
 

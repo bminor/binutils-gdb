@@ -989,7 +989,7 @@ go32_nat_target::pass_ctrlc ()
 bool
 go32_nat_target::thread_alive (ptid_t ptid)
 {
-  return !ptid_equal (ptid, null_ptid);
+  return ptid != null_ptid;
 }
 
 const char *

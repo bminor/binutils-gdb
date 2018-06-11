@@ -314,9 +314,9 @@ target_pid_to_str (ptid_t ptid)
 {
   static char buf[80];
 
-  if (ptid_equal (ptid, minus_one_ptid))
+  if (ptid == minus_one_ptid)
     xsnprintf (buf, sizeof (buf), "<all threads>");
-  else if (ptid_equal (ptid, null_ptid))
+  else if (ptid == null_ptid)
     xsnprintf (buf, sizeof (buf), "<null thread>");
   else if (ptid.tid () != 0)
     xsnprintf (buf, sizeof (buf), "Thread %d.0x%lx",

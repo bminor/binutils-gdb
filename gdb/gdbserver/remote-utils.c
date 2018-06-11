@@ -1222,7 +1222,7 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 	       in GDB will claim this event belongs to inferior_ptid
 	       if we do not specify a thread, and there's no way for
 	       gdbserver to know what inferior_ptid is.  */
-	    if (1 || !ptid_equal (cs.general_thread, ptid))
+	    if (1 || cs.general_thread != ptid)
 	      {
 		int core = -1;
 		/* In non-stop, don't change the general thread behind

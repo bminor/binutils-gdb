@@ -914,7 +914,7 @@ win32_resume (struct thread_resume *resume_info, size_t n)
   /* This handles the very limited set of resume packets that GDB can
      currently produce.  */
 
-  if (n == 1 && ptid_equal (resume_info[0].thread, minus_one_ptid))
+  if (n == 1 && resume_info[0].thread == minus_one_ptid)
     tid = -1;
   else if (n > 1)
     tid = -1;
@@ -923,7 +923,7 @@ win32_resume (struct thread_resume *resume_info, size_t n)
        the Windows resume code do the right thing for thread switching.  */
     tid = current_event.dwThreadId;
 
-  if (!ptid_equal (resume_info[0].thread, minus_one_ptid))
+  if (resume_info[0].thread != minus_one_ptid)
     {
       sig = gdb_signal_from_host (resume_info[0].sig);
       step = resume_info[0].kind == resume_step;

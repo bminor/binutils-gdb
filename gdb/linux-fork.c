@@ -144,7 +144,7 @@ delete_fork (ptid_t ptid)
   linux_target->low_forget_process (ptid.pid ());
 
   for (fp = fork_list; fp; fpprev = fp, fp = fp->next)
-    if (ptid_equal (fp->ptid, ptid))
+    if (fp->ptid == ptid)
       break;
 
   if (!fp)
@@ -162,7 +162,7 @@ delete_fork (ptid_t ptid)
      remove it, leaving the list empty -- we're now down to the
      default case of debugging a single process.  */
   if (fork_list != NULL && fork_list->next == NULL &&
-      ptid_equal (fork_list->ptid, inferior_ptid))
+      fork_list->ptid == inferior_ptid)
     {
       /* Last fork -- delete from list and handle as solo process
 	 (should be a safe recursion).  */
@@ -177,7 +177,7 @@ find_fork_ptid (ptid_t ptid)
   struct fork_info *fp;
 
   for (fp = fork_list; fp; fp = fp->next)
-    if (ptid_equal (fp->ptid, ptid))
+    if (fp->ptid == ptid)
       return fp;
 
   return NULL;
@@ -462,7 +462,7 @@ inferior_call_waitpid (ptid_t pptid, int pid)
   struct cleanup *old_cleanup;
   int ret = -1;
 
-  if (!ptid_equal (pptid, inferior_ptid))
+  if (pptid != inferior_ptid)
     {
       /* Switch to pptid.  */
       oldfp = find_fork_ptid (inferior_ptid);
@@ -515,10 +515,10 @@ delete_checkpoint_command (const char *args, int from_tty)
     error (_("Requires argument (checkpoint id to delete)"));
 
   ptid = fork_id_to_ptid (parse_and_eval_long (args));
-  if (ptid_equal (ptid, minus_one_ptid))
+  if (ptid == minus_one_ptid)
     error (_("No such checkpoint id, %s"), args);
 
-  if (ptid_equal (ptid, inferior_ptid))
+  if (ptid == inferior_ptid)
     error (_("\
 Please switch to another checkpoint before deleting the current one"));
 
@@ -556,10 +556,10 @@ detach_checkpoint_command (const char *args, int from_tty)
     error (_("Requires argument (checkpoint id to detach)"));
 
   ptid = fork_id_to_ptid (parse_and_eval_long (args));
-  if (ptid_equal (ptid, minus_one_ptid))
+  if (ptid == minus_one_ptid)
     error (_("No such checkpoint id, %s"), args);
 
-  if (ptid_equal (ptid, inferior_ptid))
+  if (ptid == inferior_ptid)
     error (_("\
 Please switch to another checkpoint before detaching the current one"));
 
@@ -593,7 +593,7 @@ info_checkpoints_command (const char *arg, int from_tty)
 	continue;
 
       printed = fp;
-      if (ptid_equal (fp->ptid, inferior_ptid))
+      if (fp->ptid == inferior_ptid)
 	printf_filtered ("* ");
       else
 	printf_filtered ("  ");

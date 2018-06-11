@@ -234,7 +234,7 @@ agent_run_command (int pid, const char *cmd, int len)
     return -1;
 
   /* Need to read response with the inferior stopped.  */
-  if (!ptid_equal (ptid, null_ptid))
+  if (ptid != null_ptid)
     {
       /* Stop thread PTID.  */
       DEBUG_AGENT ("agent: stop helper thread\n");

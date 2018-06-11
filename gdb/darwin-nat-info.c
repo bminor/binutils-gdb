@@ -116,7 +116,7 @@ get_task_from_args (const char *args)
 
   if (args == NULL || *args == 0)
     {
-      if (ptid_equal (inferior_ptid, null_ptid))
+      if (inferior_ptid == null_ptid)
 	printf_unfiltered (_("No inferior running\n"));
 
       darwin_inferior *priv = get_darwin_inferior (current_inferior ());
@@ -257,7 +257,7 @@ info_mach_ports_command (const char *args, int from_tty)
 	    printf_unfiltered (_(" gdb-exception"));
 	  else if (port == darwin_port_set)
 	    printf_unfiltered (_(" gdb-port_set"));
-	  else if (!ptid_equal (inferior_ptid, null_ptid))
+	  else if (inferior_ptid != null_ptid)
 	    {
 	      struct inferior *inf = current_inferior ();
 	      darwin_inferior *priv = get_darwin_inferior (inf);
@@ -731,7 +731,7 @@ info_mach_region_command (const char *exp, int from_tty)
     }
   address = value_as_address (val);
 
-  if (ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid == null_ptid)
     error (_("Inferior not available"));
 
   inf = current_inferior ();
@@ -803,7 +803,7 @@ info_mach_exceptions_command (const char *args, int from_tty)
     {
       if (strcmp (args, "saved") == 0)
 	{
-	  if (ptid_equal (inferior_ptid, null_ptid))
+	  if (inferior_ptid == null_ptid)
 	    printf_unfiltered (_("No inferior running\n"));
 
 	  darwin_inferior *priv = get_darwin_inferior (current_inferior ());
@@ -827,7 +827,7 @@ info_mach_exceptions_command (const char *args, int from_tty)
     {
       struct inferior *inf;
 
-      if (ptid_equal (inferior_ptid, null_ptid))
+      if (inferior_ptid == null_ptid)
 	printf_unfiltered (_("No inferior running\n"));
       inf = current_inferior ();
       

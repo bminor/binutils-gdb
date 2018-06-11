@@ -472,7 +472,7 @@ dcache_read_memory_partial (struct target_ops *ops, DCACHE *dcache,
   /* If this is a different inferior from what we've recorded,
      flush the cache.  */
 
-  if (! ptid_equal (inferior_ptid, dcache->ptid))
+  if (inferior_ptid != dcache->ptid)
     {
       dcache_invalidate (dcache);
       dcache->ptid = inferior_ptid;
@@ -608,7 +608,7 @@ dcache_info_1 (DCACHE *dcache, const char *exp)
 		   dcache ? (unsigned) dcache->line_size
 		   : dcache_line_size);
 
-  if (dcache == NULL || ptid_equal (dcache->ptid, null_ptid))
+  if (dcache == NULL || dcache->ptid == null_ptid)
     {
       printf_filtered (_("No data cache available.\n"));
       return;

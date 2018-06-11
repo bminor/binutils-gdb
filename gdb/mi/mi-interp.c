@@ -684,7 +684,7 @@ mi_about_to_proceed (void)
 {
   /* Suppress output while calling an inferior function.  */
 
-  if (!ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid != null_ptid)
     {
       struct thread_info *tp = inferior_thread ();
 
@@ -1023,7 +1023,7 @@ mi_on_resume (ptid_t ptid)
 {
   struct thread_info *tp = NULL;
 
-  if (ptid_equal (ptid, minus_one_ptid) || ptid.is_pid ())
+  if (ptid == minus_one_ptid || ptid.is_pid ())
     tp = inferior_thread ();
   else
     tp = find_thread_ptid (ptid);

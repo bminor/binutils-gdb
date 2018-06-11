@@ -1,5 +1,53 @@
 2018-07-03  Tom Tromey  <tom@tromey.com>
 
+	* common/ptid.c (ptid_equal): Remove.
+	* common/ptid.h (ptid_equal): Don't declare.
+	* ada-tasks.c: Update.
+	* breakpoint.c: Update.
+	* common/agent.c: Update.
+	* corelow.c: Update.
+	* darwin-nat-info.c: Update.
+	* darwin-nat.c: Update.
+	* dcache.c: Update.
+	* dtrace-probe.c: Update.
+	* dummy-frame.c: Update.
+	* fbsd-nat.c: Update.
+	* frame.c: Update.
+	* gdbthread.h: Update.
+	* gnu-nat.c: Update.
+	* go32-nat.c: Update.
+	* inf-loop.c: Update.
+	* inf-ptrace.c: Update.
+	* infcall.c: Update.
+	* infcmd.c: Update.
+	* inflow.c: Update.
+	* infrun.c: Update.
+	* linux-fork.c: Update.
+	* linux-nat.c: Update.
+	* linux-thread-db.c: Update.
+	* mi/mi-cmd-var.c: Update.
+	* mi/mi-interp.c: Update.
+	* mi/mi-main.c: Update.
+	* nto-procfs.c: Update.
+	* ppc-linux-tdep.c: Update.
+	* procfs.c: Update.
+	* python/py-inferior.c: Update.
+	* python/py-record-btrace.c: Update.
+	* python/py-record.c: Update.
+	* ravenscar-thread.c: Update.
+	* regcache.c: Update.
+	* remote-sim.c: Update.
+	* remote.c: Update.
+	* sol-thread.c: Update.
+	* solib.c: Update.
+	* target.c: Update.
+	* tui/tui-stack.c: Update.
+	* varobj.c: Update.
+	* windows-nat.c: Update.
+	* windows-tdep.c: Update.
+
+2018-07-03  Tom Tromey  <tom@tromey.com>
+
 	* common/ptid.c (ptid_match): Remove.
 	* common/ptid.h (ptid_match): Don't declare.
 	* fbsd-nat.c: Update.

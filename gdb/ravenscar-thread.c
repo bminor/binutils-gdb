@@ -193,7 +193,7 @@ ravenscar_task_is_currently_active (ptid_t ptid)
   ptid_t active_task_ptid
     = ravenscar_active_task (ravenscar_get_thread_base_cpu (ptid));
 
-  return ptid_equal (ptid, active_task_ptid);
+  return ptid == active_task_ptid;
 }
 
 /* Return the CPU thread (as a ptid_t) on which the given ravenscar
@@ -235,7 +235,7 @@ ravenscar_update_inferior_ptid (void)
   /* Make sure we set base_ptid before calling ravenscar_active_task
      as the latter relies on it.  */
   inferior_ptid = ravenscar_active_task (base_cpu);
-  gdb_assert (!ptid_equal (inferior_ptid, null_ptid));
+  gdb_assert (inferior_ptid != null_ptid);
 
   /* The running thread may not have been added to
      system.tasking.debug's list yet; so ravenscar_update_thread_list
@@ -291,7 +291,7 @@ has_ravenscar_runtime (void)
 static int
 ravenscar_runtime_initialized (void)
 {
-  return (!(ptid_equal (ravenscar_active_task (1), null_ptid)));
+  return (!(ravenscar_active_task (1) == null_ptid));
 }
 
 /* Return the ID of the thread that is currently running.

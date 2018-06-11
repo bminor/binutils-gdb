@@ -1336,7 +1336,7 @@ proc_set_current_signal (procinfo *pi, int signo)
 
   /* The pointer is just a type alias.  */
   get_last_target_status (&wait_ptid, &wait_status);
-  if (ptid_equal (wait_ptid, inferior_ptid)
+  if (wait_ptid == inferior_ptid
       && wait_status.kind == TARGET_WAITKIND_STOPPED
       && wait_status.value.sig == gdb_signal_from_host (signo)
       && proc_get_status (pi)
@@ -2525,7 +2525,7 @@ wait_again:
 	      /* Got this far without error: If retval isn't in the
 		 threads database, add it.  */
 	      if (retval.pid () > 0 &&
-		  !ptid_equal (retval, inferior_ptid) &&
+		  retval != inferior_ptid &&
 		  !in_thread_list (retval))
 		{
 		  /* We have a new thread.  We need to add it both to
@@ -2852,7 +2852,7 @@ unconditionally_kill_inferior (procinfo *pi)
 void
 procfs_target::kill ()
 {
-  if (!ptid_equal (inferior_ptid, null_ptid)) /* ? */
+  if (inferior_ptid != null_ptid) /* ? */
     {
       /* Find procinfo for main process.  */
       procinfo *pi = find_procinfo (inferior_ptid.pid (), 0);
@@ -2870,7 +2870,7 @@ procfs_target::mourn_inferior ()
 {
   procinfo *pi;
 
-  if (!ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid != null_ptid)
     {
       /* Find procinfo for main process.  */
       pi = find_procinfo (inferior_ptid.pid (), 0);

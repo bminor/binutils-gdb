@@ -441,8 +441,8 @@ handle_btrace_general_set (char *own_buf)
 
   op = own_buf + strlen ("Qbtrace:");
 
-  if (ptid_equal (cs.general_thread, null_ptid)
-      || ptid_equal (cs.general_thread, minus_one_ptid))
+  if (cs.general_thread == null_ptid
+      || cs.general_thread == minus_one_ptid)
     {
       strcpy (own_buf, "E.Must select a single thread.");
       return -1;
@@ -491,8 +491,8 @@ handle_btrace_conf_general_set (char *own_buf)
 
   op = own_buf + strlen ("Qbtrace-conf:");
 
-  if (ptid_equal (cs.general_thread, null_ptid)
-      || ptid_equal (cs.general_thread, minus_one_ptid))
+  if (cs.general_thread == null_ptid
+      || cs.general_thread == minus_one_ptid)
     {
       strcpy (own_buf, "E.Must select a single thread.");
       return -1;
@@ -1829,8 +1829,8 @@ handle_qxfer_btrace (const char *annex,
   if (writebuf != NULL)
     return -2;
 
-  if (ptid_equal (cs.general_thread, null_ptid)
-      || ptid_equal (cs.general_thread, minus_one_ptid))
+  if (cs.general_thread == null_ptid
+      || cs.general_thread == minus_one_ptid)
     {
       strcpy (cs.own_buf, "E.Must select a single thread.");
       return -3;
@@ -1913,8 +1913,8 @@ handle_qxfer_btrace_conf (const char *annex,
   if (annex[0] != '\0')
     return -1;
 
-  if (ptid_equal (cs.general_thread, null_ptid)
-      || ptid_equal (cs.general_thread, minus_one_ptid))
+  if (cs.general_thread == null_ptid
+      || cs.general_thread == minus_one_ptid)
     {
       strcpy (cs.own_buf, "E.Must select a single thread.");
       return -3;
@@ -2696,8 +2696,8 @@ visit_actioned_threads (thread_info *thread,
     {
       const struct thread_resume *action = &actions[i];
 
-      if (ptid_equal (action->thread, minus_one_ptid)
-	  || ptid_equal (action->thread, thread->id)
+      if (action->thread == minus_one_ptid
+	  || action->thread == thread->id
 	  || ((action->thread.pid ()
 	       == thread->id.pid ())
 	      && action->thread.lwp () == -1))
@@ -3199,8 +3199,8 @@ myresume (char *own_buf, int step, int sig)
   int n = 0;
   int valid_cont_thread;
 
-  valid_cont_thread = (!ptid_equal (cs.cont_thread, null_ptid)
-			 && !ptid_equal (cs.cont_thread, minus_one_ptid));
+  valid_cont_thread = (cs.cont_thread != null_ptid
+			 && cs.cont_thread != minus_one_ptid);
 
   if (step || sig || valid_cont_thread)
     {
@@ -4095,7 +4095,7 @@ process_serial_event (void)
 
 	  if (cs.own_buf[1] == 'g')
 	    {
-	      if (ptid_equal (thread_id, null_ptid))
+	      if (thread_id == null_ptid)
 		{
 		  /* GDB is telling us to choose any thread.  Check if
 		     the currently selected thread is still valid. If

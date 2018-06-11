@@ -383,7 +383,7 @@ spu_join (int pid)
 static int
 spu_thread_alive (ptid_t ptid)
 {
-  return ptid_equal (ptid, current_ptid);
+  return ptid == current_ptid;
 }
 
 /* Resume process.  */
@@ -394,8 +394,8 @@ spu_resume (struct thread_resume *resume_info, size_t n)
   size_t i;
 
   for (i = 0; i < n; i++)
-    if (ptid_equal (resume_info[i].thread, minus_one_ptid)
-	|| ptid_equal (resume_info[i].thread, ptid_of (thr)))
+    if (resume_info[i].thread == minus_one_ptid
+	|| resume_info[i].thread == ptid_of (thr))
       break;
 
   if (i == n)

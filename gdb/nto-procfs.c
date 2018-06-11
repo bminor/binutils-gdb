@@ -810,7 +810,7 @@ nto_procfs_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
   ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
 
-  if (ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid == null_ptid)
     {
       ourstatus->kind = TARGET_WAITKIND_STOPPED;
       ourstatus->value.sig = GDB_SIGNAL_0;
@@ -1079,10 +1079,10 @@ nto_procfs_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
   procfs_status status;
   sigset_t *run_fault = (sigset_t *) (void *) &run.fault;
 
-  if (ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid == null_ptid)
     return;
 
-  procfs_set_thread (ptid_equal (ptid, minus_one_ptid) ? inferior_ptid :
+  procfs_set_thread (ptid == minus_one_ptid ? inferior_ptid :
 		     ptid);
 
   run.flags = _DEBUG_RUN_FAULT | _DEBUG_RUN_TRACE;
@@ -1135,7 +1135,7 @@ nto_procfs_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 void
 nto_procfs_target::mourn_inferior ()
 {
-  if (!ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid != null_ptid)
     {
       SignalKill (nto_node (), inferior_ptid.pid (), 0, SIGKILL, 0, 0);
       close (ctl_fd);
@@ -1395,7 +1395,7 @@ nto_procfs_target::store_registers (struct regcache *regcache, int regno)
   char *data;
   ptid_t ptid = regcache->ptid ();
 
-  if (ptid_equal (ptid, null_ptid))
+  if (ptid == null_ptid)
     return;
   procfs_set_thread (ptid);
 

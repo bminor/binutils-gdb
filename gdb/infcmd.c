@@ -508,7 +508,7 @@ post_create_inferior (struct target_ops *target, int from_tty)
 static void
 kill_if_already_running (int from_tty)
 {
-  if (! ptid_equal (inferior_ptid, null_ptid) && target_has_execution)
+  if (inferior_ptid != null_ptid && target_has_execution)
     {
       /* Bail out before killing the program if we will not be able to
 	 restart it.  */
@@ -1349,7 +1349,7 @@ signal_command (const char *signum_exp, int from_tty)
 
       ALL_NON_EXITED_THREADS (tp)
 	{
-	  if (ptid_equal (tp->ptid, inferior_ptid))
+	  if (tp->ptid == inferior_ptid)
 	    continue;
 	  if (!tp->ptid.matches (resume_ptid))
 	    continue;
@@ -2592,7 +2592,7 @@ kill_command (const char *arg, int from_tty)
      It should be a distinct flag that indicates that a target is active, cuz
      some targets don't have processes!  */
 
-  if (ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid == null_ptid)
     error (_("The program is not being run."));
   if (!query (_("Kill the program being debugged? ")))
     error (_("Not confirmed."));
@@ -2999,7 +2999,7 @@ detach_command (const char *args, int from_tty)
 {
   dont_repeat ();		/* Not for the faint of heart.  */
 
-  if (ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid == null_ptid)
     error (_("The program is not being run."));
 
   query_if_trace_running (from_tty);

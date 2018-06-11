@@ -219,7 +219,7 @@ int
 default_child_has_all_memory ()
 {
   /* If no inferior selected, then we can't read memory here.  */
-  if (ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid == null_ptid)
     return 0;
 
   return 1;
@@ -229,7 +229,7 @@ int
 default_child_has_memory ()
 {
   /* If no inferior selected, then we can't read memory here.  */
-  if (ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid == null_ptid)
     return 0;
 
   return 1;
@@ -239,7 +239,7 @@ int
 default_child_has_stack ()
 {
   /* If no inferior selected, there's no stack.  */
-  if (ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid == null_ptid)
     return 0;
 
   return 1;
@@ -249,7 +249,7 @@ int
 default_child_has_registers ()
 {
   /* Can't read registers from no inferior.  */
-  if (ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid == null_ptid)
     return 0;
 
   return 1;
@@ -260,7 +260,7 @@ default_child_has_execution (ptid_t the_ptid)
 {
   /* If there's no thread selected, then we can't make it run through
      hoops.  */
-  if (ptid_equal (the_ptid, null_ptid))
+  if (the_ptid == null_ptid)
     return 0;
 
   return 1;
@@ -1052,7 +1052,7 @@ raw_memory_xfer_partial (struct target_ops *ops, gdb_byte *readbuf,
      first, so that if it fails, we don't write to the cache contents
      that never made it to the target.  */
   if (writebuf != NULL
-      && !ptid_equal (inferior_ptid, null_ptid)
+      && inferior_ptid != null_ptid
       && target_dcache_init_p ()
       && (stack_cache_enabled_p () || code_cache_enabled_p ()))
     {
@@ -1127,7 +1127,7 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 				 &region))
     return TARGET_XFER_E_IO;
 
-  if (!ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid != null_ptid)
     inf = current_inferior ();
   else
     inf = NULL;
@@ -2229,7 +2229,7 @@ default_mourn_inferior (struct target_ops *self)
 void
 target_mourn_inferior (ptid_t ptid)
 {
-  gdb_assert (ptid_equal (ptid, inferior_ptid));
+  gdb_assert (ptid == inferior_ptid);
   current_top_target ()->mourn_inferior ();
 
   /* We no longer need to keep handles on any of the object files.
