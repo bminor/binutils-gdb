@@ -20002,8 +20002,9 @@ MIPS options:\n\
 -mgp32			use 32-bit GPRs, regardless of the chosen ISA\n\
 -mfp32			use 32-bit FPRs, regardless of the chosen ISA\n\
 -msym32			assume all symbols have 32-bit values\n\
--O0			remove unneeded NOPs, do not swap branches\n\
--O			remove unneeded NOPs and swap branches\n\
+-O0			do not remove unneeded NOPs, do not swap branches\n\
+-O, -O1			remove unneeded NOPs, do not swap branches\n\
+-O2			remove unneeded NOPs and swap branches\n\
 --trap, --no-break	trap exception on div by 0 and mult overflow\n\
 --break, --no-trap	break exception on div by 0 and mult overflow\n"));
   fprintf (stream, _("\

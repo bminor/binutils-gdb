@@ -1,3 +1,8 @@
+2018-06-11  Maciej W. Rozycki  <macro@mips.com>
+
+	* config/tc-mips.c (md_show_usage): Correct help text for `-O0'
+	and `-O'.  Mention `-O1'.  Add `-O2' and its description.
+
 2018-06-08  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* config/tc-arm.c (arm_cpus): Add Cortex-A76 entry.
