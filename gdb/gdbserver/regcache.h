@@ -54,6 +54,9 @@ struct regcache : public reg_buffer_common
 
   /* See common/common-regcache.h.  */
   void raw_collect (int regnum, void *buf) const override;
+
+  /* See common/common-regcache.h.  */
+  bool raw_compare (int regnum, const void *buf, int offset) const override;
 };
 
 struct regcache *init_register_cache (struct regcache *regcache,

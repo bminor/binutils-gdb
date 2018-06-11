@@ -502,3 +502,17 @@ regcache::get_register_status (int regnum) const
   return REG_VALID;
 #endif
 }
+
+/* See common/common-regcache.h.  */
+
+bool
+regcache::raw_compare (int regnum, const void *buf, int offset) const
+{
+  gdb_assert (buf != NULL);
+
+  const unsigned char *regbuf = register_data (this, regnum, 1);
+  int size = register_size (tdesc, regnum);
+  gdb_assert (size >= offset);
+
+  return (memcmp (buf, regbuf + offset, size - offset) == 0);
+}

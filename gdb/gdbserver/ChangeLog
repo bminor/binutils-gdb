@@ -1,5 +1,10 @@
 2018-06-11  Alan Hayward  <alan.hayward@arm.com>
 
+	* regcache.c (regcache::raw_compare): New function.
+	* regcache.h (regcache::raw_compare): New declaration.
+
+2018-06-11  Alan Hayward  <alan.hayward@arm.com>
+
 	* regcache.c (new_register_cache): Use new.
 	(free_register_cache): Use delete.
 	(register_data): Use const.

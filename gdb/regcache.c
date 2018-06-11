@@ -1079,6 +1079,20 @@ regcache::collect_regset (const struct regset *regset,
   transfer_regset (regset, NULL, regnum, NULL, buf, size);
 }
 
+/* See common/common-regcache.h.  */
+
+bool
+reg_buffer::raw_compare (int regnum, const void *buf, int offset) const
+{
+  gdb_assert (buf != NULL);
+  assert_regnum (regnum);
+
+  const char *regbuf = (const char *) register_buffer (regnum);
+  size_t size = m_descr->sizeof_register[regnum];
+  gdb_assert (size >= offset);
+
+  return (memcmp (buf, regbuf + offset, size - offset) == 0);
+}
 
 /* Special handling for register PC.  */
 

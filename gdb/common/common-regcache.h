@@ -75,6 +75,11 @@ struct reg_buffer_common
 
   /* Collect register REGNUM from REGCACHE and store its contents in BUF.  */
   virtual void raw_collect (int regnum, void *buf) const = 0;
+
+  /* Compare the contents of the register stored in the regcache (ignoring the
+     first OFFSET bytes) to the contents of BUF (without any offset).  Returns
+     true if the same.  */
+  virtual bool raw_compare (int regnum, const void *buf, int offset) const = 0;
 };
 
 #endif /* COMMON_REGCACHE_H */

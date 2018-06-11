@@ -188,6 +188,9 @@ public:
 
   virtual ~reg_buffer () = default;
 
+  /* See common/common-regcache.h.  */
+  bool raw_compare (int regnum, const void *buf, int offset) const override;
+
 protected:
   /* Assert on the range of REGNUM.  */
   void assert_regnum (int regnum) const;
