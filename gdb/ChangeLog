@@ -1,5 +1,13 @@
 2018-06-11  Alan Hayward  <alan.hayward@arm.com>
 
+	* aarch64-tdep.c (aarch64_dwarf_reg_to_regnum): Add mappings.
+	* aarch64-tdep.h (AARCH64_DWARF_SVE_VG): Add define.
+	(AARCH64_DWARF_SVE_FFR): Likewise.
+	(AARCH64_DWARF_SVE_P0): Likewise.
+	(AARCH64_DWARF_SVE_Z0): Likewise.
+
+2018-06-11  Alan Hayward  <alan.hayward@arm.com>
+
 	* common/common-regcache.h (raw_compare): New function.
 	* regcache.c (regcache::raw_compare): Likewise.
 	* regcache.h (regcache::raw_compare): New declaration.

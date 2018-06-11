@@ -1805,9 +1805,20 @@ aarch64_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
   if (reg >= AARCH64_DWARF_V0 && reg <= AARCH64_DWARF_V0 + 31)
     return AARCH64_V0_REGNUM + reg - AARCH64_DWARF_V0;
 
+  if (reg == AARCH64_DWARF_SVE_VG)
+    return AARCH64_SVE_VG_REGNUM;
+
+  if (reg == AARCH64_DWARF_SVE_FFR)
+    return AARCH64_SVE_FFR_REGNUM;
+
+  if (reg >= AARCH64_DWARF_SVE_P0 && reg <= AARCH64_DWARF_SVE_P0 + 15)
+    return AARCH64_SVE_P0_REGNUM + reg - AARCH64_DWARF_SVE_P0;
+
+  if (reg >= AARCH64_DWARF_SVE_Z0 && reg <= AARCH64_DWARF_SVE_Z0 + 15)
+    return AARCH64_SVE_Z0_REGNUM + reg - AARCH64_DWARF_SVE_Z0;
+
   return -1;
 }
-
 
 /* Implement the "print_insn" gdbarch method.  */
 
