@@ -2600,7 +2600,7 @@ kill_command (const char *arg, int from_tty)
   int pid = current_inferior ()->pid;
   /* Save the pid as a string before killing the inferior, since that
      may unpush the current target, and we need the string after.  */
-  std::string pid_str = target_pid_to_str (pid_to_ptid (pid));
+  std::string pid_str = target_pid_to_str (ptid_t (pid));
   int infnum = current_inferior ()->num;
 
   target_kill ();
@@ -2751,7 +2751,7 @@ attach_post_wait (const char *args, int from_tty, enum attach_post_wait_mode mod
 	 Be sure to explicitly stop all threads of the process.  This
 	 should have no effect on already stopped threads.  */
       if (non_stop)
-	target_stop (pid_to_ptid (inferior->pid));
+	target_stop (ptid_t (inferior->pid));
       else if (target_is_non_stop_p ())
 	{
 	  struct thread_info *thread;
@@ -2897,7 +2897,7 @@ attach_command (const char *args, int from_tty)
       else
 	/* The user requested an `attach', so stop all threads of this
 	   inferior.  */
-	target_stop (pid_to_ptid (ptid_get_pid (inferior_ptid)));
+	target_stop (ptid_t (ptid_get_pid (inferior_ptid)));
     }
 
   mode = async_exec ? ATTACH_POST_WAIT_RESUME : ATTACH_POST_WAIT_STOP;

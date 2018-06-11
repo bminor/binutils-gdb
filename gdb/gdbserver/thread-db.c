@@ -252,7 +252,7 @@ maybe_attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p,
 {
   struct lwp_info *lwp;
 
-  lwp = find_lwp_pid (pid_to_ptid (ti_p->ti_lid));
+  lwp = find_lwp_pid (ptid_t (ti_p->ti_lid));
   if (lwp != NULL)
     return 1;
 

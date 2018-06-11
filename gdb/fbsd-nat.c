@@ -926,7 +926,7 @@ fbsd_add_threads (pid_t pid)
 {
   int i, nlwps;
 
-  gdb_assert (!in_thread_list (pid_to_ptid (pid)));
+  gdb_assert (!in_thread_list (ptid_t (pid)));
   nlwps = ptrace (PT_GETNUMLWPS, pid, NULL, 0);
   if (nlwps == -1)
     perror_with_name (("ptrace"));
@@ -1298,13 +1298,13 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	     PL_FLAG_BORN in case the first stop reported after
 	     attaching to an existing process is a PL_FLAG_BORN
 	     event.  */
-	  if (in_thread_list (pid_to_ptid (pid)))
+	  if (in_thread_list (ptid_t (pid)))
 	    {
 	      if (debug_fbsd_lwp)
 		fprintf_unfiltered (gdb_stdlog,
 				    "FLWP: using LWP %u for first thread\n",
 				    pl.pl_lwpid);
-	      thread_change_ptid (pid_to_ptid (pid), wptid);
+	      thread_change_ptid (ptid_t (pid), wptid);
 	    }
 
 #ifdef PT_LWP_EVENTS

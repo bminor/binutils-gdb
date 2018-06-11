@@ -325,7 +325,7 @@ pid_to_prc (ptid_t *ptidp)
 
   ptid = *ptidp;
   if (PD_TID (ptid))
-    *ptidp = pid_to_ptid (ptid_get_pid (ptid));
+    *ptidp = ptid_t (ptid_get_pid (ptid));
 }
 
 /* pthdb callback: for <i> from 0 to COUNT, set SYMBOLS[<i>].addr to
@@ -1042,7 +1042,7 @@ aix_thread_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
     {
       scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
       
-      inferior_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
+      inferior_ptid = ptid_t (ptid_get_pid (inferior_ptid));
       beneath ()->resume (ptid, step, sig);
     }
   else
@@ -1082,12 +1082,12 @@ aix_thread_target::wait (ptid_t ptid, struct target_waitstatus *status,
 
     pid_to_prc (&ptid);
 
-    inferior_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
+    inferior_ptid = ptid_t (ptid_get_pid (inferior_ptid));
     ptid = beneath ()->wait (ptid, status, options);
   }
 
   if (ptid_get_pid (ptid) == -1)
-    return pid_to_ptid (-1);
+    return ptid_t (-1);
 
   /* Check whether libpthdebug might be ready to be initialized.  */
   if (!pd_active && status->kind == TARGET_WAITKIND_STOPPED
@@ -1722,7 +1722,7 @@ aix_thread_target::xfer_partial (enum target_object object,
 {
   scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
-  inferior_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
+  inferior_ptid = ptid_t (ptid_get_pid (inferior_ptid));
   return beneath ()->xfer_partial (object, annex, readbuf,
 				   writebuf, offset, len, xfered_len);
 }

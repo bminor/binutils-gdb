@@ -307,20 +307,20 @@ thread_to_lwp (ptid_t thread_id, int default_lwp)
 
   val = p_td_ta_map_id2thr (main_ta, ptid_get_tid (thread_id), &th);
   if (val == TD_NOTHR)
-    return pid_to_ptid (-1);	/* Thread must have terminated.  */
+    return ptid_t (-1);	/* Thread must have terminated.  */
   else if (val != TD_OK)
     error (_("thread_to_lwp: td_ta_map_id2thr %s"), td_err_string (val));
 
   val = p_td_thr_get_info (&th, &ti);
   if (val == TD_NOTHR)
-    return pid_to_ptid (-1);	/* Thread must have terminated.  */
+    return ptid_t (-1);	/* Thread must have terminated.  */
   else if (val != TD_OK)
     error (_("thread_to_lwp: td_thr_get_info: %s"), td_err_string (val));
 
   if (ti.ti_state != TD_THR_ACTIVE)
     {
       if (default_lwp != -1)
-	return pid_to_ptid (default_lwp);
+	return ptid_t (default_lwp);
       error (_("thread_to_lwp: thread state not active: %s"),
 	     td_state_string (ti.ti_state));
     }
@@ -346,11 +346,11 @@ lwp_to_thread (ptid_t lwp)
   /* It's an LWP.  Convert it to a thread ID.  */
 
   if (!target_thread_alive (lwp))
-    return pid_to_ptid (-1);	/* Must be a defunct LPW.  */
+    return ptid_t (-1);	/* Must be a defunct LPW.  */
 
   val = p_td_ta_map_lwp2thr (main_ta, ptid_get_lwp (lwp), &th);
   if (val == TD_NOTHR)
-    return pid_to_ptid (-1);	/* Thread must have terminated.  */
+    return ptid_t (-1);	/* Thread must have terminated.  */
   else if (val != TD_OK)
     error (_("lwp_to_thread: td_ta_map_lwp2thr: %s."), td_err_string (val));
 
@@ -362,7 +362,7 @@ lwp_to_thread (ptid_t lwp)
 
   val = p_td_thr_get_info (&th, &ti);
   if (val == TD_NOTHR)
-    return pid_to_ptid (-1);	/* Thread must have terminated.  */
+    return ptid_t (-1);	/* Thread must have terminated.  */
   else if (val != TD_OK)
     error (_("lwp_to_thread: td_thr_get_info: %s."), td_err_string (val));
 
@@ -387,7 +387,7 @@ sol_thread_target::detach (inferior *inf, int from_tty)
   target_ops *beneath = this->beneath ();
 
   sol_thread_active = 0;
-  inferior_ptid = pid_to_ptid (ptid_get_pid (main_ph.ptid));
+  inferior_ptid = ptid_t (ptid_get_pid (main_ph.ptid));
   unpush_target (this);
   beneath->detach (inf, from_tty);
 }

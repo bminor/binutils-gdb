@@ -1160,7 +1160,7 @@ ctf_target_open (const char *dirname, int from_tty)
   push_target (&ctf_ops);
 
   inferior_appeared (current_inferior (), CTF_PID);
-  inferior_ptid = pid_to_ptid (CTF_PID);
+  inferior_ptid = ptid_t (CTF_PID);
   add_thread_silent (inferior_ptid);
 
   merge_uploaded_trace_state_variables (&uploaded_tsvs);

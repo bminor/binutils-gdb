@@ -543,7 +543,7 @@ rs6000_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
   else
     store_waitstatus (ourstatus, status);
 
-  return pid_to_ptid (pid);
+  return ptid_t (pid);
 }
 
 

@@ -484,7 +484,7 @@ startup_inferior (pid_t pid, int ntraps,
     }
 
   if (target_supports_multi_process ())
-    resume_ptid = pid_to_ptid (pid);
+    resume_ptid = ptid_t (pid);
   else
     resume_ptid = minus_one_ptid;
 

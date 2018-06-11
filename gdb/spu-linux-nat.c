@@ -503,7 +503,7 @@ spu_linux_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
     }
 
   store_waitstatus (ourstatus, status);
-  return pid_to_ptid (pid);
+  return ptid_t (pid);
 }
 
 /* Override the fetch_inferior_register routine.  */

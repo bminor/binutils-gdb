@@ -707,7 +707,7 @@ win32_create_inferior (const char *program,
 
   /* Wait till we are at 1st instruction in program, return new pid
      (assuming success).  */
-  cs.last_ptid = win32_wait (pid_to_ptid (current_process_id), &cs.last_status, 0);
+  cs.last_ptid = win32_wait (ptid_t (current_process_id), &cs.last_status, 0);
 
   return current_process_id;
 }
@@ -1612,7 +1612,7 @@ win32_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 	  OUTMSG2 (("Child exited with retcode = %x\n",
 		    ourstatus->value.integer));
 	  win32_clear_inferiors ();
-	  return pid_to_ptid (current_event.dwProcessId);
+	  return ptid_t (current_event.dwProcessId);
 	case TARGET_WAITKIND_STOPPED:
 	case TARGET_WAITKIND_LOADED:
 	  OUTMSG2 (("Child Stopped with signal = %d \n",

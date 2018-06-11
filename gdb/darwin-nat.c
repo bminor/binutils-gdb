@@ -1881,10 +1881,10 @@ darwin_nat_target::attach (const char *args, int from_tty)
 
       if (exec_file)
 	printf_unfiltered (_("Attaching to program: %s, %s\n"), exec_file,
-			   target_pid_to_str (pid_to_ptid (pid)));
+			   target_pid_to_str (ptid_t (pid)));
       else
 	printf_unfiltered (_("Attaching to %s\n"),
-			   target_pid_to_str (pid_to_ptid (pid)));
+			   target_pid_to_str (ptid_t (pid)));
 
       gdb_flush (gdb_stdout);
     }
@@ -1893,7 +1893,7 @@ darwin_nat_target::attach (const char *args, int from_tty)
     error (_("Can't attach to process %d: %s (%d)"),
            pid, safe_strerror (errno), errno);
 
-  inferior_ptid = pid_to_ptid (pid);
+  inferior_ptid = ptid_t (pid);
   inf = current_inferior ();
   inferior_appeared (inf, pid);
   inf->attach_flag = 1;

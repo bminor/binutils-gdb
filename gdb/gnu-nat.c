@@ -1100,7 +1100,7 @@ inf_validate_procs (struct inf *inf)
 
 	    /* Tell GDB's generic thread code.  */
 
-	    if (ptid_equal (inferior_ptid, pid_to_ptid (inf->pid)))
+	    if (ptid_equal (inferior_ptid, ptid_t (inf->pid)))
 	      /* This is the first time we're hearing about thread
 		 ids, after a fork-child.  */
 	      thread_change_ptid (inferior_ptid, ptid);
@@ -2148,7 +2148,7 @@ gnu_nat_target::create_inferior (const char *exec_file,
   /* We have something that executes now.  We'll be running through
      the shell at this point (if startup-with-shell is true), but the
      pid shouldn't change.  */
-  add_thread_silent (pid_to_ptid (pid));
+  add_thread_silent (ptid_t (pid));
 
   /* Attach to the now stopped child, which is actually a shell...  */
   inf_debug (inf, "attaching to child: %d", pid);

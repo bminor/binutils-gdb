@@ -308,7 +308,7 @@ attach_inferior (int pid)
 
   if (!non_stop)
     {
-      cs.last_ptid = mywait (pid_to_ptid (pid), &cs.last_status, 0, 0);
+      cs.last_ptid = mywait (ptid_t (pid), &cs.last_status, 0, 0);
 
       /* GDB knows to ignore the first SIGSTOP after attaching to a running
 	 process using the "attach" command, but this is different; it's
@@ -1256,7 +1256,7 @@ handle_detach (char *own_buf)
     write_enn (own_buf);
   else
     {
-      discard_queued_stop_replies (pid_to_ptid (pid));
+      discard_queued_stop_replies (ptid_t (pid));
       write_ok (own_buf);
 
       if (extended_protocol || target_running ())
@@ -1266,7 +1266,7 @@ handle_detach (char *own_buf)
 	     and instead treat this like a normal program exit.  */
 	  cs.last_status.kind = TARGET_WAITKIND_EXITED;
 	  cs.last_status.value.integer = 0;
-	  cs.last_ptid = pid_to_ptid (pid);
+	  cs.last_ptid = ptid_t (pid);
 
 	  current_thread = NULL;
 	}
@@ -3081,7 +3081,7 @@ handle_v_kill (char *own_buf)
     {
       cs.last_status.kind = TARGET_WAITKIND_SIGNALLED;
       cs.last_status.value.sig = GDB_SIGNAL_KILL;
-      cs.last_ptid = pid_to_ptid (pid);
+      cs.last_ptid = ptid_t (pid);
       discard_queued_stop_replies (cs.last_ptid);
       write_ok (own_buf);
       return 1;
@@ -3481,7 +3481,7 @@ kill_inferior_callback (process_info *process)
   int pid = process->pid;
 
   kill_inferior (pid);
-  discard_queued_stop_replies (pid_to_ptid (pid));
+  discard_queued_stop_replies (ptid_t (pid));
 }
 
 /* Call this when exiting gdbserver with possible inferiors that need
@@ -3527,7 +3527,7 @@ detach_or_kill_for_exit (void)
     else
       kill_inferior (pid);
 
-    discard_queued_stop_replies (pid_to_ptid (pid));
+    discard_queued_stop_replies (ptid_t (pid));
   });
 }
 

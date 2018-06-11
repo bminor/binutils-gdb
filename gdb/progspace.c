@@ -293,12 +293,12 @@ print_program_space (struct ui_out *uiout, int requested)
 		printed_header = 1;
 		printf_filtered ("\n\tBound inferiors: ID %d (%s)",
 				 inf->num,
-				 target_pid_to_str (pid_to_ptid (inf->pid)));
+				 target_pid_to_str (ptid_t (inf->pid)));
 	      }
 	    else
 	      printf_filtered (", ID %d (%s)",
 			       inf->num,
-			       target_pid_to_str (pid_to_ptid (inf->pid)));
+			       target_pid_to_str (ptid_t (inf->pid)));
 	  }
 
       uiout->text ("\n");

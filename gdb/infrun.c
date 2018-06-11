@@ -462,7 +462,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  if (print_inferior_events)
 	    {
 	      /* Ensure that we have a process ptid.  */
-	      ptid_t process_ptid = pid_to_ptid (ptid_get_pid (child_ptid));
+	      ptid_t process_ptid = ptid_t (ptid_get_pid (child_ptid));
 
 	      target_terminal::ours_for_output ();
 	      fprintf_filtered (gdb_stdlog,
@@ -598,7 +598,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  if (print_inferior_events)
 	    {
 	      /* Ensure that we have a process ptid.  */
-	      ptid_t process_ptid = pid_to_ptid (ptid_get_pid (parent_ptid));
+	      ptid_t process_ptid = ptid_t (ptid_get_pid (parent_ptid));
 
 	      target_terminal::ours_for_output ();
 	      fprintf_filtered (gdb_stdlog,
@@ -961,7 +961,7 @@ handle_vfork_child_exec_or_exit (int exec)
 	  if (print_inferior_events)
 	    {
 	      const char *pidstr
-		= target_pid_to_str (pid_to_ptid (inf->vfork_parent->pid));
+		= target_pid_to_str (ptid_t (inf->vfork_parent->pid));
 
 	      target_terminal::ours_for_output ();
 
@@ -1150,7 +1150,7 @@ follow_exec (ptid_t ptid, char *exec_file_target)
   update_breakpoints_after_exec ();
 
   /* What is this a.out's name?  */
-  process_ptid = pid_to_ptid (pid);
+  process_ptid = ptid_t (pid);
   printf_unfiltered (_("%s is executing new program: %s\n"),
 		     target_pid_to_str (process_ptid),
 		     exec_file_target);
@@ -2268,7 +2268,7 @@ user_visible_resume_ptid (int step)
     {
       /* Resume all threads of the current process (and none of other
 	 processes).  */
-      resume_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
+      resume_ptid = ptid_t (ptid_get_pid (inferior_ptid));
     }
   else
     {
@@ -3621,7 +3621,7 @@ void
 prepare_for_detach (void)
 {
   struct inferior *inf = current_inferior ();
-  ptid_t pid_ptid = pid_to_ptid (inf->pid);
+  ptid_t pid_ptid = ptid_t (inf->pid);
 
   displaced_step_inferior_state *displaced = get_displaced_stepping_state (inf);
 
@@ -4547,7 +4547,7 @@ stop_all_threads (void)
 	    {
 	      if (debug_infrun)
 		{
-		  ptid_t ptid = pid_to_ptid (ws.value.integer);
+		  ptid_t ptid = ptid_t (ws.value.integer);
 
 		  fprintf_unfiltered (gdb_stdlog,
 				      "infrun: %s exited while "
@@ -4904,7 +4904,7 @@ handle_inferior_event_1 (struct execution_control_state *ecs)
 	   process as not-executing so that finish_thread_state marks
 	   them stopped (in the user's perspective) if/when we present
 	   the stop to the user.  */
-	mark_ptid = pid_to_ptid (ptid_get_pid (ecs->ptid));
+	mark_ptid = ptid_t (ptid_get_pid (ecs->ptid));
       }
     else
       mark_ptid = ecs->ptid;
@@ -7887,7 +7887,7 @@ void
 print_exited_reason (struct ui_out *uiout, int exitstatus)
 {
   struct inferior *inf = current_inferior ();
-  const char *pidstr = target_pid_to_str (pid_to_ptid (inf->pid));
+  const char *pidstr = target_pid_to_str (ptid_t (inf->pid));
 
   annotate_exited (exitstatus);
   if (exitstatus)

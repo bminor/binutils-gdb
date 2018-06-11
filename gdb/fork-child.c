@@ -88,7 +88,7 @@ postfork_hook (pid_t pid)
   inferior_appeared (inf, pid);
 
   /* Needed for wait_for_inferior stuff.  */
-  inferior_ptid = pid_to_ptid (pid);
+  inferior_ptid = ptid_t (pid);
 
   gdb_assert (saved_ui != NULL);
   current_ui = saved_ui;

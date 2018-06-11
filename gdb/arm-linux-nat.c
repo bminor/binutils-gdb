@@ -994,7 +994,7 @@ arm_linux_insert_hw_breakpoint1 (const struct arm_linux_hw_breakpoint* bpt,
   struct update_registers_data data;
 
   pid = ptid_get_pid (inferior_ptid);
-  pid_ptid = pid_to_ptid (pid);
+  pid_ptid = ptid_t (pid);
 
   if (watchpoint)
     {
@@ -1033,7 +1033,7 @@ arm_linux_remove_hw_breakpoint1 (const struct arm_linux_hw_breakpoint *bpt,
   struct update_registers_data data;
 
   pid = ptid_get_pid (inferior_ptid);
-  pid_ptid = pid_to_ptid (pid);
+  pid_ptid = ptid_t (pid);
 
   if (watchpoint)
     {

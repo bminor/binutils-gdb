@@ -3242,7 +3242,7 @@ target_announce_detach (int from_tty)
 
   pid = ptid_get_pid (inferior_ptid);
   printf_unfiltered (_("Detaching from program: %s, %s\n"), exec_file,
-		     target_pid_to_str (pid_to_ptid (pid)));
+		     target_pid_to_str (ptid_t (pid)));
   gdb_flush (gdb_stdout);
 }
 

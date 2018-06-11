@@ -457,7 +457,7 @@ core_target_open (const char *arg, int from_tty)
       if (thread == NULL)
 	{
 	  inferior_appeared (current_inferior (), CORELOW_PID);
-	  inferior_ptid = pid_to_ptid (CORELOW_PID);
+	  inferior_ptid = ptid_t (CORELOW_PID);
 	  add_thread_silent (inferior_ptid);
 	}
       else
@@ -1007,7 +1007,7 @@ core_target::pid_to_str (ptid_t ptid)
   /* Try the LWPID field first.  */
   pid = ptid_get_lwp (ptid);
   if (pid != 0)
-    return normal_pid_to_str (pid_to_ptid (pid));
+    return normal_pid_to_str (ptid_t (pid));
 
   /* Otherwise, this isn't a "threaded" core -- use the PID field, but
      only if it isn't a fake PID.  */

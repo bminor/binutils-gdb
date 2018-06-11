@@ -1895,14 +1895,14 @@ procfs_target::attach (const char *args, int from_tty)
 
       if (exec_file)
 	printf_filtered (_("Attaching to program `%s', %s\n"),
-			 exec_file, target_pid_to_str (pid_to_ptid (pid)));
+			 exec_file, target_pid_to_str (ptid_t (pid)));
       else
 	printf_filtered (_("Attaching to %s\n"),
-			 target_pid_to_str (pid_to_ptid (pid)));
+			 target_pid_to_str (ptid_t (pid)));
 
       fflush (stdout);
     }
-  inferior_ptid = do_attach (pid_to_ptid (pid));
+  inferior_ptid = do_attach (ptid_t (pid));
   if (!target_is_pushed (this))
     push_target (this);
 }
@@ -1921,7 +1921,7 @@ procfs_target::detach (inferior *inf, int from_tty)
 	exec_file = "";
 
       printf_filtered (_("Detaching from program: %s, %s\n"), exec_file,
-		       target_pid_to_str (pid_to_ptid (pid)));
+		       target_pid_to_str (ptid_t (pid)));
       gdb_flush (gdb_stdout);
     }
 
@@ -2208,7 +2208,7 @@ wait_again:
 
   retry++;
   wstat    = 0;
-  retval   = pid_to_ptid (-1);
+  retval   = ptid_t (-1);
 
   /* Find procinfo for main process.  */
   pi = find_procinfo_or_die (ptid_get_pid (inferior_ptid), 0);
@@ -2244,7 +2244,7 @@ wait_again:
 		       ptid_get_pid (inferior_ptid), wait_retval);
 	      /* FIXME: might I not just use waitpid?
 		 Or try find_procinfo to see if I know about this child?  */
-	      retval = pid_to_ptid (wait_retval);
+	      retval = ptid_t (wait_retval);
 	    }
 	  else if (errno == EINTR)
 	    goto wait_again;
@@ -2340,7 +2340,7 @@ wait_again:
 			/* If wait returns -1, that's what we return
 			   to GDB.  */
 			if (temp < 0)
-			  retval = pid_to_ptid (temp);
+			  retval = ptid_t (temp);
 		      }
 		  }
 		else
@@ -2507,7 +2507,7 @@ wait_again:
 		case FLTPAGE:	/* Recoverable page fault */
 		default:	/* FIXME: use si_signo if possible for
 				   fault.  */
-		  retval = pid_to_ptid (-1);
+		  retval = ptid_t (-1);
 		  printf_filtered ("procfs:%d -- ", __LINE__);
 		  printf_filtered (_("child stopped for unknown reason:\n"));
 		  proc_prettyprint_why (why, what, 1);
@@ -2959,7 +2959,7 @@ procfs_init_inferior (struct target_ops *ops, int pid)
   /* We already have a main thread registered in the thread table at
      this point, but it didn't have any lwp info yet.  Notify the core
      about it.  This changes inferior_ptid as well.  */
-  thread_change_ptid (pid_to_ptid (pid),
+  thread_change_ptid (ptid_t (pid),
 		      ptid_t (pid, lwpid, 0));
 
   gdb_startup_inferior (pid, START_INFERIOR_TRAPS_EXPECTED);
@@ -3126,7 +3126,7 @@ procfs_target::create_inferior (const char *exec_file,
   /* We have something that executes now.  We'll be running through
      the shell at this point (if startup-with-shell is true), but the
      pid shouldn't change.  */
-  add_thread_silent (pid_to_ptid (pid));
+  add_thread_silent (ptid_t (pid));
 
   procfs_init_inferior (this, pid);
 }
@@ -3749,7 +3749,7 @@ _initialize_procfs (void)
 ptid_t
 procfs_first_available (void)
 {
-  return pid_to_ptid (procinfo_list ? procinfo_list->pid : -1);
+  return ptid_t (procinfo_list ? procinfo_list->pid : -1);
 }
 
 /* ===================  GCORE .NOTE "MODULE" =================== */

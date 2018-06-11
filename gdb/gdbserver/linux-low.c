@@ -1226,13 +1226,13 @@ linux_attach (unsigned long pid)
     {
       struct lwp_info *lwp;
       int wstat, lwpid;
-      ptid_t pid_ptid = pid_to_ptid (pid);
+      ptid_t pid_ptid = ptid_t (pid);
 
       lwpid = linux_wait_for_event_filtered (pid_ptid, pid_ptid,
 					     &wstat, __WALL);
       gdb_assert (lwpid > 0);
 
-      lwp = find_lwp_pid (pid_to_ptid (lwpid));
+      lwp = find_lwp_pid (ptid_t (lwpid));
 
       if (!WIFSTOPPED (wstat) || WSTOPSIG (wstat) != SIGSTOP)
 	{
@@ -1405,7 +1405,7 @@ linux_kill (int pid)
 
   /* See the comment in linux_kill_one_lwp.  We did not kill the first
      thread in the list, so do so now.  */
-  lwp = find_lwp_pid (pid_to_ptid (pid));
+  lwp = find_lwp_pid (ptid_t (pid));
 
   if (lwp == NULL)
     {
@@ -1640,7 +1640,7 @@ linux_detach (int pid)
      able to reap the leader.  */
   for_each_thread (pid, linux_detach_lwp_callback);
 
-  main_lwp = find_lwp_pid (pid_to_ptid (pid));
+  main_lwp = find_lwp_pid (ptid_t (pid));
   linux_detach_one_lwp (main_lwp);
 
   the_target->mourn (process);
@@ -1878,7 +1878,7 @@ check_zombie_leaders (void)
     pid_t leader_pid = pid_of (proc);
     struct lwp_info *leader_lp;
 
-    leader_lp = find_lwp_pid (pid_to_ptid (leader_pid));
+    leader_lp = find_lwp_pid (ptid_t (leader_pid));
 
     if (debug_threads)
       debug_printf ("leader_pid=%d, leader_lp!=NULL=%d, "
@@ -2363,7 +2363,7 @@ linux_low_filter_event (int lwpid, int wstat)
   struct thread_info *thread;
   int have_stop_pc = 0;
 
-  child = find_lwp_pid (pid_to_ptid (lwpid));
+  child = find_lwp_pid (ptid_t (lwpid));
 
   /* Check for stop events reported by a process we didn't already
      know about - anything not already in our LWP list.

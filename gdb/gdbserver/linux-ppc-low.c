@@ -703,7 +703,7 @@ ppc_supports_tracepoints (void)
 static int
 ppc_get_thread_area (int lwpid, CORE_ADDR *addr)
 {
-  struct lwp_info *lwp = find_lwp_pid (pid_to_ptid (lwpid));
+  struct lwp_info *lwp = find_lwp_pid (ptid_t (lwpid));
   struct thread_info *thr = get_lwp_thread (lwp);
   struct regcache *regcache = get_thread_regcache (thr, 1);
   ULONGEST tp = 0;

@@ -1845,7 +1845,7 @@ do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
      can rely on it.  When attaching, we don't know about any thread
      id here, but that's OK --- nothing should be referencing the
      current thread until we report an event out of windows_wait.  */
-  inferior_ptid = pid_to_ptid (pid);
+  inferior_ptid = ptid_t (pid);
 
   target_terminal::init ();
   target_terminal::inferior ();
@@ -1980,10 +1980,10 @@ windows_nat_target::attach (const char *args, int from_tty)
 
       if (exec_file)
 	printf_unfiltered ("Attaching to program `%s', %s\n", exec_file,
-			   target_pid_to_str (pid_to_ptid (pid)));
+			   target_pid_to_str (ptid_t (pid)));
       else
 	printf_unfiltered ("Attaching to %s\n",
-			   target_pid_to_str (pid_to_ptid (pid)));
+			   target_pid_to_str (ptid_t (pid)));
 
       gdb_flush (gdb_stdout);
     }

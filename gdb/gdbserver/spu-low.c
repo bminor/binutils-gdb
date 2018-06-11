@@ -457,7 +457,7 @@ spu_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
       ourstatus->kind =  TARGET_WAITKIND_EXITED;
       ourstatus->value.integer = WEXITSTATUS (w);
       clear_inferiors ();
-      return pid_to_ptid (ret);
+      return ptid_t (ret);
     }
   else if (!WIFSTOPPED (w))
     {
@@ -465,7 +465,7 @@ spu_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
       ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
       ourstatus->value.sig = gdb_signal_from_host (WTERMSIG (w));
       clear_inferiors ();
-      return pid_to_ptid (ret);
+      return ptid_t (ret);
     }
 
   /* After attach, we may have received a SIGSTOP.  Do not return this

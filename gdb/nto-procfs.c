@@ -713,14 +713,14 @@ nto_procfs_target::attach (const char *args, int from_tty)
 
       if (exec_file)
 	printf_unfiltered ("Attaching to program `%s', %s\n", exec_file,
-			   target_pid_to_str (pid_to_ptid (pid)));
+			   target_pid_to_str (ptid_t (pid)));
       else
 	printf_unfiltered ("Attaching to %s\n",
-			   target_pid_to_str (pid_to_ptid (pid)));
+			   target_pid_to_str (ptid_t (pid)));
 
       gdb_flush (gdb_stdout);
     }
-  inferior_ptid = do_attach (pid_to_ptid (pid));
+  inferior_ptid = do_attach (ptid_t (pid));
   inf = current_inferior ();
   inferior_appeared (inf, pid);
   inf->attach_flag = 1;
@@ -1311,7 +1311,7 @@ nto_procfs_target::create_inferior (const char *exec_file,
   if (fds[2] != STDERR_FILENO)
     close (fds[2]);
 
-  inferior_ptid = do_attach (pid_to_ptid (pid));
+  inferior_ptid = do_attach (ptid_t (pid));
   procfs_update_thread_list (ops);
 
   inf = current_inferior ();

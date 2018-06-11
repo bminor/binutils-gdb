@@ -115,7 +115,7 @@ obsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
     }
   while (pid == -1);
 
-  ptid = pid_to_ptid (pid);
+  ptid = ptid_t (pid);
 
   if (WIFSTOPPED (status))
     {
@@ -129,7 +129,7 @@ obsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	{
 	case PTRACE_FORK:
 	  ourstatus->kind = TARGET_WAITKIND_FORKED;
-	  ourstatus->value.related_pid = pid_to_ptid (pe.pe_other_pid);
+	  ourstatus->value.related_pid = ptid_t (pe.pe_other_pid);
 
 	  /* Make sure the other end of the fork is stopped too.  */
 	  fpid = waitpid (pe.pe_other_pid, &status, 0);
@@ -144,11 +144,11 @@ obsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	  gdb_assert (pe.pe_other_pid == pid);
 	  if (fpid == ptid_get_pid (inferior_ptid))
 	    {
-	      ourstatus->value.related_pid = pid_to_ptid (pe.pe_other_pid);
-	      return pid_to_ptid (fpid);
+	      ourstatus->value.related_pid = ptid_t (pe.pe_other_pid);
+	      return ptid_t (fpid);
 	    }
 
-	  return pid_to_ptid (pid);
+	  return ptid_t (pid);
 	}
 
       ptid = ptid_t (pid, pe.pe_tid, 0);

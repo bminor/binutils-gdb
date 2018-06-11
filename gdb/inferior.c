@@ -124,7 +124,7 @@ add_inferior (int pid)
   if (print_inferior_events)
     printf_unfiltered (_("[New inferior %d (%s)]\n"),
 		       inf->num,
-		       target_pid_to_str (pid_to_ptid (pid)));
+		       target_pid_to_str (ptid_t (pid)));
 
   return inf;
 }
@@ -263,7 +263,7 @@ detach_inferior (inferior *inf)
   if (print_inferior_events)
     printf_unfiltered (_("[Inferior %d (%s) detached]\n"),
 		       inf->num,
-		       target_pid_to_str (pid_to_ptid (pid)));
+		       target_pid_to_str (ptid_t (pid)));
 }
 
 void
@@ -457,7 +457,7 @@ static const char *
 inferior_pid_to_str (int pid)
 {
   if (pid != 0)
-    return target_pid_to_str (pid_to_ptid (pid));
+    return target_pid_to_str (ptid_t (pid));
   else
     return _("<null>");
 }

@@ -2443,7 +2443,7 @@ remote_target::remote_notice_new_inferior (ptid_t currthread, int executing)
 	     stub doesn't support qC.  This is the first stop reported
 	     after an attach, so this is the main thread.  Update the
 	     ptid in the thread list.  */
-	  if (in_thread_list (pid_to_ptid (pid)))
+	  if (in_thread_list (ptid_t (pid)))
 	    thread_change_ptid (inferior_ptid, currthread);
 	  else
 	    {
@@ -5682,7 +5682,7 @@ remote_target::remote_detach_1 (inferior *inf, int from_tty)
     {
       /* Save the pid as a string before mourning, since that will
 	 unpush the remote target, and we need the string after.  */
-      std::string infpid = target_pid_to_str (pid_to_ptid (pid));
+      std::string infpid = target_pid_to_str (ptid_t (pid));
 
       target_mourn_inferior (inferior_ptid);
       if (print_inferior_events)
@@ -5804,10 +5804,10 @@ extended_remote_target::attach (const char *args, int from_tty)
 
       if (exec_file)
 	printf_unfiltered (_("Attaching to program: %s, %s\n"), exec_file,
-			   target_pid_to_str (pid_to_ptid (pid)));
+			   target_pid_to_str (ptid_t (pid)));
       else
 	printf_unfiltered (_("Attaching to %s\n"),
-			   target_pid_to_str (pid_to_ptid (pid)));
+			   target_pid_to_str (ptid_t (pid)));
 
       gdb_flush (gdb_stdout);
     }
@@ -5828,19 +5828,19 @@ extended_remote_target::attach (const char *args, int from_tty)
 	}
       else if (strcmp (rs->buf, "OK") != 0)
 	error (_("Attaching to %s failed with: %s"),
-	       target_pid_to_str (pid_to_ptid (pid)),
+	       target_pid_to_str (ptid_t (pid)),
 	       rs->buf);
       break;
     case PACKET_UNKNOWN:
       error (_("This target does not support attaching to a process"));
     default:
       error (_("Attaching to %s failed"),
-	     target_pid_to_str (pid_to_ptid (pid)));
+	     target_pid_to_str (ptid_t (pid)));
     }
 
   set_current_inferior (remote_add_inferior (0, pid, 1, 0));
 
-  inferior_ptid = pid_to_ptid (pid);
+  inferior_ptid = ptid_t (pid);
 
   if (target_is_non_stop_p ())
     {
@@ -5853,7 +5853,7 @@ extended_remote_target::attach (const char *args, int from_tty)
       if (thread)
 	inferior_ptid = thread->ptid;
       else
-	inferior_ptid = pid_to_ptid (pid);
+	inferior_ptid = ptid_t (pid);
 
       /* Invalidate our notion of the remote current thread.  */
       record_currthread (rs, minus_one_ptid);
@@ -6575,7 +6575,7 @@ remote_target::commit_resume ()
 	    {
 	      if (get_remote_inferior (inf)->may_wildcard_vcont)
 		{
-		  vcont_builder.push_action (pid_to_ptid (inf->pid),
+		  vcont_builder.push_action (ptid_t (inf->pid),
 					     false, GDB_SIGNAL_0);
 		}
 	    }
@@ -7530,7 +7530,7 @@ Packet: '%s'\n"),
 	  }
 	else
 	  error (_("unknown stop reply packet: %s"), buf);
-	event->ptid = pid_to_ptid (pid);
+	event->ptid = ptid_t (pid);
       }
       break;
     case 'N':

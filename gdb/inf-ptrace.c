@@ -131,7 +131,7 @@ inf_ptrace_target::create_inferior (const char *exec_file,
   pid = fork_inferior (exec_file, allargs, env, inf_ptrace_me, NULL,
 		       NULL, NULL, NULL);
 
-  ptid = pid_to_ptid (pid);
+  ptid = ptid_t (pid);
   /* We have something that executes now.  We'll be running through
      the shell at this point (if startup-with-shell is true), but the
      pid shouldn't change.  */
@@ -213,10 +213,10 @@ inf_ptrace_target::attach (const char *args, int from_tty)
 
       if (exec_file)
 	printf_unfiltered (_("Attaching to program: %s, %s\n"), exec_file,
-			   target_pid_to_str (pid_to_ptid (pid)));
+			   target_pid_to_str (ptid_t (pid)));
       else
 	printf_unfiltered (_("Attaching to %s\n"),
-			   target_pid_to_str (pid_to_ptid (pid)));
+			   target_pid_to_str (ptid_t (pid)));
 
       gdb_flush (gdb_stdout);
     }
@@ -233,7 +233,7 @@ inf_ptrace_target::attach (const char *args, int from_tty)
   inf = current_inferior ();
   inferior_appeared (inf, pid);
   inf->attach_flag = 1;
-  inferior_ptid = pid_to_ptid (pid);
+  inferior_ptid = ptid_t (pid);
 
   /* Always add a main thread.  If some target extends the ptrace
      target, it should decorate the ptid later with more info.  */
@@ -428,7 +428,7 @@ inf_ptrace_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	{
 	case PTRACE_FORK:
 	  ourstatus->kind = TARGET_WAITKIND_FORKED;
-	  ourstatus->value.related_pid = pid_to_ptid (pe.pe_other_pid);
+	  ourstatus->value.related_pid = ptid_t (pe.pe_other_pid);
 
 	  /* Make sure the other end of the fork is stopped too.  */
 	  fpid = waitpid (pe.pe_other_pid, &status, 0);
@@ -443,17 +443,17 @@ inf_ptrace_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	  gdb_assert (pe.pe_other_pid == pid);
 	  if (fpid == ptid_get_pid (inferior_ptid))
 	    {
-	      ourstatus->value.related_pid = pid_to_ptid (pe.pe_other_pid);
-	      return pid_to_ptid (fpid);
+	      ourstatus->value.related_pid = ptid_t (pe.pe_other_pid);
+	      return ptid_t (fpid);
 	    }
 
-	  return pid_to_ptid (pid);
+	  return ptid_t (pid);
 	}
     }
 #endif
 
   store_waitstatus (ourstatus, status);
-  return pid_to_ptid (pid);
+  return ptid_t (pid);
 }
 
 /* Transfer data via ptrace into process PID's memory from WRITEBUF, or

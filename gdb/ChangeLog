@@ -1,5 +1,43 @@
 2018-07-03  Tom Tromey  <tom@tromey.com>
 
+	* common/ptid.c (pid_to_ptid): Remove.
+	* common/ptid.h (pid_to_ptid): Don't declare.
+	* aix-thread.c: Update.
+	* arm-linux-nat.c: Update.
+	* common/ptid.c: Update.
+	* common/ptid.h: Update.
+	* corelow.c: Update.
+	* ctf.c: Update.
+	* darwin-nat.c: Update.
+	* fbsd-nat.c: Update.
+	* fork-child.c: Update.
+	* gnu-nat.c: Update.
+	* go32-nat.c: Update.
+	* inf-ptrace.c: Update.
+	* infcmd.c: Update.
+	* inferior.c: Update.
+	* infrun.c: Update.
+	* linux-fork.c: Update.
+	* linux-nat.c: Update.
+	* nat/aarch64-linux-hw-point.c: Update.
+	* nat/fork-inferior.c: Update.
+	* nat/x86-linux-dregs.c: Update.
+	* nto-procfs.c: Update.
+	* obsd-nat.c: Update.
+	* procfs.c: Update.
+	* progspace.c: Update.
+	* remote.c: Update.
+	* rs6000-nat.c: Update.
+	* s390-linux-nat.c: Update.
+	* sol-thread.c: Update.
+	* spu-linux-nat.c: Update.
+	* target.c: Update.
+	* top.c: Update.
+	* tracefile-tfile.c: Update.
+	* windows-nat.c: Update.
+
+2018-07-03  Tom Tromey  <tom@tromey.com>
+
 	* common/ptid.h (ptid_build): Don't declare.
 	* common/ptid.c (ptid_build): Remove.
 	* aix-thread.c: Update.

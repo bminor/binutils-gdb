@@ -102,7 +102,7 @@ x86_linux_dr_get_addr (int regnum)
 void
 x86_linux_dr_set_addr (int regnum, CORE_ADDR addr)
 {
-  ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (current_lwp_ptid ()));
+  ptid_t pid_ptid = ptid_t (ptid_get_pid (current_lwp_ptid ()));
 
   gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
 
@@ -122,7 +122,7 @@ x86_linux_dr_get_control (void)
 void
 x86_linux_dr_set_control (unsigned long control)
 {
-  ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (current_lwp_ptid ()));
+  ptid_t pid_ptid = ptid_t (ptid_get_pid (current_lwp_ptid ()));
 
   iterate_over_lwps (pid_ptid, update_debug_registers_callback, NULL);
 }

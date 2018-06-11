@@ -1466,17 +1466,17 @@ linux_nat_target::detach (inferior *inf, int from_tty)
 
   /* Stop all threads before detaching.  ptrace requires that the
      thread is stopped to sucessfully detach.  */
-  iterate_over_lwps (pid_to_ptid (pid), stop_callback, NULL);
+  iterate_over_lwps (ptid_t (pid), stop_callback, NULL);
   /* ... and wait until all of them have reported back that
      they're no longer running.  */
-  iterate_over_lwps (pid_to_ptid (pid), stop_wait_callback, NULL);
+  iterate_over_lwps (ptid_t (pid), stop_wait_callback, NULL);
 
-  iterate_over_lwps (pid_to_ptid (pid), detach_callback, NULL);
+  iterate_over_lwps (ptid_t (pid), detach_callback, NULL);
 
   /* Only the initial process should be left right now.  */
   gdb_assert (num_lwps (pid) == 1);
 
-  main_lwp = find_lwp_pid (pid_to_ptid (pid));
+  main_lwp = find_lwp_pid (ptid_t (pid));
 
   if (forks_exist_p ())
     {
@@ -2920,7 +2920,7 @@ linux_nat_filter_event (int lwpid, int status)
   struct lwp_info *lp;
   int event = linux_ptrace_get_extended_event (status);
 
-  lp = find_lwp_pid (pid_to_ptid (lwpid));
+  lp = find_lwp_pid (ptid_t (lwpid));
 
   /* Check for stop events reported by a process we didn't already
      know about - anything not already in our LWP list.
@@ -3125,7 +3125,7 @@ linux_nat_filter_event (int lwpid, int status)
 		 will receive it - unless they're using CLONE_THREAD to
 		 share signals.  Since we only want to report it once, we
 		 mark it as ignored for all LWPs except this one.  */
-	      iterate_over_lwps (pid_to_ptid (ptid_get_pid (lp->ptid)),
+	      iterate_over_lwps (ptid_t (ptid_get_pid (lp->ptid)),
 					      set_ignore_sigint, NULL);
 	      lp->ignore_sigint = 0;
 	    }
@@ -3176,7 +3176,7 @@ check_zombie_leaders (void)
       if (inf->pid == 0)
 	continue;
 
-      leader_lp = find_lwp_pid (pid_to_ptid (inf->pid));
+      leader_lp = find_lwp_pid (ptid_t (inf->pid));
       if (leader_lp != NULL
 	  /* Check if there are other threads in the group, as we may
 	     have raced with the inferior simply exiting.  */
@@ -3713,7 +3713,7 @@ linux_nat_target::kill ()
     linux_fork_killall ();
   else
     {
-      ptid_t ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
+      ptid_t ptid = ptid_t (ptid_get_pid (inferior_ptid));
 
       /* Stop all threads before killing them, since ptrace requires
 	 that the thread is stopped to sucessfully PTRACE_KILL.  */

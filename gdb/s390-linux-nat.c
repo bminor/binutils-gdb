@@ -848,7 +848,7 @@ s390_refresh_per_info_cb (struct lwp_info *lp, void *arg)
 static int
 s390_refresh_per_info (void)
 {
-  ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (current_lwp_ptid ()));
+  ptid_t pid_ptid = ptid_t (ptid_get_pid (current_lwp_ptid ()));
 
   iterate_over_lwps (pid_ptid, s390_refresh_per_info_cb, NULL);
   return 0;
