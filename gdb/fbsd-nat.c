@@ -1130,7 +1130,7 @@ fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 
       ALL_NON_EXITED_THREADS (tp)
         {
-	  if (!ptid_match (tp->ptid, ptid))
+	  if (!tp->ptid.matches (ptid))
 	    continue;
 
 	  if (ptrace (PT_RESUME, tp->ptid.lwp (), NULL, 0) == -1)

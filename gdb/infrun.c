@@ -2877,7 +2877,7 @@ clear_proceed_status (int step)
 	 we're about to resume, implicitly and explicitly.  */
       ALL_NON_EXITED_THREADS (tp)
         {
-	  if (!ptid_match (tp->ptid, resume_ptid))
+	  if (!tp->ptid.matches (resume_ptid))
 	    continue;
 	  clear_proceed_status_thread (tp);
 	}
@@ -3095,7 +3095,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 	    continue;
 
 	  /* Ignore threads of processes we're not resuming.  */
-	  if (!ptid_match (tp->ptid, resume_ptid))
+	  if (!tp->ptid.matches (resume_ptid))
 	    continue;
 
 	  if (!thread_still_needs_step_over (tp))
@@ -3149,7 +3149,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 	ALL_NON_EXITED_THREADS (tp)
         {
 	  /* Ignore threads of processes we're not resuming.  */
-	  if (!ptid_match (tp->ptid, resume_ptid))
+	  if (!tp->ptid.matches (resume_ptid))
 	    continue;
 
 	  if (tp->resumed)
@@ -3291,7 +3291,7 @@ infrun_thread_stop_requested (ptid_t ptid)
      thread had been temporarily paused for some step-over), set up
      for reporting the stop now.  */
   ALL_NON_EXITED_THREADS (tp)
-    if (ptid_match (tp->ptid, ptid))
+    if (tp->ptid.matches (ptid))
       {
 	if (tp->state != THREAD_RUNNING)
 	  continue;
@@ -3453,7 +3453,7 @@ random_pending_event_thread (ptid_t waiton_ptid)
   /* First see how many events we have.  Count only resumed threads
      that have an event pending.  */
   ALL_NON_EXITED_THREADS (event_tp)
-    if (ptid_match (event_tp->ptid, waiton_ptid)
+    if (event_tp->ptid.matches (waiton_ptid)
 	&& event_tp->resumed
 	&& event_tp->suspend.waitstatus_pending_p)
       num_events++;
@@ -3472,7 +3472,7 @@ random_pending_event_thread (ptid_t waiton_ptid)
 
   /* Select the Nth thread that has had an event.  */
   ALL_NON_EXITED_THREADS (event_tp)
-    if (ptid_match (event_tp->ptid, waiton_ptid)
+    if (event_tp->ptid.matches (waiton_ptid)
 	&& event_tp->resumed
 	&& event_tp->suspend.waitstatus_pending_p)
       if (random_selector-- == 0)

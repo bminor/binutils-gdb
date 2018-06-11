@@ -160,8 +160,4 @@ extern ptid_t minus_one_ptid;
 
 extern int ptid_equal (const ptid_t &ptid1, const ptid_t &ptid2);
 
-/* See ptid_t::matches.  */
-
-extern int ptid_match (const ptid_t &ptid, const ptid_t &filter);
-
 #endif

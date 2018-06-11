@@ -452,7 +452,7 @@ registers_changed_ptid (ptid_t ptid)
        it != regcache::current_regcache.end ();
        )
     {
-      if (ptid_match ((*it)->ptid (), ptid))
+      if ((*it)->ptid ().matches (ptid))
 	{
 	  delete *it;
 	  it = regcache::current_regcache.erase_after (oit);
@@ -461,13 +461,13 @@ registers_changed_ptid (ptid_t ptid)
 	oit = it++;
     }
 
-  if (ptid_match (current_thread_ptid, ptid))
+  if (current_thread_ptid.matches (ptid))
     {
       current_thread_ptid = null_ptid;
       current_thread_arch = NULL;
     }
 
-  if (ptid_match (inferior_ptid, ptid))
+  if (inferior_ptid.matches (ptid))
     {
       /* We just deleted the regcache of the current thread.  Need to
 	 forget about any frames we have cached, too.  */

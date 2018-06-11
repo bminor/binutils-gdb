@@ -190,7 +190,7 @@ remove_all_on_match_ptid (QUEUE (notif_event_p) *q,
   ptid_t filter_ptid = *(ptid_t *) data;
   struct vstop_notif *vstop_event = (struct vstop_notif *) event;
 
-  if (ptid_match (vstop_event->ptid, filter_ptid))
+  if (vstop_event->ptid.matches (filter_ptid))
     {
       if (q->free_func != NULL)
 	q->free_func (event);
@@ -229,13 +229,13 @@ in_queued_stop_replies_ptid (QUEUE (notif_event_p) *q,
   ptid_t filter_ptid = *(ptid_t *) data;
   struct vstop_notif *vstop_event = (struct vstop_notif *) event;
 
-  if (ptid_match (vstop_event->ptid, filter_ptid))
+  if (vstop_event->ptid.matches (filter_ptid))
     return 0;
 
   /* Don't resume fork children that GDB does not know about yet.  */
   if ((vstop_event->status.kind == TARGET_WAITKIND_FORKED
        || vstop_event->status.kind == TARGET_WAITKIND_VFORKED)
-      && ptid_match (vstop_event->status.value.related_pid, filter_ptid))
+      && vstop_event->status.value.related_pid.matches (filter_ptid))
     return 0;
 
   return 1;

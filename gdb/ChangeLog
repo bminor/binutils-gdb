@@ -1,5 +1,17 @@
 2018-07-03  Tom Tromey  <tom@tromey.com>
 
+	* common/ptid.c (ptid_match): Remove.
+	* common/ptid.h (ptid_match): Don't declare.
+	* fbsd-nat.c: Update.
+	* infcmd.c: Update.
+	* infrun.c: Update.
+	* linux-nat.c: Update.
+	* record-btrace.c: Update.
+	* regcache.c: Update.
+	* remote.c: Update.
+
+2018-07-03  Tom Tromey  <tom@tromey.com>
+
 	* common/ptid.c (ptid_tid_p): Remove.
 	* common/ptid.h (ptid_tid_p): Don't declare.
 	* sol-thread.c: Update.

@@ -32,11 +32,3 @@ ptid_equal (const ptid_t &ptid1, const ptid_t &ptid2)
 {
   return ptid1 == ptid2;
 }
-
-/* See ptid.h.  */
-
-int
-ptid_match (const ptid_t &ptid, const ptid_t &filter)
-{
-  return ptid.matches (filter);
-}

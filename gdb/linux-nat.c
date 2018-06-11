@@ -958,7 +958,7 @@ iterate_over_lwps (ptid_t filter,
     {
       lpnext = lp->next;
 
-      if (ptid_match (lp->ptid, filter))
+      if (lp->ptid.matches (filter))
 	{
 	  if ((*callback) (lp, data) != 0)
 	    return lp;
@@ -3513,7 +3513,7 @@ resume_stopped_resumed_lwps (struct lwp_info *lp, void *data)
 
 	  /* Don't bother if there's a breakpoint at PC that we'd hit
 	     immediately, and we're not waiting for this LWP.  */
-	  if (!ptid_match (lp->ptid, *wait_ptid_p))
+	  if (!lp->ptid.matches (*wait_ptid_p))
 	    {
 	      if (breakpoint_inserted_here_p (regcache->aspace (), pc))
 		leave_stopped = 1;

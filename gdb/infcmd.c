@@ -1351,7 +1351,7 @@ signal_command (const char *signum_exp, int from_tty)
 	{
 	  if (ptid_equal (tp->ptid, inferior_ptid))
 	    continue;
-	  if (!ptid_match (tp->ptid, resume_ptid))
+	  if (!tp->ptid.matches (resume_ptid))
 	    continue;
 
 	  if (tp->suspend.stop_signal != GDB_SIGNAL_0

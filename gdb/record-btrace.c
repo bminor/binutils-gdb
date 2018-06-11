@@ -1401,7 +1401,7 @@ record_btrace_target::record_is_replaying (ptid_t ptid)
   struct thread_info *tp;
 
   ALL_NON_EXITED_THREADS (tp)
-    if (ptid_match (tp->ptid, ptid) && btrace_is_replaying (tp))
+    if (tp->ptid.matches (ptid) && btrace_is_replaying (tp))
       return true;
 
   return false;
@@ -2178,12 +2178,12 @@ record_btrace_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
      For all-stop targets, we only step INFERIOR_PTID and continue others.  */
   if (!target_is_non_stop_p ())
     {
-      gdb_assert (ptid_match (inferior_ptid, ptid));
+      gdb_assert (inferior_ptid.matches (ptid));
 
       ALL_NON_EXITED_THREADS (tp)
-	if (ptid_match (tp->ptid, ptid))
+	if (tp->ptid.matches (ptid))
 	  {
-	    if (ptid_match (tp->ptid, inferior_ptid))
+	    if (tp->ptid.matches (inferior_ptid))
 	      record_btrace_resume_thread (tp, flag);
 	    else
 	      record_btrace_resume_thread (tp, cflag);
@@ -2192,7 +2192,7 @@ record_btrace_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
   else
     {
       ALL_NON_EXITED_THREADS (tp)
-	if (ptid_match (tp->ptid, ptid))
+	if (tp->ptid.matches (ptid))
 	  record_btrace_resume_thread (tp, flag);
     }
 
@@ -2555,7 +2555,7 @@ record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
 
     ALL_NON_EXITED_THREADS (tp)
       {
-	if (ptid_match (tp->ptid, ptid)
+	if (tp->ptid.matches (ptid)
 	    && ((tp->btrace.flags & (BTHR_MOVE | BTHR_STOP)) != 0))
 	  moving.push_back (tp);
       }
@@ -2682,7 +2682,7 @@ record_btrace_target::stop (ptid_t ptid)
       struct thread_info *tp;
 
       ALL_NON_EXITED_THREADS (tp)
-       if (ptid_match (tp->ptid, ptid))
+       if (tp->ptid.matches (ptid))
          {
            tp->btrace.flags &= ~BTHR_MOVE;
            tp->btrace.flags |= BTHR_STOP;
