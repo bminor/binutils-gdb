@@ -139,7 +139,7 @@ typedef struct cached_reg
 
 /* Buffer of registers.  */
 
-class reg_buffer
+class reg_buffer : public reg_buffer_common
 {
 public:
   reg_buffer (gdbarch *gdbarch, bool has_pseudo);
@@ -149,9 +149,42 @@ public:
   /* Return regcache's architecture.  */
   gdbarch *arch () const;
 
-  /* Get the availability status of the value of register REGNUM in this
-     buffer.  */
-  enum register_status get_register_status (int regnum) const;
+  /* See common/common-regcache.h.  */
+  enum register_status get_register_status (int regnum) const override;
+
+  /* See common/common-regcache.h.  */
+  void raw_collect (int regnum, void *buf) const override;
+
+  /* Collect register REGNUM from REGCACHE.  Store collected value as an integer
+     at address ADDR, in target endian, with length ADDR_LEN and sign IS_SIGNED.
+     If ADDR_LEN is greater than the register size, then the integer will be
+     sign or zero extended.  If ADDR_LEN is smaller than the register size, then
+     the most significant bytes of the integer will be truncated.  */
+  void raw_collect_integer (int regnum, gdb_byte *addr, int addr_len,
+			    bool is_signed) const;
+
+  /* See common/common-regcache.h.  */
+  void raw_supply (int regnum, const void *buf) override;
+
+  void raw_supply (int regnum, const reg_buffer &src)
+  {
+    raw_supply (regnum, src.register_buffer (regnum));
+  }
+
+  /* Supply register REGNUM to REGCACHE.  Value to supply is an integer stored
+     at address ADDR, in target endian, with length ADDR_LEN and sign IS_SIGNED.
+     If the register size is greater than ADDR_LEN, then the integer will be
+     sign or zero extended.  If the register size is smaller than the integer,
+     then the most significant bytes of the integer will be truncated.  */
+  void raw_supply_integer (int regnum, const gdb_byte *addr, int addr_len,
+			   bool is_signed);
+
+  /* Supply register REGNUM with zeroed value to REGCACHE.  This is not the same
+     as calling raw_supply with NULL (which will set the state to
+     unavailable).  */
+  void raw_supply_zeroed (int regnum);
+
+  void invalidate (int regnum);
 
   virtual ~reg_buffer () = default;
 
@@ -231,23 +264,8 @@ public:
     : readable_regcache (gdbarch, has_pseudo)
   {}
 
-  /* Supply register REGNUM, whose contents are stored in BUF, to REGCACHE.  */
-  void raw_supply (int regnum, const void *buf);
-
-  void raw_supply (int regnum, const reg_buffer &src)
-  {
-    raw_supply (regnum, src.register_buffer (regnum));
-  }
-
   void raw_update (int regnum) override
   {}
-
-  void raw_supply_integer (int regnum, const gdb_byte *addr, int addr_len,
-			   bool is_signed);
-
-  void raw_supply_zeroed (int regnum);
-
-  void invalidate (int regnum);
 
   DISABLE_COPY_AND_ASSIGN (detached_regcache);
 };
@@ -288,12 +306,6 @@ public:
   void cooked_write (int regnum, T val);
 
   void raw_update (int regnum) override;
-
-  /* Collect register REGNUM from REGCACHE and store its contents in BUF.  */
-  void raw_collect (int regnum, void *buf) const;
-
-  void raw_collect_integer (int regnum, gdb_byte *addr, int addr_len,
-			    bool is_signed) const;
 
   /* Partial transfer of raw registers.  Perform read, modify, write style
      operations.  */

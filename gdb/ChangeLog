@@ -1,3 +1,19 @@
+2018-06-11  Alan Hayward  <alan.hayward@arm.com>
+
+	* common/common-regcache.h (reg_buffer_common): New structure.
+	* regcache.c (reg_buffer::invalidate): Move from detached_regcache.
+	(reg_buffer::raw_supply): Likewise.
+	(reg_buffer::raw_supply_integer): Likewise.
+	(reg_buffer::raw_supply_zeroed): Likewise.
+	(reg_buffer::raw_collect): Likewise.
+	(reg_buffer::raw_collect_integer): Likewise.
+	* regcache.h (reg_buffer::invalidate): Move from detached_regcache.
+	(reg_buffer::raw_supply): Likewise.
+	(reg_buffer::raw_supply_integer): Likewise.
+	(reg_buffer::raw_supply_zeroed): Likewise.
+	(reg_buffer::raw_collect): Likewise.
+	(reg_buffer::raw_collect_integer): Likewise.
+
 2018-06-10  Tom Tromey  <tom@tromey.com>
 
 	* remote.c (stop_reply_p): Remove typedef.  Don't declare queue.

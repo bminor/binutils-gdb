@@ -1,3 +1,15 @@
+2018-06-11  Alan Hayward  <alan.hayward@arm.com>
+
+	* regcache.c (new_register_cache): Use new.
+	(free_register_cache): Use delete.
+	(register_data): Use const.
+	(supply_register): Move body inside regcache.
+	(regcache::raw_supply): New override function.
+	(collect_register): Move body inside regcache.
+	(regcache::raw_collect): New override function.
+	(regcache::get_register_status): New override function.
+	* regcache.h (struct regcache): Inherit from reg_buffer_common.
+
 2018-06-09  Tom Tromey  <tom@tromey.com>
 
 	* event-loop.c (gdb_event, gdb_event_p): Remove typedefs.  Don't

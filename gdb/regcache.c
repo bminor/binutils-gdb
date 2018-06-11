@@ -321,6 +321,8 @@ regcache::restore (readonly_detached_regcache *src)
     }
 }
 
+/* See common/common-regcache.h.  */
+
 enum register_status
 reg_buffer::get_register_status (int regnum) const
 {
@@ -330,7 +332,7 @@ reg_buffer::get_register_status (int regnum) const
 }
 
 void
-detached_regcache::invalidate (int regnum)
+reg_buffer::invalidate (int regnum)
 {
   assert_regnum (regnum);
   m_register_status[regnum] = REG_UNKNOWN;
@@ -880,8 +882,10 @@ regcache::cooked_write_part (int regnum, int offset, int len,
   write_part (regnum, offset, len, buf, false);
 }
 
+/* See common/common-regcache.h.  */
+
 void
-detached_regcache::raw_supply (int regnum, const void *buf)
+reg_buffer::raw_supply (int regnum, const void *buf)
 {
   void *regbuf;
   size_t size;
@@ -906,15 +910,11 @@ detached_regcache::raw_supply (int regnum, const void *buf)
     }
 }
 
-/* Supply register REGNUM to REGCACHE.  Value to supply is an integer stored at
-   address ADDR, in target endian, with length ADDR_LEN and sign IS_SIGNED.  If
-   the register size is greater than ADDR_LEN, then the integer will be sign or
-   zero extended.  If the register size is smaller than the integer, then the
-   most significant bytes of the integer will be truncated.  */
+/* See regcache.h.  */
 
 void
-detached_regcache::raw_supply_integer (int regnum, const gdb_byte *addr,
-				   int addr_len, bool is_signed)
+reg_buffer::raw_supply_integer (int regnum, const gdb_byte *addr,
+				int addr_len, bool is_signed)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (m_descr->gdbarch);
   gdb_byte *regbuf;
@@ -930,12 +930,10 @@ detached_regcache::raw_supply_integer (int regnum, const gdb_byte *addr,
   m_register_status[regnum] = REG_VALID;
 }
 
-/* Supply register REGNUM with zeroed value to REGCACHE.  This is not the same
-   as calling raw_supply with NULL (which will set the state to
-   unavailable).  */
+/* See regcache.h.  */
 
 void
-detached_regcache::raw_supply_zeroed (int regnum)
+reg_buffer::raw_supply_zeroed (int regnum)
 {
   void *regbuf;
   size_t size;
@@ -949,8 +947,10 @@ detached_regcache::raw_supply_zeroed (int regnum)
   m_register_status[regnum] = REG_VALID;
 }
 
+/* See common/common-regcache.h.  */
+
 void
-regcache::raw_collect (int regnum, void *buf) const
+reg_buffer::raw_collect (int regnum, void *buf) const
 {
   const void *regbuf;
   size_t size;
@@ -963,19 +963,11 @@ regcache::raw_collect (int regnum, void *buf) const
   memcpy (buf, regbuf, size);
 }
 
-/* Transfer a single or all registers belonging to a certain register
-   set to or from a buffer.  This is the main worker function for
-   regcache_supply_regset and regcache_collect_regset.  */
-
-/* Collect register REGNUM from REGCACHE.  Store collected value as an integer
-   at address ADDR, in target endian, with length ADDR_LEN and sign IS_SIGNED.
-   If ADDR_LEN is greater than the register size, then the integer will be sign
-   or zero extended.  If ADDR_LEN is smaller than the register size, then the
-   most significant bytes of the integer will be truncated.  */
+/* See regcache.h.  */
 
 void
-regcache::raw_collect_integer (int regnum, gdb_byte *addr, int addr_len,
-			       bool is_signed) const
+reg_buffer::raw_collect_integer (int regnum, gdb_byte *addr, int addr_len,
+				 bool is_signed) const
 {
   enum bfd_endian byte_order = gdbarch_byte_order (m_descr->gdbarch);
   const gdb_byte *regbuf;
@@ -989,6 +981,10 @@ regcache::raw_collect_integer (int regnum, gdb_byte *addr, int addr_len,
   copy_integer_to_size (addr, addr_len, regbuf, regsize, is_signed,
 			byte_order);
 }
+
+/* Transfer a single or all registers belonging to a certain register
+   set to or from a buffer.  This is the main worker function for
+   regcache_supply_regset and regcache_collect_regset.  */
 
 void
 regcache::transfer_regset (const struct regset *regset,
