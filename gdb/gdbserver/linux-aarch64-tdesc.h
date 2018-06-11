@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-const target_desc * aarch64_linux_read_description ();
+const target_desc * aarch64_linux_read_description (uint64_t vq);
 
 #if GDB_SELF_TEST
 void initialize_low_tdesc ();

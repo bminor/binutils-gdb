@@ -40,6 +40,7 @@
 #include "gdb_proc_service.h"
 #include "arch/aarch64.h"
 #include "linux-aarch64-tdesc.h"
+#include "nat/aarch64-sve-linux-ptrace.h"
 
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
@@ -503,7 +504,10 @@ aarch64_arch_setup (void)
   is_elf64 = linux_pid_exe_is_elf_64_file (tid, &machine);
 
   if (is_elf64)
-    current_process ()->tdesc = aarch64_linux_read_description ();
+    {
+      uint64_t vq = aarch64_sve_get_vq (tid);
+      current_process ()->tdesc = aarch64_linux_read_description (vq);
+    }
   else
     current_process ()->tdesc = tdesc_arm_with_neon;
 

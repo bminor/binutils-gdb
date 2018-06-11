@@ -1,5 +1,16 @@
 2018-06-11  Alan Hayward  <alan.hayward@arm.com>
 
+	* linux-aarch64-ipa.c (get_ipa_tdesc): Add null VQ param.
+	(initialize_low_tracepoint): Likewise
+	* linux-aarch64-low.c (aarch64_arch_setup): Get VQ.
+	* linux-aarch64-tdesc-selftest.c (aarch64_tdesc_test): Add null VQ
+	param.
+	* linux-aarch64-tdesc.c (aarch64_linux_read_description): Add VQ
+	checks.
+	* linux-aarch64-tdesc.h (aarch64_linux_read_description): Add VQ.
+
+2018-06-11  Alan Hayward  <alan.hayward@arm.com>
+
 	* server.h (PBUFSIZ): Increase size
 
 2018-06-11  Alan Hayward  <alan.hayward@arm.com>

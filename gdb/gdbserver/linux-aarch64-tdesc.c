@@ -21,23 +21,37 @@
 #include "tdesc.h"
 #include "arch/aarch64.h"
 #include "linux-aarch32-low.h"
+#include <inttypes.h>
+
+/* All possible aarch64 target descriptors.  */
+struct target_desc *tdesc_aarch64_list[AARCH64_MAX_SVE_VQ + 1];
 
 /* Create the aarch64 target description.  */
 
 const target_desc *
-aarch64_linux_read_description ()
+aarch64_linux_read_description (uint64_t vq)
 {
-  static target_desc *aarch64_tdesc = NULL;
-  target_desc **tdesc = &aarch64_tdesc;
+  if (vq > AARCH64_MAX_SVE_VQ)
+    error (_("VQ is %" PRIu64 ", maximum supported value is %d"), vq,
+	   AARCH64_MAX_SVE_VQ);
 
-  if (*tdesc == NULL)
+  struct target_desc *tdesc = tdesc_aarch64_list[vq];
+
+  if (tdesc == NULL)
     {
-      /* SVE not yet supported.  */
-      *tdesc = aarch64_create_target_description (0);
+      tdesc = aarch64_create_target_description (vq);
 
       static const char *expedite_regs_aarch64[] = { "x29", "sp", "pc", NULL };
-      init_target_desc (*tdesc, expedite_regs_aarch64);
+      static const char *expedite_regs_aarch64_sve[] = { "x29", "sp", "pc",
+							 "vg", NULL };
+
+      if (vq == 0)
+	init_target_desc (tdesc, expedite_regs_aarch64);
+      else
+	init_target_desc (tdesc, expedite_regs_aarch64_sve);
+
+      tdesc_aarch64_list[vq] = tdesc;
     }
 
-  return *tdesc;
+  return tdesc;
 }
