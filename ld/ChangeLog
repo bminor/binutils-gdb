@@ -1,3 +1,7 @@
+2018-06-11  Nick Clifton  <nickc@redhat.com>
+
+	* po/es.po: Updated Spanish translation.
+
 2018-06-09  Maciej W. Rozycki  <macro@mips.com>
 
 	* testsuite/ld-mips-elf/stub-dynsym-micromips-1-7fff.d: New
