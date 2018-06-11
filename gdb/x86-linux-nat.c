@@ -70,7 +70,7 @@ x86_linux_nat_target::low_new_fork (struct lwp_info *parent, pid_t child_pid)
      in the end before detaching the forked off process, thus making
      this compatible with older Linux kernels too.  */
 
-  parent_pid = ptid_get_pid (parent->ptid);
+  parent_pid = parent->ptid.pid ();
   parent_state = x86_debug_reg_state (parent_pid);
   child_state = x86_debug_reg_state (child_pid);
   *child_state = *parent_state;
@@ -116,7 +116,7 @@ x86_linux_nat_target::read_description ()
   /* GNU/Linux LWP ID's are process ID's.  */
   tid = ptid_get_lwp (inferior_ptid);
   if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid); /* Not a threaded program.  */
+    tid = inferior_ptid.pid (); /* Not a threaded program.  */
 
 #ifdef __x86_64__
   {

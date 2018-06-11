@@ -211,7 +211,7 @@ get_base_thread_from_ravenscar_task (ptid_t ptid)
     return ptid;
 
   base_cpu = ravenscar_get_thread_base_cpu (ptid);
-  return ptid_t (ptid_get_pid (ptid), base_cpu, 0);
+  return ptid_t (ptid.pid (), base_cpu, 0);
 }
 
 /* Fetch the ravenscar running thread from target memory and
@@ -384,7 +384,7 @@ ravenscar_active_task (int cpu)
   if (tid == 0)
     return null_ptid;
   else
-    return ptid_t (ptid_get_pid (base_ptid), 0, tid);
+    return ptid_t (base_ptid.pid (), 0, tid);
 }
 
 const char *
@@ -571,7 +571,7 @@ ravenscar_inferior_created (struct target_ops *target, int from_tty)
 ptid_t
 ravenscar_thread_target::get_ada_task_ptid (long lwp, long thread)
 {
-  return ptid_t (ptid_get_pid (base_ptid), 0, thread);
+  return ptid_t (base_ptid.pid (), 0, thread);
 }
 
 /* Command-list for the "set/show ravenscar" prefix command.  */

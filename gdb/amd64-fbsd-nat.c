@@ -167,7 +167,7 @@ amd64_fbsd_nat_target::read_description ()
   struct reg regs;
   int is64;
 
-  if (ptrace (PT_GETREGS, ptid_get_pid (inferior_ptid),
+  if (ptrace (PT_GETREGS, inferior_ptid.pid (),
 	      (PTRACE_TYPE_ARG3) &regs, 0) == -1)
     perror_with_name (_("Couldn't get registers"));
   is64 = (regs.r_cs == GSEL (GUCODE_SEL, SEL_UPL));
@@ -176,7 +176,7 @@ amd64_fbsd_nat_target::read_description ()
     {
       struct ptrace_xstate_info info;
 
-      if (ptrace (PT_GETXSTATE_INFO, ptid_get_pid (inferior_ptid),
+      if (ptrace (PT_GETXSTATE_INFO, inferior_ptid.pid (),
 		  (PTRACE_TYPE_ARG3) &info, sizeof (info)) == 0)
 	{
 	  x86bsd_xsave_len = info.xsave_len;

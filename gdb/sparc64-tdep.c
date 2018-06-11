@@ -214,7 +214,7 @@ read_maps_entry (const char *line,
 static bool
 adi_available (void)
 {
-  pid_t pid = ptid_get_pid (inferior_ptid);
+  pid_t pid = inferior_ptid.pid ();
   sparc64_adi_info *proc = get_adi_info_proc (pid);
   CORE_ADDR value;
 
@@ -238,7 +238,7 @@ adi_available (void)
 static CORE_ADDR
 adi_normalize_address (CORE_ADDR addr)
 {
-  adi_stat_t ast = get_adi_info (ptid_get_pid (inferior_ptid));
+  adi_stat_t ast = get_adi_info (inferior_ptid.pid ());
 
   if (ast.nbits)
     {
@@ -258,7 +258,7 @@ adi_normalize_address (CORE_ADDR addr)
 static CORE_ADDR
 adi_align_address (CORE_ADDR naddr)
 {
-  adi_stat_t ast = get_adi_info (ptid_get_pid (inferior_ptid));
+  adi_stat_t ast = get_adi_info (inferior_ptid.pid ());
 
   return (naddr - (naddr % ast.blksize)) / ast.blksize;
 }
@@ -268,7 +268,7 @@ adi_align_address (CORE_ADDR naddr)
 static int
 adi_convert_byte_count (CORE_ADDR naddr, int nbytes, CORE_ADDR locl)
 {
-  adi_stat_t ast = get_adi_info (ptid_get_pid (inferior_ptid));
+  adi_stat_t ast = get_adi_info (inferior_ptid.pid ());
 
   return ((naddr + nbytes + ast.blksize - 1) / ast.blksize) - locl;
 }
@@ -285,7 +285,7 @@ adi_convert_byte_count (CORE_ADDR naddr, int nbytes, CORE_ADDR locl)
 static int
 adi_tag_fd (void)
 {
-  pid_t pid = ptid_get_pid (inferior_ptid);
+  pid_t pid = inferior_ptid.pid ();
   sparc64_adi_info *proc = get_adi_info_proc (pid);
 
   if (proc->stat.tag_fd != 0)
@@ -309,7 +309,7 @@ adi_is_addr_mapped (CORE_ADDR vaddr, size_t cnt)
   char filename[MAX_PROC_NAME_SIZE];
   size_t i = 0;
 
-  pid_t pid = ptid_get_pid (inferior_ptid);
+  pid_t pid = inferior_ptid.pid ();
   snprintf (filename, sizeof filename, "/proc/%ld/adi/maps", (long) pid);
   gdb::unique_xmalloc_ptr<char> data
     = target_fileio_read_stralloc (NULL, filename);
@@ -349,7 +349,7 @@ adi_read_versions (CORE_ADDR vaddr, size_t size, gdb_byte *tags)
 
   if (!adi_is_addr_mapped (vaddr, size))
     {
-      adi_stat_t ast = get_adi_info (ptid_get_pid (inferior_ptid));
+      adi_stat_t ast = get_adi_info (inferior_ptid.pid ());
       error(_("Address at %s is not in ADI maps"),
             paddress (target_gdbarch (), vaddr * ast.blksize));
     }
@@ -370,7 +370,7 @@ adi_write_versions (CORE_ADDR vaddr, size_t size, unsigned char *tags)
 
   if (!adi_is_addr_mapped (vaddr, size))
     {
-      adi_stat_t ast = get_adi_info (ptid_get_pid (inferior_ptid));
+      adi_stat_t ast = get_adi_info (inferior_ptid.pid ());
       error(_("Address at %s is not in ADI maps"),
             paddress (target_gdbarch (), vaddr * ast.blksize));
     }
@@ -388,7 +388,7 @@ adi_print_versions (CORE_ADDR vaddr, size_t cnt, gdb_byte *tags)
   int v_idx = 0;
   const int maxelts = 8;  /* # of elements per line */
 
-  adi_stat_t adi_stat = get_adi_info (ptid_get_pid (inferior_ptid));
+  adi_stat_t adi_stat = get_adi_info (inferior_ptid.pid ());
 
   while (cnt > 0)
     {
@@ -461,7 +461,7 @@ adi_examine_command (const char *args, int from_tty)
   if (!adi_available ())
     error (_("No ADI information"));
 
-  pid_t pid = ptid_get_pid (inferior_ptid);
+  pid_t pid = inferior_ptid.pid ();
   sparc64_adi_info *proc = get_adi_info_proc (pid);
   int cnt = 1;
   const char *p = args;
@@ -523,7 +523,7 @@ adi_assign_command (const char *args, int from_tty)
   int version = 0;
   if (q != NULL)           /* parse version tag */
     {
-      adi_stat_t ast = get_adi_info (ptid_get_pid (inferior_ptid));
+      adi_stat_t ast = get_adi_info (inferior_ptid.pid ());
       version = parse_and_eval_long (q);
       if (version < 0 || version > ast.max_version)
         error (_("Invalid ADI version tag %d"), version);

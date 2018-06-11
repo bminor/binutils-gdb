@@ -2433,10 +2433,10 @@ remote_target::remote_notice_new_inferior (ptid_t currthread, int executing)
   if (!in_thread_list (currthread))
     {
       struct inferior *inf = NULL;
-      int pid = ptid_get_pid (currthread);
+      int pid = currthread.pid ();
 
       if (ptid_is_pid (inferior_ptid)
-	  && pid == ptid_get_pid (inferior_ptid))
+	  && pid == inferior_ptid.pid ())
 	{
 	  /* inferior_ptid has no thread member yet.  This can happen
 	     with the vAttach -> remote_wait,"TAAthread:" path if the
@@ -2468,13 +2468,13 @@ remote_target::remote_notice_new_inferior (ptid_t currthread, int executing)
 	 extended-remote which already was debugging an inferior, we
 	 may not know about it yet.  Add it before adding its child
 	 thread, so notifications are emitted in a sensible order.  */
-      if (find_inferior_pid (ptid_get_pid (currthread)) == NULL)
+      if (find_inferior_pid (currthread.pid ()) == NULL)
 	{
 	  struct remote_state *rs = get_remote_state ();
 	  int fake_pid_p = !remote_multi_process_p (rs);
 
 	  inf = remote_add_inferior (fake_pid_p,
-				     ptid_get_pid (currthread), -1, 1);
+				     currthread.pid (), -1, 1);
 	}
 
       /* This is really a new thread.  Add it.  */
@@ -2767,7 +2767,7 @@ remote_target::set_general_process ()
 
   /* We only need to change the remote current thread if it's pointing
      at some other process.  */
-  if (ptid_get_pid (rs->general_thread) != ptid_get_pid (inferior_ptid))
+  if (rs->general_thread.pid () != inferior_ptid.pid ())
     set_general_thread (inferior_ptid);
 }
 
@@ -2782,7 +2782,7 @@ remote_thread_always_alive (ptid_t ptid)
     /* The main thread is always alive.  */
     return 1;
 
-  if (ptid_get_pid (ptid) != 0 && ptid_get_lwp (ptid) == 0)
+  if (ptid.pid () != 0 && ptid_get_lwp (ptid) == 0)
     /* The main thread is always alive.  This can happen after a
        vAttach, if the remote side doesn't support
        multi-threading.  */
@@ -2918,7 +2918,7 @@ remote_target::write_ptid (char *buf, const char *endbuf, ptid_t ptid)
 
   if (remote_multi_process_p (rs))
     {
-      pid = ptid_get_pid (ptid);
+      pid = ptid.pid ();
       if (pid < 0)
 	buf += xsnprintf (buf, endbuf - buf, "p-%x.", -pid);
       else
@@ -2974,9 +2974,9 @@ read_ptid (const char *buf, const char **obuf)
      then since there's no way to know the pid of the reported
      threads, use the magic number.  */
   if (ptid_equal (inferior_ptid, null_ptid))
-    pid = ptid_get_pid (magic_null_ptid);
+    pid = magic_null_ptid.pid ();
   else
-    pid = ptid_get_pid (inferior_ptid);
+    pid = inferior_ptid.pid ();
 
   if (obuf)
     *obuf = pp;
@@ -3839,7 +3839,7 @@ remote_target::extra_thread_info (thread_info *tp)
 		    _("remote_threads_extra_info"));
 
   if (ptid_equal (tp->ptid, magic_null_ptid)
-      || (ptid_get_pid (tp->ptid) != 0 && ptid_get_lwp (tp->ptid) == 0))
+      || (tp->ptid.pid () != 0 && ptid_get_lwp (tp->ptid) == 0))
     /* This is the main thread which was added by GDB.  The remote
        server doesn't know about it.  */
     return NULL;
@@ -3972,7 +3972,7 @@ remote_target::static_tracepoint_markers_by_strid (const char *strid)
 ptid_t
 remote_target::get_ada_task_ptid (long lwp, long thread)
 {
-  return ptid_t (ptid_get_pid (inferior_ptid), lwp, 0);
+  return ptid_t (inferior_ptid.pid (), lwp, 0);
 }
 
 
@@ -4310,7 +4310,7 @@ remote_target::add_current_inferior_and_thread (char *wait_status)
       fake_pid_p = 1;
     }
 
-  remote_add_inferior (fake_pid_p, ptid_get_pid (curr_ptid), -1, 1);
+  remote_add_inferior (fake_pid_p, curr_ptid.pid (), -1, 1);
 
   /* Add the main thread and switch to it.  Don't try reading
      registers yet, since we haven't fetched the target description
@@ -5653,7 +5653,7 @@ remote_target::remote_detach_pid (int pid)
 void
 remote_target::remote_detach_1 (inferior *inf, int from_tty)
 {
-  int pid = ptid_get_pid (inferior_ptid);
+  int pid = inferior_ptid.pid ();
   struct remote_state *rs = get_remote_state ();
   int is_fork_parent;
 
@@ -5737,7 +5737,7 @@ remote_target::follow_fork (int follow_child, int detach_fork)
 	  pid_t child_pid;
 
 	  child_ptid = inferior_thread ()->pending_follow.value.related_pid;
-	  child_pid = ptid_get_pid (child_ptid);
+	  child_pid = child_ptid.pid ();
 
 	  remote_detach_pid (child_pid);
 	}
@@ -6037,7 +6037,7 @@ remote_target::append_resumption (char *p, char *endp,
       ptid_t nptid;
 
       /* All (-1) threads of process.  */
-      nptid = ptid_t (ptid_get_pid (ptid), -1, 0);
+      nptid = ptid_t (ptid.pid (), -1, 0);
 
       p += xsnprintf (p, endp - p, ":");
       p = write_ptid (p, endp, nptid);
@@ -6615,7 +6615,7 @@ remote_target::remote_stop_ns (ptid_t ptid)
 
       if (ptid_is_pid (ptid))
 	  /* All (-1) threads of process.  */
-	nptid = ptid_t (ptid_get_pid (ptid), -1, 0);
+	nptid = ptid_t (ptid.pid (), -1, 0);
       else
 	{
 	  /* Small optimization: if we already have a stop reply for
@@ -6939,7 +6939,7 @@ is_pending_fork_parent (struct target_waitstatus *ws, int event_pid,
   if (ws->kind == TARGET_WAITKIND_FORKED
       || ws->kind == TARGET_WAITKIND_VFORKED)
     {
-      if (event_pid == -1 || event_pid == ptid_get_pid (thread_ptid))
+      if (event_pid == -1 || event_pid == thread_ptid.pid ())
 	return 1;
     }
 
@@ -7054,7 +7054,7 @@ remote_target::discard_pending_stop_replies (struct inferior *inf)
   reply = (struct stop_reply *) rns->pending_event[notif_client_stop.id];
 
   /* Discard the in-flight notification.  */
-  if (reply != NULL && ptid_get_pid (reply->ptid) == inf->pid)
+  if (reply != NULL && reply->ptid.pid () == inf->pid)
     {
       stop_reply_xfree (reply);
       rns->pending_event[notif_client_stop.id] = NULL;
@@ -7508,7 +7508,7 @@ Packet: '%s'\n"),
 	  }
 
 	/* If no process is specified, assume inferior_ptid.  */
-	pid = ptid_get_pid (inferior_ptid);
+	pid = inferior_ptid.pid ();
 	if (*p == '\0')
 	  ;
 	else if (*p == ';')
@@ -9718,7 +9718,7 @@ void
 remote_target::kill ()
 {
   int res = -1;
-  int pid = ptid_get_pid (inferior_ptid);
+  int pid = inferior_ptid.pid ();
   struct remote_state *rs = get_remote_state ();
 
   if (packet_support (PACKET_vKill) != PACKET_DISABLE)
@@ -11320,7 +11320,7 @@ static void
 threadalive_test (const char *cmd, int tty)
 {
   int sample_thread = SAMPLE_THREAD;
-  int pid = ptid_get_pid (inferior_ptid);
+  int pid = inferior_ptid.pid ();
   ptid_t ptid = ptid_t (pid, sample_thread, 0);
 
   if (remote_thread_alive (ptid))
@@ -11472,7 +11472,7 @@ remote_target::pid_to_str (ptid_t ptid)
 	  return normal_pid_to_str (ptid);
 	else
 	  xsnprintf (buf, sizeof buf, "Thread %d.%ld",
-		     ptid_get_pid (ptid), ptid_get_lwp (ptid));
+		     ptid.pid (), ptid_get_lwp (ptid));
       else
 	xsnprintf (buf, sizeof buf, "Thread %ld",
 		   ptid_get_lwp (ptid));

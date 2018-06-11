@@ -266,7 +266,7 @@ gdbpy_create_ptid_object (ptid_t ptid)
   if (!ret)
     return NULL;
 
-  pid = ptid_get_pid (ptid);
+  pid = ptid.pid ();
   lwp = ptid_get_lwp (ptid);
   tid = ptid_get_tid (ptid);
 

@@ -12108,7 +12108,7 @@ ada_exception_support_info_sniffer (void)
      loaded.  If it is not started, this may mean that the symbol is
      in a shared library.  */
 
-  if (ptid_get_pid (inferior_ptid) == 0)
+  if (inferior_ptid.pid () == 0)
     error (_("Unable to insert catchpoint. Try to start the program first."));
 
   /* At this point, we know that we are debugging an Ada program and

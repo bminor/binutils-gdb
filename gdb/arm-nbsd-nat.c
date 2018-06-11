@@ -82,7 +82,7 @@ fetch_register (struct regcache *regcache, int regno)
   struct reg inferior_registers;
   int ret;
 
-  ret = ptrace (PT_GETREGS, ptid_get_pid (regcache->ptid ()),
+  ret = ptrace (PT_GETREGS, regcache->ptid ().pid (),
 		(PTRACE_TYPE_ARG3) &inferior_registers, 0);
 
   if (ret < 0)
@@ -131,7 +131,7 @@ fetch_regs (struct regcache *regcache)
   int ret;
   int regno;
 
-  ret = ptrace (PT_GETREGS, ptid_get_pid (regcache->ptid ()),
+  ret = ptrace (PT_GETREGS, regcache->ptid ().pid (),
 		(PTRACE_TYPE_ARG3) &inferior_registers, 0);
 
   if (ret < 0)
@@ -149,7 +149,7 @@ fetch_fp_register (struct regcache *regcache, int regno)
   struct fpreg inferior_fp_registers;
   int ret;
 
-  ret = ptrace (PT_GETFPREGS, ptid_get_pid (regcache->ptid ()),
+  ret = ptrace (PT_GETFPREGS, regcache->ptid ().pid (),
 		(PTRACE_TYPE_ARG3) &inferior_fp_registers, 0);
 
   if (ret < 0)
@@ -179,7 +179,7 @@ fetch_fp_regs (struct regcache *regcache)
   int ret;
   int regno;
 
-  ret = ptrace (PT_GETFPREGS, ptid_get_pid (regcache->ptid ()),
+  ret = ptrace (PT_GETFPREGS, regcache->ptid ().pid (),
 		(PTRACE_TYPE_ARG3) &inferior_fp_registers, 0);
 
   if (ret < 0)
@@ -216,7 +216,7 @@ store_register (const struct regcache *regcache, int regno)
   struct reg inferior_registers;
   int ret;
 
-  ret = ptrace (PT_GETREGS, ptid_get_pid (regcache->ptid ()),
+  ret = ptrace (PT_GETREGS, regcache->ptid ().pid (),
 		(PTRACE_TYPE_ARG3) &inferior_registers, 0);
 
   if (ret < 0)
@@ -274,7 +274,7 @@ store_register (const struct regcache *regcache, int regno)
       break;
     }
 
-  ret = ptrace (PT_SETREGS, ptid_get_pid (regcache->ptid ()),
+  ret = ptrace (PT_SETREGS, regcache->ptid ().pid (),
 		(PTRACE_TYPE_ARG3) &inferior_registers, 0);
 
   if (ret < 0)
@@ -316,7 +316,7 @@ store_regs (const struct regcache *regcache)
       inferior_registers.r_pc = pc_val | psr_val;
     }
 
-  ret = ptrace (PT_SETREGS, ptid_get_pid (regcache->ptid ()),
+  ret = ptrace (PT_SETREGS, regcache->ptid ().pid (),
 		(PTRACE_TYPE_ARG3) &inferior_registers, 0);
 
   if (ret < 0)
@@ -329,7 +329,7 @@ store_fp_register (const struct regcache *regcache, int regno)
   struct fpreg inferior_fp_registers;
   int ret;
 
-  ret = ptrace (PT_GETFPREGS, ptid_get_pid (regcache->ptid ()),
+  ret = ptrace (PT_GETFPREGS, regcache->ptid ().pid (),
 		(PTRACE_TYPE_ARG3) &inferior_fp_registers, 0);
 
   if (ret < 0)
@@ -351,7 +351,7 @@ store_fp_register (const struct regcache *regcache, int regno)
       break;
     }
 
-  ret = ptrace (PT_SETFPREGS, ptid_get_pid (regcache->ptid ()),
+  ret = ptrace (PT_SETFPREGS, regcache->ptid ().pid (),
 		(PTRACE_TYPE_ARG3) &inferior_fp_registers, 0);
 
   if (ret < 0)
@@ -373,7 +373,7 @@ store_fp_regs (const struct regcache *regcache)
   regcache->raw_collect (ARM_FPS_REGNUM,
 			 (char *) &inferior_fp_registers.fpr_fpsr);
 
-  ret = ptrace (PT_SETFPREGS, ptid_get_pid (regcache->ptid ()),
+  ret = ptrace (PT_SETFPREGS, regcache->ptid ().pid (),
 		(PTRACE_TYPE_ARG3) &inferior_fp_registers, 0);
 
   if (ret < 0)

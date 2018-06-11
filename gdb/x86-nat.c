@@ -139,7 +139,7 @@ void
 x86_cleanup_dregs (void)
 {
   /* Starting from scratch has the same effect.  */
-  x86_forget_process (ptid_get_pid (inferior_ptid));
+  x86_forget_process (inferior_ptid.pid ());
 }
 
 /* Insert a watchpoint to watch a memory region which starts at
@@ -151,7 +151,7 @@ x86_insert_watchpoint (CORE_ADDR addr, int len,
 		       enum target_hw_bp_type type, struct expression *cond)
 {
   struct x86_debug_reg_state *state
-    = x86_debug_reg_state (ptid_get_pid (inferior_ptid));
+    = x86_debug_reg_state (inferior_ptid.pid ());
 
   return x86_dr_insert_watchpoint (state, type, addr, len);
 }
@@ -164,7 +164,7 @@ x86_remove_watchpoint (CORE_ADDR addr, int len,
 		       enum target_hw_bp_type type, struct expression *cond)
 {
   struct x86_debug_reg_state *state
-    = x86_debug_reg_state (ptid_get_pid (inferior_ptid));
+    = x86_debug_reg_state (inferior_ptid.pid ());
 
   return x86_dr_remove_watchpoint (state, type, addr, len);
 }
@@ -176,7 +176,7 @@ int
 x86_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 {
   struct x86_debug_reg_state *state
-    = x86_debug_reg_state (ptid_get_pid (inferior_ptid));
+    = x86_debug_reg_state (inferior_ptid.pid ());
 
   return x86_dr_region_ok_for_watchpoint (state, addr, len);
 }
@@ -189,7 +189,7 @@ int
 x86_stopped_data_address (CORE_ADDR *addr_p)
 {
   struct x86_debug_reg_state *state
-    = x86_debug_reg_state (ptid_get_pid (inferior_ptid));
+    = x86_debug_reg_state (inferior_ptid.pid ());
 
   return x86_dr_stopped_data_address (state, addr_p);
 }
@@ -201,7 +201,7 @@ int
 x86_stopped_by_watchpoint ()
 {
   struct x86_debug_reg_state *state
-    = x86_debug_reg_state (ptid_get_pid (inferior_ptid));
+    = x86_debug_reg_state (inferior_ptid.pid ());
 
   return x86_dr_stopped_by_watchpoint (state);
 }
@@ -213,7 +213,7 @@ int
 x86_insert_hw_breakpoint (struct gdbarch *gdbarch, struct bp_target_info *bp_tgt)
 {
   struct x86_debug_reg_state *state
-    = x86_debug_reg_state (ptid_get_pid (inferior_ptid));
+    = x86_debug_reg_state (inferior_ptid.pid ());
 
   bp_tgt->placed_address = bp_tgt->reqstd_address;
   return x86_dr_insert_watchpoint (state, hw_execute,
@@ -228,7 +228,7 @@ x86_remove_hw_breakpoint (struct gdbarch *gdbarch,
 			  struct bp_target_info *bp_tgt)
 {
   struct x86_debug_reg_state *state
-    = x86_debug_reg_state (ptid_get_pid (inferior_ptid));
+    = x86_debug_reg_state (inferior_ptid.pid ());
 
   return x86_dr_remove_watchpoint (state, hw_execute,
 				   bp_tgt->placed_address, 1);
@@ -264,7 +264,7 @@ int
 x86_stopped_by_hw_breakpoint ()
 {
   struct x86_debug_reg_state *state
-    = x86_debug_reg_state (ptid_get_pid (inferior_ptid));
+    = x86_debug_reg_state (inferior_ptid.pid ());
 
   return x86_dr_stopped_by_hw_breakpoint (state);
 }

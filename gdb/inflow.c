@@ -908,7 +908,7 @@ static void
 pass_signal (int signo)
 {
 #ifndef _WIN32
-  kill (ptid_get_pid (inferior_ptid), SIGINT);
+  kill (inferior_ptid.pid (), SIGINT);
 #endif
 }
 

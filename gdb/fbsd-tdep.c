@@ -406,7 +406,7 @@ static int
 find_signalled_thread (struct thread_info *info, void *data)
 {
   if (info->suspend.stop_signal != GDB_SIGNAL_0
-      && ptid_get_pid (info->ptid) == ptid_get_pid (inferior_ptid))
+      && info->ptid.pid () == inferior_ptid.pid ())
     return 1;
 
   return 0;
@@ -578,7 +578,7 @@ fbsd_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
     {
       if (thr == signalled_thr)
 	continue;
-      if (ptid_get_pid (thr->ptid) != ptid_get_pid (inferior_ptid))
+      if (thr->ptid.pid () != inferior_ptid.pid ())
 	continue;
 
       fbsd_corefile_thread (thr, &thread_args);

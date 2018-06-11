@@ -191,7 +191,7 @@ fetch_register (struct regcache *regcache, int regno)
   struct gdbarch *gdbarch = regcache->arch ();
   int addr[PPC_MAX_REGISTER_SIZE];
   int nr, isfloat;
-  pid_t pid = ptid_get_pid (regcache->ptid ());
+  pid_t pid = regcache->ptid ().pid ();
 
   /* Retrieved values may be -1, so infer errors from errno.  */
   errno = 0;
@@ -250,7 +250,7 @@ store_register (struct regcache *regcache, int regno)
   struct gdbarch *gdbarch = regcache->arch ();
   int addr[PPC_MAX_REGISTER_SIZE];
   int nr, isfloat;
-  pid_t pid = ptid_get_pid (regcache->ptid ());
+  pid_t pid = regcache->ptid ().pid ();
 
   /* Fetch the register's value from the register cache.  */
   regcache->raw_collect (regno, addr);
@@ -393,7 +393,7 @@ rs6000_nat_target::xfer_partial (enum target_object object,
 				 ULONGEST offset, ULONGEST len,
 				 ULONGEST *xfered_len)
 {
-  pid_t pid = ptid_get_pid (inferior_ptid);
+  pid_t pid = inferior_ptid.pid ();
   int arch64 = ARCH64 ();
 
   switch (object)
@@ -506,7 +506,7 @@ rs6000_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
       do
 	{
-	  pid = waitpid (ptid_get_pid (ptid), &status, 0);
+	  pid = waitpid (ptid.pid (), &status, 0);
 	  save_errno = errno;
 	}
       while (pid == -1 && errno == EINTR);
@@ -526,7 +526,7 @@ rs6000_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	}
 
       /* Ignore terminated detached child processes.  */
-      if (!WIFSTOPPED (status) && pid != ptid_get_pid (inferior_ptid))
+      if (!WIFSTOPPED (status) && pid != inferior_ptid.pid ())
 	pid = -1;
     }
   while (pid == -1);
@@ -611,7 +611,7 @@ rs6000_nat_target::create_inferior (const char *exec_file,
 static gdb::byte_vector
 rs6000_ptrace_ldinfo (ptid_t ptid)
 {
-  const int pid = ptid_get_pid (ptid);
+  const int pid = ptid.pid ();
   gdb::byte_vector ldi (1024);
   int rc = -1;
 

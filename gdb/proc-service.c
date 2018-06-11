@@ -204,7 +204,7 @@ ps_lsetfpregs (struct ps_prochandle *ph, lwpid_t lwpid,
 pid_t
 ps_getpid (struct ps_prochandle *ph)
 {
-  return ptid_get_pid (ph->thread->ptid);
+  return ph->thread->ptid.pid ();
 }
 
 void

@@ -51,7 +51,7 @@ static sh_nbsd_nat_target the_sh_nbsd_nat_target;
 void
 sh_nbsd_nat_target::fetch_registers (struct regcache *regcache, int regno)
 {
-  pid_t pid = ptid_get_pid (regcache->ptid ());
+  pid_t pid = regcache->ptid ().pid ();
 
   if (regno == -1 || GETREGS_SUPPLIES (regcache->arch (), regno))
     {
@@ -73,7 +73,7 @@ sh_nbsd_nat_target::fetch_registers (struct regcache *regcache, int regno)
 void
 sh_nbsd_nat_target::store_registers (struct regcache *regcache, int regno)
 {
-  pid_t pid = ptid_get_pid (regcache->ptid ());
+  pid_t pid = regcache->ptid ().pid ();
 
   if (regno == -1 || GETREGS_SUPPLIES (regcache->arch (), regno))
     {

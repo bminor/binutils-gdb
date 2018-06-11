@@ -66,7 +66,7 @@ inf_ptrace_target::follow_fork (int follow_child, int detach_fork)
   if (!follow_child)
     {
       struct thread_info *tp = inferior_thread ();
-      pid_t child_pid = ptid_get_pid (tp->pending_follow.value.related_pid);
+      pid_t child_pid = tp->pending_follow.value.related_pid.pid ();
 
       /* Breakpoints have already been detached from the child by
 	 infrun.c.  */
@@ -156,7 +156,7 @@ inf_ptrace_target::post_startup_inferior (ptid_t pid)
   /* Set the initial event mask.  */
   memset (&pe, 0, sizeof pe);
   pe.pe_set_event |= PTRACE_FORK;
-  if (ptrace (PT_SET_EVENT_MASK, ptid_get_pid (pid),
+  if (ptrace (PT_SET_EVENT_MASK, pid.pid (),
 	      (PTRACE_TYPE_ARG3)&pe, sizeof pe) == -1)
     perror_with_name (("ptrace"));
 }
@@ -174,7 +174,7 @@ inf_ptrace_target::mourn_inferior ()
      Do not check whether this succeeds though, since we may be
      dealing with a process that we attached to.  Such a process will
      only report its exit status to its original parent.  */
-  waitpid (ptid_get_pid (inferior_ptid), &status, 0);
+  waitpid (inferior_ptid.pid (), &status, 0);
 
   inf_child_target::mourn_inferior ();
 }
@@ -267,7 +267,7 @@ inf_ptrace_target::post_attach (int pid)
 void
 inf_ptrace_target::detach (inferior *inf, int from_tty)
 {
-  pid_t pid = ptid_get_pid (inferior_ptid);
+  pid_t pid = inferior_ptid.pid ();
 
   target_announce_detach (from_tty);
 
@@ -303,7 +303,7 @@ inf_ptrace_target::detach_success (inferior *inf)
 void
 inf_ptrace_target::kill ()
 {
-  pid_t pid = ptid_get_pid (inferior_ptid);
+  pid_t pid = inferior_ptid.pid ();
   int status;
 
   if (pid == 0)
@@ -327,7 +327,7 @@ get_ptrace_pid (ptid_t ptid)
      dealing with a non-threaded program/target.  */
   pid = ptid_get_lwp (ptid);
   if (pid == 0)
-    pid = ptid_get_pid (ptid);
+    pid = ptid.pid ();
   return pid;
 }
 
@@ -344,7 +344,7 @@ inf_ptrace_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
   if (ptid_equal (minus_one_ptid, ptid))
     /* Resume all threads.  Traditionally ptrace() only supports
        single-threaded processes, so simply resume the inferior.  */
-    pid = ptid_get_pid (inferior_ptid);
+    pid = inferior_ptid.pid ();
   else
     pid = get_ptrace_pid (ptid);
 
@@ -389,7 +389,7 @@ inf_ptrace_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
       do
 	{
-	  pid = waitpid (ptid_get_pid (ptid), &status, 0);
+	  pid = waitpid (ptid.pid (), &status, 0);
 	  save_errno = errno;
 	}
       while (pid == -1 && errno == EINTR);
@@ -409,7 +409,7 @@ inf_ptrace_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	}
 
       /* Ignore terminated detached child processes.  */
-      if (!WIFSTOPPED (status) && pid != ptid_get_pid (inferior_ptid))
+      if (!WIFSTOPPED (status) && pid != inferior_ptid.pid ())
 	pid = -1;
     }
   while (pid == -1);
@@ -441,7 +441,7 @@ inf_ptrace_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
 	  gdb_assert (pe.pe_report_event == PTRACE_FORK);
 	  gdb_assert (pe.pe_other_pid == pid);
-	  if (fpid == ptid_get_pid (inferior_ptid))
+	  if (fpid == inferior_ptid.pid ())
 	    {
 	      ourstatus->value.related_pid = ptid_t (pe.pe_other_pid);
 	      return ptid_t (fpid);
@@ -614,7 +614,7 @@ bool
 inf_ptrace_target::thread_alive (ptid_t ptid)
 {
   /* ??? Is kill the right way to do this?  */
-  return (::kill (ptid_get_pid (ptid), 0) != -1);
+  return (::kill (ptid.pid (), 0) != -1);
 }
 
 /* Print status information about what we're accessing.  */

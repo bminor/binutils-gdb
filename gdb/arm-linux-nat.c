@@ -993,7 +993,7 @@ arm_linux_insert_hw_breakpoint1 (const struct arm_linux_hw_breakpoint* bpt,
   struct arm_linux_hw_breakpoint* bpts;
   struct update_registers_data data;
 
-  pid = ptid_get_pid (inferior_ptid);
+  pid = inferior_ptid.pid ();
   pid_ptid = ptid_t (pid);
 
   if (watchpoint)
@@ -1032,7 +1032,7 @@ arm_linux_remove_hw_breakpoint1 (const struct arm_linux_hw_breakpoint *bpt,
   struct arm_linux_hw_breakpoint* bpts;
   struct update_registers_data data;
 
-  pid = ptid_get_pid (inferior_ptid);
+  pid = inferior_ptid.pid ();
   pid_ptid = ptid_t (pid);
 
   if (watchpoint)
@@ -1251,8 +1251,8 @@ arm_linux_nat_target::low_prepare_to_resume (struct lwp_info *lwp)
   struct arch_lwp_info *arm_lwp_info = lwp->arch_private;
 
   pid = ptid_get_lwp (lwp->ptid);
-  bpts = arm_linux_get_debug_reg_state (ptid_get_pid (lwp->ptid))->bpts;
-  wpts = arm_linux_get_debug_reg_state (ptid_get_pid (lwp->ptid))->wpts;
+  bpts = arm_linux_get_debug_reg_state (lwp->ptid.pid ())->bpts;
+  wpts = arm_linux_get_debug_reg_state (lwp->ptid.pid ())->wpts;
 
   /* NULL means this is the main thread still going through the shell,
      or, no watchpoint has been set yet.  In that case, there's
@@ -1315,7 +1315,7 @@ arm_linux_nat_target::low_new_fork (struct lwp_info *parent, pid_t child_pid)
      new process so that all breakpoints and watchpoints can be
      removed together.  */
 
-  parent_pid = ptid_get_pid (parent->ptid);
+  parent_pid = parent->ptid.pid ();
   parent_state = arm_linux_get_debug_reg_state (parent_pid);
   child_state = arm_linux_get_debug_reg_state (child_pid);
   *child_state = *parent_state;

@@ -58,14 +58,14 @@ static i386_fbsd_nat_target the_i386_fbsd_nat_target;
 void
 i386_fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
 {
-  pid_t pid = ptid_get_pid (ptid);
+  pid_t pid = ptid.pid ();
   int request = PT_STEP;
 
   if (pid == -1)
     /* Resume all threads.  This only gets used in the non-threaded
        case, where "resume all threads" and "resume inferior_ptid" are
        the same.  */
-    pid = ptid_get_pid (inferior_ptid);
+    pid = inferior_ptid.pid ();
 
   if (!step)
     {
@@ -148,7 +148,7 @@ i386_fbsd_nat_target::read_description ()
     {
       struct ptrace_xstate_info info;
 
-      if (ptrace (PT_GETXSTATE_INFO, ptid_get_pid (inferior_ptid),
+      if (ptrace (PT_GETXSTATE_INFO, inferior_ptid.pid (),
 		  (PTRACE_TYPE_ARG3) &info, sizeof (info)) == 0)
 	{
 	  x86bsd_xsave_len = info.xsave_len;

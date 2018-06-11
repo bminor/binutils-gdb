@@ -88,7 +88,7 @@ void
 ppc_nbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  pid_t pid = ptid_get_pid (regcache->ptid ());
+  pid_t pid = regcache->ptid ().pid ();
 
   if (regnum == -1 || getregs_supplies (gdbarch, regnum))
     {
@@ -117,7 +117,7 @@ void
 ppc_nbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  pid_t pid = ptid_get_pid (regcache->ptid ());
+  pid_t pid = regcache->ptid ().pid ();
 
   if (regnum == -1 || getregs_supplies (gdbarch, regnum))
     {

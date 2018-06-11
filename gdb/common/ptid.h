@@ -156,10 +156,6 @@ extern ptid_t minus_one_ptid;
 /* The following functions are kept for backwards compatibility.  The use of
    the ptid_t methods is preferred.  */
 
-/* See ptid_t::pid.  */
-
-extern int ptid_get_pid (const ptid_t &ptid);
-
 /* See ptid_t::lwp.  */
 
 extern long ptid_get_lwp (const ptid_t &ptid);

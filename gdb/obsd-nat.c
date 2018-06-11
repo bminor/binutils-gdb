@@ -52,7 +52,7 @@ obsd_nat_target::pid_to_str (ptid_t ptid)
 void
 obsd_nat_target::update_thread_list ()
 {
-  pid_t pid = ptid_get_pid (inferior_ptid);
+  pid_t pid = inferior_ptid.pid ();
   struct ptrace_thread_state pts;
 
   prune_threads ();
@@ -90,7 +90,7 @@ obsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
       do
 	{
-	  pid = waitpid (ptid_get_pid (ptid), &status, 0);
+	  pid = waitpid (ptid.pid (), &status, 0);
 	  save_errno = errno;
 	}
       while (pid == -1 && errno == EINTR);
@@ -110,7 +110,7 @@ obsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	}
 
       /* Ignore terminated detached child processes.  */
-      if (!WIFSTOPPED (status) && pid != ptid_get_pid (inferior_ptid))
+      if (!WIFSTOPPED (status) && pid != inferior_ptid.pid ())
 	pid = -1;
     }
   while (pid == -1);
@@ -142,7 +142,7 @@ obsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
 	  gdb_assert (pe.pe_report_event == PTRACE_FORK);
 	  gdb_assert (pe.pe_other_pid == pid);
-	  if (fpid == ptid_get_pid (inferior_ptid))
+	  if (fpid == inferior_ptid.pid ())
 	    {
 	      ourstatus->value.related_pid = ptid_t (pe.pe_other_pid);
 	      return ptid_t (fpid);

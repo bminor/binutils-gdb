@@ -968,7 +968,7 @@ mi_on_resume_1 (struct mi_interp *mi, ptid_t ptid)
 			  current_token ? current_token : "");
     }
 
-  if (ptid_get_pid (ptid) == -1)
+  if (ptid.pid () == -1)
     fprintf_unfiltered (mi->raw_stdout, "*running,thread-id=\"all\"\n");
   else if (ptid_is_pid (ptid))
     {

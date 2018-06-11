@@ -248,7 +248,7 @@ target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
 void
 target_mourn_inferior (ptid_t ptid)
 {
-  (*the_target->mourn) (find_process_pid (ptid_get_pid (ptid)));
+  (*the_target->mourn) (find_process_pid (ptid.pid ()));
 }
 
 /* See target/target.h.  */
@@ -320,13 +320,13 @@ target_pid_to_str (ptid_t ptid)
     xsnprintf (buf, sizeof (buf), "<null thread>");
   else if (ptid_get_tid (ptid) != 0)
     xsnprintf (buf, sizeof (buf), "Thread %d.0x%lx",
-	       ptid_get_pid (ptid), ptid_get_tid (ptid));
+	       ptid.pid (), ptid_get_tid (ptid));
   else if (ptid_get_lwp (ptid) != 0)
     xsnprintf (buf, sizeof (buf), "LWP %d.%ld",
-	       ptid_get_pid (ptid), ptid_get_lwp (ptid));
+	       ptid.pid (), ptid_get_lwp (ptid));
   else
     xsnprintf (buf, sizeof (buf), "Process %d",
-	       ptid_get_pid (ptid));
+	       ptid.pid ());
 
   return buf;
 }

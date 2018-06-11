@@ -1429,7 +1429,7 @@ windows_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
   last_sig = GDB_SIGNAL_0;
 
   DEBUG_EXEC (("gdb: windows_resume (pid=%d, tid=%ld, step=%d, sig=%d);\n",
-	       ptid_get_pid (ptid), ptid_get_tid (ptid), step, sig));
+	       ptid.pid (), ptid_get_tid (ptid), step, sig));
 
   /* Get context for currently selected thread.  */
   th = thread_rec (ptid_get_tid (inferior_ptid), FALSE);
@@ -2908,7 +2908,7 @@ void
 windows_nat_target::close ()
 {
   DEBUG_EVENTS (("gdb: windows_close, inferior_ptid=%d\n",
-		ptid_get_pid (inferior_ptid)));
+		inferior_ptid.pid ()));
 }
 
 /* Convert pid to printable format.  */
@@ -2920,7 +2920,7 @@ windows_nat_target::pid_to_str (ptid_t ptid)
   if (ptid_get_tid (ptid) != 0)
     {
       snprintf (buf, sizeof (buf), "Thread %d.0x%lx",
-		ptid_get_pid (ptid), ptid_get_tid (ptid));
+		ptid.pid (), ptid_get_tid (ptid));
       return buf;
     }
 
@@ -3020,7 +3020,7 @@ windows_nat_target::get_tib_address (ptid_t ptid, CORE_ADDR *addr)
 ptid_t
 windows_nat_target::get_ada_task_ptid (long lwp, long thread)
 {
-  return ptid_t (ptid_get_pid (inferior_ptid), 0, lwp);
+  return ptid_t (inferior_ptid.pid (), 0, lwp);
 }
 
 /* Implementation of the to_thread_name method.  */

@@ -618,7 +618,7 @@ default_terminal_info (struct target_ops *self, const char *args, int from_tty)
 static ptid_t
 default_get_ada_task_ptid (struct target_ops *self, long lwp, long tid)
 {
-  return ptid_t (ptid_get_pid (inferior_ptid), lwp, tid);
+  return ptid_t (inferior_ptid.pid (), lwp, tid);
 }
 
 static enum exec_direction_kind
@@ -3240,7 +3240,7 @@ target_announce_detach (int from_tty)
   if (exec_file == NULL)
     exec_file = "";
 
-  pid = ptid_get_pid (inferior_ptid);
+  pid = inferior_ptid.pid ();
   printf_unfiltered (_("Detaching from program: %s, %s\n"), exec_file,
 		     target_pid_to_str (ptid_t (pid)));
   gdb_flush (gdb_stdout);
@@ -3285,7 +3285,7 @@ normal_pid_to_str (ptid_t ptid)
 {
   static char buf[32];
 
-  xsnprintf (buf, sizeof buf, "process %d", ptid_get_pid (ptid));
+  xsnprintf (buf, sizeof buf, "process %d", ptid.pid ());
   return buf;
 }
 

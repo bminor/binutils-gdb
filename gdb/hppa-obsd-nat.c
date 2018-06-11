@@ -196,7 +196,7 @@ hppaobsd_collect_fpregset (struct regcache *regcache,
 void
 hppa_obsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 {
-  pid_t pid = ptid_get_pid (regcache->ptid ());
+  pid_t pid = regcache->ptid ().pid ();
 
   if (regnum == -1 || hppaobsd_gregset_supplies_p (regnum))
     {

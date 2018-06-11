@@ -1226,7 +1226,7 @@ have_ptrace_hwdebug_interface (void)
 
       tid = ptid_get_lwp (inferior_ptid);
       if (tid == 0)
-	tid = ptid_get_pid (inferior_ptid);
+	tid = inferior_ptid.pid ();
 
       /* Check for kernel support for PowerPC HWDEBUG ptrace interface.  */
       if (ptrace (PPC_PTRACE_GETHWDBGINFO, tid, 0, &hwdebug_info) >= 0)
@@ -1298,7 +1298,7 @@ ppc_linux_nat_target::can_use_hw_breakpoint (enum bptype type, int cnt, int ot)
 	 ptrace call will return -1.  Fail in that case.  */
       tid = ptid_get_lwp (ptid);
       if (tid == 0)
-	tid = ptid_get_pid (ptid);
+	tid = ptid.pid ();
 
       if (ptrace (PTRACE_SET_DEBUGREG, tid, 0, 0) == -1)
 	return 0;
@@ -2185,7 +2185,7 @@ ppc_linux_nat_target::auxv_parse (gdb_byte **readptr,
 {
   int tid = ptid_get_lwp (inferior_ptid);
   if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid);
+    tid = inferior_ptid.pid ();
 
   int sizeof_auxv_field = ppc_linux_target_wordsize (tid);
 
@@ -2212,7 +2212,7 @@ ppc_linux_nat_target::read_description ()
 {
   int tid = ptid_get_lwp (inferior_ptid);
   if (tid == 0)
-    tid = ptid_get_pid (inferior_ptid);
+    tid = inferior_ptid.pid ();
 
   if (have_ptrace_getsetevrregs)
     {

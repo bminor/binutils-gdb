@@ -530,7 +530,7 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 	      debug_printf ("HEW: Got fork event from LWP %ld, "
 			    "new child is %d\n",
 			    ptid_get_lwp (ptid_of (event_thr)),
-			    ptid_get_pid (ptid));
+			    ptid.pid ());
 	    }
 
 	  /* Add the new process to the tables and clone the breakpoint
@@ -699,7 +699,7 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 
       /* Get the event ptid.  */
       event_ptid = ptid_of (event_thr);
-      event_pid = ptid_get_pid (event_ptid);
+      event_pid = event_ptid.pid ();
 
       /* Save the syscall list from the execing process.  */
       proc = get_thread_process (event_thr);
@@ -1323,7 +1323,7 @@ static void
 kill_wait_lwp (struct lwp_info *lwp)
 {
   struct thread_info *thr = get_lwp_thread (lwp);
-  int pid = ptid_get_pid (ptid_of (thr));
+  int pid = ptid_of (thr).pid ();
   int lwpid = ptid_get_lwp (ptid_of (thr));
   int wstat;
   int res;
@@ -4546,7 +4546,7 @@ linux_set_resume_request (thread_info *thread, thread_resume *resume, size_t n)
 	  || ptid == thread->id
 	  /* Handle both 'pPID' and 'pPID.-1' as meaning 'all threads
 	     of PID'.  */
-	  || (ptid_get_pid (ptid) == pid_of (thread)
+	  || (ptid.pid () == pid_of (thread)
 	      && (ptid_is_pid (ptid)
 		  || ptid_get_lwp (ptid) == -1)))
 	{

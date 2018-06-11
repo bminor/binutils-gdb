@@ -83,7 +83,7 @@ lynx_ptid_t (int pid, long tid)
 static int
 lynx_ptid_get_pid (ptid_t ptid)
 {
-  return ptid_get_pid (ptid);
+  return ptid.pid ();
 }
 
 /* Return the LynxOS tid of the given PTID.  */
@@ -352,7 +352,7 @@ lynx_resume (struct thread_resume *resume_info, size_t n)
   if (ptid_equal (ptid, minus_one_ptid))
     ptid = ptid_of (current_thread);
 
-  regcache_invalidate_pid (ptid_get_pid (ptid));
+  regcache_invalidate_pid (ptid.pid ());
 
   errno = 0;
   lynx_ptrace (request, ptid, 1, signal, 0);

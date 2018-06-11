@@ -2638,7 +2638,7 @@ proceed_after_attach_callback (struct thread_info *thread,
 {
   int pid = * (int *) arg;
 
-  if (ptid_get_pid (thread->ptid) == pid
+  if (thread->ptid.pid () == pid
       && thread->state != THREAD_EXITED
       && !thread->executing
       && !thread->stop_requested
@@ -2677,7 +2677,7 @@ setup_inferior (int from_tty)
   /* If no exec file is yet known, try to determine it from the
      process itself.  */
   if (get_exec_file (0) == NULL)
-    exec_file_locate_attach (ptid_get_pid (inferior_ptid), 1, from_tty);
+    exec_file_locate_attach (inferior_ptid.pid (), 1, from_tty);
   else
     {
       reopen_exec_file ();
@@ -2685,7 +2685,7 @@ setup_inferior (int from_tty)
     }
 
   /* Take any necessary post-attaching actions for this platform.  */
-  target_post_attach (ptid_get_pid (inferior_ptid));
+  target_post_attach (inferior_ptid.pid ());
 
   post_create_inferior (current_top_target (), from_tty);
 }
@@ -2766,7 +2766,7 @@ attach_post_wait (const char *args, int from_tty, enum attach_post_wait_mode mod
 	     still exists.  */
 	  ALL_NON_EXITED_THREADS (thread)
 	    {
-	      if (ptid_get_pid (thread->ptid) == pid)
+	      if (thread->ptid.pid () == pid)
 		{
 		  if (thread->inf->num < lowest->inf->num
 		      || thread->per_inf_num < lowest->per_inf_num)
@@ -2897,7 +2897,7 @@ attach_command (const char *args, int from_tty)
       else
 	/* The user requested an `attach', so stop all threads of this
 	   inferior.  */
-	target_stop (ptid_t (ptid_get_pid (inferior_ptid)));
+	target_stop (ptid_t (inferior_ptid.pid ()));
     }
 
   mode = async_exec ? ATTACH_POST_WAIT_RESUME : ATTACH_POST_WAIT_STOP;

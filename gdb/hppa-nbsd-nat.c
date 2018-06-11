@@ -170,7 +170,7 @@ void
 hppa_nbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 
 {
-  pid_t pid = ptid_get_pid (regcache->ptid ());
+  pid_t pid = regcache->ptid ().pid ();
 
   if (regnum == -1 || hppanbsd_gregset_supplies_p (regnum))
     {
@@ -199,7 +199,7 @@ hppa_nbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 void
 hppa_nbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
 {
-  pid_t pid = ptid_get_pid (regcache->ptid ());
+  pid_t pid = regcache->ptid ().pid ();
 
   if (regnum == -1 || hppanbsd_gregset_supplies_p (regnum))
     {

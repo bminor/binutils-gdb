@@ -418,7 +418,7 @@ spu_resume (struct thread_resume *resume_info, size_t n)
 static ptid_t
 spu_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 {
-  int pid = ptid_get_pid (ptid);
+  int pid = ptid.pid ();
   int w;
   int ret;
 

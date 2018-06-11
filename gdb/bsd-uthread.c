@@ -407,7 +407,7 @@ bsd_uthread_target::wait (ptid_t ptid, struct target_waitstatus *status,
 	{
 	  ULONGEST magic = extract_unsigned_integer (buf, 4, byte_order);
 	  if (magic == BSD_UTHREAD_PTHREAD_MAGIC)
-	    ptid = ptid_t (ptid_get_pid (ptid), 0, addr);
+	    ptid = ptid_t (ptid.pid (), 0, addr);
 	}
     }
 
@@ -457,7 +457,7 @@ bsd_uthread_target::thread_alive (ptid_t ptid)
 void
 bsd_uthread_target::update_thread_list ()
 {
-  pid_t pid = ptid_get_pid (inferior_ptid);
+  pid_t pid = inferior_ptid.pid ();
   int offset = bsd_uthread_thread_next_offset;
   CORE_ADDR addr;
 
@@ -539,7 +539,7 @@ bsd_uthread_target::pid_to_str (ptid_t ptid)
       static char buf[64];
 
       xsnprintf (buf, sizeof buf, "process %d, thread 0x%lx",
-		 ptid_get_pid (ptid), ptid_get_tid (ptid));
+		 ptid.pid (), ptid_get_tid (ptid));
       return buf;
     }
 

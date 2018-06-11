@@ -930,7 +930,7 @@ darwin_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
 
   inferior_debug
     (2, _("darwin_resume: pid=%d, tid=0x%lx, step=%d, signal=%d\n"),
-     ptid_get_pid (ptid), ptid_get_tid (ptid), step, signal);
+     ptid.pid (), ptid_get_tid (ptid), step, signal);
 
   if (signal == GDB_SIGNAL_0)
     nsignal = 0;
@@ -1199,7 +1199,7 @@ darwin_wait (ptid_t ptid, struct target_waitstatus *status)
 
   inferior_debug
     (2, _("darwin_wait: waiting for a message pid=%d thread=%lx\n"),
-     ptid_get_pid (ptid), ptid_get_tid (ptid));
+     ptid.pid (), ptid_get_tid (ptid));
 
   /* Handle fake stop events at first.  */
   if (darwin_inf_fake_stop != NULL)
@@ -1924,7 +1924,7 @@ darwin_nat_target::attach (const char *args, int from_tty)
 void
 darwin_nat_target::detach (inferior *inf, int from_tty)
 {
-  pid_t pid = ptid_get_pid (inferior_ptid);
+  pid_t pid = inferior_ptid.pid ();
   darwin_inferior *priv = get_darwin_inferior (inf);
   kern_return_t kret;
   int res;
@@ -1967,7 +1967,7 @@ darwin_nat_target::pid_to_str (ptid_t ptid)
   if (tid != 0)
     {
       snprintf (buf, sizeof (buf), _("Thread 0x%lx of process %u"),
-		tid, ptid_get_pid (ptid));
+		tid, ptid.pid ());
       return buf;
     }
 
@@ -2272,7 +2272,7 @@ darwin_nat_target::get_ada_task_ptid (long lwp, long thread)
   for (darwin_thread_t *t : priv->threads)
     {
       if (t->inf_port == lwp)
-	return ptid_t (ptid_get_pid (inferior_ptid), 0, t->gdb_port);
+	return ptid_t (inferior_ptid.pid (), 0, t->gdb_port);
     }
 
   /* Maybe the port was never extract.  Do it now.  */
@@ -2316,7 +2316,7 @@ darwin_nat_target::get_ada_task_ptid (long lwp, long thread)
                  names_count * sizeof (mach_port_t));
 
   if (res)
-    return ptid_t (ptid_get_pid (inferior_ptid), 0, res);
+    return ptid_t (inferior_ptid.pid (), 0, res);
   else
     return null_ptid;
 }

@@ -98,7 +98,7 @@ alpha_bsd_nat_target::fetch_registers (struct regcache *regcache, int regno)
     {
       struct reg gregs;
 
-      if (ptrace (PT_GETREGS, ptid_get_pid (regcache->ptid ()),
+      if (ptrace (PT_GETREGS, regcache->ptid ().pid (),
 		  (PTRACE_TYPE_ARG3) &gregs, 0) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
@@ -112,7 +112,7 @@ alpha_bsd_nat_target::fetch_registers (struct regcache *regcache, int regno)
     {
       struct fpreg fpregs;
 
-      if (ptrace (PT_GETFPREGS, ptid_get_pid (regcache->ptid ()),
+      if (ptrace (PT_GETFPREGS, regcache->ptid ().pid (),
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get floating point status"));
 
@@ -129,13 +129,13 @@ alpha_bsd_nat_target::store_registers (struct regcache *regcache, int regno)
   if (regno == -1 || getregs_supplies (regno))
     {
       struct reg gregs;
-      if (ptrace (PT_GETREGS, ptid_get_pid (regcache->ptid ()),
+      if (ptrace (PT_GETREGS, regcache->ptid ().pid (),
                   (PTRACE_TYPE_ARG3) &gregs, 0) == -1)
         perror_with_name (_("Couldn't get registers"));
 
       alphabsd_fill_reg (regcache, (char *) &gregs, regno);
 
-      if (ptrace (PT_SETREGS, ptid_get_pid (regcache->ptid ()),
+      if (ptrace (PT_SETREGS, regcache->ptid ().pid (),
                   (PTRACE_TYPE_ARG3) &gregs, 0) == -1)
         perror_with_name (_("Couldn't write registers"));
 
@@ -148,13 +148,13 @@ alpha_bsd_nat_target::store_registers (struct regcache *regcache, int regno)
     {
       struct fpreg fpregs;
 
-      if (ptrace (PT_GETFPREGS, ptid_get_pid (regcache->ptid ()),
+      if (ptrace (PT_GETFPREGS, regcache->ptid ().pid (),
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get floating point status"));
 
       alphabsd_fill_fpreg (regcache, (char *) &fpregs, regno);
 
-      if (ptrace (PT_SETFPREGS, ptid_get_pid (regcache->ptid ()),
+      if (ptrace (PT_SETFPREGS, regcache->ptid ().pid (),
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't write floating point status"));
     }

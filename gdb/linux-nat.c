@@ -410,7 +410,7 @@ linux_nat_target::post_attach (int pid)
 void
 linux_nat_target::post_startup_inferior (ptid_t ptid)
 {
-  linux_init_ptrace (ptid_get_pid (ptid), 0);
+  linux_init_ptrace (ptid.pid (), 0);
 }
 
 /* Return the number of known LWPs in the tgid given by PID.  */
@@ -422,7 +422,7 @@ num_lwps (int pid)
   struct lwp_info *lp;
 
   for (lp = lwp_list; lp; lp = lp->next)
-    if (ptid_get_pid (lp->ptid) == pid)
+    if (lp->ptid.pid () == pid)
       count++;
 
   return count;
@@ -821,7 +821,7 @@ lwp_lwpid_htab_remove_pid (void **slot, void *info)
   struct lwp_info *lp = (struct lwp_info *) *slot;
   int pid = *(int *) info;
 
-  if (ptid_get_pid (lp->ptid) == pid)
+  if (lp->ptid.pid () == pid)
     {
       htab_clear_slot (lwp_lwpid_htab, slot);
       lwp_list_remove (lp);
@@ -938,7 +938,7 @@ find_lwp_pid (ptid_t ptid)
   if (ptid_lwp_p (ptid))
     lwp = ptid_get_lwp (ptid);
   else
-    lwp = ptid_get_pid (ptid);
+    lwp = ptid.pid ();
 
   dummy.ptid = ptid_t (0, lwp, 0);
   lp = (struct lwp_info *) htab_find (lwp_lwpid_htab, &dummy);
@@ -978,7 +978,7 @@ linux_nat_switch_fork (ptid_t new_ptid)
 {
   struct lwp_info *lp;
 
-  purge_lwp_list (ptid_get_pid (inferior_ptid));
+  purge_lwp_list (inferior_ptid.pid ());
 
   lp = add_lwp (new_ptid);
   lp->stopped = 1;
@@ -1196,8 +1196,8 @@ linux_nat_target::attach (const char *args, int from_tty)
 
   /* The ptrace base target adds the main thread with (pid,0,0)
      format.  Decorate it with lwp info.  */
-  ptid = ptid_t (ptid_get_pid (inferior_ptid),
-		 ptid_get_pid (inferior_ptid),
+  ptid = ptid_t (inferior_ptid.pid (),
+		 inferior_ptid.pid (),
 		 0);
   thread_change_ptid (inferior_ptid, ptid);
 
@@ -1245,7 +1245,7 @@ linux_nat_target::attach (const char *args, int from_tty)
   if (debug_linux_nat)
     fprintf_unfiltered (gdb_stdlog,
 			"LNA: waitpid %ld, saving status %s\n",
-			(long) ptid_get_pid (lp->ptid), status_to_str (status));
+			(long) lp->ptid.pid (), status_to_str (status));
 
   lp->status = status;
 
@@ -1256,7 +1256,7 @@ linux_nat_target::attach (const char *args, int from_tty)
      of threads/LWPs, and those structures may well be corrupted.
      Note that once thread_db is loaded, we'll still use it to list
      threads and associate pthread info with each LWP.  */
-  linux_proc_attach_tgid_threads (ptid_get_pid (lp->ptid),
+  linux_proc_attach_tgid_threads (lp->ptid.pid (),
 				  attach_proc_task_lwp_callback);
 
   if (target_can_async_p ())
@@ -1450,7 +1450,7 @@ detach_callback (struct lwp_info *lp, void *data)
   /* We don't actually detach from the thread group leader just yet.
      If the thread group exits, we must reap the zombie clone lwps
      before we're able to reap the leader.  */
-  if (ptid_get_lwp (lp->ptid) != ptid_get_pid (lp->ptid))
+  if (ptid_get_lwp (lp->ptid) != lp->ptid.pid ())
     detach_one_lwp (lp, NULL);
   return 0;
 }
@@ -1969,7 +1969,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 	}
 
       if (event == PTRACE_EVENT_FORK
-	  && linux_fork_checkpointing_p (ptid_get_pid (lp->ptid)))
+	  && linux_fork_checkpointing_p (lp->ptid.pid ()))
 	{
 	  /* Handle checkpointing by linux-fork.c here as a special
 	     case.  We don't want the follow-fork-mode or 'catch fork'
@@ -2008,7 +2008,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 				"from LWP %d, new child is LWP %ld\n",
 				pid, new_pid);
 
-	  new_lp = add_lwp (ptid_t (ptid_get_pid (lp->ptid), new_pid, 0));
+	  new_lp = add_lwp (ptid_t (lp->ptid.pid (), new_pid, 0));
 	  new_lp->stopped = 1;
 	  new_lp->resumed = 1;
 
@@ -2181,7 +2181,7 @@ wait_lwp (struct lwp_info *lp)
 	 Therefore always use WNOHANG with sigsuspend - it is equivalent to
 	 waiting waitpid but linux_proc_pid_is_zombie is safe this way.  */
 
-      if (ptid_get_pid (lp->ptid) == ptid_get_lwp (lp->ptid)
+      if (lp->ptid.pid () == ptid_get_lwp (lp->ptid)
 	  && linux_proc_pid_is_zombie (ptid_get_lwp (lp->ptid)))
 	{
 	  thread_dead = 1;
@@ -2219,11 +2219,11 @@ wait_lwp (struct lwp_info *lp)
       if (WIFEXITED (status) || WIFSIGNALED (status))
 	{
 	  if (report_thread_events
-	      || ptid_get_pid (lp->ptid) == ptid_get_lwp (lp->ptid))
+	      || lp->ptid.pid () == ptid_get_lwp (lp->ptid))
 	    {
 	      if (debug_linux_nat)
 		fprintf_unfiltered (gdb_stdlog, "WL: LWP %d exited.\n",
-				    ptid_get_pid (lp->ptid));
+				    lp->ptid.pid ());
 
 	      /* If this is the leader exiting, it means the whole
 		 process is gone.  Store the status to report to the
@@ -2251,7 +2251,7 @@ wait_lwp (struct lwp_info *lp)
 
   if (lp->must_set_ptrace_flags)
     {
-      struct inferior *inf = find_inferior_pid (ptid_get_pid (lp->ptid));
+      struct inferior *inf = find_inferior_pid (lp->ptid.pid ());
       int options = linux_nat_ptrace_options (inf->attach_flag);
 
       linux_enable_event_reporting (ptid_get_lwp (lp->ptid), options);
@@ -2973,7 +2973,7 @@ linux_nat_filter_event (int lwpid, int status)
 
   if (WIFSTOPPED (status) && lp->must_set_ptrace_flags)
     {
-      struct inferior *inf = find_inferior_pid (ptid_get_pid (lp->ptid));
+      struct inferior *inf = find_inferior_pid (lp->ptid.pid ());
       int options = linux_nat_ptrace_options (inf->attach_flag);
 
       linux_enable_event_reporting (ptid_get_lwp (lp->ptid), options);
@@ -3014,7 +3014,7 @@ linux_nat_filter_event (int lwpid, int status)
   if (WIFEXITED (status) || WIFSIGNALED (status))
     {
       if (!report_thread_events
-	  && num_lwps (ptid_get_pid (lp->ptid)) > 1)
+	  && num_lwps (lp->ptid.pid ()) > 1)
 	{
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
@@ -3125,7 +3125,7 @@ linux_nat_filter_event (int lwpid, int status)
 		 will receive it - unless they're using CLONE_THREAD to
 		 share signals.  Since we only want to report it once, we
 		 mark it as ignored for all LWPs except this one.  */
-	      iterate_over_lwps (ptid_t (ptid_get_pid (lp->ptid)),
+	      iterate_over_lwps (ptid_t (lp->ptid.pid ()),
 					      set_ignore_sigint, NULL);
 	      lp->ignore_sigint = 0;
 	    }
@@ -3227,7 +3227,7 @@ filter_exit_event (struct lwp_info *event_child,
 {
   ptid_t ptid = event_child->ptid;
 
-  if (num_lwps (ptid_get_pid (ptid)) > 1)
+  if (num_lwps (ptid.pid ()) > 1)
     {
       if (report_thread_events)
 	ourstatus->kind = TARGET_WAITKIND_THREAD_EXITED;
@@ -3259,8 +3259,8 @@ linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
     {
       /* Upgrade the main thread's ptid.  */
       thread_change_ptid (inferior_ptid,
-			  ptid_t (ptid_get_pid (inferior_ptid),
-				  ptid_get_pid (inferior_ptid), 0));
+			  ptid_t (inferior_ptid.pid (),
+				  inferior_ptid.pid (), 0));
 
       lp = add_initial_lwp (inferior_ptid);
       lp->resumed = 1;
@@ -3688,7 +3688,7 @@ kill_unfollowed_fork_children (struct inferior *inf)
 	    || ws->kind == TARGET_WAITKIND_VFORKED)
 	  {
 	    ptid_t child_ptid = ws->value.related_pid;
-	    int child_pid = ptid_get_pid (child_ptid);
+	    int child_pid = child_ptid.pid ();
 	    int child_lwp = ptid_get_lwp (child_ptid);
 
 	    kill_one_lwp (child_lwp);
@@ -3713,7 +3713,7 @@ linux_nat_target::kill ()
     linux_fork_killall ();
   else
     {
-      ptid_t ptid = ptid_t (ptid_get_pid (inferior_ptid));
+      ptid_t ptid = ptid_t (inferior_ptid.pid ());
 
       /* Stop all threads before killing them, since ptrace requires
 	 that the thread is stopped to sucessfully PTRACE_KILL.  */
@@ -3735,7 +3735,7 @@ linux_nat_target::kill ()
 void
 linux_nat_target::mourn_inferior ()
 {
-  int pid = ptid_get_pid (inferior_ptid);
+  int pid = inferior_ptid.pid ();
 
   purge_lwp_list (pid);
 
@@ -3784,7 +3784,7 @@ linux_xfer_siginfo (enum target_object object,
 
   pid = ptid_get_lwp (inferior_ptid);
   if (pid == 0)
-    pid = ptid_get_pid (inferior_ptid);
+    pid = inferior_ptid.pid ();
 
   if (offset > sizeof (siginfo))
     return TARGET_XFER_E_IO;
@@ -3934,8 +3934,8 @@ linux_nat_target::pid_to_str (ptid_t ptid)
   static char buf[64];
 
   if (ptid_lwp_p (ptid)
-      && (ptid_get_pid (ptid) != ptid_get_lwp (ptid)
-	  || num_lwps (ptid_get_pid (ptid)) > 1))
+      && (ptid.pid () != ptid_get_lwp (ptid)
+	  || num_lwps (ptid.pid ()) > 1))
     {
       snprintf (buf, sizeof (buf), "LWP %ld", ptid_get_lwp (ptid));
       return buf;
@@ -4238,7 +4238,7 @@ linux_nat_target::static_tracepoint_markers_by_strid (const char *strid)
 {
   char s[IPA_CMD_BUF_SIZE];
   struct cleanup *old_chain;
-  int pid = ptid_get_pid (inferior_ptid);
+  int pid = inferior_ptid.pid ();
   std::vector<static_tracepoint_marker> markers;
   const char *p = s;
   ptid_t ptid = ptid_t (pid, 0, 0);
@@ -4503,12 +4503,12 @@ linux_nat_target::thread_address_space (ptid_t ptid)
       /* An (lwpid,0,0) ptid.  Look up the lwp object to get at the
 	 tgid.  */
       lwp = find_lwp_pid (ptid);
-      pid = ptid_get_pid (lwp->ptid);
+      pid = lwp->ptid.pid ();
     }
   else
     {
       /* A (pid,lwpid,0) ptid.  */
-      pid = ptid_get_pid (ptid);
+      pid = ptid.pid ();
     }
 
   inf = find_inferior_pid (pid);
@@ -4646,7 +4646,7 @@ linux_nat_get_siginfo (ptid_t ptid, siginfo_t *siginfo)
 
   pid = ptid_get_lwp (ptid);
   if (pid == 0)
-    pid = ptid_get_pid (ptid);
+    pid = ptid.pid ();
 
   errno = 0;
   ptrace (PTRACE_GETSIGINFO, pid, (PTRACE_TYPE_ARG3) 0, siginfo);

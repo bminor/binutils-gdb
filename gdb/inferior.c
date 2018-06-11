@@ -141,7 +141,7 @@ delete_thread_of_inferior (struct thread_info *tp, void *data)
   struct delete_thread_of_inferior_arg *arg
     = (struct delete_thread_of_inferior_arg *) data;
 
-  if (ptid_get_pid (tp->ptid) == arg->pid)
+  if (tp->ptid.pid () == arg->pid)
     {
       if (arg->silent)
 	delete_thread_silent (tp);
@@ -322,7 +322,7 @@ find_inferior_pid (int pid)
 struct inferior *
 find_inferior_ptid (ptid_t ptid)
 {
-  return find_inferior_pid (ptid_get_pid (ptid));
+  return find_inferior_pid (ptid.pid ());
 }
 
 /* See inferior.h.  */
@@ -388,7 +388,7 @@ number_of_live_inferiors (void)
 	struct thread_info *tp;
 
 	ALL_NON_EXITED_THREADS (tp)
-	 if (tp && ptid_get_pid (tp->ptid) == inf->pid)
+	 if (tp && tp->ptid.pid () == inf->pid)
 	   if (target_has_execution_1 (tp->ptid))
 	     {
 	       /* Found a live thread in this inferior, go to the next

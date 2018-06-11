@@ -1635,17 +1635,17 @@ procfs_find_LDT_entry (ptid_t ptid)
   procinfo      *pi;
 
   /* Find procinfo for the lwp.  */
-  if ((pi = find_procinfo (ptid_get_pid (ptid), ptid_get_lwp (ptid))) == NULL)
+  if ((pi = find_procinfo (ptid.pid (), ptid_get_lwp (ptid))) == NULL)
     {
       warning (_("procfs_find_LDT_entry: could not find procinfo for %d:%ld."),
-	       ptid_get_pid (ptid), ptid_get_lwp (ptid));
+	       ptid.pid (), ptid_get_lwp (ptid));
       return NULL;
     }
   /* get its general registers.  */
   if ((gregs = proc_get_gregs (pi)) == NULL)
     {
       warning (_("procfs_find_LDT_entry: could not read gregs for %d:%ld."),
-	       ptid_get_pid (ptid), ptid_get_lwp (ptid));
+	       ptid.pid (), ptid_get_lwp (ptid));
       return NULL;
     }
   /* Now extract the GS register's lower 16 bits.  */
@@ -1910,7 +1910,7 @@ procfs_target::attach (const char *args, int from_tty)
 void
 procfs_target::detach (inferior *inf, int from_tty)
 {
-  int pid = ptid_get_pid (inferior_ptid);
+  int pid = inferior_ptid.pid ();
 
   if (from_tty)
     {
@@ -1940,14 +1940,14 @@ do_attach (ptid_t ptid)
   int fail;
   int lwpid;
 
-  if ((pi = create_procinfo (ptid_get_pid (ptid), 0)) == NULL)
+  if ((pi = create_procinfo (ptid.pid (), 0)) == NULL)
     perror (_("procfs: out of memory in 'attach'"));
 
   if (!open_procinfo_files (pi, FD_CTL))
     {
       fprintf_filtered (gdb_stderr, "procfs:%d -- ", __LINE__);
       sprintf (errmsg, "do_attach: couldn't open /proc file for process %d",
-	       ptid_get_pid (ptid));
+	       ptid.pid ());
       dead_procinfo (pi, errmsg, NOKILL);
     }
 
@@ -2008,7 +2008,7 @@ do_detach ()
   procinfo *pi;
 
   /* Find procinfo for the main process.  */
-  pi = find_procinfo_or_die (ptid_get_pid (inferior_ptid),
+  pi = find_procinfo_or_die (inferior_ptid.pid (),
 			     0); /* FIXME: threads */
 
   if (!proc_set_traced_signals (pi, &pi->saved_sigset))
@@ -2064,7 +2064,7 @@ procfs_target::fetch_registers (struct regcache *regcache, int regnum)
   gdb_gregset_t *gregs;
   procinfo *pi;
   ptid_t ptid = regcache->ptid ();
-  int pid = ptid_get_pid (ptid);
+  int pid = ptid.pid ();
   int tid = ptid_get_lwp (ptid);
   struct gdbarch *gdbarch = regcache->arch ();
 
@@ -2113,7 +2113,7 @@ procfs_target::store_registers (struct regcache *regcache, int regnum)
   gdb_gregset_t *gregs;
   procinfo *pi;
   ptid_t ptid = regcache->ptid ();
-  int pid = ptid_get_pid (ptid);
+  int pid = ptid.pid ();
   int tid = ptid_get_lwp (ptid);
   struct gdbarch *gdbarch = regcache->arch ();
 
@@ -2211,7 +2211,7 @@ wait_again:
   retval   = ptid_t (-1);
 
   /* Find procinfo for main process.  */
-  pi = find_procinfo_or_die (ptid_get_pid (inferior_ptid), 0);
+  pi = find_procinfo_or_die (inferior_ptid.pid (), 0);
   if (pi)
     {
       /* We must assume that the status is stale now...  */
@@ -2238,10 +2238,10 @@ wait_again:
 	      wait_retval = ::wait (&wstat); /* "wait" for the child's exit.  */
 
 	      /* Wrong child?  */
-	      if (wait_retval != ptid_get_pid (inferior_ptid))
+	      if (wait_retval != inferior_ptid.pid ())
 		error (_("procfs: couldn't stop "
 			 "process %d: wait returned %d."),
-		       ptid_get_pid (inferior_ptid), wait_retval);
+		       inferior_ptid.pid (), wait_retval);
 	      /* FIXME: might I not just use waitpid?
 		 Or try find_procinfo to see if I know about this child?  */
 	      retval = ptid_t (wait_retval);
@@ -2524,7 +2524,7 @@ wait_again:
 	      }
 	      /* Got this far without error: If retval isn't in the
 		 threads database, add it.  */
-	      if (ptid_get_pid (retval) > 0 &&
+	      if (retval.pid () > 0 &&
 		  !ptid_equal (retval, inferior_ptid) &&
 		  !in_thread_list (retval))
 		{
@@ -2532,9 +2532,9 @@ wait_again:
 		     GDB's list and to our own.  If we don't create a
 		     procinfo, resume may be unhappy later.  */
 		  add_thread (retval);
-		  if (find_procinfo (ptid_get_pid (retval),
+		  if (find_procinfo (retval.pid (),
 				     ptid_get_lwp (retval)) == NULL)
-		    create_procinfo (ptid_get_pid (retval),
+		    create_procinfo (retval.pid (),
 				     ptid_get_lwp (retval));
 		}
 	    }
@@ -2591,7 +2591,7 @@ procfs_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
   int nbytes;
 
   /* Find procinfo for main process.  */
-  pi = find_procinfo_or_die (ptid_get_pid (inferior_ptid), 0);
+  pi = find_procinfo_or_die (inferior_ptid.pid (), 0);
   if (pi->as_fd == 0 &&
       open_procinfo_files (pi, FD_AS) == 0)
     {
@@ -2728,7 +2728,7 @@ procfs_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
      to proc_run_process (for use in the prrun struct by ioctl).  */
 
   /* Find procinfo for main process.  */
-  pi = find_procinfo_or_die (ptid_get_pid (inferior_ptid), 0);
+  pi = find_procinfo_or_die (inferior_ptid.pid (), 0);
 
   /* First cut: ignore pid argument.  */
   errno = 0;
@@ -2748,11 +2748,11 @@ procfs_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
   /* Void the process procinfo's caches.  */
   invalidate_cache (NULL, pi, NULL);
 
-  if (ptid_get_pid (ptid) != -1)
+  if (ptid.pid () != -1)
     {
       /* Resume a specific thread, presumably suppressing the
 	 others.  */
-      thread = find_procinfo (ptid_get_pid (ptid), ptid_get_lwp (ptid));
+      thread = find_procinfo (ptid.pid (), ptid_get_lwp (ptid));
       if (thread != NULL)
 	{
 	  if (thread->tid != 0)
@@ -2788,7 +2788,7 @@ void
 procfs_target::pass_signals (int numsigs, unsigned char *pass_signals)
 {
   sigset_t signals;
-  procinfo *pi = find_procinfo_or_die (ptid_get_pid (inferior_ptid), 0);
+  procinfo *pi = find_procinfo_or_die (inferior_ptid.pid (), 0);
   int signo;
 
   prfillset (&signals);
@@ -2855,7 +2855,7 @@ procfs_target::kill ()
   if (!ptid_equal (inferior_ptid, null_ptid)) /* ? */
     {
       /* Find procinfo for main process.  */
-      procinfo *pi = find_procinfo (ptid_get_pid (inferior_ptid), 0);
+      procinfo *pi = find_procinfo (inferior_ptid.pid (), 0);
 
       if (pi)
 	unconditionally_kill_inferior (pi);
@@ -2873,7 +2873,7 @@ procfs_target::mourn_inferior ()
   if (!ptid_equal (inferior_ptid, null_ptid))
     {
       /* Find procinfo for main process.  */
-      pi = find_procinfo (ptid_get_pid (inferior_ptid), 0);
+      pi = find_procinfo (inferior_ptid.pid (), 0);
       if (pi)
 	destroy_procinfo (pi);
     }
@@ -3162,7 +3162,7 @@ procfs_target::update_thread_list ()
   prune_threads ();
 
   /* Find procinfo for main process.  */
-  pi = find_procinfo_or_die (ptid_get_pid (inferior_ptid), 0);
+  pi = find_procinfo_or_die (inferior_ptid.pid (), 0);
   proc_update_threads (pi);
   proc_iterate_over_threads (pi, procfs_notice_thread, NULL);
 }
@@ -3177,7 +3177,7 @@ procfs_target::thread_alive (ptid_t ptid)
   int proc, thread;
   procinfo *pi;
 
-  proc    = ptid_get_pid (ptid);
+  proc    = ptid.pid ();
   thread  = ptid_get_lwp (ptid);
   /* If I don't know it, it ain't alive!  */
   if ((pi = find_procinfo (proc, thread)) == NULL)
@@ -3204,7 +3204,7 @@ procfs_target::pid_to_str (ptid_t ptid)
   static char buf[80];
 
   if (ptid_get_lwp (ptid) == 0)
-    sprintf (buf, "process %d", ptid_get_pid (ptid));
+    sprintf (buf, "process %d", ptid.pid ());
   else
     sprintf (buf, "LWP %ld", ptid_get_lwp (ptid));
 
@@ -3220,8 +3220,8 @@ procfs_set_watchpoint (ptid_t ptid, CORE_ADDR addr, int len, int rwflag,
   int       pflags = 0;
   procinfo *pi;
 
-  pi = find_procinfo_or_die (ptid_get_pid (ptid) == -1 ?
-			     ptid_get_pid (inferior_ptid) : ptid_get_pid (ptid),
+  pi = find_procinfo_or_die (ptid.pid () == -1 ?
+			     inferior_ptid.pid () : ptid.pid (),
 			     0);
 
   /* Translate from GDB's flags to /proc's.  */
@@ -3298,7 +3298,7 @@ procfs_target::stopped_by_watchpoint ()
 {
   procinfo *pi;
 
-  pi = find_procinfo_or_die (ptid_get_pid (inferior_ptid), 0);
+  pi = find_procinfo_or_die (inferior_ptid.pid (), 0);
 
   if (proc_flags (pi) & (PR_STOPPED | PR_ISTOP))
     {
@@ -3322,7 +3322,7 @@ procfs_target::stopped_data_address (CORE_ADDR *addr)
 {
   procinfo *pi;
 
-  pi = find_procinfo_or_die (ptid_get_pid (inferior_ptid), 0);
+  pi = find_procinfo_or_die (inferior_ptid.pid (), 0);
   return proc_watchpoint_address (pi, addr);
 }
 
@@ -3455,7 +3455,7 @@ find_memory_regions_callback (struct prmap *map,
 int
 procfs_target::find_memory_regions (find_memory_region_ftype func, void *data)
 {
-  procinfo *pi = find_procinfo_or_die (ptid_get_pid (inferior_ptid), 0);
+  procinfo *pi = find_procinfo_or_die (inferior_ptid.pid (), 0);
 
   return iterate_over_mappings (pi, func, data,
 				find_memory_regions_callback);
@@ -3584,7 +3584,7 @@ procfs_target::info_proc (const char *args, enum info_proc_what what)
 	}
     }
   if (pid == 0)
-    pid = ptid_get_pid (inferior_ptid);
+    pid = inferior_ptid.pid ();
   if (pid == 0)
     error (_("No current process: you must name one."));
   else
@@ -3678,13 +3678,13 @@ proc_trace_syscalls (const char *args, int from_tty, int entry_or_exit, int mode
 {
   procinfo *pi;
 
-  if (ptid_get_pid (inferior_ptid) <= 0)
+  if (inferior_ptid.pid () <= 0)
     error (_("you must be debugging a process to use this command."));
 
   if (args == NULL || args[0] == 0)
     error_no_arg (_("system call to trace"));
 
-  pi = find_procinfo_or_die (ptid_get_pid (inferior_ptid), 0);
+  pi = find_procinfo_or_die (inferior_ptid.pid (), 0);
   if (isdigit (args[0]))
     {
       const int syscallnum = atoi (args);
@@ -3764,7 +3764,7 @@ procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
   gdb_fpregset_t fpregs;
   unsigned long merged_pid;
 
-  merged_pid = ptid_get_lwp (ptid) << 16 | ptid_get_pid (ptid);
+  merged_pid = ptid_get_lwp (ptid) << 16 | ptid.pid ();
 
   /* This part is the old method for fetching registers.
      It should be replaced by the newer one using regsets
@@ -3821,7 +3821,7 @@ static int
 find_signalled_thread (struct thread_info *info, void *data)
 {
   if (info->suspend.stop_signal != GDB_SIGNAL_0
-      && ptid_get_pid (info->ptid) == ptid_get_pid (inferior_ptid))
+      && info->ptid.pid () == inferior_ptid.pid ())
     return 1;
 
   return 0;
@@ -3847,7 +3847,7 @@ procfs_target::make_corefile_notes (bfd *obfd, int *note_size)
   gdb_fpregset_t fpregs;
   char fname[16] = {'\0'};
   char psargs[80] = {'\0'};
-  procinfo *pi = find_procinfo_or_die (ptid_get_pid (inferior_ptid), 0);
+  procinfo *pi = find_procinfo_or_die (inferior_ptid.pid (), 0);
   char *note_data = NULL;
   char *inf_args;
   struct procfs_corefile_thread_data thread_args;
@@ -3881,7 +3881,7 @@ procfs_target::make_corefile_notes (bfd *obfd, int *note_size)
 
   fill_gregset (get_current_regcache (), &gregs, -1);
   note_data = elfcore_write_pstatus (obfd, note_data, note_size,
-				     ptid_get_pid (inferior_ptid),
+				     inferior_ptid.pid (),
 				     stop_signal, &gregs);
 
   thread_args.obfd = obfd;

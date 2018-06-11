@@ -281,7 +281,7 @@ static struct sim_inferior_data *
 get_sim_inferior_data_by_ptid (ptid_t ptid, int sim_instance_needed)
 {
   struct inferior *inf;
-  int pid = ptid_get_pid (ptid);
+  int pid = ptid.pid ();
 
   if (pid <= 0)
     return NULL;
@@ -686,7 +686,7 @@ gdbsim_target::create_inferior (const char *exec_file,
     error (_("Unable to create sim inferior."));
 
   inferior_ptid = sim_data->remote_sim_ptid;
-  inferior_appeared (current_inferior (), ptid_get_pid (inferior_ptid));
+  inferior_appeared (current_inferior (), inferior_ptid.pid ());
   add_thread_silent (inferior_ptid);
 
   insert_breakpoints ();	/* Needed to get correct instruction
@@ -1009,7 +1009,7 @@ gdbsim_target::wait (ptid_t ptid, struct target_waitstatus *status, int options)
       sim_data = get_sim_inferior_data_by_ptid (ptid, SIM_INSTANCE_NEEDED);
       if (sim_data == NULL)
 	error (_("Unable to wait for pid %d.  Inferior not found."),
-	       ptid_get_pid (ptid));
+	       ptid.pid ());
       inferior_ptid = ptid;
     }
 

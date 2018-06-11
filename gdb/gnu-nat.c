@@ -2042,7 +2042,7 @@ gnu_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
     /* Allow all threads to run, except perhaps single-stepping one.  */
     {
       inf_debug (inf, "running all threads; tid = %d",
-		 ptid_get_pid (inferior_ptid));
+		 inferior_ptid.pid ());
       ptid = inferior_ptid;	/* What to step.  */
       inf_set_threads_resume_sc (inf, 0, 1);
     }

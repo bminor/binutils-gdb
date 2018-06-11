@@ -91,7 +91,7 @@ nto_set_thread (ptid_t ptid)
 {
   int res = 0;
 
-  TRACE ("%s pid: %d tid: %ld\n", __func__, ptid_get_pid (ptid),
+  TRACE ("%s pid: %d tid: %ld\n", __func__, ptid.pid (),
 	 ptid_get_lwp (ptid));
   if (nto_inferior.ctl_fd != -1
       && !ptid_equal (ptid, null_ptid)
@@ -430,9 +430,9 @@ nto_thread_alive (ptid_t ptid)
 {
   int res;
 
-  TRACE ("%s pid:%d tid:%d\n", __func__, ptid_get_pid (ptid),
+  TRACE ("%s pid:%d tid:%d\n", __func__, ptid.pid (),
 	 ptid_get_lwp (ptid));
-  if (SignalKill (0, ptid_get_pid (ptid), ptid_get_lwp (ptid),
+  if (SignalKill (0, ptid.pid (), ptid_get_lwp (ptid),
 		  0, 0, 0) == -1)
     res = 0;
   else
@@ -582,7 +582,7 @@ nto_wait (ptid_t ptid,
 	    int waitval = 0;
 
 	    TRACE ("  TERMINATED\n");
-	    waitpid (ptid_get_pid (ptid), &waitval, WNOHANG);
+	    waitpid (ptid.pid (), &waitval, WNOHANG);
 	    if (nto_inferior.exit_signo)
 	      {
 		/* Abnormal death.  */

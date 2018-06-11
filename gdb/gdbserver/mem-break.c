@@ -1482,7 +1482,7 @@ set_single_step_breakpoint (CORE_ADDR stop_at, ptid_t ptid)
 {
   struct single_step_breakpoint *bp;
 
-  gdb_assert (ptid_get_pid (current_ptid) == ptid_get_pid (ptid));
+  gdb_assert (current_ptid.pid () == ptid.pid ());
 
   bp = (struct single_step_breakpoint *) set_breakpoint_type_at (single_step_breakpoint,
 								stop_at, NULL);

@@ -471,7 +471,7 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
 
   pid = ptid_get_lwp (ptid);
   if (pid == 0)
-    pid = ptid_get_pid (ptid);
+    pid = ptid.pid ();
 
   errno = 0;
   scoped_fd fd (syscall (SYS_perf_event_open, &bts->attr, pid, -1, -1, 0));
@@ -587,7 +587,7 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
 
   pid = ptid_get_lwp (ptid);
   if (pid == 0)
-    pid = ptid_get_pid (ptid);
+    pid = ptid.pid ();
 
   gdb::unique_xmalloc_ptr<btrace_target_info> tinfo
     (XCNEW (btrace_target_info));

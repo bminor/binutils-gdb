@@ -1596,14 +1596,14 @@ spu_memory_remove_breakpoint (struct gdbarch *gdbarch,
      -- this is not the correct behaviour.
 
      The workaround is to check whether the PID we are asked to remove this
-     breakpoint from (i.e. ptid_get_pid (inferior_ptid)) is different from the
+     breakpoint from (i.e. inferior_ptid.pid ()) is different from the
      PID of the current inferior (i.e. current_inferior ()->pid).  This is only
      true in the context of detach_breakpoints.  If so, we simply do nothing.
      [ Note that for the fork child process, it does not matter if breakpoints
      remain inserted, because those SPU contexts are not runnable anyway --
      the Linux kernel allows only the original process to invoke spu_run.  */
 
-  if (ptid_get_pid (inferior_ptid) != current_inferior ()->pid) 
+  if (inferior_ptid.pid () != current_inferior ()->pid) 
     return 0;
 
   return default_memory_remove_breakpoint (gdbarch, bp_tgt);

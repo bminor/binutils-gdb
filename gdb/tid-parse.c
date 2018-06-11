@@ -92,7 +92,7 @@ parse_thread_id (const char *tidstr, const char **end)
 
   ALL_THREADS (tp)
     {
-      if (ptid_get_pid (tp->ptid) == inf->pid
+      if (tp->ptid.pid () == inf->pid
 	  && tp->per_inf_num == thr_num)
 	break;
     }

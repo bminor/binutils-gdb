@@ -366,7 +366,7 @@ cmd_record_save (const char *args, int from_tty)
     {
       /* Default recfile name is "gdb_record.PID".  */
       xsnprintf (recfilename_buffer, sizeof (recfilename_buffer),
-                "gdb_record.%d", ptid_get_pid (inferior_ptid));
+                "gdb_record.%d", inferior_ptid.pid ());
       recfilename = recfilename_buffer;
     }
 

@@ -325,7 +325,7 @@ pid_to_prc (ptid_t *ptidp)
 
   ptid = *ptidp;
   if (PD_TID (ptid))
-    *ptidp = ptid_t (ptid_get_pid (ptid));
+    *ptidp = ptid_t (ptid.pid ());
 }
 
 /* pthdb callback: for <i> from 0 to COUNT, set SYMBOLS[<i>].addr to
@@ -673,9 +673,9 @@ ptid_cmp (ptid_t ptid1, ptid_t ptid2)
 {
   int pid1, pid2;
 
-  if (ptid_get_pid (ptid1) < ptid_get_pid (ptid2))
+  if (ptid1.pid () < ptid2.pid ())
     return -1;
-  else if (ptid_get_pid (ptid1) > ptid_get_pid (ptid2))
+  else if (ptid1.pid () > ptid2.pid ())
     return 1;
   else if (ptid_get_tid (ptid1) < ptid_get_tid (ptid2))
     return -1;
@@ -712,7 +712,7 @@ get_signaled_thread (void)
 
   while (1)
   {
-    if (getthrds (ptid_get_pid (inferior_ptid), &thrinf, 
+    if (getthrds (inferior_ptid.pid (), &thrinf, 
           	  sizeof (thrinf), &ktid, 1) != 1)
       break;
 
@@ -795,7 +795,7 @@ sync_threadlists (void)
 
   /* Apply differences between the two arrays to GDB's thread list.  */
 
-  infpid = ptid_get_pid (inferior_ptid);
+  infpid = inferior_ptid.pid ();
   for (pi = gi = 0; pi < pcount || gi < gcount;)
     {
       if (pi == pcount)
@@ -1042,7 +1042,7 @@ aix_thread_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
     {
       scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
       
-      inferior_ptid = ptid_t (ptid_get_pid (inferior_ptid));
+      inferior_ptid = ptid_t (inferior_ptid.pid ());
       beneath ()->resume (ptid, step, sig);
     }
   else
@@ -1082,11 +1082,11 @@ aix_thread_target::wait (ptid_t ptid, struct target_waitstatus *status,
 
     pid_to_prc (&ptid);
 
-    inferior_ptid = ptid_t (ptid_get_pid (inferior_ptid));
+    inferior_ptid = ptid_t (inferior_ptid.pid ());
     ptid = beneath ()->wait (ptid, status, options);
   }
 
-  if (ptid_get_pid (ptid) == -1)
+  if (ptid.pid () == -1)
     return ptid_t (-1);
 
   /* Check whether libpthdebug might be ready to be initialized.  */
@@ -1722,7 +1722,7 @@ aix_thread_target::xfer_partial (enum target_object object,
 {
   scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
-  inferior_ptid = ptid_t (ptid_get_pid (inferior_ptid));
+  inferior_ptid = ptid_t (inferior_ptid.pid ());
   return beneath ()->xfer_partial (object, annex, readbuf,
 				   writebuf, offset, len, xfered_len);
 }
@@ -1832,7 +1832,7 @@ aix_thread_target::extra_thread_info (struct thread_info *thread)
 ptid_t
 aix_thread_target::get_ada_task_ptid (long lwp, long thread)
 {
-  return ptid_t (ptid_get_pid (inferior_ptid), 0, thread);
+  return ptid_t (inferior_ptid.pid (), 0, thread);
 }
 
 

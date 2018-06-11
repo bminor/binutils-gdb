@@ -325,7 +325,7 @@ thread_to_lwp (ptid_t thread_id, int default_lwp)
 	     td_state_string (ti.ti_state));
     }
 
-  return ptid_t (ptid_get_pid (thread_id), ti.ti_lid, 0);
+  return ptid_t (thread_id.pid (), ti.ti_lid, 0);
 }
 
 /* Convert an LWP ID into a POSIX or Solaris thread ID.  If LWP_ID
@@ -366,7 +366,7 @@ lwp_to_thread (ptid_t lwp)
   else if (val != TD_OK)
     error (_("lwp_to_thread: td_thr_get_info: %s."), td_err_string (val));
 
-  return ptid_t (ptid_get_pid (lwp), 0 , ti.ti_tid);
+  return ptid_t (lwp.pid (), 0 , ti.ti_tid);
 }
 
 
@@ -387,7 +387,7 @@ sol_thread_target::detach (inferior *inf, int from_tty)
   target_ops *beneath = this->beneath ();
 
   sol_thread_active = 0;
-  inferior_ptid = ptid_t (ptid_get_pid (main_ph.ptid));
+  inferior_ptid = ptid_t (main_ph.ptid.pid ());
   unpush_target (this);
   beneath->detach (inf, from_tty);
 }
@@ -402,18 +402,18 @@ sol_thread_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 {
   scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
-  inferior_ptid = thread_to_lwp (inferior_ptid, ptid_get_pid (main_ph.ptid));
-  if (ptid_get_pid (inferior_ptid) == -1)
+  inferior_ptid = thread_to_lwp (inferior_ptid, main_ph.ptid.pid ());
+  if (inferior_ptid.pid () == -1)
     inferior_ptid = procfs_first_available ();
 
-  if (ptid_get_pid (ptid) != -1)
+  if (ptid.pid () != -1)
     {
       ptid_t save_ptid = ptid;
 
       ptid = thread_to_lwp (ptid, -2);
-      if (ptid_get_pid (ptid) == -2)		/* Inactive thread.  */
+      if (ptid.pid () == -2)		/* Inactive thread.  */
 	error (_("This version of Solaris can't start inactive threads."));
-      if (info_verbose && ptid_get_pid (ptid) == -1)
+      if (info_verbose && ptid.pid () == -1)
 	warning (_("Specified thread %ld seems to have terminated"),
 		 ptid_get_tid (save_ptid));
     }
@@ -434,18 +434,18 @@ sol_thread_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
   save_ptid = inferior_ptid;
   scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
-  inferior_ptid = thread_to_lwp (inferior_ptid, ptid_get_pid (main_ph.ptid));
-  if (ptid_get_pid (inferior_ptid) == -1)
+  inferior_ptid = thread_to_lwp (inferior_ptid, main_ph.ptid.pid ());
+  if (inferior_ptid.pid () == -1)
     inferior_ptid = procfs_first_available ();
 
-  if (ptid_get_pid (ptid) != -1)
+  if (ptid.pid () != -1)
     {
       ptid_t save_ptid = ptid;
 
       ptid = thread_to_lwp (ptid, -2);
-      if (ptid_get_pid (ptid) == -2)		/* Inactive thread.  */
+      if (ptid.pid () == -2)		/* Inactive thread.  */
 	error (_("This version of Solaris can't start inactive threads."));
-      if (info_verbose && ptid_get_pid (ptid) == -1)
+      if (info_verbose && ptid.pid () == -1)
 	warning (_("Specified thread %ld seems to have terminated"),
 		 ptid_get_tid (save_ptid));
     }
@@ -456,7 +456,7 @@ sol_thread_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
     {
       /* Map the LWP of interest back to the appropriate thread ID.  */
       rtnval = lwp_to_thread (rtnval);
-      if (ptid_get_pid (rtnval) == -1)
+      if (rtnval.pid () == -1)
 	rtnval = save_ptid;
 
       /* See if we have a new thread.  */
@@ -652,7 +652,7 @@ check_for_thread_db (void)
 
       main_ph.ptid = inferior_ptid; /* Save for xfer_memory.  */
       ptid = lwp_to_thread (inferior_ptid);
-      if (ptid_get_pid (ptid) != -1)
+      if (ptid.pid () != -1)
 	inferior_ptid = ptid;
 
       target_update_thread_list ();
@@ -849,7 +849,7 @@ ps_ptwrite (struct ps_prochandle *ph, psaddr_t addr,
 ps_err_e
 ps_lgetregs (struct ps_prochandle *ph, lwpid_t lwpid, prgregset_t gregset)
 {
-  ptid_t ptid = ptid_t (ptid_get_pid (inferior_ptid), lwpid, 0);
+  ptid_t ptid = ptid_t (inferior_ptid.pid (), lwpid, 0);
   struct regcache *regcache
     = get_thread_arch_regcache (ptid, target_gdbarch ());
 
@@ -865,7 +865,7 @@ ps_err_e
 ps_lsetregs (struct ps_prochandle *ph, lwpid_t lwpid,
 	     const prgregset_t gregset)
 {
-  ptid_t ptid = ptid_t (ptid_get_pid (inferior_ptid), lwpid, 0);
+  ptid_t ptid = ptid_t (inferior_ptid.pid (), lwpid, 0);
   struct regcache *regcache
     = get_thread_arch_regcache (ptid, target_gdbarch ());
 
@@ -917,7 +917,7 @@ ps_err_e
 ps_lgetfpregs (struct ps_prochandle *ph, lwpid_t lwpid,
 	       prfpregset_t *fpregset)
 {
-  ptid_t ptid = ptid_t (ptid_get_pid (inferior_ptid), lwpid, 0);
+  ptid_t ptid = ptid_t (inferior_ptid.pid (), lwpid, 0);
   struct regcache *regcache
     = get_thread_arch_regcache (ptid, target_gdbarch ());
 
@@ -933,7 +933,7 @@ ps_err_e
 ps_lsetfpregs (struct ps_prochandle *ph, lwpid_t lwpid,
 	       const prfpregset_t * fpregset)
 {
-  ptid_t ptid = ptid_t (ptid_get_pid (inferior_ptid), lwpid, 0);
+  ptid_t ptid = ptid_t (inferior_ptid.pid (), lwpid, 0);
   struct regcache *regcache
     = get_thread_arch_regcache (ptid, target_gdbarch ());
 
@@ -979,10 +979,10 @@ ps_lgetLDT (struct ps_prochandle *ph, lwpid_t lwpid,
   /* FIXME: can't I get the process ID from the prochandle or
      something?  */
 
-  if (ptid_get_pid (inferior_ptid) <= 0 || lwpid <= 0)
+  if (inferior_ptid.pid () <= 0 || lwpid <= 0)
     return PS_BADLID;
 
-  ret = procfs_find_LDT_entry (ptid_t (ptid_get_pid (inferior_ptid),
+  ret = procfs_find_LDT_entry (ptid_t (inferior_ptid.pid (),
 			       lwpid, 0));
   if (ret)
     {
@@ -1009,10 +1009,10 @@ sol_thread_target::pid_to_str (ptid_t ptid)
 
       lwp = thread_to_lwp (ptid, -2);
 
-      if (ptid_get_pid (lwp) == -1)
+      if (lwp.pid () == -1)
 	xsnprintf (buf, sizeof (buf), "Thread %ld (defunct)",
 		   ptid_get_tid (ptid));
-      else if (ptid_get_pid (lwp) != -2)
+      else if (lwp.pid () != -2)
 	xsnprintf (buf, sizeof (buf), "Thread %ld (LWP %ld)",
 		 ptid_get_tid (ptid), ptid_get_lwp (lwp));
       else
@@ -1022,7 +1022,7 @@ sol_thread_target::pid_to_str (ptid_t ptid)
   else if (ptid_get_lwp (ptid) != 0)
     xsnprintf (buf, sizeof (buf), "LWP    %ld        ", ptid_get_lwp (ptid));
   else
-    xsnprintf (buf, sizeof (buf), "process %d    ", ptid_get_pid (ptid));
+    xsnprintf (buf, sizeof (buf), "process %d    ", ptid.pid ());
 
   return buf;
 }
@@ -1042,7 +1042,7 @@ sol_update_thread_list_callback (const td_thrhandle_t *th, void *ignored)
   if (retval != TD_OK)
     return -1;
 
-  ptid = ptid_t (ptid_get_pid (inferior_ptid), 0, ti.ti_tid);
+  ptid = ptid_t (inferior_ptid.pid (), 0, ti.ti_tid);
   if (!in_thread_list (ptid) || is_exited (ptid))
     add_thread (ptid);
 

@@ -1205,7 +1205,7 @@ handle_detach (char *own_buf)
       pid = strtol (&own_buf[2], NULL, 16);
     }
   else
-    pid = ptid_get_pid (current_ptid);
+    pid = current_ptid.pid ();
 
   if ((tracing && disconnected_tracing) || any_persistent_commands ())
     {
@@ -2180,7 +2180,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       if (current_thread == NULL)
 	{
 	  current_thread
-	    = find_any_thread_of_pid (ptid_get_pid (cs.general_thread));
+	    = find_any_thread_of_pid (cs.general_thread.pid ());
 
 	  /* Just in case, if we didn't find a thread, then bail out
 	     instead of crashing.  */
@@ -2698,7 +2698,7 @@ visit_actioned_threads (thread_info *thread,
 
       if (ptid_equal (action->thread, minus_one_ptid)
 	  || ptid_equal (action->thread, thread->id)
-	  || ((ptid_get_pid (action->thread)
+	  || ((action->thread.pid ()
 	       == thread->id.pid ())
 	      && ptid_get_lwp (action->thread) == -1))
 	{
@@ -4427,7 +4427,7 @@ handle_target_event (int err, gdb_client_data client_data)
     }
   else if (cs.last_status.kind != TARGET_WAITKIND_IGNORE)
     {
-      int pid = ptid_get_pid (cs.last_ptid);
+      int pid = cs.last_ptid.pid ();
       struct process_info *process = find_process_pid (pid);
       int forward_event = !gdb_connected () || process->gdb_detached;
 

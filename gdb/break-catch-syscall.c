@@ -110,7 +110,7 @@ insert_catch_syscall (struct bp_location *bl)
 	}
     }
 
-  return target_set_syscall_catchpoint (ptid_get_pid (inferior_ptid),
+  return target_set_syscall_catchpoint (inferior_ptid.pid (),
 					inf_data->total_syscalls_count != 0,
 					inf_data->any_syscall_count,
 					inf_data->syscalls_counts);
@@ -141,7 +141,7 @@ remove_catch_syscall (struct bp_location *bl, enum remove_bp_reason reason)
         }
     }
 
-  return target_set_syscall_catchpoint (ptid_get_pid (inferior_ptid),
+  return target_set_syscall_catchpoint (inferior_ptid.pid (),
 					inf_data->total_syscalls_count != 0,
 					inf_data->any_syscall_count,
 					inf_data->syscalls_counts);

@@ -49,7 +49,7 @@ getregs_supplies (struct gdbarch *gdbarch, int regno)
 void
 mips_nbsd_nat_target::fetch_registers (struct regcache *regcache, int regno)
 {
-  pid_t pid = ptid_get_pid (regcache->ptid ());
+  pid_t pid = regcache->ptid ().pid ();
 
   struct gdbarch *gdbarch = regcache->arch ();
   if (regno == -1 || getregs_supplies (gdbarch, regno))
@@ -79,7 +79,7 @@ mips_nbsd_nat_target::fetch_registers (struct regcache *regcache, int regno)
 void
 mips_nbsd_nat_target::store_registers (struct regcache *regcache, int regno)
 {
-  pid_t pid = ptid_get_pid (regcache->ptid ());
+  pid_t pid = regcache->ptid ().pid ();
 
   struct gdbarch *gdbarch = regcache->arch ();
   if (regno == -1 || getregs_supplies (gdbarch, regno))

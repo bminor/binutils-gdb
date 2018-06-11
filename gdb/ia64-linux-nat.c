@@ -555,7 +555,7 @@ store_debug_register (ptid_t ptid, int idx, long val)
 
   tid = ptid_get_lwp (ptid);
   if (tid == 0)
-    tid = ptid_get_pid (ptid);
+    tid = ptid.pid ();
 
   (void) ptrace (PT_WRITE_U, tid, (PTRACE_TYPE_ARG3) (PT_DBR + 8 * idx), val);
 }

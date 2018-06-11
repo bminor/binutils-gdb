@@ -50,7 +50,7 @@ procfs_xfer_auxv (gdb_byte *readbuf,
   int fd;
   ssize_t l;
 
-  pathname = xstrprintf ("/proc/%d/auxv", ptid_get_pid (inferior_ptid));
+  pathname = xstrprintf ("/proc/%d/auxv", inferior_ptid.pid ());
   fd = gdb_open_cloexec (pathname, writebuf != NULL ? O_WRONLY : O_RDONLY, 0);
   xfree (pathname);
   if (fd < 0)

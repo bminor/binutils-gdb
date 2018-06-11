@@ -246,7 +246,7 @@ proceed_thread (struct thread_info *thread, int pid)
   if (thread->state != THREAD_STOPPED)
     return;
 
-  if (pid != 0 && ptid_get_pid (thread->ptid) != pid)
+  if (pid != 0 && thread->ptid.pid () != pid)
     return;
 
   switch_to_thread (thread);
@@ -348,7 +348,7 @@ interrupt_thread_callback (struct thread_info *thread, void *arg)
   if (thread->state != THREAD_RUNNING)
     return 0;
 
-  if (ptid_get_pid (thread->ptid) != pid)
+  if (thread->ptid.pid () != pid)
     return 0;
 
   target_stop (thread->ptid);
@@ -487,7 +487,7 @@ find_thread_of_process (struct thread_info *ti, void *p)
 {
   int pid = *(int *)p;
 
-  if (ptid_get_pid (ti->ptid) == pid && ti->state != THREAD_EXITED)
+  if (ti->ptid.pid () == pid && ti->state != THREAD_EXITED)
     return 1;
 
   return 0;
@@ -623,7 +623,7 @@ collect_cores (struct thread_info *ti, void *xdata)
 {
   struct collect_cores_data *data = (struct collect_cores_data *) xdata;
 
-  if (ptid_get_pid (ti->ptid) == data->pid)
+  if (ti->ptid.pid () == data->pid)
     {
       int core = target_core_of_thread (ti->ptid);
 

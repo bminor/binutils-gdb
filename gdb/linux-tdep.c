@@ -1386,7 +1386,7 @@ static int
 find_signalled_thread (struct thread_info *info, void *data)
 {
   if (info->suspend.stop_signal != GDB_SIGNAL_0
-      && ptid_get_pid (info->ptid) == ptid_get_pid (inferior_ptid))
+      && info->ptid.pid () == inferior_ptid.pid ())
     return 1;
 
   return 0;
@@ -1745,7 +1745,7 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
   gdb_assert (p != NULL);
 
   /* Obtaining PID and filename.  */
-  pid = ptid_get_pid (inferior_ptid);
+  pid = inferior_ptid.pid ();
   xsnprintf (filename, sizeof (filename), "/proc/%d/cmdline", (int) pid);
   /* The full name of the program which generated the corefile.  */
   gdb::unique_xmalloc_ptr<char> fname
@@ -1959,7 +1959,7 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
     {
       if (thr == signalled_thr)
 	continue;
-      if (ptid_get_pid (thr->ptid) != ptid_get_pid (inferior_ptid))
+      if (thr->ptid.pid () != inferior_ptid.pid ())
 	continue;
 
       linux_corefile_thread (thr, &thread_args);

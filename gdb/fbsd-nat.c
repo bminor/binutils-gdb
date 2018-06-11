@@ -92,7 +92,7 @@ int
 fbsd_nat_target::find_memory_regions (find_memory_region_ftype func,
 				      void *obfd)
 {
-  pid_t pid = ptid_get_pid (inferior_ptid);
+  pid_t pid = inferior_ptid.pid ();
   struct kinfo_vmentry *kve;
   uint64_t size;
   int i, nitems;
@@ -166,7 +166,7 @@ int
 fbsd_nat_target::find_memory_regions (find_memory_region_ftype func,
 				      void *obfd)
 {
-  pid_t pid = ptid_get_pid (inferior_ptid);
+  pid_t pid = inferior_ptid.pid ();
   unsigned long start, end, size;
   char protection[4];
   int read, write, exec;
@@ -312,7 +312,7 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
   gdb_argv built_argv (args);
   if (built_argv.count () == 0)
     {
-      pid = ptid_get_pid (inferior_ptid);
+      pid = inferior_ptid.pid ();
       if (pid == 0)
 	error (_("No current process: you must name one."));
     }
@@ -674,7 +674,7 @@ fbsd_nat_target::xfer_partial (enum target_object object,
 			       ULONGEST offset, ULONGEST len,
 			       ULONGEST *xfered_len)
 {
-  pid_t pid = ptid_get_pid (inferior_ptid);
+  pid_t pid = inferior_ptid.pid ();
 
   switch (object)
     {
@@ -838,7 +838,7 @@ fbsd_nat_target::pid_to_str (ptid_t ptid)
   if (lwp != 0)
     {
       static char buf[64];
-      int pid = ptid_get_pid (ptid);
+      int pid = ptid.pid ();
 
       xsnprintf (buf, sizeof buf, "LWP %d of process %d", lwp, pid);
       return buf;
@@ -856,7 +856,7 @@ fbsd_nat_target::thread_name (struct thread_info *thr)
 {
   struct ptrace_lwpinfo pl;
   struct kinfo_proc kp;
-  int pid = ptid_get_pid (thr->ptid);
+  int pid = thr->ptid.pid ();
   long lwp = ptid_get_lwp (thr->ptid);
   static char buf[sizeof pl.pl_tdname + 1];
 
@@ -974,7 +974,7 @@ fbsd_nat_target::update_thread_list ()
 #else
   prune_threads ();
 
-  fbsd_add_threads (ptid_get_pid (inferior_ptid));
+  fbsd_add_threads (inferior_ptid.pid ());
 #endif
 }
 
@@ -1090,9 +1090,9 @@ fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 
   /* Don't PT_CONTINUE a process which has a pending vfork done event.  */
   if (ptid_equal (minus_one_ptid, ptid))
-    pid = ptid_get_pid (inferior_ptid);
+    pid = inferior_ptid.pid ();
   else
-    pid = ptid_get_pid (ptid);
+    pid = ptid.pid ();
   if (fbsd_is_vfork_done_pending (pid))
     return;
 #endif
@@ -1100,7 +1100,7 @@ fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
   if (debug_fbsd_lwp)
     fprintf_unfiltered (gdb_stdlog,
 			"FLWP: fbsd_resume for ptid (%d, %ld, %ld)\n",
-			ptid_get_pid (ptid), ptid_get_lwp (ptid),
+			ptid.pid (), ptid_get_lwp (ptid),
 			ptid_get_tid (ptid));
   if (ptid_lwp_p (ptid))
     {
@@ -1110,7 +1110,7 @@ fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 
       ALL_NON_EXITED_THREADS (tp)
         {
-	  if (ptid_get_pid (tp->ptid) != ptid_get_pid (ptid))
+	  if (tp->ptid.pid () != ptid.pid ())
 	    continue;
 
 	  if (ptid_get_lwp (tp->ptid) == ptid_get_lwp (ptid))
@@ -1249,7 +1249,7 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	  pid_t pid;
 	  int status;
 
-	  pid = ptid_get_pid (wptid);
+	  pid = wptid.pid ();
 	  if (ptrace (PT_LWPINFO, pid, (caddr_t) &pl, sizeof pl) == -1)
 	    perror_with_name (("ptrace"));
 
@@ -1361,7 +1361,7 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 		}
 
 	      /* Enable additional events on the child process.  */
-	      fbsd_enable_proc_events (ptid_get_pid (child_ptid));
+	      fbsd_enable_proc_events (child_ptid.pid ());
 
 #ifndef PTRACE_VFORK
 	      /* For vfork, the child process will have the P_PPWAIT
@@ -1487,7 +1487,7 @@ fbsd_nat_target::follow_fork (int follow_child, int detach_fork)
   if (!follow_child && detach_fork)
     {
       struct thread_info *tp = inferior_thread ();
-      pid_t child_pid = ptid_get_pid (tp->pending_follow.value.related_pid);
+      pid_t child_pid = tp->pending_follow.value.related_pid.pid ();
 
       /* Breakpoints have already been detached from the child by
 	 infrun.c.  */
@@ -1558,7 +1558,7 @@ fbsd_nat_target::remove_vfork_catchpoint (int pid)
 void
 fbsd_nat_target::post_startup_inferior (ptid_t pid)
 {
-  fbsd_enable_proc_events (ptid_get_pid (pid));
+  fbsd_enable_proc_events (pid.pid ());
 }
 
 /* Implement the "post_attach" target_ops method.  */

@@ -3637,7 +3637,7 @@ detach_breakpoints (ptid_t ptid)
   scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
   struct inferior *inf = current_inferior ();
 
-  if (ptid_get_pid (ptid) == ptid_get_pid (inferior_ptid))
+  if (ptid.pid () == inferior_ptid.pid ())
     error (_("Cannot detach breakpoints of inferior_ptid"));
 
   /* Set inferior_ptid; remove_breakpoint_1 uses this global.  */
@@ -7709,7 +7709,7 @@ struct fork_catchpoint : public breakpoint
 static int
 insert_catch_fork (struct bp_location *bl)
 {
-  return target_insert_fork_catchpoint (ptid_get_pid (inferior_ptid));
+  return target_insert_fork_catchpoint (inferior_ptid.pid ());
 }
 
 /* Implement the "remove" breakpoint_ops method for fork
@@ -7718,7 +7718,7 @@ insert_catch_fork (struct bp_location *bl)
 static int
 remove_catch_fork (struct bp_location *bl, enum remove_bp_reason reason)
 {
-  return target_remove_fork_catchpoint (ptid_get_pid (inferior_ptid));
+  return target_remove_fork_catchpoint (inferior_ptid.pid ());
 }
 
 /* Implement the "breakpoint_hit" breakpoint_ops method for fork
@@ -7761,7 +7761,7 @@ print_it_catch_fork (bpstat bs)
     }
   uiout->field_int ("bkptno", b->number);
   uiout->text (" (forked process ");
-  uiout->field_int ("newpid", ptid_get_pid (c->forked_inferior_pid));
+  uiout->field_int ("newpid", c->forked_inferior_pid.pid ());
   uiout->text ("), ");
   return PRINT_SRC_AND_LOC;
 }
@@ -7788,7 +7788,7 @@ print_one_catch_fork (struct breakpoint *b, struct bp_location **last_loc)
   if (!ptid_equal (c->forked_inferior_pid, null_ptid))
     {
       uiout->text (", process ");
-      uiout->field_int ("what", ptid_get_pid (c->forked_inferior_pid));
+      uiout->field_int ("what", c->forked_inferior_pid.pid ());
       uiout->spaces (1);
     }
 
@@ -7825,7 +7825,7 @@ static struct breakpoint_ops catch_fork_breakpoint_ops;
 static int
 insert_catch_vfork (struct bp_location *bl)
 {
-  return target_insert_vfork_catchpoint (ptid_get_pid (inferior_ptid));
+  return target_insert_vfork_catchpoint (inferior_ptid.pid ());
 }
 
 /* Implement the "remove" breakpoint_ops method for vfork
@@ -7834,7 +7834,7 @@ insert_catch_vfork (struct bp_location *bl)
 static int
 remove_catch_vfork (struct bp_location *bl, enum remove_bp_reason reason)
 {
-  return target_remove_vfork_catchpoint (ptid_get_pid (inferior_ptid));
+  return target_remove_vfork_catchpoint (inferior_ptid.pid ());
 }
 
 /* Implement the "breakpoint_hit" breakpoint_ops method for vfork
@@ -7877,7 +7877,7 @@ print_it_catch_vfork (bpstat bs)
     }
   uiout->field_int ("bkptno", b->number);
   uiout->text (" (vforked process ");
-  uiout->field_int ("newpid", ptid_get_pid (c->forked_inferior_pid));
+  uiout->field_int ("newpid", c->forked_inferior_pid.pid ());
   uiout->text ("), ");
   return PRINT_SRC_AND_LOC;
 }
@@ -7903,7 +7903,7 @@ print_one_catch_vfork (struct breakpoint *b, struct bp_location **last_loc)
   if (!ptid_equal (c->forked_inferior_pid, null_ptid))
     {
       uiout->text (", process ");
-      uiout->field_int ("what", ptid_get_pid (c->forked_inferior_pid));
+      uiout->field_int ("what", c->forked_inferior_pid.pid ());
       uiout->spaces (1);
     }
 
@@ -8254,13 +8254,13 @@ exec_catchpoint::~exec_catchpoint ()
 static int
 insert_catch_exec (struct bp_location *bl)
 {
-  return target_insert_exec_catchpoint (ptid_get_pid (inferior_ptid));
+  return target_insert_exec_catchpoint (inferior_ptid.pid ());
 }
 
 static int
 remove_catch_exec (struct bp_location *bl, enum remove_bp_reason reason)
 {
-  return target_remove_exec_catchpoint (ptid_get_pid (inferior_ptid));
+  return target_remove_exec_catchpoint (inferior_ptid.pid ());
 }
 
 static int

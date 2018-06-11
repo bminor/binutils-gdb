@@ -117,7 +117,7 @@ m68kbsd_collect_fpregset (struct regcache *regcache,
 void
 m68k_bsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 {
-  pid_t pid = ptid_get_pid (regcache->ptid ());
+  pid_t pid = regcache->ptid ().pid ();
 
   if (regnum == -1 || m68kbsd_gregset_supplies_p (regnum))
     {
@@ -146,7 +146,7 @@ m68k_bsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 void
 m68k_bsd_nat_target::store_registers (struct regcache *regcache, int regnum)
 {
-  pid_t pid = ptid_get_pid (regcache->ptid ());
+  pid_t pid = regcache->ptid ().pid ();
 
   if (regnum == -1 || m68kbsd_gregset_supplies_p (regnum))
     {

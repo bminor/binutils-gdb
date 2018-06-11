@@ -486,7 +486,7 @@ write_ptid (char *buf, ptid_t ptid)
 
   if (cs.multi_process)
     {
-      pid = ptid_get_pid (ptid);
+      pid = ptid.pid ();
       if (pid < 0)
 	buf += sprintf (buf, "p-%x.", -pid);
       else
@@ -1261,14 +1261,14 @@ prepare_resume_reply (char *buf, ptid_t ptid,
     case TARGET_WAITKIND_EXITED:
       if (cs.multi_process)
 	sprintf (buf, "W%x;process:%x",
-		 status->value.integer, ptid_get_pid (ptid));
+		 status->value.integer, ptid.pid ());
       else
 	sprintf (buf, "W%02x", status->value.integer);
       break;
     case TARGET_WAITKIND_SIGNALLED:
       if (cs.multi_process)
 	sprintf (buf, "X%x;process:%x",
-		 status->value.sig, ptid_get_pid (ptid));
+		 status->value.sig, ptid.pid ());
       else
 	sprintf (buf, "X%02x", status->value.sig);
       break;

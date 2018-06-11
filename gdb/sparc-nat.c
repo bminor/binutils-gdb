@@ -274,7 +274,7 @@ sparc_xfer_wcookie (struct target_ops *ops, enum target_object object,
      later).  Since release 3.6, OpenBSD uses a fully randomized
      cookie.  */
   {
-    int pid = ptid_get_pid (inferior_ptid);
+    int pid = inferior_ptid.pid ();
 
     /* Sanity check.  The proper type for a cookie is register_t, but
        we can't assume that this type exists on all systems supported

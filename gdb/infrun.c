@@ -462,7 +462,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  if (print_inferior_events)
 	    {
 	      /* Ensure that we have a process ptid.  */
-	      ptid_t process_ptid = ptid_t (ptid_get_pid (child_ptid));
+	      ptid_t process_ptid = ptid_t (child_ptid.pid ());
 
 	      target_terminal::ours_for_output ();
 	      fprintf_filtered (gdb_stdlog,
@@ -476,7 +476,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  struct inferior *parent_inf, *child_inf;
 
 	  /* Add process to GDB's tables.  */
-	  child_inf = add_inferior (ptid_get_pid (child_ptid));
+	  child_inf = add_inferior (child_ptid.pid ());
 
 	  parent_inf = current_inferior ();
 	  child_inf->attach_flag = parent_inf->attach_flag;
@@ -563,7 +563,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
       /* Add the new inferior first, so that the target_detach below
 	 doesn't unpush the target.  */
 
-      child_inf = add_inferior (ptid_get_pid (child_ptid));
+      child_inf = add_inferior (child_ptid.pid ());
 
       parent_inf = current_inferior ();
       child_inf->attach_flag = parent_inf->attach_flag;
@@ -598,7 +598,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  if (print_inferior_events)
 	    {
 	      /* Ensure that we have a process ptid.  */
-	      ptid_t process_ptid = ptid_t (ptid_get_pid (parent_ptid));
+	      ptid_t process_ptid = ptid_t (parent_ptid.pid ());
 
 	      target_terminal::ours_for_output ();
 	      fprintf_filtered (gdb_stdlog,
@@ -1082,7 +1082,7 @@ follow_exec (ptid_t ptid, char *exec_file_target)
 {
   struct thread_info *th, *tmp;
   struct inferior *inf = current_inferior ();
-  int pid = ptid_get_pid (ptid);
+  int pid = ptid.pid ();
   ptid_t process_ptid;
 
   /* This is an exec event that we actually wish to pay attention to.
@@ -1128,7 +1128,7 @@ follow_exec (ptid_t ptid, char *exec_file_target)
      stop provides a nicer sequence of events for user and MI
      notifications.  */
   ALL_THREADS_SAFE (th, tmp)
-    if (ptid_get_pid (th->ptid) == pid && !ptid_equal (th->ptid, ptid))
+    if (th->ptid.pid () == pid && !ptid_equal (th->ptid, ptid))
       delete_thread (th);
 
   /* We also need to clear any left over stale state for the
@@ -2268,7 +2268,7 @@ user_visible_resume_ptid (int step)
     {
       /* Resume all threads of the current process (and none of other
 	 processes).  */
-      resume_ptid = ptid_t (ptid_get_pid (inferior_ptid));
+      resume_ptid = ptid_t (inferior_ptid.pid ());
     }
   else
     {
@@ -3422,14 +3422,14 @@ print_target_wait_results (ptid_t waiton_ptid, ptid_t result_ptid,
      is set.  */
 
   stb.printf ("infrun: target_wait (%d.%ld.%ld",
-	      ptid_get_pid (waiton_ptid),
+	      waiton_ptid.pid (),
 	      ptid_get_lwp (waiton_ptid),
 	      ptid_get_tid (waiton_ptid));
-  if (ptid_get_pid (waiton_ptid) != -1)
+  if (waiton_ptid.pid () != -1)
     stb.printf (" [%s]", target_pid_to_str (waiton_ptid));
   stb.printf (", status) =\n");
   stb.printf ("infrun:   %d.%ld.%ld [%s],\n",
-	      ptid_get_pid (result_ptid),
+	      result_ptid.pid (),
 	      ptid_get_lwp (result_ptid),
 	      ptid_get_tid (result_ptid),
 	      target_pid_to_str (result_ptid));
@@ -4376,7 +4376,7 @@ save_waitstatus (struct thread_info *tp, struct target_waitstatus *ws)
       fprintf_unfiltered (gdb_stdlog,
 			  "infrun: saving status %s for %d.%ld.%ld\n",
 			  statstr.c_str (),
-			  ptid_get_pid (tp->ptid),
+			  tp->ptid.pid (),
 			  ptid_get_lwp (tp->ptid),
 			  ptid_get_tid (tp->ptid));
     }
@@ -4613,7 +4613,7 @@ stop_all_threads (void)
 					  "infrun: target_wait %s, saving "
 					  "status for %d.%ld.%ld\n",
 					  statstr.c_str (),
-					  ptid_get_pid (t->ptid),
+					  t->ptid.pid (),
 					  ptid_get_lwp (t->ptid),
 					  ptid_get_tid (t->ptid));
 		    }
@@ -4904,7 +4904,7 @@ handle_inferior_event_1 (struct execution_control_state *ecs)
 	   process as not-executing so that finish_thread_state marks
 	   them stopped (in the user's perspective) if/when we present
 	   the stop to the user.  */
-	mark_ptid = ptid_t (ptid_get_pid (ecs->ptid));
+	mark_ptid = ptid_t (ecs->ptid.pid ());
       }
     else
       mark_ptid = ecs->ptid;
@@ -7106,7 +7106,7 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 	  /* Ignore threads of processes the caller is not
 	     resuming.  */
 	  if (!sched_multi
-	      && ptid_get_pid (tp->ptid) != ptid_get_pid (ecs->ptid))
+	      && tp->ptid.pid () != ecs->ptid.pid ())
 	    continue;
 
 	  /* When stepping over a breakpoint, we lock all threads
