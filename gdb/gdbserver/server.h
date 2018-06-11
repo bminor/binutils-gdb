@@ -113,7 +113,7 @@ extern int in_queued_stop_replies (ptid_t ptid);
 /* Buffer sizes for transferring memory, registers, etc.   Set to a constant
    value to accomodate multiple register formats.  This value must be at least
    as large as the largest register set supported by gdbserver.  */
-#define PBUFSIZ 16384
+#define PBUFSIZ 18432
 
 /* Definition for an unknown syscall, used basically in error-cases.  */
 #define UNKNOWN_SYSCALL (-1)
