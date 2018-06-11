@@ -253,7 +253,7 @@ get_sim_inferior_data (struct inferior *inf, int sim_instance_needed)
       set_inferior_data (inf, sim_inferior_data_key, sim_data);
 
       /* Allocate a ptid for this inferior.  */
-      sim_data->remote_sim_ptid = ptid_build (next_pid, 0, next_pid);
+      sim_data->remote_sim_ptid = ptid_t (next_pid, 0, next_pid);
       next_pid++;
 
       /* Initialize the other instance variables.  */

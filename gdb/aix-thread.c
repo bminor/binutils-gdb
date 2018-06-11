@@ -818,7 +818,7 @@ sync_threadlists (void)
 	  ptid_t pptid, gptid;
 	  int cmp_result;
 
-	  pptid = ptid_build (infpid, 0, pbuf[pi].pthid);
+	  pptid = ptid_t (infpid, 0, pbuf[pi].pthid);
 	  gptid = gbuf[gi]->ptid;
 	  pdtid = pbuf[pi].pdtid;
 	  tid = pbuf[pi].tid;
@@ -1832,7 +1832,7 @@ aix_thread_target::extra_thread_info (struct thread_info *thread)
 ptid_t
 aix_thread_target::get_ada_task_ptid (long lwp, long thread)
 {
-  return ptid_build (ptid_get_pid (inferior_ptid), 0, thread);
+  return ptid_t (ptid_get_pid (inferior_ptid), 0, thread);
 }
 
 

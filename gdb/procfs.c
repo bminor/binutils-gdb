@@ -1996,7 +1996,7 @@ do_attach (ptid_t ptid)
   create_procinfo (pi->pid, lwpid);
 
   /* Add it to gdb's thread list.  */
-  ptid = ptid_build (pi->pid, lwpid, 0);
+  ptid = ptid_t (pi->pid, lwpid, 0);
   add_thread (ptid);
 
   return ptid;
@@ -2283,7 +2283,7 @@ wait_again:
 
 	      /* The 'pid' we will return to GDB is composed of
 		 the process ID plus the lwp ID.  */
-	      retval = ptid_build (pi->pid, proc_get_current_thread (pi), 0);
+	      retval = ptid_t (pi->pid, proc_get_current_thread (pi), 0);
 
 	      switch (why) {
 	      case PR_SIGNALLED:
@@ -2400,7 +2400,7 @@ wait_again:
 		    if (!find_procinfo (pi->pid, temp_tid))
 		      create_procinfo  (pi->pid, temp_tid);
 
-		    temp_ptid = ptid_build (pi->pid, temp_tid, 0);
+		    temp_ptid = ptid_t (pi->pid, temp_tid, 0);
 		    /* If not in GDB's thread list, add it.  */
 		    if (!in_thread_list (temp_ptid))
 		      add_thread (temp_ptid);
@@ -2468,7 +2468,7 @@ wait_again:
 		      create_procinfo  (pi->pid, temp_tid);
 
 		    /* If not in GDB's thread list, add it.  */
-		    temp_ptid = ptid_build (pi->pid, temp_tid, 0);
+		    temp_ptid = ptid_t (pi->pid, temp_tid, 0);
 		    if (!in_thread_list (temp_ptid))
 		      add_thread (temp_ptid);
 
@@ -2960,7 +2960,7 @@ procfs_init_inferior (struct target_ops *ops, int pid)
      this point, but it didn't have any lwp info yet.  Notify the core
      about it.  This changes inferior_ptid as well.  */
   thread_change_ptid (pid_to_ptid (pid),
-		      ptid_build (pid, lwpid, 0));
+		      ptid_t (pid, lwpid, 0));
 
   gdb_startup_inferior (pid, START_INFERIOR_TRAPS_EXPECTED);
 }
@@ -3143,7 +3143,7 @@ procfs_inferior_created (struct target_ops *ops, int from_tty)
 static int
 procfs_notice_thread (procinfo *pi, procinfo *thread, void *ptr)
 {
-  ptid_t gdb_threadid = ptid_build (pi->pid, thread->tid, 0);
+  ptid_t gdb_threadid = ptid_t (pi->pid, thread->tid, 0);
 
   if (!in_thread_list (gdb_threadid) || is_exited (gdb_threadid))
     add_thread (gdb_threadid);
@@ -3807,7 +3807,7 @@ procfs_corefile_thread_callback (procinfo *pi, procinfo *thread, void *data)
 
   if (pi != NULL)
     {
-      ptid_t ptid = ptid_build (pi->pid, thread->tid, 0);
+      ptid_t ptid = ptid_t (pi->pid, thread->tid, 0);
 
       args->note_data = procfs_do_thread_registers (args->obfd, ptid,
 						    args->note_data,

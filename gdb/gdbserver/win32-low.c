@@ -120,7 +120,7 @@ current_thread_ptid (void)
 static ptid_t
 debug_event_ptid (DEBUG_EVENT *event)
 {
-  return ptid_build (event->dwProcessId, event->dwThreadId, 0);
+  return ptid_t (event->dwProcessId, event->dwThreadId, 0);
 }
 
 /* Get the thread context of the thread associated with TH.  */
@@ -208,7 +208,7 @@ static win32_thread_info *
 child_add_thread (DWORD pid, DWORD tid, HANDLE h, void *tlb)
 {
   win32_thread_info *th;
-  ptid_t ptid = ptid_build (pid, tid, 0);
+  ptid_t ptid = ptid_t (pid, tid, 0);
 
   if ((th = thread_rec (ptid, FALSE)))
     return th;

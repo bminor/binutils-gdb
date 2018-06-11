@@ -28,14 +28,6 @@ ptid_t minus_one_ptid = ptid_t::make_minus_one ();
 /* See ptid.h.  */
 
 ptid_t
-ptid_build (int pid, long lwp, long tid)
-{
-  return ptid_t (pid, lwp, tid);
-}
-
-/* See ptid.h.  */
-
-ptid_t
 pid_to_ptid (int pid)
 {
   return ptid_t (pid);

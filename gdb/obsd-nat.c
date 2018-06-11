@@ -62,7 +62,7 @@ obsd_nat_target::update_thread_list ()
 
   while (pts.pts_tid != -1)
     {
-      ptid_t ptid = ptid_build (pid, pts.pts_tid, 0);
+      ptid_t ptid = ptid_t (pid, pts.pts_tid, 0);
 
       if (!in_thread_list (ptid))
 	{
@@ -151,7 +151,7 @@ obsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	  return pid_to_ptid (pid);
 	}
 
-      ptid = ptid_build (pid, pe.pe_tid, 0);
+      ptid = ptid_t (pid, pe.pe_tid, 0);
       if (!in_thread_list (ptid))
 	{
 	  if (ptid_get_lwp (inferior_ptid) == 0)

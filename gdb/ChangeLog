@@ -1,5 +1,35 @@
 2018-07-03  Tom Tromey  <tom@tromey.com>
 
+	* common/ptid.h (ptid_build): Don't declare.
+	* common/ptid.c (ptid_build): Remove.
+	* aix-thread.c: Update.
+	* bsd-kvm.c: Update.
+	* bsd-uthread.c: Update.
+	* common/agent.c: Update.
+	* common/ptid.c: Update.
+	* common/ptid.h: Update.
+	* corelow.c: Update.
+	* darwin-nat.c: Update.
+	* fbsd-nat.c: Update.
+	* gnu-nat.c: Update.
+	* linux-fork.c: Update.
+	* linux-nat.c: Update.
+	* linux-thread-db.c: Update.
+	* nat/linux-osdata.c: Update.
+	* nat/linux-procfs.c: Update.
+	* nto-procfs.c: Update.
+	* obsd-nat.c: Update.
+	* proc-service.c: Update.
+	* procfs.c: Update.
+	* ravenscar-thread.c: Update.
+	* remote-sim.c: Update.
+	* remote.c: Update.
+	* sol-thread.c: Update.
+	* target.c: Update.
+	* windows-nat.c: Update.
+
+2018-07-03  Tom Tromey  <tom@tromey.com>
+
 	* infrun.c (follow_exec): Use exit_inferior_silent.
 	* inferior.c (exit_inferior_num_silent): Remove.
 	* inferior.h (exit_inferior_num_silent): Don't declare.

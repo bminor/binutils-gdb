@@ -618,7 +618,7 @@ default_terminal_info (struct target_ops *self, const char *args, int from_tty)
 static ptid_t
 default_get_ada_task_ptid (struct target_ops *self, long lwp, long tid)
 {
-  return ptid_build (ptid_get_pid (inferior_ptid), lwp, tid);
+  return ptid_t (ptid_get_pid (inferior_ptid), lwp, tid);
 }
 
 static enum exec_direction_kind

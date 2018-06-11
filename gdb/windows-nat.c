@@ -1371,8 +1371,8 @@ fake_create_process (void)
     }
   main_thread_id = current_event.dwThreadId;
   current_thread = windows_add_thread (
-		     ptid_build (current_event.dwProcessId, 0,
-				 current_event.dwThreadId),
+		     ptid_t (current_event.dwProcessId, 0,
+			     current_event.dwThreadId),
 		     current_event.u.CreateThread.hThread,
 		     current_event.u.CreateThread.lpThreadLocalBase);
   return main_thread_id;
@@ -1544,8 +1544,8 @@ get_windows_debug_event (struct target_ops *ops,
 	}
       /* Record the existence of this thread.  */
       thread_id = current_event.dwThreadId;
-      th = windows_add_thread (ptid_build (current_event.dwProcessId, 0,
-					 current_event.dwThreadId),
+      th = windows_add_thread (ptid_t (current_event.dwProcessId, 0,
+				       current_event.dwThreadId),
 			     current_event.u.CreateThread.hThread,
 			     current_event.u.CreateThread.lpThreadLocalBase);
 
@@ -1559,8 +1559,8 @@ get_windows_debug_event (struct target_ops *ops,
 
       if (current_event.dwThreadId != main_thread_id)
 	{
-	  windows_delete_thread (ptid_build (current_event.dwProcessId, 0,
-					     current_event.dwThreadId),
+	  windows_delete_thread (ptid_t (current_event.dwProcessId, 0,
+					 current_event.dwThreadId),
 				 current_event.u.ExitThread.dwExitCode);
 	  th = &dummy_thread_info;
 	}
@@ -1577,13 +1577,13 @@ get_windows_debug_event (struct target_ops *ops,
 
       current_process_handle = current_event.u.CreateProcessInfo.hProcess;
       if (main_thread_id)
-	windows_delete_thread (ptid_build (current_event.dwProcessId, 0,
-					   main_thread_id),
+	windows_delete_thread (ptid_t (current_event.dwProcessId, 0,
+				       main_thread_id),
 			       0);
       main_thread_id = current_event.dwThreadId;
       /* Add the main thread.  */
-      th = windows_add_thread (ptid_build (current_event.dwProcessId, 0,
-					   current_event.dwThreadId),
+      th = windows_add_thread (ptid_t (current_event.dwProcessId, 0,
+				       current_event.dwThreadId),
 	     current_event.u.CreateProcessInfo.hThread,
 	     current_event.u.CreateProcessInfo.lpThreadLocalBase);
       thread_id = current_event.dwThreadId;
@@ -1685,8 +1685,7 @@ get_windows_debug_event (struct target_ops *ops,
     }
   else
     {
-      inferior_ptid = ptid_build (current_event.dwProcessId, 0,
-				  thread_id);
+      inferior_ptid = ptid_t (current_event.dwProcessId, 0, thread_id);
       current_thread = th;
       if (!current_thread)
 	current_thread = thread_rec (thread_id, TRUE);
@@ -1746,7 +1745,7 @@ windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
       SetConsoleCtrlHandler (&ctrl_c_handler, FALSE);
 
       if (retval)
-	return ptid_build (current_event.dwProcessId, 0, retval);
+	return ptid_t (current_event.dwProcessId, 0, retval);
       else
 	{
 	  int detach = 0;
@@ -3021,7 +3020,7 @@ windows_nat_target::get_tib_address (ptid_t ptid, CORE_ADDR *addr)
 ptid_t
 windows_nat_target::get_ada_task_ptid (long lwp, long thread)
 {
-  return ptid_build (ptid_get_pid (inferior_ptid), 0, lwp);
+  return ptid_t (ptid_get_pid (inferior_ptid), 0, lwp);
 }
 
 /* Implementation of the to_thread_name method.  */

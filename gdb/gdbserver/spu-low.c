@@ -297,7 +297,7 @@ spu_create_inferior (const char *program,
   proc = add_process (pid, 0);
   proc->tdesc = tdesc_spu;
 
-  ptid = ptid_build (pid, pid, 0);
+  ptid = ptid_t (pid, pid, 0);
   add_thread (ptid, NULL);
   return pid;
 }
@@ -319,7 +319,7 @@ spu_attach (unsigned long  pid)
 
   proc = add_process (pid, 1);
   proc->tdesc = tdesc_spu;
-  ptid = ptid_build (pid, pid, 0);
+  ptid = ptid_t (pid, pid, 0);
   add_thread (ptid, NULL);
   return 0;
 }
@@ -474,12 +474,12 @@ spu_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
     {
       ourstatus->kind = TARGET_WAITKIND_STOPPED;
       ourstatus->value.sig = GDB_SIGNAL_0;
-      return ptid_build (ret, ret, 0);
+      return ptid_t (ret, ret, 0);
     }
 
   ourstatus->kind = TARGET_WAITKIND_STOPPED;
   ourstatus->value.sig = gdb_signal_from_host (WSTOPSIG (w));
-  return ptid_build (ret, ret, 0);
+  return ptid_t (ret, ret, 0);
 }
 
 /* Fetch inferior registers.  */

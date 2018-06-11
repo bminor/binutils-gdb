@@ -413,5 +413,5 @@ Generic command for manipulating the kernel memory interface."),
      ptid (1, 1, 2) -> kvm inferior 1, process 2
      ptid (1, 1, n) -> kvm inferior 1, process n  */
 
-  bsd_kvm_ptid = ptid_build (1, 1, 0);
+  bsd_kvm_ptid = ptid_t (1, 1, 0);
 }

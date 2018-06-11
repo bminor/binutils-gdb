@@ -413,7 +413,7 @@ nto_procfs_target::update_thread_list ()
 	   returned different tid, meaning the requested tid no longer exists
 	   (e.g. thread exited).  */
 	continue;
-      ptid = ptid_build (pid, 0, tid);
+      ptid = ptid_t (pid, 0, tid);
       new_thread = find_thread_ptid (ptid);
       if (!new_thread)
 	new_thread = add_thread (ptid);
@@ -766,7 +766,7 @@ do_attach (ptid_t ptid)
       && status.flags & _DEBUG_FLAG_STOPPED)
     SignalKill (nto_node (), ptid_get_pid (ptid), 0, SIGCONT, 0, 0);
   nto_init_solib_absolute_prefix ();
-  return ptid_build (ptid_get_pid (ptid), 0, status.tid);
+  return ptid_t (ptid_get_pid (ptid), 0, status.tid);
 }
 
 /* Ask the user what to do when an interrupt is received.  */
@@ -899,7 +899,7 @@ nto_procfs_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	}
     }
 
-  return ptid_build (status.pid, 0, status.tid);
+  return ptid_t (status.pid, 0, status.tid);
 }
 
 /* Read the current values of the inferior's registers, both the

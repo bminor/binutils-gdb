@@ -142,7 +142,7 @@ nto_find_new_threads (struct nto_inferior *nto_inferior)
 	{
 	  struct thread_info *ti;
 
-	  ptid = ptid_build (nto_inferior->pid, tid, 0);
+	  ptid = ptid_t (nto_inferior->pid, tid, 0);
 	  ti = find_thread_ptid (ptid);
 	  if (ti != NULL)
 	    {
@@ -157,7 +157,7 @@ nto_find_new_threads (struct nto_inferior *nto_inferior)
       if (status.state != STATE_DEAD)
 	{
 	  TRACE ("Adding thread %d\n", tid);
-	  ptid = ptid_build (nto_inferior->pid, tid, 0);
+	  ptid = ptid_t (nto_inferior->pid, tid, 0);
 	  if (!find_thread_ptid (ptid))
 	    add_thread (ptid, NULL);
 	}
@@ -208,7 +208,7 @@ do_attach (pid_t pid)
       struct process_info *proc;
 
       kill (pid, SIGCONT);
-      ptid = ptid_build (status.pid, status.tid, 0);
+      ptid = ptid_t (status.pid, status.tid, 0);
       the_low_target.arch_setup ();
       proc = add_process (status.pid, 1);
       proc->tdesc = nto_tdesc;
@@ -609,7 +609,7 @@ nto_wait (ptid_t ptid,
 	}
     }
 
-  return ptid_build (status.pid, status.tid, 0);
+  return ptid_t (status.pid, status.tid, 0);
 }
 
 /* Fetch inferior's registers for currently selected thread (CURRENT_INFERIOR).
@@ -740,7 +740,7 @@ static void
 nto_request_interrupt (void)
 {
   TRACE ("%s\n", __func__);
-  nto_set_thread (ptid_build (nto_inferior.pid, 1, 0));
+  nto_set_thread (ptid_t (nto_inferior.pid, 1, 0));
   if (EOK != devctl (nto_inferior.ctl_fd, DCMD_PROC_STOP, NULL, 0, 0))
     TRACE ("Error stopping inferior.\n");
 }

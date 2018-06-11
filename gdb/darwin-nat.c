@@ -342,7 +342,7 @@ darwin_check_new_threads (struct inferior *inf)
 	  pti->msg_state = DARWIN_RUNNING;
 
 	  /* Add the new thread.  */
-	  add_thread_with_info (ptid_build (inf->pid, 0, new_id), pti);
+	  add_thread_with_info (ptid_t (inf->pid, 0, new_id), pti);
 	  new_thread_vec.push_back (pti);
 	  new_ix++;
 	  continue;
@@ -351,7 +351,7 @@ darwin_check_new_threads (struct inferior *inf)
 	{
 	  /* A thread was removed.  */
 	  struct thread_info *thr
-	    = find_thread_ptid (ptid_build (inf->pid, 0, old_id));
+	    = find_thread_ptid (ptid_t (inf->pid, 0, old_id));
 	  delete_thread (thr);
 	  kret = mach_port_deallocate (gdb_task, old_id);
 	  MACH_CHECK_ERROR (kret);
@@ -1074,7 +1074,7 @@ darwin_decode_message (mach_msg_header_t *hdr,
 	  break;
 	}
 
-      return ptid_build (inf->pid, 0, thread->gdb_port);
+      return ptid_t (inf->pid, 0, thread->gdb_port);
     }
   else if (hdr->msgh_id == 0x48)
     {
@@ -1134,7 +1134,7 @@ darwin_decode_message (mach_msg_header_t *hdr,
 	      /* Looks necessary on Leopard and harmless...  */
 	      wait4 (inf->pid, &wstatus, 0, NULL);
 
-	      inferior_ptid = ptid_build (inf->pid, 0, 0);
+	      inferior_ptid = ptid_t (inf->pid, 0, 0);
 	      return inferior_ptid;
 	    }
 	  else
@@ -1142,7 +1142,7 @@ darwin_decode_message (mach_msg_header_t *hdr,
 	      inferior_debug (4, _("darwin_wait: pid=%d\n"), inf->pid);
 	      status->kind = TARGET_WAITKIND_EXITED;
 	      status->value.integer = 0; /* Don't know.  */
-	      return ptid_build (inf->pid, 0, 0);
+	      return ptid_t (inf->pid, 0, 0);
 	    }
 	}
     }
@@ -1213,7 +1213,7 @@ darwin_wait (ptid_t ptid, struct target_waitstatus *status)
       status->value.sig = GDB_SIGNAL_TRAP;
       thread = priv->threads[0];
       thread->msg_state = DARWIN_STOPPED;
-      return ptid_build (inf->pid, 0, thread->gdb_port);
+      return ptid_t (inf->pid, 0, thread->gdb_port);
     }
 
   do
@@ -1285,7 +1285,7 @@ darwin_wait (ptid_t ptid, struct target_waitstatus *status)
 	  && thread->event.ex_type == EXC_BREAKPOINT)
 	{
 	  if (thread->single_step
-	      || cancel_breakpoint (ptid_build (inf->pid, 0, thread->gdb_port)))
+	      || cancel_breakpoint (ptid_t (inf->pid, 0, thread->gdb_port)))
 	    {
 	      gdb_assert (thread->msg_state == DARWIN_MESSAGE);
 	      darwin_send_reply (inf, thread);
@@ -2272,7 +2272,7 @@ darwin_nat_target::get_ada_task_ptid (long lwp, long thread)
   for (darwin_thread_t *t : priv->threads)
     {
       if (t->inf_port == lwp)
-	return ptid_build (ptid_get_pid (inferior_ptid), 0, t->gdb_port);
+	return ptid_t (ptid_get_pid (inferior_ptid), 0, t->gdb_port);
     }
 
   /* Maybe the port was never extract.  Do it now.  */
@@ -2316,7 +2316,7 @@ darwin_nat_target::get_ada_task_ptid (long lwp, long thread)
                  names_count * sizeof (mach_port_t));
 
   if (res)
-    return ptid_build (ptid_get_pid (inferior_ptid), 0, res);
+    return ptid_t (ptid_get_pid (inferior_ptid), 0, res);
   else
     return null_ptid;
 }

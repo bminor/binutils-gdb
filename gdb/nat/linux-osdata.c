@@ -266,8 +266,8 @@ get_cores_used_by_process (PID_T pid, int *cores, const int num_cores)
 	    continue;
 
 	  sscanf (dp->d_name, "%lld", &tid);
-	  core = linux_common_core_of_thread (ptid_build ((pid_t) pid,
-							  (pid_t) tid, 0));
+	  core = linux_common_core_of_thread (ptid_t ((pid_t) pid,
+						      (pid_t) tid, 0));
 
 	  if (core >= 0 && core < num_cores)
 	    {
@@ -595,7 +595,7 @@ linux_xfer_osdata_threads (gdb_byte *readbuf,
 			    continue;
 
 			  tid = atoi (dp2->d_name);
-			  core = linux_common_core_of_thread (ptid_build (pid, tid, 0));
+			  core = linux_common_core_of_thread (ptid_t (pid, tid, 0));
 
 			  buffer_xml_printf (
 			    &buffer,

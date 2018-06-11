@@ -94,7 +94,7 @@ add_fork (pid_t pid)
     }
 
   fp = XCNEW (struct fork_info);
-  fp->ptid = ptid_build (pid, pid, 0);
+  fp->ptid = ptid_t (pid, pid, 0);
   fp->num = ++highest_fork_num;
 
   if (fork_list == NULL)

@@ -2955,7 +2955,7 @@ read_ptid (const char *buf, const char **obuf)
       pp = unpack_varlen_hex (p + 1, &tid);
       if (obuf)
 	*obuf = pp;
-      return ptid_build (pid, tid, 0);
+      return ptid_t (pid, tid, 0);
     }
 
   /* No multi-process.  Just a tid.  */
@@ -2980,7 +2980,7 @@ read_ptid (const char *buf, const char **obuf)
 
   if (obuf)
     *obuf = pp;
-  return ptid_build (pid, tid, 0);
+  return ptid_t (pid, tid, 0);
 }
 
 static int
@@ -3972,7 +3972,7 @@ remote_target::static_tracepoint_markers_by_strid (const char *strid)
 ptid_t
 remote_target::get_ada_task_ptid (long lwp, long thread)
 {
-  return ptid_build (ptid_get_pid (inferior_ptid), lwp, 0);
+  return ptid_t (ptid_get_pid (inferior_ptid), lwp, 0);
 }
 
 
@@ -6037,7 +6037,7 @@ remote_target::append_resumption (char *p, char *endp,
       ptid_t nptid;
 
       /* All (-1) threads of process.  */
-      nptid = ptid_build (ptid_get_pid (ptid), -1, 0);
+      nptid = ptid_t (ptid_get_pid (ptid), -1, 0);
 
       p += xsnprintf (p, endp - p, ":");
       p = write_ptid (p, endp, nptid);
@@ -6615,7 +6615,7 @@ remote_target::remote_stop_ns (ptid_t ptid)
 
       if (ptid_is_pid (ptid))
 	  /* All (-1) threads of process.  */
-	nptid = ptid_build (ptid_get_pid (ptid), -1, 0);
+	nptid = ptid_t (ptid_get_pid (ptid), -1, 0);
       else
 	{
 	  /* Small optimization: if we already have a stop reply for
@@ -11321,7 +11321,7 @@ threadalive_test (const char *cmd, int tty)
 {
   int sample_thread = SAMPLE_THREAD;
   int pid = ptid_get_pid (inferior_ptid);
-  ptid_t ptid = ptid_build (pid, sample_thread, 0);
+  ptid_t ptid = ptid_t (pid, sample_thread, 0);
 
   if (remote_thread_alive (ptid))
     printf_filtered ("PASS: Thread alive test\n");
@@ -14737,7 +14737,7 @@ stepping is supported by the target.  The default is on."),
 
   /* Take advantage of the fact that the TID field is not used, to tag
      special ptids with it set to != 0.  */
-  magic_null_ptid = ptid_build (42000, -1, 1);
-  not_sent_ptid = ptid_build (42000, -2, 1);
-  any_thread_ptid = ptid_build (42000, 0, 1);
+  magic_null_ptid = ptid_t (42000, -1, 1);
+  not_sent_ptid = ptid_t (42000, -2, 1);
+  any_thread_ptid = ptid_t (42000, 0, 1);
 }

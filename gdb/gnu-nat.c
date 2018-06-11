@@ -1096,7 +1096,7 @@ inf_validate_procs (struct inf *inf)
 	    last = thread;
 	    proc_debug (thread, "new thread: %lu", threads[i]);
 
-	    ptid = ptid_build (inf->pid, thread->tid, 0);
+	    ptid = ptid_t (inf->pid, thread->tid, 0);
 
 	    /* Tell GDB's generic thread code.  */
 
@@ -1616,7 +1616,7 @@ rewait:
 
   thread = inf->wait.thread;
   if (thread)
-    ptid = ptid_build (inf->pid, thread->tid, 0);
+    ptid = ptid_t (inf->pid, thread->tid, 0);
   else if (ptid_equal (ptid, minus_one_ptid))
     thread = inf_tid_to_thread (inf, -1);
   else
@@ -1626,7 +1626,7 @@ rewait:
     {
       /* TID is dead; try and find a new thread.  */
       if (inf_update_procs (inf) && inf->threads)
-	ptid = ptid_build (inf->pid, inf->threads->tid, 0); /* The first
+	ptid = ptid_t (inf->pid, inf->threads->tid, 0); /* The first
 							       available
 							       thread.  */
       else
@@ -2167,7 +2167,7 @@ gnu_nat_target::create_inferior (const char *exec_file,
 
   /* We now have thread info.  */
   thread_change_ptid (inferior_ptid,
-		      ptid_build (inf->pid, inf_pick_first_thread (), 0));
+		      ptid_t (inf->pid, inf_pick_first_thread (), 0));
 
   gdb_startup_inferior (pid, START_INFERIOR_TRAPS_EXPECTED);
 
@@ -2228,7 +2228,7 @@ gnu_nat_target::attach (const char *args, int from_tty)
 
   inf_update_procs (inf);
 
-  inferior_ptid = ptid_build (pid, inf_pick_first_thread (), 0);
+  inferior_ptid = ptid_t (pid, inf_pick_first_thread (), 0);
 
   /* We have to initialize the terminal settings now, since the code
      below might try to restore them.  */

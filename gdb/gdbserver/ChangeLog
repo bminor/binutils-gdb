@@ -1,3 +1,13 @@
+2018-07-03  Tom Tromey  <tom@tromey.com>
+
+	* linux-low.c: Update.
+	* lynx-low.c: Update.
+	* nto-low.c: Update.
+	* remote-utils.c: Update.
+	* spu-low.c: Update.
+	* thread-db.c: Update.
+	* win32-low.c: Update.
+
 2018-06-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* linux-x86-tdesc.c (amd64_linux_read_description): Add missing

@@ -523,7 +523,7 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 	  struct thread_info *child_thr;
 	  struct target_desc *tdesc;
 
-	  ptid = ptid_build (new_pid, new_pid, 0);
+	  ptid = ptid_t (new_pid, new_pid, 0);
 
 	  if (debug_threads)
 	    {
@@ -630,7 +630,7 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 		      "from LWP %ld, new child is LWP %ld\n",
 		      lwpid_of (event_thr), new_pid);
 
-      ptid = ptid_build (pid_of (event_thr), new_pid, 0);
+      ptid = ptid_t (pid_of (event_thr), new_pid, 0);
       new_lwp = add_lwp (ptid);
 
       /* Either we're going to immediately resume the new thread
@@ -1017,7 +1017,7 @@ linux_create_inferior (const char *program,
 
   linux_add_process (pid, 0);
 
-  ptid = ptid_build (pid, pid, 0);
+  ptid = ptid_t (pid, pid, 0);
   new_lwp = add_lwp (ptid);
   new_lwp->must_set_ptrace_flags = 1;
 
@@ -1185,7 +1185,7 @@ linux_attach (unsigned long pid)
 {
   struct process_info *proc;
   struct thread_info *initial_thread;
-  ptid_t ptid = ptid_build (pid, pid, 0);
+  ptid_t ptid = ptid_t (pid, pid, 0);
   int err;
 
   /* Attach to PID.  We will check for other threads
@@ -1202,7 +1202,7 @@ linux_attach (unsigned long pid)
 
   /* Don't ignore the initial SIGSTOP if we just attached to this
      process.  It will be collected by wait shortly.  */
-  initial_thread = find_thread_ptid (ptid_build (pid, pid, 0));
+  initial_thread = find_thread_ptid (ptid_t (pid, pid, 0));
   initial_thread->last_resume_kind = resume_stop;
 
   /* We must attach to every LWP.  If /proc is mounted, use that to
@@ -2391,7 +2391,7 @@ linux_low_filter_event (int lwpid, int wstat)
 			"after exec.\n", lwpid);
 	}
 
-      child_ptid = ptid_build (lwpid, lwpid, 0);
+      child_ptid = ptid_t (lwpid, lwpid, 0);
       child = add_lwp (child_ptid);
       child->stopped = 1;
       current_thread = child->thread;

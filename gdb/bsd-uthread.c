@@ -407,7 +407,7 @@ bsd_uthread_target::wait (ptid_t ptid, struct target_waitstatus *status,
 	{
 	  ULONGEST magic = extract_unsigned_integer (buf, 4, byte_order);
 	  if (magic == BSD_UTHREAD_PTHREAD_MAGIC)
-	    ptid = ptid_build (ptid_get_pid (ptid), 0, addr);
+	    ptid = ptid_t (ptid_get_pid (ptid), 0, addr);
 	}
     }
 
@@ -466,7 +466,7 @@ bsd_uthread_target::update_thread_list ()
   addr = bsd_uthread_read_memory_address (bsd_uthread_thread_list_addr);
   while (addr != 0)
     {
-      ptid_t ptid = ptid_build (pid, 0, addr);
+      ptid_t ptid = ptid_t (pid, 0, addr);
 
       thread_info *thread = find_thread_ptid (ptid);
       if (thread == nullptr || thread->state == THREAD_EXITED)

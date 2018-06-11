@@ -158,10 +158,6 @@ extern ptid_t minus_one_ptid;
 
 /* See ptid_t::ptid_t.  */
 
-extern ptid_t ptid_build (int pid, long lwp, long tid);
-
-/* See ptid_t::ptid_t.  */
-
 extern ptid_t pid_to_ptid (int pid);
 
 /* See ptid_t::pid.  */

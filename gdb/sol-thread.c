@@ -325,7 +325,7 @@ thread_to_lwp (ptid_t thread_id, int default_lwp)
 	     td_state_string (ti.ti_state));
     }
 
-  return ptid_build (ptid_get_pid (thread_id), ti.ti_lid, 0);
+  return ptid_t (ptid_get_pid (thread_id), ti.ti_lid, 0);
 }
 
 /* Convert an LWP ID into a POSIX or Solaris thread ID.  If LWP_ID
@@ -366,7 +366,7 @@ lwp_to_thread (ptid_t lwp)
   else if (val != TD_OK)
     error (_("lwp_to_thread: td_thr_get_info: %s."), td_err_string (val));
 
-  return ptid_build (ptid_get_pid (lwp), 0 , ti.ti_tid);
+  return ptid_t (ptid_get_pid (lwp), 0 , ti.ti_tid);
 }
 
 
@@ -849,7 +849,7 @@ ps_ptwrite (struct ps_prochandle *ph, psaddr_t addr,
 ps_err_e
 ps_lgetregs (struct ps_prochandle *ph, lwpid_t lwpid, prgregset_t gregset)
 {
-  ptid_t ptid = ptid_build (ptid_get_pid (inferior_ptid), lwpid, 0);
+  ptid_t ptid = ptid_t (ptid_get_pid (inferior_ptid), lwpid, 0);
   struct regcache *regcache
     = get_thread_arch_regcache (ptid, target_gdbarch ());
 
@@ -865,7 +865,7 @@ ps_err_e
 ps_lsetregs (struct ps_prochandle *ph, lwpid_t lwpid,
 	     const prgregset_t gregset)
 {
-  ptid_t ptid = ptid_build (ptid_get_pid (inferior_ptid), lwpid, 0);
+  ptid_t ptid = ptid_t (ptid_get_pid (inferior_ptid), lwpid, 0);
   struct regcache *regcache
     = get_thread_arch_regcache (ptid, target_gdbarch ());
 
@@ -917,7 +917,7 @@ ps_err_e
 ps_lgetfpregs (struct ps_prochandle *ph, lwpid_t lwpid,
 	       prfpregset_t *fpregset)
 {
-  ptid_t ptid = ptid_build (ptid_get_pid (inferior_ptid), lwpid, 0);
+  ptid_t ptid = ptid_t (ptid_get_pid (inferior_ptid), lwpid, 0);
   struct regcache *regcache
     = get_thread_arch_regcache (ptid, target_gdbarch ());
 
@@ -933,7 +933,7 @@ ps_err_e
 ps_lsetfpregs (struct ps_prochandle *ph, lwpid_t lwpid,
 	       const prfpregset_t * fpregset)
 {
-  ptid_t ptid = ptid_build (ptid_get_pid (inferior_ptid), lwpid, 0);
+  ptid_t ptid = ptid_t (ptid_get_pid (inferior_ptid), lwpid, 0);
   struct regcache *regcache
     = get_thread_arch_regcache (ptid, target_gdbarch ());
 
@@ -982,7 +982,7 @@ ps_lgetLDT (struct ps_prochandle *ph, lwpid_t lwpid,
   if (ptid_get_pid (inferior_ptid) <= 0 || lwpid <= 0)
     return PS_BADLID;
 
-  ret = procfs_find_LDT_entry (ptid_build (ptid_get_pid (inferior_ptid),
+  ret = procfs_find_LDT_entry (ptid_t (ptid_get_pid (inferior_ptid),
 			       lwpid, 0));
   if (ret)
     {
@@ -1042,7 +1042,7 @@ sol_update_thread_list_callback (const td_thrhandle_t *th, void *ignored)
   if (retval != TD_OK)
     return -1;
 
-  ptid = ptid_build (ptid_get_pid (inferior_ptid), 0, ti.ti_tid);
+  ptid = ptid_t (ptid_get_pid (inferior_ptid), 0, ti.ti_tid);
   if (!in_thread_list (ptid) || is_exited (ptid))
     add_thread (ptid);
 

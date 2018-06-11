@@ -310,7 +310,7 @@ add_to_thread_list (bfd *abfd, asection *asect, void *reg_sect_arg)
       inf->fake_pid_p = fake_pid_p;
     }
 
-  ptid = ptid_build (pid, lwpid, 0);
+  ptid = ptid_t (pid, lwpid, 0);
 
   add_thread (ptid);
 
