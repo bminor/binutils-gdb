@@ -492,7 +492,7 @@ write_ptid (char *buf, ptid_t ptid)
       else
 	buf += sprintf (buf, "p%x.", pid);
     }
-  tid = ptid_get_lwp (ptid);
+  tid = ptid.lwp ();
   if (tid < 0)
     buf += sprintf (buf, "-%x", -tid);
   else

@@ -167,7 +167,7 @@ find_one_thread (ptid_t ptid)
   td_err_e err;
   struct lwp_info *lwp;
   struct thread_db *thread_db = current_process ()->priv->thread_db;
-  int lwpid = ptid_get_lwp (ptid);
+  int lwpid = ptid.lwp ();
 
   thread_info *thread = find_thread_ptid (ptid);
   lwp = get_thread_lwp (thread);

@@ -1620,7 +1620,7 @@ rewait:
   else if (ptid_equal (ptid, minus_one_ptid))
     thread = inf_tid_to_thread (inf, -1);
   else
-    thread = inf_tid_to_thread (inf, ptid_get_lwp (ptid));
+    thread = inf_tid_to_thread (inf, ptid.lwp ());
 
   if (!thread || thread->port == MACH_PORT_NULL)
     {
@@ -2049,7 +2049,7 @@ gnu_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
   else
     /* Just allow a single thread to run.  */
     {
-      struct proc *thread = inf_tid_to_thread (inf, ptid_get_lwp (ptid));
+      struct proc *thread = inf_tid_to_thread (inf, ptid.lwp ());
 
       if (!thread)
 	error (_("Can't run single thread id %s: no such thread!"),
@@ -2060,7 +2060,7 @@ gnu_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
 
   if (step)
     {
-      step_thread = inf_tid_to_thread (inf, ptid_get_lwp (ptid));
+      step_thread = inf_tid_to_thread (inf, ptid.lwp ());
       if (!step_thread)
 	warning (_("Can't step thread id %s: no such thread."),
 		 target_pid_to_str (ptid));
@@ -2293,7 +2293,7 @@ gnu_nat_target::thread_alive (ptid_t ptid)
 {
   inf_update_procs (gnu_current_inf);
   return !!inf_tid_to_thread (gnu_current_inf,
-			      ptid_get_lwp (ptid));
+			      ptid.lwp ());
 }
 
 
@@ -2716,7 +2716,7 @@ const char *
 gnu_nat_target::pid_to_str (ptid_t ptid)
 {
   struct inf *inf = gnu_current_inf;
-  int tid = ptid_get_lwp (ptid);
+  int tid = ptid.lwp ();
   struct proc *thread = inf_tid_to_thread (inf, tid);
 
   if (thread)
@@ -2818,7 +2818,7 @@ cur_thread (void)
 {
   struct inf *inf = cur_inf ();
   struct proc *thread = inf_tid_to_thread (inf,
-					   ptid_get_lwp (inferior_ptid));
+					   inferior_ptid.lwp ());
   if (!thread)
     error (_("No current thread."));
   return thread;
@@ -3018,7 +3018,7 @@ set_sig_thread_cmd (const char *args, int from_tty)
   else
     {
       struct thread_info *tp = parse_thread_id (args, NULL);
-      inf->signal_thread = inf_tid_to_thread (inf, ptid_get_lwp (tp->ptid));
+      inf->signal_thread = inf_tid_to_thread (inf, tp->ptid.lwp ());
     }
 }
 

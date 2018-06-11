@@ -301,9 +301,9 @@ fbsd_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
 {
   static char buf[80];
 
-  if (ptid_get_lwp (ptid) != 0)
+  if (ptid.lwp () != 0)
     {
-      xsnprintf (buf, sizeof buf, "LWP %ld", ptid_get_lwp (ptid));
+      xsnprintf (buf, sizeof buf, "LWP %ld", ptid.lwp ());
       return buf;
     }
 
@@ -320,7 +320,7 @@ fbsd_core_thread_name (struct gdbarch *gdbarch, struct thread_info *thr)
   struct bfd_section *section;
   bfd_size_type size;
 
-  if (ptid_get_lwp (thr->ptid) != 0)
+  if (thr->ptid.lwp () != 0)
     {
       /* FreeBSD includes a NT_FREEBSD_THRMISC note for each thread
 	 whose contents are defined by a "struct thrmisc" declared in
@@ -477,7 +477,7 @@ fbsd_collect_thread_registers (const struct regcache *regcache,
   data.note_size = note_size;
   data.stop_signal = stop_signal;
   data.abort_iteration = 0;
-  data.lwp = ptid_get_lwp (ptid);
+  data.lwp = ptid.lwp ();
 
   gdbarch_iterate_over_regset_sections (gdbarch,
 					fbsd_collect_regset_section_cb,

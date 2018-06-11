@@ -348,7 +348,7 @@ lwp_to_thread (ptid_t lwp)
   if (!target_thread_alive (lwp))
     return ptid_t (-1);	/* Must be a defunct LPW.  */
 
-  val = p_td_ta_map_lwp2thr (main_ta, ptid_get_lwp (lwp), &th);
+  val = p_td_ta_map_lwp2thr (main_ta, lwp.lwp (), &th);
   if (val == TD_NOTHR)
     return ptid_t (-1);	/* Thread must have terminated.  */
   else if (val != TD_OK)
@@ -1014,13 +1014,13 @@ sol_thread_target::pid_to_str (ptid_t ptid)
 		   ptid_get_tid (ptid));
       else if (lwp.pid () != -2)
 	xsnprintf (buf, sizeof (buf), "Thread %ld (LWP %ld)",
-		 ptid_get_tid (ptid), ptid_get_lwp (lwp));
+		 ptid_get_tid (ptid), lwp.lwp ());
       else
 	xsnprintf (buf, sizeof (buf), "Thread %ld        ",
 		   ptid_get_tid (ptid));
     }
-  else if (ptid_get_lwp (ptid) != 0)
-    xsnprintf (buf, sizeof (buf), "LWP    %ld        ", ptid_get_lwp (ptid));
+  else if (ptid.lwp () != 0)
+    xsnprintf (buf, sizeof (buf), "LWP    %ld        ", ptid.lwp ());
   else
     xsnprintf (buf, sizeof (buf), "process %d    ", ptid.pid ());
 

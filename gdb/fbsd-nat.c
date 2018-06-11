@@ -814,7 +814,7 @@ fbsd_nat_target::thread_alive (ptid_t ptid)
     {
       struct ptrace_lwpinfo pl;
 
-      if (ptrace (PT_LWPINFO, ptid_get_lwp (ptid), (caddr_t) &pl, sizeof pl)
+      if (ptrace (PT_LWPINFO, ptid.lwp (), (caddr_t) &pl, sizeof pl)
 	  == -1)
 	return false;
 #ifdef PL_FLAG_EXITED
@@ -834,7 +834,7 @@ fbsd_nat_target::pid_to_str (ptid_t ptid)
 {
   lwpid_t lwp;
 
-  lwp = ptid_get_lwp (ptid);
+  lwp = ptid.lwp ();
   if (lwp != 0)
     {
       static char buf[64];
@@ -857,7 +857,7 @@ fbsd_nat_target::thread_name (struct thread_info *thr)
   struct ptrace_lwpinfo pl;
   struct kinfo_proc kp;
   int pid = thr->ptid.pid ();
-  long lwp = ptid_get_lwp (thr->ptid);
+  long lwp = thr->ptid.lwp ();
   static char buf[sizeof pl.pl_tdname + 1];
 
   /* Note that ptrace_lwpinfo returns the process command in pl_tdname
@@ -1100,7 +1100,7 @@ fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
   if (debug_fbsd_lwp)
     fprintf_unfiltered (gdb_stdlog,
 			"FLWP: fbsd_resume for ptid (%d, %ld, %ld)\n",
-			ptid.pid (), ptid_get_lwp (ptid),
+			ptid.pid (), ptid.lwp (),
 			ptid_get_tid (ptid));
   if (ptid_lwp_p (ptid))
     {
@@ -1113,12 +1113,12 @@ fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 	  if (tp->ptid.pid () != ptid.pid ())
 	    continue;
 
-	  if (ptid_get_lwp (tp->ptid) == ptid_get_lwp (ptid))
+	  if (tp->ptid.lwp () == ptid.lwp ())
 	    request = PT_RESUME;
 	  else
 	    request = PT_SUSPEND;
 
-	  if (ptrace (request, ptid_get_lwp (tp->ptid), NULL, 0) == -1)
+	  if (ptrace (request, tp->ptid.lwp (), NULL, 0) == -1)
 	    perror_with_name (("ptrace"));
 	}
     }
@@ -1133,7 +1133,7 @@ fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 	  if (!ptid_match (tp->ptid, ptid))
 	    continue;
 
-	  if (ptrace (PT_RESUME, ptid_get_lwp (tp->ptid), NULL, 0) == -1)
+	  if (ptrace (PT_RESUME, tp->ptid.lwp (), NULL, 0) == -1)
 	    perror_with_name (("ptrace"));
 	}
       ptid = inferior_ptid;

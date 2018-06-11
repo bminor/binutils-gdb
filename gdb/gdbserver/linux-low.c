@@ -529,7 +529,7 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
 	    {
 	      debug_printf ("HEW: Got fork event from LWP %ld, "
 			    "new child is %d\n",
-			    ptid_get_lwp (ptid_of (event_thr)),
+			    ptid_of (event_thr).lwp (),
 			    ptid.pid ());
 	    }
 
@@ -1052,7 +1052,7 @@ int
 linux_attach_lwp (ptid_t ptid)
 {
   struct lwp_info *new_lwp;
-  int lwpid = ptid_get_lwp (ptid);
+  int lwpid = ptid.lwp ();
 
   if (ptrace (PTRACE_ATTACH, lwpid, (PTRACE_TYPE_ARG3) 0, (PTRACE_TYPE_ARG4) 0)
       != 0)
@@ -1140,7 +1140,7 @@ attach_proc_task_lwp_callback (ptid_t ptid)
   /* Is this a new thread?  */
   if (find_thread_ptid (ptid) == NULL)
     {
-      int lwpid = ptid_get_lwp (ptid);
+      int lwpid = ptid.lwp ();
       int err;
 
       if (debug_threads)
@@ -1324,7 +1324,7 @@ kill_wait_lwp (struct lwp_info *lwp)
 {
   struct thread_info *thr = get_lwp_thread (lwp);
   int pid = ptid_of (thr).pid ();
-  int lwpid = ptid_get_lwp (ptid_of (thr));
+  int lwpid = ptid_of (thr).lwp ();
   int wstat;
   int res;
 
@@ -4548,7 +4548,7 @@ linux_set_resume_request (thread_info *thread, thread_resume *resume, size_t n)
 	     of PID'.  */
 	  || (ptid.pid () == pid_of (thread)
 	      && (ptid_is_pid (ptid)
-		  || ptid_get_lwp (ptid) == -1)))
+		  || ptid.lwp () == -1)))
 	{
 	  if (resume[ndx].kind == resume_stop
 	      && thread->last_resume_kind == resume_stop)

@@ -147,7 +147,7 @@ is_ravenscar_task (ptid_t ptid)
      2.0.48 for LEON3 sends 'm0' as a reply to the 'qfThreadInfo'
      query, which the remote protocol layer then treats as a thread
      whose TID is 0.  This is obviously not a ravenscar task.  */
-  return ptid_get_lwp (ptid) == 0 && ptid_get_tid (ptid) != 0;
+  return ptid.lwp () == 0 && ptid_get_tid (ptid) != 0;
 }
 
 /* Given PTID, which can be either a ravenscar task or a CPU thread,
@@ -171,7 +171,7 @@ ravenscar_get_thread_base_cpu (ptid_t ptid)
   else
     {
       /* We assume that the LWP of the PTID is equal to the CPU number.  */
-      base_cpu = ptid_get_lwp (ptid);
+      base_cpu = ptid.lwp ();
     }
 
   return base_cpu;

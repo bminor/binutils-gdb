@@ -553,7 +553,7 @@ store_debug_register (ptid_t ptid, int idx, long val)
 {
   int tid;
 
-  tid = ptid_get_lwp (ptid);
+  tid = ptid.lwp ();
   if (tid == 0)
     tid = ptid.pid ();
 

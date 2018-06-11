@@ -183,9 +183,9 @@ i386_windows_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
 {
   static char buf[80];
 
-  if (ptid_get_lwp (ptid) != 0)
+  if (ptid.lwp () != 0)
     {
-      snprintf (buf, sizeof (buf), "Thread 0x%lx", ptid_get_lwp (ptid));
+      snprintf (buf, sizeof (buf), "Thread 0x%lx", ptid.lwp ());
       return buf;
     }
 

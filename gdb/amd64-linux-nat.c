@@ -148,7 +148,7 @@ amd64_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
   int tid;
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  tid = ptid_get_lwp (regcache->ptid ());
+  tid = regcache->ptid ().lwp ();
   if (tid == 0)
     tid = regcache->ptid ().pid (); /* Not a threaded program.  */
 
@@ -226,7 +226,7 @@ amd64_linux_nat_target::store_registers (struct regcache *regcache, int regnum)
   int tid;
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  tid = ptid_get_lwp (regcache->ptid ());
+  tid = regcache->ptid ().lwp ();
   if (tid == 0)
     tid = regcache->ptid ().pid (); /* Not a threaded program.  */
 

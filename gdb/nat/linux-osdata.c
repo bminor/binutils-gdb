@@ -70,7 +70,7 @@ linux_common_core_of_thread (ptid_t ptid)
   int core;
 
   sprintf (filename, "/proc/%lld/task/%lld/stat",
-	   (PID_T) ptid.pid (), (PID_T) ptid_get_lwp (ptid));
+	   (PID_T) ptid.pid (), (PID_T) ptid.lwp ());
   gdb_file_up f = gdb_fopen_cloexec (filename, "r");
   if (!f)
     return -1;

@@ -325,7 +325,7 @@ get_ptrace_pid (ptid_t ptid)
 
   /* If we have an LWPID to work with, use it.  Otherwise, we're
      dealing with a non-threaded program/target.  */
-  pid = ptid_get_lwp (ptid);
+  pid = ptid.lwp ();
   if (pid == 0)
     pid = ptid.pid ();
   return pid;

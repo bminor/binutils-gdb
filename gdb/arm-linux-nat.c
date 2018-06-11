@@ -119,7 +119,7 @@ fetch_fpregs (struct regcache *regcache)
   gdb_byte fp[ARM_LINUX_SIZEOF_NWFPE];
 
   /* Get the thread id for the ptrace call.  */
-  tid = ptid_get_lwp (regcache->ptid ());
+  tid = regcache->ptid ().lwp ();
 
   /* Read the floating point state.  */
   if (have_ptrace_getregset == TRIBOOL_TRUE)
@@ -155,7 +155,7 @@ store_fpregs (const struct regcache *regcache)
   gdb_byte fp[ARM_LINUX_SIZEOF_NWFPE];
 
   /* Get the thread id for the ptrace call.  */
-  tid = ptid_get_lwp (regcache->ptid ());
+  tid = regcache->ptid ().lwp ();
 
   /* Read the floating point state.  */
   if (have_ptrace_getregset == TRIBOOL_TRUE)
@@ -209,7 +209,7 @@ fetch_regs (struct regcache *regcache)
   elf_gregset_t regs;
 
   /* Get the thread id for the ptrace call.  */
-  tid = ptid_get_lwp (regcache->ptid ());
+  tid = regcache->ptid ().lwp ();
 
   if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
@@ -236,7 +236,7 @@ store_regs (const struct regcache *regcache)
   elf_gregset_t regs;
 
   /* Get the thread id for the ptrace call.  */
-  tid = ptid_get_lwp (regcache->ptid ());
+  tid = regcache->ptid ().lwp ();
 
   /* Fetch the general registers.  */
   if (have_ptrace_getregset == TRIBOOL_TRUE)
@@ -284,7 +284,7 @@ fetch_wmmx_regs (struct regcache *regcache)
   int ret, regno, tid;
 
   /* Get the thread id for the ptrace call.  */
-  tid = ptid_get_lwp (regcache->ptid ());
+  tid = regcache->ptid ().lwp ();
 
   ret = ptrace (PTRACE_GETWMMXREGS, tid, 0, regbuf);
   if (ret < 0)
@@ -309,7 +309,7 @@ store_wmmx_regs (const struct regcache *regcache)
   int ret, regno, tid;
 
   /* Get the thread id for the ptrace call.  */
-  tid = ptid_get_lwp (regcache->ptid ());
+  tid = regcache->ptid ().lwp ();
 
   ret = ptrace (PTRACE_GETWMMXREGS, tid, 0, regbuf);
   if (ret < 0)
@@ -344,7 +344,7 @@ fetch_vfp_regs (struct regcache *regcache)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* Get the thread id for the ptrace call.  */
-  tid = ptid_get_lwp (regcache->ptid ());
+  tid = regcache->ptid ().lwp ();
 
   if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
@@ -373,7 +373,7 @@ store_vfp_regs (const struct regcache *regcache)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* Get the thread id for the ptrace call.  */
-  tid = ptid_get_lwp (regcache->ptid ());
+  tid = regcache->ptid ().lwp ();
 
   if (have_ptrace_getregset == TRIBOOL_TRUE)
     {
@@ -539,7 +539,7 @@ arm_linux_nat_target::read_description ()
     {
       elf_gregset_t gpregs;
       struct iovec iov;
-      int tid = ptid_get_lwp (inferior_ptid);
+      int tid = inferior_ptid.lwp ();
 
       iov.iov_base = &gpregs;
       iov.iov_len = sizeof (gpregs);
@@ -576,7 +576,7 @@ arm_linux_nat_target::read_description ()
 
       /* Now make sure that the kernel supports reading these
 	 registers.  Support was added in 2.6.30.  */
-      pid = ptid_get_lwp (inferior_ptid);
+      pid = inferior_ptid.lwp ();
       errno = 0;
       buf = (char *) alloca (VFP_REGS_SIZE);
       if (ptrace (PTRACE_GETVFPREGS, pid, 0, buf) < 0
@@ -622,7 +622,7 @@ arm_linux_get_hwbp_cap (void)
       int tid;
       unsigned int val;
 
-      tid = ptid_get_lwp (inferior_ptid);
+      tid = inferior_ptid.lwp ();
       if (ptrace (PTRACE_GETHBPREGS, tid, 0, &val) < 0)
 	available = 0;
       else
@@ -1250,7 +1250,7 @@ arm_linux_nat_target::low_prepare_to_resume (struct lwp_info *lwp)
   struct arm_linux_hw_breakpoint *bpts, *wpts;
   struct arch_lwp_info *arm_lwp_info = lwp->arch_private;
 
-  pid = ptid_get_lwp (lwp->ptid);
+  pid = lwp->ptid.lwp ();
   bpts = arm_linux_get_debug_reg_state (lwp->ptid.pid ())->bpts;
   wpts = arm_linux_get_debug_reg_state (lwp->ptid.pid ())->wpts;
 

@@ -38,11 +38,11 @@
 const char *
 obsd_nat_target::pid_to_str (ptid_t ptid)
 {
-  if (ptid_get_lwp (ptid) != 0)
+  if (ptid.lwp () != 0)
     {
       static char buf[64];
 
-      xsnprintf (buf, sizeof buf, "thread %ld", ptid_get_lwp (ptid));
+      xsnprintf (buf, sizeof buf, "thread %ld", ptid.lwp ());
       return buf;
     }
 
@@ -66,7 +66,7 @@ obsd_nat_target::update_thread_list ()
 
       if (!in_thread_list (ptid))
 	{
-	  if (ptid_get_lwp (inferior_ptid) == 0)
+	  if (inferior_ptid.lwp () == 0)
 	    thread_change_ptid (inferior_ptid, ptid);
 	  else
 	    add_thread (ptid);
@@ -154,7 +154,7 @@ obsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
       ptid = ptid_t (pid, pe.pe_tid, 0);
       if (!in_thread_list (ptid))
 	{
-	  if (ptid_get_lwp (inferior_ptid) == 0)
+	  if (inferior_ptid.lwp () == 0)
 	    thread_change_ptid (inferior_ptid, ptid);
 	  else
 	    add_thread (ptid);

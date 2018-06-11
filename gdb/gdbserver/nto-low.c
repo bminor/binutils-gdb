@@ -92,12 +92,12 @@ nto_set_thread (ptid_t ptid)
   int res = 0;
 
   TRACE ("%s pid: %d tid: %ld\n", __func__, ptid.pid (),
-	 ptid_get_lwp (ptid));
+	 ptid.lwp ());
   if (nto_inferior.ctl_fd != -1
       && !ptid_equal (ptid, null_ptid)
       && !ptid_equal (ptid, minus_one_ptid))
     {
-      pthread_t tid = ptid_get_lwp (ptid);
+      pthread_t tid = ptid.lwp ();
 
       if (EOK == devctl (nto_inferior.ctl_fd, DCMD_PROC_CURTHREAD, &tid,
 	  sizeof (tid), 0))
@@ -213,7 +213,7 @@ do_attach (pid_t pid)
       proc = add_process (status.pid, 1);
       proc->tdesc = nto_tdesc;
       TRACE ("Adding thread: pid=%d tid=%ld\n", status.pid,
-	     ptid_get_lwp (ptid));
+	     ptid.lwp ());
       nto_find_new_threads (&nto_inferior);
     }
   else
@@ -431,8 +431,8 @@ nto_thread_alive (ptid_t ptid)
   int res;
 
   TRACE ("%s pid:%d tid:%d\n", __func__, ptid.pid (),
-	 ptid_get_lwp (ptid));
-  if (SignalKill (0, ptid.pid (), ptid_get_lwp (ptid),
+	 ptid.lwp ());
+  if (SignalKill (0, ptid.pid (), ptid.lwp (),
 		  0, 0, 0) == -1)
     res = 0;
   else

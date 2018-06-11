@@ -113,7 +113,7 @@ gnu_fetch_registers (struct target_ops *ops,
   /* Make sure we know about new threads.  */
   inf_update_procs (gnu_current_inf);
 
-  thread = inf_tid_to_thread (gnu_current_inf, ptid_get_lwp (ptid));
+  thread = inf_tid_to_thread (gnu_current_inf, ptid.lwp ());
   if (!thread)
     error (_("Can't fetch registers from thread %s: No such thread"),
 	   target_pid_to_str (ptid));
@@ -205,7 +205,7 @@ gnu_store_registers (struct target_ops *ops,
   /* Make sure we know about new threads.  */
   inf_update_procs (gnu_current_inf);
 
-  thread = inf_tid_to_thread (gnu_current_inf, ptid_get_lwp (ptid));
+  thread = inf_tid_to_thread (gnu_current_inf, ptid.lwp ());
   if (!thread)
     error (_("Couldn't store registers into thread %s: No such thread"),
 	   target_pid_to_str (ptid));
@@ -392,7 +392,7 @@ i386_gnu_dr_get_reg (ptid_t ptid, int regnum)
   /* Make sure we know about new threads.  */
   inf_update_procs (gnu_current_inf);
 
-  thread = inf_tid_to_thread (gnu_current_inf, ptid_get_lwp (ptid));
+  thread = inf_tid_to_thread (gnu_current_inf, ptid.lwp ());
   i386_gnu_dr_get (&regs, thread);
 
   return regs.dr[regnum];

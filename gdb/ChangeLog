@@ -1,5 +1,49 @@
 2018-07-03  Tom Tromey  <tom@tromey.com>
 
+	* common/ptid.c (ptid_get_lwp): Remove.
+	* common/ptid.h (ptid_get_lwp): Don't declare.
+	* aarch64-linux-nat.c: Update.
+	* ada-tasks.c: Update.
+	* aix-thread.c: Update.
+	* amd64-linux-nat.c: Update.
+	* arm-linux-nat.c: Update.
+	* corelow.c: Update.
+	* fbsd-nat.c: Update.
+	* fbsd-tdep.c: Update.
+	* gnu-nat.c: Update.
+	* i386-cygwin-tdep.c: Update.
+	* i386-gnu-nat.c: Update.
+	* i386-linux-nat.c: Update.
+	* ia64-linux-nat.c: Update.
+	* inf-ptrace.c: Update.
+	* infrun.c: Update.
+	* linux-fork.c: Update.
+	* linux-nat.c: Update.
+	* linux-tdep.c: Update.
+	* linux-thread-db.c: Update.
+	* mips-linux-nat.c: Update.
+	* nat/aarch64-linux-hw-point.c: Update.
+	* nat/aarch64-linux.c: Update.
+	* nat/linux-btrace.c: Update.
+	* nat/linux-osdata.c: Update.
+	* nat/linux-procfs.c: Update.
+	* nat/x86-linux-dregs.c: Update.
+	* obsd-nat.c: Update.
+	* ppc-fbsd-nat.c: Update.
+	* ppc-linux-nat.c: Update.
+	* procfs.c: Update.
+	* python/py-infthread.c: Update.
+	* ravenscar-thread.c: Update.
+	* remote.c: Update.
+	* s390-linux-nat.c: Update.
+	* sol-thread.c: Update.
+	* sol2-tdep.c: Update.
+	* spu-linux-nat.c: Update.
+	* x86-linux-nat.c: Update.
+	* xtensa-linux-nat.c: Update.
+
+2018-07-03  Tom Tromey  <tom@tromey.com>
+
 	* common/ptid.c (ptid_get_pid): Remove.
 	* common/ptid.h (ptid_get_pid): Don't declare.
 	* aarch64-linux-nat.c: Update.

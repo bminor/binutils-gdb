@@ -69,7 +69,7 @@ fetch_ppc_register (int regno)
 {
   PTRACE_TYPE_RET res;
 
-  int tid = ptid_get_lwp (inferior_ptid);
+  int tid = inferior_ptid.lwp ();
   if (tid == 0)
     tid = inferior_ptid.pid ();
 
@@ -154,7 +154,7 @@ fetch_ppc_memory (ULONGEST memaddr, gdb_byte *myaddr, int len)
 	       / sizeof (PTRACE_TYPE_RET));
   PTRACE_TYPE_RET *buffer;
 
-  int tid = ptid_get_lwp (inferior_ptid);
+  int tid = inferior_ptid.lwp ();
   if (tid == 0)
     tid = inferior_ptid.pid ();
 
@@ -184,7 +184,7 @@ store_ppc_memory (ULONGEST memaddr, const gdb_byte *myaddr, int len)
 	       / sizeof (PTRACE_TYPE_RET));
   PTRACE_TYPE_RET *buffer;
 
-  int tid = ptid_get_lwp (inferior_ptid);
+  int tid = inferior_ptid.lwp ();
   if (tid == 0)
     tid = inferior_ptid.pid ();
 
@@ -422,7 +422,7 @@ spu_linux_nat_target::post_startup_inferior (ptid_t ptid)
   int fd;
   ULONGEST addr;
 
-  int tid = ptid_get_lwp (ptid);
+  int tid = ptid.lwp ();
   if (tid == 0)
     tid = ptid.pid ();
   

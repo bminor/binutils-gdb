@@ -93,7 +93,7 @@ lynx_ptid_get_tid (ptid_t ptid)
 {
   /* See lynx_ptid_t: The LynxOS tid is stored inside the lwp field
      of the ptid.  */
-  return ptid_get_lwp (ptid);
+  return ptid.lwp ();
 }
 
 /* For a given PTID, return the associated PID as known by the LynxOS

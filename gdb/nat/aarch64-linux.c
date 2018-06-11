@@ -45,7 +45,7 @@ aarch64_linux_prepare_to_resume (struct lwp_info *lwp)
       || DR_HAS_CHANGED (info->dr_changed_wp))
     {
       ptid_t ptid = ptid_of_lwp (lwp);
-      int tid = ptid_get_lwp (ptid);
+      int tid = ptid.lwp ();
       struct aarch64_debug_reg_state *state
 	= aarch64_get_debug_reg_state (ptid.pid ());
 

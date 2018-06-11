@@ -394,17 +394,17 @@ thread_from_lwp (thread_info *stopped, ptid_t ptid)
 
   /* This ptid comes from linux-nat.c, which should always fill in the
      LWP.  */
-  gdb_assert (ptid_get_lwp (ptid) != 0);
+  gdb_assert (ptid.lwp () != 0);
 
   info = get_thread_db_info (ptid.pid ());
 
   /* Access an lwp we know is stopped.  */
   info->proc_handle.thread = stopped;
-  err = info->td_ta_map_lwp2thr_p (info->thread_agent, ptid_get_lwp (ptid),
+  err = info->td_ta_map_lwp2thr_p (info->thread_agent, ptid.lwp (),
 				   &th);
   if (err != TD_OK)
     error (_("Cannot find user-level thread for LWP %ld: %s"),
-	   ptid_get_lwp (ptid), thread_db_err_str (err));
+	   ptid.lwp (), thread_db_err_str (err));
 
   err = info->td_thr_get_info_p (&th, &ti);
   if (err != TD_OK)
@@ -1638,7 +1638,7 @@ thread_db_target::pid_to_str (ptid_t ptid)
       thread_db_thread_info *priv = get_thread_db_thread_info (thread_info);
 
       snprintf (buf, sizeof (buf), "Thread 0x%lx (LWP %ld)",
-		(unsigned long) priv->tid, ptid_get_lwp (ptid));
+		(unsigned long) priv->tid, ptid.lwp ());
 
       return buf;
     }

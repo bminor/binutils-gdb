@@ -212,7 +212,7 @@ fetch_gregs_from_thread (struct regcache *regcache)
      and arm.  */
   gdb_static_assert (sizeof (regs) >= 18 * 4);
 
-  tid = ptid_get_lwp (regcache->ptid ());
+  tid = regcache->ptid ().lwp ();
 
   iovec.iov_base = &regs;
   if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
@@ -249,7 +249,7 @@ store_gregs_to_thread (const struct regcache *regcache)
   /* Make sure REGS can hold all registers contents on both aarch64
      and arm.  */
   gdb_static_assert (sizeof (regs) >= 18 * 4);
-  tid = ptid_get_lwp (regcache->ptid ());
+  tid = regcache->ptid ().lwp ();
 
   iovec.iov_base = &regs;
   if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
@@ -292,7 +292,7 @@ fetch_fpregs_from_thread (struct regcache *regcache)
      and arm.  */
   gdb_static_assert (sizeof regs >= VFP_REGS_SIZE);
 
-  tid = ptid_get_lwp (regcache->ptid ());
+  tid = regcache->ptid ().lwp ();
 
   iovec.iov_base = &regs;
 
@@ -338,7 +338,7 @@ store_fpregs_to_thread (const struct regcache *regcache)
   /* Make sure REGS can hold all VFP registers contents on both aarch64
      and arm.  */
   gdb_static_assert (sizeof regs >= VFP_REGS_SIZE);
-  tid = ptid_get_lwp (regcache->ptid ());
+  tid = regcache->ptid ().lwp ();
 
   iovec.iov_base = &regs;
 
@@ -394,7 +394,7 @@ static void
 fetch_sveregs_from_thread (struct regcache *regcache)
 {
   std::unique_ptr<gdb_byte[]> base
-    = aarch64_sve_get_sveregs (ptid_get_lwp (regcache->ptid ()));
+    = aarch64_sve_get_sveregs (regcache->ptid ().lwp ());
   aarch64_sve_regs_copy_to_reg_buf (regcache, base.get ());
 }
 
@@ -406,7 +406,7 @@ store_sveregs_to_thread (struct regcache *regcache)
 {
   int ret;
   struct iovec iovec;
-  int tid = ptid_get_lwp (regcache->ptid ());
+  int tid = regcache->ptid ().lwp ();
 
   /* Obtain a dump of SVE registers from ptrace.  */
   std::unique_ptr<gdb_byte[]> base = aarch64_sve_get_sveregs (tid);
@@ -597,7 +597,7 @@ aarch64_linux_nat_target::read_description ()
   gdb_byte regbuf[VFP_REGS_SIZE];
   struct iovec iovec;
 
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = inferior_ptid.lwp ();
 
   iovec.iov_base = regbuf;
   iovec.iov_len = VFP_REGS_SIZE;

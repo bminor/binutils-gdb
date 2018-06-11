@@ -460,7 +460,7 @@ mips_linux_nat_target::read_description ()
     {
       int tid;
 
-      tid = ptid_get_lwp (inferior_ptid);
+      tid = inferior_ptid.lwp ();
       if (tid == 0)
 	tid = inferior_ptid.pid ();
 
@@ -543,7 +543,7 @@ mips_linux_nat_target::can_use_hw_breakpoint (enum bptype type,
   int i;
   uint32_t wanted_mask, irw_mask;
 
-  if (!mips_linux_read_watch_registers (ptid_get_lwp (inferior_ptid),
+  if (!mips_linux_read_watch_registers (inferior_ptid.lwp (),
 					&watch_readback,
 					&watch_readback_valid, 0))
     return 0;
@@ -584,7 +584,7 @@ mips_linux_nat_target::stopped_by_watchpoint ()
   int n;
   int num_valid;
 
-  if (!mips_linux_read_watch_registers (ptid_get_lwp (inferior_ptid),
+  if (!mips_linux_read_watch_registers (inferior_ptid.lwp (),
 					&watch_readback,
 					&watch_readback_valid, 1))
     return false;
@@ -619,7 +619,7 @@ mips_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
   struct pt_watch_regs dummy_regs;
   int i;
 
-  if (!mips_linux_read_watch_registers (ptid_get_lwp (inferior_ptid),
+  if (!mips_linux_read_watch_registers (inferior_ptid.lwp (),
 					&watch_readback,
 					&watch_readback_valid, 0))
     return 0;
@@ -641,7 +641,7 @@ write_watchpoint_regs (void)
 
   ALL_LWPS (lp)
     {
-      tid = ptid_get_lwp (lp->ptid);
+      tid = lp->ptid.lwp ();
       if (ptrace (PTRACE_SET_WATCH_REGS, tid, &watch_mirror, NULL) == -1)
 	perror_with_name (_("Couldn't write debug register"));
     }
@@ -680,7 +680,7 @@ mips_linux_nat_target::insert_watchpoint (CORE_ADDR addr, int len,
   int i;
   int retval;
 
-  if (!mips_linux_read_watch_registers (ptid_get_lwp (inferior_ptid),
+  if (!mips_linux_read_watch_registers (inferior_ptid.lwp (),
 					&watch_readback,
 					&watch_readback_valid, 0))
     return -1;

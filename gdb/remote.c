@@ -2782,7 +2782,7 @@ remote_thread_always_alive (ptid_t ptid)
     /* The main thread is always alive.  */
     return 1;
 
-  if (ptid.pid () != 0 && ptid_get_lwp (ptid) == 0)
+  if (ptid.pid () != 0 && ptid.lwp () == 0)
     /* The main thread is always alive.  This can happen after a
        vAttach, if the remote side doesn't support
        multi-threading.  */
@@ -2924,7 +2924,7 @@ remote_target::write_ptid (char *buf, const char *endbuf, ptid_t ptid)
       else
 	buf += xsnprintf (buf, endbuf - buf, "p%x.", pid);
     }
-  tid = ptid_get_lwp (ptid);
+  tid = ptid.lwp ();
   if (tid < 0)
     buf += xsnprintf (buf, endbuf - buf, "-%x", -tid);
   else
@@ -3839,7 +3839,7 @@ remote_target::extra_thread_info (thread_info *tp)
 		    _("remote_threads_extra_info"));
 
   if (ptid_equal (tp->ptid, magic_null_ptid)
-      || (tp->ptid.pid () != 0 && ptid_get_lwp (tp->ptid) == 0))
+      || (tp->ptid.pid () != 0 && tp->ptid.lwp () == 0))
     /* This is the main thread which was added by GDB.  The remote
        server doesn't know about it.  */
     return NULL;
@@ -3881,7 +3881,7 @@ remote_target::extra_thread_info (thread_info *tp)
   rs->use_threadextra_query = 0;
   set = TAG_THREADID | TAG_EXISTS | TAG_THREADNAME
     | TAG_MOREDISPLAY | TAG_DISPLAY;
-  int_to_threadref (&id, ptid_get_lwp (tp->ptid));
+  int_to_threadref (&id, tp->ptid.lwp ());
   if (remote_get_threadinfo (&id, set, &threadinfo))
     if (threadinfo.active)
       {
@@ -11468,14 +11468,14 @@ remote_target::pid_to_str (ptid_t ptid)
       if (ptid_equal (magic_null_ptid, ptid))
 	xsnprintf (buf, sizeof buf, "Thread <main>");
       else if (remote_multi_process_p (rs))
-	if (ptid_get_lwp (ptid) == 0)
+	if (ptid.lwp () == 0)
 	  return normal_pid_to_str (ptid);
 	else
 	  xsnprintf (buf, sizeof buf, "Thread %d.%ld",
-		     ptid.pid (), ptid_get_lwp (ptid));
+		     ptid.pid (), ptid.lwp ());
       else
 	xsnprintf (buf, sizeof buf, "Thread %ld",
-		   ptid_get_lwp (ptid));
+		   ptid.lwp ());
       return buf;
     }
 }

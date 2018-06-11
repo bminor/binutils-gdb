@@ -1005,7 +1005,7 @@ core_target::pid_to_str (ptid_t ptid)
      "process", with normal_pid_to_str.  */
 
   /* Try the LWPID field first.  */
-  pid = ptid_get_lwp (ptid);
+  pid = ptid.lwp ();
   if (pid != 0)
     return normal_pid_to_str (ptid_t (pid));
 

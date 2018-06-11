@@ -469,7 +469,7 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
   bts->attr.exclude_hv = 1;
   bts->attr.exclude_idle = 1;
 
-  pid = ptid_get_lwp (ptid);
+  pid = ptid.lwp ();
   if (pid == 0)
     pid = ptid.pid ();
 
@@ -585,7 +585,7 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
   size_t pages;
   int pid, pg;
 
-  pid = ptid_get_lwp (ptid);
+  pid = ptid.lwp ();
   if (pid == 0)
     pid = ptid.pid ();
 

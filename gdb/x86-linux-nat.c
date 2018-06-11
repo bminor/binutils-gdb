@@ -114,7 +114,7 @@ x86_linux_nat_target::read_description ()
   uint64_t xcr0_features_bits;
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  tid = ptid_get_lwp (inferior_ptid);
+  tid = inferior_ptid.lwp ();
   if (tid == 0)
     tid = inferior_ptid.pid (); /* Not a threaded program.  */
 

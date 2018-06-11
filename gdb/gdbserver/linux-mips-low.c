@@ -450,7 +450,7 @@ mips_linux_prepare_to_resume (struct lwp_info *lwp)
       if (mips_linux_watch_get_num_valid (&priv->watch_mirror) > 0)
 	{
 	  /* Write the mirrored watch register values.  */
-	  int tid = ptid_get_lwp (ptid);
+	  int tid = ptid.lwp ();
 
 	  if (-1 == ptrace (PTRACE_SET_WATCH_REGS, tid,
 			    &priv->watch_mirror, NULL))

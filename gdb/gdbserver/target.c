@@ -321,9 +321,9 @@ target_pid_to_str (ptid_t ptid)
   else if (ptid_get_tid (ptid) != 0)
     xsnprintf (buf, sizeof (buf), "Thread %d.0x%lx",
 	       ptid.pid (), ptid_get_tid (ptid));
-  else if (ptid_get_lwp (ptid) != 0)
+  else if (ptid.lwp () != 0)
     xsnprintf (buf, sizeof (buf), "LWP %d.%ld",
-	       ptid.pid (), ptid_get_lwp (ptid));
+	       ptid.pid (), ptid.lwp ());
   else
     xsnprintf (buf, sizeof (buf), "Process %d",
 	       ptid.pid ());

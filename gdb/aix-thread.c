@@ -681,9 +681,9 @@ ptid_cmp (ptid_t ptid1, ptid_t ptid2)
     return -1;
   else if (ptid_get_tid (ptid1) > ptid_get_tid (ptid2))
     return 1;
-  else if (ptid_get_lwp (ptid1) < ptid_get_lwp (ptid2))
+  else if (ptid1.lwp () < ptid2.lwp ())
     return -1;
-  else if (ptid_get_lwp (ptid1) > ptid_get_lwp (ptid2))
+  else if (ptid1.lwp () > ptid2.lwp ())
     return 1;
   else
     return 0;
@@ -1050,14 +1050,14 @@ aix_thread_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
       thread = find_thread_ptid (ptid);
       if (!thread)
 	error (_("aix-thread resume: unknown pthread %ld"),
-	       ptid_get_lwp (ptid));
+	       ptid.lwp ());
 
       aix_thread_info *priv = get_aix_thread_info (thread);
 
       tid[0] = priv->tid;
       if (tid[0] == PTHDB_INVALID_TID)
 	error (_("aix-thread resume: no tid for pthread %ld"),
-	       ptid_get_lwp (ptid));
+	       ptid.lwp ());
       tid[1] = 0;
 
       if (arch64)

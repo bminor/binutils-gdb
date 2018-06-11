@@ -66,7 +66,7 @@ fetch_ppc_register (int regno)
 {
   PTRACE_TYPE_RET res;
 
-  int tid = ptid_get_lwp (current_ptid);
+  int tid = current_ptid.lwp ();
 
 #ifndef __powerpc64__
   /* If running as a 32-bit process on a 64-bit system, we attempt
@@ -151,7 +151,7 @@ fetch_ppc_memory (CORE_ADDR memaddr, char *myaddr, int len)
 	       / sizeof (PTRACE_TYPE_RET));
   PTRACE_TYPE_RET *buffer;
 
-  int tid = ptid_get_lwp (current_ptid);
+  int tid = current_ptid.lwp ();
 
   buffer = XALLOCAVEC (PTRACE_TYPE_RET, count);
   for (i = 0; i < count; i++, addr += sizeof (PTRACE_TYPE_RET))
@@ -176,7 +176,7 @@ store_ppc_memory (CORE_ADDR memaddr, char *myaddr, int len)
 	       / sizeof (PTRACE_TYPE_RET));
   PTRACE_TYPE_RET *buffer;
 
-  int tid = ptid_get_lwp (current_ptid);
+  int tid = current_ptid.lwp ();
 
   buffer = XALLOCAVEC (PTRACE_TYPE_RET, count);
 
@@ -241,7 +241,7 @@ spu_proc_xfer_spu (const char *annex, unsigned char *readbuf,
   if (!annex)
     return 0;
 
-  sprintf (buf, "/proc/%ld/fd/%s", ptid_get_lwp (current_ptid), annex);
+  sprintf (buf, "/proc/%ld/fd/%s", current_ptid.lwp (), annex);
   fd = open (buf, writebuf? O_WRONLY : O_RDONLY);
   if (fd <= 0)
     return -1;
@@ -409,7 +409,7 @@ spu_resume (struct thread_resume *resume_info, size_t n)
   regcache_invalidate ();
 
   errno = 0;
-  ptrace (PTRACE_CONT, ptid_get_lwp (ptid_of (thr)), 0, resume_info[i].sig);
+  ptrace (PTRACE_CONT, ptid_of (thr).lwp (), 0, resume_info[i].sig);
   if (errno)
     perror_with_name ("ptrace");
 }

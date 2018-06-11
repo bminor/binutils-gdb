@@ -419,9 +419,9 @@ linux_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
 {
   static char buf[80];
 
-  if (ptid_get_lwp (ptid) != 0)
+  if (ptid.lwp () != 0)
     {
-      snprintf (buf, sizeof (buf), "LWP %ld", ptid_get_lwp (ptid));
+      snprintf (buf, sizeof (buf), "LWP %ld", ptid.lwp ());
       return buf;
     }
 
@@ -1632,7 +1632,7 @@ linux_collect_thread_registers (const struct regcache *regcache,
   data.abort_iteration = 0;
 
   /* For remote targets the LWP may not be available, so use the TID.  */
-  data.lwp = ptid_get_lwp (ptid);
+  data.lwp = ptid.lwp ();
   if (!data.lwp)
     data.lwp = ptid_get_tid (ptid);
 

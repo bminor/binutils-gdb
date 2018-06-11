@@ -1635,17 +1635,17 @@ procfs_find_LDT_entry (ptid_t ptid)
   procinfo      *pi;
 
   /* Find procinfo for the lwp.  */
-  if ((pi = find_procinfo (ptid.pid (), ptid_get_lwp (ptid))) == NULL)
+  if ((pi = find_procinfo (ptid.pid (), ptid.lwp ())) == NULL)
     {
       warning (_("procfs_find_LDT_entry: could not find procinfo for %d:%ld."),
-	       ptid.pid (), ptid_get_lwp (ptid));
+	       ptid.pid (), ptid.lwp ());
       return NULL;
     }
   /* get its general registers.  */
   if ((gregs = proc_get_gregs (pi)) == NULL)
     {
       warning (_("procfs_find_LDT_entry: could not read gregs for %d:%ld."),
-	       ptid.pid (), ptid_get_lwp (ptid));
+	       ptid.pid (), ptid.lwp ());
       return NULL;
     }
   /* Now extract the GS register's lower 16 bits.  */
@@ -2065,7 +2065,7 @@ procfs_target::fetch_registers (struct regcache *regcache, int regnum)
   procinfo *pi;
   ptid_t ptid = regcache->ptid ();
   int pid = ptid.pid ();
-  int tid = ptid_get_lwp (ptid);
+  int tid = ptid.lwp ();
   struct gdbarch *gdbarch = regcache->arch ();
 
   pi = find_procinfo_or_die (pid, tid);
@@ -2114,7 +2114,7 @@ procfs_target::store_registers (struct regcache *regcache, int regnum)
   procinfo *pi;
   ptid_t ptid = regcache->ptid ();
   int pid = ptid.pid ();
-  int tid = ptid_get_lwp (ptid);
+  int tid = ptid.lwp ();
   struct gdbarch *gdbarch = regcache->arch ();
 
   pi = find_procinfo_or_die (pid, tid);
@@ -2533,9 +2533,9 @@ wait_again:
 		     procinfo, resume may be unhappy later.  */
 		  add_thread (retval);
 		  if (find_procinfo (retval.pid (),
-				     ptid_get_lwp (retval)) == NULL)
+				     retval.lwp ()) == NULL)
 		    create_procinfo (retval.pid (),
-				     ptid_get_lwp (retval));
+				     retval.lwp ());
 		}
 	    }
 	  else	/* Flags do not indicate STOPPED.  */
@@ -2752,7 +2752,7 @@ procfs_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
     {
       /* Resume a specific thread, presumably suppressing the
 	 others.  */
-      thread = find_procinfo (ptid.pid (), ptid_get_lwp (ptid));
+      thread = find_procinfo (ptid.pid (), ptid.lwp ());
       if (thread != NULL)
 	{
 	  if (thread->tid != 0)
@@ -3178,7 +3178,7 @@ procfs_target::thread_alive (ptid_t ptid)
   procinfo *pi;
 
   proc    = ptid.pid ();
-  thread  = ptid_get_lwp (ptid);
+  thread  = ptid.lwp ();
   /* If I don't know it, it ain't alive!  */
   if ((pi = find_procinfo (proc, thread)) == NULL)
     return false;
@@ -3203,10 +3203,10 @@ procfs_target::pid_to_str (ptid_t ptid)
 {
   static char buf[80];
 
-  if (ptid_get_lwp (ptid) == 0)
+  if (ptid.lwp () == 0)
     sprintf (buf, "process %d", ptid.pid ());
   else
-    sprintf (buf, "LWP %ld", ptid_get_lwp (ptid));
+    sprintf (buf, "LWP %ld", ptid.lwp ());
 
   return buf;
 }
@@ -3764,7 +3764,7 @@ procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
   gdb_fpregset_t fpregs;
   unsigned long merged_pid;
 
-  merged_pid = ptid_get_lwp (ptid) << 16 | ptid.pid ();
+  merged_pid = ptid.lwp () << 16 | ptid.pid ();
 
   /* This part is the old method for fetching registers.
      It should be replaced by the newer one using regsets

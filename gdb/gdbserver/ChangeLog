@@ -3,6 +3,18 @@
 	* linux-low.c: Update.
 	* linux-mips-low.c: Update.
 	* lynx-low.c: Update.
+	* nto-low.c: Update.
+	* remote-utils.c: Update.
+	* server.c: Update.
+	* spu-low.c: Update.
+	* target.c: Update.
+	* thread-db.c: Update.
+
+2018-07-03  Tom Tromey  <tom@tromey.com>
+
+	* linux-low.c: Update.
+	* linux-mips-low.c: Update.
+	* lynx-low.c: Update.
 	* mem-break.c: Update.
 	* nto-low.c: Update.
 	* remote-utils.c: Update.

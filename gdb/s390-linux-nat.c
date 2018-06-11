@@ -258,7 +258,7 @@ static int
 s390_inferior_tid (void)
 {
   /* GNU/Linux LWP ID's are process ID's.  */
-  int tid = ptid_get_lwp (inferior_ptid);
+  int tid = inferior_ptid.lwp ();
   if (tid == 0)
     tid = inferior_ptid.pid (); /* Not a threaded program.  */
 
@@ -730,7 +730,7 @@ s390_linux_nat_target::low_prepare_to_resume (struct lwp_info *lp)
 
   lp_priv->per_info_changed = 0;
 
-  tid = ptid_get_lwp (ptid_of_lwp (lp));
+  tid = ptid_of_lwp (lp).lwp ();
   if (tid == 0)
     tid = pid;
 

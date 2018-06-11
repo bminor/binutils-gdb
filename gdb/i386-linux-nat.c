@@ -647,7 +647,7 @@ static const unsigned char linux_syscall[] = { 0xcd, 0x80 };
 void
 i386_linux_nat_target::low_resume (ptid_t ptid, int step, enum gdb_signal signal)
 {
-  int pid = ptid_get_lwp (ptid);
+  int pid = ptid.lwp ();
   int request;
 
   if (catch_syscall_enabled () > 0)

@@ -723,7 +723,7 @@ checkpoint_command (const char *args, int from_tty)
 		       fp != NULL ? fp->num : -1, (long) retpid);
       if (info_verbose)
 	{
-	  parent_pid = ptid_get_lwp (last_target_ptid);
+	  parent_pid = last_target_ptid.lwp ();
 	  if (parent_pid == 0)
 	    parent_pid = last_target_ptid.pid ();
 	  printf_filtered (_("   gdb says parent = %ld.\n"),

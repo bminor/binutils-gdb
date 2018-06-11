@@ -2700,7 +2700,7 @@ visit_actioned_threads (thread_info *thread,
 	  || ptid_equal (action->thread, thread->id)
 	  || ((action->thread.pid ()
 	       == thread->id.pid ())
-	      && ptid_get_lwp (action->thread) == -1))
+	      && action->thread.lwp () == -1))
 	{
 	  if ((*callback) (action, thread))
 	    return true;
