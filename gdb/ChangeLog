@@ -1,5 +1,11 @@
 2018-07-03  Tom Tromey  <tom@tromey.com>
 
+	* common/ptid.c (ptid_tid_p): Remove.
+	* common/ptid.h (ptid_tid_p): Don't declare.
+	* sol-thread.c: Update.
+
+2018-07-03  Tom Tromey  <tom@tromey.com>
+
 	* common/ptid.c (ptid_lwp_p): Remove.
 	* common/ptid.h (ptid_lwp_p): Don't declare.
 	* fbsd-nat.c: Update.

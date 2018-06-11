@@ -340,7 +340,7 @@ lwp_to_thread (ptid_t lwp)
   td_thrhandle_t th;
   td_err_e val;
 
-  if (ptid_tid_p (lwp))
+  if (lwp.tid_p ())
     return lwp;			/* It's already a thread ID.  */
 
   /* It's an LWP.  Convert it to a thread ID.  */
@@ -460,7 +460,7 @@ sol_thread_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	rtnval = save_ptid;
 
       /* See if we have a new thread.  */
-      if (ptid_tid_p (rtnval)
+      if (rtnval.tid_p ()
 	  && !ptid_equal (rtnval, save_ptid)
 	  && (!in_thread_list (rtnval)
 	      || is_exited (rtnval)))
@@ -486,7 +486,7 @@ sol_thread_target::fetch_registers (struct regcache *regcache, int regnum)
   gdb_fpregset_t *fpregset_p = &fpregset;
   ptid_t ptid = regcache->ptid ();
 
-  if (!ptid_tid_p (ptid))
+  if (!ptid.tid_p ())
     {
       /* It's an LWP; pass the request on to the layer beneath.  */
       beneath ()->fetch_registers (regcache, regnum);
@@ -538,7 +538,7 @@ sol_thread_target::store_registers (struct regcache *regcache, int regnum)
   prfpregset_t fpregset;
   ptid_t ptid = regcache->ptid ();
 
-  if (!ptid_tid_p (ptid))
+  if (!ptid.tid_p ())
     {
       /* It's an LWP; pass the request on to the layer beneath.  */
       beneath ()->store_registers (regcache, regnum);
@@ -591,7 +591,7 @@ sol_thread_target::xfer_partial (enum target_object object,
 {
   scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
-  if (ptid_tid_p (inferior_ptid) || !target_thread_alive (inferior_ptid))
+  if (inferior_ptid.tid_p () || !target_thread_alive (inferior_ptid))
     {
       /* It's either a thread or an LWP that isn't alive.  Any live
          LWP will do so use the first available.
@@ -697,7 +697,7 @@ sol_thread_target::mourn_inferior ()
 bool
 sol_thread_target::thread_alive (ptid_t ptid)
 {
-  if (ptid_tid_p (ptid))
+  if (ptid.tid_p ())
     {
       /* It's a (user-level) thread.  */
       td_err_e val;
@@ -785,7 +785,7 @@ rw_common (int dowrite, const struct ps_prochandle *ph, psaddr_t addr,
 
   scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
 
-  if (ptid_tid_p (inferior_ptid) || !target_thread_alive (inferior_ptid))
+  if (inferior_ptid.tid_p () || !target_thread_alive (inferior_ptid))
     {
       /* It's either a thread or an LWP that isn't alive.  Any live
          LWP will do so use the first available.
@@ -1003,7 +1003,7 @@ sol_thread_target::pid_to_str (ptid_t ptid)
 {
   static char buf[100];
 
-  if (ptid_tid_p (ptid))
+  if (ptid.tid_p ())
     {
       ptid_t lwp;
 
