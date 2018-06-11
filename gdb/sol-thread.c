@@ -305,7 +305,7 @@ thread_to_lwp (ptid_t thread_id, int default_lwp)
 
   /* It's a thread.  Convert to LWP.  */
 
-  val = p_td_ta_map_id2thr (main_ta, ptid_get_tid (thread_id), &th);
+  val = p_td_ta_map_id2thr (main_ta, thread_id.tid (), &th);
   if (val == TD_NOTHR)
     return ptid_t (-1);	/* Thread must have terminated.  */
   else if (val != TD_OK)
@@ -415,7 +415,7 @@ sol_thread_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 	error (_("This version of Solaris can't start inactive threads."));
       if (info_verbose && ptid.pid () == -1)
 	warning (_("Specified thread %ld seems to have terminated"),
-		 ptid_get_tid (save_ptid));
+		 save_ptid.tid ());
     }
 
   beneath ()->resume (ptid, step, signo);
@@ -447,7 +447,7 @@ sol_thread_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	error (_("This version of Solaris can't start inactive threads."));
       if (info_verbose && ptid.pid () == -1)
 	warning (_("Specified thread %ld seems to have terminated"),
-		 ptid_get_tid (save_ptid));
+		 save_ptid.tid ());
     }
 
   rtnval = beneath ()->wait (ptid, ourstatus, options);
@@ -494,7 +494,7 @@ sol_thread_target::fetch_registers (struct regcache *regcache, int regnum)
     }
 
   /* Solaris thread: convert PTID into a td_thrhandle_t.  */
-  thread = ptid_get_tid (ptid);
+  thread = ptid.tid ();
   if (thread == 0)
     error (_("sol_thread_fetch_registers: thread == 0"));
 
@@ -546,7 +546,7 @@ sol_thread_target::store_registers (struct regcache *regcache, int regnum)
     }
 
   /* Solaris thread: convert PTID into a td_thrhandle_t.  */
-  thread = ptid_get_tid (ptid);
+  thread = ptid.tid ();
 
   val = p_td_ta_map_id2thr (main_ta, thread, &thandle);
   if (val != TD_OK)
@@ -704,7 +704,7 @@ sol_thread_target::thread_alive (ptid_t ptid)
       td_thrhandle_t th;
       int pid;
 
-      pid = ptid_get_tid (ptid);
+      pid = ptid.tid ();
       if ((val = p_td_ta_map_id2thr (main_ta, pid, &th)) != TD_OK)
 	return false;		/* Thread not found.  */
       if ((val = p_td_thr_validate (&th)) != TD_OK)
@@ -1011,13 +1011,13 @@ sol_thread_target::pid_to_str (ptid_t ptid)
 
       if (lwp.pid () == -1)
 	xsnprintf (buf, sizeof (buf), "Thread %ld (defunct)",
-		   ptid_get_tid (ptid));
+		   ptid.tid ());
       else if (lwp.pid () != -2)
 	xsnprintf (buf, sizeof (buf), "Thread %ld (LWP %ld)",
-		 ptid_get_tid (ptid), lwp.lwp ());
+		 ptid.tid (), lwp.lwp ());
       else
 	xsnprintf (buf, sizeof (buf), "Thread %ld        ",
-		   ptid_get_tid (ptid));
+		   ptid.tid ());
     }
   else if (ptid.lwp () != 0)
     xsnprintf (buf, sizeof (buf), "LWP    %ld        ", ptid.lwp ());
@@ -1157,7 +1157,7 @@ thread_db_find_thread_from_tid (struct thread_info *thread, void *data)
 {
   long *tid = (long *) data;
 
-  if (ptid_get_tid (thread->ptid) == *tid)
+  if (thread->ptid.tid () == *tid)
     return 1;
 
   return 0;

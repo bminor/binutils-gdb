@@ -1203,7 +1203,7 @@ info_task (struct ui_out *uiout, const char *taskno_str, struct inferior *inf)
     printf_filtered (_("<no name>\n"));
 
   /* Print the TID and LWP.  */
-  printf_filtered (_("Thread: %#lx\n"), ptid_get_tid (task_info->ptid));
+  printf_filtered (_("Thread: %#lx\n"), task_info->ptid.tid ());
   printf_filtered (_("LWP: %#lx\n"), task_info->ptid.lwp ());
 
   /* If set, print the base CPU.  */

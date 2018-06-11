@@ -1101,7 +1101,7 @@ fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
     fprintf_unfiltered (gdb_stdlog,
 			"FLWP: fbsd_resume for ptid (%d, %ld, %ld)\n",
 			ptid.pid (), ptid.lwp (),
-			ptid_get_tid (ptid));
+			ptid.tid ());
   if (ptid_lwp_p (ptid))
     {
       /* If ptid is a specific LWP, suspend all other LWPs in the process.  */

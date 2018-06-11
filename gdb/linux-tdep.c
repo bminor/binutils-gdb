@@ -1634,7 +1634,7 @@ linux_collect_thread_registers (const struct regcache *regcache,
   /* For remote targets the LWP may not be available, so use the TID.  */
   data.lwp = ptid.lwp ();
   if (!data.lwp)
-    data.lwp = ptid_get_tid (ptid);
+    data.lwp = ptid.tid ();
 
   gdbarch_iterate_over_regset_sections (gdbarch,
 					linux_collect_regset_section_cb,

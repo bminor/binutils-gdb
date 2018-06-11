@@ -930,7 +930,7 @@ darwin_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
 
   inferior_debug
     (2, _("darwin_resume: pid=%d, tid=0x%lx, step=%d, signal=%d\n"),
-     ptid.pid (), ptid_get_tid (ptid), step, signal);
+     ptid.pid (), ptid.tid (), step, signal);
 
   if (signal == GDB_SIGNAL_0)
     nsignal = 0;
@@ -957,7 +957,7 @@ darwin_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
   else
     {
       struct inferior *inf = find_inferior_ptid (ptid);
-      long tid = ptid_get_tid (ptid);
+      long tid = ptid.tid ();
 
       /* Stop the inferior (should be useless).  */
       darwin_suspend_inferior (inf);
@@ -1172,7 +1172,7 @@ cancel_breakpoint (ptid_t ptid)
   if (breakpoint_inserted_here_p (regcache->aspace (), pc))
     {
       inferior_debug (4, "cancel_breakpoint for thread 0x%lx\n",
-		      (unsigned long) ptid_get_tid (ptid));
+		      (unsigned long) ptid.tid ());
 
       /* Back up the PC if necessary.  */
       if (gdbarch_decr_pc_after_break (gdbarch))
@@ -1199,7 +1199,7 @@ darwin_wait (ptid_t ptid, struct target_waitstatus *status)
 
   inferior_debug
     (2, _("darwin_wait: waiting for a message pid=%d thread=%lx\n"),
-     ptid.pid (), ptid_get_tid (ptid));
+     ptid.pid (), ptid.tid ());
 
   /* Handle fake stop events at first.  */
   if (darwin_inf_fake_stop != NULL)
@@ -1906,7 +1906,7 @@ darwin_nat_target::attach (const char *args, int from_tty)
 
   darwin_inferior *priv = get_darwin_inferior (inf);
 
-  darwin_check_osabi (priv, ptid_get_tid (inferior_ptid));
+  darwin_check_osabi (priv, inferior_ptid.tid ());
 
   darwin_setup_fake_stop_event (inf);
 
@@ -1962,7 +1962,7 @@ const char *
 darwin_nat_target::pid_to_str (ptid_t ptid)
 {
   static char buf[80];
-  long tid = ptid_get_tid (ptid);
+  long tid = ptid.tid ();
 
   if (tid != 0)
     {

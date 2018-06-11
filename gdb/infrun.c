@@ -3424,14 +3424,14 @@ print_target_wait_results (ptid_t waiton_ptid, ptid_t result_ptid,
   stb.printf ("infrun: target_wait (%d.%ld.%ld",
 	      waiton_ptid.pid (),
 	      waiton_ptid.lwp (),
-	      ptid_get_tid (waiton_ptid));
+	      waiton_ptid.tid ());
   if (waiton_ptid.pid () != -1)
     stb.printf (" [%s]", target_pid_to_str (waiton_ptid));
   stb.printf (", status) =\n");
   stb.printf ("infrun:   %d.%ld.%ld [%s],\n",
 	      result_ptid.pid (),
 	      result_ptid.lwp (),
-	      ptid_get_tid (result_ptid),
+	      result_ptid.tid (),
 	      target_pid_to_str (result_ptid));
   stb.printf ("infrun:   %s\n", status_string.c_str ());
 
@@ -4378,7 +4378,7 @@ save_waitstatus (struct thread_info *tp, struct target_waitstatus *ws)
 			  statstr.c_str (),
 			  tp->ptid.pid (),
 			  tp->ptid.lwp (),
-			  ptid_get_tid (tp->ptid));
+			  tp->ptid.tid ());
     }
 
   /* Record for later.  */
@@ -4615,7 +4615,7 @@ stop_all_threads (void)
 					  statstr.c_str (),
 					  t->ptid.pid (),
 					  t->ptid.lwp (),
-					  ptid_get_tid (t->ptid));
+					  t->ptid.tid ());
 		    }
 
 		  /* Record for later.  */

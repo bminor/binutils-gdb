@@ -59,7 +59,7 @@ static struct i386_darwin_nat_target darwin_target;
 void
 i386_darwin_nat_target::fetch_registers (struct regcache *regcache, int regno)
 {
-  thread_t current_thread = ptid_get_tid (regcache->ptid ());
+  thread_t current_thread = regcache->ptid ().tid ();
   int fetched = 0;
   struct gdbarch *gdbarch = regcache->arch ();
 
@@ -175,7 +175,7 @@ void
 i386_darwin_nat_target::store_registers (struct regcache *regcache,
 					 int regno)
 {
-  thread_t current_thread = ptid_get_tid (regcache->ptid ());
+  thread_t current_thread = regcache->ptid ().tid ();
   struct gdbarch *gdbarch = regcache->arch ();
 
 #ifdef BFD64
@@ -288,7 +288,7 @@ i386_darwin_dr_set (int regnum, CORE_ADDR value)
 
   gdb_assert (regnum >= 0 && regnum <= DR_CONTROL);
 
-  current_thread = ptid_get_tid (inferior_ptid);
+  current_thread = inferior_ptid.tid ();
 
   dr_regs.dsh.flavor = x86_DEBUG_STATE;
   dr_regs.dsh.count = x86_DEBUG_STATE_COUNT;
@@ -377,7 +377,7 @@ i386_darwin_dr_get (int regnum)
 
   gdb_assert (regnum >= 0 && regnum <= DR_CONTROL);
 
-  current_thread = ptid_get_tid (inferior_ptid);
+  current_thread = inferior_ptid.tid ();
 
   dr_regs.dsh.flavor = x86_DEBUG_STATE;
   dr_regs.dsh.count = x86_DEBUG_STATE_COUNT;

@@ -1,5 +1,25 @@
 2018-07-03  Tom Tromey  <tom@tromey.com>
 
+	* common/ptid.c (ptid_get_tid): Remove.
+	* common/ptid.h (ptid_get_tid): Don't declare.
+	* ada-tasks.c: Update.
+	* aix-thread.c: Update.
+	* bsd-uthread.c: Update.
+	* darwin-nat.c: Update.
+	* fbsd-nat.c: Update.
+	* i386-darwin-nat.c: Update.
+	* infrun.c: Update.
+	* linux-tdep.c: Update.
+	* nto-procfs.c: Update.
+	* ppc-ravenscar-thread.c: Update.
+	* python/py-infthread.c: Update.
+	* ravenscar-thread.c: Update.
+	* sol-thread.c: Update.
+	* sparc-ravenscar-thread.c: Update.
+	* windows-nat.c: Update.
+
+2018-07-03  Tom Tromey  <tom@tromey.com>
+
 	* common/ptid.c (ptid_get_lwp): Remove.
 	* common/ptid.h (ptid_get_lwp): Don't declare.
 	* aarch64-linux-nat.c: Update.

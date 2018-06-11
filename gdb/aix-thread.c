@@ -70,7 +70,7 @@ static int debug_aix_thread;
 
 /* Return whether to treat PID as a debuggable thread id.  */
 
-#define PD_TID(ptid)	(pd_active && ptid_get_tid (ptid) != 0)
+#define PD_TID(ptid)	(pd_active && ptid.tid () != 0)
 
 /* pthdb_user_t value that we pass to pthdb functions.  0 causes
    PTHDB_BAD_USER errors, so use 1.  */
@@ -677,9 +677,9 @@ ptid_cmp (ptid_t ptid1, ptid_t ptid2)
     return -1;
   else if (ptid1.pid () > ptid2.pid ())
     return 1;
-  else if (ptid_get_tid (ptid1) < ptid_get_tid (ptid2))
+  else if (ptid1.tid () < ptid2.tid ())
     return -1;
-  else if (ptid_get_tid (ptid1) > ptid_get_tid (ptid2))
+  else if (ptid1.tid () > ptid2.tid ())
     return 1;
   else if (ptid1.lwp () < ptid2.lwp ())
     return -1;
@@ -1766,7 +1766,7 @@ aix_thread_target::pid_to_str (ptid_t ptid)
      xstrprintf().  */
   xfree (ret);
 
-  ret = xstrprintf (_("Thread %ld"), ptid_get_tid (ptid));
+  ret = xstrprintf (_("Thread %ld"), ptid.tid ());
   return ret;
 }
 

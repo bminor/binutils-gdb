@@ -296,7 +296,7 @@ procfs_set_thread (ptid_t ptid)
 {
   pid_t tid;
 
-  tid = ptid_get_tid (ptid);
+  tid = ptid.tid ();
   devctl (ctl_fd, DCMD_PROC_CURTHREAD, &tid, sizeof (tid), 0);
 }
 
@@ -310,7 +310,7 @@ nto_procfs_target::thread_alive (ptid_t ptid)
   procfs_status status;
   int err;
 
-  tid = ptid_get_tid (ptid);
+  tid = ptid.tid ();
   pid = ptid.pid ();
 
   if (kill (pid, 0) == -1)
@@ -1469,7 +1469,7 @@ nto_procfs_target::pid_to_str (ptid_t ptid)
   struct tidinfo *tip;
 
   pid = ptid.pid ();
-  tid = ptid_get_tid (ptid);
+  tid = ptid.tid ();
 
   n = snprintf (buf, 1023, "process %d", pid);
 

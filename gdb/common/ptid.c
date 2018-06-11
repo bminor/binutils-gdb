@@ -27,14 +27,6 @@ ptid_t minus_one_ptid = ptid_t::make_minus_one ();
 
 /* See ptid.h.  */
 
-long
-ptid_get_tid (const ptid_t &ptid)
-{
-  return ptid.tid ();
-}
-
-/* See ptid.h.  */
-
 int
 ptid_equal (const ptid_t &ptid1, const ptid_t &ptid2)
 {

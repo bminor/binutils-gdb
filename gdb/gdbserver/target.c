@@ -318,9 +318,9 @@ target_pid_to_str (ptid_t ptid)
     xsnprintf (buf, sizeof (buf), "<all threads>");
   else if (ptid_equal (ptid, null_ptid))
     xsnprintf (buf, sizeof (buf), "<null thread>");
-  else if (ptid_get_tid (ptid) != 0)
+  else if (ptid.tid () != 0)
     xsnprintf (buf, sizeof (buf), "Thread %d.0x%lx",
-	       ptid.pid (), ptid_get_tid (ptid));
+	       ptid.pid (), ptid.tid ());
   else if (ptid.lwp () != 0)
     xsnprintf (buf, sizeof (buf), "LWP %d.%ld",
 	       ptid.pid (), ptid.lwp ());

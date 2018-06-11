@@ -154,7 +154,7 @@ ppc_ravenscar_generic_fetch_registers
   CORE_ADDR thread_descriptor_address;
 
   /* The tid is the thread_id field, which is a pointer to the thread.  */
-  thread_descriptor_address = (CORE_ADDR) ptid_get_tid (inferior_ptid);
+  thread_descriptor_address = (CORE_ADDR) inferior_ptid.tid ();
 
   /* Read registers.  */
   for (current_regnum = 0; current_regnum < num_regs; current_regnum++)
@@ -193,7 +193,7 @@ ppc_ravenscar_generic_store_registers
 
   if (register_in_thread_descriptor_p (reg_info, regnum))
     register_address
-      = ptid_get_tid (inferior_ptid) + reg_info->context_offsets [regnum];
+      = inferior_ptid.tid () + reg_info->context_offsets [regnum];
   else
     return;
 
