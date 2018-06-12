@@ -1,3 +1,8 @@
+2018-06-12  Nick Clifton  <nickc@redhat.com>
+
+	* emulparams/aarch64elf.sh (OTHER_BSS_END_SYMBOLS): Make the
+	definition of the __bss_end__ symbol conditional upon CREATE_SHLIB.
+
 2018-06-11  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.
