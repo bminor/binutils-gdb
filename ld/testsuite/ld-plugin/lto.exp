@@ -572,13 +572,29 @@ run_ld_link_exec_tests $lto_run_tests
 
 if { [is_elf_format] } {
     run_ld_link_exec_tests $lto_run_elf_tests
+
+    # Note - it is not guaranteed that the ordering of symbols in the dynamic
+    # symbol table will match the ordering of the symbols specified by the
+    # --dynamic-list command line option.
+    #
+    # For PR22983 we want to make sure that all four symbols specified in
+    # pr222983.t are present in the output, but a simple sequences of regexps
+    # will not work as we do not know the order of the symbols.  (Readelf
+    # does not have a symbol sorting option and the run_cc_list_tests proc
+    # does not allow for the output of the dump program to piped into `sort`).
+    #
+    # So instead we run readelf four times, each time checking for the
+    # presence of a specific symbol from the pr22983.t file.
     run_cc_link_tests [list \
 	[list \
 	    "Build pr22983" \
 	    "-Wl,--dynamic-list,pr22983.t" \
 	    "-flto" \
-	    {pr22983a.c pr22983b.c} \
-	    {{readelf {--dyn-syms --wide} pr22983.d}} \
+	     {pr22983a.c pr22983b.c} \
+	    {{readelf {--dyn-syms --wide} pr22983.1.d} \
+	     {readelf {--dyn-syms --wide} pr22983.2.d} \
+	     {readelf {--dyn-syms --wide} pr22983.3.d} \
+	     {readelf {--dyn-syms --wide} pr22983.4.d}} \
 	    "pr22983" \
 	] \
     ]

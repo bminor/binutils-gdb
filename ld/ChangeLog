@@ -1,5 +1,13 @@
 2018-06-12  Nick Clifton  <nickc@redhat.com>
 
+	PR 22983
+	* testsuite/ld-plugin/lto.exp: Use individual tests to check for
+	the presence of each expected symbol.
+	* testsuite/ld-plugin/pr22983.1.d: New file.
+	* testsuite/ld-plugin/pr22983.2.d: New file.
+	* testsuite/ld-plugin/pr22983.3.d: New file.
+	* testsuite/ld-plugin/pr22983.4.d: New file.
+
 	* emulparams/aarch64elf.sh (OTHER_BSS_END_SYMBOLS): Make the
 	definition of the __bss_end__ symbol conditional upon CREATE_SHLIB.
 
