@@ -1,3 +1,10 @@
+2018-06-11  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* dwarf2read.c (read_index_from_section): Rename to...
+	(read_gdb_index_from_section): ... this, update all callers.
+	(dwarf2_read_index): Rename to...
+	(dwarf2_read_gdb_index): ... this, update all callers.
+
 2018-06-11  John David Anglin  <danglin@gcc.gnu.org>
 
 	* gdb/hppa-linux-nat.c
