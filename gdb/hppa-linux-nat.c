@@ -273,8 +273,7 @@ store_register (const struct regcache *regcache, int regno)
    point registers depending upon the value of regno.  */
 
 void
-hppa_linux_nat_target::fetch_inferior_registers (struct regcache *regcache,
-						 int regno)
+hppa_linux_nat_target::fetch_registers (struct regcache *regcache, int regno)
 {
   if (-1 == regno)
     {

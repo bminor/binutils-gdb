@@ -1,3 +1,9 @@
+2018-06-11  John David Anglin  <danglin@gcc.gnu.org>
+
+	* gdb/hppa-linux-nat.c
+	(hppa_linux_nat_target::fetch_inferior_registers): Rename to
+	hppa_linux_nat_target::fetch_registers.
+
 2018-06-11  Alan Hayward  <alan.hayward@arm.com>
 
 	* aarch64-tdep.c (aarch64_dwarf_reg_to_regnum): Add mappings.
