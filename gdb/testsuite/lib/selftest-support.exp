@@ -88,10 +88,10 @@ proc selftest_setup { executable function } {
 
     set description "run until breakpoint at $function"
     gdb_test_multiple "run $INTERNAL_GDBFLAGS" "$description" {
-        -re "Starting program.*Breakpoint \[0-9\]+,.*$function \\(\\).* at .*main.c:.*$gdb_prompt $" {
+        -re "Starting program.*Breakpoint \[0-9\]+,.*$function \\(.*\\).* at .*main.c:.*$gdb_prompt $" {
             pass "$description"
         }
-        -re "Starting program.*Breakpoint \[0-9\]+,.*$function \\(\\).*$gdb_prompt $" {
+        -re "Starting program.*Breakpoint \[0-9\]+,.*$function \\(.*\\).*$gdb_prompt $" {
             xfail "$description (line numbers scrambled?)"
         }
 	-re "Starting program.*Breakpoint \[0-9\]+,.* at .*main.c:.*$function.*$gdb_prompt $" {
