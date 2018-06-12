@@ -1,3 +1,7 @@
+2018-06-12  Hans-Peter Nilsson  <hp@axis.com>
+
+	* testsuite/ld-cris/libdso-1.d: Correct recent address pattern update.
+
 2018-06-12  Nick Clifton  <nickc@redhat.com>
 
 	PR 22983
