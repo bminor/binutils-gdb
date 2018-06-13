@@ -10,15 +10,15 @@
 
 DYNAMIC SYMBOL TABLE:
 #...
-0+2238 g[ 	]+DO .data[	 ]+0+4  TST3[ 	]+__expobj2
-0+1ba g[ 	]+DF .text[	 ]+0+2  TST3[ 	]+__expfn2
-0+1ba  w[ 	]+DF .text[	 ]+0+2  TST3[ 	]+expfn2
-0+2238  w[ 	]+DO .data[	 ]+0+4  TST3[ 	]+expobj2
+0+2220 g[ 	]+DO .data[	 ]+0+4  TST3[ 	]+__expobj2
+0+1a2 g[ 	]+DF .text[	 ]+0+2  TST3[ 	]+__expfn2
+0+1a2  w[ 	]+DF .text[	 ]+0+2  TST3[ 	]+expfn2
+0+2220  w[ 	]+DO .data[	 ]+0+4  TST3[ 	]+expobj2
 #...
 Contents of section .text:
- 01b8 0f050f05                             .*
+.* 0f050f05                             .*
 #...
 Contents of section .got:
- 222c bc210000 00000000 00000000           .*
+.* a4210000 00000000 00000000           .*
 Contents of section .data:
- 2238 00000000                             .*
+.* 00000000                             .*

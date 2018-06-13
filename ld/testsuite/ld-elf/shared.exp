@@ -1350,8 +1350,16 @@ proc mix_pic_and_non_pic {xfails cflags ldflags exe} {
 mix_pic_and_non_pic [list "arm*-*-*" "aarch64*-*-*"] "" "" "pr19719"
 mix_pic_and_non_pic [] "-fPIE" "-pie" "pr19719pie"
 
-if { ([istarget "i?86-*-*"]
-      || [istarget "x86_64-*-*"]) } {
+set AFLAGS_PIE ""
+if { [istarget "i?86-*-*"]
+     || [istarget "x86_64-*-*"] } {
+    set AFLAGS_PIE "-mrelax-relocations=yes"
+}
+
+if { ([istarget "*-*-linux*"]
+      || [istarget "*-*-nacl*"]
+      || [istarget "*-*-gnu*"])
+     && ![istarget "mips*-*-*"] } {
     run_ld_link_tests [list \
 	[list \
 	    "Build libpr23162a.so" \
@@ -1367,9 +1375,9 @@ if { ([istarget "i?86-*-*"]
 	    "Build pr23162a" \
 	    "-pie --no-as-needed tmpdir/libpr23162a.so" \
 	    "" \
-	    "-mrelax-relocations=yes" \
+	    $AFLAGS_PIE \
 	    { pr23162b.c } \
-	    {{readelf {--dyn-syms -rW} pr23162.rd}} \
+	    {{readelf {-rW} pr23162.rd}} \
 	    "pr23162a" \
 	    "-fPIC -O0" \
 	] \
@@ -1387,9 +1395,9 @@ if { ([istarget "i?86-*-*"]
 	    "Build pr23162b" \
 	    "-pie --no-as-needed tmpdir/libpr23162b.so" \
 	    "" \
-	    "-mrelax-relocations=yes" \
+	    $AFLAGS_PIE \
 	    { pr23162b.c } \
-	    {{readelf {--dyn-syms -rW} pr23162.rd}} \
+	    {{readelf {-rW} pr23162.rd}} \
 	    "pr23162b" \
 	    "-fPIC -O0" \
 	] \
@@ -1407,7 +1415,7 @@ if { ([istarget "i?86-*-*"]
 	    "Build pr23161a" \
 	    "-pie --no-as-needed tmpdir/libpr23161a.so" \
 	    "" \
-	    "-mrelax-relocations=yes" \
+	    $AFLAGS_PIE \
 	    { pr23161b.c } \
 	    {{readelf {--dyn-syms -rW} pr23161b.rd}} \
 	    "pr23161a" \
@@ -1427,12 +1435,18 @@ if { ([istarget "i?86-*-*"]
 	    "Build pr23161b" \
 	    "-pie --no-as-needed tmpdir/libpr23161b.so" \
 	    "" \
-	    "-mrelax-relocations=yes" \
+	    $AFLAGS_PIE \
 	    { pr23161b.c } \
 	    {{readelf {--dyn-syms -rW} pr23161b.rd}} \
 	    "pr23161b" \
 	    "-fPIC -O0" \
 	] \
+    ]
+}
+
+if { [istarget "i?86-*-*"]
+     || [istarget "x86_64-*-*"] } {
+    run_ld_link_tests [list \
 	[list \
 	    "Build libpr23161c.so" \
 	    "-shared" \
@@ -1447,7 +1461,7 @@ if { ([istarget "i?86-*-*"]
 	    "Build pr23161c" \
 	    "-pie --no-as-needed tmpdir/libpr23161c.so" \
 	    "" \
-	    "-mrelax-relocations=yes" \
+	    $AFLAGS_PIE \
 	    { pr23161b.c } \
 	    {{readelf {--dyn-syms -rW} pr23161d.rd}} \
 	    "pr23161c" \

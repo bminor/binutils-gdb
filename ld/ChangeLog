@@ -1,3 +1,46 @@
+2018-06-14  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/readelf.exp: Delete DUMP and selection of
+	variant ver_def.vd.
+	* testsuite/ld-elf/ver_def-tic6x.vd: Delete.
+	* testsuite/ld-elf/shared.exp: Run most pr23161 and pr23162 tests for
+	linux, nacl and gnu targets.
+	* testsuite/ld-mips-elf/mips-elf.exp: Set base_syms to 1.
+	* testsuite/ld-elf/pr23161a.rd: Don't check reloc type.  Allow any
+	order of __bss_start, _edata and _end.
+	* testsuite/ld-elf/pr23161b.rd: Don't check plt and dyn relocs.
+	Allow and order of __bss_start, _edata and _end.
+	* testsuite/ld-elf/pr23162.rd: Fail if __bss_start, _edata or _end
+	relocs are present rather than testing for no relocations.
+	* testsuite/ld-aarch64/gc-plt-relocs.d,
+	* testsuite/ld-aarch64/ifunc-1-local.d,
+	* testsuite/ld-aarch64/ifunc-1.d,
+	* testsuite/ld-aarch64/ifunc-2-local.d,
+	* testsuite/ld-aarch64/ifunc-2.d,
+	* testsuite/ld-aarch64/ifunc-21.d,
+	* testsuite/ld-aarch64/ifunc-3a.d,
+	* testsuite/ld-arm/farcall-mixed-lib-v4t.d,
+	* testsuite/ld-arm/farcall-mixed-lib.d,
+	* testsuite/ld-arm/gc-hidden-1.d,
+	* testsuite/ld-arm/tls-gdesc-got.d,
+	* testsuite/ld-arm/tls-lib-loc.d,
+	* testsuite/ld-arm/tls-longplt-lib.d,
+	* testsuite/ld-arm/tls-thumb1.d,
+	* testsuite/ld-cris/libdso-10.d,
+	* testsuite/ld-cris/libdso-11.d,
+	* testsuite/ld-cris/libdso-13b.d,
+	* testsuite/ld-cris/libdso-14.d,
+	* testsuite/ld-cris/libdso-15.d,
+	* testsuite/ld-cris/pic-gc-72.d,
+	* testsuite/ld-cris/pic-gc-73.d,
+	* testsuite/ld-cris/tls-gc-71.d,
+	* testsuite/ld-mips-elf/mips16-pic-4a.nd,
+	* testsuite/ld-mips-elf/pic-and-nonpic-3a.dd,
+	* testsuite/ld-mips-elf/pie-n32.d,
+	* testsuite/ld-mips-elf/pie-n64.d,
+	* testsuite/ld-mips-elf/pie-o32.d: Update for removed dynamic
+	section symbols.
+
 2018-06-12  Hans-Peter Nilsson  <hp@axis.com>
 
 	* testsuite/ld-cris/libdso-1.d: Correct recent address pattern update.

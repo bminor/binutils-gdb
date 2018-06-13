@@ -783,11 +783,9 @@ run_dump_test "hash1c"
 
 if {[istarget mips*-*-linux*]} {
     # The number of symbols that are always included in the symbol table
-    # for these tests.  The 2 are:
-    #
+    # for these tests.
     #     the null symbol entry
-    #     the .MIPS.stubs section symbol
-    set base_syms 2
+    set base_syms 1
     foreach { isa aflag lflag suffix } \
 	{ MIPS -march=mips1 "" "" \
 	  microMIPS -mmicromips "" -micromips \

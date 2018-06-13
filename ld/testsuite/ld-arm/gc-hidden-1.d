@@ -12,7 +12,6 @@
 .*:     file format elf32-.*
 
 DYNAMIC SYMBOL TABLE:
-0+[0-9a-f]+ l    d  .text	0+              .text
 0+ g    DO \*ABS\*	0+  NS          NS
 
 Disassembly of section .text:

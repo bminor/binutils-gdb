@@ -1,5 +1,14 @@
 2018-06-14  Alan Modra  <amodra@gmail.com>
 
+	* elf-bfd.h (struct elf_link_hash_table): Add "dynamic_relocs".
+	* elflink.c (_bfd_elf_init_2_index_sections): Comment fix.
+	(_bfd_elf_add_dynamic_entry): Set "dynamic_relocs".
+	(_bfd_elf_link_renumber_dynsyms): Exclude all section symbols when
+	"dynamic_relocs" is not set.
+	* elfxx-mips.c (count_section_dynsyms): Likewise.
+
+2018-06-14  Alan Modra  <amodra@gmail.com>
+
 	PR 23282
 	* bfdio.c (bfd_seek): Optimize away seeks to current position.
 

@@ -953,6 +953,7 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
       for (p = output_bfd->sections; p ; p = p->next)
 	if ((p->flags & SEC_EXCLUDE) == 0
 	    && (p->flags & SEC_ALLOC) != 0
+	    && elf_hash_table (info)->dynamic_relocs
 	    && !(*bed->elf_backend_omit_section_dynsym) (output_bfd, info, p))
 	  {
 	    ++dynsymcount;
@@ -3455,6 +3456,9 @@ _bfd_elf_add_dynamic_entry (struct bfd_link_info *info,
   hash_table = elf_hash_table (info);
   if (! is_elf_hash_table (hash_table))
     return FALSE;
+
+  if (tag == DT_RELA || tag == DT_REL)
+    hash_table->dynamic_relocs = TRUE;
 
   bed = get_elf_backend_data (hash_table->dynobj);
   s = bfd_get_linker_section (hash_table->dynobj, ".dynamic");
@@ -7015,7 +7019,7 @@ _bfd_elf_init_2_index_sections (bfd *output_bfd, struct bfd_link_info *info)
   asection *s;
 
   /* Data first, since setting text_index_section changes
-     _bfd_elf_link_omit_section_dynsym.  */
+     _bfd_elf_omit_section_dynsym_default.  */
   for (s = output_bfd->sections; s != NULL; s = s->next)
     if (((s->flags & (SEC_EXCLUDE | SEC_ALLOC | SEC_READONLY)) == SEC_ALLOC)
 	&& !_bfd_elf_omit_section_dynsym_default (output_bfd, info, s))

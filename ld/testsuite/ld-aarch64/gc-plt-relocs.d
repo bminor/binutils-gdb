@@ -12,7 +12,6 @@
 .*:     file format elf64-(little|big)aarch64
 
 DYNAMIC SYMBOL TABLE:
-0+8000 l    d  \.text	0+ \.text
 0+8000 g    DF \.text	0+4 _start
 0+0000      D  \*UND\*	0+ foo
 0+8008 g    DF \.text	0+ bar
