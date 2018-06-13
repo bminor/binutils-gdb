@@ -1,3 +1,8 @@
+2018-06-14  Alan Modra  <amodra@gmail.com>
+
+	PR 23282
+	* bfdio.c (bfd_seek): Optimize away seeks to current position.
+
 2018-06-13  Scott Egerton  <scott.egerton@imgtec.com>
 	    Faraz Shahbazker  <Faraz.Shahbazker@mips.com>
 
