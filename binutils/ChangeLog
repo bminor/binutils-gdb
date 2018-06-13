@@ -1,3 +1,8 @@
+2018-06-13  Nick Clifton  <nickc@redhat.com>
+
+	* doc/binutils.texi (objdump): Add missing closing square
+	parenthesis to listing of objcopy's command line options.
+
 2018-06-11  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.
