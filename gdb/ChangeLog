@@ -1,3 +1,9 @@
+2018-06-13  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* procfs.c (_initialize_procfs): Use add_inf_child_target.
+	(procfs_target::make_corefile_notes): Adjust to new
+	target_read_alloc return type.
+
 2018-06-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 	    Stephen Roberts  <stephen.roberts@arm.com>
 

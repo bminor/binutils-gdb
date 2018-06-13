@@ -3731,7 +3731,7 @@ _initialize_procfs (void)
   add_com ("proc-untrace-exit", no_class, proc_untrace_sysexit_cmd,
 	   _("Cancel a trace of exits from the syscall."));
 
-  add_target (&the_procfs_target);
+  add_inf_child_target (&the_procfs_target);
 }
 
 /* =================== END, GDB  "MODULE" =================== */
@@ -3851,8 +3851,6 @@ procfs_target::make_corefile_notes (bfd *obfd, int *note_size)
   char *note_data = NULL;
   char *inf_args;
   struct procfs_corefile_thread_data thread_args;
-  gdb_byte *auxv;
-  int auxv_len;
   enum gdb_signal stop_signal;
 
   if (get_exec_file (0))
@@ -3894,14 +3892,12 @@ procfs_target::make_corefile_notes (bfd *obfd, int *note_size)
 			     &thread_args);
   note_data = thread_args.note_data;
 
-  auxv_len = target_read_alloc (current_top_target (), TARGET_OBJECT_AUXV,
-				NULL, &auxv);
-  if (auxv_len > 0)
-    {
-      note_data = elfcore_write_note (obfd, note_data, note_size,
-				      "CORE", NT_AUXV, auxv, auxv_len);
-      xfree (auxv);
-    }
+  gdb::optional<gdb::byte_vector> auxv =
+    target_read_alloc (current_top_target (), TARGET_OBJECT_AUXV, NULL);
+  if (auxv && !auxv->empty ())
+    note_data = elfcore_write_note (obfd, note_data, note_size,
+				    "CORE", NT_AUXV, auxv->data (),
+				    auxv->size ());
 
   return note_data;
 }
