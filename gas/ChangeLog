@@ -1,3 +1,32 @@
+2018-06-13  Scott Egerton  <scott.egerton@imgtec.com>
+	    Faraz Shahbazker  <Faraz.Shahbazker@mips.com>
+	    Maciej W. Rozycki  <macro@mips.com>
+
+	* config/tc-mips.c (options): Add OPTION_CRC and OPTION_NO_CRC.
+	(md_longopts): Likewise.
+	(md_show_usage): Add help for -mcrc and -mno-crc.
+	(mips_ases): Define availability for CRC and CRC64.
+	(mips_convert_ase_flags): Map ASE_CRC to AFL_ASE_CRC.
+	* doc/as.texinfo: Document -mcrc, -mno-crc.
+	* doc/c-mips.texi: Document -mcrc, -mno-crc, .set crc and
+	.set no-crc.
+	* testsuite/gas/mips/ase-errors-1.l: Add error checks for CRC
+	ASE.
+	* testsuite/gas/mips/ase-errors-2.l: Likewise.
+	* testsuite/gas/mips/ase-errors-1.s: Likewise.
+	* testsuite/gas/mips/ase-errors-2.s: Likewise.
+	* testsuite/gas/mips/crc.d: New test.
+	* testsuite/gas/mips/crc64.d: New test.
+	* testsuite/gas/mips/crc-err.d: New test.
+	* testsuite/gas/mips/crc64-err.d: New test.
+	* testsuite/gas/mips/crc-err.l: New test stderr output.
+	* testsuite/gas/mips/crc64-err.l: New test stderr output.
+	* testsuite/gas/mips/crc.s: New test source.
+	* testsuite/gas/mips/crc64.s: New test source.
+	* testsuite/gas/mips/crc-err.s: New test source.
+	* testsuite/gas/mips/crc64-err.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2018-06-11  Maciej W. Rozycki  <macro@mips.com>
 
 	* config/tc-mips.c (md_show_usage): Correct help text for `-O0'

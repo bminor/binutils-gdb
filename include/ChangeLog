@@ -1,3 +1,11 @@
+2018-06-13  Scott Egerton  <scott.egerton@imgtec.com>
+	    Faraz Shahbazker  <Faraz.Shahbazker@mips.com>
+
+	* elf/mips.h (AFL_ASE_CRC): New macro.
+	(AFL_ASE_MASK): Update to include AFL_ASE_CRC.
+	* opcode/mips.h (ASE_CRC): New macro.
+	* opcode/mips.h (ASE_CRC64): Likewise.
+
 2018-06-04  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* elf/xtensa.h (xtensa_read_table_entries)

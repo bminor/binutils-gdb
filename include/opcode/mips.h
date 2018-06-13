@@ -1294,6 +1294,9 @@ static const unsigned int mips_isa_table[] = {
 /* The Virtualization ASE has eXtended Physical Addressing (XPA)
    instructions which are only valid when both ASEs are enabled.  */
 #define ASE_XPA_VIRT		0x00020000
+/* Cyclic redundancy check (CRC) ASE.  */
+#define ASE_CRC			0x00040000
+#define ASE_CRC64		0x00080000
 
 /* MIPS ISA defines, use instead of hardcoding ISA level.  */
 

@@ -1,3 +1,8 @@
+2018-06-13  Scott Egerton  <scott.egerton@imgtec.com>
+	    Faraz Shahbazker  <Faraz.Shahbazker@mips.com>
+
+	* readelf.c (print_mips_ases): Add CRC.
+
 2018-06-13  Nick Clifton  <nickc@redhat.com>
 
 	* doc/binutils.texi (objdump): Add missing closing square

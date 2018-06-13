@@ -1,3 +1,12 @@
+2018-06-13  Scott Egerton  <scott.egerton@imgtec.com>
+	    Faraz Shahbazker  <Faraz.Shahbazker@mips.com>
+
+	* mips-dis.c (mips_arch_choices): Add CRC and CRC64 ASEs.
+	* mips-opc.c (CRC, CRC64): New macros.
+	(mips_builtin_opcodes): Define crc32b, crc32h, crc32w,
+	crc32cb, crc32ch and crc32cw for CRC.  Define crc32d and
+	crc32cd for CRC64.
+
 2018-06-08  Egeyar Bagcioglu  <egeyar.bagcioglu@oracle.com>
 
 	PR 20319

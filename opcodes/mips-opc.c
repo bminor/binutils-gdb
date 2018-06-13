@@ -404,6 +404,10 @@ decode_mips_operand (const char *p)
 #define XPA     ASE_XPA
 #define XPAVZ	ASE_XPA_VIRT
 
+/* Cyclic redundancy check instruction (CRC) support.  */
+#define CRC	ASE_CRC
+#define CRC64	ASE_CRC64
+
 /* The order of overloaded instructions matters.  Label arguments and
    register arguments look the same. Instructions that can have either
    for arguments must apear in the correct order in this table for the
@@ -3346,6 +3350,16 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"seleqz.d",		"D,S,T",	0x46200014, 0xffe0003f, WR_1|RD_2|RD_3|FP_D,	0,		I37,		0,	0 },
 
 {"aluipc",		"s,u",		0xec1f0000, 0xfc1f0000, WR_1,			RD_pc,		I37,		0,	0 },
+
+/* MIPS cyclic redundancy check (CRC) ASE.  */
+{"crc32b",		"t,s,-d",	0x7c00000f, 0xfc00ffff, MOD_1|RD_2,		0,		0,		CRC,	0 },
+{"crc32h",		"t,s,-d",	0x7c00004f, 0xfc00ffff, MOD_1|RD_2,		0,		0,		CRC,	0 },
+{"crc32w",		"t,s,-d",	0x7c00008f, 0xfc00ffff, MOD_1|RD_2,		0,		0,		CRC,	0 },
+{"crc32d",		"t,s,-d",	0x7c0000cf, 0xfc00ffff, MOD_1|RD_2,		0,		0,		CRC64,	0 },
+{"crc32cb",		"t,s,-d",	0x7c00010f, 0xfc00ffff, MOD_1|RD_2,		0,		0,		CRC,	0 },
+{"crc32ch",		"t,s,-d",	0x7c00014f, 0xfc00ffff, MOD_1|RD_2,		0,		0,		CRC,	0 },
+{"crc32cw",		"t,s,-d",	0x7c00018f, 0xfc00ffff, MOD_1|RD_2,		0,		0,		CRC,	0 },
+{"crc32cd",		"t,s,-d",	0x7c0001cf, 0xfc00ffff, MOD_1|RD_2,		0,		0,		CRC64,	0 },
 
 /* No hazard protection on coprocessor instructions--they shouldn't
    change the state of the processor and if they do it's up to the
