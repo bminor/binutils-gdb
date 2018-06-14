@@ -1732,7 +1732,7 @@ aix_thread_target::xfer_partial (enum target_object object,
 void
 aix_thread_target::mourn_inferior ()
 {
-  target_ops *beneath = beneath ();
+  target_ops *beneath = this->beneath ();
 
   pd_deactivate ();
   beneath->mourn_inferior ();
