@@ -6319,7 +6319,7 @@ a command prompt so that you can issue other commands while your program runs.
 If the target doesn't support async mode, @value{GDBN} issues an error
 message if you attempt to use the background execution commands.
 
-@cindex @code{&}
+@cindex @code{&}, background execution of commands
 To specify background execution, add a @code{&} to the command.  For example,
 the background form of the @code{continue} command is @code{continue&}, or
 just @code{c&}.  The execution commands that accept background execution
