@@ -70,6 +70,13 @@ proc do_test { detach_on_fork follow_fork non_stop schedule_multiple } {
 	gdb_test_no_output "set schedule-multiple $schedule_multiple"
     }
 
+    # If we're detaching from the parent (or child), then tell it to
+    # exit itself when its child (or parent) exits.  If we stay
+    # attached, we take care of killing it.
+    if {$detach_on_fork == "on"} {
+	gdb_test "print exit_if_relative_exits = 1" " = 1"
+    }
+
     set test "continue &"
     gdb_test_multiple $test $test {
 	-re "$gdb_prompt " {

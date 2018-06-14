@@ -1,3 +1,12 @@
+2018-06-14  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/fork-running-state.c: Include <errno.h>.
+	(exit_if_relative_exits): New.
+	(fork_child): If 'exit_if_relative_exits' is true, exit if the parent
+	exits.
+	(fork_parent): If 'exit_if_relative_exits' is true, exit if the
+	child exits.
+
 2018-06-14  Tom de Vries  <tdevries@suse.de>
 
 	PR cli/22573

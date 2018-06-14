@@ -19,8 +19,14 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <errno.h>
 
 int save_parent;
+
+/* Variable set by GDB.  If true, then a fork child (or parent) exits
+   if its parent (or child) exits.  Otherwise the process waits
+   forever until either GDB or the alarm kills it.  */
+volatile int exit_if_relative_exits = 0;
 
 /* The fork child.  Just runs forever.  */
 
@@ -31,7 +37,20 @@ fork_child (void)
   alarm (180);
 
   while (1)
-    pause ();
+    {
+      if (exit_if_relative_exits)
+	{
+	  sleep (1);
+
+	  /* Exit if GDB kills the parent.  */
+	  if (getppid () != save_parent)
+	    break;
+	  if (kill (getppid (), 0) != 0)
+	    break;
+	}
+      else
+	pause ();
+    }
 
   return 0;
 }
@@ -45,7 +64,23 @@ fork_parent (void)
   alarm (180);
 
   while (1)
-    pause ();
+    {
+      if (exit_if_relative_exits)
+	{
+	  int res = wait (NULL);
+	  if (res == -1 && errno == EINTR)
+	    continue;
+	  else if (res == -1)
+	    {
+	      perror ("wait");
+	      return 1;
+	    }
+	  else
+	    return 0;
+	}
+      else
+	pause ();
+    }
 
   return 0;
 }
