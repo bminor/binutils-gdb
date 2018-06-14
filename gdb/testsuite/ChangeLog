@@ -1,3 +1,14 @@
+2018-06-13  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/23269
+	* gdb.base/fork-running-state.c (main): Move setting of alarm ...
+	(fork_child): ... here, and ...
+	(fork_parent): ... here.
+
+2018-06-12  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.gdb/selftest.exp (test_with_self): Update gdb startup text.
+
 2018-06-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 	    Stephen Roberts  <stephen.roberts@arm.com>
 
