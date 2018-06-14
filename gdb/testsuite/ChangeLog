@@ -1,5 +1,10 @@
 2018-06-14  Pedro Alves  <palves@redhat.com>
 
+	* gdb.gdb/selftest.exp (test_with_self): Use multi_line to build
+	gdb's expected startup output.
+
+2018-06-14  Pedro Alves  <palves@redhat.com>
+
 	* lib/selftest-support.exp (selftest_setup): Remove inlined
 	function handling.
 
