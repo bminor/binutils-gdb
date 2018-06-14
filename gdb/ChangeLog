@@ -1,3 +1,8 @@
+2018-06-14  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* arch-utils.c (default_type_align): Use type_length_units.
+	* gdbtypes.c (type_align): Use type_length_units.
+
 2018-06-14  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* cli/cli-script.c (_initialize_cli_script): Fix online documentation

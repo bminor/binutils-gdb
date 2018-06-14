@@ -3072,7 +3072,7 @@ type_align (struct type *type)
 
     case TYPE_CODE_METHODPTR:
     case TYPE_CODE_MEMBERPTR:
-      align = TYPE_LENGTH (type);
+      align = type_length_units (type);
       break;
 
     case TYPE_CODE_VOID:
