@@ -1,3 +1,8 @@
+2018-06-14  Pedro Alves  <palves@redhat.com>
+
+	* lib/selftest-support.exp (selftest_setup): Remove inlined
+	function handling.
+
 2018-06-14  Tom de Vries  <tdevries@suse.de>
 
 	* lib/selftest-support.exp (selftest_setup): Allow function arguments in
