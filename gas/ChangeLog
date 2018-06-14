@@ -2,6 +2,7 @@
 	    Faraz Shahbazker  <Faraz.Shahbazker@mips.com>
 	    Maciej W. Rozycki  <macro@mips.com>
 
+	* NEWS: Mention CRC ASE support.
 	* config/tc-mips.c (options): Add OPTION_CRC and OPTION_NO_CRC.
 	(md_longopts): Likewise.
 	(md_show_usage): Add help for -mcrc and -mno-crc.
