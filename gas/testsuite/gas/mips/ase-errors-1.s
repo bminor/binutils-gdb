@@ -111,6 +111,14 @@
 	.set nocrc
 	crc32b $4,$7,$4		# ERROR: crc not enabled
 
+	.set mips32r6
+	.set ginv		# OK
+	ginvi $a0		# OK
+	.set mips32r5		# ERROR: too low
+	ginvt $a0, 1		# OK
+	.set noginv
+	ginvi $a0		# ERROR: ginv not enabled
+
 	# There should be no errors after this.
 	.set fp=32
 	.set mips1

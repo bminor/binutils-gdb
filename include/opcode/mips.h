@@ -989,6 +989,9 @@ mips_opcode_32bit_p (const struct mips_opcode *mo)
    "-A" symbolic offset (-262144 .. 262143) << 2 at bit 0
    "-B" symbolic offset (-131072 .. 131071) << 3 at bit 0
 
+   GINV ASE usage:
+   "+\" 2 bit Global TLB invalidate type at bit 8
+
    Other:
    "()" parens surrounding optional value
    ","  separates operands
@@ -1003,7 +1006,7 @@ mips_opcode_32bit_p (const struct mips_opcode *mo)
    Extension character sequences used so far ("+" followed by the
    following), for quick reference when adding more:
    "1234567890"
-   "~!@#$%^&*|:'";"
+   "~!@#$%^&*|:'";\"
    "ABCEFGHIJKLMNOPQRSTUVWXZ"
    "abcdefghijklmnopqrstuvwxyz"
 
@@ -1297,6 +1300,8 @@ static const unsigned int mips_isa_table[] = {
 /* Cyclic redundancy check (CRC) ASE.  */
 #define ASE_CRC			0x00040000
 #define ASE_CRC64		0x00080000
+/* Global INValidate Extension.  */
+#define ASE_GINV		0x00100000
 
 /* MIPS ISA defines, use instead of hardcoding ISA level.  */
 

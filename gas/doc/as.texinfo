@@ -423,6 +423,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mmt}] [@b{-mno-mt}]
    [@b{-mmcu}] [@b{-mno-mcu}]
    [@b{-mcrc}] [@b{-mno-crc}]
+   [@b{-mginv}] [@b{-mno-ginv}]
    [@b{-minsn32}] [@b{-mno-insn32}]
    [@b{-mfix7000}] [@b{-mno-fix7000}]
    [@b{-mfix-rm7000}] [@b{-mno-fix-rm7000}]
@@ -1518,6 +1519,12 @@ This tells the assembler to accept MCU instructions.
 Generate code for the MIPS cyclic redundancy check (CRC) Application
 Specific Extension.  This tells the assembler to accept CRC instructions.
 @samp{-mno-crc} turns off this option.
+
+@item -mginv
+@itemx -mno-ginv
+Generate code for the Global INValidate (GINV) Application Specific
+Extension.  This tells the assembler to accept GINV instructions.
+@samp{-mno-ginv} turns off this option.
 
 @item -minsn32
 @itemx -mno-insn32

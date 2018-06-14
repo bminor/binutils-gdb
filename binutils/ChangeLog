@@ -1,3 +1,7 @@
+2018-06-14  Faraz Shahbazker  <Faraz.Shahbazker@mips.com>
+
+	* readelf.c (print_mips_ases): Add GINV extension.
+
 2018-06-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/23267

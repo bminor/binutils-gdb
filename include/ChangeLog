@@ -1,3 +1,10 @@
+2018-06-14  Faraz Shahbazker  <Faraz.Shahbazker@mips.com>
+
+	* elf/mips.h (AFL_ASE_GINV, AFL_ASE_RESERVED1): New macros.
+	(AFL_ASE_MASK): Update to include AFL_ASE_GINV.
+	* opcode/mips.h: Document "+\" operand format.
+	(ASE_GINV): New macro.
+
 2018-06-13  Scott Egerton  <scott.egerton@imgtec.com>
 	    Faraz Shahbazker  <Faraz.Shahbazker@mips.com>
 

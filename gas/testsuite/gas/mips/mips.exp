@@ -2061,4 +2061,7 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "crc-err"	[mips_arch_list_matching mips32r6]
     run_dump_test_arches "crc64"	[mips_arch_list_matching mips64r6]
     run_dump_test_arches "crc64-err"	[mips_arch_list_matching mips64r6]
+
+    run_dump_test_arches "ginv"	[mips_arch_list_matching mips32r6]
+    run_dump_test_arches "ginv-err"	[mips_arch_list_matching mips32r6]
 }

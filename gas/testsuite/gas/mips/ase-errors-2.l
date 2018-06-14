@@ -36,3 +36,7 @@
 .*:93: Warning: the `crc' extension requires MIPS64 revision 6 or greater
 .*:97: Error: opcode not supported.* `crc32b \$4,\$7,\$4'
 .*:98: Error: opcode not supported.* `crc32d \$4,\$7,\$4'
+# ----------------------------------------------------------------------------
+.*:103: Warning: the `ginv' extension requires MIPS64 revision 6 or greater
+.*:106: Error: opcode not supported.* `ginvi \$a0'
+# ----------------------------------------------------------------------------

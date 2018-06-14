@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the MIPS Global INValidate (GINV) ASE.
+
 * Add support for the MIPS Cyclic Redudancy Check (CRC) ASE.
 
 * Add support for the Freescale S12Z architecture.

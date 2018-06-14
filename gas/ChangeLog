@@ -1,3 +1,26 @@
+2018-06-14  Faraz Shahbazker  <Faraz.Shahbazker@mips.com>
+
+	* NEWS: Mention MIPS Global INValidate ASE support.
+	* config/tc-mips.c (options): Add OPTION_GINV and OPTION_NO_GINV.
+	(md_longopts): Likewise.
+	(mips_ases): Define availability for GINV.
+	(mips_convert_ase_flags): Map ASE_GINV to AFL_ASE_GINV.
+	(md_show_usage): Add help for -mginv and -mno-ginv.
+	* doc/as.texinfo: Document -mginv, -mno-ginv.
+	* doc/c-mips.texi: Document -mginv, -mno-ginv, .set ginv and
+	.set noginv.
+	* testsuite/gas/mips/ase-errors-1.s: Add error checks for GINV
+	ASE.
+	* testsuite/gas/mips/ase-errors-2.s: Likewise.
+	* testsuite/gas/mips/ase-errors-1.l: Likewise.
+	* testsuite/gas/mips/ase-errors-2.l: Likewise.
+	* testsuite/gas/mips/ginv.d: New test.
+	* testsuite/gas/mips/ginv-err.d: New test.
+	* testsuite/gas/mips/ginv-err.l: New test stderr output.
+	* testsuite/gas/mips/ginv.s: New test source.
+	* testsuite/gas/mips/ginv-err.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2018-06-13  Scott Egerton  <scott.egerton@imgtec.com>
 	    Faraz Shahbazker  <Faraz.Shahbazker@mips.com>
 	    Maciej W. Rozycki  <macro@mips.com>

@@ -240,6 +240,12 @@ Generate code for the cyclic redundancy check (CRC) Application Specific
 Extension.  This tells the assembler to accept CRC instructions.
 @samp{-mno-crc} turns off this option.
 
+@item -mginv
+@itemx -mno-ginv
+Generate code for the Global INValidate (GINV) Application Specific
+Extension.  This tells the assembler to accept GINV instructions.
+@samp{-mno-ginv} turns off this option.
+
 @item -minsn32
 @itemx -mno-insn32
 Only use 32-bit instruction encodings when generating code for the
@@ -1123,6 +1129,13 @@ separate controls.
 The directive @code{.set crc} makes the assembler accept instructions
 from the CRC Extension from that point on in the assembly.  The
 @code{.set nocrc} directive prevents CRC instructions from being accepted.
+
+@cindex MIPS Global INValidate (GINV) instruction generation override
+@kindex @code{.set ginv}
+@kindex @code{.set noginv}
+The directive @code{.set ginv} makes the assembler accept instructions
+from the GINV Extension from that point on in the assembly.  The
+@code{.set noginv} directive prevents GINV instructions from being accepted.
 
 Traditional MIPS assemblers do not support these directives.
 

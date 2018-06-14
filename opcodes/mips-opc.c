@@ -139,6 +139,7 @@ decode_mips_operand (const char *p)
 	case '\'': BRANCH (26, 0, 2);
 	case '"': BRANCH (21, 0, 2);
 	case ';': SPECIAL (10, 16, SAME_RS_RT);
+	case '\\': BIT (2, 8, 0);		/* (0 .. 3) */
 	}
       break;
 
@@ -407,6 +408,9 @@ decode_mips_operand (const char *p)
 /* Cyclic redundancy check instruction (CRC) support.  */
 #define CRC	ASE_CRC
 #define CRC64	ASE_CRC64
+
+/* Global INValidate (GINV) support.  */
+#define GINV	ASE_GINV
 
 /* The order of overloaded instructions matters.  Label arguments and
    register arguments look the same. Instructions that can have either
@@ -3360,6 +3364,10 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"crc32ch",		"t,s,-d",	0x7c00014f, 0xfc00ffff, MOD_1|RD_2,		0,		0,		CRC,	0 },
 {"crc32cw",		"t,s,-d",	0x7c00018f, 0xfc00ffff, MOD_1|RD_2,		0,		0,		CRC,	0 },
 {"crc32cd",		"t,s,-d",	0x7c0001cf, 0xfc00ffff, MOD_1|RD_2,		0,		0,		CRC64,	0 },
+
+/* MIPS Global INValidate (GINV) ASE.  */
+{"ginvi",		"s",		0x7c00003d, 0xfc1fffff, RD_1,			0,		0,		GINV,	0 },
+{"ginvt",		"s,+\\",	0x7c0000bd, 0xfc1ffcff, RD_1,			0,		0,		GINV,	0 },
 
 /* No hazard protection on coprocessor instructions--they shouldn't
    change the state of the processor and if they do it's up to the

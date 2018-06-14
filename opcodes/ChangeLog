@@ -1,3 +1,13 @@
+2018-06-14  Faraz Shahbazker  <Faraz.Shahbazker@mips.com>
+
+	* mips-dis.c (mips_arch_choices): Add GINV to mips32r6 and
+	mips64r6 descriptors.
+	(parse_mips_ase_option): Handle -Mginv option.
+	(print_mips_disassembler_options): Document -Mginv.
+	* mips-opc.c (decode_mips_operand) <+\>: New operand format.
+	(GINV): New macro.
+	(mips_opcodes): Define ginvi and ginvt.
+
 2018-06-13  Scott Egerton  <scott.egerton@imgtec.com>
 	    Faraz Shahbazker  <Faraz.Shahbazker@mips.com>
 
