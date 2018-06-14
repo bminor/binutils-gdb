@@ -1,5 +1,14 @@
 2018-09-17  Tom Tromey  <tom@tromey.com>
 
+	* infrun.c (struct infcall_suspend_state) <registers>: Now a
+	unique_ptr.
+	<siginfo_data>: Now a unique_xmalloc_ptr.
+	(save_infcall_suspend_state, restore_infcall_suspend_state)
+	(discard_infcall_suspend_state)
+	(get_infcall_suspend_state_regcache): Update.
+
+2018-09-17  Tom Tromey  <tom@tromey.com>
+
 	* gdbthread.h (struct thread_suspend_state): Add initializers.
 	(class thread_info) <suspend>: Remove initializer.
 	* infrun.c (struct infcall_suspend_state): Add initializers.

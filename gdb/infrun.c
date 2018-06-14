@@ -8810,7 +8810,7 @@ struct infcall_suspend_state
   struct thread_suspend_state thread_suspend;
 
   /* Other fields:  */
-  readonly_detached_regcache *registers = nullptr;
+  std::unique_ptr<readonly_detached_regcache> registers;
 
   /* Format of SIGINFO_DATA or NULL if it is not present.  */
   struct gdbarch *siginfo_gdbarch = nullptr;
@@ -8818,7 +8818,7 @@ struct infcall_suspend_state
   /* The inferior format depends on SIGINFO_GDBARCH and it has a length of
      TYPE_LENGTH (gdbarch_get_siginfo_type ()).  For different gdbarch the
      content would be invalid.  */
-  gdb_byte *siginfo_data = nullptr;
+  gdb::unique_xmalloc_ptr<gdb_byte> siginfo_data;
 };
 
 struct infcall_suspend_state *
@@ -8828,25 +8828,20 @@ save_infcall_suspend_state (void)
   struct thread_info *tp = inferior_thread ();
   struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = regcache->arch ();
-  gdb_byte *siginfo_data = NULL;
+  gdb::unique_xmalloc_ptr<gdb_byte> siginfo_data;
 
   if (gdbarch_get_siginfo_type_p (gdbarch))
     {
       struct type *type = gdbarch_get_siginfo_type (gdbarch);
       size_t len = TYPE_LENGTH (type);
-      struct cleanup *back_to;
 
-      siginfo_data = (gdb_byte *) xmalloc (len);
-      back_to = make_cleanup (xfree, siginfo_data);
+      siginfo_data.reset ((gdb_byte *) xmalloc (len));
 
       if (target_read (current_top_target (), TARGET_OBJECT_SIGNAL_INFO, NULL,
-		       siginfo_data, 0, len) == len)
-	discard_cleanups (back_to);
-      else
+		       siginfo_data.get (), 0, len) != len)
 	{
 	  /* Errors ignored.  */
-	  do_cleanups (back_to);
-	  siginfo_data = NULL;
+	  siginfo_data.reset (nullptr);
 	}
     }
 
@@ -8855,7 +8850,7 @@ save_infcall_suspend_state (void)
   if (siginfo_data)
     {
       inf_state->siginfo_gdbarch = gdbarch;
-      inf_state->siginfo_data = siginfo_data;
+      inf_state->siginfo_data = std::move (siginfo_data);
     }
 
   inf_state->thread_suspend = tp->suspend;
@@ -8864,7 +8859,7 @@ save_infcall_suspend_state (void)
      GDB_SIGNAL_0 anyway.  */
   tp->suspend.stop_signal = GDB_SIGNAL_0;
 
-  inf_state->registers = new readonly_detached_regcache (*regcache);
+  inf_state->registers.reset (new readonly_detached_regcache (*regcache));
 
   return inf_state;
 }
@@ -8886,14 +8881,14 @@ restore_infcall_suspend_state (struct infcall_suspend_state *inf_state)
 
       /* Errors ignored.  */
       target_write (current_top_target (), TARGET_OBJECT_SIGNAL_INFO, NULL,
-		    inf_state->siginfo_data, 0, TYPE_LENGTH (type));
+		    inf_state->siginfo_data.get (), 0, TYPE_LENGTH (type));
     }
 
   /* The inferior can be gone if the user types "print exit(0)"
      (and perhaps other times).  */
   if (target_has_execution)
     /* NB: The register write goes through to the target.  */
-    regcache->restore (inf_state->registers);
+    regcache->restore (inf_state->registers.get ());
 
   discard_infcall_suspend_state (inf_state);
 }
@@ -8914,15 +8909,13 @@ make_cleanup_restore_infcall_suspend_state
 void
 discard_infcall_suspend_state (struct infcall_suspend_state *inf_state)
 {
-  delete inf_state->registers;
-  xfree (inf_state->siginfo_data);
   delete inf_state;
 }
 
 readonly_detached_regcache *
 get_infcall_suspend_state_regcache (struct infcall_suspend_state *inf_state)
 {
-  return inf_state->registers;
+  return inf_state->registers.get ();
 }
 
 /* infcall_control_state contains state regarding gdb's control of the
