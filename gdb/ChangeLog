@@ -1,3 +1,17 @@
+2018-06-18  Alan Hayward  <alan.hayward@arm.com>
+
+	* nat/aarch64-sve-linux-sigcontext.h: New file.
+	* nat/aarch64-sve-linux-ptrace.h (SVE_VQ_BYTES): Move to
+	new files.
+	(SVE_VQ_MIN): Likewise.
+	(SVE_VQ_MAX): Likewise.
+	(SVE_VL_MIN): Likewise.
+	(SVE_VL_MAX): Likewise.
+	(SVE_NUM_ZREGS): Likewise.
+	(SVE_NUM_PREGS): Likewise.
+	(sve_vl_valid): Likewise.
+	(struct user_sve_header): Likewise.
+
 2018-06-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 	    Richard Bunt <Richard.Bunt@arm.com>
 
