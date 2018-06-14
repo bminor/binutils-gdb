@@ -8095,6 +8095,13 @@ maybe_remove_breakpoints (void)
 
 struct stop_context
 {
+  stop_context ();
+  ~stop_context ();
+
+  DISABLE_COPY_AND_ASSIGN (stop_context);
+
+  bool changed () const;
+
   /* The stop ID.  */
   ULONGEST stop_id;
 
@@ -8110,59 +8117,50 @@ struct stop_context
   int inf_num;
 };
 
-/* Returns a new stop context.  If stopped for a thread event, this
+/* Initializes a new stop context.  If stopped for a thread event, this
    takes a strong reference to the thread.  */
 
-static struct stop_context *
-save_stop_context (void)
+stop_context::stop_context ()
 {
-  struct stop_context *sc = XNEW (struct stop_context);
-
-  sc->stop_id = get_stop_id ();
-  sc->ptid = inferior_ptid;
-  sc->inf_num = current_inferior ()->num;
+  stop_id = get_stop_id ();
+  ptid = inferior_ptid;
+  inf_num = current_inferior ()->num;
 
   if (inferior_ptid != null_ptid)
     {
       /* Take a strong reference so that the thread can't be deleted
 	 yet.  */
-      sc->thread = inferior_thread ();
-      sc->thread->incref ();
+      thread = inferior_thread ();
+      thread->incref ();
     }
   else
-    sc->thread = NULL;
-
-  return sc;
+    thread = NULL;
 }
 
 /* Release a stop context previously created with save_stop_context.
    Releases the strong reference to the thread as well. */
 
-static void
-release_stop_context_cleanup (void *arg)
+stop_context::~stop_context ()
 {
-  struct stop_context *sc = (struct stop_context *) arg;
-
-  if (sc->thread != NULL)
-    sc->thread->decref ();
-  xfree (sc);
+  if (thread != NULL)
+    thread->decref ();
 }
 
 /* Return true if the current context no longer matches the saved stop
    context.  */
 
-static int
-stop_context_changed (struct stop_context *prev)
+bool
+stop_context::changed () const
 {
-  if (prev->ptid != inferior_ptid)
-    return 1;
-  if (prev->inf_num != current_inferior ()->num)
-    return 1;
-  if (prev->thread != NULL && prev->thread->state != THREAD_STOPPED)
-    return 1;
-  if (get_stop_id () != prev->stop_id)
-    return 1;
-  return 0;
+  if (ptid != inferior_ptid)
+    return true;
+  if (inf_num != current_inferior ()->num)
+    return true;
+  if (thread != NULL && thread->state != THREAD_STOPPED)
+    return true;
+  if (get_stop_id () != stop_id)
+    return true;
+  return false;
 }
 
 /* See infrun.h.  */
@@ -8305,9 +8303,7 @@ normal_stop (void)
      of stop_command's pre-hook not existing).  */
   if (stop_command != NULL)
     {
-      struct stop_context *saved_context = save_stop_context ();
-      struct cleanup *old_chain
-	= make_cleanup (release_stop_context_cleanup, saved_context);
+      stop_context saved_context;
 
       TRY
 	{
@@ -8325,12 +8321,8 @@ normal_stop (void)
 	 gone.  Likewise if the command switches thread or inferior --
 	 the observers would print a stop for the wrong
 	 thread/inferior.  */
-      if (stop_context_changed (saved_context))
-	{
-	  do_cleanups (old_chain);
-	  return 1;
-	}
-      do_cleanups (old_chain);
+      if (saved_context.changed ())
+	return 1;
     }
 
   /* Notify observers about the stop.  This is where the interpreters

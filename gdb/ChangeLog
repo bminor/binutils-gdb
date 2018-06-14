@@ -1,5 +1,16 @@
 2018-09-17  Tom Tromey  <tom@tromey.com>
 
+	* infrun.c (struct stop_context): Declare constructor,
+	destructor, "changed" method.
+	(stop_context::stop_context): Rename from save_stop_context.
+	(stop_context::~stop_context): Rename from
+	release_stop_context_cleanup.
+	(normal_stop): Update.
+	(stop_context::changed): Rename from stop_context_changed.  Return
+	bool.
+
+2018-09-17  Tom Tromey  <tom@tromey.com>
+
 	* inferior.h (struct infcall_suspend_state_deleter): New.
 	(infcall_suspend_state_up): New typedef.
 	(struct infcall_control_state_deleter): New.
