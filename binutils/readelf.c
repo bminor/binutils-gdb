@@ -11266,7 +11266,7 @@ get_symbol_version_string (Filedata *                   filedata,
 
   vers_data = byte_get (data, 2);
 
-  if ((vers_data & VERSYM_HIDDEN) == 0 && vers_data <= 1)
+  if ((vers_data & VERSYM_HIDDEN) == 0 && vers_data == 0)
     return NULL;
 
   /* Usually we'd only see verdef for defined symbols, and verneed for
@@ -11301,12 +11301,14 @@ get_symbol_version_string (Filedata *                   filedata,
 	      ivd.vd_ndx = 0;
 	      ivd.vd_aux = 0;
 	      ivd.vd_next = 0;
+	      ivd.vd_flags = 0;
 	    }
 	  else
 	    {
 	      ivd.vd_ndx = BYTE_GET (evd.vd_ndx);
 	      ivd.vd_aux = BYTE_GET (evd.vd_aux);
 	      ivd.vd_next = BYTE_GET (evd.vd_next);
+	      ivd.vd_flags = BYTE_GET (evd.vd_flags);
 	    }
 
 	  off += ivd.vd_next;
@@ -11315,6 +11317,9 @@ get_symbol_version_string (Filedata *                   filedata,
 
       if (ivd.vd_ndx == (vers_data & VERSYM_VERSION))
 	{
+	  if (ivd.vd_ndx == 1 && ivd.vd_flags == VER_FLG_BASE) 
+	    return NULL;
+
 	  off -= ivd.vd_next;
 	  off += ivd.vd_aux;
 

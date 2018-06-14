@@ -1,3 +1,9 @@
+2018-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/23267
+	* readelf.c (get_symbol_version_string): Check if the first
+	symbol version is base version.
+
 2018-06-13  Scott Egerton  <scott.egerton@imgtec.com>
 	    Faraz Shahbazker  <Faraz.Shahbazker@mips.com>
 

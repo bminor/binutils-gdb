@@ -1865,7 +1865,10 @@ _bfd_elf_get_symbol_version_string (bfd *abfd, asymbol *symbol,
 
       if (vernum == 0)
 	version_string = "";
-      else if (vernum == 1)
+      else if (vernum == 1
+	       && (vernum > elf_tdata (abfd)->cverdefs
+		   || (elf_tdata (abfd)->verdef[0].vd_flags
+		       == VER_FLG_BASE)))
 	version_string = "Base";
       else if (vernum <= elf_tdata (abfd)->cverdefs)
 	version_string =
