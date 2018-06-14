@@ -1,3 +1,7 @@
+2018-06-15  Tom de Vries  <tdevries@suse.de>
+
+	* MAINTAINERS (Write After Approval): Add Tom de Vries.
+
 2018-06-14  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gnulib/update-gnulib.sh: Print expected versions of
