@@ -107,7 +107,8 @@ fi
 # Verify that we have the correct version of autoconf.
 ver=`autoconf --version 2>&1 | head -1 | sed 's/.*) //'`
 if [ "$ver" != "$AUTOCONF_VERSION" ]; then
-   echo "Error: Wrong autoconf version: $ver. Aborting."
+   echo "Error: Wrong autoconf version ($ver), we need $AUTOCONF_VERSION."
+   echo "Aborting."
    exit 1
 fi
 
@@ -138,7 +139,8 @@ fi
 #
 ver=`aclocal --version 2>&1 | grep -v "called too early to check prototype" | head -1 | sed 's/.*) //'`
 if [ "$ver" != "$ACLOCAL_VERSION" ]; then
-   echo "Error: Wrong aclocal version: $ver. Aborting."
+   echo "Error: Wrong aclocal version ($ver), we need $ACLOCAL_VERSION."
+   echo "Aborting."
    exit 1
 fi
 

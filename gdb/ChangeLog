@@ -1,3 +1,8 @@
+2018-06-14  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gnulib/update-gnulib.sh: Print expected versions of
+	autoconf/aclocal.
+
 2018-06-14  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* arch-utils.c (default_type_align): Use type_length_units.
