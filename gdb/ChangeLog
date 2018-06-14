@@ -1,3 +1,13 @@
+2018-06-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* sparc-nat.h: Include target.h.
+	* sparc64-linux-nat.c (class sparc64_linux_nat_target)
+	<fetch_registers>: Remove this argument in function call.
+	<store_registers>: Remove this argument in function call, remove
+	extra semicolon.
+	<low_forget_process>: Call sparc64_forget_process instead of
+	sparc_forget_process.
+
 2018-06-13  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* procfs.c (_initialize_procfs): Use add_inf_child_target.

@@ -20,6 +20,8 @@
 #ifndef SPARC_NAT_H
 #define SPARC_NAT_H 1
 
+#include "target.h"
+
 struct sparc_gregmap;
 struct sparc_fpregmap;
 

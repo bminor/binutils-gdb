@@ -35,16 +35,16 @@ class sparc64_linux_nat_target final : public linux_nat_target
 public:
   /* Add our register access methods.  */
   void fetch_registers (struct regcache *regcache, int regnum) override
-  { sparc_fetch_inferior_registers (this, regcache, regnum); }
+  { sparc_fetch_inferior_registers (regcache, regnum); }
 
-  void store_registers (struct regcache *regcache, int regnum) override;
-  { sparc_store_inferior_registers (this, regcache, regnum); }
+  void store_registers (struct regcache *regcache, int regnum) override
+  { sparc_store_inferior_registers (regcache, regnum); }
 
   /* Override linux_nat_target low methods.  */
 
   /* ADI support */
   void low_forget_process (pid_t pid) override
-  { sparc_forget_process (pid); }
+  { sparc64_forget_process (pid); }
 };
 
 static sparc64_linux_nat_target the_sparc64_linux_nat_target;
