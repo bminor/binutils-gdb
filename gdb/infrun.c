@@ -8810,15 +8810,15 @@ struct infcall_suspend_state
   struct thread_suspend_state thread_suspend;
 
   /* Other fields:  */
-  readonly_detached_regcache *registers;
+  readonly_detached_regcache *registers = nullptr;
 
   /* Format of SIGINFO_DATA or NULL if it is not present.  */
-  struct gdbarch *siginfo_gdbarch;
+  struct gdbarch *siginfo_gdbarch = nullptr;
 
   /* The inferior format depends on SIGINFO_GDBARCH and it has a length of
      TYPE_LENGTH (gdbarch_get_siginfo_type ()).  For different gdbarch the
      content would be invalid.  */
-  gdb_byte *siginfo_data;
+  gdb_byte *siginfo_data = nullptr;
 };
 
 struct infcall_suspend_state *
@@ -8850,7 +8850,7 @@ save_infcall_suspend_state (void)
 	}
     }
 
-  inf_state = XCNEW (struct infcall_suspend_state);
+  inf_state = new struct infcall_suspend_state;
 
   if (siginfo_data)
     {
@@ -8916,7 +8916,7 @@ discard_infcall_suspend_state (struct infcall_suspend_state *inf_state)
 {
   delete inf_state->registers;
   xfree (inf_state->siginfo_data);
-  xfree (inf_state);
+  delete inf_state;
 }
 
 readonly_detached_regcache *

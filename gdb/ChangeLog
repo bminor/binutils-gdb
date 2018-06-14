@@ -1,3 +1,11 @@
+2018-09-17  Tom Tromey  <tom@tromey.com>
+
+	* gdbthread.h (struct thread_suspend_state): Add initializers.
+	(class thread_info) <suspend>: Remove initializer.
+	* infrun.c (struct infcall_suspend_state): Add initializers.
+	(save_infcall_suspend_state): Use new.
+	(discard_infcall_suspend_state): Use delete.
+
 2018-09-16  Tom Tromey  <tom@tromey.com>
 
 	* python/python-internal.h (CPYCHECKER_STEALS_REFERENCE_TO_ARG):

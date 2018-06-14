@@ -155,16 +155,16 @@ struct thread_suspend_state
      "signal" command, which overrides "handle nopass".  If the signal
      should be suppressed, the core will take care of clearing this
      before the target is resumed.  */
-  enum gdb_signal stop_signal;
+  enum gdb_signal stop_signal = GDB_SIGNAL_0;
 
   /* The reason the thread last stopped, if we need to track it
      (breakpoint, watchpoint, etc.)  */
-  enum target_stop_reason stop_reason;
+  enum target_stop_reason stop_reason = TARGET_STOPPED_BY_NO_REASON;
 
   /* The waitstatus for this thread's last event.  */
-  struct target_waitstatus waitstatus;
+  struct target_waitstatus waitstatus {};
   /* If true WAITSTATUS hasn't been handled yet.  */
-  int waitstatus_pending_p;
+  int waitstatus_pending_p = 0;
 
   /* Record the pc of the thread the last time it stopped.  (This is
      not the current thread's PC as that may have changed since the
@@ -181,7 +181,7 @@ struct thread_suspend_state
 
      - If the thread is running, this is set to -1, to avoid leaving
        it with a stale value, to make it easier to catch bugs.  */
-  CORE_ADDR stop_pc;
+  CORE_ADDR stop_pc = 0;
 };
 
 /* Base class for target-specific thread data.  */
@@ -300,7 +300,7 @@ public:
 
   /* State of inferior thread to restore after GDB is done with an inferior
      call.  See `struct thread_suspend_state'.  */
-  thread_suspend_state suspend {};
+  thread_suspend_state suspend;
 
   int current_line = 0;
   struct symtab *current_symtab = NULL;
