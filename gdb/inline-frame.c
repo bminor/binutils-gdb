@@ -286,10 +286,11 @@ block_starting_point_at (CORE_ADDR pc, const struct block *block)
 }
 
 /* Loop over the stop chain and determine if execution stopped in an
-   inlined frame because of a user breakpoint set at FRAME_BLOCK.  */
+   inlined frame because of a user breakpoint.  THIS_PC is the current
+   frame's PC.  */
 
 static bool
-stopped_by_user_bp_inline_frame (const block *frame_block, bpstat stop_chain)
+stopped_by_user_bp_inline_frame (CORE_ADDR this_pc, bpstat stop_chain)
 {
   for (bpstat s = stop_chain; s != NULL; s = s->next)
     {
@@ -300,9 +301,9 @@ stopped_by_user_bp_inline_frame (const block *frame_block, bpstat stop_chain)
 	  bp_location *loc = s->bp_location_at;
 	  enum bp_loc_type t = loc->loc_type;
 
-	  if ((t == bp_loc_software_breakpoint
-	       || t == bp_loc_hardware_breakpoint)
-	      && frame_block == SYMBOL_BLOCK_VALUE (loc->symbol))
+	  if (loc->address == this_pc
+	      && (t == bp_loc_software_breakpoint
+		  || t == bp_loc_hardware_breakpoint))
 	    return true;
 	}
     }
@@ -339,12 +340,12 @@ skip_inline_frames (ptid_t ptid, bpstat stop_chain)
 		{
 		  /* Do not skip the inlined frame if execution
 		     stopped in an inlined frame because of a user
-		     breakpoint for this inline function.  */
-		  if (stopped_by_user_bp_inline_frame (cur_block, stop_chain))
-		    break;
-
-		  skip_count++;
-		  last_sym = BLOCK_FUNCTION (cur_block);
+		     breakpoint.  */
+		  if (!stopped_by_user_bp_inline_frame (this_pc, stop_chain))
+		    {
+		      skip_count++;
+		      last_sym = BLOCK_FUNCTION (cur_block);
+		    }
 		}
 	      else
 		break;

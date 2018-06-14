@@ -231,21 +231,4 @@ foreach_with_prefix cmd [list "break" "tbreak"] {
     }
 }
 
-# func_caller and func_callee are both inline functions, and one calls
-# the other.  Test that setting a breakpoint on the caller reports the
-# stop at the caller, and that setting a breakpoint at the callee
-# reports a stop at the callee.
-foreach_with_prefix func {"func_callee" "func_caller"} {
-    clean_restart $binfile
-
-    if {![runto main]} {
-	untested "could not run to main"
-	continue
-    }
-
-    gdb_breakpoint $func
-    gdb_test "continue" "Breakpoint .* $func .*at .*$srcfile.*" \
-	"continue to inline function"
-}
-
 unset -nocomplain results

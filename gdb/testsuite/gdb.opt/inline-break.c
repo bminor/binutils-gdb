@@ -176,25 +176,6 @@ not_inline_func3 (int x)
   return y + inline_func3 (x);
 }
 
-/* A static inlined function that is called by another static inlined
-   function.  */
-
-static inline ATTR int
-func_callee (int x)
-{
-  return x * 23;
-}
-
-/* A static inlined function that calls another static inlined
-   function.  The body of the function is as simple as possible so
-   that both functions are inlined to the same PC address.  */
-
-static int
-func_caller (int x)
-{
-  return func_callee (x);
-}
-
 /* Entry point.  */
 
 int
@@ -223,8 +204,6 @@ main (int argc, char *argv[])
   x = func8a (x) + func8b (x);
 
   x = not_inline_func3 (-21);
-
-  func_caller (1);
 
   return x;
 }
