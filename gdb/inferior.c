@@ -226,7 +226,7 @@ exit_inferior_1 (struct inferior *inftoex, int silent)
 
   inf->pending_detach = 0;
   /* Reset it.  */
-  inf->control = {NO_STOP_QUIETLY};
+  inf->control = inferior_control_state (NO_STOP_QUIETLY);
 }
 
 void

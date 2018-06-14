@@ -8928,11 +8928,11 @@ struct infcall_control_state
   struct inferior_control_state inferior_control;
 
   /* Other fields:  */
-  enum stop_stack_kind stop_stack_dummy;
-  int stopped_by_random_signal;
+  enum stop_stack_kind stop_stack_dummy = STOP_NONE;
+  int stopped_by_random_signal = 0;
 
   /* ID if the selected frame when the inferior function call was made.  */
-  struct frame_id selected_frame_id;
+  struct frame_id selected_frame_id {};
 };
 
 /* Save all of the information associated with the inferior<==>gdb
@@ -8941,8 +8941,7 @@ struct infcall_control_state
 struct infcall_control_state *
 save_infcall_control_state (void)
 {
-  struct infcall_control_state *inf_status =
-    XNEW (struct infcall_control_state);
+  struct infcall_control_state *inf_status = new struct infcall_control_state;
   struct thread_info *tp = inferior_thread ();
   struct inferior *inf = current_inferior ();
 
@@ -9028,7 +9027,7 @@ restore_infcall_control_state (struct infcall_control_state *inf_status)
       END_CATCH
     }
 
-  xfree (inf_status);
+  delete inf_status;
 }
 
 static void
@@ -9058,7 +9057,7 @@ discard_infcall_control_state (struct infcall_control_state *inf_status)
   /* See save_infcall_control_state for info on stop_bpstat.  */
   bpstat_clear (&inf_status->thread_control.stop_bpstat);
 
-  xfree (inf_status);
+  delete inf_status;
 }
 
 /* See infrun.h.  */

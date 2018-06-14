@@ -283,6 +283,16 @@ struct private_inferior
 
 struct inferior_control_state
 {
+  inferior_control_state ()
+    : stop_soon (NO_STOP_QUIETLY)
+  {
+  }
+
+  explicit inferior_control_state (enum stop_kind when)
+    : stop_soon (when)
+  {
+  }
+
   /* See the definition of stop_kind above.  */
   enum stop_kind stop_soon;
 };
@@ -341,7 +351,7 @@ public:
 
   /* State of GDB control of inferior process execution.
      See `struct inferior_control_state'.  */
-  inferior_control_state control {NO_STOP_QUIETLY};
+  inferior_control_state control;
 
   /* True if this was an auto-created inferior, e.g. created from
      following a fork; false, if this inferior was manually added by

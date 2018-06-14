@@ -1,5 +1,17 @@
 2018-09-17  Tom Tromey  <tom@tromey.com>
 
+	* gdbthread.h (struct thread_control_state): Add initializer.
+	(class thread_info) <control>: Remove initializer.
+	* inferior.h (struct inferior_control_state): Add initializer.
+	(class inferior) <control>: Remove initializer.
+	(exit_inferior_1): Update.
+	* infrun.c (struct infcall_control_state): Add constructors.
+	(save_infcall_control_state): Use new.
+	(restore_infcall_control_state, discard_infcall_control_state):
+	Use delete.
+
+2018-09-17  Tom Tromey  <tom@tromey.com>
+
 	* infrun.c (struct infcall_suspend_state) <registers>: Now a
 	unique_ptr.
 	<siginfo_data>: Now a unique_xmalloc_ptr.
