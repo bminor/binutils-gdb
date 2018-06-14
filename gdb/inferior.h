@@ -63,10 +63,33 @@ extern struct infcall_control_state *save_infcall_control_state (void);
 extern void restore_infcall_suspend_state (struct infcall_suspend_state *);
 extern void restore_infcall_control_state (struct infcall_control_state *);
 
-extern struct cleanup *make_cleanup_restore_infcall_suspend_state
-					    (struct infcall_suspend_state *);
-extern struct cleanup *make_cleanup_restore_infcall_control_state
-					    (struct infcall_control_state *);
+/* A deleter for infcall_suspend_state that calls
+   restore_infcall_suspend_state.  */
+struct infcall_suspend_state_deleter
+{
+  void operator() (struct infcall_suspend_state *state) const
+  {
+    restore_infcall_suspend_state (state);
+  }
+};
+
+/* A unique_ptr specialization for infcall_suspend_state.  */
+typedef std::unique_ptr<infcall_suspend_state, infcall_suspend_state_deleter>
+    infcall_suspend_state_up;
+
+/* A deleter for infcall_control_state that calls
+   restore_infcall_control_state.  */
+struct infcall_control_state_deleter
+{
+  void operator() (struct infcall_control_state *state) const
+  {
+    restore_infcall_control_state (state);
+  }
+};
+
+/* A unique_ptr specialization for infcall_control_state.  */
+typedef std::unique_ptr<infcall_control_state, infcall_control_state_deleter>
+    infcall_control_state_up;
 
 extern void discard_infcall_suspend_state (struct infcall_suspend_state *);
 extern void discard_infcall_control_state (struct infcall_control_state *);

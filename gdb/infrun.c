@@ -8893,19 +8893,6 @@ restore_infcall_suspend_state (struct infcall_suspend_state *inf_state)
   discard_infcall_suspend_state (inf_state);
 }
 
-static void
-do_restore_infcall_suspend_state_cleanup (void *state)
-{
-  restore_infcall_suspend_state ((struct infcall_suspend_state *) state);
-}
-
-struct cleanup *
-make_cleanup_restore_infcall_suspend_state
-  (struct infcall_suspend_state *inf_state)
-{
-  return make_cleanup (do_restore_infcall_suspend_state_cleanup, inf_state);
-}
-
 void
 discard_infcall_suspend_state (struct infcall_suspend_state *inf_state)
 {
@@ -9028,19 +9015,6 @@ restore_infcall_control_state (struct infcall_control_state *inf_status)
     }
 
   delete inf_status;
-}
-
-static void
-do_restore_infcall_control_state_cleanup (void *sts)
-{
-  restore_infcall_control_state ((struct infcall_control_state *) sts);
-}
-
-struct cleanup *
-make_cleanup_restore_infcall_control_state
-  (struct infcall_control_state *inf_status)
-{
-  return make_cleanup (do_restore_infcall_control_state_cleanup, inf_status);
 }
 
 void

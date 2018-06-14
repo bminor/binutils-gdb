@@ -721,9 +721,6 @@ call_function_by_hand_dummy (struct value *function,
   struct type *target_values_type;
   unsigned char struct_return = 0, hidden_first_param_p = 0;
   CORE_ADDR struct_addr = 0;
-  struct infcall_control_state *inf_status;
-  struct cleanup *inf_status_cleanup;
-  struct infcall_suspend_state *caller_state;
   CORE_ADDR real_pc;
   CORE_ADDR bp_addr;
   struct frame_id dummy_id;
@@ -757,19 +754,16 @@ call_function_by_hand_dummy (struct value *function,
   if (!gdbarch_push_dummy_call_p (gdbarch))
     error (_("This target does not support function calls."));
 
-  /* A cleanup for the inferior status.
+  /* A holder for the inferior status.
      This is only needed while we're preparing the inferior function call.  */
-  inf_status = save_infcall_control_state ();
-  inf_status_cleanup
-    = make_cleanup_restore_infcall_control_state (inf_status);
+  infcall_control_state_up inf_status (save_infcall_control_state ());
 
   /* Save the caller's registers and other state associated with the
      inferior itself so that they can be restored once the
      callee returns.  To allow nested calls the registers are (further
-     down) pushed onto a dummy frame stack.  Include a cleanup (which
-     is tossed once the regcache has been pushed).  */
-  caller_state = save_infcall_suspend_state ();
-  make_cleanup_restore_infcall_suspend_state (caller_state);
+     down) pushed onto a dummy frame stack.  This unique pointer
+     is released once the regcache has been pushed).  */
+  infcall_suspend_state_up caller_state (save_infcall_suspend_state ());
 
   /* Ensure that the initial SP is correctly aligned.  */
   {
@@ -1126,15 +1120,10 @@ call_function_by_hand_dummy (struct value *function,
   if (unwind_on_terminating_exception_p)
     set_std_terminate_breakpoint ();
 
-  /* Discard both inf_status and caller_state cleanups.
-     From this point on we explicitly restore the associated state
-     or discard it.  */
-  discard_cleanups (inf_status_cleanup);
-
   /* Everything's ready, push all the info needed to restore the
      caller (and identify the dummy-frame) onto the dummy-frame
      stack.  */
-  dummy_frame_push (caller_state, &dummy_id, call_thread.get ());
+  dummy_frame_push (caller_state.release (), &dummy_id, call_thread.get ());
   if (dummy_dtor != NULL)
     register_dummy_frame_dtor (dummy_id, call_thread.get (),
 			       dummy_dtor, dummy_dtor_data);
@@ -1189,7 +1178,7 @@ call_function_by_hand_dummy (struct value *function,
 	       suspend state, and restore the inferior control
 	       state.  */
 	    dummy_frame_pop (dummy_id, call_thread.get ());
-	    restore_infcall_control_state (inf_status);
+	    restore_infcall_control_state (inf_status.release ());
 
 	    /* Get the return value.  */
 	    retval = sm->return_value;
@@ -1220,7 +1209,7 @@ call_function_by_hand_dummy (struct value *function,
       const char *name = get_function_name (funaddr,
                                             name_buf, sizeof (name_buf));
 
-      discard_infcall_control_state (inf_status);
+      discard_infcall_control_state (inf_status.release ());
 
       /* We could discard the dummy frame here if the program exited,
          but it will get garbage collected the next time the program is
@@ -1251,7 +1240,7 @@ When the function is done executing, GDB will silently stop."),
 
       /* If we try to restore the inferior status,
 	 we'll crash as the inferior is no longer running.  */
-      discard_infcall_control_state (inf_status);
+      discard_infcall_control_state (inf_status.release ());
 
       /* We could discard the dummy frame here given that the program exited,
          but it will get garbage collected the next time the program is
@@ -1273,7 +1262,7 @@ When the function is done executing, GDB will silently stop."),
 	 signal or breakpoint while our thread was running.
 	 There's no point in restoring the inferior status,
 	 we're in a different thread.  */
-      discard_infcall_control_state (inf_status);
+      discard_infcall_control_state (inf_status.release ());
       /* Keep the dummy frame record, if the user switches back to the
 	 thread with the hand-call, we'll need it.  */
       if (stopped_by_random_signal)
@@ -1314,7 +1303,7 @@ When the function is done executing, GDB will silently stop."),
 
 	      /* We also need to restore inferior status to that before the
 		 dummy call.  */
-	      restore_infcall_control_state (inf_status);
+	      restore_infcall_control_state (inf_status.release ());
 
 	      /* FIXME: Insert a bunch of wrap_here; name can be very
 		 long if it's a C++ name with arguments and stuff.  */
@@ -1332,7 +1321,7 @@ Evaluation of the expression containing the function\n\
 		 (default).
 		 Discard inferior status, we're not at the same point
 		 we started at.  */
-	      discard_infcall_control_state (inf_status);
+	      discard_infcall_control_state (inf_status.release ());
 
 	      /* FIXME: Insert a bunch of wrap_here; name can be very
 		 long if it's a C++ name with arguments and stuff.  */
@@ -1355,7 +1344,7 @@ When the function is done executing, GDB will silently stop."),
 
 	  /* We also need to restore inferior status to that before
 	     the dummy call.  */
-	  restore_infcall_control_state (inf_status);
+	  restore_infcall_control_state (inf_status.release ());
 
 	  error (_("\
 The program being debugged entered a std::terminate call, most likely\n\
@@ -1374,7 +1363,7 @@ will be abandoned."),
 	     Keep the dummy frame, the user may want to examine its state.
 	     Discard inferior status, we're not at the same point
 	     we started at.  */
-	  discard_infcall_control_state (inf_status);
+	  discard_infcall_control_state (inf_status.release ());
 
 	  /* The following error message used to say "The expression
 	     which contained the function call has been discarded."

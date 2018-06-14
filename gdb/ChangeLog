@@ -1,5 +1,19 @@
 2018-09-17  Tom Tromey  <tom@tromey.com>
 
+	* inferior.h (struct infcall_suspend_state_deleter): New.
+	(infcall_suspend_state_up): New typedef.
+	(struct infcall_control_state_deleter): New.
+	(infcall_control_state_up): New typedef.
+	(make_cleanup_restore_infcall_suspend_state)
+	(make_cleanup_restore_infcall_control_state): Don't declare.
+	* infcall.c (call_function_by_hand_dummy): Update.
+	* infrun.c (do_restore_infcall_suspend_state_cleanup)
+	(make_cleanup_restore_infcall_suspend_state): Remove.
+	(do_restore_infcall_control_state_cleanup)
+	(make_cleanup_restore_infcall_control_state): Remove.
+
+2018-09-17  Tom Tromey  <tom@tromey.com>
+
 	* gdbthread.h (struct thread_control_state): Add initializer.
 	(class thread_info) <control>: Remove initializer.
 	* inferior.h (struct inferior_control_state): Add initializer.
