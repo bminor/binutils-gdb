@@ -28,6 +28,7 @@
 #include "registry.h"
 #include "gdb_bfd.h"
 #include <vector>
+#include "common/next-iterator.h"
 
 struct bcache;
 struct htab;
@@ -564,6 +565,22 @@ extern void default_iterate_over_objfiles_in_search_order
    iterate_over_objfiles_in_search_order_cb_ftype *cb,
    void *cb_data, struct objfile *current_objfile);
 
+
+/* An iterarable object that can be used to iterate over all
+   objfiles.  The basic use is in a foreach, like:
+
+   for (objfile *objf : all_objfiles (pspace)) { ... }  */
+
+class all_objfiles : public next_adapter<struct objfile>
+{
+public:
+
+  explicit all_objfiles (struct program_space *pspace)
+    : next_adapter<struct objfile> (pspace->objfiles)
+  {
+  }
+};
+
 
 /* Traverse all object files in the current program space.
    ALL_OBJFILES_SAFE works even if you delete the objfile during the

@@ -1,3 +1,9 @@
+2019-01-09  Tom Tromey  <tom@tromey.com>
+
+	* common/next-iterator.h: New file.
+	* objfiles.h (class all_objfiles): New.
+	(struct objfile_iterator): New.
+
 2019-01-09  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* NEWS: Move the description of the changed "frame", "select-frame",
