@@ -1,5 +1,13 @@
 2018-06-18  Alan Hayward  <alan.hayward@arm.com>
 
+	* linux-aarch64-low.c (is_sve_tdesc): New function.
+	(aarch64_sve_regs_copy_to_regcache): Likewise.
+	(aarch64_sve_regs_copy_from_regcache): Likewise.
+	(aarch64_regs_info): Add SVE checks.
+	(initialize_low_arch): Initialize SVE.
+
+2018-06-18  Alan Hayward  <alan.hayward@arm.com>
+
 	* Makefile.in: Add aarch64-sve-linux-ptrace.c.
 
 2018-06-11  Alan Hayward  <alan.hayward@arm.com>

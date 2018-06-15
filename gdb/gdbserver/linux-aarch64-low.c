@@ -41,6 +41,7 @@
 #include "arch/aarch64.h"
 #include "linux-aarch64-tdesc.h"
 #include "nat/aarch64-sve-linux-ptrace.h"
+#include "tdesc.h"
 
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
@@ -71,6 +72,16 @@ is_64bit_tdesc (void)
   struct regcache *regcache = get_thread_regcache (current_thread, 0);
 
   return register_size (regcache->tdesc, 0) == 8;
+}
+
+/* Return true if the regcache contains the number of SVE registers.  */
+
+static bool
+is_sve_tdesc (void)
+{
+  struct regcache *regcache = get_thread_regcache (current_thread, 0);
+
+  return regcache->tdesc->reg_defs.size () == AARCH64_SVE_NUM_REGS;
 }
 
 /* Implementation of linux_target_ops method "cannot_store_register".  */
@@ -514,6 +525,22 @@ aarch64_arch_setup (void)
   aarch64_linux_get_debug_reg_capacity (lwpid_of (current_thread));
 }
 
+/* Wrapper for aarch64_sve_regs_copy_to_reg_buf.  */
+
+static void
+aarch64_sve_regs_copy_to_regcache (struct regcache *regcache, const void *buf)
+{
+  return aarch64_sve_regs_copy_to_reg_buf (regcache, buf);
+}
+
+/* Wrapper for aarch64_sve_regs_copy_from_reg_buf.  */
+
+static void
+aarch64_sve_regs_copy_from_regcache (struct regcache *regcache, void *buf)
+{
+  return aarch64_sve_regs_copy_from_reg_buf (regcache, buf);
+}
+
 static struct regset_info aarch64_regsets[] =
 {
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PRSTATUS,
@@ -540,15 +567,44 @@ static struct regs_info regs_info_aarch64 =
     &aarch64_regsets_info,
   };
 
+static struct regset_info aarch64_sve_regsets[] =
+{
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PRSTATUS,
+    sizeof (struct user_pt_regs), GENERAL_REGS,
+    aarch64_fill_gregset, aarch64_store_gregset },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_SVE,
+    SVE_PT_SIZE (AARCH64_MAX_SVE_VQ, SVE_PT_REGS_SVE), EXTENDED_REGS,
+    aarch64_sve_regs_copy_from_regcache, aarch64_sve_regs_copy_to_regcache
+  },
+  NULL_REGSET
+};
+
+static struct regsets_info aarch64_sve_regsets_info =
+  {
+    aarch64_sve_regsets, /* regsets.  */
+    0, /* num_regsets.  */
+    NULL, /* disabled_regsets.  */
+  };
+
+static struct regs_info regs_info_aarch64_sve =
+  {
+    NULL, /* regset_bitmap.  */
+    NULL, /* usrregs.  */
+    &aarch64_sve_regsets_info,
+  };
+
 /* Implementation of linux_target_ops method "regs_info".  */
 
 static const struct regs_info *
 aarch64_regs_info (void)
 {
-  if (is_64bit_tdesc ())
-    return &regs_info_aarch64;
-  else
+  if (!is_64bit_tdesc ())
     return &regs_info_aarch32;
+
+  if (is_sve_tdesc ())
+    return &regs_info_aarch64_sve;
+
+  return &regs_info_aarch64;
 }
 
 /* Implementation of linux_target_ops method "supports_tracepoints".  */
@@ -3027,6 +3083,7 @@ initialize_low_arch (void)
   initialize_low_arch_aarch32 ();
 
   initialize_regsets_info (&aarch64_regsets_info);
+  initialize_regsets_info (&aarch64_sve_regsets_info);
 
 #if GDB_SELF_TEST
   initialize_low_tdesc ();
