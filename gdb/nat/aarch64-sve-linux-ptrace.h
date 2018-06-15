@@ -29,9 +29,30 @@
 #include "aarch64-sve-linux-sigcontext.h"
 #endif
 
+/* Indicates whether a SVE ptrace header is followed by SVE registers or a
+   fpsimd structure.  */
+
+#define HAS_SVE_STATE(header) ((header).flags && SVE_PT_REGS_SVE)
+
 /* Read VQ for the given tid using ptrace.  If SVE is not supported then zero
    is returned (on a system that supports SVE, then VQ cannot be zero).  */
 
 uint64_t aarch64_sve_get_vq (int tid);
+
+/* Read the current SVE register set using ptrace, allocating space as
+   required.  */
+
+extern std::unique_ptr<gdb_byte[]> aarch64_sve_get_sveregs (int tid);
+
+/* Put the registers from linux structure buf into register buffer.  */
+
+extern void aarch64_sve_regs_copy_to_reg_buf (struct reg_buffer_common *reg_buf,
+					      const void *buf);
+
+/* Put the registers from register buffer into linux structure buf.  */
+
+extern void
+aarch64_sve_regs_copy_from_reg_buf (const struct reg_buffer_common *reg_buf,
+				    void *buf);
 
 #endif /* aarch64-sve-linux-ptrace.h */

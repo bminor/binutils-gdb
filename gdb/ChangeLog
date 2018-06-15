@@ -1,5 +1,62 @@
 2018-06-18  Alan Hayward  <alan.hayward@arm.com>
 
+	* aarch64-linux-nat.c (fetch_sveregs_from_thread): New function.
+	(store_sveregs_to_thread): Likewise.
+	(aarch64_linux_fetch_inferior_registers): Check for SVE.
+	(aarch64_linux_store_inferior_registers): Likewise.
+	* nat/aarch64-sve-linux-ptrace.c (aarch64_sve_get_sveregs): New
+	function.
+	(aarch64_sve_regs_copy_to_regcache): Likewise.
+	(aarch64_sve_regs_copy_from_regcache): Likewise.
+	* nat/aarch64-sve-linux-ptrace.h (aarch64_sve_get_sveregs): New
+	declaration.
+	(aarch64_sve_regs_copy_to_regcache): Likewise.
+	(aarch64_sve_regs_copy_from_regcache): Likewise.
+	(sve_context): Structure from Linux headers.
+	(SVE_SIG_ZREGS_SIZE): Define from Linux headers.
+	(SVE_SIG_ZREG_SIZE): Likewise.
+	(SVE_SIG_PREG_SIZE): Likewise.
+	(SVE_SIG_FFR_SIZE): Likewise.
+	(SVE_SIG_REGS_OFFSET): Likewise.
+	(SVE_SIG_ZREGS_OFFSET): Likewise.
+	(SVE_SIG_ZREG_OFFSET): Likewise.
+	(SVE_SIG_ZREGS_SIZE): Likewise.
+	(SVE_SIG_PREGS_OFFSET): Likewise.
+	(SVE_SIG_PREG_OFFSET): Likewise.
+	(SVE_SIG_PREGS_SIZE): Likewise.
+	(SVE_SIG_FFR_OFFSET): Likewise.
+	(SVE_SIG_REGS_SIZE): Likewise.
+	(SVE_SIG_CONTEXT_SIZE): Likewise.
+	(SVE_PT_REGS_MASK): Likewise.
+	(SVE_PT_REGS_FPSIMD): Likewise.
+	(SVE_PT_REGS_SVE): Likewise.
+	(SVE_PT_VL_INHERIT): Likewise.
+	(SVE_PT_VL_ONEXEC): Likewise.
+	(SVE_PT_REGS_OFFSET): Likewise.
+	(SVE_PT_FPSIMD_OFFSET): Likewise.
+	(SVE_PT_FPSIMD_SIZE): Likewise.
+	(SVE_PT_SVE_ZREG_SIZE): Likewise.
+	(SVE_PT_SVE_PREG_SIZE): Likewise.
+	(SVE_PT_SVE_FFR_SIZE): Likewise.
+	(SVE_PT_SVE_FPSR_SIZE): Likewise.
+	(SVE_PT_SVE_FPCR_SIZE): Likewise.
+	(__SVE_SIG_TO_PT): Likewise.
+	(SVE_PT_SVE_OFFSET): Likewise.
+	(SVE_PT_SVE_ZREGS_OFFSET): Likewise.
+	(SVE_PT_SVE_ZREG_OFFSET): Likewise.
+	(SVE_PT_SVE_ZREGS_SIZE): Likewise.
+	(SVE_PT_SVE_PREGS_OFFSET): Likewise.
+	(SVE_PT_SVE_PREG_OFFSET): Likewise.
+	(SVE_PT_SVE_PREGS_SIZE): Likewise.
+	(SVE_PT_SVE_FFR_OFFSET): Likewise.
+	(SVE_PT_SVE_FPSR_OFFSET): Likewise.
+	(SVE_PT_SVE_FPCR_OFFSET): Likewise.
+	(SVE_PT_SVE_SIZE): Likewise.
+	(SVE_PT_SIZE): Likewise.
+	(HAS_SVE_STATE): New define.
+
+2018-06-18  Alan Hayward  <alan.hayward@arm.com>
+
 	* nat/aarch64-sve-linux-sigcontext.h: New file.
 	* nat/aarch64-sve-linux-ptrace.h (SVE_VQ_BYTES): Move to
 	new files.

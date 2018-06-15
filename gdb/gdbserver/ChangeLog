@@ -1,3 +1,7 @@
+2018-06-18  Alan Hayward  <alan.hayward@arm.com>
+
+	* Makefile.in: Add aarch64-sve-linux-ptrace.c.
+
 2018-06-11  Alan Hayward  <alan.hayward@arm.com>
 
 	* linux-aarch64-ipa.c (get_ipa_tdesc): Add null VQ param.
