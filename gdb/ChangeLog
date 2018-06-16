@@ -1,3 +1,7 @@
+2018-07-05  Tom de Vries  <tdevries@suse.de>
+
+	* macroexp.c (macro_buffer) <operator=>: New member function.
+
 2018-07-04  Tom Tromey  <tom@tromey.com>
 
 	* darwin-nat.c (darwin_attach_pid): Use exit_inferior.

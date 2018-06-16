@@ -112,6 +112,16 @@ struct macro_buffer
     shared = true;
   }
 
+  macro_buffer& operator= (const macro_buffer &src)
+  {
+    gdb_assert (src.shared);
+    gdb_assert (shared);
+    set_shared (src.text, src.len);
+    last_token = src.last_token;
+    is_identifier = src.is_identifier;
+    return *this;
+  }
+
   ~macro_buffer ()
   {
     if (! shared && size)
