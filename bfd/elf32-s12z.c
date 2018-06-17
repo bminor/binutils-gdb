@@ -34,6 +34,38 @@ static bfd_boolean s12z_info_to_howto_rel
   (bfd *, arelent *, Elf_Internal_Rela *);
 
 static bfd_reloc_status_type
+opru18_reloc (bfd *abfd, arelent *reloc_entry, struct bfd_symbol *symbol,
+		    void *data, asection *input_section ATTRIBUTE_UNUSED,
+		    bfd *output ATTRIBUTE_UNUSED, char **msg ATTRIBUTE_UNUSED)
+{
+  /* This reloc is used for 18 bit General Operand Addressing Postbyte in the
+     INST opru18 form.  This is an 18 bit reloc, but the most significant bit
+     is shifted one place to the left of where it would normally be.  See
+     Appendix A.4 of the S12Z reference manual.  */
+
+  bfd_size_type octets = reloc_entry->address * bfd_octets_per_byte (abfd);
+  bfd_vma result = bfd_get_24 (abfd, (unsigned char *) data + octets);
+  bfd_vma val = bfd_asymbol_value (symbol);
+
+  /* Keep the wanted bits and discard the rest.  */
+  result &= 0xFA0000;
+
+  val += symbol->section->output_section->vma;
+  val += symbol->section->output_offset;
+
+  /* The lowest 17 bits are copied verbatim.  */
+  result |= val & 0x1FFFF;
+
+  /* The 18th bit is put into the 19th position.  */
+  result |= (val & 0x020000) << 1;
+
+  bfd_put_24 (abfd, result, (unsigned char *) data + octets);
+
+  return bfd_reloc_ok;
+}
+
+
+static bfd_reloc_status_type
 shift_addend_reloc (bfd *abfd, arelent *reloc_entry, struct bfd_symbol *symbol ATTRIBUTE_UNUSED,
 		    void *data ATTRIBUTE_UNUSED, asection *input_section ATTRIBUTE_UNUSED,
 		    bfd *output ATTRIBUTE_UNUSED, char **msg ATTRIBUTE_UNUSED)
@@ -136,19 +168,19 @@ static reloc_howto_type elf_s12z_howto_table[] =
 	 0x00ffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* The purpose of this reloc is not known */
-  HOWTO (R_S12Z_UKNWN_3,	/* type */
+  /* An 18 bit absolute relocation */
+  HOWTO (R_S12Z_EXT18,        /* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
-	 0,			/* bitsize */
+	 5,			/* size (0 = byte, 1 = short, 2 = long) */
+	 18,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont,/* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_S12Z_UKNWN_3",	/* name */
+	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 opru18_reloc,	        /* special_function */
+	 "R_S12Z_EXT18",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0,			/* src_mask */
-	 0,			/* dst_mask */
+	 0x0005ffff,            /* src_mask */
+	 0x0005ffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   /* A 32 bit absolute relocation  */

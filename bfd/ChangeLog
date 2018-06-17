@@ -1,3 +1,8 @@
+2018-08-23  John Darington <john@darrington.wattle.id.au>
+
+	* elf32-s12z.c (opru18_reloc): New function.
+	* elf32-s12z.c (elf_s12z_howto_table): Adjust Howto according to new knowledge.
+
 2018-08-21  mephi42  <mephi42@gmail.com>
 
 	PR binutils/23315

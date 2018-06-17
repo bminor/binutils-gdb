@@ -1,3 +1,7 @@
+2018-08-23  John Darrington  <john@darrington.wattle.id.au>
+
+	* elf/s12z.h: Rename R_S12Z_UKNWN_3 to R_S12Z_EXT18.
+
 2018-08-21  Alan Modra  <amodra@gmail.com>
 
 	* opcode/ppc.h (struct powerpc_operand): Correct "insert" comment.
