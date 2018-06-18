@@ -1,3 +1,7 @@
+2018-06-18  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* tracepoint.h (current_traceframe): Remove declaration.
+
 2018-06-18  Alan Hayward  <alan.hayward@arm.com>
 
 	* linux-aarch64-low.c (is_sve_tdesc): New function.
