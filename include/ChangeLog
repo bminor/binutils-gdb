@@ -1,3 +1,17 @@
+2018-06-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	Sync with GCC
+
+	2018-05-24  Tom Rix  <trix@juniper.net>
+
+	* dwarf2.def (DW_FORM_strx*, DW_FORM_addrx*): New.
+
+	2017-11-20  Kito Cheng  <kito.cheng@gmail.com>
+
+	* longlong.h [__riscv] (__umulsidi3): Define.
+	[__riscv] (umul_ppmm): Likewise.
+	[__riscv] (__muluw3): Likewise.
+
 2018-06-14  Faraz Shahbazker  <Faraz.Shahbazker@mips.com>
 
 	* elf/mips.h (AFL_ASE_GINV, AFL_ASE_RESERVED1): New macros.
