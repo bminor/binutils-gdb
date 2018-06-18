@@ -1,3 +1,11 @@
+2018-06-18  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* Makefile.def (fortran): Add check-target-libgomp-fortran.
+	* Makefile.tpl (check-target-libgomp-fortran): New phony target.
+	* Makefile.in: Regenerate.
+
+	* configure: Regenerate.
+
 2018-06-18  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* configure.ac: Sync with GCC, remove MPX-related things.
