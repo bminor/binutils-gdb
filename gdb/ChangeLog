@@ -970,6 +970,12 @@
 	* symfile.c (addr_info_make_relative): Likewise.
 	* thread.c (value_in_thread_stack_temporaries): Likewise.
 
+2018-06-12  Weimin Pan  <weimin.pan@oracle.com>
+
+	PR gdb/16841
+	* valops.c (value_struct_elt_for_reference): Call check_typedef on
+	aggregate type to get its real type before accessing it.
+
 2018-05-29  Weimin Pan  <weimin.pan@oracle.com>
 
 	* minsyms.h (lookup_minimal_symbol_and_objfile): Remove declaration.

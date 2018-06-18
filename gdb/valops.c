@@ -3343,7 +3343,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 				int want_address,
 				enum noside noside)
 {
-  struct type *t = curtype;
+  struct type *t = check_typedef (curtype);
   int i;
   struct value *v, *result;
 

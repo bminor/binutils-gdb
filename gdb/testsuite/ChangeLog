@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 2018-06-18  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.ada/bp_inlined_func.exp: Allow 5 breakpoint locations.
@@ -95,6 +96,13 @@
 
 	* gdb.base/endian.exp: New test.
 	* gdb.base/endian.c: New test source.
+=======
+2018-06-12  Weimin Pan  <weimin.pan@oracle.com>
+
+	PR gdb/16841
+	* gdb.cp/typedef-base.cc: New file.
+	* gdb.cp/typedef-base.exp: New file.
+>>>>>>> Fix failure to find member of a typedef base class
 
 2018-05-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
