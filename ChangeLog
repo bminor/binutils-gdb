@@ -1,3 +1,7 @@
+2018-06-18  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* configure.ac: Sync with GCC, remove MPX-related things.
+
 2018-05-01  Nick Clifton  <nickc@redhat.com>
 
 	* config.guess: Synchronize with config project master sources.
