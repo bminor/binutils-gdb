@@ -1,6 +1,3 @@
-
-Symbol table '\.dynsym' contains [0-9]+ entries:
- +Num: +Value +Size Type +Bind +Vis +Ndx Name
 #...
- +[0-9]+: +[a-f0-9]+ +0 +FUNC +GLOBAL +DEFAULT +[0-9]+ +func
-#...
+ +[0-9]+: +[0-9a-f]+ +[0-9]+ +I?FUNC +GLOBAL +DEFAULT.* [0-9]+ +func
+#pass

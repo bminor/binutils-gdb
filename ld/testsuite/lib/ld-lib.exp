@@ -2137,7 +2137,7 @@ proc check_ifunc_available { } {
 	    set src [remote_download host $src]
 	}
 	set ifunc_available_saved [run_host_cmd_yesno "$CC" "$flags $src -o $output"]
-	if { $ifunc_available_saved == 1 } {
+	if { [isnative] && $ifunc_available_saved == 1 } {
 	  set ifunc_available_saved [run_host_cmd_yesno "$output" ""]
 	}
 	remote_file host delete $src
@@ -2184,7 +2184,7 @@ proc check_ifunc_attribute_available { } {
 	    set src [remote_download host $src]
 	}
 	set ifunc_attribute_available_saved [run_host_cmd_yesno "$CC" "$flags $src -o $output"]
-	if { $ifunc_attribute_available_saved == 1 } {
+	if { [isnative] && $ifunc_attribute_available_saved == 1 } {
 	  set ifunc_attribute_available_saved [run_host_cmd_yesno "$output" ""]
 	}
 	remote_file host delete $src

@@ -1,3 +1,15 @@
+2018-06-18  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/ld-lib.exp (check_ifunc_available): Pass without
+	running executable when non-native.
+	(check_ifunc_attribute_available): Likewise.
+	* testsuite/ld-ifunc/pr23169a.rd: Remove extraneous lines.  Match
+	st_other strings.  Pass when func is an ifunc.
+	* testsuite/ld-ifunc/pr23169b.rd: Remove extraneous lines.  Correct
+	reloc regexp.  Correct match-anything line.
+	* testsuite/ld-ifunc/pr23169c.rd: Remove extraneous lines.  Match
+	st_other strings.
+
 2018-06-14  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/readelf.exp: Delete DUMP and selection of
