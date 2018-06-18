@@ -1890,7 +1890,6 @@ case "${target}" in
        ;;
    or1k-*-* | or1knd-*-*)
        sim_arch=or1k
-       sim_testsuite=yes
        ;;
    rl78-*-*)
        sim_arch=rl78

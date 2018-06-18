@@ -653,8 +653,8 @@ microblaze
 mips
 mn10300
 moxie
-or1k
 msp430
+or1k
 rl78
 rx
 sh64
@@ -3777,7 +3777,6 @@ subdirs="$subdirs aarch64"
   subdirs="$subdirs or1k"
 
 
-       sim_testsuite=yes
        ;;
    rl78-*-*)
 
