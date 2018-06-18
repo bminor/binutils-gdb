@@ -5755,6 +5755,9 @@ the linker could optimize the movq to a leaq if possible.  */
 /* Same as BFD_RELOC_32_PCREL but with an implicit -4 addend.  */
   BFD_RELOC_MACH_O_X86_64_PCREL32_4,
 
+/* Used when referencing a TLV entry.  */
+  BFD_RELOC_MACH_O_X86_64_TLV,
+
 /* Addend for PAGE or PAGEOFF.  */
   BFD_RELOC_MACH_O_ARM64_ADDEND,
 

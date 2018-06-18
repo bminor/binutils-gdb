@@ -1,3 +1,14 @@
+2018-06-18  Mephi  <mephi42@gmail.com>
+
+	PR 23297
+	* mach-o-x86-64.c (x86_64_howto_table): Add entry for
+	BFD_RELOC_MACH_O_X86_64_RELOC_TLV.
+	(bfd_mach_o_x86_64_canonicalize_one_reloc): Handle the new reloc.
+	(bfd_mach_o_x86_64_swap_reloc_out): Likewise.
+	* reloc.c (BFD_RELOC_MACH_O_X86_64_TV): New entry.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2018-06-14  Faraz Shahbazker  <Faraz.Shahbazker@mips.com>
 
 	* elfxx-mips.c (print_mips_ases): Add GINV extension.
