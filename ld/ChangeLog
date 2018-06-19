@@ -1,3 +1,8 @@
+2018-06-19  Maciej W. Rozycki  <macro@mips.com>
+
+	* testsuite/ld-elf/shared.exp: XFAIL DT_TEXTREL map file warning
+	test for `mips*-*-*'.
+
 2018-06-19  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* configure.ac: Remove AC_PREREQ.

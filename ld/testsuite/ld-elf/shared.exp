@@ -176,6 +176,11 @@ run_ld_link_tests [list \
     ] \
 ] "xtensa-*-*"
 
+# The MIPS backend sets SHF_WRITE, in `mips_elf_create_dynamic_relocation',
+# for any section that has a dynamic relocation attached and consequently
+# this test is irrelevant for MIPS targets.  We don't have a clean way to
+# request UNSUPPORTED result, which would be the most appropriate here,
+# so we just XFAIL the test instead.
 run_ld_link_tests [list \
     [list \
 	"DT_TEXTREL map file warning" \
@@ -186,7 +191,7 @@ run_ld_link_tests [list \
 	 {{ld textrel.map}} \
 	"textrel.so" \
     ] \
-] "cris*-*-*"
+] "cris*-*-*" "mips*-*-*"
 
 # PR ld/20828 check for correct dynamic symbol table entries where:
 # - symbols have been defined with a linker script,
