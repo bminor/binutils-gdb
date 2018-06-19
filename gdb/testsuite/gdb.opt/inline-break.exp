@@ -231,4 +231,29 @@ foreach_with_prefix cmd [list "break" "tbreak"] {
     }
 }
 
+# func_extern_caller calls func_inline_caller which calls
+# func_inline_callee.  The latter two are both inline functions.  Test
+# that setting a breakpoint on each of the functions reports a stop at
+# that function.  This exercises the inline frame skipping logic.  If
+# we set a breakpoint at function A, we want to present the stop at A,
+# even if A's entry code is an inlined call to another inline function
+# B.
+
+foreach_with_prefix func {
+    "func_extern_caller"
+    "func_inline_caller"
+    "func_inline_callee"
+} {
+    clean_restart $binfile
+
+    if {![runto main]} {
+	untested "could not run to main"
+	continue
+    }
+
+    gdb_breakpoint $func
+    gdb_test "continue" "Breakpoint .* $func .*at .*$srcfile.*" \
+	"breakpoint hit presents stop at breakpointed function"
+}
+
 unset -nocomplain results

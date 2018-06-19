@@ -1,3 +1,12 @@
+2018-06-19  Pedro Alves  <palves@redhat.com>
+
+	* inline-frame.c (stopped_by_user_bp_inline_frame): Replace PC
+	parameter with a block parameter.  Compare location's block symbol
+	with the frame's block instead of addresses.
+	(skip_inline_frames): Pass the current block instead of the
+	frame's address.  Break out as soon as we determine the frame
+	should not be skipped.
+
 2018-06-18  Tom Tromey  <tom@tromey.com>
 
 	* solib-aix.c (solib_aix_get_section_offsets): Return

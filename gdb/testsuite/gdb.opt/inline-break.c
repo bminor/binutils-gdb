@@ -176,6 +176,38 @@ not_inline_func3 (int x)
   return y + inline_func3 (x);
 }
 
+/* The following three functions serve to exercise GDB's inline frame
+   skipping logic when setting a user breakpoint on an inline function
+   by name.  */
+
+/* A static inlined function that is called by another static inlined
+   function.  */
+
+static inline ATTR int
+func_inline_callee (int x)
+{
+  return x * 23;
+}
+
+/* A static inlined function that calls another static inlined
+   function.  The body of the function is as simple as possible so
+   that both functions are inlined to the same PC address.  */
+
+static inline ATTR int
+func_inline_caller (int x)
+{
+  return func_inline_callee (x);
+}
+
+/* An extern not-inline function that calls a static inlined
+   function.  */
+
+int
+func_extern_caller (int x)
+{
+  return func_inline_caller (x);
+}
+
 /* Entry point.  */
 
 int
@@ -204,6 +236,8 @@ main (int argc, char *argv[])
   x = func8a (x) + func8b (x);
 
   x = not_inline_func3 (-21);
+
+  func_extern_caller (1);
 
   return x;
 }

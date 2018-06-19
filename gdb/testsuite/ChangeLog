@@ -1,3 +1,11 @@
+2018-06-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.opt/inline-break.c (func_inline_callee, func_inline_caller)
+	(func_extern_caller): New.
+	(main): Call func_extern_caller.
+	* gdb.opt/inline-break.exp: Add tests for inline frame skipping
+	logic change.
+
 2018-06-18  Weimin Pan  <weimin.pan@oracle.com>
 
 	PR gdb/16841
