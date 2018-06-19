@@ -1,3 +1,16 @@
+2018-06-20  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	PR gas/23305
+	* config/tc-riscv.c (riscv_ip): Add format specifier 'B' for
+	constants and symbols.
+	* testsuite/gas/riscv/lla32.d: New file.
+	* testsuite/gas/riscv/lla32.s: Likewise.
+	* testsuite/gas/riscv/lla64-fail.d: Likewise.
+	* testsuite/gas/riscv/lla64-fail.l: Likewise.
+	* testsuite/gas/riscv/lla64-fail.s: Likewise.
+	* testsuite/gas/riscv/lla64.d: Likewise.
+	* testsuite/gas/riscv/lla64.s: Likewise.
+
 2018-06-19  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* Makefile.am (AUTOMAKE_OPTIONS): Remove 1.11, add subdir-objects.

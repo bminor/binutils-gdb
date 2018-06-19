@@ -278,8 +278,8 @@ const struct riscv_opcode riscv_opcodes[] =
    applied to an add instruction, for relaxation to use.  */
 {"add",       "I",   "d,s,t,0",MATCH_ADD, MASK_ADD, match_opcode, 0 },
 {"add",       "I",   "d,s,j",  MATCH_ADDI, MASK_ADDI, match_opcode, INSN_ALIAS },
-{"la",        "I",   "d,A",  0,    (int) M_LA,  match_never, INSN_MACRO },
-{"lla",       "I",   "d,A",  0,    (int) M_LLA,  match_never, INSN_MACRO },
+{"la",        "I",   "d,B",  0,    (int) M_LA,  match_never, INSN_MACRO },
+{"lla",       "I",   "d,B",  0,    (int) M_LLA,  match_never, INSN_MACRO },
 {"la.tls.gd", "I",   "d,A",  0,    (int) M_LA_TLS_GD,  match_never, INSN_MACRO },
 {"la.tls.ie", "I",   "d,A",  0,    (int) M_LA_TLS_IE,  match_never, INSN_MACRO },
 {"neg",       "I",   "d,t",  MATCH_SUB, MASK_SUB | MASK_RS1, match_opcode, INSN_ALIAS }, /* sub 0 */

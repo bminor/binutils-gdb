@@ -1,3 +1,9 @@
+2018-06-20  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	PR gas/23305
+	* riscv-opc.c (riscv_opcodes): Use new format specifier 'B' for
+	la and lla.
+
 2018-06-19  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* Makefile.am (AUTOMAKE_OPTIONS): Remove 1.11.

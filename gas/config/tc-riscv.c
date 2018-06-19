@@ -1935,6 +1935,17 @@ rvc_lui:
 	      s = expr_end;
 	      continue;
 
+	    case 'B':
+	      my_getExpression (imm_expr, s);
+	      normalize_constant_expr (imm_expr);
+	      /* The 'B' format specifier must be a symbol or a constant.  */
+	      if (imm_expr->X_op != O_symbol && imm_expr->X_op != O_constant)
+	        break;
+	      if (imm_expr->X_op == O_symbol)
+	        *imm_reloc = BFD_RELOC_32;
+	      s = expr_end;
+	      continue;
+
 	    case 'j': /* Sign-extended immediate.  */
 	      *imm_reloc = BFD_RELOC_RISCV_LO12_I;
 	      p = percent_op_itype;
