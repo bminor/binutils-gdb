@@ -1,3 +1,11 @@
+2018-06-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.am (AUTOMAKE_OPTIONS): Remove 1.11.
+	* configure.ac: Remove AC_PREREQ.
+	* Makefile.in: Re-generate.
+	* aclocal.m4: Re-generate.
+	* configure: Re-generate.
+
 2018-06-14  Faraz Shahbazker  <Faraz.Shahbazker@mips.com>
 
 	* mips-dis.c (mips_arch_choices): Add GINV to mips32r6 and

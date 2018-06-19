@@ -1,3 +1,22 @@
+2018-06-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* configure.ac: Remove AC_PREREQ.
+	* Makefile.am: Remove DISTCLEANFILES hack, rename ld.texinfo to
+	ld.texi, ldint.texinfo to ldint.texi throughout.
+	(AUTOMAKE_OPTIONS): Add info-in-builddir.
+	* README: Rename ld.texinfo to ld.texi, ldint.texinfo to
+	ldint.texi throughout.
+	* gen-doc.texi: Likewise.
+	* h8-doc.texi: Likewise.
+	* ld.texinfo: Rename to ...
+	* ld.texi: ... this.
+	* ldint.texinfo: Rename to ...
+	* ldint.texi: ... this.
+	* Makefile.in: Re-generate.
+	* aclocal.m4: Re-generate.
+	* config.in: Re-generate.
+	* configure: Re-generate.
+
 2018-06-18  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/lib/ld-lib.exp (check_ifunc_available): Pass without

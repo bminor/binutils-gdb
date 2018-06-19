@@ -67,8 +67,8 @@ GNULIB_COMMIT_SHA1="38237baf99386101934cd93278023aa4ae523ec0"
 
 # The expected version number for the various auto tools we will
 # use after the import.
-AUTOCONF_VERSION="2.64"
-AUTOMAKE_VERSION="1.11.1"
+AUTOCONF_VERSION="2.69"
+AUTOMAKE_VERSION="1.15.1"
 ACLOCAL_VERSION="$AUTOMAKE_VERSION"
 
 if [ $# -ne 1 ]; then

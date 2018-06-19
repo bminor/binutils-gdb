@@ -1,3 +1,20 @@
+2018-06-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/common-defs.h (PACKAGE_NAME, PACKAGE_VERSION,
+	PACKAGE_STRING, PACKAGE_TARNAME): Undefine.
+	* configure.ac: Remove AC_PREREQ, add missing quoting.
+	* gnulib/configure.ac: Modernize usage of
+	AC_INIT/AM_INIT_AUTOMAKE.  Remove AC_PREREQ.
+	* gnulib/update-gnulib.sh (AUTOCONF_VERSION): Bump to 2.69.
+	(AUTOMAKE_VERSION): Bump to 1.15.1.
+	* configure: Re-generate.
+	* config.in: Re-generate.
+	* aclocal.m4: Re-generate.
+	* gnulib/aclocal.m4: Re-generate.
+	* gnulib/config.in: Re-generate.
+	* gnulib/configure: Re-generate.
+	* gnulib/import/Makefile.in: Re-generate.
+
 2018-06-19  Pedro Alves  <palves@redhat.com>
 
 	* minsyms.c (msym_prefer_to_msym_type): New, factored out from ...

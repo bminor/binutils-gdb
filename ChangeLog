@@ -1,3 +1,12 @@
+2018-06-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* libtool.m4: Use AC_LANG_SOURCE.
+	* configure.ac: Remove AC_PREREQ, use AC_LANG_SOURCE.
+	* README-maintainer-mode: Update version requirements.
+	* ar-lib: New file.
+	* test-driver: New file.
+	* configure: Re-generate.
+
 2018-06-18  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* Makefile.def (fortran): Add check-target-libgomp-fortran.

@@ -1,3 +1,7 @@
+2018-06-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* override.m4 (_GCC_AUTOCONF_VERSION): Bump from 2.64 to 2.69.
+
 2018-06-18  Simon Marchi  <simon.marchi@ericsson.com>
 
 	Sync with GCC

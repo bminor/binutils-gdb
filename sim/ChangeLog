@@ -1,3 +1,8 @@
+2018-06-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* All configure.ac: Remove AC_PREREQ.
+	* All configure: Re-generate.
+
 2018-01-22  Maciej W. Rozycki  <macro@mips.com>
 
 	* MAINTAINERS: Update my company e-mail address.

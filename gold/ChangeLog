@@ -1,3 +1,12 @@
+2018-06-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* configure.ac: Remove AC_PREREQ, add missing quoting and usage
+	of AC_LANG_SOURCE.
+	* Makefile.in: Re-generate.
+	* aclocal.m4: Re-generate.
+	* configure: Re-generate.
+	* testsuite/Makefile.in: Re-generate.
+
 2018-05-10  Stephen Crane  <sjc@immunant.com>
 
 	* aarch64.cc (Target_aarch64::do_finalize_sections): Use size of

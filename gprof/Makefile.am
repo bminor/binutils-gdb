@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-AUTOMAKE_OPTIONS = 1.11 foreign no-dist no-texinfo.tex
+AUTOMAKE_OPTIONS = foreign no-dist no-texinfo.tex info-in-builddir
 ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
 TEXINFO_TEX = ../texinfo/texinfo.tex
 
@@ -103,10 +103,3 @@ gprof.1: $(srcdir)/gprof.texi config.texi
 	rm -f gprof.pod
 
 MAINTAINERCLEANFILES = gprof.info
-
-# Automake 1.9 will only build info files in the objdir if they are
-# mentioned in DISTCLEANFILES.  It doesn't have to be unconditional,
-# though, so we use a bogus condition.
-if GENINSRC_NEVER
-DISTCLEANFILES = gprof.info
-endif

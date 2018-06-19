@@ -1,3 +1,21 @@
+2018-06-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.am (AUTOMAKE_OPTIONS): Remove 1.11, add subdir-objects.
+	(TARG_CPU_O, OBJ_FORMAT_O, ATOF_TARG_O): Add config/ prefix.
+	* configure.ac (TARG_CPU_O, OBJ_FORMAT_O, ATOF_TARG_O, emfiles,
+	extra_objects): Add config/ prefix.
+	* doc/as.texinfo: Rename to...
+	* doc/as.texi: ... this.
+	* doc/Makefile.am: Rename as.texinfo to as.texi throughout.
+	Remove DISTCLEANFILES hack.
+	(AUTOMAKE_OPTIONS): Remove 1.8, cygnus, add no-texinfo.tex and
+	info-in-builddir.
+	* Makefile.in: Re-generate.
+	* aclocal.m4: Re-generate.
+	* config.in: Re-generate.
+	* configure: Re-generate.
+	* doc/Makefile.in: Re-generate.
+
 2018-06-14  Faraz Shahbazker  <Faraz.Shahbazker@mips.com>
 
 	* NEWS: Mention MIPS Global INValidate ASE support.

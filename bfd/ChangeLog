@@ -1,3 +1,20 @@
+2018-06-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.am (AUTOMAKE_OPTIONS): Remove 1.11.
+	(INCLUDES): Rename to ...
+	(AM_CPPFLAGS): ... this.
+	* configure.ac: Remove AC_PREREQ.
+	* doc/Makefile.am (AUTOMAKE_OPTIONS): Remove 1.9, cygnus, add
+	info-in-builddir no-texinfo.tex.
+	(info_TEXINFOS): Rename bfd.texinfo to bfd.texi.
+	* doc/bfd.texinfo: Rename to ...
+	* doc/bfd.texi: ... this.
+	* Makefile.in: Re-generate.
+	* aclocal.m4: Re-generate.
+	* config.in: Re-generate.
+	* configure: Re-generate.
+	* doc/Makefile.in: Re-generate.
+
 2018-06-18  Mephi  <mephi42@gmail.com>
 
 	PR 23297

@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-AUTOMAKE_OPTIONS = cygnus
+AUTOMAKE_OPTIONS = info-in-builddir no-texinfo.tex
 
 # What version of the manual you want; "all" includes everything
 CONFIG=all

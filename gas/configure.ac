@@ -20,7 +20,6 @@ dnl along with this program; see the file COPYING3.  If not see
 dnl <http://www.gnu.org/licenses/>.
 dnl
 dnl v2.5 needed for --bindir et al
-AC_PREREQ(2.59)
 m4_include([../bfd/version.m4])
 AC_INIT([gas], BFD_VERSION)
 AC_CONFIG_SRCDIR(as.h)
@@ -731,7 +730,7 @@ for em in . $emulations ; do
 	fmt=elf file=$em ;;
   esac
   formats="$formats $fmt"
-  emfiles="$emfiles e-$file.o"
+  emfiles="$emfiles config/e-$file.o"
   EMULATIONS="$EMULATIONS &$em,"
 done
 GAS_UNIQ(formats)
@@ -746,7 +745,7 @@ if test `set . $formats ; shift ; echo $#` -gt 1 ; then
       generic)	AC_DEFINE(OBJ_MAYBE_GENERIC, 1, [generic support?]) ;;
       som)	AC_DEFINE(OBJ_MAYBE_SOM, 1,     [SOM support?])     ;;
     esac
-    extra_objects="$extra_objects obj-$fmt.o"
+    extra_objects="$extra_objects config/obj-$fmt.o"
   done
   obj_format=multi
 fi

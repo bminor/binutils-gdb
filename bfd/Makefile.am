@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-AUTOMAKE_OPTIONS = 1.11 no-dist foreign
+AUTOMAKE_OPTIONS = no-dist foreign
 ACLOCAL_AMFLAGS = -I . -I .. -I ../config
 
 INCDIR = $(srcdir)/../include
@@ -657,7 +657,7 @@ BFD_MACHINES = @bfd_machines@
 TDEFAULTS = @tdefaults@
 HAVEVECS = @havevecs@
 
-INCLUDES = @HDEFINES@ @COREFLAG@ @TDEFINES@ $(CSEARCH) $(CSWITCHES) \
+AM_CPPFLAGS += @HDEFINES@ @COREFLAG@ @TDEFINES@ $(CSEARCH) $(CSWITCHES) \
 	$(HAVEVECS) @INCINTL@
 
 # C source files that correspond to .o's.

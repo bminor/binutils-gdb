@@ -1,3 +1,13 @@
+2018-06-19  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* configure.ac: Remove AC_PREREQ.
+	* Makefile.am: Remove DISTCLEANFILES hack.
+	(AUTOMAKE_OPTIONS): Remove 1.11, add info-in-builddir.
+	* Makefile.in: Re-generate.
+	* aclocal.m4: Re-generate.
+	* configure: Re-generate.
+	* gconfig.in: Re-generate.
+
 2018-06-05  Nick Clifton  <nickc@redhat.com>
 
 	* po/eo.po: Updated Esperanto translation.
