@@ -1,3 +1,11 @@
+2018-06-19  Andreas Schwab  <schwab@suse.de>
+
+	* readelf.c (is_16bit_abs_reloc): Handle R_RISCV_SET16.
+	(is_8bit_abs_reloc): New function.
+	(is_6bit_abs_reloc): New function.
+	(is_6bit_inplace_sub_reloc): New function.
+	(apply_relocations): Use them.  Handle 6-bit relocations.
+
 2018-06-14  Faraz Shahbazker  <Faraz.Shahbazker@mips.com>
 
 	* readelf.c (print_mips_ases): Add GINV extension.
