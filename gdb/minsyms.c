@@ -656,6 +656,27 @@ frob_address (struct objfile *objfile, CORE_ADDR *pc)
   return 0;
 }
 
+/* Helper for lookup_minimal_symbol_by_pc_section.  Convert a
+   lookup_msym_prefer to a minimal_symbol_type.  */
+
+static minimal_symbol_type
+msym_prefer_to_msym_type (lookup_msym_prefer prefer)
+{
+  switch (prefer)
+    {
+    case lookup_msym_prefer::TEXT:
+      return mst_text;
+    case lookup_msym_prefer::TRAMPOLINE:
+      return mst_solib_trampoline;
+    case lookup_msym_prefer::GNU_IFUNC:
+      return mst_text_gnu_ifunc;
+    }
+
+  /* Assert here instead of in a default switch case above so that
+     -Wswitch warns if a new enumerator is added.  */
+  gdb_assert_not_reached ("unhandled lookup_msym_prefer");
+}
+
 /* Search through the minimal symbol table for each objfile and find
    the symbol whose address is the largest address that is still less
    than or equal to PC, and matches SECTION (which is not NULL).
@@ -683,7 +704,6 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
   struct minimal_symbol *best_symbol = NULL;
   struct objfile *best_objfile = NULL;
   struct bound_minimal_symbol result;
-  enum minimal_symbol_type want_type;
 
   if (section == NULL)
     {
@@ -692,18 +712,7 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 	return {};
     }
 
-  switch (prefer)
-    {
-    case lookup_msym_prefer::TEXT:
-      want_type = mst_text;
-      break;
-    case lookup_msym_prefer::TRAMPOLINE:
-      want_type = mst_solib_trampoline;
-      break;
-    case lookup_msym_prefer::GNU_IFUNC:
-      want_type = mst_text_gnu_ifunc;
-      break;
-    }
+  minimal_symbol_type want_type = msym_prefer_to_msym_type (prefer);
 
   /* We can not require the symbol found to be in section, because
      e.g. IRIX 6.5 mdebug relies on this code returning an absolute

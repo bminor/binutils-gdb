@@ -1,5 +1,11 @@
 2018-06-19  Pedro Alves  <palves@redhat.com>
 
+	* minsyms.c (msym_prefer_to_msym_type): New, factored out from ...
+	(lookup_minimal_symbol_by_pc_section): ... here with
+	gdb_assert_not_reached added.
+
+2018-06-19  Pedro Alves  <palves@redhat.com>
+
 	* inline-frame.c (stopped_by_user_bp_inline_frame): Replace PC
 	parameter with a block parameter.  Compare location's block symbol
 	with the frame's block instead of addresses.
