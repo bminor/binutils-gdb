@@ -1,5 +1,22 @@
 2018-06-19  Maciej W. Rozycki  <macro@mips.com>
 
+	PR ld/22966
+	* testsuite/ld-mips-elf/n64-plt-1.dd: New test.
+	* testsuite/ld-mips-elf/n64-plt-1.gd: New test.
+	* testsuite/ld-mips-elf/n64-plt-2.ed: New test.
+	* testsuite/ld-mips-elf/n64-plt-3.ed: New test.
+	* testsuite/ld-mips-elf/n64-plt-4.dd: New test.
+	* testsuite/ld-mips-elf/n64-plt-4.gd: New test.
+	* testsuite/ld-mips-elf/n64-plt-1.ld: New test linker script.
+	* testsuite/ld-mips-elf/n64-plt-2.ld: New test linker script.
+	* testsuite/ld-mips-elf/n64-plt-3.ld: New test linker script.
+	* testsuite/ld-mips-elf/n64-plt-4.ld: New test linker script.
+	* testsuite/ld-mips-elf/n64-plt.s: New test source.
+	* testsuite/ld-mips-elf/n64-plt-lib.s: New test source.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
+2018-06-19  Maciej W. Rozycki  <macro@mips.com>
+
 	* testsuite/ld-elf/shared.exp: XFAIL DT_TEXTREL map file warning
 	test for `mips*-*-*'.
 

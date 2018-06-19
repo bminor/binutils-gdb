@@ -1167,6 +1167,50 @@ if { $linux_gnu } {
     }
 }
 
+# Verify graceful handling of n64 PLT 32-bit range overflows.  Given
+# that the alignment of `.got.plt' is 8 the highest usable positive
+# address is 0x7fff7ff8 and the lowest usable negative address is
+# 0xffffffff7fff8000.
+if { $linux_gnu } {
+    run_ld_link_tests [list \
+	[list "Shared library for MIPS n64 PLT 32-bit range tests" \
+	      "-shared $abi_ldflags(n64)" "" \
+	      "$abi_asflags(n64)" \
+	      { n64-plt-lib.s } \
+	      {} \
+	      "n64-plt-lib.so"] \
+	[list "MIPS n64 PLT 32-bit range test 1" \
+	      "$abi_ldflags(n64) -T n64-plt-1.ld -e foo" \
+	      "tmpdir/n64-plt-lib.so" \
+	      "$abi_asflags(n64)" \
+	      { n64-plt.s } \
+	      { { objdump -d n64-plt-1.dd } \
+		{ readelf -A n64-plt-1.gd } } \
+	      "n64-plt-1"] \
+	[list "MIPS n64 PLT 32-bit range test 2" \
+	      "$abi_ldflags(n64) -T n64-plt-2.ld -e foo" \
+	      "tmpdir/n64-plt-lib.so" \
+	      "$abi_asflags(n64)" \
+	      { n64-plt.s } \
+	      { { ld n64-plt-2.ed } } \
+	      "n64-plt-2"] \
+	[list "MIPS n64 PLT 32-bit range test 3" \
+	      "$abi_ldflags(n64) -T n64-plt-3.ld -e foo" \
+	      "tmpdir/n64-plt-lib.so" \
+	      "$abi_asflags(n64)" \
+	      { n64-plt.s } \
+	      { { ld n64-plt-3.ed } } \
+	      "n64-plt-3"] \
+	[list "MIPS n64 PLT 32-bit range test 4" \
+	      "$abi_ldflags(n64) -T n64-plt-4.ld -e foo" \
+	      "tmpdir/n64-plt-lib.so" \
+	      "$abi_asflags(n64)" \
+	      { n64-plt.s } \
+	      { { objdump -d n64-plt-4.dd } \
+		{ readelf -A n64-plt-4.gd } } \
+	      "n64-plt-4"]]
+}
+
 # PR ld/19908 export class tests.
 if { $linux_gnu } {
     run_ld_link_tests [list \

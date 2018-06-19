@@ -1,5 +1,14 @@
 2018-06-19  Maciej W. Rozycki  <macro@mips.com>
 
+	PR ld/22966
+	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_symbol): Verify the
+	`.got.plt' entry referred is in range.
+	(mips_finish_exec_plt): Correct the range check for `.got.plt'
+	start.  Replace the assertion used for that with a proper error
+	message.
+
+2018-06-19  Maciej W. Rozycki  <macro@mips.com>
+
 	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_symbol): Fix
 	formatting.
 

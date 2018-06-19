@@ -10602,6 +10602,22 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
       got_address_high = ((got_address + 0x8000) >> 16) & 0xffff;
       got_address_low = got_address & 0xffff;
 
+      /* The PLT sequence is not safe for N64 if .got.plt entry's address
+	 cannot be loaded in two instructions.  */
+      if (ABI_64_P (output_bfd)
+	  && ((got_address + 0x80008000) & ~(bfd_vma) 0xffffffff) != 0)
+	{
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("%pB: `%pA' entry VMA of %#" PRIx64 " outside the 32-bit range "
+	       "supported; consider using `-Ttext-segment=...'"),
+	     output_bfd,
+	     htab->root.sgotplt->output_section,
+	     (int64_t) got_address);
+	  bfd_set_error (bfd_error_no_error);
+	  return FALSE;
+	}
+
       /* Initially point the .got.plt entry at the PLT header.  */
       loc = (htab->root.sgotplt->contents
 	     + got_index * MIPS_ELF_GOT_SIZE (dynobj));
@@ -11246,8 +11262,19 @@ mips_finish_exec_plt (bfd *output_bfd, struct bfd_link_info *info)
 
   /* The PLT sequence is not safe for N64 if .got.plt's address can
      not be loaded in two instructions.  */
-  BFD_ASSERT ((gotplt_value & ~(bfd_vma) 0x7fffffff) == 0
-	      || ~(gotplt_value | 0x7fffffff) == 0);
+  if (ABI_64_P (output_bfd)
+      && ((gotplt_value + 0x80008000) & ~(bfd_vma) 0xffffffff) != 0)
+    {
+      _bfd_error_handler
+	/* xgettext:c-format */
+	(_("%pB: `%pA' start VMA of %#" PRIx64 " outside the 32-bit range "
+	   "supported; consider using `-Ttext-segment=...'"),
+	 output_bfd,
+	 htab->root.sgotplt->output_section,
+	 (int64_t) gotplt_value);
+      bfd_set_error (bfd_error_no_error);
+      return FALSE;
+    }
 
   /* Install the PLT header.  */
   loc = htab->root.splt->contents;
