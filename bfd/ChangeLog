@@ -1,3 +1,8 @@
+2018-06-19  Maciej W. Rozycki  <macro@mips.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_symbol): Fix
+	formatting.
+
 2018-06-19  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* Makefile.am (AUTOMAKE_OPTIONS): Remove 1.11.
