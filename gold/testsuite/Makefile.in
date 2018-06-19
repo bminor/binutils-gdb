@@ -3075,7 +3075,7 @@ TEST_AS = $(top_builddir)/../gas/as-new
 # .o's), but not all of them (such as .so's and .err files).  We
 # improve on that here.  automake-1.9 info docs say "mostlyclean" is
 # the right choice for files 'make' builds that people rebuild.
-MOSTLYCLEANFILES = *.so *.syms *.stdout $(am__append_4) \
+MOSTLYCLEANFILES = *.so *.syms *.stdout *.stderr $(am__append_4) \
 	$(am__append_17) $(am__append_21) $(am__append_31) \
 	$(am__append_34) $(am__append_37) $(am__append_41) \
 	$(am__append_47) $(am__append_51) $(am__append_52) \

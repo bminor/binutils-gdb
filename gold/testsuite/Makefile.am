@@ -81,7 +81,7 @@ endif
 # .o's), but not all of them (such as .so's and .err files).  We
 # improve on that here.  automake-1.9 info docs say "mostlyclean" is
 # the right choice for files 'make' builds that people rebuild.
-MOSTLYCLEANFILES = *.so *.syms *.stdout
+MOSTLYCLEANFILES = *.so *.syms *.stdout *.stderr
 
 # Export make variables to the shell scripts so that they can see
 # (for example) DEFAULT_TARGET.

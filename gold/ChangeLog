@@ -1,3 +1,8 @@
+2018-06-19  Cary Coutant  <ccoutant@gmail.com>
+
+	* testsuite/Makefile.am (MOSTLYCLEANFILES): Add *.stderr.
+	* testsuite/Makefile.in: Regenerate.
+
 2018-06-19  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* configure.ac: Remove AC_PREREQ, add missing quoting and usage
