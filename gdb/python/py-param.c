@@ -465,8 +465,9 @@ get_show_value (struct ui_file *file, int from_tty,
    function.  */
 static void
 add_setshow_generic (int parmclass, enum command_class cmdclass,
-		     char *cmd_name, parmpy_object *self,
-		     char *set_doc, char *show_doc, char *help_doc,
+		     const char *cmd_name, parmpy_object *self,
+		     const char *set_doc, const char *show_doc,
+		     const char *help_doc,
 		     struct cmd_list_element **set_list,
 		     struct cmd_list_element **show_list)
 {
@@ -662,7 +663,7 @@ parmpy_init (PyObject *self, PyObject *args, PyObject *kwds)
 {
   parmpy_object *obj = (parmpy_object *) self;
   const char *name;
-  char *set_doc, *show_doc, *doc;
+  gdb::unique_xmalloc_ptr<char> set_doc, show_doc, doc;
   char *cmd_name;
   int parmclass, cmdtype;
   PyObject *enum_values = NULL;
@@ -723,9 +724,9 @@ parmpy_init (PyObject *self, PyObject *args, PyObject *kwds)
   if (! cmd_name)
     return -1;
 
-  set_doc = get_doc_string (self, set_doc_cst).release ();
-  show_doc = get_doc_string (self, show_doc_cst).release ();
-  doc = get_doc_string (self, gdbpy_doc_cst).release ();
+  set_doc = get_doc_string (self, set_doc_cst);
+  show_doc = get_doc_string (self, show_doc_cst);
+  doc = get_doc_string (self, gdbpy_doc_cst);
 
   Py_INCREF (self);
 
@@ -733,15 +734,12 @@ parmpy_init (PyObject *self, PyObject *args, PyObject *kwds)
     {
       add_setshow_generic (parmclass, (enum command_class) cmdtype,
 			   cmd_name, obj,
-			   set_doc, show_doc,
-			   doc, set_list, show_list);
+			   set_doc.get (), show_doc.get (),
+			   doc.get (), set_list, show_list);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
       xfree (cmd_name);
-      xfree (set_doc);
-      xfree (show_doc);
-      xfree (doc);
       Py_DECREF (self);
       PyErr_Format (except.reason == RETURN_QUIT
 		    ? PyExc_KeyboardInterrupt : PyExc_RuntimeError,

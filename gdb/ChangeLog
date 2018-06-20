@@ -1,3 +1,8 @@
+2018-06-20  Tom Tromey  <tom@tromey.com>
+
+	* python/py-param.c (add_setshow_generic): Make parameters const.
+	(parmpy_init): Update.
+
 2018-06-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* regcache.h (regcache_cooked_read_ftype): Rename to...
