@@ -253,8 +253,11 @@ public:
   struct value *cooked_read_value (int regnum);
 
 protected:
-  enum register_status read_part (int regnum, int offset, int len, void *in,
-				  bool is_raw);
+
+  /* Perform a partial register transfer using a read, modify, write
+     operation.  Will fail if register is currently invalid.  */
+  enum register_status read_part (int regnum, int offset, int len,
+				  gdb_byte *out, bool is_raw);
 };
 
 /* Buffer of registers, can be read and written.  */
@@ -355,9 +358,10 @@ private:
 			int regnum, const void *in_buf,
 			void *out_buf, size_t size) const;
 
+  /* Perform a partial register transfer using a read, modify, write
+     operation.  */
   enum register_status write_part (int regnum, int offset, int len,
-				   const void *out, bool is_raw);
-
+				   const gdb_byte *in, bool is_raw);
 
   /* The address space of this register cache (for registers where it
      makes sense, like PC or SP).  */

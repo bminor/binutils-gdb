@@ -1,3 +1,13 @@
+2018-06-21  Alan Hayward  <alan.hayward@arm.com>
+
+        * regcache.c (readable_regcache::read_part): Avoid memcpy when
+        possible.
+        (regcache::write_part): Likewise.
+        (readable_regcache::cooked_read_part): Update comment.
+        (readable_regcache::cooked_write_part): Likewise.
+        * regcache.h: (readable_regcache::read_part): Likewise.
+        (regcache::write_part): Likewise.
+
 2018-06-21  Richard Bunt  <richard.bunt@arm.com>
 	    Dirk Schubert  <dirk.schubert@arm.com>
 
