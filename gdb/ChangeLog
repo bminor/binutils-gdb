@@ -1,5 +1,22 @@
 2018-06-22  Alan Hayward  <alan.hayward@arm.com>
 
+	* regcache.c (readable_regcache::read_part): Fix asserts.
+	(reg_buffer::raw_collect_part): New function.
+	(regcache::write_part): Fix asserts.
+	(reg_buffer::raw_supply_part): New function.
+	(regcache::transfer_regset_register): New helper function.
+	(regcache::transfer_regset): Call new functions.
+	(regcache_supply_regset): Use gdb_byte*.
+	(regcache::supply_regset): Likewise.
+	(regcache_collect_regset): Likewise.
+	(regcache::collect_regset): Likewise.
+	* regcache.h (reg_buffer::raw_collect_part): New declaration.
+	(reg_buffer::raw_supply_part): Likewise.
+	(regcache::transfer_regset_register): Likewise.
+	(regcache::transfer_regset): Use gdb_byte*.
+
+2018-06-22  Alan Hayward  <alan.hayward@arm.com>
+
 	* nat/aarch64-sve-linux-ptrace.h (HAS_SVE_STATE): Use &.
 
 2018-06-21  Pedro Alves  <palves@redhat.com>

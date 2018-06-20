@@ -166,6 +166,10 @@ public:
   void raw_collect_integer (int regnum, gdb_byte *addr, int addr_len,
 			    bool is_signed) const;
 
+  /* Collect register REGNUM from REGCACHE, starting at OFFSET in register,
+     reading only LEN.  */
+  void raw_collect_part (int regnum, int offset, int len, gdb_byte *out) const;
+
   /* See common/common-regcache.h.  */
   void raw_supply (int regnum, const void *buf) override;
 
@@ -186,6 +190,10 @@ public:
      as calling raw_supply with NULL (which will set the state to
      unavailable).  */
   void raw_supply_zeroed (int regnum);
+
+  /* Supply register REGNUM to REGCACHE, starting at OFFSET in register, writing
+     only LEN, without editing the rest of the register.  */
+  void raw_supply_part (int regnum, int offset, int len, const gdb_byte *in);
 
   void invalidate (int regnum);
 
@@ -358,10 +366,18 @@ protected:
 
 private:
 
+  /* Helper function for transfer_regset.  Copies across a single register.  */
+  void transfer_regset_register (struct regcache *out_regcache, int regnum,
+				 const gdb_byte *in_buf, gdb_byte *out_buf,
+				 int slot_size, int offs) const;
+
+  /* Transfer a single or all registers belonging to a certain register
+     set to or from a buffer.  This is the main worker function for
+     regcache_supply_regset and regcache_collect_regset.  */
   void transfer_regset (const struct regset *regset,
 			struct regcache *out_regcache,
-			int regnum, const void *in_buf,
-			void *out_buf, size_t size) const;
+			int regnum, const gdb_byte *in_buf,
+			gdb_byte *out_buf, size_t size) const;
 
   /* Perform a partial register transfer using a read, modify, write
      operation.  */
