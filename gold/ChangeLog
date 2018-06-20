@@ -4,7 +4,7 @@
 	* configure.ac: Replace manual thread configuration with AX_PTHREAD.
 	Add --enable-threads=auto.
 	* Makefile.am (THREADFLAGS, THREADLIBS): New defines.
-	(AM_CFLAGS, AM_CXXFLAGS): Add $(THREADFLAGS.
+	(AM_CFLAGS, AM_CXXFLAGS): Add $(THREADFLAGS).
 	(THREADSLIB): Remove; change all references to THREADLIBS.
 	* Makefile.in: Regenerate.
 	* aclocal.m4: Regenerate.
