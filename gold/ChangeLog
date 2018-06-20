@@ -1,3 +1,18 @@
+2018-06-20  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/23268
+	* dynobj.cc (Versions::Versions): Change init for needs_base_version_.
+	(Versions::record_version): Add verdefs for both shared objects and
+	executables.
+	(Versions::add_def): Likewise for base version.
+	(Versions::add_need): Don't add base version for executables.
+	(Versions::version_index): Look up version for both shared objects and
+	executables.
+	* testsuite/Makefile.am (ver_test_14): New test case.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/ver_test_14.script: New version script.
+	* testsuite/ver_test_14.sh: New test script.
+
 2018-06-19  Joshua Watt  <jpewhacker@gmail.com>
 	    Cary Coutant  <ccoutant@gmail.com>
 

@@ -1873,6 +1873,13 @@ ver_test_13.so: gcctestdir/ld ver_test_13.o ver_test_13.script
 ver_test_13.o: ver_test_13.c
 	$(COMPILE) -c -fpic -o $@ $<
 
+check_SCRIPTS += ver_test_14.sh
+check_DATA += ver_test_14.syms
+ver_test_14.syms: ver_test_14
+	$(TEST_OBJDUMP) -T $< | $(TEST_CXXFILT) >$@
+ver_test_14: gcctestdir/ld ver_test_main.o ver_test_1.so ver_test_2.so ver_test_4.so ver_test_14.script
+	$(CXXLINK) -Bgcctestdir/ -Wl,--version-script,$(srcdir)/ver_test_14.script -Wl,-E -Wl,-R,. ver_test_main.o ver_test_1.so ver_test_2.so ver_test_4.so
+
 check_PROGRAMS += protected_1
 protected_1_SOURCES = \
 	protected_main_1.cc protected_main_2.cc protected_main_3.cc

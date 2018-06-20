@@ -479,7 +479,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_4.sh ver_test_5.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_7.sh ver_test_8.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_10.sh ver_test_13.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	relro_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_14.sh relro_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4.sh \
@@ -533,7 +533,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_7.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_8_2.so.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_10.syms \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_13.syms protected_3.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_13.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_14.syms protected_3.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	relro_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.stdout \
@@ -5794,6 +5795,13 @@ ver_test_13.sh.log: ver_test_13.sh
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+ver_test_14.sh.log: ver_test_14.sh
+	@p='ver_test_14.sh'; \
+	b='ver_test_14.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 relro_test.sh.log: relro_test.sh
 	@p='relro_test.sh'; \
 	b='relro_test.sh'; \
@@ -8700,6 +8708,10 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_13.script ver_test_13.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_13.o: ver_test_13.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_14.syms: ver_test_14
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_OBJDUMP) -T $< | $(TEST_CXXFILT) >$@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_14: gcctestdir/ld ver_test_main.o ver_test_1.so ver_test_2.so ver_test_4.so ver_test_14.script
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--version-script,$(srcdir)/ver_test_14.script -Wl,-E -Wl,-R,. ver_test_main.o ver_test_1.so ver_test_2.so ver_test_4.so
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@protected_1.so: gcctestdir/ld protected_1_pic.o protected_2_pic.o protected_3_pic.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared protected_1_pic.o protected_2_pic.o protected_3_pic.o
