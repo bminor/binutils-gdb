@@ -125,9 +125,8 @@ extern struct type *register_type (struct gdbarch *gdbarch, int regnum);
    
 extern int register_size (struct gdbarch *gdbarch, int regnum);
 
-typedef enum register_status (regcache_cooked_read_ftype) (void *src,
-							   int regnum,
-							   gdb_byte *buf);
+typedef gdb::function_view<register_status (int regnum, gdb_byte *buf)>
+  register_read_ftype;
 
 /* A (register_number, register_value) pair.  */
 
@@ -202,7 +201,7 @@ protected:
   /* Save a register cache.  The set of registers saved into the
      regcache determined by the save_reggroup.  COOKED_READ returns
      zero iff the register's value can't be returned.  */
-  void save (regcache_cooked_read_ftype *cooked_read, void *src);
+  void save (register_read_ftype cooked_read);
 
   struct regcache_descr *m_descr;
 
@@ -379,16 +378,14 @@ private:
 class readonly_detached_regcache : public readable_regcache
 {
 public:
-  readonly_detached_regcache (const regcache &src);
+  readonly_detached_regcache (regcache &src);
 
   /* Create a readonly regcache by getting contents from COOKED_READ.  */
 
-  readonly_detached_regcache (gdbarch *gdbarch,
-			      regcache_cooked_read_ftype *cooked_read,
-			      void *src)
+  readonly_detached_regcache (gdbarch *gdbarch, register_read_ftype cooked_read)
     : readable_regcache (gdbarch, true)
   {
-    save (cooked_read, src);
+    save (cooked_read);
   }
 
   DISABLE_COPY_AND_ASSIGN (readonly_detached_regcache);

@@ -1024,21 +1024,19 @@ get_frame_func (struct frame_info *this_frame)
   return pc;
 }
 
-static enum register_status
-do_frame_register_read (void *src, int regnum, gdb_byte *buf)
-{
-  if (!deprecated_frame_register_read ((struct frame_info *) src, regnum, buf))
-    return REG_UNAVAILABLE;
-  else
-    return REG_VALID;
-}
-
 std::unique_ptr<readonly_detached_regcache>
 frame_save_as_regcache (struct frame_info *this_frame)
 {
+  auto cooked_read = [this_frame] (int regnum, gdb_byte *buf)
+    {
+      if (!deprecated_frame_register_read (this_frame, regnum, buf))
+	return REG_UNAVAILABLE;
+      else
+	return REG_VALID;
+    };
+
   std::unique_ptr<readonly_detached_regcache> regcache
-    (new readonly_detached_regcache (get_frame_arch (this_frame),
-				     do_frame_register_read, this_frame));
+    (new readonly_detached_regcache (get_frame_arch (this_frame), cooked_read));
 
   return regcache;
 }

@@ -1371,9 +1371,8 @@ struct ppu2spu_data
 };
 
 static enum register_status
-ppu2spu_unwind_register (void *src, int regnum, gdb_byte *buf)
+ppu2spu_unwind_register (ppu2spu_data *data, int regnum, gdb_byte *buf)
 {
-  struct ppu2spu_data *data = (struct ppu2spu_data *) src;
   enum bfd_endian byte_order = gdbarch_byte_order (data->gdbarch);
 
   if (regnum >= 0 && regnum < SPU_NUM_GPRS)
@@ -1435,12 +1434,14 @@ ppu2spu_sniffer (const struct frame_unwind *self,
 		       data.gprs, 0, sizeof data.gprs)
 	  == sizeof data.gprs)
 	{
+	  auto cooked_read = [&data] (int regnum, gdb_byte *buf)
+	    {
+	      return ppu2spu_unwind_register (&data, regnum, buf);
+	    };
 	  struct ppu2spu_cache *cache
 	    = FRAME_OBSTACK_CALLOC (1, struct ppu2spu_cache);
 	  std::unique_ptr<readonly_detached_regcache> regcache
-	    (new readonly_detached_regcache (data.gdbarch,
-					     ppu2spu_unwind_register,
-					     &data));
+	    (new readonly_detached_regcache (data.gdbarch, cooked_read));
 
 	  cache->frame_id = frame_id_build (base, func);
 	  cache->regcache = regcache.release ();

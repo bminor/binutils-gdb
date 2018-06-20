@@ -205,16 +205,12 @@ regcache::regcache (gdbarch *gdbarch, const address_space *aspace_)
   m_ptid = minus_one_ptid;
 }
 
-static enum register_status
-do_cooked_read (void *src, int regnum, gdb_byte *buf)
-{
-  struct regcache *regcache = (struct regcache *) src;
-
-  return regcache->cooked_read (regnum, buf);
-}
-
-readonly_detached_regcache::readonly_detached_regcache (const regcache &src)
-  : readonly_detached_regcache (src.arch (), do_cooked_read, (void *) &src)
+readonly_detached_regcache::readonly_detached_regcache (regcache &src)
+  : readonly_detached_regcache (src.arch (),
+				[&src] (int regnum, gdb_byte *buf)
+				  {
+				    return src.cooked_read (regnum, buf);
+				  })
 {
 }
 
@@ -264,8 +260,7 @@ reg_buffer::register_buffer (int regnum) const
 }
 
 void
-reg_buffer::save (regcache_cooked_read_ftype *cooked_read,
-		  void *src)
+reg_buffer::save (register_read_ftype cooked_read)
 {
   struct gdbarch *gdbarch = m_descr->gdbarch;
   int regnum;
@@ -284,7 +279,7 @@ reg_buffer::save (regcache_cooked_read_ftype *cooked_read,
       if (gdbarch_register_reggroup_p (gdbarch, regnum, save_reggroup))
 	{
 	  gdb_byte *dst_buf = register_buffer (regnum);
-	  enum register_status status = cooked_read (src, regnum, dst_buf);
+	  enum register_status status = cooked_read (regnum, dst_buf);
 
 	  gdb_assert (status != REG_UNKNOWN);
 

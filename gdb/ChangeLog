@@ -1,5 +1,23 @@
 2018-06-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* regcache.h (regcache_cooked_read_ftype): Rename to...
+	(register_read_ftype): ...this, change type to function_view.
+	(class reg_buffer) <save>: Remove src parameter.
+	(readonly_detached_regcache) <readonly_detached_regcache>: Make
+	parameter non-const in first overload.  Remove src parameter in
+	second overload.
+	* regcache.c (do_cooked_read): Remove.
+	(readonly_detached_regcache::readonly_detached_regcache): Make
+	parameter non-const, adjust call to other constructor.
+	(reg_buffer::save): Remove src parameter.
+	* frame.c (do_frame_register_read): Remove.
+	(frame_save_as_regcache): Use lambda function.
+	* ppc-linux-tdep.c (ppu2spu_unwind_register): Change type of src
+	parameter to ppu2spu_data *.
+	(ppu2spu_sniffer): Use lambda function.
+
+2018-06-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* record-full.c (record_full_target::insert_breakpoint): Remove
 	"struct" keyword, add const.
 
