@@ -75,5 +75,19 @@ gdb_test "print ld" ".* = 10\\.375.*" "the value of ld is changed to 10.375"
 gdb_test "print f128" ".* = 20\\.375.*" "the value of f128 is changed to 20.375"
 
 # Test that we can correctly handle the largest IEEE-128 value
-gdb_test "print large128" ".* = 1\\.18973149535723176508575932662800702e\\+4932" "print large128"
+# Note: If we get "inf" instead of the correct result, we may have run into
+# an internal overflow.  This typically happens on host platforms without
+# native IEEE-128 support where GDB was built without MPFR support.
+set test "print large128"
+gdb_test_multiple "print large128" "$test" {
+    -re ".* = 1\\.18973149535723176508575932662800702e\\+4932.*$gdb_prompt $" {
+	pass "$test"
+    }
+    -re ".* = inf.*$gdb_prompt $" {
+	fail "$test (GDB may be missing MPFR support!)"
+    }
+    -re ".*$gdb_prompt $" {
+	fail "$test"
+    }
+}
 
