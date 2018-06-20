@@ -1,3 +1,17 @@
+2018-06-20  Nick Clifton  <nickc@redhat.com>
+
+	PR 23299
+	* mach-o.c (cputype): New function.
+	(cpusubtype): New function.
+	(bfd_mach_o_bfd_print_private_data): New function.  Dispalys the
+	values in the MACH-O file header.
+	(bfd_mach_o_bfd_copy_private_header_data): Copy the cputype and
+	cpusubtype fields from the input bfd's mach-o header to the output
+	bfd.
+	* mach-o-target.c (bfd_mach_o_bfd_print_private_bfd_data):
+	Redefine to bfd_mach_o_bfd_print_private_data.
+	* mach-o.h (bfd_mach_o_bfd_print_private_bfd_data): Prototype.
+
 2018-06-19  Maciej W. Rozycki  <macro@mips.com>
 
 	PR ld/22966

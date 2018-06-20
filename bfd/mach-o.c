@@ -592,6 +592,124 @@ bfd_mach_o_bfd_copy_private_section_data (bfd *ibfd, asection *isection,
   return TRUE;
 }
 
+static const char *
+cputype (unsigned long value)
+{
+  switch (value)
+    {
+    case BFD_MACH_O_CPU_TYPE_VAX: return "VAX";
+    case BFD_MACH_O_CPU_TYPE_MC680x0: return "MC68k";
+    case BFD_MACH_O_CPU_TYPE_I386: return "I386";
+    case BFD_MACH_O_CPU_TYPE_MIPS: return "MIPS";
+    case BFD_MACH_O_CPU_TYPE_MC98000: return "MC98k";
+    case BFD_MACH_O_CPU_TYPE_HPPA: return "HPPA";
+    case BFD_MACH_O_CPU_TYPE_ARM: return "ARM";
+    case BFD_MACH_O_CPU_TYPE_MC88000: return "MC88K";
+    case BFD_MACH_O_CPU_TYPE_SPARC: return "SPARC";
+    case BFD_MACH_O_CPU_TYPE_I860: return "I860";
+    case BFD_MACH_O_CPU_TYPE_ALPHA: return "ALPHA";
+    case BFD_MACH_O_CPU_TYPE_POWERPC: return "PPC";
+    case BFD_MACH_O_CPU_TYPE_POWERPC_64: return "PPC64";
+    case BFD_MACH_O_CPU_TYPE_X86_64: return "X86_64";
+    case BFD_MACH_O_CPU_TYPE_ARM64: return "ARM64";
+    default: return _("<unknown>");
+    }
+}
+
+static const char *
+cpusubtype (unsigned long cputype, unsigned long cpusubtype)
+{
+  static char buffer[128];
+
+  buffer[0] = 0;
+  switch (cpusubtype & BFD_MACH_O_CPU_SUBTYPE_MASK)
+    {
+    case 0:
+      break;
+    case BFD_MACH_O_CPU_SUBTYPE_LIB64:
+      sprintf (buffer, " (LIB64)"); break;
+    default:
+      sprintf (buffer, _("<unknown mask flags>")); break;
+    }
+
+  cpusubtype &= ~ BFD_MACH_O_CPU_SUBTYPE_MASK;
+
+  switch (cputype)
+    {
+    case BFD_MACH_O_CPU_TYPE_X86_64:
+    case BFD_MACH_O_CPU_TYPE_I386:
+      switch (cpusubtype)
+	{
+	case BFD_MACH_O_CPU_SUBTYPE_X86_ALL:
+	  return strcat (buffer, " (X86_ALL)");
+	default:
+	  break;
+	}
+      break;
+	
+    case BFD_MACH_O_CPU_TYPE_ARM:
+      switch (cpusubtype)
+	{
+	case BFD_MACH_O_CPU_SUBTYPE_ARM_ALL:
+	  return strcat (buffer, " (ARM_ALL)");
+	case BFD_MACH_O_CPU_SUBTYPE_ARM_V4T:
+	  return strcat (buffer, " (ARM_V4T)");
+	case BFD_MACH_O_CPU_SUBTYPE_ARM_V6:
+	  return strcat (buffer, " (ARM_V6)");
+	case BFD_MACH_O_CPU_SUBTYPE_ARM_V5TEJ:
+	  return strcat (buffer, " (ARM_V5TEJ)");
+	case BFD_MACH_O_CPU_SUBTYPE_ARM_XSCALE:
+	  return strcat (buffer, " (ARM_XSCALE)");
+	case BFD_MACH_O_CPU_SUBTYPE_ARM_V7:
+	  return strcat (buffer, " (ARM_V7)");
+	default:
+	  break;
+	}
+      break;
+      
+    case BFD_MACH_O_CPU_TYPE_ARM64:
+      switch (cpusubtype)
+	{
+	case BFD_MACH_O_CPU_SUBTYPE_ARM64_ALL:
+	  return strcat (buffer, " (ARM64_ALL)");
+	case BFD_MACH_O_CPU_SUBTYPE_ARM64_V8:
+	  return strcat (buffer, " (ARM64_V8)");
+	default:
+	  break;
+	}
+      break;
+
+    default:
+      break;
+    }
+
+  if (cpusubtype != 0)
+    return strcat (buffer, _(" (<unknown>)"));
+
+  return buffer;
+}
+
+bfd_boolean
+bfd_mach_o_bfd_print_private_bfd_data (bfd *abfd, void *ptr)
+{
+  FILE * file = (FILE *) ptr;
+  bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
+
+  fprintf (file, _(" MACH-O header:\n"));
+  fprintf (file, _("   magic:      %#lx\n"), (long) mdata->header.magic);
+  fprintf (file, _("   cputype:    %#lx (%s)\n"), (long) mdata->header.cputype,
+	   cputype (mdata->header.cputype));
+  fprintf (file, _("   cpusubtype: %#lx%s\n"), (long) mdata->header.cpusubtype,
+	   cpusubtype (mdata->header.cputype, mdata->header.cpusubtype));
+  fprintf (file, _("   filetype:   %#lx\n"), (long) mdata->header.filetype);
+  fprintf (file, _("   ncmds:      %#lx\n"), (long) mdata->header.ncmds);
+  fprintf (file, _("   sizeocmds:  %#lx\n"), (long) mdata->header.sizeofcmds);
+  fprintf (file, _("   flags:      %#lx\n"), (long) mdata->header.flags);
+  fprintf (file, _("   version:    %x\n"), mdata->header.version);
+  
+  return TRUE;
+}
+
 /* Copy any private info we understand from the input bfd
    to the output bfd.  */
 
@@ -615,6 +733,21 @@ bfd_mach_o_bfd_copy_private_header_data (bfd *ibfd, bfd *obfd)
   /* Copy header flags.  */
   omdata->header.flags = imdata->header.flags;
 
+  /* PR 23299.  Copy the cputype.  */
+  if (imdata->header.cputype != omdata->header.cputype)
+    {
+      if (omdata->header.cputype == 0)
+	omdata->header.cputype = imdata->header.cputype;
+      else if (imdata->header.cputype != 0)
+	/* Urg - what has happened ?  */
+	_bfd_error_handler (_("incompatible cputypes in mach-o files: %ld vs %ld"),
+			    (long) imdata->header.cputype,
+			    (long) omdata->header.cputype);
+    }
+
+  /* Copy the cpusubtype.  */
+  omdata->header.cpusubtype = imdata->header.cpusubtype;
+    
   /* Copy commands.  */
   for (icmd = imdata->first_command; icmd != NULL; icmd = icmd->next)
     {
@@ -1295,7 +1428,7 @@ bfd_mach_o_get_reloc_upper_bound (bfd *abfd ATTRIBUTE_UNUSED,
 
 void
 bfd_mach_o_swap_in_non_scattered_reloc (bfd *abfd, bfd_mach_o_reloc_info *rel,
-				       unsigned char *fields)
+					unsigned char *fields)
 {
   unsigned char info = fields[3];
 
@@ -1611,7 +1744,7 @@ bfd_mach_o_canonicalize_dynamic_reloc (bfd *abfd, arelent **rels,
 
 static void
 bfd_mach_o_swap_out_non_scattered_reloc (bfd *abfd, unsigned char *fields,
-				       bfd_mach_o_reloc_info *rel)
+					 bfd_mach_o_reloc_info *rel)
 {
   unsigned char info = 0;
 
@@ -5830,7 +5963,8 @@ bfd_mach_o_close_and_cleanup (bfd *abfd)
   return _bfd_generic_close_and_cleanup (abfd);
 }
 
-bfd_boolean bfd_mach_o_free_cached_info (bfd *abfd)
+bfd_boolean
+bfd_mach_o_free_cached_info (bfd *abfd)
 {
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
   asection *asect;
