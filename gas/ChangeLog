@@ -1,3 +1,17 @@
+2018-06-20  Nick Clifton  <nickc@redhat.com>
+
+	PR 21458
+	* tc-arm.c (do_adr): Only set the bottom bit of an imported thumb
+	function symbol address if -mthumb-interwork is active.
+	(do_adrl): Likewise.
+	* doc/c-arm.texi: Update descriptions of the -mthumb-interwork
+	option and the ADR and ADRL pseudo-ops.
+	* NEWS: Mention the new behaviour of the ADR and ADRL pseudo-ops.
+	* testsuite/gas/arm/pr21458.d: Add -mthumb-interwork option to
+	assembler command line.
+	* testsuite/gas/arm/adr.d: Likewise.
+	* testsuite/gas/arm/adrl.d: Likewise.
+
 2018-06-20  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	PR gas/23305

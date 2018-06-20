@@ -8419,11 +8419,12 @@ do_adr (void)
   inst.reloc.pc_rel = 1;
   inst.reloc.exp.X_add_number -= 8;
 
-  if (inst.reloc.exp.X_op == O_symbol
+  if (support_interwork
+      && inst.reloc.exp.X_op == O_symbol
       && inst.reloc.exp.X_add_symbol != NULL
       && S_IS_DEFINED (inst.reloc.exp.X_add_symbol)
       && THUMB_IS_FUNC (inst.reloc.exp.X_add_symbol))
-    inst.reloc.exp.X_add_number += 1;
+    inst.reloc.exp.X_add_number |= 1;
 }
 
 /* This is a pseudo-op of the form "adrl rd, label" to be converted
@@ -8443,11 +8444,12 @@ do_adrl (void)
   inst.size		       = INSN_SIZE * 2;
   inst.reloc.exp.X_add_number -= 8;
 
-  if (inst.reloc.exp.X_op == O_symbol
+  if (support_interwork
+      && inst.reloc.exp.X_op == O_symbol
       && inst.reloc.exp.X_add_symbol != NULL
       && S_IS_DEFINED (inst.reloc.exp.X_add_symbol)
       && THUMB_IS_FUNC (inst.reloc.exp.X_add_symbol))
-    inst.reloc.exp.X_add_number += 1;
+    inst.reloc.exp.X_add_number |= 1;
 }
 
 static void
