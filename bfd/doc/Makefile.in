@@ -393,7 +393,7 @@ top_srcdir = @top_srcdir@
 wordsize = @wordsize@
 zlibdir = @zlibdir@
 zlibinc = @zlibinc@
-AUTOMAKE_OPTIONS = 1.9 info-in-builddir no-texinfo.tex
+AUTOMAKE_OPTIONS = info-in-builddir no-texinfo.tex foreign
 DOCFILES = aoutx.texi  archive.texi archures.texi \
 	bfdt.texi  cache.texi coffcode.texi \
 	core.texi elf.texi elfcode.texi  format.texi \
@@ -510,9 +510,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu doc/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign doc/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu doc/Makefile
+	  $(AUTOMAKE) --foreign doc/Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \

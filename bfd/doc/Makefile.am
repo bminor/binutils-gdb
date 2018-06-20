@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-AUTOMAKE_OPTIONS = info-in-builddir no-texinfo.tex
+AUTOMAKE_OPTIONS = info-in-builddir no-texinfo.tex foreign
 
 DOCFILES = aoutx.texi  archive.texi archures.texi \
 	bfdt.texi  cache.texi coffcode.texi \

@@ -1,3 +1,8 @@
+2018-06-21  Alan Modra  <amodra@gmail.com>
+
+	* doc/Makefile.am (AUTOMAKE_OPTIONS): Add "foreign".
+	* doc/Makefile.in: Regenerate.
+
 2018-06-20  Renlin Li  <renlin.li@arm.com>
 
 	* elfxx-aarch64.c (_bfd_aarch64_elf_resolve_relocation): Use PG_OFFSET

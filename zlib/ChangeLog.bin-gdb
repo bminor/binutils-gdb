@@ -1,3 +1,7 @@
+2018-06-21  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.in: Regenerate.
+
 2018-06-18  Simon Marchi  <simon.marchi@ericsson.com>
 
 	Sync with FSF GCC sources.
