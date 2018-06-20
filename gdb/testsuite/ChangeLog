@@ -1,3 +1,10 @@
+2018-06-20  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* boards/cc-with-tweaks.exp: Don't call cc-with-tweaks.sh
+	through /bin/sh.
+	* boards/dwarf4-gdb-index.exp: Likewise.
+	* boards/fission-dwp.exp: Likewise.
+
 2018-06-20  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdb.base/float128.exp: Add comment and improved fail message

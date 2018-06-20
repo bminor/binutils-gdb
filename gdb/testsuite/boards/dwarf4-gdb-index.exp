@@ -36,8 +36,8 @@ set contrib_dir [file normalize $srcdir/../contrib]
 if ![info exists CC_FOR_TARGET] {
     set CC_FOR_TARGET "$found_gcc"
 }
-set CC_FOR_TARGET "/bin/sh $contrib_dir/cc-with-tweaks.sh -i $CC_FOR_TARGET"
+set CC_FOR_TARGET "$contrib_dir/cc-with-tweaks.sh -i $CC_FOR_TARGET"
 if ![info exists CXX_FOR_TARGET] {
     set CXX_FOR_TARGET "$found_gxx"
 }
-set CXX_FOR_TARGET "/bin/sh $contrib_dir/cc-with-tweaks.sh -i $CXX_FOR_TARGET"
+set CXX_FOR_TARGET "$contrib_dir/cc-with-tweaks.sh -i $CXX_FOR_TARGET"
