@@ -1,3 +1,26 @@
+2018-06-19  Joshua Watt  <jpewhacker@gmail.com>
+	    Cary Coutant  <ccoutant@gmail.com>
+
+	* configure.ac: Replace manual thread configuration with AX_PTHREAD.
+	Add --enable-threads=auto.
+	* Makefile.am (THREADFLAGS, THREADLIBS): New defines.
+	(AM_CFLAGS, AM_CXXFLAGS): Add $(THREADFLAGS.
+	(THREADSLIB): Remove; change all references to THREADLIBS.
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* testsuite/Makefile.am (THREADSLIB): Replace with...
+	(THREADFLAGS, THREADLIBS): ... these.
+	(LDADD): Remove; add as individual defines for...
+	(object_unittest, binary_unittest, leb128_unittest)
+	(overflow_unittest): ... these tests.
+	(tls_test, tls_pic_test, tls_pie_test, tls_pie_pic_test)
+	(tls_shared_test, tls_shared_ie_test, tls_shared_gd_to_ie_test)
+	(tls_shared_gnu2_gd_to_ie_test, tls_shared_gnu2_test_LDFLAGS)
+	(tls_shared_nonpic_test_LDFLAGS): Add $(THREADFLAGS) and ($THREADLIBS).
+	* testsuite/Makefile.in: Regenerate.
+
 2018-06-19  Cary Coutant  <ccoutant@gmail.com>
 
 	* testsuite/Makefile.am (MOSTLYCLEANFILES): Add *.stderr.

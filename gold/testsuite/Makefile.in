@@ -1112,7 +1112,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @DEFAULT_TARGET_X86_64_TRUE@	dwp_test_2.stdout
 subdir = testsuite
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/../config/ax_pthread.m4 \
+	$(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/../config/gettext-sister.m4 \
 	$(top_srcdir)/../config/lcmessage.m4 \
 	$(top_srcdir)/../config/lead-dot.m4 \
@@ -1342,39 +1343,18 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 basic_pic_test_SOURCES = basic_pic_test.c
 basic_pic_test_OBJECTS = basic_pic_test.$(OBJEXT)
 basic_pic_test_LDADD = $(LDADD)
-am__DEPENDENCIES_1 =
-basic_pic_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 basic_pie_test_SOURCES = basic_pie_test.c
 basic_pie_test_OBJECTS = basic_pie_test.$(OBJEXT)
 basic_pie_test_LDADD = $(LDADD)
-basic_pie_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 basic_static_pic_test_SOURCES = basic_static_pic_test.c
 basic_static_pic_test_OBJECTS = basic_static_pic_test.$(OBJEXT)
 basic_static_pic_test_LDADD = $(LDADD)
-basic_static_pic_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 basic_static_test_SOURCES = basic_static_test.c
 basic_static_test_OBJECTS = basic_static_test.$(OBJEXT)
 basic_static_test_LDADD = $(LDADD)
-basic_static_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 basic_test_SOURCES = basic_test.c
 basic_test_OBJECTS = basic_test.$(OBJEXT)
 basic_test_LDADD = $(LDADD)
-basic_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_binary_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	binary_test.$(OBJEXT)
 binary_test_OBJECTS = $(am_binary_test_OBJECTS)
@@ -1383,11 +1363,16 @@ binary_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 @NATIVE_OR_CROSS_LINKER_TRUE@am_binary_unittest_OBJECTS =  \
 @NATIVE_OR_CROSS_LINKER_TRUE@	binary_unittest.$(OBJEXT)
 binary_unittest_OBJECTS = $(am_binary_unittest_OBJECTS)
-binary_unittest_LDADD = $(LDADD)
-binary_unittest_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+am__DEPENDENCIES_1 =
+@NATIVE_OR_CROSS_LINKER_TRUE@binary_unittest_DEPENDENCIES =  \
+@NATIVE_OR_CROSS_LINKER_TRUE@	libgoldtest.a ../libgold.a \
+@NATIVE_OR_CROSS_LINKER_TRUE@	../../libiberty/libiberty.a \
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1)
+binary_unittest_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(binary_unittest_LDFLAGS) $(LDFLAGS) -o $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_common_test_1_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	common_test_1.$(OBJEXT)
 common_test_1_OBJECTS = $(am_common_test_1_OBJECTS)
@@ -1424,10 +1409,6 @@ copy_test_relro_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.$(OBJEXT)
 discard_locals_test_OBJECTS = $(am_discard_locals_test_OBJECTS)
 discard_locals_test_LDADD = $(LDADD)
-discard_locals_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 discard_locals_test_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(discard_locals_test_LDFLAGS) $(LDFLAGS) -o $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_dynamic_list_2_OBJECTS =  \
@@ -1438,10 +1419,6 @@ dynamic_list_2_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 eh_test_SOURCES = eh_test.c
 eh_test_OBJECTS = eh_test.$(OBJEXT)
 eh_test_LDADD = $(LDADD)
-eh_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_ehdr_start_test_1_OBJECTS = ehdr_start_test_1-ehdr_start_test.$(OBJEXT)
 ehdr_start_test_1_OBJECTS = $(am_ehdr_start_test_1_OBJECTS)
 ehdr_start_test_1_LINK = $(CXXLD) $(ehdr_start_test_1_CXXFLAGS) \
@@ -1523,78 +1500,42 @@ flagstest_compress_debug_sections_SOURCES =  \
 flagstest_compress_debug_sections_OBJECTS =  \
 	flagstest_compress_debug_sections.$(OBJEXT)
 flagstest_compress_debug_sections_LDADD = $(LDADD)
-flagstest_compress_debug_sections_DEPENDENCIES = libgoldtest.a \
-	../libgold.a ../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 flagstest_compress_debug_sections_and_build_id_tree_SOURCES =  \
 	flagstest_compress_debug_sections_and_build_id_tree.c
 flagstest_compress_debug_sections_and_build_id_tree_OBJECTS =  \
 	flagstest_compress_debug_sections_and_build_id_tree.$(OBJEXT)
 flagstest_compress_debug_sections_and_build_id_tree_LDADD = $(LDADD)
-flagstest_compress_debug_sections_and_build_id_tree_DEPENDENCIES =  \
-	libgoldtest.a ../libgold.a ../../libiberty/libiberty.a \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 flagstest_compress_debug_sections_gabi_SOURCES =  \
 	flagstest_compress_debug_sections_gabi.c
 flagstest_compress_debug_sections_gabi_OBJECTS =  \
 	flagstest_compress_debug_sections_gabi.$(OBJEXT)
 flagstest_compress_debug_sections_gabi_LDADD = $(LDADD)
-flagstest_compress_debug_sections_gabi_DEPENDENCIES = libgoldtest.a \
-	../libgold.a ../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 flagstest_compress_debug_sections_gnu_SOURCES =  \
 	flagstest_compress_debug_sections_gnu.c
 flagstest_compress_debug_sections_gnu_OBJECTS =  \
 	flagstest_compress_debug_sections_gnu.$(OBJEXT)
 flagstest_compress_debug_sections_gnu_LDADD = $(LDADD)
-flagstest_compress_debug_sections_gnu_DEPENDENCIES = libgoldtest.a \
-	../libgold.a ../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 flagstest_compress_debug_sections_none_SOURCES =  \
 	flagstest_compress_debug_sections_none.c
 flagstest_compress_debug_sections_none_OBJECTS =  \
 	flagstest_compress_debug_sections_none.$(OBJEXT)
 flagstest_compress_debug_sections_none_LDADD = $(LDADD)
-flagstest_compress_debug_sections_none_DEPENDENCIES = libgoldtest.a \
-	../libgold.a ../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 flagstest_o_specialfile_SOURCES = flagstest_o_specialfile.c
 flagstest_o_specialfile_OBJECTS = flagstest_o_specialfile.$(OBJEXT)
 flagstest_o_specialfile_LDADD = $(LDADD)
-flagstest_o_specialfile_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 flagstest_o_specialfile_and_compress_debug_sections_SOURCES =  \
 	flagstest_o_specialfile_and_compress_debug_sections.c
 flagstest_o_specialfile_and_compress_debug_sections_OBJECTS =  \
 	flagstest_o_specialfile_and_compress_debug_sections.$(OBJEXT)
 flagstest_o_specialfile_and_compress_debug_sections_LDADD = $(LDADD)
-flagstest_o_specialfile_and_compress_debug_sections_DEPENDENCIES =  \
-	libgoldtest.a ../libgold.a ../../libiberty/libiberty.a \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 flagstest_o_ttext_1_SOURCES = flagstest_o_ttext_1.c
 flagstest_o_ttext_1_OBJECTS = flagstest_o_ttext_1.$(OBJEXT)
 flagstest_o_ttext_1_LDADD = $(LDADD)
-flagstest_o_ttext_1_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 icf_virtual_function_folding_test_SOURCES =  \
 	icf_virtual_function_folding_test.c
 icf_virtual_function_folding_test_OBJECTS =  \
 	icf_virtual_function_folding_test.$(OBJEXT)
 icf_virtual_function_folding_test_LDADD = $(LDADD)
-icf_virtual_function_folding_test_DEPENDENCIES = libgoldtest.a \
-	../libgold.a ../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain1_OBJECTS = ifuncmain1.$(OBJEXT)
 ifuncmain1_OBJECTS = $(am_ifuncmain1_OBJECTS)
 ifuncmain1_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(ifuncmain1_LDFLAGS) \
@@ -1602,24 +1543,12 @@ ifuncmain1_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(ifuncmain1_LDFLAGS) \
 ifuncmain1pic_SOURCES = ifuncmain1pic.c
 ifuncmain1pic_OBJECTS = ifuncmain1pic.$(OBJEXT)
 ifuncmain1pic_LDADD = $(LDADD)
-ifuncmain1pic_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 ifuncmain1picstatic_SOURCES = ifuncmain1picstatic.c
 ifuncmain1picstatic_OBJECTS = ifuncmain1picstatic.$(OBJEXT)
 ifuncmain1picstatic_LDADD = $(LDADD)
-ifuncmain1picstatic_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 ifuncmain1pie_SOURCES = ifuncmain1pie.c
 ifuncmain1pie_OBJECTS = ifuncmain1pie.$(OBJEXT)
 ifuncmain1pie_LDADD = $(LDADD)
-ifuncmain1pie_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@HAVE_STATIC_TRUE@@IFUNC_STATIC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain1static_OBJECTS = ifuncmain1.$(OBJEXT)
 ifuncmain1static_OBJECTS = $(am_ifuncmain1static_OBJECTS)
 ifuncmain1static_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -1627,17 +1556,9 @@ ifuncmain1static_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 ifuncmain1staticpic_SOURCES = ifuncmain1staticpic.c
 ifuncmain1staticpic_OBJECTS = ifuncmain1staticpic.$(OBJEXT)
 ifuncmain1staticpic_LDADD = $(LDADD)
-ifuncmain1staticpic_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 ifuncmain1staticpie_SOURCES = ifuncmain1staticpie.c
 ifuncmain1staticpie_OBJECTS = ifuncmain1staticpie.$(OBJEXT)
 ifuncmain1staticpie_LDADD = $(LDADD)
-ifuncmain1staticpie_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain1vis_OBJECTS = ifuncmain1vis.$(OBJEXT)
 ifuncmain1vis_OBJECTS = $(am_ifuncmain1vis_OBJECTS)
 ifuncmain1vis_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -1645,17 +1566,9 @@ ifuncmain1vis_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 ifuncmain1vispic_SOURCES = ifuncmain1vispic.c
 ifuncmain1vispic_OBJECTS = ifuncmain1vispic.$(OBJEXT)
 ifuncmain1vispic_LDADD = $(LDADD)
-ifuncmain1vispic_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 ifuncmain1vispie_SOURCES = ifuncmain1vispie.c
 ifuncmain1vispie_OBJECTS = ifuncmain1vispie.$(OBJEXT)
 ifuncmain1vispie_LDADD = $(LDADD)
-ifuncmain1vispie_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain2_OBJECTS = ifuncmain2.$(OBJEXT) \
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncdep2.$(OBJEXT)
 ifuncmain2_OBJECTS = $(am_ifuncmain2_OBJECTS)
@@ -1664,17 +1577,9 @@ ifuncmain2_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(ifuncmain2_LDFLAGS) \
 ifuncmain2pic_SOURCES = ifuncmain2pic.c
 ifuncmain2pic_OBJECTS = ifuncmain2pic.$(OBJEXT)
 ifuncmain2pic_LDADD = $(LDADD)
-ifuncmain2pic_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 ifuncmain2picstatic_SOURCES = ifuncmain2picstatic.c
 ifuncmain2picstatic_OBJECTS = ifuncmain2picstatic.$(OBJEXT)
 ifuncmain2picstatic_LDADD = $(LDADD)
-ifuncmain2picstatic_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@HAVE_STATIC_TRUE@@IFUNC_STATIC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain2static_OBJECTS = ifuncmain2.$(OBJEXT) \
 @GCC_TRUE@@HAVE_STATIC_TRUE@@IFUNC_STATIC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@	ifuncdep2.$(OBJEXT)
 ifuncmain2static_OBJECTS = $(am_ifuncmain2static_OBJECTS)
@@ -1691,10 +1596,6 @@ ifuncmain4_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(ifuncmain4_LDFLAGS) \
 ifuncmain4picstatic_SOURCES = ifuncmain4picstatic.c
 ifuncmain4picstatic_OBJECTS = ifuncmain4picstatic.$(OBJEXT)
 ifuncmain4picstatic_LDADD = $(LDADD)
-ifuncmain4picstatic_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@HAVE_STATIC_TRUE@@IFUNC_STATIC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain4static_OBJECTS = ifuncmain4.$(OBJEXT)
 ifuncmain4static_OBJECTS = $(am_ifuncmain4static_OBJECTS)
 ifuncmain4static_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -1706,24 +1607,12 @@ ifuncmain5_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(ifuncmain5_LDFLAGS) \
 ifuncmain5pic_SOURCES = ifuncmain5pic.c
 ifuncmain5pic_OBJECTS = ifuncmain5pic.$(OBJEXT)
 ifuncmain5pic_LDADD = $(LDADD)
-ifuncmain5pic_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 ifuncmain5picstatic_SOURCES = ifuncmain5picstatic.c
 ifuncmain5picstatic_OBJECTS = ifuncmain5picstatic.$(OBJEXT)
 ifuncmain5picstatic_LDADD = $(LDADD)
-ifuncmain5picstatic_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 ifuncmain5pie_SOURCES = ifuncmain5pie.c
 ifuncmain5pie_OBJECTS = ifuncmain5pie.$(OBJEXT)
 ifuncmain5pie_LDADD = $(LDADD)
-ifuncmain5pie_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@HAVE_STATIC_TRUE@@IFUNC_STATIC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain5static_OBJECTS = ifuncmain5.$(OBJEXT)
 ifuncmain5static_OBJECTS = $(am_ifuncmain5static_OBJECTS)
 ifuncmain5static_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -1731,17 +1620,9 @@ ifuncmain5static_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 ifuncmain5staticpic_SOURCES = ifuncmain5staticpic.c
 ifuncmain5staticpic_OBJECTS = ifuncmain5staticpic.$(OBJEXT)
 ifuncmain5staticpic_LDADD = $(LDADD)
-ifuncmain5staticpic_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 ifuncmain6pie_SOURCES = ifuncmain6pie.c
 ifuncmain6pie_OBJECTS = ifuncmain6pie.$(OBJEXT)
 ifuncmain6pie_LDADD = $(LDADD)
-ifuncmain6pie_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain7_OBJECTS = ifuncmain7.$(OBJEXT)
 ifuncmain7_OBJECTS = $(am_ifuncmain7_OBJECTS)
 ifuncmain7_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(ifuncmain7_LDFLAGS) \
@@ -1749,24 +1630,12 @@ ifuncmain7_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(ifuncmain7_LDFLAGS) \
 ifuncmain7pic_SOURCES = ifuncmain7pic.c
 ifuncmain7pic_OBJECTS = ifuncmain7pic.$(OBJEXT)
 ifuncmain7pic_LDADD = $(LDADD)
-ifuncmain7pic_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 ifuncmain7picstatic_SOURCES = ifuncmain7picstatic.c
 ifuncmain7picstatic_OBJECTS = ifuncmain7picstatic.$(OBJEXT)
 ifuncmain7picstatic_LDADD = $(LDADD)
-ifuncmain7picstatic_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 ifuncmain7pie_SOURCES = ifuncmain7pie.c
 ifuncmain7pie_OBJECTS = ifuncmain7pie.$(OBJEXT)
 ifuncmain7pie_LDADD = $(LDADD)
-ifuncmain7pie_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@HAVE_STATIC_TRUE@@IFUNC_STATIC_TRUE@@IFUNC_TRUE@@NATIVE_LINKER_TRUE@am_ifuncmain7static_OBJECTS = ifuncmain7.$(OBJEXT)
 ifuncmain7static_OBJECTS = $(am_ifuncmain7static_OBJECTS)
 ifuncmain7static_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -1780,60 +1649,28 @@ incremental_comdat_test_1_SOURCES = incremental_comdat_test_1.c
 incremental_comdat_test_1_OBJECTS =  \
 	incremental_comdat_test_1.$(OBJEXT)
 incremental_comdat_test_1_LDADD = $(LDADD)
-incremental_comdat_test_1_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 incremental_common_test_1_SOURCES = incremental_common_test_1.c
 incremental_common_test_1_OBJECTS =  \
 	incremental_common_test_1.$(OBJEXT)
 incremental_common_test_1_LDADD = $(LDADD)
-incremental_common_test_1_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 incremental_copy_test_SOURCES = incremental_copy_test.c
 incremental_copy_test_OBJECTS = incremental_copy_test.$(OBJEXT)
 incremental_copy_test_LDADD = $(LDADD)
-incremental_copy_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 incremental_test_2_SOURCES = incremental_test_2.c
 incremental_test_2_OBJECTS = incremental_test_2.$(OBJEXT)
 incremental_test_2_LDADD = $(LDADD)
-incremental_test_2_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 incremental_test_3_SOURCES = incremental_test_3.c
 incremental_test_3_OBJECTS = incremental_test_3.$(OBJEXT)
 incremental_test_3_LDADD = $(LDADD)
-incremental_test_3_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 incremental_test_4_SOURCES = incremental_test_4.c
 incremental_test_4_OBJECTS = incremental_test_4.$(OBJEXT)
 incremental_test_4_LDADD = $(LDADD)
-incremental_test_4_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 incremental_test_5_SOURCES = incremental_test_5.c
 incremental_test_5_OBJECTS = incremental_test_5.$(OBJEXT)
 incremental_test_5_LDADD = $(LDADD)
-incremental_test_5_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 incremental_test_6_SOURCES = incremental_test_6.c
 incremental_test_6_OBJECTS = incremental_test_6.$(OBJEXT)
 incremental_test_6_LDADD = $(LDADD)
-incremental_test_6_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_initpri1_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	initpri1.$(OBJEXT)
 initpri1_OBJECTS = $(am_initpri1_OBJECTS)
@@ -1870,25 +1707,21 @@ large_symbol_alignment_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 @NATIVE_OR_CROSS_LINKER_TRUE@am_leb128_unittest_OBJECTS =  \
 @NATIVE_OR_CROSS_LINKER_TRUE@	leb128_unittest.$(OBJEXT)
 leb128_unittest_OBJECTS = $(am_leb128_unittest_OBJECTS)
-leb128_unittest_LDADD = $(LDADD)
-leb128_unittest_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+@NATIVE_OR_CROSS_LINKER_TRUE@leb128_unittest_DEPENDENCIES =  \
+@NATIVE_OR_CROSS_LINKER_TRUE@	libgoldtest.a ../libgold.a \
+@NATIVE_OR_CROSS_LINKER_TRUE@	../../libiberty/libiberty.a \
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1)
+leb128_unittest_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(leb128_unittest_LDFLAGS) $(LDFLAGS) -o $@
 local_labels_test_SOURCES = local_labels_test.c
 local_labels_test_OBJECTS = local_labels_test.$(OBJEXT)
 local_labels_test_LDADD = $(LDADD)
-local_labels_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 many_sections_r_test_SOURCES = many_sections_r_test.c
 many_sections_r_test_OBJECTS = many_sections_r_test.$(OBJEXT)
 many_sections_r_test_LDADD = $(LDADD)
-many_sections_r_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_many_sections_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_test.$(OBJEXT)
 many_sections_test_OBJECTS = $(am_many_sections_test_OBJECTS)
@@ -1897,26 +1730,30 @@ many_sections_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 @NATIVE_OR_CROSS_LINKER_TRUE@am_object_unittest_OBJECTS =  \
 @NATIVE_OR_CROSS_LINKER_TRUE@	object_unittest.$(OBJEXT)
 object_unittest_OBJECTS = $(am_object_unittest_OBJECTS)
-object_unittest_LDADD = $(LDADD)
-object_unittest_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+@NATIVE_OR_CROSS_LINKER_TRUE@object_unittest_DEPENDENCIES =  \
+@NATIVE_OR_CROSS_LINKER_TRUE@	libgoldtest.a ../libgold.a \
+@NATIVE_OR_CROSS_LINKER_TRUE@	../../libiberty/libiberty.a \
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1)
+object_unittest_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(object_unittest_LDFLAGS) $(LDFLAGS) -o $@
 @NATIVE_OR_CROSS_LINKER_TRUE@am_overflow_unittest_OBJECTS =  \
 @NATIVE_OR_CROSS_LINKER_TRUE@	overflow_unittest.$(OBJEXT)
 overflow_unittest_OBJECTS = $(am_overflow_unittest_OBJECTS)
-overflow_unittest_LDADD = $(LDADD)
-overflow_unittest_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+@NATIVE_OR_CROSS_LINKER_TRUE@overflow_unittest_DEPENDENCIES =  \
+@NATIVE_OR_CROSS_LINKER_TRUE@	libgoldtest.a ../libgold.a \
+@NATIVE_OR_CROSS_LINKER_TRUE@	../../libiberty/libiberty.a \
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1)
+overflow_unittest_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(overflow_unittest_LDFLAGS) $(LDFLAGS) -o $@
 permission_test_SOURCES = permission_test.c
 permission_test_OBJECTS = permission_test.$(OBJEXT)
 permission_test_LDADD = $(LDADD)
-permission_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_pie_copyrelocs_test_OBJECTS = pie_copyrelocs_test-pie_copyrelocs_test.$(OBJEXT)
 pie_copyrelocs_test_OBJECTS = $(am_pie_copyrelocs_test_OBJECTS)
 pie_copyrelocs_test_LINK = $(CXXLD) $(pie_copyrelocs_test_CXXFLAGS) \
@@ -1924,115 +1761,51 @@ pie_copyrelocs_test_LINK = $(CXXLD) $(pie_copyrelocs_test_CXXFLAGS) \
 plugin_test_1_SOURCES = plugin_test_1.c
 plugin_test_1_OBJECTS = plugin_test_1.$(OBJEXT)
 plugin_test_1_LDADD = $(LDADD)
-plugin_test_1_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 plugin_test_10_SOURCES = plugin_test_10.c
 plugin_test_10_OBJECTS = plugin_test_10.$(OBJEXT)
 plugin_test_10_LDADD = $(LDADD)
-plugin_test_10_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 plugin_test_11_SOURCES = plugin_test_11.c
 plugin_test_11_OBJECTS = plugin_test_11.$(OBJEXT)
 plugin_test_11_LDADD = $(LDADD)
-plugin_test_11_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 plugin_test_12_SOURCES = plugin_test_12.c
 plugin_test_12_OBJECTS = plugin_test_12.$(OBJEXT)
 plugin_test_12_LDADD = $(LDADD)
-plugin_test_12_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 plugin_test_2_SOURCES = plugin_test_2.c
 plugin_test_2_OBJECTS = plugin_test_2.$(OBJEXT)
 plugin_test_2_LDADD = $(LDADD)
-plugin_test_2_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 plugin_test_3_SOURCES = plugin_test_3.c
 plugin_test_3_OBJECTS = plugin_test_3.$(OBJEXT)
 plugin_test_3_LDADD = $(LDADD)
-plugin_test_3_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 plugin_test_4_SOURCES = plugin_test_4.c
 plugin_test_4_OBJECTS = plugin_test_4.$(OBJEXT)
 plugin_test_4_LDADD = $(LDADD)
-plugin_test_4_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 plugin_test_5_SOURCES = plugin_test_5.c
 plugin_test_5_OBJECTS = plugin_test_5.$(OBJEXT)
 plugin_test_5_LDADD = $(LDADD)
-plugin_test_5_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 plugin_test_6_SOURCES = plugin_test_6.c
 plugin_test_6_OBJECTS = plugin_test_6.$(OBJEXT)
 plugin_test_6_LDADD = $(LDADD)
-plugin_test_6_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 plugin_test_7_SOURCES = plugin_test_7.c
 plugin_test_7_OBJECTS = plugin_test_7.$(OBJEXT)
 plugin_test_7_LDADD = $(LDADD)
-plugin_test_7_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 plugin_test_8_SOURCES = plugin_test_8.c
 plugin_test_8_OBJECTS = plugin_test_8.$(OBJEXT)
 plugin_test_8_LDADD = $(LDADD)
-plugin_test_8_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 plugin_test_defsym_SOURCES = plugin_test_defsym.c
 plugin_test_defsym_OBJECTS = plugin_test_defsym.$(OBJEXT)
 plugin_test_defsym_LDADD = $(LDADD)
-plugin_test_defsym_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 plugin_test_start_lib_SOURCES = plugin_test_start_lib.c
 plugin_test_start_lib_OBJECTS = plugin_test_start_lib.$(OBJEXT)
 plugin_test_start_lib_LDADD = $(LDADD)
-plugin_test_start_lib_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 plugin_test_tls_SOURCES = plugin_test_tls.c
 plugin_test_tls_OBJECTS = plugin_test_tls.$(OBJEXT)
 plugin_test_tls_LDADD = $(LDADD)
-plugin_test_tls_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 plugin_test_wrap_symbols_SOURCES = plugin_test_wrap_symbols.c
 plugin_test_wrap_symbols_OBJECTS = plugin_test_wrap_symbols.$(OBJEXT)
 plugin_test_wrap_symbols_LDADD = $(LDADD)
-plugin_test_wrap_symbols_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 pr17704a_test_SOURCES = pr17704a_test.c
 pr17704a_test_OBJECTS = pr17704a_test.$(OBJEXT)
 pr17704a_test_LDADD = $(LDADD)
-pr17704a_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @DEFAULT_TARGET_X86_64_OR_X32_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am_pr20216a_test_OBJECTS = pr20216a_test-pr20216_main.$(OBJEXT) \
 @DEFAULT_TARGET_X86_64_OR_X32_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	pr20216a_test-pr20216_def.$(OBJEXT)
 pr20216a_test_OBJECTS = $(am_pr20216a_test_OBJECTS)
@@ -2084,17 +1857,9 @@ pr20308e_test_LINK = $(CCLD) $(pr20308e_test_CFLAGS) $(CFLAGS) \
 pr20976_SOURCES = pr20976.c
 pr20976_OBJECTS = pr20976.$(OBJEXT)
 pr20976_LDADD = $(LDADD)
-pr20976_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 pr22266_SOURCES = pr22266.c
 pr22266_OBJECTS = pr22266.$(OBJEXT)
 pr22266_LDADD = $(LDADD)
-pr22266_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_protected_1_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_main_1.$(OBJEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_main_2.$(OBJEXT) \
@@ -2137,24 +1902,12 @@ script_test_1_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 script_test_11_SOURCES = script_test_11.c
 script_test_11_OBJECTS = script_test_11.$(OBJEXT)
 script_test_11_LDADD = $(LDADD)
-script_test_11_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 script_test_12_SOURCES = script_test_12.c
 script_test_12_OBJECTS = script_test_12.$(OBJEXT)
 script_test_12_LDADD = $(LDADD)
-script_test_12_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 script_test_12i_SOURCES = script_test_12i.c
 script_test_12i_OBJECTS = script_test_12i.$(OBJEXT)
 script_test_12i_LDADD = $(LDADD)
-script_test_12i_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_script_test_2_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2.$(OBJEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2a.$(OBJEXT) \
@@ -2165,10 +1918,6 @@ script_test_2_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 script_test_3_SOURCES = script_test_3.c
 script_test_3_OBJECTS = script_test_3.$(OBJEXT)
 script_test_3_LDADD = $(LDADD)
-script_test_3_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_searched_file_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	searched_file_test.$(OBJEXT)
 searched_file_test_OBJECTS = $(am_searched_file_test_OBJECTS)
@@ -2177,10 +1926,6 @@ searched_file_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 start_lib_test_SOURCES = start_lib_test.c
 start_lib_test_OBJECTS = start_lib_test.$(OBJEXT)
 start_lib_test_LDADD = $(LDADD)
-start_lib_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_thin_archive_test_1_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_main.$(OBJEXT)
 thin_archive_test_1_OBJECTS = $(am_thin_archive_test_1_OBJECTS)
@@ -2199,7 +1944,8 @@ thin_archive_test_2_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(am__objects_3)
 tls_phdrs_script_test_OBJECTS = $(am_tls_phdrs_script_test_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__DEPENDENCIES_2 =  \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_test_c.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_test_c.o \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(am__DEPENDENCIES_1)
 tls_phdrs_script_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(tls_phdrs_script_test_LDFLAGS) $(LDFLAGS) -o $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am_tls_pic_test_OBJECTS = tls_test_main.$(OBJEXT)
@@ -2209,17 +1955,9 @@ tls_pic_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 tls_pie_pic_test_SOURCES = tls_pie_pic_test.c
 tls_pie_pic_test_OBJECTS = tls_pie_pic_test.$(OBJEXT)
 tls_pie_pic_test_LDADD = $(LDADD)
-tls_pie_pic_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 tls_pie_test_SOURCES = tls_pie_test.c
 tls_pie_test_OBJECTS = tls_pie_test.$(OBJEXT)
 tls_pie_test_LDADD = $(LDADD)
-tls_pie_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_tls_script_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(am__objects_3)
 tls_script_test_OBJECTS = $(am_tls_script_test_OBJECTS)
@@ -2258,7 +1996,8 @@ tls_static_pic_test_OBJECTS = $(am_tls_static_pic_test_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__DEPENDENCIES_3 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_test_pic.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_test_file2_pic.o \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_test_c_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_test_c_pic.o \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(am__DEPENDENCIES_1)
 tls_static_pic_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(tls_static_pic_test_LDFLAGS) $(LDFLAGS) -o $@
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@am_tls_static_test_OBJECTS = $(am__objects_3)
@@ -2281,10 +2020,6 @@ two_file_mixed_2_shared_test_LINK = $(CXXLD) $(AM_CXXFLAGS) \
 two_file_mixed_pie_test_SOURCES = two_file_mixed_pie_test.c
 two_file_mixed_pie_test_OBJECTS = two_file_mixed_pie_test.$(OBJEXT)
 two_file_mixed_pie_test_LDADD = $(LDADD)
-two_file_mixed_pie_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am_two_file_mixed_shared_test_OBJECTS = two_file_test_main.$(OBJEXT)
 two_file_mixed_shared_test_OBJECTS =  \
 	$(am_two_file_mixed_shared_test_OBJECTS)
@@ -2298,10 +2033,6 @@ two_file_pic_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 two_file_pie_test_SOURCES = two_file_pie_test.c
 two_file_pie_test_OBJECTS = two_file_pie_test.$(OBJEXT)
 two_file_pie_test_LDADD = $(LDADD)
-two_file_pie_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_two_file_relocatable_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_main.$(OBJEXT)
 two_file_relocatable_test_OBJECTS =  \
@@ -2407,10 +2138,6 @@ two_file_static_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 two_file_strip_test_SOURCES = two_file_strip_test.c
 two_file_strip_test_OBJECTS = two_file_strip_test.$(OBJEXT)
 two_file_strip_test_LDADD = $(LDADD)
-two_file_strip_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_two_file_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_1.$(OBJEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_1b.$(OBJEXT) \
@@ -2462,10 +2189,6 @@ weak_alias_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 weak_plt_SOURCES = weak_plt.c
 weak_plt_OBJECTS = weak_plt.$(OBJEXT)
 weak_plt_LDADD = $(LDADD)
-weak_plt_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_weak_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_test.$(OBJEXT)
 weak_test_OBJECTS = $(am_weak_test_OBJECTS)
@@ -2489,10 +2212,6 @@ weak_undef_test_2_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 weak_unresolved_symbols_test_OBJECTS =  \
 	$(am_weak_unresolved_symbols_test_OBJECTS)
 weak_unresolved_symbols_test_LDADD = $(LDADD)
-weak_unresolved_symbols_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
 weak_unresolved_symbols_test_LINK = $(CXXLD) \
 	$(weak_unresolved_symbols_test_CXXFLAGS) $(CXXFLAGS) \
 	$(weak_unresolved_symbols_test_LDFLAGS) $(LDFLAGS) -o $@
@@ -2931,8 +2650,12 @@ PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 POSUB = @POSUB@
+PTHREAD_CC = @PTHREAD_CC@
+PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
+PTHREAD_LIBS = @PTHREAD_LIBS@
 RANDOM_SEED_CFLAGS = @RANDOM_SEED_CFLAGS@
 RANLIB = @RANLIB@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -2957,6 +2680,7 @@ am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
+ax_pthread_config = @ax_pthread_config@
 bindir = @bindir@
 build = @build@
 build_alias = @build_alias@
@@ -3068,7 +2792,8 @@ TEST_AR = $(top_builddir)/../binutils/ar
 TEST_NM = $(top_builddir)/../binutils/nm-new
 TEST_AS = $(top_builddir)/../gas/as-new
 @PLUGINS_TRUE@LIBDL = -ldl
-@THREADS_TRUE@THREADSLIB = -lpthread
+@THREADS_TRUE@THREADFLAGS = @PTHREAD_CFLAGS@
+@THREADS_TRUE@THREADLIBS = @PTHREAD_LIBS@
 @OMP_SUPPORT_TRUE@TLS_TEST_C_CFLAGS = -fopenmp
 
 # 'make clean' is good about deleting some intermediate files (such as
@@ -3115,13 +2840,26 @@ libgoldtest_a_SOURCES = test.cc testmain.cc testfile.cc
 DEPENDENCIES = \
 	libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL_DEP)
 
-LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
-	$(THREADSLIB) $(LIBDL) $(ZLIB)
-
 @NATIVE_OR_CROSS_LINKER_TRUE@object_unittest_SOURCES = object_unittest.cc
+@NATIVE_OR_CROSS_LINKER_TRUE@object_unittest_LDFLAGS = $(THREADFLAGS)
+@NATIVE_OR_CROSS_LINKER_TRUE@object_unittest_LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(THREADLIBS) $(LIBDL) $(ZLIB)
+
 @NATIVE_OR_CROSS_LINKER_TRUE@binary_unittest_SOURCES = binary_unittest.cc
+@NATIVE_OR_CROSS_LINKER_TRUE@binary_unittest_LDFLAGS = $(THREADFLAGS)
+@NATIVE_OR_CROSS_LINKER_TRUE@binary_unittest_LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(THREADLIBS) $(LIBDL) $(ZLIB)
+
 @NATIVE_OR_CROSS_LINKER_TRUE@leb128_unittest_SOURCES = leb128_unittest.cc
+@NATIVE_OR_CROSS_LINKER_TRUE@leb128_unittest_LDFLAGS = $(THREADFLAGS)
+@NATIVE_OR_CROSS_LINKER_TRUE@leb128_unittest_LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(THREADLIBS) $(LIBDL) $(ZLIB)
+
 @NATIVE_OR_CROSS_LINKER_TRUE@overflow_unittest_SOURCES = overflow_unittest.cc
+@NATIVE_OR_CROSS_LINKER_TRUE@overflow_unittest_LDFLAGS = $(THREADFLAGS)
+@NATIVE_OR_CROSS_LINKER_TRUE@overflow_unittest_LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(THREADLIBS) $(LIBDL) $(ZLIB)
+
 @GCC_TRUE@@NATIVE_LINKER_TRUE@large_symbol_alignment_SOURCES = large_symbol_alignment.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@large_symbol_alignment_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@large_symbol_alignment_LDFLAGS = -Bgcctestdir/
@@ -3349,44 +3087,44 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_relro_LDADD = copy_test_relro_1.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_SOURCES = tls_test.cc tls_test_file2.cc tls_test_main.cc tls_test.h
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_DEPENDENCIES = gcctestdir/ld tls_test_c.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_LDFLAGS = -Bgcctestdir/
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_LDADD = tls_test_c.o -lpthread
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_LDFLAGS = -Bgcctestdir/ $(THREADFLAGS)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_LDADD = tls_test_c.o $(THREADLIBS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_pic_test_SOURCES = tls_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_pic_test_DEPENDENCIES = gcctestdir/ld tls_test_pic.o tls_test_file2_pic.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_test_c_pic.o
 
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_pic_test_LDFLAGS = -Bgcctestdir/
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_pic_test_LDFLAGS = -Bgcctestdir/ $(THREADFLAGS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_pic_test_LDADD = tls_test_pic.o tls_test_file2_pic.o tls_test_c_pic.o \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	-lpthread
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(THREADLIBS)
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_test_SOURCES = tls_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_test_DEPENDENCIES = gcctestdir/ld tls_test_shared.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_test_LDADD = tls_test_shared.so -lpthread
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,. $(THREADFLAGS)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_test_LDADD = tls_test_shared.so $(THREADLIBS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_ie_test_SOURCES = tls_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_ie_test_DEPENDENCIES = gcctestdir/ld tls_test_ie_shared.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_ie_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_ie_test_LDADD = tls_test_ie_shared.so -lpthread
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_ie_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,. $(THREADFLAGS)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_ie_test_LDADD = tls_test_ie_shared.so $(THREADLIBS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_gd_to_ie_test_SOURCES = tls_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_gd_to_ie_test_DEPENDENCIES = gcctestdir/ld tls_test_pic.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_test_c_pic.o tls_test_shared2.so
 
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_gd_to_ie_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_gd_to_ie_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,. $(THREADFLAGS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_gd_to_ie_test_LDADD = tls_test_pic.o tls_test_c_pic.o \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_test_shared2.so -lpthread
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_test_shared2.so $(THREADLIBS)
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_shared_gnu2_gd_to_ie_test_SOURCES = tls_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_shared_gnu2_gd_to_ie_test_DEPENDENCIES = gcctestdir/ld tls_test_gnu2.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@	tls_test_c_gnu2.o tls_test_gnu2_shared2.so
 
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_shared_gnu2_gd_to_ie_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_shared_gnu2_gd_to_ie_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,. $(THREADFLAGS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_shared_gnu2_gd_to_ie_test_LDADD = tls_test_gnu2.o tls_test_c_gnu2.o \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@	tls_test_gnu2_shared2.so -lpthread
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@	tls_test_gnu2_shared2.so $(THREADLIBS)
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_DESCRIPTORS_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_shared_gnu2_test_SOURCES = tls_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_DESCRIPTORS_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_shared_gnu2_test_DEPENDENCIES = gcctestdir/ld tls_test_gnu2_shared.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_DESCRIPTORS_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_shared_gnu2_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_DESCRIPTORS_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_shared_gnu2_test_LDADD = tls_test_gnu2_shared.so -lpthread
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_DESCRIPTORS_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_shared_gnu2_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,. $(THREADFLAGS)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_DESCRIPTORS_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_shared_gnu2_test_LDADD = tls_test_gnu2_shared.so $(THREADLIBS)
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@tls_static_test_SOURCES = $(tls_test_SOURCES)
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@tls_static_test_DEPENDENCIES = $(tls_test_DEPENDENCIES)
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@tls_static_test_LDFLAGS = $(tls_test_LDFLAGS) -static
@@ -3397,8 +3135,8 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@tls_static_pic_test_LDADD = $(tls_pic_test_LDADD)
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_nonpic_test_SOURCES = tls_test_main.cc
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_nonpic_test_DEPENDENCIES = gcctestdir/ld tls_test_shared_nonpic.so
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_nonpic_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_nonpic_test_LDADD = tls_test_shared_nonpic.so -lpthread
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_nonpic_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,. $(THREADFLAGS)
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_nonpic_test_LDADD = tls_test_shared_nonpic.so $(THREADLIBS)
 @DEFAULT_TARGET_X86_64_OR_X32_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@pr20216a_test_SOURCES = pr20216_main.c pr20216_def.c
 @DEFAULT_TARGET_X86_64_OR_X32_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@pr20216a_test_DEPENDENCIES = pr20216_gd.o pr20216_ld.o gcctestdir/ld gcctestdir/as
 @DEFAULT_TARGET_X86_64_OR_X32_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@pr20216a_test_CFLAGS = -Bgcctestdir/ -fPIE
@@ -3762,7 +3500,7 @@ binary_test$(EXEEXT): $(binary_test_OBJECTS) $(binary_test_DEPENDENCIES) $(EXTRA
 
 binary_unittest$(EXEEXT): $(binary_unittest_OBJECTS) $(binary_unittest_DEPENDENCIES) $(EXTRA_binary_unittest_DEPENDENCIES) 
 	@rm -f binary_unittest$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(binary_unittest_OBJECTS) $(binary_unittest_LDADD) $(LIBS)
+	$(AM_V_CXXLD)$(binary_unittest_LINK) $(binary_unittest_OBJECTS) $(binary_unittest_LDADD) $(LIBS)
 
 common_test_1$(EXEEXT): $(common_test_1_OBJECTS) $(common_test_1_DEPENDENCIES) $(EXTRA_common_test_1_DEPENDENCIES) 
 	@rm -f common_test_1$(EXEEXT)
@@ -4362,7 +4100,7 @@ large_symbol_alignment$(EXEEXT): $(large_symbol_alignment_OBJECTS) $(large_symbo
 
 leb128_unittest$(EXEEXT): $(leb128_unittest_OBJECTS) $(leb128_unittest_DEPENDENCIES) $(EXTRA_leb128_unittest_DEPENDENCIES) 
 	@rm -f leb128_unittest$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(leb128_unittest_OBJECTS) $(leb128_unittest_LDADD) $(LIBS)
+	$(AM_V_CXXLD)$(leb128_unittest_LINK) $(leb128_unittest_OBJECTS) $(leb128_unittest_LDADD) $(LIBS)
 
 @GCC_FALSE@local_labels_test$(EXEEXT): $(local_labels_test_OBJECTS) $(local_labels_test_DEPENDENCIES) $(EXTRA_local_labels_test_DEPENDENCIES) 
 @GCC_FALSE@	@rm -f local_labels_test$(EXEEXT)
@@ -4386,11 +4124,11 @@ many_sections_test$(EXEEXT): $(many_sections_test_OBJECTS) $(many_sections_test_
 
 object_unittest$(EXEEXT): $(object_unittest_OBJECTS) $(object_unittest_DEPENDENCIES) $(EXTRA_object_unittest_DEPENDENCIES) 
 	@rm -f object_unittest$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(object_unittest_OBJECTS) $(object_unittest_LDADD) $(LIBS)
+	$(AM_V_CXXLD)$(object_unittest_LINK) $(object_unittest_OBJECTS) $(object_unittest_LDADD) $(LIBS)
 
 overflow_unittest$(EXEEXT): $(overflow_unittest_OBJECTS) $(overflow_unittest_DEPENDENCIES) $(EXTRA_overflow_unittest_DEPENDENCIES) 
 	@rm -f overflow_unittest$(EXEEXT)
-	$(AM_V_CXXLD)$(CXXLINK) $(overflow_unittest_OBJECTS) $(overflow_unittest_LDADD) $(LIBS)
+	$(AM_V_CXXLD)$(overflow_unittest_LINK) $(overflow_unittest_OBJECTS) $(overflow_unittest_LDADD) $(LIBS)
 
 @GCC_FALSE@permission_test$(EXEEXT): $(permission_test_OBJECTS) $(permission_test_DEPENDENCIES) $(EXTRA_permission_test_DEPENDENCIES) 
 @GCC_FALSE@	@rm -f permission_test$(EXEEXT)
@@ -8473,13 +8211,13 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(COMPILE) -c -fpic $(TLS_TEST_C_CFLAGS) -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_pie_test: tls_test_main_pie.o tls_test_pie.o tls_test_file2_pie.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@		tls_test_c_pie.o gcctestdir/ld
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -pie tls_test_main_pie.o tls_test_pie.o tls_test_file2_pie.o tls_test_c_pie.o -lpthread
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ $(THREADFLAGS) -pie tls_test_main_pie.o tls_test_pie.o tls_test_file2_pie.o tls_test_c_pie.o $(THREADLIBS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_pie_test.stdout: tls_pie_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(TEST_READELF) -rW $< > $@ 2>/dev/null
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_pie_pic_test: tls_test_main_pie.o tls_test_pic.o tls_test_file2_pic.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@		tls_test_c_pic.o gcctestdir/ld
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -pie tls_test_main_pie.o tls_test_pic.o tls_test_file2_pic.o tls_test_c_pic.o -lpthread
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ $(THREADFLAGS) -pie tls_test_main_pie.o tls_test_pic.o tls_test_file2_pic.o tls_test_c_pic.o $(THREADLIBS)
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_test_gnu2.o: tls_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@	$(CXXCOMPILE) -c -fpic -mtls-dialect=gnu2 -o $@ $<
