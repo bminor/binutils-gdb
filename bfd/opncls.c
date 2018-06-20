@@ -1877,10 +1877,11 @@ get_build_id (bfd *abfd)
   inote.descdata = inote.namedata + BFD_ALIGN (inote.namesz, 4);
   /* FIXME: Should we check for extra notes in this section ?  */
 
-  if (inote.descsz == 0
+  if (inote.descsz <= 0
       || inote.type != NT_GNU_BUILD_ID
       || inote.namesz != 4 /* sizeof "GNU"  */
       || strncmp (inote.namedata, "GNU", 4) != 0
+      || inote.descsz > 0x7ffffffe
       || size < (12 + BFD_ALIGN (inote.namesz, 4) + inote.descsz))
     {
       free (contents);

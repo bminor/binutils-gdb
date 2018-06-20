@@ -12,6 +12,12 @@
 
 2018-06-20  Nick Clifton  <nickc@redhat.com>
 
+	PR 23316
+	* opncls.c (get_build_id): Check for a negative or excessive data
+	size in the build-id note.
+
+2018-06-20  Nick Clifton  <nickc@redhat.com>
+
 	PR 23299
 	* mach-o.c (cputype): New function.
 	(cpusubtype): New function.
