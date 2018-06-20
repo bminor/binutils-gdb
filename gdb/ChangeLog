@@ -1,3 +1,8 @@
+2018-06-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* record-full.c (record_full_target::insert_breakpoint): Remove
+	"struct" keyword, add const.
+
 2018-06-19  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* common/common-defs.h (PACKAGE_NAME, PACKAGE_VERSION,

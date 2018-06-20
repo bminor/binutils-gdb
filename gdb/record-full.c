@@ -1786,7 +1786,7 @@ record_full_target::insert_breakpoint (struct gdbarch *gdbarch,
   /* Use the existing entries if found in order to avoid duplication
      in record_full_breakpoints.  */
 
-  for (struct record_full_breakpoint &bp : record_full_breakpoints)
+  for (const record_full_breakpoint &bp : record_full_breakpoints)
     {
       if (bp.addr == bp_tgt->placed_address
 	  && bp.address_space == bp_tgt->placed_address_space)
