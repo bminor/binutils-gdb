@@ -1880,6 +1880,23 @@ ver_test_14.syms: ver_test_14
 ver_test_14: gcctestdir/ld ver_test_main.o ver_test_1.so ver_test_2.so ver_test_4.so ver_test_14.script
 	$(CXXLINK) -Bgcctestdir/ -Wl,--version-script,$(srcdir)/ver_test_14.script -Wl,-E -Wl,-R,. ver_test_main.o ver_test_1.so ver_test_2.so ver_test_4.so
 
+check_SCRIPTS += weak_as_needed.sh
+check_DATA += weak_as_needed.stdout
+weak_as_needed.stdout: weak_as_needed_a.so
+	$(TEST_READELF) -dW --dyn-syms $< >$@
+weak_as_needed_a.so: gcctestdir/ld weak_as_needed_a.o weak_as_needed_b.so weak_as_needed_c.so
+	gcctestdir/ld -shared -rpath . -o $@ weak_as_needed_a.o --as-needed weak_as_needed_b.so weak_as_needed_c.so
+weak_as_needed_b.so: gcctestdir/ld weak_as_needed_b.o weak_as_needed_b.script
+	gcctestdir/ld -shared -rpath . -o $@ --version-script $(srcdir)/weak_as_needed_b.script weak_as_needed_b.o
+weak_as_needed_c.so: gcctestdir/ld weak_as_needed_c.o weak_as_needed_c.script
+	gcctestdir/ld -shared -rpath . -o $@ --version-script $(srcdir)/weak_as_needed_c.script weak_as_needed_c.o
+weak_as_needed_a.o: weak_as_needed_a.c
+	$(COMPILE) -c -fpic -o $@ $<
+weak_as_needed_b.o: weak_as_needed_b.c
+	$(COMPILE) -c -fpic -o $@ $<
+weak_as_needed_c.o: weak_as_needed_c.c
+	$(COMPILE) -c -fpic -o $@ $<
+
 check_PROGRAMS += protected_1
 protected_1_SOURCES = \
 	protected_main_1.cc protected_main_2.cc protected_main_3.cc
