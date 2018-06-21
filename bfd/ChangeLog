@@ -1,3 +1,8 @@
+2018-06-21  Jim Wilson  <jimw@sifive.com>
+
+	* elfnn-riscv.c (riscv_elf_finish_dynamic_symbol): Update comment.
+	Use SYMBOL_REFERENCES_LOCAL.  Add asserts for h->got.offset.
+
 2018-06-21  Alan Modra  <amodra@gmail.com>
 
 	* doc/Makefile.am (AUTOMAKE_OPTIONS): Add "foreign".

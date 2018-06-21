@@ -2394,15 +2394,15 @@ riscv_elf_finish_dynamic_symbol (bfd *output_bfd,
 
       rela.r_offset = sec_addr (sgot) + (h->got.offset &~ (bfd_vma) 1);
 
-      /* If this is a -Bsymbolic link, and the symbol is defined
-	 locally, we just want to emit a RELATIVE reloc.  Likewise if
+      /* If this is a local symbol reference, we just want to emit a RELATIVE
+	 reloc.  This can happen if it is a -Bsymbolic link, or a pie link, or
 	 the symbol was forced to be local because of a version file.
 	 The entry in the global offset table will already have been
 	 initialized in the relocate_section function.  */
       if (bfd_link_pic (info)
-	  && (info->symbolic || h->dynindx == -1)
-	  && h->def_regular)
+	  && SYMBOL_REFERENCES_LOCAL (info, h))
 	{
+	  BFD_ASSERT((h->got.offset & 1) != 0);
 	  asection *sec = h->root.u.def.section;
 	  rela.r_info = ELFNN_R_INFO (0, R_RISCV_RELATIVE);
 	  rela.r_addend = (h->root.u.def.value
@@ -2411,6 +2411,7 @@ riscv_elf_finish_dynamic_symbol (bfd *output_bfd,
 	}
       else
 	{
+	  BFD_ASSERT((h->got.offset & 1) == 0);
 	  BFD_ASSERT (h->dynindx != -1);
 	  rela.r_info = ELFNN_R_INFO (h->dynindx, R_RISCV_NN);
 	  rela.r_addend = 0;
