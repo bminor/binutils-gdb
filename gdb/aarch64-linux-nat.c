@@ -77,6 +77,9 @@ public:
   /* Override the GNU/Linux inferior startup hook.  */
   void post_startup_inferior (ptid_t) override;
 
+  /* Override the GNU/Linux post attach hook.  */
+  void post_attach (int pid) override;
+
   /* These three defer to common nat/ code.  */
   void low_new_thread (struct lwp_info *lp) override
   { aarch64_linux_new_thread (lp); }
@@ -566,6 +569,21 @@ aarch64_linux_nat_target::post_startup_inferior (ptid_t ptid)
   low_forget_process (ptid_get_pid (ptid));
   aarch64_linux_get_debug_reg_capacity (ptid_get_pid (ptid));
   linux_nat_target::post_startup_inferior (ptid);
+}
+
+/* Implement the "post_attach" target_ops method.  */
+
+void
+aarch64_linux_nat_target::post_attach (int pid)
+{
+  low_forget_process (pid);
+  /* Set the hardware debug register capacity.  If
+     aarch64_linux_get_debug_reg_capacity is not called
+     (as it is in aarch64_linux_child_post_startup_inferior) then
+     software watchpoints will be used instead of hardware
+     watchpoints when attaching to a target.  */
+  aarch64_linux_get_debug_reg_capacity (pid);
+  linux_nat_target::post_attach (pid);
 }
 
 extern struct target_desc *tdesc_arm_with_neon;

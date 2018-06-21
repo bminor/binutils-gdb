@@ -1,3 +1,10 @@
+2018-06-21  Richard Bunt  <richard.bunt@arm.com>
+	    Dirk Schubert  <dirk.schubert@arm.com>
+
+	* aarch64-linux-nat.c (post_attach): New.
+	(aarch64_linux_nat_target::post_attach): Override post_attach to
+	record the number of hardware debug registers.
+
 2018-06-20  Tom Tromey  <tom@tromey.com>
 
 	* python/py-param.c (add_setshow_generic): Make parameters const.

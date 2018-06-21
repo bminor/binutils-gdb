@@ -1,3 +1,8 @@
+2018-06-21  Richard Bunt  <richard.bunt@arm.com>
+
+	* gdb.base/watchpoint-hw-attach.c: New test.
+	* gdb.base/watchpoint-hw-attach.exp: New file.
+
 2018-06-20  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* boards/cc-with-tweaks.exp: Don't call cc-with-tweaks.sh
