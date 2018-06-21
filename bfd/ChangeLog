@@ -1,5 +1,10 @@
 2018-06-21  Maciej W. Rozycki  <macro@mips.com>
 
+	* elfxx-mips.c (_bfd_mips_elf_compact_eh_encoding)
+	(_bfd_mips_elf_cant_unwind_opcode): Correct formatting.
+
+2018-06-21  Maciej W. Rozycki  <macro@mips.com>
+
 	* elfxx-mips.c (_bfd_mips_post_process_headers): Keep
 	EI_ABIVERSION setting together.
 

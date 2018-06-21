@@ -16266,7 +16266,8 @@ _bfd_mips_post_process_headers (bfd *abfd, struct bfd_link_info *link_info)
 }
 
 int
-_bfd_mips_elf_compact_eh_encoding (struct bfd_link_info *link_info ATTRIBUTE_UNUSED)
+_bfd_mips_elf_compact_eh_encoding
+  (struct bfd_link_info *link_info ATTRIBUTE_UNUSED)
 {
   return DW_EH_PE_pcrel | DW_EH_PE_sdata4;
 }
@@ -16274,7 +16275,8 @@ _bfd_mips_elf_compact_eh_encoding (struct bfd_link_info *link_info ATTRIBUTE_UNU
 /* Return the opcode for can't unwind.  */
 
 int
-_bfd_mips_elf_cant_unwind_opcode (struct bfd_link_info *link_info ATTRIBUTE_UNUSED)
+_bfd_mips_elf_cant_unwind_opcode
+  (struct bfd_link_info *link_info ATTRIBUTE_UNUSED)
 {
   return COMPACT_EH_CANT_UNWIND_OPCODE;
 }
