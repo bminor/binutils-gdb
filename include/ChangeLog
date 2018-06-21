@@ -1,3 +1,7 @@
+2018-06-26  Alan Modra  <amodra@gmail.com>
+
+	* elf/internal.h (ELF_SECTION_IN_SEGMENT): Revert last change.
+
 2018-06-24  Nick Clifton  <nickc@redhat.com>
 
 	2.31 branch created.
