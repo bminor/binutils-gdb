@@ -221,13 +221,14 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
   if (PyErr_Occurred ())
     return -1;
 
-  thread = ptid_to_global_thread_id (inferior_ptid);
-  if (thread == 0)
+  if (inferior_ptid == null_ptid)
     {
       PyErr_SetString (PyExc_ValueError,
                        _("No thread currently selected."));
       return -1;
     }
+
+  thread = inferior_thread ()->global_num;
 
   if (internal)
     {

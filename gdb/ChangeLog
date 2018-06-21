@@ -1,3 +1,299 @@
+2018-06-21  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.h (ada_get_task_number): Take a thread_info pointer
+	instead of a ptid_t.  All callers adjusted.
+	* ada-tasks.c (ada_get_task_number): Likewise.  All callers
+	adjusted.
+	(print_ada_task_info, display_current_task_id, task_command_1):
+	Adjust.
+	* breakpoint.c (watchpoint_in_thread_scope): Adjust to use
+	inferior_thread.
+	(breakpoint_kind): Adjust.
+	(remove_breakpoints_pid): Rename to ...
+	(remove_breakpoints_inf): ... this.  Adjust to take an inferior
+	pointer.  All callers adjusted.
+	(bpstat_clear_actions): Use inferior_thread.
+	(get_bpstat_thread): New.
+	(bpstat_do_actions): Use it.
+	(bpstat_check_breakpoint_conditions, bpstat_stop_status): Adjust
+	to take a thread_info pointer.  All callers adjusted.
+	(set_longjmp_breakpoint_for_call_dummy, set_momentary_breakpoint)
+	(breakpoint_re_set_thread): Use inferior_thread.
+	* breakpoint.h (struct inferior): Forward declare.
+	(bpstat_stop_status): Update.
+	(remove_breakpoints_pid): Delete.
+	(remove_breakpoints_inf): New.
+	* bsd-uthread.c (bsd_uthread_target::wait)
+	(bsd_uthread_target::update_thread_list): Use find_thread_ptid.
+	* btrace.c (btrace_add_pc, btrace_enable, btrace_fetch)
+	(maint_btrace_packet_history_cmd)
+	(maint_btrace_clear_packet_history_cmd): Adjust.
+	(maint_btrace_clear_cmd, maint_info_btrace_cmd): Adjust to use
+	inferior_thread.
+	* cli/cli-interp.c: Include "inferior.h".
+	* common/refcounted-object.h (struct
+	refcounted_object_ref_policy): New.
+	* compile/compile-object-load.c: Include gdbthread.h.
+	(store_regs): Use inferior_thread.
+	* corelow.c (core_target::close): Use current_inferior.
+	(core_target_open): Adjust to use first_thread_of_inferior and use
+	the current inferior.
+	* ctf.c (ctf_target::close): Adjust to use current_inferior.
+	* dummy-frame.c (dummy_frame_id) <ptid>: Delete, replaced by ...
+	<thread>: ... this new field.  All references adjusted.
+	(dummy_frame_pop, dummy_frame_discard, register_dummy_frame_dtor):
+	Take a thread_info pointer instead of a ptid_t.
+	* dummy-frame.h (dummy_frame_push, dummy_frame_pop)
+	(dummy_frame_discard, register_dummy_frame_dtor): Take a
+	thread_info pointer instead of a ptid_t.
+	* elfread.c: Include "inferior.h".
+	(elf_gnu_ifunc_resolver_stop, elf_gnu_ifunc_resolver_return_stop):
+	Use inferior_thread.
+	* eval.c (evaluate_subexp): Likewise.
+	* frame.c (frame_pop, has_stack_frames, find_frame_sal): Use
+	inferior_thread.
+	* gdb_proc_service.h (struct thread_info): Forward declare.
+	(struct ps_prochandle) <ptid>: Delete, replaced by ...
+	<thread>: ... this new field.  All references adjusted.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* gdbarch.sh (get_syscall_number): Replace 'ptid' parameter with a
+	'thread' parameter.  All implementations and callers adjusted.
+	* gdbthread.h (thread_info) <set_running>: New method.
+	(delete_thread, delete_thread_silent): Take a thread_info pointer
+	instead of a ptid.
+	(global_thread_id_to_ptid, ptid_to_global_thread_id): Delete.
+	(first_thread_of_process): Delete, replaced by ...
+	(first_thread_of_inferior): ... this new function.  All callers
+	adjusted.
+	(any_live_thread_of_process): Delete, replaced by ...
+	(any_live_thread_of_inferior): ... this new function.  All callers
+	adjusted.
+	(switch_to_thread, switch_to_no_thread): Declare.
+	(is_executing): Delete.
+	(enable_thread_stack_temporaries): Update comment.
+	<enable_thread_stack_temporaries>: Take a thread_info pointer
+	instead of a ptid_t.  Incref the thread.
+	<~enable_thread_stack_temporaries>: Decref the thread.
+	<m_ptid>: Delete
+	<m_thr>: New.
+	(thread_stack_temporaries_enabled_p, push_thread_stack_temporary)
+	(get_last_thread_stack_temporary)
+	(value_in_thread_stack_temporaries, can_access_registers_thread):
+	Take a thread_info pointer instead of a ptid_t.  All callers
+	adjusted.
+	* infcall.c (get_call_return_value): Use inferior_thread.
+	(run_inferior_call): Work with thread pointers instead of ptid_t.
+	(call_function_by_hand_dummy): Work with thread pointers instead
+	of ptid_t.  Use thread_info_ref.
+	* infcmd.c (proceed_thread_callback): Access thread's state
+	directly.
+	(ensure_valid_thread, ensure_not_running): Use inferior_thread,
+	access thread's state directly.
+	(continue_command): Use inferior_thread.
+	(info_program_command): Use find_thread_ptid and access thread
+	state directly.
+	(proceed_after_attach_callback): Use thread state directly.
+	(notice_new_inferior): Take a thread_info pointer instead of a
+	ptid_t.  All callers adjusted.
+	(exit_inferior): Take an inferior pointer instead of a pid.  All
+	callers adjusted.
+	(exit_inferior_silent): New.
+	(detach_inferior): Delete.
+	(valid_gdb_inferior_id, pid_to_gdb_inferior_id)
+	(gdb_inferior_id_to_pid, in_inferior_list): Delete.
+	(detach_inferior_command, kill_inferior_command): Use
+	find_inferior_id instead of valid_gdb_inferior_id and
+	gdb_inferior_id_to_pid.
+	(inferior_command): Use inferior and thread pointers.
+	* inferior.h (struct thread_info): Forward declare.
+	(notice_new_inferior): Take a thread_info pointer instead of a
+	ptid_t.  All callers adjusted.
+	(detach_inferior): Delete declaration.
+	(exit_inferior, exit_inferior_silent): Take an inferior pointer
+	instead of a pid.  All callers adjusted.
+	(gdb_inferior_id_to_pid, pid_to_gdb_inferior_id, in_inferior_list)
+	(valid_gdb_inferior_id): Delete.
+	* infrun.c (follow_fork_inferior, proceed_after_vfork_done)
+	(handle_vfork_child_exec_or_exit, follow_exec): Adjust.
+	(struct displaced_step_inferior_state) <pid>: Delete, replaced by
+	...
+	<inf>: ... this new field.
+	<step_ptid>: Delete, replaced by ...
+	<step_thread>: ... this new field.
+	(get_displaced_stepping_state): Take an inferior pointer instead
+	of a pid.  All callers adjusted.
+	(displaced_step_in_progress_any_inferior): Adjust.
+	(displaced_step_in_progress_thread): Take a thread pointer instead
+	of a ptid_t.  All callers adjusted.
+	(displaced_step_in_progress, add_displaced_stepping_state): Take
+	an inferior pointer instead of a pid.  All callers adjusted.
+	(get_displaced_step_closure_by_addr): Adjust.
+	(remove_displaced_stepping_state): Take an inferior pointer
+	instead of a pid.  All callers adjusted.
+	(displaced_step_prepare_throw, displaced_step_prepare)
+	(displaced_step_fixup): Take a thread pointer instead of a ptid_t.
+	All callers adjusted.
+	(start_step_over): Adjust.
+	(infrun_thread_ptid_changed): Remove bit updating ptids in the
+	displaced step queue.
+	(do_target_resume): Adjust.
+	(fetch_inferior_event): Use inferior_thread.
+	(context_switch, get_inferior_stop_soon): Take an
+	execution_control_state pointer instead of a ptid_t.  All callers
+	adjusted.
+	(switch_to_thread_cleanup): Delete.
+	(stop_all_threads): Use scoped_restore_current_thread.
+	* inline-frame.c: Include "gdbthread.h".
+	(inline_state) <inline_state>: Take a thread pointer instead of a
+	ptid_t.  All callers adjusted.
+	<ptid>: Delete, replaced by ...
+	<thread>: ... this new field.
+	(find_inline_frame_state): Take a thread pointer instead of a
+	ptid_t.  All callers adjusted.
+	(skip_inline_frames, step_into_inline_frame)
+	(inline_skipped_frames, inline_skipped_symbol): Take a thread
+	pointer instead of a ptid_t.  All callers adjusted.
+	* inline-frame.h (skip_inline_frames, step_into_inline_frame)
+	(inline_skipped_frames, inline_skipped_symbol): Likewise.
+	* linux-fork.c (delete_checkpoint_command): Adjust to use thread
+	pointers directly.
+	* linux-nat.c (get_detach_signal): Likewise.
+	* linux-thread-db.c (thread_from_lwp): New 'stopped' parameter.
+	(thread_db_notice_clone): Adjust.
+	(thread_db_find_new_threads_silently)
+	(thread_db_find_new_threads_2, thread_db_find_new_threads_1): Take
+	a thread pointer instead of a ptid_t.  All callers adjusted.
+	* mi/mi-cmd-var.c: Include "inferior.h".
+	(mi_cmd_var_update_iter): Update to use thread pointers.
+	* mi/mi-interp.c (mi_new_thread): Update to use the thread's
+	inferior directly.
+	(mi_output_running_pid, mi_inferior_count): Delete, bits factored
+	out to ...
+	(mi_output_running): ... this new function.
+	(mi_on_resume_1): Adjust to use it.
+	(mi_user_selected_context_changed): Adjust to use inferior_thread.
+	* mi/mi-main.c (proceed_thread): Adjust to use thread pointers
+	directly.
+	(interrupt_thread_callback): : Adjust to use thread and inferior
+	pointers.
+	* proc-service.c: Include "gdbthread.h".
+	(ps_pglobal_lookup): Adjust to use the thread's inferior directly.
+	* progspace-and-thread.c: Include "inferior.h".
+	* progspace.c: Include "inferior.h".
+	* python/py-exitedevent.c (create_exited_event_object): Adjust to
+	hold a reference to an inferior_object.
+	* python/py-finishbreakpoint.c (bpfinishpy_init): Adjust to use
+	inferior_thread.
+	* python/py-inferior.c (struct inferior_object): Give the type a
+	tag name instead of a typedef.
+	(python_on_normal_stop): No need to check if the current thread is
+	listed.
+	(inferior_to_inferior_object): Change return type to
+	inferior_object.  All callers adjusted.
+	(find_thread_object): Delete, bits factored out to ...
+	(thread_to_thread_object): ... this new function.
+	* python/py-infthread.c (create_thread_object): Use
+	inferior_to_inferior_object.
+	(thpy_is_stopped): Use thread pointer directly.
+	(gdbpy_selected_thread): Use inferior_thread.
+	* python/py-record-btrace.c (btpy_list_object) <ptid>: Delete
+	field, replaced with ...
+	<thread>: ... this new field.  All users adjusted.
+	(btpy_insn_or_gap_new): Drop const.
+	(btpy_list_new): Take a thread pointer instead of a ptid_t.  All
+	callers adjusted.
+	* python/py-record.c: Include "gdbthread.h".
+	(recpy_insn_new, recpy_func_new): Take a thread pointer instead of
+	a ptid_t.  All callers adjusted.
+	(gdbpy_current_recording): Use inferior_thread.
+	* python/py-record.h (recpy_record_object) <ptid>: Delete
+	field, replaced with ...
+	<thread>: ... this new field.  All users adjusted.
+	(recpy_element_object) <ptid>: Delete
+	field, replaced with ...
+	<thread>: ... this new field.  All users adjusted.
+	(recpy_insn_new, recpy_func_new): Take a thread pointer instead of
+	a ptid_t.  All callers adjusted.
+	* python/py-threadevent.c: Include "gdbthread.h".
+	(get_event_thread): Use thread_to_thread_object.
+	* python/python-internal.h (struct inferior_object): Forward
+	declare.
+	(find_thread_object, find_inferior_object): Delete declarations.
+	(thread_to_thread_object, inferior_to_inferior_object): New
+	declarations.
+	* record-btrace.c: Include "inferior.h".
+	(require_btrace_thread): Use inferior_thread.
+	(record_btrace_frame_sniffer)
+	(record_btrace_tailcall_frame_sniffer): Use inferior_thread.
+	(get_thread_current_frame): Use scoped_restore_current_thread and
+	switch_to_thread.
+	(get_thread_current_frame): Use thread pointer directly.
+	(record_btrace_replay_at_breakpoint): Use thread's inferior
+	pointer directly.
+	* record-full.c: Include "inferior.h".
+	* regcache.c: Include "gdbthread.h".
+	(get_thread_arch_regcache): Use the inferior's address space
+	directly.
+	(get_thread_regcache, registers_changed_thread): New.
+	* regcache.h (get_thread_regcache(thread_info *thread)): New
+	overload.
+	(registers_changed_thread): New.
+	(remote_target) <remote_detach_1>: Swap order of parameters.
+	(remote_add_thread): <remote_add_thread>: Return the new thread.
+	(get_remote_thread_info(ptid_t)): New overload.
+	(remote_target::remote_notice_new_inferior): Use thread pointers
+	directly.
+	(remote_target::process_initial_stop_replies): Use
+	thread_info::set_running.
+	(remote_target::remote_detach_1, remote_target::detach)
+	(extended_remote_target::detach): Adjust.
+	* stack.c (frame_show_address): Use inferior_thread.
+	* target-debug.h (target_debug_print_thread_info_pp): New.
+	* target-delegates.c: Regenerate.
+	* target.c (default_thread_address_space): Delete.
+	(memory_xfer_partial_1): Use current_inferior.
+	(target_detach): Use current_inferior.
+	(target_thread_address_space): Delete.
+	(generic_mourn_inferior): Use current_inferior.
+	* target.h (struct target_ops) <thread_address_space>: Delete.
+	(target_thread_address_space): Delete.
+	* thread.c (init_thread_list): Use ALL_THREADS_SAFE.  Use thread
+	pointers directly.
+	(delete_thread_1, delete_thread, delete_thread_silent): Take a
+	thread pointer instead of a ptid_t.  Adjust all callers.
+	(ptid_to_global_thread_id, global_thread_id_to_ptid): Delete.
+	(first_thread_of_process): Delete, replaced by ...
+	(first_thread_of_inferior): ... this new function.  All callers
+	adjusted.
+	(any_thread_of_process): Rename to ...
+	(any_thread_of_inferior): ... this, and take an inferior pointer.
+	(any_live_thread_of_process): Rename to ...
+	(any_live_thread_of_inferior): ... this, and take an inferior
+	pointer.
+	(thread_stack_temporaries_enabled_p, push_thread_stack_temporary)
+	(value_in_thread_stack_temporaries)
+	(get_last_thread_stack_temporary): Take a thread pointer instead
+	of a ptid_t.  Adjust all callers.
+	(thread_info::set_running): New.
+	(validate_registers_access): Use inferior_thread.
+	(can_access_registers_ptid): Rename to ...
+	(can_access_registers_thread): ... this, and take a thread
+	pointer.
+	(print_thread_info_1): Adjust to compare thread pointers instead
+	of ptids.
+	(switch_to_no_thread, switch_to_thread): Make extern.
+	(scoped_restore_current_thread::~scoped_restore_current_thread):
+	Use m_thread pointer directly.
+	(scoped_restore_current_thread::scoped_restore_current_thread):
+	Use inferior_thread.
+	(thread_command): Use thread pointer directly.
+	(thread_num_make_value_helper): Use inferior_thread.
+	* top.c (execute_command): Use inferior_thread.
+	* tui/tui-interp.c: Include "inferior.h".
+	* varobj.c (varobj_create): Use inferior_thread.
+	(value_of_root_1): Use find_thread_global_id instead of
+	global_thread_id_to_ptid.
+
 2018-06-21  Alan Hayward  <alan.hayward@arm.com>
 
         * regcache.c (readable_regcache::read_part): Avoid memcpy when

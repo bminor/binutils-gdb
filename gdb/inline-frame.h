@@ -36,7 +36,7 @@ extern const struct frame_unwind inline_frame_unwind;
    user's perspective.  GDB will stop "in" the inlined frame instead of
    the caller.  */
 
-void skip_inline_frames (ptid_t ptid, struct bpstats *stop_chain);
+void skip_inline_frames (thread_info *thread, struct bpstats *stop_chain);
 
 /* Forget about any hidden inlined functions in PTID, which is new or
    about to be resumed.  If PTID is minus_one_ptid, forget about all
@@ -46,17 +46,17 @@ void clear_inline_frame_state (ptid_t ptid);
 
 /* Step into an inlined function by unhiding it.  */
 
-void step_into_inline_frame (ptid_t ptid);
+void step_into_inline_frame (thread_info *thread);
 
 /* Return the number of hidden functions inlined into the current
    frame.  */
 
-int inline_skipped_frames (ptid_t ptid);
+int inline_skipped_frames (thread_info *thread);
 
 /* If one or more inlined functions are hidden, return the symbol for
    the function inlined into the current frame.  */
 
-struct symbol *inline_skipped_symbol (ptid_t ptid);
+struct symbol *inline_skipped_symbol (thread_info *thread);
 
 /* Return the number of functions inlined into THIS_FRAME.  Some of
    the callees may not have associated frames (see

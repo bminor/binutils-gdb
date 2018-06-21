@@ -17,6 +17,7 @@
 
 #include "defs.h"
 #include "progspace-and-thread.h"
+#include "inferior.h"
 
 /* See progspace-and-thread.h  */
 
@@ -27,17 +28,17 @@ switch_to_program_space_and_thread (program_space *pspace)
 
   if (inf != NULL && inf->pid != 0)
     {
-      thread_info *tp = any_live_thread_of_process (inf->pid);
+      thread_info *tp = any_live_thread_of_inferior (inf);
 
       if (tp != NULL)
 	{
-	  switch_to_thread (tp->ptid);
+	  switch_to_thread (tp);
 	  /* Switching thread switches pspace implicitly.  We're
 	     done.  */
 	  return;
 	}
     }
 
-  switch_to_thread (null_ptid);
+  switch_to_no_thread ();
   set_current_program_space (pspace);
 }

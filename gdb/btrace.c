@@ -1567,7 +1567,7 @@ btrace_add_pc (struct thread_info *tp)
   struct regcache *regcache;
   CORE_ADDR pc;
 
-  regcache = get_thread_regcache (tp->ptid);
+  regcache = get_thread_regcache (tp);
   pc = regcache_read_pc (regcache);
 
   btrace.format = BTRACE_FORMAT_BTS;
@@ -1615,7 +1615,7 @@ btrace_enable (struct thread_info *tp, const struct btrace_config *conf)
 	 This is not relevant for BTRACE_FORMAT_PT since the trace will already
 	 start at the PC at which tracing was enabled.  */
       if (conf->format != BTRACE_FORMAT_PT
-	  && can_access_registers_ptid (tp->ptid))
+	  && can_access_registers_thread (tp))
 	btrace_add_pc (tp);
     }
   CATCH (exception, RETURN_MASK_ALL)
@@ -1911,7 +1911,7 @@ btrace_fetch (struct thread_info *tp, const struct btrace_cpu *cpu)
   inferior_ptid = tp->ptid;
 
   /* We should not be called on running or exited threads.  */
-  gdb_assert (can_access_registers_ptid (tp->ptid));
+  gdb_assert (can_access_registers_thread (tp));
 
   /* Let's first try to extend the trace we already have.  */
   if (!btinfo->functions.empty ())
@@ -3231,10 +3231,9 @@ static void
 maint_btrace_packet_history_cmd (const char *arg, int from_tty)
 {
   struct btrace_thread_info *btinfo;
-  struct thread_info *tp;
   unsigned int size, begin, end, from, to;
 
-  tp = find_thread_ptid (inferior_ptid);
+  thread_info *tp = find_thread_ptid (inferior_ptid);
   if (tp == NULL)
     error (_("No thread."));
 
@@ -3335,17 +3334,14 @@ maint_btrace_packet_history_cmd (const char *arg, int from_tty)
 static void
 maint_btrace_clear_packet_history_cmd (const char *args, int from_tty)
 {
-  struct btrace_thread_info *btinfo;
-  struct thread_info *tp;
-
   if (args != NULL && *args != 0)
     error (_("Invalid argument."));
 
-  tp = find_thread_ptid (inferior_ptid);
-  if (tp == NULL)
+  if (inferior_ptid == null_ptid)
     error (_("No thread."));
 
-  btinfo = &tp->btrace;
+  thread_info *tp = inferior_thread ();
+  btrace_thread_info *btinfo = &tp->btrace;
 
   /* Must clear the maint data before - it depends on BTINFO->DATA.  */
   btrace_maint_clear (btinfo);
@@ -3357,15 +3353,13 @@ maint_btrace_clear_packet_history_cmd (const char *args, int from_tty)
 static void
 maint_btrace_clear_cmd (const char *args, int from_tty)
 {
-  struct thread_info *tp;
-
   if (args != NULL && *args != 0)
     error (_("Invalid argument."));
 
-  tp = find_thread_ptid (inferior_ptid);
-  if (tp == NULL)
+  if (inferior_ptid == null_ptid)
     error (_("No thread."));
 
+  thread_info *tp = inferior_thread ();
   btrace_clear (tp);
 }
 
@@ -3420,15 +3414,15 @@ static void
 maint_info_btrace_cmd (const char *args, int from_tty)
 {
   struct btrace_thread_info *btinfo;
-  struct thread_info *tp;
   const struct btrace_config *conf;
 
   if (args != NULL && *args != 0)
     error (_("Invalid argument."));
 
-  tp = find_thread_ptid (inferior_ptid);
-  if (tp == NULL)
+  if (inferior_ptid == null_ptid)
     error (_("No thread."));
+
+  thread_info *tp = inferior_thread ();
 
   btinfo = &tp->btrace;
 

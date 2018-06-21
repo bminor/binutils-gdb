@@ -1006,7 +1006,7 @@ exit_lwp (struct lwp_info *lp)
       if (print_thread_events)
 	printf_unfiltered (_("[%s exited]\n"), target_pid_to_str (lp->ptid));
 
-      delete_thread (lp->ptid);
+      delete_thread (th);
     }
 
   delete_lwp (lp->ptid);
@@ -1298,27 +1298,26 @@ get_detach_signal (struct lwp_info *lp)
     signo = GDB_SIGNAL_0; /* a pending ptrace event, not a real signal.  */
   else if (lp->status)
     signo = gdb_signal_from_host (WSTOPSIG (lp->status));
-  else if (target_is_non_stop_p () && !is_executing (lp->ptid))
+  else
     {
       struct thread_info *tp = find_thread_ptid (lp->ptid);
 
-      if (tp->suspend.waitstatus_pending_p)
-	signo = tp->suspend.waitstatus.value.sig;
-      else
-	signo = tp->suspend.stop_signal;
-    }
-  else if (!target_is_non_stop_p ())
-    {
-      struct target_waitstatus last;
-      ptid_t last_ptid;
-
-      get_last_target_status (&last_ptid, &last);
-
-      if (ptid_get_lwp (lp->ptid) == ptid_get_lwp (last_ptid))
+      if (target_is_non_stop_p () && !tp->executing)
 	{
-	  struct thread_info *tp = find_thread_ptid (lp->ptid);
+	  if (tp->suspend.waitstatus_pending_p)
+	    signo = tp->suspend.waitstatus.value.sig;
+	  else
+	    signo = tp->suspend.stop_signal;
+	}
+      else if (!target_is_non_stop_p ())
+	{
+	  struct target_waitstatus last;
+	  ptid_t last_ptid;
 
-	  signo = tp->suspend.stop_signal;
+	  get_last_target_status (&last_ptid, &last);
+
+	  if (ptid_get_lwp (lp->ptid) == ptid_get_lwp (last_ptid))
+	    signo = tp->suspend.stop_signal;
 	}
     }
 
@@ -1801,7 +1800,8 @@ linux_handle_syscall_trap (struct lwp_info *lp, int stopping)
 {
   struct target_waitstatus *ourstatus = &lp->waitstatus;
   struct gdbarch *gdbarch = target_thread_architecture (lp->ptid);
-  int syscall_number = (int) gdbarch_get_syscall_number (gdbarch, lp->ptid);
+  thread_info *thread = find_thread_ptid (lp->ptid);
+  int syscall_number = (int) gdbarch_get_syscall_number (gdbarch, thread);
 
   if (stopping)
     {

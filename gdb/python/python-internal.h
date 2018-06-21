@@ -440,6 +440,8 @@ typedef struct
   PyObject *inf_obj;
 } thread_object;
 
+struct inferior_object;
+
 extern struct cmd_list_element *set_python_list;
 extern struct cmd_list_element *show_python_list;
 
@@ -532,10 +534,9 @@ PyObject *gdbpy_lookup_objfile (PyObject *self, PyObject *args, PyObject *kw);
 PyObject *gdbarch_to_arch_object (struct gdbarch *gdbarch);
 
 thread_object *create_thread_object (struct thread_info *tp);
-thread_object *find_thread_object (ptid_t ptid)
-    CPYCHECKER_RETURNS_BORROWED_REF;
-PyObject *find_inferior_object (int pid);
-PyObject *inferior_to_inferior_object (struct inferior *inferior);
+thread_object *thread_to_thread_object (thread_info *thr)
+  CPYCHECKER_RETURNS_BORROWED_REF;
+inferior_object *inferior_to_inferior_object (inferior *inf);
 
 const struct block *block_object_to_block (PyObject *obj);
 struct symbol *symbol_object_to_symbol (PyObject *obj);

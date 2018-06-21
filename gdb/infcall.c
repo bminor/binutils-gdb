@@ -422,7 +422,8 @@ static struct value *
 get_call_return_value (struct call_return_meta_info *ri)
 {
   struct value *retval = NULL;
-  bool stack_temporaries = thread_stack_temporaries_enabled_p (inferior_ptid);
+  thread_info *thr = inferior_thread ();
+  bool stack_temporaries = thread_stack_temporaries_enabled_p (thr);
 
   if (TYPE_CODE (ri->value_type) == TYPE_CODE_VOID)
     retval = allocate_value (ri->value_type);
@@ -432,7 +433,7 @@ get_call_return_value (struct call_return_meta_info *ri)
 	{
 	  retval = value_from_contents_and_address (ri->value_type, NULL,
 						    ri->struct_addr);
-	  push_thread_stack_temporary (inferior_ptid, retval);
+	  push_thread_stack_temporary (thr, retval);
 	}
       else
 	{
@@ -458,7 +459,7 @@ get_call_return_value (struct call_return_meta_info *ri)
 	     the this pointer, GDB needs the memory address of the
 	     value.  */
 	  value_force_lval (retval, ri->struct_addr);
-	  push_thread_stack_temporary (inferior_ptid, retval);
+	  push_thread_stack_temporary (thr, retval);
 	}
     }
 
@@ -586,6 +587,7 @@ run_inferior_call (struct call_thread_fsm *sm,
   struct gdb_exception caught_error = exception_none;
   int saved_in_infcall = call_thread->control.in_infcall;
   ptid_t call_thread_ptid = call_thread->ptid;
+  inferior *call_thread_inf = call_thread->inf;
   enum prompt_state saved_prompt_state = current_ui->prompt_state;
   int was_running = call_thread->state == THREAD_RUNNING;
   int saved_ui_async = current_ui->async;
@@ -637,10 +639,6 @@ run_inferior_call (struct call_thread_fsm *sm,
     ui_register_input_event_handler (current_ui);
   current_ui->async = saved_ui_async;
 
-  /* At this point the current thread may have changed.  Refresh
-     CALL_THREAD as it could be invalid if its thread has exited.  */
-  call_thread = find_thread_ptid (call_thread_ptid);
-
   /* If the infcall does NOT succeed, normal_stop will have already
      finished the thread states.  However, on success, normal_stop
      defers here, so that we can set back the thread states to what
@@ -657,7 +655,7 @@ run_inferior_call (struct call_thread_fsm *sm,
      evaluates true and thus we'll present a user-visible stop is
      decided elsewhere.  */
   if (!was_running
-      && ptid_equal (call_thread_ptid, inferior_ptid)
+      && call_thread_ptid == inferior_ptid
       && stop_stack_dummy == STOP_STACK_DUMMY)
     finish_thread_state (user_visible_resume_ptid (0));
 
@@ -670,12 +668,11 @@ run_inferior_call (struct call_thread_fsm *sm,
      of error out of resume()), then we wouldn't need this.  */
   if (caught_error.reason < 0)
     {
-      if (call_thread != NULL)
+      if (call_thread->state != THREAD_EXITED)
 	breakpoint_auto_delete (call_thread->control.stop_bpstat);
     }
 
-  if (call_thread != NULL)
-    call_thread->control.in_infcall = saved_in_infcall;
+  call_thread->control.in_infcall = saved_in_infcall;
 
   return caught_error;
 }
@@ -739,7 +736,6 @@ call_function_by_hand_dummy (struct value *function,
   ptid_t call_thread_ptid;
   struct gdb_exception e;
   char name_buf[RAW_FUNCTION_ADDRESS_SIZE];
-  bool stack_temporaries = thread_stack_temporaries_enabled_p (inferior_ptid);
 
   if (!target_has_execution)
     noprocess ();
@@ -749,6 +745,14 @@ call_function_by_hand_dummy (struct value *function,
 
   if (execution_direction == EXEC_REVERSE)
     error (_("Cannot call functions in reverse mode."));
+
+  /* We're going to run the target, and inspect the thread's state
+     afterwards.  Hold a strong reference so that the pointer remains
+     valid even if the thread exits.  */
+  thread_info_ref call_thread
+    = thread_info_ref::new_reference (inferior_thread ());
+
+  bool stack_temporaries = thread_stack_temporaries_enabled_p (call_thread.get ());
 
   frame = get_current_frame ();
   gdbarch = get_frame_arch (frame);
@@ -842,7 +846,7 @@ call_function_by_hand_dummy (struct value *function,
       {
 	struct value *lastval;
 
-	lastval = get_last_thread_stack_temporary (inferior_ptid);
+	lastval = get_last_thread_stack_temporary (call_thread.get ());
         if (lastval != NULL)
 	  {
 	    CORE_ADDR lastval_addr = value_address (lastval);
@@ -1137,9 +1141,9 @@ call_function_by_hand_dummy (struct value *function,
   /* Everything's ready, push all the info needed to restore the
      caller (and identify the dummy-frame) onto the dummy-frame
      stack.  */
-  dummy_frame_push (caller_state, &dummy_id, inferior_ptid);
+  dummy_frame_push (caller_state, &dummy_id, call_thread.get ());
   if (dummy_dtor != NULL)
-    register_dummy_frame_dtor (dummy_id, inferior_ptid,
+    register_dummy_frame_dtor (dummy_id, call_thread.get (),
 			       dummy_dtor, dummy_dtor_data);
 
   /* Register a clean-up for unwind_on_terminating_exception_breakpoint.  */
@@ -1150,20 +1154,17 @@ call_function_by_hand_dummy (struct value *function,
      If you're looking to implement asynchronous dummy-frames, then
      just below is the place to chop this function in two..  */
 
-  /* TP is invalid after run_inferior_call returns, so enclose this
-     in a block so that it's only in scope during the time it's valid.  */
   {
-    struct thread_info *tp = inferior_thread ();
     struct thread_fsm *saved_sm;
     struct call_thread_fsm *sm;
 
     /* Save the current FSM.  We'll override it.  */
-    saved_sm = tp->thread_fsm;
-    tp->thread_fsm = NULL;
+    saved_sm = call_thread->thread_fsm;
+    call_thread->thread_fsm = NULL;
 
     /* Save this thread's ptid, we need it later but the thread
        may have exited.  */
-    call_thread_ptid = tp->ptid;
+    call_thread_ptid = call_thread->ptid;
 
     /* Run the inferior until it stops.  */
 
@@ -1177,17 +1178,16 @@ call_function_by_hand_dummy (struct value *function,
 			      struct_return || hidden_first_param_p,
 			      struct_addr);
 
-    e = run_inferior_call (sm, tp, real_pc);
+    e = run_inferior_call (sm, call_thread.get (), real_pc);
 
     gdb::observers::inferior_call_post.notify (call_thread_ptid, funaddr);
 
-    tp = find_thread_ptid (call_thread_ptid);
-    if (tp != NULL)
+    if (call_thread->state != THREAD_EXITED)
       {
 	/* The FSM should still be the same.  */
-	gdb_assert (tp->thread_fsm == &sm->thread_fsm);
+	gdb_assert (call_thread->thread_fsm == &sm->thread_fsm);
 
-	if (thread_fsm_finished_p (tp->thread_fsm))
+	if (thread_fsm_finished_p (call_thread->thread_fsm))
 	  {
 	    struct value *retval;
 
@@ -1195,7 +1195,7 @@ call_function_by_hand_dummy (struct value *function,
 	       which runs its destructors and restores the inferior's
 	       suspend state, and restore the inferior control
 	       state.  */
-	    dummy_frame_pop (dummy_id, call_thread_ptid);
+	    dummy_frame_pop (dummy_id, call_thread.get ());
 	    restore_infcall_control_state (inf_status);
 
 	    /* Get the return value.  */
@@ -1203,9 +1203,9 @@ call_function_by_hand_dummy (struct value *function,
 
 	    /* Clean up / destroy the call FSM, and restore the
 	       original one.  */
-	    thread_fsm_clean_up (tp->thread_fsm, tp);
-	    thread_fsm_delete (tp->thread_fsm);
-	    tp->thread_fsm = saved_sm;
+	    thread_fsm_clean_up (call_thread->thread_fsm, call_thread.get ());
+	    thread_fsm_delete (call_thread->thread_fsm);
+	    call_thread->thread_fsm = saved_sm;
 
 	    maybe_remove_breakpoints ();
 
@@ -1216,7 +1216,7 @@ call_function_by_hand_dummy (struct value *function,
 
 	/* Didn't complete.  Restore previous state machine, and
 	   handle the error.  */
-	tp->thread_fsm = saved_sm;
+	call_thread->thread_fsm = saved_sm;
       }
   }
 
@@ -1317,7 +1317,7 @@ When the function is done executing, GDB will silently stop."),
 
 	      /* We must get back to the frame we were before the
 		 dummy call.  */
-	      dummy_frame_pop (dummy_id, call_thread_ptid);
+	      dummy_frame_pop (dummy_id, call_thread.get ());
 
 	      /* We also need to restore inferior status to that before the
 		 dummy call.  */
@@ -1358,7 +1358,7 @@ When the function is done executing, GDB will silently stop."),
 	{
 	  /* We must get back to the frame we were before the dummy
 	     call.  */
-	  dummy_frame_pop (dummy_id, call_thread_ptid);
+	  dummy_frame_pop (dummy_id, call_thread.get ());
 
 	  /* We also need to restore inferior status to that before
 	     the dummy call.  */

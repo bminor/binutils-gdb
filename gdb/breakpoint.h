@@ -40,6 +40,7 @@ struct bpstats;
 struct bp_location;
 struct linespec_result;
 struct linespec_sals;
+struct inferior;
 
 /* Why are we removing the breakpoint from the target?  */
 
@@ -948,7 +949,7 @@ extern bpstat build_bpstat_chain (const address_space *aspace,
    commands, FIXME??? fields.  */
 
 extern bpstat bpstat_stop_status (const address_space *aspace,
-				  CORE_ADDR pc, ptid_t ptid,
+				  CORE_ADDR pc, thread_info *thread,
 				  const struct target_waitstatus *ws,
 				  bpstat stop_chain = NULL);
 
@@ -1396,7 +1397,7 @@ extern void insert_breakpoints (void);
 
 extern int remove_breakpoints (void);
 
-extern int remove_breakpoints_pid (int pid);
+extern int remove_breakpoints_inf (inferior *inf);
 
 /* This function can be used to update the breakpoint package's state
    after an exec() system call has been executed.

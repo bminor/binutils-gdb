@@ -559,9 +559,9 @@ i386_linux_get_syscall_number_from_regcache (struct regcache *regcache)
 
 static LONGEST
 i386_linux_get_syscall_number (struct gdbarch *gdbarch,
-                               ptid_t ptid)
+			       thread_info *thread)
 {
-  struct regcache *regcache = get_thread_regcache (ptid);
+  struct regcache *regcache = get_thread_regcache (thread);
 
   return i386_linux_get_syscall_number_from_regcache (regcache);
 }

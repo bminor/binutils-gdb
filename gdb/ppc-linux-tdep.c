@@ -803,9 +803,9 @@ ppc_linux_trap_reg_p (struct gdbarch *gdbarch)
    r0 register.  When the function fails, it returns -1.  */
 static LONGEST
 ppc_linux_get_syscall_number (struct gdbarch *gdbarch,
-                              ptid_t ptid)
+			      thread_info *thread)
 {
-  struct regcache *regcache = get_thread_regcache (ptid);
+  struct regcache *regcache = get_thread_regcache (thread);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 

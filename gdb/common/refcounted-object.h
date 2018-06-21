@@ -51,4 +51,20 @@ private:
   int m_refcount = 0;
 };
 
+/* A policy class to interface gdb::ref_ptr with a
+   refcounted_object.  */
+
+struct refcounted_object_ref_policy
+{
+  static void incref (refcounted_object *ptr)
+  {
+    ptr->incref ();
+  }
+
+  static void decref (refcounted_object *ptr)
+  {
+    ptr->decref ();
+  }
+};
+
 #endif /* REFCOUNTED_OBJECT_H */

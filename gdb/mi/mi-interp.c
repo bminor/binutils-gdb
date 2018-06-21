@@ -328,10 +328,6 @@ mi_interp::pre_command_loop ()
 static void
 mi_new_thread (struct thread_info *t)
 {
-  struct inferior *inf = find_inferior_ptid (t->ptid);
-
-  gdb_assert (inf);
-
   SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
@@ -344,7 +340,7 @@ mi_new_thread (struct thread_info *t)
 
       fprintf_unfiltered (mi->event_channel,
 			  "thread-created,id=\"%d\",group-id=\"i%d\"",
-			  t->global_num, inf->num);
+			  t->global_num, t->inf->num);
       gdb_flush (mi->event_channel);
     }
 }
@@ -658,7 +654,7 @@ mi_on_normal_stop_1 (struct bpstats *bs, int print_frame)
       else
 	mi_uiout->field_string ("stopped-threads", "all");
 
-      core = target_core_of_thread (inferior_ptid);
+      core = target_core_of_thread (tp->ptid);
       if (core != -1)
 	mi_uiout->field_int ("core", core);
     }
@@ -939,11 +935,9 @@ mi_breakpoint_modified (struct breakpoint *b)
     }
 }
 
-static int
-mi_output_running_pid (struct thread_info *info, void *arg)
+static void
+mi_output_running (struct thread_info *thread)
 {
-  ptid_t *ptid = (ptid_t *) arg;
-
   SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
@@ -951,25 +945,10 @@ mi_output_running_pid (struct thread_info *info, void *arg)
       if (mi == NULL)
 	continue;
 
-      if (ptid_get_pid (*ptid) == ptid_get_pid (info->ptid))
-	fprintf_unfiltered (mi->raw_stdout,
-			    "*running,thread-id=\"%d\"\n",
-			    info->global_num);
+      fprintf_unfiltered (mi->raw_stdout,
+			  "*running,thread-id=\"%d\"\n",
+			  thread->global_num);
     }
-
-  return 0;
-}
-
-static int
-mi_inferior_count (struct inferior *inf, void *arg)
-{
-  if (inf->pid != 0)
-    {
-      int *count_p = (int *) arg;
-      (*count_p)++;
-    }
-
-  return 0;
 }
 
 static void
@@ -994,24 +973,37 @@ mi_on_resume_1 (struct mi_interp *mi, ptid_t ptid)
   else if (ptid_is_pid (ptid))
     {
       int count = 0;
+      inferior *inf;
 
       /* Backwards compatibility.  If there's only one inferior,
 	 output "all", otherwise, output each resumed thread
 	 individually.  */
-      iterate_over_inferiors (mi_inferior_count, &count);
+      ALL_INFERIORS (inf)
+	if (inf->pid != 0)
+	  {
+	    count++;
+	    if (count > 1)
+	      break;
+	  }
 
       if (count == 1)
 	fprintf_unfiltered (mi->raw_stdout, "*running,thread-id=\"all\"\n");
       else
-	iterate_over_threads (mi_output_running_pid, &ptid);
+	{
+	  thread_info *tp;
+	  inferior *curinf = current_inferior ();
+
+	  ALL_NON_EXITED_THREADS (tp)
+	    if (tp->inf == curinf)
+	      mi_output_running (tp);
+	}
     }
   else
     {
-      struct thread_info *ti = find_thread_ptid (ptid);
+      thread_info *ti = find_thread_ptid (ptid);
 
       gdb_assert (ti);
-      fprintf_unfiltered (mi->raw_stdout, "*running,thread-id=\"%d\"\n",
-			  ti->global_num);
+      mi_output_running (ti);
     }
 
   if (!running_result_record_printed && mi_proceeded)
@@ -1234,7 +1226,10 @@ mi_user_selected_context_changed (user_selected_what selection)
   if (mi_suppress_notification.user_selected_context)
     return;
 
-  tp = find_thread_ptid (inferior_ptid);
+  if (inferior_ptid != null_ptid)
+    tp = inferior_thread ();
+  else
+    tp = NULL;
 
   SWITCH_THRU_ALL_UIS ()
     {

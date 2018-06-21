@@ -646,7 +646,7 @@ execute_command (const char *p, int from_tty)
      we just finished executing did not resume the inferior's execution.
      If it did resume the inferior, we will do that check after
      the inferior stopped.  */
-  if (has_stack_frames () && !is_running (inferior_ptid))
+  if (has_stack_frames () && inferior_thread ()->state != THREAD_RUNNING)
     check_frame_language_change ();
 
   discard_cleanups (cleanup_if_error);
@@ -1505,15 +1505,14 @@ static int
 kill_or_detach (struct inferior *inf, void *args)
 {
   struct qt_args *qt = (struct qt_args *) args;
-  struct thread_info *thread;
 
   if (inf->pid == 0)
     return 0;
 
-  thread = any_thread_of_process (inf->pid);
+  thread_info *thread = any_thread_of_inferior (inf);
   if (thread != NULL)
     {
-      switch_to_thread (thread->ptid);
+      switch_to_thread (thread);
 
       /* Leave core files alone.  */
       if (target_has_execution)

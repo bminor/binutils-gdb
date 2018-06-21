@@ -1175,15 +1175,12 @@ ctf_target_open (const char *dirname, int from_tty)
 void
 ctf_target::close ()
 {
-  int pid;
-
   ctf_destroy ();
   xfree (trace_dirname);
   trace_dirname = NULL;
 
-  pid = ptid_get_pid (inferior_ptid);
   inferior_ptid = null_ptid;	/* Avoid confusion from thread stuff.  */
-  exit_inferior_silent (pid);
+  exit_inferior_silent (current_inferior ());
 
   trace_reset_local_state ();
 }

@@ -819,9 +819,9 @@ arm_linux_sigreturn_next_pc (struct regcache *regcache,
 
 static LONGEST
 arm_linux_get_syscall_number (struct gdbarch *gdbarch,
-			      ptid_t ptid)
+			      thread_info *thread)
 {
-  struct regcache *regs = get_thread_regcache (ptid);
+  struct regcache *regs = get_thread_regcache (thread);
 
   ULONGEST pc;
   ULONGEST cpsr;

@@ -366,9 +366,9 @@ aarch64_stap_parse_special_token (struct gdbarch *gdbarch,
 
 static LONGEST
 aarch64_linux_get_syscall_number (struct gdbarch *gdbarch,
-				  ptid_t ptid)
+				  thread_info *thread)
 {
-  struct regcache *regs = get_thread_regcache (ptid);
+  struct regcache *regs = get_thread_regcache (thread);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   /* The content of register x8.  */

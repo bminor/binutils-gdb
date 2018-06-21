@@ -23,6 +23,7 @@
 #include "py-record-btrace.h"
 #include "py-record-full.h"
 #include "target.h"
+#include "gdbthread.h"
 
 /* Python Record type.  */
 
@@ -176,7 +177,7 @@ recpy_end (PyObject *self, void* closure)
 /* Create a new gdb.RecordInstruction object.  */
 
 PyObject *
-recpy_insn_new (ptid_t ptid, enum record_method method, Py_ssize_t number)
+recpy_insn_new (thread_info *thread, enum record_method method, Py_ssize_t number)
 {
   recpy_element_object * const obj = PyObject_New (recpy_element_object,
 						   &recpy_insn_type);
@@ -184,7 +185,7 @@ recpy_insn_new (ptid_t ptid, enum record_method method, Py_ssize_t number)
   if (obj == NULL)
    return NULL;
 
-  obj->ptid = ptid;
+  obj->thread = thread;
   obj->method = method;
   obj->number = number;
 
@@ -272,7 +273,7 @@ recpy_insn_is_speculative (PyObject *self, void *closure)
 /* Create a new gdb.RecordFunctionSegment object.  */
 
 PyObject *
-recpy_func_new (ptid_t ptid, enum record_method method, Py_ssize_t number)
+recpy_func_new (thread_info *thread, enum record_method method, Py_ssize_t number)
 {
   recpy_element_object * const obj = PyObject_New (recpy_element_object,
 						   &recpy_func_type);
@@ -280,7 +281,7 @@ recpy_func_new (ptid_t ptid, enum record_method method, Py_ssize_t number)
   if (obj == NULL)
    return NULL;
 
-  obj->ptid = ptid;
+  obj->thread = thread;
   obj->method = method;
   obj->number = number;
 
@@ -405,7 +406,7 @@ recpy_element_richcompare (PyObject *self, PyObject *other, int op)
   switch (op)
   {
     case Py_EQ:
-      if (ptid_equal (obj1->ptid, obj2->ptid)
+      if (obj1->thread == obj2->thread
 	  && obj1->method == obj2->method
 	  && obj1->number == obj2->number)
 	Py_RETURN_TRUE;
@@ -413,7 +414,7 @@ recpy_element_richcompare (PyObject *self, PyObject *other, int op)
 	Py_RETURN_FALSE;
 
     case Py_NE:
-      if (!ptid_equal (obj1->ptid, obj2->ptid)
+      if (obj1->thread != obj2->thread
 	  || obj1->method != obj2->method
 	  || obj1->number != obj2->number)
 	Py_RETURN_TRUE;
@@ -626,8 +627,8 @@ gdbpy_current_recording (PyObject *self, PyObject *args)
     Py_RETURN_NONE;
 
   ret = PyObject_New (recpy_record_object, &recpy_record_type);
-  ret->ptid = inferior_ptid;
-  ret->method = target_record_method (inferior_ptid);
+  ret->thread = inferior_thread ();
+  ret->method = target_record_method (ret->thread->ptid);
 
   return (PyObject *) ret;
 }

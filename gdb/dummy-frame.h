@@ -33,8 +33,9 @@ struct frame_unwind;
    be expanded so that it knowns the lower/upper extent of the dummy
    frame's code.  */
 
-extern void dummy_frame_push (struct infcall_suspend_state *caller_state,
-                              const struct frame_id *dummy_id, ptid_t ptid);
+extern void dummy_frame_push (infcall_suspend_state *caller_state,
+			      const frame_id *dummy_id,
+			      thread_info *thread);
 
 /* Pop the dummy frame DUMMY_ID, restoring program state to that before the
    frame was created.
@@ -45,9 +46,9 @@ extern void dummy_frame_push (struct infcall_suspend_state *caller_state,
    stack, because the other frames may be for different threads, and there's
    currently no way to tell which stack frame is for which thread.  */
 
-extern void dummy_frame_pop (struct frame_id dummy_id, ptid_t ptid);
+extern void dummy_frame_pop (frame_id dummy_id, thread_info *thread);
 
-extern void dummy_frame_discard (struct frame_id dummy_id, ptid_t ptid);
+extern void dummy_frame_discard (frame_id dummy_id, thread_info *thread);
 
 /* If the PC falls in a dummy frame, return a dummy frame
    unwinder.  */
@@ -58,11 +59,12 @@ extern const struct frame_unwind dummy_frame_unwind;
    REGISTERS_VALID is 1 for dummy_frame_pop, 0 for dummy_frame_discard.  */
 typedef void (dummy_frame_dtor_ftype) (void *data, int registers_valid);
 
-/* Call DTOR with DTOR_DATA when DUMMY_ID frame of thread PTID gets discarded.
-   Dummy frame with DUMMY_ID must exist.  Multiple destructors may be
-   registered, they will be called in the reverse order of registrations
-   (LIFO).  */
-extern void register_dummy_frame_dtor (struct frame_id dummy_id, ptid_t ptid,
+/* Call DTOR with DTOR_DATA when DUMMY_ID frame of thread THREAD gets
+   discarded.  Dummy frame with DUMMY_ID must exist.  Multiple
+   destructors may be registered, they will be called in the reverse
+   order of registrations (LIFO).  */
+extern void register_dummy_frame_dtor (frame_id dummy_id,
+				       thread_info *thread,
 				       dummy_frame_dtor_ftype *dtor,
 				       void *dtor_data);
 

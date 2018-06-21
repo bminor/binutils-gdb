@@ -401,7 +401,7 @@ extern int valid_task_id (int);
 
 extern struct ada_task_info *ada_get_task_info_from_ptid (ptid_t ptid);
 
-extern int ada_get_task_number (ptid_t);
+extern int ada_get_task_number (thread_info *thread);
 
 typedef void (ada_task_list_iterator_ftype) (struct ada_task_info *task);
 extern void iterate_over_live_ada_tasks

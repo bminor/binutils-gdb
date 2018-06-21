@@ -211,6 +211,9 @@ public:
     return (refcount () == 0 && !ptid_equal (ptid, inferior_ptid));
   }
 
+  /* Mark this thread as running and notify observers.  */
+  void set_running (bool running);
+
   struct thread_info *next = NULL;
   ptid_t ptid;			/* "Actual process id";
 				    In fact, this may be overloaded with 
@@ -367,6 +370,11 @@ public:
   struct thread_info *step_over_next = NULL;
 };
 
+/* A gdb::ref_ptr pointer to a thread_info.  */
+
+using thread_info_ref
+  = gdb::ref_ptr<thread_info, refcounted_object_ref_policy>;
+
 /* Create an empty thread list, or empty the existing one.  */
 extern void init_thread_list (void);
 
@@ -385,12 +393,12 @@ extern struct thread_info *add_thread_with_info (ptid_t ptid,
 						 struct private_thread_info *);
 
 /* Delete an existing thread list entry.  */
-extern void delete_thread (ptid_t);
+extern void delete_thread (thread_info *thread);
 
 /* Delete an existing thread list entry, and be quiet about it.  Used
    after the process this thread having belonged to having already
    exited, for example.  */
-extern void delete_thread_silent (ptid_t);
+extern void delete_thread_silent (thread_info *thread);
 
 /* Delete a step_resume_breakpoint from the thread database.  */
 extern void delete_step_resume_breakpoint (struct thread_info *);
@@ -411,16 +419,6 @@ extern int thread_has_single_step_breakpoint_here (struct thread_info *tp,
 						   const address_space *aspace,
 						   CORE_ADDR addr);
 
-/* Translate the global integer thread id (GDB's homegrown id, not the
-   system's) into a "pid" (which may be overloaded with extra thread
-   information).  */
-extern ptid_t global_thread_id_to_ptid (int num);
-
-/* Translate a 'pid' (which may be overloaded with extra thread
-   information) into the global integer thread id (GDB's homegrown id,
-   not the system's).  */
-extern int ptid_to_global_thread_id (ptid_t ptid);
-
 /* Returns whether to show inferior-qualified thread IDs, or plain
    thread numbers.  Inferior-qualified IDs are shown whenever we have
    multiple inferiors, or the only inferior left has number > 1.  */
@@ -432,8 +430,7 @@ extern int show_inferior_qualified_tids (void);
    circular static buffer, NUMCELLS deep.  */
 const char *print_thread_id (struct thread_info *thr);
 
-/* Boolean test for an already-known pid (which may be overloaded with
-   extra thread information).  */
+/* Boolean test for an already-known ptid.  */
 extern int in_thread_list (ptid_t ptid);
 
 /* Boolean test for an already-known global thread id (GDB's homegrown
@@ -450,17 +447,16 @@ struct thread_info *find_thread_global_id (int global_id);
 struct thread_info *find_thread_by_handle (struct value *thread_handle,
 					   struct inferior *inf);
 
-/* Finds the first thread of the inferior given by PID.  If PID is -1,
-   returns the first thread in the list.  */
-struct thread_info *first_thread_of_process (int pid);
+/* Finds the first thread of the specified inferior.  */
+extern thread_info *first_thread_of_inferior (inferior *inf);
 
-/* Returns any thread of process PID, giving preference to the current
-   thread.  */
-extern struct thread_info *any_thread_of_process (int pid);
+/* Returns any thread of inferior INF, giving preference to the
+   current thread.  */
+extern thread_info *any_thread_of_inferior (inferior *inf);
 
-/* Returns any non-exited thread of process PID, giving preference to
+/* Returns any non-exited thread of inferior INF, giving preference to
    the current thread, and to not executing threads.  */
-extern struct thread_info *any_live_thread_of_process (int pid);
+extern thread_info *any_live_thread_of_inferior (inferior *inf);
 
 /* Change the ptid of thread OLD_PTID to NEW_PTID.  */
 void thread_change_ptid (ptid_t old_ptid, ptid_t new_ptid);
@@ -495,6 +491,12 @@ extern struct thread_info *iterate_over_threads (thread_callback_func, void *);
        (T) = (TMP))
 
 extern int thread_count (void);
+
+/* Switch context to thread THR.  Also sets the STOP_PC global.  */
+extern void switch_to_thread (thread_info *thr);
+
+/* Switch context to no thread selected.  */
+extern void switch_to_no_thread ();
 
 /* Switch from one thread to another.  Does not read registers and
    sets STOP_PC to -1.  */
@@ -548,9 +550,6 @@ extern int is_stopped (ptid_t ptid);
    description of state and executing fields of struct
    thread_info.  */
 extern void set_executing (ptid_t ptid, int executing);
-
-/* Reports if thread PTID is executing.  */
-extern int is_executing (ptid_t ptid);
 
 /* True if any (known or unknown) thread is or may be executing.  */
 extern int threads_are_executing (void);
@@ -653,48 +652,48 @@ extern void delete_exited_threads (void);
 
 int pc_in_thread_step_range (CORE_ADDR pc, struct thread_info *thread);
 
-/* Enable storing stack temporaries for thread with id PTID and
-   disable and clear the stack temporaries on destruction.  */
+/* Enable storing stack temporaries for thread THR and disable and
+   clear the stack temporaries on destruction.  Holds a strong
+   reference to THR.  */
 
 class enable_thread_stack_temporaries
 {
 public:
 
-  explicit enable_thread_stack_temporaries (ptid_t ptid)
-    : m_ptid (ptid)
+  explicit enable_thread_stack_temporaries (thread_info *thr)
+    : m_thr (thr)
   {
-    struct thread_info *tp = find_thread_ptid (ptid);
+    gdb_assert (m_thr != NULL);
 
-    gdb_assert (tp != NULL);
-    tp->stack_temporaries_enabled = true;
-    tp->stack_temporaries.clear ();
+    m_thr->incref ();
+
+    m_thr->stack_temporaries_enabled = true;
+    m_thr->stack_temporaries.clear ();
   }
 
   ~enable_thread_stack_temporaries ()
   {
-    struct thread_info *tp = find_thread_ptid (m_ptid);
+    m_thr->stack_temporaries_enabled = false;
+    m_thr->stack_temporaries.clear ();
 
-    if (tp != NULL)
-      {
-	tp->stack_temporaries_enabled = false;
-	tp->stack_temporaries.clear ();
-      }
+    m_thr->decref ();
   }
 
   DISABLE_COPY_AND_ASSIGN (enable_thread_stack_temporaries);
 
 private:
 
-  ptid_t m_ptid;
+  thread_info *m_thr;
 };
 
-extern bool thread_stack_temporaries_enabled_p (ptid_t ptid);
+extern bool thread_stack_temporaries_enabled_p (thread_info *tp);
 
-extern void push_thread_stack_temporary (ptid_t ptid, struct value *v);
+extern void push_thread_stack_temporary (thread_info *tp, struct value *v);
 
-extern struct value *get_last_thread_stack_temporary (ptid_t);
+extern value *get_last_thread_stack_temporary (thread_info *tp);
 
-extern bool value_in_thread_stack_temporaries (struct value *, ptid_t);
+extern bool value_in_thread_stack_temporaries (struct value *,
+					       thread_info *thr);
 
 /* Add TP to the end of its inferior's pending step-over chain.  */
 
@@ -722,9 +721,9 @@ extern void thread_cancel_execution_command (struct thread_info *thr);
    executing).  */
 extern void validate_registers_access (void);
 
-/* Check whether it makes sense to access a register of PTID at this point.
+/* Check whether it makes sense to access a register of THREAD at this point.
    Returns true if registers may be accessed; false otherwise.  */
-extern bool can_access_registers_ptid (ptid_t ptid);
+extern bool can_access_registers_thread (thread_info *thread);
 
 /* Returns whether to show which thread hit the breakpoint, received a
    signal, etc. and ended up causing a user-visible stop.  This is

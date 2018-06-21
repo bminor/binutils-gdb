@@ -356,7 +356,7 @@ varobj_create (const char *objname,
 	    error (_("Failed to find the specified frame"));
 
 	  var->root->frame = get_frame_id (fi);
-	  var->root->thread_id = ptid_to_global_thread_id (inferior_ptid);
+	  var->root->thread_id = inferior_thread ()->global_num;
 	  old_id = get_frame_id (get_selected_frame (NULL));
 	  select_frame (fi);	 
 	}
@@ -2122,11 +2122,11 @@ value_of_root_1 (struct varobj **var_handle)
     }
   else
     {
-      ptid_t ptid = global_thread_id_to_ptid (var->root->thread_id);
+      thread_info *thread = find_thread_global_id (var->root->thread_id);
 
-      if (!ptid_equal (minus_one_ptid, ptid))
+      if (thread != NULL)
 	{
-	  switch_to_thread (ptid);
+	  switch_to_thread (thread);
 	  within_scope = check_scope (var);
 	}
     }

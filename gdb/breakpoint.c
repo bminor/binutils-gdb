@@ -1548,7 +1548,7 @@ watchpoint_in_thread_scope (struct watchpoint *b)
   return (b->pspace == current_program_space
 	  && (ptid_equal (b->watchpoint_thread, null_ptid)
 	      || (ptid_equal (inferior_ptid, b->watchpoint_thread)
-		  && !is_executing (inferior_ptid))));
+		  && !inferior_thread ()->executing)));
 }
 
 /* Set watchpoint B to disp_del_at_next_stop, even including its possible
@@ -2408,7 +2408,7 @@ breakpoint_kind (struct bp_location *bl, CORE_ADDR *addr)
       struct thread_info *thr = find_thread_global_id (bl->owner->thread);
       struct regcache *regcache;
 
-      regcache = get_thread_regcache (thr->ptid);
+      regcache = get_thread_regcache (thr);
 
       return gdbarch_breakpoint_kind_from_current_state (bl->gdbarch,
 							 regcache, addr);
@@ -3061,14 +3061,13 @@ Thread-specific breakpoint %d deleted - thread %s no longer in the thread list.\
     }
 }
 
-/* Remove breakpoints of process PID.  */
+/* Remove breakpoints of inferior INF.  */
 
 int
-remove_breakpoints_pid (int pid)
+remove_breakpoints_inf (inferior *inf)
 {
   struct bp_location *bl, **blp_tmp;
   int val;
-  struct inferior *inf = find_inferior_pid (pid);
 
   ALL_BP_LOCATIONS (bl, blp_tmp)
   {
@@ -4329,16 +4328,12 @@ bpstat_num (bpstat *bsp, int *num)
 void
 bpstat_clear_actions (void)
 {
-  struct thread_info *tp;
   bpstat bs;
 
-  if (ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_ptid == null_ptid)
     return;
 
-  tp = find_thread_ptid (inferior_ptid);
-  if (tp == NULL)
-    return;
-
+  thread_info *tp = inferior_thread ();
   for (bs = tp->control.stop_bpstat; bs != NULL; bs = bs->next)
     {
       bs->commands = NULL;
@@ -4466,22 +4461,37 @@ bpstat_do_actions_1 (bpstat *bsp)
   return again;
 }
 
+/* Helper for bpstat_do_actions.  Get the current thread, if there's
+   one, is alive and has execution.  Return NULL otherwise.  */
+
+static thread_info *
+get_bpstat_thread ()
+{
+  if (inferior_ptid == null_ptid || !target_has_execution)
+    return NULL;
+
+  thread_info *tp = inferior_thread ();
+  if (tp->state == THREAD_EXITED || tp->executing)
+    return NULL;
+  return tp;
+}
+
 void
 bpstat_do_actions (void)
 {
   struct cleanup *cleanup_if_error = make_bpstat_clear_actions_cleanup ();
+  thread_info *tp;
 
   /* Do any commands attached to breakpoint we are stopped at.  */
-  while (!ptid_equal (inferior_ptid, null_ptid)
-	 && target_has_execution
-	 && !is_exited (inferior_ptid)
-	 && !is_executing (inferior_ptid))
-    /* Since in sync mode, bpstat_do_actions may resume the inferior,
-       and only return when it is stopped at the next breakpoint, we
-       keep doing breakpoint actions until it returns false to
-       indicate the inferior was not resumed.  */
-    if (!bpstat_do_actions_1 (&inferior_thread ()->control.stop_bpstat))
-      break;
+  while ((tp = get_bpstat_thread ()) != NULL)
+    {
+      /* Since in sync mode, bpstat_do_actions may resume the
+	 inferior, and only return when it is stopped at the next
+	 breakpoint, we keep doing breakpoint actions until it returns
+	 false to indicate the inferior was not resumed.  */
+      if (!bpstat_do_actions_1 (&tp->control.stop_bpstat))
+	break;
+    }
 
   discard_cleanups (cleanup_if_error);
 }
@@ -5154,7 +5164,7 @@ bpstat_check_watchpoint (bpstat bs)
    breakpoint, set BS->stop to 0.  */
 
 static void
-bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
+bpstat_check_breakpoint_conditions (bpstat bs, thread_info *thread)
 {
   const struct bp_location *bl;
   struct breakpoint *b;
@@ -5184,9 +5194,8 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
   /* If this is a thread/task-specific breakpoint, don't waste cpu
      evaluating the condition if this isn't the specified
      thread/task.  */
-  if ((b->thread != -1 && b->thread != ptid_to_global_thread_id (ptid))
-      || (b->task != 0 && b->task != ada_get_task_number (ptid)))
-
+  if ((b->thread != -1 && b->thread != thread->global_num)
+      || (b->task != 0 && b->task != ada_get_task_number (thread)))
     {
       bs->stop = 0;
       return;
@@ -5387,7 +5396,7 @@ build_bpstat_chain (const address_space *aspace, CORE_ADDR bp_addr,
 
 bpstat
 bpstat_stop_status (const address_space *aspace,
-		    CORE_ADDR bp_addr, ptid_t ptid,
+		    CORE_ADDR bp_addr, thread_info *thread,
 		    const struct target_waitstatus *ws,
 		    bpstat stop_chain)
 {
@@ -5435,7 +5444,7 @@ bpstat_stop_status (const address_space *aspace,
       b->ops->check_status (bs);
       if (bs->stop)
 	{
-	  bpstat_check_breakpoint_conditions (bs, ptid);
+	  bpstat_check_breakpoint_conditions (bs, thread);
 
 	  if (bs->stop)
 	    {
@@ -7316,7 +7325,7 @@ set_longjmp_breakpoint_for_call_dummy (void)
 	new_b = momentary_breakpoint_from_master (b, bp_longjmp_call_dummy,
 						  &momentary_breakpoint_ops,
 						  1);
-	new_b->thread = ptid_to_global_thread_id (inferior_ptid);
+	new_b->thread = inferior_thread ()->global_num;
 
 	/* Link NEW_B into the chain of RETVAL breakpoints.  */
 
@@ -7356,7 +7365,7 @@ check_longjmp_breakpoint_for_call_dummy (struct thread_info *tp)
 	    || frame_find_by_id (dummy_b->frame_id) != NULL)
 	  continue;
 	
-	dummy_frame_discard (dummy_b->frame_id, tp->ptid);
+	dummy_frame_discard (dummy_b->frame_id, tp);
 
 	while (b->related_breakpoint != b)
 	  {
@@ -8497,11 +8506,7 @@ set_momentary_breakpoint (struct gdbarch *gdbarch, struct symtab_and_line sal,
   b->disposition = disp_donttouch;
   b->frame_id = frame_id;
 
-  /* If we're debugging a multi-threaded program, then we want
-     momentary breakpoints to be active in only a single thread of
-     control.  */
-  if (in_thread_list (inferior_ptid))
-    b->thread = ptid_to_global_thread_id (inferior_ptid);
+  b->thread = inferior_thread ()->global_num;
 
   update_global_location_list_nothrow (UGLL_MAY_INSERT);
 
@@ -13923,8 +13928,7 @@ breakpoint_re_set_thread (struct breakpoint *b)
 {
   if (b->thread != -1)
     {
-      if (in_thread_list (inferior_ptid))
-	b->thread = ptid_to_global_thread_id (inferior_ptid);
+      b->thread = inferior_thread ()->global_num;
 
       /* We're being called after following a fork.  The new fork is
 	 selected as current, and unless this was a vfork will have a

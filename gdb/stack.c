@@ -134,7 +134,7 @@ frame_show_address (struct frame_info *frame,
   if (sal.line != 0 && sal.pc == 0 && sal.end == 0)
     {
       if (get_next_frame (frame) == NULL)
-	gdb_assert (inline_skipped_frames (inferior_ptid) > 0);
+	gdb_assert (inline_skipped_frames (inferior_thread ()) > 0);
       else
 	gdb_assert (get_frame_type (get_next_frame (frame)) == INLINE_FRAME);
       return 0;

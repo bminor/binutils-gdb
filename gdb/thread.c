@@ -220,16 +220,12 @@ set_thread_exited (thread_info *tp, int silent)
 void
 init_thread_list (void)
 {
-  struct thread_info *tp, *tpnext;
+  struct thread_info *tp, *tmp;
 
   highest_thread_num = 0;
 
-  if (!thread_list)
-    return;
-
-  for (tp = thread_list; tp; tp = tpnext)
+  ALL_THREADS_SAFE (tp, tmp)
     {
-      tpnext = tp->next;
       if (tp->deletable ())
 	delete tp;
       else
@@ -285,28 +281,28 @@ add_thread_silent (ptid_t ptid)
 
       if (inferior_ptid == ptid)
 	{
-	  tp = new_thread (inf, null_ptid);
+	  thread_info *new_thr = new_thread (inf, null_ptid);
 
 	  /* Make switch_to_thread not read from the thread.  */
-	  tp->state = THREAD_EXITED;
-	  switch_to_thread (null_ptid);
+	  new_thr->state = THREAD_EXITED;
+	  switch_to_no_thread ();
 
 	  /* Now we can delete it.  */
-	  delete_thread (ptid);
+	  delete_thread (tp);
 
 	  /* Now reset its ptid, and reswitch inferior_ptid to it.  */
-	  tp->ptid = ptid;
-	  tp->state = THREAD_STOPPED;
-	  switch_to_thread (ptid);
+	  new_thr->ptid = ptid;
+	  new_thr->state = THREAD_STOPPED;
+	  switch_to_thread (new_thr);
 
-	  gdb::observers::new_thread.notify (tp);
+	  gdb::observers::new_thread.notify (new_thr);
 
 	  /* All done.  */
-	  return tp;
+	  return new_thr;
 	}
       else
 	/* Just go ahead and delete it.  */
-	delete_thread (ptid);
+	delete_thread (tp);
     }
 
   tp = new_thread (inf, ptid);
@@ -436,17 +432,18 @@ thread_step_over_chain_remove (struct thread_info *tp)
   step_over_chain_remove (&step_over_queue_head, tp);
 }
 
-/* Delete thread PTID.  If SILENT, don't notify the observer of this
+/* Delete thread TP.  If SILENT, don't notify the observer of this
    exit.  */
+
 static void
-delete_thread_1 (ptid_t ptid, int silent)
+delete_thread_1 (thread_info *thr, bool silent)
 {
   struct thread_info *tp, *tpprev;
 
   tpprev = NULL;
 
   for (tp = thread_list; tp; tpprev = tp, tp = tp->next)
-    if (tp->ptid == ptid)
+    if (tp == thr)
       break;
 
   if (!tp)
@@ -468,20 +465,21 @@ delete_thread_1 (ptid_t ptid, int silent)
   delete tp;
 }
 
-/* Delete thread PTID and notify of thread exit.  If this is
-   inferior_ptid, don't actually delete it, but tag it as exited and
-   do the notification.  If PTID is the user selected thread, clear
+/* Delete thread THREAD and notify of thread exit.  If this is the
+   current thread, don't actually delete it, but tag it as exited and
+   do the notification.  If this is the user selected thread, clear
    it.  */
+
 void
-delete_thread (ptid_t ptid)
+delete_thread (thread_info *thread)
 {
-  delete_thread_1 (ptid, 0 /* not silent */);
+  delete_thread_1 (thread, false /* not silent */);
 }
 
 void
-delete_thread_silent (ptid_t ptid)
+delete_thread_silent (thread_info *thread)
 {
-  delete_thread_1 (ptid, 1 /* silent */);
+  delete_thread_1 (thread, true /* silent */);
 }
 
 struct thread_info *
@@ -602,29 +600,6 @@ valid_global_thread_id (int global_id)
 }
 
 int
-ptid_to_global_thread_id (ptid_t ptid)
-{
-  struct thread_info *tp;
-
-  for (tp = thread_list; tp; tp = tp->next)
-    if (tp->ptid == ptid)
-      return tp->global_num;
-
-  return 0;
-}
-
-ptid_t
-global_thread_id_to_ptid (int global_id)
-{
-  struct thread_info *thread = find_thread_global_id (global_id);
-
-  if (thread)
-    return thread->ptid;
-  else
-    return minus_one_ptid;
-}
-
-int
 in_thread_list (ptid_t ptid)
 {
   struct thread_info *tp;
@@ -636,51 +611,50 @@ in_thread_list (ptid_t ptid)
   return 0;			/* Never heard of 'im.  */
 }
 
-/* Finds the first thread of the inferior given by PID.  If PID is -1,
-   return the first thread in the list.  */
+/* Finds the first thread of the inferior.  */
 
-struct thread_info *
-first_thread_of_process (int pid)
+thread_info *
+first_thread_of_inferior (inferior *inf)
 {
   struct thread_info *tp, *ret = NULL;
 
   for (tp = thread_list; tp; tp = tp->next)
-    if (pid == -1 || ptid_get_pid (tp->ptid) == pid)
+    if (tp->inf == inf)
       if (ret == NULL || tp->global_num < ret->global_num)
 	ret = tp;
 
   return ret;
 }
 
-struct thread_info *
-any_thread_of_process (int pid)
+thread_info *
+any_thread_of_inferior (inferior *inf)
 {
   struct thread_info *tp;
 
-  gdb_assert (pid != 0);
+  gdb_assert (inf->pid != 0);
 
   /* Prefer the current thread.  */
-  if (ptid_get_pid (inferior_ptid) == pid)
+  if (inf == current_inferior ())
     return inferior_thread ();
 
   ALL_NON_EXITED_THREADS (tp)
-    if (ptid_get_pid (tp->ptid) == pid)
+    if (tp->inf == inf)
       return tp;
 
   return NULL;
 }
 
-struct thread_info *
-any_live_thread_of_process (int pid)
+thread_info *
+any_live_thread_of_inferior (inferior *inf)
 {
   struct thread_info *curr_tp = NULL;
   struct thread_info *tp;
   struct thread_info *tp_executing = NULL;
 
-  gdb_assert (pid != 0);
+  gdb_assert (inf != NULL && inf->pid != 0);
 
   /* Prefer the current thread if it's not executing.  */
-  if (ptid_get_pid (inferior_ptid) == pid)
+  if (inferior_ptid != null_ptid && current_inferior () == inf)
     {
       /* If the current thread is dead, forget it.  If it's not
 	 executing, use it.  Otherwise, still choose it (below), but
@@ -693,7 +667,7 @@ any_live_thread_of_process (int pid)
     }
 
   ALL_NON_EXITED_THREADS (tp)
-    if (ptid_get_pid (tp->ptid) == pid)
+    if (tp->inf == inf)
       {
 	if (!tp->executing)
 	  return tp;
@@ -731,7 +705,7 @@ prune_threads (void)
   ALL_THREADS_SAFE (tp, tmp)
     {
       if (!thread_alive (tp))
-	delete_thread (tp->ptid);
+	delete_thread (tp);
     }
 }
 
@@ -745,18 +719,16 @@ delete_exited_threads (void)
   ALL_THREADS_SAFE (tp, tmp)
     {
       if (tp->state == THREAD_EXITED)
-	delete_thread (tp->ptid);
+	delete_thread (tp);
     }
 }
 
 /* Return true value if stack temporaies are enabled for the thread
-   with id PTID.  */
+   TP.  */
 
 bool
-thread_stack_temporaries_enabled_p (ptid_t ptid)
+thread_stack_temporaries_enabled_p (thread_info *tp)
 {
-  struct thread_info *tp = find_thread_ptid (ptid);
-
   if (tp == NULL)
     return false;
   else
@@ -766,22 +738,18 @@ thread_stack_temporaries_enabled_p (ptid_t ptid)
 /* Push V on to the stack temporaries of the thread with id PTID.  */
 
 void
-push_thread_stack_temporary (ptid_t ptid, struct value *v)
+push_thread_stack_temporary (thread_info *tp, struct value *v)
 {
-  struct thread_info *tp = find_thread_ptid (ptid);
-
   gdb_assert (tp != NULL && tp->stack_temporaries_enabled);
   tp->stack_temporaries.push_back (v);
 }
 
 /* Return true if VAL is among the stack temporaries of the thread
-   with id PTID.  Return false otherwise.  */
+   TP.  Return false otherwise.  */
 
 bool
-value_in_thread_stack_temporaries (struct value *val, ptid_t ptid)
+value_in_thread_stack_temporaries (struct value *val, thread_info *tp)
 {
-  struct thread_info *tp = find_thread_ptid (ptid);
-
   gdb_assert (tp != NULL && tp->stack_temporaries_enabled);
   for (value *v : tp->stack_temporaries)
     if (v == val)
@@ -793,11 +761,10 @@ value_in_thread_stack_temporaries (struct value *val, ptid_t ptid)
 /* Return the last of the stack temporaries for thread with id PTID.
    Return NULL if there are no stack temporaries for the thread.  */
 
-struct value *
-get_last_thread_stack_temporary (ptid_t ptid)
+value *
+get_last_thread_stack_temporary (thread_info *tp)
 {
   struct value *lastval = NULL;
-  struct thread_info *tp = find_thread_ptid (ptid);
 
   gdb_assert (tp != NULL);
   if (!tp->stack_temporaries.empty ())
@@ -868,6 +835,15 @@ set_running_thread (struct thread_info *tp, int running)
     }
 
   return started;
+}
+
+/* See gdbthread.h.  */
+
+void
+thread_info::set_running (bool running)
+{
+  if (set_running_thread (this, running))
+    gdb::observers::target_resumed.notify (this->ptid);
 }
 
 void
@@ -1049,8 +1025,10 @@ validate_registers_access (void)
   if (inferior_ptid == null_ptid)
     error (_("No thread selected."));
 
+  thread_info *tp = inferior_thread ();
+
   /* Don't try to read from a dead thread.  */
-  if (is_exited (inferior_ptid))
+  if (tp->state == THREAD_EXITED)
     error (_("The current thread has terminated"));
 
   /* ... or from a spinning thread.  FIXME: This isn't actually fully
@@ -1058,25 +1036,25 @@ validate_registers_access (void)
      at the prompt) when a thread is not executing for some internal
      reason, but is marked running from the user's perspective.  E.g.,
      the thread is waiting for its turn in the step-over queue.  */
-  if (is_executing (inferior_ptid))
+  if (tp->executing)
     error (_("Selected thread is running."));
 }
 
 /* See gdbthread.h.  */
 
 bool
-can_access_registers_ptid (ptid_t ptid)
+can_access_registers_thread (thread_info *thread)
 {
   /* No thread, no registers.  */
-  if (ptid == null_ptid)
+  if (thread == NULL)
     return false;
 
   /* Don't try to read from a dead thread.  */
-  if (is_exited (ptid))
+  if (thread->state == THREAD_EXITED)
     return false;
 
   /* ... or from a spinning thread.  FIXME: see validate_registers_access.  */
-  if (is_executing (ptid))
+  if (thread->executing)
     return false;
 
   return true;
@@ -1139,13 +1117,19 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 		     int show_global_ids)
 {
   struct thread_info *tp;
-  ptid_t current_ptid;
   const char *extra_info, *name, *target_id;
   struct inferior *inf;
   int default_inf_num = current_inferior ()->num;
 
   update_thread_list ();
-  current_ptid = inferior_ptid;
+
+  /* Whether we saw any thread.  */
+  bool any_thread = false;
+  /* Whether the current thread is exited.  */
+  bool current_exited = false;
+
+  thread_info *current_thread = (inferior_ptid != null_ptid
+				 ? inferior_thread () : NULL);
 
   {
     /* For backward compatibility, we make a list for MI.  A table is
@@ -1160,7 +1144,7 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
       {
 	int n_threads = 0;
 
-	for (tp = thread_list; tp; tp = tp->next)
+	ALL_THREADS (tp)
 	  {
 	    if (!should_print_thread (requested_threads, default_inf_num,
 				      global_ids, pid, tp))
@@ -1198,6 +1182,10 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
       {
 	int core;
 
+	any_thread = true;
+	if (tp == current_thread && tp->state == THREAD_EXITED)
+	  current_exited = true;
+
 	if (!should_print_thread (requested_threads, default_inf_num,
 				  global_ids, pid, tp))
 	  continue;
@@ -1206,7 +1194,7 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 
 	if (!uiout->is_mi_like_p ())
 	  {
-	    if (tp->ptid == current_ptid)
+	    if (tp == current_thread)
 	      uiout->field_string ("current", "*");
 	    else
 	      uiout->field_skip ("current");
@@ -1259,7 +1247,7 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 	  {
 	    /* The switch below puts us at the top of the stack (leaf
 	       frame).  */
-	    switch_to_thread (tp->ptid);
+	    switch_to_thread (tp);
 	    print_stack_frame (get_selected_frame (NULL),
 			       /* For MI output, print frame level.  */
 			       uiout->is_mi_like_p (),
@@ -1287,20 +1275,14 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 
   if (pid == -1 && requested_threads == NULL)
     {
-      if (uiout->is_mi_like_p ()
-	  && inferior_ptid != null_ptid)
-	{
-	  int num = ptid_to_global_thread_id (inferior_ptid);
+      if (uiout->is_mi_like_p () && inferior_ptid != null_ptid)
+	uiout->field_int ("current-thread-id", current_thread->global_num);
 
-	  gdb_assert (num != 0);
-	  uiout->field_int ("current-thread-id", num);
-	}
-
-      if (inferior_ptid != null_ptid && is_exited (inferior_ptid))
+      if (inferior_ptid != null_ptid && current_exited)
 	uiout->message ("\n\
 The current thread <Thread ID %s> has terminated.  See `help thread'.\n",
 			print_thread_id (inferior_thread ()));
-      else if (thread_list != NULL && inferior_ptid == null_ptid)
+      else if (any_thread && inferior_ptid == null_ptid)
 	uiout->message ("\n\
 No selected thread.  See `help thread'.\n");
     }
@@ -1349,9 +1331,9 @@ switch_to_thread_no_regs (struct thread_info *thread)
   stop_pc = ~(CORE_ADDR) 0;
 }
 
-/* Switch to no thread selected.  */
+/* See gdbthread.h.  */
 
-static void
+void
 switch_to_no_thread ()
 {
   if (inferior_ptid == null_ptid)
@@ -1362,9 +1344,9 @@ switch_to_no_thread ()
   stop_pc = ~(CORE_ADDR) 0;
 }
 
-/* Switch from one thread to another.  */
+/* See gdbthread.h.  */
 
-static void
+void
 switch_to_thread (thread_info *thr)
 {
   gdb_assert (thr != NULL);
@@ -1381,18 +1363,16 @@ switch_to_thread (thread_info *thr)
      internal event.  */
   if (thr->state != THREAD_EXITED
       && !thr->executing)
-    stop_pc = regcache_read_pc (get_thread_regcache (thr->ptid));
+    stop_pc = regcache_read_pc (get_thread_regcache (thr));
 }
 
-/* See gdbthread.h.  */
+/* See common/common-gdbthread.h.  */
 
 void
 switch_to_thread (ptid_t ptid)
 {
-  if (ptid == null_ptid)
-    switch_to_no_thread ();
-  else
-    switch_to_thread (find_thread_ptid (ptid));
+  thread_info *thr = find_thread_ptid (ptid);
+  switch_to_thread (thr);
 }
 
 static void
@@ -1476,7 +1456,7 @@ scoped_restore_current_thread::~scoped_restore_current_thread ()
      changed, so we have to recheck it here.  */
   if (inferior_ptid != null_ptid
       && m_was_stopped
-      && is_stopped (inferior_ptid)
+      && m_thread->state == THREAD_STOPPED
       && target_has_registers
       && target_has_stack
       && target_has_memory)
@@ -1494,10 +1474,8 @@ scoped_restore_current_thread::scoped_restore_current_thread ()
 
   if (inferior_ptid != null_ptid)
     {
-      thread_info *tp = find_thread_ptid (inferior_ptid);
+      thread_info *tp = inferior_thread ();
       struct frame_info *frame;
-
-      gdb_assert (tp != NULL);
 
       m_was_stopped = tp->state == THREAD_STOPPED;
       if (m_was_stopped
@@ -1638,7 +1616,7 @@ thread_apply_all_command (const char *cmd, int from_tty)
       for (thread_info *thr : thr_list_cpy)
 	if (thread_alive (thr))
 	  {
-	    switch_to_thread (thr->ptid);
+	    switch_to_thread (thr);
 	    printf_filtered (_("\nThread %s (%s):\n"),
 			     print_thread_id (thr),
 			     target_pid_to_str (inferior_ptid));
@@ -1725,7 +1703,7 @@ thread_apply_command (const char *tidlist, int from_tty)
 	  continue;
 	}
 
-      switch_to_thread (tp->ptid);
+      switch_to_thread (tp);
 
       printf_filtered (_("\nThread %s (%s):\n"), print_thread_id (tp),
 		       target_pid_to_str (inferior_ptid));
@@ -1747,7 +1725,7 @@ thread_command (const char *tidstr, int from_tty)
 	{
 	  struct thread_info *tp = inferior_thread ();
 
-	  if (is_exited (inferior_ptid))
+	  if (tp->state == THREAD_EXITED)
 	    printf_filtered (_("[Current thread is %s (%s) (exited)]\n"),
 			     print_thread_id (tp),
 			     target_pid_to_str (inferior_ptid));
@@ -1871,7 +1849,7 @@ thread_select (const char *tidstr, thread_info *tp)
   if (!thread_alive (tp))
     error (_("Thread ID %s has terminated."), tidstr);
 
-  switch_to_thread (tp->ptid);
+  switch_to_thread (tp);
 
   annotate_thread_changed ();
 
@@ -1954,15 +1932,18 @@ update_thread_list (void)
 static struct value *
 thread_num_make_value_helper (struct gdbarch *gdbarch, int global)
 {
-  struct thread_info *tp = find_thread_ptid (inferior_ptid);
   int int_val;
 
-  if (tp == NULL)
+  if (inferior_ptid == null_ptid)
     int_val = 0;
-  else if (global)
-    int_val = tp->global_num;
   else
-    int_val = tp->per_inf_num;
+    {
+      thread_info *tp = inferior_thread ();
+      if (global)
+	int_val = tp->global_num;
+      else
+	int_val = tp->per_inf_num;
+    }
 
   return value_from_longest (builtin_type (gdbarch)->builtin_int, int_val);
 }

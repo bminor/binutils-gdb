@@ -23,6 +23,8 @@
 
 #include "gregset.h"
 
+struct thread_info;
+
 #ifdef HAVE_PROC_SERVICE_H
 
 /* glibc's proc_service.h doesn't wrap itself with extern "C".  Need
@@ -179,7 +181,7 @@ typedef prfpregset_t gdb_prfpregset_t;
 struct ps_prochandle
 {
   /* The LWP we use for memory reads.  */
-  ptid_t ptid;
+  thread_info *thread;
 };
 
 #endif /* gdb_proc_service.h */

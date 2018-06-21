@@ -615,14 +615,11 @@ tfile_interp_line (char *line, struct uploaded_tp **utpp,
 void
 tfile_target::close ()
 {
-  int pid;
-
   if (trace_fd < 0)
     return;
 
-  pid = ptid_get_pid (inferior_ptid);
   inferior_ptid = null_ptid;	/* Avoid confusion from thread stuff.  */
-  exit_inferior_silent (pid);
+  exit_inferior_silent (current_inferior ());
 
   ::close (trace_fd);
   trace_fd = -1;

@@ -30,6 +30,10 @@ struct address_space;
 
 extern struct regcache *get_current_regcache (void);
 extern struct regcache *get_thread_regcache (ptid_t ptid);
+
+/* Get the regcache of THREAD.  */
+extern struct regcache *get_thread_regcache (thread_info *thread);
+
 extern struct regcache *get_thread_arch_regcache (ptid_t, struct gdbarch *);
 extern struct regcache *get_thread_arch_aspace_regcache (ptid_t,
 							 struct gdbarch *,
@@ -349,6 +353,7 @@ public:
   static void regcache_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid);
 protected:
   regcache (gdbarch *gdbarch, const address_space *aspace_);
+
   static std::forward_list<regcache *> current_regcache;
 
 private:
@@ -400,6 +405,10 @@ public:
 
 extern void registers_changed (void);
 extern void registers_changed_ptid (ptid_t);
+
+/* Indicate that registers of THREAD may have changed, so invalidate
+   the cache.  */
+extern void registers_changed_thread (thread_info *thread);
 
 /* An abstract base class for register dump.  */
 

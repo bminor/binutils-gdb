@@ -723,10 +723,10 @@ proceed_thread_callback (struct thread_info *thread, void *arg)
      much.  If/when GDB gains a way to tell the target `hold this
      thread stopped until I say otherwise', then we can optimize
      this.  */
-  if (!is_stopped (thread->ptid))
+  if (thread->state != THREAD_STOPPED)
     return 0;
 
-  switch_to_thread (thread->ptid);
+  switch_to_thread (thread);
   clear_proceed_status (0);
   proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
   return 0;
@@ -735,8 +735,8 @@ proceed_thread_callback (struct thread_info *thread, void *arg)
 static void
 ensure_valid_thread (void)
 {
-  if (ptid_equal (inferior_ptid, null_ptid)
-      || is_exited (inferior_ptid))
+  if (inferior_ptid == null_ptid
+      || inferior_thread ()->state == THREAD_EXITED)
     error (_("Cannot execute this command without a live selected thread."));
 }
 
@@ -765,7 +765,7 @@ error_is_running (void)
 static void
 ensure_not_running (void)
 {
-  if (is_running (inferior_ptid))
+  if (inferior_thread ()->state == THREAD_RUNNING)
     error_is_running ();
 }
 
@@ -855,7 +855,7 @@ continue_command (const char *args, int from_tty)
       struct thread_info *tp;
 
       if (non_stop)
-	tp = find_thread_ptid (inferior_ptid);
+	tp = inferior_thread ();
       else
 	{
 	  ptid_t last_ptid;
@@ -1148,7 +1148,7 @@ prepare_one_step (struct step_command_fsm *sm)
 
 	  /* Step at an inlined function behaves like "down".  */
 	  if (!sm->skip_subroutines
-	      && inline_skipped_frames (inferior_ptid))
+	      && inline_skipped_frames (tp))
 	    {
 	      ptid_t resume_ptid;
 
@@ -1156,7 +1156,7 @@ prepare_one_step (struct step_command_fsm *sm)
 	      resume_ptid = user_visible_resume_ptid (1);
 	      set_running (resume_ptid, 1);
 
-	      step_into_inline_frame (inferior_ptid);
+	      step_into_inline_frame (tp);
 	      sm->count--;
 	      return prepare_one_step (sm);
 	    }
@@ -2076,7 +2076,6 @@ info_program_command (const char *args, int from_tty)
 {
   bpstat bs;
   int num, stat;
-  struct thread_info *tp;
   ptid_t ptid;
 
   if (!target_has_execution)
@@ -2094,12 +2093,16 @@ info_program_command (const char *args, int from_tty)
       get_last_target_status (&ptid, &ws);
     }
 
-  if (ptid_equal (ptid, null_ptid) || is_exited (ptid))
+  if (ptid == null_ptid)
+    error (_("No selected thread."));
+
+  thread_info *tp = find_thread_ptid (ptid);
+
+  if (tp->state == THREAD_EXITED)
     error (_("Invalid selected thread."));
-  else if (is_running (ptid))
+  else if (tp->state == THREAD_RUNNING)
     error (_("Selected thread is running."));
 
-  tp = find_thread_ptid (ptid);
   bs = tp->control.stop_bpstat;
   stat = bpstat_num (&bs, &num);
 
@@ -2638,12 +2641,12 @@ proceed_after_attach_callback (struct thread_info *thread,
   int pid = * (int *) arg;
 
   if (ptid_get_pid (thread->ptid) == pid
-      && !is_exited (thread->ptid)
-      && !is_executing (thread->ptid)
+      && thread->state != THREAD_EXITED
+      && !thread->executing
       && !thread->stop_requested
       && thread->suspend.stop_signal == GDB_SIGNAL_0)
     {
-      switch_to_thread (thread->ptid);
+      switch_to_thread (thread);
       clear_proceed_status (0);
       proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
     }
@@ -2773,7 +2776,7 @@ attach_post_wait (const char *args, int from_tty, enum attach_post_wait_mode mod
 		}
 	    }
 
-	  switch_to_thread (lowest->ptid);
+	  switch_to_thread (lowest);
 	}
 
       /* Tell the user/frontend where we're stopped.  */
@@ -2939,7 +2942,7 @@ attach_command (const char *args, int from_tty)
    as stopped.  */
 
 void
-notice_new_inferior (ptid_t ptid, int leave_running, int from_tty)
+notice_new_inferior (thread_info *thr, int leave_running, int from_tty)
 {
   enum attach_post_wait_mode mode
     = leave_running ? ATTACH_POST_WAIT_RESUME : ATTACH_POST_WAIT_NOTHING;
@@ -2951,12 +2954,12 @@ notice_new_inferior (ptid_t ptid, int leave_running, int from_tty)
 
   /* Avoid reading registers -- we haven't fetched the target
      description yet.  */
-  switch_to_thread_no_regs (find_thread_ptid (ptid));
+  switch_to_thread_no_regs (thr);
 
   /* When we "notice" a new inferior we need to do all the things we
      would normally do if we had just attached to it.  */
 
-  if (is_executing (inferior_ptid))
+  if (thr->executing)
     {
       struct attach_command_continuation_args *a;
       struct inferior *inferior = current_inferior ();

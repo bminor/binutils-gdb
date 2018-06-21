@@ -535,10 +535,11 @@ Please switch to another checkpoint before deleting the current one"));
 
   /* If fi->parent_ptid is not a part of lwp but it's a part of checkpoint
      list, waitpid the ptid.
-     If fi->parent_ptid is a part of lwp and it is stoped, waitpid the
+     If fi->parent_ptid is a part of lwp and it is stopped, waitpid the
      ptid.  */
-  if ((!find_thread_ptid (pptid) && find_fork_ptid (pptid))
-      || (find_thread_ptid (pptid) && is_stopped (pptid)))
+  thread_info *parent = find_thread_ptid (pptid);
+  if ((parent == NULL && find_fork_ptid (pptid))
+      || (parent != NULL && parent->state == THREAD_STOPPED))
     {
       if (inferior_call_waitpid (pptid, ptid_get_pid (ptid)))
         warning (_("Unable to wait pid %s"), target_pid_to_str (ptid));

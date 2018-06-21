@@ -37,7 +37,7 @@ struct dummy_frame_id
   struct frame_id id;
 
   /* The thread this dummy_frame relates to.  */
-  ptid_t ptid;
+  thread_info *thread;
 };
 
 /* Return whether dummy_frame_id *ID1 and *ID2 are equal.  */
@@ -46,7 +46,7 @@ static int
 dummy_frame_id_eq (struct dummy_frame_id *id1,
 		   struct dummy_frame_id *id2)
 {
-  return frame_id_eq (id1->id, id2->id) && ptid_equal (id1->ptid, id2->ptid);
+  return frame_id_eq (id1->id, id2->id) && id1->thread == id2->thread;
 }
 
 /* List of dummy_frame destructors.  */
@@ -89,14 +89,14 @@ static struct dummy_frame *dummy_frame_stack = NULL;
 
 void
 dummy_frame_push (struct infcall_suspend_state *caller_state,
-		  const struct frame_id *dummy_id, ptid_t ptid)
+		  const frame_id *dummy_id, thread_info *thread)
 {
   struct dummy_frame *dummy_frame;
 
   dummy_frame = XCNEW (struct dummy_frame);
   dummy_frame->caller_state = caller_state;
   dummy_frame->id.id = (*dummy_id);
-  dummy_frame->id.ptid = ptid;
+  dummy_frame->id.thread = thread;
   dummy_frame->next = dummy_frame_stack;
   dummy_frame_stack = dummy_frame;
 }
@@ -130,7 +130,7 @@ pop_dummy_frame_bpt (struct breakpoint *b, void *dummy_voidp)
 {
   struct dummy_frame *dummy = (struct dummy_frame *) dummy_voidp;
 
-  if (b->thread == ptid_to_global_thread_id (dummy->id.ptid)
+  if (b->thread == dummy->id.thread->global_num
       && b->disposition == disp_del && frame_id_eq (b->frame_id, dummy->id.id))
     {
       while (b->related_breakpoint != b)
@@ -154,7 +154,7 @@ pop_dummy_frame (struct dummy_frame **dummy_ptr)
 {
   struct dummy_frame *dummy = *dummy_ptr;
 
-  gdb_assert (ptid_equal (dummy->id.ptid, inferior_ptid));
+  gdb_assert (dummy->id.thread == inferior_thread ());
 
   while (dummy->dtor_list != NULL)
     {
@@ -196,16 +196,16 @@ lookup_dummy_frame (struct dummy_frame_id *dummy_id)
   return NULL;
 }
 
-/* Find the dummy frame by DUMMY_ID and PTID, and pop it, restoring
+/* Find the dummy frame by DUMMY_ID and THREAD, and pop it, restoring
    program state to that before the frame was created.
    On return reinit_frame_cache has been called.
    If the frame isn't found, flag an internal error.  */
 
 void
-dummy_frame_pop (struct frame_id dummy_id, ptid_t ptid)
+dummy_frame_pop (frame_id dummy_id, thread_info *thread)
 {
   struct dummy_frame **dp;
-  struct dummy_frame_id id = { dummy_id, ptid };
+  struct dummy_frame_id id = { dummy_id, thread };
 
   dp = lookup_dummy_frame (&id);
   gdb_assert (dp != NULL);
@@ -218,10 +218,10 @@ dummy_frame_pop (struct frame_id dummy_id, ptid_t ptid)
    free its memory.  */
 
 void
-dummy_frame_discard (struct frame_id dummy_id, ptid_t ptid)
+dummy_frame_discard (struct frame_id dummy_id, thread_info *thread)
 {
   struct dummy_frame **dp;
-  struct dummy_frame_id id = { dummy_id, ptid };
+  struct dummy_frame_id id = { dummy_id, thread };
 
   dp = lookup_dummy_frame (&id);
   if (dp)
@@ -231,10 +231,10 @@ dummy_frame_discard (struct frame_id dummy_id, ptid_t ptid)
 /* See dummy-frame.h.  */
 
 void
-register_dummy_frame_dtor (struct frame_id dummy_id, ptid_t ptid,
+register_dummy_frame_dtor (frame_id dummy_id, thread_info *thread,
 			   dummy_frame_dtor_ftype *dtor, void *dtor_data)
 {
-  struct dummy_frame_id id = { dummy_id, ptid };
+  struct dummy_frame_id id = { dummy_id, thread };
   struct dummy_frame **dp, *d;
   struct dummy_frame_dtor_list *list;
 
@@ -306,7 +306,7 @@ dummy_frame_sniffer (const struct frame_unwind *self,
 	 dummy ID, assuming it is a dummy frame.  */
       struct frame_id this_id
 	= gdbarch_dummy_id (get_frame_arch (this_frame), this_frame);
-      struct dummy_frame_id dummy_id = { this_id, inferior_ptid };
+      struct dummy_frame_id dummy_id = { this_id, inferior_thread () };
 
       /* Use that ID to find the corresponding cache entry.  */
       for (dummyframe = dummy_frame_stack;
@@ -397,7 +397,7 @@ fprint_dummy_frames (struct ui_file *file)
       fprintf_unfiltered (file, " id=");
       fprint_frame_id (file, s->id.id);
       fprintf_unfiltered (file, ", ptid=%s",
-			  target_pid_to_str (s->id.ptid));
+			  target_pid_to_str (s->id.thread->ptid));
       fprintf_unfiltered (file, "\n");
     }
 }

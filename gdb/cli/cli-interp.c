@@ -29,6 +29,7 @@
 #include "observable.h"
 #include "gdbthread.h"
 #include "thread-fsm.h"
+#include "inferior.h"
 
 cli_interp_base::cli_interp_base (const char *name)
   : interp (name)

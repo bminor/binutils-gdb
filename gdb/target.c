@@ -1128,7 +1128,7 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
     return TARGET_XFER_E_IO;
 
   if (!ptid_equal (inferior_ptid, null_ptid))
-    inf = find_inferior_ptid (inferior_ptid);
+    inf = current_inferior ();
   else
     inf = NULL;
 
@@ -2025,12 +2025,10 @@ target_pre_inferior (int from_tty)
 static int
 dispose_inferior (struct inferior *inf, void *args)
 {
-  struct thread_info *thread;
-
-  thread = any_thread_of_process (inf->pid);
-  if (thread)
+  thread_info *thread = any_thread_of_inferior (inf);
+  if (thread != NULL)
     {
-      switch_to_thread (thread->ptid);
+      switch_to_thread (thread);
 
       /* Core inferiors actually should be detached, not killed.  */
       if (target_has_execution)
@@ -2087,8 +2085,8 @@ target_detach (inferior *inf, int from_tty)
     ;
   else
     /* If we're in breakpoints-always-inserted mode, have to remove
-       them before detaching.  */
-    remove_breakpoints_pid (ptid_get_pid (inferior_ptid));
+       breakpoints before detaching.  */
+    remove_breakpoints_inf (current_inferior ());
 
   prepare_for_detach ();
 
@@ -3252,9 +3250,8 @@ target_announce_detach (int from_tty)
 void
 generic_mourn_inferior (void)
 {
-  ptid_t ptid;
+  inferior *inf = current_inferior ();
 
-  ptid = inferior_ptid;
   inferior_ptid = null_ptid;
 
   /* Mark breakpoints uninserted in case something tries to delete a
@@ -3262,11 +3259,8 @@ generic_mourn_inferior (void)
      fail, since the inferior is long gone).  */
   mark_breakpoints_out ();
 
-  if (!ptid_equal (ptid, null_ptid))
-    {
-      int pid = ptid_get_pid (ptid);
-      exit_inferior (pid);
-    }
+  if (inf->pid != 0)
+    exit_inferior (inf);
 
   /* Note this wipes step-resume breakpoints, so needs to be done
      after exit_inferior, which ends up referencing the step-resume

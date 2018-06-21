@@ -74,14 +74,14 @@ evaluate_subexp (struct type *expect_type, struct expression *exp,
   gdb::optional<enable_thread_stack_temporaries> stack_temporaries;
   if (*pos == 0 && target_has_execution
       && exp->language_defn->la_language == language_cplus
-      && !thread_stack_temporaries_enabled_p (inferior_ptid))
-    stack_temporaries.emplace (inferior_ptid);
+      && !thread_stack_temporaries_enabled_p (inferior_thread ()))
+    stack_temporaries.emplace (inferior_thread ());
 
   retval = (*exp->language_defn->la_exp_desc->evaluate_exp)
     (expect_type, exp, pos, noside);
 
   if (stack_temporaries.has_value ()
-      && value_in_thread_stack_temporaries (retval, inferior_ptid))
+      && value_in_thread_stack_temporaries (retval, inferior_thread ()))
     retval = value_non_lval (retval);
 
   return retval;

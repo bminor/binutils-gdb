@@ -4269,13 +4269,13 @@ gdbarch_get_syscall_number_p (struct gdbarch *gdbarch)
 }
 
 LONGEST
-gdbarch_get_syscall_number (struct gdbarch *gdbarch, ptid_t ptid)
+gdbarch_get_syscall_number (struct gdbarch *gdbarch, thread_info *thread)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->get_syscall_number != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_get_syscall_number called\n");
-  return gdbarch->get_syscall_number (gdbarch, ptid);
+  return gdbarch->get_syscall_number (gdbarch, thread);
 }
 
 void

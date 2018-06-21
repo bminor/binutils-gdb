@@ -1314,9 +1314,9 @@ mips_linux_syscall_next_pc (struct frame_info *frame)
 
 static LONGEST
 mips_linux_get_syscall_number (struct gdbarch *gdbarch,
-			       ptid_t ptid)
+			       thread_info *thread)
 {
-  struct regcache *regcache = get_thread_regcache (ptid);
+  struct regcache *regcache = get_thread_regcache (thread);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int regsize = register_size (gdbarch, MIPS_V0_REGNUM);

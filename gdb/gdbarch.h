@@ -1168,8 +1168,8 @@ extern void set_gdbarch_record_special_symbol (struct gdbarch *gdbarch, gdbarch_
 
 extern int gdbarch_get_syscall_number_p (struct gdbarch *gdbarch);
 
-typedef LONGEST (gdbarch_get_syscall_number_ftype) (struct gdbarch *gdbarch, ptid_t ptid);
-extern LONGEST gdbarch_get_syscall_number (struct gdbarch *gdbarch, ptid_t ptid);
+typedef LONGEST (gdbarch_get_syscall_number_ftype) (struct gdbarch *gdbarch, thread_info *thread);
+extern LONGEST gdbarch_get_syscall_number (struct gdbarch *gdbarch, thread_info *thread);
 extern void set_gdbarch_get_syscall_number (struct gdbarch *gdbarch, gdbarch_get_syscall_number_ftype *get_syscall_number);
 
 /* The filename of the XML syscall for this architecture. */

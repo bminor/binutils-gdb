@@ -43,7 +43,7 @@ typedef struct {
   PyObject_HEAD
 
   /* The thread this list belongs to.  */
-  ptid_t ptid;
+  thread_info *thread;
 
   /* The first index being part of this list.  */
   Py_ssize_t first;
@@ -82,7 +82,7 @@ btrace_insn_from_recpy_insn (const PyObject * const pyobject)
     }
 
   obj = (const recpy_element_object *) pyobject;
-  tinfo = find_thread_ptid (obj->ptid);
+  tinfo = obj->thread;
 
   if (tinfo == NULL || btrace_is_empty (tinfo))
     {
@@ -125,7 +125,7 @@ btrace_func_from_recpy_func (const PyObject * const pyobject)
     }
 
   obj = (const recpy_element_object *) pyobject;
-  tinfo = find_thread_ptid (obj->ptid);
+  tinfo = obj->thread;
 
   if (tinfo == NULL || btrace_is_empty (tinfo))
     {
@@ -153,7 +153,7 @@ btrace_func_from_recpy_func (const PyObject * const pyobject)
    gdb.RecordInstruction or gdb.RecordGap object for it accordingly.  */
 
 static PyObject *
-btpy_insn_or_gap_new (const thread_info *tinfo, Py_ssize_t number)
+btpy_insn_or_gap_new (thread_info *tinfo, Py_ssize_t number)
 {
   btrace_insn_iterator iter;
   int err_code;
@@ -172,13 +172,13 @@ btpy_insn_or_gap_new (const thread_info *tinfo, Py_ssize_t number)
       return recpy_gap_new (err_code, err_string, number);
     }
 
-  return recpy_insn_new (tinfo->ptid, RECORD_METHOD_BTRACE, number);
+  return recpy_insn_new (tinfo, RECORD_METHOD_BTRACE, number);
 }
 
 /* Create a new gdb.BtraceList object.  */
 
 static PyObject *
-btpy_list_new (ptid_t ptid, Py_ssize_t first, Py_ssize_t last, Py_ssize_t step,
+btpy_list_new (thread_info *thread, Py_ssize_t first, Py_ssize_t last, Py_ssize_t step,
 	       PyTypeObject *element_type)
 {
   btpy_list_object * const obj = PyObject_New (btpy_list_object,
@@ -187,7 +187,7 @@ btpy_list_new (ptid_t ptid, Py_ssize_t first, Py_ssize_t last, Py_ssize_t step,
   if (obj == NULL)
     return NULL;
 
-  obj->ptid = ptid;
+  obj->thread = thread;
   obj->first = first;
   obj->last = last;
   obj->step = step;
@@ -344,7 +344,7 @@ recpy_bt_func_level (PyObject *self, void *closure)
   if (func == NULL)
     return NULL;
 
-  tinfo = find_thread_ptid (((recpy_element_object *) self)->ptid);
+  tinfo = ((recpy_element_object *) self)->thread;
   return PyInt_FromLong (tinfo->btrace.level + func->level);
 }
 
@@ -383,7 +383,7 @@ recpy_bt_func_instructions (PyObject *self, void *closure)
   if (len == 0)
     len = 1;
 
-  return btpy_list_new (((recpy_element_object *) self)->ptid,
+  return btpy_list_new (((recpy_element_object *) self)->thread,
 			func->insn_offset, func->insn_offset + len, 1,
 			&recpy_insn_type);
 }
@@ -402,7 +402,7 @@ recpy_bt_func_up (PyObject *self, void *closure)
   if (func->up == 0)
     Py_RETURN_NONE;
 
-  return recpy_func_new (((recpy_element_object *) self)->ptid,
+  return recpy_func_new (((recpy_element_object *) self)->thread,
 			 RECORD_METHOD_BTRACE, func->up);
 }
 
@@ -420,7 +420,7 @@ recpy_bt_func_prev (PyObject *self, void *closure)
   if (func->prev == 0)
     Py_RETURN_NONE;
 
-  return recpy_func_new (((recpy_element_object *) self)->ptid,
+  return recpy_func_new (((recpy_element_object *) self)->thread,
 			 RECORD_METHOD_BTRACE, func->prev);
 }
 
@@ -438,7 +438,7 @@ recpy_bt_func_next (PyObject *self, void *closure)
   if (func->next == 0)
     Py_RETURN_NONE;
 
-  return recpy_func_new (((recpy_element_object *) self)->ptid,
+  return recpy_func_new (((recpy_element_object *) self)->thread,
 			 RECORD_METHOD_BTRACE, func->next);
 }
 
@@ -474,9 +474,9 @@ btpy_list_item (PyObject *self, Py_ssize_t index)
   number = obj->first + (obj->step * index);
 
   if (obj->element_type == &recpy_insn_type)
-    return recpy_insn_new (obj->ptid, RECORD_METHOD_BTRACE, number);
+    return recpy_insn_new (obj->thread, RECORD_METHOD_BTRACE, number);
   else
-    return recpy_func_new (obj->ptid, RECORD_METHOD_BTRACE, number);
+    return recpy_func_new (obj->thread, RECORD_METHOD_BTRACE, number);
 }
 
 /* Implementation of BtraceList.__getitem__ (self, slice) -> BtraceList.  */
@@ -506,7 +506,7 @@ btpy_list_slice (PyObject *self, PyObject *value)
 				 &step, &slicelength))
     return NULL;
 
-  return btpy_list_new (obj->ptid, obj->first + obj->step * start,
+  return btpy_list_new (obj->thread, obj->first + obj->step * start,
 			obj->first + obj->step * stop, obj->step * step,
 			obj->element_type);
 }
@@ -524,7 +524,7 @@ btpy_list_position (PyObject *self, PyObject *value)
   if (list_obj->element_type != Py_TYPE (value))
     return -1;
 
-  if (!ptid_equal (list_obj->ptid, obj->ptid))
+  if (list_obj->thread != obj->thread)
     return -1;
 
   if (index < list_obj->first || index > list_obj->last)
@@ -590,7 +590,7 @@ btpy_list_richcompare (PyObject *self, PyObject *other, int op)
   switch (op)
   {
     case Py_EQ:
-      if (ptid_equal (obj1->ptid, obj2->ptid)
+      if (obj1->thread == obj2->thread
 	  && obj1->element_type == obj2->element_type
 	  && obj1->first == obj2->first
 	  && obj1->last == obj2->last
@@ -600,7 +600,7 @@ btpy_list_richcompare (PyObject *self, PyObject *other, int op)
 	Py_RETURN_FALSE;
 
     case Py_NE:
-      if (!ptid_equal (obj1->ptid, obj2->ptid)
+      if (obj1->thread != obj2->thread
 	  || obj1->element_type != obj2->element_type
 	  || obj1->first != obj2->first
 	  || obj1->last != obj2->last
@@ -633,7 +633,7 @@ PyObject *
 recpy_bt_format (PyObject *self, void *closure)
 {
   const recpy_record_object * const record = (recpy_record_object *) self;
-  const struct thread_info * const tinfo = find_thread_ptid (record->ptid);
+  const struct thread_info * const tinfo = record->thread;
   const struct btrace_config * config;
 
   if (tinfo == NULL)
@@ -654,7 +654,7 @@ PyObject *
 recpy_bt_replay_position (PyObject *self, void *closure)
 {
   const recpy_record_object * const record = (recpy_record_object *) self;
-  const struct thread_info * const tinfo = find_thread_ptid (record->ptid);
+  thread_info * tinfo = record->thread;
 
   if (tinfo == NULL)
     Py_RETURN_NONE;
@@ -673,7 +673,7 @@ PyObject *
 recpy_bt_begin (PyObject *self, void *closure)
 {
   const recpy_record_object * const record = (recpy_record_object *) self;
-  struct thread_info * const tinfo = find_thread_ptid (record->ptid);
+  thread_info *const tinfo = record->thread;
   struct btrace_insn_iterator iterator;
 
   if (tinfo == NULL)
@@ -695,7 +695,7 @@ PyObject *
 recpy_bt_end (PyObject *self, void *closure)
 {
   const recpy_record_object * const record = (recpy_record_object *) self;
-  struct thread_info * const tinfo = find_thread_ptid (record->ptid);
+  thread_info *const tinfo = record->thread;
   struct btrace_insn_iterator iterator;
 
   if (tinfo == NULL)
@@ -717,7 +717,7 @@ PyObject *
 recpy_bt_instruction_history (PyObject *self, void *closure)
 {
   const recpy_record_object * const record = (recpy_record_object *) self;
-  struct thread_info * const tinfo = find_thread_ptid (record->ptid);
+  thread_info *const tinfo = record->thread;
   struct btrace_insn_iterator iterator;
   unsigned long first = 0;
   unsigned long last = 0;
@@ -736,7 +736,7 @@ recpy_bt_instruction_history (PyObject *self, void *closure)
    btrace_insn_end (&iterator, &tinfo->btrace);
    last = btrace_insn_number (&iterator);
 
-   return btpy_list_new (record->ptid, first, last, 1, &recpy_insn_type);
+   return btpy_list_new (tinfo, first, last, 1, &recpy_insn_type);
 }
 
 /* Implementation of
@@ -746,7 +746,7 @@ PyObject *
 recpy_bt_function_call_history (PyObject *self, void *closure)
 {
   const recpy_record_object * const record = (recpy_record_object *) self;
-  struct thread_info * const tinfo = find_thread_ptid (record->ptid);
+  thread_info *const tinfo = record->thread;
   struct btrace_call_iterator iterator;
   unsigned long first = 0;
   unsigned long last = 0;
@@ -765,7 +765,7 @@ recpy_bt_function_call_history (PyObject *self, void *closure)
   btrace_call_end (&iterator, &tinfo->btrace);
   last = btrace_call_number (&iterator);
 
-  return btpy_list_new (record->ptid, first, last, 1, &recpy_func_type);
+  return btpy_list_new (tinfo, first, last, 1, &recpy_func_type);
 }
 
 /* Implementation of BtraceRecord.goto (self, BtraceInstruction) -> None.  */
@@ -774,7 +774,7 @@ PyObject *
 recpy_bt_goto (PyObject *self, PyObject *args)
 {
   const recpy_record_object * const record = (recpy_record_object *) self;
-  struct thread_info * const tinfo = find_thread_ptid (record->ptid);
+  thread_info *const tinfo = record->thread;
   const recpy_element_object *obj;
 
   if (tinfo == NULL || btrace_is_empty (tinfo))

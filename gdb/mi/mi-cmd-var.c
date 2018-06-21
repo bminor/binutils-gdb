@@ -31,6 +31,7 @@
 #include "gdbthread.h"
 #include "mi-parse.h"
 #include "common/gdb_optional.h"
+#include "inferior.h"
 
 extern unsigned int varobjdebug;		/* defined in varobj.c.  */
 
@@ -600,22 +601,21 @@ static void
 mi_cmd_var_update_iter (struct varobj *var, void *data_pointer)
 {
   struct mi_cmd_var_update *data = (struct mi_cmd_var_update *) data_pointer;
-  int thread_id, thread_stopped;
+  bool thread_stopped;
 
-  thread_id = varobj_get_thread_id (var);
+  int thread_id = varobj_get_thread_id (var);
 
-  if (thread_id == -1
-      && (ptid_equal (inferior_ptid, null_ptid)
-	  || is_stopped (inferior_ptid)))
-    thread_stopped = 1;
+  if (thread_id == -1)
+    {
+      thread_stopped = (inferior_ptid == null_ptid
+			|| inferior_thread ()->state == THREAD_STOPPED);
+    }
   else
     {
-      struct thread_info *tp = find_thread_global_id (thread_id);
+      thread_info *tp = find_thread_global_id (thread_id);
 
-      if (tp)
-	thread_stopped = is_stopped (tp->ptid);
-      else
-	thread_stopped = 1;
+      thread_stopped = (tp == NULL
+			|| tp->state == THREAD_STOPPED);
     }
 
   if (thread_stopped

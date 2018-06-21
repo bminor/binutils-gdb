@@ -19,6 +19,7 @@
 
 #include "defs.h"
 #include "inferior.h"
+#include "gdbthread.h"
 #include "target.h"
 #include "gdbarch.h"
 #include "gdbcmd.h"
@@ -390,10 +391,18 @@ get_thread_regcache (ptid_t ptid)
   return get_thread_arch_regcache (ptid, current_thread_arch);
 }
 
+/* See regcache.h.  */
+
+struct regcache *
+get_thread_regcache (thread_info *thread)
+{
+  return get_thread_regcache (thread->ptid);
+}
+
 struct regcache *
 get_current_regcache (void)
 {
-  return get_thread_regcache (inferior_ptid);
+  return get_thread_regcache (inferior_thread ());
 }
 
 /* See common/common-regcache.h.  */
@@ -464,6 +473,14 @@ registers_changed_ptid (ptid_t ptid)
 	 forget about any frames we have cached, too.  */
       reinit_frame_cache ();
     }
+}
+
+/* See regcache.h.  */
+
+void
+registers_changed_thread (thread_info *thread)
+{
+  registers_changed_ptid (thread->ptid);
 }
 
 void

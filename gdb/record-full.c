@@ -21,6 +21,7 @@
 #include "gdbcmd.h"
 #include "regcache.h"
 #include "gdbthread.h"
+#include "inferior.h"
 #include "event-top.h"
 #include "completer.h"
 #include "arch-utils.h"

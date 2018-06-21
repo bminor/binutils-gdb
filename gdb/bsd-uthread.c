@@ -419,7 +419,8 @@ bsd_uthread_target::wait (ptid_t ptid, struct target_waitstatus *status,
     thread_change_ptid (inferior_ptid, ptid);
 
   /* Don't let the core see a ptid without a corresponding thread.  */
-  if (!in_thread_list (ptid) || is_exited (ptid))
+  thread_info *thread = find_thread_ptid (ptid);
+  if (thread == NULL || thread->state == THREAD_EXITED)
     add_thread (ptid);
 
   return ptid;
@@ -467,7 +468,8 @@ bsd_uthread_target::update_thread_list ()
     {
       ptid_t ptid = ptid_build (pid, 0, addr);
 
-      if (!in_thread_list (ptid) || is_exited (ptid))
+      thread_info *thread = find_thread_ptid (ptid);
+      if (thread == nullptr || thread->state == THREAD_EXITED)
 	{
 	  /* If INFERIOR_PTID doesn't have a tid member yet, then ptid
 	     is still the initial thread of the process.  Notify GDB

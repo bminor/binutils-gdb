@@ -24,6 +24,7 @@
 #include "gdbcore.h"
 #include "solib.h"
 #include "gdbthread.h"
+#include "inferior.h"
 
 /* The last program space number assigned.  */
 int last_program_space_num = 0;

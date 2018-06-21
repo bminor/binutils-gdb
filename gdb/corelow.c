@@ -260,11 +260,9 @@ core_target::close ()
 {
   if (core_bfd)
     {
-      int pid = ptid_get_pid (inferior_ptid);
       inferior_ptid = null_ptid;    /* Avoid confusion from thread
 				       stuff.  */
-      if (pid != 0)
-	exit_inferior_silent (pid);
+      exit_inferior_silent (current_inferior ());
 
       /* Clear out solib state while the bfd is still open.  See
          comments in clear_solib in solib.c.  */
@@ -454,7 +452,7 @@ core_target_open (const char *arg, int from_tty)
 	 which was the "main" thread.  The latter case shouldn't
 	 usually happen, but we're dealing with input here, which can
 	 always be broken in different ways.  */
-      struct thread_info *thread = first_thread_of_process (-1);
+      thread_info *thread = first_thread_of_inferior (current_inferior ());
 
       if (thread == NULL)
 	{
@@ -463,7 +461,7 @@ core_target_open (const char *arg, int from_tty)
 	  add_thread_silent (inferior_ptid);
 	}
       else
-	switch_to_thread (thread->ptid);
+	switch_to_thread (thread);
     }
 
   post_create_inferior (target, from_tty);

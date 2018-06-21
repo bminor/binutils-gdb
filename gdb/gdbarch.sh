@@ -904,7 +904,7 @@ M;void;record_special_symbol;struct objfile *objfile, asymbol *sym;objfile, sym
 # Function for the 'catch syscall' feature.
 
 # Get architecture-specific system calls information from registers.
-M;LONGEST;get_syscall_number;ptid_t ptid;ptid
+M;LONGEST;get_syscall_number;thread_info *thread;thread
 
 # The filename of the XML syscall for this architecture.
 v;const char *;xml_syscall_file;;;0;0;;0;pstring (gdbarch->xml_syscall_file)

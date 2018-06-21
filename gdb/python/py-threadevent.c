@@ -18,6 +18,7 @@
 #include "defs.h"
 #include "py-event.h"
 #include "infrun.h"
+#include "gdbthread.h"
 
 /* thread events can either be thread specific or process wide.  If gdb is
    running in non-stop mode then the event is thread specific, otherwise
@@ -31,10 +32,10 @@ static PyObject *get_event_thread (void)
 static PyObject *
 get_event_thread (void)
 {
-  PyObject *thread = NULL;
+  PyObject *thread;
 
   if (non_stop)
-    thread = (PyObject *) find_thread_object (inferior_ptid);
+    thread = (PyObject *) thread_to_thread_object (inferior_thread ());
   else
     thread = Py_None;
 

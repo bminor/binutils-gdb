@@ -128,9 +128,9 @@ static const struct tramp_frame bfin_linux_sigframe =
 
 static LONGEST
 bfin_linux_get_syscall_number (struct gdbarch *gdbarch,
-                               ptid_t ptid)
+			       thread_info *thread)
 {
-  struct regcache *regcache = get_thread_regcache (ptid);
+  struct regcache *regcache = get_thread_regcache (thread);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   /* The content of a register.  */
   gdb_byte buf[4];

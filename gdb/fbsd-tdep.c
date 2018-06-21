@@ -1146,8 +1146,7 @@ fbsd_get_siginfo_type (struct gdbarch *gdbarch)
 /* Implement the "get_syscall_number" gdbarch method.  */
 
 static LONGEST
-fbsd_get_syscall_number (struct gdbarch *gdbarch,
-			 ptid_t ptid)
+fbsd_get_syscall_number (struct gdbarch *gdbarch, thread_info *thread)
 {
 
   /* FreeBSD doesn't use gdbarch_get_syscall_number since FreeBSD

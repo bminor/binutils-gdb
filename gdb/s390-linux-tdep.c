@@ -557,9 +557,9 @@ static const struct frame_unwind s390_sigtramp_frame_unwind = {
 
 static LONGEST
 s390_linux_get_syscall_number (struct gdbarch *gdbarch,
-			       ptid_t ptid)
+			       thread_info *thread)
 {
-  struct regcache *regs = get_thread_regcache (ptid);
+  struct regcache *regs = get_thread_regcache (thread);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST pc;
