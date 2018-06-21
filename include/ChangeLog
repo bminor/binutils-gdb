@@ -1,3 +1,8 @@
+2018-06-21  Alan Hayward  <alan.hayward@arm.com>
+
+	* elf/internal.h (ELF_SECTION_IN_SEGMENT): Don’t check addresses
+	for non SHT_NOBITS.
+
 2018-06-19  Simon Marchi  <simon.marchi@ericsson.com>
 
 	Sync with GCC
