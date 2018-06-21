@@ -1,5 +1,10 @@
 2018-06-21  Maciej W. Rozycki  <macro@mips.com>
 
+	* elfxx-mips.c (_bfd_mips_post_process_headers): Keep
+	EI_ABIVERSION setting together.
+
+2018-06-21  Maciej W. Rozycki  <macro@mips.com>
+
 	* elfxx-mips.c (MIPS_LIBC_ABI_DEFAULT, MIPS_LIBC_ABI_MIPS_PLT)
 	(MIPS_LIBC_ABI_UNIQUE, MIPS_LIBC_ABI_MIPS_O32_FP64)
 	(MIPS_LIBC_ABI_MAX): New enumeration constants.

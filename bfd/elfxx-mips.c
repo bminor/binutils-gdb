@@ -16258,11 +16258,11 @@ _bfd_mips_post_process_headers (bfd *abfd, struct bfd_link_info *link_info)
 	i_ehdrp->e_ident[EI_ABIVERSION] = MIPS_LIBC_ABI_MIPS_PLT;
     }
 
-  _bfd_elf_post_process_headers (abfd, link_info);
-
   if (mips_elf_tdata (abfd)->abiflags.fp_abi == Val_GNU_MIPS_ABI_FP_64
       || mips_elf_tdata (abfd)->abiflags.fp_abi == Val_GNU_MIPS_ABI_FP_64A)
     i_ehdrp->e_ident[EI_ABIVERSION] = MIPS_LIBC_ABI_MIPS_O32_FP64;
+
+  _bfd_elf_post_process_headers (abfd, link_info);
 }
 
 int
