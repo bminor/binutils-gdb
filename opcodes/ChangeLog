@@ -1,3 +1,8 @@
+2018-06-21  Maciej W. Rozycki  <macro@mips.com>
+
+	* mips-dis.c (print_mips_disassembler_options): Fix a typo in
+	`-M ginv' option description.
+
 2018-06-20  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	PR gas/23305

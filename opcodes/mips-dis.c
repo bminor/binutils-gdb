@@ -2575,7 +2575,7 @@ with the -M switch (multiple options should be separated by commas):\n"));
                            ASE instructions.\n"));
 
   fprintf (stream, _("\n\
-  ginv                     Recognize the Global INValidate (GINV) ASe\n\
+  ginv                     Recognize the Global INValidate (GINV) ASE\n\
                            instructions.\n"));
 
   fprintf (stream, _("\n\
