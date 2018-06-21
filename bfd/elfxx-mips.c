@@ -16230,6 +16230,18 @@ bfd_mips_elf_get_abiflags (bfd *abfd)
   return tdata->abiflags_valid ? &tdata->abiflags : NULL;
 }
 
+/* MIPS libc ABI versions, used with the EI_ABIVERSION ELF file header
+   field.  Taken from `libc-abis.h' generated at GNU libc build time.
+   Using a MIPS_ prefix as other libc targets use different values.  */
+enum
+{
+  MIPS_LIBC_ABI_DEFAULT = 0,
+  MIPS_LIBC_ABI_MIPS_PLT,
+  MIPS_LIBC_ABI_UNIQUE,
+  MIPS_LIBC_ABI_MIPS_O32_FP64,
+  MIPS_LIBC_ABI_MAX
+};
+
 void
 _bfd_mips_post_process_headers (bfd *abfd, struct bfd_link_info *link_info)
 {
@@ -16243,14 +16255,14 @@ _bfd_mips_post_process_headers (bfd *abfd, struct bfd_link_info *link_info)
       BFD_ASSERT (htab != NULL);
 
       if (htab->use_plts_and_copy_relocs && !htab->is_vxworks)
-	i_ehdrp->e_ident[EI_ABIVERSION] = 1;
+	i_ehdrp->e_ident[EI_ABIVERSION] = MIPS_LIBC_ABI_MIPS_PLT;
     }
 
   _bfd_elf_post_process_headers (abfd, link_info);
 
   if (mips_elf_tdata (abfd)->abiflags.fp_abi == Val_GNU_MIPS_ABI_FP_64
       || mips_elf_tdata (abfd)->abiflags.fp_abi == Val_GNU_MIPS_ABI_FP_64A)
-    i_ehdrp->e_ident[EI_ABIVERSION] = 3;
+    i_ehdrp->e_ident[EI_ABIVERSION] = MIPS_LIBC_ABI_MIPS_O32_FP64;
 }
 
 int

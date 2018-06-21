@@ -1,3 +1,11 @@
+2018-06-21  Maciej W. Rozycki  <macro@mips.com>
+
+	* elfxx-mips.c (MIPS_LIBC_ABI_DEFAULT, MIPS_LIBC_ABI_MIPS_PLT)
+	(MIPS_LIBC_ABI_UNIQUE, MIPS_LIBC_ABI_MIPS_O32_FP64)
+	(MIPS_LIBC_ABI_MAX): New enumeration constants.
+	(_bfd_mips_post_process_headers): Use them in place of magic
+	numbers.
+
 2018-06-21  Jim Wilson  <jimw@sifive.com>
 
 	* elfnn-riscv.c (riscv_elf_finish_dynamic_symbol): Update comment.
