@@ -1282,6 +1282,102 @@ Sized_relobj_file<size, big_endian>::layout_eh_frame_section(
     this->set_relocs_must_follow_section_writes();
 }
 
+// Layout an input .note.gnu.property section.
+
+// This note section has an *extremely* non-standard layout.
+// The gABI spec says that ELF-64 files should have 8-byte fields and
+// 8-byte alignment in the note section, but the Gnu tools generally
+// use 4-byte fields and 4-byte alignment (see the comment for
+// Layout::create_note).  This section uses 4-byte fields (i.e.,
+// namesz, descsz, and type are always 4 bytes), the name field is
+// padded to a multiple of 4 bytes, but the desc field is padded
+// to a multiple of 4 or 8 bytes, depending on the ELF class.
+// The individual properties within the desc field always use
+// 4-byte pr_type and pr_datasz fields, but pr_data is padded to
+// a multiple of 4 or 8 bytes, depending on the ELF class.
+
+template<int size, bool big_endian>
+void
+Sized_relobj_file<size, big_endian>::layout_gnu_property_section(
+    Layout* layout,
+    unsigned int shndx)
+{
+  section_size_type contents_len;
+  const unsigned char* pcontents = this->section_contents(shndx,
+							  &contents_len,
+							  false);
+  const unsigned char* pcontents_end = pcontents + contents_len;
+
+  // Loop over all the notes in this section.
+  while (pcontents < pcontents_end)
+    {
+      if (pcontents + 16 > pcontents_end)
+	{
+	  gold_warning(_("%s: corrupt .note.gnu.property section "
+			 "(note too short)"),
+		       this->name().c_str());
+	  return;
+	}
+
+      size_t namesz = elfcpp::Swap<32, big_endian>::readval(pcontents);
+      size_t descsz = elfcpp::Swap<32, big_endian>::readval(pcontents + 4);
+      unsigned int ntype = elfcpp::Swap<32, big_endian>::readval(pcontents + 8);
+      const unsigned char* pname = pcontents + 12;
+
+      if (namesz != 4 || strcmp(reinterpret_cast<const char*>(pname), "GNU") != 0)
+	{
+	  gold_warning(_("%s: corrupt .note.gnu.property section "
+			 "(name is not 'GNU')"),
+		       this->name().c_str());
+	  return;
+	}
+
+      if (ntype != elfcpp::NT_GNU_PROPERTY_TYPE_0)
+	{
+	  gold_warning(_("%s: unsupported note type %d "
+			 "in .note.gnu.property section"),
+		       this->name().c_str(), ntype);
+	  return;
+	}
+
+      size_t aligned_namesz = align_address(namesz, 4);
+      const unsigned char* pdesc = pname + aligned_namesz;
+
+      if (pdesc + descsz > pcontents + contents_len)
+	{
+	  gold_warning(_("%s: corrupt .note.gnu.property section"),
+		       this->name().c_str());
+	  return;
+	}
+
+      const unsigned char* pprop = pdesc;
+
+      // Loop over the program properties in this note.
+      while (pprop < pdesc + descsz)
+	{
+	  if (pprop + 8 > pdesc + descsz)
+	    {
+	      gold_warning(_("%s: corrupt .note.gnu.property section"),
+			   this->name().c_str());
+	      return;
+	    }
+	  unsigned int pr_type = elfcpp::Swap<32, big_endian>::readval(pprop);
+	  size_t pr_datasz = elfcpp::Swap<32, big_endian>::readval(pprop + 4);
+	  pprop += 8;
+	  if (pprop + pr_datasz > pdesc + descsz)
+	    {
+	      gold_warning(_("%s: corrupt .note.gnu.property section"),
+			   this->name().c_str());
+	      return;
+	    }
+	  layout->layout_gnu_property(ntype, pr_type, pr_datasz, pprop, this);
+	  pprop += align_address(pr_datasz, size / 8);
+	}
+
+      pcontents = pdesc + align_address(descsz, size / 8);
+    }
+}
+
 // Lay out the input sections.  We walk through the sections and check
 // whether they should be included in the link.  If they should, we
 // pass them to the Layout object, which will return an output section
@@ -1535,6 +1631,14 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
 	  // Skip attributes section.
 	  if (parameters->target().is_attributes_section(name))
 	    {
+	      omit[i] = true;
+	    }
+
+	  // Handle .note.gnu.property sections.
+	  if (sh_type == elfcpp::SHT_NOTE
+	      && strcmp(name, ".note.gnu.property") == 0)
+	    {
+	      this->layout_gnu_property_section(layout, i);
 	      omit[i] = true;
 	    }
 

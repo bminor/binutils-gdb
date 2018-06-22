@@ -509,6 +509,23 @@ class Target
   should_include_section(elfcpp::Elf_Word sh_type) const
   { return this->do_should_include_section(sh_type); }
 
+  // Merge a target-specific program property in the .note.gnu.properties
+  // section.
+  void
+  merge_gnu_property(int note_type,
+		     int pr_type,
+		     size_t new_pr_datasz,
+		     const unsigned char* new_pr_data,
+		     size_t old_pr_datasz,
+		     unsigned char* old_pr_data,
+		     const Object* object) const
+  {
+    return this->do_merge_gnu_property(note_type, pr_type,
+				       new_pr_datasz, new_pr_data,
+				       old_pr_datasz, old_pr_data,
+				       object);
+  }
+
  protected:
   // This struct holds the constant information for a child class.  We
   // use a struct to avoid the overhead of virtual function calls for
@@ -814,6 +831,13 @@ class Target
   virtual bool
   do_should_include_section(elfcpp::Elf_Word) const
   { return true; }
+
+  // Merge a target-specific program property in the .note.gnu.properties
+  // section.
+  virtual void
+  do_merge_gnu_property(int, int, size_t, const unsigned char*,
+			size_t, unsigned char*, const Object*) const
+  { }
 
  private:
   // The implementations of the four do_make_elf_object virtual functions are

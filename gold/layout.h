@@ -693,6 +693,14 @@ class Layout
   layout_gnu_stack(bool seen_gnu_stack, uint64_t gnu_stack_flags,
 		   const Object*);
 
+  // Layout a .note.gnu.property section.
+  void
+  layout_gnu_property(unsigned int note_type,
+		      unsigned int pr_type,
+		      size_t pr_datasz,
+		      const unsigned char* pr_data,
+		      const Object* object);
+
   // Add an Output_section_data to the layout.  This is used for
   // special sections like the GOT section.  ORDER is where the
   // section should wind up in the output segment.  IS_RELRO is true
@@ -1061,6 +1069,10 @@ class Layout
   create_note(const char* name, int note_type, const char* section_name,
 	      size_t descsz, bool allocate, size_t* trailing_padding);
 
+  // Create a note section for gnu program properties.
+  void
+  create_gnu_properties_note();
+
   // Create a note section for gold version.
   void
   create_gold_note();
@@ -1347,6 +1359,14 @@ class Layout
     std::vector<Section_info> section_infos_;
   };
 
+  // Program properties from .note.gnu.properties sections.
+  struct Gnu_property
+  {
+    size_t pr_datasz;
+    unsigned char* pr_data;
+  };
+  typedef std::map<unsigned int, Gnu_property> Gnu_properties;
+
   // The number of input files, for sizing tables.
   int number_of_input_files_;
   // Information set by scripts or by command line options.
@@ -1473,6 +1493,8 @@ class Layout
   Incremental_binary* incremental_base_;
   // For incremental links, a list of free space within the file.
   Free_list free_list_;
+  // Program properties.
+  Gnu_properties gnu_properties_;
 };
 
 // This task handles writing out data in output sections which is not

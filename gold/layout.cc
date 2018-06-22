@@ -474,7 +474,8 @@ Layout::Layout(int number_of_input_files, Script_options* script_options)
     input_section_position_(),
     input_section_glob_(),
     incremental_base_(NULL),
-    free_list_()
+    free_list_(),
+    gnu_properties_()
 {
   // Make space for more than enough segments for a typical file.
   // This is just for efficiency--it's OK if we wind up needing more.
@@ -2193,11 +2194,133 @@ Layout::layout_gnu_stack(bool seen_gnu_stack, uint64_t gnu_stack_flags,
     }
 }
 
+// Read a value with given size and endianness.
+
+static inline uint64_t
+read_sized_value(size_t size, const unsigned char* buf, bool is_big_endian,
+		 const Object* object)
+{
+  uint64_t val = 0;
+  if (size == 4)
+    {
+      if (is_big_endian)
+	val = elfcpp::Swap<32, true>::readval(buf);
+      else
+	val = elfcpp::Swap<32, false>::readval(buf);
+    }
+  else if (size == 8)
+    {
+      if (is_big_endian)
+	val = elfcpp::Swap<64, true>::readval(buf);
+      else
+	val = elfcpp::Swap<64, false>::readval(buf);
+    }
+  else
+    {
+      gold_warning(_("%s: in .note.gnu.properties section, "
+		     "pr_datasz must be 4 or 8"),
+		   object->name().c_str());
+    }
+  return val;
+}
+
+// Write a value with given size and endianness.
+
+static inline void
+write_sized_value(uint64_t value, size_t size, unsigned char* buf,
+		  bool is_big_endian)
+{
+  if (size == 4)
+    {
+      if (is_big_endian)
+	elfcpp::Swap<32, true>::writeval(buf, static_cast<uint32_t>(value));
+      else
+	elfcpp::Swap<32, false>::writeval(buf, static_cast<uint32_t>(value));
+    }
+  else if (size == 8)
+    {
+      if (is_big_endian)
+	elfcpp::Swap<64, true>::writeval(buf, value);
+      else
+	elfcpp::Swap<64, false>::writeval(buf, value);
+    }
+  else
+    {
+      // We will have already complained about this.
+    }
+}
+
+// Handle the .note.gnu.property section at layout time.
+
+void
+Layout::layout_gnu_property(unsigned int note_type,
+			    unsigned int pr_type,
+			    size_t pr_datasz,
+			    const unsigned char* pr_data,
+			    const Object* object)
+{
+  // We currently support only the one note type.
+  gold_assert(note_type == elfcpp::NT_GNU_PROPERTY_TYPE_0);
+
+  Gnu_properties::iterator pprop = this->gnu_properties_.find(pr_type);
+  if (pprop == this->gnu_properties_.end())
+    {
+      Gnu_property prop;
+      prop.pr_datasz = pr_datasz;
+      prop.pr_data = new unsigned char[pr_datasz];
+      memcpy(prop.pr_data, pr_data, pr_datasz);
+      this->gnu_properties_[pr_type] = prop;
+    }
+  else
+    {
+      if (pr_type >= elfcpp::GNU_PROPERTY_LOPROC
+	  && pr_type < elfcpp::GNU_PROPERTY_HIPROC)
+	{
+	  // Target-dependent property value; call the target to merge.
+	  parameters->target().merge_gnu_property(note_type,
+						  pr_type,
+						  pr_datasz,
+						  pr_data,
+						  pprop->second.pr_datasz,
+						  pprop->second.pr_data,
+						  object);
+	}
+      else
+	{
+	  const bool is_big_endian = parameters->target().is_big_endian();
+	  switch (pr_type)
+	    {
+	    case elfcpp::GNU_PROPERTY_STACK_SIZE:
+	      // Record the maximum value seen.
+	      {
+		uint64_t val1 = read_sized_value(pprop->second.pr_datasz,
+						 pprop->second.pr_data,
+						 is_big_endian, object);
+		uint64_t val2 = read_sized_value(pr_datasz, pr_data,
+						 is_big_endian, object);
+		if (val2 > val1)
+		  write_sized_value(val2, pprop->second.pr_datasz,
+				    pprop->second.pr_data, is_big_endian);
+	      }
+	      break;
+	    case elfcpp::GNU_PROPERTY_NO_COPY_ON_PROTECTED:
+	      // No data to merge.
+	      break;
+	    default:
+	      gold_warning(_("%s: unknown program property type %d "
+			     "in .note.gnu.properties section"),
+			   object->name().c_str(), pr_type);
+	    }
+	}
+    }
+}
+
 // Create automatic note sections.
 
 void
 Layout::create_notes()
 {
+  this->create_gnu_properties_note();
   this->create_gold_note();
   this->create_stack_segment();
   this->create_build_id();
@@ -3019,6 +3142,56 @@ Layout::create_note(const char* name, int note_type,
   *trailing_padding = aligned_descsz - descsz;
 
   return os;
+}
+
+// Create a .note.gnu.properties section to record program properties
+// accumulated from the input files.
+
+void
+Layout::create_gnu_properties_note()
+{
+  if (this->gnu_properties_.empty())
+    return;
+
+  const unsigned int size = parameters->target().get_size();
+  const bool is_big_endian = parameters->target().is_big_endian();
+
+  // Compute the total size of the properties array.
+  size_t descsz = 0;
+  for (Gnu_properties::const_iterator prop = this->gnu_properties_.begin();
+       prop != this->gnu_properties_.end();
+       ++prop)
+    {
+      descsz = align_address(descsz + 8 + prop->second.pr_datasz, size / 8);
+    }
+
+  // Create the note section.
+  size_t trailing_padding;
+  Output_section* os = this->create_note("GNU", elfcpp::NT_GNU_PROPERTY_TYPE_0,
+					 ".note.gnu.properties", descsz,
+					 true, &trailing_padding);
+  if (os == NULL)
+    return;
+  gold_assert(trailing_padding == 0);
+
+  // Allocate and fill the properties array.
+  unsigned char* desc = new unsigned char[descsz];
+  unsigned char* p = desc;
+  for (Gnu_properties::const_iterator prop = this->gnu_properties_.begin();
+       prop != this->gnu_properties_.end();
+       ++prop)
+    {
+      size_t datasz = prop->second.pr_datasz;
+      size_t aligned_datasz = align_address(prop->second.pr_datasz, size / 8);
+      write_sized_value(prop->first, 4, p, is_big_endian);
+      write_sized_value(datasz, 4, p + 4, is_big_endian);
+      memcpy(p + 8, prop->second.pr_data, datasz);
+      if (aligned_datasz > datasz)
+        memset(p + 8 + datasz, 0, aligned_datasz - datasz);
+      p += 8 + aligned_datasz;
+    }
+  Output_section_data* posd = new Output_data_const(desc, descsz, 4);
+  os->add_output_section_data(posd);
 }
 
 // For an executable or shared library, create a note to record the

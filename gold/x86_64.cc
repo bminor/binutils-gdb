@@ -1188,6 +1188,12 @@ class Target_x86_64 : public Sized_target<size, false>
 				  this->rela_dyn_section(layout));
   }
 
+  // Merge a target-specific program property in the .note.gnu.properties
+  // section.
+  void
+  do_merge_gnu_property(int, int, size_t, const unsigned char*,
+			size_t, unsigned char*, const Object*) const;
+
   // Information about this specific target which we pass to the
   // general Target structure.
   static const Target::Target_info x86_64_info;
@@ -1431,6 +1437,39 @@ Target_x86_64<size>::rela_irelative_section(Layout* layout)
 		  == this->rela_irelative_->output_section());
     }
   return this->rela_irelative_;
+}
+
+// Merge a target-specific program property in the .note.gnu.properties
+// section.
+template<int size>
+void
+Target_x86_64<size>::do_merge_gnu_property(
+    int, int pr_type,
+    size_t new_pr_datasz, const unsigned char* new_pr_data,
+    size_t old_pr_datasz, unsigned char* old_pr_data,
+    const Object*) const
+{
+  size_t min_datasz = (new_pr_datasz > old_pr_datasz
+		       ? old_pr_datasz
+		       : new_pr_datasz);
+  switch (pr_type)
+    {
+    case elfcpp::GNU_PROPERTY_X86_ISA_1_USED:
+    case elfcpp::GNU_PROPERTY_X86_ISA_1_NEEDED:
+      {
+        for (size_t i = 0; i < min_datasz; ++i)
+          old_pr_data[i] |= new_pr_data[i];
+      }
+      break;
+    case elfcpp::GNU_PROPERTY_X86_FEATURE_1_AND:
+      {
+        for (size_t i = 0; i < min_datasz; ++i)
+          old_pr_data[i] &= new_pr_data[i];
+      }
+      break;
+    default:
+      break;
+    }
 }
 
 // Write the first three reserved words of the .got.plt section.

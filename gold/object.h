@@ -2663,6 +2663,10 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
 			  unsigned int shndx, const typename This::Shdr&,
 			  unsigned int reloc_shndx, unsigned int reloc_type);
 
+  // Layout an input .note.gnu.property section.
+  void
+  layout_gnu_property_section(Layout* layout, unsigned int shndx);
+
   // Write section data to the output file.  Record the views and
   // sizes in VIEWS for use when relocating.
   void

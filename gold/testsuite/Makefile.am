@@ -3255,6 +3255,23 @@ exception_x86_64_bnd_2.o: exception_test_2.cc gcctestdir/as
 	$(CXXCOMPILE) -c -Bgcctestdir/ -Wa,-madd-bnd-prefix -o $@ $<
 endif DEFAULT_TARGET_X86_64
 
+if DEFAULT_TARGET_X86_64
+check_SCRIPTS += gnu_property_test.sh
+check_DATA += gnu_property_test.stdout
+gnu_property_test.stdout: gnu_property_test
+	$(TEST_READELF) -n $< >$@
+gnu_property_test: gcctestdir/ld gnu_property_main.o gnu_property_a.o gnu_property_b.o gnu_property_c.o
+	$(LINK) -Bgcctestdir/ -o $@ gnu_property_main.o gnu_property_a.o gnu_property_b.o gnu_property_c.o
+gnu_property_main.o: gnu_property_main.c
+	$(COMPILE) -c -o $@ $<
+gnu_property_a.o: gnu_property_a.S
+	$(COMPILE) -c -o $@ $<
+gnu_property_b.o: gnu_property_b.S
+	$(COMPILE) -c -o $@ $<
+gnu_property_c.o: gnu_property_c.S
+	$(COMPILE) -c -o $@ $<
+endif DEFAULT_TARGET_X86_64
+
 check_PROGRAMS += pr22266
 pr22266: pr22266_main.o pr22266_ar.o gcctestdir/ld
 	$(LINK) -Bgcctestdir/ pr22266_main.o pr22266_ar.o

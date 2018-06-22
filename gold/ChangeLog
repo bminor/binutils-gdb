@@ -1,3 +1,31 @@
+2018-06-22  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/22914
+	* layout.cc (Layout::Layout): Initialize gnu_properties_.
+	(read_sized_value, write_sized_value): New functions.
+	(Layout::layout_gnu_property): New method.
+	(Layout::create_notes): Call create_gnu_properties_note.
+	(Layout::create_gnu_properties_note): New method.
+	* layout.h (Layout::layout_gnu_property): New method.
+	(Layout::create_gnu_properties_note): New method.
+	(Layout::Gnu_property, Layout::Gnu_properties): New types.
+	(Layout::gnu_properties_): New data member.
+	* object.cc (Sized_relobj_file::layout_gnu_property_section): New
+	method.
+	(Sized_relobj_file::do_layout): Handle .note.gnu.property sections.
+	* object.h (Sized_relobj_file::layout_gnu_property_section): New
+	method.
+	* target.h (Target::merge_gnu_property): New method.
+	(Target::do_merge_gnu_property): New virtual method.
+	* x86_64.cc (Target_x86_64::do_merge_gnu_property): New method.
+	* testsuite/Makefile.am (gnu_property_test): New test case.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/gnu_property_a.S: New source file.
+	* testsuite/gnu_property_b.S: New source file.
+	* testsuite/gnu_property_c.S: New source file.
+	* testsuite/gnu_property_main.c: New source file.
+	* testsuite/gnu_property_test.sh: New test script.
+
 2018-06-21  Cary Coutant  <ccoutant@gmail.com>
 
 	* resolve.cc (Symbol_table::resolve): Rename tobinding to
