@@ -1,3 +1,9 @@
+2018-06-19  Tamar Christina  <tamar.christina@arm.com>
+
+	* aarch64-tbl.h (aarch64_opcode_table): Fix alias flag for negs
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Likewise.
+
 2018-06-21  Maciej W. Rozycki  <macro@mips.com>
 
 	* mips-dis.c (print_mips_disassembler_options): Fix a typo in

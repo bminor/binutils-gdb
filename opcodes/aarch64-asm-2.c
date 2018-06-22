@@ -66,8 +66,8 @@ aarch64_find_real_opcode (const aarch64_opcode *opcode)
     case 22:	/* sub */
       value = 22;	/* --> sub.  */
       break;
-    case 26:	/* negs */
     case 25:	/* cmp */
+    case 26:	/* negs */
     case 24:	/* subs */
       value = 24;	/* --> subs.  */
       break;

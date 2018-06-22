@@ -19404,7 +19404,7 @@ aarch64_find_alias_opcode (const aarch64_opcode *opcode)
     case 17: value = 18; break;	/* subs --> cmp.  */
     case 20: value = 21; break;	/* adds --> cmn.  */
     case 22: value = 23; break;	/* sub --> neg.  */
-    case 24: value = 26; break;	/* subs --> negs.  */
+    case 24: value = 25; break;	/* subs --> cmp.  */
     case 150: value = 151; break;	/* umov --> mov.  */
     case 152: value = 153; break;	/* ins --> mov.  */
     case 154: value = 155; break;	/* ins --> mov.  */
@@ -19543,8 +19543,8 @@ aarch64_find_next_alias_opcode (const aarch64_opcode *opcode)
     case 18: value = 17; break;	/* cmp --> subs.  */
     case 21: value = 20; break;	/* cmn --> adds.  */
     case 23: value = 22; break;	/* neg --> sub.  */
-    case 26: value = 25; break;	/* negs --> cmp.  */
-    case 25: value = 24; break;	/* cmp --> subs.  */
+    case 25: value = 26; break;	/* cmp --> negs.  */
+    case 26: value = 24; break;	/* negs --> subs.  */
     case 151: value = 150; break;	/* mov --> umov.  */
     case 153: value = 152; break;	/* mov --> ins.  */
     case 155: value = 154; break;	/* mov --> ins.  */

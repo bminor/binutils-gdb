@@ -2266,7 +2266,7 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("sub",  0x4b000000, 0x7f200000, addsub_shift, 0, OP3 (Rd, Rn, Rm_SFT), QL_I3SAMER, F_HAS_ALIAS | F_SF),
   CORE_INSN ("neg",  0x4b0003e0, 0x7f2003e0, addsub_shift, 0, OP2 (Rd, Rm_SFT),     QL_I2SAME,  F_ALIAS | F_SF),
   CORE_INSN ("subs", 0x6b000000, 0x7f200000, addsub_shift, 0, OP3 (Rd, Rn, Rm_SFT), QL_I3SAMER, F_HAS_ALIAS | F_SF),
-  CORE_INSN ("cmp",  0x6b00001f, 0x7f20001f, addsub_shift, 0, OP2 (Rn, Rm_SFT),     QL_I2SAME,  F_ALIAS | F_SF),
+  CORE_INSN ("cmp",  0x6b00001f, 0x7f20001f, addsub_shift, 0, OP2 (Rn, Rm_SFT),     QL_I2SAME,  F_ALIAS | F_SF | F_P1),
   CORE_INSN ("negs", 0x6b0003e0, 0x7f2003e0, addsub_shift, 0, OP2 (Rd, Rm_SFT),     QL_I2SAME,  F_ALIAS | F_SF),
   /* AdvSIMD across lanes.  */
   SIMD_INSN ("saddlv", 0x0e303800, 0xbf3ffc00, asimdall, 0, OP2 (Fd, Vn), QL_XLANES_L,    F_SIZEQ),

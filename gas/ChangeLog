@@ -1,3 +1,8 @@
+2018-06-22  Tamar Christina  <tamar.christina@arm.com>
+
+	* testsuite/gas/aarch64/addsub.s: Add negs to zero reg test.
+	* testsuite/gas/aarch64/addsub.d: Likewise.
+
 2018-06-21  Alan Modra  <amodra@gmail.com>
 
 	* doc/Makefile.am (AUTOMAKE_OPTIONS): Add "foreign".
