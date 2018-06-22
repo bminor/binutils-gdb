@@ -1,3 +1,9 @@
+2018-08-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR gdb/18050:
+	* gdb.server/extended-remote-restart.c: New file.
+	* gdb.server/extended-remote-restart.exp: New file.
+
 2018-08-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.fortran/nested-funcs.exp: Replace "set index = 42" with

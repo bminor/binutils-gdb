@@ -2022,6 +2022,12 @@ target_pre_inferior (int from_tty)
 static int
 dispose_inferior (struct inferior *inf, void *args)
 {
+  /* Not all killed inferiors can, or will ever be, removed from the
+     inferior list.  Killed inferiors clearly don't need to be killed
+     again, so, we're done.  */
+  if (inf->pid == 0)
+    return 0;
+
   thread_info *thread = any_thread_of_inferior (inf);
   if (thread != NULL)
     {
