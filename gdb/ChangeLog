@@ -1,3 +1,7 @@
+2018-06-22  Alan Hayward  <alan.hayward@arm.com>
+
+	* nat/aarch64-sve-linux-ptrace.h (HAS_SVE_STATE): Use &.
+
 2018-06-21  Pedro Alves  <palves@redhat.com>
 
 	* ada-lang.h (ada_get_task_number): Take a thread_info pointer

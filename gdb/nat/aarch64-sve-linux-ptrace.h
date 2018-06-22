@@ -32,7 +32,7 @@
 /* Indicates whether a SVE ptrace header is followed by SVE registers or a
    fpsimd structure.  */
 
-#define HAS_SVE_STATE(header) ((header).flags && SVE_PT_REGS_SVE)
+#define HAS_SVE_STATE(header) ((header).flags & SVE_PT_REGS_SVE)
 
 /* Read VQ for the given tid using ptrace.  If SVE is not supported then zero
    is returned (on a system that supports SVE, then VQ cannot be zero).  */
