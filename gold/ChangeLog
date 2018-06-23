@@ -1,5 +1,13 @@
 2018-06-22  Cary Coutant  <ccoutant@gmail.com>
 
+	* incremental.cc (Sized_incremental_binary::setup_readers): Use
+	emplace_back for GCC 5 and later.
+	* incremental.h (Incremental_binary::Input_reader): Provide copy
+	constructor.
+	(Sized_incremental_binary::Sized_input_reader): Likewise.
+
+2018-06-22  Cary Coutant  <ccoutant@gmail.com>
+
 	PR gold/22914
 	* layout.cc (Layout::Layout): Initialize gnu_properties_.
 	(read_sized_value, write_sized_value): New functions.

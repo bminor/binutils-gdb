@@ -311,7 +311,11 @@ Sized_incremental_binary<size, big_endian>::setup_readers()
   for (unsigned int i = 0; i < count; i++)
     {
       Input_entry_reader input_file = inputs.input_file(i);
+#if defined(__GNUC__) && __GNUC__ < 5
       this->input_entry_readers_.push_back(Sized_input_reader(input_file));
+#else
+      this->input_entry_readers_.emplace_back(input_file);
+#endif
       switch (input_file.type())
 	{
 	case INCREMENTAL_INPUT_OBJECT:
