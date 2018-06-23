@@ -509,22 +509,10 @@ class Target
   should_include_section(elfcpp::Elf_Word sh_type) const
   { return this->do_should_include_section(sh_type); }
 
-  // Merge a target-specific program property in the .note.gnu.properties
-  // section.
+  // Finalize the target-specific properties in the .note.gnu.property section.
   void
-  merge_gnu_property(int note_type,
-		     int pr_type,
-		     size_t new_pr_datasz,
-		     const unsigned char* new_pr_data,
-		     size_t old_pr_datasz,
-		     unsigned char* old_pr_data,
-		     const Object* object) const
-  {
-    return this->do_merge_gnu_property(note_type, pr_type,
-				       new_pr_datasz, new_pr_data,
-				       old_pr_datasz, old_pr_data,
-				       object);
-  }
+  finalize_gnu_properties(Layout* layout) const
+  { this->do_finalize_gnu_properties(layout); }
 
  protected:
   // This struct holds the constant information for a child class.  We
@@ -832,11 +820,9 @@ class Target
   do_should_include_section(elfcpp::Elf_Word) const
   { return true; }
 
-  // Merge a target-specific program property in the .note.gnu.properties
-  // section.
+  // Finalize the target-specific properties in the .note.gnu.property section.
   virtual void
-  do_merge_gnu_property(int, int, size_t, const unsigned char*,
-			size_t, unsigned char*, const Object*) const
+  do_finalize_gnu_properties(Layout*) const
   { }
 
  private:
@@ -1157,6 +1143,17 @@ class Sized_target : public Target
     elfcpp::Rel<size, big_endian> rel(preloc);
     return elfcpp::elf_r_sym<size>(rel.get_r_info());
   }
+
+  // Record a target-specific program property in the .note.gnu.property
+  // section.
+  virtual void
+  record_gnu_property(int, int, size_t, const unsigned char*, const Object*)
+  { }
+
+  // Merge the target-specific program properties from the current object.
+  virtual void
+  merge_gnu_properties(const Object*)
+  { }
 
  protected:
   Sized_target(const Target::Target_info* pti)

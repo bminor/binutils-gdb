@@ -11,6 +11,11 @@
 # define ALIGN 2
 #endif
 
+	.text
+	.globl _start
+_start:
+	ret
+
         .section ".note.gnu.property", "a"
         .p2align ALIGN
 

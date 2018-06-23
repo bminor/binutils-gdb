@@ -590,7 +590,8 @@ class Target_x86_64 : public Sized_target<size, false>
       got_tlsdesc_(NULL), global_offset_table_(NULL), rela_dyn_(NULL),
       rela_irelative_(NULL), copy_relocs_(elfcpp::R_X86_64_COPY),
       got_mod_index_offset_(-1U), tlsdesc_reloc_info_(),
-      tls_base_symbol_defined_(false)
+      tls_base_symbol_defined_(false), isa_1_used_(0), isa_1_needed_(0),
+      feature_1_(0), object_feature_1_(0), seen_first_object_(false)
   { }
 
   // Hook for a new output section.
@@ -1188,11 +1189,19 @@ class Target_x86_64 : public Sized_target<size, false>
 				  this->rela_dyn_section(layout));
   }
 
-  // Merge a target-specific program property in the .note.gnu.properties
+  // Record a target-specific program property in the .note.gnu.property
   // section.
   void
-  do_merge_gnu_property(int, int, size_t, const unsigned char*,
-			size_t, unsigned char*, const Object*) const;
+  record_gnu_property(int, int, size_t, const unsigned char*, const Object*);
+
+  // Merge the target-specific program properties from the current object.
+  void
+  merge_gnu_properties(const Object*);
+
+  // Finalize the target-specific program properties and add them back to
+  // the layout.
+  void
+  do_finalize_gnu_properties(Layout*) const;
 
   // Information about this specific target which we pass to the
   // general Target structure.
@@ -1251,6 +1260,17 @@ class Target_x86_64 : public Sized_target<size, false>
   std::vector<Tlsdesc_info> tlsdesc_reloc_info_;
   // True if the _TLS_MODULE_BASE_ symbol has been defined.
   bool tls_base_symbol_defined_;
+  // Target-specific program properties, from .note.gnu.property section.
+  // Each bit represents a specific feature.
+  uint32_t isa_1_used_;
+  uint32_t isa_1_needed_;
+  uint32_t feature_1_;
+  // Target-specific properties from the current object.
+  // These bits get ANDed into FEATURE_1_ after all properties for the object
+  // have been processed.
+  uint32_t object_feature_1_;
+  // Whether we have seen our first object, for use in initializing FEATURE_1_.
+  bool seen_first_object_;
 };
 
 template<>
@@ -1439,37 +1459,91 @@ Target_x86_64<size>::rela_irelative_section(Layout* layout)
   return this->rela_irelative_;
 }
 
-// Merge a target-specific program property in the .note.gnu.properties
+// Record a target-specific program property from the .note.gnu.property
 // section.
 template<int size>
 void
-Target_x86_64<size>::do_merge_gnu_property(
+Target_x86_64<size>::record_gnu_property(
     int, int pr_type,
-    size_t new_pr_datasz, const unsigned char* new_pr_data,
-    size_t old_pr_datasz, unsigned char* old_pr_data,
-    const Object*) const
+    size_t pr_datasz, const unsigned char* pr_data,
+    const Object* object)
 {
-  size_t min_datasz = (new_pr_datasz > old_pr_datasz
-		       ? old_pr_datasz
-		       : new_pr_datasz);
+  uint32_t val;
+
   switch (pr_type)
     {
     case elfcpp::GNU_PROPERTY_X86_ISA_1_USED:
     case elfcpp::GNU_PROPERTY_X86_ISA_1_NEEDED:
-      {
-        for (size_t i = 0; i < min_datasz; ++i)
-          old_pr_data[i] |= new_pr_data[i];
-      }
-      break;
     case elfcpp::GNU_PROPERTY_X86_FEATURE_1_AND:
-      {
-        for (size_t i = 0; i < min_datasz; ++i)
-          old_pr_data[i] &= new_pr_data[i];
-      }
+      if (pr_datasz != 4)
+	{
+	  gold_warning(_("%s: corrupt .note.gnu.property section "
+			 "(pr_datasz for property %d is not 4)"),
+		       object->name().c_str(), pr_type);
+	  return;
+	}
+      val = elfcpp::Swap<32, false>::readval(pr_data);
       break;
     default:
+      gold_warning(_("%s: unknown program property type 0x%x "
+		     "in .note.gnu.property section"),
+		   object->name().c_str(), pr_type);
       break;
     }
+
+  switch (pr_type)
+    {
+    case elfcpp::GNU_PROPERTY_X86_ISA_1_USED:
+      this->isa_1_used_ |= val;
+      break;
+    case elfcpp::GNU_PROPERTY_X86_ISA_1_NEEDED:
+      this->isa_1_needed_ |= val;
+      break;
+    case elfcpp::GNU_PROPERTY_X86_FEATURE_1_AND:
+      // If we see multiple feature props in one object, OR them together.
+      this->object_feature_1_ |= val;
+      break;
+    }
+}
+
+// Merge the target-specific program properties from the current object.
+template<int size>
+void
+Target_x86_64<size>::merge_gnu_properties(const Object*)
+{
+  if (this->seen_first_object_)
+    this->feature_1_ &= this->object_feature_1_;
+  else
+    {
+      this->feature_1_ = this->object_feature_1_;
+      this->seen_first_object_ = true;
+    }
+  this->object_feature_1_ = 0;
+}
+
+static inline void
+add_property(Layout* layout, unsigned int pr_type, uint32_t val)
+{
+  unsigned char buf[4];
+  elfcpp::Swap<32, false>::writeval(buf, val);
+  layout->add_gnu_property(elfcpp::NT_GNU_PROPERTY_TYPE_0, pr_type, 4, buf);
+}
+
+// Finalize the target-specific program properties and add them back to
+// the layout.
+template<int size>
+void
+Target_x86_64<size>::do_finalize_gnu_properties(Layout* layout) const
+{
+  if (this->isa_1_used_ != 0)
+    add_property(layout, elfcpp::GNU_PROPERTY_X86_ISA_1_USED,
+		 this->isa_1_used_);
+  if (this->isa_1_needed_ != 0)
+    add_property(layout, elfcpp::GNU_PROPERTY_X86_ISA_1_NEEDED,
+		 this->isa_1_needed_);
+  if (this->feature_1_ != 0)
+    add_property(layout, elfcpp::GNU_PROPERTY_X86_FEATURE_1_AND,
+		 this->feature_1_);
 }
 
 // Write the first three reserved words of the .got.plt section.

@@ -2217,7 +2217,7 @@ read_sized_value(size_t size, const unsigned char* buf, bool is_big_endian,
     }
   else
     {
-      gold_warning(_("%s: in .note.gnu.properties section, "
+      gold_warning(_("%s: in .note.gnu.property section, "
 		     "pr_datasz must be 4 or 8"),
 		   object->name().c_str());
     }
@@ -2262,6 +2262,63 @@ Layout::layout_gnu_property(unsigned int note_type,
   // We currently support only the one note type.
   gold_assert(note_type == elfcpp::NT_GNU_PROPERTY_TYPE_0);
 
+  if (pr_type >= elfcpp::GNU_PROPERTY_LOPROC
+      && pr_type < elfcpp::GNU_PROPERTY_HIPROC)
+    {
+      // Target-dependent property value; call the target to record.
+      const int size = parameters->target().get_size();
+      const bool is_big_endian = parameters->target().is_big_endian();
+      if (size == 32)
+        {
+          if (is_big_endian)
+            {
+#ifdef HAVE_TARGET_32_BIG
+	      parameters->sized_target<32, true>()->
+		  record_gnu_property(note_type, pr_type, pr_datasz, pr_data,
+				      object);
+#else
+	      gold_unreachable();
+#endif
+            }
+          else
+            {
+#ifdef HAVE_TARGET_32_LITTLE
+	      parameters->sized_target<32, false>()->
+		  record_gnu_property(note_type, pr_type, pr_datasz, pr_data,
+				      object);
+#else
+	      gold_unreachable();
+#endif
+            }
+        }
+      else if (size == 64)
+        {
+          if (is_big_endian)
+            {
+#ifdef HAVE_TARGET_64_BIG
+	      parameters->sized_target<64, true>()->
+		  record_gnu_property(note_type, pr_type, pr_datasz, pr_data,
+				      object);
+#else
+	      gold_unreachable();
+#endif
+            }
+          else
+            {
+#ifdef HAVE_TARGET_64_LITTLE
+	      parameters->sized_target<64, false>()->
+		  record_gnu_property(note_type, pr_type, pr_datasz, pr_data,
+				      object);
+#else
+	      gold_unreachable();
+#endif
+            }
+        }
+      else
+        gold_unreachable();
+      return;
+    }
+
   Gnu_properties::iterator pprop = this->gnu_properties_.find(pr_type);
   if (pprop == this->gnu_properties_.end())
     {
@@ -2273,46 +2330,99 @@ Layout::layout_gnu_property(unsigned int note_type,
     }
   else
     {
-      if (pr_type >= elfcpp::GNU_PROPERTY_LOPROC
-	  && pr_type < elfcpp::GNU_PROPERTY_HIPROC)
+      const bool is_big_endian = parameters->target().is_big_endian();
+      switch (pr_type)
 	{
-	  // Target-dependent property value; call the target to merge.
-	  parameters->target().merge_gnu_property(note_type,
-						  pr_type,
-						  pr_datasz,
-						  pr_data,
-						  pprop->second.pr_datasz,
-						  pprop->second.pr_data,
-						  object);
+	case elfcpp::GNU_PROPERTY_STACK_SIZE:
+	  // Record the maximum value seen.
+	  {
+	    uint64_t val1 = read_sized_value(pprop->second.pr_datasz,
+					     pprop->second.pr_data,
+					     is_big_endian, object);
+	    uint64_t val2 = read_sized_value(pr_datasz, pr_data,
+					     is_big_endian, object);
+	    if (val2 > val1)
+	      write_sized_value(val2, pprop->second.pr_datasz,
+				pprop->second.pr_data, is_big_endian);
+	  }
+	  break;
+	case elfcpp::GNU_PROPERTY_NO_COPY_ON_PROTECTED:
+	  // No data to merge.
+	  break;
+	default:
+	  gold_warning(_("%s: unknown program property type %d "
+			 "in .note.gnu.property section"),
+		       object->name().c_str(), pr_type);
+	}
+    }
+}
+
+// Merge per-object properties with program properties.
+// This lets the target identify objects that are missing certain
+// properties, in cases where properties must be ANDed together.
+
+void
+Layout::merge_gnu_properties(const Object* object)
+{
+  const int size = parameters->target().get_size();
+  const bool is_big_endian = parameters->target().is_big_endian();
+  if (size == 32)
+    {
+      if (is_big_endian)
+	{
+#ifdef HAVE_TARGET_32_BIG
+	  parameters->sized_target<32, true>()->merge_gnu_properties(object);
+#else
+	  gold_unreachable();
+#endif
 	}
       else
 	{
-	  const bool is_big_endian = parameters->target().is_big_endian();
-	  switch (pr_type)
-	    {
-	    case elfcpp::GNU_PROPERTY_STACK_SIZE:
-	      // Record the maximum value seen.
-	      {
-		uint64_t val1 = read_sized_value(pprop->second.pr_datasz,
-						 pprop->second.pr_data,
-						 is_big_endian, object);
-		uint64_t val2 = read_sized_value(pr_datasz, pr_data,
-						 is_big_endian, object);
-		if (val2 > val1)
-		  write_sized_value(val2, pprop->second.pr_datasz,
-				    pprop->second.pr_data, is_big_endian);
-	      }
-	      break;
-	    case elfcpp::GNU_PROPERTY_NO_COPY_ON_PROTECTED:
-	      // No data to merge.
-	      break;
-	    default:
-	      gold_warning(_("%s: unknown program property type %d "
-			     "in .note.gnu.properties section"),
-			   object->name().c_str(), pr_type);
-	    }
+#ifdef HAVE_TARGET_32_LITTLE
+	  parameters->sized_target<32, false>()->merge_gnu_properties(object);
+#else
+	  gold_unreachable();
+#endif
 	}
     }
+  else if (size == 64)
+    {
+      if (is_big_endian)
+	{
+#ifdef HAVE_TARGET_64_BIG
+	  parameters->sized_target<64, true>()->merge_gnu_properties(object);
+#else
+	  gold_unreachable();
+#endif
+	}
+      else
+	{
+#ifdef HAVE_TARGET_64_LITTLE
+	  parameters->sized_target<64, false>()->merge_gnu_properties(object);
+#else
+	  gold_unreachable();
+#endif
+	}
+    }
+  else
+    gold_unreachable();
+}
+
+// Add a target-specific property for the output .note.gnu.property section.
+
+void
+Layout::add_gnu_property(unsigned int note_type,
+			 unsigned int pr_type,
+			 size_t pr_datasz,
+			 const unsigned char* pr_data)
+{
+  gold_assert(note_type == elfcpp::NT_GNU_PROPERTY_TYPE_0);
+
+  Gnu_property prop;
+  prop.pr_datasz = pr_datasz;
+  prop.pr_data = new unsigned char[pr_datasz];
+  memcpy(prop.pr_data, pr_data, pr_datasz);
+  this->gnu_properties_[pr_type] = prop;
 }
 
 // Create automatic note sections.
@@ -3144,12 +3254,14 @@ Layout::create_note(const char* name, int note_type,
   return os;
 }
 
-// Create a .note.gnu.properties section to record program properties
+// Create a .note.gnu.property section to record program properties
 // accumulated from the input files.
 
 void
 Layout::create_gnu_properties_note()
 {
+  parameters->target().finalize_gnu_properties(this);
+
   if (this->gnu_properties_.empty())
     return;
 
@@ -3168,7 +3280,7 @@ Layout::create_gnu_properties_note()
   // Create the note section.
   size_t trailing_padding;
   Output_section* os = this->create_note("GNU", elfcpp::NT_GNU_PROPERTY_TYPE_0,
-					 ".note.gnu.properties", descsz,
+					 ".note.gnu.property", descsz,
 					 true, &trailing_padding);
   if (os == NULL)
     return;

@@ -701,6 +701,17 @@ class Layout
 		      const unsigned char* pr_data,
 		      const Object* object);
 
+  // Merge per-object properties with program properties.
+  void
+  merge_gnu_properties(const Object* object);
+
+  // Add a target-specific property for the output .note.gnu.property section.
+  void
+  add_gnu_property(unsigned int note_type,
+		   unsigned int pr_type,
+		   size_t pr_datasz,
+		   const unsigned char* pr_data);
+
   // Add an Output_section_data to the layout.  This is used for
   // special sections like the GOT section.  ORDER is where the
   // section should wind up in the output segment.  IS_RELRO is true
@@ -1359,7 +1370,7 @@ class Layout
     std::vector<Section_info> section_infos_;
   };
 
-  // Program properties from .note.gnu.properties sections.
+  // Program properties from .note.gnu.property sections.
   struct Gnu_property
   {
     size_t pr_datasz;

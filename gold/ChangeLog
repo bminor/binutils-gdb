@@ -1,5 +1,40 @@
 2018-06-22  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/22914
+	* layout.cc (read_sized_value): Fix spelling of section name.
+	(Layout::layout_gnu_property): Call Sized_target::record_gnu_property
+	for target-specific properties;
+	don't store them with target-independent properties yet.
+	(Layout::merge_gnu_properties): New method.
+	(Layout::add_gnu_property): New method.
+	(Layout::create_gnu_properties_note): Call target to finalize
+	target-specific properties. Fix spelling of output section name.
+	* layout.h (Layout::merge_gnu_properties): New method.
+	(Layout::add_gnu_property): New method.
+	* object.cc (Sized_relobj_file::do_layout): Call
+	Layout::merge_gnu_properties.
+	* target.h (Target::merge_gnu_property): Remove.
+	(Target::finalize_gnu_properties): New method.
+	(Target::do_merge_gnu_property): Move to Sized_target and rename.
+	(Target::do_finalize_gnu_properties): New virtual method.
+	(Sized_target::record_gnu_property): Moved and renamed from
+	Target::do_merge_gnu_property.
+	(Sized_target::merge_gnu_properties): New virtual method.
+	* x86_64.cc (Target_x86_64::isa_1_used_, isa_1_needed_)
+	(feature_1_, object_feature_1_, seen_first_object_): New data members.
+	(Target_x86_64::do_merge_gnu_property): Rename to ...
+	(Target_x86_64::record_gnu_property): ... this.  Save target-specific
+	properties in Target class object.
+	(Target_x86_64::merge_gnu_properties): New method.
+	(add_property): New static inline function.
+	(Target_x86_64::do_finalize_gnu_properties): New method.
+	* testsuite/Makefile.am (gnu_property_test): Remove C source file;
+	link directly without compiler driver.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/gnu_property_a.S: Add _start.
+
+2018-06-22  Cary Coutant  <ccoutant@gmail.com>
+
 	* incremental.cc (Sized_incremental_binary::setup_readers): Use
 	emplace_back for GCC 5 and later.
 	* incremental.h (Incremental_binary::Input_reader): Provide copy

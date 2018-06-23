@@ -1862,7 +1862,10 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
     }
 
   if (!is_pass_two)
-    layout->layout_gnu_stack(seen_gnu_stack, gnu_stack_flags, this);
+    {
+      layout->merge_gnu_properties(this);
+      layout->layout_gnu_stack(seen_gnu_stack, gnu_stack_flags, this);
+    }
 
   // Handle the .eh_frame sections after the other sections.
   gold_assert(!is_pass_one || eh_frame_sections.empty());
