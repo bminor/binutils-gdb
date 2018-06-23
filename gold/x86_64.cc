@@ -1583,7 +1583,7 @@ Target_x86_64<size>::record_gnu_property(
     size_t pr_datasz, const unsigned char* pr_data,
     const Object* object)
 {
-  uint32_t val;
+  uint32_t val = 0;
 
   switch (pr_type)
     {

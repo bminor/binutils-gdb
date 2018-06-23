@@ -1,5 +1,10 @@
 2018-06-23  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/22914
+	* x86_64.cc (Target_x86_64::record_gnu_property): Initialize val.
+
+2018-06-23  Cary Coutant  <ccoutant@gmail.com>
+
 	PR gold/22915
 	* x86_64.cc (Output_data_plt_x86_64_ibt): New class.
 	(Target_x86_64::do_make_data_plt): (All instantiations) Check for
