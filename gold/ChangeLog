@@ -1,5 +1,10 @@
 2018-06-23  Cary Coutant  <ccoutant@gmail.com>
 
+	* version.cc (version_string): Bump to 1.16.
+	* NEWS: Add new features in 1.16.
+
+2018-06-23  Cary Coutant  <ccoutant@gmail.com>
+
 	PR gold/22914
 	* x86_64.cc (Target_x86_64::record_gnu_property): Initialize val.
 
