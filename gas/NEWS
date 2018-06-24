@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.31:
+
 * The ADR and ADRL pseudo-instructions supported by the ARM assembler
   now only set the bottom bit of the address of thumb function symbols
   if the -mthumb-interwork command line option is active.

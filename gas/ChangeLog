@@ -1,3 +1,8 @@
+2018-06-24  Nick Clifton  <nickc@redhat.com>
+
+	2.31 branch created.
+	* NEWS: Add marker for 2.31.
+
 2018-06-22  Tamar Christina  <tamar.christina@arm.com>
 
 	* testsuite/gas/aarch64/addsub.s: Add negs to zero reg test.

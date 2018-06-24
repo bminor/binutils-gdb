@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.31:
+
 * Add support for disassembling netronome Flow Processor (NFP) firmware files.
 
 * The AArch64 port now supports showing disassembly notes which are emitted

@@ -31,7 +31,6 @@ How to perform a release.
        [If using the make-prerelease.sh script, check that
         common.sh has the right values].
        [make-prelease.sh command i]
-       [make-prelease.sh command C]
      Likewise for all of the ChangeLog files.
      Add a note of the name of the new branch to binutils/BRANCHES.
      Commit these changes.

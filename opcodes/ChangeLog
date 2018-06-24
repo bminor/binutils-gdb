@@ -1,3 +1,7 @@
+2018-06-24  Nick Clifton  <nickc@redhat.com>
+
+	2.31 branch created.
+
 2018-06-19  Tamar Christina  <tamar.christina@arm.com>
 
 	* aarch64-tbl.h (aarch64_opcode_table): Fix alias flag for negs

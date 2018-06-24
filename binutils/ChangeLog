@@ -1,3 +1,8 @@
+2018-06-24  Nick Clifton  <nickc@redhat.com>
+
+	2.31 branch created.
+	* NEWS: Add marker for 2.31.
+
 2018-06-21  Alan Modra  <amodra@gmail.com>
 
 	* doc/Makefile.am (AUTOMAKE_OPTIONS): Add "foreign".

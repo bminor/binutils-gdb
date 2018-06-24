@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.31:
+
 * Speed up direct linking with DLLs for Cygwin and Mingw targets.
 
 * Add a configure option --enable-separate-code to decide whether
