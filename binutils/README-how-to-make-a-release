@@ -38,12 +38,17 @@ How to perform a release.
 
   4. Create the release branch using:
 
-	git tag -a binutils-2_31-branch   [e.g. for the 2.31 branch...]
-	  Suggested tag note: "The 2.31 branch for the FSF binutils"
-	  
-        git push --tags origin binutils-2_31-branch
+	git branch binutils-2_31-branch
+        git push origin binutils-2_31-branch
 
-  5. Update "BINUTILS_BRANCH" in gdbadmin's crontab:
+  5. Make sure that the branch is there.  IE check out the branch sources:
+  
+        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_31-branch 2.31
+
+     If you get a message about being in a "detached head" state, something
+     has gone wrong...
+
+  6. Update "BINUTILS_BRANCH" in gdbadmin's crontab:
 
      Log in as gdbadmin on sourceware.org, and then:
 
@@ -56,15 +61,11 @@ How to perform a release.
      If you do not have access to this account, please feel free to
      ask Joel Brobecker <brobecker AT adacore DOT com>.
 
-  6. Rename the current HEAD version entry in Bugzilla, and create a
+  7. Rename the current HEAD version entry in Bugzilla, and create a
      new one.  E.g. rename "2.30 (HEAD)" to 2.30, and create "2.31
      (HEAD)":
      
         https://sourceware.org/bugzilla/editversions.cgi?product=binutils
-
-  7. Check out the branch sources:
-  
-      git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_31-branch 2.31
 
   8. Update bfd/version.m4 on HEAD to indicate that is now a snapshot
      of the next release:
@@ -85,7 +86,7 @@ How to perform a release.
 
   8. Create an initial prerelease:
 
-     a. Create a source tarball of the branch sources:
+     a. Create a source tarball of the BRANCH sources:
 
            ./src-release -x binutils
 
@@ -96,42 +97,56 @@ How to perform a release.
           scp ../binutils-$version.tar.xz sourceware.org:~ftp/pub/binutils/snapshots
           ssh sourceware.org md5sum ~ftp/pub/binutils/snapshots/binutils-$version.tar.xz
 
-   9. Send it to the Translation Project:
+     d. Clean up the source directory.
 
-        http://translationproject.org/html/maintainers.html
+   9. Tell the Translation Project where to find the new tarball. <coordinator@translationproject.org>
+      qv: http://translationproject.org/html/maintainers.html
 
-      Sending mail for one of the POT files is sufficient.
+------------------------------------------------------------------------
+Dear Translation Project
+
+  The 2.31 release branch has been created for the FSF binutils.
+
+  A snapshot of the branch sources can be found here:
+
+    https://sourceware.org/pub/binutils/snapshots/binutils-2.30.90.tar.xz
+
+  We hope to make the official release of the sources on the 8th July
+  although that could change if there are important bugs that need to
+  be fixed before the release.
+------------------------------------------------------------------------
 
   10. Announce the availability of the snapshot and the branch on the
       binutils mailing list.  Set a date for when the release will
       actually happen.  Something like:
-        ------------------------------------------------------------------------
-        Hi Everyone, 
-       
-          The 2.XX branch has now been created:
+      
+------------------------------------------------------------------------
+Hi Everyone, 
 
-             git clone git://sourceware.org/git/binutils-gdb.git -b binutils-2_XX-branch 2.XX
+  The 2.XX branch has now been created:
 
-          A snapshot of the sources is also available here:
+     git clone git://sourceware.org/git/binutils-gdb.git -b binutils-2_XX-branch 2.XX
 
-            ftp://sourceware.org/pub/binutils/snapshots/binutils-2.XX.0.tar.xz
+  A snapshot of the sources is also available here:
 
-          Please could all patches for the branch be run by me.
-          The rules for the branch are:
-        
-            * No new features.
-            * Target specific bug fixes are OK.
-            * Generic bug fixes are OK if they are important and widely tested.
-            * Documentation updates/fixes are OK.
-            * Translation updates are OK.
-            * Fixes for testsuite failures are OK.
-        
-          Ideally I would like to make the release happen in two weeks time,
-          i.e. Saturday 27th Jan.  Which I hope will be enough time for everyone
-          to get their final fixes in.
-        ------------------------------------------------------------------------
+    https://sourceware.org/pub/binutils/snapshots/binutils-2.XX.90.tar.xz
 
-  12. Build various different toolchains, test them and nag
+  Please could all patches for the branch be run by me.
+  The rules for the branch are:
+
+    * No new features.
+    * Target specific bug fixes are OK.
+    * Generic bug fixes are OK if they are important and widely tested.
+    * Documentation updates/fixes are OK.
+    * Translation updates are OK.
+    * Fixes for testsuite failures are OK.
+
+  Ideally I would like to make the release happen in two weeks time,
+  i.e. Saturday 27th Jan.  Which I hope will be enough time for everyone
+  to get their final fixes in.
+------------------------------------------------------------------------
+
+  11. Build various different toolchains, test them and nag
       maintainers to fix any testsuite failures for their
       architectures...
 
