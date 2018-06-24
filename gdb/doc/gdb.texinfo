@@ -2936,7 +2936,7 @@ programs:
 @item automatic notification of new threads
 @item @samp{thread @var{thread-id}}, a command to switch among threads
 @item @samp{info threads}, a command to inquire about existing threads
-@item @samp{thread apply [@var{thread-id-list}] [@var{all}] @var{args}},
+@item @samp{thread apply [@var{thread-id-list} | all] @var{args}},
 a command to apply a command to a list of threads
 @item thread-specific breakpoints
 @item @samp{set print thread-events}, which controls printing of 
@@ -3173,7 +3173,7 @@ threads.
 
 @kindex thread apply
 @cindex apply command to several threads
-@item thread apply [@var{thread-id-list} | all [-ascending]] @var{command}
+@item thread apply [@var{thread-id-list} | all [-ascending]] [@var{flag}]@dots{} @var{command}
 The @code{thread apply} command allows you to apply the named
 @var{command} to one or more threads.  Specify the threads that you
 want affected using the thread ID list syntax (@pxref{thread ID
@@ -3181,6 +3181,59 @@ lists}), or specify @code{all} to apply to all threads.  To apply a
 command to all threads in descending order, type @kbd{thread apply all
 @var{command}}.  To apply a command to all threads in ascending order,
 type @kbd{thread apply all -ascending @var{command}}.
+
+The @var{flag} arguments control what output to produce and how to handle
+errors raised when applying @var{command} to a thread.  @var{flag}
+must start with a @code{-} directly followed by one letter in
+@code{qcs}.  If several flags are provided, they must be given
+individually, such as @code{-c -q}.
+
+By default, @value{GDBN} displays some thread information before the
+output produced by @var{command}, and an error raised during the
+execution of a @var{command} will abort @code{thread apply}.  The
+following flags can be used to fine-tune this behavior:
+
+@table @code
+@item -c
+The flag @code{-c}, which stands for @samp{continue}, causes any
+errors in @var{command} to be displayed, and the execution of
+@code{thread apply} then continues.
+@item -s
+The flag @code{-s}, which stands for @samp{silent}, causes any errors
+or empty output produced by a @var{command} to be silently ignored.
+That is, the execution continues, but the thread information and errors
+are not printed.
+@item -q
+The flag @code{-q} (@samp{quiet}) disables printing the thread
+information.
+@end table
+
+Flags @code{-c} and @code{-s} cannot be used together.
+
+@kindex taas
+@cindex apply command to all threads (ignoring errors and empty output)
+@item taas @var{command}
+Shortcut for @code{thread apply all -s @var{command}}.
+Applies @var{command} on all threads, ignoring errors and empty output.
+
+@kindex tfaas
+@cindex apply a command to all frames of all threads (ignoring errors and empty output)
+@item tfaas @var{command}
+Shortcut for @code{thread apply all -s frame apply all -s @var{command}}.
+Applies @var{command} on all frames of all threads, ignoring errors
+and empty output.  Note that the flag @code{-s} is specified twice:
+The first @code{-s} ensures that @code{thread apply} only shows the thread
+information of the threads for which @code{frame apply} produces
+some output.  The second @code{-s} is needed to ensure that @code{frame
+apply} shows the frame information of a frame only if the
+@var{command} successfully produced some output.
+
+It can for example be used to print a local variable or a function
+argument without knowing the thread or frame where this variable or argument
+is, using:
+@smallexample
+(@value{GDBP}) tfaas p some_local_var_i_do_not_remember_where_it_is
+@end smallexample
 
 
 @kindex thread name
@@ -7304,6 +7357,7 @@ currently executing frame and describes it briefly, similar to the
 * Backtrace::                   Backtraces
 * Selection::                   Selecting a frame
 * Frame Info::                  Information on a frame
+* Frame Apply::                 Applying a command to several frames
 * Frame Filter Management::     Managing frame filters
 
 @end menu
@@ -7715,6 +7769,136 @@ line.  These are all variables (declared either static or automatic)
 accessible at the point of execution of the selected frame.
 
 @end table
+
+@node Frame Apply
+@section Applying a Command to Several Frames.
+@kindex frame apply
+@cindex apply command to several frames
+@table @code
+@item frame apply [all | @var{count} | @var{-count} | level @var{level}@dots{}] [@var{flag}]@dots{} @var{command}
+The @code{frame apply} command allows you to apply the named
+@var{command} to one or more frames.
+
+@table @code
+@item @code{all}
+Specify @code{all} to apply @var{command} to all frames.
+
+@item @var{count}
+Use @var{count} to apply @var{command} to the innermost @var{count}
+frames, where @var{count} is a positive number.
+
+@item @var{-count}
+Use @var{-count} to apply @var{command} to the outermost @var{count}
+frames, where @var{count} is a positive number.
+
+@item @code{level}
+Use @code{level} to apply @var{command} to the set of frames identified
+by the @var{level} list.  @var{level} is a frame level or a range of frame
+levels as @var{level1}-@var{level2}.  The frame level is the number shown
+in the first field of the @samp{backtrace} command output.
+E.g., @samp{2-4 6-8 3} indicates to apply @var{command} for the frames
+at levels 2, 3, 4, 6, 7, 8, and then again on frame at level 3.
+
+@end table
+
+@end table
+
+Note that the frames on which @code{frame apply} applies a command are
+also influenced by the @code{set backtrace} settings such as @code{set
+backtrace past-main} and @code{set backtrace limit N}.  See
+@xref{Backtrace,,Backtraces}.
+
+The @var{flag} arguments control what output to produce and how to handle
+errors raised when applying @var{command} to a frame.  @var{flag}
+must start with a @code{-} directly followed by one letter in
+@code{qcs}.  If several flags are provided, they must be given
+individually, such as @code{-c -q}.
+
+By default, @value{GDBN} displays some frame information before the
+output produced by @var{command}, and an error raised during the
+execution of a @var{command} will abort @code{frame apply}.  The
+following flags can be used to fine-tune this behavior:
+
+@table @code
+@item -c
+The flag @code{-c}, which stands for @samp{continue}, causes any
+errors in @var{command} to be displayed, and the execution of
+@code{frame apply} then continues.
+@item -s
+The flag @code{-s}, which stands for @samp{silent}, causes any errors
+or empty output produced by a @var{command} to be silently ignored.
+That is, the execution continues, but the frame information and errors
+are not printed.
+@item -q
+The flag @code{-q} (@samp{quiet}) disables printing the frame
+information.
+@end table
+
+The following example shows how the flags @code{-c} and @code{-s} are
+working when applying the command @code{p j} to all frames, where
+variable @code{j} can only be successfully printed in the outermost
+@code{#1 main} frame.
+
+@smallexample
+@group
+(gdb) frame apply all p j
+#0  some_function (i=5) at fun.c:4
+No symbol "j" in current context.
+(gdb) frame apply all -c p j
+#0  some_function (i=5) at fun.c:4
+No symbol "j" in current context.
+#1  0x565555fb in main (argc=1, argv=0xffffd2c4) at fun.c:11
+$1 = 5
+(gdb) frame apply all -s p j
+#1  0x565555fb in main (argc=1, argv=0xffffd2c4) at fun.c:11
+$2 = 5
+(gdb)
+@end group
+@end smallexample
+
+By default, @samp{frame apply}, prints the frame location
+information before the command output:
+
+@smallexample
+@group
+(gdb) frame apply all p $sp
+#0  some_function (i=5) at fun.c:4
+$4 = (void *) 0xffffd1e0
+#1  0x565555fb in main (argc=1, argv=0xffffd2c4) at fun.c:11
+$5 = (void *) 0xffffd1f0
+(gdb)
+@end group
+@end smallexample
+
+If flag @code{-q} is given, no frame information is printed:
+@smallexample
+@group
+(gdb) frame apply all -q p $sp
+$12 = (void *) 0xffffd1e0
+$13 = (void *) 0xffffd1f0
+(gdb)
+@end group
+@end smallexample
+
+@table @code
+
+@kindex faas
+@cindex apply a command to all frames (ignoring errors and empty output)
+@item faas @var{command}
+Shortcut for @code{frame apply all -s @var{command}}.
+Applies @var{command} on all frames, ignoring errors and empty output.
+
+It can for example be used to print a local variable or a function
+argument without knowing the frame where this variable or argument
+is, using:
+@smallexample
+(@value{GDBP}) faas p some_local_var_i_do_not_remember_where_it_is
+@end smallexample
+
+Note that the command @code{tfaas @var{command}} applies @var{command}
+on all frames of all threads.  See @xref{Threads,,Threads}.
+@end table
+
 
 @node Frame Filter Management
 @section Management of Frame Filters.

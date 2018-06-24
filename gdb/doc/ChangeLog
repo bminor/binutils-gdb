@@ -1,3 +1,10 @@
+2018-07-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Debugging Programs with Multiple Threads):
+	Document changes to 'thread apply'.  Document 'taas'.
+	Document 'tfaas'.
+	(Examining the Stack): Document 'frame apply'.  Document 'faas'.
+
 2018-07-11  Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Paul Fertser  <fercerpav@gmail.com>
