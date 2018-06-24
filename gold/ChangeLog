@@ -1,5 +1,9 @@
 2018-06-24  Nick Clifton  <nickc@redhat.com>
 
+	* po/gold.pot: Regenerate.
+
+2018-06-24  Nick Clifton  <nickc@redhat.com>
+
 	2.31 branch created.
 
 2018-06-23  Cary Coutant  <ccoutant@gmail.com>

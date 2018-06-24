@@ -1,5 +1,10 @@
 2018-06-24  Nick Clifton  <nickc@redhat.com>
 
+	* configure: Regenerate.
+	* po/binutils.pot: Regenerate.
+
+2018-06-24  Nick Clifton  <nickc@redhat.com>
+
 	2.31 branch created.
 	* NEWS: Add marker for 2.31.
 
