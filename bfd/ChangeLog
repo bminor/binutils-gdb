@@ -1,5 +1,10 @@
 2018-06-24  Nick Clifton  <nickc@redhat.com>
 
+	* version.m4: Update version string to 2.31.51.
+	* configure: Regenerate.
+
+2018-06-24  Nick Clifton  <nickc@redhat.com>
+
 	2.31 branch created.
 
 2018-06-21  Maciej W. Rozycki  <macro@mips.com>
