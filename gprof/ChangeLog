@@ -1,5 +1,10 @@
 2018-06-24  Nick Clifton  <nickc@redhat.com>
 
+	* configure: Regenerate.
+	* po/gprof.pot: Regenerate.
+
+2018-06-24  Nick Clifton  <nickc@redhat.com>
+
 	2.31 branch created.
 
 2018-06-19  Simon Marchi  <simon.marchi@ericsson.com>

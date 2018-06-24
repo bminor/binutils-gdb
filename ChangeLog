@@ -1,3 +1,7 @@
+2018-06-24  Nick Clifton  <nickc@redhat.com>
+
+	* configure: Regenerate.
+
 2018-06-19  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* libtool.m4: Use AC_LANG_SOURCE.

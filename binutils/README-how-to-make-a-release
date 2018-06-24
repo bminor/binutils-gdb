@@ -38,8 +38,10 @@ How to perform a release.
 
   4. Create the release branch using:
 
-	git tag -a binutils-2_30-branch   [e.g. for the 2.30 branch...]
-        git push --tags origin binutils-2_30-branch
+	git tag -a binutils-2_31-branch   [e.g. for the 2.31 branch...]
+	  Suggested tag note: "The 2.31 branch for the FSF binutils"
+	  
+        git push --tags origin binutils-2_31-branch
 
   5. Update "BINUTILS_BRANCH" in gdbadmin's crontab:
 
@@ -54,49 +56,53 @@ How to perform a release.
      If you do not have access to this account, please feel free to
      ask Joel Brobecker <brobecker AT adacore DOT com>.
 
-  6. Update bfd/configure and bfd/configure.ac on HEAD to indicate
-     snapshot of the following release.
-       [make-prerelease.sh command hv + C]
-
-  7. Rename the current HEAD version entry in Bugzilla, and create a
+  6. Rename the current HEAD version entry in Bugzilla, and create a
      new one.  E.g. rename "2.30 (HEAD)" to 2.30, and create "2.31
      (HEAD)":
      
         https://sourceware.org/bugzilla/editversions.cgi?product=binutils
 
-  8. Update the release number in bfd/version.m4 for the mainline and
-     the branch.  The mainline should have the minor number
-     incremented, but the branch only needs the point value set to 90
-     as the release has not actually happened yet.
+  7. Check out the branch sources:
+  
+      git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_31-branch 2.31
+
+  8. Update bfd/version.m4 on HEAD to indicate that is now a snapshot
+     of the next release:
+     
+       m4_define([BFD_VERSION], [2.31.51])
+       
+     Update the release number in bfd/version.m4 for the the branch.
+     The branch only needs the point value set to 90 as the release
+     has not actually happened yet.
+
+       m4_define([BFD_VERSION], [2.30.90])
 
      Regenerate various files on both branch and HEAD by configuring
      with --enable-maintainer-mode.  NB/ Remember to build gold and
-     gprof.  Commit the changes.  Make sure that this includes the
-     .pot files as well as the configure and makefiles.
+     gprof.  Add ChangeLog entries.  Commit the changes.  Make sure
+     that this includes the .pot files as well as the configure and
+     makefiles.
 
-  9. Create an initial prerelease:
+  8. Create an initial prerelease:
 
-     a. Change the version on the branch (bfd/version.m4), regenerate
-        the files, and check this in.
-
-     b. Create a source tarball of the branch sources:
+     a. Create a source tarball of the branch sources:
 
            ./src-release -x binutils
 
-     c. Build a test target using this tarball.
+     b. Build a test target using this tarball.
 
-     d. Upload the prerelease snapshot to the FTP:
+     c. Upload the prerelease snapshot to the FTP:
 
           scp ../binutils-$version.tar.xz sourceware.org:~ftp/pub/binutils/snapshots
           ssh sourceware.org md5sum ~ftp/pub/binutils/snapshots/binutils-$version.tar.xz
 
-  10. Send it to the Translation Project:
+   9. Send it to the Translation Project:
 
         http://translationproject.org/html/maintainers.html
 
       Sending mail for one of the POT files is sufficient.
 
-  11. Announce the availability of the snapshot and the branch on the
+  10. Announce the availability of the snapshot and the branch on the
       binutils mailing list.  Set a date for when the release will
       actually happen.  Something like:
         ------------------------------------------------------------------------

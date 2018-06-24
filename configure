@@ -2275,7 +2275,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-
 progname=$0
 # if PWD already has a value, it is probably wrong.
 if test -n "$PWD" ; then PWD=`${PWDCMD-pwd}`; fi

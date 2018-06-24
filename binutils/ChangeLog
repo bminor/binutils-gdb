@@ -1,5 +1,12 @@
 2018-06-24  Nick Clifton  <nickc@redhat.com>
 
+	* README-how-to-make-a-release: Update with experiences from
+	making 2.31 branch.
+	* po/binutils.pot: Regenerate.
+	* configure: Regenerate.
+
+2018-06-24  Nick Clifton  <nickc@redhat.com>
+
 	2.31 branch created.
 	* NEWS: Add marker for 2.31.
 

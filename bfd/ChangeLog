@@ -1,5 +1,9 @@
 2018-06-24  Nick Clifton  <nickc@redhat.com>
 
+	* po/bfd.pot: Regenerate.
+
+2018-06-24  Nick Clifton  <nickc@redhat.com>
+
 	* version.m4: Update version string to 2.31.51.
 	* configure: Regenerate.
 
