@@ -1,3 +1,8 @@
+2018-06-25  Tom Tromey  <tom@tromey.com>
+
+	* dwarf-mode.el (dwarf-mode-syntax-table): New variable.
+	Bump version number.
+
 2018-06-24  Nick Clifton  <nickc@redhat.com>
 
 	* README-how-to-make-a-release: Update with experiences from
