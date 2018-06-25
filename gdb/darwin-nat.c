@@ -350,7 +350,9 @@ darwin_check_new_threads (struct inferior *inf)
       if (old_ix < old_nbr && (new_ix == new_nbr || new_id > old_id))
 	{
 	  /* A thread was removed.  */
-	  delete_thread (ptid_build (inf->pid, 0, old_id));
+	  struct thread_info *thr
+	    = find_thread_ptid (ptid_build (inf->pid, 0, old_id));
+	  delete_thread (thr);
 	  kret = mach_port_deallocate (gdb_task, old_id);
 	  MACH_CHECK_ERROR (kret);
 	  old_ix++;

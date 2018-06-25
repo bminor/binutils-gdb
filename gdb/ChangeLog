@@ -1,3 +1,28 @@
+2018-06-25  Pedro Alves  <palves@redhat.com>
+
+	* windows-nat.c (windows_delete_thread): Use find_thread_ptid and
+	pass thread_info pointer to delete_thread.
+	(windows_nat_target::detach): Pass inferior pointer to
+	detach_inferior.
+	* aix-thread.c (sync_threadlists): Pass thread_info pointer to
+	delete_thread.
+	* bsd-kvm.c (bsd_kvm_target::close): Use discard_all_inferiors.
+	* darwin-nat.c (darwin_check_new_threads): Use find_thread_ptid
+	and pass a thread_info pointer to delete_thread.
+	* fbsd-nat.c (fbsd_nat_target::wait): Use find_thread_ptid and
+	pass thread_info pointer to delete_thread.
+	* go32-nat.c (go32_nat_target::mourn_inferior): Remove
+	delete_thread_silent call.
+	* procfs.c (procfs_target::detach): Pass inferior pointer to
+	detach_inferior.
+	(procfs_target::wait): Pass thread_info pointer to delete_thread.
+	* remote-sim.c (gdbsim_target::mourn_inferior): Remove
+	delete_thread_silent call.
+	* windows-nat.c (windows_delete_thread): Use find_thread_ptid and
+	pass thread_info pointer to delete_thread.
+	(windows_nat_target::detach): Pass inferior pointer to
+	delete_inferior.
+
 2018-06-22  Alan Hayward  <alan.hayward@arm.com>
 
 	* regcache.c (readable_regcache::read_part): Fix asserts.

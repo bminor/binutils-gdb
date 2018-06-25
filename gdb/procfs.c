@@ -1928,7 +1928,7 @@ procfs_target::detach (inferior *inf, int from_tty)
   do_detach ();
 
   inferior_ptid = null_ptid;
-  detach_inferior (pid);
+  detach_inferior (inf);
   maybe_unpush_target ();
 }
 
@@ -2295,7 +2295,7 @@ wait_again:
 		    if (print_thread_events)
 		      printf_unfiltered (_("[%s exited]\n"),
 					 target_pid_to_str (retval));
-		    delete_thread (retval);
+		    delete_thread (find_thread_ptid (retval));
 		    status->kind = TARGET_WAITKIND_SPURIOUS;
 		    return retval;
 		  }
@@ -2414,7 +2414,7 @@ wait_again:
 		    if (print_thread_events)
 		      printf_unfiltered (_("[%s exited]\n"),
 					 target_pid_to_str (retval));
-		    delete_thread (retval);
+		    delete_thread (find_thread_ptid (retval));
 		    status->kind = TARGET_WAITKIND_SPURIOUS;
 		    return retval;
 		  }

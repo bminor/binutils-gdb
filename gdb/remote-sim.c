@@ -1195,7 +1195,6 @@ gdbsim_target::mourn_inferior ()
 
   remove_breakpoints ();
   generic_mourn_inferior ();
-  delete_thread_silent (sim_data->remote_sim_ptid);
 }
 
 /* Pass the command argument through to the simulator verbatim.  The

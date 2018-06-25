@@ -1274,7 +1274,8 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 		 threads might be skipped during post_attach that
 		 have not yet reported their PL_FLAG_EXITED event.
 		 Ignore EXITED events for an unknown LWP.  */
-	      if (in_thread_list (wptid))
+	      thread_info *thr = find_thread_ptid (wptid);
+	      if (thr != nullptr)
 		{
 		  if (debug_fbsd_lwp)
 		    fprintf_unfiltered (gdb_stdlog,
@@ -1283,7 +1284,7 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 		  if (print_thread_events)
 		    printf_unfiltered (_("[%s exited]\n"), target_pid_to_str
 				       (wptid));
-		  delete_thread (wptid);
+		  delete_thread (thr);
 		}
 	      if (ptrace (PT_CONTINUE, pid, (caddr_t) 1, 0) == -1)
 		perror_with_name (("ptrace"));

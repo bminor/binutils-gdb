@@ -788,7 +788,6 @@ go32_nat_target::mourn_inferior ()
 
   ptid = inferior_ptid;
   inferior_ptid = null_ptid;
-  delete_thread_silent (ptid);
   prog_has_started = 0;
 
   generic_mourn_inferior ();

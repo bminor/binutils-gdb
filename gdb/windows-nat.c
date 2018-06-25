@@ -493,7 +493,7 @@ windows_delete_thread (ptid_t ptid, DWORD exit_code)
   else if (print_thread_events && id != main_thread_id)
     printf_unfiltered (_("[%s exited with code %u]\n"),
 		       target_pid_to_str (ptid), (unsigned) exit_code);
-  delete_thread (ptid);
+  delete_thread (find_thread_ptid (ptid));
 
   for (th = &thread_head;
        th->next != NULL && th->next->id != id;
@@ -2000,7 +2000,7 @@ windows_nat_target::detach (inferior *inf, int from_tty)
 
   x86_cleanup_dregs ();
   inferior_ptid = null_ptid;
-  detach_inferior (current_event.dwProcessId);
+  detach_inferior (inf);
 
   maybe_unpush_target ();
 }

@@ -155,7 +155,7 @@ bsd_kvm_target::close ()
     }
 
   inferior_ptid = null_ptid;
-  delete_thread_silent (bsd_kvm_ptid);
+  discard_all_inferiors ();
 }
 
 static LONGEST

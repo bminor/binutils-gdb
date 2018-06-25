@@ -800,7 +800,7 @@ sync_threadlists (void)
     {
       if (pi == pcount)
 	{
-	  delete_thread (gbuf[gi]->ptid);
+	  delete_thread (gbuf[gi]);
 	  gi++;
 	}
       else if (gi == gcount)
@@ -836,7 +836,7 @@ sync_threadlists (void)
 	    }
 	  else if (cmp_result > 0)
 	    {
-	      delete_thread (gptid);
+	      delete_thread (gbuf[gi]);
 	      gi++;
 	    }
 	  else
