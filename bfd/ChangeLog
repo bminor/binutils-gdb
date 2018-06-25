@@ -1,3 +1,10 @@
+2018-06-25  Nick Clifton  <nickc@redhat.com>
+
+	* elfnn-aarch64.c (_bfd_aarch64_erratum_835769_stub_name): Check
+	for malloc returning NULL.
+	(_bfd_aarch64_erratum_843419_fixup): Check for
+	_bfd_aarch64_erratum_835769_stub_name returning NULL.
+
 2018-06-24  Nick Clifton  <nickc@redhat.com>
 
 	* po/bfd.pot: Regenerate.
