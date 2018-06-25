@@ -177,7 +177,7 @@ extern void delete_longjmp_breakpoint_cleanup (void *arg);
 
 extern void detach_command (const char *, int);
 
-extern void notice_new_inferior (thread_info *, int, int);
+extern void notice_new_inferior (struct thread_info *, int, int);
 
 extern struct value *get_return_value (struct value *function,
 				       struct type *value_type);

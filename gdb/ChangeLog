@@ -1,5 +1,17 @@
 2018-06-25  Pedro Alves  <palves@redhat.com>
 
+	* gdbthread.h (thread_info_ref, delete_thread)
+	(delete_thread_silent, first_thread_of_inferior)
+	(any_thread_of_inferior, switch_to_thread)
+	(enable_thread_stack_temporaries)
+	(thread_stack_temporaries_enabled_p, push_thread_stack_temporary)
+	(get_last_thread_stack_temporary)
+	(value_in_thread_stack_temporaries, can_access_registers_thread):
+	Spell out "struct thread_info" instead of just "thread_info".
+	* inferior.h (notice_new_inferior): Likewise.
+
+2018-06-25  Pedro Alves  <palves@redhat.com>
+
 	* windows-nat.c (windows_delete_thread): Use find_thread_ptid and
 	pass thread_info pointer to delete_thread.
 	(windows_nat_target::detach): Pass inferior pointer to
