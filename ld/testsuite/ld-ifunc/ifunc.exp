@@ -702,6 +702,19 @@ run_ld_link_exec_tests [list \
 	"pr18841cn" \
 	"pr18841.out" \
     ] \
+]
+
+# The pr23169 testcase is not valid.  In general, you can't call ifunc
+# resolvers in another binary unless you know what you're doing.  In
+# particular you must ensure that the binary containing the resolver
+# is relocated before the resolver is called (for example, the
+# function addresses returned by the resolver may be loaded from the
+# GOT).
+# That does not happen for the pr23169 testcase where the resolver is
+# in the executable (which is relocated last by ld.so).
+if { [isnative]
+     && ![istarget "powerpc-*-*"] } {
+run_ld_link_exec_tests [list \
     [list \
 	"Run pr23169a" \
 	"$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/libpr23169a.so" \
@@ -756,4 +769,4 @@ run_ld_link_exec_tests [list \
 	"pass.out" \
 	"-fPIE -O2 -g" \
     ] \
-]
+]}
