@@ -1,3 +1,10 @@
+2018-06-26  Nick Clifton  <nickc@redhat.com>
+
+	PR 23335
+	* config/tc-msp430.c (check_reg): Only accept register name
+	strings that do not end in an alphanumeric character.
+	* testsuite/gas/msp430/msp430x.d: Update expected disassembly.
+
 2018-06-24  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.

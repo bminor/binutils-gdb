@@ -1672,6 +1672,12 @@ md_begin (void)
   linkrelax = 1;
 }
 
+static inline bfd_boolean
+is_regname_end (char c)
+{
+  return (c == 0 || ! ISALNUM (c));
+}
+  
 /* Returns the register number equivalent to the string T.
    Returns -1 if there is no such register.
    Skips a leading 'r' or 'R' character if there is one.
@@ -1680,32 +1686,36 @@ md_begin (void)
 static signed int
 check_reg (char * t)
 {
-  signed int val;
+  char * endt;
+  signed long int val;
 
-  if (t == NULL)
+  if (t == NULL || t[0] == 0)
     return -1;
 
   if (*t == 'r' || *t == 'R')
     ++t;
 
-  if (strncasecmp (t, "pc", 2) == 0)
+  if (strncasecmp (t, "pc", 2) == 0 && is_regname_end (t[2]))
     return 0;
 
-  if (strncasecmp (t, "sp", 2) == 0)
+  if (strncasecmp (t, "sp", 2) == 0 && is_regname_end (t[2]))
     return 1;
 
-  if (strncasecmp (t, "sr", 2) == 0)
+  if (strncasecmp (t, "sr", 2) == 0 && is_regname_end (t[2]))
     return 2;
 
-  if (*t == '0')
+  if (*t == '0' && is_regname_end (t[1]))
     return 0;
 
-  val = atoi (t);
+  val = strtol (t, & endt, 0);
 
   if (val < 1 || val > 15)
     return -1;
 
-  return val;
+  if (is_regname_end (*endt))
+    return val;
+
+  return -1;
 }
 
 static int
