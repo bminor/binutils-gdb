@@ -2976,7 +2976,7 @@ with the -M switch (multiple options should be separated by commas):\n"));
   fprintf (stream, _("\n\
   no-pc		    Don't print program counter prefix.\n\
   ctx4		    Force disassembly using 4-context mode.\n\
-  ctx8		    Force 8-context mode, takes presedence.\""));
+  ctx8		    Force 8-context mode, takes precedence."));
 
   fprintf (stream, _("\n"));
 }

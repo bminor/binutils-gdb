@@ -1876,7 +1876,7 @@ needed if debugging abilities are required.  The suggested procedure
 to create these files is as follows:
 
 @enumerate
-@item Link the executable as normal.  Assuming that is is called
+@item Link the executable as normal.  Assuming that it is called
 @code{foo} then...
 @item Run @code{objcopy --only-keep-debug foo foo.dbg} to
 create a file containing the debugging info.
@@ -2314,7 +2314,7 @@ precision FP instructions, @option{quarkse_em} selects the printing of
 special QuarkSE-EM instructions, @option{fpuda} selects the printing
 of double precision assist instructions, @option{fpus} selects the
 printing of FPU single precision FP instructions, while @option{fpud}
-selects the printing of FPU souble precision FP instructions.
+selects the printing of FPU double precision FP instructions.
 Additionally, one can choose to have all the immediates printed in
 hexadecimal using @option{hex}.  By default, the short immediates are
 printed using the decimal representation, while the long immediate
@@ -3326,7 +3326,7 @@ needed if debugging abilities are required.  The suggested procedure
 to create these files is as follows:
 
 @enumerate
-@item Link the executable as normal.  Assuming that is is called
+@item Link the executable as normal.  Assuming that it is called
 @code{foo} then...
 @item Run @code{objcopy --only-keep-debug foo foo.dbg} to
 create a file containing the debugging info.

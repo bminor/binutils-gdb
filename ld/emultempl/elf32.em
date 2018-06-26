@@ -2737,7 +2737,7 @@ fragment <<EOF
 
 	  config.maxpagesize = strtoul (optarg + 14, &end, 0);
 	  if (*end || (config.maxpagesize & (config.maxpagesize - 1)) != 0)
-	    einfo (_("%F%P: invalid maxium page size \`%s'\n"),
+	    einfo (_("%F%P: invalid maximum page size \`%s'\n"),
 		   optarg + 14);
 	}
       else if (CONST_STRNEQ (optarg, "common-page-size="))
