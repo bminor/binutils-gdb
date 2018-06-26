@@ -1,3 +1,8 @@
+2018-06-26  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-bootstrap/bootstrap.exp: Use parentheses rather
+	than curly braces in logical expression.
+
 2018-06-26  Nick Clifton  <nickc@redhat.com>
 
 	* po/uk.po: Updated Ukranian translation.
