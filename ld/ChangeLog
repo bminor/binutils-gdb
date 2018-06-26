@@ -1,5 +1,11 @@
 2018-06-26  Alan Modra  <amodra@gmail.com>
 
+	PR 23169
+	* testsuite/ld-ifunc/ifunc.exp: Don't run pr23169 tests on
+	powerpc.  Comment.
+
+2018-06-26  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-bootstrap/bootstrap.exp: Use parentheses rather
 	than curly braces in logical expression.
 
