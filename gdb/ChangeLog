@@ -1,3 +1,16 @@
+2018-06-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* windows-nat.c (do_windows_fetch_inferior_registers): Rename
+	to windows_fetch_one_register, and only handle the case of
+	fetching one register.  Move the code that reloads the context
+	and iterates over all registers if R is negative to...
+	(windows_nat_target::fetch_registers): ... here.
+	(do_windows_store_inferior_registers): Rename to
+	windows_store_one_register, and only handle the case of storing
+	one register.  Move the code that handles the case where r is
+	negative to...
+	(windows_nat_target::store_registers) ... here.
+
 2018-06-26  Tom Tromey  <tom@tromey.com>
 
 	PR rust/22574:

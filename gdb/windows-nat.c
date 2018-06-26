@@ -509,14 +509,59 @@ windows_delete_thread (ptid_t ptid, DWORD exit_code)
     }
 }
 
+/* Fetches register number R from the given windows_thread_info,
+   and supplies its value to the given regcache.
+
+   This function assumes that R is non-negative.  A failed assertion
+   is raised if that is not true.
+
+   This function assumes that TH->RELOAD_CONTEXT is not set, meaning
+   that the windows_thread_info has an up-to-date context.  A failed
+   assertion is raised if that assumption is violated.  */
+
 static void
-do_windows_fetch_inferior_registers (struct regcache *regcache,
-				     windows_thread_info *th, int r)
+windows_fetch_one_register (struct regcache *regcache,
+			    windows_thread_info *th, int r)
 {
+  gdb_assert (r >= 0);
+  gdb_assert (!th->reload_context);
+
   char *context_offset = ((char *) &th->context) + mappings[r];
   struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  long l;
+
+  if (r == I387_FISEG_REGNUM (tdep))
+    {
+      long l = *((long *) context_offset) & 0xffff;
+      regcache->raw_supply (r, (char *) &l);
+    }
+  else if (r == I387_FOP_REGNUM (tdep))
+    {
+      long l = (*((long *) context_offset) >> 16) & ((1 << 11) - 1);
+      regcache->raw_supply (r, (char *) &l);
+    }
+  else if (segment_register_p (r))
+    {
+      /* GDB treats segment registers as 32bit registers, but they are
+	 in fact only 16 bits long.  Make sure we do not read extra
+	 bits from our source buffer.  */
+      long l = *((long *) context_offset) & 0xffff;
+      regcache->raw_supply (r, (char *) &l);
+    }
+  else
+    regcache->raw_supply (r, context_offset);
+}
+
+void
+windows_nat_target::fetch_registers (struct regcache *regcache, int r)
+{
+  DWORD pid = ptid_get_tid (regcache->ptid ());
+  windows_thread_info *th = thread_rec (pid, TRUE);
+
+  /* Check if TH exists.  Windows sometimes uses a non-existent
+     thread id in its events.  */
+  if (th == NULL)
+    return;
 
   if (th->reload_context)
     {
@@ -552,56 +597,26 @@ do_windows_fetch_inferior_registers (struct regcache *regcache,
       th->reload_context = 0;
     }
 
-  if (r == I387_FISEG_REGNUM (tdep))
-    {
-      l = *((long *) context_offset) & 0xffff;
-      regcache->raw_supply (r, (char *) &l);
-    }
-  else if (r == I387_FOP_REGNUM (tdep))
-    {
-      l = (*((long *) context_offset) >> 16) & ((1 << 11) - 1);
-      regcache->raw_supply (r, (char *) &l);
-    }
-  else if (segment_register_p (r))
-    {
-      /* GDB treats segment registers as 32bit registers, but they are
-	 in fact only 16 bits long.  Make sure we do not read extra
-	 bits from our source buffer.  */
-      l = *((long *) context_offset) & 0xffff;
-      regcache->raw_supply (r, (char *) &l);
-    }
-  else if (r >= 0)
-    regcache->raw_supply (r, context_offset);
+  if (r < 0)
+    for (r = 0; r < gdbarch_num_regs (regcache->arch()); r++)
+      windows_fetch_one_register (regcache, th, r);
   else
-    {
-      for (r = 0; r < gdbarch_num_regs (gdbarch); r++)
-	do_windows_fetch_inferior_registers (regcache, th, r);
-    }
+    windows_fetch_one_register (regcache, th, r);
 }
 
-void
-windows_nat_target::fetch_registers (struct regcache *regcache, int r)
-{
-  DWORD pid = ptid_get_tid (regcache->ptid ());
-  windows_thread_info *th = thread_rec (pid, TRUE);
+/* Collect the register number R from the given regcache, and store
+   its value into the corresponding area of the given thread's context.
 
-  /* Check if TH exists.  Windows sometimes uses a non-existent
-     thread id in its events.  */
-  if (th != NULL)
-    do_windows_fetch_inferior_registers (regcache, th, r);
-}
+   This function assumes that R is non-negative.  A failed assertion
+   assertion is raised if that is not true.  */
 
 static void
-do_windows_store_inferior_registers (const struct regcache *regcache,
-				     windows_thread_info *th, int r)
+windows_store_one_register (const struct regcache *regcache,
+			    windows_thread_info *th, int r)
 {
-  if (r >= 0)
-    regcache->raw_collect (r, ((char *) &th->context) + mappings[r]);
-  else
-    {
-      for (r = 0; r < gdbarch_num_regs (regcache->arch ()); r++)
-	do_windows_store_inferior_registers (regcache, th, r);
-    }
+  gdb_assert (r >= 0);
+
+  regcache->raw_collect (r, ((char *) &th->context) + mappings[r]);
 }
 
 /* Store a new register value into the context of the thread tied to
@@ -615,8 +630,14 @@ windows_nat_target::store_registers (struct regcache *regcache, int r)
 
   /* Check if TH exists.  Windows sometimes uses a non-existent
      thread id in its events.  */
-  if (th != NULL)
-    do_windows_store_inferior_registers (regcache, th, r);
+  if (th == NULL)
+    return;
+
+  if (r < 0)
+    for (r = 0; r < gdbarch_num_regs (regcache->arch ()); r++)
+      windows_store_one_register (regcache, th, r);
+  else
+    windows_store_one_register (regcache, th, r);
 }
 
 /* Encapsulate the information required in a call to
