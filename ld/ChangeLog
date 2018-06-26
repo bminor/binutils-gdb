@@ -1,5 +1,9 @@
 2018-06-26  Nick Clifton  <nickc@redhat.com>
 
+	* po/uk.po: Updated Ukranian translation.
+
+2018-06-26  Nick Clifton  <nickc@redhat.com>
+
 	* emultempl/aarch64elf.em: Fix spelling mistake.
 	* emultempl/avrelf.em: Likewise.
 	* emultempl/elf32.em: Likewise.
