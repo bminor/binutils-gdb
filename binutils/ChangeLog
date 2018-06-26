@@ -1,3 +1,8 @@
+2018-06-26  Nick Clifton  <nickc@redhat.com>
+
+	* doc/binutils.texi: Fix spelling mistakes.
+	* README--how-to-make-a-release: Likewise.
+
 2018-06-25  Tom Tromey  <tom@tromey.com>
 
 	* dwarf-mode.el (dwarf-mode-syntax-table): New variable.

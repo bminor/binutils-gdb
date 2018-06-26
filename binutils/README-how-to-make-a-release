@@ -72,7 +72,7 @@ How to perform a release.
      
        m4_define([BFD_VERSION], [2.31.51])
        
-     Update the release number in bfd/version.m4 for the the branch.
+     Update the release number in bfd/version.m4 for the branch.
      The branch only needs the point value set to 90 as the release
      has not actually happened yet.
 

@@ -257,7 +257,7 @@ PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("  --pmem-wrap-around=<val>    "
 		   "Make the linker relaxation machine assume that a\n"
 		   "                              "
-		   "  program counter wrap-around occures at address\n"
+		   "  program counter wrap-around occurs at address\n"
 		   "                              "
 		   "  <val>.  Supported values: 8k, 16k, 32k and 64k.\n"));
   fprintf (file, _("  --no-call-ret-replacement   "
