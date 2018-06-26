@@ -1,5 +1,10 @@
 2018-06-26  Nick Clifton  <nickc@redhat.com>
 
+	* po/sv.po: Updated Swedish translation.
+	* po/uk.po: Updated Ukranian translation.
+
+2018-06-26  Nick Clifton  <nickc@redhat.com>
+
 	* doc/binutils.texi: Fix spelling mistakes.
 	* README--how-to-make-a-release: Likewise.
 

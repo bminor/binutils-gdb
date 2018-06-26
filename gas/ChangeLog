@@ -1,5 +1,9 @@
 2018-06-26  Nick Clifton  <nickc@redhat.com>
 
+	* po/uk.po: Updated Ukranian translation.
+
+2018-06-26  Nick Clifton  <nickc@redhat.com>
+
 	PR 23335
 	* config/tc-msp430.c (check_reg): Only accept register name
 	strings that do not end in an alphanumeric character.

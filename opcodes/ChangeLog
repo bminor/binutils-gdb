@@ -1,5 +1,11 @@
 2018-06-26  Nick Clifton  <nickc@redhat.com>
 
+	* po/uk.po: Updated Ukranian translation.
+	* po/de.po: Updated German translation.
+	* po/pt_BR.po: Updated Brazilian Portuguese translation.
+
+2018-06-26  Nick Clifton  <nickc@redhat.com>
+
 	* nfp-dis.c: Fix spelling mistake.
 
 2018-06-24  Nick Clifton  <nickc@redhat.com>
