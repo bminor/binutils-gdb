@@ -436,7 +436,7 @@ i386_arch_setup (void)
 
 #ifdef __x86_64__
   tdesc = amd64_create_target_description (X86_XSTATE_SSE_MASK, false,
-						 false);
+					   false, false);
   const char **expedite_regs = amd64_expedite_regs;
 #else
   tdesc = i386_create_target_description (X86_XSTATE_SSE_MASK, false);

@@ -1,5 +1,25 @@
 2018-06-29  Pedro Alves  <palves@redhat.com>
 
+	* gdb/amd64-tdep.h (amd64_create_target_description): Add
+	"segments" parameter.
+	* gdb/amd64-tdep.c (amd64_none_init_abi, amd64_x32_none_init_abi)
+	(_initialize_amd64_tdep): Update call to
+	amd64_create_target_description.
+	(amd64_target_description): Add "segments" parameter.  Adjust
+	the implementation to use it.
+	* gdb/amd64-linux-tdep.c (amd64_linux_read_description): Update
+	call to amd64_create_target_description.
+	* gdb/amd64-windows-tdep.c (amd64_windows_init_abi): Likewise.
+	* gdb/arch/amd64.h (amd64_create_target_description): Add
+	"segments" register.
+	* gdb/arch/amd64.c (amd64_create_target_description): Add
+	"segments" parameter.  Call create_feature_i386_64bit_segments
+	only if SEGMENTS is true.
+	* gdb/gdbserver/win32-i386-low.c (i386_arch_setup): Update
+	call to amd64_create_target_description.
+
+2018-06-29  Pedro Alves  <palves@redhat.com>
+
 	* thread.c (thread_target_id_str): New, factored out from ...
 	(print_thread_info_1): ... here.  Use it to compute the max
 	"Target Id" column width.

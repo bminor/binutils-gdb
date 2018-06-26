@@ -1226,7 +1226,7 @@ amd64_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   frame_unwind_append_unwinder (gdbarch, &amd64_windows_frame_unwind);
 
   amd64_init_abi (info, gdbarch,
-		  amd64_target_description (X86_XSTATE_SSE_MASK));
+		  amd64_target_description (X86_XSTATE_SSE_MASK, false));
 
   windows_init_abi (info, gdbarch);
 

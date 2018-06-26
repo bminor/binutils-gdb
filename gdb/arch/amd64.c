@@ -33,10 +33,12 @@
 
 /* Create amd64 target descriptions according to XCR0.  If IS_X32 is
    true, create the x32 ones.  If IS_LINUX is true, create target
-   descriptions for Linux.  */
+   descriptions for Linux.  If SEGMENTS is true, then include
+   the "org.gnu.gdb.i386.segments" feature registers.  */
 
 target_desc *
-amd64_create_target_description (uint64_t xcr0, bool is_x32, bool is_linux)
+amd64_create_target_description (uint64_t xcr0, bool is_x32, bool is_linux,
+				 bool segments)
 {
   target_desc *tdesc = allocate_target_description ();
 
@@ -57,7 +59,8 @@ amd64_create_target_description (uint64_t xcr0, bool is_x32, bool is_linux)
   regnum = create_feature_i386_64bit_sse (tdesc, regnum);
   if (is_linux)
     regnum = create_feature_i386_64bit_linux (tdesc, regnum);
-  regnum = create_feature_i386_64bit_segments (tdesc, regnum);
+  if (segments)
+    regnum = create_feature_i386_64bit_segments (tdesc, regnum);
 
   if (xcr0 & X86_XSTATE_AVX)
     regnum = create_feature_i386_64bit_avx (tdesc, regnum);

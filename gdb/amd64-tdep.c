@@ -3225,7 +3225,8 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
 static void
 amd64_none_init_abi (gdbarch_info info, gdbarch *arch)
 {
-  amd64_init_abi (info, arch, amd64_target_description (X86_XSTATE_SSE_MASK));
+  amd64_init_abi (info, arch, amd64_target_description (X86_XSTATE_SSE_MASK,
+							true));
 }
 
 static struct type *
@@ -3266,25 +3267,27 @@ static void
 amd64_x32_none_init_abi (gdbarch_info info, gdbarch *arch)
 {
   amd64_x32_init_abi (info, arch,
-		      amd64_target_description (X86_XSTATE_SSE_MASK));
+		      amd64_target_description (X86_XSTATE_SSE_MASK, true));
 }
 
 /* Return the target description for a specified XSAVE feature mask.  */
 
 const struct target_desc *
-amd64_target_description (uint64_t xcr0)
+amd64_target_description (uint64_t xcr0, bool segments)
 {
   static target_desc *amd64_tdescs \
-    [2/*AVX*/][2/*MPX*/][2/*AVX512*/][2/*PKRU*/] = {};
+    [2/*AVX*/][2/*MPX*/][2/*AVX512*/][2/*PKRU*/][2/*segments*/] = {};
   target_desc **tdesc;
 
   tdesc = &amd64_tdescs[(xcr0 & X86_XSTATE_AVX) ? 1 : 0]
     [(xcr0 & X86_XSTATE_MPX) ? 1 : 0]
     [(xcr0 & X86_XSTATE_AVX512) ? 1 : 0]
-    [(xcr0 & X86_XSTATE_PKRU) ? 1 : 0];
+    [(xcr0 & X86_XSTATE_PKRU) ? 1 : 0]
+    [segments ? 1 : 0];
 
   if (*tdesc == NULL)
-    *tdesc = amd64_create_target_description (xcr0, false, false);
+    *tdesc = amd64_create_target_description (xcr0, false, false,
+					      segments);
 
   return *tdesc;
 }
@@ -3314,7 +3317,7 @@ _initialize_amd64_tdep (void)
 
   for (auto &a : xml_masks)
     {
-      auto tdesc = amd64_target_description (a.mask);
+      auto tdesc = amd64_target_description (a.mask, true);
 
       selftests::record_xml_tdesc (a.xml, tdesc);
     }
