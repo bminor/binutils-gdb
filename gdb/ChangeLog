@@ -1,5 +1,10 @@
 2018-06-27  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* gdb-gdb.py.in (TypeFlag) <__cmp__>: Remove.
+	<__lt__>: Add.
+
+2018-06-27  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* gdb-gdb.py: Move to...
 	* gdb-gdb.py.in: ... here.
 	* configure.ac (AC_CONFIG_FILES): Add gdb-gdb.py.

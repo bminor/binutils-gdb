@@ -38,9 +38,11 @@ class TypeFlag:
         self.name = name
         self.value = value
         self.short_name = name.replace("TYPE_INSTANCE_FLAG_", '')
-    def __cmp__(self, other):
+
+    def __lt__(self, other):
         """Sort by value order."""
-        return self.value.__cmp__(other.value)
+        return self.value < other.value
+        
 
 # A list of all existing TYPE_INSTANCE_FLAGS_* enumerations,
 # stored as TypeFlags objects.  Lazy-initialized.
