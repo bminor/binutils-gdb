@@ -1,5 +1,10 @@
 2018-06-27  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* gdb-gdb.py.in (StructMainTypePrettyPrinter) <to_string>: Don't
+	print tag_name.
+
+2018-06-27  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* gdb-gdb.py.in (TypeFlag) <__cmp__>: Remove.
 	<__lt__>: Add.
 

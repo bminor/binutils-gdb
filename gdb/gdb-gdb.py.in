@@ -209,7 +209,6 @@ class StructMainTypePrettyPrinter:
         """
         fields = []
         fields.append("name = %s" % self.val['name'])
-        fields.append("tag_name = %s" % self.val['tag_name'])
         fields.append("code = %s" % self.val['code'])
         fields.append("flags = [%s]" % self.flags_to_string())
         fields.append("owner = %s" % self.owner_to_string())
