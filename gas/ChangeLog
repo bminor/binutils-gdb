@@ -1,3 +1,10 @@
+2018-06-27  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Specify extra_objects with leading "config/"
+	for xtensa-relax.o and te-vms.o.  Use case statements to unique
+	extra_objects.  Formatting.
+	* configure: Regenerate.
+
 2018-06-26  Nick Clifton  <nickc@redhat.com>
 
 	* po/uk.po: Updated Ukranian translation.
