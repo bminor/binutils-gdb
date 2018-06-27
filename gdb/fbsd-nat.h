@@ -37,9 +37,9 @@ class fbsd_nat_target : public inf_ptrace_target
 public:
   char *pid_to_exec_file (int pid) override;
 
-  int find_memory_regions (find_memory_region_ftype func, void *data);
+  int find_memory_regions (find_memory_region_ftype func, void *data) override;
 
-  bool info_proc (const char *, enum info_proc_what);
+  bool info_proc (const char *, enum info_proc_what) override;
 
 #ifdef KERN_PROC_AUXV
   enum target_xfer_status xfer_partial (enum target_object object,

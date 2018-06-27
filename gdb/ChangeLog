@@ -1,3 +1,9 @@
+2018-06-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* fbsd-nat.h (class fbsd_nat_target) <find_memory_regions>: Add
+	override.
+	<info_proc>: Likewise.
+
 2018-06-26  Joel Brobecker  <brobecker@adacore.com>
 
 	* windows-nat.c (do_windows_fetch_inferior_registers): Rename
