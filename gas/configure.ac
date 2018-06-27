@@ -389,16 +389,13 @@ changequote([,])dnl
     case ${cpu_type} in
 
       bfin)
-        echo ${extra_objects} | grep -s "bfin-parse.o"
-        if test $? -ne 0 ; then
-          extra_objects="$extra_objects bfin-parse.o"
-        fi
-
-        echo ${extra_objects} | grep -s "bfin-lex-wrapper.o"
-        if test $? -ne 0 ; then
-          extra_objects="$extra_objects bfin-lex-wrapper.o"
-        fi
-        ;;
+	for f in bfin-parse.o bfin-lex-wrapper.o; do
+	  case " $extra_objects " in
+	    *" $f "*) ;;
+	    *) extra_objects="$extra_objects $f" ;;
+	  esac
+	done
+	;;
 
       epiphany | fr30 | ip2k | iq2000 | lm32 | m32r | or1k)
 	using_cgen=yes
@@ -411,9 +408,10 @@ changequote([,])dnl
 	using_cgen=yes
 	;;
       m68k)
-	case ${extra_objects} in
-	*m68k-parse.o*) ;;
-	*) extra_objects="$extra_objects m68k-parse.o" ;;
+	f=m68k-parse.o
+	case " $extra_objects " in
+	  *" $f "*) ;;
+	  *) extra_objects="$extra_objects $f" ;;
 	esac
 	;;
 
@@ -422,45 +420,37 @@ changequote([,])dnl
 	;;
 
       mips)
-	echo ${extra_objects} | grep -s "itbl-parse.o"
-	if test $? -ne 0 ; then
-	  extra_objects="$extra_objects itbl-parse.o"
-	fi
-
-	echo ${extra_objects} | grep -s "itbl-lex-wrapper.o"
-	if test $? -ne 0 ; then
-	  extra_objects="$extra_objects itbl-lex-wrapper.o"
-	fi
-
-	echo ${extra_objects} | grep -s "itbl-ops.o"
-	if test $? -ne 0 ; then
-	  extra_objects="$extra_objects itbl-ops.o"
-	fi
+	for f in itbl-parse.o itbl-lex-wrapper.o itbl-ops.o; do
+	  case " $extra_objects " in
+	    *" $f "*) ;;
+	    *) extra_objects="$extra_objects $f" ;;
+	  esac
+	done
 	;;
 
       mt)
-        using_cgen=yes
+	using_cgen=yes
 	;;
 
       nds32)
-        # Decide BASELINE, REDUCED_REGS, FPU_DP_EXT, FPU_SP_EXT features
+	# Decide BASELINE, REDUCED_REGS, FPU_DP_EXT, FPU_SP_EXT features
 	# based on arch_name.
 	AC_MSG_CHECKING(for default configuration of --with-arch)
 	if test "x${with_arch}" != x; then
 	  case ${with_arch} in
-            v2j | v2s | v2f | v2 | v3m | v3j | v3s | v3f | v3 )
+	    v2j | v2s | v2f | v2 | v3m | v3j | v3s | v3f | v3 )
 	      AC_DEFINE_UNQUOTED(NDS32_DEFAULT_ARCH_NAME, "$with_arch",
 				 [Define value for nds32_arch_name])
-              ;;
+	      ;;
 	    *)
 	      AC_MSG_ERROR(This kind of arch name does *NOT* exist!)
 	      ;;
-          esac
+	  esac
 	fi
 	AC_MSG_RESULT($with_arch)
 
-        # Decide features one by one.
-        AC_MSG_CHECKING(for default configuration of --enable-dx-regs)
+	# Decide features one by one.
+	AC_MSG_CHECKING(for default configuration of --enable-dx-regs)
 	if test "x${enable_dx_regs}" = xyes; then
 	  AC_DEFINE(NDS32_DEFAULT_DX_REGS, 1,
 		    [Define value for nds32_dx_regs])
@@ -470,7 +460,7 @@ changequote([,])dnl
 	fi
 	AC_MSG_RESULT($enable_dx_regs)
 
-        AC_MSG_CHECKING(for default configuration of --enable-perf-ext)
+	AC_MSG_CHECKING(for default configuration of --enable-perf-ext)
 	if test "x${enable_perf_ext}" = xno; then
 	  AC_DEFINE(NDS32_DEFAULT_PERF_EXT, 0,
 		    [Define value for nds32_perf_ext])
@@ -480,7 +470,7 @@ changequote([,])dnl
 	fi
 	AC_MSG_RESULT($enable_perf_ext)
 
-        AC_MSG_CHECKING(for default configuration of --enable-perf-ext2)
+	AC_MSG_CHECKING(for default configuration of --enable-perf-ext2)
 	if test "x${enable_perf_ext2}" = xno; then
 	  AC_DEFINE(NDS32_DEFAULT_PERF_EXT2, 0,
 		    [Define value for nds32_perf_ext2])
@@ -490,7 +480,7 @@ changequote([,])dnl
 	fi
 	AC_MSG_RESULT($enable_perf_ext2)
 
-        AC_MSG_CHECKING(for default configuration of --enable-string-ext)
+	AC_MSG_CHECKING(for default configuration of --enable-string-ext)
 	if test "x${enable_string_ext}" = xno; then
 	  AC_DEFINE(NDS32_DEFAULT_STRING_EXT, 0,
 		    [Define value for nds32_string_ext])
@@ -500,7 +490,7 @@ changequote([,])dnl
 	fi
 	AC_MSG_RESULT($enable_string_ext)
 
-        AC_MSG_CHECKING(for default configuration of --enable-audio-ext)
+	AC_MSG_CHECKING(for default configuration of --enable-audio-ext)
 	if test "x${enable_audio_ext}" = xno; then
 	  AC_DEFINE(NDS32_DEFAULT_AUDIO_EXT, 0,
 		    [Define value for nds32_audio_ext])
@@ -518,17 +508,19 @@ changequote([,])dnl
 	;;
 
       rl78)
-        echo ${extra_objects} | grep -s "rl78-parse.o"
-        if test $? -ne 0 ; then
-          extra_objects="$extra_objects rl78-parse.o"
-        fi
+	f=rl78-parse.o
+	case " $extra_objects " in
+	  *" $f "*) ;;
+	  *) extra_objects="$extra_objects $f" ;;
+	esac
 	;;
 
       rx)
-        echo ${extra_objects} | grep -s "rx-parse.o"
-        if test $? -ne 0 ; then
-          extra_objects="$extra_objects rx-parse.o"
-        fi
+	f=rx-parse.o
+	case " $extra_objects " in
+	  *" $f "*) ;;
+	  *) extra_objects="$extra_objects $f" ;;
+	esac
 	;;
 
       xstormy16)
@@ -540,10 +532,11 @@ changequote([,])dnl
 	;;
 
       xtensa)
-	echo ${extra_objects} | grep -s "xtensa-relax.o"
-	if test $? -ne 0 ; then
-	  extra_objects="$extra_objects xtensa-relax.o"
-	fi
+	f=config/xtensa-relax.o
+	case " $extra_objects " in
+	  *" $f "*) ;;
+	  *) extra_objects="$extra_objects $f" ;;
+	esac
 	;;
 
       *)
@@ -551,9 +544,10 @@ changequote([,])dnl
     esac
 
     if test $using_cgen = yes ; then
-	case "x${extra_objects}" in
-	*cgen.o*) ;;
-	*) extra_objects="$extra_objects cgen.o" ;;
+	f=cgen.o
+	case " $extra_objects " in
+	  *" $f "*) ;;
+	  *) extra_objects="$extra_objects $f" ;;
 	esac
     fi
 
@@ -564,9 +558,14 @@ changequote([,])dnl
       te_file=$em
     fi
 
-   case ${te_file} in
-      vms) extra_objects="$extra_objects te-vms.o" ;;
-   esac
+    case ${te_file} in
+      vms)
+	f=config/te-vms.o
+	case " $extra_objects " in
+	  *" $f "*) ;;
+	  *) extra_objects="$extra_objects $f" ;;
+	esac ;;
+    esac
 
 # From target name and format, produce a list of supported emulations.
 

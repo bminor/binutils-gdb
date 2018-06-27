@@ -12782,16 +12782,13 @@ _ACEOF
     case ${cpu_type} in
 
       bfin)
-        echo ${extra_objects} | grep -s "bfin-parse.o"
-        if test $? -ne 0 ; then
-          extra_objects="$extra_objects bfin-parse.o"
-        fi
-
-        echo ${extra_objects} | grep -s "bfin-lex-wrapper.o"
-        if test $? -ne 0 ; then
-          extra_objects="$extra_objects bfin-lex-wrapper.o"
-        fi
-        ;;
+	for f in bfin-parse.o bfin-lex-wrapper.o; do
+	  case " $extra_objects " in
+	    *" $f "*) ;;
+	    *) extra_objects="$extra_objects $f" ;;
+	  esac
+	done
+	;;
 
       epiphany | fr30 | ip2k | iq2000 | lm32 | m32r | or1k)
 	using_cgen=yes
@@ -12804,9 +12801,10 @@ _ACEOF
 	using_cgen=yes
 	;;
       m68k)
-	case ${extra_objects} in
-	*m68k-parse.o*) ;;
-	*) extra_objects="$extra_objects m68k-parse.o" ;;
+	f=m68k-parse.o
+	case " $extra_objects " in
+	  *" $f "*) ;;
+	  *) extra_objects="$extra_objects $f" ;;
 	esac
 	;;
 
@@ -12815,50 +12813,42 @@ _ACEOF
 	;;
 
       mips)
-	echo ${extra_objects} | grep -s "itbl-parse.o"
-	if test $? -ne 0 ; then
-	  extra_objects="$extra_objects itbl-parse.o"
-	fi
-
-	echo ${extra_objects} | grep -s "itbl-lex-wrapper.o"
-	if test $? -ne 0 ; then
-	  extra_objects="$extra_objects itbl-lex-wrapper.o"
-	fi
-
-	echo ${extra_objects} | grep -s "itbl-ops.o"
-	if test $? -ne 0 ; then
-	  extra_objects="$extra_objects itbl-ops.o"
-	fi
+	for f in itbl-parse.o itbl-lex-wrapper.o itbl-ops.o; do
+	  case " $extra_objects " in
+	    *" $f "*) ;;
+	    *) extra_objects="$extra_objects $f" ;;
+	  esac
+	done
 	;;
 
       mt)
-        using_cgen=yes
+	using_cgen=yes
 	;;
 
       nds32)
-        # Decide BASELINE, REDUCED_REGS, FPU_DP_EXT, FPU_SP_EXT features
+	# Decide BASELINE, REDUCED_REGS, FPU_DP_EXT, FPU_SP_EXT features
 	# based on arch_name.
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --with-arch" >&5
 $as_echo_n "checking for default configuration of --with-arch... " >&6; }
 	if test "x${with_arch}" != x; then
 	  case ${with_arch} in
-            v2j | v2s | v2f | v2 | v3m | v3j | v3s | v3f | v3 )
+	    v2j | v2s | v2f | v2 | v3m | v3j | v3s | v3f | v3 )
 
 cat >>confdefs.h <<_ACEOF
 #define NDS32_DEFAULT_ARCH_NAME "$with_arch"
 _ACEOF
 
-              ;;
+	      ;;
 	    *)
 	      as_fn_error $? "This kind of arch name does *NOT* exist!" "$LINENO" 5
 	      ;;
-          esac
+	  esac
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_arch" >&5
 $as_echo "$with_arch" >&6; }
 
-        # Decide features one by one.
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --enable-dx-regs" >&5
+	# Decide features one by one.
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --enable-dx-regs" >&5
 $as_echo_n "checking for default configuration of --enable-dx-regs... " >&6; }
 	if test "x${enable_dx_regs}" = xyes; then
 
@@ -12872,7 +12862,7 @@ $as_echo "#define NDS32_DEFAULT_DX_REGS 0" >>confdefs.h
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_dx_regs" >&5
 $as_echo "$enable_dx_regs" >&6; }
 
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --enable-perf-ext" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --enable-perf-ext" >&5
 $as_echo_n "checking for default configuration of --enable-perf-ext... " >&6; }
 	if test "x${enable_perf_ext}" = xno; then
 
@@ -12886,7 +12876,7 @@ $as_echo "#define NDS32_DEFAULT_PERF_EXT 1" >>confdefs.h
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_perf_ext" >&5
 $as_echo "$enable_perf_ext" >&6; }
 
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --enable-perf-ext2" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --enable-perf-ext2" >&5
 $as_echo_n "checking for default configuration of --enable-perf-ext2... " >&6; }
 	if test "x${enable_perf_ext2}" = xno; then
 
@@ -12900,7 +12890,7 @@ $as_echo "#define NDS32_DEFAULT_PERF_EXT2 1" >>confdefs.h
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_perf_ext2" >&5
 $as_echo "$enable_perf_ext2" >&6; }
 
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --enable-string-ext" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --enable-string-ext" >&5
 $as_echo_n "checking for default configuration of --enable-string-ext... " >&6; }
 	if test "x${enable_string_ext}" = xno; then
 
@@ -12914,7 +12904,7 @@ $as_echo "#define NDS32_DEFAULT_STRING_EXT 1" >>confdefs.h
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_string_ext" >&5
 $as_echo "$enable_string_ext" >&6; }
 
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --enable-audio-ext" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --enable-audio-ext" >&5
 $as_echo_n "checking for default configuration of --enable-audio-ext... " >&6; }
 	if test "x${enable_audio_ext}" = xno; then
 
@@ -12940,17 +12930,19 @@ _ACEOF
 	;;
 
       rl78)
-        echo ${extra_objects} | grep -s "rl78-parse.o"
-        if test $? -ne 0 ; then
-          extra_objects="$extra_objects rl78-parse.o"
-        fi
+	f=rl78-parse.o
+	case " $extra_objects " in
+	  *" $f "*) ;;
+	  *) extra_objects="$extra_objects $f" ;;
+	esac
 	;;
 
       rx)
-        echo ${extra_objects} | grep -s "rx-parse.o"
-        if test $? -ne 0 ; then
-          extra_objects="$extra_objects rx-parse.o"
-        fi
+	f=rx-parse.o
+	case " $extra_objects " in
+	  *" $f "*) ;;
+	  *) extra_objects="$extra_objects $f" ;;
+	esac
 	;;
 
       xstormy16)
@@ -12962,10 +12954,11 @@ _ACEOF
 	;;
 
       xtensa)
-	echo ${extra_objects} | grep -s "xtensa-relax.o"
-	if test $? -ne 0 ; then
-	  extra_objects="$extra_objects xtensa-relax.o"
-	fi
+	f=config/xtensa-relax.o
+	case " $extra_objects " in
+	  *" $f "*) ;;
+	  *) extra_objects="$extra_objects $f" ;;
+	esac
 	;;
 
       *)
@@ -12973,9 +12966,10 @@ _ACEOF
     esac
 
     if test $using_cgen = yes ; then
-	case "x${extra_objects}" in
-	*cgen.o*) ;;
-	*) extra_objects="$extra_objects cgen.o" ;;
+	f=cgen.o
+	case " $extra_objects " in
+	  *" $f "*) ;;
+	  *) extra_objects="$extra_objects $f" ;;
 	esac
     fi
 
@@ -12986,9 +12980,14 @@ _ACEOF
       te_file=$em
     fi
 
-   case ${te_file} in
-      vms) extra_objects="$extra_objects te-vms.o" ;;
-   esac
+    case ${te_file} in
+      vms)
+	f=config/te-vms.o
+	case " $extra_objects " in
+	  *" $f "*) ;;
+	  *) extra_objects="$extra_objects $f" ;;
+	esac ;;
+    esac
 
 # From target name and format, produce a list of supported emulations.
 
