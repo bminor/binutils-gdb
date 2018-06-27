@@ -17789,7 +17789,7 @@ fi
 
 ac_config_files="$ac_config_files gcore"
 
-ac_config_files="$ac_config_files Makefile gdb-gdb.gdb doc/Makefile data-directory/Makefile"
+ac_config_files="$ac_config_files Makefile gdb-gdb.gdb gdb-gdb.py doc/Makefile data-directory/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -18516,6 +18516,7 @@ do
     "gcore") CONFIG_FILES="$CONFIG_FILES gcore" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "gdb-gdb.gdb") CONFIG_FILES="$CONFIG_FILES gdb-gdb.gdb" ;;
+    "gdb-gdb.py") CONFIG_FILES="$CONFIG_FILES gdb-gdb.py" ;;
     "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
     "data-directory/Makefile") CONFIG_FILES="$CONFIG_FILES data-directory/Makefile" ;;
 
@@ -19153,6 +19154,12 @@ echo > stamp-h ;;
 esac
  ;;
     "gdb-gdb.gdb":F)
+case x$CONFIG_HEADERS in
+xconfig.h:config.in)
+echo > stamp-h ;;
+esac
+ ;;
+    "gdb-gdb.py":F)
 case x$CONFIG_HEADERS in
 xconfig.h:config.in)
 echo > stamp-h ;;

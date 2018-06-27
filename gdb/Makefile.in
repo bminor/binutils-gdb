@@ -1607,7 +1607,7 @@ generated_files = \
 # Flags needed to compile Python code
 PYTHON_CFLAGS = @PYTHON_CFLAGS@
 
-all: gdb$(EXEEXT) $(CONFIG_ALL)
+all: gdb$(EXEEXT) $(CONFIG_ALL) gdb-gdb.py gdb-gdb.gdb
 	@$(MAKE) $(FLAGS_TO_PASS) DO=all "DODIRS=`echo $(SUBDIRS) | sed 's/testsuite//'`" subdir_do
 
 # Rule for compiling .c files in the top-level gdb directory.
@@ -1983,7 +1983,8 @@ distclean: clean
 	rm -f gdbserver/config.status gdbserver/config.log
 	rm -f gdbserver/tm.h gdbserver/xm.h gdbserver/nm.h
 	rm -f gdbserver/Makefile gdbserver/config.cache
-	rm -f nm.h config.status config.h stamp-h gdb-gdb.gdb jit-reader.h
+	rm -f nm.h config.status config.h stamp-h b jit-reader.h
+	rm -f gdb-gdb.py gdb-gdb.gdb
 	rm -f y.output yacc.acts yacc.tmp y.tab.h
 	rm -f config.log config.cache
 	rm -f Makefile
@@ -2058,6 +2059,12 @@ jit-reader.h: $(srcdir)/jit-reader.in
 	$(SHELL) config.status $@
 
 gcore: $(srcdir)/gcore.in
+	$(SHELL) config.status $@
+
+gdb-gdb.py: $(srcdir)/gdb-gdb.py.in
+	$(SHELL) config.status $@
+
+gdb-gdb.gdb: $(srcdir)/gdb-gdb.gdb.in
 	$(SHELL) config.status $@
 
 config.h: stamp-h ; @true

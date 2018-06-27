@@ -1,3 +1,14 @@
+2018-06-27  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb-gdb.py: Move to...
+	* gdb-gdb.py.in: ... here.
+	* configure.ac (AC_CONFIG_FILES): Add gdb-gdb.py.
+	* Makefile.in (all): Add gdb-gdb.gdb and gdb-gdb.py as
+	dependencies.
+	(distclean): Remove gdb-gdb.py when cleaning.
+	(gdb-gdb.py, gdb-gdb.gdb): New rules.
+	* configure: Re-generate.
+
 2018-06-27  Pedro Alves  <palves@redhat.com>
 
 	* proc-service.c (get_ps_regcache): New.
