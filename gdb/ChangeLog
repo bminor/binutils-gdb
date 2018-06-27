@@ -1,3 +1,7 @@
+2018-06-27  Tom Tromey  <tom@tromey.com>
+
+	* machoread.c (macho_symfile_read): Define "symbol_table" earlier.
+
 2018-06-27  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb-gdb.py.in: Format using autopep8.
