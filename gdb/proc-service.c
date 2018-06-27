@@ -126,13 +126,28 @@ ps_pdwrite (struct ps_prochandle *ph, psaddr_t addr,
   return ps_xfer_memory (ph, addr, (gdb_byte *) buf, size, 1);
 }
 
+/* Get a regcache for LWPID using its inferior's "main" architecture,
+   which is the register set libthread_db expects to be using.  In
+   multi-arch debugging scenarios, the thread's architecture may
+   differ from the inferior's "main" architecture.  E.g., in the Cell
+   combined debugger, if GDB happens to interrupt SPU code, the
+   thread's architecture is SPU, and the main architecture is
+   PowerPC.  */
+
+static struct regcache *
+get_ps_regcache (struct ps_prochandle *ph, lwpid_t lwpid)
+{
+  inferior *inf = ph->thread->inf;
+  return get_thread_arch_regcache (ptid_t (inf->pid, lwpid), inf->gdbarch);
+}
+
 /* Get the general registers of LWP LWPID within the target process PH
    and store them in GREGSET.  */
 
 ps_err_e
 ps_lgetregs (struct ps_prochandle *ph, lwpid_t lwpid, prgregset_t gregset)
 {
-  struct regcache *regcache = get_thread_regcache (ph->thread);
+  struct regcache *regcache = get_ps_regcache (ph, lwpid);
 
   target_fetch_registers (regcache, -1);
   fill_gregset (regcache, (gdb_gregset_t *) gregset, -1);
@@ -146,7 +161,7 @@ ps_lgetregs (struct ps_prochandle *ph, lwpid_t lwpid, prgregset_t gregset)
 ps_err_e
 ps_lsetregs (struct ps_prochandle *ph, lwpid_t lwpid, const prgregset_t gregset)
 {
-  struct regcache *regcache = get_thread_regcache (ph->thread);
+  struct regcache *regcache = get_ps_regcache (ph, lwpid);
 
   supply_gregset (regcache, (const gdb_gregset_t *) gregset);
   target_store_registers (regcache, -1);
@@ -160,7 +175,7 @@ ps_lsetregs (struct ps_prochandle *ph, lwpid_t lwpid, const prgregset_t gregset)
 ps_err_e
 ps_lgetfpregs (struct ps_prochandle *ph, lwpid_t lwpid, gdb_prfpregset_t *fpregset)
 {
-  struct regcache *regcache = get_thread_regcache (ph->thread);
+  struct regcache *regcache = get_ps_regcache (ph, lwpid);
 
   target_fetch_registers (regcache, -1);
   fill_fpregset (regcache, (gdb_fpregset_t *) fpregset, -1);
@@ -175,7 +190,7 @@ ps_err_e
 ps_lsetfpregs (struct ps_prochandle *ph, lwpid_t lwpid,
 	       const gdb_prfpregset_t *fpregset)
 {
-  struct regcache *regcache = get_thread_regcache (ph->thread);
+  struct regcache *regcache = get_ps_regcache (ph, lwpid);
 
   supply_fpregset (regcache, (const gdb_fpregset_t *) fpregset);
   target_store_registers (regcache, -1);

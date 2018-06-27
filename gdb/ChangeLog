@@ -1,3 +1,9 @@
+2018-06-27  Pedro Alves  <palves@redhat.com>
+
+	* proc-service.c (get_ps_regcache): New.
+	(ps_lgetregs, ps_lsetregs, ps_lgetfpregs)
+	(ps_lsetfpregs): Use it.
+
 2018-06-27  Omair Javaid  <omair.javaid@linaro.org>
 
 	PR gdb/21695
