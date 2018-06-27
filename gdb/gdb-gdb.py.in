@@ -18,6 +18,7 @@
 import gdb
 import os.path
 
+
 class TypeFlag:
     """A class that allows us to store a flag name, its short name,
     and its value.
@@ -34,6 +35,7 @@ class TypeFlag:
       value: The associated value.
       short_name: The enumeration name, with the suffix stripped.
     """
+
     def __init__(self, name, value):
         self.name = name
         self.value = value
@@ -42,11 +44,12 @@ class TypeFlag:
     def __lt__(self, other):
         """Sort by value order."""
         return self.value < other.value
-        
+
 
 # A list of all existing TYPE_INSTANCE_FLAGS_* enumerations,
 # stored as TypeFlags objects.  Lazy-initialized.
 TYPE_FLAGS = None
+
 
 class TypeFlagsPrinter:
     """A class that prints a decoded form of an instance_flags value.
@@ -59,8 +62,10 @@ class TypeFlagsPrinter:
     If not, then printing of the instance_flag is going to be degraded,
     but it's not a fatal error.
     """
+
     def __init__(self, val):
         self.val = val
+
     def __str__(self):
         global TYPE_FLAGS
         if TYPE_FLAGS is None:
@@ -73,6 +78,7 @@ class TypeFlagsPrinter:
         else:
             flag_list = ["???"]
         return "0x%x [%s]" % (self.val, "|".join(flag_list))
+
     def init_TYPE_FLAGS(self):
         """Initialize the TYPE_FLAGS global as a list of TypeFlag objects.
         This operation requires the search of a couple of enumeration types.
@@ -94,10 +100,13 @@ class TypeFlagsPrinter:
                       for field in iflags.fields()]
         TYPE_FLAGS.sort()
 
+
 class StructTypePrettyPrinter:
     """Pretty-print an object of type struct type"""
+
     def __init__(self, val):
         self.val = val
+
     def to_string(self):
         fields = []
         fields.append("pointer_type = %s" % self.val['pointer_type'])
@@ -109,10 +118,13 @@ class StructTypePrettyPrinter:
         fields.append("main_type = %s" % self.val['main_type'])
         return "\n{" + ",\n ".join(fields) + "}"
 
+
 class StructMainTypePrettyPrinter:
     """Pretty-print an objet of type main_type"""
+
     def __init__(self, val):
         self.val = val
+
     def flags_to_string(self):
         """struct main_type contains a series of components that
         are one-bit ints whose name start with "flag_".  For instance:
@@ -124,9 +136,9 @@ class StructMainTypePrettyPrinter:
         """
         fields = [field.name.replace("flag_", "")
                   for field in self.val.type.fields()
-                  if field.name.startswith("flag_")
-                     and self.val[field.name]]
+                  if field.name.startswith("flag_") and self.val[field.name]]
         return "|".join(fields)
+
     def owner_to_string(self):
         """Return an image of component "owner".
         """
@@ -134,6 +146,7 @@ class StructMainTypePrettyPrinter:
             return "%s (objfile)" % self.val['owner']['objfile']
         else:
             return "%s (gdbarch)" % self.val['owner']['gdbarch']
+
     def struct_field_location_img(self, field_val):
         """Return an image of the loc component inside the given field
         gdb.Value.
@@ -152,6 +165,7 @@ class StructMainTypePrettyPrinter:
             return 'dwarf_block = %s' % loc_val['dwarf_block']
         else:
             return 'loc = ??? (unsupported loc_kind value)'
+
     def struct_field_img(self, fieldno):
         """Return an image of the main_type field number FIELDNO.
         """
@@ -166,6 +180,7 @@ class StructMainTypePrettyPrinter:
         fields.append("bitsize = %d" % f['bitsize'])
         fields.append(self.struct_field_location_img(f))
         return label + "\n" + "  {" + ",\n   ".join(fields) + "}"
+
     def bounds_img(self):
         """Return an image of the main_type bounds.
         """
@@ -177,6 +192,7 @@ class StructMainTypePrettyPrinter:
         if b['high_undefined'] != 0:
             high += " (undefined)"
         return "flds_bnds.bounds = {%s, %s}" % (low, high)
+
     def type_specific_img(self):
         """Return a string image of the main_type type_specific union.
         Only the relevant component of that union is printed (based on
@@ -245,10 +261,12 @@ def type_lookup_function(val):
         return CoreAddrPrettyPrinter(val)
     return None
 
+
 def register_pretty_printer(objfile):
     """A routine to register a pretty-printer against the given OBJFILE.
     """
     objfile.pretty_printers.append(type_lookup_function)
+
 
 if __name__ == "__main__":
     if gdb.current_objfile() is not None:
