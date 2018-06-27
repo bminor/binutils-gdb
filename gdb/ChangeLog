@@ -1,5 +1,10 @@
 2018-06-27  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* gdb-gdb.py.in (CoreAddrPrettyPrinter): New class.
+	(type_lookup_function): Recognize CORE_ADDR values.
+
+2018-06-27  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* gdb-gdb.py.in (StructMainTypePrettyPrinter) <to_string>: Don't
 	print tag_name.
 

@@ -222,6 +222,17 @@ class StructMainTypePrettyPrinter:
 
         return "\n{" + ",\n ".join(fields) + "}"
 
+
+class CoreAddrPrettyPrinter:
+    """Print CORE_ADDR values as hex."""
+
+    def __init__(self, val):
+        self._val = val
+
+    def to_string(self):
+        return hex(int(self._val))
+
+
 def type_lookup_function(val):
     """A routine that returns the correct pretty printer for VAL
     if appropriate.  Returns None otherwise.
@@ -230,6 +241,8 @@ def type_lookup_function(val):
         return StructTypePrettyPrinter(val)
     elif val.type.tag == "main_type":
         return StructMainTypePrettyPrinter(val)
+    elif val.type.name == 'CORE_ADDR':
+        return CoreAddrPrettyPrinter(val)
     return None
 
 def register_pretty_printer(objfile):
