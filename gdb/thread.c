@@ -918,6 +918,18 @@ is_executing (ptid_t ptid)
   return tp->executing;
 }
 
+/* Helper for set_executing.  Set's the thread's 'executing' field
+   from EXECUTING, and if EXECUTING is true also clears the thread's
+   stop_pc.  */
+
+static void
+set_executing_thread (thread_info *thr, bool executing)
+{
+  thr->executing = executing;
+  if (executing)
+    thr->suspend.stop_pc = ~(CORE_ADDR) 0;
+}
+
 void
 set_executing (ptid_t ptid, int executing)
 {
@@ -928,13 +940,13 @@ set_executing (ptid_t ptid, int executing)
     {
       for (tp = thread_list; tp; tp = tp->next)
 	if (all || ptid_get_pid (tp->ptid) == ptid_get_pid (ptid))
-	  tp->executing = executing;
+	  set_executing_thread (tp, executing);
     }
   else
     {
       tp = find_thread_ptid (ptid);
       gdb_assert (tp);
-      tp->executing = executing;
+      set_executing_thread (tp, executing);
     }
 
   /* It only takes one running thread to spawn more threads.*/
@@ -1328,7 +1340,6 @@ switch_to_thread_no_regs (struct thread_info *thread)
   set_current_inferior (inf);
 
   inferior_ptid = thread->ptid;
-  stop_pc = ~(CORE_ADDR) 0;
 }
 
 /* See gdbthread.h.  */
@@ -1341,7 +1352,6 @@ switch_to_no_thread ()
 
   inferior_ptid = null_ptid;
   reinit_frame_cache ();
-  stop_pc = ~(CORE_ADDR) 0;
 }
 
 /* See gdbthread.h.  */
@@ -1357,13 +1367,6 @@ switch_to_thread (thread_info *thr)
   switch_to_thread_no_regs (thr);
 
   reinit_frame_cache ();
-
-  /* We don't check for is_stopped, because we're called at times
-     while in the TARGET_RUNNING state, e.g., while handling an
-     internal event.  */
-  if (thr->state != THREAD_EXITED
-      && !thr->executing)
-    stop_pc = regcache_read_pc (get_thread_regcache (thr));
 }
 
 /* See common/common-gdbthread.h.  */

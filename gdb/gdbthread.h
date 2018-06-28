@@ -168,10 +168,19 @@ struct thread_suspend_state
 
   /* Record the pc of the thread the last time it stopped.  (This is
      not the current thread's PC as that may have changed since the
-     last stop, e.g., "return" command, or "p $pc = 0xf000").  This is
-     used in coordination with stop_reason and waitstatus_pending_p:
-     if the thread's PC is changed since it last stopped, a pending
-     breakpoint waitstatus is discarded.  */
+     last stop, e.g., "return" command, or "p $pc = 0xf000").
+
+     - If the thread's PC has not changed since the thread last
+       stopped, then proceed skips a breakpoint at the current PC,
+       otherwise we let the thread run into the breakpoint.
+
+     - If the thread has an unprocessed event pending, as indicated by
+       waitstatus_pending_p, this is used in coordination with
+       stop_reason: if the thread's PC has changed since the thread
+       last stopped, a pending breakpoint waitstatus is discarded.
+
+     - If the thread is running, this is set to -1, to avoid leaving
+       it with a stale value, to make it easier to catch bugs.  */
   CORE_ADDR stop_pc;
 };
 
@@ -498,8 +507,7 @@ extern void switch_to_thread (struct thread_info *thr);
 /* Switch context to no thread selected.  */
 extern void switch_to_no_thread ();
 
-/* Switch from one thread to another.  Does not read registers and
-   sets STOP_PC to -1.  */
+/* Switch from one thread to another.  Does not read registers.  */
 extern void switch_to_thread_no_regs (struct thread_info *thread);
 
 /* Marks or clears thread(s) PTID as resumed.  If PTID is

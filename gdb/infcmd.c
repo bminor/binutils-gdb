@@ -94,10 +94,6 @@ static char *inferior_io_terminal_scratch;
 
 ptid_t inferior_ptid;
 
-/* Address at which inferior stopped.  */
-
-CORE_ADDR stop_pc;
-
 /* Nonzero if stopped due to completion of a stack dummy routine.  */
 
 enum stop_stack_kind stop_stack_dummy;
@@ -448,10 +444,12 @@ post_create_inferior (struct target_ops *target, int from_tty)
   /* Now that we know the register layout, retrieve current PC.  But
      if the PC is unavailable (e.g., we're opening a core file with
      missing registers info), ignore it.  */
-  stop_pc = 0;
+  thread_info *thr = inferior_thread ();
+
+  thr->suspend.stop_pc = 0;
   TRY
     {
-      stop_pc = regcache_read_pc (get_current_regcache ());
+      thr->suspend.stop_pc = regcache_read_pc (get_current_regcache ());
     }
   CATCH (ex, RETURN_MASK_ERROR)
     {
@@ -2108,7 +2106,7 @@ info_program_command (const char *args, int from_tty)
 
   target_files_info ();
   printf_filtered (_("Program stopped at %s.\n"),
-		   paddress (target_gdbarch (), stop_pc));
+		   paddress (target_gdbarch (), tp->suspend.stop_pc));
   if (tp->control.stop_step)
     printf_filtered (_("It stopped after being stepped.\n"));
   else if (stat != 0)

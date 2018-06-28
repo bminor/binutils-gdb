@@ -4331,7 +4331,7 @@ print_one_stopped_thread (struct thread_info *thread)
   struct target_waitstatus *ws = &thread->suspend.waitstatus;
 
   switch_to_thread (thread);
-  stop_pc = get_frame_pc (get_current_frame ());
+  thread->suspend.stop_pc = get_frame_pc (get_current_frame ());
   set_current_sal_from_frame (get_current_frame ());
 
   thread->suspend.waitstatus_pending_p = 0;

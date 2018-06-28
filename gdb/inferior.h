@@ -208,10 +208,6 @@ extern void prepare_execution_command (struct target_ops *target,
    the target is started up with a shell.  */
 extern int startup_with_shell;
 
-/* Address at which inferior stopped.  */
-
-extern CORE_ADDR stop_pc;
-
 /* Nonzero if stopped due to completion of a stack dummy routine.  */
 
 extern enum stop_stack_kind stop_stack_dummy;

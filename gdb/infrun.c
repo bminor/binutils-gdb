@@ -3009,7 +3009,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 
   if (addr == (CORE_ADDR) -1)
     {
-      if (pc == stop_pc
+      if (pc == tp->suspend.stop_pc
 	  && breakpoint_here_p (aspace, pc) == ordinary_breakpoint_here
 	  && execution_direction != EXEC_REVERSE)
 	/* There is a breakpoint at the address we will resume at,
@@ -4249,7 +4249,7 @@ handle_syscall_event (struct execution_control_state *ecs)
 
   regcache = get_thread_regcache (ecs->event_thread);
   syscall_number = ecs->ws.value.syscall_number;
-  stop_pc = regcache_read_pc (regcache);
+  ecs->event_thread->suspend.stop_pc = regcache_read_pc (regcache);
 
   if (catch_syscall_enabled () > 0
       && catching_syscall_number (syscall_number) > 0)
@@ -4260,7 +4260,8 @@ handle_syscall_event (struct execution_control_state *ecs)
 
       ecs->event_thread->control.stop_bpstat
 	= bpstat_stop_status (regcache->aspace (),
-			      stop_pc, ecs->event_thread, &ecs->ws);
+			      ecs->event_thread->suspend.stop_pc,
+			      ecs->event_thread, &ecs->ws);
 
       if (handle_stop_requested (ecs))
 	return 0;
@@ -4290,7 +4291,8 @@ fill_in_stop_func (struct gdbarch *gdbarch,
     {
       /* Don't care about return value; stop_func_start and stop_func_name
 	 will both be 0 if it doesn't work.  */
-      find_pc_partial_function (stop_pc, &ecs->stop_func_name,
+      find_pc_partial_function (ecs->event_thread->suspend.stop_pc,
+				&ecs->stop_func_name,
 				&ecs->stop_func_start, &ecs->stop_func_end);
       ecs->stop_func_start
 	+= gdbarch_deprecated_function_start_offset (gdbarch);
@@ -4937,7 +4939,8 @@ handle_inferior_event_1 (struct execution_control_state *ecs)
 
 	  ecs->event_thread->control.stop_bpstat
 	    = bpstat_stop_status (regcache->aspace (),
-				  stop_pc, ecs->event_thread, &ecs->ws);
+				  ecs->event_thread->suspend.stop_pc,
+				  ecs->event_thread, &ecs->ws);
 
 	  if (handle_stop_requested (ecs))
 	    return;
@@ -5183,11 +5186,13 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	 and not immediately.  */
       ecs->event_thread->pending_follow = ecs->ws;
 
-      stop_pc = regcache_read_pc (get_thread_regcache (ecs->event_thread));
+      ecs->event_thread->suspend.stop_pc
+	= regcache_read_pc (get_thread_regcache (ecs->event_thread));
 
       ecs->event_thread->control.stop_bpstat
 	= bpstat_stop_status (get_current_regcache ()->aspace (),
-			      stop_pc, ecs->event_thread, &ecs->ws);
+			      ecs->event_thread->suspend.stop_pc,
+			      ecs->event_thread, &ecs->ws);
 
       if (handle_stop_requested (ecs))
 	return;
@@ -5294,11 +5299,13 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	 execd thread for that case (this is a nop otherwise).  */
       ecs->event_thread = inferior_thread ();
 
-      stop_pc = regcache_read_pc (get_thread_regcache (ecs->event_thread));
+      ecs->event_thread->suspend.stop_pc
+	= regcache_read_pc (get_thread_regcache (ecs->event_thread));
 
       ecs->event_thread->control.stop_bpstat
 	= bpstat_stop_status (get_current_regcache ()->aspace (),
-			      stop_pc, ecs->event_thread, &ecs->ws);
+			      ecs->event_thread->suspend.stop_pc,
+			      ecs->event_thread, &ecs->ws);
 
       /* Note that this may be referenced from inside
 	 bpstat_stop_status above, through inferior_has_execd.  */
@@ -5359,7 +5366,8 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	fprintf_unfiltered (gdb_stdlog, "infrun: stopped\n");
 
       delete_just_stopped_threads_single_step_breakpoints ();
-      stop_pc = regcache_read_pc (get_thread_regcache (inferior_thread ()));
+      ecs->event_thread->suspend.stop_pc
+	= regcache_read_pc (get_thread_regcache (inferior_thread ()));
 
       if (handle_stop_requested (ecs))
 	return;
@@ -5651,7 +5659,8 @@ handle_signal_stop (struct execution_control_state *ecs)
       && ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP)
     ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
 
-  stop_pc = regcache_read_pc (get_thread_regcache (ecs->event_thread));
+  ecs->event_thread->suspend.stop_pc
+    = regcache_read_pc (get_thread_regcache (ecs->event_thread));
 
   if (debug_infrun)
     {
@@ -5662,7 +5671,8 @@ handle_signal_stop (struct execution_control_state *ecs)
       inferior_ptid = ecs->ptid;
 
       fprintf_unfiltered (gdb_stdlog, "infrun: stop_pc = %s\n",
-                          paddress (gdbarch, stop_pc));
+			  paddress (gdbarch,
+				    ecs->event_thread->suspend.stop_pc));
       if (target_stopped_by_watchpoint ())
 	{
           CORE_ADDR addr;
@@ -5858,14 +5868,18 @@ handle_signal_stop (struct execution_control_state *ecs)
 	 user had set a breakpoint on that inlined code, the missing
 	 skip_inline_frames call would break things.  Fortunately
 	 that's an extremely unlikely scenario.  */
-      if (!pc_at_non_inline_function (aspace, stop_pc, &ecs->ws)
+      if (!pc_at_non_inline_function (aspace,
+				      ecs->event_thread->suspend.stop_pc,
+				      &ecs->ws)
 	  && !(ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP
 	       && ecs->event_thread->control.trap_expected
 	       && pc_at_non_inline_function (aspace,
 					     ecs->event_thread->prev_pc,
 					     &ecs->ws)))
 	{
-	  stop_chain = build_bpstat_chain (aspace, stop_pc, &ecs->ws);
+	  stop_chain = build_bpstat_chain (aspace,
+					   ecs->event_thread->suspend.stop_pc,
+					   &ecs->ws);
 	  skip_inline_frames (ecs->event_thread, stop_chain);
 
 	  /* Re-fetch current thread's frame in case that invalidated
@@ -5915,7 +5929,8 @@ handle_signal_stop (struct execution_control_state *ecs)
      handles this event.  */
   ecs->event_thread->control.stop_bpstat
     = bpstat_stop_status (get_current_regcache ()->aspace (),
-			  stop_pc, ecs->event_thread, &ecs->ws, stop_chain);
+			  ecs->event_thread->suspend.stop_pc,
+			  ecs->event_thread, &ecs->ws, stop_chain);
 
   /* Following in case break condition called a
      function.  */
@@ -5967,7 +5982,8 @@ handle_signal_stop (struct execution_control_state *ecs)
      been removed.  */
   if (random_signal && target_stopped_by_sw_breakpoint ())
     {
-      if (program_breakpoint_here_p (gdbarch, stop_pc))
+      if (program_breakpoint_here_p (gdbarch,
+				     ecs->event_thread->suspend.stop_pc))
 	{
 	  struct regcache *regcache;
 	  int decr_pc;
@@ -5985,7 +6001,8 @@ handle_signal_stop (struct execution_control_state *ecs)
 		restore_operation_disable.emplace
 		  (record_full_gdb_operation_disable_set ());
 
-	      regcache_write_pc (regcache, stop_pc + decr_pc);
+	      regcache_write_pc (regcache,
+				 ecs->event_thread->suspend.stop_pc + decr_pc);
 	    }
 	}
       else
@@ -6077,7 +6094,7 @@ handle_signal_stop (struct execution_control_state *ecs)
       if (signal_program[ecs->event_thread->suspend.stop_signal] == 0)
 	ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
 
-      if (ecs->event_thread->prev_pc == stop_pc
+      if (ecs->event_thread->prev_pc == ecs->event_thread->suspend.stop_pc
 	  && ecs->event_thread->control.trap_expected
 	  && ecs->event_thread->control.step_resume_breakpoint == NULL)
 	{
@@ -6109,7 +6126,8 @@ handle_signal_stop (struct execution_control_state *ecs)
 	}
 
       if (ecs->event_thread->suspend.stop_signal != GDB_SIGNAL_0
-	  && (pc_in_thread_step_range (stop_pc, ecs->event_thread)
+	  && (pc_in_thread_step_range (ecs->event_thread->suspend.stop_pc,
+				       ecs->event_thread)
 	      || ecs->event_thread->control.step_range_end == 1)
 	  && frame_id_eq (get_stack_frame_id (frame),
 			  ecs->event_thread->control.step_stack_frame_id)
@@ -6339,7 +6357,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	  return;
 	}
       fill_in_stop_func (gdbarch, ecs);
-      if (stop_pc == ecs->stop_func_start
+      if (ecs->event_thread->suspend.stop_pc == ecs->stop_func_start
 	  && execution_direction == EXEC_REVERSE)
 	{
 	  /* We are stepping over a function call in reverse, and just
@@ -6472,7 +6490,8 @@ process_event_stop_test (struct execution_control_state *ecs)
      through a function epilogue and therefore must detect when
      the current-frame changes in the middle of a line.  */
 
-  if (pc_in_thread_step_range (stop_pc, ecs->event_thread)
+  if (pc_in_thread_step_range (ecs->event_thread->suspend.stop_pc,
+			       ecs->event_thread)
       && (execution_direction != EXEC_REVERSE
 	  || frame_id_eq (get_frame_id (frame),
 			  ecs->event_thread->control.step_frame_id)))
@@ -6491,6 +6510,7 @@ process_event_stop_test (struct execution_control_state *ecs)
       /* When stepping backward, stop at beginning of line range
 	 (unless it's the function entry point, in which case
 	 keep going back to the call point).  */
+      CORE_ADDR stop_pc = ecs->event_thread->suspend.stop_pc;
       if (stop_pc == ecs->event_thread->control.step_range_start
 	  && stop_pc != ecs->stop_func_start
 	  && execution_direction == EXEC_REVERSE)
@@ -6517,10 +6537,11 @@ process_event_stop_test (struct execution_control_state *ecs)
 
   if (execution_direction != EXEC_REVERSE
       && ecs->event_thread->control.step_over_calls == STEP_OVER_UNDEBUGGABLE
-      && in_solib_dynsym_resolve_code (stop_pc))
+      && in_solib_dynsym_resolve_code (ecs->event_thread->suspend.stop_pc))
     {
       CORE_ADDR pc_after_resolver =
-	gdbarch_skip_solib_resolver (gdbarch, stop_pc);
+	gdbarch_skip_solib_resolver (gdbarch,
+				     ecs->event_thread->suspend.stop_pc);
 
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog,
@@ -6544,7 +6565,8 @@ process_event_stop_test (struct execution_control_state *ecs)
 
   /* Step through an indirect branch thunk.  */
   if (ecs->event_thread->control.step_over_calls != STEP_OVER_NONE
-      && gdbarch_in_indirect_branch_thunk (gdbarch, stop_pc))
+      && gdbarch_in_indirect_branch_thunk (gdbarch,
+					   ecs->event_thread->suspend.stop_pc))
     {
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog,
@@ -6576,13 +6598,14 @@ process_event_stop_test (struct execution_control_state *ecs)
      call check below as on some targets return trampolines look
      like subroutine calls (MIPS16 return thunks).  */
   if (gdbarch_in_solib_return_trampoline (gdbarch,
-					  stop_pc, ecs->stop_func_name)
+					  ecs->event_thread->suspend.stop_pc,
+					  ecs->stop_func_name)
       && ecs->event_thread->control.step_over_calls != STEP_OVER_NONE)
     {
       /* Determine where this trampoline returns.  */
-      CORE_ADDR real_stop_pc;
-
-      real_stop_pc = gdbarch_skip_trampoline_code (gdbarch, frame, stop_pc);
+      CORE_ADDR stop_pc = ecs->event_thread->suspend.stop_pc;
+      CORE_ADDR real_stop_pc
+	= gdbarch_skip_trampoline_code (gdbarch, frame, stop_pc);
 
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog,
@@ -6634,8 +6657,9 @@ process_event_stop_test (struct execution_control_state *ecs)
 	  && (!frame_id_eq (ecs->event_thread->control.step_stack_frame_id,
 			    outer_frame_id)
 	      || (ecs->event_thread->control.step_start_function
-		  != find_pc_function (stop_pc)))))
+		  != find_pc_function (ecs->event_thread->suspend.stop_pc)))))
     {
+      CORE_ADDR stop_pc = ecs->event_thread->suspend.stop_pc;
       CORE_ADDR real_stop_pc;
 
       if (debug_infrun)
@@ -6793,6 +6817,8 @@ process_event_stop_test (struct execution_control_state *ecs)
   if (execution_direction == EXEC_REVERSE
       && ecs->event_thread->control.step_over_calls != STEP_OVER_NONE)
     {
+      CORE_ADDR stop_pc = ecs->event_thread->suspend.stop_pc;
+
       if (gdbarch_skip_trampoline_code (gdbarch, frame, stop_pc)
 	  || (ecs->stop_func_start == 0
 	      && in_solib_dynsym_resolve_code (stop_pc)))
@@ -6820,7 +6846,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	}
     }
 
-  stop_pc_sal = find_pc_line (stop_pc, 0);
+  stop_pc_sal = find_pc_line (ecs->event_thread->suspend.stop_pc, 0);
 
   /* NOTE: tausq/2004-05-24: This if block used to be done before all
      the trampoline processing logic, however, there are some trampolines 
@@ -6946,7 +6972,7 @@ process_event_stop_test (struct execution_control_state *ecs)
       return;
     }
 
-  if ((stop_pc == stop_pc_sal.pc)
+  if ((ecs->event_thread->suspend.stop_pc == stop_pc_sal.pc)
       && (ecs->event_thread->current_line != stop_pc_sal.line
  	  || ecs->event_thread->current_symtab != stop_pc_sal.symtab))
     {
@@ -7180,7 +7206,7 @@ keep_going_stepped_thread (struct thread_info *tp)
   reset_ecs (ecs, tp);
   switch_to_thread (tp);
 
-  stop_pc = regcache_read_pc (get_thread_regcache (tp));
+  tp->suspend.stop_pc = regcache_read_pc (get_thread_regcache (tp));
   frame = get_current_frame ();
 
   /* If the PC of the thread we were trying to single-step has
@@ -7196,7 +7222,7 @@ keep_going_stepped_thread (struct thread_info *tp)
      This prevents us continuously moving the single-step breakpoint
      forward, one instruction at a time, overstepping.  */
 
-  if (stop_pc != tp->prev_pc)
+  if (tp->suspend.stop_pc != tp->prev_pc)
     {
       ptid_t resume_ptid;
 
@@ -7204,7 +7230,7 @@ keep_going_stepped_thread (struct thread_info *tp)
 	fprintf_unfiltered (gdb_stdlog,
 			    "infrun: expected thread advanced also (%s -> %s)\n",
 			    paddress (target_gdbarch (), tp->prev_pc),
-			    paddress (target_gdbarch (), stop_pc));
+			    paddress (target_gdbarch (), tp->suspend.stop_pc));
 
       /* Clear the info of the previous step-over, as it's no longer
 	 valid (if the thread was trying to step over a breakpoint, it
@@ -7218,7 +7244,7 @@ keep_going_stepped_thread (struct thread_info *tp)
 
       insert_single_step_breakpoint (get_frame_arch (frame),
 				     get_frame_address_space (frame),
-				     stop_pc);
+				     tp->suspend.stop_pc);
 
       tp->resumed = 1;
       resume_ptid = internal_resume_ptid (tp->control.stepping_command);
@@ -7259,7 +7285,8 @@ handle_step_into_function (struct gdbarch *gdbarch,
 {
   fill_in_stop_func (gdbarch, ecs);
 
-  compunit_symtab *cust = find_pc_compunit_symtab (stop_pc);
+  compunit_symtab *cust
+    = find_pc_compunit_symtab (ecs->event_thread->suspend.stop_pc);
   if (cust != NULL && compunit_language (cust) != language_asm)
     ecs->stop_func_start
       = gdbarch_skip_prologue_noexcept (gdbarch, ecs->stop_func_start);
@@ -7299,7 +7326,7 @@ handle_step_into_function (struct gdbarch *gdbarch,
 					     ecs->stop_func_start);
     }
 
-  if (ecs->stop_func_start == stop_pc)
+  if (ecs->stop_func_start == ecs->event_thread->suspend.stop_pc)
     {
       /* We are already there: stop now.  */
       end_stepping_range (ecs);
@@ -7338,15 +7365,15 @@ handle_step_into_function_backward (struct gdbarch *gdbarch,
 
   fill_in_stop_func (gdbarch, ecs);
 
-  cust = find_pc_compunit_symtab (stop_pc);
+  cust = find_pc_compunit_symtab (ecs->event_thread->suspend.stop_pc);
   if (cust != NULL && compunit_language (cust) != language_asm)
     ecs->stop_func_start
       = gdbarch_skip_prologue_noexcept (gdbarch, ecs->stop_func_start);
 
-  stop_func_sal = find_pc_line (stop_pc, 0);
+  stop_func_sal = find_pc_line (ecs->event_thread->suspend.stop_pc, 0);
 
   /* OK, we're just going to keep stepping here.  */
-  if (stop_func_sal.pc == stop_pc)
+  if (stop_func_sal.pc == ecs->event_thread->suspend.stop_pc)
     {
       /* We're there already.  Just stop stepping now.  */
       end_stepping_range (ecs);
@@ -7981,7 +8008,8 @@ print_stop_location (struct target_waitstatus *ws)
       if (tp->control.stop_step
 	  && frame_id_eq (tp->control.step_frame_id,
 			  get_frame_id (get_current_frame ()))
-	  && tp->control.step_start_function == find_pc_function (stop_pc))
+	  && (tp->control.step_start_function
+	      == find_pc_function (tp->suspend.stop_pc)))
 	{
 	  /* Finished step, just print source line.  */
 	  source_flag = SRC_LINE;
@@ -8785,7 +8813,6 @@ struct infcall_suspend_state
   struct thread_suspend_state thread_suspend;
 
   /* Other fields:  */
-  CORE_ADDR stop_pc;
   readonly_detached_regcache *registers;
 
   /* Format of SIGINFO_DATA or NULL if it is not present.  */
@@ -8840,8 +8867,6 @@ save_infcall_suspend_state (void)
      GDB_SIGNAL_0 anyway.  */
   tp->suspend.stop_signal = GDB_SIGNAL_0;
 
-  inf_state->stop_pc = stop_pc;
-
   inf_state->registers = new readonly_detached_regcache (*regcache);
 
   return inf_state;
@@ -8857,8 +8882,6 @@ restore_infcall_suspend_state (struct infcall_suspend_state *inf_state)
   struct gdbarch *gdbarch = regcache->arch ();
 
   tp->suspend = inf_state->thread_suspend;
-
-  stop_pc = inf_state->stop_pc;
 
   if (inf_state->siginfo_gdbarch == gdbarch)
     {

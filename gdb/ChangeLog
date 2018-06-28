@@ -1,5 +1,33 @@
 2018-06-28  Pedro Alves  <palves@redhat.com>
 
+	* gdbthread.h (struct thread_suspend_state) <stop_pc>: Extend
+	comments.
+	(switch_to_thread_no_regs): Adjust comment.
+	* infcmd.c (stop_pc): Delete.
+	(post_create_inferior, info_program_command): Replace references
+	to stop_pc with references to thread_info->suspend.stop_pc.
+	* inferior.h (stop_pc): Delete declaration.
+	* infrun.c (proceed, handle_syscall_event, fill_in_stop_func)
+	(handle_inferior_event_1, handle_signal_stop)
+	(process_event_stop_test, keep_going_stepped_thread)
+	(handle_step_into_function, handle_step_into_function_backward)
+	(print_stop_location): Replace references to stop_pc with
+	references to thread_info->suspend.stop_pc.
+	(struct infcall_suspend_state) <stop_pc>: Delete field.
+	(save_infcall_suspend_state, restore_infcall_suspend_state):
+	Remove references to inf_stat->stop_pc.
+	* linux-fork.c (fork_load_infrun_state): Likewise.
+	* record-btrace.c (record_btrace_set_replay): Likewise.
+	* record-full.c (record_full_goto_entry): Likewise.
+	* remote.c (print_one_stopped_thread): Likewise.
+	* target.c (target_resume): Extend comment.
+	* thread.c (set_executing_thread): New.
+	(set_executing): Use it.
+	(switch_to_thread_no_regs, switch_to_no_thread, switch_to_thread):
+	Remove references to stop_pc.
+
+2018-06-28  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (handle_inferior_event_1) <TARGET_WAITKIND_EXECD>:
 	Moving fetching stop_pc until after ecs->event_thread is refreshed.
 
