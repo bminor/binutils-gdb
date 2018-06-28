@@ -73,6 +73,21 @@ gdb_test_multiple "add-symbol-file -s .text 0x200 $binfile 0x100" $test {
 	gdb_test "n" "Not confirmed\." $test
     }
 }
+# Check that passing a single "-s .text" is equivalent to passing
+# the text address in a positional argument.
+set test "add-symbol-file -s .text, no address"
+gdb_test_multiple "add-symbol-file $binfile -s .text 0x100" $test {
+    -re "add symbol table from file \"${binfile}\" at\r\n\t\.text_addr = 0x100\r\n\\(y or n\\) " {
+	gdb_test "n" "Not confirmed\." $test
+    }
+}
+# Check section addresses can be omitted.
+set test "add-symbol-file no address"
+gdb_test_multiple "add-symbol-file $binfile" $test {
+    -re "add symbol table from file \"${binfile}\"\r\n\\(y or n\\) " {
+	gdb_test "n" "Not confirmed\." $test
+    }
+}
 # Test that passing "--" disables option processing.
 gdb_test "add-symbol-file -- $binfile 0x100 -s .bss 0x3" \
     "Unrecognized argument \"-s\"" \

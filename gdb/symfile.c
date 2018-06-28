@@ -2161,29 +2161,26 @@ add_symbol_file_command (const char *args, int from_tty)
 
   validate_readnow_readnever (flags);
 
-  /* This command takes at least two arguments.  The first one is a
-     filename, and the second is the address where this file has been
-     loaded.  Abort now if this address hasn't been provided by the
-     user.  */
-  if (!seen_addr)
-    error (_("The address where %s has been loaded is missing"),
-	   filename.get ());
-
   /* Print the prompt for the query below.  And save the arguments into
      a sect_addr_info structure to be passed around to other
      functions.  We have to split this up into separate print
      statements because hex_string returns a local static
      string.  */
 
-  printf_unfiltered (_("add symbol table from file \"%s\" at\n"),
+  printf_unfiltered (_("add symbol table from file \"%s\""),
 		     filename.get ());
   section_addr_info section_addrs;
-  for (sect_opt &sect : sect_opts)
+  std::vector<sect_opt>::const_iterator it = sect_opts.begin ();
+  if (!seen_addr)
+    ++it;
+  for (; it != sect_opts.end (); ++it)
     {
       CORE_ADDR addr;
-      const char *val = sect.value;
-      const char *sec = sect.name;
+      const char *val = it->value;
+      const char *sec = it->name;
 
+      if (section_addrs.empty ())
+	printf_unfiltered (_(" at\n"));
       addr = parse_and_eval_address (val);
 
       /* Here we store the section offsets in the order they were
@@ -2198,6 +2195,8 @@ add_symbol_file_command (const char *args, int from_tty)
 	 At this point, we don't know what file type this is,
 	 so we can't determine what section names are valid.  */
     }
+  if (section_addrs.empty ())
+    printf_unfiltered ("\n");
 
   if (from_tty && (!query ("%s", "")))
     error (_("Not confirmed."));
@@ -3793,8 +3792,8 @@ to execute.\n" READNOW_READNEVER_HELP), &cmdlist);
 
   c = add_cmd ("add-symbol-file", class_files, add_symbol_file_command, _("\
 Load symbols from FILE, assuming FILE has been dynamically loaded.\n\
-Usage: add-symbol-file FILE ADDR [-readnow | -readnever | \
--s SECT-NAME SECT-ADDR]...\n\
+Usage: add-symbol-file FILE [-readnow | -readnever] [ADDR] \
+[-s SECT-NAME SECT-ADDR]...\n\
 ADDR is the starting address of the file's text.\n\
 Each '-s' argument provides a section name and address, and\n\
 should be specified if the data and bss segments are not contiguous\n\

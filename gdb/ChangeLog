@@ -1,5 +1,11 @@
 2018-06-28  Petr Tesarik  <ptesarik@suse.cz>
 
+	* symfile.c (add_symbol_file_command, _initialize_symfile): Do not
+	require the second argument.  If omitted, load sections at the
+	addresses specified in the file.
+
+2018-06-28  Petr Tesarik  <ptesarik@suse.cz>
+
 	* symfile.c (symbol_file_command, symbol_file_add_main_1)
 	(_initialize_symfile): Add option "-o" to symbol-file to add an
 	offset to each section of the symbol file.

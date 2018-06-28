@@ -18918,18 +18918,17 @@ the program is running.  To do this, use the @code{kill} command
 
 @kindex add-symbol-file
 @cindex dynamic linking
-@item add-symbol-file @var{filename} @var{address}
-@itemx add-symbol-file @var{filename} @var{address} @r{[} -readnow @r{|} -readnever @r{]}
-@itemx add-symbol-file @var{filename} @var{address} -s @var{section} @var{address} @dots{}
+@item add-symbol-file @var{filename} @r{[} -readnow @r{|} -readnever @r{]} @r{[} @var{textaddress} @r{]} @r{[} -s @var{section} @var{address} @dots{} @r{]}
 The @code{add-symbol-file} command reads additional symbol table
 information from the file @var{filename}.  You would use this command
 when @var{filename} has been dynamically loaded (by some other means)
-into the program that is running.  The @var{address} should give the memory
-address at which the file has been loaded; @value{GDBN} cannot figure
-this out for itself.  You can additionally specify an arbitrary number
-of @samp{-s @var{section} @var{address}} pairs, to give an explicit
-section name and base address for that section.  You can specify any
-@var{address} as an expression.
+into the program that is running.  The @var{textaddress} parameter gives
+the memory address at which the file's text section has been loaded.
+You can additionally specify the base address of other sections using
+an arbitrary number of @samp{-s @var{section} @var{address}} pairs.
+If a section is omitted, @value{GDBN} will use its default addresses
+as found in @var{filename}.  Any @var{address} or @var{textaddress}
+can be given as an expression.
 
 The symbol table of the file @var{filename} is added to the symbol table
 originally read with the @code{symbol-file} command.  You can use the

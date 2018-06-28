@@ -6,6 +6,9 @@
 * The 'symbol-file' command now accepts an '-o' option to add a relative
   offset to all sections.
 
+* The 'add-symbol-file' command no longer requires the second argument
+  (address of the text section).
+
 * The endianness used with the 'set endian auto' mode in the absence of
   an executable selected for debugging is now the last endianness chosen
   either by one of the 'set endian big' and 'set endian little' commands
