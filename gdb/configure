@@ -745,6 +745,7 @@ AWK
 REPORT_BUGS_TEXI
 REPORT_BUGS_TO
 PKGVERSION
+CODESIGN_CERT
 HAVE_NATIVE_GCORE_TARGET
 TARGET_OBS
 subdirs
@@ -861,6 +862,7 @@ enable_gdbtk
 with_libunwind_ia64
 with_curses
 enable_profiling
+enable_codesign
 with_pkgversion
 with_bugurl
 with_system_zlib
@@ -1550,6 +1552,7 @@ Optional Features:
   --enable-tui            enable full-screen terminal user interface (TUI)
   --enable-gdbtk          enable gdbtk graphical user interface (GUI)
   --enable-profiling      enable profiling of GDB
+  --enable-codesign=CERT  sign gdb with 'codesign -s CERT'
   --disable-rpath         do not hardcode runtime library paths
   --enable-libmcheck      Try linking with -lmcheck if available
   --enable-werror         treat compile warnings as errors
@@ -7049,6 +7052,14 @@ $as_echo "$ac_cv_cc_supports_pg" >&6; }
 
   CFLAGS="$OLD_CFLAGS"
 fi
+
+CODESIGN_CERT=
+# Check whether --enable-codesign was given.
+if test "${enable_codesign+set}" = set; then :
+  enableval=$enable_codesign; CODESIGN_CERT=$enableval
+fi
+
+
 
 
 

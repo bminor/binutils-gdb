@@ -1,3 +1,12 @@
+2018-06-28  Tom Tromey  <tom@tromey.com>
+
+	* NEWS: Mention --enable-codesign.
+	* silent-rules.mk (ECHO_SIGN): New variable.
+	* configure.ac: Add --enable-codesign.
+	* configure: Rebuild.
+	* Makefile.in (CODESIGN, CODESIGN_CERT): New variables.
+	(gdb$(EXEEXT)): Optionally invoke codesign.
+
 2018-06-28  Pedro Alves  <palves@redhat.com>
 
 	* gdbthread.h (struct thread_suspend_state) <stop_pc>: Extend

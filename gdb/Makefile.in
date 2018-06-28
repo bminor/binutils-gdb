@@ -222,6 +222,10 @@ LIBICONV = @LIBICONV@
 # Did the user give us a --with-gdb-datadir option?
 GDB_DATADIR = @GDB_DATADIR@
 
+# Code signing.
+CODESIGN = codesign
+CODESIGN_CERT = @CODESIGN_CERT@
+
 # Flags to pass to gdb when invoked with "make run".
 GDBFLAGS =
 
@@ -1916,6 +1920,9 @@ gdb$(EXEEXT): gdb.o $(LIBGDB_OBS) $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
 	$(ECHO_CXXLD) $(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
 		-o gdb$(EXEEXT) gdb.o $(LIBGDB_OBS) \
 		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
+ifneq ($(CODESIGN_CERT),)
+	$(ECHO_SIGN) $(CODESIGN) -s $(CODESIGN_CERT) gdb$(EXEEXT)
+endif
 
 # Convenience rule to handle recursion.
 $(LIBGNU) $(GNULIB_H): all-lib

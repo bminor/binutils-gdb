@@ -471,6 +471,13 @@ if test "$enable_profiling" = yes ; then
   CFLAGS="$OLD_CFLAGS"
 fi
 
+CODESIGN_CERT=
+AC_ARG_ENABLE([codesign],
+  AS_HELP_STRING([--enable-codesign=CERT],
+                 [sign gdb with 'codesign -s CERT']),
+  [CODESIGN_CERT=$enableval])
+AC_SUBST([CODESIGN_CERT])
+
 ACX_PKGVERSION([GDB])
 ACX_BUGURL([http://www.gnu.org/software/gdb/bugs/])
 AC_DEFINE_UNQUOTED([PKGVERSION], ["$PKGVERSION"], [Additional package description])
