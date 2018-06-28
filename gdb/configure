@@ -855,7 +855,6 @@ with_auto_load_dir
 with_auto_load_safe_path
 enable_targets
 enable_64_bit_bfd
-enable_gdbcli
 enable_gdbmi
 enable_tui
 enable_gdbtk
@@ -1547,7 +1546,6 @@ Optional Features:
   --enable-targets=TARGETS
                           alternative target configurations
   --enable-64-bit-bfd     64-bit support (on hosts with narrower word sizes)
-  --disable-gdbcli        disable command-line interface (CLI)
   --disable-gdbmi         disable machine-interface (MI)
   --enable-tui            enable full-screen terminal user interface (TUI)
   --enable-gdbtk          enable gdbtk graphical user interface (GUI)
@@ -6753,32 +6751,6 @@ cat >>confdefs.h <<_ACEOF
 #define DEFAULT_BFD_VEC $targ_defvec
 _ACEOF
 
-fi
-
-# The CLI cannot be disabled yet, but may be in the future.
-
-# Enable CLI.
-# Check whether --enable-gdbcli was given.
-if test "${enable_gdbcli+set}" = set; then :
-  enableval=$enable_gdbcli; case $enableval in
-    yes)
-      ;;
-    no)
-      as_fn_error $? "the command-line interface cannot be disabled yet" "$LINENO" 5 ;;
-    *)
-      as_fn_error $? "bad value $enableval for --enable-gdbcli" "$LINENO" 5 ;;
-  esac
-else
-  enable_gdbcli=yes
-fi
-
-if test x"$enable_gdbcli" = xyes; then
-  if test -d $srcdir/cli; then
-    CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_CLI_OBS)"
-    CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_CLI_DEPS)"
-    CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_CLI_SRCS)"
-    ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_CLI_CFLAGS)"
-  fi
 fi
 
 # Enable MI.

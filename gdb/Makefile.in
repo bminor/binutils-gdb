@@ -253,10 +253,6 @@ SUBDIR_CLI_SRCS = \
 
 SUBDIR_CLI_OBS = $(patsubst %.c,%.o,$(SUBDIR_CLI_SRCS))
 
-SUBDIR_CLI_DEPS =
-SUBDIR_CLI_LDFLAGS =
-SUBDIR_CLI_CFLAGS =
-
 #
 # MI sub directory definitons
 #
@@ -1160,6 +1156,7 @@ SFILES = \
 	symfile-mem.c \
 	ui-file.h \
 	mi/mi-common.c \
+	$(SUBDIR_CLI_SRCS) \
 	$(SUBDIR_TARGET_SRCS) \
 	$(COMMON_SFILES) \
 	$(SUBDIR_GCC_COMPILE_SRCS)
@@ -1557,6 +1554,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	version.o \
 	xml-builtin.o \
 	$(patsubst %.c,%.o,$(COMMON_SFILES)) \
+	$(SUBDIR_CLI_OBS) \
 	$(SUBDIR_TARGET_OBS) \
 	$(SUBDIR_GCC_COMPILE_OBS)
 

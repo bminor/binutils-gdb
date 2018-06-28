@@ -299,29 +299,6 @@ if test "x$targ_defvec" != x; then
     [Define to BFD's default target vector. ])
 fi
 
-# The CLI cannot be disabled yet, but may be in the future.
-
-# Enable CLI.
-AC_ARG_ENABLE(gdbcli,
-AS_HELP_STRING([--disable-gdbcli], [disable command-line interface (CLI)]),
-  [case $enableval in
-    yes)
-      ;;
-    no)
-      AC_MSG_ERROR([the command-line interface cannot be disabled yet]) ;;
-    *)
-      AC_MSG_ERROR([bad value $enableval for --enable-gdbcli]) ;;
-  esac],
-  [enable_gdbcli=yes])
-if test x"$enable_gdbcli" = xyes; then
-  if test -d $srcdir/cli; then
-    CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_CLI_OBS)"
-    CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_CLI_DEPS)"
-    CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_CLI_SRCS)"
-    ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_CLI_CFLAGS)"
-  fi
-fi
-
 # Enable MI.
 AC_ARG_ENABLE(gdbmi,
 AS_HELP_STRING([--disable-gdbmi], [disable machine-interface (MI)]),

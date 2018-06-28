@@ -1,5 +1,14 @@
 2018-07-17  Tom Tromey  <tom@tromey.com>
 
+	* configure.ac: Remove --disable-gdbcli.
+	* configure: Rebuild.
+	* Makefile.in (SUBDIR_CLI_DEPS, SUBDIR_CLI_LDFLAGS)
+	(SUBDIR_CLI_CFLAGS): Remove.
+	(SFILES): Use SUBDIR_CLI_SRCS.
+	(COMMON_OBS): Use SUBDIR_CLI_OBS.
+
+2018-07-17  Tom Tromey  <tom@tromey.com>
+
 	PR gdb/18624:
 	* coffread.c (coff_symtab_read): Use scoped_free_pendings.
 

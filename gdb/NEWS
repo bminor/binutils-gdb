@@ -130,12 +130,15 @@ SH-5/SH64 running OpenBSD 	SH-5/SH64 support in sh*-*-openbsd*
   the tradeoff that there is a possibility of false hits being
   reported.
 
-* New configure options
+* Configure changes
 
 --enable-codesign=CERT
   This can be used to invoke "codesign -s CERT" after building gdb.
   This option is useful on macOS, where code signing is required for
   gdb to work properly.
+
+--disable-gdbcli has been removed
+  This is now silently accepted, but does nothing.
 
 *** Changes in GDB 8.1
 
