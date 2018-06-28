@@ -1,3 +1,7 @@
+2018-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* lib/compiler.c: Remove executable permission flag.
+
 2018-06-28  Richard Bunt  <richard.bunt@arm.com>
 
 	* gdb.base/watchpoint-hw-attach.c (main): Remove unneeded
