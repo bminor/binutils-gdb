@@ -908,6 +908,9 @@ init_entry_point_info (struct objfile *objfile)
    into an offset from the section VMA's as it appears in the object
    file, and then call the file's sym_offsets function to convert this
    into a format-specific offset table --- a `struct section_offsets'.
+   The sectindex field is used to control the ordering of sections
+   with the same name.  Upon return, it is updated to contain the
+   correspondig BFD section index, or -1 if the section was not found.
 
    ADD_FLAGS encodes verbosity level, whether this is main symbol or
    an extra symbol file such as dynamically loaded code, and wether
@@ -2184,8 +2187,12 @@ add_symbol_file_command (const char *args, int from_tty)
       addr = parse_and_eval_address (val);
 
       /* Here we store the section offsets in the order they were
-         entered on the command line.  */
-      section_addrs.emplace_back (addr, sec, 0);
+         entered on the command line.  Every array element is
+         assigned an ascending section index to preserve the above
+         order over an unstable sorting algorithm.  This dummy
+         index is not used for any other purpose.
+      */
+      section_addrs.emplace_back (addr, sec, section_addrs.size ());
       printf_unfiltered ("\t%s_addr = %s\n", sec,
 			 paddress (gdbarch, addr));
 

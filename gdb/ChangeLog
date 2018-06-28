@@ -1,5 +1,10 @@
 2018-06-28  Petr Tesarik  <ptesarik@suse.cz>
 
+	* symfile.c (add_symbol_file_command): Make sure that sections
+	with the same name are sorted in the same order.
+
+2018-06-28  Petr Tesarik  <ptesarik@suse.cz>
+
 	* symfile.c (add_symbol_file_command, _initialize_symfile): Do not
 	require the second argument.  If omitted, load sections at the
 	addresses specified in the file.

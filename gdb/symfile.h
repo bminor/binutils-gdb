@@ -61,7 +61,9 @@ struct other_sections
   CORE_ADDR addr;
   std::string name;
 
-  /* SECTINDEX must be valid for associated BFD or set to -1.  */
+  /* SECTINDEX must be valid for associated BFD or set to -1.
+     See syms_from_objfile_1 for an exception to this rule.
+   */
   int sectindex;
 };
 
