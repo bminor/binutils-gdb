@@ -1583,77 +1583,92 @@ darwin_attach_pid (struct inferior *inf)
   darwin_inferior *priv = new darwin_inferior;
   inf->priv.reset (priv);
 
-  kret = task_for_pid (gdb_task, inf->pid, &priv->task);
-  if (kret != KERN_SUCCESS)
+  TRY
     {
-      int status;
-
-      if (!inf->attach_flag)
+      kret = task_for_pid (gdb_task, inf->pid, &priv->task);
+      if (kret != KERN_SUCCESS)
 	{
-	  kill (inf->pid, 9);
-	  waitpid (inf->pid, &status, 0);
+	  int status;
+
+	  if (!inf->attach_flag)
+	    {
+	      kill (inf->pid, 9);
+	      waitpid (inf->pid, &status, 0);
+	    }
+
+	  error
+	    (_("Unable to find Mach task port for process-id %d: %s (0x%lx).\n"
+	       " (please check gdb is codesigned - see taskgated(8))"),
+	     inf->pid, mach_error_string (kret), (unsigned long) kret);
 	}
 
-      error (_("Unable to find Mach task port for process-id %d: %s (0x%lx).\n"
-	       " (please check gdb is codesigned - see taskgated(8))"),
-             inf->pid, mach_error_string (kret), (unsigned long) kret);
-    }
+      inferior_debug (2, _("inferior task: 0x%x, pid: %d\n"),
+		      priv->task, inf->pid);
 
-  inferior_debug (2, _("inferior task: 0x%x, pid: %d\n"),
-		  priv->task, inf->pid);
+      if (darwin_ex_port == MACH_PORT_NULL)
+	{
+	  /* Create a port to get exceptions.  */
+	  kret = mach_port_allocate (gdb_task, MACH_PORT_RIGHT_RECEIVE,
+				     &darwin_ex_port);
+	  if (kret != KERN_SUCCESS)
+	    error (_("Unable to create exception port, mach_port_allocate "
+		     "returned: %d"),
+		   kret);
 
-  if (darwin_ex_port == MACH_PORT_NULL)
-    {
-      /* Create a port to get exceptions.  */
+	  kret = mach_port_insert_right (gdb_task, darwin_ex_port,
+					 darwin_ex_port,
+					 MACH_MSG_TYPE_MAKE_SEND);
+	  if (kret != KERN_SUCCESS)
+	    error (_("Unable to create exception port, mach_port_insert_right "
+		     "returned: %d"),
+		   kret);
+
+	  /* Create a port set and put ex_port in it.  */
+	  kret = mach_port_allocate (gdb_task, MACH_PORT_RIGHT_PORT_SET,
+				     &darwin_port_set);
+	  if (kret != KERN_SUCCESS)
+	    error (_("Unable to create port set, mach_port_allocate "
+		     "returned: %d"),
+		   kret);
+
+	  kret = mach_port_move_member (gdb_task, darwin_ex_port,
+					darwin_port_set);
+	  if (kret != KERN_SUCCESS)
+	    error (_("Unable to move exception port into new port set, "
+		     "mach_port_move_member\n"
+		     "returned: %d"),
+		   kret);
+	}
+
+      /* Create a port to be notified when the child task terminates.  */
       kret = mach_port_allocate (gdb_task, MACH_PORT_RIGHT_RECEIVE,
-				 &darwin_ex_port);
+				 &priv->notify_port);
       if (kret != KERN_SUCCESS)
-	error (_("Unable to create exception port, mach_port_allocate "
+	error (_("Unable to create notification port, mach_port_allocate "
 		 "returned: %d"),
 	       kret);
 
-      kret = mach_port_insert_right (gdb_task, darwin_ex_port, darwin_ex_port,
-				     MACH_MSG_TYPE_MAKE_SEND);
+      kret = mach_port_move_member (gdb_task,
+				    priv->notify_port, darwin_port_set);
       if (kret != KERN_SUCCESS)
-	error (_("Unable to create exception port, mach_port_insert_right "
-		 "returned: %d"),
-	       kret);
-
-      /* Create a port set and put ex_port in it.  */
-      kret = mach_port_allocate (gdb_task, MACH_PORT_RIGHT_PORT_SET,
-				 &darwin_port_set);
-      if (kret != KERN_SUCCESS)
-	error (_("Unable to create port set, mach_port_allocate "
-		 "returned: %d"),
-	       kret);
-
-      kret = mach_port_move_member (gdb_task, darwin_ex_port, darwin_port_set);
-      if (kret != KERN_SUCCESS)
-	error (_("Unable to move exception port into new port set, "
+	error (_("Unable to move notification port into new port set, "
 		 "mach_port_move_member\n"
 		 "returned: %d"),
 	       kret);
+
+      darwin_setup_request_notification (inf);
+
+      darwin_setup_exceptions (inf);
     }
+  CATCH (ex, RETURN_MASK_ALL)
+    {
+      inf->pid = 0;
+      inf->priv.reset ();
+      inferior_ptid = null_ptid;
 
-  /* Create a port to be notified when the child task terminates.  */
-  kret = mach_port_allocate (gdb_task, MACH_PORT_RIGHT_RECEIVE,
-			     &priv->notify_port);
-  if (kret != KERN_SUCCESS)
-    error (_("Unable to create notification port, mach_port_allocate "
-	     "returned: %d"),
-	   kret);
-
-  kret = mach_port_move_member (gdb_task,
-				priv->notify_port, darwin_port_set);
-  if (kret != KERN_SUCCESS)
-    error (_("Unable to move notification port into new port set, "
-	     "mach_port_move_member\n"
-	     "returned: %d"),
-	   kret);
-
-  darwin_setup_request_notification (inf);
-
-  darwin_setup_exceptions (inf);
+      throw_exception (ex);
+    }
+  END_CATCH
 
   target_ops *darwin_ops = get_native_target ();
   if (!target_is_pushed (darwin_ops))
