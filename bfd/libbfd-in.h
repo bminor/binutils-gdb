@@ -277,6 +277,7 @@ extern int bfd_generic_stat_arch_elt
 #define _bfd_generic_close_and_cleanup _bfd_archive_close_and_cleanup
 extern bfd_boolean _bfd_archive_close_and_cleanup
   (bfd *) ATTRIBUTE_HIDDEN;
+extern void _bfd_unlink_from_archive_parent (bfd *) ATTRIBUTE_HIDDEN;
 #define _bfd_generic_bfd_free_cached_info _bfd_bool_bfd_true
 extern bfd_boolean _bfd_generic_new_section_hook
   (bfd *, asection *) ATTRIBUTE_HIDDEN;

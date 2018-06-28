@@ -1,3 +1,17 @@
+2018-07-02  Jeff Muizelaar  <jrmuizel@gmail.com>
+	    Tom Tromey  <tom@tromey.com>
+
+	PR 13157
+	PR 21787
+	* mach-o.c (bfd_mach_o_fat_close_and_cleanup): New function.
+	(bfd_mach_o_close_and_cleanup): Redefine.
+	* archive.c (_bfd_unlink_from_archive_parent): New function,
+	extracted from..
+	(_bfd_archive_close_and_cleanup): ..here.
+	(bfd_generic_archive_p): Do not clear archive's format.
+	* libbfd-in.h (_bfd_unlink_from_archive_parent): Declare.
+	* libbfd.h: Regenerate.
+
 2018-07-02  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* archures.c (bfd_mach_arm_5TEJ, bfd_mach_arm_6, bfd_mach_arm_6KZ,

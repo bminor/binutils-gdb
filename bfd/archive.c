@@ -850,8 +850,6 @@ bfd_generic_archive_p (bfd *abfd)
       && ! bfd_is_thin_archive (abfd))
     {
       bfd_set_error (bfd_error_wrong_format);
-      if (abfd->format == bfd_archive)
-	abfd->format = bfd_unknown;
       return NULL;
     }
 
@@ -2765,6 +2763,30 @@ archive_close_worker (void **slot, void *inf ATTRIBUTE_UNUSED)
   return 1;
 }
 
+void
+_bfd_unlink_from_archive_parent (bfd *abfd)
+{
+  if (arch_eltdata (abfd) != NULL)
+    {
+      struct areltdata *ared = arch_eltdata (abfd);
+      htab_t htab = (htab_t) ared->parent_cache;
+
+      if (htab)
+	{
+	  struct ar_cache ent;
+	  void **slot;
+
+	  ent.ptr = ared->key;
+	  slot = htab_find_slot (htab, &ent, NO_INSERT);
+	  if (slot != NULL)
+	    {
+	      BFD_ASSERT (((struct ar_cache *) *slot)->arbfd == abfd);
+	      htab_clear_slot (htab, slot);
+	    }
+	}
+    }
+}
+
 bfd_boolean
 _bfd_archive_close_and_cleanup (bfd *abfd)
 {
@@ -2789,25 +2811,9 @@ _bfd_archive_close_and_cleanup (bfd *abfd)
 	  bfd_ardata (abfd)->cache = NULL;
 	}
     }
-  if (arch_eltdata (abfd) != NULL)
-    {
-      struct areltdata *ared = arch_eltdata (abfd);
-      htab_t htab = (htab_t) ared->parent_cache;
 
-      if (htab)
-	{
-	  struct ar_cache ent;
-	  void **slot;
+  _bfd_unlink_from_archive_parent (abfd);
 
-	  ent.ptr = ared->key;
-	  slot = htab_find_slot (htab, &ent, NO_INSERT);
-	  if (slot != NULL)
-	    {
-	      BFD_ASSERT (((struct ar_cache *) *slot)->arbfd == abfd);
-	      htab_clear_slot (htab, slot);
-	    }
-	}
-    }
   if (abfd->is_linker_output)
     (*abfd->link.hash->hash_table_free) (abfd);
 
