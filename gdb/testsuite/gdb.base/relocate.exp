@@ -196,6 +196,30 @@ if { "${function_foo_addr}" == "${new_function_foo_addr}" } {
   pass "function foo has a different address"
 }
 
+# Load the object using symbol-file with an offset and check that
+# all addresses are moved by that offset.
+
+set offset 0x10000
+clean_restart
+gdb_test "symbol-file -o $offset $binfile" \
+    "Reading symbols from ${binfile}\.\.\.done\." \
+    "symbol-file with offset"
+
+# Make sure the address of a static variable is moved by offset.
+set new_static_foo_addr [get_var_address static_foo]
+gdb_assert {${new_static_foo_addr} == ${static_foo_addr} + $offset} \
+    "static variable foo is moved by offset"
+
+# Make sure the address of a global variable is moved by offset.
+set new_global_foo_addr [get_var_address global_foo]
+gdb_assert {${new_global_foo_addr} == ${global_foo_addr} + $offset} \
+    "global variable foo is moved by offset"
+
+# Make sure the address of a function is moved by offset.
+set new_function_foo_addr [get_var_address function_foo]
+gdb_assert {${new_function_foo_addr} == ${function_foo_addr} + $offset} \
+    "function foo is moved by offset"
+
 # Now try loading the object as an exec-file; we should be able to print
 # the values of variables after we do this.
 

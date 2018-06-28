@@ -18823,10 +18823,15 @@ if necessary to locate your program.  Omitting @var{filename} means to
 discard information on the executable file.
 
 @kindex symbol-file
-@item symbol-file @r{[} @var{filename} @r{]}
+@item symbol-file @r{[} @var{filename} @r{[} -o @var{offset} @r{]]}
 Read symbol table information from file @var{filename}.  @code{PATH} is
 searched when necessary.  Use the @code{file} command to get both symbol
 table and program to run from the same file.
+
+If an optional @var{offset} is specified, it is added to the start
+address of each section in the symbol file.  This is useful if the
+program is relocated at runtime, such as the Linux kernel with kASLR
+enabled.
 
 @code{symbol-file} with no argument clears out @value{GDBN} information on your
 program's symbol table.

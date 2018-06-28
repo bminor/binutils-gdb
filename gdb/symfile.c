@@ -87,7 +87,7 @@ int readnever_symbol_files;	/* Never read full symbols.  */
 /* Functions this file defines.  */
 
 static void symbol_file_add_main_1 (const char *args, symfile_add_flags add_flags,
-				    objfile_flags flags);
+				    objfile_flags flags, CORE_ADDR reloff);
 
 static const struct sym_fns *find_sym_fns (bfd *);
 
@@ -1225,16 +1225,18 @@ symbol_file_add (const char *name, symfile_add_flags add_flags,
 void
 symbol_file_add_main (const char *args, symfile_add_flags add_flags)
 {
-  symbol_file_add_main_1 (args, add_flags, 0);
+  symbol_file_add_main_1 (args, add_flags, 0, 0);
 }
 
 static void
 symbol_file_add_main_1 (const char *args, symfile_add_flags add_flags,
-			objfile_flags flags)
+			objfile_flags flags, CORE_ADDR reloff)
 {
   add_flags |= current_inferior ()->symfile_flags | SYMFILE_MAINLINE;
 
-  symbol_file_add (args, add_flags, NULL, flags);
+  struct objfile *objfile = symbol_file_add (args, add_flags, NULL, flags);
+  if (reloff != 0)
+    objfile_rebase (objfile, reloff);
 
   /* Getting new symbols may change our opinion about
      what is frameless.  */
@@ -1551,6 +1553,7 @@ symbol_file_command (const char *args, int from_tty)
       symfile_add_flags add_flags = 0;
       char *name = NULL;
       bool stop_processing_options = false;
+      CORE_ADDR offset = 0;
       int idx;
       char *arg;
 
@@ -1571,6 +1574,14 @@ symbol_file_command (const char *args, int from_tty)
 	    flags |= OBJF_READNOW;
 	  else if (strcmp (arg, "-readnever") == 0)
 	    flags |= OBJF_READNEVER;
+	  else if (strcmp (arg, "-o") == 0)
+	    {
+	      arg = built_argv[++idx];
+	      if (arg == NULL)
+		error (_("Missing argument to -o"));
+
+	      offset = parse_and_eval_address (arg);
+	    }
 	  else if (strcmp (arg, "--") == 0)
 	    stop_processing_options = true;
 	  else
@@ -1582,7 +1593,7 @@ symbol_file_command (const char *args, int from_tty)
 
       validate_readnow_readnever (flags);
 
-      symbol_file_add_main_1 (name, add_flags, flags);
+      symbol_file_add_main_1 (name, add_flags, flags, offset);
     }
 }
 
@@ -3774,7 +3785,8 @@ symbolic debug information."
 
   c = add_cmd ("symbol-file", class_files, symbol_file_command, _("\
 Load symbol table from executable file FILE.\n\
-Usage: symbol-file [-readnow | -readnever] FILE\n\
+Usage: symbol-file [-readnow | -readnever] [-o OFF] FILE\n\
+OFF is an optional offset which is added to each section address.\n\
 The `file' command can also load symbol tables, as well as setting the file\n\
 to execute.\n" READNOW_READNEVER_HELP), &cmdlist);
   set_cmd_completer (c, filename_completer);

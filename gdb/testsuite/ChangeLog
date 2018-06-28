@@ -1,3 +1,7 @@
+2018-06-28  Petr Tesarik  <ptesarik@suse.cz>
+
+	* gdb.base/relocate.exp: Add test for "symbol-file -o ".
+
 2018-06-27  Omair Javaid  <omair.javaid@linaro.org>
 
 	PR gdb/21695
