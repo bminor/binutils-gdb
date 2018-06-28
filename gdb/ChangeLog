@@ -1,3 +1,8 @@
+2018-06-28  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (handle_inferior_event_1) <TARGET_WAITKIND_EXECD>:
+	Moving fetching stop_pc until after ecs->event_thread is refreshed.
+
 2018-06-28  Tom Tromey  <tom@tromey.com>
 
 	* coffread.c (coff_symfile_finish): Update.

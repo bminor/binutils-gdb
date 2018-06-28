@@ -5289,12 +5289,12 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
          stop.  */
       follow_exec (inferior_ptid, ecs->ws.value.execd_pathname);
 
-      stop_pc = regcache_read_pc (get_thread_regcache (ecs->event_thread));
-
       /* In follow_exec we may have deleted the original thread and
 	 created a new one.  Make sure that the event thread is the
 	 execd thread for that case (this is a nop otherwise).  */
       ecs->event_thread = inferior_thread ();
+
+      stop_pc = regcache_read_pc (get_thread_regcache (ecs->event_thread));
 
       ecs->event_thread->control.stop_bpstat
 	= bpstat_stop_status (get_current_regcache ()->aspace (),
