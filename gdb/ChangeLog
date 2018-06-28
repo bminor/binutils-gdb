@@ -1,3 +1,7 @@
+2018-06-28  Petr Tesarik  <ptesarik@suse.cz>
+
+	* MAINTAINERS (Write After Approval): Add Petr Tesarik.
+
 2018-06-27  Tom Tromey  <tom@tromey.com>
 
 	* stack.c (_initialize_stack): Update "func" help text.
