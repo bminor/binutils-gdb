@@ -18918,7 +18918,7 @@ the program is running.  To do this, use the @code{kill} command
 
 @kindex add-symbol-file
 @cindex dynamic linking
-@item add-symbol-file @var{filename} @r{[} -readnow @r{|} -readnever @r{]} @r{[} @var{textaddress} @r{]} @r{[} -s @var{section} @var{address} @dots{} @r{]}
+@item add-symbol-file @var{filename} @r{[} -readnow @r{|} -readnever @r{]} @r{[} -o @var{offset} @r{]} @r{[} @var{textaddress} @r{]} @r{[} -s @var{section} @var{address} @dots{} @r{]}
 The @code{add-symbol-file} command reads additional symbol table
 information from the file @var{filename}.  You would use this command
 when @var{filename} has been dynamically loaded (by some other means)
@@ -18929,6 +18929,10 @@ an arbitrary number of @samp{-s @var{section} @var{address}} pairs.
 If a section is omitted, @value{GDBN} will use its default addresses
 as found in @var{filename}.  Any @var{address} or @var{textaddress}
 can be given as an expression.
+
+If an optional @var{offset} is specified, it is added to the start
+address of each section, except those for which the address was
+specified explicitly.
 
 The symbol table of the file @var{filename} is added to the symbol table
 originally read with the @code{symbol-file} command.  You can use the

@@ -1,5 +1,9 @@
 2018-06-28  Petr Tesarik  <ptesarik@suse.cz>
 
+	* gdb.texinfo (Files): Document "add-symbol-file -o offset".
+
+2018-06-28  Petr Tesarik  <ptesarik@suse.cz>
+
 	* gdb.texinfo (Files): The address argument for "add-symbol-file"
 	is no longer mandatory.
 

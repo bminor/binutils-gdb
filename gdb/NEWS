@@ -6,6 +6,10 @@
 * The 'symbol-file' command now accepts an '-o' option to add a relative
   offset to all sections.
 
+* Similarly, the 'add-symbol-file' command also accepts an '-o' option to add
+  a relative offset to all sections, but it allows to override the load
+  address of individual sections using '-s'.
+
 * The 'add-symbol-file' command no longer requires the second argument
   (address of the text section).
 

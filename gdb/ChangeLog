@@ -1,5 +1,12 @@
 2018-06-28  Petr Tesarik  <ptesarik@suse.cz>
 
+	* symfile.c (add_symbol_file_command, _initialize_symfile): Add
+	option "-o" to add-symbol-file-load to add an offset to each
+	section's load address.
+	* symfile.c (set_objfile_default_section_offset): New function.
+
+2018-06-28  Petr Tesarik  <ptesarik@suse.cz>
+
 	* symfile.c (add_symbol_file_command): Make sure that sections
 	with the same name are sorted in the same order.
 

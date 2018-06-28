@@ -1,5 +1,9 @@
 2018-06-28  Petr Tesarik  <ptesarik@suse.cz>
 
+	* gdb.base/relocate.exp: Add test for "add-symbol-file -o ".
+
+2018-06-28  Petr Tesarik  <ptesarik@suse.cz>
+
 	* gdb.base/relocate.exp: Test add-symbol-file behavior when the
 	address argument is omitted.
 

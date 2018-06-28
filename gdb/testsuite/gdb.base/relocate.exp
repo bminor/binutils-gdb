@@ -235,6 +235,62 @@ set new_function_foo_addr [get_var_address function_foo]
 gdb_assert {${new_function_foo_addr} == ${function_foo_addr} + $offset} \
     "function foo is moved by offset"
 
+# Load the object using add-symbol-file with an offset and check that
+# all addresses are moved by that offset.
+
+set offset 0x10000
+clean_restart
+gdb_test "add-symbol-file -o $offset $binfile" \
+    "Reading symbols from ${binfile}\.\.\.done\." \
+    "add-symbol-file with offset" \
+    "add symbol table from file \".*${testfile}\\.o\" with all sections offset by $offset\[\r\n\]+\\(y or n\\) " \
+    "y"
+
+# Make sure the address of a static variable is moved by offset.
+set new_static_foo_addr [get_var_address static_foo]
+gdb_assert { ${new_static_foo_addr} == ${static_foo_addr} + $offset } \
+    "static variable foo is moved by offset"
+
+# Make sure the address of a global variable is moved by offset.
+set new_global_foo_addr [get_var_address global_foo]
+gdb_assert { ${new_global_foo_addr} == ${global_foo_addr} + $offset } \
+    "global variable foo is moved by offset"
+
+# Make sure the address of a function is moved by offset.
+set new_function_foo_addr [get_var_address function_foo]
+gdb_assert { ${new_function_foo_addr} == ${function_foo_addr} + $offset } \
+    "function foo is moved by offset"
+
+# Re-load the object giving an explicit address for .text
+
+set text [ format "0x%x" [expr ${function_foo_addr} + 0x20000] ]
+clean_restart
+gdb_test "add-symbol-file $binfile -o $offset $text" \
+    "Reading symbols from ${binfile}\.\.\.done\." \
+    "add-symbol-file with offset, text address given" \
+    "add symbol table from file \".*${testfile}\\.o\" at\[ \t\r\n\]+\.text_addr = ${text}\[\r\n\]+with other sections offset by ${offset}\[\r\n\]+\\(y or n\\) " \
+    "y"
+
+# Make sure function has a different addresses now.
+set function_foo_addr [get_var_address function_foo]
+gdb_assert { ${function_foo_addr} != ${new_function_foo_addr} } \
+    "function foo has a different address"
+
+# Re-load the object giving an explicit address for .data
+
+set data [ format "0x%x" [expr ${global_foo_addr} + 0x20000] ]
+clean_restart
+gdb_test "add-symbol-file $binfile -o $offset -s .data $data" \
+    "Reading symbols from ${binfile}\.\.\.done\." \
+    "add-symbol-file with offset, data address given" \
+    "add symbol table from file \".*${testfile}\\.o\" at\[ \t\r\n\]+\.data_addr = ${data}\[\r\n\]+with other sections offset by ${offset}\[\r\n\]+\\(y or n\\) " \
+    "y"
+
+# Make sure variable has a different addresses now.
+set global_foo_addr [get_var_address global_foo]
+gdb_assert { ${global_foo_addr} != ${new_global_foo_addr} } \
+    "global variable foo has a different address"
+
 # Now try loading the object as an exec-file; we should be able to print
 # the values of variables after we do this.
 
