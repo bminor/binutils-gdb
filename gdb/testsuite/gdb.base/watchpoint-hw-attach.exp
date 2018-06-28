@@ -57,12 +57,12 @@ clean_restart $binfile
 
 gdb_test "attach $testpid" "Attaching to program: .*, process $testpid.*"
 
-gdb_test_no_output "set should_continue = 1"
-
 # Ensure the test program is in the top frame so the required
 # variables are in scope.
-gdb_breakpoint [gdb_get_line_number "prewatchtrigger"]
-gdb_continue_to_breakpoint "prewatchtrigger"
+gdb_breakpoint $srcfile:[gdb_get_line_number "pidacquired"]
+gdb_continue_to_breakpoint "$srcfile:pidacquired"
+
+gdb_test_no_output "set should_continue = 1"
 
 gdb_test "watch watched_variable" \
 	 "Hardware watchpoint $decimal: watched_variable"

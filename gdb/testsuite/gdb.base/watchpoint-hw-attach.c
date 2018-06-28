@@ -36,7 +36,6 @@ main (void)
   for (counter = 0; !should_continue && counter < 100; counter++)
     sleep (1);			/* pidacquired */
 
-  watched_variable = 0;		/* prewatchtrigger */
   /* Trigger a watchpoint.  */
   watched_variable = 4;
   printf ("My variable is %d\n", watched_variable);

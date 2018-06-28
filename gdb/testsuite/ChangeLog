@@ -1,3 +1,9 @@
+2018-06-28  Richard Bunt  <richard.bunt@arm.com>
+
+	* gdb.base/watchpoint-hw-attach.c (main): Remove unneeded
+	code.
+	* gdb.base/watchpoint-hw-attach.exp: Break in outermost frame.
+
 2018-06-28  Petr Tesarik  <ptesarik@suse.cz>
 
 	* gdb.base/relocate.exp: Add test for "add-symbol-file -o ".
