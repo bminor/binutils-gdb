@@ -3830,12 +3830,9 @@ const char *
 remote_target::extra_thread_info (thread_info *tp)
 {
   struct remote_state *rs = get_remote_state ();
-  int result;
   int set;
   threadref id;
   struct gdb_ext_thread_info threadinfo;
-  static char display_buf[100];	/* arbitrary...  */
-  int n = 0;                    /* position in display_buf */
 
   if (rs->remote_desc == 0)		/* paranoia */
     internal_error (__FILE__, __LINE__,
@@ -3847,15 +3844,18 @@ remote_target::extra_thread_info (thread_info *tp)
        server doesn't know about it.  */
     return NULL;
 
+  std::string &extra = get_remote_thread_info (tp)->extra;
+
+  /* If already have cached info, use it.  */
+  if (!extra.empty ())
+    return extra.c_str ();
+
   if (packet_support (PACKET_qXfer_threads) == PACKET_ENABLE)
     {
-      if (tp->priv != NULL)
-	{
-	  const std::string &extra = get_remote_thread_info (tp)->extra;
-	  return !extra.empty () ? extra.c_str () : NULL;
-	}
-      else
-	return NULL;
+      /* If we're using qXfer:threads:read, then the extra info is
+	 included in the XML.  So if we didn't have anything cached,
+	 it's because there's really no extra info.  */
+      return NULL;
     }
 
   if (rs->use_threadextra_query)
@@ -3871,10 +3871,9 @@ remote_target::extra_thread_info (thread_info *tp)
       getpkt (&rs->buf, &rs->buf_size, 0);
       if (rs->buf[0] != 0)
 	{
-	  n = std::min (strlen (rs->buf) / 2, sizeof (display_buf));
-	  result = hex2bin (rs->buf, (gdb_byte *) display_buf, n);
-	  display_buf [result] = '\0';
-	  return display_buf;
+	  extra.resize (strlen (rs->buf) / 2);
+	  hex2bin (rs->buf, (gdb_byte *) &extra[0], extra.size ());
+	  return extra.c_str ();
 	}
     }
 
@@ -3887,22 +3886,20 @@ remote_target::extra_thread_info (thread_info *tp)
     if (threadinfo.active)
       {
 	if (*threadinfo.shortname)
-	  n += xsnprintf (&display_buf[0], sizeof (display_buf) - n,
-			  " Name: %s,", threadinfo.shortname);
+	  string_appendf (extra, " Name: %s", threadinfo.shortname);
 	if (*threadinfo.display)
-	  n += xsnprintf (&display_buf[n], sizeof (display_buf) - n,
-			  " State: %s,", threadinfo.display);
-	if (*threadinfo.more_display)
-	  n += xsnprintf (&display_buf[n], sizeof (display_buf) - n,
-			  " Priority: %s", threadinfo.more_display);
-
-	if (n > 0)
 	  {
-	    /* For purely cosmetic reasons, clear up trailing commas.  */
-	    if (',' == display_buf[n-1])
-	      display_buf[n-1] = ' ';
-	    return display_buf;
+	    if (!extra.empty ())
+	      extra += ',';
+	    string_appendf (extra, " State: %s", threadinfo.display);
 	  }
+	if (*threadinfo.more_display)
+	  {
+	    if (!extra.empty ())
+	      extra += ',';
+	    string_appendf (extra, " Priority: %s", threadinfo.more_display);
+	  }
+	return extra.c_str ();
       }
   return NULL;
 }

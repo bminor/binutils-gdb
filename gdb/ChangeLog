@@ -1,5 +1,12 @@
 2018-06-29  Pedro Alves  <palves@redhat.com>
 
+	* remote.c (remote_target::extra_thread_info): Delete
+	'display_buf' and 'n' locals.  from the cache, regardless of
+	packet mechanims is in use.  Use cache for qThreadExtra and qP
+	methods too.
+
+2018-06-29  Pedro Alves  <palves@redhat.com>
+
 	* blockframe.c (find_pc_sect_containing_function): New function.
 	* breakpoint.c (print_breakpoint_location): Don't call
 	find_pc_sect_function.
