@@ -1,3 +1,15 @@
+2018-06-29  Tamar Christina  <tamar.christina@arm.com>
+
+	PR binutils/23192
+	* config/tc-aarch64.c (process_omitted_operand, parse_operands): Add
+	AARCH64_OPND_Em16
+	* testsuite/gas/aarch64/advsimd-armv8_3.s: Expand tests to cover upper
+	16 registers.
+	* testsuite/gas/aarch64/advsimd-armv8_3.d: Likewise.
+	* testsuite/gas/aarch64/advsimd-compnum.s: Likewise.
+	* testsuite/gas/aarch64/advsimd-compnum.d: Likewise.
+	* testsuite/gas/aarch64/sve.d: Likewise.
+
 2018-06-27  Alan Modra  <amodra@gmail.com>
 
 	* configure.ac: Specify extra_objects with leading "config/"

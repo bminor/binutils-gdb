@@ -178,6 +178,8 @@ enum aarch64_opnd
   AARCH64_OPND_Ed,	/* AdvSIMD Vector Element Vd.  */
   AARCH64_OPND_En,	/* AdvSIMD Vector Element Vn.  */
   AARCH64_OPND_Em,	/* AdvSIMD Vector Element Vm.  */
+  AARCH64_OPND_Em16,	/* AdvSIMD Vector Element Vm restricted to V0 - V15 when
+			   qualifier is S_H.  */
   AARCH64_OPND_LVn,	/* AdvSIMD Vector register list used in e.g. TBL.  */
   AARCH64_OPND_LVt,	/* AdvSIMD Vector register list used in ld/st.  */
   AARCH64_OPND_LVt_AL,	/* AdvSIMD Vector register list for loading single

@@ -1,3 +1,8 @@
+2018-06-29  Tamar Christina  <tamar.christina@arm.com>
+
+	PR binutils/23192
+	*opcode/aarch64.h (aarch64_opnd): Add AARCH64_OPND_Em16.
+
 2018-06-26  Alan Modra  <amodra@gmail.com>
 
 	* elf/internal.h (ELF_SECTION_IN_SEGMENT): Revert last change.

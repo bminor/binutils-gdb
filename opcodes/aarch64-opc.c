@@ -2516,7 +2516,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	 01		0:Rm
 	 10		M:Rm
 	 11		RESERVED  */
-      if (type == AARCH64_OPND_Em && qualifier == AARCH64_OPND_QLF_S_H
+      if (type == AARCH64_OPND_Em16 && qualifier == AARCH64_OPND_QLF_S_H
 	  && !value_in_range_p (opnd->reglane.regno, 0, 15))
 	{
 	  set_regno_out_of_range_error (mismatch_detail, idx, 0, 15);
@@ -3161,6 +3161,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_Ed:
     case AARCH64_OPND_En:
     case AARCH64_OPND_Em:
+    case AARCH64_OPND_Em16:
     case AARCH64_OPND_SM3_IMM2:
       snprintf (buf, size, "v%d.%s[%" PRIi64 "]", opnd->reglane.regno,
 		aarch64_get_qualifier_name (opnd->qualifier),
