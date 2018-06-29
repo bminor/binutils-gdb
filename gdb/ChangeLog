@@ -1,5 +1,24 @@
 2018-06-29  Pedro Alves  <palves@redhat.com>
 
+	* blockframe.c (find_pc_sect_containing_function): New function.
+	* breakpoint.c (print_breakpoint_location): Don't call
+	find_pc_sect_function.
+	* linespec.c (create_sals_line_offset): Record the location's
+	symbol in the sal.
+	* linespec.c (convert_address_location_to_sals): Fill in sal's
+	symbol with find_pc_sect_containing_function.
+	* symtab.c (find_function_start_sal): Rename to ...
+	(find_function_start_sal_1): ... this.
+	(find_function_start_sal): Reimplement as wrapper around
+	find_function_start_sal_1, and use
+	find_pc_sect_containing_function to fill in the sal's symbol.
+	(find_function_start_sal(symbol*, bool)): Adjust.
+	* symtab.h (find_pc_function, find_pc_sect_function): Adjust
+	comments.
+	(find_pc_sect_containing_function): Declare.
+
+2018-06-29  Pedro Alves  <palves@redhat.com>
+
 	* inline-frame.c (stopped_by_user_bp_inline_frame): Return
 	true if the the location has no symbol.
 

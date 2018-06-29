@@ -272,6 +272,9 @@ with_test_prefix "line number" {
     # Set the breakpoint by line number, and check that GDB reports
     # the breakpoint location being the inline function.
     gdb_test "break $srcfile:$line" ".*Breakpoint .* at .*: file .*$srcfile, line $line."
+
+    gdb_test "info break \$bpnum" "in func1 at .*$srcfile:$line"
+
     gdb_test "continue" "Breakpoint .*, func1 \\(x=1\\) at .*$srcfile:$line.*break here.*" \
 	"breakpoint hit presents stop at inlined function"
 
@@ -294,6 +297,9 @@ with_test_prefix "address" {
     # Set the breakpoint by address, and check that GDB reports the
     # breakpoint location being the inline function.
     gdb_test "break *$address" ".*Breakpoint .* at $address: file .*$srcfile, line $line."
+
+    gdb_test "info break \$bpnum" "in func1 at .*$srcfile:$line"
+
     gdb_test "continue" "Breakpoint .*, func1 \\(x=1\\) at .*$srcfile:$line.*break here.*" \
 	"breakpoint hit presents stop at inlined function"
 }

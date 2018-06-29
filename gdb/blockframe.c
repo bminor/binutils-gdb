@@ -152,6 +152,19 @@ find_pc_function (CORE_ADDR pc)
   return find_pc_sect_function (pc, find_pc_mapped_section (pc));
 }
 
+/* See symtab.h.  */
+
+struct symbol *
+find_pc_sect_containing_function (CORE_ADDR pc, struct obj_section *section)
+{
+  const block *bl = block_for_pc_sect (pc, section);
+
+  if (bl == nullptr)
+    return nullptr;
+
+  return block_containing_function (bl);
+}
+
 /* These variables are used to cache the most recent result
    of find_pc_partial_function.  */
 

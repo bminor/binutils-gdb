@@ -5867,9 +5867,6 @@ print_breakpoint_location (struct breakpoint *b,
     {
       const struct symbol *sym = loc->symbol;
 
-      if (sym == NULL)
-	sym = find_pc_sect_function (loc->address, loc->section);
-
       if (sym)
 	{
 	  uiout->text ("in ");

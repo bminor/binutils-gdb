@@ -1670,13 +1670,24 @@ extern struct type *lookup_enum (const char *, const struct block *);
 
 /* from blockframe.c: */
 
-/* lookup the function symbol corresponding to the address.  */
+/* lookup the function symbol corresponding to the address.  The
+   return value will not be an inlined function; the containing
+   function will be returned instead.  */
 
 extern struct symbol *find_pc_function (CORE_ADDR);
 
-/* lookup the function corresponding to the address and section.  */
+/* lookup the function corresponding to the address and section.  The
+   return value will not be an inlined function; the containing
+   function will be returned instead.  */
 
 extern struct symbol *find_pc_sect_function (CORE_ADDR, struct obj_section *);
+
+/* lookup the function symbol corresponding to the address and
+   section.  The return value will be the closest enclosing function,
+   which might be an inline function.  */
+
+extern struct symbol *find_pc_sect_containing_function
+  (CORE_ADDR pc, struct obj_section *section);
 
 /* Find the symbol at the given address.  Returns NULL if no symbol
    found.  Only exact matches for ADDRESS are considered.  */

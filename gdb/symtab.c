@@ -3575,11 +3575,12 @@ find_pc_line_pc_range (CORE_ADDR pc, CORE_ADDR *startptr, CORE_ADDR *endptr)
   return sal.symtab != 0;
 }
 
-/* See symtab.h.  */
+/* Helper for find_function_start_sal.  Does most of the work, except
+   setting the sal's symbol.  */
 
-symtab_and_line
-find_function_start_sal (CORE_ADDR func_addr, obj_section *section,
-			 bool funfirstline)
+static symtab_and_line
+find_function_start_sal_1 (CORE_ADDR func_addr, obj_section *section,
+			   bool funfirstline)
 {
   symtab_and_line sal = find_pc_sect_line (func_addr, section, 0);
 
@@ -3616,13 +3617,30 @@ find_function_start_sal (CORE_ADDR func_addr, obj_section *section,
 /* See symtab.h.  */
 
 symtab_and_line
+find_function_start_sal (CORE_ADDR func_addr, obj_section *section,
+			 bool funfirstline)
+{
+  symtab_and_line sal
+    = find_function_start_sal_1 (func_addr, section, funfirstline);
+
+  /* find_function_start_sal_1 does a linetable search, so it finds
+     the symtab and linenumber, but not a symbol.  Fill in the
+     function symbol too.  */
+  sal.symbol = find_pc_sect_containing_function (sal.pc, sal.section);
+
+  return sal;
+}
+
+/* See symtab.h.  */
+
+symtab_and_line
 find_function_start_sal (symbol *sym, bool funfirstline)
 {
   fixup_symbol_section (sym, NULL);
   symtab_and_line sal
-    = find_function_start_sal (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)),
-			       SYMBOL_OBJ_SECTION (symbol_objfile (sym), sym),
-			       funfirstline);
+    = find_function_start_sal_1 (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)),
+				 SYMBOL_OBJ_SECTION (symbol_objfile (sym), sym),
+				 funfirstline);
   sal.symbol = sym;
   return sal;
 }
