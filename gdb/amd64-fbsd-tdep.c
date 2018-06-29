@@ -156,7 +156,7 @@ amd64fbsd_core_read_description (struct gdbarch *gdbarch,
 				 struct target_ops *target,
 				 bfd *abfd)
 {
-  return amd64_target_description (i386fbsd_core_read_xcr0 (abfd));
+  return amd64_target_description (i386fbsd_core_read_xcr0 (abfd), true);
 }
 
 /* Similar to amd64_supply_fpregset, but use XSAVE extended state.  */
@@ -218,7 +218,7 @@ amd64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sizeof_gregset = 22 * 8;
 
   amd64_init_abi (info, gdbarch,
-		  amd64_target_description (X86_XSTATE_SSE_MASK));
+		  amd64_target_description (X86_XSTATE_SSE_MASK, true));
 
   tdep->sigtramp_p = amd64fbsd_sigtramp_p;
   tdep->sigtramp_start = amd64fbsd_sigtramp_start_addr;

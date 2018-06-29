@@ -101,7 +101,7 @@ amd64_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sizeof_gregset = 28 * 8;
 
   amd64_init_abi (info, gdbarch,
-		  amd64_target_description (X86_XSTATE_SSE_MASK));
+		  amd64_target_description (X86_XSTATE_SSE_MASK, true));
 
   tdep->sigtramp_p = amd64_sol2_sigtramp_p;
   tdep->sigcontext_addr = amd64_sol2_mcontext_addr;

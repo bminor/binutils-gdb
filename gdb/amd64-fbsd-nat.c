@@ -188,13 +188,13 @@ amd64_fbsd_nat_target::read_description ()
   if (x86bsd_xsave_len != 0)
     {
       if (is64)
-	return amd64_target_description (xcr0);
+	return amd64_target_description (xcr0, true);
       else
 	return i386_target_description (xcr0);
     }
 #endif
   if (is64)
-    return amd64_target_description (X86_XSTATE_SSE_MASK);
+    return amd64_target_description (X86_XSTATE_SSE_MASK, true);
   else
     return i386_target_description (X86_XSTATE_SSE_MASK);
 }

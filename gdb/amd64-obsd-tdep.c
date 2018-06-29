@@ -421,7 +421,7 @@ amd64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   amd64_init_abi (info, gdbarch,
-		  amd64_target_description (X86_XSTATE_SSE_MASK));
+		  amd64_target_description (X86_XSTATE_SSE_MASK, true));
   obsd_init_abi (info, gdbarch);
 
   /* Initialize general-purpose register set details.  */
