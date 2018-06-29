@@ -1,3 +1,9 @@
+2018-06-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.opt/inline-break.c (func1): Add "break here" marker.
+	* gdb.opt/inline-break.exp: Test setting breakpoints by line
+	number and address and running to them.
+
 2018-06-29  Richard Bunt  <richard.bunt@arm.com>
 
 	* gdb.base/watchpoint-hw-attach.exp: Remove unstable output.

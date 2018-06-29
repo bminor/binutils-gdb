@@ -256,4 +256,46 @@ foreach_with_prefix func {
 	"breakpoint hit presents stop at breakpointed function"
 }
 
+# Test setting a breakpoint in an inline function by line number and
+# by address, and that GDB presents the stop there.
+
+set line [gdb_get_line_number "break here"]
+
+with_test_prefix "line number" {
+    clean_restart $binfile
+
+    if {![runto main]} {
+	untested "could not run to main"
+	continue
+    }
+
+    # Set the breakpoint by line number, and check that GDB reports
+    # the breakpoint location being the inline function.
+    gdb_test "break $srcfile:$line" ".*Breakpoint .* at .*: file .*$srcfile, line $line."
+    gdb_test "continue" "Breakpoint .*, func1 \\(x=1\\) at .*$srcfile:$line.*break here.*" \
+	"breakpoint hit presents stop at inlined function"
+
+    # Save the PC for the following by-address test.
+    set address [get_hexadecimal_valueof "\$pc" "0"]
+}
+
+# Test setting a breakpoint in an inline function by address, and that
+# GDB presents the stop there.
+
+with_test_prefix "address" {
+
+    clean_restart $binfile
+
+    if {![runto main]} {
+	untested "could not run to main"
+	continue
+    }
+
+    # Set the breakpoint by address, and check that GDB reports the
+    # breakpoint location being the inline function.
+    gdb_test "break *$address" ".*Breakpoint .* at $address: file .*$srcfile, line $line."
+    gdb_test "continue" "Breakpoint .*, func1 \\(x=1\\) at .*$srcfile:$line.*break here.*" \
+	"breakpoint hit presents stop at inlined function"
+}
+
 unset -nocomplain results

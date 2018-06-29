@@ -300,10 +300,18 @@ stopped_by_user_bp_inline_frame (const block *frame_block, bpstat stop_chain)
 	  bp_location *loc = s->bp_location_at;
 	  enum bp_loc_type t = loc->loc_type;
 
-	  if ((t == bp_loc_software_breakpoint
-	       || t == bp_loc_hardware_breakpoint)
-	      && frame_block == SYMBOL_BLOCK_VALUE (loc->symbol))
-	    return true;
+	  if (t == bp_loc_software_breakpoint
+	      || t == bp_loc_hardware_breakpoint)
+	    {
+	      /* If the location has a function symbol, check whether
+		 the frame was for that inlined function.  If it has
+		 no function symbol, then assume it is.  I.e., default
+		 to presenting the stop at the innermost inline
+		 function.  */
+	      if (loc->symbol == nullptr
+		  || frame_block == SYMBOL_BLOCK_VALUE (loc->symbol))
+		return true;
+	    }
 	}
     }
 

@@ -29,7 +29,7 @@
 static inline ATTR int
 func1 (int x)
 {
-  return x * 23;
+  return x * 23; /* break here */
 }
 
 /* A non-static inlined function that is called once.  */

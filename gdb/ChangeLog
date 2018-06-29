@@ -1,3 +1,8 @@
+2018-06-29  Pedro Alves  <palves@redhat.com>
+
+	* inline-frame.c (stopped_by_user_bp_inline_frame): Return
+	true if the the location has no symbol.
+
 2018-06-28  Tom Tromey  <tom@tromey.com>
 
 	* NEWS: Mention --enable-codesign.
