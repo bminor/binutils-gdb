@@ -1119,6 +1119,26 @@ should_print_thread (const char *requested_threads, int default_inf_num,
   return 1;
 }
 
+/* Return the string to display in "info threads"'s "Target Id"
+   column, for TP.  */
+
+static std::string
+thread_target_id_str (thread_info *tp)
+{
+  const char *target_id = target_pid_to_str (tp->ptid);
+  const char *extra_info = target_extra_thread_info (tp);
+  const char *name = tp->name != nullptr ? tp->name : target_thread_name (tp);
+
+  if (extra_info != nullptr && name != nullptr)
+    return string_printf ("%s \"%s\" (%s)", target_id, name, extra_info);
+  else if (extra_info != nullptr)
+    return string_printf ("%s (%s)", target_id, extra_info);
+  else if (name != nullptr)
+    return string_printf ("%s \"%s\"", target_id, name);
+  else
+    return target_id;
+}
+
 /* Like print_thread_info, but in addition, GLOBAL_IDS indicates
    whether REQUESTED_THREADS is a list of global or per-inferior
    thread ids.  */
@@ -1129,7 +1149,6 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 		     int show_global_ids)
 {
   struct thread_info *tp;
-  const char *extra_info, *name, *target_id;
   struct inferior *inf;
   int default_inf_num = current_inferior ()->num;
 
@@ -1155,12 +1174,22 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
     else
       {
 	int n_threads = 0;
+	/* The width of the "Target Id" column.  Grown below to
+	   accommodate the largest entry.  */
+	size_t target_id_col_width = 17;
 
 	ALL_THREADS (tp)
 	  {
 	    if (!should_print_thread (requested_threads, default_inf_num,
 				      global_ids, pid, tp))
 	      continue;
+
+	    if (!uiout->is_mi_like_p ())
+	      {
+		target_id_col_width
+		  = std::max (target_id_col_width,
+			      thread_target_id_str (tp).size ());
+	      }
 
 	    ++n_threads;
 	  }
@@ -1182,7 +1211,8 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 	uiout->table_header (4, ui_left, "id-in-tg", "Id");
 	if (show_global_ids)
 	  uiout->table_header (4, ui_left, "id", "GId");
-	uiout->table_header (17, ui_left, "target-id", "Target Id");
+	uiout->table_header (target_id_col_width, ui_left,
+			     "target-id", "Target Id");
 	uiout->table_header (1, ui_left, "frame", "Frame");
 	uiout->table_body ();
       }
@@ -1224,33 +1254,24 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 	   shared by several fields.  For MI, we do the right thing
 	   instead.  */
 
-	target_id = target_pid_to_str (tp->ptid);
-	extra_info = target_extra_thread_info (tp);
-	name = tp->name ? tp->name : target_thread_name (tp);
-
 	if (uiout->is_mi_like_p ())
 	  {
-	    uiout->field_string ("target-id", target_id);
-	    if (extra_info)
+	    uiout->field_string ("target-id", target_pid_to_str (tp->ptid));
+
+	    const char *extra_info = target_extra_thread_info (tp);
+	    if (extra_info != nullptr)
 	      uiout->field_string ("details", extra_info);
-	    if (name)
+
+	    const char *name = (tp->name != nullptr
+				? tp->name
+				: target_thread_name (tp));
+	    if (name != NULL)
 	      uiout->field_string ("name", name);
 	  }
 	else
 	  {
-	    std::string contents;
-
-	    if (extra_info && name)
-	      contents = string_printf ("%s \"%s\" (%s)", target_id,
-					name, extra_info);
-	    else if (extra_info)
-	      contents = string_printf ("%s (%s)", target_id, extra_info);
-	    else if (name)
-	      contents = string_printf ("%s \"%s\"", target_id, name);
-	    else
-	      contents = target_id;
-
-	    uiout->field_string ("target-id", contents.c_str ());
+	    uiout->field_string ("target-id",
+				 thread_target_id_str (tp).c_str ());
 	  }
 
 	if (tp->state == THREAD_RUNNING)

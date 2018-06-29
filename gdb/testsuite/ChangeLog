@@ -1,5 +1,9 @@
 2018-06-29  Pedro Alves  <palves@redhat.com>
 
+	* gdb.threads/names.exp: Adjust expected "info threads" output.
+
+2018-06-29  Pedro Alves  <palves@redhat.com>
+
 	* gdb.opt/inline-break.exp (line number, address): Add "info
 	break" tests.
 

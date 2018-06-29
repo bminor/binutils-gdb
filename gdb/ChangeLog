@@ -1,5 +1,11 @@
 2018-06-29  Pedro Alves  <palves@redhat.com>
 
+	* thread.c (thread_target_id_str): New, factored out from ...
+	(print_thread_info_1): ... here.  Use it to compute the max
+	"Target Id" column width.
+
+2018-06-29  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (remote_target::extra_thread_info): Delete
 	'display_buf' and 'n' locals.  from the cache, regardless of
 	packet mechanims is in use.  Use cache for qThreadExtra and qP

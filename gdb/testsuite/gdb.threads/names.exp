@@ -31,7 +31,7 @@ if ![runto "all_threads_ready"] {
 }
 
 gdb_test "info threads" \
-    [multi_line "\\* 1   .*\"main\" all_threads_ready.*" \
+    [multi_line "\\* 1   .*\"main\"\[ \]\+all_threads_ready.*" \
 		"  2   .*\"carrot\".*"  \
 		"  3   .*\"potato\".*"  \
 		"  4   .*\"celery\".*" ] \
