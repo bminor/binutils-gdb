@@ -1,3 +1,8 @@
+2018-06-29  Maciej W. Rozycki  <macro@mips.com>
+
+	* elfxx-mips.c (allocate_dynrelocs): Remove extraneous symbol
+	visibility check made for undefined weak symbols.
+
 2018-06-26  Nick Clifton  <nickc@redhat.com>
 
 	* po/uk.po: Updated Ukranian translation.

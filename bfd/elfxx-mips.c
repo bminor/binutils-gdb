@@ -8951,10 +8951,9 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
       if (h->root.type == bfd_link_hash_undefweak)
 	{
-	  /* Do not copy relocations for undefined weak symbols with
-	     non-default visibility.  */
-	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-	      || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
+	  /* Do not copy relocations for undefined weak symbols that
+	     we are not going to export.  */
+	  if (UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	    do_copy = FALSE;
 
 	  /* Make sure undefined weak symbols are output as a dynamic
