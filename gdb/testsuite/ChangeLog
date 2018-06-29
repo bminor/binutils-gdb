@@ -1,4 +1,4 @@
-2018-06-29  Richard Bunt  richard.bunt@arm.com
+2018-06-29  Richard Bunt  <richard.bunt@arm.com>
 
 	* gdb.base/watchpoint-hw-attach.exp: Remove unstable output.
 
