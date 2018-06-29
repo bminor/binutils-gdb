@@ -1,3 +1,8 @@
+2018-07-17  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/18624:
+	* coffread.c (coff_symtab_read): Use scoped_free_pendings.
+
 2018-07-16  Jim Wilson  <jimw@sifive.com>
 
 	* riscv-tdep.c (riscv_gdbarch_init): Call gdbarch_init_osabi.
