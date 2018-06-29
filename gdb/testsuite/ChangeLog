@@ -1,3 +1,7 @@
+2018-06-29  Richard Bunt  richard.bunt@arm.com
+
+	* gdb.base/watchpoint-hw-attach.exp: Remove unstable output.
+
 2018-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* lib/compiler.c: Remove executable permission flag.

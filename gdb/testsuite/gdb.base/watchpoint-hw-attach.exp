@@ -55,7 +55,7 @@ if {$testpid == ""} {
 # logic to run post attach rather than post inferior launch.
 clean_restart $binfile
 
-gdb_test "attach $testpid" "Attaching to program: .*, process $testpid.*"
+gdb_test "attach $testpid" "Attaching to program: .*, process $testpid.*" "attach"
 
 # Ensure the test program is in the top frame so the required
 # variables are in scope.
