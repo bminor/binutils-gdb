@@ -300,3 +300,14 @@
 	ip1	.req 	x1
 	lr	.req 	x2
 	fp	.req 	x3
+
+	stlxrb 	w26, w26, [x0]
+	stlxrh	w26, w26, [x1]
+	stlxr 	w26, w26, [x2]
+	stlxrb 	w26, w27, [x26]
+	stlxrh	w26, w27, [x26]
+	stlxr 	w26, w27, [x26]
+	stlxr 	w26, x27, [x26]
+	stlxr	w26, x26, [x3]
+	ldxp	x26, x26, [x5]
+	ldxp	x26, x1, [x26]
