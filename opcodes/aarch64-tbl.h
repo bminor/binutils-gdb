@@ -2340,8 +2340,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
   SIMD_INSN ("umull",   0x2e20c000, 0xff20fc00, asimddiff, 0, OP3 (Vd, Vn, Vm), QL_V3LONGBHS,  F_SIZEQ),
   SIMD_INSN ("umull2",  0x6e20c000, 0xff20fc00, asimddiff, 0, OP3 (Vd, Vn, Vm), QL_V3LONGBHS2, F_SIZEQ),
   /* AdvSIMD vector x indexed element.  */
-  SIMD_INSN ("smlal",   0x0f002000, 0xff00f400, asimdelem, 0, OP3 (Vd, Vn, Em), QL_ELEMENT_L,    F_SIZEQ),
-  SIMD_INSN ("smlal2",  0x4f002000, 0xff00f400, asimdelem, 0, OP3 (Vd, Vn, Em), QL_ELEMENT_L2,   F_SIZEQ),
+  SIMD_INSN ("smlal",   0x0f002000, 0xff00f400, asimdelem, 0, OP3 (Vd, Vn, Em16), QL_ELEMENT_L,    F_SIZEQ),
+  SIMD_INSN ("smlal2",  0x4f002000, 0xff00f400, asimdelem, 0, OP3 (Vd, Vn, Em16), QL_ELEMENT_L2,   F_SIZEQ),
   SIMD_INSN ("sqdmlal", 0x0f003000, 0xff00f400, asimdelem, 0, OP3 (Vd, Vn, Em), QL_ELEMENT_L,    F_SIZEQ),
   SIMD_INSN ("sqdmlal2",0x4f003000, 0xff00f400, asimdelem, 0, OP3 (Vd, Vn, Em), QL_ELEMENT_L2,   F_SIZEQ),
   SIMD_INSN ("smlsl",   0x0f006000, 0xff00f400, asimdelem, 0, OP3 (Vd, Vn, Em), QL_ELEMENT_L,    F_SIZEQ),
@@ -2356,11 +2356,11 @@ struct aarch64_opcode aarch64_opcode_table[] =
   SIMD_INSN ("sqdmulh", 0x0f00c000, 0xbf00f400, asimdelem, 0, OP3 (Vd, Vn, Em), QL_ELEMENT,      F_SIZEQ),
   SIMD_INSN ("sqrdmulh",0x0f00d000, 0xbf00f400, asimdelem, 0, OP3 (Vd, Vn, Em), QL_ELEMENT,      F_SIZEQ),
   SIMD_INSN ("fmla",    0x0f801000, 0xbf80f400, asimdelem, 0, OP3 (Vd, Vn, Em), QL_ELEMENT_FP,   F_SIZEQ),
-  SF16_INSN ("fmla",    0x0f001000, 0xbfc0f400, asimdelem, OP3 (Vd, Vn, Em), QL_ELEMENT_FP_H, F_SIZEQ),
+  SF16_INSN ("fmla",    0x0f001000, 0xbfc0f400, asimdelem, OP3 (Vd, Vn, Em16), QL_ELEMENT_FP_H, F_SIZEQ),
   SIMD_INSN ("fmls",    0x0f805000, 0xbf80f400, asimdelem, 0, OP3 (Vd, Vn, Em), QL_ELEMENT_FP,   F_SIZEQ),
-  SF16_INSN ("fmls",    0x0f005000, 0xbfc0f400, asimdelem, OP3 (Vd, Vn, Em), QL_ELEMENT_FP_H, F_SIZEQ),
+  SF16_INSN ("fmls",    0x0f005000, 0xbfc0f400, asimdelem, OP3 (Vd, Vn, Em16), QL_ELEMENT_FP_H, F_SIZEQ),
   SIMD_INSN ("fmul",    0x0f809000, 0xbf80f400, asimdelem, 0, OP3 (Vd, Vn, Em), QL_ELEMENT_FP,   F_SIZEQ),
-  SF16_INSN ("fmul",    0x0f009000, 0xbfc0f400, asimdelem, OP3 (Vd, Vn, Em), QL_ELEMENT_FP_H, F_SIZEQ),
+  SF16_INSN ("fmul",    0x0f009000, 0xbfc0f400, asimdelem, OP3 (Vd, Vn, Em16), QL_ELEMENT_FP_H, F_SIZEQ),
   SIMD_INSN ("mla",     0x2f000000, 0xbf00f400, asimdelem, 0, OP3 (Vd, Vn, Em), QL_ELEMENT,      F_SIZEQ),
   SIMD_INSN ("umlal",   0x2f002000, 0xff00f400, asimdelem, 0, OP3 (Vd, Vn, Em), QL_ELEMENT_L,    F_SIZEQ),
   SIMD_INSN ("umlal2",  0x6f002000, 0xff00f400, asimdelem, 0, OP3 (Vd, Vn, Em), QL_ELEMENT_L2,   F_SIZEQ),
@@ -2370,9 +2370,9 @@ struct aarch64_opcode aarch64_opcode_table[] =
   SIMD_INSN ("umull",   0x2f00a000, 0xff00f400, asimdelem, 0, OP3 (Vd, Vn, Em), QL_ELEMENT_L,    F_SIZEQ),
   SIMD_INSN ("umull2",  0x6f00a000, 0xff00f400, asimdelem, 0, OP3 (Vd, Vn, Em), QL_ELEMENT_L2,   F_SIZEQ),
   SIMD_INSN ("fmulx",   0x2f809000, 0xbf80f400, asimdelem, 0, OP3 (Vd, Vn, Em), QL_ELEMENT_FP,   F_SIZEQ),
-  SF16_INSN ("fmulx",   0x2f009000, 0xbfc0f400, asimdelem, OP3 (Vd, Vn, Em), QL_ELEMENT_FP_H, F_SIZEQ),
-  RDMA_INSN ("sqrdmlah",0x2f00d000, 0xbf00f400, asimdelem, OP3 (Vd, Vn, Em), QL_ELEMENT,      F_SIZEQ),
-  RDMA_INSN ("sqrdmlsh",0x2f00f000, 0xbf00f400, asimdelem, OP3 (Vd, Vn, Em), QL_ELEMENT,      F_SIZEQ),
+  SF16_INSN ("fmulx",   0x2f009000, 0xbfc0f400, asimdelem, OP3 (Vd, Vn, Em16), QL_ELEMENT_FP_H, F_SIZEQ),
+  RDMA_INSN ("sqrdmlah",0x2f00d000, 0xbf00f400, asimdelem, OP3 (Vd, Vn, Em16), QL_ELEMENT,      F_SIZEQ),
+  RDMA_INSN ("sqrdmlsh",0x2f00f000, 0xbf00f400, asimdelem, OP3 (Vd, Vn, Em16), QL_ELEMENT,      F_SIZEQ),
   CNUM_INSN ("fcmla", 0x2f001000, 0xbf009400, asimdelem, OP_FCMLA_ELEM, OP4 (Vd, Vn, Em, IMM_ROT2), QL_ELEMENT_ROT, F_SIZEQ),
   /* AdvSIMD EXT.  */
   SIMD_INSN ("ext",  0x2e000000, 0xbfe08400, asimdext, 0, OP4 (Vd, Vn, Vm, IDX), QL_VEXT, F_SIZEQ),
@@ -2680,15 +2680,15 @@ struct aarch64_opcode aarch64_opcode_table[] =
   SIMD_INSN ("sqdmulh", 0x5f00c000, 0xff00f400, asisdelem, 0, OP3 (Sd, Sn, Em), QL_SISD_HS, F_SSIZE),
   SIMD_INSN ("sqrdmulh", 0x5f00d000, 0xff00f400, asisdelem, 0, OP3 (Sd, Sn, Em), QL_SISD_HS, F_SSIZE),
   SIMD_INSN ("fmla", 0x5f801000, 0xff80f400, asisdelem, 0, OP3 (Sd, Sn, Em), QL_FP3, F_SSIZE),
-  SF16_INSN ("fmla", 0x5f001000, 0xffc0f400, asisdelem, OP3 (Sd, Sn, Em), QL_FP3_H, F_SSIZE),
+  SF16_INSN ("fmla", 0x5f001000, 0xffc0f400, asisdelem, OP3 (Sd, Sn, Em16), QL_FP3_H, F_SSIZE),
   SIMD_INSN ("fmls", 0x5f805000, 0xff80f400, asisdelem, 0, OP3 (Sd, Sn, Em), QL_FP3, F_SSIZE),
-  SF16_INSN ("fmls", 0x5f005000, 0xffc0f400, asisdelem, OP3 (Sd, Sn, Em), QL_FP3_H, F_SSIZE),
+  SF16_INSN ("fmls", 0x5f005000, 0xffc0f400, asisdelem, OP3 (Sd, Sn, Em16), QL_FP3_H, F_SSIZE),
   SIMD_INSN ("fmul", 0x5f809000, 0xff80f400, asisdelem, 0, OP3 (Sd, Sn, Em), QL_FP3, F_SSIZE),
-  SF16_INSN ("fmul", 0x5f009000, 0xffc0f400, asisdelem, OP3 (Sd, Sn, Em), QL_FP3_H, F_SSIZE),
+  SF16_INSN ("fmul", 0x5f009000, 0xffc0f400, asisdelem, OP3 (Sd, Sn, Em16), QL_FP3_H, F_SSIZE),
   SIMD_INSN ("fmulx", 0x7f809000, 0xff80f400, asisdelem, 0, OP3 (Sd, Sn, Em), QL_FP3, F_SSIZE),
-  SF16_INSN ("fmulx", 0x7f009000, 0xffc0f400, asisdelem, OP3 (Sd, Sn, Em), QL_FP3_H, F_SSIZE),
-  RDMA_INSN ("sqrdmlah", 0x7f00d000, 0xff00f400, asisdelem, OP3 (Sd, Sn, Em), QL_SISD_HS, F_SSIZE),
-  RDMA_INSN ("sqrdmlsh", 0x7f00f000, 0xff00f400, asisdelem, OP3 (Sd, Sn, Em), QL_SISD_HS, F_SSIZE),
+  SF16_INSN ("fmulx", 0x7f009000, 0xffc0f400, asisdelem, OP3 (Sd, Sn, Em16), QL_FP3_H, F_SSIZE),
+  RDMA_INSN ("sqrdmlah", 0x7f00d000, 0xff00f400, asisdelem, OP3 (Sd, Sn, Em16), QL_SISD_HS, F_SSIZE),
+  RDMA_INSN ("sqrdmlsh", 0x7f00f000, 0xff00f400, asisdelem, OP3 (Sd, Sn, Em16), QL_SISD_HS, F_SSIZE),
   /* AdvSIMD load/store multiple structures.  */
   SIMD_INSN ("st4", 0xc000000, 0xbfff0000, asisdlse, 0, OP2 (LVt, SIMD_ADDR_SIMPLE), QL_SIMD_LDST, F_SIZEQ | F_OD(4)),
   SIMD_INSN ("st1", 0xc000000, 0xbfff0000, asisdlse, 0, OP2 (LVt, SIMD_ADDR_SIMPLE), QL_SIMD_LDST_ANY, F_SIZEQ | F_OD(1)),
@@ -4361,15 +4361,15 @@ struct aarch64_opcode aarch64_opcode_table[] =
   FP16_V8_2_INSN ("fmlal2", 0x6e20cc00, 0xffa0fc00, asimdsame, OP3 (Vd, Vn, Vm), QL_V3FML4S, 0),
   FP16_V8_2_INSN ("fmlsl2", 0x6ea0cc00, 0xffa0fc00, asimdsame, OP3 (Vd, Vn, Vm), QL_V3FML4S, 0),
 
-  FP16_V8_2_INSN ("fmlal",  0xf800000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em), QL_V2FML2S, 0),
-  FP16_V8_2_INSN ("fmlsl",  0xf804000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em), QL_V2FML2S, 0),
-  FP16_V8_2_INSN ("fmlal2", 0x2f808000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em), QL_V2FML2S, 0),
-  FP16_V8_2_INSN ("fmlsl2", 0x2f80c000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em), QL_V2FML2S, 0),
+  FP16_V8_2_INSN ("fmlal",  0xf800000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em16), QL_V2FML2S, 0),
+  FP16_V8_2_INSN ("fmlsl",  0xf804000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em16), QL_V2FML2S, 0),
+  FP16_V8_2_INSN ("fmlal2", 0x2f808000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em16), QL_V2FML2S, 0),
+  FP16_V8_2_INSN ("fmlsl2", 0x2f80c000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em16), QL_V2FML2S, 0),
 
-  FP16_V8_2_INSN ("fmlal",  0x4f800000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em), QL_V2FML4S, 0),
-  FP16_V8_2_INSN ("fmlsl",  0x4f804000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em), QL_V2FML4S, 0),
-  FP16_V8_2_INSN ("fmlal2", 0x6f808000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em), QL_V2FML4S, 0),
-  FP16_V8_2_INSN ("fmlsl2", 0x6f80c000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em), QL_V2FML4S, 0),
+  FP16_V8_2_INSN ("fmlal",  0x4f800000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em16), QL_V2FML4S, 0),
+  FP16_V8_2_INSN ("fmlsl",  0x4f804000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em16), QL_V2FML4S, 0),
+  FP16_V8_2_INSN ("fmlal2", 0x6f808000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em16), QL_V2FML4S, 0),
+  FP16_V8_2_INSN ("fmlsl2", 0x6f80c000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em16), QL_V2FML4S, 0),
   /* System extensions ARMv8.4-a.  */
   V8_4_INSN ("cfinv",  0xd500401f, 0xffffffff, ic_system, OP0 (), {}, 0),
   V8_4_INSN ("rmif",   0xba000400, 0xffe07c10, ic_system, OP3 (Rn, IMM_2, MASK), QL_RMIF, 0),
@@ -4454,6 +4454,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
       "a SIMD vector element")						\
     Y(SIMD_ELEMENT, reglane, "Em", 0, F(FLD_Rm),			\
       "a SIMD vector element")						\
+    Y(SIMD_ELEMENT, reglane, "Em16", 0, F(FLD_Rm),			\
+      "a SIMD vector element limited to V0-V15")			\
     Y(SIMD_REGLIST, reglist, "LVn", 0, F(FLD_Rn),			\
       "a SIMD vector register list")					\
     Y(SIMD_REGLIST, ldst_reglist, "LVt", 0, F(),			\

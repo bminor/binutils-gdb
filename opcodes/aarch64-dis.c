@@ -372,10 +372,18 @@ aarch64_ext_reglane (const aarch64_operand *self, aarch64_opnd_info *info,
       switch (info->qualifier)
 	{
 	case AARCH64_OPND_QLF_S_H:
-	  /* h:l:m */
-	  info->reglane.index = extract_fields (code, 0, 3, FLD_H, FLD_L,
-						FLD_M);
-	  info->reglane.regno &= 0xf;
+	  if (info->type == AARCH64_OPND_Em16)
+	    {
+	      /* h:l:m */
+	      info->reglane.index = extract_fields (code, 0, 3, FLD_H, FLD_L,
+						    FLD_M);
+	      info->reglane.regno &= 0xf;
+	    }
+	  else
+	    {
+	      /* h:l */
+	      info->reglane.index = extract_fields (code, 0, 2, FLD_H, FLD_L);
+	    }
 	  break;
 	case AARCH64_OPND_QLF_S_S:
 	  /* h:l */
@@ -389,7 +397,8 @@ aarch64_ext_reglane (const aarch64_operand *self, aarch64_opnd_info *info,
 	  return FALSE;
 	}
 
-      if (inst->opcode->op == OP_FCMLA_ELEM)
+      if (inst->opcode->op == OP_FCMLA_ELEM
+	  && info->qualifier != AARCH64_OPND_QLF_S_H)
 	{
 	  /* Complex operand takes two elements.  */
 	  if (info->reglane.index & 1)

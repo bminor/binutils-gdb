@@ -1,3 +1,17 @@
+2018-06-29  Tamar Christina  <tamar.christina@arm.com>
+
+	PR binutils/23192
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Likewise.
+	* aarch64-opc-2.c: Likewise.
+	* aarch64-dis.c (aarch64_ext_reglane): Add AARCH64_OPND_Em16 constraint.
+	* aarch64-opc.c (operand_general_constraint_met_p,
+	aarch64_print_operand): Likewise.
+	* aarch64-tbl.h (aarch64_opcode_table): Change Em to Em16 for smlal,
+	smlal2, fmla, fmls, fmul, fmulx, sqrdmlah, sqrdlsh, fmlal, fmlsl,
+	fmlal2, fmlsl2.
+	(AARCH64_OPERANDS): Add Em2.
+
 2018-06-26  Nick Clifton  <nickc@redhat.com>
 
 	* po/uk.po: Updated Ukranian translation.
