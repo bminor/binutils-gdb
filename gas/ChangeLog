@@ -1,3 +1,7 @@
+2018-06-29  Jim Wilson  <jimw@sifive.com>
+
+	* config/tc-riscv.c (md_begin): Call hash_reg_name for "fp".
+
 2018-06-29  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
 
 	* config/tc-aarch64.c (warn_unpredictable_ldst): Add unpredictable

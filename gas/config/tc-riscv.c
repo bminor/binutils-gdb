@@ -853,6 +853,9 @@ md_begin (void)
   hash_reg_names (RCLASS_FPR, riscv_fpr_names_numeric, NFPR);
   hash_reg_names (RCLASS_FPR, riscv_fpr_names_abi, NFPR);
 
+  /* Add "fp" as an alias for "s0".  */
+  hash_reg_name (RCLASS_GPR, "fp", 8);
+
   opcode_names_hash = hash_new ();
   init_opcode_names_hash ();
 
