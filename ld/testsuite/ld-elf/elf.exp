@@ -257,13 +257,6 @@ if { [istarget *-*-linux*]
     ]
 }
 
-# <http://www.gnu.org/software/hurd/open_issues/binutils.html#static>
-# Be cautious to not XFAIL for *-*-linux-gnu*, *-*-kfreebsd-gnu*, etc.
-switch -regexp $target_triplet {
-    ^\[^-\]*-\[^-\]*-gnu.*$ {
-	set xfails "*-*-*"
-    }
-}
 run_ld_link_exec_tests $array_tests_static $xfails
 
 catch "exec rm -f tmpdir/preinit tmpdir/init tmpdir/fini tmpdir/init-mixed" status
