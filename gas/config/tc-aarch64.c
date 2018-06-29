@@ -6705,6 +6705,22 @@ warn_unpredictable_ldst (aarch64_instruction *instr, char *str)
 	  && opnds[0].reg.regno == opnds[1].reg.regno)
 	    as_warn (_("unpredictable load of register pair -- `%s'"), str);
       break;
+
+    case ldstexcl:
+      /* It is unpredictable if the destination and status registers are the
+	 same.  */
+      if ((aarch64_get_operand_class (opnds[0].type)
+	   == AARCH64_OPND_CLASS_INT_REG)
+	  && (aarch64_get_operand_class (opnds[1].type)
+	      == AARCH64_OPND_CLASS_INT_REG)
+	  && (opnds[0].reg.regno == opnds[1].reg.regno
+	      || opnds[0].reg.regno == opnds[2].reg.regno))
+	as_warn (_("unpredictable: identical transfer and status registers"
+		   " --`%s'"),
+		 str);
+
+      break;
+
     default:
       break;
     }
