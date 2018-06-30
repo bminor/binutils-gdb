@@ -118,7 +118,7 @@ amd64_linux_read_description (uint64_t xcr0, bool is_x32)
 
   if (*tdesc == NULL)
     {
-      *tdesc = amd64_create_target_description (xcr0, is_x32, true);
+      *tdesc = amd64_create_target_description (xcr0, is_x32, true, true);
 
       init_target_desc (*tdesc, amd64_expedite_regs);
     }

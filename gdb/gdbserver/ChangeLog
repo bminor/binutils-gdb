@@ -1,3 +1,8 @@
+2018-06-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* linux-x86-tdesc.c (amd64_linux_read_description): Add missing
+	parameter in call to 'amd64_create_target_description'.
+
 2018-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* x86-tdesc.h: Remove executable permission flag.
