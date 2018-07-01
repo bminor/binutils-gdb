@@ -1,3 +1,14 @@
+2018-10-27  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* cli-utils.c (extract_arg_maybe_quoted): New function.
+	(extract_info_print_args): New function.
+	(info_print_args_help): New function.
+	(report_unrecognized_option_error): New function.
+	* cli-utils.h (extract_arg_maybe_quoted): New function.
+	(extract_info_print_args): New function.
+	(info_print_args_help): New function.
+	(report_unrecognized_option_error): New function.
+
 2018-10-26  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2read.c (recursively_compute_inclusions): Use std::vector.

@@ -39,6 +39,36 @@ extern int get_number (const char **);
 
 extern int get_number (char **);
 
+/* Extract from ARGS the arguments [-q] [-t TYPEREGEXP] [--] NAMEREGEXP.
+
+   The caller is responsible to initialize *QUIET to false, *REGEXP
+   and *T_REGEXP to "".
+   extract_info_print_args can then be called iteratively to search
+   for valid arguments, as part of a 'main parsing loop' searching for
+   -q/-t/-- arguments together with other flags and options.
+
+   Returns true and updates *ARGS + one of *QUIET, *REGEXP, *T_REGEXP if
+   it finds a valid argument.
+   Returns false if no valid argument is found at the beginning of ARGS.  */
+
+extern bool extract_info_print_args (const char **args,
+				     bool *quiet,
+				     std::string *regexp,
+				     std::string *t_regexp);
+
+/* Throws an error telling the user that ARGS starts with an option
+   unrecognized by COMMAND.  */
+
+extern void report_unrecognized_option_error (const char *command,
+					      const char *args);
+
+
+/* Builds the help string for a command documented by PREFIX,
+   followed by the extract_info_print_args help for ENTITY_KIND.  */
+
+const char *info_print_args_help (const char *prefix,
+				  const char *entity_kind);
+
 /* Parse a number or a range.
    A number will be of the form handled by get_number.
    A range will be of the form <number1> - <number2>, and
