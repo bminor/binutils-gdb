@@ -1,3 +1,11 @@
+2018-07-09  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (TSOBS): Remove.
+	(INIT_FILES): Update.
+	(LIBGDB_OBS): Update.
+	(COMMON_SFILES): Add inflow.c.
+	(SFILES): Remove inflow.c.
+
 2018-07-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* contrib/gdb-add-index.sh ($dwarf5): New, use it.

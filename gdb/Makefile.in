@@ -1042,6 +1042,7 @@ COMMON_SFILES = \
 	infcall.c \
 	infcmd.c \
 	inferior.c \
+	inflow.c \
 	infrun.c \
 	inline-frame.c \
 	interps.c \
@@ -1151,7 +1152,6 @@ SFILES = \
 	f-exp.y \
 	gdb.c \
 	go-exp.y \
-	inflow.c \
 	m2-exp.y \
 	p-exp.y \
 	proc-service.list \
@@ -1566,8 +1566,6 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	$(SUBDIR_TARGET_OBS) \
 	$(SUBDIR_GCC_COMPILE_OBS)
 
-TSOBS = inflow.o
-
 SUBDIRS = doc @subdirs@ data-directory $(GNULIB_BUILDDIR)
 CLEANDIRS = $(SUBDIRS)
 
@@ -1854,7 +1852,7 @@ test-cp-name-parser$(EXEEXT): test-cp-name-parser.o $(LIBIBERTY)
 # duplicates.  Files in the gdb/ directory can end up appearing in
 # COMMON_OBS (as a .o file) and CONFIG_SRCS (as a .c file).
 
-INIT_FILES = $(COMMON_OBS) $(TSOBS) $(CONFIG_SRCS) $(SUBDIR_GCC_COMPILE_SRCS)
+INIT_FILES = $(COMMON_OBS) $(CONFIG_SRCS) $(SUBDIR_GCC_COMPILE_SRCS)
 init.c: $(INIT_FILES)
 	@$(ECHO_INIT_C) echo "Making init.c"
 	@rm -f init.c-tmp init.l-tmp
@@ -1908,7 +1906,7 @@ init.c: $(INIT_FILES)
 # against that.
 #
 # init.o is very important.  It pulls in the rest of GDB.
-LIBGDB_OBS = $(COMMON_OBS) $(TSOBS) $(ADD_FILES) init.o
+LIBGDB_OBS = $(COMMON_OBS) $(ADD_FILES) init.o
 libgdb.a: $(LIBGDB_OBS)
 	-rm -f libgdb.a
 	$(AR) q libgdb.a $(LIBGDB_OBS)
