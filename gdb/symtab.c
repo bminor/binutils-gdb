@@ -43,6 +43,7 @@
 #include "cli/cli-utils.h"
 #include "fnmatch.h"
 #include "hashtab.h"
+#include "typeprint.h"
 
 #include "gdb_obstack.h"
 #include "block.h"
@@ -4266,6 +4267,52 @@ symbol_search::compare_search_syms (const symbol_search &sym_a,
 		 SYMBOL_PRINT_NAME (sym_b.symbol));
 }
 
+/* Returns true if the type_name of symbol_type of SYM matches TREG.
+   If SYM has no symbol_type or symbol_name, returns false.  */
+
+bool
+treg_matches_sym_type_name (const compiled_regex &treg,
+			    const struct symbol *sym)
+{
+  struct type *sym_type;
+  std::string printed_sym_type_name;
+
+  if (symbol_lookup_debug > 1)
+    {
+      fprintf_unfiltered (gdb_stdlog,
+			  "treg_matches_sym_type_name\n     sym %s\n",
+			  SYMBOL_NATURAL_NAME (sym));
+    }
+
+  sym_type = SYMBOL_TYPE (sym);
+  if (sym_type == NULL)
+    return false;
+
+  if (language_mode == language_mode_auto)
+    {
+      scoped_restore_current_language l;
+
+      set_language (SYMBOL_LANGUAGE (sym));
+      printed_sym_type_name = type_to_string (sym_type);
+    }
+  else
+    printed_sym_type_name = type_to_string (sym_type);
+
+  if (symbol_lookup_debug > 1)
+    {
+      fprintf_unfiltered (gdb_stdlog,
+			  "     sym_type_name %s\n",
+			  printed_sym_type_name.c_str ());
+    }
+
+
+  if (printed_sym_type_name.empty ())
+    return false;
+
+  return treg.exec (printed_sym_type_name.c_str (), 0, NULL, 0) == 0;
+}
+
+
 /* Sort the symbols in RESULT and remove duplicates.  */
 
 static void
@@ -4281,7 +4328,9 @@ sort_search_symbols_remove_dups (std::vector<symbol_search> *result)
 
    Only symbols of KIND are searched:
    VARIABLES_DOMAIN - search all symbols, excluding functions, type names,
-                      and constants (enums)
+                      and constants (enums).
+		      if T_REGEXP is not NULL, only returns var that have
+		      a type matching regular expression T_REGEXP.
    FUNCTIONS_DOMAIN - search all functions
    TYPES_DOMAIN     - search all type names
    ALL_DOMAIN       - an internal error for this function
@@ -4292,6 +4341,7 @@ sort_search_symbols_remove_dups (std::vector<symbol_search> *result)
 
 std::vector<symbol_search>
 search_symbols (const char *regexp, enum search_domain kind,
+		const char *t_regexp,
 		int nfiles, const char *files[])
 {
   struct compunit_symtab *cust;
@@ -4317,6 +4367,7 @@ search_symbols (const char *regexp, enum search_domain kind,
   enum minimal_symbol_type ourtype4;
   std::vector<symbol_search> result;
   gdb::optional<compiled_regex> preg;
+  gdb::optional<compiled_regex> treg;
 
   gdb_assert (kind <= TYPES_DOMAIN);
 
@@ -4366,6 +4417,13 @@ search_symbols (const char *regexp, enum search_domain kind,
       preg.emplace (regexp, cflags, _("Invalid regexp"));
     }
 
+  if (t_regexp != NULL)
+    {
+      int cflags = REG_NOSUB | (case_sensitivity == case_sensitive_off
+				? REG_ICASE : 0);
+      treg.emplace (t_regexp, cflags, _("Invalid regexp"));
+    }
+
   /* Search through the partial symtabs *first* for all symbols
      matching the regexp.  That way we don't have to reproduce all of
      the machinery below.  */
@@ -4377,8 +4435,9 @@ search_symbols (const char *regexp, enum search_domain kind,
 			   lookup_name_info::match_any (),
 			   [&] (const char *symname)
 			   {
-			     return (!preg || preg->exec (symname,
-							  0, NULL, 0) == 0);
+			     return (!preg.has_value ()
+				     || preg->exec (symname,
+						    0, NULL, 0) == 0);
 			   },
 			   NULL,
 			   kind);
@@ -4413,7 +4472,7 @@ search_symbols (const char *regexp, enum search_domain kind,
 	    || MSYMBOL_TYPE (msymbol) == ourtype3
 	    || MSYMBOL_TYPE (msymbol) == ourtype4)
 	  {
-	    if (!preg
+	    if (!preg.has_value ()
 		|| preg->exec (MSYMBOL_NATURAL_NAME (msymbol), 0,
 			       NULL, 0) == 0)
 	      {
@@ -4452,7 +4511,7 @@ search_symbols (const char *regexp, enum search_domain kind,
 				       files, nfiles, 1))
 		     && file_matches (symtab_to_fullname (real_symtab),
 				      files, nfiles, 0)))
-		&& ((!preg
+		&& ((!preg.has_value ()
 		     || preg->exec (SYMBOL_NATURAL_NAME (sym), 0,
 				    NULL, 0) == 0)
 		    && ((kind == VARIABLES_DOMAIN
@@ -4464,9 +4523,13 @@ search_symbols (const char *regexp, enum search_domain kind,
 			    We only want to skip enums here.  */
 			 && !(SYMBOL_CLASS (sym) == LOC_CONST
 			      && (TYPE_CODE (SYMBOL_TYPE (sym))
-				  == TYPE_CODE_ENUM)))
-			|| (kind == FUNCTIONS_DOMAIN 
-			    && SYMBOL_CLASS (sym) == LOC_BLOCK)
+				  == TYPE_CODE_ENUM))
+			 && (!treg.has_value ()
+			     || treg_matches_sym_type_name (*treg, sym)))
+			|| (kind == FUNCTIONS_DOMAIN
+			    && SYMBOL_CLASS (sym) == LOC_BLOCK
+			    && (!treg.has_value ()
+				|| treg_matches_sym_type_name (*treg, sym)))
 			|| (kind == TYPES_DOMAIN
 			    && SYMBOL_CLASS (sym) == LOC_TYPEDEF))))
 	      {
@@ -4497,8 +4560,13 @@ search_symbols (const char *regexp, enum search_domain kind,
 	    || MSYMBOL_TYPE (msymbol) == ourtype3
 	    || MSYMBOL_TYPE (msymbol) == ourtype4)
 	  {
-	    if (!preg || preg->exec (MSYMBOL_NATURAL_NAME (msymbol), 0,
-				     NULL, 0) == 0)
+	    /* If the user wants to see var matching a type regexp,
+	       then never give a minimal symbol.  */
+	    if (kind != VARIABLES_DOMAIN
+		&& !treg.has_value () /* minimal symbol has never a type ???? */
+		&& (!preg.has_value ()
+		    || preg->exec (MSYMBOL_NATURAL_NAME (msymbol), 0,
+				   NULL, 0) == 0))
 	      {
 		/* For functions we can do a quick check of whether the
 		   symbol might be found via find_pc_symtab.  */
@@ -4599,7 +4667,9 @@ print_msymbol_info (struct bound_minimal_symbol msymbol)
    matches.  */
 
 static void
-symtab_symbol_info (const char *regexp, enum search_domain kind, int from_tty)
+symtab_symbol_info (bool quiet,
+		    const char *regexp, enum search_domain kind,
+		    const char *t_regexp, int from_tty)
 {
   static const char * const classnames[] =
     {"variable", "function", "type"};
@@ -4609,13 +4679,33 @@ symtab_symbol_info (const char *regexp, enum search_domain kind, int from_tty)
   gdb_assert (kind <= TYPES_DOMAIN);
 
   /* Must make sure that if we're interrupted, symbols gets freed.  */
-  std::vector<symbol_search> symbols = search_symbols (regexp, kind, 0, NULL);
+  std::vector<symbol_search> symbols = search_symbols (regexp, kind,
+						       t_regexp, 0, NULL);
 
-  if (regexp != NULL)
-    printf_filtered (_("All %ss matching regular expression \"%s\":\n"),
-		     classnames[kind], regexp);
-  else
-    printf_filtered (_("All defined %ss:\n"), classnames[kind]);
+  if (!quiet)
+    {
+      if (regexp != NULL)
+	{
+	  if (t_regexp != NULL)
+	    printf_filtered
+	      (_("All %ss matching regular expression \"%s\""
+		 " with type matching regulation expression \"%s\":\n"),
+	       classnames[kind], regexp, t_regexp);
+	  else
+	    printf_filtered (_("All %ss matching regular expression \"%s\":\n"),
+			     classnames[kind], regexp);
+	}
+      else
+	{
+	  if (t_regexp != NULL)
+	    printf_filtered
+	      (_("All defined %ss"
+		 " with type matching regulation expression \"%s\" :\n"),
+	       classnames[kind], t_regexp);
+	  else
+	    printf_filtered (_("All defined %ss:\n"), classnames[kind]);
+	}
+    }
 
   for (const symbol_search &p : symbols)
     {
@@ -4625,7 +4715,8 @@ symtab_symbol_info (const char *regexp, enum search_domain kind, int from_tty)
 	{
 	  if (first)
 	    {
-	      printf_filtered (_("\nNon-debugging symbols:\n"));
+	      if (!quiet)
+		printf_filtered (_("\nNon-debugging symbols:\n"));
 	      first = 0;
 	    }
 	  print_msymbol_info (p.msymbol);
@@ -4643,22 +4734,53 @@ symtab_symbol_info (const char *regexp, enum search_domain kind, int from_tty)
 }
 
 static void
-info_variables_command (const char *regexp, int from_tty)
+info_variables_command (const char *args, int from_tty)
 {
-  symtab_symbol_info (regexp, VARIABLES_DOMAIN, from_tty);
+  std::string regexp;
+  std::string t_regexp;
+  bool quiet = false;
+
+  while (args != NULL
+	 && extract_info_print_args (&args, &quiet, &regexp, &t_regexp))
+    ;
+
+  if (args != NULL)
+    report_unrecognized_option_error ("info variables", args);
+
+  symtab_symbol_info (quiet,
+		      regexp.empty () ? NULL : regexp.c_str (),
+		      VARIABLES_DOMAIN,
+		      t_regexp.empty () ? NULL : t_regexp.c_str (),
+		      from_tty);
 }
 
+
 static void
-info_functions_command (const char *regexp, int from_tty)
+info_functions_command (const char *args, int from_tty)
 {
-  symtab_symbol_info (regexp, FUNCTIONS_DOMAIN, from_tty);
+  std::string regexp;
+  std::string t_regexp;
+  bool quiet;
+
+  while (args != NULL
+	 && extract_info_print_args (&args, &quiet, &regexp, &t_regexp))
+    ;
+
+  if (args != NULL)
+    report_unrecognized_option_error ("info functions", args);
+
+  symtab_symbol_info (quiet,
+		      regexp.empty () ? NULL : regexp.c_str (),
+		      FUNCTIONS_DOMAIN,
+		      t_regexp.empty () ? NULL : t_regexp.c_str (),
+		      from_tty);
 }
 
 
 static void
 info_types_command (const char *regexp, int from_tty)
 {
-  symtab_symbol_info (regexp, TYPES_DOMAIN, from_tty);
+  symtab_symbol_info (false, regexp, TYPES_DOMAIN, NULL, from_tty);
 }
 
 /* Breakpoint all functions matching regular expression.  */
@@ -4701,6 +4823,7 @@ rbreak_command (const char *regexp, int from_tty)
 
   std::vector<symbol_search> symbols = search_symbols (regexp,
 						       FUNCTIONS_DOMAIN,
+						       NULL,
 						       nfiles, files);
 
   scoped_rbreak_breakpoints finalize;
@@ -5902,14 +6025,26 @@ _initialize_symtab (void)
   symbol_cache_key
     = register_program_space_data_with_cleanup (NULL, symbol_cache_cleanup);
 
-  add_info ("variables", info_variables_command, _("\
-All global and static variable names, or those matching REGEXP."));
+  add_info ("variables", info_variables_command,
+	    info_print_args_help (_("\
+All global and static variable names or those matching REGEXPs.\n\
+Usage: info variables [-q] [-t TYPEREGEXP] [NAMEREGEXP]\n\
+Prints the global and static variables.\n"),
+				  _("global and static variables")));
   if (dbx_commands)
-    add_com ("whereis", class_info, info_variables_command, _("\
-All global and static variable names, or those matching REGEXP."));
+    add_com ("whereis", class_info, info_variables_command,
+	     info_print_args_help (_("\
+All global and static variable names, or those matching REGEXPs.\n\
+Usage: whereis [-q] [-t TYPEREGEXP] [NAMEREGEXP]\n\
+Prints the global and static variables.\n"),
+				   _("global and static variables")));
 
   add_info ("functions", info_functions_command,
-	    _("All function names, or those matching REGEXP."));
+	    info_print_args_help (_("\
+All function names or those matching REGEXPs.\n\
+Usage: info functions [-q] [-t TYPEREGEXP] [NAMEREGEXP]\n\
+Prints the functions.\n"),
+				  _("functions")));
 
   /* FIXME:  This command has at least the following problems:
      1.  It prints builtin types (in a very strange and confusing fashion).

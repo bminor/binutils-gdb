@@ -25,6 +25,7 @@
 #include <string>
 #include "gdb_vecs.h"
 #include "gdbtypes.h"
+#include "gdb_regex.h"
 #include "common/enum-flags.h"
 #include "common/function-view.h"
 #include "common/gdb_optional.h"
@@ -2057,8 +2058,12 @@ private:
 };
 
 extern std::vector<symbol_search> search_symbols (const char *,
-						  enum search_domain, int,
+						  enum search_domain,
+						  const char *,
+						  int,
 						  const char **);
+extern bool treg_matches_sym_type_name (const compiled_regex &treg,
+					const struct symbol *sym);
 
 /* The name of the ``main'' function.
    FIXME: cagney/2001-03-20: Can't make main_name() const since some

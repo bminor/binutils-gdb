@@ -88,8 +88,10 @@ const char *print_entry_values = print_entry_values_default;
 
 /* Prototypes for local functions.  */
 
-static void print_frame_local_vars (struct frame_info *, int,
-				    struct ui_file *);
+static void print_frame_local_vars (struct frame_info *frame,
+				    bool quiet,
+				    const char *regexp, const char *t_regexp,
+				    int num_tabs, struct ui_file *stream);
 
 static void print_frame (struct frame_info *frame, int print_level,
 			 enum print_what print_what,  int print_args,
@@ -1878,7 +1880,7 @@ backtrace_command_1 (const char *count_exp, frame_filter_flags flags,
 	    {
 	      struct frame_id frame_id = get_frame_id (fi);
 
-	      print_frame_local_vars (fi, 1, gdb_stdout);
+	      print_frame_local_vars (fi, false, NULL, NULL, 1, gdb_stdout);
 
 	      /* print_frame_local_vars invalidates FI.  */
 	      fi = frame_find_by_id (frame_id);
@@ -2060,6 +2062,8 @@ iterate_over_block_local_vars (const struct block *block,
 
 struct print_variable_and_value_data
 {
+  gdb::optional<compiled_regex> preg;
+  gdb::optional<compiled_regex> treg;
   struct frame_id frame_id;
   int num_tabs;
   struct ui_file *stream;
@@ -2077,6 +2081,14 @@ do_print_variable_and_value (const char *print_name,
     = (struct print_variable_and_value_data *) cb_data;
   struct frame_info *frame;
 
+  if (p->preg.has_value ()
+      && p->preg->exec (SYMBOL_NATURAL_NAME (sym), 0,
+			NULL, 0) != 0)
+    return;
+  if (p->treg.has_value ()
+      && !treg_matches_sym_type_name (*p->treg, sym))
+    return;
+
   frame = frame_find_by_id (p->frame_id);
   if (frame == NULL)
     {
@@ -2092,14 +2104,38 @@ do_print_variable_and_value (const char *print_name,
   p->values_printed = 1;
 }
 
+/* Prepares the regular expression REG from REGEXP.
+   If REGEXP is NULL, it results in an empty regular expression.  */
+
+static void
+prepare_reg (const char *regexp, gdb::optional<compiled_regex> *reg)
+{
+  if (regexp != NULL)
+    {
+      int cflags = REG_NOSUB | (case_sensitivity == case_sensitive_off
+				? REG_ICASE : 0);
+      reg->emplace (regexp, cflags, _("Invalid regexp"));
+    }
+  else
+    reg->reset ();
+}
+
 /* Print all variables from the innermost up to the function block of FRAME.
    Print them with values to STREAM indented by NUM_TABS.
+   If REGEXP is not NULL, only print local variables whose name
+   matches REGEXP.
+   If T_REGEXP is not NULL, only print local variables whose type
+   matches T_REGEXP.
+   If no local variables have been printed and !QUIET, prints a message
+   explaining why no local variables could be printed.
 
    This function will invalidate FRAME.  */
 
 static void
-print_frame_local_vars (struct frame_info *frame, int num_tabs,
-			struct ui_file *stream)
+print_frame_local_vars (struct frame_info *frame,
+			bool quiet,
+			const char *regexp, const char *t_regexp,
+			int num_tabs, struct ui_file *stream)
 {
   struct print_variable_and_value_data cb_data;
   const struct block *block;
@@ -2107,18 +2143,22 @@ print_frame_local_vars (struct frame_info *frame, int num_tabs,
 
   if (!get_frame_pc_if_available (frame, &pc))
     {
-      fprintf_filtered (stream,
-			_("PC unavailable, cannot determine locals.\n"));
+      if (!quiet)
+	fprintf_filtered (stream,
+			  _("PC unavailable, cannot determine locals.\n"));
       return;
     }
 
   block = get_frame_block (frame, 0);
   if (block == 0)
     {
-      fprintf_filtered (stream, "No symbol table info available.\n");
+      if (!quiet)
+	fprintf_filtered (stream, "No symbol table info available.\n");
       return;
     }
 
+  prepare_reg (regexp, &cb_data.preg);
+  prepare_reg (t_regexp, &cb_data.treg);
   cb_data.frame_id = get_frame_id (frame);
   cb_data.num_tabs = 4 * num_tabs;
   cb_data.stream = stream;
@@ -2134,14 +2174,33 @@ print_frame_local_vars (struct frame_info *frame, int num_tabs,
 				 do_print_variable_and_value,
 				 &cb_data);
 
-  if (!cb_data.values_printed)
-    fprintf_filtered (stream, _("No locals.\n"));
+  if (!cb_data.values_printed && !quiet)
+    {
+      if (regexp == NULL && t_regexp == NULL)
+	fprintf_filtered (stream, _("No locals.\n"));
+      else
+	fprintf_filtered (stream, _("No matching locals.\n"));
+    }
 }
 
 void
 info_locals_command (const char *args, int from_tty)
 {
+  std::string regexp;
+  std::string t_regexp;
+  bool quiet = false;
+
+  while (args != NULL
+	 && extract_info_print_args (&args, &quiet, &regexp, &t_regexp))
+    ;
+
+  if (args != NULL)
+    report_unrecognized_option_error ("info locals", args);
+
   print_frame_local_vars (get_selected_frame (_("No frame selected.")),
+			  quiet,
+			  regexp.empty () ? NULL : regexp.c_str (),
+			  t_regexp.empty () ? NULL : t_regexp.c_str (),
 			  0, gdb_stdout);
 }
 
@@ -2180,29 +2239,45 @@ iterate_over_block_arg_vars (const struct block *b,
 
 /* Print all argument variables of the function of FRAME.
    Print them with values to STREAM.
+   If REGEXP is not NULL, only print argument variables whose name
+   matches REGEXP.
+   If T_REGEXP is not NULL, only print argument variables whose type
+   matches T_REGEXP.
+   If no argument variables have been printed and !QUIET, prints a message
+   explaining why no argument variables could be printed.
 
    This function will invalidate FRAME.  */
 
 static void
-print_frame_arg_vars (struct frame_info *frame, struct ui_file *stream)
+print_frame_arg_vars (struct frame_info *frame,
+		      bool quiet,
+		      const char *regexp, const char *t_regexp,
+		      struct ui_file *stream)
 {
   struct print_variable_and_value_data cb_data;
   struct symbol *func;
   CORE_ADDR pc;
+  gdb::optional<compiled_regex> preg;
+  gdb::optional<compiled_regex> treg;
 
   if (!get_frame_pc_if_available (frame, &pc))
     {
-      fprintf_filtered (stream, _("PC unavailable, cannot determine args.\n"));
+      if (!quiet)
+	fprintf_filtered (stream,
+			  _("PC unavailable, cannot determine args.\n"));
       return;
     }
 
   func = get_frame_function (frame);
   if (func == NULL)
     {
-      fprintf_filtered (stream, _("No symbol table info available.\n"));
+      if (!quiet)
+	fprintf_filtered (stream, _("No symbol table info available.\n"));
       return;
     }
 
+  prepare_reg (regexp, &cb_data.preg);
+  prepare_reg (t_regexp, &cb_data.treg);
   cb_data.frame_id = get_frame_id (frame);
   cb_data.num_tabs = 0;
   cb_data.stream = stream;
@@ -2214,14 +2289,34 @@ print_frame_arg_vars (struct frame_info *frame, struct ui_file *stream)
   /* do_print_variable_and_value invalidates FRAME.  */
   frame = NULL;
 
-  if (!cb_data.values_printed)
-    fprintf_filtered (stream, _("No arguments.\n"));
+  if (!cb_data.values_printed && !quiet)
+    {
+      if (regexp == NULL && t_regexp == NULL)
+	fprintf_filtered (stream, _("No arguments.\n"));
+      else
+	fprintf_filtered (stream, _("No matching arguments.\n"));
+    }
 }
 
 void
-info_args_command (const char *ignore, int from_tty)
+info_args_command (const char *args, int from_tty)
 {
+  std::string regexp;
+  std::string t_regexp;
+  bool quiet;
+
+  while (args != NULL
+	 && extract_info_print_args (&args, &quiet, &regexp, &t_regexp))
+    ;
+
+  if (args != NULL)
+    report_unrecognized_option_error ("info args", args);
+
+
   print_frame_arg_vars (get_selected_frame (_("No frame selected.")),
+			quiet,
+			regexp.empty () ? NULL : regexp.c_str (),
+			t_regexp.empty () ? NULL : t_regexp.c_str (),
 			gdb_stdout);
 }
 
@@ -2994,9 +3089,17 @@ Usage: info frame level LEVEL"),
 	   &info_frame_cmd_list);
 
   add_info ("locals", info_locals_command,
-	    _("Local variables of current stack frame."));
+	    info_print_args_help (_("\
+All local variables of current stack frame or those matching REGEXPs.\n\
+Usage: info locals [-q] [-t TYPEREGEXP] [NAMEREGEXP]\n\
+Prints the local variables of the current stack frame.\n"),
+				  _("local variables")));
   add_info ("args", info_args_command,
-	    _("Argument variables of current stack frame."));
+	    info_print_args_help (_("\
+All argument variables of current stack frame or those matching REGEXPs.\n\
+Usage: info args [-q] [-t TYPEREGEXP] [NAMEREGEXP]\n\
+Prints the argument variables of the current stack frame.\n"),
+				  _("argument variables")));
 
   if (dbx_commands)
     add_com ("func", class_stack, func_command, _("\

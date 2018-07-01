@@ -1,5 +1,25 @@
 2018-10-27  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* stack.c (print_variable_and_value_data): Add preg and treg.
+	(print_frame_local_vars): Add quiet, regexp and t_regexp arguments,
+	and update callers.
+	(print_frame_arg_vars): Likewise.
+	(prepare_reg): New function.
+	(info_locals_command): Extract info print args and use them.
+	(info_args_command): Likewise.
+	(_initialize_stack): Modify on-line help.
+	* symtab.c (treg_matches_sym_type_name): New function.
+	(search_symbols): New arg t_regexp.
+	(symtab_symbol_info): New args quiet, regexp, t_regexp.
+	(info_variables_command): Extract info print args and use them.
+	(info_functions_command): Likewise.
+	(info_types_command): Update call to symtab_symbol_info.
+	(_initialize_symtab): Modify on-line help.
+	* symtab.h (treg_matches_sym_type_name): New function.
+	(search_symbols): New t_regexp arg.
+
+2018-10-27  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* cli-utils.c (extract_arg_maybe_quoted): New function.
 	(extract_info_print_args): New function.
 	(info_print_args_help): New function.
