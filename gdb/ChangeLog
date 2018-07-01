@@ -1,5 +1,9 @@
 2018-10-27  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* NEWS: Mention changes to 'info [args|functions|locals|variables]'
+
+2018-10-27  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* stack.c (print_variable_and_value_data): Add preg and treg.
 	(print_frame_local_vars): Add quiet, regexp and t_regexp arguments,
 	and update callers.

@@ -86,6 +86,15 @@ target extended-remote FILENAME
   If FILENAME is a Unix domain socket, GDB will attempt to connect
   to this socket instead of opening FILENAME as a character device.
 
+info args [-q] [-t TYPEREGEXP] [NAMEREGEXP]
+info functions [-q] [-t TYPEREGEXP] [NAMEREGEXP]
+info locals [-q] [-t TYPEREGEXP] [NAMEREGEXP]
+info variables [-q] [-t TYPEREGEXP] [NAMEREGEXP]
+  These commands can now print only the searched entities
+  matching the provided regexp(s), giving a condition
+  on the entity names or entity types.  The flag -q disables
+  printing headers or informations messages.
+
 thread apply [all | COUNT | -COUNT] [FLAG]... COMMAND
   The 'thread apply' command accepts new FLAG arguments.
   FLAG arguments allow to control what output to produce and how to handle
