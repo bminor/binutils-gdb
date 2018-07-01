@@ -1,3 +1,10 @@
+2018-10-27  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Information About a Frame): Document changes
+	to 'info args' and 'info locals'.
+	(Examining the Symbol Table): Document changes to 'info functions'
+	and 'info variables'.
+
 2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
 	* gdb.texinfo (PowerPC Features): Describe new features

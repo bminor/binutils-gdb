@@ -7830,14 +7830,74 @@ same as for the @command{frame} command (@pxref{Selection, ,Selecting
 a Frame}).  The selected frame remains unchanged by this command.
 
 @kindex info args
-@item info args
+@item info args [-q]
 Print the arguments of the selected frame, each on a separate line.
 
-@item info locals
+The optional flag @samp{-q}, which stands for @samp{quiet}, disables
+printing header information and messages explaining why no argument
+have been printed.
+
+@item info args [-q] [-t @var{type_regexp}] [@var{regexp}]
+Like @kbd{info args}, but only print the arguments selected
+with the provided regexp(s).
+
+If @var{regexp} is provided, print only the arguments whose names
+match the regular expression @var{regexp}.
+
+If @var{type_regexp} is provided, print only the arguments whose
+types, as printed by the @code{whatis} command, match
+the regular expression @var{type_regexp}.
+If @var{type_regexp} contains space(s), it should be enclosed in
+quote characters.  If needed, use backslash to escape the meaning
+of special characters or quotes.
+
+If both @var{regexp} and @var{type_regexp} are provided, an argument
+is printed only if its name matches @var{regexp} and its type matches
+@var{type_regexp}.
+
+@item info locals [-q]
 @kindex info locals
 Print the local variables of the selected frame, each on a separate
 line.  These are all variables (declared either static or automatic)
 accessible at the point of execution of the selected frame.
+
+The optional flag @samp{-q}, which stands for @samp{quiet}, disables
+printing header information and messages explaining why no local variables
+have been printed.
+
+@item info locals [-q] [-t @var{type_regexp}] [@var{regexp}]
+Like @kbd{info locals}, but only print the local variables selected
+with the provided regexp(s).
+
+If @var{regexp} is provided, print only the local variables whose names
+match the regular expression @var{regexp}.
+
+If @var{type_regexp} is provided, print only the local variables whose
+types, as printed by the @code{whatis} command, match
+the regular expression @var{type_regexp}.
+If @var{type_regexp} contains space(s), it should be enclosed in
+quote characters.  If needed, use backslash to escape the meaning
+of special characters or quotes.
+
+If both @var{regexp} and @var{type_regexp} are provided, a local variable
+is printed only if its name matches @var{regexp} and its type matches
+@var{type_regexp}.
+
+The command @kbd{info locals -q -t @var{type_regexp}} can usefully be
+combined with the commands @kbd{frame apply} and @kbd{thread apply}.
+For example, your program might use Resource Acquisition Is
+Initialization types (RAII) such as @code{lock_something_t}: each
+local variable of type @code{lock_something_t} automatically places a
+lock that is destroyed when the variable goes out of scope.  You can
+then list all acquired locks in your program by doing
+@smallexample
+thread apply all -s frame apply all -s info locals -q -t lock_something_t
+@end smallexample
+@noindent
+or the equivalent shorter form
+@smallexample
+tfaas i lo -q -t lock_something_t
+@end smallexample
 
 @end table
 
@@ -17920,32 +17980,73 @@ debugging information, organized into two lists: files whose symbols
 have already been read, and files whose symbols will be read when needed.
 
 @kindex info functions
-@item info functions
+@item info functions [-q]
 Print the names and data types of all defined functions.
 Similarly to @samp{info types}, this command groups its output by source
 files and annotates each function definition with its source line
 number.
 
-@item info functions @var{regexp}
-Like @samp{info functions}, but only print the names and data types of
-functions whose names contain a match for regular expression
-@var{regexp}.  Thus, @samp{info fun step} finds all functions whose
+The optional flag @samp{-q}, which stands for @samp{quiet}, disables
+printing header information and messages explaining why no functions
+have been printed.
+
+@item info functions [-q] [-t @var{type_regexp}] [@var{regexp}]
+Like @samp{info functions}, but only print the names and data types
+of the functions selected with the provided regexp(s).
+
+If @var{regexp} is provided, print only the functions whose names
+match the regular expression @var{regexp}.
+Thus, @samp{info fun step} finds all functions whose
 names include @code{step}; @samp{info fun ^step} finds those whose names
 start with @code{step}.  If a function name contains characters that
 conflict with the regular expression language (e.g.@:
 @samp{operator*()}), they may be quoted with a backslash.
 
+If @var{type_regexp} is provided, print only the functions whose
+types, as printed by the @code{whatis} command, match
+the regular expression @var{type_regexp}.
+If @var{type_regexp} contains space(s), it should be enclosed in
+quote characters.  If needed, use backslash to escape the meaning
+of special characters or quotes.
+Thus, @samp{info fun -t '^int ('} finds the functions that return
+an integer; @samp{info fun -t '(.*int.*'} finds the functions that
+have an argument type containing int; @samp{info fun -t '^int (' ^step}
+finds the functions whose names start with @code{step} and that return
+int.
+
+If both @var{regexp} and @var{type_regexp} are provided, a function
+is printed only if its name matches @var{regexp} and its type matches
+@var{type_regexp}.
+
+
 @kindex info variables
-@item info variables
+@item info variables [-q]
 Print the names and data types of all variables that are defined
 outside of functions (i.e.@: excluding local variables).
 The printed variables are grouped by source files and annotated with
 their respective source line numbers.
 
-@item info variables @var{regexp}
-Like @kbd{info variables}, but only print the names and data types of
-non-local variables whose names contain a match for regular expression
-@var{regexp}.
+The optional flag @samp{-q}, which stands for @samp{quiet}, disables
+printing header information and messages explaining why no variables
+have been printed.
+
+@item info variables [-q] [-t @var{type_regexp}] [@var{regexp}]
+Like @kbd{info variables}, but only print the variables selected
+with the provided regexp(s).
+
+If @var{regexp} is provided, print only the variables whose names
+match the regular expression @var{regexp}.
+
+If @var{type_regexp} is provided, print only the variables whose
+types, as printed by the @code{whatis} command, match
+the regular expression @var{type_regexp}.
+If @var{type_regexp} contains space(s), it should be enclosed in
+quote characters.  If needed, use backslash to escape the meaning
+of special characters or quotes.
+
+If both @var{regexp} and @var{type_regexp} are provided, an argument
+is printed only if its name matches @var{regexp} and its type matches
+@var{type_regexp}.
 
 @kindex info classes
 @cindex Objective-C, classes and selectors
