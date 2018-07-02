@@ -1,3 +1,10 @@
+2018-07-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23324
+	* testsuite/ld-x86-64/pr23324.s: New file.
+	* testsuite/ld-x86-64/pr23324a.d: Likewise.
+	* testsuite/ld-x86-64/pr23324b.d: Likewise.
+
 2018-07-02  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* arm-dis.c (select_arm_features): Fix typo in heading comment.  Allow
