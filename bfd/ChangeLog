@@ -1,5 +1,11 @@
 2018-07-02  Maciej W. Rozycki  <macro@mips.com>
 
+	* elfxx-mips.c (_bfd_mips_elf_create_dynamic_sections): Set
+	`mark' for symbols created from `mips_elf_dynsym_rtproc_names'
+	list.
+
+2018-07-02  Maciej W. Rozycki  <macro@mips.com>
+
 	* elf64-mips.c (micromips_elf64_howto_table_rel): Add
 	R_MICROMIPS_HI0_LO16, R_MICROMIPS_TLS_GD, R_MICROMIPS_TLS_LDM,
 	R_MICROMIPS_TLS_DTPREL_HI16, R_MICROMIPS_TLS_DTPREL_LO16,
