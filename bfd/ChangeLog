@@ -1,3 +1,17 @@
+2018-07-02  Maciej W. Rozycki  <macro@mips.com>
+
+	* elf64-mips.c (micromips_elf64_howto_table_rel): Add
+	R_MICROMIPS_HI0_LO16, R_MICROMIPS_TLS_GD, R_MICROMIPS_TLS_LDM,
+	R_MICROMIPS_TLS_DTPREL_HI16, R_MICROMIPS_TLS_DTPREL_LO16,
+	R_MICROMIPS_TLS_GOTTPREL, R_MICROMIPS_TLS_TPREL_HI16,
+	R_MICROMIPS_TLS_TPREL_LO16, R_MICROMIPS_GPREL7_S2 and
+	R_MICROMIPS_PC23_S2 relocation entries.
+	(micromips_elf64_howto_table_rela): Likewise.
+	(micromips_reloc_map): Likewise.
+	* elfn32-mips.c (elf_micromips_howto_table_rel): Likewise.
+	(elf_micromips_howto_table_rela): Likewise.
+	(micromips_reloc_map): Likewise.
+
 2018-07-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23324

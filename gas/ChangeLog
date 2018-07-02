@@ -1,3 +1,9 @@
+2018-07-02  Maciej W. Rozycki  <macro@mips.com>
+
+	* testsuite/gas/mips/elf-rel28-micromips-n32.d: New test.
+	* testsuite/gas/mips/elf-rel28-micromips-n64.d: New test.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2018-07-02  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* config/tc-arm.c (cpu_arch_ver): Use symbolic TAG_CPU_ARCH macros
