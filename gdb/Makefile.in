@@ -1849,7 +1849,8 @@ test-cp-name-parser$(EXEEXT): test-cp-name-parser.o $(LIBIBERTY)
 # in sub-directories such as cli/ and mi/.
 
 INIT_FILES = $(COMMON_OBS)
-init.c: $(INIT_FILES)
+init.c: stamp-init; @true
+stamp-init: $(INIT_FILES)
 	@$(ECHO_INIT_C) echo "Making init.c"
 	@rm -f init.c-tmp init.l-tmp
 	@touch init.c-tmp
@@ -1879,8 +1880,8 @@ init.c: $(INIT_FILES)
 	@echo '{' >>init.c-tmp
 	@sed -e 's/\(.*\)/  _initialize_\1 ();/' <init.l-tmp >>init.c-tmp
 	@echo '}' >>init.c-tmp
-	@rm init.l-tmp
-	@mv init.c-tmp init.c
+	@$(SHELL) $(srcdir)/../move-if-change init.c-tmp init.c
+	@echo stamp > stamp-init
 
 .PRECIOUS: init.c
 
@@ -1947,7 +1948,7 @@ tags: TAGS
 clean mostlyclean: $(CONFIG_CLEAN)
 	@$(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(CLEANDIRS)" subdir_do
 	rm -f *.o *.a $(ADD_FILES) *~ init.c-tmp init.l-tmp version.c-tmp
-	rm -f init.c version.c
+	rm -f init.c stamp-init version.c
 	rm -f gdb$(EXEEXT) core make.log
 	rm -f gdb[0-9]$(EXEEXT)
 	rm -f test-cp-name-parser$(EXEEXT)

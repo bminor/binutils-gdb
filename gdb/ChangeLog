@@ -1,5 +1,11 @@
 2018-07-09  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (init.c): Depend on stamp-init.
+	(stamp-init): New rule, from init.c rule.
+	(clean mostlyclean): Remove stamp-init.
+
+2018-07-09  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (INIT_FILES): Remove CONFIG_SRCS,
 	SUBDIR_GCC_COMPILE_SRCS.
 
