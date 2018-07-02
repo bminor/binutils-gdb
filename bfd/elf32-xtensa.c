@@ -1437,6 +1437,10 @@ elf_xtensa_allocate_dynrelocs (struct elf_link_hash_entry *h, void *arg)
   if (! elf_xtensa_dynamic_symbol_p (h, info))
     elf_xtensa_make_sym_local (info, h);
 
+  if (! elf_xtensa_dynamic_symbol_p (h, info)
+      && h->root.type == bfd_link_hash_undefweak)
+    return TRUE;
+
   if (h->plt.refcount > 0)
     htab->elf.srelplt->size += (h->plt.refcount * sizeof (Elf32_External_Rela));
 
@@ -2777,11 +2781,15 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 			}
 		      unresolved_reloc = FALSE;
 		    }
-		  else
+		  else if (!is_weak_undef)
 		    {
 		      /* Generate a RELATIVE relocation.  */
 		      outrel.r_info = ELF32_R_INFO (0, R_XTENSA_RELATIVE);
 		      outrel.r_addend = 0;
+		    }
+		  else
+		    {
+		      continue;
 		    }
 		}
 
@@ -10013,7 +10021,8 @@ shrink_dynamic_reloc_sections (struct bfd_link_info *info,
 
   if ((r_type == R_XTENSA_32 || r_type == R_XTENSA_PLT)
       && (input_section->flags & SEC_ALLOC) != 0
-      && (dynamic_symbol || bfd_link_pic (info)))
+      && (dynamic_symbol || bfd_link_pic (info))
+      && (!h || h->root.type != bfd_link_hash_undefweak))
     {
       asection *srel;
       bfd_boolean is_plt = FALSE;

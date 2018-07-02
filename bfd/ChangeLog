@@ -1,3 +1,12 @@
+2018-07-11  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* elf32-xtensa.c (elf_xtensa_allocate_dynrelocs): Don't allocate
+	space for dynamic relocation for undefined weak symbol.
+	(elf_xtensa_relocate_section): Don't emit R_XTENSA_RELATIVE
+	relocation for undefined weak symbols.
+	(shrink_dynamic_reloc_sections): Don't shrink dynamic relocation
+	section for relocations against undefined weak symbols.
+
 2018-07-10  Maciej W. Rozycki  <macro@mips.com>
 
 	* elflink.c (bfd_elf_final_link): Rename `remove' local variable
