@@ -1,3 +1,39 @@
+2018-07-02  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* NEWS: Use command-line consistently when used in a compount word.
+	* doc/as.texi: Likewise.
+	* doc/c-aarch64.texi: Likewise.
+	* doc/c-alpha.texi: Likewise.
+	* doc/c-arc.texi: Likewise.
+	* doc/c-arm.texi: Likewise.
+	* doc/c-avr.texi: Likewise.
+	* doc/c-bfin.texi: Likewise.
+	* doc/c-cris.texi: Likewise.
+	* doc/c-epiphany.texi: Likewise.
+	* doc/c-i386.texi: Likewise.
+	* doc/c-ia64.texi: Likewise.
+	* doc/c-lm32.texi: Likewise.
+	* doc/c-m32r.texi: Likewise.
+	* doc/c-m68k.texi: Likewise.
+	* doc/c-mips.texi: Likewise.
+	* doc/c-mmix.texi: Likewise.
+	* doc/c-msp430.texi: Likewise.
+	* doc/c-mt.texi: Likewise.
+	* doc/c-nios2.texi: Likewise.
+	* doc/c-ppc.texi: Likewise.
+	* doc/c-pru.texi: Likewise.
+	* doc/c-rl78.texi: Likewise.
+	* doc/c-rx.texi: Likewise.
+	* doc/c-tic6x.texi: Likewise.
+	* doc/c-v850.texi: Likewise.
+	* doc/c-vax.texi: Likewise.
+	* doc/c-visium.texi: Likewise.
+	* doc/c-xstormy16.texi: Likewise.
+	* doc/c-xtensa.texi: Likewise.
+	* doc/c-z80.texi: Likewise.
+	* doc/c-z8k.texi: Likewise.
+	* doc/internals.texi: Likewise.
+
 2018-06-29  Jim Wilson  <jimw@sifive.com>
 
 	* config/tc-riscv.c (md_begin): Call hash_reg_name for "fp".

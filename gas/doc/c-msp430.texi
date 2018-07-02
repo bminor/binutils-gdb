@@ -83,7 +83,7 @@ changes the interrupt state (@code{EINT}, @code{DINT}, @code{BIC #8,
 SR}, @code{BIS #8, SR} or @code{MOV.W <>, SR}) must be 
 followed by a NOP instruction in order to ensure the correct
 processing of interrupts.  By default it is up to the programmer to
-supply these NOP instructions, but this command line option enables
+supply these NOP instructions, but this command-line option enables
 the automatic insertion by the assembler, if they are missing.
 
 @item -mN
@@ -302,12 +302,12 @@ MSP 430 assemblers.
 @cindex @code{arch} directive, MSP 430
 @item .arch
 Sets the target microcontroller in the same way as the @option{-mmcu}
-command line option.
+command-line option.
 
 @cindex @code{cpu} directive, MSP 430
 @item .cpu
 Sets the target architecture in the same way as the @option{-mcpu}
-command line option.
+command-line option.
 
 @cindex @code{profiler} directive, MSP 430
 @item .profiler

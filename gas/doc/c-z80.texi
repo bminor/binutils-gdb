@@ -30,7 +30,7 @@
 The Zilog Z80 and Ascii R800 version of @code{@value{AS}} have a few machine
 dependent options.
 @table @option
-@cindex @code{-z80} command line option, Z80
+@cindex @code{-z80} command-line option, Z80
 @item -z80
 Produce code for the Z80 processor. There are additional options to
 request warnings and error messages for undocumented instructions.
@@ -56,7 +56,7 @@ Treat all undocumented z80-instructions as errors.
 @itemx -Fup
 Treat undocumented z80-instructions that do not work on R800 as errors.
 
-@cindex @code{-r800} command line option, Z80
+@cindex @code{-r800} command-line option, Z80
 @item -r800
 Produce code for the R800 processor. The assembler does not support
 undocumented instructions for the R800.

@@ -1224,7 +1224,7 @@ the relax table.
 @item LINKER_RELAXING_SHRINKS_ONLY
 @cindex LINKER_RELAXING_SHRINKS_ONLY
 If you define this macro, and the global variable @samp{linkrelax} is set
-(because of a command line option, or unconditionally in @code{md_begin}), a
+(because of a command-line option, or unconditionally in @code{md_begin}), a
 @samp{.align} directive will cause extra space to be allocated.  The linker can
 then discard this space when relaxing the section.
 
@@ -1588,7 +1588,7 @@ if it is necessary to add object file format specific code to the CPU file.
 
 @item obj_begin
 If you define this macro, GAS will call it at the start of the assembly, after
-the command line arguments have been parsed and all the machine independent
+the command-line arguments have been parsed and all the machine independent
 initializations have been completed.
 
 @item obj_app_file

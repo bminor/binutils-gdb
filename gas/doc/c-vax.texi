@@ -50,7 +50,7 @@ These are obsolete options used to debug old assemblers.
 @item @code{-d} (Displacement size for JUMPs)
 This option expects a number following the @samp{-d}.  Like options
 that expect filenames, the number may immediately follow the
-@samp{-d} (old standard) or constitute the whole of the command line
+@samp{-d} (old standard) or constitute the whole of the command-line
 argument that follows @samp{-d} (@sc{gnu} standard).
 
 @cindex @code{-V}, redundant on VAX

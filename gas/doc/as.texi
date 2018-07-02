@@ -757,7 +757,7 @@ configure option.
 @end ifset
 
 @item --help
-Print a summary of the command line options and exit.
+Print a summary of the command-line options and exit.
 
 @item --target-help
 Print a summary of all target specific options and exit.
@@ -1607,12 +1607,12 @@ an MCore processor.
 @item -jsri2bsr
 @itemx -nojsri2bsr
 Enable or disable the JSRI to BSR transformation.  By default this is enabled.
-The command line option @samp{-nojsri2bsr} can be used to disable it.
+The command-line option @samp{-nojsri2bsr} can be used to disable it.
 
 @item -sifilter
 @itemx -nosifilter
 Enable or disable the silicon filter behaviour.  By default this is disabled.
-The default can be overridden by the @samp{-sifilter} command line option.
+The default can be overridden by the @samp{-sifilter} command-line option.
 
 @item -relax
 Alter jump instructions for long displacements.
@@ -2011,7 +2011,7 @@ significant.
 explicitly, as one of the files for @command{@value{AS}} to assemble.
 
 @cindex options, command line
-Except for @samp{--} any command line argument that begins with a
+Except for @samp{--} any command-line argument that begins with a
 hyphen (@samp{-}) is an option.  Each option changes the behavior of
 @command{@value{AS}}.  No option changes the way another option works.  An
 option is a @samp{-} followed by one or more letters; the case of
@@ -2050,7 +2050,7 @@ program.  The source program is made up of one or more files.
 
 You give @command{@value{AS}} a command line that has zero or more input file
 names.  The input files are read (from left file name to right).  A
-command line argument (in any position) that has no special meaning
+command-line argument (in any position) that has no special meaning
 is taken to be an input file name.
 
 If you give @command{@value{AS}} no file names it attempts to read one input file
@@ -2288,7 +2288,7 @@ The letters after @samp{-a} may be combined into one option,
 
 Note if the assembler source is coming from the standard input (e.g.,
 because it
-is being created by @code{@value{GCC}} and the @samp{-pipe} command line switch
+is being created by @code{@value{GCC}} and the @samp{-pipe} command-line switch
 is being used) then the listing will not contain any comments or preprocessor
 directives.  This is because the listing code buffers input source lines from
 stdin only after they have been preprocessed by the assembler.  This reduces
@@ -2383,7 +2383,7 @@ in the object file.  Usually if you do this you also tell the linker
 @node listing
 @section Configuring listing output: @option{--listing}
 
-The listing feature of the assembler can be enabled via the command line switch
+The listing feature of the assembler can be enabled via the command-line switch
 @samp{-a} (@pxref{a}).  This feature combines the input source file(s) with a
 hex dump of the corresponding locations in the output object file, and displays
 them as a listing file.  The format of this listing can be controlled by
@@ -2777,7 +2777,7 @@ specific, and some targets multiple comment characters.  Some targets also have
 line comment characters that only work if they are the first character on a
 line.  Some targets use a sequence of two characters to introduce a line
 comment.  Some targets can also change their line comment characters depending
-upon command line options that have been used.  For more details see the
+upon command-line options that have been used.  For more details see the
 @emph{Syntax} section in the documentation for individual targets.
 
 If the line comment character is the hash sign (@samp{#}) then it still has the
@@ -5700,7 +5700,7 @@ counter, and @code{.nolist} decrements it.  Assembly listings are
 generated whenever the counter is greater than zero.
 
 By default, listings are disabled.  When you enable them (with the
-@samp{-a} command line option; @pxref{Invoking,,Command-Line Options}),
+@samp{-a} command-line option; @pxref{Invoking,,Command-Line Options}),
 the initial value of the listing counter is one.
 
 @node Ln

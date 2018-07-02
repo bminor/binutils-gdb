@@ -229,7 +229,7 @@ control command (@pxref{Preprocessing}).
 
 If the assembler has been configured for the ppc-*-solaris* target
 then the @samp{!} character also acts as a line comment character.
-This can be disabled via the @option{-mno-solaris} command line
+This can be disabled via the @option{-mno-solaris} command-line
 option.
 
 @cindex line separator, PowerPC

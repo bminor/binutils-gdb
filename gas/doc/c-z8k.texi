@@ -36,11 +36,11 @@ for a list of other Z8000 specific assembler directives.
 @cindex Z8000 options
 @cindex options, Z8000
 @table @option
-@cindex @code{-z8001} command line option, Z8000
+@cindex @code{-z8001} command-line option, Z8000
 @item -z8001
 Generate segmented code by default.
 
-@cindex @code{-z8002} command line option, Z8000
+@cindex @code{-z8002} command-line option, Z8000
 @item -z8002
 Generate unsegmented code by default.
 @end table

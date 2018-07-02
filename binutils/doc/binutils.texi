@@ -520,13 +520,13 @@ when the modifier @samp{v} is appended.
 This modifier shows the version number of @command{ar}.
 @end table
 
-The @command{ar} program also supports some command line options which
+The @command{ar} program also supports some command-line options which
 are neither modifiers nor actions, but which do change its behaviour
 in specific ways:
 
 @table @samp
 @item --help
-Displays the list of command line options supported by @command{ar}
+Displays the list of command-line options supported by @command{ar}
 and then exits.
 
 @item --version
@@ -541,7 +541,7 @@ of the other @samp{-X} options; in particular, it does not support
 
 @item --plugin @var{name}
 @cindex plugins
-The optional command line switch @option{--plugin @var{name}} causes 
+The optional command-line switch @option{--plugin @var{name}} causes
 @command{ar} to load the plugin called @var{name} which adds support
 for more file formats, including object files with link-time
 optimization information.
@@ -564,7 +564,7 @@ is always backwards compatible with earlier versions, so it is
 sufficient to just copy the newest one.
 
 @item --target @var{target}
-The optional command line switch @option{--target @var{bfdname}}
+The optional command-line switch @option{--target @var{bfdname}}
 specifies that the archive members are in an object code format
 different from your system's default format.  See
 @xref{Target Selection}, for more information.
@@ -2852,7 +2852,7 @@ If none are specified, the file @code{a.out} will be used.
 
 @c man begin OPTIONS size
 
-The command line options have the following meanings:
+The command-line options have the following meanings:
 
 @table @env
 @item -A
@@ -2980,7 +2980,7 @@ data sections.  If the file type in unrecognizable, or if strings is
 reading from stdin then it will always display all of the printable
 sequences that it can find.
 
-For backwards compatibility any file that occurs after a command line
+For backwards compatibility any file that occurs after a command-line
 option of just @option{-} will also be scanned in full, regardless of
 the presence of any @option{-d} option. 
 
@@ -3430,7 +3430,7 @@ If no @var{symbol} arguments are given, @command{c++filt} reads symbol
 names from the standard input instead.  All the results are printed on
 the standard output.  The difference between reading names from the
 command line versus reading names from the standard input is that
-command line arguments are expected to be just mangled names and no
+command-line arguments are expected to be just mangled names and no
 checking is performed to separate them from surrounding text.  Thus
 for example:
 
@@ -3804,7 +3804,7 @@ current directory.
 
 @item -H
 @itemx --help
-Displays a list of command line options and then exits.
+Displays a list of command-line options and then exits.
 
 @item -m @var{characters}
 @itemx --maxlength @var{characters}
@@ -4166,7 +4166,7 @@ which in turn will import LoadLibraryA and GetProcAddress from kernel32.
 
 @command{dlltool} builds the library file by hand, but it builds the
 exports file by creating temporary files containing assembler statements
-and then assembling these.  The @option{-S} command line option can be
+and then assembling these.  The @option{-S} command-line option can be
 used to specify the path to the assembler that dlltool will use,
 and the @option{-f} option can be used to pass specific flags to that
 assembler.  The @option{-n} can be used to prevent dlltool from deleting
@@ -4194,7 +4194,7 @@ description of the @option{-I} or @option{--identify} option.
 
 @c man begin OPTIONS dlltool
 
-The command line options have the following meanings:
+The command-line options have the following meanings:
 
 @table @env
 
@@ -4260,7 +4260,7 @@ to create the exports file.
 
 @item -f @var{options}
 @itemx --as-flags @var{options}
-Specifies any specific command line options to be passed to the
+Specifies any specific command-line options to be passed to the
 assembler when building the exports file.  This option will work even if
 the @option{-S} option is not used.  This option only takes one argument,
 and if it occurs more than once on the command line, then later
@@ -4387,7 +4387,7 @@ Make dlltool describe what it is doing.
 
 @item -h
 @itemx --help
-Displays a list of command line options and then exits.
+Displays a list of command-line options and then exits.
 
 @item -V
 @itemx --version
@@ -4695,7 +4695,7 @@ single line, which is far more readable on terminals wider than 80 columns.
 
 @item -H
 @itemx --help
-Display the command line options understood by @command{readelf}.
+Display the command-line options understood by @command{readelf}.
 
 @end table
 
@@ -4789,7 +4789,7 @@ Display the version number of @command{elfedit}.
 
 @item -h
 @itemx --help
-Display the command line options understood by @command{elfedit}.
+Display the command-line options understood by @command{elfedit}.
 
 @end table
 
@@ -4882,7 +4882,7 @@ Ways to specify:
 
 @enumerate
 @item
-command line option: @option{-b} or @option{--target}
+command-line option: @option{-b} or @option{--target}
 
 @item
 environment variable @code{GNUTARGET}
@@ -4897,7 +4897,7 @@ Ways to specify:
 
 @enumerate
 @item
-command line options: @option{-I} or @option{--input-target}, or @option{-F} or @option{--target}
+command-line options: @option{-I} or @option{--input-target}, or @option{-F} or @option{--target}
 
 @item
 environment variable @code{GNUTARGET}
@@ -4912,7 +4912,7 @@ Ways to specify:
 
 @enumerate
 @item
-command line options: @option{-O} or @option{--output-target}, or @option{-F} or @option{--target}
+command-line options: @option{-O} or @option{--output-target}, or @option{-F} or @option{--target}
 
 @item
 the input target (see ``@command{objcopy} and @command{strip} Input Target'' above)
@@ -4930,7 +4930,7 @@ Ways to specify:
 
 @enumerate
 @item
-command line option: @option{--target}
+command-line option: @option{--target}
 
 @item
 environment variable @code{GNUTARGET}
@@ -4957,7 +4957,7 @@ Ways to specify:
 
 @enumerate
 @item
-command line option: @option{-m} or @option{--architecture}
+command-line option: @option{-m} or @option{--architecture}
 
 @item
 deduced from the input file

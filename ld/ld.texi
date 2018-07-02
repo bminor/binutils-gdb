@@ -247,12 +247,12 @@ you have many choices to control its behavior.
 
 @ifset UsesEnvVars
 @menu
-* Options::                     Command Line Options
+* Options::                     Command-line Options
 * Environment::                 Environment Variables
 @end menu
 
 @node Options
-@section Command Line Options
+@section Command-line Options
 @end ifset
 
 @cindex command line
@@ -332,7 +332,7 @@ Unique abbreviations of the names of multiple-letter options are
 accepted.
 
 Note---if the linker is being invoked indirectly, via a compiler driver
-(e.g. @samp{gcc}) then all the linker command line options should be
+(e.g. @samp{gcc}) then all the linker command-line options should be
 prefixed by @samp{-Wl,} (or whatever is appropriate for the particular
 compiler driver) like this:
 
@@ -352,7 +352,7 @@ the joined forms of both single- and multiple-letter options, such as:
   gcc foo.o bar.o -Wl,-eENTRY -Wl,-Map=a.map
 @end smallexample
 
-Here is a table of the generic command line switches accepted by the GNU
+Here is a table of the generic command-line switches accepted by the GNU
 linker:
 
 @table @gcctabopt
@@ -1153,7 +1153,7 @@ This option is only meaningful when building a dynamic executable.
 This option marks the executable as requiring global auditing by
 setting the @code{DF_1_GLOBAUDIT} bit in the @code{DT_FLAGS_1} dynamic
 tag.  Global auditing requires that any auditing library defined via
-the @option{--depaudit} or @option{-P} command line options be run for
+the @option{--depaudit} or @option{-P} command-line options be run for
 all dynamic objects loaded by the application.
 
 @item ibtplt
@@ -1436,7 +1436,7 @@ been assigned to see if there are any overlaps.  Normally the linker will
 perform this check, and if it finds any overlaps it will produce
 suitable error messages.  The linker does know about, and does make
 allowances for sections in overlays.  The default behaviour can be
-restored by using the command line switch @option{--check-sections}.
+restored by using the command-line switch @option{--check-sections}.
 Section overlap is not usually checked for relocatable links.  You can
 force checking in that case by using the @option{--check-sections}
 option.
@@ -2497,7 +2497,7 @@ symbols from, to ensure that they get linked in, just like a normal
 object file).
 
 In addition to the options common to all targets, the i386 PE linker
-support additional command line options that are specific to the i386
+support additional command-line options that are specific to the i386
 PE target.  Options that take values may be separated from their
 values by either a space or an equals sign.
 
@@ -3168,8 +3168,8 @@ described below.
 
 The linker always uses a linker script.  If you do not supply one
 yourself, the linker will use a default script that is compiled into the
-linker executable.  You can use the @samp{--verbose} command line option
-to display the default linker script.  Certain command line options,
+linker executable.  You can use the @samp{--verbose} command-line option
+to display the default linker script.  Certain command-line options,
 such as @samp{-r} or @samp{-N}, will affect the default linker script.
 
 You may supply your own linker script by using the @samp{-T} command
@@ -3425,10 +3425,10 @@ linker will search through the archive library search path.
 The @dfn{sysroot prefix} can also be forced by specifying @code{=}
 as the first character in the filename path, or prefixing the filename
 path with @code{$SYSROOT}.  See also the description of @samp{-L} in
-@ref{Options,,Command Line Options}.
+@ref{Options,,Command-line Options}.
 
 If you use @samp{INPUT (-l@var{file})}, @command{ld} will transform the
-name to @code{lib@var{file}.a}, as with the command line argument
+name to @code{lib@var{file}.a}, as with the command-line argument
 @samp{-l}.
 
 When you use the @code{INPUT} command in an implicit linker script, the
@@ -3442,7 +3442,7 @@ script file is included.  This can affect archive searching.
 The @code{GROUP} command is like @code{INPUT}, except that the named
 files should all be archives, and they are searched repeatedly until no
 new undefined references are created.  See the description of @samp{-(}
-in @ref{Options,,Command Line Options}.
+in @ref{Options,,Command-line Options}.
 
 @item AS_NEEDED(@var{file}, @var{file}, @dots{})
 @itemx AS_NEEDED(@var{file} @var{file} @dots{})
@@ -3462,7 +3462,7 @@ setting afterwards.
 The @code{OUTPUT} command names the output file.  Using
 @code{OUTPUT(@var{filename})} in the linker script is exactly like using
 @samp{-o @var{filename}} on the command line (@pxref{Options,,Command
-Line Options}).  If both are used, the command line option takes
+Line Options}).  If both are used, the command-line option takes
 precedence.
 
 You can use the @code{OUTPUT} command to define a default name for the
@@ -3476,9 +3476,9 @@ output file other than the usual default of @file{a.out}.
 The @code{SEARCH_DIR} command adds @var{path} to the list of paths where
 @command{ld} looks for archive libraries.  Using
 @code{SEARCH_DIR(@var{path})} is exactly like using @samp{-L @var{path}}
-on the command line (@pxref{Options,,Command Line Options}).  If both
+on the command line (@pxref{Options,,Command-line Options}).  If both
 are used, then the linker will search both paths.  Paths specified using
-the command line option are searched first.
+the command-line option are searched first.
 
 @item STARTUP(@var{filename})
 @kindex STARTUP(@var{filename})
@@ -3503,11 +3503,11 @@ A couple of linker script commands deal with object file formats.
 The @code{OUTPUT_FORMAT} command names the BFD format to use for the
 output file (@pxref{BFD}).  Using @code{OUTPUT_FORMAT(@var{bfdname})} is
 exactly like using @samp{--oformat @var{bfdname}} on the command line
-(@pxref{Options,,Command Line Options}).  If both are used, the command
+(@pxref{Options,,Command-line Options}).  If both are used, the command
 line option takes precedence.
 
 You can use @code{OUTPUT_FORMAT} with three arguments to use different
-formats based on the @samp{-EB} and @samp{-EL} command line options.
+formats based on the @samp{-EB} and @samp{-EL} command-line options.
 This permits the linker script to set the output format based on the
 desired endianness.
 
@@ -3522,7 +3522,7 @@ command:
 OUTPUT_FORMAT(elf32-bigmips, elf32-bigmips, elf32-littlemips)
 @end smallexample
 This says that the default format for the output file is
-@samp{elf32-bigmips}, but if the user uses the @samp{-EL} command line
+@samp{elf32-bigmips}, but if the user uses the @samp{-EL} command-line
 option, the output file will be created in the @samp{elf32-littlemips}
 format.
 
@@ -3532,7 +3532,7 @@ format.
 The @code{TARGET} command names the BFD format to use when reading input
 files.  It affects subsequent @code{INPUT} and @code{GROUP} commands.
 This command is like using @samp{-b @var{bfdname}} on the command line
-(@pxref{Options,,Command Line Options}).  If the @code{TARGET} command
+(@pxref{Options,,Command-line Options}).  If the @code{TARGET} command
 is used but @code{OUTPUT_FORMAT} is not, then the last @code{TARGET}
 command is also used to set the format for the output file.  @xref{BFD}.
 @end table
@@ -4552,12 +4552,12 @@ is treated the same as @code{SORT_BY_ALIGNMENT} (wildcard section pattern).
 All other nested section sorting commands are invalid.
 @end enumerate
 
-When both command line section sorting option and linker script
+When both command-line section sorting option and linker script
 section sorting command are used, section sorting command always
-takes precedence over the command line option.
+takes precedence over the command-line option.
 
 If the section sorting command in linker script isn't nested, the
-command line option will make the section sorting command to be
+command-line option will make the section sorting command to be
 treated as nested sorting command.
 
 @enumerate
@@ -4572,10 +4572,10 @@ treated as nested sorting command.
 @end enumerate
 
 If the section sorting command in linker script is nested, the
-command line option will be ignored.
+command-line option will be ignored.
 
 @cindex SORT_NONE
-@code{SORT_NONE} disables section sorting by ignoring the command line
+@code{SORT_NONE} disables section sorting by ignoring the command-line
 section sorting option.
 
 If you ever get confused about where input sections are going, use the
@@ -5871,8 +5871,8 @@ attribute, such as code vs data, loadable vs non-loadable, etc.  If no
 sections with matching attributes are found, or your target lacks this
 support, the orphan section is placed at the end of the file.
 
-The command line options @samp{--orphan-handling} and @samp{--unique}
-(@pxref{Options,,Command Line Options}) can be used to control which
+The command-line options @samp{--orphan-handling} and @samp{--unique}
+(@pxref{Options,,Command-line Options}) can be used to control which
 output sections an orphan is placed in.
 
 @node Location Counter
@@ -6734,7 +6734,7 @@ between ARM and Thumb code.  These stubs only work with code that has
 been compiled and assembled with the @samp{-mthumb-interwork} command
 line option.  If it is necessary to link with old ARM object files or
 libraries, which have not been compiled with the -mthumb-interwork
-option then the @samp{--support-old-code} command line switch should be
+option then the @samp{--support-old-code} command-line switch should be
 given to the linker.  This will make it generate larger stub functions
 which will work with non-interworking aware ARM code.  Note, however,
 the linker does not support generating stubs for function calls to
@@ -6940,7 +6940,7 @@ The linker will automatically generate and insert small sequences of
 code into a linked ARM ELF executable whenever an attempt is made to
 perform a function call to a symbol that is too far away.  The
 placement of these sequences of instructions - called stubs - is
-controlled by the command line option @option{--stub-group-size=N}.
+controlled by the command-line option @option{--stub-group-size=N}.
 The placement is important because a poor choice can create a need for
 duplicate stubs, increasing the code size.  The linker will try to
 group stubs together in order to reduce interruptions to the flow of
@@ -6997,7 +6997,7 @@ link-time values for dynamic relocations.
 
 @cindex Placement of SG veneers
 All SG veneers are placed in the special output section @code{.gnu.sgstubs}.
-Its start address must be set, either with the command line option
+Its start address must be set, either with the command-line option
 @samp{--section-start} or in a linker script, to indicate where to place these
 veneers in memory.
 
@@ -7734,8 +7734,8 @@ header format depends on the default specified by the specific target.
 @section @command{ld} and WIN32 (cygwin/mingw)
 
 This section describes some of the win32 specific @command{ld} issues.
-See @ref{Options,,Command Line Options} for detailed description of the
-command line options mentioned here.
+See @ref{Options,,Command-line Options} for detailed description of the
+command-line options mentioned here.
 
 @table @emph
 @cindex import libraries
@@ -7745,7 +7745,7 @@ libraries, which contains information for linking to dll's.  They are
 regular static archives and are handled as any other static
 archive.  The cygwin and mingw ports of @command{ld} have specific
 support for creating such libraries provided with the
-@samp{--out-implib} command line option.
+@samp{--out-implib} command-line option.
 
 @item   exporting DLL symbols
 @cindex exporting DLL symbols
@@ -7755,7 +7755,7 @@ The cygwin/mingw @command{ld} has several ways to export symbols for dll's.
 @item   using auto-export functionality
 @cindex using auto-export functionality
 By default @command{ld} exports symbols with the auto-export functionality,
-which is controlled by the following command line options:
+which is controlled by the following command-line options:
 
 @itemize
 @item --export-all-symbols   [This is the default]
@@ -7889,7 +7889,7 @@ other DEF file statements
 
 @cindex creating a DEF file
 While linking a shared dll, @command{ld} is able to create a DEF file
-with the @samp{--output-def <file>} command line option.
+with the @samp{--output-def <file>} command-line option.
 
 @item   Using decorations
 @cindex Using decorations
@@ -8150,7 +8150,7 @@ The line @samp{_foo = foo} maps the exported symbol @samp{foo} to
 @end table
 
 Note: using a DEF file disables the default auto-export behavior,
-unless the @samp{--export-all-symbols} command line option is used.
+unless the @samp{--export-all-symbols} command-line option is used.
 If, however, you are trying to rename symbols, then you should list
 @emph{all} desired exports in the DEF file, including the symbols
 that are not being renamed, and do @emph{not} use the

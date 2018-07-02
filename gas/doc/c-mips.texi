@@ -522,7 +522,7 @@ for branches.
 By default @samp{-mno-ignore-branch-isa} is selected, causing any invalid
 branch requiring a transition between ISA modes to produce an error.
 
-@cindex @option{-mnan=} command line option, MIPS
+@cindex @option{-mnan=} command-line option, MIPS
 @item -mnan=@var{encoding}
 This option indicates whether the source code uses the IEEE 2008
 NaN encoding (@option{-mnan=2008}) or the original MIPS encoding
@@ -748,7 +748,7 @@ for the corresponding ISA level, from that point on in the
 assembly.  @code{.set mips@var{n}} affects not only which instructions
 are permitted, but also how certain macros are expanded.  @code{.set
 mips0} restores the ISA level to its original level: either the
-level you selected with command line options, or the default for your
+level you selected with command-line options, or the default for your
 configuration.  You can use this feature to permit specific MIPS III
 instructions while assembling in 32 bit mode.  Use this directive with
 care!
@@ -758,7 +758,7 @@ care!
 The @code{.set arch=@var{cpu}} directive provides even finer control.
 It changes the effective CPU target and allows the assembler to use
 instructions specific to a particular CPU.  All CPUs supported by the
-@samp{-march} command line option are also selectable by this directive.
+@samp{-march} command-line option are also selectable by this directive.
 The original value is restored by @code{.set arch=default}.
 
 The directive @code{.set mips16} puts the assembler into MIPS 16 mode,
@@ -776,13 +776,13 @@ Traditional MIPS assemblers do not support this directive.
 @node MIPS assembly options
 @section Directives to control code generation
 
-@cindex MIPS directives to override command line options
+@cindex MIPS directives to override command-line options
 @kindex @code{.module}
-The @code{.module} directive allows command line options to be set directly
+The @code{.module} directive allows command-line options to be set directly
 from assembly.  The format of the directive matches the @code{.set}
 directive but only those options which are relevant to a whole module are
 supported.  The effect of a @code{.module} directive is the same as the
-corresponding command line option.  Where @code{.set} directives support
+corresponding command-line option.  Where @code{.set} directives support
 returning to a default then the @code{.module} directives do not as they
 define the defaults.
 
@@ -873,7 +873,7 @@ other and must be tracked carefully.
 
 Traditionally the use of an explicit @code{.gnu_attribute 4, @var{n}}
 directive is used to indicate which ABI is in use by a specific module.
-It was then left to the user to ensure that command line options and the
+It was then left to the user to ensure that command-line options and the
 selected ABI were compatible with some potential for inconsistencies.
 
 @node MIPS FP ABI Variants
@@ -933,7 +933,7 @@ of MIPS32r2.
 @cindex @code{.module fp=@var{nn}} directive, MIPS
 In order to simplify and add safety to the process of selecting the
 correct floating-point ABI, the assembler will automatically infer the
-correct @code{.gnu_attribute 4, @var{n}} directive based on command line
+correct @code{.gnu_attribute 4, @var{n}} directive based on command-line
 options and @code{.module} overrides.  Where an explicit
 @code{.gnu_attribute 4, @var{n}} directive has been seen then a warning
 will be raised if it does not match an inferred setting.

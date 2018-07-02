@@ -30,7 +30,7 @@ The Visium assembler implements one machine-specific option:
 
 @c man begin OPTIONS
 @table @gcctabopt
-@cindex @code{-mtune=@var{arch}} command line option, Visium
+@cindex @code{-mtune=@var{arch}} command-line option, Visium
 @item -mtune=@var{arch}
 This option specifies the target architecture.  If an attempt is made to
 assemble an instruction that will not execute on the target architecture,

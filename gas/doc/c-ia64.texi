@@ -29,7 +29,7 @@
 @cindex options for IA-64
 
 @table @option
-@cindex @code{-mconstant-gp} command line option, IA-64
+@cindex @code{-mconstant-gp} command-line option, IA-64
 
 @item -mconstant-gp
 This option instructs the assembler to mark the resulting object file
