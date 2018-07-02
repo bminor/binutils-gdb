@@ -1,3 +1,9 @@
+2018-07-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23324
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Clear the
+	R_X86_64_converted_reloc_bit bit.
+
 2018-06-26  Nick Clifton  <nickc@redhat.com>
 
 	* po/uk.po: Updated Ukranian translation.

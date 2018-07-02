@@ -1,3 +1,10 @@
+2018-07-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23324
+	* testsuite/ld-x86-64/pr23324.s: New file.
+	* testsuite/ld-x86-64/pr23324a.d: Likewise.
+	* testsuite/ld-x86-64/pr23324b.d: Likewise.
+
 2018-06-26  Alan Modra  <amodra@gmail.com>
 
 	PR 23169

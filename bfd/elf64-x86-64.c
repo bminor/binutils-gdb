@@ -2431,8 +2431,13 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	  continue;
 	}
 
+      r_symndx = htab->r_sym (rel->r_info);
       converted_reloc = (r_type & R_X86_64_converted_reloc_bit) != 0;
-      r_type &= ~R_X86_64_converted_reloc_bit;
+      if (converted_reloc)
+	{
+	  r_type &= ~R_X86_64_converted_reloc_bit;
+	  rel->r_info = htab->r_info (r_symndx, r_type);
+	}
 
       if (r_type >= (int) R_X86_64_standard)
 	return _bfd_unrecognized_reloc (input_bfd, input_section, r_type);
@@ -2443,7 +2448,6 @@ elf_x86_64_relocate_section (bfd *output_bfd,
       else
 	howto = (x86_64_elf_howto_table
 		 + ARRAY_SIZE (x86_64_elf_howto_table) - 1);
-      r_symndx = htab->r_sym (rel->r_info);
       h = NULL;
       sym = NULL;
       sec = NULL;
