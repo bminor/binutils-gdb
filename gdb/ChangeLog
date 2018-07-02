@@ -1,5 +1,10 @@
 2018-07-09  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (CDEPS): Don't mention XM_CDEPS.
+	(CLIBS): Don't mention NAT_CLIBS.
+
+2018-07-09  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (ADD_FILES, ADD_DEPS): Remove.
 	(LIBGDB_OBS, clean mostlyclean): Update.
 	(gdb$(EXEEXT), insight$(EXEEXT)): Update.
