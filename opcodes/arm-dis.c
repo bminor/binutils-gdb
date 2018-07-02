@@ -6387,7 +6387,7 @@ mapping_symbol_for_insn (bfd_vma pc, struct disassemble_info *info,
 
 /* Given a bfd_mach_arm_XXX value, this function fills in the fields
    of the supplied arm_feature_set structure with bitmasks indicating
-   the support base architectures and coprocessor extensions.
+   the supported base architectures and coprocessor extensions.
 
    FIXME: This could more efficiently implemented as a constant array,
    although it would also be less robust.  */
@@ -6396,40 +6396,69 @@ static void
 select_arm_features (unsigned long mach,
 		     arm_feature_set * features)
 {
+  arm_feature_set arch_fset;
+  const arm_feature_set fpu_any = FPU_ANY;
+
 #undef ARM_SET_FEATURES
 #define ARM_SET_FEATURES(FSET) \
   {							\
     const arm_feature_set fset = FSET;			\
-    arm_feature_set tmp = ARM_FEATURE (0, 0, FPU_FPA) ;	\
-    ARM_MERGE_FEATURE_SETS (*features, tmp, fset);	\
+    arch_fset = fset;					\
   }
 
+  /* When several architecture versions share the same bfd_mach_arm_XXX value
+     the most featureful is chosen.  */
   switch (mach)
     {
-    case bfd_mach_arm_2:       ARM_SET_FEATURES (ARM_ARCH_V2); break;
-    case bfd_mach_arm_2a:      ARM_SET_FEATURES (ARM_ARCH_V2S); break;
-    case bfd_mach_arm_3:       ARM_SET_FEATURES (ARM_ARCH_V3); break;
-    case bfd_mach_arm_3M:      ARM_SET_FEATURES (ARM_ARCH_V3M); break;
-    case bfd_mach_arm_4:       ARM_SET_FEATURES (ARM_ARCH_V4); break;
-    case bfd_mach_arm_4T:      ARM_SET_FEATURES (ARM_ARCH_V4T); break;
-    case bfd_mach_arm_5:       ARM_SET_FEATURES (ARM_ARCH_V5); break;
-    case bfd_mach_arm_5T:      ARM_SET_FEATURES (ARM_ARCH_V5T); break;
-    case bfd_mach_arm_5TE:     ARM_SET_FEATURES (ARM_ARCH_V5TE); break;
-    case bfd_mach_arm_XScale:  ARM_SET_FEATURES (ARM_ARCH_XSCALE); break;
+    case bfd_mach_arm_2:	 ARM_SET_FEATURES (ARM_ARCH_V2); break;
+    case bfd_mach_arm_2a:	 ARM_SET_FEATURES (ARM_ARCH_V2S); break;
+    case bfd_mach_arm_3:	 ARM_SET_FEATURES (ARM_ARCH_V3); break;
+    case bfd_mach_arm_3M:	 ARM_SET_FEATURES (ARM_ARCH_V3M); break;
+    case bfd_mach_arm_4:	 ARM_SET_FEATURES (ARM_ARCH_V4); break;
+    case bfd_mach_arm_4T:	 ARM_SET_FEATURES (ARM_ARCH_V4T); break;
+    case bfd_mach_arm_5:	 ARM_SET_FEATURES (ARM_ARCH_V5); break;
+    case bfd_mach_arm_5T:	 ARM_SET_FEATURES (ARM_ARCH_V5T); break;
+    case bfd_mach_arm_5TE:	 ARM_SET_FEATURES (ARM_ARCH_V5TE); break;
+    case bfd_mach_arm_XScale:	 ARM_SET_FEATURES (ARM_ARCH_XSCALE); break;
     case bfd_mach_arm_ep9312:
-      ARM_SET_FEATURES (ARM_FEATURE_LOW (ARM_AEXT_V4T,
-					 ARM_CEXT_MAVERICK | FPU_MAVERICK));
+	ARM_SET_FEATURES (ARM_FEATURE_LOW (ARM_AEXT_V4T,
+					   ARM_CEXT_MAVERICK | FPU_MAVERICK));
        break;
-    case bfd_mach_arm_iWMMXt:  ARM_SET_FEATURES (ARM_ARCH_IWMMXT); break;
-    case bfd_mach_arm_iWMMXt2: ARM_SET_FEATURES (ARM_ARCH_IWMMXT2); break;
-      /* If the machine type is unknown allow all
-	 architecture types and all extensions.  */
-    case bfd_mach_arm_unknown: ARM_SET_FEATURES (ARM_FEATURE_ALL); break;
+    case bfd_mach_arm_iWMMXt:	 ARM_SET_FEATURES (ARM_ARCH_IWMMXT); break;
+    case bfd_mach_arm_iWMMXt2:	 ARM_SET_FEATURES (ARM_ARCH_IWMMXT2); break;
+    case bfd_mach_arm_5TEJ:	 ARM_SET_FEATURES (ARM_ARCH_V5TEJ); break;
+    case bfd_mach_arm_6:	 ARM_SET_FEATURES (ARM_ARCH_V6); break;
+    case bfd_mach_arm_6KZ:	 ARM_SET_FEATURES (ARM_ARCH_V6KZ); break;
+    case bfd_mach_arm_6T2:	 ARM_SET_FEATURES (ARM_ARCH_V6KZT2); break;
+    case bfd_mach_arm_6K:	 ARM_SET_FEATURES (ARM_ARCH_V6K); break;
+    case bfd_mach_arm_7:	 ARM_SET_FEATURES (ARM_ARCH_V7VE); break;
+    case bfd_mach_arm_6M:	 ARM_SET_FEATURES (ARM_ARCH_V6M); break;
+    case bfd_mach_arm_6SM:	 ARM_SET_FEATURES (ARM_ARCH_V6SM); break;
+    case bfd_mach_arm_7EM:	 ARM_SET_FEATURES (ARM_ARCH_V7EM); break;
+    case bfd_mach_arm_8:
+	{
+	  /* Add bits for extensions that Armv8.4-A recognizes.  */
+	  arm_feature_set armv8_4_ext_fset
+	    = ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST | ARM_EXT2_FP16_FML);
+	  ARM_SET_FEATURES (ARM_ARCH_V8_4A);
+	  ARM_MERGE_FEATURE_SETS (arch_fset, arch_fset, armv8_4_ext_fset);
+	  break;
+	}
+    case bfd_mach_arm_8R:	 ARM_SET_FEATURES (ARM_ARCH_V8R); break;
+    case bfd_mach_arm_8M_BASE:	 ARM_SET_FEATURES (ARM_ARCH_V8M_BASE); break;
+    case bfd_mach_arm_8M_MAIN:	 ARM_SET_FEATURES (ARM_ARCH_V8M_MAIN); break;
+      /* If the machine type is unknown allow all architecture types and all
+	 extensions.  */
+    case bfd_mach_arm_unknown:	 ARM_SET_FEATURES (ARM_FEATURE_ALL); break;
     default:
       abort ();
     }
-
 #undef ARM_SET_FEATURES
+
+  /* None of the feature bits related to -mfpu have an impact on Tag_CPU_arch
+     and thus on bfd_mach_arm_XXX value.  Therefore for a given
+     bfd_mach_arm_XXX value all coprocessor feature bits should be allowed.  */
+  ARM_MERGE_FEATURE_SETS (*features, arch_fset, fpu_any);
 }
 
 

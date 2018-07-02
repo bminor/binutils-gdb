@@ -1,5 +1,10 @@
 2018-07-02  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* config/tc-arm.c (cpu_arch_ver): Use symbolic TAG_CPU_ARCH macros
+	rather than hardcode their values.
+
+2018-07-02  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* NEWS: Use command-line consistently when used in a compount word.
 	* doc/as.texi: Likewise.
 	* doc/c-aarch64.texi: Likewise.

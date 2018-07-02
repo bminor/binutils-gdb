@@ -13642,6 +13642,7 @@ bfd_arm_get_mach_from_attributes (bfd * abfd)
 
   switch (arch)
     {
+    case TAG_CPU_ARCH_PRE_V4: return bfd_mach_arm_3M;
     case TAG_CPU_ARCH_V4: return bfd_mach_arm_4;
     case TAG_CPU_ARCH_V4T: return bfd_mach_arm_4T;
     case TAG_CPU_ARCH_V5T: return bfd_mach_arm_5T;
@@ -13679,7 +13680,38 @@ bfd_arm_get_mach_from_attributes (bfd * abfd)
 	return bfd_mach_arm_5TE;
       }
 
+    case TAG_CPU_ARCH_V5TEJ:
+	return bfd_mach_arm_5TEJ;
+    case TAG_CPU_ARCH_V6:
+	return bfd_mach_arm_6;
+    case TAG_CPU_ARCH_V6KZ:
+	return bfd_mach_arm_6KZ;
+    case TAG_CPU_ARCH_V6T2:
+	return bfd_mach_arm_6T2;
+    case TAG_CPU_ARCH_V6K:
+	return bfd_mach_arm_6K;
+    case TAG_CPU_ARCH_V7:
+	return bfd_mach_arm_7;
+    case TAG_CPU_ARCH_V6_M:
+	return bfd_mach_arm_6M;
+    case TAG_CPU_ARCH_V6S_M:
+	return bfd_mach_arm_6SM;
+    case TAG_CPU_ARCH_V7E_M:
+	return bfd_mach_arm_7EM;
+    case TAG_CPU_ARCH_V8:
+	return bfd_mach_arm_8;
+    case TAG_CPU_ARCH_V8R:
+	return bfd_mach_arm_8R;
+    case TAG_CPU_ARCH_V8M_BASE:
+	return bfd_mach_arm_8M_BASE;
+    case TAG_CPU_ARCH_V8M_MAIN:
+	return bfd_mach_arm_8M_MAIN;
+
     default:
+      /* Force entry to be added for any new known Tag_CPU_arch value.  */
+      BFD_ASSERT (arch > MAX_TAG_CPU_ARCH);
+
+      /* Unknown Tag_CPU_arch value.  */
       return bfd_mach_arm_unknown;
     }
 }

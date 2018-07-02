@@ -1,5 +1,11 @@
 2018-07-02  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* arm-dis.c (select_arm_features): Fix typo in heading comment.  Allow
+	all FPU features and add mapping from new bfd_mach_arm values to
+	allowed CPU feature bits.
+
+2018-07-02  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* NEWS: Use command-line consistently when used in a compount word.
 	* ld.texinfo: Likewise.
 	* ldint.texinfo: Likewise.

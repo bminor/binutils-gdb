@@ -1,5 +1,18 @@
 2018-07-02  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* archures.c (bfd_mach_arm_5TEJ, bfd_mach_arm_6, bfd_mach_arm_6KZ,
+	bfd_mach_arm_6T2, bfd_mach_arm_6K, bfd_mach_arm_7, bfd_mach_arm_6M,
+	bfd_mach_arm_6SM, bfd_mach_arm_7EM, bfd_mach_arm_8, bfd_mach_arm_8R,
+	bfd_mach_arm_8M_BASE, bfd_mach_arm_8M_MAIN): Define.
+	* bfd-in2.h: Regenerate.
+	* cpu-arm.c (arch_info_struct): Add entries for above new
+	bfd_mach_arm values.
+	* elf32-arm.c (bfd_arm_get_mach_from_attributes): Add Tag_CPU_arch to
+	bfd_mach_arm mapping logic for pre Armv4 and Armv5TEJ and later
+	architectures.  Force assert failure for any new Tag_CPU_arch value.
+
+2018-07-02  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* doc/bfdint.texi: Use command-line consistently when used in a
 	compount word.
 	* doc/bfdsumm.texi: Likewise.

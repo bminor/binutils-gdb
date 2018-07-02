@@ -129,20 +129,33 @@ scan (const struct bfd_arch_info *info, const char *string)
 
 static const bfd_arch_info_type arch_info_struct[] =
 {
-  N (bfd_mach_arm_2,       "armv2",   FALSE, & arch_info_struct[1]),
-  N (bfd_mach_arm_2a,      "armv2a",  FALSE, & arch_info_struct[2]),
-  N (bfd_mach_arm_3,       "armv3",   FALSE, & arch_info_struct[3]),
-  N (bfd_mach_arm_3M,      "armv3m",  FALSE, & arch_info_struct[4]),
-  N (bfd_mach_arm_4,       "armv4",   FALSE, & arch_info_struct[5]),
-  N (bfd_mach_arm_4T,      "armv4t",  FALSE, & arch_info_struct[6]),
-  N (bfd_mach_arm_5,       "armv5",   FALSE, & arch_info_struct[7]),
-  N (bfd_mach_arm_5T,      "armv5t",  FALSE, & arch_info_struct[8]),
-  N (bfd_mach_arm_5TE,     "armv5te", FALSE, & arch_info_struct[9]),
-  N (bfd_mach_arm_XScale,  "xscale",  FALSE, & arch_info_struct[10]),
-  N (bfd_mach_arm_ep9312,  "ep9312",  FALSE, & arch_info_struct[11]),
-  N (bfd_mach_arm_iWMMXt,  "iwmmxt",  FALSE, & arch_info_struct[12]),
-  N (bfd_mach_arm_iWMMXt2, "iwmmxt2", FALSE, & arch_info_struct[13]),
-  N (bfd_mach_arm_unknown, "arm_any", FALSE, NULL)
+  N (bfd_mach_arm_2,         "armv2",          FALSE, & arch_info_struct[1]),
+  N (bfd_mach_arm_2a,        "armv2a",         FALSE, & arch_info_struct[2]),
+  N (bfd_mach_arm_3,         "armv3",          FALSE, & arch_info_struct[3]),
+  N (bfd_mach_arm_3M,        "armv3m",         FALSE, & arch_info_struct[4]),
+  N (bfd_mach_arm_4,         "armv4",          FALSE, & arch_info_struct[5]),
+  N (bfd_mach_arm_4T,        "armv4t",         FALSE, & arch_info_struct[6]),
+  N (bfd_mach_arm_5,         "armv5",          FALSE, & arch_info_struct[7]),
+  N (bfd_mach_arm_5T,        "armv5t",         FALSE, & arch_info_struct[8]),
+  N (bfd_mach_arm_5TE,       "armv5te",        FALSE, & arch_info_struct[9]),
+  N (bfd_mach_arm_XScale,    "xscale",         FALSE, & arch_info_struct[10]),
+  N (bfd_mach_arm_ep9312,    "ep9312",         FALSE, & arch_info_struct[11]),
+  N (bfd_mach_arm_iWMMXt,    "iwmmxt",         FALSE, & arch_info_struct[12]),
+  N (bfd_mach_arm_iWMMXt2,   "iwmmxt2",        FALSE, & arch_info_struct[13]),
+  N (bfd_mach_arm_5TEJ,      "armv5tej",       FALSE, & arch_info_struct[14]),
+  N (bfd_mach_arm_6,         "armv6",          FALSE, & arch_info_struct[15]),
+  N (bfd_mach_arm_6KZ,       "armv6kz",        FALSE, & arch_info_struct[16]),
+  N (bfd_mach_arm_6T2,       "armv6t2",        FALSE, & arch_info_struct[17]),
+  N (bfd_mach_arm_6K,        "armv6k",         FALSE, & arch_info_struct[18]),
+  N (bfd_mach_arm_7,         "armv7",          FALSE, & arch_info_struct[19]),
+  N (bfd_mach_arm_6M,        "armv6-m",        FALSE, & arch_info_struct[20]),
+  N (bfd_mach_arm_6SM,       "armv6s-m",       FALSE, & arch_info_struct[21]),
+  N (bfd_mach_arm_7EM,       "armv7e-m",       FALSE, & arch_info_struct[22]),
+  N (bfd_mach_arm_8,         "armv8-a",        FALSE, & arch_info_struct[23]),
+  N (bfd_mach_arm_8R,        "armv8-r",        FALSE, & arch_info_struct[24]),
+  N (bfd_mach_arm_8M_BASE,   "armv8-m.base",   FALSE, & arch_info_struct[25]),
+  N (bfd_mach_arm_8M_MAIN,   "armv8-m.main",   FALSE, & arch_info_struct[26]),
+  N (bfd_mach_arm_unknown,   "arm_any",        FALSE, NULL)
 };
 
 const bfd_arch_info_type bfd_arm_arch =

@@ -1,3 +1,11 @@
+2018-07-02  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* testsuite/ld-arm/tls-descrelax-be8.d: Add architecture version in
+	expected result.
+	* testsuite/ld-arm/tls-descrelax-v7.d: Likewise.
+	* testsuite/ld-arm/tls-longplt-lib.d: Likewise.
+	* testsuite/ld-arm/tls-longplt.d: Likewise.
+
 2018-06-29  Tamar Christina  <tamar.christina@arm.com>
 
 	PR binutils/23192
