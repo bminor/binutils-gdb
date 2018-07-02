@@ -1,3 +1,11 @@
+2018-07-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* remote.c (show_hardware_watchpoint_limit): New function.
+	(show_hardware_watchpoint_length_limit): New function.
+	(show_hardware_breakpoint_limit): New function.
+	(_initialize_remote): Use add_setshow_zuinteger_unlimited_cmd
+	where appropriate, update help text.
+
 2018-07-09  Tom Tromey  <tom@tromey.com>
 
 	* Makefile.in (CDEPS): Don't mention XM_CDEPS.

@@ -21161,16 +21161,24 @@ responses.
 @anchor{set remote hardware-breakpoint-limit}
 @item set remote hardware-watchpoint-limit @var{limit}
 @itemx set remote hardware-breakpoint-limit @var{limit}
-Restrict @value{GDBN} to using @var{limit} remote hardware breakpoint or
-watchpoints.  A limit of -1, the default, is treated as unlimited.
+Restrict @value{GDBN} to using @var{limit} remote hardware watchpoints
+or breakpoints.  The @var{limit} can be set to 0 to disable hardware
+watchpoints or breakpoints, and @code{unlimited} for unlimited
+watchpoints or breakpoints.
+
+@item show remote hardware-watchpoint-limit
+@itemx show remote hardware-breakpoint-limit
+Show the current limit for the number of hardware watchpoints or
+breakpoints that @value{GDBN} can use.
 
 @cindex limit hardware watchpoints length
 @cindex remote target, limit watchpoints length
 @anchor{set remote hardware-watchpoint-length-limit}
 @item set remote hardware-watchpoint-length-limit @var{limit}
-Restrict @value{GDBN} to using @var{limit} bytes for the maximum length of
-a remote hardware watchpoint.  A limit of -1, the default, is treated
-as unlimited.
+Restrict @value{GDBN} to using @var{limit} bytes for the maximum
+length of a remote hardware watchpoint.  A @var{limit} of 0 disables
+hardware watchpoints and @code{unlimited} allows watchpoints of any
+length.
 
 @item show remote hardware-watchpoint-length-limit
 Show the current limit (in bytes) of the maximum length of

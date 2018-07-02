@@ -1,3 +1,9 @@
+2018-07-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Remote Configuration): Update descriptions for
+	set/show of hardware-watchpoint-limit, hardware-breakpoint-limit,
+	and hardware-watchpoint-length-limit variables.
+
 2018-07-02  Maciej W. Rozycki  <macro@mips.com>
 
 	PR tdep/8282

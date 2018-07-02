@@ -1728,6 +1728,39 @@ show_memory_write_packet_size (const char *args, int from_tty)
   show_memory_packet_size (&memory_write_packet_config);
 }
 
+/* Show the number of hardware watchpoints that can be used.  */
+
+static void
+show_hardware_watchpoint_limit (struct ui_file *file, int from_tty,
+				struct cmd_list_element *c,
+				const char *value)
+{
+  fprintf_filtered (file, _("The maximum number of target hardware "
+			    "watchpoints is %s.\n"), value);
+}
+
+/* Show the length limit (in bytes) for hardware watchpoints.  */
+
+static void
+show_hardware_watchpoint_length_limit (struct ui_file *file, int from_tty,
+				       struct cmd_list_element *c,
+				       const char *value)
+{
+  fprintf_filtered (file, _("The maximum length (in bytes) of a target "
+			    "hardware watchpoint is %s.\n"), value);
+}
+
+/* Show the number of hardware breakpoints that can be used.  */
+
+static void
+show_hardware_breakpoint_limit (struct ui_file *file, int from_tty,
+				struct cmd_list_element *c,
+				const char *value)
+{
+  fprintf_filtered (file, _("The maximum number of target hardware "
+			    "breakpoints is %s.\n"), value);
+}
+
 long
 remote_target::get_memory_write_packet_size ()
 {
@@ -14347,32 +14380,28 @@ further restriction and ``limit'' to enable that restriction."),
 	   _("Show the maximum number of bytes per memory-read packet."),
 	   &remote_show_cmdlist);
 
-  add_setshow_zinteger_cmd ("hardware-watchpoint-limit", no_class,
+  add_setshow_zuinteger_unlimited_cmd ("hardware-watchpoint-limit", no_class,
 			    &remote_hw_watchpoint_limit, _("\
 Set the maximum number of target hardware watchpoints."), _("\
 Show the maximum number of target hardware watchpoints."), _("\
-Specify a negative limit for unlimited."),
-			    NULL, NULL, /* FIXME: i18n: The maximum
-					   number of target hardware
-					   watchpoints is %s.  */
-			    &remote_set_cmdlist, &remote_show_cmdlist);
-  add_setshow_zinteger_cmd ("hardware-watchpoint-length-limit", no_class,
+Specify \"unlimited\" for unlimited hardware watchpoints."),
+			    NULL, show_hardware_watchpoint_limit,
+			    &remote_set_cmdlist,
+			    &remote_show_cmdlist);
+  add_setshow_zuinteger_unlimited_cmd ("hardware-watchpoint-length-limit",
+			    no_class,
 			    &remote_hw_watchpoint_length_limit, _("\
 Set the maximum length (in bytes) of a target hardware watchpoint."), _("\
 Show the maximum length (in bytes) of a target hardware watchpoint."), _("\
-Specify a negative limit for unlimited."),
-			    NULL, NULL, /* FIXME: i18n: The maximum
-                                           length (in bytes) of a target
-                                           hardware watchpoint is %s.  */
+Specify \"unlimited\" to allow watchpoints of unlimited size."),
+			    NULL, show_hardware_watchpoint_length_limit,
 			    &remote_set_cmdlist, &remote_show_cmdlist);
-  add_setshow_zinteger_cmd ("hardware-breakpoint-limit", no_class,
+  add_setshow_zuinteger_unlimited_cmd ("hardware-breakpoint-limit", no_class,
 			    &remote_hw_breakpoint_limit, _("\
 Set the maximum number of target hardware breakpoints."), _("\
 Show the maximum number of target hardware breakpoints."), _("\
-Specify a negative limit for unlimited."),
-			    NULL, NULL, /* FIXME: i18n: The maximum
-					   number of target hardware
-					   breakpoints is %s.  */
+Specify \"unlimited\" for unlimited hardware breakpoints."),
+			    NULL, show_hardware_breakpoint_limit,
 			    &remote_set_cmdlist, &remote_show_cmdlist);
 
   add_setshow_zuinteger_cmd ("remoteaddresssize", class_obscure,
