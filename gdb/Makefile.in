@@ -1865,18 +1865,10 @@ init.c: $(INIT_FILES)
 	sed \
 	    -e '/^gdbtypes.[co]$$/d' \
 	    -e '/^init.[co]$$/d' \
-	    -e '/xdr_ld.[co]$$/d' \
-	    -e '/xdr_ptrace.[co]$$/d' \
-	    -e '/xdr_rdb.[co]$$/d' \
-	    -e '/udr.[co]$$/d' \
-	    -e '/udip2soc.[co]$$/d' \
-	    -e '/udi2go32.[co]$$/d' \
 	    -e '/version.[co]$$/d' \
 	    -e '/^[a-z0-9A-Z_]*_[SU].[co]$$/d' \
-	    -e '/[a-z0-9A-Z_]*-exp.tab.[co]$$/d' \
 	    -e 's/-exp\.o$$/-exp.y/' \
 	    -e 's/\.[co]$$/.c/' \
-	    -e 's,signals\.c,common/signals\.c,' \
 	    -e 's|^\([^  /][^     ]*\)|$(srcdir)/\1|g' | \
 	while read f; do \
 	    sed -n -e 's/^_initialize_\([a-z_0-9A-Z]*\).*/\1/p' $$f 2>/dev/null; \

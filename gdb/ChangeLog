@@ -1,5 +1,9 @@
 2018-07-09  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (init.c): Remove some unused sed rules.
+
+2018-07-09  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (TSOBS): Remove.
 	(INIT_FILES): Update.
 	(LIBGDB_OBS): Update.
