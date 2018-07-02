@@ -1006,6 +1006,7 @@ COMMON_SFILES = \
 	event-loop.c \
 	event-top.c \
 	exceptions.c \
+	exec.c \
 	expprint.c \
 	extension.c \
 	f-lang.c \
@@ -1551,7 +1552,6 @@ TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
 TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 
 COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
-	exec.o \
 	mi/mi-common.o \
 	version.o \
 	xml-builtin.o \
@@ -2208,7 +2208,6 @@ ALLDEPFILES = \
 	bsd-uthread.c \
 	darwin-nat.c \
 	dicos-tdep.c \
-	exec.c \
 	fbsd-nat.c \
 	fbsd-tdep.c \
 	fork-child.c \

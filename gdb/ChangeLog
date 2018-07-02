@@ -1,5 +1,11 @@
 2018-07-09  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (ALLDEPFILES): Remove exec.c.
+	(COMMON_OBS): Remove exec.o.
+	(COMMON_SFILES): Add exec.c.
+
+2018-07-09  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (LINT, LINTFLAGS, LINTFILES, lint): Remove.
 
 2018-07-09  Tom Tromey  <tom@tromey.com>
