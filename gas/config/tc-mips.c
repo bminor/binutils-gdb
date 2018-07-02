@@ -8851,7 +8851,26 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 		      || *r == BFD_RELOC_MIPS_HIGHER
 		      || *r == BFD_RELOC_HI16_S
 		      || *r == BFD_RELOC_LO16
-		      || *r == BFD_RELOC_MIPS_GOT_OFST);
+		      || *r == BFD_RELOC_MIPS_GOT_OFST
+		      || (mips_opts.micromips
+			  && (*r == BFD_RELOC_16
+			      || *r == BFD_RELOC_MIPS_GOT16
+			      || *r == BFD_RELOC_MIPS_CALL16
+			      || *r == BFD_RELOC_MIPS_GOT_HI16
+			      || *r == BFD_RELOC_MIPS_GOT_LO16
+			      || *r == BFD_RELOC_MIPS_CALL_HI16
+			      || *r == BFD_RELOC_MIPS_CALL_LO16
+			      || *r == BFD_RELOC_MIPS_SUB
+			      || *r == BFD_RELOC_MIPS_GOT_PAGE
+			      || *r == BFD_RELOC_MIPS_HIGHEST
+			      || *r == BFD_RELOC_MIPS_GOT_DISP
+			      || *r == BFD_RELOC_MIPS_TLS_GD
+			      || *r == BFD_RELOC_MIPS_TLS_LDM
+			      || *r == BFD_RELOC_MIPS_TLS_DTPREL_HI16
+			      || *r == BFD_RELOC_MIPS_TLS_DTPREL_LO16
+			      || *r == BFD_RELOC_MIPS_TLS_GOTTPREL
+			      || *r == BFD_RELOC_MIPS_TLS_TPREL_HI16
+			      || *r == BFD_RELOC_MIPS_TLS_TPREL_LO16)));
 	  break;
 
 	case 'o':

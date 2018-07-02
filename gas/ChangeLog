@@ -1,5 +1,25 @@
 2018-07-02  Maciej W. Rozycki  <macro@mips.com>
 
+	* config/tc-mips.c (macro_build) <'i', 'j'>: Also accept
+	BFD_RELOC_16, BFD_RELOC_MIPS_GOT16, BFD_RELOC_MIPS_CALL16,
+	BFD_RELOC_MIPS_GOT_HI16, BFD_RELOC_MIPS_GOT_LO16,
+	BFD_RELOC_MIPS_CALL_HI16, BFD_RELOC_MIPS_CALL_LO16,
+	BFD_RELOC_MIPS_SUB, BFD_RELOC_MIPS_GOT_PAGE,
+	BFD_RELOC_MIPS_HIGHEST, BFD_RELOC_MIPS_GOT_DISP,
+	BFD_RELOC_MIPS_TLS_GD, BFD_RELOC_MIPS_TLS_LDM,
+	BFD_RELOC_MIPS_TLS_DTPREL_HI16, BFD_RELOC_MIPS_TLS_DTPREL_LO16,
+	BFD_RELOC_MIPS_TLS_GOTTPREL, BFD_RELOC_MIPS_TLS_TPREL_HI16 and
+	BFD_RELOC_MIPS_TLS_TPREL_LO16 relocations if in the microMIPS
+	mode.
+	* testsuite/gas/mips/elf-rel28-lldscd-n32.d: New test.
+	* testsuite/gas/mips/elf-rel28-lldscd-micromips-n32.d: New test.
+	* testsuite/gas/mips/elf-rel28-lldscd-n64.d: New test.
+	* testsuite/gas/mips/elf-rel28-lldscd-micromips-n64.d: New test.
+	* testsuite/gas/mips/elf-rel28.s: Add instruction selection.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2018-07-02  Maciej W. Rozycki  <macro@mips.com>
+
 	* testsuite/gas/mips/elf-rel28-micromips-n32.d: New test.
 	* testsuite/gas/mips/elf-rel28-micromips-n64.d: New test.
 	* testsuite/gas/mips/mips.exp: Run the new tests.
