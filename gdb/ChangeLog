@@ -1,5 +1,11 @@
 2018-07-09  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (clean mostlyclean): Remove stamp-version.
+	(version.c): Depend on stamp-version.
+	(stamp-version): New rule, from version.c rule.
+
+2018-07-09  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (init.c): Depend on stamp-init.
 	(stamp-init): New rule, from init.c rule.
 	(clean mostlyclean): Remove stamp-init.
