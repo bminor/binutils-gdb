@@ -608,11 +608,6 @@ ADD_DEPS = $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
 DIST = gdb
 
-LINT = /usr/5bin/lint
-LINTFLAGS = $(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
-	$(BFD_CFLAGS) $(INCLUDE_CFLAGS) \
-	$(INTL_CFLAGS)
-
 RUNTEST = runtest
 RUNTESTFLAGS =
 
@@ -1167,8 +1162,6 @@ SFILES = \
 	$(SUBDIR_TARGET_SRCS) \
 	$(COMMON_SFILES) \
 	$(SUBDIR_GCC_COMPILE_SRCS)
-
-LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
 # Header files that need to have srcdir added.  Note that in the cases
 # where we use a macro like $(gdbcmd_h), things are carefully arranged
@@ -2147,10 +2140,6 @@ stamp-version: Makefile version.in $(srcdir)/../bfd/version.h $(srcdir)/common/c
 	@$(SHELL) $(srcdir)/../move-if-change version-t.t version.c
 	@echo stamp > stamp-version
 
-
-lint: $(LINTFILES)
-	$(LINT) $(INCLUDE_CFLAGS) $(LINTFLAGS) $(LINTFILES) \
-	   `echo $(DEPFILES) $(CONFIG_OBS) | sed 's/\.o /\.c /g'`
 
 gdb.cxref: $(SFILES)
 	cxref -I. $(SFILES) >gdb.cxref
