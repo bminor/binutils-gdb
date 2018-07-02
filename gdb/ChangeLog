@@ -1,3 +1,40 @@
+2018-07-02  Maciej W. Rozycki  <macro@mips.com>
+	    Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR tdep/8282
+	* disasm.h (gdb_disassembler): Add
+	`m_disassembler_options_holder'. member
+	* disasm.c (get_all_disassembler_options): New function.
+	(gdb_disassembler::gdb_disassembler): Use it.
+	(gdb_buffered_insn_length_init_dis): Likewise.
+	(gdb_buffered_insn_length): Adjust accordingly.
+	(set_disassembler_options): Handle options with arguments.
+	(show_disassembler_options_sfunc): Likewise.  Add a leading new
+	line if showing options with descriptions.
+	(disassembler_options_completer): Adapt to using the
+	`disasm_options_and_args_t' structure.
+	* mips-tdep.c (mips_disassembler_options): New variable.
+	(mips_disassembler_options_o32): Likewise.
+	(mips_disassembler_options_n32): Likewise.
+	(mips_disassembler_options_n64): Likewise.
+	(gdb_print_insn_mips): Don't set `disassembler_options'.
+	(gdb_print_insn_mips_n32, gdb_print_insn_mips_n64): Remove
+	functions.
+	(mips_gdbarch_init): Always set `gdbarch_print_insn' to
+	`gdb_print_insn_mips'.  Set `gdbarch_disassembler_options',
+	`gdbarch_disassembler_options_implicit' and
+	`gdbarch_valid_disassembler_options'.
+	* arm-tdep.c (_initialize_arm_tdep): Adapt to using the
+	`disasm_options_and_args_t' structure.
+	* gdbarch.sh (disassembler_options_implicit): New `gdbarch'
+	method.
+	(valid_disassembler_options): Switch from `disasm_options_t' to
+	the `disasm_options_and_args_t' structure.
+	* NEWS: Document `set disassembler-options' support for the MIPS
+	target.
+	* gdbarch.h: Regenerate.
+	* gdbarch.c: Regenerate.
+
 2018-07-02  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	* riscv-tdep.c (riscv_register_aliases): Swap "fp" and "s0" entries.

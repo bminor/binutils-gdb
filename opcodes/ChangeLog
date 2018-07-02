@@ -1,3 +1,16 @@
+2018-07-02  Maciej W. Rozycki  <macro@mips.com>
+
+	PR tdep/8282
+	* mips-dis.c (mips_option_arg_t): New enumeration.
+	(mips_options): New variable.
+	(disassembler_options_mips): New function.
+	(print_mips_disassembler_options): Reimplement in terms of
+	`disassembler_options_mips'.
+	* arm-dis.c (disassembler_options_arm): Adapt to using the
+	`disasm_options_and_args_t' structure.
+	* ppc-dis.c (disassembler_options_powerpc): Likewise.
+	* s390-dis.c (disassembler_options_s390): Likewise.
+
 2018-07-02  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* testsuite/ld-arm/tls-descrelax-be8.d: Add architecture version in

@@ -350,8 +350,9 @@ struct gdbarch
   gdbarch_gcc_target_options_ftype *gcc_target_options;
   gdbarch_gnu_triplet_regexp_ftype *gnu_triplet_regexp;
   gdbarch_addressable_memory_unit_size_ftype *addressable_memory_unit_size;
+  const char * disassembler_options_implicit;
   char ** disassembler_options;
-  const disasm_options_t * valid_disassembler_options;
+  const disasm_options_and_args_t * valid_disassembler_options;
   gdbarch_type_align_ftype *type_align;
 };
 
@@ -707,6 +708,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of gcc_target_options, invalid_p == 0 */
   /* Skip verify of gnu_triplet_regexp, invalid_p == 0 */
   /* Skip verify of addressable_memory_unit_size, invalid_p == 0 */
+  /* Skip verify of disassembler_options_implicit, invalid_p == 0 */
   /* Skip verify of disassembler_options, invalid_p == 0 */
   /* Skip verify of valid_disassembler_options, invalid_p == 0 */
   /* Skip verify of type_align, invalid_p == 0 */
@@ -901,6 +903,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: disassembler_options = %s\n",
                       pstring_ptr (gdbarch->disassembler_options));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: disassembler_options_implicit = %s\n",
+                      pstring (gdbarch->disassembler_options_implicit));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_displaced_step_copy_insn_p() = %d\n",
                       gdbarch_displaced_step_copy_insn_p (gdbarch));
@@ -5044,6 +5049,23 @@ set_gdbarch_addressable_memory_unit_size (struct gdbarch *gdbarch,
   gdbarch->addressable_memory_unit_size = addressable_memory_unit_size;
 }
 
+const char *
+gdbarch_disassembler_options_implicit (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of disassembler_options_implicit, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_disassembler_options_implicit called\n");
+  return gdbarch->disassembler_options_implicit;
+}
+
+void
+set_gdbarch_disassembler_options_implicit (struct gdbarch *gdbarch,
+                                           const char * disassembler_options_implicit)
+{
+  gdbarch->disassembler_options_implicit = disassembler_options_implicit;
+}
+
 char **
 gdbarch_disassembler_options (struct gdbarch *gdbarch)
 {
@@ -5061,7 +5083,7 @@ set_gdbarch_disassembler_options (struct gdbarch *gdbarch,
   gdbarch->disassembler_options = disassembler_options;
 }
 
-const disasm_options_t *
+const disasm_options_and_args_t *
 gdbarch_valid_disassembler_options (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
@@ -5073,7 +5095,7 @@ gdbarch_valid_disassembler_options (struct gdbarch *gdbarch)
 
 void
 set_gdbarch_valid_disassembler_options (struct gdbarch *gdbarch,
-                                        const disasm_options_t * valid_disassembler_options)
+                                        const disasm_options_and_args_t * valid_disassembler_options)
 {
   gdbarch->valid_disassembler_options = valid_disassembler_options;
 }

@@ -810,24 +810,30 @@ print_insn_powerpc (bfd_vma memaddr,
   return 4;
 }
 
-const disasm_options_t *
+const disasm_options_and_args_t *
 disassembler_options_powerpc (void)
 {
-  static disasm_options_t *opts = NULL;
+  static disasm_options_and_args_t *opts_and_args;
 
-  if (opts == NULL)
+  if (opts_and_args == NULL)
     {
       size_t i, num_options = ARRAY_SIZE (ppc_opts);
-      opts = XNEW (disasm_options_t);
+      disasm_options_t *opts;
+
+      opts_and_args = XNEW (disasm_options_and_args_t);
+      opts_and_args->args = NULL;
+
+      opts = &opts_and_args->options;
       opts->name = XNEWVEC (const char *, num_options + 1);
+      opts->description = NULL;
+      opts->arg = NULL;
       for (i = 0; i < num_options; i++)
 	opts->name[i] = ppc_opts[i].opt;
       /* The array we return must be NULL terminated.  */
       opts->name[i] = NULL;
-      opts->description = NULL;
     }
 
-  return opts;
+  return opts_and_args;
 }
 
 void

@@ -1,3 +1,13 @@
+2018-07-02  Maciej W. Rozycki  <macro@mips.com>
+
+	PR tdep/8282
+	* dis-asm.h (disasm_option_arg_t): New typedef.
+	(disasm_options_and_args_t): Likewise.
+	(disasm_options_t): Add `arg' member, document members.
+	(disassembler_options_mips): New prototype.
+	(disassembler_options_arm, disassembler_options_powerpc)
+	(disassembler_options_s390): Update prototypes.
+
 2018-06-29  Tamar Christina  <tamar.christina@arm.com>
 
 	PR binutils/23192

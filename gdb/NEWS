@@ -3,6 +3,9 @@
 
 *** Changes since GDB 8.1
 
+* The 'set disassembler-options' command now supports specifying options
+  for the MIPS target.
+
 * The 'symbol-file' command now accepts an '-o' option to add a relative
   offset to all sections.
 

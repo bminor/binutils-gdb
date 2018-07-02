@@ -1,3 +1,9 @@
+2018-07-02  Maciej W. Rozycki  <macro@mips.com>
+
+	PR tdep/8282
+	* gdb.texinfo (Source and Machine Code): Document `set
+	disassembler-options' support for the MIPS target.
+
 2018-06-28  Petr Tesarik  <ptesarik@suse.cz>
 
 	* gdb.texinfo (Files): Document "add-symbol-file -o offset".

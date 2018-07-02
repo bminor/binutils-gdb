@@ -722,6 +722,31 @@ fprintf_disasm (void *stream, const char *format, ...)
   return 0;
 }
 
+/* Combine implicit and user disassembler options and return them
+   in a newly-created string.  */
+
+static std::string
+get_all_disassembler_options (struct gdbarch *gdbarch)
+{
+  const char *implicit = gdbarch_disassembler_options_implicit (gdbarch);
+  const char *options = get_disassembler_options (gdbarch);
+  const char *comma = ",";
+
+  if (implicit == nullptr)
+    {
+      implicit = "";
+      comma = "";
+    }
+
+  if (options == nullptr)
+    {
+      options = "";
+      comma = "";
+    }
+
+  return string_printf ("%s%s%s", implicit, comma, options);
+}
+
 gdb_disassembler::gdb_disassembler (struct gdbarch *gdbarch,
 				    struct ui_file *file,
 				    di_read_memory_ftype read_memory_func)
@@ -746,7 +771,9 @@ gdb_disassembler::gdb_disassembler (struct gdbarch *gdbarch,
   m_di.endian = gdbarch_byte_order (gdbarch);
   m_di.endian_code = gdbarch_byte_order_for_code (gdbarch);
   m_di.application_data = this;
-  m_di.disassembler_options = get_disassembler_options (gdbarch);
+  m_disassembler_options_holder = get_all_disassembler_options (gdbarch);
+  if (!m_disassembler_options_holder.empty ())
+    m_di.disassembler_options = m_disassembler_options_holder.c_str ();
   disassemble_init_for_target (&m_di);
 }
 
@@ -833,13 +860,16 @@ gdb_buffered_insn_length_fprintf (void *stream, const char *format, ...)
   return 0;
 }
 
-/* Initialize a struct disassemble_info for gdb_buffered_insn_length.  */
+/* Initialize a struct disassemble_info for gdb_buffered_insn_length.
+   Upon return, *DISASSEMBLER_OPTIONS_HOLDER owns the string pointed
+   to by DI.DISASSEMBLER_OPTIONS.  */
 
 static void
 gdb_buffered_insn_length_init_dis (struct gdbarch *gdbarch,
 				   struct disassemble_info *di,
 				   const gdb_byte *insn, int max_len,
-				   CORE_ADDR addr)
+				   CORE_ADDR addr,
+				   std::string *disassembler_options_holder)
 {
   init_disassemble_info (di, NULL, gdb_buffered_insn_length_fprintf);
 
@@ -855,7 +885,9 @@ gdb_buffered_insn_length_init_dis (struct gdbarch *gdbarch,
   di->endian = gdbarch_byte_order (gdbarch);
   di->endian_code = gdbarch_byte_order_for_code (gdbarch);
 
-  di->disassembler_options = get_disassembler_options (gdbarch);
+  *disassembler_options_holder = get_all_disassembler_options (gdbarch);
+  if (!disassembler_options_holder->empty ())
+    di->disassembler_options = disassembler_options_holder->c_str ();
   disassemble_init_for_target (di);
 }
 
@@ -867,8 +899,10 @@ gdb_buffered_insn_length (struct gdbarch *gdbarch,
 			  const gdb_byte *insn, int max_len, CORE_ADDR addr)
 {
   struct disassemble_info di;
+  std::string disassembler_options_holder;
 
-  gdb_buffered_insn_length_init_dis (gdbarch, &di, insn, max_len, addr);
+  gdb_buffered_insn_length_init_dis (gdbarch, &di, insn, max_len, addr,
+				     &disassembler_options_holder);
 
   return gdbarch_print_insn (gdbarch, addr, &di);
 }
@@ -887,6 +921,7 @@ set_disassembler_options (char *prospective_options)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   char **disassembler_options = gdbarch_disassembler_options (gdbarch);
+  const disasm_options_and_args_t *valid_options_and_args;
   const disasm_options_t *valid_options;
   char *options = remove_whitespace_and_extra_commas (prospective_options);
   const char *opt;
@@ -903,20 +938,42 @@ set_disassembler_options (char *prospective_options)
       return;
     }
 
-  valid_options = gdbarch_valid_disassembler_options (gdbarch);
-  if (valid_options  == NULL)
+  valid_options_and_args = gdbarch_valid_disassembler_options (gdbarch);
+  if (valid_options_and_args == NULL)
     {
       fprintf_filtered (gdb_stdlog, _("\
 'set disassembler-options ...' is not supported on this architecture.\n"));
       return;
     }
 
+  valid_options = &valid_options_and_args->options;
+
   /* Verify we have valid disassembler options.  */
   FOR_EACH_DISASSEMBLER_OPTION (opt, options)
     {
       size_t i;
       for (i = 0; valid_options->name[i] != NULL; i++)
-	if (disassembler_options_cmp (opt, valid_options->name[i]) == 0)
+	if (valid_options->arg != NULL && valid_options->arg[i] != NULL)
+	  {
+	    size_t len = strlen (valid_options->name[i]);
+	    bool found = false;
+	    const char *arg;
+	    size_t j;
+
+	    if (memcmp (opt, valid_options->name[i], len) != 0)
+	      continue;
+	    arg = opt + len;
+	    for (j = 0; valid_options->arg[i]->values[j] != NULL; j++)
+	      if (disassembler_options_cmp
+		    (arg, valid_options->arg[i]->values[j]) == 0)
+		{
+		  found = true;
+		  break;
+		}
+	    if (found)
+	      break;
+	  }
+	else if (disassembler_options_cmp (opt, valid_options->name[i]) == 0)
 	  break;
       if (valid_options->name[i] == NULL)
 	{
@@ -943,6 +1000,8 @@ show_disassembler_options_sfunc (struct ui_file *file, int from_tty,
 				 struct cmd_list_element *c, const char *value)
 {
   struct gdbarch *gdbarch = get_current_arch ();
+  const disasm_options_and_args_t *valid_options_and_args;
+  const disasm_option_arg_t *valid_args;
   const disasm_options_t *valid_options;
 
   const char *options = get_disassembler_options (gdbarch);
@@ -952,10 +1011,12 @@ show_disassembler_options_sfunc (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("The current disassembler options are '%s'\n"),
 		    options);
 
-  valid_options = gdbarch_valid_disassembler_options (gdbarch);
+  valid_options_and_args = gdbarch_valid_disassembler_options (gdbarch);
 
-  if (valid_options == NULL)
+  if (valid_options_and_args == NULL)
     return;
+
+  valid_options = &valid_options_and_args->options;
 
   fprintf_filtered (file, _("\n\
 The following disassembler options are supported for use with the\n\
@@ -965,10 +1026,15 @@ The following disassembler options are supported for use with the\n\
     {
       size_t i, max_len = 0;
 
+      fprintf_filtered (file, "\n");
+
       /* Compute the length of the longest option name.  */
       for (i = 0; valid_options->name[i] != NULL; i++)
 	{
 	  size_t len = strlen (valid_options->name[i]);
+
+	  if (valid_options->arg != NULL && valid_options->arg[i] != NULL)
+	    len += strlen (valid_options->arg[i]->name);
 	  if (max_len < len)
 	    max_len = len;
 	}
@@ -976,10 +1042,17 @@ The following disassembler options are supported for use with the\n\
       for (i = 0, max_len++; valid_options->name[i] != NULL; i++)
 	{
 	  fprintf_filtered (file, "  %s", valid_options->name[i]);
+	  if (valid_options->arg != NULL && valid_options->arg[i] != NULL)
+	    fprintf_filtered (file, "%s", valid_options->arg[i]->name);
 	  if (valid_options->description[i] != NULL)
-	    fprintf_filtered (file, "%*c %s",
-			      (int)(max_len - strlen (valid_options->name[i])), ' ',
-			      valid_options->description[i]);
+	    {
+	      size_t len = strlen (valid_options->name[i]);
+
+	      if (valid_options->arg != NULL && valid_options->arg[i] != NULL)
+		len += strlen (valid_options->arg[i]->name);
+	      fprintf_filtered (file, "%*c %s", (int) (max_len - len), ' ',
+				valid_options->description[i]);
+	    }
 	  fprintf_filtered (file, "\n");
 	}
     }
@@ -990,11 +1063,32 @@ The following disassembler options are supported for use with the\n\
       for (i = 0; valid_options->name[i] != NULL; i++)
 	{
 	  fprintf_filtered (file, "%s", valid_options->name[i]);
+	  if (valid_options->arg != NULL && valid_options->arg[i] != NULL)
+	    fprintf_filtered (file, "%s", valid_options->arg[i]->name);
 	  if (valid_options->name[i + 1] != NULL)
 	    fprintf_filtered (file, ", ");
 	  wrap_here ("  ");
 	}
       fprintf_filtered (file, "\n");
+    }
+
+  valid_args = valid_options_and_args->args;
+  if (valid_args != NULL)
+    {
+      size_t i, j;
+
+      for (i = 0; valid_args[i].name != NULL; i++)
+	{
+	  fprintf_filtered (file, _("\n\
+  For the options above, the following values are supported for \"%s\":\n   "),
+			    valid_args[i].name);
+	  for (j = 0; valid_args[i].values[j] != NULL; j++)
+	    {
+	      fprintf_filtered (file, " %s", valid_args[i].values[j]);
+	      wrap_here ("   ");
+	    }
+	  fprintf_filtered (file, "\n");
+	}
     }
 }
 
@@ -1006,10 +1100,13 @@ disassembler_options_completer (struct cmd_list_element *ignore,
 				const char *text, const char *word)
 {
   struct gdbarch *gdbarch = get_current_arch ();
-  const disasm_options_t *opts = gdbarch_valid_disassembler_options (gdbarch);
+  const disasm_options_and_args_t *opts_and_args
+    = gdbarch_valid_disassembler_options (gdbarch);
 
-  if (opts != NULL)
+  if (opts_and_args != NULL)
     {
+      const disasm_options_t *opts = &opts_and_args->options;
+
       /* Only attempt to complete on the last option text.  */
       const char *separator = strrchr (text, ',');
       if (separator != NULL)

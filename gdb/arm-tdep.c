@@ -9572,7 +9572,8 @@ _initialize_arm_tdep (void)
 
 
   arm_disassembler_options = xstrdup ("reg-names-std");
-  const disasm_options_t *disasm_options = disassembler_options_arm ();
+  const disasm_options_t *disasm_options
+    = &disassembler_options_arm ()->options;
   int num_disassembly_styles = 0;
   for (i = 0; disasm_options->name[i] != NULL; i++)
     if (CONST_STRNEQ (disasm_options->name[i], "reg-names-"))

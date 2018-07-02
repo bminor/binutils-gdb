@@ -6850,17 +6850,23 @@ print_insn_little_arm (bfd_vma pc, struct disassemble_info *info)
   return print_insn (pc, info, TRUE);
 }
 
-const disasm_options_t *
+const disasm_options_and_args_t *
 disassembler_options_arm (void)
 {
-  static disasm_options_t *opts = NULL;
+  static disasm_options_and_args_t *opts_and_args;
 
-  if (opts == NULL)
+  if (opts_and_args == NULL)
     {
+      disasm_options_t *opts;
       unsigned int i;
-      opts = XNEW (disasm_options_t);
+
+      opts_and_args = XNEW (disasm_options_and_args_t);
+      opts_and_args->args = NULL;
+
+      opts = &opts_and_args->options;
       opts->name = XNEWVEC (const char *, NUM_ARM_OPTIONS + 1);
       opts->description = XNEWVEC (const char *, NUM_ARM_OPTIONS + 1);
+      opts->arg = NULL;
       for (i = 0; i < NUM_ARM_OPTIONS; i++)
 	{
 	  opts->name[i] = regnames[i].name;
@@ -6874,7 +6880,7 @@ disassembler_options_arm (void)
       opts->description[i] = NULL;
     }
 
-  return opts;
+  return opts_and_args;
 }
 
 void

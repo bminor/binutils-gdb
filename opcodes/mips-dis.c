@@ -2552,72 +2552,178 @@ print_insn_little_mips (bfd_vma memaddr, struct disassemble_info *info)
   return _print_insn_mips (memaddr, info, BFD_ENDIAN_LITTLE);
 }
 
+/* Indices into option argument vector for options accepting an argument.
+   Use MIPS_OPTION_ARG_NONE for options accepting no argument.  */
+typedef enum
+{
+  MIPS_OPTION_ARG_NONE = -1,
+  MIPS_OPTION_ARG_ABI,
+  MIPS_OPTION_ARG_ARCH,
+  MIPS_OPTION_ARG_SIZE
+} mips_option_arg_t;
+
+/* Valid MIPS disassembler options.  */
+static struct
+{
+  const char *name;
+  const char *description;
+  mips_option_arg_t arg;
+} mips_options[] =
+{
+  { "no-aliases", N_("Use canonical instruction forms.\n"),
+		  MIPS_OPTION_ARG_NONE },
+  { "msa",        N_("Recognize MSA instructions.\n"),
+		  MIPS_OPTION_ARG_NONE },
+  { "virt",       N_("Recognize the virtualization ASE instructions.\n"),
+		  MIPS_OPTION_ARG_NONE },
+  { "xpa",        N_("Recognize the eXtended Physical Address (XPA) ASE\n\
+                  instructions.\n"),
+		  MIPS_OPTION_ARG_NONE },
+  { "ginv",       N_("Recognize the Global INValidate (GINV) ASE "
+		     "instructions.\n"),
+		  MIPS_OPTION_ARG_NONE },
+  { "gpr-names=", N_("Print GPR names according to specified ABI.\n\
+                  Default: based on binary being disassembled.\n"),
+		  MIPS_OPTION_ARG_ABI },
+  { "fpr-names=", N_("Print FPR names according to specified ABI.\n\
+                  Default: numeric.\n"),
+		  MIPS_OPTION_ARG_ABI },
+  { "cp0-names=", N_("Print CP0 register names according to specified "
+		     "architecture.\n\
+                  Default: based on binary being disassembled.\n"),
+		  MIPS_OPTION_ARG_ARCH },
+  { "hwr-names=", N_("Print HWR names according to specified architecture.\n\
+                  Default: based on binary being disassembled.\n"),
+		  MIPS_OPTION_ARG_ARCH },
+  { "reg-names=", N_("Print GPR and FPR names according to specified ABI.\n"),
+		  MIPS_OPTION_ARG_ABI },
+  { "reg-names=", N_("Print CP0 register and HWR names according to "
+		     "specified\n\
+                  architecture."),
+		  MIPS_OPTION_ARG_ARCH }
+};
+
+/* Build the structure representing valid MIPS disassembler options.
+   This is done dynamically for maintenance ease purpose; a static
+   initializer would be unreadable.  */
+
+const disasm_options_and_args_t *
+disassembler_options_mips (void)
+{
+  static disasm_options_and_args_t *opts_and_args;
+
+  if (opts_and_args == NULL)
+    {
+      size_t num_options = ARRAY_SIZE (mips_options);
+      size_t num_args = MIPS_OPTION_ARG_SIZE;
+      disasm_option_arg_t *args;
+      disasm_options_t *opts;
+      size_t i;
+      size_t j;
+
+      args = XNEWVEC (disasm_option_arg_t, num_args + 1);
+
+      args[MIPS_OPTION_ARG_ABI].name = "ABI";
+      args[MIPS_OPTION_ARG_ABI].values
+	= XNEWVEC (const char *, ARRAY_SIZE (mips_abi_choices) + 1);
+      for (i = 0; i < ARRAY_SIZE (mips_abi_choices); i++)
+	args[MIPS_OPTION_ARG_ABI].values[i] = mips_abi_choices[i].name;
+      /* The array we return must be NULL terminated.  */
+      args[MIPS_OPTION_ARG_ABI].values[i] = NULL;
+
+      args[MIPS_OPTION_ARG_ARCH].name = "ARCH";
+      args[MIPS_OPTION_ARG_ARCH].values
+	= XNEWVEC (const char *, ARRAY_SIZE (mips_arch_choices) + 1);
+      for (i = 0, j = 0; i < ARRAY_SIZE (mips_arch_choices); i++)
+	if (*mips_arch_choices[i].name != '\0')
+	  args[MIPS_OPTION_ARG_ARCH].values[j++] = mips_arch_choices[i].name;
+      /* The array we return must be NULL terminated.  */
+      args[MIPS_OPTION_ARG_ARCH].values[j] = NULL;
+
+      /* The array we return must be NULL terminated.  */
+      args[MIPS_OPTION_ARG_SIZE].name = NULL;
+      args[MIPS_OPTION_ARG_SIZE].values = NULL;
+
+      opts_and_args = XNEW (disasm_options_and_args_t);
+      opts_and_args->args = args;
+
+      opts = &opts_and_args->options;
+      opts->name = XNEWVEC (const char *, num_options + 1);
+      opts->description = XNEWVEC (const char *, num_options + 1);
+      opts->arg = XNEWVEC (const disasm_option_arg_t *, num_options + 1);
+      for (i = 0; i < num_options; i++)
+	{
+	  opts->name[i] = mips_options[i].name;
+	  opts->description[i] = _(mips_options[i].description);
+	  if (mips_options[i].arg != MIPS_OPTION_ARG_NONE)
+	    opts->arg[i] = &args[mips_options[i].arg];
+	  else
+	    opts->arg[i] = NULL;
+	}
+      /* The array we return must be NULL terminated.  */
+      opts->name[i] = NULL;
+      opts->description[i] = NULL;
+      opts->arg[i] = NULL;
+    }
+
+  return opts_and_args;
+}
+
 void
 print_mips_disassembler_options (FILE *stream)
 {
-  unsigned int i;
+  const disasm_options_and_args_t *opts_and_args;
+  const disasm_option_arg_t *args;
+  const disasm_options_t *opts;
+  size_t max_len = 0;
+  size_t i;
+  size_t j;
+
+  opts_and_args = disassembler_options_mips ();
+  opts = &opts_and_args->options;
+  args = opts_and_args->args;
 
   fprintf (stream, _("\n\
 The following MIPS specific disassembler options are supported for use\n\
-with the -M switch (multiple options should be separated by commas):\n"));
+with the -M switch (multiple options should be separated by commas):\n\n"));
 
-  fprintf (stream, _("\n\
-  no-aliases               Use canonical instruction forms.\n"));
+  /* Compute the length of the longest option name.  */
+  for (i = 0; opts->name[i] != NULL; i++)
+    {
+      size_t len = strlen (opts->name[i]);
 
-  fprintf (stream, _("\n\
-  msa                      Recognize MSA instructions.\n"));
+      if (opts->arg[i] != NULL)
+	len += strlen (opts->arg[i]->name);
+      if (max_len < len)
+	max_len = len;
+    }
 
-  fprintf (stream, _("\n\
-  virt                     Recognize the virtualization ASE instructions.\n"));
+  for (i = 0, max_len++; opts->name[i] != NULL; i++)
+    {
+      fprintf (stream, "  %s", opts->name[i]);
+      if (opts->arg[i] != NULL)
+	fprintf (stream, "%s", opts->arg[i]->name);
+      if (opts->description[i] != NULL)
+	{
+	  size_t len = strlen (opts->name[i]);
 
-  fprintf (stream, _("\n\
-  xpa                      Recognize the eXtended Physical Address (XPA)\n\
-                           ASE instructions.\n"));
+	  if (opts->arg[i] != NULL)
+	    len += strlen (opts->arg[i]->name);
+	  fprintf (stream,
+		   "%*c %s", (int) (max_len - len), ' ', opts->description[i]);
+	}
+      fprintf (stream, _("\n"));
+    }
 
-  fprintf (stream, _("\n\
-  ginv                     Recognize the Global INValidate (GINV) ASE\n\
-                           instructions.\n"));
-
-  fprintf (stream, _("\n\
-  gpr-names=ABI            Print GPR names according to specified ABI.\n\
-                           Default: based on binary being disassembled.\n"));
-
-  fprintf (stream, _("\n\
-  fpr-names=ABI            Print FPR names according to specified ABI.\n\
-                           Default: numeric.\n"));
-
-  fprintf (stream, _("\n\
-  cp0-names=ARCH           Print CP0 register names according to\n\
-                           specified architecture.\n\
-                           Default: based on binary being disassembled.\n"));
-
-  fprintf (stream, _("\n\
-  hwr-names=ARCH           Print HWR names according to specified \n\
-                           architecture.\n\
-                           Default: based on binary being disassembled.\n"));
-
-  fprintf (stream, _("\n\
-  reg-names=ABI            Print GPR and FPR names according to\n\
-                           specified ABI.\n"));
-
-  fprintf (stream, _("\n\
-  reg-names=ARCH           Print CP0 register and HWR names according to\n\
-                           specified architecture.\n"));
-
-  fprintf (stream, _("\n\
-  For the options above, the following values are supported for \"ABI\":\n\
-   "));
-  for (i = 0; i < ARRAY_SIZE (mips_abi_choices); i++)
-    fprintf (stream, " %s", mips_abi_choices[i].name);
-  fprintf (stream, _("\n"));
-
-  fprintf (stream, _("\n\
-  For the options above, The following values are supported for \"ARCH\":\n\
-   "));
-  for (i = 0; i < ARRAY_SIZE (mips_arch_choices); i++)
-    if (*mips_arch_choices[i].name != '\0')
-      fprintf (stream, " %s", mips_arch_choices[i].name);
-  fprintf (stream, _("\n"));
+  for (i = 0; args[i].name != NULL; i++)
+    {
+      fprintf (stream, _("\n\
+  For the options above, the following values are supported for \"%s\":\n   "),
+	       args[i].name);
+      for (j = 0; args[i].values[j] != NULL; j++)
+	fprintf (stream, " %s", args[i].values[j]);
+      fprintf (stream, _("\n"));
+    }
 
   fprintf (stream, _("\n"));
 }

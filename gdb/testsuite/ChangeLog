@@ -1,3 +1,9 @@
+2018-07-02  Maciej W. Rozycki  <macro@mips.com>
+
+	PR tdep/8282
+	* gdb.arch/mips-disassembler-options.exp: New test.
+	* gdb.arch/mips-disassembler-options.s: New test source.
+
 2018-06-29  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/names.exp: Adjust expected "info threads" output.

@@ -1549,11 +1549,14 @@ extern void set_gdbarch_addressable_memory_unit_size (struct gdbarch *gdbarch, g
 
 /* Functions for allowing a target to modify its disassembler options. */
 
+extern const char * gdbarch_disassembler_options_implicit (struct gdbarch *gdbarch);
+extern void set_gdbarch_disassembler_options_implicit (struct gdbarch *gdbarch, const char * disassembler_options_implicit);
+
 extern char ** gdbarch_disassembler_options (struct gdbarch *gdbarch);
 extern void set_gdbarch_disassembler_options (struct gdbarch *gdbarch, char ** disassembler_options);
 
-extern const disasm_options_t * gdbarch_valid_disassembler_options (struct gdbarch *gdbarch);
-extern void set_gdbarch_valid_disassembler_options (struct gdbarch *gdbarch, const disasm_options_t * valid_disassembler_options);
+extern const disasm_options_and_args_t * gdbarch_valid_disassembler_options (struct gdbarch *gdbarch);
+extern void set_gdbarch_valid_disassembler_options (struct gdbarch *gdbarch, const disasm_options_and_args_t * valid_disassembler_options);
 
 /* Type alignment. */
 
