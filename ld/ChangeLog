@@ -1,3 +1,8 @@
+2018-07-02  Maciej W. Rozycki  <macro@mips.com>
+
+	* testsuite/ld-mips-elf/mips-elf.exp: Fix a typo in PR ld/21334
+	test name.
+
 2018-07-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23324
