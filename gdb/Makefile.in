@@ -603,9 +603,6 @@ CLIBS = $(SIM) $(READLINE) $(OPCODES) $(BFD) $(ZLIB) $(INTL) $(LIBIBERTY) $(LIBD
 CDEPS = $(XM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) \
 	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU)
 
-ADD_FILES = $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
-ADD_DEPS = $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
-
 DIST = gdb
 
 RUNTEST = runtest
@@ -1882,14 +1879,14 @@ stamp-init: $(INIT_FILES)
 # against that.
 #
 # init.o is very important.  It pulls in the rest of GDB.
-LIBGDB_OBS = $(COMMON_OBS) $(ADD_FILES) init.o
+LIBGDB_OBS = $(COMMON_OBS) init.o
 libgdb.a: $(LIBGDB_OBS)
 	-rm -f libgdb.a
 	$(AR) q libgdb.a $(LIBGDB_OBS)
 	$(RANLIB) libgdb.a
 
 # Removing the old gdb first works better if it is running, at least on SunOS.
-gdb$(EXEEXT): gdb.o $(LIBGDB_OBS) $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
+gdb$(EXEEXT): gdb.o $(LIBGDB_OBS) $(CDEPS) $(TDEPLIBS)
 	$(SILENCE) rm -f gdb$(EXEEXT)
 	$(ECHO_CXXLD) $(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
 		-o gdb$(EXEEXT) gdb.o $(LIBGDB_OBS) \
@@ -1940,7 +1937,7 @@ tags: TAGS
 
 clean mostlyclean: $(CONFIG_CLEAN)
 	@$(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(CLEANDIRS)" subdir_do
-	rm -f *.o *.a $(ADD_FILES) *~ init.c-tmp init.l-tmp version.c-tmp
+	rm -f *.o *.a *~ init.c-tmp init.l-tmp version.c-tmp
 	rm -f init.c stamp-init version.c stamp-version
 	rm -f gdb$(EXEEXT) core make.log
 	rm -f gdb[0-9]$(EXEEXT)
@@ -2572,8 +2569,7 @@ clean-gdbtk:
 	rm -f insight$(EXEEXT)
 
 # Removing the old gdb first works better if it is running, at least on SunOS.
-insight$(EXEEXT): gdbtk-main.o libgdb.a $(ADD_DEPS) \
-		$(CDEPS) $(TDEPLIBS)
+insight$(EXEEXT): gdbtk-main.o libgdb.a $(CDEPS) $(TDEPLIBS)
 	rm -f insight$(EXEEXT)
 	$(ECHO_CXXLD) $(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
 		-o insight$(EXEEXT) gdbtk-main.o libgdb.a \

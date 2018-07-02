@@ -1,5 +1,11 @@
 2018-07-09  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (ADD_FILES, ADD_DEPS): Remove.
+	(LIBGDB_OBS, clean mostlyclean): Update.
+	(gdb$(EXEEXT), insight$(EXEEXT)): Update.
+
+2018-07-09  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (%.c: %.y): Use ECHO_YACC.
 	(%.c: %.l): Use ECHO_LEX.  Just fail if flex not available.
 	* silent-rules.mk (ECHO_YACC, ECHO_LEX): New variables.
