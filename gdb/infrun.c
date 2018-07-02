@@ -1190,7 +1190,7 @@ follow_exec (ptid_t ptid, char *exec_file_target)
       /* Do exit processing for the original inferior before adding
 	 the new inferior so we don't have two active inferiors with
 	 the same ptid, which can confuse find_inferior_ptid.  */
-      exit_inferior_num_silent (current_inferior ()->num);
+      exit_inferior_silent (current_inferior ());
 
       inf = add_inferior_with_spaces ();
       inf->pid = pid;

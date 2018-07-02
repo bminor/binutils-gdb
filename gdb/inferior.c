@@ -250,14 +250,6 @@ exit_inferior_silent (inferior *inf)
   exit_inferior_1 (inf, 1);
 }
 
-void
-exit_inferior_num_silent (int num)
-{
-  struct inferior *inf = find_inferior_id (num);
-
-  exit_inferior_1 (inf, 1);
-}
-
 /* See inferior.h.  */
 
 void

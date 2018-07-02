@@ -1,5 +1,11 @@
 2018-07-03  Tom Tromey  <tom@tromey.com>
 
+	* infrun.c (follow_exec): Use exit_inferior_silent.
+	* inferior.c (exit_inferior_num_silent): Remove.
+	* inferior.h (exit_inferior_num_silent): Don't declare.
+
+2018-07-03  Tom Tromey  <tom@tromey.com>
+
 	PR cli/23340:
 	* darwin-nat.c (darwin_attach_pid): Reset inferior and
 	inferior_ptid on error.
