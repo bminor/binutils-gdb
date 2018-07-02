@@ -1848,11 +1848,7 @@ test-cp-name-parser$(EXEEXT): test-cp-name-parser.o $(LIBIBERTY)
 # automatically adds the $(srcdir) prefixes when it encounters files
 # in sub-directories such as cli/ and mi/.
 
-# NOTE: cagney/2004-02-08: The ``case "$$fs" in'' eliminates
-# duplicates.  Files in the gdb/ directory can end up appearing in
-# COMMON_OBS (as a .o file) and CONFIG_SRCS (as a .c file).
-
-INIT_FILES = $(COMMON_OBS) $(CONFIG_SRCS) $(SUBDIR_GCC_COMPILE_SRCS)
+INIT_FILES = $(COMMON_OBS)
 init.c: $(INIT_FILES)
 	@$(ECHO_INIT_C) echo "Making init.c"
 	@rm -f init.c-tmp init.l-tmp
@@ -1868,16 +1864,10 @@ init.c: $(INIT_FILES)
 	    -e '/version.[co]$$/d' \
 	    -e '/^[a-z0-9A-Z_]*_[SU].[co]$$/d' \
 	    -e 's/-exp\.o$$/-exp.y/' \
-	    -e 's/\.[co]$$/.c/' \
+	    -e 's/\.o$$/.c/' \
 	    -e 's|^\([^  /][^     ]*\)|$(srcdir)/\1|g' | \
 	while read f; do \
 	    sed -n -e 's/^_initialize_\([a-z_0-9A-Z]*\).*/\1/p' $$f 2>/dev/null; \
-	done | \
-	while read f; do \
-	    case " $$fs " in \
-	        *" $$f "* ) ;; \
-	        * ) echo $$f ; fs="$$fs $$f";; \
-            esac; \
 	done >> init.l-tmp
 	@echo '/* Do not modify this file.  */' >>init.c-tmp
 	@echo '/* It is created automatically by the Makefile.  */'>>init.c-tmp

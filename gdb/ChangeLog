@@ -1,5 +1,10 @@
 2018-07-09  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (INIT_FILES): Remove CONFIG_SRCS,
+	SUBDIR_GCC_COMPILE_SRCS.
+
+2018-07-09  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (init.c): Remove some unused sed rules.
 
 2018-07-09  Tom Tromey  <tom@tromey.com>
