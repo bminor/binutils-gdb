@@ -1,5 +1,11 @@
 2018-07-09  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (%.c: %.y): Use ECHO_YACC.
+	(%.c: %.l): Use ECHO_LEX.  Just fail if flex not available.
+	* silent-rules.mk (ECHO_YACC, ECHO_LEX): New variables.
+
+2018-07-09  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (ALLDEPFILES): Remove exec.c.
 	(COMMON_OBS): Remove exec.o.
 	(COMMON_SFILES): Add exec.c.
