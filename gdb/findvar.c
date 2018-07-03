@@ -789,6 +789,8 @@ default_read_var_value (struct symbol *var, const struct block *var_block,
       break;
 
     case LOC_OPTIMIZED_OUT:
+      if (is_dynamic_type (type))
+	type = resolve_dynamic_type (type, NULL, /* Unused address.  */ 0);
       return allocate_optimized_out_value (type);
 
     default:

@@ -1,3 +1,8 @@
+2018-07-18  Tom de Vries  <tdevries@suse.de>
+
+	* findvar.c (default_read_var_value): Also resolve dynamic type for
+	LOC_OPTIMIZED_OUT vars.
+
 2018-07-18  Maciej W. Rozycki  <macro@mips.com>
 
 	* mips-tdep.c (micromips_next_pc): Add SYSCALL instruction
