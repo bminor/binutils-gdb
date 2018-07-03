@@ -1,3 +1,9 @@
+2018-08-06  Sergey Korolev  <s.korolev@ndmsystems.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* linux-nat.c (linux_nat_target::follow_fork): Avoid using
+	'W_STOPCODE (0)' as this could be ambiguous.
+
 2018-08-03  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* ser-tcp.c (net_open): Fix thinko when deciding whether to

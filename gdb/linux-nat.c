@@ -445,7 +445,6 @@ linux_nat_target::follow_fork (int follow_child, int detach_fork)
   if (!follow_child)
     {
       struct lwp_info *child_lp = NULL;
-      int status = W_STOPCODE (0);
       int has_vforked;
       ptid_t parent_ptid, child_ptid;
       int parent_pid, child_pid;
@@ -465,6 +464,8 @@ linux_nat_target::follow_fork (int follow_child, int detach_fork)
       /* Detach new forked process?  */
       if (detach_fork)
 	{
+	  int child_stop_signal = 0;
+	  bool detach_child = true;
 	  struct cleanup *old_chain = make_cleanup (delete_lwp_cleanup,
 						    child_lp);
 
@@ -484,18 +485,24 @@ linux_nat_target::follow_fork (int follow_child, int detach_fork)
 	  if (!gdbarch_software_single_step_p (target_thread_architecture
 					       (parent_ptid)))
 	    {
+	      int status;
+
 	      linux_disable_event_reporting (child_pid);
 	      if (ptrace (PTRACE_SINGLESTEP, child_pid, 0, 0) < 0)
 		perror_with_name (_("Couldn't do single step"));
 	      if (my_waitpid (child_pid, &status, 0) < 0)
 		perror_with_name (_("Couldn't wait vfork process"));
+	      else
+		{
+		  detach_child = WIFSTOPPED (status);
+		  child_stop_signal = WSTOPSIG (status);
+		}
 	    }
 
-	  if (WIFSTOPPED (status))
+	  if (detach_child)
 	    {
-	      int signo;
+	      int signo = child_stop_signal;
 
-	      signo = WSTOPSIG (status);
 	      if (signo != 0
 		  && !signal_pass_state (gdb_signal_from_host (signo)))
 		signo = 0;
