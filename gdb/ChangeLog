@@ -1,5 +1,10 @@
 2018-07-26  Tom de Vries  <tdevries@suse.de>
 
+	PR breakpoints/23366
+	* infcmd.c (info_program_command): Handle ptid == minus_one_ptid.
+
+2018-07-26  Tom de Vries  <tdevries@suse.de>
+
 	* dwarf2read.c (read_subrange_type): Warn if DW_AT_upper_bound or
 	DW_AT_count can't be translated to a dynamic prop.
 

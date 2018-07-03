@@ -2091,7 +2091,7 @@ info_program_command (const char *args, int from_tty)
       get_last_target_status (&ptid, &ws);
     }
 
-  if (ptid == null_ptid)
+  if (ptid == null_ptid || ptid == minus_one_ptid)
     error (_("No selected thread."));
 
   thread_info *tp = find_thread_ptid (ptid);
