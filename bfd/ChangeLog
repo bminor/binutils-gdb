@@ -1,5 +1,10 @@
 2018-07-03  Alan Modra  <amodra@gmail.com>
 
+	* elflink.c (bfd_elf_final_link): Remove zero size .gnu.attributes
+	sections.
+
+2018-07-03  Alan Modra  <amodra@gmail.com>
+
 	* elf-bfd.h (ATTR_TYPE_FLAG_ERROR, ATTR_TYPE_HAS_ERROR): Define.
 	* elf-attrs.c (is_default_attr): Handle ATTR_TYPE_HAS_ERROR.
 	* elf32-ppc.c (_bfd_elf_ppc_merge_fp_attributes): Use

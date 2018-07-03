@@ -11715,6 +11715,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   std_attrs_section = get_elf_backend_data (abfd)->obj_attrs_section;
   for (o = abfd->sections; o != NULL; o = o->next)
     {
+      bfd_boolean remove = FALSE;
+
       if ((std_attrs_section && strcmp (o->name, std_attrs_section) == 0)
 	  || strcmp (o->name, ".gnu.attributes") == 0)
 	{
@@ -11731,19 +11733,21 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	    }
 
 	  attr_size = bfd_elf_obj_attr_size (abfd);
+	  bfd_set_section_size (abfd, o, attr_size);
+	  /* Skip this section later on.  */
+	  o->map_head.link_order = NULL;
 	  if (attr_size)
-	    {
-	      bfd_set_section_size (abfd, o, attr_size);
-	      attr_section = o;
-	      /* Skip this section later on.  */
-	      o->map_head.link_order = NULL;
-	    }
+	    attr_section = o;
 	  else
-	    o->flags |= SEC_EXCLUDE;
+	    remove = TRUE;
 	}
       else if ((o->flags & SEC_GROUP) != 0 && o->size == 0)
 	{
 	  /* Remove empty group section from linker output.  */
+	  remove = TRUE;
+	}
+      if (remove)
+	{
 	  o->flags |= SEC_EXCLUDE;
 	  bfd_section_list_remove (abfd, o);
 	  abfd->section_count--;
