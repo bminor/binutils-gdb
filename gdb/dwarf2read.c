@@ -6308,6 +6308,10 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
   cu_header->offset_size = (bytes_read == 4) ? 4 : 8;
   info_ptr += bytes_read;
   cu_header->version = read_2_bytes (abfd, info_ptr);
+  if (cu_header->version < 2 || cu_header->version > 5)
+    error (_("Dwarf Error: wrong version in compilation unit header "
+	   "(is %d, should be 2, 3, 4 or 5) [in module %s]"),
+	   cu_header->version, filename);
   info_ptr += 2;
   if (cu_header->version < 5)
     switch (section_kind)
@@ -6409,11 +6413,6 @@ error_check_comp_unit_head (struct dwarf2_per_objfile *dwarf2_per_objfile,
 			    struct dwarf2_section_info *abbrev_section)
 {
   const char *filename = get_section_file_name (section);
-
-  if (header->version < 2 || header->version > 5)
-    error (_("Dwarf Error: wrong version in compilation unit header "
-	   "(is %d, should be 2, 3, 4 or 5) [in module %s]"), header->version,
-	   filename);
 
   if (to_underlying (header->abbrev_sect_off)
       >= dwarf2_section_size (dwarf2_per_objfile->objfile, abbrev_section))

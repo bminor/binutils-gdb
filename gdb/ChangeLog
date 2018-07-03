@@ -1,3 +1,9 @@
+2018-07-04  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf2read.c (error_check_comp_unit_head): Move dwarf version
+	check ...
+	(read_comp_unit_head): ... here.
+
 2018-07-03  Tom Tromey  <tom@tromey.com>
 
 	* tracepoint.c (process_tracepoint_on_disconnect, start_tracing)
