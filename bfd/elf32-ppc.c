@@ -4735,27 +4735,41 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 	;
       else if (out_fp == 0)
 	{
-	  out_attr->type = 1;
+	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL;
 	  out_attr->i ^= in_fp;
 	}
       else if (out_fp != 2 && in_fp == 2)
-	_bfd_error_handler
-	  /* xgettext:c-format */
-	  (_("warning: %pB uses hard float, %pB uses soft float"), obfd, ibfd);
+	{
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("warning: %pB uses hard float, %pB uses soft float"),
+	     obfd, ibfd);
+	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+	}
       else if (out_fp == 2 && in_fp != 2)
-	_bfd_error_handler
-	  /* xgettext:c-format */
-	  (_("warning: %pB uses hard float, %pB uses soft float"), ibfd, obfd);
+	{
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("warning: %pB uses hard float, %pB uses soft float"),
+	     ibfd, obfd);
+	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+	}
       else if (out_fp == 1 && in_fp == 3)
-	_bfd_error_handler
-	  /* xgettext:c-format */
-	  (_("warning: %pB uses double-precision hard float, "
-	     "%pB uses single-precision hard float"), obfd, ibfd);
+	{
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("warning: %pB uses double-precision hard float, "
+	       "%pB uses single-precision hard float"), obfd, ibfd);
+	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+	}
       else if (out_fp == 3 && in_fp == 1)
-	_bfd_error_handler
-	  /* xgettext:c-format */
-	  (_("warning: %pB uses double-precision hard float, "
-	     "%pB uses single-precision hard float"), ibfd, obfd);
+	{
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("warning: %pB uses double-precision hard float, "
+	       "%pB uses single-precision hard float"), ibfd, obfd);
+	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+	}
 
       in_fp = in_attr->i & 0xc;
       out_fp = out_attr->i & 0xc;
@@ -4763,29 +4777,41 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 	;
       else if (out_fp == 0)
 	{
-	  out_attr->type = 1;
+	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL;
 	  out_attr->i ^= in_fp;
 	}
       else if (out_fp != 2 * 4 && in_fp == 2 * 4)
-	_bfd_error_handler
-	  /* xgettext:c-format */
-	  (_("warning: %pB uses 64-bit long double, "
-	     "%pB uses 128-bit long double"), ibfd, obfd);
+	{
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("warning: %pB uses 64-bit long double, "
+	       "%pB uses 128-bit long double"), ibfd, obfd);
+	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+	}
       else if (in_fp != 2 * 4 && out_fp == 2 * 4)
-	_bfd_error_handler
-	  /* xgettext:c-format */
-	  (_("warning: %pB uses 64-bit long double, "
-	     "%pB uses 128-bit long double"), obfd, ibfd);
+	{
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("warning: %pB uses 64-bit long double, "
+	       "%pB uses 128-bit long double"), obfd, ibfd);
+	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+	}
       else if (out_fp == 1 * 4 && in_fp == 3 * 4)
-	_bfd_error_handler
-	  /* xgettext:c-format */
-	  (_("warning: %pB uses IBM long double, "
-	     "%pB uses IEEE long double"), obfd, ibfd);
+	{
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("warning: %pB uses IBM long double, "
+	       "%pB uses IEEE long double"), obfd, ibfd);
+	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+	}
       else if (out_fp == 3 * 4 && in_fp == 1 * 4)
-	_bfd_error_handler
-	  /* xgettext:c-format */
-	  (_("warning: %pB uses IBM long double, "
-	     "%pB uses IEEE long double"), ibfd, obfd);
+	{
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("warning: %pB uses IBM long double, "
+	       "%pB uses IEEE long double"), ibfd, obfd);
+	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+	}
     }
 }
 
@@ -4817,7 +4843,7 @@ ppc_elf_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
 	;
       else if (out_vec == 0)
 	{
-	  out_attr->type = 1;
+	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL;
 	  out_attr->i = in_vec;
 	}
       /* For now, allow generic to transition to AltiVec or SPE
@@ -4829,19 +4855,25 @@ ppc_elf_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
 	;
       else if (out_vec == 1)
 	{
-	  out_attr->type = 1;
+	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL;
 	  out_attr->i = in_vec;
 	}
       else if (out_vec < in_vec)
-	_bfd_error_handler
-	  /* xgettext:c-format */
-	  (_("warning: %pB uses AltiVec vector ABI, %pB uses SPE vector ABI"),
-	   obfd, ibfd);
+	{
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("warning: %pB uses AltiVec vector ABI, %pB uses SPE vector ABI"),
+	     obfd, ibfd);
+	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+	}
       else if (out_vec > in_vec)
-	_bfd_error_handler
-	  /* xgettext:c-format */
-	  (_("warning: %pB uses AltiVec vector ABI, %pB uses SPE vector ABI"),
-	   ibfd, obfd);
+	{
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("warning: %pB uses AltiVec vector ABI, %pB uses SPE vector ABI"),
+	     ibfd, obfd);
+	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+	}
     }
 
   /* Check for conflicting Tag_GNU_Power_ABI_Struct_Return attributes
@@ -4857,25 +4889,29 @@ ppc_elf_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
        ;
       else if (out_struct == 0)
 	{
-	  out_attr->type = 1;
+	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL;
 	  out_attr->i = in_struct;
 	}
       else if (out_struct < in_struct)
-	_bfd_error_handler
-	  /* xgettext:c-format */
-	  (_("warning: %pB uses r3/r4 for small structure returns, "
-	     "%pB uses memory"), obfd, ibfd);
+	{
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("warning: %pB uses r3/r4 for small structure returns, "
+	       "%pB uses memory"), obfd, ibfd);
+	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+	}
       else if (out_struct > in_struct)
-	_bfd_error_handler
-	  /* xgettext:c-format */
-	  (_("warning: %pB uses r3/r4 for small structure returns, "
-	     "%pB uses memory"), ibfd, obfd);
+	{
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("warning: %pB uses r3/r4 for small structure returns, "
+	       "%pB uses memory"), ibfd, obfd);
+	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+	}
     }
 
   /* Merge Tag_compatibility attributes and any common GNU ones.  */
-  _bfd_elf_merge_object_attributes (ibfd, info);
-
-  return TRUE;
+  return _bfd_elf_merge_object_attributes (ibfd, info);
 }
 
 /* Merge backend specific data from an object file to the output

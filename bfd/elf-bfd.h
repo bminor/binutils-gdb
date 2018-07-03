@@ -1699,17 +1699,20 @@ struct bfd_elf_section_data
 
 /* The value of an object attribute.  The type indicates whether the attribute
    holds and integer, a string, or both.  It can also indicate that there can
-   be no default (i.e. all values must be written to file, even zero).  */
+   be no default (i.e. all values must be written to file, even zero), or
+   that the value is in error and should not be written to file.  */
 
 typedef struct obj_attribute
 {
 #define ATTR_TYPE_FLAG_INT_VAL    (1 << 0)
 #define ATTR_TYPE_FLAG_STR_VAL    (1 << 1)
 #define ATTR_TYPE_FLAG_NO_DEFAULT (1 << 2)
+#define ATTR_TYPE_FLAG_ERROR	  (1 << 3)
 
 #define ATTR_TYPE_HAS_INT_VAL(TYPE)	((TYPE) & ATTR_TYPE_FLAG_INT_VAL)
 #define ATTR_TYPE_HAS_STR_VAL(TYPE)	((TYPE) & ATTR_TYPE_FLAG_STR_VAL)
 #define ATTR_TYPE_HAS_NO_DEFAULT(TYPE)	((TYPE) & ATTR_TYPE_FLAG_NO_DEFAULT)
+#define ATTR_TYPE_HAS_ERROR(TYPE)	((TYPE) & ATTR_TYPE_FLAG_ERROR)
 
   int type;
   unsigned int i;
