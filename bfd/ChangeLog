@@ -1,5 +1,17 @@
 2018-07-03  Alan Modra  <amodra@gmail.com>
 
+	* elf-bfd.h (ATTR_TYPE_FLAG_ERROR, ATTR_TYPE_HAS_ERROR): Define.
+	* elf-attrs.c (is_default_attr): Handle ATTR_TYPE_HAS_ERROR.
+	* elf32-ppc.c (_bfd_elf_ppc_merge_fp_attributes): Use
+	ATTR_TYPE_FLAG_INT_VAL.  Set ATTR_TYPE_HAS_ERROR on finding
+	incompatible attribute.
+	(ppc_elf_merge_obj_attributes): Likewise.  Return
+	_bfd_elf_merge_object_attributes result.
+	* elf64-ppc.c (ppc64_elf_merge_private_bfd_data): Return
+	_bfd_elf_merge_object_attributes result.
+
+2018-07-03  Alan Modra  <amodra@gmail.com>
+
 	PR 17550
 	* elflink.c (_bfd_elf_fix_symbol_flags): Hide dynamic symbols
 	in discarded sections.

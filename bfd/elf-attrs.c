@@ -42,6 +42,8 @@ uleb128_size (unsigned int i)
 static bfd_boolean
 is_default_attr (obj_attribute *attr)
 {
+  if (ATTR_TYPE_HAS_ERROR (attr->type))
+    return TRUE;
   if (ATTR_TYPE_HAS_INT_VAL (attr->type) && attr->i != 0)
     return FALSE;
   if (ATTR_TYPE_HAS_STR_VAL (attr->type) && attr->s && *attr->s)
