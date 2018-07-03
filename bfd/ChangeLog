@@ -1,3 +1,9 @@
+2018-07-03  Alan Modra  <amodra@gmail.com>
+
+	PR 17550
+	* elflink.c (_bfd_elf_fix_symbol_flags): Hide dynamic symbols
+	in discarded sections.
+
 2018-07-11  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* elf32-xtensa.c (elf_xtensa_allocate_dynrelocs): Don't allocate

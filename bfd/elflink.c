@@ -2853,10 +2853,14 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
       && (h->root.u.def.section->owner->flags & (DYNAMIC | BFD_PLUGIN)) == 0)
     h->def_regular = 1;
 
+  /* Symbols defined in discarded sections shouldn't be dynamic.  */
+  if (h->root.type == bfd_link_hash_undefined && h->indx == -3)
+    (*bed->elf_backend_hide_symbol) (eif->info, h, TRUE);
+
   /* If a weak undefined symbol has non-default visibility, we also
      hide it from the dynamic linker.  */
-  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-      && h->root.type == bfd_link_hash_undefweak)
+  else if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	   && h->root.type == bfd_link_hash_undefweak)
     (*bed->elf_backend_hide_symbol) (eif->info, h, TRUE);
 
   /* A hidden versioned symbol in executable should be forced local if
