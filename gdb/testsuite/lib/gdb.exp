@@ -6053,6 +6053,76 @@ gdb_caching_proc gdb_target_symbol_prefix {
     return $prefix
 }
 
+# Return 1 if target supports scheduler locking, otherwise return 0.
+
+gdb_caching_proc target_supports_scheduler_locking {
+    global gdb_prompt
+
+    set me "gdb_target_supports_scheduler_locking"
+
+    set src [standard_temp_file has_schedlock[pid].c]
+    set exe [standard_temp_file has_schedlock[pid].x]
+
+    gdb_produce_source $src {
+	int main () {
+	    return 0;
+	}
+    }
+
+    verbose "$me:  compiling testfile $src" 2
+    set compile_flags {debug nowarnings}
+    set lines [gdb_compile $src $exe executable $compile_flags]
+    file delete $src
+
+    if ![string match "" $lines] then {
+        verbose "$me:  testfile compilation failed, returning 0" 2
+        return 0
+    }
+
+    clean_restart $exe
+    gdb_start_cmd
+
+    set supports_schedule_locking -1
+    set current_schedule_locking_mode ""
+
+    set test "reading current scheduler-locking mode"
+    gdb_test_multiple "show scheduler-locking" $test {
+	-re "Mode for locking scheduler during execution is \"(\[\^\"\]*)\".*$gdb_prompt" {
+	    set current_schedule_locking_mode $expect_out(1,string)
+	}
+	-re "$gdb_prompt $" {
+	    set supports_schedule_locking 0
+	}
+	timeout {
+	    set supports_schedule_locking 0
+	}
+    }
+
+    if { $supports_schedule_locking == -1 } {
+	set test "checking for scheduler-locking support"
+	gdb_test_multiple "set scheduler-locking $current_schedule_locking_mode" $test {
+	    -re "Target '\[^'\]+' cannot support this command\..*$gdb_prompt $" {
+		set supports_schedule_locking 0
+	    }
+	    -re "$gdb_prompt $" {
+		set supports_schedule_locking 1
+	    }
+	    timeout {
+		set supports_schedule_locking 0
+	    }
+	}
+    }
+
+    if { $supports_schedule_locking == -1 } {
+	set supports_schedule_locking 0
+    }
+
+    gdb_exit
+    remote_file build delete $exe
+    verbose "$me:  returning $supports_schedule_locking" 2
+    return $supports_schedule_locking
+}
+
 # gdb_target_symbol returns the provided symbol with the correct prefix
 # prepended.  (See gdb_target_symbol_prefix, above.)
 

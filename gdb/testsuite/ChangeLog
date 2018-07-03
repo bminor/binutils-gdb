@@ -1,3 +1,9 @@
+2018-08-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* lib/gdb.exp (target_supports_scheduler_locking): New proc.
+	* gdb.mi/mi-cmd-param-changed.exp: Only run scheduler locking
+	tests if the target supports scheduler locking.
+
 2018-08-04  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.python/py-rbreak.exp: Fix rbreak regexp.
