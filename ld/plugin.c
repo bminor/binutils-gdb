@@ -625,8 +625,6 @@ static inline bfd_boolean
 is_visible_from_outside (struct ld_plugin_symbol *lsym,
 			 struct bfd_link_hash_entry *blhe)
 {
-  struct bfd_sym_chain *sym;
-
   if (bfd_link_relocatable (&link_info))
     return TRUE;
   if (blhe->non_ir_ref_dynamic
@@ -657,11 +655,6 @@ is_visible_from_outside (struct ld_plugin_symbol *lsym,
       return (lsym->visibility == LDPV_DEFAULT
 	      || lsym->visibility == LDPV_PROTECTED);
     }
-
-  for (sym = &entry_symbol; sym != NULL; sym = sym->next)
-    if (sym->name
-	&& strcmp (sym->name, blhe->root.string) == 0)
-      return TRUE;
 
   return FALSE;
 }

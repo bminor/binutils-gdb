@@ -242,6 +242,10 @@ set lto_compile_elf_tests [list \
   [list "Compile 8b" \
    "" "-flto -O2" \
    {lto-8b.c} {} ""] \
+  [list "PR ld/23309" \
+   "-O2 -flto -fuse-linker-plugin -fvisibility=hidden -ffunction-sections -Wl,--gc-sections,-u,KeepMe" \
+   "-O2 -flto -fuse-linker-plugin -fvisibility=hidden -ffunction-sections" \
+   {pr23309.c} {{"nm" {} "pr23309.d"}} "pr23309.exe" "c"] \
 ]
 
 # Generate input files for complex LTO tests for ELF.
