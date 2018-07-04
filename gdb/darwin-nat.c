@@ -1662,8 +1662,7 @@ darwin_attach_pid (struct inferior *inf)
     }
   CATCH (ex, RETURN_MASK_ALL)
     {
-      inf->pid = 0;
-      inf->priv.reset ();
+      exit_inferior (inf);
       inferior_ptid = null_ptid;
 
       throw_exception (ex);

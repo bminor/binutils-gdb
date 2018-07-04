@@ -1,3 +1,7 @@
+2018-07-04  Tom Tromey  <tom@tromey.com>
+
+	* darwin-nat.c (darwin_attach_pid): Use exit_inferior.
+
 2018-07-04  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* common/common-defs.h (HAVE_USEFUL_SBRK): Define.
