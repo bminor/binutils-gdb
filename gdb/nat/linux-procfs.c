@@ -357,3 +357,20 @@ linux_proc_pid_to_exec_file (int pid)
 
   return buf;
 }
+
+/* See linux-procfs.h.  */
+
+void
+linux_proc_init_warnings ()
+{
+  static bool warned = false;
+
+  if (warned)
+    return;
+  warned = true;
+
+  struct stat st;
+
+  if (stat ("/proc/self", &st) != 0)
+    warning (_("/proc is not accessible."));
+}

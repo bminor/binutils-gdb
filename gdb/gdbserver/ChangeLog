@@ -1,3 +1,8 @@
+2018-07-04  Vyacheslav Barinov  <v.barinov@samsung.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (initialize_low): Call linux_proc_init_warnings.
+
 2018-07-03  Tom Tromey  <tom@tromey.com>
 
 	* linux-low.c: Update.

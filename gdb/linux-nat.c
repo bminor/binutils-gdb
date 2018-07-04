@@ -384,18 +384,19 @@ linux_nat_ptrace_options (int attached)
   return options;
 }
 
-/* Initialize ptrace warnings and check for supported ptrace
-   features given PID.
+/* Initialize ptrace and procfs warnings and check for supported
+   ptrace features given PID.
 
    ATTACHED should be nonzero iff we attached to the inferior.  */
 
 static void
-linux_init_ptrace (pid_t pid, int attached)
+linux_init_ptrace_procfs (pid_t pid, int attached)
 {
   int options = linux_nat_ptrace_options (attached);
 
   linux_enable_event_reporting (pid, options);
   linux_ptrace_init_warnings ();
+  linux_proc_init_warnings ();
 }
 
 linux_nat_target::~linux_nat_target ()
@@ -404,13 +405,13 @@ linux_nat_target::~linux_nat_target ()
 void
 linux_nat_target::post_attach (int pid)
 {
-  linux_init_ptrace (pid, 1);
+  linux_init_ptrace_procfs (pid, 1);
 }
 
 void
 linux_nat_target::post_startup_inferior (ptid_t ptid)
 {
-  linux_init_ptrace (ptid.pid (), 0);
+  linux_init_ptrace_procfs (ptid.pid (), 0);
 }
 
 /* Return the number of known LWPs in the tgid given by PID.  */

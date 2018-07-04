@@ -7558,6 +7558,7 @@ initialize_low (void)
   set_target_ops (&linux_target_ops);
 
   linux_ptrace_init_warnings ();
+  linux_proc_init_warnings ();
 
   sigchld_action.sa_handler = sigchld_handler;
   sigemptyset (&sigchld_action.sa_mask);

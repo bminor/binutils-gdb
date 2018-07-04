@@ -1,3 +1,14 @@
+2018-07-04  Vyacheslav Barinov  <v.barinov@samsung.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (linux_init_ptrace): Rename to ...
+	(linux_init_ptrace_procfs): ... this.  Call
+	linux_proc_init_warnings.
+	(linux_nat_target::post_attach)
+	(linux_nat_target::post_startup_inferior): Adjust.
+	* nat/linux-procfs.c (linux_proc_init_warnings): Define function.
+	* nat/linux-procfs.h (linux_proc_init_warnings): Declare function.
+
 2018-07-04  Tom de Vries  <tdevries@suse.de>
 
 	* dwarf2read.c (error_check_comp_unit_head): Move dwarf version
