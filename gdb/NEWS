@@ -1,7 +1,9 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 8.1
+*** Changes since GDB 8.2
+
+*** Changes in GDB 8.2
 
 * The 'set disassembler-options' command now supports specifying options
   for the MIPS target.
