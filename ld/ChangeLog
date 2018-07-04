@@ -1,3 +1,9 @@
+2018-07-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23358
+	* lexsup.c (elf_shlib_list_options): Properly display default
+	for -z separate-code.
+
 2018-07-02  Maciej W. Rozycki  <macro@mips.com>
 
 	* testsuite/ld-mips-elf/mips-elf.exp: Fix a typo in PR ld/21334
