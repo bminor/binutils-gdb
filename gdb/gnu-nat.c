@@ -69,6 +69,7 @@ extern "C"
 #include "gdbthread.h"
 #include "gdb_obstack.h"
 #include "tid-parse.h"
+#include "nat/fork-inferior.h"
 
 #include "inf-child.h"
 

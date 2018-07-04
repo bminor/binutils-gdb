@@ -215,6 +215,7 @@ case ${gdb_host} in
 		# Host: Intel 386 running the GNU Hurd
 		NATDEPFILES='i386-gnu-nat.o gnu-nat.o \
 		     x86-nat.o nat/x86-dregs.o fork-child.o \
+		     nat/fork-inferior.o \
 		     notify_S.o process_reply_S.o msg_reply_S.o \
 		     msg_U.o exc_request_U.o exc_request_S.o'
 		HAVE_NATIVE_GCORE_HOST=1

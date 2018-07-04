@@ -1,5 +1,9 @@
 2019-02-14  Thomas Schwinge  <thomas@codesourcery.com>
 
+	* configure.nat [gdb_host == i386gnu] (NATDEPFILES): Add
+	'nat/fork-inferior.o'.
+	* gnu-nat.c: #include "nat/fork-inferior.h".
+
 	* gnu-nat.c (gnu_nat_target::detach): Instead of
 	'inf_child_maybe_unpush_target (ops)' call 'maybe_unpush_target'.
 	* gnu-nat.h: #include "inf-child.h".
