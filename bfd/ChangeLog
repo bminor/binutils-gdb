@@ -1,3 +1,8 @@
+2018-07-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (bfdinclude_HEADERS): Add $(INCDIR)/diagnostics.h.
+	* Makefile.in: Regenerated.
+
 2018-07-03  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (bfd_elf_final_link): Remove zero size .gnu.attributes
