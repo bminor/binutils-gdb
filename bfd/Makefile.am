@@ -32,7 +32,8 @@ if INSTALL_LIBBFD
 bfdlibdir = @bfdlibdir@
 bfdincludedir = @bfdincludedir@
 bfdlib_LTLIBRARIES = libbfd.la
-bfdinclude_HEADERS = $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/bfdlink.h
+bfdinclude_HEADERS = $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
+		     $(INCDIR)/bfdlink.h $(INCDIR)/diagnostics.h
 else !INSTALL_LIBBFD
 # Empty these so that the respective installation directories will not be created.
 bfdlibdir =

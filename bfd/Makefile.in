@@ -247,7 +247,8 @@ am__can_run_installinfo = \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
 am__bfdinclude_HEADERS_DIST = $(INCDIR)/plugin-api.h bfd.h \
-	$(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/bfdlink.h
+	$(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/bfdlink.h \
+	$(INCDIR)/diagnostics.h
 HEADERS = $(bfdinclude_HEADERS)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
@@ -466,7 +467,8 @@ libbfd_la_LDFLAGS = $(am__append_1) -release `cat libtool-soversion` \
 @INSTALL_LIBBFD_FALSE@bfdinclude_HEADERS = $(am__append_2)
 @INSTALL_LIBBFD_TRUE@bfdinclude_HEADERS = $(BFD_H) \
 @INSTALL_LIBBFD_TRUE@	$(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
-@INSTALL_LIBBFD_TRUE@	$(INCDIR)/bfdlink.h $(am__append_2)
+@INSTALL_LIBBFD_TRUE@	$(INCDIR)/bfdlink.h \
+@INSTALL_LIBBFD_TRUE@	$(INCDIR)/diagnostics.h $(am__append_2)
 @INSTALL_LIBBFD_FALSE@rpath_bfdlibdir = @bfdlibdir@
 @INSTALL_LIBBFD_FALSE@noinst_LTLIBRARIES = libbfd.la
 
