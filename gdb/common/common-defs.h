@@ -105,4 +105,13 @@
 /* String containing the current directory (what getwd would return).  */
 extern char *current_directory;
 
+/* sbrk on macOS is not useful for our purposes, since sbrk(0) always
+   returns the same value.  brk/sbrk on macOS is just an emulation
+   that always returns a pointer to a 4MB section reserved for
+   that.  */
+
+#if defined (HAVE_SBRK) && !__APPLE__
+#define HAVE_USEFUL_SBRK 1
+#endif
+
 #endif /* COMMON_DEFS_H */

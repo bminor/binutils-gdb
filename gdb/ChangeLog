@@ -1,3 +1,10 @@
+2018-07-04  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* common/common-defs.h (HAVE_USEFUL_SBRK): Define.
+	* main.c: Use HAVE_USEFUL_SBRK instead of HAVE_SBRK.
+	* maint.c: Likewise.
+	* top.c: Likewise.
+
 2018-07-04  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Create a new section for the next release branch.

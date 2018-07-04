@@ -828,7 +828,7 @@ scoped_command_stats::~scoped_command_stats ()
 
   if (m_space_enabled && per_command_space)
     {
-#ifdef HAVE_SBRK
+#ifdef HAVE_USEFUL_SBRK
       char *lim = (char *) sbrk (0);
 
       long space_now = lim - lim_at_start;
@@ -866,7 +866,7 @@ scoped_command_stats::scoped_command_stats (bool msg_type)
 {
   if (!m_msg_type || per_command_space)
     {
-#ifdef HAVE_SBRK
+#ifdef HAVE_USEFUL_SBRK
       char *lim = (char *) sbrk (0);
       m_start_space = lim - lim_at_start;
       m_space_enabled = 1;

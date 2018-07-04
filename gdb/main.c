@@ -487,7 +487,7 @@ captured_main_1 (struct captured_main_args *context)
   int save_auto_load;
   struct objfile *objfile;
 
-#ifdef HAVE_SBRK
+#ifdef HAVE_USEFUL_SBRK
   /* Set this before constructing scoped_command_stats.  */
   lim_at_start = (char *) sbrk (0);
 #endif
