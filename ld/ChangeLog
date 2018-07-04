@@ -1,5 +1,11 @@
 2018-07-04  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/23358
+	* lexsup.c (elf_shlib_list_options): Properly display default
+	for -z separate-code.
+
+2018-07-04  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/23324
 	* testsuite/ld-x86-64/pr23324.s: New file.
 	* testsuite/ld-x86-64/pr23324a.d: Likewise.
