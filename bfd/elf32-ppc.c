@@ -4713,12 +4713,13 @@ ppc_elf_check_relocs (bfd *abfd,
 
 /* Warn for conflicting Tag_GNU_Power_ABI_FP attributes between IBFD
    and OBFD, and merge non-conflicting ones.  */
-void
+bfd_boolean
 _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 {
   bfd *obfd = info->output_bfd;
   obj_attribute *in_attr, *in_attrs;
   obj_attribute *out_attr, *out_attrs;
+  bfd_boolean ret = TRUE;
 
   in_attrs = elf_known_obj_attributes (ibfd)[OBJ_ATTR_GNU];
   out_attrs = elf_known_obj_attributes (obfd)[OBJ_ATTR_GNU];
@@ -4730,6 +4731,7 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
     {
       int in_fp = in_attr->i & 3;
       int out_fp = out_attr->i & 3;
+      static bfd *last_fp, *last_ld;
 
       if (in_fp == 0)
 	;
@@ -4737,38 +4739,39 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 	{
 	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL;
 	  out_attr->i ^= in_fp;
+	  last_fp = ibfd;
 	}
       else if (out_fp != 2 && in_fp == 2)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("warning: %pB uses hard float, %pB uses soft float"),
-	     obfd, ibfd);
-	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+	    (_("%pB uses hard float, %pB uses soft float"),
+	     last_fp, ibfd);
+	  ret = FALSE;
 	}
       else if (out_fp == 2 && in_fp != 2)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("warning: %pB uses hard float, %pB uses soft float"),
-	     ibfd, obfd);
-	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+	    (_("%pB uses hard float, %pB uses soft float"),
+	     ibfd, last_fp);
+	  ret = FALSE;
 	}
       else if (out_fp == 1 && in_fp == 3)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("warning: %pB uses double-precision hard float, "
-	       "%pB uses single-precision hard float"), obfd, ibfd);
-	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+	    (_("%pB uses double-precision hard float, "
+	       "%pB uses single-precision hard float"), last_fp, ibfd);
+	  ret = FALSE;
 	}
       else if (out_fp == 3 && in_fp == 1)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("warning: %pB uses double-precision hard float, "
-	       "%pB uses single-precision hard float"), ibfd, obfd);
-	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+	    (_("%pB uses double-precision hard float, "
+	       "%pB uses single-precision hard float"), ibfd, last_fp);
+	  ret = FALSE;
 	}
 
       in_fp = in_attr->i & 0xc;
@@ -4779,40 +4782,48 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 	{
 	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL;
 	  out_attr->i ^= in_fp;
+	  last_ld = ibfd;
 	}
       else if (out_fp != 2 * 4 && in_fp == 2 * 4)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("warning: %pB uses 64-bit long double, "
-	       "%pB uses 128-bit long double"), ibfd, obfd);
-	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+	    (_("%pB uses 64-bit long double, "
+	       "%pB uses 128-bit long double"), ibfd, last_ld);
+	  ret = FALSE;
 	}
       else if (in_fp != 2 * 4 && out_fp == 2 * 4)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("warning: %pB uses 64-bit long double, "
-	       "%pB uses 128-bit long double"), obfd, ibfd);
-	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+	    (_("%pB uses 64-bit long double, "
+	       "%pB uses 128-bit long double"), last_ld, ibfd);
+	  ret = FALSE;
 	}
       else if (out_fp == 1 * 4 && in_fp == 3 * 4)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("warning: %pB uses IBM long double, "
-	       "%pB uses IEEE long double"), obfd, ibfd);
-	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+	    (_("%pB uses IBM long double, "
+	       "%pB uses IEEE long double"), last_ld, ibfd);
+	  ret = FALSE;
 	}
       else if (out_fp == 3 * 4 && in_fp == 1 * 4)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("warning: %pB uses IBM long double, "
-	       "%pB uses IEEE long double"), ibfd, obfd);
-	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+	    (_("%pB uses IBM long double, "
+	       "%pB uses IEEE long double"), ibfd, last_ld);
+	  ret = FALSE;
 	}
     }
+
+  if (!ret)
+    {
+      out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+      bfd_set_error (bfd_error_bad_value);
+    }
+  return ret;
 }
 
 /* Merge object attributes from IBFD into OBFD.  Warn if
@@ -4823,8 +4834,10 @@ ppc_elf_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
   bfd *obfd;
   obj_attribute *in_attr, *in_attrs;
   obj_attribute *out_attr, *out_attrs;
+  bfd_boolean ret;
 
-  _bfd_elf_ppc_merge_fp_attributes (ibfd, info);
+  if (!_bfd_elf_ppc_merge_fp_attributes (ibfd, info))
+    return FALSE;
 
   obfd = info->output_bfd;
   in_attrs = elf_known_obj_attributes (ibfd)[OBJ_ATTR_GNU];
@@ -4834,10 +4847,12 @@ ppc_elf_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
      merge non-conflicting ones.  */
   in_attr = &in_attrs[Tag_GNU_Power_ABI_Vector];
   out_attr = &out_attrs[Tag_GNU_Power_ABI_Vector];
+  ret = TRUE;
   if (in_attr->i != out_attr->i)
     {
       int in_vec = in_attr->i & 3;
       int out_vec = out_attr->i & 3;
+      static bfd *last_vec;
 
       if (in_vec == 0)
 	;
@@ -4845,6 +4860,7 @@ ppc_elf_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
 	{
 	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL;
 	  out_attr->i = in_vec;
+	  last_vec = ibfd;
 	}
       /* For now, allow generic to transition to AltiVec or SPE
 	 without a warning.  If GCC marked files with their stack
@@ -4857,22 +4873,25 @@ ppc_elf_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
 	{
 	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL;
 	  out_attr->i = in_vec;
+	  last_vec = ibfd;
 	}
       else if (out_vec < in_vec)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("warning: %pB uses AltiVec vector ABI, %pB uses SPE vector ABI"),
-	     obfd, ibfd);
+	    (_("%pB uses AltiVec vector ABI, %pB uses SPE vector ABI"),
+	     last_vec, ibfd);
 	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+	  ret = FALSE;
 	}
       else if (out_vec > in_vec)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("warning: %pB uses AltiVec vector ABI, %pB uses SPE vector ABI"),
-	     ibfd, obfd);
+	    (_("%pB uses AltiVec vector ABI, %pB uses SPE vector ABI"),
+	     ibfd, last_vec);
 	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+	  ret = FALSE;
 	}
     }
 
@@ -4884,6 +4903,7 @@ ppc_elf_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
     {
       int in_struct = in_attr->i & 3;
       int out_struct = out_attr->i & 3;
+      static bfd *last_struct;
 
       if (in_struct == 0 || in_struct == 3)
        ;
@@ -4891,23 +4911,31 @@ ppc_elf_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
 	{
 	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL;
 	  out_attr->i = in_struct;
+	  last_struct = ibfd;
 	}
       else if (out_struct < in_struct)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("warning: %pB uses r3/r4 for small structure returns, "
-	       "%pB uses memory"), obfd, ibfd);
+	    (_("%pB uses r3/r4 for small structure returns, "
+	       "%pB uses memory"), last_struct, ibfd);
 	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+	  ret = FALSE;
 	}
       else if (out_struct > in_struct)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("warning: %pB uses r3/r4 for small structure returns, "
-	       "%pB uses memory"), ibfd, obfd);
+	    (_("%pB uses r3/r4 for small structure returns, "
+	       "%pB uses memory"), ibfd, last_struct);
 	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+	  ret = FALSE;
 	}
+    }
+  if (!ret)
+    {
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
     }
 
   /* Merge Tag_compatibility attributes and any common GNU ones.  */

@@ -1,3 +1,14 @@
+2018-07-05  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/attr-gnu-4-12.d: Update expected output.
+	* testsuite/ld-powerpc/attr-gnu-4-13.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-21.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-23.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-31.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-4-32.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-8-23.d: Likewise.
+	* testsuite/ld-powerpc/attr-gnu-12-21.d: Likewise.
+
 2018-07-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23309
