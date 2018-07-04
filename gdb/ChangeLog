@@ -1,5 +1,9 @@
 2018-07-04  Joel Brobecker  <brobecker@adacore.com>
 
+	* NEWS: Change "Changes since GDB 8.1" into "Changes in GDB 8.2".
+
+2018-07-04  Joel Brobecker  <brobecker@adacore.com>
+
 	GDB 8.2 branch created (1b919490e8ba30bf1d6941df0ed112b0e557017e):
 	* version.in: Bump version to 8.1.90.DATE-git.
 
