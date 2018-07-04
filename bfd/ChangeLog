@@ -1,3 +1,14 @@
+2018-07-05  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (_bfd_elf_ppc_merge_fp_attributes): Update prototype.
+	* elf32-ppc.c (_bfd_elf_ppc_merge_fp_attributes): Return error
+	on mismatch.  Remove "warning: " from messages.  Track last bfd
+	used to set tags.
+	(ppc_elf_merge_obj_attributes): Likewise.  Handle status from
+	_bfd_elf_ppc_merge_fp_attributes.
+	* elf64-ppc.c (ppc64_elf_merge_private_bfd_data): Handle status
+	from _bfd_elf_ppc_merge_fp_attributes.
+
 2018-07-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (bfdinclude_HEADERS): Add $(INCDIR)/diagnostics.h.
