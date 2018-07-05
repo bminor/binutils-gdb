@@ -1,3 +1,8 @@
+2018-10-27  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.base/info_qt.c: New file.
+	* gdb.base/info_qt.exp: New file.
+
 2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
 	* gdb.arch/powerpc-htm-regs.c: New file.
