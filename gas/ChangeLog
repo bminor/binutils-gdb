@@ -1,3 +1,7 @@
+2018-07-05  Nick Clifton  <nickc@redhat.com>
+
+	* po/ru.po: Updated Russian translation.
+
 2018-06-29  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
 
 	* config/tc-aarch64.c (warn_unpredictable_ldst): Add unpredictable
