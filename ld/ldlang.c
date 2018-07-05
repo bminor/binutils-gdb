@@ -3413,6 +3413,7 @@ insert_undefined (const char *name)
     {
       h->type = bfd_link_hash_undefined;
       h->u.undef.abfd = NULL;
+      h->non_ir_ref_regular = TRUE;
       if (is_elf_hash_table (link_info.hash))
 	((struct elf_link_hash_entry *) h)->mark = 1;
       bfd_link_add_undef (link_info.hash, h);

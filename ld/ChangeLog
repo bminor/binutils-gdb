@@ -1,3 +1,11 @@
+2018-07-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23309
+	* ldlang.c (insert_undefined): Set non_ir_ref_regular to TRUE.
+	* plugin.c (is_visible_from_outside): Don't scan entry_symbol.
+	* testsuite/ld-plugin/pr23309.c: New file.
+	* testsuite/ld-plugin/pr23309.d: Likewise.
+
 2018-07-05  Nick Clifton  <nickc@redhat.com>
 
 	* po/bg.po: Updated Bulgarian translation.
