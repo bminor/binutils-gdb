@@ -1,3 +1,7 @@
+2018-07-05  Nick Clifton  <nickc@redhat.com>
+
+	* po/ru.po: Updated Russian translation.
+
 2018-07-05  Alan Modra  <amodra@gmail.com>
 
 	* elf-bfd.h (_bfd_elf_ppc_merge_fp_attributes): Update prototype.

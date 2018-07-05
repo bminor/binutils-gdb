@@ -1,3 +1,7 @@
+2018-07-05  Nick Clifton  <nickc@redhat.com>
+
+	* po/ru.po: Updated Russian translation.
+
 2018-07-02  Maciej W. Rozycki  <macro@mips.com>
 
 	* config/tc-mips.c (macro_build) <'i', 'j'>: Also accept
