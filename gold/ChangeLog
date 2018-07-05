@@ -1,3 +1,18 @@
+2018-07-06  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc: Include attributes.h.
+	(Powerpc_relobj::attributes_section_data_): New variable, with
+	accessor and associated constructor and destructor support.
+	(Powerpc_dynobj::attributes_section_data_): Likewise.
+	(Powerpc_relobj::do_read_symbols): Stash SHT_GNU_ATTRIBUTES section
+	contents in attributes_section_data_.
+	(Powerpc_dynobj::do_read_symbols): Likewise.
+	(Target_powerpc): Add attributes_section_data_, last_fp_, last_ld_,
+	last_vec_, and last_struct_ vars.
+	(Target_powerpc::merge_object_attributes): New function.
+	(Target_powerpc::do_finalize_sections): Iterate over input objects
+	merging attributes.  Create output attributes section.
+
 2018-06-26  Nick Clifton  <nickc@redhat.com>
 
 	* po/uk.po: Updated Ukranian translation.

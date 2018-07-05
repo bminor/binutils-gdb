@@ -1,3 +1,8 @@
+2018-07-06  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.h (Tag_GNU_Power_ABI_FP): Define.
+	(Tag_GNU_Power_ABI_Vector, Tag_GNU_Power_ABI_Struct_Return): Define.
+
 2018-06-24  Nick Clifton  <nickc@redhat.com>
 
 	2.31 branch created.
