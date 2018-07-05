@@ -1,3 +1,22 @@
+2018-07-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23372
+	* testsuite/ld-i386/i386.exp: Run pr23372a and pr23372b.
+	* testsuite/ld-i386/pr23372a.d: New file.
+	* testsuite/ld-i386/pr23372a.s: Likewise.
+	* testsuite/ld-i386/pr23372b.d: Likewise.
+	* testsuite/ld-i386/pr23372b.s: Likewise.
+	* testsuite/ld-i386/pr23372c.s: Likewise.
+	* testsuite/ld-x86-64/pr23372a-x32.d: Likewise.
+	* testsuite/ld-x86-64/pr23372a.d: Likewise.
+	* testsuite/ld-x86-64/pr23372a.s: Likewise.
+	* testsuite/ld-x86-64/pr23372b-x32.d: Likewise.
+	* testsuite/ld-x86-64/pr23372b.d: Likewise.
+	* testsuite/ld-x86-64/pr23372b.s: Likewise.
+	* testsuite/ld-x86-64/pr23372c.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pr23372a, pr23372a-x32,
+	pr23372b and pr23372b-x32.
+
 2018-07-05  Nick Clifton  <nickc@redhat.com>
 
 	* po/bg.po: Updated Bulgarian translation.
