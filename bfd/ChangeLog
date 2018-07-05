@@ -1,3 +1,9 @@
+2018-07-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23372
+	* elfxx-x86.c (_bfd_x86_elf_merge_gnu_properties): Remove x86
+	ISA properties with empty bits.
+
 2018-07-06  Alan Modra  <amodra@gmail.com>
 
 	* elf32-arm.c (elf32_arm_nabi_write_core_note): Don't use

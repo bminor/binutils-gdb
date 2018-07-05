@@ -2412,13 +2412,34 @@ _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
 	{
 	  number = aprop->u.number;
 	  aprop->u.number = number | bprop->u.number;
-	  updated = number != (unsigned int) aprop->u.number;
+	  /* Remove the property if ISA bits are empty.  */
+	  if (aprop->u.number == 0)
+	    {
+	      aprop->pr_kind = property_remove;
+	      updated = TRUE;
+	    }
+	  else
+	    updated = number != (unsigned int) aprop->u.number;
 	}
       else
 	{
-	  /* Return TRUE if APROP is NULL to indicate that BPROP should
-	     be added to ABFD.  */
-	  updated = aprop == NULL;
+	  /* Only one of APROP and BPROP can be NULL.  */
+	  if (aprop != NULL)
+	    {
+	      if (aprop->u.number == 0)
+		{
+		  /* Remove APROP if ISA bits are empty.  */
+		  aprop->pr_kind = property_remove;
+		  updated = TRUE;
+		}
+	    }
+	  else
+	    {
+	      /* Return TRUE if APROP is NULL and ISA bits of BPROP
+		 aren't empty to indicate that BPROP should be added
+		 to ABFD.  */
+	      updated = bprop->u.number != 0;
+	    }
 	}
       break;
 
