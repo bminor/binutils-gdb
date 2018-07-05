@@ -1,3 +1,8 @@
+2018-07-05  Maciej W. Rozycki  <macro@mips.com>
+
+	* testsuite/ld-mips-elf/mips-elf.exp: Replace remaining calls to
+	`[istarget mips*-*-linux*]' with $linux_gnu.
+
 2018-07-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23372

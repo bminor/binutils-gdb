@@ -781,7 +781,7 @@ run_dump_test "hash1a"
 run_dump_test "hash1b"
 run_dump_test "hash1c"
 
-if {[istarget mips*-*-linux*]} {
+if { $linux_gnu } {
     # The number of symbols that are always included in the symbol table
     # for these tests.
     #     the null symbol entry
@@ -885,7 +885,7 @@ set mips_tls_tests {
      "tls-hidden4.so"}
 }
 
-if {[istarget mips*-*-linux*]} {
+if { $linux_gnu } {
     run_ld_link_tests $mips_tls_tests
 }
 
