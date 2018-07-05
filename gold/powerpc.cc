@@ -41,6 +41,7 @@
 #include "tls.h"
 #include "errors.h"
 #include "gc.h"
+#include "attributes.h"
 
 namespace
 {
@@ -100,13 +101,14 @@ public:
       uniq_(object_id++), special_(0), relatoc_(0), toc_(0),
       has_small_toc_reloc_(false), opd_valid_(false),
       e_flags_(ehdr.get_e_flags()), no_toc_opt_(), opd_ent_(),
-      access_from_map_(), has14_(), stub_table_index_(), st_other_()
+      access_from_map_(), has14_(), stub_table_index_(), st_other_(),
+      attributes_section_data_(NULL)
   {
     this->set_abiversion(0);
   }
 
   ~Powerpc_relobj()
-  { }
+  { delete this->attributes_section_data_; }
 
   // Read the symbols then set up st_other vector.
   void
@@ -388,6 +390,11 @@ public:
   ppc64_local_entry_offset(unsigned int symndx) const
   { return elfcpp::ppc64_decode_local_entry(this->st_other_[symndx] >> 5); }
 
+  // The contents of the .gnu.attributes section if there is one.
+  const Attributes_section_data*
+  attributes_section_data() const
+  { return this->attributes_section_data_; }
+
 private:
   struct Opd_ent
   {
@@ -458,6 +465,9 @@ private:
 
   // ELF st_other field for local symbols.
   std::vector<unsigned char> st_other_;
+
+  // Object attributes if there is a .gnu.attributes section.
+  Attributes_section_data* attributes_section_data_;
 };
 
 template<int size, bool big_endian>
@@ -469,13 +479,14 @@ public:
   Powerpc_dynobj(const std::string& name, Input_file* input_file, off_t offset,
 		 const typename elfcpp::Ehdr<size, big_endian>& ehdr)
     : Sized_dynobj<size, big_endian>(name, input_file, offset, ehdr),
-      opd_shndx_(0), e_flags_(ehdr.get_e_flags()), opd_ent_()
+      opd_shndx_(0), e_flags_(ehdr.get_e_flags()), opd_ent_(),
+      attributes_section_data_(NULL)
   {
     this->set_abiversion(0);
   }
 
   ~Powerpc_dynobj()
-  { }
+  { delete this->attributes_section_data_; }
 
   // Call Sized_dynobj::do_read_symbols to read the symbols then
   // read .opd from a dynamic object, filling in opd_ent_ vector,
@@ -534,6 +545,11 @@ public:
   void
   set_abiversion(int ver);
 
+  // The contents of the .gnu.attributes section if there is one.
+  const Attributes_section_data*
+  attributes_section_data() const
+  { return this->attributes_section_data_; }
+
 private:
   // Used to specify extent of executable sections.
   struct Sec_info
@@ -574,6 +590,9 @@ private:
   // corresponding to the address.  Note that in dynamic objects,
   // offset is *not* relative to the section.
   std::vector<Opd_ent> opd_ent_;
+
+  // Object attributes if there is a .gnu.attributes section.
+  Attributes_section_data* attributes_section_data_;
 };
 
 // Powerpc_copy_relocs class.  Needed to peek at dynamic relocs the
@@ -618,7 +637,9 @@ class Target_powerpc : public Sized_target<size, big_endian>
       has_tls_get_addr_opt_(false),
       relax_failed_(false), relax_fail_count_(0),
       stub_group_size_(0), savres_section_(0),
-      tls_get_addr_(NULL), tls_get_addr_opt_(NULL)
+      tls_get_addr_(NULL), tls_get_addr_opt_(NULL),
+      attributes_section_data_(NULL),
+      last_fp_(NULL), last_ld_(NULL), last_vec_(NULL), last_struct_(NULL)
   {
   }
 
@@ -1156,6 +1177,10 @@ class Target_powerpc : public Sized_target<size, big_endian>
   stk_linker() const
   { return this->abiversion() < 2 ? 32 : 8; }
 
+  // Merge object attributes from input object with those in the output.
+  void
+  merge_object_attributes(const char*, const Attributes_section_data*);
+
  private:
 
   class Track_tls
@@ -1647,6 +1672,15 @@ class Target_powerpc : public Sized_target<size, big_endian>
   Symbol* tls_get_addr_;
   // If optimizing __tls_get_addr calls, the "__tls_get_addr_opt" symbol.
   Symbol* tls_get_addr_opt_;
+
+  // Attributes in output.
+  Attributes_section_data* attributes_section_data_;
+
+  // Last input file to change various attribute tags
+  const char* last_fp_;
+  const char* last_ld_;
+  const char* last_vec_;
+  const char* last_struct_;
 };
 
 template<>
@@ -2312,6 +2346,8 @@ void
 Powerpc_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 {
   this->base_read_symbols(sd);
+  if (this->input_file()->format() != Input_file::FORMAT_ELF)
+    return;
   if (size == 64)
     {
       const int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
@@ -2345,6 +2381,56 @@ Powerpc_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 	    }
 	}
     }
+
+  const size_t shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
+  const unsigned char* ps = sd->section_headers->data() + shdr_size;
+  bool merge_attributes = false;
+  for (unsigned int i = 1; i < this->shnum(); ++i, ps += shdr_size)
+    {
+      elfcpp::Shdr<size, big_endian> shdr(ps);
+      switch (shdr.get_sh_type())
+	{
+	case elfcpp::SHT_GNU_ATTRIBUTES:
+	  {
+	    gold_assert(this->attributes_section_data_ == NULL);
+	    section_offset_type section_offset = shdr.get_sh_offset();
+	    section_size_type section_size =
+	      convert_to_section_size_type(shdr.get_sh_size());
+	    const unsigned char* view =
+	      this->get_view(section_offset, section_size, true, false);
+	    this->attributes_section_data_ =
+	      new Attributes_section_data(view, section_size);
+	  }
+	  break;
+
+	case elfcpp::SHT_SYMTAB:
+	  {
+	    // Sometimes an object has no contents except the section
+	    // name string table and an empty symbol table with the
+	    // undefined symbol.  We don't want to merge
+	    // processor-specific flags from such an object.
+	    const typename elfcpp::Elf_types<size>::Elf_WXword sym_size =
+	      elfcpp::Elf_sizes<size>::sym_size;
+	    if (shdr.get_sh_size() > sym_size)
+	      merge_attributes = true;
+	  }
+	  break;
+
+	case elfcpp::SHT_STRTAB:
+	  break;
+
+	default:
+	  merge_attributes = true;
+	  break;
+	}
+    }
+
+  if (!merge_attributes)
+    {
+      // Should rarely happen.
+      delete this->attributes_section_data_;
+      this->attributes_section_data_ = NULL;
+    }
 }
 
 template<int size, bool big_endian>
@@ -2376,9 +2462,26 @@ void
 Powerpc_dynobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 {
   this->base_read_symbols(sd);
+  const size_t shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
+  const unsigned char* ps =
+    sd->section_headers->data() + shdr_size * (this->shnum() - 1);
+  for (unsigned int i = this->shnum(); i > 0; --i, ps -= shdr_size)
+    {
+      elfcpp::Shdr<size, big_endian> shdr(ps);
+      if (shdr.get_sh_type() == elfcpp::SHT_GNU_ATTRIBUTES)
+	{
+	  section_offset_type section_offset = shdr.get_sh_offset();
+	  section_size_type section_size =
+	    convert_to_section_size_type(shdr.get_sh_size());
+	  const unsigned char* view =
+	    this->get_view(section_offset, section_size, true, false);
+	  this->attributes_section_data_ =
+	    new Attributes_section_data(view, section_size);
+	  break;
+	}
+    }
   if (size == 64)
     {
-      const int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
       const unsigned char* const pshdrs = sd->section_headers->data();
       const unsigned char* namesu = sd->section_names->data();
       const char* names = reinterpret_cast<const char*>(namesu);
@@ -8298,7 +8401,7 @@ template<int size, bool big_endian>
 void
 Target_powerpc<size, big_endian>::do_finalize_sections(
     Layout* layout,
-    const Input_objects*,
+    const Input_objects* input_objects,
     Symbol_table* symtab)
 {
   if (parameters->doing_static_link())
@@ -8401,6 +8504,243 @@ Target_powerpc<size, big_endian>::do_finalize_sections(
   // relocs.
   if (this->copy_relocs_.any_saved_relocs())
     this->copy_relocs_.emit(this->rela_dyn_section(layout));
+
+  for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
+       p != input_objects->relobj_end();
+       ++p)
+    {
+      Powerpc_relobj<size, big_endian>* ppc_relobj
+	= static_cast<Powerpc_relobj<size, big_endian>*>(*p);
+      if (ppc_relobj->attributes_section_data())
+	this->merge_object_attributes(ppc_relobj->name().c_str(),
+				      ppc_relobj->attributes_section_data());
+    }
+  for (Input_objects::Dynobj_iterator p = input_objects->dynobj_begin();
+       p != input_objects->dynobj_end();
+       ++p)
+    {
+      Powerpc_dynobj<size, big_endian>* ppc_dynobj
+	= static_cast<Powerpc_dynobj<size, big_endian>*>(*p);
+      if (ppc_dynobj->attributes_section_data())
+	this->merge_object_attributes(ppc_dynobj->name().c_str(),
+				      ppc_dynobj->attributes_section_data());
+    }
+
+  // Create a .gnu.attributes section if we have merged any attributes
+  // from inputs.
+  if (this->attributes_section_data_ != NULL
+      && this->attributes_section_data_->size() != 0)
+    {
+      Output_attributes_section_data* attributes_section
+	= new Output_attributes_section_data(*this->attributes_section_data_);
+      layout->add_output_section_data(".gnu.attributes",
+				      elfcpp::SHT_GNU_ATTRIBUTES, 0,
+				      attributes_section, ORDER_INVALID, false);
+    }
+}
+
+// Merge object attributes from input file called NAME with those of the
+// output.  The input object attributes are in the object pointed by PASD.
+
+template<int size, bool big_endian>
+void
+Target_powerpc<size, big_endian>::merge_object_attributes(
+    const char* name,
+    const Attributes_section_data* pasd)
+{
+  // Return if there is no attributes section data.
+  if (pasd == NULL)
+    return;
+
+  // Create output object attributes.
+  if (this->attributes_section_data_ == NULL)
+    this->attributes_section_data_ = new Attributes_section_data(NULL, 0);
+
+  const int vendor = Object_attribute::OBJ_ATTR_GNU;
+  const Object_attribute* in_attr = pasd->known_attributes(vendor);
+  Object_attribute* out_attr
+    = this->attributes_section_data_->known_attributes(vendor);
+
+  const char* err;
+  const char* first;
+  const char* second;
+  int tag = elfcpp::Tag_GNU_Power_ABI_FP;
+  int in_fp = in_attr[tag].int_value() & 0xf;
+  int out_fp = out_attr[tag].int_value() & 0xf;
+  if (in_fp != out_fp)
+    {
+      err = NULL;
+      if ((in_fp & 3) == 0)
+	;
+      else if ((out_fp & 3) == 0)
+	{
+	  out_fp |= in_fp & 3;
+	  out_attr[tag].set_int_value(out_fp);
+	  out_attr[tag].set_type(Object_attribute::ATTR_TYPE_FLAG_INT_VAL);
+	  this->last_fp_ = name;
+	}
+      else if ((out_fp & 3) != 2 && (in_fp & 3) == 2)
+	{
+	  err = N_("%s uses hard float, %s uses soft float");
+	  first = this->last_fp_;
+	  second = name;
+	}
+      else if ((out_fp & 3) == 2 && (in_fp & 3) != 2)
+	{
+	  err = N_("%s uses hard float, %s uses soft float");
+	  first = name;
+	  second = this->last_fp_;
+	}
+      else if ((out_fp & 3) == 1 && (in_fp & 3) == 3)
+	{
+	  err = N_("%s uses double-precision hard float, "
+		   "%s uses single-precision hard float");
+	  first = this->last_fp_;
+	  second = name;
+	}
+      else if ((out_fp & 3) == 3 && (in_fp & 3) == 1)
+	{
+	  err = N_("%s uses double-precision hard float, "
+		   "%s uses single-precision hard float");
+	  first = name;
+	  second = this->last_fp_;
+	}
+
+      if (err || (in_fp & 0xc) == 0)
+	;
+      else if ((out_fp & 0xc) == 0)
+	{
+	  out_fp |= in_fp & 0xc;
+	  out_attr[tag].set_int_value(out_fp);
+	  out_attr[tag].set_type(Object_attribute::ATTR_TYPE_FLAG_INT_VAL);
+	  this->last_ld_ = name;
+	}
+      else if ((out_fp & 0xc) != 2 * 4 && (in_fp & 0xc) == 2 * 4)
+	{
+	  err = N_("%s uses 64-bit long double, %s uses 128-bit long double");
+	  first = name;
+	  second = this->last_ld_;
+	}
+      else if ((in_fp & 0xc) != 2 * 4 && (out_fp & 0xc) == 2 * 4)
+	{
+	  err = N_("%s uses 64-bit long double, %s uses 128-bit long double");
+	  first = this->last_ld_;
+	  second = name;
+	}
+      else if ((out_fp & 0xc) == 1 * 4 && (in_fp & 0xc) == 3 * 4)
+	{
+	  err = N_("%s uses IBM long double, %s uses IEEE long double");
+	  first = this->last_ld_;
+	  second = name;
+	}
+      else if ((out_fp & 0xc) == 3 * 4 && (in_fp & 0xc) == 1 * 4)
+	{
+	  err = N_("%s uses IBM long double, %s uses IEEE long double");
+	  first = name;
+	  second = this->last_ld_;
+	}
+
+      if (err)
+	{
+	  if (parameters->options().warn_mismatch())
+	    gold_error(_(err), first, second);
+	  // Arrange for this attribute to be deleted.  It's better to
+	  // say "don't know" about a file than to wrongly claim compliance.
+	  out_attr[tag].set_type(0);
+	}
+    }
+
+  if (size == 32)
+    {
+      tag = elfcpp::Tag_GNU_Power_ABI_Vector;
+      int in_vec = in_attr[tag].int_value() & 3;
+      int out_vec = out_attr[tag].int_value() & 3;
+      if (in_vec != out_vec)
+	{
+	  err = NULL;
+	  if (in_vec == 0)
+	    ;
+	  else if (out_vec == 0)
+	    {
+	      out_vec = in_vec;
+	      out_attr[tag].set_int_value(out_vec);
+	      out_attr[tag].set_type(Object_attribute::ATTR_TYPE_FLAG_INT_VAL);
+	      this->last_vec_ = name;
+	    }
+	  // For now, allow generic to transition to AltiVec or SPE
+	  // without a warning.  If GCC marked files with their stack
+	  // alignment and used don't-care markings for files which are
+	  // not affected by the vector ABI, we could warn about this
+	  // case too.  */
+	  else if (in_vec == 1)
+	    ;
+	  else if (out_vec == 1)
+	    {
+	      out_vec = in_vec;
+	      out_attr[tag].set_int_value(out_vec);
+	      out_attr[tag].set_type(Object_attribute::ATTR_TYPE_FLAG_INT_VAL);
+	      this->last_vec_ = name;
+	    }
+	  else if (out_vec < in_vec)
+	    {
+	      err = N_("%s uses AltiVec vector ABI, %s uses SPE vector ABI");
+	      first = this->last_vec_;
+	      second = name;
+	    }
+	  else if (out_vec > in_vec)
+	    {
+	      err = N_("%s uses AltiVec vector ABI, %s uses SPE vector ABI");
+	      first = name;
+	      second = this->last_vec_;
+	    }
+	  if (err)
+	    {
+	      if (parameters->options().warn_mismatch())
+		gold_error(_(err), first, second);
+	      out_attr[tag].set_type(0);
+	    }
+	}
+
+      tag = elfcpp::Tag_GNU_Power_ABI_Struct_Return;
+      int in_struct = in_attr[tag].int_value() & 3;
+      int out_struct = out_attr[tag].int_value() & 3;
+      if (in_struct != out_struct)
+	{
+	  err = NULL;
+	  if (in_struct == 0 || in_struct == 3)
+	    ;
+	  else if (out_struct == 0)
+	    {
+	      out_struct = in_struct;
+	      out_attr[tag].set_int_value(out_struct);
+	      out_attr[tag].set_type(Object_attribute::ATTR_TYPE_FLAG_INT_VAL);
+	      this->last_struct_ = name;
+	    }
+	  else if (out_struct < in_struct)
+	    {
+	      err = N_("%s uses r3/r4 for small structure returns, "
+		       "%s uses memory");
+	      first = this->last_struct_;
+	      second = name;
+	    }
+	  else if (out_struct > in_struct)
+	    {
+	      err = N_("%s uses r3/r4 for small structure returns, "
+		       "%s uses memory");
+	      first = name;
+	      second = this->last_struct_;
+	    }
+	  if (err)
+	    {
+	      if (parameters->options().warn_mismatch())
+		gold_error(_(err), first, second);
+	      out_attr[tag].set_type(0);
+	    }
+	}
+    }
+
+  // Merge Tag_compatibility attributes and any common GNU ones.
+  this->attributes_section_data_->merge(name, pasd);
 }
 
 // Emit any saved relocs, and mark toc entries using any of these
