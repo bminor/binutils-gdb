@@ -1,3 +1,8 @@
+2018-07-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* darwin-nat.c (darwin_pthread_kill): New function.
+	(darwin_resume_thread): Use darwin_pthread_kill.
+
 2018-07-05  Tom de Vries  <tdevries@suse.de>
 
 	* macroexp.c (macro_buffer) <operator=>: New member function.

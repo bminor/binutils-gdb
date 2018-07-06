@@ -1,3 +1,8 @@
+2018-07-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* diagnostics.h (DIAGNOSTIC_IGNORE_DEPRECATED_DECLARATIONS):
+	Define for clang.
+
 2018-07-02  Maciej W. Rozycki  <macro@mips.com>
 
 	PR tdep/8282

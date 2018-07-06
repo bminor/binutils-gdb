@@ -809,13 +809,24 @@ darwin_send_reply (struct inferior *inf, darwin_thread_t *thread)
   priv->pending_messages--;
 }
 
+/* Wrapper around the __pthread_kill syscall.  We use this instead of the
+   pthread_kill function to be able to send a signal to any kind of thread,
+   including GCD threads.  */
+
+static int
+darwin_pthread_kill (darwin_thread_t *thread, int nsignal)
+{
+  DIAGNOSTIC_PUSH;
+  DIAGNOSTIC_IGNORE_DEPRECATED_DECLARATIONS;
+  int res = syscall (SYS___pthread_kill, thread->gdb_port, nsignal);
+  DIAGNOSTIC_POP;
+  return res;
+}
+
 static void
 darwin_resume_thread (struct inferior *inf, darwin_thread_t *thread,
 		      int step, int nsignal)
 {
-  kern_return_t kret;
-  int res;
-
   inferior_debug
     (3, _("darwin_resume_thread: state=%d, thread=0x%x, step=%d nsignal=%d\n"),
      thread->msg_state, thread->gdb_port, step, nsignal);
@@ -827,8 +838,8 @@ darwin_resume_thread (struct inferior *inf, darwin_thread_t *thread,
 	  && thread->event.ex_data[0] == EXC_SOFT_SIGNAL)
 	{
 	  /* Either deliver a new signal or cancel the signal received.  */
-	  res = PTRACE (PT_THUPDATE, inf->pid,
-			(caddr_t) (uintptr_t) thread->gdb_port, nsignal);
+	  int res = PTRACE (PT_THUPDATE, inf->pid,
+			    (caddr_t) (uintptr_t) thread->gdb_port, nsignal);
 	  if (res < 0)
 	    inferior_debug (1, _("ptrace THUP: res=%d\n"), res);
 	}
@@ -836,7 +847,7 @@ darwin_resume_thread (struct inferior *inf, darwin_thread_t *thread,
 	{
 	  /* Note: ptrace is allowed only if the process is stopped.
 	     Directly send the signal to the thread.  */
-	  res = syscall (SYS___pthread_kill, thread->gdb_port, nsignal);
+	  int res = darwin_pthread_kill (thread, nsignal);
 	  inferior_debug (4, _("darwin_resume_thread: kill 0x%x %d: %d\n"),
 			  thread->gdb_port, nsignal, res);
 	  thread->signaled = 1;
@@ -856,7 +867,7 @@ darwin_resume_thread (struct inferior *inf, darwin_thread_t *thread,
       break;
 
     case DARWIN_STOPPED:
-      kret = thread_resume (thread->gdb_port);
+      kern_return_t kret = thread_resume (thread->gdb_port);
       MACH_CHECK_ERROR (kret);
 
       thread->msg_state = DARWIN_RUNNING;
