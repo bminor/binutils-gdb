@@ -1,3 +1,11 @@
+2018-07-06  Alan Hayward  <alan.hayward@arm.com>
+
+	* elf.c (elfcore_grok_aarch_sve): New function.
+	(elfcore_grok_note): Check for Aarch64 SVE.
+	(elfcore_write_aarch_sve): New function.
+	(elfcore_write_register_note): Check for Aarch64 SVE.
+	* elf-bfd.h(elfcore_grok_aarch_sve): New declaration.
+
 2018-07-06  Alan Modra  <amodra@gmail.com>
 
 	* elf32-arm.c (elf32_arm_nabi_write_core_note): Don't use

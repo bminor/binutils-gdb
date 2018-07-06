@@ -2602,6 +2602,8 @@ extern char *elfcore_write_aarch_hw_break
   (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_aarch_hw_watch
   (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_aarch_sve
+  (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_lwpstatus
   (bfd *, char *, int *, long, int, const void *);
 extern char *elfcore_write_register_note
