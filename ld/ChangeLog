@@ -1,3 +1,7 @@
+2018-07-05  Jim Wilson  <jimw@sifive.com>
+
+	* configure.tgt (riscv-*-*): Add as an alias for riscv32*-*-*.
+
 2018-07-05  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/attr-gnu-4-12.d: Update expected output.
