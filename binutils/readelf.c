@@ -17705,6 +17705,20 @@ get_symbol_for_build_attribute (Filedata *       filedata,
   return saved_sym;
 }
 
+/* Returns true iff addr1 and addr2 are in the same section.  */
+
+static bfd_boolean
+same_section (Filedata * filedata, unsigned long addr1, unsigned long addr2)
+{
+  Elf_Internal_Shdr * a1;
+  Elf_Internal_Shdr * a2;
+
+  a1 = find_section_by_address (filedata, addr1);
+  a2 = find_section_by_address (filedata, addr2);
+  
+  return a1 == a2 && a1 != NULL;
+}
+
 static bfd_boolean
 print_gnu_build_attribute_description (Elf_Internal_Note *  pnote,
 				       Filedata *           filedata)
@@ -17786,8 +17800,14 @@ print_gnu_build_attribute_description (Elf_Internal_Note *  pnote,
 
   if (is_open_attr)
     {
-      /* FIXME: Need to properly allow for section alignment.  16 is just the alignment used on x86_64.  */
-      if (global_end > 0 && start > BFD_ALIGN (global_end, 16))
+      /* FIXME: Need to properly allow for section alignment.
+	 16 is just the alignment used on x86_64.  */
+      if (global_end > 0
+	  && start > BFD_ALIGN (global_end, 16)
+	  /* Build notes are not guaranteed to be organised in order of
+	     increasing address, but we should find the all of the notes
+	     for one section in the same place.  */
+	  && same_section (filedata, start, global_end))
 	warn (_("Gap in build notes detected from %#lx to %#lx\n"),
 	      global_end + 1, start - 1);
 
