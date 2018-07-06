@@ -16,6 +16,20 @@
 #ifndef DIAGNOSTICS_H
 #define DIAGNOSTICS_H
 
+/* If at all possible, fix the source rather than using these macros
+   to silence warnings.  If you do use these macros be aware that
+   you'll need to condition their use on particular compiler versions,
+   which can be done for gcc using ansidecl.h's GCC_VERSION macro.
+
+   gcc versions between 4.2 and 4.6 do not allow pragma control of
+   diagnostics inside functions, giving a hard error if you try to use
+   the finer control available with later versions.
+   gcc prior to 4.2 warns about diagnostic push and pop.
+
+   The other macros have restrictions too, for example gcc-5, gcc-6
+   and gcc-7 warn that -Wstringop-truncation is unknown, unless you
+   also add DIAGNOSTIC_IGNORE ("-Wpragma").  */
+
 #ifdef __GNUC__
 # define DIAGNOSTIC_PUSH _Pragma ("GCC diagnostic push")
 # define DIAGNOSTIC_POP _Pragma ("GCC diagnostic pop")

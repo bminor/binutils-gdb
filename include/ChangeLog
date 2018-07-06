@@ -1,3 +1,7 @@
+2018-07-06  Alan Modra  <amodra@gmail.com>
+
+	* diagnostics.h: Comment on macro usage.
+
 2018-07-05  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* diagnostics.h (DIAGNOSTIC_IGNORE_DEPRECATED_DECLARATIONS):
