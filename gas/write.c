@@ -2008,7 +2008,7 @@ maybe_generate_build_notes (void)
     if (sym->bsym != NULL
 	&& sym->bsym->flags & BSF_SECTION_SYM
 	&& sym->bsym->section != NULL
-	/* Skip linkonce sections - we cannot these section symbols as they may disappear.  */
+	/* Skip linkonce sections - we cannot use these section symbols as they may disappear.  */
 	&& (sym->bsym->section->flags & (SEC_CODE | SEC_LINK_ONCE)) == SEC_CODE
 	/* Not all linkonce sections are flagged...  */
 	&& strncmp (S_GET_NAME (sym), ".gnu.linkonce", sizeof ".gnu.linkonce" - 1) != 0)
@@ -2038,10 +2038,10 @@ maybe_generate_build_notes (void)
 	memcpy (note + 12, "GA$3a1", 8);
 
 	/* Create a relocation to install the start address of the note...  */
-	create_note_reloc (sec, sym, 20, desc_reloc, 0, note);
+	create_note_reloc (sec, sym, total_size + 20, desc_reloc, 0, note);
 
 	/* ...and another one to install the end address.  */
-	create_note_reloc (sec, sym, desc2_offset, desc_reloc,
+	create_note_reloc (sec, sym, total_size + desc2_offset, desc_reloc,
 			   bfd_get_section_size (sym->bsym->section),
 			   note);
 
