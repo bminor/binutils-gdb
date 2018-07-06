@@ -1,3 +1,7 @@
+2018-07-06  Alan Modra  <amodra@gmail.com>
+
+	* diagnostics.h: Comment on macro usage.
+
 2018-06-29  Tamar Christina  <tamar.christina@arm.com>
 
 	PR binutils/23192

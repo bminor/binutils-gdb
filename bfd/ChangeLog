@@ -1,3 +1,13 @@
+2018-07-06  Alan Modra  <amodra@gmail.com>
+
+	* elf32-arm.c (elf32_arm_nabi_write_core_note): Don't use
+	DIAGNOTIC_PUSH and DIAGNOSTIC_POP unconditionally.
+	* elf32-ppc.c (ppc_elf_write_core_note): Likewise.
+	* elf32-s390.c (elf_s390_write_core_note): Likewise.
+	* elf64-ppc.c (ppc64_elf_write_core_note): Likewise.
+	* elf64-s390.c (elf_s390_write_core_note): Likewise.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_write_core_note): Likewise.
+
 2018-07-05  Jim Wilson  <jimw@sifive.com>
 
 	* config.bfd (riscv32*-*-*): Renamed from riscv32-*-*.
