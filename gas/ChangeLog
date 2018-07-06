@@ -1,3 +1,10 @@
+2018-07-06  Tamar Christina  <tamar.christina@arm.com>
+
+	PR binutils/23369
+	* testsuite/gas/aarch64/msr.d (csselr_el1,
+	vsesr_el2, osdtrrx_el1, osdtrtx_el1, pmsidr_el1): New.
+	* testsuite/gas/aarch64/msr.s: Likewise.
+
 2018-07-06  Nick Clifton  <nickc@redhat.com>
 
 	* write.c (maybe_generate_build_notes): Bias reloc offsets by the
