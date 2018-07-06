@@ -1,5 +1,10 @@
 2018-07-06  Tamar Christina  <tamar.christina@arm.com>
 
+	PR binutils/23242
+	* aarch64-tbl.h (ldarh): Fix disassembly mask.
+
+2018-07-06  Tamar Christina  <tamar.christina@arm.com>
+
 	PR binutils/23369
 	* aarch64-opc.c (aarch64_sys_regs): Make read/write csselr_el1,
 	vsesr_el2, osdtrrx_el1, osdtrtx_el1, pmsidr_el1.

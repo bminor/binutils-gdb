@@ -3219,7 +3219,7 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("ldxrh", 0x485f7c00, 0xffe08000, ldstexcl, 0, OP2 (Rt, ADDR_SIMPLE), QL_W1_LDST_EXC, 0),
   CORE_INSN ("ldaxrh", 0x485ffc00, 0xffe08000, ldstexcl, 0, OP2 (Rt, ADDR_SIMPLE), QL_W1_LDST_EXC, 0),
   CORE_INSN ("stlrh", 0x489ffc00, 0xffe08000, ldstexcl, 0, OP2 (Rt, ADDR_SIMPLE), QL_W1_LDST_EXC, 0),
-  CORE_INSN ("ldarh", 0x48dffc00, 0xffeffc00, ldstexcl, 0, OP2 (Rt, ADDR_SIMPLE), QL_W1_LDST_EXC, 0),
+  CORE_INSN ("ldarh", 0x48dffc00, 0xfffffc00, ldstexcl, 0, OP2 (Rt, ADDR_SIMPLE), QL_W1_LDST_EXC, 0),
   CORE_INSN ("stxr", 0x88007c00, 0xbfe08000, ldstexcl, 0, OP3 (Rs, Rt, ADDR_SIMPLE), QL_R2_LDST_EXC, F_GPRSIZE_IN_Q),
   CORE_INSN ("stlxr", 0x8800fc00, 0xbfe08000, ldstexcl, 0, OP3 (Rs, Rt, ADDR_SIMPLE), QL_R2_LDST_EXC, F_GPRSIZE_IN_Q),
   CORE_INSN ("stxp", 0x88200000, 0xbfe08000, ldstexcl, 0, OP4 (Rs, Rt, Rt2, ADDR_SIMPLE), QL_R3_LDST_EXC, F_GPRSIZE_IN_Q),
