@@ -111,17 +111,19 @@ struct libunwind_frame_cache
 #define LIBUNWIND_SO_7 "libunwind-" STRINGIFY(UNW_TARGET) ".so.7"
 #endif
 
-static char *get_reg_name = STRINGIFY(UNW_OBJ(get_reg));
-static char *get_fpreg_name = STRINGIFY(UNW_OBJ(get_fpreg));
-static char *get_saveloc_name = STRINGIFY(UNW_OBJ(get_save_loc));
-static char *is_signal_frame_name = STRINGIFY(UNW_OBJ(is_signal_frame));
-static char *step_name = STRINGIFY(UNW_OBJ(step));
-static char *init_remote_name = STRINGIFY(UNW_OBJ(init_remote));
-static char *create_addr_space_name = STRINGIFY(UNW_OBJ(create_addr_space));
-static char *destroy_addr_space_name = STRINGIFY(UNW_OBJ(destroy_addr_space));
-static char *search_unwind_table_name
+static const char *get_reg_name = STRINGIFY(UNW_OBJ(get_reg));
+static const char *get_fpreg_name = STRINGIFY(UNW_OBJ(get_fpreg));
+static const char *get_saveloc_name = STRINGIFY(UNW_OBJ(get_save_loc));
+static const char *is_signal_frame_name = STRINGIFY(UNW_OBJ(is_signal_frame));
+static const char *step_name = STRINGIFY(UNW_OBJ(step));
+static const char *init_remote_name = STRINGIFY(UNW_OBJ(init_remote));
+static const char *create_addr_space_name
+  = STRINGIFY(UNW_OBJ(create_addr_space));
+static const char *destroy_addr_space_name
+  = STRINGIFY(UNW_OBJ(destroy_addr_space));
+static const char *search_unwind_table_name
   = STRINGIFY(UNW_OBJ(search_unwind_table));
-static char *find_dyn_list_name = STRINGIFY(UNW_OBJ(find_dyn_list));
+static const char *find_dyn_list_name = STRINGIFY(UNW_OBJ(find_dyn_list));
 
 static struct libunwind_descr *
 libunwind_descr (struct gdbarch *gdbarch)
