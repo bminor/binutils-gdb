@@ -1,3 +1,7 @@
+2018-07-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* contrib/gdb-add-index.sh ($dwarf5): New, use it.
+
 2018-07-04  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set GDB version number to 8.1.90.DATE-git.
