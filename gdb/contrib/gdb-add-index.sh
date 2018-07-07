@@ -23,8 +23,14 @@ OBJCOPY=${OBJCOPY:=objcopy}
 
 myname="${0##*/}"
 
+dwarf5=""
+if [ "$1" = "-dwarf-5" ]; then
+    dwarf5="$1"
+    shift
+fi
+
 if test $# != 1; then
-    echo "usage: $myname FILE" 1>&2
+    echo "usage: $myname [-dwarf-5] FILE" 1>&2
     exit 1
 fi
 
@@ -48,7 +54,7 @@ rm -f $index4 $index5 $debugstr $debugstrmerge $debugstrerr
 trap "rm -f $index4 $index5 $debugstr $debugstrmerge $debugstrerr" 0
 
 $GDB --batch -nx -iex 'set auto-load no' \
-    -ex "file $file" -ex "save gdb-index $dir" || {
+    -ex "file $file" -ex "save gdb-index $dwarf5 $dir" || {
     # Just in case.
     status=$?
     echo "$myname: gdb error generating index for $file" 1>&2

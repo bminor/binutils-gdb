@@ -1,3 +1,7 @@
+2018-07-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* contrib/gdb-add-index.sh ($dwarf5): New, use it.
+
 2018-07-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* ia64-tdep.c (get_reg_name, get_fpreg_name, get_saveloc_name,
