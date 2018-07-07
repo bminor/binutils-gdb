@@ -1,3 +1,29 @@
+2018-07-10  Alan Modra  <amodra@gmail.com>
+
+	* elf32-xgate.h: Delete.
+	* elf32-xgate.c: Delete unnecessary forward declarations, add two
+	that are now needed.
+	(xgate_elf_bfd_link_hash_table_create)
+	(xgate_elf_bfd_link_hash_table_free)
+	(xgate_elf_set_mach_from_flags, struct xgate_scan_param)
+	(stub_hash_newfunc, elf32_xgate_add_symbol_hook)
+	(elf32_xgate_setup_section_lists, elf32_xgate_size_stubs)
+	(elf32_xgate_build_stubs, elf32_xgate_check_relocs)
+	(elf32_xgate_relocate_section, _bfd_xgate_elf_set_private_flags)
+	(elf32_xgate_post_process_headers): Delete.
+	(elf32_xgate_backend_symbol_processing): New function.
+	(xgate_elf_ignore_reloc, xgate_elf_special_reloc)
+	(_bfd_xgate_elf_print_private_bfd_data): Make static.
+	(ELF_TARGET_ID, elf_info_to_howto, elf_backend_check_relocs)
+	(elf_backend_relocate_section, elf_backend_object_p)
+	(elf_backend_final_write_processing, elf_backend_can_gc_sections)
+	(elf_backend_post_process_headers, elf_backend_add_symbol_hook)
+	(bfd_elf32_bfd_link_hash_table_create)
+	(bfd_elf32_bfd_set_private_flags)
+	(xgate_stub_hash_lookup): Don't define.
+	(elf_backend_symbol_processing): Define.
+	* elf-bfd.h (elf_target_id): Delete XGATE_ELF_DATA.
+
 2018-07-09  Maciej W. Rozycki  <macro@mips.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_adjust_dynamic_symbol): Don't set

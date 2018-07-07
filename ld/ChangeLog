@@ -1,5 +1,10 @@
 2018-07-10  Alan Modra  <amodra@gmail.com>
 
+	* emulparams/xgateelf.sh (TEMPLATE_NAME) Set to generic.
+	(EXTRA_EM_FILE): Set to genelf.
+
+2018-07-10  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-elf/attributes.d: Use xfail rather than notarget.
 	* testsuite/ld-elf/hash.d: Likewise.
 	* testsuite/ld-elf/orphan-10.d: Likewise.
