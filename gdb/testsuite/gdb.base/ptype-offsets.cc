@@ -177,6 +177,13 @@ struct asd
   void *f16;
 };
 
+/* See PR c++/23373.  */
+
+struct static_member
+{
+  static static_member Empty;
+  int abc;
+};
 
 int
 main (int argc, char *argv[])
@@ -188,6 +195,7 @@ main (int argc, char *argv[])
   struct tyu e;
   struct asd f;
   uint8_t i;
+  static_member stmember;
 
   return 0;
 }

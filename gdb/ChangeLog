@@ -1,3 +1,9 @@
+2018-07-11  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR c++/23373
+	* c-typeprint.c (c_type_print_base_struct_union): Don't print
+	offsets/sizes for static members of a class/struct.
+
 2018-07-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* contrib/gdb-add-index.sh ($dwarf5): New, use it.
