@@ -1,3 +1,12 @@
+2018-07-11  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR c++/23373
+	* gdb.base/ptype-offsets.cc (struct static_member): New
+	struct.
+	(main) <stmember>: New variable.
+	* gdb.base/ptype-offsets.exp: Add test for printing a struct
+	with a static member in it.
+
 2018-07-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/watchpoint-reuse-slot.exp: Test with hardware

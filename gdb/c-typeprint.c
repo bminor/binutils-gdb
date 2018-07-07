@@ -1168,7 +1168,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 
 	  int newshow = show - 1;
 
-	  if (flags->print_offsets
+	  if (!is_static && flags->print_offsets
 	      && (TYPE_CODE (TYPE_FIELD_TYPE (type, i)) == TYPE_CODE_STRUCT
 		  || TYPE_CODE (TYPE_FIELD_TYPE (type, i)) == TYPE_CODE_UNION))
 	    {

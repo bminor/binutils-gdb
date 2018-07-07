@@ -328,3 +328,14 @@ gdb_test_multiple "$test" "$test" {
        pass $test
    }
 }
+
+# Test that printing a struct with a static member of itself doesn't
+# get us into an infinite loop.
+gdb_test "ptype/o static_member" \
+    [multi_line \
+{/\* offset    |  size \*/  type = struct static_member \{} \
+{                           static static_member Empty;} \
+{\/*    0      |     4 \*/    int abc;} \
+{} \
+{                           /\* total size \(bytes\):    4 \*/} \
+{                         \}}]
