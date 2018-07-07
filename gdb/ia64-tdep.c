@@ -69,6 +69,7 @@ struct ia64_table_entry
   };
 
 static struct ia64_table_entry *ktab = NULL;
+static gdb::optional<gdb::byte_vector> ktab_buf;
 
 #endif
 
@@ -2647,11 +2648,9 @@ ia64_access_mem (unw_addr_space_t as,
 }
 
 /* Call low-level function to access the kernel unwind table.  */
-static LONGEST
-getunwind_table (gdb_byte **buf_p)
+static gdb::optional<gdb::byte_vector>
+getunwind_table ()
 {
-  LONGEST x;
-
   /* FIXME drow/2005-09-10: This code used to call
      ia64_linux_xfer_unwind_table directly to fetch the unwind table
      for the currently running ia64-linux kernel.  That data should
@@ -2660,10 +2659,8 @@ getunwind_table (gdb_byte **buf_p)
      we should find a way to override the corefile layer's
      xfer_partial method.  */
 
-  x = target_read_alloc (current_top_target (), TARGET_OBJECT_UNWIND_TABLE,
-			 NULL, buf_p);
-
-  return x;
+  return target_read_alloc (current_top_target (), TARGET_OBJECT_UNWIND_TABLE,
+			    NULL);
 }
 
 /* Get the kernel unwind table.  */				 
@@ -2674,15 +2671,12 @@ get_kernel_table (unw_word_t ip, unw_dyn_info_t *di)
 
   if (!ktab) 
     {
-      gdb_byte *ktab_buf;
-      LONGEST size;
-
-      size = getunwind_table (&ktab_buf);
-      if (size <= 0)
+      ktab_buf = getunwind_table ();
+      if (!ktab_buf)
 	return -UNW_ENOINFO;
 
-      ktab = (struct ia64_table_entry *) ktab_buf;
-      ktab_size = size;
+      ktab = (struct ia64_table_entry *) ktab_buf->data ();
+      ktab_size = ktab_buf->size ();
 
       for (etab = ktab; etab->start_offset; ++etab)
         etab->info_offset += KERNEL_START;
