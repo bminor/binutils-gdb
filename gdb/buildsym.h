@@ -128,11 +128,11 @@ struct buildsym_compunit
   buildsym_compunit (struct objfile *objfile_, const char *name,
 		     const char *comp_dir_, enum language language_,
 		     CORE_ADDR last_addr, struct compunit_symtab *cust)
-    : objfile (objfile_),
+    : m_objfile (objfile_),
       m_last_source_file (name == nullptr ? nullptr : xstrdup (name)),
-      comp_dir (comp_dir_ == nullptr ? nullptr : xstrdup (comp_dir_)),
-      compunit_symtab (cust),
-      language (language_),
+      m_comp_dir (comp_dir_ == nullptr ? nullptr : xstrdup (comp_dir_)),
+      m_compunit_symtab (cust),
+      m_language (language_),
       m_last_source_start_addr (last_addr)
   {
   }
@@ -189,7 +189,7 @@ struct buildsym_compunit
 
   struct compunit_symtab *get_compunit_symtab ()
   {
-    return compunit_symtab;
+    return m_compunit_symtab;
   }
 
   void set_last_source_start_addr (CORE_ADDR addr)
@@ -256,12 +256,12 @@ struct buildsym_compunit
 
   void record_debugformat (const char *format)
   {
-    debugformat = format;
+    m_debugformat = format;
   }
 
   void record_producer (const char *producer)
   {
-    this->producer = producer;
+    m_producer = producer;
   }
 
   struct context_stack *push_context (int desc, CORE_ADDR valu);
@@ -300,16 +300,16 @@ private:
       (struct block *static_block, int section, int expandable);
 
   /* The objfile we're reading debug info from.  */
-  struct objfile *objfile;
+  struct objfile *m_objfile;
 
   /* List of subfiles (source files).
      Files are added to the front of the list.
      This is important mostly for the language determination hacks we use,
      which iterate over previously added files.  */
-  struct subfile *subfiles = nullptr;
+  struct subfile *m_subfiles = nullptr;
 
   /* The subfile of the main source file.  */
-  struct subfile *main_subfile = nullptr;
+  struct subfile *m_main_subfile = nullptr;
 
   /* Name of source file whose symbol data we are now processing.  This
      comes from a symbol of type N_SO for stabs.  For DWARF it comes
@@ -317,21 +317,21 @@ private:
   gdb::unique_xmalloc_ptr<char> m_last_source_file;
 
   /* E.g., DW_AT_comp_dir if DWARF.  Space for this is malloc'd.  */
-  gdb::unique_xmalloc_ptr<char> comp_dir;
+  gdb::unique_xmalloc_ptr<char> m_comp_dir;
 
   /* Space for this is not malloc'd, and is assumed to have at least
      the same lifetime as objfile.  */
-  const char *producer = nullptr;
+  const char *m_producer = nullptr;
 
   /* Space for this is not malloc'd, and is assumed to have at least
      the same lifetime as objfile.  */
-  const char *debugformat = nullptr;
+  const char *m_debugformat = nullptr;
 
   /* The compunit we are building.  */
-  struct compunit_symtab *compunit_symtab = nullptr;
+  struct compunit_symtab *m_compunit_symtab = nullptr;
 
   /* Language of this compunit_symtab.  */
-  enum language language;
+  enum language m_language;
 
   /* The macro table for the compilation unit whose symbols we're
      currently reading.  */

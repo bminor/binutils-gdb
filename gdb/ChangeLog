@@ -1,3 +1,11 @@
+2018-07-20  Keith Seitz  <keiths@redhat.com>
+
+	* buildsym.h (struct buildsym_compunit) <m_objfile, m_subfiles,
+	m_main_subfile, m_comp_dir, m_producer, m_debugformat,
+	m_compunit_symtab, m_language>: Add "m_" prefix.
+	Update all uses.
+	* buildsym.c: Update all uses.
+
 2018-07-20  Tom Tromey  <tom@tromey.com>
 
 	* buildsym-legacy.h (record_line): Don't use record_line_ftype.

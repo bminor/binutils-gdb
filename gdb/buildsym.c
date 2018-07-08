@@ -63,15 +63,15 @@ buildsym_compunit::buildsym_compunit (struct objfile *objfile_,
 				      const char *comp_dir_,
 				      enum language language_,
 				      CORE_ADDR last_addr)
-  : objfile (objfile_),
+  : m_objfile (objfile_),
     m_last_source_file (name == nullptr ? nullptr : xstrdup (name)),
-    comp_dir (comp_dir_ == nullptr ? nullptr : xstrdup (comp_dir_)),
-    language (language_),
+    m_comp_dir (comp_dir_ == nullptr ? nullptr : xstrdup (comp_dir_)),
+    m_language (language_),
     m_last_source_start_addr (last_addr)
 {
   /* Allocate the compunit symtab now.  The caller needs it to allocate
      non-primary symtabs.  It is also needed by get_macro_table.  */
-  compunit_symtab = allocate_compunit_symtab (objfile, name);
+  m_compunit_symtab = allocate_compunit_symtab (m_objfile, name);
 
   /* Build the subfile for NAME (the main source file) so that we can record
      a pointer to it for later.
@@ -82,7 +82,7 @@ buildsym_compunit::buildsym_compunit (struct objfile *objfile_,
   start_subfile (name);
   /* Save this so that we don't have to go looking for it at the end
      of the subfiles list.  */
-  main_subfile = m_current_subfile;
+  m_main_subfile = m_current_subfile;
 }
 
 buildsym_compunit::~buildsym_compunit ()
@@ -92,7 +92,7 @@ buildsym_compunit::~buildsym_compunit ()
   if (m_pending_macros != nullptr)
     free_macro_table (m_pending_macros);
 
-  for (subfile = subfiles;
+  for (subfile = m_subfiles;
        subfile != NULL;
        subfile = nextsub)
     {
@@ -121,9 +121,9 @@ struct macro_table *
 buildsym_compunit::get_macro_table ()
 {
   if (m_pending_macros == nullptr)
-    m_pending_macros = new_macro_table (&objfile->per_bfd->storage_obstack,
-					objfile->per_bfd->macro_cache,
-					compunit_symtab);
+    m_pending_macros = new_macro_table (&m_objfile->per_bfd->storage_obstack,
+					m_objfile->per_bfd->macro_cache,
+					m_compunit_symtab);
   return m_pending_macros;
 }
 
@@ -215,34 +215,34 @@ buildsym_compunit::finish_block_internal
      CORE_ADDR start, CORE_ADDR end,
      int is_global, int expandable)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = get_objfile_arch (m_objfile);
   struct pending *next, *next1;
   struct block *block;
   struct pending_block *pblock;
   struct pending_block *opblock;
 
   block = (is_global
-	   ? allocate_global_block (&objfile->objfile_obstack)
-	   : allocate_block (&objfile->objfile_obstack));
+	   ? allocate_global_block (&m_objfile->objfile_obstack)
+	   : allocate_block (&m_objfile->objfile_obstack));
 
   if (symbol)
     {
       BLOCK_DICT (block)
-	= dict_create_linear (&objfile->objfile_obstack,
-			      language, *listhead);
+	= dict_create_linear (&m_objfile->objfile_obstack,
+			      m_language, *listhead);
     }
   else
     {
       if (expandable)
 	{
-	  BLOCK_DICT (block) = dict_create_hashed_expandable (language);
+	  BLOCK_DICT (block) = dict_create_hashed_expandable (m_language);
 	  dict_add_pending (BLOCK_DICT (block), *listhead);
 	}
       else
 	{
 	  BLOCK_DICT (block) =
-	    dict_create_hashed (&objfile->objfile_obstack,
-				language, *listhead);
+	    dict_create_hashed (&m_objfile->objfile_obstack,
+				m_language, *listhead);
 	}
     }
 
@@ -303,7 +303,7 @@ buildsym_compunit::finish_block_internal
     }
 
   if (static_link != NULL)
-    objfile_register_static_link (objfile, block, static_link);
+    objfile_register_static_link (m_objfile, block, static_link);
 
   /* Now free the links of the list, and empty the list.  */
 
@@ -385,7 +385,7 @@ buildsym_compunit::finish_block_internal
 		   (is_global
 		    ? m_global_using_directives
 		    : m_local_using_directives),
-		   &objfile->objfile_obstack);
+		   &m_objfile->objfile_obstack);
   if (is_global)
     m_global_using_directives = NULL;
   else
@@ -448,7 +448,7 @@ buildsym_compunit::make_blockvector ()
     }
 
   blockvector = (struct blockvector *)
-    obstack_alloc (&objfile->objfile_obstack,
+    obstack_alloc (&m_objfile->objfile_obstack,
 		   (sizeof (struct blockvector)
 		    + (i - 1) * sizeof (struct block *)));
 
@@ -470,7 +470,7 @@ buildsym_compunit::make_blockvector ()
      blockvector.  */
   if (m_pending_addrmap != nullptr && m_pending_addrmap_interesting)
     BLOCKVECTOR_MAP (blockvector)
-      = addrmap_create_fixed (m_pending_addrmap, &objfile->objfile_obstack);
+      = addrmap_create_fixed (m_pending_addrmap, &m_objfile->objfile_obstack);
   else
     BLOCKVECTOR_MAP (blockvector) = 0;
 
@@ -509,11 +509,11 @@ buildsym_compunit::start_subfile (const char *name)
   const char *subfile_dirname;
   struct subfile *subfile;
 
-  subfile_dirname = comp_dir.get ();
+  subfile_dirname = m_comp_dir.get ();
 
   /* See if this subfile is already registered.  */
 
-  for (subfile = subfiles; subfile; subfile = subfile->next)
+  for (subfile = m_subfiles; subfile; subfile = subfile->next)
     {
       char *subfile_name;
 
@@ -544,8 +544,8 @@ buildsym_compunit::start_subfile (const char *name)
   memset (subfile, 0, sizeof (struct subfile));
   subfile->buildsym_compunit = this;
 
-  subfile->next = subfiles;
-  subfiles = subfile;
+  subfile->next = m_subfiles;
+  m_subfiles = subfile;
 
   m_current_subfile = subfile;
 
@@ -583,7 +583,7 @@ buildsym_compunit::start_subfile (const char *name)
       enum language sublang = deduce_language_from_filename (subfile->name);
 
       if (sublang == language_cplus || sublang == language_fortran)
-	for (s = subfiles; s != NULL; s = s->next)
+	for (s = m_subfiles; s != NULL; s = s->next)
 	  if (s->language == language_c)
 	    s->language = sublang;
     }
@@ -615,11 +615,11 @@ buildsym_compunit::patch_subfile_names (struct subfile *subfile,
 					const char *name)
 {
   if (subfile != NULL
-      && comp_dir == NULL
+      && m_comp_dir == NULL
       && subfile->name != NULL
       && IS_DIR_SEPARATOR (subfile->name[strlen (subfile->name) - 1]))
     {
-      comp_dir.reset (subfile->name);
+      m_comp_dir.reset (subfile->name);
       subfile->name = xstrdup (name);
       set_last_source_file (name);
 
@@ -766,7 +766,7 @@ buildsym_compunit::watch_main_source_file_lossage ()
   struct subfile *mainsub, *subfile;
 
   /* Get the main source file.  */
-  mainsub = main_subfile;
+  mainsub = m_main_subfile;
 
   /* If the main source file doesn't have any line number or symbol
      info, look for an alias in another subfile.  */
@@ -781,7 +781,7 @@ buildsym_compunit::watch_main_source_file_lossage ()
       struct subfile *prev_mainsub_alias = NULL;
 
       prevsub = NULL;
-      for (subfile = subfiles;
+      for (subfile = m_subfiles;
 	   subfile != NULL;
 	   subfile = subfile->next)
 	{
@@ -809,7 +809,7 @@ buildsym_compunit::watch_main_source_file_lossage ()
 	  mainsub->symtab = mainsub_alias->symtab;
 
 	  if (prev_mainsub_alias == NULL)
-	    subfiles = mainsub_alias->next;
+	    m_subfiles = mainsub_alias->next;
 	  else
 	    prev_mainsub_alias->next = mainsub_alias->next;
 	  xfree (mainsub_alias->name);
@@ -862,7 +862,7 @@ buildsym_compunit::end_symtab_get_static_block (CORE_ADDR end_addr,
   /* Reordered executables may have out of order pending blocks; if
      OBJF_REORDERED is true, then sort the pending blocks.  */
 
-  if ((objfile->flags & OBJF_REORDERED) && m_pending_blocks)
+  if ((m_objfile->flags & OBJF_REORDERED) && m_pending_blocks)
     {
       struct pending_block *pb;
 
@@ -895,8 +895,8 @@ buildsym_compunit::end_symtab_get_static_block (CORE_ADDR end_addr,
      are no-ops.  FIXME: Is this handled right in case of QUIT?  Can
      we make this cleaner?  */
 
-  cleanup_undefined_stabs_types (objfile);
-  finish_global_stabs (objfile);
+  cleanup_undefined_stabs_types (m_objfile);
+  finish_global_stabs (m_objfile);
 
   if (!required
       && m_pending_blocks == NULL
@@ -926,14 +926,14 @@ struct compunit_symtab *
 buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
 						int section, int expandable)
 {
-  struct compunit_symtab *cu = compunit_symtab;
+  struct compunit_symtab *cu = m_compunit_symtab;
   struct symtab *symtab;
   struct blockvector *blockvector;
   struct subfile *subfile;
   CORE_ADDR end_addr;
 
   gdb_assert (static_block != NULL);
-  gdb_assert (subfiles != NULL);
+  gdb_assert (m_subfiles != NULL);
 
   end_addr = BLOCK_END (static_block);
 
@@ -945,8 +945,8 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
 
   /* Read the line table if it has to be read separately.
      This is only used by xcoffread.c.  */
-  if (objfile->sf->sym_read_linetable != NULL)
-    objfile->sf->sym_read_linetable (objfile);
+  if (m_objfile->sf->sym_read_linetable != NULL)
+    m_objfile->sf->sym_read_linetable (m_objfile);
 
   /* Handle the case where the debug info specifies a different path
      for the main source file.  It can cause us to lose track of its
@@ -956,7 +956,7 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
   /* Now create the symtab objects proper, if not already done,
      one for each subfile.  */
 
-  for (subfile = subfiles;
+  for (subfile = m_subfiles;
        subfile != NULL;
        subfile = subfile->next)
     {
@@ -970,7 +970,7 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
 	  /* Like the pending blocks, the line table may be
 	     scrambled in reordered executables.  Sort it if
 	     OBJF_REORDERED is true.  */
-	  if (objfile->flags & OBJF_REORDERED)
+	  if (m_objfile->flags & OBJF_REORDERED)
 	    qsort (subfile->line_vector->item,
 		   subfile->line_vector->nitems,
 		   sizeof (struct linetable_entry), compare_line_numbers);
@@ -987,7 +987,7 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
 	{
 	  /* Reallocate the line table on the symbol obstack.  */
 	  SYMTAB_LINETABLE (symtab) = (struct linetable *)
-	    obstack_alloc (&objfile->objfile_obstack, linetablesize);
+	    obstack_alloc (&m_objfile->objfile_obstack, linetablesize);
 	  memcpy (SYMTAB_LINETABLE (symtab), subfile->line_vector,
 		  linetablesize);
 	}
@@ -1009,7 +1009,7 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
   {
     struct symtab *main_symtab, *prev_symtab;
 
-    main_symtab = main_subfile->symtab;
+    main_symtab = m_main_subfile->symtab;
     prev_symtab = NULL;
     ALL_COMPUNIT_FILETABS (cu, symtab)
       {
@@ -1030,20 +1030,20 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
 
   /* Fill out the compunit symtab.  */
 
-  if (comp_dir != NULL)
+  if (m_comp_dir != NULL)
     {
       /* Reallocate the dirname on the symbol obstack.  */
-      const char *comp_dir = this->comp_dir.get ();
+      const char *comp_dir = m_comp_dir.get ();
       COMPUNIT_DIRNAME (cu)
-	= (const char *) obstack_copy0 (&objfile->objfile_obstack,
+	= (const char *) obstack_copy0 (&m_objfile->objfile_obstack,
 					comp_dir, strlen (comp_dir));
     }
 
   /* Save the debug format string (if any) in the symtab.  */
-  COMPUNIT_DEBUGFORMAT (cu) = debugformat;
+  COMPUNIT_DEBUGFORMAT (cu) = m_debugformat;
 
   /* Similarly for the producer.  */
-  COMPUNIT_PRODUCER (cu) = producer;
+  COMPUNIT_PRODUCER (cu) = m_producer;
 
   COMPUNIT_BLOCKVECTOR (cu) = blockvector;
   {
@@ -1192,7 +1192,7 @@ set_missing_symtab (struct pending *pending_list,
 void
 buildsym_compunit::augment_type_symtab ()
 {
-  struct compunit_symtab *cust = compunit_symtab;
+  struct compunit_symtab *cust = m_compunit_symtab;
   const struct blockvector *blockvector = COMPUNIT_BLOCKVECTOR (cust);
 
   if (!m_context_stack.empty ())
