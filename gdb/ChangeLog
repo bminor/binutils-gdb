@@ -1,5 +1,9 @@
 2018-07-22  Tom Tromey  <tom@tromey.com>
 
+	* value.c (value_fetch_lazy_bitfield): Remove unused variable.
+
+2018-07-22  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (reread_symbols): Notify iter, not objfile.
 
 2018-07-22  Tom Tromey  <tom@tromey.com>

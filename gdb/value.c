@@ -3726,7 +3726,6 @@ value_fetch_lazy_bitfield (struct value *val)
      per bitfield.  It would be even better to read only the containing
      word, but we have no way to record that just specific bits of a
      value have been fetched.  */
-  struct type *type = check_typedef (value_type (val));
   struct value *parent = value_parent (val);
 
   if (value_lazy (parent))
