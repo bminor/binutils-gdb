@@ -321,8 +321,6 @@ buildsym_compunit_symtab (void)
 struct macro_table *
 get_macro_table (void)
 {
-  struct objfile *objfile;
-
   gdb_assert (buildsym_compunit != NULL);
   return buildsym_compunit->get_macro_table ();
 }

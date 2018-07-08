@@ -1150,7 +1150,6 @@ s390_linux_init_abi_any (struct gdbarch_info info, struct gdbarch *gdbarch)
 static void
 s390_linux_init_abi_31 (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  const struct target_desc *tdesc = info.target_desc;
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   tdep->abi = ABI_LINUX_S390;
@@ -1167,7 +1166,6 @@ s390_linux_init_abi_31 (struct gdbarch_info info, struct gdbarch *gdbarch)
 static void
 s390_linux_init_abi_64 (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  const struct target_desc *tdesc = info.target_desc;
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   tdep->abi = ABI_LINUX_ZSERIES;

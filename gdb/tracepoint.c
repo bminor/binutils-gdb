@@ -1543,7 +1543,6 @@ trace_reset_local_state (void)
 void
 start_tracing (const char *notes)
 {
-  struct trace_state_variable *tsv;
   int any_enabled = 0, num_to_download = 0;
   int ret;
 
@@ -2752,7 +2751,6 @@ all_tracepoint_actions (struct breakpoint *t)
      the fly, and don't cache it.  */
   if (*default_collect)
     {
-      struct command_line *default_collect_action;
       gdb::unique_xmalloc_ptr<char> default_collect_line
 	(xstrprintf ("collect %s", default_collect));
 
@@ -3179,7 +3177,6 @@ create_tsv_from_upload (struct uploaded_tsv *utsv)
 void
 merge_uploaded_trace_state_variables (struct uploaded_tsv **uploaded_tsvs)
 {
-  int ix;
   struct uploaded_tsv *utsv;
   struct trace_state_variable *tsv;
   int highest;
@@ -3682,7 +3679,6 @@ print_one_static_tracepoint_marker (int count,
   if (!tracepoints.empty ())
     {
       int ix;
-      struct breakpoint *b;
 
       {
 	ui_out_emit_tuple tuple_emitter (uiout, "tracepoints-at");

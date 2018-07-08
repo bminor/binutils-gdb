@@ -879,7 +879,6 @@ gdbscm_frame_read_var (SCM self, SCM symbol_scm, SCM rest)
   else if (scm_is_string (symbol_scm))
     {
       const struct block *block = NULL;
-      struct cleanup *cleanup;
       struct gdb_exception except = exception_none;
 
       if (! SCM_UNBNDP (block_scm))

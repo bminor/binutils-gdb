@@ -1214,7 +1214,6 @@ gdbscm_field_baseclass_p (SCM self)
 {
   field_smob *f_smob
     = tyscm_get_field_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
-  struct field *field = tyscm_field_smob_to_field (f_smob);
   struct type *type = tyscm_field_smob_containing_type (f_smob);
 
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT)

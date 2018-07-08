@@ -27,7 +27,7 @@ test01()
   typedef gdb::string_view::size_type csize_type;
   typedef gdb::string_view::const_reference cref;
   typedef gdb::string_view::reference ref;
-  csize_type csz01, csz02;
+  csize_type csz01;
 
   const gdb::string_view str01("tamarindo, costa rica");
   gdb::string_view str02("41st street beach, capitola, california");

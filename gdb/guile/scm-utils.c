@@ -387,7 +387,6 @@ gdbscm_parse_function_args (const char *func_name,
   SCM rest = SCM_EOL;
   /* Keep track of malloc'd strings.  We need to free them upon error.  */
   std::vector<char *> allocated_strings;
-  char *ptr;
 
   have_rest = validate_arg_format (format);
   num_keywords = count_keywords (keywords);

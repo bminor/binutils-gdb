@@ -680,11 +680,9 @@ gdbscm_value_call (SCM self, SCM args)
   value_smob *v_smob
     = vlscm_get_value_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct value *function = v_smob->value;
-  struct value *mark = value_mark ();
   struct type *ftype = NULL;
   long args_count;
   struct value **vargs = NULL;
-  SCM result = SCM_BOOL_F;
 
   TRY
     {

@@ -757,8 +757,6 @@ static int
 riscv_register_reggroup_p (struct gdbarch  *gdbarch, int regnum,
 			   struct reggroup *reggroup)
 {
-  int float_p;
-  int raw_p;
   unsigned int i;
 
   /* Used by 'info registers' and 'info registers <groupname>'.  */
@@ -2018,7 +2016,6 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
   int i;
   CORE_ADDR sp_args, sp_refs;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   struct riscv_arg_info *arg_info =
     (struct riscv_arg_info *) alloca (nargs * sizeof (struct riscv_arg_info));
@@ -2204,10 +2201,6 @@ riscv_return_value (struct gdbarch  *gdbarch,
 		    gdb_byte *readbuf,
 		    const gdb_byte *writebuf)
 {
-  enum type_code rv_type = TYPE_CODE (type);
-  unsigned int rv_size = TYPE_LENGTH (type);
-  int fp, regnum, flen;
-  ULONGEST tmp;
   struct riscv_call_info call_info (gdbarch);
   struct riscv_arg_info info;
   struct type *arg_type;

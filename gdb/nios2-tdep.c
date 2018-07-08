@@ -1820,7 +1820,6 @@ nios2_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int argnum;
   int len = 0;
   int stack_offset = 0;
-  CORE_ADDR func_addr = find_function_addr (function, NULL);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   /* Set the return address register to point to the entry point of

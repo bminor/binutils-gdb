@@ -516,7 +516,6 @@ static int
 bppy_set_commands (PyObject *self, PyObject *newvalue, void *closure)
 {
   gdbpy_breakpoint_object *self_bp = (gdbpy_breakpoint_object *) self;
-  struct breakpoint *bp = self_bp->bp;
   struct gdb_exception except = exception_none;
 
   BPPY_SET_REQUIRE_VALID (self_bp);

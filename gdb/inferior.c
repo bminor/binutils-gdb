@@ -232,7 +232,6 @@ exit_inferior_1 (struct inferior *inftoex, int silent)
 void
 exit_inferior (inferior *inf)
 {
-  int pid = inf->pid;
   exit_inferior_1 (inf, 0);
 }
 

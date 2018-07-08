@@ -1501,8 +1501,6 @@ decode_line_2 (struct linespec_state *self,
   for (i = 0; i < result->size (); ++i)
     {
       const struct linespec_canonical_name *canonical;
-      struct decode_line_2_item *item;
-
       std::string displayform;
 
       canonical = &self->canonical_names[i];

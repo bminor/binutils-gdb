@@ -3373,7 +3373,6 @@ amd64_supply_xsave (struct regcache *regcache, int regnum,
       && gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 64)
     {
       const gdb_byte *regs = (const gdb_byte *) xsave;
-      static const gdb_byte zero[I386_MAX_REGISTER_SIZE] = { 0 };
       ULONGEST clear_bv;
 
       clear_bv = i387_xsave_get_clear_bv (gdbarch, xsave);

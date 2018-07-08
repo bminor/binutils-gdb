@@ -1999,7 +1999,6 @@ mi_execute_command (const char *cmd, int from_tty)
 	     again.  */
 	  && !command_notifies_uscc_observer (command.get ()))
 	{
-	  struct mi_interp *mi = (struct mi_interp *) top_level_interpreter ();
 	  int report_change = 0;
 
 	  if (command->thread == -1)

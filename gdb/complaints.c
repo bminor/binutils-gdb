@@ -92,8 +92,6 @@ complaint_internal (const char *fmt, ...)
 void
 clear_complaints (int less_verbose)
 {
-  struct complain *p;
-
   counters.clear ();
 
   if (!less_verbose)

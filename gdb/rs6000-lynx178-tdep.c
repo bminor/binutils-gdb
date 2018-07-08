@@ -44,7 +44,6 @@ rs6000_lynx178_push_dummy_call (struct gdbarch *gdbarch,
   gdb_byte tmp_buffer[50];
   int f_argno = 0;		/* current floating point argno */
   int wordsize = gdbarch_tdep (gdbarch)->wordsize;
-  CORE_ADDR func_addr = find_function_addr (function, NULL);
 
   struct value *arg = 0;
   struct type *type;

@@ -191,10 +191,6 @@ struct linux_nat_target *linux_target;
 /* Does the current host support PTRACE_GETREGSET?  */
 enum tribool have_ptrace_getregset = TRIBOOL_UNKNOWN;
 
-/* The saved to_close method, inherited from inf-ptrace.c.
-   Called by our to_close.  */
-static void (*super_close) (struct target_ops *);
-
 static unsigned int debug_linux_nat;
 static void
 show_debug_linux_nat (struct ui_file *file, int from_tty,

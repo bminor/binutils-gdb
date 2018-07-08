@@ -2264,7 +2264,6 @@ mep_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR *copy = (CORE_ADDR *) alloca (argc * sizeof (copy[0]));
-  CORE_ADDR func_addr = find_function_addr (function, NULL);
   int i;
 
   /* The number of the next register available to hold an argument.  */

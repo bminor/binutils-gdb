@@ -882,7 +882,6 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int argnum;
   int stack_offset = 4;
   int references_offset = 4;
-  CORE_ADDR func_addr = find_function_addr (function, NULL);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct type *func_type = value_type (function);
   /* The first arg passed on stack.  Mostly the first 10 args are passed by

@@ -2174,8 +2174,6 @@ start_step_over (void)
 static void
 infrun_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
 {
-  struct displaced_step_inferior_state *displaced;
-
   if (inferior_ptid == old_ptid)
     inferior_ptid = new_ptid;
 }

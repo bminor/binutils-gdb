@@ -395,7 +395,6 @@ static int
 stscm_print_sal_smob (SCM self, SCM port, scm_print_state *pstate)
 {
   sal_smob *s_smob = (sal_smob *) SCM_SMOB_DATA (self);
-  symtab_smob *st_smob = (symtab_smob *) SCM_SMOB_DATA (s_smob->symtab_scm);
 
   gdbscm_printf (port, "#<%s ", symtab_smob_name);
   scm_write (s_smob->symtab_scm, port);

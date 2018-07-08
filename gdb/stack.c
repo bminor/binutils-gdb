@@ -2629,7 +2629,8 @@ frame_apply_level_command (const char *cmd, int from_tty)
   /* Skip the LEVEL list to find the flags and command args.  */
   while (!levels.finished ())
     {
-      const int level_beg = levels.get_number ();
+      /* Call for effect.  */
+      levels.get_number ();
 
       level_found = true;
       if (levels.in_range ())

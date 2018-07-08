@@ -329,8 +329,6 @@ static void
 unwind_infopy_dealloc (PyObject *self)
 {
   unwind_info_object *unwind_info = (unwind_info_object *) self;
-  int i;
-  saved_reg *reg;
 
   Py_XDECREF (unwind_info->pending_frame);
   delete unwind_info->saved_regs;

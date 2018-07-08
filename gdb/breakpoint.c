@@ -1009,8 +1009,6 @@ check_no_tracepoint_commands (struct command_line *commands)
 
   for (c = commands; c; c = c->next)
     {
-      int i;
-
       if (c->control_type == while_stepping_control)
 	error (_("The 'while-stepping' command can "
 		 "only be used for tracepoints"));
@@ -1775,7 +1773,7 @@ update_watchpoint (struct watchpoint *b, int reparse)
     {
       int pc = 0;
       std::vector<value_ref_ptr> val_chain;
-      struct value *v, *result, *next;
+      struct value *v, *result;
       struct program_space *frame_pspace;
 
       fetch_subexp_value (b->exp.get (), &pc, &v, &result, &val_chain, 0);

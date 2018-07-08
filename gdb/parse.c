@@ -458,7 +458,6 @@ find_minsym_type_and_address (minimal_symbol *msymbol,
 			      CORE_ADDR *address_p)
 {
   bound_minimal_symbol bound_msym = {msymbol, objfile};
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct obj_section *section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
   enum minimal_symbol_type type = MSYMBOL_TYPE (msymbol);
 

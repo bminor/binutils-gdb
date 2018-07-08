@@ -5786,7 +5786,6 @@ ada_lookup_symbol_list_worker (const lookup_name_info &lookup_name,
 {
   int syms_from_global_search;
   int ndefns;
-  int results_size;
   auto_obstack obstack;
 
   ada_add_all_symbols (&obstack, block, lookup_name,

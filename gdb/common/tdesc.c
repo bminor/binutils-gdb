@@ -314,7 +314,6 @@ void print_xml_feature::visit (const tdesc_type_vector *t)
 
 void print_xml_feature::visit (const tdesc_type_with_fields *t)
 {
-  struct tdesc_type_field *f;
   const static char *types[] = { "struct", "union", "flags", "enum" };
 
   gdb_assert (t->kind >= TDESC_TYPE_STRUCT && t->kind <= TDESC_TYPE_ENUM);

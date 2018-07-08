@@ -180,7 +180,6 @@ compute_garbled_blocks (const std::vector<memory_write_request> &erased_blocks,
 
   unsigned j;
   unsigned je = written_blocks.size ();
-  struct memory_write_request *erased_p;
 
   /* Look at each erased memory_write_request in turn, and
      see what part of it is subsequently written to.
@@ -265,7 +264,6 @@ target_write_memory_blocks (const std::vector<memory_write_request> &requests,
 			    void (*progress_cb) (ULONGEST, void *))
 {
   std::vector<memory_write_request> blocks = requests;
-  struct memory_write_request *r;
   std::vector<memory_write_request> regular;
   std::vector<memory_write_request> flash;
   std::vector<memory_write_request> erased, garbled;

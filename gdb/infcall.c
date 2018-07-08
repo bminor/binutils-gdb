@@ -587,7 +587,6 @@ run_inferior_call (struct call_thread_fsm *sm,
   struct gdb_exception caught_error = exception_none;
   int saved_in_infcall = call_thread->control.in_infcall;
   ptid_t call_thread_ptid = call_thread->ptid;
-  inferior *call_thread_inf = call_thread->inf;
   enum prompt_state saved_prompt_state = current_ui->prompt_state;
   int was_running = call_thread->state == THREAD_RUNNING;
   int saved_ui_async = current_ui->async;

@@ -1297,7 +1297,6 @@ info_symbol_command (const char *arg, int from_tty)
       {
 	const char *obj_name, *mapped, *sec_name, *msym_name;
 	const char *loc_string;
-	struct cleanup *old_chain;
 
 	matches = 1;
 	offset = sect_addr - MSYMBOL_VALUE_ADDRESS (objfile, msymbol);
@@ -2286,7 +2285,6 @@ printf_floating (struct ui_file *stream, const char *format,
   /* Parameter data.  */
   struct type *param_type = value_type (value);
   struct gdbarch *gdbarch = get_type_arch (param_type);
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   /* Determine target type corresponding to the format string.  */
   struct type *fmt_type;

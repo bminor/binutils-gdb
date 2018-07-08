@@ -461,8 +461,6 @@ adi_examine_command (const char *args, int from_tty)
   if (!adi_available ())
     error (_("No ADI information"));
 
-  pid_t pid = inferior_ptid.pid ();
-  sparc64_adi_info *proc = get_adi_info_proc (pid);
   int cnt = 1;
   const char *p = args;
   if (p && *p == '/')

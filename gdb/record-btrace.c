@@ -1569,8 +1569,6 @@ record_btrace_target::fetch_registers (struct regcache *regcache, int regno)
 void
 record_btrace_target::store_registers (struct regcache *regcache, int regno)
 {
-  struct target_ops *t;
-
   if (!record_btrace_generating_corefile
       && record_is_replaying (regcache->ptid ()))
     error (_("Cannot write registers while replaying."));
@@ -3085,8 +3083,6 @@ cmd_set_record_btrace_cpu (const char *args, int from_tty)
 static void
 cmd_show_record_btrace_cpu (const char *args, int from_tty)
 {
-  const char *cpu;
-
   if (args != nullptr && *args != 0)
     error (_("Trailing junk: '%s'."), args);
 

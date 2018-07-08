@@ -674,9 +674,6 @@ unpush_target (struct target_ops *t)
 bool
 target_stack::unpush (target_ops *t)
 {
-  struct target_ops **cur;
-  struct target_ops *tmp;
-
   if (t->to_stratum == dummy_stratum)
     internal_error (__FILE__, __LINE__,
 		    _("Attempt to unpush the dummy target"));

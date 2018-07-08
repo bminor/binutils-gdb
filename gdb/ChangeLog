@@ -1,3 +1,89 @@
+2018-07-22  Tom Tromey  <tom@tromey.com>
+
+	* guile/scm-value.c (gdbscm_value_call): Remove unused variables.
+	* guile/scm-math.c (vlscm_unop_gdbthrow, vlscm_binop_gdbthrow)
+	(vlscm_convert_typed_value_from_scheme): Remove unused variable.
+	* buildsym-legacy.c (get_macro_table): Remove unused variable.
+	* stack.c (frame_apply_level_command): Remove unused variable.
+	* tic6x-tdep.c (tic6x_push_dummy_call): Remove unused variable.
+	* sparc64-tdep.c (adi_examine_command): Remove unused variable.
+	* rs6000-lynx178-tdep.c (rs6000_lynx178_push_dummy_call): Remove
+	unused variable.
+	* nios2-tdep.c (nios2_push_dummy_call): Remove unused variable.
+	* mep-tdep.c (mep_push_dummy_call): Remove unused variable.
+	* ada-lang.c (ada_lookup_symbol_list_worker): Remove unused
+	variable.
+	* amd64-tdep.c (amd64_supply_xsave): Remove unused variable.
+	* arm-tdep.c (arm_record_data_proc_misc_ld_str): Remove unused
+	variable.
+	* breakpoint.c (check_no_tracepoint_commands, update_watchpoint):
+	Remove unused variable.
+	* cli/cli-script.c (recurse_read_control_structure): Remove unused
+	variable.
+	* common/tdesc.c (print_xml_feature::visit): Remove unused
+	variable.
+	* compile/compile-object-load.c (store_regs): Remove unused
+	variables.
+	* complaints.c (clear_complaints): Remove unused variable.
+	* corelow.c (core_target_open): Remove unused variable.
+	* fbsd-tdep.c (fbsd_core_info_proc_status): Remove unused
+	variable.
+	* guile/scm-frame.c (gdbscm_frame_read_var): Remove unused
+	variable.
+	* guile/scm-symtab.c (stscm_print_sal_smob): Remove unused
+	variable.
+	* guile/scm-type.c (gdbscm_field_baseclass_p): Remove unused
+	variable.
+	* guile/scm-utils.c (gdbscm_parse_function_args): Remove unused
+	variable.
+	* hppa-tdep.c (hppa_stub_frame_unwind_cache): Remove unused
+	variable.
+	* ia64-tdep.c (examine_prologue): Remove unused variable.
+	* infcall.c (run_inferior_call): Remove unused variable.
+	* inferior.c (exit_inferior): Remove unused variable.
+	* infrun.c (infrun_thread_ptid_changed): Remove unused variable.
+	* linespec.c (decode_line_2): Remove unused variable.
+	* linux-nat.c (super_close): Remove.
+	* linux-tdep.c (linux_info_proc): Remove unused variable.
+	* mi/mi-main.c (mi_execute_command): Remove unused variable.
+	* microblaze-linux-tdep.c (microblaze_linux_sigtramp_cache):
+	Remove unused variable.
+	* parse.c (find_minsym_type_and_address): Remove unused variable.
+	* printcmd.c (info_symbol_command, printf_floating): Remove unused
+	variable.
+	* python/py-breakpoint.c (bppy_set_commands): Remove unused
+	variable.
+	* python/py-unwind.c (unwind_infopy_dealloc): Remove unused
+	variables.
+	* record-btrace.c (record_btrace_target::store_registers): Remove
+	unused variable.
+	(cmd_show_record_btrace_cpu): Remove unused variable.
+	* riscv-tdep.c (riscv_register_reggroup_p)
+	(riscv_push_dummy_call, riscv_return_value): Remove unused
+	variable.
+	* rust-exp.y (literal): Remove unused variable.
+	* rust-lang.c (rust_evaluate_subexp) <OP_RUST_ARARAY>: Remove
+	unused variable.
+	<STRUCTOP_ANONYMOUS>: Likewise.
+	* s390-linux-tdep.c (s390_linux_init_abi_31)
+	(s390_linux_init_abi_64): Remove unused variable.
+	* ser-ming2.c (ser_windows_read_prim, pipe_select_thread)
+	(file_select_thread, net_windows_open, _initialize_ser_windows):
+	Remove unused variables.
+	* symtab.c (find_pc_sect_line): Remove unused variable.
+	* target-memory.c (compute_garbled_blocks): Remove unused
+	variable.
+	(target_write_memory_blocks): Remove unused variable.
+	* target.c (target_stack::unpush): Remove unused variables.
+	* tracepoint.c (start_tracing, all_tracepoint_actions)
+	(merge_uploaded_trace_state_variables)
+	(print_one_static_tracepoint_marker): Remove unused variable.
+	* unittests/basic_string_view/element_access/char/1.cc (test01):
+	Remove unused variable.
+	* windows-nat.c (windows_continue, windows_add_all_dlls)
+	(do_initial_windows_stuff, windows_nat_target::create_inferior):
+	Remove unused variables.
+
 2018-07-21  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* arm-tdep.c (arm_gdbarch_init): Declare attr_arch and

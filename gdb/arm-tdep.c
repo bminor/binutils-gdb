@@ -10220,7 +10220,7 @@ arm_record_data_proc_misc_ld_str (insn_decode_record *arm_insn_r)
   uint32_t record_buf[8], record_buf_mem[8];
   ULONGEST u_regval[2] = {0};
 
-  uint32_t reg_src1 = 0, reg_dest = 0;
+  uint32_t reg_src1 = 0;
   uint32_t opcode1 = 0;
 
   arm_insn_r->opcode = bits (arm_insn_r->arm_insn, 21, 24);

@@ -787,7 +787,6 @@ fbsd_core_info_proc_status (struct gdbarch *gdbarch)
 {
   const struct kinfo_proc_layout *kp;
   asection *section;
-  const char *state;
   unsigned char *descdata;
   int addr_bit, long_bit;
   size_t note_size;

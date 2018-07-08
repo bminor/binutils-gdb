@@ -1555,7 +1555,7 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
     case OP_RUST_ARRAY:
       {
-	int pc = (*pos)++;
+	(*pos)++;
 	int copies;
 	struct value *elt;
 	struct value *ncopies;
@@ -1589,7 +1589,7 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
         /* Anonymous field access, i.e. foo.1.  */
         struct value *lhs;
         int pc, field_number, nfields;
-        struct type *type, *variant_type;
+        struct type *type;
 
         pc = (*pos)++;
         field_number = longest_to_int (exp->elts[pc + 1].longconst);

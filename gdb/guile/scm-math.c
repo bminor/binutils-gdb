@@ -76,7 +76,6 @@ vlscm_unop_gdbthrow (enum valscm_unary_opcode opcode, SCM x,
 {
   struct gdbarch *gdbarch = get_current_arch ();
   const struct language_defn *language = current_language;
-  SCM result = SCM_BOOL_F;
 
   scoped_value_mark free_values;
 
@@ -142,7 +141,6 @@ vlscm_binop_gdbthrow (enum valscm_binary_opcode opcode, SCM x, SCM y,
   struct gdbarch *gdbarch = get_current_arch ();
   const struct language_defn *language = current_language;
   struct value *arg1, *arg2;
-  SCM result = SCM_BOOL_F;
   struct value *res_val = NULL;
   SCM except_scm;
 
@@ -791,7 +789,6 @@ vlscm_convert_typed_value_from_scheme (const char *func_name,
       else if (scm_is_string (obj))
 	{
 	  size_t len;
-	  struct cleanup *cleanup;
 
 	  if (type != NULL)
 	    {

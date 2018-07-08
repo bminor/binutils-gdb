@@ -2435,9 +2435,7 @@ static struct hppa_stub_unwind_cache *
 hppa_stub_frame_unwind_cache (struct frame_info *this_frame,
 			      void **this_cache)
 {
-  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct hppa_stub_unwind_cache *info;
-  struct unwind_table_entry *u;
 
   if (*this_cache)
     return (struct hppa_stub_unwind_cache *) *this_cache;

@@ -3053,7 +3053,6 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
   struct symtab *iter_s;
   struct linetable *l;
   int len;
-  int i;
   struct linetable_entry *item;
   const struct blockvector *bv;
   struct bound_minimal_symbol msymbol;

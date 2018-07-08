@@ -1526,11 +1526,8 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc,
 	         where the pc is.  If it's still early in the prologue
 		 this'll be wrong.  FIXME */
 	      if (this_frame)
-		{
-		  struct gdbarch *gdbarch = get_frame_arch (this_frame);
-		  saved_sp = get_frame_register_unsigned (this_frame,
-							  sp_regnum);
-		}
+		saved_sp = get_frame_register_unsigned (this_frame,
+							sp_regnum);
 	      spill_addr  = saved_sp
 	                  + (rM == 12 ? 0 : mem_stack_frame_size) 
 			  + imm;
