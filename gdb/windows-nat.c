@@ -146,8 +146,10 @@ static GetConsoleFontSize_ftype *GetConsoleFontSize;
 
 static int have_saved_context;	/* True if we've saved context from a
 				   cygwin signal.  */
+#ifdef __CYGWIN__
 static CONTEXT saved_context;	/* Containes the saved context from a
 				   cygwin signal.  */
+#endif
 
 /* If we're not using the old Cygwin header file set, define the
    following which never should have been in the generic Win32 API

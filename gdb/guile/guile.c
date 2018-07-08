@@ -46,8 +46,10 @@ int gdbscm_guile_major_version;
 int gdbscm_guile_minor_version;
 int gdbscm_guile_micro_version;
 
+#ifdef HAVE_GUILE
 /* The guile subdirectory within gdb's data-directory.  */
 static const char *guile_datadir;
+#endif
 
 /* Declared constants and enum for guile exception printing.  */
 const char gdbscm_print_excp_none[] = "none";

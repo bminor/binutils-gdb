@@ -13717,7 +13717,9 @@ remote_target::remote_btrace_maybe_reopen ()
   struct remote_state *rs = get_remote_state ();
   struct thread_info *tp;
   int btrace_target_pushed = 0;
+#if !defined (HAVE_LIBIPT)
   int warned = 0;
+#endif
 
   scoped_restore_current_thread restore_thread;
 

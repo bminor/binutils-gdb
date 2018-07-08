@@ -138,7 +138,9 @@ private:
    to SIG_IGN.  */
 
 static sighandler_t sigint_ours;
+#ifdef SIGQUIT
 static sighandler_t sigquit_ours;
+#endif
 
 /* The name of the tty (from the `tty' command) that we're giving to
    the inferior when starting it up.  This is only (and should only
@@ -825,11 +827,11 @@ check_syscall (const char *msg, int result)
 void
 new_tty (void)
 {
-  int tty;
-
   if (inferior_thisrun_terminal == 0)
     return;
 #if !defined(__GO32__) && !defined(_WIN32)
+  int tty;
+
 #ifdef TIOCNOTTY
   /* Disconnect the child process from our controlling terminal.  On some
      systems (SVR4 for example), this may cause a SIGTTOU, so temporarily

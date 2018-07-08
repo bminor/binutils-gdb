@@ -1,5 +1,18 @@
 2018-07-22  Tom Tromey  <tom@tromey.com>
 
+	* windows-nat.c (saved_context): Conditionally define.
+	* remote.c (remote_target::remote_btrace_maybe_reopen):
+	Conditionally declare "warned".
+	* inflow.c (sigquit_ours): Conditionally define.
+	(new_tty): Move "tty" declaration inside #if.
+	* guile/guile.c (guile_datadir): Conditionally define.
+	* charset.c (set_be_le_names): Move some declarations inside #if.
+	* btrace.c (parse_xml_btrace): Move "errcode" declaration inside
+	#if.
+	(parse_xml_btrace_conf): Likewise.
+
+2018-07-22  Tom Tromey  <tom@tromey.com>
+
 	* spu-tdep.c (spu_get_overlay_table): Remove unused variable.
 
 2018-07-22  Tom Tromey  <tom@tromey.com>

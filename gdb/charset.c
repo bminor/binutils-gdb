@@ -295,9 +295,6 @@ static struct gdbarch *be_le_arch;
 static void
 set_be_le_names (struct gdbarch *gdbarch)
 {
-  int i, len;
-  const char *target_wide;
-
   if (be_le_arch == gdbarch)
     return;
   be_le_arch = gdbarch;
@@ -307,6 +304,9 @@ set_be_le_names (struct gdbarch *gdbarch)
   target_wide_charset_le_name = "UTF-32LE";
   target_wide_charset_be_name = "UTF-32BE";
 #else
+  int i, len;
+  const char *target_wide;
+
   target_wide_charset_le_name = NULL;
   target_wide_charset_be_name = NULL;
 

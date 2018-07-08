@@ -2202,10 +2202,9 @@ static const struct gdb_xml_element btrace_elements[] = {
 void
 parse_xml_btrace (struct btrace_data *btrace, const char *buffer)
 {
-  int errcode;
-
 #if defined (HAVE_LIBEXPAT)
 
+  int errcode;
   btrace_data result;
   result.format = BTRACE_FORMAT_NONE;
 
@@ -2303,10 +2302,9 @@ static const struct gdb_xml_element btrace_conf_elements[] = {
 void
 parse_xml_btrace_conf (struct btrace_config *conf, const char *xml)
 {
-  int errcode;
-
 #if defined (HAVE_LIBEXPAT)
 
+  int errcode;
   errcode = gdb_xml_parse_quick (_("btrace-conf"), "btrace-conf.dtd",
 				 btrace_conf_elements, xml, conf);
   if (errcode != 0)
