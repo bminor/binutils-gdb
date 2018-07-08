@@ -526,7 +526,7 @@ bfin_push_dummy_call (struct gdbarch *gdbarch,
     {
       struct type *value_type = value_enclosing_type (args[i]);
       struct type *arg_type = check_typedef (value_type);
-      int container_len = (TYPE_LENGTH (value_type) + 3) & ~3;
+      int container_len = (TYPE_LENGTH (arg_type) + 3) & ~3;
 
       sp -= container_len;
       write_memory (sp, value_contents (args[i]), container_len);

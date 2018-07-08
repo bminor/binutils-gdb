@@ -1,5 +1,10 @@
 2018-07-22  Tom Tromey  <tom@tromey.com>
 
+	* bfin-tdep.c (bfin_push_dummy_call): Use arg_type, not
+	value_type.
+
+2018-07-22  Tom Tromey  <tom@tromey.com>
+
 	* windows-nat.c (saved_context): Conditionally define.
 	* remote.c (remote_target::remote_btrace_maybe_reopen):
 	Conditionally declare "warned".
