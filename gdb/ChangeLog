@@ -1,3 +1,9 @@
+2018-07-22  Tom Tromey  <tom@tromey.com>
+
+	* ravenscar-thread.c (ravenscar_thread_target::store_registers):
+	Use arch_ops.
+	(ravenscar_thread_target::prepare_to_store): Likewise.
+
 2018-07-17  Tom Tromey  <tom@tromey.com>
 
 	PR gdb/18624:
