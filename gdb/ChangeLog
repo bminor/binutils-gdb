@@ -1,5 +1,12 @@
 2018-07-22  Tom Tromey  <tom@tromey.com>
 
+	* guile/scm-cmd.c (gdbscm_dont_repeat): Call
+	cmdscm_get_valid_command_smob_arg_unsafe for effect.
+	* guile/scm-block.c (gdbscm_make_block_syms_iter): Call
+	bkscm_get_valid_block_smob_arg_unsafe for effect.
+
+2018-07-22  Tom Tromey  <tom@tromey.com>
+
 	* bfin-tdep.c (bfin_push_dummy_call): Use arg_type, not
 	value_type.
 

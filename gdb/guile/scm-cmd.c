@@ -267,9 +267,9 @@ gdbscm_command_valid_p (SCM self)
 static SCM
 gdbscm_dont_repeat (SCM self)
 {
-  /* We currently don't need anything from SELF, but still verify it.  */
-  command_smob *c_smob
-    = cmdscm_get_valid_command_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
+  /* We currently don't need anything from SELF, but still verify it.
+     Call for side effects.  */
+  cmdscm_get_valid_command_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
   dont_repeat ();
 
