@@ -1,5 +1,12 @@
 2018-07-22  Tom Tromey  <tom@tromey.com>
 
+	* python/py-prettyprint.c (gdbpy_apply_val_pretty_printer): Remove
+	unused variable.  Call value_fetch_lazy when needed.
+	* guile/scm-pretty-print.c (gdbscm_apply_val_pretty_printer):
+	Remove unused variable.  Call value_fetch_lazy when needed.
+
+2018-07-22  Tom Tromey  <tom@tromey.com>
+
 	* m32c-tdep.c (mark_dma): Return void.
 	(make_regs): Remove unused declarations.
 

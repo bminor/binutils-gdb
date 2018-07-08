@@ -949,7 +949,9 @@ gdbscm_apply_val_pretty_printer (const struct extension_language_defn *extlang,
   enum display_hint hint;
   enum ext_lang_rc result = EXT_LANG_RC_NOP;
   enum string_repr_result print_result;
-  const gdb_byte *valaddr = value_contents_for_printing (val);
+
+  if (value_lazy (val))
+    value_fetch_lazy (val);
 
   /* No pretty-printer support for unavailable values.  */
   if (!value_bytes_available (val, embedded_offset, TYPE_LENGTH (type)))
