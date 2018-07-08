@@ -1,5 +1,11 @@
 2018-07-22  Tom Tromey  <tom@tromey.com>
 
+	* ravenscar-thread.c (ravenscar_thread_target::store_registers):
+	Use arch_ops.
+	(ravenscar_thread_target::prepare_to_store): Likewise.
+
+2018-07-22  Tom Tromey  <tom@tromey.com>
+
 	* python/py-prettyprint.c (gdbpy_apply_val_pretty_printer): Remove
 	unused variable.  Call value_fetch_lazy when needed.
 	* guile/scm-pretty-print.c (gdbscm_apply_val_pretty_printer):

@@ -442,7 +442,7 @@ ravenscar_thread_target::store_registers (struct regcache *regcache,
       struct ravenscar_arch_ops *arch_ops
 	= gdbarch_ravenscar_ops (gdbarch);
 
-      beneath ()->store_registers (regcache, regnum);
+      arch_ops->to_store_registers (regcache, regnum);
     }
   else
     beneath ()->store_registers (regcache, regnum);
@@ -461,7 +461,7 @@ ravenscar_thread_target::prepare_to_store (struct regcache *regcache)
       struct ravenscar_arch_ops *arch_ops
 	= gdbarch_ravenscar_ops (gdbarch);
 
-      beneath ()->prepare_to_store (regcache);
+      arch_ops->to_prepare_to_store (regcache);
     }
   else
     beneath ()->prepare_to_store (regcache);
