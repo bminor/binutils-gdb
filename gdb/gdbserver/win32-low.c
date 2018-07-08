@@ -634,8 +634,6 @@ win32_create_inferior (const char *program,
 #endif
   BOOL ret;
   DWORD flags;
-  int argslen;
-  int argc;
   PROCESS_INFORMATION pi;
   DWORD err;
   std::string str_program_args = stringify_argv (program_args);

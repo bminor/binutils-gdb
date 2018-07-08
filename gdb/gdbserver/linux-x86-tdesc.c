@@ -69,9 +69,9 @@ xcr0_to_tdesc_idx (uint64_t xcr0, bool is_x32)
     return X86_TDESC_LAST;
 }
 
-static struct target_desc *i386_tdescs[X86_TDESC_LAST] = { };
-
 #if defined __i386__ || !defined IN_PROCESS_AGENT
+
+static struct target_desc *i386_tdescs[X86_TDESC_LAST] = { };
 
 /* Return the target description according to XCR0.  */
 

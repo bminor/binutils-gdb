@@ -231,7 +231,6 @@ void
 remote_prepare (const char *name)
 {
   client_state &cs = get_client_state ();
-  const char *port_str;
 #ifdef USE_WIN32API
   static int winsock_initialized;
 #endif
@@ -902,7 +901,6 @@ static unsigned char *readchar_bufp;
 static int
 readchar (void)
 {
-  client_state &cs = get_client_state ();
   int ch;
 
   if (readchar_bufcnt == 0)

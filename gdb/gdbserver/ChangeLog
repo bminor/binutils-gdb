@@ -1,3 +1,14 @@
+2018-07-22  Tom Tromey  <tom@tromey.com>
+
+	* win32-low.c (win32_create_inferior): Remove unused variables.
+	* gdbreplay.c (remote_open): Remove unused variable.
+	* remote-utils.c (remote_prepare): Remove unused variable.
+	* x86-tdesc.h (X86_TDESC_H): Define.
+	(amd64_expedite_regs): Define conditionally.
+	(i386_expedite_regs): Mark ATTRIBUTE_UNUSED.
+	* linux-x86-tdesc.c (i386_tdescs): Move inside #if.
+	* remote-utils.c (readchar): Remove unused variable.
+
 2018-07-13  Pedro Alves  <palves@redhat.com>
 
 	* linux-low.c (linux_kill): Change parameter to process_info

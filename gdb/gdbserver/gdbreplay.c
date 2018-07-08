@@ -157,7 +157,6 @@ remote_open (char *name)
 #ifdef USE_WIN32API
   static int winsock_initialized;
 #endif
-  char *port_str;
   int tmp;
   int tmp_desc;
   struct addrinfo hint;
