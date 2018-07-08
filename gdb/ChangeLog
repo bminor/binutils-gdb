@@ -1,5 +1,10 @@
 2018-07-22  Tom Tromey  <tom@tromey.com>
 
+	* m32c-tdep.c (mark_dma): Return void.
+	(make_regs): Remove unused declarations.
+
+2018-07-22  Tom Tromey  <tom@tromey.com>
+
 	* guile/scm-cmd.c (gdbscm_dont_repeat): Call
 	cmdscm_get_valid_command_smob_arg_unsafe for effect.
 	* guile/scm-block.c (gdbscm_make_block_syms_iter): Call
