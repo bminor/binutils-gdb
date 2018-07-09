@@ -1,3 +1,9 @@
+2018-07-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23388
+	* configure.ac: Use changequote for "i[3-7]86-*-linux-*".
+	* configure: Regenerated.
+
 2018-07-09  Alan Modra  <amodra@gmail.com>
 
 	* elf32-m68hc1x.c (elf32_m68hc11_post_process_headers): Call
