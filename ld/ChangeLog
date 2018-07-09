@@ -1,5 +1,27 @@
 2018-07-09  Maciej W. Rozycki  <macro@mips.com>
 
+	* testsuite/ld-mips-elf/stub-dynsym-2.dd: New test.
+	* testsuite/ld-mips-elf/stub-dynsym-2.gd: New test.
+	* testsuite/ld-mips-elf/stub-dynsym-2.sd: New test.
+	* testsuite/ld-mips-elf/stub-dynsym-discard-2.gd: New test.
+	* testsuite/ld-mips-elf/stub-dynsym-discard-2.sd: New test.
+	* testsuite/ld-mips-elf/stub-dynsym-micromips-2.dd: New test.
+	* testsuite/ld-mips-elf/stub-dynsym-micromips-2.gd: New test.
+	* testsuite/ld-mips-elf/stub-dynsym-micromips-2.sd: New test.
+	* testsuite/ld-mips-elf/stub-dynsym-micromips-insn32-2.dd: New
+	test.
+	* testsuite/ld-mips-elf/stub-dynsym-micromips-insn32-2.gd: New
+	test.
+	* testsuite/ld-mips-elf/stub-dynsym-micromips-insn32-2.sd: New
+	test.
+	* testsuite/ld-mips-elf/stub-dynsym-2.ld: New test linker
+	script.
+	* testsuite/ld-mips-elf/stub-dynsym-discard-2.ld: New test
+	linker script.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
+2018-07-09  Maciej W. Rozycki  <macro@mips.com>
+
 	* testsuite/lib/ld-lib.exp (run_dump_test): Call `unsupported'
 	if the target being tested has been excluded by means of one or
 	more of `target', `alltargets' and `notarget' tags.  Add support

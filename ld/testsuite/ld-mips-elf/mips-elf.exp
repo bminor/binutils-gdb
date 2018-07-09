@@ -807,6 +807,42 @@ if { $linux_gnu } {
 				      "stub-dynsym$suffix-1-$dynsym.d"]] \
 			   "stub-dynsym$suffix-1-$dynsym"]]
 	}
+	run_ld_link_tests [list \
+	     [list \
+		 "Retained stubs for dynsyms ($isa)" \
+		 "-shared -melf32btsmip -T stub-dynsym-2.ld $lflag" "" \
+		 "-EB $aflag -32 -KPIC" \
+		 [list "stub-dynsym-2.s"] \
+		 [list \
+		     [list \
+			"objdump" \
+			"-dz -j .MIPS.stubs" \
+			"stub-dynsym$suffix-2.dd"] \
+		     [list \
+			"readelf" \
+			"--dyn-syms" \
+			"stub-dynsym$suffix-2.sd"] \
+		     [list \
+			"readelf" \
+			"-A" \
+			"stub-dynsym$suffix-2.gd"]] \
+		 "stub-dynsym$suffix-2"] \
+	     [list \
+		 "Discarded stubs for dynsyms ($isa)" \
+		 "-shared -melf32btsmip -T stub-dynsym-discard-2.ld $lflag" \
+		 "" \
+		 "-EB $aflag -32 -KPIC" \
+		 [list "stub-dynsym-2.s"] \
+		 [list \
+		     [list \
+			"readelf" \
+			"--dyn-syms" \
+			"stub-dynsym-discard-2.sd"] \
+		     [list \
+			"readelf" \
+			"-A" \
+			"stub-dynsym-discard-2.gd"]] \
+		 "stub-dynsym-discard$suffix-2"]]
     }
 }
 

@@ -9043,7 +9043,8 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	 the symbol to the stub location.  This is required to make
 	 function pointers compare as equal between the normal
 	 executable and the shared library.  */
-      if (!h->def_regular)
+      if (!h->def_regular
+	  && !bfd_is_abs_section (htab->sstubs->output_section))
 	{
 	  hmips->needs_lazy_stub = TRUE;
 	  htab->lazy_stub_count++;

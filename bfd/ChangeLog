@@ -1,3 +1,9 @@
+2018-07-09  Maciej W. Rozycki  <macro@mips.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_adjust_dynamic_symbol): Don't set
+	`->needs_lazy_stub' if the stubs output section is the absolute
+	section.
+
 2018-07-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23388
