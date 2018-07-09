@@ -1,3 +1,10 @@
+2018-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
+	    Tom Tromey  <tom@tromey.com>
+
+	* warning.m4 (AM_GDB_WARNINGS): Add -Wunused-variable and special
+	test for it.
+	* configure: Rebuild.
+
 2018-07-22  Tom Tromey  <tom@tromey.com>
 
 	* regformats/regdat.sh: Define xmltarget_${name} inside

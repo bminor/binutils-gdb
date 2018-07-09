@@ -7237,7 +7237,7 @@ fi
 
 # The options we'll try to enable.
 build_warnings="-Wall -Wpointer-arith \
--Wno-unused -Wunused-value -Wunused-function \
+-Wno-unused -Wunused-value -Wunused-variable -Wunused-function \
 -Wno-switch -Wno-char-subscripts \
 -Wempty-body -Wunused-but-set-parameter -Wunused-but-set-variable \
 -Wno-sign-compare -Wno-narrowing -Wno-error=maybe-uninitialized \
@@ -7326,7 +7326,30 @@ $as_echo_n "checking compiler warning flags... " >&6; }
 	    CFLAGS="$CFLAGS -Werror $wtest"
 	    saved_CXXFLAGS="$CXXFLAGS"
 	    CXXFLAGS="$CXXFLAGS -Werror $wtest"
-	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+	    if test "x$w" = "x-Wunused-variable"; then
+	      # Check for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=38958,
+	      # fixed in GCC 4.9.  This test is derived from the gdb
+	      # source code that triggered this bug in GCC.
+	      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+struct scoped_restore_base {};
+                 struct scoped_restore_tmpl : public scoped_restore_base {
+		   ~scoped_restore_tmpl() {}
+		 };
+int
+main ()
+{
+const scoped_restore_base &b = scoped_restore_tmpl();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  WARN_CFLAGS="${WARN_CFLAGS} $w"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+	    else
+	      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 int
@@ -7341,6 +7364,7 @@ if ac_fn_cxx_try_compile "$LINENO"; then :
   WARN_CFLAGS="${WARN_CFLAGS} $w"
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+	    fi
 	    CFLAGS="$saved_CFLAGS"
 	    CXXFLAGS="$saved_CXXFLAGS"
 	esac
