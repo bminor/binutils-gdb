@@ -1,3 +1,8 @@
+2018-07-09  Christophe Lyon  <christophe.lyon@linaro.org>
+
+	* emultempl/armelf.em (gld${EMULATION_NAME}_finish): Use the right
+	symbol name in case of warning.
+
 2018-07-05  Jim Wilson  <jimw@sifive.com>
 
 	* configure.tgt (riscv-*-*): Add as an alias for riscv32*-*-*.

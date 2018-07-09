@@ -499,7 +499,7 @@ gld${EMULATION_NAME}_finish (void)
     }
   else
     einfo (_("%P: warning: cannot find thumb start symbol %s\n"),
-	   params.thumb_entry_symbol);
+	   h->root.string);
 }
 
 /* This is a convenient point to tell BFD about target specific flags.
