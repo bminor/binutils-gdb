@@ -1,3 +1,11 @@
+2018-07-09  Maciej W. Rozycki  <macro@mips.com>
+
+	* s12z-dis.c (lea_reg_xys_opr): Rename `reg' local variable to
+	`reg_xys'.
+	(lea_reg_xys): Likewise.
+	(print_insn_loop_primitive): Rename `reg' local variable to
+	`reg_dxy'.
+
 2018-07-06  Tamar Christina  <tamar.christina@arm.com>
 
 	PR binutils/23242

@@ -811,22 +811,22 @@ lea_reg_xys_opr (bfd_vma memaddr, struct disassemble_info* info)
   if (status < 0)
     return;
 
-  char *reg = NULL;
+  char *reg_xys = NULL;
   switch (byte & 0x03)
     {
     case 0x00:
-      reg = "x";
+      reg_xys = "x";
       break;
     case 0x01:
-      reg = "y";
+      reg_xys = "y";
       break;
     case 0x02:
-      reg = "s";
+      reg_xys = "s";
       break;
     }
 
   operand_separator (info);
-  (*info->fprintf_func) (info->stream, "%s", reg);
+  (*info->fprintf_func) (info->stream, "%s", reg_xys);
   opr_decode (memaddr, info);
 }
 
@@ -840,17 +840,17 @@ lea_reg_xys (bfd_vma memaddr, struct disassemble_info* info)
   if (status < 0)
     return;
 
-  char *reg = NULL;
+  char *reg_xys = NULL;
   switch (byte & 0x03)
     {
     case 0x00:
-      reg = "x";
+      reg_xys = "x";
       break;
     case 0x01:
-      reg = "y";
+      reg_xys = "y";
       break;
     case 0x02:
-      reg = "s";
+      reg_xys = "s";
       break;
     }
 
@@ -861,7 +861,7 @@ lea_reg_xys (bfd_vma memaddr, struct disassemble_info* info)
   int8_t v = byte;
 
   operand_separator (info);
-  (*info->fprintf_func) (info->stream, "%s, (%d,%s)", reg, v, reg);
+  (*info->fprintf_func) (info->stream, "%s, (%d,%s)", reg_xys, v, reg_xys);
 }
 
 
@@ -2203,7 +2203,7 @@ print_insn_loop_primitive (bfd_vma memaddr, struct disassemble_info* info)
   stpcpy (mnemonic + x, lb_condition [(lb & 0x70) >> 4]);
   x += 2;
 
-  const char *reg  = NULL;
+  const char *reg_dxy  = NULL;
   enum LP_MODE mode = -1;
   size_t i;
   for (i = 0; i < sizeof (lp_mode) / sizeof (lp_mode[0]); ++i)
@@ -2219,10 +2219,10 @@ print_insn_loop_primitive (bfd_vma memaddr, struct disassemble_info* info)
   switch (mode)
     {
     case LP_REG:
-      reg = registers [lb & 0x07].name;
+      reg_dxy = registers [lb & 0x07].name;
       break;
     case LP_XY:
-      reg = (lb & 0x1) ? "y" : "x";
+      reg_dxy = (lb & 0x1) ? "y" : "x";
       break;
     case LP_OPR:
       mnemonic[x++] = '.';
@@ -2240,7 +2240,7 @@ print_insn_loop_primitive (bfd_vma memaddr, struct disassemble_info* info)
   else
     {
       operand_separator (info);
-      (*info->fprintf_func) (info->stream, "%s", reg);
+      (*info->fprintf_func) (info->stream, "%s", reg_dxy);
     }
 
   rel_15_7 (memaddr + offs, info, offs + 1);
