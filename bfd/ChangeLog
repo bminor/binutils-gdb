@@ -1,3 +1,8 @@
+2018-07-09  Alan Modra  <amodra@gmail.com>
+
+	* elf32-m68hc1x.c (elf32_m68hc11_post_process_headers): Call
+	_bfd_elf_post_process_headers.
+
 2018-07-06  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* elf32-xtensa.c (elf_xtensa_allocate_dynrelocs): Don't allocate

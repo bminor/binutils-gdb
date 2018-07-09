@@ -1456,6 +1456,8 @@ elf32_m68hc11_post_process_headers (bfd *abfd, struct bfd_link_info *link_info)
   struct m68hc11_scan_param param;
   struct m68hc11_elf_link_hash_table *htab;
 
+  _bfd_elf_post_process_headers (abfd, link_info);
+
   if (link_info == NULL)
     return;
 

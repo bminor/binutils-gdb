@@ -1,3 +1,9 @@
+2018-07-09  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-discard/extern.d: Remove m68hc12 xfail.
+	* testsuite/ld-discard/start.d: Likewise.
+	* testsuite/ld-discard/static.d: Likewise.
+
 2018-07-09  Christophe Lyon  <christophe.lyon@linaro.org>
 
 	* emultempl/armelf.em (gld${EMULATION_NAME}_finish): Use the right
