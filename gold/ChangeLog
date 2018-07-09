@@ -1,3 +1,8 @@
+2018-07-09  Cary Coutant  <ccoutant@gmail.com>
+
+	* incremental.cc (Sized_incremental_binary::setup_readers): Use
+	emplace_back for C++ 11 or later.
+
 2018-07-06  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc: Include attributes.h.
