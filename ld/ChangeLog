@@ -1,5 +1,12 @@
 2018-07-09  Maciej W. Rozycki  <macro@mips.com>
 
+	* testsuite/lib/ld-lib.exp (run_dump_test): Call `unsupported'
+	if the target being tested has been excluded by means of one or
+	more of `target', `alltargets' and `notarget' tags.  Add support
+	for `skip', `anyskip' and `noskip' tags.
+
+2018-07-09  Maciej W. Rozycki  <macro@mips.com>
+
 	* testsuite/lib/ld-lib.exp (run_dump_test): Move the setting of
 	`testname' earlier on and use it for test status reporting.
 

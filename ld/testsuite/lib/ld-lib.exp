@@ -542,19 +542,29 @@ proc ld_link_defsyms {} {
 #	as a TCL procedure if surrounded by square brackets, or passed
 #	to "istarget" if not.
 #	This may occur more than once; the target being tested must match
-#	at least one.
+#	at least one.  Otherwise the test will be marked unsupported.
 #
 #   alltargets: TARGET
 #	Only run the test for TARGET.
 #	The syntax for TARGET is as with 'target'.
 #	This may occur more than once; the target being tested must match
-#	all of them.
+#	all of them.  Otherwise the test will be marked unsupported.
 #
 #   notarget: TARGET
 #	Do not run the test for TARGET.
 #	The syntax for TARGET is as with 'target'.
 #	This may occur more than once; the target being tested must not
-#	match any of them.
+#	match any of them.  Otherwise the test will be marked unsupported.
+#
+#   skip: TARGET
+#   anyskip: TARGET
+#   noskip: TARGET
+#	These are exactly the same as "notarget", "alltargets" and
+#	"target" respectively, except that they do nothing at all if the
+#	check fails.  They should only be used in groups, to construct a
+#	single test which is run on all targets but with variant options
+#	or expected output on some targets.  (For example, see
+#	gas/arm/inst.d and gas/arm/wince_inst.d.)
 #
 #   error: REGEX
 #	An error with message matching REGEX must be emitted for the test
@@ -632,6 +642,9 @@ proc run_dump_test { name {extra_options {}} } {
     set opts(target) {}
     set opts(alltargets) {}
     set opts(notarget) {}
+    set opts(skip) {}
+    set opts(anyskip) {}
+    set opts(noskip) {}
     set opts(objdump) {}
     set opts(nm) {}
     set opts(objcopy) {}
@@ -662,6 +675,9 @@ proc run_dump_test { name {extra_options {}} } {
 	    target {}
 	    alltargets {}
 	    notarget {}
+	    skip {}
+	    anyskip {}
+	    noskip {}
 	    warning {}
 	    error {}
 	    source {
@@ -753,9 +769,9 @@ proc run_dump_test { name {extra_options {}} } {
     }
 
     # Decide early whether we should run the test for this target.
-    if { [llength $opts(target)] > 0 } {
+    if { [llength $opts(noskip)] > 0 } {
 	set targmatch 0
-	foreach targ $opts(target) {
+	foreach targ $opts(noskip) {
 	    if [match_target $targ] {
 		set targmatch 1
 		break
@@ -765,13 +781,38 @@ proc run_dump_test { name {extra_options {}} } {
 	    return
 	}
     }
+    foreach targ $opts(anyskip) {
+	if ![match_target $targ] {
+	    return
+	}
+    }
+    foreach targ $opts(skip) {
+	if [match_target $targ] {
+	    return
+	}
+    }
+    if { [llength $opts(target)] > 0 } {
+	set targmatch 0
+	foreach targ $opts(target) {
+	    if [match_target $targ] {
+		set targmatch 1
+		break
+	    }
+	}
+	if { $targmatch == 0 } {
+	    unsupported $testname
+	    return
+	}
+    }
     foreach targ $opts(alltargets) {
 	if ![match_target $targ] {
+	    unsupported $testname
 	    return
 	}
     }
     foreach targ $opts(notarget) {
 	if [match_target $targ] {
+	    unsupported $testname
 	    return
 	}
     }
