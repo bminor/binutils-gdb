@@ -1,5 +1,5 @@
 #objdump: -dr --prefix-addresses
-#name: nds32 load-store instructions
+#name: nds32 ji-jr instructions
 #as:
 
 # Test ls instructions

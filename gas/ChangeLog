@@ -1,3 +1,7 @@
+2018-07-09  Jeff Law  <law@redhat.com>
+
+	* testsuite/nds32/ji-jr.d: Fix name tag.
+
 2018-07-06  Tamar Christina  <tamar.christina@arm.com>
 
 	PR binutils/23369
