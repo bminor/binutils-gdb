@@ -12485,7 +12485,7 @@ fi
 
 # Enable -z separate-code by default for Linux/x86.
 case "${target}" in
-i3-786-*-linux-* | x86_64-*-linux-*)
+i[3-7]86-*-linux-* | x86_64-*-linux-*)
   if test ${ac_default_ld_z_separate_code} = unset; then
     ac_default_ld_z_separate_code=1
   fi
