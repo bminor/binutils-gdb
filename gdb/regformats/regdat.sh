@@ -163,6 +163,8 @@ done
 
 echo
 echo "static const char *expedite_regs_${name}[] = { \"`echo ${expedite} | sed 's/,/", "/g'`\", 0 };"
+
+echo "#ifndef IN_PROCESS_AGENT"
 if test "${feature}" != x; then
   echo "static const char *xmltarget_${name} = 0;"
 elif test "${xmltarget}" = x; then
@@ -184,7 +186,6 @@ fi
 echo
 
 cat <<EOF
-#ifndef IN_PROCESS_AGENT
   result->xmltarget = xmltarget_${name};
 #endif
 

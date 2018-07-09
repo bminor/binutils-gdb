@@ -1,5 +1,10 @@
 2018-07-22  Tom Tromey  <tom@tromey.com>
 
+	* regformats/regdat.sh: Define xmltarget_${name} inside
+	#ifndef IN_PROCESS_AGENT.
+
+2018-07-22  Tom Tromey  <tom@tromey.com>
+
 	* value.c (value_fetch_lazy_bitfield): Remove unused variable.
 
 2018-07-22  Tom Tromey  <tom@tromey.com>
