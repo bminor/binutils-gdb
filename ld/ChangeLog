@@ -1,5 +1,11 @@
 2018-07-09  Maciej W. Rozycki  <macro@mips.com>
 
+	* testsuite/ld-mips-elf/elf-rel-got-n64.d: Add `#pass' at the
+	end.
+	* testsuite/ld-mips-elf/elf-rel-xgot-n64.d: Likewise.
+
+2018-07-09  Maciej W. Rozycki  <macro@mips.com>
+
 	* testsuite/ld-mips-elf/stub-dynsym-2.dd: New test.
 	* testsuite/ld-mips-elf/stub-dynsym-2.gd: New test.
 	* testsuite/ld-mips-elf/stub-dynsym-2.sd: New test.
