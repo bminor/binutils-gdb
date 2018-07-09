@@ -1,3 +1,8 @@
+2018-07-09  Maciej W. Rozycki  <macro@mips.com>
+
+	* testsuite/lib/ld-lib.exp (run_dump_test): Move the setting of
+	`testname' earlier on and use it for test status reporting.
+
 2018-07-09  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-discard/extern.d: Remove m68hc12 xfail.
