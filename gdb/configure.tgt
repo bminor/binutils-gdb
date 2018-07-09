@@ -659,6 +659,11 @@ spu*-*-*)
 	build_gdbserver=yes
 	;;
 
+s12z-*-*)
+	# Target: Freescale S12z
+	gdb_target_obs="s12z-tdep.o"
+	;;
+
 tic6x-*-*linux)
 	# Target: GNU/Linux TI C6x
 	gdb_target_obs="tic6x-tdep.o tic6x-linux-tdep.o solib-dsbt.o \

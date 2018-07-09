@@ -752,6 +752,7 @@ ALL_TARGET_OBS = \
 	rs6000-lynx178-tdep.o \
 	rs6000-tdep.o \
 	rx-tdep.o \
+	s12z-tdep.o \
 	s390-linux-tdep.o \
 	s390-tdep.o \
 	score-tdep.o \

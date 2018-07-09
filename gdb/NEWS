@@ -33,6 +33,10 @@
   requires the use of a keyword.  Selecting a frame by level is
   unchanged.  The MI comment "-stack-select-frame" is unchanged.
 
+* New targets
+
+  NXP S12Z		s12z-*-elf
+
 * New commands
 
 set debug compile-cplus-types

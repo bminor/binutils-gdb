@@ -23615,6 +23615,7 @@ all uses of @value{GDBN} with the architecture, both native and cross.
 * PowerPC::
 * Nios II::
 * Sparc64::
+* S12Z::
 @end menu
 
 @node AArch64
@@ -24086,6 +24087,21 @@ variable "shmaddr":
 @end smallexample
 
 @end table
+
+@node S12Z
+@subsection S12Z
+@cindex S12Z support
+
+When @value{GDBN} is debugging the S12Z architecture,
+it provides the following special command:
+
+@table @code
+@item maint info bdccsr
+@kindex maint info bdccsr@r{, S12Z}
+This command displays the current value of the microprocessor's
+BDCCSR register.
+@end table
+
 
 @node Controlling GDB
 @chapter Controlling @value{GDBN}
