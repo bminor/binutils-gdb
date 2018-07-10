@@ -1839,15 +1839,16 @@ proc check_gc_sections_available { } {
     if {![info exists gc_sections_available_saved]} {
 	# Some targets don't support gc-sections despite whatever's
 	# advertised by ld's options.
-	if {   [istarget d30v-*-*]
+	if {   [istarget alpha-*-*]
+	    || [istarget d30v-*-*]
 	    || [istarget dlx-*-*]
-	    || [istarget pj*-*-*]
-	    || [istarget pru*-*-*]
-	    || [istarget alpha-*-*]
 	    || [istarget hppa*64-*-*]
 	    || [istarget ia64-*-*]
 	    || [istarget mep-*-*]
-	    || [istarget mn10200-*-*] } {
+	    || [istarget mn10200-*-*]
+	    || [istarget pj*-*-*]
+	    || [istarget pru*-*-*]
+	    || [istarget xgate-*-*] } {
 	    set gc_sections_available_saved 0
 	    return 0
 	}
@@ -1902,7 +1903,8 @@ proc is_generic_elf { } {
 	 || [istarget "moxie-*-*"]
 	 || [istarget "msp430-*-*"]
 	 || [istarget "mt-*-*"]
-	 || [istarget "pj*-*-*"] } {
+	 || [istarget "pj*-*-*"]
+	 || [istarget "xgate-*-*"] } {
 	return 1;
     }
     return 0;

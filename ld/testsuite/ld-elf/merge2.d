@@ -1,8 +1,7 @@
 #source: merge2.s
 #ld: -T merge.ld
 #objdump: -s
-#xfail: "d30v-*-*" "dlx-*-*" "hppa64-*-*"
-#xfail: "ip2k-*-*" "pj-*-*"
+#xfail: d30v-*-* dlx-*-* hppa64-*-* ip2k-*-* pj-*-* xgate-*-*
 
 .*:     file format .*elf.*
 

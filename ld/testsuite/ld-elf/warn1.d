@@ -5,7 +5,7 @@
 #warning: ^[^\n]*\): warning: witty one-liner$
 #readelf: -s
 #notarget: "sparc64-*-solaris2*" "sparcv9-*-solaris2*"
-#xfail: "d30v-*-*" "dlx-*-*" "pj-*-*"
+#xfail: d30v-*-* dlx-*-* pj-*-* xgate-*-*
 
 # Check that warnings are generated for the .gnu.warning.SYMBOL
 # construct and that the symbol still appears as expected.

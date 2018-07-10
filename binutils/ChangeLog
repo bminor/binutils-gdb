@@ -1,3 +1,8 @@
+2018-07-10  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/binutils-common.exp (supports_gnu_unique): Return
+	zero for xgate.
+
 2018-07-06  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (same_section): New function.

@@ -115,7 +115,7 @@ run_ld_link_tests {
       {"PR ld/21703 -r"
 	"-r --allow-multiple-definition tmpdir/pr21703-3.o tmpdir/pr21703-4.o" "" "" \
 	{pr21703-3.s pr21703-4.s} {{readelf {-s} pr21703-r.sd}} "pr21703.o" }
-} "d30v-*-*" "dlx-*-*" "pj-*-*"
+} "d30v-*-*" "dlx-*-*" "pj-*-*" "xgate-*-*"
 
 if [is_underscore_target] {
     set ASFLAGS "$ASFLAGS --defsym UNDERSCORE=1"

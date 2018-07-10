@@ -5,6 +5,7 @@
 #source: finin.s
 #ld: --sort-section=alignment
 #nm: -n
+#xfail: xgate-*-*
 
 #...
 [0-9a-f]+ T foo

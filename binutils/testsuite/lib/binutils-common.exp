@@ -177,7 +177,8 @@ proc supports_gnu_unique {} {
     if { [istarget "am33_2.0-*-*"]
 	 || [istarget "d30v-*-*"]
 	 || [istarget "dlx-*-*"]
-	 || [istarget "pj*-*-*"] } {
+	 || [istarget "pj*-*-*"]
+	 || [istarget "xgate-*-*"] } {
 	return 0
     }
     return 1

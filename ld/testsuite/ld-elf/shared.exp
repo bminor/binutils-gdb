@@ -359,7 +359,7 @@ run_ld_link_tests [list \
 	 tmpdir/pr21703-3.o tmpdir/pr21703-4.o" "" "$AFLAGS_PIC" \
 	{pr21703-3.s pr21703-4.s} {{readelf {--dyn-syms} pr21703-shared.sd}} \
 	"pr21703.so" ] \
-] "d30v-*-*" "dlx-*-*" "pj-*-*" "hppa64-*-*"
+] "d30v-*-*" "dlx-*-*" "pj-*-*" "hppa64-*-*" "xgate-*-*"
 
 # This target requires extra GAS options when building non-PIC code
 # for linking with shared libraries.
