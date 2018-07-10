@@ -1,6 +1,6 @@
 # ld: -T overlay.t -u __load_start_text1 -u __load_start_text2 -u __load_stop_text1 -u __load_stop_text2
 #readelf: -s
-#notarget: spu-*-*
+#xfail: spu-*-*
 # The SPU adds its own LOAD segments, out of order, at the start of the program header table.
 
 #...

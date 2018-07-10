@@ -4,7 +4,6 @@
 #objdump: -dw
 #target: x86_64-*-*
 #notarget: x86_64-*-nacl*
-#notarget: x86_64-*-nacl*
 
 .*: +file format .*
 

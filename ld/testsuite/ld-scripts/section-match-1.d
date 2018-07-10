@@ -3,7 +3,7 @@
 #objdump: -s
 #notarget: *-*-osf* *-*-aix* *-*-pe *-*-*aout *-*-ecoff *-*-netbsd *-*-vms h8300-*-* tic30-*-*
 # This test uses arbitrary section names, which are not support by some
-# file formts.  Also these section names must be present in the
+# file formats.  Also these section names must be present in the
 # output, not translated into some other name, eg .text
 
 .*:     file format .*

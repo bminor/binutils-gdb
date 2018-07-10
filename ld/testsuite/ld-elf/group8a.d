@@ -1,9 +1,8 @@
 #source: group8.s
 #ld: -r --gc-sections --entry foo
 #readelf: -g --wide
-#notarget: d30v-*-* dlx-*-* pj*-*-* pru-*-*
-#notarget: hppa64-*-* ia64-*-* mep-*-* mn10200-*-*
-#xfail: cr16-*-* crx-*-*
+#xfail: cr16-*-* crx-*-* d30v-*-* dlx-*-* hppa64-*-*
+#xfail: mep-*-* mn10200-*-* pj*-*-* pru-*-*
 # generic linker targets don't support --gc-sections, nor do a bunch of others
 # cr16 and crx use non-standard scripts with memory regions, which don't play
 # well with unique group sections under ld -r.

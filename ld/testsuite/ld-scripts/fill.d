@@ -3,18 +3,11 @@
 #source: fill_2.s
 #ld: -T fill.t
 #objdump: -s -j .text
-#notarget: ia64-*-*
-#notarget: mips*-*-irix* mips*-*-linux* mips*-*-freebsd* mips*-*-gnu*
-#notarget: mips*-*-kfreebsd* mips*-*-netbsd* mips*-*-openbsd* mips*-*-sysv4*
-#notarget: tilegx*-*-*
-#notarget: tilepro-*-*
-#notarget: x86_64-*-cygwin x86_64-*-mingw* x86_64-*-pe*
-#xfail: alpha*-*-*ecoff
-#xfail: m32c-*-*
-#xfail: sh-*-pe
-#xfail: sparc*-*-coff
-#xfail: tic30-*-coff tic4x-*-* tic54x-*-*
-#xfail: z8k-*-*
+#xfail: alpha*-*-*ecoff ia64-*-* m32c-*-* mips*-*-freebsd* mips*-*-gnu*
+#xfail: mips*-*-irix* mips*-*-kfreebsd* mips*-*-linux* mips*-*-netbsd*
+#xfail: mips*-*-openbsd* mips*-*-sysv4* sh-*-pe sparc*-*-coff
+#xfail: tic30-*-coff tic4x-*-* tic54x-*-* tilegx*-*-* tilepro-*-*
+#xfail: x86_64-*-cygwin x86_64-*-mingw* x86_64-*-pe* z8k-*-*
 #
 # See also fill16.d.  We use `notarget' for configurations unsupported
 # here that are covered there, and `xfail' for configurations that work
