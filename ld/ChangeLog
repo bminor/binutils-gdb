@@ -1,3 +1,17 @@
+2018-07-10  Maciej W. Rozycki  <macro@mips.com>
+
+	* testsuite/ld-mips-elf/elf-rel-got-n64.d: Rename to...
+	* testsuite/ld-mips-elf/elf-rel-got-n64-irix.d: ... this.
+	* testsuite/ld-mips-elf/elf-rel-got-n64-linux.d: Rename to...
+	* testsuite/ld-mips-elf/elf-rel-got-n64.d: ... this.
+	* testsuite/ld-mips-elf/elf-rel-xgot-n64.d: Rename to...
+	* testsuite/ld-mips-elf/elf-rel-xgot-n64-irix.d: ... this.
+	* testsuite/ld-mips-elf/elf-rel-xgot-n64-linux.dd: Rename to...
+	* testsuite/ld-mips-elf/elf-rel-xgot-n64.d: ... this.
+	* testsuite/ld-mips-elf/mips-elf.exp: Update accordingly.
+	Define `irix' as a shorthand for `[istarget *-*-irix*]' and use
+	it throughout.
+
 2018-07-09  Maciej W. Rozycki  <macro@mips.com>
 
 	* testsuite/ld-mips-elf/elf-rel-got-n64.d: Add `#pass' at the

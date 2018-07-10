@@ -58,6 +58,7 @@ set has_newabi [expr [istarget *-*-irix6*] \
 		     || [istarget mips*-mti-elf*] \
 		     || [istarget mips*-img-elf*]]
 set has_elf32 [expr ![istarget *-*-openbsd*]]
+set irix [expr [istarget *-*-irix*]]
 set linux_gnu [expr [istarget mips*-*-linux*]]
 set embedded_elf [expr [istarget mips*-*-elf]]
 
@@ -390,10 +391,10 @@ if $has_newabi {
 	run_dump_test "elf-rel-got-n32" [list [list ld $abi_ldflags(n32)]]
 	run_dump_test "elf-rel-xgot-n32" [list [list ld $abi_ldflags(n32)]]
     }
-    if { $linux_gnu } {
-	run_dump_test "elf-rel-got-n64-linux" \
+    if { $irix } {
+	run_dump_test "elf-rel-got-n64-irix" \
 					[list [list ld $abi_ldflags(n64)]]
-	run_dump_test "elf-rel-xgot-n64-linux" \
+	run_dump_test "elf-rel-xgot-n64-irix" \
 					[list [list ld $abi_ldflags(n64)]]
     } elseif { $embedded_elf } {
 	run_dump_test "elf-rel-got-n64-embed" \
@@ -1053,7 +1054,7 @@ foreach { abi } $abis {
     set loadaddr [string map \
 	{o32 0x12340000 n32 0x12340000 n64 0x123456789abc0000} $abi]
     set suff [subst \
-	[expr { [istarget *-*-irix*] \
+	[expr { $irix \
 		? [string map {o32 o32-irix n32 n32 n64 n64} $abi] \
 		: $abi }]]
     run_ld_link_tests [list \
