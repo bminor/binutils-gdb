@@ -1050,23 +1050,27 @@ run_dump_test "mips16-and-micromips"
 
 # Export class call relocation tests.
 set abis [concat o32 [expr {$has_newabi ? "n32 n64" : ""}]]
-foreach { abi } $abis {
-    set loadaddr [string map \
-	{o32 0x12340000 n32 0x12340000 n64 0x123456789abc0000} $abi]
-    set suff [subst \
-	[expr { $irix \
-		? [string map {o32 o32-irix n32 n32 n64 n64} $abi] \
-		: $abi }]]
-    run_ld_link_tests [list \
-	[list \
-	    "MIPS export class call relocation test ($abi)" \
-	    "$abi_ldflags($abi) -shared -Ttext $loadaddr -T export-class-call16.ld" "" \
-	    "$abi_asflags($abi) -mips3 -KPIC" \
-	    [list export-class-call16-${abi}.s export-class-call16-def.s] \
+if [check_shared_lib_support] {
+    foreach { abi } $abis {
+	set loadaddr [string map \
+	    {o32 0x12340000 n32 0x12340000 n64 0x123456789abc0000} $abi]
+	set suff [subst \
+	    [expr { $irix \
+		    ? [string map {o32 o32-irix n32 n32 n64 n64} $abi] \
+		    : $abi }]]
+	run_ld_link_tests [list \
 	    [list \
-		"objdump -d export-class-call16-${suff}.dd" \
-		"readelf -A export-class-call16-${abi}.gd"] \
-	    "export-class-call16-${abi}.so"]]
+		"MIPS export class call relocation test ($abi)" \
+		"$abi_ldflags($abi) -shared -Ttext $loadaddr\
+		 -T export-class-call16.ld" \
+		"" \
+		"$abi_asflags($abi) -mips3 -KPIC" \
+		[list export-class-call16-${abi}.s export-class-call16-def.s] \
+		[list \
+		    "objdump -d export-class-call16-${suff}.dd" \
+		    "readelf -A export-class-call16-${abi}.gd"] \
+		"export-class-call16-${abi}.so"]]
+    }
 }
 
 # Magic __ehdr_start symbol tests.

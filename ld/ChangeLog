@@ -1,3 +1,8 @@
+2018-07-10  Maciej W. Rozycki  <macro@mips.com>
+
+	* testsuite/ld-mips-elf/mips-elf.exp: Limit export class call
+	relocation tests to shared library targets.
+
 2018-07-10  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/lib/ld-lib.exp (check_gc_sections_available): Return 0
