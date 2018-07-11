@@ -1,5 +1,14 @@
 2018-09-17  Tom Tromey  <tom@tromey.com>
 
+	* infrun.c (save_infcall_suspend_state): Return
+	infcall_suspend_state_up.
+	(save_infcall_control_state): Return infcall_control_state_up.
+	* inferior.h (save_infcall_suspend_state)
+	(save_infcall_control_state): Declare later.  Return unique
+	pointers.
+
+2018-09-17  Tom Tromey  <tom@tromey.com>
+
 	* infrun.c (struct stop_context): Declare constructor,
 	destructor, "changed" method.
 	(stop_context::stop_context): Rename from save_stop_context.

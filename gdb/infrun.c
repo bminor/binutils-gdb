@@ -8813,10 +8813,9 @@ struct infcall_suspend_state
   gdb::unique_xmalloc_ptr<gdb_byte> siginfo_data;
 };
 
-struct infcall_suspend_state *
-save_infcall_suspend_state (void)
+infcall_suspend_state_up
+save_infcall_suspend_state ()
 {
-  struct infcall_suspend_state *inf_state;
   struct thread_info *tp = inferior_thread ();
   struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = regcache->arch ();
@@ -8837,7 +8836,7 @@ save_infcall_suspend_state (void)
 	}
     }
 
-  inf_state = new struct infcall_suspend_state;
+  infcall_suspend_state_up inf_state (new struct infcall_suspend_state);
 
   if (siginfo_data)
     {
@@ -8917,10 +8916,10 @@ struct infcall_control_state
 /* Save all of the information associated with the inferior<==>gdb
    connection.  */
 
-struct infcall_control_state *
-save_infcall_control_state (void)
+infcall_control_state_up
+save_infcall_control_state ()
 {
-  struct infcall_control_state *inf_status = new struct infcall_control_state;
+  infcall_control_state_up inf_status (new struct infcall_control_state);
   struct thread_info *tp = inferior_thread ();
   struct inferior *inf = current_inferior ();
 

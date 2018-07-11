@@ -57,9 +57,6 @@ struct thread_info;
 struct infcall_suspend_state;
 struct infcall_control_state;
 
-extern struct infcall_suspend_state *save_infcall_suspend_state (void);
-extern struct infcall_control_state *save_infcall_control_state (void);
-
 extern void restore_infcall_suspend_state (struct infcall_suspend_state *);
 extern void restore_infcall_control_state (struct infcall_control_state *);
 
@@ -77,6 +74,8 @@ struct infcall_suspend_state_deleter
 typedef std::unique_ptr<infcall_suspend_state, infcall_suspend_state_deleter>
     infcall_suspend_state_up;
 
+extern infcall_suspend_state_up save_infcall_suspend_state ();
+
 /* A deleter for infcall_control_state that calls
    restore_infcall_control_state.  */
 struct infcall_control_state_deleter
@@ -90,6 +89,8 @@ struct infcall_control_state_deleter
 /* A unique_ptr specialization for infcall_control_state.  */
 typedef std::unique_ptr<infcall_control_state, infcall_control_state_deleter>
     infcall_control_state_up;
+
+extern infcall_control_state_up save_infcall_control_state ();
 
 extern void discard_infcall_suspend_state (struct infcall_suspend_state *);
 extern void discard_infcall_control_state (struct infcall_control_state *);
