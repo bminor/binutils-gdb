@@ -1523,13 +1523,13 @@ hsubps, 2, 0xf20f7d, None, 2, CpuSSE3, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|
 lddqu, 2, 0xf2f0, None, 1, CpuAVX, Modrm|Vex|VexOpcode=0|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|SSE2AVX, { Xmmword|Unspecified|BaseIndex, RegXMM }
 lddqu, 2, 0xf20ff0, None, 2, CpuSSE3, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Unspecified|BaseIndex, RegXMM }
 monitor, 0, 0xf01, 0xc8, 2, CpuSSE3, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|NoAVX, { 0 }
-// monitor is very special. CX and DX are always 64bits with zero upper
-// 32bits in 64bit mode, and 32bits in 16bit and 32bit modes. The
+// monitor is very special. CX and DX are always 32 bits. The
 // address size override prefix can be used to overrride the AX size in
 // all modes.
-// Need to ensure only "monitor %eax/%ax,%ecx,%edx" is accepted.
+// Need to ensure only "monitor %rax/%eax/%ax,%ecx,%edx" is accepted.
 monitor, 3, 0xf01, 0xc8, 2, CpuSSE3|CpuNo64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|AddrPrefixOpReg|NoAVX, { Reg16|Reg32, Reg32, Reg32 }
-// Need to ensure only "monitor %rax/%eax,%rcx,%rdx" is accepted.
+monitor, 3, 0xf01, 0xc8, 2, CpuSSE3|Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|AddrPrefixOpReg|NoRex64|NoAVX, { Reg32|Reg64, Reg32, Reg32 }
+// The 64-bit form exists only for compatibility with older gas.
 monitor, 3, 0xf01, 0xc8, 2, CpuSSE3|Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|AddrPrefixOpReg|NoRex64|NoAVX, { Reg32|Reg64, Reg64, Reg64 }
 movddup, 2, 0xf212, None, 1, CpuAVX, Modrm|Vex|VexOpcode=0|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|SSE2AVX, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
 movddup, 2, 0xf20f12, None, 2, CpuSSE3, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Qword|Unspecified|BaseIndex|RegXMM, RegXMM }
@@ -1538,12 +1538,10 @@ movshdup, 2, 0xf30f16, None, 2, CpuSSE3, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSu
 movsldup, 2, 0xf312, None, 1, CpuAVX, Modrm|Vex|VexOpcode=0|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|SSE2AVX, { Xmmword|Unspecified|BaseIndex|RegXMM, RegXMM }
 movsldup, 2, 0xf30f12, None, 2, CpuSSE3, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Unspecified|BaseIndex|RegXMM, RegXMM }
 mwait, 0, 0xf01, 0xc9, 2, CpuSSE3, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|NoAVX, { 0 }
-// mwait is very special. AX and CX are always 64bits with zero upper
-// 32bits in 64bit mode, and 32bits in 16bit and 32bit modes.
+// mwait is very special. AX and CX are always 32 bits.
 // Need to ensure only "mwait %eax,%ecx" is accepted.
-mwait, 2, 0xf01, 0xc9, 2, CpuSSE3|CpuNo64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|NoAVX, { Reg32, Reg32 }
-// Need to ensure only "mwait %rax,%rcx" is accepted.
-mwait, 2, 0xf01, 0xc9, 2, CpuSSE3|Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|NoRex64|NoAVX, { Reg64, Reg64 }
+// The 64-bit form exists only for compatibility with older gas.
+mwait, 2, 0xf01, 0xc9, 2, CpuSSE3, CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|NoRex64|NoAVX, { Reg32|Reg64, Reg32|Reg64 }
 
 // VMX instructions.
 
@@ -5741,16 +5739,16 @@ clzero, 0, 0xf01fc, None, 3, CpuCLZERO, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|
 
 // MONITORX/MWAITX instructions
 monitorx, 0, 0xf01, 0xfa, 2, CpuMWAITX, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
-// Need to ensure only "monitorx %eax/%ax,%ecx,%edx" is accepted.
+// Need to ensure only "monitorx %rax/%eax/%ax,%ecx,%edx" is accepted.
 monitorx, 3, 0xf01, 0xfa, 2, CpuMWAITX|CpuNo64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|AddrPrefixOpReg, { Reg16|Reg32, Reg32, Reg32 }
-// Need to ensure only "monitorx %rax/%eax,%rcx,%rdx" is accepted.
+monitorx, 3, 0xf01, 0xfa, 2, CpuMWAITX|Cpu64,   No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|AddrPrefixOpReg|NoRex64, { Reg32|Reg64, Reg32, Reg32 }
+// The 64-bit form exists only for compatibility with older gas.
 monitorx, 3, 0xf01, 0xfa, 2, CpuMWAITX|Cpu64,   No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|AddrPrefixOpReg|NoRex64, { Reg32|Reg64, Reg64, Reg64 }
 
 mwaitx, 0, 0xf01, 0xfb, 2, CpuMWAITX, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
 // Need to ensure only "mwaitx %eax,%ecx,%ebx" is accepted.
-mwaitx, 3, 0xf01, 0xfb, 2, CpuMWAITX|CpuNo64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { Reg32, Reg32, Reg32 }
-// Need to ensure only "mwaitx %rax,%rcx,%rbx" is accepted.
-mwaitx, 3, 0xf01, 0xfb, 2, CpuMWAITX|Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|NoRex64, { Reg64, Reg64, Reg64 }
+// The 64-bit form exists only for compatibility with older gas.
+mwaitx, 3, 0xf01, 0xfb, 2, CpuMWAITX, CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|NoRex64, { Reg32|Reg64, Reg32|Reg64, Reg32|Reg64 }
 // MONITORX/MWAITX instructions end
 
 // OSPKE instructions.
