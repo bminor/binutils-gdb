@@ -3,10 +3,11 @@
 #source: fill16_2.s
 #ld: -T fill.t
 #objdump: -s -j .text
-#xfail: alpha*-*-*ecoff arm-*-coff i[3-7]86-*-coff m32c-*-* sh-*-pe
-#xfail: sparc*-*-coff tic30-*-coff tic4x-*-* tic54x-*-* z8k-*-*
+#skip: arm-*-coff i[3-7]86-*-coff
+#xfail: alpha*-*-*ecoff m32c-*-* sh-*-pe sparc*-*-coff
+#xfail: tic30-*-coff tic4x-*-* tic54x-*-* z8k-*-*
 #
-# See also fill.d.  We use `notarget' for configurations unsupported
+# See also fill.d.  We use `skip' for configurations unsupported
 # here that are covered there, and `xfail' for configurations that work
 # with neither place.  See below for details as to why individual
 # configurations are listed above.

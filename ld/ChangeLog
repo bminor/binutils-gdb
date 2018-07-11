@@ -1,3 +1,12 @@
+2018-07-11  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/hash.d: Comment on mips xfail.
+	* testsuite/ld-gc/pr20022b.s: Use .data not .text.
+	* testsuite/ld-gc/pr20022.d: Remove xfails.
+	* testsuite/ld-scripts/fill.d: Revert most of last patch, but use
+	skip rather than notarget.
+	* testsuite/ld-scripts/fill16.d: Likewise.
+
 2018-07-10  Maciej W. Rozycki  <macro@mips.com>
 
 	* testsuite/ld-mips-elf/mips-elf.exp: Limit export class call

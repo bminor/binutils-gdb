@@ -3,6 +3,8 @@
 #ld: -shared --hash-style=gnu
 #target: *-*-linux* *-*-gnu* arm*-*-uclinuxfdpiceabi
 #xfail: mips*-*-*
+# GNU hash is not supported for MIPS targets due to psABI restrictions
+# on dynsym table ordering.
 
 #...
  +0x[0-9a-z]+ +\(GNU_HASH\) +0x[0-9a-z]+

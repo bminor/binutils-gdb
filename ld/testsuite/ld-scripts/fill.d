@@ -3,13 +3,13 @@
 #source: fill_2.s
 #ld: -T fill.t
 #objdump: -s -j .text
-#xfail: alpha*-*-*ecoff ia64-*-* m32c-*-* mips*-*-freebsd* mips*-*-gnu*
-#xfail: mips*-*-irix* mips*-*-kfreebsd* mips*-*-linux* mips*-*-netbsd*
-#xfail: mips*-*-openbsd* mips*-*-sysv4* sh-*-pe sparc*-*-coff
-#xfail: tic30-*-coff tic4x-*-* tic54x-*-* tilegx*-*-* tilepro-*-*
-#xfail: x86_64-*-cygwin x86_64-*-mingw* x86_64-*-pe* z8k-*-*
+#skip: ia64-*-* mips*-*-freebsd* mips*-*-gnu* mips*-*-irix* mips*-*-kfreebsd*
+#skip: mips*-*-linux* mips*-*-netbsd* mips*-*-openbsd* mips*-*-sysv4*
+#skip: tilegx*-*-* tilepro-*-* x86_64-*-cygwin x86_64-*-mingw* x86_64-*-pe*
+#xfail: alpha*-*-*ecoff m32c-*-* sh-*-pe sparc*-*-coff
+#xfail: tic30-*-coff tic4x-*-* tic54x-*-* z8k-*-*
 #
-# See also fill16.d.  We use `notarget' for configurations unsupported
+# See also fill16.d.  We use `skip' for configurations unsupported
 # here that are covered there, and `xfail' for configurations that work
 # in neither place.  See below for details as to why individual
 # configurations are listed above.
