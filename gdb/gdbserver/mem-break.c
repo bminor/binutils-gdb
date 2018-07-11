@@ -302,10 +302,9 @@ is_gdb_breakpoint (enum bkpt_type type)
 	  || type == gdb_breakpoint_Z4);
 }
 
-int
-any_persistent_commands (void)
+bool
+any_persistent_commands (process_info *proc)
 {
-  struct process_info *proc = current_process ();
   struct breakpoint *bp;
   struct point_command_list *cl;
 
@@ -317,11 +316,11 @@ any_persistent_commands (void)
 
 	  for (cl = gdb_bp->command_list; cl != NULL; cl = cl->next)
 	    if (cl->persistence)
-	      return 1;
+	      return true;
 	}
     }
 
-  return 0;
+  return false;
 }
 
 /* Find low-level breakpoint of type TYPE at address ADDR that is not

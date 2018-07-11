@@ -1,5 +1,18 @@
 2018-07-11  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/23377
+	* mem-break.c (any_persistent_commands): Add process_info
+	parameter and use it instead of relying on the current process.
+	Change return type to bool.
+	* mem-break.h (any_persistent_commands): Add process_info
+	parameter and change return type to bool.
+	* server.c (handle_detach): Remove require_running_or_return call.
+	Look up the process_info for the process we're about to detach.
+	If not found, return back error to GDB.  Adjust
+	any_persistent_commands call to pass down a process pointer.
+
+2018-07-11  Pedro Alves  <palves@redhat.com>
+
 	* i387-fp.c (i387_cache_to_fsave, cache_to_fxsave)
 	(i387_cache_to_xsave): Use regcache_raw_get_unsigned_by_name
 	instead of collect_register_by_name.
