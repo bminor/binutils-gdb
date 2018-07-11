@@ -1,3 +1,11 @@
+2018-07-11  Pedro Alves  <palves@redhat.com>
+
+	* i387-fp.c (i387_cache_to_fsave, cache_to_fxsave)
+	(i387_cache_to_xsave): Use regcache_raw_get_unsigned_by_name
+	instead of collect_register_by_name.
+	* regcache.c (regcache_raw_get_unsigned_by_name): New.
+	* regcache.h (regcache_raw_get_unsigned_by_name): New.
+
 2018-07-04  Vyacheslav Barinov  <v.barinov@samsung.com>
 	    Pedro Alves  <palves@redhat.com>
 

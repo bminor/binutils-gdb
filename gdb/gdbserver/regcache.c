@@ -448,6 +448,16 @@ regcache_raw_read_unsigned (struct regcache *regcache, int regnum,
 
 #ifndef IN_PROCESS_AGENT
 
+/* See regcache.h.  */
+
+ULONGEST
+regcache_raw_get_unsigned_by_name (struct regcache *regcache,
+				   const char *name)
+{
+  return regcache_raw_get_unsigned (regcache,
+				    find_regno (regcache->tdesc, name));
+}
+
 void
 collect_register_as_string (struct regcache *regcache, int n, char *buf)
 {
