@@ -1,8 +1,4 @@
-2018-07-11  Nick Clifton  <nickc@redhat.com>
-
-	Reimport this patch:
-
-	2018-01-24  Franz Sirl  <franz.sirl-kernel@lauterbach.com>
+2018-07-11  Franz Sirl  <franz.sirl-kernel@lauterbach.com>
 
 	* main.cc: Print m.arena as long long.
 
