@@ -1,3 +1,10 @@
+2018-07-11  Alan Hayward  <alan.hayward@arm.com>
+
+	* target-descriptions.c (tdesc_register_bitsize): Rename.
+	* target-descriptions.h (tdesc_register_bitsize): Likewise.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Use new name.
+	* aarch64-tdep.c (aarch64_get_tdesc_vq): Convert size.
+
 2018-07-10  Tom Tromey  <tom@tromey.com>
 
 	* breakpoint.c (moribund_locations): Now static and a

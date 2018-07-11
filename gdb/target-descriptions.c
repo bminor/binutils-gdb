@@ -816,8 +816,7 @@ tdesc_numbered_register_choices (const struct tdesc_feature *feature,
    bits.  The register must exist.  */
 
 int
-tdesc_register_size (const struct tdesc_feature *feature,
-		     const char *name)
+tdesc_register_bitsize (const struct tdesc_feature *feature, const char *name)
 {
   struct tdesc_reg *reg = tdesc_find_register_early (feature, name);
 

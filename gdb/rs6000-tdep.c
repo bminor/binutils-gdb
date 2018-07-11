@@ -5953,7 +5953,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       have_mq = tdesc_numbered_register (feature, tdesc_data, PPC_MQ_REGNUM,
 					 "mq");
 
-      tdesc_wordsize = tdesc_register_size (feature, "pc") / 8;
+      tdesc_wordsize = tdesc_register_bitsize (feature, "pc") / 8;
       if (wordsize == -1)
 	wordsize = tdesc_wordsize;
 
@@ -5984,7 +5984,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  /* The fpscr register was expanded in isa 2.05 to 64 bits
 	     along with the addition of the decimal floating point
 	     facility.  */
-	  if (tdesc_register_size (feature, "fpscr") > 32)
+	  if (tdesc_register_bitsize (feature, "fpscr") > 32)
 	    have_dfp = 1;
 	}
       else
