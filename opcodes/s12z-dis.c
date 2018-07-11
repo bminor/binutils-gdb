@@ -24,7 +24,7 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#include "s12z.h"
+#include "opcode/s12z.h"
 
 #include "bfd.h"
 #include "dis-asm.h"

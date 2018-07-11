@@ -1,3 +1,7 @@
+2018-07-28  John Darrington <john@darrington.wattle.id.au>
+
+        * s12z.h: Delete.
+
 2018-08-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (OP_E_memory): In 64-bit mode, display eiz for

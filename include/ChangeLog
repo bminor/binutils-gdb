@@ -1,3 +1,7 @@
+2018-07-27  John Darrington <john@darrington.wattle.id.au>
+
+        * opcode/s12z.h: New file.
+
 2018-08-09  Richard Earnshaw  <rearnsha@arm.com>
 
 	* elf/arm.h: Updated comments for e_flags definitions.

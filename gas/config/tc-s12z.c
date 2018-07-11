@@ -22,7 +22,7 @@
 #include "safe-ctype.h"
 #include "subsegs.h"
 #include "dwarf2dbg.h"
-#include "opcodes/s12z.h"
+#include "opcode/s12z.h"
 #include <stdint.h>
 #include <limits.h>
 #include <stdbool.h>
