@@ -92,6 +92,8 @@ static void insert_longjmp_resume_breakpoint (struct gdbarch *, CORE_ADDR);
 
 static int maybe_software_singlestep (struct gdbarch *gdbarch, CORE_ADDR pc);
 
+static void resume (gdb_signal sig);
+
 /* Asynchronous signal handler registered as event loop source for
    when we have pending events ready to be passed to the core.  */
 static struct async_event_handler *infrun_async_inferior_event_token;
@@ -2729,7 +2731,7 @@ resume_1 (enum gdb_signal sig)
    (GDB_SIGNAL_0 for none).  This is a wrapper around 'resume_1' that
    rolls back state on error.  */
 
-void
+static void
 resume (gdb_signal sig)
 {
   TRY
@@ -2957,12 +2959,8 @@ schedlock_applies (struct thread_info *tp)
 /* Basic routine for continuing the program in various fashions.
 
    ADDR is the address to resume at, or -1 for resume where stopped.
-   SIGGNAL is the signal to give it, or 0 for none,
-   or -1 for act according to how it stopped.
-   STEP is nonzero if should trap after one instruction.
-   -1 means return after that and print nothing.
-   You should probably set various step_... variables
-   before calling here, if you are stepping.
+   SIGGNAL is the signal to give it, or GDB_SIGNAL_0 for none,
+   or GDB_SIGNAL_DEFAULT for act according to how it stopped.
 
    You should call clear_proceed_status before calling proceed.  */
 
