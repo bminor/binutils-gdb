@@ -131,4 +131,11 @@ void collect_register_as_string (struct regcache *regcache, int n, char *buf);
 void collect_register_by_name (struct regcache *regcache,
 			       const char *name, void *buf);
 
+/* Read a raw register as an unsigned integer.  Convenience wrapper
+   around regcache_raw_get_unsigned that takes a register name instead
+   of a register number.  */
+
+ULONGEST regcache_raw_get_unsigned_by_name (struct regcache *regcache,
+					    const char *name);
+
 #endif /* REGCACHE_H */
