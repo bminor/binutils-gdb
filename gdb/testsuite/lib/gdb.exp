@@ -4483,6 +4483,12 @@ proc gdb_remote_download {dest fromfile {tofile {}}} {
 # Copy the listed library to the target.
 
 proc gdb_load_shlib { file } {
+    global gdb_spawn_id
+
+    if ![info exists gdb_spawn_id] {
+	perror "gdb_load_shlib: GDB is not running"
+    }
+
     set dest [gdb_remote_download target [shlib_target_file $file]]
 
     if {[is_remote target]} {

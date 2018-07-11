@@ -19,7 +19,6 @@ standard_testfile
 set executable $testfile
 
 set ipalib [get_in_proc_agent]
-gdb_load_shlib $ipalib
 
 if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 	  executable [concat {debug nowarnings c} shlib=$ipalib]] != "" } {
@@ -41,6 +40,7 @@ proc prepare_for_trace_test {} {
     global executable
 
     clean_restart $executable
+    gdb_load_shlib $ipalib
 
     runto_main
 
@@ -126,6 +126,8 @@ proc gdb_trace_collection_test {} {
 }
 
 clean_restart $executable
+gdb_load_shlib $ipalib
+
 runto_main
 
 if { ![gdb_target_supports_trace] } then {
