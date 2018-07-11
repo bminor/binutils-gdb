@@ -1,4 +1,12 @@
 2018-07-11  Maciej W. Rozycki  <macro@mips.com>
+
+	* elfxx-mips.c (mips_tls_got_relocs): Use `bfd_link_dll' rather
+	than `!bfd_link_pic' in determining the dynamic symbol index.
+	Avoid the index of -1.
+	(mips_elf_initialize_tls_slots): Likewise.  Flatten code by
+	moving `dyn' to the beginning of the function block.
+
+2018-07-11  Maciej W. Rozycki  <macro@mips.com>
 	    Rich Felker  <bugdal@aerifal.cx>
 
 	PR ld/22570

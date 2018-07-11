@@ -3251,8 +3251,10 @@ mips_tls_got_relocs (struct bfd_link_info *info, unsigned char tls_type,
   bfd_boolean need_relocs = FALSE;
   bfd_boolean dyn = elf_hash_table (info)->dynamic_sections_created;
 
-  if (h && WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, bfd_link_pic (info), h)
-      && (!bfd_link_pic (info) || !SYMBOL_REFERENCES_LOCAL (info, h)))
+  if (h != NULL
+      && h->dynindx != -1
+      && WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, bfd_link_pic (info), h)
+      && (bfd_link_dll (info) || !SYMBOL_REFERENCES_LOCAL (info, h)))
     indx = h->dynindx;
 
   if ((bfd_link_dll (info) || indx != 0)
@@ -3340,6 +3342,7 @@ mips_elf_initialize_tls_slots (bfd *abfd, struct bfd_link_info *info,
 			       struct mips_elf_link_hash_entry *h,
 			       bfd_vma value)
 {
+  bfd_boolean dyn = elf_hash_table (info)->dynamic_sections_created;
   struct mips_elf_link_hash_table *htab;
   int indx;
   asection *sreloc, *sgot;
@@ -3353,16 +3356,11 @@ mips_elf_initialize_tls_slots (bfd *abfd, struct bfd_link_info *info,
   sgot = htab->root.sgot;
 
   indx = 0;
-  if (h != NULL)
-    {
-      bfd_boolean dyn = elf_hash_table (info)->dynamic_sections_created;
-
-      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, bfd_link_pic (info),
-					   &h->root)
-	  && (!bfd_link_pic (info)
-	      || !SYMBOL_REFERENCES_LOCAL (info, &h->root)))
-	indx = h->root.dynindx;
-    }
+  if (h != NULL
+      && h->root.dynindx != -1
+      && WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, bfd_link_pic (info), &h->root)
+      && (bfd_link_dll (info) || !SYMBOL_REFERENCES_LOCAL (info, &h->root)))
+    indx = h->root.dynindx;
 
   if (entry->tls_initialized)
     return;
