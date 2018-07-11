@@ -125,8 +125,8 @@ int tdesc_unnumbered_register (const struct tdesc_feature *feature,
 /* Search FEATURE for a register named NAME, and return its size in
    bits.  The register must exist.  */
 
-int tdesc_register_size (const struct tdesc_feature *feature,
-			 const char *name);
+int tdesc_register_bitsize (const struct tdesc_feature *feature,
+			    const char *name);
 
 /* Search FEATURE for a register with any of the names from NAMES
    (NULL-terminated).  Record REGNO and the register in DATA; when
