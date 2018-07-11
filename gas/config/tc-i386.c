@@ -7676,22 +7676,16 @@ output_insn (void)
 	      if (i.tm.base_opcode & 0xff000000)
 		{
 		  prefix = (i.tm.base_opcode >> 24) & 0xff;
-		  goto check_prefix;
+		  add_prefix (prefix);
 		}
 	      break;
 	    case 2:
 	      if ((i.tm.base_opcode & 0xff0000) != 0)
 		{
 		  prefix = (i.tm.base_opcode >> 16) & 0xff;
-		  if (i.tm.cpu_flags.bitfield.cpupadlock)
-		    {
-check_prefix:
-		      if (prefix != REPE_PREFIX_OPCODE
-			  || (i.prefix[REP_PREFIX]
-			      != REPE_PREFIX_OPCODE))
-			add_prefix (prefix);
-		    }
-		  else
+		  if (!i.tm.cpu_flags.bitfield.cpupadlock
+		      || prefix != REPE_PREFIX_OPCODE
+		      || (i.prefix[REP_PREFIX] != REPE_PREFIX_OPCODE))
 		    add_prefix (prefix);
 		}
 	      break;
