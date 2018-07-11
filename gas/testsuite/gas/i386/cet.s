@@ -18,7 +18,9 @@ _start:
 	saveprevssp
 	rstorssp QWORD PTR [ecx + eax]
 	wrssd [edx],eax
+	wrssd dword ptr [eax],edx
 	wrussd [edi + ebp],edx
+	wrussd dword ptr [edx + ebp],edi
 	setssbsy
 	clrssbsy QWORD PTR [esp + eax]
 	endbr64
