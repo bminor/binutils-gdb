@@ -765,18 +765,18 @@ enum
   /* Bound register.  */
   RegBND,
 
-  /* The last bitfield in i386_operand_type.  */
-  OTMax
+  /* The number of bitfields in i386_operand_type.  */
+  OTNum
 };
 
 #define OTNumOfUints \
-  (OTMax / sizeof (unsigned int) / CHAR_BIT + 1)
+  ((OTNum - 1) / sizeof (unsigned int) / CHAR_BIT + 1)
 #define OTNumOfBits \
   (OTNumOfUints * sizeof (unsigned int) * CHAR_BIT)
 
 /* If you get a compiler error for zero width of the unused field,
    comment it out.  */
-#define OTUnused		(OTMax + 1)
+#define OTUnused		OTNum
 
 typedef union i386_operand_type
 {
