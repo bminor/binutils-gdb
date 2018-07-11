@@ -1,5 +1,11 @@
 2018-07-11  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/23377
+	* remote.c (remote_target::remote_detach_pid): Call
+	set_current_process.
+
+2018-07-11  Pedro Alves  <palves@redhat.com>
+
 	* h8300-tdep.c (h8300_gdbarch_init): Remove
 	set_gdbarch_ecoff_reg_to_regnum calls.
 

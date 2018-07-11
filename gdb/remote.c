@@ -5661,6 +5661,14 @@ remote_target::remote_detach_pid (int pid)
 {
   struct remote_state *rs = get_remote_state ();
 
+  /* This should not be necessary, but the handling for D;PID in
+     GDBserver versions prior to 8.2 incorrectly assumes that the
+     selected process points to the same process we're detaching,
+     leading to misbehavior (and possibly GDBserver crashing) when it
+     does not.  Since it's easy and cheap, work around it by forcing
+     GDBserver to select GDB's current process.  */
+  set_general_process ();
+
   if (remote_multi_process_p (rs))
     xsnprintf (rs->buf, get_remote_packet_size (), "D;%x", pid);
   else
