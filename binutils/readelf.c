@@ -6508,8 +6508,7 @@ process_section_headers (Filedata * filedata)
 	}
       else if (do_section_details)
 	{
-	  printf ("       %-15.15s  ",
-		  get_section_type_name (filedata, section->sh_type));
+	  putchar (' ');
 	  print_vma (section->sh_addr, LONG_HEX);
 	  if ((long) section->sh_offset == section->sh_offset)
 	    printf ("  %16.16lx", (unsigned long) section->sh_offset);
