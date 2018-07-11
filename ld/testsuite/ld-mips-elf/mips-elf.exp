@@ -863,6 +863,12 @@ set mips_tls_tests {
      "-EB -march=mips1 -32 -KPIC" {tlsbin-o32.s}
      {{objdump {-dr -m mips:isa32r2} tlsbin-o32.d} {objdump -srj.got tlsbin-o32.got}}
      "tls-static-o32"}
+    {"Static PIE executable with TLS"
+     "-static -pie -melf32btsmip -T mips-dyn.ld" ""
+     "-EB -march=mips1 -32 -KPIC" {tlsbin-o32.s}
+     {{objdump {-dr -m mips:isa32r2} tlsbin-pie-o32.d}
+      {objdump -Rsj.got tlsbin-pie-o32.got}}
+     "tls-static-pie-o32"}
     {"Shared library with TLS" "-shared -melf32btsmip -T mips-lib.ld" ""
      "-EB -march=mips1 -32 -KPIC" {tlslib-o32.s}
      {{objdump {-dr -m mips:isa32r2} tlslib-o32.d} {objdump -Rsj.got tlslib-o32.got}}
@@ -872,6 +878,12 @@ set mips_tls_tests {
      "-EB -march=mips1 -32 -KPIC" {tlsdyn-o32.s}
      {{objdump {-dr -m mips:isa32r2} tlsdyn-o32.d} {objdump -Rsj.got tlsdyn-o32.got}}
      "tls-dynamic-o32"}
+    {"Dynamic PIE executable with TLS"
+     "-pie -melf32btsmip -T mips-dyn.ld tmpdir/tlslib-o32.so" ""
+     "-EB -march=mips1 -32 -KPIC" {tlsdyn-o32.s}
+     {{objdump {-dr -m mips:isa32r2} tlsdyn-pie-o32.d}
+      {objdump -Rsj.got tlsdyn-pie-o32.got}}
+     "tls-dynamic-pie-o32"}
     {"Shared library with multiple GOTs and TLS"
      "-shared -melf32btsmip -T mips-lib.ld" ""
      "-EB -march=mips1 -32 -KPIC" {tls-multi-got-1-1.s tls-multi-got-1-2.s}

@@ -3255,7 +3255,7 @@ mips_tls_got_relocs (struct bfd_link_info *info, unsigned char tls_type,
       && (!bfd_link_pic (info) || !SYMBOL_REFERENCES_LOCAL (info, h)))
     indx = h->dynindx;
 
-  if ((bfd_link_pic (info) || indx != 0)
+  if ((bfd_link_dll (info) || indx != 0)
       && (h == NULL
 	  || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 	  || h->root.type != bfd_link_hash_undefweak))
@@ -3273,7 +3273,7 @@ mips_tls_got_relocs (struct bfd_link_info *info, unsigned char tls_type,
       return 1;
 
     case GOT_TLS_LDM:
-      return bfd_link_pic (info) ? 1 : 0;
+      return bfd_link_dll (info) ? 1 : 0;
 
     default:
       return 0;
@@ -3367,7 +3367,7 @@ mips_elf_initialize_tls_slots (bfd *abfd, struct bfd_link_info *info,
   if (entry->tls_initialized)
     return;
 
-  if ((bfd_link_pic (info) || indx != 0)
+  if ((bfd_link_dll (info) || indx != 0)
       && (h == NULL
 	  || ELF_ST_VISIBILITY (h->root.other) == STV_DEFAULT
 	  || h->root.type != bfd_link_hash_undefweak))
@@ -3442,7 +3442,7 @@ mips_elf_initialize_tls_slots (bfd *abfd, struct bfd_link_info *info,
 			 sgot->contents + got_offset
 			 + MIPS_ELF_GOT_SIZE (abfd));
 
-      if (!bfd_link_pic (info))
+      if (!bfd_link_dll (info))
 	MIPS_ELF_PUT_WORD (abfd, 1,
 			   sgot->contents + got_offset);
       else

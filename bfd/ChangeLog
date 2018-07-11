@@ -1,3 +1,12 @@
+2018-07-11  Maciej W. Rozycki  <macro@mips.com>
+	    Rich Felker  <bugdal@aerifal.cx>
+
+	PR ld/22570
+	* elfxx-mips.c (mips_tls_got_relocs): Use `bfd_link_dll' rather
+	than `bfd_link_pic' to determine whether dynamic relocations are
+	to be produced.
+	(mips_elf_initialize_tls_slots): Likewise.
+
 2018-07-10  Maciej W. Rozycki  <macro@mips.com>
 
 	* elflink.c (bfd_elf_final_link): Rename `remove' local variable
