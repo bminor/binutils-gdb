@@ -1832,10 +1832,6 @@ operand_type_xor (i386_operand_type x, i386_operand_type y)
 
 static const i386_operand_type acc32 = OPERAND_TYPE_ACC32;
 static const i386_operand_type acc64 = OPERAND_TYPE_ACC64;
-static const i386_operand_type inoutportreg
-  = OPERAND_TYPE_INOUTPORTREG;
-static const i386_operand_type reg16_inoutportreg
-  = OPERAND_TYPE_REG16_INOUTPORTREG;
 static const i386_operand_type disp16 = OPERAND_TYPE_DISP16;
 static const i386_operand_type disp32 = OPERAND_TYPE_DISP32;
 static const i386_operand_type disp32s = OPERAND_TYPE_DISP32S;
@@ -9637,14 +9633,13 @@ i386_att_operand (char *operand_string)
 
       /* Special case for (%dx) while doing input/output op.  */
       if (i.base_reg
-	  && operand_type_equal (&i.base_reg->reg_type,
-				 &reg16_inoutportreg)
+	  && i.base_reg->reg_type.bitfield.inoutportreg
 	  && i.index_reg == 0
 	  && i.log2_scale_factor == 0
 	  && i.seg[i.mem_operands] == 0
 	  && !operand_type_check (i.types[this_operand], disp))
 	{
-	  i.types[this_operand] = inoutportreg;
+	  i.types[this_operand] = i.base_reg->reg_type;
 	  return 1;
 	}
 

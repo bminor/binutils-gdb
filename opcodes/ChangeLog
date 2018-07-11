@@ -1,5 +1,12 @@
 2018-07-11  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-gen.c (operand_type_init): Remove
+	OPERAND_TYPE_REG16_INOUTPORTREG entry and one instance of
+	OPERAND_TYPE_INOUTPORTREG.
+	* i386-init.h: Re-generate.
+
+2018-07-11  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (wrssd, wrussd): Add Dword.
 	(wrssq, wrussq): Add Qword.
 	* i386-tbl.h: Re-generate.
