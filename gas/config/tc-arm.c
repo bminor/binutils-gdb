@@ -20051,6 +20051,8 @@ static const struct asm_opcode insns[] =
 #define THUMB_VARIANT  & arm_ext_v6t2
 
  TUE("csdb",	320f014, f3af8014, 0, (), noargs, t_csdb),
+ TUF("ssbb",	57ff040, f3bf8f40, 0, (), noargs, t_csdb),
+ TUF("pssbb",	57ff044, f3bf8f44, 0, (), noargs, t_csdb),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT    & arm_ext_v6t2

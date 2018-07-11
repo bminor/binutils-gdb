@@ -1,3 +1,13 @@
+2018-07-11  Sudakshina Das  <sudi.das@arm.com>
+
+	* config/tc-arm.c (insns): Add new ssbb and pssbb instructions.
+	* testsuite/gas/arm/csdb.s: Add new tests for ssbb and pssbb.
+	* testsuite/gas/arm/csdb.d: Likewise
+	* testsuite/gas/arm/thumb2_it_bad.s: Likewise.
+	* testsuite/gas/arm/thumb2_it_bad.l: Likewise.
+	* testsuite/gas/arm/barrier.d: Update with ssbb.
+	* testsuite/gas/arm/barrier-thumb.d: Likewise.
+
 2018-07-11  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (inoutportreg, reg16_inoutportreg): Delete.

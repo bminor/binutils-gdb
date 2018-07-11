@@ -1,3 +1,9 @@
+2018-07-11  Sudakshina Das  <sudi.das@arm.com>
+
+	* arm-dis.c (arm_opcodes): Add ssbb and pssbb and move
+	csdb together with them.
+	(thumb32_opcodes): Likewise.
+
 2018-07-11  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-opc.tbl (monitor, monitorx): Add 64-bit template
