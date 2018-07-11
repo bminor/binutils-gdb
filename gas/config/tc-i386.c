@@ -4112,10 +4112,16 @@ md_assemble (char *line)
     }
 
   /* Insert BND prefix.  */
-  if (add_bnd_prefix
-      && i.tm.opcode_modifier.bndprefixok
-      && !i.prefix[BND_PREFIX])
-    add_prefix (BND_PREFIX_OPCODE);
+  if (add_bnd_prefix && i.tm.opcode_modifier.bndprefixok)
+    {
+      if (!i.prefix[BND_PREFIX])
+	add_prefix (BND_PREFIX_OPCODE);
+      else if (i.prefix[BND_PREFIX] != BND_PREFIX_OPCODE)
+	{
+	  as_warn (_("replacing `rep'/`repe' prefix by `bnd'"));
+	  i.prefix[BND_PREFIX] = BND_PREFIX_OPCODE;
+	}
+    }
 
   /* Check string instruction segment overrides.  */
   if (i.tm.opcode_modifier.isstring && i.mem_operands != 0)

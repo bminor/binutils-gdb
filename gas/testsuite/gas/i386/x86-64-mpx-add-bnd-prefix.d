@@ -1,4 +1,5 @@
 #as: -madd-bnd-prefix
+#stderr: x86-64-mpx-add-bnd-prefix.e
 #objdump: -drw
 #name: Check -madd-bnd-prefix (x86-64)
 
@@ -18,7 +19,9 @@ Disassembly of section .text:
 0+14 <foo>:
 [ 	]*[a-f0-9]+:	f2 c3                	bnd retq 
 [ 	]*[a-f0-9]+:	f2 c3                	bnd retq 
-[ 	]*[a-f0-9]+:	f2 e8 f6 ff ff ff    	bnd callq 14 <foo>
+[ 	]*[a-f0-9]+:	f2 c3                	bnd retq 
+[ 	]*[a-f0-9]+:	f2 c3                	bnd retq 
+[ 	]*[a-f0-9]+:	f2 e8 f2 ff ff ff    	bnd callq 14 <foo>
 [ 	]*[a-f0-9]+:	48 01 c3             	add    %rax,%rbx
-[ 	]*[a-f0-9]+:	e2 f1                	loop   14 <foo>
+[ 	]*[a-f0-9]+:	e2 ed                	loop   14 <foo>
 #pass
