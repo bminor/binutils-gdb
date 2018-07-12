@@ -1,3 +1,8 @@
+2018-07-12  Maciej W. Rozycki  <macro@mips.com>
+
+	* testsuite/ld-mips-elf/mips-elf.exp: Limit reloc 6 tests to
+	shared library targets.
+
 2018-07-11  Maciej W. Rozycki  <macro@mips.com>
 
 	* testsuite/ld-mips-elf/tlsdyn-o32.d: Update test for dynamic

@@ -625,7 +625,7 @@ if {$has_newabi} {
 }
 run_dump_test "reloc-4"
 run_dump_test "reloc-5"
-if { $has_newabi } {
+if { $has_newabi && [check_shared_lib_support] } {
     run_ld_link_tests [list \
 	[list \
 	    "reloc test 6a" \
