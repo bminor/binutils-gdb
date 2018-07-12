@@ -1,5 +1,9 @@
 2018-07-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* NEWS: Mention new commands. Mention change to 'thread apply'.
+
+2018-07-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* thread.c (thr_try_catch_cmd): New function.
 	(thread_apply_all_command): Handle qcs flags.
 	(thread_apply_command): Handle qcs flags.

@@ -7,6 +7,33 @@
   can be passed using the '[ADDRESS]:PORT' notation, or the regular
   'ADDRESS:PORT' method.
 
+* New commands
+
+frame apply [all | COUNT | -COUNT | level LEVEL...] [FLAG]... COMMAND
+  Apply a command to some frames.
+  FLAG arguments allow to control what output to produce and how to handle
+  errors raised when applying COMMAND to a frame.
+
+taas COMMAND
+  Apply a command to all threads (ignoring errors and empty output).
+  Shortcut for 'thread apply all -s COMMAND'.
+
+faas COMMAND
+  Apply a command to all frames (ignoring errors and empty output).
+  Shortcut for 'frame apply all -s COMMAND'.
+
+tfaas COMMAND
+  Apply a command to all frames of all threads (ignoring errors and empty
+  output).
+  Shortcut for 'thread apply all -s frame apply all -s COMMAND'.
+
+* Changed commands
+
+thread apply [all | COUNT | -COUNT] [FLAG]... COMMAND
+  The 'thread apply' command accepts new FLAG arguments.
+  FLAG arguments allow to control what output to produce and how to handle
+  errors raised when applying COMMAND to a thread.
+
 *** Changes in GDB 8.2
 
 * The 'set disassembler-options' command now supports specifying options
