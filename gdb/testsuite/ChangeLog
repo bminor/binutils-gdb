@@ -1,5 +1,10 @@
 2018-07-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* gdb.base/frameapply.c: New file.
+	* gdb.base/frameapply.exp: New file.
+
+2018-07-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* gdb.base/skip.exp: Update expected error message.
 
 2018-07-11  Sergio Durigan Junior  <sergiodj@redhat.com>
