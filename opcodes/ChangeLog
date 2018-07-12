@@ -1,3 +1,11 @@
+2018-07-12  Tamar Christina  <tamar.christina@arm.com>
+
+	PR binutils/23192
+	* aarch64-tbl.h (sqdmlal, sqdmlal2, smlsl, smlsl2, sqdmlsl, sqdmlsl2,
+	mul, smull, smull2, sqdmull, sqdmull2, sqdmulh, sqrdmulh, mla, umlal,
+	umlal2, mls, umlsl, umlsl2, umull, umull2, sqdmlal, sqdmlsl, sqdmull,
+	sqdmulh, sqrdmulh): Use Em16.
+
 2018-07-11  Sudakshina Das  <sudi.das@arm.com>
 
 	* arm-dis.c (arm_opcodes): Add ssbb and pssbb and move
