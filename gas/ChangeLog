@@ -1,5 +1,12 @@
 2018-07-12  Sudakshina Das  <sudi.das@arm.com>
 
+	* testsuite/gas/aarch64/system.s: Add test for ssbb
+	and pssbb.
+	* testsuite/gas/aarch64/system.d: Update accordingly
+	and remove explicit addresses.
+
+2018-07-12  Sudakshina Das  <sudi.das@arm.com>
+
 	* config/tc-arm.c (insns): Add new ssbb and pssbb instructions.
 	* testsuite/gas/arm/csdb.s: Add new tests for ssbb and pssbb.
 	* testsuite/gas/arm/csdb.d: Likewise
