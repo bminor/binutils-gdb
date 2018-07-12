@@ -1,3 +1,8 @@
+2018-07-12  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* ser-tcp.c (try_connect): Declare 'ioarg' as 'u_long' if building
+	on Windows.
+
 2018-07-11  Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Paul Fertser  <fercerpav@gmail.com>

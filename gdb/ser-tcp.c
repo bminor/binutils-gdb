@@ -171,7 +171,11 @@ try_connect (const struct addrinfo *ainfo, unsigned int *polls)
     return -1;
 
   /* Set socket nonblocking.  */
+#ifdef USE_WIN32API
+  u_long ioarg = 1;
+#else
   int ioarg = 1;
+#endif
 
   ioctl (sock, FIONBIO, &ioarg);
 
