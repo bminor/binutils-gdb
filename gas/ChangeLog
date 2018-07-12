@@ -1,3 +1,10 @@
+2018-07-12  Tamar Christina  <tamar.christina@arm.com>
+
+	PR binutils/23192
+	* testsuite/gas/aarch64/illegal-by-element.s: New.
+	* testsuite/gas/aarch64/illegal-by-element.d: New.
+	* testsuite/gas/aarch64/illegal-by-element.l: New.
+
 2018-07-06  Tamar Christina  <tamar.christina@arm.com>
 
 	PR binutils/23369
