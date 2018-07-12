@@ -1,3 +1,10 @@
+2018-07-12  Sudakshina Das  <sudi.das@arm.com>
+
+	* testsuite/gas/aarch64/system.s: Add test for ssbb
+	and pssbb.
+	* testsuite/gas/aarch64/system.d: Update accordingly
+	and remove explicit addresses.
+
 2018-07-11  Tamar Christina  <tamar.christina@arm.com>
 
 	PR binutils/23192

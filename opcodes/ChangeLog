@@ -1,3 +1,11 @@
+2018-07-12  Sudakshina Das  <sudi.das@arm.com>
+
+	* aarch64-tbl.h (aarch64_opcode_table): Add entry for
+	ssbb and pssbb and update dsb flags to F_HAS_ALIAS.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
 2018-07-12  Tamar Christina  <tamar.christina@arm.com>
 
 	PR binutils/23192
