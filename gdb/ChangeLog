@@ -1,5 +1,11 @@
 2018-07-20  Tom Tromey  <tom@tromey.com>
 
+	* buildsym.c (record_pending_block): Move earlier.  Remove objfile
+	parameter.
+	(finish_block_internal): Update.
+
+2018-07-20  Tom Tromey  <tom@tromey.com>
+
 	* buildsym.h (EXTERN): Don't define or undef.
 	* buildsym.c (EXTERN): Don't define.
 

@@ -282,10 +282,6 @@ static void free_buildsym_compunit (void);
 
 static int compare_line_numbers (const void *ln1p, const void *ln2p);
 
-static void record_pending_block (struct objfile *objfile,
-				  struct block *block,
-				  struct pending_block *opblock);
-
 /* Initial sizes of data structures.  These are realloc'd larger if
    needed, and realloc'd down to the size actually used, when
    completed.  */
@@ -353,6 +349,30 @@ find_symbol_in_list (struct pending *list, char *name, int length)
 scoped_free_pendings::~scoped_free_pendings ()
 {
   free_buildsym_compunit ();
+}
+
+/* Record BLOCK on the list of all blocks in the file.  Put it after
+   OPBLOCK, or at the beginning if opblock is NULL.  This puts the
+   block in the list after all its subblocks.  */
+
+static void
+record_pending_block (struct block *block, struct pending_block *opblock)
+{
+  struct pending_block *pblock;
+
+  pblock = XOBNEW (&buildsym_compunit->m_pending_block_obstack,
+		   struct pending_block);
+  pblock->block = block;
+  if (opblock)
+    {
+      pblock->next = opblock->next;
+      opblock->next = pblock;
+    }
+  else
+    {
+      pblock->next = buildsym_compunit->m_pending_blocks;
+      buildsym_compunit->m_pending_blocks = pblock;
+    }
 }
 
 /* Take one of the lists of symbols and make a block from it.  Keep
@@ -545,7 +565,7 @@ finish_block_internal (struct symbol *symbol,
   else
     buildsym_compunit->m_local_using_directives = NULL;
 
-  record_pending_block (objfile, block, opblock);
+  record_pending_block (block, opblock);
 
   return block;
 }
@@ -560,35 +580,6 @@ finish_block (struct symbol *symbol,
 				old_blocks, static_link,
 				start, end, 0, 0);
 }
-
-/* Record BLOCK on the list of all blocks in the file.  Put it after
-   OPBLOCK, or at the beginning if opblock is NULL.  This puts the
-   block in the list after all its subblocks.
-
-   Allocate the pending block struct in the objfile_obstack to save
-   time.  This wastes a little space.  FIXME: Is it worth it?  */
-
-static void
-record_pending_block (struct objfile *objfile, struct block *block,
-		      struct pending_block *opblock)
-{
-  struct pending_block *pblock;
-
-  pblock = XOBNEW (&buildsym_compunit->m_pending_block_obstack,
-		   struct pending_block);
-  pblock->block = block;
-  if (opblock)
-    {
-      pblock->next = opblock->next;
-      opblock->next = pblock;
-    }
-  else
-    {
-      pblock->next = buildsym_compunit->m_pending_blocks;
-      buildsym_compunit->m_pending_blocks = pblock;
-    }
-}
-
 
 /* Record that the range of addresses from START to END_INCLUSIVE
    (inclusive, like it says) belongs to BLOCK.  BLOCK's start and end
