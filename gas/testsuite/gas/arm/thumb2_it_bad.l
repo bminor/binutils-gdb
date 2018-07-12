@@ -11,3 +11,5 @@
 [^:]*:20: Error: instruction not allowed in IT block -- `setendeq le'
 [^:]*:22: Error: IT falling in the range of a previous IT block -- `iteq eq'
 [^:]*:25: Error: instruction not allowed in IT block -- `csdbeq'
+[^:]*:26: Error: instruction not allowed in IT block -- `ssbbeq'
+[^:]*:27: Error: instruction not allowed in IT block -- `pssbbeq'

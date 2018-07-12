@@ -21,6 +21,8 @@ thumb2_it_bad:
 	it	eq
 	iteq	eq
 	nop
-	it	eq
+	ittt	eq
 	csdbeq
+	ssbbeq
+	pssbbeq
 foo:

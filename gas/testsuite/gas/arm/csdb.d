@@ -5,6 +5,9 @@
 .*: +file format .*arm.*
 
 Disassembly of section .text:
-0+000 <[^>]*> f3af 8014 ?	csdb
-0+004 <[^>]*> e320f014 ?	csdb
-
+.*> f3af 8014 ?	csdb
+.*> f3bf 8f40 ?	ssbb
+.*> f3bf 8f44 ?	pssbb
+.*> e320f014 ?	csdb
+.*> f57ff040 ?	ssbb
+.*> f57ff044 ?	pssbb
