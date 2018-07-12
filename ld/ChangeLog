@@ -1,5 +1,218 @@
 2018-07-12  Maciej W. Rozycki  <macro@mips.com>
 
+	* testsuite/ld-mips-elf/mips-elf.exp (run_dump_test_abi)
+	(run_dump_test_o32, run_dump_test_n32, run_dump_test_n64)
+	(run_dump_test_eabi): New procedures.
+	(has_newabi, has_elf32): Remove variables.
+	(has_abi): New associative array variable.
+	(abi_asflags, abi_ldflags): Update settings across targets.
+	(irixemul): New variable.
+	Replace `run_dump_test' calls where applicable throughout with
+	`run_dump_test_o32', `run_dump_test_n32', `run_dump_test_n64'
+	and `run_dump_test_eabi' as appropriate.  Remove explicit
+	passing of `abi_asflags' and `abi_ldflags'.  Use `noarch' for
+	tests that require their own architecture setting.  Force the
+	big endianness for tests that require it.  Select the endianness
+	required for `objdump invocation with the `reloc-2' test.
+	Conditionalize tests run via `run_ld_link_tests' on the ABI
+	required and use the ABI list from the `has_abi' array where
+	appropriate.
+	* testsuite/ld-mips-elf/attr-gnu-4-0-n32-ph.d: Remove ABI and
+	endianness selection options from `ld' and `source' tags.  Relax
+	output format matching.
+	* testsuite/ld-mips-elf/attr-gnu-4-0-n64-ph.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-1-n32-ph.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-1-n64-ph.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-2-n32-ph.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-2-n64-ph.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-3-n32-ph.d: Likewise.
+	* testsuite/ld-mips-elf/attr-gnu-4-3-n64-ph.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-addend-micromips-n32.d: Remove
+	ABI and endianness selection options from `as', `ld', `source'
+	tags, and also the `-march=from-abi' option.  Remove the `as'
+	tag where it would become empty.
+	* testsuite/ld-mips-elf/bal-jalx-addend-micromips-n64.d:
+	Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-addend-micromips.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-addend-n32.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-addend-n64.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-addend.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-local-micromips-n32.d:
+	Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-local-micromips-n64.d:
+	Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-local-micromips.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-local-n32.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-local-n64.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-local.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-pic-ignore-micromips-n32.d:
+	Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-pic-ignore-micromips-n64.d:
+	Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-pic-ignore-micromips.d:
+	Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-pic-ignore-n32.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-pic-ignore-n64.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-pic-ignore.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-pic-micromips-n32.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-pic-micromips-n64.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-pic-micromips.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-pic-n32.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-pic-n64.d: Likewise.
+	* testsuite/ld-mips-elf/bal-jalx-pic.d: Likewise.
+	* testsuite/ld-mips-elf/branch-absolute-addend-n32.d: Likewise.
+	* testsuite/ld-mips-elf/branch-absolute-addend-n64.d: Likewise.
+	* testsuite/ld-mips-elf/branch-absolute-addend.d: Likewise.
+	* testsuite/ld-mips-elf/branch-absolute-n32.d: Likewise.
+	* testsuite/ld-mips-elf/branch-absolute-n64.d: Likewise.
+	* testsuite/ld-mips-elf/branch-absolute.d: Likewise.
+	* testsuite/ld-mips-elf/dyn-sec64.d: Likewise.
+	* testsuite/ld-mips-elf/eh-frame1-n32.d: Likewise.
+	* testsuite/ld-mips-elf/eh-frame1-n64.d: Likewise.
+	* testsuite/ld-mips-elf/eh-frame2-n32.d: Likewise.
+	* testsuite/ld-mips-elf/eh-frame2-n64.d: Likewise.
+	* testsuite/ld-mips-elf/elf-rel-got-n32-embed.d: Likewise.
+	* testsuite/ld-mips-elf/elf-rel-got-n32.d: Likewise.
+	* testsuite/ld-mips-elf/elf-rel-got-n64-embed.d: Likewise.
+	* testsuite/ld-mips-elf/elf-rel-got-n64-irix.d: Likewise.
+	* testsuite/ld-mips-elf/elf-rel-got-n64.d: Likewise.
+	* testsuite/ld-mips-elf/elf-rel-xgot-n32-embed.d: Likewise.
+	* testsuite/ld-mips-elf/elf-rel-xgot-n32.d: Likewise.
+	* testsuite/ld-mips-elf/elf-rel-xgot-n64-embed.d: Likewise.
+	* testsuite/ld-mips-elf/elf-rel-xgot-n64-irix.d: Likewise.
+	* testsuite/ld-mips-elf/elf-rel-xgot-n64.d: Likewise.
+	* testsuite/ld-mips-elf/emit-relocs-1.d: Likewise.
+	* testsuite/ld-mips-elf/got-dump-2.d: Likewise.
+	* testsuite/ld-mips-elf/got-page-2.d: Likewise.
+	* testsuite/ld-mips-elf/jal-global-overflow-0.d: Likewise.
+	* testsuite/ld-mips-elf/jal-global-overflow-1.d: Likewise.
+	* testsuite/ld-mips-elf/jal-local-overflow-0.d: Likewise.
+	* testsuite/ld-mips-elf/jal-local-overflow-1.d: Likewise.
+	* testsuite/ld-mips-elf/jalbal.d: Likewise.
+	* testsuite/ld-mips-elf/jalx-addend-n32.d: Likewise.
+	* testsuite/ld-mips-elf/jalx-addend-n64.d: Likewise.
+	* testsuite/ld-mips-elf/jalx-addend.d: Likewise.
+	* testsuite/ld-mips-elf/jalx-local-n32.d: Likewise.
+	* testsuite/ld-mips-elf/jalx-local-n64.d: Likewise.
+	* testsuite/ld-mips-elf/jalx-local.d: Likewise.
+	* testsuite/ld-mips-elf/jr-to-b-1.d: Likewise.
+	* testsuite/ld-mips-elf/jr-to-b-2.d: Likewise.
+	* testsuite/ld-mips-elf/lsi-4010-isa.d: Likewise.
+	* testsuite/ld-mips-elf/micromips-branch-absolute-addend-n32.d:
+	Likewise.
+	* testsuite/ld-mips-elf/micromips-branch-absolute-addend-n64.d:
+	Likewise.
+	* testsuite/ld-mips-elf/micromips-branch-absolute-addend.d:
+	Likewise.
+	* testsuite/ld-mips-elf/micromips-branch-absolute-n32.d:
+	Likewise.
+	* testsuite/ld-mips-elf/micromips-branch-absolute-n64.d:
+	Likewise.
+	* testsuite/ld-mips-elf/micromips-branch-absolute.d: Likewise.
+	* testsuite/ld-mips-elf/mips16-branch-2.d: Likewise.
+	* testsuite/ld-mips-elf/mips16-branch-3.d: Likewise.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-1.d: Likewise.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-2.d: Likewise.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-addend-1.d:
+	Likewise.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-addend-n32-1.d:
+	Likewise.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-addend-n32.d:
+	Likewise.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-addend-n64-1.d:
+	Likewise.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-addend-n64.d:
+	Likewise.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-addend.d:
+	Likewise.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-n32-1.d:
+	Likewise.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-n32-2.d:
+	Likewise.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-n32.d: Likewise.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-n64-1.d:
+	Likewise.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-n64-2.d:
+	Likewise.
+	* testsuite/ld-mips-elf/mips16-branch-absolute-n64.d: Likewise.
+	* testsuite/ld-mips-elf/mips16-branch-absolute.d: Likewise.
+	* testsuite/ld-mips-elf/mips16-branch-addend-2.d: Likewise.
+	* testsuite/ld-mips-elf/mips16-branch-addend-3.d: Likewise.
+	* testsuite/ld-mips-elf/mips16-hilo-n32.d: Likewise.
+	* testsuite/ld-mips-elf/mips16-pcrel-0.d: Likewise.
+	* testsuite/ld-mips-elf/mips16-pcrel-1.d: Likewise.
+	* testsuite/ld-mips-elf/mips16-pcrel-addend-2.d: Likewise.
+	* testsuite/ld-mips-elf/mips16-pcrel-addend-6.d: Likewise.
+	* testsuite/ld-mips-elf/mips16-pcrel-n32-0.d: Likewise.
+	* testsuite/ld-mips-elf/mips16-pcrel-n32-1.d: Likewise.
+	* testsuite/ld-mips-elf/mips16-pcrel-n64-sym32-0.d: Likewise.
+	* testsuite/ld-mips-elf/mips16-pcrel-n64-sym32-1.d: Likewise.
+	* testsuite/ld-mips-elf/mips16e2-pcrel-0.d: Likewise.
+	* testsuite/ld-mips-elf/mips16e2-pcrel-1.d: Likewise.
+	* testsuite/ld-mips-elf/mips16e2-pcrel-addend-2.d: Likewise.
+	* testsuite/ld-mips-elf/mips16e2-pcrel-addend-6.d: Likewise.
+	* testsuite/ld-mips-elf/mips16e2-pcrel-n32-0.d: Likewise.
+	* testsuite/ld-mips-elf/mips16e2-pcrel-n32-1.d: Likewise.
+	* testsuite/ld-mips-elf/mips16e2-pcrel-n64-sym32-0.d: Likewise.
+	* testsuite/ld-mips-elf/mips16e2-pcrel-n64-sym32-1.d: Likewise.
+	* testsuite/ld-mips-elf/multi-got-1.d: Likewise.
+	* testsuite/ld-mips-elf/multi-got-hidden-1.d: Likewise.
+	* testsuite/ld-mips-elf/multi-got-hidden-2.d: Likewise.
+	* testsuite/ld-mips-elf/multi-got-no-shared.d: Likewise.
+	* testsuite/ld-mips-elf/no-shared-1-n32.d: Likewise.
+	* testsuite/ld-mips-elf/no-shared-1-n64.d: Likewise.
+	* testsuite/ld-mips-elf/no-shared-1-o32.d: Likewise.
+	* testsuite/ld-mips-elf/pic-and-nonpic-2.d: Likewise.
+	* testsuite/ld-mips-elf/pic-and-nonpic-3-error.d: Likewise.
+	* testsuite/ld-mips-elf/pic-and-nonpic-4-error.d: Likewise.
+	* testsuite/ld-mips-elf/pie-n32.d: Likewise.
+	* testsuite/ld-mips-elf/pie-n64.d: Likewise.
+	* testsuite/ld-mips-elf/pie-o32.d: Likewise.
+	* testsuite/ld-mips-elf/rel32-n32.d: Likewise.
+	* testsuite/ld-mips-elf/rel32-o32.d: Likewise.
+	* testsuite/ld-mips-elf/rel64.d: Likewise.
+	* testsuite/ld-mips-elf/relax-jalr-n32.d: Likewise.
+	* testsuite/ld-mips-elf/reloc-1-n32.d: Likewise.
+	* testsuite/ld-mips-elf/reloc-1-n64.d: Likewise.
+	* testsuite/ld-mips-elf/reloc-2.d: Likewise.
+	* testsuite/ld-mips-elf/reloc-3-n32.d: Likewise.
+	* testsuite/ld-mips-elf/reloc-local-overflow.d: Likewise.
+	* testsuite/ld-mips-elf/textrel-1.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-2.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-ignore-2.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-ignore-micromips.d:
+	Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-ignore-mips16.d:
+	Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-ignore-r6-1.d:
+	Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-micromips.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-mips16.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-r6-1.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch-r6-2.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-branch.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-0.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-1.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-2.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-3.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-micromips-0.d:
+	Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-micromips-1.d:
+	Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-mips16-0.d:
+	Likewise.
+	* testsuite/ld-mips-elf/unaligned-jalx-addend-mips16-1.d:
+	Likewise.
+	* testsuite/ld-mips-elf/unaligned-jump-micromips.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-jump-mips16.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-jump.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-ldpc-0.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-ldpc-1.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-lwpc-0.d: Likewise.
+	* testsuite/ld-mips-elf/unaligned-lwpc-1.d: Likewise.
+
+2018-07-12  Maciej W. Rozycki  <macro@mips.com>
+
 	* testsuite/ld-mips-elf/mips-elf.exp: Limit reloc 6 tests to
 	shared library targets.
 
