@@ -1,3 +1,21 @@
+2018-07-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* dwarf2-frame-tailcall.c (tailcall_frame_sniffer): Exit early if
+	DWARF unwinders are disabled.
+	* dwarf2-frame.c: Add dwarf2read.h include.
+	(dwarf2_frame_sniffer): Exit early if DWARF unwinders are
+	disabled.
+	(dwarf2_frame_unwinders_enabled_p): Define.
+	(show_dwarf_unwinders_enabled_p): New function.
+	(_initialize_dwarf2_frame): Register switch to control DWARF
+	unwinder use.
+	* dwarf2-frame.h (dwarf2_frame_unwinders_enabled_p): Declare.
+	* dwarf2read.c (set_dwarf_cmdlist): Remove static keyword.
+	(show_dwarf_cmdlist): Remove static keyword.
+	* dwarf2read.h (set_dwarf_cmdlist): Declare.
+	(show_dwarf_cmdlist): Declare.
+	* NEWS: Document new feature.
+
 2018-07-26  Tom de Vries  <tdevries@suse.de>
 
 	PR breakpoints/23366

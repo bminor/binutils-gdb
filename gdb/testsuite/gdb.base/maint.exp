@@ -526,6 +526,10 @@ gdb_test_no_output "maint info line-table xxx.c" \
 
 set timeout $oldtimeout
 
+# Just check that the DWARF unwinders control flag is visible.
+gdb_test "maint show dwarf unwinders" \
+    "The DWARF stack unwinders are currently (on|off)\\."
+
 #============test help on maint commands
 
 test_prefix_command_help {"maint info" "maintenance info"} {

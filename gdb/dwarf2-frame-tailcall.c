@@ -318,6 +318,9 @@ tailcall_frame_sniffer (const struct frame_unwind *self,
   int next_levels;
   struct tailcall_cache *cache;
 
+  if (!dwarf2_frame_unwinders_enabled_p)
+    return 0;
+
   /* Inner tail call element does not make sense for a sentinel frame.  */
   next_frame = get_next_frame (this_frame);
   if (next_frame == NULL)

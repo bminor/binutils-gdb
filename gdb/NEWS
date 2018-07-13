@@ -27,6 +27,10 @@ tfaas COMMAND
   output).
   Shortcut for 'thread apply all -s frame apply all -s COMMAND'.
 
+maint set dwarf unwinders (on|off)
+maint show dwarf unwinders
+  Control whether DWARF unwinders can be used.
+
 * Changed commands
 
 thread apply [all | COUNT | -COUNT] [FLAG]... COMMAND

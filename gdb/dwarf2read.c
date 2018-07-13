@@ -25345,8 +25345,8 @@ partial_die_eq (const void *item_lhs, const void *item_rhs)
   return part_die_lhs->sect_off == part_die_rhs->sect_off;
 }
 
-static struct cmd_list_element *set_dwarf_cmdlist;
-static struct cmd_list_element *show_dwarf_cmdlist;
+struct cmd_list_element *set_dwarf_cmdlist;
+struct cmd_list_element *show_dwarf_cmdlist;
 
 static void
 set_dwarf_cmd (const char *args, int from_tty)

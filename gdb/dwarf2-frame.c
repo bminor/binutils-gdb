@@ -35,6 +35,7 @@
 
 #include "complaints.h"
 #include "dwarf2-frame.h"
+#include "dwarf2read.h"
 #include "ax.h"
 #include "dwarf2loc.h"
 #include "dwarf2-frame-tailcall.h"
@@ -168,6 +169,9 @@ static CORE_ADDR read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
 				     unsigned int *bytes_read_ptr,
 				     CORE_ADDR func_base);
 
+
+/* See dwarf2-frame.h.  */
+int dwarf2_frame_unwinders_enabled_p = 1;
 
 /* Store the length the expression for the CFA in the `cfa_reg' field,
    which is unused in that case.  */
@@ -1326,6 +1330,9 @@ static int
 dwarf2_frame_sniffer (const struct frame_unwind *self,
 		      struct frame_info *this_frame, void **this_cache)
 {
+  if (!dwarf2_frame_unwinders_enabled_p)
+    return 0;
+
   /* Grab an address that is guarenteed to reside somewhere within the
      function.  get_frame_pc(), with a no-return next function, can
      end up returning something past the end of this function's body.
@@ -2394,11 +2401,35 @@ dwarf2_build_frame_info (struct objfile *objfile)
   set_objfile_data (objfile, dwarf2_frame_objfile_data, fde_table2);
 }
 
+/* Handle 'maintenance show dwarf unwinders'.  */
+
+static void
+show_dwarf_unwinders_enabled_p (struct ui_file *file, int from_tty,
+				struct cmd_list_element *c,
+				const char *value)
+{
+  fprintf_filtered (file,
+		    _("The DWARF stack unwinders are currently %s.\n"),
+		    value);
+}
+
 void
 _initialize_dwarf2_frame (void)
 {
   dwarf2_frame_data = gdbarch_data_register_pre_init (dwarf2_frame_init);
   dwarf2_frame_objfile_data = register_objfile_data ();
+
+  add_setshow_boolean_cmd ("unwinders", class_obscure,
+			   &dwarf2_frame_unwinders_enabled_p , _("\
+Set whether the DWARF stack frame unwinders are used."), _("\
+Show whether the DWARF stack frame unwinders are used."), _("\
+When enabled the DWARF stack frame unwinders can be used for architectures\n\
+that support the DWARF unwinders.  Enabling the DWARF unwinders for an\n\
+architecture that doesn't support them will have no effect."),
+			   NULL,
+			   show_dwarf_unwinders_enabled_p,
+			   &set_dwarf_cmdlist,
+			   &show_dwarf_cmdlist);
 
 #if GDB_SELF_TEST
   selftests::register_test_foreach_arch ("execute_cfa_program",

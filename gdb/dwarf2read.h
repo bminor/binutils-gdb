@@ -23,6 +23,10 @@
 #include "filename-seen-cache.h"
 #include "gdb_obstack.h"
 
+/* Hold 'maintenance (set|show) dwarf' commands.  */
+extern struct cmd_list_element *set_dwarf_cmdlist;
+extern struct cmd_list_element *show_dwarf_cmdlist;
+
 typedef struct dwarf2_per_cu_data *dwarf2_per_cu_ptr;
 DEF_VEC_P (dwarf2_per_cu_ptr);
 

@@ -1,3 +1,8 @@
+2018-07-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Maintenance Commands): Add description of
+	maintenance command to control dwarf unwinders.
+
 2018-07-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.texinfo (Debugging Programs with Multiple Threads):
