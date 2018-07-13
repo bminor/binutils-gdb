@@ -42389,6 +42389,7 @@ Boolean type, occupying a single bit.
 
 @item int8
 @itemx int16
+@itemx int24
 @itemx int32
 @itemx int64
 @itemx int128
@@ -42396,6 +42397,7 @@ Signed integer types holding the specified number of bits.
 
 @item uint8
 @itemx uint16
+@itemx uint24
 @itemx uint32
 @itemx uint64
 @itemx uint128
