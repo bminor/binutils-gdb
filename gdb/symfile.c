@@ -2088,7 +2088,7 @@ set_objfile_default_section_offset (struct objfile *objf,
 {
   /* Add OFFSET to all sections by default.  */
   std::vector<struct section_offsets> offsets (objf->num_sections,
-					       { offset });
+					       { { offset } });
 
   /* Create sorted lists of all sections in ADDRS as well as all
      sections in OBJF.  */

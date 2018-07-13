@@ -1,3 +1,8 @@
+2018-07-13  Tom Tromey  <tom@tromey.com>
+
+	* symfile.c (set_objfile_default_section_offset): Use extra braces
+	around initializer.
+
 2018-07-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* s390-tdep.c (s390_displaced_step_fixup): Adjust PC for a
