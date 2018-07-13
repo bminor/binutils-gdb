@@ -1,5 +1,13 @@
 2018-07-13  Nick Clifton  <nickc@redhat.com>
 
+	* testsuite/gas/elf/missing-build-notes.s: New test.  Checks that
+	relocs are correctly generated for missing build notes.
+	* testsuite/gas/elf/missing-build-notes.d: New file.  Expected
+	output from objdump.
+	* testsuite/gas/elf/elf.exp: Run the new test.
+
+2018-07-13  Nick Clifton  <nickc@redhat.com>
+
 	* config/tc-arm.c (do_neon_mov): When converting an integer
 	immediate into a floating point value, check that the conversion
 	is valid.  Also warn if the immediate is valid as both a floating
