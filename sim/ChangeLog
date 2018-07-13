@@ -1,3 +1,7 @@
+2018-07-14  Stafford Horne  <shorne@gmail.com>
+
+	* MAINTAINERS (or1k): Add myself as or1k maintainer.
+
 2018-06-19  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* All configure.ac: Remove AC_PREREQ.
