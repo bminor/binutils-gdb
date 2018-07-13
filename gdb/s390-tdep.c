@@ -492,6 +492,9 @@ s390_displaced_step_fixup (struct gdbarch *gdbarch,
       /* Recompute saved return address in R1.  */
       regcache_cooked_write_unsigned (regs, S390_R0_REGNUM + r1,
 				      amode | (from + insnlen));
+      /* Update PC iff the instruction doesn't actually branch.  */
+      if (insn[0] == op_basr && r2 == 0)
+	regcache_write_pc (regs, from + insnlen);
     }
 
   /* Handle absolute branch instructions.  */

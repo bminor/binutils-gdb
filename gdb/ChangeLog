@@ -1,3 +1,8 @@
+2018-07-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-tdep.c (s390_displaced_step_fixup): Adjust PC for a
+	non-branching basr.
+
 2018-07-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
