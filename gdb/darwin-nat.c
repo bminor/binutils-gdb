@@ -259,6 +259,9 @@ darwin_check_new_threads (struct inferior *inf)
   darwin_inferior *darwin_inf = get_darwin_inferior (inf);
   std::vector<darwin_thread_t *> new_thread_vec;
 
+  if (darwin_inf == nullptr)
+    return;
+
   /* Get list of threads.  */
   kret = task_threads (darwin_inf->task, &thread_list, &new_nbr);
   MACH_CHECK_ERROR (kret);
@@ -374,7 +377,7 @@ find_inferior_task_it (struct inferior *inf, void *port_ptr)
 {
   darwin_inferior *priv = get_darwin_inferior (inf);
 
-  return priv->task == *(task_t *)port_ptr;
+  return priv != nullptr && priv->task == *(task_t *)port_ptr;
 }
 
 static int
@@ -403,11 +406,12 @@ darwin_find_thread (struct inferior *inf, thread_t thread)
 {
   darwin_inferior *priv = get_darwin_inferior (inf);
 
-  for (darwin_thread_t *t : priv->threads)
-    {
-      if (t->gdb_port == thread)
-	return t;
-    }
+  if (priv != nullptr)
+    for (darwin_thread_t *t : priv->threads)
+      {
+	if (t->gdb_port == thread)
+	  return t;
+      }
 
   return NULL;
 }
@@ -419,7 +423,7 @@ darwin_suspend_inferior (struct inferior *inf)
 {
   darwin_inferior *priv = get_darwin_inferior (inf);
 
-  if (!priv->suspended)
+  if (priv != nullptr && !priv->suspended)
     {
       kern_return_t kret;
 
@@ -437,7 +441,7 @@ darwin_resume_inferior (struct inferior *inf)
 {
   darwin_inferior *priv = get_darwin_inferior (inf);
 
-  if (priv->suspended)
+  if (priv != nullptr && priv->suspended)
     {
       kern_return_t kret;
 
@@ -766,11 +770,13 @@ darwin_decode_notify_message (mach_msg_header_t *hdr, struct inferior **pinf)
   inf = darwin_find_inferior_by_task (task_port);
   *pinf = inf;
 
-  darwin_inferior *priv = get_darwin_inferior (inf);
-
   /* Check message destination.  */
-  if (inf != NULL && hdr->msgh_local_port != priv->notify_port)
-    return -4;
+  if (inf != NULL)
+    {
+      darwin_inferior *priv = get_darwin_inferior (inf);
+      if (hdr->msgh_local_port != priv->notify_port)
+	return -4;
+    }
 
   return 0;
 }
@@ -882,8 +888,9 @@ darwin_resume_inferior_threads (struct inferior *inf, int step, int nsignal)
 {
   darwin_inferior *priv = get_darwin_inferior (inf);
 
-  for (darwin_thread_t *thread : priv->threads)
-    darwin_resume_thread (inf, thread, step, nsignal);
+  if (priv != nullptr)
+    for (darwin_thread_t *thread : priv->threads)
+      darwin_resume_thread (inf, thread, step, nsignal);
 }
 
 struct resume_inferior_threads_param
