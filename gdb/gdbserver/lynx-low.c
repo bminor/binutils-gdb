@@ -541,14 +541,9 @@ lynx_kill (int pid)
 /* Implement the detach target_ops method.  */
 
 static int
-lynx_detach (int pid)
+lynx_detach (process_info *process)
 {
-  ptid_t ptid = lynx_ptid_t (pid, 0);
-  struct process_info *process;
-
-  process = find_process_pid (pid);
-  if (process == NULL)
-    return -1;
+  ptid_t ptid = lynx_ptid_t (process->pid, 0);
 
   lynx_ptrace (PTRACE_DETACH, ptid, 0, 0, 0);
   the_target->mourn (process);
@@ -572,7 +567,7 @@ lynx_mourn (struct process_info *proc)
 /* Implement the join target_ops method.  */
 
 static void
-lynx_join (int pid)
+lynx_join (process_info *proc)
 {
   /* The PTRACE_DETACH is sufficient to detach from the process.
      So no need to do anything extra.  */

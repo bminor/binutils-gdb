@@ -1255,7 +1255,7 @@ handle_detach (char *own_buf)
 
   fprintf (stderr, "Detaching from process %d\n", process->pid);
   stop_tracing ();
-  if (detach_inferior (process->pid) != 0)
+  if (detach_inferior (process) != 0)
     write_enn (own_buf);
   else
     {
@@ -1281,7 +1281,7 @@ handle_detach (char *own_buf)
 	  /* If we are attached, then we can exit.  Otherwise, we
 	     need to hang around doing nothing, until the child is
 	     gone.  */
-	  join_inferior (process->pid);
+	  join_inferior (process);
 	  exit (0);
 	}
     }
@@ -3526,7 +3526,7 @@ detach_or_kill_for_exit (void)
     int pid = process->pid;
 
     if (process->attached)
-      detach_inferior (pid);
+      detach_inferior (process);
     else
       kill_inferior (pid);
 

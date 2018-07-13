@@ -1,3 +1,18 @@
+2018-07-13  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (linux_detach, linux_join): Change parameter to
+	process_info pointer instead of pid.  Adjust.
+	* lynx-low.c (lynx_detach, lynx_join): Likewise.
+	* nto-low.c (nto_detach): Likewise.
+	* spu-low.c (spu_detach, spu_join): Likewise.
+	* win32-low.c (win32_detach, win32_join): Likewise.
+	* server.c (handle_detach, detach_or_kill_for_exit): Adjust.
+	* target.h (struct target_ops) <detach, join>: Change parameter to
+	process_info pointer instead of pid.  Adjust all implementations
+	and callers.
+	(detach_inferior, join_inferior): Rename 'pid' parameter to
+	'proc'.
+
 2018-07-11  Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Paul Fertser  <fercerpav@gmail.com>

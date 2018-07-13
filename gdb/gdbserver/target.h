@@ -94,17 +94,18 @@ struct target_ops
 
   int (*kill) (int pid);
 
-  /* Detach from inferior PID. Return -1 on failure, and 0 on
+  /* Detach from process PROC.  Return -1 on failure, and 0 on
      success.  */
 
-  int (*detach) (int pid);
+  int (*detach) (process_info *proc);
 
   /* The inferior process has died.  Do what is right.  */
 
   void (*mourn) (struct process_info *proc);
 
-  /* Wait for inferior PID to exit.  */
-  void (*join) (int pid);
+  /* Wait for process PROC to exit.  */
+
+  void (*join) (process_info *proc);
 
   /* Return 1 iff the thread with process ID PID is alive.  */
 
@@ -517,8 +518,8 @@ int kill_inferior (int);
 	(*the_target->handle_new_gdb_connection) ();	 \
     } while (0)
 
-#define detach_inferior(pid) \
-  (*the_target->detach) (pid)
+#define detach_inferior(proc) \
+  (*the_target->detach) (proc)
 
 #define mythread_alive(pid) \
   (*the_target->thread_alive) (pid)
@@ -529,8 +530,8 @@ int kill_inferior (int);
 #define store_inferior_registers(regcache, regno) \
   (*the_target->store_registers) (regcache, regno)
 
-#define join_inferior(pid) \
-  (*the_target->join) (pid)
+#define join_inferior(proc) \
+  (*the_target->join) (proc)
 
 #define target_supports_non_stop() \
   (the_target->supports_non_stop ? (*the_target->supports_non_stop ) () : 0)
