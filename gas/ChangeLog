@@ -1,3 +1,14 @@
+2018-07-13  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (do_neon_mov): When converting an integer
+	immediate into a floating point value, check that the conversion
+	is valid.  Also warn if the immediate is valid as both a floating
+	point value and a bit pattern.
+	* testsuite/gas/arm/vfp-mov-enc.s: Add instructions that use
+	floating point bit patterns.
+	* testsuite/gas/arm/vfp-mov-enc.d: Add regexps for the disassembly
+	of the new insns.
+
 2018-07-12  Sudakshina Das  <sudi.das@arm.com>
 
 	* testsuite/gas/aarch64/system.s: Add test for ssbb

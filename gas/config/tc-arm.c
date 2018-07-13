@@ -16692,13 +16692,24 @@ do_neon_mov (void)
     case NS_HI:
     case NS_FI:  /* case 10 (fconsts).  */
       ldconst = "fconsts";
-      encode_fconstd:
+    encode_fconstd:
       if (!inst.operands[1].immisfloat)
 	{
+	  unsigned new_imm;
 	  /* Immediate has to fit in 8 bits so float is enough.  */
-	  float imm = (float)inst.operands[1].imm;
-	  memcpy (&inst.operands[1].imm, &imm, sizeof (float));
-	  inst.operands[1].immisfloat = 1;
+	  float imm = (float) inst.operands[1].imm;
+	  memcpy (&new_imm, &imm, sizeof (float));
+	  /* But the assembly may have been written to provide an integer
+	     bit pattern that equates to a float, so check that the
+	     conversion has worked.  */
+	  if (is_quarter_float (new_imm))
+	    {
+	      if (is_quarter_float (inst.operands[1].imm))
+		as_warn (_("immediate constant is valid both as a bit-pattern and a floating point value (using the fp value)"));
+
+	      inst.operands[1].imm = new_imm;
+	      inst.operands[1].immisfloat = 1;
+	    }
 	}
 
       if (is_quarter_float (inst.operands[1].imm))
