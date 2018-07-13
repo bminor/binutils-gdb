@@ -288,6 +288,9 @@ the native maintainer when resolving ABI issues.
 
 	ns32k		Deleted
 
+	or1k		--target=or1k-elf ,-Werror
+			Stafford Horne		shorne@gmail.com
+
 	pa		--target=hppa-elf ,-Werror
 
 	powerpc		--target=powerpc-eabi ,-Werror
