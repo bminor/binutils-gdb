@@ -522,15 +522,10 @@ lynx_wait (ptid_t ptid, struct target_waitstatus *status, int options)
 /* Implement the kill target_ops method.  */
 
 static int
-lynx_kill (int pid)
+lynx_kill (process_info *process)
 {
-  ptid_t ptid = lynx_ptid_t (pid, 0);
+  ptid_t ptid = lynx_ptid_t (process->pid, 0);
   struct target_waitstatus status;
-  struct process_info *process;
-
-  process = find_process_pid (pid);
-  if (process == NULL)
-    return -1;
 
   lynx_ptrace (PTRACE_KILL, ptid, 0, 0, 0);
   lynx_wait (ptid, &status, 0);

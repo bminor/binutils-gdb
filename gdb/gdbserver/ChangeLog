@@ -1,5 +1,22 @@
 2018-07-13  Pedro Alves  <palves@redhat.com>
 
+	* linux-low.c (linux_kill): Change parameter to process_info
+	pointer instead of pid.  Adjust.
+	* lynx-low.c (lynx_kill): Likewise.
+	* nto-low.c (nto_kill): Likewise.
+	* spu-low.c (spu_kill): Likewise.
+	* win32-low.c (win32_kill): Likewise.
+	* server.c (handle_v_kill, kill_inferior_callback)
+	(detach_or_kill_for_exit): Adjust.
+	* target.c (kill_inferior): Change parameter to process_info
+	pointer instead of pid.  Adjust.
+	* target.h (struct target_ops) <kill>: Change parameter to
+	process_info pointer instead of pid.  Adjust all implementations
+	and callers.
+	(kill_inferior): Likewise.
+
+2018-07-13  Pedro Alves  <palves@redhat.com>
+
 	* linux-low.c (linux_detach, linux_join): Change parameter to
 	process_info pointer instead of pid.  Adjust.
 	* lynx-low.c (lynx_detach, lynx_join): Likewise.

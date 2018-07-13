@@ -1385,14 +1385,9 @@ kill_one_lwp_callback (thread_info *thread, int pid)
 }
 
 static int
-linux_kill (int pid)
+linux_kill (process_info *process)
 {
-  struct process_info *process;
-  struct lwp_info *lwp;
-
-  process = find_process_pid (pid);
-  if (process == NULL)
-    return -1;
+  int pid = process->pid;
 
   /* If we're killing a running inferior, make sure it is stopped
      first, as PTRACE_KILL will not work otherwise.  */
@@ -1405,7 +1400,7 @@ linux_kill (int pid)
 
   /* See the comment in linux_kill_one_lwp.  We did not kill the first
      thread in the list, so do so now.  */
-  lwp = find_lwp_pid (ptid_t (pid));
+  lwp_info *lwp = find_lwp_pid (ptid_t (pid));
 
   if (lwp == NULL)
     {

@@ -805,15 +805,11 @@ win32_clear_inferiors (void)
   clear_inferiors ();
 }
 
-/* Kill all inferiors.  */
+/* Implementation of target_ops::kill.  */
+
 static int
-win32_kill (int pid)
+win32_kill (process_info *process)
 {
-  struct process_info *process;
-
-  if (current_process_handle == NULL)
-    return -1;
-
   TerminateProcess (current_process_handle, 0);
   for (;;)
     {
@@ -829,7 +825,6 @@ win32_kill (int pid)
 
   win32_clear_inferiors ();
 
-  process = find_process_pid (pid);
   remove_process (process);
   return 0;
 }

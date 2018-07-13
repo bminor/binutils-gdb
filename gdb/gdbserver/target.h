@@ -90,9 +90,9 @@ struct target_ops
 
   int (*attach) (unsigned long pid);
 
-  /* Kill inferior PID.  Return -1 on failure, and 0 on success.  */
+  /* Kill process PROC.  Return -1 on failure, and 0 on success.  */
 
-  int (*kill) (int pid);
+  int (*kill) (process_info *proc);
 
   /* Detach from process PROC.  Return -1 on failure, and 0 on
      success.  */
@@ -497,7 +497,7 @@ void set_target_ops (struct target_ops *);
 #define myattach(pid) \
   (*the_target->attach) (pid)
 
-int kill_inferior (int);
+int kill_inferior (process_info *proc);
 
 #define target_supports_fork_events() \
   (the_target->supports_fork_events ? \

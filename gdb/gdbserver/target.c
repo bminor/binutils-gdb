@@ -332,11 +332,11 @@ target_pid_to_str (ptid_t ptid)
 }
 
 int
-kill_inferior (int pid)
+kill_inferior (process_info *proc)
 {
-  gdb_agent_about_to_close (pid);
+  gdb_agent_about_to_close (proc->pid);
 
-  return (*the_target->kill) (pid);
+  return (*the_target->kill) (proc);
 }
 
 /* Target can do hardware single step.  */

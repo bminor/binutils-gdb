@@ -326,12 +326,10 @@ spu_attach (unsigned long  pid)
 
 /* Kill the inferior process.  */
 static int
-spu_kill (int pid)
+spu_kill (process_info *process)
 {
   int status, ret;
-  struct process_info *process = find_process_pid (pid);
-  if (process == NULL)
-    return -1;
+  int pid = process->pid;
 
   ptrace (PTRACE_KILL, pid, 0, 0);
 

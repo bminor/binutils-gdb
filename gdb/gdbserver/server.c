@@ -3080,7 +3080,10 @@ handle_v_kill (char *own_buf)
     pid = strtol (p, NULL, 16);
   else
     pid = signal_pid;
-  if (pid != 0 && kill_inferior (pid) == 0)
+
+  process_info *proc = find_process_pid (pid);
+
+  if (proc != nullptr && kill_inferior (proc) == 0)
     {
       cs.last_status.kind = TARGET_WAITKIND_SIGNALLED;
       cs.last_status.value.sig = GDB_SIGNAL_KILL;
@@ -3481,10 +3484,8 @@ gdbserver_show_disableable (FILE *stream)
 static void
 kill_inferior_callback (process_info *process)
 {
-  int pid = process->pid;
-
-  kill_inferior (pid);
-  discard_queued_stop_replies (ptid_t (pid));
+  kill_inferior (process);
+  discard_queued_stop_replies (ptid_t (process->pid));
 }
 
 /* Call this when exiting gdbserver with possible inferiors that need
@@ -3528,7 +3529,7 @@ detach_or_kill_for_exit (void)
     if (process->attached)
       detach_inferior (process);
     else
-      kill_inferior (pid);
+      kill_inferior (process);
 
     discard_queued_stop_replies (ptid_t (pid));
   });
