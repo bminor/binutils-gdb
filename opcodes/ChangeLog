@@ -1,8 +1,12 @@
 2018-07-14  Nick Clifton  <nickc@redhat.com>
 
-	2.31 Release point.
 	* configure: Regenerate.
 	* po/opcodes.pot: Regenerate.
+
+2018-07-14  Nick Clifton  <nickc@redhat.com>
+
+	2.31 Release point.
+	* configure: Regenerate.
 
 2018-07-12  Sudakshina Das  <sudi.das@arm.com>
 
