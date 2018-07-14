@@ -1898,10 +1898,13 @@ Symbol_table::define_special_symbol(const char** pname, const char** pversion,
 	  add_to_table = true;
 	  add_loc = ins.first;
 
-	  if (is_default_version && !insdefault.second)
+	  if (is_default_version
+	      && !insdefault.second
+	      && insdefault.first->second->version() == NULL)
 	    {
 	      // We are adding NAME/VERSION, and it is the default
-	      // version.  We already have an entry for NAME/NULL.
+	      // version.  We already have an entry for NAME/NULL
+	      // that does not already have a version.
 	      oldsym = insdefault.first->second;
 	      *resolve_oldsym = true;
 	    }

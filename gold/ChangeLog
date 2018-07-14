@@ -1,3 +1,14 @@
+2018-07-14  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/23409
+	* symtab.cc (Symbol_table::define_special_symbol): Add check for
+	version name on existing symbol.
+	* testsuite/Makefile.am (ver_test_pr23409): New test case.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/ver_test_pr23409.sh: New test script.
+	* testsuite/ver_test_pr23409_1.script: New version script.
+	* testsuite/ver_test_pr23409_2.script: New version script.
+
 2018-07-11  Franz Sirl  <franz.sirl-kernel@lauterbach.com>
 
 	* main.cc (main): Print m.arena as long long.
