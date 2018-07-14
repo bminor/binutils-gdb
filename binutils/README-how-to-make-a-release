@@ -155,29 +155,37 @@ When the time comes to actually make the release....
 
 
   20. Make sure that the branch sources still build, test and install 
-      correctly.
+      correctly.  Make sure that the sources are clean, without any
+      patch files (.reg .orig *~) left over.
+
+         cd <branch>
+	 cvsclean | xargs rm
 
   21. Update the release number in bfd/version.m4 on the release
       branch to a whole new minor version number, without a point
       value.  Eg "2.29.90" becomes "2.30".  Change bfd/development.sh
       to set the value to "false".  Regenerate the configure and
-      makefiles.  Add changelog entries for the updates and add a
-      "this-is-the-2.XX-release" commit and commit.  Make sure to
+      makefiles.  Add ChangeLog entries for the updates and add a
+      "this-is-the-2.XX-release" comment and commit.  Make sure to
       include the .gmo files.
 
   22. Check that your file creation mask will create the
       correct file permissions.  Eg:
 
-	    umask 022
+      	    % umask
+	    22
+
+      Remove any spurious autom4te.cache files left over from the
+      reconfiguring:
+
+            % find . -depth -name autom4te.cache -exec rm -r {} \;
 
   23. Create the release tarballs:
   
-            ./src-release -b -g -l -x binutils
+            ./src-release.sh -b -g -l -x binutils
 
   24. Check that the files in the tarballs have the correct
-      permissions.  FIXME: The tarballs will contain spurious
-      autom4te.cache directories which could be removed to reduce
-      their size.
+      permissions. 
 
   25. Sanity check the release on x86_64-pc-linux-gnu by building and
       running the testsuite.  Make the source directory read-only
@@ -193,15 +201,7 @@ When the time comes to actually make the release....
         NB/ If you do sign the binaries make sure to use a key
 	that has been published with the FSF.
 
-  27. Clean up the source tree.  (Use "git status" to find new
-      files, and remove them).
-
-  28. Edit bfd/development.sh on the branch and set
-      "development=true".  Also bump the version by adding a trailing 
-      .0, so that the date suffix keeps the version lower than the
-      trunk version.  Regenerate files.  Commit these changes.
-
-  29. Upload the tarballs to ftp.gnu.org.
+  27. Upload the tarballs to ftp.gnu.org.
 
        gnupload --to ftp.gnu.org:binutils binutils-X.XX.tar.*
 
@@ -210,7 +210,7 @@ When the time comes to actually make the release....
       Check for an email response from the upload.  If necessary
       fix any problems.
 
-  30. Upload the tarballs (and signatures) to sourceware.org:
+  28. Upload the tarballs (and signatures) to sourceware.org:
 
        sftp sourceware.org
          cd /sourceware/ftp/pub/binutils/releases
@@ -221,7 +221,7 @@ When the time comes to actually make the release....
       FIXME: Should the signatures (created by the gnupload script in
       step 29) be uploaded as well ?
 
-  31. Update web pages.  For sourceware.org:
+  29. Update web pages.  For sourceware.org:
 
       Create a new documentation folder on the sourceware.org web
       pages as /sourceware/www/sourceware/htdocs/binutils/docs-X.XX.
@@ -230,13 +230,14 @@ When the time comes to actually make the release....
       index.html file and then edit the docs link to point to the new
       docs-X.XX directory.
       
-      Update the sourceware.org site to point to the new documentation
-      and  mention the new version.  
+      Update the index.html file in the directory containing the
+      docs-X.XX entries to point to the new documentation and mention
+      the new version.
 
       For the www.gnu.org site you have to email webmasters@gnu.org
       and ask them to make the change(s).
 
-  32. Send emails to binutils@sourceware.org, info-gnu@gnu.org and
+  30. Send emails to binutils@sourceware.org, info-gnu@gnu.org and
       David Edelsohn <dje.gcc@gmail.com> announcing the new release.
       Sign the email and include the checksum.
       (The email to Davis is so that he can update the GNU Toolchain
@@ -262,6 +263,19 @@ When the time comes to actually make the release....
 
       --------------------------------------------------------------------------
 
+  31. Clean up the source tree.  (Use "git status" to find new
+      files, and remove them).
+
+  32. Edit bfd/development.sh on the branch and set
+      "development=true".  Also bump the version in bfd/version.m4 by
+      adding a trailing .0, so that the date suffix keeps the version
+      lower than the trunk version.  Regenerate files.  Commit these
+      changes.
+
+  33. Email the binutils list telling everyone that the 2.31 branch
+      is now open for business as usual and that patched no longer
+      need special approval.
+ 
 -------------------------------------------------
 How to perform a point release.
 -------------------------------------------------
