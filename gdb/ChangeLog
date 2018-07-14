@@ -1,3 +1,8 @@
+2018-07-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* symfile.c (set_objfile_default_section_offset): Remove struct
+	keyword.
+
 2018-07-25  Alan Hayward  <alan.hayward@arm.com>
 
 	* target-descriptions.c (tdesc_register_bitsize): Rename.
