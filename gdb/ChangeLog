@@ -1,3 +1,8 @@
+2018-07-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* symfile.c (set_objfile_default_section_offset): Remove struct
+	keyword.
+
 2018-07-14  Stafford Horne  <shorne@gmail.com>
 
 	* (Responsible Maintainers): Add myself as or1k maintainer.
