@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2018-06-24 19:41+0100\n"
+"POT-Creation-Date: 2018-07-14 19:00+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,12 +26,12 @@ msgid "specified register cannot be written to"
 msgstr ""
 
 #. Invalid option.
-#: aarch64-dis.c:94 arc-dis.c:782 arm-dis.c:6158
+#: aarch64-dis.c:94 arc-dis.c:782 arm-dis.c:6162
 #, c-format
 msgid "unrecognised disassembler option: %s"
 msgstr ""
 
-#: aarch64-dis.c:3362
+#: aarch64-dis.c:3371
 #, c-format
 msgid ""
 "\n"
@@ -39,42 +39,42 @@ msgid ""
 "with the -M switch (multiple options should be separated by commas):\n"
 msgstr ""
 
-#: aarch64-dis.c:3366
+#: aarch64-dis.c:3375
 #, c-format
 msgid ""
 "\n"
 "  no-aliases         Don't print instruction aliases.\n"
 msgstr ""
 
-#: aarch64-dis.c:3369
+#: aarch64-dis.c:3378
 #, c-format
 msgid ""
 "\n"
 "  aliases            Do print instruction aliases.\n"
 msgstr ""
 
-#: aarch64-dis.c:3372
+#: aarch64-dis.c:3381
 #, c-format
 msgid ""
 "\n"
 "  no-notes         Don't print instruction notes.\n"
 msgstr ""
 
-#: aarch64-dis.c:3375
+#: aarch64-dis.c:3384
 #, c-format
 msgid ""
 "\n"
 "  notes            Do print instruction notes.\n"
 msgstr ""
 
-#: aarch64-dis.c:3379
+#: aarch64-dis.c:3388
 #, c-format
 msgid ""
 "\n"
 "  debug_dump         Temp switch for debug trace.\n"
 msgstr ""
 
-#: aarch64-dis.c:3383 mips-dis.c:2612 mips-dis.c:2620 mips-dis.c:2622
+#: aarch64-dis.c:3392 mips-dis.c:2612 mips-dis.c:2620 mips-dis.c:2622
 #: nfp-dis.c:2981 riscv-dis.c:509
 #, c-format
 msgid "\n"
@@ -283,11 +283,11 @@ msgstr ""
 msgid "'ROR' operator not allowed"
 msgstr ""
 
-#: aarch64-opc.c:3583
+#: aarch64-opc.c:3584
 msgid "reading from a write-only register."
 msgstr ""
 
-#: aarch64-opc.c:3585
+#: aarch64-opc.c:3586
 msgid "writing to a read-only register."
 msgstr ""
 
@@ -521,48 +521,48 @@ msgstr ""
 msgid "invalid position, should be one of: 0,4,8,...124."
 msgstr ""
 
-#: arm-dis.c:3229
+#: arm-dis.c:3233
 msgid "Select raw register names"
 msgstr ""
 
-#: arm-dis.c:3231
+#: arm-dis.c:3235
 msgid "Select register names used by GCC"
 msgstr ""
 
-#: arm-dis.c:3233
+#: arm-dis.c:3237
 msgid "Select register names used in ARM's ISA documentation"
 msgstr ""
 
-#: arm-dis.c:3235
+#: arm-dis.c:3239
 msgid "Assume all insns are Thumb insns"
 msgstr ""
 
-#: arm-dis.c:3236
+#: arm-dis.c:3240
 msgid "Examine preceding label to determine an insn's type"
 msgstr ""
 
-#: arm-dis.c:3237
+#: arm-dis.c:3241
 msgid "Select register names used in the APCS"
 msgstr ""
 
-#: arm-dis.c:3239
+#: arm-dis.c:3243
 msgid "Select register names used in the ATPCS"
 msgstr ""
 
-#: arm-dis.c:3241
+#: arm-dis.c:3245
 msgid "Select special register names used in the ATPCS"
 msgstr ""
 
-#: arm-dis.c:3639
+#: arm-dis.c:3643
 msgid "<illegal precision>"
 msgstr ""
 
-#: arm-dis.c:6149
+#: arm-dis.c:6153
 #, c-format
 msgid "unrecognised register name set: %s"
 msgstr ""
 
-#: arm-dis.c:6855
+#: arm-dis.c:6859
 #, c-format
 msgid ""
 "\n"
@@ -1763,7 +1763,7 @@ msgid ""
 "\n"
 "  no-pc\t\t    Don't print program counter prefix.\n"
 "  ctx4\t\t    Force disassembly using 4-context mode.\n"
-"  ctx8\t\t    Force 8-context mode, takes presedence.\""
+"  ctx8\t\t    Force 8-context mode, takes precedence."
 msgstr ""
 
 #: nios2-dis.c:135

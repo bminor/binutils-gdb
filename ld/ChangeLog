@@ -1,3 +1,8 @@
+2018-07-14  Nick Clifton  <nickc@redhat.com>
+
+	2.31 Release point.
+	* configure: Regenerate.
+
 2018-07-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23372

@@ -1,3 +1,11 @@
+2018-07-14  Nick Clifton  <nickc@redhat.com>
+
+	2.31 Release point.
+	* version.m4: Update to 2.31.
+	* development.sh: Set to false.
+	* configure: Regenerate.
+	* po/bfd.pot: Regenerate.
+
 2018-07-03  Alan Modra  <amodra@gmail.com>
 
 	PR 17550

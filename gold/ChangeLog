@@ -1,3 +1,8 @@
+2018-07-14  Nick Clifton  <nickc@redhat.com>
+
+	2.31 Release point.
+	* po/gold.pot: Regenerate.
+
 2018-07-11  Franz Sirl  <franz.sirl-kernel@lauterbach.com>
 
 	* main.cc: Print m.arena as long long.

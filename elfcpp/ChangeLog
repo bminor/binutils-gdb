@@ -1,3 +1,7 @@
+2018-07-14  Nick Clifton  <nickc@redhat.com>
+
+	2.31 Release point.
+
 2018-07-06  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.h (Tag_GNU_Power_ABI_FP): Define.

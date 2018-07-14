@@ -1,3 +1,9 @@
+2018-07-14  Nick Clifton  <nickc@redhat.com>
+
+	2.31 Release point.
+	* configure: Regenerate.
+	* po/gas.pot: Regenerate.
+
 2018-07-13  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (do_neon_mov): When converting an integer
