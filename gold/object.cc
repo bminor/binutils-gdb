@@ -1742,9 +1742,13 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
 		  out_section_offsets[i] = invalid_address;
 		}
 	      else if (this->is_deferred_layout())
-		this->deferred_layout_.push_back(
-		    Deferred_layout(i, name, sh_type, pshdrs,
-				    reloc_shndx[i], reloc_type[i]));
+		{
+		  out_sections[i] = reinterpret_cast<Output_section*>(2);
+		  out_section_offsets[i] = invalid_address;
+		  this->deferred_layout_.push_back(
+		      Deferred_layout(i, name, sh_type, pshdrs,
+				      reloc_shndx[i], reloc_type[i]));
+		}
 	      else
 		eh_frame_sections.push_back(i);
 	      continue;

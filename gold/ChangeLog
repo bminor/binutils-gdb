@@ -1,5 +1,13 @@
 2018-07-14  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/23397
+	* object.cc (Sized_relobj_file::do_layout): Mark section as deferred.
+	* testsuite/Makefile.am (plugin_test_1): Add --emit-relocs option to
+	existing test case.
+	* testsuite/Makefile.in: Regenerate.
+
+2018-07-14  Cary Coutant  <ccoutant@gmail.com>
+
 	PR gold/23409
 	* symtab.cc (Symbol_table::define_special_symbol): Add check for
 	version name on existing symbol.
