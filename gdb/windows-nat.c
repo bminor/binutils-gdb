@@ -2681,13 +2681,13 @@ windows_nat_target::create_inferior (const char *exec_file,
 
   if (tty >= 0)
     {
-      close (tty);
+      ::close (tty);
       dup2 (ostdin, 0);
       dup2 (ostdout, 1);
       dup2 (ostderr, 2);
-      close (ostdin);
-      close (ostdout);
-      close (ostderr);
+      ::close (ostdin);
+      ::close (ostdout);
+      ::close (ostderr);
     }
 #else  /* !__CYGWIN__ */
   allargs_len = strlen (allargs);
