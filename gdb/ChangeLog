@@ -209,10 +209,11 @@
 
 2018-07-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
-	* ia64-tdep.c (get_reg_name, get_fpreg_name, get_saveloc_name,
-	is_signal_frame_name, step_name, init_remote_name,
-	create_addr_space_name, destroy_addr_space_name,
-	search_unwind_table_name, find_dyn_list_name): Constify.
+	* ia64-libunwind-tdep.c (get_reg_name, get_fpreg_name,
+	get_saveloc_name, is_signal_frame_name, step_name,
+	init_remote_name, create_addr_space_name,
+	destroy_addr_space_name, search_unwind_table_name,
+	find_dyn_list_name): Constify.
 
 2018-07-05  Simon Marchi  <simon.marchi@polymtl.ca>
 
