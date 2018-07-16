@@ -64,6 +64,11 @@ movntiw %ax, (%eax)
 	add (%eiz), %eax
 	add (%eax), %eiz
 
+	mov %cr0, %di
+	mov %ax, %cr7
+	mov %cr0, %bh
+	mov %al, %cr7
+
 	.intel_syntax noprefix
 	cvtsi2ss xmm1,QWORD PTR [eax]
 	cvtsi2sd xmm1,QWORD PTR [eax]

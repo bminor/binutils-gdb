@@ -1,3 +1,19 @@
+2018-07-16  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (match_reg_size): Split second parameter
+	into two.
+	(match_simd_size): Likewise.
+	(match_mem_size): Likewise.
+	(MATCH_STRAIGHT, MATCH_REVERSE): Define.
+	(operand_size_match): Change return type. New local variable
+	"match". Always check for reverse match when opcode_modifier.d
+	is set.
+	(match_template) New local variable "size_match". Skip further
+	matching if operand_size_match() did not report a respective
+	match.
+	* testsuite/gas/i386/inval.s: Add control register reads/writes.
+	* testsuite/gas/i386/inval.l: Adjust expectations.
+
 2018-07-13  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/gas/elf/missing-build-notes.s: New test.  Checks that
