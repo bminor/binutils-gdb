@@ -1,3 +1,7 @@
+2018-07-16  Jim Wilson  <jimw@sifive.com>
+
+	* riscv-tdep.c (riscv_gdbarch_init): Call gdbarch_init_osabi.
+
 2018-07-16  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* ia64-libunwind-tdep.c (libunwind_frame_cache): Remove unused

@@ -2569,6 +2569,9 @@ riscv_gdbarch_init (struct gdbarch_info info,
     user_reg_add (gdbarch, riscv_register_aliases[i].name,
 		  value_of_riscv_user_reg, &riscv_register_aliases[i].regnum);
 
+  /* Hook in OS ABI-specific overrides, if they have been registered.  */
+  gdbarch_init_osabi (info, gdbarch);
+
   return gdbarch;
 }
 
