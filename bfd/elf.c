@@ -11629,8 +11629,9 @@ bfd_get_elf_phdrs (bfd *abfd, void *phdrs)
     }
 
   num_phdrs = elf_elfheader (abfd)->e_phnum;
-  memcpy (phdrs, elf_tdata (abfd)->phdr,
-	  num_phdrs * sizeof (Elf_Internal_Phdr));
+  if (num_phdrs != 0)
+    memcpy (phdrs, elf_tdata (abfd)->phdr,
+	    num_phdrs * sizeof (Elf_Internal_Phdr));
 
   return num_phdrs;
 }

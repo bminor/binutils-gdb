@@ -1,3 +1,7 @@
+2018-07-23  Tom Tromey  <tom@tromey.com>
+
+	* elf.c (bfd_get_elf_phdrs): Don't call memcpy with size 0.
+
 2018-07-21  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* elf32-arm.c (elf32_arm_final_link_relocate) <R_ARM_GOT32>: Small
