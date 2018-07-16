@@ -1,5 +1,17 @@
 2018-07-16  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* ia64-libunwind-tdep.c (libunwind_frame_cache): Remove unused
+	variable.
+	(libunwind_frame_sniffer): Likewise.
+	(libunwind_frame_prev_register): Likewise.
+	(libunwind_sigtramp_frame_sniffer): Likewise.
+	* ia64-tdep.c (ia64_access_reg): Likewise.
+	(ia64_access_rse_reg): Likewise.
+	(ia64_libunwind_sigtramp_frame_this_id): Likewise.
+	* ia64-vms-tdep.c (ia64_vms_find_proc_info_x): Likewise.
+
+2018-07-16  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* ia64-vms-tdep.c (ia64_vms_find_proc_info_x): Add cast.
 
 2018-07-16  Simon Marchi  <simon.marchi@ericsson.com>
