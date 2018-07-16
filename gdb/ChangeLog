@@ -1,3 +1,9 @@
+2018-07-16  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* ia64-tdep.c (ktab_buf): New global.
+	(getunwind_table): Return a gdb::optional<gdb::byte_vector>.
+	(get_kernel_table): Adjust.
+
 2018-07-16  Tom Tromey  <tom@tromey.com>
 
 	* xcoffread.c (read_xcoff_symtab): Use outermost_context_p.
