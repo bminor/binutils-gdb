@@ -1,5 +1,9 @@
 2018-07-16  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* ia64-vms-tdep.c (ia64_vms_find_proc_info_x): Add cast.
+
+2018-07-16  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* remote-sim.c (gdbsim_target::close,
 	gdbsim_target::mourn_inferior): Remove unused variables.
 

@@ -76,7 +76,7 @@ ia64_vms_find_proc_info_x (unw_addr_space_t as, unw_word_t ip,
   pi->unwind_info = xmalloc (pi->unwind_info_size);
 
   res = target_read_memory (table_addr + 8,
-                            pi->unwind_info, pi->unwind_info_size);
+                            (gdb_byte *) pi->unwind_info, pi->unwind_info_size);
   if (res != 0)
     {
       xfree (pi->unwind_info);
