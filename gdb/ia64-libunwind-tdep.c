@@ -178,7 +178,7 @@ libunwind_frame_cache (struct frame_info *this_frame, void **this_cache)
   struct libunwind_frame_cache *cache;
   struct libunwind_descr *descr;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  int i, ret;
+  int ret;
 
   if (*this_cache)
     return (struct libunwind_frame_cache *) *this_cache;
@@ -270,7 +270,7 @@ libunwind_frame_sniffer (const struct frame_unwind *self,
   unw_addr_space_t as;
   struct libunwind_descr *descr;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  int i, ret;
+  int ret;
 
   /* To test for libunwind unwind support, initialize a cursor to
      the current frame and try to back up.  We use this same method
@@ -324,12 +324,9 @@ libunwind_frame_prev_register (struct frame_info *this_frame,
 {
   struct libunwind_frame_cache *cache =
     libunwind_frame_cache (this_frame, this_cache);
-  struct gdbarch *gdbarch = get_frame_arch (this_frame);
 
-  void *ptr;
-  unw_cursor_t *c;
   unw_save_loc_t sl;
-  int i, ret;
+  int ret;
   unw_word_t intval;
   unw_fpreg_t fpval;
   unw_regnum_t uw_regnum;
@@ -414,7 +411,7 @@ libunwind_sigtramp_frame_sniffer (const struct frame_unwind *self,
   unw_addr_space_t as;
   struct libunwind_descr *descr;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  int i, ret;
+  int ret;
 
   /* To test for libunwind unwind support, initialize a cursor to the
      current frame and try to back up.  We use this same method when

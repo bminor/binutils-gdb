@@ -2484,8 +2484,6 @@ ia64_access_reg (unw_addr_space_t as, unw_regnum_t uw_regnum, unw_word_t *val,
   unw_word_t bsp, sof, cfm, psr, ip;
   struct frame_info *this_frame = (struct frame_info *) arg;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  long new_sof, old_sof;
   
   /* We never call any libunwind routines that need to write registers.  */
   gdb_assert (!write);
@@ -2557,8 +2555,6 @@ ia64_access_rse_reg (unw_addr_space_t as, unw_regnum_t uw_regnum,
   unw_word_t bsp, sof, cfm, psr, ip;
   struct regcache *regcache = (struct regcache *) arg;
   struct gdbarch *gdbarch = regcache->arch ();
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  long new_sof, old_sof;
   
   /* We never call any libunwind routines that need to write registers.  */
   gdb_assert (!write);
@@ -3032,7 +3028,6 @@ ia64_libunwind_sigtramp_frame_this_id (struct frame_info *this_frame,
   gdb_byte buf[8];
   CORE_ADDR bsp;
   struct frame_id id = outer_frame_id;
-  CORE_ADDR prev_ip;
 
   libunwind_frame_this_id (this_frame, this_cache, &id);
   if (frame_id_eq (id, outer_frame_id))
