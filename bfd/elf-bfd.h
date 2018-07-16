@@ -2569,6 +2569,32 @@ extern char *elfcore_write_ppc_vmx
   (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_ppc_vsx
   (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_ppc_tar
+  (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_ppc_ppr
+  (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_ppc_dscr
+  (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_ppc_ebb
+  (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_ppc_pmu
+  (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_ppc_tm_cgpr
+  (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_ppc_tm_cfpr
+  (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_ppc_tm_cvmx
+  (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_ppc_tm_cvsx
+  (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_ppc_tm_spr
+  (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_ppc_tm_ctar
+  (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_ppc_tm_cppr
+  (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_ppc_tm_cdscr
+  (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_s390_timer
   (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_s390_todcmp

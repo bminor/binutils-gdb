@@ -9239,6 +9239,84 @@ elfcore_grok_ppc_vsx (bfd *abfd, Elf_Internal_Note *note)
 }
 
 static bfd_boolean
+elfcore_grok_ppc_tar (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-ppc-tar", note);
+}
+
+static bfd_boolean
+elfcore_grok_ppc_ppr (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-ppc-ppr", note);
+}
+
+static bfd_boolean
+elfcore_grok_ppc_dscr (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-ppc-dscr", note);
+}
+
+static bfd_boolean
+elfcore_grok_ppc_ebb (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-ppc-ebb", note);
+}
+
+static bfd_boolean
+elfcore_grok_ppc_pmu (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-ppc-pmu", note);
+}
+
+static bfd_boolean
+elfcore_grok_ppc_tm_cgpr (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-ppc-tm-cgpr", note);
+}
+
+static bfd_boolean
+elfcore_grok_ppc_tm_cfpr (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-ppc-tm-cfpr", note);
+}
+
+static bfd_boolean
+elfcore_grok_ppc_tm_cvmx (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-ppc-tm-cvmx", note);
+}
+
+static bfd_boolean
+elfcore_grok_ppc_tm_cvsx (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-ppc-tm-cvsx", note);
+}
+
+static bfd_boolean
+elfcore_grok_ppc_tm_spr (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-ppc-tm-spr", note);
+}
+
+static bfd_boolean
+elfcore_grok_ppc_tm_ctar (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-ppc-tm-ctar", note);
+}
+
+static bfd_boolean
+elfcore_grok_ppc_tm_cppr (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-ppc-tm-cppr", note);
+}
+
+static bfd_boolean
+elfcore_grok_ppc_tm_cdscr (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-ppc-tm-cdscr", note);
+}
+
+static bfd_boolean
 elfcore_grok_s390_high_gprs (bfd *abfd, Elf_Internal_Note *note)
 {
   return elfcore_make_note_pseudosection (abfd, ".reg-s390-high-gprs", note);
@@ -9722,6 +9800,97 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
 	return elfcore_grok_ppc_vsx (abfd, note);
       else
 	return TRUE;
+
+    case NT_PPC_TAR:
+      if (note->namesz == 6
+          && strcmp (note->namedata, "LINUX") == 0)
+        return elfcore_grok_ppc_tar (abfd, note);
+      else
+        return TRUE;
+
+    case NT_PPC_PPR:
+      if (note->namesz == 6
+          && strcmp (note->namedata, "LINUX") == 0)
+        return elfcore_grok_ppc_ppr (abfd, note);
+      else
+        return TRUE;
+
+    case NT_PPC_DSCR:
+      if (note->namesz == 6
+          && strcmp (note->namedata, "LINUX") == 0)
+        return elfcore_grok_ppc_dscr (abfd, note);
+      else
+        return TRUE;
+
+    case NT_PPC_EBB:
+      if (note->namesz == 6
+          && strcmp (note->namedata, "LINUX") == 0)
+        return elfcore_grok_ppc_ebb (abfd, note);
+      else
+        return TRUE;
+
+    case NT_PPC_PMU:
+      if (note->namesz == 6
+          && strcmp (note->namedata, "LINUX") == 0)
+        return elfcore_grok_ppc_pmu (abfd, note);
+      else
+        return TRUE;
+
+    case NT_PPC_TM_CGPR:
+      if (note->namesz == 6
+          && strcmp (note->namedata, "LINUX") == 0)
+        return elfcore_grok_ppc_tm_cgpr (abfd, note);
+      else
+        return TRUE;
+
+    case NT_PPC_TM_CFPR:
+      if (note->namesz == 6
+          && strcmp (note->namedata, "LINUX") == 0)
+        return elfcore_grok_ppc_tm_cfpr (abfd, note);
+      else
+        return TRUE;
+
+    case NT_PPC_TM_CVMX:
+      if (note->namesz == 6
+          && strcmp (note->namedata, "LINUX") == 0)
+        return elfcore_grok_ppc_tm_cvmx (abfd, note);
+      else
+        return TRUE;
+
+    case NT_PPC_TM_CVSX:
+      if (note->namesz == 6
+          && strcmp (note->namedata, "LINUX") == 0)
+        return elfcore_grok_ppc_tm_cvsx (abfd, note);
+      else
+        return TRUE;
+
+    case NT_PPC_TM_SPR:
+      if (note->namesz == 6
+          && strcmp (note->namedata, "LINUX") == 0)
+        return elfcore_grok_ppc_tm_spr (abfd, note);
+      else
+        return TRUE;
+
+    case NT_PPC_TM_CTAR:
+      if (note->namesz == 6
+          && strcmp (note->namedata, "LINUX") == 0)
+        return elfcore_grok_ppc_tm_ctar (abfd, note);
+      else
+        return TRUE;
+
+    case NT_PPC_TM_CPPR:
+      if (note->namesz == 6
+          && strcmp (note->namedata, "LINUX") == 0)
+        return elfcore_grok_ppc_tm_cppr (abfd, note);
+      else
+        return TRUE;
+
+    case NT_PPC_TM_CDSCR:
+      if (note->namesz == 6
+          && strcmp (note->namedata, "LINUX") == 0)
+        return elfcore_grok_ppc_tm_cdscr (abfd, note);
+      else
+        return TRUE;
 
     case NT_S390_HIGH_GPRS:
       if (note->namesz == 6
@@ -10830,6 +10999,162 @@ elfcore_write_ppc_vsx (bfd *abfd,
 			     note_name, NT_PPC_VSX, ppc_vsx, size);
 }
 
+char *
+elfcore_write_ppc_tar (bfd *abfd,
+                       char *buf,
+                       int *bufsiz,
+                       const void *ppc_tar,
+                       int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+                             note_name, NT_PPC_TAR, ppc_tar, size);
+}
+
+char *
+elfcore_write_ppc_ppr (bfd *abfd,
+                       char *buf,
+                       int *bufsiz,
+                       const void *ppc_ppr,
+                       int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+                             note_name, NT_PPC_PPR, ppc_ppr, size);
+}
+
+char *
+elfcore_write_ppc_dscr (bfd *abfd,
+                        char *buf,
+                        int *bufsiz,
+                        const void *ppc_dscr,
+                        int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+                             note_name, NT_PPC_DSCR, ppc_dscr, size);
+}
+
+char *
+elfcore_write_ppc_ebb (bfd *abfd,
+                       char *buf,
+                       int *bufsiz,
+                       const void *ppc_ebb,
+                       int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+                             note_name, NT_PPC_EBB, ppc_ebb, size);
+}
+
+char *
+elfcore_write_ppc_pmu (bfd *abfd,
+                       char *buf,
+                       int *bufsiz,
+                       const void *ppc_pmu,
+                       int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+                             note_name, NT_PPC_PMU, ppc_pmu, size);
+}
+
+char *
+elfcore_write_ppc_tm_cgpr (bfd *abfd,
+                           char *buf,
+                           int *bufsiz,
+                           const void *ppc_tm_cgpr,
+                           int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+                             note_name, NT_PPC_TM_CGPR, ppc_tm_cgpr, size);
+}
+
+char *
+elfcore_write_ppc_tm_cfpr (bfd *abfd,
+                           char *buf,
+                           int *bufsiz,
+                           const void *ppc_tm_cfpr,
+                           int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+                             note_name, NT_PPC_TM_CFPR, ppc_tm_cfpr, size);
+}
+
+char *
+elfcore_write_ppc_tm_cvmx (bfd *abfd,
+                           char *buf,
+                           int *bufsiz,
+                           const void *ppc_tm_cvmx,
+                           int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+                             note_name, NT_PPC_TM_CVMX, ppc_tm_cvmx, size);
+}
+
+char *
+elfcore_write_ppc_tm_cvsx (bfd *abfd,
+                           char *buf,
+                           int *bufsiz,
+                           const void *ppc_tm_cvsx,
+                           int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+                             note_name, NT_PPC_TM_CVSX, ppc_tm_cvsx, size);
+}
+
+char *
+elfcore_write_ppc_tm_spr (bfd *abfd,
+                          char *buf,
+                          int *bufsiz,
+                          const void *ppc_tm_spr,
+                          int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+                             note_name, NT_PPC_TM_SPR, ppc_tm_spr, size);
+}
+
+char *
+elfcore_write_ppc_tm_ctar (bfd *abfd,
+                           char *buf,
+                           int *bufsiz,
+                           const void *ppc_tm_ctar,
+                           int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+                             note_name, NT_PPC_TM_CTAR, ppc_tm_ctar, size);
+}
+
+char *
+elfcore_write_ppc_tm_cppr (bfd *abfd,
+                           char *buf,
+                           int *bufsiz,
+                           const void *ppc_tm_cppr,
+                           int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+                             note_name, NT_PPC_TM_CPPR, ppc_tm_cppr, size);
+}
+
+char *
+elfcore_write_ppc_tm_cdscr (bfd *abfd,
+                            char *buf,
+                            int *bufsiz,
+                            const void *ppc_tm_cdscr,
+                            int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+                             note_name, NT_PPC_TM_CDSCR, ppc_tm_cdscr, size);
+}
+
 static char *
 elfcore_write_s390_high_gprs (bfd *abfd,
 			      char *buf,
@@ -11070,6 +11395,32 @@ elfcore_write_register_note (bfd *abfd,
     return elfcore_write_ppc_vmx (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-ppc-vsx") == 0)
     return elfcore_write_ppc_vsx (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-ppc-tar") == 0)
+    return elfcore_write_ppc_tar (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-ppc-ppr") == 0)
+    return elfcore_write_ppc_ppr (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-ppc-dscr") == 0)
+    return elfcore_write_ppc_dscr (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-ppc-ebb") == 0)
+    return elfcore_write_ppc_ebb (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-ppc-pmu") == 0)
+    return elfcore_write_ppc_pmu (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-ppc-tm-cgpr") == 0)
+    return elfcore_write_ppc_tm_cgpr (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-ppc-tm-cfpr") == 0)
+    return elfcore_write_ppc_tm_cfpr (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-ppc-tm-cvmx") == 0)
+    return elfcore_write_ppc_tm_cvmx (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-ppc-tm-cvsx") == 0)
+    return elfcore_write_ppc_tm_cvsx (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-ppc-tm-spr") == 0)
+    return elfcore_write_ppc_tm_spr (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-ppc-tm-ctar") == 0)
+    return elfcore_write_ppc_tm_ctar (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-ppc-tm-cppr") == 0)
+    return elfcore_write_ppc_tm_cppr (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-ppc-tm-cdscr") == 0)
+    return elfcore_write_ppc_tm_cdscr (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-s390-high-gprs") == 0)
     return elfcore_write_s390_high_gprs (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-s390-timer") == 0)

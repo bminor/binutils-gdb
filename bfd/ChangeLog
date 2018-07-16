@@ -1,3 +1,47 @@
+2018-07-16  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* elf-bfd.h (elfcore_write_ppc_tar): Add prototype.
+	(elfcore_write_ppc_ppr): Likewise.
+	(elfcore_write_ppc_dscr): Likewise.
+	(elfcore_write_ppc_ebb): Likewise.
+	(elfcore_write_ppc_pmu): Likewise.
+	(elfcore_write_ppc_tm_cgpr): Likewise.
+	(elfcore_write_ppc_tm_cfpr): Likewise.
+	(elfcore_write_ppc_tm_cvmx): Likewise.
+	(elfcore_write_ppc_tm_cvsx): Likewise.
+	(elfcore_write_ppc_tm_spr): Likewise.
+	(elfcore_write_ppc_tm_ctar): Likewise.
+	(elfcore_write_ppc_tm_cppr): Likewise.
+	(elfcore_write_ppc_tm_cdscr): Likewise.
+	* elf.c (elfcore_write_ppc_tar): New function.
+	(elfcore_write_ppc_ppr): Likewise.
+	(elfcore_write_ppc_dscr): Likewise.
+	(elfcore_write_ppc_ebb): Likewise.
+	(elfcore_write_ppc_pmu): Likewise.
+	(elfcore_write_ppc_tm_cgpr): Likewise.
+	(elfcore_write_ppc_tm_cfpr): Likewise.
+	(elfcore_write_ppc_tm_cvmx): Likewise.
+	(elfcore_write_ppc_tm_cvsx): Likewise.
+	(elfcore_write_ppc_tm_spr): Likewise.
+	(elfcore_write_ppc_tm_ctar): Likewise.
+	(elfcore_write_ppc_tm_cppr): Likewise.
+	(elfcore_write_ppc_tm_cdscr): Likewise.
+	(elfcore_write_register_note): Call them.
+	(elfcore_grok_ppc_tar): New function.
+	(elfcore_grok_ppc_ppr): Likewise.
+	(elfcore_grok_ppc_dscr): Likewise.
+	(elfcore_grok_ppc_ebb): Likewise.
+	(elfcore_grok_ppc_pmu): Likewise.
+	(elfcore_grok_ppc_tm_cgpr): Likewise.
+	(elfcore_grok_ppc_tm_cfpr): Likewise.
+	(elfcore_grok_ppc_tm_cvmx): Likewise.
+	(elfcore_grok_ppc_tm_cvsx): Likewise.
+	(elfcore_grok_ppc_tm_spr): Likewise.
+	(elfcore_grok_ppc_tm_ctar): Likewise.
+	(elfcore_grok_ppc_tm_cppr): Likewise.
+	(elfcore_grok_ppc_tm_cdscr): Likewise.
+	(elfcore_grok_note): Call them.
+
 2018-07-11  Maciej W. Rozycki  <macro@mips.com>
 
 	* elfxx-mips.c (mips_tls_got_relocs): Use `bfd_link_dll' rather
