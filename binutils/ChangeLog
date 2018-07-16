@@ -1,3 +1,8 @@
+2018-07-16  Nick Clifton  <nickc@redhat.com>
+
+	* README-how-to-make-a-release: Add note to check for new top
+	level files and add them to the src-release.sh script.
+
 2018-07-14  Nick Clifton  <nickc@redhat.com>
 
 	* README-how-to-make-a-release: Updated with corrections based on

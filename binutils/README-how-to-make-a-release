@@ -180,7 +180,12 @@ When the time comes to actually make the release....
 
             % find . -depth -name autom4te.cache -exec rm -r {} \;
 
-  23. Create the release tarballs:
+  23. Note - check to see if any new files have been added to the top
+      level of the source directory, but which are not in the
+      DEVO_SUPPORT variable in the src-release.sh script.  If they are
+      needed then add them.
+
+       Create the release tarballs:
   
             ./src-release.sh -b -g -l -x binutils
 
@@ -226,7 +231,9 @@ When the time comes to actually make the release....
       Create a new documentation folder on the sourceware.org web
       pages as /sourceware/www/sourceware/htdocs/binutils/docs-X.XX.
       Make the html documentation locally with the "make html" command
-      and then upload and rename the directories as needed.  Create an
+      and then upload and rename the directories as needed.  (sftp
+      does not appear to support recursive uploads however, so the
+      directories will have to be made by hand).  Create an
       index.html file and then edit the docs link to point to the new
       docs-X.XX directory.
       
@@ -245,7 +252,7 @@ When the time comes to actually make the release....
       ------------------------------------------------------------------------
         Hi Everyone,
 
-        We are pleased to announce that version 2.XX of the Binutils project
+        We are pleased to announce that version 2.XX of the GNU Binutils project
         sources have been released and are now available for download at:
 
           https://ftp.gnu.org/gnu/binutils
