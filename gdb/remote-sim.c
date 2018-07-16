@@ -834,9 +834,6 @@ gdbsim_close_inferior (struct inferior *inf, void *arg)
 void
 gdbsim_target::close ()
 {
-  struct sim_inferior_data *sim_data
-    = get_sim_inferior_data (current_inferior (), SIM_INSTANCE_NOT_NEEDED);
-
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "gdbsim_close\n");
 
@@ -1187,9 +1184,6 @@ gdbsim_target::files_info ()
 void
 gdbsim_target::mourn_inferior ()
 {
-  struct sim_inferior_data *sim_data
-    = get_sim_inferior_data (current_inferior (), SIM_INSTANCE_NOT_NEEDED);
-
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "gdbsim_mourn_inferior:\n");
 

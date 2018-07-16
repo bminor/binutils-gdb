@@ -1,3 +1,8 @@
+2018-07-16  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* remote-sim.c (gdbsim_target::close,
+	gdbsim_target::mourn_inferior): Remove unused variables.
+
 2018-07-16  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* ia64-tdep.c (ktab_buf): New global.
