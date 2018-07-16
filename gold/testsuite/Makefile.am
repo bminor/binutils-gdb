@@ -1880,6 +1880,15 @@ ver_test_14.syms: ver_test_14
 ver_test_14: gcctestdir/ld ver_test_main.o ver_test_1.so ver_test_2.so ver_test_4.so ver_test_14.script
 	$(CXXLINK) -Bgcctestdir/ -Wl,--version-script,$(srcdir)/ver_test_14.script -Wl,-E -Wl,-R,. ver_test_main.o ver_test_1.so ver_test_2.so ver_test_4.so
 
+check_SCRIPTS += ver_test_pr23409.sh
+check_DATA += ver_test_pr23409.syms
+ver_test_pr23409.syms: ver_test_pr23409_1.so
+       $(TEST_READELF) --dyn-syms -W $< >$@
+ver_test_pr23409_1.so: gcctestdir/ld ver_test_1.o $(srcdir)/ver_test_pr23409_1.script ver_test_pr23409_2.so
+       gcctestdir/ld -shared -o $@ ver_test_1.o ver_test_pr23409_2.so --version-script $(srcdir)/ver_test_pr23409_1.script
+ver_test_pr23409_2.so: gcctestdir/ld ver_test_1.o $(srcdir)/ver_test_pr23409_2.script
+       gcctestdir/ld -shared -o $@ ver_test_1.o --version-script $(srcdir)/ver_test_pr23409_2.script
+
 check_SCRIPTS += weak_as_needed.sh
 check_DATA += weak_as_needed.stdout
 weak_as_needed.stdout: weak_as_needed_a.so

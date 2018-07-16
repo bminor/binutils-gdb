@@ -479,8 +479,9 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_4.sh ver_test_5.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_7.sh ver_test_8.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_10.sh ver_test_13.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_14.sh weak_as_needed.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	relro_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_14.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_pr23409.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_as_needed.sh relro_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4.sh \
@@ -536,6 +537,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_10.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_13.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_14.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_pr23409.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_as_needed.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_3.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	relro_test.stdout \
@@ -5807,6 +5809,13 @@ ver_test_14.sh.log: ver_test_14.sh
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+ver_test_pr23409.sh.log: ver_test_pr23409.sh
+	@p='ver_test_pr23409.sh'; \
+	b='ver_test_pr23409.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 weak_as_needed.sh.log: weak_as_needed.sh
 	@p='weak_as_needed.sh'; \
 	b='weak_as_needed.sh'; \
@@ -8731,6 +8740,12 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_OBJDUMP) -T $< | $(TEST_CXXFILT) >$@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_14: gcctestdir/ld ver_test_main.o ver_test_1.so ver_test_2.so ver_test_4.so ver_test_14.script
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--version-script,$(srcdir)/ver_test_14.script -Wl,-E -Wl,-R,. ver_test_main.o ver_test_1.so ver_test_2.so ver_test_4.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_pr23409.syms: ver_test_pr23409_1.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) --dyn-syms -W $< >$@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_pr23409_1.so: gcctestdir/ld ver_test_1.o $(srcdir)/ver_test_pr23409_1.script ver_test_pr23409_2.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -shared -o $@ ver_test_1.o ver_test_pr23409_2.so --version-script $(srcdir)/ver_test_pr23409_1.script
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_pr23409_2.so: gcctestdir/ld ver_test_1.o $(srcdir)/ver_test_pr23409_2.script
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -shared -o $@ ver_test_1.o --version-script $(srcdir)/ver_test_pr23409_2.script
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_as_needed.stdout: weak_as_needed_a.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -dW --dyn-syms $< >$@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_as_needed_a.so: gcctestdir/ld weak_as_needed_a.o weak_as_needed_b.so weak_as_needed_c.so
