@@ -1,5 +1,9 @@
 2018-07-22  Tom Tromey  <tom@tromey.com>
 
+	* spu-tdep.c (spu_get_overlay_table): Remove unused variable.
+
+2018-07-22  Tom Tromey  <tom@tromey.com>
+
 	* guile/scm-value.c (gdbscm_value_call): Remove unused variables.
 	* guile/scm-math.c (vlscm_unop_gdbthrow, vlscm_binop_gdbthrow)
 	(vlscm_convert_typed_value_from_scheme): Remove unused variable.

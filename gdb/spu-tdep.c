@@ -1820,8 +1820,8 @@ spu_get_overlay_table (struct objfile *objfile)
     {
       CORE_ADDR vma  = extract_unsigned_integer (ovly_table + 16*i + 0,
 						 4, byte_order);
-      CORE_ADDR size = extract_unsigned_integer (ovly_table + 16*i + 4,
-						 4, byte_order);
+      /* Note that this skips the "size" entry, which is at offset
+	 4.  */
       CORE_ADDR pos  = extract_unsigned_integer (ovly_table + 16*i + 8,
 						 4, byte_order);
       CORE_ADDR buf  = extract_unsigned_integer (ovly_table + 16*i + 12,
