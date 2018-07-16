@@ -1,3 +1,8 @@
+2018-07-16  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* readelf.c (get_note_type): Fix typo in NT_PPC_TM_CVSX note
+	description.
+
 2018-07-16  Nick Clifton  <nickc@redhat.com>
 
 	* README-how-to-make-a-release: Add note to check for new top

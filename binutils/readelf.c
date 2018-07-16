@@ -16679,7 +16679,7 @@ get_note_type (Filedata * filedata, unsigned e_type)
       case NT_PPC_TM_CVMX:
 	return _("NT_PPC_TM_CVMX (ppc checkpointed Altivec registers)");
       case NT_PPC_TM_CVSX:
-	return _("NT_PPC_TM_VSX (ppc checkpointed VSX registers)");
+	return _("NT_PPC_TM_CVSX (ppc checkpointed VSX registers)");
       case NT_PPC_TM_SPR:
 	return _("NT_PPC_TM_SPR (ppc TM special purpose registers)");
       case NT_PPC_TM_CTAR:
