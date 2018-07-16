@@ -46,7 +46,7 @@ DEVO_SUPPORT="README Makefile.in configure configure.ac \
 	Makefile.def Makefile.tpl src-release.sh config.rpath \
 	ChangeLog MAINTAINERS README-maintainer-mode \
 	lt~obsolete.m4 ltgcc.m4 depcomp mkdep compile \
-	COPYING3 COPYING3.LIB"
+	COPYING3 COPYING3.LIB test-driver ar-lib"
 
 # Files in devo/etc used in any net release.
 ETC_SUPPORT="Makefile.in configure configure.in standards.texi \
