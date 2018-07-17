@@ -335,23 +335,7 @@ riscv_has_feature (struct gdbarch *gdbarch, char feature)
 
   gdb_assert (feature >= 'A' && feature <= 'Z');
 
-  /* It would be nice to always check with the real target where possible,
-     however, for compressed instructions this is a bad idea.
-
-     The call to `set_gdbarch_decr_pc_after_break' is made just once per
-     GDBARCH and we decide at that point if we should decrement by 2 or 4
-     bytes based on whether the BFD has compressed instruction support or
-     not.
-
-     If the BFD was not compiled with compressed instruction support, but we
-     are running on a target with compressed instructions then we might
-     place a 4-byte breakpoint, then decrement the $pc by 2 bytes leading to
-     confusion.
-
-     It's safer if we just make decisions about compressed instruction
-     support based on the BFD.  */
-  if (feature != 'C')
-    misa = riscv_read_misa_reg (&have_read_misa);
+  misa = riscv_read_misa_reg (&have_read_misa);
   if (!have_read_misa || misa == 0)
     misa = gdbarch_tdep (gdbarch)->core_features;
 
@@ -2440,7 +2424,6 @@ riscv_gdbarch_init (struct gdbarch_info info,
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
   struct gdbarch_tdep tmp_tdep;
-  bool has_compressed_isa = false;
   int i;
 
   /* Ideally, we'd like to get as much information from the target for
@@ -2472,10 +2455,7 @@ riscv_gdbarch_init (struct gdbarch_info info,
 			_("unknown ELF header class %d"), eclass);
 
       if (e_flags & EF_RISCV_RVC)
-	{
-	  has_compressed_isa = true;
-	  tmp_tdep.core_features |= (1 << ('C' - 'A'));
-	}
+	tmp_tdep.core_features |= (1 << ('C' - 'A'));
 
       if (e_flags & EF_RISCV_FLOAT_ABI_DOUBLE)
 	{
@@ -2545,7 +2525,6 @@ riscv_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_register_reggroup_p (gdbarch, riscv_register_reggroup_p);
 
   /* Functions to analyze frames.  */
-  set_gdbarch_decr_pc_after_break (gdbarch, (has_compressed_isa ? 2 : 4));
   set_gdbarch_skip_prologue (gdbarch, riscv_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_frame_align (gdbarch, riscv_frame_align);

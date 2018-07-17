@@ -1,5 +1,11 @@
 2018-07-17  Jim Wilson  <jimw@sifive.com>
 
+	* riscv-tdep.c (riscv_has_feature): Delete comment that refers to
+	set_gdbarch_decr_pc_after_break.  Call riscv_read_misa_reg always.
+	(riscv_gdbarch_init): Delete local has_compressed_isa.  Delete now
+	unecessary braces after EF_RISCV_RVC test.  Delete call to
+	set_gdbarch_decr_pc_after_break.
+
 	* riscv-tdep.h (DECLARE_CSR): Use RISCV_FIRST_CSR_REGNUM instead of
 	RISCV_LAST_FP_REGNUM + 1.
 	(RSICV_CSR_LEGACY_MISA_REGNUM): Add RISCV_FIRST_CSR_REGNUM.
