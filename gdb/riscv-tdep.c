@@ -54,6 +54,7 @@
 #include "opcode/riscv-opc.h"
 #include "cli/cli-decode.h"
 #include "observable.h"
+#include "prologue-value.h"
 
 /* The stack must be 16-byte aligned.  */
 #define SP_ALIGNMENT 16
@@ -70,6 +71,29 @@ static inline bool is_ ## INSN_NAME ## _insn (long insn) \
 }
 #include "opcode/riscv-opc.h"
 #undef DECLARE_INSN
+
+/* Cached information about a frame.  */
+
+struct riscv_unwind_cache
+{
+  /* The register from which we can calculate the frame base.  This is
+     usually $sp or $fp.  */
+  int frame_base_reg;
+
+  /* The offset from the current value in register FRAME_BASE_REG to the
+     actual frame base address.  */
+  int frame_base_offset;
+
+  /* Information about previous register values.  */
+  struct trad_frame_saved_reg *regs;
+
+  /* The id for this frame.  */
+  struct frame_id this_id;
+
+  /* The base (stack) address for this frame.  This is the stack pointer
+     value on entry to this frame before any adjustments are made.  */
+  CORE_ADDR frame_base;
+};
 
 /* Architectural name for core registers.  */
 
@@ -264,6 +288,11 @@ show_riscv_debug_variable (struct ui_file *file, int from_tty,
    will be printed.  */
 
 static unsigned int riscv_debug_infcall = 0;
+
+/* When this is set to non-zero debugging information about stack unwinding
+   will be printed.  */
+
+static unsigned int riscv_debug_unwinder = 0;
 
 /* Read the MISA register from the target.  The register will only be read
    once, and the value read will be cached.  If the register can't be read
@@ -1240,16 +1269,34 @@ riscv_insn::decode (struct gdbarch *gdbarch, CORE_ADDR pc)
 
 static CORE_ADDR
 riscv_scan_prologue (struct gdbarch *gdbarch,
-		     CORE_ADDR start_pc, CORE_ADDR limit_pc)
+		     CORE_ADDR start_pc, CORE_ADDR end_pc,
+		     struct riscv_unwind_cache *cache)
 {
-  CORE_ADDR cur_pc, next_pc;
-  long frame_offset = 0;
+  CORE_ADDR cur_pc, next_pc, after_prologue_pc;
   CORE_ADDR end_prologue_addr = 0;
 
-  if (limit_pc > start_pc + 200)
-    limit_pc = start_pc + 200;
+  /* Find an upper limit on the function prologue using the debug
+     information.  If the debug information could not be used to provide
+     that bound, then use an arbitrary large number as the upper bound.  */
+  after_prologue_pc = skip_prologue_using_sal (gdbarch, start_pc);
+  if (after_prologue_pc == 0)
+    after_prologue_pc = start_pc + 100;   /* Arbitrary large number.  */
+  if (after_prologue_pc < end_pc)
+    end_pc = after_prologue_pc;
 
-  for (next_pc = cur_pc = start_pc; cur_pc < limit_pc; cur_pc = next_pc)
+  pv_t regs[RISCV_NUM_INTEGER_REGS]; /* Number of GPR.  */
+  for (int regno = 0; regno < RISCV_NUM_INTEGER_REGS; regno++)
+    regs[regno] = pv_register (regno, 0);
+  pv_area stack (RISCV_SP_REGNUM, gdbarch_addr_bit (gdbarch));
+
+  if (riscv_debug_unwinder)
+    fprintf_unfiltered
+      (gdb_stdlog,
+       "Prologue scan for function starting at %s (limit %s)\n",
+       core_addr_to_string (start_pc),
+       core_addr_to_string (end_pc));
+
+  for (next_pc = cur_pc = start_pc; cur_pc < end_pc; cur_pc = next_pc)
     {
       struct riscv_insn insn;
 
@@ -1267,10 +1314,10 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
 	{
 	  /* Handle: addi sp, sp, -i
 	     or:     addiw sp, sp, -i  */
-	  if (insn.imm_signed () < 0)
-	    frame_offset += insn.imm_signed ();
-	  else
-	    break;
+          gdb_assert (insn.rd () < RISCV_NUM_INTEGER_REGS);
+          gdb_assert (insn.rs1 () < RISCV_NUM_INTEGER_REGS);
+          regs[insn.rd ()]
+            = pv_add_constant (regs[insn.rs1 ()], insn.imm_signed ());
 	}
       else if ((insn.opcode () == riscv_insn::SW
 		|| insn.opcode () == riscv_insn::SD)
@@ -1282,6 +1329,11 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
 	     or:     sw reg, offset(s0)
 	     or:     sd reg, offset(s0)  */
 	  /* Instruction storing a register onto the stack.  */
+          gdb_assert (insn.rs1 () < RISCV_NUM_INTEGER_REGS);
+          gdb_assert (insn.rs2 () < RISCV_NUM_INTEGER_REGS);
+          stack.store (pv_add_constant (regs[insn.rs1 ()], insn.imm_signed ()),
+                        (insn.opcode () == riscv_insn::SW ? 4 : 8),
+                        regs[insn.rs2 ()]);
 	}
       else if (insn.opcode () == riscv_insn::ADDI
 	       && insn.rd () == RISCV_FP_REGNUM
@@ -1289,6 +1341,10 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
 	{
 	  /* Handle: addi s0, sp, size  */
 	  /* Instructions setting up the frame pointer.  */
+          gdb_assert (insn.rd () < RISCV_NUM_INTEGER_REGS);
+          gdb_assert (insn.rs1 () < RISCV_NUM_INTEGER_REGS);
+          regs[insn.rd ()]
+            = pv_add_constant (regs[insn.rs1 ()], insn.imm_signed ());
 	}
       else if ((insn.opcode () == riscv_insn::ADD
 		|| insn.opcode () == riscv_insn::ADDW)
@@ -1299,6 +1355,9 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
 	  /* Handle: add s0, sp, 0
 	     or:     addw s0, sp, 0  */
 	  /* Instructions setting up the frame pointer.  */
+          gdb_assert (insn.rd () < RISCV_NUM_INTEGER_REGS);
+          gdb_assert (insn.rs1 () < RISCV_NUM_INTEGER_REGS);
+          regs[insn.rd ()] = pv_add_constant (regs[insn.rs1 ()], 0);
 	}
       else if ((insn.rd () == RISCV_GP_REGNUM
 		&& (insn.opcode () == riscv_insn::AUIPC
@@ -1324,13 +1383,54 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
 	}
       else
 	{
-	  if (end_prologue_addr == 0)
-	    end_prologue_addr = cur_pc;
+	  end_prologue_addr = cur_pc;
+	  break;
 	}
     }
 
   if (end_prologue_addr == 0)
     end_prologue_addr = cur_pc;
+
+  if (riscv_debug_unwinder)
+    fprintf_unfiltered (gdb_stdlog, "End of prologue at %s\n",
+			core_addr_to_string (end_prologue_addr));
+
+  if (cache != NULL)
+    {
+      /* Figure out if it is a frame pointer or just a stack pointer.  Also
+         the offset held in the pv_t is from the original register value to
+         the current value, which for a grows down stack means a negative
+         value.  The FRAME_BASE_OFFSET is the negation of this, how to get
+         from the current value to the original value.  */
+      if (pv_is_register (regs[RISCV_FP_REGNUM], RISCV_SP_REGNUM))
+	{
+          cache->frame_base_reg = RISCV_FP_REGNUM;
+          cache->frame_base_offset = -regs[RISCV_FP_REGNUM].k;
+	}
+      else
+	{
+          cache->frame_base_reg = RISCV_SP_REGNUM;
+          cache->frame_base_offset = -regs[RISCV_SP_REGNUM].k;
+	}
+
+      /* Assign offset from old SP to all saved registers.  As we don't
+         have the previous value for the frame base register at this
+         point, we store the offset as the address in the trad_frame, and
+         then convert this to an actual address later.  */
+      for (int i = 0; i <= RISCV_NUM_INTEGER_REGS; i++)
+	{
+	  CORE_ADDR offset;
+	  if (stack.find_reg (gdbarch, i, &offset))
+            {
+              if (riscv_debug_unwinder)
+                fprintf_unfiltered (gdb_stdlog,
+                                    "Register $%s at stack offset %ld\n",
+                                    gdbarch_register_name (gdbarch, i),
+                                    offset);
+              trad_frame_set_addr (cache->regs, i, offset);
+            }
+	}
+    }
 
   return end_prologue_addr;
 }
@@ -1338,10 +1438,8 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
 /* Implement the riscv_skip_prologue gdbarch method.  */
 
 static CORE_ADDR
-riscv_skip_prologue (struct gdbarch *gdbarch,
-		     CORE_ADDR       pc)
+riscv_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  CORE_ADDR limit_pc;
   CORE_ADDR func_addr;
 
   /* See if we can determine the end of the prologue via the symbol
@@ -1357,16 +1455,9 @@ riscv_skip_prologue (struct gdbarch *gdbarch,
     }
 
   /* Can't determine prologue from the symbol table, need to examine
-     instructions.  */
-
-  /* Find an upper limit on the function prologue using the debug
-     information.  If the debug information could not be used to provide
-     that bound, then use an arbitrary large number as the upper bound.  */
-  limit_pc = skip_prologue_using_sal (gdbarch, pc);
-  if (limit_pc == 0)
-    limit_pc = pc + 100;   /* MAGIC! */
-
-  return riscv_scan_prologue (gdbarch, pc, limit_pc);
+     instructions.  Pass -1 for the end address to indicate the prologue
+     scanner can scan as far as it needs to find the end of the prologue.  */
+  return riscv_scan_prologue (gdbarch, pc, ((CORE_ADDR) -1), NULL);
 }
 
 /* Implement the gdbarch push dummy code callback.  */
@@ -2444,31 +2535,63 @@ riscv_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 /* Generate, or return the cached frame cache for the RiscV frame
    unwinder.  */
 
-static struct trad_frame_cache *
+static struct riscv_unwind_cache *
 riscv_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
-  CORE_ADDR pc;
-  CORE_ADDR start_addr;
-  CORE_ADDR stack_addr;
-  struct trad_frame_cache *this_trad_cache;
+  CORE_ADDR pc, start_addr;
+  struct riscv_unwind_cache *cache;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  int numregs, regno;
 
   if ((*this_cache) != NULL)
-    return (struct trad_frame_cache *) *this_cache;
-  this_trad_cache = trad_frame_cache_zalloc (this_frame);
-  (*this_cache) = this_trad_cache;
+    return (struct riscv_unwind_cache *) *this_cache;
 
-  trad_frame_set_reg_realreg (this_trad_cache, gdbarch_pc_regnum (gdbarch),
-			      RISCV_RA_REGNUM);
+  cache = FRAME_OBSTACK_ZALLOC (struct riscv_unwind_cache);
+  cache->regs = trad_frame_alloc_saved_regs (this_frame);
+  (*this_cache) = cache;
 
+  /* Scan the prologue, filling in the cache.  */
+  start_addr = get_frame_func (this_frame);
   pc = get_frame_pc (this_frame);
-  find_pc_partial_function (pc, NULL, &start_addr, NULL);
-  stack_addr = get_frame_register_signed (this_frame, RISCV_SP_REGNUM);
-  trad_frame_set_id (this_trad_cache, frame_id_build (stack_addr, start_addr));
+  riscv_scan_prologue (gdbarch, start_addr, pc, cache);
 
-  trad_frame_set_this_base (this_trad_cache, stack_addr);
+  /* We can now calculate the frame base address.  */
+  cache->frame_base
+    = (get_frame_register_signed (this_frame, cache->frame_base_reg) +
+       cache->frame_base_offset);
+  if (riscv_debug_unwinder)
+    fprintf_unfiltered (gdb_stdlog, "Frame base is %s ($%s + 0x%x)\n",
+                        core_addr_to_string (cache->frame_base),
+                        gdbarch_register_name (gdbarch,
+                                               cache->frame_base_reg),
+                        cache->frame_base_offset);
 
-  return this_trad_cache;
+  /* The prologue scanner sets the address of registers stored to the stack
+     as the offset of that register from the frame base.  The prologue
+     scanner doesn't know the actual frame base value, and so is unable to
+     compute the exact address.  We do now know the frame base value, so
+     update the address of registers stored to the stack.  */
+  numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
+  for (regno = 0; regno < numregs; ++regno)
+    {
+      if (trad_frame_addr_p (cache->regs, regno))
+	cache->regs[regno].addr += cache->frame_base;
+    }
+
+  /* The previous $pc can be found wherever the $ra value can be found.
+     The previous $ra value is gone, this would have been stored be the
+     previous frame if required.  */
+  cache->regs[gdbarch_pc_regnum (gdbarch)] = cache->regs[RISCV_RA_REGNUM];
+  trad_frame_set_unknown (cache->regs, RISCV_RA_REGNUM);
+
+  /* Build the frame id.  */
+  cache->this_id = frame_id_build (cache->frame_base, start_addr);
+
+  /* The previous $sp value is the frame base value.  */
+  trad_frame_set_value (cache->regs, gdbarch_sp_regnum (gdbarch),
+			cache->frame_base);
+
+  return cache;
 }
 
 /* Implement the this_id callback for RiscV frame unwinder.  */
@@ -2478,10 +2601,10 @@ riscv_frame_this_id (struct frame_info *this_frame,
 		     void **prologue_cache,
 		     struct frame_id *this_id)
 {
-  struct trad_frame_cache *info;
+  struct riscv_unwind_cache *cache;
 
-  info = riscv_frame_cache (this_frame, prologue_cache);
-  trad_frame_get_id (info, this_id);
+  cache = riscv_frame_cache (this_frame, prologue_cache);
+  *this_id = cache->this_id;
 }
 
 /* Implement the prev_register callback for RiscV frame unwinder.  */
@@ -2491,10 +2614,10 @@ riscv_frame_prev_register (struct frame_info *this_frame,
 			   void **prologue_cache,
 			   int regnum)
 {
-  struct trad_frame_cache *info;
+  struct riscv_unwind_cache *cache;
 
-  info = riscv_frame_cache (this_frame, prologue_cache);
-  return trad_frame_get_register (info, this_frame, regnum);
+  cache = riscv_frame_cache (this_frame, prologue_cache);
+  return trad_frame_get_prev_register (this_frame, cache->regs, regnum);
 }
 
 /* Structure defining the RiscV normal frame unwind functions.  Since we
@@ -2819,6 +2942,16 @@ Set riscv inferior call debugging."), _("\
 Show riscv inferior call debugging."), _("\
 When non-zero, print debugging information for the riscv specific parts\n\
 of the inferior call mechanism."),
+			     NULL,
+			     show_riscv_debug_variable,
+			     &setdebugriscvcmdlist, &showdebugriscvcmdlist);
+
+  add_setshow_zuinteger_cmd ("unwinder", class_maintenance,
+			     &riscv_debug_unwinder,  _("\
+Set riscv stack unwinding debugging."), _("\
+Show riscv stack unwinding debugging."), _("\
+When non-zero, print debugging information for the riscv specific parts\n\
+of the stack unwinding mechanism."),
 			     NULL,
 			     show_riscv_debug_variable,
 			     &setdebugriscvcmdlist, &showdebugriscvcmdlist);

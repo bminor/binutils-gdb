@@ -34,6 +34,8 @@ enum
   RISCV_A1_REGNUM = 11,		/* Second argument.  */
   RISCV_PC_REGNUM = 32,		/* Program Counter.  */
 
+  RISCV_NUM_INTEGER_REGS = 32,
+
   RISCV_FIRST_FP_REGNUM = 33,	/* First Floating Point Register */
   RISCV_FA0_REGNUM = 43,
   RISCV_FA1_REGNUM = RISCV_FA0_REGNUM + 1,

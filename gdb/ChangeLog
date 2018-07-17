@@ -1,5 +1,23 @@
 2018-09-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* riscv-tdep.c: Add 'prologue-value.h' include.
+	(struct riscv_unwind_cache): New struct.
+	(riscv_debug_unwinder): New global.
+	(riscv_scan_prologue): Update arguments, capture register details
+	from prologue scan.
+	(riscv_skip_prologue): Reformat arguments line, move end of
+	prologue calculation into riscv_scan_prologue.
+	(riscv_frame_cache): Update return type, create
+	riscv_unwind_cache, scan the prologue, and fill in remaining cache
+	details.
+	(riscv_frame_this_id): Use frame id computed in riscv_frame_cache.
+	(riscv_frame_prev_register): Use the trad_frame within the
+	riscv_unwind_cache.
+	(_initialize_riscv_tdep): Add 'set/show debug riscv unwinder'
+	flag.
+
+2018-09-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* trad-frame.h (trad_frame_set_realreg): Declare.
 	(trad_frame_set_addr): Declare.
 	* trad-frame.c (trad_frame_set_realreg): Define new function.
