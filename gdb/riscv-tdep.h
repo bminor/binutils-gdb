@@ -39,11 +39,11 @@ enum
   RISCV_LAST_FP_REGNUM = 64,	/* Last Floating Point Register */
 
   RISCV_FIRST_CSR_REGNUM = 65,  /* First CSR */
-#define DECLARE_CSR(name, num) RISCV_ ## num ## _REGNUM = RISCV_LAST_FP_REGNUM + 1 + num,
+#define DECLARE_CSR(name, num) RISCV_ ## num ## _REGNUM = RISCV_FIRST_CSR_REGNUM + num,
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
   RISCV_LAST_CSR_REGNUM = 4160,
-  RISCV_CSR_LEGACY_MISA_REGNUM = 0xf10,
+  RISCV_CSR_LEGACY_MISA_REGNUM = 0xf10 + RISCV_FIRST_CSR_REGNUM,
 
   RISCV_PRIV_REGNUM = 4161,
 

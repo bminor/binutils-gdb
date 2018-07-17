@@ -1,3 +1,9 @@
+2018-07-17  Jim Wilson  <jimw@sifive.com>
+
+	* riscv-tdep.h (DECLARE_CSR): Use RISCV_FIRST_CSR_REGNUM instead of
+	RISCV_LAST_FP_REGNUM + 1.
+	(RSICV_CSR_LEGACY_MISA_REGNUM): Add RISCV_FIRST_CSR_REGNUM.
+
 2018-07-17  Tom Tromey  <tom@tromey.com>
 
 	* configure.ac: Remove --disable-gdbcli.
