@@ -1,5 +1,17 @@
 2018-07-17  Maciej W. Rozycki  <macro@mips.com>
 
+	* elf32-nds32.c (nds32_elf_relax_loadstore): Use
+	`bfd_is_abs_symbol' rather than `bfd_is_abs_section' in checking
+	whether the symbol is absolute.
+	(nds32_elf_relax_lo12): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Likewise.
+	(elfNN_aarch64_check_relocs): Likewise.
+	* xcofflink.c (xcoff_need_ldrel_p): Likewise.
+	(bfd_xcoff_import_symbol): Likewise.
+	(xcoff_write_global_symbol): Likewise.
+
+2018-07-17  Maciej W. Rozycki  <macro@mips.com>
+
 	* linker.c (bfd_is_abs_symbol): New macro.
 	* bfd-in2.h: Regenerate.
 

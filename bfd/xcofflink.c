@@ -2687,10 +2687,7 @@ xcoff_need_ldrel_p (struct bfd_link_info *info, struct internal_reloc *rel,
     case R_RLA:
       /* Absolute relocations against absolute symbols can be
 	 resolved statically.  */
-      if (h != NULL
-	  && (h->root.type == bfd_link_hash_defined
-	      || h->root.type == bfd_link_hash_defweak)
-	  && bfd_is_abs_section (h->root.u.def.section))
+      if (h != NULL && bfd_is_abs_symbol (&h->root))
 	return FALSE;
 
       return TRUE;
@@ -3125,7 +3122,7 @@ bfd_xcoff_import_symbol (bfd *output_bfd,
   if (val != (bfd_vma) -1)
     {
       if (h->root.type == bfd_link_hash_defined
-	  && (! bfd_is_abs_section (h->root.u.def.section)
+	  && (!bfd_is_abs_symbol (&h->root)
 	      || h->root.u.def.value != val))
 	(*info->callbacks->multiple_definition) (info, &h->root, output_bfd,
 						 bfd_abs_section_ptr, val);
@@ -5589,7 +5586,7 @@ xcoff_write_global_symbol (struct bfd_hash_entry *bh, void * inf)
 	    || h->root.type == bfd_link_hash_defweak)
 	   && h->smclas == XMC_XO)
     {
-      BFD_ASSERT (bfd_is_abs_section (h->root.u.def.section));
+      BFD_ASSERT (bfd_is_abs_symbol (&h->root));
       isym.n_value = h->root.u.def.value;
       isym.n_scnum = N_UNDEF;
       if (h->root.type == bfd_link_hash_undefweak

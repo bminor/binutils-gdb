@@ -10567,7 +10567,7 @@ nds32_elf_relax_loadstore (struct bfd_link_info *link_info, bfd *abfd,
 
 	  /* This is avoid to relax symbol address which is fixed
 	     relocations.  Ex: _stack.  */
-	  if (h && bfd_is_abs_section (h->root.u.def.section))
+	  if (h && bfd_is_abs_symbol (&h->root))
 	    return FALSE;
 	}
 
@@ -10707,7 +10707,7 @@ nds32_elf_relax_lo12 (struct bfd_link_info *link_info, bfd *abfd,
   /* This is avoid to relax symbol address which is fixed
      relocations.  Ex: _stack.  */
   else if (N32_OP6 (insn) == N32_OP6_ORI
-	   && h && bfd_is_abs_section (h->root.u.def.section))
+	   && h && bfd_is_abs_symbol (&h->root))
     return;
   else
     {

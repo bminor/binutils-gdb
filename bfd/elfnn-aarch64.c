@@ -5224,8 +5224,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 
   weak_undef_p = (h ? h->root.type == bfd_link_hash_undefweak
 		  : bfd_is_und_section (sym_sec));
-  abs_symbol_p = (h !=NULL && h->root.type == bfd_link_hash_defined
-		  && bfd_is_abs_section (h->root.u.def.section));
+  abs_symbol_p = h != NULL && bfd_is_abs_symbol (&h->root);
 
 
   /* Since STT_GNU_IFUNC symbol must go through PLT, we handle
@@ -7363,8 +7362,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      if (h != NULL
 		  /* This is an absolute symbol.  It represents a value instead
 		     of an address.  */
-		  && ((h->root.type == bfd_link_hash_defined
-		       && bfd_is_abs_section (h->root.u.def.section))
+		  && (bfd_is_abs_symbol (&h->root)
 		      /* This is an undefined symbol.  */
 		      || h->root.type == bfd_link_hash_undefined))
 		break;
