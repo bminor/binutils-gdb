@@ -7802,6 +7802,17 @@ bfd_boolean bfd_set_format (bfd *abfd, bfd_format format);
 const char *bfd_format_string (bfd_format format);
 
 /* Extracted from linker.c.  */
+/* Return TRUE if the symbol described by a linker hash entry H
+   is going to be absolute.  Linker-script defined symbols can be
+   converted from absolute to section-relative ones late in the
+   link.  Use this macro to correctly determine whether the symbol
+   will actually end up absolute in output.  */
+#define bfd_is_abs_symbol(H) \
+  (((H)->type == bfd_link_hash_defined \
+    || (H)->type == bfd_link_hash_defweak) \
+   && bfd_is_abs_section ((H)->u.def.section) \
+   && !(H)->rel_from_abs)
+
 bfd_boolean bfd_link_split_section (bfd *abfd, asection *sec);
 
 #define bfd_link_split_section(abfd, sec) \

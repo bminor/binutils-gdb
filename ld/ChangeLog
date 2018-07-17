@@ -1,3 +1,9 @@
+2018-07-17  Maciej W. Rozycki  <macro@mips.com>
+
+	* ldexp.c (exp_fold_tree_1) <etree_assign, etree_provide>
+	<etree_provided>: Copy expression's `rel_from_abs' flag to the
+	link hash.
+
 2018-07-12  Maciej W. Rozycki  <macro@mips.com>
 
 	* testsuite/ld-mips-elf/mips-elf.exp (run_dump_test_abi)

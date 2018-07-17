@@ -115,6 +115,11 @@ struct bfd_link_hash_entry
   /* Symbol defined in a linker script.  */
   unsigned int ldscript_def : 1;
 
+  /* Symbol will be converted from absolute to section-relative.  Set for
+     symbols defined by a script from "dot" (also SEGMENT_START or ORIGIN)
+     outside of an output section statement.  */
+  unsigned int rel_from_abs : 1;
+
   /* A union of information depending upon the type.  */
   union
     {

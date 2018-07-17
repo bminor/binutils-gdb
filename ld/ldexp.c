@@ -1200,6 +1200,7 @@ exp_fold_tree_1 (etree_type *tree)
 		  h->u.def.section = expld.result.section;
 		  h->linker_def = ! tree->assign.type.lineno;
 		  h->ldscript_def = 1;
+		  h->rel_from_abs = expld.rel_from_abs;
 		  if (tree->assign.hidden)
 		    bfd_link_hide_symbol (link_info.output_bfd,
 					  &link_info, h);

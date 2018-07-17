@@ -484,7 +484,20 @@ _bfd_link_hash_table_init
 
 /* Look up a symbol in a link hash table.  If follow is TRUE, we
    follow bfd_link_hash_indirect and bfd_link_hash_warning links to
-   the real symbol.  */
+   the real symbol.
+
+.{* Return TRUE if the symbol described by a linker hash entry H
+.   is going to be absolute.  Linker-script defined symbols can be
+.   converted from absolute to section-relative ones late in the
+.   link.  Use this macro to correctly determine whether the symbol
+.   will actually end up absolute in output.  *}
+.#define bfd_is_abs_symbol(H) \
+.  (((H)->type == bfd_link_hash_defined \
+.    || (H)->type == bfd_link_hash_defweak) \
+.   && bfd_is_abs_section ((H)->u.def.section) \
+.   && !(H)->rel_from_abs)
+.
+*/
 
 struct bfd_link_hash_entry *
 bfd_link_hash_lookup (struct bfd_link_hash_table *table,
