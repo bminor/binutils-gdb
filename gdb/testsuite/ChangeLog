@@ -1,3 +1,7 @@
+2018-07-28  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/vla-optimized-out-o3-strict.exp: New file.
+
 2018-07-26  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/vla-optimized-out.c: Add comment about origin of test-case.

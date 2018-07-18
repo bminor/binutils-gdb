@@ -1,3 +1,8 @@
+2018-07-28  Tom de Vries  <tdevries@suse.de>
+
+	* eval.c (evaluate_subexp_for_sizeof): Interpret size of dynamic type
+	with undefined upper bound as <optimized out>.
+
 2018-07-27  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gcore.in: Rename variable "name" to "prefix".  Expand

@@ -3145,6 +3145,8 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
 	{
 	  val = evaluate_subexp (NULL_TYPE, exp, pos, EVAL_NORMAL);
 	  type = value_type (val);
+	  if (TYPE_HIGH_BOUND_UNDEFINED (TYPE_INDEX_TYPE (type)))
+	    return allocate_optimized_out_value (size_type);
 	}
       else
 	(*pos) += 4;
