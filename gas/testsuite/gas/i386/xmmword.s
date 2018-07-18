@@ -127,3 +127,8 @@ xmmword:
 	vpmovzxwq	xmm0{k7}, xmmword ptr [eax]
 	vpmovzxwq	ymm0, xmmword ptr [eax]
 	vpmovzxwq	ymm0{k7}, xmmword ptr [eax]
+
+	vcvtps2qq	xmm0, xmmword ptr [rax]
+	vcvtps2uqq	xmm0, xmmword ptr [rax]
+	vcvttps2qq	xmm0, xmmword ptr [rax]
+	vcvttps2uqq	xmm0, xmmword ptr [rax]
