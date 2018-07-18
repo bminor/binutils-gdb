@@ -1,8 +1,12 @@
 2018-07-18  Nick Clifton  <nickc@redhat.com>
 
+	* development.sh: Set to true.
+
+2018-07-18  Nick Clifton  <nickc@redhat.com>
+
 	2.31.1 Release point.
 	* version.m4: Set to 2.31.1
-	* development.sh: Set to true.
+	* development.sh: Set to false.
 	* configure: Regenerate.
 	* po/bfd.pot: Regenerate.
 
