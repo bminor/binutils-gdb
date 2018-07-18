@@ -783,13 +783,13 @@ gdbscm_frame_read_register (SCM self, SCM register_scm)
   char *register_str;
   struct value *value = NULL;
   struct frame_info *frame = NULL;
-  struct cleanup *cleanup;
   frame_smob *f_smob;
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   gdbscm_parse_function_args (FUNC_NAME, SCM_ARG2, NULL, "s",
 			      register_scm, &register_str);
-  cleanup = make_cleanup (xfree, register_str);
+
+  struct gdb_exception except = exception_none;
 
   TRY
     {
@@ -805,13 +805,14 @@ gdbscm_frame_read_register (SCM self, SCM register_scm)
 	    value = value_of_register (regnum, frame);
 	}
     }
-  CATCH (except, RETURN_MASK_ALL)
+  CATCH (ex, RETURN_MASK_ALL)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      except = ex;
     }
   END_CATCH
 
-  do_cleanups (cleanup);
+  xfree (register_str);
+  GDBSCM_HANDLE_GDB_EXCEPTION (except);
 
   if (frame == NULL)
     {

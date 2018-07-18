@@ -639,8 +639,18 @@ extern void gdbscm_initialize_symtabs (void);
 extern void gdbscm_initialize_types (void);
 extern void gdbscm_initialize_values (void);
 
-/* Use these after a TRY_CATCH to throw the appropriate Scheme exception
-   if a GDB error occurred.  */
+
+/* A complication with the Guile code is that we have two types of
+   exceptions to consider.  GDB/C++ exceptions, and Guile/SJLJ
+   exceptions.  Code that is facing the Guile interpreter must not
+   throw GDB exceptions, instead Scheme exceptions must be thrown.
+   Also, because Guile exceptions are SJLJ based, Guile-facing code
+   must not use local objects with dtors, unless wrapped in a scope
+   with a TRY/CATCH, because the dtors won't otherwise be run when a
+   Guile exceptions is thrown.  */
+
+/* Use this after a TRY/CATCH to throw the appropriate Scheme
+   exception if a GDB error occurred.  */
 
 #define GDBSCM_HANDLE_GDB_EXCEPTION(exception)		\
   do {							\
@@ -651,16 +661,35 @@ extern void gdbscm_initialize_values (void);
       }							\
   } while (0)
 
-/* If cleanups are establish outside the TRY_CATCH block, use this version.  */
+/* Use this to wrap a callable to throw the appropriate Scheme
+   exception if the callable throws a GDB error.  ARGS are forwarded
+   to FUNC.  Returns the result of FUNC, unless FUNC returns a Scheme
+   exception, in which case that exception is thrown.  Note that while
+   the callable is free to use objects of types with destructors,
+   because GDB errors are C++ exceptions, the caller of gdbscm_wrap
+   must not use such objects, because their destructors would not be
+   called when a Scheme exception is thrown.  */
 
-#define GDBSCM_HANDLE_GDB_EXCEPTION_WITH_CLEANUPS(exception, cleanups)	\
-  do {									\
-    if (exception.reason < 0)						\
-      {									\
-	do_cleanups (cleanups);						\
-	gdbscm_throw_gdb_exception (exception);				\
-        /*NOTREACHED */							\
-      }									\
-  } while (0)
+template<typename Function, typename... Args>
+SCM
+gdbscm_wrap (Function &&func, Args... args)
+{
+  SCM result = SCM_BOOL_F;
+
+  TRY
+    {
+      result = func (std::forward<Args> (args)...);
+    }
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+    }
+  END_CATCH
+
+  if (gdbscm_is_exception (result))
+    gdbscm_throw (result);
+
+  return result;
+}
 
 #endif /* GDB_GUILE_INTERNAL_H */

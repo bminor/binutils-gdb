@@ -1,3 +1,44 @@
+2018-07-18  Pedro Alves  <palves@redhat.com>
+
+	* guile/guile-internal.h: Add comment about mixing GDB and Scheme
+	exceptions.
+	(GDBSCM_HANDLE_GDB_EXCEPTION_WITH_CLEANUPS): Delete.
+	(gdbscm_wrap): New.
+	* guile/scm-frame.c (gdbscm_frame_read_register): Use xfree
+	directly instead of a cleanup.
+	* guile/scm-math.c (vlscm_unop_gdbthrow): New, factored out from ...
+	(vlscm_unop): ... this.  Reimplement using gdbscm_wrap.
+	(vlscm_binop_gdbthrow): New, factored out from ...
+	(vlscm_binop): ... this.  Reimplement using gdbscm_wrap.
+	(vlscm_rich_compare): Use gdbscm_wrap.
+	* guile/scm-symbol.c (gdbscm_lookup_symbol): Use xfree directly
+	instead of a cleanup.
+	(gdbscm_lookup_global_symbol): Use xfree directly instead of a
+	cleanup.
+	* guile/scm-type.c (gdbscm_type_field, gdbscm_type_has_field_p):
+	Use xfree directly instead of a cleanup.
+	* guile/scm-value.c (gdbscm_make_value, gdbscm_make_lazy_value):
+	Adjust to use gdbscm_wrap and scoped_value_mark.
+	(gdbscm_value_optimized_out_p): Adjust to use gdbscm_wrap.
+	(gdbscm_value_address, gdbscm_value_dereference)
+	(gdbscm_value_referenced_value): Adjust to use gdbscm_wrap and
+	scoped_value_mark.
+	(gdbscm_value_dynamic_type): Use scoped_value_mark.
+	(vlscm_do_cast, gdbscm_value_field): Adjust to use gdbscm_wrap and
+	scoped_value_mark.
+	(gdbscm_value_subscript, gdbscm_value_call): Adjust to use
+	gdbscm_wrap and scoped_value_mark.
+	(gdbscm_value_to_string): Use xfree directly instead of a
+	cleanup.  Move 'buffer' unique_ptr to TRY scope.
+	(gdbscm_value_to_lazy_string): Use xfree directly instead of a
+	cleanup.  Move 'buffer' unique_ptr to TRY scope.  Use
+	scoped_value_mark.
+	(gdbscm_value_fetch_lazy_x): Use gdbscm_wrap.
+	(gdbscm_parse_and_eval): Adjust to use gdbscm_wrap and
+	scoped_value_mark.
+	(gdbscm_history_ref, gdbscm_history_append_x): Adjust to use
+	gdbscm_wrap.
+
 2018-07-18  Tom de Vries  <tdevries@suse.de>
 
 	* findvar.c (default_read_var_value): Also resolve dynamic type for

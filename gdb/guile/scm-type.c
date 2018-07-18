@@ -977,7 +977,6 @@ gdbscm_type_field (SCM self, SCM field_scm)
   struct type *type = t_smob->type;
   char *field;
   int i;
-  struct cleanup *cleanups;
 
   SCM_ASSERT_TYPE (scm_is_string (field_scm), field_scm, SCM_ARG2, FUNC_NAME,
 		   _("string"));
@@ -992,7 +991,6 @@ gdbscm_type_field (SCM self, SCM field_scm)
 			       _(not_composite_error));
 
   field = gdbscm_scm_to_c_string (field_scm);
-  cleanups = make_cleanup (xfree, field);
 
   for (i = 0; i < TYPE_NFIELDS (type); i++)
     {
@@ -1000,12 +998,12 @@ gdbscm_type_field (SCM self, SCM field_scm)
 
       if (t_field_name && (strcmp_iw (t_field_name, field) == 0))
 	{
-	    do_cleanups (cleanups);
-	    return tyscm_make_field_smob (self, i);
+	  xfree (field);
+	  return tyscm_make_field_smob (self, i);
 	}
     }
 
-  do_cleanups (cleanups);
+  xfree (field);
 
   gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG1, field_scm,
 			     _("Unknown field"));
@@ -1022,7 +1020,6 @@ gdbscm_type_has_field_p (SCM self, SCM field_scm)
   struct type *type = t_smob->type;
   char *field;
   int i;
-  struct cleanup *cleanups;
 
   SCM_ASSERT_TYPE (scm_is_string (field_scm), field_scm, SCM_ARG2, FUNC_NAME,
 		   _("string"));
@@ -1037,7 +1034,6 @@ gdbscm_type_has_field_p (SCM self, SCM field_scm)
 			       _(not_composite_error));
 
   field = gdbscm_scm_to_c_string (field_scm);
-  cleanups = make_cleanup (xfree, field);
 
   for (i = 0; i < TYPE_NFIELDS (type); i++)
     {
@@ -1045,12 +1041,12 @@ gdbscm_type_has_field_p (SCM self, SCM field_scm)
 
       if (t_field_name && (strcmp_iw (t_field_name, field) == 0))
 	{
-	    do_cleanups (cleanups);
-	    return SCM_BOOL_T;
+	  xfree (field);
+	  return SCM_BOOL_T;
 	}
     }
 
-  do_cleanups (cleanups);
+  xfree (field);
 
   return SCM_BOOL_F;
 }
