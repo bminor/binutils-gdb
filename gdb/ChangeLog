@@ -1,5 +1,11 @@
 2018-07-18  Pedro Alves  <palves@redhat.com>
 
+	* guile/guile.c (gdbscm_execute_gdb_command): Adjust to use
+	gdbscm_wrap.  Use gdb::unique_xmalloc_ptr<char> instead of a
+	cleanup.
+
+2018-07-18  Pedro Alves  <palves@redhat.com>
+
 	* guile/guile-internal.h: Add comment about mixing GDB and Scheme
 	exceptions.
 	(GDBSCM_HANDLE_GDB_EXCEPTION_WITH_CLEANUPS): Delete.
