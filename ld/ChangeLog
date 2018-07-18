@@ -1,3 +1,7 @@
+2018-07-18  Nick Clifton  <nickc@redhat.com>
+
+	* po/es.po: Updated Spanish translation.
+
 2018-07-14  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.

@@ -46,7 +46,7 @@ DEVO_SUPPORT="README Makefile.in configure configure.ac \
 	Makefile.def Makefile.tpl src-release.sh config.rpath \
 	ChangeLog MAINTAINERS README-maintainer-mode \
 	lt~obsolete.m4 ltgcc.m4 depcomp mkdep compile \
-	COPYING3 COPYING3.LIB test-drivrer ar-lib"
+	COPYING3 COPYING3.LIB test-driver ar-lib"
 
 # Files in devo/etc used in any net release.
 ETC_SUPPORT="Makefile.in configure configure.in standards.texi \
@@ -97,8 +97,8 @@ do_proto_toplev()
 	    *) disables="$disables --disable-$dir" ;;
 	esac
     done
-    echo "==> configure --target=i386-pc-linux-gnu $disables $enables"
-    ./configure --target=i386-pc-linux-gnu $disables $enables
+    echo "==> configure --target=x86_64-pc-linux-gnu $disables $enables"
+    ./configure --quiet --target=x86_64-pc-linux-gnu $disables $enables
     $MAKE configure-host configure-target \
 	ALL_GCC="" ALL_GCC_C="" ALL_GCC_CXX="" \
 	CC_FOR_TARGET="$CC" CXX_FOR_TARGET="$CXX"
