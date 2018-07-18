@@ -1,3 +1,7 @@
+2018-07-18  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+
 2018-07-17  Maciej W. Rozycki  <macro@mips.com>
 
 	* ldexp.c (exp_fold_tree_1) <etree_assign, etree_provide>
