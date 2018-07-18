@@ -5589,7 +5589,7 @@ xcoff_write_global_symbol (struct bfd_hash_entry *bh, void * inf)
       BFD_ASSERT (bfd_is_abs_symbol (&h->root));
       isym.n_value = h->root.u.def.value;
       isym.n_scnum = N_UNDEF;
-      if (h->root.type == bfd_link_hash_undefweak
+      if (h->root.type == bfd_link_hash_defweak
 	  && C_WEAKEXT == C_AIX_WEAKEXT)
 	isym.n_sclass = C_WEAKEXT;
       else
@@ -5655,7 +5655,7 @@ xcoff_write_global_symbol (struct bfd_hash_entry *bh, void * inf)
       /* We just output an SD symbol.  Now output an LD symbol.  */
       h->indx += 2;
 
-      if (h->root.type == bfd_link_hash_undefweak
+      if (h->root.type == bfd_link_hash_defweak
 	  && C_WEAKEXT == C_AIX_WEAKEXT)
 	isym.n_sclass = C_WEAKEXT;
       else
