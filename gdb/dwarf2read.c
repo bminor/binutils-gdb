@@ -17626,10 +17626,11 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
 	       sect_offset_str (die->sect_off),
 	       objfile_name (cu->per_cu->dwarf2_per_objfile->objfile));
 
-  attr = dwarf2_attr (die, DW_AT_upper_bound, cu);
+  struct attribute *attr_ub, *attr_count;
+  attr = attr_ub = dwarf2_attr (die, DW_AT_upper_bound, cu);
   if (!attr_to_dynamic_prop (attr, die, cu, &high))
     {
-      attr = dwarf2_attr (die, DW_AT_count, cu);
+      attr = attr_count = dwarf2_attr (die, DW_AT_count, cu);
       if (attr_to_dynamic_prop (attr, die, cu, &high))
 	{
 	  /* If bounds are constant do the final calculation here.  */
@@ -17638,6 +17639,20 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
 	  else
 	    high_bound_is_count = 1;
 	}
+      else
+	{
+	  if (attr_ub != NULL)
+	    complaint (_("Unresolved DW_AT_upper_bound "
+			 "- DIE at %s [in module %s]"),
+		       sect_offset_str (die->sect_off),
+		       objfile_name (cu->per_cu->dwarf2_per_objfile->objfile));
+	  if (attr_count != NULL)
+	    complaint (_("Unresolved DW_AT_count "
+			 "- DIE at %s [in module %s]"),
+		       sect_offset_str (die->sect_off),
+		       objfile_name (cu->per_cu->dwarf2_per_objfile->objfile));
+	}
+	
     }
 
   /* Dwarf-2 specifications explicitly allows to create subrange types

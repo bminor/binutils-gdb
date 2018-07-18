@@ -1,3 +1,8 @@
+2018-07-26  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf2read.c (read_subrange_type): Warn if DW_AT_upper_bound or
+	DW_AT_count can't be translated to a dynamic prop.
+
 2018-07-25  Tom de Vries  <tdevries@suse.de>
 
 	* dwarf2loc.c (dwarf2_locexpr_baton_eval): Wrap ctx.eval call in
