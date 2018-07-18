@@ -1,3 +1,17 @@
+2018-07-18  Maciej W. Rozycki  <macro@mips.com>
+
+	* testsuite/gas/mips/loongson-2e.d: Correct whitespace issues.
+	* testsuite/gas/mips/loongson-2f.d: Likewise.
+	* testsuite/gas/mips/loongson-2f-2.d: Likewise.
+	* testsuite/gas/mips/loongson-2f-3.d: Likewise.
+	* testsuite/gas/mips/loongson-3a.d: Likewise.
+	* testsuite/gas/mips/loongson-3a-2.d: Likewise.
+	* testsuite/gas/mips/loongson-2e.s: Likewise.
+	* testsuite/gas/mips/loongson-2f.s: Likewise.
+	* testsuite/gas/mips/loongson-2f-3.s: Likewise.
+	* testsuite/gas/mips/loongson-3a.s: Likewise.
+	* testsuite/gas/mips/loongson-3a-2.s: Likewise.
+
 2018-07-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/23418

@@ -62,4 +62,3 @@ Disassembly of section .text:
 .*:	ca15bff4 	gslqc1	\$f20,\$f21,4080\(\$16\)
 .*:	ea37c036 	gssqc1	\$f22,\$f23,-4096\(\$17\)
 #pass
-

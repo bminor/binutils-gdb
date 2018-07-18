@@ -107,5 +107,3 @@ Disassembly of section .text:
 .*:	4bbbd00d 	slt	\$f26,\$f27
 .*:	4bbde00e 	sle	\$f28,\$f29
 #pass
-
-

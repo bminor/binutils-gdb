@@ -101,5 +101,3 @@ fixed_point_insns:
 	seq		$f24, $f25
 	slt		$f26, $f27
 	sle		$f28, $f29
-
-

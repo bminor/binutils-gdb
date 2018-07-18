@@ -147,4 +147,3 @@ Disassembly of section .text:
 .*:	46c04187 	neg.ps	\$f6,\$f8
 .*:	46dac581 	sub.ps	\$f22,\$f24,\$f26
 #pass
-
