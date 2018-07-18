@@ -1,5 +1,11 @@
 2018-07-18  Nick Clifton  <nickc@redhat.com>
 
+	2.31.1 Release point.
+	* configure: Regenerate.
+	* po/ld.pot: Regenerate.
+
+2018-07-18  Nick Clifton  <nickc@redhat.com>
+
 	* po/es.po: Updated Spanish translation.
 
 2018-07-14  Nick Clifton  <nickc@redhat.com>

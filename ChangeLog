@@ -1,5 +1,9 @@
 2018-07-18  Nick Clifton  <nickc@redhat.com>
 
+	2.31.1 Release point.
+
+2018-07-18  Nick Clifton  <nickc@redhat.com>
+
 	* (DEVO_SUPPORT): Fix typo in previous delta.
 	(do_proto_toplev): Add --quiet option to configure command line.
 

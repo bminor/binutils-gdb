@@ -1,3 +1,8 @@
+2018-07-18  Nick Clifton  <nickc@redhat.com>
+
+	2.31.1 Release point.
+	* configure: Regenerate.
+
 2018-07-14  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.

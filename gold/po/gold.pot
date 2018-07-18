@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2018-07-14 19:00+0100\n"
+"POT-Creation-Date: 2018-07-18 08:41+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -4093,29 +4093,29 @@ msgstr ""
 msgid "versym for symbol %zu has no name: %u"
 msgstr ""
 
-#: symtab.cc:2623
+#: symtab.cc:2626
 #, c-format
 msgid ""
 "discarding version information for %s@%s, defined in unused shared library "
 "%s (linked with --as-needed)"
 msgstr ""
 
-#: symtab.cc:2970 symtab.cc:3116
+#: symtab.cc:2973 symtab.cc:3119
 #, c-format
 msgid "%s: unsupported symbol section 0x%x"
 msgstr ""
 
-#: symtab.cc:3448
+#: symtab.cc:3451
 #, c-format
 msgid "%s: symbol table entries: %zu; buckets: %zu\n"
 msgstr ""
 
-#: symtab.cc:3451
+#: symtab.cc:3454
 #, c-format
 msgid "%s: symbol table entries: %zu\n"
 msgstr ""
 
-#: symtab.cc:3608
+#: symtab.cc:3611
 #, c-format
 msgid ""
 "while linking %s: symbol '%s' defined in multiple places (possible ODR "
@@ -4126,7 +4126,7 @@ msgstr ""
 #. which may not be the location we expect to intersect
 #. with another definition.  We could print the whole
 #. set of locations, but that seems too verbose.
-#: symtab.cc:3615 symtab.cc:3618
+#: symtab.cc:3618 symtab.cc:3621
 #, c-format
 msgid "  %s from %s\n"
 msgstr ""

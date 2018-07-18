@@ -1,5 +1,11 @@
 2018-07-18  Nick Clifton  <nickc@redhat.com>
 
+	2.31.1 Release point.
+	* Makefile.am: Replace spurious spaces with tabs.
+	* po/gold.pot: Regenerate.
+
+2018-07-18  Nick Clifton  <nickc@redhat.com>
+
 	* po/fr.po: Updated French translation.
 
 2018-07-16  Nick Clifton  <nickc@redhat.com>
