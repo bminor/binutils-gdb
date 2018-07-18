@@ -736,23 +736,23 @@ enum
   RegMem,
   /* Memory.  */
   Mem,
-  /* BYTE memory. */
+  /* BYTE size. */
   Byte,
-  /* WORD memory. 2 byte */
+  /* WORD size. 2 byte */
   Word,
-  /* DWORD memory. 4 byte */
+  /* DWORD size. 4 byte */
   Dword,
-  /* FWORD memory. 6 byte */
+  /* FWORD size. 6 byte */
   Fword,
-  /* QWORD memory. 8 byte */
+  /* QWORD size. 8 byte */
   Qword,
-  /* TBYTE memory. 10 byte */
+  /* TBYTE size. 10 byte */
   Tbyte,
-  /* XMMWORD memory. */
+  /* XMMWORD size. */
   Xmmword,
-  /* YMMWORD memory. */
+  /* YMMWORD size. */
   Ymmword,
-  /* ZMMWORD memory.  */
+  /* ZMMWORD size.  */
   Zmmword,
   /* Unspecified memory size.  */
   Unspecified,

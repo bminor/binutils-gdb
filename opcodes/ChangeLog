@@ -1,3 +1,19 @@
+2018-07-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/23418
+	* i386-opc.h (Byte): Update comments.
+	(Word): Likewise.
+	(Dword): Likewise.
+	(Fword): Likewise.
+	(Qword): Likewise.
+	(Tbyte): Likewise.
+	(Xmmword): Likewise.
+	(Ymmword): Likewise.
+	(Zmmword): Likewise.
+	* i386-opc.tbl: Split vcvtps2qq, vcvtps2uqq, vcvttps2qq and
+	vcvttps2uqq.
+	* i386-tbl.h: Regenerated.
+
 2018-07-18  Nick Clifton  <nickc@redhat.com>
 
 	2.31.1 Release point.

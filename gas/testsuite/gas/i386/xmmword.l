@@ -99,3 +99,7 @@
 .*:127: Error: .* `vpmovzxwq'
 .*:128: Error: .* `vpmovzxwq'
 .*:129: Error: .* `vpmovzxwq'
+.*:131: Error: .* `vcvtps2qq'
+.*:132: Error: .* `vcvtps2uqq'
+.*:133: Error: .* `vcvttps2qq'
+.*:134: Error: .* `vcvttps2uqq'

@@ -1,3 +1,10 @@
+2018-07-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/23418
+	* testsuite/gas/i386/xmmword.s: Add tests for vcvtps2qq,
+	vcvtps2uqq, vcvttps2qq and vcvttps2uqq.
+	* testsuite/gas/i386/xmmword.l: Updated.
+
 2018-07-18  Nick Clifton  <nickc@redhat.com>
 
 	2.31.1 Release point.
