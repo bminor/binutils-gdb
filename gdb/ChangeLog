@@ -1,3 +1,8 @@
+2018-07-18  Maciej W. Rozycki  <macro@mips.com>
+
+	* mips-tdep.c (micromips_next_pc): Add SYSCALL instruction
+	decoding.
+
 2018-07-17  Tom Tromey  <tom@tromey.com>
 
 	* guile/scm-param.c (pascm_set_func, pascm_show_func)

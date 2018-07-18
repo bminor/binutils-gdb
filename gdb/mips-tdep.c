@@ -1898,12 +1898,30 @@ micromips_next_pc (struct regcache *regcache, CORE_ADDR pc)
       switch (micromips_op (insn >> 16))
 	{
 	case 0x00: /* POOL32A: bits 000000 */
-	  if (b0s6_op (insn) == 0x3c
-				/* POOL32Axf: bits 000000 ... 111100 */
-	      && (b6s10_ext (insn) & 0x2bf) == 0x3c)
-				/* JALR, JALR.HB: 000000 000x111100 111100 */
-				/* JALRS, JALRS.HB: 000000 010x111100 111100 */
-	    pc = regcache_raw_get_signed (regcache, b0s5_reg (insn >> 16));
+	  switch (b0s6_op (insn))
+	    {
+	    case 0x3c: /* POOL32Axf: bits 000000 ... 111100 */
+	      switch (b6s10_ext (insn))
+		{
+		case 0x3c:  /* JALR:     000000 0000111100 111100 */
+		case 0x7c:  /* JALR.HB:  000000 0001111100 111100 */
+		case 0x13c: /* JALRS:    000000 0100111100 111100 */
+		case 0x17c: /* JALRS.HB: 000000 0101111100 111100 */
+		  pc = regcache_raw_get_signed (regcache,
+						b0s5_reg (insn >> 16));
+		  break;
+		case 0x22d: /* SYSCALL:  000000 1000101101 111100 */
+		  {
+		    struct gdbarch_tdep *tdep;
+
+		    tdep = gdbarch_tdep (gdbarch);
+		    if (tdep->syscall_next_pc != NULL)
+		      pc = tdep->syscall_next_pc (get_current_frame ());
+		  }
+		  break;
+		}
+	      break;
+	    }
 	  break;
 
 	case 0x10: /* POOL32I: bits 010000 */
