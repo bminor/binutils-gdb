@@ -713,7 +713,7 @@ run_ld_link_exec_tests [list \
 # That does not happen for the pr23169 testcase where the resolver is
 # in the executable (which is relocated last by ld.so).
 if { [isnative]
-     && ![istarget "powerpc-*-*"] } {
+     && !([istarget "powerpc-*-*"] || [istarget "aarch64*-*-*"]) } {
 run_ld_link_exec_tests [list \
     [list \
 	"Run pr23169a" \
