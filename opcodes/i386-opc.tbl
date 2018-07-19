@@ -18,6 +18,12 @@
 // Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
 // 02110-1301, USA.
 
+#define OPCODE_I386_H
+#include "i386-opc.h"
+#undef None
+
+### MARKER ###
+
 // Move instructions.
 // We put the 64bit displacement first and we only mark constants
 // larger than 32bit as Disp64.

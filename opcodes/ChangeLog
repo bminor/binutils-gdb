@@ -1,3 +1,15 @@
+2018-07-19  Jan Beulich  <jbeulich@suse.com>
+
+	* Makefile.am: Change dependencies and rule for
+	$(srcdir)/i386-init.h.
+	* Makefile.in: Re-generate.
+	* i386-gen.c (process_i386_opcodes): New local variable
+	"marker". Drop opening of input file. Recognize marker and line
+	number directives.
+	* i386-opc.tbl (OPCODE_I386_H): Define.
+	(i386-opc.h): Include it.
+	(None): Undefine.
+
 2018-07-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/23418

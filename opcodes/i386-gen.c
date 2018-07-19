@@ -1262,14 +1262,10 @@ process_i386_opcodes (FILE *table)
   htab_t opcode_hash_table;
   struct opcode_hash_entry **opcode_array;
   unsigned int opcode_array_size = 1024;
-  int lineno = 0;
+  int lineno = 0, marker = 0;
 
   filename = "i386-opc.tbl";
-  fp = fopen (filename, "r");
-
-  if (fp == NULL)
-    fail (_("can't find i386-opc.tbl for reading, errno = %s\n"),
-	  xstrerror (errno));
+  fp = stdin;
 
   i = 0;
   opcode_array = (struct opcode_hash_entry **)
@@ -1303,11 +1299,32 @@ process_i386_opcodes (FILE *table)
       switch (p[0])
 	{
 	case '#':
+	  if (!strcmp("### MARKER ###", buf))
+	    marker = 1;
+	  else
+	    {
+	      /* Since we ignore all included files (we only care about their
+		 #define-s here), we don't need to monitor filenames.  The final
+		 line number directive is going to refer to the main source file
+		 again.  */
+	      char *end;
+	      unsigned long ln;
+
+	      p = remove_leading_whitespaces (p + 1);
+	      if (!strncmp(p, "line", 4))
+		p += 4;
+	      ln = strtoul (p, &end, 10);
+	      if (ln > 1 && ln < INT_MAX
+		  && *remove_leading_whitespaces (end) == '"')
+		lineno = ln - 1;
+	    }
 	  /* Ignore comments.  */
 	case '\0':
 	  continue;
 	  break;
 	default:
+	  if (!marker)
+	    continue;
 	  break;
 	}
 
