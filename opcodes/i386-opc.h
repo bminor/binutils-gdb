@@ -569,7 +569,8 @@ enum
   /* Supress All Exceptions is supported.  */
   SAE,
 
-  /* Copressed Disp8*N attribute.  */
+  /* Compressed Disp8*N attribute.  */
+#define DISP8_SHIFT_VL 7
   Disp8MemShift,
 
   /* Default mask isn't allowed.  */

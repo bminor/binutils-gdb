@@ -1,5 +1,15 @@
 2018-07-19  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.h (DISP8_SHIFT_VL): New.
+	* i386-opc.tbl (Disp8ShiftVL):  Define.
+	(various): Fold AVX512VL templates into their respective
+	AVX512F counterparts where possible, using Disp8ShiftVL and
+	CheckRegSize instead of Evex= plus Disp8MemShift= (plus often
+	IgnoreSize) as appropriate.
+	* i386-tbl.h: Re-generate.
+
+2018-07-19  Jan Beulich  <jbeulich@suse.com>
+
 	* Makefile.am: Change dependencies and rule for
 	$(srcdir)/i386-init.h.
 	* Makefile.in: Re-generate.

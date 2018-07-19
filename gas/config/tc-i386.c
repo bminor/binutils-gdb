@@ -3466,7 +3466,7 @@ build_vex_prefix (const insn_template *t)
 static INLINE bfd_boolean
 is_evex_encoding (const insn_template *t)
 {
-  return t->opcode_modifier.evex
+  return t->opcode_modifier.evex || t->opcode_modifier.disp8memshift
 	 || t->opcode_modifier.broadcast || t->opcode_modifier.masking
 	 || t->opcode_modifier.staticrounding || t->opcode_modifier.sae;
 }
@@ -3889,6 +3889,8 @@ optimize_encoding (void)
 		   && is_evex_encoding (&i.tm)
 		   && (i.vec_encoding != vex_encoding_evex
 		       || i.tm.cpu_flags.bitfield.cpuavx512vl
+		       || (i.tm.operand_types[2].bitfield.zmmword
+			   && i.types[2].bitfield.ymmword)
 		       || cpu_arch_isa_flags.bitfield.cpuavx512vl)))
 	   && ((i.tm.base_opcode == 0x55
 		|| i.tm.base_opcode == 0x6655
@@ -5210,8 +5212,47 @@ check_VecOperands (const insn_template *t)
     {
       if (i.broadcast)
 	i.memshift = t->operand_types[op].bitfield.dword ? 2 : 3;
-      else
+      else if (t->opcode_modifier.disp8memshift != DISP8_SHIFT_VL)
 	i.memshift = t->opcode_modifier.disp8memshift;
+      else
+	{
+	  const i386_operand_type *type = NULL;
+
+	  i.memshift = 0;
+	  for (op = 0; op < i.operands; op++)
+	    if (operand_type_check (i.types[op], anymem))
+	      {
+		if (t->operand_types[op].bitfield.xmmword
+		    + t->operand_types[op].bitfield.ymmword
+		    + t->operand_types[op].bitfield.zmmword <= 1)
+		  type = &t->operand_types[op];
+		else if (!i.types[op].bitfield.unspecified)
+		  type = &i.types[op];
+	      }
+	    else if (i.types[op].bitfield.regsimd)
+	      {
+		if (i.types[op].bitfield.zmmword)
+		  i.memshift = 6;
+		else if (i.types[op].bitfield.ymmword && i.memshift < 5)
+		  i.memshift = 5;
+		else if (i.types[op].bitfield.xmmword && i.memshift < 4)
+		  i.memshift = 4;
+	      }
+
+	  if (type)
+	    {
+	      if (type->bitfield.zmmword)
+		i.memshift = 6;
+	      else if (type->bitfield.ymmword)
+		i.memshift = 5;
+	      else if (type->bitfield.xmmword)
+		i.memshift = 4;
+	    }
+
+	  /* For the check in fits_in_disp8().  */
+	  if (i.memshift == 0)
+	    i.memshift = -1;
+	}
 
       for (op = 0; op < i.operands; op++)
 	if (operand_type_check (i.types[op], disp)
