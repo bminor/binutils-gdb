@@ -45,7 +45,7 @@ set id_re "id=\"$decimal\""
 set type_re "type=\"process\""
 set description_re "description=\"$string_re\""
 set user_re "user=\"$string_re\""
-set cores_re "cores=\[\"$decimal\"(,\"$decimal\")*\]"
+set cores_re "cores=\\\[\"$decimal\"(,\"$decimal\")*\\\]"
 
 # List all available processes.
 set process_entry_re "{${id_re},${type_re}(,$description_re)?(,$user_re)?(,$cores_re)?}"
