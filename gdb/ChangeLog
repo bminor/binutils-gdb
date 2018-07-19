@@ -1,3 +1,10 @@
+2018-08-02  Tom Tromey  <tom@tromey.com>
+
+	PR symtab/16842.
+	* dwarf2read.c (read_func_scope): Set symtab on template parameter
+	symbols.
+	(process_structure_scope): Likewise.
+
 2018-08-02  Xavier Roirand  <roirand@adacore.com>
 
 	PR gdb/22629:

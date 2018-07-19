@@ -13753,6 +13753,13 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
       memcpy (templ_func->template_arguments,
 	      template_args.data (),
 	      (templ_func->n_template_arguments * sizeof (struct symbol *)));
+
+      /* Make sure that the symtab is set on the new symbols.  Even
+	 though they don't appear in this symtab directly, other parts
+	 of gdb assume that symbols do, and this is reasonably
+	 true.  */
+      for (struct symbol *sym : template_args)
+	symbol_set_symtab (sym, symbol_symtab (templ_func));
     }
 
   /* In C++, we can have functions nested inside functions (e.g., when
@@ -15873,6 +15880,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
      discriminant_info.  */
   bool is_variant_part = TYPE_FLAG_DISCRIMINATED_UNION (type);
   sect_offset discr_offset;
+  bool has_template_parameters = false;
 
   if (is_variant_part)
     {
@@ -15920,6 +15928,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
       /* Attach template arguments to type.  */
       if (!template_args.empty ())
 	{
+	  has_template_parameters = true;
 	  ALLOCATE_CPLUS_STRUCT_TYPE (type);
 	  TYPE_N_TEMPLATE_ARGUMENTS (type) = template_args.size ();
 	  TYPE_TEMPLATE_ARGUMENTS (type)
@@ -16069,7 +16078,20 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
      attribute, and a declaration attribute.  */
   if (dwarf2_attr (die, DW_AT_byte_size, cu) != NULL
       || !die_is_declaration (die, cu))
-    new_symbol (die, type, cu);
+    {
+      struct symbol *sym = new_symbol (die, type, cu);
+
+      if (has_template_parameters)
+	{
+	  /* Make sure that the symtab is set on the new symbols.
+	     Even though they don't appear in this symtab directly,
+	     other parts of gdb assume that symbols do, and this is
+	     reasonably true.  */
+	  for (int i = 0; i < TYPE_N_TEMPLATE_ARGUMENTS (type); ++i)
+	    symbol_set_symtab (TYPE_TEMPLATE_ARGUMENT (type, i),
+			       symbol_symtab (sym));
+	}
+    }
 }
 
 /* Assuming DIE is an enumeration type, and TYPE is its associated type,
