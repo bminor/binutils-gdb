@@ -672,7 +672,7 @@ extern void gdbscm_initialize_values (void);
 
 template<typename Function, typename... Args>
 SCM
-gdbscm_wrap (Function &&func, Args... args)
+gdbscm_wrap (Function &&func, Args &&... args)
 {
   SCM result = SCM_BOOL_F;
 

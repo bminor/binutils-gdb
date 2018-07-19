@@ -1,3 +1,8 @@
+2018-07-19  Pedro Alves  <palves@redhat.com>
+
+	* guile/guile-internal.h (gdbscm_wrap): Really make 'args' a
+	forwarding reference.
+
 2018-07-18  Pedro Alves  <palves@redhat.com>
 
 	* guile/guile.c (gdbscm_execute_gdb_command): Adjust to use
