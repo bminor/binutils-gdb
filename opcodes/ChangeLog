@@ -1,5 +1,13 @@
 2018-07-19  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl: Fold AVX512DQ templates into their respective
+	AVX512VL counterparts where possible, using Disp8ShiftVL and
+	CheckRegSize instead of Evex= plus Disp8MemShift= (plus often
+	IgnoreSize) as appropriate.
+	* i386-tbl.h: Re-generate.
+
+2018-07-19  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl: Fold AVX512BW templates into their respective
 	AVX512VL counterparts where possible, using Disp8ShiftVL and
 	CheckRegSize instead of Evex= plus Disp8MemShift= (plus often
