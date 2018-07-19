@@ -519,7 +519,7 @@ extern SCM psscm_scm_from_pspace (struct program_space *);
 
 extern int gdbscm_scm_string_to_int (SCM string);
 
-extern char *gdbscm_scm_to_c_string (SCM string);
+extern gdb::unique_xmalloc_ptr<char> gdbscm_scm_to_c_string (SCM string);
 
 extern SCM gdbscm_scm_from_c_string (const char *string);
 

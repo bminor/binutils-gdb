@@ -975,8 +975,6 @@ gdbscm_type_field (SCM self, SCM field_scm)
   type_smob *t_smob
     = tyscm_get_type_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct type *type = t_smob->type;
-  char *field;
-  int i;
 
   SCM_ASSERT_TYPE (scm_is_string (field_scm), field_scm, SCM_ARG2, FUNC_NAME,
 		   _("string"));
@@ -990,20 +988,20 @@ gdbscm_type_field (SCM self, SCM field_scm)
     gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG1, self,
 			       _(not_composite_error));
 
-  field = gdbscm_scm_to_c_string (field_scm);
+  {
+    gdb::unique_xmalloc_ptr<char> field = gdbscm_scm_to_c_string (field_scm);
 
-  for (i = 0; i < TYPE_NFIELDS (type); i++)
-    {
-      const char *t_field_name = TYPE_FIELD_NAME (type, i);
+    for (int i = 0; i < TYPE_NFIELDS (type); i++)
+      {
+	const char *t_field_name = TYPE_FIELD_NAME (type, i);
 
-      if (t_field_name && (strcmp_iw (t_field_name, field) == 0))
-	{
-	  xfree (field);
-	  return tyscm_make_field_smob (self, i);
-	}
-    }
-
-  xfree (field);
+	if (t_field_name && (strcmp_iw (t_field_name, field.get ()) == 0))
+	  {
+	    field.reset (nullptr);
+	    return tyscm_make_field_smob (self, i);
+	  }
+      }
+  }
 
   gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG1, field_scm,
 			     _("Unknown field"));
@@ -1018,8 +1016,6 @@ gdbscm_type_has_field_p (SCM self, SCM field_scm)
   type_smob *t_smob
     = tyscm_get_type_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct type *type = t_smob->type;
-  char *field;
-  int i;
 
   SCM_ASSERT_TYPE (scm_is_string (field_scm), field_scm, SCM_ARG2, FUNC_NAME,
 		   _("string"));
@@ -1033,20 +1029,18 @@ gdbscm_type_has_field_p (SCM self, SCM field_scm)
     gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG1, self,
 			       _(not_composite_error));
 
-  field = gdbscm_scm_to_c_string (field_scm);
+  {
+    gdb::unique_xmalloc_ptr<char> field
+      = gdbscm_scm_to_c_string (field_scm);
 
-  for (i = 0; i < TYPE_NFIELDS (type); i++)
-    {
-      const char *t_field_name = TYPE_FIELD_NAME (type, i);
+    for (int i = 0; i < TYPE_NFIELDS (type); i++)
+      {
+	const char *t_field_name = TYPE_FIELD_NAME (type, i);
 
-      if (t_field_name && (strcmp_iw (t_field_name, field) == 0))
-	{
-	  xfree (field);
+	if (t_field_name && (strcmp_iw (t_field_name, field.get ()) == 0))
 	  return SCM_BOOL_T;
-	}
-    }
-
-  xfree (field);
+      }
+  }
 
   return SCM_BOOL_F;
 }

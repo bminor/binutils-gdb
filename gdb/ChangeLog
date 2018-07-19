@@ -1,3 +1,22 @@
+2018-07-19  Pedro Alves  <palves@redhat.com>
+
+	* guile/guile-internal.h (gdbscm_scm_to_c_string): Now returns a
+	gdb::unique_xmalloc_ptr.
+	* guile/scm-breakpoint.c (gdbscm_set_breakpoint_condition_x):
+	Adjust to use dbscm_wrap and gdb::unique_xmalloc_ptr.
+	* guile/scm-exception.c (gdbscm_exception_message_to_string): Use
+	copy-initialization.
+	* guile/scm-pretty-print.c (ppscm_print_children): Use
+	gdb::unique_xmalloc_ptr instead of cleanups.
+	(gdbscm_apply_val_pretty_printer): Remove cleanups.
+	* guile/scm-string.c (gdbscm_scm_to_c_string): Now returns a
+	gdb::unique_xmalloc_ptr.
+	* guile/scm-type.c (gdbscm_type_field, gdbscm_type_has_field_p):
+	Adjust to use gdb::unique_xmalloc_ptr.
+	* guile/scm-utils.c (extract_arg): Adjust.
+	* guile/scm-value.c (gdbscm_value_field): Adjust to use
+	gdb::unique_xmalloc_ptr instead of a cleanup.
+
 2018-07-19  Tom Tromey  <tom@tromey.com>
 
 	* utils.c (do_value_free_to_mark)

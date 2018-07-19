@@ -205,7 +205,7 @@ extract_arg (char format_char, SCM arg, void *argp,
 
 	CHECK_TYPE (gdbscm_is_true (scm_string_p (arg)), arg, position,
 		    func_name, _("string"));
-	*arg_ptr = gdbscm_scm_to_c_string (arg);
+	*arg_ptr = gdbscm_scm_to_c_string (arg).release ();
 	break;
       }
     case 't':

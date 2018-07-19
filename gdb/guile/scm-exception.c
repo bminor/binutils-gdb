@@ -599,7 +599,7 @@ gdbscm_exception_message_to_string (SCM exception)
 
   gdbscm_print_exception_message (port, SCM_BOOL_F, key, args);
   gdb::unique_xmalloc_ptr<char> result
-    (gdbscm_scm_to_c_string (scm_get_output_string (port)));
+    = gdbscm_scm_to_c_string (scm_get_output_string (port));
   scm_close_port (port);
   return result;
 }

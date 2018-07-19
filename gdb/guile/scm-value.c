@@ -619,20 +619,14 @@ gdbscm_value_field (SCM self, SCM field_scm)
     {
       scoped_value_mark free_values;
 
-      char *field = gdbscm_scm_to_c_string (field_scm);
-
-      struct cleanup *cleanups = make_cleanup (xfree, field);
+      gdb::unique_xmalloc_ptr<char> field = gdbscm_scm_to_c_string (field_scm);
 
       struct value *tmp = v_smob->value;
 
-      struct value *res_val = value_struct_elt (&tmp, NULL, field, NULL,
+      struct value *res_val = value_struct_elt (&tmp, NULL, field.get (), NULL,
 						"struct/class/union");
 
-      SCM result = vlscm_scm_from_value (res_val);
-
-      do_cleanups (cleanups);
-
-      return result;
+      return vlscm_scm_from_value (res_val);
     });
 }
 

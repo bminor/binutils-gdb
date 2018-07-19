@@ -48,13 +48,12 @@ gdbscm_scm_from_c_string (const char *string)
 
 /* Convert an SCM string to a C (latin1) string.
    "latin1" is chosen because Guile won't throw an exception.
-   Space for the result is allocated with malloc, caller must free.
    It is an error to call this if STRING is not a string.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 gdbscm_scm_to_c_string (SCM string)
 {
-  return scm_to_latin1_string (string);
+  return gdb::unique_xmalloc_ptr<char> (scm_to_latin1_string (string));
 }
 
 /* Use printf to construct a Scheme string.  */

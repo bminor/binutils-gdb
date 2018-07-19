@@ -888,32 +888,22 @@ gdbscm_set_breakpoint_condition_x (SCM self, SCM newvalue)
 {
   breakpoint_smob *bp_smob
     = bpscm_get_valid_breakpoint_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
-  char *exp;
-  struct gdb_exception except = exception_none;
 
   SCM_ASSERT_TYPE (scm_is_string (newvalue) || gdbscm_is_false (newvalue),
 		   newvalue, SCM_ARG2, FUNC_NAME,
 		   _("string or #f"));
 
-  if (gdbscm_is_false (newvalue))
-    exp = NULL;
-  else
-    exp = gdbscm_scm_to_c_string (newvalue);
-
-  TRY
+  return gdbscm_wrap ([=]
     {
-      set_breakpoint_condition (bp_smob->bp, exp ? exp : "", 0);
-    }
-  CATCH (ex, RETURN_MASK_ALL)
-    {
-      except = ex;
-    }
-  END_CATCH
+      gdb::unique_xmalloc_ptr<char> exp
+	= (gdbscm_is_false (newvalue)
+	   ? nullptr
+	   : gdbscm_scm_to_c_string (newvalue));
 
-  xfree (exp);
-  GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      set_breakpoint_condition (bp_smob->bp, exp ? exp.get () : "", 0);
 
-  return SCM_UNSPECIFIED;
+      return SCM_UNSPECIFIED;
+    });
 }
 
 /* (breakpoint-stop <gdb:breakpoint>) -> procedure or #f */

@@ -734,7 +734,6 @@ ppscm_print_children (SCM printer, enum display_hint hint,
   unsigned int i;
   SCM children;
   SCM iter = SCM_BOOL_F; /* -Wall */
-  struct cleanup *cleanups;
 
   if (gdbscm_is_false (w_smob->children))
     return;
@@ -745,8 +744,6 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 	 w_smob->children);
       return;
     }
-
-  cleanups = make_cleanup (null_cleanup, NULL);
 
   /* If we are printing a map or an array, we want special formatting.  */
   is_map = hint == HINT_MAP;
@@ -788,9 +785,7 @@ ppscm_print_children (SCM printer, enum display_hint hint,
   for (i = 0; i < options->print_max; ++i)
     {
       SCM scm_name, v_scm;
-      char *name;
       SCM item = itscm_safe_call_next_x (iter, gdbscm_memory_error_p);
-      struct cleanup *inner_cleanup = make_cleanup (null_cleanup, NULL);
 
       if (gdbscm_is_exception (item))
 	{
@@ -822,8 +817,8 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 	       " a string"), item);
 	  continue;
 	}
-      name = gdbscm_scm_to_c_string (scm_name);
-      make_cleanup (xfree, name);
+      gdb::unique_xmalloc_ptr<char> name
+	= gdbscm_scm_to_c_string (scm_name);
 
       /* Print initial "{".  For other elements, there are three cases:
 	 1. Maps.  Print a "," after each value element.
@@ -874,7 +869,7 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 	}
       else if (! is_map)
 	{
-	  fputs_filtered (name, stream);
+	  fputs_filtered (name.get (), stream);
 	  fputs_filtered (" = ", stream);
 	}
 
@@ -887,10 +882,9 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 	}
       else if (scm_is_string (v_scm))
 	{
-	  char *output = gdbscm_scm_to_c_string (v_scm);
-
-	  fputs_filtered (output, stream);
-	  xfree (output);
+	  gdb::unique_xmalloc_ptr<char> output
+	    = gdbscm_scm_to_c_string (v_scm);
+	  fputs_filtered (output.get (), stream);
 	}
       else
 	{
@@ -910,8 +904,6 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 
       if (is_map && i % 2 == 0)
 	fputs_filtered ("] = ", stream);
-
-      do_cleanups (inner_cleanup);
     }
 
   if (i)
@@ -934,8 +926,6 @@ ppscm_print_children (SCM printer, enum display_hint hint,
     }
 
  done:
-  do_cleanups (cleanups);
-
   /* Play it safe, make sure ITER doesn't get GC'd.  */
   scm_remember_upto_here_1 (iter);
 }
@@ -957,7 +947,6 @@ gdbscm_apply_val_pretty_printer (const struct extension_language_defn *extlang,
   SCM val_obj = SCM_BOOL_F;
   struct value *value;
   enum display_hint hint;
-  struct cleanup *cleanups;
   enum ext_lang_rc result = EXT_LANG_RC_NOP;
   enum string_repr_result print_result;
   const gdb_byte *valaddr = value_contents_for_printing (val);
@@ -968,8 +957,6 @@ gdbscm_apply_val_pretty_printer (const struct extension_language_defn *extlang,
 
   if (!gdb_scheme_initialized)
     return EXT_LANG_RC_NOP;
-
-  cleanups = make_cleanup (null_cleanup, NULL);
 
   /* Instantiate the printer.  */
   value = value_from_component (val, type, embedded_offset);
@@ -1024,7 +1011,6 @@ gdbscm_apply_val_pretty_printer (const struct extension_language_defn *extlang,
  done:
   if (gdbscm_is_exception (exception))
     ppscm_print_exception_unless_memory_error (exception, stream);
-  do_cleanups (cleanups);
   return result;
 }
 
