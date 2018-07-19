@@ -141,23 +141,6 @@ show_pagination_enabled (struct ui_file *file, int from_tty,
    because while they use the "cleanup API" they are not part of the
    "cleanup API".  */
 
-/* Helper for make_cleanup_value_free_to_mark.  */
-
-static void
-do_value_free_to_mark (void *value)
-{
-  value_free_to_mark ((struct value *) value);
-}
-
-/* Free all values allocated since MARK was obtained by value_mark
-   (except for those released) when the cleanup is run.  */
-
-struct cleanup *
-make_cleanup_value_free_to_mark (struct value *mark)
-{
-  return make_cleanup (do_value_free_to_mark, mark);
-}
-
 /* This function is useful for cleanups.
    Do
 

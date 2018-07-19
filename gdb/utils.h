@@ -248,10 +248,6 @@ private:
 
 /* Cleanup utilities.  */
 
-/* For make_cleanup_close see common/filestuff.h.  */
-
-extern struct cleanup *make_cleanup_value_free_to_mark (struct value *);
-
 /* A deleter for a hash table.  */
 struct htab_deleter
 {
