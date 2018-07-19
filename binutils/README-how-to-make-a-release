@@ -315,6 +315,10 @@ looks like this:
        a. Update the minor release number in bfd/version.m4.
        b. Edit bfd/development.sh and set "development=false".
        c. Regenerate the configure files.
+       c.1. Remove spurious autom4te.cache files:
+
+          find . -depth -name autom4te.cache -exec rm -r {} \;
+	  
        d. Commit the updates along with a "this-is-the-2.XX.X-release"
           note in all of the changelogs.
        e. Tag the branch with the new release number:
@@ -339,9 +343,6 @@ looks like this:
        k. Clean up the source tree.  (Use "git status" to find new
            files, and remove them).
 
-     FIXME: The tarballs will contain spurious autom4te.cache
-     directories which could be removed to reduce their size.
-
   4. [If paranoid - upload the tarballs to one of the FTP servers and
       ask people to test it before going on to step 5].
 
@@ -354,18 +355,17 @@ looks like this:
   6. Upload the tarballs to sourceware.org:
 
        sftp sourceware.org
-         cd /ftp/pub/binutils/releases
+         cd /sourceware/ftp/pub/binutils/releases
  	 put binutils-X.XX.X.tar.*
  	 chmod 644 binutils-X.XX.X.tar.*
 	 quit
 
-    FIXME: Should the signatures (created by the gnupload script in
-    step 5) be uploaded as well ?
+    It is OK to upload the signatures as well.
 
   7. Update web pages.  For sourceware.org:
 
       * Log on to sourceware.org
-      * Go /www/htdocs/binutils
+      * Go to /sourceware/www/sourceware/htdocs/binutils
       * Edit index.html
 
       For the www.gnu.org site you have to email webmasters@gnu.org
@@ -378,8 +378,8 @@ looks like this:
 ------------------------------------------------------------------------
 Hi Everyone,
 
-  We are pleased to announce that version 2.XX.X of the Binutils project
-  sources have been released and are now available for download at:
+  We are pleased to announce that version 2.XX.X of the GNU Binutils
+  project sources have been released and are now available for download at:
 
     https://ftp.gnu.org/gnu/binutils
     https://sourceware.org/pub/binutils/releases/

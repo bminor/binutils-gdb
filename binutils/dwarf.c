@@ -7283,7 +7283,7 @@ read_cie (unsigned char *start, unsigned char *end,
   if (start == end)
     {
       warn (_("No terminator for augmentation name\n"));
-      return start;
+      goto fail;
     }
 
   if (strcmp (fc->augmentation, "eh") == 0)
@@ -7295,7 +7295,7 @@ read_cie (unsigned char *start, unsigned char *end,
       if (fc->ptr_size < 1 || fc->ptr_size > 8)
 	{
 	  warn (_("Invalid pointer size (%d) in CIE data\n"), fc->ptr_size);
-	  return end;
+	  goto fail;
 	}
 
       GET (fc->segment_size, 1);
@@ -7303,7 +7303,7 @@ read_cie (unsigned char *start, unsigned char *end,
       if (fc->segment_size > 8 || fc->segment_size + fc->ptr_size > 8)
 	{
 	  warn (_("Invalid segment size (%d) in CIE data\n"), fc->segment_size);
-	  return end;
+	  goto fail;
 	}
 
       eh_addr_size = fc->ptr_size;
@@ -7313,8 +7313,10 @@ read_cie (unsigned char *start, unsigned char *end,
       fc->ptr_size = eh_addr_size;
       fc->segment_size = 0;
     }
+
   READ_ULEB (fc->code_factor);
   READ_SLEB (fc->data_factor);
+
   if (version == 1)
     {
       GET (fc->ra, 1);
@@ -7334,7 +7336,7 @@ read_cie (unsigned char *start, unsigned char *end,
 	  warn (_("Augmentation data too long: 0x%s, expected at most %#lx\n"),
 		dwarf_vmatoa ("x", augmentation_data_len),
 		(unsigned long) (end - start));
-	  return end;
+	  goto fail;
 	}
       start += augmentation_data_len;
     }
@@ -7376,6 +7378,12 @@ read_cie (unsigned char *start, unsigned char *end,
       *p_aug = augmentation_data;
     }
   return start;
+
+ fail:
+  free (fc->col_offset);
+  free (fc->col_type);
+  free (fc);
+  return end;
 }
 
 /* Prints out the contents on the DATA array formatted as unsigned bytes.

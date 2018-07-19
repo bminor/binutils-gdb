@@ -1,3 +1,8 @@
+2018-07-19  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (read_cie): Free allocated memory before returning with
+	a failure result.
+
 2018-07-16  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
 	* readelf.c (get_note_type): Fix typo in NT_PPC_TM_CVSX note
