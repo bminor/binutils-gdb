@@ -1126,7 +1126,7 @@ e561 tbeginc SIL_RDU "constrained transaction begin" zEC12 zarch htm
 b2f8 tend S_00 "transaction end" zEC12 zarch htm
 c7 bpp SMI_U0RDP "branch prediction preload" zEC12 zarch
 c5 bprp MII_UPP "branch prediction relative preload" zEC12 zarch
-b2e8 ppa RRF_U0RR "perform processor assist" zEC12 zarch
+b2e8 ppa RRF_U0RR "perform processor assist" zEC12 zarch htm
 b2fa niai IE_UU "next instruction access intent" zEC12 zarch
 b98f crdte RRF_RURR2 "compare and replace DAT table entry" zEC12 zarch optparm
 e3000000009f lat RXY_RRRD "load and trap 32 bit" zEC12 zarch
