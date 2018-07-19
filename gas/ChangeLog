@@ -1,5 +1,9 @@
 2018-07-19  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/gas/i386/noavx512-2.l: Adjust expectations.
+
+2018-07-19  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (is_evex_encoding): Also check disp8memshift.
 	(optimize_encoding): Also cover templates without cpuavx512vl
 	allowing for zmmword and having a ymmword actual.
