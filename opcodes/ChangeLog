@@ -1,5 +1,12 @@
 2018-07-19  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (vcvtpd2dq, vcvtpd2ps, vcvttpd2dq, vcvtpd2udq,
+	vcvtqq2ps, vcvtuqq2ps): Fold 128- and 256-bit templates. Drop
+	IgnoreSize and [XYZ]MMword where applicable.
+	* i386-tbl.h: Re-generate.
+
+2018-07-19  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (vfpclasspd, vfpclassps): Fold.
 	(vfpclasspdz, vfpclasspsz): Drop IgnoreSize and ZmmWord.
 	(vfpclasspdx, vfpclasspsx): Drop IgnoreSize and XmmWord.
