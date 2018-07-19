@@ -1,5 +1,13 @@
 2018-07-19  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (vfpclasspd, vfpclassps): Fold.
+	(vfpclasspdz, vfpclasspsz): Drop IgnoreSize and ZmmWord.
+	(vfpclasspdx, vfpclasspsx): Drop IgnoreSize and XmmWord.
+	(vfpclasspdy, vfpclasspsy): Drop IgnoreSize and YmmWord.
+	* i386-tbl.h: Re-generate.
+
+2018-07-19  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl: Fold AVX512IFMA, AVX512VBMI, AVX512_VPOPCNTDQ,
 	AVX512_VBMI2, AVX512_VNNI, AVX512_BITALG, GFNI, VAES, and
 	VPCLMULQDQ templates into their respective AVX512VL counterparts

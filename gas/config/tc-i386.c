@@ -3622,7 +3622,24 @@ build_evex_prefix (void)
 		  i.tm.opcode_modifier.evex = EVEX256;
 		else if (i.types[op].bitfield.xmmword)
 		  i.tm.opcode_modifier.evex = EVEX128;
-		else
+		else if (i.broadcast && (int) op == i.broadcast->operand)
+		  {
+		    switch ((i.tm.operand_types[op].bitfield.dword ? 4 : 8)
+			    * i.broadcast->type)
+		      {
+			case 64:
+			  i.tm.opcode_modifier.evex = EVEX512;
+			  break;
+			case 32:
+			  i.tm.opcode_modifier.evex = EVEX256;
+			  break;
+			case 16:
+			  i.tm.opcode_modifier.evex = EVEX128;
+			  break;
+			default:
+			  continue;
+		      }
+		  }
 		  continue;
 		break;
 	      }
@@ -5430,6 +5447,7 @@ match_template (char mnem_suffix)
 	  && flag_code != CODE_64BIT
 	  && (intel_syntax
 	      ? (!t->opcode_modifier.ignoresize
+	         && !t->opcode_modifier.broadcast
 		 && !intel_float_operand (t->name))
 	      : intel_float_operand (t->name) != 2)
 	  && ((!operand_types[0].bitfield.regmmx

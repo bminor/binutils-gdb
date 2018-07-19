@@ -1,5 +1,12 @@
 2018-07-19  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (build_evex_prefix): Derive vector length
+	from broadcast specification if necessary.
+	(match_template): Also exclude broadcast when checking whether
+	to reject 32-bit operands on pre-386.
+
+2018-07-19  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/i386/noavx512-2.l: Adjust expectations.
 
 2018-07-19  Jan Beulich  <jbeulich@suse.com>
