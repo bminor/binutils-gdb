@@ -458,11 +458,7 @@ mips_linux_nat_target::read_description ()
 
   if (have_dsp < 0)
     {
-      int tid;
-
-      tid = inferior_ptid.lwp ();
-      if (tid == 0)
-	tid = inferior_ptid.pid ();
+      int tid = get_ptrace_pid (inferior_ptid);
 
       errno = 0;
       ptrace (PTRACE_PEEKUSER, tid, DSP_CONTROL, 0);
