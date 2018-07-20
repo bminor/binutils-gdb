@@ -105,9 +105,8 @@ fetch_fpregs (struct regcache *regcache, struct proc *thread)
 }
 
 /* Fetch register REGNO, or all regs if REGNO is -1.  */
-static void
-gnu_fetch_registers (struct target_ops *ops,
-		     struct regcache *regcache, int regno)
+void
+i386_gnu_nat_target::fetch_registers (struct regcache *regcache, int regno)
 {
   struct proc *thread;
   ptid_t ptid = regcache->ptid ();
@@ -196,9 +195,8 @@ store_fpregs (const struct regcache *regcache, struct proc *thread, int regno)
 }
 
 /* Store at least register REGNO, or all regs if REGNO == -1.  */
-static void
-gnu_store_registers (struct target_ops *ops,
-		     struct regcache *regcache, int regno)
+void
+i386_gnu_nat_target::store_registers (struct regcache *regcache, int regno)
 {
   struct proc *thread;
   struct gdbarch *gdbarch = regcache->arch ();

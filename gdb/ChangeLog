@@ -1,5 +1,13 @@
 2019-02-14  Thomas Schwinge  <thomas@codesourcery.com>
 
+	* gnu-nat.c (gnu_nat_target::detach): Instead of
+	'inf_child_maybe_unpush_target (ops)' call 'maybe_unpush_target'.
+	* gnu-nat.h: #include "inf-child.h".
+	* i386-gnu-nat.c (gnu_fetch_registers): Rename/move to
+	'i386_gnu_nat_target::fetch_registers'.
+	(gnu_store_registers): Rename/move to
+	'i386_gnu_nat_target::store_registers'.
+
 	* config/i386/nm-i386gnu.h: Don't "#include" any files.
 	* gnu-nat.h (mach_thread_info): New function.
 	* gnu-nat.c (thread_takeover_sc_cmd): Use it.

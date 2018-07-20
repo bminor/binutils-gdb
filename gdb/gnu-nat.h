@@ -35,6 +35,8 @@ extern __typeof__ (mach_thread_info) mach_thread_info asm ("thread_info");
 
 #include <unistd.h>
 
+#include "inf-child.h"
+
 struct inf;
 
 extern struct inf *gnu_current_inf;
