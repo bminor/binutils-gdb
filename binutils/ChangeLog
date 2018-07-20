@@ -1,3 +1,13 @@
+2018-07-20  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (add_specific_symbols): Free buffer on exit.
+	(add_redefine_syms_file): Close file handle on exit.
+	(copy_object): Close file handle on early exit.
+	Free buffer on early exit.
+	Free gaps buffers once they are no longer needed.
+	* dwarf.c (display_debug_frames): Free allocated memory on exit.
+	(load_separate_debug_info): Free allocate memory on early exit.
+
 2018-07-20  Chenghua Xu  <paul.hua.gm@gmail.com>
 	    Maciej W. Rozycki  <macro@mips.com>
 

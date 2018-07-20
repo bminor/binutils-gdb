@@ -1142,6 +1142,8 @@ add_specific_symbols (const char *filename, htab_t htab)
       line = eol;
       line_count ++;
     }
+
+  free (buffer);
 }
 
 /* See whether a symbol should be stripped or kept
@@ -1817,6 +1819,7 @@ add_redefine_syms_file (const char *filename)
     fatal (_("%s:%d: premature end of file"), filename, lineno);
 
   free (buf);
+  fclose (file);
 }
 
 /* Copy unknown object file IBFD onto OBFD.
@@ -2823,6 +2826,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 			     pdump->filename,
 			     strerror (errno));
 		  free (contents);
+		  fclose (f);
 		  return FALSE;
 		}
 	    }
@@ -3153,6 +3157,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 						  off, now))
 		    {
 		      bfd_nonfatal_message (NULL, obfd, osections[i], NULL);
+		      free (buf);
 		      return FALSE;
 		    }
 
@@ -3161,6 +3166,10 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 		}
 	    }
 	}
+
+      free (buf);
+      free (gaps);
+      gaps = NULL;
     }
 
   /* Allow the BFD backend to copy any private data it understands

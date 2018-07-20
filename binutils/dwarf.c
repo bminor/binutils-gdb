@@ -7429,10 +7429,10 @@ display_debug_frames (struct dwarf_section *section,
   unsigned char *start = section->start;
   unsigned char *end = start + section->size;
   unsigned char *section_start = start;
-  Frame_Chunk *chunks = 0, *forward_refs = 0;
-  Frame_Chunk *remembered_state = 0;
+  Frame_Chunk *chunks = NULL, *forward_refs = NULL;
+  Frame_Chunk *remembered_state = NULL;
   Frame_Chunk *rs;
-  int is_eh = strcmp (section->name, ".eh_frame") == 0;
+  bfd_boolean is_eh = strcmp (section->name, ".eh_frame") == 0;
   unsigned int length_return;
   unsigned int max_regs = 0;
   const char *bad_reg = _("bad register: ");
@@ -8364,6 +8364,36 @@ display_debug_frames (struct dwarf_section *section,
     }
 
   printf ("\n");
+
+  while (remembered_state != NULL)
+    {
+      rs = remembered_state;
+      remembered_state = rs->next;
+      free (rs->col_type);
+      free (rs->col_offset);
+      rs->next = NULL; /* Paranoia.  */
+      free (rs);
+    }
+
+  while (chunks != NULL)
+    {
+      rs = chunks;
+      chunks = rs->next;
+      free (rs->col_type);
+      free (rs->col_offset);
+      rs->next = NULL; /* Paranoia.  */
+      free (rs);
+    }
+
+  while (forward_refs != NULL)
+    {
+      rs = forward_refs;
+      forward_refs = rs->next;
+      free (rs->col_type);
+      free (rs->col_offset);
+      rs->next = NULL; /* Paranoia.  */
+      free (rs);
+    }
 
   return 1;
 }
@@ -9793,6 +9823,7 @@ load_separate_debug_info (const char *            main_filename,
   if (debugfile == NULL)
     {
       warn (_("Out of memory"));
+      free (canon_dir);
       return NULL;
     }
 
