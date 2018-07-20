@@ -1,3 +1,27 @@
+2018-07-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23428
+	* testsuite/ld-elf/linux-x86.S: New file.
+	* testsuite/ld-elf/linux-x86.exp: Likewise.
+	* testsuite/ld-elf/pr23428.c: Likewise.
+	* testsuite/ld-elf/sec64k.exp: Pass "-z noseparate-code" to ld
+	for Linux/x86 targets.
+	* testsuite/ld-i386/abs-iamcu.d: Likewise.
+	* testsuite/ld-i386/abs.d: Likewise.
+	* testsuite/ld-i386/pr12718.d: Likewise.
+	* testsuite/ld-i386/pr12921.d: Likewise.
+	* testsuite/ld-x86-64/abs-k1om.d: Likewise.
+	* testsuite/ld-x86-64/abs-l1om.d: Likewise.
+	* testsuite/ld-x86-64/abs.d: Likewise.
+	* testsuite/ld-x86-64/pr12718.d: Likewise.
+	* testsuite/ld-x86-64/pr12921.d: Likewise.
+	* testsuite/ld-linkonce/zeroeh.ld: Discard .note.gnu.property
+	section.
+	* testsuite/ld-scripts/print-memory-usage.t: Likewise.
+	* testsuite/ld-scripts/size-2.t: Likewise.
+	* testsuite/lib/ld-lib.exp (run_ld_link_exec_tests): Use ld to
+	create executable if language is "asm".
+
 2018-07-18  Nick Clifton  <nickc@redhat.com>
 
 	2.31.1 Release point.

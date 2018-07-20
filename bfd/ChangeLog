@@ -1,3 +1,11 @@
+2018-07-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23428
+	* elfxx-x86.c (_bfd_x86_elf_link_setup_gnu_properties): If the
+	separate code program header is needed, make sure that the first
+	read-only PT_LOAD segment has no code by adding a
+	GNU_PROPERTY_X86_ISA_1_USED note.
+
 2018-07-18  Nick Clifton  <nickc@redhat.com>
 
 	* development.sh: Set to true.

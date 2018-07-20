@@ -177,6 +177,8 @@ if { ![istarget "d10v-*-*"]
     foreach sfile $sfiles { puts $ofd "#source: $sfile" }
     if { [istarget spu*-*-*] } {
 	puts $ofd "#ld: --local-store 0:0"
+    } elseif { [istarget "i?86-*-linux*"] || [istarget "x86_64-*-linux*"] } {
+	puts $ofd "#ld: -z noseparate-code"
     } else {
 	puts $ofd "#ld:"
     }
