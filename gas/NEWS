@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add support for the MIPS Loongson MultiMedia extensions Instructions (MMI)
+  ASE.
+
 Changes in 2.31:
 
 * The ADR and ADRL pseudo-instructions supported by the ARM assembler

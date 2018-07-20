@@ -1,3 +1,8 @@
+2018-07-20  Chenghua Xu  <paul.hua.gm@gmail.com>
+	    Maciej W. Rozycki  <macro@mips.com>
+
+	* readelf.c (print_mips_ases): Add MMI extension.
+
 2018-07-19  DJ Delorie  <dj@redhat.com>
 
 	* MAINTAINERS (RL78, RX): Remove myself as maintainer.

@@ -1,3 +1,33 @@
+2018-07-20  Chenghua Xu  <paul.hua.gm@gmail.com>
+	    Maciej W. Rozycki  <macro@mips.com>
+
+	* NEWS: Mention MultiMedia extensions Instructions (MMI)
+	support.
+	* config/tc-mips.c (options): Add OPTION_LOONGSON_MMI and
+	OPTION_NO_LOONGSON_MMI.
+	(md_longopts): Likewise.
+	(mips_ases): Define availability for MMI.
+	(mips_convert_ase_flags): Map ASE_LOONGSON_MMI to
+	AFL_ASE_LOONGSON_MMI.
+	(mips_cpu_info_table): Add ASE_LOONGSON_MMI for loongson2f/3a.
+	(md_show_usage): Add help for -mloongson-mmi and
+	-mno-loongson-mmi.
+	* doc/as.texi: Document -mloongson-mmi, -mno-loongson-mmi.
+	* doc/c-mips.texi: Document -mloongson-mmi, -mno-loongson-mmi,
+	.set loongson-mmi and .set noloongson-mmi.
+	* testsuite/gas/mips/loongson-2f.d: Move mmi test to ...
+	* testsuite/gas/mips/loongson-2f-mmi.d: Here.  Add ISA/ASE
+	flag verification.
+	* testsuite/gas/mips/loongson-2f.s: Move mmi test to ...
+	* testsuite/gas/mips/loongson-2f-mmi.s: Here.
+	* testsuite/gas/mips/loongson-3a.d: Move mmi test to ...
+	* testsuite/gas/mips/loongson-3a-mmi.d: Here.  Add ISA/ASE
+	flag verification.
+	* testsuite/gas/mips/loongson-3a.s: Move mmi test to ...
+	* testsuite/gas/mips/loongson-3a-mmi.s: Here.
+	* testsuite/gas/mips/mips.exp: Run loongson-2f-mmi and
+	loongson-3a-mmi tests.
+
 2018-07-20  Jose E. Marchesi  <jose.marchesi@oracle.com>
 	    Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 

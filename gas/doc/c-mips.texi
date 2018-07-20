@@ -246,6 +246,13 @@ Generate code for the Global INValidate (GINV) Application Specific
 Extension.  This tells the assembler to accept GINV instructions.
 @samp{-mno-ginv} turns off this option.
 
+@item -mloongson-mmi
+@itemx -mno-loongson-mmi
+Generate code for the Loongson MultiMedia extensions Instructions (MMI)
+Application Specific Extension.  This tells the assembler to accept MMI
+instructions.
+@samp{-mno-loongson-mmi} turns off this option.
+
 @item -minsn32
 @itemx -mno-insn32
 Only use 32-bit instruction encodings when generating code for the
@@ -1136,6 +1143,14 @@ from the CRC Extension from that point on in the assembly.  The
 The directive @code{.set ginv} makes the assembler accept instructions
 from the GINV Extension from that point on in the assembly.  The
 @code{.set noginv} directive prevents GINV instructions from being accepted.
+
+@cindex Loongson MultiMedia extensions Instructions (MMI) generation override
+@kindex @code{.set loongson-mmi}
+@kindex @code{.set noloongson-mmi}
+The directive @code{.set loongson-mmi} makes the assembler accept
+instructions from the MMI Extension from that point on in the assembly.
+The @code{.set noloongson-mmi} directive prevents MMI instructions from
+being accepted.
 
 Traditional MIPS assemblers do not support these directives.
 

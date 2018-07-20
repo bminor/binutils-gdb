@@ -1238,7 +1238,8 @@ extern void bfd_mips_elf_swap_abiflags_v0_out
 #define AFL_ASE_CRC          0x00008000 /* CRC ASE.  */
 #define AFL_ASE_RESERVED1    0x00010000 /* Reserved by MIPS Tech for WIP.  */
 #define AFL_ASE_GINV         0x00020000 /* GINV ASE.  */
-#define AFL_ASE_MASK         0x0002ffff /* All ASEs.  */
+#define AFL_ASE_LOONGSON_MMI 0x00040000 /* Loongson MMI ASE.  */
+#define AFL_ASE_MASK         0x0004ffff /* All ASEs.  */
 
 /* Values for the isa_ext word of an ABI flags structure.  */
 

@@ -626,11 +626,11 @@ const struct mips_arch_choice mips_arch_choices[] =
     NULL, 0, mips_cp1_names_numeric, mips_hwr_names_numeric },
 
   { "loongson2f",   1, bfd_mach_mips_loongson_2f, CPU_LOONGSON_2F,
-    ISA_MIPS3 | INSN_LOONGSON_2F, 0, mips_cp0_names_numeric,
+    ISA_MIPS3 | INSN_LOONGSON_2F, ASE_LOONGSON_MMI, mips_cp0_names_numeric,
     NULL, 0, mips_cp1_names_numeric, mips_hwr_names_numeric },
 
   { "loongson3a",   1, bfd_mach_mips_loongson_3a, CPU_LOONGSON_3A,
-    ISA_MIPS64R2 | INSN_LOONGSON_3A, 0, mips_cp0_names_numeric,
+    ISA_MIPS64R2 | INSN_LOONGSON_3A, ASE_LOONGSON_MMI, mips_cp0_names_numeric,
     NULL, 0, mips_cp1_names_mips3264, mips_hwr_names_numeric },
 
   { "octeon",   1, bfd_mach_mips_octeon, CPU_OCTEON,
@@ -932,6 +932,12 @@ parse_mips_ase_option (const char *option)
   if (CONST_STRNEQ (option, "ginv"))
     {
       mips_ase |= ASE_GINV;
+      return TRUE;
+    }
+
+  if (CONST_STRNEQ (option, "loongson-mmi"))
+    {
+      mips_ase |= ASE_LOONGSON_MMI;
       return TRUE;
     }
 
@@ -2581,6 +2587,10 @@ static struct
 		  MIPS_OPTION_ARG_NONE },
   { "ginv",       N_("Recognize the Global INValidate (GINV) ASE "
 		     "instructions.\n"),
+		  MIPS_OPTION_ARG_NONE },
+  { "loongson-mmi",
+		  N_("Recognize the Loongson MultiMedia extensions "
+		     "Instructions (MMI) ASE instructions.\n"),
 		  MIPS_OPTION_ARG_NONE },
   { "gpr-names=", N_("Print GPR names according to specified ABI.\n\
                   Default: based on binary being disassembled.\n"),

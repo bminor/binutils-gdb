@@ -1,3 +1,10 @@
+2018-07-20  Chenghua Xu  <paul.hua.gm@gmail.com>
+	    Maciej W. Rozycki  <macro@mips.com>
+
+	* elf/mips.h (AFL_ASE_MMI): New macro.
+	(AFL_ASE_MASK): Update to include AFL_ASE_LOONGSON_MMI.
+	* opcode/mips.h (ASE_LOONGSON_MMI): New macro.
+
 2018-07-17  Maciej W. Rozycki  <macro@mips.com>
 
 	* bfdlink.h (bfd_link_hash_entry): Add `rel_from_abs' member.

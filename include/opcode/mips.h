@@ -1302,6 +1302,8 @@ static const unsigned int mips_isa_table[] = {
 #define ASE_CRC64		0x00080000
 /* Global INValidate Extension.  */
 #define ASE_GINV		0x00100000
+/* Loongson MultiMedia extensions Instructions (MMI).  */
+#define ASE_LOONGSON_MMI	0x00200000
 
 /* MIPS ISA defines, use instead of hardcoding ISA level.  */
 

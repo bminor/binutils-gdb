@@ -1,3 +1,8 @@
+2018-07-20  Chenghua Xu  <paul.hua.gm@gmail.com>
+	    Maciej W. Rozycki  <macro@mips.com>
+
+	* elfxx-mips.c (print_mips_ases): Add MMI extension.
+
 2018-07-20  Maciej W. Rozycki  <macro@mips.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_size_dynamic_sections): Do not
