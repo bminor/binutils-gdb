@@ -1,3 +1,7 @@
+2018-07-19  DJ Delorie  <dj@redhat.com>
+
+	* MAINTAINERS (RL78, RX): Remove myself as maintainer.
+
 2018-07-19  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (read_cie): Free allocated memory before returning with

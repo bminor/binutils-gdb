@@ -121,8 +121,6 @@ responsibility among the other maintainers.
   RISC-V	   Palmer Dabbelt <palmer@sifive.com>
   RISC-V	   Andrew Waterman <andrew@sifive.com>
   RISC-V	   Jim Wilson <jimw@sifive.com>
-  RL78             DJ Delorie <dj@redhat.com>
-  RX               DJ Delorie <dj@redhat.com>
   RX               Nick Clifton <nickc@redhat.com>
   s390, s390x	   Martin Schwidefsky <schwidefsky@de.ibm.com>
   s390, s390x	   Andreas Krebbel <krebbel@linux.vnet.ibm.com>

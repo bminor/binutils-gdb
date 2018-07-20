@@ -1,3 +1,7 @@
+2018-07-19  DJ Delorie  <dj@redhat.com>
+
+	* MAINTAINERS (rl78, m32c, rx, v850): Remove myself as maintainer.
+
 2018-07-14  Stafford Horne  <shorne@gmail.com>
 
 	* MAINTAINERS (or1k): Add myself as or1k maintainer.
