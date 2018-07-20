@@ -2573,7 +2573,26 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
   ctx.ref_addr_size = dwarf2_per_cu_ref_addr_size (dlbaton->per_cu);
   ctx.offset = dwarf2_per_cu_text_offset (dlbaton->per_cu);
 
-  ctx.eval (dlbaton->data, dlbaton->size);
+  TRY
+    {
+      ctx.eval (dlbaton->data, dlbaton->size);
+    }
+  CATCH (ex, RETURN_MASK_ERROR)
+    {
+      if (ex.error == NOT_AVAILABLE_ERROR)
+	{
+	  return 0;
+	}
+      else if (ex.error == NO_ENTRY_VALUE_ERROR)
+	{
+	  if (entry_values_debug)
+	    exception_print (gdb_stdout, ex);
+	  return 0;
+	}
+      else
+	throw_exception (ex);
+    }
+  END_CATCH
 
   switch (ctx.location)
     {

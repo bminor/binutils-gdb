@@ -1,3 +1,8 @@
+2018-07-25  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/vla-optimized-out-o3.exp: New file.  Reuse
+	vla-optimized-out.c.
+
 2018-07-25  Jan Vrany  <jan.vrany@fit.cvut.cz>
 
 	* gdb.mi/mi-breakpoint-location-ena-dis.cc: New file.
