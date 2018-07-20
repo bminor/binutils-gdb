@@ -1,5 +1,10 @@
 2018-07-30  Tom Tromey  <tom@tromey.com>
 
+	* nat/linux-osdata.c (pid_pgid_entry::operator<): Fix
+	irreflexivity violation.
+
+2018-07-30  Tom Tromey  <tom@tromey.com>
+
 	* cli/cli-decode.c (lookup_cmd): Remove lint code.
 	* value.c (unpack_long): Remove lint code.
 	* valops.c (value_ind): Remove lint code.

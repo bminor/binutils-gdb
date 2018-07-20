@@ -415,9 +415,11 @@ struct pid_pgid_entry
 
     /* Process group leaders always come first...  */
     if (this->is_leader ())
-      return true;
-
-    if (other.is_leader ())
+      {
+	if (!other.is_leader ())
+	  return true;
+      }
+    else if (other.is_leader ())
       return false;
 
     /* ...else sort by PID.  */
