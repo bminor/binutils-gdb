@@ -1,5 +1,22 @@
 2018-07-23  Max Filippov  <jcmvbkbc@gmail.com>
 
+	* testsuite/ld-xtensa/relax-static-defs.s: New file.
+	* testsuite/ld-xtensa/relax-static-local-pie.d: New file.
+	* testsuite/ld-xtensa/relax-static-local-shared.d: New file.
+	* testsuite/ld-xtensa/relax-static-local.s: New file.
+	* testsuite/ld-xtensa/relax-static-pie.d: New file.
+	* testsuite/ld-xtensa/relax-static-shared.d: New file.
+	* testsuite/ld-xtensa/relax-static.s: New file.
+	* testsuite/ld-xtensa/relax-undef-weak-local-pie.d: New file.
+	* testsuite/ld-xtensa/relax-undef-weak-local-shared.d: New file.
+	* testsuite/ld-xtensa/relax-undef-weak-local.s: New file.
+	* testsuite/ld-xtensa/relax-undef-weak-pie.d: New file.
+	* testsuite/ld-xtensa/relax-undef-weak-shared.d: New file.
+	* testsuite/ld-xtensa/relax-undef-weak.s: New file.
+	* testsuite/ld-xtensa/xtensa.exp: New file.
+
+2018-07-23  Max Filippov  <jcmvbkbc@gmail.com>
+
 	* testsuite/ld-xtensa/xtensa.exp: Rename to xtensa-linux.exp.
 
 2018-07-23  Alan Modra  <amodra@gmail.com>
