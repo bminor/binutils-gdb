@@ -15,7 +15,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-int __attribute__((noinline, noclone))
+int
+#ifdef NOCLONE
+__attribute__((noinline, noclone))
+#else
+__attribute__((noinline))
+#endif
 f1 (int i)
 {
   char a[i + 1];
