@@ -9890,7 +9890,8 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	}
       else
 	{
-	  if (sreldyn && sreldyn->size > 0)
+	  if (sreldyn && sreldyn->size > 0
+	      && !bfd_is_abs_section (sreldyn->output_section))
 	    {
 	      if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_REL, 0))
 		return FALSE;
@@ -11798,6 +11799,7 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 				   : sizeof (Elf32_External_Rel)));
 	      /* Adjust the section size too.  Tools like the prelinker
 		 can reasonably expect the values to the same.  */
+	      BFD_ASSERT (!bfd_is_abs_section (s->output_section));
 	      elf_section_data (s->output_section)->this_hdr.sh_size
 		= dyn.d_un.d_val;
 	      break;

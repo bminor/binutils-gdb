@@ -1,3 +1,11 @@
+2018-07-20  Maciej W. Rozycki  <macro@mips.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_size_dynamic_sections): Do not
+	create DT_REL, DT_RELSZ or DT_RELENT dynamic entries if the
+	dynamic relocation section will be discarded from output.
+	(_bfd_mips_elf_finish_dynamic_sections) <DT_RELSZ>: Assert that
+	the dynamic relocation section will be retained in output.
+
 2018-07-18  Maciej W. Rozycki  <macro@mips.com>
 
 	* xcofflink.c (xcoff_write_global_symbol): Fix symbol type

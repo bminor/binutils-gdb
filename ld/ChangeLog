@@ -1,3 +1,9 @@
+2018-07-20  Maciej W. Rozycki  <macro@mips.com>
+
+	* testsuite/ld-elf/reloc-discard.d: New test.
+	* testsuite/ld-elf/reloc-discard.ld: New test linker script.
+	* testsuite/ld-elf/reloc-discard.s: New test source.
+
 2018-07-18  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.
