@@ -1,5 +1,10 @@
 2018-07-20  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-elf/reloc-discard.ld: Discard .rel.* and .rela.*
+	sections instead of .rel.dyn and .rela.dyn sections.
+
+2018-07-20  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/23428
 	* testsuite/ld-elf/linux-x86.S: New file.
 	* testsuite/ld-elf/linux-x86.exp: Likewise.
