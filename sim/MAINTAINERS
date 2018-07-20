@@ -25,7 +25,7 @@ lm32		Jon Beniston <jon@beniston.com>
 m32r		Doug Evans <dje@sebabeach.org>
 m68hc11		Stephane Carrez <Stephane.Carrez@gmail.com>
 microblaze	Michael Eager <eager@eagercon.com>
-mips		Maciej W. Rozycki <macro@mips.com>
+mips I-IV	Maciej W. Rozycki <macro@linux-mips.org>
 moxie		Anthony Green <green@moxielogic.com>
 msp430		Nick Clifton <nickc@redhat.com>
 or1k		Stafford Horne <shorne@gmail.com>

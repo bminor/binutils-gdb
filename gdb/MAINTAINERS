@@ -270,8 +270,8 @@ the native maintainer when resolving ABI issues.
 			--target=microblaze-linux-gnu ,-Werror
 			Michael Eager		eager@eagercon.com
 
-	mips		--target=mips-elf ,-Werror
-			Maciej W. Rozycki	macro@mips.com
+	mips I-IV	--target=mips-elf ,-Werror
+			Maciej W. Rozycki	macro@linux-mips.org
 
 	mn10300		--target=mn10300-elf broken
 			(sim/ dies with make -j)

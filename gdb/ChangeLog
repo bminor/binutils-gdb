@@ -1,5 +1,10 @@
 2018-07-20  Maciej W. Rozycki  <macro@mips.com>
 
+	* MAINTAINERS: Update my e-mail address, downgrade to MIPS I-IV
+	ISA maintenance.
+
+2018-07-20  Maciej W. Rozycki  <macro@mips.com>
+
 	* mips-linux-nat.c (mips_linux_nat_target::read_description):
 	Call `get_ptrace_pid' rather than extracting the ptrace PID by
 	hand.
