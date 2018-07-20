@@ -1,3 +1,10 @@
+2018-07-20  Jose E. Marchesi  <jose.marchesi@oracle.com>
+	    Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* testsuite/gas/sparc/sparc.exp (set_tests_arch): New proc.
+	Prefix v9c, v9d, v9v, v9m, v9m8 tests with corresponding
+	set_tests_arch.
+
 2018-07-19  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (build_evex_prefix): Derive vector length
