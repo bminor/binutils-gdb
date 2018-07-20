@@ -1897,11 +1897,12 @@ operand_type_check (i386_operand_type t, enum operand_type c)
   return 0;
 }
 
-/* Return 1 if there is no conflict in 8bit/16bit/32bit/64bit/80bit on
-   operand J for instruction template T.  */
+/* Return 1 if there is no conflict in 8bit/16bit/32bit/64bit/80bit size
+   between operand GIVEN and opeand WANTED for instruction template T.  */
 
 static INLINE int
-match_reg_size (const insn_template *t, unsigned int wanted, unsigned int given)
+match_operand_size (const insn_template *t, unsigned int wanted,
+		    unsigned int given)
 {
   return !((i.types[given].bitfield.byte
 	    && !t->operand_types[wanted].bitfield.byte)
@@ -1915,8 +1916,8 @@ match_reg_size (const insn_template *t, unsigned int wanted, unsigned int given)
 	       && !t->operand_types[wanted].bitfield.tbyte));
 }
 
-/* Return 1 if there is no conflict in SIMD register on
-   operand J for instruction template T.  */
+/* Return 1 if there is no conflict in SIMD register between operand GIVEN
+   and opeand WANTED for instruction template T.  */
 
 static INLINE int
 match_simd_size (const insn_template *t, unsigned int wanted, unsigned int given)
@@ -1929,13 +1930,13 @@ match_simd_size (const insn_template *t, unsigned int wanted, unsigned int given
 	       && !t->operand_types[wanted].bitfield.zmmword));
 }
 
-/* Return 1 if there is no conflict in any size on operand J for
-   instruction template T.  */
+/* Return 1 if there is no conflict in any size between operand GIVEN
+   and opeand WANTED for instruction template T.  */
 
 static INLINE int
 match_mem_size (const insn_template *t, unsigned int wanted, unsigned int given)
 {
-  return (match_reg_size (t, wanted, given)
+  return (match_operand_size (t, wanted, given)
 	  && !((i.types[given].bitfield.unspecified
 		&& !i.broadcast
 		&& !t->operand_types[wanted].bitfield.unspecified)
@@ -1985,7 +1986,7 @@ operand_size_match (const insn_template *t)
 	continue;
 
       if (t->operand_types[j].bitfield.reg
-	  && !match_reg_size (t, j, j))
+	  && !match_operand_size (t, j, j))
 	{
 	  match = 0;
 	  break;
@@ -1999,7 +2000,7 @@ operand_size_match (const insn_template *t)
 	}
 
       if (t->operand_types[j].bitfield.acc
-	  && (!match_reg_size (t, j, j) || !match_simd_size (t, j, j)))
+	  && (!match_operand_size (t, j, j) || !match_simd_size (t, j, j)))
 	{
 	  match = 0;
 	  break;
@@ -2027,7 +2028,7 @@ mismatch:
     {
       if ((t->operand_types[j].bitfield.reg
 	   || t->operand_types[j].bitfield.acc)
-	  && !match_reg_size (t, j, !j))
+	  && !match_operand_size (t, j, !j))
 	goto mismatch;
 
       if (i.types[!j].bitfield.mem
