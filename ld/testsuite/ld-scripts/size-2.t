@@ -18,4 +18,5 @@ SECTIONS
     LONG (SIZEOF (.tdata))
     LONG (SIZEOF (.tbss))
   } :image
+  /DISCARD/ : { *(.note.gnu.property) }
 }

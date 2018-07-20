@@ -1523,7 +1523,10 @@ proc run_ld_link_exec_tests { ldtests args } {
 	    continue
 	}
 
-	if { [ string match "c++" $lang ] } {
+	if { [ string match "asm" $lang ] } {
+	    set link_proc ld_link
+	    set link_cmd $ld
+	} elseif { [ string match "c++" $lang ] } {
 	    set link_proc ld_link
 	    set link_cmd $CXX
 	} else {
