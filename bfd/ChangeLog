@@ -1,3 +1,10 @@
+2018-07-21  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* elf32-arm.c (elf32_arm_final_link_relocate) <R_ARM_GOT32>: Small
+	cleanup for the case of a global symbol that binds locally.  Also
+	install a value in the GOT slot in the case of a local symbol in
+	a non-PIC link.
+
 2018-07-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23428
