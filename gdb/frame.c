@@ -1091,7 +1091,7 @@ frame_pop (struct frame_info *this_frame)
 }
 
 void
-frame_register_unwind (struct frame_info *frame, int regnum,
+frame_register_unwind (frame_info *next_frame, int regnum,
 		       int *optimizedp, int *unavailablep,
 		       enum lval_type *lvalp, CORE_ADDR *addrp,
 		       int *realnump, gdb_byte *bufferp)
@@ -1106,7 +1106,7 @@ frame_register_unwind (struct frame_info *frame, int regnum,
   gdb_assert (realnump != NULL);
   /* gdb_assert (bufferp != NULL); */
 
-  value = frame_unwind_register_value (frame, regnum);
+  value = frame_unwind_register_value (next_frame, regnum);
 
   gdb_assert (value != NULL);
 
@@ -1154,7 +1154,7 @@ frame_register (struct frame_info *frame, int regnum,
 }
 
 void
-frame_unwind_register (struct frame_info *frame, int regnum, gdb_byte *buf)
+frame_unwind_register (frame_info *next_frame, int regnum, gdb_byte *buf)
 {
   int optimized;
   int unavailable;
@@ -1162,7 +1162,7 @@ frame_unwind_register (struct frame_info *frame, int regnum, gdb_byte *buf)
   int realnum;
   enum lval_type lval;
 
-  frame_register_unwind (frame, regnum, &optimized, &unavailable,
+  frame_register_unwind (next_frame, regnum, &optimized, &unavailable,
 			 &lval, &addr, &realnum, buf);
 
   if (optimized)
@@ -1181,29 +1181,31 @@ get_frame_register (struct frame_info *frame,
 }
 
 struct value *
-frame_unwind_register_value (struct frame_info *frame, int regnum)
+frame_unwind_register_value (frame_info *next_frame, int regnum)
 {
   struct gdbarch *gdbarch;
   struct value *value;
 
-  gdb_assert (frame != NULL);
-  gdbarch = frame_unwind_arch (frame);
+  gdb_assert (next_frame != NULL);
+  gdbarch = frame_unwind_arch (next_frame);
 
   if (frame_debug)
     {
       fprintf_unfiltered (gdb_stdlog,
 			  "{ frame_unwind_register_value "
 			  "(frame=%d,regnum=%d(%s),...) ",
-			  frame->level, regnum,
+			  next_frame->level, regnum,
 			  user_reg_map_regnum_to_name (gdbarch, regnum));
     }
 
   /* Find the unwinder.  */
-  if (frame->unwind == NULL)
-    frame_unwind_find_by_frame (frame, &frame->prologue_cache);
+  if (next_frame->unwind == NULL)
+    frame_unwind_find_by_frame (next_frame, &next_frame->prologue_cache);
 
   /* Ask this frame to unwind its register.  */
-  value = frame->unwind->prev_register (frame, &frame->prologue_cache, regnum);
+  value = next_frame->unwind->prev_register (next_frame,
+					     &next_frame->prologue_cache,
+					     regnum);
 
   if (frame_debug)
     {
@@ -1253,12 +1255,12 @@ get_frame_register_value (struct frame_info *frame, int regnum)
 }
 
 LONGEST
-frame_unwind_register_signed (struct frame_info *frame, int regnum)
+frame_unwind_register_signed (frame_info *next_frame, int regnum)
 {
-  struct gdbarch *gdbarch = frame_unwind_arch (frame);
+  struct gdbarch *gdbarch = frame_unwind_arch (next_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int size = register_size (gdbarch, regnum);
-  struct value *value = frame_unwind_register_value (frame, regnum);
+  struct value *value = frame_unwind_register_value (next_frame, regnum);
 
   gdb_assert (value != NULL);
 
@@ -1287,12 +1289,12 @@ get_frame_register_signed (struct frame_info *frame, int regnum)
 }
 
 ULONGEST
-frame_unwind_register_unsigned (struct frame_info *frame, int regnum)
+frame_unwind_register_unsigned (frame_info *next_frame, int regnum)
 {
-  struct gdbarch *gdbarch = frame_unwind_arch (frame);
+  struct gdbarch *gdbarch = frame_unwind_arch (next_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int size = register_size (gdbarch, regnum);
-  struct value *value = frame_unwind_register_value (frame, regnum);
+  struct value *value = frame_unwind_register_value (next_frame, regnum);
 
   gdb_assert (value != NULL);
 

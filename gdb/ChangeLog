@@ -1,3 +1,17 @@
+2018-07-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* frame.c (frame_register_unwind): Change parameter name.
+	(frame_unwind_register): Likewise.
+	(frame_unwind_register_value): Likewise.
+	(frame_unwind_register_signed): Likewise.
+	(frame_unwind_register_unsigned): Likewise.
+	* frame.h (frame_register_unwind): Likewise.
+	(frame_unwind_register): Likewise.
+	(frame_unwind_register_value): Likewise.
+	(frame_unwind_register_signed): Likewise.
+	(frame_unwind_register_unsigned): Likewise.
+	(frame_unwind_arch): Likewise.
+
 2018-07-20  Maciej W. Rozycki  <macro@mips.com>
 
 	* MAINTAINERS: Update my e-mail address, downgrade to MIPS I-IV

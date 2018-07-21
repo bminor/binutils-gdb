@@ -26,7 +26,7 @@
 
    Prefixes:
 
-   get_frame_WHAT...(): Get WHAT from the THIS frame (functionaly
+   get_frame_WHAT...(): Get WHAT from the THIS frame (functionally
    equivalent to THIS->next->unwind->what)
 
    frame_unwind_WHAT...(): Unwind THIS frame's WHAT from the NEXT
@@ -559,7 +559,7 @@ const char *frame_stop_reason_string (struct frame_info *);
    (up, older) frame is returned.  If VALUEP is NULL, don't
    fetch/compute the value.  Instead just return the location of the
    value.  */
-extern void frame_register_unwind (struct frame_info *frame, int regnum,
+extern void frame_register_unwind (frame_info *frame, int regnum,
 				   int *optimizedp, int *unavailablep,
 				   enum lval_type *lvalp,
 				   CORE_ADDR *addrp, int *realnump,
@@ -571,22 +571,22 @@ extern void frame_register_unwind (struct frame_info *frame, int regnum,
    fetch fails.  The value methods never return NULL, but usually
    do return a lazy value.  */
 
-extern void frame_unwind_register (struct frame_info *frame,
+extern void frame_unwind_register (frame_info *next_frame,
 				   int regnum, gdb_byte *buf);
 extern void get_frame_register (struct frame_info *frame,
 				int regnum, gdb_byte *buf);
 
-struct value *frame_unwind_register_value (struct frame_info *frame,
+struct value *frame_unwind_register_value (frame_info *next_frame,
 					   int regnum);
 struct value *get_frame_register_value (struct frame_info *frame,
 					int regnum);
 
-extern LONGEST frame_unwind_register_signed (struct frame_info *frame,
+extern LONGEST frame_unwind_register_signed (frame_info *next_frame,
 					     int regnum);
 extern LONGEST get_frame_register_signed (struct frame_info *frame,
 					  int regnum);
-extern ULONGEST frame_unwind_register_unsigned (struct frame_info *frame,
-					       int regnum);
+extern ULONGEST frame_unwind_register_unsigned (frame_info *frame,
+						int regnum);
 extern ULONGEST get_frame_register_unsigned (struct frame_info *frame,
 					     int regnum);
 
@@ -669,7 +669,7 @@ extern int safe_frame_unwind_memory (struct frame_info *this_frame,
 extern struct gdbarch *get_frame_arch (struct frame_info *this_frame);
 
 /* Return the previous frame's architecture.  */
-extern struct gdbarch *frame_unwind_arch (struct frame_info *frame);
+extern struct gdbarch *frame_unwind_arch (frame_info *next_frame);
 
 /* Return the previous frame's architecture, skipping inline functions.  */
 extern struct gdbarch *frame_unwind_caller_arch (struct frame_info *frame);
