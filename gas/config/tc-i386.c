@@ -1916,11 +1916,12 @@ match_operand_size (const insn_template *t, unsigned int wanted,
 	       && !t->operand_types[wanted].bitfield.tbyte));
 }
 
-/* Return 1 if there is no conflict in SIMD register between operand GIVEN
-   and opeand WANTED for instruction template T.  */
+/* Return 1 if there is no conflict in SIMD register between operand
+   GIVEN and opeand WANTED for instruction template T.  */
 
 static INLINE int
-match_simd_size (const insn_template *t, unsigned int wanted, unsigned int given)
+match_simd_size (const insn_template *t, unsigned int wanted,
+		 unsigned int given)
 {
   return !((i.types[given].bitfield.xmmword
 	    && !t->operand_types[wanted].bitfield.xmmword)
@@ -1934,7 +1935,8 @@ match_simd_size (const insn_template *t, unsigned int wanted, unsigned int given
    and opeand WANTED for instruction template T.  */
 
 static INLINE int
-match_mem_size (const insn_template *t, unsigned int wanted, unsigned int given)
+match_mem_size (const insn_template *t, unsigned int wanted,
+		unsigned int given)
 {
   return (match_operand_size (t, wanted, given)
 	  && !((i.types[given].bitfield.unspecified

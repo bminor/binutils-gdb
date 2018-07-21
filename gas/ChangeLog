@@ -1,5 +1,10 @@
 2018-07-20  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (match_simd_size): Break long line.
+	(match_mem_size): Likewise.
+
+2018-07-20  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (match_reg_size): Renamed to ...
 	(match_operand_size): This.  Update comments.
 	(match_simd_size): Update comments.  Replace match_reg_size
