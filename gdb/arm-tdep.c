@@ -8955,7 +8955,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  else if (ei_osabi == ELFOSABI_NONE || ei_osabi == ELFOSABI_GNU)
 	    {
 	      int eabi_ver = EF_ARM_EABI_VERSION (e_flags);
-	      int attr_arch, attr_profile;
 
 	      switch (eabi_ver)
 		{
@@ -9026,11 +9025,13 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		 executable file includes build attributes; GCC does
 		 copy them to the executable, but e.g. RealView does
 		 not.  */
-	      attr_arch = bfd_elf_get_obj_attr_int (info.abfd, OBJ_ATTR_PROC,
-						    Tag_CPU_arch);
-	      attr_profile = bfd_elf_get_obj_attr_int (info.abfd,
-						       OBJ_ATTR_PROC,
-						       Tag_CPU_arch_profile);
+	      int attr_arch
+		= bfd_elf_get_obj_attr_int (info.abfd, OBJ_ATTR_PROC,
+					    Tag_CPU_arch);
+	      int attr_profile
+		= bfd_elf_get_obj_attr_int (info.abfd, OBJ_ATTR_PROC,
+					    Tag_CPU_arch_profile);
+
 	      /* GCC specifies the profile for v6-M; RealView only
 		 specifies the profile for architectures starting with
 		 V7 (as opposed to architectures with a tag

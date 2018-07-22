@@ -1,3 +1,10 @@
+2018-07-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* arm-tdep.c (arm_gdbarch_init): Declare attr_arch and
+	attr_profile in HAVE_ELF.
+	* rs6000-tdep.c (bfd_uses_spe_extensions): Declare vector_abi in
+	HAVE_ELF.
+
 2018-07-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* frame.c (frame_register_unwind): Change parameter name.
