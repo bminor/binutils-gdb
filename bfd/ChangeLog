@@ -1,3 +1,9 @@
+2018-07-23  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* elf32-xtensa.c (shrink_dynamic_reloc_sections): Shrink dynamic
+	relocations section for dynamic undefined weak symbols when
+	linking a shared object.
+
 2018-07-23  Tom Tromey  <tom@tromey.com>
 
 	* elf.c (bfd_get_elf_phdrs): Don't call memcpy with size 0.
