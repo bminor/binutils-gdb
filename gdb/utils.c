@@ -72,16 +72,6 @@
 #include <algorithm>
 #include "common/pathstuff.h"
 
-#if !HAVE_DECL_MALLOC
-extern PTR malloc ();		/* ARI: PTR */
-#endif
-#if !HAVE_DECL_REALLOC
-extern PTR realloc ();		/* ARI: PTR */
-#endif
-#if !HAVE_DECL_FREE
-extern void free ();
-#endif
-
 void (*deprecated_error_begin_hook) (void);
 
 /* Prototypes for local functions */

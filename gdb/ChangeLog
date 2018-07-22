@@ -1,3 +1,10 @@
+2018-07-24  Tom Tromey  <tom@tromey.com>
+
+	* utils.c (malloc, realloc, free): Don't declare.
+	* configure, config.in: Rebuild.
+	* configure.ac: Don't check for declarations of free, malloc, or
+	realloc.
+
 2018-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* aarch64-linux-nat.c

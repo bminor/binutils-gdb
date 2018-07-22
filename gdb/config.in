@@ -102,25 +102,13 @@
 /* Define to 1 if you have the declaration of `ffs', and to 0 if you don't. */
 #undef HAVE_DECL_FFS
 
-/* Define to 1 if you have the declaration of `free', and to 0 if you don't.
-   */
-#undef HAVE_DECL_FREE
-
 /* Define to 1 if you have the declaration of `getthrds', and to 0 if you
    don't. */
 #undef HAVE_DECL_GETTHRDS
 
-/* Define to 1 if you have the declaration of `malloc', and to 0 if you don't.
-   */
-#undef HAVE_DECL_MALLOC
-
 /* Define to 1 if you have the declaration of `ptrace', and to 0 if you don't.
    */
 #undef HAVE_DECL_PTRACE
-
-/* Define to 1 if you have the declaration of `realloc', and to 0 if you
-   don't. */
-#undef HAVE_DECL_REALLOC
 
 /* Define to 1 if you have the declaration of `snprintf', and to 0 if you
    don't. */

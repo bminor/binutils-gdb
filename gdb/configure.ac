@@ -1317,7 +1317,7 @@ AC_CHECK_HEADERS(term.h, [], [],
 
 libiberty_INIT
 
-AC_CHECK_DECLS([free, malloc, realloc, snprintf])
+AC_CHECK_DECLS([snprintf])
 AM_LC_MESSAGES
 
 # ----------------------- #
