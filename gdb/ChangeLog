@@ -1,3 +1,15 @@
+2018-08-28  Tom Tromey  <tom@tromey.com>
+
+	* c-exp.y (struct token_and_value): Remove typedef and DEF_VEC.
+	(token_fifo): Now a std::vector.
+	(yylex, c_parse): Update.
+	* d-exp.y (struct token_and_value): Remove typedef and DEF_VEC.
+	(token_fifo): Now a std::vector.
+	(yylex, d_parse): Update.
+	* go-exp.y (struct token_and_value): Remove typedef and DEF_VEC.
+	(token_fifo): Now a std::vector.
+	(yylex, go_parse): Update.
+
 2018-08-28  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* parser-defs.h (struct type_stack) <elements>: Change type to
