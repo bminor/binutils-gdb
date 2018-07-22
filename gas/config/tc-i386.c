@@ -3363,10 +3363,12 @@ build_vex_prefix (const insn_template *t)
     vector_length = 1;
   else
     {
-      unsigned int op;
+      int op;
 
+      /* Determine vector length from the last multi-length vector
+	 operand.  */
       vector_length = 0;
-      for (op = 0; op < t->operands; ++op)
+      for (op = t->operands - 1; op >= 0; op--)
 	if (t->operand_types[op].bitfield.xmmword
 	    && t->operand_types[op].bitfield.ymmword
 	    && i.types[op].bitfield.ymmword)
@@ -3611,20 +3613,31 @@ build_evex_prefix (void)
       if (!i.tm.opcode_modifier.evex
 	  || i.tm.opcode_modifier.evex == EVEXDYN)
 	{
-	  unsigned int op;
+	  int op;
 
+	  /* Determine vector length from the last multi-length vector
+	     operand.  */
 	  vec_length = 0;
-	  for (op = 0; op < i.tm.operands; ++op)
+	  for (op = i.operands - 1; op >= 0; op--)
 	    if (i.tm.operand_types[op].bitfield.xmmword
 		+ i.tm.operand_types[op].bitfield.ymmword
 		+ i.tm.operand_types[op].bitfield.zmmword > 1)
 	      {
 		if (i.types[op].bitfield.zmmword)
-		  i.tm.opcode_modifier.evex = EVEX512;
+		  {
+		    i.tm.opcode_modifier.evex = EVEX512;
+		    break;
+		  }
 		else if (i.types[op].bitfield.ymmword)
-		  i.tm.opcode_modifier.evex = EVEX256;
+		  {
+		    i.tm.opcode_modifier.evex = EVEX256;
+		    break;
+		  }
 		else if (i.types[op].bitfield.xmmword)
-		  i.tm.opcode_modifier.evex = EVEX128;
+		  {
+		    i.tm.opcode_modifier.evex = EVEX128;
+		    break;
+		  }
 		else if (i.broadcast && (int) op == i.broadcast->operand)
 		  {
 		    switch ((i.tm.operand_types[op].bitfield.dword ? 4 : 8)
@@ -3640,12 +3653,14 @@ build_evex_prefix (void)
 			  i.tm.opcode_modifier.evex = EVEX128;
 			  break;
 			default:
-			  continue;
+			  abort ();
 		      }
+		    break;
 		  }
-		  continue;
-		break;
 	      }
+
+	  if (op < 0)
+	    abort ();
 	}
 
       switch (i.tm.opcode_modifier.evex)
