@@ -1,3 +1,12 @@
+2019-05-04  Simon Marchi  <simon.marchi@efficios.com>
+	    Tom Tromey  <tom@tromey.com>
+
+	* ppc-linux-nat.c (thread_points_p): Remove typedef and DEF_VEC.
+	(ppc_threads): Now a std::vector.  Now static.
+	(hwdebug_find_thread_points_by_tid)
+	(ppc_linux_nat_target::low_new_thread, ppc_linux_thread_exit):
+	Update.
+
 2019-05-04  Tom Tromey  <tom@tromey.com>
 
 	* arc-tdep.c (arc_tdesc_init): Return bool.

@@ -1578,7 +1578,7 @@ struct hw_break_tuple
 /* This is an internal VEC created to store information about *points inserted
    for each thread.  This is used when PowerPC HWDEBUG ptrace interface is
    available.  */
-typedef struct thread_points
+struct thread_points
   {
     /* The TID to which this *point relates.  */
     int tid;
@@ -1589,10 +1589,9 @@ typedef struct thread_points
        size of these vector is MAX_SLOTS_NUMBER.  If the hw_break element of
        the tuple is NULL, then the position in the vector is free.  */
     struct hw_break_tuple *hw_breaks;
-  } *thread_points_p;
-DEF_VEC_P (thread_points_p);
+  };
 
-VEC(thread_points_p) *ppc_threads = NULL;
+static std::vector<thread_points *> ppc_threads;
 
 /* The version of the PowerPC HWDEBUG kernel interface that we will use, if
    available.  */
@@ -1758,14 +1757,13 @@ hwdebug_point_cmp (struct ppc_hw_breakpoint *a, struct ppc_hw_breakpoint *b)
 static struct thread_points *
 hwdebug_find_thread_points_by_tid (int tid, int alloc_new)
 {
-  int i;
-  struct thread_points *t;
+  for (thread_points *t : ppc_threads)
+    {
+      if (t->tid == tid)
+	return t;
+    }
 
-  for (i = 0; VEC_iterate (thread_points_p, ppc_threads, i, t); i++)
-    if (t->tid == tid)
-      return t;
-
-  t = NULL;
+  struct thread_points *t = NULL;
 
   /* Do we need to allocate a new point_item
      if the wanted one does not exist?  */
@@ -1774,7 +1772,7 @@ hwdebug_find_thread_points_by_tid (int tid, int alloc_new)
       t = XNEW (struct thread_points);
       t->hw_breaks = XCNEWVEC (struct hw_break_tuple, max_slots_number);
       t->tid = tid;
-      VEC_safe_push (thread_points_p, ppc_threads, t);
+      ppc_threads.push_back (t);
     }
 
   return t;
@@ -1804,12 +1802,14 @@ hwdebug_insert_point (struct ppc_hw_breakpoint *b, int tid)
 
   /* Find a free element in the hw_breaks vector.  */
   for (i = 0; i < max_slots_number; i++)
-    if (hw_breaks[i].hw_break == NULL)
-      {
-	hw_breaks[i].slot = slot;
-	hw_breaks[i].hw_break = p.release ();
-	break;
-      }
+    {
+      if (hw_breaks[i].hw_break == NULL)
+	{
+	  hw_breaks[i].slot = slot;
+	  hw_breaks[i].hw_break = p.release ();
+	  break;
+	}
+    }
 
   gdb_assert (i != max_slots_number);
 }
@@ -2359,11 +2359,11 @@ ppc_linux_nat_target::low_new_thread (struct lwp_info *lp)
       struct thread_points *p;
       struct hw_break_tuple *hw_breaks;
 
-      if (VEC_empty (thread_points_p, ppc_threads))
+      if (ppc_threads.empty ())
 	return;
 
       /* Get a list of breakpoints from any thread.  */
-      p = VEC_last (thread_points_p, ppc_threads);
+      p = ppc_threads.back ();
       hw_breaks = p->hw_breaks;
 
       /* Copy that thread's breakpoints and watchpoints to the new thread.  */
@@ -2392,22 +2392,24 @@ ppc_linux_thread_exit (struct thread_info *tp, int silent)
   int i;
   int tid = tp->ptid.lwp ();
   struct hw_break_tuple *hw_breaks;
-  struct thread_points *t = NULL, *p;
+  struct thread_points *t = NULL;
 
   if (!have_ptrace_hwdebug_interface ())
     return;
 
-  for (i = 0; VEC_iterate (thread_points_p, ppc_threads, i, p); i++)
-    if (p->tid == tid)
-      {
-	t = p;
-	break;
-      }
+  for (i = 0; i < ppc_threads.size (); i++)
+    {
+      if (ppc_threads[i]->tid == tid)
+	{
+	  t = ppc_threads[i];
+	  break;
+	}
+    }
 
   if (t == NULL)
     return;
 
-  VEC_unordered_remove (thread_points_p, ppc_threads, i);
+  unordered_remove (ppc_threads, i);
 
   hw_breaks = t->hw_breaks;
 
