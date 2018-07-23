@@ -1,3 +1,8 @@
+2018-07-23  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/reloc-discard-warn.d: New.
+	* testsuite/ld-elf/reloc-discard.d: Skip test on PowerPC64.
+
 2018-07-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-elf/reloc-discard.ld: Discard .rel.* and .rela.*
