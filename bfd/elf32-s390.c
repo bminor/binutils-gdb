@@ -3951,7 +3951,7 @@ elf_s390_write_core_note (bfd *abfd, char *buf, int *bufsiz,
 	va_end (ap);
 
 	strncpy (data + 28, fname, 16);
-#if GCC_VERSION == 8001
+#if GCC_VERSION == 8000 || GCC_VERSION == 8001
 	DIAGNOSTIC_PUSH;
 	/* GCC 8.1 warns about 80 equals destination size with
 	   -Wstringop-truncation:
@@ -3960,7 +3960,7 @@ elf_s390_write_core_note (bfd *abfd, char *buf, int *bufsiz,
 	DIAGNOSTIC_IGNORE_STRINGOP_TRUNCATION;
 #endif
 	strncpy (data + 44, psargs, 80);
-#if GCC_VERSION == 8001
+#if GCC_VERSION == 8000 || GCC_VERSION == 8001
 	DIAGNOSTIC_POP;
 #endif
 	return elfcore_write_note (abfd, buf, bufsiz, "CORE", note_type,
