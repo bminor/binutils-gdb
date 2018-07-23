@@ -269,7 +269,6 @@ enum i386_error
     invalid_vector_register_set,
     unsupported_vector_index_register,
     unsupported_broadcast,
-    broadcast_not_on_src_operand,
     broadcast_needed,
     unsupported_masking,
     mask_not_on_destination,
@@ -5768,9 +5767,6 @@ check_reverse:
 	  break;
 	case unsupported_broadcast:
 	  err_msg = _("unsupported broadcast");
-	  break;
-	case broadcast_not_on_src_operand:
-	  err_msg = _("broadcast not on source memory operand");
 	  break;
 	case broadcast_needed:
 	  err_msg = _("broadcast is needed for operand of such type");

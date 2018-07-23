@@ -1,3 +1,9 @@
+2018-07-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (i386_error): Remove
+	broadcast_not_on_src_operand.
+	(match_template): Likewse.
+
 2018-07-23  Claudiu Zissulescu <claziss@synopsys.com>
 
 	* testsuite/gas/arc/st.d: Fix test.
