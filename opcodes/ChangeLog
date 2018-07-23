@@ -1,3 +1,9 @@
+2018-07-23  Alan Modra  <amodra@gmail.com>
+
+	PR 23419
+	* ppc-opc.c (powerpc_opcodes): Add mtupmc/mfupmc/mfpmc extended
+	opcode variants for mtspr/mfspr encodings.
+
 2018-07-20  Chenghua Xu  <paul.hua.gm@gmail.com>
 	    Maciej W. Rozycki  <macro@mips.com>
 
