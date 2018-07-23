@@ -1,5 +1,16 @@
 2018-07-23  Max Filippov  <jcmvbkbc@gmail.com>
 
+	* testsuite/ld-xtensa/coalesce.d: New file.
+	* testsuite/ld-xtensa/coalesce.exp: Remove file.
+	* testsuite/ld-xtensa/diff_overflow.d: New file.
+	* testsuite/ld-xtensa/diff_overflow.exp: Remove file.
+	* testsuite/ld-xtensa/lcall.d: New file.
+	* testsuite/ld-xtensa/lcall.exp: Remove file.
+	* testsuite/ld-xtensa/xtensa.exp (coalesce, diff_overflow)
+	(lcall): New tests.
+
+2018-07-23  Max Filippov  <jcmvbkbc@gmail.com>
+
 	* testsuite/ld-xtensa/relax-static-defs.s: New file.
 	* testsuite/ld-xtensa/relax-static-local-pie.d: New file.
 	* testsuite/ld-xtensa/relax-static-local-shared.d: New file.
