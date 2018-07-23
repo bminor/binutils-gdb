@@ -1,5 +1,12 @@
 2018-07-23  Max Filippov  <jcmvbkbc@gmail.com>
 
+	* elf32-xtensa.c (elf_xtensa_finish_dynamic_sections): Move
+	relocation sections consistency check to always check both
+	.rela.dyn and .rela.plt when they exist. Rearrange variable
+	definition and assignment places.
+
+2018-07-23  Max Filippov  <jcmvbkbc@gmail.com>
+
 	* elf32-xtensa.c (shrink_dynamic_reloc_sections): Shrink dynamic
 	relocations section for dynamic undefined weak symbols when
 	linking a shared object.
