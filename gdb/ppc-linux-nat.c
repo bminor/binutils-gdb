@@ -532,11 +532,9 @@ static void
 fetch_register (struct regcache *regcache, int tid, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr = ppc_register_u_addr (gdbarch, regno);
   int bytes_transferred;
-  unsigned int offset;         /* Offset of registers within the u area.  */
   gdb_byte buf[PPC_MAX_REGISTER_SIZE];
 
   if (altivec_register_p (gdbarch, regno))
@@ -630,8 +628,6 @@ fetch_register (struct regcache *regcache, int tid, int regno)
 static int
 fetch_all_gp_regs (struct regcache *regcache, int tid)
 {
-  struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   gdb_gregset_t gregset;
 
   if (ptrace (PTRACE_GETREGS, tid, 0, (void *) &gregset) < 0)
@@ -728,7 +724,6 @@ fetch_fp_regs (struct regcache *regcache, int tid)
 static void 
 fetch_ppc_registers (struct regcache *regcache, int tid)
 {
-  int i;
   struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
@@ -1004,8 +999,6 @@ store_register (const struct regcache *regcache, int tid, int regno)
 static int
 store_all_gp_regs (const struct regcache *regcache, int tid, int regno)
 {
-  struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   gdb_gregset_t gregset;
 
   if (ptrace (PTRACE_GETREGS, tid, 0, (void *) &gregset) < 0)
@@ -1122,7 +1115,6 @@ store_fp_regs (const struct regcache *regcache, int tid, int regno)
 static void
 store_ppc_registers (const struct regcache *regcache, int tid)
 {
-  int i;
   struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
  
@@ -1407,7 +1399,6 @@ hwdebug_insert_point (struct ppc_hw_breakpoint *b, int tid)
   gdb::unique_xmalloc_ptr<ppc_hw_breakpoint> p (XDUP (ppc_hw_breakpoint, b));
   struct hw_break_tuple *hw_breaks;
   struct thread_points *t;
-  struct hw_break_tuple *tuple;
 
   errno = 0;
   slot = ptrace (PPC_PTRACE_SETHWDEBUG, tid, 0, p.get ());
@@ -1627,7 +1618,6 @@ can_use_watchpoint_cond_accel (void)
   struct thread_points *p;
   int tid = inferior_ptid.lwp ();
   int cnt = hwdebug_info.num_condition_regs, i;
-  CORE_ADDR tmp_value;
 
   if (!have_ptrace_hwdebug_interface () || cnt == 0)
     return 0;

@@ -67,7 +67,6 @@ std::unique_ptr<gdb_byte[]>
 aarch64_sve_get_sveregs (int tid)
 {
   struct iovec iovec;
-  struct user_sve_header header;
   uint64_t vq = aarch64_sve_get_vq (tid);
 
   if (vq == 0)

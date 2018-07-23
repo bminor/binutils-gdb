@@ -1,4 +1,30 @@
 2018-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* aarch64-linux-nat.c
+	(aarch64_linux_nat_target::stopped_data_address): Remove unused
+	variable.
+	* arm-linux-nat.c (fetch_regs): Likewise.
+	(store_regs): Likewise.
+	(fetch_vfp_regs): Likewise.
+	(store_vfp_regs): Likewise.
+	(arm_linux_nat_target::insert_hw_breakpoint): Likewise.
+	(arm_linux_nat_target::remove_hw_breakpoint): Likewise.
+	(arm_linux_nat_target::insert_watchpoint): Likewise.
+	(arm_linux_nat_target::remove_watchpoint): Likewise.
+	* mips-linux-nat.c (mips_linux_nat_target::insert_watchpoint):
+	Likewise.
+	* nat/aarch64-sve-linux-ptrace.c (aarch64_sve_get_sveregs):
+	Likewise.
+	* ppc-linux-nat.c (fetch_register): Likewise.
+	(fetch_all_gp_regs): Likewise.
+	(fetch_ppc_registers): Likewise.
+	(store_all_gp_regs): Likewise.
+	(store_ppc_registers): Likewise.
+	(hwdebug_insert_point): Likewise.
+	(can_use_watchpoint_cond_accel): Likewise.
+	* remote-sim.c (gdb_os_write_stdout): Likewise.
+
+2018-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
 	    Tom Tromey  <tom@tromey.com>
 
 	* warning.m4 (AM_GDB_WARNINGS): Add -Wunused-variable and special

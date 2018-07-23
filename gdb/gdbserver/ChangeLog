@@ -1,3 +1,9 @@
+2018-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-mips-low.c (mips_collect_ptrace_register): Remove unused
+	variable.
+	(mips_supply_ptrace_register): Likewise.
+
 2018-07-22  Tom Tromey  <tom@tromey.com>
 
 	* configure: Rebuild.

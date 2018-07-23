@@ -673,7 +673,6 @@ mips_linux_nat_target::insert_watchpoint (CORE_ADDR addr, int len,
   struct mips_watchpoint *new_watch;
   struct mips_watchpoint **pw;
 
-  int i;
   int retval;
 
   if (!mips_linux_read_watch_registers (inferior_ptid.lwp (),

@@ -852,7 +852,6 @@ static void
 mips_collect_ptrace_register (struct regcache *regcache,
 			      int regno, char *buf)
 {
-  const struct target_desc *tdesc = current_process ()->tdesc;
   int use_64bit = sizeof (PTRACE_XFER_TYPE) == 8;
 
   if (use_64bit && register_size (regcache->tdesc, regno) == 4)
@@ -872,7 +871,6 @@ static void
 mips_supply_ptrace_register (struct regcache *regcache,
 			     int regno, const char *buf)
 {
-  const struct target_desc *tdesc = current_process ()->tdesc;
   int use_64bit = sizeof (PTRACE_XFER_TYPE) == 8;
 
   if (use_64bit && register_size (regcache->tdesc, regno) == 4)

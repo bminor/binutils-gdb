@@ -205,7 +205,7 @@ store_fpregs (const struct regcache *regcache)
 static void
 fetch_regs (struct regcache *regcache)
 {
-  int ret, regno, tid;
+  int ret, tid;
   elf_gregset_t regs;
 
   /* Get the thread id for the ptrace call.  */
@@ -232,7 +232,7 @@ fetch_regs (struct regcache *regcache)
 static void
 store_regs (const struct regcache *regcache)
 {
-  int ret, regno, tid;
+  int ret, tid;
   elf_gregset_t regs;
 
   /* Get the thread id for the ptrace call.  */
@@ -339,7 +339,7 @@ static void
 fetch_vfp_regs (struct regcache *regcache)
 {
   gdb_byte regbuf[VFP_REGS_SIZE];
-  int ret, regno, tid;
+  int ret, tid;
   struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
@@ -368,7 +368,7 @@ static void
 store_vfp_regs (const struct regcache *regcache)
 {
   gdb_byte regbuf[VFP_REGS_SIZE];
-  int ret, regno, tid;
+  int ret, tid;
   struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
@@ -1064,7 +1064,6 @@ int
 arm_linux_nat_target::insert_hw_breakpoint (struct gdbarch *gdbarch,
 					    struct bp_target_info *bp_tgt)
 {
-  struct lwp_info *lp;
   struct arm_linux_hw_breakpoint p;
 
   if (arm_linux_get_hw_breakpoint_count () == 0)
@@ -1082,7 +1081,6 @@ int
 arm_linux_nat_target::remove_hw_breakpoint (struct gdbarch *gdbarch,
 					    struct bp_target_info *bp_tgt)
 {
-  struct lwp_info *lp;
   struct arm_linux_hw_breakpoint p;
 
   if (arm_linux_get_hw_breakpoint_count () == 0)
@@ -1134,7 +1132,6 @@ arm_linux_nat_target::insert_watchpoint (CORE_ADDR addr, int len,
 					 enum target_hw_bp_type rw,
 					 struct expression *cond)
 {
-  struct lwp_info *lp;
   struct arm_linux_hw_breakpoint p;
 
   if (arm_linux_get_hw_watchpoint_count () == 0)
@@ -1153,7 +1150,6 @@ arm_linux_nat_target::remove_watchpoint (CORE_ADDR addr,
 					 int len, enum target_hw_bp_type rw,
 					 struct expression *cond)
 {
-  struct lwp_info *lp;
   struct arm_linux_hw_breakpoint p;
 
   if (arm_linux_get_hw_watchpoint_count () == 0)

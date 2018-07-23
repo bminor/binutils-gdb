@@ -377,9 +377,6 @@ end_callbacks (void)
 static int
 gdb_os_write_stdout (host_callback *p, const char *buf, int len)
 {
-  int i;
-  char b[2];
-
   ui_file_write (gdb_stdtarg, buf, len);
   return len;
 }

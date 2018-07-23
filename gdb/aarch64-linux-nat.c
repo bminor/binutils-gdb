@@ -819,7 +819,7 @@ bool
 aarch64_linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
 {
   siginfo_t siginfo;
-  int i, tid;
+  int i;
   struct aarch64_debug_reg_state *state;
 
   if (!linux_nat_get_siginfo (inferior_ptid, &siginfo))
