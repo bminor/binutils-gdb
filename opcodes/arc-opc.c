@@ -651,9 +651,13 @@ static long long
 extract_w6 (unsigned long long  insn,
 	    bfd_boolean *       invalid ATTRIBUTE_UNUSED)
 {
-  unsigned value = 0;
+  int value = 0;
 
   value |= ((insn >> 6) & 0x003f) << 0;
+
+  /* Extend the sign.  */
+  int signbit = 1 << 5;
+  value = (value ^ signbit) - signbit;
 
   return value;
 }
