@@ -319,7 +319,7 @@ Raw dump of debug contents of section .debug_line:
   1	\(indirect line string, offset: 0x1\): 
   2	\(indirect line string, offset: 0x22\): /usr/include
 
- The File name Table \(offset 0x34\):
+ The File Name Table \(offset 0x34\):
   Entry	Dir	Name
   0	0	\(indirect line string, offset: 0x14\): main.c
   1	1	\(indirect line string, offset: 0x1b\): main.c

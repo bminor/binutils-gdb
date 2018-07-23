@@ -1,5 +1,12 @@
 2018-07-24  Alan Modra  <amodra@gmail.com>
 
+	PR 23431
+	* dwarf.c (display_formatted_table): Replace "what" parameter
+	with "is_dir".  Expand messages.  Fix capitalisation.
+	* testsuite/binutils-all/dw5.W: Update expected output.
+
+2018-07-24  Alan Modra  <amodra@gmail.com>
+
 	PR 23430
 	* elfcomm.h (struct archive_info): Rename uses_64bit_indicies
 	to uses_64bit_indices.

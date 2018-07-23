@@ -3424,7 +3424,7 @@ display_formatted_table (unsigned char *                   data,
 			 unsigned char *                   end,
 			 const DWARF2_Internal_LineInfo *  linfo,
 			 struct dwarf_section *            section,
-			 const char *                      what)
+			 bfd_boolean                       is_dir)
 {
   unsigned char *format_start, format_count, *format, formati;
   dwarf_vma data_count, datai;
@@ -3440,7 +3440,10 @@ display_formatted_table (unsigned char *                   data,
       data += bytes_read;
       if (data == end)
 	{
-	  warn (_("Corrupt %s format table entry\n"), what);
+	  if (is_dir)
+	    warn (_("Corrupt directory format table entry\n"));
+	  else
+	    warn (_("Corrupt file name format table entry\n"));
 	  return data;
 	}
     }
@@ -3449,18 +3452,28 @@ display_formatted_table (unsigned char *                   data,
   data += bytes_read;
   if (data == end)
     {
-      warn (_("Corrupt %s list\n"), what);
+      if (is_dir)
+	warn (_("Corrupt directory list\n"));
+      else
+	warn (_("Corrupt file name list\n"));
       return data;
     }
 
   if (data_count == 0)
     {
-      printf (_("\n The %s Table is empty.\n"), what);
+      if (is_dir)
+	printf (_("\n The Directory Table is empty.\n"));
+      else
+	printf (_("\n The File Name Table is empty.\n"));
       return data;
     }
 
-  printf (_("\n The %s Table (offset 0x%lx):\n"), what,
-	  (long)(data - start));
+  if (is_dir)
+    printf (_("\n The Directory Table (offset 0x%lx):\n"),
+	    (long) (data - start));
+  else
+    printf (_("\n The File Name Table (offset 0x%lx):\n"),
+	    (long) (data - start));
 
   printf (_("  Entry"));
   /* Delay displaying name as the last entry for better screen layout.  */ 
@@ -3528,7 +3541,10 @@ display_formatted_table (unsigned char *                   data,
 	}
       if (data == end)
 	{
-	  warn (_("Corrupt %s entries list\n"), what);
+	  if (is_dir)
+	    warn (_("Corrupt directory entries list\n"));
+	  else
+	    warn (_("Corrupt file name entries list\n"));
 	  return data;
 	}
       putchar ('\n');
@@ -3636,9 +3652,9 @@ display_debug_lines_raw (struct dwarf_section *  section,
 	      load_debug_section_with_follow (line_str, file);
 
 	      data = display_formatted_table (data, start, end, &linfo, section,
-					      _("Directory"));
+					      TRUE);
 	      data = display_formatted_table (data, start, end, &linfo, section,
-					      _("File name"));
+					      FALSE);
 	    }
 	  else
 	    {
