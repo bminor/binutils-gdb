@@ -100,6 +100,7 @@
 .*:155: Error: .*vaddpd.*
 .*:156: Error: .*vaddpd.*
 .*:157: Error: .*vaddpd.*
+.*:159: Error: .*vcvtps2qq.*
 GAS LISTING .*
 
 
@@ -282,3 +283,5 @@ GAS LISTING .*
 #...
 [ 	]*156[ 	]+vaddpd xmm2, xmm1, QWORD PTR \[eax\]\{1to8\}
 [ 	]*157[ 	]+vaddpd xmm2, xmm1, QWORD PTR \[eax\]\{1to16\}
+[ 	]*158[ 	]*
+[ 	]*159[ 	]+vcvtps2qq xmm0, DWORD PTR \[eax\]

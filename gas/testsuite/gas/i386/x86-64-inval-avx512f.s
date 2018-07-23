@@ -54,3 +54,5 @@ _start:
 	.intel_syntax noprefix
 	vaddps zmm2{rcx}, zmm1, zmm0
 	vaddps zmm2{z}, zmm1, zmm0
+
+	vcvtps2qq xmm0, DWORD PTR [rax]

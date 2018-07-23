@@ -38,6 +38,7 @@
 .*:52: Error: .*
 .*:55: Error: .*
 .*:56: Error: .*
+.*:58: Error: .*
 GAS LISTING .*
 
 
@@ -97,3 +98,6 @@ GAS LISTING .*
 [ 	]*54[ 	]+\.intel_syntax noprefix
 [ 	]*55[ 	]+vaddps zmm2\{rcx\}, zmm1, zmm0
 [ 	]*56[ 	]+vaddps zmm2\{z\}, zmm1, zmm0
+[ 	]*57[ 	]*
+GAS LISTING .*
+[ 	]*58[ 	]+vcvtps2qq xmm0, DWORD PTR \[rax\]

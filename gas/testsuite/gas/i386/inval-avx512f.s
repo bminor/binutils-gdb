@@ -155,3 +155,5 @@ _start:
 	vaddpd xmm2, xmm1, QWORD PTR [eax]{1to4}
 	vaddpd xmm2, xmm1, QWORD PTR [eax]{1to8}
 	vaddpd xmm2, xmm1, QWORD PTR [eax]{1to16}
+
+	vcvtps2qq xmm0, DWORD PTR [eax]
