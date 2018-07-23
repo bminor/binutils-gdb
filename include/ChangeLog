@@ -1,3 +1,7 @@
+2018-07-26  Alex Chadwick  <Alex.Chadwick@cl.cam.ac.uk>
+
+	* opcode/ppc.h (PPC_OPCODE_750): Adjust comment.
+
 2018-07-26  Alan Modra  <amodra@gmail.com>
 
 	* elf/ppc64.h: Specify byte offset to local entry for values

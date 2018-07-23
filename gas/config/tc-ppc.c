@@ -1340,7 +1340,8 @@ PowerPC options:\n\
 -m476                   generate code for PowerPC 476\n\
 -m7400, -m7410, -m7450, -m7455\n\
                         generate code for PowerPC 7400/7410/7450/7455\n\
--m750cl                 generate code for PowerPC 750cl\n\
+-m750cl, -mgekko, -mbroadway\n\
+                        generate code for PowerPC 750cl/Gekko/Broadway\n\
 -m821, -m850, -m860     generate code for PowerPC 821/850/860\n"));
   fprintf (stream, _("\
 -mppc64, -m620          generate code for PowerPC 620/625/630\n\

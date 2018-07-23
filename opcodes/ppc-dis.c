@@ -94,6 +94,10 @@ struct ppc_mopt ppc_opts[] = {
     0 },
   { "750cl",   PPC_OPCODE_PPC | PPC_OPCODE_750 | PPC_OPCODE_PPCPS
     , 0 },
+  { "gekko",   PPC_OPCODE_PPC | PPC_OPCODE_750 | PPC_OPCODE_PPCPS
+    , 0 },
+  { "broadway", PPC_OPCODE_PPC | PPC_OPCODE_750 | PPC_OPCODE_PPCPS
+    , 0 },
   { "821",     PPC_OPCODE_PPC | PPC_OPCODE_860,
     0 },
   { "850",     PPC_OPCODE_PPC | PPC_OPCODE_860,
@@ -312,6 +316,9 @@ powerpc_init_dialect (struct disassemble_info *info)
       break;
     case bfd_mach_ppc_601:
       dialect = ppc_parse_cpu (dialect, &sticky, "601");
+      break;
+    case bfd_mach_ppc_750:
+      dialect = ppc_parse_cpu (dialect, &sticky, "750cl");
       break;
     case bfd_mach_ppc_a35:
     case bfd_mach_ppc_rs64ii:

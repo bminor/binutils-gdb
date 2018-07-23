@@ -204,7 +204,7 @@ extern const unsigned int spe2_num_opcodes;
 /* Opcode is only supported by Power8 architecture.  */
 #define PPC_OPCODE_POWER8     0x1000000000ull
 
-/* Opcode is supported by ppc750cl.  */
+/* Opcode is supported by ppc750cl/Gekko/Broadway.  */
 #define PPC_OPCODE_750	      0x2000000000ull
 
 /* Opcode is supported by ppc7450.  */

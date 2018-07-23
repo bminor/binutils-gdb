@@ -1,3 +1,12 @@
+2018-07-26  Alex Chadwick  <Alex.Chadwick@cl.cam.ac.uk>
+
+	* config/tc-ppc.c (md_show_usage): Add -mgekko and -mbroadway.
+	* doc/as.texi (Target PowerPC options): Add -mgekko and -mbroadway.
+	* doc/c-ppc.texi (PowerPC-Opts): Likewise.
+	* testsuite/gas/ppc/broadway.d,
+	* testsuite/gas/ppc/broadway.s: New test for broadway.
+	* testsuite/gas/ppc/ppc.exp: Run new test.
+
 2018-07-26  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (ppc_elf_localentry): Allow .localentry values

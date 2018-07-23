@@ -1,3 +1,14 @@
+2018-07-26  Alex Chadwick  <Alex.Chadwick@cl.cam.ac.uk>
+	    Alan Modra  <amodra@gmail.com>
+
+	* ppc-dis.c (ppc_opts): Add -mgekko and -mbroadway.
+	(powerpc_init_dialect): Handle bfd_mach_ppc_750.
+	* ppc-opc.c (insert_sprbat, extract_sprbat): New functions to
+	support disjointed BAT.
+	(powerpc_operands): Allow extra bit in SPRBAT_MASK.  Add SPRGQR.
+	(XSPRGQR_MASK, GEKKO, BROADWAY): Define.
+	(powerpc_opcodes): Add 750cl extended mnemonics for spr access.
+
 2018-07-25  H.J. Lu  <hongjiu.lu@intel.com>
 	    Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
 
