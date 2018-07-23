@@ -4369,6 +4369,10 @@ tokenize_extinsn (extInstruction_t *einsn)
   insn_name = xstrdup (p);
   restore_line_pointer (c);
 
+  /* Convert to lower case.  */
+  for (p = insn_name; *p; ++p)
+    *p = TOLOWER (*p);
+
   /* 2nd: get major opcode.  */
   if (*input_line_pointer != ',')
     {

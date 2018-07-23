@@ -1,3 +1,10 @@
+2018-07-23  Claudiu Zissulescu <claziss@synopsys.com>
+
+	* config/tc-arc.c (tokenize_extinsn): Convert to lower case the
+	name of extension instructions.
+	* testsuite/gas/arc/textinsn_case.d: New file.
+	* testsuite/gas/arc/textinsn_case.s: Likewise.
+
 2018-07-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (build_vex_prefix): Determine vector
