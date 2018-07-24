@@ -1677,6 +1677,12 @@ mul_n_bytes (bfd_vma memaddr, struct disassemble_info* info)
 }
 
 
+ /* The NXP documentation is vague about BM_RESERVED0 and BM_RESERVED1,
+    and contains obvious typos.
+    However the Freescale tools and experiments with the chip itself
+    seem to indicate that they behave like BM_REG_IMM and BM_OPR_REG
+    respectively.  */
+
 enum BM_MODE {
   BM_REG_IMM,
   BM_RESERVED0,
@@ -1731,6 +1737,7 @@ bm_decode (bfd_vma memaddr, struct disassemble_info* info)
   switch (mode)
     {
     case BM_REG_IMM:
+    case BM_RESERVED0:
       operand_separator (info);
       (*info->fprintf_func) (info->stream, "%s", registers[bm & 0x07].name);
       break;
@@ -1747,6 +1754,7 @@ bm_decode (bfd_vma memaddr, struct disassemble_info* info)
       opr_decode (memaddr + 1, info);
       break;
     case BM_OPR_REG:
+    case BM_RESERVED1:
       {
 	uint8_t xb;
 	read_memory (memaddr + 1, &xb, 1, info);
@@ -1756,10 +1764,6 @@ bm_decode (bfd_vma memaddr, struct disassemble_info* info)
 	opr_decode (memaddr + 1, info);
       }
       break;
-    case BM_RESERVED0:
-    case BM_RESERVED1:
-      assert (0);
-      break;
     }
 
   uint8_t imm = 0;
@@ -1768,7 +1772,7 @@ bm_decode (bfd_vma memaddr, struct disassemble_info* info)
     {
     case BM_REG_IMM:
       {
-	imm = (bm & 0xF8) >> 3;
+	imm = (bm & 0x38) >> 3;
 	(*info->fprintf_func) (info->stream, "#%d", imm);
       }
       break;
@@ -1783,10 +1787,10 @@ bm_decode (bfd_vma memaddr, struct disassemble_info* info)
       (*info->fprintf_func) (info->stream, "#%d", imm);
       break;
     case BM_OPR_REG:
+    case BM_RESERVED1:
       (*info->fprintf_func) (info->stream, "%s", registers[(bm & 0x70) >> 4].name);
       break;
     case BM_RESERVED0:
-    case BM_RESERVED1:
       assert (0);
       break;
     }
@@ -1816,6 +1820,7 @@ bm_rel_decode (bfd_vma memaddr, struct disassemble_info* info)
   switch (mode)
     {
     case BM_REG_IMM:
+    case BM_RESERVED0:
       break;
     case BM_OPR_B:
       (*info->fprintf_func) (info->stream, ".%c", 'b');
@@ -1827,6 +1832,7 @@ bm_rel_decode (bfd_vma memaddr, struct disassemble_info* info)
       (*info->fprintf_func) (info->stream, ".%c", 'l');
       break;
     case BM_OPR_REG:
+    case BM_RESERVED1:
       {
 	uint8_t xb;
 	read_memory (memaddr + 1, &xb, 1, info);
@@ -1836,16 +1842,13 @@ bm_rel_decode (bfd_vma memaddr, struct disassemble_info* info)
 				 shift_size_table[(bm & 0x0C) >> 2]);
       }
       break;
-    case BM_RESERVED0:
-    case BM_RESERVED1:
-      assert (0);
-      break;
     }
 
   int n = 1;
   switch (mode)
     {
     case BM_REG_IMM:
+    case BM_RESERVED0:
       operand_separator (info);
       (*info->fprintf_func) (info->stream, "%s", registers[bm & 0x07].name);
       break;
@@ -1856,11 +1859,8 @@ bm_rel_decode (bfd_vma memaddr, struct disassemble_info* info)
       n = 1 + opr_n_bytes (memaddr + 1, info);
       break;
     case BM_OPR_REG:
-      opr_decode (memaddr + 1, info);
-      break;
-    case BM_RESERVED0:
     case BM_RESERVED1:
-      assert (0);
+      opr_decode (memaddr + 1, info);
       break;
     }
 
@@ -1879,15 +1879,16 @@ bm_rel_decode (bfd_vma memaddr, struct disassemble_info* info)
       imm |= (bm & 0x70) >> 4;
       (*info->fprintf_func) (info->stream, "#%d", imm);
       break;
+    case BM_RESERVED0:
+      imm = (bm & 0x38) >> 3;
+      (*info->fprintf_func) (info->stream, "#%d", imm);
+      break;
     case BM_REG_IMM:
       imm = (bm & 0xF8) >> 3;
       (*info->fprintf_func) (info->stream, "#%d", imm);
       break;
-    case BM_RESERVED0:
-    case BM_RESERVED1:
-      assert (0);
-      break;
     case BM_OPR_REG:
+    case BM_RESERVED1:
       (*info->fprintf_func) (info->stream, "%s", registers[(bm & 0x70) >> 4].name);
       n += opr_n_bytes (memaddr + 1, info);
       break;
@@ -1920,6 +1921,7 @@ bm_n_bytes (bfd_vma memaddr, struct disassemble_info* info)
   switch (mode)
     {
     case BM_REG_IMM:
+    case BM_RESERVED0:
       break;
 
     case BM_OPR_B:
@@ -1928,9 +1930,8 @@ bm_n_bytes (bfd_vma memaddr, struct disassemble_info* info)
       n += opr_n_bytes (memaddr + 1, info);
       break;
     case BM_OPR_REG:
+    case BM_RESERVED1:
       n += opr_n_bytes (memaddr + 1, info);
-      break;
-    default:
       break;
   }
 

@@ -1,3 +1,9 @@
+2018-07-28  John Darrington  <john@darrington.wattle.id.au>
+
+	* testsuite/gas/s12z/bit-manip-invalid.d: New file.
+	* testsuite/gas/s12z/bit-manip-invalid.s: New file.
+	* testsuite/gas/s12z/s12z.exp: Add them.
+
 2018-08-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/gas/i386/evex-no-scale-64.d: Updated.
