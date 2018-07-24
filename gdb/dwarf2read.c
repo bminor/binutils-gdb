@@ -9700,6 +9700,23 @@ compute_delayed_physnames (struct dwarf2_cu *cu)
   cu->method_list.clear ();
 }
 
+/* A wrapper for add_symbol_to_list to ensure that SYMBOL's language is
+   the same as all other symbols in LISTHEAD.  If a new symbol is added
+   with a different language, this function asserts.  */
+
+static inline void
+dw2_add_symbol_to_list (struct symbol *symbol, struct pending **listhead)
+{
+  /* Only assert if LISTHEAD already contains symbols of a different
+     language (dict_create_hashed/insert_symbol_hashed requires that all
+     symbols in this list are of the same language).  */
+  gdb_assert ((*listhead) == NULL
+	      || (SYMBOL_LANGUAGE ((*listhead)->symbol[0])
+		  == SYMBOL_LANGUAGE (symbol)));
+
+  add_symbol_to_list (symbol, listhead);
+}
+
 /* Go objects should be embedded in a DW_TAG_module DIE,
    and it's not clear if/how imported objects will appear.
    To keep Go support simple until that's worked out,
@@ -9771,7 +9788,7 @@ fixup_go_packaging (struct dwarf2_cu *cu)
       SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
       SYMBOL_TYPE (sym) = type;
 
-      add_symbol_to_list (sym, &global_symbols);
+      dw2_add_symbol_to_list (sym, &global_symbols);
 
       xfree (package_name);
     }
@@ -11431,6 +11448,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   struct die_info *child_die;
   CORE_ADDR baseaddr;
 
+  prepare_one_comp_unit (cu, die, cu->language);
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
   get_scope_pc_bounds (die, &lowpc, &highpc, cu);
@@ -11442,8 +11460,6 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   lowpc = gdbarch_adjust_dwarf2_addr (gdbarch, lowpc + baseaddr);
 
   file_and_directory fnd = find_file_and_directory (die, cu);
-
-  prepare_one_comp_unit (cu, die, cu->language);
 
   /* The XLCL doesn't generate DW_LANG_OpenCL because this attribute is not
      standardised yet.  As a workaround for the language detection we fall
@@ -21201,7 +21217,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  SYMBOL_TYPE (sym) = objfile_type (objfile)->builtin_core_addr;
 	  SYMBOL_DOMAIN (sym) = LABEL_DOMAIN;
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_LABEL;
-	  add_symbol_to_list (sym, cu->list_in_scope);
+	  dw2_add_symbol_to_list (sym, cu->list_in_scope);
 	  break;
 	case DW_TAG_subprogram:
 	  /* SYMBOL_BLOCK_VALUE (sym) will be filled in later by
@@ -21459,7 +21475,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	case DW_TAG_common_block:
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_COMMON_BLOCK;
 	  SYMBOL_DOMAIN (sym) = COMMON_BLOCK_DOMAIN;
-	  add_symbol_to_list (sym, cu->list_in_scope);
+	  dw2_add_symbol_to_list (sym, cu->list_in_scope);
 	  break;
 	default:
 	  /* Not a tag we recognize.  Hopefully we aren't processing
@@ -21479,7 +21495,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	}
 
       if (list_to_add != NULL)
-	add_symbol_to_list (sym, list_to_add);
+	dw2_add_symbol_to_list (sym, list_to_add);
 
       /* For the benefit of old versions of GCC, check for anonymous
 	 namespaces based on the demangled name.  */
