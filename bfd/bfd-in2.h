@@ -1160,6 +1160,20 @@ char *bfd_follow_build_id_debuglink (bfd *abfd, const char *dir);
 #define bfd_get_signed_16(abfd, ptr) \
   BFD_SEND (abfd, bfd_getx_signed_16, (ptr))
 
+#define bfd_put_24(abfd, val, ptr) \
+  do                                   \
+    if (bfd_big_endian (abfd))         \
+      bfd_putb24 ((val), (ptr));       \
+    else                               \
+      bfd_putl24 ((val), (ptr));       \
+  while (0)
+
+bfd_vma bfd_getb24 (const void *p);
+bfd_vma bfd_getl24 (const void *p);
+
+#define bfd_get_24(abfd, ptr) \
+  (bfd_big_endian (abfd) ? bfd_getb24 (ptr) : bfd_getl24 (ptr))
+
 #define bfd_put_32(abfd, val, ptr) \
   BFD_SEND (abfd, bfd_putx32, ((val),(ptr)))
 #define bfd_put_signed_32 \

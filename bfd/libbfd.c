@@ -458,6 +458,20 @@ DESCRIPTION
 .#define bfd_get_signed_16(abfd, ptr) \
 .  BFD_SEND (abfd, bfd_getx_signed_16, (ptr))
 .
+.#define bfd_put_24(abfd, val, ptr) \
+.  do					\
+.    if (bfd_big_endian (abfd))		\
+.      bfd_putb24 ((val), (ptr));	\
+.    else				\
+.      bfd_putl24 ((val), (ptr));	\
+.  while (0)
+.
+.bfd_vma bfd_getb24 (const void *p);
+.bfd_vma bfd_getl24 (const void *p);
+.
+.#define bfd_get_24(abfd, ptr) \
+.  (bfd_big_endian (abfd) ? bfd_getb24 (ptr) : bfd_getl24 (ptr))
+.
 .#define bfd_put_32(abfd, val, ptr) \
 .  BFD_SEND (abfd, bfd_putx32, ((val),(ptr)))
 .#define bfd_put_signed_32 \
@@ -613,7 +627,6 @@ bfd_putl16 (bfd_vma data, void *p)
   addr[1] = (data >> 8) & 0xff;
 }
 
-
 void
 bfd_putb24 (bfd_vma data, void *p)
 {
@@ -622,7 +635,6 @@ bfd_putb24 (bfd_vma data, void *p)
   addr[1] = (data >> 8) & 0xff;
   addr[2] = data & 0xff;
 }
-
 
 void
 bfd_putl24 (bfd_vma data, void *p)
@@ -633,6 +645,29 @@ bfd_putl24 (bfd_vma data, void *p)
   addr[2] = (data >> 16) & 0xff;
 }
 
+bfd_vma
+bfd_getb24 (const void *p)
+{
+  const bfd_byte *addr = (const bfd_byte *) p;
+  unsigned long v;
+
+  v =  (unsigned long) addr[0] << 16;
+  v |= (unsigned long) addr[1] << 8;
+  v |= (unsigned long) addr[2];
+  return v;
+}
+
+bfd_vma
+bfd_getl24 (const void *p)
+{
+  const bfd_byte *addr = (const bfd_byte *) p;
+  unsigned long v;
+
+  v = (unsigned long) addr[0];
+  v |= (unsigned long) addr[1] << 8;
+  v |= (unsigned long) addr[2] << 16;
+  return v;
+}
 
 bfd_vma
 bfd_getb32 (const void *p)
