@@ -2279,7 +2279,7 @@ gnu_nat_target::detach (inferior *inf, int from_tty)
   inf_detach (gnu_current_inf);
 
   inferior_ptid = null_ptid;
-  detach_inferior (pid);
+  detach_inferior (find_inferior_pid (pid));
 
   maybe_unpush_target ();
 }
