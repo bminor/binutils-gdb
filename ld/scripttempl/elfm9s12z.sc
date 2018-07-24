@@ -401,6 +401,7 @@ SECTIONS
     ${RELOCATING+__bss_start = .;}
     ${RELOCATING+*(.softregs)}
     ${RELOCATING+*(.sbss)}
+    ${RELOCATING+*(.common)}
     ${RELOCATING+*(.scommon)}
 
     *(.dynbss)
