@@ -248,7 +248,7 @@ s12z_info_to_howto_rel (bfd *abfd,
 static bfd_boolean
 s12z_elf_set_mach_from_flags (bfd *abfd)
 {
-  bfd_default_set_arch_mach (abfd, bfd_arch_s12z, 0); // bfd_mach_s12z);
+  bfd_default_set_arch_mach (abfd, bfd_arch_s12z, 0);
 
   return TRUE;
 }

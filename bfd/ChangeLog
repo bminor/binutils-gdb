@@ -1,3 +1,7 @@
+2018-07-27  John Darrington  <john@darrington.wattle.id.au>
+
+	* elf32-s12z.c (s12z_elf_set_mach_from_flags): Remove comment.
+
 2018-07-26  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_size_stubs): Use a ppc_stub_long_branch_r2off
