@@ -654,6 +654,7 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-nops-5"
     run_dump_test "x86-64-nops-5-k8"
     run_dump_test "x86-64-nops-7"
+    run_list_test "cvtsi2sX"
     run_dump_test "x86-64-sse4_1"
     run_dump_test "x86-64-sse4_1-intel"
     run_dump_test "x86-64-sse4_2"

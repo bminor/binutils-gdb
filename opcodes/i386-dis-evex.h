@@ -3045,13 +3045,13 @@ static const struct dis386 evex_table[][256] = {
   },
   /* EVEX_W_0F2A_P_1 */
   {
-    { "vcvtsi2ss",	{ XMScalar, VexScalar, EXxEVexR, Ed }, 0 },
-    { "vcvtsi2ss",	{ XMScalar, VexScalar, EXxEVexR, Eq }, 0 },
+    { "vcvtsi2ss%LQ",	{ XMScalar, VexScalar, EXxEVexR, Ed }, 0 },
+    { "vcvtsi2ss%LQ",	{ XMScalar, VexScalar, EXxEVexR, Eq }, 0 },
   },
   /* EVEX_W_0F2A_P_3 */
   {
-    { "vcvtsi2sd",	{ XMScalar, VexScalar, Ed }, 0 },
-    { "vcvtsi2sd",	{ XMScalar, VexScalar, EXxEVexR, Eq }, 0 },
+    { "vcvtsi2sd%LQ",	{ XMScalar, VexScalar, Ed }, 0 },
+    { "vcvtsi2sd%LQ",	{ XMScalar, VexScalar, EXxEVexR, Eq }, 0 },
   },
   /* EVEX_W_0F2B_P_0 */
   {
@@ -3382,8 +3382,8 @@ static const struct dis386 evex_table[][256] = {
   },
   /* EVEX_W_0F7B_P_1 */
   {
-    { "vcvtusi2ss",	{ XMScalar, VexScalar, EXxEVexR, Ed }, 0 },
-    { "vcvtusi2ss",	{ XMScalar, VexScalar, EXxEVexR, Eq }, 0 },
+    { "vcvtusi2ss%LQ",	{ XMScalar, VexScalar, EXxEVexR, Ed }, 0 },
+    { "vcvtusi2ss%LQ",	{ XMScalar, VexScalar, EXxEVexR, Eq }, 0 },
   },
   /* EVEX_W_0F7B_P_2 */
   {
@@ -3392,8 +3392,8 @@ static const struct dis386 evex_table[][256] = {
   },
   /* EVEX_W_0F7B_P_3 */
   {
-    { "vcvtusi2sd",	{ XMScalar, VexScalar, Ed }, 0 },
-    { "vcvtusi2sd",	{ XMScalar, VexScalar, EXxEVexR, Eq }, 0 },
+    { "vcvtusi2sd%LQ",	{ XMScalar, VexScalar, Ed }, 0 },
+    { "vcvtusi2sd%LQ",	{ XMScalar, VexScalar, EXxEVexR, Eq }, 0 },
   },
   /* EVEX_W_0F7E_P_1 */
   {

@@ -5256,14 +5256,17 @@ check_VecOperands (const insn_template *t)
 	  for (op = 0; op < i.operands; op++)
 	    if (operand_type_check (i.types[op], anymem))
 	      {
-		if (t->operand_types[op].bitfield.xmmword
-		    + t->operand_types[op].bitfield.ymmword
-		    + t->operand_types[op].bitfield.zmmword <= 1)
+		if (t->opcode_modifier.evex == EVEXLIG)
+		  i.memshift = 2 + (i.suffix == QWORD_MNEM_SUFFIX);
+		else if (t->operand_types[op].bitfield.xmmword
+			 + t->operand_types[op].bitfield.ymmword
+			 + t->operand_types[op].bitfield.zmmword <= 1)
 		  type = &t->operand_types[op];
 		else if (!i.types[op].bitfield.unspecified)
 		  type = &i.types[op];
 	      }
-	    else if (i.types[op].bitfield.regsimd)
+	    else if (i.types[op].bitfield.regsimd
+		     && t->opcode_modifier.evex != EVEXLIG)
 	      {
 		if (i.types[op].bitfield.zmmword)
 		  i.memshift = 6;

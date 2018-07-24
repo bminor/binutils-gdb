@@ -1,3 +1,17 @@
+2018-07-24  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (check_VecOperands): Handle EVEXLIG when
+	deriving i.memshift.
+	* testsuite/gas/i386/cvtsi2sX.s, testsuite/gas/i386/cvtsi2sX.l:
+	New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+	* testsuite/gas/i386/avx512f.d,
+	testsuite/gas/i386/evex-lig256.d,
+	testsuite/gas/i386/evex-lig512.d,,
+	testsuite/gas/i386/x86-64-avx512f.d,
+	testsuite/gas/i386/x86-64-evex-lig256.d,
+	testsuite/gas/i386/x86-64-evex-lig512.d: Adjust expectations.
+
 2018-07-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/gas/i386/inval-avx512f.s: Add a test for missing
