@@ -1,3 +1,10 @@
+2019-05-04  Tom Tromey  <tom@tromey.com>
+
+	* aarch64-tdep.c (stack_item_t): Remove typedef and DEF_VEC.
+	(struct aarch64_call_info): Add initializers.
+	<si>: Now a std::vector.
+	(pass_on_stack, aarch64_push_dummy_call): Update.
+
 2019-05-04  Simon Marchi  <simon.marchi@efficios.com>
 	    Tom Tromey  <tom@tromey.com>
 

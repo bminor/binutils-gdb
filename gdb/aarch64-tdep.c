@@ -1206,7 +1206,7 @@ aarch64_execute_dwarf_cfa_vendor_op (struct gdbarch *gdbarch, gdb_byte op,
 /* When arguments must be pushed onto the stack, they go on in reverse
    order.  The code below implements a FILO (stack) to do this.  */
 
-typedef struct
+struct stack_item_t
 {
   /* Value to pass on stack.  It can be NULL if this item is for stack
      padding.  */
@@ -1214,9 +1214,7 @@ typedef struct
 
   /* Size in bytes of value to pass on stack.  */
   int len;
-} stack_item_t;
-
-DEF_VEC_O (stack_item_t);
+};
 
 /* Implement the gdbarch type alignment method, overrides the generic
    alignment algorithm for anything that is aarch64 specific.  */
@@ -1392,22 +1390,22 @@ aapcs_is_vfp_call_or_return_candidate (struct type *type, int *count,
 struct aarch64_call_info
 {
   /* the current argument number.  */
-  unsigned argnum;
+  unsigned argnum = 0;
 
   /* The next general purpose register number, equivalent to NGRN as
      described in the AArch64 Procedure Call Standard.  */
-  unsigned ngrn;
+  unsigned ngrn = 0;
 
   /* The next SIMD and floating point register number, equivalent to
      NSRN as described in the AArch64 Procedure Call Standard.  */
-  unsigned nsrn;
+  unsigned nsrn = 0;
 
   /* The next stacked argument address, equivalent to NSAA as
      described in the AArch64 Procedure Call Standard.  */
-  unsigned nsaa;
+  unsigned nsaa = 0;
 
   /* Stack item vector.  */
-  VEC(stack_item_t) *si;
+  std::vector<stack_item_t> si;
 };
 
 /* Pass a value in a sequence of consecutive X registers.  The caller
@@ -1521,7 +1519,7 @@ pass_on_stack (struct aarch64_call_info *info, struct type *type,
 
   item.len = len;
   item.data = buf;
-  VEC_safe_push (stack_item_t, info->si, &item);
+  info->si.push_back (item);
 
   info->nsaa += len;
   if (info->nsaa & (align - 1))
@@ -1532,7 +1530,7 @@ pass_on_stack (struct aarch64_call_info *info, struct type *type,
       item.len = pad;
       item.data = NULL;
 
-      VEC_safe_push (stack_item_t, info->si, &item);
+      info->si.push_back (item);
       info->nsaa += pad;
     }
 }
@@ -1631,8 +1629,6 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 {
   int argnum;
   struct aarch64_call_info info;
-
-  memset (&info, 0, sizeof (info));
 
   /* We need to know what the type of the called function is in order
      to determine the number of named/anonymous arguments for the
@@ -1762,17 +1758,15 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   if (info.nsaa & 15)
     sp -= 16 - (info.nsaa & 15);
 
-  while (!VEC_empty (stack_item_t, info.si))
+  while (!info.si.empty ())
     {
-      stack_item_t *si = VEC_last (stack_item_t, info.si);
+      const stack_item_t &si = info.si.back ();
 
-      sp -= si->len;
-      if (si->data != NULL)
-	write_memory (sp, si->data, si->len);
-      VEC_pop (stack_item_t, info.si);
+      sp -= si.len;
+      if (si.data != NULL)
+	write_memory (sp, si.data, si.len);
+      info.si.pop_back ();
     }
-
-  VEC_free (stack_item_t, info.si);
 
   /* Finally, update the SP register.  */
   regcache_cooked_write_unsigned (regcache, AARCH64_SP_REGNUM, sp);
