@@ -5,14 +5,14 @@
 # Tommy Pettersson <ptp@lysator.liu.se>, 2001, 2002, 2004.
 # Göran Uddeborg <goeran@uddeborg.se>, 2013, 2014, 2016, 2017, 2018.
 #
-# $Revision: 1.17 $
+# $Revision: 1.19 $
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: binutils 2.30.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2018-06-24 19:42+0100\n"
-"PO-Revision-Date: 2018-06-25 16:02+0200\n"
+"PO-Revision-Date: 2018-07-19 10:55+0200\n"
 "Last-Translator: Göran Uddeborg <goeran@uddeborg.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -124,7 +124,7 @@ msgstr "ingen post %s i arkivet\n"
 #: ar.c:274
 #, c-format
 msgid "Usage: %s [emulation options] [-]{dmpqrstx}[abcDfilMNoOPsSTuvV] [--plugin <name>] [member-name] [count] archive-file file...\n"
-msgstr "Användning: %s [emuleringsflaggor] [-]{dmpqrstx}[abcDfilMNoOPsSTuvV] [--plugin <namn>] [nummer] arkivfil fil…\n"
+msgstr "Användning: %s [emuleringsflaggor] [-]{dmpqrstx}[abcDfilMNoOPsSTuvV] [--plugin <namn>] [medlemsnamn] [nummer] arkivfil fil…\n"
 
 #: ar.c:280
 #, c-format
@@ -1779,7 +1779,7 @@ msgstr "ENHET flaggor     : %s\n"
 
 #: dwarf.c:152
 msgid "Encoded value extends past end of section\n"
-msgstr "Kodat väde sträcker sig utanför slutet av sektionen\n"
+msgstr "Kodat värde sträcker sig utanför slutet av sektionen\n"
 
 #: dwarf.c:160
 #, c-format
@@ -2273,7 +2273,7 @@ msgid ""
 "Raw dump of debug contents of section %s (loaded from %s):\n"
 "\n"
 msgstr ""
-"Rå utskrift av felsökningsinnehåll i sektion %s (inläst från %s)::\n"
+"Rå utskrift av felsökningsinnehåll i sektion %s (inläst från %s):\n"
 "\n"
 
 #: dwarf.c:2743
@@ -2621,14 +2621,14 @@ msgid_plural "  Opcode %d has %d args\n"
 msgstr[0] "  Op-kod %d har %d argument\n"
 msgstr[1] "  Op-kod %d har %d argument\n"
 
-# Detta kommer bindas samman med "tabell" och liknande.  Borde
-# eventuellt felrapporteras.
+# Detta kommer bindas samman med "tabell" och liknande.
+# https://sourceware.org/bugzilla/show_bug.cgi?id=23431
 #: dwarf.c:3639
 msgid "Directory"
 msgstr "Katalog"
 
-# Detta kommer bindas samman med "tabell" och liknande.  Borde
-# eventuellt felrapporteras.
+# Detta kommer bindas samman med "tabell" och liknande.
+# https://sourceware.org/bugzilla/show_bug.cgi?id=23431
 #: dwarf.c:3641
 msgid "File name"
 msgstr "Filnamns"
@@ -3097,7 +3097,7 @@ msgstr " DW_MACRO_define_sup — radnr : %d makroavstånd : 0x%lx\n"
 #: dwarf.c:5281
 #, c-format
 msgid " DW_MACRO_undef_sup - lineno : %d macro offset : 0x%lx\n"
-msgstr " DW_MACRO_GNU_undef_sup — radnr : %d makroavstånd : 0x%lx\n"
+msgstr " DW_MACRO_undef_sup — radnr : %d makroavstånd : 0x%lx\n"
 
 #: dwarf.c:5287
 #, c-format
@@ -3390,12 +3390,12 @@ msgstr "(start > slut)"
 #: dwarf.c:6620
 #, c-format
 msgid "Range list starting at offset 0x%lx is not terminated.\n"
-msgstr "Intervalllistan som startar på avstånd 0x%lx är inte avslutad.\n"
+msgstr "Intervallistan som startar på avstånd 0x%lx är inte avslutad.\n"
 
 #: dwarf.c:6656
 #, c-format
 msgid "Invalid range list entry type %d\n"
-msgstr "Okänd typ av intervalllistpost %d\n"
+msgstr "Okänd typ av intervallistpost %d\n"
 
 #: dwarf.c:6733
 #, c-format
@@ -3436,7 +3436,7 @@ msgstr "Trasig pekarstorlek (%d) i felsökningspost på position %8.8lx\n"
 #: dwarf.c:6841
 #, c-format
 msgid "Corrupt offset (%#8.8lx) in range entry %u\n"
-msgstr "Trasigt avstånd (%#8.8lx) i intervalpost %u\n"
+msgstr "Trasigt avstånd (%#8.8lx) i intervallpost %u\n"
 
 #: dwarf.c:6849
 #, c-format
@@ -3503,7 +3503,7 @@ msgstr "Troligen trasig segmentstorlek: %d — använder 4 istället\n"
 #: dwarf.c:7701
 #, c-format
 msgid "Corrupt augmentation data length: 0x%s\n"
-msgstr "Trasigt tilläggsdatalängd: 0x%s\n"
+msgstr "Trasig tilläggsdatalängd: 0x%s\n"
 
 #: dwarf.c:7823
 #, c-format
@@ -3711,7 +3711,7 @@ msgstr "Adresstabellavståndet (%x) är mindre än TU-avståndet (%x)\n"
 #: dwarf.c:8873
 #, c-format
 msgid "Symbol table offset (%x) is less then Address table offset (%x)\n"
-msgstr "Symboltabellavståndet (%x) är mindre än adresstebellavståndet (%x)\n"
+msgstr "Symboltabellavståndet (%x) är mindre än adresstabellavståndet (%x)\n"
 
 #: dwarf.c:8882
 #, c-format
@@ -3947,7 +3947,7 @@ msgstr "Kan inte återöppna filen med felsökningsinformation: %s\n"
 #: dwarf.c:9654
 #, c-format
 msgid "Separate debug info file %s found, but CRC does not match - ignoring\n"
-msgstr "Separat fil %s med filsökningsinformation hittad, men CRC:n stämmer inte — ignorerar\n"
+msgstr "Separat fil %s med felsökningsinformation hittad, men CRC:n stämmer inte — ignorerar\n"
 
 #: dwarf.c:9749
 #, c-format
@@ -4160,7 +4160,7 @@ msgstr "Hittade ett index till långt namn (%ld) efter slutet på tabellen över
 
 #: elfcomm.c:805
 msgid "Invalid Thin archive member name\n"
-msgstr "Felaktigt medlemnamn i tunt arkiv\n"
+msgstr "Felaktigt medlemsnamn i tunt arkiv\n"
 
 #: elfcomm.c:861
 #, c-format
@@ -4912,12 +4912,11 @@ msgstr ""
 "  -g -S -d --strip-debug           Ta bort alla felsökssymboler & -sektioner\n"
 "     --strip-dwo                   Ta bort alla DWO-sektioner\n"
 "     --strip-unneeded              Ta bort alla symboler som inte är\n"
-"                                   nödvändiga för relokeringen\n"
+"                                   nödvändiga för omlokaliseringen\n"
 "     --only-keep-debug             Ta bort allt utom felsökningsinformationen\n"
 "  -M  --merge-notes                Ta bort överflödiga poster i\n"
-"                                     noteringssektioner\n"
+"                                     noteringssektioner (standard)\n"
 "      --no-merge-notes             Försök inte ta bort överflödiga noteringar\n"
-"                                     (standard)\n"
 "  -N --strip-symbol=<namn>         Kopiera inte symbol <namn>\n"
 "  -K --keep-symbol=<namn>          Ta inte bort symbol <namn>\n"
 "     --keep-file-symbols           Ta inte bort filsymboler\n"
@@ -6336,7 +6335,7 @@ msgstr "  importfilavstånd: %u\n"
 #: od-xcoff.c:1085
 #, c-format
 msgid "  string table len:  %u\n"
-msgstr "  strängtabelllängd: %u\n"
+msgstr "  strängtabellängd: %u\n"
 
 #: od-xcoff.c:1087
 #, c-format
@@ -6594,7 +6593,7 @@ msgstr "Avhuggen storlek förhindrar läsning av %s element av storlek %s för %
 #: readelf.c:394
 #, c-format
 msgid "Size overflow prevents reading %s elements of size %s for %s\n"
-msgstr "Storleksavhuggning förhindrar läsning av %s element av storlek %s för %s\n"
+msgstr "Storleksöverspill förhindrar läsning av %s element av storlek %s för %s\n"
 
 #: readelf.c:406
 #, c-format
@@ -6614,7 +6613,7 @@ msgstr "Slut på minne vid allokering av %s byte för %s\n"
 #: readelf.c:441
 #, c-format
 msgid "Unable to read in %s bytes of %s\n"
-msgstr "Kan inte läsa in %s byte af %s\n"
+msgstr "Kan inte läsa in %s byte av %s\n"
 
 #: readelf.c:882
 msgid "Don't know about relocations on this machine architecture\n"
@@ -6718,7 +6717,7 @@ msgstr "NONE (ingen)"
 
 #: readelf.c:2250
 msgid "REL (Relocatable file)"
-msgstr "REL (relokeringsbar fil)"
+msgstr "REL (omlokaliserbar fil)"
 
 #: readelf.c:2251
 msgid "EXEC (Executable file)"
@@ -7310,12 +7309,12 @@ msgstr "Slut på minne när %u sektionshuvuden lästes\n"
 #: readelf.c:5351 readelf.c:5417
 #, c-format
 msgid "Section %u has an out of range sh_link value of %u\n"
-msgstr "Sektion %u har ett sh_link-värde utanför intervallet %u\n"
+msgstr "Sektion %u har ett sh_link-värde %u utanför intervallet\n"
 
 #: readelf.c:5353 readelf.c:5419
 #, c-format
 msgid "Section %u has an out of range sh_info value of %u\n"
-msgstr "Sektion %u har ett sh_info-värde utanför intervallet %u\n"
+msgstr "Sektion %u har ett sh_info-värde %u utanför intervallet\n"
 
 #: readelf.c:5448 readelf.c:5561
 #, c-format
@@ -7336,6 +7335,8 @@ msgstr "Storleken (0x%lx) på sektionen %s är inte en multipel av dess sh_entsi
 msgid "symbols"
 msgstr "symboler"
 
+# "Indicies" är en felstavning, skall vara "indices".
+# https://sourceware.org/bugzilla/show_bug.cgi?id=23430
 #: readelf.c:5488 readelf.c:5601
 msgid "symbol table section indicies"
 msgstr "sektionsindex för symboltabellen"
@@ -7348,7 +7349,7 @@ msgstr "Indexsektionen %s har en sh_size på 0x%lx — 0x%lx förväntades\n"
 #: readelf.c:5507 readelf.c:5620
 #, c-format
 msgid "Out of memory reading %lu symbols\n"
-msgstr "Slut på minne när %lu sumbyler lästes\n"
+msgstr "Slut på minne när %lu symboler lästes\n"
 
 #: readelf.c:5801 readelf.c:5876 readelf.c:5894 readelf.c:5912
 msgid "Internal error: not enough buffer room for section flag info"
@@ -7487,7 +7488,7 @@ msgstr "[%2u]: Länkfält (%u) skall indexera en symboltabellsektion.\n"
 #: readelf.c:6295
 #, c-format
 msgid "[%2u]: Link field (%u) should index a string section.\n"
-msgstr "[%2u]: Länkfält (%u) skall indexera en stränsektion.\n"
+msgstr "[%2u]: Länkfält (%u) skall indexera en strängsektion.\n"
 
 #: readelf.c:6303 readelf.c:6314
 #, c-format
@@ -7521,7 +7522,7 @@ msgstr "sektion %u: sh_link-värdet på %u är större än antalet sektioner\n"
 
 #: readelf.c:6565
 msgid "compression header"
-msgstr "kompressionshuvud"
+msgstr "komprimeringshuvud"
 
 #: readelf.c:6574
 #, c-format
@@ -7641,9 +7642,11 @@ msgstr "   [Index]    Namn\n"
 msgid "section [%5u] in group section [%5u] > maximum section [%5u]\n"
 msgstr "sektion [%5u] i gruppsektion [%5u] > maximala sektionen [%5u]\n"
 
+# "Indicies" är en felstavning, skall vara "indices".
+# https://sourceware.org/bugzilla/show_bug.cgi?id=23430
 #: readelf.c:6846
 msgid "Further error messages about overlarge group section indicies suppressed\n"
-msgstr "Ytterligare felmeddelanden om överstora gruppsektionsindex utelämnas\n"
+msgstr "Ytterligare felmeddelanden om för stora gruppsektionsindex utelämnas\n"
 
 #: readelf.c:6859
 #, c-format
@@ -7729,7 +7732,7 @@ msgid ""
 "Relocation section "
 msgstr ""
 "\n"
-"Omrelokeringssektion "
+"Omlokeringssektion "
 
 #: readelf.c:7205
 #, c-format
@@ -8071,7 +8074,7 @@ msgstr "dynamisk sektion"
 #: readelf.c:9514 readelf.c:9563
 #, c-format
 msgid "Out of memory allocating space for %lu dynamic entries\n"
-msgstr "Slut på minne vid allokering av utrymmer för %lu dynamiska poster\n"
+msgstr "Slut på minne vid allokering av utrymme för %lu dynamiska poster\n"
 
 #: readelf.c:9623
 #, c-format
@@ -8112,7 +8115,7 @@ msgstr "symbolinformation"
 #: readelf.c:9769
 #, c-format
 msgid "Out of memory allocating %lu byte for dynamic symbol info\n"
-msgstr "Slut på minne vid allokering av %lu för information om dynamiska symboler\n"
+msgstr "Slut på minne vid allokering av %lu byte för information om dynamiska symboler\n"
 
 #: readelf.c:9788
 #, c-format
@@ -8152,7 +8155,7 @@ msgstr "konfigurationsfil"
 #: readelf.c:9841
 #, c-format
 msgid "Dependency audit library"
-msgstr "beroendövervakningsbibliotek"
+msgstr "beroendeövervakningsbibliotek"
 
 #: readelf.c:9845
 #, c-format
@@ -8491,7 +8494,7 @@ msgstr "Kan inte läsa in %s byte med dynamiska data\n"
 #: readelf.c:11179
 #, c-format
 msgid "Out of memory allocating space for %s dynamic entries\n"
-msgstr "Slut på minne vid allokering av utrymmer för %s dynamiska poster\n"
+msgstr "Slut på minne vid allokering av utrymme för %s dynamiska poster\n"
 
 #: readelf.c:11206
 #, c-format
@@ -8703,7 +8706,7 @@ msgstr "MSP430-omlokalisering innehåller ett felaktigt symbolindex %lu\n"
 #: readelf.c:12101
 #, c-format
 msgid "MSP430 sym diff reloc contains invalid offset: 0x%lx\n"
-msgstr "MSP430 symbolskillnadsomlokallisering innehåller ett felaktigt avstånd: 0x%lx\n"
+msgstr "MSP430 symbolskillnadsomlokalisering innehåller ett felaktigt avstånd: 0x%lx\n"
 
 #: readelf.c:12112
 msgid "Unhandled MSP430 reloc type found after SYM_DIFF reloc\n"
@@ -9021,7 +9024,7 @@ msgstr "hårda flyttal, "
 #: readelf.c:14585
 #, c-format
 msgid "soft float, "
-msgstr "mjuka flytta, "
+msgstr "mjuka flyttal, "
 
 #: readelf.c:14588
 #, c-format
@@ -9071,7 +9074,7 @@ msgstr "vilken som helst\n"
 #: readelf.c:14697
 #, c-format
 msgid "software\n"
-msgstr "mjukvara\n"
+msgstr "programvara\n"
 
 #: readelf.c:14700
 #, c-format
@@ -9262,7 +9265,7 @@ msgstr "Felaktig delsektionslängd (%u > %u)\n"
 #: readelf.c:15415
 #, c-format
 msgid "Bad subsection length (%u < 6)\n"
-msgstr "Felaktig delsektionslängd (%u > 6)\n"
+msgstr "Felaktig delsektionslängd (%u < 6)\n"
 
 #: readelf.c:15430
 #, c-format
@@ -9719,11 +9722,11 @@ msgstr "NT_S390_TDB (s390 transactionsdiagnostikblock)"
 
 #: readelf.c:16717
 msgid "NT_S390_VXRS_LOW (s390 vector registers 0-15 upper half)"
-msgstr "NT_S390_VXRS_LOW (s390 kontrollregister 0-15 övre halva)"
+msgstr "NT_S390_VXRS_LOW (s390 vektorregister 0-15 övre halva)"
 
 #: readelf.c:16719
 msgid "NT_S390_VXRS_HIGH (s390 vector registers 16-31)"
-msgstr "NT_S390_VXRS_HIGH (s390 kontrollregister 16-31)"
+msgstr "NT_S390_VXRS_HIGH (s390 vektorregister 16-31)"
 
 #: readelf.c:16721
 msgid "NT_S390_GS_CB (s390 guarded-storage registers)"
@@ -9914,7 +9917,7 @@ msgstr "<okänd typ %#x-data: "
 #: readelf.c:17069
 #, c-format
 msgid "<procesor-specific type %#x data: "
-msgstr "<processorspecifi typ %#x-data: "
+msgstr "<processorspecifik typ %#x-data: "
 
 #: readelf.c:17071
 #, c-format
@@ -10538,7 +10541,7 @@ msgstr "%s: kunde inte söka till en arkivmedlem.\n"
 
 #: readelf.c:19217
 msgid "Out of memory allocating file data structure\n"
-msgstr "Slut på minne vid allokering fildatapost\n"
+msgstr "Slut på minne vid allokering av fildatapost\n"
 
 #: readelf.c:19253
 #, c-format
@@ -11060,7 +11063,7 @@ msgstr "Okänd coff-symbolplats: %d"
 #. FIXME: Return error status.
 #: srconv.c:1424
 msgid "Failed to write CS struct"
-msgstr "misslyckades att skriva en CS-post"
+msgstr "Misslyckades att skriva en CS-post"
 
 #: srconv.c:1696
 #, c-format
@@ -11292,7 +11295,7 @@ msgstr ""
 "  -T --target=<BFDNAMN>     Välj binärfilens format\n"
 "  -e --encoding={s,S,b,l,B,L} Välj teckenstorlek och byteordning:\n"
 "                            s = 7-bit, S = 8-bit, {b,l} = 16-bit, {B,L} = 32-bit\n"
-"  -s --output-separator=<string> Sträng som skall användas för att separera\n"
+"  -s --output-separator=<sträng> Sträng som skall användas för att separera\n"
 "                              strängar i utdata.\n"
 "  @<fil>                    Läs flaggor från <fil>\n"
 "  -h --help                 Visa denna information\n"
@@ -11304,7 +11307,7 @@ msgstr "*odefinierad*"
 
 #: sysdump.c:57
 msgid "*corrupt*"
-msgstr "trasig"
+msgstr "*trasig*"
 
 #: sysdump.c:125
 #, c-format
@@ -11358,7 +11361,7 @@ msgid ""
 msgstr ""
 " Flaggorna är:\n"
 "  -h --help        Visa denna hjälp\n"
-"  -v --version     Visa programment versionsinformation\n"
+"  -v --version     Visa programmets versionsinformation\n"
 
 #: sysdump.c:711
 #, c-format

@@ -3280,8 +3280,10 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
       /* If the file already exists, make another temp dir.  */
       if (stat (output_name, &buf) >= 0)
 	{
-	  output_name = make_tempdir (output_name);
-	  if (output_name == NULL)
+	  char * tmpdir = make_tempdir (output_name);
+
+	  free (output_name);
+	  if (tmpdir == NULL)
 	    {
 	      non_fatal (_("cannot create tempdir for archive copying (error: %s)"),
 			 strerror (errno));
@@ -3290,11 +3292,11 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	    }
 
 	  l = (struct name_list *) xmalloc (sizeof (struct name_list));
-	  l->name = output_name;
+	  l->name = tmpdir;
 	  l->next = list;
 	  l->obfd = NULL;
 	  list = l;
-	  output_name = concat (output_name, "/",
+	  output_name = concat (tmpdir, "/",
 				bfd_get_filename (this_element), (char *) 0);
 	}
 
@@ -3401,16 +3403,22 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 
  cleanup_and_exit:
   /* Delete all the files that we opened.  */
-  for (l = list; l != NULL; l = l->next)
-    {
-      if (l->obfd == NULL)
-	rmdir (l->name);
-      else
-	{
-	  bfd_close (l->obfd);
-	  unlink (l->name);
-	}
-    }
+  {
+    struct name_list * next;
+
+    for (l = list; l != NULL; l = next)
+      {
+	if (l->obfd == NULL)
+	  rmdir (l->name);
+	else
+	  {
+	    bfd_close (l->obfd);
+	    unlink (l->name);
+	  }
+	next = l->next;
+	free (l);
+      }
+  }
 
   rmdir (dir);
 }
@@ -4263,7 +4271,7 @@ write_debugging_info (bfd *obfd, void *dhandle,
   if (bfd_get_flavour (obfd) == bfd_target_coff_flavour
       || bfd_get_flavour (obfd) == bfd_target_elf_flavour)
     {
-      bfd_byte *syms, *strings;
+      bfd_byte *syms, *strings = NULL;
       bfd_size_type symsize, stringsize;
       asection *stabsec, *stabstrsec;
       flagword flags;
@@ -4285,6 +4293,7 @@ write_debugging_info (bfd *obfd, void *dhandle,
 	{
 	  bfd_nonfatal_message (NULL, obfd, NULL,
 				_("can't create debugging section"));
+	  free (strings);
 	  return FALSE;
 	}
 
@@ -4298,6 +4307,7 @@ write_debugging_info (bfd *obfd, void *dhandle,
 	{
 	  bfd_nonfatal_message (NULL, obfd, NULL,
 				_("can't set debugging section contents"));
+	  free (strings);
 	  return FALSE;
 	}
 

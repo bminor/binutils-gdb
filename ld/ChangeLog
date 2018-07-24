@@ -1,3 +1,7 @@
+2018-07-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+
 2018-07-23  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* testsuite/ld-xtensa/coalesce.d: New file.
