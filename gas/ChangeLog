@@ -1,3 +1,9 @@
+2018-07-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (build_vex_prefix): Use unsigned int to
+	iterate through multi-length vector operands.
+	(build_evex_prefix): Likewise.
+
 2018-07-24  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (check_VecOperands): Handle EVEXLIG when

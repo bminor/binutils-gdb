@@ -3362,12 +3362,12 @@ build_vex_prefix (const insn_template *t)
     vector_length = 1;
   else
     {
-      int op;
+      unsigned int op;
 
       /* Determine vector length from the last multi-length vector
 	 operand.  */
       vector_length = 0;
-      for (op = t->operands - 1; op >= 0; op--)
+      for (op = t->operands; op--;)
 	if (t->operand_types[op].bitfield.xmmword
 	    && t->operand_types[op].bitfield.ymmword
 	    && i.types[op].bitfield.ymmword)
@@ -3612,12 +3612,12 @@ build_evex_prefix (void)
       if (!i.tm.opcode_modifier.evex
 	  || i.tm.opcode_modifier.evex == EVEXDYN)
 	{
-	  int op;
+	  unsigned int op;
 
 	  /* Determine vector length from the last multi-length vector
 	     operand.  */
 	  vec_length = 0;
-	  for (op = i.operands - 1; op >= 0; op--)
+	  for (op = i.operands; op--;)
 	    if (i.tm.operand_types[op].bitfield.xmmword
 		+ i.tm.operand_types[op].bitfield.ymmword
 		+ i.tm.operand_types[op].bitfield.zmmword > 1)
@@ -3658,7 +3658,7 @@ build_evex_prefix (void)
 		  }
 	      }
 
-	  if (op < 0)
+	  if (op >= MAX_OPERANDS)
 	    abort ();
 	}
 
