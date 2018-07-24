@@ -1,5 +1,16 @@
 2018-11-09  Tom Tromey  <tom@tromey.com>
 
+	* remote.c (remote_g_packet_guess_s): Remove typedef and DEF_VEC.
+	(struct remote_g_packet_data): Derive from allocate_on_obstack.
+	<guesses>: Now a std::vector.
+	(remote_g_packet_data_init, register_remote_g_packet_guess):
+	Update.
+	(remote_read_description_p): Update.  Return bool.
+	(remote_target::read_description): Update.
+	(struct remote_g_packet_guess): Add constructor.
+
+2018-11-09  Tom Tromey  <tom@tromey.com>
+
 	* common/scoped_fd.h (class scoped_fd): Add move constructor and
 	move assignment operator.
 	* psymtab.c (psymtab_to_fullname): Update.

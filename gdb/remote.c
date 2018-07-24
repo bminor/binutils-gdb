@@ -1030,7 +1030,7 @@ static ptid_t read_ptid (const char *buf, const char **obuf);
 
 static void remote_async_inferior_event_handler (gdb_client_data);
 
-static int remote_read_description_p (struct target_ops *target);
+static bool remote_read_description_p (struct target_ops *target);
 
 static void remote_console_output (char *msg);
 
@@ -11617,15 +11617,19 @@ remote_target::get_tib_address (ptid_t ptid, CORE_ADDR *addr)
 
 struct remote_g_packet_guess
 {
+  remote_g_packet_guess (int bytes_, const struct target_desc *tdesc_)
+    : bytes (bytes_),
+      tdesc (tdesc_)
+  {
+  }
+
   int bytes;
   const struct target_desc *tdesc;
 };
-typedef struct remote_g_packet_guess remote_g_packet_guess_s;
-DEF_VEC_O(remote_g_packet_guess_s);
 
-struct remote_g_packet_data
+struct remote_g_packet_data : public allocate_on_obstack
 {
-  VEC(remote_g_packet_guess_s) *guesses;
+  std::vector<remote_g_packet_guess> guesses;
 };
 
 static struct gdbarch_data *remote_g_packet_data_handle;
@@ -11633,7 +11637,7 @@ static struct gdbarch_data *remote_g_packet_data_handle;
 static void *
 remote_g_packet_data_init (struct obstack *obstack)
 {
-  return OBSTACK_ZALLOC (obstack, struct remote_g_packet_data);
+  return new (obstack) remote_g_packet_data;
 }
 
 void
@@ -11643,38 +11647,29 @@ register_remote_g_packet_guess (struct gdbarch *gdbarch, int bytes,
   struct remote_g_packet_data *data
     = ((struct remote_g_packet_data *)
        gdbarch_data (gdbarch, remote_g_packet_data_handle));
-  struct remote_g_packet_guess new_guess, *guess;
-  int ix;
 
   gdb_assert (tdesc != NULL);
 
-  for (ix = 0;
-       VEC_iterate (remote_g_packet_guess_s, data->guesses, ix, guess);
-       ix++)
-    if (guess->bytes == bytes)
+  for (const remote_g_packet_guess &guess : data->guesses)
+    if (guess.bytes == bytes)
       internal_error (__FILE__, __LINE__,
 		      _("Duplicate g packet description added for size %d"),
 		      bytes);
 
-  new_guess.bytes = bytes;
-  new_guess.tdesc = tdesc;
-  VEC_safe_push (remote_g_packet_guess_s, data->guesses, &new_guess);
+  data->guesses.emplace_back (bytes, tdesc);
 }
 
-/* Return 1 if remote_read_description would do anything on this target
-   and architecture, 0 otherwise.  */
+/* Return true if remote_read_description would do anything on this target
+   and architecture, false otherwise.  */
 
-static int
+static bool
 remote_read_description_p (struct target_ops *target)
 {
   struct remote_g_packet_data *data
     = ((struct remote_g_packet_data *)
        gdbarch_data (target_gdbarch (), remote_g_packet_data_handle));
 
-  if (!VEC_empty (remote_g_packet_guess_s, data->guesses))
-    return 1;
-
-  return 0;
+  return !data->guesses.empty ();
 }
 
 const struct target_desc *
@@ -11689,17 +11684,13 @@ remote_target::read_description ()
   if (!target_has_execution || inferior_ptid == null_ptid)
     return beneath ()->read_description ();
 
-  if (!VEC_empty (remote_g_packet_guess_s, data->guesses))
+  if (!data->guesses.empty ())
     {
-      struct remote_g_packet_guess *guess;
-      int ix;
       int bytes = send_g_packet ();
 
-      for (ix = 0;
-	   VEC_iterate (remote_g_packet_guess_s, data->guesses, ix, guess);
-	   ix++)
-	if (guess->bytes == bytes)
-	  return guess->tdesc;
+      for (const remote_g_packet_guess &guess : data->guesses)
+	if (guess.bytes == bytes)
+	  return guess.tdesc;
 
       /* We discard the g packet.  A minor optimization would be to
 	 hold on to it, and fill the register cache once we have selected
