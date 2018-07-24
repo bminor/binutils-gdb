@@ -1,3 +1,7 @@
+2018-07-27  John Darrington  <john@darrington.wattle.id.au>
+
+	* scripttempl/elfm9s12z.sc: Emit the data_section at the end of text.
+
 2018-07-26  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/vxworks-relax-2.rd: Update for 2018-07-25
