@@ -35,34 +35,35 @@ public:
   scoped_mmap () noexcept : m_mem (MAP_FAILED), m_length (0) {}
   scoped_mmap (void *addr, size_t length, int prot, int flags, int fd,
 	       off_t offset) noexcept : m_length (length)
-    {
-      m_mem = mmap (addr, m_length, prot, flags, fd, offset);
-    }
+  {
+    m_mem = mmap (addr, m_length, prot, flags, fd, offset);
+  }
+
   ~scoped_mmap ()
-    {
-      if (m_mem != MAP_FAILED)
-	munmap (m_mem, m_length);
-    }
+  {
+    if (m_mem != MAP_FAILED)
+      munmap (m_mem, m_length);
+  }
 
   DISABLE_COPY_AND_ASSIGN (scoped_mmap);
 
   void *release () noexcept
-    {
-      void *mem = m_mem;
-      m_mem = MAP_FAILED;
-      m_length = 0;
-      return mem;
-    }
+  {
+    void *mem = m_mem;
+    m_mem = MAP_FAILED;
+    m_length = 0;
+    return mem;
+  }
 
   void reset (void *addr, size_t length, int prot, int flags, int fd,
 	      off_t offset) noexcept
-    {
-      if (m_mem != MAP_FAILED)
-	munmap (m_mem, m_length);
+  {
+    if (m_mem != MAP_FAILED)
+      munmap (m_mem, m_length);
 
-      m_length = length;
-      m_mem = mmap (addr, m_length, prot, flags, fd, offset);
-    }
+    m_length = length;
+    m_mem = mmap (addr, m_length, prot, flags, fd, offset);
+  }
 
   size_t size () const noexcept { return m_length; }
   void *get () const noexcept { return m_mem; }
