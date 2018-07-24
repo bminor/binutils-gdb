@@ -1,3 +1,12 @@
+2018-07-24  Keith Seitz  <keiths@redhat.comt
+
+	PR symtab/23010
+	* dwarf2read.c (dw2_add_symbol_to_list): New function.
+	(fixup_go_packaging, new_symbol): Use dw2_add_symbol_to_list
+	instead of add_symbol_to_list.
+	(read_file_scope): Call prepare_one_comp_unit before reading
+	any other DIEs.
+
 2018-07-24  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* common/scoped_mmap.h (class scoped_mmap): Fix indentation.
