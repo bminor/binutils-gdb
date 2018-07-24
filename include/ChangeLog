@@ -1,3 +1,8 @@
+2018-07-24  Alan Modra  <amodra@gmail.com>
+
+	PR 23430
+	* elf/common.h (SHT_SYMTAB_SHNDX): Fix comment typo.
+
 2018-07-20  Chenghua Xu  <paul.hua.gm@gmail.com>
 	    Maciej W. Rozycki  <macro@mips.com>
 

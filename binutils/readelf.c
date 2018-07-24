@@ -4217,7 +4217,7 @@ get_section_type_name (Filedata * filedata, unsigned int sh_type)
     case SHT_PREINIT_ARRAY:	return "PREINIT_ARRAY";
     case SHT_GNU_HASH:		return "GNU_HASH";
     case SHT_GROUP:		return "GROUP";
-    case SHT_SYMTAB_SHNDX:	return "SYMTAB SECTION INDICIES";
+    case SHT_SYMTAB_SHNDX:	return "SYMTAB SECTION INDICES";
     case SHT_GNU_verdef:	return "VERDEF";
     case SHT_GNU_verneed:	return "VERNEED";
     case SHT_GNU_versym:	return "VERSYM";
@@ -5485,7 +5485,7 @@ get_32bit_elf_symbols (Filedata *           filedata,
 	  shndx = (Elf_External_Sym_Shndx *) get_data (NULL, filedata,
 						       entry->hdr->sh_offset,
 						       1, entry->hdr->sh_size,
-						       _("symbol table section indicies"));
+						       _("symbol table section indices"));
 	  if (shndx == NULL)
 	    goto exit_point;
 	  /* PR17531: file: heap-buffer-overflow */
@@ -5598,7 +5598,7 @@ get_64bit_elf_symbols (Filedata *           filedata,
 	  shndx = (Elf_External_Sym_Shndx *) get_data (NULL, filedata,
 						       entry->hdr->sh_offset,
 						       1, entry->hdr->sh_size,
-						       _("symbol table section indicies"));
+						       _("symbol table section indices"));
 	  if (shndx == NULL)
 	    goto exit_point;
 	  /* PR17531: file: heap-buffer-overflow */
@@ -6842,7 +6842,7 @@ process_section_groups (Filedata * filedata)
 		      error (_("section [%5u] in group section [%5u] > maximum section [%5u]\n"),
 			     entry, i, filedata->file_header.e_shnum - 1);
 		      if (num_group_errors == 10)
-			warn (_("Further error messages about overlarge group section indicies suppressed\n"));
+			warn (_("Further error messages about overlarge group section indices suppressed\n"));
 		    }
 		  continue;
 		}
@@ -19027,7 +19027,7 @@ process_archive (Filedata * filedata, bfd_boolean is_thin_archive)
 	      l += strnlen (arch.sym_table + l, arch.sym_size - l) + 1;
 	    }
 
-	  if (arch.uses_64bit_indicies)
+	  if (arch.uses_64bit_indices)
 	    l = (l + 7) & ~ 7;
 	  else
 	    l += l & 1;

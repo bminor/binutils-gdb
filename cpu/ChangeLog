@@ -1,3 +1,8 @@
+2018-07-24  Alan Modra  <amodra@gmail.com>
+
+	PR 23430
+	* or1kcommon.cpu (spr-reg-indices): Fix description typo.
+
 2018-05-09  Sebastian Rasmussen  <sebras@gmail.com>
 
 	* or1kcommon.cpu (spr-reg-info): Typo fix.

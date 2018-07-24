@@ -65,7 +65,7 @@ struct archive_info
   unsigned long nested_member_origin;   /* Origin in the nested archive of the current member.  */
   unsigned long next_arhdr_offset;      /* Offset of the next archive header.  */
   bfd_boolean is_thin_archive;          /* TRUE if this is a thin archive.  */
-  bfd_boolean uses_64bit_indicies;      /* TRUE if the index table uses 64bit entries.  */
+  bfd_boolean uses_64bit_indices;       /* TRUE if the index table uses 64bit entries.  */
   struct ar_hdr arhdr;                  /* Current archive header.  */
 };
 

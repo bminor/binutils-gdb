@@ -194,7 +194,7 @@
 
 (define-normal-enum
   spr-reg-indices
-  "special purpose register indicies"
+  "special purpose register indices"
   ()
   SPR-INDEX-
   (.map (.pmacro (args)

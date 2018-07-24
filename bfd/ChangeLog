@@ -1,3 +1,9 @@
+2018-07-24  Alan Modra  <amodra@gmail.com>
+
+	PR 23430
+	* dwarf2.c (dwarf_debug_section_enum): Fix comment typo.
+	* elf.c (bfd_section_from_shdr, elf_sort_sections): Likewise.
+
 2018-07-23  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* elf32-xtensa.c (elf_xtensa_finish_dynamic_sections): Move

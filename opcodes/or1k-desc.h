@@ -78,7 +78,7 @@ typedef enum spr_groups {
  , SPR_GROUP_POWER, SPR_GROUP_PIC, SPR_GROUP_TICK, SPR_GROUP_FPU
 } SPR_GROUPS;
 
-/* Enum declaration for special purpose register indicies.  */
+/* Enum declaration for special purpose register indices.  */
 typedef enum spr_reg_indices {
   SPR_INDEX_SYS_VR = 0, SPR_INDEX_SYS_UPR = 1, SPR_INDEX_SYS_CPUCFGR = 2, SPR_INDEX_SYS_DMMUCFGR = 3
  , SPR_INDEX_SYS_IMMUCFGR = 4, SPR_INDEX_SYS_DCCFGR = 5, SPR_INDEX_SYS_ICCFGR = 6, SPR_INDEX_SYS_DCFGR = 7

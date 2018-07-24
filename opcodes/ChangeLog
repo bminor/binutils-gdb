@@ -1,3 +1,8 @@
+2018-07-24  Alan Modra  <amodra@gmail.com>
+
+	PR 23430
+	* or1k-desc.h: Regenerate.
+
 2018-07-24  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis-evex.h (evex_table): Add %LQ to vcvtsi2ss, vcvtsi2sd,

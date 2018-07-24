@@ -622,7 +622,7 @@ setup_archive (struct archive_info *arch, const char *file_name,
   arch->longnames_size = 0;
   arch->nested_member_origin = 0;
   arch->is_thin_archive = is_thin_archive;
-  arch->uses_64bit_indicies = FALSE;
+  arch->uses_64bit_indices = FALSE;
   arch->next_arhdr_offset = SARMAG;
 
   /* Read the first archive member header.  */
@@ -649,7 +649,7 @@ setup_archive (struct archive_info *arch, const char *file_name,
     }
   else if (const_strneq (arch->arhdr.ar_name, "/SYM64/         "))
     {
-      arch->uses_64bit_indicies = TRUE;
+      arch->uses_64bit_indices = TRUE;
       if (! process_archive_index_and_symbols (arch, 8, read_symbols))
 	return 1;
     }

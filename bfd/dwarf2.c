@@ -345,7 +345,7 @@ const struct dwarf_debug_section dwarf_debug_sections[] =
   { NULL,			NULL },
 };
 
-/* NB/ Numbers in this enum must match up with indicies
+/* NB/ Numbers in this enum must match up with indices
    into the dwarf_debug_sections[] array above.  */
 enum dwarf_debug_section_enum
 {
