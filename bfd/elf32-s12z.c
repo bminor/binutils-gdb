@@ -254,7 +254,6 @@ s12z_elf_set_mach_from_flags (bfd *abfd)
 }
 
 #define ELF_ARCH		bfd_arch_s12z
-#define ELF_TARGET_ID		0
 #define ELF_MACHINE_CODE	EM_S12Z
 #define ELF_MAXPAGESIZE		0x1000
 
