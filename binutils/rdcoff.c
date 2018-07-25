@@ -409,6 +409,7 @@ parse_coff_struct_type (bfd *abfd, struct coff_symbols *symbols,
 	{
 	  non_fatal (_("bfd_coff_get_syment failed: %s"),
 		     bfd_errmsg (bfd_get_error ()));
+	  free (fields);
 	  return DEBUG_TYPE_NULL;
 	}
 
@@ -425,6 +426,7 @@ parse_coff_struct_type (bfd *abfd, struct coff_symbols *symbols,
 	    {
 	      non_fatal (_("bfd_coff_get_auxent failed: %s"),
 			 bfd_errmsg (bfd_get_error ()));
+	      free (fields);
 	      return DEBUG_TYPE_NULL;
 	    }
 	  psubaux = &auxent;
@@ -514,6 +516,8 @@ parse_coff_enum_type (bfd *abfd, struct coff_symbols *symbols,
 	{
 	  non_fatal (_("bfd_coff_get_syment failed: %s"),
 		     bfd_errmsg (bfd_get_error ()));
+	  free (names);
+	  free (vals);
 	  return DEBUG_TYPE_NULL;
 	}
 

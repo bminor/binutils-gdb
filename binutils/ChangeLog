@@ -1,3 +1,21 @@
+2018-07-25  Nick Clifton  <nickc@redhat.com>
+
+	* rdcoff.c (parse_coff_struct_type): Free fields array upon early
+	exit.
+	(parse_coff_enum_type): Free names and vals arrays upon early
+	exit.
+	* rddbg.c (read_section_stabs_debugging_info): Free shandle and
+	strings and stabs arrays upon early exit.
+	* readelf.c (get_32bit_section_headers): Free shdrs structure upon
+	early exit.
+	(get_64bit_section_headers): Likewise.
+	(get_32bit_elf_symbols): Generate an error if multiple symbol
+	table index sections are associated with the same symbol section.
+	(get_64bit_elf_symbols): Likewise.
+	(process_dynamic_section): Generate an error if there are multiple
+	dynamic symbol table sections, multiple dynamic string tables or
+	multiple dynamic symbol information sections.
+
 2018-07-24  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Updated Swedish translation.

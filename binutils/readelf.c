@@ -5330,6 +5330,7 @@ get_32bit_section_headers (Filedata * filedata, bfd_boolean probe)
     {
       if (!probe)
 	error (_("Out of memory reading %u section headers\n"), num);
+      free (shdrs);
       return FALSE;
     }
 
@@ -5396,6 +5397,7 @@ get_64bit_section_headers (Filedata * filedata, bfd_boolean probe)
     {
       if (! probe)
 	error (_("Out of memory reading %u section headers\n"), num);
+      free (shdrs);
       return FALSE;
     }
 
@@ -5434,6 +5436,7 @@ get_32bit_elf_symbols (Filedata *           filedata,
   Elf_Internal_Sym * isyms = NULL;
   Elf_Internal_Sym * psym;
   unsigned int j;
+  elf_section_list * entry;
 
   if (section->sh_size == 0)
     {
@@ -5475,30 +5478,35 @@ get_32bit_elf_symbols (Filedata *           filedata,
   if (esyms == NULL)
     goto exit_point;
 
-  {
-    elf_section_list * entry;
+  shndx = NULL;
+  for (entry = symtab_shndx_list; entry != NULL; entry = entry->next)
+    {
+      if (entry->hdr->sh_link != (unsigned long) (section - filedata->section_headers))
+	continue;
 
-    shndx = NULL;
-    for (entry = symtab_shndx_list; entry != NULL; entry = entry->next)
-      if (entry->hdr->sh_link == (unsigned long) (section - filedata->section_headers))
+      if (shndx != NULL)
 	{
-	  shndx = (Elf_External_Sym_Shndx *) get_data (NULL, filedata,
-						       entry->hdr->sh_offset,
-						       1, entry->hdr->sh_size,
-						       _("symbol table section indices"));
-	  if (shndx == NULL)
-	    goto exit_point;
-	  /* PR17531: file: heap-buffer-overflow */
-	  else if (entry->hdr->sh_size / sizeof (Elf_External_Sym_Shndx) < number)
-	    {
-	      error (_("Index section %s has an sh_size of 0x%lx - expected 0x%lx\n"),
-		     printable_section_name (filedata, entry->hdr),
-		     (unsigned long) entry->hdr->sh_size,
-		     (unsigned long) section->sh_size);
-	      goto exit_point;
-	    }
+	  error (_("Multiple symbol table index sections associated with the same symbol section\n"));
+	  free (shndx);
 	}
-  }
+
+      shndx = (Elf_External_Sym_Shndx *) get_data (NULL, filedata,
+						   entry->hdr->sh_offset,
+						   1, entry->hdr->sh_size,
+						   _("symbol table section indices"));
+      if (shndx == NULL)
+	goto exit_point;
+
+      /* PR17531: file: heap-buffer-overflow */
+      if (entry->hdr->sh_size / sizeof (Elf_External_Sym_Shndx) < number)
+	{
+	  error (_("Index section %s has an sh_size of 0x%lx - expected 0x%lx\n"),
+		 printable_section_name (filedata, entry->hdr),
+		 (unsigned long) entry->hdr->sh_size,
+		 (unsigned long) section->sh_size);
+	  goto exit_point;
+	}
+    }
 
   isyms = (Elf_Internal_Sym *) cmalloc (number, sizeof (Elf_Internal_Sym));
 
@@ -5525,10 +5533,8 @@ get_32bit_elf_symbols (Filedata *           filedata,
     }
 
  exit_point:
-  if (shndx != NULL)
-    free (shndx);
-  if (esyms != NULL)
-    free (esyms);
+  free (shndx);
+  free (esyms);
 
   if (num_syms_return != NULL)
     * num_syms_return = isyms == NULL ? 0 : number;
@@ -5547,6 +5553,7 @@ get_64bit_elf_symbols (Filedata *           filedata,
   Elf_Internal_Sym * isyms = NULL;
   Elf_Internal_Sym * psym;
   unsigned int j;
+  elf_section_list * entry;
 
   if (section->sh_size == 0)
     {
@@ -5588,30 +5595,35 @@ get_64bit_elf_symbols (Filedata *           filedata,
   if (!esyms)
     goto exit_point;
 
-  {
-    elf_section_list * entry;
+  shndx = NULL;
+  for (entry = symtab_shndx_list; entry != NULL; entry = entry->next)
+    {
+      if (entry->hdr->sh_link != (unsigned long) (section - filedata->section_headers))
+	continue;
 
-    shndx = NULL;
-    for (entry = symtab_shndx_list; entry != NULL; entry = entry->next)
-      if (entry->hdr->sh_link == (unsigned long) (section - filedata->section_headers))
+      if (shndx != NULL)
 	{
-	  shndx = (Elf_External_Sym_Shndx *) get_data (NULL, filedata,
-						       entry->hdr->sh_offset,
-						       1, entry->hdr->sh_size,
-						       _("symbol table section indices"));
-	  if (shndx == NULL)
-	    goto exit_point;
-	  /* PR17531: file: heap-buffer-overflow */
-	  else if (entry->hdr->sh_size / sizeof (Elf_External_Sym_Shndx) < number)
-	    {
-	      error (_("Index section %s has an sh_size of 0x%lx - expected 0x%lx\n"),
-		     printable_section_name (filedata, entry->hdr),
-		     (unsigned long) entry->hdr->sh_size,
-		     (unsigned long) section->sh_size);
-	      goto exit_point;
-	    }
+	  error (_("Multiple symbol table index sections associated with the same symbol section\n"));
+	  free (shndx);
 	}
-  }
+
+      shndx = (Elf_External_Sym_Shndx *) get_data (NULL, filedata,
+						   entry->hdr->sh_offset,
+						   1, entry->hdr->sh_size,
+						   _("symbol table section indices"));
+      if (shndx == NULL)
+	goto exit_point;
+
+      /* PR17531: file: heap-buffer-overflow */
+      if (entry->hdr->sh_size / sizeof (Elf_External_Sym_Shndx) < number)
+	{
+	  error (_("Index section %s has an sh_size of 0x%lx - expected 0x%lx\n"),
+		 printable_section_name (filedata, entry->hdr),
+		 (unsigned long) entry->hdr->sh_size,
+		 (unsigned long) section->sh_size);
+	  goto exit_point;
+	}
+    }
 
   isyms = (Elf_Internal_Sym *) cmalloc (number, sizeof (Elf_Internal_Sym));
 
@@ -5640,10 +5652,8 @@ get_64bit_elf_symbols (Filedata *           filedata,
     }
 
  exit_point:
-  if (shndx != NULL)
-    free (shndx);
-  if (esyms != NULL)
-    free (esyms);
+  free (shndx);
+  free (esyms);
 
   if (num_syms_return != NULL)
     * num_syms_return = isyms == NULL ? 0 : number;
@@ -9672,6 +9682,11 @@ process_dynamic_section (Filedata * filedata)
 	    section.sh_entsize = sizeof (Elf64_External_Sym);
 	  section.sh_name = filedata->string_table_length;
 
+	  if (dynamic_symbols != NULL)
+	    {
+	      error (_("Multiple dynamic symbol table sections found\n"));
+	      free (dynamic_symbols);
+	    }
 	  dynamic_symbols = GET_ELF_SYMBOLS (filedata, &section, & num_dynamic_syms);
 	  if (num_dynamic_syms < 1)
 	    {
@@ -9715,11 +9730,16 @@ process_dynamic_section (Filedata * filedata)
 	      continue;
 	    }
 
+	  if (dynamic_strings != NULL)
+	    {
+	      error (_("Multiple dynamic string tables found\n"));
+	      free (dynamic_strings);
+	    }
+
 	  dynamic_strings = (char *) get_data (NULL, filedata, offset, 1,
                                                str_tab_len,
                                                _("dynamic string table"));
 	  dynamic_strings_length = dynamic_strings == NULL ? 0 : str_tab_len;
-	  break;
 	}
     }
 
@@ -9762,6 +9782,11 @@ process_dynamic_section (Filedata * filedata)
 	  if (!extsyminfo)
 	    return FALSE;
 
+	  if (dynamic_syminfo != NULL)
+	    {
+	      error (_("Multiple dynamic symbol information sections found\n"));
+	      free (dynamic_syminfo);
+	    }
 	  dynamic_syminfo = (Elf_Internal_Syminfo *) malloc (syminsz);
 	  if (dynamic_syminfo == NULL)
 	    {

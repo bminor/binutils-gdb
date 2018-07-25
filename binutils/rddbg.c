@@ -128,6 +128,8 @@ read_section_stabs_debugging_info (bfd *abfd, asymbol **syms, long symcount,
 	      fprintf (stderr, "%s: %s: %s\n",
 		       bfd_get_filename (abfd), names[i].secname,
 		       bfd_errmsg (bfd_get_error ()));
+	      free (shandle);
+	      free (stabs);
 	      return FALSE;
 	    }
 
@@ -138,6 +140,9 @@ read_section_stabs_debugging_info (bfd *abfd, asymbol **syms, long symcount,
 	      fprintf (stderr, "%s: %s: %s\n",
 		       bfd_get_filename (abfd), names[i].strsecname,
 		       bfd_errmsg (bfd_get_error ()));
+	      free (shandle);
+	      free (strings);
+	      free (stabs);
 	      return FALSE;
 	    }
 	  /* Zero terminate the strings table, just in case.  */
@@ -146,7 +151,11 @@ read_section_stabs_debugging_info (bfd *abfd, asymbol **syms, long symcount,
 	    {
 	      shandle = start_stab (dhandle, abfd, TRUE, syms, symcount);
 	      if (shandle == NULL)
-		return FALSE;
+		{
+		  free (strings);
+		  free (stabs);
+		  return FALSE;
+		}
 	    }
 
 	  *pfound = TRUE;
@@ -213,17 +222,16 @@ read_section_stabs_debugging_info (bfd *abfd, asymbol **syms, long symcount,
 				   (long) (stab - stabs) / 12);
 			  break;
 			}
-		      else
-			s = concat (s, (char *) strings + strx,
-				    (const char *) NULL);
+
+		      s = concat (s, (char *) strings + strx,
+				  (const char *) NULL);
 
 		      /* We have to restore the backslash, because, if
 			 the linker is hashing stabs strings, we may
 			 see the same string more than once.  */
 		      *p = '\\';
 
-		      if (f != NULL)
-			free (f);
+		      free (f);
 		      f = s;
 		    }
 
@@ -233,6 +241,10 @@ read_section_stabs_debugging_info (bfd *abfd, asymbol **syms, long symcount,
 		    {
 		      stab_context ();
 		      free_saved_stabs ();
+		      free (f);
+		      free (shandle);
+		      free (stabs);
+		      free (strings);
 		      return FALSE;
 		    }
 
