@@ -1,3 +1,7 @@
+2018-07-25  Joel Brobecker  <brobecker@adacore.com>
+
+	* MAINTAINERS (Global Maintainers): Add Tom Tromey.
+
 2018-07-24  Keith Seitz  <keiths@redhat.comt
 
 	PR symtab/23010
