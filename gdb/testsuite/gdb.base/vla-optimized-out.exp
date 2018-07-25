@@ -44,6 +44,28 @@ proc vla_optimized_out {exe_suffix options} {
     gdb_test "p sizeof (a)" \
 	" = $sizeof_result" \
 	"printed size of optimized out vla"
+
+    # At lower optimisation levels, the upper bound of the array is
+    # still defined, it's just the loctaion that tells GDB the array
+    # is optimised out.  In that case, when we access an element that
+    # is within the bounds of the array an answer of '<optimized out>'
+    # is reasonable.
+    #
+    # At higher optimisation levels, the array bounds themselves have
+    # been removed.  As such GDB can't be expected to know if the
+    # array contains _any_ elements at all.  It seems reasonable in
+    # that case to reply with 'no such vector element'.
+    gdb_test "p a\[0\]" \
+	"(= <optimized out>|no such vector element)" \
+	"print out of range element of vla (0)"
+
+    gdb_test "p a\[6\]" \
+	"no such vector element" \
+	"print out of range element of vla (6)"
+
+    gdb_test "p a\[0xffffffff\]" \
+	"no such vector element" \
+	"print out of range element of vla (0xffffffff)"
 }
 
 foreach {test_prefix options} \

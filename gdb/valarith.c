@@ -189,8 +189,11 @@ value_subscripted_rvalue (struct value *array, LONGEST index, int lowerbound)
   ULONGEST elt_size = type_length_units (elt_type);
   ULONGEST elt_offs = elt_size * (index - lowerbound);
 
-  if (index < lowerbound || (!TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (array_type)
-			     && elt_offs >= type_length_units (array_type)))
+  if (index < lowerbound
+      || (!TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (array_type)
+          && elt_offs >= type_length_units (array_type))
+      || (VALUE_LVAL (array) != lval_memory
+          && TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (array_type)))
     {
       if (type_not_associated (array_type))
         error (_("no such vector element (vector not associated)"));
