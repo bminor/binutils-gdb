@@ -59,6 +59,8 @@ GNU/Linux/RISC-V		riscv*-*-linux*
 * New targets
 
 GNU/Linux/RISC-V		riscv*-*-linux*
+CSKY ELF			csky*-*-elf
+CSKY GNU/LINUX			csky*-*-linux
 
 *** Changes in GDB 8.2
 
