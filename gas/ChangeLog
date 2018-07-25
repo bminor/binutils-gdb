@@ -1,3 +1,9 @@
+2018-07-25  Thomas Preud'homme  <thomas.preudhomme@linaro.org>
+
+	* doc/c-arm.texi (.arch directive): Clarify that name must not include
+	an extension.
+	(.cpu directive): Likewise.
+
 2018-07-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (build_vex_prefix): Use unsigned int to

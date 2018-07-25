@@ -624,7 +624,8 @@ boundary).  This is for compatibility with ARM's own assembler.
 @cindex @code{.arch} directive, ARM
 @item .arch @var{name}
 Select the target architecture.  Valid values for @var{name} are the same as
-for the @option{-march} command-line option.
+for the @option{-march} command-line option without the instruction set
+extension.
 
 Specifying @code{.arch} clears any previously selected architecture
 extensions.
@@ -663,7 +664,8 @@ selects Thumb, with the value 32 selecting ARM.
 @cindex @code{.cpu} directive, ARM
 @item .cpu @var{name}
 Select the target processor.  Valid values for @var{name} are the same as
-for the @option{-mcpu} command-line option.
+for the @option{-mcpu} command-line option without the instruction set
+extension.
 
 Specifying @code{.cpu} clears any previously selected architecture
 extensions.
