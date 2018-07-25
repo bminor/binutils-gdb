@@ -1,5 +1,12 @@
 2018-07-25  Alan Modra  <amodra@gmail.com>
 
+	* elf32-ppc.c (ppc_elf_relax_section): Ignore common or undef locals.
+	Avoid trashing toff with added when used as a symbol index.
+	Ignore R_PPC_PLTREL24 addends in unused example code.  Avoid
+	creating unnecessary fixups when relocatable.
+
+2018-07-25  Alan Modra  <amodra@gmail.com>
+
 	* elf32-arm.c (elf32_arm_nabi_write_core_note): Disable
 	-Wstringop-truncation warning for gcc-8.0 too.
 	* elf32-ppc.c (ppc_elf_write_core_note): Likewise.

@@ -7386,12 +7386,10 @@ ppc_elf_relax_section (bfd *abfd,
 	    {
 	      if (tsec != NULL)
 		;
-	      else if (isym->st_shndx == SHN_UNDEF)
-		tsec = bfd_und_section_ptr;
 	      else if (isym->st_shndx == SHN_ABS)
 		tsec = bfd_abs_section_ptr;
-	      else if (isym->st_shndx == SHN_COMMON)
-		tsec = bfd_com_section_ptr;
+	      else
+		continue;
 
 	      toff = isym->st_value;
 	      sym_type = ELF_ST_TYPE (isym->st_info);
@@ -7533,6 +7531,17 @@ ppc_elf_relax_section (bfd *abfd,
 	  if (tsec == isec)
 	    continue;
 
+	  /* toff is used for the symbol index when the symbol is
+	     undefined and we're doing a relocatable link, so we can't
+	     support addends.  It would be possible to do so by
+	     putting the addend in one_branch_fixup but addends on
+	     branches are rare so it hardly seems worth supporting.  */
+	  if (bfd_link_relocatable (link_info)
+	      && tsec == bfd_und_section_ptr
+	      && r_type != R_PPC_PLTREL24
+	      && irel->r_addend != 0)
+	    continue;
+
 	  /* There probably isn't any reason to handle symbols in
 	     SEC_MERGE sections;  SEC_MERGE doesn't seem a likely
 	     attribute for a code section, and we are only looking at
@@ -7556,7 +7565,8 @@ ppc_elf_relax_section (bfd *abfd,
 		 a section symbol should not include the addend;  Such an
 		 access is presumed to be an offset from "sym";  The
 		 location of interest is just "sym".  */
-	      if (sym_type == STT_SECTION)
+	      if (sym_type == STT_SECTION
+		  && r_type != R_PPC_PLTREL24)
 		toff += irel->r_addend;
 
 	      toff
@@ -7564,7 +7574,8 @@ ppc_elf_relax_section (bfd *abfd,
 					      elf_section_data (tsec)->sec_info,
 					      toff);
 
-	      if (sym_type != STT_SECTION)
+	      if (sym_type != STT_SECTION
+		  && r_type != R_PPC_PLTREL24)
 		toff += irel->r_addend;
 	    }
 	  /* PLTREL24 addends are special.  */
@@ -7580,6 +7591,16 @@ ppc_elf_relax_section (bfd *abfd,
 	    continue;
 
 	  roff = irel->r_offset;
+
+	  /* Avoid creating a lot of unnecessary fixups when
+	     relocatable if the output section size is such that a
+	     fixup can be created at final link.
+	     The max_branch_offset adjustment allows for some number
+	     of other fixups being needed at final link.  */
+	  if (bfd_link_relocatable (link_info)
+	      && (isec->output_section->rawsize - (isec->output_offset + roff)
+		  < max_branch_offset - (max_branch_offset >> 4)))
+	    continue;
 
 	  /* If the branch is in range, no need to do anything.  */
 	  if (tsec != bfd_und_section_ptr

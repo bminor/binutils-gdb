@@ -160,6 +160,9 @@ set ppcelftests {
     {"relocatable relaxing" "-melf32ppc -r --relax" "" "-a32" "relax.s"
      {{objdump -dr relaxr.d}}
      "rrelax"}
+    {"relocatable relaxing large" "-melf32ppc -r --relax" "" "-a32" "relax.s big.s"
+     {{objdump -dr relaxrl.d}}
+     "rrelax"}
 }
 
 set ppc64elftests {

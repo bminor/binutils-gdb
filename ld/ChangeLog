@@ -1,3 +1,10 @@
+2018-07-25  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/big.s: New file.
+	* testsuite/ld-powerpc/relaxrl.d: New test.
+	* testsuite/ld-powerpc/powerpc.exp: Run new test.
+	* testsuite/ld-powerpc/relaxr.d: Adjust.
+
 2018-07-24  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.
