@@ -687,6 +687,8 @@ ALL_TARGET_OBS = \
 	bsd-uthread.o \
 	cris-linux-tdep.o \
 	cris-tdep.o \
+	csky-linux-tdep.o \
+	csky-tdep.o \
 	dicos-tdep.o \
 	fbsd-tdep.o \
 	frv-linux-tdep.o \
@@ -1209,6 +1211,7 @@ HFILES_NO_SRCDIR = \
 	completer.h \
 	cp-abi.h \
 	cp-support.h \
+	csky-tdep.h \
 	ctf.h \
 	d-lang.h \
 	darwin-nat.h \
@@ -2215,6 +2218,8 @@ ALLDEPFILES = \
 	bfin-tdep.c \
 	bsd-kvm.c \
 	bsd-uthread.c \
+	csky-linux-tdep.c \
+	csky-tdep.c \
 	darwin-nat.c \
 	dicos-tdep.c \
 	fbsd-nat.c \

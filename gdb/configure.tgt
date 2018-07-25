@@ -206,6 +206,17 @@ cris*)
 	gdb_target_obs="cris-tdep.o cris-linux-tdep.o linux-tdep.o solib-svr4.o"
 	;;
 
+csky*-*-linux*)
+	# Target: CSKY running GNU/Linux
+	gdb_target_obs="csky-tdep.o csky-linux-tdep.o glibc-tdep.o \
+			linux-tdep.o solib-svr4.o"
+	;;
+
+csky*-*-*)
+	# Target: CSKY bare metal
+	gdb_target_obs="csky-tdep.o"
+	;;
+
 frv-*-*)
 	# Target: Fujitsu FRV processor
 	gdb_target_obs="frv-tdep.o frv-linux-tdep.o linux-tdep.o solib-frv.o"

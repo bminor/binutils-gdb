@@ -1,3 +1,16 @@
+2018-08-28  Jiangshuai Li  <jiangshuai_li@c-sky.com>
+	    Hafiz Abid Qadeer  <abidh@codesourcery.com>
+	    Don Breazeal  <donb@codesourcery.com>
+
+	* csky-linux-tdep.c: New file.
+	* csky-tdep.c: Likewise.
+	* csky-tdep.h: Likewise.
+	* Makefile.in (ALL_TARGET_OBS): Add csky-linux-tdep.o and
+	csky-tdep.o.
+	(HFILES_NO_SRCDIR): Add csky-tdep.h.
+	(ALLDEPFILES): Add csky-linux-tdep.c and csky-tdep.c
+	* configure.tgt: Add csky support.
+
 2018-08-27  Jan Vrany  <jan.vrany@fit.cvut.cz>
 
 	* python/py-framefilter.c (py_print_frame): Print frame architecture
