@@ -230,6 +230,9 @@ struct Broadcast_Operation
 
   /* Index of broadcasted operand.  */
   int operand;
+
+  /* Number of bytes to broadcast.  */
+  int bytes;
 };
 
 static struct Broadcast_Operation broadcast_op;
@@ -3639,8 +3642,7 @@ build_evex_prefix (void)
 		  }
 		else if (i.broadcast && (int) op == i.broadcast->operand)
 		  {
-		    switch ((i.tm.operand_types[op].bitfield.dword ? 4 : 8)
-			    * i.broadcast->type)
+		    switch (i.broadcast->bytes)
 		      {
 			case 64:
 			  i.tm.opcode_modifier.evex = EVEX512;
@@ -5008,6 +5010,22 @@ optimize_disp (void)
       }
 }
 
+/* Return 1 if there is a match in broadcast bytes between operand
+   GIVEN and instruction template T.   */
+
+static INLINE int
+match_broadcast_size (const insn_template *t, unsigned int given)
+{
+  return ((t->opcode_modifier.broadcast == BYTE_BROADCAST
+	   && i.types[given].bitfield.byte)
+	  || (t->opcode_modifier.broadcast == WORD_BROADCAST
+	      && i.types[given].bitfield.word)
+	  || (t->opcode_modifier.broadcast == DWORD_BROADCAST
+	      && i.types[given].bitfield.dword)
+	  || (t->opcode_modifier.broadcast == QWORD_BROADCAST
+	      && i.types[given].bitfield.qword));
+}
+
 /* Check if operands are valid for the instruction.  */
 
 static int
@@ -5126,23 +5144,29 @@ check_VecOperands (const insn_template *t)
       i386_operand_type type, overlap;
 
       /* Check if specified broadcast is supported in this instruction,
-	 and it's applied to memory operand of DWORD or QWORD type.  */
+	 and its broadcast bytes match the memory operand.  */
       op = i.broadcast->operand;
       if (!t->opcode_modifier.broadcast
 	  || !i.types[op].bitfield.mem
 	  || (!i.types[op].bitfield.unspecified
-	      && (t->operand_types[op].bitfield.dword
-		  ? !i.types[op].bitfield.dword
-		  : !i.types[op].bitfield.qword)))
+	      && !match_broadcast_size (t, op)))
 	{
 	bad_broadcast:
 	  i.error = unsupported_broadcast;
 	  return 1;
 	}
 
+      i.broadcast->bytes = ((1 << (t->opcode_modifier.broadcast - 1))
+			    * i.broadcast->type);
       operand_type_set (&type, 0);
-      switch ((t->operand_types[op].bitfield.dword ? 4 : 8) * i.broadcast->type)
+      switch (i.broadcast->bytes)
 	{
+	case 2:
+	  type.bitfield.word = 1;
+	  break;
+	case 4:
+	  type.bitfield.dword = 1;
+	  break;
 	case 8:
 	  type.bitfield.qword = 1;
 	  break;
@@ -5189,9 +5213,7 @@ check_VecOperands (const insn_template *t)
 	  break;
       gas_assert (op < i.operands);
       /* Check size of the memory operand.  */
-      if (t->operand_types[op].bitfield.dword
-	  ? i.types[op].bitfield.dword
-	  : i.types[op].bitfield.qword)
+      if (match_broadcast_size (t, op))
 	{
 	  i.error = broadcast_needed;
 	  return 1;
@@ -5245,7 +5267,7 @@ check_VecOperands (const insn_template *t)
       && i.disp_encoding != disp_encoding_32bit)
     {
       if (i.broadcast)
-	i.memshift = t->operand_types[op].bitfield.dword ? 2 : 3;
+	i.memshift = t->opcode_modifier.broadcast - 1;
       else if (t->opcode_modifier.disp8memshift != DISP8_SHIFT_VL)
 	i.memshift = t->opcode_modifier.disp8memshift;
       else

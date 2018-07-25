@@ -1,3 +1,12 @@
+2018-07-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (Broadcast_Operation): Add bytes.
+	(build_evex_prefix): Use i.broadcast->bytes.
+	(match_broadcast_size): New function.
+	(check_VecOperands): Use the broadcast field to compute the
+	number of bytes to broadcast directly.  Set i.broadcast->bytes.
+	Use match_broadcast_size.
+
 2018-07-25  Thomas Preud'homme  <thomas.preudhomme@linaro.org>
 
 	* doc/c-arm.texi (.arch directive): Clarify that name must not include

@@ -1,3 +1,20 @@
+2018-07-25  H.J. Lu  <hongjiu.lu@intel.com>
+	    Igor Tsimbalist  <igor.v.tsimbalist@intel.com>
+
+	* i386-gen.c (adjust_broadcast_modifier): New function.
+	(process_i386_opcode_modifier): Add an argument for operands.
+	Adjust the Broadcast value based on operands.
+	(output_i386_opcode): Pass operand_types to
+	process_i386_opcode_modifier.
+	(process_i386_opcodes): Pass NULL as operands to
+	process_i386_opcode_modifier.
+	* i386-opc.h (BYTE_BROADCAST): New.
+	(WORD_BROADCAST): Likewise.
+	(DWORD_BROADCAST): Likewise.
+	(QWORD_BROADCAST): Likewise.
+	(i386_opcode_modifier): Expand broadcast to 3 bits.
+	* i386-tbl.h: Regenerated.
+
 2018-07-24  Alan Modra  <amodra@gmail.com>
 
 	PR 23430

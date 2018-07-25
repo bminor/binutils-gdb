@@ -1023,8 +1023,58 @@ output_opcode_modifier (FILE *table, bitfield *modifier, unsigned int size)
   fprintf (table, "%d },\n", modifier[i].value);
 }
 
+static int
+adjust_broadcast_modifier (char **opnd)
+{
+  char *str, *next, *last, *op;
+  int bcst_type = INT_MAX;
+
+  /* Skip the immediate operand.  */
+  op = opnd[0];
+  if (strcasecmp(op, "Imm8") == 0)
+    op = opnd[1];
+
+  op = xstrdup (op);
+  last = op + strlen (op);
+  for (next = op; next && next < last; )
+    {
+      str = next_field (next, '|', &next, last);
+      if (str)
+	{
+	  if (strcasecmp(str, "Byte") == 0)
+	    {
+	      /* The smalest broadcast type, no need to check
+		 further.  */
+	      bcst_type = BYTE_BROADCAST;
+	      break;
+	    }
+	  else if (strcasecmp(str, "Word") == 0)
+	    {
+	      if (bcst_type > WORD_BROADCAST)
+		bcst_type = WORD_BROADCAST;
+	    }
+	  else if (strcasecmp(str, "Dword") == 0)
+	    {
+	      if (bcst_type > DWORD_BROADCAST)
+		bcst_type = DWORD_BROADCAST;
+	    }
+	  else if (strcasecmp(str, "Qword") == 0)
+	    {
+	      if (bcst_type > QWORD_BROADCAST)
+		bcst_type = QWORD_BROADCAST;
+	    }
+	}
+    }
+  free (op);
+
+  if (bcst_type == INT_MAX)
+    fail (_("unknown broadcast operand: %s\n"), op);
+
+  return bcst_type;
+}
+
 static void
-process_i386_opcode_modifier (FILE *table, char *mod, int lineno)
+process_i386_opcode_modifier (FILE *table, char *mod, char **opnd, int lineno)
 {
   char *str, *next, *last;
   bitfield modifiers [ARRAY_SIZE (opcode_modifiers)];
@@ -1042,7 +1092,10 @@ process_i386_opcode_modifier (FILE *table, char *mod, int lineno)
 	  str = next_field (next, '|', &next, last);
 	  if (str)
 	    {
-	      set_bitfield (str, modifiers, 1, ARRAY_SIZE (modifiers),
+	      int val = 1;
+	      if (strcasecmp(str, "Broadcast") == 0)
+		  val = adjust_broadcast_modifier (opnd);
+	      set_bitfield (str, modifiers, val, ARRAY_SIZE (modifiers),
 			  lineno);
 	      if (strcasecmp(str, "IsString") == 0)
 		active_isstring = 1;
@@ -1201,7 +1254,7 @@ output_i386_opcode (FILE *table, const char *name, char *str,
 
   process_i386_cpu_flag (table, cpu_flags, 0, ",", "    ", lineno);
 
-  process_i386_opcode_modifier (table, opcode_modifier, lineno);
+  process_i386_opcode_modifier (table, opcode_modifier, operand_types, lineno);
 
   fprintf (table, "    { ");
 
@@ -1394,7 +1447,7 @@ process_i386_opcodes (FILE *table)
 
   process_i386_cpu_flag (table, "0", 0, ",", "    ", -1);
 
-  process_i386_opcode_modifier (table, "0", -1);
+  process_i386_opcode_modifier (table, "0", NULL, -1);
 
   fprintf (table, "    { ");
   process_i386_operand_type (table, "0", stage_opcodes, "\t  ", -1);

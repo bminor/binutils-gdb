@@ -561,6 +561,17 @@ enum
 #define BOTH_MASKING    3
   Masking,
 
+  /* AVX512 broadcast support.  The number of bytes to broadcast is
+     1 << (Broadcast - 1):
+	1: Byte broadcast.
+	2: Word broadcast.
+	3: Dword broadcast.
+	4: Qword broadcast.
+   */
+#define BYTE_BROADCAST	1
+#define WORD_BROADCAST	2
+#define DWORD_BROADCAST	3
+#define QWORD_BROADCAST	4
   Broadcast,
 
   /* Static rounding control is supported.  */
@@ -650,7 +661,7 @@ typedef struct i386_opcode_modifier
   unsigned int noavx:1;
   unsigned int evex:3;
   unsigned int masking:2;
-  unsigned int broadcast:1;
+  unsigned int broadcast:3;
   unsigned int staticrounding:1;
   unsigned int sae:1;
   unsigned int disp8memshift:3;
