@@ -1,3 +1,7 @@
+2018-10-19  Tom Tromey  <tom@tromey.com>
+
+	* symfile.c (reread_symbols): Clear "static_links".
+
 2018-10-19  Alan Hayward  <alan.hayward@arm.com>
 
 	* aarch64-linux-tdep.c (AARCH64_SIGCONTEXT_RESERVED_SIZE): New

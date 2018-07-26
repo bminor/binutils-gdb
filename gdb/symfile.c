@@ -2497,6 +2497,7 @@ reread_symbols (void)
 	  objfile->psymtabs_addrmap = NULL;
 	  objfile->free_psymtabs = NULL;
 	  objfile->template_symbols = NULL;
+	  objfile->static_links = NULL;
 
 	  /* obstack_init also initializes the obstack so it is
 	     empty.  We could use obstack_specify_allocation but
