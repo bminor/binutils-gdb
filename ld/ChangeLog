@@ -1,5 +1,10 @@
 2018-07-26  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-powerpc/vxworks-relax-2.rd: Update for 2018-07-25
+	ppc_elf_relax_section changes.
+
+2018-07-26  Alan Modra  <amodra@gmail.com>
+
 	* ld-powerpc/elfv2.s: Add .localentry f5,1 testcase.
 	* ld-powerpc/elfv2exe.d: Update.
 	* ld-powerpc/elfv2so.d: Update.
