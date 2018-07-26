@@ -1,3 +1,7 @@
+2018-10-03  Tom Tromey  <tom@tromey.com>
+
+	* namespace.c (add_using_directive): Don't pass NULL to memcpy.
+
 2018-10-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* tid-parse.c (tid_is_in_list): Fix wrong 'See' comment.

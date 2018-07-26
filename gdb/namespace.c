@@ -111,8 +111,9 @@ add_using_directive (struct using_direct **using_directives,
   else
     newobj->declaration = declaration;
 
-  memcpy (newobj->excludes, excludes.data (),
-	  excludes.size () * sizeof (*newobj->excludes));
+  if (!excludes.empty ())
+    memcpy (newobj->excludes, excludes.data (),
+	    excludes.size () * sizeof (*newobj->excludes));
   newobj->excludes[excludes.size ()] = NULL;
 
   newobj->next = *using_directives;
