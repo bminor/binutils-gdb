@@ -198,13 +198,15 @@ END_RELOC_NUMBERS (R_PPC64_max)
 #define EF_PPC64_ABI	3
 
 /* The ELFv2 ABI uses three bits in the symbol st_other field of a
-   function definition to specify the number of instructions between a
+   function definition to specify the number of bytes between a
    function's global entry point and local entry point.
+   Values of two to six specify powers of two from four to sixty four
+   bytes.  For such functions:
    The global entry point is used when it is necessary to set up the
    toc pointer (r2) for the function.  Callers must enter the global
    entry point with r12 set to the global entry point address.  On
-   return from the function, r2 may have a different value to that
-   which it had on entry.
+   return from the function r2 will contain the toc pointer for the
+   function.
    The local entry point is used when r2 is known to already be valid
    for the function.  There is no requirement on r12 when using the
    local entry point, and on return r2 will contain the same value as
@@ -212,7 +214,9 @@ END_RELOC_NUMBERS (R_PPC64_max)
    A value of zero in these bits means that the function has a single
    entry point with no requirement on r12 or r2, and that on return r2
    will contain the same value as at entry.
-   Values of one and seven are reserved.  */
+   A value of one means that the function has a single entry point
+   with no requirement on r12 or r2, and that r2 is *not* preserved.
+   A value of seven is reserved.  */
 #define STO_PPC64_LOCAL_BIT		5
 #define STO_PPC64_LOCAL_MASK		(7 << STO_PPC64_LOCAL_BIT)
 

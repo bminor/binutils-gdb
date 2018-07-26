@@ -1,3 +1,10 @@
+2018-07-26  Alan Modra  <amodra@gmail.com>
+
+	* elf/ppc64.h: Specify byte offset to local entry for values
+	of two to six in STO_PPC64_LOCAL_MASK.  Clarify r2 return
+	value for such functions when entering via global entry point.
+	Specify meaning of a value of one in STO_PPC64_LOCAL_MASK.
+
 2018-07-24  Alan Modra  <amodra@gmail.com>
 
 	PR 23430

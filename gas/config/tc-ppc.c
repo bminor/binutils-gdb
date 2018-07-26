@@ -2378,12 +2378,22 @@ ppc_elf_localentry (int ignore ATTRIBUTE_UNUSED)
   if (resolve_expression (&exp)
       && exp.X_op == O_constant)
     {
-      unsigned char encoded = PPC64_SET_LOCAL_ENTRY_OFFSET (exp.X_add_number);
+      unsigned int encoded, ok;
 
-      if (exp.X_add_number != (offsetT) PPC64_LOCAL_ENTRY_OFFSET (encoded))
-        as_bad (_(".localentry expression for `%s' "
-		  "is not a valid power of 2"), S_GET_NAME (sym));
+      ok = 1;
+      if (exp.X_add_number == 1 || exp.X_add_number == 7)
+	encoded = exp.X_add_number << STO_PPC64_LOCAL_BIT;
       else
+	{
+	  encoded = PPC64_SET_LOCAL_ENTRY_OFFSET (exp.X_add_number);
+	  if (exp.X_add_number != (offsetT) PPC64_LOCAL_ENTRY_OFFSET (encoded))
+	    {
+	      as_bad (_(".localentry expression for `%s' "
+			"is not a valid power of 2"), S_GET_NAME (sym));
+	      ok = 0;
+	    }
+	}
+      if (ok)
 	{
 	  bfdsym = symbol_get_bfdsym (sym);
 	  elfsym = elf_symbol_from (bfd_asymbol_bfd (bfdsym), bfdsym);
