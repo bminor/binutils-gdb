@@ -1,3 +1,9 @@
+2018-07-27  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (insert_sprbat): Correct function parameter and
+	return type.
+	(extract_sprbat): Likewise, variable too.
+
 2018-07-26  Alex Chadwick  <Alex.Chadwick@cl.cam.ac.uk>
 	    Alan Modra  <amodra@gmail.com>
 

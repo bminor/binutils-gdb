@@ -1190,9 +1190,9 @@ extract_spr (uint64_t insn,
 /* Some dialects have 8 [DI]BAT registers instead of the standard 4.  */
 #define ALLOW8_BAT (PPC_OPCODE_750)
 
-static unsigned long
-insert_sprbat (unsigned long insn,
-	       long value,
+static uint64_t
+insert_sprbat (uint64_t insn,
+	       int64_t value,
 	       ppc_cpu_t dialect,
 	       const char **errmsg)
 {
@@ -1209,12 +1209,12 @@ insert_sprbat (unsigned long insn,
   return insn | (value << 11);
 }
 
-static long
-extract_sprbat (unsigned long insn,
+static int64_t
+extract_sprbat (uint64_t insn,
 		ppc_cpu_t dialect,
 		int *invalid)
 {
-  unsigned long val = (insn >> 17) & 0x3;
+  uint64_t val = (insn >> 17) & 0x3;
 
   val = val + ((insn >> 9) & 0x4);
   if (val > 3 && (dialect & ALLOW8_BAT) == 0)
