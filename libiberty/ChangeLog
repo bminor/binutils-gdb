@@ -1,3 +1,14 @@
+2018-08-01  Richard Earnshaw  <rearnsha@arm.com>
+
+	Copy over from GCC
+	2018-07-26  Martin Liska  <mliska@suse.cz>
+
+        PR lto/86548
+	* make-temp-file.c (TEMP_FILE): Remove leading 'cc'.
+	(make_temp_file): Call make_temp_file_with_prefix with
+        first argument set to NULL.
+	(make_temp_file_with_prefix): Support also prefix.
+
 2018-07-18  Eli Zaretskii  <eliz@gnu.org>
 
 	PR gdb/23434
