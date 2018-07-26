@@ -8634,6 +8634,7 @@ check_VecOperations (char *op_string, char *op_end)
 
 	      broadcast_op.type = bcst_type;
 	      broadcast_op.operand = this_operand;
+	      broadcast_op.bytes = 0;
 	      i.broadcast = &broadcast_op;
 	    }
 	  /* Check masking operation.  */

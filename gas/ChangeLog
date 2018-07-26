@@ -1,3 +1,8 @@
+2018-07-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (check_VecOperations): Initialize
+	broadcast_op.bytes to 0.
+
 2018-07-26  Alex Chadwick  <Alex.Chadwick@cl.cam.ac.uk>
 
 	* config/tc-ppc.c (md_show_usage): Add -mgekko and -mbroadway.
