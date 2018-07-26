@@ -15,6 +15,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* The version of this test-case with f1 tagged with noinline only is equivalent
+   to gcc/testsuite/gcc.dg/guality/vla-1.c.  */
+
 int
 #ifdef NOCLONE
 __attribute__((noinline, noclone))
