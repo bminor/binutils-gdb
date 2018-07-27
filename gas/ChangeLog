@@ -1,3 +1,7 @@
+2018-07-27  Jim Wilson  <jimw@sifive.com>
+
+	* configure.tgt (riscv*): Accept as alias for riscv32*.
+
 2018-07-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/23453
