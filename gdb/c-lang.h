@@ -35,7 +35,7 @@ struct parser_state;
 /* The various kinds of C string and character.  Note that these
    values are chosen so that they may be or'd together in certain
    ways.  */
-enum c_string_type_values
+enum c_string_type_values : unsigned
   {
     /* An ordinary string: "value".  */
     C_STRING = 0,

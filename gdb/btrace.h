@@ -228,7 +228,7 @@ struct btrace_call_history
 };
 
 /* Branch trace thread flags.  */
-enum btrace_thread_flag
+enum btrace_thread_flag : unsigned
 {
   /* The thread is to be stepped forwards.  */
   BTHR_STEP = (1 << 0),

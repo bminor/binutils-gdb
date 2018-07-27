@@ -193,7 +193,7 @@ enum type_code
 /* * Some bits for the type's instance_flags word.  See the macros
    below for documentation on each bit.  */
 
-enum type_instance_flag_value
+enum type_instance_flag_value : unsigned
 {
   TYPE_INSTANCE_FLAG_CONST = (1 << 0),
   TYPE_INSTANCE_FLAG_VOLATILE = (1 << 1),

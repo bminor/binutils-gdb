@@ -26,7 +26,7 @@
    symbol_file_add, etc.  Defined in a separate file to break circular
    header dependencies.  */
 
-enum symfile_add_flag
+enum symfile_add_flag : unsigned
   {
     /* Be chatty about what you are doing.  */
     SYMFILE_VERBOSE = 1 << 1,

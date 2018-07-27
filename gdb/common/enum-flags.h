@@ -164,6 +164,12 @@ public:
   }
   enum_flags operator~ () const
   {
+    // We only the underlying type to be unsigned when actually using
+    // operator~ -- if it were not unsigned, undefined behavior could
+    // result.  However, asserting this in the class itself would
+    // require too many unnecessary changes to otherwise ok enum
+    // types.
+    gdb_static_assert (std::is_unsigned<underlying_type>::value);
     return (enum_type) ~underlying_value ();
   }
 

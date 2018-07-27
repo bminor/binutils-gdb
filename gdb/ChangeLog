@@ -1,5 +1,17 @@
 2018-10-03  Tom Tromey  <tom@tromey.com>
 
+	* common/enum-flags.h (enum_flags::operator~): Add static assert.
+	* symfile-add-flags.h (enum symfile_add_flag): Use unsigned as
+	base type.
+	* objfile-flags.h (enum objfile_flag): Use unsigned as base type.
+	* gdbtypes.h (enum type_instance_flag_value): Use unsigned as base
+	type.
+	* c-lang.h (enum c_string_type_values): Use unsigned as base
+	type.
+	* btrace.h (enum btrace_thread_flag): Use unsigned as base type.
+
+2018-10-03  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2-frame.h (dwarf2_frame_state_reg_info)
 	<~dwarf2_frame_state_reg_info>: Update.
 	<dwarf2_frame_state_reg_info>: Update.
