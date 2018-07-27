@@ -97,3 +97,6 @@ movnti word ptr [eax], ax
 	shl [eax], 1
 	rol [ecx], 2
 	rcl [edx], cl
+
+	.att_syntax prefix
+	movsd (%esi), %ss:(%edi), %ss:(%eax)

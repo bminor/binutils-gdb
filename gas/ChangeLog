@@ -1,5 +1,16 @@
 2018-07-26  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gas/23453
+	* config/tc-i386.c (parse_operands): Check for more than 2
+	memory references.
+	* testsuite/gas/i386/inval.s: Add a movsd test with 3 memory
+	references.
+	* testsuite/gas/i386/x86-64-inval.s: Likewise.
+	* testsuite/gas/i386/inval.l: Updated.
+	* testsuite/gas/i386/x86-64-inval.l: Likewise.
+
+2018-07-26  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (check_VecOperations): Initialize
 	broadcast_op.bytes to 0.
 

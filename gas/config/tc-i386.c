@@ -4675,6 +4675,13 @@ parse_operands (char *l, const char *mnemonic)
 	  /* Now parse operand adding info to 'i' as we go along.  */
 	  END_STRING_AND_SAVE (l);
 
+	  if (i.mem_operands > 1)
+	    {
+	      as_bad (_("too many memory references for `%s'"),
+		      mnemonic);
+	      return 0;
+	    }
+
 	  if (intel_syntax)
 	    operand_ok =
 	      i386_intel_operand (token_start,
