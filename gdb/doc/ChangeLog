@@ -1,3 +1,10 @@
+2018-07-27  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.texinfo (gcore man): Rewrite "Description" and "-o"
+	option sections to further clarify that gcore can take more
+	than one PID, and that "-o" is used to specify a prefix, not a
+	filename.
+
 2018-07-26  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (Maintenance Commands): Add description of

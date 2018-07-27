@@ -21,7 +21,7 @@
 #
 
 # Need to check for -o option, but set default basename to "core".
-name=core
+prefix=core
 
 # When the -a option is present, this may hold additional commands
 # to ensure gdb dumps all mappings (OS dependent).
@@ -38,10 +38,10 @@ while getopts :ao: opt; do
             esac
             ;;
         o)
-            name=$OPTARG
+            prefix=$OPTARG
             ;;
         *)
-            echo "usage:  @GCORE_TRANSFORM_NAME@ [-a] [-o filename] pid"
+            echo "usage:  @GCORE_TRANSFORM_NAME@ [-a] [-o prefix] pid1 [pid2...pidN]"
             exit 2
             ;;
     esac
@@ -51,7 +51,7 @@ shift $((OPTIND-1))
 
 if [ "$#" -eq "0" ]
 then
-    echo "usage:  @GCORE_TRANSFORM_NAME@ [-a] [-o filename] pid"
+    echo "usage:  @GCORE_TRANSFORM_NAME@ [-a] [-o prefix] pid1 [pid2...pidN]"
     exit 2
 fi
 
@@ -100,12 +100,12 @@ do
 	"$binary_path/@GDB_TRANSFORM_NAME@" </dev/null --nx --batch \
 	    -ex "set pagination off" -ex "set height 0" -ex "set width 0" \
 	    "${dump_all_cmds[@]}" \
-	    -ex "attach $pid" -ex "gcore $name.$pid" -ex detach -ex quit
+	    -ex "attach $pid" -ex "gcore $prefix.$pid" -ex detach -ex quit
 
-	if [ -r "$name.$pid" ] ; then
+	if [ -r "$prefix.$pid" ] ; then
 	    rc=0
 	else
-	    echo "@GCORE_TRANSFORM_NAME@: failed to create $name.$pid"
+	    echo "@GCORE_TRANSFORM_NAME@: failed to create $prefix.$pid"
 	    rc=1
 	    break
 	fi

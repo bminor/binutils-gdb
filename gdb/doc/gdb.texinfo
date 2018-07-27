@@ -43765,16 +43765,17 @@ Richard M. Stallman and Roland H. Pesch, July 1991.
 
 @format
 @c man begin SYNOPSIS gcore
-gcore [-a] [-o @var{filename}] @var{pid}
+gcore [-a] [-o @var{prefix}] @var{pid1} [@var{pid2}...@var{pidN}]
 @c man end
 @end format
 
 @c man begin DESCRIPTION gcore
-Generate a core dump of a running program with process ID @var{pid}.
-Produced file is equivalent to a kernel produced core file as if the process
-crashed (and if @kbd{ulimit -c} were used to set up an appropriate core dump
-limit).  Unlike after a crash, after @command{gcore} the program remains
-running without any change.
+Generate core dumps of one or more running programs with process IDs
+@var{pid1}, @var{pid2}, etc.  A core file produced by @command{gcore}
+is equivalent to one produced by the kernel when the process crashes
+(and when @kbd{ulimit -c} was used to set up an appropriate core dump
+limit).  However, unlike after a crash, after @command{gcore} finishes
+its job the program remains running without any change.
 @c man end
 
 @c man begin OPTIONS gcore
@@ -43786,11 +43787,12 @@ the Operating System.  On @sc{gnu}/Linux, it will disable
 enable @code{dump-excluded-mappings} (@pxref{set
 dump-excluded-mappings}).
 
-@item -o @var{filename}
-The optional argument
-@var{filename} specifies the file name where to put the core dump.
-If not specified, the file name defaults to @file{core.@var{pid}},
-where @var{pid} is the running program process ID.
+@item -o @var{prefix}
+The optional argument @var{prefix} specifies the prefix to be used
+when composing the file names of the core dumps.  The file name is
+composed as @file{@var{prefix}.@var{pid}}, where @var{pid} is the
+process ID of the running program being analyzed by @command{gcore}.
+If not specified, @var{prefix} defaults to @var{gcore}.
 @end table
 @c man end
 

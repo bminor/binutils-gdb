@@ -1,3 +1,8 @@
+2018-07-27  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gcore.in: Rename variable "name" to "prefix".  Expand
+	"usage" text.
+
 2018-07-14  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* windows-nat.c (windows_nat_target::create_inferior): Update to
