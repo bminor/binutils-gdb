@@ -1,3 +1,8 @@
+2018-07-27  Chenghua Xu  <paul.hua.gm@gmail.com>
+	    Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* elf/mips.h (AFL_ASE_MASK): Correct typo.
+
 2018-07-26  Alex Chadwick  <Alex.Chadwick@cl.cam.ac.uk>
 
 	* opcode/ppc.h (PPC_OPCODE_750): Adjust comment.
