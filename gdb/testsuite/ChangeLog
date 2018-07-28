@@ -1,3 +1,10 @@
+2018-08-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/vla-optimized-out-o3.exp: Delete.
+	* gdb.base/vla-optimized-out-o3-strict.exp: Delete.
+	* gdb.base/vla-optimized-out.exp: Extend to cover all of the
+	deleted tests.
+
 2018-08-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR gdb/18050:

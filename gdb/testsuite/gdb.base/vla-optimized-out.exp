@@ -17,24 +17,43 @@
 
 standard_testfile
 
-if { [prepare_for_testing "failed to prepare" $testfile $srcfile \
-	  {debug optimize=-O1 additional_flags=-DNOCLONE}] } {
-    return -1
-}
+# The EXE_SUFFIX is a string appended to the name of the test binary
+# to make it unique per variation.
+# The OPTIONS is a two item list, the first item is a list of compiler
+# flags used for building the test binary, and the second item is a
+# pattern which matches some expected output within this proc.
+proc vla_optimized_out {exe_suffix options} {
+    global testfile srcfile
 
-proc vla_optimized_out { } {
+    lassign $options compile_flags sizeof_result
+
+    if { [prepare_for_testing "failed to prepare" "$testfile-$exe_suffix" $srcfile \
+	      $compile_flags] } {
+	return -1
+    }
+
     if ![runto f1] {
 	fail "can't run to f1"
 	return
     }
 
     gdb_test "p a" \
-	{ = <optimized out>} \
+	" = <optimized out>" \
 	"printed optimized out vla"
 
     gdb_test "p sizeof (a)" \
-	{ = 6} \
+	" = $sizeof_result" \
 	"printed size of optimized out vla"
 }
 
-vla_optimized_out
+foreach {test_prefix options} \
+    { "o1" {{debug optimize=-O1 additional_flags=-DNOCLONE} "6"} \
+      "o3" {{debug optimize=-O3} "<optimized out>"} \
+      "o3_strict" {{debug optimize=-O3 \
+			additional_flags=-gstrict-dwarf} \
+		       "<optimized out>"}} {
+    with_test_prefix $test_prefix {
+	vla_optimized_out $test_prefix $options
+    }
+}
+
