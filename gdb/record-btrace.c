@@ -1967,10 +1967,10 @@ record_btrace_resume_thread (struct thread_info *tp,
 
 /* Get the current frame for TP.  */
 
-static struct frame_info *
-get_thread_current_frame (struct thread_info *tp)
+static struct frame_id
+get_thread_current_frame_id (struct thread_info *tp)
 {
-  struct frame_info *frame;
+  struct frame_id id;
   int executing;
 
   /* Set current thread, which is implicitly used by
@@ -1989,10 +1989,10 @@ get_thread_current_frame (struct thread_info *tp)
   executing = tp->executing;
   set_executing (inferior_ptid, false);
 
-  frame = NULL;
+  id = null_frame_id;
   TRY
     {
-      frame = get_current_frame ();
+      id = get_frame_id (get_current_frame ());
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -2006,7 +2006,7 @@ get_thread_current_frame (struct thread_info *tp)
   /* Restore the previous execution state.  */
   set_executing (inferior_ptid, executing);
 
-  return frame;
+  return id;
 }
 
 /* Start replaying a thread.  */
@@ -2031,13 +2031,11 @@ record_btrace_start_replaying (struct thread_info *tp)
      subroutines after we started replaying.  */
   TRY
     {
-      struct frame_info *frame;
       struct frame_id frame_id;
       int upd_step_frame_id, upd_step_stack_frame_id;
 
       /* The current frame without replaying - computed via normal unwind.  */
-      frame = get_thread_current_frame (tp);
-      frame_id = get_frame_id (frame);
+      frame_id = get_thread_current_frame_id (tp);
 
       /* Check if we need to update any stepping-related frame id's.  */
       upd_step_frame_id = frame_id_eq (frame_id,
@@ -2068,8 +2066,7 @@ record_btrace_start_replaying (struct thread_info *tp)
       registers_changed_thread (tp);
 
       /* The current frame with replaying - computed via btrace unwind.  */
-      frame = get_thread_current_frame (tp);
-      frame_id = get_frame_id (frame);
+      frame_id = get_thread_current_frame_id (tp);
 
       /* Replace stepping related frames where necessary.  */
       if (upd_step_frame_id)
