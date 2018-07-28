@@ -1987,8 +1987,10 @@ ppc_insert_operand (uint64_t insn,
 	 hand but only up to 32 bits.  This shouldn't really be valid,
 	 but, to permit this code to assemble on a 64-bit host, we
 	 sign extend the 32-bit value to 64 bits if so doing makes the
-	 value valid.  */
+	 value valid.  We only do this for operands that are 32-bits or
+	 smaller.  */
       if (val > max
+	  && (operand->bitm & ~0xffffffffULL) == 0
 	  && (val - (1LL << 32)) >= min
 	  && (val - (1LL << 32)) <= max
 	  && ((val - (1LL << 32)) & (right - 1)) == 0)
@@ -1997,6 +1999,7 @@ ppc_insert_operand (uint64_t insn,
       /* Similarly, people write expressions like ~(1<<15), and expect
 	 this to be OK for a 32-bit unsigned value.  */
       else if (val < min
+	       && (operand->bitm & ~0xffffffffULL) == 0
 	       && (val + (1LL << 32)) >= min
 	       && (val + (1LL << 32)) <= max
 	       && ((val + (1LL << 32)) & (right - 1)) == 0)

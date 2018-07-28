@@ -1,6 +1,19 @@
 2019-05-24  Peter Bergner  <bergner@linux.ibm.com>
 	    Alan Modra  <amodra@gmail.com>
 
+	* ppc-opc.c (insert_d34, extract_d34, insert_nsi34, extract_nsi34),
+	(insert_pcrel, extract_pcrel, extract_pcrel0): New functions.
+	(extract_esync, extract_raq, extract_tbr, extract_sxl): Comment.
+	(powerpc_operands <D34, SI34, NSI34, PRA0, PRAQ, PCREL, PCREL0,
+	XTOP>): Define and add entries.
+	(P8LS, PMLS, P_D_MASK, P_DRAPCREL_MASK): Define.
+	(prefix_opcodes): Add pli, paddi, pla, psubi, plwz, plbz, pstw,
+	pstb, plhz, plha, psth, plfs, plfd, pstfs, pstfd, plq, plxsd,
+	plxssp, pld, plwa, pstxsd, pstxssp, pstxv, pstd, and pstq.
+
+2019-05-24  Peter Bergner  <bergner@linux.ibm.com>
+	    Alan Modra  <amodra@gmail.com>
+
 	* ppc-dis.c (ppc_opts): Add "future" entry.
 	(PREFIX_OPCD_SEGS): Define.
 	(prefix_opcd_indices): New array.

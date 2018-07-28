@@ -1,6 +1,17 @@
 2019-05-24  Peter Bergner  <bergner@linux.ibm.com>
 	    Alan Modra  <amodra@gmail.com>
 
+	* config/tc-ppc.c (ppc_insert_operand): Only sign extend fields that
+	are 32-bits or smaller.
+	* messages.c (as_internal_value_out_of_range): Do not truncate
+	variables and use BFD_VMA_FMT to print them.
+	* testsuite/gas/ppc/prefix-pcrel.s,
+	* testsuite/gas/ppc/prefix-pcrel.d: New test.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+2019-05-24  Peter Bergner  <bergner@linux.ibm.com>
+	    Alan Modra  <amodra@gmail.com>
+
 	* config/tc-ppc.c (ppc_setup_opcodes): Handle prefix_opcodes.
 	(struct insn_label_list): New.
 	(insn_labels, free_insn_labels): New variables.

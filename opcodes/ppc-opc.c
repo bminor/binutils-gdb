@@ -596,6 +596,106 @@ extract_dxdn (uint64_t insn,
   return -extract_dxd (insn, dialect, invalid);
 }
 
+/* The D field in a 64-bit D form prefix instruction when the field is split
+   into separate D0 and D1 fields.  */
+
+static uint64_t
+insert_d34 (uint64_t insn,
+	    int64_t value,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | ((value & 0x3ffff0000ULL) << 16) | (value & 0xffff);
+}
+
+static int64_t
+extract_d34 (uint64_t insn,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     int *invalid ATTRIBUTE_UNUSED)
+{
+  int64_t mask = 1ULL << 33;
+  int64_t value = ((insn >> 16) & 0x3ffff0000ULL) | (insn & 0xffff);
+  value = (value ^ mask) - mask;
+  return value;
+}
+
+/* The NSI34 field in an 8-byte D form prefix instruction.  This is the same
+   as the SI34 field, only negated.  The extraction function always marks it
+   as invalid, since we never want to recognize an instruction which uses
+   a field of this type.  */
+
+static uint64_t
+insert_nsi34 (uint64_t insn,
+	      int64_t value,
+	      ppc_cpu_t dialect,
+	      const char **errmsg)
+{
+  return insert_d34 (insn, -value, dialect, errmsg);
+}
+
+static int64_t
+extract_nsi34 (uint64_t insn,
+	       ppc_cpu_t dialect,
+	       int *invalid)
+{
+  int64_t value = extract_d34 (insn, dialect, invalid);
+  *invalid = 1;
+  return -value;
+}
+
+/* The R field in an 8-byte prefix instruction when there are restrictions
+   between R's value and the RA value (ie, they cannot both be non zero).  */
+
+static uint64_t
+insert_pcrel (uint64_t insn,
+	      int64_t value,
+	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	      const char **errmsg)
+{
+  value &= 0x1;
+  int64_t ra = (insn >> 16) & 0x1f;
+  if (ra != 0 && value != 0)
+    *errmsg = _("invalid R operand");
+
+  return insn | (value << 52);
+}
+
+static int64_t
+extract_pcrel (uint64_t insn,
+	       ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	       int *invalid)
+{
+  /* If called with *invalid < 0 to return the value for missing
+     operands, *invalid will be the negative count of missing operands
+     including this one.  Return a default value of 1 if the PRA0/PRAQ
+     operand was also omitted (ie. *invalid is -2).  Return a default
+     value of 0 if the PRA0/PRAQ operand was not omitted
+     (ie. *invalid is -1).  */
+  if (*invalid < 0)
+    return ~ *invalid & 1;
+
+  int64_t ra = (insn >> 16) & 0x1f;
+  int64_t pcrel = (insn >> 52) & 0x1;
+  if (ra != 0 && pcrel != 0)
+    *invalid = 1;
+
+  return pcrel;
+}
+
+/* Variant of extract_pcrel that sets invalid for R bit set.  The idea
+   is to disassemble "paddi rt,0,offset,1" as "pla rt,offset".  */
+
+static int64_t
+extract_pcrel0 (uint64_t insn,
+		ppc_cpu_t dialect,
+		int *invalid)
+{
+  int64_t pcrel = extract_pcrel (insn, dialect, invalid);
+  if (pcrel)
+    *invalid = 1;
+  return pcrel;
+}
+
 /* FXM mask in mfcr and mtcrf instructions.  */
 
 static uint64_t
@@ -758,6 +858,7 @@ extract_esync (uint64_t insn,
 	       ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	       int *invalid)
 {
+  /* Missing optional operands have a value of zero.  */
   if (*invalid < 0)
     return 0;
 
@@ -1013,6 +1114,7 @@ extract_raq (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
+  /* Missing optional operands have a value of zero.  */
   if (*invalid < 0)
     return 0;
 
@@ -1338,6 +1440,7 @@ extract_tbr (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
+  /* Missing optional operands have a value of 268.  */
   if (*invalid < 0)
     return 268;
 
@@ -1810,6 +1913,7 @@ extract_sxl (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
+  /* Missing optional operands have a value of one.  */
   if (*invalid < 0)
     return 1;
   return (insn >> 11) & 0x1;
@@ -2039,9 +2143,26 @@ const struct powerpc_operand powerpc_operands[] =
   { 0xfffc, 0, NULL, NULL,
     PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED | PPC_OPERAND_DS },
 
+  /* The D field in an 8-byte D form prefix instruction.  This is a displacement
+     off a register, and implies that the next operand is a register in
+     parentheses.  */
+#define D34 DS + 1
+  { 0x3ffffffff, PPC_OPSHIFT_INV, insert_d34, extract_d34,
+    PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED },
+
+  /* The SI field in an 8-byte D form prefix instruction.  */
+#define SI34 D34 + 1
+  { 0x3ffffffff, PPC_OPSHIFT_INV, insert_d34, extract_d34, PPC_OPERAND_SIGNED },
+
+  /* The NSI field in an 8-byte D form prefix instruction.  This is the
+     same as the SI34 field, only negated.  */
+#define NSI34 SI34 + 1
+  { 0x3ffffffff, PPC_OPSHIFT_INV, insert_nsi34, extract_nsi34,
+    PPC_OPERAND_NEGATIVE | PPC_OPERAND_SIGNED },
+
   /* The DUIS or BHRBE fields in a XFX form instruction, 10 bits
      unsigned imediate */
-#define DUIS DS + 1
+#define DUIS NSI34 + 1
 #define BHRBE DUIS
   { 0x3ff, 11, NULL, NULL, 0 },
 
@@ -2217,16 +2338,33 @@ const struct powerpc_operand powerpc_operands[] =
 #define RA0 RA + 1
   { 0x1f, 16, NULL, NULL, PPC_OPERAND_GPR_0 },
 
+  /* Similar to above, but optional.  */
+#define PRA0 RA0 + 1
+  { 0x1f, 16, NULL, NULL, PPC_OPERAND_GPR_0 | PPC_OPERAND_OPTIONAL },
+
   /* The RA field in the DQ form lq or an lswx instruction, which have
      special value restrictions.  */
-#define RAQ RA0 + 1
+#define RAQ PRA0 + 1
 #define RAX RAQ
   { 0x1f, 16, insert_raq, extract_raq, PPC_OPERAND_GPR_0 },
+
+  /* Similar to above, but optional.  */
+#define PRAQ RAQ + 1
+  { 0x1f, 16, insert_raq, extract_raq,
+    PPC_OPERAND_GPR_0 | PPC_OPERAND_OPTIONAL },
+
+  /* The R field in an 8-byte D, DS, DQ or X form prefix instruction.  */
+#define PCREL PRAQ + 1
+#define PCREL_MASK (1ULL << 52)
+  { 0x1, 52, insert_pcrel, extract_pcrel, PPC_OPERAND_OPTIONAL },
+
+#define PCREL0 PCREL + 1
+  { 0x1, 52, insert_pcrel, extract_pcrel0, PPC_OPERAND_OPTIONAL },
 
   /* The RA field in a D or X form instruction which is an updating
      load, which means that the RA field may not be zero and may not
      equal the RT field.  */
-#define RAL RAQ + 1
+#define RAL PCREL0 + 1
   { 0x1f, 16, insert_ral, extract_ral, PPC_OPERAND_GPR_0 },
 
   /* The RA field in an lmw instruction, which has special value
@@ -2651,8 +2789,12 @@ const struct powerpc_operand powerpc_operands[] =
 #define XTQ6 XSQ6
   { 0x3f, PPC_OPSHIFT_INV, insert_xtq6, extract_xtq6, PPC_OPERAND_VSR },
 
+  /* The XT field in a plxv instruction.  Runs into the OP field.  */
+#define XTOP XSQ6 + 1
+  { 0x3f, 21, NULL, NULL, PPC_OPERAND_VSR },
+
   /* The XA field in an XX3 form instruction.  This is split.  */
-#define XA6 XTQ6 + 1
+#define XA6 XTOP + 1
   { 0x3f, PPC_OPSHIFT_INV, insert_xa6, extract_xa6, PPC_OPERAND_VSR },
 
   /* The XB field in an XX2 or XX3 form instruction.  This is split.  */
@@ -2730,8 +2872,20 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 #define SUFFIX_MASK ((1ULL << 32) - 1)
 #define PREFIX_MASK (SUFFIX_MASK << 32)
 
+/* Prefix insn, eight byte load/store form 8LS.  */
+#define P8LS (PREFIX_OP | PREFIX_FORM (0))
+
+/* Prefix insn, modified load/store form MLS.  */
+#define PMLS (PREFIX_OP | PREFIX_FORM (2))
+
 /* Prefix insn, modified register to register form MRR.  */
 #define PMRR (PREFIX_OP | PREFIX_FORM (3))
+
+/* An 8-byte D form prefix instruction.  */
+#define P_D_MASK (((-1ULL << 50) & ~PCREL_MASK) | OP_MASK)
+
+/* The same as P_D_MASK, but with the RA and PCREL fields specified.  */
+#define P_DRAPCREL_MASK (P_D_MASK | PCREL_MASK | RA_MASK)
 
 /* The main opcode combined with a trap code in the TO field of a D
    form instruction.  Used for extended mnemonics for the trap
@@ -7815,6 +7969,32 @@ const unsigned int powerpc_num_opcodes =
 
 const struct powerpc_opcode prefix_opcodes[] = {
 {"pnop",	  PMRR,		       PREFIX_MASK,	POWERXX, 0,	{0}},
+{"pli",		  PMLS|OP(14),	       P_DRAPCREL_MASK,	POWERXX, 0,	{RT, SI34}},
+{"paddi",	  PMLS|OP(14),	       P_D_MASK,	POWERXX, 0,	{RT, RA0, SI34, PCREL0}},
+{"psubi",	  PMLS|OP(14),	       P_D_MASK,	POWERXX, 0,	{RT, RA0, NSI34, PCREL0}},
+{"pla",		  PMLS|OP(14),	       P_D_MASK,	POWERXX, 0,	{RT, D34, PRA0, PCREL}},
+{"plwz",	  PMLS|OP(32),	       P_D_MASK,	POWERXX, 0,	{RT, D34, PRA0, PCREL}},
+{"plbz",	  PMLS|OP(34),	       P_D_MASK,	POWERXX, 0,	{RT, D34, PRA0, PCREL}},
+{"pstw",	  PMLS|OP(36),	       P_D_MASK,	POWERXX, 0,	{RS, D34, PRA0, PCREL}},
+{"pstb",	  PMLS|OP(38),	       P_D_MASK,	POWERXX, 0,	{RS, D34, PRA0, PCREL}},
+{"plhz",	  PMLS|OP(40),	       P_D_MASK,	POWERXX, 0,	{RT, D34, PRA0, PCREL}},
+{"plwa",	  P8LS|OP(41),	       P_D_MASK,	POWERXX, 0,	{RT, D34, PRA0, PCREL}},
+{"plxsd",	  P8LS|OP(42),	       P_D_MASK,	POWERXX, 0,	{VD, D34, PRA0, PCREL}},
+{"plha",	  PMLS|OP(42),	       P_D_MASK,	POWERXX, 0,	{RT, D34, PRA0, PCREL}},
+{"plxssp",	  P8LS|OP(43),	       P_D_MASK,	POWERXX, 0,	{VD, D34, PRA0, PCREL}},
+{"psth",	  PMLS|OP(44),	       P_D_MASK,	POWERXX, 0,	{RS, D34, PRA0, PCREL}},
+{"pstxsd",	  P8LS|OP(46),	       P_D_MASK,	POWERXX, 0,	{VS, D34, PRA0, PCREL}},
+{"pstxssp",	  P8LS|OP(47),	       P_D_MASK,	POWERXX, 0,	{VS, D34, PRA0, PCREL}},
+{"plfs",	  PMLS|OP(48),	       P_D_MASK,	POWERXX, 0,	{FRT, D34, PRA0, PCREL}},
+{"plxv",	  P8LS|OP(50),	       P_D_MASK&~OP(1),	POWERXX, 0,	{XTOP, D34, PRA0, PCREL}},
+{"plfd",	  PMLS|OP(50),	       P_D_MASK,	POWERXX, 0,	{FRT, D34, PRA0, PCREL}},
+{"pstfs",	  PMLS|OP(52),	       P_D_MASK,	POWERXX, 0,	{FRS, D34, PRA0, PCREL}},
+{"pstxv",	  P8LS|OP(54),	       P_D_MASK&~OP(1),	POWERXX, 0,	{XTOP, D34, PRA0, PCREL}},
+{"pstfd",	  PMLS|OP(54),	       P_D_MASK,	POWERXX, 0,	{FRS, D34, PRA0, PCREL}},
+{"plq",		  P8LS|OP(56),	       P_D_MASK,	POWERXX, 0,	{RTQ, D34, PRAQ, PCREL}},
+{"pld",		  P8LS|OP(57),	       P_D_MASK,	POWERXX, 0,	{RT, D34, PRA0, PCREL}},
+{"pstq",	  P8LS|OP(60),	       P_D_MASK,	POWERXX, 0,	{RSQ, D34, PRA0, PCREL}},
+{"pstd",	  P8LS|OP(61),	       P_D_MASK,	POWERXX, 0,	{RS, D34, PRA0, PCREL}},
 };
 
 const unsigned int prefix_num_opcodes =
