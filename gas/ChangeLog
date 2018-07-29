@@ -1,3 +1,9 @@
+2018-07-29  John David Anglin  <danglin@gcc.gnu.org>
+
+	* config/tc-hppa.c: Include "struc-symbol.h".
+	(pa_build_unwind_subspace): Use call_info->start_symbol->sy_frag
+	instead of frag_now for local symbol replacement.
+
 2018-07-27  Jim Wilson  <jimw@sifive.com>
 
 	* configure.tgt (riscv*): Accept as alias for riscv32*.
