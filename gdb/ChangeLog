@@ -1,5 +1,9 @@
 2018-10-03  Tom Tromey  <tom@tromey.com>
 
+	* findvar.c (extract_integer): Do work in an unsigned type.
+
+2018-10-03  Tom Tromey  <tom@tromey.com>
+
 	* common/enum-flags.h (enum_flags::operator~): Add static assert.
 	* symfile-add-flags.h (enum symfile_add_flag): Use unsigned as
 	base type.
