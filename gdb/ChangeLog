@@ -1,3 +1,8 @@
+2018-07-30  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* eval.c (evaluate_subexp_for_sizeof): Check for array type before
+	checking array bounds are defined.
+
 2018-07-30  Tom Tromey  <tom@tromey.com>
 
 	* nat/linux-osdata.c (pid_pgid_entry::operator<): Fix
