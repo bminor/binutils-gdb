@@ -1,5 +1,10 @@
 2018-10-03  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.c (read_subrange_type): Make "negative_mask"
+	unsigned.
+
+2018-10-03  Tom Tromey  <tom@tromey.com>
+
 	* findvar.c (extract_integer): Do work in an unsigned type.
 
 2018-10-03  Tom Tromey  <tom@tromey.com>
