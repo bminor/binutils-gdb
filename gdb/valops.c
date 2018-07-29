@@ -1588,7 +1588,6 @@ value_ind (struct value *arg1)
     }
 
   error (_("Attempt to take contents of a non-pointer value."));
-  return 0;			/* For lint -- never reached.  */
 }
 
 /* Create a value for an array by allocating space in GDB, copying the

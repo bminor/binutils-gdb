@@ -504,9 +504,6 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
     }
   throw_error (NOT_FOUND_ERROR,
                _("member function %s not found"), tstr);
-#ifdef lint
-  return call_function_by_hand (argvec[0], 2 - static_memfuncp, argvec + 1);
-#endif
 }
 
 /* We know that arg1 is a structure, so try to find a unary user
@@ -622,8 +619,6 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
     }
   throw_error (NOT_FOUND_ERROR,
                _("member function %s not found"), tstr);
-
-  return 0;			/* For lint -- never reached */
 }
 
 
@@ -1533,10 +1528,7 @@ value_equal (struct value *arg1, struct value *arg2)
       return value_strcmp (arg1, arg2) == 0;
     }
   else
-    {
-      error (_("Invalid type combination in equality test."));
-      return 0;			/* For lint -- never reached.  */
-    }
+    error (_("Invalid type combination in equality test."));
 }
 
 /* Compare values based on their raw contents.  Useful for arrays since
@@ -1628,10 +1620,7 @@ value_pos (struct value *arg1)
       || (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type)))
     return value_from_contents (type, value_contents (arg1));
   else
-    {
-      error (_("Argument to positive operation not a number."));
-      return 0;			/* For lint -- never reached.  */
-    }
+    error (_("Argument to positive operation not a number."));
 }
 
 struct value *
@@ -1663,10 +1652,7 @@ value_neg (struct value *arg1)
       return val;
     }
   else
-    {
-      error (_("Argument to negate operation not a number."));
-      return 0;			/* For lint -- never reached.  */
-    }
+    error (_("Argument to negate operation not a number."));
 }
 
 struct value *

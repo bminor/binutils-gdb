@@ -2777,7 +2777,6 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
     default:
       error (_("Value can't be converted to integer."));
     }
-  return 0;			/* Placate lint.  */
 }
 
 /* Unpack raw data (copied from debugee, target byte order) at VALADDR

@@ -1561,7 +1561,6 @@ lookup_cmd (const char **line, struct cmd_list_element *list,
 	      }
 	  error (_("Ambiguous %scommand \"%s\": %s."), local_cmdtype,
 		 *line, ambbuf);
-	  return 0;		/* lint */
 	}
     }
   else

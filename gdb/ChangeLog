@@ -1,3 +1,11 @@
+2018-07-30  Tom Tromey  <tom@tromey.com>
+
+	* cli/cli-decode.c (lookup_cmd): Remove lint code.
+	* value.c (unpack_long): Remove lint code.
+	* valops.c (value_ind): Remove lint code.
+	* valarith.c (value_x_binop, value_x_unop, value_equal)
+	(value_pos): Remove lint code.
+
 2018-07-28  Tom de Vries  <tdevries@suse.de>
 
 	* eval.c (evaluate_subexp_for_sizeof): Interpret size of dynamic type
