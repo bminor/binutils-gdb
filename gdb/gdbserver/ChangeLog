@@ -1,3 +1,14 @@
+2018-11-29  Tom Tromey  <tom@tromey.com>
+
+	* win32-low.c (win32_join): Take pid, not process.
+	* target.h (struct target_ops) <join>: Change argument type.
+	(join_inferior): Change argument name.
+	* spu-low.c (spu_join): Take pid, not process.
+	* server.c (handle_detach): Preserve pid before destroying
+	process.
+	* lynx-low.c (lynx_join): Take pid, not process.
+	* linux-low.c (linux_join): Take pid, not process.
+
 2018-11-23  Alan Hayward  <alan.hayward@arm.com>
 
 	* linux-aarch64-low.c (aarch64_cannot_store_register): Remove.

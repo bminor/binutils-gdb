@@ -1255,11 +1255,15 @@ handle_detach (char *own_buf)
 
   fprintf (stderr, "Detaching from process %d\n", process->pid);
   stop_tracing ();
+
+  /* We'll need this after PROCESS has been destroyed.  */
+  int pid = process->pid;
+
   if (detach_inferior (process) != 0)
     write_enn (own_buf);
   else
     {
-      discard_queued_stop_replies (ptid_t (process->pid));
+      discard_queued_stop_replies (ptid_t (pid));
       write_ok (own_buf);
 
       if (extended_protocol || target_running ())
@@ -1269,7 +1273,7 @@ handle_detach (char *own_buf)
 	     and instead treat this like a normal program exit.  */
 	  cs.last_status.kind = TARGET_WAITKIND_EXITED;
 	  cs.last_status.value.integer = 0;
-	  cs.last_ptid = ptid_t (process->pid);
+	  cs.last_ptid = ptid_t (pid);
 
 	  current_thread = NULL;
 	}
@@ -1281,7 +1285,7 @@ handle_detach (char *own_buf)
 	  /* If we are attached, then we can exit.  Otherwise, we
 	     need to hang around doing nothing, until the child is
 	     gone.  */
-	  join_inferior (process);
+	  join_inferior (pid);
 	  exit (0);
 	}
     }

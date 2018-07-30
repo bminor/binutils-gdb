@@ -1670,12 +1670,12 @@ linux_mourn (struct process_info *process)
 }
 
 static void
-linux_join (process_info *proc)
+linux_join (int pid)
 {
   int status, ret;
 
   do {
-    ret = my_waitpid (proc->pid, &status, 0);
+    ret = my_waitpid (pid, &status, 0);
     if (WIFEXITED (status) || WIFSIGNALED (status))
       break;
   } while (ret != -1 || errno != ECHILD);

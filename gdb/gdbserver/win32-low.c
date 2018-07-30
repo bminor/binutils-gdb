@@ -873,9 +873,9 @@ win32_mourn (struct process_info *process)
 /* Implementation of target_ops::join.  */
 
 static void
-win32_join (process_info *proc)
+win32_join (int pid)
 {
-  HANDLE h = OpenProcess (PROCESS_ALL_ACCESS, FALSE, proc->pid);
+  HANDLE h = OpenProcess (PROCESS_ALL_ACCESS, FALSE, pid);
   if (h != NULL)
     {
       WaitForSingleObject (h, INFINITE);

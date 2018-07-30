@@ -562,7 +562,7 @@ lynx_mourn (struct process_info *proc)
 /* Implement the join target_ops method.  */
 
 static void
-lynx_join (process_info *proc)
+lynx_join (int pid)
 {
   /* The PTRACE_DETACH is sufficient to detach from the process.
      So no need to do anything extra.  */

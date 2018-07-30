@@ -103,9 +103,9 @@ struct target_ops
 
   void (*mourn) (struct process_info *proc);
 
-  /* Wait for process PROC to exit.  */
+  /* Wait for process PID to exit.  */
 
-  void (*join) (process_info *proc);
+  void (*join) (int pid);
 
   /* Return 1 iff the thread with process ID PID is alive.  */
 
@@ -530,8 +530,8 @@ int kill_inferior (process_info *proc);
 #define store_inferior_registers(regcache, regno) \
   (*the_target->store_registers) (regcache, regno)
 
-#define join_inferior(proc) \
-  (*the_target->join) (proc)
+#define join_inferior(pid) \
+  (*the_target->join) (pid)
 
 #define target_supports_non_stop() \
   (the_target->supports_non_stop ? (*the_target->supports_non_stop ) () : 0)

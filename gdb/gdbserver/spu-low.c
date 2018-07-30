@@ -362,12 +362,12 @@ spu_mourn (struct process_info *process)
 }
 
 static void
-spu_join (process_info *proc)
+spu_join (int pid)
 {
   int status, ret;
 
   do {
-    ret = waitpid (proc->pid, &status, 0);
+    ret = waitpid (pid, &status, 0);
     if (WIFEXITED (status) || WIFSIGNALED (status))
       break;
   } while (ret != -1 || errno != ECHILD);
