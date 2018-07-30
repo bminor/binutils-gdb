@@ -326,7 +326,7 @@ proc gdbserver_start { options arguments } {
 		    continue
 		}
 	    }
-	    -re ".*: cannot resolve name: \(No address associated with hostname|Name or service not known\)\r\n" {
+	    -re ".*: cannot resolve name: .*\r\n" {
 		error "gdbserver cannot resolve name."
 	    }
 	    timeout {

@@ -1,3 +1,8 @@
+2018-07-30  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* lib/gdbserver-support.exp (gdbserver_start): Match any kind of
+	error after "cannot resolve name" string.
+
 2018-07-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.trace/tspeed.exp: Only call gdb_load_shlib after gdb has
