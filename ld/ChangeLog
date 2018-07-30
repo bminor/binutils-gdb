@@ -1,3 +1,8 @@
+2018-07-30  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/elf.sc: Place .gnu.build.attributes sections with
+	other read-only sections.
+
 2018-07-27  John Darrington  <john@darrington.wattle.id.au>
 
 	* scripttempl/elfm9s12z.sc: Put input sections called .common
