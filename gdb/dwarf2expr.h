@@ -221,6 +221,9 @@ struct dwarf_expr_context
      subroutine.  */
   virtual void dwarf_call (cu_offset die_cu_off) = 0;
 
+  /* Execute "variable value" operation on the DIE at SECT_OFF.  */
+  virtual struct value *dwarf_variable_value (sect_offset sect_off) = 0;
+
   /* Return the base type given by the indicated DIE at DIE_CU_OFF.
      This can throw an exception if the DIE is invalid or does not
      represent a base type.  SIZE is non-zero if this function should

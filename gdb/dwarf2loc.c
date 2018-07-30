@@ -61,6 +61,12 @@ static struct call_site_parameter *dwarf_expr_reg_to_entry_parameter
      union call_site_parameter_u kind_u,
      struct dwarf2_per_cu_data **per_cu_return);
 
+static struct value *indirect_synthetic_pointer
+  (sect_offset die, LONGEST byte_offset,
+   struct dwarf2_per_cu_data *per_cu,
+   struct frame_info *frame,
+   struct type *type);
+
 /* Until these have formal names, we define these here.
    ref: http://gcc.gnu.org/wiki/DebugFission
    Each entry in .debug_loc.dwo begins with a byte that describes the entry,
@@ -546,6 +552,30 @@ per_cu_dwarf_call (struct dwarf_expr_context *ctx, cu_offset die_offset,
   ctx->eval (block.data, block.size);
 }
 
+/* Given context CTX, section offset SECT_OFF, and compilation unit
+   data PER_CU, execute the "variable value" operation on the DIE
+   found at SECT_OFF.  */
+
+static struct value *
+sect_variable_value (struct dwarf_expr_context *ctx, sect_offset sect_off,
+		     struct dwarf2_per_cu_data *per_cu)
+{
+  struct type *die_type = dwarf2_fetch_die_type_sect_off (sect_off, per_cu);
+
+  if (die_type == NULL)
+    error (_("Bad DW_OP_GNU_variable_value DIE."));
+
+  /* Note: Things still work when the following test is removed.  This
+     test and error is here to conform to the proposed specification.  */
+  if (TYPE_CODE (die_type) != TYPE_CODE_INT
+      && TYPE_CODE (die_type) != TYPE_CODE_PTR)
+    error (_("Type of DW_OP_GNU_variable_value DIE must be an integer or pointer."));
+
+  struct type *type = lookup_pointer_type (die_type);
+  struct frame_info *frame = get_selected_frame (_("No frame selected."));
+  return indirect_synthetic_pointer (sect_off, 0, per_cu, frame, type);
+}
+
 class dwarf_evaluate_loc_desc : public dwarf_expr_context
 {
  public:
@@ -585,6 +615,14 @@ class dwarf_evaluate_loc_desc : public dwarf_expr_context
   void dwarf_call (cu_offset die_offset) override
   {
     per_cu_dwarf_call (this, die_offset, per_cu);
+  }
+
+  /* Helper interface of sect_variable_value for
+     dwarf2_evaluate_loc_desc.  */
+
+  struct value *dwarf_variable_value (sect_offset sect_off) override
+  {
+    return sect_variable_value (this, sect_off, per_cu);
   }
 
   struct type *get_base_type (cu_offset die_offset, int size) override
@@ -2815,6 +2853,14 @@ class symbol_needs_eval_context : public dwarf_expr_context
     per_cu_dwarf_call (this, die_offset, per_cu);
   }
 
+  /* Helper interface of sect_variable_value for
+     dwarf2_loc_desc_get_symbol_read_needs.  */
+
+  struct value *dwarf_variable_value (sect_offset sect_off) override
+  {
+    return sect_variable_value (this, sect_off, per_cu);
+  }
+
   /* DW_OP_entry_value accesses require a caller, therefore a
      frame.  */
 
@@ -3655,6 +3701,9 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	case DW_OP_call_ref:
 	  unimplemented (op);
 
+	case DW_OP_GNU_variable_value:
+	  unimplemented (op);
+
 	default:
 	  unimplemented (op);
 	}
@@ -4279,6 +4328,13 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	  data = safe_read_uleb128 (data, end, &ul);
 	  ul = dwarf2_read_addr_index (per_cu, ul);
 	  fprintf_filtered (stream, " %s", pulongest (ul));
+	  break;
+
+	case DW_OP_GNU_variable_value:
+	  ul = extract_unsigned_integer (data, offset_size,
+					 gdbarch_byte_order (arch));
+	  data += offset_size;
+	  fprintf_filtered (stream, " offset %s", phex_nz (ul, offset_size));
 	  break;
 	}
 

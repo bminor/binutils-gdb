@@ -1259,6 +1259,17 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    this->dwarf_call (cu_off);
 	  }
 	  goto no_push;
+
+	case DW_OP_GNU_variable_value:
+	  {
+	    sect_offset sect_off
+	      = (sect_offset) extract_unsigned_integer (op_ptr,
+	                                                this->ref_addr_size,
+							byte_order);
+	    op_ptr += this->ref_addr_size;
+	    result_val = this->dwarf_variable_value (sect_off);
+	  }
+	  break;
 	
 	case DW_OP_entry_value:
 	case DW_OP_GNU_entry_value:
