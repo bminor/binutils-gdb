@@ -1575,6 +1575,25 @@ decode_location_expression (unsigned char * data,
 	  data += bytes_read;
 	  printf ("DW_OP_GNU_const_index <0x%s>", dwarf_vmatoa ("x", uvalue));
 	  break;
+	case DW_OP_GNU_variable_value:
+	  /* FIXME: Strictly speaking for 64-bit DWARF3 files
+	     this ought to be an 8-byte wide computation.  */
+	  if (dwarf_version == -1)
+	    {
+	      printf (_("(DW_OP_GNU_variable_value in frame info)"));
+	      /* No way to tell where the next op is, so just bail.  */
+	      return need_frame_base;
+	    }
+	  if (dwarf_version == 2)
+	    {
+	      SAFE_BYTE_GET_AND_INC (uvalue, data, pointer_size, end);
+	    }
+	  else
+	    {
+	      SAFE_BYTE_GET_AND_INC (uvalue, data, offset_size, end);
+	    }
+	  printf ("DW_OP_GNU_variable_value: <0x%s>", dwarf_vmatoa ("x", uvalue));
+	  break;
 
 	  /* HP extensions.  */
 	case DW_OP_HP_is_value:

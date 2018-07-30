@@ -1,3 +1,8 @@
+2018-08-08  Kevin Buettner  <kevinb@redhat.com>
+
+    	* dwarf.c (decode_location_expresion): Add case for
+    	DW_OP_GNU_variable_value.
+
 2018-08-06  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* readelf.c (display_arc_attribute): Print Tag_ARC_ATR_version.
