@@ -1,3 +1,10 @@
+2018-07-30  Nick Clifton  <nickc@redhat.com>
+
+	PR 22706
+	* elf32-sh.c (sh_elf_relocate_section): When processing
+	translation relocs, fail if the relocation offset is too small.
+	Replace BFD_ASSERTs with more helpful error messages.
+
 2018-07-30  Andrew Jenner  <andrew@codesourcery.com>
 
 	* Makefile.am (ALL_MACHINES, ALL_MACHINES_CFILES): Add C-SKY.

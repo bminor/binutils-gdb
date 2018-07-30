@@ -4694,7 +4694,15 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		       1: .long x@TPOFF; 2: .long __tls_get_addr@PLT; 3:.  */
 
 		  offset = rel->r_offset;
-		  BFD_ASSERT (offset >= 16);
+		  if (offset < 16)
+		    {
+		      _bfd_error_handler
+			/* xgettext:c-format */
+			(_("%pB(%pA): offset in relocation for GD->LE translation is too small: %#" PRIx64),
+			 input_bfd, input_section, (uint64_t) offset);
+		      return FALSE;
+		    }
+
 		  /* Size of GD instructions is 16 or 18.  */
 		  offset -= 16;
 		  insn = bfd_get_16 (input_bfd, contents + offset + 0);
@@ -4705,17 +4713,47 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		      insn = bfd_get_16 (input_bfd, contents + offset + 0);
 		    }
 
-		  BFD_ASSERT ((insn & 0xff00) == 0xd400);
+		  if ((insn & 0xff00) != 0xd400)
+		    _bfd_error_handler
+		      /* xgettext:c-format */  /* The backslash is to prevent bogus trigraph detection.  */
+		      (_("%pB(%pA+%#" PRIx64 "): unexpected instruction %#04X (expected 0xd4?\?)"),
+		       input_bfd, input_section, (uint64_t) offset, (int) insn);
+
 		  insn = bfd_get_16 (input_bfd, contents + offset + 2);
-		  BFD_ASSERT ((insn & 0xff00) == 0xc700);
+
+		  if ((insn & 0xff00) != 0xc700)
+		    _bfd_error_handler
+		      /* xgettext:c-format */
+		      (_("%pB(%pA+%#" PRIx64 "): unexpected instruction %#04X (expected 0xc7?\?)"),
+		       input_bfd, input_section, (uint64_t) offset, (int) insn);
+
 		  insn = bfd_get_16 (input_bfd, contents + offset + 4);
-		  BFD_ASSERT ((insn & 0xff00) == 0xd100);
+		  if ((insn & 0xff00) != 0xd100)
+		    _bfd_error_handler
+		      /* xgettext:c-format */
+		      (_("%pB(%pA+%#" PRIx64 "): unexpected instruction %#04X (expected 0xd1?\?)"),
+		       input_bfd, input_section, (uint64_t) offset, (int) insn);
+
 		  insn = bfd_get_16 (input_bfd, contents + offset + 6);
-		  BFD_ASSERT (insn == 0x310c);
+		  if (insn != 0x310c)
+		    _bfd_error_handler
+		      /* xgettext:c-format */
+		      (_("%pB(%pA+%#" PRIx64 "): unexpected instruction %#04X (expected 0x310c)"),
+		       input_bfd, input_section, (uint64_t) offset, (int) insn);
+
 		  insn = bfd_get_16 (input_bfd, contents + offset + 8);
-		  BFD_ASSERT (insn == 0x410b);
+		  if (insn != 0x410b)
+		    _bfd_error_handler
+		      /* xgettext:c-format */
+		      (_("%pB(%pA+%#" PRIx64 "): unexpected instruction %#04X (expected 0x410b)"),
+		       input_bfd, input_section, (uint64_t) offset, (int) insn);
+
 		  insn = bfd_get_16 (input_bfd, contents + offset + 10);
-		  BFD_ASSERT (insn == 0x34cc);
+		  if (insn != 0x34cc)
+		    _bfd_error_handler
+		      /* xgettext:c-format */
+		      (_("%pB(%pA+%#" PRIx64 "): unexpected instruction %#04X (expected 0x34cc)"),
+		       input_bfd, input_section, (uint64_t) offset, (int) insn);
 
 		  bfd_put_16 (output_bfd, 0x0012, contents + offset + 2);
 		  bfd_put_16 (output_bfd, 0x304c, contents + offset + 4);
@@ -4728,14 +4766,32 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  int target;
 
 		  /* IE->LE transition:
-		     mov.l 1f,r0; stc gbr,rN; mov.l @(r0,r12),rM;
-		     bra 2f; add ...; .align 2; 1: x@GOTTPOFF; 2:
+		         mov.l 1f,r0;
+		         stc gbr,rN;
+		         mov.l @(r0,r12),rM;
+		         bra 2f;
+		         add ...;
+		         .align 2;
+		       1: x@GOTTPOFF;
+		       2:
 		     We change it into:
-		     mov.l .Ln,rM; stc gbr,rN; nop; ...;
-		     1: x@TPOFF; 2:.  */
+		         mov.l .Ln,rM;
+			 stc gbr,rN;
+			 nop;
+			 ...;
+		       1: x@TPOFF;
+		       2:.  */
 
 		  offset = rel->r_offset;
-		  BFD_ASSERT (offset >= 16);
+		  if (offset < 16)
+		    {
+		      _bfd_error_handler
+			/* xgettext:c-format */
+			(_("%pB(%pA): offset in relocation for IE->LE translation is too small: %#" PRIx64),
+			 input_bfd, input_section, (uint64_t) offset);
+		      return FALSE;
+		    }
+
 		  /* Size of IE instructions is 10 or 12.  */
 		  offset -= 10;
 		  insn = bfd_get_16 (input_bfd, contents + offset + 0);
@@ -4746,12 +4802,28 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		      insn = bfd_get_16 (input_bfd, contents + offset + 0);
 		    }
 
-		  BFD_ASSERT ((insn & 0xff00) == 0xd000);
+		  if ((insn & 0xff00) != 0xd000)
+		    _bfd_error_handler
+		      /* xgettext:c-format */
+		      (_("%pB(%pA+%#" PRIx64 "): unexpected instruction %#04X (expected 0xd0??: mov.l)"),
+		       input_bfd, input_section, (uint64_t) offset, (int) insn);
+
 		  target = insn & 0x00ff;
+
 		  insn = bfd_get_16 (input_bfd, contents + offset + 2);
-		  BFD_ASSERT ((insn & 0xf0ff) == 0x0012);
+		  if ((insn & 0xf0ff) != 0x0012)
+		    _bfd_error_handler
+		      /* xgettext:c-format */
+		      (_("%pB(%pA+%#" PRIx64 "): unexpected instruction %#04X (expected 0x0?12: stc)"),
+		       input_bfd, input_section, (uint64_t) (offset + 2), (int) insn);
+
 		  insn = bfd_get_16 (input_bfd, contents + offset + 4);
-		  BFD_ASSERT ((insn & 0xf0ff) == 0x00ce);
+		  if ((insn & 0xf0ff) != 0x00ce)
+		    _bfd_error_handler
+		      /* xgettext:c-format */
+		      (_("%pB(%pA+%#" PRIx64 "): unexpected instruction %#04X (expected 0x0?ce: mov.l)"),
+		       input_bfd, input_section, (uint64_t) (offset + 4), (int) insn);
+
 		  insn = 0xd000 | (insn & 0x0f00) | target;
 		  bfd_put_16 (output_bfd, insn, contents + offset + 0);
 		  bfd_put_16 (output_bfd, 0x0009, contents + offset + 4);
@@ -4860,7 +4932,15 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		   1: .long x@TPOFF; 2:...; 3:.  */
 
 	      offset = rel->r_offset;
-	      BFD_ASSERT (offset >= 16);
+	      if (offset < 16)
+		{
+		  _bfd_error_handler
+		    /* xgettext:c-format */
+		    (_("%pB(%pA): offset in relocation for GD->IE translation is too small: %#" PRIx64),
+		     input_bfd, input_section, (uint64_t) offset);
+		  return FALSE;
+		}
+
 	      /* Size of GD instructions is 16 or 18.  */
 	      offset -= 16;
 	      insn = bfd_get_16 (input_bfd, contents + offset + 0);
@@ -4920,7 +5000,15 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		   nop; nop; bra 3f; ...; 3:.  */
 
 	      offset = rel->r_offset;
-	      BFD_ASSERT (offset >= 16);
+	      if (offset < 16)
+		{
+		  _bfd_error_handler
+		    /* xgettext:c-format */
+		    (_("%pB(%pA): offset in relocation for LD->LE translation is too small: %#" PRIx64),
+		     input_bfd, input_section, (uint64_t) offset);
+		  return FALSE;
+		}
+
 	      /* Size of LD instructions is 16 or 18.  */
 	      offset -= 16;
 	      insn = bfd_get_16 (input_bfd, contents + offset + 0);
