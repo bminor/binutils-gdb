@@ -1,3 +1,8 @@
+2018-07-30  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/elf.sc: Move the .gnu.build.attributes section to
+	after the .comment section.
+
 2018-07-30  Andrew Jenner  <andrew@codesourcery.com>
 
 	* Makefile.am (ALL_EMULATION_SOURCES): Add C-SKY emulations.
