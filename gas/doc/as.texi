@@ -306,6 +306,26 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @c Deprecated -- deliberately not documented.
 @c [@b{-h}] [@b{-H}]
 @end ifset
+@ifset CSKY
+
+@emph{Target C-SKY options:}
+   [@b{-march=@var{arch}}] [@b{-mcpu=@var{cpu}}]
+   [@b{-EL}] [@b{-mlittle-endian}] [@b{-EB}] [@b{-mbig-endian}]
+   [@b{-fpic}] [@b{-pic}]
+   [@b{-mljump}] [@b{-mno-ljump}]
+   [@b{-force2bsr}] [@b{-mforce2bsr}] [@b{-no-force2bsr}] [@b{-mno-force2bsr}]
+   [@b{-jsri2bsr}] [@b{-mjsri2bsr}] [@b{-no-jsri2bsr }] [@b{-mno-jsri2bsr}]
+   [@b{-mnolrw }] [@b{-mno-lrw}]
+   [@b{-melrw}] [@b{-mno-elrw}]
+   [@b{-mlaf }] [@b{-mliterals-after-func}]
+   [@b{-mno-laf}] [@b{-mno-literals-after-func}]
+   [@b{-mlabr}] [@b{-mliterals-after-br}]
+   [@b{-mno-labr}] [@b{-mnoliterals-after-br}]
+   [@b{-mistack}] [@b{-mno-istack}]
+   [@b{-mhard-float}] [@b{-mmp}] [@b{-mcp}] [@b{-mcache}]
+   [@b{-msecurity}] [@b{-mtrust}]
+   [@b{-mdsp}] [@b{-medsp}] [@b{-mvdsp}]
+@end ifset
 @ifset D10V
 
 @emph{Target D10V options:}
@@ -977,6 +997,25 @@ the Blackfin processor family.
 @c man begin OPTIONS
 @ifset CRIS
 See the info pages for documentation of the CRIS-specific options.
+@end ifset
+
+@ifset CSKY
+
+@ifclear man
+@xref{C-SKY Options}, for the options available when @value{AS} is
+configured for the C-SKY processor family.
+@end ifclear
+
+@ifset man
+@c man begin OPTIONS
+The following options are available when @value{AS} is configured for
+the C-SKY processor family.
+@c man end
+@c man begin INCLUDE
+@include c-csky.texi
+@c ended inside the included file
+@end ifset
+
 @end ifset
 
 @ifset D10V
@@ -7548,6 +7587,9 @@ subject, see the hardware manufacturer's manual.
 @ifset CRIS
 * CRIS-Dependent::              CRIS Dependent Features
 @end ifset
+@ifset CSKY
+* C-SKY-Dependent::             C-SKY Dependent Features
+@end ifset
 @ifset D10V
 * D10V-Dependent::              D10V Dependent Features
 @end ifset
@@ -7729,6 +7771,10 @@ subject, see the hardware manufacturer's manual.
 
 @ifset CRIS
 @include c-cris.texi
+@end ifset
+
+@ifset CSKY
+@include c-csky.texi
 @end ifset
 
 @ifset Renesas-all

@@ -1,3 +1,15 @@
+2018-07-30  Andrew Jenner  <andrew@codesourcery.com>
+
+	* Makefile.am (TARGET_LIBOPCODES_CFILES): Add csky-dis.c.
+	* Makefile.in: Regenerated.
+	* configure.ac: Add C-SKY.
+	* configure: Regenerated.
+	* csky-dis.c: New file.
+	* csky-opc.h: New file.
+	* disassemble.c (ARCH_csky): Define.
+	(disassembler, disassemble_init_for_target): Add case for ARCH_csky.
+	* disassemble.h (print_insn_csky, csky_get_disassembler): Declare.
+
 2018-07-27  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc.c (insert_sprbat): Correct function parameter and

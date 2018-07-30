@@ -529,6 +529,15 @@ DESCRIPTION
 .  bfd_arch_nfp,       {* Netronome Flow Processor *}
 .#define bfd_mach_nfp3200	0x3200
 .#define bfd_mach_nfp6000	0x6000
+.  bfd_arch_csky,      {* C-SKY.  *}
+.#define bfd_mach_ck_unknown    0
+.#define bfd_mach_ck510		1
+.#define bfd_mach_ck610		2
+.#define bfd_mach_ck801		3
+.#define bfd_mach_ck802		4
+.#define bfd_mach_ck803		5
+.#define bfd_mach_ck807		6
+.#define bfd_mach_ck810		7
 .  bfd_arch_last
 .  };
 */
@@ -583,6 +592,7 @@ extern const bfd_arch_info_type bfd_cr16_arch;
 extern const bfd_arch_info_type bfd_cr16c_arch;
 extern const bfd_arch_info_type bfd_cris_arch;
 extern const bfd_arch_info_type bfd_crx_arch;
+extern const bfd_arch_info_type bfd_csky_arch;
 extern const bfd_arch_info_type bfd_d10v_arch;
 extern const bfd_arch_info_type bfd_d30v_arch;
 extern const bfd_arch_info_type bfd_dlx_arch;
@@ -673,6 +683,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_cr16c_arch,
     &bfd_cris_arch,
     &bfd_crx_arch,
+    &bfd_csky_arch,
     &bfd_d10v_arch,
     &bfd_d30v_arch,
     &bfd_dlx_arch,

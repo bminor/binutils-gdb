@@ -1,3 +1,11 @@
+2018-07-30  Andrew Jenner  <andrew@codesourcery.com>
+
+	* readelf.c: Include elf/csky.h.
+	(guess_is_rela): Handle EM_CSKY.
+	(dump_relocations): Likewise.
+	(get_machine_name): Likewise.
+	(is_32bit_abs_reloc): Likewise.
+
 2018-07-25  Nick Clifton  <nickc@redhat.com>
 
 	* rdcoff.c (parse_coff_struct_type): Free fields array upon early

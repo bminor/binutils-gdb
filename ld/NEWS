@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the C-SKY processor series.
+
 Changes in 2.31:
 
 * Speed up direct linking with DLLs for Cygwin and Mingw targets.

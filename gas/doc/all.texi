@@ -32,6 +32,7 @@
 @set Blackfin
 @set CR16
 @set CRIS
+@set CSKY
 @set D10V
 @set D30V
 @set EPIPHANY

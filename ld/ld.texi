@@ -21,6 +21,7 @@
 @set GENERIC
 @set ARM
 @set C6X
+@set CSKY
 @set H8300
 @set HPPA
 @set M68HC11
@@ -3002,6 +3003,36 @@ executables.  If a shared library is generated with a DSBT index of 0, the
 @kindex --no-merge-exidx-entries
 The @samp{--no-merge-exidx-entries} switch disables the merging of adjacent
 exidx entries in frame unwind info.
+
+@end table
+
+@c man end
+@end ifset
+
+@ifset CSKY
+@subsection Options specific to C-SKY targets
+
+@c man begin OPTIONS
+
+@table @gcctabopt
+
+@kindex --branch-stub on C-SKY
+@item --branch-stub
+This option enables linker branch relaxation by inserting branch stub
+sections when needed to extend the range of branches.  This option is
+usually not required since C-SKY supports branch and call instructions that
+can access the full memory range and branch relaxation is normally handled by
+the compiler or assembler.
+
+@kindex --stub-group-size on C-SKY
+@item --stub-group-size=@var{N}
+This option allows finer control of linker branch stub creation.
+It sets the maximum size of a group of input sections that can
+be handled by one stub section.  A negative value of @var{N} locates
+stub sections after their branches, while a positive value allows stub
+sections to appear either before or after the branches.  Values of
+@samp{1} or @samp{-1} indicate that the
+linker should choose suitable defaults.
 
 @end table
 

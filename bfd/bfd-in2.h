@@ -1070,6 +1070,18 @@ extern bfd_boolean v850_elf_set_note
 /* MIPS ABI flags data access.  For the disassembler.  */
 struct elf_internal_abiflags_v0;
 extern struct elf_internal_abiflags_v0 *bfd_mips_elf_get_abiflags (bfd *);
+
+/* C-SKY functions.  */
+extern bfd_boolean elf32_csky_build_stubs
+  (struct bfd_link_info *);
+extern bfd_boolean elf32_csky_size_stubs
+  (bfd *, bfd *, struct bfd_link_info *, bfd_signed_vma,
+   struct bfd_section *(*) (const char*, struct bfd_section*),
+   void (*) (void));
+extern void elf32_csky_next_input_section
+  (struct bfd_link_info *, struct bfd_section *);
+extern int elf32_csky_setup_section_lists
+  (bfd *, struct bfd_link_info *);
 /* Extracted from init.c.  */
 void bfd_init (void);
 
@@ -2414,6 +2426,15 @@ enum bfd_architecture
   bfd_arch_nfp,       /* Netronome Flow Processor */
 #define bfd_mach_nfp3200       0x3200
 #define bfd_mach_nfp6000       0x6000
+  bfd_arch_csky,      /* C-SKY.  */
+#define bfd_mach_ck_unknown    0
+#define bfd_mach_ck510         1
+#define bfd_mach_ck610         2
+#define bfd_mach_ck801         3
+#define bfd_mach_ck802         4
+#define bfd_mach_ck803         5
+#define bfd_mach_ck807         6
+#define bfd_mach_ck810         7
   bfd_arch_last
   };
 
@@ -6580,6 +6601,73 @@ assembler and not (currently) written to any object files.  */
   BFD_RELOC_WASM32_CODE_POINTER,
   BFD_RELOC_WASM32_INDEX,
   BFD_RELOC_WASM32_PLT_SIG,
+
+/* C-SKY relocations.  */
+  BFD_RELOC_CKCORE_NONE,
+  BFD_RELOC_CKCORE_ADDR32,
+  BFD_RELOC_CKCORE_PCREL_IMM8BY4,
+  BFD_RELOC_CKCORE_PCREL_IMM11BY2,
+  BFD_RELOC_CKCORE_PCREL_IMM4BY2,
+  BFD_RELOC_CKCORE_PCREL32,
+  BFD_RELOC_CKCORE_PCREL_JSR_IMM11BY2,
+  BFD_RELOC_CKCORE_GNU_VTINHERIT,
+  BFD_RELOC_CKCORE_GNU_VTENTRY,
+  BFD_RELOC_CKCORE_RELATIVE,
+  BFD_RELOC_CKCORE_COPY,
+  BFD_RELOC_CKCORE_GLOB_DAT,
+  BFD_RELOC_CKCORE_JUMP_SLOT,
+  BFD_RELOC_CKCORE_GOTOFF,
+  BFD_RELOC_CKCORE_GOTPC,
+  BFD_RELOC_CKCORE_GOT32,
+  BFD_RELOC_CKCORE_PLT32,
+  BFD_RELOC_CKCORE_ADDRGOT,
+  BFD_RELOC_CKCORE_ADDRPLT,
+  BFD_RELOC_CKCORE_PCREL_IMM26BY2,
+  BFD_RELOC_CKCORE_PCREL_IMM16BY2,
+  BFD_RELOC_CKCORE_PCREL_IMM16BY4,
+  BFD_RELOC_CKCORE_PCREL_IMM10BY2,
+  BFD_RELOC_CKCORE_PCREL_IMM10BY4,
+  BFD_RELOC_CKCORE_ADDR_HI16,
+  BFD_RELOC_CKCORE_ADDR_LO16,
+  BFD_RELOC_CKCORE_GOTPC_HI16,
+  BFD_RELOC_CKCORE_GOTPC_LO16,
+  BFD_RELOC_CKCORE_GOTOFF_HI16,
+  BFD_RELOC_CKCORE_GOTOFF_LO16,
+  BFD_RELOC_CKCORE_GOT12,
+  BFD_RELOC_CKCORE_GOT_HI16,
+  BFD_RELOC_CKCORE_GOT_LO16,
+  BFD_RELOC_CKCORE_PLT12,
+  BFD_RELOC_CKCORE_PLT_HI16,
+  BFD_RELOC_CKCORE_PLT_LO16,
+  BFD_RELOC_CKCORE_ADDRGOT_HI16,
+  BFD_RELOC_CKCORE_ADDRGOT_LO16,
+  BFD_RELOC_CKCORE_ADDRPLT_HI16,
+  BFD_RELOC_CKCORE_ADDRPLT_LO16,
+  BFD_RELOC_CKCORE_PCREL_JSR_IMM26BY2,
+  BFD_RELOC_CKCORE_TOFFSET_LO16,
+  BFD_RELOC_CKCORE_DOFFSET_LO16,
+  BFD_RELOC_CKCORE_PCREL_IMM18BY2,
+  BFD_RELOC_CKCORE_DOFFSET_IMM18,
+  BFD_RELOC_CKCORE_DOFFSET_IMM18BY2,
+  BFD_RELOC_CKCORE_DOFFSET_IMM18BY4,
+  BFD_RELOC_CKCORE_GOTOFF_IMM18,
+  BFD_RELOC_CKCORE_GOT_IMM18BY4,
+  BFD_RELOC_CKCORE_PLT_IMM18BY4,
+  BFD_RELOC_CKCORE_PCREL_IMM7BY4,
+  BFD_RELOC_CKCORE_TLS_LE32,
+  BFD_RELOC_CKCORE_TLS_IE32,
+  BFD_RELOC_CKCORE_TLS_GD32,
+  BFD_RELOC_CKCORE_TLS_LDM32,
+  BFD_RELOC_CKCORE_TLS_LDO32,
+  BFD_RELOC_CKCORE_TLS_DTPMOD32,
+  BFD_RELOC_CKCORE_TLS_DTPOFF32,
+  BFD_RELOC_CKCORE_TLS_TPOFF32,
+  BFD_RELOC_CKCORE_PCREL_FLRW_IMM8BY4,
+  BFD_RELOC_CKCORE_NOJSRI,
+  BFD_RELOC_CKCORE_CALLGRAPH,
+  BFD_RELOC_CKCORE_IRELATIVE,
+  BFD_RELOC_CKCORE_PCREL_BLOOP_IMM4BY4,
+  BFD_RELOC_CKCORE_PCREL_BLOOP_IMM12BY4,
   BFD_RELOC_UNUSED };
 
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;

@@ -503,6 +503,7 @@ TARGET_LIBOPCODES_CFILES = \
 	cris-opc.c \
 	crx-dis.c \
 	crx-opc.c \
+	csky-dis.c \
 	d10v-dis.c \
 	d10v-opc.c \
 	d30v-dis.c \
@@ -907,6 +908,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cris-opc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/crx-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/crx-opc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/csky-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/d10v-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/d10v-opc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/d30v-dis.Plo@am__quote@

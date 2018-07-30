@@ -1,3 +1,8 @@
+2018-07-30  Andrew Jenner  <andrew@codesourcery.com>
+
+	* elf/common.h (EM_CSKY, EM_CSKY_OLD): Define.
+	* elf/csky.h: New file.
+
 2018-07-27  Chenghua Xu  <paul.hua.gm@gmail.com>
 	    Maciej W. Rozycki  <macro@linux-mips.org>
 

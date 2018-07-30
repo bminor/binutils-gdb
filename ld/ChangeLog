@@ -1,3 +1,18 @@
+2018-07-30  Andrew Jenner  <andrew@codesourcery.com>
+
+	* Makefile.am (ALL_EMULATION_SOURCES): Add C-SKY emulations.
+	(ecskyelf.c, ecskyelf_linux.c): New rules.
+	* Makefile.in: Regenerated.
+	* configure.tgt: Add C-SKY.
+	* emulparams/cskyelf.sh: New file.
+	* emulparams/cskyelf_linux.sh: New file.
+	* emultempl/cskyelf.em: New file.
+	* gen-doc.texi: Add C-SKY.
+	* ld.texi: Likewise.
+	(Options specific to C-SKY targets): New section.
+	* testsuite/ld-csky/*: New tests.
+	* NEWS: Mention the support.
+
 2018-07-30  Nick Clifton  <nickc@redhat.com>
 
 	* scripttempl/elf.sc: Place .gnu.build.attributes sections with

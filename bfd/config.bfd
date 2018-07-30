@@ -170,6 +170,7 @@ c54x*)		 targ_archs=bfd_tic54x_arch ;;
 cr16*)		 targ_archs=bfd_cr16_arch ;;
 crisv32)	 targ_archs=bfd_cris_arch ;;
 crx*)		 targ_archs=bfd_crx_arch ;;
+csky*)		 targ_archs=bfd_csky_arch ;;
 dlx*)		 targ_archs=bfd_dlx_arch ;;
 fido*)		 targ_archs=bfd_m68k_arch ;;
 hppa*)		 targ_archs=bfd_hppa_arch ;;
@@ -459,6 +460,11 @@ case "${targ}" in
   crx-*-elf*)
     targ_defvec=crx_elf32_vec
     targ_underscore=yes
+    ;;
+
+  csky-*-elf* | csky-*-linux* )
+    targ_defvec=csky_elf32_be_vec
+    targ_selvecs="csky_elf32_be_vec csky_elf32_le_vec"
     ;;
 
   d10v-*-*)

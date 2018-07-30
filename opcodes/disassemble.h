@@ -32,6 +32,7 @@ extern int print_insn_big_powerpc	(bfd_vma, disassemble_info *);
 extern int print_insn_big_score         (bfd_vma, disassemble_info *);
 extern int print_insn_cr16              (bfd_vma, disassemble_info *);
 extern int print_insn_crx               (bfd_vma, disassemble_info *);
+extern int print_insn_csky		(bfd_vma, disassemble_info *);
 extern int print_insn_d10v		(bfd_vma, disassemble_info *);
 extern int print_insn_d30v		(bfd_vma, disassemble_info *);
 extern int print_insn_dlx		(bfd_vma, disassemble_info *);
@@ -100,5 +101,6 @@ extern int print_insn_z80		(bfd_vma, disassemble_info *);
 extern int print_insn_z8001		(bfd_vma, disassemble_info *);
 extern int print_insn_z8002		(bfd_vma, disassemble_info *);
 
+extern disassembler_ftype csky_get_disassembler (bfd *);
 extern disassembler_ftype rl78_get_disassembler (bfd *);
 #endif /* DISASSEMBLE_H */

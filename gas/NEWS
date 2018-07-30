@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the C-SKY processor series.
+
 * Add support for the MIPS Loongson MultiMedia extensions Instructions (MMI)
   ASE.
 

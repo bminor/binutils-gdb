@@ -112,6 +112,7 @@ TARGET_LIBOPCODES_CFILES = \
 	cris-opc.c \
 	crx-dis.c \
 	crx-opc.c \
+	csky-dis.c \
 	d10v-dis.c \
 	d10v-opc.c \
 	d30v-dis.c \

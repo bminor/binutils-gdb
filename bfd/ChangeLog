@@ -1,3 +1,28 @@
+2018-07-30  Andrew Jenner  <andrew@codesourcery.com>
+
+	* Makefile.am (ALL_MACHINES, ALL_MACHINES_CFILES): Add C-SKY.
+	(BFD32_BACKENDS, BFD_BACKENDS_CFILES): Likewise.
+	* Makefile.in: Regenerated.
+	* archures.c (enum bfd_architecture): Add bfd_arch_csky and
+	related bfd_mach defines.
+	(bfd_csky_arch): Declare.
+	(bfd_archures_list): Add C-SKY.
+	* bfd-in.h (elf32_csky_build_stubs): Declare.
+	(elf32_csky_size_stubs): Declare.
+	(elf32_csky_next_input_section: Declare.
+	(elf32_csky_setup_section_lists): Declare.
+	* bfd-in2.h: Regenerated.
+	* config.bfd: Add C-SKY.
+	* configure.ac: Likewise.
+	* configure: Regenerated.
+	* cpu-csky.c: New file.
+	* elf-bfd.h (enum elf_target_id): Add C-SKY.
+	* elf32-csky.c: New file.
+	* libbfd.h: Regenerated.
+	* reloc.c: Add C-SKY relocations.
+	* targets.c (csky_elf32_be_vec, csky_elf32_le_vec): Declare.
+	(_bfd_target_vector): Add C-SKY target vector entries.
+
 2018-07-27  John Darrington  <john@darrington.wattle.id.au>
 
 	* elf32-s12z.c (ELF_TARGET_ID): Don't define.

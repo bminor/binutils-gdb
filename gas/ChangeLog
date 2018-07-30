@@ -1,3 +1,24 @@
+2018-07-30  Andrew Jenner  <andrew@codesourcery.com>
+
+	* Makefile.am (TARGET_CPU_CFILES): Add entry for C-SKY.
+	(TARGET_CPU_HFILES, TARGET_ENV_HFILES): Likewise.
+	* Makefile.in: Regenerated.
+	* config/tc-csky.c: New file.
+	* config/tc-csky.h: New file.
+	* config/te-csky_abiv1.h: New file.
+	* config/te-csky_abiv1_linux.h: New file.
+	* config/te-csky_abiv2.h: New file.
+	* config/te-csky_abiv2_linux.h: New file.
+	* configure.tgt: Add C-SKY.
+	* doc/Makefile.am (CPU_DOCS): Add entry for C-SKY.
+	* doc/Makefile.in: Regenerated.
+	* doc/all.texi: Set CSKY feature.
+	* doc/as.texi (Overview): Add C-SKY options.
+	(Machine Dependencies): Likewise.
+	* doc/c-csky.texi: New file.
+	* testsuite/gas/csky/*: New test cases.
+	* NEWS: Mention the support.
+
 2018-07-29  John David Anglin  <danglin@gcc.gnu.org>
 
 	* config/tc-hppa.c: Include "struc-symbol.h".

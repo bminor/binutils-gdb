@@ -33,6 +33,7 @@
 #define ARCH_cr16
 #define ARCH_cris
 #define ARCH_crx
+#define ARCH_csky
 #define ARCH_d10v
 #define ARCH_d30v
 #define ARCH_dlx
@@ -164,6 +165,12 @@ disassembler (enum bfd_architecture a,
       disassemble = print_insn_crx;
       break;
 #endif
+#ifdef ARCH_csky
+    case bfd_arch_csky:
+      disassemble = csky_get_disassembler (abfd);
+      break;
+#endif
+
 #ifdef ARCH_d10v
     case bfd_arch_d10v:
       disassemble = print_insn_d10v;
@@ -590,6 +597,13 @@ disassemble_init_for_target (struct disassemble_info * info)
       info->disassembler_needs_relocs = TRUE;
       break;
 #endif
+#ifdef ARCH_csky
+    case bfd_arch_csky:
+      info->symbol_is_valid = csky_symbol_is_valid;
+      info->disassembler_needs_relocs = TRUE;
+      break;
+#endif
+
 #ifdef ARCH_ia64
     case bfd_arch_ia64:
       info->skip_zeroes = 16;

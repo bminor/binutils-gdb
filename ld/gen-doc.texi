@@ -8,6 +8,7 @@
 @c 2. Specific target machines
 @set ARM
 @set C6X
+@set CSKY
 @set H8300
 @set HPPA
 @set I960

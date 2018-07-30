@@ -54,6 +54,7 @@ CPU_DOCS = \
 	c-bfin.texi \
 	c-cr16.texi \
 	c-cris.texi \
+	c-csky.texi \
 	c-d10v.texi \
 	c-epiphany.texi \
 	c-h8300.texi \
