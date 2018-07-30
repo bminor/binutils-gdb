@@ -1,3 +1,9 @@
+2018-07-30  Jim Wilson  <jimw@sifive.com>
+
+	* riscv-dis.c (riscv_disassemble_insn): Set insn_type and data_size
+	fields.
+	* riscv-opc.c (riscv_opcodes): Use new INSN_* flags to annotate insns.
+
 2018-07-30  Andrew Jenner  <andrew@codesourcery.com>
 
 	* Makefile.am (TARGET_LIBOPCODES_CFILES): Add csky-dis.c.

@@ -1,3 +1,9 @@
+2018-07-30  Jim Wilson  <jimw@sifive.com>
+
+	* opcode/riscv.h (INSN_TYPE, INSN_BRANCH, INSN_CONDBRANCH, INSN_JSR)
+	(INSN_DREF, INSN_DATA_SIZE, INSN_DATA_SIZE_SHIFT, INSN_1_BYTE)
+	(INSN_2_BYTE, INSN_4_BYTE, INSN_8_BYTE, INSN_16_BYTE): New.
+
 2018-07-30  Andrew Jenner  <andrew@codesourcery.com>
 
 	* elf/common.h (EM_CSKY, EM_CSKY_OLD): Define.

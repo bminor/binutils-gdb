@@ -312,6 +312,32 @@ struct riscv_opcode
 
 /* Instruction is a simple alias (e.g. "mv" for "addi").  */
 #define	INSN_ALIAS		0x00000001
+
+/* These are for setting insn_info fields.
+
+   Nonbranch is the default.  Noninsn is used only if there is no match.
+   There are no condjsr or dref2 instructions.  So that leaves condbranch,
+   branch, jsr, and dref that we need to handle here, encoded in 3 bits.  */
+#define INSN_TYPE		0x0000000e
+
+/* Instruction is an unconditional branch.  */
+#define INSN_BRANCH		0x00000002
+/* Instruction is a conditional branch.  */
+#define INSN_CONDBRANCH		0x00000004
+/* Instruction is a jump to subroutine.  */
+#define INSN_JSR		0x00000006
+/* Instruction is a data reference.  */
+#define INSN_DREF		0x00000008
+
+/* We have 5 data reference sizes, which we can encode in 3 bits.  */
+#define INSN_DATA_SIZE		0x00000070
+#define INSN_DATA_SIZE_SHIFT	4
+#define INSN_1_BYTE		0x00000010
+#define INSN_2_BYTE		0x00000020
+#define INSN_4_BYTE		0x00000030
+#define INSN_8_BYTE		0x00000040
+#define INSN_16_BYTE		0x00000050
+
 /* Instruction is actually a macro.  It should be ignored by the
    disassembler, and requires special treatment by the assembler.  */
 #define INSN_MACRO		0xffffffff

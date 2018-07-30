@@ -446,6 +446,32 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
 	      pd->print_addr = -1;
 	    }
 
+	  /* Finish filling out insn_info fields.  */
+	  switch (op->pinfo & INSN_TYPE)
+	    {
+	    case INSN_BRANCH:
+	      info->insn_type = dis_branch;
+	      break;
+	    case INSN_CONDBRANCH:
+	      info->insn_type = dis_condbranch;
+	      break;
+	    case INSN_JSR:
+	      info->insn_type = dis_jsr;
+	      break;
+	    case INSN_DREF:
+	      info->insn_type = dis_dref;
+	      break;
+	    default:
+	      break;
+	    }
+
+	  if (op->pinfo & INSN_DATA_SIZE)
+	    {
+	      int size = ((op->pinfo & INSN_DATA_SIZE)
+			  >> INSN_DATA_SIZE_SHIFT);
+	      info->data_size = 1 << (size - 1);
+	    }
+
 	  return insnlen;
 	}
     }
