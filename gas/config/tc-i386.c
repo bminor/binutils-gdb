@@ -10376,7 +10376,7 @@ parse_real_register (char *reg_string, char **end_op)
      mode, and require EVEX encoding.  */
   if (r->reg_flags & RegVRex)
     {
-      if (!cpu_arch_flags.bitfield.cpuvrex
+      if (!cpu_arch_flags.bitfield.cpuavx512f
 	  || flag_code != CODE_64BIT)
 	return (const reg_entry *) NULL;
 

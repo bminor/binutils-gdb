@@ -174,8 +174,6 @@ enum
   CpuSMAP,
   /* SHA instructions required.  */
   CpuSHA,
-  /* VREX support required  */
-  CpuVREX,
   /* CLFLUSHOPT instruction required */
   CpuClflushOpt,
   /* XSAVES/XRSTORS instruction required */
@@ -329,7 +327,6 @@ typedef union i386_cpu_flags
       unsigned int cpuprfchw:1;
       unsigned int cpusmap:1;
       unsigned int cpusha:1;
-      unsigned int cpuvrex:1;
       unsigned int cpuclflushopt:1;
       unsigned int cpuxsaves:1;
       unsigned int cpuxsavec:1;

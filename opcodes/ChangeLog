@@ -1,3 +1,11 @@
+2018-07-31  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (cpu_flag_init): Drop CpuVREX uses.
+	(cpu_flags): Drop CpuVREX.
+	* i386-opc.h (CpuVREX): Delete.
+	(union i386_cpu_flags): Remove cpuvrex.
+	* i386-init.h, i386-tbl.h: Re-generate.
+
 2018-07-30  Jim Wilson  <jimw@sifive.com>
 
 	* riscv-dis.c (riscv_disassemble_insn): Set insn_type and data_size
