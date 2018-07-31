@@ -948,6 +948,11 @@ varobj_get_path_expr_parent (const struct varobj *var)
   while (!is_root_p (parent) && !is_path_expr_parent (parent))
     parent = parent->parent;
 
+  /* Computation of full rooted expression for children of dynamic
+     varobjs is not supported.  */
+  if (varobj_is_dynamic_p (parent))
+    error (_("Invalid variable object (child of a dynamic varobj)"));
+
   return parent;
 }
 

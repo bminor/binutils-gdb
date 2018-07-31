@@ -1,3 +1,9 @@
+2018-07-31  Jan Vrany  <jan.vrany@fit.cvut.cz>
+
+	* gdb.python/py-mi-var-info-path-expression.c: New file.
+	* gdb.python/py-mi-var-info-path-expression.py: New file.
+	* gdb.python/py-mi-var-info-path-expression.exp: New file.
+
 2018-07-30  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* lib/gdbserver-support.exp (gdbserver_start): Match any kind of
