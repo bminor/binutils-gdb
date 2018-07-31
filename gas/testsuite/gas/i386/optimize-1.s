@@ -66,3 +66,9 @@ _start:
 	vpsubq %ymm1, %ymm1, %ymm5{z}{%k7}
 	vpsubq %zmm1, %zmm1, %zmm5
 	vpsubq %ymm1, %ymm1, %ymm5
+
+	kxord %k1, %k1, %k5
+	kxorq %k1, %k1, %k5
+
+	kandnd %k1, %k1, %k5
+	kandnq %k1, %k1, %k5

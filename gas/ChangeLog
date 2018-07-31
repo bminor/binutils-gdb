@@ -1,5 +1,14 @@
 2018-07-31  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (optimize_encoding): Also handle kandnd,
+	kandnq, kxord, and kxorq.
+	* testsuite/gas/i386/optimize-1.s: Add kandn and kxor tests.
+	* testsuite/gas/i386/optimize-1.d,
+	testsuite/gas/i386/optimize-4.d,
+	testsuite/gas/i386/optimize-5.d: Adjust expectations.
+
+2018-07-31  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (check_VecOperands): Convert masking handling
 	to switch(), to deal with DYNAMIC_MASKING.
 

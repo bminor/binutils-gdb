@@ -1,5 +1,10 @@
 2018-07-31  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (kandnd, kandnq, kxord, kxorq): Add Optimize.
+	* i386-init.h, i386-tbl.h: Re-generate.
+
+2018-07-31  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.h (ZEROING_MASKING) Rename to ...
 	(DYNAMIC_MASKING): ... this. Adjust comment.
 	* i386-opc.tbl (MaskingMorZ): Define.

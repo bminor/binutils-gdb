@@ -3942,7 +3942,11 @@ optimize_encoding (void)
 		|| i.tm.base_opcode == 0x66f8
 		|| i.tm.base_opcode == 0x66f9
 		|| i.tm.base_opcode == 0x66fa
-		|| i.tm.base_opcode == 0x66fb)
+		|| i.tm.base_opcode == 0x66fb
+		|| i.tm.base_opcode == 0x42
+		|| i.tm.base_opcode == 0x6642
+		|| i.tm.base_opcode == 0x47
+		|| i.tm.base_opcode == 0x6647)
 	       && i.tm.extension_opcode == None))
     {
       /* Optimize: -O2:
@@ -3973,6 +3977,12 @@ optimize_encoding (void)
 	     EVEX VOP %ymmM, %ymmM, %ymmN
 	       -> VEX vpxor %xmmM, %xmmM, %xmmN (M and N < 16)
 	       -> EVEX VOP %xmmM, %xmmM, %xmmN (M || N >= 16)
+	   VOP, one of kxord and kxorq:
+	     VEX VOP %kM, %kM, %kN
+	       -> VEX kxorw %kM, %kM, %kN
+	   VOP, one of kandnd and kandnq:
+	     VEX VOP %kM, %kM, %kN
+	       -> VEX kandnw %kM, %kM, %kN
        */
       if (is_evex_encoding (&i.tm))
 	{
@@ -3984,6 +3994,11 @@ optimize_encoding (void)
 	      i.tm.opcode_modifier.vexw = VEXW0;
 	      i.tm.opcode_modifier.evex = 0;
 	    }
+	}
+      else if (i.tm.operand_types[0].bitfield.regmask)
+	{
+	  i.tm.base_opcode &= 0xff;
+	  i.tm.opcode_modifier.vexw = VEXW0;
 	}
       else
 	i.tm.opcode_modifier.vex = VEX128;

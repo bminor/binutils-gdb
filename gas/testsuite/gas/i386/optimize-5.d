@@ -58,6 +58,10 @@ Disassembly of section .text:
  +[a-f0-9]+:	c5 f1 fb e9          	vpsubq %xmm1,%xmm1,%xmm5
  +[a-f0-9]+:	c5 f1 fb e9          	vpsubq %xmm1,%xmm1,%xmm5
  +[a-f0-9]+:	c5 f1 fb e9          	vpsubq %xmm1,%xmm1,%xmm5
+ +[a-f0-9]+:	c5 f4 47 e9          	kxorw  %k1,%k1,%k5
+ +[a-f0-9]+:	c5 f4 47 e9          	kxorw  %k1,%k1,%k5
+ +[a-f0-9]+:	c5 f4 42 e9          	kandnw %k1,%k1,%k5
+ +[a-f0-9]+:	c5 f4 42 e9          	kandnw %k1,%k1,%k5
  +[a-f0-9]+:	62 f1 f5 08 55 e9    	vandnpd %xmm1,%xmm1,%xmm5
  +[a-f0-9]+:	62 f1 f5 08 55 e9    	vandnpd %xmm1,%xmm1,%xmm5
 #pass
