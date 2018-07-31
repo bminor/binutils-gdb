@@ -1,3 +1,8 @@
+2018-07-31  Joel Brobecker  <brobecker@adacore.com>
+
+	* version.in: Set GDB version number to 8.1.1.
+	* PROBLEMS: Likewise.
+
 2018-06-09  Paul Koning  <paul_koning@dell.com>
 
 	PR gdb/23252
