@@ -3478,6 +3478,13 @@ is_evex_encoding (const insn_template *t)
 	 || t->opcode_modifier.staticrounding || t->opcode_modifier.sae;
 }
 
+static INLINE bfd_boolean
+is_any_vex_encoding (const insn_template *t)
+{
+  return t->opcode_modifier.vex || t->opcode_modifier.vexopcode
+	 || is_evex_encoding (t);
+}
+
 /* Build the EVEX prefix.  */
 
 static void
@@ -3760,9 +3767,7 @@ bad_register_operand:
 
   gas_assert (i.imm_operands <= 1
 	      && (i.operands <= 2
-		  || ((i.tm.opcode_modifier.vex
-		       || i.tm.opcode_modifier.vexopcode
-		       || is_evex_encoding (&i.tm))
+		  || (is_any_vex_encoding (&i.tm)
 		      && i.operands <= 4)));
 
   exp = &im_expressions[i.imm_operands++];
@@ -4125,6 +4130,13 @@ md_assemble (char *line)
       return;
     }
 
+  /* Check for data size prefix on VEX/XOP/EVEX encoded insns.  */
+  if (i.prefix[DATA_PREFIX] && is_any_vex_encoding (&i.tm))
+    {
+      as_bad (_("data size prefix invalid with `%s'"), i.tm.name);
+      return;
+    }
+
   /* Check if HLE prefix is OK.  */
   if (i.hle_prefix && !check_hle ())
     return;
@@ -4211,8 +4223,7 @@ md_assemble (char *line)
       as_warn (_("translating to `%sp'"), i.tm.name);
     }
 
-  if (i.tm.opcode_modifier.vex || i.tm.opcode_modifier.vexopcode
-      || is_evex_encoding (&i.tm))
+  if (is_any_vex_encoding (&i.tm))
     {
       if (flag_code == CODE_16BIT)
 	{
@@ -6137,6 +6148,9 @@ process_suffix (void)
       else if (i.suffix != QWORD_MNEM_SUFFIX
 	       && !i.tm.opcode_modifier.ignoresize
 	       && !i.tm.opcode_modifier.floatmf
+	       && !i.tm.opcode_modifier.vex
+	       && !i.tm.opcode_modifier.vexopcode
+	       && !is_evex_encoding (&i.tm)
 	       && ((i.suffix == LONG_MNEM_SUFFIX) == (flag_code == CODE_16BIT)
 		   || (flag_code == CODE_64BIT
 		       && i.tm.opcode_modifier.jumpbyte)))
