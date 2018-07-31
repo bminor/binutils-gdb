@@ -7391,11 +7391,6 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-case " $WARN_CFLAGS " in
-*" -Wmissing-prototypes "*)
-  WARN_CFLAGS="$WARN_CFLAGS -Wno-missing-prototypes"
-  ;;
-esac
 
 old_LIBS="$LIBS"
 LIBS="$LIBS -ldl"
