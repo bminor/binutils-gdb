@@ -7857,7 +7857,8 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 	      int size = disp_size (n);
 	      offsetT val = i.op[n].disps->X_add_number;
 
-	      val = offset_in_range (val >> i.memshift, size);
+	      val = offset_in_range (val >> (size == 1 ? i.memshift : 0),
+				     size);
 	      p = frag_more (size);
 	      md_number_to_chars (p, val, size);
 	    }
