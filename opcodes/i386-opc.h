@@ -549,11 +549,11 @@ enum
   EVex,
 
   /* AVX512 masking support:
-	1: Zeroing-masking.
+	1: Zeroing or merging masking depending on operands.
 	2: Merging-masking.
 	3: Both zeroing and merging masking.
    */
-#define ZEROING_MASKING 1
+#define DYNAMIC_MASKING 1
 #define MERGING_MASKING 2
 #define BOTH_MASKING    3
   Masking,

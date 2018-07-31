@@ -5241,13 +5241,39 @@ check_VecOperands (const insn_template *t)
     op = MAX_OPERANDS - 1; /* Avoid uninitialized variable warning.  */
 
   /* Check if requested masking is supported.  */
-  if (i.mask
-      && (!t->opcode_modifier.masking
-	  || (i.mask->zeroing
-	      && t->opcode_modifier.masking == MERGING_MASKING)))
+  if (i.mask)
     {
-      i.error = unsupported_masking;
-      return 1;
+      switch (t->opcode_modifier.masking)
+	{
+	case BOTH_MASKING:
+	  break;
+	case MERGING_MASKING:
+	  if (i.mask->zeroing)
+	    {
+	case 0:
+	      i.error = unsupported_masking;
+	      return 1;
+	    }
+	  break;
+	case DYNAMIC_MASKING:
+	  /* Memory destinations allow only merging masking.  */
+	  if (i.mask->zeroing && i.mem_operands)
+	    {
+	      /* Find memory operand.  */
+	      for (op = 0; op < i.operands; op++)
+		if (i.types[op].bitfield.mem)
+		  break;
+	      gas_assert (op < i.operands);
+	      if (op == i.operands - 1)
+		{
+		  i.error = unsupported_masking;
+		  return 1;
+		}
+	    }
+	  break;
+	default:
+	  abort ();
+	}
     }
 
   /* Check if masking is applied to dest operand.  */

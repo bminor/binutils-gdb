@@ -1,5 +1,20 @@
 2018-07-31  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.h (ZEROING_MASKING) Rename to ...
+	(DYNAMIC_MASKING): ... this. Adjust comment.
+	* i386-opc.tbl (MaskingMorZ): Define.
+	(vcompresspd, vcompressps, vcvtps2ph, vextractf32x4,
+	vextractf32x8, vextractf64x2, vextractf64x4, vextracti32x4,
+	vextracti32x8, vextracti64x2, vextracti64x4, vmovapd, vmovaps,
+	vmovdqa32, vmovdqa64, vmovdqu8, vmovdqu16, vmovdqu32, vmovdqu64,
+	vmovupd, vmovups, vpcompressb, vpcompressw, vpcompressd,
+	vpcompressq, vpmovdb, vpmovdw, vpmovqb, vpmovqd, vpmovqw,
+	vpmovsdb, vpmovsdw, vpmovsqb, vpmovsqd, vpmovsqw, vpmovswb,
+	vpmovusdb, vpmovusdw, vpmovusqb, vpmovusqd, vpmovusqw,
+	vpmovuswb, vpmovwb): Fold AVX512 register and memory forms.
+
+2018-07-31  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl: Use element rather than vector size for AVX512*
 	scatter/gather insns.
 	* i386-tbl.h: Re-generate.
