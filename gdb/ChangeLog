@@ -1,5 +1,14 @@
 2018-07-31  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* gnulib/aclocal.m4: Re-generate.
+	* gnulib/config.in: Re-generate.
+	* gnulib/configure: Re-generate.
+	* gnulib/import/Makefile.in: Re-generate.
+	* gnulib/import/m4/gnulib-comp.m4: Re-generate.
+	* gnulib/import/m4/onceonly.m4: Re-generate.
+
+2018-07-31  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* target-descriptions.c (struct xml_test_tdesc): New.
 	(xml_tdesc): Change type to std::vector<xml_test_tdesc>.
 	(record_xml_tdesc): Update.

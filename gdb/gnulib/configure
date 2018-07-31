@@ -619,8 +619,8 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_func_list=
-ac_header_list=
+gl_func_list=
+gl_header_list=
 gl_fnmatch_required=POSIX
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
@@ -3376,62 +3376,62 @@ $as_echo "$as_me: creating cache $cache_file" >&6;}
   >$cache_file
 fi
 
-as_fn_append ac_func_list " canonicalize_file_name"
-as_fn_append ac_func_list " getcwd"
-as_fn_append ac_func_list " readlink"
-as_fn_append ac_func_list " realpath"
-as_fn_append ac_header_list " sys/param.h"
-as_fn_append ac_header_list " unistd.h"
-as_fn_append ac_func_list " _set_invalid_parameter_handler"
-as_fn_append ac_header_list " sys/socket.h"
-as_fn_append ac_func_list " fchdir"
-as_fn_append ac_header_list " dirent.h"
-as_fn_append ac_func_list " fcntl"
-as_fn_append ac_func_list " symlink"
-as_fn_append ac_func_list " fdopendir"
-as_fn_append ac_func_list " mempcpy"
-as_fn_append ac_func_list " btowc"
-as_fn_append ac_func_list " isblank"
-as_fn_append ac_func_list " iswctype"
-as_fn_append ac_func_list " mbsrtowcs"
-as_fn_append ac_func_list " wmemchr"
-as_fn_append ac_func_list " wmemcpy"
-as_fn_append ac_func_list " wmempcpy"
-as_fn_append ac_header_list " wctype.h"
+gl_func_list="$gl_func_list canonicalize_file_name"
+gl_func_list="$gl_func_list getcwd"
+gl_func_list="$gl_func_list readlink"
+gl_func_list="$gl_func_list realpath"
+gl_header_list="$gl_header_list sys/param.h"
+gl_header_list="$gl_header_list unistd.h"
+gl_func_list="$gl_func_list _set_invalid_parameter_handler"
+gl_header_list="$gl_header_list sys/socket.h"
+gl_func_list="$gl_func_list fchdir"
+gl_header_list="$gl_header_list dirent.h"
+gl_func_list="$gl_func_list fcntl"
+gl_func_list="$gl_func_list symlink"
+gl_func_list="$gl_func_list fdopendir"
+gl_func_list="$gl_func_list mempcpy"
+gl_func_list="$gl_func_list btowc"
+gl_func_list="$gl_func_list isblank"
+gl_func_list="$gl_func_list iswctype"
+gl_func_list="$gl_func_list mbsrtowcs"
+gl_func_list="$gl_func_list wmemchr"
+gl_func_list="$gl_func_list wmemcpy"
+gl_func_list="$gl_func_list wmempcpy"
+gl_header_list="$gl_header_list wctype.h"
 gl_fnmatch_required=GNU
-as_fn_append ac_header_list " sys/stat.h"
-as_fn_append ac_func_list " fstatat"
-as_fn_append ac_func_list " getdtablesize"
-as_fn_append ac_func_list " getlogin_r"
-as_fn_append ac_func_list " getprogname"
-as_fn_append ac_func_list " getexecname"
-as_fn_append ac_header_list " sys/time.h"
-as_fn_append ac_func_list " gettimeofday"
-as_fn_append ac_header_list " sys/cdefs.h"
-as_fn_append ac_func_list " getpwnam_r"
-as_fn_append ac_header_list " limits.h"
-as_fn_append ac_header_list " wchar.h"
-as_fn_append ac_header_list " stdint.h"
-as_fn_append ac_header_list " inttypes.h"
-as_fn_append ac_func_list " lstat"
-as_fn_append ac_header_list " math.h"
-as_fn_append ac_func_list " mbsinit"
-as_fn_append ac_func_list " mbrtowc"
-as_fn_append ac_header_list " sys/mman.h"
-as_fn_append ac_func_list " mprotect"
-as_fn_append ac_func_list " mkstemp"
-as_fn_append ac_func_list " openat"
-as_fn_append ac_func_list " link"
-as_fn_append ac_func_list " secure_getenv"
-as_fn_append ac_func_list " getuid"
-as_fn_append ac_func_list " geteuid"
-as_fn_append ac_func_list " getgid"
-as_fn_append ac_func_list " getegid"
-as_fn_append ac_func_list " setenv"
-as_fn_append ac_func_list " strdup"
-as_fn_append ac_func_list " pipe"
-as_fn_append ac_header_list " features.h"
-as_fn_append ac_func_list " iswcntrl"
+gl_header_list="$gl_header_list sys/stat.h"
+gl_func_list="$gl_func_list fstatat"
+gl_func_list="$gl_func_list getdtablesize"
+gl_func_list="$gl_func_list getlogin_r"
+gl_func_list="$gl_func_list getprogname"
+gl_func_list="$gl_func_list getexecname"
+gl_header_list="$gl_header_list sys/time.h"
+gl_func_list="$gl_func_list gettimeofday"
+gl_header_list="$gl_header_list sys/cdefs.h"
+gl_func_list="$gl_func_list getpwnam_r"
+gl_header_list="$gl_header_list limits.h"
+gl_header_list="$gl_header_list wchar.h"
+gl_header_list="$gl_header_list stdint.h"
+gl_header_list="$gl_header_list inttypes.h"
+gl_func_list="$gl_func_list lstat"
+gl_header_list="$gl_header_list math.h"
+gl_func_list="$gl_func_list mbsinit"
+gl_func_list="$gl_func_list mbrtowc"
+gl_header_list="$gl_header_list sys/mman.h"
+gl_func_list="$gl_func_list mprotect"
+gl_func_list="$gl_func_list mkstemp"
+gl_func_list="$gl_func_list openat"
+gl_func_list="$gl_func_list link"
+gl_func_list="$gl_func_list secure_getenv"
+gl_func_list="$gl_func_list getuid"
+gl_func_list="$gl_func_list geteuid"
+gl_func_list="$gl_func_list getgid"
+gl_func_list="$gl_func_list getegid"
+gl_func_list="$gl_func_list setenv"
+gl_func_list="$gl_func_list strdup"
+gl_func_list="$gl_func_list pipe"
+gl_header_list="$gl_header_list features.h"
+gl_func_list="$gl_func_list iswcntrl"
 # Check that the precious variables saved in the cache have kept the same
 # value.
 ac_cache_corrupted=false
@@ -6753,7 +6753,8 @@ fi
 
 
 
-  for ac_func in $ac_func_list
+
+  for ac_func in $gl_func_list
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -6764,6 +6765,14 @@ _ACEOF
 
 fi
 done
+
+
+
+
+
+
+
+
 
 
 
@@ -6809,6 +6818,15 @@ $as_echo "$gl_cv_double_slash_root" >&6; }
 $as_echo "#define DOUBLE_SLASH_IS_DISTINCT_ROOT 1" >>confdefs.h
 
   fi
+
+
+
+
+
+
+
+
+  :
 
 
 
@@ -7015,11 +7033,11 @@ $as_echo "#define FUNC_REALPATH_WORKS 1" >>confdefs.h
 
 
 
-  for ac_header in $ac_header_list
+
+  for ac_header in $gl_header_list
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default
-"
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
 if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
 #define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
@@ -7032,6 +7050,26 @@ done
 
 
 
+
+
+
+
+  :
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  :
 
 
 
@@ -7171,6 +7209,27 @@ done
 
 
 
+  :
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  :
+
+
+
 
 
   if test $ac_cv_func__set_invalid_parameter_handler = yes; then
@@ -7181,6 +7240,12 @@ $as_echo "#define HAVE_MSVC_INVALID_PARAMETER_HANDLER 1" >>confdefs.h
   else
     HAVE_MSVC_INVALID_PARAMETER_HANDLER=0
   fi
+
+
+
+
+
+
 
 
 
@@ -7326,6 +7391,15 @@ $as_echo "$gl_cv_pragma_columns" >&6; }
 
 
 
+
+
+
+
+
+
+
+
+  :
 
 
 
@@ -7846,12 +7920,10 @@ $as_echo "#define STRERROR_R_CHAR_P 1" >>confdefs.h
 fi
 
 
-  XGETTEXT_EXTRA_OPTIONS=
 
 
 
-
-ac_fn_c_check_decl "$LINENO" "fchdir" "ac_cv_have_decl_fchdir" "$ac_includes_default"
+      ac_fn_c_check_decl "$LINENO" "fchdir" "ac_cv_have_decl_fchdir" "$ac_includes_default"
 if test "x$ac_cv_have_decl_fchdir" = xyes; then :
   ac_have_decl=1
 else
@@ -7861,6 +7933,7 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_FCHDIR $ac_have_decl
 _ACEOF
+
 
 
   GNULIB_FCNTL=0;
@@ -7877,6 +7950,24 @@ _ACEOF
 
 
 
+
+
+
+
+
+
+
+
+
+
+  :
+
+
+
+
+
+
+  :
 
 
 
@@ -8051,6 +8142,12 @@ fi
 
 
 
+
+
+
+
+
+
    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mbstate_t" >&5
 $as_echo_n "checking for mbstate_t... " >&6; }
 if ${ac_cv_type_mbstate_t+:} false; then :
@@ -8093,6 +8190,30 @@ $as_echo "#define HAVE_MBSTATE_T 1" >>confdefs.h
 $as_echo "#define mbstate_t int" >>confdefs.h
 
    fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -8397,7 +8518,8 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_func_frexp_no_libm" >&5
 $as_echo "$gl_cv_func_frexp_no_libm" >&6; }
 
-ac_fn_c_check_decl "$LINENO" "alarm" "ac_cv_have_decl_alarm" "$ac_includes_default"
+
+      ac_fn_c_check_decl "$LINENO" "alarm" "ac_cv_have_decl_alarm" "$ac_includes_default"
 if test "x$ac_cv_have_decl_alarm" = xyes; then :
   ac_have_decl=1
 else
@@ -8407,6 +8529,7 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_ALARM $ac_have_decl
 _ACEOF
+
 
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether long double and double are the same" >&5
@@ -8531,6 +8654,9 @@ fi
 
 
 
+
+
+
   case "$host_os" in
     mingw*)
                         { $as_echo "$as_me:${as_lineno-$LINENO}: checking for 64-bit off_t" >&5
@@ -8580,6 +8706,12 @@ $as_echo "$gl_cv_type_off_t_64" >&6; }
 
 
 
+
+
+
+
+
+  :
 
 
 
@@ -8788,6 +8920,15 @@ _ACEOF
 
 
 
+
+
+
+  :
+
+
+
+
+
    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether getcwd (NULL, 0) allocates memory for result" >&5
 $as_echo_n "checking whether getcwd (NULL, 0) allocates memory for result... " >&6; }
 if ${gl_cv_func_getcwd_null+:} false; then :
@@ -8892,7 +9033,8 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_func_getcwd_posix_signature" >&5
 $as_echo "$gl_cv_func_getcwd_posix_signature" >&6; }
 
-ac_fn_c_check_decl "$LINENO" "getcwd" "ac_cv_have_decl_getcwd" "$ac_includes_default"
+
+      ac_fn_c_check_decl "$LINENO" "getcwd" "ac_cv_have_decl_getcwd" "$ac_includes_default"
 if test "x$ac_cv_have_decl_getcwd" = xyes; then :
   ac_have_decl=1
 else
@@ -8905,7 +9047,12 @@ _ACEOF
 
 
 
-ac_fn_c_check_decl "$LINENO" "getdtablesize" "ac_cv_have_decl_getdtablesize" "$ac_includes_default"
+
+
+
+
+
+      ac_fn_c_check_decl "$LINENO" "getdtablesize" "ac_cv_have_decl_getdtablesize" "$ac_includes_default"
 if test "x$ac_cv_have_decl_getdtablesize" = xyes; then :
   ac_have_decl=1
 else
@@ -8916,7 +9063,9 @@ cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_GETDTABLESIZE $ac_have_decl
 _ACEOF
 
-ac_fn_c_check_decl "$LINENO" "getlogin_r" "ac_cv_have_decl_getlogin_r" "$ac_includes_default"
+
+
+      ac_fn_c_check_decl "$LINENO" "getlogin_r" "ac_cv_have_decl_getlogin_r" "$ac_includes_default"
 if test "x$ac_cv_have_decl_getlogin_r" = xyes; then :
   ac_have_decl=1
 else
@@ -8929,7 +9078,12 @@ _ACEOF
 
 
 
-ac_fn_c_check_decl "$LINENO" "getlogin" "ac_cv_have_decl_getlogin" "$ac_includes_default"
+
+
+
+
+
+      ac_fn_c_check_decl "$LINENO" "getlogin" "ac_cv_have_decl_getlogin" "$ac_includes_default"
 if test "x$ac_cv_have_decl_getlogin" = xyes; then :
   ac_have_decl=1
 else
@@ -8939,6 +9093,13 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_GETLOGIN $ac_have_decl
 _ACEOF
+
+
+
+
+
+
+
 
 
 
@@ -9008,6 +9169,21 @@ _ACEOF
 
 
 
+
+
+  :
+
+
+
+
+
+
+
+
+
+
+
+  :
 
 
 
@@ -9089,6 +9265,12 @@ $as_echo "$gl_cv_next_sys_time_h" >&6; }
   if test $ac_cv_header_sys_time_h != yes; then
     HAVE_SYS_TIME_H=0
   fi
+
+
+
+
+
+  :
 
 
 
@@ -9253,6 +9435,24 @@ fi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  :
 
 
 
@@ -9497,6 +9697,12 @@ $as_echo "#define HAVE_LONG_LONG_INT 1" >>confdefs.h
 
 
 
+
+
+
+
+
+
     gl_cv_c_multiarch=no
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -9558,6 +9764,12 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
 
 
+  :
+
+
+
+
+
   if test $ac_cv_header_wchar_h = yes; then
     HAVE_WCHAR_H=1
   else
@@ -9580,6 +9792,12 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
 
 
+
+
+
+
+
+  :
 
 
 
@@ -10395,6 +10613,9 @@ fi
 
 
 
+
+
+
   GNULIB_IMAXABS=0;
   GNULIB_IMAXDIV=0;
   GNULIB_STRTOIMAX=0;
@@ -10415,9 +10636,21 @@ fi
 
 
 
+  :
 
 
 
+
+
+
+
+
+
+
+
+
+
+  :
 
 
 
@@ -11204,7 +11437,8 @@ $as_echo "#define HAVE_LANGINFO_CODESET 1" >>confdefs.h
 
   fi
 
-ac_fn_c_check_decl "$LINENO" "getc_unlocked" "ac_cv_have_decl_getc_unlocked" "$ac_includes_default"
+
+      ac_fn_c_check_decl "$LINENO" "getc_unlocked" "ac_cv_have_decl_getc_unlocked" "$ac_includes_default"
 if test "x$ac_cv_have_decl_getc_unlocked" = xyes; then :
   ac_have_decl=1
 else
@@ -11214,6 +11448,7 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_GETC_UNLOCKED $ac_have_decl
 _ACEOF
+
 
 
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether we are using the GNU C Library >= 2.1 or uClibc" >&5
@@ -11250,6 +11485,9 @@ fi
 $as_echo "$ac_cv_gnu_library_2_1" >&6; }
 
     GLIBC21="$ac_cv_gnu_library_2_1"
+
+
+
 
 
 
@@ -11364,6 +11602,9 @@ _ACEOF
 
 
 
+
+
+
   GNULIB_BTOWC=0;
   GNULIB_WCTOB=0;
   GNULIB_MBSINIT=0;
@@ -11455,6 +11696,12 @@ _ACEOF
   REPLACE_WCSNRTOMBS=0;
   REPLACE_WCWIDTH=0;
   REPLACE_WCSWIDTH=0;
+
+
+
+
+
+
 
 
 
@@ -12000,6 +12247,12 @@ $as_echo "$gt_cv_locale_fr" >&6; }
 
 
 
+
+
+
+
+
+
   GNULIB_FFSL=0;
   GNULIB_FFSLL=0;
   GNULIB_MEMCHR=0;
@@ -12139,6 +12392,18 @@ $as_echo "#define HAVE_MAP_ANONYMOUS 1" >>confdefs.h
   fi
 
 
+  :
+
+
+
+
+
+
+  :
+
+
+
+
 
 
 
@@ -12231,7 +12496,8 @@ $as_echo "$gl_cv_func_memchr_works" >&6; }
     fi
   fi
 
-ac_fn_c_check_decl "$LINENO" "memmem" "ac_cv_have_decl_memmem" "$ac_includes_default"
+
+      ac_fn_c_check_decl "$LINENO" "memmem" "ac_cv_have_decl_memmem" "$ac_includes_default"
 if test "x$ac_cv_have_decl_memmem" = xyes; then :
   ac_have_decl=1
 else
@@ -12241,6 +12507,7 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_MEMMEM $ac_have_decl
 _ACEOF
+
 
 
 
@@ -12262,6 +12529,12 @@ done
   else
     HAVE_MEMMEM=0
   fi
+
+  :
+
+
+
+
 
   if test $ac_cv_have_decl_memmem = no; then
     HAVE_DECL_MEMMEM=0
@@ -12352,7 +12625,8 @@ $as_echo "$gl_cv_func_memmem_works_always" >&6; }
   fi
   :
 
-ac_fn_c_check_decl "$LINENO" "memrchr" "ac_cv_have_decl_memrchr" "$ac_includes_default"
+
+      ac_fn_c_check_decl "$LINENO" "memrchr" "ac_cv_have_decl_memrchr" "$ac_includes_default"
 if test "x$ac_cv_have_decl_memrchr" = xyes; then :
   ac_have_decl=1
 else
@@ -12362,6 +12636,10 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_MEMRCHR $ac_have_decl
 _ACEOF
+
+
+
+
 
 
 
@@ -12401,6 +12679,9 @@ $as_echo "$gl_cv_promoted_mode_t" >&6; }
 cat >>confdefs.h <<_ACEOF
 #define PROMOTED_MODE_T $gl_cv_promoted_mode_t
 _ACEOF
+
+
+
 
 
 
@@ -12520,7 +12801,26 @@ _ACEOF
 
 
 
-ac_fn_c_check_decl "$LINENO" "setenv" "ac_cv_have_decl_setenv" "$ac_includes_default"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      ac_fn_c_check_decl "$LINENO" "setenv" "ac_cv_have_decl_setenv" "$ac_includes_default"
 if test "x$ac_cv_have_decl_setenv" = xyes; then :
   ac_have_decl=1
 else
@@ -12536,9 +12836,31 @@ _ACEOF
 
 
 
+
+
+
+
+  :
+
+
+
+
+
   if test $ac_cv_have_decl_setenv = no; then
     HAVE_DECL_SETENV=0
   fi
+
+  :
+
+
+
+
+
+
+
+
+
+  :
 
 
 
@@ -12776,7 +13098,11 @@ $as_echo "#define HAVE_WCHAR_T 1" >>confdefs.h
 
 
 
-ac_fn_c_check_decl "$LINENO" "strdup" "ac_cv_have_decl_strdup" "$ac_includes_default"
+
+
+
+
+      ac_fn_c_check_decl "$LINENO" "strdup" "ac_cv_have_decl_strdup" "$ac_includes_default"
 if test "x$ac_cv_have_decl_strdup" = xyes; then :
   ac_have_decl=1
 else
@@ -12786,6 +13112,7 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_STRDUP $ac_have_decl
 _ACEOF
+
 
 
      REPLACE_STRERROR_0=0
@@ -13042,7 +13369,8 @@ $as_echo "$gl_cv_func_strstr_works_always" >&6; }
     esac
   fi
 
-ac_fn_c_check_decl "$LINENO" "strtok_r" "ac_cv_have_decl_strtok_r" "$ac_includes_default"
+
+      ac_fn_c_check_decl "$LINENO" "strtok_r" "ac_cv_have_decl_strtok_r" "$ac_includes_default"
 if test "x$ac_cv_have_decl_strtok_r" = xyes; then :
   ac_have_decl=1
 else
@@ -13052,6 +13380,7 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_STRTOK_R $ac_have_decl
 _ACEOF
+
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for a thread-safe mkdir -p" >&5
 $as_echo_n "checking for a thread-safe mkdir -p... " >&6; }
@@ -13202,6 +13531,12 @@ $as_echo "$gl_cv_next_sys_types_h" >&6; }
       : ${GNULIB_GETTIMEOFDAY=0};
         REPLACE_GMTIME=0;
   REPLACE_LOCALTIME=0;
+
+
+
+  :
+
+
 
 
 
@@ -13412,7 +13747,11 @@ $as_echo "$gl_cv_next_time_h" >&6; }
 
 
 
-ac_fn_c_check_decl "$LINENO" "unsetenv" "ac_cv_have_decl_unsetenv" "$ac_includes_default"
+
+
+
+
+      ac_fn_c_check_decl "$LINENO" "unsetenv" "ac_cv_have_decl_unsetenv" "$ac_includes_default"
 if test "x$ac_cv_have_decl_unsetenv" = xyes; then :
   ac_have_decl=1
 else
@@ -13422,6 +13761,7 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_UNSETENV $ac_have_decl
 _ACEOF
+
 
 
             { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether <wchar.h> uses 'inline' correctly" >&5
@@ -13503,6 +13843,15 @@ Configuration aborted." "$LINENO" 5
 
 
 
+
+
+
+  :
+
+
+
+
+
   if test $ac_cv_header_features_h = yes; then
     HAVE_FEATURES_H=1
   else
@@ -13561,6 +13910,9 @@ $as_echo "#define HAVE_WINT_T 1" >>confdefs.h
   HAVE_WCTYPE_T=1;
   HAVE_WCTRANS_T=1;
   REPLACE_ISWBLANK=0;
+
+
+
 
 
 
@@ -13815,6 +14167,12 @@ $as_echo "#define GNULIB_TEST_CLOEXEC 1" >>confdefs.h
 
 
 
+  :
+
+
+
+
+
   if test $ac_cv_header_sys_socket_h != yes; then
                     for ac_header in winsock2.h
 do :
@@ -13844,6 +14202,12 @@ done
 
 
     if test $REPLACE_CLOSE = 0; then
+
+
+
+  :
+
+
 
 
 
@@ -13901,6 +14265,12 @@ done
   if test $ac_cv_func_closedir = no; then
     HAVE_CLOSEDIR=0
   fi
+
+
+
+
+  :
+
 
 
 
@@ -14093,6 +14463,12 @@ $as_echo "#define HAVE_STRUCT_DIRENT_D_TYPE 1" >>confdefs.h
 
 
 
+
+
+
+
+
+  :
 
 
 
@@ -14418,6 +14794,12 @@ $as_echo "#define DOUBLE_SLASH_IS_DISTINCT_ROOT 1" >>confdefs.h
 
 
 
+  :
+
+
+
+
+
   if test $ac_cv_func_fchdir = no; then
     HAVE_FCHDIR=0
   fi
@@ -14631,6 +15013,12 @@ done
 
 
 
+  :
+
+
+
+
+
   if test $ac_cv_func_fchdir = no; then
     HAVE_FCHDIR=0
   fi
@@ -14733,13 +15121,12 @@ $as_echo "$ac_cv_lib_error_at_line" >&6; }
   fi
 
 
-  XGETTEXT_EXTRA_OPTIONS="$XGETTEXT_EXTRA_OPTIONS --flag=error:3:c-format"
 
 
 
-  XGETTEXT_EXTRA_OPTIONS="$XGETTEXT_EXTRA_OPTIONS --flag=error_at_line:5:c-format"
 
 
+  :
 
 
 
@@ -14833,7 +15220,19 @@ $as_echo "#define GNULIB_TEST_FCHDIR 1" >>confdefs.h
 
 
 
+  :
+
+
+
+
+
   if test $ac_cv_func_fcntl = no; then
+
+
+
+  :
+
+
 
 
 
@@ -14919,6 +15318,12 @@ $as_echo "$gl_cv_func_fcntl_f_dupfd_works" >&6; }
       *)
 
 
+  :
+
+
+
+
+
   if test $ac_cv_func_fcntl = no; then
     HAVE_FCNTL=0
   else
@@ -14986,6 +15391,12 @@ $as_echo "$gl_cv_func_fcntl_f_dupfd_cloexec" >&6; }
 
 
 
+  :
+
+
+
+
+
   if test $ac_cv_func_fcntl = no; then
     HAVE_FCNTL=0
   else
@@ -14998,11 +15409,23 @@ $as_echo "$gl_cv_func_fcntl_f_dupfd_cloexec" >&6; }
 
 
 
+  :
+
+
+
+
+
   if test $ac_cv_func_fchdir = no; then
     HAVE_FCHDIR=0
   fi
 
     if test $HAVE_FCHDIR = 0; then
+
+
+
+  :
+
+
 
 
 
@@ -15187,6 +15610,12 @@ else
 fi
 
 
+  :
+
+
+
+
+
   if test $ac_cv_func_fdopendir = no; then
     HAVE_FDOPENDIR=0
   else
@@ -15283,6 +15712,12 @@ $as_echo "#define GNULIB_TEST_FDOPENDIR 1" >>confdefs.h
 cat >>confdefs.h <<_ACEOF
 #define GNULIB_FDOPENDIR 1
 _ACEOF
+
+
+
+
+  :
+
 
 
 
@@ -15724,6 +16159,39 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
+  :
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  :
+
+
+
+
 
 
   fi
@@ -15761,6 +16229,39 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_ISBLANK $ac_have_decl
 _ACEOF
+
+
+  :
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  :
+
+
 
 
 
@@ -15811,6 +16312,12 @@ $as_echo "$gl_cv_func_frexp_in_libm" >&6; }
      || test $gl_cv_func_frexp_in_libm = yes; then
     save_LIBS="$LIBS"
     LIBS="$LIBS $FREXP_LIBM"
+
+
+
+  :
+
+
 
 
 
@@ -16234,6 +16741,12 @@ $as_echo "#define GNULIB_TEST_FREXPL 1" >>confdefs.h
 
 
 
+  :
+
+
+
+
+
   if test $ac_cv_func_fchdir = no; then
     HAVE_FCHDIR=0
   fi
@@ -16276,6 +16789,12 @@ $as_echo "#define GNULIB_TEST_FSTAT 1" >>confdefs.h
 
 
 
+
+
+
+
+
+  :
 
 
 
@@ -16376,6 +16895,18 @@ $as_echo "#define GNULIB_TEST_FSTATAT 1" >>confdefs.h
       gl_cv_func_getcwd_path_max=yes
       ;;
     *)
+
+
+  :
+
+
+
+
+
+
+
+  :
+
 
 
 
@@ -16613,6 +17144,18 @@ $as_echo "$gl_cv_func_getcwd_path_max" >&6; }
 
       case "$gl_cv_func_getcwd_null" in
         *yes)
+
+
+  :
+
+
+
+
+
+
+  :
+
+
 
 
 
@@ -16894,6 +17437,18 @@ $as_echo "#define GNULIB_TEST_GETCWD 1" >>confdefs.h
 
 
 
+  :
+
+
+
+
+
+
+  :
+
+
+
+
 
   if test $ac_cv_func_getdtablesize = yes &&
      test $ac_cv_have_decl_getdtablesize = yes; then
@@ -16984,9 +17539,21 @@ $as_echo "#define GNULIB_TEST_GETDTABLESIZE 1" >>confdefs.h
 
 
 
+  :
+
+
+
+
+
   if test $ac_cv_have_decl_getlogin_r = no; then
     HAVE_DECL_GETLOGIN_R=0
   fi
+
+
+  :
+
+
+
 
 
   if test $ac_cv_func_getlogin_r = no; then
@@ -17069,6 +17636,12 @@ $as_echo "$gl_cv_func_getlogin_r_works" >&6; }
 
 
 
+  :
+
+
+
+
+
 
   fi
 
@@ -17083,6 +17656,15 @@ $as_echo "$gl_cv_func_getlogin_r_works" >&6; }
 
 
 $as_echo "#define GNULIB_TEST_GETLOGIN_R 1" >>confdefs.h
+
+
+
+
+
+  :
+
+
+
 
 
 
@@ -17179,6 +17761,12 @@ $as_echo "#define HAVE_VAR___PROGNAME 1" >>confdefs.h
 
 
 
+
+
+
+
+
+  :
 
 
 
@@ -17497,11 +18085,32 @@ fi
   gl_LIBOBJS="$gl_LIBOBJS glob.$ac_objext"
 
 
-          if test $ac_cv_header_sys_cdefs_h = yes; then
+
+  :
+
+
+
+
+
+
+
+  if test $ac_cv_header_sys_cdefs_h = yes; then
     HAVE_SYS_CDEFS_H=1
   else
     HAVE_SYS_CDEFS_H=0
   fi
+
+
+  :
+
+
+
+
+
+
+
+
+
 
 
   fi
@@ -18148,11 +18757,23 @@ _ACEOF
 
 
 
+  :
+
+
+
+
+
 
 
 
 
   LOCALCHARSET_TESTS_ENVIRONMENT="CHARSETALIASDIR=\"\$(abs_top_builddir)/$gl_source_base\""
+
+
+
+
+  :
+
 
 
 
@@ -18241,6 +18862,12 @@ $as_echo "#define GNULIB_TEST_MALLOC_POSIX 1" >>confdefs.h
 
 
 
+
+
+
+
+
+  :
 
 
 
@@ -18434,6 +19061,18 @@ fi
 
 
 
+  :
+
+
+
+
+
+
+  :
+
+
+
+
 
   if test $ac_cv_func_mbsinit = yes && test $ac_cv_func_mbrtowc = yes; then
 
@@ -18578,6 +19217,12 @@ $as_echo "$gl_cv_func_mbrtowc_sanitycheck" >&6; }
   else
     REPLACE_MBSTATE_T=1
   fi
+
+
+
+  :
+
+
 
 
 
@@ -19141,6 +19786,18 @@ $as_echo "#define GNULIB_TEST_MBRTOWC 1" >>confdefs.h
 
 
 
+  :
+
+
+
+
+
+
+  :
+
+
+
+
 
   if test $ac_cv_func_mbsinit = yes && test $ac_cv_func_mbrtowc = yes; then
 
@@ -19285,6 +19942,12 @@ $as_echo "$gl_cv_func_mbrtowc_sanitycheck" >&6; }
   else
     REPLACE_MBSTATE_T=1
   fi
+
+
+
+  :
+
+
 
 
 
@@ -19363,6 +20026,18 @@ $as_echo "#define GNULIB_TEST_MBSINIT 1" >>confdefs.h
 
 
 
+  :
+
+
+
+
+
+
+  :
+
+
+
+
 
   if test $ac_cv_func_mbsinit = yes && test $ac_cv_func_mbrtowc = yes; then
 
@@ -19507,6 +20182,12 @@ $as_echo "$gl_cv_func_mbrtowc_sanitycheck" >&6; }
   else
     REPLACE_MBSTATE_T=1
   fi
+
+
+
+  :
+
+
 
 
 
@@ -19870,6 +20551,12 @@ done
     HAVE_MEMMEM=0
   fi
 
+  :
+
+
+
+
+
   if test $ac_cv_have_decl_memmem = no; then
     HAVE_DECL_MEMMEM=0
   else
@@ -20042,6 +20729,12 @@ $as_echo "#define GNULIB_TEST_MEMPCPY 1" >>confdefs.h
 
 
 
+  :
+
+
+
+
+
   if test $ac_cv_have_decl_memrchr = no; then
     HAVE_DECL_MEMRCHR=0
   fi
@@ -20085,6 +20778,12 @@ done
 $as_echo "#define GNULIB_TEST_MEMRCHR 1" >>confdefs.h
 
 
+
+
+
+
+
+  :
 
 
 
@@ -20232,6 +20931,12 @@ $as_echo "#define GNULIB_TEST_MKSTEMP 1" >>confdefs.h
       ;;
     *)
 
+  :
+
+
+
+
+
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether open recognizes a trailing slash" >&5
 $as_echo_n "checking whether open recognizes a trailing slash... " >&6; }
 if ${gl_cv_func_open_slash+:} false; then :
@@ -20300,6 +21005,12 @@ $as_echo "#define OPEN_TRAILING_SLASH_BUG 1" >>confdefs.h
 
 
 
+  :
+
+
+
+
+
   if test $ac_cv_func_fchdir = no; then
     HAVE_FCHDIR=0
   fi
@@ -20341,6 +21052,12 @@ $as_echo "#define OPEN_TRAILING_SLASH_BUG 1" >>confdefs.h
 $as_echo "#define GNULIB_TEST_OPEN 1" >>confdefs.h
 
 
+
+
+
+
+
+  :
 
 
 
@@ -20418,6 +21135,12 @@ done
 
 
 
+  :
+
+
+
+
+
   if test $ac_cv_func_fchdir = no; then
     HAVE_FCHDIR=0
   fi
@@ -20457,6 +21180,12 @@ done
 
 
 $as_echo "#define GNULIB_TEST_OPENDIR 1" >>confdefs.h
+
+
+
+
+
+  :
 
 
 
@@ -20553,6 +21282,12 @@ done
 
 $as_echo "#define GNULIB_TEST_READDIR 1" >>confdefs.h
 
+
+
+
+
+
+  :
 
 
 
@@ -20718,6 +21453,12 @@ $as_echo "#define GNULIB_TEST_REALLOC_POSIX 1" >>confdefs.h
 
 
 
+  :
+
+
+
+
+
 
                 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether rename honors trailing slash on destination" >&5
 $as_echo_n "checking whether rename honors trailing slash on destination... " >&6; }
@@ -20856,6 +21597,12 @@ $as_echo "#define RENAME_TRAILING_SLASH_SOURCE_BUG 1" >>confdefs.h
 
       ;;
   esac
+
+
+  :
+
+
+
 
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether rename manages hard links correctly" >&5
@@ -21067,6 +21814,12 @@ $as_echo "#define GNULIB_TEST_REWINDDIR 1" >>confdefs.h
 
 
 
+  :
+
+
+
+
+
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether rmdir works" >&5
 $as_echo_n "checking whether rmdir works... " >&6; }
 if ${gl_cv_func_rmdir_works+:} false; then :
@@ -21158,7 +21911,19 @@ $as_echo "#define GNULIB_TEST_RMDIR 1" >>confdefs.h
 
 
 
+  :
 
+
+
+
+
+
+
+
+
+
+
+  :
 
 
 
@@ -21204,6 +21969,21 @@ fi
 done
 
   fi
+
+  :
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   fi
@@ -21495,6 +22275,12 @@ $as_echo "$gt_cv_ssize_t" >&6; }
 $as_echo "#define ssize_t int" >>confdefs.h
 
   fi
+
+
+
+
+  :
+
 
 
 
@@ -22217,11 +23003,23 @@ $as_echo "#define GNULIB_TEST_STRCHRNUL 1" >>confdefs.h
 
 
 
+  :
+
+
+
+
+
   if test $ac_cv_func_strdup = yes; then
     if test $gl_cv_func_malloc_posix != yes; then
       REPLACE_STRDUP=1
     fi
   fi
+
+  :
+
+
+
+
 
   if test $ac_cv_have_decl_strdup = no; then
     HAVE_DECL_STRDUP=0
@@ -22357,6 +23155,12 @@ $as_echo "#define GNULIB_TEST_STRERROR 1" >>confdefs.h
 
 
   gl_LIBOBJS="$gl_LIBOBJS strerror-override.$ac_objext"
+
+
+
+
+
+  :
 
 
 
@@ -22690,6 +23494,12 @@ $as_echo "$gl_cv_func_strtok_r_works" >&6; }
     HAVE_STRTOK_R=0
   fi
 
+  :
+
+
+
+
+
   if test $ac_cv_have_decl_strtok_r = no; then
     HAVE_DECL_STRTOK_R=0
   fi
@@ -22730,6 +23540,12 @@ $as_echo "#define GNULIB_TEST_STRTOK_R 1" >>confdefs.h
 
 
 
+
+
+
+
+
+  :
 
 
 
@@ -22897,6 +23713,12 @@ fi
 
 
 
+  :
+
+
+
+
+
 
 
 
@@ -23034,6 +23856,18 @@ fi
 
 
 
+
+  :
+
+
+
+
+
+
+
+
+
+  :
 
 
 
@@ -23177,6 +24011,12 @@ $as_echo "$gl_cv_func_unsetenv_works" >&6; }
 
 
 
+  :
+
+
+
+
+
 
   fi
 
@@ -23198,6 +24038,12 @@ $as_echo "#define GNULIB_TEST_UNSETENV 1" >>confdefs.h
 
 
 
+
+
+
+
+
+  :
 
 
 
@@ -23348,6 +24194,12 @@ fi
 
 
 
+  :
+
+
+
+
+
   if test $ac_cv_func_iswcntrl = yes; then
     HAVE_ISWCNTRL=1
   else
@@ -23364,6 +24216,12 @@ fi
 
 
 
+
+
+
+
+
+  :
 
 
 
