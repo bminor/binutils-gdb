@@ -1734,7 +1734,19 @@ maint_print_c_tdesc_cmd (const char *args, int from_tty)
 
 namespace selftests {
 
-static std::vector<std::pair<const char*, const target_desc *>> xml_tdesc;
+/* A reference target description, used for testing (see record_xml_tdesc).  */
+
+struct xml_test_tdesc
+{
+  xml_test_tdesc (const char *name, std::unique_ptr<const target_desc> &&tdesc)
+    : name (name), tdesc (std::move (tdesc))
+  {}
+
+  const char *name;
+  std::unique_ptr<const target_desc> tdesc;
+};
+
+static std::vector<xml_test_tdesc> xml_tdesc;
 
 #if GDB_SELF_TEST
 
@@ -1743,7 +1755,7 @@ static std::vector<std::pair<const char*, const target_desc *>> xml_tdesc;
 void
 record_xml_tdesc (const char *xml_file, const struct target_desc *tdesc)
 {
-  xml_tdesc.emplace_back (xml_file, tdesc);
+  xml_tdesc.emplace_back (xml_file, std::unique_ptr<const target_desc> (tdesc));
 }
 #endif
 
@@ -1798,17 +1810,17 @@ maintenance_check_xml_descriptions (const char *dir, int from_tty)
 
   for (auto const &e : selftests::xml_tdesc)
     {
-      std::string tdesc_xml = (feature_dir + SLASH_STRING + e.first);
+      std::string tdesc_xml = (feature_dir + SLASH_STRING + e.name);
       const target_desc *tdesc
 	= file_read_description_xml (tdesc_xml.data ());
 
-      if (tdesc == NULL || *tdesc != *e.second)
+      if (tdesc == NULL || *tdesc != *e.tdesc)
 	{
-	  printf_filtered ( _("Descriptions for %s do not match.\n"), e.first);
+	  printf_filtered ( _("Descriptions for %s do not match.\n"), e.name);
 	  failed++;
 	}
-      else if (!maintenance_check_tdesc_xml_convert (tdesc, e.first)
-	       || !maintenance_check_tdesc_xml_convert (e.second, e.first))
+      else if (!maintenance_check_tdesc_xml_convert (tdesc, e.name)
+	       || !maintenance_check_tdesc_xml_convert (e.tdesc.get (), e.name))
 	failed++;
     }
   printf_filtered (_("Tested %lu XML files, %d failed\n"),

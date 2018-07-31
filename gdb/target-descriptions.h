@@ -215,7 +215,7 @@ namespace selftests {
 
 /* Record that XML_FILE should generate a target description that equals
    TDESC, to be verified by the "maintenance check xml-descriptions"
-   command.  */
+   command.  This function takes ownership of TDESC.  */
 
 void record_xml_tdesc (const char *xml_file,
 		       const struct target_desc *tdesc);

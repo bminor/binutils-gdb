@@ -1,3 +1,11 @@
+2018-07-31  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* target-descriptions.c (struct xml_test_tdesc): New.
+	(xml_tdesc): Change type to std::vector<xml_test_tdesc>.
+	(record_xml_tdesc): Update.
+	(maintenance_check_xml_descriptions): Update.
+	* target-descriptions.h (record_xml_tdesc): Update comment.
+
 2018-07-30  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* eval.c (evaluate_subexp_for_sizeof): Check for array type before
