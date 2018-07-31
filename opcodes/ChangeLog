@@ -1,3 +1,7 @@
+2018-07-31  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
 2018-07-31  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-opc.tbl (kandnd, kandnq, kxord, kxorq): Add Optimize.
