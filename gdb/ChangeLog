@@ -1,5 +1,9 @@
 2018-07-31  Joel Brobecker  <brobecker@adacore.com>
 
+	GDB 8.1.1 released.
+
+2018-07-31  Joel Brobecker  <brobecker@adacore.com>
+
 	* version.in: Set GDB version number to 8.1.1.
 	* PROBLEMS: Likewise.
 
