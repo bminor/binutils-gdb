@@ -1,3 +1,7 @@
+2018-07-31  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 8.1.1 released.
+
 2018-07-31  Jan Vrany  <jan.vrany@fit.cvut.cz>
 
 	* varobj.c (varobj_get_path_expr_parent): Report an error if
