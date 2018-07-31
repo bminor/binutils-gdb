@@ -1,5 +1,16 @@
 2018-07-31  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/gas/i386/sg.s, testsuite/gas/i386/sg.l: New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+	* testsuite/gas/i386/avx512f.s, testsuite/gas/i386/avx512f_vl.s,
+	testsuite/gas/i386/avx512pf.s,
+	testsuite/gas/i386/x86-64-avx512f.s,
+	testsuite/gas/i386/x86-64-avx512f_vl.s,
+	testsuite/gas/i386/x86-64-avx512pf.s: Drop unnessecary operand
+	size specifiers from scatter/gather insns in Intel mode.
+
+2018-07-31  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (is_any_vex_encoding): New.
 	(process_immext, process_suffix): Use it.
 	(md_assemble): Likewise. Reject DATA_PREFIX with VEX/XOP/EVEX

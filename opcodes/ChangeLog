@@ -1,5 +1,11 @@
 2018-07-31  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl: Use element rather than vector size for AVX512*
+	scatter/gather insns.
+	* i386-tbl.h: Re-generate.
+
+2018-07-31  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-gen.c (cpu_flag_init): Drop CpuVREX uses.
 	(cpu_flags): Drop CpuVREX.
 	* i386-opc.h (CpuVREX): Delete.
