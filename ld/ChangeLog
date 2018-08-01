@@ -1,3 +1,10 @@
+2018-08-01  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/powerpc.exp: Run tlsopt5 with plt alignment.
+	* testsuite/ld-powerpc/tlsopt5.s: Add extra call.
+	* testsuite/ld-powerpc/tlsopt5.wf: Adjust expected output.
+	* testsuite/ld-powerpc/tlsopt5.d: Likewise.
+
 2018-08-07  Nick Clifton  <nickc@redhat.com>
 
 	* po/bg.po: Updated Bulgarian translation.
