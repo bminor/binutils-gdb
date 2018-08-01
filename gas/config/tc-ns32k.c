@@ -493,7 +493,7 @@ addr_mode (char *operand,
 	default:
 	  break;
 	}
-      /* Drop through.  */
+      /* Fall through.  */
 
     case 3:
       if (!strncmp (str, "tos", 3))

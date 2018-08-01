@@ -1,3 +1,9 @@
+2018-08-01  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-ns32k.c (addr_mode): Replace "Drop through" comment
+	with "Fall through" so that it will be recognised by gcc's switch
+	statment error checker.
+
 2018-08-01  Alan Modra  <amodra@gmail.com>
 
 	* po/POTFILES.in: Regenerate.
