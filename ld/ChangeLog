@@ -1,3 +1,7 @@
+2018-08-01  Alan Modra  <amodra@gmail.com>
+
+	* po/BLD-POTFILES.in: Regenerate.
+
 2018-07-30  Nick Clifton  <nickc@redhat.com>
 
 	* scripttempl/elf.sc: Move the .gnu.build.attributes section to

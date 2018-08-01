@@ -66,6 +66,8 @@ eavrxmega7.c
 ecrisaout.c
 ecriself.c
 ecrislinux.c
+ecskyelf.c
+ecskyelf_linux.c
 ed10velf.c
 ed30v_e.c
 ed30v_o.c

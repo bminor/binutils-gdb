@@ -1,3 +1,7 @@
+2018-08-01  Alan Modra  <amodra@gmail.com>
+
+	* po/SRC-POTFILES.in: Regenerate.
+
 2018-07-30  Nick Clifton  <nickc@redhat.com>
 
 	PR 22706

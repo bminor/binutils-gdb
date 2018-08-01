@@ -1,3 +1,7 @@
+2018-08-01  Alan Modra  <amodra@gmail.com>
+
+	* po/POTFILES.in: Regenerate.
+
 2018-07-31  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (optimize_encoding): Also handle kandnd,
