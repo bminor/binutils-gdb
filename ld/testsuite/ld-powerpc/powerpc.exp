@@ -224,7 +224,7 @@ set ppc64elftests {
      "tlsopt4"}
     {"TLS DLL" "-shared -melf64ppc --version-script tlsdll.ver" "" "-a64" {tlsdll.s}
      {} "tlsdll.so"}
-    {"TLS opt 5" "-melf64ppc --no-plt-align -shared --gc-sections --no-plt-localentry tmpdir/tlsdll.so" "" "-a64"  {tlsopt5.s}
+    {"TLS opt 5" "-melf64ppc -shared --gc-sections --no-plt-localentry tmpdir/tlsdll.so" "" "-a64"  {tlsopt5.s}
      {{objdump -dr tlsopt5.d} {readelf -wf tlsopt5.wf}}
      "tlsopt5"}
     {"sym@tocbase" "-shared -melf64ppc" "" "-a64" {symtocbase-1.s symtocbase-2.s}

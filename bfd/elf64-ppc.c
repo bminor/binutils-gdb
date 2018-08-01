@@ -10829,7 +10829,7 @@ plt_stub_pad (struct ppc_link_hash_table *htab,
 	      bfd_vma plt_off)
 {
   int stub_align;
-  unsigned stub_size = plt_stub_size (htab, stub_entry, plt_off);
+  unsigned stub_size;
   bfd_vma stub_off = stub_entry->group->stub_sec->size;
 
   if (htab->params->plt_stub_align >= 0)
@@ -10841,6 +10841,7 @@ plt_stub_pad (struct ppc_link_hash_table *htab,
     }
 
   stub_align = 1 << -htab->params->plt_stub_align;
+  stub_size = plt_stub_size (htab, stub_entry, plt_off);
   if (((stub_off + stub_size - 1) & -stub_align) - (stub_off & -stub_align)
       > ((stub_size - 1) & -stub_align))
     return stub_align - (stub_off & (stub_align - 1));
@@ -11148,7 +11149,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   struct ppc_link_hash_table *htab;
   bfd_byte *loc;
   bfd_byte *p;
-  bfd_vma dest, off;
+  bfd_vma targ, off;
   Elf_Internal_Rela *r;
   asection *plt;
 
@@ -11160,8 +11161,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   if (htab == NULL)
     return FALSE;
 
-  /* Make a note of the offset within the stubs for this entry.  */
-  stub_entry->stub_offset = stub_entry->group->stub_sec->size;
+  BFD_ASSERT (stub_entry->stub_offset >= stub_entry->group->stub_sec->size);
   loc = stub_entry->group->stub_sec->contents + stub_entry->stub_offset;
 
   htab->stub_count[stub_entry->stub_type - 1] += 1;
@@ -11170,16 +11170,16 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
     case ppc_stub_long_branch:
     case ppc_stub_long_branch_r2off:
       /* Branches are relative.  This is where we are going to.  */
-      dest = (stub_entry->target_value
+      targ = (stub_entry->target_value
 	      + stub_entry->target_section->output_offset
 	      + stub_entry->target_section->output_section->vma);
-      dest += PPC64_LOCAL_ENTRY_OFFSET (stub_entry->other);
-      off = dest;
+      targ += PPC64_LOCAL_ENTRY_OFFSET (stub_entry->other);
 
       /* And this is where we are coming from.  */
-      off -= (stub_entry->stub_offset
-	      + stub_entry->group->stub_sec->output_offset
-	      + stub_entry->group->stub_sec->output_section->vma);
+      off = (stub_entry->stub_offset
+	     + stub_entry->group->stub_sec->output_offset
+	     + stub_entry->group->stub_sec->output_section->vma);
+      off = targ - off;
 
       p = loc;
       if (stub_entry->stub_type == ppc_stub_long_branch_r2off)
@@ -11226,7 +11226,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	    return FALSE;
 	  r->r_offset = p - 4 - stub_entry->group->stub_sec->contents;
 	  r->r_info = ELF64_R_INFO (0, R_PPC64_REL24);
-	  r->r_addend = dest;
+	  r->r_addend = targ;
 	  if (stub_entry->h != NULL)
 	    {
 	      struct elf_link_hash_entry **hashes;
@@ -11278,13 +11278,13 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  return FALSE;
 	}
 
-      dest = (stub_entry->target_value
+      targ = (stub_entry->target_value
 	      + stub_entry->target_section->output_offset
 	      + stub_entry->target_section->output_section->vma);
       if (stub_entry->stub_type != ppc_stub_plt_branch_r2off)
-	dest += PPC64_LOCAL_ENTRY_OFFSET (stub_entry->other);
+	targ += PPC64_LOCAL_ENTRY_OFFSET (stub_entry->other);
 
-      bfd_put_64 (htab->brlt->owner, dest,
+      bfd_put_64 (htab->brlt->owner, targ,
 		  htab->brlt->contents + br_entry->offset);
 
       if (br_entry->iter == htab->stub_iteration)
@@ -11301,7 +11301,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 			       + htab->brlt->output_offset
 			       + htab->brlt->output_section->vma);
 	      rela.r_info = ELF64_R_INFO (0, R_PPC64_RELATIVE);
-	      rela.r_addend = dest;
+	      rela.r_addend = targ;
 
 	      rl = htab->relbrlt->contents;
 	      rl += (htab->relbrlt->reloc_count++
@@ -11321,17 +11321,17 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 			     + htab->brlt->output_offset
 			     + htab->brlt->output_section->vma);
 	      r->r_info = ELF64_R_INFO (0, R_PPC64_RELATIVE);
-	      r->r_addend = dest;
+	      r->r_addend = targ;
 	    }
 	}
 
-      dest = (br_entry->offset
+      targ = (br_entry->offset
 	      + htab->brlt->output_offset
 	      + htab->brlt->output_section->vma);
 
-      off = (dest
-	     - elf_gp (info->output_bfd)
-	     - htab->sec_info[stub_entry->group->link_sec->id].toc_off);
+      off = (elf_gp (info->output_bfd)
+	     + htab->sec_info[stub_entry->group->link_sec->id].toc_off);
+      off = targ - off;
 
       if (off + 0x80008000 > 0xffffffff || (off & 7) != 0)
 	{
@@ -11354,7 +11354,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  if (stub_entry->stub_type == ppc_stub_plt_branch_r2off)
 	    r[0].r_offset += 4;
 	  r[0].r_info = ELF64_R_INFO (0, R_PPC64_TOC16_DS);
-	  r[0].r_addend = dest;
+	  r[0].r_addend = targ;
 	  if (PPC_HA (off) != 0)
 	    {
 	      r[0].r_info = ELF64_R_INFO (0, R_PPC64_TOC16_HA);
@@ -11439,8 +11439,8 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	}
 
       /* Now build the stub.  */
-      dest = stub_entry->plt_ent->plt.offset & ~1;
-      if (dest >= (bfd_vma) -2)
+      targ = stub_entry->plt_ent->plt.offset & ~1;
+      if (targ >= (bfd_vma) -2)
 	abort ();
 
       plt = htab->elf.splt;
@@ -11453,12 +11453,11 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  else
 	    plt = htab->pltlocal;
 	}
+      targ += plt->output_offset + plt->output_section->vma;
 
-      dest += plt->output_offset + plt->output_section->vma;
-
-      off = (dest
-	     - elf_gp (info->output_bfd)
-	     - htab->sec_info[stub_entry->group->link_sec->id].toc_off);
+      off = (elf_gp (info->output_bfd)
+	     + htab->sec_info[stub_entry->group->link_sec->id].toc_off);
+      off = targ - off;
 
       if (off + 0x80008000 > 0xffffffff || (off & 7) != 0)
 	{
@@ -11471,15 +11470,6 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  bfd_set_error (bfd_error_bad_value);
 	  htab->stub_error = TRUE;
 	  return FALSE;
-	}
-
-      if (htab->params->plt_stub_align != 0)
-	{
-	  unsigned pad = plt_stub_pad (htab, stub_entry, off);
-
-	  stub_entry->group->stub_sec->size += pad;
-	  stub_entry->stub_offset = stub_entry->group->stub_sec->size;
-	  loc += pad;
 	}
 
       r = NULL;
@@ -11496,7 +11486,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  r[0].r_offset = loc - stub_entry->group->stub_sec->contents;
 	  if (bfd_big_endian (info->output_bfd))
 	    r[0].r_offset += 2;
-	  r[0].r_addend = dest;
+	  r[0].r_addend = targ;
 	}
       if (stub_entry->h != NULL
 	  && (stub_entry->h == htab->tls_get_addr_fd
@@ -11515,7 +11505,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       return FALSE;
     }
 
-  stub_entry->group->stub_sec->size += p - loc;
+  stub_entry->group->stub_sec->size = stub_entry->stub_offset + (p - loc);
 
   if (htab->params->emit_stub_syms)
     {
@@ -11567,7 +11557,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   struct ppc_stub_hash_entry *stub_entry;
   struct bfd_link_info *info;
   struct ppc_link_hash_table *htab;
-  bfd_vma off;
+  bfd_vma targ, off;
   int size;
 
   /* Massage our args to the form they really have.  */
@@ -11577,6 +11567,9 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   htab = ppc_hash_table (info);
   if (htab == NULL)
     return FALSE;
+
+  /* Make a note of the offset within the stubs for this entry.  */
+  stub_entry->stub_offset = stub_entry->group->stub_sec->size;
 
   if (stub_entry->h != NULL
       && stub_entry->h->save_res
@@ -11594,8 +11587,8 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       || stub_entry->stub_type == ppc_stub_plt_call_r2save)
     {
       asection *plt;
-      off = stub_entry->plt_ent->plt.offset & ~(bfd_vma) 1;
-      if (off >= (bfd_vma) -2)
+      targ = stub_entry->plt_ent->plt.offset & ~(bfd_vma) 1;
+      if (targ >= (bfd_vma) -2)
 	abort ();
       plt = htab->elf.splt;
       if (!htab->elf.dynamic_sections_created
@@ -11607,12 +11600,22 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  else
 	    plt = htab->pltlocal;
 	}
-      off += (plt->output_offset
-	      + plt->output_section->vma
-	      - elf_gp (info->output_bfd)
-	      - htab->sec_info[stub_entry->group->link_sec->id].toc_off);
+      targ += plt->output_offset + plt->output_section->vma;
+
+      off = (elf_gp (info->output_bfd)
+	     + htab->sec_info[stub_entry->group->link_sec->id].toc_off);
+      off = targ - off;
+
+      if (htab->params->plt_stub_align != 0)
+	{
+	  unsigned pad = plt_stub_pad (htab, stub_entry, off);
+
+	  stub_entry->group->stub_sec->size += pad;
+	  stub_entry->stub_offset = stub_entry->group->stub_sec->size;
+	}
 
       size = plt_stub_size (htab, stub_entry, off);
+
       if (stub_entry->h != NULL
 	  && (stub_entry->h == htab->tls_get_addr_fd
 	      || stub_entry->h == htab->tls_get_addr)
@@ -11620,10 +11623,8 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  && (ALWAYS_EMIT_R2SAVE
 	      || stub_entry->stub_type == ppc_stub_plt_call_r2save))
 	stub_entry->group->tls_get_addr_opt_bctrl
-	  = stub_entry->group->stub_sec->size + size - 5 * 4;
+	  = stub_entry->stub_offset + size - 5 * 4;
 
-      if (htab->params->plt_stub_align)
-	size += plt_stub_pad (htab, stub_entry, off);
       if (info->emitrelocations)
 	{
 	  stub_entry->group->stub_sec->reloc_count
@@ -11642,12 +11643,12 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       bfd_vma r2off = 0;
       bfd_vma local_off = 0;
 
-      off = (stub_entry->target_value
-	     + stub_entry->target_section->output_offset
-	     + stub_entry->target_section->output_section->vma);
-      off -= (stub_entry->group->stub_sec->size
-	      + stub_entry->group->stub_sec->output_offset
-	      + stub_entry->group->stub_sec->output_section->vma);
+      targ = (stub_entry->target_value
+	      + stub_entry->target_section->output_offset
+	      + stub_entry->target_section->output_section->vma);
+      off = (stub_entry->stub_offset
+	     + stub_entry->group->stub_sec->output_offset
+	     + stub_entry->group->stub_sec->output_section->vma);
 
       /* Reset the stub type from the plt variant in case we now
 	 can reach with a shorter stub.  */
@@ -11668,8 +11669,9 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	    size += 4;
 	  if (PPC_LO (r2off) != 0)
 	    size += 4;
-	  off -= size - 4;
+	  off += size - 4;
 	}
+      off = targ - off;
 
       local_off = PPC64_LOCAL_ENTRY_OFFSET (stub_entry->other);
 
@@ -11709,11 +11711,12 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	    }
 
 	  stub_entry->stub_type += ppc_stub_plt_branch - ppc_stub_long_branch;
-	  off = (br_entry->offset
-		 + htab->brlt->output_offset
-		 + htab->brlt->output_section->vma
-		 - elf_gp (info->output_bfd)
-		 - htab->sec_info[stub_entry->group->link_sec->id].toc_off);
+	  targ = (br_entry->offset
+		  + htab->brlt->output_offset
+		  + htab->brlt->output_section->vma);
+	  off = (elf_gp (info->output_bfd)
+		 + htab->sec_info[stub_entry->group->link_sec->id].toc_off);
+	  off = targ - off;
 
 	  if (info->emitrelocations)
 	    {

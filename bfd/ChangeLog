@@ -1,5 +1,15 @@
 2018-08-01  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (plt_stub_pad): Delay plt_stub_size call until needed.
+	(ppc_build_one_stub): Don't set stub_offset, instead assert that
+	it is sane.  Don't adjust stub_offset for alignment.  Adjust size
+	calculation.  Use "targ" temp when calculating offsets.
+	(ppc_size_one_stub): Set stub_offset here.  Use "targ" temp when
+	calculating offsets.  Adjust for alignment before setting
+	tls_get_addr_opt_bctrl.
+
+2018-08-01  Alan Modra  <amodra@gmail.com>
+
 	* po/SRC-POTFILES.in: Regenerate.
 
 2018-07-30  Nick Clifton  <nickc@redhat.com>
