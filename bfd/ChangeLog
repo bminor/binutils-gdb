@@ -1,5 +1,9 @@
 2018-08-01  Nick Clifton  <nickc@redhat.com>
 
+	* coff-rs6000.c (_bfd_xcoff_put_ldsymbol_name): Suppress warnings
+	about potentially truncated strncpy operations.
+	(_bfd_xcoff_put_symbol_name): Likewise.
+
 	* elf32-avr.c (avr_stub_name): Check for a NULL return from
 	bfd_malloc.
 
