@@ -1,3 +1,14 @@
+2018-08-01  Zenith  <zenith432@users.sourceforge.net>
+
+	PR 23460
+	* plugin.c (bfd_plugin_open_input): Close file descriptor if the
+	call to fstat fails.
+	(try_claim): Always close the file descriptor at the end of the
+	function.
+	(try_load_plugin): If a plugin has already been registered, then
+	skip the dlopen and onload steps and go straight to claiming the
+	file.  If these is an error, close the plugin.
+
 2018-08-01  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (plt_stub_pad): Delay plt_stub_size call until needed.
