@@ -1,3 +1,13 @@
+2018-08-01  Roland McGrath  <mcgrathr@google.com>
+
+	* testsuite/ld-aarch64/ifunc-1-local.d: Adjust regexps to match
+	the offsets emitted by aarch64-elf configurations.
+	* testsuite/ld-aarch64/ifunc-1.d: Likewise.
+	* testsuite/ld-aarch64/ifunc-2-local.d: Likewise.
+	* testsuite/ld-aarch64/ifunc-2.d: Likewise.
+	* testsuite/ld-aarch64/ifunc-21.d: Likewise.
+	* testsuite/ld-aarch64/ifunc-3a.d: Likewise.
+
 2018-07-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23428
