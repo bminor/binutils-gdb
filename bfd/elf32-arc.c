@@ -1202,7 +1202,8 @@ arc_special_overflow_checks (const struct arc_relocation_data reloc_data,
 #define _SDA_BASE_ (bfd_signed_vma) (reloc_data.sdata_begin_symbol_vma)
 #define TLS_REL (bfd_signed_vma) \
   ((elf_hash_table (info))->tls_sec->output_section->vma)
-#define TLS_TBSS (8)
+#define TLS_TBSS (align_power(TCB_SIZE, \
+		  reloc_data.sym_section->alignment_power))
 
 #define none (0)
 
