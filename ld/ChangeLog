@@ -1,3 +1,9 @@
+2018-08-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 23463
+	* testsuite/ld-plugin/pr12982.d: Skip thios test for the HPPA
+	target.
+
 2018-08-01  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/powerpc.exp: Run tlsopt5 with hash-style
