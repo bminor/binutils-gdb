@@ -489,7 +489,7 @@ ARC_RELOC_HOWTO(ARC_TLS_LE_32, 75, \
                 32, \
                 replace_word32, \
                 dont, \
-                ( ME ( ( ( ( S + A ) + TCB_SIZE ) - TLS_REL ) ) ))
+		( ME ( ( ( ( S + A ) + TLS_TBSS ) - TLS_REL ) ) ))
 
 ARC_RELOC_HOWTO(ARC_S25W_PCREL_PLT, 76, \
                 2, \
