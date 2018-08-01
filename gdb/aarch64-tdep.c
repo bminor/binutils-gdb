@@ -2971,7 +2971,31 @@ aarch64_target_description_changed_p (struct gdbarch *gdbarch,
 				      ptid_t ptid,
 				      VEC (cached_reg_t) *registers)
 {
-  return false;
+  /* Return true if the VG value in the given VEC of registers list does not
+     match the VG value in the current regcache.  */
+
+  cached_reg_t *reg;
+  bool regcache_has_vg = (gdbarch_num_regs (gdbarch) > AARCH64_SVE_VG_REGNUM);
+
+  for (int ix = 0; VEC_iterate (cached_reg_t, registers, ix, reg); ix++)
+    if (reg->num == AARCH64_SVE_VG_REGNUM)
+      {
+	if (!regcache_has_vg)
+	  {
+	    /* No VG in regcache.  */
+	    return true;
+	  }
+
+	struct regcache *regcache = get_thread_arch_regcache (ptid, gdbarch);
+
+	if (regcache->get_register_status (AARCH64_SVE_VG_REGNUM) != REG_VALID)
+	  return true;
+
+	return !regcache->raw_compare (AARCH64_SVE_VG_REGNUM, reg->data, 0);
+      }
+
+  /* VG is not in the given register list.  */
+  return regcache_has_vg;
 }
 
 /* Implement the "target_get_tdep_info" gdbarch method.  */
@@ -2979,7 +3003,21 @@ aarch64_target_description_changed_p (struct gdbarch *gdbarch,
 static union gdbarch_target_info
 aarch64_target_get_tdep_info (VEC (cached_reg_t) *registers)
 {
-  return {0};
+  gdbarch_target_info info = {0};
+
+  /* Use the current VQ value as the tdep info value.  */
+
+  cached_reg_t *reg;
+
+  for (int ix = 0; VEC_iterate (cached_reg_t, registers, ix, reg); ix++)
+    if (reg->num == AARCH64_SVE_VG_REGNUM)
+      {
+	uint64_t vg = *(uint64_t *) reg->data;
+	info.id = (int *) sve_vq_from_vg (vg);
+	return info;
+      }
+
+  return info;
 }
 
 /* Initialize the current architecture based on INFO.  If possible,

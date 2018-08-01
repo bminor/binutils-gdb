@@ -491,11 +491,12 @@ target_desc_info_free (struct target_desc_info *tdesc_info)
 
 static char *tdesc_filename_cmd_string;
 
-/* Fetch the current target's description, and switch the current
-   architecture to one which incorporates that description.  */
+/* Fetch the current inferior's description, and switch its current
+   architecture to one which incorporates that description.  If given, use the
+   tdep_info when finding the description.  */
 
 void
-target_find_description (void)
+target_find_description (gdbarch_target_info target_info)
 {
   /* If we've already fetched a description from the target, don't do
      it again.  This allows a target to fetch the description early,
@@ -534,6 +535,8 @@ target_find_description (void)
 
       gdbarch_info_init (&info);
       info.target_desc = current_target_desc;
+      info.target_info = target_info;
+
       if (!gdbarch_update_p (info))
 	warning (_("Architecture rejected target-supplied description"));
       else

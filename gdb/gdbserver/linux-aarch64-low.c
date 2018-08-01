@@ -3042,7 +3042,26 @@ aarch64_supports_hardware_single_step (void)
 static bool
 aarch64_validate_tdesc (struct thread_info *thread)
 {
-  return true;
+  /* For SVE there is a target descriptor for each VL.  Read the current vector
+     length and check if it matches the size of a variable register in the
+     current target descriptor.  */
+
+  int tid = (ptid_of (thread)).lwp ();
+  long vl = sve_vl_from_vq (aarch64_sve_get_vq (tid));
+  struct regcache *regcache = thread_regcache_data (thread);
+  struct process_info *proc;
+
+  /* Non SVE targets always validate as true.  */
+  if (vl == 0)
+    return true;
+
+  /* If there is a register cache, check the z0 register size.  */
+  if (regcache)
+    return (register_size (regcache->tdesc, AARCH64_SVE_Z0_REGNUM) == vl);
+
+  /* Otherwise, check the z0 register size in the description.  */
+  proc = get_thread_process (thread);
+  return (register_size (proc->tdesc, AARCH64_SVE_Z0_REGNUM) == vl);
 }
 
 struct linux_target_ops the_low_target =
