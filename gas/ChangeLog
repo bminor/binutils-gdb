@@ -1,3 +1,13 @@
+2018-08-01  James Patrick Conlon <cptjustice@gmail.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR 14480
+	* config/tc-pdp11.c (parse_op_noreg): Check for and handle auto
+	increment deferred.
+	* testsuite/gas/pdp11/pr14480.d: New test driver file.
+	* testsuite/gas/pdp11/pr14480.s: New test source file file.
+	* testsuite/gas/pdp11/pdp11.exp: Run the new test.
+
 2018-08-01  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-ns32k.c (addr_mode): Replace "Drop through" comment
