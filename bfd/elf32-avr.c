@@ -3295,10 +3295,10 @@ avr_stub_name (const asection *symbol_section,
 
   len = 8 + 1 + 8 + 1 + 1;
   stub_name = bfd_malloc (len);
-
-  sprintf (stub_name, "%08x+%08x",
-	   symbol_section->id & 0xffffffff,
-	   (unsigned int) ((rela->r_addend & 0xffffffff) + symbol_offset));
+  if (stub_name != NULL)
+    sprintf (stub_name, "%08x+%08x",
+	     symbol_section->id & 0xffffffff,
+	     (unsigned int) ((rela->r_addend & 0xffffffff) + symbol_offset));
 
   return stub_name;
 }

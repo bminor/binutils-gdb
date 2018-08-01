@@ -1,3 +1,8 @@
+2018-08-01  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-avr.c (avr_stub_name): Check for a NULL return from
+	bfd_malloc.
+
 2018-08-01  Zenith  <zenith432@users.sourceforge.net>
 
 	PR 23460
