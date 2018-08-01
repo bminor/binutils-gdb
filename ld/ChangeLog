@@ -1,5 +1,10 @@
 2018-08-01  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-powerpc/powerpc.exp: Run tlsopt5 with hash-style
+	specified.
+
+2018-08-01  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-powerpc/powerpc.exp: Run tlsopt5 with plt alignment.
 	* testsuite/ld-powerpc/tlsopt5.s: Add extra call.
 	* testsuite/ld-powerpc/tlsopt5.wf: Adjust expected output.
