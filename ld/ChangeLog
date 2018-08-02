@@ -1,5 +1,9 @@
 2018-08-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-ifunc/ifunc.exp: Always build static_nonifunc_prog.
+
+2018-08-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/23460
 	* testsuite/ld-plugin/lto.exp: Run the PR binutils/23460 test.
 	* testsuite/ld-plugin/pr23460a.c: New file.
