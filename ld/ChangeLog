@@ -1,3 +1,14 @@
+2018-08-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/23460
+	* testsuite/ld-plugin/lto.exp: Run the PR binutils/23460 test.
+	* testsuite/ld-plugin/pr23460a.c: New file.
+	* testsuite/ld-plugin/pr23460b.c: Likewise.
+	* testsuite/ld-plugin/pr23460c.c: Likewise.
+	* testsuite/ld-plugin/pr23460d.c: Likewise.
+	* testsuite/ld-plugin/pr23460e.c: Likewise.
+	* testsuite/ld-plugin/pr23460f.c: Likewise.
+
 2018-08-01  Roland McGrath  <mcgrathr@google.com>
 
 	* testsuite/ld-aarch64/ifunc-1-local.d: Adjust regexps to match
