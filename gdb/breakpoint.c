@@ -1219,6 +1219,10 @@ commands_command_1 (const char *arg, int from_tty,
 		    struct command_line *control)
 {
   counted_command_line cmd;
+  /* cmd_read will be true once we have read cmd.  Note that cmd might still be
+     NULL after the call to read_command_lines if the user provides an empty
+     list of command by just typing "end".  */
+  bool cmd_read = false;
 
   std::string new_arg;
 
@@ -1235,8 +1239,9 @@ commands_command_1 (const char *arg, int from_tty,
   map_breakpoint_numbers
     (arg, [&] (breakpoint *b)
      {
-       if (cmd == NULL)
+       if (!cmd_read)
 	 {
+	   gdb_assert (cmd == NULL);
 	   if (control != NULL)
 	     cmd = control->body_list_0;
 	   else
@@ -1256,6 +1261,7 @@ commands_command_1 (const char *arg, int from_tty,
 
 	       cmd = read_command_lines (str.c_str (), from_tty, 1, validator);
 	     }
+	   cmd_read = true;
 	 }
 
        /* If a breakpoint was on the list more than once, we don't need to
