@@ -281,6 +281,48 @@ proc_with_prefix breakpoint_command_test {} {
     gdb_test "print value" " = 5"
 }
 
+# Test clearing the commands of several breakpoints with one single "end".
+proc_with_prefix breakpoint_clear_command_test {} {
+    runto_or_return factorial
+
+    set any "\[^\r\n\]*"
+    delete_breakpoints
+    gdb_test "break factorial" "Breakpoint.*at.*"
+    gdb_test_no_output "set \$bpnumfactorial = \$bpnum"
+    gdb_test "break main" "Breakpoint.*at.*"
+    gdb_test_no_output "set \$bpnummain = \$bpnum"
+
+    gdb_test \
+	[multi_line_input \
+	     {commands $bpnumfactorial $bpnummain} \
+	     {  print 1234321} \
+	     {end}] \
+	"End with.*" \
+	"set commands of two breakpoints to print 1234321"
+    gdb_test "info breakpoints" \
+	[multi_line \
+	     "${any}What${any}" \
+	     "${any}in factorial${any}" \
+	     "${any}print 1234321${any}" \
+	     "${any}in main${any}" \
+	     "${any}print 1234321${any}" \
+	    ] \
+	"print 1234321 command present in the two breakpoints"
+    gdb_test \
+	[multi_line_input \
+	     {commands $bpnumfactorial $bpnummain} \
+	     {end}] \
+	"End with.*" \
+	"clear the command list of the two breakpoints"
+    gdb_test "info breakpoints" \
+	[multi_line \
+	     "${any}What${any}" \
+	     "${any}in factorial${any}" \
+	     "${any}in main${any}" \
+	    ] \
+	"print 1234321 command is not present anymore in the two breakpoints"
+    }
+
 # Test a simple user defined command (with arguments)
 proc_with_prefix user_defined_command_test {} {
     global valnum_re
@@ -368,8 +410,8 @@ proc_with_prefix user_defined_command_case_sensitivity {} {
 
     gdb_test "print 456\nend" "" "enter commands 2"
 
-    gdb_test "Homer-Simpson" " = 123" "execute command"
-    gdb_test "HomeR-SimpsoN" " = 456" "execute command"
+    gdb_test "Homer-Simpson" " = 123" "execute command Homer-Simpson"
+    gdb_test "HomeR-SimpsoN" " = 456" "execute command HomeR-SimpsoN"
     gdb_test "HOMER-SIMPSON" "Undefined command.*" "try to call in upper case"
     gdb_test "homer-simpson" "Undefined command.*" "try to call in lower case"
 }
@@ -1134,6 +1176,7 @@ progvar_complex_if_while_test
 if_while_breakpoint_command_test
 infrun_breakpoint_command_test
 breakpoint_command_test
+breakpoint_clear_command_test
 user_defined_command_test
 user_defined_command_case_sensitivity
 user_defined_command_args_eval
