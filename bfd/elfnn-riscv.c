@@ -353,7 +353,8 @@ riscv_elf_create_dynamic_sections (bfd *dynobj,
     {
       htab->sdyntdata =
 	bfd_make_section_anyway_with_flags (dynobj, ".tdata.dyn",
-					    SEC_ALLOC | SEC_THREAD_LOCAL);
+					    (SEC_ALLOC | SEC_THREAD_LOCAL
+					     | SEC_LINKER_CREATED));
     }
 
   if (!htab->elf.splt || !htab->elf.srelplt || !htab->elf.sdynbss
