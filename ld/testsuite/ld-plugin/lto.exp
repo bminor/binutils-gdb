@@ -262,9 +262,6 @@ set lto_link_elf_tests [list \
   [list "Build liblto-17b.so 2" \
    "-shared -O2 -fpic -flto -fuse-linker-plugin tmpdir/lto-17a.o" "-O2 -fpic -flto" \
    {lto-17b.c} {{"nm" {} "lto-17b-2.d"}} "liblto-17b.so"] \
-  [list "PR ld/12982" \
-   "-O2 -flto -fuse-linker-plugin" "-O2 -flto" \
-   {pr12982.c} {{"readelf" {-l --wide} "pr12982.d"}} "pr12982.exe"] \
   [list "PR ld/12975" \
    "-shared -O2 -fPIC -flto -fuse-linker-plugin -nostdlib -Wl,-version-script,pr12975.t" "-O2 -flto" \
    {pr12975.c} {{"readelf" {-s --wide} "pr12975.d"}} "pr12975.so" "c"] \
@@ -325,6 +322,18 @@ if { ! [istarget "arm*-*-*"] } {
   [list "PR ld/14918" \
    "-flto" "-flto" \
    {pr14918.c} {{"readelf" {-d --wide} "pr14918.d"}} "pr14918.exe" "c"] \
+  ]]
+}
+
+# PR 12982 checks that an executable stack is not created by default
+# when using the LTO plugin.  The HPPA target however requires an
+# executable stack for syscall restarts and signal returns, so we
+# skip this test for that target.
+if { ! [istarget "hppa*-*-*"] } {
+    set lto_link_elf_tests [concat $lto_link_elf_tests [list \
+  [list "PR ld/12982" \
+   "-O2 -flto -fuse-linker-plugin" "-O2 -flto" \
+   {pr12982.c} {{"readelf" {-l --wide} "pr12982.d"}} "pr12982.exe"] \
   ]]
 }
 

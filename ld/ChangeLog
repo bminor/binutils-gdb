@@ -1,3 +1,10 @@
+2018-08-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 23463
+	* testsuite/ld-plugin/pr12982.d: Revert previous delta.
+	* testsuite/ld-plugin/lto.exp: Skip the pr12982 test for HPPA
+	targets.
+
 2018-08-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-ifunc/ifunc.exp: Always build static_nonifunc_prog.
@@ -26,7 +33,7 @@
 2018-08-01  Nick Clifton  <nickc@redhat.com>
 
 	PR 23463
-	* testsuite/ld-plugin/pr12982.d: Skip thios test for the HPPA
+	* testsuite/ld-plugin/pr12982.d: Skip this test for the HPPA
 	target.
 
 2018-08-01  Alan Modra  <amodra@gmail.com>
