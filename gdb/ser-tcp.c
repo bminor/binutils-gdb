@@ -371,7 +371,7 @@ net_open (struct serial *scb, const char *name)
 
   ioctl (scb->fd, FIONBIO, &ioarg);
 
-  if (success_ainfo->ai_socktype == IPPROTO_TCP)
+  if (success_ainfo->ai_protocol == IPPROTO_TCP)
     {
       /* Disable Nagle algorithm.  Needed in some cases.  */
       int tmp = 1;
