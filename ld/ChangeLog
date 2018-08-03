@@ -1,3 +1,8 @@
+2018-08-05  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/elfv2exe.d: Adjust for stub symbol change.
+	* testsuite/ld-powerpc/tocopt6.d: Likewise.
+
 2018-08-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-x86-64/property-x86-3.s: Use ".p2align 2" to

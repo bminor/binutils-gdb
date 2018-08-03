@@ -19,7 +19,7 @@ Disassembly of section \.text:
 .*:	(7d 89 03 a6|a6 03 89 7d) 	mtctr   r12
 .*:	(4e 80 04 20|20 04 80 4e) 	bctr
 
-0+100000e0 <.*\.long_branch_r2off\.f5>:
+0+100000e0 <.*\.long_branch\.f5>:
 .*:	(f8 41 00 18|18 00 41 f8) 	std     r2,24\(r1\)
 .*:	(48 00 00 6c|6c 00 00 48) 	b       .* <f5>
 	\.\.\.
@@ -39,7 +39,7 @@ Disassembly of section \.text:
 .*:	(60 00 00 00|00 00 00 60) 	nop
 .*:	(4b .. .. ..|.. .. .. 4b) 	bl      .*\.plt_branch\.f4>
 .*:	(60 00 00 00|00 00 00 60) 	nop
-.*:	(4b .. .. ..|.. .. .. 4b) 	bl      .*\.long_branch_r2off\.f5>
+.*:	(4b .. .. ..|.. .. .. 4b) 	bl      .*\.long_branch\.f5>
 .*:	(e8 41 00 18|18 00 41 e8) 	ld      r2,24\(r1\)
 .*:	(e8 01 00 30|30 00 01 e8) 	ld      r0,48\(r1\)
 .*:	(38 21 00 20|20 00 21 38) 	addi    r1,r1,32

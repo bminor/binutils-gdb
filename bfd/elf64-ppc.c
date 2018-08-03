@@ -11513,9 +11513,9 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       size_t len1, len2;
       char *name;
       const char *const stub_str[] = { "long_branch",
-				       "long_branch_r2off",
+				       "long_branch",
 				       "plt_branch",
-				       "plt_branch_r2off",
+				       "plt_branch",
 				       "plt_call",
 				       "plt_call" };
 
