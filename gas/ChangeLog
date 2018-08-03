@@ -1,3 +1,12 @@
+2018-08-03  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (Operand_Mem): Define.
+	(operand_size_match): Use it.
+	(check_VecOperands): Likewise.
+	(i386_att_operand): Likewise.
+	(swap_2_operands): Also swap flags fields.
+	* config/tc-i386-intel.c (i386_intel_operand): Likewise.
+
 2018-08-01  James Patrick Conlon <cptjustice@gmail.com>
 	    Nick Clifton  <nickc@redhat.com>
 

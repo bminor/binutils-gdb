@@ -1,3 +1,9 @@
+2018-08-03  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (operand_types): Remove Mem field.
+	* i386-opc.h (union i386_operand_type): Remove mem field.
+	* i386-init.h, i386-tbl.h: Re-generate.
+
 2018-08-01  Alan Modra  <amodra@gmail.com>
 
 	* po/POTFILES.in: Regenerate.

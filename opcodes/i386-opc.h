@@ -819,7 +819,6 @@ typedef union i386_operand_type
       unsigned int jumpabsolute:1;
       unsigned int esseg:1;
       unsigned int regmem:1;
-      unsigned int mem:1;
       unsigned int byte:1;
       unsigned int word:1;
       unsigned int dword:1;

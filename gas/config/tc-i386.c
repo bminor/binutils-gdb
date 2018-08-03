@@ -309,6 +309,7 @@ struct _i386_insn
     /* Flags for operands.  */
     unsigned int flags[MAX_OPERANDS];
 #define Operand_PCrel 1
+#define Operand_Mem   2
 
     /* Relocation type for operand */
     enum bfd_reloc_code_real reloc[MAX_OPERANDS];
@@ -2010,7 +2011,7 @@ operand_size_match (const insn_template *t)
 	  break;
 	}
 
-      if (i.types[j].bitfield.mem && !match_mem_size (t, j, j))
+      if ((i.flags[j] & Operand_Mem) && !match_mem_size (t, j, j))
 	{
 	  match = 0;
 	  break;
@@ -2035,8 +2036,7 @@ mismatch:
 	  && !match_operand_size (t, j, !j))
 	goto mismatch;
 
-      if (i.types[!j].bitfield.mem
-	  && !match_mem_size (t, j, !j))
+      if ((i.flags[!j] & Operand_Mem) && !match_mem_size (t, j, !j))
 	goto mismatch;
     }
 
@@ -4753,14 +4753,21 @@ swap_2_operands (int xchg1, int xchg2)
 {
   union i386_op temp_op;
   i386_operand_type temp_type;
+  unsigned int temp_flags;
   enum bfd_reloc_code_real temp_reloc;
 
   temp_type = i.types[xchg2];
   i.types[xchg2] = i.types[xchg1];
   i.types[xchg1] = temp_type;
+
+  temp_flags = i.flags[xchg2];
+  i.flags[xchg2] = i.flags[xchg1];
+  i.flags[xchg1] = temp_flags;
+
   temp_op = i.op[xchg2];
   i.op[xchg2] = i.op[xchg1];
   i.op[xchg1] = temp_op;
+
   temp_reloc = i.reloc[xchg2];
   i.reloc[xchg2] = i.reloc[xchg1];
   i.reloc[xchg1] = temp_reloc;
@@ -5180,7 +5187,7 @@ check_VecOperands (const insn_template *t)
 	 and its broadcast bytes match the memory operand.  */
       op = i.broadcast->operand;
       if (!t->opcode_modifier.broadcast
-	  || !i.types[op].bitfield.mem
+	  || !(i.flags[op] & Operand_Mem)
 	  || (!i.types[op].bitfield.unspecified
 	      && !match_broadcast_size (t, op)))
 	{
@@ -5276,7 +5283,7 @@ check_VecOperands (const insn_template *t)
 	    {
 	      /* Find memory operand.  */
 	      for (op = 0; op < i.operands; op++)
-		if (i.types[op].bitfield.mem)
+		if (i.flags[op] & Operand_Mem)
 		  break;
 	      gas_assert (op < i.operands);
 	      if (op == i.operands - 1)
@@ -9814,7 +9821,7 @@ i386_att_operand (char *operand_string)
 
       if (i386_index_check (operand_string) == 0)
 	return 0;
-      i.types[this_operand].bitfield.mem = 1;
+      i.flags[this_operand] |= Operand_Mem;
       if (i.mem_operands == 0)
 	i.memop1_string = xstrdup (operand_string);
       i.mem_operands++;
