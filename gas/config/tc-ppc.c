@@ -2085,6 +2085,7 @@ ppc_elf_suffix (char **str_p, expressionS *exp_p)
     MAP64 ("tprel@highera",	BFD_RELOC_PPC64_TPREL16_HIGHERA),
     MAP64 ("tprel@highest",	BFD_RELOC_PPC64_TPREL16_HIGHEST),
     MAP64 ("tprel@highesta",	BFD_RELOC_PPC64_TPREL16_HIGHESTA),
+    MAP64 ("notoc",		BFD_RELOC_PPC64_REL24_NOTOC),
     { (char *) 0, 0, 0, 0,	BFD_RELOC_NONE }
   };
 
@@ -6416,6 +6417,7 @@ ppc_force_relocation (fixS *fix)
     case BFD_RELOC_PPC_BA26:
     case BFD_RELOC_PPC_B16:
     case BFD_RELOC_PPC_BA16:
+    case BFD_RELOC_PPC64_REL24_NOTOC:
       /* All branch fixups targeting a localentry symbol must
          force a relocation.  */
       if (fix->fx_addsy)
@@ -6454,6 +6456,7 @@ ppc_fix_adjustable (fixS *fix)
     case BFD_RELOC_PPC_B16_BRNTAKEN:
     case BFD_RELOC_PPC_BA16_BRTAKEN:
     case BFD_RELOC_PPC_BA16_BRNTAKEN:
+    case BFD_RELOC_PPC64_REL24_NOTOC:
       if (fix->fx_addsy)
 	{
 	  asymbol *bfdsym = symbol_get_bfdsym (fix->fx_addsy);

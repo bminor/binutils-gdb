@@ -331,6 +331,8 @@ if [ supports_ppc64 ] then {
     run_dump_test "dotsym2"
     run_dump_test "dotsym3"
     run_dump_test "dotsym4"
+    run_dump_test "ext"
+    run_dump_test "notoc"
 }
 
 run_dump_test "tlsld32"

@@ -1,3 +1,8 @@
+2018-08-05  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (ppc_elf_suffix): Support @notoc.
+	(ppc_force_relocation, ppc_fix_adjustable): Handle REL24_NOTOC.
+
 2018-08-03  Dimitar Dimitrov  <dimitar@dinux.eu>
 
 	* config/tc-pru.c (pru_regname_to_dw2regnum): Return the starting HW

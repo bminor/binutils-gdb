@@ -3457,6 +3457,7 @@ instruction.  */
   BFD_RELOC_PPC64_ADDR16_HIGHA,
   BFD_RELOC_PPC64_ADDR64_LOCAL,
   BFD_RELOC_PPC64_ENTRY,
+  BFD_RELOC_PPC64_REL24_NOTOC,
 
 /* PowerPC and PowerPC64 thread-local storage relocations.  */
   BFD_RELOC_PPC_TLS,

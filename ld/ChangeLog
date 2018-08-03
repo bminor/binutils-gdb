@@ -1,5 +1,14 @@
 2018-08-05  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-powerpc/ext.d,
+	* testsuite/ld-powerpc/ext.s,
+	* testsuite/ld-powerpc/ext.lnk,
+	* testsuite/ld-powerpc/notoc.d,
+	* testsuite/ld-powerpc/notoc.s: New tests.
+	* testsuite/ld-powerpc/powerpc.exp: Run them.
+
+2018-08-05  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-powerpc/elfv2exe.d: Adjust for stub symbol change.
 	* testsuite/ld-powerpc/tocopt6.d: Likewise.
 

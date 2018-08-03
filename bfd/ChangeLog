@@ -1,5 +1,27 @@
 2018-08-05  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (ADDI_R12_R11, ADDI_R12_R12, LIS_R12),
+	(ADDIS_R12_R11, ORIS_R12_R12_0, ORI_R12_R12_0),
+	(SLDI_R12_R12_32, LDX_R12_R11_R12, ADD_R12_R11_R12): Define.
+	(ppc64_elf_howto_raw): Add R_PPC64_REL24_NOTOC entry.
+	(ppc64_elf_reloc_type_lookup): Support R_PPC64_REL24_NOTOC.
+	(ppc_stub_type): Add ppc_stub_long_branch_notoc,
+	ppc_stub_long_branch_both, ppc_stub_plt_branch_notoc,
+	ppc_stub_plt_branch_both, ppc_stub_plt_call_notoc, and
+	ppc_stub_plt_call_both.
+	(is_branch_reloc): Add R_PPC64_REL24_NOTOC.
+	(build_offset, size_offset): New functions.
+	(plt_stub_size): Support plt_call_notoc and plt_call_both.
+	(ppc_build_one_stub, ppc_size_one_stub): Support new stubs.
+	(toc_adjusting_stub_needed): Handle R_PPC64_REL24_NOTOC.
+	(ppc64_elf_size_stubs): Likewise, and new stubs.
+	(ppc64_elf_build_stubs, ppc64_elf_relocate_section): Likewise.
+	* reloc.c: Add BFD_RELOC_PPC64_REL24_NOTOC.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+2018-08-05  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (ppc_build_one_stub): Lose "_r2off" in stub symbols.
 
 2018-08-02  Jim Wilson  <jimw@sifive.com>
