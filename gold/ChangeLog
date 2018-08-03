@@ -1,3 +1,9 @@
+2018-08-03  Roland McGrath  <mcgrathr@google.com>
+
+	* target.h (Sized_target::record_gnu_property): Use unsigned int
+	for second argument.
+	* x86_64.cc (Target_x86_64<size>::record_gnu_property): Likewise.
+
 2018-07-18  Nick Clifton  <nickc@redhat.com>
 
 	2.31.1 Release point.
