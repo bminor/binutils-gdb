@@ -1,3 +1,8 @@
+2018-08-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-x86-64/property-x86-3.s: Use ".p2align 2" to
+	align .note.gnu.property section if __64_bit__ is undefined.
+
 2018-08-01  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/powerpc.exp: Run tlsopt5 with hash-style
