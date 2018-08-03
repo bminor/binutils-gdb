@@ -41,7 +41,11 @@
 3:
 
 	.section ".note.gnu.property", "a"
+.ifdef __64_bit__
 	.p2align 3
+.else
+	.p2align 2
+.endif
 	.long 1f - 0f		/* name length.  */
 	.long 3f - 1f		/* data length.  */
 	/* NT_GNU_PROPERTY_TYPE_0 */
