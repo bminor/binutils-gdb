@@ -1,3 +1,7 @@
+2018-08-04  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.python/py-rbreak.exp: Fix rbreak regexp.
+
 2018-08-02  Tom Tromey  <tom@tromey.com>
 
 	PR symtab/16842.

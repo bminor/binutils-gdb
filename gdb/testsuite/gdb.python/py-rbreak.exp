@@ -33,7 +33,7 @@ if ![runto_main] then {
 }
 
 gdb_test_no_output "nosharedlibrary"
-gdb_py_test_silent_cmd "py sl = gdb.rbreak(\"\",minsyms=False)" \
+gdb_py_test_silent_cmd "py sl = gdb.rbreak(\"^\[^_\]\",minsyms=False)" \
     "get all function breakpoints" 0
 gdb_test "py print(len(sl))" "11" \
     "check number of returned breakpoints is 11"
