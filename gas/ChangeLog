@@ -1,3 +1,12 @@
+2018-08-03  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+	* config/tc-pru.c (pru_regname_to_dw2regnum): Return the starting HW
+	byte-register number.
+	(pru_frame_initial_instructions): Use byte-numbering for FP index.
+	* config/tc-pru.h (DWARF2_DEFAULT_RETURN_COLUMN): Use number from
+	latest GCC.
+	(DWARF2_CIE_DATA_ALIGNMENT): Set to -1.
+
 2018-08-03  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (Operand_Mem): Define.

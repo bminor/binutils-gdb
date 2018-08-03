@@ -424,7 +424,7 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 					/* PR ld/20906.  A corrupt input file
 					   can contain bogus strings.  */
 					len = strlen (yylval.name);
-					if (len > yyleng - 2)
+					if (len > (bfd_size_type) yyleng - 2)
 					  len = yyleng - 2;
 					yylval.name[len] = 0;
 					return NAME;

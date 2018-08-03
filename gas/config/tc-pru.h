@@ -138,8 +138,14 @@ extern int pru_validate_fix_sub (struct fix *);
 
 /* We want .cfi_* pseudo-ops for generating unwind info.  */
 #define TARGET_USE_CFIPOP 1
-#define DWARF2_DEFAULT_RETURN_COLUMN 31
-#define DWARF2_CIE_DATA_ALIGNMENT (-4)
+
+/* Program Counter register number is not defined by TI documents.
+   Pick the virtual number used by GCC.  */
+#define DWARF2_DEFAULT_RETURN_COLUMN 132
+
+/* The stack grows down, and is only byte aligned.  */
+#define DWARF2_CIE_DATA_ALIGNMENT -1
+
 #define tc_regname_to_dw2regnum pru_regname_to_dw2regnum
 extern int pru_regname_to_dw2regnum (char *regname);
 #define tc_cfi_frame_initial_instructions  pru_frame_initial_instructions

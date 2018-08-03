@@ -1920,14 +1920,28 @@ pru_cons_fix_new (fragS *frag, int where, unsigned int nbytes,
 }
 
 /* Implement tc_regname_to_dw2regnum, to convert REGNAME to a DWARF-2
-   register number.  */
+   register number.  Return the starting HW byte-register number.  */
+
 int
 pru_regname_to_dw2regnum (char *regname)
 {
+  static const unsigned int regstart[RSEL_NUM_ITEMS] =
+    {
+     [RSEL_7_0]	  = 0,
+     [RSEL_15_8]  = 1,
+     [RSEL_23_16] = 2,
+     [RSEL_31_24] = 3,
+     [RSEL_15_0]  = 0,
+     [RSEL_23_8]  = 1,
+     [RSEL_31_16] = 2,
+     [RSEL_31_0]  = 0,
+    };
+
   struct pru_reg *r = pru_reg_lookup (regname);
-  if (r == NULL)
+
+  if (r == NULL || r->regsel >= RSEL_NUM_ITEMS)
     return -1;
-  return r->index;
+  return r->index * 4 + regstart[r->regsel];
 }
 
 /* Implement tc_cfi_frame_initial_instructions, to initialize the DWARF-2
@@ -1935,7 +1949,7 @@ pru_regname_to_dw2regnum (char *regname)
 void
 pru_frame_initial_instructions (void)
 {
-  const unsigned fp_regno = 4;
+  const unsigned fp_regno = 4 * 4;
   cfi_add_CFA_def_cfa (fp_regno, 0);
 }
 
