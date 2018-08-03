@@ -2177,7 +2177,7 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
      3. Eliminate any NT_GNU_BUILD_ATTRIBUTE_OPEN notes that have the same
         full name field as the immediately preceeding note with the same type
 	of name and whose address ranges coincide.
-	IE - it there are gaps in the coverage of the notes, then these gaps
+	IE - if there are gaps in the coverage of the notes, then these gaps
 	must be preserved.
      4. Combine the numeric value of any NT_GNU_BUILD_ATTRIBUTE_OPEN notes
         of type GNU_BUILD_ATTRIBUTE_STACK_SIZE.
@@ -2185,16 +2185,48 @@ merge_gnu_build_notes (bfd * abfd, asection * sec, bfd_size_type size, bfd_byte 
         its description field is empty then the nearest preceeding OPEN note
 	with a non-empty description field must also be preserved *OR* the
 	description field of the note must be changed to contain the starting
-	address to which it refers.  */
+	address to which it refers.
+     6. Notes with the same start and end address can be deleted.  */
   for (pnote = pnotes + 1; pnote < pnotes_end; pnote ++)
     {
       int                      note_type;
       objcopy_internal_note *  back;
       objcopy_internal_note *  prev_open_with_range = NULL;
 
+      /* Rule 6 - delete 0-range notes.  */
+      if (pnote->start == pnote->end)
+	{
+	  duplicate_found = TRUE;
+	  pnote->note.type = 0;
+	  continue;
+	}
+
       /* Rule 2 - preserve function notes.  */
       if (! is_open_note (pnote))
-	continue;
+	{
+	  int iter;
+
+	  /* Check to see if there is an identical previous function note.
+	     This can happen with overlays for example.  */
+	  for (iter = 0, back = pnote -1; back >= pnotes; back --)
+	    {
+	      if (back->start == pnote->start
+		  && back->end == pnote->end
+		  && back->note.namesz == pnote->note.namesz
+		  && memcmp (back->note.namedata, pnote->note.namedata, pnote->note.namesz) == 0)
+		{
+ fprintf (stderr, "DUP FUNXC\n");
+		  duplicate_found = TRUE;
+		  pnote->note.type = 0;
+		  break;
+		}
+
+	      /* Don't scan too far back however.  */
+	      if (iter ++ > 16)
+		break;
+	    }
+	  continue;
+	}
 
       note_type = pnote->note.namedata[attribute_type_byte];
 
