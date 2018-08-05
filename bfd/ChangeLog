@@ -1,3 +1,11 @@
+2018-08-07  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section): Don't skip first
+	instruction of __tls_get_addr_opt stub.
+	(plt_stub_size): Omit ALWAYS_EMIT_R2SAVE condition when
+	dealing with __tls_get_addr_opt stub.
+	(build_tls_get_addr_stub, ppc_size_one_stub): Likewise.
+
 2018-08-06  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* elf32-arc.c (arc_elf_merge_private_bfd_data): Complain about
