@@ -1,3 +1,8 @@
+2018-08-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/gas/i386/i386.exp: Run evex-no-scale-32 and
+	evex-no-scale-64 only for ELF targets.
+
 2018-07-31  Jan Beulich  <jbeulich@suse.com>
 
 	PR gas/23465
