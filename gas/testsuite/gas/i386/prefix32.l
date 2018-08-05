@@ -32,3 +32,5 @@ GAS LISTING .*
 \*\*\*\*  Error: .*
 [ 	]*20[ 	]+data16 vaddps	%xmm0, %xmm0, %xmm0
 [ 	]*21[ 	]+data16 vaddpd	%xmm0, %xmm0, %xmm0
+[ 	]*22[ 	]*
+[ 	]*23[ 	]*[\?]+ 0+[ \t]+\.p2align	4,0

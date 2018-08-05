@@ -19,3 +19,5 @@ prefix:
 	data16 addpd	%xmm0, %xmm0
 	data16 vaddps	%xmm0, %xmm0, %xmm0
 	data16 vaddpd	%xmm0, %xmm0, %xmm0
+
+	.p2align	4,0
