@@ -1,3 +1,12 @@
+2018-08-05  John David Anglin  <danglin@gcc.gnu.org>
+
+	Backport from master branch
+	2018-07-30  John David Anglin  <danglin@gcc.gnu.org>
+
+	* config/tc-hppa.c: Include "struc-symbol.h".
+	(pa_build_unwind_subspace): Use call_info->start_symbol->sy_frag
+	instead of frag_now for local symbol replacement.
+
 2018-06-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master branch
