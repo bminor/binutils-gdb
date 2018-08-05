@@ -10810,8 +10810,7 @@ plt_stub_size (struct ppc_link_hash_table *htab,
       && htab->params->tls_get_addr_opt)
     {
       size += 7 * 4;
-      if (ALWAYS_EMIT_R2SAVE
-	  || stub_entry->stub_type == ppc_stub_plt_call_r2save)
+      if (stub_entry->stub_type == ppc_stub_plt_call_r2save)
 	size += 6 * 4;
     }
   return size;
@@ -11056,8 +11055,7 @@ build_tls_get_addr_stub (struct ppc_link_hash_table *htab,
   bfd_put_32 (obfd, MR_R3_R0, p),		p += 4;
   if (r != NULL)
     r[0].r_offset += 7 * 4;
-  if (!ALWAYS_EMIT_R2SAVE
-      && stub_entry->stub_type != ppc_stub_plt_call_r2save)
+  if (stub_entry->stub_type != ppc_stub_plt_call_r2save)
     return build_plt_stub (htab, stub_entry, p, offset, r);
 
   bfd_put_32 (obfd, MFLR_R11, p),		p += 4;
@@ -11620,8 +11618,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  && (stub_entry->h == htab->tls_get_addr_fd
 	      || stub_entry->h == htab->tls_get_addr)
 	  && htab->params->tls_get_addr_opt
-	  && (ALWAYS_EMIT_R2SAVE
-	      || stub_entry->stub_type == ppc_stub_plt_call_r2save))
+	  && stub_entry->stub_type == ppc_stub_plt_call_r2save)
 	stub_entry->group->tls_get_addr_opt_bctrl
 	  = stub_entry->stub_offset + size - 5 * 4;
 
@@ -14880,10 +14877,13 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      addend = 0;
 	      reloc_dest = DEST_STUB;
 
-	      if ((stub_entry->stub_type == ppc_stub_plt_call
+	      if (((stub_entry->stub_type == ppc_stub_plt_call
+		    && ALWAYS_EMIT_R2SAVE)
 		   || stub_entry->stub_type == ppc_stub_plt_call_r2save)
-		  && (ALWAYS_EMIT_R2SAVE
-		      || stub_entry->stub_type == ppc_stub_plt_call_r2save)
+		  && !(h != NULL
+		       && (h == htab->tls_get_addr_fd
+			   || h == htab->tls_get_addr)
+		       && htab->params->tls_get_addr_opt)
 		  && rel + 1 < relend
 		  && rel[1].r_offset == rel->r_offset + 4
 		  && ELF64_R_TYPE (rel[1].r_info) == R_PPC64_TOCSAVE)
