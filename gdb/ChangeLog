@@ -1,5 +1,14 @@
 2018-08-06  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
+	* remote.c (remote_target::download_tracepoint): Remove BUF_SIZE.
+	Replace array buf with gdb::char_vector buf, of size
+	get_remote_packet_size ().  Replace references to buf and
+	BUF_SIZE to buf.data () and buf.size ().  Replace strcpy, strcat
+	and xsnprintf with snprintf.  Raise errors if the buffer is too
+	small.
+
+2018-08-06  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
 	* remote.c (remote_target::download_tracepoint): Fix the has_more
 	predicate in the QTDP action list iteration.
 

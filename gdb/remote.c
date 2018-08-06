@@ -12832,26 +12832,35 @@ remote_target::remote_download_command_source (int num, ULONGEST addr,
 void
 remote_target::download_tracepoint (struct bp_location *loc)
 {
-#define BUF_SIZE 2048
-
   CORE_ADDR tpaddr;
   char addrbuf[40];
-  char buf[BUF_SIZE];
   std::vector<std::string> tdp_actions;
   std::vector<std::string> stepping_actions;
   char *pkt;
   struct breakpoint *b = loc->owner;
   struct tracepoint *t = (struct tracepoint *) b;
   struct remote_state *rs = get_remote_state ();
+  int ret;
+  char *err_msg = _("Tracepoint packet too large for target.");
+  size_t size_left;
+
+  /* We use a buffer other than rs->buf because we'll build strings
+     across multiple statements, and other statements in between could
+     modify rs->buf.  */
+  gdb::char_vector buf (get_remote_packet_size ());
 
   encode_actions_rsp (loc, &tdp_actions, &stepping_actions);
 
   tpaddr = loc->address;
   sprintf_vma (addrbuf, tpaddr);
-  xsnprintf (buf, BUF_SIZE, "QTDP:%x:%s:%c:%lx:%x", b->number,
-	     addrbuf, /* address */
-	     (b->enable_state == bp_enabled ? 'E' : 'D'),
-	     t->step_count, t->pass_count);
+  ret = snprintf (buf.data (), buf.size (), "QTDP:%x:%s:%c:%lx:%x",
+		  b->number, addrbuf, /* address */
+		  (b->enable_state == bp_enabled ? 'E' : 'D'),
+		  t->step_count, t->pass_count);
+
+  if (ret < 0 || ret >= buf.size ())
+    error (err_msg);
+
   /* Fast tracepoints are mostly handled by the target, but we can
      tell the target how big of an instruction block should be moved
      around.  */
@@ -12863,8 +12872,15 @@ remote_target::download_tracepoint (struct bp_location *loc)
 	{
 	  if (gdbarch_fast_tracepoint_valid_at (loc->gdbarch, tpaddr,
 						NULL))
-	    xsnprintf (buf + strlen (buf), BUF_SIZE - strlen (buf), ":F%x",
-		       gdb_insn_length (loc->gdbarch, tpaddr));
+	    {
+	      size_left = buf.size () - strlen (buf.data ());
+	      ret = snprintf (buf.data () + strlen (buf.data ()),
+			      size_left, ":F%x",
+			      gdb_insn_length (loc->gdbarch, tpaddr));
+
+	      if (ret < 0 || ret >= size_left)
+		error (err_msg);
+	    }
 	  else
 	    /* If it passed validation at definition but fails now,
 	       something is very wrong.  */
@@ -12888,7 +12904,14 @@ remote_target::download_tracepoint (struct bp_location *loc)
 	  struct static_tracepoint_marker marker;
 
 	  if (target_static_tracepoint_marker_at (tpaddr, &marker))
-	    strcat (buf, ":S");
+	    {
+	      size_left = buf.size () - strlen (buf.data ());
+	      ret = snprintf (buf.data () + strlen (buf.data ()),
+			      size_left, ":S");
+
+	      if (ret < 0 || ret >= size_left)
+		error (err_msg);
+	    }
 	  else
 	    error (_("Static tracepoint not valid during download"));
 	}
@@ -12906,10 +12929,26 @@ remote_target::download_tracepoint (struct bp_location *loc)
 	 capabilities at definition time.  */
       if (remote_supports_cond_tracepoints ())
 	{
-	  agent_expr_up aexpr = gen_eval_for_expr (tpaddr, loc->cond.get ());
-	  xsnprintf (buf + strlen (buf), BUF_SIZE - strlen (buf), ":X%x,",
-		     aexpr->len);
-	  pkt = buf + strlen (buf);
+	  agent_expr_up aexpr = gen_eval_for_expr (tpaddr,
+						   loc->cond.get ());
+
+	  size_left = buf.size () - strlen (buf.data ());
+
+	  ret = snprintf (buf.data () + strlen (buf.data ()),
+			  size_left, ":X%x,", aexpr->len);
+
+	  if (ret < 0 || ret >= size_left)
+	    error (err_msg);
+
+	  size_left = buf.size () - strlen (buf.data ());
+
+	  /* Two bytes to encode each aexpr byte, plus the terminating
+	     null byte.  */
+	  if (aexpr->len * 2 + 1 > size_left)
+	    error (err_msg);
+
+	  pkt = buf.data () + strlen (buf.data ());
+
 	  for (int ndx = 0; ndx < aexpr->len; ++ndx)
 	    pkt = pack_hex_byte (pkt, aexpr->buf[ndx]);
 	  *pkt = '\0';
@@ -12920,8 +12959,17 @@ remote_target::download_tracepoint (struct bp_location *loc)
     }
 
   if (b->commands || *default_collect)
-    strcat (buf, "-");
-  putpkt (buf);
+    {
+      size_left = buf.size () - strlen (buf.data ());
+
+      ret = snprintf (buf.data () + strlen (buf.data ()),
+		      size_left, "-");
+
+      if (ret < 0 || ret >= size_left)
+	error (err_msg);
+    }
+
+  putpkt (buf.data ());
   remote_get_noisy_reply ();
   if (strcmp (rs->buf, "OK"))
     error (_("Target does not support tracepoints."));
@@ -12935,11 +12983,15 @@ remote_target::download_tracepoint (struct bp_location *loc)
       bool has_more = ((action_it + 1) != tdp_actions.end ()
 		       || !stepping_actions.empty ());
 
-      xsnprintf (buf, BUF_SIZE, "QTDP:-%x:%s:%s%c",
-		 b->number, addrbuf, /* address */
-		 action_it->c_str (),
-		 has_more ? '-' : 0);
-      putpkt (buf);
+      ret = snprintf (buf.data (), buf.size (), "QTDP:-%x:%s:%s%c",
+		      b->number, addrbuf, /* address */
+		      action_it->c_str (),
+		      has_more ? '-' : 0);
+
+      if (ret < 0 || ret >= buf.size ())
+	error (err_msg);
+
+      putpkt (buf.data ());
       remote_get_noisy_reply ();
       if (strcmp (rs->buf, "OK"))
 	error (_("Error on target while setting tracepoints."));
@@ -12953,12 +13005,16 @@ remote_target::download_tracepoint (struct bp_location *loc)
       bool is_first = action_it == stepping_actions.begin ();
       bool has_more = (action_it + 1) != stepping_actions.end ();
 
-      xsnprintf (buf, BUF_SIZE, "QTDP:-%x:%s:%s%s%s",
-		 b->number, addrbuf, /* address */
-		 is_first ? "S" : "",
-		 action_it->c_str (),
-		 has_more ? "-" : "");
-      putpkt (buf);
+      ret = snprintf (buf.data (), buf.size (), "QTDP:-%x:%s:%s%s%s",
+		      b->number, addrbuf, /* address */
+		      is_first ? "S" : "",
+		      action_it->c_str (),
+		      has_more ? "-" : "");
+
+      if (ret < 0 || ret >= buf.size ())
+	error (err_msg);
+
+      putpkt (buf.data ());
       remote_get_noisy_reply ();
       if (strcmp (rs->buf, "OK"))
 	error (_("Error on target while setting tracepoints."));
@@ -12968,22 +13024,32 @@ remote_target::download_tracepoint (struct bp_location *loc)
     {
       if (b->location != NULL)
 	{
-	  strcpy (buf, "QTDPsrc:");
+	  ret = snprintf (buf.data (), buf.size (), "QTDPsrc:");
+
+	  if (ret < 0 || ret >= buf.size ())
+	    error (err_msg);
+
 	  encode_source_string (b->number, loc->address, "at",
 				event_location_to_string (b->location.get ()),
-				buf + strlen (buf), 2048 - strlen (buf));
-	  putpkt (buf);
+				buf.data () + strlen (buf.data ()),
+				buf.size () - strlen (buf.data ()));
+	  putpkt (buf.data ());
 	  remote_get_noisy_reply ();
 	  if (strcmp (rs->buf, "OK"))
 	    warning (_("Target does not support source download."));
 	}
       if (b->cond_string)
 	{
-	  strcpy (buf, "QTDPsrc:");
+	  ret = snprintf (buf.data (), buf.size (), "QTDPsrc:");
+
+	  if (ret < 0 || ret >= buf.size ())
+	    error (err_msg);
+
 	  encode_source_string (b->number, loc->address,
-				"cond", b->cond_string, buf + strlen (buf),
-				2048 - strlen (buf));
-	  putpkt (buf);
+				"cond", b->cond_string,
+				buf.data () + strlen (buf.data ()),
+				buf.size () - strlen (buf.data ()));
+	  putpkt (buf.data ());
 	  remote_get_noisy_reply ();
 	  if (strcmp (rs->buf, "OK"))
 	    warning (_("Target does not support source download."));
