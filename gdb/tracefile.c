@@ -22,6 +22,7 @@
 #include "ctf.h"
 #include "exec.h"
 #include "regcache.h"
+#include "common/byte-vector.h"
 
 /* Helper macros.  */
 
@@ -67,7 +68,7 @@ trace_save (const char *filename, struct trace_file_writer *writer,
 
   ULONGEST offset = 0;
 #define MAX_TRACE_UPLOAD 2000
-  gdb_byte buf[MAX_TRACE_UPLOAD];
+  gdb::byte_vector buf (std::max (MAX_TRACE_UPLOAD, trace_regblock_size));
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
 
   /* If the target is to save the data to a file on its own, then just
@@ -144,7 +145,7 @@ trace_save (const char *filename, struct trace_file_writer *writer,
 	  /* We ask for big blocks, in the hopes of efficiency, but
 	     will take less if the target has packet size limitations
 	     or some such.  */
-	  gotten = target_get_raw_trace_data (buf, offset,
+	  gotten = target_get_raw_trace_data (buf.data (), offset,
 					      MAX_TRACE_UPLOAD);
 	  if (gotten < 0)
 	    error (_("Failure to get requested trace buffer data"));
@@ -152,7 +153,7 @@ trace_save (const char *filename, struct trace_file_writer *writer,
 	  if (gotten == 0)
 	    break;
 
-	  writer->ops->write_trace_buffer (writer, buf, gotten);
+	  writer->ops->write_trace_buffer (writer, buf.data (), gotten);
 
 	  offset += gotten;
 	}
@@ -163,7 +164,7 @@ trace_save (const char *filename, struct trace_file_writer *writer,
 	  /* Parse the trace buffers according to how data are stored
 	     in trace buffer in GDBserver.  */
 
-	  gotten = target_get_raw_trace_data (buf, offset, 6);
+	  gotten = target_get_raw_trace_data (buf.data (), offset, 6);
 
 	  if (gotten == 0)
 	    break;
@@ -171,10 +172,10 @@ trace_save (const char *filename, struct trace_file_writer *writer,
 	  /* Read the first six bytes in, which is the tracepoint
 	     number and trace frame size.  */
 	  tp_num = (uint16_t)
-	    extract_unsigned_integer (&buf[0], 2, byte_order);
+	    extract_unsigned_integer (&((buf.data ())[0]), 2, byte_order);
 
 	  tf_size = (uint32_t)
-	    extract_unsigned_integer (&buf[2], 4, byte_order);
+	    extract_unsigned_integer (&((buf.data ())[2]), 4, byte_order);
 
 	  writer->ops->frame_ops->start (writer, tp_num);
 	  gotten = 6;
@@ -192,7 +193,8 @@ trace_save (const char *filename, struct trace_file_writer *writer,
 		  /* We'll fetch one block each time, in order to
 		     handle the extremely large 'M' block.  We first
 		     fetch one byte to get the type of the block.  */
-		  gotten = target_get_raw_trace_data (buf, offset, 1);
+		  gotten = target_get_raw_trace_data (buf.data (),
+						      offset, 1);
 		  if (gotten < 1)
 		    error (_("Failure to get requested trace buffer data"));
 
@@ -205,13 +207,13 @@ trace_save (const char *filename, struct trace_file_writer *writer,
 		    {
 		    case 'R':
 		      gotten
-			= target_get_raw_trace_data (buf, offset,
+			= target_get_raw_trace_data (buf.data (), offset,
 						     trace_regblock_size);
 		      if (gotten < trace_regblock_size)
 			error (_("Failure to get requested trace"
 				 " buffer data"));
 
-		      TRACE_WRITE_R_BLOCK (writer, buf,
+		      TRACE_WRITE_R_BLOCK (writer, buf.data (),
 					   trace_regblock_size);
 		      break;
 		    case 'M':
@@ -221,7 +223,8 @@ trace_save (const char *filename, struct trace_file_writer *writer,
 			LONGEST t;
 			int j;
 
-			t = target_get_raw_trace_data (buf,offset, 10);
+			t = target_get_raw_trace_data (buf.data (),
+						       offset, 10);
 			if (t < 10)
 			  error (_("Failure to get requested trace"
 				   " buffer data"));
@@ -231,10 +234,10 @@ trace_save (const char *filename, struct trace_file_writer *writer,
 
 			gotten = 0;
 			addr = (ULONGEST)
-			  extract_unsigned_integer (buf, 8,
+			  extract_unsigned_integer (buf.data (), 8,
 						    byte_order);
 			mlen = (unsigned short)
-			  extract_unsigned_integer (&buf[8], 2,
+			  extract_unsigned_integer (&((buf.data ())[8]), 2,
 						    byte_order);
 
 			TRACE_WRITE_M_BLOCK_HEADER (writer, addr,
@@ -252,14 +255,15 @@ trace_save (const char *filename, struct trace_file_writer *writer,
 			    else
 			      read_length = mlen - j;
 
-			    t = target_get_raw_trace_data (buf,
+			    t = target_get_raw_trace_data (buf.data (),
 							   offset + j,
 							   read_length);
 			    if (t < read_length)
 			      error (_("Failure to get requested"
 				       " trace buffer data"));
 
-			    TRACE_WRITE_M_BLOCK_MEMORY (writer, buf,
+			    TRACE_WRITE_M_BLOCK_MEMORY (writer,
+							buf.data (),
 							read_length);
 
 			    j += read_length;
@@ -274,18 +278,18 @@ trace_save (const char *filename, struct trace_file_writer *writer,
 			LONGEST val;
 
 			gotten
-			  = target_get_raw_trace_data (buf, offset,
-						       12);
+			  = target_get_raw_trace_data (buf.data (),
+						       offset, 12);
 			if (gotten < 12)
 			  error (_("Failure to get requested"
 				   " trace buffer data"));
 
-			vnum  = (int) extract_signed_integer (buf,
+			vnum  = (int) extract_signed_integer (buf.data (),
 							      4,
 							      byte_order);
 			val
-			  = extract_signed_integer (&buf[4], 8,
-						    byte_order);
+			  = extract_signed_integer (&((buf.data ())[4]),
+						    8, byte_order);
 
 			TRACE_WRITE_V_BLOCK (writer, vnum, val);
 		      }

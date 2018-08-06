@@ -1,5 +1,11 @@
 2018-08-06  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
+	* tracefile.c: Include common/byte-vector.h.
+	(trace_save): Change type of buf to gdb::byte_vector.  Initialize
+	with trace_regblock_size if needed.  Update uses of buf.
+
+2018-08-06  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
 	* tracepoint.h (collection_list) <m_regs_mask>: Change type to
 	std::vector<unsigned char>.
 	* tracepoint.c (collection_list::collection_list): Remove
