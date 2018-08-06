@@ -917,14 +917,16 @@ arc_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	       && !bfd_elf_get_obj_attr_int (ibfd, OBJ_ATTR_PROC,
 					     Tag_ARC_CPU_base))
 	{
-	  /* Warn if different flags.  */
-	  _bfd_error_handler
-	    /* xgettext:c-format */
-	    (_("%pB: uses different e_flags (%#x) fields than "
-	       "previous modules (%#x)"),
-	     ibfd, in_flags, out_flags);
 	  if (in_flags && out_flags)
-	    return FALSE;
+	    {
+	      /* Warn if different flags.  */
+	      _bfd_error_handler
+		/* xgettext:c-format */
+		(_("%pB: uses different e_flags (%#x) fields than "
+		   "previous modules (%#x)"),
+		 ibfd, in_flags, out_flags);
+	      return FALSE;
+	    }
 	  /* MWDT doesnt set the eflags hence make sure we choose the
 	     eflags set by gcc.  */
 	  in_flags = in_flags > out_flags ? in_flags : out_flags;
@@ -2894,6 +2896,7 @@ elf32_arc_section_from_shdr (bfd *abfd,
 {
   switch (hdr->sh_type)
     {
+    case 0x0c: /* MWDT specific section, don't complain about it.  */
     case SHT_ARC_ATTRIBUTES:
       break;
 
