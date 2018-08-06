@@ -1882,13 +1882,20 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 		case O_symbol:
 		  {
 		    const char *p;
+		    char *tmpp, *pp;
 		    const struct arc_aux_reg *auxr;
 
 		    if (opcode->insn_class != AUXREG)
 		      goto de_fault;
 		    p = S_GET_NAME (tok[tokidx].X_add_symbol);
 
-		    auxr = hash_find (arc_aux_hash, p);
+		    /* For compatibility reasons, an aux register can
+		       be spelled with upper or lower case
+		       letters.  */
+		    tmpp = strdup (p);
+		    for (pp = tmpp; *pp; ++pp) *pp = TOLOWER (*pp);
+
+		    auxr = hash_find (arc_aux_hash, tmpp);
 		    if (auxr)
 		      {
 			/* We modify the token array here, safe in the
@@ -1899,6 +1906,7 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 			tok[tokidx].X_add_number = auxr->address;
 			ARC_SET_FLAG (tok[tokidx].X_add_symbol, ARC_FLAG_AUX);
 		      }
+		    free (tmpp);
 
 		    if (tok[tokidx].X_op != O_constant)
 		      goto de_fault;
