@@ -12932,7 +12932,7 @@ remote_target::download_tracepoint (struct bp_location *loc)
     {
       QUIT;	/* Allow user to bail out with ^C.  */
 
-      bool has_more = (action_it != tdp_actions.end ()
+      bool has_more = ((action_it + 1) != tdp_actions.end ()
 		       || !stepping_actions.empty ());
 
       xsnprintf (buf, BUF_SIZE, "QTDP:-%x:%s:%s%c",
@@ -12951,7 +12951,7 @@ remote_target::download_tracepoint (struct bp_location *loc)
       QUIT;	/* Allow user to bail out with ^C.  */
 
       bool is_first = action_it == stepping_actions.begin ();
-      bool has_more = action_it != stepping_actions.end ();
+      bool has_more = (action_it + 1) != stepping_actions.end ();
 
       xsnprintf (buf, BUF_SIZE, "QTDP:-%x:%s:%s%s%s",
 		 b->number, addrbuf, /* address */

@@ -1,5 +1,10 @@
 2018-08-06  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
+	* remote.c (remote_target::download_tracepoint): Fix the has_more
+	predicate in the QTDP action list iteration.
+
+2018-08-06  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
 	* remote.c (remote_target::download_tracepoint): Fix indentation
 	in for block.
 
