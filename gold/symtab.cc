@@ -2623,11 +2623,12 @@ Symbol_table::set_dynsym_indexes(unsigned int index,
 		versions->record_version(this, dynpool, sym);
 	      else
 		{
-		  gold_warning(_("discarding version information for "
-				 "%s@%s, defined in unused shared library %s "
-				 "(linked with --as-needed)"),
-			       sym->name(), sym->version(),
-			       sym->object()->name().c_str());
+		  if (parameters->options().warn_drop_version())
+		    gold_warning(_("discarding version information for "
+				   "%s@%s, defined in unused shared library %s "
+				   "(linked with --as-needed)"),
+				 sym->name(), sym->version(),
+				 sym->object()->name().c_str());
 		  sym->clear_version();
 		}
 	    }
