@@ -1,5 +1,19 @@
 2018-08-06  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
+	* tracepoint.h (collection_list) <m_regs_mask>: Change type to
+	std::vector<unsigned char>.
+	* tracepoint.c (collection_list::collection_list): Remove
+	m_regs_mask initializer from initializer list.  Resize
+	m_regs_mask using the largest remote register number.
+	(collection_list::add_remote_register): Remove size check on
+	m_regs_mask.  Use at to access element.
+	(collection_list::stringify): Change type of temp_buf to
+	gdb::char_vector.  Update uses of temp_buf.  Resize if needed to
+	stringify the register mask.  Use pack_hex_byte for the register
+	mask.
+
+2018-08-06  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
 	* tracepoint.h (class collection_list) <add_register>: Remove.
 	<add_remote_register, add_ax_registers, add_local_register>:
 	Declare.

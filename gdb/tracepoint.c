@@ -822,10 +822,8 @@ collection_list::add_remote_register (unsigned int regno)
 {
   if (info_verbose)
     printf_filtered ("collect register %d\n", regno);
-  if (regno >= (8 * sizeof (m_regs_mask)))
-    error (_("Internal: register number %d too large for tracepoint"),
-	   regno);
-  m_regs_mask[regno / 8] |= 1 << (regno % 8);
+
+  m_regs_mask.at (regno / 8) |= 1 << (regno % 8);
 }
 
 /* Add all the registers from the mask in AEXPR to the mask in the
@@ -1136,9 +1134,20 @@ collection_list::add_static_trace_data ()
 }
 
 collection_list::collection_list ()
-  : m_regs_mask (),
-    m_strace_data (false)
+  : m_strace_data (false)
 {
+  int max_remote_regno = 0;
+  for (int i = 0; i < gdbarch_num_regs (target_gdbarch ()); i++)
+    {
+      int remote_regno = (gdbarch_remote_register_number
+			  (target_gdbarch (), i));
+
+      if (remote_regno >= 0 && remote_regno > max_remote_regno)
+	max_remote_regno = remote_regno;
+    }
+
+  m_regs_mask.resize ((max_remote_regno / 8) + 1);
+
   m_memranges.reserve (128);
   m_aexprs.reserve (128);
 }
@@ -1148,7 +1157,8 @@ collection_list::collection_list ()
 std::vector<std::string>
 collection_list::stringify ()
 {
-  char temp_buf[2048];
+  gdb::char_vector temp_buf (2048);
+
   int count;
   char *end;
   long i;
@@ -1158,35 +1168,45 @@ collection_list::stringify ()
     {
       if (info_verbose)
 	printf_filtered ("\nCollecting static trace data\n");
-      end = temp_buf;
+      end = temp_buf.data ();
       *end++ = 'L';
-      str_list.emplace_back (temp_buf, end - temp_buf);
+      str_list.emplace_back (temp_buf.data (), end - temp_buf.data ());
     }
 
-  for (i = sizeof (m_regs_mask) - 1; i > 0; i--)
+  for (i = m_regs_mask.size () - 1; i > 0; i--)
     if (m_regs_mask[i] != 0)    /* Skip leading zeroes in regs_mask.  */
       break;
   if (m_regs_mask[i] != 0)	/* Prepare to send regs_mask to the stub.  */
     {
       if (info_verbose)
 	printf_filtered ("\nCollecting registers (mask): 0x");
-      end = temp_buf;
+
+      /* One char for 'R', one for the null terminator and two per
+	 mask byte.  */
+      std::size_t new_size = (i + 1) * 2 + 2;
+      if (new_size > temp_buf.size ())
+	temp_buf.resize (new_size);
+
+      end = temp_buf.data ();
       *end++ = 'R';
       for (; i >= 0; i--)
 	{
 	  QUIT;			/* Allow user to bail out with ^C.  */
 	  if (info_verbose)
 	    printf_filtered ("%02X", m_regs_mask[i]);
-	  sprintf (end, "%02X", m_regs_mask[i]);
-	  end += 2;
+
+	  end = pack_hex_byte (end, m_regs_mask[i]);
 	}
-      str_list.emplace_back (temp_buf);
+      *end = '\0';
+
+      str_list.emplace_back (temp_buf.data ());
     }
   if (info_verbose)
     printf_filtered ("\n");
   if (!m_memranges.empty () && info_verbose)
     printf_filtered ("Collecting memranges: \n");
-  for (i = 0, count = 0, end = temp_buf; i < m_memranges.size (); i++)
+  for (i = 0, count = 0, end = temp_buf.data ();
+       i < m_memranges.size (); i++)
     {
       QUIT;			/* Allow user to bail out with ^C.  */
       if (info_verbose)
@@ -1200,9 +1220,9 @@ collection_list::stringify ()
 	}
       if (count + 27 > MAX_AGENT_EXPR_LEN)
 	{
-	  str_list.emplace_back (temp_buf, count);
+	  str_list.emplace_back (temp_buf.data (), count);
 	  count = 0;
-	  end = temp_buf;
+	  end = temp_buf.data ();
 	}
 
       {
@@ -1222,7 +1242,7 @@ collection_list::stringify ()
       }
 
       count += strlen (end);
-      end = temp_buf + count;
+      end = temp_buf.data () + count;
     }
 
   for (i = 0; i < m_aexprs.size (); i++)
@@ -1230,9 +1250,9 @@ collection_list::stringify ()
       QUIT;			/* Allow user to bail out with ^C.  */
       if ((count + 10 + 2 * m_aexprs[i]->len) > MAX_AGENT_EXPR_LEN)
 	{
-	  str_list.emplace_back (temp_buf, count);
+	  str_list.emplace_back (temp_buf.data (), count);
 	  count = 0;
-	  end = temp_buf;
+	  end = temp_buf.data ();
 	}
       sprintf (end, "X%08X,", m_aexprs[i]->len);
       end += 10;		/* 'X' + 8 hex digits + ',' */
@@ -1244,9 +1264,9 @@ collection_list::stringify ()
 
   if (count != 0)
     {
-      str_list.emplace_back (temp_buf, count);
+      str_list.emplace_back (temp_buf.data (), count);
       count = 0;
-      end = temp_buf;
+      end = temp_buf.data ();
     }
 
   return str_list;

@@ -292,8 +292,9 @@ public:
   { return m_computed; }
 
 private:
-  /* room for up to 256 regs */
-  unsigned char m_regs_mask[32];
+  /* We need the allocator zero-initialize the mask, so we don't use
+     gdb::byte_vector.  */
+  std::vector<unsigned char> m_regs_mask;
 
   std::vector<memrange> m_memranges;
 
