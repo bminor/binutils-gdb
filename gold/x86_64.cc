@@ -1307,7 +1307,8 @@ class Target_x86_64 : public Sized_target<size, false>
   // Record a target-specific program property in the .note.gnu.property
   // section.
   void
-  record_gnu_property(int, int, size_t, const unsigned char*, const Object*);
+  record_gnu_property(unsigned int, unsigned int, size_t,
+		      const unsigned char*, const Object*);
 
   // Merge the target-specific program properties from the current object.
   void
@@ -1579,7 +1580,7 @@ Target_x86_64<size>::rela_irelative_section(Layout* layout)
 template<int size>
 void
 Target_x86_64<size>::record_gnu_property(
-    int, int pr_type,
+    unsigned int, unsigned int pr_type,
     size_t pr_datasz, const unsigned char* pr_data,
     const Object* object)
 {

@@ -1,3 +1,9 @@
+2018-08-06  Cary Coutant  <ccoutant@gmail.com>
+
+	* target.h (Sized_target::record_gnu_property): Change first two
+	parameters to unsigned int.
+	* x86_64.cc (Target_x86_64::record_gnu_property): Likewise.
+
 2018-07-18  Nick Clifton  <nickc@redhat.com>
 
 	2.31.1 Release point.
