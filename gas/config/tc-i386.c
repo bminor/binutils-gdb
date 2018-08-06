@@ -7094,8 +7094,7 @@ build_modrm_byte (void)
 
 	  if (i.tm.opcode_modifier.vecsib)
 	    {
-	      if (i.index_reg->reg_num == RegEiz
-		  || i.index_reg->reg_num == RegRiz)
+	      if (i.index_reg->reg_num == RegIZ)
 		abort ();
 
 	      i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
@@ -7166,8 +7165,7 @@ build_modrm_byte (void)
 	      else if (!i.tm.opcode_modifier.vecsib)
 		{
 		  /* !i.base_reg && i.index_reg  */
-		  if (i.index_reg->reg_num == RegEiz
-		      || i.index_reg->reg_num == RegRiz)
+		  if (i.index_reg->reg_num == RegIZ)
 		    i.sib.index = NO_INDEX_REGISTER;
 		  else
 		    i.sib.index = i.index_reg->reg_num;
@@ -7193,8 +7191,7 @@ build_modrm_byte (void)
 		}
 	    }
 	  /* RIP addressing for 64bit mode.  */
-	  else if (i.base_reg->reg_num == RegRip ||
-		   i.base_reg->reg_num == RegEip)
+	  else if (i.base_reg->reg_num == RegIP)
 	    {
 	      gas_assert (!i.tm.opcode_modifier.vecsib);
 	      i.rm.regmem = NO_BASE_REGISTER;
@@ -7286,8 +7283,7 @@ build_modrm_byte (void)
 		}
 	      else if (!i.tm.opcode_modifier.vecsib)
 		{
-		  if (i.index_reg->reg_num == RegEiz
-		      || i.index_reg->reg_num == RegRiz)
+		  if (i.index_reg->reg_num == RegIZ)
 		    i.sib.index = NO_INDEX_REGISTER;
 		  else
 		    i.sib.index = i.index_reg->reg_num;
@@ -8133,8 +8129,7 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 		    {
 		      fixP->fx_tcbit = i.rex != 0;
 		      if (i.base_reg
-			  && (i.base_reg->reg_num == RegRip
-			      || i.base_reg->reg_num == RegEip))
+			  && (i.base_reg->reg_num == RegIP))
 		      fixP->fx_tcbit2 = 1;
 		    }
 		  else
@@ -9235,9 +9230,7 @@ i386_addressing_mode (void)
 
 	  if (addr_reg)
 	    {
-	      if (addr_reg->reg_num == RegEip
-		  || addr_reg->reg_num == RegEiz
-		  || addr_reg->reg_type.bitfield.dword)
+	      if (addr_reg->reg_type.bitfield.dword)
 		addr_mode = CODE_32BIT;
 	      else if (flag_code != CODE_64BIT
 		       && addr_reg->reg_type.bitfield.word)
@@ -9347,21 +9340,18 @@ bad_address:
 	{
 	  /* 32-bit/64-bit checks.  */
 	  if ((i.base_reg
-	       && (addr_mode == CODE_64BIT
-		   ? !i.base_reg->reg_type.bitfield.qword
-		   : !i.base_reg->reg_type.bitfield.dword)
-	       && (i.index_reg
-		   || (i.base_reg->reg_num
-		       != (addr_mode == CODE_64BIT ? RegRip : RegEip))))
+	       && ((addr_mode == CODE_64BIT
+		    ? !i.base_reg->reg_type.bitfield.qword
+		    : !i.base_reg->reg_type.bitfield.dword)
+		   || (i.index_reg && i.base_reg->reg_num == RegIP)
+		   || i.base_reg->reg_num == RegIZ))
 	      || (i.index_reg
 		  && !i.index_reg->reg_type.bitfield.xmmword
 		  && !i.index_reg->reg_type.bitfield.ymmword
 		  && !i.index_reg->reg_type.bitfield.zmmword
 		  && ((addr_mode == CODE_64BIT
-		       ? !(i.index_reg->reg_type.bitfield.qword
-			   || i.index_reg->reg_num == RegRiz)
-		       : !(i.index_reg->reg_type.bitfield.dword
-			   || i.index_reg->reg_num == RegEiz))
+		       ? !i.index_reg->reg_type.bitfield.qword
+		       : !i.index_reg->reg_type.bitfield.dword)
 		      || !i.index_reg->reg_type.bitfield.baseindex)))
 	    goto bad_address;
 
@@ -9370,7 +9360,7 @@ bad_address:
 	      || (current_templates->start->base_opcode & ~1) == 0x0f1a)
 	    {
 	      /* They cannot use RIP-relative addressing. */
-	      if (i.base_reg && i.base_reg->reg_num == RegRip)
+	      if (i.base_reg && i.base_reg->reg_num == RegIP)
 		{
 		  as_bad (_("`%s' cannot be used here"), operand_string);
 		  return 0;
@@ -10430,8 +10420,7 @@ parse_real_register (char *reg_string, char **end_op)
     return (const reg_entry *) NULL;
 
   /* Don't allow fake index register unless allow_index_reg isn't 0. */
-  if (!allow_index_reg
-      && (r->reg_num == RegEiz || r->reg_num == RegRiz))
+  if (!allow_index_reg && r->reg_num == RegIZ)
     return (const reg_entry *) NULL;
 
   /* Upper 16 vector registers are only available with VREX in 64bit

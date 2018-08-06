@@ -289,8 +289,7 @@ i386_intel_simplify_register (expressionS *e)
 	   && (i386_regtab[reg_num].reg_type.bitfield.xmmword
 	       || i386_regtab[reg_num].reg_type.bitfield.ymmword
 	       || i386_regtab[reg_num].reg_type.bitfield.zmmword
-	       || i386_regtab[reg_num].reg_num == RegRiz
-	       || i386_regtab[reg_num].reg_num == RegEiz))
+	       || i386_regtab[reg_num].reg_num == RegIZ))
     intel_state.index = i386_regtab + reg_num;
   else if (!intel_state.base && !intel_state.in_scale)
     intel_state.base = i386_regtab + reg_num;

@@ -1,3 +1,14 @@
+2018-08-06  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (build_modrm_byte): Use RegIP and RegIZ.
+	(output_disp): Use RegIP.
+	(i386_addressing_mode): Drop uses of RegEip and RegEiz.
+	(i386_index_check): Replace uses of RegEip/RegEiz.
+	(parse_real_register): Use RegIZ.
+	* config/tc-i386-intel.c (i386_intel_simplify_register): Use
+	RegIZ.
+	* testsuite/gas/i386/x86-64-mpx-inval-2.l: Adjust expectations.
+
 2018-08-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/gas/i386/i386.exp: Run evex-no-scale-32 and

@@ -895,11 +895,9 @@ typedef struct
 #define RegRex64    0x2  /* Extended 8 bit register.  */
 #define RegVRex	    0x4  /* Extended vector register.  */
   unsigned char reg_num;
-#define RegRip	((unsigned char ) ~0)
-#define RegEip	(RegRip - 1)
+#define RegIP	((unsigned char ) ~0)
 /* EIZ and RIZ are fake index registers.  */
-#define RegEiz	(RegEip - 1)
-#define RegRiz	(RegEiz - 1)
+#define RegIZ	(RegIP - 1)
 /* FLAT is a fake segment register (Intel mode).  */
 #define RegFlat     ((unsigned char) ~0)
   signed char dw2_regnum[2];
