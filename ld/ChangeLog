@@ -1,5 +1,12 @@
 2018-08-06  Claudiu Zissulescu  <claziss@synopsys.com>
 
+	* testsuite/ld-arc/attr-merge-6.d: New file.
+	* testsuite/ld-arc/attr-merge-6a.s: Likewise.
+	* testsuite/ld-arc/attr-merge-6b.s: Likewise.
+	* testsuite/ld-arc/attr-merge-6bis.d: Likewise.
+
+2018-08-06  Claudiu Zissulescu  <claziss@synopsys.com>
+
 	* testsuite/ld-arc/attr-merge-0.d: Update test.
 	* testsuite/ld-arc/attr-merge-1.d: Likewise.
 	* testsuite/ld-arc/attr-merge-2.d: Likewise.
