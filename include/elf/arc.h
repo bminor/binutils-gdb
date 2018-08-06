@@ -83,7 +83,8 @@ enum {
   Tag_ARC_ABI_double_size,
   Tag_ARC_ISA_config,
   Tag_ARC_ISA_apex,
-  Tag_ARC_ISA_mpy_option
+  Tag_ARC_ISA_mpy_option,
+  Tag_ARC_ATR_version = 20
 };
 
 /* Values for the Tag_ARC_cpu_base attribute.  */

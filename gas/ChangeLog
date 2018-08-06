@@ -1,5 +1,40 @@
 2018-08-06  Claudiu Zissulescu  <claziss@synopsys.com>
 
+	* config/tc-arc.c (arc_set_public_attributes): Add
+	Tag_ARC_ATR_version.
+	(arc_convert_symbolic_attribute): Likewise.
+	* testsuite/gas/arc/attr-arc600.d: Update test.
+	* testsuite/gas/arc/attr-arc600_mul32x16.d: Likewise.
+	* testsuite/gas/arc/attr-arc600_norm.d: Likewise.
+	* testsuite/gas/arc/attr-arc601.d: Likewise.
+	* testsuite/gas/arc/attr-arc601_mul32x16.d: Likewise.
+	* testsuite/gas/arc/attr-arc601_mul64.d: Likewise.
+	* testsuite/gas/arc/attr-arc601_norm.d: Likewise.
+	* testsuite/gas/arc/attr-arc700.d: Likewise.
+	* testsuite/gas/arc/attr-arcem.d: Likewise.
+	* testsuite/gas/arc/attr-archs.d: Likewise.
+	* testsuite/gas/arc/attr-autodetect-1.d: Likewise.
+	* testsuite/gas/arc/attr-cpu-a601.d: Likewise.
+	* testsuite/gas/arc/attr-cpu-a700.d: Likewise.
+	* testsuite/gas/arc/attr-cpu-em.d: Likewise.
+	* testsuite/gas/arc/attr-cpu-hs.d: Likewise.
+	* testsuite/gas/arc/attr-em.d: Likewise.
+	* testsuite/gas/arc/attr-em4.d: Likewise.
+	* testsuite/gas/arc/attr-em4_dmips.d: Likewise.
+	* testsuite/gas/arc/attr-em4_fpuda.d: Likewise.
+	* testsuite/gas/arc/attr-em4_fpus.d: Likewise.
+	* testsuite/gas/arc/attr-hs.d: Likewise.
+	* testsuite/gas/arc/attr-hs34.d: Likewise.
+	* testsuite/gas/arc/attr-hs38.d: Likewise.
+	* testsuite/gas/arc/attr-hs38_linux.d: Likewise.
+	* testsuite/gas/arc/attr-mul64.d: Likewise.
+	* testsuite/gas/arc/attr-name.d: Likewise.
+	* testsuite/gas/arc/attr-nps400.d: Likewise.
+	* testsuite/gas/arc/attr-override-mcpu.d: Likewise.
+	* testsuite/gas/arc/attr-quarkse_em.d: Likewise.
+
+2018-08-06  Claudiu Zissulescu  <claziss@synopsys.com>
+
 	* config/tc-arc.c (find_opcode_match): Accept uppercase aux-regs
 	names.
 	* testsuite/gas/arc/ld2.d: Update test.

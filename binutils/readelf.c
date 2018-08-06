@@ -14246,6 +14246,12 @@ display_arc_attribute (unsigned char * p,
       printf ("  Tag_ARC_ISA_mpy_option: %d\n", val);
       break;
 
+    case Tag_ARC_ATR_version:
+      val = read_uleb128 (p, &len, end);
+      p += len;
+      printf ("  Tag_ARC_ATR_version: %d\n", val);
+      break;
+
     default:
       return display_tag_value (tag & 1, p, end);
     }

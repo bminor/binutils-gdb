@@ -1,3 +1,8 @@
+2018-08-06  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* elf32-arc.c (arc_elf_merge_attributes): Handle
+	Tag_ARC_ATR_version.
+
 2018-08-05  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ADDI_R12_R11, ADDI_R12_R12, LIS_R12),

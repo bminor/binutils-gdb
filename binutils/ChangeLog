@@ -1,3 +1,7 @@
+2018-08-06  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* readelf.c (display_arc_attribute): Print Tag_ARC_ATR_version.
+
 2018-08-03  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (merge_gnu_build_notes): Delete empty notes.  Merge

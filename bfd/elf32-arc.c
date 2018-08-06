@@ -578,6 +578,7 @@ arc_elf_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
   bfd_boolean result = TRUE;
   const char *sec_name = get_elf_backend_data (ibfd)->obj_attrs_section;
   char *tagname = NULL;
+  int offset = 0;
 
   /* Skip the linker stubs file.  This preserves previous behavior
      of accepting unknown attributes in the first input file - but
@@ -803,6 +804,11 @@ arc_elf_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 
 	case Tag_ARC_ISA_config:
 	  /* It is handled in Tag_ARC_CPU_base.  */
+	  break;
+
+	case Tag_ARC_ATR_version:
+	  if (out_attr[i].i == 0)
+	    out_attr[i].i = in_attr[i].i;
 	  break;
 
 	default:
