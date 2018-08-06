@@ -12945,24 +12945,24 @@ remote_target::download_tracepoint (struct bp_location *loc)
 	error (_("Error on target while setting tracepoints."));
     }
 
-    for (auto action_it = stepping_actions.begin ();
-	 action_it != stepping_actions.end (); action_it++)
-      {
-	QUIT;	/* Allow user to bail out with ^C.  */
+  for (auto action_it = stepping_actions.begin ();
+       action_it != stepping_actions.end (); action_it++)
+    {
+      QUIT;	/* Allow user to bail out with ^C.  */
 
-	bool is_first = action_it == stepping_actions.begin ();
-	bool has_more = action_it != stepping_actions.end ();
+      bool is_first = action_it == stepping_actions.begin ();
+      bool has_more = action_it != stepping_actions.end ();
 
-	xsnprintf (buf, BUF_SIZE, "QTDP:-%x:%s:%s%s%s",
-		   b->number, addrbuf, /* address */
-		   is_first ? "S" : "",
-		   action_it->c_str (),
-		   has_more ? "-" : "");
-	putpkt (buf);
-	remote_get_noisy_reply ();
-	if (strcmp (rs->buf, "OK"))
-	  error (_("Error on target while setting tracepoints."));
-      }
+      xsnprintf (buf, BUF_SIZE, "QTDP:-%x:%s:%s%s%s",
+		 b->number, addrbuf, /* address */
+		 is_first ? "S" : "",
+		 action_it->c_str (),
+		 has_more ? "-" : "");
+      putpkt (buf);
+      remote_get_noisy_reply ();
+      if (strcmp (rs->buf, "OK"))
+	error (_("Error on target while setting tracepoints."));
+    }
 
   if (packet_support (PACKET_TracepointSource) == PACKET_ENABLE)
     {

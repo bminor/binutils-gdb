@@ -1,3 +1,8 @@
+2018-08-06  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* remote.c (remote_target::download_tracepoint): Fix indentation
+	in for block.
+
 2018-08-06  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* proc-api.c (_initialize_proc_api): Remove c, unused.
