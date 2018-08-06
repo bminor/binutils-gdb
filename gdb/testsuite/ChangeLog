@@ -1,3 +1,9 @@
+2018-08-06  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* dg-extract-results.sh: Move to toplevel contrib.
+	* Makefile.in (check-parallel): Reflect dg-extract-results.sh move.
+	* Makefile.in (check-parallel-racy): Likewise.
+
 2018-08-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* lib/gdb.exp (target_supports_scheduler_locking): New proc.

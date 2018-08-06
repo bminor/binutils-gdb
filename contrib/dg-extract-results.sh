@@ -6,7 +6,7 @@
 # The resulting file can be used with test result comparison scripts for
 # results from tests that were run in parallel.  See usage() below.
 
-# Copyright (C) 2008-2018 Free Software Foundation, Inc.
+# Copyright (C) 2008, 2009, 2010, 2012 Free Software Foundation
 # Contributed by Janis Johnson <janis187@us.ibm.com>
 #
 # This file is part of GCC.
@@ -22,7 +22,9 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# along with GCC; see the file COPYING.  If not, write to
+# the Free Software Foundation, 51 Franklin Street, Fifth Floor,
+# Boston, MA 02110-1301, USA.
 
 PROGNAME=dg-extract-results.sh
 
@@ -30,7 +32,7 @@ PROGNAME=dg-extract-results.sh
 PYTHON_VER=`echo "$0" | sed 's/sh$/py/'`
 if test "$PYTHON_VER" != "$0" &&
    test -f "$PYTHON_VER" &&
-   python -c 'import sys; sys.exit (0 if sys.version_info >= (2, 6) else 1)' \
+   python -c 'import sys, getopt, re, io, datetime, operator; sys.exit (0 if sys.version_info >= (2, 6) else 1)' \
      > /dev/null 2> /dev/null; then
   exec python $PYTHON_VER "$@"
 fi
@@ -367,10 +369,11 @@ EOF
 BEGIN {
   variant="$VAR"
   tool="$TOOL"
-  passcnt=0; failcnt=0; untstcnt=0; xpasscnt=0; xfailcnt=0; kpasscnt=0; kfailcnt=0; unsupcnt=0; unrescnt=0;
+  passcnt=0; failcnt=0; untstcnt=0; xpasscnt=0; xfailcnt=0; kpasscnt=0; kfailcnt=0; unsupcnt=0; unrescnt=0; dgerrorcnt=0;
   curvar=""; insummary=0
 }
 /^Running target /		{ curvar = \$3; next }
+/^ERROR: \(DejaGnu\)/		{ if (variant == curvar) dgerrorcnt += 1 }
 /^# of /			{ if (variant == curvar) insummary = 1 }
 /^# of expected passes/		{ if (insummary == 1) passcnt += \$5; next; }
 /^# of unexpected successes/	{ if (insummary == 1) xpasscnt += \$5; next; }
@@ -388,6 +391,7 @@ BEGIN {
 { next }
 END {
   printf ("\t\t=== %s Summary for %s ===\n\n", tool, variant)
+  if (dgerrorcnt != 0) printf ("# of DejaGnu errors\t\t%d\n", dgerrorcnt)
   if (passcnt != 0) printf ("# of expected passes\t\t%d\n", passcnt)
   if (failcnt != 0) printf ("# of unexpected failures\t%d\n", failcnt)
   if (xpasscnt != 0) printf ("# of unexpected successes\t%d\n", xpasscnt)
@@ -417,8 +421,9 @@ TOTAL_AWK=${TMP}/total.awk
 cat << EOF > $TOTAL_AWK
 BEGIN {
   tool="$TOOL"
-  passcnt=0; failcnt=0; untstcnt=0; xpasscnt=0; xfailcnt=0; kfailcnt=0; unsupcnt=0; unrescnt=0
+  passcnt=0; failcnt=0; untstcnt=0; xpasscnt=0; xfailcnt=0; kfailcnt=0; unsupcnt=0; unrescnt=0; dgerrorcnt=0
 }
+/^# of DejaGnu errors/		{ dgerrorcnt += \$5 }
 /^# of expected passes/		{ passcnt += \$5 }
 /^# of unexpected failures/	{ failcnt += \$5 }
 /^# of unexpected successes/	{ xpasscnt += \$5 }
@@ -430,6 +435,7 @@ BEGIN {
 /^# of unsupported tests/	{ unsupcnt += \$5 }
 END {
   printf ("\n\t\t=== %s Summary ===\n\n", tool)
+  if (dgerrorcnt != 0) printf ("# of DejaGnu errors\t\t%d\n", dgerrorcnt)
   if (passcnt != 0) printf ("# of expected passes\t\t%d\n", passcnt)
   if (failcnt != 0) printf ("# of unexpected failures\t%d\n", failcnt)
   if (xpasscnt != 0) printf ("# of unexpected successes\t%d\n", xpasscnt)

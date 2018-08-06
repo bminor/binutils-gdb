@@ -217,9 +217,9 @@ check-parallel:
 	-rm -rf cache outputs temp
 	$(MAKE) -k do-check-parallel; \
 	result=$$?; \
-	$(SHELL) $(srcdir)/dg-extract-results.sh \
+	$(SHELL) $(srcdir)/../../contrib/dg-extract-results.sh \
 	  `find outputs -name gdb.sum -print` > gdb.sum; \
-	$(SHELL) $(srcdir)/dg-extract-results.sh -L \
+	$(SHELL) $(srcdir)/../../contrib/dg-extract-results.sh -L \
 	  `find outputs -name gdb.log -print` > gdb.log; \
 	sed -n '/=== gdb Summary ===/,$$ p' gdb.sum; \
 	exit $$result
@@ -237,10 +237,10 @@ check-parallel-racy:
 	for n in `seq $$racyiter` ; do \
 	  $(MAKE) -k do-check-parallel-racy \
 	    RACY_OUTPUT_N=$$n; \
-	  $(SHELL) $(srcdir)/dg-extract-results.sh \
+	  $(SHELL) $(srcdir)/../../contrib/dg-extract-results.sh \
 	    `find racy_outputs/$$n -name gdb.sum -print` > \
 	    racy_outputs/$$n/gdb.sum; \
-	  $(SHELL) $(srcdir)/dg-extract-results.sh -L \
+	  $(SHELL) $(srcdir)/../../dg-extract-results.sh -L \
 	    `find racy_outputs/$$n -name gdb.log -print` > \
 	    racy_outputs/$$n/gdb.log; \
 	  sed -n '/=== gdb Summary ===/,$$ p' racy_outputs/$$n/gdb.sum; \
