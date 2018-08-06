@@ -53,4 +53,6 @@ g2:
  blr
 
 _start:
+ .cfi_startproc
  b _start
+ .cfi_endproc

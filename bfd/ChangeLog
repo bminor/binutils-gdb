@@ -1,5 +1,21 @@
 2018-08-07  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (struct map_stub): Delete tls_get_addr_opt_bctrl.
+	Add lr_restore, eh_size and eh_base.
+	(eh_advance, eh_advance_size): New functions.
+	(build_tls_get_addr_stub): Emit EH info for stub.
+	(ppc_build_one_stub): Likewise for _notoc stubs.
+	(ppc_size_one_stub): Size EH info for stub.
+	(group_sections): Init new map_stub fields.
+	(stub_eh_frame_size): Delete.
+	(ppc64_elf_size_stubs): Size EH info for stubs.  Set up dummy EH
+	program for stubs.
+	(ppc64_elf_build_stubs): Reinit new map_stub fields.  Set FDE
+	offset to stub section here..
+	(ppc64_elf_finish_dynamic_sections): ..rather than here.
+
+2018-08-07  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (ppc64_elf_relocate_section): Don't skip first
 	instruction of __tls_get_addr_opt stub.
 	(plt_stub_size): Omit ALWAYS_EMIT_R2SAVE condition when

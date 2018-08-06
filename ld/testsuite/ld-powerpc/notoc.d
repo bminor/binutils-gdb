@@ -1,7 +1,7 @@
 #source: notoc.s
 #as: -a64
 #ld: --no-plt-localentry -T ext.lnk
-#objdump: -dr
+#objdump: -d
 #target: powerpc64*-*-*
 
 .*
@@ -63,8 +63,8 @@ Disassembly of section \.text:
 .*:	(20 00 80 4e|4e 80 00 20) 	blr
 
 .* <f2>:
-.*:	(02 10 40 3c|3c 40 10 02) 	lis     r2,4098
-.*:	(00 90 42 38|38 42 90 00) 	addi    r2,r2,-28672
+.*:	(01 10 40 3c|3c 40 10 01) 	lis     r2,4097
+.*:	(00 80 42 38|38 42 80 00) 	addi    r2,r2,-32768
 .*:	(4d ff ff 4b|4b ff ff 4d) 	bl      .* <.*\.long_branch\.f1>
 .*:	(18 00 41 e8|e8 41 00 18) 	ld      r2,24\(r1\)
 .*:	(f9 ff ff 4b|4b ff ff f9) 	bl      .* <f2\+0x8>
@@ -78,8 +78,8 @@ Disassembly of section \.text:
 .*:	(20 00 80 4e|4e 80 00 20) 	blr
 
 .* <g2>:
-.*:	(02 10 40 3c|3c 40 10 02) 	lis     r2,4098
-.*:	(00 90 42 38|38 42 90 00) 	addi    r2,r2,-28672
+.*:	(01 10 40 3c|3c 40 10 01) 	lis     r2,4097
+.*:	(00 80 42 38|38 42 80 00) 	addi    r2,r2,-32768
 .*:	(cd ff ff 4b|4b ff ff cd) 	bl      .* <f2\+0x8>
 .*:	(00 00 00 60|60 00 00 00) 	nop
 .*:	(11 ff ff 4b|4b ff ff 11) 	bl      .* <.*\.long_branch\.f1>
@@ -96,7 +96,7 @@ Disassembly of section \.text:
 Disassembly of section \.text\.ext:
 
 8000000000000000 <ext>:
-8000000000000000:	(02 10 40 3c|3c 40 10 02) 	lis     r2,4098
-8000000000000004:	(00 90 42 38|38 42 90 00) 	addi    r2,r2,-28672
+8000000000000000:	(01 10 40 3c|3c 40 10 01) 	lis     r2,4097
+8000000000000004:	(00 80 42 38|38 42 80 00) 	addi    r2,r2,-32768
 8000000000000008:	(00 00 00 60|60 00 00 00) 	nop
 800000000000000c:	(20 00 80 4e|4e 80 00 20) 	blr

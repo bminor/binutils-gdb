@@ -1,3 +1,11 @@
+2018-08-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/notoc.s: Generate some cfi.
+	* testsuite/ld-powerpc/notoc.d: Adjust.
+	* testsuite/ld-powerpc/notoc.wf: New file.
+	* testsuite/ld-powerpc/powerpc.exp: Run "ext" and "notoc" tests
+	as run_ld_link_tests rather than run_dump_test.
+
 2018-08-07  Martin Storsjo  <martin@martin.st>
 
 	* scripttempl/pe.sc: Improve the comment about overriding

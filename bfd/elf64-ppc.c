@@ -4113,9 +4113,15 @@ struct map_stub
   /* Whether to emit a copy of register save/restore functions in this
      group.  */
   int needs_save_res;
-  /* The offset of the __tls_get_addr_opt plt stub bctrl in this group,
-     or -1u if no such stub with bctrl exists.  */
-  unsigned int tls_get_addr_opt_bctrl;
+  /* Current offset within stubs after the insn restoring lr in a
+     _notoc or _both stub using bcl for pc-relative addressing, or
+     after the insn restoring lr in a __tls_get_addr_opt plt stub.  */
+  unsigned int lr_restore;
+  /* Accumulated size of EH info emitted to describe return address
+     if stubs modify lr.  Does not include 17 byte FDE header.  */
+  unsigned int eh_size;
+  /* Offset in glink_eh_frame to the start of EH info for this group.  */
+  unsigned int eh_base;
 };
 
 struct ppc_stub_hash_entry {
@@ -10965,6 +10971,52 @@ size_offset (bfd_vma off)
   return size;
 }
 
+/* Emit .eh_frame opcode to advance pc by DELTA.  */
+
+static bfd_byte *
+eh_advance (bfd *abfd, bfd_byte *eh, unsigned int delta)
+{
+  delta /= 4;
+  if (delta < 64)
+    *eh++ = DW_CFA_advance_loc + delta;
+  else if (delta < 256)
+    {
+      *eh++ = DW_CFA_advance_loc1;
+      *eh++ = delta;
+    }
+  else if (delta < 65536)
+    {
+      *eh++ = DW_CFA_advance_loc2;
+      bfd_put_16 (abfd, delta, eh);
+      eh += 2;
+    }
+  else
+    {
+      *eh++ = DW_CFA_advance_loc4;
+      bfd_put_32 (abfd, delta, eh);
+      eh += 4;
+    }
+  return eh;
+}
+
+/* Size of required .eh_frame opcode to advance pc by DELTA.  */
+
+static unsigned int
+eh_advance_size (unsigned int delta)
+{
+  if (delta < 64 * 4)
+    /* DW_CFA_advance_loc+[1..63].  */
+    return 1;
+  if (delta < 256 * 4)
+    /* DW_CFA_advance_loc1, byte.  */
+    return 2;
+  if (delta < 65536 * 4)
+    /* DW_CFA_advance_loc2, 2 bytes.  */
+    return 3;
+  /* DW_CFA_advance_loc4, 4 bytes.  */
+  return 5;
+}
+
 /* With power7 weakly ordered memory model, it is possible for ld.so
    to update a plt entry in one thread and have another thread see a
    stale zero toc entry.  To avoid this we need some sort of acquire
@@ -11262,6 +11314,7 @@ build_tls_get_addr_stub (struct ppc_link_hash_table *htab,
 			 bfd_byte *p, bfd_vma offset, Elf_Internal_Rela *r)
 {
   bfd *obfd = htab->params->stub_bfd;
+  bfd_byte *loc = p;
 
   bfd_put_32 (obfd, LD_R11_0R3 + 0, p),		p += 4;
   bfd_put_32 (obfd, LD_R12_0R3 + 8, p),		p += 4;
@@ -11288,6 +11341,26 @@ build_tls_get_addr_stub (struct ppc_link_hash_table *htab,
   bfd_put_32 (obfd, MTLR_R11, p),		p += 4;
   bfd_put_32 (obfd, BLR, p),			p += 4;
 
+  if (htab->glink_eh_frame != NULL
+      && htab->glink_eh_frame->size != 0)
+    {
+      bfd_byte *base, *eh;
+      unsigned int lr_used, delta;
+
+      base = htab->glink_eh_frame->contents + stub_entry->group->eh_base + 17;
+      eh = base + stub_entry->group->eh_size;
+      lr_used = stub_entry->stub_offset + (p - 20 - loc);
+      delta = lr_used - stub_entry->group->lr_restore;
+      stub_entry->group->lr_restore = lr_used + 16;
+      eh = eh_advance (htab->elf.dynobj, eh, delta);
+      *eh++ = DW_CFA_offset_extended_sf;
+      *eh++ = 65;
+      *eh++ = -(STK_LINKER (htab) / 8) & 0x7f;
+      *eh++ = DW_CFA_advance_loc + 4;
+      *eh++ = DW_CFA_restore_extended;
+      *eh++ = 65;
+      stub_entry->group->eh_size = eh - base;
+    }
   return p;
 }
 
@@ -11707,6 +11780,32 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  bfd_put_32 (htab->params->stub_bfd, BCTR, p);
 	}
       p += 4;
+
+      if (htab->glink_eh_frame != NULL
+	&& htab->glink_eh_frame->size != 0)
+	{
+	  bfd_byte *base, *eh;
+	  unsigned int lr_used, delta;
+
+	  base = (htab->glink_eh_frame->contents
+		  + stub_entry->group->eh_base + 17);
+	  eh = base + stub_entry->group->eh_size;
+	  lr_used = stub_entry->stub_offset + 8;
+	  if (stub_entry->stub_type == ppc_stub_long_branch_both
+	      || stub_entry->stub_type == ppc_stub_plt_branch_both
+	      || stub_entry->stub_type == ppc_stub_plt_call_both)
+	    lr_used += 4;
+	  delta = lr_used - stub_entry->group->lr_restore;
+	  stub_entry->group->lr_restore = lr_used + 8;
+	  eh = eh_advance (htab->elf.dynobj, eh, delta);
+	  *eh++ = DW_CFA_register;
+	  *eh++ = 65;
+	  *eh++ = 12;
+	  *eh++ = DW_CFA_advance_loc + 2;
+	  *eh++ = DW_CFA_restore_extended;
+	  *eh++ = 65;
+	  stub_entry->group->eh_size = eh - base;
+	}
       break;
 
     case ppc_stub_plt_call:
@@ -11920,15 +12019,45 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       off = targ - off;
       size = plt_stub_size (htab, stub_entry, off);
 
-      if (stub_entry->stub_type < ppc_stub_plt_call_notoc)
+      if (stub_entry->stub_type >= ppc_stub_plt_call_notoc)
+	{
+	  /* After the bcl, lr has been modified so we need to emit
+	     .eh_frame info saying the return address is in r12.  */
+	  unsigned int lr_used = stub_entry->stub_offset + 8;
+	  unsigned int delta;
+	  if (stub_entry->stub_type > ppc_stub_plt_call_notoc)
+	    lr_used += 4;
+	  /* The eh_frame info will consist of a DW_CFA_advance_loc or
+	     variant, DW_CFA_register, 65, 12, DW_CFA_advance_loc+2,
+	     DW_CFA_restore_extended 65.  */
+	  delta = lr_used - stub_entry->group->lr_restore;
+	  stub_entry->group->eh_size += eh_advance_size (delta) + 6;
+	  stub_entry->group->lr_restore = lr_used + 8;
+	}
+      else
 	{
 	  if (stub_entry->h != NULL
 	      && (stub_entry->h == htab->tls_get_addr_fd
 		  || stub_entry->h == htab->tls_get_addr)
 	      && htab->params->tls_get_addr_opt
 	      && stub_entry->stub_type == ppc_stub_plt_call_r2save)
-	    stub_entry->group->tls_get_addr_opt_bctrl
-	      = stub_entry->stub_offset + size - 5 * 4;
+	    {
+	      /* After the bctrl, lr has been modified so we need to
+		 emit .eh_frame info saying the return address is
+		 on the stack.  In fact we put the EH info specifying
+		 that the return address is on the stack *at* the
+		 call rather than after it, because the EH info for a
+		 call needs to be specified by that point.
+		 See libgcc/unwind-dw2.c execute_cfa_program.  */
+	      unsigned int lr_used = stub_entry->stub_offset + size - 20;
+	      unsigned int delta;
+	      /* The eh_frame info will consist of a DW_CFA_advance_loc
+		 or variant, DW_CFA_offset_externed_sf, 65, -stackoff,
+		 DW_CFA_advance_loc+4, DW_CFA_restore_extended, 65.  */
+	      delta = lr_used - stub_entry->group->lr_restore;
+	      stub_entry->group->eh_size += eh_advance_size (delta) + 6;
+	      stub_entry->group->lr_restore = size - 4;
+	    }
 
 	  if (info->emitrelocations)
 	    {
@@ -11988,6 +12117,19 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
       if (stub_entry->stub_type >= ppc_stub_long_branch_notoc)
 	{
+	  /* After the bcl, lr has been modified so we need to emit
+	     .eh_frame info saying the return address is in r12.  */
+	  unsigned int lr_used = stub_entry->stub_offset + 8;
+	  unsigned int delta;
+	  if (stub_entry->stub_type > ppc_stub_long_branch_notoc)
+	    lr_used += 4;
+	  /* The eh_frame info will consist of a DW_CFA_advance_loc or
+	     variant, DW_CFA_register, 65, 12, DW_CFA_advance_loc+2,
+	     DW_CFA_restore_extended 65.  */
+	  delta = lr_used - stub_entry->group->lr_restore;
+	  stub_entry->group->eh_size += eh_advance_size (delta) + 6;
+	  stub_entry->group->lr_restore = lr_used + 8;
+
 	  if (off + (1 << 25) >= (bfd_vma) (1 << 26))
 	    {
 	      stub_entry->stub_type += (ppc_stub_plt_branch_notoc
@@ -12821,7 +12963,9 @@ group_sections (struct bfd_link_info *info,
 	  group->link_sec = curr;
 	  group->stub_sec = NULL;
 	  group->needs_save_res = 0;
-	  group->tls_get_addr_opt_bctrl = -1u;
+	  group->lr_restore = 0;
+	  group->eh_size = 0;
+	  group->eh_base = 0;
 	  group->next = htab->group;
 	  htab->group = group;
 	  do
@@ -12871,27 +13015,6 @@ static const unsigned char glink_eh_frame_cie[] =
   DW_EH_PE_pcrel | DW_EH_PE_sdata4,	/* FDE encoding.  */
   DW_CFA_def_cfa, 1, 0			/* def_cfa: r1 offset 0.  */
 };
-
-static size_t
-stub_eh_frame_size (struct map_stub *group, size_t align)
-{
-  size_t this_size = 17;
-  if (group->tls_get_addr_opt_bctrl != -1u)
-    {
-      unsigned int to_bctrl = group->tls_get_addr_opt_bctrl / 4;
-      if (to_bctrl < 64)
-	this_size += 1;
-      else if (to_bctrl < 256)
-	this_size += 2;
-      else if (to_bctrl < 65536)
-	this_size += 3;
-      else
-	this_size += 5;
-      this_size += 6;
-    }
-  this_size = (this_size + align - 1) & -align;
-  return this_size;
-}
 
 /* Stripping output sections is normally done before dynamic section
    symbols have been allocated.  This function is called later, and
@@ -13394,18 +13517,22 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
       /* We may have added some stubs.  Find out the new size of the
 	 stub sections.  */
       for (group = htab->group; group != NULL; group = group->next)
-	if (group->stub_sec != NULL)
-	  {
-	    asection *stub_sec = group->stub_sec;
+	{
+	  group->lr_restore = 0;
+	  group->eh_size = 0;
+	  if (group->stub_sec != NULL)
+	    {
+	      asection *stub_sec = group->stub_sec;
 
-	    if (htab->stub_iteration <= STUB_SHRINK_ITER
-		|| stub_sec->rawsize < stub_sec->size)
-	      /* Past STUB_SHRINK_ITER, rawsize is the max size seen.  */
-	      stub_sec->rawsize = stub_sec->size;
-	    stub_sec->size = 0;
-	    stub_sec->reloc_count = 0;
-	    stub_sec->flags &= ~SEC_RELOC;
-	  }
+	      if (htab->stub_iteration <= STUB_SHRINK_ITER
+		  || stub_sec->rawsize < stub_sec->size)
+		/* Past STUB_SHRINK_ITER, rawsize is the max size seen.  */
+		stub_sec->rawsize = stub_sec->size;
+	      stub_sec->size = 0;
+	      stub_sec->reloc_count = 0;
+	      stub_sec->flags &= ~SEC_RELOC;
+	    }
+	}
 
       if (htab->stub_iteration <= STUB_SHRINK_ITER
 	  || htab->brlt->rawsize < htab->brlt->size)
@@ -13436,8 +13563,8 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	  size_t size = 0, align = 4;
 
 	  for (group = htab->group; group != NULL; group = group->next)
-	    if (group->stub_sec != NULL)
-	      size += stub_eh_frame_size (group, align);
+	    if (group->eh_size != 0)
+	      size += (group->eh_size + 17 + align - 1) & -align;
 	  if (htab->glink != NULL && htab->glink->size != 0)
 	    size += (24 + align - 1) & -align;
 	  if (size != 0)
@@ -13484,6 +13611,10 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
       size_t last_fde_len, size, align, pad;
       struct map_stub *group;
 
+      /* It is necessary to at least have a rough outline of the
+	 linker generated CIEs and FDEs written before
+	 bfd_elf_discard_info is run, in order for these FDEs to be
+	 indexed in .eh_frame_hdr.  */
       p = bfd_zalloc (htab->glink_eh_frame->owner, htab->glink_eh_frame->size);
       if (p == NULL)
 	return FALSE;
@@ -13498,10 +13629,11 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
       p += last_fde_len + 4;
 
       for (group = htab->group; group != NULL; group = group->next)
-	if (group->stub_sec != NULL)
+	if (group->eh_size != 0)
 	  {
+	    group->eh_base = p - htab->glink_eh_frame->contents;
 	    last_fde = p;
-	    last_fde_len = stub_eh_frame_size (group, align) - 4;
+	    last_fde_len = ((group->eh_size + 17 + align - 1) & -align) - 4;
 	    /* FDE length.  */
 	    bfd_put_32 (htab->elf.dynobj, last_fde_len, p);
 	    p += 4;
@@ -13516,39 +13648,9 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	    p += 4;
 	    /* Augmentation.  */
 	    p += 1;
-	    if (group->tls_get_addr_opt_bctrl != -1u)
-	      {
-		unsigned int to_bctrl = group->tls_get_addr_opt_bctrl / 4;
-
-		/* This FDE needs more than just the default.
-		   Describe __tls_get_addr_opt stub LR.  */
-		if (to_bctrl < 64)
-		  *p++ = DW_CFA_advance_loc + to_bctrl;
-		else if (to_bctrl < 256)
-		  {
-		    *p++ = DW_CFA_advance_loc1;
-		    *p++ = to_bctrl;
-		  }
-		else if (to_bctrl < 65536)
-		  {
-		    *p++ = DW_CFA_advance_loc2;
-		    bfd_put_16 (htab->elf.dynobj, to_bctrl, p);
-		    p += 2;
-		  }
-		else
-		  {
-		    *p++ = DW_CFA_advance_loc4;
-		    bfd_put_32 (htab->elf.dynobj, to_bctrl, p);
-		    p += 4;
-		  }
-		*p++ = DW_CFA_offset_extended_sf;
-		*p++ = 65;
-		*p++ = -(STK_LINKER (htab) / 8) & 0x7f;
-		*p++ = DW_CFA_advance_loc + 4;
-		*p++ = DW_CFA_restore_extended;
-		*p++ = 65;
-	      }
-	    /* Pad.  */
+	    /* Make sure we don't have all nops.  This is enough for
+	       elf-eh-frame.c to detect the last non-nop opcode.  */
+	    p[group->eh_size - 1] = DW_CFA_advance_loc + 1;
 	    p = last_fde + last_fde_len + 4;
 	  }
       if (htab->glink != NULL && htab->glink->size != 0)
@@ -14023,14 +14125,19 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 
   /* Allocate memory to hold the linker stubs.  */
   for (group = htab->group; group != NULL; group = group->next)
-    if ((stub_sec = group->stub_sec) != NULL
-	&& stub_sec->size != 0)
-      {
-	stub_sec->contents = bfd_zalloc (htab->params->stub_bfd, stub_sec->size);
-	if (stub_sec->contents == NULL)
-	  return FALSE;
-	stub_sec->size = 0;
-      }
+    {
+      group->eh_size = 0;
+      group->lr_restore = 0;
+      if ((stub_sec = group->stub_sec) != NULL
+	  && stub_sec->size != 0)
+	{
+	  stub_sec->contents = bfd_zalloc (htab->params->stub_bfd,
+					   stub_sec->size);
+	  if (stub_sec->contents == NULL)
+	    return FALSE;
+	  stub_sec->size = 0;
+	}
+    }
 
   if (htab->glink != NULL && htab->glink->size != 0)
     {
@@ -14212,6 +14319,55 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 		return FALSE;
 	  }
       }
+
+  if (htab->glink_eh_frame != NULL
+      && htab->glink_eh_frame->size != 0)
+    {
+      bfd_vma val;
+      size_t align = 4;
+
+      p = htab->glink_eh_frame->contents;
+      p += (sizeof (glink_eh_frame_cie) + align - 1) & -align;
+
+      for (group = htab->group; group != NULL; group = group->next)
+	if (group->eh_size != 0)
+	  {
+	    /* Offset to stub section.  */
+	    val = (group->stub_sec->output_section->vma
+		   + group->stub_sec->output_offset);
+	    val -= (htab->glink_eh_frame->output_section->vma
+		    + htab->glink_eh_frame->output_offset
+		    + (p + 8 - htab->glink_eh_frame->contents));
+	    if (val + 0x80000000 > 0xffffffff)
+	      {
+		_bfd_error_handler
+		  (_("%s offset too large for .eh_frame sdata4 encoding"),
+		   group->stub_sec->name);
+		return FALSE;
+	      }
+	    bfd_put_32 (htab->elf.dynobj, val, p + 8);
+	    p += (group->eh_size + 17 + 3) & -4;
+	  }
+      if (htab->glink != NULL && htab->glink->size != 0)
+	{
+	  /* Offset to .glink.  */
+	  val = (htab->glink->output_section->vma
+		 + htab->glink->output_offset
+		 + 8);
+	  val -= (htab->glink_eh_frame->output_section->vma
+		  + htab->glink_eh_frame->output_offset
+		  + (p + 8 - htab->glink_eh_frame->contents));
+	  if (val + 0x80000000 > 0xffffffff)
+	    {
+	      _bfd_error_handler
+		(_("%s offset too large for .eh_frame sdata4 encoding"),
+		 htab->glink->name);
+	      return FALSE;
+	    }
+	  bfd_put_32 (htab->elf.dynobj, val, p + 8);
+	  p += (24 + align - 1) & -align;
+	}
+    }
 
   for (group = htab->group; group != NULL; group = group->next)
     if ((stub_sec = group->stub_sec) != NULL)
@@ -16745,62 +16901,14 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 				       NULL))
     return FALSE;
 
+
   if (htab->glink_eh_frame != NULL
-      && htab->glink_eh_frame->size != 0)
-    {
-      bfd_vma val;
-      bfd_byte *p;
-      struct map_stub *group;
-      size_t align = 4;
-
-      p = htab->glink_eh_frame->contents;
-      p += (sizeof (glink_eh_frame_cie) + align - 1) & -align;
-
-      for (group = htab->group; group != NULL; group = group->next)
-	if (group->stub_sec != NULL)
-	  {
-	    /* Offset to stub section.  */
-	    val = (group->stub_sec->output_section->vma
-		   + group->stub_sec->output_offset);
-	    val -= (htab->glink_eh_frame->output_section->vma
-		    + htab->glink_eh_frame->output_offset
-		    + (p + 8 - htab->glink_eh_frame->contents));
-	    if (val + 0x80000000 > 0xffffffff)
-	      {
-		_bfd_error_handler
-		  (_("%s offset too large for .eh_frame sdata4 encoding"),
-		   group->stub_sec->name);
-		return FALSE;
-	      }
-	    bfd_put_32 (dynobj, val, p + 8);
-	    p += stub_eh_frame_size (group, align);
-	  }
-      if (htab->glink != NULL && htab->glink->size != 0)
-	{
-	  /* Offset to .glink.  */
-	  val = (htab->glink->output_section->vma
-		 + htab->glink->output_offset
-		 + 8);
-	  val -= (htab->glink_eh_frame->output_section->vma
-		  + htab->glink_eh_frame->output_offset
-		  + (p + 8 - htab->glink_eh_frame->contents));
-	  if (val + 0x80000000 > 0xffffffff)
-	    {
-	      _bfd_error_handler
-		(_("%s offset too large for .eh_frame sdata4 encoding"),
-		 htab->glink->name);
-	      return FALSE;
-	    }
-	  bfd_put_32 (dynobj, val, p + 8);
-	  p += (24 + align - 1) & -align;
-	}
-
-      if (htab->glink_eh_frame->sec_info_type == SEC_INFO_TYPE_EH_FRAME
-	  && !_bfd_elf_write_section_eh_frame (output_bfd, info,
-					       htab->glink_eh_frame,
-					       htab->glink_eh_frame->contents))
-	return FALSE;
-    }
+      && htab->glink_eh_frame->size != 0
+      && htab->glink_eh_frame->sec_info_type == SEC_INFO_TYPE_EH_FRAME
+      && !_bfd_elf_write_section_eh_frame (output_bfd, info,
+					   htab->glink_eh_frame,
+					   htab->glink_eh_frame->contents))
+    return FALSE;
 
   /* We need to handle writing out multiple GOT sections ourselves,
      since we didn't add them to DYNOBJ.  We know dynobj is the first

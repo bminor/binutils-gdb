@@ -257,6 +257,9 @@ set ppc64elftests {
 	{{objdump -dr tocsave2a.d}} "tocsave2a"}
     {"ambig shared v1" "-shared -melf64ppc" "" "-a64" {funv1.s} {} "funv1.so"}
     {"ambig shared v2" "-shared -melf64ppc" "" "-a64" {funv2.s} {} "funv2.so"}
+    {"notoc ext" "" "" "-a64" {ext.s} {} ""}
+    {"notoc" "-melf64ppc --no-plt-localentry -T ext.lnk" "" "-a64" {notoc.s}
+	{{objdump -d notoc.d} {readelf {-wf -W} notoc.wf}} "notoc"}
 }
 
 set ppceabitests {
@@ -331,8 +334,6 @@ if [ supports_ppc64 ] then {
     run_dump_test "dotsym2"
     run_dump_test "dotsym3"
     run_dump_test "dotsym4"
-    run_dump_test "ext"
-    run_dump_test "notoc"
 }
 
 run_dump_test "tlsld32"
