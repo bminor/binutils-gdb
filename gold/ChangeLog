@@ -1,5 +1,11 @@
 2018-08-06  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/23455
+	* options.h (General_options): Add --warn-drop-version option.
+	* symtab.cc (Symbol_table::set_dynsym_indexes): Check it.
+
+2018-08-06  Cary Coutant  <ccoutant@gmail.com>
+
 	* target.h (Sized_target::record_gnu_property): Change first two
 	parameters to unsigned int.
 	* x86_64.cc (Target_x86_64::record_gnu_property): Likewise.
