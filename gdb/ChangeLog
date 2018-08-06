@@ -1,5 +1,28 @@
 2018-08-06  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
+	* tracepoint.h (class collection_list) <add_register>: Remove.
+	<add_remote_register, add_ax_registers, add_local_register>:
+	Declare.
+	<add_memrange>: Add scope parameter.
+	* tracepoint.c (encode_actions_1): Likewise.
+	(collection_list::add_register): Rename to ...
+	(collection_list::add_remote_register): ... this.  Update
+	comment.
+	(collection_list::add_ax_registers, add_local_register): New
+	methods.
+	(collection_list::add_memrange): Add scope parameter.  Call
+	add_local_register instead of add_register.
+	(finalize_tracepoint_aexpr): New function.
+	(collection_list::collect_symbol): Update calls to add_memrange.
+	Call add_local_register instead of add_register.  Call
+	add_ax_registers.  Call finalize_tracepoint_aexpr.
+	(encode_actions_1): Get remote regnos for $reg action.  Call
+	add_remote_register, add_ax_registers, and add_local_register.
+	Update call to add_memrange.  Call finalize_tracepoint_aexpr.
+	(validate_actionline): Call finalize_tracepoint_aexpr.
+
+2018-08-06  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
 	* remote.c (remote_target::download_tracepoint): Remove BUF_SIZE.
 	Replace array buf with gdb::char_vector buf, of size
 	get_remote_packet_size ().  Replace references to buf and

@@ -615,6 +615,19 @@ report_agent_reqs_errors (struct agent_expr *aexpr)
     error (_("Expression is too complicated."));
 }
 
+/* Call ax_reqs on AEXPR and raise an error if something is wrong.  */
+
+static void
+finalize_tracepoint_aexpr (struct agent_expr *aexpr)
+{
+  ax_reqs (aexpr);
+
+  if (aexpr->len > MAX_AGENT_EXPR_LEN)
+    error (_("Expression is too complicated."));
+
+  report_agent_reqs_errors (aexpr);
+}
+
 /* worker function */
 void
 validate_actionline (const char *line, struct breakpoint *b)
@@ -699,12 +712,7 @@ validate_actionline (const char *line, struct breakpoint *b)
 							exp.get (),
 							trace_string);
 
-	      if (aexpr->len > MAX_AGENT_EXPR_LEN)
-		error (_("Expression is too complicated."));
-
-	      ax_reqs (aexpr.get ());
-
-	      report_agent_reqs_errors (aexpr.get ());
+	      finalize_tracepoint_aexpr (aexpr.get ());
 	    }
 	}
       while (p && *p++ == ',');
@@ -731,11 +739,7 @@ validate_actionline (const char *line, struct breakpoint *b)
 		 long.  */
 	      agent_expr_up aexpr = gen_eval_for_expr (loc->address, exp.get ());
 
-	      if (aexpr->len > MAX_AGENT_EXPR_LEN)
-		error (_("Expression is too complicated."));
-
-	      ax_reqs (aexpr.get ());
-	      report_agent_reqs_errors (aexpr.get ());
+	      finalize_tracepoint_aexpr (aexpr.get ());
 	    }
 	}
       while (p && *p++ == ',');
@@ -811,10 +815,10 @@ memrange_sortmerge (std::vector<memrange> &memranges)
     }
 }
 
-/* Add a register to a collection list.  */
+/* Add remote register number REGNO to the collection list mask.  */
 
 void
-collection_list::add_register (unsigned int regno)
+collection_list::add_remote_register (unsigned int regno)
 {
   if (info_verbose)
     printf_filtered ("collect register %d\n", regno);
@@ -824,12 +828,74 @@ collection_list::add_register (unsigned int regno)
   m_regs_mask[regno / 8] |= 1 << (regno % 8);
 }
 
+/* Add all the registers from the mask in AEXPR to the mask in the
+   collection list.  Registers in the AEXPR mask are already remote
+   register numbers.  */
+
+void
+collection_list::add_ax_registers (struct agent_expr *aexpr)
+{
+  if (aexpr->reg_mask_len > 0)
+    {
+      for (int ndx1 = 0; ndx1 < aexpr->reg_mask_len; ndx1++)
+	{
+	  QUIT;	/* Allow user to bail out with ^C.  */
+	  if (aexpr->reg_mask[ndx1] != 0)
+	    {
+	      /* Assume chars have 8 bits.  */
+	      for (int ndx2 = 0; ndx2 < 8; ndx2++)
+		if (aexpr->reg_mask[ndx1] & (1 << ndx2))
+		  /* It's used -- record it.  */
+		  add_remote_register (ndx1 * 8 + ndx2);
+	    }
+	}
+    }
+}
+
+/* If REGNO is raw, add its corresponding remote register number to
+   the mask.  If REGNO is a pseudo-register, figure out the necessary
+   registers using a temporary agent expression, and add it to the
+   list if it needs more than just a mask.  */
+
+void
+collection_list::add_local_register (struct gdbarch *gdbarch,
+				     unsigned int regno,
+				     CORE_ADDR scope)
+{
+  if (regno < gdbarch_num_regs (gdbarch))
+    {
+      int remote_regno = gdbarch_remote_register_number (gdbarch, regno);
+
+      if (remote_regno < 0)
+	error (_("Can't collect register %d"), regno);
+
+      add_remote_register (remote_regno);
+    }
+  else
+    {
+      agent_expr_up aexpr (new agent_expr (gdbarch, scope));
+
+      ax_reg_mask (aexpr.get (), regno);
+
+      finalize_tracepoint_aexpr (aexpr.get ());
+
+      add_ax_registers (aexpr.get ());
+
+      /* Usually ax_reg_mask for a pseudo-regiser only sets the
+	 corresponding raw registers in the ax mask, but if this isn't
+	 the case add the expression that is generated to the
+	 collection list.  */
+      if (aexpr->len > 0)
+	add_aexpr (std::move (aexpr));
+    }
+}
+
 /* Add a memrange to a collection list.  */
 
 void
 collection_list::add_memrange (struct gdbarch *gdbarch,
 			       int type, bfd_signed_vma base,
-			       unsigned long len)
+			       unsigned long len, CORE_ADDR scope)
 {
   if (info_verbose)
     printf_filtered ("(%d,%s,%ld)\n", type, paddress (gdbarch, base), len);
@@ -840,7 +906,7 @@ collection_list::add_memrange (struct gdbarch *gdbarch,
   m_memranges.emplace_back (type, base, base + len);
 
   if (type != memrange_absolute)    /* Better collect the base register!  */
-    add_register (type);
+    add_local_register (gdbarch, type, scope);
 }
 
 /* Add a symbol to a collection list.  */
@@ -882,19 +948,19 @@ collection_list::collect_symbol (struct symbol *sym,
       if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT)
 	treat_as_expr = 1;
       else
-	add_memrange (gdbarch, memrange_absolute, offset, len);
+	add_memrange (gdbarch, memrange_absolute, offset, len, scope);
       break;
     case LOC_REGISTER:
       reg = SYMBOL_REGISTER_OPS (sym)->register_number (sym, gdbarch);
       if (info_verbose)
 	printf_filtered ("LOC_REG[parm] %s: ", 
 			 SYMBOL_PRINT_NAME (sym));
-      add_register (reg);
+      add_local_register (gdbarch, reg, scope);
       /* Check for doubles stored in two registers.  */
       /* FIXME: how about larger types stored in 3 or more regs?  */
       if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_FLT &&
 	  len > register_size (gdbarch, reg))
-	add_register (reg + 1);
+	add_local_register (gdbarch, reg + 1, scope);
       break;
     case LOC_REF_ARG:
       printf_filtered ("Sorry, don't know how to do LOC_REF_ARG yet.\n");
@@ -911,7 +977,7 @@ collection_list::collect_symbol (struct symbol *sym,
 			   SYMBOL_PRINT_NAME (sym), len,
 			   paddress (gdbarch, offset), reg);
 	}
-      add_memrange (gdbarch, reg, offset, len);
+      add_memrange (gdbarch, reg, offset, len, scope);
       break;
     case LOC_REGPARM_ADDR:
       reg = SYMBOL_VALUE (sym);
@@ -923,7 +989,7 @@ collection_list::collect_symbol (struct symbol *sym,
 			   SYMBOL_PRINT_NAME (sym), len,
 			   paddress (gdbarch, offset), reg);
 	}
-      add_memrange (gdbarch, reg, offset, len);
+      add_memrange (gdbarch, reg, offset, len, scope);
       break;
     case LOC_LOCAL:
       reg = frame_regno;
@@ -935,7 +1001,7 @@ collection_list::collect_symbol (struct symbol *sym,
 			   SYMBOL_PRINT_NAME (sym), len,
 			   paddress (gdbarch, offset), reg);
 	}
-      add_memrange (gdbarch, reg, offset, len);
+      add_memrange (gdbarch, reg, offset, len, scope);
       break;
 
     case LOC_UNRESOLVED:
@@ -968,26 +1034,10 @@ collection_list::collect_symbol (struct symbol *sym,
 	  return;
 	}
 
-      ax_reqs (aexpr.get ());
-
-      report_agent_reqs_errors (aexpr.get ());
+      finalize_tracepoint_aexpr (aexpr.get ());
 
       /* Take care of the registers.  */
-      if (aexpr->reg_mask_len > 0)
-	{
-	  for (int ndx1 = 0; ndx1 < aexpr->reg_mask_len; ndx1++)
-	    {
-	      QUIT;	/* Allow user to bail out with ^C.  */
-	      if (aexpr->reg_mask[ndx1] != 0)
-		{
-		  /* Assume chars have 8 bits.  */
-		  for (int ndx2 = 0; ndx2 < 8; ndx2++)
-		    if (aexpr->reg_mask[ndx1] & (1 << ndx2))
-		      /* It's used -- record it.  */
-		      add_register (ndx1 * 8 + ndx2);
-		}
-	    }
-	}
+      add_ax_registers (aexpr.get ());
 
       add_aexpr (std::move (aexpr));
     }
@@ -1257,8 +1307,18 @@ encode_actions_1 (struct command_line *action,
 
 	      if (0 == strncasecmp ("$reg", action_exp, 4))
 		{
-		  for (i = 0; i < gdbarch_num_regs (target_gdbarch ()); i++)
-		    collect->add_register (i);
+		  for (i = 0; i < gdbarch_num_regs (target_gdbarch ());
+		       i++)
+		    {
+		      int remote_regno = (gdbarch_remote_register_number
+					  (target_gdbarch (), i));
+
+		      /* Ignore arch regnos without a corresponding
+			 remote regno.  This can happen for regnos not
+			 in the tdesc.  */
+		      if (remote_regno >= 0)
+			collect->add_remote_register (remote_regno);
+		    }
 		  action_exp = strchr (action_exp, ',');	/* more? */
 		}
 	      else if (0 == strncasecmp ("$arg", action_exp, 4))
@@ -1288,27 +1348,10 @@ encode_actions_1 (struct command_line *action,
 						    target_gdbarch (),
 						    trace_string);
 
-		  ax_reqs (aexpr.get ());
-		  report_agent_reqs_errors (aexpr.get ());
+		  finalize_tracepoint_aexpr (aexpr.get ());
 
 		  /* take care of the registers */
-		  if (aexpr->reg_mask_len > 0)
-		    {
-		      for (int ndx1 = 0; ndx1 < aexpr->reg_mask_len; ndx1++)
-			{
-			  QUIT;	/* allow user to bail out with ^C */
-			  if (aexpr->reg_mask[ndx1] != 0)
-			    {
-			      /* assume chars have 8 bits */
-			      for (int ndx2 = 0; ndx2 < 8; ndx2++)
-				if (aexpr->reg_mask[ndx1] & (1 << ndx2))
-				  {
-				    /* It's used -- record it.  */
-				    collect->add_register (ndx1 * 8 + ndx2);
-				  }
-			    }
-			}
-		    }
+		  collect->add_ax_registers (aexpr.get ());
 
 		  collect->add_aexpr (std::move (aexpr));
 		  action_exp = strchr (action_exp, ',');	/* more? */
@@ -1340,7 +1383,8 @@ encode_actions_1 (struct command_line *action,
 					  name);
 			if (info_verbose)
 			  printf_filtered ("OP_REGISTER: ");
-			collect->add_register (i);
+			collect->add_local_register (target_gdbarch (),
+						     i, tloc->address);
 			break;
 		      }
 
@@ -1352,7 +1396,8 @@ encode_actions_1 (struct command_line *action,
 		      check_typedef (exp->elts[1].type);
 		      collect->add_memrange (target_gdbarch (),
 					     memrange_absolute, addr,
-					     TYPE_LENGTH (exp->elts[1].type));
+					     TYPE_LENGTH (exp->elts[1].type),
+					     tloc->address);
 		      collect->append_exp (exp.get ());
 		      break;
 
@@ -1376,28 +1421,10 @@ encode_actions_1 (struct command_line *action,
 								exp.get (),
 								trace_string);
 
-		      ax_reqs (aexpr.get ());
-
-		      report_agent_reqs_errors (aexpr.get ());
+		      finalize_tracepoint_aexpr (aexpr.get ());
 
 		      /* Take care of the registers.  */
-		      if (aexpr->reg_mask_len > 0)
-			{
-			  for (int ndx1 = 0; ndx1 < aexpr->reg_mask_len; ndx1++)
-			    {
-			      QUIT;	/* Allow user to bail out with ^C.  */
-			      if (aexpr->reg_mask[ndx1] != 0)
-				{
-				  /* Assume chars have 8 bits.  */
-				  for (int ndx2 = 0; ndx2 < 8; ndx2++)
-				    if (aexpr->reg_mask[ndx1] & (1 << ndx2))
-				      {
-					/* It's used -- record it.  */
-					collect->add_register (ndx1 * 8 + ndx2);
-				      }
-				}
-			    }
-			}
+		      collect->add_ax_registers (aexpr.get ());
 
 		      collect->add_aexpr (std::move (aexpr));
 		      collect->append_exp (exp.get ());
@@ -1422,8 +1449,7 @@ encode_actions_1 (struct command_line *action,
 		  agent_expr_up aexpr = gen_eval_for_expr (tloc->address,
 							   exp.get ());
 
-		  ax_reqs (aexpr.get ());
-		  report_agent_reqs_errors (aexpr.get ());
+		  finalize_tracepoint_aexpr (aexpr.get ());
 
 		  /* Even though we're not officially collecting, add
 		     to the collect list anyway.  */
