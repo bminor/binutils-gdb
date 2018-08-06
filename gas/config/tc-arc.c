@@ -475,6 +475,9 @@ static const struct cpu_type
 /* Information about the cpu/variant we're assembling for.  */
 static struct cpu_type selected_cpu = { 0, 0, 0, E_ARC_OSABI_CURRENT, 0 };
 
+/* TRUE if current assembly code uses RF16 only registers.  */
+static bfd_boolean rf16_only = TRUE;
+
 /* MPY option.  */
 static unsigned mpy_option = 0;
 
@@ -2379,6 +2382,17 @@ autodetect_attributes (const struct arc_opcode *opcode,
 	case O_dtpoff9:
 	case O_dtpoff:
 	  tls_option = 1;
+	  break;
+	default:
+	  break;
+	}
+
+      switch (tok[i].X_op)
+	{
+	case O_register:
+	  if ((tok[i].X_add_number >= 4 && tok[i].X_add_number <= 9)
+	      || (tok[i].X_add_number >= 16 && tok[i].X_add_number <= 25))
+	    rf16_only = FALSE;
 	  break;
 	default:
 	  break;
@@ -5017,6 +5031,17 @@ arc_set_public_attributes (void)
 
   /* Tag_ARC_ATR_version.  */
   arc_set_attribute_int (Tag_ARC_ATR_version, 1);
+
+  /* Tag_ARC_ABI_rf16.  */
+  if (attributes_set_explicitly[Tag_ARC_ABI_rf16]
+      && bfd_elf_get_obj_attr_int (stdoutput, OBJ_ATTR_PROC,
+				   Tag_ARC_ABI_rf16)
+      && !rf16_only)
+    {
+      as_warn (_("Overwrite explicitly set Tag_ARC_ABI_rf16 to full "
+		 "register file"));
+      bfd_elf_add_proc_attr_int (stdoutput, Tag_ARC_ABI_rf16, 0);
+    }
 }
 
 /* Add the default contents for the .ARC.attributes section.  */

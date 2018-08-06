@@ -1,5 +1,14 @@
 2018-08-06  Claudiu Zissulescu  <claziss@synopsys.com>
 
+	* config/tc-arc.c (rf16_only): New static variable.
+	(autodetect_attributes): Check if we are rf16 compliant.
+	(arc_set_public_attributes): Fix and emit the warning is required.
+	* testsuite/gas/arc/attr-rf16.d: New file.
+	* testsuite/gas/arc/attr-rf16.err: Likewise.
+	* testsuite/gas/arc/attr-rf16.s: Likewise.
+
+2018-08-06  Claudiu Zissulescu  <claziss@synopsys.com>
+
 	* config/tc-arc.c (arc_set_public_attributes): Add
 	Tag_ARC_ATR_version.
 	(arc_convert_symbolic_attribute): Likewise.
