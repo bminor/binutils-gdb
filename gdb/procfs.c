@@ -2892,7 +2892,6 @@ static void
 procfs_init_inferior (struct target_ops *ops, int pid)
 {
   procinfo *pi;
-  sigset_t signals;
   int fail;
   int lwpid;
 
@@ -3842,9 +3841,7 @@ find_stop_signal (void)
 char *
 procfs_target::make_corefile_notes (bfd *obfd, int *note_size)
 {
-  struct cleanup *old_chain;
   gdb_gregset_t gregs;
-  gdb_fpregset_t fpregs;
   char fname[16] = {'\0'};
   char psargs[80] = {'\0'};
   procinfo *pi = find_procinfo_or_die (inferior_ptid.pid (), 0);

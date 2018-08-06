@@ -1,3 +1,10 @@
+2018-08-06  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* proc-api.c (_initialize_proc_api): Remove c, unused.
+	* procfs.c (procfs_init_inferior): Remove signals, unused.
+	(procfs_target::make_corefile_notes): Remove old_chain, fpregs,
+	unused.
+
 2018-08-06  Sergey Korolev  <s.korolev@ndmsystems.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 
