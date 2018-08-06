@@ -1147,7 +1147,8 @@ class Sized_target : public Target
   // Record a target-specific program property in the .note.gnu.property
   // section.
   virtual void
-  record_gnu_property(int, int, size_t, const unsigned char*, const Object*)
+  record_gnu_property(unsigned int, unsigned int, size_t,
+		      const unsigned char*, const Object*)
   { }
 
   // Merge the target-specific program properties from the current object.
