@@ -1,5 +1,11 @@
 2018-08-27  Tom Tromey  <tom@tromey.com>
 
+	PR build/23087:
+	* configure: Rebuild.
+	* warning.m4 (AM_GDB_WARNINGS): Remove -Wno-narrowing.
+
+2018-08-27  Tom Tromey  <tom@tromey.com>
+
 	* aarch64-linux-tdep.c
 	(aarch64_linux_iterate_over_regset_sections) <sve_regmap>: Add
 	casts to int.
