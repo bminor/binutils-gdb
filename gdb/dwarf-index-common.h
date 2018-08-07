@@ -20,6 +20,11 @@
 #ifndef DWARF_INDEX_COMMON_H
 #define DWARF_INDEX_COMMON_H
 
+/* The suffix for an index file.  */
+#define INDEX4_SUFFIX ".gdb-index"
+#define INDEX5_SUFFIX ".debug_names"
+#define DEBUG_STR_SUFFIX ".debug_str"
+
 /* All offsets in the index are of this type.  It must be
    architecture-independent.  */
 typedef uint32_t offset_type;

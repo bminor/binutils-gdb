@@ -158,3 +158,27 @@ contains_dir_separator (const char *path)
 
   return false;
 }
+
+/* See common/pathstuff.h.  */
+
+std::string
+get_standard_cache_dir ()
+{
+  char *xdg_cache_home = getenv ("XDG_CACHE_HOME");
+  if (xdg_cache_home != NULL)
+    {
+      /* Make sure the path is absolute and tilde-expanded.  */
+      gdb::unique_xmalloc_ptr<char> abs (gdb_abspath (xdg_cache_home));
+      return string_printf ("%s/gdb", abs.get ());
+    }
+
+  char *home = getenv ("HOME");
+  if (home != NULL)
+    {
+      /* Make sure the path is absolute and tilde-expanded.  */
+      gdb::unique_xmalloc_ptr<char> abs (gdb_abspath (home));
+      return string_printf ("%s/.cache/gdb", abs.get ());
+    }
+
+  return {};
+}

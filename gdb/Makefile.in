@@ -993,6 +993,7 @@ COMMON_SFILES = \
 	disasm.c \
 	disasm-selftests.c \
 	dummy-frame.c \
+	dwarf-index-cache.c \
 	dwarf-index-common.c \
 	dwarf-index-write.c \
 	dwarf2-frame.c \
@@ -1217,6 +1218,7 @@ HFILES_NO_SRCDIR = \
 	dictionary.h \
 	disasm.h \
 	dummy-frame.h \
+	dwarf-index-cache.h \
 	dwarf-index-common.h \
 	dwarf2-frame.h \
 	dwarf2-frame-tailcall.h \

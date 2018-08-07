@@ -24,6 +24,7 @@
 #include "common/byte-vector.h"
 #include "common/filestuff.h"
 #include "common/gdb_unlinker.h"
+#include "common/scoped_fd.h"
 #include "complaints.h"
 #include "dwarf-index-common.h"
 #include "dwarf2.h"
@@ -38,11 +39,6 @@
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
-
-/* The suffix for an index file.  */
-#define INDEX4_SUFFIX ".gdb-index"
-#define INDEX5_SUFFIX ".debug_names"
-#define DEBUG_STR_SUFFIX ".debug_str"
 
 /* Ensure only legit values are used.  */
 #define DW2_GDB_INDEX_SYMBOL_STATIC_SET_VALUE(cu_index, value) \
@@ -1541,11 +1537,11 @@ assert_file_size (FILE *file, const char *filename, size_t expected_size)
   gdb_assert (file_size == expected_size);
 }
 
-/* Create an index file for OBJFILE in the directory DIR.  */
+/* See dwarf-index-write.h.  */
 
-static void
+void
 write_psymtabs_to_index (struct dwarf2_per_objfile *dwarf2_per_objfile,
-			 const char *dir,
+			 const char *dir, const char *basename,
 			 dw_index_kind index_kind)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
@@ -1563,50 +1559,85 @@ write_psymtabs_to_index (struct dwarf2_per_objfile *dwarf2_per_objfile,
   if (stat (objfile_name (objfile), &st) < 0)
     perror_with_name (objfile_name (objfile));
 
-  std::string filename (std::string (dir) + SLASH_STRING
-			+ lbasename (objfile_name (objfile))
+  /* Make a filename suitable to pass to mkstemp based on F (e.g.
+     /tmp/foo -> /tmp/foo-XXXXXX).  */
+  auto make_temp_filename = [] (const std::string &f) -> gdb::char_vector
+    {
+      gdb::char_vector filename_temp (f.length () + 8);
+      strcpy (filename_temp.data (), f.c_str ());
+      strcat (filename_temp.data () + f.size (), "-XXXXXX");
+      return filename_temp;
+    };
+
+  std::string filename (std::string (dir) + SLASH_STRING + basename
 			+ (index_kind == dw_index_kind::DEBUG_NAMES
 			   ? INDEX5_SUFFIX : INDEX4_SUFFIX));
+  gdb::char_vector filename_temp = make_temp_filename (filename);
 
-  FILE *out_file = gdb_fopen_cloexec (filename.c_str (), "wb").release ();
-  if (!out_file)
-    error (_("Can't open `%s' for writing"), filename.c_str ());
+  gdb::optional<scoped_fd> out_file_fd
+    (gdb::in_place, mkstemp (filename_temp.data ()));
+  if (out_file_fd->get () == -1)
+    perror_with_name ("mkstemp");
 
-  /* Order matters here; we want FILE to be closed before FILENAME is
+  FILE *out_file = gdb_fopen_cloexec (filename_temp.data (), "wb").release ();
+  if (out_file == nullptr)
+    error (_("Can't open `%s' for writing"), filename_temp.data ());
+
+  /* Order matters here; we want FILE to be closed before FILENAME_TEMP is
      unlinked, because on MS-Windows one cannot delete a file that is
      still open.  (Don't call anything here that might throw until
-     file_closer is created.)  */
-  gdb::unlinker unlink_file (filename.c_str ());
+     file_closer is created.)  We don't need OUT_FILE_FD anymore, so we might
+     as well close it now.  */
+  out_file_fd.reset ();
+  gdb::unlinker unlink_file (filename_temp.data ());
   gdb_file_up close_out_file (out_file);
 
   if (index_kind == dw_index_kind::DEBUG_NAMES)
     {
       std::string filename_str (std::string (dir) + SLASH_STRING
-				+ lbasename (objfile_name (objfile))
-				+ DEBUG_STR_SUFFIX);
+				+ basename + DEBUG_STR_SUFFIX);
+      gdb::char_vector filename_str_temp = make_temp_filename (filename_str);
+
+      gdb::optional<scoped_fd> out_file_str_fd
+	(gdb::in_place, mkstemp (filename_str_temp.data ()));
+      if (out_file_str_fd->get () == -1)
+        perror_with_name ("mkstemp");
+
       FILE *out_file_str
-	= gdb_fopen_cloexec (filename_str.c_str (), "wb").release ();
-      if (!out_file_str)
-	error (_("Can't open `%s' for writing"), filename_str.c_str ());
-      gdb::unlinker unlink_file_str (filename_str.c_str ());
+	= gdb_fopen_cloexec (filename_str_temp.data (), "wb").release ();
+      if (out_file_str == nullptr)
+	error (_("Can't open `%s' for writing"), filename_str_temp.data ());
+
+      out_file_str_fd.reset ();
+      gdb::unlinker unlink_file_str (filename_str_temp.data ());
       gdb_file_up close_out_file_str (out_file_str);
 
       const size_t total_len
 	= write_debug_names (dwarf2_per_objfile, out_file, out_file_str);
-      assert_file_size (out_file, filename.c_str (), total_len);
+      assert_file_size (out_file, filename_temp.data (), total_len);
 
       /* We want to keep the file .debug_str file too.  */
       unlink_file_str.keep ();
+
+      /* Close and move the str file in place.  */
+      close_out_file_str.reset ();
+      if (rename (filename_str_temp.data (), filename_str.c_str ()) != 0)
+	perror_with_name ("rename");
     }
   else
     {
       const size_t total_len
 	= write_gdbindex (dwarf2_per_objfile, out_file);
-      assert_file_size (out_file, filename.c_str (), total_len);
+      assert_file_size (out_file, filename_temp.data (), total_len);
     }
 
   /* We want to keep the file.  */
   unlink_file.keep ();
+
+  /* Close and move the file in place.  */
+  close_out_file.reset ();
+  if (rename (filename_temp.data (), filename.c_str ()) != 0)
+	perror_with_name ("rename");
 }
 
 /* Implementation of the `save gdb-index' command.
@@ -1651,7 +1682,9 @@ save_gdb_index_command (const char *arg, int from_tty)
       {
 	TRY
 	  {
-	    write_psymtabs_to_index (dwarf2_per_objfile, arg, index_kind);
+	    const char *basename = lbasename (objfile_name (objfile));
+	    write_psymtabs_to_index (dwarf2_per_objfile, arg, basename,
+				     index_kind);
 	  }
 	CATCH (except, RETURN_MASK_ERROR)
 	  {

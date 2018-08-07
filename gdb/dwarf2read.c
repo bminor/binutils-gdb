@@ -30,6 +30,7 @@
 
 #include "defs.h"
 #include "dwarf2read.h"
+#include "dwarf-index-cache.h"
 #include "dwarf-index-common.h"
 #include "bfd.h"
 #include "elf-bfd.h"
@@ -868,6 +869,10 @@ struct dwz_file
 
   /* The dwz's BFD.  */
   gdb_bfd_ref_ptr dwz_bfd;
+
+  /* If we loaded the index from an external file, this contains the
+     resources associated to the open file, memory mapping, etc.  */
+  std::unique_ptr<index_cache_resource> index_cache_res;
 };
 
 /* Struct used to pass misc. parameters to read_die_and_children, et
@@ -6186,6 +6191,32 @@ get_gdb_index_contents_from_section (objfile *obj, T *section_owner)
   return {section->buffer, section->size};
 }
 
+/* Lookup the index cache for the contents of the index associated to
+   DWARF2_OBJ.  */
+
+static gdb::array_view<const gdb_byte>
+get_gdb_index_contents_from_cache (objfile *obj, dwarf2_per_objfile *dwarf2_obj)
+{
+  const bfd_build_id *build_id = build_id_bfd_get (obj->obfd);
+  if (build_id == nullptr)
+    return {};
+
+  return global_index_cache.lookup_gdb_index (build_id,
+					      &dwarf2_obj->index_cache_res);
+}
+
+/* Same as the above, but for DWZ.  */
+
+static gdb::array_view<const gdb_byte>
+get_gdb_index_contents_from_cache_dwz (objfile *obj, dwz_file *dwz)
+{
+  const bfd_build_id *build_id = build_id_bfd_get (dwz->dwz_bfd.get ());
+  if (build_id == nullptr)
+    return {};
+
+  return global_index_cache.lookup_gdb_index (build_id, &dwz->index_cache_res);
+}
+
 /* See symfile.h.  */
 
 bool
@@ -6237,6 +6268,17 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
       return true;
     }
 
+  /* ... otherwise, try to find the index in the index cache.  */
+  if (dwarf2_read_gdb_index (dwarf2_per_objfile,
+			     get_gdb_index_contents_from_cache,
+			     get_gdb_index_contents_from_cache_dwz))
+    {
+      global_index_cache.hit ();
+      *index_kind = dw_index_kind::GDB_INDEX;
+      return true;
+    }
+
+  global_index_cache.miss ();
   return false;
 }
 
@@ -6262,6 +6304,9 @@ dwarf2_build_psymtabs (struct objfile *objfile)
       psymtab_discarder psymtabs (objfile);
       dwarf2_build_psymtabs_hard (dwarf2_per_objfile);
       psymtabs.keep ();
+
+      /* (maybe) store an index in the cache.  */
+      global_index_cache.store (dwarf2_per_objfile);
     }
   CATCH (except, RETURN_MASK_ERROR)
     {

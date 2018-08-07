@@ -1,5 +1,29 @@
 2018-08-07  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* common/pathstuff.h (get_standard_cache_dir): New.
+	* common/pathstuff.c (get_standard_cache_dir): New.
+	* build-id.h (build_id_to_string): New.
+	* dwarf-index-common.h (INDEX4_SUFFIX, INDEX5_SUFFIX,
+	DEBUG_STR_SUFFIX): Move to here.
+	* dwarf-index-write.c (INDEX4_SUFFIX, INDEX5_SUFFIX,
+	DEBUG_STR_SUFFIX): Move from there.
+	(write_psymtabs_to_index): Make non-static, add basename
+	parameter.  Write to temporary files, rename when done.
+	(save_gdb_index_command): Adjust call to
+	write_psymtabs_to_index.
+	* dwarf2read.h (dwarf2_per_objfile) <index_cache_res>: New
+	field.
+	* dwarf2read.c (dwz_file) <index_cache_res>: New field.
+	(get_gdb_index_contents_from_cache): New.
+	(get_gdb_index_contents_from_cache_dwz): New.
+	(dwarf2_initialize_objfile): Read index from cache.
+	(dwarf2_build_psymtabs): Save to index.
+	* dwarf-index-cache.h: New file.
+	* dwarf-index-cache.c: New file.
+	* dwarf-index-write.h: New file.
+
+2018-08-07  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* gnulib/aclocal.m4: Re-generate.
 	* gnulib/config.in: Re-generate.
 	* gnulib/configure: Re-generate.

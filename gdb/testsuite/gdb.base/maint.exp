@@ -123,6 +123,30 @@ gdb_test_multiple "maint info sections .gdb_index .debug_names" "check for .gdb_
     }
 }
 
+# There also won't be any psymtabs if we read the index from the index cache.
+# We can detect this by looking if the index-cache is enabled and if the number
+# of cache misses is 0.
+set index_cache_misses -1
+gdb_test_multiple "show index-cache stats" "check index cache stats" {
+    -re ".*Cache misses \\(this session\\): (\\d+)\r\n.*$gdb_prompt $" {
+	set index_cache_misses $expect_out(1,string)
+    }
+}
+
+set using_index_cache 0
+gdb_test_multiple "show index-cache" "check index cache status" {
+    -re ".*is currently disabled.\r\n$gdb_prompt $" {
+	set using_index_cache 0
+    }
+    -re ".*is currently enabled.\r\n$gdb_prompt $" {
+	set using_index_cache 1
+    }
+}
+
+if { $index_cache_misses == 0 && $using_index_cache } {
+    set have_gdb_index 1
+}
+
 #
 # this command does not produce any output
 # unless there is some problem with the symtabs and psymtabs

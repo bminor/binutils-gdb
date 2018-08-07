@@ -50,4 +50,14 @@ extern gdb::unique_xmalloc_ptr<char> gdb_abspath (const char *path);
 
 extern bool contains_dir_separator (const char *path);
 
+/* Get the usual user cache directory for the current platform.
+
+   On Linux, it follows the XDG Base Directory specification: use
+   $XDG_CACHE_HOME/gdb if the XDG_CACHE_HOME environment variable is defined,
+   otherwise $HOME/.cache.  The return value is absolute and tilde-expanded.
+
+   Return an empty string if neither XDG_CACHE_HOME or HOME are defined.  */
+
+extern std::string get_standard_cache_dir ();
+
 #endif /* PATHSTUFF_H */

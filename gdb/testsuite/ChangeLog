@@ -1,3 +1,10 @@
+2018-08-07  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* boards/index-cache-gdb.exp: New file.
+	* gdb.dwarf2/index-cache.exp: New file.
+	* gdb.dwarf2/index-cache.c: New file.
+	* gdb.base/maint.exp: Check if we are using the index cache.
+
 2018-08-07  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* Makefile.in (saw_dash_j): Allow for GNU make 4.2+ passing -jN in
