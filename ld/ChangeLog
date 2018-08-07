@@ -1,3 +1,7 @@
+2018-08-07  Nick Clifton  <nickc@redhat.com>
+
+	* po/bg.po: Updated Bulgarian translation.
+
 2018-08-01  Roland McGrath  <mcgrathr@google.com>
 
 	* testsuite/ld-aarch64/ifunc-1-local.d: Adjust regexps to match
