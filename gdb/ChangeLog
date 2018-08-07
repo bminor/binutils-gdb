@@ -1,3 +1,8 @@
+2018-08-07  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (CPPFLAGS): New variable.
+	(INTERNAL_CPPFLAGS): Use it.
+
 2018-08-07  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* NEWS: Mention the index cache.
