@@ -1,3 +1,8 @@
+2018-08-07  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* Makefile.in (saw_dash_j): Allow for GNU make 4.2+ passing -jN in
+	MAKEFLAGS.
+
 2018-08-06  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* dg-extract-results.sh: Move to toplevel contrib.

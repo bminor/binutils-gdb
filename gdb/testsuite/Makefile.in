@@ -137,10 +137,11 @@ $(abs_builddir)/site.exp site.exp: ./config.status Makefile
 
 installcheck:
 
-# See whether -j was given to make.  Either it was given with no
-# arguments, and appears as "j" in the first word, or it was given an
-# argument and appears as "-j" in a separate word.
-saw_dash_j = $(or $(findstring j,$(firstword $(MAKEFLAGS))),$(filter -j,$(MAKEFLAGS)))
+# See whether -j was given to make.  Before GNU make 4.2, either it was
+# given with no arguments, and appears as "j" in the first word, or it was
+# given an argument and appears as "-j" in a separate word.  Starting with
+# GNU make 4.2, it always appears as "-j"/"-jN" in a separate word.
+saw_dash_j = $(or $(findstring j,$(firstword $(MAKEFLAGS))),$(filter -j%,$(MAKEFLAGS)))
 
 # Try to run the tests in parallel if any -j option is given.  If RUNTESTFLAGS
 # is not empty, then by default the tests will be serialized.  This can be
