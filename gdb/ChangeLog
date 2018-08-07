@@ -1,5 +1,19 @@
 2018-08-07  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* gnulib/aclocal.m4: Re-generate.
+	* gnulib/config.in: Re-generate.
+	* gnulib/configure: Re-generate.
+	* gnulib/import/Makefile.am: Re-generate.
+	* gnulib/import/Makefile.in: Re-generate.
+	* gnulib/import/m4/gnulib-cache.m4: Re-generate.
+	* gnulib/import/m4/gnulib-comp.m4: Re-generate.
+	* gnulib/import/m4/mkdir.m4: New file.
+	* gnulib/import/mkdir.c: New file.
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add mkdir
+	module.
+
+2018-08-07  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* Makefile.in (COMMON_SFILES): Add common/scoped_mmap.c.
 	* common/scoped_mmap.c: New file.
 	* common/scoped_mmap.h (destroy): New method.

@@ -44,6 +44,7 @@ IMPORTED_GNULIB_MODULES="\
     limits-h \
     memchr \
     memmem \
+    mkdir \
     mkstemp \
     pathmax \
     rawmemchr \

@@ -64,6 +64,10 @@
    MSVC and with C++ compilers. */
 #undef FLEXIBLE_ARRAY_MEMBER
 
+/* Define to 1 if mkdir mistakenly creates a directory given with a trailing
+   dot component. */
+#undef FUNC_MKDIR_DOT_BUG
+
 /* Define to 1 if realpath() can malloc memory, always gives an absolute path,
    and handles trailing slash correctly. */
 #undef FUNC_REALPATH_WORKS
