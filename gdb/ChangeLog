@@ -1,5 +1,18 @@
 2018-08-07  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* dwarf2read.c (read_gdb_index_from_section): Rename to...
+	(read_gdb_index_from_buffer): ... this.  Remove section
+	parameter, add buffer parameter.
+	(get_gdb_index_contents_ftype,
+	get_gdb_index_contents_dwz_ftype): New typedefs.
+	(dwarf2_read_gdb_index): Add callback parameters to get the
+	index contents.
+	(get_gdb_index_contents_from_section): New.
+	(dwarf2_initialize_objfile): Update call to
+	dwarf2_read_gdb_index.
+
+2018-08-07  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* common/filestuff.h (gdb_fopen_cloexec): New overload.
 	(gdb_open_cloexec): Likewise.
 	* nat/linux-osdata.c (command_from_pid): Use string_printf.

@@ -3410,8 +3410,8 @@ find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
     }
 }
 
-/* A helper function that reads the .gdb_index from SECTION and fills
-   in MAP.  FILENAME is the name of the file containing the section;
+/* A helper function that reads the .gdb_index from BUFFER and fills
+   in MAP.  FILENAME is the name of the file containing the data;
    it is used for error reporting.  DEPRECATED_OK is true if it is
    ok to use deprecated sections.
 
@@ -3419,37 +3419,23 @@ find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
    out parameters that are filled in with information about the CU and
    TU lists in the section.
 
-   Returns 1 if all went well, 0 otherwise.  */
+   Returns true if all went well, false otherwise.  */
 
 static bool
-read_gdb_index_from_section (struct objfile *objfile,
-			     const char *filename,
-			     bool deprecated_ok,
-			     struct dwarf2_section_info *section,
-			     struct mapped_index *map,
-			     const gdb_byte **cu_list,
-			     offset_type *cu_list_elements,
-			     const gdb_byte **types_list,
-			     offset_type *types_list_elements)
+read_gdb_index_from_buffer (struct objfile *objfile,
+			    const char *filename,
+			    bool deprecated_ok,
+			    gdb::array_view<const gdb_byte> buffer,
+			    struct mapped_index *map,
+			    const gdb_byte **cu_list,
+			    offset_type *cu_list_elements,
+			    const gdb_byte **types_list,
+			    offset_type *types_list_elements)
 {
-  const gdb_byte *addr;
-  offset_type version;
-  offset_type *metadata;
-  int i;
+  const gdb_byte *addr = &buffer[0];
 
-  if (dwarf2_section_empty_p (section))
-    return 0;
-
-  /* Older elfutils strip versions could keep the section in the main
-     executable while splitting it for the separate debug info file.  */
-  if ((get_section_flags (section) & SEC_HAS_CONTENTS) == 0)
-    return 0;
-
-  dwarf2_read_section (objfile, section);
-
-  addr = section->buffer;
   /* Version check.  */
-  version = MAYBE_SWAP (*(offset_type *) addr);
+  offset_type version = MAYBE_SWAP (*(offset_type *) addr);
   /* Versions earlier than 3 emitted every copy of a psymbol.  This
      causes the index to behave very poorly for certain requests.  Version 3
      contained incomplete addrmap.  So, it seems better to just ignore such
@@ -3502,9 +3488,9 @@ to use the section anyway."),
 
   map->version = version;
 
-  metadata = (offset_type *) (addr + sizeof (offset_type));
+  offset_type *metadata = (offset_type *) (addr + sizeof (offset_type));
 
-  i = 0;
+  int i = 0;
   *cu_list = addr + MAYBE_SWAP (metadata[i]);
   *cu_list_elements = ((MAYBE_SWAP (metadata[i + 1]) - MAYBE_SWAP (metadata[i]))
 		       / 8);
@@ -3535,23 +3521,41 @@ to use the section anyway."),
   return 1;
 }
 
+/* Callback types for dwarf2_read_gdb_index.  */
+
+typedef gdb::function_view
+    <gdb::array_view<const gdb_byte>(objfile *, dwarf2_per_objfile *)>
+    get_gdb_index_contents_ftype;
+typedef gdb::function_view
+    <gdb::array_view<const gdb_byte>(objfile *, dwz_file *)>
+    get_gdb_index_contents_dwz_ftype;
+
 /* Read .gdb_index.  If everything went ok, initialize the "quick"
    elements of all the CUs and return 1.  Otherwise, return 0.  */
 
 static int
-dwarf2_read_gdb_index (struct dwarf2_per_objfile *dwarf2_per_objfile)
+dwarf2_read_gdb_index
+  (struct dwarf2_per_objfile *dwarf2_per_objfile,
+   get_gdb_index_contents_ftype get_gdb_index_contents,
+   get_gdb_index_contents_dwz_ftype get_gdb_index_contents_dwz)
 {
   const gdb_byte *cu_list, *types_list, *dwz_list = NULL;
   offset_type cu_list_elements, types_list_elements, dwz_list_elements = 0;
   struct dwz_file *dwz;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
 
+  gdb::array_view<const gdb_byte> main_index_contents
+    = get_gdb_index_contents (objfile, dwarf2_per_objfile);
+
+  if (main_index_contents.empty ())
+    return 0;
+
   std::unique_ptr<struct mapped_index> map (new struct mapped_index);
-  if (!read_gdb_index_from_section (objfile, objfile_name (objfile),
-				    use_deprecated_index_sections,
-				    &dwarf2_per_objfile->gdb_index, map.get (),
-				    &cu_list, &cu_list_elements,
-				    &types_list, &types_list_elements))
+  if (!read_gdb_index_from_buffer (objfile, objfile_name (objfile),
+				   use_deprecated_index_sections,
+				   main_index_contents, map.get (), &cu_list,
+				   &cu_list_elements, &types_list,
+				   &types_list_elements))
     return 0;
 
   /* Don't use the index if it's empty.  */
@@ -3567,12 +3571,18 @@ dwarf2_read_gdb_index (struct dwarf2_per_objfile *dwarf2_per_objfile)
       const gdb_byte *dwz_types_ignore;
       offset_type dwz_types_elements_ignore;
 
-      if (!read_gdb_index_from_section (objfile,
-					bfd_get_filename (dwz->dwz_bfd), 1,
-					&dwz->gdb_index, &dwz_map,
-					&dwz_list, &dwz_list_elements,
-					&dwz_types_ignore,
-					&dwz_types_elements_ignore))
+      gdb::array_view<const gdb_byte> dwz_index_content
+	= get_gdb_index_contents_dwz (objfile, dwz);
+
+      if (dwz_index_content.empty ())
+	return 0;
+
+      if (!read_gdb_index_from_buffer (objfile,
+				       bfd_get_filename (dwz->dwz_bfd), 1,
+				       dwz_index_content, &dwz_map,
+				       &dwz_list, &dwz_list_elements,
+				       &dwz_types_ignore,
+				       &dwz_types_elements_ignore))
 	{
 	  warning (_("could not read '.gdb_index' section from %s; skipping"),
 		   bfd_get_filename (dwz->dwz_bfd));
@@ -6154,6 +6164,28 @@ const struct quick_symbol_functions dwarf2_debug_names_functions =
   dw2_map_symbol_filenames
 };
 
+/* Get the content of the .gdb_index section of OBJ.  SECTION_OWNER should point
+   to either a dwarf2_per_objfile or dwz_file object.  */
+
+template <typename T>
+static gdb::array_view<const gdb_byte>
+get_gdb_index_contents_from_section (objfile *obj, T *section_owner)
+{
+  dwarf2_section_info *section = &section_owner->gdb_index;
+
+  if (dwarf2_section_empty_p (section))
+    return {};
+
+  /* Older elfutils strip versions could keep the section in the main
+     executable while splitting it for the separate debug info file.  */
+  if ((get_section_flags (section) & SEC_HAS_CONTENTS) == 0)
+    return {};
+
+  dwarf2_read_section (obj, section);
+
+  return {section->buffer, section->size};
+}
+
 /* See symfile.h.  */
 
 bool
@@ -6197,7 +6229,9 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
       return true;
     }
 
-  if (dwarf2_read_gdb_index (dwarf2_per_objfile))
+  if (dwarf2_read_gdb_index (dwarf2_per_objfile,
+			     get_gdb_index_contents_from_section<struct dwarf2_per_objfile>,
+			     get_gdb_index_contents_from_section<dwz_file>))
     {
       *index_kind = dw_index_kind::GDB_INDEX;
       return true;
