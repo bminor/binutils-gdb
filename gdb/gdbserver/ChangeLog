@@ -1,3 +1,11 @@
+2018-08-27  Tom Tromey  <tom@tromey.com>
+
+	* linux-s390-low.c (s390_emit_ext, s390_emit_litpool)
+	(s390_emit_const, s390_emit_reg, s390_emit_zero_ext)
+	(s390_emit_stack_adjust, s390_emit_set_r2, s390x_emit_ext)
+	(s390x_emit_const, s390x_emit_reg, s390x_emit_zero_ext)
+	(s390x_emit_stack_adjust): Add casts to unsigned char.
+
 2018-08-22  Simon Marchi  <simon.marchi@ericsson.com>
 
 	PR gdb/23374
