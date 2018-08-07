@@ -123,11 +123,11 @@ static const struct tramp_frame arm_fbsd_sigframe =
   SIGTRAMP_FRAME,
   4,
   {
-    {0xe1a0000d, -1},		/* mov  r0, sp  */
-    {0xe2800040, -1},		/* add  r0, r0, #SIGF_UC  */
-    {0xe59f700c, -1},		/* ldr  r7, [pc, #12]  */
-    {0xef0001a1, -1},		/* swi  SYS_sigreturn  */
-    {TRAMP_SENTINEL_INSN, -1}
+    {0xe1a0000d, ULONGEST_MAX},		/* mov  r0, sp  */
+    {0xe2800040, ULONGEST_MAX},		/* add  r0, r0, #SIGF_UC  */
+    {0xe59f700c, ULONGEST_MAX},		/* ldr  r7, [pc, #12]  */
+    {0xef0001a1, ULONGEST_MAX},		/* swi  SYS_sigreturn  */
+    {TRAMP_SENTINEL_INSN, ULONGEST_MAX}
   },
   arm_fbsd_sigframe_init
 };

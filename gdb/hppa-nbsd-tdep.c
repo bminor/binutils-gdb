@@ -71,25 +71,25 @@ static const struct tramp_frame hppanbsd_sigtramp_si4 =
   SIGTRAMP_FRAME,
   4,
   {
-    { 0xc7d7c012, -1 },	/*	bb,>=,n %arg3, 30, 1f		*/
-    { 0xd6e01c1e, -1 },	/*	 depwi 0,31,2,%arg3		*/
-    { 0x0ee81093, -1 },	/*	ldw 4(%arg3), %r19		*/
-    { 0x0ee01097, -1 },	/*	ldw 0(%arg3), %arg3		*/
+    { 0xc7d7c012, ULONGEST_MAX },	/*	bb,>=,n %arg3, 30, 1f		*/
+    { 0xd6e01c1e, ULONGEST_MAX },	/*	 depwi 0,31,2,%arg3		*/
+    { 0x0ee81093, ULONGEST_MAX },	/*	ldw 4(%arg3), %r19		*/
+    { 0x0ee01097, ULONGEST_MAX },	/*	ldw 0(%arg3), %arg3		*/
 			/* 1: 					*/
-    { 0xe8404000, -1 },	/* 	blr %r0, %rp			*/
-    { 0xeae0c002, -1 },	/*	bv,n %r0(%arg3)			*/
-    { 0x08000240, -1 },	/*	 nop				*/
+    { 0xe8404000, ULONGEST_MAX },	/* 	blr %r0, %rp			*/
+    { 0xeae0c002, ULONGEST_MAX },	/*	bv,n %r0(%arg3)			*/
+    { 0x08000240, ULONGEST_MAX },	/*	 nop				*/
 
-    { 0x0803025a, -1 },	/*	copy %r3, %arg0			*/
-    { 0x20200801, -1 },	/*	ldil -40000000, %r1		*/
-    { 0xe420e008, -1 },	/*	be,l 4(%sr7, %r1), %sr0, %r31	*/
-    { 0x34160268, -1 },	/*	 ldi 134, %t1 ; SYS_setcontext	*/
+    { 0x0803025a, ULONGEST_MAX },	/*	copy %r3, %arg0			*/
+    { 0x20200801, ULONGEST_MAX },	/*	ldil -40000000, %r1		*/
+    { 0xe420e008, ULONGEST_MAX },	/*	be,l 4(%sr7, %r1), %sr0, %r31	*/
+    { 0x34160268, ULONGEST_MAX },	/*	 ldi 134, %t1 ; SYS_setcontext	*/
 
-    { 0x081c025a, -1 },	/*	copy ret0, %arg0		*/
-    { 0x20200801, -1 },	/*	ldil -40000000, %r1		*/
-    { 0xe420e008, -1 },	/*	be,l 4(%sr7, %r1), %sr0, %r31	*/
-    { 0x34160002, -1 },	/*	 ldi 1, %t1 ; SYS_exit		*/
-    { TRAMP_SENTINEL_INSN, -1 }
+    { 0x081c025a, ULONGEST_MAX },	/*	copy ret0, %arg0		*/
+    { 0x20200801, ULONGEST_MAX },	/*	ldil -40000000, %r1		*/
+    { 0xe420e008, ULONGEST_MAX },	/*	be,l 4(%sr7, %r1), %sr0, %r31	*/
+    { 0x34160002, ULONGEST_MAX },	/*	 ldi 1, %t1 ; SYS_exit		*/
+    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
   },
   hppanbsd_sigtramp_cache_init
 };

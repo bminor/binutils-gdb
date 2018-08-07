@@ -163,8 +163,8 @@ static struct tramp_frame nios2_r1_linux_rt_sigreturn_tramp_frame =
   SIGTRAMP_FRAME,
   4,
   {
-    { MATCH_R1_MOVI | SET_IW_I_B (2) | SET_IW_I_IMM16 (139), -1 },
-    { MATCH_R1_TRAP | SET_IW_R_IMM5 (0), -1},
+    { MATCH_R1_MOVI | SET_IW_I_B (2) | SET_IW_I_IMM16 (139), ULONGEST_MAX },
+    { MATCH_R1_TRAP | SET_IW_R_IMM5 (0), ULONGEST_MAX},
     { TRAMP_SENTINEL_INSN }
   },
   nios2_linux_rt_sigreturn_init
@@ -175,8 +175,8 @@ static struct tramp_frame nios2_r2_linux_rt_sigreturn_tramp_frame =
   SIGTRAMP_FRAME,
   4,
   {
-    { MATCH_R2_MOVI | SET_IW_F2I16_B (2) | SET_IW_F2I16_IMM16 (139), -1 },
-    { MATCH_R2_TRAP | SET_IW_X2L5_IMM5 (0), -1},
+    { MATCH_R2_MOVI | SET_IW_F2I16_B (2) | SET_IW_F2I16_IMM16 (139), ULONGEST_MAX },
+    { MATCH_R2_TRAP | SET_IW_X2L5_IMM5 (0), ULONGEST_MAX},
     { TRAMP_SENTINEL_INSN }
   },
   nios2_linux_rt_sigreturn_init

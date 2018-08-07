@@ -64,9 +64,9 @@ static const struct tramp_frame sparc64_linux_rt_sigframe =
   SIGTRAMP_FRAME,
   4,
   {
-    { 0x82102065, -1 },		/* mov __NR_rt_sigreturn, %g1 */
-    { 0x91d0206d, -1 },		/* ta  0x6d */
-    { TRAMP_SENTINEL_INSN, -1 }
+    { 0x82102065, ULONGEST_MAX },		/* mov __NR_rt_sigreturn, %g1 */
+    { 0x91d0206d, ULONGEST_MAX },		/* ta  0x6d */
+    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
   },
   sparc64_linux_sigframe_init
 };

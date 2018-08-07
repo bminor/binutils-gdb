@@ -1,5 +1,57 @@
 2018-08-27  Tom Tromey  <tom@tromey.com>
 
+	* tramp-frame.h (TRAMP_SENTINEL_INSN): Redefine.
+	* tilegx-linux-tdep.c (tilegx_linux_rt_sigframe): Use
+	ULONGEST_MAX.
+	* tic6x-linux-tdep.c (tic6x_linux_rt_sigreturn_tramp_frame): Use
+	ULONGEST_MAX.
+	* sparc64-linux-tdep.c (sparc64_linux_rt_sigframe): Use
+	ULONGEST_MAX.
+	* sparc-linux-tdep.c (sparc32_linux_sigframe)
+	(sparc32_linux_rt_sigframe): Use ULONGEST_MAX.
+	* ppc-nbsd-tdep.c (ppcnbsd_sigtramp, ppcnbsd2_sigtramp): Use
+	ULONGEST_MAX.
+	* ppc-linux-tdep.c (ppc32_linux_sigaction_tramp_frame)
+	(ppc64_linux_sigaction_tramp_frame)
+	(ppc32_linux_sighandler_tramp_frame)
+	(ppc64_linux_sighandler_tramp_frame): Use ULONGEST_MAX.
+	* nios2-linux-tdep.c (nios2_r1_linux_rt_sigreturn_tramp_frame)
+	(nios2_r2_linux_rt_sigreturn_tramp_frame): Use ULONGEST_MAX.
+	* mn10300-linux-tdep.c (am33_linux_sigframe)
+	(am33_linux_rt_sigframe): Use ULONGEST_MAX.
+	* mips64-obsd-tdep.c (mips64obsd_sigframe): Use ULONGEST_MAX.
+	* mips-linux-tdep.c (mips_linux_o32_sigframe)
+	(mips_linux_o32_rt_sigframe, mips_linux_n32_rt_sigframe)
+	(mips_linux_n64_rt_sigframe, micromips_linux_o32_sigframe)
+	(micromips_linux_o32_rt_sigframe, micromips_linux_n32_rt_sigframe)
+	(micromips_linux_n64_rt_sigframe): Use ULONGEST_MAX.
+	* mips-fbsd-tdep.c (mips_fbsd_sigframe, mipsn32_fbsd_sigframe)
+	(mips64_fbsd_sigframe): Use ULONGEST_MAX.
+	* microblaze-linux-tdep.c
+	(microblaze_linux_sighandler_tramp_frame): Use ULONGEST_MAX.
+	* i386-nbsd-tdep.c (i386nbsd_sigtramp_sc16, i386nbsd_sigtramp_sc2)
+	(i386nbsd_sigtramp_si2, i386nbsd_sigtramp_si31)
+	(i386nbsd_sigtramp_si4): Use ULONGEST_MAX.
+	* hppa-nbsd-tdep.c (hppanbsd_sigtramp_si4): Use ULONGEST_MAX.
+	* common/common-types.h (ULONGEST_MAX): New define.
+	(CORE_ADDR_MAX): Fix formatting.
+	* bfin-linux-tdep.c (bfin_linux_sigframe): Use ULONGEST_MAX.
+	* arm-obsd-tdep.c (armobsd_sigframe): Use ULONGEST_MAX.
+	* arm-linux-tdep.c (arm_linux_sigreturn_tramp_frame)
+	(arm_linux_rt_sigreturn_tramp_frame)
+	(arm_eabi_linux_sigreturn_tramp_frame)
+	(arm_eabi_linux_rt_sigreturn_tramp_frame)
+	(thumb2_eabi_linux_sigreturn_tramp_frame)
+	(thumb2_eabi_linux_rt_sigreturn_tramp_frame)
+	(arm_linux_restart_syscall_tramp_frame)
+	(arm_kernel_linux_restart_syscall_tramp_frame): Use ULONGEST_MAX.
+	* arm-fbsd-tdep.c (arm_fbsd_sigframe): Use ULONGEST_MAX.
+	* aarch64-linux-tdep.c (aarch64_linux_rt_sigframe): Use
+	ULONGEST_MAX.
+	* aarch64-fbsd-tdep.c (aarch64_fbsd_sigframe): Use ULONGEST_MAX.
+
+2018-08-27  Tom Tromey  <tom@tromey.com>
+
 	* rs6000-tdep.c (ppc_deal_with_atomic_sequence): Use
 	CORE_ADDR_MAX.
 	* mips-tdep.c (mips_deal_with_atomic_sequence)

@@ -746,8 +746,8 @@ static struct tramp_frame ppc32_linux_sigaction_tramp_frame = {
   SIGTRAMP_FRAME,
   4,
   { 
-    { 0x380000ac, -1 }, /* li r0, 172 */
-    { 0x44000002, -1 }, /* sc */
+    { 0x380000ac, ULONGEST_MAX }, /* li r0, 172 */
+    { 0x44000002, ULONGEST_MAX }, /* sc */
     { TRAMP_SENTINEL_INSN },
   },
   ppc32_linux_sigaction_cache_init
@@ -756,9 +756,9 @@ static struct tramp_frame ppc64_linux_sigaction_tramp_frame = {
   SIGTRAMP_FRAME,
   4,
   {
-    { 0x38210080, -1 }, /* addi r1,r1,128 */
-    { 0x380000ac, -1 }, /* li r0, 172 */
-    { 0x44000002, -1 }, /* sc */
+    { 0x38210080, ULONGEST_MAX }, /* addi r1,r1,128 */
+    { 0x380000ac, ULONGEST_MAX }, /* li r0, 172 */
+    { 0x44000002, ULONGEST_MAX }, /* sc */
     { TRAMP_SENTINEL_INSN },
   },
   ppc64_linux_sigaction_cache_init
@@ -767,8 +767,8 @@ static struct tramp_frame ppc32_linux_sighandler_tramp_frame = {
   SIGTRAMP_FRAME,
   4,
   { 
-    { 0x38000077, -1 }, /* li r0,119 */
-    { 0x44000002, -1 }, /* sc */
+    { 0x38000077, ULONGEST_MAX }, /* li r0,119 */
+    { 0x44000002, ULONGEST_MAX }, /* sc */
     { TRAMP_SENTINEL_INSN },
   },
   ppc32_linux_sighandler_cache_init
@@ -777,9 +777,9 @@ static struct tramp_frame ppc64_linux_sighandler_tramp_frame = {
   SIGTRAMP_FRAME,
   4,
   { 
-    { 0x38210080, -1 }, /* addi r1,r1,128 */
-    { 0x38000077, -1 }, /* li r0,119 */
-    { 0x44000002, -1 }, /* sc */
+    { 0x38210080, ULONGEST_MAX }, /* addi r1,r1,128 */
+    { 0x38000077, ULONGEST_MAX }, /* li r0,119 */
+    { 0x44000002, ULONGEST_MAX }, /* sc */
     { TRAMP_SENTINEL_INSN },
   },
   ppc64_linux_sighandler_cache_init

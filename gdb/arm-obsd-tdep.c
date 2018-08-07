@@ -58,11 +58,11 @@ static const struct tramp_frame armobsd_sigframe =
   SIGTRAMP_FRAME,
   4,
   {
-    { 0xe28d0010, -1 },		/* add     r0, sp, #16 */
-    { 0xef000067, -1 },		/* swi     SYS_sigreturn */
-    { 0xef000001, -1 },		/* swi     SYS_exit */
-    { 0xeafffffc, -1 },		/* b       . - 8 */
-    { TRAMP_SENTINEL_INSN, -1 }
+    { 0xe28d0010, ULONGEST_MAX },		/* add     r0, sp, #16 */
+    { 0xef000067, ULONGEST_MAX },		/* swi     SYS_sigreturn */
+    { 0xef000001, ULONGEST_MAX },		/* swi     SYS_exit */
+    { 0xeafffffc, ULONGEST_MAX },		/* b       . - 8 */
+    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
   },
   armobsd_sigframe_init
 };

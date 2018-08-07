@@ -755,9 +755,9 @@ static const struct tramp_frame mips_linux_o32_sigframe = {
   SIGTRAMP_FRAME,
   4,
   {
-    { MIPS_INST_LI_V0_SIGRETURN, -1 },
-    { MIPS_INST_SYSCALL, -1 },
-    { TRAMP_SENTINEL_INSN, -1 }
+    { MIPS_INST_LI_V0_SIGRETURN, ULONGEST_MAX },
+    { MIPS_INST_SYSCALL, ULONGEST_MAX },
+    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
   },
   mips_linux_o32_sigframe_init,
   mips_linux_sigframe_validate
@@ -767,9 +767,9 @@ static const struct tramp_frame mips_linux_o32_rt_sigframe = {
   SIGTRAMP_FRAME,
   4,
   {
-    { MIPS_INST_LI_V0_RT_SIGRETURN, -1 },
-    { MIPS_INST_SYSCALL, -1 },
-    { TRAMP_SENTINEL_INSN, -1 } },
+    { MIPS_INST_LI_V0_RT_SIGRETURN, ULONGEST_MAX },
+    { MIPS_INST_SYSCALL, ULONGEST_MAX },
+    { TRAMP_SENTINEL_INSN, ULONGEST_MAX } },
   mips_linux_o32_sigframe_init,
   mips_linux_sigframe_validate
 };
@@ -778,9 +778,9 @@ static const struct tramp_frame mips_linux_n32_rt_sigframe = {
   SIGTRAMP_FRAME,
   4,
   {
-    { MIPS_INST_LI_V0_N32_RT_SIGRETURN, -1 },
-    { MIPS_INST_SYSCALL, -1 },
-    { TRAMP_SENTINEL_INSN, -1 }
+    { MIPS_INST_LI_V0_N32_RT_SIGRETURN, ULONGEST_MAX },
+    { MIPS_INST_SYSCALL, ULONGEST_MAX },
+    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
   },
   mips_linux_n32n64_sigframe_init,
   mips_linux_sigframe_validate
@@ -790,9 +790,9 @@ static const struct tramp_frame mips_linux_n64_rt_sigframe = {
   SIGTRAMP_FRAME,
   4,
   {
-    { MIPS_INST_LI_V0_N64_RT_SIGRETURN, -1 },
-    { MIPS_INST_SYSCALL, -1 },
-    { TRAMP_SENTINEL_INSN, -1 }
+    { MIPS_INST_LI_V0_N64_RT_SIGRETURN, ULONGEST_MAX },
+    { MIPS_INST_SYSCALL, ULONGEST_MAX },
+    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
   },
   mips_linux_n32n64_sigframe_init,
   mips_linux_sigframe_validate
@@ -802,11 +802,11 @@ static const struct tramp_frame micromips_linux_o32_sigframe = {
   SIGTRAMP_FRAME,
   2,
   {
-    { MICROMIPS_INST_LI_V0, -1 },
-    { MIPS_NR_sigreturn, -1 },
-    { MICROMIPS_INST_POOL32A, -1 },
-    { MICROMIPS_INST_SYSCALL, -1 },
-    { TRAMP_SENTINEL_INSN, -1 }
+    { MICROMIPS_INST_LI_V0, ULONGEST_MAX },
+    { MIPS_NR_sigreturn, ULONGEST_MAX },
+    { MICROMIPS_INST_POOL32A, ULONGEST_MAX },
+    { MICROMIPS_INST_SYSCALL, ULONGEST_MAX },
+    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
   },
   mips_linux_o32_sigframe_init,
   micromips_linux_sigframe_validate
@@ -816,11 +816,11 @@ static const struct tramp_frame micromips_linux_o32_rt_sigframe = {
   SIGTRAMP_FRAME,
   2,
   {
-    { MICROMIPS_INST_LI_V0, -1 },
-    { MIPS_NR_rt_sigreturn, -1 },
-    { MICROMIPS_INST_POOL32A, -1 },
-    { MICROMIPS_INST_SYSCALL, -1 },
-    { TRAMP_SENTINEL_INSN, -1 }
+    { MICROMIPS_INST_LI_V0, ULONGEST_MAX },
+    { MIPS_NR_rt_sigreturn, ULONGEST_MAX },
+    { MICROMIPS_INST_POOL32A, ULONGEST_MAX },
+    { MICROMIPS_INST_SYSCALL, ULONGEST_MAX },
+    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
   },
   mips_linux_o32_sigframe_init,
   micromips_linux_sigframe_validate
@@ -830,11 +830,11 @@ static const struct tramp_frame micromips_linux_n32_rt_sigframe = {
   SIGTRAMP_FRAME,
   2,
   {
-    { MICROMIPS_INST_LI_V0, -1 },
-    { MIPS_NR_N32_rt_sigreturn, -1 },
-    { MICROMIPS_INST_POOL32A, -1 },
-    { MICROMIPS_INST_SYSCALL, -1 },
-    { TRAMP_SENTINEL_INSN, -1 }
+    { MICROMIPS_INST_LI_V0, ULONGEST_MAX },
+    { MIPS_NR_N32_rt_sigreturn, ULONGEST_MAX },
+    { MICROMIPS_INST_POOL32A, ULONGEST_MAX },
+    { MICROMIPS_INST_SYSCALL, ULONGEST_MAX },
+    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
   },
   mips_linux_n32n64_sigframe_init,
   micromips_linux_sigframe_validate
@@ -844,11 +844,11 @@ static const struct tramp_frame micromips_linux_n64_rt_sigframe = {
   SIGTRAMP_FRAME,
   2,
   {
-    { MICROMIPS_INST_LI_V0, -1 },
-    { MIPS_NR_N64_rt_sigreturn, -1 },
-    { MICROMIPS_INST_POOL32A, -1 },
-    { MICROMIPS_INST_SYSCALL, -1 },
-    { TRAMP_SENTINEL_INSN, -1 }
+    { MICROMIPS_INST_LI_V0, ULONGEST_MAX },
+    { MIPS_NR_N64_rt_sigreturn, ULONGEST_MAX },
+    { MICROMIPS_INST_POOL32A, ULONGEST_MAX },
+    { MICROMIPS_INST_SYSCALL, ULONGEST_MAX },
+    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
   },
   mips_linux_n32n64_sigframe_init,
   micromips_linux_sigframe_validate

@@ -137,14 +137,14 @@ static const struct tramp_frame ppcnbsd_sigtramp =
   SIGTRAMP_FRAME,
   4,
   {
-    { 0x3821fff0, -1 },		/* add r1,r1,-16 */
-    { 0x4e800021, -1 },		/* blrl */
-    { 0x38610018, -1 },		/* addi r3,r1,24 */
-    { 0x38000127, -1 },		/* li r0,295 */
-    { 0x44000002, -1 },		/* sc */
-    { 0x38000001, -1 },		/* li r0,1 */
-    { 0x44000002, -1 },		/* sc */
-    { TRAMP_SENTINEL_INSN, -1 }
+    { 0x3821fff0, ULONGEST_MAX },		/* add r1,r1,-16 */
+    { 0x4e800021, ULONGEST_MAX },		/* blrl */
+    { 0x38610018, ULONGEST_MAX },		/* addi r3,r1,24 */
+    { 0x38000127, ULONGEST_MAX },		/* li r0,295 */
+    { 0x44000002, ULONGEST_MAX },		/* sc */
+    { 0x38000001, ULONGEST_MAX },		/* li r0,1 */
+    { 0x44000002, ULONGEST_MAX },		/* sc */
+    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
   },
   ppcnbsd_sigtramp_cache_init
 };
@@ -156,14 +156,14 @@ const struct tramp_frame ppcnbsd2_sigtramp =
   SIGTRAMP_FRAME,
   4,
   {
-    { 0x3821fff0, -1 },		/* add r1,r1,-16 */
-    { 0x4e800021, -1 },		/* blrl */
-    { 0x38610010, -1 },		/* addi r3,r1,16 */
-    { 0x38000127, -1 },		/* li r0,295 */
-    { 0x44000002, -1 },		/* sc */
-    { 0x38000001, -1 },		/* li r0,1 */
-    { 0x44000002, -1 },		/* sc */
-    { TRAMP_SENTINEL_INSN, -1 }
+    { 0x3821fff0, ULONGEST_MAX },		/* add r1,r1,-16 */
+    { 0x4e800021, ULONGEST_MAX },		/* blrl */
+    { 0x38610010, ULONGEST_MAX },		/* addi r3,r1,16 */
+    { 0x38000127, ULONGEST_MAX },		/* li r0,295 */
+    { 0x44000002, ULONGEST_MAX },		/* sc */
+    { 0x38000001, ULONGEST_MAX },		/* li r0,1 */
+    { 0x44000002, ULONGEST_MAX },		/* sc */
+    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
   },
   ppcnbsd_sigtramp_cache_init
 };

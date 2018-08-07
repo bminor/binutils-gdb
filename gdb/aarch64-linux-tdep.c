@@ -176,12 +176,12 @@ static const struct tramp_frame aarch64_linux_rt_sigframe =
   {
     /* movz x8, 0x8b (S=1,o=10,h=0,i=0x8b,r=8)
        Soo1 0010 1hhi iiii iiii iiii iiir rrrr  */
-    {0xd2801168, -1},
+    {0xd2801168, ULONGEST_MAX},
 
     /* svc  0x0      (o=0, l=1)
        1101 0100 oooi iiii iiii iiii iii0 00ll  */
-    {0xd4000001, -1},
-    {TRAMP_SENTINEL_INSN, -1}
+    {0xd4000001, ULONGEST_MAX},
+    {TRAMP_SENTINEL_INSN, ULONGEST_MAX}
   },
   aarch64_linux_sigframe_init
 };

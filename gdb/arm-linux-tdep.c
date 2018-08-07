@@ -385,7 +385,7 @@ static struct tramp_frame arm_linux_sigreturn_tramp_frame = {
   SIGTRAMP_FRAME,
   4,
   {
-    { ARM_LINUX_SIGRETURN_INSTR, -1 },
+    { ARM_LINUX_SIGRETURN_INSTR, ULONGEST_MAX },
     { TRAMP_SENTINEL_INSN }
   },
   arm_linux_sigreturn_init
@@ -395,7 +395,7 @@ static struct tramp_frame arm_linux_rt_sigreturn_tramp_frame = {
   SIGTRAMP_FRAME,
   4,
   {
-    { ARM_LINUX_RT_SIGRETURN_INSTR, -1 },
+    { ARM_LINUX_RT_SIGRETURN_INSTR, ULONGEST_MAX },
     { TRAMP_SENTINEL_INSN }
   },
   arm_linux_rt_sigreturn_init
@@ -405,8 +405,8 @@ static struct tramp_frame arm_eabi_linux_sigreturn_tramp_frame = {
   SIGTRAMP_FRAME,
   4,
   {
-    { ARM_SET_R7_SIGRETURN, -1 },
-    { ARM_EABI_SYSCALL, -1 },
+    { ARM_SET_R7_SIGRETURN, ULONGEST_MAX },
+    { ARM_EABI_SYSCALL, ULONGEST_MAX },
     { TRAMP_SENTINEL_INSN }
   },
   arm_linux_sigreturn_init
@@ -416,8 +416,8 @@ static struct tramp_frame arm_eabi_linux_rt_sigreturn_tramp_frame = {
   SIGTRAMP_FRAME,
   4,
   {
-    { ARM_SET_R7_RT_SIGRETURN, -1 },
-    { ARM_EABI_SYSCALL, -1 },
+    { ARM_SET_R7_RT_SIGRETURN, ULONGEST_MAX },
+    { ARM_EABI_SYSCALL, ULONGEST_MAX },
     { TRAMP_SENTINEL_INSN }
   },
   arm_linux_rt_sigreturn_init
@@ -427,9 +427,9 @@ static struct tramp_frame thumb2_eabi_linux_sigreturn_tramp_frame = {
   SIGTRAMP_FRAME,
   2,
   {
-    { THUMB2_SET_R7_SIGRETURN1, -1 },
-    { THUMB2_SET_R7_SIGRETURN2, -1 },
-    { THUMB2_EABI_SYSCALL, -1 },
+    { THUMB2_SET_R7_SIGRETURN1, ULONGEST_MAX },
+    { THUMB2_SET_R7_SIGRETURN2, ULONGEST_MAX },
+    { THUMB2_EABI_SYSCALL, ULONGEST_MAX },
     { TRAMP_SENTINEL_INSN }
   },
   arm_linux_sigreturn_init
@@ -439,9 +439,9 @@ static struct tramp_frame thumb2_eabi_linux_rt_sigreturn_tramp_frame = {
   SIGTRAMP_FRAME,
   2,
   {
-    { THUMB2_SET_R7_RT_SIGRETURN1, -1 },
-    { THUMB2_SET_R7_RT_SIGRETURN2, -1 },
-    { THUMB2_EABI_SYSCALL, -1 },
+    { THUMB2_SET_R7_RT_SIGRETURN1, ULONGEST_MAX },
+    { THUMB2_SET_R7_RT_SIGRETURN2, ULONGEST_MAX },
+    { THUMB2_EABI_SYSCALL, ULONGEST_MAX },
     { TRAMP_SENTINEL_INSN }
   },
   arm_linux_rt_sigreturn_init
@@ -451,8 +451,8 @@ static struct tramp_frame arm_linux_restart_syscall_tramp_frame = {
   NORMAL_FRAME,
   4,
   {
-    { ARM_OABI_SYSCALL_RESTART_SYSCALL, -1 },
-    { ARM_LDR_PC_SP_12, -1 },
+    { ARM_OABI_SYSCALL_RESTART_SYSCALL, ULONGEST_MAX },
+    { ARM_LDR_PC_SP_12, ULONGEST_MAX },
     { TRAMP_SENTINEL_INSN }
   },
   arm_linux_restart_syscall_init
@@ -462,8 +462,8 @@ static struct tramp_frame arm_kernel_linux_restart_syscall_tramp_frame = {
   NORMAL_FRAME,
   4,
   {
-    { ARM_OABI_SYSCALL_RESTART_SYSCALL, -1 },
-    { ARM_LDR_PC_SP_4, -1 },
+    { ARM_OABI_SYSCALL_RESTART_SYSCALL, ULONGEST_MAX },
+    { ARM_LDR_PC_SP_4, ULONGEST_MAX },
     { TRAMP_SENTINEL_INSN }
   },
   arm_linux_restart_syscall_init

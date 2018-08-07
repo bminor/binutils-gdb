@@ -118,11 +118,11 @@ static const struct tramp_frame aarch64_fbsd_sigframe =
   SIGTRAMP_FRAME,
   4,
   {
-    {0x910003e0, -1},		/* mov  x0, sp  */
-    {0x91014000, -1},		/* add  x0, x0, #SF_UC  */
-    {0xd2803428, -1},		/* mov  x8, #SYS_sigreturn  */
-    {0xd4000001, -1},		/* svc  0x0  */
-    {TRAMP_SENTINEL_INSN, -1}
+    {0x910003e0, ULONGEST_MAX},		/* mov  x0, sp  */
+    {0x91014000, ULONGEST_MAX},		/* add  x0, x0, #SF_UC  */
+    {0xd2803428, ULONGEST_MAX},		/* mov  x8, #SYS_sigreturn  */
+    {0xd4000001, ULONGEST_MAX},		/* svc  0x0  */
+    {TRAMP_SENTINEL_INSN, ULONGEST_MAX}
   },
   aarch64_fbsd_sigframe_init
 };

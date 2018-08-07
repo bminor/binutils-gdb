@@ -137,7 +137,7 @@ static struct tramp_frame tic6x_linux_rt_sigreturn_tramp_frame =
   4,
   {
     {0x000045aa, 0x0fffffff},	/* mvk .S2 139,b0 */
-    {0x10000000, -1},		/* swe */
+    {0x10000000, ULONGEST_MAX},		/* swe */
     {TRAMP_SENTINEL_INSN}
   },
   tic6x_linux_rt_sigreturn_init

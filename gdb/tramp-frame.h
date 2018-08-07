@@ -41,7 +41,7 @@ struct trad_frame_cache;
 
 /* Magic instruction that to mark the end of the signal trampoline
    instruction sequence.  */
-#define TRAMP_SENTINEL_INSN ((LONGEST) -1)
+#define TRAMP_SENTINEL_INSN ULONGEST_MAX
 
 struct tramp_frame
 {

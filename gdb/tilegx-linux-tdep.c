@@ -65,9 +65,9 @@ static const struct tramp_frame tilegx_linux_rt_sigframe =
   SIGTRAMP_FRAME,
   8,
   {
-    { 0x00045fe551483000ULL, -1 }, /* { moveli r10, 139 } */
-    { 0x286b180051485000ULL, -1 }, /* { swint1 } */
-    { TRAMP_SENTINEL_INSN, -1 }
+    { 0x00045fe551483000ULL, ULONGEST_MAX }, /* { moveli r10, 139 } */
+    { 0x286b180051485000ULL, ULONGEST_MAX }, /* { swint1 } */
+    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
   },
   tilegx_linux_sigframe_init
 };
