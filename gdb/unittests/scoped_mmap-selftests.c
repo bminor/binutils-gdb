@@ -25,6 +25,7 @@
 #if defined(HAVE_SYS_MMAN_H) && defined(HAVE_UNISTD_H)
 
 #include "selftest.h"
+#include "common/gdb_unlinker.h"
 
 #include <unistd.h>
 
@@ -78,6 +79,57 @@ run_tests ()
 }
 
 } /* namespace scoped_mmap */
+
+namespace mmap_file
+{
+
+/* Test the standard usage of mmap_file.  */
+static void
+test_normal ()
+{
+  char filename[] = "scoped_mmapped_file-selftest-XXXXXX";
+  int fd = mkstemp (filename);
+  SELF_CHECK (fd >= 0);
+
+  write (fd, "Hello!", 7);
+  close (fd);
+
+  gdb::unlinker unlink_test_file (filename);
+
+  {
+    ::scoped_mmap m = ::mmap_file (filename);
+
+    SELF_CHECK (m.get () != MAP_FAILED);
+    SELF_CHECK (m.size () == 7);
+    SELF_CHECK (0 == strcmp ((char *) m.get (), "Hello!"));
+  }
+}
+
+/* Calling mmap_file with a non-existent file should throw an exception.  */
+static void
+test_invalid_filename ()
+{
+  bool threw = false;
+
+  try {
+      ::scoped_mmap m = ::mmap_file ("/this/file/should/not/exist");
+  } catch (gdb_exception &e) {
+      threw = true;
+  }
+
+  SELF_CHECK (threw);
+}
+
+
+/* Run selftests.  */
+static void
+run_tests ()
+{
+  test_normal ();
+  test_invalid_filename ();
+}
+
+} /* namespace mmap_file */
 } /* namespace selftests */
 
 #endif /* !defined(HAVE_SYS_MMAN_H) || !defined(HAVE_UNISTD_H) */
@@ -88,5 +140,7 @@ _initialize_scoped_mmap_selftests ()
 #if defined(HAVE_SYS_MMAN_H) && defined(HAVE_UNISTD_H)
   selftests::register_test ("scoped_mmap",
 			    selftests::scoped_mmap::run_tests);
+  selftests::register_test ("mmap_file",
+			    selftests::mmap_file::run_tests);
 #endif
 }

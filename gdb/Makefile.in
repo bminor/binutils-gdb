@@ -965,6 +965,7 @@ COMMON_SFILES = \
 	common/ptid.c \
 	common/rsp-low.c \
 	common/run-time-clock.c \
+	common/scoped_mmap.c \
 	common/signals.c \
 	common/signals-state-save-restore.c \
 	common/tdesc.c \

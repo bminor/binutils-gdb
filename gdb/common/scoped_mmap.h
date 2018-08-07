@@ -41,8 +41,18 @@ public:
 
   ~scoped_mmap ()
   {
-    if (m_mem != MAP_FAILED)
-      munmap (m_mem, m_length);
+    destroy ();
+  }
+
+  scoped_mmap (scoped_mmap &&rhs)
+  {
+    destroy ();
+
+    m_mem = rhs.m_mem;
+    m_length = rhs.m_length;
+
+    rhs.m_mem = MAP_FAILED;
+    rhs.m_length = 0;
   }
 
   DISABLE_COPY_AND_ASSIGN (scoped_mmap);
@@ -58,8 +68,7 @@ public:
   void reset (void *addr, size_t length, int prot, int flags, int fd,
 	      off_t offset) noexcept
   {
-    if (m_mem != MAP_FAILED)
-      munmap (m_mem, m_length);
+    destroy ();
 
     m_length = length;
     m_mem = mmap (addr, m_length, prot, flags, fd, offset);
@@ -69,9 +78,18 @@ public:
   void *get () const noexcept { return m_mem; }
 
 private:
+  void destroy ()
+  {
+    if (m_mem != MAP_FAILED)
+      munmap (m_mem, m_length);
+  }
+
   void *m_mem;
   size_t m_length;
 };
+
+/* Map FILENAME in memory.  Throw an error if anything goes wrong.  */
+scoped_mmap mmap_file (const char *filename);
 
 #endif /* HAVE_SYS_MMAN_H */
 #endif /* SCOPED_MMAP_H */

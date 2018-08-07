@@ -1,5 +1,17 @@
 2018-08-07  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* Makefile.in (COMMON_SFILES): Add common/scoped_mmap.c.
+	* common/scoped_mmap.c: New file.
+	* common/scoped_mmap.h (destroy): New method.
+	(~scoped_mmap, reset): Use destroy.
+	(scoped_mmap): New move constructor.
+	(mmap_file): New declaration.
+	* unittests/scoped_mmap-selftests.c (test_normal,
+	test_invalid_filename, run_tests): New functions.
+	(_initialize_scoped_mmap_selftests): Register selftest.
+
+2018-08-07  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* dwarf2read.c (read_gdb_index_from_section): Rename to...
 	(read_gdb_index_from_buffer): ... this.  Remove section
 	parameter, add buffer parameter.
