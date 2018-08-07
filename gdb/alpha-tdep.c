@@ -767,7 +767,7 @@ static const int stq_c_opcode = 0x2f;
 static std::vector<CORE_ADDR>
 alpha_deal_with_atomic_sequence (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  CORE_ADDR breaks[2] = {-1, -1};
+  CORE_ADDR breaks[2] = {CORE_ADDR_MAX, CORE_ADDR_MAX};
   CORE_ADDR loc = pc;
   CORE_ADDR closing_insn; /* Instruction that closes the atomic sequence.  */
   unsigned int insn = alpha_read_insn (gdbarch, loc);

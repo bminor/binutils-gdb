@@ -1,5 +1,18 @@
 2018-08-27  Tom Tromey  <tom@tromey.com>
 
+	* rs6000-tdep.c (ppc_deal_with_atomic_sequence): Use
+	CORE_ADDR_MAX.
+	* mips-tdep.c (mips_deal_with_atomic_sequence)
+	(micromips_deal_with_atomic_sequence): Use CORE_ADDR_MAX.
+	* arch/arm-get-next-pcs.c (thumb_deal_with_atomic_sequence_raw)
+	(arm_deal_with_atomic_sequence_raw): Use CORE_ADDR_MAX.
+	* alpha-tdep.c (alpha_deal_with_atomic_sequence): Use
+	CORE_ADDR_MAX.
+	* aarch64-tdep.c (aarch64_software_single_step): Use
+	CORE_ADDR_MAX.
+
+2018-08-27  Tom Tromey  <tom@tromey.com>
+
 	* linespec.c (complete_linespec_component): Add cast to "char".
 	* completer.c (completion_tracker::build_completion_result): Add
 	cast to "char".
