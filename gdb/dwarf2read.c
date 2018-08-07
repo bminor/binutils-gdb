@@ -7757,19 +7757,17 @@ create_type_unit_group (struct dwarf2_cu *cu, sect_offset line_offset_struct)
     {
       unsigned int line_offset = to_underlying (line_offset_struct);
       struct partial_symtab *pst;
-      char *name;
+      std::string name;
 
       /* Give the symtab a useful name for debug purposes.  */
       if ((line_offset & NO_STMT_LIST_TYPE_UNIT_PSYMTAB) != 0)
-	name = xstrprintf ("<type_units_%d>",
-			   (line_offset & ~NO_STMT_LIST_TYPE_UNIT_PSYMTAB));
+	name = string_printf ("<type_units_%d>",
+			      (line_offset & ~NO_STMT_LIST_TYPE_UNIT_PSYMTAB));
       else
-	name = xstrprintf ("<type_units_at_0x%x>", line_offset);
+	name = string_printf ("<type_units_at_0x%x>", line_offset);
 
-      pst = create_partial_symtab (per_cu, name);
+      pst = create_partial_symtab (per_cu, name.c_str ());
       pst->anonymous = 1;
-
-      xfree (name);
     }
 
   tu_group->hash.dwo_unit = cu->dwo_unit;
@@ -21844,15 +21842,15 @@ build_error_marker_type (struct dwarf2_cu *cu, struct die_info *die)
   struct dwarf2_per_objfile *dwarf2_per_objfile
     = cu->per_cu->dwarf2_per_objfile;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
-  char *message, *saved;
+  char *saved;
 
-  message = xstrprintf (_("<unknown type in %s, CU %s, DIE %s>"),
-			objfile_name (objfile),
-			sect_offset_str (cu->header.sect_off),
-			sect_offset_str (die->sect_off));
+  std::string message
+    = string_printf (_("<unknown type in %s, CU %s, DIE %s>"),
+		     objfile_name (objfile),
+		     sect_offset_str (cu->header.sect_off),
+		     sect_offset_str (die->sect_off));
   saved = (char *) obstack_copy0 (&objfile->objfile_obstack,
-				  message, strlen (message));
-  xfree (message);
+				  message.c_str (), message.length ());
 
   return init_type (objfile, TYPE_CODE_ERROR, 0, saved);
 }

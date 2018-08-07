@@ -48,6 +48,16 @@ extern void close_most_fds (void);
 extern int gdb_open_cloexec (const char *filename, int flags,
 			     /* mode_t */ unsigned long mode);
 
+/* Convenience wrapper for the above, which takes the filename as an
+   std::string.  */
+
+static inline int
+gdb_open_cloexec (const std::string &filename, int flags,
+		  /* mode_t */ unsigned long mode)
+{
+  return gdb_open_cloexec (filename.c_str (), flags, mode);
+}
+
 struct gdb_file_deleter
 {
   void operator() (FILE *file) const
@@ -65,6 +75,15 @@ typedef std::unique_ptr<FILE, gdb_file_deleter> gdb_file_up;
 
 extern gdb_file_up gdb_fopen_cloexec (const char *filename,
 				      const char *opentype);
+
+/* Convenience wrapper for the above, which takes the filename as an
+   std::string.  */
+
+static inline gdb_file_up
+gdb_fopen_cloexec (const std::string &filename, const char *opentype)
+{
+  return gdb_fopen_cloexec (filename.c_str (), opentype);
+}
 
 /* Like 'socketpair', but ensures that the returned file descriptors
    have the close-on-exec flag set.  */

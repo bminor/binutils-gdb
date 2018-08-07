@@ -319,15 +319,14 @@ xtensa_register_type (struct gdbarch *gdbarch, int regnum)
 
 	      if (tp == NULL)
 		{
-		  char *name = xstrprintf ("int%d", size * 8);
+		  std::string name = string_printf ("int%d", size * 8);
 
 		  tp = XNEW (struct ctype_cache);
 		  tp->next = tdep->type_entries;
 		  tdep->type_entries = tp;
 		  tp->size = size;
 		  tp->virtual_type
-		    = arch_integer_type (gdbarch, size * 8, 1, name);
-		  xfree (name);
+		    = arch_integer_type (gdbarch, size * 8, 1, name.c_str ());
 		}
 
 	      reg->ctype = tp->virtual_type;

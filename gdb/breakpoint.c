@@ -6038,16 +6038,9 @@ print_one_breakpoint_location (struct breakpoint *b,
   /* 1 */
   annotate_field (0);
   if (part_of_multiple)
-    {
-      char *formatted;
-      formatted = xstrprintf ("%d.%d", b->number, loc_number);
-      uiout->field_string ("number", formatted);
-      xfree (formatted);
-    }
+    uiout->field_fmt ("number", "%d.%d", b->number, loc_number);
   else
-    {
-      uiout->field_int ("number", b->number);
-    }
+    uiout->field_int ("number", b->number);
 
   /* 2 */
   annotate_field (1);
@@ -8048,7 +8041,6 @@ print_one_catch_solib (struct breakpoint *b, struct bp_location **locs)
   struct solib_catchpoint *self = (struct solib_catchpoint *) b;
   struct value_print_options opts;
   struct ui_out *uiout = current_uiout;
-  char *msg;
 
   get_user_print_options (&opts);
   /* Field 4, the address, is omitted (which makes the columns not
@@ -8060,23 +8052,23 @@ print_one_catch_solib (struct breakpoint *b, struct bp_location **locs)
       uiout->field_skip ("addr");
     }
 
+  std::string msg;
   annotate_field (5);
   if (self->is_load)
     {
       if (self->regex)
-	msg = xstrprintf (_("load of library matching %s"), self->regex);
+	msg = string_printf (_("load of library matching %s"), self->regex);
       else
-	msg = xstrdup (_("load of library"));
+	msg = _("load of library");
     }
   else
     {
       if (self->regex)
-	msg = xstrprintf (_("unload of library matching %s"), self->regex);
+	msg = string_printf (_("unload of library matching %s"), self->regex);
       else
-	msg = xstrdup (_("unload of library"));
+	msg = _("unload of library");
     }
   uiout->field_string ("what", msg);
-  xfree (msg);
 
   if (uiout->is_mi_like_p ())
     uiout->field_string ("catch-type", self->is_load ? "load" : "unload");

@@ -46,13 +46,11 @@ procfs_xfer_auxv (gdb_byte *readbuf,
 		  ULONGEST len,
 		  ULONGEST *xfered_len)
 {
-  char *pathname;
   int fd;
   ssize_t l;
 
-  pathname = xstrprintf ("/proc/%d/auxv", inferior_ptid.pid ());
+  std::string pathname = string_printf ("/proc/%d/auxv", inferior_ptid.pid ());
   fd = gdb_open_cloexec (pathname, writebuf != NULL ? O_WRONLY : O_RDONLY, 0);
-  xfree (pathname);
   if (fd < 0)
     return TARGET_XFER_E_IO;
 

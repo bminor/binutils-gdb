@@ -115,7 +115,7 @@ linux_common_core_of_thread (ptid_t ptid)
 static void
 command_from_pid (char *command, int maxlen, PID_T pid)
 {
-  char *stat_path = xstrprintf ("/proc/%lld/stat", pid); 
+  std::string stat_path = string_printf ("/proc/%lld/stat", pid);
   gdb_file_up fp = gdb_fopen_cloexec (stat_path, "r");
   
   command[0] = '\0';
@@ -142,8 +142,6 @@ command_from_pid (char *command, int maxlen, PID_T pid)
     }
 
   command[maxlen - 1] = '\0'; /* Ensure string is null-terminated.  */
-	
-  xfree (stat_path);
 }
 
 /* Returns the command-line of the process with the given PID. The
@@ -152,7 +150,7 @@ command_from_pid (char *command, int maxlen, PID_T pid)
 static char *
 commandline_from_pid (PID_T pid)
 {
-  char *pathname = xstrprintf ("/proc/%lld/cmdline", pid);
+  std::string pathname = xstrprintf ("/proc/%lld/cmdline", pid);
   char *commandline = NULL;
   gdb_file_up f = gdb_fopen_cloexec (pathname, "r");
 
@@ -197,8 +195,6 @@ commandline_from_pid (PID_T pid)
 	    strcat (commandline, "]");
 	}
     }
-
-  xfree (pathname);
 
   return commandline;
 }
@@ -572,16 +568,16 @@ linux_xfer_osdata_threads (gdb_byte *readbuf,
 		  && S_ISDIR (statbuf.st_mode))
 		{
 		  DIR *dirp2;
-		  char *pathname;
 		  PID_T pid;
 		  char command[32];
 
-		  pathname = xstrprintf ("/proc/%s/task", dp->d_name);
+		  std::string pathname
+		    = string_printf ("/proc/%s/task", dp->d_name);
 		  
 		  pid = atoi (dp->d_name);
 		  command_from_pid (command, sizeof (command), pid);
 
-		  dirp2 = opendir (pathname);
+		  dirp2 = opendir (pathname.c_str ());
 
 		  if (dirp2)
 		    {
@@ -615,8 +611,6 @@ linux_xfer_osdata_threads (gdb_byte *readbuf,
 
 		      closedir (dirp2);
 		    }
-
-		  xfree (pathname);
 		}
 	    }
 
@@ -781,7 +775,6 @@ linux_xfer_osdata_fds (gdb_byte *readbuf,
 	      if (stat (procentry, &statbuf) == 0
 		  && S_ISDIR (statbuf.st_mode))
 		{
-		  char *pathname;
 		  DIR *dirp2;
 		  PID_T pid;
 		  char command[32];
@@ -789,8 +782,9 @@ linux_xfer_osdata_fds (gdb_byte *readbuf,
 		  pid = atoi (dp->d_name);
 		  command_from_pid (command, sizeof (command), pid);
 
-		  pathname = xstrprintf ("/proc/%s/fd", dp->d_name);
-		  dirp2 = opendir (pathname);
+		  std::string pathname
+		    = string_printf ("/proc/%s/fd", dp->d_name);
+		  dirp2 = opendir (pathname.c_str ());
 
 		  if (dirp2)
 		    {
@@ -798,15 +792,17 @@ linux_xfer_osdata_fds (gdb_byte *readbuf,
 
 		      while ((dp2 = readdir (dirp2)) != NULL)
 			{
-			  char *fdname;
 			  char buf[1000];
 			  ssize_t rslt;
 
 			  if (!isdigit (dp2->d_name[0]))
 			    continue;
 
-			  fdname = xstrprintf ("%s/%s", pathname, dp2->d_name);
-			  rslt = readlink (fdname, buf, sizeof (buf) - 1);
+			  std::string fdname
+			    = string_printf ("%s/%s", pathname.c_str (),
+					     dp2->d_name);
+			  rslt = readlink (fdname.c_str (), buf,
+					   sizeof (buf) - 1);
 			  if (rslt >= 0)
 			    buf[rslt] = '\0';
 
@@ -826,8 +822,6 @@ linux_xfer_osdata_fds (gdb_byte *readbuf,
 
 		      closedir (dirp2);
 		    }
-
-		  xfree (pathname);
 		}
 	    }
 

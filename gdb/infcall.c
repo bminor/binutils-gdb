@@ -385,13 +385,11 @@ get_function_name (CORE_ADDR funaddr, char *buf, int buf_size)
   }
 
   {
-    char *tmp = xstrprintf (_(RAW_FUNCTION_ADDRESS_FORMAT),
-                            hex_string (funaddr));
+    std::string tmp = string_printf (_(RAW_FUNCTION_ADDRESS_FORMAT),
+				     hex_string (funaddr));
 
-    gdb_assert (strlen (tmp) + 1 <= buf_size);
-    strcpy (buf, tmp);
-    xfree (tmp);
-    return buf;
+    gdb_assert (tmp.length () + 1 <= buf_size);
+    return strcpy (buf, tmp.c_str ());
   }
 }
 

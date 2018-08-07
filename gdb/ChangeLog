@@ -1,3 +1,24 @@
+2018-08-07  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/filestuff.h (gdb_fopen_cloexec): New overload.
+	(gdb_open_cloexec): Likewise.
+	* nat/linux-osdata.c (command_from_pid): Use string_printf.
+	(commandline_from_pid): Likewise.
+	(linux_xfer_osdata_threads): Likewise.
+	(linux_xfer_osdata_fds): Likewise.
+	* ada-lang.c (is_package_name): Likewise.
+	* auxv.c (procfs_xfer_auxv): Likewise.
+	* breakpoint.c (print_one_breakpoint_location): Use
+	uiout::field_fmt.
+	(print_one_catch_solib): Use string_printf.
+	* coff-pe-read.c (add_pe_exported_sym): Likewise.
+	(add_pe_forwarded_sym): Likewise.
+	* dwarf2read.c (create_type_unit_group): Likewise.
+	(build_error_marker_type): Likewise.
+	* infcall.c (get_function_name): Likewise.
+	* valprint.c (print_converted_chars_to_obstack): Likewise.
+	* xtensa-tdep.c (xtensa_register_type): Likewise.
+
 2018-08-06  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* remote.c (remote_target::download_tracepoint): Fix format

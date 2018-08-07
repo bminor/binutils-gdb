@@ -5205,8 +5205,6 @@ is_package_name (const char *name)
      to NAME not existing in our list of symbols.  There is only one
      small complication with library-level functions (see below).  */
 
-  char *fun_name;
-
   /* If it is a function that has not been defined at library level,
      then we should be able to look it up in the symbols.  */
   if (standard_lookup (name, NULL, VAR_DOMAIN) != NULL)
@@ -5220,9 +5218,9 @@ is_package_name (const char *name)
   if (strstr (name, "__") != NULL)
     return 0;
 
-  fun_name = xstrprintf ("_ada_%s", name);
+  std::string fun_name = string_printf ("_ada_%s", name);
 
-  return (standard_lookup (fun_name, NULL, VAR_DOMAIN) == NULL);
+  return (standard_lookup (fun_name.c_str (), NULL, VAR_DOMAIN) == NULL);
 }
 
 /* Return nonzero if SYM corresponds to a renaming entity that is

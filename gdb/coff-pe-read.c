@@ -157,7 +157,6 @@ add_pe_exported_sym (minimal_symbol_reader &reader,
 		     const struct read_pe_section_data *section_data,
 		     const char *dll_name, struct objfile *objfile)
 {
-  char *qualified_name, *bare_name;
   /* Add the stored offset to get the loaded address of the symbol.  */
   CORE_ADDR vma = func_rva + section_data->vma_offset;
 
@@ -165,12 +164,14 @@ add_pe_exported_sym (minimal_symbol_reader &reader,
      of the dll name, e.g. KERNEL32!AddAtomA.  This matches the style
      used by windbg from the "Microsoft Debugging Tools for Windows".  */
 
+  std::string bare_name;
   if (sym_name == NULL || *sym_name == '\0')
-    bare_name = xstrprintf ("#%d", ordinal);
+    bare_name = string_printf ("#%d", ordinal);
   else
-    bare_name = xstrdup (sym_name);
+    bare_name = sym_name;
 
-  qualified_name = xstrprintf ("%s!%s", dll_name, bare_name);
+  std::string qualified_name
+    = string_printf ("%s!%s", dll_name, bare_name.c_str ());
 
   if ((section_data->ms_type == mst_unknown) && debug_coff_pe_read)
     fprintf_unfiltered (gdb_stdlog , _("Unknown section type for \"%s\""
@@ -178,17 +179,15 @@ add_pe_exported_sym (minimal_symbol_reader &reader,
 			section_data->section_name.c_str (), sym_name,
 			dll_name);
 
-  reader.record_with_info (qualified_name, vma, section_data->ms_type,
+  reader.record_with_info (qualified_name.c_str (), vma, section_data->ms_type,
 			   section_data->index);
 
   /* Enter the plain name as well, which might not be unique.  */
-  reader.record_with_info (bare_name, vma, section_data->ms_type,
+  reader.record_with_info (bare_name.c_str (), vma, section_data->ms_type,
 			   section_data->index);
   if (debug_coff_pe_read > 1)
     fprintf_unfiltered (gdb_stdlog, _("Adding exported symbol \"%s\""
 			" in dll \"%s\"\n"), sym_name, dll_name);
-  xfree (qualified_name);
-  xfree (bare_name);
 }
 
 /* Create a minimal symbol entry for an exported forward symbol.
@@ -209,7 +208,6 @@ add_pe_forwarded_sym (minimal_symbol_reader &reader,
   CORE_ADDR vma, baseaddr;
   struct bound_minimal_symbol msymbol;
   enum minimal_symbol_type msymtype;
-  char *qualified_name, *bare_name;
   int forward_dll_name_len = strlen (forward_dll_name);
   int forward_func_name_len = strlen (forward_func_name);
   int forward_len = forward_dll_name_len + forward_func_name_len + 2;
@@ -254,12 +252,14 @@ add_pe_forwarded_sym (minimal_symbol_reader &reader,
      of the dll name, e.g. KERNEL32!AddAtomA.  This matches the style
      used by windbg from the "Microsoft Debugging Tools for Windows".  */
 
+  std::string bare_name;
   if (sym_name == NULL || *sym_name == '\0')
-    bare_name = xstrprintf ("#%d", ordinal);
+    bare_name = string_printf ("#%d", ordinal);
   else
-    bare_name = xstrdup (sym_name);
+    bare_name = sym_name;
 
-  qualified_name = xstrprintf ("%s!%s", dll_name, bare_name);
+  std::string qualified_name
+    = string_printf ("%s!%s", dll_name, bare_name.c_str ());
 
   /* Note that this code makes a minimal symbol whose value may point
      outside of any section in this objfile.  These symbols can't
@@ -268,12 +268,12 @@ add_pe_forwarded_sym (minimal_symbol_reader &reader,
      code.  */
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
-  reader.record_with_info (qualified_name, vma - baseaddr, msymtype, section);
+  reader.record_with_info (qualified_name.c_str (), vma - baseaddr, msymtype,
+			   section);
 
   /* Enter the plain name as well, which might not be unique.  */
-  reader.record_with_info (bare_name, vma - baseaddr, msymtype, section);
-  xfree (qualified_name);
-  xfree (bare_name);
+  reader.record_with_info (bare_name.c_str(), vma - baseaddr, msymtype,
+			   section);
 
   return 1;
 }

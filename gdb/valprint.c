@@ -2572,7 +2572,6 @@ print_converted_chars_to_obstack (struct obstack *obstack,
 	case REPEAT:
 	  {
 	    int j;
-	    char *s;
 
 	    /* We are outputting a character with a repeat count
 	       greater than options->repeat_count_threshold.  */
@@ -2595,13 +2594,13 @@ print_converted_chars_to_obstack (struct obstack *obstack,
 	      print_wchar (gdb_WEOF, elem->buf, elem->buflen, width,
 			   byte_order, obstack, quote_char, &need_escape);
 	    obstack_grow_wstr (obstack, LCST ("'"));
-	    s = xstrprintf (_(" <repeats %u times>"), elem->repeat_count);
+	    std::string s = string_printf (_(" <repeats %u times>"),
+					   elem->repeat_count);
 	    for (j = 0; s[j]; ++j)
 	      {
 		gdb_wchar_t w = gdb_btowc (s[j]);
 		obstack_grow (obstack, &w, sizeof (gdb_wchar_t));
 	      }
-	    xfree (s);
 	  }
 	  break;
 
