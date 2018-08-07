@@ -1,5 +1,15 @@
 2018-08-27  Tom Tromey  <tom@tromey.com>
 
+	* ppc64-tdep.c (insn_d, insn_ds, insn_xfx): Add casts to
+	unsigned.
+	(ppc64_standard_linkage1, ppc64_standard_linkage2)
+	(ppc64_standard_linkage3, ppc64_standard_linkage4)
+	(ppc64_standard_linkage5, ppc64_standard_linkage6)
+	(ppc64_standard_linkage7, ppc64_standard_linkage8): Add casts to
+	unsigned.
+
+2018-08-27  Tom Tromey  <tom@tromey.com>
+
 	* xtensa-tdep.h (XTREG_END): Add cast to unsigned.
 	(XTENSA_GDBARCH_TDEP_INSTANTIATE): Likewise.
 
