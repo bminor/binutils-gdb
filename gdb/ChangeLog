@@ -1,5 +1,9 @@
 2018-08-07  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* NEWS: Mention the index cache.
+
+2018-08-07  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* common/pathstuff.h (get_standard_cache_dir): New.
 	* common/pathstuff.c (get_standard_cache_dir): New.
 	* build-id.h (build_id_to_string): New.

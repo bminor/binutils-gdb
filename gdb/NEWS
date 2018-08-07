@@ -7,6 +7,9 @@
   can be passed using the '[ADDRESS]:PORT' notation, or the regular
   'ADDRESS:PORT' method.
 
+* DWARF index cache: GDB can now automatically save indices of DWARF
+  symbols on disk to speed up further loading of the same binaries.
+
 * New commands
 
 frame apply [all | COUNT | -COUNT | level LEVEL...] [FLAG]... COMMAND

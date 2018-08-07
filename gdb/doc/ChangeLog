@@ -1,3 +1,8 @@
+2018-08-07  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Index Files Speed Up GDB): Add section about
+	symbol index cache.
+
 2018-07-27  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.texinfo (gcore man): Rewrite "Description" and "-o"
