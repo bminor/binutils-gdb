@@ -350,10 +350,7 @@ parse_reg (char *str, struct pdp11_code *operand)
       str += 2;
     }
   else
-    {
-      operand->error = _("Bad register name");
-      return str;
-    }
+    operand->error = _("Bad register name");
 
   return str;
 }
@@ -594,10 +591,21 @@ parse_op_noreg (char *str, struct pdp11_code *operand)
           str = parse_op_no_deferred (str, operand);
         }
       else
-        str = parse_op_no_deferred (str + 1, operand);
+        {
+          /* @Rn == (Rn): Register deferred.  */
+          str = parse_reg (str + 1, operand);
+	  
+          /* Not @Rn */
+          if (operand->error)
+	    {
+	      operand->error = NULL;
+	      str = parse_op_no_deferred (str, operand);
+	    }
+        }
 
       if (operand->error)
 	return str;
+
       operand->code |= 010;
     }
   else

@@ -1,3 +1,13 @@
+2018-08-07  James Patrick Conlon  <cptjustice@gmail.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR 23481
+	* config/tc-pdp11.c (parse_op_noreg): Check for deferred register
+	addressing before assuming non-deferred addressing.
+	* testsuite/gas/pdp11/pr23481.s: New test source file.
+	* testsuite/gas/pdp11/pr23481.d: New test driver file.
+	* testsuite/gas/pdp11/pdp11.exp: Run the new test.
+
 2018-08-06  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* config/tc-arc.c (rf16_only): New static variable.
@@ -93,7 +103,7 @@
 	(swap_2_operands): Also swap flags fields.
 	* config/tc-i386-intel.c (i386_intel_operand): Likewise.
 
-2018-08-01  James Patrick Conlon <cptjustice@gmail.com>
+2018-08-01  James Patrick Conlon  <cptjustice@gmail.com>
 	    Nick Clifton  <nickc@redhat.com>
 
 	PR 14480
