@@ -130,7 +130,7 @@ typedef struct
 	 ct, bsz, sz, al, tnum, flg, cp, mas, fet, sto},
 #define XTREG_END \
   {0, 0, (xtensa_register_type_t) 0, (xtensa_register_group_t) 0,	\
-   0, 0, 0, 0, -1, 0, 0, 0, 0, 0},
+   0, 0, 0, 0, (unsigned) -1, 0, 0, 0, 0, 0},
 
 #define XTENSA_REGISTER_FLAGS_PRIVILEGED	0x0001
 #define XTENSA_REGISTER_FLAGS_READABLE		0x0002
@@ -228,7 +228,7 @@ struct gdbarch_tdep
 #define XTENSA_GDBARCH_TDEP_INSTANTIATE(rmap,spillsz)			\
   {									\
     0,				/* target_flags */			\
-    -1,				/* spill_location */			\
+    (unsigned) -1,		/* spill_location */	\
     (spillsz),			/* spill_size */			\
     0,				/* unused */				\
     (XSHAL_ABI == XTHAL_ABI_CALL0					\

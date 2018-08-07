@@ -1,5 +1,10 @@
 2018-08-27  Tom Tromey  <tom@tromey.com>
 
+	* xtensa-tdep.h (XTREG_END): Add cast to unsigned.
+	(XTENSA_GDBARCH_TDEP_INSTANTIATE): Likewise.
+
+2018-08-27  Tom Tromey  <tom@tromey.com>
+
 	* tramp-frame.h (TRAMP_SENTINEL_INSN): Redefine.
 	* tilegx-linux-tdep.c (tilegx_linux_rt_sigframe): Use
 	ULONGEST_MAX.
