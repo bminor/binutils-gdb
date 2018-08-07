@@ -1,3 +1,7 @@
+2018-08-07  Nick Clifton  <nickc@redhat.com>
+
+	* po/bg.po: Updated Bulgarian translation.
+
 2018-08-06  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* testsuite/ld-arc/attr-merge-6.d: New file.
