@@ -106,10 +106,12 @@ SECTIONS
 	  overridden and global constructors will not be run.
 	  
 	  This does mean that it is not possible for a user to define
-	  their own __CTOR_LIST__ and __DTOR_LIST__ symbols.  If that
-	  ability is needed a custom linker script will have to be
-	  used.  (The custom script can just be a copy of this script
-	  with the PROVIDE() qualifiers added).
+	  their own __CTOR_LIST__ and __DTOR_LIST__ symbols; if they do,
+	  the content from those variables are included but the symbols
+	  defined here silently take precedence.  If they truly need to
+	  be redefined, a custom linker script will have to be used.
+	  (The custom script can just be a copy of this script with the
+	  PROVIDE() qualifiers added).
 
 	  See PR 22762 for more details.  */
        ___CTOR_LIST__ = .;

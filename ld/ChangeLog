@@ -1,3 +1,9 @@
+2018-08-07  Martin Storsjo  <martin@martin.st>
+
+	* scripttempl/pe.sc: Improve the comment about overriding
+	__CTOR_LIST__ and __DTOR_LIST__ symbols.
+	* scripttemp/pep.sc: Likewise.
+
 2018-08-07  Nick Clifton  <nickc@redhat.com>
 
 	* po/bg.po: Updated Bulgarian translation.
