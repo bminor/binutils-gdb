@@ -706,7 +706,8 @@ class Target_x86_64 : public Sized_target<size, false>
       rela_irelative_(NULL), copy_relocs_(elfcpp::R_X86_64_COPY),
       got_mod_index_offset_(-1U), tlsdesc_reloc_info_(),
       tls_base_symbol_defined_(false), isa_1_used_(0), isa_1_needed_(0),
-      feature_1_(0), object_feature_1_(0), seen_first_object_(false)
+      feature_1_(0), object_isa_1_used_(0), object_feature_1_(0),
+      seen_first_object_(false)
   { }
 
   // Hook for a new output section.
@@ -1382,6 +1383,11 @@ class Target_x86_64 : public Sized_target<size, false>
   uint32_t isa_1_needed_;
   uint32_t feature_1_;
   // Target-specific properties from the current object.
+  // These bits get ORed into ISA_1_USED_ after all properties for the object
+  // have been processed. But if either is all zeroes (as when the property
+  // is absent from an object), the result should be all zeroes.
+  // (See PR ld/23486.)
+  uint32_t object_isa_1_used_;
   // These bits get ANDed into FEATURE_1_ after all properties for the object
   // have been processed.
   uint32_t object_feature_1_;
@@ -1610,7 +1616,7 @@ Target_x86_64<size>::record_gnu_property(
   switch (pr_type)
     {
     case elfcpp::GNU_PROPERTY_X86_ISA_1_USED:
-      this->isa_1_used_ |= val;
+      this->object_isa_1_used_ |= val;
       break;
     case elfcpp::GNU_PROPERTY_X86_ISA_1_NEEDED:
       this->isa_1_needed_ |= val;
@@ -1628,12 +1634,22 @@ void
 Target_x86_64<size>::merge_gnu_properties(const Object*)
 {
   if (this->seen_first_object_)
-    this->feature_1_ &= this->object_feature_1_;
+    {
+      // If any object is missing the ISA_1_USED property, we must omit
+      // it from the output file.
+      if (this->object_isa_1_used_ == 0)
+	this->isa_1_used_ = 0;
+      else if (this->isa_1_used_ != 0)
+	this->isa_1_used_ |= this->object_isa_1_used_;
+      this->feature_1_ &= this->object_feature_1_;
+    }
   else
     {
+      this->isa_1_used_ = this->object_isa_1_used_;
       this->feature_1_ = this->object_feature_1_;
       this->seen_first_object_ = true;
     }
+  this->object_isa_1_used_ = 0;
   this->object_feature_1_ = 0;
 }
 

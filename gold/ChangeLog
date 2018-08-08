@@ -1,3 +1,12 @@
+2018-08-07  Cary Coutant  <ccoutant@gmail.com>
+
+	PR ld/23486
+	* x86_64.cc (Target_x86_64::Target_x86_64): Initialize
+	object_isa_1_used_.
+	(Target_x86_64::object_isa_1_used_): New data member.
+	(Target_x86_64::record_gnu_property): Save ISA_1_USED bits for object.
+	(Target_x86_64::merge_gnu_properties): Merge ISA_1_USED bits.
+
 2018-08-06  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/23455
