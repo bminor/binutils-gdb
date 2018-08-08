@@ -346,7 +346,7 @@ riscv_has_feature (struct gdbarch *gdbarch, char feature)
    Possible return values are 4, 8, or 16 for RiscV variants RV32, RV64, or
    RV128.  */
 
-static int
+int
 riscv_isa_xlen (struct gdbarch *gdbarch)
 {
   switch (gdbarch_tdep (gdbarch)->abi.fields.base_len)

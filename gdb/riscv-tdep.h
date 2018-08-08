@@ -76,4 +76,7 @@ struct gdbarch_tdep
   unsigned core_features;
 };
 
+/* Return the width in bytes of the general purpose registers for GDBARCH.  */
+extern int riscv_isa_xlen (struct gdbarch *gdbarch);
+
 #endif /* RISCV_TDEP_H */
