@@ -1,5 +1,17 @@
 2018-08-08  Jim Wilson  <jimw@sifive.com>
 
+	* riscv-tdep.c (enum opcode): Add jump, branch, lr, and sc opcodes.
+	(decode_register_index_short): New.
+	(decode_j_type_insn, decode_cj_type_insn): New.
+	(decode_b_type_insn, decode_cb_type_insn): New.
+	(riscv_insn::decode): Add support for jumps, branches, lr, and sc.  New
+	local xlen.  Check xlen when decoding ambiguous compressed insns.  In
+	compressed decode, use is_c_lui_insn instead of is_lui_insn, and
+	is_c_sw_insn instead of is_sw_insn.
+	(riscv_next_pc, riscv_next_pc_atomic_sequence): New.
+	(riscv_software_single_step): New.
+	* riscv-tdep.h (riscv_software_single_step): Declare.
+
 	* riscv-tdep.c (riscv_isa_xlen): Drop static.
 	* riscv-tdep.h (riscv_isa_xlen): Add extern declaration.
 
