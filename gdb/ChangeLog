@@ -1,3 +1,7 @@
+2018-08-08  Tom Tromey  <tom@tromey.com>
+
+	* unittests/scoped_mmap-selftests.c: Check result of "write".
+
 2018-08-08  Jim Wilson  <jimw@sifive.com>
 
 	* riscv-tdep.c (enum opcode): Add jump, branch, lr, and sc opcodes.

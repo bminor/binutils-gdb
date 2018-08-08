@@ -91,7 +91,7 @@ test_normal ()
   int fd = mkstemp (filename);
   SELF_CHECK (fd >= 0);
 
-  write (fd, "Hello!", 7);
+  SELF_CHECK (write (fd, "Hello!", 7) == 7);
   close (fd);
 
   gdb::unlinker unlink_test_file (filename);
