@@ -1,3 +1,8 @@
+2018-07-10  Tulio Magno Quites Machado Filho  <tuliom@linux.ibm.com>
+
+	* object.cc (Sized_relobj_file::map_to_kept_section): Initialize
+	kept_file.
+
 2018-08-07  Cary Coutant  <ccoutant@gmail.com>
 
 	PR ld/23486
