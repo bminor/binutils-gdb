@@ -3447,7 +3447,7 @@ target_continue (ptid_t ptid, enum gdb_signal signal)
   target_resume (ptid, 0, signal);
 }
 
-/* Concatenate ELEM to LIST, a comma separate list.  */
+/* Concatenate ELEM to LIST, a comma-separated list.  */
 
 static void
 str_comma_list_concat_elem (std::string *list, const char *elem)
@@ -3472,6 +3472,8 @@ do_option (int *target_options, std::string *ret,
       *target_options &= ~opt;
     }
 }
+
+/* See target.h.  */
 
 std::string
 target_options_to_string (int target_options)

@@ -1,3 +1,8 @@
+2018-08-08  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* target.c (str_comma_list_concat_elem): Fix typo in comment.
+	(target_options_to_string): Add comment.
+
 2018-08-08  Tom Tromey  <tom@tromey.com>
 
 	* unittests/scoped_mmap-selftests.c: Check result of "write".
