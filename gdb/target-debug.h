@@ -203,10 +203,9 @@ target_debug_print_struct_target_waitstatus_p (struct target_waitstatus *status)
 static void
 target_debug_print_options (int options)
 {
-  char *str = target_options_to_string (options);
+  std::string str = target_options_to_string (options);
 
-  fputs_unfiltered (str, gdb_stdlog);
-  xfree (str);
+  fputs_unfiltered (str.c_str (), gdb_stdlog);
 }
 
 static void

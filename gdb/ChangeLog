@@ -1,3 +1,13 @@
+2018-08-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* target.h (target_options_to_string): Return an std::string.
+	* target.c (str_comma_list_concat_elem): Return void, use
+	std::string.
+	(do_option): Likewise.
+	(target_options_to_string): Return an std::string.
+	* linux-nat.c (linux_nat_target::wait): Adjust.
+	* target-debug.h (target_debug_print_options): Adjust.
+
 2018-08-07  Tom Tromey  <tom@tromey.com>
 
 	* Makefile.in (CPPFLAGS): New variable.

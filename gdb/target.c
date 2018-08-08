@@ -3441,51 +3441,45 @@ target_continue (ptid_t ptid, enum gdb_signal signal)
   target_resume (ptid, 0, signal);
 }
 
-/* Concatenate ELEM to LIST, a comma separate list, and return the
-   result.  The LIST incoming argument is released.  */
+/* Concatenate ELEM to LIST, a comma separate list.  */
 
-static char *
-str_comma_list_concat_elem (char *list, const char *elem)
+static void
+str_comma_list_concat_elem (std::string *list, const char *elem)
 {
-  if (list == NULL)
-    return xstrdup (elem);
-  else
-    return reconcat (list, list, ", ", elem, (char *) NULL);
+  if (!list->empty ())
+    list->append (", ");
+
+  list->append (elem);
 }
 
 /* Helper for target_options_to_string.  If OPT is present in
    TARGET_OPTIONS, append the OPT_STR (string version of OPT) in RET.
-   Returns the new resulting string.  OPT is removed from
-   TARGET_OPTIONS.  */
+   OPT is removed from TARGET_OPTIONS.  */
 
-static char *
-do_option (int *target_options, char *ret,
+static void
+do_option (int *target_options, std::string *ret,
 	   int opt, const char *opt_str)
 {
   if ((*target_options & opt) != 0)
     {
-      ret = str_comma_list_concat_elem (ret, opt_str);
+      str_comma_list_concat_elem (ret, opt_str);
       *target_options &= ~opt;
     }
-
-  return ret;
 }
 
-char *
+std::string
 target_options_to_string (int target_options)
 {
-  char *ret = NULL;
+  std::string ret;
 
 #define DO_TARG_OPTION(OPT) \
-  ret = do_option (&target_options, ret, OPT, #OPT)
+  do_option (&target_options, &ret, OPT, #OPT)
 
   DO_TARG_OPTION (TARGET_WNOHANG);
 
   if (target_options != 0)
-    ret = str_comma_list_concat_elem (ret, "unknown???");
+    str_comma_list_concat_elem (&ret, "unknown???");
 
-  if (ret == NULL)
-    ret = xstrdup ("");
   return ret;
 }
 

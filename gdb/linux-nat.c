@@ -3555,14 +3555,11 @@ linux_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
   if (debug_linux_nat)
     {
-      char *options_string;
-
-      options_string = target_options_to_string (target_options);
+      std::string options_string = target_options_to_string (target_options);
       fprintf_unfiltered (gdb_stdlog,
 			  "linux_nat_wait: [%s], [%s]\n",
 			  target_pid_to_str (ptid),
-			  options_string);
-      xfree (options_string);
+			  options_string.c_str ());
     }
 
   /* Flush the async file first.  */
