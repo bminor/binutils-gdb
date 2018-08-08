@@ -12841,7 +12841,7 @@ remote_target::download_tracepoint (struct bp_location *loc)
   struct tracepoint *t = (struct tracepoint *) b;
   struct remote_state *rs = get_remote_state ();
   int ret;
-  char *err_msg = _("Tracepoint packet too large for target.");
+  const char *err_msg = _("Tracepoint packet too large for target.");
   size_t size_left;
 
   /* We use a buffer other than rs->buf because we'll build strings

@@ -1,3 +1,8 @@
+2018-08-08  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* remote.c (remote_target::download_tracepoint): Change char* to
+	const char*.
+
 2018-08-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* target.h (target_options_to_string): Return an std::string.
