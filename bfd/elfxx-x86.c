@@ -2407,12 +2407,27 @@ _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
   switch (pr_type)
     {
     case GNU_PROPERTY_X86_ISA_1_USED:
+      if (aprop == NULL || bprop == NULL)
+	{
+	  /* Only one of APROP and BPROP can be NULL.  */
+	  if (aprop != NULL)
+	    {
+	      /* Remove this property since the other input file doesn't
+		 have it.  */
+	      aprop->pr_kind = property_remove;
+	      updated = TRUE;
+	    }
+	  break;
+	}
+      goto or_property;
+
     case GNU_PROPERTY_X86_ISA_1_NEEDED:
       if (aprop != NULL && bprop != NULL)
 	{
+or_property:
 	  number = aprop->u.number;
 	  aprop->u.number = number | bprop->u.number;
-	  /* Remove the property if ISA bits are empty.  */
+	  /* Remove the property if all bits are empty.  */
 	  if (aprop->u.number == 0)
 	    {
 	      aprop->pr_kind = property_remove;
@@ -2428,14 +2443,14 @@ _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
 	    {
 	      if (aprop->u.number == 0)
 		{
-		  /* Remove APROP if ISA bits are empty.  */
+		  /* Remove APROP if all bits are empty.  */
 		  aprop->pr_kind = property_remove;
 		  updated = TRUE;
 		}
 	    }
 	  else
 	    {
-	      /* Return TRUE if APROP is NULL and ISA bits of BPROP
+	      /* Return TRUE if APROP is NULL and all bits of BPROP
 		 aren't empty to indicate that BPROP should be added
 		 to ABFD.  */
 	      updated = bprop->u.number != 0;
@@ -2582,9 +2597,9 @@ _bfd_x86_elf_link_setup_gnu_properties
 	{
 	  /* If the separate code program header is needed, make sure
 	     that the first read-only PT_LOAD segment has no code by
-	     adding a GNU_PROPERTY_X86_ISA_1_USED note.  */
+	     adding a GNU_PROPERTY_X86_ISA_1_NEEDED note.  */
 	  prop = _bfd_elf_get_property (ebfd,
-					GNU_PROPERTY_X86_ISA_1_USED,
+					GNU_PROPERTY_X86_ISA_1_NEEDED,
 					4);
 	  prop->u.number = GNU_PROPERTY_X86_ISA_1_486;
 	  prop->pr_kind = property_number;
