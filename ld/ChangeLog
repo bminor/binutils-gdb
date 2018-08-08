@@ -1,3 +1,35 @@
+2018-08-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23486
+	* testsuite/ld-i386/i386.exp: Run PR ld/23486 tests.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr23486a.d: New file.
+	* testsuite/ld-i386/pr23486b.d: Likewise.
+	* testsuite/ld-x86-64/pr23486a-x32.d: Likewise.
+	* testsuite/ld-x86-64/pr23486a.d: Likewise.
+	* testsuite/ld-x86-64/pr23486a.s: Likewise.
+	* testsuite/ld-x86-64/pr23486b-x32.d: Likewise.
+	* testsuite/ld-x86-64/pr23486b.d: Likewise.
+	* testsuite/ld-x86-64/pr23486b.s: Likewise.
+	* testsuite/ld-i386/property-3.r: Remove "x86 ISA used".
+	* testsuite/ld-i386/property-4.r: Likewise.
+	* testsuite/ld-i386/property-5.r: Likewise.
+	* testsuite/ld-i386/property-x86-ibt3a.d: Likewise.
+	* testsuite/ld-i386/property-x86-ibt3b.d: Likewise.
+	* testsuite/ld-i386/property-x86-shstk3a.d: Likewise.
+	* testsuite/ld-i386/property-x86-shstk3b.d: Likewise.
+	* testsuite/ld-x86-64/property-3.r: Likewise.
+	* testsuite/ld-x86-64/property-4.r: Likewise.
+	* testsuite/ld-x86-64/property-5.r: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt3a-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt3a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt3b-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt3b.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk3a-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk3a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk3b-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk3b.d: Likewise.
+
 2018-08-07  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/notoc.s: Generate some cfi.

@@ -1,3 +1,12 @@
+2018-08-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23486
+	* elfxx-x86.c (_bfd_x86_elf_merge_gnu_properties): Remove
+	GNU_PROPERTY_X86_ISA_1_USED if an input file doesn't have it.
+	(_bfd_x86_elf_link_setup_gnu_properties): Adding the
+	GNU_PROPERTY_X86_ISA_1_NEEDED, instead of
+	GNU_PROPERTY_X86_ISA_1_USED, property.
+
 2018-08-07  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (struct map_stub): Delete tls_get_addr_opt_bctrl.
