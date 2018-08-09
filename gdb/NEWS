@@ -41,6 +41,14 @@ thread apply [all | COUNT | -COUNT] [FLAG]... COMMAND
   FLAG arguments allow to control what output to produce and how to handle
   errors raised when applying COMMAND to a thread.
 
+* New native configurations
+
+GNU/Linux/RISC-V		riscv*-*-linux*
+
+* New targets
+
+GNU/Linux/RISC-V		riscv*-*-linux*
+
 *** Changes in GDB 8.2
 
 * The 'set disassembler-options' command now supports specifying options

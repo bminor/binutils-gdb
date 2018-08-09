@@ -267,6 +267,10 @@ case ${gdb_host} in
 		# Host: PowerPC, running Linux
 		NATDEPFILES="${NATDEPFILES} ppc-linux-nat.o ppc-linux.o"
 		;;
+	    riscv*)
+		# Host: RISC-V, running Linux
+		NATDEPFILES="${NATDEPFILES} riscv-linux-nat.o"
+		;;
 	    s390)
 		# Host: S390, running Linux
 		NATDEPFILES="${NATDEPFILES} s390-linux-nat.o"

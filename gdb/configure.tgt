@@ -517,6 +517,12 @@ s390*-*-linux*)
 	build_gdbserver=yes
 	;;
 
+riscv*-*-linux*)
+	# Target: Linux/RISC-V
+	gdb_target_obs="riscv-linux-tdep.o riscv-tdep.o glibc-tdep.o \
+ 			linux-tdep.o solib-svr4.o symfile-mem.o linux-record.o"
+	;;
+
 riscv*-*-*)
 	# Target: RISC-V architecture
 	gdb_target_obs="riscv-tdep.o"

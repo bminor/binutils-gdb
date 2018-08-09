@@ -1,5 +1,11 @@
 2018-08-09  Jim Wilson  <jimw@sifive.com>
 
+	* Makefile.in (ALL_TARGET_OBS): Add riscv-linux-tdep.c.
+	(ALLDEPFILES): Add riscv-linux-nat.c, and riscv-linux-tdep.c.
+	* NEWS: Mention new GNU/Linux RISC-V target.
+	* configure.host: Add riscv*-*-linux*.
+	* configure.nat: Add riscv*.
+	* configure.tgt: Add riscv*-*-linux*.
 	* riscv-linux-nat.c: New file.
 	* riscv-linux-tdep.c: New file.
 
