@@ -1,3 +1,7 @@
+2018-08-09  Richard Earnshaw  <rearnsha@arm.com>
+
+	* elf/arm.h: Updated comments for e_flags definitions.
+
 2018-08-06  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* elf/arc.h (Tag_ARC_ATR_version): New tag.
