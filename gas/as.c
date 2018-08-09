@@ -301,7 +301,12 @@ Options:\n\
   --size-check=[error|warning]\n\
 			  ELF .size directive check (default --size-check=error)\n"));
   fprintf (stream, _("\
-  --elf-stt-common=[no|yes]\n\
+  --elf-stt-common=[no|yes] "));
+  if (DEFAULT_GENERATE_ELF_STT_COMMON)
+    fprintf (stream, _("(default: yes)\n"));
+  else
+    fprintf (stream, _("(default: no)\n"));
+  fprintf (stream, _("\
                           generate ELF common symbols with STT_COMMON type\n"));
   fprintf (stream, _("\
   --sectname-subst        enable section name substitution sequences\n"));
