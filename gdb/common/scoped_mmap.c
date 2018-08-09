@@ -28,11 +28,11 @@ mmap_file (const char *filename)
 {
   scoped_fd fd (open (filename, O_RDONLY));
   if (fd.get () < 0)
-    perror_with_name ("open");
+    perror_with_name (("open"));
 
   off_t size = lseek (fd.get (), 0, SEEK_END);
   if (size < 0)
-    perror_with_name ("lseek");
+    perror_with_name (("lseek"));
 
   /* We can't map an empty file.  */
   if (size == 0)
@@ -40,7 +40,7 @@ mmap_file (const char *filename)
 
   scoped_mmap mmapped_file (nullptr, size, PROT_READ, MAP_PRIVATE, fd.get (), 0);
   if (mmapped_file.get () == MAP_FAILED)
-    perror_with_name ("mmap");
+    perror_with_name (("mmap"));
 
   return mmapped_file;
 }

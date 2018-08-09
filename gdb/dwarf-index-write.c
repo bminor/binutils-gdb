@@ -1577,7 +1577,7 @@ write_psymtabs_to_index (struct dwarf2_per_objfile *dwarf2_per_objfile,
   gdb::optional<scoped_fd> out_file_fd
     (gdb::in_place, mkstemp (filename_temp.data ()));
   if (out_file_fd->get () == -1)
-    perror_with_name ("mkstemp");
+    perror_with_name (("mkstemp"));
 
   FILE *out_file = gdb_fopen_cloexec (filename_temp.data (), "wb").release ();
   if (out_file == nullptr)
@@ -1601,7 +1601,7 @@ write_psymtabs_to_index (struct dwarf2_per_objfile *dwarf2_per_objfile,
       gdb::optional<scoped_fd> out_file_str_fd
 	(gdb::in_place, mkstemp (filename_str_temp.data ()));
       if (out_file_str_fd->get () == -1)
-        perror_with_name ("mkstemp");
+        perror_with_name (("mkstemp"));
 
       FILE *out_file_str
 	= gdb_fopen_cloexec (filename_str_temp.data (), "wb").release ();
@@ -1622,7 +1622,7 @@ write_psymtabs_to_index (struct dwarf2_per_objfile *dwarf2_per_objfile,
       /* Close and move the str file in place.  */
       close_out_file_str.reset ();
       if (rename (filename_str_temp.data (), filename_str.c_str ()) != 0)
-	perror_with_name ("rename");
+	perror_with_name (("rename"));
     }
   else
     {
@@ -1637,7 +1637,7 @@ write_psymtabs_to_index (struct dwarf2_per_objfile *dwarf2_per_objfile,
   /* Close and move the file in place.  */
   close_out_file.reset ();
   if (rename (filename_temp.data (), filename.c_str ()) != 0)
-	perror_with_name ("rename");
+	perror_with_name (("rename"));
 }
 
 /* Implementation of the `save gdb-index' command.

@@ -359,7 +359,7 @@ create_dir_and_check (const char *dir)
 
   struct stat st;
   if (stat (dir, &st) != 0)
-    perror_with_name ("stat");
+    perror_with_name (("stat"));
 
   return (st.st_mode & S_IFDIR) != 0;
 }
@@ -372,7 +372,7 @@ test_mkdir_recursive ()
   char base[] = "/tmp/gdb-selftests-XXXXXX";
 
   if (mkdtemp (base) == NULL)
-    perror_with_name ("mkdtemp");
+    perror_with_name (("mkdtemp"));
 
   /* Try not to leave leftover directories.  */
   struct cleanup_dirs {

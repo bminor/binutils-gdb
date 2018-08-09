@@ -1,3 +1,10 @@
+2018-08-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/scoped_mmap.c (mmap_file): Silence ARI warning.
+	* dwarf-index-cache.c (create_dir_and_check): Likewise.
+	(test_mkdir_recursive): Likewise.
+	* dwarf-index-write.c (write_psymtabs_to_index): Likewise.
+
 2018-08-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* valarith.c (value_subscripted_rvalue): If an array is not in
