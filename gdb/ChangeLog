@@ -1,3 +1,7 @@
+2018-08-09  Tom Tromey  <tom@tromey.com>
+
+	* riscv-tdep.h: Minor formatting fixes.
+
 2018-08-09  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* common/scoped_mmap.c (mmap_file): Silence ARI warning.
