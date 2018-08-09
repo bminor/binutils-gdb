@@ -1,5 +1,20 @@
 2019-05-24  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c: Comment on powerxx _notoc stub variants.
+	(LI_R11_0, LIS_R11, ORI_R11_R11_0, SLDI_R11_R11_34): Define.
+	(PADDI_R12_PC, PLD_R12_PC, D34, HA34): Define.
+	(struct ppc_link_hash_table): Add powerxx_stubs.
+	(ppc64_elf_check_relocs): Set powerxx_stubs.
+	(build_powerxx_offset, size_powerxx_offset),
+	(num_relocs_for_powerxx_offset),
+	(emit_relocs_for_powerxx_offset): New functions.
+	(plt_stub_size): Size powerxx stubs.
+	(ppc_build_one_stub): Emit powerxx stubs.
+	(ppc_size_one_stub): Size powerxx stubs.  Omit .eh_frame for
+	powerxx stubs.
+
+2019-05-24  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (ppc64_elf_check_relocs): Set has_gotrel for
 	R_PPC64_GOT_PCREL34.
 	(xlate_pcrel_opt): New function.
