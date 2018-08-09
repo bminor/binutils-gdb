@@ -2469,10 +2469,6 @@ bfd_convert_section_size (bfd *ibfd, sec_ptr isec, bfd *obfd,
 {
   bfd_size_type hdr_size;
 
-  /* Do nothing if input file will be decompressed.  */
-  if ((ibfd->flags & BFD_DECOMPRESS))
-    return size;
-
   /* Do nothing if either input or output aren't ELF.  */
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
@@ -2481,6 +2477,14 @@ bfd_convert_section_size (bfd *ibfd, sec_ptr isec, bfd *obfd,
   /* Do nothing if ELF classes of input and output are the same. */
   if (get_elf_backend_data (ibfd)->s->elfclass
       == get_elf_backend_data (obfd)->s->elfclass)
+    return size;
+
+  /* Convert GNU property size.  */
+  if (CONST_STRNEQ (isec->name, NOTE_GNU_PROPERTY_SECTION_NAME))
+    return _bfd_elf_convert_gnu_property_size (ibfd, obfd);
+
+  /* Do nothing if input file will be decompressed.  */
+  if ((ibfd->flags & BFD_DECOMPRESS))
     return size;
 
   /* Do nothing if the input section isn't a SHF_COMPRESSED section. */
@@ -2523,10 +2527,6 @@ bfd_convert_section_contents (bfd *ibfd, sec_ptr isec, bfd *obfd,
   Elf_Internal_Chdr chdr;
   bfd_boolean use_memmove;
 
-  /* Do nothing if input file will be decompressed.  */
-  if ((ibfd->flags & BFD_DECOMPRESS))
-    return TRUE;
-
   /* Do nothing if either input or output aren't ELF.  */
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
@@ -2535,6 +2535,15 @@ bfd_convert_section_contents (bfd *ibfd, sec_ptr isec, bfd *obfd,
   /* Do nothing if ELF classes of input and output are the same. */
   if (get_elf_backend_data (ibfd)->s->elfclass
       == get_elf_backend_data (obfd)->s->elfclass)
+    return TRUE;
+
+  /* Convert GNU properties.  */
+  if (CONST_STRNEQ (isec->name, NOTE_GNU_PROPERTY_SECTION_NAME))
+    return _bfd_elf_convert_gnu_properties (ibfd, isec, obfd, ptr,
+					    ptr_size);
+
+  /* Do nothing if input file will be decompressed.  */
+  if ((ibfd->flags & BFD_DECOMPRESS))
     return TRUE;
 
   /* Do nothing if the input section isn't a SHF_COMPRESSED section. */

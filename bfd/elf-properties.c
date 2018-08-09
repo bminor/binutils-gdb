@@ -304,6 +304,94 @@ elf_merge_gnu_property_list (struct bfd_link_info *info, bfd *abfd,
       }
 }
 
+/* Get GNU property section size.  */
+
+static bfd_size_type
+elf_get_gnu_property_section_size (elf_property_list *list,
+				   unsigned int align_size)
+{
+  bfd_size_type size;
+  unsigned int descsz;
+
+  /* Compute the output section size.  */
+  descsz = offsetof (Elf_External_Note, name[sizeof "GNU"]);
+  descsz = (descsz + 3) & -(unsigned int) 4;
+  size = descsz;
+  for (; list != NULL; list = list->next)
+    {
+      /* There are 4 byte type + 4 byte datasz for each property.  */
+      size += 4 + 4 + list->property.pr_datasz;
+      /* Align each property.  */
+      size = (size + (align_size - 1)) & ~(align_size - 1);
+    }
+
+  return size;
+}
+
+/* Write GNU properties.  */
+
+static void
+elf_write_gnu_properties (bfd *abfd, bfd_byte *contents,
+			  elf_property_list *list, unsigned int size,
+			  unsigned int align_size)
+{
+  unsigned int descsz;
+  Elf_External_Note *e_note;
+
+  e_note = (Elf_External_Note *) contents;
+  descsz = offsetof (Elf_External_Note, name[sizeof "GNU"]);
+  descsz = (descsz + 3) & -(unsigned int) 4;
+  bfd_h_put_32 (abfd, sizeof "GNU", &e_note->namesz);
+  bfd_h_put_32 (abfd, size - descsz, &e_note->descsz);
+  bfd_h_put_32 (abfd, NT_GNU_PROPERTY_TYPE_0, &e_note->type);
+  memcpy (e_note->name, "GNU", sizeof "GNU");
+
+  size = descsz;
+  for (; list != NULL; list = list->next)
+    {
+      /* There are 4 byte type + 4 byte datasz for each property.  */
+      bfd_h_put_32 (abfd, list->property.pr_type,
+		    contents + size);
+      bfd_h_put_32 (abfd, list->property.pr_datasz,
+		    contents + size + 4);
+      size += 4 + 4;
+
+      /* Write out property value.  */
+      switch (list->property.pr_kind)
+	{
+	case property_number:
+	  switch (list->property.pr_datasz)
+	    {
+	    default:
+	      /* Never should happen.  */
+	      abort ();
+
+	    case 0:
+	      break;
+
+	    case 4:
+	      bfd_h_put_32 (abfd, list->property.u.number,
+			    contents + size);
+	      break;
+
+	    case 8:
+	      bfd_h_put_64 (abfd, list->property.u.number,
+			    contents + size);
+	      break;
+	    }
+	  break;
+
+	default:
+	  /* Never should happen.  */
+	  abort ();
+	}
+      size += list->property.pr_datasz;
+
+      /* Align each property.  */
+      size = (size + (align_size - 1)) & ~ (align_size - 1);
+    }
+}
+
 /* Set up GNU properties.  Return the first relocatable ELF input with
    GNU properties if found.  Otherwise, return NULL.  */
 
@@ -390,10 +478,8 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
      always sorted by type even if input GNU properties aren't sorted.  */
   if (first_pbfd != NULL)
     {
-      unsigned int size;
-      unsigned int descsz;
+      bfd_size_type size;
       bfd_byte *contents;
-      Elf_External_Note *e_note;
       unsigned int align_size = bed->s->elfclass == ELFCLASS64 ? 8 : 4;
 
       sec = bfd_get_section_by_name (first_pbfd,
@@ -427,75 +513,15 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 	}
 
       /* Compute the section size.  */
-      descsz = offsetof (Elf_External_Note, name[sizeof "GNU"]);
-      descsz = (descsz + 3) & -(unsigned int) 4;
-      size = descsz;
-      for (list = elf_properties (first_pbfd);
-	   list != NULL;
-	   list = list->next)
-	{
-	  /* There are 4 byte type + 4 byte datasz for each property.  */
-	  size += 4 + 4 + list->property.pr_datasz;
-	  /* Align each property.  */
-	  size = (size + (align_size - 1)) & ~(align_size - 1);
-	}
+      list = elf_properties (first_pbfd);
+      size = elf_get_gnu_property_section_size (list, align_size);
 
       /* Update .note.gnu.property section now.  */
       sec->size = size;
       contents = (bfd_byte *) bfd_zalloc (first_pbfd, size);
 
-      e_note = (Elf_External_Note *) contents;
-      bfd_h_put_32 (first_pbfd, sizeof "GNU", &e_note->namesz);
-      bfd_h_put_32 (first_pbfd, size - descsz, &e_note->descsz);
-      bfd_h_put_32 (first_pbfd, NT_GNU_PROPERTY_TYPE_0, &e_note->type);
-      memcpy (e_note->name, "GNU", sizeof "GNU");
-
-      size = descsz;
-      for (list = elf_properties (first_pbfd);
-	   list != NULL;
-	   list = list->next)
-	{
-	  /* There are 4 byte type + 4 byte datasz for each property.  */
-	  bfd_h_put_32 (first_pbfd, list->property.pr_type,
-			contents + size);
-	  bfd_h_put_32 (first_pbfd, list->property.pr_datasz,
-			contents + size + 4);
-	  size += 4 + 4;
-
-	  /* Write out property value.  */
-	  switch (list->property.pr_kind)
-	    {
-	    case property_number:
-	      switch (list->property.pr_datasz)
-		{
-		default:
-		  /* Never should happen.  */
-		  abort ();
-
-		case 0:
-		  break;
-
-		case 4:
-		  bfd_h_put_32 (first_pbfd, list->property.u.number,
-				contents + size);
-		  break;
-
-		case 8:
-		  bfd_h_put_64 (first_pbfd, list->property.u.number,
-				contents + size);
-		  break;
-		}
-	      break;
-
-	    default:
-	      /* Never should happen.  */
-	      abort ();
-	    }
-	  size += list->property.pr_datasz;
-
-	  /* Align each property.  */
-	  size = (size + (align_size - 1)) & ~ (align_size - 1);
-	}
+      elf_write_gnu_properties (first_pbfd, contents, list, size,
+				align_size);
 
       /* Cache the section contents for elf_link_input_bfd.  */
       elf_section_data (sec)->this_hdr.contents = contents;
@@ -507,4 +533,59 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
     }
 
   return first_pbfd;
+}
+
+/* Convert GNU property size.  */
+
+bfd_size_type
+_bfd_elf_convert_gnu_property_size (bfd *ibfd, bfd *obfd)
+{
+  unsigned int align_size;
+  const struct elf_backend_data *bed;
+  elf_property_list *list = elf_properties (ibfd);
+
+  bed = get_elf_backend_data (obfd);
+  align_size = bed->s->elfclass == ELFCLASS64 ? 8 : 4;
+
+  /* Get the output .note.gnu.property section size.  */
+  return elf_get_gnu_property_section_size (list, align_size);
+}
+
+/* Convert GNU properties.  */
+
+bfd_boolean
+_bfd_elf_convert_gnu_properties (bfd *ibfd, asection *isec,
+				 bfd *obfd, bfd_byte **ptr,
+				 bfd_size_type *ptr_size)
+{
+  unsigned int size;
+  bfd_byte *contents;
+  unsigned int align_shift;
+  const struct elf_backend_data *bed;
+  elf_property_list *list = elf_properties (ibfd);
+
+  bed = get_elf_backend_data (obfd);
+  align_shift = bed->s->elfclass == ELFCLASS64 ? 3 : 2;
+
+  /* Get the output .note.gnu.property section size.  */
+  size = bfd_get_section_size (isec->output_section);
+
+  /* Update the output .note.gnu.property section alignment.  */
+  bfd_set_section_alignment (obfd, isec->output_section, align_shift);
+
+  if (size > bfd_get_section_size (isec))
+    {
+      contents = (bfd_byte *) bfd_malloc (size);
+      free (*ptr);
+      *ptr = contents;
+    }
+  else
+    contents = *ptr;
+
+  *ptr_size = size;
+
+  /* Generate the output .note.gnu.property section.  */
+  elf_write_gnu_properties (ibfd, contents, list, size, 1 << align_shift);
+
+  return TRUE;
 }

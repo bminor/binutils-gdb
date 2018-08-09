@@ -1,5 +1,24 @@
 2018-08-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/23494
+	* bfd.c (bfd_convert_section_size): Check BFD_DECOMPRESS after
+	calling _bfd_elf_convert_gnu_property_size to convert
+	.note.gnu.property section size.
+	(bfd_convert_section_contents): Check BFD_DECOMPRESS after
+	calling _bfd_elf_convert_gnu_properties to convert
+	.note.gnu.property section.
+	* elf-bfd.h (_bfd_elf_convert_gnu_property_size): New prototype.
+	(_bfd_elf_convert_gnu_properties): Likewise.
+	* elf-properties.c (elf_get_gnu_property_section_size): New
+	function.
+	(elf_write_gnu_properties): Likewise.
+	(_bfd_elf_convert_gnu_property_size): Likewise.
+	(_bfd_elf_convert_gnu_properties): Likewise.
+	(_bfd_elf_link_setup_gnu_properties): Use
+	elf_get_gnu_property_section_size and elf_write_gnu_properties.
+
+2018-08-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/23486
 	* elfxx-x86.c (_bfd_x86_elf_merge_gnu_properties): Remove
 	GNU_PROPERTY_X86_ISA_1_USED if an input file doesn't have it.

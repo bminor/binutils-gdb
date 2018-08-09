@@ -2705,6 +2705,10 @@ extern elf_property * _bfd_elf_get_property
   (bfd *, unsigned int, unsigned int);
 extern bfd *_bfd_elf_link_setup_gnu_properties
   (struct bfd_link_info *);
+extern bfd_size_type _bfd_elf_convert_gnu_property_size
+  (bfd *, bfd *);
+extern bfd_boolean _bfd_elf_convert_gnu_properties
+  (bfd *, asection *, bfd *, bfd_byte **, bfd_size_type *);
 
 /* The linker may need to keep track of the number of relocs that it
    decides to copy as dynamic relocs in check_relocs for each symbol.
