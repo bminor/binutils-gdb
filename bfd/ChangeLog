@@ -1,3 +1,10 @@
+2018-08-11  John Darrington  <john@darrington.wattle.id.au>
+
+	* reloc.c (_bfd_relocate_contents): Handle 3 byte relocs.
+	(_bfd_clear_contents): Likewise.
+	(bfd_perform_relocation): Likewise.
+	(bfd_install_relocation): Likewise.
+
 2018-08-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23499

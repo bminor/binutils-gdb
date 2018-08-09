@@ -920,11 +920,9 @@ space consuming.  For each target:
     {
     case 5:
       {
-	long x = bfd_get_32 (abfd, (bfd_byte *) data + octets);
-	x >>= 8;
+	long x = bfd_get_24 (abfd, (bfd_byte *) data + octets);
 	DOIT (x);
-	bfd_put_16 (abfd, (bfd_vma) (x >> 8), (bfd_byte *) data + octets);
-	bfd_put_8 (abfd, (x & 0xFF), (unsigned char *) data + 2 + octets);
+	bfd_put_24 (abfd, (bfd_vma) x, (unsigned char *) data + octets);
       }
       break;
 
@@ -1340,6 +1338,13 @@ space consuming.  For each target:
 	bfd_put_32 (abfd, (bfd_vma) x, data);
       }
       break;
+    case 5:
+      {
+	long x = bfd_get_24 (abfd, data);
+	DOIT (x);
+	bfd_put_24 (abfd, (bfd_vma) x, data);
+      }
+      break;
     case -2:
       {
 	long x = bfd_get_32 (abfd, data);
@@ -1467,6 +1472,9 @@ _bfd_relocate_contents (reloc_howto_type *howto,
     case 2:
       x = bfd_get_16 (input_bfd, location);
       break;
+    case 3:
+      x = bfd_get_24 (input_bfd, location);
+      break;
     case 4:
       x = bfd_get_32 (input_bfd, location);
       break;
@@ -1593,6 +1601,9 @@ _bfd_relocate_contents (reloc_howto_type *howto,
     case 2:
       bfd_put_16 (input_bfd, x, location);
       break;
+    case 3:
+      bfd_put_24 (input_bfd, x, location);
+      break;
     case 4:
       bfd_put_32 (input_bfd, x, location);
       break;
@@ -1636,6 +1647,9 @@ _bfd_clear_contents (reloc_howto_type *howto,
     case 2:
       x = bfd_get_16 (input_bfd, location);
       break;
+    case 3:
+      x = bfd_get_24 (input_bfd, location);
+      break;
     case 4:
       x = bfd_get_32 (input_bfd, location);
       break;
@@ -1669,6 +1683,9 @@ _bfd_clear_contents (reloc_howto_type *howto,
       break;
     case 2:
       bfd_put_16 (input_bfd, x, location);
+      break;
+    case 3:
+      bfd_put_24 (input_bfd, x, location);
       break;
     case 4:
       bfd_put_32 (input_bfd, x, location);
