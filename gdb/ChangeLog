@@ -1,3 +1,7 @@
+2018-08-09  Jim Wilson  <jimw@sifive.com>
+
+	* riscv-linux-tdep.c: New file.
+
 2018-08-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* infrun.c (resume): Make static, add forward declaration.
