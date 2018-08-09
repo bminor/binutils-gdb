@@ -11152,28 +11152,38 @@ md_show_usage (FILE *stream)
   fprintf (stream, _("\
   -msse2avx               encode SSE instructions with VEX prefix\n"));
   fprintf (stream, _("\
-  -msse-check=[none|error|warning]\n\
+  -msse-check=[none|error|warning] (default: warning)\n\
                           check SSE instructions\n"));
   fprintf (stream, _("\
-  -moperand-check=[none|error|warning]\n\
+  -moperand-check=[none|error|warning] (default: warning)\n\
                           check operand combinations for validity\n"));
   fprintf (stream, _("\
-  -mavxscalar=[128|256]   encode scalar AVX instructions with specific vector\n\
+  -mavxscalar=[128|256] (default: 128)\n\
+                          encode scalar AVX instructions with specific vector\n\
                            length\n"));
   fprintf (stream, _("\
-  -mevexlig=[128|256|512] encode scalar EVEX instructions with specific vector\n\
+  -mevexlig=[128|256|512] (default: 128)\n\
+                          encode scalar EVEX instructions with specific vector\n\
                            length\n"));
   fprintf (stream, _("\
-  -mevexwig=[0|1]         encode EVEX instructions with specific EVEX.W value\n\
+  -mevexwig=[0|1] (default: 0)\n\
+                          encode EVEX instructions with specific EVEX.W value\n\
                            for EVEX.W bit ignored instructions\n"));
   fprintf (stream, _("\
-  -mevexrcig=[rne|rd|ru|rz]\n\
+  -mevexrcig=[rne|rd|ru|rz] (default: rne)\n\
                           encode EVEX instructions with specific EVEX.RC value\n\
                            for SAE-only ignored instructions\n"));
   fprintf (stream, _("\
-  -mmnemonic=[att|intel]  use AT&T/Intel mnemonic\n"));
+  -mmnemonic=[att|intel] "));
+  if (SYSV386_COMPAT)
+    fprintf (stream, _("(default: att)\n"));
+  else
+    fprintf (stream, _("(default: intel)\n"));
   fprintf (stream, _("\
-  -msyntax=[att|intel]    use AT&T/Intel syntax\n"));
+                          use AT&T/Intel mnemonic\n"));
+  fprintf (stream, _("\
+  -msyntax=[att|intel] (default: att)\n\
+                          use AT&T/Intel syntax\n"));
   fprintf (stream, _("\
   -mindex-reg             support pseudo index registers\n"));
   fprintf (stream, _("\
@@ -11187,17 +11197,22 @@ md_show_usage (FILE *stream)
   -mbig-obj               generate big object files\n"));
 #endif
   fprintf (stream, _("\
-  -momit-lock-prefix=[no|yes]\n\
+  -momit-lock-prefix=[no|yes] (default: no)\n\
                           strip all lock prefixes\n"));
   fprintf (stream, _("\
-  -mfence-as-lock-add=[no|yes]\n\
+  -mfence-as-lock-add=[no|yes] (default: no)\n\
                           encode lfence, mfence and sfence as\n\
                            lock addl $0x0, (%%{re}sp)\n"));
   fprintf (stream, _("\
-  -mrelax-relocations=[no|yes]\n\
+  -mrelax-relocations=[no|yes] "));
+  if (DEFAULT_GENERATE_X86_RELAX_RELOCATIONS)
+    fprintf (stream, _("(default: yes)\n"));
+  else
+    fprintf (stream, _("(default: no)\n"));
+  fprintf (stream, _("\
                           generate relax relocations\n"));
   fprintf (stream, _("\
-  -mamd64                 accept only AMD64 ISA\n"));
+  -mamd64                 accept only AMD64 ISA [default]\n"));
   fprintf (stream, _("\
   -mintel64               accept only Intel64 ISA\n"));
 }

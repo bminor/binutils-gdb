@@ -1,3 +1,7 @@
+2018-08-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (md_show_usage): Display default options.
+
 2018-08-07  James Patrick Conlon  <cptjustice@gmail.com>
 	    Nick Clifton  <nickc@redhat.com>
 
