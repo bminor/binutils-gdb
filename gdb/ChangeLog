@@ -1,5 +1,6 @@
 2018-08-09  Jim Wilson  <jimw@sifive.com>
 
+	* riscv-linux-nat.c: New file.
 	* riscv-linux-tdep.c: New file.
 
 2018-08-09  Andrew Burgess  <andrew.burgess@embecosm.com>
