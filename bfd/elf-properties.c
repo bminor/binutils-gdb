@@ -320,7 +320,12 @@ elf_get_gnu_property_section_size (elf_property_list *list,
   for (; list != NULL; list = list->next)
     {
       /* There are 4 byte type + 4 byte datasz for each property.  */
-      size += 4 + 4 + list->property.pr_datasz;
+      unsigned int datasz;
+      if (list->property.pr_type == GNU_PROPERTY_STACK_SIZE)
+	datasz = align_size;
+      else
+	datasz = list->property.pr_datasz;
+      size += 4 + 4 + datasz;
       /* Align each property.  */
       size = (size + (align_size - 1)) & ~(align_size - 1);
     }
@@ -336,6 +341,7 @@ elf_write_gnu_properties (bfd *abfd, bfd_byte *contents,
 			  unsigned int align_size)
 {
   unsigned int descsz;
+  unsigned int datasz;
   Elf_External_Note *e_note;
 
   e_note = (Elf_External_Note *) contents;
@@ -350,17 +356,19 @@ elf_write_gnu_properties (bfd *abfd, bfd_byte *contents,
   for (; list != NULL; list = list->next)
     {
       /* There are 4 byte type + 4 byte datasz for each property.  */
-      bfd_h_put_32 (abfd, list->property.pr_type,
-		    contents + size);
-      bfd_h_put_32 (abfd, list->property.pr_datasz,
-		    contents + size + 4);
+      if (list->property.pr_type == GNU_PROPERTY_STACK_SIZE)
+	datasz = align_size;
+      else
+	datasz = list->property.pr_datasz;
+      bfd_h_put_32 (abfd, list->property.pr_type, contents + size);
+      bfd_h_put_32 (abfd, datasz, contents + size + 4);
       size += 4 + 4;
 
       /* Write out property value.  */
       switch (list->property.pr_kind)
 	{
 	case property_number:
-	  switch (list->property.pr_datasz)
+	  switch (datasz)
 	    {
 	    default:
 	      /* Never should happen.  */
@@ -385,7 +393,7 @@ elf_write_gnu_properties (bfd *abfd, bfd_byte *contents,
 	  /* Never should happen.  */
 	  abort ();
 	}
-      size += list->property.pr_datasz;
+      size += datasz;
 
       /* Align each property.  */
       size = (size + (align_size - 1)) & ~ (align_size - 1);

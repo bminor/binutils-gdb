@@ -1,5 +1,12 @@
 2018-08-10  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/23494
+	* testsuite/binutils-all/x86-64/pr23494c.s: New file.
+	* testsuite/binutils-all/x86-64/pr23494e-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494e.d: Likewise.
+
+2018-08-10  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/binutils-all/x86-64/pr23494a-x32.d: Skip nacl
 	targets.
 	* testsuite/binutils-all/x86-64/pr23494a.d: Likewise.

@@ -1,3 +1,10 @@
+2018-08-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/23494
+	* elf-properties.c (elf_get_gnu_property_section_size): Always
+	use align_size as pr_datasz for GNU_PROPERTY_STACK_SIZE.
+	(elf_write_gnu_properties): Likewise.
+
 2018-08-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/23494
