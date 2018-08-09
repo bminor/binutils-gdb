@@ -1,3 +1,9 @@
+2018-08-27  Tom Tromey  <tom@tromey.com>
+
+	* linespec.c (complete_linespec_component): Add cast to "char".
+	* completer.c (completion_tracker::build_completion_result): Add
+	cast to "char".
+
 2018-08-26  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* solist.h (struct solist, struct target_so_ops): Fix

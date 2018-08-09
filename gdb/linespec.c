@@ -2894,7 +2894,7 @@ complete_linespec_component (linespec_parser *parser,
 	     new "quote" char.  */
 	  if (tracker.quote_char ())
 	    {
-	      char quote_char_str[2] = { tracker.quote_char () };
+	      char quote_char_str[2] = { (char) tracker.quote_char () };
 
 	      fn = reconcat (fn, fn, quote_char_str, (char *) NULL);
 	      tracker.set_quote_char (':');
