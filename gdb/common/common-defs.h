@@ -59,6 +59,18 @@
 #define __STDC_LIMIT_MACROS 1
 #define __STDC_FORMAT_MACROS 1
 
+/* Some distros enable _FORTIFY_SOURCE by default, which on occasion
+   has caused build failures with -Wunused-result when a patch is
+   developed on a distro that does not enable _FORTIFY_SOURCE.  We
+   enable it here in order to try to catch these problems earlier;
+   plus this seems like a reasonable safety measure.  The check for
+   optimization is required because _FORTIFY_SOURCE only works when
+   optimization is enabled.  */
+
+#if defined __OPTIMIZE__ && __OPTIMIZE__ > 0
+#define _FORTIFY_SOURCE 2
+#endif
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,3 +1,7 @@
+2018-08-13  Tom Tromey  <tom@tromey.com>
+
+	* common/common-defs.h (_FORTIFY_SOURCE): Define.
+
 2018-08-13  Alan Hayward  <alan.hayward@arm.com>
 
 	* aarch64-linux-tdep.c (aarch64_linux_supply_sve_regset): New function.
