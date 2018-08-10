@@ -1,5 +1,14 @@
 2018-08-10  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/gas/i386/evex-no-scale.s: Removed.
+	* testsuite/gas/i386/evex-no-scale-32.d: Don't use
+	evex-no-scale.s.
+	* testsuite/gas/i386/evex-no-scale-64.d: Likewise.
+	* testsuite/gas/i386/evex-no-scale-32.s: New file.
+	* testsuite/gas/i386/evex-no-scale-64.s: Likewise.
+
+2018-08-10  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/gas/i386/i386.exp: Run evex-no-scale-32 and
 	evex-no-scale-64 only for ELF targets.
 

@@ -1,4 +1,3 @@
-#source: evex-no-scale.s
 #objdump: -dw
 #name: x86-64 EVEX no disp scaling
 
