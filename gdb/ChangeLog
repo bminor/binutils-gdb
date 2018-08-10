@@ -1,3 +1,12 @@
+2018-08-10  Keith Seitz  <keiths@redhat.com>
+
+	* compile/compile-c-support.c (c_compute_program): Use
+	unique_xmalloc_ptr to eliminate cleanup.
+	* compile/compile-c-symbols.c (generate_c_for_variable_locations):
+	Return a unique_xmalloc_ptr and eliminate cleanup.
+	* compile/compile-internal.h (generate_c_for_variable_locations):
+	Return unique_xmalloc_ptr and update description.
+
 2018-08-10  Alan Hayward  <alan.hayward@arm.com>
 
 	* corelow.c (core_target::get_core_register_section): Rename

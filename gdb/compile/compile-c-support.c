@@ -351,17 +351,15 @@ c_compute_program (struct compile_instance *inst,
      and the user's code may only refer to globals.  */
   if (inst->scope != COMPILE_I_RAW_SCOPE)
     {
-      unsigned char *registers_used;
       int i;
 
       /* Generate the code to compute variable locations, but do it
 	 before generating the function header, so we can define the
 	 register struct before the function body.  This requires a
 	 temporary stream.  */
-      registers_used = generate_c_for_variable_locations (context,
-							  var_stream, gdbarch,
-							  expr_block, expr_pc);
-      make_cleanup (xfree, registers_used);
+      gdb::unique_xmalloc_ptr<unsigned char> registers_used
+	= generate_c_for_variable_locations (context, var_stream, gdbarch,
+					     expr_block, expr_pc);
 
       buf.puts ("typedef unsigned int"
 		" __attribute__ ((__mode__(__pointer__)))"
@@ -382,7 +380,7 @@ c_compute_program (struct compile_instance *inst,
 		      mode, mode);
 	}
 
-      generate_register_struct (&buf, gdbarch, registers_used);
+      generate_register_struct (&buf, gdbarch, registers_used.get ());
     }
 
   add_code_header (inst->scope, &buf);

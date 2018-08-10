@@ -708,24 +708,22 @@ generate_c_for_for_one_variable (struct compile_c_instance *compiler,
 
 /* See compile-internal.h.  */
 
-unsigned char *
+gdb::unique_xmalloc_ptr<unsigned char>
 generate_c_for_variable_locations (struct compile_c_instance *compiler,
 				   string_file &stream,
 				   struct gdbarch *gdbarch,
 				   const struct block *block,
 				   CORE_ADDR pc)
 {
-  struct cleanup *outer;
   const struct block *static_block = block_static_block (block);
-  unsigned char *registers_used;
 
   /* If we're already in the static or global block, there is nothing
      to write.  */
   if (static_block == NULL || block == static_block)
     return NULL;
 
-  registers_used = XCNEWVEC (unsigned char, gdbarch_num_regs (gdbarch));
-  outer = make_cleanup (xfree, registers_used);
+  gdb::unique_xmalloc_ptr<unsigned char> registers_used
+    (XCNEWVEC (unsigned char, gdbarch_num_regs (gdbarch)));
 
   /* Ensure that a given name is only entered once.  This reflects the
      reality of shadowing.  */
@@ -745,7 +743,7 @@ generate_c_for_variable_locations (struct compile_c_instance *compiler,
 	{
 	  if (!symbol_seen (symhash.get (), sym))
 	    generate_c_for_for_one_variable (compiler, stream, gdbarch,
-					     registers_used, pc, sym);
+					     registers_used.get (), pc, sym);
 	}
 
       /* If we just finished the outermost block of a function, we're
@@ -755,6 +753,5 @@ generate_c_for_variable_locations (struct compile_c_instance *compiler,
       block = BLOCK_SUPERBLOCK (block);
     }
 
-  discard_cleanups (outer);
   return registers_used;
 }

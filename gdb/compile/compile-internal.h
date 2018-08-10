@@ -128,11 +128,12 @@ extern gcc_c_symbol_address_function gcc_symbol_address;
 extern struct compile_instance *new_compile_instance (struct gcc_c_context *fe);
 
 /* Emit code to compute the address for all the local variables in
-   scope at PC in BLOCK.  Returns a malloc'd vector, indexed by gdb
-   register number, where each element indicates if the corresponding
-   register is needed to compute a local variable.  */
+   scope at PC in BLOCK.  Returns a vector, indexed by gdb register
+   number, where each element indicates if the corresponding register
+   is needed to compute a local variable.  */
 
-extern unsigned char *generate_c_for_variable_locations
+extern gdb::unique_xmalloc_ptr<unsigned char>
+  generate_c_for_variable_locations
      (struct compile_c_instance *compiler,
       string_file &stream,
       struct gdbarch *gdbarch,
