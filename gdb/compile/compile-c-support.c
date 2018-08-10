@@ -96,7 +96,7 @@ load_libcc (void)
    This function calls the symbol returned from the load_libcc
    function.  This will provide the gcc_c_context.  */
 
-struct compile_instance *
+compile_instance *
 c_get_compile_context (void)
 {
   static gcc_c_fe_context_function *func;
@@ -114,7 +114,7 @@ c_get_compile_context (void)
     error (_("The loaded version of GCC does not support the required version "
 	     "of the API."));
 
-  return new_compile_instance (context);
+  return new compile_c_instance (context);
 }
 
 
@@ -334,13 +334,14 @@ generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
    indicates the value of $PC.  */
 
 std::string
-c_compute_program (struct compile_instance *inst,
+c_compute_program (compile_instance *inst,
 		   const char *input,
 		   struct gdbarch *gdbarch,
 		   const struct block *expr_block,
 		   CORE_ADDR expr_pc)
 {
-  struct compile_c_instance *context = (struct compile_c_instance *) inst;
+  compile_c_instance *context
+    = static_cast<compile_c_instance *> (inst);
 
   string_file buf;
   string_file var_stream;
@@ -350,7 +351,7 @@ c_compute_program (struct compile_instance *inst,
   /* Do not generate local variable information for "raw"
      compilations.  In this case we aren't emitting our own function
      and the user's code may only refer to globals.  */
-  if (inst->scope != COMPILE_I_RAW_SCOPE)
+  if (inst->scope () != COMPILE_I_RAW_SCOPE)
     {
       int i;
 
@@ -384,11 +385,11 @@ c_compute_program (struct compile_instance *inst,
       generate_register_struct (&buf, gdbarch, registers_used.get ());
     }
 
-  add_code_header (inst->scope, &buf);
+  add_code_header (inst->scope (), &buf);
 
-  if (inst->scope == COMPILE_I_SIMPLE_SCOPE
-      || inst->scope == COMPILE_I_PRINT_ADDRESS_SCOPE
-      || inst->scope == COMPILE_I_PRINT_VALUE_SCOPE)
+  if (inst->scope () == COMPILE_I_SIMPLE_SCOPE
+      || inst->scope () == COMPILE_I_PRINT_ADDRESS_SCOPE
+      || inst->scope () == COMPILE_I_PRINT_VALUE_SCOPE)
     {
       buf.write (var_stream.c_str (), var_stream.size ());
       buf.puts ("#pragma GCC user_expression\n");
@@ -398,12 +399,12 @@ c_compute_program (struct compile_instance *inst,
      works properly.  Otherwise gcc thinks that the "extern"
      declaration is in the same scope as the declaration provided by
      gdb.  */
-  if (inst->scope != COMPILE_I_RAW_SCOPE)
+  if (inst->scope () != COMPILE_I_RAW_SCOPE)
     buf.puts ("{\n");
 
   buf.puts ("#line 1 \"gdb command line\"\n");
 
-  switch (inst->scope)
+  switch (inst->scope ())
     {
     case COMPILE_I_PRINT_ADDRESS_SCOPE:
     case COMPILE_I_PRINT_VALUE_SCOPE:
@@ -413,7 +414,7 @@ c_compute_program (struct compile_instance *inst,
 "memcpy (" COMPILE_I_PRINT_OUT_ARG ", %s" COMPILE_I_EXPR_VAL ",\n"
 	 "sizeof (*" COMPILE_I_EXPR_PTR_TYPE "));\n"
 			  , input, input,
-			  (inst->scope == COMPILE_I_PRINT_ADDRESS_SCOPE
+			  (inst->scope () == COMPILE_I_PRINT_ADDRESS_SCOPE
 			   ? "&" : ""));
       break;
     default:
@@ -428,9 +429,9 @@ c_compute_program (struct compile_instance *inst,
   if (strchr (input, '\n') == NULL)
     buf.puts (";\n");
 
-  if (inst->scope != COMPILE_I_RAW_SCOPE)
+  if (inst->scope () != COMPILE_I_RAW_SCOPE)
     buf.puts ("}\n");
 
-  add_code_footer (inst->scope, &buf);
+  add_code_footer (inst->scope (), &buf);
   return std::move (buf.string ());
 }

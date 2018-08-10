@@ -79,16 +79,27 @@ del_symbol_error (void *a)
   xfree (se);
 }
 
-/* Associate SYMBOL with some error text.  */
+/* See compile-internal.h.  */
 
-static void
-insert_symbol_error (htab_t hash, const struct symbol *sym, const char *text)
+void
+compile_instance::insert_symbol_error (const struct symbol *sym,
+				       const char *text)
 {
   struct symbol_error e;
   void **slot;
 
+  if (m_symbol_err_map == NULL)
+    {
+      m_symbol_err_map = htab_create_alloc (10,
+					    hash_symbol_error,
+					    eq_symbol_error,
+					    del_symbol_error,
+					    xcalloc,
+					    xfree);
+    }
+
   e.sym = sym;
-  slot = htab_find_slot (hash, &e, INSERT);
+  slot = htab_find_slot (m_symbol_err_map, &e, INSERT);
   if (*slot == NULL)
     {
       struct symbol_error *e = XNEW (struct symbol_error);
@@ -99,21 +110,19 @@ insert_symbol_error (htab_t hash, const struct symbol *sym, const char *text)
     }
 }
 
-/* Emit the error message corresponding to SYM, if one exists, and
-   arrange for it not to be emitted again.  */
+/* See compile-internal.h.  */
 
-static void
-error_symbol_once (struct compile_c_instance *context,
-		   const struct symbol *sym)
+void
+compile_instance::error_symbol_once (const struct symbol *sym)
 {
   struct symbol_error search;
   struct symbol_error *err;
 
-  if (context->symbol_err_map == NULL)
+  if (m_symbol_err_map == NULL)
     return;
 
   search.sym = sym;
-  err = (struct symbol_error *) htab_find (context->symbol_err_map, &search);
+  err = (struct symbol_error *) htab_find (m_symbol_err_map, &search);
   if (err == NULL || err->message == NULL)
     return;
 
@@ -142,7 +151,7 @@ c_symbol_substitution_name (struct symbol *sym)
    scope.)  */
 
 static void
-convert_one_symbol (struct compile_c_instance *context,
+convert_one_symbol (compile_c_instance *context,
 		    struct block_symbol sym,
 		    int is_global,
 		    int is_local)
@@ -151,17 +160,17 @@ convert_one_symbol (struct compile_c_instance *context,
   const char *filename = symbol_symtab (sym.symbol)->filename;
   unsigned short line = SYMBOL_LINE (sym.symbol);
 
-  error_symbol_once (context, sym.symbol);
+  context->error_symbol_once (sym.symbol);
 
   if (SYMBOL_CLASS (sym.symbol) == LOC_LABEL)
     sym_type = 0;
   else
-    sym_type = convert_type (context, SYMBOL_TYPE (sym.symbol));
+    sym_type = context->convert_type (SYMBOL_TYPE (sym.symbol));
 
   if (SYMBOL_DOMAIN (sym.symbol) == STRUCT_DOMAIN)
     {
       /* Binding a tag, so we don't need to build a decl.  */
-      context->c_plugin->tagbind (SYMBOL_NATURAL_NAME (sym.symbol),
+      context->plugin ().tagbind (SYMBOL_NATURAL_NAME (sym.symbol),
 				  sym_type, filename, line);
     }
   else
@@ -195,7 +204,7 @@ convert_one_symbol (struct compile_c_instance *context,
 	      /* Already handled by convert_enum.  */
 	      return;
 	    }
-	  context->c_plugin->build_constant
+	  context->plugin ().build_constant
 	    (sym_type, SYMBOL_NATURAL_NAME (sym.symbol),
 	     SYMBOL_VALUE (sym.symbol),
 	     filename, line);
@@ -280,17 +289,17 @@ convert_one_symbol (struct compile_c_instance *context,
 	}
 
       /* Don't emit local variable decls for a raw expression.  */
-      if (context->base.scope != COMPILE_I_RAW_SCOPE
+      if (context->scope () != COMPILE_I_RAW_SCOPE
 	  || symbol_name == NULL)
 	{
-	  decl = context->c_plugin->build_decl
+	  decl = context->plugin ().build_decl
 	    (SYMBOL_NATURAL_NAME (sym.symbol),
 	     kind,
 	     sym_type,
 	     symbol_name.get (), addr,
 	     filename, line);
 
-	  context->c_plugin->bind (decl, is_global);
+	  context->plugin ().bind (decl, is_global);
 	}
     }
 }
@@ -300,7 +309,7 @@ convert_one_symbol (struct compile_c_instance *context,
    itself, and DOMAIN is the domain which was searched.  */
 
 static void
-convert_symbol_sym (struct compile_c_instance *context, const char *identifier,
+convert_symbol_sym (compile_c_instance *context, const char *identifier,
 		    struct block_symbol sym, domain_enum domain)
 {
   const struct block *static_block;
@@ -350,7 +359,7 @@ convert_symbol_sym (struct compile_c_instance *context, const char *identifier,
    to use and BMSYM is the minimal symbol to convert.  */
 
 static void
-convert_symbol_bmsym (struct compile_c_instance *context,
+convert_symbol_bmsym (compile_c_instance *context,
 		      struct bound_minimal_symbol bmsym)
 {
   struct minimal_symbol *msym = bmsym.minsym;
@@ -398,11 +407,11 @@ convert_symbol_bmsym (struct compile_c_instance *context,
       break;
     }
 
-  sym_type = convert_type (context, type);
-  decl = context->c_plugin->build_decl (MSYMBOL_NATURAL_NAME (msym),
+  sym_type = context->convert_type (type);
+  decl = context->plugin ().build_decl (MSYMBOL_NATURAL_NAME (msym),
 					kind, sym_type, NULL, addr,
 					NULL, 0);
-  context->c_plugin->bind (decl, 1 /* is_global */);
+  context->plugin ().bind (decl, 1 /* is_global */);
 }
 
 /* See compile-internal.h.  */
@@ -413,7 +422,8 @@ gcc_convert_symbol (void *datum,
 		    enum gcc_c_oracle_request request,
 		    const char *identifier)
 {
-  struct compile_c_instance *context = (struct compile_c_instance *) datum;
+  compile_c_instance *context
+    = static_cast<compile_c_instance *> (datum);
   domain_enum domain;
   int found = 0;
 
@@ -438,7 +448,7 @@ gcc_convert_symbol (void *datum,
     {
       struct block_symbol sym;
 
-      sym = lookup_symbol (identifier, context->base.block, domain, NULL);
+      sym = lookup_symbol (identifier, context->block (), domain, NULL);
       if (sym.symbol != NULL)
 	{
 	  convert_symbol_sym (context, identifier, sym, domain);
@@ -459,7 +469,7 @@ gcc_convert_symbol (void *datum,
 
   CATCH (e, RETURN_MASK_ALL)
     {
-      context->c_plugin->error (e.message);
+      context->plugin ().error (e.message);
     }
   END_CATCH
 
@@ -476,7 +486,8 @@ gcc_address
 gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 		    const char *identifier)
 {
-  struct compile_c_instance *context = (struct compile_c_instance *) datum;
+  compile_c_instance *context
+    = static_cast<compile_c_instance *> (datum);
   gcc_address result = 0;
   int found = 0;
 
@@ -521,7 +532,7 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 
   CATCH (e, RETURN_MASK_ERROR)
     {
-      context->c_plugin->error (e.message);
+      context->plugin ().error (e.message);
     }
   END_CATCH
 
@@ -575,7 +586,7 @@ symbol_seen (htab_t hashtab, struct symbol *sym)
 /* Generate C code to compute the length of a VLA.  */
 
 static void
-generate_vla_size (struct compile_c_instance *compiler,
+generate_vla_size (compile_instance *compiler,
 		   string_file &stream,
 		   struct gdbarch *gdbarch,
 		   unsigned char *registers_used,
@@ -629,7 +640,7 @@ generate_vla_size (struct compile_c_instance *compiler,
 /* Generate C code to compute the address of SYM.  */
 
 static void
-generate_c_for_for_one_variable (struct compile_c_instance *compiler,
+generate_c_for_for_one_variable (compile_instance *compiler,
 				 string_file &stream,
 				 struct gdbarch *gdbarch,
 				 unsigned char *registers_used,
@@ -691,14 +702,7 @@ generate_c_for_for_one_variable (struct compile_c_instance *compiler,
 
   CATCH (e, RETURN_MASK_ERROR)
     {
-      if (compiler->symbol_err_map == NULL)
-	compiler->symbol_err_map = htab_create_alloc (10,
-						      hash_symbol_error,
-						      eq_symbol_error,
-						      del_symbol_error,
-						      xcalloc,
-						      xfree);
-      insert_symbol_error (compiler->symbol_err_map, sym, e.message);
+      compiler->insert_symbol_error (sym, e.message);
     }
   END_CATCH
 }
@@ -706,7 +710,7 @@ generate_c_for_for_one_variable (struct compile_c_instance *compiler,
 /* See compile-c.h.  */
 
 gdb::unique_xmalloc_ptr<unsigned char>
-generate_c_for_variable_locations (struct compile_c_instance *compiler,
+generate_c_for_variable_locations (compile_instance *compiler,
 				   string_file &stream,
 				   struct gdbarch *gdbarch,
 				   const struct block *block,

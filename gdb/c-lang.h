@@ -158,7 +158,7 @@ extern int c_textual_element_type (struct type *, char);
    exception on failure.  This is suitable for use as the
    la_get_compile_instance language method.  */
 
-extern struct compile_instance *c_get_compile_context (void);
+extern compile_instance *c_get_compile_context (void);
 
 /* This takes the user-supplied text and returns a new bit of code to
    compile.
@@ -166,7 +166,7 @@ extern struct compile_instance *c_get_compile_context (void);
    This is used as the la_compute_program language method; see that
    for a description of the arguments.  */
 
-extern std::string c_compute_program (struct compile_instance *inst,
+extern std::string c_compute_program (compile_instance *inst,
 				      const char *input,
 				      struct gdbarch *gdbarch,
 				      const struct block *expr_block,

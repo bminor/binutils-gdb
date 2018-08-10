@@ -1,5 +1,46 @@
 2018-08-10  Keith Seitz  <keiths@redhat.com>
 
+	* compile/compile-c-support.c (c_get_compile_context): Use `new'
+	instead of `new_compile_instance'.
+	* compile/compile-c-symbols.c (compile_instance::insert_symbol_error):
+	Update description.
+	If the symbol error map is not initialized, create it.
+	(generate_c_for_for_one_symbol): Do not check/initialize
+	the symbol error map.
+	* compile/compile-c-types.c (compile_c_instance): Make a class.
+	Update all callers.
+	(compile_instance::compile_instance): Initialize the type cache.
+	(get_cached_type): New function.
+	(insert_type): Update description.
+	(compile_c_instance::m_default_cflags): Define.
+	(convert_type): Update description.  Use get_cached_type.
+	(delete_instance): Moved to destructor.
+	(new_compile_instance): Moved to constructor.
+	* compile/compile-c.h (compile_c_instance): Make class inheriting
+	from compile_instance.
+	<base>: Remove field.
+	<type_map, symbol_err_map>: Move to base class.
+	<c_plugin>: Rename to `m_plugin' and remove pointer type.
+	* compile/compile-internal.h (compile_instance): Make class.
+	<type_map_t, symbol_err_map_t>: Define.
+	<fe>: Rename to `m_gcc_fe'.
+	<scope, block, gcc_target_options>: Add `m_' prefix.
+	<m_type_map, m_symbol_err_map>: New fields, moved from
+	compile_c_instance.
+	<destroy>: Remove.
+	(convert_type, new_compile_instance): Remove.
+	* compile/compile.c (cleanup_compile_instance): Remove.
+	(compile_to_object): Use unique_ptr to eliminate cleanups.
+	(compile_instance::set_print_callback, compile_instance::version)
+	(compile_instance::set_verbose)
+	(compile_instance::set_driver_filename)
+	(compile_instance::set_triplet_regexp)
+	(compile_instance::set_arguments)
+	(compile_instance::set_source_file)
+	(compile_instance::compile): Define.
+
+2018-08-10  Keith Seitz  <keiths@redhat.com>
+
 	* Makefile.in (HFILES_NO_SRCDIR): Add compile/gcc-c-plugin.h.
 	* compile/compile-c-types.c: Define GCC_METHODN macros and include
 	gcc-c-fe.def to define C plugin.

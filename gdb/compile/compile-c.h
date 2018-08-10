@@ -19,7 +19,6 @@
 
 #include "common/enum-flags.h"
 #include "gcc-c-plugin.h"
-#include "hashtab.h"
 
 /* enum-flags wrapper.  */
 
@@ -36,20 +35,30 @@ extern gcc_c_symbol_address_function gcc_symbol_address;
 /* A subclass of compile_instance that is specific to the C front
    end.  */
 
-struct compile_c_instance
+class compile_c_instance : public compile_instance
 {
-  /* Base class.  Note that the base class vtable actually points to a
-     gcc_c_fe_vtable.  */
-  struct compile_instance base;
+public:
+  explicit compile_c_instance (struct gcc_c_context *gcc_c)
+    : compile_instance (&gcc_c->base, m_default_cflags),
+      m_plugin (gcc_c)
+  {
+    m_plugin.set_callbacks (gcc_convert_symbol, gcc_symbol_address, this);
+  }
 
-  /* Map from gdb types to gcc types.  */
-  htab_t type_map;
+  /* Convert a gdb type, TYPE, to a GCC type.
 
-  /* Map from gdb symbols to gcc error messages to emit.  */
-  htab_t symbol_err_map;
+     The new GCC type is returned.  */
+  gcc_type convert_type (struct type *type);
 
-  /* GCC C plugin.  */
-  gcc_c_plugin *c_plugin;
+  /* Return a handle for the GCC plug-in.  */
+  gcc_c_plugin &plugin () { return m_plugin; }
+
+private:
+  /* Default compiler flags for C.  */
+  static const char *m_default_cflags;
+
+  /* The GCC plug-in.  */
+  gcc_c_plugin m_plugin;
 };
 
 /* Emit code to compute the address for all the local variables in
@@ -59,7 +68,7 @@ struct compile_c_instance
 
 extern gdb::unique_xmalloc_ptr<unsigned char>
   generate_c_for_variable_locations
-     (struct compile_c_instance *compiler,
+     (compile_instance *compiler,
       string_file &stream,
       struct gdbarch *gdbarch,
       const struct block *block,
