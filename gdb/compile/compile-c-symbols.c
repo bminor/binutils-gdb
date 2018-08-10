@@ -161,9 +161,8 @@ convert_one_symbol (struct compile_c_instance *context,
   if (SYMBOL_DOMAIN (sym.symbol) == STRUCT_DOMAIN)
     {
       /* Binding a tag, so we don't need to build a decl.  */
-      C_CTX (context)->c_ops->tagbind (C_CTX (context),
-				       SYMBOL_NATURAL_NAME (sym.symbol),
-				       sym_type, filename, line);
+      context->c_plugin->tagbind (SYMBOL_NATURAL_NAME (sym.symbol),
+				  sym_type, filename, line);
     }
   else
     {
@@ -196,9 +195,8 @@ convert_one_symbol (struct compile_c_instance *context,
 	      /* Already handled by convert_enum.  */
 	      return;
 	    }
-	  C_CTX (context)->c_ops->build_constant
-	    (C_CTX (context),
-	     sym_type, SYMBOL_NATURAL_NAME (sym.symbol),
+	  context->c_plugin->build_constant
+	    (sym_type, SYMBOL_NATURAL_NAME (sym.symbol),
 	     SYMBOL_VALUE (sym.symbol),
 	     filename, line);
 	  return;
@@ -285,15 +283,14 @@ convert_one_symbol (struct compile_c_instance *context,
       if (context->base.scope != COMPILE_I_RAW_SCOPE
 	  || symbol_name == NULL)
 	{
-	  decl = C_CTX (context)->c_ops->build_decl
-	    (C_CTX (context),
-	     SYMBOL_NATURAL_NAME (sym.symbol),
+	  decl = context->c_plugin->build_decl
+	    (SYMBOL_NATURAL_NAME (sym.symbol),
 	     kind,
 	     sym_type,
 	     symbol_name.get (), addr,
 	     filename, line);
 
-	  C_CTX (context)->c_ops->bind (C_CTX (context), decl, is_global);
+	  context->c_plugin->bind (decl, is_global);
 	}
     }
 }
@@ -402,11 +399,10 @@ convert_symbol_bmsym (struct compile_c_instance *context,
     }
 
   sym_type = convert_type (context, type);
-  decl = C_CTX (context)->c_ops->build_decl (C_CTX (context),
-					     MSYMBOL_NATURAL_NAME (msym),
-					     kind, sym_type, NULL, addr,
-					     NULL, 0);
-  C_CTX (context)->c_ops->bind (C_CTX (context), decl, 1 /* is_global */);
+  decl = context->c_plugin->build_decl (MSYMBOL_NATURAL_NAME (msym),
+					kind, sym_type, NULL, addr,
+					NULL, 0);
+  context->c_plugin->bind (decl, 1 /* is_global */);
 }
 
 /* See compile-internal.h.  */
@@ -463,7 +459,7 @@ gcc_convert_symbol (void *datum,
 
   CATCH (e, RETURN_MASK_ALL)
     {
-      C_CTX (context)->c_ops->error (C_CTX (context), e.message);
+      context->c_plugin->error (e.message);
     }
   END_CATCH
 
@@ -525,7 +521,7 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 
   CATCH (e, RETURN_MASK_ERROR)
     {
-      C_CTX (context)->c_ops->error (C_CTX (context), e.message);
+      context->c_plugin->error (e.message);
     }
   END_CATCH
 

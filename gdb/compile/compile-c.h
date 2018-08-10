@@ -18,6 +18,7 @@
 #define GDB_COMPILE_C_H
 
 #include "common/enum-flags.h"
+#include "gcc-c-plugin.h"
 #include "hashtab.h"
 
 /* enum-flags wrapper.  */
@@ -46,12 +47,10 @@ struct compile_c_instance
 
   /* Map from gdb symbols to gcc error messages to emit.  */
   htab_t symbol_err_map;
+
+  /* GCC C plugin.  */
+  gcc_c_plugin *c_plugin;
 };
-
-/* A helper macro that takes a compile_c_instance and returns its
-   corresponding gcc_c_context.  */
-
-#define C_CTX(I) ((struct gcc_c_context *) ((I)->base.fe))
 
 /* Emit code to compute the address for all the local variables in
    scope at PC in BLOCK.  Returns a malloc'd vector, indexed by gdb

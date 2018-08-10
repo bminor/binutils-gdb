@@ -99,8 +99,7 @@ convert_pointer (struct compile_c_instance *context, struct type *type)
 {
   gcc_type target = convert_type (context, TYPE_TARGET_TYPE (type));
 
-  return C_CTX (context)->c_ops->build_pointer_type (C_CTX (context),
-						     target);
+  return context->c_plugin->build_pointer_type (target);
 }
 
 /* Convert an array type to its gcc representation.  */
@@ -114,13 +113,11 @@ convert_array (struct compile_c_instance *context, struct type *type)
   element_type = convert_type (context, TYPE_TARGET_TYPE (type));
 
   if (TYPE_LOW_BOUND_KIND (range) != PROP_CONST)
-    return C_CTX (context)->c_ops->error (C_CTX (context),
-					  _("array type with non-constant"
-					    " lower bound is not supported"));
+    return context->c_plugin->error (_("array type with non-constant"
+				       " lower bound is not supported"));
   if (TYPE_LOW_BOUND (range) != 0)
-    return C_CTX (context)->c_ops->error (C_CTX (context),
-					  _("cannot convert array type with "
-					    "non-zero lower bound to C"));
+    return context->c_plugin->error (_("cannot convert array type with "
+				       "non-zero lower bound to C"));
 
   if (TYPE_HIGH_BOUND_KIND (range) == PROP_LOCEXPR
       || TYPE_HIGH_BOUND_KIND (range) == PROP_LOCLIST)
@@ -128,15 +125,13 @@ convert_array (struct compile_c_instance *context, struct type *type)
       gcc_type result;
 
       if (TYPE_VECTOR (type))
-	return C_CTX (context)->c_ops->error (C_CTX (context),
-					      _("variably-sized vector type"
-						" is not supported"));
+	return context->c_plugin->error (_("variably-sized vector type"
+					   " is not supported"));
 
       std::string upper_bound
 	= c_get_range_decl_name (&TYPE_RANGE_DATA (range)->high);
-      result = C_CTX (context)->c_ops->build_vla_array_type (C_CTX (context),
-							     element_type,
-							     upper_bound.c_str ());
+      result = context->c_plugin->build_vla_array_type (element_type,
+							upper_bound.c_str ());
       return result;
     }
   else
@@ -152,11 +147,8 @@ convert_array (struct compile_c_instance *context, struct type *type)
 	}
 
       if (TYPE_VECTOR (type))
-	return C_CTX (context)->c_ops->build_vector_type (C_CTX (context),
-							  element_type,
-							  count);
-      return C_CTX (context)->c_ops->build_array_type (C_CTX (context),
-						       element_type, count);
+	return context->c_plugin->build_vector_type (element_type, count);
+      return context->c_plugin->build_array_type (element_type, count);
     }
 }
 
@@ -171,11 +163,11 @@ convert_struct_or_union (struct compile_c_instance *context, struct type *type)
   /* First we create the resulting type and enter it into our hash
      table.  This lets recursive types work.  */
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
-    result = C_CTX (context)->c_ops->build_record_type (C_CTX (context));
+    result = context->c_plugin->build_record_type ();
   else
     {
       gdb_assert (TYPE_CODE (type) == TYPE_CODE_UNION);
-      result = C_CTX (context)->c_ops->build_union_type (C_CTX (context));
+      result = context->c_plugin->build_union_type ();
     }
   insert_type (context, type, result);
 
@@ -187,15 +179,14 @@ convert_struct_or_union (struct compile_c_instance *context, struct type *type)
       field_type = convert_type (context, TYPE_FIELD_TYPE (type, i));
       if (bitsize == 0)
 	bitsize = 8 * TYPE_LENGTH (TYPE_FIELD_TYPE (type, i));
-      C_CTX (context)->c_ops->build_add_field (C_CTX (context), result,
-					       TYPE_FIELD_NAME (type, i),
-					       field_type,
-					       bitsize,
-					       TYPE_FIELD_BITPOS (type, i));
+      context->c_plugin->build_add_field (result,
+					  TYPE_FIELD_NAME (type, i),
+					  field_type,
+					  bitsize,
+					  TYPE_FIELD_BITPOS (type, i));
     }
 
-  C_CTX (context)->c_ops->finish_record_or_union (C_CTX (context), result,
-						  TYPE_LENGTH (type));
+  context->c_plugin->finish_record_or_union (result, TYPE_LENGTH (type));
   return result;
 }
 
@@ -206,22 +197,20 @@ convert_enum (struct compile_c_instance *context, struct type *type)
 {
   gcc_type int_type, result;
   int i;
-  struct gcc_c_context *ctx = C_CTX (context);
+  const gcc_c_plugin *plugin = context->c_plugin;
 
-  int_type = ctx->c_ops->int_type_v0 (ctx,
-				      TYPE_UNSIGNED (type),
-				      TYPE_LENGTH (type));
+  int_type = plugin->int_type_v0 (TYPE_UNSIGNED (type),
+				  TYPE_LENGTH (type));
 
-  result = ctx->c_ops->build_enum_type (ctx, int_type);
+  result = plugin->build_enum_type (int_type);
   for (i = 0; i < TYPE_NFIELDS (type); ++i)
     {
-      ctx->c_ops->build_add_enum_constant (ctx,
-					   result,
-					   TYPE_FIELD_NAME (type, i),
-					   TYPE_FIELD_ENUMVAL (type, i));
+      plugin->build_add_enum_constant (result,
+				       TYPE_FIELD_NAME (type, i),
+				       TYPE_FIELD_ENUMVAL (type, i));
     }
 
-  ctx->c_ops->finish_enum_type (ctx, result);
+  plugin->finish_enum_type (result);
 
   return result;
 }
@@ -261,9 +250,8 @@ convert_func (struct compile_c_instance *context, struct type *type)
   for (i = 0; i < TYPE_NFIELDS (type); ++i)
     array.elements[i] = convert_type (context, TYPE_FIELD_TYPE (type, i));
 
-  result = C_CTX (context)->c_ops->build_function_type (C_CTX (context),
-							return_type,
-							&array, is_varargs);
+  result = context->c_plugin->build_function_type (return_type,
+						   &array, is_varargs);
   xfree (array.elements);
 
   return result;
@@ -274,22 +262,20 @@ convert_func (struct compile_c_instance *context, struct type *type)
 static gcc_type
 convert_int (struct compile_c_instance *context, struct type *type)
 {
-  if (C_CTX (context)->c_ops->c_version >= GCC_C_FE_VERSION_1)
+  if (context->c_plugin->version () >= GCC_C_FE_VERSION_1)
     {
       if (TYPE_NOSIGN (type))
 	{
 	  gdb_assert (TYPE_LENGTH (type) == 1);
-	  return C_CTX (context)->c_ops->char_type (C_CTX (context));
+	  return context->c_plugin->char_type ();
 	}
-      return C_CTX (context)->c_ops->int_type (C_CTX (context),
-					       TYPE_UNSIGNED (type),
-					       TYPE_LENGTH (type),
-					       TYPE_NAME (type));
+      return context->c_plugin->int_type (TYPE_UNSIGNED (type),
+					  TYPE_LENGTH (type),
+					  TYPE_NAME (type));
     }
   else
-    return C_CTX (context)->c_ops->int_type_v0 (C_CTX (context),
-						TYPE_UNSIGNED (type),
-						TYPE_LENGTH (type));
+    return context->c_plugin->int_type_v0 (TYPE_UNSIGNED (type),
+					   TYPE_LENGTH (type));
 }
 
 /* Convert a floating-point type to its gcc representation.  */
@@ -297,13 +283,11 @@ convert_int (struct compile_c_instance *context, struct type *type)
 static gcc_type
 convert_float (struct compile_c_instance *context, struct type *type)
 {
-  if (C_CTX (context)->c_ops->c_version >= GCC_C_FE_VERSION_1)
-    return C_CTX (context)->c_ops->float_type (C_CTX (context),
-					       TYPE_LENGTH (type),
-					       TYPE_NAME (type));
+  if (context->c_plugin->version () >= GCC_C_FE_VERSION_1)
+    return context->c_plugin->float_type (TYPE_LENGTH (type),
+					  TYPE_NAME (type));
   else
-    return C_CTX (context)->c_ops->float_type_v0 (C_CTX (context),
-						  TYPE_LENGTH (type));
+    return context->c_plugin->float_type_v0 (TYPE_LENGTH (type));
 }
 
 /* Convert the 'void' type to its gcc representation.  */
@@ -311,7 +295,7 @@ convert_float (struct compile_c_instance *context, struct type *type)
 static gcc_type
 convert_void (struct compile_c_instance *context, struct type *type)
 {
-  return C_CTX (context)->c_ops->void_type (C_CTX (context));
+  return context->c_plugin->void_type ();
 }
 
 /* Convert a boolean type to its gcc representation.  */
@@ -319,7 +303,7 @@ convert_void (struct compile_c_instance *context, struct type *type)
 static gcc_type
 convert_bool (struct compile_c_instance *context, struct type *type)
 {
-  return C_CTX (context)->c_ops->bool_type (C_CTX (context));
+  return context->c_plugin->bool_type ();
 }
 
 /* Convert a qualified type to its gcc representation.  */
@@ -340,9 +324,7 @@ convert_qualified (struct compile_c_instance *context, struct type *type)
   if (TYPE_RESTRICT (type))
     quals |= GCC_QUALIFIER_RESTRICT;
 
-  return C_CTX (context)->c_ops->build_qualified_type (C_CTX (context),
-						       unqual_converted,
-						       quals);
+  return context->c_plugin->build_qualified_type (unqual_converted, quals);
 }
 
 /* Convert a complex type to its gcc representation.  */
@@ -352,7 +334,7 @@ convert_complex (struct compile_c_instance *context, struct type *type)
 {
   gcc_type base = convert_type (context, TYPE_TARGET_TYPE (type));
 
-  return C_CTX (context)->c_ops->build_complex_type (C_CTX (context), base);
+  return context->c_plugin->build_complex_type (base);
 }
 
 /* A helper function which knows how to convert most types from their
@@ -419,9 +401,7 @@ convert_type_basic (struct compile_c_instance *context, struct type *type)
       }
     }
 
-  return C_CTX (context)->c_ops->error (C_CTX (context),
-					_("cannot convert gdb type "
-					  "to gcc type"));
+  return context->c_plugin->error (_("cannot convert gdb type to gcc type"));
 }
 
 /* See compile-internal.h.  */
@@ -456,6 +436,7 @@ delete_instance (struct compile_instance *c)
   struct compile_c_instance *context = (struct compile_c_instance *) c;
 
   context->base.fe->ops->destroy (context->base.fe);
+  delete context->c_plugin;
   htab_delete (context->type_map);
   if (context->symbol_err_map != NULL)
     htab_delete (context->symbol_err_map);
@@ -481,8 +462,46 @@ new_compile_instance (struct gcc_c_context *fe)
 					eq_type_map_instance,
 					xfree, xcalloc, xfree);
 
-  fe->c_ops->set_callbacks (fe, gcc_convert_symbol,
-			    gcc_symbol_address, result);
+  result->c_plugin = new gcc_c_plugin (fe);
+
+  result->c_plugin->set_callbacks (gcc_convert_symbol, gcc_symbol_address,
+				   result);
 
   return &result->base;
 }
+
+/* C plug-in wrapper.  */
+
+#define FORWARD(OP,...) m_context->c_ops->OP(m_context, ##__VA_ARGS__)
+#define GCC_METHOD0(R, N) \
+  R gcc_c_plugin::N () const \
+  { return FORWARD (N); }
+#define GCC_METHOD1(R, N, A) \
+  R gcc_c_plugin::N (A a) const \
+  { return FORWARD (N, a); }
+#define GCC_METHOD2(R, N, A, B) \
+  R gcc_c_plugin::N (A a, B b) const \
+  { return FORWARD (N, a, b); }
+#define GCC_METHOD3(R, N, A, B, C) \
+  R gcc_c_plugin::N (A a, B b, C c)  const \
+  { return FORWARD (N, a, b, c); }
+#define GCC_METHOD4(R, N, A, B, C, D) \
+  R gcc_c_plugin::N (A a, B b, C c, D d) const \
+  { return FORWARD (N, a, b, c, d); }
+#define GCC_METHOD5(R, N, A, B, C, D, E) \
+  R gcc_c_plugin::N (A a, B b, C c, D d, E e) const \
+  { return FORWARD (N, a, b, c, d, e); }
+#define GCC_METHOD7(R, N, A, B, C, D, E, F, G) \
+  R gcc_c_plugin::N (A a, B b, C c, D d, E e, F f, G g) const \
+  { return FORWARD (N, a, b, c, d, e, f, g); }
+
+#include "gcc-c-fe.def"
+
+#undef GCC_METHOD0
+#undef GCC_METHOD1
+#undef GCC_METHOD2
+#undef GCC_METHOD3
+#undef GCC_METHOD4
+#undef GCC_METHOD5
+#undef GCC_METHOD7
+#undef FORWARD

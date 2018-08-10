@@ -1,5 +1,17 @@
 2018-08-10  Keith Seitz  <keiths@redhat.com>
 
+	* Makefile.in (HFILES_NO_SRCDIR): Add compile/gcc-c-plugin.h.
+	* compile/compile-c-types.c: Define GCC_METHODN macros and include
+	gcc-c-fe.def to define C plugin.
+	(delete_instance): Delete `c_plugin'.
+	(new_compile_instance): Initialize `c_plugin'.
+	* compile/compile-c.h: Include gcc_c_plugin.h.
+	(struct compile_c_instance) <c_plugin>: New member.
+	* gcc-c-plugin.h: New file.
+	Update all callers with API change.
+
+2018-08-10  Keith Seitz  <keiths@redhat.com>
+
 	* Makefile.in (SUBDIR_GCC_COMPILE_SRCS): Move header files ...
 	(HFILES_NO_SRCDIR): ... to here.
 	Add compile-internal.h and compile-c.h.

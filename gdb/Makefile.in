@@ -1464,6 +1464,7 @@ HFILES_NO_SRCDIR = \
 	compile/compile-internal.h \
 	compile/compile-object-load.h \
 	compile/compile-object-run.h \
+	compile/gcc-c-plugin.h \
 	config/nm-linux.h \
 	config/nm-nto.h \
 	config/djgpp/langinfo.h \
