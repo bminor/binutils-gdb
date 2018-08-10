@@ -49,9 +49,6 @@ public:
   virtual ~compile_instance ()
   {
     m_gcc_fe->ops->destroy (m_gcc_fe);
-    htab_delete (m_type_map);
-    if (m_symbol_err_map != NULL)
-      htab_delete (m_symbol_err_map);
   }
 
   /* Returns the GCC options to be passed during compilation.  */
@@ -148,10 +145,10 @@ protected:
   std::string m_gcc_target_options;
 
   /* Map from gdb types to gcc types.  */
-  htab_t m_type_map;
+  htab_up m_type_map;
 
   /* Map from gdb symbols to gcc error messages to emit.  */
-  htab_t m_symbol_err_map;
+  htab_up m_symbol_err_map;
 };
 
 /* Define header and footers for different scopes.  */

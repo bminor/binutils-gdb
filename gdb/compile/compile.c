@@ -129,11 +129,13 @@ del_symbol_error (void *a)
 compile_instance::compile_instance (struct gcc_base_context *gcc_fe,
 				    const char *options)
   : m_gcc_fe (gcc_fe), m_gcc_target_options (options),
-    m_symbol_err_map (NULL)
+    m_type_map (htab_create_alloc (10, hash_type_map_instance,
+				   eq_type_map_instance,
+				   xfree, xcalloc, xfree)),
+    m_symbol_err_map (htab_create_alloc (10, hash_symbol_error,
+					 eq_symbol_error, del_symbol_error,
+					 xcalloc, xfree))
 {
-  m_type_map = htab_create_alloc (10, hash_type_map_instance,
-				  eq_type_map_instance,
-				  xfree, xcalloc, xfree);
 }
 
 /* See compile-internal.h.  */
@@ -144,7 +146,7 @@ compile_instance::get_cached_type (struct type *type, gcc_type &ret) const
   struct type_map_instance inst, *found;
 
   inst.type = type;
-  found = (struct type_map_instance *) htab_find (m_type_map, &inst);
+  found = (struct type_map_instance *) htab_find (m_type_map.get (), &inst);
   if (found != NULL)
     {
       ret = found->gcc_type_handle;
@@ -164,7 +166,7 @@ compile_instance::insert_type (struct type *type, gcc_type gcc_type)
 
   inst.type = type;
   inst.gcc_type_handle = gcc_type;
-  slot = htab_find_slot (m_type_map, &inst, INSERT);
+  slot = htab_find_slot (m_type_map.get (), &inst, INSERT);
 
   add = (struct type_map_instance *) *slot;
   /* The type might have already been inserted in order to handle
@@ -189,18 +191,8 @@ compile_instance::insert_symbol_error (const struct symbol *sym,
   struct symbol_error e;
   void **slot;
 
-  if (m_symbol_err_map == NULL)
-    {
-      m_symbol_err_map = htab_create_alloc (10,
-					    hash_symbol_error,
-					    eq_symbol_error,
-					    del_symbol_error,
-					    xcalloc,
-					    xfree);
-    }
-
   e.sym = sym;
-  slot = htab_find_slot (m_symbol_err_map, &e, INSERT);
+  slot = htab_find_slot (m_symbol_err_map.get (), &e, INSERT);
   if (*slot == NULL)
     {
       struct symbol_error *e = XNEW (struct symbol_error);
@@ -223,7 +215,7 @@ compile_instance::error_symbol_once (const struct symbol *sym)
     return;
 
   search.sym = sym;
-  err = (struct symbol_error *) htab_find (m_symbol_err_map, &search);
+  err = (struct symbol_error *) htab_find (m_symbol_err_map.get (), &search);
   if (err == NULL || err->message == NULL)
     return;
 

@@ -1,5 +1,15 @@
 2018-08-10  Keith Seitz  <keiths@redhat.com>
 
+	* compile/compile-internal.h (compile_instance::~compile_instance):
+	Remove calls to htab_delete.
+	<m_type_map, m_symbol_err_map>: Switch type to htab_up.
+	* compile.c (compile_instance::compile_instance): Initialize
+	htab unique pointers.
+	(compile_instance::get_cached_type, compile_instance::insert_type)
+	(compile_instance::error_symbol_once): Update for unique_ptr.
+
+2018-08-10  Keith Seitz  <keiths@redhat.com>
+
 	* compile/compile-c-symbols.c (struct symbol_error)
 	(hash_symbol_error, eq_symbol_error, del_symbol_error)
 	(compile_instance::insert_symbol_error)
