@@ -1,3 +1,8 @@
+2018-08-10  Alan Hayward  <alan.hayward@arm.com>
+
+	* corelow.c (core_target::get_core_register_section): Rename
+	min_size to section_min_size.
+
 2018-08-09  Jim Wilson  <jimw@sifive.com>
 
 	* Makefile.in (ALL_TARGET_OBS): Add riscv-linux-tdep.c.

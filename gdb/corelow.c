@@ -106,7 +106,7 @@ public:
   void get_core_register_section (struct regcache *regcache,
 				  const struct regset *regset,
 				  const char *name,
-				  int min_size,
+				  int section_min_size,
 				  int which,
 				  const char *human_name,
 				  bool required);
@@ -569,7 +569,7 @@ void
 core_target::get_core_register_section (struct regcache *regcache,
 					const struct regset *regset,
 					const char *name,
-					int min_size,
+					int section_min_size,
 					int which,
 					const char *human_name,
 					bool required)
@@ -592,13 +592,13 @@ core_target::get_core_register_section (struct regcache *regcache,
     }
 
   size = bfd_section_size (core_bfd, section);
-  if (size < min_size)
+  if (size < section_min_size)
     {
       warning (_("Section `%s' in core file too small."),
 	       section_name.c_str ());
       return;
     }
-  if (size != min_size && !variable_size_section)
+  if (size != section_min_size && !variable_size_section)
     {
       warning (_("Unexpected size of section `%s' in core file."),
 	       section_name.c_str ());
