@@ -150,7 +150,7 @@ command_from_pid (char *command, int maxlen, PID_T pid)
 static char *
 commandline_from_pid (PID_T pid)
 {
-  std::string pathname = xstrprintf ("/proc/%lld/cmdline", pid);
+  std::string pathname = string_printf ("/proc/%lld/cmdline", pid);
   char *commandline = NULL;
   gdb_file_up f = gdb_fopen_cloexec (pathname, "r");
 

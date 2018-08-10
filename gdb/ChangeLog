@@ -1,3 +1,8 @@
+2018-08-10  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* nat/linux-osdata.c (commandline_from_pid): Replace xstrprintf
+	with string_printf.
+
 2018-08-10  Keith Seitz  <keiths@redhat.com>
 
 	* compile/compile-c-support.c (add_code_header, add_code_footer):
