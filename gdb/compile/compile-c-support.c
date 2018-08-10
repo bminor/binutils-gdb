@@ -19,6 +19,7 @@
 
 #include "defs.h"
 #include "compile-internal.h"
+#include "compile-c.h"
 #include "compile.h"
 #include "gdb-dlfcn.h"
 #include "c-lang.h"

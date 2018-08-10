@@ -21,6 +21,7 @@
 #include "defs.h"
 #include "gdbtypes.h"
 #include "compile-internal.h"
+#include "compile-c.h"
 #include "objfiles.h"
 
 /* An object that maps a gdb type to a gcc type.  */

@@ -17,12 +17,7 @@
 #ifndef GDB_COMPILE_INTERNAL_H
 #define GDB_COMPILE_INTERNAL_H
 
-#include "hashtab.h"
 #include "gcc-c-interface.h"
-#include "common/enum-flags.h"
-
-/* enum-flags wrapper.  */
-DEF_ENUM_FLAGS_TYPE (enum gcc_qualifiers, gcc_qualifiers_flags);
 
 /* Debugging flag for the "compile" family of commands.  */
 
@@ -56,29 +51,6 @@ struct compile_instance
 
   void (*destroy) (struct compile_instance *);
 };
-
-/* A subclass of compile_instance that is specific to the C front
-   end.  */
-struct compile_c_instance
-{
-  /* Base class.  Note that the base class vtable actually points to a
-     gcc_c_fe_vtable.  */
-
-  struct compile_instance base;
-
-  /* Map from gdb types to gcc types.  */
-
-  htab_t type_map;
-
-  /* Map from gdb symbols to gcc error messages to emit.  */
-
-  htab_t symbol_err_map;
-};
-
-/* A helper macro that takes a compile_c_instance and returns its
-   corresponding gcc_c_context.  */
-
-#define C_CTX(I) ((struct gcc_c_context *) ((I)->base.fe))
 
 /* Define header and footers for different scopes.  */
 
@@ -114,42 +86,10 @@ struct type;
 extern gcc_type convert_type (struct compile_c_instance *context,
 			      struct type *type);
 
-/* A callback suitable for use as the GCC C symbol oracle.  */
-
-extern gcc_c_oracle_function gcc_convert_symbol;
-
-/* A callback suitable for use as the GCC C address oracle.  */
-
-extern gcc_c_symbol_address_function gcc_symbol_address;
-
 /* Instantiate a GDB object holding state for the GCC context FE.  The
    new object is returned.  */
 
 extern struct compile_instance *new_compile_instance (struct gcc_c_context *fe);
-
-/* Emit code to compute the address for all the local variables in
-   scope at PC in BLOCK.  Returns a vector, indexed by gdb register
-   number, where each element indicates if the corresponding register
-   is needed to compute a local variable.  */
-
-extern gdb::unique_xmalloc_ptr<unsigned char>
-  generate_c_for_variable_locations
-     (struct compile_c_instance *compiler,
-      string_file &stream,
-      struct gdbarch *gdbarch,
-      const struct block *block,
-      CORE_ADDR pc);
-
-/* Get the GCC mode attribute value for a given type size.  */
-
-extern const char *c_get_mode_for_size (int size);
-
-/* Given a dynamic property, return a name that is used to represent
-   its size.  The contents of the resulting string will be the same
-   each time for each call with the same argument.  */
-
-struct dynamic_prop;
-extern std::string c_get_range_decl_name (const struct dynamic_prop *prop);
 
 /* Type used to hold and pass around the source and object file names
    to use for compilation.  */

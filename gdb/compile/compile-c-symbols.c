@@ -20,6 +20,7 @@
 
 #include "defs.h"
 #include "compile-internal.h"
+#include "compile-c.h"
 #include "symtab.h"
 #include "parser-defs.h"
 #include "block.h"
@@ -706,7 +707,7 @@ generate_c_for_for_one_variable (struct compile_c_instance *compiler,
   END_CATCH
 }
 
-/* See compile-internal.h.  */
+/* See compile-c.h.  */
 
 gdb::unique_xmalloc_ptr<unsigned char>
 generate_c_for_variable_locations (struct compile_c_instance *compiler,

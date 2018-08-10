@@ -1,5 +1,24 @@
 2018-08-10  Keith Seitz  <keiths@redhat.com>
 
+	* Makefile.in (SUBDIR_GCC_COMPILE_SRCS): Move header files ...
+	(HFILES_NO_SRCDIR): ... to here.
+	Add compile-internal.h and compile-c.h.
+	* compile/compile-c-support.c: Include compile-c.h.
+	* compile/compile-c-symbols.c: Include compile-c.h.
+	(generate_c_for_variable_locations): Update comment.
+	* compile/compile-c-types.c: Include compile-c.h.
+	* compile/compile-c.h: New file -- moved C language declarations
+	from other files here.
+	* compile/compile-internal.h: Do not include hashtab.h or
+	common/enum-flags.h.
+	(gcc_qualifiers_flags, struct compile_c_instance, C_CTX)
+	(gcc_convert_symbol, gcc_symbol_address)
+	(generate_c_for_variable_locations, c_get_mode_for_size)
+	(c_get_range_decl_name): Definitions moved to compile-c.h.
+	* compile/compile-loc2c.c: Include compile-c.h.
+
+2018-08-10  Keith Seitz  <keiths@redhat.com>
+
 	* compile/compile-c-symbols.c (symbol_substitution_name): Rename to ...
 	(c_symbol_substitution_name): ... this.
 	Update all callers.

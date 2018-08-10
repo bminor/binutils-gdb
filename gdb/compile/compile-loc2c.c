@@ -24,6 +24,7 @@
 #include "ui-file.h"
 #include "utils.h"
 #include "compile-internal.h"
+#include "compile-c.h"
 #include "compile.h"
 #include "block.h"
 #include "dwarf2-frame.h"

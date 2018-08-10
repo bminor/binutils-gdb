@@ -319,9 +319,7 @@ SUBDIR_GCC_COMPILE_SRCS = \
 	compile/compile-c-types.c \
 	compile/compile-loc2c.c \
 	compile/compile-object-load.c \
-	compile/compile-object-load.h \
-	compile/compile-object-run.c \
-	compile/compile-object-run.h
+	compile/compile-object-run.c
 
 SUBDIR_GCC_COMPILE_OBS = $(patsubst %.c,%.o,$(filter %.c,$(SUBDIR_GCC_COMPILE_SRCS)))
 
@@ -1462,6 +1460,10 @@ HFILES_NO_SRCDIR = \
 	common/x86-xstate.h \
 	common/xml-utils.h \
 	compile/compile.h \
+	compile/compile-c.h \
+	compile/compile-internal.h \
+	compile/compile-object-load.h \
+	compile/compile-object-run.h \
 	config/nm-linux.h \
 	config/nm-nto.h \
 	config/djgpp/langinfo.h \
