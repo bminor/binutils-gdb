@@ -11127,8 +11127,8 @@ md_show_usage (FILE *stream)
   fprintf (stream, _("\
   -s                      ignored\n"));
 #endif
-#if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
-     || defined (TE_PE) || defined (TE_PEP))
+#if defined BFD64 && (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
+		      || defined (TE_PE) || defined (TE_PEP))
   fprintf (stream, _("\
   --32/--64/--x32         generate 32bit/64bit/x32 code\n"));
 #endif
