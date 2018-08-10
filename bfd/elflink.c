@@ -686,13 +686,11 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
       && !h->def_regular)
     h->root.type = bfd_link_hash_undefined;
 
-  /* If this symbol is not being provided by the linker script, and it is
-     currently defined by a dynamic object, but not by a regular object,
-     then clear out any version information because the symbol will not be
-     associated with the dynamic object any more.  */
-  if (!provide
-      && h->def_dynamic
-      && !h->def_regular)
+  /* If this symbol is currently defined by a dynamic object, but not
+     by a regular object, then clear out any version information because
+     the symbol will not be associated with the dynamic object any
+     more.  */
+  if (h->def_dynamic && !h->def_regular)
     h->verinfo.verdef = NULL;
 
   /* Make sure this symbol is not garbage collected.  */
