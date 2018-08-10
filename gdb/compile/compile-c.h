@@ -86,4 +86,10 @@ extern const char *c_get_mode_for_size (int size);
 struct dynamic_prop;
 extern std::string c_get_range_decl_name (const struct dynamic_prop *prop);
 
+/* Compute the name of the pointer representing a local symbol's
+   address.  */
+
+extern gdb::unique_xmalloc_ptr<char>
+  c_symbol_substitution_name (struct symbol *sym);
+
 #endif /* GDB_COMPILE_C_H  */

@@ -33,110 +33,10 @@
 
 
 
-/* Object of this type are stored in the compiler's symbol_err_map.  */
-
-struct symbol_error
-{
-  /* The symbol.  */
-
-  const struct symbol *sym;
-
-  /* The error message to emit.  This is malloc'd and owned by the
-     hash table.  */
-
-  char *message;
-};
-
-/* Hash function for struct symbol_error.  */
-
-static hashval_t
-hash_symbol_error (const void *a)
-{
-  const struct symbol_error *se = (const struct symbol_error *) a;
-
-  return htab_hash_pointer (se->sym);
-}
-
-/* Equality function for struct symbol_error.  */
-
-static int
-eq_symbol_error (const void *a, const void *b)
-{
-  const struct symbol_error *sea = (const struct symbol_error *) a;
-  const struct symbol_error *seb = (const struct symbol_error *) b;
-
-  return sea->sym == seb->sym;
-}
-
-/* Deletion function for struct symbol_error.  */
-
-static void
-del_symbol_error (void *a)
-{
-  struct symbol_error *se = (struct symbol_error *) a;
-
-  xfree (se->message);
-  xfree (se);
-}
-
-/* See compile-internal.h.  */
-
-void
-compile_instance::insert_symbol_error (const struct symbol *sym,
-				       const char *text)
-{
-  struct symbol_error e;
-  void **slot;
-
-  if (m_symbol_err_map == NULL)
-    {
-      m_symbol_err_map = htab_create_alloc (10,
-					    hash_symbol_error,
-					    eq_symbol_error,
-					    del_symbol_error,
-					    xcalloc,
-					    xfree);
-    }
-
-  e.sym = sym;
-  slot = htab_find_slot (m_symbol_err_map, &e, INSERT);
-  if (*slot == NULL)
-    {
-      struct symbol_error *e = XNEW (struct symbol_error);
-
-      e->sym = sym;
-      e->message = xstrdup (text);
-      *slot = e;
-    }
-}
-
-/* See compile-internal.h.  */
-
-void
-compile_instance::error_symbol_once (const struct symbol *sym)
-{
-  struct symbol_error search;
-  struct symbol_error *err;
-
-  if (m_symbol_err_map == NULL)
-    return;
-
-  search.sym = sym;
-  err = (struct symbol_error *) htab_find (m_symbol_err_map, &search);
-  if (err == NULL || err->message == NULL)
-    return;
-
-  gdb::unique_xmalloc_ptr<char> message (err->message);
-  err->message = NULL;
-  error (_("%s"), message.get ());
-}
-
-
-
 /* Compute the name of the pointer representing a local symbol's
    address.  */
 
-static gdb::unique_xmalloc_ptr<char>
+gdb::unique_xmalloc_ptr<char>
 c_symbol_substitution_name (struct symbol *sym)
 {
   return gdb::unique_xmalloc_ptr<char>

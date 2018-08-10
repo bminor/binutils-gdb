@@ -1,5 +1,13 @@
 2018-08-10  Keith Seitz  <keiths@redhat.com>
 
+	* compile/compile-c-symbols.c (struct symbol_error)
+	(hash_symbol_error, eq_symbol_error, del_symbol_error)
+	(compile_instance::insert_symbol_error)
+	(compile_instance::error_symbol_once): Move to ...
+	* compile/compile.c: ... here.
+
+2018-08-10  Keith Seitz  <keiths@redhat.com>
+
 	* compile/compile-c-support.c (c_get_compile_context): Use `new'
 	instead of `new_compile_instance'.
 	* compile/compile-c-symbols.c (compile_instance::insert_symbol_error):
