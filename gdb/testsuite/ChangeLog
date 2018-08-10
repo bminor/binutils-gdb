@@ -1,3 +1,7 @@
+2018-08-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.mi/list-thread-groups-available.exp: Update test regexp.
+
 2018-08-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/vla-optimized-out.exp: Add new test.

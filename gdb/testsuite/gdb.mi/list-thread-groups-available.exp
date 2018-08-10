@@ -45,7 +45,11 @@ set id_re "id=\"$decimal\""
 set type_re "type=\"process\""
 set description_re "description=\"$string_re\""
 set user_re "user=\"$string_re\""
-set cores_re "cores=\\\[\"$decimal\"(,\"$decimal\")*\\\]"
+
+# The CORES_RE regexp allows a process to be running on zero or more
+# cores.  The former can happen if a process exits while GDB is
+# reading information out of /proc.
+set cores_re "cores=\\\[(\"$decimal\"(,\"$decimal\")*)?\\\]"
 
 # List all available processes.
 set process_entry_re "{${id_re},${type_re}(,$description_re)?(,$user_re)?(,$cores_re)?}"
@@ -63,6 +67,12 @@ set id_re_1 "id=\"$pid_1\""
 set spawn_id_2 [remote_spawn target $binfile]
 set pid_2 [spawn_id_get_pid $spawn_id_2]
 set id_re_2 "id=\"$pid_2\""
+
+# Unlike the earlier CORES_RE this list must contain at least one
+# core.  Given that we know these processes will not exit while GDB is
+# reading their information from /proc we can expect at least one core
+# for each process.
+set cores_re "cores=\\\[\"$decimal\"(,\"$decimal\")*\\\]"
 
 set process_entry_re_1 "{${id_re_1},${type_re}(,$description_re)?(,$user_re)?(,$cores_re)?}"
 set process_entry_re_2 "{${id_re_2},${type_re}(,$description_re)?(,$user_re)?(,$cores_re)?}"
