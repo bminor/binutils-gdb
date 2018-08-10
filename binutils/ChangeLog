@@ -1,3 +1,15 @@
+2018-08-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/binutils-all/x86-64/pr23494a-x32.d: Skip nacl
+	targets.
+	* testsuite/binutils-all/x86-64/pr23494a.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494b-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494b.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494c-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494c.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494d-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494d.d: Likewise.
+
 2018-08-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/23494

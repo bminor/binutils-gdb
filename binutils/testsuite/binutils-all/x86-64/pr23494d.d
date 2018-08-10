@@ -3,6 +3,7 @@
 #as: --64 -defsym __64_bit__=1
 #objcopy: -O elf32-x86-64 --decompress-debug-sections
 #readelf: -n
+#not-target: x86_64-*-nacl*
 
 Displaying notes found in: .note.gnu.property
   Owner                 Data size	Description
