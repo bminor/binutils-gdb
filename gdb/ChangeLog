@@ -1,5 +1,15 @@
 2018-08-10  Keith Seitz  <keiths@redhat.com>
 
+	* compile/compile-c-support.c (add_code_header, add_code_footer):
+	Move into policy class.
+	(c_push_user_expression, pop_user_expression_nop)
+	(c_add_code_header, c_add_code_footer, c_add_input): New policy class.
+	(compile_program): New host class.
+	(c_compile_program): New typedef.
+	(c_compute_porgram): Use c_compile_program.
+
+2018-08-10  Keith Seitz  <keiths@redhat.com>
+
 	* compile/compile-internal.h (compile_instance::~compile_instance):
 	Remove calls to htab_delete.
 	<m_type_map, m_symbol_err_map>: Switch type to htab_up.

@@ -180,71 +180,6 @@ write_macro_definitions (const struct block *block, CORE_ADDR pc,
     }
 }
 
-/* Helper function to construct a header scope for a block of code.
-   Takes a scope argument which selects the correct header to
-   insert into BUF.  */
-
-static void
-add_code_header (enum compile_i_scope_types type, struct ui_file *buf)
-{
-  switch (type)
-    {
-    case COMPILE_I_SIMPLE_SCOPE:
-      fputs_unfiltered ("void "
-			GCC_FE_WRAPPER_FUNCTION
-			" (struct "
-			COMPILE_I_SIMPLE_REGISTER_STRUCT_TAG
-			" *"
-			COMPILE_I_SIMPLE_REGISTER_ARG_NAME
-			") {\n",
-			buf);
-      break;
-    case COMPILE_I_PRINT_ADDRESS_SCOPE:
-    case COMPILE_I_PRINT_VALUE_SCOPE:
-      /* <string.h> is needed for a memcpy call below.  */
-      fputs_unfiltered ("#include <string.h>\n"
-			"void "
-			GCC_FE_WRAPPER_FUNCTION
-			" (struct "
-			COMPILE_I_SIMPLE_REGISTER_STRUCT_TAG
-			" *"
-			COMPILE_I_SIMPLE_REGISTER_ARG_NAME
-			", "
-			COMPILE_I_PRINT_OUT_ARG_TYPE
-			" "
-			COMPILE_I_PRINT_OUT_ARG
-			") {\n",
-			buf);
-      break;
-
-    case COMPILE_I_RAW_SCOPE:
-      break;
-    default:
-      gdb_assert_not_reached (_("Unknown compiler scope reached."));
-    }
-}
-
-/* Helper function to construct a footer scope for a block of code.
-   Takes a scope argument which selects the correct footer to
-   insert into BUF.  */
-
-static void
-add_code_footer (enum compile_i_scope_types type, struct ui_file *buf)
-{
-  switch (type)
-    {
-    case COMPILE_I_SIMPLE_SCOPE:
-    case COMPILE_I_PRINT_ADDRESS_SCOPE:
-    case COMPILE_I_PRINT_VALUE_SCOPE:
-      fputs_unfiltered ("}\n", buf);
-      break;
-    case COMPILE_I_RAW_SCOPE:
-      break;
-    default:
-      gdb_assert_not_reached (_("Unknown compiler scope reached."));
-    }
-}
-
 /* Generate a structure holding all the registers used by the function
    we're generating.  */
 
@@ -325,13 +260,267 @@ generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
   fputs_unfiltered ("};\n\n", stream);
 }
 
-/* Take the source code provided by the user with the 'compile'
-   command, and compute the additional wrapping, macro, variable and
-   register operations needed.  INPUT is the source code derived from
-   the 'compile' command, GDBARCH is the architecture to use when
-   computing above, EXPR_BLOCK denotes the block relevant contextually
-   to the inferior when the expression was created, and EXPR_PC
-   indicates the value of $PC.  */
+/* C-language policy to emit a push user expression pragma into BUF.  */
+
+struct c_push_user_expression
+{
+  void push_user_expression (struct ui_file *buf)
+  {
+    fputs_unfiltered ("#pragma GCC user_expression\n", buf);
+  }
+};
+
+/* C-language policy to emit a pop user expression pragma into BUF.
+   For C, this is a nop.  */
+
+struct pop_user_expression_nop
+{
+  void pop_user_expression (struct ui_file *buf)
+  {
+    /* Nothing to do.  */
+  }
+};
+
+/* C-language policy to construct a code header for a block of code.
+   Takes a scope TYPE argument which selects the correct header to
+   insert into BUF.  */
+
+struct c_add_code_header
+{
+  void add_code_header (enum compile_i_scope_types type, struct ui_file *buf)
+  {
+    switch (type)
+      {
+      case COMPILE_I_SIMPLE_SCOPE:
+	fputs_unfiltered ("void "
+			  GCC_FE_WRAPPER_FUNCTION
+			  " (struct "
+			  COMPILE_I_SIMPLE_REGISTER_STRUCT_TAG
+			  " *"
+			  COMPILE_I_SIMPLE_REGISTER_ARG_NAME
+			  ") {\n",
+			  buf);
+	break;
+
+      case COMPILE_I_PRINT_ADDRESS_SCOPE:
+      case COMPILE_I_PRINT_VALUE_SCOPE:
+	/* <string.h> is needed for a memcpy call below.  */
+	fputs_unfiltered ("#include <string.h>\n"
+			  "void "
+			  GCC_FE_WRAPPER_FUNCTION
+			  " (struct "
+			  COMPILE_I_SIMPLE_REGISTER_STRUCT_TAG
+			  " *"
+			  COMPILE_I_SIMPLE_REGISTER_ARG_NAME
+			  ", "
+			  COMPILE_I_PRINT_OUT_ARG_TYPE
+			  " "
+			  COMPILE_I_PRINT_OUT_ARG
+			  ") {\n",
+			  buf);
+	break;
+
+      case COMPILE_I_RAW_SCOPE:
+	break;
+
+      default:
+	gdb_assert_not_reached (_("Unknown compiler scope reached."));
+      }
+  }
+};
+
+/* C-language policy to construct a code footer for a block of code.
+   Takes a scope TYPE which selects the correct footer to insert into BUF.  */
+
+struct c_add_code_footer
+{
+  void add_code_footer (enum compile_i_scope_types type, struct ui_file *buf)
+  {
+    switch (type)
+      {
+      case COMPILE_I_SIMPLE_SCOPE:
+      case COMPILE_I_PRINT_ADDRESS_SCOPE:
+      case COMPILE_I_PRINT_VALUE_SCOPE:
+	fputs_unfiltered ("}\n", buf);
+	break;
+
+      case COMPILE_I_RAW_SCOPE:
+	break;
+
+      default:
+	gdb_assert_not_reached (_("Unknown compiler scope reached."));
+      }
+  }
+};
+
+/* C-language policy to emit the user code snippet INPUT into BUF based on the
+   scope TYPE.  */
+
+struct c_add_input
+{
+  void add_input (enum compile_i_scope_types type, const char *input,
+		  struct ui_file *buf)
+  {
+    switch (type)
+      {
+      case COMPILE_I_PRINT_ADDRESS_SCOPE:
+      case COMPILE_I_PRINT_VALUE_SCOPE:
+	fprintf_unfiltered (buf,
+			    "__auto_type " COMPILE_I_EXPR_VAL " = %s;\n"
+			    "typeof (%s) *" COMPILE_I_EXPR_PTR_TYPE ";\n"
+			    "memcpy (" COMPILE_I_PRINT_OUT_ARG ", %s"
+			    COMPILE_I_EXPR_VAL ",\n"
+			    "sizeof (*" COMPILE_I_EXPR_PTR_TYPE "));\n"
+			    , input, input,
+			    (type == COMPILE_I_PRINT_ADDRESS_SCOPE
+			     ? "&" : ""));
+	break;
+
+      default:
+	fputs_unfiltered (input, buf);
+	break;
+      }
+    fputs_unfiltered ("\n", buf);
+  }
+};
+
+/* A host class representing a compile program.
+
+   CompileInstanceType is the type of the compile_instance for the
+   language.
+
+   PushUserExpressionPolicy and PopUserExpressionPolicy are used to
+   push and pop user expression pragmas to the compile plug-in.
+
+   AddCodeHeaderPolicy and AddCodeFooterPolicy are used to add the appropriate
+   code header and footer, respectively.
+
+   AddInputPolicy adds the actual user code.  */
+
+template <class CompileInstanceType, class PushUserExpressionPolicy,
+	  class PopUserExpressionPolicy, class AddCodeHeaderPolicy,
+	  class AddCodeFooterPolicy, class AddInputPolicy>
+class compile_program
+  : private PushUserExpressionPolicy, private PopUserExpressionPolicy,
+    private AddCodeHeaderPolicy, private AddCodeFooterPolicy,
+    private AddInputPolicy
+{
+public:
+
+  /* Construct a compile_program using the compiler instance INST
+     using the architecture given by GDBARCH.  */
+  compile_program (CompileInstanceType *inst, struct gdbarch *gdbarch)
+    : m_instance (inst), m_arch (gdbarch)
+  {
+  }
+
+  /* Take the source code provided by the user with the 'compile'
+     command and compute the additional wrapping, macro, variable and
+     register operations needed.  INPUT is the source code derived from
+     the 'compile' command, EXPR_BLOCK denotes the block relevant contextually
+     to the inferior when the expression was created, and EXPR_PC
+     indicates the value of $PC.
+
+     Returns the text of the program to compile.  */
+  std::string compute (const char *input, const struct block *expr_block,
+		       CORE_ADDR expr_pc)
+  {
+    string_file var_stream;
+    string_file buf;
+
+    /* Do not generate local variable information for "raw"
+       compilations.  In this case we aren't emitting our own function
+       and the user's code may only refer to globals.  */
+    if (m_instance->scope () != COMPILE_I_RAW_SCOPE)
+      {
+	/* Generate the code to compute variable locations, but do it
+	   before generating the function header, so we can define the
+	   register struct before the function body.  This requires a
+	   temporary stream.  */
+	gdb::unique_xmalloc_ptr<unsigned char> registers_used
+	  = generate_c_for_variable_locations (m_instance, var_stream, m_arch,
+					       expr_block, expr_pc);
+
+	buf.puts ("typedef unsigned int"
+		  " __attribute__ ((__mode__(__pointer__)))"
+		  " __gdb_uintptr;\n");
+	buf.puts ("typedef int"
+		  " __attribute__ ((__mode__(__pointer__)))"
+		  " __gdb_intptr;\n");
+
+	/* Iterate all log2 sizes in bytes supported by c_get_mode_for_size.  */
+	for (int i = 0; i < 4; ++i)
+	  {
+	    const char *mode = c_get_mode_for_size (1 << i);
+
+	    gdb_assert (mode != NULL);
+	    buf.printf ("typedef int"
+			" __attribute__ ((__mode__(__%s__)))"
+			" __gdb_int_%s;\n",
+			mode, mode);
+	  }
+
+	generate_register_struct (&buf, m_arch, registers_used.get ());
+      }
+
+    AddCodeHeaderPolicy::add_code_header (m_instance->scope (), &buf);
+
+    if (m_instance->scope () == COMPILE_I_SIMPLE_SCOPE
+	|| m_instance->scope () == COMPILE_I_PRINT_ADDRESS_SCOPE
+	|| m_instance->scope () == COMPILE_I_PRINT_VALUE_SCOPE)
+      {
+	buf.write (var_stream.c_str (), var_stream.size ());
+	PushUserExpressionPolicy::push_user_expression (&buf);
+      }
+
+    write_macro_definitions (expr_block, expr_pc, &buf);
+
+    /* The user expression has to be in its own scope, so that "extern"
+       works properly.  Otherwise gcc thinks that the "extern"
+       declaration is in the same scope as the declaration provided by
+       gdb.  */
+    if (m_instance->scope () != COMPILE_I_RAW_SCOPE)
+      buf.puts ("{\n");
+
+    buf.puts ("#line 1 \"gdb command line\"\n");
+
+    AddInputPolicy::add_input (m_instance->scope (), input, &buf);
+
+    /* For larger user expressions the automatic semicolons may be
+       confusing.  */
+    if (strchr (input, '\n') == NULL)
+      buf.puts (";\n");
+
+    if (m_instance->scope () != COMPILE_I_RAW_SCOPE)
+      buf.puts ("}\n");
+
+    if (m_instance->scope () == COMPILE_I_SIMPLE_SCOPE
+	|| m_instance->scope () == COMPILE_I_PRINT_ADDRESS_SCOPE
+	|| m_instance->scope () == COMPILE_I_PRINT_VALUE_SCOPE)
+      PopUserExpressionPolicy::pop_user_expression (&buf);
+
+    AddCodeFooterPolicy::add_code_footer (m_instance->scope (), &buf);
+    return buf.string ();
+  }
+
+private:
+
+  /* The compile instance to be used for compilation and
+     type-conversion.  */
+  CompileInstanceType *m_instance;
+
+  /* The architecture to be used.  */
+  struct gdbarch *m_arch;
+};
+
+/* Type used for C program computations.  */
+
+typedef compile_program<compile_c_instance,
+			c_push_user_expression, pop_user_expression_nop,
+			c_add_code_header, c_add_code_footer,
+			c_add_input> c_compile_program;
+
+/* The la_compute_program method for C.  */
 
 std::string
 c_compute_program (compile_instance *inst,
@@ -340,98 +529,8 @@ c_compute_program (compile_instance *inst,
 		   const struct block *expr_block,
 		   CORE_ADDR expr_pc)
 {
-  compile_c_instance *context
-    = static_cast<compile_c_instance *> (inst);
+  compile_c_instance *c_inst = static_cast<compile_c_instance *> (inst);
+  c_compile_program program (c_inst, gdbarch);
 
-  string_file buf;
-  string_file var_stream;
-
-  write_macro_definitions (expr_block, expr_pc, &buf);
-
-  /* Do not generate local variable information for "raw"
-     compilations.  In this case we aren't emitting our own function
-     and the user's code may only refer to globals.  */
-  if (inst->scope () != COMPILE_I_RAW_SCOPE)
-    {
-      int i;
-
-      /* Generate the code to compute variable locations, but do it
-	 before generating the function header, so we can define the
-	 register struct before the function body.  This requires a
-	 temporary stream.  */
-      gdb::unique_xmalloc_ptr<unsigned char> registers_used
-	= generate_c_for_variable_locations (context, var_stream, gdbarch,
-					     expr_block, expr_pc);
-
-      buf.puts ("typedef unsigned int"
-		" __attribute__ ((__mode__(__pointer__)))"
-		" __gdb_uintptr;\n");
-      buf.puts ("typedef int"
-		" __attribute__ ((__mode__(__pointer__)))"
-		" __gdb_intptr;\n");
-
-      /* Iterate all log2 sizes in bytes supported by c_get_mode_for_size.  */
-      for (i = 0; i < 4; ++i)
-	{
-	  const char *mode = c_get_mode_for_size (1 << i);
-
-	  gdb_assert (mode != NULL);
-	  buf.printf ("typedef int"
-		      " __attribute__ ((__mode__(__%s__)))"
-		      " __gdb_int_%s;\n",
-		      mode, mode);
-	}
-
-      generate_register_struct (&buf, gdbarch, registers_used.get ());
-    }
-
-  add_code_header (inst->scope (), &buf);
-
-  if (inst->scope () == COMPILE_I_SIMPLE_SCOPE
-      || inst->scope () == COMPILE_I_PRINT_ADDRESS_SCOPE
-      || inst->scope () == COMPILE_I_PRINT_VALUE_SCOPE)
-    {
-      buf.write (var_stream.c_str (), var_stream.size ());
-      buf.puts ("#pragma GCC user_expression\n");
-    }
-
-  /* The user expression has to be in its own scope, so that "extern"
-     works properly.  Otherwise gcc thinks that the "extern"
-     declaration is in the same scope as the declaration provided by
-     gdb.  */
-  if (inst->scope () != COMPILE_I_RAW_SCOPE)
-    buf.puts ("{\n");
-
-  buf.puts ("#line 1 \"gdb command line\"\n");
-
-  switch (inst->scope ())
-    {
-    case COMPILE_I_PRINT_ADDRESS_SCOPE:
-    case COMPILE_I_PRINT_VALUE_SCOPE:
-      buf.printf (
-"__auto_type " COMPILE_I_EXPR_VAL " = %s;\n"
-"typeof (%s) *" COMPILE_I_EXPR_PTR_TYPE ";\n"
-"memcpy (" COMPILE_I_PRINT_OUT_ARG ", %s" COMPILE_I_EXPR_VAL ",\n"
-	 "sizeof (*" COMPILE_I_EXPR_PTR_TYPE "));\n"
-			  , input, input,
-			  (inst->scope () == COMPILE_I_PRINT_ADDRESS_SCOPE
-			   ? "&" : ""));
-      break;
-    default:
-      buf.puts (input);
-      break;
-    }
-
-  buf.puts ("\n");
-
-  /* For larger user expressions the automatic semicolons may be
-     confusing.  */
-  if (strchr (input, '\n') == NULL)
-    buf.puts (";\n");
-
-  if (inst->scope () != COMPILE_I_RAW_SCOPE)
-    buf.puts ("}\n");
-
-  add_code_footer (inst->scope (), &buf);
-  return std::move (buf.string ());
+  return program.compute (input, expr_block, expr_pc);
 }
