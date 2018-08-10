@@ -1,5 +1,11 @@
 2018-08-10  Keith Seitz  <keiths@redhat.com>
 
+	* compile/compile-c-symbols.c (symbol_substitution_name): Rename to ...
+	(c_symbol_substitution_name): ... this.
+	Update all callers.
+
+2018-08-10  Keith Seitz  <keiths@redhat.com>
+
 	* compile/compile-c-support.c (c_compute_program): Use
 	unique_xmalloc_ptr to eliminate cleanup.
 	* compile/compile-c-symbols.c (generate_c_for_variable_locations):

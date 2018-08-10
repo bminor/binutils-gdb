@@ -127,7 +127,7 @@ error_symbol_once (struct compile_c_instance *context,
    address.  */
 
 static gdb::unique_xmalloc_ptr<char>
-symbol_substitution_name (struct symbol *sym)
+c_symbol_substitution_name (struct symbol *sym)
 {
   return gdb::unique_xmalloc_ptr<char>
     (concat ("__", SYMBOL_NATURAL_NAME (sym), "_ptr", (char *) NULL));
@@ -266,7 +266,7 @@ convert_one_symbol (struct compile_c_instance *context,
 	case LOC_LOCAL:
 	substitution:
 	  kind = GCC_C_SYMBOL_VARIABLE;
-	  symbol_name = symbol_substitution_name (sym.symbol);
+	  symbol_name = c_symbol_substitution_name (sym.symbol);
 	  break;
 
 	case LOC_STATIC:
@@ -657,7 +657,7 @@ generate_c_for_for_one_variable (struct compile_c_instance *compiler,
       if (SYMBOL_COMPUTED_OPS (sym) != NULL)
 	{
 	  gdb::unique_xmalloc_ptr<char> generated_name
-	    = symbol_substitution_name (sym);
+	    = c_symbol_substitution_name (sym);
 	  /* We need to emit to a temporary buffer in case an error
 	     occurs in the middle.  */
 	  string_file local_file;
