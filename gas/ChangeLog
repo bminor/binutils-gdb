@@ -1,3 +1,9 @@
+2018-08-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .cmov and .fxsr.
+	(cpu_noarch): Add nocmov and nofxsr.
+	* doc/c-i386.texi: Document cmov and fxsr.
+
 2018-08-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (md_show_usage): Don't display --32/--64/--x32

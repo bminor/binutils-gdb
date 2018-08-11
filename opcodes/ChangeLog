@@ -1,3 +1,14 @@
+2018-08-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (cpu_flag_init): Add CpuCMOV and CpuFXSR to
+	CPU_I686_FLAGS.  Add CPU_CMOV_FLAGS, CPU_FXSR_FLAGS,
+	CPU_ANY_CMOV_FLAGS and CPU_ANY_FXSR_FLAGS.
+	(cpu_flags): Add CpuCMOV and CpuFXSR.
+	* i386-opc.tbl: Replace Cpu686 with CpuFXSR on fxsave, fxsave64,
+	fxrstor and fxrstor64.  Replace Cpu686 with CpuCMOV on cmovCC.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2018-08-06  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* arc-regs.h: Update auxiliary registers.

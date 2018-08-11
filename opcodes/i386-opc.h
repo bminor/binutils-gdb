@@ -43,6 +43,10 @@ enum
   Cpu586,
   /* i686 or better required */
   Cpu686,
+  /* CMOV Instruction support required */
+  CpuCMOV,
+  /* FXSR Instruction support required */
+  CpuFXSR,
   /* CLFLUSH Instruction support required */
   CpuClflush,
   /* NOP Instruction support required */
@@ -262,6 +266,8 @@ typedef union i386_cpu_flags
       unsigned int cpui486:1;
       unsigned int cpui586:1;
       unsigned int cpui686:1;
+      unsigned int cpucmov:1;
+      unsigned int cpufxsr:1;
       unsigned int cpuclflush:1;
       unsigned int cpunop:1;
       unsigned int cpusyscall:1;

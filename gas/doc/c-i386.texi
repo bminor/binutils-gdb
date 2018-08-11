@@ -141,6 +141,10 @@ accept various extension mnemonics.  For example,
 @code{no287},
 @code{no387},
 @code{no687},
+@code{cmov},
+@code{nocmov},
+@code{fxsr},
+@code{nofxsr},
 @code{mmx},
 @code{nommx},
 @code{sse},
@@ -1256,12 +1260,13 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{i486} @tab @samp{i586} @tab @samp{i686} @tab @samp{pentium}
 @item @samp{pentiumpro} @tab @samp{pentiumii} @tab @samp{pentiumiii} @tab @samp{pentium4}
 @item @samp{prescott} @tab @samp{nocona} @tab @samp{core} @tab @samp{core2}
-@item @samp{corei7} @tab @samp{l1om} @tab @samp{k1om} @samp{iamcu}
+@item @samp{corei7} @tab @samp{l1om} @tab @samp{k1om} @tab @samp{iamcu}
 @item @samp{k6} @tab @samp{k6_2} @tab @samp{athlon} @tab @samp{k8}
 @item @samp{amdfam10} @tab @samp{bdver1} @tab @samp{bdver2} @tab @samp{bdver3}
 @item @samp{bdver4} @tab @samp{znver1} @tab @samp{znver2} @tab @samp{btver1}
-@item @samp{btver2} @samp{generic32} @tab @samp{generic64}
-@item @samp{.mmx} @tab @samp{.sse} @tab @samp{.sse2} @tab @samp{.sse3}
+@item @samp{btver2} @tab @samp{generic32} @tab @samp{generic64}
+@item @samp{.cmov} @tab @samp{.fxsr} @tab @samp{.mmx}
+@item @samp{.sse} @tab @samp{.sse2} @tab @samp{.sse3}
 @item @samp{.ssse3} @tab @samp{.sse4.1} @tab @samp{.sse4.2} @tab @samp{.sse4}
 @item @samp{.avx} @tab @samp{.vmx} @tab @samp{.smx} @tab @samp{.ept}
 @item @samp{.clflush} @tab @samp{.movbe} @tab @samp{.xsave} @tab @samp{.xsaveopt}
