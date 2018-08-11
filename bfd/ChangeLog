@@ -1,3 +1,11 @@
+2018-08-11  Alan Modra  <amodra@gmail.com>
+
+	* reloc.c (bfd_get_reloc_size): Sort switch.
+	(read_reloc, write_reloc, apply_reloc): New functions.
+	(bfd_perform_relocation, bfd_install_relocation): Use apply_reloc.
+	(_bfd_relocate_contents): Use read_reloc and write_reloc.
+	(_bfd_clear_contents): Likewise.
+
 2018-08-11  John Darrington  <john@darrington.wattle.id.au>
 
 	* reloc.c (_bfd_relocate_contents): Handle 3 byte relocs.

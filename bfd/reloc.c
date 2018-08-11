@@ -431,15 +431,15 @@ bfd_get_reloc_size (reloc_howto_type *howto)
 {
   switch (howto->size)
     {
-    case 5: return 3;
     case 0: return 1;
-    case 1: return 2;
-    case 2: return 4;
+    case 1:
+    case -1: return 2;
+    case 2:
+    case -2: return 4;
     case 3: return 0;
     case 4: return 8;
+    case 5: return 3;
     case 8: return 16;
-    case -1: return 2;
-    case -2: return 4;
     default: abort ();
     }
 }
@@ -572,6 +572,100 @@ bfd_reloc_offset_in_range (reloc_howto_type *howto,
      Allow zero length fields (marker relocs or NONE relocs where no
      relocation will be performed) at the end of the section.  */
   return octet <= octet_end && octet + reloc_size <= octet_end;
+}
+
+/* Read and return the section contents at DATA converted to a host
+   integer (bfd_vma).  The number of bytes read is given by the HOWTO.  */
+
+static bfd_vma
+read_reloc (bfd *abfd, bfd_byte *data, reloc_howto_type *howto)
+{
+  switch (howto->size)
+    {
+    case 0:
+      return bfd_get_8 (abfd, data);
+
+    case 1:
+    case -1:
+      return bfd_get_16 (abfd, data);
+
+    case 2:
+    case -2:
+      return bfd_get_32 (abfd, data);
+
+    case 3:
+      break;
+
+#ifdef BFD64
+    case 4:
+      return bfd_get_64 (abfd, data);
+#endif
+
+    case 5:
+      return bfd_get_24 (abfd, data);
+
+    default:
+      abort ();
+    }
+  return 0;
+}
+
+/* Convert VAL to target format and write to DATA.  The number of
+   bytes written is given by the HOWTO.  */
+
+static void
+write_reloc (bfd *abfd, bfd_vma val, bfd_byte *data, reloc_howto_type *howto)
+{
+  switch (howto->size)
+    {
+    case 0:
+      bfd_put_8 (abfd, val, data);
+      break;
+
+    case 1:
+    case -1:
+      bfd_put_16 (abfd, val, data);
+      break;
+
+    case 2:
+    case -2:
+      bfd_put_32 (abfd, val, data);
+      break;
+
+    case 3:
+      break;
+
+#ifdef BFD64
+    case 4:
+      bfd_put_64 (abfd, val, data);
+      break;
+#endif
+
+    case 5:
+      bfd_put_24 (abfd, val, data);
+      break;
+
+    default:
+      abort ();
+    }
+}
+
+/* Apply RELOCATION value to target bytes at DATA, according to
+   HOWTO.  */
+
+static void
+apply_reloc (bfd *abfd, bfd_byte *data, reloc_howto_type *howto,
+	     bfd_vma relocation)
+{
+  bfd_vma val = read_reloc (abfd, data, howto);
+
+  if (howto->size < 0)
+    relocation = -relocation;
+
+  val = ((val & ~howto->dst_mask)
+	 | (((val & howto->src_mask) + relocation) & howto->dst_mask));
+
+  write_reloc (abfd, val, data, howto);
 }
 
 /*
@@ -913,78 +1007,8 @@ space consuming.  For each target:
      =	 R R R R R R R R R R  put into bfd_put<size>
      */
 
-#define DOIT(x) \
-  x = ( (x & ~howto->dst_mask) | (((x & howto->src_mask) +  relocation) & howto->dst_mask))
-
-  switch (howto->size)
-    {
-    case 5:
-      {
-	long x = bfd_get_24 (abfd, (bfd_byte *) data + octets);
-	DOIT (x);
-	bfd_put_24 (abfd, (bfd_vma) x, (unsigned char *) data + octets);
-      }
-      break;
-
-    case 0:
-      {
-	char x = bfd_get_8 (abfd, (char *) data + octets);
-	DOIT (x);
-	bfd_put_8 (abfd, x, (unsigned char *) data + octets);
-      }
-      break;
-
-    case 1:
-      {
-	short x = bfd_get_16 (abfd, (bfd_byte *) data + octets);
-	DOIT (x);
-	bfd_put_16 (abfd, (bfd_vma) x, (unsigned char *) data + octets);
-      }
-      break;
-    case 2:
-      {
-	long x = bfd_get_32 (abfd, (bfd_byte *) data + octets);
-	DOIT (x);
-	bfd_put_32 (abfd, (bfd_vma) x, (bfd_byte *) data + octets);
-      }
-      break;
-    case -2:
-      {
-	long x = bfd_get_32 (abfd, (bfd_byte *) data + octets);
-	relocation = -relocation;
-	DOIT (x);
-	bfd_put_32 (abfd, (bfd_vma) x, (bfd_byte *) data + octets);
-      }
-      break;
-
-    case -1:
-      {
-	long x = bfd_get_16 (abfd, (bfd_byte *) data + octets);
-	relocation = -relocation;
-	DOIT (x);
-	bfd_put_16 (abfd, (bfd_vma) x, (bfd_byte *) data + octets);
-      }
-      break;
-
-    case 3:
-      /* Do nothing */
-      break;
-
-    case 4:
-#ifdef BFD64
-      {
-	bfd_vma x = bfd_get_64 (abfd, (bfd_byte *) data + octets);
-	DOIT (x);
-	bfd_put_64 (abfd, x, (bfd_byte *) data + octets);
-      }
-#else
-      abort ();
-#endif
-      break;
-    default:
-      return bfd_reloc_other;
-    }
-
+  data = (bfd_byte *) data + octets;
+  apply_reloc (abfd, data, howto, relocation);
   return flag;
 }
 
@@ -1309,66 +1333,8 @@ space consuming.  For each target:
      =	 R R R R R R R R R R  put into bfd_put<size>
      */
 
-#define DOIT(x) \
-  x = ( (x & ~howto->dst_mask) | (((x & howto->src_mask) +  relocation) & howto->dst_mask))
-
   data = (bfd_byte *) data_start + (octets - data_start_offset);
-
-  switch (howto->size)
-    {
-    case 0:
-      {
-	char x = bfd_get_8 (abfd, data);
-	DOIT (x);
-	bfd_put_8 (abfd, x, data);
-      }
-      break;
-
-    case 1:
-      {
-	short x = bfd_get_16 (abfd, data);
-	DOIT (x);
-	bfd_put_16 (abfd, (bfd_vma) x, data);
-      }
-      break;
-    case 2:
-      {
-	long x = bfd_get_32 (abfd, data);
-	DOIT (x);
-	bfd_put_32 (abfd, (bfd_vma) x, data);
-      }
-      break;
-    case 5:
-      {
-	long x = bfd_get_24 (abfd, data);
-	DOIT (x);
-	bfd_put_24 (abfd, (bfd_vma) x, data);
-      }
-      break;
-    case -2:
-      {
-	long x = bfd_get_32 (abfd, data);
-	relocation = -relocation;
-	DOIT (x);
-	bfd_put_32 (abfd, (bfd_vma) x, data);
-      }
-      break;
-
-    case 3:
-      /* Do nothing */
-      break;
-
-    case 4:
-      {
-	bfd_vma x = bfd_get_64 (abfd, data);
-	DOIT (x);
-	bfd_put_64 (abfd, x, data);
-      }
-      break;
-    default:
-      return bfd_reloc_other;
-    }
-
+  apply_reloc (abfd, data, howto, relocation);
   return flag;
 }
 
@@ -1447,8 +1413,7 @@ _bfd_relocate_contents (reloc_howto_type *howto,
 			bfd_vma relocation,
 			bfd_byte *location)
 {
-  int size;
-  bfd_vma x = 0;
+  bfd_vma x;
   bfd_reloc_status_type flag;
   unsigned int rightshift = howto->rightshift;
   unsigned int bitpos = howto->bitpos;
@@ -1459,33 +1424,7 @@ _bfd_relocate_contents (reloc_howto_type *howto,
     relocation = -relocation;
 
   /* Get the value we are going to relocate.  */
-  size = bfd_get_reloc_size (howto);
-  switch (size)
-    {
-    default:
-      abort ();
-    case 0:
-      return bfd_reloc_ok;
-    case 1:
-      x = bfd_get_8 (input_bfd, location);
-      break;
-    case 2:
-      x = bfd_get_16 (input_bfd, location);
-      break;
-    case 3:
-      x = bfd_get_24 (input_bfd, location);
-      break;
-    case 4:
-      x = bfd_get_32 (input_bfd, location);
-      break;
-    case 8:
-#ifdef BFD64
-      x = bfd_get_64 (input_bfd, location);
-#else
-      abort ();
-#endif
-      break;
-    }
+  x = read_reloc (input_bfd, location, howto);
 
   /* Check for overflow.  FIXME: We may drop bits during the addition
      which we don't check for.  We must either check at every single
@@ -1591,31 +1530,7 @@ _bfd_relocate_contents (reloc_howto_type *howto,
        | (((x & howto->src_mask) + relocation) & howto->dst_mask));
 
   /* Put the relocated value back in the object file.  */
-  switch (size)
-    {
-    default:
-      abort ();
-    case 1:
-      bfd_put_8 (input_bfd, x, location);
-      break;
-    case 2:
-      bfd_put_16 (input_bfd, x, location);
-      break;
-    case 3:
-      bfd_put_24 (input_bfd, x, location);
-      break;
-    case 4:
-      bfd_put_32 (input_bfd, x, location);
-      break;
-    case 8:
-#ifdef BFD64
-      bfd_put_64 (input_bfd, x, location);
-#else
-      abort ();
-#endif
-      break;
-    }
-
+  write_reloc (input_bfd, x, location, howto);
   return flag;
 }
 
@@ -1630,37 +1545,10 @@ _bfd_clear_contents (reloc_howto_type *howto,
 		     asection *input_section,
 		     bfd_byte *location)
 {
-  int size;
-  bfd_vma x = 0;
+  bfd_vma x;
 
   /* Get the value we are going to relocate.  */
-  size = bfd_get_reloc_size (howto);
-  switch (size)
-    {
-    default:
-      abort ();
-    case 0:
-      return;
-    case 1:
-      x = bfd_get_8 (input_bfd, location);
-      break;
-    case 2:
-      x = bfd_get_16 (input_bfd, location);
-      break;
-    case 3:
-      x = bfd_get_24 (input_bfd, location);
-      break;
-    case 4:
-      x = bfd_get_32 (input_bfd, location);
-      break;
-    case 8:
-#ifdef BFD64
-      x = bfd_get_64 (input_bfd, location);
-#else
-      abort ();
-#endif
-      break;
-    }
+  x = read_reloc (input_bfd, location, howto);
 
   /* Zero out the unwanted bits of X.  */
   x &= ~howto->dst_mask;
@@ -1673,31 +1561,7 @@ _bfd_clear_contents (reloc_howto_type *howto,
     x |= 1;
 
   /* Put the relocated value back in the object file.  */
-  switch (size)
-    {
-    default:
-    case 0:
-      abort ();
-    case 1:
-      bfd_put_8 (input_bfd, x, location);
-      break;
-    case 2:
-      bfd_put_16 (input_bfd, x, location);
-      break;
-    case 3:
-      bfd_put_24 (input_bfd, x, location);
-      break;
-    case 4:
-      bfd_put_32 (input_bfd, x, location);
-      break;
-    case 8:
-#ifdef BFD64
-      bfd_put_64 (input_bfd, x, location);
-#else
-      abort ();
-#endif
-      break;
-    }
+  write_reloc (input_bfd, x, location, howto);
 }
 
 /*
