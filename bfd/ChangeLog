@@ -1,3 +1,10 @@
+2018-08-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23428
+	* elfxx-x86.c (_bfd_x86_elf_link_setup_gnu_properties): Don't
+	add X86_ISA_1_NEEDED property only if existing properties won't
+	be removed.
+
 2018-08-11  Alan Modra  <amodra@gmail.com>
 
 	* reloc.c (bfd_get_reloc_size): Sort switch.

@@ -1,3 +1,10 @@
+2018-08-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23428
+	* testsuite/ld-elf/dummy.s: New file.
+	* testsuite/ld-elf/linux-x86.S: Add X86_FEATURE_1_AND property.
+	* testsuite/ld-elf/linux-x86.exp: Add dummy.s to pr23428.
+
 2018-08-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23486

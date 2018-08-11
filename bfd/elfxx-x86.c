@@ -2588,7 +2588,6 @@ _bfd_x86_elf_link_setup_gnu_properties
 	  prop->pr_kind = property_number;
 	}
       else if (has_text
-	       && elf_properties (ebfd) == NULL
 	       && elf_tdata (info->output_bfd)->o->build_id.sec == NULL
 	       && !htab->elf.dynamic_sections_created
 	       && !info->traditional_format
@@ -2598,11 +2597,28 @@ _bfd_x86_elf_link_setup_gnu_properties
 	  /* If the separate code program header is needed, make sure
 	     that the first read-only PT_LOAD segment has no code by
 	     adding a GNU_PROPERTY_X86_ISA_1_NEEDED note.  */
-	  prop = _bfd_elf_get_property (ebfd,
-					GNU_PROPERTY_X86_ISA_1_NEEDED,
-					4);
-	  prop->u.number = GNU_PROPERTY_X86_ISA_1_486;
-	  prop->pr_kind = property_number;
+	  elf_property_list *list;
+	  bfd_boolean need_property = TRUE;
+
+	  for (list = elf_properties (ebfd); list; list = list->next)
+	    switch (list->property.pr_type)
+	      {
+	      case GNU_PROPERTY_STACK_SIZE:
+	      case GNU_PROPERTY_NO_COPY_ON_PROTECTED:
+	      case GNU_PROPERTY_X86_ISA_1_NEEDED:
+		/* These properties won't be removed during merging.  */
+		need_property = FALSE;
+		break;
+	      }
+
+	  if (need_property)
+	    {
+	      prop = _bfd_elf_get_property (ebfd,
+					    GNU_PROPERTY_X86_ISA_1_NEEDED,
+					    4);
+	      prop->u.number = GNU_PROPERTY_X86_ISA_1_486;
+	      prop->pr_kind = property_number;
+	    }
 	}
 
       /* Create the GNU property note section if needed.  */
