@@ -37,7 +37,7 @@ run_ld_link_exec_tests [list \
 	"Run PR ld/23428 test" \
 	"--no-dynamic-linker -z separate-code" \
 	"" \
-	{ linux-x86.S pr23428.c } \
+	{ linux-x86.S pr23428.c dummy.s } \
 	"pr23428" \
 	"pass.out" \
 	"$NOPIE_CFLAGS -fno-asynchronous-unwind-tables" \
