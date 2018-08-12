@@ -1,3 +1,7 @@
+2018-08-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-x86-64/pr23486b.d: Swap pr23486a.s and pr23486a.s.
+
 2018-08-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23428
