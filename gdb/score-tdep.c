@@ -1447,8 +1447,8 @@ score7_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					   void *cb_data,
 					   const struct regcache *regcache)
 {
-  cb (".reg", SCORE7_LINUX_SIZEOF_GREGSET, &score7_linux_gregset,
-      NULL, cb_data);
+  cb (".reg", SCORE7_LINUX_SIZEOF_GREGSET, SCORE7_LINUX_SIZEOF_GREGSET,
+      &score7_linux_gregset, NULL, cb_data);
 }
 
 static struct gdbarch *

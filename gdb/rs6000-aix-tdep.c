@@ -146,9 +146,9 @@ rs6000_aix_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					 const struct regcache *regcache)
 {
   if (gdbarch_tdep (gdbarch)->wordsize == 4)
-    cb (".reg", 592, &rs6000_aix32_regset, NULL, cb_data);
+    cb (".reg", 592, 592, &rs6000_aix32_regset, NULL, cb_data);
   else
-    cb (".reg", 576, &rs6000_aix64_regset, NULL, cb_data);
+    cb (".reg", 576, 576, &rs6000_aix64_regset, NULL, cb_data);
 }
 
 

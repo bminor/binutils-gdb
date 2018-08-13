@@ -96,7 +96,7 @@ vax_iterate_over_regset_sections (struct gdbarch *gdbarch,
 				  void *cb_data,
 				  const struct regcache *regcache)
 {
-  cb (".reg", VAX_NUM_REGS * 4, &vax_gregset, NULL, cb_data);
+  cb (".reg", VAX_NUM_REGS * 4, VAX_NUM_REGS * 4, &vax_gregset, NULL, cb_data);
 }
 
 /* The VAX UNIX calling convention uses R1 to pass a structure return

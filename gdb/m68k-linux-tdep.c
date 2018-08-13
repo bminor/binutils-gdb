@@ -374,8 +374,10 @@ m68k_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					 void *cb_data,
 					 const struct regcache *regcache)
 {
-  cb (".reg", M68K_LINUX_GREGS_SIZE, &m68k_linux_gregset, NULL, cb_data);
-  cb (".reg2", M68K_LINUX_FPREGS_SIZE, &m68k_linux_fpregset, NULL, cb_data);
+  cb (".reg", M68K_LINUX_GREGS_SIZE, M68K_LINUX_GREGS_SIZE, &m68k_linux_gregset,
+      NULL, cb_data);
+  cb (".reg2", M68K_LINUX_FPREGS_SIZE, M68K_LINUX_FPREGS_SIZE,
+      &m68k_linux_fpregset, NULL, cb_data);
 }
 
 static void

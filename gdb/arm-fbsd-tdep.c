@@ -175,14 +175,15 @@ arm_fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  cb (".reg", ARM_FBSD_SIZEOF_GREGSET, &arm_fbsd_gregset, NULL, cb_data);
+  cb (".reg", ARM_FBSD_SIZEOF_GREGSET, ARM_FBSD_SIZEOF_GREGSET,
+      &arm_fbsd_gregset, NULL, cb_data);
 
   /* While FreeBSD/arm cores do contain a NT_FPREGSET / ".reg2"
      register set, it is not populated with register values by the
      kernel but just contains all zeroes.  */
   if (tdep->vfp_register_count > 0)
-    cb (".reg-arm-vfp", ARM_FBSD_SIZEOF_VFPREGSET, &arm_fbsd_vfpregset,
-	"VFP floating-point", cb_data);
+    cb (".reg-arm-vfp", ARM_FBSD_SIZEOF_VFPREGSET, ARM_FBSD_SIZEOF_VFPREGSET,
+	&arm_fbsd_vfpregset, "VFP floating-point", cb_data);
 }
 
 /* Lookup a target description from a target's AT_HWCAP auxiliary

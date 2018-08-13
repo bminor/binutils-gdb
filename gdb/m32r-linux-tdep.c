@@ -440,7 +440,8 @@ m32r_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					 void *cb_data,
 					 const struct regcache *regcache)
 {
-  cb (".reg", M32R_LINUX_GREGS_SIZE, &m32r_linux_gregset, NULL, cb_data);
+  cb (".reg", M32R_LINUX_GREGS_SIZE, M32R_LINUX_GREGS_SIZE, &m32r_linux_gregset,
+      NULL, cb_data);
 }
 
 static void

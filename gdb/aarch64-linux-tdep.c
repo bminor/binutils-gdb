@@ -227,10 +227,10 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					    void *cb_data,
 					    const struct regcache *regcache)
 {
-  cb (".reg", AARCH64_LINUX_SIZEOF_GREGSET, &aarch64_linux_gregset,
-      NULL, cb_data);
-  cb (".reg2", AARCH64_LINUX_SIZEOF_FPREGSET, &aarch64_linux_fpregset,
-      NULL, cb_data);
+  cb (".reg", AARCH64_LINUX_SIZEOF_GREGSET, AARCH64_LINUX_SIZEOF_GREGSET,
+      &aarch64_linux_gregset, NULL, cb_data);
+  cb (".reg2", AARCH64_LINUX_SIZEOF_FPREGSET, AARCH64_LINUX_SIZEOF_FPREGSET,
+      &aarch64_linux_fpregset, NULL, cb_data);
 }
 
 /* Implement the "core_read_description" gdbarch method.  SVE not yet

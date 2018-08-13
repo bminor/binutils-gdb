@@ -72,7 +72,8 @@ mips64obsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					 void *cb_data,
 					 const struct regcache *regcache)
 {
-  cb (".reg", MIPS64OBSD_NUM_REGS * 8, &mips64obsd_gregset, NULL, cb_data);
+  cb (".reg", MIPS64OBSD_NUM_REGS * 8, MIPS64OBSD_NUM_REGS * 8,
+      &mips64obsd_gregset, NULL, cb_data);
 }
 
 

@@ -128,10 +128,10 @@ ppcfbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (tdep->wordsize == 4)
-    cb (".reg", 148, &ppc32_fbsd_gregset, NULL, cb_data);
+    cb (".reg", 148, 148, &ppc32_fbsd_gregset, NULL, cb_data);
   else
-    cb (".reg", 296, &ppc64_fbsd_gregset, NULL, cb_data);
-  cb (".reg2", 264, &ppc32_fbsd_fpregset, NULL, cb_data);
+    cb (".reg", 296, 296, &ppc64_fbsd_gregset, NULL, cb_data);
+  cb (".reg2", 264, 264, &ppc32_fbsd_fpregset, NULL, cb_data);
 }
 
 /* Default page size.  */

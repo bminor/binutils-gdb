@@ -3910,9 +3910,11 @@ i386_iterate_over_regset_sections (struct gdbarch *gdbarch,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  cb (".reg", tdep->sizeof_gregset, &i386_gregset, NULL, cb_data);
+  cb (".reg", tdep->sizeof_gregset, tdep->sizeof_gregset, &i386_gregset, NULL,
+      cb_data);
   if (tdep->sizeof_fpregset)
-    cb (".reg2", tdep->sizeof_fpregset, tdep->fpregset, NULL, cb_data);
+    cb (".reg2", tdep->sizeof_fpregset, tdep->sizeof_fpregset, tdep->fpregset,
+	NULL, cb_data);
 }
 
 

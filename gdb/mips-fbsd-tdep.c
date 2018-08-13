@@ -245,10 +245,10 @@ mips_fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 {
   size_t regsize = mips_abi_regsize (gdbarch);
 
-  cb (".reg", MIPS_FBSD_NUM_GREGS * regsize, &mips_fbsd_gregset,
-      NULL, cb_data);
-  cb (".reg2", MIPS_FBSD_NUM_FPREGS * regsize, &mips_fbsd_fpregset,
-      NULL, cb_data);
+  cb (".reg", MIPS_FBSD_NUM_GREGS * regsize, MIPS_FBSD_NUM_GREGS * regsize,
+      &mips_fbsd_gregset, NULL, cb_data);
+  cb (".reg2", MIPS_FBSD_NUM_FPREGS * regsize, MIPS_FBSD_NUM_FPREGS * regsize,
+      &mips_fbsd_fpregset, NULL, cb_data);
 }
 
 /* Signal trampoline support.  */

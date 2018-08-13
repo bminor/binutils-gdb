@@ -161,8 +161,10 @@ alphanbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					void *cb_data,
 					const struct regcache *regcache)
 {
-  cb (".reg", ALPHANBSD_SIZEOF_GREGS, &alphanbsd_gregset, NULL, cb_data);
-  cb (".reg2", ALPHANBSD_SIZEOF_FPREGS, &alphanbsd_fpregset, NULL, cb_data);
+  cb (".reg", ALPHANBSD_SIZEOF_GREGS, ALPHANBSD_SIZEOF_GREGS,
+      &alphanbsd_gregset, NULL, cb_data);
+  cb (".reg2", ALPHANBSD_SIZEOF_FPREGS, ALPHANBSD_SIZEOF_FPREGS,
+      &alphanbsd_fpregset, NULL, cb_data);
 }
 
 
