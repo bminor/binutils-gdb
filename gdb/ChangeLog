@@ -1,5 +1,12 @@
 2018-08-13  Alan Hayward  <alan.hayward@arm.com>
 
+	* aarch64-linux-tdep.c (aarch64_linux_supply_sve_regset): New function.
+	(aarch64_linux_collect_sve_regset): Likewise.
+	(aarch64_linux_iterate_over_regset_sections): Check for SVE.
+	* regcache.h (regcache_map_entry_size): New function.
+
+2018-08-13  Alan Hayward  <alan.hayward@arm.com>
+
 	* aarch64-linux-tdep.c (SVE_HEADER_SIZE_LENGTH): Add define.
 	(SVE_HEADER_MAX_SIZE_LENGTH): Likewise.
 	(SVE_HEADER_VL_LENGTH): Likewise.

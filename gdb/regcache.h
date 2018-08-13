@@ -99,6 +99,18 @@ enum
     REGCACHE_MAP_SKIP = -1,
   };
 
+/* Calculate and return the total size of all the registers in a
+   regcache_map_entry.  */
+
+static inline int
+regcache_map_entry_size (const struct regcache_map_entry *map)
+{
+  int size = 0;
+  for (int i = 0; map[i].count != 0; i++)
+    size += (map[i].count * map[i].size);
+  return size;
+}
+
 /* Transfer a set of registers (as described by REGSET) between
    REGCACHE and BUF.  If REGNUM == -1, transfer all registers
    belonging to the regset, otherwise just the register numbered
