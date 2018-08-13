@@ -111,15 +111,16 @@ proc is_elf64 { binary_file } {
     global READELF
     global READELFFLAGS
 
+    set tmpfile [file dirname $binary_file]/readelf.out
     set readelf_size ""
-    catch "exec $READELF $READELFFLAGS -h $binary_file > readelf.out" got
+    catch "exec $READELF $READELFFLAGS -h $binary_file > $tmpfile" got
 
     if ![string match "" $got] then {
 	return 0
     }
 
     if { ![regexp "\n\[ \]*Class:\[ \]*ELF(\[0-9\]+)\n" \
-	   [file_contents readelf.out] nil readelf_size] } {
+	   [file_contents $tmpfile] nil readelf_size] } {
 	return 0
     }
 
@@ -128,6 +129,26 @@ proc is_elf64 { binary_file } {
     }
 
     return 0
+}
+
+# True if the object format is known to use RELA relocations.
+#
+proc is_rela { binary_file } {
+    global READELF
+    global READELFFLAGS
+
+    set tmpfile [file dirname $binary_file]/readelf.out
+    catch "exec $READELF $READELFFLAGS -S $binary_file > $tmpfile" got
+
+    if ![string match "" $got] then {
+	return 0
+    }
+
+    if { ![regexp "RELA" [file_contents $tmpfile]] } {
+	return 0
+    }
+
+    return 1
 }
 
 # True if the target matches TARGET, specified as a TCL procedure if

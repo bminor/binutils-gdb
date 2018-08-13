@@ -1033,6 +1033,7 @@ if { ([istarget "ia64-*-elf*"]
 }
 
 # ELF specific tests
+set elf64 ""
 if [is_elf_format] {
     objcopy_test_symbol_manipulation
     objcopy_test_elf_common_symbols
@@ -1049,7 +1050,9 @@ if [is_elf_format] {
     run_dump_test "group-7c"
     run_dump_test "copy-1"
     run_dump_test "note-1"
+    # Use bintest.o from the note-1 test to determine ELF32 or ELF64
     if [is_elf64 tmpdir/bintest.o] {
+	set elf64 "--defsym ELF64=1"
 	run_dump_test "note-2-64"
 	run_dump_test "note-3-64"
 	run_dump_test "note-4-64"
@@ -1064,6 +1067,11 @@ if [is_elf_format] {
 run_dump_test "copy-2"
 run_dump_test "copy-3"
 run_dump_test "copy-4"
+# Use bintest.o from the copy-4 test to determine ELF reloc type
+set reloc_format rel
+if { [is_elf_format] && [is_rela tmpdir/bintest.o] } {
+    set reloc_format rela
+}
 run_dump_test "pr19020a"
 run_dump_test "pr19020b"
 
@@ -1081,27 +1089,12 @@ if [is_elf_format] {
 
     if { [istarget "mips64*-*-openbsd*"] } {
 	set reloc_format mips64
-    } elseif { ([istarget "arm*-*"] \
-		&& ![istarget "*-*-vxworks"] \
-		&& ![istarget "*-*-windiss"]) \
-	       || [istarget "d10v-*"] \
-	       || [istarget "dlx-*"] \
-	       || [istarget "i*86-*"] \
-	       || [istarget "m681*-*"] \
-	       || [istarget "m68hc1*-*"] \
-	       || ([istarget "mips*-*"] \
-		   && ![istarget "mips64*-ps2-elf*"] \
-		   && ![istarget "*-*-irix6*"] \
-		   && ![istarget "mips64*-*-freebsd*"] \
-		   && ![istarget "mips64*-*-kfreebsd*-gnu"] \
-		   && ![istarget "mips64*-*-linux*"]) \
-	       || [istarget "score*-*"] \
-	       || [istarget "xgate-*"] } {
-	set reloc_format rel
-    } else {
-	set reloc_format rela
     }
-    run_dump_test "strip-13" [list [list source strip-13${reloc_format}.s]]
+    # A relocation type not supported by any target
+    set reloc 215
+    run_dump_test "strip-13" [list \
+				  [list source strip-13${reloc_format}.s] \
+				  [list as "${elf64} --defsym RELOC=${reloc}"]]
     # Select a relocation number that corresponds to one actually
     # supported by the target and ABI being tested.
     if { [istarget "aarch64*-*"] } {
@@ -1117,15 +1110,11 @@ if [is_elf_format] {
 	set reloc 1
     }
     run_dump_test "strip-14" [list \
-				[list source strip-14${reloc_format}.s] \
-				[list as "--defsym RELOC=${reloc}"] \
-				[list as [expr {[is_elf64 tmpdir/bintest.o] \
-				    ? "--defsym ELF64=1" : ""}]]]
+				  [list source strip-14${reloc_format}.s] \
+				  [list as "${elf64} --defsym RELOC=${reloc}"]]
     run_dump_test "strip-15" [list \
-				[list source strip-15${reloc_format}.s] \
-				[list as "--defsym RELOC=${reloc}"] \
-				[list as [expr {[is_elf64 tmpdir/bintest.o] \
-				    ? "--defsym ELF64=1" : ""}]]]
+				  [list source strip-15${reloc_format}.s] \
+				  [list as "${elf64} --defsym RELOC=${reloc}"]]
 
     # This requires STB_GNU_UNIQUE support with OSABI set to GNU.
     if { [supports_gnu_unique] } {

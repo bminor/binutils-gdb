@@ -1,3 +1,20 @@
+2018-08-18  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/binutils-common.exp (is_elf64): Use directory of
+	input file for readelf.out.
+	(is_rela): New proc.
+	* testsuite/binutils-all/objcopy.exp (elf64): Set new variable
+	from first result of is_elf64 test.
+	(reloc_format): Set using is_rela.
+	(strip-13): Pass RELOC and ELF64 to assembler.
+	(strip-14, strip-15): Use elf64 rather than calling is_elf64 again.
+	* testsuite/binutils-all/strip-13.d: Run for more targets.
+	* testsuite/binutils-all/strip-13mips64.s: Use RELOC and set
+	addend to zero.
+	* testsuite/binutils-all/strip-13rel.s: Use RELOC and ELF64.
+	Don't add _NONE reloc.
+	* testsuite/binutils-all/strip-13rela.s: Likewise.
+
 2018-08-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/23494
