@@ -1,5 +1,23 @@
 2018-08-13  Alan Hayward  <alan.hayward@arm.com>
 
+	* aarch64-linux-tdep.c (SVE_HEADER_SIZE_LENGTH): Add define.
+	(SVE_HEADER_MAX_SIZE_LENGTH): Likewise.
+	(SVE_HEADER_VL_LENGTH): Likewise.
+	(SVE_HEADER_MAX_VL_LENGTH): Likewise.
+	(SVE_HEADER_FLAGS_LENGTH): Likewise.
+	(SVE_HEADER_RESERVED_LENGTH): Likewise.
+	(SVE_HEADER_SIZE_OFFSET): Likewise.
+	(SVE_HEADER_MAX_SIZE_OFFSET): Likewise.
+	(SVE_HEADER_VL_OFFSET): Likewise.
+	(SVE_HEADER_MAX_VL_OFFSET): Likewise.
+	(SVE_HEADER_FLAGS_OFFSET): Likewise.
+	(SVE_HEADER_RESERVED_OFFSET): Likewise.
+	(SVE_HEADER_SIZE): Likewise.
+	(aarch64_linux_core_read_vq): Add function.
+	(aarch64_linux_core_read_description): Check for SVE section.
+
+2018-08-13  Alan Hayward  <alan.hayward@arm.com>
+
 	* aarch64-fbsd-tdep.c
 	(aarch64_fbsd_iterate_over_regset_sections): Add supply_size and
 	collect_size.
