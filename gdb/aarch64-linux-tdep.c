@@ -219,6 +219,79 @@ const struct regset aarch64_linux_fpregset =
     regcache_supply_regset, regcache_collect_regset
   };
 
+/* The fields in an SVE header at the start of a SVE regset.  */
+
+#define SVE_HEADER_SIZE_LENGTH		4
+#define SVE_HEADER_MAX_SIZE_LENGTH	4
+#define SVE_HEADER_VL_LENGTH		2
+#define SVE_HEADER_MAX_VL_LENGTH	2
+#define SVE_HEADER_FLAGS_LENGTH		2
+#define SVE_HEADER_RESERVED_LENGTH	2
+
+#define SVE_HEADER_SIZE_OFFSET		0
+#define SVE_HEADER_MAX_SIZE_OFFSET	\
+  (SVE_HEADER_SIZE_OFFSET + SVE_HEADER_SIZE_LENGTH)
+#define SVE_HEADER_VL_OFFSET		\
+  (SVE_HEADER_MAX_SIZE_OFFSET + SVE_HEADER_MAX_SIZE_LENGTH)
+#define SVE_HEADER_MAX_VL_OFFSET	\
+  (SVE_HEADER_VL_OFFSET + SVE_HEADER_VL_LENGTH)
+#define SVE_HEADER_FLAGS_OFFSET		\
+  (SVE_HEADER_MAX_VL_OFFSET + SVE_HEADER_MAX_VL_LENGTH)
+#define SVE_HEADER_RESERVED_OFFSET	\
+  (SVE_HEADER_FLAGS_OFFSET + SVE_HEADER_FLAGS_LENGTH)
+#define SVE_HEADER_SIZE			\
+  (SVE_HEADER_RESERVED_OFFSET + SVE_HEADER_RESERVED_LENGTH)
+
+/* Get VQ value from SVE section in the core dump.  */
+
+static uint64_t
+aarch64_linux_core_read_vq (struct gdbarch *gdbarch, bfd *abfd)
+{
+  gdb_byte header[SVE_HEADER_SIZE];
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  asection *sve_section = bfd_get_section_by_name (abfd, ".reg-aarch-sve");
+
+  if (sve_section == nullptr)
+    {
+      /* No SVE state.  */
+      return 0;
+    }
+
+  size_t size = bfd_section_size (abfd, sve_section);
+
+  /* Check extended state size.  */
+  if (size < SVE_HEADER_SIZE)
+    {
+      warning (_("'.reg-aarch-sve' section in core file too small."));
+      return 0;
+    }
+
+  if (!bfd_get_section_contents (abfd, sve_section, header, 0, SVE_HEADER_SIZE))
+    {
+      warning (_("Couldn't read sve header from "
+		 "'.reg-aarch-sve' section in core file."));
+      return 0;
+    }
+
+  uint64_t vl = extract_unsigned_integer (header + SVE_HEADER_VL_OFFSET,
+					  SVE_HEADER_VL_LENGTH, byte_order);
+  uint64_t vq = sve_vq_from_vl (vl);
+
+  if (vq > AARCH64_MAX_SVE_VQ)
+    {
+      warning (_("SVE Vector length in core file not supported by this version"
+		 " of GDB.  (VQ=%ld)"), vq);
+      return 0;
+    }
+  else if (vq == 0)
+    {
+      warning (_("SVE Vector length in core file is invalid. (VQ=%ld"), vq);
+      return 0;
+    }
+
+  return vq;
+}
+
 /* Implement the "regset_from_core_section" gdbarch method.  */
 
 static void
@@ -233,8 +306,7 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
       &aarch64_linux_fpregset, NULL, cb_data);
 }
 
-/* Implement the "core_read_description" gdbarch method.  SVE not yet
-   supported.  */
+/* Implement the "core_read_description" gdbarch method.  */
 
 static const struct target_desc *
 aarch64_linux_core_read_description (struct gdbarch *gdbarch,
@@ -245,7 +317,7 @@ aarch64_linux_core_read_description (struct gdbarch *gdbarch,
   if (target_auxv_search (target, AT_HWCAP, &aarch64_hwcap) != 1)
     return NULL;
 
-  return aarch64_read_description (0);
+  return aarch64_read_description (aarch64_linux_core_read_vq (gdbarch, abfd));
 }
 
 /* Implementation of `gdbarch_stap_is_single_operand', as defined in
