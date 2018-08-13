@@ -1,3 +1,14 @@
+2018-08-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/23494
+	* Makefile.am (BFD32_LIBS): Add elf-properties.lo.
+	(BFD32_LIBS_CFILES): Add elf-properties.c.
+	(BFD32_BACKENDS): Remove elf-properties.lo.
+	(BFD32_BACKENDS_CFILES): Remove elf-properties.c.
+	* configure.ac (elf): Remove elf-properties.lo.
+	* Makefile.in: Regenerated.
+	* configure: Likewise.
+
 2018-08-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23428
