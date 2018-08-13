@@ -537,16 +537,18 @@ mips_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 {
   if (register_size (gdbarch, MIPS_ZERO_REGNUM) == 4)
     {
-      cb (".reg", sizeof (mips_elf_gregset_t), &mips_linux_gregset,
-	  NULL, cb_data);
-      cb (".reg2", sizeof (mips64_elf_fpregset_t), &mips64_linux_fpregset,
+      cb (".reg", sizeof (mips_elf_gregset_t), sizeof (mips_elf_gregset_t),
+	  &mips_linux_gregset, NULL, cb_data);
+      cb (".reg2", sizeof (mips64_elf_fpregset_t),
+	  sizeof (mips64_elf_fpregset_t), &mips64_linux_fpregset,
 	  NULL, cb_data);
     }
   else
     {
-      cb (".reg", sizeof (mips64_elf_gregset_t), &mips64_linux_gregset,
-	  NULL, cb_data);
-      cb (".reg2", sizeof (mips64_elf_fpregset_t), &mips64_linux_fpregset,
+      cb (".reg", sizeof (mips64_elf_gregset_t), sizeof (mips64_elf_gregset_t),
+	  &mips64_linux_gregset, NULL, cb_data);
+      cb (".reg2", sizeof (mips64_elf_fpregset_t),
+	  sizeof (mips64_elf_fpregset_t), &mips64_linux_fpregset,
 	  NULL, cb_data);
     }
 }

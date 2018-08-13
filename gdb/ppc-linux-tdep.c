@@ -605,21 +605,21 @@ ppc_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
   int have_vsx = tdep->ppc_vsr0_upper_regnum != -1;
 
   if (tdep->wordsize == 4)
-    cb (".reg", 48 * 4, &ppc32_linux_gregset, NULL, cb_data);
+    cb (".reg", 48 * 4, 48 * 4, &ppc32_linux_gregset, NULL, cb_data);
   else
-    cb (".reg", 48 * 8, &ppc64_linux_gregset, NULL, cb_data);
+    cb (".reg", 48 * 8, 48 * 8, &ppc64_linux_gregset, NULL, cb_data);
 
-  cb (".reg2", 264, &ppc32_linux_fpregset, NULL, cb_data);
+  cb (".reg2", 264, 264, &ppc32_linux_fpregset, NULL, cb_data);
 
   if (have_altivec)
     {
       const struct regset *vrregset = ppc_linux_vrregset (gdbarch);
-      cb (".reg-ppc-vmx", PPC_LINUX_SIZEOF_VRREGSET, vrregset,
-	  "ppc Altivec", cb_data);
+      cb (".reg-ppc-vmx", PPC_LINUX_SIZEOF_VRREGSET, PPC_LINUX_SIZEOF_VRREGSET,
+	  vrregset, "ppc Altivec", cb_data);
     }
 
   if (have_vsx)
-    cb (".reg-ppc-vsx", PPC_LINUX_SIZEOF_VSXREGSET,
+    cb (".reg-ppc-vsx", PPC_LINUX_SIZEOF_VSXREGSET, PPC_LINUX_SIZEOF_VSXREGSET,
 	&ppc32_linux_vsxregset, "POWER7 VSX", cb_data);
 }
 

@@ -1,3 +1,61 @@
+2018-08-13  Alan Hayward  <alan.hayward@arm.com>
+
+	* aarch64-fbsd-tdep.c
+	(aarch64_fbsd_iterate_over_regset_sections): Add supply_size and
+	collect_size.
+	* aarch64-linux-tdep.c
+	(aarch64_linux_iterate_over_regset_sections): Likewise.
+	* alpha-linux-tdep.c
+	(alpha_linux_iterate_over_regset_sections):
+	* alpha-nbsd-tdep.c
+	(alphanbsd_iterate_over_regset_sections): Likewise.
+	* amd64-fbsd-tdep.c
+	(amd64fbsd_iterate_over_regset_sections): Likewise.
+	* amd64-linux-tdep.c
+	(amd64_linux_iterate_over_regset_sections): Likewise.
+	* arm-bsd-tdep.c
+	(armbsd_iterate_over_regset_sections): Likewise.
+	* arm-fbsd-tdep.c
+	(arm_fbsd_iterate_over_regset_sections): Likewise.
+	* arm-linux-tdep.c
+	(arm_linux_iterate_over_regset_sections): Likewise.
+	* corelow.c (get_core_registers_cb): Likewise.
+	(core_target::fetch_registers): Likewise.
+	* fbsd-tdep.c (fbsd_collect_regset_section_cb): Likewise.
+	* frv-linux-tdep.c (frv_linux_iterate_over_regset_sections): Likewise.
+	* gdbarch.h (void): Regenerate.
+	* gdbarch.sh: Add supply_size and collect_size.
+	* hppa-linux-tdep.c (hppa_linux_iterate_over_regset_sections): Likewise.
+	* hppa-nbsd-tdep.c (hppanbsd_iterate_over_regset_sections): Likewise.
+	* hppa-obsd-tdep.c (hppaobsd_iterate_over_regset_sections): Likewise.
+	* i386-fbsd-tdep.c (i386fbsd_iterate_over_regset_sections): Likewise.
+	* i386-linux-tdep.c (i386_linux_iterate_over_regset_sections): Likewise.
+	* i386-tdep.c (i386_iterate_over_regset_sections): Likewise.
+	* ia64-linux-tdep.c (ia64_linux_iterate_over_regset_sections): Likewise.
+	* linux-tdep.c (linux_collect_regset_section_cb): Likewise.
+	* m32r-linux-tdep.c (m32r_linux_iterate_over_regset_sections): Likewise.
+	* m68k-bsd-tdep.c (m68kbsd_iterate_over_regset_sections): Likewise.
+	* m68k-linux-tdep.c (m68k_linux_iterate_over_regset_sections): Likewise.
+	* mips-fbsd-tdep.c (mips_fbsd_iterate_over_regset_sections): Likewise.
+	* mips-linux-tdep.c (mips_linux_iterate_over_regset_sections): Likewise.
+	* mips-nbsd-tdep.c (mipsnbsd_iterate_over_regset_sections): Likewise.
+	* mips64-obsd-tdep.c (mips64obsd_iterate_over_regset_sections): Likewise.
+	* mn10300-linux-tdep.c (am33_iterate_over_regset_sections): Likewise.
+	* nios2-linux-tdep.c (nios2_iterate_over_regset_sections): Likewise.
+	* ppc-fbsd-tdep.c (ppcfbsd_iterate_over_regset_sections): Likewise.
+	* ppc-linux-tdep.c (ppc_linux_iterate_over_regset_sections): Likewise.
+	* ppc-nbsd-tdep.c (ppcnbsd_iterate_over_regset_sections): Likewise.
+	* ppc-obsd-tdep.c (ppcobsd_iterate_over_regset_sections): Likewise.
+	* riscv-linux-tdep.c (riscv_linux_iterate_over_regset_sections): Likewise.
+	* rs6000-aix-tdep.c (rs6000_aix_iterate_over_regset_sections): Likewise.
+	* s390-linux-tdep.c (s390_iterate_over_regset_sections): Likewise.
+	* score-tdep.c (score7_linux_iterate_over_regset_sections): Likewise.
+	* sh-tdep.c (sh_iterate_over_regset_sections): Likewise.
+	* sparc-tdep.c (sparc_iterate_over_regset_sections): Likewise.
+	* tilegx-linux-tdep.c (tilegx_iterate_over_regset_sections): Likewise.
+	* vax-tdep.c (vax_iterate_over_regset_sections): Likewise.
+	* xtensa-tdep.c (xtensa_iterate_over_regset_sections): Likewise.
+
 2018-08-10  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* nat/linux-osdata.c (commandline_from_pid): Replace xstrprintf

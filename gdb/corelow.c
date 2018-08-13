@@ -636,12 +636,17 @@ struct get_core_registers_cb_data
    register note section. */
 
 static void
-get_core_registers_cb (const char *sect_name, int size,
+get_core_registers_cb (const char *sect_name, int supply_size, int collect_size,
 		       const struct regset *regset,
 		       const char *human_name, void *cb_data)
 {
   auto *data = (get_core_registers_cb_data *) cb_data;
   bool required = false;
+  bool variable_size_section = (regset != NULL
+				&& regset->flags & REGSET_VARIABLE_SIZE);
+
+  if (!variable_size_section)
+    gdb_assert (supply_size == collect_size);
 
   if (strcmp (sect_name, ".reg") == 0)
     {
@@ -658,7 +663,8 @@ get_core_registers_cb (const char *sect_name, int size,
   /* The 'which' parameter is only used when no regset is provided.
      Thus we just set it to -1. */
   data->target->get_core_register_section (data->regcache, regset, sect_name,
-					   size, -1, human_name, required);
+					   supply_size, -1, human_name,
+					   required);
 }
 
 /* Get the registers out of a core file.  This is the machine-

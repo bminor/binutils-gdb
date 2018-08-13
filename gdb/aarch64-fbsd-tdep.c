@@ -169,10 +169,10 @@ aarch64_fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					   void *cb_data,
 					   const struct regcache *regcache)
 {
-  cb (".reg", AARCH64_FBSD_SIZEOF_GREGSET, &aarch64_fbsd_gregset,
-      NULL, cb_data);
-  cb (".reg2", AARCH64_FBSD_SIZEOF_FPREGSET, &aarch64_fbsd_fpregset,
-      NULL, cb_data);
+  cb (".reg", AARCH64_FBSD_SIZEOF_GREGSET, AARCH64_FBSD_SIZEOF_GREGSET,
+      &aarch64_fbsd_gregset, NULL, cb_data);
+  cb (".reg2", AARCH64_FBSD_SIZEOF_FPREGSET, AARCH64_FBSD_SIZEOF_FPREGSET,
+      &aarch64_fbsd_fpregset, NULL, cb_data);
 }
 
 /* Implement the 'init_osabi' method of struct gdb_osabi_handler.  */

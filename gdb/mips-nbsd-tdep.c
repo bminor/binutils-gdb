@@ -123,10 +123,10 @@ mipsnbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 {
   size_t regsize = mips_isa_regsize (gdbarch);
 
-  cb (".reg", MIPSNBSD_NUM_GREGS * regsize, &mipsnbsd_gregset,
-      NULL, cb_data);
-  cb (".reg2", MIPSNBSD_NUM_FPREGS * regsize, &mipsnbsd_fpregset,
-      NULL, cb_data);
+  cb (".reg", MIPSNBSD_NUM_GREGS * regsize, MIPSNBSD_NUM_GREGS * regsize,
+      &mipsnbsd_gregset, NULL, cb_data);
+  cb (".reg2", MIPSNBSD_NUM_FPREGS * regsize, MIPSNBSD_NUM_FPREGS * regsize,
+      &mipsnbsd_fpregset, NULL, cb_data);
 }
 
 

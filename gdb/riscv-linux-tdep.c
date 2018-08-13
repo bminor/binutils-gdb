@@ -50,7 +50,7 @@ riscv_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
                                           void *cb_data,
                                           const struct regcache *regcache)
 {
-  cb (".reg", (32 * riscv_isa_xlen (gdbarch)),
+  cb (".reg", (32 * riscv_isa_xlen (gdbarch)), (32 * riscv_isa_xlen (gdbarch)),
       &riscv_linux_gregset, NULL, cb_data);
 
   /* TODO: Add FP register support.  */

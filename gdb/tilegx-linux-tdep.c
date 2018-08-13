@@ -99,8 +99,8 @@ tilegx_iterate_over_regset_sections (struct gdbarch *gdbarch,
 				     void *cb_data,
 				     const struct regcache *regcache)
 {
-  cb (".reg", TILEGX_LINUX_SIZEOF_GREGSET, &tilegx_linux_regset,
-      NULL, cb_data);
+  cb (".reg", TILEGX_LINUX_SIZEOF_GREGSET, TILEGX_LINUX_SIZEOF_GREGSET,
+      &tilegx_linux_regset, NULL, cb_data);
 }
 
 /* OS specific initialization of gdbarch.  */

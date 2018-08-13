@@ -2232,10 +2232,12 @@ sh_iterate_over_regset_sections (struct gdbarch *gdbarch,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (tdep->core_gregmap != NULL)
-    cb (".reg", tdep->sizeof_gregset, &sh_corefile_gregset, NULL, cb_data);
+    cb (".reg", tdep->sizeof_gregset, tdep->sizeof_gregset,
+	&sh_corefile_gregset, NULL, cb_data);
 
   if (tdep->core_fpregmap != NULL)
-    cb (".reg2", tdep->sizeof_fpregset, &sh_corefile_fpregset, NULL, cb_data);
+    cb (".reg2", tdep->sizeof_fpregset, tdep->sizeof_fpregset,
+	&sh_corefile_fpregset, NULL, cb_data);
 }
 
 /* This is the implementation of gdbarch method

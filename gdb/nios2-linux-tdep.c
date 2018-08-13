@@ -106,7 +106,8 @@ nios2_iterate_over_regset_sections (struct gdbarch *gdbarch,
 				    void *cb_data,
 				    const struct regcache *regcache)
 {
-  cb (".reg", NIOS2_GREGS_SIZE, &nios2_core_regset, NULL, cb_data);
+  cb (".reg", NIOS2_GREGS_SIZE, NIOS2_GREGS_SIZE, &nios2_core_regset, NULL,
+      cb_data);
 }
 
 /* Initialize a trad-frame cache corresponding to the tramp-frame.

@@ -902,8 +902,8 @@ xtensa_iterate_over_regset_sections (struct gdbarch *gdbarch,
 {
   DEBUGTRACE ("xtensa_iterate_over_regset_sections\n");
 
-  cb (".reg", sizeof (xtensa_elf_gregset_t), &xtensa_gregset,
-      NULL, cb_data);
+  cb (".reg", sizeof (xtensa_elf_gregset_t), sizeof (xtensa_elf_gregset_t),
+      &xtensa_gregset, NULL, cb_data);
 }
 
 

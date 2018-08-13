@@ -428,8 +428,8 @@ struct fbsd_collect_regset_section_cb_data
 };
 
 static void
-fbsd_collect_regset_section_cb (const char *sect_name, int size,
-				const struct regset *regset,
+fbsd_collect_regset_section_cb (const char *sect_name, int supply_size,
+				int collect_size, const struct regset *regset,
 				const char *human_name, void *cb_data)
 {
   char *buf;
@@ -441,8 +441,8 @@ fbsd_collect_regset_section_cb (const char *sect_name, int size,
 
   gdb_assert (regset->collect_regset);
 
-  buf = (char *) xmalloc (size);
-  regset->collect_regset (regset, data->regcache, -1, buf, size);
+  buf = (char *) xmalloc (collect_size);
+  regset->collect_regset (regset, data->regcache, -1, buf, collect_size);
 
   /* PRSTATUS still needs to be treated specially.  */
   if (strcmp (sect_name, ".reg") == 0)
@@ -452,7 +452,7 @@ fbsd_collect_regset_section_cb (const char *sect_name, int size,
   else
     data->note_data = (char *) elfcore_write_register_note
       (data->obfd, data->note_data, data->note_size,
-       sect_name, buf, size);
+       sect_name, buf, collect_size);
   xfree (buf);
 
   if (data->note_data == NULL)

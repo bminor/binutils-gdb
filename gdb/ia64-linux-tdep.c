@@ -207,8 +207,10 @@ ia64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					 void *cb_data,
 					 const struct regcache *regcache)
 {
-  cb (".reg", IA64_LINUX_GREGS_SIZE, &ia64_linux_gregset, NULL, cb_data);
-  cb (".reg2", IA64_LINUX_FPREGS_SIZE, &ia64_linux_fpregset, NULL, cb_data);
+  cb (".reg", IA64_LINUX_GREGS_SIZE, IA64_LINUX_GREGS_SIZE, &ia64_linux_gregset,
+      NULL, cb_data);
+  cb (".reg2", IA64_LINUX_FPREGS_SIZE, IA64_LINUX_FPREGS_SIZE,
+      &ia64_linux_fpregset, NULL, cb_data);
 }
 
 static void

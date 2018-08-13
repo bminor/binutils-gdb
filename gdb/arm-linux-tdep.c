@@ -712,14 +712,15 @@ arm_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  cb (".reg", ARM_LINUX_SIZEOF_GREGSET, &arm_linux_gregset, NULL, cb_data);
+  cb (".reg", ARM_LINUX_SIZEOF_GREGSET, ARM_LINUX_SIZEOF_GREGSET,
+      &arm_linux_gregset, NULL, cb_data);
 
   if (tdep->vfp_register_count > 0)
-    cb (".reg-arm-vfp", ARM_LINUX_SIZEOF_VFP, &arm_linux_vfpregset,
-	"VFP floating-point", cb_data);
+    cb (".reg-arm-vfp", ARM_LINUX_SIZEOF_VFP, ARM_LINUX_SIZEOF_VFP,
+	&arm_linux_vfpregset, "VFP floating-point", cb_data);
   else if (tdep->have_fpa_registers)
-    cb (".reg2", ARM_LINUX_SIZEOF_NWFPE, &arm_linux_fpregset,
-	"FPA floating-point", cb_data);
+    cb (".reg2", ARM_LINUX_SIZEOF_NWFPE, ARM_LINUX_SIZEOF_NWFPE,
+	&arm_linux_fpregset, "FPA floating-point", cb_data);
 }
 
 /* Determine target description from core file.  */

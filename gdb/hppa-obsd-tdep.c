@@ -149,8 +149,10 @@ hppaobsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 				       void *cb_data,
 				       const struct regcache *regcache)
 {
-  cb (".reg", HPPAOBSD_SIZEOF_GREGS, &hppaobsd_gregset, NULL, cb_data);
-  cb (".reg2", HPPAOBSD_SIZEOF_FPREGS, &hppaobsd_fpregset, NULL, cb_data);
+  cb (".reg", HPPAOBSD_SIZEOF_GREGS, HPPAOBSD_SIZEOF_GREGS, &hppaobsd_gregset,
+      NULL, cb_data);
+  cb (".reg2", HPPAOBSD_SIZEOF_FPREGS, HPPAOBSD_SIZEOF_FPREGS,
+      &hppaobsd_fpregset, NULL, cb_data);
 }
 
 

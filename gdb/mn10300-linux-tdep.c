@@ -455,10 +455,10 @@ am33_iterate_over_regset_sections (struct gdbarch *gdbarch,
 				   void *cb_data,
 				   const struct regcache *regcache)
 {
-  cb (".reg", sizeof (mn10300_elf_gregset_t), &am33_gregset,
-      NULL, cb_data);
-  cb (".reg2", sizeof(mn10300_elf_fpregset_t), &am33_fpregset,
-      NULL, cb_data);
+  cb (".reg", sizeof (mn10300_elf_gregset_t), sizeof (mn10300_elf_gregset_t),
+      &am33_gregset, NULL, cb_data);
+  cb (".reg2", sizeof (mn10300_elf_fpregset_t), sizeof (mn10300_elf_fpregset_t),
+      &am33_fpregset, NULL, cb_data);
 }
 
 static void

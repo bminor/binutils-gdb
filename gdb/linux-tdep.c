@@ -1579,21 +1579,26 @@ struct linux_collect_regset_section_cb_data
    regset in the corefile note section.  */
 
 static void
-linux_collect_regset_section_cb (const char *sect_name, int size,
-				 const struct regset *regset,
+linux_collect_regset_section_cb (const char *sect_name, int supply_size,
+				 int collect_size, const struct regset *regset,
 				 const char *human_name, void *cb_data)
 {
   char *buf;
   struct linux_collect_regset_section_cb_data *data
     = (struct linux_collect_regset_section_cb_data *) cb_data;
+  bool variable_size_section = (regset != NULL
+				&& regset->flags & REGSET_VARIABLE_SIZE);
+
+  if (!variable_size_section)
+    gdb_assert (supply_size == collect_size);
 
   if (data->abort_iteration)
     return;
 
   gdb_assert (regset && regset->collect_regset);
 
-  buf = (char *) xmalloc (size);
-  regset->collect_regset (regset, data->regcache, -1, buf, size);
+  buf = (char *) xmalloc (collect_size);
+  regset->collect_regset (regset, data->regcache, -1, buf, collect_size);
 
   /* PRSTATUS still needs to be treated specially.  */
   if (strcmp (sect_name, ".reg") == 0)
@@ -1603,7 +1608,7 @@ linux_collect_regset_section_cb (const char *sect_name, int size,
   else
     data->note_data = (char *) elfcore_write_register_note
       (data->obfd, data->note_data, data->note_size,
-       sect_name, buf, size);
+       sect_name, buf, collect_size);
   xfree (buf);
 
   if (data->note_data == NULL)

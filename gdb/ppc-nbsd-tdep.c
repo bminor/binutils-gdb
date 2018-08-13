@@ -59,8 +59,8 @@ ppcnbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 				      void *cb_data,
 				      const struct regcache *regcache)
 {
-  cb (".reg", 148, &ppcnbsd_gregset, NULL, cb_data);
-  cb (".reg2", 264, &ppcnbsd_fpregset, NULL, cb_data);
+  cb (".reg", 148, 148, &ppcnbsd_gregset, NULL, cb_data);
+  cb (".reg2", 264, 264, &ppcnbsd_fpregset, NULL, cb_data);
 }
 
 
