@@ -242,6 +242,8 @@ const struct regset aarch64_linux_fpregset =
 #define SVE_HEADER_SIZE			\
   (SVE_HEADER_RESERVED_OFFSET + SVE_HEADER_RESERVED_LENGTH)
 
+#define SVE_HEADER_FLAG_SVE		1
+
 /* Get VQ value from SVE section in the core dump.  */
 
 static uint64_t
@@ -292,6 +294,104 @@ aarch64_linux_core_read_vq (struct gdbarch *gdbarch, bfd *abfd)
   return vq;
 }
 
+/* Supply register REGNUM from BUF to REGCACHE, using the register map
+   in REGSET.  If REGNUM is -1, do this for all registers in REGSET.
+   If BUF is NULL, set the registers to "unavailable" status.  */
+
+static void
+aarch64_linux_supply_sve_regset (const struct regset *regset,
+				 struct regcache *regcache,
+				 int regnum, const void *buf, size_t size)
+{
+  gdb_byte *header = (gdb_byte *) buf;
+  struct gdbarch *gdbarch = regcache->arch ();
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
+  if (buf == nullptr)
+    return regcache->supply_regset (regset, regnum, nullptr, size);
+  gdb_assert (size > SVE_HEADER_SIZE);
+
+  /* BUF contains an SVE header followed by a register dump of either the
+     passed in SVE regset or a NEON fpregset.  */
+
+  /* Extract required fields from the header.  */
+  uint64_t vl = extract_unsigned_integer (header + SVE_HEADER_VL_OFFSET,
+					  SVE_HEADER_VL_LENGTH, byte_order);
+  uint16_t flags = extract_unsigned_integer (header + SVE_HEADER_FLAGS_OFFSET,
+					     SVE_HEADER_FLAGS_LENGTH,
+					     byte_order);
+
+  if (regnum == -1 || regnum == AARCH64_SVE_VG_REGNUM)
+    {
+      gdb_byte vg_target[8];
+      store_integer ((gdb_byte *)&vg_target, sizeof (uint64_t), byte_order,
+		     sve_vg_from_vl (vl));
+      regcache->raw_supply (AARCH64_SVE_VG_REGNUM, &vg_target);
+    }
+
+  if (flags & SVE_HEADER_FLAG_SVE)
+    {
+      /* Register dump is a SVE structure.  */
+      regcache->supply_regset (regset, regnum,
+			       (gdb_byte *) buf + SVE_HEADER_SIZE,
+			       size - SVE_HEADER_SIZE);
+    }
+  else
+    {
+      /* Register dump is a fpsimd structure.  First clear the SVE
+	 registers.  */
+      for (int i = 0; i < AARCH64_SVE_Z_REGS_NUM; i++)
+	regcache->raw_supply_zeroed (AARCH64_SVE_Z0_REGNUM + i);
+      for (int i = 0; i < AARCH64_SVE_P_REGS_NUM; i++)
+	regcache->raw_supply_zeroed (AARCH64_SVE_P0_REGNUM + i);
+      regcache->raw_supply_zeroed (AARCH64_SVE_FFR_REGNUM);
+
+      /* Then supply the fpsimd registers.  */
+      regcache->supply_regset (&aarch64_linux_fpregset, regnum,
+			       (gdb_byte *) buf + SVE_HEADER_SIZE,
+			       size - SVE_HEADER_SIZE);
+    }
+}
+
+/* Collect register REGNUM from REGCACHE to BUF, using the register
+   map in REGSET.  If REGNUM is -1, do this for all registers in
+   REGSET.  */
+
+static void
+aarch64_linux_collect_sve_regset (const struct regset *regset,
+				  const struct regcache *regcache,
+				  int regnum, void *buf, size_t size)
+{
+  gdb_byte *header = (gdb_byte *) buf;
+  struct gdbarch *gdbarch = regcache->arch ();
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  uint64_t vq = gdbarch_tdep (gdbarch)->vq;
+
+  gdb_assert (buf != NULL);
+  gdb_assert (size > SVE_HEADER_SIZE);
+
+  /* BUF starts with a SVE header prior to the register dump.  */
+
+  store_unsigned_integer (header + SVE_HEADER_SIZE_OFFSET,
+			  SVE_HEADER_SIZE_LENGTH, byte_order, size);
+  store_unsigned_integer (header + SVE_HEADER_MAX_SIZE_OFFSET,
+			  SVE_HEADER_MAX_SIZE_LENGTH, byte_order, size);
+  store_unsigned_integer (header + SVE_HEADER_VL_OFFSET, SVE_HEADER_VL_LENGTH,
+			  byte_order, sve_vl_from_vq (vq));
+  store_unsigned_integer (header + SVE_HEADER_MAX_VL_OFFSET,
+			  SVE_HEADER_MAX_VL_LENGTH, byte_order,
+			  sve_vl_from_vq (vq));
+  store_unsigned_integer (header + SVE_HEADER_FLAGS_OFFSET,
+			  SVE_HEADER_FLAGS_LENGTH, byte_order,
+			  SVE_HEADER_FLAG_SVE);
+  store_unsigned_integer (header + SVE_HEADER_RESERVED_OFFSET,
+			  SVE_HEADER_RESERVED_LENGTH, byte_order, 0);
+
+  /* The SVE register dump follows.  */
+  regcache->collect_regset (regset, regnum, (gdb_byte *) buf + SVE_HEADER_SIZE,
+			    size - SVE_HEADER_SIZE);
+}
+
 /* Implement the "regset_from_core_section" gdbarch method.  */
 
 static void
@@ -300,10 +400,39 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					    void *cb_data,
 					    const struct regcache *regcache)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
   cb (".reg", AARCH64_LINUX_SIZEOF_GREGSET, AARCH64_LINUX_SIZEOF_GREGSET,
       &aarch64_linux_gregset, NULL, cb_data);
-  cb (".reg2", AARCH64_LINUX_SIZEOF_FPREGSET, AARCH64_LINUX_SIZEOF_FPREGSET,
-      &aarch64_linux_fpregset, NULL, cb_data);
+
+  if (tdep->has_sve ())
+    {
+      /* Create this on the fly in order to handle vector register sizes.  */
+      const struct regcache_map_entry sve_regmap[] =
+	{
+	  { 32, AARCH64_SVE_Z0_REGNUM, tdep->vq * 16 },
+	  { 16, AARCH64_SVE_P0_REGNUM, tdep->vq * 16 / 8 },
+	  { 1, AARCH64_SVE_FFR_REGNUM, 4 },
+	  { 1, AARCH64_FPSR_REGNUM, 4 },
+	  { 1, AARCH64_FPCR_REGNUM, 4 },
+	  { 0 }
+	};
+
+      const struct regset aarch64_linux_sve_regset =
+	{
+	  sve_regmap,
+	  aarch64_linux_supply_sve_regset, aarch64_linux_collect_sve_regset,
+	  REGSET_VARIABLE_SIZE
+	};
+
+      cb (".reg-aarch-sve",
+	  SVE_HEADER_SIZE + regcache_map_entry_size (aarch64_linux_fpregmap),
+	  SVE_HEADER_SIZE + regcache_map_entry_size (sve_regmap),
+	  &aarch64_linux_sve_regset, "SVE registers", cb_data);
+    }
+  else
+    cb (".reg2", AARCH64_LINUX_SIZEOF_FPREGSET, AARCH64_LINUX_SIZEOF_FPREGSET,
+	&aarch64_linux_fpregset, NULL, cb_data);
 }
 
 /* Implement the "core_read_description" gdbarch method.  */
