@@ -15337,6 +15337,7 @@ OP_E_memory (int bytemode, int sizeflag)
       int havebase;
       int haveindex;
       int needindex;
+      int needaddr32;
       int base, rbase;
       int vindex = 0;
       int scale = 0;
@@ -15433,12 +15434,27 @@ OP_E_memory (int bytemode, int sizeflag)
 	  break;
 	}
 
-      /* In 32bit mode, we need index register to tell [offset] from
-	 [eiz*1 + offset].  */
-      needindex = (havesib
-		   && !havebase
-		   && !haveindex
-		   && address_mode == mode_32bit);
+      needindex = 0;
+      needaddr32 = 0;
+      if (havesib
+	  && !havebase
+	  && !haveindex
+	  && address_mode != mode_16bit)
+	{
+	  if (address_mode == mode_64bit)
+	    {
+	      /* Display eiz instead of addr32.  */
+	      needindex = addr32flag;
+	      needaddr32 = 1;
+	    }
+	  else
+	    {
+	      /* In 32-bit mode, we need index register to tell [offset]
+		 from [eiz*1 + offset].  */
+	      needindex = 1;
+	    }
+	}
+
       havedisp = (havebase
 		  || needindex
 		  || (havesib && (haveindex || scale != 0)));
@@ -15458,7 +15474,7 @@ OP_E_memory (int bytemode, int sizeflag)
 	      }
 	  }
 
-      if ((havebase || haveindex || riprel)
+      if ((havebase || haveindex || needaddr32 || riprel)
 	  && (bytemode != v_bnd_mode)
 	  && (bytemode != bnd_mode)
 	  && (bytemode != bnd_swap_mode))

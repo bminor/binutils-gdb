@@ -1,3 +1,9 @@
+2018-08-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (OP_E_memory): In 64-bit mode, display eiz for
+	address with the addr32 prefix and without base nor index
+	registers.
+
 2018-08-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (cpu_flag_init): Add CpuCMOV and CpuFXSR to

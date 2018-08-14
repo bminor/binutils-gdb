@@ -1,3 +1,12 @@
+2018-08-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/gas/i386/evex-no-scale-64.d: Updated.
+	* testsuite/gas/i386/x86-64-addr32-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-addr32.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-addr32-intel.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-addr32.d: Likewise.
+	* testsuite/gas/i386/x86-64-addr32.s: Add %eiz tests.
+
 2018-08-14  Robert Yang  <liezhi.yang@windriver.com>
 
 	* as.c (main): Improve check for input file matching output file.
