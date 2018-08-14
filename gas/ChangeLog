@@ -1,3 +1,7 @@
+2018-08-14  Robert Yang  <liezhi.yang@windriver.com>
+
+	* as.c (main): Improve check for input file matching output file.
+
 2018-08-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (cpu_arch): Add .cmov and .fxsr.
