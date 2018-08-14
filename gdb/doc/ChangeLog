@@ -1,3 +1,10 @@
+2018-08-14  Jan Vrany  <jan.vrany@fit.cvut.cz>
+
+	* gdb.texinfo (GDB/MI Data Manipulation): Document
+	"-data-disassemble -a addr".
+	(GDB/MI Support Commands): Document "data-disassemble-a-option"
+	feature.
+
 2018-08-07  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.texinfo (Index Files Speed Up GDB): Add section about

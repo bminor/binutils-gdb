@@ -41,6 +41,14 @@ thread apply [all | COUNT | -COUNT] [FLAG]... COMMAND
   FLAG arguments allow to control what output to produce and how to handle
   errors raised when applying COMMAND to a thread.
 
+* MI changes
+
+  ** The '-data-disassemble' MI command now accepts an '-a' option to
+     disassemble the whole function surrounding the given program
+     counter value or function name.  Support for this feature can be
+     verified by using the "-list-features" command, which should
+     contain "data-disassemble-a-option".
+
 * New native configurations
 
 GNU/Linux/RISC-V		riscv*-*-linux*

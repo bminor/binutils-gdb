@@ -31208,6 +31208,7 @@ For details about what an addressable memory unit is,
 @smallexample
  -data-disassemble
     [ -s @var{start-addr} -e @var{end-addr} ]
+  | [ -a @var{addr} ]
   | [ -f @var{filename} -l @var{linenum} [ -n @var{lines} ] ]
   -- @var{mode}
 @end smallexample
@@ -31220,6 +31221,11 @@ Where:
 is the beginning address (or @code{$pc})
 @item @var{end-addr}
 is the end address
+@item @var{addr}
+is an address anywhere within (or the name of) the function to
+disassemble.  If an address is specified, the whole function
+surrounding that address will be disassembled.  If a name is
+specified, the whole function with that name will be disassembled.
 @item @var{filename}
 is the name of the file to disassemble
 @item @var{linenum}
@@ -33356,6 +33362,9 @@ records, produced when trying to execute an undefined @sc{gdb/mi} command
 @item exec-run-start-option
 Indicates that the @code{-exec-run} command supports the @option{--start}
 option (@pxref{GDB/MI Program Execution}).
+@item data-disassemble-a-option
+Indicates that the @code{-data-disassemble} command supports the @option{-a}
+option (@pxref{GDB/MI Data Manipulation}).
 @end ftable
 
 @subheading The @code{-list-target-features} Command

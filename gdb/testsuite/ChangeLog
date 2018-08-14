@@ -1,3 +1,9 @@
+2018-08-14  Jan Vrany  <jan.vrany@fit.cvut.cz>
+
+	* gdb.mi/mi-disassemble.exp (test_disassembly_only): Add tests for
+	-data-disassemble -a.
+	(test_disassembly_bogus_args): Likewise.
+
 2018-08-14  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.mi/list-thread-groups-available.exp: Update test regexp.
