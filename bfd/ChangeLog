@@ -1,3 +1,8 @@
+2018-08-16  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c: Correct ppc_stub_long_branch_notoc example.
+	Formatting.
+
 2018-08-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/23494
