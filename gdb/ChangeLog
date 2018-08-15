@@ -1,3 +1,7 @@
+2018-08-15  Tom Tromey  <tom@tromey.com>
+
+	* aarch64-linux-tdep.c (aarch64_linux_core_read_vq): Use pulongest.
+
 2018-08-14  Jan Vrany  <jan.vrany@fit.cvut.cz>
 
 	* mi/mi-cmd-disas.c (mi_cmd_disassemble): Add -a option.

@@ -282,12 +282,13 @@ aarch64_linux_core_read_vq (struct gdbarch *gdbarch, bfd *abfd)
   if (vq > AARCH64_MAX_SVE_VQ)
     {
       warning (_("SVE Vector length in core file not supported by this version"
-		 " of GDB.  (VQ=%ld)"), vq);
+		 " of GDB.  (VQ=%s)"), pulongest (vq));
       return 0;
     }
   else if (vq == 0)
     {
-      warning (_("SVE Vector length in core file is invalid. (VQ=%ld"), vq);
+      warning (_("SVE Vector length in core file is invalid. (VQ=%s"),
+	       pulongest (vq));
       return 0;
     }
 
