@@ -1,5 +1,10 @@
 2018-08-30  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* riscv-tdep.c (riscv_insn::decode): Decode c.addi4spn, c.sd,
+	c.sw, c.swsp, and c.sdsp.
+
+2018-08-30  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* riscv-tdep.c (struct riscv_inferior_data): Delete.
 	(riscv_read_misa_reg): Don't cache value read into inferior data.
 	(riscv_new_inferior_data): Delete.
