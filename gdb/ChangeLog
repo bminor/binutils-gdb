@@ -1,3 +1,8 @@
+2018-08-17  Tom Tromey  <tom@tromey.com>
+
+	* cli/cli-script.c (read_next_line): Pass 0 as repeat argument to
+	command_line_input.
+
 2018-08-15  Tom Tromey  <tom@tromey.com>
 
 	* aarch64-linux-tdep.c (aarch64_linux_core_read_vq): Use pulongest.

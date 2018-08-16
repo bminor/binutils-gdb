@@ -903,7 +903,7 @@ read_next_line (void)
   else
     prompt_ptr = NULL;
 
-  return command_line_input (prompt_ptr, from_tty, "commands");
+  return command_line_input (prompt_ptr, 0, "commands");
 }
 
 /* Return true if CMD's name is NAME.  */
