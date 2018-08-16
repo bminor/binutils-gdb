@@ -1,3 +1,8 @@
+2018-08-17  Alan Hayward  <alan.hayward@arm.com>
+
+	PR gdb/18931
+	* gdb.arch/aarch64-fp.c (main): Fix asm registers.
+
 2018-08-16  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.compile/compile.exp: Use gdb_test_no_output for "compile code"
