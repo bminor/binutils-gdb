@@ -256,7 +256,7 @@ gdb_test "print union_object.intfield" " = 7"
 # LOC_UNRESOLVED tests.
 
 gdb_test "print unresolved" " = 20"
-gdb_test "compile code globalvar = unresolved;"
+gdb_test_no_output "compile code globalvar = unresolved;"
 gdb_test "print globalvar" " = 20" "print unresolved value"
 
 # Test shadowing with global and static variables.
@@ -353,7 +353,7 @@ if { $srcfile3 != "" } {
     gdb_test "p constvar" " = 3"
     gdb_test "info addr constvar" {Symbol "constvar" is constant\.}
 
-    gdb_test "compile code globalvar = constvar;"
+    gdb_test_no_output "compile code globalvar = constvar;"
     gdb_test "print globalvar" " = 3" "print constvar value"
 } else {
     untested "print constvar value"

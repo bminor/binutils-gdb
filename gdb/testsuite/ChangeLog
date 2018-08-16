@@ -1,3 +1,8 @@
+2018-08-16  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.compile/compile.exp: Use gdb_test_no_output for "compile code"
+	tests expected to pass.
+
 2018-08-14  Jan Vrany  <jan.vrany@fit.cvut.cz>
 
 	* gdb.mi/mi-disassemble.exp (test_disassembly_only): Add tests for
