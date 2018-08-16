@@ -1,3 +1,8 @@
+2018-08-17  Tom Tromey  <tom@tromey.com>
+
+	* cli/cli-script.c (read_next_line): Pass 0 as repeat argument to
+	command_line_input.
+
 2018-07-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* symfile.c (set_objfile_default_section_offset): Remove struct
