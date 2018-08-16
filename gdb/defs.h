@@ -309,7 +309,7 @@ typedef void initialize_file_ftype (void);
 
 extern char *gdb_readline_wrapper (const char *);
 
-extern char *command_line_input (const char *, int, const char *);
+extern char *command_line_input (const char *, const char *);
 
 extern void print_prompt (void);
 

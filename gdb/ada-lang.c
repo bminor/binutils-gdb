@@ -4041,7 +4041,7 @@ get_selections (int *choices, int n_choices, int max_results,
   if (prompt == NULL)
     prompt = "> ";
 
-  args = command_line_input (prompt, 0, annotation_suffix);
+  args = command_line_input (prompt, annotation_suffix);
 
   if (args == NULL)
     error_no_arg (_("one or more choice numbers"));

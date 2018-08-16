@@ -1,3 +1,13 @@
+2018-08-16  Tom Tromey  <tom@tromey.com>
+
+	* top.c (read_command_file): Update.
+	(command_line_input): Remove "repeat" argument.
+	* ada-lang.c (get_selections): Update.
+	* linespec.c (decode_line_2): Update.
+	* defs.h (command_line_input): Remove argument.
+	* cli/cli-script.c (read_next_line): Update.
+	* python/py-gdb-readline.c: Update.
+
 2018-08-17  Tom Tromey  <tom@tromey.com>
 
 	* cli/cli-script.c (read_next_line): Pass 0 as repeat argument to
