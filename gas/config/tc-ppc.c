@@ -2745,7 +2745,6 @@ md_assemble (char *str)
   const struct powerpc_opcode *opcode;
   uint64_t insn;
   const unsigned char *opindex_ptr;
-  int skip_optional;
   int need_paren;
   int next_opindex;
   struct ppc_fixup fixups[MAX_INSN_FIXUPS];
@@ -2783,55 +2782,11 @@ md_assemble (char *str)
     ++str;
 
   /* PowerPC operands are just expressions.  The only real issue is
-     that a few operand types are optional.  All cases which might use
-     an optional operand separate the operands only with commas (in some
-     cases parentheses are used, as in ``lwz 1,0(1)'' but such cases never
-     have optional operands).  Most instructions with optional operands
-     have only one.  Those that have more than one optional operand can
-     take either all their operands or none.  So, before we start seriously
-     parsing the operands, we check to see if we have optional operands,
-     and if we do, we count the number of commas to see which operands
-     have been omitted.  */
-  skip_optional = 0;
-  for (opindex_ptr = opcode->operands; *opindex_ptr != 0; opindex_ptr++)
-    {
-      const struct powerpc_operand *operand;
-
-      operand = &powerpc_operands[*opindex_ptr];
-      if ((operand->flags & PPC_OPERAND_OPTIONAL) != 0
-	  && !((operand->flags & PPC_OPERAND_OPTIONAL32) != 0 && ppc_obj64))
-	{
-	  unsigned int opcount;
-	  unsigned int num_operands_expected;
-
-	  /* There is an optional operand.  Count the number of
-	     commas in the input line.  */
-	  if (*str == '\0')
-	    opcount = 0;
-	  else
-	    {
-	      opcount = 1;
-	      s = str;
-	      while ((s = strchr (s, ',')) != (char *) NULL)
-		{
-		  ++opcount;
-		  ++s;
-		}
-	    }
-
-	  /* Compute the number of expected operands.  */
-	  for (num_operands_expected = 0, i = 0; opcode->operands[i]; i ++)
-	    ++ num_operands_expected;
-
-	  /* If there are fewer operands in the line then are called
-	     for by the instruction, we want to skip the optional
-	     operands.  */
-	  if (opcount < num_operands_expected)
-	    skip_optional = 1;
-
-	  break;
-	}
-    }
+     that a few operand types are optional.  If an instruction has
+     multiple optional operands and one is omitted, then all optional
+     operands past the first omitted one must also be omitted.  */
+  int num_optional_operands = 0;
+  int num_optional_provided = 0;
 
   /* Gather the operands.  */
   need_paren = 0;
@@ -2855,26 +2810,66 @@ md_assemble (char *str)
       errmsg = NULL;
 
       /* If this is an optional operand, and we are skipping it, just
-	 insert a zero.  */
+	 insert the default value, usually a zero.  */
       if ((operand->flags & PPC_OPERAND_OPTIONAL) != 0
-	  && !((operand->flags & PPC_OPERAND_OPTIONAL32) != 0 && ppc_obj64)
-	  && skip_optional)
+	  && !((operand->flags & PPC_OPERAND_OPTIONAL32) != 0 && ppc_obj64))
 	{
-	  int64_t val = ppc_optional_operand_value (operand);
-	  if (operand->insert)
+	  if (num_optional_operands == 0)
 	    {
-	      insn = (*operand->insert) (insn, val, ppc_cpu, &errmsg);
-	      if (errmsg != (const char *) NULL)
-		as_bad ("%s", errmsg);
-	    }
-	  else if (operand->shift >= 0)
-	    insn |= (val & operand->bitm) << operand->shift;
-	  else
-	    insn |= (val & operand->bitm) >> -operand->shift;
+	      const unsigned char *optr;
+	      int total = 0;
+	      int provided = 0;
+	      int omitted;
 
-	  if ((operand->flags & PPC_OPERAND_NEXT) != 0)
-	    next_opindex = *opindex_ptr + 1;
-	  continue;
+	      s = str;
+	      for (optr = opindex_ptr; *optr != 0; optr++)
+		{
+		  const struct powerpc_operand *op;
+		  op = &powerpc_operands[*optr];
+
+		  ++total;
+
+		  if ((op->flags & PPC_OPERAND_OPTIONAL) != 0
+		      && !((op->flags & PPC_OPERAND_OPTIONAL32) != 0
+			   && ppc_obj64))
+		    ++num_optional_operands;
+
+		  if (s != NULL && *s != '\0')
+		    {
+		      ++provided;
+
+		      /* Look for the start of the next operand.  */
+		      if ((op->flags & PPC_OPERAND_PARENS) != 0)
+			s = strpbrk (s, "(,");
+		      else
+			s = strchr (s, ',');
+
+		      if (s != NULL)
+			++s;
+		    }
+		}
+	      omitted = total - provided;
+	      num_optional_provided = num_optional_operands - omitted;
+	    }
+	  if (--num_optional_provided < 0)
+	    {
+	      int64_t val = ppc_optional_operand_value (operand, insn, ppc_cpu,
+							num_optional_provided);
+	      if (operand->insert)
+		{
+		  insn = (*operand->insert) (insn, val, ppc_cpu, &errmsg);
+		  if (errmsg != (const char *) NULL)
+		    as_bad ("%s", errmsg);
+		}
+	      else if (operand->shift >= 0)
+		insn |= (val & operand->bitm) << operand->shift;
+	      else
+		insn |= (val & operand->bitm) >> -operand->shift;
+
+	      if ((operand->flags & PPC_OPERAND_NEXT) != 0)
+		next_opindex = *opindex_ptr + 1;
+	      continue;
+	    }
 	}
 
       /* Gather the operand.  */
@@ -3448,27 +3443,28 @@ md_assemble (char *str)
 	    }
 	}
       else if ((operand->flags & PPC_OPERAND_PARENS) != 0)
-	{
-	  endc = '(';
-	  need_paren = 1;
-	}
+	endc = '(';
       else
 	endc = ',';
 
       /* The call to expression should have advanced str past any
 	 whitespace.  */
-      if (*str != endc
-	  && (endc != ',' || *str != '\0'))
+      if (*str == endc)
 	{
-	  if (*str == '\0')
-	    as_bad (_("syntax error; end of line, expected `%c'"), endc);
-	  else
-	    as_bad (_("syntax error; found `%c', expected `%c'"), *str, endc);
+	  ++str;
+	  if (endc == '(')
+	    need_paren = 1;
+	}
+      else if (*str != '\0')
+	{
+	  as_bad (_("syntax error; found `%c', expected `%c'"), *str, endc);
 	  break;
 	}
-
-      if (*str != '\0')
-	++str;
+      else if (endc == ')')
+	{
+	  as_bad (_("syntax error; end of line, expected `%c'"), endc);
+	  break;
+	}
     }
 
   while (ISSPACE (*str))

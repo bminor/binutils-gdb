@@ -483,7 +483,7 @@ insert_dxdn (uint64_t insn,
 static int64_t
 extract_dxdn (uint64_t insn,
 	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
-	      int *invalid ATTRIBUTE_UNUSED)
+	      int *invalid)
 {
   return -extract_dxd (insn, dialect, invalid);
 }
@@ -537,8 +537,12 @@ extract_fxm (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
-  int64_t mask = (insn >> 12) & 0xff;
+  /* Return a value of -1 for a missing optional operand, which is
+     used as a flag by insert_fxm.  */
+  if (*invalid < 0)
+    return -1;
 
+  int64_t mask = (insn >> 12) & 0xff;
   /* Is this a Power4 insn?  */
   if ((insn & (1 << 20)) != 0)
     {
@@ -611,8 +615,11 @@ extract_ls (uint64_t insn,
 	    ppc_cpu_t dialect,
 	    int *invalid)
 {
-  uint64_t lvalue = (insn >> 21) & 3;
+  /* Missing optional operands have a value of zero.  */
+  if (*invalid < 0)
+    return 0;
 
+  uint64_t lvalue = (insn >> 21) & 3;
   if (((insn >> 1) & 0x3ff) == 598)
     {
       uint64_t max_lvalue = (dialect & PPC_OPCODE_POWER4) ? 2 : 1;
@@ -629,21 +636,13 @@ extract_ls (uint64_t insn,
 static uint64_t
 insert_esync (uint64_t insn,
 	      int64_t value,
-	      ppc_cpu_t dialect,
+	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	      const char **errmsg)
 {
   uint64_t ls = (insn >> 21) & 0x03;
 
-  if (value == 0)
-    {
-      if (((dialect & PPC_OPCODE_E6500) != 0 && ls > 1)
-	  || ((dialect & PPC_OPCODE_POWER9) != 0 && ls > 2))
-	*errmsg = _("illegal L operand value");
-      return insn;
-    }
-
-  if ((ls & ~0x1)
-      || (((value >> 1) & 0x1) ^ ls) == 0)
+  if (value != 0
+      && ((~value >> 1) & 0x1) != ls)
     *errmsg = _("incompatible L operand value");
 
   return insn | ((value & 0xf) << 16);
@@ -651,23 +650,18 @@ insert_esync (uint64_t insn,
 
 static int64_t
 extract_esync (uint64_t insn,
-	       ppc_cpu_t dialect,
+	       ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	       int *invalid)
 {
+  if (*invalid < 0)
+    return 0;
+
   uint64_t ls = (insn >> 21) & 0x3;
-  uint64_t lvalue = (insn >> 16) & 0xf;
-
-  if (lvalue == 0)
-    {
-      if (((dialect & PPC_OPCODE_E6500) != 0 && ls > 1)
-	  || ((dialect & PPC_OPCODE_POWER9) != 0 && ls > 2))
-	*invalid = 1;
-    }
-  else if ((ls & ~0x1)
-	   || (((lvalue >> 1) & 0x1) ^ ls) == 0)
+  uint64_t value = (insn >> 16) & 0xf;
+  if (value != 0
+      && ((~value >> 1) & 0x1) != ls)
     *invalid = 1;
-
-  return lvalue;
+  return value;
 }
 
 /* The MB and ME fields in an M form instruction expressed as a single
@@ -914,9 +908,11 @@ extract_raq (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
+  if (*invalid < 0)
+    return 0;
+
   uint64_t rtvalue = (insn >> 21) & 0x1f;
   uint64_t ravalue = (insn >> 16) & 0x1f;
-
   if (ravalue == rtvalue)
     *invalid = 1;
   return ravalue;
@@ -1279,6 +1275,9 @@ extract_tbr (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
+  if (*invalid < 0)
+    return 268;
+
   int64_t ret = ((insn >> 16) & 0x1f) | ((insn >> 6) & 0x3e0);
   if (ret != 268 && ret != 269)
     *invalid = 1;
@@ -1461,7 +1460,7 @@ insert_vlensi (uint64_t insn,
 static int64_t
 extract_vlensi (uint64_t insn,
 		ppc_cpu_t dialect ATTRIBUTE_UNUSED,
-		int *invalid ATTRIBUTE_UNUSED)
+		int *invalid)
 {
   int64_t value = ((insn >> 10) & 0xf800) | (insn & 0x7ff);
   value = (value ^ 0x8000) - 0x8000;
@@ -1773,6 +1772,25 @@ extract_Ddd (uint64_t insn,
 {
   return ((insn >> 11) & 0x3) | ((insn << 2) & 0x4);
 }
+
+static uint64_t
+insert_sxl (uint64_t insn,
+	    int64_t value,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | ((value & 0x1) << 11);
+}
+
+static int64_t
+extract_sxl (uint64_t insn,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     int *invalid)
+{
+  if (*invalid < 0)
+    return 1;
+  return (insn >> 11) & 0x1;
+}
 
 /* The operands table.
 
@@ -2071,13 +2089,10 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* Power4 version for mfcr.  */
 #define FXM4 FXM + 1
-  { 0xff, 12, insert_fxm, extract_fxm,
-    PPC_OPERAND_OPTIONAL | PPC_OPERAND_OPTIONAL_VALUE},
-  /* If the FXM4 operand is ommitted, use the sentinel value -1.  */
-  { -1, -1, NULL, NULL, 0},
+  { 0xff, 12, insert_fxm, extract_fxm, PPC_OPERAND_OPTIONAL },
 
   /* The IMM20 field in an LI instruction.  */
-#define IMM20 FXM4 + 2
+#define IMM20 FXM4 + 1
   { 0xfffff, PPC_OPSHIFT_INV, insert_li20, extract_li20, PPC_OPERAND_SIGNED},
 
   /* The L field in a D or X form instruction.  */
@@ -2378,12 +2393,10 @@ const struct powerpc_operand powerpc_operands[] =
      field, but it is optional.  */
 #define TBR SV + 1
   { 0x3ff, 11, insert_tbr, extract_tbr,
-    PPC_OPERAND_SPR | PPC_OPERAND_OPTIONAL | PPC_OPERAND_OPTIONAL_VALUE},
-  /* If the TBR operand is ommitted, use the value 268.  */
-  { -1, 268, NULL, NULL, 0},
+    PPC_OPERAND_SPR | PPC_OPERAND_OPTIONAL },
 
   /* The TO field in a D or X form instruction.  */
-#define TO TBR + 2
+#define TO TBR + 1
 #define DUI TO
 #define TO_MASK (0x1f << 21)
   { 0x1f, 21, NULL, NULL, 0 },
@@ -2537,12 +2550,10 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The S field in a XL form instruction.  */
 #define SXL S + 1
-  { 0x1, 11, NULL, NULL, PPC_OPERAND_OPTIONAL | PPC_OPERAND_OPTIONAL_VALUE},
-  /* If the SXL operand is ommitted, use the value 1.  */
-  { -1, 1, NULL, NULL, 0},
+  { 0x1, 11, insert_sxl, extract_sxl, PPC_OPERAND_OPTIONAL },
 
   /* SH field starting at bit position 16.  */
-#define SH16 SXL + 2
+#define SH16 SXL + 1
   /* The DCM and DGM fields in a Z form instruction.  */
 #define DCM SH16
 #define DGM DCM

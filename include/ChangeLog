@@ -1,3 +1,10 @@
+2018-08-21  Alan Modra  <amodra@gmail.com>
+
+	* opcode/ppc.h (struct powerpc_operand): Correct "insert" comment.
+	Mention use of "extract" function to provide default value.
+	(PPC_OPERAND_OPTIONAL_VALUE): Delete.
+	(ppc_optional_operand_value): Rewrite to use extract function.
+
 2018-08-18  John Darrington  <john@darrington.wattle.id.au>
 
 	* opcode/s12z.h: New file.

@@ -1,5 +1,12 @@
 2018-08-21  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-ppc.c (md_assemble): Delay counting of optional
+	operands until one is encountered.  Allow for the possibility
+	of optional base regs, ie. PPC_OPERAND_PARENS.  Call
+	ppc_optional_operand_value with extra args.
+
+2018-08-21  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/gas/s12z/bit-manip-invalid.d: Correct regexps.
 
 2018-08-18  John Darrington  <john@darrington.wattle.id.au>

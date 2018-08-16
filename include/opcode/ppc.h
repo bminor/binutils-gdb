@@ -280,11 +280,10 @@ struct powerpc_operand
 
      If this field is not NULL, then simply call it with the
      instruction and the operand value.  It will return the new value
-     of the instruction.  If the ERRMSG argument is not NULL, then if
-     the operand value is illegal, *ERRMSG will be set to a warning
-     string (the operand will be inserted in any case).  If the
-     operand value is legal, *ERRMSG will be unchanged (most operands
-     can accept any value).  */
+     of the instruction.  If the operand value is illegal, *ERRMSG
+     will be set to a warning string (the operand will be inserted in
+     any case).  If the operand value is legal, *ERRMSG will be
+     unchanged (most operands can accept any value).  */
   uint64_t (*insert)
     (uint64_t instruction, int64_t op, ppc_cpu_t dialect, const char **errmsg);
 
@@ -302,11 +301,18 @@ struct powerpc_operand
      is the result).
 
      If this field is not NULL, then simply call it with the
-     instruction value.  It will return the value of the operand.  If
-     the INVALID argument is not NULL, *INVALID will be set to
-     non-zero if this operand type can not actually be extracted from
-     this operand (i.e., the instruction does not match).  If the
-     operand is valid, *INVALID will not be changed.  */
+     instruction value.  It will return the value of the operand.
+     *INVALID will be set to one by the extraction function if this
+     operand type can not be extracted from this operand (i.e., the
+     instruction does not match).  If the operand is valid, *INVALID
+     will not be changed.  *INVALID will always be non-negative when
+     used to extract a field from an instruction.
+
+     The extraction function is also called by both the assembler and
+     disassembler if an operand is optional, in which case the
+     function should return the default value of the operand.
+     *INVALID is negative in this case, and is the negative count of
+     omitted optional operands up to and including this operand.  */
   int64_t (*extract) (uint64_t instruction, ppc_cpu_t dialect, int *invalid);
 
   /* One bit syntax flags.  */
@@ -421,11 +427,6 @@ extern const unsigned int num_powerpc_operands;
    out regardless of the PPC_OPERAND_OPTIONAL field.  */
 #define PPC_OPERAND_NEXT (0x100000)
 
-/* This flag is only used with PPC_OPERAND_OPTIONAL.  If this operand
-   is omitted, then the value it should use for the operand is stored
-   in the SHIFT field of the immediatly following operand field.  */
-#define PPC_OPERAND_OPTIONAL_VALUE (0x200000)
-
 /* This flag is only used with PPC_OPERAND_OPTIONAL.  The operand is
    only optional when generating 32-bit code.  */
 #define PPC_OPERAND_OPTIONAL32 (0x400000)
@@ -464,10 +465,13 @@ extern const int powerpc_num_macros;
 extern ppc_cpu_t ppc_parse_cpu (ppc_cpu_t, ppc_cpu_t *, const char *);
 
 static inline int64_t
-ppc_optional_operand_value (const struct powerpc_operand *operand)
+ppc_optional_operand_value (const struct powerpc_operand *operand,
+			    uint64_t insn,
+			    ppc_cpu_t dialect,
+			    int num_optional)
 {
-  if ((operand->flags & PPC_OPERAND_OPTIONAL_VALUE) != 0)
-    return (operand+1)->shift;
+  if (operand->extract)
+    return (*operand->extract) (insn, dialect, &num_optional);
   return 0;
 }
 

@@ -1,3 +1,19 @@
+2018-08-21  Alan Modra  <amodra@gmail.com>
+
+	* ppc-dis.c (operand_value_powerpc): Init "invalid".
+	(skip_optional_operands): Count optional operands, and update
+	ppc_optional_operand_value call.
+	* ppc-opc.c (extract_dxdn): Remove ATTRIBUTE_UNUSED from used arg.
+	(extract_vlensi): Likewise.
+	(extract_fxm): Return default value for missing optional operand.
+	(extract_ls, extract_raq, extract_tbr): Likewise.
+	(insert_sxl, extract_sxl): New functions.
+	(insert_esync, extract_esync): Remove Power9 handling and simplify.
+	(powerpc_operands <FXM4, TBR>): Delete PPC_OPERAND_OPTIONAL_VALUE
+	flag and extra entry.
+	(powerpc_operands <SXL>): Likewise, and use insert_sxl and
+	extract_sxl.
+
 2018-08-20  Alan Modra  <amodra@gmail.com>
 
 	* sh-opc.h (MASK): Simplify.

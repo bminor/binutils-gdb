@@ -451,7 +451,7 @@ operand_value_powerpc (const struct powerpc_operand *operand,
 		       uint64_t insn, ppc_cpu_t dialect)
 {
   int64_t value;
-  int invalid;
+  int invalid = 0;
   /* Extract the value from the instruction.  */
   if (operand->extract)
     value = (*operand->extract) (insn, dialect, &invalid);
@@ -484,15 +484,22 @@ skip_optional_operands (const unsigned char *opindex,
 			uint64_t insn, ppc_cpu_t dialect)
 {
   const struct powerpc_operand *operand;
+  int num_optional;
 
-  for (; *opindex != 0; opindex++)
+  for (num_optional = 0; *opindex != 0; opindex++)
     {
       operand = &powerpc_operands[*opindex];
-      if ((operand->flags & PPC_OPERAND_NEXT) != 0
-	  || ((operand->flags & PPC_OPERAND_OPTIONAL) != 0
-	      && operand_value_powerpc (operand, insn, dialect) !=
-		 ppc_optional_operand_value (operand)))
+      if ((operand->flags & PPC_OPERAND_NEXT) != 0)
 	return 0;
+      if ((operand->flags & PPC_OPERAND_OPTIONAL) != 0)
+	{
+	  /* Negative count is used as a flag to extract function.  */
+	  --num_optional;
+	  if (operand_value_powerpc (operand, insn, dialect)
+	      != ppc_optional_operand_value (operand, insn, dialect,
+					     num_optional))
+	    return 0;
+	}
     }
 
   return 1;
