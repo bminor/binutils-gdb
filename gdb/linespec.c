@@ -1554,7 +1554,7 @@ decode_line_2 (struct linespec_state *self,
     {
       prompt = "> ";
     }
-  args = command_line_input (prompt, 0, "overload-choice");
+  args = command_line_input (prompt, "overload-choice");
 
   if (args == 0 || *args == 0)
     error_no_arg (_("one or more choice numbers"));

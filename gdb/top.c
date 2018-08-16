@@ -418,7 +418,7 @@ read_command_file (FILE *stream)
       char *command;
 
       /* Get a command-line.  This calls the readline package.  */
-      command = command_line_input (NULL, 0, NULL);
+      command = command_line_input (NULL, NULL);
       if (command == NULL)
 	break;
       command_handler (command);
@@ -1161,16 +1161,11 @@ gdb_safe_append_history (void)
 
    NULL is returned for end of file.
 
-   *If* input is from an interactive stream (stdin), the line read is
-   copied into the global 'saved_command_line' so that it can be
-   repeated.
-
    This routine either uses fancy command line editing or simple input
    as the user has requested.  */
 
 char *
-command_line_input (const char *prompt_arg, int repeat,
-		    const char *annotation_suffix)
+command_line_input (const char *prompt_arg, const char *annotation_suffix)
 {
   static struct buffer cmd_line_buffer;
   static int cmd_line_buffer_initialized;
@@ -1255,7 +1250,7 @@ command_line_input (const char *prompt_arg, int repeat,
 	}
 
       cmd = handle_line_of_input (&cmd_line_buffer, rl,
-				  repeat, annotation_suffix);
+				  0, annotation_suffix);
       if (cmd == (char *) EOF)
 	{
 	  cmd = NULL;

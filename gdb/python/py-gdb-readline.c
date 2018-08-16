@@ -41,7 +41,7 @@ gdbpy_readline_wrapper (FILE *sys_stdin, FILE *sys_stdout,
 
   TRY
     {
-      p = command_line_input (prompt, 0, "python");
+      p = command_line_input (prompt, "python");
     }
   /* Handle errors by raising Python exceptions.  */
   CATCH (except, RETURN_MASK_ALL)
