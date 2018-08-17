@@ -88,6 +88,14 @@ struct trad_frame_saved_reg
 void trad_frame_set_value (struct trad_frame_saved_reg this_saved_regs[],
 			   int regnum, LONGEST val);
 
+/* Encode REGNUM is in REALREG in the trad-frame.  */
+void trad_frame_set_realreg (struct trad_frame_saved_reg this_saved_regs[],
+			     int regnum, int realreg);
+
+/* Encode REGNUM is at address ADDR in the trad-frame.  */
+void trad_frame_set_addr (struct trad_frame_saved_reg this_trad_cache[],
+			  int regnum, CORE_ADDR addr);
+
 /* Mark REGNUM as unknown.  */
 void trad_frame_set_unknown (struct trad_frame_saved_reg this_saved_regs[],
 			     int regnum);

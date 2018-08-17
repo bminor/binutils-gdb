@@ -105,6 +105,26 @@ trad_frame_set_value (struct trad_frame_saved_reg this_saved_regs[],
   this_saved_regs[regnum].addr = val;
 }
 
+/* See trad-frame.h.  */
+
+void
+trad_frame_set_realreg (struct trad_frame_saved_reg this_saved_regs[],
+			int regnum, int realreg)
+{
+  this_saved_regs[regnum].realreg = realreg;
+  this_saved_regs[regnum].addr = -1;
+}
+
+/* See trad-frame.h.  */
+
+void
+trad_frame_set_addr (struct trad_frame_saved_reg this_saved_regs[],
+		     int regnum, CORE_ADDR addr)
+{
+  this_saved_regs[regnum].realreg = regnum;
+  this_saved_regs[regnum].addr = addr;
+}
+
 void
 trad_frame_set_reg_value (struct trad_frame_cache *this_trad_cache,
 			  int regnum, LONGEST val)
@@ -118,15 +138,14 @@ void
 trad_frame_set_reg_realreg (struct trad_frame_cache *this_trad_cache,
 			    int regnum, int realreg)
 {
-  this_trad_cache->prev_regs[regnum].realreg = realreg;
-  this_trad_cache->prev_regs[regnum].addr = -1;
+  trad_frame_set_realreg (this_trad_cache->prev_regs, regnum, realreg);
 }
 
 void
 trad_frame_set_reg_addr (struct trad_frame_cache *this_trad_cache,
 			 int regnum, CORE_ADDR addr)
 {
-  this_trad_cache->prev_regs[regnum].addr = addr;
+  trad_frame_set_addr (this_trad_cache->prev_regs, regnum, addr);
 }
 
 void

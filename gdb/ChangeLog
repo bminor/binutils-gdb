@@ -1,3 +1,12 @@
+2018-09-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* trad-frame.h (trad_frame_set_realreg): Declare.
+	(trad_frame_set_addr): Declare.
+	* trad-frame.c (trad_frame_set_realreg): Define new function.
+	(trad_frame_set_addr): Define new function.
+	(trad_frame_set_reg_realreg): Use new function.
+	(trad_frame_set_reg_addr): Use new function.
+
 2018-09-01  Keith Seitz  <keiths@redhat.com>
 
 	* compile/compile-cplus-types.c (compile_cplus_debug_output_1): Use
