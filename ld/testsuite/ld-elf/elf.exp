@@ -73,32 +73,6 @@ run_ld_link_tests [list \
 ]
 
 
-# True if the object format is known to be 64-bit ELF.
-#
-proc is_elf64 { binary_file } {
-    global READELF
-    global READELFFLAGS
-
-    set readelf_size ""
-    catch "exec $READELF $READELFFLAGS -h $binary_file > readelf.out" got
-
-    if ![string match "" $got] then {
-	return 0
-    }
-
-    if { ![regexp "\n\[ \]*Class:\[ \]*ELF(\[0-9\]+)\n" \
-	       [file_contents readelf.out] nil readelf_size] } {
-	verbose "FAILED to determine ELF size"
-	return 0
-    }
-
-    if { $readelf_size == "64" } {
-	return 1
-    }
-
-    return 0
-}
-
 if [is_elf64 tmpdir/symbol3w.a] {
     set ASFLAGS "$ASFLAGS --defsym ALIGN=3"
 } else {

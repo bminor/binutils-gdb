@@ -1,3 +1,7 @@
+2018-08-18  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/elf.exp (is_elf64): Delete.
+
 2018-08-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23515
