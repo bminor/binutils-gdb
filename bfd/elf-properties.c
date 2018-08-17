@@ -520,6 +520,18 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 	  return NULL;
 	}
 
+      /* Fix up GNU properties.  */
+      if (bed->fixup_gnu_properties)
+	bed->fixup_gnu_properties (info, &elf_properties (first_pbfd));
+
+      if (elf_properties (first_pbfd) == NULL)
+	{
+	  /* Discard .note.gnu.property section if all properties have
+	     been removed.  */
+	  sec->output_section = bfd_abs_section_ptr;
+	  return NULL;
+	}
+
       /* Compute the section size.  */
       list = elf_properties (first_pbfd);
       size = elf_get_gnu_property_section_size (list, align_size);

@@ -1,3 +1,18 @@
+2018-08-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23515
+	* elf-bfd.h (elf_backend_data): Add fixup_gnu_properties.
+	* elf-properties.c (_bfd_elf_link_setup_gnu_properties): Call
+	backend fixup_gnu_properties if it isn't NULL.  Discard
+	.note.gnu.property section if all properties have been removed.
+	* elfxx-target.h (elf_backend_fixup_gnu_properties): New.
+	(elfNN_bed): Initialize fixup_gnu_properties.
+	* elfxx-x86.c (_bfd_x86_elf_link_fixup_gnu_properties): New
+	function.
+	* elfxx-x86.h (_bfd_x86_elf_link_fixup_gnu_properties): New
+	prototype.
+	(elf_backend_fixup_gnu_properties): New.
+
 2018-08-16  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c: Correct ppc_stub_long_branch_notoc example.

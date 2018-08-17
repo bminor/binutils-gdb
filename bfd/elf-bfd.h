@@ -1479,6 +1479,10 @@ struct elf_backend_data
   /* Set up GNU properties.  */
   bfd *(*setup_gnu_properties) (struct bfd_link_info *);
 
+  /* Fix up GNU properties.  */
+  void (*fixup_gnu_properties) (struct bfd_link_info *,
+				elf_property_list **);
+
   /* Encoding used for compact EH tables.  */
   int (*compact_eh_encoding) (struct bfd_link_info *);
 

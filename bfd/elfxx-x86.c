@@ -2959,3 +2959,31 @@ error_alignment:
 
   return pbfd;
 }
+
+/* Fix up x86 GNU properties.  */
+
+void
+_bfd_x86_elf_link_fixup_gnu_properties
+  (struct bfd_link_info *info ATTRIBUTE_UNUSED,
+   elf_property_list **listp)
+{
+  elf_property_list *p;
+
+  for (p = *listp; p; p = p->next)
+    switch (p->property.pr_type)
+      {
+      case GNU_PROPERTY_X86_ISA_1_USED:
+      case GNU_PROPERTY_X86_ISA_1_NEEDED:
+      case GNU_PROPERTY_X86_FEATURE_1_AND:
+	if (p->property.u.number == 0)
+	  {
+	    /* Remove empty property.  */
+	    *listp = p->next;
+	    continue;
+	  }
+	listp = &p->next;
+	break;
+      default:
+	break;
+      }
+}
