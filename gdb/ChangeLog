@@ -1,5 +1,9 @@
 2018-10-03  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.c (read_signed_leb128): Work in ULONGEST.
+
+2018-10-03  Tom Tromey  <tom@tromey.com>
+
 	* c-exp.y (parse_number): Work in unsigned.  Remove casts.
 
 2018-10-03  Tom Tromey  <tom@tromey.com>

@@ -19627,7 +19627,7 @@ static LONGEST
 read_signed_leb128 (bfd *abfd, const gdb_byte *buf,
 		    unsigned int *bytes_read_ptr)
 {
-  LONGEST result;
+  ULONGEST result;
   int shift, num_read;
   unsigned char byte;
 
@@ -19639,7 +19639,7 @@ read_signed_leb128 (bfd *abfd, const gdb_byte *buf,
       byte = bfd_get_8 (abfd, buf);
       buf++;
       num_read++;
-      result |= ((LONGEST) (byte & 127) << shift);
+      result |= ((ULONGEST) (byte & 127) << shift);
       shift += 7;
       if ((byte & 128) == 0)
 	{
@@ -19647,7 +19647,7 @@ read_signed_leb128 (bfd *abfd, const gdb_byte *buf,
 	}
     }
   if ((shift < 8 * sizeof (result)) && (byte & 0x40))
-    result |= -(((LONGEST) 1) << shift);
+    result |= -(((ULONGEST) 1) << shift);
   *bytes_read_ptr = num_read;
   return result;
 }
