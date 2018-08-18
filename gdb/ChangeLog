@@ -1,5 +1,11 @@
 2018-10-03  Tom Tromey  <tom@tromey.com>
 
+	* parse.c (prefixify_expression): Add assert.
+	(parse_exp_in_context_1): Throw exception if the expression is
+	empty.
+
+2018-10-03  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.c (read_signed_leb128): Work in ULONGEST.
 
 2018-10-03  Tom Tromey  <tom@tromey.com>
@@ -14219,7 +14225,7 @@
 
 	Update copyright year range in all GDB files.
 
-2018-01-01  Joel Brobecker  <brobecker@adacore.com>
+2018-01-01, 18  Joel Brobecker  <brobecker@adacore.com>
 
 	* copyright.py (BY_HAND): Remove gdb/testsuite/gdb.base/step-line.inp
 	and gdb/testsuite/gdb.base/step-line.c.

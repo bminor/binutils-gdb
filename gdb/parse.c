@@ -792,6 +792,7 @@ copy_name (struct stoken token)
 int
 prefixify_expression (struct expression *expr)
 {
+  gdb_assert (expr->nelts > 0);
   int len = sizeof (struct expression) + EXP_ELEM_TO_BYTES (expr->nelts);
   struct expression *temp;
   int inpos = expr->nelts, outpos = 0;
@@ -1205,7 +1206,10 @@ parse_exp_in_context_1 (const char **stringptr, CORE_ADDR pc,
     }
   CATCH (except, RETURN_MASK_ALL)
     {
-      if (! parse_completion)
+      /* If parsing for completion, allow this to succeed; but if no
+	 expression elements have been written, then there's nothing
+	 to do, so fail.  */
+      if (! parse_completion || ps.expout_ptr == 0)
 	throw_exception (except);
     }
   END_CATCH
