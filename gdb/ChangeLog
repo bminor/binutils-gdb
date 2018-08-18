@@ -1,5 +1,14 @@
 2018-10-03  Tom Tromey  <tom@tromey.com>
 
+	* README: Mention --enable-ubsan.
+	* NEWS: Mention --enable-ubsan.
+	* acinclude.m4: Include sanitize.m4.
+	* configure: Rebuild.
+	* configure.ac: Call AM_GDB_UBSAN.
+	* sanitize.m4: New file.
+
+2018-10-03  Tom Tromey  <tom@tromey.com>
+
 	* expression.h (enum exp_opcode): Use uint8_t as base type.
 	* expprint.c (op_name): Handle invalid opcodes.
 

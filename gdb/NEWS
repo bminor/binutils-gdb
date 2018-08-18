@@ -108,6 +108,16 @@ CSKY GNU/LINUX			csky*-*-linux
   ** The gdb.Progspace type has a new 'objfiles' method, which returns the list
      of objfiles associated to that program space.
 
+* Configure changes
+
+--enable-ubsan
+
+  Enable or disable the undefined behavior sanitizer.  Release
+  versions of GDB disable this by default if it is available, but
+  development versions enable it.  Enabling this can cause a
+  performance penalty.  The undefined behavior sanitizer was first
+  introduced in GCC 4.9.
+
 *** Changes in GDB 8.2
 
 * The 'set disassembler-options' command now supports specifying options

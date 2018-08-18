@@ -538,6 +538,13 @@ more obscure GDB `configure' options are not listed here.
      the compiler, which will fail the compilation if the compiler
      outputs any warning messages.
 
+`--enable-ubsan'
+     Enable the GCC undefined behavior sanitizer.  By default this is
+     disabled in GDB releases, but enabled when building from git.
+     The undefined behavior sanitizer checks for C++ undefined
+     behavior.  It has a performance cost, so if you are looking at
+     GDB's performance, you should disable it.
+
 `configure' accepts other options, for compatibility with configuring
 other GNU tools recursively.
 
