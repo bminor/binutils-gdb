@@ -1,5 +1,10 @@
 2018-10-03  Tom Tromey  <tom@tromey.com>
 
+	* expression.h (enum exp_opcode): Use uint8_t as base type.
+	* expprint.c (op_name): Handle invalid opcodes.
+
+2018-10-03  Tom Tromey  <tom@tromey.com>
+
 	* parse.c (prefixify_expression): Add assert.
 	(parse_exp_in_context_1): Throw exception if the expression is
 	empty.

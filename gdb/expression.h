@@ -39,7 +39,7 @@
    and skip that many.  Strings, like numbers, are indicated
    by the preceding opcode.  */
 
-enum exp_opcode
+enum exp_opcode : uint8_t
   {
 #define OP(name) name ,
 

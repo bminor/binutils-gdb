@@ -687,6 +687,13 @@ static int dump_subexp_body (struct expression *exp, struct ui_file *, int);
 const char *
 op_name (struct expression *exp, enum exp_opcode opcode)
 {
+  if (opcode >= OP_UNUSED_LAST)
+    {
+      char *cell = get_print_cell ();
+      xsnprintf (cell, PRINT_CELL_SIZE, "unknown opcode: %u",
+		 unsigned (opcode));
+      return cell;
+    }
   return exp->language_defn->la_exp_desc->op_name (opcode);
 }
 
