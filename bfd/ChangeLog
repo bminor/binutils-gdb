@@ -1,5 +1,11 @@
 2018-08-20  Alan Modra  <amodra@gmail.com>
 
+	* mmo.c (valid_mmo_symbol_character_set): Initialize and make
+	array const.
+	(mmo_init): Don't init valid_mmo_symbol_character_set.
+
+2018-08-20  Alan Modra  <amodra@gmail.com>
+
 	* rs6000-core.c (CORE_COMMONSZ): Balance parentheses in expression.
 
 2018-08-17  H.J. Lu  <hongjiu.lu@intel.com>
