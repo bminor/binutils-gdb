@@ -271,8 +271,8 @@ typedef union
 #define CORE_COMMONSZ  ((long) &((struct core_dumpx *) 0)->c_entries \
 			+ sizeof (((struct core_dumpx *) 0)->c_entries))
 #else
-#define CORE_COMMONSZ   ((int) &((struct core_dump *) 0)->c_entries \
-		       + sizeof (((struct core_dump *) 0)->c_entries)
+#define CORE_COMMONSZ  ((int) &((struct core_dump *) 0)->c_entries \
+			+ sizeof (((struct core_dump *) 0)->c_entries))
 #endif
 /* Define prototypes for certain functions, to avoid a compiler warning
    saying that they are missing.  */
