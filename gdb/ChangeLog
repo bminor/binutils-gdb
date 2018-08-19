@@ -1,3 +1,23 @@
+2019-03-06  Joel Brobecker  <brobecker@adacore.com>
+	    Tom Tromey  <tom@tromey.com>
+
+	* stabsread.h (struct stab_section_list): Remove.
+	(coffstab_build_psymtabs): Update.
+	* dbxread.c (symbuf_sections): Now a std::vector.
+	(sect_idx): New global.
+	(fill_symbuf): Update.
+	(coffstab_build_psymtabs): Change type of stabsects parameter.
+	Update.
+	* coffread.c (struct coff_symfile_info) <stabsects>: Now a
+	std::vector.
+	(linetab, linetab_offset, linetab_size, stringtab): Move earlier.
+	(coff_locate_sections): Update.
+	(coff_symfile_read): Remove cleanups.  Update.
+	(init_stringtab): Add storage parameter.
+	(free_stringtab, free_stringtab_cleanup): Remove.
+	(init_lineno): Add storage parameter.
+	(free_linetab, free_linetab_cleanup): Remove.
+
 2019-03-06  Pedro Alves  <palves@redhat.com>
 
 	* linux-fork.c (fork_info::clobber_regs): Delete.

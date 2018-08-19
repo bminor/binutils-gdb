@@ -747,7 +747,8 @@ static char *stringtab_global;
 /* These variables are used to control fill_symbuf when the stabs
    symbols are not contiguous (as may be the case when a COFF file is
    linked using --split-by-reloc).  */
-static struct stab_section_list *symbuf_sections;
+static const std::vector<asection *> *symbuf_sections;
+static size_t sect_idx;
 static unsigned int symbuf_left;
 static unsigned int symbuf_read;
 
@@ -783,13 +784,13 @@ fill_symbuf (bfd *sym_bfd)
     {
       if (symbuf_left <= 0)
 	{
-	  file_ptr filepos = symbuf_sections->section->filepos;
+	  file_ptr filepos = (*symbuf_sections)[sect_idx]->filepos;
 
 	  if (bfd_seek (sym_bfd, filepos, SEEK_SET) != 0)
 	    perror_with_name (bfd_get_filename (sym_bfd));
-	  symbuf_left = bfd_section_size (sym_bfd, symbuf_sections->section);
+	  symbuf_left = bfd_section_size (sym_bfd, (*symbuf_sections)[sect_idx]);
 	  symbol_table_offset = filepos - symbuf_read;
-	  symbuf_sections = symbuf_sections->next;
+	  ++sect_idx;
 	}
 
       count = symbuf_left;
@@ -2942,7 +2943,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 void
 coffstab_build_psymtabs (struct objfile *objfile,
 			 CORE_ADDR textaddr, unsigned int textsize,
-			 struct stab_section_list *stabsects,
+			 const std::vector<asection *> &stabsects,
 			 file_ptr stabstroffset, unsigned int stabstrsize)
 {
   int val;
@@ -2981,27 +2982,28 @@ coffstab_build_psymtabs (struct objfile *objfile,
   /* In a coff file, we've already installed the minimal symbols that came
      from the coff (non-stab) symbol table, so always act like an
      incremental load here.  */
-  if (stabsects->next == NULL)
+  scoped_restore save_symbuf_sections
+    = make_scoped_restore (&symbuf_sections);
+  if (stabsects.size () == 1)
     {
-      stabsize = bfd_section_size (sym_bfd, stabsects->section);
+      stabsize = bfd_section_size (sym_bfd, stabsects[0]);
       DBX_SYMCOUNT (objfile) = stabsize / DBX_SYMBOL_SIZE (objfile);
-      DBX_SYMTAB_OFFSET (objfile) = stabsects->section->filepos;
+      DBX_SYMTAB_OFFSET (objfile) = stabsects[0]->filepos;
     }
   else
     {
-      struct stab_section_list *stabsect;
-
       DBX_SYMCOUNT (objfile) = 0;
-      for (stabsect = stabsects; stabsect != NULL; stabsect = stabsect->next)
+      for (asection *section : stabsects)
 	{
-	  stabsize = bfd_section_size (sym_bfd, stabsect->section);
+	  stabsize = bfd_section_size (sym_bfd, section);
 	  DBX_SYMCOUNT (objfile) += stabsize / DBX_SYMBOL_SIZE (objfile);
 	}
 
-      DBX_SYMTAB_OFFSET (objfile) = stabsects->section->filepos;
+      DBX_SYMTAB_OFFSET (objfile) = stabsects[0]->filepos;
 
-      symbuf_sections = stabsects->next;
-      symbuf_left = bfd_section_size (sym_bfd, stabsects->section);
+      sect_idx = 1;
+      symbuf_sections = &stabsects;
+      symbuf_left = bfd_section_size (sym_bfd, stabsects[0]);
       symbuf_read = 0;
     }
 

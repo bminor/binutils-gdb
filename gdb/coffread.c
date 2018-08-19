@@ -58,7 +58,7 @@ struct coff_symfile_info
 
     CORE_ADDR textaddr;		/* Addr of .text section.  */
     unsigned int textsize;	/* Size of .text section.  */
-    struct stab_section_list *stabsects;	/* .stab sections.  */
+    std::vector<asection *> *stabsects;	/* .stab sections.  */
     asection *stabstrsect;	/* Section pointer for .stab section.  */
     char *stabstrdata;
   };
@@ -155,6 +155,12 @@ static int type_vector_length;
 
 #define INITIAL_TYPE_VECTOR_LENGTH 160
 
+static char *linetab = NULL;
+static long linetab_offset;
+static unsigned long linetab_size;
+
+static char *stringtab = NULL;
+
 extern void stabsread_clear_cache (void);
 
 static struct type *coff_read_struct_type (int, int, int,
@@ -185,21 +191,13 @@ static void patch_opaque_types (struct symtab *);
 
 static void enter_linenos (long, int, int, struct objfile *);
 
-static void free_linetab (void);
-
-static void free_linetab_cleanup (void *ignore);
-
-static int init_lineno (bfd *, long, int);
+static int init_lineno (bfd *, long, int, gdb::unique_xmalloc_ptr<char> *);
 
 static char *getsymname (struct internal_syment *);
 
 static const char *coff_getfilename (union internal_auxent *);
 
-static void free_stringtab (void);
-
-static void free_stringtab_cleanup (void *ignore);
-
-static int init_stringtab (bfd *, long);
+static int init_stringtab (bfd *, long, gdb::unique_xmalloc_ptr<char> *);
 
 static void read_one_sym (struct coff_symbol *,
 			  struct internal_syment *,
@@ -249,21 +247,7 @@ coff_locate_sections (bfd *abfd, asection *sectp, void *csip)
 	if (!isdigit (*s))
 	  break;
       if (*s == '\0')
-	{
-	  struct stab_section_list *n, **pn;
-
-	  n = XNEW (struct stab_section_list);
-	  n->section = sectp;
-	  n->next = NULL;
-	  for (pn = &csi->stabsects; *pn != NULL; pn = &(*pn)->next)
-	    ;
-	  *pn = n;
-
-	  /* This will be run after coffstab_build_psymtabs is called
-	     in coff_symfile_read, at which point we no longer need
-	     the information.  */
-	  make_cleanup (xfree, n);
-	}
+	csi->stabsects->push_back (sectp);
     }
 }
 
@@ -567,12 +551,15 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
   unsigned int num_symbols;
   int symtab_offset;
   int stringtab_offset;
-  struct cleanup *back_to;
   int stabstrsize;
   
   info = (struct coff_symfile_info *) objfile_data (objfile,
 						    coff_objfile_data_key);
   symfile_bfd = abfd;		/* Kludge for swap routines.  */
+
+  std::vector<asection *> stabsects;
+  scoped_restore restore_stabsects
+    = make_scoped_restore (&info->stabsects, &stabsects);
 
 /* WARNING WILL ROBINSON!  ACCESSING BFD-PRIVATE DATA HERE!  FIXME!  */
   num_symbols = bfd_get_symcount (abfd);	/* How many syms */
@@ -592,10 +579,10 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 
   /* Allocate space for raw symbol and aux entries, based on their
      space requirements as reported by BFD.  */
-  temp_sym = (char *) xmalloc
-    (cdata->local_symesz + cdata->local_auxesz);
+  gdb::def_vector<char> temp_storage (cdata->local_symesz
+				      + cdata->local_auxesz);
+  temp_sym = temp_storage.data ();
   temp_aux = temp_sym + cdata->local_symesz;
-  back_to = make_cleanup (free_current_contents, &temp_sym);
 
   /* We need to know whether this is a PE file, because in PE files,
      unlike standard COFF files, symbol values are stored as offsets
@@ -625,22 +612,25 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
      can avoid spurious error messages (and maybe run a little
      faster!) by not even reading the line number table unless we have
      symbols.  */
+  scoped_restore restore_linetab = make_scoped_restore (&linetab);
+  gdb::unique_xmalloc_ptr<char> linetab_storage;
   if (num_symbols > 0)
     {
       /* Read the line number table, all at once.  */
       bfd_map_over_sections (abfd, find_linenos, (void *) info);
 
-      make_cleanup (free_linetab_cleanup, 0 /*ignore*/);
       val = init_lineno (abfd, info->min_lineno_offset,
-                         info->max_lineno_offset - info->min_lineno_offset);
+                         info->max_lineno_offset - info->min_lineno_offset,
+			 &linetab_storage);
       if (val < 0)
         error (_("\"%s\": error reading line numbers."), filename);
     }
 
   /* Now read the string table, all at once.  */
 
-  make_cleanup (free_stringtab_cleanup, 0 /*ignore*/);
-  val = init_stringtab (abfd, stringtab_offset);
+  scoped_restore restore_stringtab = make_scoped_restore (&stringtab);
+  gdb::unique_xmalloc_ptr<char> stringtab_storage;
+  val = init_stringtab (abfd, stringtab_offset, &stringtab_storage);
   if (val < 0)
     error (_("\"%s\": can't get string table"), filename);
 
@@ -698,7 +688,7 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
   if (!(objfile->flags & OBJF_READNEVER))
     bfd_map_over_sections (abfd, coff_locate_sections, (void *) info);
 
-  if (info->stabsects)
+  if (!info->stabsects->empty())
     {
       if (!info->stabstrsect)
 	{
@@ -715,7 +705,7 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 
       coffstab_build_psymtabs (objfile,
 			       info->textaddr, info->textsize,
-			       info->stabsects,
+			       *info->stabsects,
 			       info->stabstrsect->filepos, stabstrsize);
     }
   if (dwarf2_has_info (objfile, NULL))
@@ -742,8 +732,6 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 				    symfile_flags, objfile);
 	}
     }
-
-  do_cleanups (back_to);
 }
 
 static void
@@ -1295,16 +1283,12 @@ read_one_sym (struct coff_symbol *cs,
 
 /* Support for string table handling.  */
 
-static char *stringtab = NULL;
-
 static int
-init_stringtab (bfd *abfd, long offset)
+init_stringtab (bfd *abfd, long offset, gdb::unique_xmalloc_ptr<char> *storage)
 {
   long length;
   int val;
   unsigned char lengthbuf[4];
-
-  free_stringtab ();
 
   /* If the file is stripped, the offset might be zero, indicating no
      string table.  Just return with `stringtab' set to null.  */
@@ -1322,7 +1306,8 @@ init_stringtab (bfd *abfd, long offset)
   if (val != sizeof lengthbuf || length < sizeof lengthbuf)
     return 0;
 
-  stringtab = (char *) xmalloc (length);
+  storage->reset ((char *) xmalloc (length));
+  stringtab = storage->get ();
   /* This is in target format (probably not very useful, and not
      currently used), not host format.  */
   memcpy (stringtab, lengthbuf, sizeof lengthbuf);
@@ -1335,20 +1320,6 @@ init_stringtab (bfd *abfd, long offset)
     return -1;
 
   return 0;
-}
-
-static void
-free_stringtab (void)
-{
-  if (stringtab)
-    xfree (stringtab);
-  stringtab = NULL;
-}
-
-static void
-free_stringtab_cleanup (void *ignore)
-{
-  free_stringtab ();
 }
 
 static char *
@@ -1404,23 +1375,18 @@ coff_getfilename (union internal_auxent *aux_entry)
 
 /* Support for line number handling.  */
 
-static char *linetab = NULL;
-static long linetab_offset;
-static unsigned long linetab_size;
-
 /* Read in all the line numbers for fast lookups later.  Leave them in
    external (unswapped) format in memory; we'll swap them as we enter
    them into GDB's data structures.  */
 
 static int
-init_lineno (bfd *abfd, long offset, int size)
+init_lineno (bfd *abfd, long offset, int size,
+	     gdb::unique_xmalloc_ptr<char> *storage)
 {
   int val;
 
   linetab_offset = offset;
   linetab_size = size;
-
-  free_linetab ();
 
   if (size == 0)
     return 0;
@@ -1429,9 +1395,10 @@ init_lineno (bfd *abfd, long offset, int size)
     return -1;
 
   /* Allocate the desired table, plus a sentinel.  */
-  linetab = (char *) xmalloc (size + local_linesz);
+  storage->reset ((char *) xmalloc (size + local_linesz));
+  linetab = storage->get ();
 
-  val = bfd_bread (linetab, size, abfd);
+  val = bfd_bread (storage->get (), size, abfd);
   if (val != size)
     return -1;
 
@@ -1439,20 +1406,6 @@ init_lineno (bfd *abfd, long offset, int size)
   memset (linetab + size, 0, local_linesz);
 
   return 0;
-}
-
-static void
-free_linetab (void)
-{
-  if (linetab)
-    xfree (linetab);
-  linetab = NULL;
-}
-
-static void
-free_linetab_cleanup (void *ignore)
-{
-  free_linetab ();
 }
 
 #if !defined (L_LNNO32)

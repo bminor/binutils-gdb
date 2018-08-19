@@ -167,18 +167,6 @@ extern void end_stabs (void);
 
 extern void finish_global_stabs (struct objfile *objfile);
 
-/* COFF files can have multiple .stab sections, if they are linked
-   using --split-by-reloc.  This linked list is used to pass the
-   information into the functions in dbxread.c.  */
-struct stab_section_list
-  {
-    /* Next in list.  */
-    struct stab_section_list *next;
-
-    /* Stab section.  */
-    asection *section;
-  };
-
 /* Functions exported by dbxread.c.  These are not in stabsread.c because
    they are only used by some stabs readers.  */
 
@@ -201,7 +189,7 @@ extern void elfstab_build_psymtabs (struct objfile *objfile,
 extern void coffstab_build_psymtabs
   (struct objfile *objfile,
    CORE_ADDR textaddr, unsigned int textsize,
-   struct stab_section_list *stabs,
+   const std::vector<asection *> &stabs,
    file_ptr stabstroffset, unsigned int stabstrsize);
 
 extern void stabsect_build_psymtabs (struct objfile *objfile, char *stab_name,
