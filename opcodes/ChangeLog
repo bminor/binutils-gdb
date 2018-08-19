@@ -1,12 +1,17 @@
-2018-07-28  John Darrington <john@darrington.wattle.id.au>
+2018-08-20  Alan Modra  <amodra@gmail.com>
 
-        * s12z-dis.c (bm_decode): Deal with cases where the mode is BM_RESERVED0 or BM_RESERVED1
-        * s12z-dis.c (bm_rel_decode): ditto
-        * s12z-dis.c (bm_n_bytes): ditto
+	* sh-opc.h (MASK): Simplify.
 
-2018-07-28  John Darrington <john@darrington.wattle.id.au>
+2018-07-28  John Darrington  <john@darrington.wattle.id.au>
 
-        * s12z.h: Delete.
+	* s12z-dis.c (bm_decode): Deal with cases where the mode is
+	BM_RESERVED0 or BM_RESERVED1
+	* s12z-dis.c (bm_rel_decode): ditto
+	* s12z-dis.c (bm_n_bytes): ditto
+
+2018-07-28  John Darrington  <john@darrington.wattle.id.au>
+
+	* s12z.h: Delete.
 
 2018-08-14  H.J. Lu  <hongjiu.lu@intel.com>
 

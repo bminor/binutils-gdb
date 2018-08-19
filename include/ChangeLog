@@ -1,6 +1,6 @@
-2018-07-27  John Darrington <john@darrington.wattle.id.au>
+2018-07-27  John Darrington  <john@darrington.wattle.id.au>
 
-        * opcode/s12z.h: New file.
+	* opcode/s12z.h: New file.
 
 2018-08-09  Richard Earnshaw  <rearnsha@arm.com>
 
@@ -19,7 +19,7 @@
 	Copy over from GCC
 	2018-07-26  Martin Liska  <mliska@suse.cz>
 
-        PR lto/86548
+	PR lto/86548
 	* libiberty.h (make_temp_file_with_prefix): New function.
 
 2018-07-30  Jim Wilson  <jimw@sifive.com>
