@@ -1,3 +1,9 @@
+2018-08-19  Michael Spang  <spang@google.com>
+
+	PR gdb/11786
+	* solib-svr4.c (svr4_exec_displacement): Ignore memsz fields
+	for PT_TLS segments.
+
 2018-08-18  Kevin Buettner  <kevinb@redhat.com>
 
 	* dwarf2expr.h (struct dwarf_expr_context): Add virtual method

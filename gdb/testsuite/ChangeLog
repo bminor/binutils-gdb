@@ -1,3 +1,9 @@
+2018-08-19  Michael Spang  <spang@google.com>
+
+	PR gdb/11786
+	* gdb.base/gcore-tls-pie.c: New file.
+	* gdb.base/gcore-tls-pie.exp: New file.
+
 2018-08-18  Kevin Buettner  <kevinb@redhat.com>
 
 	* lib/dwarf.exp: Add support for DW_OP_GNU_variable_value.
