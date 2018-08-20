@@ -372,19 +372,11 @@ FUNCTION
 	The HOWTO Macro
 
 DESCRIPTION
-	The HOWTO define is horrible and will go away.
+	The HOWTO macro fills in a reloc_howto_type (a typedef for
+	const struct reloc_howto_struct).
 
 .#define HOWTO(C, R, S, B, P, BI, O, SF, NAME, INPLACE, MASKSRC, MASKDST, PC) \
 .  { (unsigned) C, R, S, B, P, BI, O, SF, NAME, INPLACE, MASKSRC, MASKDST, PC }
-
-DESCRIPTION
-	And will be replaced with the totally magic way. But for the
-	moment, we are compatible, so do it this way.
-
-.#define NEWHOWTO(FUNCTION, NAME, SIZE, REL, IN) \
-.  HOWTO (0, 0, SIZE, 0, REL, 0, complain_overflow_dont, FUNCTION, \
-.	  NAME, FALSE, 0, 0, IN)
-.
 
 DESCRIPTION
 	This is used to fill in an empty howto entry in an array.
@@ -392,25 +384,6 @@ DESCRIPTION
 .#define EMPTY_HOWTO(C) \
 .  HOWTO ((C), 0, 0, 0, FALSE, 0, complain_overflow_dont, NULL, \
 .	  NULL, FALSE, 0, 0, FALSE)
-.
-
-DESCRIPTION
-	Helper routine to turn a symbol into a relocation value.
-
-.#define HOWTO_PREPARE(relocation, symbol)		\
-.  {							\
-.    if (symbol != NULL)				\
-.      {						\
-.	 if (bfd_is_com_section (symbol->section))	\
-.	   {						\
-.	     relocation = 0;				\
-.	   }						\
-.	 else						\
-.	   {						\
-.	     relocation = symbol->value;		\
-.	   }						\
-.      }						\
-.  }
 .
 */
 

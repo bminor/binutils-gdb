@@ -5601,7 +5601,7 @@ static reloc_howto_type alpha_howto_table[] =
 /* Return a pointer to a howto structure which, when invoked, will perform
    the relocation code on data from the architecture noted.  */
 
-static const struct reloc_howto_struct *
+static reloc_howto_type *
 alpha_vms_bfd_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
 				 bfd_reloc_code_real_type code)
 {

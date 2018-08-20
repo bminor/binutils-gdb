@@ -1,3 +1,18 @@
+2018-08-21  Alan Modra  <amodra@gmail.com>
+
+	* reloc.c (HOWTO): Revise comment.
+	(NEWHOWTO, HOWTO_PREPARE): Delete.
+	* coff-arm.c (coff_arm_reloc_type_lookup): Replace const struc
+	reloc_howto_struct with reloc_howto_type.
+	* ns32knetbsd.c (MY_bfd_reloc_type_lookup): Likewise.
+	* vms-alpha.c (alpha_vms_bfd_reloc_type_lookup): Likewise.
+	* elf-hppa.h (HOW): Define.
+	(elf_hppa_howto_table): Use it to simplify this table, correcting
+	name of R_PARISC_LTOFF16WF, R_PARISC_LTOFF_FPTR64, and
+	R_PARISC_LTOFF_FPTR16DF.
+	* elf32-mep.c (MEPREL): Use HOWTO.
+	* bfd-in2.h: Regenerate.
+
 2018-08-20  Alan Modra  <amodra@gmail.com>
 
 	* mmo.c (valid_mmo_symbol_character_set): Initialize and make
