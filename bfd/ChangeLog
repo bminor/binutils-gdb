@@ -1,5 +1,14 @@
 2018-08-21  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (HOW): Define.
+	(ONES): Delete.
+	(ppc64_elf_howto_raw): Use HOW to initialize entries.
+	* elf32-ppc.c (HOW): Define.
+	(ppc_elf_howto_raw): Use HOW to initialize entries, updating
+	R_PPC_VLE_REL15 and R_PPC_VLE_REL24 to use bitpos=0.
+
+2018-08-21  Alan Modra  <amodra@gmail.com>
+
 	* reloc.c (reloc_howto_type): Typedef.
 	(bfd_symbol): Delete forward declaration.
 	(struct reloc_howto_struct): Add "negate" field.  Make "size",
