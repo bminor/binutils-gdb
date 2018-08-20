@@ -1,4 +1,8 @@
-2018-07-28  John Darrington  <john@darrington.wattle.id.au>
+2018-08-21  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/s12z/bit-manip-invalid.d: Correct regexps.
+
+2018-08-18  John Darrington  <john@darrington.wattle.id.au>
 
 	* testsuite/gas/s12z/bit-manip-invalid.d: New file.
 	* testsuite/gas/s12z/bit-manip-invalid.s: New file.
