@@ -1,3 +1,7 @@
+2018-08-19  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* solib-svr4.c (svr4_exec_displacement): Fix formatting.
+
 2018-08-19  Michael Spang  <spang@google.com>
 
 	PR gdb/11786
