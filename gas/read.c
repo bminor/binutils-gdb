@@ -3117,7 +3117,8 @@ do_repeat_with_expander (size_t count,
 	  sub = strstr (processed.ptr, expander);
 	  len = sprintf (sub, "%lu", (unsigned long) count);
 	  gas_assert (len < 8);
-	  strcpy (sub + len, sub + 8);
+	  memmove (sub + len, sub + 8,
+		   processed.ptr + processed.len - (sub + 8));
 	  processed.len -= (8 - len);
 	  sb_add_sb (& many, & processed);
 	  sb_kill (& processed);
