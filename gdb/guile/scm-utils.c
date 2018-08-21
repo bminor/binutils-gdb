@@ -306,80 +306,18 @@ lookup_keyword (const SCM *keyword_list, SCM keyword)
   return -1;
 }
 
-/* Utility to parse required, optional, and keyword arguments to Scheme
-   functions.  Modelled on PyArg_ParseTupleAndKeywords, but no attempt is made
-   at similarity or functionality.
-   There is no result, if there's an error a Scheme exception is thrown.
 
-   Guile provides scm_c_bind_keyword_arguments, and feel free to use it.
-   This is for times when we want a bit more parsing.
+/* Helper for gdbscm_parse_function_args that does most of the work,
+   in a separate function wrapped with gdbscm_wrap so that we can use
+   non-trivial-dtor objects here.  The result is #f upon success or a
+   <gdb:exception> object otherwise.  */
 
-   BEGINNING_ARG_POS is the position of the first argument passed to this
-   routine.  It should be one of the SCM_ARGn values.  It could be > SCM_ARG1
-   if the caller chooses not to parse one or more required arguments.
-
-   KEYWORDS may be NULL if there are no keywords.
-
-   FORMAT:
-   s - string -> char *, malloc'd
-   t - boolean (gdb uses "t", for biT?) -> int
-   i - int
-   u - unsigned int
-   l - long
-   n - unsigned long
-   L - longest
-   U - unsigned longest
-   O - random scheme object
-   | - indicates the next set is for optional arguments
-   # - indicates the next set is for keyword arguments (must follow |)
-   . - indicates "rest" arguments are present, this character must appear last
-
-   FORMAT must match the definition from scm_c_{make,define}_gsubr.
-   Required and optional arguments appear in order in the format string.
-   Afterwards, keyword-based arguments are processed.  There must be as many
-   remaining characters in the format string as their are keywords.
-   Except for "|#.", the number of characters in the format string must match
-   #required + #optional + #keywords.
-
-   The function is required to be defined in a compatible manner:
-   #required-args and #optional-arguments must match, and rest-arguments
-   must be specified if keyword args are desired, and/or regular "rest" args.
-
-   Example:  For this function,
-   scm_c_define_gsubr ("execute", 2, 3, 1, foo);
-   the format string + keyword list could be any of:
-   1) "ss|ttt#tt", { "key1", "key2", NULL }
-   2) "ss|ttt.", { NULL }
-   3) "ss|ttt#t.", { "key1", NULL }
-
-   For required and optional args pass the SCM of the argument, and a
-   pointer to the value to hold the parsed result (type depends on format
-   char).  After that pass the SCM containing the "rest" arguments followed
-   by pointers to values to hold parsed keyword arguments, and if specified
-   a pointer to hold the remaining contents of "rest".
-
-   For keyword arguments pass two pointers: the first is a pointer to an int
-   that will contain the position of the argument in the arg list, and the
-   second will contain result of processing the argument.  The int pointed
-   to by the first value should be initialized to -1.  It can then be used
-   to tell whether the keyword was present.
-
-   If both keyword and rest arguments are present, the caller must pass a
-   pointer to contain the new value of rest (after keyword args have been
-   removed).
-
-   There's currently no way, that I know of, to specify default values for
-   optional arguments in C-provided functions.  At the moment they're a
-   work-in-progress.  The caller should test SCM_UNBNDP for each optional
-   argument.  Unbound optional arguments are ignored.  */
-
-void
-gdbscm_parse_function_args (const char *func_name,
-			    int beginning_arg_pos,
-			    const SCM *keywords,
-			    const char *format, ...)
+static SCM
+gdbscm_parse_function_args_1 (const char *func_name,
+			      int beginning_arg_pos,
+			      const SCM *keywords,
+			      const char *format, va_list args)
 {
-  va_list args;
   const char *p;
   int i, have_rest, num_keywords, position;
   int have_optional = 0;
@@ -390,8 +328,6 @@ gdbscm_parse_function_args (const char *func_name,
 
   have_rest = validate_arg_format (format);
   num_keywords = count_keywords (keywords);
-
-  va_start (args, format);
 
   p = format;
   position = beginning_arg_pos;
@@ -511,15 +447,100 @@ gdbscm_parse_function_args (const char *func_name,
 	}
     }
 
-  va_end (args);
-  return;
+  /* Return anything not-an-exception.  */
+  return SCM_BOOL_F;
 
  fail:
-  va_end (args);
   for (char *ptr : allocated_strings)
     xfree (ptr);
-  gdbscm_throw (status);
+
+  /* Return the exception, which gdbscm_wrap takes care of
+     throwing.  */
+  return status;
 }
+
+/* Utility to parse required, optional, and keyword arguments to Scheme
+   functions.  Modelled on PyArg_ParseTupleAndKeywords, but no attempt is made
+   at similarity or functionality.
+   There is no result, if there's an error a Scheme exception is thrown.
+
+   Guile provides scm_c_bind_keyword_arguments, and feel free to use it.
+   This is for times when we want a bit more parsing.
+
+   BEGINNING_ARG_POS is the position of the first argument passed to this
+   routine.  It should be one of the SCM_ARGn values.  It could be > SCM_ARG1
+   if the caller chooses not to parse one or more required arguments.
+
+   KEYWORDS may be NULL if there are no keywords.
+
+   FORMAT:
+   s - string -> char *, malloc'd
+   t - boolean (gdb uses "t", for biT?) -> int
+   i - int
+   u - unsigned int
+   l - long
+   n - unsigned long
+   L - longest
+   U - unsigned longest
+   O - random scheme object
+   | - indicates the next set is for optional arguments
+   # - indicates the next set is for keyword arguments (must follow |)
+   . - indicates "rest" arguments are present, this character must appear last
+
+   FORMAT must match the definition from scm_c_{make,define}_gsubr.
+   Required and optional arguments appear in order in the format string.
+   Afterwards, keyword-based arguments are processed.  There must be as many
+   remaining characters in the format string as their are keywords.
+   Except for "|#.", the number of characters in the format string must match
+   #required + #optional + #keywords.
+
+   The function is required to be defined in a compatible manner:
+   #required-args and #optional-arguments must match, and rest-arguments
+   must be specified if keyword args are desired, and/or regular "rest" args.
+
+   Example:  For this function,
+   scm_c_define_gsubr ("execute", 2, 3, 1, foo);
+   the format string + keyword list could be any of:
+   1) "ss|ttt#tt", { "key1", "key2", NULL }
+   2) "ss|ttt.", { NULL }
+   3) "ss|ttt#t.", { "key1", NULL }
+
+   For required and optional args pass the SCM of the argument, and a
+   pointer to the value to hold the parsed result (type depends on format
+   char).  After that pass the SCM containing the "rest" arguments followed
+   by pointers to values to hold parsed keyword arguments, and if specified
+   a pointer to hold the remaining contents of "rest".
+
+   For keyword arguments pass two pointers: the first is a pointer to an int
+   that will contain the position of the argument in the arg list, and the
+   second will contain result of processing the argument.  The int pointed
+   to by the first value should be initialized to -1.  It can then be used
+   to tell whether the keyword was present.
+
+   If both keyword and rest arguments are present, the caller must pass a
+   pointer to contain the new value of rest (after keyword args have been
+   removed).
+
+   There's currently no way, that I know of, to specify default values for
+   optional arguments in C-provided functions.  At the moment they're a
+   work-in-progress.  The caller should test SCM_UNBNDP for each optional
+   argument.  Unbound optional arguments are ignored.  */
+
+void
+gdbscm_parse_function_args (const char *func_name,
+			    int beginning_arg_pos,
+			    const SCM *keywords,
+			    const char *format, ...)
+{
+  va_list args;
+  va_start (args, format);
+
+  gdbscm_wrap (gdbscm_parse_function_args_1, func_name,
+	       beginning_arg_pos, keywords, format, args);
+
+  va_end (args);
+}
+
 
 /* Return longest L as a scheme object.  */
 

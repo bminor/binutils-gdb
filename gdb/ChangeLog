@@ -1,3 +1,10 @@
+2018-08-21  Pedro Alves  <palves@redhat.com>
+
+	* guile/scm-utils.c (gdbscm_parse_function_args_1): New, factored
+	out from gdbscm_parse_function_args.
+	(gdbscm_parse_function_args): Rework to use gdbscm_wrap and
+	gdbscm_parse_function_args_1.
+
 2018-08-21  Simon Marchi  <simon.marchi@ericsson.com>
 
 	PR gdb/17816
