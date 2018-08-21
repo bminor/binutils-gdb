@@ -1,3 +1,8 @@
+2018-08-21  Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS: Note that Arnold Metselaar has retired as the z80
+	maintainer.
+
 2018-08-21  L. Simon  <l.simon@samsung.com>
 
 	PR 23531

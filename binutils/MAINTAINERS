@@ -145,7 +145,6 @@ responsibility among the other maintainers.
   XCOFF 	   Richard Sandiford <r.sandiford@uk.ibm.com>
   XGATE            Sean Keys <skeys@ipdatasys.com>
   Xtensa	   Sterling Augustine <augustine.sterling@gmail.com>
-  z80		   Arnold Metselaar <arnold.metselaar@planet.nl>
   z8k		   Christian Groessler <chris@groessler.org>
 
       --------- Past Maintainers -------------
@@ -159,6 +158,7 @@ goes with them.
   Jason Eckhardt
   Mark Kettenis
   Mei Ligang
+  Arnold Metselaar
   Mark Mitchell
   Bernd Schmidt
   Svein Seldal
