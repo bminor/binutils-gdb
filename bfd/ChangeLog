@@ -1,3 +1,9 @@
+2018-08-21  mephi42  <mephi42@gmail.com>
+
+	PR binutils/23315
+	* mach-o.c (bfd_mach_o_mangle_symbols): Update n_type even if
+	data is already considered filled.
+
 2018-08-21  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (HOW): Define.

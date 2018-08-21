@@ -2497,10 +2497,13 @@ bfd_mach_o_mangle_symbols (bfd *abfd)
 	    }
 	  else
 	    s->n_type = BFD_MACH_O_N_SECT;
-
-	  if (s->symbol.flags & BSF_GLOBAL)
-	    s->n_type |= BFD_MACH_O_N_EXT;
 	}
+
+      /* Update external symbol bit in case objcopy changed it.  */
+      if (s->symbol.flags & BSF_GLOBAL)
+	s->n_type |= BFD_MACH_O_N_EXT;
+      else
+	s->n_type &= ~BFD_MACH_O_N_EXT;
 
       /* Put the section index in, where required.  */
       if ((s->symbol.section != bfd_abs_section_ptr
