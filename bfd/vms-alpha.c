@@ -4001,6 +4001,7 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 		  break;
 
 		case ALPHA_R_LINKAGE:
+		  size = 16;
 		  etir_output_check (abfd, section, curr_addr, 64);
 		  _bfd_vms_output_begin_subrec (recwr, ETIR__C_STC_LP_PSB);
 		  _bfd_vms_output_long
@@ -5157,6 +5158,7 @@ alpha_vms_slurp_relocs (bfd *abfd)
 	    asection *sec;
 	    struct vms_section_data_struct *vms_sec;
 	    arelent *reloc;
+	    bfd_size_type size;
 
 	    /* Get section to which the relocation applies.  */
 	    if (cur_psect < 0 || cur_psect > (int)PRIV (section_count))
@@ -5237,7 +5239,11 @@ alpha_vms_slurp_relocs (bfd *abfd)
 	    reloc->address = cur_address;
 	    reloc->addend = cur_addend;
 
-	    vaddr += bfd_get_reloc_size (reloc->howto);
+	    if (reloc_code == ALPHA_R_LINKAGE)
+	      size = 16;
+	    else
+	      size = bfd_get_reloc_size (reloc->howto);
+	    vaddr += size;
 	  }
 
 	  cur_addend = 0;
@@ -5496,8 +5502,8 @@ static reloc_howto_type alpha_howto_table[] =
   /* Hack. Linkage is done by linker.  */
   HOWTO (ALPHA_R_LINKAGE,	/* Type.  */
 	 0,			/* Rightshift.  */
-	 8,			/* Size (0 = byte, 1 = short, 2 = long).  */
-	 256,			/* Bitsize.  */
+	 0,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 0,			/* Bitsize.  */
 	 FALSE,			/* PC relative.  */
 	 0,			/* Bitpos.  */
 	 complain_overflow_dont,/* Complain_on_overflow.  */

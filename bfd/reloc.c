@@ -94,6 +94,7 @@ CODE_FRAGMENT
 . }
 . bfd_reloc_status_type;
 .
+.typedef const struct reloc_howto_struct reloc_howto_type;
 .
 .typedef struct reloc_cache_entry
 .{
@@ -279,51 +280,39 @@ SUBSUBSECTION
 	information that libbfd needs to know to tie up a back end's data.
 
 CODE_FRAGMENT
-.struct bfd_symbol;		{* Forward declaration.  *}
-.
 .struct reloc_howto_struct
 .{
-.  {*  The type field has mainly a documentary use - the back end can
-.      do what it wants with it, though normally the back end's
-.      external idea of what a reloc number is stored
-.      in this field.  For example, a PC relative word relocation
-.      in a coff environment has the type 023 - because that's
-.      what the outside world calls a R_PCRWORD reloc.  *}
+.  {* The type field has mainly a documentary use - the back end can
+.     do what it wants with it, though normally the back end's idea of
+.     an external reloc number is stored in this field.  *}
 .  unsigned int type;
 .
-.  {*  The value the final relocation is shifted right by.  This drops
-.      unwanted data from the relocation.  *}
-.  unsigned int rightshift;
+.  {* The encoded size of the item to be relocated.  This is *not* a
+.     power-of-two measure.  Use bfd_get_reloc_size to find the size
+.     of the item in bytes.  *}
+.  unsigned int size:3;
 .
-.  {*  The size of the item to be relocated.  This is *not* a
-.      power-of-two measure.  To get the number of bytes operated
-.      on by a type of relocation, use bfd_get_reloc_size.  *}
-.  int size;
+.  {* The number of bits in the field to be relocated.  This is used
+.     when doing overflow checking.  *}
+.  unsigned int bitsize:7;
 .
-.  {*  The number of bits in the item to be relocated.  This is used
-.      when doing overflow checking.  *}
-.  unsigned int bitsize;
+.  {* The value the final relocation is shifted right by.  This drops
+.     unwanted data from the relocation.  *}
+.  unsigned int rightshift:6;
 .
-.  {*  The relocation is relative to the field being relocated.  *}
-.  bfd_boolean pc_relative;
-.
-.  {*  The bit position of the reloc value in the destination.
-.      The relocated value is left shifted by this amount.  *}
-.  unsigned int bitpos;
+.  {* The bit position of the reloc value in the destination.
+.     The relocated value is left shifted by this amount.  *}
+.  unsigned int bitpos:6;
 .
 .  {* What type of overflow error should be checked for when
 .     relocating.  *}
-.  enum complain_overflow complain_on_overflow;
+.  ENUM_BITFIELD (complain_overflow) complain_on_overflow:2;
 .
-.  {* If this field is non null, then the supplied function is
-.     called rather than the normal function.  This allows really
-.     strange relocation methods to be accommodated.  *}
-.  bfd_reloc_status_type (*special_function)
-.    (bfd *, arelent *, struct bfd_symbol *, void *, asection *,
-.     bfd *, char **);
+.  {* The relocation value should be negated before applying.  *}
+.  unsigned int negate:1;
 .
-.  {* The textual name of the relocation type.  *}
-.  char *name;
+.  {* The relocation is relative to the item being relocated.  *}
+.  unsigned int pc_relative:1;
 .
 .  {* Some formats record a relocation addend in the section contents
 .     rather than with the relocation.  For ELF formats this is the
@@ -340,21 +329,7 @@ CODE_FRAGMENT
 .     USE_REL targets set this field to TRUE.  Why this is so is peculiar
 .     to each particular target.  For relocs that aren't used in partial
 .     links (e.g. GOT stuff) it doesn't matter what this is set to.  *}
-.  bfd_boolean partial_inplace;
-.
-.  {* src_mask selects the part of the instruction (or data) to be used
-.     in the relocation sum.  If the target relocations don't have an
-.     addend in the reloc, eg. ELF USE_REL, src_mask will normally equal
-.     dst_mask to extract the addend from the section contents.  If
-.     relocations do have an addend in the reloc, eg. ELF USE_RELA, this
-.     field should be zero.  Non-zero values for ELF USE_RELA targets are
-.     bogus as in those cases the value in the dst_mask part of the
-.     section contents should be treated as garbage.  *}
-.  bfd_vma src_mask;
-.
-.  {* dst_mask selects which parts of the instruction (or data) are
-.     replaced with a relocated value.  *}
-.  bfd_vma dst_mask;
+.  unsigned int partial_inplace:1;
 .
 .  {* When some formats create PC relative instructions, they leave
 .     the value of the pc of the place being relocated in the offset
@@ -362,7 +337,31 @@ CODE_FRAGMENT
 .     be made just by adding in an ordinary offset (e.g., sun3 a.out).
 .     Some formats leave the displacement part of an instruction
 .     empty (e.g., ELF); this flag signals the fact.  *}
-.  bfd_boolean pcrel_offset;
+.  unsigned int pcrel_offset:1;
+.
+.  {* src_mask selects the part of the instruction (or data) to be used
+.     in the relocation sum.  If the target relocations don't have an
+.     addend in the reloc, eg. ELF USE_REL, src_mask will normally equal
+.     dst_mask to extract the addend from the section contents.  If
+.     relocations do have an addend in the reloc, eg. ELF USE_RELA, this
+.     field should normally be zero.  Non-zero values for ELF USE_RELA
+.     targets should be viewed with suspicion as normally the value in
+.     the dst_mask part of the section contents should be ignored.  *}
+.  bfd_vma src_mask;
+.
+.  {* dst_mask selects which parts of the instruction (or data) are
+.     replaced with a relocated value.  *}
+.  bfd_vma dst_mask;
+.
+.  {* If this field is non null, then the supplied function is
+.     called rather than the normal function.  This allows really
+.     strange relocation methods to be accommodated.  *}
+.  bfd_reloc_status_type (*special_function)
+.    (bfd *, arelent *, struct bfd_symbol *, void *, asection *,
+.     bfd *, char **);
+.
+.  {* The textual name of the relocation type.  *}
+.  char *name;
 .};
 .
 */
@@ -375,8 +374,10 @@ DESCRIPTION
 	The HOWTO macro fills in a reloc_howto_type (a typedef for
 	const struct reloc_howto_struct).
 
-.#define HOWTO(C, R, S, B, P, BI, O, SF, NAME, INPLACE, MASKSRC, MASKDST, PC) \
-.  { (unsigned) C, R, S, B, P, BI, O, SF, NAME, INPLACE, MASKSRC, MASKDST, PC }
+.#define HOWTO(type, right, size, bits, pcrel, left, ovf, func, name,	\
+.              inplace, src_mask, dst_mask, pcrel_off)			\
+.  { (unsigned) type, size < 0 ? -size : size, bits, right, left, ovf,	\
+.    size < 0, pcrel, inplace, pcrel_off, src_mask, dst_mask, func, name }
 
 DESCRIPTION
 	This is used to fill in an empty howto entry in an array.
@@ -405,14 +406,11 @@ bfd_get_reloc_size (reloc_howto_type *howto)
   switch (howto->size)
     {
     case 0: return 1;
-    case 1:
-    case -1: return 2;
-    case 2:
-    case -2: return 4;
+    case 1: return 2;
+    case 2: return 4;
     case 3: return 0;
     case 4: return 8;
     case 5: return 3;
-    case 8: return 16;
     default: abort ();
     }
 }
@@ -559,11 +557,9 @@ read_reloc (bfd *abfd, bfd_byte *data, reloc_howto_type *howto)
       return bfd_get_8 (abfd, data);
 
     case 1:
-    case -1:
       return bfd_get_16 (abfd, data);
 
     case 2:
-    case -2:
       return bfd_get_32 (abfd, data);
 
     case 3:
@@ -596,12 +592,10 @@ write_reloc (bfd *abfd, bfd_vma val, bfd_byte *data, reloc_howto_type *howto)
       break;
 
     case 1:
-    case -1:
       bfd_put_16 (abfd, val, data);
       break;
 
     case 2:
-    case -2:
       bfd_put_32 (abfd, val, data);
       break;
 
@@ -632,7 +626,7 @@ apply_reloc (bfd *abfd, bfd_byte *data, reloc_howto_type *howto,
 {
   bfd_vma val = read_reloc (abfd, data, howto);
 
-  if (howto->size < 0)
+  if (howto->negate)
     relocation = -relocation;
 
   val = ((val & ~howto->dst_mask)
@@ -1391,9 +1385,7 @@ _bfd_relocate_contents (reloc_howto_type *howto,
   unsigned int rightshift = howto->rightshift;
   unsigned int bitpos = howto->bitpos;
 
-  /* If the size is negative, negate RELOCATION.  This isn't very
-     general.  */
-  if (howto->size < 0)
+  if (howto->negate)
     relocation = -relocation;
 
   /* Get the value we are going to relocate.  */

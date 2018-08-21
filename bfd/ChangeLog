@@ -1,5 +1,32 @@
 2018-08-21  Alan Modra  <amodra@gmail.com>
 
+	* reloc.c (reloc_howto_type): Typedef.
+	(bfd_symbol): Delete forward declaration.
+	(struct reloc_howto_struct): Add "negate" field.  Make "size",
+	"bitsize", "rightshift", "bitpos", "complain_on_overflow",
+	"pc_relative", "partial_inplace", and "pcrel_offset" bitfields.
+	Rearrange for better packing.  Revise comments.
+	(HOWTO): Map to rearranged reloc_howto_struct.
+	(bfd_get_reloc_size): Delete now unused cases.
+	(read_reloc, write_reloc): Likewise.
+	(apply_reloc, _bfd_relocate_contents): Test howto->negate
+	rather than howto->size < 0 for negated relocation values.
+	* coff-rs6000.c (xcoff_complain_overflow_bitfield_func): Avoid
+	signed/unsigned warning.
+	(xcoff_ppc_relocate_section): Delete "condition is always false"
+	code.
+	* coff64-rs6000.c (xcoff64_ppc_relocate_section): Likewise.
+	* cpu-ns32k.c (do_ns32k_reloc): Adjust to suit reloc_howto_struct
+	changes.
+	* vms-alpha.c (_bfd_vms_write_etir, alpha_vms_slurp_relocs): Use
+	size 16 for ALPHA_R_LINKAGE.
+	(alpha_howto_table <ALPHA_R_LINKAGE>): Set encoded size and
+	bitsize to zero.
+	* bfd-in.h (reloc_howto_type): Delete.
+	* bfd-in2.h: Regenerate.
+
+2018-08-21  Alan Modra  <amodra@gmail.com>
+
 	* reloc.c (HOWTO): Revise comment.
 	(NEWHOWTO, HOWTO_PREPARE): Delete.
 	* coff-arm.c (coff_arm_reloc_type_lookup): Replace const struc

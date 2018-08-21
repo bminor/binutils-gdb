@@ -501,6 +501,9 @@ do_ns32k_reloc (bfd *      abfd,
      -----------------------
      R R R R R R R R R R	put into bfd_put<size>.  */
 
+  if (howto->negate)
+    relocation = -relocation;
+
 #define DOIT(x) \
   x = ( (x & ~howto->dst_mask) | (((x & howto->src_mask) +  relocation) & howto->dst_mask))
 
@@ -530,14 +533,6 @@ do_ns32k_reloc (bfd *      abfd,
 	  DOIT (x);
 	  put_data ((bfd_vma) x, location, 4);
 	}
-      break;
-    case -2:
-      {
-	bfd_vma x = get_data (location, 4);
-	relocation = -relocation;
-	DOIT(x);
-	put_data ((bfd_vma) x, location, 4);
-      }
       break;
 
     case 3:
