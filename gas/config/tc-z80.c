@@ -849,8 +849,9 @@ emit_m (char prefix, char opcode, const char *args)
 /* The operand m may be as above or one of the undocumented
    combinations (ix+d),r and (iy+d),r (if unportable instructions
    are allowed).  */
+
 static const char *
-emit_mr (char prefix, char opcode, const char *args)
+emit_mr (char prefix, char opcode, const char *args, bfd_boolean unportable)
 {
   expressionS arg_m, arg_r;
   const char *p;
@@ -867,22 +868,37 @@ emit_mr (char prefix, char opcode, const char *args)
 	  if ((arg_r.X_md == 0)
 	      && (arg_r.X_op == O_register)
 	      && (arg_r.X_add_number < 8))
-	    opcode += arg_r.X_add_number-6; /* Emit_mx () will add 6.  */
+	    opcode += arg_r.X_add_number - 6; /* Emit_mx () will add 6.  */
 	  else
 	    {
 	      ill_op ();
 	      break;
 	    }
 	  check_mach (INS_UNPORT);
+          unportable = TRUE;
 	}
       /* Fall through.  */
     case O_register:
+      if (unportable)
+	check_mach (INS_UNPORT);
       emit_mx (prefix, opcode, 0, & arg_m);
       break;
     default:
       ill_op ();
     }
   return p;
+}
+
+static const char *
+emit_mr_z80 (char prefix, char opcode, const char *args)
+{
+  return emit_mr (prefix, opcode, args, FALSE);
+}
+
+static const char *
+emit_mr_unport (char prefix, char opcode, const char *args)
+{
+  return emit_mr (prefix, opcode, args, TRUE);
 }
 
 static void
@@ -1203,7 +1219,7 @@ emit_bit (char prefix, char opcode, const char * args)
 	p = emit_m (prefix, opcode + (bn << 3), p);
       else
 	/* Set, res : resulting byte can be copied to register.  */
-	p = emit_mr (prefix, opcode + (bn << 3), p);
+        p = emit_mr (prefix, opcode + (bn << 3), p, FALSE);
     }
   else
     ill_op ();
@@ -1888,31 +1904,31 @@ static table_t instab[] =
   { "ret",  0xC9, 0xC0, emit_retcc },
   { "reti", 0xED, 0x4D, emit_insn },
   { "retn", 0xED, 0x45, emit_insn },
-  { "rl",   0xCB, 0x10, emit_mr },
+  { "rl",   0xCB, 0x10, emit_mr_z80 },
   { "rla",  0x00, 0x17, emit_insn },
-  { "rlc",  0xCB, 0x00, emit_mr },
+  { "rlc",  0xCB, 0x00, emit_mr_z80 },
   { "rlca", 0x00, 0x07, emit_insn },
   { "rld",  0xED, 0x6F, emit_insn },
-  { "rr",   0xCB, 0x18, emit_mr },
+  { "rr",   0xCB, 0x18, emit_mr_z80 },
   { "rra",  0x00, 0x1F, emit_insn },
-  { "rrc",  0xCB, 0x08, emit_mr },
+  { "rrc",  0xCB, 0x08, emit_mr_z80 },
   { "rrca", 0x00, 0x0F, emit_insn },
   { "rrd",  0xED, 0x67, emit_insn },
   { "rst",  0x00, 0xC7, emit_rst},
   { "sbc",  0x98, 0x42, emit_adc },
   { "scf",  0x00, 0x37, emit_insn },
   { "set",  0xCB, 0xC0, emit_bit },
-  { "sla",  0xCB, 0x20, emit_mr },
-  { "sli",  0xCB, 0x30, emit_mr },
-  { "sll",  0xCB, 0x30, emit_mr },
-  { "sra",  0xCB, 0x28, emit_mr },
-  { "srl",  0xCB, 0x38, emit_mr },
+  { "sla",  0xCB, 0x20, emit_mr_z80 },
+  { "sli",  0xCB, 0x30, emit_mr_unport },
+  { "sll",  0xCB, 0x30, emit_mr_unport },
+  { "sra",  0xCB, 0x28, emit_mr_z80 },
+  { "srl",  0xCB, 0x38, emit_mr_z80 },
   { "sub",  0x00, 0x90, emit_s },
   { "xor",  0x00, 0xA8, emit_s },
 } ;
 
 void
-md_assemble (char* str)
+md_assemble (char *str)
 {
   const char *p;
   char * old_ptr;

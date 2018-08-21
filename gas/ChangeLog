@@ -1,3 +1,14 @@
+2018-08-21  Arnold Metselaar  <arnold.metsel@gmail.com>
+
+	* config/tc-z80.c: Correct treatment of undocumented instruction
+	sli/sll.
+	(emit_mr): Add argument unportable.
+	(emit_bit): Adapt call to emit_mr.
+	(emit_mr_z80): New function.
+	(emit_mr_unportable): New function.
+	(instab[]): Replace emit_mr with emit_mr_z80 or emit_mr_unportable
+	as appropriate.
+
 2018-08-21  Andreas Schwab  <schwab@suse.de>
 
 	* read.c (do_repeat_with_expander): Use memmove instead of strcpy
