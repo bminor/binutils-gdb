@@ -2408,7 +2408,8 @@ Set the type of linker's hash table(s).  @var{style} can be either
 @code{sysv} for classic ELF @code{.hash} section, @code{gnu} for
 new style GNU @code{.gnu.hash} section or @code{both} for both
 the classic ELF @code{.hash} and new style GNU @code{.gnu.hash}
-hash tables.  The default is @code{sysv}.
+hash tables.  The default depends upon how the linker was configured,
+but for most Linux based systems it will be @code{both}.
 
 @kindex --compress-debug-sections=none
 @kindex --compress-debug-sections=zlib

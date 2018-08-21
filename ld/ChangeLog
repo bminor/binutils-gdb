@@ -1,3 +1,9 @@
+2018-08-21  Nick Clifton  <nickc@redhat.com>
+
+	PR 23426
+	* ld.texi (--hash-style): Note that the default is configurable
+	and that for most Linux based systems it will be "both".
+
 2018-08-18  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/elf.exp (is_elf64): Delete.
