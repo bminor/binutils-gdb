@@ -1,3 +1,9 @@
+2018-08-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/17816
+	* m32c-tdep.c (m32c_decode_srcdest4): Remove unnecessary ternary
+	operator.
+
 2018-08-19  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* solib-svr4.c (svr4_exec_displacement): Fix formatting.

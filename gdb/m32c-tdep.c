@@ -1236,7 +1236,7 @@ m32c_decode_srcdest4 (struct m32c_pv_state *st,
 
   switch (code)
     {
-    case 0x0: sd.reg = (size == 1 ? &st->r0 : &st->r0); break;
+    case 0x0: sd.reg = &st->r0; break;
     case 0x1: sd.reg = (size == 1 ? &st->r0 : &st->r1); break;
     case 0x2: sd.reg = (size == 1 ? &st->r1 : &st->r2); break;
     case 0x3: sd.reg = (size == 1 ? &st->r1 : &st->r3); break;
