@@ -1,3 +1,9 @@
+2018-08-21  L. Simon  <l.simon@samsung.com>
+
+	PR 23531
+	* readelf.c (hppa_process_unwind): Only dump the unwind table if
+	the data was successfully read in.
+
 2018-08-18  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/lib/binutils-common.exp (is_elf64): Use directory of

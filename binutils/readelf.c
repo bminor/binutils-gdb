@@ -8130,8 +8130,8 @@ hppa_process_unwind (Filedata * filedata)
 
           if (! slurp_hppa_unwind_table (filedata, &aux, sec))
 	    res = FALSE;
-	
-	  if (aux.table_len > 0)
+
+	  if (res && aux.table_len > 0)
 	    {
 	      if (! dump_hppa_unwind (filedata, &aux))
 		res = FALSE;
