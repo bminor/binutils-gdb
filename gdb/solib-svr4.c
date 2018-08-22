@@ -409,37 +409,34 @@ get_svr4_info (void)
 static int match_main (const char *);
 
 /* Read program header TYPE from inferior memory.  The header is found
-   by scanning the OS auxillary vector.
+   by scanning the OS auxiliary vector.
 
    If TYPE == -1, return the program headers instead of the contents of
    one program header.
 
-   Return a pointer to allocated memory holding the program header contents,
-   or NULL on failure.  If sucessful, and unless P_SECT_SIZE is NULL, the
-   size of those contents is returned to P_SECT_SIZE.  Likewise, the target
-   architecture size (32-bit or 64-bit) is returned to P_ARCH_SIZE and
-   the base address of the section is returned in BASE_ADDR.  */
+   Return vector of bytes holding the program header contents, or an empty
+   optional on failure.  If successful and P_ARCH_SIZE is non-NULL, the target
+   architecture size (32-bit or 64-bit) is returned to *P_ARCH_SIZE.  Likewise,
+   the base address of the section is returned in *BASE_ADDR.  */
 
-static gdb_byte *
-read_program_header (int type, int *p_sect_size, int *p_arch_size,
-		     CORE_ADDR *base_addr)
+static gdb::optional<gdb::byte_vector>
+read_program_header (int type, int *p_arch_size, CORE_ADDR *base_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   CORE_ADDR at_phdr, at_phent, at_phnum, pt_phdr = 0;
   int arch_size, sect_size;
   CORE_ADDR sect_addr;
-  gdb_byte *buf;
   int pt_phdr_p = 0;
 
   /* Get required auxv elements from target.  */
   if (target_auxv_search (current_top_target (), AT_PHDR, &at_phdr) <= 0)
-    return 0;
+    return {};
   if (target_auxv_search (current_top_target (), AT_PHENT, &at_phent) <= 0)
-    return 0;
+    return {};
   if (target_auxv_search (current_top_target (), AT_PHNUM, &at_phnum) <= 0)
-    return 0;
+    return {};
   if (!at_phdr || !at_phnum)
-    return 0;
+    return {};
 
   /* Determine ELF architecture type.  */
   if (at_phent == sizeof (Elf32_External_Phdr))
@@ -447,7 +444,7 @@ read_program_header (int type, int *p_sect_size, int *p_arch_size,
   else if (at_phent == sizeof (Elf64_External_Phdr))
     arch_size = 64;
   else
-    return 0;
+    return {};
 
   /* Find the requested segment.  */
   if (type == -1)
@@ -467,7 +464,7 @@ read_program_header (int type, int *p_sect_size, int *p_arch_size,
 
 	  if (target_read_memory (at_phdr + i * sizeof (phdr),
 				  (gdb_byte *)&phdr, sizeof (phdr)))
-	    return 0;
+	    return {};
 
 	  p_type = extract_unsigned_integer ((gdb_byte *) phdr.p_type,
 					     4, byte_order);
@@ -484,7 +481,7 @@ read_program_header (int type, int *p_sect_size, int *p_arch_size,
 	}
 
       if (i == at_phnum)
-	return 0;
+	return {};
 
       /* Retrieve address and size.  */
       sect_addr = extract_unsigned_integer ((gdb_byte *)phdr.p_vaddr,
@@ -504,7 +501,7 @@ read_program_header (int type, int *p_sect_size, int *p_arch_size,
 
 	  if (target_read_memory (at_phdr + i * sizeof (phdr),
 				  (gdb_byte *)&phdr, sizeof (phdr)))
-	    return 0;
+	    return {};
 
 	  p_type = extract_unsigned_integer ((gdb_byte *) phdr.p_type,
 					     4, byte_order);
@@ -521,7 +518,7 @@ read_program_header (int type, int *p_sect_size, int *p_arch_size,
 	}
 
       if (i == at_phnum)
-	return 0;
+	return {};
 
       /* Retrieve address and size.  */
       sect_addr = extract_unsigned_integer ((gdb_byte *)phdr.p_vaddr,
@@ -541,17 +538,12 @@ read_program_header (int type, int *p_sect_size, int *p_arch_size,
     }
 
   /* Read in requested program header.  */
-  buf = (gdb_byte *) xmalloc (sect_size);
-  if (target_read_memory (sect_addr, buf, sect_size))
-    {
-      xfree (buf);
-      return NULL;
-    }
+  gdb::byte_vector buf (sect_size);
+  if (target_read_memory (sect_addr, buf.data (), sect_size))
+    return {};
 
   if (p_arch_size)
     *p_arch_size = arch_size;
-  if (p_sect_size)
-    *p_sect_size = sect_size;
   if (base_addr)
     *base_addr = sect_addr;
 
@@ -560,11 +552,9 @@ read_program_header (int type, int *p_sect_size, int *p_arch_size,
 
 
 /* Return program interpreter string.  */
-static char *
+static gdb::optional<gdb::byte_vector>
 find_program_interpreter (void)
 {
-  gdb_byte *buf = NULL;
-
   /* If we have an exec_bfd, use its section table.  */
   if (exec_bfd
       && bfd_get_flavour (exec_bfd) == bfd_target_elf_flavour)
@@ -576,16 +566,15 @@ find_program_interpreter (void)
       {
 	int sect_size = bfd_section_size (exec_bfd, interp_sect);
 
-	buf = (gdb_byte *) xmalloc (sect_size);
-	bfd_get_section_contents (exec_bfd, interp_sect, buf, 0, sect_size);
+	gdb::byte_vector buf (sect_size);
+	bfd_get_section_contents (exec_bfd, interp_sect, buf.data (), 0,
+				  sect_size);
+	return buf;
       }
    }
 
-  /* If we didn't find it, use the target auxillary vector.  */
-  if (!buf)
-    buf = read_program_header (PT_INTERP, NULL, NULL, NULL);
-
-  return (char *) buf;
+  /* If we didn't find it, use the target auxiliary vector.  */
+  return read_program_header (PT_INTERP, NULL, NULL);
 }
 
 
@@ -700,24 +689,22 @@ scan_dyntag_auxv (const int desired_dyntag, CORE_ADDR *ptr,
 		  CORE_ADDR *ptr_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
-  int sect_size, arch_size, step;
+  int arch_size, step;
   long current_dyntag;
   CORE_ADDR dyn_ptr;
   CORE_ADDR base_addr;
-  gdb_byte *bufend, *bufstart, *buf;
 
   /* Read in .dynamic section.  */
-  buf = bufstart = read_program_header (PT_DYNAMIC, &sect_size, &arch_size,
-					&base_addr);
-  if (!buf)
+  gdb::optional<gdb::byte_vector> ph_data
+    = read_program_header (PT_DYNAMIC, &arch_size, &base_addr);
+  if (!ph_data)
     return 0;
 
   /* Iterate over BUF and scan for DYNTAG.  If found, set PTR and return.  */
   step = (arch_size == 32) ? sizeof (Elf32_External_Dyn)
 			   : sizeof (Elf64_External_Dyn);
-  for (bufend = buf + sect_size;
-       buf < bufend;
-       buf += step)
+  for (gdb_byte *buf = ph_data->data (), *bufend = buf + ph_data->size ();
+       buf < bufend; buf += step)
   {
     if (arch_size == 32)
       {
@@ -746,14 +733,12 @@ scan_dyntag_auxv (const int desired_dyntag, CORE_ADDR *ptr,
 	  *ptr = dyn_ptr;
 
 	if (ptr_addr)
-	  *ptr_addr = base_addr + buf - bufstart;
+	  *ptr_addr = base_addr + buf - ph_data->data ();
 
-	xfree (bufstart);
 	return 1;
       }
   }
 
-  xfree (bufstart);
   return 0;
 }
 
@@ -2197,7 +2182,6 @@ enable_break (struct svr4_info *info, int from_tty)
   struct bound_minimal_symbol msymbol;
   const char * const *bkpt_namep;
   asection *interp_sect;
-  char *interp_name;
   CORE_ADDR sym_addr;
 
   info->interp_text_sect_low = info->interp_text_sect_high = 0;
@@ -2280,9 +2264,11 @@ enable_break (struct svr4_info *info, int from_tty)
 
   /* Find the program interpreter; if not found, warn the user and drop
      into the old breakpoint at symbol code.  */
-  interp_name = find_program_interpreter ();
-  if (interp_name)
+  gdb::optional<gdb::byte_vector> interp_name_holder
+    = find_program_interpreter ();
+  if (interp_name_holder)
     {
+      const char *interp_name = (const char *) interp_name_holder->data ();
       CORE_ADDR load_addr = 0;
       int load_addr_found = 0;
       int loader_found_in_list = 0;
@@ -2436,14 +2422,12 @@ enable_break (struct svr4_info *info, int from_tty)
 	{
 	  svr4_create_solib_event_breakpoints (target_gdbarch (),
 					       load_addr + sym_addr);
-	  xfree (interp_name);
 	  return 1;
 	}
 
       /* For whatever reason we couldn't set a breakpoint in the dynamic
          linker.  Warn and drop into the old code.  */
     bkpt_at_symbol:
-      xfree (interp_name);
       warning (_("Unable to find dynamic linker breakpoint function.\n"
                "GDB will be unable to debug shared library initializers\n"
                "and track explicitly loaded dynamic code."));
@@ -2467,7 +2451,7 @@ enable_break (struct svr4_info *info, int from_tty)
 	}
     }
 
-  if (interp_name != NULL && !current_inferior ()->attach_flag)
+  if (interp_name_holder && !current_inferior ()->attach_flag)
     {
       for (bkpt_namep = bkpt_names; *bkpt_namep != NULL; bkpt_namep++)
 	{
@@ -2604,13 +2588,14 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
     {
       /* Be optimistic and clear OK only if GDB was able to verify the headers
 	 really do not match.  */
-      int phdrs_size, phdrs2_size, ok = 1;
-      gdb_byte *buf, *buf2;
+      int phdrs2_size, ok = 1;
+      gdb_byte *buf2;
       int arch_size;
 
-      buf = read_program_header (-1, &phdrs_size, &arch_size, NULL);
+      gdb::optional<gdb::byte_vector> phdrs_target
+	= read_program_header (-1, &arch_size, NULL);
       buf2 = read_program_headers_from_bfd (exec_bfd, &phdrs2_size);
-      if (buf != NULL && buf2 != NULL)
+      if (phdrs_target && buf2 != NULL)
 	{
 	  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
 
@@ -2627,12 +2612,12 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 	     relocate BUF and BUF2 just by the EXEC_BFD vs. target memory
 	     content offset for the verification purpose.  */
 
-	  if (phdrs_size != phdrs2_size
+	  if (phdrs_target->size () != phdrs2_size
 	      || bfd_get_arch_size (exec_bfd) != arch_size)
 	    ok = 0;
 	  else if (arch_size == 32
-		   && phdrs_size >= sizeof (Elf32_External_Phdr)
-	           && phdrs_size % sizeof (Elf32_External_Phdr) == 0)
+		   && phdrs_target->size () >= sizeof (Elf32_External_Phdr)
+	           && phdrs_target->size () % sizeof (Elf32_External_Phdr) == 0)
 	    {
 	      Elf_Internal_Ehdr *ehdr2 = elf_tdata (exec_bfd)->elf_header;
 	      Elf_Internal_Phdr *phdr2 = elf_tdata (exec_bfd)->phdr;
@@ -2653,7 +2638,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 		    CORE_ADDR displacement_vaddr = 0;
 		    CORE_ADDR displacement_paddr = 0;
 
-		    phdrp = &((Elf32_External_Phdr *) buf)[i];
+		    phdrp = &((Elf32_External_Phdr *) phdrs_target->data ())[i];
 		    buf_vaddr_p = (gdb_byte *) &phdrp->p_vaddr;
 		    buf_paddr_p = (gdb_byte *) &phdrp->p_paddr;
 
@@ -2671,9 +2656,12 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 		    break;
 		  }
 
-	      /* Now compare BUF and BUF2 with optional DISPLACEMENT.  */
+	      /* Now compare program headers from the target and the binary
+	         with optional DISPLACEMENT.  */
 
-	      for (i = 0; i < phdrs_size / sizeof (Elf32_External_Phdr); i++)
+	      for (i = 0;
+		   i < phdrs_target->size () / sizeof (Elf32_External_Phdr);
+		   i++)
 		{
 		  Elf32_External_Phdr *phdrp;
 		  Elf32_External_Phdr *phdr2p;
@@ -2681,7 +2669,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 		  CORE_ADDR vaddr, paddr;
 		  asection *plt2_asect;
 
-		  phdrp = &((Elf32_External_Phdr *) buf)[i];
+		  phdrp = &((Elf32_External_Phdr *) phdrs_target->data ())[i];
 		  buf_vaddr_p = (gdb_byte *) &phdrp->p_vaddr;
 		  buf_paddr_p = (gdb_byte *) &phdrp->p_paddr;
 		  phdr2p = &((Elf32_External_Phdr *) buf2)[i];
@@ -2764,8 +2752,8 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 		}
 	    }
 	  else if (arch_size == 64
-		   && phdrs_size >= sizeof (Elf64_External_Phdr)
-	           && phdrs_size % sizeof (Elf64_External_Phdr) == 0)
+		   && phdrs_target->size () >= sizeof (Elf64_External_Phdr)
+	           && phdrs_target->size () % sizeof (Elf64_External_Phdr) == 0)
 	    {
 	      Elf_Internal_Ehdr *ehdr2 = elf_tdata (exec_bfd)->elf_header;
 	      Elf_Internal_Phdr *phdr2 = elf_tdata (exec_bfd)->phdr;
@@ -2786,7 +2774,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 		    CORE_ADDR displacement_vaddr = 0;
 		    CORE_ADDR displacement_paddr = 0;
 
-		    phdrp = &((Elf64_External_Phdr *) buf)[i];
+		    phdrp = &((Elf64_External_Phdr *) phdrs_target->data ())[i];
 		    buf_vaddr_p = (gdb_byte *) &phdrp->p_vaddr;
 		    buf_paddr_p = (gdb_byte *) &phdrp->p_paddr;
 
@@ -2806,7 +2794,9 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 
 	      /* Now compare BUF and BUF2 with optional DISPLACEMENT.  */
 
-	      for (i = 0; i < phdrs_size / sizeof (Elf64_External_Phdr); i++)
+	      for (i = 0;
+		   i < phdrs_target->size () / sizeof (Elf64_External_Phdr);
+		   i++)
 		{
 		  Elf64_External_Phdr *phdrp;
 		  Elf64_External_Phdr *phdr2p;
@@ -2814,7 +2804,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 		  CORE_ADDR vaddr, paddr;
 		  asection *plt2_asect;
 
-		  phdrp = &((Elf64_External_Phdr *) buf)[i];
+		  phdrp = &((Elf64_External_Phdr *) phdrs_target->data ())[i];
 		  buf_vaddr_p = (gdb_byte *) &phdrp->p_vaddr;
 		  buf_paddr_p = (gdb_byte *) &phdrp->p_paddr;
 		  phdr2p = &((Elf64_External_Phdr *) buf2)[i];
@@ -2900,7 +2890,6 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 	    ok = 0;
 	}
 
-      xfree (buf);
       xfree (buf2);
 
       if (!ok)

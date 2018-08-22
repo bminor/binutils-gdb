@@ -1,5 +1,15 @@
 2018-08-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* solib-svr4.c (read_program_header): Return
+	gdb::optional<gdb::byte_vector>, remove p_sect_size param.
+	(find_program_interpreter): Return
+	gdb::optional<gdb::byte_vector>.
+	(scan_dyntag_auxv): Adjust.
+	(enable_break): Adjust.
+	(svr4_exec_displacement): Adjust.
+
+2018-08-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* inf-child.h (inf_child_target) <terminal_save_inferior>: New.
 	* inf-child.c (inf_child_target::terminal_save_inferior): New.
 
