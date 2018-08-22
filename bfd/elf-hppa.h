@@ -889,9 +889,11 @@ elf_hppa_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
       asection *asec;
 
 #if ARCH_SIZE == 64
-      hdr->sh_type = SHT_LOPROC + 1;
+      hdr->sh_type = SHT_PARISC_UNWIND;
 #else
-      hdr->sh_type = 1;
+      /* Note - it is not clear why this is not SHT_PARISC_UNWIND as well.
+	 Presumably it is a historical constraint, so leave it as it is.  */
+      hdr->sh_type = SHT_PROGBITS;
 #endif
       /* ?!? How are unwinds supposed to work for symbols in arbitrary
 	 sections?  Or what if we have multiple .text sections in a single
@@ -912,7 +914,10 @@ elf_hppa_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
 	    }
 	}
 
-      /* I have no idea if this is really necessary or what it means.  */
+      /* The unwind table entries are 16 bytes long, so it is not clear
+	 why this field is set to 4.  (The ELF spec says that the sh_entsize
+	 field is a byte quantity, but this is a processor specific section,
+	 so it is allowed to change the rules).  Leave as it is for now.  */
       hdr->sh_entsize = 4;
     }
   return TRUE;

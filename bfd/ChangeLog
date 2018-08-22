@@ -1,3 +1,11 @@
+2018-08-22  Helge Deller  <deller@gmx.de>
+	Nick Clifton  <nickc@redhat.com>
+
+	* elf-hppa.h (elf_hppa_fake_sections): Use SHT_PARISC_UNWIND as
+	the section type of the .PARISC.unwind section on 64-bit binaries
+	and SHT_PROGBITS for 32-bit binaries.  Add a comment about it.
+	Add comment about the sh_entsize value.
+
 2018-08-22  Rafeal Auler  <rafaelauler@gmail.com>
 
 	PR 23560
