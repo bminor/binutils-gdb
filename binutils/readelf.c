@@ -4765,12 +4765,12 @@ process_file_header (Filedata * filedata)
 	      get_elf_class (header->e_ident[EI_CLASS]));
       printf (_("  Data:                              %s\n"),
 	      get_data_encoding (header->e_ident[EI_DATA]));
-      printf (_("  Version:                           %d %s\n"),
+      printf (_("  Version:                           %d%s\n"),
 	      header->e_ident[EI_VERSION],
 	      (header->e_ident[EI_VERSION] == EV_CURRENT
-	       ? "(current)"
+	       ? _(" (current)")
 	       : (header->e_ident[EI_VERSION] != EV_NONE
-		  ? _("<unknown: %lx>")
+		  ? _(" <unknown>")
 		  : "")));
       printf (_("  OS/ABI:                            %s\n"),
 	      get_osabi_name (filedata, header->e_ident[EI_OSABI]));
@@ -4781,45 +4781,57 @@ process_file_header (Filedata * filedata)
       printf (_("  Machine:                           %s\n"),
 	      get_machine_name (header->e_machine));
       printf (_("  Version:                           0x%lx\n"),
-	      (unsigned long) header->e_version);
+	      header->e_version);
 
       printf (_("  Entry point address:               "));
-      print_vma ((bfd_vma) header->e_entry, PREFIX_HEX);
+      print_vma (header->e_entry, PREFIX_HEX);
       printf (_("\n  Start of program headers:          "));
-      print_vma ((bfd_vma) header->e_phoff, DEC);
+      print_vma (header->e_phoff, DEC);
       printf (_(" (bytes into file)\n  Start of section headers:          "));
-      print_vma ((bfd_vma) header->e_shoff, DEC);
+      print_vma (header->e_shoff, DEC);
       printf (_(" (bytes into file)\n"));
 
       printf (_("  Flags:                             0x%lx%s\n"),
-	      (unsigned long) header->e_flags,
+	      header->e_flags,
 	      get_machine_flags (filedata, header->e_flags, header->e_machine));
-      printf (_("  Size of this header:               %ld (bytes)\n"),
-	      (long) header->e_ehsize);
-      printf (_("  Size of program headers:           %ld (bytes)\n"),
-	      (long) header->e_phentsize);
-      printf (_("  Number of program headers:         %ld"),
-	      (long) header->e_phnum);
+      printf (_("  Size of this header:               %u (bytes)\n"),
+	      header->e_ehsize);
+      printf (_("  Size of program headers:           %u (bytes)\n"),
+	      header->e_phentsize);
+      printf (_("  Number of program headers:         %u"),
+	      header->e_phnum);
       if (filedata->section_headers != NULL
 	  && header->e_phnum == PN_XNUM
 	  && filedata->section_headers[0].sh_info != 0)
-	printf (" (%ld)", (long) filedata->section_headers[0].sh_info);
+	{
+	  header->e_phnum = filedata->section_headers[0].sh_info;
+	  printf (" (%u)", header->e_phnum);
+	}
       putc ('\n', stdout);
-      printf (_("  Size of section headers:           %ld (bytes)\n"),
-	      (long) header->e_shentsize);
-      printf (_("  Number of section headers:         %ld"),
-	      (long) header->e_shnum);
+      printf (_("  Size of section headers:           %u (bytes)\n"),
+	      header->e_shentsize);
+      printf (_("  Number of section headers:         %u"),
+	      header->e_shnum);
       if (filedata->section_headers != NULL && header->e_shnum == SHN_UNDEF)
-	printf (" (%ld)", (long) filedata->section_headers[0].sh_size);
+	{
+	  header->e_shnum = filedata->section_headers[0].sh_size;
+	  printf (" (%u)", header->e_shnum);
+	}
       putc ('\n', stdout);
-      printf (_("  Section header string table index: %ld"),
-	      (long) header->e_shstrndx);
+      printf (_("  Section header string table index: %u"),
+	      header->e_shstrndx);
       if (filedata->section_headers != NULL
 	  && header->e_shstrndx == (SHN_XINDEX & 0xffff))
-	printf (" (%u)", filedata->section_headers[0].sh_link);
-      else if (header->e_shstrndx != SHN_UNDEF
-	       && header->e_shstrndx >= header->e_shnum)
-	printf (_(" <corrupt: out of range>"));
+	{
+	  header->e_shstrndx = filedata->section_headers[0].sh_link;
+	  printf (" (%u)", header->e_shstrndx);
+	}
+      if (header->e_shstrndx != SHN_UNDEF
+	  && header->e_shstrndx >= header->e_shnum)
+	{
+	  header->e_shstrndx = SHN_UNDEF;
+	  printf (_(" <corrupt: out of range>"));
+	}
       putc ('\n', stdout);
     }
 
