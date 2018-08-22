@@ -1,5 +1,9 @@
 2018-08-21  Alan Hayward  <alan.hayward@arm.com>
 
+	* arch/aarch64.h (aarch64_regnum): Update comment.
+
+2018-08-21  Alan Hayward  <alan.hayward@arm.com>
+
 	* NEWS: Add SVE to 8.2 section.
 
 2018-08-21  Pedro Alves  <palves@redhat.com>

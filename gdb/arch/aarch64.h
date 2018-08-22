@@ -49,7 +49,7 @@ enum aarch64_regnum
   AARCH64_SVE_P15_REGNUM = AARCH64_SVE_P0_REGNUM + 15,	/* Last SVE predicate
 							   register.  */
   AARCH64_SVE_FFR_REGNUM,	/* SVE First Fault Register.  */
-  AARCH64_SVE_VG_REGNUM,	/* SVE Vector Gradient.  */
+  AARCH64_SVE_VG_REGNUM,	/* SVE Vector Granule.  */
 
   /* Other useful registers.  */
   AARCH64_LAST_X_ARG_REGNUM = AARCH64_X0_REGNUM + 7,
@@ -71,7 +71,7 @@ enum aarch64_regnum
 	The number of bytes in an SVE Z register.
    VQ : Vector Quotient.
 	The number of 128bit chunks in an SVE Z register.
-   VG : Vector Gradient.
+   VG : Vector Granule.
 	The number of 64bit chunks in an SVE Z register.  */
 
 #define sve_vg_from_vl(vl)	((vl) / 8)
