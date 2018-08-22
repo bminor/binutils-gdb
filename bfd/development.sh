@@ -17,3 +17,6 @@
 
 # Controls whether to enable development-mode features by default.
 development=true
+
+# Indicate whether this is a release branch.
+experimental=true

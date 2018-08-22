@@ -1,3 +1,8 @@
+2018-08-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23536
+	* development.sh (experimental): New.
+
 2018-08-22  Helge Deller  <deller@gmx.de>
 	Nick Clifton  <nickc@redhat.com>
 
