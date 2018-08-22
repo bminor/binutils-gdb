@@ -197,7 +197,7 @@ emit_expr_encoded (expressionS *exp, int encoding, bfd_boolean emit_encoding)
     {
       reloc_howto_type *howto = bfd_reloc_type_lookup (stdoutput, code);
       char *p = frag_more (size);
-      gas_assert (size == howto->bitsize / 8);
+      gas_assert (size == (unsigned) howto->bitsize / 8);
       md_number_to_chars (p, 0, size);
       fix_new (frag_now, p - frag_now->fr_literal, size, exp->X_add_symbol,
 	       exp->X_add_number, howto->pc_relative, code);
@@ -1979,7 +1979,7 @@ output_fde (struct fde_entry *fde, struct cie_entry *cie,
 	{
 	  reloc_howto_type *howto = bfd_reloc_type_lookup (stdoutput, code);
 	  char *p = frag_more (addr_size);
-	  gas_assert (addr_size == howto->bitsize / 8);
+	  gas_assert (addr_size == (unsigned) howto->bitsize / 8);
 	  md_number_to_chars (p, 0, addr_size);
 	  fix_new (frag_now, p - frag_now->fr_literal, addr_size,
 		   fde->start_address, 0, howto->pc_relative, code);

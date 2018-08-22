@@ -1,3 +1,7 @@
+2018-08-22  Alan Modra  <amodra@gmail.com>
+
+	* dw2gencfi.c (emit_expr_encoded, output_fde): Warning fixes.
+
 2018-08-21  Arnold Metselaar  <arnold.metsel@gmail.com>
 
 	* config/tc-z80.c: Correct treatment of undocumented instruction
