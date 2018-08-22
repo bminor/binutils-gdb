@@ -1,3 +1,9 @@
+2018-08-22  Rafeal Auler  <rafaelauler@gmail.com>
+
+	PR 23560
+	* elfnn-aarch64.c (elfNN_aarch64_size_stubs): Always update the
+	stub's target, since it may have been changed after the layout.
+
 2018-08-21  John Darington  <john@darrington.wattle.id.au>
 
 	* elf32-s12z.c (opru18_reloc): New function.

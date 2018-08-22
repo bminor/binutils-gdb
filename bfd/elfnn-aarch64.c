@@ -4414,6 +4414,9 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
 		    {
 		      /* The proper stub has already been created.  */
 		      free (stub_name);
+		      /* Always update this stub's target since it may have
+			 changed after layout.  */
+		      stub_entry->target_value = sym_value + irela->r_addend;
 		      continue;
 		    }
 
