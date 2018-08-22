@@ -1,5 +1,11 @@
 2018-08-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* solib-svr4.c (read_program_headers_from_bfd): Return
+	gdb::optional<gdb::byte_vector>.
+	(svr4_exec_displacement): Adjust.
+
+2018-08-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* solib-svr4.c (read_program_header): Return
 	gdb::optional<gdb::byte_vector>, remove p_sect_size param.
 	(find_program_interpreter): Return

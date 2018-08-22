@@ -2471,28 +2471,20 @@ enable_break (struct svr4_info *info, int from_tty)
   return 0;
 }
 
-/* Read the ELF program headers from ABFD.  Return the contents and
-   set *PHDRS_SIZE to the size of the program headers.  */
+/* Read the ELF program headers from ABFD.  */
 
-static gdb_byte *
-read_program_headers_from_bfd (bfd *abfd, int *phdrs_size)
+static gdb::optional<gdb::byte_vector>
+read_program_headers_from_bfd (bfd *abfd)
 {
-  Elf_Internal_Ehdr *ehdr;
-  gdb_byte *buf;
+  Elf_Internal_Ehdr *ehdr = elf_elfheader (abfd);
+  int phdrs_size = ehdr->e_phnum * ehdr->e_phentsize;
+  if (phdrs_size == 0)
+    return {};
 
-  ehdr = elf_elfheader (abfd);
-
-  *phdrs_size = ehdr->e_phnum * ehdr->e_phentsize;
-  if (*phdrs_size == 0)
-    return NULL;
-
-  buf = (gdb_byte *) xmalloc (*phdrs_size);
+  gdb::byte_vector buf (phdrs_size);
   if (bfd_seek (abfd, ehdr->e_phoff, SEEK_SET) != 0
-      || bfd_bread (buf, *phdrs_size, abfd) != *phdrs_size)
-    {
-      xfree (buf);
-      return NULL;
-    }
+      || bfd_bread (buf.data (), phdrs_size, abfd) != phdrs_size)
+    return {};
 
   return buf;
 }
@@ -2586,16 +2578,15 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 
   if (bfd_get_flavour (exec_bfd) == bfd_target_elf_flavour)
     {
-      /* Be optimistic and clear OK only if GDB was able to verify the headers
+      /* Be optimistic and return 0 only if GDB was able to verify the headers
 	 really do not match.  */
-      int phdrs2_size, ok = 1;
-      gdb_byte *buf2;
       int arch_size;
 
       gdb::optional<gdb::byte_vector> phdrs_target
 	= read_program_header (-1, &arch_size, NULL);
-      buf2 = read_program_headers_from_bfd (exec_bfd, &phdrs2_size);
-      if (phdrs_target && buf2 != NULL)
+      gdb::optional<gdb::byte_vector> phdrs_binary
+	= read_program_headers_from_bfd (exec_bfd);
+      if (phdrs_target && phdrs_binary)
 	{
 	  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
 
@@ -2612,9 +2603,9 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 	     relocate BUF and BUF2 just by the EXEC_BFD vs. target memory
 	     content offset for the verification purpose.  */
 
-	  if (phdrs_target->size () != phdrs2_size
+	  if (phdrs_target->size () != phdrs_binary->size ()
 	      || bfd_get_arch_size (exec_bfd) != arch_size)
-	    ok = 0;
+	    return 0;
 	  else if (arch_size == 32
 		   && phdrs_target->size () >= sizeof (Elf32_External_Phdr)
 	           && phdrs_target->size () % sizeof (Elf32_External_Phdr) == 0)
@@ -2672,7 +2663,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 		  phdrp = &((Elf32_External_Phdr *) phdrs_target->data ())[i];
 		  buf_vaddr_p = (gdb_byte *) &phdrp->p_vaddr;
 		  buf_paddr_p = (gdb_byte *) &phdrp->p_paddr;
-		  phdr2p = &((Elf32_External_Phdr *) buf2)[i];
+		  phdr2p = &((Elf32_External_Phdr *) phdrs_binary->data ())[i];
 
 		  /* PT_GNU_STACK is an exception by being never relocated by
 		     prelink as its addresses are always zero.  */
@@ -2747,8 +2738,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 			continue;
 		    }
 
-		  ok = 0;
-		  break;
+		  return 0;
 		}
 	    }
 	  else if (arch_size == 64
@@ -2807,7 +2797,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 		  phdrp = &((Elf64_External_Phdr *) phdrs_target->data ())[i];
 		  buf_vaddr_p = (gdb_byte *) &phdrp->p_vaddr;
 		  buf_paddr_p = (gdb_byte *) &phdrp->p_paddr;
-		  phdr2p = &((Elf64_External_Phdr *) buf2)[i];
+		  phdr2p = &((Elf64_External_Phdr *) phdrs_binary->data ())[i];
 
 		  /* PT_GNU_STACK is an exception by being never relocated by
 		     prelink as its addresses are always zero.  */
@@ -2882,18 +2872,12 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 			continue;
 		    }
 
-		  ok = 0;
-		  break;
+		  return 0;
 		}
 	    }
 	  else
-	    ok = 0;
+	    return 0;
 	}
-
-      xfree (buf2);
-
-      if (!ok)
-	return 0;
     }
 
   if (info_verbose)
