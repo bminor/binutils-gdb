@@ -9,7 +9,7 @@
 	(emit_mr): Add argument unportable.
 	(emit_bit): Adapt call to emit_mr.
 	(emit_mr_z80): New function.
-	(emit_mr_unportable): New function.
+	(emit_mr_unport): New function.
 	(instab[]): Replace emit_mr with emit_mr_z80 or emit_mr_unportable
 	as appropriate.
 
