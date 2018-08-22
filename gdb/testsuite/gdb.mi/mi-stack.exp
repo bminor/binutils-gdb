@@ -46,6 +46,8 @@ proc test_stack_frame_listing {} {
     global mi_gdb_prompt
     global hex fullname_syntax srcfile
 
+    set any "\[^\"\]+"
+
     set callee4_begin [gdb_get_line_number "callee4 begin"]
     mi_continue_to_line $callee4_begin "continue to callee4 begin"
 
@@ -56,7 +58,7 @@ proc test_stack_frame_listing {} {
     # -stack-list-frames 1 3
     # -stack-info-frame
     mi_gdb_test "231-stack-list-frames" \
-	"231\\^done,stack=\\\[frame=\{level=\"0\",addr=\"$hex\",func=\"callee4\",file=\".*${srcfile}\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$callee4_begin\"\},frame=\{level=\"1\",addr=\"$hex\",func=\"callee3\",.*\},frame=\{level=\"2\",addr=\"$hex\",func=\"callee2\",.*\},frame=\{level=\"3\",addr=\"$hex\",func=\"callee1\",.*\},frame=\{level=\"4\",addr=\"$hex\",func=\"main\",.*\}\\\]" \
+	"231\\^done,stack=\\\[frame=\{level=\"0\",addr=\"$hex\",func=\"callee4\",file=\".*${srcfile}\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$callee4_begin\",arch=\"$any\"\},frame=\{level=\"1\",addr=\"$hex\",func=\"callee3\",.*\},frame=\{level=\"2\",addr=\"$hex\",func=\"callee2\",.*\},frame=\{level=\"3\",addr=\"$hex\",func=\"callee1\",.*\},frame=\{level=\"4\",addr=\"$hex\",func=\"main\",.*\}\\\]" \
 	"stack frame listing"
     mi_gdb_test "232-stack-list-frames 1 1" \
 	"232\\^done,stack=\\\[frame=\{level=\"1\",addr=\"$hex\",func=\"callee3\",.*\}\\\]" \
@@ -70,7 +72,7 @@ proc test_stack_frame_listing {} {
 	"stack frame listing wrong"
 
     mi_gdb_test "235-stack-info-frame" \
-	"235\\^done,frame=\{level=\"0\",addr=\"$hex\",func=\"callee4\",file=\".*${srcfile}\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$callee4_begin\"\}" \
+	"235\\^done,frame=\{level=\"0\",addr=\"$hex\",func=\"callee4\",file=\".*${srcfile}\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$callee4_begin\",arch=\"$any\"\}" \
 	"selected frame listing"
 
     mi_gdb_test "236-stack-list-frames 1 300" \

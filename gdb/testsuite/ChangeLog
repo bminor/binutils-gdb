@@ -1,3 +1,12 @@
+2018-08-22  Jan Vrany  <jan.vrany@fit.cvut.cz>
+
+	* lib/mi-support.exp (mi_expect_stop): Update regexp to
+	accommodate new "arch" field in frame output.
+	* gdb.mi/mi-return.exp: Likewise.
+	* gdb.mi/mi-stack.exp: Likewise.
+	* gdb.mi/mi-syn-frame.exp: Likewise.
+	* gdb.mi/user-selected-context-sync.exp: Likewise.
+
 2018-08-19  Michael Spang  <spang@google.com>
 
 	PR gdb/11786

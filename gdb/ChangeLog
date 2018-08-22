@@ -1,3 +1,9 @@
+2018-08-22  Jan Vrany  <jan.vrany@fit.cvut.cz>
+
+	* stack.c (print_frame): Print frame architecture when printing on
+	an MI output.
+	* NEWS: Mention new "arch" attribute in frame output.
+
 2018-08-21  Alan Hayward  <alan.hayward@arm.com>
 
 	* arch/aarch64.h (aarch64_regnum): Update comment.

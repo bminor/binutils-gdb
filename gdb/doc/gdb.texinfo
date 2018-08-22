@@ -28017,7 +28017,8 @@ reason that execution stopped.
 <- *stopped,reason="breakpoint-hit",disp="keep",bkptno="1",thread-id="0",
    frame=@{addr="0x08048564",func="main",
    args=[@{name="argc",value="1"@},@{name="argv",value="0xbfc4d4d4"@}],
-   file="myprog.c",fullname="/home/nickrob/myprog.c",line="68"@}
+   file="myprog.c",fullname="/home/nickrob/myprog.c",line="68",
+   arch="i386:x86_64"@}
 <- (gdb)
 -> -exec-continue
 <- ^running
@@ -28680,7 +28681,7 @@ Setting a watchpoint on a variable in the @code{main} function:
 *stopped,reason="watchpoint-trigger",wpt=@{number="2",exp="x"@},
 value=@{old="-268439212",new="55"@},
 frame=@{func="main",args=[],file="recursive2.c",
-fullname="/home/foo/bar/recursive2.c",line="5"@}
+fullname="/home/foo/bar/recursive2.c",line="5",arch="i386:x86_64"@}
 (gdb)
 @end smallexample
 
@@ -28700,7 +28701,8 @@ for the watchpoint going out of scope.
 wpt=@{number="5",exp="C"@},value=@{old="-276895068",new="3"@},
 frame=@{func="callee4",args=[],
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
-fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="13"@}
+fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="13",
+arch="i386:x86_64"@}
 (gdb)
 -exec-continue
 ^running
@@ -28709,7 +28711,8 @@ fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="13"@}
 frame=@{func="callee3",args=[@{name="strarg",
 value="0x11940 \"A string argument.\""@}],
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
-fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="18"@}
+fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="18",
+arch="i386:x86_64"@}
 (gdb)
 @end smallexample
 
@@ -28745,7 +28748,8 @@ enabled="y",addr="",what="C",thread-groups=["i1"],times="0"@}]@}
 value=@{old="-276895068",new="3"@},
 frame=@{func="callee4",args=[],
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
-fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="13"@}
+fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="13",
+arch="i386:x86_64"@}
 (gdb)
 -break-list
 ^done,BreakpointTable=@{nr_rows="2",nr_cols="6",
@@ -28769,7 +28773,8 @@ enabled="y",addr="",what="C",thread-groups=["i1"],times="-5"@}]@}
 frame=@{func="callee3",args=[@{name="strarg",
 value="0x11940 \"A string argument.\""@}],
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
-fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="18"@}
+fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="18",
+arch="i386:x86_64"@}
 (gdb)
 -break-list
 ^done,BreakpointTable=@{nr_rows="1",nr_cols="6",
@@ -29248,7 +29253,7 @@ the command.
 @{id="1",target-id="Thread 0xb7e156b0 (LWP 21254)",
    frame=@{level="0",addr="0x0804891f",func="foo",
            args=[@{name="i",value="10"@}],
-           file="/tmp/a.c",fullname="/tmp/a.c",line="158"@},
+           file="/tmp/a.c",fullname="/tmp/a.c",line="158",arch="i386:x86_64"@},
            state="running"@}],
 current-thread-id="1"
 (gdb)
@@ -29324,7 +29329,7 @@ number-of-threads="3"
 ^done,new-thread-id="3",
 frame=@{level="0",func="vprintf",
 args=[@{name="format",value="0x8048e9c \"%*s%c %d %c\\n\""@},
-@{name="arg",value="0x2"@}],file="vprintf.c",line="31"@}
+@{name="arg",value="0x2"@}],file="vprintf.c",line="31",arch="i386:x86_64"@}
 (gdb)
 @end smallexample
 
@@ -29458,7 +29463,7 @@ The corresponding @value{GDBN} corresponding is @samp{continue}.
 @@Hello world
 *stopped,reason="breakpoint-hit",disp="keep",bkptno="2",frame=@{
 func="foo",args=[],file="hello.c",fullname="/home/foo/bar/hello.c",
-line="13"@}
+line="13",arch="i386:x86_64"@}
 (gdb)
 @end smallexample
 
@@ -29492,7 +29497,7 @@ Function returning @code{void}.
 (gdb)
 @@hello from foo
 *stopped,reason="function-finished",frame=@{func="main",args=[],
-file="hello.c",fullname="/home/foo/bar/hello.c",line="7"@}
+file="hello.c",fullname="/home/foo/bar/hello.c",line="7",arch="i386:x86_64"@}
 (gdb)
 @end smallexample
 
@@ -29506,7 +29511,8 @@ value itself.
 (gdb)
 *stopped,reason="function-finished",frame=@{addr="0x000107b0",func="foo",
 args=[@{name="a",value="1"],@{name="b",value="9"@}@},
-file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14",
+arch="i386:x86_64"@},
 gdb-result-var="$1",return-value="0"
 (gdb)
 @end smallexample
@@ -29554,7 +29560,7 @@ The corresponding @value{GDBN} command is @samp{interrupt}.
 (gdb)
 111*stopped,signal-name="SIGINT",signal-meaning="Interrupt",
 frame=@{addr="0x00010140",func="foo",args=[],file="try.c",
-fullname="/home/foo/bar/try.c",line="13"@}
+fullname="/home/foo/bar/try.c",line="13",arch="i386:x86_64"@}
 (gdb)
 
 (gdb)
@@ -29691,7 +29697,8 @@ file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="8"@}
 000*stopped,reason="breakpoint-hit",disp="keep",bkptno="1",
 frame=@{func="callee4",args=[],
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
-fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="8"@}
+fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="8",
+arch="i386:x86_64"@}
 (gdb)
 205-break-delete
 205^done
@@ -29701,7 +29708,8 @@ fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="8"@}
 args=[@{name="strarg",
 value="0x11940 \"A string argument.\""@}],
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
-fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="18"@}
+fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="18",
+arch="i386:x86_64"@}
 (gdb)
 @end smallexample
 
@@ -29747,7 +29755,7 @@ The corresponding @value{GDBN} command is @samp{run}.
 (gdb)
 *stopped,reason="breakpoint-hit",disp="keep",bkptno="1",
 frame=@{func="main",args=[],file="recursive2.c",
-fullname="/home/foo/bar/recursive2.c",line="4"@}
+fullname="/home/foo/bar/recursive2.c",line="4",arch="i386:x86_64"@}
 (gdb)
 @end smallexample
 
@@ -29821,7 +29829,7 @@ Stepping into a function:
 *stopped,reason="end-stepping-range",
 frame=@{func="foo",args=[@{name="a",value="10"@},
 @{name="b",value="0"@}],file="recursive2.c",
-fullname="/home/foo/bar/recursive2.c",line="11"@}
+fullname="/home/foo/bar/recursive2.c",line="11",arch="i386:x86_64"@}
 (gdb)
 @end smallexample
 
@@ -29867,7 +29875,7 @@ The corresponding @value{GDBN} command is @samp{stepi}.
 (gdb)
 *stopped,reason="end-stepping-range",
 frame=@{func="foo",args=[],file="try.c",
-fullname="/home/foo/bar/try.c",line="10"@}
+fullname="/home/foo/bar/try.c",line="10",arch="i386:x86_64"@}
 (gdb)
 -exec-step-instruction
 ^running
@@ -29875,7 +29883,7 @@ fullname="/home/foo/bar/try.c",line="10"@}
 (gdb)
 *stopped,reason="end-stepping-range",
 frame=@{addr="0x000100f4",func="foo",args=[],file="try.c",
-fullname="/home/foo/bar/try.c",line="10"@}
+fullname="/home/foo/bar/try.c",line="10",arch="i386:x86_64"@}
 (gdb)
 @end smallexample
 
@@ -29907,7 +29915,8 @@ The corresponding @value{GDBN} command is @samp{until}.
 (gdb)
 x = 55
 *stopped,reason="location-reached",frame=@{func="main",args=[],
-file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="6"@}
+file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="6",
+arch="i386:x86_64"@}
 (gdb)
 @end smallexample
 
@@ -29960,7 +29969,8 @@ The corresponding @value{GDBN} command is @samp{info frame} or @samp{frame}
 -stack-info-frame
 ^done,frame=@{level="1",addr="0x0001076c",func="callee3",
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
-fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="17"@}
+fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="17",
+arch="i386:x86_64"@}
 (gdb)
 @end smallexample
 
@@ -30052,19 +30062,24 @@ functionality of @samp{-stack-list-arguments}.
 stack=[
 frame=@{level="0",addr="0x00010734",func="callee4",
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
-fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="8"@},
+fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="8",
+arch="i386:x86_64"@},
 frame=@{level="1",addr="0x0001076c",func="callee3",
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
-fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="17"@},
+fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="17",
+arch="i386:x86_64"@},
 frame=@{level="2",addr="0x0001078c",func="callee2",
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
-fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="22"@},
+fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="22",
+arch="i386:x86_64"@},
 frame=@{level="3",addr="0x000107b4",func="callee1",
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
-fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="27"@},
+fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="27",
+arch="i386:x86_64"@},
 frame=@{level="4",addr="0x000107e0",func="main",
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
-fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="32"@}]
+fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="32",
+arch="i386:x86_64"@}]
 (gdb)
 -stack-list-arguments 0
 ^done,
@@ -30132,6 +30147,8 @@ Line number corresponding to the @code{$pc}.
 @item @var{from}
 The shared library where this function is defined.  This is only given
 if the frame's function is not known.
+@item @var{arch}
+Frame's architecture.
 @end table
 
 If invoked without arguments, this command prints a backtrace for the
@@ -30157,29 +30174,41 @@ Full stack backtrace:
 -stack-list-frames
 ^done,stack=
 [frame=@{level="0",addr="0x0001076c",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="11"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="11",
+  arch="i386:x86_64"@},
 frame=@{level="1",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14",
+  arch="i386:x86_64"@},
 frame=@{level="2",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14",
+  arch="i386:x86_64"@},
 frame=@{level="3",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14",
+  arch="i386:x86_64"@},
 frame=@{level="4",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14",
+  arch="i386:x86_64"@},
 frame=@{level="5",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14",
+  arch="i386:x86_64"@},
 frame=@{level="6",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14",
+  arch="i386:x86_64"@},
 frame=@{level="7",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14",
+  arch="i386:x86_64"@},
 frame=@{level="8",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14",
+  arch="i386:x86_64"@},
 frame=@{level="9",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14",
+  arch="i386:x86_64"@},
 frame=@{level="10",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14",
+  arch="i386:x86_64"@},
 frame=@{level="11",addr="0x00010738",func="main",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="4"@}]
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="4",
+  arch="i386:x86_64"@}]
 (gdb)
 @end smallexample
 
@@ -30190,11 +30219,14 @@ Show frames between @var{low_frame} and @var{high_frame}:
 -stack-list-frames 3 5
 ^done,stack=
 [frame=@{level="3",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14",
+  arch="i386:x86_64"@},
 frame=@{level="4",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14",
+  arch="i386:x86_64"@},
 frame=@{level="5",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@}]
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14",
+  arch="i386:x86_64"@}]
 (gdb)
 @end smallexample
 
@@ -30205,7 +30237,8 @@ Show a single frame:
 -stack-list-frames 3 3
 ^done,stack=
 [frame=@{level="3",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@}]
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14",
+  arch="i386:x86_64"@}]
 (gdb)
 @end smallexample
 
@@ -31485,7 +31518,7 @@ On a PPC MBX board:
 (gdb)
 *stopped,reason="breakpoint-hit",disp="keep",bkptno="1",frame=@{
 func="main",args=[],file="try.c",fullname="/home/foo/bar/try.c",
-line="5"@}
+line="5",arch="powerpc"@}
 (gdb)
 -data-list-changed-registers
 ^done,changed-registers=["0","1","2","4","5","6","7","8","9",
@@ -33663,7 +33696,7 @@ and only if there is a corresponding executable file.
    frame=@{level="0",addr="0xffffe410",func="__kernel_vsyscall",args=[]@},state="running"@},
 @{id="1",target-id="Thread 0xb7e156b0 (LWP 21254)",
    frame=@{level="0",addr="0x0804891f",func="foo",args=[@{name="i",value="10"@}],
-           file="/tmp/a.c",fullname="/tmp/a.c",line="158"@},state="running"@}]]
+           file="/tmp/a.c",fullname="/tmp/a.c",line="158",arch="i386:x86_64"@},state="running"@}]]
 -list-thread-groups --available
 ^done,groups=[@{id="17",type="process",pid="yyy",num_children="2",cores=[1,2]@}]
 -list-thread-groups --available --recurse 1
@@ -33895,7 +33928,7 @@ time=@{wallclock="0.05185",user="0.00800",system="0.00000"@}
 *stopped,reason="breakpoint-hit",disp="keep",bkptno="1",thread-id="0",
 frame=@{addr="0x080484ed",func="main",args=[@{name="argc",value="1"@},
 @{name="argv",value="0xbfb60364"@}],file="myprog.c",
-fullname="/home/nickrob/myprog.c",line="73"@}
+fullname="/home/nickrob/myprog.c",line="73",arch="i386:x86_64"@}
 (gdb)
 @end smallexample
 

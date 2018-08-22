@@ -1,3 +1,10 @@
+2018-08-22  Jan Vrany  <jan.vrany@fit.cvut.cz>
+
+	* gdb.texinfo (The -stack-list-frames Command): Update description
+	to mention "arch".
+	Update MI examples throughout the document to contain "arch" in
+	frame output.
+
 2018-08-21  Alan Hayward  <alan.hayward@arm.com>
 
 	* gdb.texinfo (AArch64 SVE): New subsubsection.
