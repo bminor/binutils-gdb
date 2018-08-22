@@ -1,3 +1,7 @@
+2018-08-21  Alan Hayward  <alan.hayward@arm.com>
+
+	* NEWS: Add SVE to 8.2 section.
+
 2018-08-16  Tom Tromey  <tom@tromey.com>
 
 	* top.c (read_command_file): Update.

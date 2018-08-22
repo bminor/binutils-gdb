@@ -1,3 +1,7 @@
+2018-08-21  Alan Hayward  <alan.hayward@arm.com>
+
+	* gdb.texinfo (AArch64 SVE): New subsubsection.
+
 2018-07-02  Maciej W. Rozycki  <macro@mips.com>
 
 	PR tdep/8282
