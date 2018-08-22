@@ -1,3 +1,10 @@
+2018-08-22  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/23374
+	PR gdb/23375
+	* server.h (struct client_state) <disable_randomization>:
+	Initialize to 1.
+
 2018-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* linux-mips-low.c (mips_collect_ptrace_register): Remove unused
