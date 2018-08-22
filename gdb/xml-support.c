@@ -179,16 +179,14 @@ void
 gdb_xml_parser::vdebug (const char *format, va_list ap)
 {
   int line = XML_GetCurrentLineNumber (m_expat_parser);
-  char *message;
 
-  message = xstrvprintf (format, ap);
+  std::string message = string_vprintf (format, ap);
   if (line)
     fprintf_unfiltered (gdb_stderr, "%s (line %d): %s\n",
-			m_name, line, message);
+			m_name, line, message.c_str ());
   else
     fprintf_unfiltered (gdb_stderr, "%s: %s\n",
-			m_name, message);
-  xfree (message);
+			m_name, message.c_str ());
 }
 
 void

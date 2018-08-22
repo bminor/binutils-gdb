@@ -79,13 +79,11 @@ void
 gdbscm_printf (SCM port, const char *format, ...)
 {
   va_list args;
-  char *string;
 
   va_start (args, format);
-  string = xstrvprintf (format, args);
+  std::string string = string_vprintf (format, args);
   va_end (args);
-  scm_puts (string, port);
-  xfree (string);
+  scm_puts (string.c_str (), port);
 }
 
 /* Utility for calling from gdb to "display" an SCM object.  */

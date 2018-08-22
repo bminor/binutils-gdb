@@ -434,16 +434,14 @@ serial_write (struct serial *scb, const void *buf, size_t count)
 }
 
 void
-serial_printf (struct serial *desc, const char *format,...)
+serial_printf (struct serial *desc, const char *format, ...)
 {
   va_list args;
-  char *buf;
   va_start (args, format);
 
-  buf = xstrvprintf (format, args);
-  serial_write (desc, buf, strlen (buf));
+  std::string buf = string_vprintf (format, args);
+  serial_write (desc, buf.c_str (), buf.length ());
 
-  xfree (buf);
   va_end (args);
 }
 

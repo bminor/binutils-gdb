@@ -1,3 +1,11 @@
+2018-08-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* guile/scm-string.c (gdbscm_scm_from_printf): Use
+	string_vprintf.
+	* guile/scm-utils.c (gdbscm_printf): Likewise.
+	* serial.c (serial_printf): Likewise.
+	* xml-support.c (gdb_xml_parser::vdebug): Likewise.
+
 2018-08-22  Jan Vrany  <jan.vrany@fit.cvut.cz>
 
 	* stack.c (print_frame): Print frame architecture when printing on
