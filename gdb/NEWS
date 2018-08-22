@@ -90,6 +90,9 @@ GNU/Linux/RISC-V		riscv*-*-linux*
 * C expressions can now use _Alignof, and C++ expressions can now use
   alignof.
 
+* Support for SVE on AArch64 Linux.  Note that GDB does not detect changes to
+  the vector length while the process is running.
+
 * New commands
 
 set debug fbsd-nat

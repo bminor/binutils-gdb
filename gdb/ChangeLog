@@ -1,3 +1,7 @@
+2018-08-21  Alan Hayward  <alan.hayward@arm.com>
+
+	* NEWS: Add SVE to 8.2 section.
+
 2018-08-21  Pedro Alves  <palves@redhat.com>
 
 	* guile/scm-utils.c (gdbscm_parse_function_args_1): New, factored
