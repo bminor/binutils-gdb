@@ -46,6 +46,7 @@ public:
   bool supports_terminal_ours () override;
   void terminal_init () override;
   void terminal_inferior () override;
+  void terminal_save_inferior () override;
   void terminal_ours_for_output () override;
   void terminal_ours () override;
   void terminal_info (const char *, int) override;

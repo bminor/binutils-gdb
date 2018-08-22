@@ -1,3 +1,9 @@
+2018-08-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.base/term.exp: Compare terminal settings with values from
+	the inferior.
+	* gdb.base/term.c: Get and set terminal settings.
+
 2018-08-22  Jan Vrany  <jan.vrany@fit.cvut.cz>
 
 	* lib/mi-support.exp (mi_expect_stop): Update regexp to

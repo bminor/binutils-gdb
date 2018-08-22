@@ -114,6 +114,12 @@ inf_child_target::terminal_inferior ()
 }
 
 void
+inf_child_target::terminal_save_inferior ()
+{
+  child_terminal_save_inferior (this);
+}
+
+void
 inf_child_target::terminal_ours_for_output ()
 {
   child_terminal_ours_for_output (this);
