@@ -1,3 +1,10 @@
+2018-09-19  Xavier Roirand  <roirand@adacore.com>
+
+	PR gdb/20981:
+	* solib-darwin.c (darwin_get_dyld_bfd): New function.
+	(darwin_solib_get_all_image_info_addr_at_init): Update call.
+	(darwin_solib_create_inferior_hook): Handle unrelocated dyld.
+
 2018-09-19  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-tdep.c (fbsd_print_sockaddr_in): Style fix.
