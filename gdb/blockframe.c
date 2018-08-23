@@ -377,6 +377,43 @@ find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
 
 /* See symtab.h.  */
 
+bool
+find_function_entry_range_from_pc (CORE_ADDR pc, const char **name,
+				   CORE_ADDR *address, CORE_ADDR *endaddr)
+{
+  const struct block *block;
+  bool status = find_pc_partial_function (pc, name, address, endaddr, &block);
+
+  if (status && block != nullptr && !BLOCK_CONTIGUOUS_P (block))
+    {
+      CORE_ADDR entry_pc = BLOCK_ENTRY_PC (block);
+
+      for (int i = 0; i < BLOCK_NRANGES (block); i++)
+        {
+	  if (BLOCK_RANGE_START (block, i) <= entry_pc
+	      && entry_pc < BLOCK_RANGE_END (block, i))
+	    {
+	      if (address != nullptr)
+	        *address = BLOCK_RANGE_START (block, i);
+
+	      if (endaddr != nullptr)
+	        *endaddr = BLOCK_RANGE_END (block, i);
+
+	      return status;
+	    }
+	}
+
+      /* It's an internal error if we exit the above loop without finding
+         the range.  */
+      internal_error (__FILE__, __LINE__,
+                      _("Entry block not found in find_function_entry_range_from_pc"));
+    }
+
+  return status;
+}
+
+/* See symtab.h.  */
+
 struct type *
 find_function_type (CORE_ADDR pc)
 {

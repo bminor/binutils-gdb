@@ -4287,9 +4287,10 @@ fill_in_stop_func (struct gdbarch *gdbarch,
     {
       /* Don't care about return value; stop_func_start and stop_func_name
 	 will both be 0 if it doesn't work.  */
-      find_pc_partial_function (ecs->event_thread->suspend.stop_pc,
-				&ecs->stop_func_name,
-				&ecs->stop_func_start, &ecs->stop_func_end);
+      find_function_entry_range_from_pc (ecs->event_thread->suspend.stop_pc,
+				         &ecs->stop_func_name,
+				         &ecs->stop_func_start,
+					 &ecs->stop_func_end);
       ecs->stop_func_start
 	+= gdbarch_deprecated_function_start_offset (gdbarch);
 

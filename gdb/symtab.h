@@ -1725,11 +1725,30 @@ extern struct symbol *find_symbol_at_address (CORE_ADDR);
    This might suggest that *ADDRESS and *ENDADDR ought to be set to the
    limits of the entry pc range, but that will cause the 
    *ADDRESS <= PC < *ENDADDR condition to be violated; many of the
-   callers of find_pc_partial_function expect this condition to hold.  */
+   callers of find_pc_partial_function expect this condition to hold. 
+
+   Callers which require the start and/or end addresses for the range
+   containing the entry pc should instead call
+   find_function_entry_range_from_pc.  */
 
 extern int find_pc_partial_function (CORE_ADDR pc, const char **name,
 				     CORE_ADDR *address, CORE_ADDR *endaddr,
 				     const struct block **block = nullptr);
+
+/* Like find_pc_partial_function, above, but *ADDRESS and *ENDADDR are
+   set to start and end addresses of the range containing the entry pc.
+
+   Note that it is not necessarily the case that (for non-NULL ADDRESS
+   and ENDADDR arguments) the *ADDRESS <= PC < *ENDADDR condition will
+   hold.
+
+   See comment for find_pc_partial_function, above, for further
+   explanation.  */
+
+extern bool find_function_entry_range_from_pc (CORE_ADDR pc,
+					       const char **name,
+					       CORE_ADDR *address,
+					       CORE_ADDR *endaddr);
 
 /* Return the type of a function with its first instruction exactly at
    the PC address.  Return NULL otherwise.  */
