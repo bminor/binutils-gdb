@@ -1694,10 +1694,42 @@ extern struct symbol *find_pc_sect_containing_function
 
 extern struct symbol *find_symbol_at_address (CORE_ADDR);
 
-/* lookup function from address, return name, start addr and end addr.  */
+/* Finds the "function" (text symbol) that is smaller than PC but
+   greatest of all of the potential text symbols in SECTION.  Sets
+   *NAME and/or *ADDRESS conditionally if that pointer is non-null.
+   If ENDADDR is non-null, then set *ENDADDR to be the end of the
+   function (exclusive).  If the optional parameter BLOCK is non-null,
+   then set *BLOCK to the address of the block corresponding to the
+   function symbol, if such a symbol could be found during the lookup;
+   nullptr is used as a return value for *BLOCK if no block is found. 
+   This function either succeeds or fails (not halfway succeeds).  If
+   it succeeds, it sets *NAME, *ADDRESS, and *ENDADDR to real
+   information and returns 1.  If it fails, it sets *NAME, *ADDRESS
+   and *ENDADDR to zero and returns 0.
+   
+   If the function in question occupies non-contiguous ranges,
+   *ADDRESS and *ENDADDR are (subject to the conditions noted above) set
+   to the start and end of the range in which PC is found.  Thus
+   *ADDRESS <= PC < *ENDADDR with no intervening gaps (in which ranges
+   from other functions might be found).
+   
+   This property allows find_pc_partial_function to be used (as it had
+   been prior to the introduction of non-contiguous range support) by
+   various tdep files for finding a start address and limit address
+   for prologue analysis.  This still isn't ideal, however, because we
+   probably shouldn't be doing prologue analysis (in which
+   instructions are scanned to determine frame size and stack layout)
+   for any range that doesn't contain the entry pc.  Moreover, a good
+   argument can be made that prologue analysis ought to be performed
+   starting from the entry pc even when PC is within some other range.
+   This might suggest that *ADDRESS and *ENDADDR ought to be set to the
+   limits of the entry pc range, but that will cause the 
+   *ADDRESS <= PC < *ENDADDR condition to be violated; many of the
+   callers of find_pc_partial_function expect this condition to hold.  */
 
-extern int find_pc_partial_function (CORE_ADDR, const char **, CORE_ADDR *,
-				     CORE_ADDR *);
+extern int find_pc_partial_function (CORE_ADDR pc, const char **name,
+				     CORE_ADDR *address, CORE_ADDR *endaddr,
+				     const struct block **block = nullptr);
 
 /* Return the type of a function with its first instruction exactly at
    the PC address.  Return NULL otherwise.  */

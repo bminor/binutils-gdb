@@ -9,6 +9,11 @@
 	block.c (make_blockranges): New function.
 	* dwarf2read.c (dwarf2_record_block_ranges): Fill in BLOCK_RANGES
 	for block.
+	* symtab.h (find_pc_partial_function): Add new parameter `block'.
+	* blockframe.c (cache_pc_function_block): New static global.
+	(clear_pc_function_cache): Clear cache_pc_function_block.
+	(find_pc_partial_function): Move comment to symtab.h.  Add
+	support for non-contiguous blocks.
 
 2018-08-23  Xavier Roirand  <roirand@adacore.com>
 
