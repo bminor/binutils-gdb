@@ -1,5 +1,10 @@
 2018-08-23  Nick Clifton  <nickc@redhat.com>
 
+	* elf64-hppa.c (elf_hppa_final_link_relocate): Replace unworkable
+	code with an assertion.
+
+2018-08-23  Nick Clifton  <nickc@redhat.com>
+
 	PR 23061
 	* coffgen.c (coff_pointerize_aux): Add table_end parameter.  Use
 	it to prevent walking off the end of the table.

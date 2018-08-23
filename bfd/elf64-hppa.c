@@ -3556,33 +3556,12 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 
     case R_PARISC_LTOFF_FPTR32:
       {
-	/* We may still need to create the FPTR itself if it was for
-	   a local symbol.  */
-	if (hh == NULL)
-	  {
-	    /* The first two words of an .opd entry are zero.  */
-	    memset (hppa_info->opd_sec->contents + hh->opd_offset, 0, 16);
-
-	    /* The next word is the address of the function.  */
-	    bfd_put_64 (hppa_info->opd_sec->owner, value + addend,
-			(hppa_info->opd_sec->contents
-			 + hh->opd_offset + 16));
-
-	    /* The last word is our local __gp value.  */
-	    value = _bfd_get_gp_value
-		      (hppa_info->opd_sec->output_section->owner);
-	    bfd_put_64 (hppa_info->opd_sec->owner, value,
-			hppa_info->opd_sec->contents + hh->opd_offset + 24);
-
-	    /* The DLT value is the address of the .opd entry.  */
-	    value = (hh->opd_offset
-		     + hppa_info->opd_sec->output_offset
-		     + hppa_info->opd_sec->output_section->vma);
-
-	    bfd_put_64 (hppa_info->dlt_sec->owner,
-			value,
-			hppa_info->dlt_sec->contents + hh->dlt_offset);
-	  }
+	/* FIXME: There used to be code here to create the FPTR itself if
+	   the relocation was against a local symbol.  But the code could
+	   never have worked.  If the assert below is ever triggered then
+	   the code will need to be reinstated and fixed so that it does
+	   what is needed.  */
+	BFD_ASSERT (hh != NULL);
 
 	/* We want the value of the DLT offset for this symbol, not
 	   the symbol's actual address.  Note that __gp may not point
