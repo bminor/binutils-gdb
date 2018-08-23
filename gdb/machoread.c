@@ -615,7 +615,7 @@ macho_symfile_read_all_oso (std::vector<oso_el> *oso_vector_ptr,
   std::sort (oso_vector_ptr->begin (), oso_vector_ptr->end (),
 	     oso_el_compare_name);
 
-  for (ix = 0; ix < oso_vector_ptr->size (); ++ix)
+  for (ix = 0; ix < oso_vector_ptr->size ();)
     {
       int pfx_len;
 

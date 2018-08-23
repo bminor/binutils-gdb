@@ -1,3 +1,8 @@
+2018-08-23  Xavier Roirand  <roirand@adacore.com>
+
+	* machoread.c (macho_symfile_read_all_oso): Remove uneeded
+	incrementation.
+
 2018-08-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* solib-svr4.c (read_program_headers_from_bfd): Return
