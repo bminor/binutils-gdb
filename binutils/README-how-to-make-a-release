@@ -164,7 +164,7 @@ When the time comes to actually make the release....
   21. Update the release number in bfd/version.m4 on the release
       branch to a whole new minor version number, without a point
       value.  Eg "2.29.90" becomes "2.30".  Change bfd/development.sh
-      to set the value to "false".  Regenerate the configure and
+      to set all values to "false".  Regenerate the configure and
       makefiles.  And *info* files.  Add ChangeLog entries for the
       updates and add a  "this-is-the-2.XX-release" comment and
       commit.  Make sure to include the .gmo files.
@@ -313,7 +313,8 @@ looks like this:
   3. In the branch sources:
 
        a. Update the minor release number in bfd/version.m4.
-       b. Edit bfd/development.sh and set "development=false".
+       b. Edit bfd/development.sh, set "development=false" and
+       "experimental=false".
        c. Regenerate the configure files.
        c.1. Remove spurious autom4te.cache files:
 
