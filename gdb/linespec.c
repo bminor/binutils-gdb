@@ -2283,7 +2283,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 		   && SYMBOL_CLASS (sym) == LOC_BLOCK)
 		{
 		  const CORE_ADDR addr
-		    = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
+		    = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym));
 
 		  bound_minimal_symbol_d *elem;
 		  for (int m = 0;

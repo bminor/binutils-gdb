@@ -1746,7 +1746,7 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
       addr = SYMBOL_VALUE_ADDRESS (sym);
       break;
     case LOC_BLOCK:
-      addr = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
+      addr = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym));
       break;
 
     default:
@@ -3637,7 +3637,7 @@ find_function_start_sal (symbol *sym, bool funfirstline)
 {
   fixup_symbol_section (sym, NULL);
   symtab_and_line sal
-    = find_function_start_sal_1 (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)),
+    = find_function_start_sal_1 (BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym)),
 				 SYMBOL_OBJ_SECTION (symbol_objfile (sym), sym),
 				 funfirstline);
   sal.symbol = sym;
@@ -3717,7 +3717,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
       fixup_symbol_section (sym, NULL);
 
       objfile = symbol_objfile (sym);
-      pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
+      pc = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym));
       section = SYMBOL_OBJ_SECTION (objfile, sym);
       name = SYMBOL_LINKAGE_NAME (sym);
     }
@@ -3778,7 +3778,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
       /* Check if gdbarch_skip_prologue left us in mid-line, and the next
 	 line is still part of the same function.  */
       if (skip && start_sal.pc != pc
-	  && (sym ? (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) <= start_sal.end
+	  && (sym ? (BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym)) <= start_sal.end
 		     && start_sal.end < BLOCK_END (SYMBOL_BLOCK_VALUE (sym)))
 	      : (lookup_minimal_symbol_by_pc_section (start_sal.end, section).minsym
 		 == lookup_minimal_symbol_by_pc_section (pc, section).minsym)))
@@ -3982,7 +3982,7 @@ find_function_alias_target (bound_minimal_symbol msymbol)
   symbol *sym = find_pc_function (func_addr);
   if (sym != NULL
       && SYMBOL_CLASS (sym) == LOC_BLOCK
-      && BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) == func_addr)
+      && BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym)) == func_addr)
     return sym;
 
   return NULL;
@@ -4987,7 +4987,7 @@ find_gnu_ifunc (const symbol *sym)
 				symbol_name_match_type::SEARCH_NAME);
   struct objfile *objfile = symbol_objfile (sym);
 
-  CORE_ADDR address = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
+  CORE_ADDR address = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym));
   minimal_symbol *ifunc = NULL;
 
   iterate_over_minimal_symbols (objfile, lookup_name,

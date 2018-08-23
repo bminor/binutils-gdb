@@ -439,10 +439,10 @@ get_expr_block_and_pc (CORE_ADDR *pc)
 	block = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (cursal.symtab),
 				   STATIC_BLOCK);
       if (block != NULL)
-	*pc = BLOCK_START (block);
+	*pc = BLOCK_ENTRY_PC (block);
     }
   else
-    *pc = BLOCK_START (block);
+    *pc = BLOCK_ENTRY_PC (block);
 
   return block;
 }
