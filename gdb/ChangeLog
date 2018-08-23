@@ -1,3 +1,8 @@
+2018-08-23  Xavier Roirand  <roirand@adacore.com>
+
+	* machoread.c (macho_symfile_read_all_oso): Remove uneeded
+	incrementation.
+
 2018-08-21  Alan Hayward  <alan.hayward@arm.com>
 
 	* arch/aarch64.h (aarch64_regnum): Update comment.
