@@ -14,6 +14,10 @@
 	(clear_pc_function_cache): Clear cache_pc_function_block.
 	(find_pc_partial_function): Move comment to symtab.h.  Add
 	support for non-contiguous blocks.
+	* cli/cli-cmds.c (block.h): Include.
+	(print_disassembly): Handle printing of non-contiguous blocks.
+	(disassemble_current_function): Likewise.
+	(disassemble_command): Likewise.
 
 2018-08-23  Xavier Roirand  <roirand@adacore.com>
 
