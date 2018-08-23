@@ -11088,11 +11088,16 @@ get_ia64_symbol_other (Filedata * filedata, unsigned int other)
 static const char *
 get_ppc64_symbol_other (unsigned int other)
 {
-  if (PPC64_LOCAL_ENTRY_OFFSET (other) != 0)
+  if ((other & ~STO_PPC64_LOCAL_MASK) != 0)
+    return NULL;
+
+  other >>= STO_PPC64_LOCAL_BIT;
+  if (other <= 6)
     {
       static char buf[32];
-      snprintf (buf, sizeof buf, _("<localentry>: %d"),
-		PPC64_LOCAL_ENTRY_OFFSET (other));
+      if (other >= 2)
+	other = ppc64_decode_local_entry (other);
+      snprintf (buf, sizeof buf, _("<localentry>: %d"), other);
       return buf;
     }
   return NULL;

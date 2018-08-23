@@ -1,3 +1,9 @@
+2018-08-23  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (get_ppc64_symbol_other): Return NULL if st_other
+	field contains unrecognised or reserved values.  Handle
+	localentry:1 value.
+
 2018-08-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23536
