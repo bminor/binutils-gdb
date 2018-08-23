@@ -1,3 +1,8 @@
+2018-08-23  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.dwarf2/dw2-ranges-func.c: New file.
+	* gdb.dwarf2/dw2-ranges-func.exp: New file.
+
 2018-08-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.base/term.exp: Compare terminal settings with values from
