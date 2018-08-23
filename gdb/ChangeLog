@@ -7,6 +7,8 @@
 	macros for accessing ranges in struct block.
 	(make_blockranges): New declaration.
 	block.c (make_blockranges): New function.
+	* dwarf2read.c (dwarf2_record_block_ranges): Fill in BLOCK_RANGES
+	for block.
 
 2018-08-23  Xavier Roirand  <roirand@adacore.com>
 
