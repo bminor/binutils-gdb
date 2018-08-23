@@ -200,6 +200,10 @@ check-DEJAGNU: site.exp
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi
 
+development.exp: $(BFDDIR)/development.sh
+	$(EGREP) "[development|experimental]=" $(BFDDIR)/development.sh  \
+	  | $(AWK) -F= '{ print "set " $$1 " " $$2 }' > $@
+
 installcheck-local:
 	/bin/sh $(srcdir)/sanity.sh $(bindir)
 
@@ -491,7 +495,10 @@ all: info
 # development.sh is used to determine -Werror default.
 CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/development.sh
 
-DISTCLEANFILES = sysroff.c sysroff.h site.exp site.bak embedspu
+EXTRA_DEJAGNU_SITE_CONFIG = development.exp
+
+DISTCLEANFILES = sysroff.c sysroff.h site.exp development.exp \
+  site.bak embedspu
 
 MOSTLYCLEANFILES = sysinfo$(EXEEXT_FOR_BUILD) bin2c$(EXEEXT_FOR_BUILD) \
   binutils.log binutils.sum abcdefgh*

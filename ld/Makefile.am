@@ -1905,6 +1905,10 @@ check-DEJAGNU: site.exp
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi
 
+development.exp: $(BFDDIR)/development.sh
+	$(EGREP) "[development|experimental]=" $(BFDDIR)/development.sh  \
+	  | $(AWK) -F= '{ print "set " $$1 " " $$2 }' > $@
+#
 #
 # Build a dummy plugin using libtool.
 #
@@ -1952,6 +1956,8 @@ MAINTAINERCLEANFILES = configdoc.texi ld.1
 CONFIG_STATUS_DEPENDENCIES = $(srcdir)/configure.host $(srcdir)/configure.tgt \
 	$(BFDDIR)/development.sh
 
+EXTRA_DEJAGNU_SITE_CONFIG = development.exp
+
 MOSTLYCLEANFILES = $(STAGESTUFF) ld1$(EXEEXT) ld2$(EXEEXT) ld3$(EXEEXT) \
 	ldemul-list.h crtbegin.@OBJEXT@ crtend.@OBJEXT@ ld.log ld.sum
 mostlyclean-local:
@@ -1997,7 +2003,7 @@ diststuff: info $(EXTRA_DIST)
 # ld.1 to support parallel build.
 info-recursive: ld.1
 
-DISTCLEANFILES = tdirs site.exp site.bak stringify.sed
+DISTCLEANFILES = tdirs site.exp development.exp site.bak stringify.sed
 distclean-local:
 	rm -rf ldscripts
 

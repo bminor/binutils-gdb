@@ -168,6 +168,7 @@ foreach flags $test_flags {
     if {"$do_strip" == "yes"} { 
 	verbose -log "$strip tmpdir/ld1"     
 	catch "exec $strip tmpdir/ld1" exec_output
+	set exec_output [prune_warnings $exec_output]
 	if ![string match "" $exec_output] then {
 	    verbose -log "$exec_output"
 	    fail $testname

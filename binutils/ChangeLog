@@ -1,5 +1,20 @@
 2018-08-23  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/23536
+	* Makefile.am (development.exp): New target.
+	(EXTRA_DEJAGNU_SITE_CONFIG): New.
+	(DISTCLEANFILES): Add development.exp.
+	* Makefile.in: Regenerated.
+	* testsuite/binutils-all/objcopy.exp (strip_test): Call
+	prune_warnings to prune BFD output.
+	(strip_test_with_saving_a_symbol): Likewise.
+	(objcopy_test_without_global_symbol): Likewise.
+	* testsuite/lib/binutils-common.exp (prune_warnings_extra):
+	New proc.
+	(prune_warnings): Likewise.
+
+2018-08-23  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* README-how-to-make-a-release: Document setting "experimental"
 	to false.
 

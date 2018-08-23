@@ -440,6 +440,7 @@ proc strip_test { } {
     remote_file build delete tmpdir/libstrip.a
 
     set exec_output [binutils_run $AR "rc $archive ${objfile}"]
+    set exec_output [prune_warnings $exec_output]
     if ![string equal "" $exec_output] {
 	fail $test
 	unresolved "$test preserving OS/ABI"
@@ -447,6 +448,7 @@ proc strip_test { } {
     }
 
     set exec_output [binutils_run $STRIP "-g $archive"]
+    set exec_output [prune_warnings $exec_output]
     if ![string equal "" $exec_output] {
 	fail $test
 	unresolved "$test preserving OS/ABI"
@@ -454,6 +456,7 @@ proc strip_test { } {
     }
 
     set exec_output [binutils_run $STRIP "$STRIPFLAGS $archive"]
+    set exec_output [prune_warnings $exec_output]
     if ![string equal "" $exec_output] {
 	fail $test
 	unresolved "$test preserving OS/ABI"
@@ -488,12 +491,14 @@ proc strip_test { } {
     }
 
     set exec_output [binutils_run $STRIP "$STRIPFLAGS $objfile"]
+    set exec_output [prune_warnings $exec_output]
     if ![string equal "" $exec_output] {
 	fail $test
 	return
     }
 
     set exec_output [binutils_run $NM "-a $NMFLAGS $objfile"]
+    set exec_output [prune_warnings $exec_output]
     if ![string match "*: no symbols*" $exec_output] {
 	fail $test
 	return
@@ -529,12 +534,14 @@ proc strip_test_with_saving_a_symbol { } {
     }
 
     set exec_output [binutils_run $STRIP "$STRIPFLAGS -K main -K _main $objfile"]
+    set exec_output [prune_warnings $exec_output]
     if ![string equal "" $exec_output] {
 	fail $test
 	return
     }
 
     set exec_output [binutils_run $NM "$NMFLAGS $objfile"]
+    set exec_output [prune_warnings $exec_output]
     if {![regexp {^([0-9a-fA-F]+)?[ ]+[TD] main} $exec_output] \
          && ![regexp {^([0-9a-fA-F]+)?[ ]+T _main} $exec_output]} {
 	fail $test
@@ -1195,12 +1202,14 @@ proc objcopy_test_without_global_symbol { } {
     }
 
     set exec_output [binutils_run $OBJCOPY "$OBJCOPYFLAGS --strip-unneeded $objfile"]
+    set exec_output [prune_warnings $exec_output]
     if ![string equal "" $exec_output] {
 	fail $test
 	return
     }
 
     set exec_output [binutils_run $OBJDUMP "$OBJDUMPFLAGS -t $objfile"]
+    set exec_output [prune_warnings $exec_output]
     if {![regexp "no symbols" $exec_output]} {
 	fail $test
 	return

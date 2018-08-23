@@ -1008,7 +1008,7 @@ ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) \
 		      $(BFDLIB) $(LIBIBERTY) $(LIBINTL_DEP)
 
 ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
-
+#
 #
 # Build a dummy plugin using libtool.
 #
@@ -1034,6 +1034,7 @@ MAINTAINERCLEANFILES = configdoc.texi ld.1 ld.info
 CONFIG_STATUS_DEPENDENCIES = $(srcdir)/configure.host $(srcdir)/configure.tgt \
 	$(BFDDIR)/development.sh
 
+EXTRA_DEJAGNU_SITE_CONFIG = development.exp
 MOSTLYCLEANFILES = $(STAGESTUFF) ld1$(EXEEXT) ld2$(EXEEXT) ld3$(EXEEXT) \
 	ldemul-list.h crtbegin.@OBJEXT@ crtend.@OBJEXT@ ld.log ld.sum
 
@@ -1044,7 +1045,7 @@ CLEANFILES = dep.sed DEP DEPA DEP1 DEP2 spu_ovl.s spu_ovl.@OBJEXT@ spu_icache.s 
 EXTRA_DIST = ldgram.c ldgram.h ldlex.c emultempl/spu_ovl.@OBJEXT@_c \
 	     emultempl/spu_icache.@OBJEXT@_c deffilep.c deffilep.h $(man_MANS)
 
-DISTCLEANFILES = tdirs site.exp site.bak stringify.sed
+DISTCLEANFILES = tdirs site.exp development.exp site.bak stringify.sed
 all: $(BUILT_SOURCES) config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -3488,6 +3489,10 @@ check-DEJAGNU: site.exp
 		$(RUNTESTFLAGS); \
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi
+
+development.exp: $(BFDDIR)/development.sh
+	$(EGREP) "[development|experimental]=" $(BFDDIR)/development.sh  \
+	  | $(AWK) -F= '{ print "set " $$1 " " $$2 }' > $@
 
 # DOCUMENTATION TARGETS
 # Manual configuration file; not usually attached to normal configuration,

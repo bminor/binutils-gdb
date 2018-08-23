@@ -803,13 +803,14 @@ CGEN_CPU_PREFIX = @cgen_cpu_prefix@
 # Remake the info files.
 MOSTLYCLEANFILES = $(STAGESTUFF) core \
 	testsuite/*.@OBJEXT@ testsuite/*.out testsuite/gas.log testsuite/gas.sum \
-	testsuite/site.exp site.bak site.exp stage stage1 stage2
+	testsuite/site.exp site.bak site.exp development.exp stage stage1 stage2
 
 against = stage2
 
 # Reconfigure if configure.tgt changes.
 # development.sh is used to determine -Werror default.
 CONFIG_STATUS_DEPENDENCIES = $(srcdir)/configure.tgt $(BFDDIR)/development.sh
+EXTRA_DEJAGNU_SITE_CONFIG = development.exp
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -1562,6 +1563,10 @@ check-DEJAGNU: site.exp
 		$(RUNTESTFLAGS); \
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi
+
+development.exp: $(BFDDIR)/development.sh
+	$(EGREP) "[development|experimental]=" $(BFDDIR)/development.sh  \
+	  | $(AWK) -F= '{ print "set " $$1 " " $$2 }' > $@
 
 # If m68k-parse.y is in a different directory, then ylwrap will use an
 # absolute path when it invokes yacc, which will cause yacc to put the

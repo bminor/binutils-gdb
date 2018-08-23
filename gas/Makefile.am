@@ -432,6 +432,10 @@ check-DEJAGNU: site.exp
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi
 
+development.exp: $(BFDDIR)/development.sh
+	$(EGREP) "[development|experimental]=" $(BFDDIR)/development.sh  \
+	  | $(AWK) -F= '{ print "set " $$1 " " $$2 }' > $@
+
 # The m68k operand parser.
 
 EXTRA_as_new_SOURCES += config/m68k-parse.y
@@ -591,7 +595,7 @@ cgen.@OBJEXT@: cgen.c cgen.h cgen-desc.h subsegs.h \
 
 MOSTLYCLEANFILES = $(STAGESTUFF) core \
 	testsuite/*.@OBJEXT@ testsuite/*.out testsuite/gas.log testsuite/gas.sum \
-	testsuite/site.exp site.bak site.exp stage stage1 stage2
+	testsuite/site.exp site.bak site.exp development.exp stage stage1 stage2
 
 .PHONY: install-exec-local install-data-local
 .PHONY: install-exec-bindir install-exec-tooldir
@@ -692,3 +696,5 @@ de-stage3:
 # Reconfigure if configure.tgt changes.
 # development.sh is used to determine -Werror default.
 CONFIG_STATUS_DEPENDENCIES = $(srcdir)/configure.tgt $(BFDDIR)/development.sh
+
+EXTRA_DEJAGNU_SITE_CONFIG = development.exp

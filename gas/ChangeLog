@@ -1,3 +1,11 @@
+2018-08-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23536
+	* Makefile.am (development.exp): New target.
+	(EXTRA_DEJAGNU_SITE_CONFIG): New.
+	(DISTCLEANFILES): Add development.exp.
+	* Makefile.in: Regenerated.
+
 2018-08-22  Alan Modra  <amodra@gmail.com>
 
 	* dw2gencfi.c (emit_expr_encoded, output_fde): Warning fixes.

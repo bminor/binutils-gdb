@@ -1,3 +1,16 @@
+2018-08-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23536
+	* Makefile.am (development.exp): New target.
+	(EXTRA_DEJAGNU_SITE_CONFIG): New.
+	(DISTCLEANFILES): Add development.exp.
+	* Makefile.in: Regenerated.
+	* testsuite/ld-bootstrap/bootstrap.exp: Call prune_warnings to
+	prune BFD output.
+	* testsuite/ld-plugin/lto.exp: Likewise.
+	* testsuite/lib/ld-lib.exp (prune_warnings): Removed.
+	* testsuite/ld-elf/shared.exp: Allow "\n" in linker warnings.
+
 2018-08-21  Nick Clifton  <nickc@redhat.com>
 
 	PR 23426
