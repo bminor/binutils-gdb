@@ -1,3 +1,11 @@
+2018-08-23  Nick Clifton  <nickc@redhat.com>
+
+	PR 23061
+	* coffgen.c (coff_pointerize_aux): Add table_end parameter.  Use
+	it to prevent walking off the end of the table.
+	(coff_get_normalized_symtab): Pass internal_end pointer to
+	coff_pointerize_aux.
+
 2018-08-23  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_relocate_section): Don't miss clearing
