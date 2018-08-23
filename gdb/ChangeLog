@@ -1,3 +1,13 @@
+2018-08-23  Kevin Buettner  <kevinb@redhat.com>
+
+	* block.h (blockrange, blockranges): New struct declarations.
+	(struct block): Add new field named `ranges'.
+	(BLOCK_RANGES, BLOCK_NRANGES, BLOCK_RANGE, BLOCK_CONTIGUOUS_P)
+	(BLOCK_RANGE_START, BLOCK_RANGE_END, BLOCK_ENTRY_PC): New
+	macros for accessing ranges in struct block.
+	(make_blockranges): New declaration.
+	block.c (make_blockranges): New function.
+
 2018-08-23  Xavier Roirand  <roirand@adacore.com>
 
 	* machoread.c (macho_symfile_read_all_oso): Remove uneeded
