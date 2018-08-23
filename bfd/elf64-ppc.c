@@ -13887,9 +13887,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    stub_entry = NULL;
 
 	  if (stub_entry != NULL
-	      && (stub_entry->stub_type == ppc_stub_plt_call
-		  || stub_entry->stub_type == ppc_stub_plt_call_r2save
-		  || stub_entry->stub_type == ppc_stub_plt_call_both
+	      && ((stub_entry->stub_type >= ppc_stub_plt_call
+		   && stub_entry->stub_type <= ppc_stub_plt_call_both)
 		  || stub_entry->stub_type == ppc_stub_plt_branch_r2off
 		  || stub_entry->stub_type == ppc_stub_plt_branch_both
 		  || stub_entry->stub_type == ppc_stub_long_branch_r2off
