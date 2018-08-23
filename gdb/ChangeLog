@@ -49,6 +49,14 @@
 	* tracepoint.c (info_scope_command): Likewise.
 	* value.c (value_fn_field): Likewise.
 
+	* infrun.c (fill_in_stop_func): Use find_function_entry_range_from_pc
+	in place of find_pc_partial_function.
+	* blockframe.c (find_function_entry_range_from_pc): New function.
+	* symtab.h (find_function_entry_range_from_pc): Declare and document.
+	* objfiles.c (objfile_relocate1): Relocate start and end addresses
+	for each range in a block.
+
+
 2018-08-23  Xavier Roirand  <roirand@adacore.com>
 
 	* machoread.c (macho_symfile_read_all_oso): Remove uneeded
