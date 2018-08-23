@@ -1680,11 +1680,6 @@ gld${EMULATION_NAME}_append_to_separated_string (char **to, char *op_arg)
     }
 }
 
-#if defined(__GNUC__) && GCC_VERSION < 4006
-  /* Work around a GCC uninitialized warning bug fixed in GCC 4.6.  */
-static struct bfd_link_hash_entry ehdr_start_empty;
-#endif
-
 /* This is called after the sections have been attached to output
    sections, but before any sizes or addresses have been set.  */
 
@@ -1695,13 +1690,11 @@ gld${EMULATION_NAME}_before_allocation (void)
   asection *sinterp;
   bfd *abfd;
   struct elf_link_hash_entry *ehdr_start = NULL;
-#if defined(__GNUC__) && GCC_VERSION < 4006
-  /* Work around a GCC uninitialized warning bug fixed in GCC 4.6.  */
-  struct bfd_link_hash_entry ehdr_start_save = ehdr_start_empty;
-#else
   struct bfd_link_hash_entry ehdr_start_save;
-#endif
 
+  /* The memset is here only to silence brain-dead compiler warnings
+     that the variable may be used uninitialized.  */
+  memset (&ehdr_start_save, 0, sizeof ehdr_start_save);
   if (is_elf_hash_table (link_info.hash))
     {
       _bfd_elf_tls_setup (link_info.output_bfd, &link_info);

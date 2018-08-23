@@ -1,3 +1,8 @@
+2018-08-23  Alan Modra  <amodra@gmail.com>
+
+	PR 23566
+	* emultempl/elf32.em (before_allocation): Warning fix.
+
 2018-08-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23536
