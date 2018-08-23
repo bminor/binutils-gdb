@@ -1,3 +1,14 @@
+2018-08-23  Kito Cheng  <kito@andestech.com>
+
+	* config/tc-riscv.c (arg_lookup): Checking
+	length before look up.
+	* testsuite/gas/riscv/fence-fail.d: New file.
+	* testsuite/gas/riscv/fence-fail.l: Likewise.
+	* testsuite/gas/riscv/fence-fail.s: Likewise.
+	* testsuite/gas/riscv/rouding-fail.d: Likewise.
+	* testsuite/gas/riscv/rouding-fail.l: Likewise.
+	* testsuite/gas/riscv/rouding-fail.s: Likewise.
+
 2018-08-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23536

@@ -618,6 +618,9 @@ arg_lookup (char **s, const char *const *array, size_t size, unsigned *regnop)
   const char *p = strchr (*s, ',');
   size_t i, len = p ? (size_t)(p - *s) : strlen (*s);
 
+  if (len == 0)
+    return FALSE;
+
   for (i = 0; i < size; i++)
     if (array[i] != NULL && strncmp (array[i], *s, len) == 0)
       {
