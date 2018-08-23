@@ -1,3 +1,11 @@
+2018-08-23  Zenith423  <zenith432@users.sourceforge.net>
+
+	PR 23460
+	* plugin.c (struct plugin_list_entry): New structure.
+	(plugin_list): New variable.
+	(try_load_plugin): Place opened plugins on a list.  Ensure that
+	the refcount in the dynamic loader is kept at 1.
+
 2018-08-23  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_relocate_section): Revise "call lacks

@@ -219,6 +219,15 @@ try_claim (bfd *abfd)
   return claimed;
 }
 
+struct plugin_list_entry
+{
+  void *                        handle;
+  ld_plugin_claim_file_handler  claim_file;
+  struct plugin_list_entry *    next;
+};
+
+static struct plugin_list_entry * plugin_list = NULL;
+
 static int
 try_load_plugin (const char *pname, bfd *abfd, int *has_plugin_p)
 {
@@ -227,9 +236,7 @@ try_load_plugin (const char *pname, bfd *abfd, int *has_plugin_p)
   int i;
   ld_plugin_onload onload;
   enum ld_plugin_status status;
-
-  if (claim_file)
-    goto have_claim_file;
+  struct plugin_list_entry *plugin_list_iter;
 
   *has_plugin_p = 0;
 
@@ -240,9 +247,30 @@ try_load_plugin (const char *pname, bfd *abfd, int *has_plugin_p)
       return 0;
     }
 
+  for (plugin_list_iter = plugin_list;
+       plugin_list_iter;
+       plugin_list_iter = plugin_list_iter->next)
+    {
+      if (plugin_handle == plugin_list_iter->handle)
+        {
+          dlclose (plugin_handle);
+          if (!plugin_list_iter->claim_file)
+            return 0;
+
+          register_claim_file (plugin_list_iter->claim_file);
+          goto have_claim_file;
+        }
+    }
+
+  plugin_list_iter = (struct plugin_list_entry *) xmalloc (sizeof *plugin_list_iter);
+  plugin_list_iter->handle = plugin_handle;
+  plugin_list_iter->claim_file = NULL;
+  plugin_list_iter->next = plugin_list;
+  plugin_list = plugin_list_iter;
+
   onload = dlsym (plugin_handle, "onload");
   if (!onload)
-    goto err;
+    return 0;
 
   i = 0;
   tv[i].tv_tag = LDPT_MESSAGE;
@@ -263,7 +291,9 @@ try_load_plugin (const char *pname, bfd *abfd, int *has_plugin_p)
   status = (*onload)(tv);
 
   if (status != LDPS_OK)
-    goto err;
+    return 0;
+
+  plugin_list_iter->claim_file = claim_file;
 
 have_claim_file:
   *has_plugin_p = 1;
@@ -271,20 +301,13 @@ have_claim_file:
   abfd->plugin_format = bfd_plugin_no;
 
   if (!claim_file)
-    goto err;
+    return 0;
 
   if (!try_claim (abfd))
-    goto err;
+    return 0;
 
   abfd->plugin_format = bfd_plugin_yes;
-
   return 1;
-
- err:
-  if (plugin_handle)
-    dlclose (plugin_handle);
-  register_claim_file (NULL);
-  return 0;
 }
 
 /* There may be plugin libraries in lib/bfd-plugins.  */
