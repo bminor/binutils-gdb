@@ -13995,13 +13995,13 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		    info->callbacks->einfo
 		      /* xgettext:c-format */
 		      (_("%H: call to `%pT' lacks nop, can't restore toc; "
-			 "recompile with -fPIC\n"),
+			 "(plt call stub)\n"),
 		       input_bfd, input_section, rel->r_offset, sym_name);
 		  else
 		    info->callbacks->einfo
 		      /* xgettext:c-format */
 		      (_("%H: call to `%pT' lacks nop, can't restore toc; "
-			 "(-mcmodel=small toc adjust stub)\n"),
+			 "(toc save/adjust stub)\n"),
 		       input_bfd, input_section, rel->r_offset, sym_name);
 
 		  bfd_set_error (bfd_error_bad_value);
