@@ -67,7 +67,7 @@ const gdb_byte *dwarf2_find_location_expression
 struct dwarf2_locexpr_baton dwarf2_fetch_die_loc_sect_off
   (sect_offset offset_in_cu, struct dwarf2_per_cu_data *per_cu,
    CORE_ADDR (*get_frame_pc) (void *baton),
-   void *baton);
+   void *baton, bool resolve_abstract_p = false);
 
 struct dwarf2_locexpr_baton dwarf2_fetch_die_loc_cu_off
   (cu_offset offset_in_cu, struct dwarf2_per_cu_data *per_cu,

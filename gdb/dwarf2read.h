@@ -20,6 +20,7 @@
 #ifndef DWARF2READ_H
 #define DWARF2READ_H
 
+#include <unordered_map>
 #include "dwarf-index-cache.h"
 #include "filename-seen-cache.h"
 #include "gdb_obstack.h"
@@ -95,6 +96,8 @@ struct dwarf2_debug_sections;
 struct mapped_index;
 struct mapped_debug_names;
 struct signatured_type;
+struct die_info;
+typedef struct die_info *die_info_ptr;
 
 /* Collection of data recorded per objfile.
    This hangs off of dwarf2_objfile_data_key.  */
@@ -250,6 +253,11 @@ public:
   /* If we loaded the index from an external file, this contains the
      resources associated to the open file, memory mapping, etc.  */
   std::unique_ptr<index_cache_resource> index_cache_res;
+
+  /* Mapping from abstract origin DIE to concrete DIEs that reference it as
+     DW_AT_abstract_origin.  */
+  std::unordered_map<die_info_ptr, std::vector<die_info_ptr>>
+    abstract_to_concrete;
 };
 
 /* Get the dwarf2_per_objfile associated to OBJFILE.  */

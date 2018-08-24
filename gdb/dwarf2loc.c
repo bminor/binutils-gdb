@@ -65,7 +65,7 @@ static struct value *indirect_synthetic_pointer
   (sect_offset die, LONGEST byte_offset,
    struct dwarf2_per_cu_data *per_cu,
    struct frame_info *frame,
-   struct type *type);
+   struct type *type, bool resolve_abstract_p = false);
 
 /* Until these have formal names, we define these here.
    ref: http://gcc.gnu.org/wiki/DebugFission
@@ -573,7 +573,7 @@ sect_variable_value (struct dwarf_expr_context *ctx, sect_offset sect_off,
 
   struct type *type = lookup_pointer_type (die_type);
   struct frame_info *frame = get_selected_frame (_("No frame selected."));
-  return indirect_synthetic_pointer (sect_off, 0, per_cu, frame, type);
+  return indirect_synthetic_pointer (sect_off, 0, per_cu, frame, type, true);
 }
 
 class dwarf_evaluate_loc_desc : public dwarf_expr_context
@@ -2181,12 +2181,14 @@ fetch_const_value_from_synthetic_pointer (sect_offset die, LONGEST byte_offset,
 static struct value *
 indirect_synthetic_pointer (sect_offset die, LONGEST byte_offset,
 			    struct dwarf2_per_cu_data *per_cu,
-			    struct frame_info *frame, struct type *type)
+			    struct frame_info *frame, struct type *type,
+			    bool resolve_abstract_p)
 {
   /* Fetch the location expression of the DIE we're pointing to.  */
   struct dwarf2_locexpr_baton baton
     = dwarf2_fetch_die_loc_sect_off (die, per_cu,
-				     get_frame_address_in_block_wrapper, frame);
+				     get_frame_address_in_block_wrapper, frame,
+				     resolve_abstract_p);
 
   /* Get type of pointed-to DIE.  */
   struct type *orig_type = dwarf2_fetch_die_type_sect_off (die, per_cu);

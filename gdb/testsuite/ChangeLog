@@ -1,3 +1,7 @@
+2018-09-05  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dwarf2/varval.exp: Add test.
+
 2018-09-04  Gary Benson <gbenson@redhat.com>
 
 	* gdb.base/batch-exit-status.exp: Use gdb_test_multiple and expect

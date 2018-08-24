@@ -1,3 +1,19 @@
+2018-09-05  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf2loc.c (sect_variable_value): Call indirect_synthetic_pointer
+	with resolve_abstract_p == true.
+	(indirect_synthetic_pointer): Add resolve_abstract_p parameter,
+	defaulting to false. Propagate resolve_abstract_p to
+	dwarf2_fetch_die_loc_sect_off.
+	* dwarf2loc.h (dwarf2_fetch_die_loc_sect_off): Add resolve_abstract_p
+	parameter, defaulting to false.
+	* dwarf2read.c (read_variable): Add variable to abstract_to_concrete.
+	(dwarf2_fetch_die_loc_sect_off): Add and handle resolve_abstract_p
+	parameter.
+	* dwarf2read.h (struct die_info): Forward-declare.
+	(die_info_ptr): New typedef.
+	(struct dwarf2_per_objfile): Add abstract_to_concrete field.
+
 2018-09-05  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 8.2 released.

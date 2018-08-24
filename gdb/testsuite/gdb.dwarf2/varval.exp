@@ -49,7 +49,9 @@ Dwarf::assemble ${asm_file} {
 	} {
 	    declare_labels int_label ptr_label struct_label var_a_label \
 	                   var_b_label var_c_label var_p_label var_bad_label \
-			   varval_label var_s_label var_untyped_label
+			   varval_label var_s_label var_untyped_label \
+			   var_a_abstract_label var_a_concrete_label \
+			   varval2_label
 
 	    set int_size [get_sizeof "int" -1]
 
@@ -71,6 +73,11 @@ Dwarf::assemble ${asm_file} {
 		{DW_AT_type :${int_label}}
 		{DW_AT_external 1 DW_FORM_flag}
 		{DW_AT_location {DW_OP_addr [gdb_target_symbol "var_a"]} SPECIAL_expr}
+	    }
+
+	    var_a_abstract_label: DW_TAG_variable {
+		{DW_AT_type :${int_label}}
+		{DW_AT_external 1 DW_FORM_flag}
 	    }
 
 	    var_b_label: DW_TAG_variable {
@@ -171,6 +178,18 @@ Dwarf::assemble ${asm_file} {
 			DW_OP_stack_value
 		    } SPECIAL_expr}
 		}
+		varval2_label: DW_TAG_variable {
+		    {DW_AT_name "varval2"}
+		    {DW_AT_type :${int_label}}
+		    {DW_AT_location {
+			DW_OP_GNU_variable_value ${var_a_abstract_label}
+			DW_OP_stack_value
+		    } SPECIAL_expr}
+		}
+		var_a_concrete_label: DW_TAG_variable {
+		    {DW_AT_abstract_origin :${var_a_abstract_label}}
+		    {DW_AT_location {DW_OP_addr [gdb_target_symbol "var_a"]} SPECIAL_expr}
+		}
 		DW_TAG_variable {
 		    {DW_AT_name "constval"}
 		    {DW_AT_type :${int_label}}
@@ -255,6 +274,7 @@ if ![runto_main] {
 }
 
 gdb_test "print varval" "= 8"
+gdb_test "print varval2" "= 8"
 gdb_test "print constval" "= 53"
 gdb_test "print mixedval" "= 42"
 gdb_test "print pointerval" "= \\(int \\*\\) $hex <var_b>"
