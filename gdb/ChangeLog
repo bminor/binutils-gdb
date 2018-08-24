@@ -1,4 +1,31 @@
 2018-08-24  Pedro Alves  <palves@redhat.com>
+
+	* python/py-bpevent.c (create_breakpoint_event_object): Use
+	copy-initialization.
+	* python/py-continueevent.c (emit_continue_event): Use
+	copy-initialization.
+	* python/py-exitedevent.c (create_exited_event_object): Return a
+	gdbpy_ref<>.
+	(emit_exited_event): Use copy-initialization.
+	* python/py-inferior.c (python_new_inferior)
+	(python_inferior_deleted, add_thread_object): Use
+	copy-initialization.
+	* python/py-infevents.c (create_inferior_call_event_object)
+	(create_register_changed_event_object)
+	(create_memory_changed_event_object): Return a gdbpy_ref<>.
+	(emit_inferior_call_event, emit_memory_changed_event)
+	(emit_register_changed_event): Use copy-initialization.
+	* python/py-newobjfileevent.c (create_new_objfile_event_object):
+	Return a gdbpy_ref<>.
+	(emit_new_objfile_event): Use copy-initialization.
+	(create_clear_objfiles_event_object): Return a gdbpy_ref<>.
+	(emit_clear_objfiles_event): Use copy-initialization.
+	* python/py-signalevent.c (create_signal_event_object): Use
+	copy-initialization.
+	* python/py-threadevent.c (create_thread_event_object): Use
+	copy-initialization.
+
+2018-08-24  Pedro Alves  <palves@redhat.com>
 	    Simon Marchi  <simon.marchi@ericsson.com>
 
 	PR gdb/23379

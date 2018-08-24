@@ -28,7 +28,7 @@ gdbpy_ref<>
 create_breakpoint_event_object (PyObject *breakpoint_list, PyObject *first_bp)
 {
   gdbpy_ref<> breakpoint_event_obj
-    (create_stop_event_object (&breakpoint_event_object_type));
+    = create_stop_event_object (&breakpoint_event_object_type);
 
   if (breakpoint_event_obj == NULL)
     return NULL;

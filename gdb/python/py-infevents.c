@@ -24,7 +24,7 @@
 /* Construct either a gdb.InferiorCallPreEvent or a
    gdb.InferiorCallPostEvent. */
 
-static PyObject *
+static gdbpy_ref<>
 create_inferior_call_event_object (inferior_call_kind flag, ptid_t ptid,
 				   CORE_ADDR addr)
 {
@@ -56,17 +56,17 @@ create_inferior_call_event_object (inferior_call_kind flag, ptid_t ptid,
   if (evpy_add_attribute (event.get (), "address", addr_obj.get ()) < 0)
     return NULL;
 
-  return event.release ();
+  return event;
 }
 
 /* Construct a gdb.RegisterChangedEvent containing the affected
    register number. */
 
-static PyObject *
+static gdbpy_ref<>
 create_register_changed_event_object (struct frame_info *frame, 
 				      int regnum)
 {
-  gdbpy_ref<> event (create_event_object (&register_changed_event_object_type));
+  gdbpy_ref<> event = create_event_object (&register_changed_event_object_type);
   if (event == NULL)
     return NULL;
 
@@ -84,16 +84,16 @@ create_register_changed_event_object (struct frame_info *frame,
   if (evpy_add_attribute (event.get (), "regnum", regnum_obj.get ()) < 0)
     return NULL;
 
-  return event.release ();
+  return event;
 }
 
 /* Construct a gdb.MemoryChangedEvent describing the extent of the
    affected memory. */
 
-static PyObject *
+static gdbpy_ref<>
 create_memory_changed_event_object (CORE_ADDR addr, ssize_t len)
 {
-  gdbpy_ref<> event (create_event_object (&memory_changed_event_object_type));
+  gdbpy_ref<> event = create_event_object (&memory_changed_event_object_type);
 
   if (event == NULL)
     return NULL;
@@ -112,7 +112,7 @@ create_memory_changed_event_object (CORE_ADDR addr, ssize_t len)
   if (evpy_add_attribute (event.get (), "length", len_obj.get ()) < 0)
     return NULL;
 
-  return event.release ();
+  return event;
 }
 
 /* Callback function which notifies observers when an event occurs which
@@ -127,7 +127,7 @@ emit_inferior_call_event (inferior_call_kind flag, ptid_t thread,
   if (evregpy_no_listeners_p (gdb_py_events.inferior_call))
     return 0;
 
-  gdbpy_ref<> event (create_inferior_call_event_object (flag, thread, addr));
+  gdbpy_ref<> event = create_inferior_call_event_object (flag, thread, addr);
   if (event != NULL)
     return evpy_emit_event (event.get (), gdb_py_events.inferior_call);
   return -1;
@@ -142,7 +142,7 @@ emit_memory_changed_event (CORE_ADDR addr, ssize_t len)
   if (evregpy_no_listeners_p (gdb_py_events.memory_changed))
     return 0;
 
-  gdbpy_ref<> event (create_memory_changed_event_object (addr, len));
+  gdbpy_ref<> event = create_memory_changed_event_object (addr, len);
   if (event != NULL)
     return evpy_emit_event (event.get (), gdb_py_events.memory_changed);
   return -1;
@@ -157,7 +157,7 @@ emit_register_changed_event (struct frame_info* frame, int regnum)
   if (evregpy_no_listeners_p (gdb_py_events.register_changed))
     return 0;
 
-  gdbpy_ref<> event (create_register_changed_event_object (frame, regnum));
+  gdbpy_ref<> event = create_register_changed_event_object (frame, regnum);
   if (event != NULL)
     return evpy_emit_event (event.get (), gdb_py_events.register_changed);
   return -1;

@@ -50,7 +50,7 @@ create_thread_event_object (PyTypeObject *py_type, PyObject *thread)
 {
   gdb_assert (thread != NULL);
 
-  gdbpy_ref<> thread_event_obj (create_event_object (py_type));
+  gdbpy_ref<> thread_event_obj = create_event_object (py_type);
   if (thread_event_obj == NULL)
     return NULL;
 

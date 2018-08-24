@@ -50,7 +50,7 @@ emit_continue_event (ptid_t ptid)
   if (evregpy_no_listeners_p (gdb_py_events.cont))
     return 0;
 
-  gdbpy_ref<> event (create_continue_event_object (ptid));
+  gdbpy_ref<> event = create_continue_event_object (ptid);
   if (event != NULL)
     return evpy_emit_event (event.get (), gdb_py_events.cont);
   return -1;
