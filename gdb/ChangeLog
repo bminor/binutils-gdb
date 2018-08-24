@@ -1,3 +1,24 @@
+2018-08-24  Pedro Alves  <palves@redhat.com>
+	    Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/23379
+	* python/py-continueevent.c: Include "gdbthread.h".
+	(create_continue_event_object): Add intro comment.  Add 'ptid'
+	parameter.  Use it to find thread to pass to
+	create_thread_event_object.
+	(emit_continue_event): Pass PTID down to
+	create_continue_event_object.
+	* python/py-event.h (py_get_event_thread): Declare.
+	(create_thread_event_object): Remove default from 'thread'
+	parameter.
+	* python/py-stopevent.c (create_stop_event_object): Use
+	py_get_event_thread.
+	* python/py-threadevent.c (get_event_thread): Rename to ...
+	(py_get_event_thread): ... this, make extern, add 'ptid' parameter
+	and use it to find the thread.
+	(create_thread_event_object): Assert that THREAD isn't null.
+	Don't find the event thread here.
+
 2018-08-23  Kevin Buettner  <kevinb@redhat.com>
 
 	* block.h (blockrange, blockranges): New struct declarations.
