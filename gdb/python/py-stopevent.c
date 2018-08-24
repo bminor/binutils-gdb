@@ -23,7 +23,8 @@
 gdbpy_ref<>
 create_stop_event_object (PyTypeObject *py_type)
 {
-  return create_thread_event_object (py_type);
+  return create_thread_event_object (py_type,
+				     py_get_event_thread (inferior_ptid));
 }
 
 /* Callback observers when a stop event occurs.  This function will create a

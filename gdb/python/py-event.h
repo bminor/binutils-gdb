@@ -63,8 +63,18 @@ extern int evpy_emit_event (PyObject *event,
                             eventregistry_object *registry);
 
 extern gdbpy_ref<> create_event_object (PyTypeObject *py_type);
+
+/* thread events can either be thread specific or process wide.  If gdb is
+   running in non-stop mode then the event is thread specific, otherwise
+   it is process wide.
+   This function returns the currently stopped thread in non-stop mode and
+   Py_None otherwise.  In each case it returns a borrowed reference.  */
+extern PyObject *py_get_event_thread (ptid_t ptid)
+  CPYCHECKER_RETURNS_BORROWED_REF;
+
 extern gdbpy_ref<> create_thread_event_object (PyTypeObject *py_type,
-					       PyObject *thread = nullptr);
+					       PyObject *thread);
+
 extern int emit_new_objfile_event (struct objfile *objfile);
 extern int emit_clear_objfiles_event (void);
 
