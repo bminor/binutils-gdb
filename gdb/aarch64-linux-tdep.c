@@ -85,11 +85,6 @@
     struct ucontext uc;
   };
 
-  typedef struct
-  {
-    ...                                    128 bytes
-  } siginfo_t;
-
   The ucontext has the following form:
   struct ucontext
   {
@@ -100,13 +95,6 @@
     struct sigcontext uc_mcontext;
   };
 
-  typedef struct sigaltstack
-  {
-    void *ss_sp;
-    int ss_flags;
-    size_t ss_size;
-  } stack_t;
-
   struct sigcontext
   {
     unsigned long fault_address;
@@ -115,6 +103,17 @@
     unsigned long pc;		/ * 32 * /
     unsigned long pstate;	/ * 33 * /
     __u8 __reserved[4096]
+  };
+
+  The reserved space in sigcontext contains additional structures, each starting
+  with a aarch64_ctx, which specifies a unique identifier and the total size of
+  the structure.  The final structure in reserved will start will a null
+  aarch64_ctx.  The penultimate entry in reserved may be a extra_context which
+  then points to a further block of reserved space.
+
+  struct aarch64_ctx {
+	u32 magic;
+	u32 size;
   };
 
   The restorer stub will always have the form:
@@ -136,6 +135,52 @@
 #define AARCH64_RT_SIGFRAME_UCONTEXT_OFFSET     128
 #define AARCH64_UCONTEXT_SIGCONTEXT_OFFSET      176
 #define AARCH64_SIGCONTEXT_XO_OFFSET            8
+#define AARCH64_SIGCONTEXT_RESERVED_OFFSET      288
+
+/* Unique identifiers that may be used for aarch64_ctx.magic.  */
+#define AARCH64_EXTRA_MAGIC			0x45585401
+#define AARCH64_FPSIMD_MAGIC			0x46508001
+#define AARCH64_SVE_MAGIC			0x53564501
+
+/* Defines for the extra_context that follows an AARCH64_EXTRA_MAGIC.  */
+#define AARCH64_EXTRA_DATAP_OFFSET		8
+
+/* Defines for the fpsimd that follows an AARCH64_FPSIMD_MAGIC.  */
+#define AARCH64_FPSIMD_FPSR_OFFSET		8
+#define AARCH64_FPSIMD_FPCR_OFFSET		12
+#define AARCH64_FPSIMD_V0_OFFSET		16
+#define AARCH64_FPSIMD_VREG_SIZE		16
+
+/* Defines for the sve structure that follows an AARCH64_SVE_MAGIC.  */
+#define AARCH64_SVE_CONTEXT_VL_OFFSET		8
+#define AARCH64_SVE_CONTEXT_REGS_OFFSET		16
+#define AARCH64_SVE_CONTEXT_P_REGS_OFFSET(vq) (32 * vq * 16)
+#define AARCH64_SVE_CONTEXT_FFR_OFFSET(vq) \
+  (AARCH64_SVE_CONTEXT_P_REGS_OFFSET (vq) + (16 * vq * 2))
+#define AARCH64_SVE_CONTEXT_SIZE(vq) \
+  (AARCH64_SVE_CONTEXT_FFR_OFFSET (vq) + (vq * 2))
+
+
+/* Read an aarch64_ctx, returning the magic value, and setting *SIZE to the
+   size, or return 0 on error.  */
+
+static uint32_t
+read_aarch64_ctx (CORE_ADDR ctx_addr, enum bfd_endian byte_order,
+		  uint32_t *size)
+{
+  uint32_t magic = 0;
+  gdb_byte buf[4];
+
+  if (target_read_memory (ctx_addr, buf, 4) != 0)
+    return 0;
+  magic = extract_unsigned_integer (buf, 4, byte_order);
+
+  if (target_read_memory (ctx_addr + 4, buf, 4) != 0)
+    return 0;
+  *size = extract_unsigned_integer (buf, 4, byte_order);
+
+  return magic;
+}
 
 /* Implement the "init" method of struct tramp_frame.  */
 
@@ -145,19 +190,26 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
 			     struct trad_frame_cache *this_cache,
 			     CORE_ADDR func)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   CORE_ADDR sp = get_frame_register_unsigned (this_frame, AARCH64_SP_REGNUM);
-  CORE_ADDR sigcontext_addr =
-    sp
-    + AARCH64_RT_SIGFRAME_UCONTEXT_OFFSET
-    + AARCH64_UCONTEXT_SIGCONTEXT_OFFSET;
-  int i;
+  CORE_ADDR sigcontext_addr = (sp + AARCH64_RT_SIGFRAME_UCONTEXT_OFFSET
+			       + AARCH64_UCONTEXT_SIGCONTEXT_OFFSET );
+  CORE_ADDR section = sigcontext_addr + AARCH64_SIGCONTEXT_RESERVED_OFFSET;
+  CORE_ADDR fpsimd = 0;
+  CORE_ADDR sve_regs = 0;
+  uint32_t size, magic;
+  int num_regs = gdbarch_num_regs (gdbarch);
 
-  for (i = 0; i < 31; i++)
+  /* Read in the integer registers.  */
+
+  for (int i = 0; i < 31; i++)
     {
       trad_frame_set_reg_addr (this_cache,
 			       AARCH64_X0_REGNUM + i,
 			       sigcontext_addr + AARCH64_SIGCONTEXT_XO_OFFSET
-			       + i * AARCH64_SIGCONTEXT_REG_SIZE);
+				 + i * AARCH64_SIGCONTEXT_REG_SIZE);
     }
   trad_frame_set_reg_addr (this_cache, AARCH64_SP_REGNUM,
 			   sigcontext_addr + AARCH64_SIGCONTEXT_XO_OFFSET
@@ -165,6 +217,134 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
   trad_frame_set_reg_addr (this_cache, AARCH64_PC_REGNUM,
 			   sigcontext_addr + AARCH64_SIGCONTEXT_XO_OFFSET
 			     + 32 * AARCH64_SIGCONTEXT_REG_SIZE);
+
+  /* Find the FP and SVE sections.  */
+  while ((magic = read_aarch64_ctx (section, byte_order, &size)) != 0)
+    {
+      switch (magic)
+	{
+	case AARCH64_FPSIMD_MAGIC:
+	  fpsimd = section;
+	  section += size;
+	  break;
+
+	case AARCH64_SVE_MAGIC:
+	  {
+	    /* Check if the section is followed by a full SVE dump, and set
+	       sve_regs if it is.  */
+	    gdb_byte buf[4];
+	    uint16_t vq;
+
+	    if (!tdep->has_sve ())
+	      break;
+
+	    if (target_read_memory (section + AARCH64_SVE_CONTEXT_VL_OFFSET,
+				    buf, 2) != 0)
+	      {
+		section += size;
+		break;
+	      }
+	    vq = sve_vq_from_vl (extract_unsigned_integer (buf, 2, byte_order));
+
+	    if (vq != tdep->vq)
+	      error (_("Invalid vector length in signal frame %d vs %ld."), vq,
+		     tdep->vq);
+
+	    if (size >= AARCH64_SVE_CONTEXT_SIZE (vq))
+	      sve_regs = section + AARCH64_SVE_CONTEXT_REGS_OFFSET;
+
+	    section += size;
+	    break;
+	  }
+
+	case AARCH64_EXTRA_MAGIC:
+	  {
+	    /* Extra is always the last valid section in reserved and points to
+	       an additional block of memory filled with more sections. Reset
+	       the address to the extra section and continue looking for more
+	       structures.  */
+	    gdb_byte buf[8];
+
+	    if (target_read_memory (section + AARCH64_EXTRA_DATAP_OFFSET,
+				    buf, 8) != 0)
+	      {
+		section += size;
+		break;
+	      }
+
+	    section = extract_unsigned_integer (buf, 8, byte_order);
+	    break;
+	  }
+
+	default:
+	  break;
+	}
+    }
+
+  if (sve_regs != 0)
+    {
+      CORE_ADDR offset;
+
+      for (int i = 0; i < 32; i++)
+	{
+	  offset = sve_regs + (i * tdep->vq * 16);
+	  trad_frame_set_reg_addr (this_cache, AARCH64_SVE_Z0_REGNUM + i,
+				   offset);
+	  trad_frame_set_reg_addr (this_cache,
+				   num_regs + AARCH64_SVE_V0_REGNUM + i,
+				   offset);
+	  trad_frame_set_reg_addr (this_cache, num_regs + AARCH64_Q0_REGNUM + i,
+				   offset);
+	  trad_frame_set_reg_addr (this_cache, num_regs + AARCH64_D0_REGNUM + i,
+				   offset);
+	  trad_frame_set_reg_addr (this_cache, num_regs + AARCH64_S0_REGNUM + i,
+				   offset);
+	  trad_frame_set_reg_addr (this_cache, num_regs + AARCH64_H0_REGNUM + i,
+				   offset);
+	  trad_frame_set_reg_addr (this_cache, num_regs + AARCH64_B0_REGNUM + i,
+				   offset);
+	}
+
+      offset = sve_regs + AARCH64_SVE_CONTEXT_P_REGS_OFFSET (tdep->vq);
+      for (int i = 0; i < 16; i++)
+	trad_frame_set_reg_addr (this_cache, AARCH64_SVE_P0_REGNUM + i,
+				 offset + (i * tdep->vq * 2));
+
+      offset = sve_regs + AARCH64_SVE_CONTEXT_FFR_OFFSET (tdep->vq);
+      trad_frame_set_reg_addr (this_cache, AARCH64_SVE_FFR_REGNUM, offset);
+    }
+
+  if (fpsimd != 0)
+    {
+      trad_frame_set_reg_addr (this_cache, AARCH64_FPSR_REGNUM,
+			       fpsimd + AARCH64_FPSIMD_FPSR_OFFSET);
+      trad_frame_set_reg_addr (this_cache, AARCH64_FPCR_REGNUM,
+			       fpsimd + AARCH64_FPSIMD_FPCR_OFFSET);
+
+      /* If there was no SVE section then set up the V registers.  */
+      if (sve_regs == 0)
+	for (int i = 0; i < 32; i++)
+	  {
+	    CORE_ADDR offset = (fpsimd + AARCH64_FPSIMD_V0_OFFSET
+				  + (i * AARCH64_FPSIMD_VREG_SIZE));
+
+	    trad_frame_set_reg_addr (this_cache, AARCH64_V0_REGNUM + i, offset);
+	    trad_frame_set_reg_addr (this_cache,
+				     num_regs + AARCH64_Q0_REGNUM + i, offset);
+	    trad_frame_set_reg_addr (this_cache,
+				     num_regs + AARCH64_D0_REGNUM + i, offset);
+	    trad_frame_set_reg_addr (this_cache,
+				     num_regs + AARCH64_S0_REGNUM + i, offset);
+	    trad_frame_set_reg_addr (this_cache,
+				     num_regs + AARCH64_H0_REGNUM + i, offset);
+	    trad_frame_set_reg_addr (this_cache,
+				     num_regs + AARCH64_B0_REGNUM + i, offset);
+	    if (tdep->has_sve ())
+	      trad_frame_set_reg_addr (this_cache,
+				       num_regs + AARCH64_SVE_V0_REGNUM + i,
+				       offset);
+	  }
+    }
 
   trad_frame_set_id (this_cache, frame_id_build (sp, func));
 }

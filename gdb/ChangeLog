@@ -1,5 +1,25 @@
 2018-10-01  Alan Hayward  <alan.hayward@arm.com>
 
+	* aarch64-linux-tdep.c (AARCH64_SIGCONTEXT_RESERVED_OFFSET): Add
+	define.
+	(AARCH64_EXTRA_MAGIC): Likewise.
+	(AARCH64_FPSIMD_MAGIC): Likewise.
+	(AARCH64_SVE_MAGIC): Likewise.
+	(AARCH64_EXTRA_DATAP_OFFSET): Likewise.
+	(AARCH64_FPSIMD_FPSR_OFFSET): Likewise.
+	(AARCH64_FPSIMD_FPCR_OFFSET): Likewise.
+	(AARCH64_FPSIMD_V0_OFFSET): Likewise.
+	(AARCH64_FPSIMD_VREG_SIZE): Likewise.
+	(AARCH64_SVE_CONTEXT_VL_OFFSET): Likewise.
+	(AARCH64_SVE_CONTEXT_REGS_OFFSET): Likewise.
+	(AARCH64_SVE_CONTEXT_P_REGS_OFFSET): Likewise.
+	(AARCH64_SVE_CONTEXT_FFR_OFFSET): Likewise.
+	(AARCH64_SVE_CONTEXT_SIZE): Likewise.
+	(read_aarch64_ctx): Add function.
+	(aarch64_linux_sigframe_init): Detect FP registers.
+
+2018-10-01  Alan Hayward  <alan.hayward@arm.com>
+
 	* aarch64-tdep.c (AARCH64_Q0_REGNUM): Move to here.
 	(AARCH64_D0_REGNUM): Likewise.
 	(AARCH64_S0_REGNUM): Likewise.
