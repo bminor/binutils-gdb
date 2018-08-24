@@ -1689,12 +1689,11 @@ gld${EMULATION_NAME}_before_allocation (void)
   const char *rpath;
   asection *sinterp;
   bfd *abfd;
-  struct elf_link_hash_entry *ehdr_start = NULL;
-  struct bfd_link_hash_entry ehdr_start_save;
+  struct bfd_link_hash_entry *ehdr_start = NULL;
+  unsigned char ehdr_start_save_type = 0;
+  char ehdr_start_save_u[sizeof ehdr_start->u
+			 - sizeof ehdr_start->u.def.next] = "";
 
-  /* The memset is here only to silence brain-dead compiler warnings
-     that the variable may be used uninitialized.  */
-  memset (&ehdr_start_save, 0, sizeof ehdr_start_save);
   if (is_elf_hash_table (link_info.hash))
     {
       _bfd_elf_tls_setup (link_info.output_bfd, &link_info);
@@ -1725,11 +1724,14 @@ gld${EMULATION_NAME}_before_allocation (void)
 		 we most likely will need dynamic relocations for
 		 __ehdr_start if we are building a PIE or shared
 		 library.  */
-	      ehdr_start = h;
-	      ehdr_start_save = h->root;
-	      h->root.type = bfd_link_hash_defined;
-	      h->root.u.def.section = bfd_abs_section_ptr;
-	      h->root.u.def.value = 0;
+	      ehdr_start = &h->root;
+	      ehdr_start_save_type = ehdr_start->type;
+	      memcpy (ehdr_start_save_u,
+		      (char *) &ehdr_start->u + sizeof ehdr_start->u.def.next,
+		      sizeof ehdr_start_save_u);
+	      ehdr_start->type = bfd_link_hash_defined;
+	      ehdr_start->u.def.section = bfd_abs_section_ptr;
+	      ehdr_start->u.def.value = 0;
 	    }
 	}
 
@@ -1848,8 +1850,10 @@ ${ELF_INTERPRETER_SET_DEFAULT}
     {
       /* If we twiddled __ehdr_start to defined earlier, put it back
 	 as it was.  */
-      ehdr_start->root.type = ehdr_start_save.type;
-      ehdr_start->root.u = ehdr_start_save.u;
+      ehdr_start->type = ehdr_start_save_type;
+      memcpy ((char *) &ehdr_start->u + sizeof ehdr_start->u.def.next,
+	      ehdr_start_save_u,
+	      sizeof ehdr_start_save_u);
     }
 }
 
