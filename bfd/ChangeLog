@@ -1,5 +1,21 @@
 2018-08-24  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elfxx-x86.c (_bfd_x86_elf_parse_gnu_properties): Handle
+	X86_COMPAT_ISA_1_USED, X86_COMPAT_ISA_1_NEEDED,
+	X86_UINT32_AND_LO, X86_UINT32_AND_HI, X86_UINT32_OR_LO,
+	X86_UINT32_OR_HI, X86_UINT32_OR_AND_LO and X86_UINT32_OR_AND_HI
+	instead of X86_ISA_1_USED, X86_ISA_1_NEEDED and X86_FEATURE_1_AND.
+	(_bfd_x86_elf_merge_gnu_properties): Likewise.
+	(_bfd_x86_elf_link_setup_gnu_properties): Add X86_FEATURE_2_NEEDED
+	instead of X86_ISA_1_NEEDED.
+	(_bfd_x86_elf_link_fixup_gnu_properties): Handle
+	X86_COMPAT_ISA_1_USED, X86_COMPAT_ISA_1_NEEDED, X86_UINT32_AND_LO,
+	X86_UINT32_AND_HI, X86_UINT32_OR_LO, X86_UINT32_OR_HI,
+	X86_UINT32_OR_AND_LO and X86_UINT32_OR_AND_HI instead of
+	X86_ISA_1_USED, X86_ISA_1_NEEDED and X86_FEATURE_1_AND.
+
+2018-08-24  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elfxx-x86.c (_bfd_x86_elf_parse_gnu_properties): Mask out the
 	GNU_PROPERTY_X86_UINT32_VALID bit.
 	(_bfd_x86_elf_link_fixup_gnu_properties): Set the

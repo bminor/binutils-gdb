@@ -1,5 +1,35 @@
 2018-08-24  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* readelf.c (decode_x86_compat_isa): New function.
+	(decode_x86_feature_2): Likewise.
+	(decode_x86_isa): Updated for new X86_ISA_1_XXX bits.
+	(decode_x86_feature): Renamed to ...
+	(decode_x86_feature_1): This.  Remove the type argument.
+	(print_gnu_property_note): Handle X86_COMPAT_ISA_1_USED,
+	X86_COMPAT_ISA_1_NEEDED, X86_UINT32_AND_LO, X86_UINT32_AND_HI,
+	X86_UINT32_OR_LO, X86_UINT32_OR_HI, X86_UINT32_OR_AND_LO and
+	X86_UINT32_OR_AND_HI instead of X86_ISA_1_USED, X86_ISA_1_NEEDED
+	and X86_FEATURE_1_AND.
+	* testsuite/binutils-all/i386/pr21231b.s: Updated to the current
+	GNU_PROPERTY_X86_ISA_1_USED and GNU_PROPERTY_X86_ISA_1_NEEDED
+	values.
+	* testsuite/binutils-all/x86-64/pr21231b.s: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494a.s: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494b.s: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494c.s: Likewise.
+	* testsuite/binutils-all/i386/pr21231b.d: Updated.
+	* testsuite/binutils-all/x86-64/pr21231b.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494a-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494a.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494c-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494c.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494d-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494d.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494e-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494e.d: Likewise.
+
+2018-08-24  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* readelf.c (print_gnu_property_note): Check the
 	GNU_PROPERTY_X86_UINT32_VALID bit for invalid GNU property note.
 

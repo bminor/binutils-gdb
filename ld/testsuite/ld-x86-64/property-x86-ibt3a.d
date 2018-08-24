@@ -7,4 +7,4 @@
 Displaying notes found in: .note.gnu.property
   Owner                 Data size	Description
   GNU                  0x00000010	NT_GNU_PROPERTY_TYPE_0
-      Properties: x86 ISA needed: i486, 586, SSE2, SSE3
+      Properties: x86 ISA needed: CMOV, SSE, SSSE3, SSE4_1

@@ -2361,20 +2361,20 @@ _bfd_x86_elf_parse_gnu_properties (bfd *abfd, unsigned int type,
 {
   elf_property *prop;
 
-  switch (type)
+  if (type == GNU_PROPERTY_X86_COMPAT_ISA_1_USED
+      || type == GNU_PROPERTY_X86_COMPAT_ISA_1_NEEDED
+      || (type >= GNU_PROPERTY_X86_UINT32_AND_LO
+	  && type <= GNU_PROPERTY_X86_UINT32_AND_HI)
+      || (type >= GNU_PROPERTY_X86_UINT32_OR_LO
+	  && type <= GNU_PROPERTY_X86_UINT32_OR_HI)
+      || (type >= GNU_PROPERTY_X86_UINT32_OR_AND_LO
+	  && type <= GNU_PROPERTY_X86_UINT32_OR_AND_HI))
     {
-    case GNU_PROPERTY_X86_ISA_1_USED:
-    case GNU_PROPERTY_X86_ISA_1_NEEDED:
-    case GNU_PROPERTY_X86_FEATURE_1_AND:
       if (datasz != 4)
 	{
 	  _bfd_error_handler
-	    ((type == GNU_PROPERTY_X86_ISA_1_USED
-	      ? _("error: %pB: <corrupt x86 ISA used size: 0x%x>")
-	      : (type == GNU_PROPERTY_X86_ISA_1_NEEDED
-		 ? _("error: %pB: <corrupt x86 ISA needed size: 0x%x>")
-		 : _("error: %pB: <corrupt x86 feature size: 0x%x>"))),
-	     abfd, datasz);
+	    (_("error: %pB: <corrupt x86 property (0x%x) size: 0x%x>"),
+	     abfd, type, datasz);
 	  return property_corrupt;
 	}
       prop = _bfd_elf_get_property (abfd, type, datasz);
@@ -2383,13 +2383,10 @@ _bfd_x86_elf_parse_gnu_properties (bfd *abfd, unsigned int type,
       prop->u.number |= (bfd_h_get_32 (abfd, ptr)
 			 & ~GNU_PROPERTY_X86_UINT32_VALID);
       prop->pr_kind = property_number;
-      break;
-
-    default:
-      return property_ignored;
+      return property_number;
     }
 
-  return property_number;
+  return property_ignored;
 }
 
 /* Merge x86 GNU property BPROP with APROP.  If APROP isn't NULL,
@@ -2406,9 +2403,10 @@ _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
   bfd_boolean updated = FALSE;
   unsigned int pr_type = aprop != NULL ? aprop->pr_type : bprop->pr_type;
 
-  switch (pr_type)
+  if (pr_type == GNU_PROPERTY_X86_COMPAT_ISA_1_USED
+      || (pr_type >= GNU_PROPERTY_X86_UINT32_OR_AND_LO
+	  && pr_type <= GNU_PROPERTY_X86_UINT32_OR_AND_HI))
     {
-    case GNU_PROPERTY_X86_ISA_1_USED:
       if (aprop == NULL || bprop == NULL)
 	{
 	  /* Only one of APROP and BPROP can be NULL.  */
@@ -2419,11 +2417,14 @@ _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
 	      aprop->pr_kind = property_remove;
 	      updated = TRUE;
 	    }
-	  break;
+	  return updated;
 	}
       goto or_property;
-
-    case GNU_PROPERTY_X86_ISA_1_NEEDED:
+    }
+  else if (pr_type == GNU_PROPERTY_X86_COMPAT_ISA_1_NEEDED
+	   || (pr_type >= GNU_PROPERTY_X86_UINT32_OR_LO
+	       && pr_type <= GNU_PROPERTY_X86_UINT32_OR_HI))
+    {
       if (aprop != NULL && bprop != NULL)
 	{
 or_property:
@@ -2458,9 +2459,11 @@ or_property:
 	      updated = bprop->u.number != 0;
 	    }
 	}
-      break;
-
-    case GNU_PROPERTY_X86_FEATURE_1_AND:
+      return updated;
+    }
+  else if (pr_type >= GNU_PROPERTY_X86_UINT32_AND_LO
+	   && pr_type <= GNU_PROPERTY_X86_UINT32_AND_HI)
+    {
       /* Only one of APROP and BPROP can be NULL:
 	 1. APROP & BPROP when both APROP and BPROP aren't NULL.
 	 2. If APROP is NULL, remove x86 feature.
@@ -2511,9 +2514,10 @@ or_property:
 	      updated = TRUE;
 	    }
 	}
-      break;
-
-    default:
+      return updated;
+    }
+  else
+    {
       /* Never should happen.  */
       abort ();
     }
@@ -2598,27 +2602,30 @@ _bfd_x86_elf_link_setup_gnu_properties
 	{
 	  /* If the separate code program header is needed, make sure
 	     that the first read-only PT_LOAD segment has no code by
-	     adding a GNU_PROPERTY_X86_ISA_1_NEEDED note.  */
+	     adding a GNU_PROPERTY_X86_FEATURE_2_NEEDED note.  */
 	  elf_property_list *list;
 	  bfd_boolean need_property = TRUE;
 
 	  for (list = elf_properties (ebfd); list; list = list->next)
-	    switch (list->property.pr_type)
-	      {
-	      case GNU_PROPERTY_STACK_SIZE:
-	      case GNU_PROPERTY_NO_COPY_ON_PROTECTED:
-	      case GNU_PROPERTY_X86_ISA_1_NEEDED:
-		/* These properties won't be removed during merging.  */
-		need_property = FALSE;
-		break;
-	      }
+	    {
+	      unsigned int pr_type = list->property.pr_type;
+	      if (pr_type == GNU_PROPERTY_STACK_SIZE
+		  || pr_type == GNU_PROPERTY_NO_COPY_ON_PROTECTED
+		  || pr_type == GNU_PROPERTY_X86_COMPAT_ISA_1_NEEDED
+		  || (pr_type >= GNU_PROPERTY_X86_UINT32_OR_LO
+		      && pr_type <= GNU_PROPERTY_X86_UINT32_OR_HI))
+		{
+		  /* These properties won't be removed during merging.  */
+		  need_property = FALSE;
+		  break;
+		}
+	    }
 
 	  if (need_property)
 	    {
-	      prop = _bfd_elf_get_property (ebfd,
-					    GNU_PROPERTY_X86_ISA_1_NEEDED,
-					    4);
-	      prop->u.number = GNU_PROPERTY_X86_ISA_1_486;
+	      prop = _bfd_elf_get_property
+		(ebfd, GNU_PROPERTY_X86_FEATURE_2_NEEDED, 4);
+	      prop->u.number = GNU_PROPERTY_X86_FEATURE_2_X86;
 	      prop->pr_kind = property_number;
 	    }
 	}
@@ -2971,26 +2978,35 @@ _bfd_x86_elf_link_fixup_gnu_properties (struct bfd_link_info *info,
   elf_property_list *p;
 
   for (p = *listp; p; p = p->next)
-    switch (p->property.pr_type)
-      {
-      case GNU_PROPERTY_X86_ISA_1_USED:
-      case GNU_PROPERTY_X86_ISA_1_NEEDED:
-      case GNU_PROPERTY_X86_FEATURE_1_AND:
-	if (p->property.u.number == 0)
-	  {
-	    /* Remove empty property.  */
-	    *listp = p->next;
-	    continue;
-	  }
+    {
+      unsigned int type = p->property.pr_type;
+      if (type == GNU_PROPERTY_X86_COMPAT_ISA_1_USED
+	  || type == GNU_PROPERTY_X86_COMPAT_ISA_1_NEEDED
+	  || (type >= GNU_PROPERTY_X86_UINT32_AND_LO
+	      && type <= GNU_PROPERTY_X86_UINT32_AND_HI)
+	  || (type >= GNU_PROPERTY_X86_UINT32_OR_LO
+	      && type <= GNU_PROPERTY_X86_UINT32_OR_HI)
+	  || (type >= GNU_PROPERTY_X86_UINT32_OR_AND_LO
+	      && type <= GNU_PROPERTY_X86_UINT32_OR_AND_HI))
+	{
+	  if (p->property.u.number == 0)
+	    {
+	      /* Remove empty property.  */
+	      *listp = p->next;
+	      continue;
+	    }
 
-	/* Mark x86-specific properties with X86_UINT32_VALID for
-	   non-relocatable output.  */
-	if (!(bfd_link_relocatable (info)))
-	  p->property.u.number |= GNU_PROPERTY_X86_UINT32_VALID;
+	  /* Mark x86-specific properties with X86_UINT32_VALID for
+	     non-relocatable output.  */
+	  if (!bfd_link_relocatable (info))
+	    p->property.u.number |= GNU_PROPERTY_X86_UINT32_VALID;
 
-	listp = &p->next;
-	break;
-      default:
-	break;
-      }
+	  listp = &p->next;
+	}
+      else if (type > GNU_PROPERTY_HIPROC)
+	{
+	  /* The property list is sorted in order of type.  */
+	  break;
+	}
+    }
 }
