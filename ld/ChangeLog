@@ -1,3 +1,10 @@
+2018-08-24  Chenghua Xu  <paul.hua.gm@gmail.com>
+
+	* testsuite/ld-mips-elf/mips-elf-flags.exp
+	(check_ld_support_32bit, check_is_32bit_args): New procedures.
+	(good_combination, bad_combination): Skip 32bit test if ld
+	not support 32bit emulations.
+
 2018-08-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-i386/i386.exp: Run pr23372c, pr23372d, pr23486c

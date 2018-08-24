@@ -36,6 +36,32 @@ if {[istarget mips*-*-irix6*]} {
     set ldemul ""
 }
 
+# Check is ld supported 32bit emulations.
+proc check_ld_support_32bit { } {
+    global ld
+    global echo
+
+    set ld_output [remote_exec host $ld "-V"]
+    if [string match "*elf32*" $ld_output] then {
+	return 1
+    } else {
+	return 0
+    }
+}
+
+# Check args is 32bit abis.
+proc check_is_32bit_args {arg} {
+
+    if { [string match "*-32*" $arg]
+         || [string match "*-mabi=32*" $arg]
+         || [string match "*-mabi=o64*" $arg]
+         || [string match "*-mgp32*" $arg] } {
+	return 1
+    } else {
+	return 0
+    }
+}
+
 # Assemble jr.s using each of the argument lists in ARGLIST.  Return the
 # list of object files on success and an empty list on failure.
 proc assemble_for_flags {arglist} {
@@ -69,6 +95,13 @@ proc good_combination {arglist flags args} {
     set finalobj "tmpdir/mips-flags.o"
     set testname "MIPS compatible objects: $arglist"
     set objs [assemble_for_flags $arglist]
+
+    foreach argsl $arglist {
+        if { [check_is_32bit_args $argsl] && ![check_ld_support_32bit] } {
+	    unsupported $testname
+	    return 0
+	}
+    }
 
     if {$objs == ""} {
 	unresolved $testname
@@ -155,6 +188,13 @@ proc bad_combination {arglist message} {
     set finalobj "tmpdir/mips-flags.o"
     set testname "MIPS incompatible objects: $arglist"
     set objs [assemble_for_flags $arglist]
+
+    foreach argsl $arglist {
+        if { [check_is_32bit_args $argsl] && ![check_ld_support_32bit] } {
+	    unsupported $testname
+	    return 0
+	}
+    }
 
     if {$objs == ""} {
 	unresolved $testname
