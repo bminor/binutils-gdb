@@ -2825,6 +2825,56 @@ gdb_caching_proc skip_btrace_pt_tests {
     return $skip_btrace_tests
 }
 
+# Run a test on the target to see if it supports Aarch64 SVE hardware.
+# Return 0 if so, 1 if it does not.  Note this causes a restart of GDB.
+
+gdb_caching_proc skip_aarch64_sve_tests {
+    global srcdir subdir gdb_prompt inferior_exited_re
+
+    set me "skip_aarch64_sve_tests"
+
+    if { ![is_aarch64_target]} {
+	return 1
+    }
+
+    set compile_flags "{additional_flags=-march=armv8-a+sve}"
+
+    # Compile a test program containing SVE instructions.
+    set src {
+	int main() {
+	    asm volatile ("ptrue p0.b");
+	    return 0;
+	}
+    }
+    if {![gdb_simple_compile $me $src executable $compile_flags]} {
+        return 1
+    }
+
+    # Compilation succeeded so now run it via gdb.
+    clean_restart $obj
+    gdb_run_cmd
+    gdb_expect {
+        -re ".*Illegal instruction.*${gdb_prompt} $" {
+            verbose -log "\n$me sve hardware not detected"
+            set skip_sve_tests 1
+        }
+        -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
+            verbose -log "\n$me: sve hardware detected"
+            set skip_sve_tests 0
+        }
+        default {
+          warning "\n$me: default case taken"
+            set skip_sve_tests 1
+        }
+    }
+    gdb_exit
+    remote_file build delete $obj
+
+    verbose "$me:  returning $skip_sve_tests" 2
+    return $skip_sve_tests
+}
+
+
 # A helper that compiles a test case to see if __int128 is supported.
 proc gdb_int128_helper {lang} {
     return [gdb_can_simple_compile "i128-for-$lang" {
