@@ -752,6 +752,9 @@
 #define GNU_PROPERTY_X86_ISA_1_NEEDED		0xc0000001
 #define GNU_PROPERTY_X86_FEATURE_1_AND		0xc0000002
 
+/* Set by linker to indicate that the property is valid.  */
+#define GNU_PROPERTY_X86_UINT32_VALID		(1U << 31)
+
 #define GNU_PROPERTY_X86_ISA_1_486           (1U << 0)
 #define GNU_PROPERTY_X86_ISA_1_586           (1U << 1)
 #define GNU_PROPERTY_X86_ISA_1_686           (1U << 2)

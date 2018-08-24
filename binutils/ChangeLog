@@ -1,3 +1,8 @@
+2018-08-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (print_gnu_property_note): Check the
+	GNU_PROPERTY_X86_UINT32_VALID bit for invalid GNU property note.
+
 2018-08-23  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (get_ppc64_symbol_other): Return NULL if st_other

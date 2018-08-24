@@ -17067,30 +17067,56 @@ print_gnu_property_note (Filedata * filedata, Elf_Internal_Note * pnote)
 	      || filedata->file_header.e_machine == EM_IAMCU
 	      || filedata->file_header.e_machine == EM_386)
 	    {
+	      unsigned int bitmask;
+
+	      if (datasz == 4)
+		{
+		  bitmask = byte_get (ptr, 4);
+		  if (filedata->file_header.e_type == ET_EXEC
+		      || filedata->file_header.e_type == ET_DYN)
+		    {
+		      if ((bitmask & GNU_PROPERTY_X86_UINT32_VALID))
+			bitmask &= ~GNU_PROPERTY_X86_UINT32_VALID;
+		      else
+			printf ("Invalid ");
+		    }
+		}
+	      else
+		bitmask = 0;
+
 	      switch (type)
 		{
 		case GNU_PROPERTY_X86_ISA_1_USED:
-		  printf ("x86 ISA used: ");
 		  if (datasz != 4)
-		    printf (_("<corrupt length: %#x> "), datasz);
+		    printf (_("x86 ISA used: <corrupt length: %#x> "),
+			    datasz);
 		  else
-		    decode_x86_isa (byte_get (ptr, 4));
+		    {
+		      printf ("x86 ISA used: ");
+		      decode_x86_isa (bitmask);
+		    }
 		  goto next;
 
 		case GNU_PROPERTY_X86_ISA_1_NEEDED:
-		  printf ("x86 ISA needed: ");
 		  if (datasz != 4)
-		    printf (_("<corrupt length: %#x> "), datasz);
+		    printf (_("x86 ISA needed: <corrupt length: %#x> "),
+			    datasz);
 		  else
-		    decode_x86_isa (byte_get (ptr, 4));
+		    {
+		      printf ("x86 ISA needed: ");
+		      decode_x86_isa (bitmask);
+		    }
 		  goto next;
 
 		case GNU_PROPERTY_X86_FEATURE_1_AND:
-		  printf ("x86 feature: ");
 		  if (datasz != 4)
-		    printf (_("<corrupt length: %#x> "), datasz);
+		    printf (_("x86 feature: <corrupt length: %#x> "),
+			    datasz);
 		  else
-		    decode_x86_feature (type, byte_get (ptr, 4));
+		    {
+		      printf ("x86 feature: ");
+		      decode_x86_feature (type, bitmask);
+		    }
 		  goto next;
 
 		default:

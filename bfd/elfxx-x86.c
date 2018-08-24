@@ -2378,8 +2378,10 @@ _bfd_x86_elf_parse_gnu_properties (bfd *abfd, unsigned int type,
 	  return property_corrupt;
 	}
       prop = _bfd_elf_get_property (abfd, type, datasz);
-      /* Combine properties of the same type.  */
-      prop->u.number |= bfd_h_get_32 (abfd, ptr);
+      /* Mask out GNU_PROPERTY_X86_UINT32_VALID and combine properties
+	 of the same type.  */
+      prop->u.number |= (bfd_h_get_32 (abfd, ptr)
+			 & ~GNU_PROPERTY_X86_UINT32_VALID);
       prop->pr_kind = property_number;
       break;
 
@@ -2963,9 +2965,8 @@ error_alignment:
 /* Fix up x86 GNU properties.  */
 
 void
-_bfd_x86_elf_link_fixup_gnu_properties
-  (struct bfd_link_info *info ATTRIBUTE_UNUSED,
-   elf_property_list **listp)
+_bfd_x86_elf_link_fixup_gnu_properties (struct bfd_link_info *info,
+					elf_property_list **listp)
 {
   elf_property_list *p;
 
@@ -2981,6 +2982,12 @@ _bfd_x86_elf_link_fixup_gnu_properties
 	    *listp = p->next;
 	    continue;
 	  }
+
+	/* Mark x86-specific properties with X86_UINT32_VALID for
+	   non-relocatable output.  */
+	if (!(bfd_link_relocatable (info)))
+	  p->property.u.number |= GNU_PROPERTY_X86_UINT32_VALID;
+
 	listp = &p->next;
 	break;
       default:

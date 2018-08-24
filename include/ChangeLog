@@ -1,3 +1,7 @@
+2018-08-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf/common.h (GNU_PROPERTY_X86_UINT32_VALID): New.
+
 2018-08-21  John Darrington  <john@darrington.wattle.id.au>
 
 	* elf/s12z.h: Rename R_S12Z_UKNWN_3 to R_S12Z_EXT18.
