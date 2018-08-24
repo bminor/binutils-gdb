@@ -1,3 +1,18 @@
+2018-10-01  Alan Hayward  <alan.hayward@arm.com>
+
+	* aarch64-tdep.c (AARCH64_Q0_REGNUM): Move to here.
+	(AARCH64_D0_REGNUM): Likewise.
+	(AARCH64_S0_REGNUM): Likewise.
+	(AARCH64_H0_REGNUM): Likewise.
+	(AARCH64_B0_REGNUM): Likewise.
+	(AARCH64_SVE_V0_REGNUM): Likewise.
+	* arch/aarch64.h (AARCH64_Q0_REGNUM): Move from here.
+	(AARCH64_D0_REGNUM): Likewise.
+	(AARCH64_S0_REGNUM): Likewise.
+	(AARCH64_H0_REGNUM): Likewise.
+	(AARCH64_B0_REGNUM): Likewise.
+	(AARCH64_SVE_V0_REGNUM): Likewise.
+
 2018-10-01  Gary Benson <gbenson@redhat.com>
 
 	* gdb_proc_service.h (gdb_prfpregset_t): Remove typedef.

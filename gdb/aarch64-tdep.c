@@ -63,14 +63,6 @@
 #define bit(obj,st) (((obj) >> (st)) & 1)
 #define bits(obj,st,fn) (((obj) >> (st)) & submask ((fn) - (st)))
 
-/* Pseudo register base numbers.  */
-#define AARCH64_Q0_REGNUM 0
-#define AARCH64_D0_REGNUM (AARCH64_Q0_REGNUM + AARCH64_D_REGISTER_COUNT)
-#define AARCH64_S0_REGNUM (AARCH64_D0_REGNUM + 32)
-#define AARCH64_H0_REGNUM (AARCH64_S0_REGNUM + 32)
-#define AARCH64_B0_REGNUM (AARCH64_H0_REGNUM + 32)
-#define AARCH64_SVE_V0_REGNUM (AARCH64_B0_REGNUM + 32)
-
 /* A Homogeneous Floating-Point or Short-Vector Aggregate may have at most
    four members.  */
 #define HA_MAX_NUM_FLDS		4
