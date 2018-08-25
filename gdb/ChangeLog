@@ -20,6 +20,36 @@
 	(disassemble_current_function): Likewise.
 	(disassemble_command): Likewise.
 
+	* ax-gdb.c (gen_var_ref): Use BLOCK_ENTRY_PC in place of
+	BLOCK_START.
+	* blockframe.c (get_pc_function_start): Likewise.
+	* compile/compile-c-symbols.c (convert_one_symbol): Likewise.
+	(gcc_symbol_address): Likewise.
+	* compile/compile-object-run.c (compile_object_run): Likewise.
+	* compile/compile.c (get_expr_block_and_pc): Likewise.
+	* dwarf2loc.c (dwarf2_find_location_expression): Likewise.
+	(func_addr_to_tail_call_list): Likewise.
+	* findvar.c (default_read_var_value): Likewise.
+	* inline-frame.c (inline_frame_this_id): Likewise.
+	(skip-inline_frames): Likewise.
+	* infcmd.c (until_next_command): Likewise.
+	* linespec.c (convert_linespec_to_sals): Likewise.
+	* parse.c (parse_exp_in_context_1): Likewise.
+	* printcmd.c (build_address_symbolic): likewise.
+	(info_address_command): Likewise.
+	symtab.c (find_function_start_sal): Likewise.
+	(skip_prologue_sal): Likewise.
+	(find_function_alias_target): Likewise.
+	(find_gnu_ifunc): Likewise.
+	* stack.c (find_frame_funname): Likewise.
+	* symtab.c (fixup_symbol_section): Likewise.
+	(find_function_start_sal): Likewise.
+	(skip_prologue_sal): Likewsie.
+	(find_function_alias_target): Likewise.
+	(find_gnu_ifunc): Likewise.
+	* tracepoint.c (info_scope_command): Likewise.
+	* value.c (value_fn_field): Likewise.
+
 2018-08-24  Pedro Alves  <palves@redhat.com>
 	    Simon Marchi  <simon.marchi@ericsson.com>
 

@@ -702,10 +702,10 @@ default_read_var_value (struct symbol *var, const struct block *var_block,
     case LOC_BLOCK:
       if (overlay_debugging)
 	addr = symbol_overlayed_address
-	  (BLOCK_START (SYMBOL_BLOCK_VALUE (var)),
+	  (BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (var)),
 	   SYMBOL_OBJ_SECTION (symbol_objfile (var), var));
       else
-	addr = BLOCK_START (SYMBOL_BLOCK_VALUE (var));
+	addr = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (var));
       break;
 
     case LOC_REGISTER:

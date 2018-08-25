@@ -96,7 +96,7 @@ get_pc_function_start (CORE_ADDR pc)
       if (symbol)
 	{
 	  bl = SYMBOL_BLOCK_VALUE (symbol);
-	  return BLOCK_START (bl);
+	  return BLOCK_ENTRY_PC (bl);
 	}
     }
 
@@ -382,7 +382,7 @@ find_function_type (CORE_ADDR pc)
 {
   struct symbol *sym = find_pc_function (pc);
 
-  if (sym != NULL && BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) == pc)
+  if (sym != NULL && BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym)) == pc)
     return SYMBOL_TYPE (sym);
 
   return NULL;
