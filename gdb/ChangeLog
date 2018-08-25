@@ -1,3 +1,8 @@
+2018-08-25  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* python/py-threadevent.c (py_get_event_thread): Initialize
+	pythread.
+
 2018-08-24  Pedro Alves  <palves@redhat.com>
 
 	* python/py-bpevent.c (create_breakpoint_event_object): Use
