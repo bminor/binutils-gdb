@@ -54,6 +54,8 @@
 	in place of find_pc_partial_function.
 	* blockframe.c (find_function_entry_range_from_pc): New function.
 	* symtab.h (find_function_entry_range_from_pc): Declare and document.
+	* objfiles.c (objfile_relocate1): Relocate start and end addresses
+	for each range in a block.
 
 2018-08-24  Pedro Alves  <palves@redhat.com>
 	    Simon Marchi  <simon.marchi@ericsson.com>
