@@ -31,6 +31,37 @@ struct using_direct;
 struct obstack;
 struct addrmap;
 
+/* Blocks can occupy non-contiguous address ranges.  When this occurs,
+   startaddr and endaddr within struct block (still) specify the lowest
+   and highest addresses of all ranges, but each individual range is
+   specified by the addresses in struct blockrange.  */
+
+struct blockrange
+{
+  blockrange (CORE_ADDR startaddr_, CORE_ADDR endaddr_)
+    : startaddr (startaddr_),
+      endaddr (endaddr_)
+  {
+  }
+
+  /* Lowest address in this range.  */
+
+  CORE_ADDR startaddr;
+
+  /* One past the highest address in the range.  */
+
+  CORE_ADDR endaddr;
+};
+
+/* Two or more non-contiguous ranges in the same order as that provided
+   via the debug info.  */
+
+struct blockranges
+{
+  int nranges;
+  struct blockrange range[1];
+};
+
 /* All of the name-scope contours of the program
    are represented by `struct block' objects.
    All of these objects are pointed to by the blockvector.
@@ -86,6 +117,12 @@ struct block
      using directives and the current namespace scope.  */
 
   struct block_namespace_info *namespace_info;
+
+  /* Address ranges for blocks with non-contiguous ranges.  If this
+     is NULL, then there is only one range which is specified by
+     startaddr and endaddr above.  */
+
+  struct blockranges *ranges;
 };
 
 /* The global block is singled out so that we can provide a back-link
@@ -108,6 +145,49 @@ struct global_block
 #define BLOCK_SUPERBLOCK(bl)	(bl)->superblock
 #define BLOCK_DICT(bl)		(bl)->dict
 #define BLOCK_NAMESPACE(bl)	(bl)->namespace_info
+
+/* Accessor for ranges field within block BL.  */
+
+#define BLOCK_RANGES(bl)	(bl)->ranges
+
+/* Number of ranges within a block.  */
+
+#define BLOCK_NRANGES(bl)	(bl)->ranges->nranges
+
+/* Access range array for block BL.  */
+
+#define BLOCK_RANGE(bl)		(bl)->ranges->range
+
+/* Are all addresses within a block contiguous?  */
+
+#define BLOCK_CONTIGUOUS_P(bl)	(BLOCK_RANGES (bl) == nullptr \
+				 || BLOCK_NRANGES (bl) <= 1)
+
+/* Obtain the start address of the Nth range for block BL.  */
+
+#define BLOCK_RANGE_START(bl,n) (BLOCK_RANGE (bl)[n].startaddr)
+
+/* Obtain the end address of the Nth range for block BL.  */
+
+#define BLOCK_RANGE_END(bl,n)	(BLOCK_RANGE (bl)[n].endaddr)
+
+/* Define the "entry pc" for a block BL to be the lowest (start) address
+   for the block when all addresses within the block are contiguous.  If
+   non-contiguous, then use the start address for the first range in the
+   block.
+
+   At the moment, this almost matches what DWARF specifies as the entry
+   pc.  (The missing bit is support for DW_AT_entry_pc which should be
+   preferred over range data and the low_pc.)
+
+   Once support for DW_AT_entry_pc is added, I expect that an entry_pc
+   field will be added to one of these data structures.  Once that's done,
+   the entry_pc field can be set from the dwarf reader (and other readers
+   too).  BLOCK_ENTRY_PC can then be redefined to be less DWARF-centric.  */
+
+#define BLOCK_ENTRY_PC(bl)	(BLOCK_CONTIGUOUS_P (bl) \
+				 ? BLOCK_START (bl) \
+				 : BLOCK_RANGE_START (bl,0))
 
 struct blockvector
 {
@@ -321,5 +401,10 @@ extern int block_find_non_opaque_type_preferred (struct symbol *sym,
   for ((sym) = block_iter_match_first ((block), (name), &(iter));	\
        (sym) != NULL;							\
        (sym) = block_iter_match_next ((name), &(iter)))
+
+/* Given a vector of pairs, allocate and build an obstack allocated
+   blockranges struct for a block.  */
+struct blockranges *make_blockranges (struct objfile *objfile,
+                                      const std::vector<blockrange> &rangevec);
 
 #endif /* BLOCK_H */

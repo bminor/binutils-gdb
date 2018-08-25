@@ -807,3 +807,24 @@ block_find_non_opaque_type_preferred (struct symbol *sym, void *data)
   *best = sym;
   return 0;
 }
+
+/* See block.h.  */
+
+struct blockranges *
+make_blockranges (struct objfile *objfile,
+                  const std::vector<blockrange> &rangevec)
+{
+  struct blockranges *blr;
+  size_t n = rangevec.size();
+
+  blr = (struct blockranges *)
+    obstack_alloc (&objfile->objfile_obstack,
+                   sizeof (struct blockranges)
+		   + (n - 1) * sizeof (struct blockrange));
+
+  blr->nranges = n;
+  for (int i = 0; i < n; i++)
+    blr->range[i] = rangevec[i];
+  return blr;
+}
+
