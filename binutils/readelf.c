@@ -11300,6 +11300,7 @@ get_symbol_version_string (Filedata *                   filedata,
   unsigned char data[2];
   unsigned short vers_data;
   unsigned long offset;
+  unsigned short max_vd_ndx;
 
   if (!is_dynsym
       || version_info[DT_VERSIONTAGIDX (DT_VERSYM)] == 0)
@@ -11316,6 +11317,8 @@ get_symbol_version_string (Filedata *                   filedata,
 
   if ((vers_data & VERSYM_HIDDEN) == 0 && vers_data == 0)
     return NULL;
+
+  max_vd_ndx = 0;
 
   /* Usually we'd only see verdef for defined symbols, and verneed for
      undefined symbols.  However, symbols defined by the linker in
@@ -11358,6 +11361,9 @@ get_symbol_version_string (Filedata *                   filedata,
 	      ivd.vd_next = BYTE_GET (evd.vd_next);
 	      ivd.vd_flags = BYTE_GET (evd.vd_flags);
 	    }
+
+	  if ((ivd.vd_ndx & VERSYM_VERSION) > max_vd_ndx)
+	    max_vd_ndx = ivd.vd_ndx & VERSYM_VERSION;
 
 	  off += ivd.vd_next;
 	}
@@ -11450,6 +11456,9 @@ get_symbol_version_string (Filedata *                   filedata,
 	  return (ivna.vna_name < strtab_size
 		  ? strtab + ivna.vna_name : _("<corrupt>"));
 	}
+      else if ((max_vd_ndx || (vers_data & VERSYM_VERSION) != 1)
+	       && (vers_data & VERSYM_VERSION) > max_vd_ndx)
+	return _("<corrupt>");
     }
   return NULL;
 }

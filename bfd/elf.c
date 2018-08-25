@@ -1877,7 +1877,7 @@ _bfd_elf_get_symbol_version_string (bfd *abfd, asymbol *symbol,
 	{
 	  Elf_Internal_Verneed *t;
 
-	  version_string = "";
+	  version_string = _("<corrupt>");
 	  for (t = elf_tdata (abfd)->verref;
 	       t != NULL;
 	       t = t->vn_nextref)
