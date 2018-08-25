@@ -25,7 +25,7 @@
 PyObject *
 py_get_event_thread (ptid_t ptid)
 {
-  PyObject *pythread;
+  PyObject *pythread = nullptr;
 
   if (non_stop)
     {
@@ -36,7 +36,7 @@ py_get_event_thread (ptid_t ptid)
   else
     pythread = Py_None;
 
-  if (!pythread)
+  if (pythread == nullptr)
     {
       PyErr_SetString (PyExc_RuntimeError, "Could not find event thread");
       return NULL;
