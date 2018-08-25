@@ -165,13 +165,35 @@ find_pc_sect_containing_function (CORE_ADDR pc, struct obj_section *section)
   return block_containing_function (bl);
 }
 
-/* These variables are used to cache the most recent result
-   of find_pc_partial_function.  */
+/* These variables are used to cache the most recent result of
+   find_pc_partial_function.
+
+   The addresses cache_pc_function_low and cache_pc_function_high
+   record the range in which PC was found during the most recent
+   successful lookup.  When the function occupies a single contiguous
+   address range, these values correspond to the low and high
+   addresses of the function.  (The high address is actually one byte
+   beyond the last byte of the function.)  For a function with more
+   than one (non-contiguous) range, the range in which PC was found is
+   used to set the cache bounds.
+
+   When determining whether or not these cached values apply to a
+   particular PC value, PC must be within the range specified by
+   cache_pc_function_low and cache_pc_function_high.  In addition to
+   PC being in that range, cache_pc_section must also match PC's
+   section.  See find_pc_partial_function() for details on both the
+   comparison as well as how PC's section is determined.
+
+   The other values aren't used for determining whether the cache
+   applies, but are used for setting the outputs from
+   find_pc_partial_function.  cache_pc_function_low and
+   cache_pc_function_high are used to set outputs as well.  */
 
 static CORE_ADDR cache_pc_function_low = 0;
 static CORE_ADDR cache_pc_function_high = 0;
 static const char *cache_pc_function_name = 0;
 static struct obj_section *cache_pc_function_section = NULL;
+static const struct block *cache_pc_function_block = nullptr;
 
 /* Clear cache, e.g. when symbol table is discarded.  */
 
@@ -182,24 +204,14 @@ clear_pc_function_cache (void)
   cache_pc_function_high = 0;
   cache_pc_function_name = (char *) 0;
   cache_pc_function_section = NULL;
+  cache_pc_function_block = nullptr;
 }
 
-/* Finds the "function" (text symbol) that is smaller than PC but
-   greatest of all of the potential text symbols in SECTION.  Sets
-   *NAME and/or *ADDRESS conditionally if that pointer is non-null.
-   If ENDADDR is non-null, then set *ENDADDR to be the end of the
-   function (exclusive), but passing ENDADDR as non-null means that
-   the function might cause symbols to be read.  This function either
-   succeeds or fails (not halfway succeeds).  If it succeeds, it sets
-   *NAME, *ADDRESS, and *ENDADDR to real information and returns 1.
-   If it fails, it sets *NAME, *ADDRESS and *ENDADDR to zero and
-   returns 0.  */
-
-/* Backward compatibility, no section argument.  */
+/* See symtab.h.  */
 
 int
 find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
-			  CORE_ADDR *endaddr)
+			  CORE_ADDR *endaddr, const struct block **block)
 {
   struct obj_section *section;
   struct symbol *f;
@@ -241,17 +253,62 @@ find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
   if (compunit_symtab != NULL)
     {
       /* Checking whether the msymbol has a larger value is for the
-	 "pathological" case mentioned in print_frame_info.  */
+	 "pathological" case mentioned in stack.c:find_frame_funname.
+
+	 We use BLOCK_ENTRY_PC instead of BLOCK_START_PC for this
+	 comparison because the minimal symbol should refer to the
+	 function's entry pc which is not necessarily the lowest
+	 address of the function.  This will happen when the function
+	 has more than one range and the entry pc is not within the
+	 lowest range of addresses.  */
       f = find_pc_sect_function (mapped_pc, section);
       if (f != NULL
 	  && (msymbol.minsym == NULL
-	      || (BLOCK_START (SYMBOL_BLOCK_VALUE (f))
+	      || (BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (f))
 		  >= BMSYMBOL_VALUE_ADDRESS (msymbol))))
 	{
-	  cache_pc_function_low = BLOCK_START (SYMBOL_BLOCK_VALUE (f));
-	  cache_pc_function_high = BLOCK_END (SYMBOL_BLOCK_VALUE (f));
+	  const struct block *b = SYMBOL_BLOCK_VALUE (f);
+
 	  cache_pc_function_name = SYMBOL_LINKAGE_NAME (f);
 	  cache_pc_function_section = section;
+	  cache_pc_function_block = b;
+
+	  /* For blocks occupying contiguous addresses (i.e. no gaps),
+	     the low and high cache addresses are simply the start
+	     and end of the block.
+
+	     For blocks with non-contiguous ranges, we have to search
+	     for the range containing mapped_pc and then use the start
+	     and end of that range.
+
+	     This causes the returned *ADDRESS and *ENDADDR values to
+	     be limited to the range in which mapped_pc is found.  See
+	     comment preceding declaration of find_pc_partial_function
+	     in symtab.h for more information.  */
+
+	  if (BLOCK_CONTIGUOUS_P (b))
+	    {
+	      cache_pc_function_low = BLOCK_START (b);
+	      cache_pc_function_high = BLOCK_END (b);
+	    }
+	  else
+	    {
+	      int i;
+	      for (i = 0; i < BLOCK_NRANGES (b); i++)
+	        {
+		  if (BLOCK_RANGE_START (b, i) <= mapped_pc
+		      && mapped_pc < BLOCK_RANGE_END (b, i))
+		    {
+		      cache_pc_function_low = BLOCK_RANGE_START (b, i);
+		      cache_pc_function_high = BLOCK_RANGE_END (b, i);
+		      break;
+		    }
+		}
+	      /* Above loop should exit via the break.  */
+	      gdb_assert (i < BLOCK_NRANGES (b));
+	    }
+
+
 	  goto return_cached_value;
 	}
     }
@@ -281,6 +338,7 @@ find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
   cache_pc_function_name = MSYMBOL_LINKAGE_NAME (msymbol.minsym);
   cache_pc_function_section = section;
   cache_pc_function_high = minimal_symbol_upper_bound (msymbol);
+  cache_pc_function_block = nullptr;
 
  return_cached_value:
 
@@ -310,6 +368,9 @@ find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
       else
 	*endaddr = cache_pc_function_high;
     }
+
+  if (block != nullptr)
+    *block = cache_pc_function_block;
 
   return 1;
 }
