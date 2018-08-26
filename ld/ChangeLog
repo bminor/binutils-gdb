@@ -1,3 +1,26 @@
+2018-08-26  Alan Modra  <amodra@gmail.com>
+
+	PR 23571
+	* ldlang.h (section_alignment): Make it an expression tree.
+	(subsection_alignment): Likewise.
+	* ldlang.c (topower): Delete.
+	(output_section_statement_newfunc): Adjust initialization.
+	(init_os): Evaluate section_alignment.
+	(lang_size_sections_1): Likewise.
+	(size_input_section): Evaluate subsection_alignment.
+	(lang_enter_output_section_statement): Don't evaluate here.
+	(lang_new_phdr): Use exp_get_vma rather than exp_get_value_int.
+	* ldexp.h (exp_get_value_int): Delete.
+	(exp_get_power): Declare.
+	* ldexp.c (exp_get_value_int): Delete.
+	(exp_get_power): New function.
+	* emultempl/pe.em (place_orphan): Build expression for section
+	alignment.
+	* emultempl/pep.em (place_orphan): Likewise.
+	* testsuite/ld-scripts/pr23571.d,
+	* testsuite/ld-scripts/pr23571.t: New test.
+	* testsuite/ld-scripts/align.exp: Run it.
+
 2018-08-24  Chenghua Xu  <paul.hua.gm@gmail.com>
 
 	* testsuite/ld-mips-elf/mips-elf-flags.exp

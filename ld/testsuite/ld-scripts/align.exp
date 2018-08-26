@@ -53,3 +53,7 @@ if ![is_aout_format] {
 }
 run_dump_test align2c
 set LDFLAGS "$saved_LDFLAGS"
+
+if { [is_elf_format] && ![is_generic_elf] } {
+    run_dump_test pr23571
+}

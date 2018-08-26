@@ -1199,8 +1199,8 @@ output_section_statement_newfunc (struct bfd_hash_entry *entry,
   ret = (struct out_section_hash_entry *) entry;
   memset (&ret->s, 0, sizeof (ret->s));
   ret->s.header.type = lang_output_section_statement_enum;
-  ret->s.output_section_statement.subsection_alignment = -1;
-  ret->s.output_section_statement.section_alignment = -1;
+  ret->s.output_section_statement.subsection_alignment = NULL;
+  ret->s.output_section_statement.section_alignment = NULL;
   ret->s.output_section_statement.block_value = 1;
   lang_list_init (&ret->s.output_section_statement.children);
   lang_statement_append (stat_ptr, &ret->s, &ret->s.header.next);
@@ -2193,8 +2193,9 @@ init_os (lang_output_section_statement_type *s, flagword flags)
     exp_init_os (s->load_base);
 
   /* If supplied an alignment, set it.  */
-  if (s->section_alignment != -1)
-    s->bfd_section->alignment_power = s->section_alignment;
+  if (s->section_alignment != NULL)
+    s->bfd_section->alignment_power = exp_get_power (s->section_alignment,
+						     "section alignment");
 }
 
 /* Make sure that all output sections mentioned in an expression are
@@ -4706,8 +4707,10 @@ size_input_section
 	 is greater than any seen before, then record it too.  Perform
 	 the alignment by inserting a magic 'padding' statement.  */
 
-      if (output_section_statement->subsection_alignment != -1)
-	i->alignment_power = output_section_statement->subsection_alignment;
+      if (output_section_statement->subsection_alignment != NULL)
+	i->alignment_power
+	  = exp_get_power (output_section_statement->subsection_alignment,
+			   "subsection alignment");
 
       if (o->alignment_power < i->alignment_power)
 	o->alignment_power = i->alignment_power;
@@ -5147,7 +5150,8 @@ lang_size_sections_1
 		    section_alignment = os->bfd_section->alignment_power;
 		  }
 		else
-		  section_alignment = os->section_alignment;
+		  section_alignment = exp_get_power (os->section_alignment,
+						     "section alignment");
 
 		/* Align to what the section needs.  */
 		if (section_alignment > 0)
@@ -5225,7 +5229,8 @@ lang_size_sections_1
 		       only align according to the value in the output
 		       statement.  */
 		    if (os->lma_region != os->region)
-		      section_alignment = os->section_alignment;
+		      section_alignment = exp_get_power (os->section_alignment,
+							 "section alignment");
 		    if (section_alignment > 0)
 		      lma = align_power (lma, section_alignment);
 		  }
@@ -6673,25 +6678,6 @@ lang_add_output (const char *name, int from_script)
     }
 }
 
-static int
-topower (int x)
-{
-  unsigned int i = 1;
-  int l;
-
-  if (x < 0)
-    return -1;
-
-  for (l = 0; l < 32; l++)
-    {
-      if (i >= (unsigned int) x)
-	return l;
-      i <<= 1;
-    }
-
-  return 0;
-}
-
 lang_output_section_statement_type *
 lang_enter_output_section_statement (const char *output_section_statement_name,
 				     etree_type *address_exp,
@@ -6727,10 +6713,8 @@ lang_enter_output_section_statement (const char *output_section_statement_name,
     einfo (_("%F%P:%pS: error: align with input and explicit align specified\n"),
 	   NULL);
 
-  os->subsection_alignment =
-    topower (exp_get_value_int (subalign, -1, "subsection alignment"));
-  os->section_alignment =
-    topower (exp_get_value_int (align, -1, "section alignment"));
+  os->subsection_alignment = subalign;
+  os->section_alignment = align;
 
   os->load_base = ebase;
   return os;
@@ -7748,7 +7732,7 @@ lang_new_phdr (const char *name,
   n = (struct lang_phdr *) stat_alloc (sizeof (struct lang_phdr));
   n->next = NULL;
   n->name = name;
-  n->type = exp_get_value_int (type, 0, "program header type");
+  n->type = exp_get_vma (type, 0, "program header type");
   n->filehdr = filehdr;
   n->phdrs = phdrs;
   n->at = at;

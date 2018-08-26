@@ -1523,10 +1523,26 @@ exp_get_vma (etree_type *tree, bfd_vma def, char *name)
   return def;
 }
 
+/* Return the smallest non-negative integer such that two raised to
+   that power is at least as large as the vma evaluated at TREE, if
+   TREE is a non-NULL expression that can be resolved.  If TREE is
+   NULL or cannot be resolved, return -1.  */
+
 int
-exp_get_value_int (etree_type *tree, int def, char *name)
+exp_get_power (etree_type *tree, char *name)
 {
-  return exp_get_vma (tree, def, name);
+  bfd_vma x = exp_get_vma (tree, -1, name);
+  bfd_vma p2;
+  int n;
+
+  if (x == (bfd_vma) -1)
+    return -1;
+
+  for (n = 0, p2 = 1; p2 < x; ++n, p2 <<= 1)
+    if (p2 == 0)
+      break;
+
+  return n;
 }
 
 fill_type *

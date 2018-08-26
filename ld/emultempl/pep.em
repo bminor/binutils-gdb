@@ -1962,7 +1962,7 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
 			       &add_child);
       if (bfd_link_relocatable (&link_info))
 	{
-	  os->section_alignment = s->alignment_power;
+	  os->section_alignment = exp_intop (1U << s->alignment_power);
 	  os->bfd_section->alignment_power = s->alignment_power;
 	}
     }
