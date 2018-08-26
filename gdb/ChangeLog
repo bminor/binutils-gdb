@@ -1,3 +1,7 @@
+2018-08-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* ada-lang.c (add_angle_brackets): Return std::string.
+
 2018-08-25  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* python/py-threadevent.c (py_get_event_thread): Initialize
