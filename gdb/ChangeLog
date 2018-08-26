@@ -1,5 +1,24 @@
 2018-08-26  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* ada-tasks.c (ada_task_info_s): Remove typedef.
+	(DEF_VEC_O(ada_task_info_s)): Remove.
+	(struct ada_tasks_inferior_data): Initialize fields.
+	<task_list>: Make an std::vector.
+	(get_ada_tasks_inferior_data): Allocate with new.
+	(ada_get_task_number): Adjust.
+	(get_task_number_from_id): Likewise.
+	(valid_task_id): Likewise.
+	(ada_get_task_info_from_ptid): Likewise.
+	(iterate_over_live_ada_tasks): Likewise.
+	(add_ada_task): Likewise.
+	(read_known_tasks): Likewise.
+	(ada_build_task_list): Likewise.
+	(print_ada_task_info): Likewise.
+	(info_task): Likewise.
+	(task_command_1): Likewise.
+
+2018-08-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* ada-lang.c (add_angle_brackets): Return std::string.
 
 2018-08-25  Simon Marchi  <simon.marchi@polymtl.ca>
