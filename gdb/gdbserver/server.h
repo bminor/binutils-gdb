@@ -176,7 +176,7 @@ struct client_state
 
   /* Whether we should attempt to disable the operating system's address
      space randomization feature before starting an inferior.  */
-  int disable_randomization = 0;
+  int disable_randomization = 1;
 
   int pass_signals[GDB_SIGNAL_LAST];
   int program_signals[GDB_SIGNAL_LAST];
