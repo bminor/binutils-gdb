@@ -411,8 +411,8 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
       /* Create this on the fly in order to handle vector register sizes.  */
       const struct regcache_map_entry sve_regmap[] =
 	{
-	  { 32, AARCH64_SVE_Z0_REGNUM, tdep->vq * 16 },
-	  { 16, AARCH64_SVE_P0_REGNUM, tdep->vq * 16 / 8 },
+	  { 32, AARCH64_SVE_Z0_REGNUM, (int) (tdep->vq * 16) },
+	  { 16, AARCH64_SVE_P0_REGNUM, (int) (tdep->vq * 16 / 8) },
 	  { 1, AARCH64_SVE_FFR_REGNUM, 4 },
 	  { 1, AARCH64_FPSR_REGNUM, 4 },
 	  { 1, AARCH64_FPCR_REGNUM, 4 },
