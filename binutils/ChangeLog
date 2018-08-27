@@ -1,3 +1,9 @@
+2018-08-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (decode_x86_compat_isa): Break multi-statement line.
+	(decode_x86_isa): Likewise.
+	(decode_x86_feature_2): Likewise.
+
 2018-08-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23499

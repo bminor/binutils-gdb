@@ -17019,7 +17019,9 @@ decode_x86_compat_isa (unsigned int bitmask)
 	case GNU_PROPERTY_X86_COMPAT_ISA_1_AVX512BW:
 	  printf ("AVX512BW");
 	  break;
-	default: printf (_("<unknown: %x>"), bit); break;
+	default:
+	  printf (_("<unknown: %x>"), bit);
+	  break;
 	}
       if (bitmask)
 	printf (", ");
@@ -17108,7 +17110,9 @@ decode_x86_isa (unsigned int bitmask)
 	case GNU_PROPERTY_X86_ISA_1_AVX512_VNNI:
 	  printf ("AVX512_VNNI");
 	  break;
-	default: printf (_("<unknown: %x>"), bit); break;
+	default:
+	  printf (_("<unknown: %x>"), bit);
+	  break;
 	}
       if (bitmask)
 	printf (", ");
@@ -17180,7 +17184,9 @@ decode_x86_feature_2 (unsigned int bitmask)
 	case GNU_PROPERTY_X86_FEATURE_2_XSAVEC:
 	  printf ("XSAVEC");
 	  break;
-	default: printf (_("<unknown: %x>"), bit); break;
+	default:
+	  printf (_("<unknown: %x>"), bit);
+	  break;
 	}
       if (bitmask)
 	printf (", ");
