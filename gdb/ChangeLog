@@ -1,3 +1,8 @@
+2018-08-27  Jan Vrany  <jan.vrany@fit.cvut.cz>
+
+	* python/py-framefilter.c (py_print_frame): Print frame architecture
+	when printing on an MI output.
+
 2018-08-27  Tom Tromey  <tom@tromey.com>
 
 	PR build/23087:

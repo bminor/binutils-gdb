@@ -958,6 +958,9 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 	      out->field_int ("line", line);
 	    }
 	}
+      if (out->is_mi_like_p ())
+        out->field_string ("arch",
+                           (gdbarch_bfd_arch_info (gdbarch))->printable_name);
     }
 
   /* For MI we need to deal with the "children" list population of

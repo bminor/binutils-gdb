@@ -1,3 +1,8 @@
+2018-08-27  Jan Vrany  <jan.vrany@fit.cvut.cz>
+
+	* gdb.python/py-framefilter-mi.exp: Update regexp to
+	check for "arch" field in frame output.
+
 2018-08-23  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.dwarf2/dw2-ranges-func.c: New file.
