@@ -1,3 +1,8 @@
+2018-08-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-x86.c (_bfd_x86_elf_parse_gnu_properties): Don't mask
+	out the GNU_PROPERTY_X86_UINT32_VALID bit.
+
 2018-08-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23499

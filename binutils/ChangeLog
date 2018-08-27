@@ -1,5 +1,16 @@
 2018-08-27  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* readelf.c (decode_x86_isa): Print <None> if bitmask only
+	contains the GNU_PROPERTY_X86_UINT32_VALID bit.
+	(decode_x86_feature_1): Likewise.
+	(decode_x86_feature_2): Likewise.
+	(print_gnu_property_note): Don't mask out the
+	GNU_PROPERTY_X86_UINT32_VALID bit.
+	* testsuite/binutils-all/i386/pr21231b.d: Updated.
+	* testsuite/binutils-all/x86-64/pr21231b.d: Likewise.
+
+2018-08-27  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* readelf.c (decode_x86_compat_isa): Break multi-statement line.
 	(decode_x86_isa): Likewise.
 	(decode_x86_feature_2): Likewise.

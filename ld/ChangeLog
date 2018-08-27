@@ -1,3 +1,14 @@
+2018-08-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: Run property-x86-5.
+	* testsuite/ld-i386/property-x86-5.d: New file.
+	* testsuite/ld-x86-64/property-x86-5-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-5.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-5a.s: Likewise.
+	* testsuite/ld-x86-64/property-x86-5b.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run property-x86-5 and
+	property-x86-5-x32.
+
 2018-08-26  Alan Modra  <amodra@gmail.com>
 
 	PR 23571

@@ -17031,6 +17031,14 @@ decode_x86_compat_isa (unsigned int bitmask)
 static void
 decode_x86_isa (unsigned int bitmask)
 {
+  if (bitmask == GNU_PROPERTY_X86_UINT32_VALID)
+    {
+      printf (_("<None>"));
+      return;
+    }
+  else
+    bitmask &= ~GNU_PROPERTY_X86_UINT32_VALID;
+
   while (bitmask)
     {
       unsigned int bit = bitmask & (- bitmask);
@@ -17122,6 +17130,14 @@ decode_x86_isa (unsigned int bitmask)
 static void
 decode_x86_feature_1 (unsigned int bitmask)
 {
+  if (bitmask == GNU_PROPERTY_X86_UINT32_VALID)
+    {
+      printf (_("<None>"));
+      return;
+    }
+  else
+    bitmask &= ~GNU_PROPERTY_X86_UINT32_VALID;
+
   while (bitmask)
     {
       unsigned int bit = bitmask & (- bitmask);
@@ -17147,6 +17163,14 @@ decode_x86_feature_1 (unsigned int bitmask)
 static void
 decode_x86_feature_2 (unsigned int bitmask)
 {
+  if (bitmask == GNU_PROPERTY_X86_UINT32_VALID)
+    {
+      printf (_("<None>"));
+      return;
+    }
+  else
+    bitmask &= ~GNU_PROPERTY_X86_UINT32_VALID;
+
   while (bitmask)
     {
       unsigned int bit = bitmask & (- bitmask);
@@ -17243,14 +17267,10 @@ print_gnu_property_note (Filedata * filedata, Elf_Internal_Note * pnote)
 	      if (datasz == 4)
 		{
 		  bitmask = byte_get (ptr, 4);
-		  if (filedata->file_header.e_type == ET_EXEC
-		      || filedata->file_header.e_type == ET_DYN)
-		    {
-		      if ((bitmask & GNU_PROPERTY_X86_UINT32_VALID))
-			bitmask &= ~GNU_PROPERTY_X86_UINT32_VALID;
-		      else
-			printf ("Invalid ");
-		    }
+		  if ((filedata->file_header.e_type == ET_EXEC
+		       || filedata->file_header.e_type == ET_DYN)
+		      && !(bitmask & GNU_PROPERTY_X86_UINT32_VALID))
+		    printf ("Invalid ");
 		}
 	      else
 		bitmask = 0;

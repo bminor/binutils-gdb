@@ -1,3 +1,11 @@
+2018-08-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/gas/i386/i386.exp: Run property-1 and
+	x86-64-property-1.
+	* testsuite/gas/i386/property-1.d: New file.
+	* testsuite/gas/i386/property-1.s: Likewise.
+	* testsuite/gas/i386/x86-64-property-1.d: Likewise.
+
 2018-08-23  Kito Cheng  <kito@andestech.com>
 
 	* config/tc-riscv.c (arg_lookup): Checking
