@@ -1,5 +1,5 @@
 # onceonly.m4 serial 9
-dnl Copyright (C) 2002-2003, 2005-2006, 2008-2016 Free Software Foundation,
+dnl Copyright (C) 2002-2003, 2005-2006, 2008-2018 Free Software Foundation,
 dnl Inc.
 dnl
 dnl This file is free software; you can redistribute it and/or modify
@@ -13,7 +13,7 @@ dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 dnl GNU General Public License for more details.
 dnl
 dnl You should have received a copy of the GNU General Public License
-dnl along with this file.  If not, see <http://www.gnu.org/licenses/>.
+dnl along with this file.  If not, see <https://www.gnu.org/licenses/>.
 dnl
 dnl As a special exception to the GNU General Public License,
 dnl this file may be distributed as part of a program

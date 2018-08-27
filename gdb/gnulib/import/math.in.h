@@ -1,6 +1,6 @@
 /* A GNU-like <math.h>.
 
-   Copyright (C) 2002-2003, 2007-2016 Free Software Foundation, Inc.
+   Copyright (C) 2002-2003, 2007-2018 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #ifndef _@GUARD_PREFIX@_MATH_H
 
@@ -27,6 +27,11 @@
 
 #ifndef _@GUARD_PREFIX@_MATH_H
 #define _@GUARD_PREFIX@_MATH_H
+
+/* On OpenVMS, NAN, INFINITY, and HUGEVAL macros are defined in <fp.h>.  */
+#if defined __VMS && ! defined NAN
+# include <fp.h>
+#endif
 
 #ifndef _GL_INLINE_HEADER_BEGIN
  #error "Please include config.h first."
@@ -87,27 +92,27 @@ _GL_END_NAMESPACE
    classification macros with an argument of real-floating (that is,
    one of float, double, or long double).  */
 #define _GL_WARN_REAL_FLOATING_DECL(func) \
-_GL_MATH_INLINE int                                                 \
-rpl_ ## func ## f (float f)                                         \
-{                                                                   \
-  return func (f);                                                  \
-}                                                                   \
-_GL_MATH_INLINE int                                                 \
-rpl_ ## func ## d (double d)                                        \
-{                                                                   \
-  return func (d);                                                  \
-}                                                                   \
-_GL_MATH_INLINE int                                                 \
-rpl_ ## func ## l (long double l)                                   \
-{                                                                   \
-  return func (l);                                                  \
-}                                                                   \
-_GL_WARN_ON_USE (rpl_ ## func ## f, #func " is unportable - "       \
-                 "use gnulib module " #func " for portability");    \
-_GL_WARN_ON_USE (rpl_ ## func ## d, #func " is unportable - "       \
-                 "use gnulib module " #func " for portability");    \
-_GL_WARN_ON_USE (rpl_ ## func ## l, #func " is unportable - "       \
-                 "use gnulib module " #func " for portability")
+_GL_MATH_INLINE int                                                       \
+_GL_WARN_ON_USE_ATTRIBUTE (#func " is unportable - "                      \
+                           "use gnulib module " #func " for portability") \
+rpl_ ## func ## f (float f)                                               \
+{                                                                         \
+  return func (f);                                                        \
+}                                                                         \
+_GL_MATH_INLINE int                                                       \
+_GL_WARN_ON_USE_ATTRIBUTE (#func " is unportable - "                      \
+                           "use gnulib module " #func " for portability") \
+rpl_ ## func ## d (double d)                                              \
+{                                                                         \
+  return func (d);                                                        \
+}                                                                         \
+_GL_MATH_INLINE int                                                       \
+_GL_WARN_ON_USE_ATTRIBUTE (#func " is unportable - "                      \
+                           "use gnulib module " #func " for portability") \
+rpl_ ## func ## l (long double l)                                         \
+{                                                                         \
+  return func (l);                                                        \
+}
 #define _GL_WARN_REAL_FLOATING_IMPL(func, value) \
   (sizeof (value) == sizeof (float) ? rpl_ ## func ## f (value)     \
    : sizeof (value) == sizeof (double) ? rpl_ ## func ## d (value)  \
@@ -189,8 +194,17 @@ _NaN ()
 #endif
 
 
-/* Ensure FP_ILOGB0 and FP_ILOGBNAN are defined.  */
-#if !(defined FP_ILOGB0 && defined FP_ILOGBNAN)
+#if defined FP_ILOGB0 && defined FP_ILOGBNAN
+ /* Ensure FP_ILOGB0 and FP_ILOGBNAN are correct.  */
+# if defined __HAIKU__
+  /* Haiku: match what ilogb() does */
+#  undef FP_ILOGB0
+#  undef FP_ILOGBNAN
+#  define FP_ILOGB0   (- 2147483647 - 1) /* INT_MIN */
+#  define FP_ILOGBNAN (- 2147483647 - 1) /* INT_MIN */
+# endif
+#else
+ /* Ensure FP_ILOGB0 and FP_ILOGBNAN are defined.  */
 # if defined __NetBSD__ || defined __sgi
   /* NetBSD, IRIX 6.5: match what ilogb() does */
 #  define FP_ILOGB0   (- 2147483647 - 1) /* INT_MIN */
@@ -212,11 +226,20 @@ _NaN ()
 
 
 #if @GNULIB_ACOSF@
-# if !@HAVE_ACOSF@
-#  undef acosf
+# if @REPLACE_ACOSF@
+#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+#   undef acosf
+#   define acosf rpl_acosf
+#  endif
+_GL_FUNCDECL_RPL (acosf, float, (float x));
+_GL_CXXALIAS_RPL (acosf, float, (float x));
+# else
+#  if !@HAVE_ACOSF@
+#   undef acosf
 _GL_FUNCDECL_SYS (acosf, float, (float x));
-# endif
+#  endif
 _GL_CXXALIAS_SYS (acosf, float, (float x));
+# endif
 _GL_CXXALIASWARN (acosf);
 #elif defined GNULIB_POSIXCHECK
 # undef acosf
@@ -243,11 +266,20 @@ _GL_WARN_ON_USE (acosl, "acosl is unportable - "
 
 
 #if @GNULIB_ASINF@
-# if !@HAVE_ASINF@
-#  undef asinf
+# if @REPLACE_ASINF@
+#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+#   undef asinf
+#   define asinf rpl_asinf
+#  endif
+_GL_FUNCDECL_RPL (asinf, float, (float x));
+_GL_CXXALIAS_RPL (asinf, float, (float x));
+# else
+#  if !@HAVE_ASINF@
+#   undef asinf
 _GL_FUNCDECL_SYS (asinf, float, (float x));
-# endif
+#  endif
 _GL_CXXALIAS_SYS (asinf, float, (float x));
+# endif
 _GL_CXXALIASWARN (asinf);
 #elif defined GNULIB_POSIXCHECK
 # undef asinf
@@ -274,11 +306,20 @@ _GL_WARN_ON_USE (asinl, "asinl is unportable - "
 
 
 #if @GNULIB_ATANF@
-# if !@HAVE_ATANF@
-#  undef atanf
+# if @REPLACE_ATANF@
+#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+#   undef atanf
+#   define atanf rpl_atanf
+#  endif
+_GL_FUNCDECL_RPL (atanf, float, (float x));
+_GL_CXXALIAS_RPL (atanf, float, (float x));
+# else
+#  if !@HAVE_ATANF@
+#   undef atanf
 _GL_FUNCDECL_SYS (atanf, float, (float x));
-# endif
+#  endif
 _GL_CXXALIAS_SYS (atanf, float, (float x));
+# endif
 _GL_CXXALIASWARN (atanf);
 #elif defined GNULIB_POSIXCHECK
 # undef atanf
@@ -305,11 +346,20 @@ _GL_WARN_ON_USE (atanl, "atanl is unportable - "
 
 
 #if @GNULIB_ATAN2F@
-# if !@HAVE_ATAN2F@
-#  undef atan2f
+# if @REPLACE_ATAN2F@
+#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+#   undef atan2f
+#   define atan2f rpl_atan2f
+#  endif
+_GL_FUNCDECL_RPL (atan2f, float, (float y, float x));
+_GL_CXXALIAS_RPL (atan2f, float, (float y, float x));
+# else
+#  if !@HAVE_ATAN2F@
+#   undef atan2f
 _GL_FUNCDECL_SYS (atan2f, float, (float y, float x));
-# endif
+#  endif
 _GL_CXXALIAS_SYS (atan2f, float, (float y, float x));
+# endif
 _GL_CXXALIASWARN (atan2f);
 #elif defined GNULIB_POSIXCHECK
 # undef atan2f
@@ -488,11 +538,20 @@ _GL_WARN_ON_USE (copysign, "copysignl is unportable - "
 
 
 #if @GNULIB_COSF@
-# if !@HAVE_COSF@
-#  undef cosf
+# if @REPLACE_COSF@
+#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+#   undef cosf
+#   define cosf rpl_cosf
+#  endif
+_GL_FUNCDECL_RPL (cosf, float, (float x));
+_GL_CXXALIAS_RPL (cosf, float, (float x));
+# else
+#  if !@HAVE_COSF@
+#   undef cosf
 _GL_FUNCDECL_SYS (cosf, float, (float x));
-# endif
+#  endif
 _GL_CXXALIAS_SYS (cosf, float, (float x));
+# endif
 _GL_CXXALIASWARN (cosf);
 #elif defined GNULIB_POSIXCHECK
 # undef cosf
@@ -519,11 +578,20 @@ _GL_WARN_ON_USE (cosl, "cosl is unportable - "
 
 
 #if @GNULIB_COSHF@
-# if !@HAVE_COSHF@
-#  undef coshf
+# if @REPLACE_COSHF@
+#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+#   undef coshf
+#   define coshf rpl_coshf
+#  endif
+_GL_FUNCDECL_RPL (coshf, float, (float x));
+_GL_CXXALIAS_RPL (coshf, float, (float x));
+# else
+#  if !@HAVE_COSHF@
+#   undef coshf
 _GL_FUNCDECL_SYS (coshf, float, (float x));
-# endif
+#  endif
 _GL_CXXALIAS_SYS (coshf, float, (float x));
+# endif
 _GL_CXXALIASWARN (coshf);
 #elif defined GNULIB_POSIXCHECK
 # undef coshf
@@ -535,11 +603,20 @@ _GL_WARN_ON_USE (coshf, "coshf is unportable - "
 
 
 #if @GNULIB_EXPF@
-# if !@HAVE_EXPF@
-#  undef expf
+# if @REPLACE_EXPF@
+#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+#   undef expf
+#   define expf rpl_expf
+#  endif
+_GL_FUNCDECL_RPL (expf, float, (float x));
+_GL_CXXALIAS_RPL (expf, float, (float x));
+# else
+#  if !@HAVE_EXPF@
+#   undef expf
 _GL_FUNCDECL_SYS (expf, float, (float x));
-# endif
+#  endif
 _GL_CXXALIAS_SYS (expf, float, (float x));
+# endif
 _GL_CXXALIASWARN (expf);
 #elif defined GNULIB_POSIXCHECK
 # undef expf
@@ -1146,10 +1223,19 @@ _GL_WARN_ON_USE (ilogb, "ilogb is unportable - "
 #endif
 
 #if @GNULIB_ILOGBL@
-# if !@HAVE_ILOGBL@
+# if @REPLACE_ILOGBL@
+#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+#   undef ilogbl
+#   define ilogbl rpl_ilogbl
+#  endif
+_GL_FUNCDECL_RPL (ilogbl, int, (long double x));
+_GL_CXXALIAS_RPL (ilogbl, int, (long double x));
+# else
+#  if !@HAVE_ILOGBL@
 _GL_FUNCDECL_SYS (ilogbl, int, (long double x));
-# endif
+#  endif
 _GL_CXXALIAS_SYS (ilogbl, int, (long double x));
+# endif
 _GL_CXXALIASWARN (ilogbl);
 #elif defined GNULIB_POSIXCHECK
 # undef ilogbl
@@ -1827,11 +1913,20 @@ _GL_WARN_ON_USE (roundl, "roundl is unportable - "
 
 
 #if @GNULIB_SINF@
-# if !@HAVE_SINF@
-#  undef sinf
+# if @REPLACE_SINF@
+#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+#   undef sinf
+#   define sinf rpl_sinf
+#  endif
+_GL_FUNCDECL_RPL (sinf, float, (float x));
+_GL_CXXALIAS_RPL (sinf, float, (float x));
+# else
+#  if !@HAVE_SINF@
+ #  undef sinf
 _GL_FUNCDECL_SYS (sinf, float, (float x));
-# endif
+#  endif
 _GL_CXXALIAS_SYS (sinf, float, (float x));
+# endif
 _GL_CXXALIASWARN (sinf);
 #elif defined GNULIB_POSIXCHECK
 # undef sinf
@@ -1858,11 +1953,20 @@ _GL_WARN_ON_USE (sinl, "sinl is unportable - "
 
 
 #if @GNULIB_SINHF@
-# if !@HAVE_SINHF@
-#  undef sinhf
+# if @REPLACE_SINHF@
+#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+#   undef sinhf
+#   define sinhf rpl_sinhf
+#  endif
+_GL_FUNCDECL_RPL (sinhf, float, (float x));
+_GL_CXXALIAS_RPL (sinhf, float, (float x));
+# else
+#  if !@HAVE_SINHF@
+#   undef sinhf
 _GL_FUNCDECL_SYS (sinhf, float, (float x));
-# endif
+#  endif
 _GL_CXXALIAS_SYS (sinhf, float, (float x));
+# endif
 _GL_CXXALIASWARN (sinhf);
 #elif defined GNULIB_POSIXCHECK
 # undef sinhf
@@ -1874,11 +1978,20 @@ _GL_WARN_ON_USE (sinhf, "sinhf is unportable - "
 
 
 #if @GNULIB_SQRTF@
-# if !@HAVE_SQRTF@
-#  undef sqrtf
+# if @REPLACE_SQRTF@
+#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+#   undef sqrtf
+#   define sqrtf rpl_sqrtf
+#  endif
+_GL_FUNCDECL_RPL (sqrtf, float, (float x));
+_GL_CXXALIAS_RPL (sqrtf, float, (float x));
+# else
+#  if !@HAVE_SQRTF@
+#   undef sqrtf
 _GL_FUNCDECL_SYS (sqrtf, float, (float x));
-# endif
+#  endif
 _GL_CXXALIAS_SYS (sqrtf, float, (float x));
+# endif
 _GL_CXXALIASWARN (sqrtf);
 #elif defined GNULIB_POSIXCHECK
 # undef sqrtf
@@ -1914,11 +2027,20 @@ _GL_WARN_ON_USE (sqrtl, "sqrtl is unportable - "
 
 
 #if @GNULIB_TANF@
-# if !@HAVE_TANF@
-#  undef tanf
+# if @REPLACE_TANF@
+#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+#   undef tanf
+#   define tanf rpl_tanf
+#  endif
+_GL_FUNCDECL_RPL (tanf, float, (float x));
+_GL_CXXALIAS_RPL (tanf, float, (float x));
+# else
+#  if !@HAVE_TANF@
+#   undef tanf
 _GL_FUNCDECL_SYS (tanf, float, (float x));
-# endif
+#  endif
 _GL_CXXALIAS_SYS (tanf, float, (float x));
+# endif
 _GL_CXXALIASWARN (tanf);
 #elif defined GNULIB_POSIXCHECK
 # undef tanf
@@ -1945,11 +2067,20 @@ _GL_WARN_ON_USE (tanl, "tanl is unportable - "
 
 
 #if @GNULIB_TANHF@
-# if !@HAVE_TANHF@
-#  undef tanhf
+# if @REPLACE_TANHF@
+#  if !(defined __cplusplus && defined GNULIB_NAMESPACE)
+#   undef tanhf
+#   define tanhf rpl_tanhf
+#  endif
+_GL_FUNCDECL_RPL (tanhf, float, (float x));
+_GL_CXXALIAS_RPL (tanhf, float, (float x));
+# else
+#  if !@HAVE_TANHF@
+#   undef tanhf
 _GL_FUNCDECL_SYS (tanhf, float, (float x));
-# endif
+#  endif
 _GL_CXXALIAS_SYS (tanhf, float, (float x));
+# endif
 _GL_CXXALIASWARN (tanhf);
 #elif defined GNULIB_POSIXCHECK
 # undef tanhf

@@ -1,5 +1,5 @@
 /* C++ compatible function declaration macros.
-   Copyright (C) 2010-2016 Free Software Foundation, Inc.
+   Copyright (C) 2010-2018 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published
@@ -12,7 +12,7 @@
    General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #ifndef _GL_CXXDEFS_H
 #define _GL_CXXDEFS_H
@@ -133,8 +133,11 @@
       static const struct _gl_ ## func ## _wrapper            \
       {                                                       \
         typedef rettype (*type) parameters;                   \
-        inline type rpl () const { return ::rpl_func; }       \
-        inline operator type () const  { return rpl (); }     \
+                                                              \
+        inline operator type () const                         \
+        {                                                     \
+          return ::rpl_func;                                  \
+        }                                                     \
       } func = {};                                            \
     }                                                         \
     _GL_EXTERN_C int _gl_cxxalias_dummy
@@ -155,9 +158,11 @@
       static const struct _gl_ ## func ## _wrapper                 \
       {                                                            \
         typedef rettype (*type) parameters;                        \
-        inline type rpl () const                                   \
-        { return reinterpret_cast<type>(::rpl_func); }             \
-        inline operator type () const { return rpl (); }           \
+                                                                   \
+        inline operator type () const                              \
+        {                                                          \
+          return reinterpret_cast<type>(::rpl_func);               \
+        }                                                          \
       } func = {};                                                 \
     }                                                              \
     _GL_EXTERN_C int _gl_cxxalias_dummy
@@ -183,10 +188,13 @@
       static const struct _gl_ ## func ## _wrapper            \
       {                                                       \
         typedef rettype (*type) parameters;                   \
-        inline type rpl () const { return ::func; }           \
-        inline operator type () const { return rpl (); }      \
+                                                              \
+        inline operator type () const                         \
+        {                                                     \
+          return ::func;                                      \
+        }                                                     \
       } func = {};                                            \
-    }                                              \
+    }                                                         \
     _GL_EXTERN_C int _gl_cxxalias_dummy
 #else
 # define _GL_CXXALIAS_SYS(func,rettype,parameters) \
@@ -205,9 +213,11 @@
       static const struct _gl_ ## func ## _wrapper      \
       {                                                 \
         typedef rettype (*type) parameters;             \
-        inline type rpl () const                        \
-        { return reinterpret_cast<type>(::func); }      \
-        inline operator type () const { return rpl (); }\
+                                                        \
+        inline operator type () const                   \
+        {                                               \
+          return reinterpret_cast<type>(::func);        \
+        }                                               \
       } func = {};                                      \
     }                                                   \
     _GL_EXTERN_C int _gl_cxxalias_dummy
@@ -235,10 +245,10 @@
       {                                                                       \
         typedef rettype (*type) parameters;                                   \
                                                                               \
-        inline type rpl () const                                              \
-        { return reinterpret_cast<type>((rettype2 (*) parameters2)(::func)); }\
-                                                                              \
-        inline operator type () const { return rpl (); }                      \
+        inline operator type () const                                         \
+        {                                                                     \
+          return reinterpret_cast<type>((rettype2 (*) parameters2)(::func));  \
+        }                                                                     \
       } func = {};                                                            \
     }                                                                         \
     _GL_EXTERN_C int _gl_cxxalias_dummy
@@ -256,7 +266,7 @@
    _GL_CXXALIASWARN_1 (func, GNULIB_NAMESPACE)
 # define _GL_CXXALIASWARN_1(func,namespace) \
    _GL_CXXALIASWARN_2 (func, namespace)
-/* To work around GCC bug <http://gcc.gnu.org/bugzilla/show_bug.cgi?id=43881>,
+/* To work around GCC bug <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=43881>,
    we enable the warning only when not optimizing.  */
 # if !__OPTIMIZE__
 #  define _GL_CXXALIASWARN_2(func,namespace) \
@@ -284,7 +294,7 @@
                         GNULIB_NAMESPACE)
 # define _GL_CXXALIASWARN1_1(func,rettype,parameters_and_attributes,namespace) \
    _GL_CXXALIASWARN1_2 (func, rettype, parameters_and_attributes, namespace)
-/* To work around GCC bug <http://gcc.gnu.org/bugzilla/show_bug.cgi?id=43881>,
+/* To work around GCC bug <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=43881>,
    we enable the warning only when not optimizing.  */
 # if !__OPTIMIZE__
 #  define _GL_CXXALIASWARN1_2(func,rettype,parameters_and_attributes,namespace) \

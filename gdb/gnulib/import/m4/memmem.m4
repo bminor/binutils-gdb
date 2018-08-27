@@ -1,5 +1,5 @@
-# memmem.m4 serial 24
-dnl Copyright (C) 2002-2004, 2007-2016 Free Software Foundation, Inc.
+# memmem.m4 serial 25
+dnl Copyright (C) 2002-2004, 2007-2018 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -21,7 +21,7 @@ AC_DEFUN([gl_FUNC_MEMMEM_SIMPLE],
   if test $ac_cv_have_decl_memmem = no; then
     HAVE_DECL_MEMMEM=0
   else
-    dnl Detect http://sourceware.org/bugzilla/show_bug.cgi?id=12092.
+    dnl Detect https://sourceware.org/bugzilla/show_bug.cgi?id=12092.
     dnl Also check that we handle empty needles correctly.
     AC_CACHE_CHECK([whether memmem works],
       [gl_cv_func_memmem_works_always],
@@ -113,6 +113,9 @@ static void quit (int sig) { _exit (sig + 128); }
         if (!memmem (haystack, 2 * m + 1, needle, m + 1))
           result |= 1;
       }
+    /* Free allocated memory, in case some sanitizer is watching.  */
+    free (haystack);
+    free (needle);
     return result;
     ]])],
         [gl_cv_func_memmem_works_fast=yes], [gl_cv_func_memmem_works_fast=no],

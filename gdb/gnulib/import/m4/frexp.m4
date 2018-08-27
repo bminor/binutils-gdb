@@ -1,5 +1,5 @@
-# frexp.m4 serial 15
-dnl Copyright (C) 2007-2016 Free Software Foundation, Inc.
+# frexp.m4 serial 16
+dnl Copyright (C) 2007-2018 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -164,8 +164,17 @@ int main()
         [gl_cv_func_frexp_works=yes],
         [gl_cv_func_frexp_works=no],
         [case "$host_os" in
-           netbsd* | irix* | mingw*) gl_cv_func_frexp_works="guessing no";;
-           *)                        gl_cv_func_frexp_works="guessing yes";;
+           netbsd* | irix*) gl_cv_func_frexp_works="guessing no" ;;
+           mingw*) # Guess yes with MSVC, no with mingw.
+             AC_EGREP_CPP([Good], [
+#ifdef _MSC_VER
+ Good
+#endif
+               ],
+               [gl_cv_func_frexp_works="guessing yes"],
+               [gl_cv_func_frexp_works="guessing no"])
+             ;;
+           *) gl_cv_func_frexp_works="guessing yes" ;;
          esac
         ])
     ])

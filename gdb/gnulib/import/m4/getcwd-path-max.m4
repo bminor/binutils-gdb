@@ -1,4 +1,4 @@
-# serial 19
+# serial 21
 # Check for several getcwd bugs with long file names.
 # If so, arrange to compile the wrapper function.
 
@@ -6,7 +6,7 @@
 # I've heard that this is due to a Linux kernel bug, and that it has
 # been fixed between 2.4.21-pre3 and 2.4.21-pre4.
 
-# Copyright (C) 2003-2007, 2009-2016 Free Software Foundation, Inc.
+# Copyright (C) 2003-2007, 2009-2018 Free Software Foundation, Inc.
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -21,7 +21,7 @@ AC_DEFUN([gl_FUNC_GETCWD_PATH_MAX],
   AC_CHECK_HEADERS_ONCE([unistd.h])
   AC_REQUIRE([gl_PATHMAX_SNIPPET_PREREQ])
   AC_CACHE_CHECK([whether getcwd handles long file names properly],
-    gl_cv_func_getcwd_path_max,
+    [gl_cv_func_getcwd_path_max],
     [# Arrange for deletion of the temporary directory this test creates.
      ac_clean_files="$ac_clean_files confdir3"
      dnl Please keep this in sync with tests/test-getcwd.c.
@@ -202,16 +202,28 @@ main ()
 #endif
 }
           ]])],
-    [gl_cv_func_getcwd_path_max=yes],
-    [case $? in
-     10|11|12) gl_cv_func_getcwd_path_max='no, but it is partly working';;
-     31) gl_cv_func_getcwd_path_max='no, it has the AIX bug';;
-     32) gl_cv_func_getcwd_path_max='yes, but with shorter paths';;
-     *) gl_cv_func_getcwd_path_max=no;;
-     esac],
-    [case "$host_os" in
-       aix*) gl_cv_func_getcwd_path_max='no, it has the AIX bug';;
-       *) gl_cv_func_getcwd_path_max=no;;
-     esac])
-  ])
+       [gl_cv_func_getcwd_path_max=yes],
+       [case $? in
+        10|11|12) gl_cv_func_getcwd_path_max='no, but it is partly working';;
+        31) gl_cv_func_getcwd_path_max='no, it has the AIX bug';;
+        32) gl_cv_func_getcwd_path_max='yes, but with shorter paths';;
+        *) gl_cv_func_getcwd_path_max=no;;
+        esac],
+       [# Cross-compilation guesses:
+        case "$host_os" in
+          aix*) # On AIX, it has the AIX bug.
+            gl_cv_func_getcwd_path_max='no, it has the AIX bug' ;;
+          gnu*) # On Hurd, it is 'yes'.
+            gl_cv_func_getcwd_path_max=yes ;;
+          linux* | kfreebsd*)
+            # On older Linux+glibc it's 'no, but it is partly working',
+            # on newer Linux+glibc it's 'yes'.
+            # On Linux+musl libc, it's 'no, but it is partly working'.
+            # On kFreeBSD+glibc, it's 'no, but it is partly working'.
+            gl_cv_func_getcwd_path_max='no, but it is partly working' ;;
+          *) # If we don't know, assume the worst.
+            gl_cv_func_getcwd_path_max=no ;;
+        esac
+       ])
+    ])
 ])
