@@ -1,5 +1,10 @@
 2018-08-26  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* solist.h (struct solist, struct target_so_ops): Fix
+	indentation.
+
+2018-08-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* ada-tasks.c (ada_task_info_s): Remove typedef.
 	(DEF_VEC_O(ada_task_info_s)): Remove.
 	(struct ada_tasks_inferior_data): Initialize fields.
