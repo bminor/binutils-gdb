@@ -21,8 +21,10 @@
 #include "target/target.h"
 #include "common/symbol.h"
 #include <unistd.h>
-#include "agent.h"
 #include "filestuff.h"
+
+#define IPA_SYM_STRUCT_NAME ipa_sym_addresses_common
+#include "agent.h"
 
 int debug_agent = 0;
 
@@ -48,7 +50,7 @@ int use_agent = 0;
 /* Addresses of in-process agent's symbols both GDB and GDBserver cares
    about.  */
 
-struct ipa_sym_addresses
+struct ipa_sym_addresses_common
 {
   CORE_ADDR addr_helper_thread_id;
   CORE_ADDR addr_cmd_buf;
@@ -69,7 +71,7 @@ static struct
   IPA_SYM(capability),
 };
 
-static struct ipa_sym_addresses ipa_sym_addrs;
+static struct ipa_sym_addresses_common ipa_sym_addrs;
 
 static int all_agent_symbols_looked_up = 0;
 

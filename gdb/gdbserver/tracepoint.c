@@ -19,7 +19,6 @@
 #include "server.h"
 #include "tracepoint.h"
 #include "gdbthread.h"
-#include "agent.h"
 #include "rsp-low.h"
 
 #include <ctype.h>
@@ -29,6 +28,9 @@
 #include <inttypes.h>
 #include "ax.h"
 #include "tdesc.h"
+
+#define IPA_SYM_STRUCT_NAME ipa_sym_addresses
+#include "agent.h"
 
 #define DEFAULT_TRACE_BUFFER_SIZE 5242880 /* 5*1024*1024 */
 

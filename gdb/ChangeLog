@@ -1,3 +1,11 @@
+2018-08-28  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR build/23399
+	* common/agent.c (IPA_SYM_STRUCT_NAME): Define.
+	(struct ipa_sym_addresses): Rename to...
+	(struct ipa_sym_addresses_common): ... this.
+	* common/agent.h (IPA_SYM): Use IPA_SYM_STRUCT_NAME.
+
 2018-08-28  Tom Tromey  <tom@tromey.com>
 
 	* c-exp.y (struct token_and_value): Remove typedef and DEF_VEC.

@@ -1,3 +1,8 @@
+2018-08-28  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR build/23399
+	* tracepoint.c (IPA_SYM_STRUCT_NAME): Define.
+
 2018-08-27  Tom Tromey  <tom@tromey.com>
 
 	PR build/23087:

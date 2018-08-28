@@ -27,10 +27,15 @@ int agent_run_command (int pid, const char *cmd, int len);
 int agent_look_up_symbols (void *);
 
 #define IPA_SYM_EXPORTED_NAME(SYM) gdb_agent_ ## SYM
+
+/* Define an entry in an IPA symbol list array.  If IPA_SYM is used, the macro
+   IPA_SYM_STRUCT_NAME must be defined to the structure name holding the IPA
+   symbol addresses in that particular file, before including
+   common/agent.h.  */
 #define IPA_SYM(SYM)                                   \
   {                                                    \
-    STRINGIFY (IPA_SYM_EXPORTED_NAME (SYM)),		\
-    offsetof (struct ipa_sym_addresses, addr_ ## SYM)	\
+    STRINGIFY (IPA_SYM_EXPORTED_NAME (SYM)),           \
+    offsetof (IPA_SYM_STRUCT_NAME, addr_ ## SYM)       \
   }
 
 /* The size in bytes of the buffer used to talk to the IPA helper
