@@ -233,11 +233,7 @@ union type_stack_elt
 struct type_stack
 {
   /* Elements on the stack.  */
-  union type_stack_elt *elements;
-  /* Current stack depth.  */
-  int depth;
-  /* Allocated size of stack.  */
-  int size;
+  std::vector<union type_stack_elt> elements;
 };
 
 /* Reverse an expression from suffix form (in which it is constructed)

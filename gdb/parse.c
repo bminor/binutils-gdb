@@ -1126,7 +1126,7 @@ parse_exp_in_context_1 (const char **stringptr, CORE_ADDR pc,
   prev_lexptr = NULL;
 
   paren_depth = 0;
-  type_stack.depth = 0;
+  type_stack.elements.clear ();
   expout_last_struct = -1;
   expout_tag_completion_type = TYPE_CODE_UNDEF;
   expout_completion_name.reset ();
@@ -1342,29 +1342,6 @@ parse_float (const char *p, int len,
 /* Stuff for maintaining a stack of types.  Currently just used by C, but
    probably useful for any language which declares its types "backwards".  */
 
-/* Ensure that there are HOWMUCH open slots on the type stack STACK.  */
-
-static void
-type_stack_reserve (struct type_stack *stack, int howmuch)
-{
-  if (stack->depth + howmuch >= stack->size)
-    {
-      stack->size *= 2;
-      if (stack->size < howmuch)
-	stack->size = howmuch;
-      stack->elements = XRESIZEVEC (union type_stack_elt, stack->elements,
-				    stack->size);
-    }
-}
-
-/* Ensure that there is a single open slot in the global type stack.  */
-
-static void
-check_type_stack_depth (void)
-{
-  type_stack_reserve (&type_stack, 1);
-}
-
 /* A helper function for insert_type and insert_type_address_space.
    This does work of expanding the type stack and inserting the new
    element, ELEMENT, into the stack at location SLOT.  */
@@ -1372,13 +1349,8 @@ check_type_stack_depth (void)
 static void
 insert_into_type_stack (int slot, union type_stack_elt element)
 {
-  check_type_stack_depth ();
-
-  if (slot < type_stack.depth)
-    memmove (&type_stack.elements[slot + 1], &type_stack.elements[slot],
-	     (type_stack.depth - slot) * sizeof (union type_stack_elt));
-  type_stack.elements[slot] = element;
-  ++type_stack.depth;
+  gdb_assert (slot <= type_stack.elements.size ());
+  type_stack.elements.insert (type_stack.elements.begin () + slot, element);
 }
 
 /* Insert a new type, TP, at the bottom of the type stack.  If TP is
@@ -1400,7 +1372,7 @@ insert_type (enum type_pieces tp)
   /* If there is anything on the stack (we know it will be a
      tp_pointer), insert the qualifier above it.  Otherwise, simply
      push this on the top of the stack.  */
-  if (type_stack.depth && (tp == tp_const || tp == tp_volatile))
+  if (!type_stack.elements.empty () && (tp == tp_const || tp == tp_volatile))
     slot = 1;
   else
     slot = 0;
@@ -1412,15 +1384,17 @@ insert_type (enum type_pieces tp)
 void
 push_type (enum type_pieces tp)
 {
-  check_type_stack_depth ();
-  type_stack.elements[type_stack.depth++].piece = tp;
+  type_stack_elt elt;
+  elt.piece = tp;
+  type_stack.elements.push_back (elt);
 }
 
 void
 push_type_int (int n)
 {
-  check_type_stack_depth ();
-  type_stack.elements[type_stack.depth++].int_val = n;
+  type_stack_elt elt;
+  elt.int_val = n;
+  type_stack.elements.push_back (elt);
 }
 
 /* Insert a tp_space_identifier and the corresponding address space
@@ -1440,7 +1414,7 @@ insert_type_address_space (struct parser_state *pstate, char *string)
   /* If there is anything on the stack (we know it will be a
      tp_pointer), insert the address space qualifier above it.
      Otherwise, simply push this on the top of the stack.  */
-  if (type_stack.depth)
+  if (!type_stack.elements.empty ())
     slot = 1;
   else
     slot = 0;
@@ -1455,16 +1429,24 @@ insert_type_address_space (struct parser_state *pstate, char *string)
 enum type_pieces
 pop_type (void)
 {
-  if (type_stack.depth)
-    return type_stack.elements[--type_stack.depth].piece;
+  if (!type_stack.elements.empty ())
+    {
+      type_stack_elt elt = type_stack.elements.back ();
+      type_stack.elements.pop_back ();
+      return elt.piece;
+    }
   return tp_end;
 }
 
 int
 pop_type_int (void)
 {
-  if (type_stack.depth)
-    return type_stack.elements[--type_stack.depth].int_val;
+  if (!type_stack.elements.empty ())
+    {
+      type_stack_elt elt = type_stack.elements.back ();
+      type_stack.elements.pop_back ();
+      return elt.int_val;
+    }
   /* "Can't happen".  */
   return 0;
 }
@@ -1474,8 +1456,10 @@ pop_type_int (void)
 static VEC (type_ptr) *
 pop_typelist (void)
 {
-  gdb_assert (type_stack.depth);
-  return type_stack.elements[--type_stack.depth].typelist_val;
+  gdb_assert (!type_stack.elements.empty ());
+  type_stack_elt elt = type_stack.elements.back ();
+  type_stack.elements.pop_back ();
+  return elt.typelist_val;
 }
 
 /* Pop a type_stack element from the global type stack.  */
@@ -1483,8 +1467,10 @@ pop_typelist (void)
 static struct type_stack *
 pop_type_stack (void)
 {
-  gdb_assert (type_stack.depth);
-  return type_stack.elements[--type_stack.depth].stack_val;
+  gdb_assert (!type_stack.elements.empty ());
+  type_stack_elt elt = type_stack.elements.back ();
+  type_stack.elements.pop_back ();
+  return elt.stack_val;
 }
 
 /* Append the elements of the type stack FROM to the type stack TO.
@@ -1493,12 +1479,8 @@ pop_type_stack (void)
 struct type_stack *
 append_type_stack (struct type_stack *to, struct type_stack *from)
 {
-  type_stack_reserve (to, from->depth);
-
-  memcpy (&to->elements[to->depth], &from->elements[0],
-	  from->depth * sizeof (union type_stack_elt));
-  to->depth += from->depth;
-
+  to->elements.insert (to->elements.end (), from->elements.begin (),
+		       from->elements.end ());
   return to;
 }
 
@@ -1507,8 +1489,9 @@ append_type_stack (struct type_stack *to, struct type_stack *from)
 void
 push_type_stack (struct type_stack *stack)
 {
-  check_type_stack_depth ();
-  type_stack.elements[type_stack.depth++].stack_val = stack;
+  type_stack_elt elt;
+  elt.stack_val = stack;
+  type_stack.elements.push_back (elt);
   push_type (tp_type_stack);
 }
 
@@ -1519,13 +1502,8 @@ push_type_stack (struct type_stack *stack)
 struct type_stack *
 get_type_stack (void)
 {
-  struct type_stack *result = XNEW (struct type_stack);
-
-  *result = type_stack;
-  type_stack.depth = 0;
-  type_stack.size = 0;
-  type_stack.elements = NULL;
-
+  struct type_stack *result = new struct type_stack (std::move (type_stack));
+  type_stack.elements.clear ();
   return result;
 }
 
@@ -1536,8 +1514,7 @@ type_stack_cleanup (void *arg)
 {
   struct type_stack *stack = (struct type_stack *) arg;
 
-  xfree (stack->elements);
-  xfree (stack);
+  delete stack;
 }
 
 /* Push a function type with arguments onto the global type stack.
@@ -1547,8 +1524,9 @@ type_stack_cleanup (void *arg)
 void
 push_typelist (VEC (type_ptr) *list)
 {
-  check_type_stack_depth ();
-  type_stack.elements[type_stack.depth++].typelist_val = list;
+  type_stack_elt elt;
+  elt.typelist_val = list;
+  type_stack.elements.push_back (elt);
   push_type (tp_function_with_arguments);
 }
 
@@ -1693,7 +1671,7 @@ follow_types (struct type *follow_type)
 
 	  type_stack = *stack;
 	  follow_type = follow_types (follow_type);
-	  gdb_assert (type_stack.depth == 0);
+	  gdb_assert (type_stack.elements.empty ());
 
 	  type_stack = save;
 	}
@@ -1878,10 +1856,6 @@ increase_expout_size (struct parser_state *ps, size_t lenelt)
 void
 _initialize_parse (void)
 {
-  type_stack.size = 0;
-  type_stack.depth = 0;
-  type_stack.elements = NULL;
-
   add_setshow_zuinteger_cmd ("expression", class_maintenance,
 			     &expressiondebug,
 			     _("Set expression debugging."),

@@ -1,3 +1,28 @@
+2018-08-28  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* parser-defs.h (struct type_stack) <elements>: Change type to
+	std::vector<union type_stack_elt>.
+	<depth, size>: Remove.
+	* parse.c (parse_exp_in_context_1): Adjust.
+	(type_stack_reserve): Remove.
+	(check_type_stack_depth): Remove.
+	(insert_into_type_stack): Adjust to std::vector.
+	(insert_type): Likewise.
+	(push_type): Likewise.
+	(push_type_int): Likewise.
+	(insert_type_address_space): Likewise.
+	(pop_type): Likewise.
+	(pop_type_int): Likewise.
+	(pop_typelist): Likewise.
+	(pop_type_stack): Likewise.
+	(append_type_stack): Likewise.
+	(push_type_stack): Likewise.
+	(get_type_stack): Likewise.
+	(type_stack_cleanup): Likewise.
+	(push_typelist): Likewise.
+	(follow_types): Likewise.
+	(_initialize_parse): Likewise.
+
 2018-08-28  Hafiz Abid Qadeer  <abidh@codesourcery.com>
 
 	* NEWS: Mention csky target.
