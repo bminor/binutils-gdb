@@ -98,19 +98,14 @@ struct dwarf2_frame_state_reg_info
   ~dwarf2_frame_state_reg_info ()
   {
     delete prev;
-    xfree (reg);
   }
 
   /* Copy constructor.  */
   dwarf2_frame_state_reg_info (const dwarf2_frame_state_reg_info &src)
-    : num_regs (src.num_regs), cfa_offset (src.cfa_offset),
+    : reg (src.reg), cfa_offset (src.cfa_offset),
       cfa_reg (src.cfa_reg), cfa_how (src.cfa_how), cfa_exp (src.cfa_exp),
       prev (src.prev)
   {
-    size_t size = src.num_regs * sizeof (struct dwarf2_frame_state_reg);
-
-    reg = (struct dwarf2_frame_state_reg *) xmalloc (size);
-    memcpy (reg, src.reg, size);
   }
 
   /* Assignment operator for both move-assignment and copy-assignment.  */
@@ -123,33 +118,26 @@ struct dwarf2_frame_state_reg_info
 
   /* Move constructor.  */
   dwarf2_frame_state_reg_info (dwarf2_frame_state_reg_info &&rhs) noexcept
-    : reg (rhs.reg), num_regs (rhs.num_regs), cfa_offset (rhs.cfa_offset),
+    : reg (std::move (rhs.reg)), cfa_offset (rhs.cfa_offset),
       cfa_reg (rhs.cfa_reg), cfa_how (rhs.cfa_how), cfa_exp (rhs.cfa_exp),
       prev (rhs.prev)
   {
     rhs.prev = nullptr;
-    rhs.reg = nullptr;
   }
 
-/* Assert that the register set RS is large enough to store gdbarch_num_regs
-   columns.  If necessary, enlarge the register set.  */
+  /* If necessary, enlarge the register set to hold NUM_REGS_REQUESTED
+     registers.  */
   void alloc_regs (int num_regs_requested)
   {
-    if (num_regs_requested <= num_regs)
+    gdb_assert (num_regs_requested > 0);
+
+    if (num_regs_requested <= reg.size ())
       return;
 
-    size_t size = sizeof (struct dwarf2_frame_state_reg);
-
-    reg = (struct dwarf2_frame_state_reg *)
-      xrealloc (reg, num_regs_requested * size);
-
-    /* Initialize newly allocated registers.  */
-    memset (reg + num_regs, 0, (num_regs_requested - num_regs) * size);
-    num_regs = num_regs_requested;
+    reg.resize (num_regs_requested);
   }
 
-  struct dwarf2_frame_state_reg *reg = NULL;
-  int num_regs = 0;
+  std::vector<struct dwarf2_frame_state_reg> reg;
 
   LONGEST cfa_offset = 0;
   ULONGEST cfa_reg = 0;
@@ -166,7 +154,6 @@ private:
     using std::swap;
 
     swap (lhs.reg, rhs.reg);
-    swap (lhs.num_regs, rhs.num_regs);
     swap (lhs.cfa_offset, rhs.cfa_offset);
     swap (lhs.cfa_reg, rhs.cfa_reg);
     swap (lhs.cfa_how, rhs.cfa_how);

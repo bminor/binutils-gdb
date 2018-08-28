@@ -1,5 +1,17 @@
 2018-10-03  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2-frame.h (dwarf2_frame_state_reg_info)
+	<~dwarf2_frame_state_reg_info>: Update.
+	<dwarf2_frame_state_reg_info>: Update.
+	<alloc_regs>: Add assertion.  Update.
+	<reg>: Now a std::vector.
+	<num_regs>: Remove.
+	<swap>: Update.
+	* dwarf2-frame.c (dwarf2_restore_rule, execute_cfa_program)
+	(execute_cfa_program_test, dwarf2_frame_cache): Update.
+
+2018-10-03  Tom Tromey  <tom@tromey.com>
+
 	* namespace.c (add_using_directive): Don't pass NULL to memcpy.
 
 2018-10-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
