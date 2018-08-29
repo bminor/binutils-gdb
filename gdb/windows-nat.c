@@ -280,26 +280,29 @@ static const int *mappings;
    a segment register or not.  */
 static segment_register_p_ftype *segment_register_p;
 
+/* See windows_nat_target::resume to understand why this is commented
+   out.  */
+#if 0
 /* This vector maps the target's idea of an exception (extracted
    from the DEBUG_EVENT structure) to GDB's idea.  */
 
 struct xlate_exception
   {
-    int them;
+    DWORD them;
     enum gdb_signal us;
   };
 
-static const struct xlate_exception
-  xlate[] =
+static const struct xlate_exception xlate[] =
 {
   {EXCEPTION_ACCESS_VIOLATION, GDB_SIGNAL_SEGV},
   {STATUS_STACK_OVERFLOW, GDB_SIGNAL_SEGV},
   {EXCEPTION_BREAKPOINT, GDB_SIGNAL_TRAP},
   {DBG_CONTROL_C, GDB_SIGNAL_INT},
   {EXCEPTION_SINGLE_STEP, GDB_SIGNAL_TRAP},
-  {STATUS_FLOAT_DIVIDE_BY_ZERO, GDB_SIGNAL_FPE},
-  {-1, GDB_SIGNAL_UNKNOWN}};
+  {STATUS_FLOAT_DIVIDE_BY_ZERO, GDB_SIGNAL_FPE}
+};
 
+#endif /* 0 */
 
 struct windows_nat_target final : public x86_nat_target<inf_child_target>
 {
@@ -1408,12 +1411,11 @@ windows_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
   structure when passing the exception to the inferior.
   Note that this seems possible in the exception handler itself.  */
 	{
-	  int i;
-	  for (i = 0; xlate[i].them != -1; i++)
-	    if (xlate[i].us == sig)
+	  for (const xlate_exception &x : xlate)
+	    if (x.us == sig)
 	      {
 		current_event.u.Exception.ExceptionRecord.ExceptionCode
-		  = xlate[i].them;
+		  = x.them;
 		continue_status = DBG_EXCEPTION_NOT_HANDLED;
 		break;
 	      }

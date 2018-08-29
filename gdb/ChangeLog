@@ -1,3 +1,11 @@
+2018-08-29  Tom Tromey  <tom@tromey.com>
+
+	* windows-nat.c (struct xlate_exception) <them>: Change type to
+	DWORD.
+	(xlate): Fix formatting.  Remove last entry.
+	(struct xlate_exception, xlate): Comment out.
+	(windows_nat_target::resume): Use ranged for.
+
 2018-08-29  Jim Wilson  <jimw@sifive.com>
 
 	* riscv-linux-nat.c: Include elf/common.h instead of elf.h.
