@@ -166,7 +166,7 @@ fn main () {
     };
 
     let u = Union { f2: 255 };
-    let v = SimpleLayout { f1: 8, f2: 9 };
+    let simplelayout = SimpleLayout { f1: 8, f2: 9 };
 
     println!("{}, {}", x.0, x.1);        // set breakpoint here
     println!("{}", diff2(92, 45));

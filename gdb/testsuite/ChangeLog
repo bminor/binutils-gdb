@@ -1,3 +1,7 @@
+2018-08-31  Tom Tromey  <tom@tromey.com>
+
+	* gdb.rust/simple.rs: Rename second variable "v".
+
 2018-08-30  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/funcargs.c (use_a): New function.
