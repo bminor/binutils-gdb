@@ -1151,68 +1151,6 @@ aarch64_type_align (struct type *t)
     }
 }
 
-/* Return 1 if *TY is a homogeneous floating-point aggregate or
-   homogeneous short-vector aggregate as defined in the AAPCS64 ABI
-   document; otherwise return 0.  */
-
-static int
-is_hfa_or_hva (struct type *ty)
-{
-  switch (TYPE_CODE (ty))
-    {
-    case TYPE_CODE_ARRAY:
-      {
-	struct type *target_ty = TYPE_TARGET_TYPE (ty);
-
-	if (TYPE_VECTOR (ty))
-	  return 0;
-
-	if (TYPE_LENGTH (ty) <= 4 /* HFA or HVA has at most 4 members.  */
-	    && (TYPE_CODE (target_ty) == TYPE_CODE_FLT /* HFA */
-		|| (TYPE_CODE (target_ty) == TYPE_CODE_ARRAY /* HVA */
-		    && TYPE_VECTOR (target_ty))))
-	  return 1;
-	break;
-      }
-
-    case TYPE_CODE_UNION:
-    case TYPE_CODE_STRUCT:
-      {
-	/* HFA or HVA has at most four members.  */
-	if (TYPE_NFIELDS (ty) > 0 && TYPE_NFIELDS (ty) <= 4)
-	  {
-	    struct type *member0_type;
-
-	    member0_type = check_typedef (TYPE_FIELD_TYPE (ty, 0));
-	    if (TYPE_CODE (member0_type) == TYPE_CODE_FLT
-		|| (TYPE_CODE (member0_type) == TYPE_CODE_ARRAY
-		    && TYPE_VECTOR (member0_type)))
-	      {
-		int i;
-
-		for (i = 0; i < TYPE_NFIELDS (ty); i++)
-		  {
-		    struct type *member1_type;
-
-		    member1_type = check_typedef (TYPE_FIELD_TYPE (ty, i));
-		    if (TYPE_CODE (member0_type) != TYPE_CODE (member1_type)
-			|| (TYPE_LENGTH (member0_type)
-			    != TYPE_LENGTH (member1_type)))
-		      return 0;
-		  }
-		return 1;
-	      }
-	  }
-	return 0;
-      }
-
-    default:
-      break;
-    }
-
-  return 0;
-}
-
 /* Worker function for aapcs_is_vfp_call_or_return_candidate.
 
    Return the number of register required, or -1 on failure.
@@ -1988,14 +1926,30 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
 {
   struct gdbarch *gdbarch = regs->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int elements;
+  struct type *fundamental_type;
 
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+  if (aapcs_is_vfp_call_or_return_candidate (type, &elements,
+					     &fundamental_type))
     {
-      bfd_byte buf[V_REGISTER_SIZE];
-      int len = TYPE_LENGTH (type);
+      int len = TYPE_LENGTH (fundamental_type);
 
-      regs->cooked_read (AARCH64_V0_REGNUM, buf);
-      memcpy (valbuf, buf, len);
+      for (int i = 0; i < elements; i++)
+	{
+	  int regno = AARCH64_V0_REGNUM + i;
+	  bfd_byte buf[V_REGISTER_SIZE];
+
+	  if (aarch64_debug)
+	    {
+	      debug_printf ("read HFA or HVA return value element %d from %s\n",
+			    i + 1,
+			    gdbarch_register_name (gdbarch, regno));
+	    }
+	  regs->cooked_read (regno, buf);
+
+	  memcpy (valbuf, buf, len);
+	  valbuf += len;
+	}
     }
   else if (TYPE_CODE (type) == TYPE_CODE_INT
 	   || TYPE_CODE (type) == TYPE_CODE_CHAR
@@ -2022,53 +1976,6 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
 	  len -= X_REGISTER_SIZE;
 	  valbuf += X_REGISTER_SIZE;
 	}
-    }
-  else if (TYPE_CODE (type) == TYPE_CODE_COMPLEX)
-    {
-      int regno = AARCH64_V0_REGNUM;
-      bfd_byte buf[V_REGISTER_SIZE];
-      struct type *target_type = check_typedef (TYPE_TARGET_TYPE (type));
-      int len = TYPE_LENGTH (target_type);
-
-      regs->cooked_read (regno, buf);
-      memcpy (valbuf, buf, len);
-      valbuf += len;
-      regs->cooked_read (regno + 1, buf);
-      memcpy (valbuf, buf, len);
-      valbuf += len;
-    }
-  else if (is_hfa_or_hva (type))
-    {
-      int elements = TYPE_NFIELDS (type);
-      struct type *member_type = check_typedef (TYPE_FIELD_TYPE (type, 0));
-      int len = TYPE_LENGTH (member_type);
-      int i;
-
-      for (i = 0; i < elements; i++)
-	{
-	  int regno = AARCH64_V0_REGNUM + i;
-	  bfd_byte buf[V_REGISTER_SIZE];
-
-	  if (aarch64_debug)
-	    {
-	      debug_printf ("read HFA or HVA return value element %d from %s\n",
-			    i + 1,
-			    gdbarch_register_name (gdbarch, regno));
-	    }
-	  regs->cooked_read (regno, buf);
-
-	  memcpy (valbuf, buf, len);
-	  valbuf += len;
-	}
-    }
-  else if (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type)
-	   && (TYPE_LENGTH (type) == 16 || TYPE_LENGTH (type) == 8))
-    {
-      /* Short vector is returned in V register.  */
-      gdb_byte buf[V_REGISTER_SIZE];
-
-      regs->cooked_read (AARCH64_V0_REGNUM, buf);
-      memcpy (valbuf, buf, TYPE_LENGTH (type));
     }
   else
     {
@@ -2098,8 +2005,11 @@ static int
 aarch64_return_in_memory (struct gdbarch *gdbarch, struct type *type)
 {
   type = check_typedef (type);
+  int elements;
+  struct type *fundamental_type;
 
-  if (is_hfa_or_hva (type))
+  if (aapcs_is_vfp_call_or_return_candidate (type, &elements,
+					     &fundamental_type))
     {
       /* v0-v7 are used to return values and one register is allocated
 	 for one member.  However, HFA or HVA has at most four members.  */
@@ -2126,14 +2036,31 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 {
   struct gdbarch *gdbarch = regs->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int elements;
+  struct type *fundamental_type;
 
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+  if (aapcs_is_vfp_call_or_return_candidate (type, &elements,
+					     &fundamental_type))
     {
-      bfd_byte buf[V_REGISTER_SIZE];
-      int len = TYPE_LENGTH (type);
+      int len = TYPE_LENGTH (fundamental_type);
 
-      memcpy (buf, valbuf, len > V_REGISTER_SIZE ? V_REGISTER_SIZE : len);
-      regs->cooked_write (AARCH64_V0_REGNUM, buf);
+      for (int i = 0; i < elements; i++)
+	{
+	  int regno = AARCH64_V0_REGNUM + i;
+	  bfd_byte tmpbuf[V_REGISTER_SIZE];
+
+	  if (aarch64_debug)
+	    {
+	      debug_printf ("write HFA or HVA return value element %d to %s\n",
+			    i + 1,
+			    gdbarch_register_name (gdbarch, regno));
+	    }
+
+	  memcpy (tmpbuf, valbuf,
+		  len > V_REGISTER_SIZE ? V_REGISTER_SIZE : len);
+	  regs->cooked_write (regno, tmpbuf);
+	  valbuf += len;
+	}
     }
   else if (TYPE_CODE (type) == TYPE_CODE_INT
 	   || TYPE_CODE (type) == TYPE_CODE_CHAR
@@ -2167,39 +2094,6 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 	      valbuf += X_REGISTER_SIZE;
 	    }
 	}
-    }
-  else if (is_hfa_or_hva (type))
-    {
-      int elements = TYPE_NFIELDS (type);
-      struct type *member_type = check_typedef (TYPE_FIELD_TYPE (type, 0));
-      int len = TYPE_LENGTH (member_type);
-      int i;
-
-      for (i = 0; i < elements; i++)
-	{
-	  int regno = AARCH64_V0_REGNUM + i;
-	  bfd_byte tmpbuf[V_REGISTER_SIZE];
-
-	  if (aarch64_debug)
-	    {
-	      debug_printf ("write HFA or HVA return value element %d to %s\n",
-			    i + 1,
-			    gdbarch_register_name (gdbarch, regno));
-	    }
-
-	  memcpy (tmpbuf, valbuf, len);
-	  regs->cooked_write (regno, tmpbuf);
-	  valbuf += len;
-	}
-    }
-  else if (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type)
-	   && (TYPE_LENGTH (type) == 8 || TYPE_LENGTH (type) == 16))
-    {
-      /* Short vector.  */
-      gdb_byte buf[V_REGISTER_SIZE];
-
-      memcpy (buf, valbuf, TYPE_LENGTH (type));
-      regs->cooked_write (AARCH64_V0_REGNUM, buf);
     }
   else
     {

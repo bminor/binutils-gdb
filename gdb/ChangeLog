@@ -1,5 +1,14 @@
 2018-08-29  Alan Hayward  <alan.hayward@arm.com>
 
+	PR gdb/22943:
+	* aarch64-tdep.c (is_hfa_or_hva): Remove function.
+	(aarch64_extract_return_value): Use
+	aapcs_is_vfp_call_or_return_candidate.
+	(aarch64_return_in_memory): Likewise.
+	(aarch64_store_return_value): Likewise.
+
+2018-08-29  Alan Hayward  <alan.hayward@arm.com>
+
 	* aarch64-tdep.c
 	(aapcs_is_vfp_call_or_return_candidate): Make static
 	(pass_in_v_or_stack): Remove function.
