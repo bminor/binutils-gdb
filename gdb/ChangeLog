@@ -1,3 +1,9 @@
+2018-08-29  Alan Hayward  <alan.hayward@arm.com>
+
+	* aarch64-tdep.c (HA_MAX_NUM_FLDS): New macro.
+	(aapcs_is_vfp_call_or_return_candidate_1): New function.
+	(aapcs_is_vfp_call_or_return_candidate): Likewise.
+
 2018-08-28  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR build/23399

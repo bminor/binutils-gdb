@@ -71,6 +71,10 @@
 #define AARCH64_B0_REGNUM (AARCH64_H0_REGNUM + 32)
 #define AARCH64_SVE_V0_REGNUM (AARCH64_B0_REGNUM + 32)
 
+/* A Homogeneous Floating-Point or Short-Vector Aggregate may have at most
+   four members.  */
+#define HA_MAX_NUM_FLDS		4
+
 /* All possible aarch64 target descriptors.  */
 struct target_desc *tdesc_aarch64_list[AARCH64_MAX_SVE_VQ + 1];
 
@@ -1207,6 +1211,143 @@ is_hfa_or_hva (struct type *ty)
     }
 
   return 0;
+}
+
+/* Worker function for aapcs_is_vfp_call_or_return_candidate.
+
+   Return the number of register required, or -1 on failure.
+
+   When encountering a base element, if FUNDAMENTAL_TYPE is not set then set it
+   to the element, else fail if the type of this element does not match the
+   existing value.  */
+
+static int
+aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
+					 struct type **fundamental_type)
+{
+  if (type == nullptr)
+    return -1;
+
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_FLT:
+      if (TYPE_LENGTH (type) > 16)
+	return -1;
+
+      if (*fundamental_type == nullptr)
+	*fundamental_type = type;
+      else if (TYPE_LENGTH (type) != TYPE_LENGTH (*fundamental_type)
+	       || TYPE_CODE (type) != TYPE_CODE (*fundamental_type))
+	return -1;
+
+      return 1;
+
+    case TYPE_CODE_COMPLEX:
+      {
+	struct type *target_type = check_typedef (TYPE_TARGET_TYPE (type));
+	if (TYPE_LENGTH (target_type) > 16)
+	  return -1;
+
+	if (*fundamental_type == nullptr)
+	  *fundamental_type = target_type;
+	else if (TYPE_LENGTH (target_type) != TYPE_LENGTH (*fundamental_type)
+		 || TYPE_CODE (target_type) != TYPE_CODE (*fundamental_type))
+	  return -1;
+
+	return 2;
+      }
+
+    case TYPE_CODE_ARRAY:
+      {
+	if (TYPE_VECTOR (type))
+	  {
+	    if (TYPE_LENGTH (type) != 8 && TYPE_LENGTH (type) != 16)
+	      return -1;
+
+	    if (*fundamental_type == nullptr)
+	      *fundamental_type = type;
+	    else if (TYPE_LENGTH (type) != TYPE_LENGTH (*fundamental_type)
+		     || TYPE_CODE (type) != TYPE_CODE (*fundamental_type))
+	      return -1;
+
+	    return 1;
+	  }
+	else
+	  {
+	    struct type *target_type = TYPE_TARGET_TYPE (type);
+	    int count = aapcs_is_vfp_call_or_return_candidate_1
+			  (target_type, fundamental_type);
+
+	    if (count == -1)
+	      return count;
+
+	    count *= TYPE_LENGTH (type);
+	      return count;
+	  }
+      }
+
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
+      {
+	int count = 0;
+
+	for (int i = 0; i < TYPE_NFIELDS (type); i++)
+	  {
+	    struct type *member = check_typedef (TYPE_FIELD_TYPE (type, i));
+
+	    int sub_count = aapcs_is_vfp_call_or_return_candidate_1
+			      (member, fundamental_type);
+	    if (sub_count == -1)
+	      return -1;
+	    count += sub_count;
+	  }
+	return count;
+      }
+
+    default:
+      break;
+    }
+
+  return -1;
+}
+
+/* Return true if an argument, whose type is described by TYPE, can be passed or
+   returned in simd/fp registers, providing enough parameter passing registers
+   are available.  This is as described in the AAPCS64.
+
+   Upon successful return, *COUNT returns the number of needed registers,
+   *FUNDAMENTAL_TYPE contains the type of those registers.
+
+   Candidate as per the AAPCS64 5.4.2.C is either a:
+   - float.
+   - short-vector.
+   - HFA (Homogeneous Floating-point Aggregate, 4.3.5.1). A Composite type where
+     all the members are floats and has at most 4 members.
+   - HVA (Homogeneous Short-vector Aggregate, 4.3.5.2). A Composite type where
+     all the members are short vectors and has at most 4 members.
+   - Complex (7.1.1)
+
+   Note that HFAs and HVAs can include nested structures and arrays.  */
+
+bool
+aapcs_is_vfp_call_or_return_candidate (struct type *type, int *count,
+				       struct type **fundamental_type)
+{
+  if (type == nullptr)
+    return false;
+
+  *fundamental_type = nullptr;
+
+  int ag_count = aapcs_is_vfp_call_or_return_candidate_1 (type,
+							  fundamental_type);
+
+  if (ag_count > 0 && ag_count <= HA_MAX_NUM_FLDS)
+    {
+      *count = ag_count;
+      return true;
+    }
+  else
+    return false;
 }
 
 /* AArch64 function call information structure.  */
