@@ -1,3 +1,8 @@
+2018-08-29  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* csky-tdep.c (csky_memory_insert_breakpoint): Remove newline at
+	end of warning message.
+
 2018-08-29  Alan Hayward  <alan.hayward@arm.com>
 
 	PR gdb/22943:

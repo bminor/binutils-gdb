@@ -1609,7 +1609,7 @@ csky_memory_insert_breakpoint (struct gdbarch *gdbarch,
 
   /* Sanity-check bp_address.  */
   if (bp_tgt->reqstd_address % 2)
-    warning (_("Invalid breakpoint address 0x%x is an odd number.\n"),
+    warning (_("Invalid breakpoint address 0x%x is an odd number."),
 	     (unsigned int) bp_tgt->reqstd_address);
   scoped_restore restore_memory
     = make_scoped_restore_show_memory_breakpoints (1);
