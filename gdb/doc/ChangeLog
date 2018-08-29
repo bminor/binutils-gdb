@@ -1,3 +1,9 @@
+2018-10-02  John Darrington <john@darrington.wattle.id.au>
+
+        * gdb.texinfo (Remote Connection Commands): Describe
+	  the changes to target remote and target extended-remote
+	  relating to Unix domain sockets.
+
 2018-10-01  Tom Tromey  <tom@tromey.com>
 
 	* gdb.texinfo (Configure Options): Document configure options.

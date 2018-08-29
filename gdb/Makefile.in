@@ -2323,6 +2323,7 @@ ALLDEPFILES = \
 	ser-mingw.c \
 	ser-pipe.c \
 	ser-tcp.c \
+	ser-uds.c \
 	sh-nbsd-nat.c \
 	sh-nbsd-tdep.c \
 	sh-tdep.c \

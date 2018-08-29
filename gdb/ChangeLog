@@ -1,3 +1,13 @@
+2018-10-02  John Darrington <john@darrington.wattle.id.au>
+
+	* NEWS: Mention changed commands.
+	* ser-uds.c: New file.
+	* configure.ac (SER_HARDWIRE): Add ser-uds.o.
+	* configure: Regenerate.
+	* Makefile.in: Add new file.
+	* serial.c (serial_open): Check if filename is a socket
+	  and lookup the appropriate interface accordingly.
+
 2018-10-01  Alan Hayward  <alan.hayward@arm.com>
 
 	* aarch64-linux-tdep.c (AARCH64_SIGCONTEXT_RESERVED_OFFSET): Add

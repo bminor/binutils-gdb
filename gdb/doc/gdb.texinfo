@@ -20782,7 +20782,8 @@ programs.
 
 @subsection Remote Connection Commands
 @cindex remote connection commands
-@value{GDBN} can communicate with the target over a serial line, or
+@value{GDBN} can communicate with the target over a serial line, a
+local Unix domain socket, or
 over an @acronym{IP} network using @acronym{TCP} or @acronym{UDP}.  In
 each case, @value{GDBN} uses the same protocol for debugging your
 program; only the medium carrying the debugging packets varies.  The
@@ -20806,6 +20807,24 @@ If you're using a serial line, you may want to give @value{GDBN} the
 @samp{--baud} option, or use the @code{set serial baud} command
 (@pxref{Remote Configuration, set serial baud}) before the
 @code{target} command.
+
+@item target remote @var{local-socket}
+@itemx target extended-remote @var{local-socket}
+@cindex local socket, @code{target remote}
+@cindex Unix domain socket
+Use @var{local-socket} to communicate with the target.  For example,
+to use a local Unix domain socket bound to the file system entry @file{/tmp/gdb-socket0}:
+
+@smallexample
+target remote /tmp/gdb-socket0
+@end smallexample
+
+Note that this command has the same form as the command to connect
+to a serial line.  @value{GDBN} will automatically determine which
+kind of file you have specified and will make the appropriate kind
+of connection.
+This feature is not available if the host system does not support
+Unix domain sockets.
 
 @item target remote @code{@var{host}:@var{port}}
 @itemx target remote @code{@var{[host]}:@var{port}}

@@ -213,7 +213,17 @@ serial_open (const char *name)
   else if (strchr (name, ':'))
     ops = serial_interface_lookup ("tcp");
   else
-    ops = serial_interface_lookup ("hardwire");
+    {
+#ifndef USE_WIN32API
+      /* Check to see if name is a socket.  If it is, then treat it
+         as such.  Otherwise assume that it's a character device.  */
+      struct stat sb;
+      if (stat (name, &sb) == 0 && (sb.st_mode & S_IFMT) == S_IFSOCK)
+	ops = serial_interface_lookup ("local");
+      else
+#endif
+	ops = serial_interface_lookup ("hardwire");
+    }
 
   if (!ops)
     return NULL;
