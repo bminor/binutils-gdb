@@ -81,9 +81,6 @@ enum class linespec_complete_what
 
 typedef std::unique_ptr<std::vector<symtab *>> symtab_vector_up;
 
-typedef struct symbol *symbolp;
-DEF_VEC_P (symbolp);
-
 /* An address entry is used to ensure that any given location is only
    added to the result a single time.  It holds an address and the
    program space from which the address came.  */
@@ -93,10 +90,6 @@ struct address_entry
   struct program_space *pspace;
   CORE_ADDR addr;
 };
-
-typedef struct bound_minimal_symbol bound_minimal_symbol_d;
-
-DEF_VEC_O (bound_minimal_symbol_d);
 
 /* A linespec.  Elements of this structure are filled in by a parser
    (either parse_linespec or some other function).  The structure is

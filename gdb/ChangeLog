@@ -1,5 +1,10 @@
 2018-08-29  Keith Seitz  <keiths@redhat.com>
 
+	* linespec.c (symbolp): Remove typedef and VEC definitions.
+	(bound_minimal_symbol_d): Likewise.
+
+2018-08-29  Keith Seitz  <keiths@redhat.com>
+
 	* linespec.c (decode_compound_collector::decode_compound_collector):
 	Remove initialization for `m_symtabs'.
 	(decode_compound_collector::release_symbols): Change return type
