@@ -1,5 +1,10 @@
 2018-08-29  Tom Tromey  <tom@tromey.com>
 
+	* csky-tdep.c (csky_analyze_prologue): Use
+	core_addr_to_string_nz.
+
+2018-08-29  Tom Tromey  <tom@tromey.com>
+
 	* windows-nat.c (struct xlate_exception) <them>: Change type to
 	DWORD.
 	(xlate): Fix formatting.  Remove last entry.
