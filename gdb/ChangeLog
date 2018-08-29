@@ -1,5 +1,16 @@
 2018-08-29  Keith Seitz  <keiths@redhat.com>
 
+	* linespec.c (struct linespec) <minimal_symbols>: Change type to
+	std::vector.  Update all users.
+	(convert_linespec_to_sals): Use std::sort to sort minimal symbols.
+	(struct collect_info) <minimal_symbols>: Likewise.
+	(compare_msymbols): Return bool.  Change parameters to const
+	bound_minimal_symbol references.
+	(find_method, find_function_symbols, find_linespec_symbols): Change
+	`minsyms' parameter to std::vector.  Update all callers.
+
+2018-08-29  Keith Seitz  <keiths@redhat.com>
+
 	* linespec.c (struct linespec) <label_symbols>: Change type to
 	std::vector.  Update all users.
 	(find_label_symbols_in_block): Change `result' parameter to
