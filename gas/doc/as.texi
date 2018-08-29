@@ -445,6 +445,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mcrc}] [@b{-mno-crc}]
    [@b{-mginv}] [@b{-mno-ginv}]
    [@b{-mloongson-mmi}] [@b{-mno-loongson-mmi}]
+   [@b{-mloongson-cam}] [@b{-mno-loongson-cam}]
    [@b{-minsn32}] [@b{-mno-insn32}]
    [@b{-mfix7000}] [@b{-mno-fix7000}]
    [@b{-mfix-rm7000}] [@b{-mno-fix-rm7000}]
@@ -1572,6 +1573,12 @@ Generate code for the Loongson MultiMedia extensions Instructions (MMI)
 Application Specific Extension.  This tells the assembler to accept MMI
 instructions.
 @samp{-mno-loongson-mmi} turns off this option.
+
+@item -mloongson-cam
+@itemx -mno-loongson-cam
+Generate code for the Loongson Content Address Memory (CAM) instructions.
+This tells the assembler to accept Loongson CAM instructions.
+@samp{-mno-loongson-cam} turns off this option.
 
 @item -minsn32
 @itemx -mno-insn32

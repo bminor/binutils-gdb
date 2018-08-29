@@ -253,6 +253,13 @@ Application Specific Extension.  This tells the assembler to accept MMI
 instructions.
 @samp{-mno-loongson-mmi} turns off this option.
 
+@item -mloongson-cam
+@itemx -mno-loongson-cam
+Generate code for the Loongson Content Address Memory (CAM)
+Application Specific Extension.  This tells the assembler to accept CAM
+instructions.
+@samp{-mno-loongson-cam} turns off this option.
+
 @item -minsn32
 @itemx -mno-insn32
 Only use 32-bit instruction encodings when generating code for the
@@ -1151,6 +1158,14 @@ The directive @code{.set loongson-mmi} makes the assembler accept
 instructions from the MMI Extension from that point on in the assembly.
 The @code{.set noloongson-mmi} directive prevents MMI instructions from
 being accepted.
+
+@cindex Loongson Content Address Memory (CAM) generation override
+@kindex @code{.set loongson-cam}
+@kindex @code{.set noloongson-cam}
+The directive @code{.set loongson-cam} makes the assembler accept
+instructions from the Loongson CAM from that point on in the assembly.
+The @code{.set noloongson-cam} directive prevents Loongson CAM instructions
+from being accepted.
 
 Traditional MIPS assemblers do not support these directives.
 

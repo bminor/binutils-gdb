@@ -1,3 +1,7 @@
+2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
+
+	* elfxx-mips.c (print_mips_ases): Add CAM extension.
+
 2018-08-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-x86.c (_bfd_x86_elf_parse_gnu_properties): Don't mask

@@ -1394,6 +1394,8 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "loongson-2f-mmi"
     run_dump_test "loongson-3a-mmi"
 
+    run_dump_test "loongson-cam"
+
     if { $has_newabi } {
 	run_dump_test_arches "octeon"	[mips_arch_list_matching octeon]
     }

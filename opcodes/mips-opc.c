@@ -415,6 +415,9 @@ decode_mips_operand (const char *p)
 /* Loongson MultiMedia extensions Instructions (MMI) support.  */
 #define LMMI	ASE_LOONGSON_MMI
 
+/* Loongson Content Address Memory (CAM) support.  */
+#define LCAM	ASE_LOONGSON_CAM
+
 /* The order of overloaded instructions matters.  Label arguments and
    register arguments look the same. Instructions that can have either
    for arguments must apear in the correct order in this table for the
@@ -459,10 +462,10 @@ const struct mips_opcode mips_builtin_opcodes[] =
 /* Loongson specific instructions.  Loongson 3A redefines the Coprocessor 2
    instructions.  Put them here so that disassembler will find them first.
    The assemblers uses a hash table based on the instruction name anyhow.  */
-{"campi",		"d,s",		0x70000075, 0xfc1f07ff,	WR_1|RD_2,		0,		IL3A,		0,	0 },
-{"campv",		"d,s",		0x70000035, 0xfc1f07ff,	WR_1|RD_2,		0,		IL3A,		0,	0 },
-{"camwi",		"d,s,t",	0x700000b5, 0xfc0007ff,	RD_1|RD_2|RD_3,		0,		IL3A,		0,	0 },
-{"ramri",		"d,s",		0x700000f5, 0xfc1f07ff,	WR_1|RD_2,		0,		IL3A,		0,	0 },
+{"campi",		"d,s",		0x70000075, 0xfc1f07ff,	WR_1|RD_2,		0,		0,		LCAM,	0 },
+{"campv",		"d,s",		0x70000035, 0xfc1f07ff,	WR_1|RD_2,		0,		0,		LCAM,	0 },
+{"camwi",		"d,s,t",	0x700000b5, 0xfc0007ff,	RD_1|RD_2|RD_3,		0,		0,		LCAM,	0 },
+{"ramri",		"d,s",		0x700000f5, 0xfc1f07ff,	WR_1|RD_2,		0,		0,		LCAM,	0 },
 {"gsle",		"s,t",		0x70000026, 0xfc00ffff,	RD_1|RD_2,		0,		IL3A,		0,	0 },
 {"gsgt",		"s,t",		0x70000027, 0xfc00ffff,	RD_1|RD_2,		0,		IL3A,		0,	0 },
 {"gslble",		"t,b,d",	0xc8000010, 0xfc0007ff,	WR_1|RD_2|RD_3|LM,	0,		IL3A,		0,	0 },

@@ -15,6 +15,7 @@ FP ABI: .*
 ISA Extension: Loongson 3A
 ASEs:
 	Loongson MMI ASE
+	Loongson CAM ASE
 FLAGS 1: .*
 FLAGS 2: .*
 

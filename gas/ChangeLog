@@ -1,3 +1,27 @@
+2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
+
+	* NEWS: Mention Loongson Content Address Memory (CAM)
+	support.
+	* config/tc-mips.c (options): Add OPTION_LOONGSON_CAM and
+	OPTION_NO_LOONGSON_CAM.
+	(md_longopts): Likewise.
+	(mips_ases): Define availability for CAM.
+	(mips_convert_ase_flags): Map ASE_LOONGSON_CAM to
+	AFL_ASE_LOONGSON_CAM.
+	(mips_cpu_info_table): Add ASE_LOONGSON_CAM for loongson3a.
+	(md_show_usage): Add help for -mloongson-cam and
+	-mno-loongson-cam.
+	* doc/as.texi: Document -mloongson-cam, -mno-loongson-cam.
+	* doc/c-mips.texi: Document -mloongson-cam, -mno-loongson-cam,
+	.set loongson-cam and .set noloongson-cam.
+	* testsuite/gas/mips/loongson-3a-2.d: Move cam test to ...
+	* testsuite/gas/mips/loongson-cam.d: Here.  Add ISA/ASE
+	flag verification.
+	* testsuite/gas/mips/loongson-3a-2.s: Move cam test to ...
+	* testsuite/gas/mips/loongson-cam.s: Here.
+	* testsuite/gas/mips/loongson-3a-mmi.d: Add ASE flag.
+	* testsuite/gas/mips/mips.exp: Run loongson-cam test.
+
 2018-08-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/gas/i386/i386.exp: Run property-1 and
