@@ -1241,7 +1241,8 @@ extern void bfd_mips_elf_swap_abiflags_v0_out
 #define AFL_ASE_LOONGSON_MMI 0x00040000 /* Loongson MMI ASE.  */
 #define AFL_ASE_LOONGSON_CAM 0x00080000 /* Loongson CAM ASE.  */
 #define AFL_ASE_LOONGSON_EXT 0x00100000 /* Loongson EXT instructions.  */
-#define AFL_ASE_MASK         0x001effff /* All ASEs.  */
+#define AFL_ASE_LOONGSON_EXT2 0x00200000 /* Loongson EXT2 instructions.  */
+#define AFL_ASE_MASK         0x003effff /* All ASEs.  */
 
 /* Values for the isa_ext word of an ABI flags structure.  */
 

@@ -1,5 +1,13 @@
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
+	* mips-dis.c (parse_mips_ase_option): Handle -M loongson-ext
+	option.
+	(print_mips_disassembler_options): Document -M loongson-ext.
+	* mips-opc.c (LEXT2): New macro.
+	(mips_opcodes): Add cto, ctz, dcto, dctz instructions.
+
+2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
+
 	 * mips-dis.c (mips_arch_choices): Add EXT to loongson3a
 	 descriptors.
 	 (parse_mips_ase_option): Handle -M loongson-ext option.

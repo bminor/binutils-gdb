@@ -1535,6 +1535,8 @@ enum options
     OPTION_NO_LOONGSON_CAM,
     OPTION_LOONGSON_EXT,
     OPTION_NO_LOONGSON_EXT,
+    OPTION_LOONGSON_EXT2,
+    OPTION_NO_LOONGSON_EXT2,
     OPTION_END_OF_ENUM
   };
 
@@ -1601,6 +1603,8 @@ struct option md_longopts[] =
   {"mno-loongson-cam", no_argument, NULL, OPTION_NO_LOONGSON_CAM},
   {"mloongson-ext", no_argument, NULL, OPTION_LOONGSON_EXT},
   {"mno-loongson-ext", no_argument, NULL, OPTION_NO_LOONGSON_EXT},
+  {"mloongson-ext2", no_argument, NULL, OPTION_LOONGSON_EXT2},
+  {"mno-loongson-ext2", no_argument, NULL, OPTION_NO_LOONGSON_EXT2},
 
   /* Old-style architecture options.  Don't add more of these.  */
   {"m4650", no_argument, NULL, OPTION_M4650},
@@ -1813,6 +1817,11 @@ static const struct mips_ase mips_ases[] = {
     OPTION_LOONGSON_EXT, OPTION_NO_LOONGSON_EXT,
     0, 0, -1, -1,
     -1 },
+
+  { "loongson-ext2", ASE_LOONGSON_EXT | ASE_LOONGSON_EXT2, 0,
+    OPTION_LOONGSON_EXT2, OPTION_NO_LOONGSON_EXT2,
+    0, 0, -1, -1,
+    -1 },
 };
 
 /* The set of ASEs that require -mfp64.  */
@@ -1820,7 +1829,8 @@ static const struct mips_ase mips_ases[] = {
 
 /* Groups of ASE_* flags that represent different revisions of an ASE.  */
 static const unsigned int mips_ase_groups[] = {
-  ASE_DSP | ASE_DSPR2 | ASE_DSPR3
+  ASE_DSP | ASE_DSPR2 | ASE_DSPR3, 
+  ASE_LOONGSON_EXT | ASE_LOONGSON_EXT2 
 };
 
 /* Pseudo-op table.
@@ -19050,6 +19060,8 @@ mips_convert_ase_flags (int ase)
     ext_ases |= AFL_ASE_LOONGSON_CAM;
   if (ase & ASE_LOONGSON_EXT)
     ext_ases |= AFL_ASE_LOONGSON_EXT;
+  if (ase & ASE_LOONGSON_EXT2)
+    ext_ases |= AFL_ASE_LOONGSON_EXT2;
 
   return ext_ases;
 }
@@ -20079,6 +20091,9 @@ MIPS options:\n\
   fprintf (stream, _("\
 -mloongson-ext		generate Loongson EXTensions (EXT) instructions\n\
 -mno-loongson-ext	do not generate Loongson EXTensions Instructions\n"));
+  fprintf (stream, _("\
+-mloongson-ext2		generate Loongson EXTensions R2 (EXT2) instructions\n\
+-mno-loongson-ext2	do not generate Loongson EXTensions R2 Instructions\n"));
   fprintf (stream, _("\
 -minsn32		only generate 32-bit microMIPS instructions\n\
 -mno-insn32		generate all microMIPS instructions\n"));

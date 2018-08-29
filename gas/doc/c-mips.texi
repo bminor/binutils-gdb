@@ -267,6 +267,13 @@ Application Specific Extension.  This tells the assembler to accept EXT
 instructions.
 @samp{-mno-loongson-ext} turns off this option.
 
+@item -mloongson-ext2
+@itemx -mno-loongson-ext2
+Generate code for the Loongson EXTensions R2 (EXT2) instructions
+Application Specific Extension.  This tells the assembler to accept EXT2
+instructions.
+@samp{-mno-loongson-ext2} turns off this option.
+
 @item -minsn32
 @itemx -mno-insn32
 Only use 32-bit instruction encodings when generating code for the
@@ -1180,6 +1187,15 @@ from being accepted.
 The directive @code{.set loongson-ext} makes the assembler accept
 instructions from the Loongson EXT from that point on in the assembly.
 The @code{.set noloongson-ext} directive prevents Loongson EXT instructions
+from being accepted.
+
+@cindex Loongson EXTensions R2 (EXT2) instructions generation override
+@kindex @code{.set loongson-ext2}
+@kindex @code{.set noloongson-ext2}
+The directive @code{.set loongson-ext2} makes the assembler accept
+instructions from the Loongson EXT2 from that point on in the assembly.
+This directive implies @code{.set loognson-ext}.
+The @code{.set noloongson-ext2} directive prevents Loongson EXT2 instructions
 from being accepted.
 
 Traditional MIPS assemblers do not support these directives.

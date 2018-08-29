@@ -1,5 +1,23 @@
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
+	* NEWS: Mention Loongson EXTensions R2 (EXT2) support.
+	* config/tc-mips.c (options): Add OPTION_LOONGSON_EXT2 and
+	OPTION_NO_LOONGSON_EXT2.
+	(md_longopts): Likewise.
+	(mips_ases): Define availability for EXT.
+	(mips_convert_ase_flags): Map ASE_LOONGSON_EXT2 to
+	AFL_ASE_LOONGSON_EXT2.
+	(md_show_usage): Add help for -mloongson-ext2 and
+	-mno-loongson-ext2.
+	* doc/as.texi: Document -mloongson-ext2, -mno-loongson-ext2.
+	* doc/c-mips.texi: Document -mloongson-ext2, -mno-loongson-ext2,
+	.set loongson-ext2 and .set noloongson-ext2.
+	* testsuite/gas/mips/loongson-ext2.d: New test.
+	* testsuite/gas/mips/loongson-ext2.s: New test.
+	* testsuite/gas/mips/mips.exp: Run loongson-ext2 test.
+
+2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
+
 	 * NEWS: Mention Loongson EXTensions (EXT) support.
 	 * config/tc-mips.c (options): Add OPTION_LOONGSON_EXT and
 	 OPTION_NO_LOONGSON_EXT.

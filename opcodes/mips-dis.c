@@ -947,6 +947,13 @@ parse_mips_ase_option (const char *option)
       mips_ase |= ASE_LOONGSON_CAM;
       return TRUE;
     }
+  
+  /* Put here for match ext2 frist */
+  if (CONST_STRNEQ (option, "loongson-ext2"))
+    {
+      mips_ase |= ASE_LOONGSON_EXT2;
+      return TRUE;
+    }
 
   if (CONST_STRNEQ (option, "loongson-ext"))
     {
@@ -2611,6 +2618,10 @@ static struct
 		  MIPS_OPTION_ARG_NONE },
   { "loongson-ext",
 		  N_("Recognize the Loongson EXTensions (EXT) "
+		     " instructions.\n"),
+		  MIPS_OPTION_ARG_NONE },
+  { "loongson-ext2",
+		  N_("Recognize the Loongson EXTensions R2 (EXT2) "
 		     " instructions.\n"),
 		  MIPS_OPTION_ARG_NONE },
   { "gpr-names=", N_("Print GPR names according to specified ABI.\n\

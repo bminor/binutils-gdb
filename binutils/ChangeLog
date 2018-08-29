@@ -1,5 +1,9 @@
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
+	* readelf.c (print_mips_ases): Add Loongson EXT2 extension.
+
+2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
+
 	 * readelf.c (print_mips_ases): Add Loongson EXT extension.
 
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>

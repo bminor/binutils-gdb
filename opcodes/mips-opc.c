@@ -420,6 +420,9 @@ decode_mips_operand (const char *p)
 /* Loongson EXTensions (EXT) instructions support.  */
 #define LEXT	ASE_LOONGSON_EXT
 
+/* Loongson EXTensions R2 (EXT2) instructions support.  */
+#define LEXT2	ASE_LOONGSON_EXT2
+
 /* The order of overloaded instructions matters.  Label arguments and
    register arguments look the same. Instructions that can have either
    for arguments must apear in the correct order in this table for the
@@ -518,6 +521,10 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"gssq",		"+z,t,+c(b)",	0xe8000020, 0xfc008020,	RD_1|RD_2|RD_4|SM,	0,		0,		LEXT,	0 },
 {"gslqc1",		"+Z,T,+c(b)",	0xc8008020, 0xfc008020,	WR_1|WR_2|RD_4|LM,	0,		0,		LEXT,	0 },
 {"gssqc1",		"+Z,T,+c(b)",	0xe8008020, 0xfc008020,	RD_1|RD_2|RD_4|SM,	0,		0,		LEXT,	0 },
+{"cto",			"d,s",		0x70000062, 0xfc1f07ff,	WR_1|RD_2,		0,		0,		LEXT2,	0 },
+{"ctz",			"d,s",		0x70000022, 0xfc1f07ff,	WR_1|RD_2,		0,		0,		LEXT2,	0 },
+{"dcto",		"d,s",		0x700000e2, 0xfc1f07ff,	WR_1|RD_2,		0,		0,		LEXT2,	0 },
+{"dctz",		"d,s",		0x700000a2, 0xfc1f07ff,	WR_1|RD_2,		0,		0,		LEXT2,	0 },
 
 /* R5900 VU0 Macromode instructions. */
 {"vabs",		"+7+K,+6+K",	  0x4a0001fd, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
