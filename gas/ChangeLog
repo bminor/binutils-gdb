@@ -1,5 +1,22 @@
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
+	 * NEWS: Mention Loongson EXTensions (EXT) support.
+	 * config/tc-mips.c (options): Add OPTION_LOONGSON_EXT and
+	 OPTION_NO_LOONGSON_EXT.
+	 (md_longopts): Likewise.
+	 (mips_ases): Define availability for EXT.
+	 (mips_convert_ase_flags): Map ASE_LOONGSON_EXT to
+	 AFL_ASE_LOONGSON_EXT.
+	 (mips_cpu_info_table): Add ASE_LOONGSON_EXT for loongson3a.
+	 (md_show_usage): Add help for -mloongson-ext and
+	 -mno-loongson-ext.
+	 * doc/as.texi: Document -mloongson-ext, -mno-loongson-ext.
+	 * doc/c-mips.texi: Document -mloongson-ext, -mno-loongson-ext,
+	 .set loongson-ext and .set noloongson-ext.
+	 * testsuite/gas/mips/loongson-mmi.d: Add ASE flag.
+
+2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
+
 	* NEWS: Mention Loongson Content Address Memory (CAM)
 	support.
 	* config/tc-mips.c (options): Add OPTION_LOONGSON_CAM and

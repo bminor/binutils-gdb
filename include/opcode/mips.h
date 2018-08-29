@@ -1306,6 +1306,8 @@ static const unsigned int mips_isa_table[] = {
 #define ASE_LOONGSON_MMI	0x00200000
 /* Loongson Content Address Memory (CAM).  */
 #define ASE_LOONGSON_CAM	0x00400000
+/* Loongson EXTensions (EXT) instructions.  */
+#define ASE_LOONGSON_EXT	0x00800000
 
 /* MIPS ISA defines, use instead of hardcoding ISA level.  */
 

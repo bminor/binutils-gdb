@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the MIPS Loongson EXTensions (EXT) instructions.
+
 * Add support for the MIPS Loongson Content Address Memory (CAM) ASE.
 
 * Add support for the C-SKY processor series.

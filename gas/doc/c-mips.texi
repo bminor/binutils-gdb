@@ -260,6 +260,13 @@ Application Specific Extension.  This tells the assembler to accept CAM
 instructions.
 @samp{-mno-loongson-cam} turns off this option.
 
+@item -mloongson-ext
+@itemx -mno-loongson-ext
+Generate code for the Loongson EXTensions (EXT) instructions
+Application Specific Extension.  This tells the assembler to accept EXT
+instructions.
+@samp{-mno-loongson-ext} turns off this option.
+
 @item -minsn32
 @itemx -mno-insn32
 Only use 32-bit instruction encodings when generating code for the
@@ -1165,6 +1172,14 @@ being accepted.
 The directive @code{.set loongson-cam} makes the assembler accept
 instructions from the Loongson CAM from that point on in the assembly.
 The @code{.set noloongson-cam} directive prevents Loongson CAM instructions
+from being accepted.
+
+@cindex Loongson EXTensions (EXT) instructions generation override
+@kindex @code{.set loongson-ext}
+@kindex @code{.set noloongson-ext}
+The directive @code{.set loongson-ext} makes the assembler accept
+instructions from the Loongson EXT from that point on in the assembly.
+The @code{.set noloongson-ext} directive prevents Loongson EXT instructions
 from being accepted.
 
 Traditional MIPS assemblers do not support these directives.

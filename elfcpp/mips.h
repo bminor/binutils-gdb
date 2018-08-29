@@ -308,7 +308,9 @@ enum
   // MICROMIPS ASE.
   AFL_ASE_MICROMIPS = 0x00000800,
   // XPA ASE.
-  AFL_ASE_XPA = 0x00001000
+  AFL_ASE_XPA = 0x00001000,
+  // Loongson EXT ASE.
+  AFL_ASE_LOONGSON_EXT = 0x00002000
 };
 
 // Values for the isa_ext word of an ABI flags structure.

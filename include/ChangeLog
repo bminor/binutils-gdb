@@ -1,5 +1,11 @@
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
+	 * elf/mips.h (AFL_ASE_LOONGSON_EXT): New macro.
+	 (AFL_ASE_MASK): Update to include AFL_ASE_LOONGSON_EXT.
+	 * opcode/mips.h (ASE_LOONGSON_EXT): New macro.
+
+2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
+
 	* elf/mips.h (AFL_ASE_LOONGSON_CAM): New macro.
 	(AFL_ASE_MASK): Update to include AFL_ASE_LOONGSON_CAM.
 	* opcode/mips.h (ASE_LOONGSON_CAM): New macro.

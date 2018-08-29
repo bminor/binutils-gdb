@@ -15653,6 +15653,8 @@ print_mips_ases (unsigned int mask)
     fputs ("\n\tLoongson MMI ASE", stdout);
   if (mask & AFL_ASE_LOONGSON_CAM)
     fputs ("\n\tLoongson CAM ASE", stdout);
+  if (mask & AFL_ASE_LOONGSON_EXT)
+    fputs ("\n\tLoongson EXT ASE", stdout);
   if (mask == 0)
     fprintf (stdout, "\n\t%s", _("None"));
   else if ((mask & ~AFL_ASE_MASK) != 0)

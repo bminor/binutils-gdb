@@ -1,5 +1,11 @@
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
+	 * elfxx-mips.c (infer_mips_abiflags): Use ases instead of
+	 isa_ext for infer ABI flags.
+	 (print_mips_ases): Add Loongson EXT extension.
+
+2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
+
 	* elfxx-mips.c (print_mips_ases): Add CAM extension.
 
 2018-08-27  H.J. Lu  <hongjiu.lu@intel.com>

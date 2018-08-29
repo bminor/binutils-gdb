@@ -630,7 +630,7 @@ const struct mips_arch_choice mips_arch_choices[] =
     NULL, 0, mips_cp1_names_numeric, mips_hwr_names_numeric },
 
   { "loongson3a",   1, bfd_mach_mips_loongson_3a, CPU_LOONGSON_3A,
-    ISA_MIPS64R2 | INSN_LOONGSON_3A, ASE_LOONGSON_MMI | ASE_LOONGSON_CAM,
+    ISA_MIPS64R2, ASE_LOONGSON_MMI | ASE_LOONGSON_CAM | ASE_LOONGSON_EXT,
     mips_cp0_names_numeric, NULL, 0, mips_cp1_names_mips3264,
     mips_hwr_names_numeric },
 
@@ -945,6 +945,12 @@ parse_mips_ase_option (const char *option)
   if (CONST_STRNEQ (option, "loongson-cam"))
     {
       mips_ase |= ASE_LOONGSON_CAM;
+      return TRUE;
+    }
+
+  if (CONST_STRNEQ (option, "loongson-ext"))
+    {
+      mips_ase |= ASE_LOONGSON_EXT;
       return TRUE;
     }
 
@@ -2601,6 +2607,10 @@ static struct
 		  MIPS_OPTION_ARG_NONE },
   { "loongson-cam",
 		  N_("Recognize the Loongson Content Address Memory (CAM) "
+		     " instructions.\n"),
+		  MIPS_OPTION_ARG_NONE },
+  { "loongson-ext",
+		  N_("Recognize the Loongson EXTensions (EXT) "
 		     " instructions.\n"),
 		  MIPS_OPTION_ARG_NONE },
   { "gpr-names=", N_("Print GPR names according to specified ABI.\n\
