@@ -1,5 +1,10 @@
 -*- text -*-
 
+* The MIPS port now supports the Loongson 3A2000/3A3000 processor which
+  implements the MIPS64r2 ISA, the Loongson-mmi ASE, Loongson-cam ASE,
+  Loongson-ext ASE and Loongson-ext2 ASE instructions. Add -march=gs464e
+  option for Loongson 3A2000/3A3000 processor.
+
 * The MIPS port now supports the Loongson 3A1000 processor, aka Loongson3a,
   which implements the MIPS64r2 ISA, the Loongson-mmi ASE, Loongson-cam ASE
   and Loongson-ext ASE instructions. Add -march=gs464 option for Loongson

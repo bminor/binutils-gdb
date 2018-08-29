@@ -1,5 +1,18 @@
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
+	* archures.c (bfd_architecture): New machine
+	bfd_mach_mips_gs464e.
+	* bfd-in2.h (bfd_architecture): Likewise.
+	* cpu-mips.c (enum I_xxx): Likewise.
+	(arch_info_struct): Likewise.
+	* elfxx-mips.c (_bfd_elf_mips_mach): Handle
+	E_MIPS_MACH_GS464E.
+	(mips_set_isa_flags): Likewise.
+	(mips_mach_extensions): Map bfd_mach_mips_gs464e to
+	bfd_mach_mips_gs464 extension.
+
+2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
+
 	* archures.c (bfd_architecture): Rename
 	bfd_mach_mips_loongson_3a to bfd_mach_mips_gs464.
 	* bfd-in2.h (bfd_architecture): Likewise.

@@ -1,5 +1,9 @@
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
+	* mips.c (EF_MIPS_MACH): New E_MIPS_MACH_GS464E.
+
+2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
+
 	* mips.c (EF_MIPS_MACH): Rename E_MIPS_MACH_LS3A to
 	E_MIPS_MACH_GS464.
 

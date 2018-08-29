@@ -1,5 +1,11 @@
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
+	* config/tc-mips.c (ISA_HAS_ODD_SINGLE_FPR): Exclude CPU_GS464E.
+	(mips_cpu_info_table): Add gs464e descriptors.
+	* doc/as.texi (march table): Add gs464e.
+
+2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
+
 	* config/tc-mips.c (ISA_HAS_ODD_SINGLE_FPR): Rename
 	CPU_LOONGSON_3A to CPU_GS464.
 	(mips_cpu_info_table): Add gs464 descriptors, Keep

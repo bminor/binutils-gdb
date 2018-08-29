@@ -1,5 +1,10 @@
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
+	* testsuite/ld-mips-elf/mips-elf-flags.exp: Run good_combination
+	gs464e and gs464.
+
+2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
+
 	* testsuite/ld-mips-elf/mips-elf-flags.exp: Rename loongson3a
 	to gs464.
 

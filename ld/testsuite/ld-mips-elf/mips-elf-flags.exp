@@ -315,3 +315,8 @@ good_combination { "-march=interaptiv-mr2 -32" "-march=m5100 -32" } \
 		 { mips32r2 interaptiv-mr2 } \
 		 MIPS32r5 "Imagination interAptiv MR2" \
 		 { "DSP ASE" "Enhanced VA Scheme" "MT ASE" }
+
+good_combination { "-march=gs464 -32" "-march=gs464e -32" }	\
+		 { gs464e o32 }					\
+		 MIPS64r2 "None"				\
+		 { "Loongson MMI ASE" "Loongson CAM ASE" "Loongson EXT ASE" "Loongson EXT2 ASE" }

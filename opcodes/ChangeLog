@@ -1,5 +1,9 @@
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
+	* mips-dis.c (mips_arch_choices): Add gs464e descriptors.
+
+2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
+
 	* mips-dis.c (mips_arch_choices): Add gs464 descriptors, Keep
 	loongson3a as an alias of gs464 for compatibility.
 	* mips-opc.c (mips_opcodes): Change Comments.
