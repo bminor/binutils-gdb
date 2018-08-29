@@ -1,5 +1,18 @@
 2018-08-29  Keith Seitz  <keiths@redhat.com>
 
+	* linespec.c (struct linespec) <function_symbols>: Change type to
+	std::vector.  Update all users.
+	(struct collect_info) <function_symbols>: Likewise.
+	(convert_linespec_to_sals): Use std::sort to sort function_symbols.
+	(std_compare_symbols): New function.
+	(find_method, find_function_symbols, find_linespec_symbols)
+	(find_label_symbols_in_block): Change `symbols' parameter to
+	std::vector.  Update all callers.
+	(find_label_symbols): Likewise for `function_symbols' and
+	`label_funcs_ret'.
+
+2018-08-29  Keith Seitz  <keiths@redhat.com>
+
 	* linespec.c (symtab_vector_up): Define.
 	(struct linespec) <file_symtabs>: Change type to std::vector *.
 	Update all uses.
