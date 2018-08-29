@@ -159,13 +159,19 @@ START_RELOC_NUMBERS (elf_ppc64_reloc_type)
   RELOC_NUMBER (R_PPC64_PLTCALL,	   120)
 
 #ifndef RELOC_MACROS_GEN_FUNC
-/* Relocation only used internally by ld.  If you need to use these
-   reloc numbers, you can change them to some other unused value
+/* Relocation only used internally by gas or ld.  If you need to use
+   these reloc numbers, you can change them to some other unused value
    without affecting the ABI.  They will never appear in object files.  */
-  RELOC_NUMBER (R_PPC64_LO_DS_OPT,	   128)
-/* Reloc only used internally by gas.  As above, value is unimportant.  */
-  RELOC_NUMBER (R_PPC64_16DX_HA,	   129)
+  RELOC_NUMBER (R_PPC64_LO_DS_OPT,	   200)
+  RELOC_NUMBER (R_PPC64_16DX_HA,	   201)
 #endif
+
+  RELOC_NUMBER (R_PPC64_REL16_HIGH,	   240)
+  RELOC_NUMBER (R_PPC64_REL16_HIGHA,	   241)
+  RELOC_NUMBER (R_PPC64_REL16_HIGHER,	   242)
+  RELOC_NUMBER (R_PPC64_REL16_HIGHERA,	   243)
+  RELOC_NUMBER (R_PPC64_REL16_HIGHEST,	   244)
+  RELOC_NUMBER (R_PPC64_REL16_HIGHESTA,	   245)
 
 /* Power9 split rel16 for addpcis.  */
   RELOC_NUMBER (R_PPC64_REL16DX_HA,	   246)

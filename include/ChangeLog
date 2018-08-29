@@ -1,3 +1,10 @@
+2018-08-31  Alan Modra  <amodra@gmail.com>
+
+	* elf/ppc64.h (R_PPC64_REL16_HIGH, R_PPC64_REL16_HIGHA),
+	(R_PPC64_REL16_HIGHER, R_PPC64_REL16_HIGHERA),
+	(R_PPC64_REL16_HIGHEST, R_PPC64_REL16_HIGHESTA): Define.
+	(R_PPC64_LO_DS_OPT, R_PPC64_16DX_HA): Bump value.
+
 2018-08-30  Kito Cheng  <kito@andestech.com>
 
 	* opcode/riscv.h (MAX_SUBSET_NUM): New.

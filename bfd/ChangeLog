@@ -1,5 +1,17 @@
 2018-08-31  Alan Modra  <amodra@gmail.com>
 
+	* reloc.c (BFD_RELOC_PPC64_REL16_HIGH, BFD_RELOC_PPC64_REL16_HIGHA),
+	(BFD_RELOC_PPC64_REL16_HIGHER, BFD_RELOC_PPC64_REL16_HIGHERA),
+	(BFD_RELOC_PPC64_REL16_HIGHEST, BFD_RELOC_PPC64_REL16_HIGHESTA):
+	Define.
+	* elf64-ppc.c (ppc64_elf_howto_raw): Add new REL16 howtos.
+	(ppc64_elf_reloc_type_lookup): Translate new REL16 relocs.
+	(ppc64_elf_check_relocs, ppc64_elf_relocate_section): Handle them.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+2018-08-31  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c: Correct _notoc stub comments.
 	(ppc_build_one_stub): Simplify output of branch for notoc
 	long branch stub.  Don't include label offset of 8 bytes in

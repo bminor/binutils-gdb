@@ -1,3 +1,11 @@
+2018-08-31  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.h (TC_FORCE_RELOCATION_SUB_LOCAL): Allow ADDR16
+	HIGH, HIGHA, HIGHER, HIGHERA, HIGHEST, and HIGHESTA relocs.
+	Group 16-bit relocs.
+	* config/tc-ppc.c (md_apply_fix): Translate those ADDR16 relocs
+	to REL16 when pcrel.  Sort relocs.
+
 2018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/gas/elf/elf.exp: Pass -mx86-used-note=no to

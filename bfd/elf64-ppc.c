@@ -820,6 +820,24 @@ static reloc_howto_type ppc64_elf_howto_raw[] =
   HOW (R_PPC64_REL16_HA, 1, 16, 0xffff, 16, TRUE, signed,
        ppc64_elf_ha_reloc),
 
+  HOW (R_PPC64_REL16_HIGH, 1, 16, 0xffff, 16, TRUE, dont,
+       bfd_elf_generic_reloc),
+
+  HOW (R_PPC64_REL16_HIGHA, 1, 16, 0xffff, 16, TRUE, dont,
+       ppc64_elf_ha_reloc),
+
+  HOW (R_PPC64_REL16_HIGHER, 1, 16, 0xffff, 32, TRUE, dont,
+       bfd_elf_generic_reloc),
+
+  HOW (R_PPC64_REL16_HIGHERA, 1, 16, 0xffff, 32, TRUE, dont,
+       ppc64_elf_ha_reloc),
+
+  HOW (R_PPC64_REL16_HIGHEST, 1, 16, 0xffff, 48, TRUE, dont,
+       bfd_elf_generic_reloc),
+
+  HOW (R_PPC64_REL16_HIGHESTA, 1, 16, 0xffff, 48, TRUE, dont,
+       ppc64_elf_ha_reloc),
+
   /* Like R_PPC64_REL16_HA but for split field in addpcis.  */
   HOW (R_PPC64_REL16DX_HA, 2, 16, 0x1fffc1, 16, TRUE, signed,
        ppc64_elf_ha_reloc),
@@ -1128,6 +1146,18 @@ ppc64_elf_reloc_type_lookup (bfd *abfd,
     case BFD_RELOC_HI16_PCREL:			r = R_PPC64_REL16_HI;
       break;
     case BFD_RELOC_HI16_S_PCREL:		r = R_PPC64_REL16_HA;
+      break;
+    case BFD_RELOC_PPC64_REL16_HIGH:		r = R_PPC64_REL16_HIGH;
+      break;
+    case BFD_RELOC_PPC64_REL16_HIGHA:		r = R_PPC64_REL16_HIGHA;
+      break;
+    case BFD_RELOC_PPC64_REL16_HIGHER:		r = R_PPC64_REL16_HIGHER;
+      break;
+    case BFD_RELOC_PPC64_REL16_HIGHERA:		r = R_PPC64_REL16_HIGHERA;
+      break;
+    case BFD_RELOC_PPC64_REL16_HIGHEST:		r = R_PPC64_REL16_HIGHEST;
+      break;
+    case BFD_RELOC_PPC64_REL16_HIGHESTA:	r = R_PPC64_REL16_HIGHESTA;
       break;
     case BFD_RELOC_PPC_16DX_HA:			r = R_PPC64_16DX_HA;
       break;
@@ -4474,6 +4504,12 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_REL16_LO:
 	case R_PPC64_REL16_HI:
 	case R_PPC64_REL16_HA:
+	case R_PPC64_REL16_HIGH:
+	case R_PPC64_REL16_HIGHA:
+	case R_PPC64_REL16_HIGHER:
+	case R_PPC64_REL16_HIGHERA:
+	case R_PPC64_REL16_HIGHEST:
+	case R_PPC64_REL16_HIGHESTA:
 	case R_PPC64_REL16DX_HA:
 	  break;
 
@@ -14557,6 +14593,12 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_REL16_LO:
 	case R_PPC64_REL16_HI:
 	case R_PPC64_REL16_HA:
+	case R_PPC64_REL16_HIGH:
+	case R_PPC64_REL16_HIGHA:
+	case R_PPC64_REL16_HIGHER:
+	case R_PPC64_REL16_HIGHERA:
+	case R_PPC64_REL16_HIGHEST:
+	case R_PPC64_REL16_HIGHESTA:
 	case R_PPC64_REL16DX_HA:
 	  break;
 
@@ -15038,6 +15080,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_PPC64_REL16_HA:
+	case R_PPC64_REL16_HIGHA:
+	case R_PPC64_REL16_HIGHERA:
+	case R_PPC64_REL16_HIGHESTA:
 	case R_PPC64_REL16DX_HA:
 	case R_PPC64_ADDR16_HA:
 	case R_PPC64_ADDR16_HIGHA:

@@ -6624,6 +6624,18 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
     {
       switch (fixP->fx_r_type)
 	{
+	case BFD_RELOC_64:
+	  fixP->fx_r_type = BFD_RELOC_64_PCREL;
+	  break;
+
+	case BFD_RELOC_32:
+	  fixP->fx_r_type = BFD_RELOC_32_PCREL;
+	  break;
+
+	case BFD_RELOC_16:
+	  fixP->fx_r_type = BFD_RELOC_16_PCREL;
+	  break;
+
 	case BFD_RELOC_LO16:
 	  fixP->fx_r_type = BFD_RELOC_LO16_PCREL;
 	  break;
@@ -6636,16 +6648,28 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	  fixP->fx_r_type = BFD_RELOC_HI16_S_PCREL;
 	  break;
 
-	case BFD_RELOC_64:
-	  fixP->fx_r_type = BFD_RELOC_64_PCREL;
+	case BFD_RELOC_PPC64_ADDR16_HIGH:
+	  fixP->fx_r_type = BFD_RELOC_PPC64_REL16_HIGH;
 	  break;
 
-	case BFD_RELOC_32:
-	  fixP->fx_r_type = BFD_RELOC_32_PCREL;
+	case BFD_RELOC_PPC64_ADDR16_HIGHA:
+	  fixP->fx_r_type = BFD_RELOC_PPC64_REL16_HIGHA;
 	  break;
 
-	case BFD_RELOC_16:
-	  fixP->fx_r_type = BFD_RELOC_16_PCREL;
+	case BFD_RELOC_PPC64_HIGHER:
+	  fixP->fx_r_type = BFD_RELOC_PPC64_REL16_HIGHER;
+	  break;
+
+	case BFD_RELOC_PPC64_HIGHER_S:
+	  fixP->fx_r_type = BFD_RELOC_PPC64_REL16_HIGHERA;
+	  break;
+
+	case BFD_RELOC_PPC64_HIGHEST:
+	  fixP->fx_r_type = BFD_RELOC_PPC64_REL16_HIGHEST;
+	  break;
+
+	case BFD_RELOC_PPC64_HIGHEST_S:
+	  fixP->fx_r_type = BFD_RELOC_PPC64_REL16_HIGHESTA;
 	  break;
 
 	case BFD_RELOC_PPC_16DX_HA:

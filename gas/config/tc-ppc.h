@@ -264,13 +264,19 @@ extern int ppc_force_relocation (struct fix *);
 /* Don't allow the generic code to convert fixups involving the
    subtraction of a label in the current section to pc-relative if we
    don't have the necessary pc-relative relocation.  */
-#define TC_FORCE_RELOCATION_SUB_LOCAL(FIX, SEG)		\
-  (!((FIX)->fx_r_type == BFD_RELOC_LO16			\
-     || (FIX)->fx_r_type == BFD_RELOC_HI16		\
-     || (FIX)->fx_r_type == BFD_RELOC_HI16_S		\
-     || (FIX)->fx_r_type == BFD_RELOC_64		\
-     || (FIX)->fx_r_type == BFD_RELOC_32		\
-     || (FIX)->fx_r_type == BFD_RELOC_16		\
+#define TC_FORCE_RELOCATION_SUB_LOCAL(FIX, SEG) \
+  (!((FIX)->fx_r_type == BFD_RELOC_64				\
+     || (FIX)->fx_r_type == BFD_RELOC_32			\
+     || (FIX)->fx_r_type == BFD_RELOC_16			\
+     || (FIX)->fx_r_type == BFD_RELOC_LO16			\
+     || (FIX)->fx_r_type == BFD_RELOC_HI16			\
+     || (FIX)->fx_r_type == BFD_RELOC_HI16_S			\
+     || (FIX)->fx_r_type == BFD_RELOC_PPC64_ADDR16_HIGH		\
+     || (FIX)->fx_r_type == BFD_RELOC_PPC64_ADDR16_HIGHA	\
+     || (FIX)->fx_r_type == BFD_RELOC_PPC64_HIGHER		\
+     || (FIX)->fx_r_type == BFD_RELOC_PPC64_HIGHER_S		\
+     || (FIX)->fx_r_type == BFD_RELOC_PPC64_HIGHEST		\
+     || (FIX)->fx_r_type == BFD_RELOC_PPC64_HIGHEST_S		\
      || (FIX)->fx_r_type == BFD_RELOC_PPC_16DX_HA))
 #endif
 
