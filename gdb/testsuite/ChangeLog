@@ -1,3 +1,8 @@
+2018-08-30  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/funcargs.c (use_a): New function.
+	(recurse): Call use_a.
+
 2018-08-29  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.compile/compile-cplus-anonymous.cc: New file.
