@@ -1,5 +1,21 @@
 2018-08-29  Keith Seitz  <keiths@redhat.com>
 
+	* linespec.c (decode_compound_collector::decode_compound_collector):
+	Remove initialization for `m_symtabs'.
+	(decode_compound_collector::release_symbols): Change return type
+	to std::vector.  Update all callers.
+	(class decode_compound_collector) <m_symbols>: Change type to
+	std::vector.
+	(lookup_prefix_sym): Change return type to std::vector.  Update all
+	callers.
+	(compare_symbols): Remove.
+	(std_compare_symbols): Rename to `compare_symbols'.
+	(find_method): Change `sym_classes' parameter to std::vector.
+	Update all callers.  Use std::sort to sort sym_classes.
+	(find_linespec_symbols): Remove cleanup.
+
+2018-08-29  Keith Seitz  <keiths@redhat.com>
+
 	* linespec.c (struct linespec) <minimal_symbols>: Change type to
 	std::vector.  Update all users.
 	(convert_linespec_to_sals): Use std::sort to sort minimal symbols.

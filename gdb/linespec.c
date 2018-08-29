@@ -400,9 +400,7 @@ static void minsym_found (struct linespec_state *self, struct objfile *objfile,
 			  struct minimal_symbol *msymbol,
 			  std::vector<symtab_and_line> *result);
 
-static int compare_symbols (const void *a, const void *b);
-static bool std_compare_symbols (const struct symbol *a,
-				 const struct symbol *b);
+static bool compare_symbols (const struct symbol *a, const struct symbol *b);
 
 static bool compare_msymbols (const bound_minimal_symbol &a,
 			      const bound_minimal_symbol &b);
@@ -2266,7 +2264,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 	     to each other.  */
 	  std::sort (ls->function_symbols->begin (),
 		     ls->function_symbols->end (),
-		     std_compare_symbols);
+		     compare_symbols);
 
 	  for (const auto &sym : *ls->function_symbols)
 	    {
@@ -3501,7 +3499,6 @@ class decode_compound_collector
 {
 public:
   decode_compound_collector ()
-    : m_symbols (NULL)
   {
     m_unique_syms = htab_create_alloc (1, htab_hash_pointer,
 				       htab_eq_pointer, NULL,
@@ -3514,12 +3511,10 @@ public:
       htab_delete (m_unique_syms);
   }
 
-  /* Releases ownership of the collected symbols and returns them.  */
-  VEC (symbolp) *release_symbols ()
+  /* Return all symbols collected.  */
+  std::vector<symbol *> release_symbols ()
   {
-    VEC (symbolp) *res = m_symbols;
-    m_symbols = NULL;
-    return res;
+    return std::move (m_symbols);
   }
 
   /* Callable as a symbol_found_callback_ftype callback.  */
@@ -3531,7 +3526,7 @@ private:
   htab_t m_unique_syms;
 
   /* The result vector.  */
-  VEC (symbolp) *m_symbols;
+  std::vector<symbol *>  m_symbols;
 };
 
 bool
@@ -3554,7 +3549,7 @@ decode_compound_collector::operator () (symbol *sym)
   if (!*slot)
     {
       *slot = sym;
-      VEC_safe_push (symbolp, m_symbols, sym);
+      m_symbols.push_back (sym);
     }
 
   return true; /* Continue iterating.  */
@@ -3564,7 +3559,7 @@ decode_compound_collector::operator () (symbol *sym)
 
 /* Return any symbols corresponding to CLASS_NAME in FILE_SYMTABS.  */
 
-static VEC (symbolp) *
+static std::vector<symbol *>
 lookup_prefix_sym (struct linespec_state *state,
 		   std::vector<symtab *> *file_symtabs,
 		   const char *class_name)
@@ -3603,7 +3598,7 @@ lookup_prefix_sym (struct linespec_state *state,
    symbols with the same program space end up next to each other.  */
 
 static bool
-std_compare_symbols (const struct symbol *a, const struct symbol *b)
+compare_symbols (const struct symbol *a, const struct symbol *b)
 {
   uintptr_t uia, uib;
 
@@ -3622,36 +3617,6 @@ std_compare_symbols (const struct symbol *a, const struct symbol *b)
     return true;
 
   return false;
-}
-
-/* A qsort comparison function for symbols.  The resulting order does
-   not actually matter; we just need to be able to sort them so that
-   symbols with the same program space end up next to each other.  */
-
-static int
-compare_symbols (const void *a, const void *b)
-{
-  struct symbol * const *sa = (struct symbol * const*) a;
-  struct symbol * const *sb = (struct symbol * const*) b;
-  uintptr_t uia, uib;
-
-  uia = (uintptr_t) SYMTAB_PSPACE (symbol_symtab (*sa));
-  uib = (uintptr_t) SYMTAB_PSPACE (symbol_symtab (*sb));
-
-  if (uia < uib)
-    return -1;
-  if (uia > uib)
-    return 1;
-
-  uia = (uintptr_t) *sa;
-  uib = (uintptr_t) *sb;
-
-  if (uia < uib)
-    return -1;
-  if (uia > uib)
-    return 1;
-
-  return 0;
 }
 
 /* Like compare_symbols but for minimal symbols.  */
@@ -3723,11 +3688,9 @@ find_superclass_methods (std::vector<struct type *> &&superclasses,
 static void
 find_method (struct linespec_state *self, std::vector<symtab *> *file_symtabs,
 	     const char *class_name, const char *method_name,
-	     VEC (symbolp) *sym_classes, std::vector<symbol *> *symbols,
+	     std::vector<symbol *> *sym_classes, std::vector<symbol *> *symbols,
 	     std::vector<bound_minimal_symbol> *minsyms)
 {
-  struct symbol *sym;
-  int ix;
   size_t last_result_len;
   std::vector<struct type *> superclass_vec;
   std::vector<const char *> result_names;
@@ -3735,10 +3698,8 @@ find_method (struct linespec_state *self, std::vector<symtab *> *file_symtabs,
 
   /* Sort symbols so that symbols with the same program space are next
      to each other.  */
-  qsort (VEC_address (symbolp, sym_classes),
-	 VEC_length (symbolp, sym_classes),
-	 sizeof (symbolp),
-	 compare_symbols);
+  std::sort (sym_classes->begin (), sym_classes->end (),
+	     compare_symbols);
 
   info.state = self;
   info.file_symtabs = file_symtabs;
@@ -3755,7 +3716,8 @@ find_method (struct linespec_state *self, std::vector<symtab *> *file_symtabs,
      because we collect data across the program space before deciding
      what to do.  */
   last_result_len = 0;
-  for (ix = 0; VEC_iterate (symbolp, sym_classes, ix, sym); ++ix)
+  unsigned int ix = 0;
+  for (const auto &sym : *sym_classes)
     {
       struct type *t;
       struct program_space *pspace;
@@ -3771,10 +3733,9 @@ find_method (struct linespec_state *self, std::vector<symtab *> *file_symtabs,
 
       /* Handle all items from a single program space at once; and be
 	 sure not to miss the last batch.  */
-      if (ix == VEC_length (symbolp, sym_classes) - 1
+      if (ix == sym_classes->size () - 1
 	  || (pspace
-	      != SYMTAB_PSPACE (symbol_symtab (VEC_index (symbolp, sym_classes,
-							  ix + 1)))))
+	      != SYMTAB_PSPACE (symbol_symtab (sym_classes->at (ix + 1)))))
 	{
 	  /* If we did not find a direct implementation anywhere in
 	     this program space, consider superclasses.  */
@@ -3790,6 +3751,7 @@ find_method (struct linespec_state *self, std::vector<symtab *> *file_symtabs,
 
 	  superclass_vec.clear ();
 	  last_result_len = result_names.size ();
+	  ++ix;
 	}
     }
 
@@ -3976,7 +3938,6 @@ find_linespec_symbols (struct linespec_state *state,
     {
       std::string klass, method;
       const char *last, *p, *scope_op;
-      VEC (symbolp) *classes;
 
       /* See if we can find a scope operator and break this symbol
 	 name into namespaces${SCOPE_OPERATOR}class_name and method_name.  */
@@ -4005,18 +3966,16 @@ find_linespec_symbols (struct linespec_state *state,
       method = last;
 
       /* Find a list of classes named KLASS.  */
-      classes = lookup_prefix_sym (state, file_symtabs, klass.c_str ());
-      struct cleanup *old_chain
-	= make_cleanup (VEC_cleanup (symbolp), &classes);
-
-      if (!VEC_empty (symbolp, classes))
+      std::vector<symbol *> classes
+	= lookup_prefix_sym (state, file_symtabs, klass.c_str ());
+      if (!classes.empty ())
 	{
 	  /* Now locate a list of suitable methods named METHOD.  */
 	  TRY
 	    {
 	      find_method (state, file_symtabs,
 			   klass.c_str (), method.c_str (),
-			   classes, symbols, minsyms);
+			   &classes, symbols, minsyms);
 	    }
 
 	  /* If successful, we're done.  If NOT_FOUND_ERROR
@@ -4028,8 +3987,6 @@ find_linespec_symbols (struct linespec_state *state,
 	    }
 	  END_CATCH
 	}
-
-      do_cleanups (old_chain);
     }
 }
 
