@@ -273,7 +273,13 @@ extern int ppc_force_relocation (struct fix *);
      || (FIX)->fx_r_type == BFD_RELOC_PPC64_HIGHER_S		\
      || (FIX)->fx_r_type == BFD_RELOC_PPC64_HIGHEST		\
      || (FIX)->fx_r_type == BFD_RELOC_PPC64_HIGHEST_S		\
-     || (FIX)->fx_r_type == BFD_RELOC_PPC_16DX_HA))
+     || (FIX)->fx_r_type == BFD_RELOC_PPC64_ADDR16_HIGHER34	\
+     || (FIX)->fx_r_type == BFD_RELOC_PPC64_ADDR16_HIGHERA34	\
+     || (FIX)->fx_r_type == BFD_RELOC_PPC64_ADDR16_HIGHEST34	\
+     || (FIX)->fx_r_type == BFD_RELOC_PPC64_ADDR16_HIGHESTA34	\
+     || (FIX)->fx_r_type == BFD_RELOC_PPC_16DX_HA		\
+     || (FIX)->fx_r_type == BFD_RELOC_PPC64_D34			\
+     || (FIX)->fx_r_type == BFD_RELOC_PPC64_D28))
 #endif
 
 #define TC_VALIDATE_FIX_SUB(FIX, SEG) 0

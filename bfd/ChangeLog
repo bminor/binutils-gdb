@@ -1,3 +1,35 @@
+2019-05-24  Alan Modra  <amodra@gmail.com>
+
+	* reloc.c (BFD_RELOC_PPC64_D34, BFD_RELOC_PPC64_D34_LO),
+	(BFD_RELOC_PPC64_D34_HI30, BFD_RELOC_PPC64_D34_HA30),
+	(BFD_RELOC_PPC64_PCREL34, BFD_RELOC_PPC64_GOT_PCREL34),
+	(BFD_RELOC_PPC64_PLT_PCREL34),
+	(BFD_RELOC_PPC64_ADDR16_HIGHER34, BFD_RELOC_PPC64_ADDR16_HIGHERA34),
+	(BFD_RELOC_PPC64_ADDR16_HIGHEST34, BFD_RELOC_PPC64_ADDR16_HIGHESTA34),
+	(BFD_RELOC_PPC64_REL16_HIGHER34, BFD_RELOC_PPC64_REL16_HIGHERA34),
+	(BFD_RELOC_PPC64_REL16_HIGHEST34, BFD_RELOC_PPC64_REL16_HIGHESTA34),
+	(BFD_RELOC_PPC64_D28, BFD_RELOC_PPC64_PCREL28): New reloc enums.
+	* elf64-ppc.c (PNOP): Define.
+	(ppc64_elf_howto_raw): Add reloc howtos for new relocations.
+	(ppc64_elf_reloc_type_lookup): Translate new bfd reloc numbers.
+	(ppc64_elf_ha_reloc): Adjust addend for highera34 and highesta34
+	relocs.
+	(ppc64_elf_prefix_reloc): New function.
+	(struct ppc_link_hash_table): Add notoc_plt.
+	(is_branch_reloc): Add R_PPC64_PLTCALL_NOTOC.
+	(is_plt_seq_reloc): Add R_PPC64_PLT_PCREL34,
+	R_PPC64_PLT_PCREL34_NOTOC, and R_PPC64_PLTSEQ_NOTOC.
+	(ppc64_elf_check_relocs): Handle pcrel got and plt relocs.  Set
+	has_pltcall for section on seeing R_PPC64_PLTCALL_NOTOC.  Handle
+	possible need for dynamic relocs on non-pcrel powerxx relocs.
+	(dec_dynrel_count): Handle non-pcrel powerxx relocs.
+	(ppc64_elf_inline_plt): Handle R_PPC64_PLTCALL_NOTOC.
+	(toc_adjusting_stub_needed): Likewise.
+	(ppc64_elf_tls_optimize): Handle R_PPC64_PLTSEQ_NOTOC.
+	(ppc64_elf_relocate_section): Handle new powerxx relocs.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2019-05-23  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* config.bfd (targ_cpu): Process bpf-*-none only if BFD64.

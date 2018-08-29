@@ -1,3 +1,23 @@
+2019-05-24  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (ppc_elf_suffix): Support @pcrel, @got@pcrel,
+	@plt@pcrel, @higher34, @highera34, @highest34, and @highesta34.
+	(fixup_size): Handle new powerxx relocs.
+	(md_assemble): Warn for @pcrel on non-prefix insns.
+	Accept @l, @h and @ha on prefix insns, and infer reloc without
+	any @ suffix.  Translate powerxx relocs to suit DQ and DS field
+	instructions.  Include operand tests as well as opcode test to
+	translate BFD_RELOC_HI16_S to BFD_RELOC_PPC_16DX_HA.
+	(ppc_fix_adjustable): Return false for pcrel GOT and PLT relocs.
+	(md_apply_fix): Handle new powerxx relocs.
+	* config/tc-ppc.h (TC_FORCE_RELOCATION_SUB_LOCAL): Accept
+	BFD_RELOC_PPC64_ADDR16_HIGHER34, BFD_RELOC_PPC64_ADDR16_HIGHERA34,
+	BFD_RELOC_PPC64_ADDR16_HIGHEST34, BFD_RELOC_PPC64_ADDR16_HIGHESTA34,
+	BFD_RELOC_PPC64_D34, and BFD_RELOC_PPC64_D28.
+	* testsuite/gas/ppc/prefix-reloc.d,
+	* testsuite/gas/ppc/prefix-reloc.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
 2019-05-24  Peter Bergner  <bergner@linux.ibm.com>
 	    Alan Modra  <amodra@gmail.com>
 
