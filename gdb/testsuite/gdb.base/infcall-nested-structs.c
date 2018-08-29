@@ -17,13 +17,13 @@
 
 /* This file is used for testing GDBs ability to pass structures to, and
    return structures from, functions.  All of the structures in this test
-   are special in that they are small structures containing only 1 or 2
+   are special in that they are small structures containing from 1 up to 5
    scalar fields, the fields can be inside nested structures, and there can
    be empty structures around too.
 
-   This test was originally written for RiscV which has some special ABI
-   rules for structures like these, however, there should be no harm in
-   running these tests on other targets, though in many cases the
+   This test is specifically written for RiscV and Aarch64, which both have
+   special ABI rules for structures like these, however, there should be no harm
+   in running these tests on other targets, though in many cases the
    structures will treated no differently to the structures already covered
    in the structs.exp test script.  */
 
@@ -61,69 +61,133 @@ typedef long double _Complex tldc;
 #define REF_VAL(NAME) struct NAME ref_val_ ## NAME
 #define ES(NAME) struct { } NAME
 
+/* Test is either for a single type or two differing types.  */
 #if defined tA && ! defined tB
+#define tB tA
+#endif
+#if ! defined tB
+#error "Incorrect configuration of tA and tB defines"
+#endif
 
 /* Structures with a single field nested to various depths, along with
    some empty structures.  */
-struct struct01 { ES(es1); struct { struct { tA a; } s1; } s2; };
-struct struct02 { tA a; struct { struct { ES(es1); } s1; } s2; };
-struct struct03 { struct { struct { ES(es1); } s1; } s2; ES(es1); struct { struct { tA a; } s3; } s4;};
-struct struct04 { ES(es1); ES(es2); tA a; ES(es3); };
+struct struct_01_01 { ES(es1); struct { struct { tA a; } s1; } s2; };
+struct struct_01_02 { tA a; struct { struct { ES(es1); } s1; } s2; };
+struct struct_01_03 { struct { struct { ES(es1); } s1; } s2; ES(es1); struct { struct { tA a; } s3; } s4;};
+struct struct_01_04 { ES(es1); ES(es2); tA a; ES(es3); };
 
-int cmp_struct01 (struct struct01 a, struct struct01 b)
+/* Structures with two fields nested to various depths, along with
+   some empty structures.  */
+struct struct_02_01 { ES(es1); struct { struct { tA a; tB b; } s1; } s2; };
+struct struct_02_02 { tA a; struct { struct { ES(es1); } s1; } s2; tB b; };
+struct struct_02_03 { struct { struct { ES(es1); } s1; } s2; ES(es1); struct { struct { tA a; } s3; } s4; struct { struct { tB b; } s5; } s6;};
+struct struct_02_04 { ES(es1); ES(es2); tA a; ES(es3); tB b; };
+
+/* Structures with four fields nested to various depths, along with
+   some empty structures.  */
+struct struct_04_01 { ES(es1); struct { struct { tA a; tB b; tA c; tB d; } s1; } s2; };
+struct struct_04_02 { tA a; struct { struct { ES(es1); } s1; } s2; tB b; struct { struct { ES(es1); } s2; } s3; tA c; struct { struct { ES(es2); } s4; } s5; tB d;};
+struct struct_04_03 { struct { struct { ES(es1); } s1; } s2; ES(es1); struct { struct { tA a; } s3; } s4; struct { struct { tB b; } s5; } s6; struct { struct { tA c; } s7; } s8; struct { struct { tB d; } s9; } s10;};
+struct struct_04_04 { ES(es1); ES(es2); tA a; ES(es3); tB b; ES(es4); tA c; ES(es5); tB d; };
+
+/* Structures with five fields nested to various depths, along with
+   some empty structures.  */
+struct struct_05_01 { ES(es1); struct { struct { tA a; tB b; tA c; tB d; tA e; } s1; } s2; };
+struct struct_05_02 { tA a; struct { struct { ES(es1); } s1; } s2; tB b; struct { struct { ES(es1); } s2; } s3; tA c; struct { struct { ES(es2); } s4; } s5; tB d; struct { struct { ES(es2); } s6; } s7; tB e;};
+struct struct_05_03 { struct { struct { ES(es1); } s1; } s2; ES(es1); struct { struct { tA a; } s3; } s4; struct { struct { tB b; } s5; } s6; struct { struct { tA c; } s7; } s8; struct { struct { tB d; } s9; } s10; struct { struct { tA e; } s11; } s12;};
+struct struct_05_04 { ES(es1); ES(es2); tA a; ES(es3); tB b; ES(es4); tA c; ES(es5); tB d; ES(es6); tA e; };
+
+int cmp_struct_01_01 (struct struct_01_01 a, struct struct_01_01 b)
 { return a.s2.s1.a == b.s2.s1.a; }
 
-int cmp_struct02 (struct struct02 a, struct struct02 b)
+int cmp_struct_01_02 (struct struct_01_02 a, struct struct_01_02 b)
 { return a.a == b.a; }
 
-int cmp_struct03 (struct struct03 a, struct struct03 b)
+int cmp_struct_01_03 (struct struct_01_03 a, struct struct_01_03 b)
 { return a.s4.s3.a == b.s4.s3.a; }
 
-int cmp_struct04 (struct struct04 a, struct struct04 b)
+int cmp_struct_01_04 (struct struct_01_04 a, struct struct_01_04 b)
 { return a.a == b.a; }
 
-REF_VAL(struct01) = { {}, { { 'a' } } };
-REF_VAL(struct02) = { 'a', { { {} } } };
-REF_VAL(struct03) = { { { {} } }, {}, { { 'a' } } };
-REF_VAL(struct04) = { {}, {}, 'a', {} };
+int cmp_struct_02_01 (struct struct_02_01 a, struct struct_02_01 b)
+{ return a.s2.s1.a == b.s2.s1.a && a.s2.s1.b == a.s2.s1.b; }
 
-#elif defined tA && defined tB
+int cmp_struct_02_02 (struct struct_02_02 a, struct struct_02_02 b)
+{ return a.a == b.a && a.b == b.b; }
 
-/* These structures all have 2 fields, nested to various depths, along
-   with some empty structures.  */
-struct struct01 { struct { tA a; } s1; ES (e1); struct { struct { tB b; } s2;} s3;};
-struct struct02 { struct { struct { tA a; } s1; ES(e1); } s2; struct { struct { tB b; } s3;} s4; ES(e2);};
-struct struct03 { ES(e1); tA a; ES (e2); struct { struct { tB b; } s2;} s3;};
-struct struct04 { ES(e1); ES (e2); struct { struct { struct { tA a; struct { ES(e3); } s1; tB b; } s2; } s3;} s4;};
+int cmp_struct_02_03 (struct struct_02_03 a, struct struct_02_03 b)
+{ return a.s4.s3.a == b.s4.s3.a && a.s6.s5.b == b.s6.s5.b; }
 
-int cmp_struct01 (struct struct01 a, struct struct01 b)
-{ return a.s1.a == b.s1.a && a.s3.s2.b == b.s3.s2.b; }
+int cmp_struct_02_04 (struct struct_02_04 a, struct struct_02_04 b)
+{ return a.a == b.a && a.b == b.b; }
 
-int cmp_struct02 (struct struct02 a, struct struct02 b)
-{ return a.s2.s1.a == b.s2.s1.a && a.s4.s3.b == b.s4.s3.b; }
+int cmp_struct_04_01 (struct struct_04_01 a, struct struct_04_01 b)
+{ return a.s2.s1.a == b.s2.s1.a && a.s2.s1.b == a.s2.s1.b
+	 && a.s2.s1.c == b.s2.s1.c && a.s2.s1.d == a.s2.s1.d; }
 
-int cmp_struct03 (struct struct03 a, struct struct03 b)
-{ return a.a == b.a && a.s3.s2.b == b.s3.s2.b; }
+int cmp_struct_04_02 (struct struct_04_02 a, struct struct_04_02 b)
+{ return a.a == b.a && a.b == b.b && a.c == b.c && a.d == b.d; }
 
-int cmp_struct04 (struct struct04 a, struct struct04 b)
-{ return a.s4.s3.s2.a == b.s4.s3.s2.a && a.s4.s3.s2.b == b.s4.s3.s2.b; }
+int cmp_struct_04_03 (struct struct_04_03 a, struct struct_04_03 b)
+{ return a.s4.s3.a == b.s4.s3.a && a.s6.s5.b == b.s6.s5.b
+	 && a.s8.s7.c == b.s8.s7.c && a.s10.s9.d == b.s10.s9.d; }
 
-REF_VAL(struct01) = { { 'a' }, {}, { { '1' } } };
-REF_VAL(struct02) = { { { 'a' }, {} }, { { '1' } }, {} };
-REF_VAL(struct03) = { {}, 'a', {}, { { '1' } } };
-REF_VAL(struct04) = { {}, {}, { { { 'a', {}, '1'} } } } ;
+int cmp_struct_04_04 (struct struct_04_04 a, struct struct_04_04 b)
+{ return a.a == b.a && a.b == b.b && a.c == b.c && a.d == b.d; }
 
-#else
+int cmp_struct_05_01 (struct struct_05_01 a, struct struct_05_01 b)
+{ return a.s2.s1.a == b.s2.s1.a && a.s2.s1.b == a.s2.s1.b
+	 && a.s2.s1.c == b.s2.s1.c && a.s2.s1.d == a.s2.s1.d
+	 && a.s2.s1.e == b.s2.s1.e; }
 
-#error "Incorrect configuration of tA and tB defines"
+int cmp_struct_05_02 (struct struct_05_02 a, struct struct_05_02 b)
+{ return a.a == b.a && a.b == b.b && a.c == b.c && a.d == b.d && a.e == b.e; }
 
-#endif
+int cmp_struct_05_03 (struct struct_05_03 a, struct struct_05_03 b)
+{ return a.s4.s3.a == b.s4.s3.a && a.s6.s5.b == b.s6.s5.b
+	 && a.s8.s7.c == b.s8.s7.c && a.s10.s9.d == b.s10.s9.d
+	 && a.s12.s11.e == b.s12.s11.e; }
+
+int cmp_struct_05_04 (struct struct_05_04 a, struct struct_05_04 b)
+{ return a.a == b.a && a.b == b.b && a.c == b.c && a.d == b.d && a.e == b.e; }
+
+REF_VAL(struct_01_01) = { {}, { { 'a' } } };
+REF_VAL(struct_01_02) = { 'a', { { {} } } };
+REF_VAL(struct_01_03) = { { { {} } }, {}, { { 'a' } } };
+REF_VAL(struct_01_04) = { {}, {}, 'a', {} };
+
+REF_VAL(struct_02_01) = { {}, { { 'a', 'b' } } };
+REF_VAL(struct_02_02) = { 'a', { { {} } }, 'b' };
+REF_VAL(struct_02_03) = { { { {} } }, {}, { { 'a' } }, { { 'b' } } };
+REF_VAL(struct_02_04) = { {}, {}, 'a', {}, 'b' };
+
+REF_VAL(struct_04_01) = { {}, { { 'a', 'b', 'c', 'd' } } };
+REF_VAL(struct_04_02) = { 'a', { { {} } }, 'b', { { {} } }, 'c', { { {} } }, 'd' };
+REF_VAL(struct_04_03) = { { { {} } }, {}, { { 'a' } }, { { 'b' } }, { { 'c' } }, { { 'd' } } };
+REF_VAL(struct_04_04) = { {}, {}, 'a', {}, 'b', {}, 'c', {}, 'd' };
+
+REF_VAL(struct_05_01) = { {}, { { 'a', 'b', 'c', 'd', 'e' } } };
+REF_VAL(struct_05_02) = { 'a', { { {} } }, 'b', { { {} } }, 'c', { { {} } }, 'd', { { {} } }, 'e' };
+REF_VAL(struct_05_03) = { { { {} } }, {}, { { 'a' } }, { { 'b' } }, { { 'c' } }, { { 'd' } }, { { 'e' } } };
+REF_VAL(struct_05_04) = { {}, {}, 'a', {}, 'b', {}, 'c', {}, 'd', {}, 'e' };
 
 /* Create all of the functions GDB will call to check functionality.  */
-MAKE_CHECK_FUNCS(struct01)
-MAKE_CHECK_FUNCS(struct02)
-MAKE_CHECK_FUNCS(struct03)
-MAKE_CHECK_FUNCS(struct04)
+MAKE_CHECK_FUNCS(struct_01_01)
+MAKE_CHECK_FUNCS(struct_01_02)
+MAKE_CHECK_FUNCS(struct_01_03)
+MAKE_CHECK_FUNCS(struct_01_04)
+MAKE_CHECK_FUNCS(struct_02_01)
+MAKE_CHECK_FUNCS(struct_02_02)
+MAKE_CHECK_FUNCS(struct_02_03)
+MAKE_CHECK_FUNCS(struct_02_04)
+MAKE_CHECK_FUNCS(struct_04_01)
+MAKE_CHECK_FUNCS(struct_04_02)
+MAKE_CHECK_FUNCS(struct_04_03)
+MAKE_CHECK_FUNCS(struct_04_04)
+MAKE_CHECK_FUNCS(struct_05_01)
+MAKE_CHECK_FUNCS(struct_05_02)
+MAKE_CHECK_FUNCS(struct_05_03)
+MAKE_CHECK_FUNCS(struct_05_04)
 
 #define CALL_LINE(NAME) val += check_arg_ ## NAME (rtn_str_ ## NAME ())
 
@@ -132,10 +196,22 @@ call_all ()
 {
   int val;
 
-  CALL_LINE(struct01);
-  CALL_LINE(struct02);
-  CALL_LINE(struct03);
-  CALL_LINE(struct04);
+  CALL_LINE(struct_01_01);
+  CALL_LINE(struct_01_02);
+  CALL_LINE(struct_01_03);
+  CALL_LINE(struct_01_04);
+  CALL_LINE(struct_02_01);
+  CALL_LINE(struct_02_02);
+  CALL_LINE(struct_02_03);
+  CALL_LINE(struct_02_04);
+  CALL_LINE(struct_04_01);
+  CALL_LINE(struct_04_02);
+  CALL_LINE(struct_04_03);
+  CALL_LINE(struct_04_04);
+  CALL_LINE(struct_05_01);
+  CALL_LINE(struct_05_02);
+  CALL_LINE(struct_05_03);
+  CALL_LINE(struct_05_04);
 
   return (val != 4);
 }

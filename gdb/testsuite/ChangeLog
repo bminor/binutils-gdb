@@ -1,3 +1,48 @@
+2018-08-29  Alan Hayward  <alan.hayward@arm.com>
+
+	* gdb.base/infcall-nested-structs.c (struct struct01): Remove.
+	(struct struct02): Likewise.
+	(struct struct03): Likewise.
+	(struct struct04): Likewise.
+	(struct struct_01_01): New struct.
+	(struct struct_01_02): Likewise.
+	(struct struct_01_03): Likewise.
+	(struct struct_01_04): Likewise.
+	(struct struct_02_01): Likewise.
+	(struct struct_02_02): Likewise.
+	(struct struct_02_03): Likewise.
+	(struct struct_02_04): Likewise.
+	(struct struct_04_01): Likewise.
+	(struct struct_04_02): Likewise.
+	(struct struct_04_03): Likewise.
+	(struct struct_04_04): Likewise.
+	(struct struct_05_01): Likewise.
+	(struct struct_05_02): Likewise.
+	(struct struct_05_03): Likewise.
+	(struct struct_05_04): Likewise.
+	(cmp_struct01): Remove function.
+	(cmp_struct02): Likewise.
+	(cmp_struct03): Likewise.
+	(cmp_struct04): Likewise.
+	(cmp_struct_01_01): Add Function.
+	(cmp_struct_01_02): Likewise.
+	(cmp_struct_01_03): Likewise.
+	(cmp_struct_01_04): Likewise.
+	(cmp_struct_02_01): Likewise.
+	(cmp_struct_02_02): Likewise.
+	(cmp_struct_02_03): Likewise.
+	(cmp_struct_02_04): Likewise.
+	(cmp_struct_04_01): Likewise.
+	(cmp_struct_04_02): Likewise.
+	(cmp_struct_04_03): Likewise.
+	(cmp_struct_04_04): Likewise.
+	(cmp_struct_05_01): Likewise.
+	(cmp_struct_05_02): Likewise.
+	(cmp_struct_05_03): Likewise.
+	(cmp_struct_05_04): Likewise.
+	(call_all): Add new structs.
+	* gdb.base/infcall-nested-structs.exp: Likewise.
+
 2018-08-27  Jan Vrany  <jan.vrany@fit.cvut.cz>
 
 	* gdb.python/py-framefilter-mi.exp: Update regexp to

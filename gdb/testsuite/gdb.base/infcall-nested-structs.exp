@@ -102,7 +102,10 @@ proc start_nested_structs_test { types } {
 proc run_tests {} {
     global gdb_prompt
 
-    foreach {name} {struct01 struct02 struct03 struct04} {
+    foreach {name} {struct_01_01 struct_01_02 struct_01_03 struct_01_04
+                    struct_02_01 struct_02_02 struct_02_03 struct_02_04
+                    struct_04_01 struct_04_02 struct_04_03 struct_04_04
+                    struct_05_01 struct_05_02 struct_05_03 struct_05_04} {
 	gdb_test "p/d check_arg_${name} (ref_val_${name})" "= 1"
 
 	set refval [ get_valueof "" "ref_val_${name}" "" ]
