@@ -1,4 +1,4 @@
-/* C language support for compilation.
+/* C/C++ language support for compilation.
 
    Copyright (C) 2014-2018 Free Software Foundation, Inc.
 
@@ -20,6 +20,7 @@
 #include "defs.h"
 #include "compile-internal.h"
 #include "compile-c.h"
+#include "compile-cplus.h"
 #include "compile.h"
 #include "gdb-dlfcn.h"
 #include "c-lang.h"
@@ -67,25 +68,22 @@ c_get_range_decl_name (const struct dynamic_prop *prop)
 
 
 
-/* Helper function for c_get_compile_context.  Open the GCC front-end
-   shared library and return the symbol specified by the current
-   GCC_C_FE_CONTEXT.  */
+/* Load the plug-in library FE_LIBCC and return the initialization function
+   FE_CONTEXT.  */
 
-static gcc_c_fe_context_function *
-load_libcc (void)
+template <typename FUNCTYPE>
+FUNCTYPE *
+load_libcompile (const char *fe_libcc, const char *fe_context)
 {
-  gcc_c_fe_context_function *func;
+  FUNCTYPE *func;
 
-   /* gdb_dlopen will call error () on an error, so no need to check
-      value.  */
-  gdb_dlhandle_up handle = gdb_dlopen (STRINGIFY (GCC_C_FE_LIBCC));
-  func = (gcc_c_fe_context_function *) gdb_dlsym (handle,
-						  STRINGIFY (GCC_C_FE_CONTEXT));
+  /* gdb_dlopen will call error () on an error, so no need to check
+     value.  */
+  gdb_dlhandle_up handle = gdb_dlopen (fe_libcc);
+  func = (FUNCTYPE *) gdb_dlsym (handle, fe_context);
 
   if (func == NULL)
-    error (_("could not find symbol %s in library %s"),
-	   STRINGIFY (GCC_C_FE_CONTEXT),
-	   STRINGIFY (GCC_C_FE_LIBCC));
+    error (_("could not find symbol %s in library %s"), fe_context, fe_libcc);
 
   /* Leave the library open.  */
   handle.release ();
@@ -93,28 +91,57 @@ load_libcc (void)
 }
 
 /* Return the compile instance associated with the current context.
-   This function calls the symbol returned from the load_libcc
-   function.  This will provide the gcc_c_context.  */
+   This function calls the symbol returned from the load_libcompile
+   function.  FE_LIBCC is the library to load.  BASE_VERSION is the
+   base compile plug-in version we support.  API_VERSION is the
+   API version supported.  */
 
+template <typename INSTTYPE, typename FUNCTYPE, typename CTXTYPE,
+	  typename BASE_VERSION_TYPE, typename API_VERSION_TYPE>
 compile_instance *
-c_get_compile_context (void)
+get_compile_context (const char *fe_libcc, const char *fe_context,
+		     BASE_VERSION_TYPE base_version,
+		     API_VERSION_TYPE api_version)
 {
-  static gcc_c_fe_context_function *func;
-
-  struct gcc_c_context *context;
+  static FUNCTYPE *func;
+  static CTXTYPE *context;
 
   if (func == NULL)
     {
-      func = load_libcc ();
+      func = load_libcompile<FUNCTYPE> (fe_libcc, fe_context);
       gdb_assert (func != NULL);
     }
 
-  context = (*func) (GCC_FE_VERSION_0, GCC_C_FE_VERSION_0);
+  context = (*func) (base_version, api_version);
   if (context == NULL)
     error (_("The loaded version of GCC does not support the required version "
 	     "of the API."));
 
-  return new compile_c_instance (context);
+  return new INSTTYPE (context);
+}
+
+/* A C-language implementation of get_compile_context.  */
+
+compile_instance *
+c_get_compile_context ()
+{
+  return get_compile_context
+    <compile_c_instance, gcc_c_fe_context_function, gcc_c_context,
+    gcc_base_api_version, gcc_c_api_version>
+    (STRINGIFY (GCC_C_FE_LIBCC), STRINGIFY (GCC_C_FE_CONTEXT),
+     GCC_FE_VERSION_0, GCC_C_FE_VERSION_0);
+}
+
+/* A C++-language implementation of get_compile_context.  */
+
+compile_instance *
+cplus_get_compile_context ()
+{
+  return get_compile_context
+    <compile_cplus_instance, gcc_cp_fe_context_function, gcc_cp_context,
+     gcc_base_api_version, gcc_cp_api_version>
+    (STRINGIFY (GCC_CP_FE_LIBCC), STRINGIFY (GCC_CP_FE_CONTEXT),
+     GCC_FE_VERSION_0, GCC_CP_FE_VERSION_0);
 }
 
 
@@ -384,6 +411,113 @@ struct c_add_input
   }
 };
 
+/* C++-language policy to emit a push user expression pragma into
+   BUF.  */
+
+struct cplus_push_user_expression
+{
+  void push_user_expression (struct ui_file *buf)
+  {
+    fputs_unfiltered ("#pragma GCC push_user_expression\n", buf);
+  }
+};
+
+/* C++-language policy to emit a pop user expression pragma into BUF.  */
+
+struct cplus_pop_user_expression
+{
+  void pop_user_expression (struct ui_file *buf)
+  {
+    fputs_unfiltered ("#pragma GCC pop_user_expression\n", buf);
+  }
+};
+
+/* C++-language policy to construct a code header for a block of code.
+   Takes a scope TYPE argument which selects the correct header to
+   insert into BUF.  */
+
+struct cplus_add_code_header
+{
+  void add_code_header (enum compile_i_scope_types type, struct ui_file *buf)
+  {
+  switch (type)
+    {
+    case COMPILE_I_SIMPLE_SCOPE:
+      fputs_unfiltered ("void "
+			GCC_FE_WRAPPER_FUNCTION
+			" (struct "
+			COMPILE_I_SIMPLE_REGISTER_STRUCT_TAG
+			" *"
+			COMPILE_I_SIMPLE_REGISTER_ARG_NAME
+			") {\n",
+			buf);
+      break;
+
+    case COMPILE_I_PRINT_ADDRESS_SCOPE:
+    case COMPILE_I_PRINT_VALUE_SCOPE:
+      fputs_unfiltered (
+			"#include <cstring>\n"
+			"#include <bits/move.h>\n"
+			"void "
+			GCC_FE_WRAPPER_FUNCTION
+			" (struct "
+			COMPILE_I_SIMPLE_REGISTER_STRUCT_TAG
+			" *"
+			COMPILE_I_SIMPLE_REGISTER_ARG_NAME
+			", "
+			COMPILE_I_PRINT_OUT_ARG_TYPE
+			" "
+			COMPILE_I_PRINT_OUT_ARG
+			") {\n",
+			buf);
+      break;
+
+    case COMPILE_I_RAW_SCOPE:
+      break;
+
+    default:
+      gdb_assert_not_reached (_("Unknown compiler scope reached."));
+    }
+  }
+};
+
+/* C++-language policy to emit the user code snippet INPUT into BUF based on
+   the scope TYPE.  */
+
+struct cplus_add_input
+{
+  void add_input (enum compile_i_scope_types type, const char *input,
+		  struct ui_file *buf)
+  {
+    switch (type)
+      {
+      case COMPILE_I_PRINT_VALUE_SCOPE:
+      case COMPILE_I_PRINT_ADDRESS_SCOPE:
+	fprintf_unfiltered
+	  (buf,
+	   /* "auto" strips ref- and cv- qualifiers, so we need to also strip
+	      those from COMPILE_I_EXPR_PTR_TYPE.  */
+	   "auto " COMPILE_I_EXPR_VAL " = %s;\n"
+	   "typedef "
+	     "std::add_pointer<std::remove_cv<decltype (%s)>::type>::type "
+	     " __gdb_expr_ptr;\n"
+	   "__gdb_expr_ptr " COMPILE_I_EXPR_PTR_TYPE ";\n"
+	   "std::memcpy (" COMPILE_I_PRINT_OUT_ARG ", %s ("
+	   COMPILE_I_EXPR_VAL "),\n"
+	   "\tsizeof (*" COMPILE_I_EXPR_PTR_TYPE "));\n"
+	   ,input, input,
+	   (type == COMPILE_I_PRINT_ADDRESS_SCOPE
+	    ? "__builtin_addressof" : ""));
+	break;
+
+      default:
+	fputs_unfiltered (input, buf);
+	break;
+      }
+    fputs_unfiltered ("\n", buf);
+  }
+};
+
 /* A host class representing a compile program.
 
    CompileInstanceType is the type of the compile_instance for the
@@ -513,12 +647,17 @@ private:
   struct gdbarch *m_arch;
 };
 
-/* Type used for C program computations.  */
+/* The types used for C and C++ program computations.  */
 
 typedef compile_program<compile_c_instance,
 			c_push_user_expression, pop_user_expression_nop,
 			c_add_code_header, c_add_code_footer,
 			c_add_input> c_compile_program;
+
+typedef compile_program<compile_cplus_instance,
+			cplus_push_user_expression, cplus_pop_user_expression,
+			cplus_add_code_header, c_add_code_footer,
+			cplus_add_input> cplus_compile_program;
 
 /* The la_compute_program method for C.  */
 
@@ -531,6 +670,22 @@ c_compute_program (compile_instance *inst,
 {
   compile_c_instance *c_inst = static_cast<compile_c_instance *> (inst);
   c_compile_program program (c_inst, gdbarch);
+
+  return program.compute (input, expr_block, expr_pc);
+}
+
+/* The la_compute_program method for C++.  */
+
+std::string
+cplus_compute_program (compile_instance *inst,
+		       const char *input,
+		       struct gdbarch *gdbarch,
+		       const struct block *expr_block,
+		       CORE_ADDR expr_pc)
+{
+  compile_cplus_instance *cplus_inst
+    = static_cast<compile_cplus_instance *> (inst);
+  cplus_compile_program program (cplus_inst, gdbarch);
 
   return program.compute (input, expr_block, expr_pc);
 }

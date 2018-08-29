@@ -164,6 +164,10 @@ protected:
 #define COMPILE_I_EXPR_VAL "__gdb_expr_val"
 #define COMPILE_I_EXPR_PTR_TYPE "__gdb_expr_ptr_type"
 
+/* A "type" to indicate a NULL type.  */
+
+const gcc_type GCC_TYPE_NONE = (gcc_type) -1;
+
 /* Call gdbarch_register_name (GDBARCH, REGNUM) and convert its result
    to a form suitable for the compiler source.  The register names
    should not clash with inferior defined macros. */

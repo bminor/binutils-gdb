@@ -317,6 +317,8 @@ SUBDIR_GCC_COMPILE_SRCS = \
 	compile/compile-c-support.c \
 	compile/compile-c-symbols.c \
 	compile/compile-c-types.c \
+	compile/compile-cplus-symbols.c \
+	compile/compile-cplus-types.c \
 	compile/compile-loc2c.c \
 	compile/compile-object-load.c \
 	compile/compile-object-run.c
@@ -1464,10 +1466,12 @@ HFILES_NO_SRCDIR = \
 	common/xml-utils.h \
 	compile/compile.h \
 	compile/compile-c.h \
+	compile/compile-cplus.h \
 	compile/compile-internal.h \
 	compile/compile-object-load.h \
 	compile/compile-object-run.h \
 	compile/gcc-c-plugin.h \
+	compile/gcc-cp-plugin.h \
 	config/nm-linux.h \
 	config/nm-nto.h \
 	config/djgpp/langinfo.h \

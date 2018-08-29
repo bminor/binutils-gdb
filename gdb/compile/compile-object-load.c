@@ -459,7 +459,8 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
       if (function != NULL
 	  && (BLOCK_SUPERBLOCK (function_block)
 	      == BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK))
-	  && (strcmp (SYMBOL_LINKAGE_NAME (function), GCC_FE_WRAPPER_FUNCTION)
+	  && (strcmp_iw (SYMBOL_LINKAGE_NAME (function),
+			 GCC_FE_WRAPPER_FUNCTION)
 	      == 0))
 	break;
     }
@@ -478,7 +479,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
   gdb_ptr_type = check_typedef (gdb_ptr_type);
   if (TYPE_CODE (gdb_ptr_type) != TYPE_CODE_PTR)
     error (_("Type of \"%s\" is not a pointer"), COMPILE_I_EXPR_PTR_TYPE);
-  gdb_type_from_ptr = TYPE_TARGET_TYPE (gdb_ptr_type);
+  gdb_type_from_ptr = check_typedef (TYPE_TARGET_TYPE (gdb_ptr_type));
 
   if (types_deeply_equal (gdb_type, gdb_type_from_ptr))
     {
@@ -741,6 +742,8 @@ compile_object_load (const compile_file_names &file_names,
 	      ? mst_unknown : MSYMBOL_TYPE (bmsym.minsym))
 	{
 	case mst_text:
+	case mst_bss:
+	case mst_data:
 	  sym->value = BMSYMBOL_VALUE_ADDRESS (bmsym);
 	  if (compile_debug)
 	    fprintf_unfiltered (gdb_stdlog,

@@ -1,3 +1,8 @@
+2018-08-29  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.texinfo (Compiling and injecting code in GDB): Document
+	set/show "compile-oracle" and "compile-cplus-types" commands.
+
 2018-08-22  Jan Vrany  <jan.vrany@fit.cvut.cz>
 
 	* gdb.texinfo (The -stack-list-frames Command): Update description

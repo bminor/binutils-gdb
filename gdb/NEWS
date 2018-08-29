@@ -3,6 +3,14 @@
 
 *** Changes since GDB 8.2
 
+* GDB now has experimental support for the compilation and injection of
+  C++ source code into the inferior.  This beta release does not include
+  support for several language features, such as templates, constructors,
+  and operators.
+
+  This feature requires GCC 7.1 or higher built with libcp1.so
+  (the C++ plug-in).
+
 * GDB and GDBserver now support IPv6 connections.  IPv6 addresses
   can be passed using the '[ADDRESS]:PORT' notation, or the regular
   'ADDRESS:PORT' method.
@@ -14,6 +22,12 @@
   executed failed.
 
 * New commands
+
+set debug compile-cplus-types
+show debug compile-cplus-types
+  Control the display of debug output about type conversion in the
+  C++ compile feature.  Commands have no effect while compiliong
+  for other languages.
 
 frame apply [all | COUNT | -COUNT | level LEVEL...] [FLAG]... COMMAND
   Apply a command to some frames.

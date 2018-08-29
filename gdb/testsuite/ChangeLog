@@ -1,3 +1,28 @@
+2018-08-29  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.compile/compile-cplus-anonymous.cc: New file.
+	* gdb.compile/compile-cplus-anonymous.exp: New file.
+	* gdb.compile/compile-cplus-array-decay.cc: New file.
+	* gdb.compile/compile-cplus-array-decay.exp: New file.
+	* gdb.compile/compile-cplus-inherit.cc: New file.
+	* gdb.compile/compile-cplus-inherit.exp: New file.
+	* gdb.compile/compile-cplus-member.cc: New file.
+	* gdb.compile/compile-cplus-member.exp: New file.
+	* gdb.compile/compile-cplus-method.cc: New file.
+	* gdb.compile/compile-cplus-method.exp: New file.
+	* gdb.compile/compile-cplus-mod.c: "New" file.
+	* gdb.compile/compile-cplus-namespace.cc: New file.
+	* gdb.compile/compile-cplus-namespace.exp: New file.
+	* gdb.compile/compile-cplus-nested.cc: New file.
+	* gdb.compile/compile-cplus-nested.exp: New file.
+	* gdb.compile/compile-cplus-print.c: "New" file.
+	* gdb.compile/compile-cplus-print.exp: "New" file.
+	* gdb.compile/compile-cplus-virtual.cc: New file.
+	* gdb.compile/compile-cplus-virtual.exp: New file.
+	* gdb.compile/compile-cplus.c: "New" file.
+	* gdb.compile/compile-cplus.exp: "New" file.
+	* lib/compile-support.exp: New file.
+
 2018-08-16  Gary Benson <gbenson@redhat.com>
 
 	PR gdb/13000:

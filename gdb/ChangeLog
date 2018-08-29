@@ -1,5 +1,34 @@
 2018-08-29  Keith Seitz  <keiths@redhat.com>
 
+	* Makefile.in (SUBDIR_GCC_COMPILE_SRCS): Add compile-cplus-symbols.c
+	and compile-cplus-types.c.
+	(HFILES_NO_SRCDIR): Add gcc-cp-plugin.h.
+	* c-lang.c (cplus_language_defn): Set C++ compile functions.
+	* c-lang.h (cplus_get_compile_context, cplus_compute_program):
+	Declare.
+	* compile/compile-c-support.c: Include compile-cplus.h.
+	(load_libcompile): Templatize.
+	(get_compile_context): "New" function.
+	(c_get_compile_context): Use get_compile_context.
+	(cplus_get_compile_context): New function.
+	(cplus_push_user_expression, cplus_pop_user_expression)
+	(cplus_add_code_header, cplus_add_input, cplus_compile_program)
+	(cplus_compute_program): Define new structs/functions.
+	* compile/compile-cplus-symmbols.c: New file.
+	* compile/compile-cplus-types.c: New file.
+	* compile/compile-cplus.h: New file.
+	* compile/compile-internal.h (debug_compile_oracle, GCC_TYPE_NONE):
+	Declare.
+	* compile/compile-object-load.c (get_out_value_type): Use
+	strncmp_iw when comparing symbol names.
+	(compile_object_load): Add mst_bss and mst_data.
+	* compile/compile.c (_initialize_compile): Remove
+	-Wno-implicit-function-declaration from `compile_args'.
+	* compile/gcc-cp-plugin.h: New file.
+	* NEWS: Mention C++ compile support and new debug options.
+
+2018-08-29  Keith Seitz  <keiths@redhat.com>
+
 	* linespec.c (collect_info::add_symbol): Make virtual.
 	(struct symbol_searcher_collect_info): New struct.
 	(symbol_searcher::find_all_symbols): New method.

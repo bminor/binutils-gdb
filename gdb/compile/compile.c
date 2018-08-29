@@ -995,7 +995,6 @@ String quoting is parsed like in shell, for example:\n\
 			 " -fPIE"
   /* We want warnings, except for some commonly happening for GDB commands.  */
 			 " -Wall "
-			 " -Wno-implicit-function-declaration"
 			 " -Wno-unused-but-set-variable"
 			 " -Wno-unused-variable"
   /* Override CU's possible -fstack-protector-strong.  */
