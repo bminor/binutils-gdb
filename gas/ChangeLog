@@ -1,3 +1,9 @@
+2018-08-29  Daniel Cederman  <cederman@gaisler.com>
+
+	* testsuite/gas/sparc/leon.d: New test.
+	* testsuite/gas/sparc/leon.s: New test.
+	* testsuite/gas/sparc/sparc.exp: Execute the pwrpsr test.
+
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
 	* config/tc-mips.c (ISA_HAS_ODD_SINGLE_FPR): Exclude CPU_GS264E.

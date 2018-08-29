@@ -65,6 +65,7 @@ if [istarget sparc*-*-*] {
         run_dump_test "ticc-imm-reg"
         run_dump_test "v8-movwr-imm"
         run_dump_test "save-args"
+        run_dump_test "leon"
 
 	set_tests_arch "v9c"
 	run_dump_test "ldtxa"
