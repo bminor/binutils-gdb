@@ -1,5 +1,12 @@
 2018-08-29  Keith Seitz  <keiths@redhat.com>
 
+	* linespec.c (collect_info::add_symbol): Make virtual.
+	(struct symbol_searcher_collect_info): New struct.
+	(symbol_searcher::find_all_symbols): New method.
+	* symtab.h (class symbol_searcher): New class.
+
+2018-08-29  Keith Seitz  <keiths@redhat.com>
+
 	* linespec.c (struct linespec) <function_symbols, label_symbols>:
 	Change to vector of block_symbol.  Update all users.
 	(struct collect_info) <symbols>: Likewise.

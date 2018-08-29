@@ -2185,4 +2185,47 @@ void completion_list_add_name (completion_tracker &tracker,
 			       const lookup_name_info &lookup_name,
 			       const char *text, const char *word);
 
+/* A simple symbol searching class.  */
+
+class symbol_searcher
+{
+public:
+  /* Returns the symbols found for the search.  */
+  const std::vector<block_symbol> &
+  matching_symbols () const
+  {
+    return m_symbols;
+  }
+
+  /* Returns the minimal symbols found for the search.  */
+  const std::vector<bound_minimal_symbol> &
+  matching_msymbols () const
+  {
+    return m_minimal_symbols;
+  }
+
+  /* Search for all symbols named NAME in LANGUAGE with DOMAIN, restricting
+     search to FILE_SYMTABS and SEARCH_PSPACE, both of which may be NULL
+     to search all symtabs and program spaces.  */
+  void find_all_symbols (const std::string &name,
+			 const struct language_defn *language,
+			 enum search_domain search_domain,
+			 std::vector<symtab *> *search_symtabs,
+			 struct program_space *search_pspace);
+
+  /* Reset this object to perform another search.  */
+  void reset ()
+  {
+    m_symbols.clear ();
+    m_minimal_symbols.clear ();
+  }
+
+private:
+  /* Matching debug symbols.  */
+  std::vector<block_symbol>  m_symbols;
+
+  /* Matching non-debug symbols.  */
+  std::vector<bound_minimal_symbol> m_minimal_symbols;
+};
+
 #endif /* !defined(SYMTAB_H) */

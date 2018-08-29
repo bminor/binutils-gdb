@@ -199,7 +199,7 @@ struct collect_info
   } result;
 
   /* Possibly add a symbol to the results.  */
-  bool add_symbol (block_symbol *bsym);
+  virtual bool add_symbol (block_symbol *bsym);
 };
 
 bool
@@ -213,6 +213,21 @@ collect_info::add_symbol (block_symbol *bsym)
   /* Continue iterating.  */
   return true;
 }
+
+/* Custom collect_info for symbol_searcher.  */
+
+struct symbol_searcher_collect_info
+  : collect_info
+{
+  bool add_symbol (block_symbol *bsym) override
+  {
+    /* Add everything.  */
+    this->result.symbols->push_back (*bsym);
+
+    /* Continue iterating.  */
+    return true;
+  }
+};
 
 /* Token types  */
 
@@ -3874,6 +3889,36 @@ symtabs_from_filename (const char *filename,
     }
 
   return result;
+}
+
+/* See symtab.h.  */
+
+void
+symbol_searcher::find_all_symbols (const std::string &name,
+				   const struct language_defn *language,
+				   enum search_domain search_domain,
+				   std::vector<symtab *> *search_symtabs,
+				   struct program_space *search_pspace)
+{
+  symbol_searcher_collect_info info;
+  struct linespec_state state;
+
+  memset (&state, 0, sizeof (state));
+  state.language = language;
+  info.state = &state;
+
+  info.result.symbols = &m_symbols;
+  info.result.minimal_symbols = &m_minimal_symbols;
+  std::vector<symtab *> all_symtabs;
+  if (search_symtabs == nullptr)
+    {
+      all_symtabs.push_back (nullptr);
+      search_symtabs = &all_symtabs;
+    }
+  info.file_symtabs = search_symtabs;
+
+  add_matching_symbols_to_info (name.c_str (), symbol_name_match_type::WILD,
+				search_domain, &info, search_pspace);
 }
 
 /* Look up a function symbol named NAME in symtabs FILE_SYMTABS.  Matching
