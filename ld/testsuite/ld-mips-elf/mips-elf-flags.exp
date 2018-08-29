@@ -320,3 +320,7 @@ good_combination { "-march=gs464 -32" "-march=gs464e -32" }	\
 		 { gs464e o32 }					\
 		 MIPS64r2 "None"				\
 		 { "Loongson MMI ASE" "Loongson CAM ASE" "Loongson EXT ASE" "Loongson EXT2 ASE" }
+good_combination { "-march=gs264e -32" "-march=gs464e -32" }	\
+		 { gs264e o32 }					\
+		 MIPS64r2 "None"				\
+		 { "Loongson MMI ASE" "Loongson CAM ASE" "Loongson EXT ASE" "Loongson EXT2 ASE" }

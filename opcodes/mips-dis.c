@@ -645,6 +645,11 @@ const struct mips_arch_choice mips_arch_choices[] =
     | ASE_LOONGSON_EXT2, mips_cp0_names_numeric, NULL, 0, mips_cp1_names_mips3264,
     mips_hwr_names_numeric },
 
+  { "g264e",   1, bfd_mach_mips_gs464e, CPU_GS264E,
+    ISA_MIPS64R2, ASE_LOONGSON_MMI | ASE_LOONGSON_CAM | ASE_LOONGSON_EXT
+    | ASE_LOONGSON_EXT2 | ASE_MSA | ASE_MSA64, mips_cp0_names_numeric, NULL,
+    0, mips_cp1_names_mips3264, mips_hwr_names_numeric },
+
   { "octeon",   1, bfd_mach_mips_octeon, CPU_OCTEON,
     ISA_MIPS64R2 | INSN_OCTEON, 0, mips_cp0_names_numeric, NULL, 0,
     mips_cp1_names_mips3264, mips_hwr_names_numeric },

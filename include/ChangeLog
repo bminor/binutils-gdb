@@ -1,5 +1,9 @@
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
+	* elf/mips.h (E_MIPS_MACH_XXX): New E_MIPS_MACH_GS264E.
+	* opcode/mips.h (CPU_XXX): New CPU_GS264E.
+
+2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
 	* elf/mips.h (E_MIPS_MACH_XXX): New E_MIPS_MACH_GS464E.
 	* opcode/mips.h (CPU_XXX): New CPU_GS464E.

@@ -1374,6 +1374,7 @@ static const unsigned int mips_isa_table[] = {
 #define CPU_LOONGSON_2F 3002
 #define CPU_GS464	3003
 #define CPU_GS464E	3004
+#define CPU_GS264E	3005
 #define CPU_OCTEON	6501
 #define CPU_OCTEONP	6601
 #define CPU_OCTEON2	6502
