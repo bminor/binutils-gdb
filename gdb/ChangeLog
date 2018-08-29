@@ -1,3 +1,20 @@
+2018-08-29  Keith Seitz  <keiths@redhat.com>
+
+	* linespec.c (symtab_vector_up): Define.
+	(struct linespec) <file_symtabs>: Change type to std::vector *.
+	Update all uses.
+	(struct collect_info) <file_symtabs>: Likewise.
+	(collect_symtabs_from_filename): Return symtab_vector_up.
+	Update all callers.
+	(decode_objc): Remove cleanup.
+	(symtab_collector::symtab_collector): Initialize `m_symtabs'.
+	(symtab_collector::release_symtabs): Return symtab_vector_up.
+	Update all callers.
+	(class symtab_collector) <m_symtabs>: Change type to symtab_vector_up.
+	Update all users.
+	(collect_symtabs_from_filename, symtabs_from_filename): Return
+	symtab_vector_up.  Update all callers.
+
 2018-08-29  Tom Tromey  <tom@tromey.com>
 
 	* csky-tdep.c (csky_analyze_prologue): Use
