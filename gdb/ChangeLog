@@ -1,3 +1,8 @@
+2018-08-31  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gnulib/Makefile.in (aclocal_m4_deps): Update according to
+	the files present in "gnulib/import/m4/".
+
 2018-08-30  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* riscv-tdep.c (riscv_insn::decode): Decode c.addi4spn, c.sd,
