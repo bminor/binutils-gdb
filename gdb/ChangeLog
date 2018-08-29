@@ -1,5 +1,13 @@
 2018-08-29  Keith Seitz  <keiths@redhat.com>
 
+	* linespec.c (struct linespec) <label_symbols>: Change type to
+	std::vector.  Update all users.
+	(find_label_symbols_in_block): Change `result' parameter to
+	std::vector.  Update all callers.
+	(find_label_symbols): Return std::vector.  Update all callers.
+
+2018-08-29  Keith Seitz  <keiths@redhat.com>
+
 	* linespec.c (struct linespec) <function_symbols>: Change type to
 	std::vector.  Update all users.
 	(struct collect_info) <function_symbols>: Likewise.

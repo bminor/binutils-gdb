@@ -123,7 +123,7 @@ struct linespec
      or both must be non-NULL.  */
   struct
   {
-    VEC (symbolp) *label_symbols;
+    std::vector<symbol *> *label_symbols;
     std::vector<symbol *> *function_symbols;
   } labels;
 };
@@ -352,7 +352,7 @@ static std::vector<symtab_and_line> decode_objc (struct linespec_state *self,
 static symtab_vector_up symtabs_from_filename
   (const char *, struct program_space *pspace);
 
-static VEC (symbolp) *find_label_symbols
+static std::vector<symbol *> *find_label_symbols
   (struct linespec_state *self, std::vector<symbol *> *function_symbols,
    std::vector<symbol *> *label_funcs_ret, const char *name,
    bool completion_mode = false);
@@ -1769,7 +1769,7 @@ linespec_parse_basic (linespec_parser *parser)
   gdb::unique_xmalloc_ptr<char> name;
   linespec_token token;
   std::vector<symbol *> symbols;
-  VEC (symbolp) *labels;
+  std::vector<symbol *> *labels;
   VEC (bound_minimal_symbol_d) *minimal_symbols;
 
   /* Get the next token.  */
@@ -2243,12 +2243,9 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
   if (ls->labels.label_symbols != NULL)
     {
       /* We have just a bunch of functions/methods or labels.  */
-      int i;
-      struct symtab_and_line sal;
-      struct symbol *sym;
-
-      for (i = 0; VEC_iterate (symbolp, ls->labels.label_symbols, i, sym); ++i)
+      for (const auto &sym : *ls->labels.label_symbols)
 	{
+	  struct symtab_and_line sal;
 	  struct program_space *pspace = SYMTAB_PSPACE (symbol_symtab (sym));
 
 	  if (symbol_to_sal (&sal, state->funfirstline, sym)
@@ -2391,7 +2388,7 @@ convert_explicit_location_to_linespec (struct linespec_state *self,
 				       struct line_offset line_offset)
 {
   std::vector<symbol *> symbols;
-  VEC (symbolp) *labels;
+  std::vector<symbol *> *labels;
   VEC (bound_minimal_symbol_d) *minimal_symbols;
 
   result->explicit_loc.func_name_match_type = fname_match_type;
@@ -2785,9 +2782,7 @@ linespec_parser_delete (void *arg)
   if (PARSER_RESULT (parser)->minimal_symbols != NULL)
     VEC_free (bound_minimal_symbol_d, PARSER_RESULT (parser)->minimal_symbols);
 
-  if (PARSER_RESULT (parser)->labels.label_symbols != NULL)
-    VEC_free (symbolp, PARSER_RESULT (parser)->labels.label_symbols);
-
+  delete PARSER_RESULT (parser)->labels.label_symbols;
   delete PARSER_RESULT (parser)->labels.function_symbols;
 
   linespec_state_destructor (PARSER_STATE (parser));
@@ -2922,20 +2917,21 @@ complete_label (completion_tracker &tracker,
 		const char *label_name)
 {
   std::vector<symbol *> label_function_symbols;
-  VEC (symbolp) *labels
+  std::vector<symbol *> *labels
     = find_label_symbols (PARSER_STATE (parser),
 			  PARSER_RESULT (parser)->function_symbols,
 			  &label_function_symbols,
 			  label_name, true);
 
-  symbol *label;
-  for (int ix = 0;
-       VEC_iterate (symbolp, labels, ix, label); ++ix)
+  if (labels != nullptr)
     {
-      char *match = xstrdup (SYMBOL_SEARCH_NAME (label));
-      tracker.add_completion (gdb::unique_xmalloc_ptr<char> (match));
+      for (const auto &label : *labels)
+	{
+	  char *match = xstrdup (SYMBOL_SEARCH_NAME (label));
+	  tracker.add_completion (gdb::unique_xmalloc_ptr<char> (match));
+	}
+      delete labels;
     }
-  VEC_free (symbolp, labels);
 }
 
 /* See linespec.h.  */
@@ -4073,7 +4069,7 @@ static void
 find_label_symbols_in_block (const struct block *block,
 			     const char *name, struct symbol *fn_sym,
 			     bool completion_mode,
-			     VEC (symbolp) **result,
+			     std::vector<symbol *> *result,
 			     std::vector<symbol *> *label_funcs_ret)
 {
   if (completion_mode)
@@ -4091,7 +4087,7 @@ find_label_symbols_in_block (const struct block *block,
 				     SYMBOL_DOMAIN (sym), LABEL_DOMAIN)
 	      && cmp (SYMBOL_SEARCH_NAME (sym), name, name_len) == 0)
 	    {
-	      VEC_safe_push (symbolp, *result, sym);
+	      result->push_back (sym);
 	      label_funcs_ret->push_back (fn_sym);
 	    }
 	}
@@ -4102,19 +4098,21 @@ find_label_symbols_in_block (const struct block *block,
 
       if (sym != NULL)
 	{
-	  VEC_safe_push (symbolp, *result, sym);
+	  result->push_back (sym);
 	  label_funcs_ret->push_back (fn_sym);
 	}
     }
 }
 
-/* Return all labels that match name NAME in FUNCTION_SYMBOLS.  Return
-   the actual function symbol in which the label was found in
+/* Return all labels that match name NAME in FUNCTION_SYMBOLS or NULL
+   if no matches were found.
+
+   Return the actual function symbol in which the label was found in
    LABEL_FUNC_RET.  If COMPLETION_MODE is true, then NAME is
    interpreted as a label name prefix.  Otherwise, only labels named
    exactly NAME match.  */
 
-static VEC (symbolp) *
+static std::vector<symbol *> *
 find_label_symbols (struct linespec_state *self,
 		    std::vector<symbol *> *function_symbols,
 		    std::vector<symbol *> *label_funcs_ret, const char *name,
@@ -4122,7 +4120,7 @@ find_label_symbols (struct linespec_state *self,
 {
   const struct block *block;
   struct symbol *fn_sym;
-  VEC (symbolp) *result = NULL;
+  std::vector<symbol *> result;
 
   if (function_symbols == NULL)
     {
@@ -4152,7 +4150,9 @@ find_label_symbols (struct linespec_state *self,
 	}
     }
 
-  return result;
+  if (!result.empty ())
+    return new std::vector<symbol *> (std::move (result));
+  return nullptr;
 }
 
 
