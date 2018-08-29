@@ -2860,7 +2860,9 @@ iterate_over_symbols (const struct block *block,
       if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
 				 SYMBOL_DOMAIN (sym), domain))
 	{
-	  if (!callback (sym))
+	  struct block_symbol block_sym = {sym, block};
+
+	  if (!callback (&block_sym))
 	    return;
 	}
     }

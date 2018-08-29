@@ -5836,7 +5836,7 @@ ada_iterate_over_symbols
 
   for (i = 0; i < ndefs; ++i)
     {
-      if (!callback (results[i].symbol))
+      if (!callback (&results[i]))
 	break;
     }
 }
