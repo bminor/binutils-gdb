@@ -6787,8 +6787,8 @@ _bfd_elf_mips_mach (flagword flags)
     case E_MIPS_MACH_LS2F:
       return bfd_mach_mips_loongson_2f;
 
-    case E_MIPS_MACH_LS3A:
-      return bfd_mach_mips_loongson_3a;
+    case E_MIPS_MACH_GS464:
+      return bfd_mach_mips_gs464;
 
     case E_MIPS_MACH_OCTEON3:
       return bfd_mach_mips_octeon3;
@@ -11984,8 +11984,8 @@ mips_set_isa_flags (bfd *abfd)
       val = E_MIPS_ARCH_64 | E_MIPS_MACH_SB1;
       break;
 
-    case bfd_mach_mips_loongson_3a:
-      val = E_MIPS_ARCH_64R2 | E_MIPS_MACH_LS3A;
+    case bfd_mach_mips_gs464:
+      val = E_MIPS_ARCH_64R2 | E_MIPS_MACH_GS464;
       break;
 
     case bfd_mach_mips_octeon:
@@ -13993,7 +13993,7 @@ static const struct mips_mach_extension mips_mach_extensions[] =
   { bfd_mach_mips_octeon2, bfd_mach_mips_octeonp },
   { bfd_mach_mips_octeonp, bfd_mach_mips_octeon },
   { bfd_mach_mips_octeon, bfd_mach_mipsisa64r2 },
-  { bfd_mach_mips_loongson_3a, bfd_mach_mipsisa64r2 },
+  { bfd_mach_mips_gs464, bfd_mach_mipsisa64r2 },
 
   /* MIPS64 extensions.  */
   { bfd_mach_mipsisa64r2, bfd_mach_mipsisa64 },
@@ -14105,7 +14105,6 @@ bfd_mips_isa_ext_mach (unsigned int isa_ext)
     case AFL_EXT_10000:	      return bfd_mach_mips10000;
     case AFL_EXT_LOONGSON_2E: return bfd_mach_mips_loongson_2e;
     case AFL_EXT_LOONGSON_2F: return bfd_mach_mips_loongson_2f;
-    case AFL_EXT_LOONGSON_3A: return bfd_mach_mips_loongson_3a;
     case AFL_EXT_SB1:	      return bfd_mach_mips_sb1;
     case AFL_EXT_OCTEON:      return bfd_mach_mips_octeon;
     case AFL_EXT_OCTEONP:     return bfd_mach_mips_octeonp;
@@ -14134,7 +14133,6 @@ bfd_mips_isa_ext (bfd *abfd)
     case bfd_mach_mips10000:	    return AFL_EXT_10000;
     case bfd_mach_mips_loongson_2e: return AFL_EXT_LOONGSON_2E;
     case bfd_mach_mips_loongson_2f: return AFL_EXT_LOONGSON_2F;
-    case bfd_mach_mips_loongson_3a: return AFL_EXT_LOONGSON_3A;
     case bfd_mach_mips_sb1:	    return AFL_EXT_SB1;
     case bfd_mach_mips_octeon:	    return AFL_EXT_OCTEON;
     case bfd_mach_mips_octeonp:	    return AFL_EXT_OCTEONP;
@@ -15708,9 +15706,6 @@ print_mips_isa_ext (FILE *file, unsigned int isa_ext)
       break;
     case AFL_EXT_OCTEONP:
       fputs ("Cavium Networks OcteonP", file);
-      break;
-    case AFL_EXT_LOONGSON_3A:
-      fputs ("Loongson 3A", file);
       break;
     case AFL_EXT_OCTEON:
       fputs ("Cavium Networks Octeon", file);

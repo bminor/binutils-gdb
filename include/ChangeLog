@@ -1,5 +1,14 @@
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
+	* elf/mips.h (E_MIPS_MACH_XXX): Rename E_MIPS_MACH_LS3A to
+	E_MIPS_MACH_GS464.
+	(AFL_EXT_XXX): Delete AFL_EXT_LOONGSON_3A.
+	* opcode/mips.h (INSN_XXX): Delete INSN_LOONGSON_3A.
+	(CPU_XXX): Rename CPU_LOONGSON_3A to CPU_GS464.
+	* opcode/mips.h (mips_isa_table): Delete CPU_LOONGSON_3A case.
+
+2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
+
 	* elf/mips.h (AFL_ASE_LOONGSON_EXT2): New macro.
 	(AFL_ASE_MASK): Update to include AFL_ASE_LOONGSON_EXT2.
 	* opcode/mips.h (ASE_LOONGSON_EXT2): New macro.

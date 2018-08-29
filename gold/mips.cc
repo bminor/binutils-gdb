@@ -3982,7 +3982,7 @@ class Target_mips : public Sized_target<size, big_endian>
     mach_mips5                = 5,
     mach_mips_loongson_2e     = 3001,
     mach_mips_loongson_2f     = 3002,
-    mach_mips_loongson_3a     = 3003,
+    mach_mips_gs464           = 3003,
     mach_mips_sb1             = 12310201, // octal 'SB', 01
     mach_mips_octeon          = 6501,
     mach_mips_octeonp         = 6601,
@@ -4148,7 +4148,7 @@ class Target_mips : public Sized_target<size, big_endian>
     this->add_extension(mach_mips_octeon2, mach_mips_octeonp);
     this->add_extension(mach_mips_octeonp, mach_mips_octeon);
     this->add_extension(mach_mips_octeon, mach_mipsisa64r2);
-    this->add_extension(mach_mips_loongson_3a, mach_mipsisa64r2);
+    this->add_extension(mach_mips_gs464, mach_mipsisa64r2);
 
     // MIPS64 extensions.
     this->add_extension(mach_mipsisa64r2, mach_mipsisa64);
@@ -8858,8 +8858,8 @@ Target_mips<size, big_endian>::elf_mips_mach(elfcpp::Elf_Word flags)
     case elfcpp::E_MIPS_MACH_LS2F:
       return mach_mips_loongson_2f;
 
-    case elfcpp::E_MIPS_MACH_LS3A:
-      return mach_mips_loongson_3a;
+    case elfcpp::E_MIPS_MACH_GS464:
+      return mach_mips_gs464;
 
     case elfcpp::E_MIPS_MACH_OCTEON3:
       return mach_mips_octeon3;
@@ -8959,9 +8959,6 @@ Target_mips<size, big_endian>::mips_isa_ext_mach(unsigned int isa_ext)
     case elfcpp::AFL_EXT_LOONGSON_2F:
       return mach_mips_loongson_2f;
 
-    case elfcpp::AFL_EXT_LOONGSON_3A:
-      return mach_mips_loongson_3a;
-
     case elfcpp::AFL_EXT_SB1:
       return mach_mips_sb1;
 
@@ -9025,9 +9022,6 @@ Target_mips<size, big_endian>::mips_isa_ext(unsigned int mips_mach)
 
     case mach_mips_loongson_2f:
       return elfcpp::AFL_EXT_LOONGSON_2F;
-
-    case mach_mips_loongson_3a:
-      return elfcpp::AFL_EXT_LOONGSON_3A;
 
     case mach_mips_sb1:
       return elfcpp::AFL_EXT_SB1;
@@ -9160,7 +9154,7 @@ Target_mips<size, big_endian>::infer_abiflags(
       && abiflags->fp_abi != elfcpp::Val_GNU_MIPS_ABI_FP_SOFT
       && abiflags->fp_abi != elfcpp::Val_GNU_MIPS_ABI_FP_64A
       && abiflags->isa_level >= 32
-      && abiflags->isa_ext != elfcpp::AFL_EXT_LOONGSON_3A)
+      && abiflags->ases != elfcpp::AFL_ASE_LOONGSON_EXT)
     abiflags->flags1 |= elfcpp::AFL_FLAGS1_ODDSPREG;
 }
 
@@ -12530,8 +12524,8 @@ Target_mips<size, big_endian>::elf_mips_mach_name(elfcpp::Elf_Word e_flags)
       return "mips:loongson_2e";
     case elfcpp::E_MIPS_MACH_LS2F:
       return "mips:loongson_2f";
-    case elfcpp::E_MIPS_MACH_LS3A:
-      return "mips:loongson_3a";
+    case elfcpp::E_MIPS_MACH_GS464:
+      return "mips:gs464";
     case elfcpp::E_MIPS_MACH_OCTEON:
       return "mips:octeon";
     case elfcpp::E_MIPS_MACH_OCTEON2:

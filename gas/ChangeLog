@@ -1,5 +1,15 @@
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
+	* config/tc-mips.c (ISA_HAS_ODD_SINGLE_FPR): Rename
+	CPU_LOONGSON_3A to CPU_GS464.
+	(mips_cpu_info_table): Add gs464 descriptors, Keep
+	loongson3a as an alias of gs464 for compatibility.
+	* doc/as.texi (march table): Rename loongson3a to gs464.
+	* testsuite/gas/mips/loongson-3a-mmi.d: Set "ISA Extension"
+	flag to None.
+
+2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
+
 	* NEWS: Mention Loongson EXTensions R2 (EXT2) support.
 	* config/tc-mips.c (options): Add OPTION_LOONGSON_EXT2 and
 	OPTION_NO_LOONGSON_EXT2.

@@ -1,5 +1,10 @@
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
+	* testsuite/ld-mips-elf/mips-elf-flags.exp: Rename loongson3a
+	to gs464.
+
+2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
+
 	* testsuite/ld-mips-elf/mips-elf-flags.exp (good_combination):
 	Skip o32 flags checking if target is mips*-*-irix*.
 

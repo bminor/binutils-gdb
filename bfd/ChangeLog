@@ -1,5 +1,19 @@
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
+	* archures.c (bfd_architecture): Rename
+	bfd_mach_mips_loongson_3a to bfd_mach_mips_gs464.
+	* bfd-in2.h (bfd_architecture): Likewise.
+	* cpu-mips.c (enum I_xxx): Likewise.
+	(arch_info_struct): Likewise.
+	* elfxx-mips.c (_bfd_elf_mips_mach): Likewise.
+	(mips_set_isa_flags): Likewise.
+	(mips_mach_extensions): Likewise.
+	(bfd_mips_isa_ext_mach): Likewise.
+	(bfd_mips_isa_ext): Likewise.
+	(print_mips_isa_ext): Delete AFL_EXT_LOONGSON_3A.
+
+2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
+
 	* elfxx-mips.c (print_mips_ases): Add Loongson EXT2 extension.
 
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>

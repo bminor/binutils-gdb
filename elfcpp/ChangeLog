@@ -1,5 +1,10 @@
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
+	* mips.c (EF_MIPS_MACH): Rename E_MIPS_MACH_LS3A to
+	E_MIPS_MACH_GS464.
+
+2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
+
 	 * mips.h (AFL_ASE_LOONGSON_EXT): New enum.
 
 2018-07-06  Alan Modra  <amodra@gmail.com>

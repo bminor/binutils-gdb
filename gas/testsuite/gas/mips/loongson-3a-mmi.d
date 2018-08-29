@@ -12,7 +12,7 @@ GPR size: .*
 CPR1 size: .*
 CPR2 size: .*
 FP ABI: .*
-ISA Extension: Loongson 3A
+ISA Extension: None
 ASEs:
 	Loongson MMI ASE
 	Loongson CAM ASE

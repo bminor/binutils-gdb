@@ -1,5 +1,11 @@
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
+	* NEWS: Mention Loongson 3A1000 proccessor support.
+	* readelf.c (get_machine_flags): Rename loongson-3a to gs464.
+	(print_mips_isa_ext): Delete AFL_EXT_LOONGSON_3A.
+
+2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
+
 	* readelf.c (print_mips_ases): Add Loongson EXT2 extension.
 
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>

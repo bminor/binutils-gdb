@@ -464,7 +464,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"lapc",		"s,-A",		0xec000000, 0xfc180000, WR_1,			RD_pc,		I37,		0,	0 },
 {"la",			"t,A(b)",	0,    (int) M_LA_AB,	INSN_MACRO,		0,		I1,		0,	0 },
 
-/* Loongson specific instructions.  Loongson 3A redefines the Coprocessor 2
+/* Loongson specific instructions.  Loongson gs464 (aka loongson3a) redefines the Coprocessor 2
    instructions.  Put them here so that disassembler will find them first.
    The assemblers uses a hash table based on the instruction name anyhow.  */
 {"campi",		"d,s",		0x70000075, 0xfc1f07ff,	WR_1|RD_2,		0,		0,		LCAM,	0 },

@@ -422,7 +422,7 @@ static int mips_32bitmode = 0;
     || (ISA) == ISA_MIPS64R5		\
     || (ISA) == ISA_MIPS64R6		\
     || (CPU) == CPU_R5900)		\
-   && (CPU) != CPU_LOONGSON_3A)
+   && (CPU) != CPU_GS464)
 
 /* Return true if ISA supports move to/from high part of a 64-bit
    floating-point register. */
@@ -19809,8 +19809,11 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
 
   /* MIPS 64 Release 2 */
   /* Loongson CPU core */
+  /* -march=loongson3a is an alias of -march=gs464 for compatibility */
   { "loongson3a",     0, ASE_LOONGSON_MMI | ASE_LOONGSON_CAM | ASE_LOONGSON_EXT,
-     ISA_MIPS64R2,	CPU_LOONGSON_3A },
+     ISA_MIPS64R2,	CPU_GS464 },
+  { "gs464",          0, ASE_LOONGSON_MMI | ASE_LOONGSON_CAM | ASE_LOONGSON_EXT,
+     ISA_MIPS64R2,	CPU_GS464 },
 
   /* Cavium Networks Octeon CPU core */
   { "octeon",	      0, 0,			ISA_MIPS64R2, CPU_OCTEON },

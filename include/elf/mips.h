@@ -299,7 +299,7 @@ END_RELOC_NUMBERS (R_MIPS_maxext)
 #define E_MIPS_MACH_9000	0x00990000
 #define E_MIPS_MACH_LS2E        0x00A00000
 #define E_MIPS_MACH_LS2F        0x00A10000
-#define E_MIPS_MACH_LS3A        0x00A20000
+#define E_MIPS_MACH_GS464       0x00A20000
 
 /* Processor specific section indices.  These sections do not actually
    exist.  Symbols with a st_shndx field corresponding to one of these
@@ -1249,7 +1249,6 @@ extern void bfd_mips_elf_swap_abiflags_v0_out
 #define AFL_EXT_XLR           1  /* RMI Xlr instruction.  */
 #define AFL_EXT_OCTEON2       2  /* Cavium Networks Octeon2.  */
 #define AFL_EXT_OCTEONP       3  /* Cavium Networks OcteonP.  */
-#define AFL_EXT_LOONGSON_3A   4  /* Loongson 3A.  */
 #define AFL_EXT_OCTEON        5  /* Cavium Networks Octeon.  */
 #define AFL_EXT_5900          6  /* MIPS R5900 instruction.  */
 #define AFL_EXT_4650          7  /* MIPS R4650 instruction.  */
