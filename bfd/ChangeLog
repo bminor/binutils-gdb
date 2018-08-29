@@ -1,3 +1,15 @@
+2018-08-31  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c: Correct _notoc stub comments.
+	(ppc_build_one_stub): Simplify output of branch for notoc
+	long branch stub.  Don't include label offset of 8 bytes in
+	"off" calculation for notoc plt stub.  Don't emit insns to get pc.
+	(build_offset): Emit insns to get pc here instead.
+	(size_offset): Add 4 extra insns.
+	(plt_stub_size): Adjust for "off" and size_offset changes.
+	(ppc_size_one_stub): Rearrange code into a switch, duplicating
+	some to better match ppc_build_one_stub.
+
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
 	* archures.c (bfd_architecture): New machine
