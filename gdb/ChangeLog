@@ -1,3 +1,10 @@
+2018-08-29  Jim Wilson  <jimw@sifive.com>
+
+	* riscv-linux-nat.c: Include elf/common.h instead of elf.h.
+	(riscv_linux_nat_target::fetch_registers): Use NT_FPREGSET instead
+	of NT_PRFPREG.
+	(riscv_linux_nat_target::store_registers): Likewise.
+
 2018-08-29  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR gdb/23555

@@ -20,8 +20,9 @@
 #include "regcache.h"
 #include "gregset.h"
 #include "linux-nat.h"
-#include "elf.h"
 #include "riscv-tdep.h"
+
+#include "elf/common.h"
 
 #include <sys/ptrace.h>
 
@@ -191,7 +192,7 @@ riscv_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
       iov.iov_base = &regs;
       iov.iov_len = sizeof (regs);
 
-      if (ptrace (PTRACE_GETREGSET, tid, NT_PRFPREG,
+      if (ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET,
 		  (PTRACE_TYPE_ARG3) &iov) == -1)
 	perror_with_name (_("Couldn't get registers"));
       else
@@ -252,14 +253,14 @@ riscv_linux_nat_target::store_registers (struct regcache *regcache, int regnum)
       iov.iov_base = &regs;
       iov.iov_len = sizeof (regs);
 
-      if (ptrace (PTRACE_GETREGSET, tid, NT_PRFPREG,
+      if (ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET,
 		  (PTRACE_TYPE_ARG3) &iov) == -1)
 	perror_with_name (_("Couldn't get registers"));
       else
 	{
 	  fill_fpregset (regcache, &regs, regnum);
 
-	  if (ptrace (PTRACE_SETREGSET, tid, NT_PRFPREG,
+	  if (ptrace (PTRACE_SETREGSET, tid, NT_FPREGSET,
 		      (PTRACE_TYPE_ARG3) &iov) == -1)
 	    perror_with_name (_("Couldn't set registers"));
 	}
