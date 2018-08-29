@@ -1,3 +1,10 @@
+2018-08-16  Gary Benson <gbenson@redhat.com>
+
+	PR gdb/13000:
+	* gdb/main.c (captured_main_1): Exit with nonzero status
+	in batch mode if the last command to be executed failed.
+	* NEWS: Mention the above.
+
 2018-08-29  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* csky-tdep.c (csky_memory_insert_breakpoint): Remove newline at

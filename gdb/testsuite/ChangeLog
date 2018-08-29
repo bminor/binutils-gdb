@@ -1,3 +1,10 @@
+2018-08-16  Gary Benson <gbenson@redhat.com>
+
+	PR gdb/13000:
+	* gdb.base/batch-exit-status.exp: New file.
+	* gdb.base/batch-exit-status.good-commands: Likewise.
+	* gdb.base/batch-exit-status.bad-commands: Likewise.
+
 2018-08-29  Alan Hayward  <alan.hayward@arm.com>
 
 	* gdb.base/infcall-nested-structs.c (struct struct01): Remove.
