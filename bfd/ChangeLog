@@ -1,5 +1,14 @@
 2018-08-31  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (num_relocs_for_offset): New function.
+	(emit_relocs_for_offset): New function.
+	(use_global_in_relocs): New function, split out from..
+	(ppc_build_one_stub): ..here.  Output relocations for notoc stubs.
+	(ppc_size_one_stub): Calculate reloc count for notoc stubs.
+	(ppc64_elf_size_stubs): Don't count undefined syms in stub_globals.
+
+2018-08-31  Alan Modra  <amodra@gmail.com>
+
 	* reloc.c (BFD_RELOC_PPC64_REL16_HIGH, BFD_RELOC_PPC64_REL16_HIGHA),
 	(BFD_RELOC_PPC64_REL16_HIGHER, BFD_RELOC_PPC64_REL16_HIGHERA),
 	(BFD_RELOC_PPC64_REL16_HIGHEST, BFD_RELOC_PPC64_REL16_HIGHESTA):
