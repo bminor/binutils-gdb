@@ -1,5 +1,13 @@
 2018-08-29  Alan Hayward  <alan.hayward@arm.com>
 
+	* aarch64-tdep.c
+	(aapcs_is_vfp_call_or_return_candidate): Make static
+	(pass_in_v_or_stack): Remove function.
+	(pass_in_v_vfp_candidate): New function.
+	(aarch64_push_dummy_call): Check for float register candidates.
+
+2018-08-29  Alan Hayward  <alan.hayward@arm.com>
+
 	* aarch64-tdep.c (HA_MAX_NUM_FLDS): New macro.
 	(aapcs_is_vfp_call_or_return_candidate_1): New function.
 	(aapcs_is_vfp_call_or_return_candidate): Likewise.

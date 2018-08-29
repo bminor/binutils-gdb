@@ -1329,7 +1329,7 @@ aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
 
    Note that HFAs and HVAs can include nested structures and arrays.  */
 
-bool
+static bool
 aapcs_is_vfp_call_or_return_candidate (struct type *type, int *count,
 				       struct type **fundamental_type)
 {
@@ -1522,19 +1522,57 @@ pass_in_x_or_stack (struct gdbarch *gdbarch, struct regcache *regcache,
     }
 }
 
-/* Pass a value in a V register, or on the stack if insufficient are
-   available.  */
-
-static void
-pass_in_v_or_stack (struct gdbarch *gdbarch,
-		    struct regcache *regcache,
-		    struct aarch64_call_info *info,
-		    struct type *type,
-		    struct value *arg)
+/* Pass a value, which is of type arg_type, in a V register.  Assumes value is a
+   aapcs_is_vfp_call_or_return_candidate and there are enough spare V
+   registers.  A return value of false is an error state as the value will have
+   been partially passed to the stack.  */
+static bool
+pass_in_v_vfp_candidate (struct gdbarch *gdbarch, struct regcache *regcache,
+			 struct aarch64_call_info *info, struct type *arg_type,
+			 struct value *arg)
 {
-  if (!pass_in_v (gdbarch, regcache, info, TYPE_LENGTH (type),
-		  value_contents (arg)))
-    pass_on_stack (info, type, arg);
+  switch (TYPE_CODE (arg_type))
+    {
+    case TYPE_CODE_FLT:
+      return pass_in_v (gdbarch, regcache, info, TYPE_LENGTH (arg_type),
+			value_contents (arg));
+      break;
+
+    case TYPE_CODE_COMPLEX:
+      {
+	const bfd_byte *buf = value_contents (arg);
+	struct type *target_type = check_typedef (TYPE_TARGET_TYPE (arg_type));
+
+	if (!pass_in_v (gdbarch, regcache, info, TYPE_LENGTH (target_type),
+			buf))
+	  return false;
+
+	return pass_in_v (gdbarch, regcache, info, TYPE_LENGTH (target_type),
+			  buf + TYPE_LENGTH (target_type));
+      }
+
+    case TYPE_CODE_ARRAY:
+      if (TYPE_VECTOR (arg_type))
+	return pass_in_v (gdbarch, regcache, info, TYPE_LENGTH (arg_type),
+			  value_contents (arg));
+      /* fall through.  */
+
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
+      for (int i = 0; i < TYPE_NFIELDS (arg_type); i++)
+	{
+	  struct value *field = value_primitive_field (arg, 0, i, arg_type);
+	  struct type *field_type = check_typedef (value_type (field));
+
+	  if (!pass_in_v_vfp_candidate (gdbarch, regcache, info, field_type,
+					field))
+	    return false;
+	}
+      return true;
+
+    default:
+      return false;
+    }
 }
 
 /* Implement the "push_dummy_call" gdbarch method.  */
@@ -1623,11 +1661,32 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       struct value *arg = args[argnum];
-      struct type *arg_type;
-      int len;
+      struct type *arg_type, *fundamental_type;
+      int len, elements;
 
       arg_type = check_typedef (value_type (arg));
       len = TYPE_LENGTH (arg_type);
+
+      /* If arg can be passed in v registers as per the AAPCS64, then do so if
+	 if there are enough spare registers.  */
+      if (aapcs_is_vfp_call_or_return_candidate (arg_type, &elements,
+						 &fundamental_type))
+	{
+	  if (info.nsrn + elements <= 8)
+	    {
+	      /* We know that we have sufficient registers available therefore
+		 this will never need to fallback to the stack.  */
+	      if (!pass_in_v_vfp_candidate (gdbarch, regcache, &info, arg_type,
+					    arg))
+		gdb_assert_not_reached ("Failed to push args");
+	    }
+	  else
+	    {
+	      info.nsrn = 8;
+	      pass_on_stack (&info, arg_type, arg);
+	    }
+	  continue;
+	}
 
       switch (TYPE_CODE (arg_type))
 	{
@@ -1648,68 +1707,10 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  pass_in_x_or_stack (gdbarch, regcache, &info, arg_type, arg);
 	  break;
 
-	case TYPE_CODE_COMPLEX:
-	  if (info.nsrn <= 6)
-	    {
-	      const bfd_byte *buf = value_contents (arg);
-	      struct type *target_type =
-		check_typedef (TYPE_TARGET_TYPE (arg_type));
-
-	      pass_in_v (gdbarch, regcache, &info,
-			 TYPE_LENGTH (target_type), buf);
-	      pass_in_v (gdbarch, regcache, &info,
-			 TYPE_LENGTH (target_type),
-			 buf + TYPE_LENGTH (target_type));
-	    }
-	  else
-	    {
-	      info.nsrn = 8;
-	      pass_on_stack (&info, arg_type, arg);
-	    }
-	  break;
-	case TYPE_CODE_FLT:
-	  pass_in_v_or_stack (gdbarch, regcache, &info, arg_type, arg);
-	  break;
-
 	case TYPE_CODE_STRUCT:
 	case TYPE_CODE_ARRAY:
 	case TYPE_CODE_UNION:
-	  if (is_hfa_or_hva (arg_type))
-	    {
-	      int elements = TYPE_NFIELDS (arg_type);
-
-	      /* Homogeneous Aggregates */
-	      if (info.nsrn + elements < 8)
-		{
-		  int i;
-
-		  for (i = 0; i < elements; i++)
-		    {
-		      /* We know that we have sufficient registers
-			 available therefore this will never fallback
-			 to the stack.  */
-		      struct value *field =
-			value_primitive_field (arg, 0, i, arg_type);
-		      struct type *field_type =
-			check_typedef (value_type (field));
-
-		      pass_in_v_or_stack (gdbarch, regcache, &info,
-					  field_type, field);
-		    }
-		}
-	      else
-		{
-		  info.nsrn = 8;
-		  pass_on_stack (&info, arg_type, arg);
-		}
-	    }
-	  else if (TYPE_CODE (arg_type) == TYPE_CODE_ARRAY
-		   && TYPE_VECTOR (arg_type) && (len == 16 || len == 8))
-	    {
-	      /* Short vector types are passed in V registers.  */
-	      pass_in_v_or_stack (gdbarch, regcache, &info, arg_type, arg);
-	    }
-	  else if (len > 16)
+	  if (len > 16)
 	    {
 	      /* PCS B.7 Aggregates larger than 16 bytes are passed by
 		 invisible reference.  */
