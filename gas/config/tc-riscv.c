@@ -113,20 +113,30 @@ struct riscv_subset
 static struct riscv_subset *riscv_subsets;
 
 static bfd_boolean
-riscv_subset_supports (const char *feature)
+riscv_subset_supports (unsigned xlen_required, const char *feature)
 {
   struct riscv_subset *s;
-  char *p;
-  unsigned xlen_required = strtoul (feature, &p, 10);
 
   if (xlen_required && xlen != xlen_required)
     return FALSE;
 
   for (s = riscv_subsets; s != NULL; s = s->next)
-    if (strcasecmp (s->name, p) == 0)
+    if (strcasecmp (s->name, feature) == 0)
       return TRUE;
 
   return FALSE;
+}
+
+static bfd_boolean
+riscv_multi_subset_supports (unsigned xlen_required, const char *features[])
+{
+  unsigned i = 0;
+  bfd_boolean supported = TRUE;
+
+  for (;features[i]; ++i)
+    supported = supported && riscv_subset_supports (xlen_required, features[i]);
+
+  return supported;
 }
 
 static void
@@ -234,16 +244,16 @@ riscv_set_arch (const char *s)
 	as_fatal ("-march=%s: unsupported ISA subset `%c'", s, *p);
     }
 
-  if (riscv_subset_supports ("e") && riscv_subset_supports ("f"))
+  if (riscv_subset_supports (0, "e") && riscv_subset_supports (0, "f"))
     as_fatal ("-march=%s: rv32e does not support the `f' extension", s);
 
-  if (riscv_subset_supports ("d") && !riscv_subset_supports ("f"))
+  if (riscv_subset_supports (0, "d") && !riscv_subset_supports (0, "f"))
     as_fatal ("-march=%s: `d' extension requires `f' extension", s);
 
-  if (riscv_subset_supports ("q") && !riscv_subset_supports ("d"))
+  if (riscv_subset_supports (0, "q") && !riscv_subset_supports (0, "d"))
     as_fatal ("-march=%s: `q' extension requires `d' extension", s);
 
-  if (riscv_subset_supports ("q") && xlen < 64)
+  if (riscv_subset_supports (0, "q") && xlen < 64)
     as_fatal ("-march=%s: rv32 does not support the `q' extension", s);
 
   free (extension);
@@ -1480,7 +1490,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
   argsStart = s;
   for ( ; insn && insn->name && strcmp (insn->name, str) == 0; insn++)
     {
-      if (!riscv_subset_supports (insn->subset))
+      if (!riscv_multi_subset_supports (insn->xlen_requirement, insn->subset))
 	continue;
 
       create_insn (ip, insn);
@@ -2297,14 +2307,14 @@ riscv_after_parse_args (void)
 
   /* Add the RVC extension, regardless of -march, to support .option rvc.  */
   riscv_set_rvc (FALSE);
-  if (riscv_subset_supports ("c"))
+  if (riscv_subset_supports (0, "c"))
     riscv_set_rvc (TRUE);
   else
     riscv_add_subset ("c");
 
   /* Enable RVE if specified by the -march option.  */
   riscv_set_rve (FALSE);
-  if (riscv_subset_supports ("e"))
+  if (riscv_subset_supports (0, "e"))
     riscv_set_rve (TRUE);
 
   /* Infer ABI from ISA if not specified on command line.  */

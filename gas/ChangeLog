@@ -1,3 +1,14 @@
+2018-08-30  Kito Cheng  <kito@andestech.com>
+
+	* config/tc-riscv.c (riscv_subset_supports): New argument:
+	xlen_required.
+	(riscv_multi_subset_supports): New function, able to check more
+	than one extension.
+	(riscv_ip): Use riscv_multi_subset_supports instead of
+	riscv_subset_supports.
+	(riscv_set_arch): Update call-site for riscv_subset_supports.
+	(riscv_after_parse_args): Likewise.
+
 2018-08-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/gas/elf/section14.d: Skip h8300 targets.

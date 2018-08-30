@@ -281,14 +281,20 @@ static const char * const riscv_pred_succ[16] =
 #define EXTRACT_OPERAND(FIELD, INSN) \
   EXTRACT_BITS ((INSN), OP_MASK_##FIELD, OP_SH_##FIELD)
 
+/* The maximal number of subset can be required. */
+#define MAX_SUBSET_NUM 4
+
 /* This structure holds information for a particular instruction.  */
 
 struct riscv_opcode
 {
   /* The name of the instruction.  */
   const char *name;
-  /* The ISA subset name (I, M, A, F, D, Xextension).  */
-  const char *subset;
+  /* The requirement of xlen for the instruction, 0 if no requirement.  */
+  int xlen_requirement;
+  /* An array of ISA subset name (I, M, A, F, D, Xextension), must ended
+     with a NULL pointer sential.  */
+  const char *subset[MAX_SUBSET_NUM];
   /* A string describing the arguments for this instruction.  */
   const char *args;
   /* The basic opcode for the instruction.  When assembling, this

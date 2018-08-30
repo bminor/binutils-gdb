@@ -1,3 +1,9 @@
+2018-08-30  Kito Cheng  <kito@andestech.com>
+
+	* riscv-dis.c (riscv_disassemble_insn): Check XLEN by
+	riscv_opcode.xlen_requirement.
+	* riscv-opc.c (riscv_opcodes): Update for struct change.
+
 2018-08-29  Martin Aberg  <maberg@gaisler.com>
 
 	* sparc-opc.c (sparc_opcodes): Add Leon specific partial write

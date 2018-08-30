@@ -1,3 +1,9 @@
+2018-08-30  Kito Cheng  <kito@andestech.com>
+
+	* opcode/riscv.h (MAX_SUBSET_NUM): New.
+	(riscv_opcode): Add xlen_requirement field and change type of
+	subset.
+
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
 	* elf/mips.h (E_MIPS_MACH_XXX): New E_MIPS_MACH_GS264E.
