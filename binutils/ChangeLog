@@ -1,3 +1,7 @@
+2018-08-30  Chenghua Xu  <paul.hua.gm@gmail.com>
+
+	* MAINTAINERS: Add myself as a MIPS port maintainer.
+
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
 	* NEWS: Mention Loongson 2K1000 proccessor support.
