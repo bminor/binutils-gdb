@@ -149,10 +149,7 @@ void
 try_open_exec_file (const char *exec_file_host, struct inferior *inf,
 		    symfile_add_flags add_flags)
 {
-  struct cleanup *old_chain;
   struct gdb_exception prev_err = exception_none;
-
-  old_chain = make_cleanup (free_current_contents, &prev_err.message);
 
   /* exec_file_attach and symbol_file_add_main may throw an error if the file
      cannot be opened either locally or remotely.
@@ -165,6 +162,7 @@ try_open_exec_file (const char *exec_file_host, struct inferior *inf,
      Even without a symbol file, the remote-based debugging session should
      continue normally instead of ending abruptly.  Hence we catch thrown
      errors/exceptions in the following code.  */
+  std::string saved_message;
   TRY
     {
       /* We must do this step even if exec_file_host is NULL, so that
@@ -180,7 +178,10 @@ try_open_exec_file (const char *exec_file_host, struct inferior *inf,
 
       /* Save message so it doesn't get trashed by the catch below.  */
       if (err.message != NULL)
-	prev_err.message = xstrdup (err.message);
+	{
+	  saved_message = err.message;
+	  prev_err.message = saved_message.c_str ();
+	}
     }
   END_CATCH
 
@@ -197,8 +198,6 @@ try_open_exec_file (const char *exec_file_host, struct inferior *inf,
 	}
       END_CATCH
     }
-
-  do_cleanups (old_chain);
 }
 
 /* See gdbcore.h.  */

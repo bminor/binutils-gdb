@@ -1,5 +1,9 @@
 2018-09-13  Tom Tromey  <tom@tromey.com>
 
+	* exec.c (try_open_exec_file): Use std::string.
+
+2018-09-13  Tom Tromey  <tom@tromey.com>
+
 	* utils.h (gdb_bfd_errmsg): Return std::string.
 	* exec.c (exec_file_attach): Update.
 	* compile/compile-object-load.c (compile_object_load): Update.
