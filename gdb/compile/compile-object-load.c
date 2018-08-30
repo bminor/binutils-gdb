@@ -638,7 +638,8 @@ compile_object_load (const compile_file_names &file_names,
 
   if (!bfd_check_format_matches (abfd.get (), bfd_object, &matching))
     error (_("\"%s\": not in loadable format: %s"),
-          filename.get (), gdb_bfd_errmsg (bfd_get_error (), matching));
+	   filename.get (),
+	   gdb_bfd_errmsg (bfd_get_error (), matching).c_str ());
 
   if ((bfd_get_file_flags (abfd.get ()) & (EXEC_P | DYNAMIC)) != 0)
     error (_("\"%s\": not in object format."), filename.get ());

@@ -362,7 +362,7 @@ exec_file_attach (const char *filename, int from_tty)
 	  exec_close ();
 	  error (_("\"%s\": not in executable format: %s"),
 		 scratch_pathname,
-		 gdb_bfd_errmsg (bfd_get_error (), matching));
+		 gdb_bfd_errmsg (bfd_get_error (), matching).c_str ());
 	}
 
       if (build_section_table (exec_bfd, &sections, &sections_end))

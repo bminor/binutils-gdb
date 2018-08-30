@@ -115,7 +115,7 @@ compare_cstrings (const char *str1, const char *str2)
    MATCHING, if non-NULL, is the corresponding argument to
    bfd_check_format_matches, and will be freed.  */
 
-extern const char *gdb_bfd_errmsg (bfd_error_type error_tag, char **matching);
+extern std::string gdb_bfd_errmsg (bfd_error_type error_tag, char **matching);
 
 /* Reset the prompt_for_continue clock.  */
 void reset_prompt_for_continue_wait_time (void);

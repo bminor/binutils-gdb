@@ -2921,39 +2921,26 @@ compare_positive_ints (const void *ap, const void *bp)
 #define AMBIGUOUS_MESS2	\
   ".\nUse \"set gnutarget format-name\" to specify the format."
 
-const char *
+std::string
 gdb_bfd_errmsg (bfd_error_type error_tag, char **matching)
 {
-  char *ret, *retp;
-  int ret_len;
   char **p;
 
   /* Check if errmsg just need simple return.  */
   if (error_tag != bfd_error_file_ambiguously_recognized || matching == NULL)
     return bfd_errmsg (error_tag);
 
-  ret_len = strlen (bfd_errmsg (error_tag)) + strlen (AMBIGUOUS_MESS1)
-            + strlen (AMBIGUOUS_MESS2);
-  for (p = matching; *p; p++)
-    ret_len += strlen (*p) + 1;
-  ret = (char *) xmalloc (ret_len + 1);
-  retp = ret;
-  make_cleanup (xfree, ret);
-
-  strcpy (retp, bfd_errmsg (error_tag));
-  retp += strlen (retp);
-
-  strcpy (retp, AMBIGUOUS_MESS1);
-  retp += strlen (retp);
+  std::string ret (bfd_errmsg (error_tag));
+  ret += AMBIGUOUS_MESS1;
 
   for (p = matching; *p; p++)
     {
-      sprintf (retp, " %s", *p);
-      retp += strlen (retp);
+      ret += " ";
+      ret += *p;
     }
-  xfree (matching);
+  ret += AMBIGUOUS_MESS2;
 
-  strcpy (retp, AMBIGUOUS_MESS2);
+  xfree (matching);
 
   return ret;
 }
