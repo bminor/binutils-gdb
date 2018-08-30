@@ -15169,6 +15169,18 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       fp->type = get_die_type (die, cu);
       fp->artificial = 1;
       fp->name = "<<variant>>";
+
+      /* Normally a DW_TAG_variant_part won't have a size, but our
+	 representation requires one, so set it to the maximum of the
+	 child sizes.  */
+      if (TYPE_LENGTH (fp->type) == 0)
+	{
+	  unsigned max = 0;
+	  for (int i = 0; i < TYPE_NFIELDS (fp->type); ++i)
+	    if (TYPE_LENGTH (TYPE_FIELD_TYPE (fp->type, i)) > max)
+	      max = TYPE_LENGTH (TYPE_FIELD_TYPE (fp->type, i));
+	  TYPE_LENGTH (fp->type) = max;
+	}
     }
   else
     gdb_assert_not_reached ("missing case in dwarf2_add_field");
