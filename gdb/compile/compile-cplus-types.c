@@ -306,7 +306,10 @@ compile_cplus_instance::leave_scope ()
   if (current.m_pushed)
     {
       if (debug_compile_cplus_scopes)
-	fprintf_unfiltered (gdb_stdlog, "leaving scope %p\n", current);
+	{
+	  fprintf_unfiltered (gdb_stdlog, "leaving scope %s\n",
+			      host_address_to_string (&current));
+	}
 
       /* Pop namespaces.  */
       std::for_each
@@ -1058,7 +1061,7 @@ compile_cplus_instance::convert_qualified_base (gcc_type base,
 {
   gcc_type result = base;
 
-  if (quals != GCC_CP_REF_QUAL_NONE)
+  if (quals != 0)
     result = plugin ().build_qualified_type (base, quals);
 
   return result;

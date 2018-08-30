@@ -1,3 +1,11 @@
+2018-08-30  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* compile/compile-cplus-types.c
+	(compile_cplus_instance::leave_scope): Take the address of scope
+	object.
+	(compile_cplus_instance::convert_qualified_base): Compare quals
+	to 0.
+
 2018-08-30  Keith Seitz  <keiths@redhat.com>
 
 	* compile/compile-cplus-types.c (compile_cplus_instance::enter_scope):
