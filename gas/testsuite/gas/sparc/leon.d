@@ -1,5 +1,5 @@
 #as: -Aleon
-#objdump: -dr
+#objdump: -dr -m sparc
 #name: LEON instructions
 
 .*: +file format .*

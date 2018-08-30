@@ -1,3 +1,8 @@
+2018-08-30  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* testsuite/gas/sparc/leon.d: Disassemble v8 code also in sparc64
+	targets.
+
 2018-08-30  Kito Cheng  <kito@andestech.com>
 
 	* config/tc-riscv.c (riscv_subset_supports): New argument:
