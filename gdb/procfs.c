@@ -272,7 +272,6 @@ static procinfo *find_procinfo_or_die (int pid, int tid);
 static procinfo *find_procinfo (int pid, int tid);
 static procinfo *create_procinfo (int pid, int tid);
 static void destroy_procinfo (procinfo *p);
-static void do_destroy_procinfo_cleanup (void *);
 static void dead_procinfo (procinfo *p, const char *msg, int killp);
 static int open_procinfo_files (procinfo *p, int which);
 static void close_procinfo_files (procinfo *p);
@@ -549,11 +548,16 @@ destroy_procinfo (procinfo *pi)
     }
 }
 
-static void
-do_destroy_procinfo_cleanup (void *pi)
+/* A deleter that calls destroy_procinfo.  */
+struct procinfo_deleter
 {
-  destroy_procinfo ((procinfo *) pi);
-}
+  void operator() (procinfo *pi) const
+  {
+    destroy_procinfo (pi);
+  }
+};
+
+typedef std::unique_ptr<procinfo, procinfo_deleter> procinfo_up;
 
 enum { NOKILL, KILL };
 
@@ -3545,7 +3549,6 @@ info_proc_mappings (procinfo *pi, int summary)
 bool
 procfs_target::info_proc (const char *args, enum info_proc_what what)
 {
-  struct cleanup *old_chain;
   procinfo *process  = NULL;
   procinfo *thread   = NULL;
   char     *tmp      = NULL;
@@ -3567,7 +3570,6 @@ procfs_target::info_proc (const char *args, enum info_proc_what what)
       error (_("Not supported on this target."));
     }
 
-  old_chain = make_cleanup (null_cleanup, 0);
   gdb_argv built_argv (args);
   for (char *arg : built_argv)
     {
@@ -3582,6 +3584,8 @@ procfs_target::info_proc (const char *args, enum info_proc_what what)
 	  tid = strtoul (arg + 1, NULL, 10);
 	}
     }
+
+  procinfo_up temporary_procinfo;
   if (pid == 0)
     pid = inferior_ptid.pid ();
   if (pid == 0)
@@ -3596,7 +3600,7 @@ procfs_target::info_proc (const char *args, enum info_proc_what what)
 	   /* No.  So open a procinfo for it, but
 	      remember to close it again when finished.  */
 	   process = create_procinfo (pid, 0);
-	   make_cleanup (do_destroy_procinfo_cleanup, process);
+	   temporary_procinfo.reset (process);
 	   if (!open_procinfo_files (process, FD_CTL))
 	     proc_error (process, "info proc, open_procinfo_files", __LINE__);
 	 }
@@ -3626,8 +3630,6 @@ procfs_target::info_proc (const char *args, enum info_proc_what what)
     {
       info_proc_mappings (process, 0);
     }
-
-  do_cleanups (old_chain);
 
   return true;
 }

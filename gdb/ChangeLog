@@ -1,5 +1,12 @@
 2018-09-13  Tom Tromey  <tom@tromey.com>
 
+	* procfs.c (struct procinfo_deleter): New.
+	(procinfo_up): New typedef.
+	(do_destroy_procinfo_cleanup): Remove.
+	(procfs_target::info_proc): Use procinfo_up.  Remove cleanups.
+
+2018-09-13  Tom Tromey  <tom@tromey.com>
+
 	* source.c (add_path): Use gdb::unique_xmalloc_ptr.
 
 2018-09-13  Simon Marchi  <simon.marchi@ericsson.com>
