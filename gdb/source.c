@@ -479,13 +479,12 @@ add_path (const char *dirname, char **which_path, int parse_separators)
   else
     dir_vec.emplace_back (xstrdup (dirname));
 
-  struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
-
   for (const gdb::unique_xmalloc_ptr<char> &name_up : dir_vec)
     {
       char *name = name_up.get ();
       char *p;
       struct stat st;
+      gdb::unique_xmalloc_ptr<char> new_name_holder;
 
       /* Spaces and tabs will have been removed by buildargv().
          NAME is the start of the directory.
@@ -531,16 +530,17 @@ add_path (const char *dirname, char **which_path, int parse_separators)
 	}
 
       if (name[0] == '~')
-	name = tilde_expand (name);
+	new_name_holder.reset (tilde_expand (name));
 #ifdef HAVE_DOS_BASED_FILE_SYSTEM
       else if (IS_ABSOLUTE_PATH (name) && p == name + 2) /* "d:" => "d:." */
-	name = concat (name, ".", (char *)NULL);
+	new_name_holder.reset (concat (name, ".", (char *) NULL));
 #endif
       else if (!IS_ABSOLUTE_PATH (name) && name[0] != '$')
-	name = concat (current_directory, SLASH_STRING, name, (char *)NULL);
+	new_name_holder.reset (concat (current_directory, SLASH_STRING, name,
+				       (char *) NULL));
       else
-	name = savestring (name, p - name);
-      make_cleanup (xfree, name);
+	new_name_holder.reset (savestring (name, p - name));
+      name = new_name_holder.get ();
 
       /* Unless it's a variable, check existence.  */
       if (name[0] != '$')
@@ -630,8 +630,6 @@ add_path (const char *dirname, char **which_path, int parse_separators)
     skip_dup:
       ;
     }
-
-  do_cleanups (back_to);
 }
 
 

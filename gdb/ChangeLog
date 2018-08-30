@@ -1,3 +1,7 @@
+2018-09-13  Tom Tromey  <tom@tromey.com>
+
+	* source.c (add_path): Use gdb::unique_xmalloc_ptr.
+
 2018-09-13  Simon Marchi  <simon.marchi@ericsson.com>
 2018-09-13  Tom Tromey  <tom@tromey.com>
 
