@@ -1,3 +1,10 @@
+2018-09-01  Keith Seitz  <keiths@redhat.com>
+
+	* compile/compile-cplus-types.c (compile_cplus_debug_output_1): Use
+	pulongest instead of "%lld".
+	* compile/compile-cplus-symbols.c (gcc_cplus_convert_symbol): Remove
+	ATTRIBUTE_UNUSED.
+
 2018-08-31  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2read.c (dwarf2_add_field): Set the TYPE_LENGTH of the

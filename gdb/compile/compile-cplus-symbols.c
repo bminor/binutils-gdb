@@ -335,7 +335,7 @@ convert_symbol_bmsym (compile_cplus_instance *instance,
 void
 gcc_cplus_convert_symbol (void *datum,
 			  struct gcc_cp_context *gcc_context,
-			  enum gcc_cp_oracle_request request ATTRIBUTE_UNUSED,
+			  enum gcc_cp_oracle_request request,
 			  const char *identifier)
 {
   if (compile_debug)

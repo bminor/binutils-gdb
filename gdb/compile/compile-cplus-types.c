@@ -1244,9 +1244,9 @@ compile_cplus_instance::gcc_cplus_leave_scope
    gcc_decl.  */
 
 static void
-compile_cplus_debug_output_1 (gcc_type arg)
+compile_cplus_debug_output_1 (ULONGEST arg)
 {
-  fprintf_unfiltered (gdb_stdlog, "%lld", arg);
+  fprintf_unfiltered (gdb_stdlog, "%s", pulongest (arg));
 }
 
 static void
