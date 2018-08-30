@@ -1,3 +1,8 @@
+2018-08-30  Keith Seitz  <keiths@redhat.com>
+
+	* compile/compile-cplus-types.c (compile_cplus_instance::enter_scope):
+	Use "%s" and host_address_to_string instead of "%p" in printf.
+
 2018-08-29  Keith Seitz  <keiths@redhat.com>
 
 	* Makefile.in (SUBDIR_GCC_COMPILE_SRCS): Add compile-cplus-symbols.c

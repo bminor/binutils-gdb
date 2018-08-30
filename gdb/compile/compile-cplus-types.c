@@ -259,7 +259,10 @@ compile_cplus_instance::enter_scope (compile_scope &new_scope)
   if (must_push)
     {
       if (debug_compile_cplus_scopes)
-	fprintf_unfiltered (gdb_stdlog, "entering new scope %p\n", new_scope);
+	{
+	  fprintf_unfiltered (gdb_stdlog, "entering new scope %s\n",
+			      host_address_to_string (&new_scope));
+	}
 
       /* Push the global namespace. */
       plugin ().push_namespace ("");
