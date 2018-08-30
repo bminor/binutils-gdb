@@ -219,6 +219,7 @@ if { [is_elf_format] } then {
     run_dump_test "section12a"
     run_dump_test "section12b"
     run_dump_test "section13"
+    run_dump_test "section14"
     run_dump_test "dwarf2-1"
     run_dump_test "dwarf2-2"
     run_dump_test "dwarf2-3"

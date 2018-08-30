@@ -1,3 +1,9 @@
+2018-08-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/gas/elf/elf.exp: Run section14.
+	* testsuite/gas/elf/section14.d: New file.
+	* testsuite/gas/elf/section14.s: Likewise.
+
 2018-08-29  Daniel Cederman  <cederman@gaisler.com>
 
 	* testsuite/gas/sparc/leon.d: New test.

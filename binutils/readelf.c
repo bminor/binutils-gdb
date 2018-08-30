@@ -6359,6 +6359,8 @@ process_section_headers (Filedata * filedata)
 		  && filedata->section_headers[section->sh_info].sh_type != SHT_NOBITS
 		  && filedata->section_headers[section->sh_info].sh_type != SHT_NOTE
 		  && filedata->section_headers[section->sh_info].sh_type != SHT_INIT_ARRAY
+		  && filedata->section_headers[section->sh_info].sh_type != SHT_FINI_ARRAY
+		  && filedata->section_headers[section->sh_info].sh_type != SHT_PREINIT_ARRAY
 		  /* FIXME: Are other section types valid ?  */
 		  && filedata->section_headers[section->sh_info].sh_type < SHT_LOOS))
 	    {
