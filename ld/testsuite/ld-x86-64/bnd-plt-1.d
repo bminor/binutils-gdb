@@ -1,4 +1,4 @@
-#source: bnd-branch-1.s
+#source: bnd-branch-1.s -mx86-used-note=no
 #as: --64
 #ld: -shared -melf_x86_64 -z bndplt --hash-style=sysv -z max-page-size=0x200000 -z noseparate-code
 #objdump: -dw

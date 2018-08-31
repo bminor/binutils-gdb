@@ -1,6 +1,6 @@
 #source: pr23486a.s
 #source: pr23486b.s
-#as: --64 -defsym __64_bit__=1
+#as: --64 -defsym __64_bit__=1 -mx86-used-note=no
 #ld: -r -m elf_x86_64
 #readelf: -n
 

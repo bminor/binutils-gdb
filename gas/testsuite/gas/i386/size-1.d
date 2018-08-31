@@ -1,3 +1,4 @@
+#as: -mx86-used-note=no
 #name: i386 size 1
 #readelf: -r
 

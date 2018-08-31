@@ -1,6 +1,6 @@
 #source: ../ld-x86-64/pr23486a.s
 #source: ../ld-x86-64/pr23486b.s
-#as: --32
+#as: --32 -mx86-used-note=no
 #ld: -r -m elf_i386
 #readelf: -n
 

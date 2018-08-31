@@ -1,6 +1,6 @@
 #name: x86-64 property 1
 #source: property-1.s
-#as: -defsym __64_bit__=1
+#as: -mx86-used-note=no -defsym __64_bit__=1
 #readelf: -n
 
 Displaying notes found in: .note.gnu.property

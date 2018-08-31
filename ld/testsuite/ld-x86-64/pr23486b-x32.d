@@ -1,6 +1,6 @@
 #source: pr23486b.s
 #source: pr23486a.s
-#as: --x32
+#as: --x32 -mx86-used-note=no
 #ld: -r -m elf32_x86_64
 #readelf: -n
 

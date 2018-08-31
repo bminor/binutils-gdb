@@ -1,3 +1,4 @@
+#as: -mx86-used-note=no
 #source: ../x86-64-unwind.s
 #readelf: -S
 #name: x86-64 (ILP32) unwind

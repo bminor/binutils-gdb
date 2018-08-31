@@ -1,3 +1,4 @@
+#as: -mx86-used-note=no
 #name: x86-64 size 1
 #source: size-1.s
 #readelf: -r

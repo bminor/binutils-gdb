@@ -1,3 +1,4 @@
+#as: -mx86-used-note=no
 #readelf: -S
 #name: x86-64 unwind
 

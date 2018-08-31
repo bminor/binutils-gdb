@@ -1,4 +1,5 @@
 #name: i386 property 1
+#as: -mx86-used-note=no
 #readelf: -n
 
 Displaying notes found in: .note.gnu.property

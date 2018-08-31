@@ -1,3 +1,35 @@
+2018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/binutils-all/i386/compressed-1b.d: Pass
+	-mx86-used-note=no to assembler.
+	* testsuite/binutils-all/i386/compressed-1c.d: Likewise.
+	* testsuite/binutils-all/x86-64/compressed-1b.d: Likewise.
+	* testsuite/binutils-all/x86-64/compressed-1c.d: Likewise.
+	* testsuite/binutils-all/i386/empty.d: Pass -mx86-used-note=yes
+	to assembler and update expected output from "readelf -n".
+	* testsuite/binutils-all/i386/ibt.d: Likewise.
+	* testsuite/binutils-all/i386/pr21231a.d: Likewise.
+	* testsuite/binutils-all/i386/pr21231b.d: Likewise.
+	* testsuite/binutils-all/i386/shstk.d: Likewise.
+	* testsuite/binutils-all/x86-64/empty-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/empty.d: Likewise.
+	* testsuite/binutils-all/x86-64/ibt-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/ibt.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr21231a.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr21231b.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494a-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494a.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494b-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494b.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494c-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494c.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494d-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494d.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494e-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494e.d: Likewise.
+	* testsuite/binutils-all/x86-64/shstk-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/shstk.d: Likewise.
+
 2018-08-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (process_section_headers): Treat SHT_FINI_ARRAY and

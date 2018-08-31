@@ -1,6 +1,6 @@
 #source: pr23494b.s
 #PROG: objcopy
-#as: --x32
+#as: --x32 -mx86-used-note=no
 #objcopy: -O elf64-x86-64
 #readelf: -n
 #not-target: x86_64-*-nacl*

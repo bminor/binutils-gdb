@@ -1,3 +1,4 @@
+#as: -mx86-used-note=no
 #objdump: -s
 #name: i386 .bss
 

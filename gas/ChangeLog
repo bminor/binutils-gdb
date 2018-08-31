@@ -1,5 +1,26 @@
 2018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/gas/i386/bss.d: Pass -mx86-used-note=no to assembler.
+	* testsuite/gas/i386/ilp32/quad.d: Likewise.
+	* testsuite/gas/i386/ilp32/reloc64.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-size-1.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-size-3.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-size-5.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-unwind.d: Likewise.
+	* testsuite/gas/i386/property-1.d: Likewise.
+	* testsuite/gas/i386/relax.d: Likewise.
+	* testsuite/gas/i386/reloc64.d: Likewise.
+	* testsuite/gas/i386/size-1.d: Likewise.
+	* testsuite/gas/i386/size-3.d: Likewise.
+	* testsuite/gas/i386/x86-64-property-1.d: Likewise.
+	* testsuite/gas/i386/x86-64-size-1.d: Likewise.
+	* testsuite/gas/i386/x86-64-size-3.d: Likewise.
+	* testsuite/gas/i386/x86-64-size-5.d: Likewise.
+	* testsuite/gas/i386/x86-64-unwind.d: Likewise.
+	* testsuite/gas/i386/divide.d: Append "#pass".
+
+2018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* NEWS: Mention -mx86-used-note=[no|yes].
 	* configure.ac: Add --enable-x86-used-note.  Define
 	DEFAULT_X86_USED_NOTE.

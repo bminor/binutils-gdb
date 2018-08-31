@@ -1,3 +1,91 @@
+2018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/i386.exp: (ASFLAGS): Save, append
+	-mx86-used-note=no and restore.  Pass -mx86-used-note=yes and
+	-mx86-used-note=no to assembler.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/no-plt.exp: Pass -mx86-used-note=yes to
+	assembler.
+	* testsuite/ld-i386/tls.exp: Likewise.
+	* testsuite/ld-x86-64/no-plt.exp: Likewise.
+	* testsuite/ld-x86-64/tls.exp: Likewise.
+	* testsuite/ld-i386/pr23486a.d: Pass -mx86-used-note=no to
+	assembler.
+	* testsuite/ld-i386/pr23486b.d: Likewise.
+	* testsuite/ld-x86-64/bnd-branch-1-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-ifunc-1-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-ifunc-2-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-ifunc-2.d: Likewise.
+	* testsuite/ld-x86-64/bnd-plt-1-now.d: Likewise.
+	* testsuite/ld-x86-64/bnd-plt-1.d: Likewise.
+	* testsuite/ld-x86-64/pr23486a-x32.d: Likewise.
+	* testsuite/ld-x86-64/pr23486a.d: Likewise.
+	* testsuite/ld-x86-64/pr23486b-x32.d: Likewise.
+	* testsuite/ld-x86-64/pr23486b.d: Likewise.
+	* testsuite/ld-i386/property-x86-3.d: Pass -mx86-used-note=yes
+	to assembler and update expected output from "readelf -n".
+	* testsuite/ld-i386/property-x86-4a.d: Likewise.
+	* testsuite/ld-i386/property-x86-ibt1a.d: Likewise.
+	* testsuite/ld-i386/property-x86-ibt1b.d: Likewise.
+	* testsuite/ld-i386/property-x86-ibt2.d: Likewise.
+	* testsuite/ld-i386/property-x86-ibt3a.d: Likewise.
+	* testsuite/ld-i386/property-x86-ibt3b.d: Likewise.
+	* testsuite/ld-i386/property-x86-ibt4.d: Likewise.
+	* testsuite/ld-i386/property-x86-ibt5.d: Likewise.
+	* testsuite/ld-i386/property-x86-shstk1a.d: Likewise.
+	* testsuite/ld-i386/property-x86-shstk1b.d: Likewise.
+	* testsuite/ld-i386/property-x86-shstk2.d: Likewise.
+	* testsuite/ld-i386/property-x86-shstk3a.d: Likewise.
+	* testsuite/ld-i386/property-x86-shstk3b.d: Likewise.
+	* testsuite/ld-i386/property-x86-shstk4.d: Likewise.
+	* testsuite/ld-i386/property-x86-shstk5.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-3-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-3.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-4a-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-4a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt1a-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt1a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt1b-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt1b.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt2-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt2.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt3a-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt3a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt3b-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt3b.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt4-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt4.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt5-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt5.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk1a-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk1a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk1b-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk1b.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk2-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk2.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk3a-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk3a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk3b-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk3b.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk4-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk4.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk5-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-shstk5.d: Likewise.
+	* testsuite/ld-i386/property-1a.r: New file.
+	* testsuite/ld-i386/property-2a.r: Likewise.
+	* testsuite/ld-i386/property-3a.r: Likewise.
+	* testsuite/ld-i386/property-4a.r: Likewise.
+	* testsuite/ld-i386/property-5a.r: Likewise.
+	* testsuite/ld-i386/property-7a.r: Likewise.
+	* testsuite/ld-x86-64/property-1a.r: Likewise.
+	* testsuite/ld-x86-64/property-2a.r: Likewise.
+	* testsuite/ld-x86-64/property-3a.r: Likewise.
+	* testsuite/ld-x86-64/property-4a.r: Likewise.
+	* testsuite/ld-x86-64/property-5a.r: Likewise.
+	* testsuite/ld-x86-64/property-7a.r: Likewise.
+	* testsuite/ld-x86-64/mpx.exp: Pass -mx86-used-note=no to
+	assembler.
+
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
 	* testsuite/ld-mips-elf/mips-elf-flags.exp: Run good_combination
