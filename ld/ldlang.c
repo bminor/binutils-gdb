@@ -6097,6 +6097,24 @@ undef_start_stop (struct bfd_link_hash_entry *h)
       || strcmp (h->u.def.section->name,
 		 h->u.def.section->output_section->name) != 0)
     {
+      asection *sec = bfd_get_section_by_name (link_info.output_bfd,
+					       h->u.def.section->name);
+      if (sec != NULL)
+	{
+	  /* When there are more than one input sections with the same
+	     section name, SECNAME, linker picks the first one to define
+	     __start_SECNAME and __stop_SECNAME symbols.  When the first
+	     input section is removed by comdat group, we need to check
+	     if there is still an output section with section name
+	     SECNAME.  */
+	  asection *i;
+	  for (i = sec->map_head.s; i != NULL; i = i->map_head.s)
+	    if (strcmp (h->u.def.section->name, i->name) == 0)
+	      {
+		h->u.def.section = i;
+		return;
+	      }
+	}
       h->type = bfd_link_hash_undefined;
       h->u.undef.abfd = NULL;
     }

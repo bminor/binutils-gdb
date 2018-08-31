@@ -1,3 +1,13 @@
+018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23591
+	* ldlang.c (undef_start_stop): Lookup section in output with
+	the same name.
+	* testsuite/ld-elf/pr23591.d: New file.
+	* testsuite/ld-elf/pr23591a.s: Likewise.
+	* testsuite/ld-elf/pr23591b.s: Likewise.
+	* testsuite/ld-elf/pr23591c.s: Likewise.
+
 2018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-i386/i386.exp: Also run for x86_64-*-elf* targets.
