@@ -1,3 +1,9 @@
+2018-08-31  Kito Cheng  <kito@andestech.com>
+
+	* testsuite/gas/riscv/c-fld-fsd-fail.d: New.
+	* testsuite/gas/riscv/c-fld-fsd-fail.l: Likewise.
+	* testsuite/gas/riscv/c-fld-fsd-fail.s: Likewise.
+
 2018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/gas/elf/section14.d: Change skip to xfail.

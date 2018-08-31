@@ -1,3 +1,8 @@
+2018-08-31  Kito Cheng  <kito@andestech.com>
+
+	* riscv-opc.c (riscv_opcodes): Fix incorrect subset info for
+	compressed floating point instructions.
+
 2018-08-30  Kito Cheng  <kito@andestech.com>
 
 	* riscv-dis.c (riscv_disassemble_insn): Check XLEN by
