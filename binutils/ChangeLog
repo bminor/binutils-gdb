@@ -1,5 +1,12 @@
 2018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/binutils-all/readelf.s-64: Adjusted for
+	.note.gnu.property section.
+	* testsuite/binutils-all/strip-3.d: Also strip
+	.note.gnu.property section.
+
+2018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/binutils-all/i386/compressed-1b.d: Pass
 	-mx86-used-note=no to assembler.
 	* testsuite/binutils-all/i386/compressed-1c.d: Likewise.
