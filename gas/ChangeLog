@@ -1,5 +1,10 @@
 2018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/gas/cfi/cfi-label.d: Pass -mx86-used-note=no to
+	assembler.
+
+2018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/gas/i386/bss.d: Pass -mx86-used-note=no to assembler.
 	* testsuite/gas/i386/ilp32/quad.d: Likewise.
 	* testsuite/gas/i386/ilp32/reloc64.d: Likewise.
