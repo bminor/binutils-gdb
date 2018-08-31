@@ -1905,6 +1905,40 @@ extern struct thread_info *target_thread_handle_to_thread_info
 
 /* Hardware watchpoint interfaces.  */
 
+/* GDB's current model is that there are three "kinds" of watchpoints,
+   with respect to when they trigger and how you can move past them.
+
+   Those are: continuable, steppable, and non-steppable.
+
+   Continuable watchpoints are like x86's -- those trigger after the
+   memory access's side effects are fully committed to memory.  I.e.,
+   they trap with the PC pointing at the next instruction already.
+   Continuing past such a watchpoint is doable by just normally
+   continuing, hence the name.
+
+   Both steppable and non-steppable watchpoints trap before the memory
+   access.  I.e, the PC points at the instruction that is accessing
+   the memory.  So GDB needs to single-step once past the current
+   instruction in order to make the access effective and check whether
+   the instruction's side effects change the watched expression.
+
+   Now, in order to step past that instruction, depending on
+   architecture and target, you can have two situations:
+
+   - steppable watchpoints: you can single-step with the watchpoint
+     still armed, and the watchpoint won't trigger again.
+
+   - non-steppable watchpoints: if you try to single-step with the
+     watchpoint still armed, you'd trap the watchpoint again and the
+     thread wouldn't make any progress.  So GDB needs to temporarily
+     remove the watchpoint in order to step past it.
+
+   If your target/architecture does not signal that it has either
+   steppable or non-steppable watchpoints via either
+   target_have_steppable_watchpoint or
+   gdbarch_have_nonsteppable_watchpoint, GDB assumes continuable
+   watchpoints.  */
+
 /* Returns non-zero if we were stopped by a hardware watchpoint (memory read or
    write).  Only the INFERIOR_PTID task is being queried.  */
 

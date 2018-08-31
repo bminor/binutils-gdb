@@ -707,6 +707,8 @@ f;CORE_ADDR;adjust_dwarf2_addr;CORE_ADDR pc;pc;;default_adjust_dwarf2_addr;;0
 # stop PC.
 f;CORE_ADDR;adjust_dwarf2_line;CORE_ADDR addr, int rel;addr, rel;;default_adjust_dwarf2_line;;0
 v;int;cannot_step_breakpoint;;;0;0;;0
+# See comment in target.h about continuable, steppable and
+# non-steppable watchpoints.
 v;int;have_nonsteppable_watchpoint;;;0;0;;0
 F;int;address_class_type_flags;int byte_size, int dwarf2_addr_class;byte_size, dwarf2_addr_class
 M;const char *;address_class_type_flags_to_name;int type_flags;type_flags

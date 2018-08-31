@@ -1,5 +1,12 @@
 2018-08-31  Pedro Alves  <palves@redhat.com>
 
+	* gdbarch.sh (have_nonsteppable_watchpoint): Add comment.
+	* target.h (Hardware watchpoint interfaces): Describe
+	continuable/steppable/non-steppable watchpoints.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+2018-08-31  Pedro Alves  <palves@redhat.com>
+
 	* nto-procfs.c (nto_procfs_target::have_continuable_watchpoint):
 	Delete.
 	* s390-linux-nat.c
