@@ -1,5 +1,10 @@
 2018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/gas/elf/elf.exp: Pass -mx86-used-note=no to
+	assembler for section2 test on ELF/x86 targets.
+
+2018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/gas/cfi/cfi-label.d: Pass -mx86-used-note=no to
 	assembler.
 

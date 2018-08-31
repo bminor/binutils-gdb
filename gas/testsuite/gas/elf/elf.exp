@@ -170,7 +170,11 @@ if { [is_elf_format] } then {
     if {! [istarget "h8300-*-*"]} then {
 	# The h8300 port issues a warning message for
 	# new sections created without atrributes.
-	run_elf_list_test "section2" "$target_machine" "-al" "-s" ""
+	if  { [istarget "i*86-*-*"] || [istarget "x86_64-*-*"] } then {
+	    run_elf_list_test "section2" "$target_machine" "-al -mx86-used-note=no" "-s" ""
+	} {
+	    run_elf_list_test "section2" "$target_machine" "-al" "-s" ""
+	}
     }
     run_dump_test "section3"
     run_dump_test "section4"
