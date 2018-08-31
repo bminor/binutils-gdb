@@ -1,5 +1,9 @@
 2018-08-31  Pedro Alves  <palves@redhat.com>
 
+	* gdbarch.h: Regenerate.
+
+2018-08-31  Pedro Alves  <palves@redhat.com>
+
 	* gdbarch.sh (have_nonsteppable_watchpoint): Add comment.
 	* target.h (Hardware watchpoint interfaces): Describe
 	continuable/steppable/non-steppable watchpoints.
