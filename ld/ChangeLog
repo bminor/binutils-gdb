@@ -1,5 +1,10 @@
 2018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-srec/srec.exp: Append -Wa,-mx86-used-note=no to
+	CC and CXX on ELF/x86 targets.
+
+2018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-i386/i386.exp: (ASFLAGS): Save, append
 	-mx86-used-note=no and restore.  Pass -mx86-used-note=yes and
 	-mx86-used-note=no to assembler.

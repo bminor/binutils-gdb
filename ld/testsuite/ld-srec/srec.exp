@@ -357,6 +357,13 @@ set CC "$CC $PLT_CFLAGS $NOPIE_CFLAGS $NOPIE_LDFLAGS"
 set old_CXX "$CXX"
 set CXX "$CXX $PLT_CFLAGS $NOPIE_CFLAGS $NOPIE_LDFLAGS"
 
+# S-records can't handle .note.gnu.property sections.
+if { [is_elf_format] \
+     && ([istarget "i?86-*-*"] || [istarget "x86_64-*-*"]) } {
+    set CC "$CC -Wa,-mx86-used-note=no"
+    set CXX "$CXX -Wa,-mx86-used-note=no"
+}
+
 if { ![ld_compile $CC $srcdir/$subdir/sr1.c tmpdir/sr1.o] \
      || ![ld_compile $CC $srcdir/$subdir/sr2.c tmpdir/sr2.o] } {
     unresolved $test1
