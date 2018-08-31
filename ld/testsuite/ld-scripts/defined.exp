@@ -62,6 +62,13 @@ if ![ld_link $ld tmpdir/def "$LDFLAGS -T $srcdir/$subdir/defined.t tmpdir/def.o"
     }
 }
 
+global ASFLAGS
+set saved_ASFLAGS "$ASFLAGS"
+if { [is_elf_format] \
+     && ([istarget "i?86-*-*"] || [istarget "x86_64-*-*"]) } {
+    set ASFLAGS "$ASFLAGS -mx86-used-note=no"
+}
+
 set prms_id 0
 run_dump_test "defined2"
 run_dump_test "defined3"
@@ -73,3 +80,4 @@ if [is_elf_format] {
     run_dump_test "defined6"
 }
 set LDFLAGS "$saved_LDFLAGS"
+set ASFLAGS "$saved_ASFLAGS"

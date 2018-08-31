@@ -1,5 +1,13 @@
 2018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-elf/elf.exp (ASFLAGS): Save, append
+	-mx86-used-note=no and restore.
+	* testsuite/ld-ifunc/ifunc.exp (ASFLAGS): Likewise.
+	* testsuite/ld-scripts/defined.exp (ASFLAGS): Likewise.
+	* testsuite/ld-scripts/overlay-size.exp (ASFLAGS): Likewise.
+
+2018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-srec/srec.exp: Append -Wa,-mx86-used-note=no to
 	CC and CXX on ELF/x86 targets.
 

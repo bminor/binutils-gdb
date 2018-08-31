@@ -45,6 +45,12 @@ if ![check_shared_lib_support] {
     return
 }
 
+global ASFLAGS
+set saved_ASFLAGS "$ASFLAGS"
+if { [istarget "i?86-*-*"] || [istarget "x86_64-*-*"] } {
+    set ASFLAGS "$ASFLAGS -mx86-used-note=no"
+}
+
 # This test does not need a compiler...
 run_dump_test "ifuncmod5"
 
@@ -770,3 +776,5 @@ run_ld_link_exec_tests [list \
 	"-fPIE -O2 -g" \
     ] \
 ]}
+
+set ASFLAGS "$saved_ASFLAGS"
