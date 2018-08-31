@@ -119,9 +119,6 @@ struct nto_procfs_target : public inf_child_target
 
   void interrupt () override;
 
-  bool have_continuable_watchpoint ()
-  { return true; }
-
   const char *extra_thread_info (struct thread_info *) override;
 
   char *pid_to_exec_file (int pid) override;

@@ -1,3 +1,14 @@
+2018-08-31  Pedro Alves  <palves@redhat.com>
+
+	* nto-procfs.c (nto_procfs_target::have_continuable_watchpoint):
+	Delete.
+	* s390-linux-nat.c
+	(s390_linux_nat_target::have_continuable_watchpoint): Delete.
+	* target.h (target_ops::have_continuable_watchpoint): Delete.
+	(target_have_continuable_watchpoint): Delete.
+	* x86-nat.h (x86_nat_target::have_continuable_watchpoint): Delete.
+	* target-delegates.c: Regenerate.
+
 2018-08-31  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gnulib/Makefile.in (aclocal_m4_deps): Update according to

@@ -552,8 +552,6 @@ struct target_ops
       TARGET_DEFAULT_RETURN (false);
     virtual int have_steppable_watchpoint ()
       TARGET_DEFAULT_RETURN (false);
-    virtual bool have_continuable_watchpoint ()
-      TARGET_DEFAULT_RETURN (false);
     virtual bool stopped_data_address (CORE_ADDR *)
       TARGET_DEFAULT_RETURN (false);
     virtual bool watchpoint_addr_within_range (CORE_ADDR, CORE_ADDR, int)
@@ -1932,11 +1930,6 @@ extern struct thread_info *target_thread_handle_to_thread_info
 
 #define target_have_steppable_watchpoint \
   (current_top_target ()->have_steppable_watchpoint ())
-
-/* Non-zero if we have continuable watchpoints  */
-
-#define target_have_continuable_watchpoint \
-  (current_top_target ()->have_continuable_watchpoint ())
 
 /* Provide defaults for hardware watchpoint functions.  */
 
