@@ -1,5 +1,13 @@
 2018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-i386/i386.exp: Also run for x86_64-*-elf* targets.
+	* testsuite/ld-i386/property-x86-4a.d: Pass -z separate-code to
+	ld.
+	* testsuite/ld-x86-64/property-x86-4a-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-4a.d: Likewise.
+
+2018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-elf/elf.exp (ASFLAGS): Save, append
 	-mx86-used-note=no and restore.
 	* testsuite/ld-ifunc/ifunc.exp (ASFLAGS): Likewise.

@@ -1,7 +1,7 @@
 #source: property-x86-4a.s
 #source: property-x86-4b.s
 #as: --32 -mx86-used-note=yes
-#ld: -m elf_i386 --gc-sections --entry=main
+#ld: -m elf_i386 --gc-sections --entry=main -z separate-code
 #readelf: -n
 
 Displaying notes found in: .note.gnu.property

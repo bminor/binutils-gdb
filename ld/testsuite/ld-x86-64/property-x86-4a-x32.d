@@ -1,7 +1,7 @@
 #source: property-x86-4a.s
 #source: property-x86-4b.s
 #as: --x32 -mx86-used-note=yes
-#ld: -m elf32_x86_64 --gc-sections --entry=main
+#ld: -m elf32_x86_64 --gc-sections --entry=main -z separate-code
 #readelf: -n
 
 Displaying notes found in: .note.gnu.property
