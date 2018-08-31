@@ -408,6 +408,10 @@ proc run_dump_tests { testcases {extra_options {}} } {
 #       expected output on some targets.  (For example, see
 #       gas/arm/inst.d and gas/arm/wince_inst.d.)
 #
+#   xfail: GLOB|PROC ...
+#	Run this test and it is is expected to fail on a specified list
+#	of targets.
+#
 #   error: REGEX
 #	An error with message matching REGEX must be emitted for the test
 #	to pass.  The PROG, objdump, nm and objcopy options have no
@@ -475,6 +479,7 @@ proc run_dump_test { name {extra_options {}} } {
     set opts(not-target) {}
     set opts(skip) {}
     set opts(not-skip) {}
+    set opts(xfail) {}
     set opts(section-subst) {}
 
     foreach i $opt_array {
@@ -617,6 +622,11 @@ proc run_dump_test { name {extra_options {}} } {
 		return
 	    }
 	}
+    }
+
+    # Setup xfailures.
+    foreach targ $opts(xfail) {
+	setup_xfail $targ
     }
 
     if { $opts(source) == "" } {
