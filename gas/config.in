@@ -50,6 +50,10 @@
 /* Define to 1 if you want to generate x86 relax relocations by default. */
 #undef DEFAULT_GENERATE_X86_RELAX_RELOCATIONS
 
+/* Define to 1 if you want to generate GNU x86 used ISA and feature properties
+   by default. */
+#undef DEFAULT_X86_USED_NOTE
+
 /* Supported emulations. */
 #undef EMULATIONS
 

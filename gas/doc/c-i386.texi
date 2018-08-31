@@ -400,6 +400,15 @@ R_X86_64_REX_GOTPCRELX, in 64-bit mode.
 relocations.  The default can be controlled by a configure option
 @option{--enable-x86-relax-relocations}.
 
+@cindex @samp{-mx86-used-note=} option, i386
+@cindex @samp{-mx86-used-note=} option, x86-64
+@item -mx86-used-note=@var{no}
+@itemx -mx86-used-note=@var{yes}
+These options control whether the assembler should generate
+GNU_PROPERTY_X86_ISA_1_USED and GNU_PROPERTY_X86_FEATURE_2_USED
+GNU property notes.  The default can be controlled by the
+@option{--enable-x86-used-note} configure option.
+
 @cindex @samp{-mevexrcig=} option, i386
 @cindex @samp{-mevexrcig=} option, x86-64
 @item -mevexrcig=@var{rne}

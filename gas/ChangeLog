@@ -1,3 +1,27 @@
+2018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention -mx86-used-note=[no|yes].
+	* configure.ac: Add --enable-x86-used-note.  Define
+	DEFAULT_X86_USED_NOTE.
+	* config.in: Regenerated.
+	* configure: Likewise.
+	* config/tc-i386.c (x86_isa_1_used): New.
+	(x86_feature_2_used): Likewise.
+	(x86_used_note): Likewise.
+	(_i386_insn): Add has_regmmx, has_regxmm, has_regymm and
+	has_regzmm.
+	(build_modrm_byte): Set i.has_regmmx, i.has_regzmm.
+	i.has_regymm and i.has_regxmm.
+	(x86_cleanup): New function.
+	(output_insn): Update x86_isa_1_used and x86_feature_2_used.
+	(OPTION_X86_USED_NOTE): New.
+	(md_longopts): Add -mx86-used-note=.
+	(md_parse_option): Handle OPTION_X86_USED_NOTE.
+	(md_show_usage): Display -mx86-used-note=.
+	* config/tc-i386.h (x86_cleanup): New prototype.
+	(md_cleanup): New.
+	* doc/c-i386.texi: Document -mx86-used-note=.
+
 2018-08-30  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* testsuite/gas/sparc/leon.d: Disassemble v8 code also in sparc64

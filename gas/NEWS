@@ -1,5 +1,10 @@
 -*- text -*-
 
+* Add -mx86-used-note=[yes|no] option to generate (or not) x86 GNU property
+  notes.  Add a --enable-x86-used-note configure time option to set the
+  default behavior.  Set the default if the configure option is not used
+  to "no".
+
 * Add support for the MIPS Loongson EXTensions R2 (EXT2) instructions.
 
 * Add support for the MIPS Loongson EXTensions (EXT) instructions.

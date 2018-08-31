@@ -316,6 +316,11 @@ extern bfd_vma x86_64_section_letter (int, const char **);
 #define md_elf_section_letter(LETTER, PTR_MSG)	x86_64_section_letter (LETTER, PTR_MSG)
 #define md_elf_section_word(STR, LEN)		x86_64_section_word (STR, LEN)
 
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+extern void x86_cleanup (void);
+#define md_cleanup() x86_cleanup ()
+#endif
+
 #ifdef TE_PE
 
 #define O_secrel O_md1

@@ -188,6 +188,13 @@ static void s_bss (int);
 #endif
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
 static void handle_large_common (int small ATTRIBUTE_UNUSED);
+
+/* GNU_PROPERTY_X86_ISA_1_USED.  */
+static unsigned int x86_isa_1_used;
+/* GNU_PROPERTY_X86_FEATURE_2_USED.  */
+static unsigned int x86_feature_2_used;
+/* Generate x86 used ISA and feature properties.  */
+static unsigned int x86_used_note = DEFAULT_X86_USED_NOTE;
 #endif
 
 static const char *default_arch = DEFAULT_ARCH;
@@ -331,6 +338,18 @@ struct _i386_insn
        PREFIXES is the number of prefix opcodes.  */
     unsigned int prefixes;
     unsigned char prefix[MAX_PREFIXES];
+
+    /* Has MMX register operands.  */
+    bfd_boolean has_regmmx;
+
+    /* Has XMM register operands.  */
+    bfd_boolean has_regxmm;
+
+    /* Has YMM register operands.  */
+    bfd_boolean has_regymm;
+
+    /* Has ZMM register operands.  */
+    bfd_boolean has_regzmm;
 
     /* RM and SIB are the modrm byte and the sib byte where the
        addressing modes of this insn are encoded.  */
@@ -7054,6 +7073,21 @@ build_modrm_byte (void)
 	{
 	  i.rm.reg = i.op[dest].regs->reg_num;
 	  i.rm.regmem = i.op[source].regs->reg_num;
+	  if (i.op[dest].regs->reg_type.bitfield.regmmx
+	       || i.op[source].regs->reg_type.bitfield.regmmx)
+	    i.has_regmmx = TRUE;
+	  else if (i.op[dest].regs->reg_type.bitfield.regsimd
+		   || i.op[source].regs->reg_type.bitfield.regsimd)
+	    {
+	      if (i.types[dest].bitfield.zmmword
+		  || i.types[source].bitfield.zmmword)
+		i.has_regzmm = TRUE;
+	      else if (i.types[dest].bitfield.ymmword
+		       || i.types[source].bitfield.ymmword)
+		i.has_regymm = TRUE;
+	      else
+		i.has_regxmm = TRUE;
+	    }
 	  if ((i.op[dest].regs->reg_flags & RegRex) != 0)
 	    i.rex |= REX_R;
 	  if ((i.op[dest].regs->reg_flags & RegVRex) != 0)
@@ -7393,17 +7427,32 @@ build_modrm_byte (void)
 	  unsigned int vex_reg = ~0;
 
 	  for (op = 0; op < i.operands; op++)
-	    if (i.types[op].bitfield.reg
-		|| i.types[op].bitfield.regmmx
-		|| i.types[op].bitfield.regsimd
-		|| i.types[op].bitfield.regbnd
-		|| i.types[op].bitfield.regmask
-		|| i.types[op].bitfield.sreg2
-		|| i.types[op].bitfield.sreg3
-		|| i.types[op].bitfield.control
-		|| i.types[op].bitfield.debug
-		|| i.types[op].bitfield.test)
-	      break;
+	    {
+	      if (i.types[op].bitfield.reg
+		  || i.types[op].bitfield.regbnd
+		  || i.types[op].bitfield.regmask
+		  || i.types[op].bitfield.sreg2
+		  || i.types[op].bitfield.sreg3
+		  || i.types[op].bitfield.control
+		  || i.types[op].bitfield.debug
+		  || i.types[op].bitfield.test)
+		break;
+	      if (i.types[op].bitfield.regsimd)
+		{
+		  if (i.types[op].bitfield.zmmword)
+		    i.has_regzmm = TRUE;
+		  else if (i.types[op].bitfield.ymmword)
+		    i.has_regymm = TRUE;
+		  else
+		    i.has_regxmm = TRUE;
+		  break;
+		}
+	      if (i.types[op].bitfield.regmmx)
+		{
+		  i.has_regmmx = TRUE;
+		  break;
+		}
+	    }
 
 	  if (vex_3_sources)
 	    op = dest;
@@ -7783,11 +7832,218 @@ output_interseg_jump (void)
   md_number_to_chars (p + size, (valueT) i.op[0].imms->X_add_number, 2);
 }
 
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+void
+x86_cleanup (void)
+{
+  char *p;
+  asection *seg = now_seg;
+  subsegT subseg = now_subseg;
+  asection *sec;
+  unsigned int alignment, align_size_1;
+  unsigned int isa_1_descsz, feature_2_descsz, descsz;
+  unsigned int isa_1_descsz_raw, feature_2_descsz_raw;
+  unsigned int padding;
+
+  if (!IS_ELF || !x86_used_note)
+    return;
+
+  x86_isa_1_used |= GNU_PROPERTY_X86_UINT32_VALID;
+  x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_X86;
+
+  /* The .note.gnu.property section layout:
+
+     Field	Length		Contents
+     ----	----		----
+     n_namsz	4		4
+     n_descsz	4		The note descriptor size
+     n_type	4		NT_GNU_PROPERTY_TYPE_0
+     n_name	4		"GNU"
+     n_desc	n_descsz	The program property array
+     ....	....		....
+   */
+
+  /* Create the .note.gnu.property section.  */
+  sec = subseg_new (NOTE_GNU_PROPERTY_SECTION_NAME, 0);
+  bfd_set_section_flags (stdoutput, sec,
+			 (SEC_ALLOC
+			  | SEC_LOAD
+			  | SEC_DATA
+			  | SEC_HAS_CONTENTS
+			  | SEC_READONLY));
+
+  if (get_elf_backend_data (stdoutput)->s->elfclass == ELFCLASS64)
+    {
+      align_size_1 = 7;
+      alignment = 3;
+    }
+  else
+    {
+      align_size_1 = 3;
+      alignment = 2;
+    }
+
+  bfd_set_section_alignment (stdoutput, sec, alignment);
+  elf_section_type (sec) = SHT_NOTE;
+
+  /* GNU_PROPERTY_X86_ISA_1_USED: 4-byte type + 4-byte data size
+				  + 4-byte data  */
+  isa_1_descsz_raw = 4 + 4 + 4;
+  /* Align GNU_PROPERTY_X86_ISA_1_USED.  */
+  isa_1_descsz = (isa_1_descsz_raw + align_size_1) & ~align_size_1;
+
+  feature_2_descsz_raw = isa_1_descsz;
+  /* GNU_PROPERTY_X86_FEATURE_2_USED: 4-byte type + 4-byte data size
+				      + 4-byte data  */
+  feature_2_descsz_raw += 4 + 4 + 4;
+  /* Align GNU_PROPERTY_X86_FEATURE_2_USED.  */
+  feature_2_descsz = ((feature_2_descsz_raw + align_size_1)
+		      & ~align_size_1);
+
+  descsz = feature_2_descsz;
+  /* Section size: n_namsz + n_descsz + n_type + n_name + n_descsz.  */
+  p = frag_more (4 + 4 + 4 + 4 + descsz);
+
+  /* Write n_namsz.  */
+  md_number_to_chars (p, (valueT) 4, 4);
+
+  /* Write n_descsz.  */
+  md_number_to_chars (p + 4, (valueT) descsz, 4);
+
+  /* Write n_type.  */
+  md_number_to_chars (p + 4 * 2, (valueT) NT_GNU_PROPERTY_TYPE_0, 4);
+
+  /* Write n_name.  */
+  memcpy (p + 4 * 3, "GNU", 4);
+
+  /* Write 4-byte type.  */
+  md_number_to_chars (p + 4 * 4,
+		      (valueT) GNU_PROPERTY_X86_ISA_1_USED, 4);
+
+  /* Write 4-byte data size.  */
+  md_number_to_chars (p + 4 * 5, (valueT) 4, 4);
+
+  /* Write 4-byte data.  */
+  md_number_to_chars (p + 4 * 6, (valueT) x86_isa_1_used, 4);
+
+  /* Zero out paddings.  */
+  padding = isa_1_descsz - isa_1_descsz_raw;
+  if (padding)
+    memset (p + 4 * 7, 0, padding);
+
+  /* Write 4-byte type.  */
+  md_number_to_chars (p + isa_1_descsz + 4 * 4,
+		      (valueT) GNU_PROPERTY_X86_FEATURE_2_USED, 4);
+
+  /* Write 4-byte data size.  */
+  md_number_to_chars (p + isa_1_descsz + 4 * 5, (valueT) 4, 4);
+
+  /* Write 4-byte data.  */
+  md_number_to_chars (p + isa_1_descsz + 4 * 6,
+		      (valueT) x86_feature_2_used, 4);
+
+  /* Zero out paddings.  */
+  padding = feature_2_descsz - feature_2_descsz_raw;
+  if (padding)
+    memset (p + isa_1_descsz + 4 * 7, 0, padding);
+
+  /* We probably can't restore the current segment, for there likely
+     isn't one yet...  */
+  if (seg && subseg)
+    subseg_set (seg, subseg);
+}
+#endif
+
 static void
 output_insn (void)
 {
   fragS *insn_start_frag;
   offsetT insn_start_off;
+
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+  if (IS_ELF && x86_used_note)
+    {
+      if (i.tm.cpu_flags.bitfield.cpucmov)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_CMOV;
+      if (i.tm.cpu_flags.bitfield.cpusse)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_SSE;
+      if (i.tm.cpu_flags.bitfield.cpusse2)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_SSE2;
+      if (i.tm.cpu_flags.bitfield.cpusse3)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_SSE3;
+      if (i.tm.cpu_flags.bitfield.cpussse3)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_SSSE3;
+      if (i.tm.cpu_flags.bitfield.cpusse4_1)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_SSE4_1;
+      if (i.tm.cpu_flags.bitfield.cpusse4_2)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_SSE4_2;
+      if (i.tm.cpu_flags.bitfield.cpuavx)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX;
+      if (i.tm.cpu_flags.bitfield.cpuavx2)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX2;
+      if (i.tm.cpu_flags.bitfield.cpufma)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_FMA;
+      if (i.tm.cpu_flags.bitfield.cpuavx512f)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512F;
+      if (i.tm.cpu_flags.bitfield.cpuavx512cd)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512CD;
+      if (i.tm.cpu_flags.bitfield.cpuavx512er)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512ER;
+      if (i.tm.cpu_flags.bitfield.cpuavx512pf)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512PF;
+      if (i.tm.cpu_flags.bitfield.cpuavx512vl)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512VL;
+      if (i.tm.cpu_flags.bitfield.cpuavx512dq)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512DQ;
+      if (i.tm.cpu_flags.bitfield.cpuavx512bw)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512BW;
+      if (i.tm.cpu_flags.bitfield.cpuavx512_4fmaps)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512_4FMAPS;
+      if (i.tm.cpu_flags.bitfield.cpuavx512_4vnniw)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512_4VNNIW;
+      if (i.tm.cpu_flags.bitfield.cpuavx512_bitalg)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512_BITALG;
+      if (i.tm.cpu_flags.bitfield.cpuavx512ifma)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512_IFMA;
+      if (i.tm.cpu_flags.bitfield.cpuavx512vbmi)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512_VBMI;
+      if (i.tm.cpu_flags.bitfield.cpuavx512_vbmi2)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512_VBMI2;
+      if (i.tm.cpu_flags.bitfield.cpuavx512_vnni)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512_VNNI;
+
+      if (i.tm.cpu_flags.bitfield.cpu8087
+	  || i.tm.cpu_flags.bitfield.cpu287
+	  || i.tm.cpu_flags.bitfield.cpu387
+	  || i.tm.cpu_flags.bitfield.cpu687
+	  || i.tm.cpu_flags.bitfield.cpufisttp)
+	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_X87;
+      /* Don't set GNU_PROPERTY_X86_FEATURE_2_MMX for prefetchtXXX nor
+	 Xfence instructions.  */
+      if (i.tm.base_opcode != 0xf18
+	  && i.tm.base_opcode != 0xf0d
+	  && i.tm.base_opcode != 0xfae
+	  && (i.has_regmmx
+	      || i.tm.cpu_flags.bitfield.cpummx
+	      || i.tm.cpu_flags.bitfield.cpua3dnow
+	      || i.tm.cpu_flags.bitfield.cpua3dnowa))
+	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_MMX;
+      if (i.has_regxmm)
+	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XMM;
+      if (i.has_regymm)
+	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_YMM;
+      if (i.has_regzmm)
+	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_ZMM;
+      if (i.tm.cpu_flags.bitfield.cpufxsr)
+	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_FXSR;
+      if (i.tm.cpu_flags.bitfield.cpuxsave)
+	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XSAVE;
+      if (i.tm.cpu_flags.bitfield.cpuxsaveopt)
+	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XSAVEOPT;
+      if (i.tm.cpu_flags.bitfield.cpuxsavec)
+	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XSAVEC;
+    }
+#endif
 
   /* Tie dwarf2 debug info to the address at the start of the insn.
      We can't do this after the insn has been output as the current
@@ -10581,6 +10837,7 @@ const char *md_shortopts = "qnO::";
 #define OPTION_MAMD64 (OPTION_MD_BASE + 22)
 #define OPTION_MINTEL64 (OPTION_MD_BASE + 23)
 #define OPTION_MFENCE_AS_LOCK_ADD (OPTION_MD_BASE + 24)
+#define OPTION_X86_USED_NOTE (OPTION_MD_BASE + 25)
 
 struct option md_longopts[] =
 {
@@ -10592,6 +10849,7 @@ struct option md_longopts[] =
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   {"x32", no_argument, NULL, OPTION_X32},
   {"mshared", no_argument, NULL, OPTION_MSHARED},
+  {"mx86-used-note", required_argument, NULL, OPTION_X86_USED_NOTE},
 #endif
   {"divide", no_argument, NULL, OPTION_DIVIDE},
   {"march", required_argument, NULL, OPTION_MARCH},
@@ -10659,6 +10917,17 @@ md_parse_option (int c, const char *arg)
     case OPTION_MSHARED:
       shared = 1;
       break;
+
+    case OPTION_X86_USED_NOTE:
+      if (strcasecmp (arg, "yes") == 0)
+        x86_used_note = 1;
+      else if (strcasecmp (arg, "no") == 0)
+        x86_used_note = 0;
+      else
+        as_fatal (_("invalid -mx86-used-note= option: `%s'"), arg);
+      break;
+
+
 #endif
 #if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
      || defined (TE_PE) || defined (TE_PEP) || defined (OBJ_MACH_O))
@@ -11196,9 +11465,19 @@ md_show_usage (FILE *stream)
   -mnaked-reg             don't require `%%' prefix for registers\n"));
   fprintf (stream, _("\
   -madd-bnd-prefix        add BND prefix for all valid branches\n"));
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   fprintf (stream, _("\
   -mshared                disable branch optimization for shared code\n"));
-# if defined (TE_PE) || defined (TE_PEP)
+  fprintf (stream, _("\
+  -mx86-used-note=[no|yes] "));
+  if (DEFAULT_X86_USED_NOTE)
+    fprintf (stream, _("(default: yes)\n"));
+  else
+    fprintf (stream, _("(default: no)\n"));
+  fprintf (stream, _("\
+                          generate x86 used ISA and feature properties\n"));
+#endif
+#if defined (TE_PE) || defined (TE_PEP)
   fprintf (stream, _("\
   -mbig-obj               generate big object files\n"));
 #endif
