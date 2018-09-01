@@ -896,12 +896,13 @@ bfd_arch_get_compatible (const bfd *abfd,
     /* Otherwise architecture-specific code has to decide.  */
     return abfd->arch_info->compatible (abfd->arch_info, bbfd->arch_info);
 
-  /* We can allow an unknown architecture if accept_unknowns
-     is true, or if the target is the "binary" format, which
-     has an unknown architecture.  Since the binary format can
+  /* We can allow an unknown architecture if accept_unknowns is true,
+     if UBFD is an IR object, or if the target is the "binary" format,
+     which has an unknown architecture.  Since the binary format can
      only be set by explicit request from the user, it is safe
      to assume that they know what they are doing.  */
   if (accept_unknowns
+      || ubfd->plugin_format == bfd_plugin_yes
       || strcmp (bfd_get_target (ubfd), "binary") == 0)
     return kbfd->arch_info;
   return NULL;

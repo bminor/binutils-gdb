@@ -1,3 +1,9 @@
+018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23600
+	* archures.c (bfd_arch_get_compatible): Allow an IR object with
+	unknown architecture.
+
 2018-08-31  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (num_relocs_for_offset): New function.
