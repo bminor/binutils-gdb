@@ -1,5 +1,10 @@
 2018-09-04  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (printcmd.o, target-float.o): Remove.
+	(GDB_WARN_CFLAGS_NO_FORMAT): Remove.
+
+2018-09-04  Tom Tromey  <tom@tromey.com>
+
 	* gnulib/Makefile.in: Remove obsolete comment.
 	* Makefile.in: Remove obsolete comment.
 

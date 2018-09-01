@@ -199,8 +199,6 @@ WERROR_CFLAGS = @WERROR_CFLAGS@
 GDB_WARN_CFLAGS = $(WARN_CFLAGS)
 GDB_WERROR_CFLAGS = $(WERROR_CFLAGS)
 
-GDB_WARN_CFLAGS_NO_FORMAT = `echo " $(GDB_WARN_CFLAGS) " \
-		   | sed "s/ -Wformat-nonliteral / -Wno-format-nonliteral /g"`
 GDB_WARN_CFLAGS_NO_DEFS = `echo " $(GDB_WARN_CFLAGS) " \
 		   | sed "s/ -Wold-style-definition / -Wno-old-style-definition /g"`
 
@@ -2382,20 +2380,6 @@ ALLDEPFILES = \
 
 # Some files need explicit build rules (due to -Werror problems) or due
 # to sub-directory fun 'n' games.
-
-# Do not try to build "printcmd.c" with -Wformat-nonliteral.  It manually
-# checks format strings.
-printcmd.o: $(srcdir)/printcmd.c
-	$(ECHO_CXX) $(COMPILE.pre) $(INTERNAL_CFLAGS) \
-		$(GDB_WARN_CFLAGS_NO_FORMAT) $(COMPILE.post) \
-		$(srcdir)/printcmd.c
-	$(POSTCOMPILE)
-
-# Same for "target-float.c".
-target-float.o: $(srcdir)/target-float.c
-	$(ECHO_CXX) $(COMPILE.pre) $(INTERNAL_CFLAGS) \
-		$(GDB_WARN_CFLAGS_NO_FORMAT) $(COMPILE.post) \
-		$(srcdir)/target-float.c
 
 # ada-exp.c can appear in srcdir, for releases; or in ., for
 # development builds.
