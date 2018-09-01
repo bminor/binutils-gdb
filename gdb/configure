@@ -892,7 +892,6 @@ with_tcl
 with_tk
 with_x
 enable_sim
-enable_multi_ice
 enable_gdbserver
 with_babeltrace
 with_libbabeltrace_prefix
@@ -916,7 +915,6 @@ YFLAGS
 XMKMF'
 ac_subdirs_all='testsuite
 gdbtk
-multi-ice
 gdbserver'
 
 # Initialize some variables set by options.
@@ -1559,7 +1557,6 @@ Optional Features:
                           enable GDB specific build-time compiler warnings if
                           gcc is used
   --enable-sim            link gdb with simulator
-  --enable-multi-ice      build the multi-ice-gdb-server
   --enable-gdbserver      automatically build gdbserver (yes/no/auto, default
                           is auto)
 
@@ -17086,21 +17083,6 @@ if test x"${gdb_osabi}" != x ; then
 cat >>confdefs.h <<_ACEOF
 #define GDB_OSABI_DEFAULT $gdb_osabi
 _ACEOF
-
-fi
-
-# Enable multi-ice-gdb-server.
-# Check whether --enable-multi-ice was given.
-if test "${enable_multi_ice+set}" = set; then :
-  enableval=$enable_multi_ice; case $enableval in
-    yes | no)
-      ;;
-    *) as_fn_error $? "bad value $enableval for --enable-multi-ice" "$LINENO" 5 ;;
-  esac
-fi
-
-if test "x$enable_multi_ice" = xyes; then
-   subdirs="$subdirs multi-ice"
 
 fi
 

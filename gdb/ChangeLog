@@ -1,5 +1,10 @@
 2018-09-04  Tom Tromey  <tom@tromey.com>
 
+	* configure: Rebuild.
+	* configure.ac: Remove multi-ice code.
+
+2018-09-04  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (GDB_WARN_CFLAGS_NO_DEFS): Remove.
 	(ada-exp.o): Update.
 

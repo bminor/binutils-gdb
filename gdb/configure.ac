@@ -2160,18 +2160,6 @@ if test x"${gdb_osabi}" != x ; then
 		       [Define to the default OS ABI for this configuration.])
 fi
 
-# Enable multi-ice-gdb-server.
-AC_ARG_ENABLE(multi-ice,
-AS_HELP_STRING([--enable-multi-ice], [build the multi-ice-gdb-server]),
-  [case $enableval in
-    yes | no)
-      ;;
-    *) AC_MSG_ERROR([bad value $enableval for --enable-multi-ice]) ;;
-  esac])
-if test "x$enable_multi_ice" = xyes; then
-   AC_CONFIG_SUBDIRS(multi-ice)
-fi
-
 AC_ARG_ENABLE(gdbserver,
 AS_HELP_STRING([--enable-gdbserver],
                [automatically build gdbserver (yes/no/auto, default is auto)]),
