@@ -1,3 +1,8 @@
+2018-09-04  Tom Tromey  <tom@tromey.com>
+
+	* gnulib/Makefile.in: Remove obsolete comment.
+	* Makefile.in: Remove obsolete comment.
+
 2018-09-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* riscv-tdep.c (riscv_frame_cache): Fix ARI warning, don't end a

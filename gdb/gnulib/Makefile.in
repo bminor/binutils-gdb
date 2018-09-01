@@ -62,11 +62,6 @@ SUBDIRS = import
 CLEANDIRS = $(SUBDIRS)
 REQUIRED_SUBDIRS = $(SUBDIRS)
 
-# If you are compiling with GCC, make sure that either 1) You have the
-# fixed include files where GCC can reach them, or 2) You use the
-# -traditional flag.  Otherwise the ioctl calls in inflow.c
-# will be incorrectly compiled.  The "fixincludes" script in the gcc
-# distribution will fix your include files up.
 CC=@CC@
 
 # Directory containing source files.
