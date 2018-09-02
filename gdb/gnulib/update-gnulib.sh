@@ -167,3 +167,13 @@ if [ $? -ne 0 ]; then
    exit 1
 fi
 
+# Update aclocal-m4-deps.mk
+ACLOCAL_M4_DEPS_FILE=aclocal-m4-deps.mk
+cat > ${ACLOCAL_M4_DEPS_FILE}.tmp <<EOF
+# THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi :set ro:
+aclocal_m4_deps = \\
+$(find import/m4 -type f -name "*.m4" | sed 's/^/\t/; s/$/ \\/; $s/ \\//g')
+EOF
+
+../../move-if-change ${ACLOCAL_M4_DEPS_FILE}.tmp ${ACLOCAL_M4_DEPS_FILE}
+rm -f ${ACLOCAL_M4_DEPS_FILE}.tmp
