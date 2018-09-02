@@ -1,5 +1,13 @@
 2018-10-19  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-io.h (key_is_start_sequence, key_is_end_sequence)
+	(key_is_backspace, tui_getc): Don't declare.
+	* tui/tui-io.c (key_is_start_sequence): Now static.
+	(key_is_end_sequence, key_is_backspace): Remove.
+	(tui_getc): Now static.
+
+2018-10-19  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (reread_symbols): Clear "static_links".
 
 2018-10-19  Alan Hayward  <alan.hayward@arm.com>

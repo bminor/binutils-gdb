@@ -38,9 +38,6 @@ extern void tui_setup_io (int mode);
 /* Initialize the IO for gdb in curses mode.  */
 extern void tui_initialize_io (void);
 
-/* Get a character from the command window.  */
-extern int tui_getc (FILE *);
-
 /* Readline callback.
    Redisplay the command line with its prompt after readline has
    changed the edited text.  */
@@ -51,10 +48,5 @@ extern char *tui_expand_tabs (const char *, int);
 
 extern struct ui_out *tui_out;
 extern cli_ui_out *tui_old_uiout;
-
-extern int key_is_start_sequence (int ch);
-extern int key_is_end_sequence (int ch);
-extern int key_is_backspace (int ch);
-extern int key_is_command_char (int ch);
 
 #endif

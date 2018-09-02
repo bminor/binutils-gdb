@@ -46,22 +46,12 @@
    "gdb_curses.h".  */
 #include "readline/readline.h"
 
-int
+static int tui_getc (FILE *fp);
+
+static int
 key_is_start_sequence (int ch)
 {
   return (ch == 27);
-}
-
-int
-key_is_end_sequence (int ch)
-{
-  return (ch == 126);
-}
-
-int
-key_is_backspace (int ch)
-{
-  return (ch == 8);
 }
 
 /* Use definition from readline 4.3.  */
@@ -614,7 +604,7 @@ tui_initialize_io (void)
 
 /* Get a character from the command window.  This is called from the
    readline package.  */
-int
+static int
 tui_getc (FILE *fp)
 {
   int ch;
