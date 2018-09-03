@@ -1,3 +1,7 @@
+2018-09-03  Nick Clifton  <nickc@redhat.com>
+
+	* po/ja.po: Updated Japanese translation.
+
 2018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/binutils-all/readelf.s-64: Adjusted for
