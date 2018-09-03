@@ -1,3 +1,12 @@
+2018-09-03  Alan Modra  <amodra@gmail.com>
+
+	PR ld/23591
+	* testsuite/ld-elf/pr23591a.s,
+	* testsuite/ld-elf/pr23591b.s,
+	* testsuite/ld-elf/pr23591c.s: Don't start directives in first column.
+	* testsuite/ld-elf/pr23591.d: xfail frv-linux and lm32-linux.
+	Allow __start___sancov_cntrs as a local symbol.
+
 018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23591

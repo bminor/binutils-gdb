@@ -1,14 +1,14 @@
-.ifdef UNDERSCORE
+ .ifdef UNDERSCORE
 	.hidden ___start___sancov_cntrs
-.else
+ .else
 	.hidden __start___sancov_cntrs
-.endif
+ .endif
 	.text
 	.globl	_start
 	.type	_start, %function
 _start:
-.ifdef UNDERSCORE
+ .ifdef UNDERSCORE
 	.dc.a	___start___sancov_cntrs
-.else
+ .else
 	.dc.a	__start___sancov_cntrs
-.endif
+ .endif
