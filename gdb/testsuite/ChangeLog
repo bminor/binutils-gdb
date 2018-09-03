@@ -1,3 +1,8 @@
+2018-09-04  Gary Benson <gbenson@redhat.com>
+
+	* gdb.base/batch-exit-status.exp: Use gdb_test_multiple and expect
+	'eof' before 'wait -i'.  Use remote_close and clear_gdb_spawn_id.
+
 2018-08-31  Tom Tromey  <tom@tromey.com>
 
 	* gdb.rust/simple.rs: Rename second variable "v".
