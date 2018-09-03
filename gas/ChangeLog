@@ -1,3 +1,10 @@
+2018-09-03  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/23570
+	* config/tc-avr.c (md_pseudo_table): Add entry for "secction".
+	(avr_set_section): New function.  Ensures that the .noinit section
+	gets the NOBITS ELF section type.
+
 2018-08-31  Kito Cheng  <kito@andestech.com>
 
 	* testsuite/gas/riscv/c-fld-fsd-fail.d: New.
