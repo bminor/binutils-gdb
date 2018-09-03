@@ -243,8 +243,6 @@ bfd_elf32_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 {
   unsigned int i;
 
-  printf ("%s:%d Looking up %s\n", __FILE__, __LINE__, r_name);
-
   for (i = 0;
        i < (sizeof (elf_s12z_howto_table)
 	    / sizeof (elf_s12z_howto_table[0]));
