@@ -171,7 +171,7 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
   int max_lines, line_width;
   CORE_ADDR cur_pc;
   struct tui_gen_win_info *locator = tui_locator_win_info_ptr ();
-  int tab_len = tui_default_tab_len ();
+  int tab_len = tui_tab_width;
   struct tui_asm_line *asm_lines;
   int insn_pos;
   int addr_size, insn_size;

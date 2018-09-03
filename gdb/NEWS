@@ -79,6 +79,10 @@ thread apply [all | COUNT | -COUNT] [FLAG]... COMMAND
   FLAG arguments allow to control what output to produce and how to handle
   errors raised when applying COMMAND to a thread.
 
+set tui tab-width NCHARS
+show tui tab-width NCHARS
+  "set tui tab-width" replaces the "tabset" command, which has been deprecated.
+
 * MI changes
 
   ** The '-data-disassemble' MI command now accepts an '-a' option to

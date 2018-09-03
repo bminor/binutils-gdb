@@ -331,8 +331,6 @@ extern void tui_clear_source_windows (void);
 extern void tui_clear_source_windows_detail (void);
 extern void tui_clear_win_detail (struct tui_win_info *);
 extern void tui_add_to_source_windows (struct tui_win_info *);
-extern int tui_default_tab_len (void);
-extern void tui_set_default_tab_len (int);
 extern struct tui_win_info *tui_win_with_focus (void);
 extern void tui_set_win_with_focus (struct tui_win_info *);
 extern struct tui_layout_def *tui_layout_def (void);
@@ -343,5 +341,7 @@ extern struct tui_win_info *tui_next_win (struct tui_win_info *);
 extern struct tui_win_info *tui_prev_win (struct tui_win_info *);
 
 extern void tui_add_to_source_windows (struct tui_win_info *);
+
+extern unsigned int tui_tab_width;
 
 #endif /* TUI_DATA_H */

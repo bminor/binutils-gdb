@@ -1,5 +1,23 @@
 2018-10-19  Tom Tromey  <tom@tromey.com>
 
+	PR tui/18388:
+	* NEWS: Mention tabset deprecation.
+	* tui/tui-win.c (tui_tab_width, internal_tab_width): New globals.
+	(update_tab_width): New function.
+	(tui_set_tab_width, tui_show_tab_width): New functions.
+	(tui_set_tab_width_command): Use update_tab_width.
+	(_initialize_tui_win): Move to end of file.  Deprecate "tabset".
+	Add new "set tui tab-width" command.
+	* tui/tui-source.c (tui_set_source_content): Update.
+	* tui/tui-disasm.c (tui_set_disassem_content): Update.
+	* tui/tui-data.h (tui_default_tab_len, tui_set_default_tab_len):
+	Don't declare.
+	(tui_tab_width): Declare.
+	* tui/tui-data.c (default_tab_len, tui_default_tab_len)
+	(tui_set_default_tab_len): Remove.
+
+2018-10-19  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-io.h (key_is_start_sequence, key_is_end_sequence)
 	(key_is_backspace, tui_getc): Don't declare.
 	* tui/tui-io.c (key_is_start_sequence): Now static.
