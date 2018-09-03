@@ -1,3 +1,9 @@
+2018-10-06  Tom Tromey  <tom@tromey.com>
+
+	PR tui/28819:
+	* tui/tui-io.c (gdb_wgetch): New function.
+	(tui_mld_getc, tui_getc): Use it.
+
 2018-10-05  Tom Tromey  <tom@tromey.com>
 
 	* sol-thread.c (sol_thread_target::wait): Rename inner
