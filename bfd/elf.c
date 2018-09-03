@@ -7235,6 +7235,7 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
       Elf_Internal_Shdr *this_hdr;
       asection *first_section = NULL;
       asection *lowest_section;
+      bfd_boolean no_contents = TRUE;
 
       /* Compute how many sections are in this segment.  */
       for (section = ibfd->sections, section_count = 0;
@@ -7246,6 +7247,8 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 	    {
 	      if (first_section == NULL)
 		first_section = section;
+	      if (elf_section_type (section) != SHT_NOBITS)
+		no_contents = FALSE;
 	      section_count++;
 	    }
 	}
@@ -7342,8 +7345,17 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 	}
 
       if (map->includes_filehdr && lowest_section != NULL)
-	/* We need to keep the space used by the headers fixed.  */
-	map->header_size = lowest_section->vma - segment->p_vaddr;
+	{
+	  /* Try to keep the space used by the headers plus any
+	     padding fixed.  If there are sections with file contents
+	     in this segment then the lowest sh_offset is the best
+	     guess.  Otherwise the segment only has file contents for
+	     the headers, and p_filesz is the best guess.  */
+	  if (no_contents)
+	    map->header_size = segment->p_filesz;
+	  else
+	    map->header_size = lowest_section->filepos;
+	}
 
       if (!map->includes_phdrs
 	  && !map->includes_filehdr

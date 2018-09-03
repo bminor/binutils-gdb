@@ -1,3 +1,12 @@
+2018-09-03  Jozef Lawrynowicz <jozef.l@mittosystems.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	PR 23595
+	elf.c (copy_elf_program_header): When first segment contains
+	only the headers and SHT_NOBITS sections, use segment p_filesz
+	to calculate header and padding size.  Use filepos of the first
+	section otherwise.
+
 018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23600
