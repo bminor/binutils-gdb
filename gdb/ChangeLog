@@ -1,3 +1,7 @@
+2018-09-26  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-win.c (WIN_HEIGHT_USAGE): Remove extra ">"s.
+
 2018-09-24  Tom Tromey  <tom@tromey.com>
 
 	* common/pathstuff.c (get_standard_cache_dir): Make

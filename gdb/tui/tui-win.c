@@ -78,7 +78,7 @@ static void parse_scrolling_args (const char *,
 /***************************************
 ** DEFINITIONS
 ***************************************/
-#define WIN_HEIGHT_USAGE    "Usage: winheight WINDOW-NAME> [+ | -] NUM-LINES>\n"
+#define WIN_HEIGHT_USAGE    "Usage: winheight WINDOW-NAME [+ | -] NUM-LINES\n"
 #define FOCUS_USAGE         "Usage: focus [WINDOW-NAME | next | prev]\n"
 
 /***************************************
