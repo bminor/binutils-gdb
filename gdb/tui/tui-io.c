@@ -40,6 +40,7 @@
 #include "filestuff.h"
 #include "completer.h"
 #include "gdb_curses.h"
+#include <map>
 
 /* This redefines CTRL if it is not already defined, so it must come
    after terminal state releated include files like <term.h> and
@@ -188,6 +189,171 @@ tui_putc (char c)
   update_cmdwin_start_line ();
 }
 
+/* This maps colors to their corresponding color index.  */
+
+static std::map<ui_file_style::color, int> color_map;
+
+/* This holds a pair of colors and is used to track the mapping
+   between a color pair index and the actual colors.  */
+
+struct color_pair
+{
+  int fg;
+  int bg;
+
+  bool operator< (const color_pair &o) const
+  {
+    return fg < o.fg || (fg == o.fg && bg < o.bg);
+  }
+};
+
+/* This maps pairs of colors to their corresponding color pair
+   index.  */
+
+static std::map<color_pair, int> color_pair_map;
+
+/* This is indexed by ANSI color offset from the base color, and holds
+   the corresponding curses color constant.  */
+
+static const int curses_colors[] = {
+  COLOR_BLACK,
+  COLOR_RED,
+  COLOR_GREEN,
+  COLOR_YELLOW,
+  COLOR_BLUE,
+  COLOR_MAGENTA,
+  COLOR_CYAN,
+  COLOR_WHITE
+};
+
+/* Given a color, find its index.  */
+
+static bool
+get_color (const ui_file_style::color &color, int *result)
+{
+  if (color.is_none ())
+    *result = -1;
+  else if (color.is_basic ())
+    *result = curses_colors[color.get_value ()];
+  else
+    {
+      auto it = color_map.find (color);
+      if (it == color_map.end ())
+	{
+	  /* The first 8 colors are standard.  */
+	  int next = color_map.size () + 8;
+	  if (next >= COLORS)
+	    return false;
+	  uint8_t rgb[3];
+	  color.get_rgb (rgb);
+	  /* We store RGB as 0..255, but curses wants 0..1000.  */
+	  if (init_color (next, rgb[0] * 1000 / 255, rgb[1] * 1000 / 255,
+			  rgb[2] * 1000 / 255) == ERR)
+	    return false;
+	  color_map[color] = next;
+	  *result = next;
+	}
+      else
+	*result = it->second;
+    }
+  return true;
+}
+
+/* The most recently emitted color pair.  */
+
+static int last_color_pair = -1;
+
+/* The most recently applied style.  */
+
+static ui_file_style last_style;
+
+/* Given two colors, return their color pair index; making a new one
+   if necessary.  */
+
+static int
+get_color_pair (int fg, int bg)
+{
+  color_pair c = { fg, bg };
+  auto it = color_pair_map.find (c);
+  if (it == color_pair_map.end ())
+    {
+      /* Color pair 0 is our default color, so new colors start at
+	 1.  */
+      int next = color_pair_map.size () + 1;
+      /* Curses has a limited number of available color pairs.  Fall
+	 back to the default if we've used too many.  */
+      if (next >= COLOR_PAIRS)
+	return 0;
+      init_pair (next, fg, bg);
+      color_pair_map[c] = next;
+      return next;
+    }
+  return it->second;
+}
+
+/* Apply an ANSI escape sequence from BUF to W.  BUF must start with
+   the ESC character.  If BUF does not start with an ANSI escape,
+   return 0.  Otherwise, apply the sequence if it is recognized, or
+   simply ignore it if not.  In this case, the number of bytes read
+   from BUF is returned.  */
+
+static size_t
+apply_ansi_escape (WINDOW *w, const char *buf)
+{
+  ui_file_style style = last_style;
+  size_t n_read;
+
+  if (!style.parse (buf, &n_read))
+    return n_read;
+
+  /* Reset.  */
+  wattron (w, A_NORMAL);
+  wattroff (w, A_BOLD);
+  wattroff (w, A_DIM);
+  wattroff (w, A_REVERSE);
+  if (last_color_pair != -1)
+    wattroff (w, COLOR_PAIR (last_color_pair));
+  wattron (w, COLOR_PAIR (0));
+
+  const ui_file_style::color &fg = style.get_foreground ();
+  const ui_file_style::color &bg = style.get_background ();
+  if (!fg.is_none () || !bg.is_none ())
+    {
+      int fgi, bgi;
+      if (get_color (fg, &fgi) && get_color (bg, &bgi))
+	{
+	  int pair = get_color_pair (fgi, bgi);
+	  if (last_color_pair != -1)
+	    wattroff (w, COLOR_PAIR (last_color_pair));
+	  wattron (w, COLOR_PAIR (pair));
+	  last_color_pair = pair;
+	}
+    }
+
+  switch (style.get_intensity ())
+    {
+    case ui_file_style::NORMAL:
+      break;
+
+    case ui_file_style::BOLD:
+      wattron (w, A_BOLD);
+      break;
+
+    case ui_file_style::DIM:
+      wattron (w, A_DIM);
+      break;
+
+    default:
+      gdb_assert_not_reached ("invalid intensity");
+    }
+
+  if (style.is_reverse ())
+    wattron (w, A_REVERSE);
+
+  last_style = style;
+  return n_read;
+}
+
 /* Print LENGTH characters from the buffer pointed to by BUF to the
    curses command window.  The output is buffered.  It is up to the
    caller to refresh the screen if necessary.  */
@@ -195,10 +361,47 @@ tui_putc (char c)
 void
 tui_write (const char *buf, size_t length)
 {
-  WINDOW *w = TUI_CMD_WIN->generic.handle;
+  /* We need this to be \0-terminated for the regexp matching.  */
+  std::string copy (buf, length);
+  tui_puts (copy.c_str ());
+}
 
-  for (size_t i = 0; i < length; i++)
-    do_tui_putc (w, buf[i]);
+static void
+tui_puts_internal (const char *string, int *height)
+{
+  WINDOW *w = TUI_CMD_WIN->generic.handle;
+  char c;
+  int prev_col = 0;
+
+  while ((c = *string++) != 0)
+    {
+      if (c == '\1' || c == '\2')
+	{
+	  /* Ignore these, they are readline escape-marking
+	     sequences.  */
+	}
+      else
+	{
+	  if (c == '\033')
+	    {
+	      size_t bytes_read = apply_ansi_escape (w, string - 1);
+	      if (bytes_read > 0)
+		{
+		  string = string + bytes_read - 1;
+		  continue;
+		}
+	    }
+	  do_tui_putc (w, c);
+
+	  if (height != nullptr)
+	    {
+	      int col = getcurx (w);
+	      if (col <= prev_col)
+		++*height;
+	      prev_col = col;
+	    }
+	}
+    }
   update_cmdwin_start_line ();
 }
 
@@ -209,12 +412,7 @@ tui_write (const char *buf, size_t length)
 void
 tui_puts (const char *string)
 {
-  WINDOW *w = TUI_CMD_WIN->generic.handle;
-  char c;
-
-  while ((c = *string++) != 0)
-    do_tui_putc (w, c);
-  update_cmdwin_start_line ();
+  tui_puts_internal (string, nullptr);
 }
 
 /* Readline callback.
@@ -254,14 +452,10 @@ tui_redisplay_readline (void)
   wmove (w, start_line, 0);
   prev_col = 0;
   height = 1;
-  for (in = 0; prompt && prompt[in]; in++)
-    {
-      waddch (w, prompt[in]);
-      col = getcurx (w);
-      if (col <= prev_col)
-        height++;
-      prev_col = col;
-    }
+  if (prompt != nullptr)
+    tui_puts_internal (prompt, &height);
+
+  prev_col = getcurx (w);
   for (in = 0; in <= rl_end; in++)
     {
       unsigned char c;
@@ -537,6 +731,12 @@ tui_setup_io (int mode)
 
       /* Save tty for SIGCONT.  */
       savetty ();
+
+      /* Clean up color information.  */
+      last_color_pair = -1;
+      last_style = ui_file_style ();
+      color_map.clear ();
+      color_pair_map.clear ();
     }
 }
 

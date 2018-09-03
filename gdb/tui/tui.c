@@ -437,6 +437,15 @@ tui_enable (void)
 		 gdb_getenv_term ());
 	}
       w = stdscr;
+      if (has_colors ())
+	{
+#ifdef HAVE_USE_DEFAULT_COLORS
+	  /* Ncurses extension to help with resetting to the default
+	     color.  */
+	  use_default_colors ();
+#endif
+	  start_color ();
+	}
 
       /* Check required terminal capabilities.  The MinGW port of
 	 ncurses does have them, but doesn't expose them through "cup".  */

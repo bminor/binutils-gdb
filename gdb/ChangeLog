@@ -1,5 +1,26 @@
 2018-12-28  Tom Tromey  <tom@tromey.com>
 
+	PR tui/14126:
+	* tui/tui.c (tui_enable): Call start_color and
+	use_default_colors.
+	* tui/tui-io.c (struct color_pair): New.
+	(color_pair_map, last_color_pair, last_style): New globals.
+	(tui_setup_io): Clean up color map when shutting down.
+	(curses_colors): New constant.
+	(get_color_pair, apply_ansi_escape): New functions.
+	(tui_write): Rewrite.
+	(tui_puts_internal): New function, from tui_puts.  Add "height"
+	parameter.
+	(tui_puts): Use tui_puts_internal.
+	(tui_redisplay_readline): Use tui_puts_internal.
+	(_initialize_tui_io): New function.
+	(color_map): New globals.
+	(get_color): New function.
+	* configure.ac: Check for use_default_colors.
+	* config.in, configure: Rebuild.
+
+2018-12-28  Tom Tromey  <tom@tromey.com>
+
 	* ui-out.h (enum class ui_out_style_kind) <ADDRESS>: New
 	constant.
 	* ui-out.c (ui_out::field_core_addr): Add styling.
