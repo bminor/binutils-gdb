@@ -1,5 +1,10 @@
 2018-12-28  Tom Tromey  <tom@tromey.com>
 
+	* gdb.base/style.exp: New file.
+	* gdb.base/style.c: New file.
+
+2018-12-28  Tom Tromey  <tom@tromey.com>
+
 	* lib/gdb.exp (gdb_init): Set the TERM environment variable to
 	"dumb".
 	* gdb.base/readline.exp (operate_and_get_next): Save and restore

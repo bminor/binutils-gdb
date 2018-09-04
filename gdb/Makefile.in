@@ -239,6 +239,7 @@ SUBDIR_CLI_SRCS = \
 	cli/cli-logging.c \
 	cli/cli-script.c \
 	cli/cli-setshow.c \
+	cli/cli-style.c \
 	cli/cli-utils.c
 
 SUBDIR_CLI_OBS = $(patsubst %.c,%.o,$(SUBDIR_CLI_SRCS))
@@ -1429,6 +1430,7 @@ HFILES_NO_SRCDIR = \
 	cli/cli-decode.h \
 	cli/cli-script.h \
 	cli/cli-setshow.h \
+	cli/cli-style.h \
 	cli/cli-utils.h \
 	common/buffer.h \
 	common/cleanups.h \

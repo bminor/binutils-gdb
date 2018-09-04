@@ -898,7 +898,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 	  if (function == NULL)
 	    out->field_skip ("func");
 	  else
-	    out->field_string ("func", function);
+	    out->field_string ("func", function, ui_out_style_kind::FUNCTION);
 	}
     }
 
@@ -934,7 +934,8 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 	      out->wrap_hint ("   ");
 	      out->text (" at ");
 	      annotate_frame_source_file ();
-	      out->field_string ("file", filename.get ());
+	      out->field_string ("file", filename.get (),
+				 ui_out_style_kind::FILE);
 	      annotate_frame_source_file_end ();
 	    }
 	}

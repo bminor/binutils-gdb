@@ -71,6 +71,7 @@
 #include "cp-support.h"
 #include <algorithm>
 #include "common/pathstuff.h"
+#include "cli/cli-style.h"
 
 void (*deprecated_error_begin_hook) (void);
 
@@ -1422,6 +1423,46 @@ set_screen_width_and_height (int width, int height)
   set_width ();
 }
 
+/* The currently applied style.  */
+
+static ui_file_style applied_style;
+
+/* The currently desired style.  This can differ from the applied
+   style when showing the pagination prompt.  */
+
+static ui_file_style desired_style;
+
+/* Emit an ANSI style escape for STYLE to the wrap buffer.  */
+
+static void
+emit_style_escape (const ui_file_style &style)
+{
+  if (applied_style == style)
+    return;
+  applied_style = style;
+
+  wrap_buffer.append (style.to_ansi ());
+}
+
+/* Set the current output style.  This will affect future uses of the
+   _filtered output functions.  */
+
+static void
+set_output_style (struct ui_file *stream, const ui_file_style &style)
+{
+  if (stream != gdb_stdout
+      || !cli_styling
+      || style == desired_style
+      || !ui_file_isatty (stream))
+    return;
+  const char *term = getenv ("TERM");
+  if (term == nullptr || !strcmp (term, "dumb"))
+    return;
+
+  desired_style = style;
+  emit_style_escape (style);
+}
+
 /* Wait, so the user can read what's on the screen.  Prompt the user
    to continue by pressing RETURN.  'q' is also provided because
    telling users what to do in the prompt is more user-friendly than
@@ -1436,6 +1477,9 @@ prompt_for_continue (void)
   using namespace std::chrono;
   steady_clock::time_point prompt_started = steady_clock::now ();
   bool disable_pagination = pagination_disabled_for_command;
+
+  /* Clear the current styling.  */
+  emit_style_escape (ui_file_style ());
 
   if (annotation_level > 1)
     printf_unfiltered (("\n\032\032pre-prompt-for-continue\n"));
@@ -1480,6 +1524,9 @@ prompt_for_continue (void)
      need to save the ---Type <return>--- line at the top of the screen.  */
   reinitialize_more_filter ();
   pagination_disabled_for_command = disable_pagination;
+
+  /* Restore the current styling.  */
+  emit_style_escape (desired_style);
 
   dont_repeat ();		/* Forget prev cmd -- CR won't repeat it.  */
 }
@@ -1714,7 +1761,11 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 	         if chars_per_line is right, we probably just overflowed
 	         anyway; if it's wrong, let us keep going.  */
 	      if (wrap_column)
-		fputc_unfiltered ('\n', stream);
+		{
+		  emit_style_escape (ui_file_style ());
+		  flush_wrap_buffer (stream);
+		  fputc_unfiltered ('\n', stream);
+		}
 
 	      /* Possible new page.  Note that
 		 PAGINATION_DISABLED_FOR_COMMAND might be set during
@@ -1727,6 +1778,7 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 	      if (wrap_column)
 		{
 		  fputs_unfiltered (wrap_indent, stream);
+		  emit_style_escape (desired_style);
 		  flush_wrap_buffer (stream);
 		  /* FIXME, this strlen is what prevents wrap_indent from
 		     containing tabs.  However, if we recurse to print it
@@ -1757,6 +1809,17 @@ void
 fputs_filtered (const char *linebuffer, struct ui_file *stream)
 {
   fputs_maybe_filtered (linebuffer, stream, 1);
+}
+
+/* See utils.h.  */
+
+void
+fputs_styled (const char *linebuffer, const ui_file_style &style,
+	      struct ui_file *stream)
+{
+  set_output_style (stream, style);
+  fputs_maybe_filtered (linebuffer, stream, 1);
+  set_output_style (stream, ui_file_style ());
 }
 
 int
@@ -1984,6 +2047,21 @@ fprintfi_filtered (int spaces, struct ui_file *stream, const char *format,
 
   vfprintf_filtered (stream, format, args);
   va_end (args);
+}
+
+/* See utils.h.  */
+
+void
+fprintf_styled (struct ui_file *stream, const ui_file_style &style,
+		const char *format, ...)
+{
+  va_list args;
+
+  set_output_style (stream, style);
+  va_start (args, format);
+  vfprintf_filtered (stream, format, args);
+  va_end (args);
+  set_output_style (stream, ui_file_style ());
 }
 
 

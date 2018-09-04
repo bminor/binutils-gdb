@@ -413,7 +413,8 @@ info_skip_command (const char *arg, int from_tty)
 
       current_uiout->field_string ("file",
 				   e.file ().empty () ? "<none>"
-				   : e.file ().c_str ()); /* 4 */
+				   : e.file ().c_str (),
+				   ui_out_style_kind::FILE); /* 4 */
       if (e.function_is_regexp ())
 	current_uiout->field_string ("regexp", "y"); /* 5 */
       else
@@ -421,7 +422,8 @@ info_skip_command (const char *arg, int from_tty)
 
       current_uiout->field_string ("function",
 				   e.function ().empty () ? "<none>"
-				   : e.function ().c_str ()); /* 6 */
+				   : e.function ().c_str (),
+				   ui_out_style_kind::FUNCTION); /* 6 */
 
       current_uiout->text ("\n");
     }

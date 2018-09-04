@@ -57,7 +57,8 @@ protected:
   virtual void do_field_skip (int fldno, int width, ui_align align,
 			   const char *fldname) override;
   virtual void do_field_string (int fldno, int width, ui_align align,
-			     const char *fldname, const char *string) override;
+				const char *fldname, const char *string,
+				ui_out_style_kind style) override;
   virtual void do_field_fmt (int fldno, int width, ui_align align,
 			  const char *fldname, const char *format, va_list args)
     override ATTRIBUTE_PRINTF (6,0);

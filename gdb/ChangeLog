@@ -1,5 +1,52 @@
 2018-12-28  Tom Tromey  <tom@tromey.com>
 
+	* utils.h (set_output_style, fprintf_styled)
+	(fputs_styled): Declare.
+	* utils.c (applied_style, desired_style): New globals.
+	(emit_style_escape, set_output_style): New function.
+	(prompt_for_continue): Emit style escapes.
+	(fputs_maybe_filtered): Likewise.
+	(fputs_styled, fprintf_styled): New functions.
+	* ui-out.h (enum class ui_out_style_kind): New.
+	(class ui_out) <field_string, field_stream, do_field_string>: Add
+	style parameter.
+	* ui-out.c (ui_out::field_stream, ui_out::field_string): Add style
+	parameter.
+	* tui/tui-out.h (class tui_ui_out) <do_field_string>: Add style
+	parameter.
+	* tui/tui-out.c (tui_ui_out::do_field_string): Add style
+	parameter.
+	(tui_ui_out::do_field_string): Update.
+	* tracepoint.c (print_one_static_tracepoint_marker): Style
+	output.
+	* stack.c (print_frame_info, print_frame): Style output.
+	* source.c (print_source_lines_base): Style output.
+	* skip.c (info_skip_command): Style output.
+	* record-btrace.c (btrace_call_history_src_line): Style output.
+	(btrace_call_history): Likewise.
+	* python/py-framefilter.c (py_print_frame): Style output.
+	* mi/mi-out.h (class mi_ui_out) <do_field_string>: Add style
+	parameter.
+	* mi/mi-out.c (mi_ui_out::do_table_header)
+	(mi_ui_out::do_field_int): Update.
+	(mi_ui_out::do_field_string): Update.
+	* disasm.c (gdb_pretty_print_disassembler::pretty_print_insn):
+	Style output.
+	* cli/cli-style.h: New file.
+	* cli/cli-style.c: New file.
+	* cli-out.h (class cli_ui_out) <do_field_string>: Add style
+	parameter.
+	* cli-out.c (cli_ui_out::do_table_header)
+	(cli_ui_out::do_field_int, cli_ui_out::do_field_skip): Update.
+	(cli_ui_out::do_field_string): Add style parameter.  Style the
+	output.
+	* breakpoint.c (print_breakpoint_location): Style output.
+	(update_static_tracepoint): Likewise.
+	* Makefile.in (SUBDIR_CLI_SRCS): Add cli-style.c.
+	(HFILES_NO_SRCDIR): Add cli-style.h.
+
+2018-12-28  Tom Tromey  <tom@tromey.com>
+
 	* unittests/style-selftests.c: New file.
 	* ui-style.c: New file.
 	* ui-style.h: New file.

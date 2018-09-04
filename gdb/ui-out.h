@@ -66,6 +66,18 @@ enum ui_out_type
     ui_out_type_list
   };
 
+/* Possible kinds of styling.  */
+
+enum class ui_out_style_kind
+{
+  /* The default (plain) style.  */
+  DEFAULT,
+  /* File name.  */
+  FILE,
+  /* Function name.  */
+  FUNCTION
+};
+
 class ui_out
 {
  public:
@@ -95,9 +107,11 @@ class ui_out
 		      int value);
   void field_core_addr (const char *fldname, struct gdbarch *gdbarch,
 			CORE_ADDR address);
-  void field_string (const char *fldname, const char *string);
+  void field_string (const char *fldname, const char *string,
+		     ui_out_style_kind style = ui_out_style_kind::DEFAULT);
   void field_string (const char *fldname, const std::string &string);
-  void field_stream (const char *fldname, string_file &stream);
+  void field_stream (const char *fldname, string_file &stream,
+		     ui_out_style_kind style = ui_out_style_kind::DEFAULT);
   void field_skip (const char *fldname);
   void field_fmt (const char *fldname, const char *format, ...)
     ATTRIBUTE_PRINTF (3, 4);
@@ -141,7 +155,8 @@ class ui_out
   virtual void do_field_skip (int fldno, int width, ui_align align,
 			      const char *fldname) = 0;
   virtual void do_field_string (int fldno, int width, ui_align align,
-				const char *fldname, const char *string) = 0;
+				const char *fldname, const char *string,
+				ui_out_style_kind style) = 0;
   virtual void do_field_fmt (int fldno, int width, ui_align align,
 			     const char *fldname, const char *format,
 			     va_list args)

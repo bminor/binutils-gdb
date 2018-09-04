@@ -51,7 +51,8 @@ tui_ui_out::do_field_int (int fldno, int width, ui_align alignment,
 
 void
 tui_ui_out::do_field_string (int fldno, int width, ui_align align,
-			     const char *fldname, const char *string)
+			     const char *fldname, const char *string,
+			     ui_out_style_kind style)
 {
   if (suppress_output ())
     return;
@@ -68,7 +69,7 @@ tui_ui_out::do_field_string (int fldno, int width, ui_align align,
   
   m_start_of_line++;
 
-  cli_ui_out::do_field_string (fldno, width, align, fldname, string);
+  cli_ui_out::do_field_string (fldno, width, align, fldname, string, style);
 }
 
 void

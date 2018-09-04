@@ -65,8 +65,10 @@ mi_ui_out::do_table_header (int width, ui_align alignment,
   open (NULL, ui_out_type_tuple);
   do_field_int (0, 0, ui_center, "width", width);
   do_field_int (0, 0, ui_center, "alignment", alignment);
-  do_field_string (0, 0, ui_center, "col_name", col_name.c_str ());
-  do_field_string (0, width, alignment, "colhdr", col_hdr.c_str ());
+  do_field_string (0, 0, ui_center, "col_name", col_name.c_str (),
+		   ui_out_style_kind::DEFAULT);
+  do_field_string (0, width, alignment, "colhdr", col_hdr.c_str (),
+		   ui_out_style_kind::DEFAULT);
   close (ui_out_type_tuple);
 }
 
@@ -95,7 +97,8 @@ mi_ui_out::do_field_int (int fldno, int width, ui_align alignment,
   char buffer[20];	/* FIXME: how many chars long a %d can become? */
 
   xsnprintf (buffer, sizeof (buffer), "%d", value);
-  do_field_string (fldno, width, alignment, fldname, buffer);
+  do_field_string (fldno, width, alignment, fldname, buffer,
+		   ui_out_style_kind::DEFAULT);
 }
 
 /* Used to omit a field.  */
@@ -111,7 +114,8 @@ mi_ui_out::do_field_skip (int fldno, int width, ui_align alignment,
 
 void
 mi_ui_out::do_field_string (int fldno, int width, ui_align align,
-			    const char *fldname, const char *string)
+			    const char *fldname, const char *string,
+			    ui_out_style_kind style)
 {
   ui_file *stream = m_streams.back ();
   field_separator ();

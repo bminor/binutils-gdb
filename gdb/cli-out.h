@@ -51,7 +51,8 @@ protected:
 			      const char *fldname) override;
   virtual void do_field_string (int fldno, int width, ui_align align,
 				const char *fldname,
-				const char *string) override;
+				const char *string,
+				ui_out_style_kind style) override;
   virtual void do_field_fmt (int fldno, int width, ui_align align,
 			     const char *fldname, const char *format,
 			     va_list args)

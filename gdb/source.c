@@ -1320,7 +1320,8 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	     MI expects both fields.  ui_source_list is set only for CLI,
 	     not for TUI.  */
 	  if (uiout->is_mi_like_p () || uiout->test_flags (ui_source_list))
-	    uiout->field_string ("file", symtab_to_filename_for_display (s));
+	    uiout->field_string ("file", symtab_to_filename_for_display (s),
+				 ui_out_style_kind::FILE);
 	  if (uiout->is_mi_like_p () || !uiout->test_flags (ui_source_list))
  	    {
 	      const char *s_fullname = symtab_to_fullname (s);
