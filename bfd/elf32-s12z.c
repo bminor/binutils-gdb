@@ -119,7 +119,7 @@ static reloc_howto_type elf_s12z_howto_table[] =
 	 shift_addend_reloc,
 	 "R_S12Z_OPR",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0x00ffffff,            /* src_mask */
+	 0x00000000,            /* src_mask */
 	 0x00ffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
@@ -164,7 +164,7 @@ static reloc_howto_type elf_s12z_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_S12Z_EXT24",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0x00ffffff,            /* src_mask */
+	 0x00000000,            /* src_mask */
 	 0x00ffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
@@ -179,7 +179,7 @@ static reloc_howto_type elf_s12z_howto_table[] =
 	 opru18_reloc,	        /* special_function */
 	 "R_S12Z_EXT18",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0x0005ffff,            /* src_mask */
+	 0x00000000,            /* src_mask */
 	 0x0005ffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
@@ -194,7 +194,7 @@ static reloc_howto_type elf_s12z_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_S12Z_EXT32",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0xffffffff,            /* src_mask */
+	 0x00000000,            /* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 };
