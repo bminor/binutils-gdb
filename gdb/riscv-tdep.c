@@ -2557,8 +2557,8 @@ riscv_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   /* We can now calculate the frame base address.  */
   cache->frame_base
-    = (get_frame_register_signed (this_frame, cache->frame_base_reg) +
-       cache->frame_base_offset);
+    = (get_frame_register_signed (this_frame, cache->frame_base_reg)
+       + cache->frame_base_offset);
   if (riscv_debug_unwinder)
     fprintf_unfiltered (gdb_stdlog, "Frame base is %s ($%s + 0x%x)\n",
                         core_addr_to_string (cache->frame_base),
