@@ -658,8 +658,6 @@ _bfd_sparc_elf_info_to_howto (bfd *abfd, arelent *cache_ptr,
 
   if ((cache_ptr->howto = _bfd_sparc_elf_info_to_howto_ptr (abfd, r_type)) == NULL)
     {
-      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
-			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }

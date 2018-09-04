@@ -1,5 +1,11 @@
 2018-09-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* elfxx-sparc.c (_bfd_sparc_elf_info_to_howto): Do not issue an
+	error when an invalid relocation is passed;  this is already done
+	by `_bfd_sparc_elf_info_to_howto_ptr'.
+
+2018-09-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* elf64-sparc.c (elf64_sparc_slurp_one_reloc_table): Issue an
 	error when an invalid symbol index is retrieved in ELF64_R_SYM of
 	a relocation seen in an input file.
