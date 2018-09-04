@@ -209,9 +209,21 @@ main ()
      32) gl_cv_func_getcwd_path_max='yes, but with shorter paths';;
      *) gl_cv_func_getcwd_path_max=no;;
      esac],
-    [case "$host_os" in
-       aix*) gl_cv_func_getcwd_path_max='no, it has the AIX bug';;
-       *) gl_cv_func_getcwd_path_max=no;;
-     esac])
+    [# Cross-compilation guesses:
+     case "$host_os" in
+       aix*) # On AIX, it has the AIX bug.
+         gl_cv_func_getcwd_path_max='no, it has the AIX bug' ;;
+       gnu*) # On Hurd, it is 'yes'.
+         gl_cv_func_getcwd_path_max=yes ;;
+       linux* | kfreebsd*)
+         # On older Linux+glibc it's 'no, but it is partly working',
+         # on newer Linux+glibc it's 'yes'.
+         # On Linux+musl libc, it's 'no, but it is partly working'.
+         # On kFreeBSD+glibc, it's 'no, but it is partly working'.
+         gl_cv_func_getcwd_path_max='no, but it is partly working' ;;
+       *) # If we don't know, assume the worst.
+         gl_cv_func_getcwd_path_max=no ;;
+     esac
+    ])
   ])
 ])
