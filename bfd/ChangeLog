@@ -1,3 +1,9 @@
+2018-09-06  Alan Modra  <amodra@gmail.com>
+
+	PR 23570
+	* elf32-avr.c (elf_avr_special_sections): New.
+	(elf_backend_special_sections): Define.
+
 2018-09-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* elfxx-sparc.c (_bfd_sparc_elf_info_to_howto): Do not issue an

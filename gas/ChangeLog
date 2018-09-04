@@ -1,3 +1,8 @@
+2018-09-06  Alan Modra  <amodra@gmail.com>
+
+	PR 23570
+	* config/tc-avr.c: Revert 2018-09-03 change.
+
 2018-09-04  Daniel Cederman  <cederman@gaisler.com>
 
 	* config/tc-sparc.c (md_assemble): Allow non-fpop2 instructions

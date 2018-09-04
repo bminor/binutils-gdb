@@ -481,13 +481,11 @@ const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "dD";
 
 static void avr_set_arch (int);
-static void avr_set_section (int);
 
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
 {
   {"arch", avr_set_arch,	0},
-  {"section", avr_set_section,  0},
   { NULL,	NULL,		0}
 };
 
@@ -702,23 +700,6 @@ avr_set_arch (int dummy ATTRIBUTE_UNUSED)
   input_line_pointer = extract_word (input_line_pointer, str, 20);
   md_parse_option (OPTION_MMCU, str);
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, avr_mcu->mach);
-}
-
-static void
-avr_set_section (int push)
-{
-  obj_elf_section (push);
-
-  /* PR 23570.  The .noinit section needs to be explicitly
-     set to the NOBITS type.  */
-  if (seg_info (now_seg)->bss == 0
-      && strcmp (bfd_get_section_name (stdoutput, now_seg), ".noinit") == 0)
-    {
-      bfd_set_section_flags (stdoutput, now_seg, SEC_ALLOC | SEC_RELOC);
-      seg_info (now_seg)->bss = 1;
-      elf_section_type (now_seg) = SHT_NOBITS;
-      elf_section_flags (now_seg) = SHF_ALLOC | SHF_WRITE;
-    }
 }
 
 int

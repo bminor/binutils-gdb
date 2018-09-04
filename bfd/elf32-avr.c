@@ -708,6 +708,12 @@ static const struct avr_reloc_map avr_reloc_map[] =
   { BFD_RELOC_32_PCREL,		    R_AVR_32_PCREL}
 };
 
+static const struct bfd_elf_special_section elf_avr_special_sections[] =
+{
+  { STRING_COMMA_LEN (".noinit"), 0, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
+  { NULL, 0,			  0, 0,		   0 }
+};
+
 /* Meant to be filled one day with the wrap around address for the
    specific device.  I.e. should get the value 0x4000 for 16k devices,
    0x8000 for 32k devices and so on.
@@ -4256,5 +4262,6 @@ avr_elf32_property_record_name (struct avr_property_record *rec)
 #define bfd_elf32_bfd_get_relocated_section_contents \
 					elf32_avr_get_relocated_section_contents
 #define bfd_elf32_new_section_hook	elf_avr_new_section_hook
+#define elf_backend_special_sections	elf_avr_special_sections
 
 #include "elf32-target.h"
