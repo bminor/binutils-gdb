@@ -1,3 +1,11 @@
+2018-09-04  Daniel Cederman  <cederman@gaisler.com>
+
+	* config/tc-sparc.c (md_assemble): Allow non-fpop2 instructions
+            before floating point branches for Sparc V8 and earlier.
+	* testsuite/gas/sparc/sparc.exp: Execute the new test.
+	* testsuite/gas/sparc/v8branch.d: New test.
+	* testsuite/gas/sparc/v8branch.s: New test.
+
 2018-09-03  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/23570
