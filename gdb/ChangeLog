@@ -1,3 +1,7 @@
+2018-09-05  Tom Tromey  <tom@tromey.com>
+
+	* cli/cli-cmds.c (shell_escape, edit_command): Remove cast.
+
 2018-09-05  Tom de Vries  <tdevries@suse.de>
 
 	* dwarf2loc.c (sect_variable_value): Call indirect_synthetic_pointer

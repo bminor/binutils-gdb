@@ -730,7 +730,7 @@ shell_escape (const char *arg, int from_tty)
 
       close_most_fds ();
 
-      if ((user_shell = (char *) getenv ("SHELL")) == NULL)
+      if ((user_shell = getenv ("SHELL")) == NULL)
 	user_shell = "/bin/sh";
 
       /* Get the name of the shell for arg0.  */
@@ -850,8 +850,8 @@ edit_command (const char *arg, int from_tty)
         error (_("No line number known for %s."), arg);
     }
 
-  if ((editor = (char *) getenv ("EDITOR")) == NULL)
-      editor = "/bin/ex";
+  if ((editor = getenv ("EDITOR")) == NULL)
+    editor = "/bin/ex";
 
   fn = symtab_to_fullname (sal.symtab);
 
