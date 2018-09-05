@@ -1,3 +1,8 @@
+2018-09-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* version.in: Set GDB version number to 8.2.
+	* PROBLEMS: Likewise.
+
 2018-09-04  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR gdb/23558
