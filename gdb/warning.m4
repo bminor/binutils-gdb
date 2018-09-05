@@ -58,7 +58,10 @@ case "${host}" in
     build_warnings="$build_warnings -Wno-unknown-pragmas"
     # Solaris 11 <unistd.h> marks vfork deprecated.
     build_warnings="$build_warnings -Wno-deprecated-declarations" ;;
-  *) build_warnings="$build_warnings -Wformat-nonliteral" ;;
+  *)
+    # Note that gcc requires -Wformat for -Wformat-nonliteral to work,
+    # but there's a special case for this below.
+    build_warnings="$build_warnings -Wformat-nonliteral" ;;
 esac
 
 AC_ARG_ENABLE(build-warnings,
@@ -106,6 +109,12 @@ then
 	case $w in
 	-Wno-*)
 		wtest=`echo $w | sed 's/-Wno-/-W/g'` ;;
+        -Wformat-nonliteral)
+		# gcc requires -Wformat before -Wformat-nonliteral
+		# will work, so stick them together.
+		w="-Wformat $w"
+		wtest="$w"
+		;;
 	*)
 		wtest=$w ;;
 	esac

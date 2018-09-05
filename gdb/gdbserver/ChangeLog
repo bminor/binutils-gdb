@@ -1,3 +1,7 @@
+2018-09-05  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+
 2018-08-28  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR build/23399

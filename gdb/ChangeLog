@@ -1,3 +1,12 @@
+2018-09-05  Tom Tromey  <tom@tromey.com>
+
+	* warning.m4 (AM_GDB_WARNINGS): Add -Wformat when testing
+	-Wformat-nonliteral.
+	* target-float.c (host_float_ops<T>::to_string)
+	(host_float_ops<T>::from_string): Use
+	DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL.
+	* configure: Rebuild.
+
 2018-09-05  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* printcmd.c (printf_c_string): Use

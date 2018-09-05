@@ -948,7 +948,11 @@ host_float_ops<T>::to_string (const gdb_byte *addr, const struct type *type,
 
   T host_float;
   from_target (type, addr, &host_float);
+
+  DIAGNOSTIC_PUSH
+  DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
   return string_printf (host_format.c_str (), host_float);
+  DIAGNOSTIC_POP
 }
 
 /* Parse string IN into a target floating-number of type TYPE and
@@ -977,7 +981,10 @@ host_float_ops<T>::from_string (gdb_byte *addr, const struct type *type,
     scan_format += scanf_length_modifier<T>::value;
   scan_format += "g%n";
 
+  DIAGNOSTIC_PUSH
+  DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
   num = sscanf (in.c_str (), scan_format.c_str(), &host_float, &n);
+  DIAGNOSTIC_POP
 
   /* The sscanf man page suggests not making any assumptions on the effect
      of %n on the result, so we don't.
