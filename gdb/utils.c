@@ -1268,13 +1268,11 @@ static bool pagination_disabled_for_command;
    the end of the line, we spit out a newline, the indent, and then
    the buffered output.  */
 
-/* Malloc'd buffer with chars_per_line+2 bytes.  Contains characters which
-   are waiting to be output (they have already been counted in chars_printed).
-   When wrap_buffer[0] is null, the buffer is empty.  */
-static char *wrap_buffer;
+static bool filter_initialized = false;
 
-/* Pointer in wrap_buffer to the next character to fill.  */
-static char *wrap_pointer;
+/* Contains characters which are waiting to be output (they have
+   already been counted in chars_printed).  */
+static std::string wrap_buffer;
 
 /* String to indent by if the wrap occurs.  Must not be NULL if wrap_column
    is non-zero.  */
@@ -1347,7 +1345,7 @@ init_page_info (void)
 int
 filtered_printing_initialized (void)
 {
-  return wrap_buffer != NULL;
+  return filter_initialized;
 }
 
 set_batch_flag_and_restore_page_info::set_batch_flag_and_restore_page_info ()
@@ -1387,8 +1385,7 @@ set_screen_size (void)
   rl_set_screen_size (rows, cols);
 }
 
-/* Reinitialize WRAP_BUFFER according to the current value of
-   CHARS_PER_LINE.  */
+/* Reinitialize WRAP_BUFFER.  */
 
 static void
 set_width (void)
@@ -1396,14 +1393,8 @@ set_width (void)
   if (chars_per_line == 0)
     init_page_info ();
 
-  if (!wrap_buffer)
-    {
-      wrap_buffer = (char *) xmalloc (chars_per_line + 2);
-      wrap_buffer[0] = '\0';
-    }
-  else
-    wrap_buffer = (char *) xrealloc (wrap_buffer, chars_per_line + 2);
-  wrap_pointer = wrap_buffer;	/* Start it at the beginning.  */
+  wrap_buffer.clear ();
+  filter_initialized = true;
 }
 
 static void
@@ -1521,6 +1512,18 @@ reinitialize_more_filter (void)
   pagination_disabled_for_command = false;
 }
 
+/* Flush the wrap buffer to STREAM, if necessary.  */
+
+static void
+flush_wrap_buffer (struct ui_file *stream)
+{
+  if (!wrap_buffer.empty ())
+    {
+      fputs_unfiltered (wrap_buffer.c_str (), stream);
+      wrap_buffer.clear ();
+    }
+}
+
 /* Indicate that if the next sequence of characters overflows the line,
    a newline should be inserted here rather than when it hits the end.
    If INDENT is non-null, it is a string to be printed to indent the
@@ -1546,17 +1549,11 @@ void
 wrap_here (const char *indent)
 {
   /* This should have been allocated, but be paranoid anyway.  */
-  if (!wrap_buffer)
+  if (!filter_initialized)
     internal_error (__FILE__, __LINE__,
 		    _("failed internal consistency check"));
 
-  if (wrap_buffer[0])
-    {
-      *wrap_pointer = '\0';
-      fputs_unfiltered (wrap_buffer, gdb_stdout);
-    }
-  wrap_pointer = wrap_buffer;
-  wrap_buffer[0] = '\0';
+  flush_wrap_buffer (gdb_stdout);
   if (chars_per_line == UINT_MAX)	/* No line overflow checking.  */
     {
       wrap_column = 0;
@@ -1669,6 +1666,7 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
       || top_level_interpreter () == NULL
       || top_level_interpreter ()->interp_ui_out ()->is_mi_like_p ())
     {
+      flush_wrap_buffer (stream);
       fputs_unfiltered (linebuffer, stream);
       return;
     }
@@ -1692,10 +1690,7 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 	  /* Print a single line.  */
 	  if (*lineptr == '\t')
 	    {
-	      if (wrap_column)
-		*wrap_pointer++ = '\t';
-	      else
-		fputc_unfiltered ('\t', stream);
+	      wrap_buffer.push_back ('\t');
 	      /* Shifting right by 3 produces the number of tab stops
 	         we have already passed, and then adding one and
 	         shifting left 3 advances to the next tab stop.  */
@@ -1704,10 +1699,7 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 	    }
 	  else
 	    {
-	      if (wrap_column)
-		*wrap_pointer++ = *lineptr;
-	      else
-		fputc_unfiltered (*lineptr, stream);
+	      wrap_buffer.push_back (*lineptr);
 	      chars_printed++;
 	      lineptr++;
 	    }
@@ -1735,8 +1727,7 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 	      if (wrap_column)
 		{
 		  fputs_unfiltered (wrap_indent, stream);
-		  *wrap_pointer = '\0';	/* Null-terminate saved stuff, */
-		  fputs_unfiltered (wrap_buffer, stream); /* and eject it.  */
+		  flush_wrap_buffer (stream);
 		  /* FIXME, this strlen is what prevents wrap_indent from
 		     containing tabs.  However, if we recurse to print it
 		     and count its chars, we risk trouble if wrap_indent is
@@ -1745,8 +1736,6 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 		     if we are printing a long string.  */
 		  chars_printed = strlen (wrap_indent)
 		    + (save_chars - wrap_column);
-		  wrap_pointer = wrap_buffer;	/* Reset buffer */
-		  wrap_buffer[0] = '\0';
 		  wrap_column = 0;	/* And disable fancy wrap */
 		}
 	    }
