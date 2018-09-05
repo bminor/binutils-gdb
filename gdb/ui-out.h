@@ -75,7 +75,9 @@ enum class ui_out_style_kind
   /* File name.  */
   FILE,
   /* Function name.  */
-  FUNCTION
+  FUNCTION,
+  /* Variable name.  */
+  VARIABLE
 };
 
 class ui_out

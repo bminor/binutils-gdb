@@ -1,5 +1,15 @@
 2018-12-28  Tom Tromey  <tom@tromey.com>
 
+	* ui-out.h (enum class ui_out_style_kind) <VARIABLE>: New global.
+	* stack.c (print_frame_arg): Style name.
+	* printcmd.c (print_variable_and_value): Style variable name.
+	* cli/cli-style.h (variable_name_style): Declare.
+	* cli/cli-style.c (variable_name_style): New global.
+	(_initialize_cli_style): Update.
+	* cli-out.c (cli_ui_out::do_field_string): Update.
+
+2018-12-28  Tom Tromey  <tom@tromey.com>
+
 	* utils.h (reset_terminal_style): Declare.
 	* utils.c (can_emit_style_escape): New function.
 	(set_output_style): Use it.

@@ -173,6 +173,9 @@ cli_ui_out::do_field_string (int fldno, int width, ui_align align,
 	case ui_out_style_kind::FUNCTION:
 	  fstyle = function_name_style.style ();
 	  break;
+	case ui_out_style_kind::VARIABLE:
+	  fstyle = variable_name_style.style ();
+	  break;
 	default:
 	  gdb_assert_not_reached ("missing case");
 	}

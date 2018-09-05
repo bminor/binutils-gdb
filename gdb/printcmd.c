@@ -46,6 +46,7 @@
 #include "arch-utils.h"
 #include "cli/cli-utils.h"
 #include "cli/cli-script.h"
+#include "cli/cli-style.h"
 #include "format.h"
 #include "source.h"
 #include "common/byte-vector.h"
@@ -2156,7 +2157,10 @@ print_variable_and_value (const char *name, struct symbol *var,
   if (!name)
     name = SYMBOL_PRINT_NAME (var);
 
-  fprintf_filtered (stream, "%s%s = ", n_spaces (2 * indent), name);
+  fputs_filtered (n_spaces (2 * indent), stream);
+  fputs_styled (name, variable_name_style.style (), stream);
+  fputs_filtered (" = ", stream);
+
   TRY
     {
       struct value *val;

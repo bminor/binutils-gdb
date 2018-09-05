@@ -256,7 +256,7 @@ print_frame_arg (const struct frame_arg *arg)
   if (arg->entry_kind == print_entry_values_only
       || arg->entry_kind == print_entry_values_compact)
     stb.puts ("@entry");
-  uiout->field_stream ("name", stb);
+  uiout->field_stream ("name", stb, ui_out_style_kind::VARIABLE);
   annotate_arg_name_end ();
   uiout->text ("=");
 

@@ -1,5 +1,9 @@
 2018-12-28  Tom Tromey  <tom@tromey.com>
 
+	* gdb.base/style.exp: Add test for variable names.
+
+2018-12-28  Tom Tromey  <tom@tromey.com>
+
 	* gdb.base/style.exp: New file.
 	* gdb.base/style.c: New file.
 

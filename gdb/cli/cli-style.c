@@ -62,6 +62,10 @@ cli_style_option function_name_style (ui_file_style::YELLOW);
 
 /* See cli-style.h.  */
 
+cli_style_option variable_name_style (ui_file_style::CYAN);
+
+/* See cli-style.h.  */
+
 cli_style_option::cli_style_option (ui_file_style::basic_color fg)
   : m_foreground (cli_colors[fg - ui_file_style::NONE]),
     m_background (cli_colors[0]),
@@ -252,6 +256,13 @@ Configure filename colors and display intensity."),
 Function name display styling\n\
 Configure function name colors and display intensity"),
 					    "style function",
+					    &style_set_list,
+					    &style_show_list);
+  variable_name_style.add_setshow_commands ("variable", no_class,
+					    "style variable",
+					    _("\
+Variable name display styling\n\
+Configure variable name colors and display intensity"),
 					    &style_set_list,
 					    &style_show_list);
 }
