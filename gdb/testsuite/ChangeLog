@@ -1,3 +1,17 @@
+2018-09-14  Alan Hayward  <alan.hayward@arm.com>
+
+	* lib/gdb.exp (gdb_simple_compile): Add proc.
+	(is_elf_target): Use gdb_simple_compile.
+	(skip_altivec_tests): Likewise.
+	(skip_vsx_tests): Likewise.
+	(skip_tsx_tests): Likewise.
+	(skip_btrace_tests): Likewise.
+	(skip_btrace_pt_tests): Likewise.
+	(gdb_can_simple_compile): Likewise.
+	(gdb_has_argv0): Likewise.
+	(gdb_target_symbol_prefix): Likewise.
+	(target_supports_scheduler_locking): Likewise.
+
 2018-09-13  Tom Tromey  <tom@tromey.com>
 
 	* Makefile.in (TAGS): Recognize proc_with_prefix and

@@ -2376,21 +2376,9 @@ proc readline_is_used { } {
 gdb_caching_proc is_elf_target {
     set me "is_elf_target"
 
-    set src [standard_temp_file is_elf_target[pid].c]
-    set obj [standard_temp_file is_elf_target[pid].o]
-
-    gdb_produce_source $src {
-	int foo () {return 0;}
-    }
-
-    verbose "$me:  compiling testfile $src" 2
-    set lines [gdb_compile $src $obj object {quiet}]
-
-    file delete $src
-
-    if ![string match "" $lines] then {
-	verbose "$me:  testfile compilation failed, returning 0" 2
-	return 0
+    set src { int foo () {return 0;} }
+    if {![gdb_simple_compile elf_target $src]} {
+        return 0
     }
 
     set fp_obj [open $obj "r"]
@@ -2554,27 +2542,21 @@ gdb_caching_proc skip_altivec_tests {
     }
 
     # Make sure we have a compiler that understands altivec.
-    set compile_flags {debug nowarnings}
     if [get_compiler_info] {
        warning "Could not get compiler info"
        return 1
     }
     if [test_compiler_info gcc*] {
-        set compile_flags "$compile_flags additional_flags=-maltivec"
+        set compile_flags "additional_flags=-maltivec"
     } elseif [test_compiler_info xlc*] {
-        set compile_flags "$compile_flags additional_flags=-qaltivec"
+        set compile_flags "additional_flags=-qaltivec"
     } else {
         verbose "Could not compile with altivec support, returning 1" 2
         return 1
     }
 
-    # Set up, compile, and execute a test program containing VMX instructions.
-    # Include the current process ID in the file names to prevent conflicts
-    # with invocations for multiple testsuites.
-    set src [standard_temp_file vmx[pid].c]
-    set exe [standard_temp_file vmx[pid].x]
-
-    gdb_produce_source $src {
+    # Compile a test program containing VMX instructions.
+    set src {
 	int main() {
 	    #ifdef __MACH__
 	    asm volatile ("vor v0,v0,v0");
@@ -2584,22 +2566,16 @@ gdb_caching_proc skip_altivec_tests {
 	    return 0;
 	}
     }
-
-    verbose "$me:  compiling testfile $src" 2
-    set lines [gdb_compile $src $exe executable $compile_flags]
-    file delete $src
-
-    if ![string match "" $lines] then {
-        verbose "$me:  testfile compilation failed, returning 1" 2
+    if {![gdb_simple_compile $me $src executable $compile_flags]} {
         return 1
     }
 
-    # No error message, compilation succeeded so now run it via gdb.
+    # Compilation succeeded so now run it via gdb.
 
     gdb_exit
     gdb_start
     gdb_reinitialize_dir $srcdir/$subdir
-    gdb_load "$exe"
+    gdb_load "$obj"
     gdb_run_cmd
     gdb_expect {
         -re ".*Illegal instruction.*${gdb_prompt} $" {
@@ -2616,7 +2592,7 @@ gdb_caching_proc skip_altivec_tests {
         }
     }
     gdb_exit
-    remote_file build delete $exe
+    remote_file build delete $obj
 
     verbose "$me:  returning $skip_vmx_tests" 2
     return $skip_vmx_tests
@@ -2638,24 +2614,21 @@ gdb_caching_proc skip_vsx_tests {
     }
 
     # Make sure we have a compiler that understands altivec.
-    set compile_flags {debug nowarnings quiet}
     if [get_compiler_info] {
        warning "Could not get compiler info"
        return 1
     }
     if [test_compiler_info gcc*] {
-        set compile_flags "$compile_flags additional_flags=-mvsx"
+        set compile_flags "additional_flags=-mvsx"
     } elseif [test_compiler_info xlc*] {
-        set compile_flags "$compile_flags additional_flags=-qasm=gcc"
+        set compile_flags "additional_flags=-qasm=gcc"
     } else {
         verbose "Could not compile with vsx support, returning 1" 2
         return 1
     }
 
-    set src [standard_temp_file vsx[pid].c]
-    set exe [standard_temp_file vsx[pid].x]
-
-    gdb_produce_source $src {
+    # Compile a test program containing VSX instructions.
+    set src {
 	int main() {
 	    double a[2] = { 1.0, 2.0 };
 	    #ifdef __MACH__
@@ -2666,13 +2639,7 @@ gdb_caching_proc skip_vsx_tests {
 	    return 0;
 	}
     }
-
-    verbose "$me:  compiling testfile $src" 2
-    set lines [gdb_compile $src $exe executable $compile_flags]
-    file delete $src
-
-    if ![string match "" $lines] then {
-        verbose "$me:  testfile compilation failed, returning 1" 2
+    if {![gdb_simple_compile $me $src executable $compile_flags]} {
         return 1
     }
 
@@ -2681,7 +2648,7 @@ gdb_caching_proc skip_vsx_tests {
     gdb_exit
     gdb_start
     gdb_reinitialize_dir $srcdir/$subdir
-    gdb_load "$exe"
+    gdb_load "$obj"
     gdb_run_cmd
     gdb_expect {
         -re ".*Illegal instruction.*${gdb_prompt} $" {
@@ -2698,7 +2665,7 @@ gdb_caching_proc skip_vsx_tests {
         }
     }
     gdb_exit
-    remote_file build delete $exe
+    remote_file build delete $obj
 
     verbose "$me:  returning $skip_vsx_tests" 2
     return $skip_vsx_tests
@@ -2712,24 +2679,16 @@ gdb_caching_proc skip_tsx_tests {
 
     set me "skip_tsx_tests"
 
-    set src [standard_temp_file tsx[pid].c]
-    set exe [standard_temp_file tsx[pid].x]
-
-    gdb_produce_source $src {
-    int main() {
-        asm volatile ("xbegin .L0");
-        asm volatile ("xend");
-        asm volatile (".L0: nop");
-        return 0;
+    # Compile a test program.
+    set src {
+        int main() {
+            asm volatile ("xbegin .L0");
+            asm volatile ("xend");
+            asm volatile (".L0: nop");
+            return 0;
+        }
     }
-    }
-
-    verbose "$me:  compiling testfile $src" 2
-    set lines [gdb_compile $src $exe executable {nowarnings quiet}]
-    file delete $src
-
-    if ![string match "" $lines] then {
-        verbose "$me:  testfile compilation failed." 2
+    if {![gdb_simple_compile $me $src executable]} {
         return 1
     }
 
@@ -2738,7 +2697,7 @@ gdb_caching_proc skip_tsx_tests {
     gdb_exit
     gdb_start
     gdb_reinitialize_dir $srcdir/$subdir
-    gdb_load "$exe"
+    gdb_load "$obj"
     gdb_run_cmd
     gdb_expect {
         -re ".*Illegal instruction.*${gdb_prompt} $" {
@@ -2755,7 +2714,7 @@ gdb_caching_proc skip_tsx_tests {
         }
     }
     gdb_exit
-    remote_file build delete $exe
+    remote_file build delete $obj
 
     verbose "$me:  returning $skip_tsx_tests" 2
     return $skip_tsx_tests
@@ -2773,24 +2732,10 @@ gdb_caching_proc skip_btrace_tests {
         return 1
     }
 
-    # Set up, compile, and execute a test program.
-    # Include the current process ID in the file names to prevent conflicts
-    # with invocations for multiple testsuites.
-    set src [standard_temp_file btrace[pid].c]
-    set exe [standard_temp_file btrace[pid].x]
-
-    gdb_produce_source $src {
-	int main(void) { return 0; }
-    }
-
-    verbose "$me:  compiling testfile $src" 2
-    set compile_flags {debug nowarnings quiet}
-    set lines [gdb_compile $src $exe executable $compile_flags]
-
-    if ![string match "" $lines] then {
-        verbose "$me:  testfile compilation failed, returning 1" 2
-	file delete $src
-        return 1
+    # Compile a test program.
+    set src { int main() { return 0; } }
+    if {![gdb_simple_compile $me $src executable]} {
+        return 0
     }
 
     # No error message, compilation succeeded so now run it via gdb.
@@ -2798,12 +2743,10 @@ gdb_caching_proc skip_btrace_tests {
     gdb_exit
     gdb_start
     gdb_reinitialize_dir $srcdir/$subdir
-    gdb_load $exe
+    gdb_load $obj
     if ![runto_main] {
-	file delete $src
         return 1
     }
-    file delete $src
     # In case of an unexpected output, we return 2 as a fail value.
     set skip_btrace_tests 2
     gdb_test_multiple "record btrace" "check btrace support" {
@@ -2821,7 +2764,7 @@ gdb_caching_proc skip_btrace_tests {
         }
     }
     gdb_exit
-    remote_file build delete $exe
+    remote_file build delete $obj
 
     verbose "$me:  returning $skip_btrace_tests" 2
     return $skip_btrace_tests
@@ -2840,24 +2783,10 @@ gdb_caching_proc skip_btrace_pt_tests {
         return 1
     }
 
-    # Set up, compile, and execute a test program.
-    # Include the current process ID in the file names to prevent conflicts
-    # with invocations for multiple testsuites.
-    set src [standard_temp_file btrace[pid].c]
-    set exe [standard_temp_file btrace[pid].x]
-
-    gdb_produce_source $src {
-	int main(void) { return 0; }
-    }
-
-    verbose "$me:  compiling testfile $src" 2
-    set compile_flags {debug nowarnings quiet}
-    set lines [gdb_compile $src $exe executable $compile_flags]
-
-    if ![string match "" $lines] then {
-        verbose "$me:  testfile compilation failed, returning 1" 2
-	file delete $src
-        return 1
+    # Compile a test program.
+    set src { int main() { return 0; } }
+    if {![gdb_simple_compile $me $src executable]} {
+        return 0
     }
 
     # No error message, compilation succeeded so now run it via gdb.
@@ -2865,12 +2794,10 @@ gdb_caching_proc skip_btrace_pt_tests {
     gdb_exit
     gdb_start
     gdb_reinitialize_dir $srcdir/$subdir
-    gdb_load $exe
+    gdb_load $obj
     if ![runto_main] {
-	file delete $src
         return 1
     }
-    file delete $src
     # In case of an unexpected output, we return 2 as a fail value.
     set skip_btrace_tests 2
     gdb_test_multiple "record btrace pt" "check btrace pt support" {
@@ -2891,7 +2818,7 @@ gdb_caching_proc skip_btrace_pt_tests {
         }
     }
     gdb_exit
-    remote_file build delete $exe
+    remote_file build delete $obj
 
     verbose "$me:  returning $skip_btrace_tests" 2
     return $skip_btrace_tests
@@ -3408,9 +3335,10 @@ gdb_caching_proc universal_compile_options {
 # Compile the code in $code to a file based on $name, using the flags
 # $compile_flag as well as debug, nowarning and quiet.
 # Return 1 if code can be compiled
-# Delete all created files and objects.
+# Leave the file name of the resulting object in the upvar object.
 
-proc gdb_can_simple_compile {name code {type object} {compile_flags {}}} {
+proc gdb_simple_compile {name code {type object} {compile_flags {}} {object obj}} {
+    upvar $object obj
 
     switch -regexp -- $type {
         "executable" {
@@ -3436,13 +3364,23 @@ proc gdb_can_simple_compile {name code {type object} {compile_flags {}}} {
     set lines [gdb_compile $src $obj $type $compile_flags]
 
     file delete $src
-    file delete $obj
 
     if ![string match "" $lines] then {
         verbose "$name:  compilation failed, returning 0" 2
         return 0
     }
     return 1
+}
+
+# Compile the code in $code to a file based on $name, using the flags
+# $compile_flag as well as debug, nowarning and quiet.
+# Return 1 if code can be compiled
+# Delete all created files and objects.
+
+proc gdb_can_simple_compile {name code {type object} {compile_flags ""}} {
+    set ret [gdb_simple_compile $name $code $type $compile_flags temp_obj]
+    file delete $temp_obj
+    return $ret
 }
 
 # Some targets need to always link a special object in.  Save its path here.
@@ -5146,18 +5084,13 @@ gdb_caching_proc gdb_skip_xml_test {
 gdb_caching_proc gdb_has_argv0 {
     set result 0
 
-    # Set up, compile, and execute a test program to check whether
-    # argv[0] is available.
-    set src [standard_temp_file has_argv0[pid].c]
-    set exe [standard_temp_file has_argv0[pid].x]
-
-    gdb_produce_source $src {
+    # Compile and execute a test program to check whether argv[0] is available.
+    gdb_simple_compile has_argv0 {
 	int main (int argc, char **argv) {
 	    return 0;
 	}
-    }
+    } executable
 
-    gdb_compile $src $exe executable {debug}
 
     # Helper proc.
     proc gdb_has_argv0_1 { exe } {
@@ -5228,11 +5161,10 @@ gdb_caching_proc gdb_has_argv0 {
 	return $retval
     }
 
-    set result [gdb_has_argv0_1 $exe]
+    set result [gdb_has_argv0_1 $obj]
 
     gdb_exit
-    file delete $src
-    file delete $exe
+    file delete $obj
 
     if { !$result
       && ([istarget *-*-linux*]
@@ -5939,37 +5871,24 @@ proc core_find {binfile {deletefiles {}} {arg ""}} {
 # for linker symbol prefixes.
 
 gdb_caching_proc gdb_target_symbol_prefix {
-    # Set up and compile a simple test program...
-    set src [standard_temp_file main[pid].c]
-    set exe [standard_temp_file main[pid].x]
-
-    gdb_produce_source $src {
-	int main() {
-	    return 0;
-	}
+    # Compile a simple test program...
+    set src { int main() { return 0; } }
+    if {![gdb_simple_compile target_symbol_prefix $src executable]} {
+        return 0
     }
-
-    verbose "compiling testfile $src" 2
-    set compile_flags {debug nowarnings quiet}
-    set lines [gdb_compile $src $exe executable $compile_flags]
 
     set prefix ""
 
-    if ![string match "" $lines] then {
-        verbose "gdb_target_symbol_prefix: testfile compilation failed, returning null prefix" 2
-    } else {
-	set objdump_program [gdb_find_objdump]
-	set result [catch "exec $objdump_program --syms $exe" output]
+    set objdump_program [gdb_find_objdump]
+    set result [catch "exec $objdump_program --syms $obj" output]
 
-	if { $result == 0 \
-	     && ![regexp -lineanchor \
-	          { ([^ a-zA-Z0-9]*)main$} $output dummy prefix] } {
-	    verbose "gdb_target_symbol_prefix: Could not find main in objdump output; returning null prefix" 2
-	}
+    if { $result == 0 \
+	&& ![regexp -lineanchor \
+	     { ([^ a-zA-Z0-9]*)main$} $output dummy prefix] } {
+	verbose "gdb_target_symbol_prefix: Could not find main in objdump output; returning null prefix" 2
     }
 
-    file delete $src
-    file delete $exe
+    file delete $obj
 
     return $prefix
 }
@@ -5981,26 +5900,12 @@ gdb_caching_proc target_supports_scheduler_locking {
 
     set me "gdb_target_supports_scheduler_locking"
 
-    set src [standard_temp_file has_schedlock[pid].c]
-    set exe [standard_temp_file has_schedlock[pid].x]
-
-    gdb_produce_source $src {
-	int main () {
-	    return 0;
-	}
-    }
-
-    verbose "$me:  compiling testfile $src" 2
-    set compile_flags {debug nowarnings}
-    set lines [gdb_compile $src $exe executable $compile_flags]
-    file delete $src
-
-    if ![string match "" $lines] then {
-        verbose "$me:  testfile compilation failed, returning 0" 2
+    set src { int main() { return 0; } }
+    if {![gdb_simple_compile $me $src executable]} {
         return 0
     }
 
-    clean_restart $exe
+    clean_restart $obj
     gdb_start_cmd
 
     set supports_schedule_locking -1
@@ -6039,7 +5944,7 @@ gdb_caching_proc target_supports_scheduler_locking {
     }
 
     gdb_exit
-    remote_file build delete $exe
+    remote_file build delete $obj
     verbose "$me:  returning $supports_schedule_locking" 2
     return $supports_schedule_locking
 }
