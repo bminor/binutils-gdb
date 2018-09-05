@@ -335,7 +335,11 @@ relocate_fix_got_relocs_for_got_info (struct got_entry **	   list_p,
 		bfd_vma sec_vma = tls_sec->output_section->vma;
 
 		bfd_put_32 (output_bfd,
-			    sym_value - sec_vma,
+			    sym_value - sec_vma
+			    + (elf_hash_table (info)->dynamic_sections_created
+			       ? 0
+			       : (align_power (TCB_SIZE,
+					       tls_sec->alignment_power))),
 			    htab->sgot->contents + entry->offset
 			    + (entry->existing_entries == TLS_GOT_MOD_AND_OFF
 			       ? 4 : 0));
@@ -346,7 +350,7 @@ relocate_fix_got_relocs_for_got_info (struct got_entry **	   list_p,
 			    "GOT_TLS_IE"),
 			   (long) (sym_value - sec_vma),
 			   (long) (htab->sgot->output_section->vma
-			      + htab->sgot->output_offset->vma
+			      + htab->sgot->output_offset
 			      + entry->offset
 			      + (entry->existing_entries == TLS_GOT_MOD_AND_OFF
 				 ? 4 : 0)),
@@ -376,7 +380,7 @@ relocate_fix_got_relocs_for_got_info (struct got_entry **	   list_p,
 			    "GOT_TLS_IE"),
 			   (long) (sym_value - sec_vma),
 			   (long) (htab->sgot->output_section->vma
-			      + htab->sgot->output_offset->vma
+			      + htab->sgot->output_offset
 			      + entry->offset
 			      + (entry->existing_entries == TLS_GOT_MOD_AND_OFF
 				 ? 4 : 0)),

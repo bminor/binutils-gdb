@@ -1198,6 +1198,8 @@ arc_special_overflow_checks (const struct arc_relocation_data reloc_data,
 	     + (reloc_data.reloc_offset))))
 #define SECTSTART (bfd_signed_vma) (reloc_data.sym_section->output_section->vma \
 				    + reloc_data.sym_section->output_offset)
+#define FINAL_SECTSTART \
+  (bfd_signed_vma) (reloc_data.sym_section->output_section->vma)
 #define JLI (bfd_signed_vma) (reloc_data.sym_section->output_section->vma)
 #define _SDA_BASE_ (bfd_signed_vma) (reloc_data.sdata_begin_symbol_vma)
 #define TLS_REL (bfd_signed_vma) \

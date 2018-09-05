@@ -1,25 +1,31 @@
 2018-11-15  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	Backport from mainline
+	2018-09-06  Cupertino Miranda <cmiranda@synopsys.com>
+	* arc-got.h (relocate_fix_got_relocs_for_got_info): Changed. Take
+	TLS section alignment in consideration for this relocation.
+	* elf32-arc.c (FINAL_SECTSTART): Added this formula macro.
+	(ARC_TLS_DTPOFF) Updated reloc to use new created macro instead.
+
+2018-11-15  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	Backport from mainline
 	2018-08-01  Cupertino Miranda <cmiranda@synopsys.com>
 	* arc-got.h (relocate_fix_got_relocs_for_got_info): Changed, fixed
 	TCB_SIZE offsize to include section alignment.
 	* elf32-arc.c (arc_special_overflow_checks): Likewise.
 
-
 2018-11-15  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	Backport from mainline
 	2018-03-02  Cupertino Miranda <cmiranda@synopsys.com>
 	* elf32-arc.c (elf_arc_check_relocs): Changed.
 
-
 2018-11-15  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	Backport from mainline
 	2018-03-02  Cupertino Miranda <cmiranda@synopsys.com>
 	* elf32-arc.c (elf_arc_check_relocs): Changed.
-
 
 2018-11-15  Claudiu Zissulescu  <claziss@synopsys.com>
 
