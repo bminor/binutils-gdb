@@ -1,3 +1,7 @@
+2018-09-05  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* diagnostics.h (DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL): New macro.
+
 2018-08-31  Alan Modra  <amodra@gmail.com>
 
 	* elf/ppc64.h (R_PPC64_REL16_HIGH, R_PPC64_REL16_HIGHA),

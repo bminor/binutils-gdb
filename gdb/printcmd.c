@@ -2200,7 +2200,10 @@ printf_c_string (struct ui_file *stream, const char *format,
   tem = value_as_address (value);
   if (tem == 0)
     {
+      DIAGNOSTIC_PUSH
+      DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
       fprintf_filtered (stream, format, "(null)");
+      DIAGNOSTIC_POP
       return;
     }
 
@@ -2221,7 +2224,10 @@ printf_c_string (struct ui_file *stream, const char *format,
     read_memory (tem, str, j);
   str[j] = 0;
 
+  DIAGNOSTIC_PUSH
+  DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
   fprintf_filtered (stream, format, (char *) str);
+  DIAGNOSTIC_POP
 }
 
 /* Subroutine of ui_printf to simplify it.
@@ -2245,7 +2251,10 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
   tem = value_as_address (value);
   if (tem == 0)
     {
+      DIAGNOSTIC_PUSH
+      DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
       fprintf_filtered (stream, format, "(null)");
+      DIAGNOSTIC_POP
       return;
     }
 
@@ -2272,7 +2281,10 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
 			     &output, translit_char);
   obstack_grow_str0 (&output, "");
 
+  DIAGNOSTIC_PUSH
+  DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
   fprintf_filtered (stream, format, obstack_base (&output));
+  DIAGNOSTIC_POP
 }
 
 /* Subroutine of ui_printf to simplify it.
@@ -2400,13 +2412,19 @@ printf_pointer (struct ui_file *stream, const char *format,
       *fmt_p++ = 'l';
       *fmt_p++ = 'x';
       *fmt_p++ = '\0';
+      DIAGNOSTIC_PUSH
+      DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
       fprintf_filtered (stream, fmt, val);
+      DIAGNOSTIC_POP
     }
   else
     {
       *fmt_p++ = 's';
       *fmt_p++ = '\0';
+      DIAGNOSTIC_PUSH
+      DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
       fprintf_filtered (stream, fmt, "(nil)");
+      DIAGNOSTIC_POP
     }
 }
 
@@ -2507,8 +2525,11 @@ ui_printf (const char *arg, struct ui_file *stream)
 					 &output, translit_char);
 	      obstack_grow_str0 (&output, "");
 
+	      DIAGNOSTIC_PUSH
+	      DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
 	      fprintf_filtered (stream, current_substring,
                                 obstack_base (&output));
+	      DIAGNOSTIC_POP
 	    }
 	    break;
 	  case long_long_arg:
@@ -2516,7 +2537,10 @@ ui_printf (const char *arg, struct ui_file *stream)
 	    {
 	      long long val = value_as_long (val_args[i]);
 
+	      DIAGNOSTIC_PUSH
+	      DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
               fprintf_filtered (stream, current_substring, val);
+	      DIAGNOSTIC_POP
 	      break;
 	    }
 #else
@@ -2526,14 +2550,20 @@ ui_printf (const char *arg, struct ui_file *stream)
 	    {
 	      int val = value_as_long (val_args[i]);
 
+	      DIAGNOSTIC_PUSH
+	      DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
               fprintf_filtered (stream, current_substring, val);
+	      DIAGNOSTIC_POP
 	      break;
 	    }
 	  case long_arg:
 	    {
 	      long val = value_as_long (val_args[i]);
 
+	      DIAGNOSTIC_PUSH
+	      DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
               fprintf_filtered (stream, current_substring, val);
+	      DIAGNOSTIC_POP
 	      break;
 	    }
 	  /* Handles floating-point values.  */
@@ -2557,7 +2587,10 @@ ui_printf (const char *arg, struct ui_file *stream)
 	       have modified GCC to include -Wformat-security by
 	       default, which will warn here if there is no
 	       argument.  */
+	    DIAGNOSTIC_PUSH
+	    DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
 	    fprintf_filtered (stream, current_substring, 0);
+	    DIAGNOSTIC_POP
 	    break;
 	  default:
 	    internal_error (__FILE__, __LINE__,
