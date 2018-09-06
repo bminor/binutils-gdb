@@ -202,6 +202,10 @@ enum target_object
      of the process ID of the process in question, in hexadecimal
      format.  */
   TARGET_OBJECT_EXEC_FILE,
+  /* FreeBSD virtual memory mappings.  */
+  TARGET_OBJECT_FREEBSD_VMMAP,
+  /* FreeBSD process strings.  */
+  TARGET_OBJECT_FREEBSD_PS_STRINGS,
   /* Possible future objects: TARGET_OBJECT_FILE, ...  */
 };
 

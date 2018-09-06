@@ -1,3 +1,14 @@
+2018-09-06  Simon Ser  <contact@emersion.fr>
+
+	PR gdb/23105
+	* fbsd-nat.c (fbsd_nat_target::xfer_partial): Add support for
+	TARGET_OBJECT_FREEBSD_VMMAP and TARGET_OBJECT_FREEBSD_PS_STRINGS.
+	* fbsd-tdep.c (fbsd_make_note_desc): New.
+	(fbsd_make_corefile_notes): Write NT_PROCSTAT_AUXV,
+	NT_PROCSTAT_VMMAP and NT_PROCSTAT_PS_STRINGS notes.
+	* target.h (enum target_object) Add FreeBSD-specific
+	TARGET_OBJECT_FREEBSD_VMMAP and TARGET_OBJECT_FREEBSD_PS_STRINGS.
+
 2018-09-06  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* compile/compile-c.h (generate_c_for_variable_locations):

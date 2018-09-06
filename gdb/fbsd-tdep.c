@@ -512,6 +512,28 @@ fbsd_corefile_thread (struct thread_info *info,
      args->note_size, args->stop_signal);
 }
 
+/* Return a byte_vector containing the contents of a core dump note
+   for the target object of type OBJECT.  If STRUCTSIZE is non-zero,
+   the data is prefixed with a 32-bit integer size to match the format
+   used in FreeBSD NT_PROCSTAT_* notes.  */
+
+static gdb::optional<gdb::byte_vector>
+fbsd_make_note_desc (enum target_object object, uint32_t structsize)
+{
+  gdb::optional<gdb::byte_vector> buf =
+    target_read_alloc (current_top_target (), object, NULL);
+  if (!buf || buf->empty ())
+    return {};
+
+  if (structsize == 0)
+    return buf;
+
+  gdb::byte_vector desc (sizeof (structsize) + buf->size ());
+  memcpy (desc.data (), &structsize, sizeof (structsize));
+  memcpy (desc.data () + sizeof (structsize), buf->data (), buf->size ());
+  return desc;
+}
+
 /* Create appropriate note sections for a corefile, returning them in
    allocated memory.  */
 
@@ -585,6 +607,40 @@ fbsd_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
     }
 
   note_data = thread_args.note_data;
+
+  /* Auxiliary vector.  */
+  uint32_t structsize = gdbarch_ptr_bit (gdbarch) / 4; /* Elf_Auxinfo  */
+  gdb::optional<gdb::byte_vector> note_desc =
+    fbsd_make_note_desc (TARGET_OBJECT_AUXV, structsize);
+  if (note_desc && !note_desc->empty ())
+    {
+      note_data = elfcore_write_note (obfd, note_data, note_size, "FreeBSD",
+				      NT_FREEBSD_PROCSTAT_AUXV,
+				      note_desc->data (), note_desc->size ());
+      if (!note_data)
+	return NULL;
+    }
+
+  /* Virtual memory mappings.  */
+  note_desc = fbsd_make_note_desc (TARGET_OBJECT_FREEBSD_VMMAP, 0);
+  if (note_desc && !note_desc->empty ())
+    {
+      note_data = elfcore_write_note (obfd, note_data, note_size, "FreeBSD",
+				      NT_FREEBSD_PROCSTAT_VMMAP,
+				      note_desc->data (), note_desc->size ());
+      if (!note_data)
+	return NULL;
+    }
+
+  note_desc = fbsd_make_note_desc (TARGET_OBJECT_FREEBSD_PS_STRINGS, 0);
+  if (note_desc && !note_desc->empty ())
+    {
+      note_data = elfcore_write_note (obfd, note_data, note_size, "FreeBSD",
+				      NT_FREEBSD_PROCSTAT_PSSTRINGS,
+				      note_desc->data (), note_desc->size ());
+      if (!note_data)
+	return NULL;
+    }
 
   return note_data;
 }

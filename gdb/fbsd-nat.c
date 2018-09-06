@@ -751,6 +751,61 @@ fbsd_nat_target::xfer_partial (enum target_object object,
 	  }
 	return TARGET_XFER_E_IO;
       }
+    case TARGET_OBJECT_FREEBSD_VMMAP:
+    case TARGET_OBJECT_FREEBSD_PS_STRINGS:
+      {
+	gdb::byte_vector buf_storage;
+	gdb_byte *buf;
+	size_t buflen;
+	int mib[4];
+
+	int proc_target;
+	uint32_t struct_size;
+	switch (object)
+	  {
+	  case TARGET_OBJECT_FREEBSD_VMMAP:
+	    proc_target = KERN_PROC_VMMAP;
+	    struct_size = sizeof (struct kinfo_vmentry);
+	    break;
+	  case TARGET_OBJECT_FREEBSD_PS_STRINGS:
+	    proc_target = KERN_PROC_PS_STRINGS;
+	    struct_size = sizeof (void *);
+	    break;
+	  }
+
+	if (writebuf != NULL)
+	  return TARGET_XFER_E_IO;
+
+	mib[0] = CTL_KERN;
+	mib[1] = KERN_PROC;
+	mib[2] = proc_target;
+	mib[3] = pid;
+
+	if (sysctl (mib, 4, NULL, &buflen, NULL, 0) != 0)
+	  return TARGET_XFER_E_IO;
+	buflen += sizeof (struct_size);
+
+	if (offset >= buflen)
+	  {
+	    *xfered_len = 0;
+	    return TARGET_XFER_EOF;
+	  }
+
+	buf_storage.resize (buflen);
+	buf = buf_storage.data ();
+
+	memcpy (buf, &struct_size, sizeof (struct_size));
+	buflen -= sizeof (struct_size);
+	if (sysctl (mib, 4, buf + sizeof (struct_size), &buflen, NULL, 0) != 0)
+	  return TARGET_XFER_E_IO;
+	buflen += sizeof (struct_size);
+
+	if (buflen - offset < len)
+	  len = buflen - offset;
+	memcpy (readbuf, buf + offset, len);
+	*xfered_len = len;
+	return TARGET_XFER_OK;
+      }
     default:
       return inf_ptrace_target::xfer_partial (object, annex,
 					      readbuf, writebuf, offset,
