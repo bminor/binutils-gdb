@@ -42,4 +42,6 @@ save_vars { env(TERM) } {
     gdb_test "info breakpoints" "$main_expr at $file_expr.*"
 
     gdb_test "break main" "file $base_file_expr.*"
+
+    gdb_test "print &main" " = .* <$main_expr>"
 }

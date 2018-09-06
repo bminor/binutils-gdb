@@ -1,5 +1,9 @@
 2018-12-28  Tom Tromey  <tom@tromey.com>
 
+	* printcmd.c (print_address_symbolic): Style function name.
+
+2018-12-28  Tom Tromey  <tom@tromey.com>
+
 	* breakpoint.c (say_where): Style file name.
 
 2018-12-28  Tom Tromey  <tom@tromey.com>

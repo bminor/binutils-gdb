@@ -1,5 +1,9 @@
 2018-12-28  Tom Tromey  <tom@tromey.com>
 
+	* gdb.base/style.exp: Add test for print_address_symbolic.
+
+2018-12-28  Tom Tromey  <tom@tromey.com>
+
 	* gdb.base/style.exp: Add test for breakpoint setting.
 
 2018-12-28  Tom Tromey  <tom@tromey.com>

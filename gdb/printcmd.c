@@ -50,6 +50,7 @@
 #include "format.h"
 #include "source.h"
 #include "common/byte-vector.h"
+#include "cli/cli-style.h"
 
 /* Last specified output format.  */
 
@@ -535,7 +536,7 @@ print_address_symbolic (struct gdbarch *gdbarch, CORE_ADDR addr,
     fputs_filtered ("<*", stream);
   else
     fputs_filtered ("<", stream);
-  fputs_filtered (name.c_str (), stream);
+  fputs_styled (name.c_str (), function_name_style.style (), stream);
   if (offset != 0)
     fprintf_filtered (stream, "+%u", (unsigned int) offset);
 
@@ -543,10 +544,10 @@ print_address_symbolic (struct gdbarch *gdbarch, CORE_ADDR addr,
      line # of this addr, if we have it; else line # of the nearest symbol.  */
   if (print_symbol_filename && !filename.empty ())
     {
+      fputs_filtered (line == -1 ? " in " : " at ", stream);
+      fputs_styled (filename.c_str (), file_name_style.style (), stream);
       if (line != -1)
-	fprintf_filtered (stream, " at %s:%d", filename.c_str (), line);
-      else
-	fprintf_filtered (stream, " in %s", filename.c_str ());
+	fprintf_filtered (stream, ":%d", line);
     }
   if (unmapped)
     fputs_filtered ("*>", stream);
