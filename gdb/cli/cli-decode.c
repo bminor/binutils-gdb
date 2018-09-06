@@ -531,16 +531,20 @@ add_setshow_enum_cmd (const char *name,
 		      cmd_const_sfunc_ftype *set_func,
 		      show_value_ftype *show_func,
 		      struct cmd_list_element **set_list,
-		      struct cmd_list_element **show_list)
+		      struct cmd_list_element **show_list,
+		      void *context)
 {
-  struct cmd_list_element *c;
+  struct cmd_list_element *c, *show;
 
   add_setshow_cmd_full (name, theclass, var_enum, var,
 			set_doc, show_doc, help_doc,
 			set_func, show_func,
 			set_list, show_list,
-			&c, NULL);
+			&c, &show);
   c->enums = enumlist;
+
+  set_cmd_context (c, context);
+  set_cmd_context (show, context);
 }
 
 const char * const auto_boolean_enums[] = { "on", "off", "auto", NULL };
