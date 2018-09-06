@@ -159,7 +159,7 @@ public:
   compile_scope new_scope (const char *type_name, struct type *type);
 
   /* Enter the given NEW_SCOPE.  */
-  void enter_scope (compile_scope &scope);
+  void enter_scope (compile_scope &&scope);
 
   /* Leave the current scope.  */
   void leave_scope ();

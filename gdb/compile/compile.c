@@ -141,7 +141,7 @@ compile_instance::compile_instance (struct gcc_base_context *gcc_fe,
 /* See compile-internal.h.  */
 
 bool
-compile_instance::get_cached_type (struct type *type, gcc_type &ret) const
+compile_instance::get_cached_type (struct type *type, gcc_type *ret) const
 {
   struct type_map_instance inst, *found;
 
@@ -149,7 +149,7 @@ compile_instance::get_cached_type (struct type *type, gcc_type &ret) const
   found = (struct type_map_instance *) htab_find (m_type_map.get (), &inst);
   if (found != NULL)
     {
-      ret = found->gcc_type_handle;
+      *ret = found->gcc_type_handle;
       return true;
     }
 

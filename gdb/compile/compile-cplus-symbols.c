@@ -184,13 +184,11 @@ convert_one_symbol (compile_cplus_instance *instance,
       /* Don't emit local variable decls for a raw expression.  */
       if (instance->scope () != COMPILE_I_RAW_SCOPE || symbol_name == nullptr)
 	{
-	  compile_scope scope;
-
 	  /* For non-local symbols, create/push a new scope so that the
 	     symbol is properly scoped to the plug-in.  */
 	  if (!is_local)
 	    {
-	      scope
+	      compile_scope scope
 		= instance->new_scope (SYMBOL_NATURAL_NAME (sym.symbol),
 				       SYMBOL_TYPE (sym.symbol));
 	      if (scope.nested_type () != GCC_TYPE_NONE)
@@ -200,7 +198,7 @@ convert_one_symbol (compile_cplus_instance *instance,
 		  return;
 		}
 
-	      instance->enter_scope (scope);
+	      instance->enter_scope (std::move (scope));
 	    }
 
 	  /* Get the `raw' name of the symbol.  */

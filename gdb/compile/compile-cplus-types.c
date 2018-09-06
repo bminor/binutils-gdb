@@ -247,14 +247,14 @@ operator!= (const compile_scope &lhs, const compile_scope &rhs)
 /* See description in compile-cplus.h.  */
 
 void
-compile_cplus_instance::enter_scope (compile_scope &new_scope)
+compile_cplus_instance::enter_scope (compile_scope &&new_scope)
 {
   bool must_push = m_scopes.empty () || m_scopes.back () != new_scope;
 
   new_scope.m_pushed = must_push;
 
   /* Save the new scope.  */
-  m_scopes.push_back (new_scope);
+  m_scopes.push_back (std::move (new_scope));
 
   if (must_push)
     {
@@ -360,7 +360,7 @@ compile_cplus_instance::new_scope (const char *type_name, struct type *type)
 	     class, the previous call will give us that type's gcc_type.
 	     Upper layers are expecting to get the original type's
 	     gcc_type!  */
-	  get_cached_type (type, scope.m_nested_type);
+	  get_cached_type (type, &scope.m_nested_type);
 	  return scope;
 	}
     }
@@ -526,7 +526,7 @@ compile_cplus_convert_typedef (compile_cplus_instance *instance,
     = compile_cplus_instance::decl_name (TYPE_NAME (type));
 
   /* Make sure the scope for this type has been pushed.  */
-  instance->enter_scope (scope);
+  instance->enter_scope (std::move (scope));
 
   /* Convert the typedef's real type.  */
   gcc_type typedef_type = instance->convert_type (check_typedef (type));
@@ -822,7 +822,7 @@ compile_cplus_convert_struct_or_union (compile_cplus_instance *instance,
     }
 
   /* Push all scopes.  */
-  instance->enter_scope (scope);
+  instance->enter_scope (std::move (scope));
 
   /* First we create the resulting type and enter it into our hash
      table.  This lets recursive types work.  */
@@ -928,7 +928,7 @@ compile_cplus_convert_enum (compile_cplus_instance *instance, struct type *type,
     = compile_cplus_instance::decl_name (TYPE_NAME (type));
 
   /* Push all scopes.  */
-  instance->enter_scope (scope);
+  instance->enter_scope (std::move (scope));
 
   gcc_type int_type
     = instance->plugin ().get_int_type (TYPE_UNSIGNED (type),
@@ -1109,7 +1109,7 @@ compile_cplus_convert_namespace (compile_cplus_instance *instance,
     = compile_cplus_instance::decl_name (TYPE_NAME (type));
 
   /* Push scope.  */
-  instance->enter_scope (scope);
+  instance->enter_scope (std::move (scope));
 
   /* Convert this namespace.  */
   instance->plugin ().push_namespace (name.get ());
@@ -1211,7 +1211,7 @@ compile_cplus_instance::convert_type (struct type *type,
 {
   /* Check if TYPE has already been converted.  */
   gcc_type result;
-  if (get_cached_type (type, result))
+  if (get_cached_type (type, &result))
     return result;
 
   /* It is the first time this type has been seen -- convert it

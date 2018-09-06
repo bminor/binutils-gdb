@@ -59,7 +59,7 @@ public:
 
   /* Query the type cache for TYPE, returning the compiler's
      type for it in RET.  */
-  bool get_cached_type (struct type *type, gcc_type &ret) const;
+  bool get_cached_type (struct type *type, gcc_type *ret) const;
 
   /* Insert GCC_TYPE into the type cache for TYPE.
 

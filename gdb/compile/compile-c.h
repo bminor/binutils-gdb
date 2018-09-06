@@ -69,7 +69,7 @@ private:
 extern gdb::unique_xmalloc_ptr<unsigned char>
   generate_c_for_variable_locations
      (compile_instance *compiler,
-      string_file &stream,
+      string_file *stream,
       struct gdbarch *gdbarch,
       const struct block *block,
       CORE_ADDR pc);

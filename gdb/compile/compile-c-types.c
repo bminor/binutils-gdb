@@ -353,7 +353,7 @@ compile_c_instance::convert_type (struct type *type)
   type = check_typedef (type);
 
   gcc_type result;
-  if (get_cached_type (type, result))
+  if (get_cached_type (type, &result))
     return result;
 
   result = convert_type_basic (this, type);

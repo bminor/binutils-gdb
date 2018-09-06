@@ -572,7 +572,7 @@ public:
 	   register struct before the function body.  This requires a
 	   temporary stream.  */
 	gdb::unique_xmalloc_ptr<unsigned char> registers_used
-	  = generate_c_for_variable_locations (m_instance, var_stream, m_arch,
+	  = generate_c_for_variable_locations (m_instance, &var_stream, m_arch,
 					       expr_block, expr_pc);
 
 	buf.puts ("typedef unsigned int"

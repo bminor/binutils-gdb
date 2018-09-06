@@ -1,5 +1,53 @@
 2018-09-06  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* compile/compile-c.h (generate_c_for_variable_locations):
+	Change reference to pointer.
+	* compile/compile-c-support.c (compile_program) <compute>:
+	Likewise.
+	* compile/compile-c-symbols.c (generate_vla_size): Likewise.
+	(generate_c_for_for_one_variable): Likewise
+	(generate_c_for_variable_locations): Likewise
+	* compile/compile-c-types.c (compile_c_instance::convert_type):
+	Likewise
+	* compile/compile-cplus-symbols.c (convert_one_symbol):
+	std::move the scope passed to enter_scope.
+	* compile/compile-cplus-types.c
+	(compile_cplus_instance::enter_scope): Make parameter
+	rvalue-reference.
+	(compile_cplus_instance::new_scope): Change reference to
+	pointer.
+	(compile_cplus_instance::convert_type): Likewise
+	(compile_cplus_convert_typedef): std::move the scope passed to
+	enter_scope.
+	(compile_cplus_convert_struct_or_union): Likewise.
+	(compile_cplus_convert_enum): Likewise.
+	(compile_cplus_convert_namespace): Likewise.
+	* compile/compile-cplus.h (compile_cplus_instance)
+	<enter_scope>: Make parameter rvalue-reference.
+	* compile/compile-internal.h (compile_instance)
+	<get_cached_type>: Likewise
+	* compile/compile-loc2c.c (push): Likewise
+	(pushf): Likewise
+	(unary): Likewise
+	(binary): Likewise
+	(print_label): Likewise
+	(pushf_register_address): Likewise
+	(pushf_register): Likewise
+	(do_compile_dwarf_expr_to_c): Likewise
+	(compile_dwarf_expr_to_c): Likewise
+	(compile_dwarf_bounds_to_c): Likewise
+	* compile/compile.c (compile_instance::get_cached_type):
+	Likewise
+	* compile/compile.h (compile_dwarf_expr_to_c): Likewise.
+	(compile_dwarf_bounds_to_c): Likewise
+	* dwarf2loc.c (locexpr_generate_c_location): Likewise.
+	(dwarf2_compile_property_to_c): Likewise
+	* dwarf2loc.h (dwarf2_compile_property_to_c): Likewise
+	* symtab.h (struct symbol_computed_ops) <generate_c_location>:
+	Likewise
+
+2018-09-06  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* tui/tui-data.h (struct tui_win_element) <highlight>: Remove.
 	* tui/tui-data.c (init_content_element): Don't initialize it.
 

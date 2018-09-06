@@ -487,7 +487,7 @@ symbol_seen (htab_t hashtab, struct symbol *sym)
 
 static void
 generate_vla_size (compile_instance *compiler,
-		   string_file &stream,
+		   string_file *stream,
 		   struct gdbarch *gdbarch,
 		   unsigned char *registers_used,
 		   CORE_ADDR pc,
@@ -541,7 +541,7 @@ generate_vla_size (compile_instance *compiler,
 
 static void
 generate_c_for_for_one_variable (compile_instance *compiler,
-				 string_file &stream,
+				 string_file *stream,
 				 struct gdbarch *gdbarch,
 				 unsigned char *registers_used,
 				 CORE_ADDR pc,
@@ -556,10 +556,10 @@ generate_c_for_for_one_variable (compile_instance *compiler,
 	     occurs in the middle.  */
 	  string_file local_file;
 
-	  generate_vla_size (compiler, local_file, gdbarch, registers_used, pc,
+	  generate_vla_size (compiler, &local_file, gdbarch, registers_used, pc,
 			     SYMBOL_TYPE (sym), sym);
 
-	  stream.write (local_file.c_str (), local_file.size ());
+	  stream->write (local_file.c_str (), local_file.size ());
 	}
 
       if (SYMBOL_COMPUTED_OPS (sym) != NULL)
@@ -570,12 +570,12 @@ generate_c_for_for_one_variable (compile_instance *compiler,
 	     occurs in the middle.  */
 	  string_file local_file;
 
-	  SYMBOL_COMPUTED_OPS (sym)->generate_c_location (sym, local_file,
+	  SYMBOL_COMPUTED_OPS (sym)->generate_c_location (sym, &local_file,
 							  gdbarch,
 							  registers_used,
 							  pc,
 							  generated_name.get ());
-	  stream.write (local_file.c_str (), local_file.size ());
+	  stream->write (local_file.c_str (), local_file.size ());
 	}
       else
 	{
@@ -611,7 +611,7 @@ generate_c_for_for_one_variable (compile_instance *compiler,
 
 gdb::unique_xmalloc_ptr<unsigned char>
 generate_c_for_variable_locations (compile_instance *compiler,
-				   string_file &stream,
+				   string_file *stream,
 				   struct gdbarch *gdbarch,
 				   const struct block *block,
 				   CORE_ADDR pc)
