@@ -278,7 +278,6 @@ struct tui_win_info
     struct tui_source_info source_info;
     struct tui_data_info data_display_info;
     struct tui_command_info command_info;
-    void *opaque;
   }
   detail;
   int can_highlight;	/* Can this window ever be highlighted?  */

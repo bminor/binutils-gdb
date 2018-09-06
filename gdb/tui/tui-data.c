@@ -546,9 +546,6 @@ init_win_info (struct tui_win_info *win_info)
       break;
     case CMD_WIN:
       break;
-    default:
-      win_info->detail.opaque = NULL;
-      break;
     }
 }
 
