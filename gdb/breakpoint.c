@@ -68,6 +68,7 @@
 #include "format.h"
 #include "thread-fsm.h"
 #include "tid-parse.h"
+#include "cli/cli-style.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -12195,9 +12196,14 @@ say_where (struct breakpoint *b)
 	  /* If there is a single location, we can print the location
 	     more nicely.  */
 	  if (b->loc->next == NULL)
-	    printf_filtered (": file %s, line %d.",
-			     symtab_to_filename_for_display (b->loc->symtab),
-			     b->loc->line_number);
+	    {
+	      puts_filtered (": file ");
+	      fputs_styled (symtab_to_filename_for_display (b->loc->symtab),
+			    file_name_style.style (),
+			    gdb_stdout);
+	      printf_filtered (", line %d.",
+			       b->loc->line_number);
+	    }
 	  else
 	    /* This is not ideal, but each location may have a
 	       different file name, and this at least reflects the

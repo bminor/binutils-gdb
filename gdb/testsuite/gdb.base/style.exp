@@ -33,10 +33,13 @@ save_vars { env(TERM) } {
     gdb_test_no_output "set style enabled on"
 
     set main_expr "\033\\\[33mmain\033\\\[m"
-    set file_expr "\033\\\[32m.*style\\.c\033\\\[m:\[0-9\]"
+    set base_file_expr "\033\\\[32m.*style\\.c\033\\\[m"
+    set file_expr "$base_file_expr:\[0-9\]"
     set arg_expr "\033\\\[36marg.\033\\\[m"
 
     gdb_test "frame" \
 	"$main_expr.*$arg_expr.*$arg_expr.*$file_expr.*"
     gdb_test "info breakpoints" "$main_expr at $file_expr.*"
+
+    gdb_test "break main" "file $base_file_expr.*"
 }
