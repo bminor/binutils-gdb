@@ -1,5 +1,10 @@
 2018-12-28  Tom Tromey  <tom@tromey.com>
 
+	* gdb.base/style.exp: Add test for styling of "Reading symbols"
+	message.
+
+2018-12-28  Tom Tromey  <tom@tromey.com>
+
 	* gdb.base/style.exp: Add test for version number styling.
 
 2018-12-28  Tom Tromey  <tom@tromey.com>

@@ -1,5 +1,9 @@
 2018-12-28  Tom Tromey  <tom@tromey.com>
 
+	* symfile.c (symbol_file_add_with_addrs): Style file name.
+
+2018-12-28  Tom Tromey  <tom@tromey.com>
+
 	* top.c (print_gdb_version): Style gdb version number.
 
 2018-12-28  Tom Tromey  <tom@tromey.com>

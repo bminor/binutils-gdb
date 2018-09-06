@@ -58,6 +58,7 @@
 #include "cli/cli-utils.h"
 #include "common/byte-vector.h"
 #include "selftest.h"
+#include "cli/cli-style.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -1110,7 +1111,11 @@ symbol_file_add_with_addrs (bfd *abfd, const char *name,
       if (deprecated_pre_add_symbol_hook)
 	deprecated_pre_add_symbol_hook (name);
       else
-	printf_filtered (_("Reading symbols from %s...\n"), name);
+	{
+	  puts_filtered (_("Reading symbols from "));
+	  fputs_styled (name, file_name_style.style (), gdb_stdout);
+	  puts_filtered ("...\n");
+	}
     }
   syms_from_objfile (objfile, addrs, add_flags);
 
