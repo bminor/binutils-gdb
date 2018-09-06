@@ -229,7 +229,6 @@ union tui_which_element
 
 struct tui_win_element
 {
-  int highlight;
   union tui_which_element which_element;
 };
 

@@ -472,7 +472,6 @@ static void
 init_content_element (struct tui_win_element *element, 
 		      enum tui_win_type type)
 {
-  element->highlight = FALSE;
   switch (type)
     {
     case SRC_WIN:

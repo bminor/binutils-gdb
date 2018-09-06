@@ -1,5 +1,10 @@
 2018-09-06  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* tui/tui-data.h (struct tui_win_element) <highlight>: Remove.
+	* tui/tui-data.c (init_content_element): Don't initialize it.
+
+2018-09-06  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* tui/tui-data.h (struct tui_win_info)
 	<detail::opaque>: Remove.
 	* tui/tui-data.c (init_win_info): Remove assignment.
