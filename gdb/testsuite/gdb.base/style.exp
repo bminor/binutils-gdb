@@ -44,4 +44,10 @@ save_vars { env(TERM) } {
     gdb_test "break main" "file $base_file_expr.*"
 
     gdb_test "print &main" " = .* <$main_expr>"
+
+    gdb_exit
+    gdb_spawn
+
+    gdb_test "" "\033\\\[35;1mGNU gdb.*\033\\\[m.*" \
+	"version is styled"
 }

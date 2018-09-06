@@ -1281,7 +1281,14 @@ print_gdb_version (struct ui_file *stream, bool interactive)
      program to parse, and is just canonical program name and version
      number, which starts after last space.  */
 
-  fprintf_filtered (stream, "GNU gdb %s%s\n", PKGVERSION, version);
+  ui_file_style style;
+  if (interactive)
+    {
+      ui_file_style nstyle = { ui_file_style::MAGENTA, ui_file_style::NONE,
+			       ui_file_style::BOLD };
+      style = nstyle;
+    }
+  fprintf_styled (stream, style, "GNU gdb %s%s\n", PKGVERSION, version);
 
   /* Second line is a copyright notice.  */
 
