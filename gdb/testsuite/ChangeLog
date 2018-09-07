@@ -1,3 +1,8 @@
+2018-09-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/watchpoint.exp (test_complex_watchpoint): Extend test
+	names, and add test prefixes to make test names unique.
+
 2018-09-05  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.dwarf2/varval.exp: Add test.
