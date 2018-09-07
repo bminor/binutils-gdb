@@ -389,7 +389,7 @@ SECTIONS
 
   .install ${RELOCATING-0}:
   {
-    . = __data_section_size;
+    ${RELOCATING+. = __data_section_size;}
   } ${RELOCATING+ > ${TEXT_MEMORY}}
 
   /* Relocation for some bss and data sections.  */
