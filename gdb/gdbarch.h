@@ -403,7 +403,14 @@ typedef struct type * (gdbarch_register_type_ftype) (struct gdbarch *gdbarch, in
 extern struct type * gdbarch_register_type (struct gdbarch *gdbarch, int reg_nr);
 extern void set_gdbarch_register_type (struct gdbarch *gdbarch, gdbarch_register_type_ftype *register_type);
 
-extern int gdbarch_dummy_id_p (struct gdbarch *gdbarch);
+/* Generate a dummy frame_id for THIS_FRAME assuming that the frame is
+   a dummy frame.  A dummy frame is created before an inferior call,
+   the frame_id returned here must match the frame_id that was built
+   for the inferior call.  Usually this means the returned frame_id's
+   stack address should match the address returned by
+   gdbarch_push_dummy_call, and the returned frame_id's code address
+   should match the address at which the breakpoint was set in the dummy
+   frame. */
 
 typedef struct frame_id (gdbarch_dummy_id_ftype) (struct gdbarch *gdbarch, struct frame_info *this_frame);
 extern struct frame_id gdbarch_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame);
@@ -645,13 +652,9 @@ extern void set_gdbarch_fetch_tls_load_module_address (struct gdbarch *gdbarch, 
 extern CORE_ADDR gdbarch_frame_args_skip (struct gdbarch *gdbarch);
 extern void set_gdbarch_frame_args_skip (struct gdbarch *gdbarch, CORE_ADDR frame_args_skip);
 
-extern int gdbarch_unwind_pc_p (struct gdbarch *gdbarch);
-
 typedef CORE_ADDR (gdbarch_unwind_pc_ftype) (struct gdbarch *gdbarch, struct frame_info *next_frame);
 extern CORE_ADDR gdbarch_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame);
 extern void set_gdbarch_unwind_pc (struct gdbarch *gdbarch, gdbarch_unwind_pc_ftype *unwind_pc);
-
-extern int gdbarch_unwind_sp_p (struct gdbarch *gdbarch);
 
 typedef CORE_ADDR (gdbarch_unwind_sp_ftype) (struct gdbarch *gdbarch, struct frame_info *next_frame);
 extern CORE_ADDR gdbarch_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame);

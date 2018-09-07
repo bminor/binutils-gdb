@@ -872,76 +872,71 @@ frame_unwind_pc (struct frame_info *this_frame)
 {
   if (this_frame->prev_pc.status == CC_UNKNOWN)
     {
-      if (gdbarch_unwind_pc_p (frame_unwind_arch (this_frame)))
+      struct gdbarch *prev_gdbarch;
+      CORE_ADDR pc = 0;
+      int pc_p = 0;
+
+      /* The right way.  The `pure' way.  The one true way.  This
+	 method depends solely on the register-unwind code to
+	 determine the value of registers in THIS frame, and hence
+	 the value of this frame's PC (resume address).  A typical
+	 implementation is no more than:
+
+	 frame_unwind_register (this_frame, ISA_PC_REGNUM, buf);
+	 return extract_unsigned_integer (buf, size of ISA_PC_REGNUM);
+
+	 Note: this method is very heavily dependent on a correct
+	 register-unwind implementation, it pays to fix that
+	 method first; this method is frame type agnostic, since
+	 it only deals with register values, it works with any
+	 frame.  This is all in stark contrast to the old
+	 FRAME_SAVED_PC which would try to directly handle all the
+	 different ways that a PC could be unwound.  */
+      prev_gdbarch = frame_unwind_arch (this_frame);
+
+      TRY
 	{
-	  struct gdbarch *prev_gdbarch;
-	  CORE_ADDR pc = 0;
-	  int pc_p = 0;
-
-	  /* The right way.  The `pure' way.  The one true way.  This
-	     method depends solely on the register-unwind code to
-	     determine the value of registers in THIS frame, and hence
-	     the value of this frame's PC (resume address).  A typical
-	     implementation is no more than:
-	   
-	     frame_unwind_register (this_frame, ISA_PC_REGNUM, buf);
-	     return extract_unsigned_integer (buf, size of ISA_PC_REGNUM);
-
-	     Note: this method is very heavily dependent on a correct
-	     register-unwind implementation, it pays to fix that
-	     method first; this method is frame type agnostic, since
-	     it only deals with register values, it works with any
-	     frame.  This is all in stark contrast to the old
-	     FRAME_SAVED_PC which would try to directly handle all the
-	     different ways that a PC could be unwound.  */
-	  prev_gdbarch = frame_unwind_arch (this_frame);
-
-	  TRY
+	  pc = gdbarch_unwind_pc (prev_gdbarch, this_frame);
+	  pc_p = 1;
+	}
+      CATCH (ex, RETURN_MASK_ERROR)
+	{
+	  if (ex.error == NOT_AVAILABLE_ERROR)
 	    {
-	      pc = gdbarch_unwind_pc (prev_gdbarch, this_frame);
-	      pc_p = 1;
-	    }
-	  CATCH (ex, RETURN_MASK_ERROR)
-	    {
-	      if (ex.error == NOT_AVAILABLE_ERROR)
-		{
-		  this_frame->prev_pc.status = CC_UNAVAILABLE;
+	      this_frame->prev_pc.status = CC_UNAVAILABLE;
 
-		  if (frame_debug)
-		    fprintf_unfiltered (gdb_stdlog,
-					"{ frame_unwind_pc (this_frame=%d)"
-					" -> <unavailable> }\n",
-					this_frame->level);
-		}
-	      else if (ex.error == OPTIMIZED_OUT_ERROR)
-		{
-		  this_frame->prev_pc.status = CC_NOT_SAVED;
-
-		  if (frame_debug)
-		    fprintf_unfiltered (gdb_stdlog,
-					"{ frame_unwind_pc (this_frame=%d)"
-					" -> <not saved> }\n",
-					this_frame->level);
-		}
-	      else
-		throw_exception (ex);
-	    }
-	  END_CATCH
-
-	  if (pc_p)
-	    {
-	      this_frame->prev_pc.value = pc;
-	      this_frame->prev_pc.status = CC_VALUE;
 	      if (frame_debug)
 		fprintf_unfiltered (gdb_stdlog,
-				    "{ frame_unwind_pc (this_frame=%d) "
-				    "-> %s }\n",
-				    this_frame->level,
-				    hex_string (this_frame->prev_pc.value));
+				    "{ frame_unwind_pc (this_frame=%d)"
+				    " -> <unavailable> }\n",
+				    this_frame->level);
 	    }
+	  else if (ex.error == OPTIMIZED_OUT_ERROR)
+	    {
+	      this_frame->prev_pc.status = CC_NOT_SAVED;
+
+	      if (frame_debug)
+		fprintf_unfiltered (gdb_stdlog,
+				    "{ frame_unwind_pc (this_frame=%d)"
+				    " -> <not saved> }\n",
+				    this_frame->level);
+	    }
+	  else
+	    throw_exception (ex);
 	}
-      else
-	internal_error (__FILE__, __LINE__, _("No unwind_pc method"));
+      END_CATCH
+
+      if (pc_p)
+	{
+	  this_frame->prev_pc.value = pc;
+	  this_frame->prev_pc.status = CC_VALUE;
+	  if (frame_debug)
+	    fprintf_unfiltered (gdb_stdlog,
+				"{ frame_unwind_pc (this_frame=%d) "
+				"-> %s }\n",
+				this_frame->level,
+				hex_string (this_frame->prev_pc.value));
+	}
     }
 
   if (this_frame->prev_pc.status == CC_VALUE)
@@ -2782,18 +2777,9 @@ get_frame_sp (struct frame_info *this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
 
-  /* Normality - an architecture that provides a way of obtaining any
-     frame inner-most address.  */
-  if (gdbarch_unwind_sp_p (gdbarch))
-    /* NOTE drow/2008-06-28: gdbarch_unwind_sp could be converted to
-       operate on THIS_FRAME now.  */
-    return gdbarch_unwind_sp (gdbarch, this_frame->next);
-  /* Now things are really are grim.  Hope that the value returned by
-     the gdbarch_sp_regnum register is meaningful.  */
-  if (gdbarch_sp_regnum (gdbarch) >= 0)
-    return get_frame_register_unsigned (this_frame,
-					gdbarch_sp_regnum (gdbarch));
-  internal_error (__FILE__, __LINE__, _("Missing unwind SP method"));
+  /* NOTE drow/2008-06-28: gdbarch_unwind_sp could be converted to
+     operate on THIS_FRAME now.  */
+  return gdbarch_unwind_sp (gdbarch, this_frame->next);
 }
 
 /* Return the reason why we can't unwind past FRAME.  */

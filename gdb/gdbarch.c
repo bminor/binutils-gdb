@@ -48,6 +48,8 @@
 #include "regcache.h"
 #include "objfiles.h"
 #include "auxv.h"
+#include "frame-unwind.h"
+#include "dummy-frame.h"
 
 /* Static function declarations */
 
@@ -408,6 +410,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->ecoff_reg_to_regnum = no_op_reg_to_regnum;
   gdbarch->sdb_reg_to_regnum = no_op_reg_to_regnum;
   gdbarch->dwarf2_reg_to_regnum = no_op_reg_to_regnum;
+  gdbarch->dummy_id = default_dummy_id;
   gdbarch->deprecated_fp_regnum = -1;
   gdbarch->call_dummy_location = AT_ENTRY_POINT;
   gdbarch->code_of_frame_writable = default_code_of_frame_writable;
@@ -427,6 +430,8 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
   gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
   gdbarch->remote_register_number = default_remote_register_number;
+  gdbarch->unwind_pc = default_unwind_pc;
+  gdbarch->unwind_sp = default_unwind_sp;
   gdbarch->stabs_argument_has_addr = default_stabs_argument_has_addr;
   gdbarch->convert_from_func_ptr_addr = convert_from_func_ptr_addr_identity;
   gdbarch->addr_bits_remove = core_addr_identity;
@@ -570,7 +575,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if (gdbarch->register_name == 0)
     log.puts ("\n\tregister_name");
   /* Skip verify of register_type, has predicate.  */
-  /* Skip verify of dummy_id, has predicate.  */
+  /* Skip verify of dummy_id, invalid_p == 0 */
   /* Skip verify of deprecated_fp_regnum, invalid_p == 0 */
   /* Skip verify of push_dummy_call, has predicate.  */
   /* Skip verify of call_dummy_location, invalid_p == 0 */
@@ -609,8 +614,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of remote_register_number, invalid_p == 0 */
   /* Skip verify of fetch_tls_load_module_address, has predicate.  */
   /* Skip verify of frame_args_skip, invalid_p == 0 */
-  /* Skip verify of unwind_pc, has predicate.  */
-  /* Skip verify of unwind_sp, has predicate.  */
+  /* Skip verify of unwind_pc, invalid_p == 0 */
+  /* Skip verify of unwind_sp, invalid_p == 0 */
   /* Skip verify of frame_num_args, has predicate.  */
   /* Skip verify of frame_align, has predicate.  */
   /* Skip verify of stabs_argument_has_addr, invalid_p == 0 */
@@ -954,9 +959,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: dtrace_probe_is_enabled = <%s>\n",
                       host_address_to_string (gdbarch->dtrace_probe_is_enabled));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: gdbarch_dummy_id_p() = %d\n",
-                      gdbarch_dummy_id_p (gdbarch));
   fprintf_unfiltered (file,
                       "gdbarch_dump: dummy_id = <%s>\n",
                       host_address_to_string (gdbarch->dummy_id));
@@ -1441,14 +1443,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: type_align = <%s>\n",
                       host_address_to_string (gdbarch->type_align));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: gdbarch_unwind_pc_p() = %d\n",
-                      gdbarch_unwind_pc_p (gdbarch));
-  fprintf_unfiltered (file,
                       "gdbarch_dump: unwind_pc = <%s>\n",
                       host_address_to_string (gdbarch->unwind_pc));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: gdbarch_unwind_sp_p() = %d\n",
-                      gdbarch_unwind_sp_p (gdbarch));
   fprintf_unfiltered (file,
                       "gdbarch_dump: unwind_sp = <%s>\n",
                       host_address_to_string (gdbarch->unwind_sp));
@@ -2307,13 +2303,6 @@ set_gdbarch_register_type (struct gdbarch *gdbarch,
   gdbarch->register_type = register_type;
 }
 
-int
-gdbarch_dummy_id_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->dummy_id != NULL;
-}
-
 struct frame_id
 gdbarch_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
@@ -3046,13 +3035,6 @@ set_gdbarch_frame_args_skip (struct gdbarch *gdbarch,
   gdbarch->frame_args_skip = frame_args_skip;
 }
 
-int
-gdbarch_unwind_pc_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->unwind_pc != NULL;
-}
-
 CORE_ADDR
 gdbarch_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
@@ -3068,13 +3050,6 @@ set_gdbarch_unwind_pc (struct gdbarch *gdbarch,
                        gdbarch_unwind_pc_ftype unwind_pc)
 {
   gdbarch->unwind_pc = unwind_pc;
-}
-
-int
-gdbarch_unwind_sp_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->unwind_sp != NULL;
 }
 
 CORE_ADDR

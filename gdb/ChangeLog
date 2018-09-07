@@ -1,3 +1,20 @@
+2018-12-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb/dummy-frame.c (default_dummy_id): Defined new function.
+	* gdb/dummy-frame.h (default_dummy_id): Declare new function.
+	* gdb/frame-unwind.c (default_unwind_pc): Define new function.
+	(default_unwind_sp): Define new function.
+	* gdb/frame-unwind.h (default_unwind_pc): Declare new function.
+	(default_unwind_sp): Declare new function.
+	* gdb/frame.c (frame_unwind_pc): Assume gdbarch_unwind_pc is
+	available.
+	(get_frame_sp): Assume that gdbarch_unwind_sp is available.
+	* gdb/gdbarch.c: Regenerate.
+	* gdb/gdbarch.h: Regenerate.
+	* gdb/gdbarch.sh: Update definition of dummy_id, unwind_pc, and
+	unwind_sp.  Add additional header files to be included in
+	generated file.
+
 2018-12-19  Dimitar Dimitrov  <dimitar@dinux.eu>
 
 	* nat/linux-ptrace.c (linux_ptrace_test_ret_to_nx): Remove

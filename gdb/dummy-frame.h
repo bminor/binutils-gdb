@@ -73,4 +73,10 @@ extern void register_dummy_frame_dtor (frame_id dummy_id,
 extern int find_dummy_frame_dtor (dummy_frame_dtor_ftype *dtor,
 				  void *dtor_data);
 
+/* Default implementation of gdbarch_dummy_id.  Generate a dummy frame_id
+   for THIS_FRAME assuming that the frame is a dummy frame.  */
+
+extern struct frame_id default_dummy_id (struct gdbarch *gdbarch,
+					 struct frame_info *this_frame);
+
 #endif /* !defined (DUMMY_FRAME_H)  */
