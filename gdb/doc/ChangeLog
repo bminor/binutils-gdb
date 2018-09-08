@@ -1,5 +1,11 @@
 2018-09-10  Tom Tromey  <tom@tromey.com>
 
+	* python.texi (Frames In Python, Blocks In Python)
+	(Symbols In Python, Symbol Tables In Python)
+	(Lazy Strings In Python): Remove periods from section titles.
+
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
 	* python.texi (Pretty Printing API): Swap sentence order.
 
 2018-09-10  Tom Tromey  <tom@tromey.com>

@@ -4223,7 +4223,7 @@ from a different place.
 @end defun
 
 @node Frames In Python
-@subsubsection Accessing inferior stack frames from Python.
+@subsubsection Accessing inferior stack frames from Python
 
 @cindex frames in python
 When the debugged program stops, @value{GDBN} is able to analyze its call
@@ -4425,7 +4425,7 @@ Stack}.
 @end defun
 
 @node Blocks In Python
-@subsubsection Accessing blocks from Python.
+@subsubsection Accessing blocks from Python
 
 @cindex blocks in python
 @tindex gdb.Block
@@ -4558,7 +4558,7 @@ writable.
 @end defvar
 
 @node Symbols In Python
-@subsubsection Python representation of Symbols.
+@subsubsection Python representation of Symbols
 
 @cindex symbols in python
 @tindex gdb.Symbol
@@ -4798,7 +4798,7 @@ The value's address is a computed location.
 @end vtable
 
 @node Symbol Tables In Python
-@subsubsection Symbol table representation in Python.
+@subsubsection Symbol table representation in Python
 
 @cindex symbol tables in python
 @tindex gdb.Symtab
@@ -5274,7 +5274,7 @@ is not writable.
 @end defvar
 
 @node Lazy Strings In Python
-@subsubsection Python representation of lazy strings.
+@subsubsection Python representation of lazy strings
 
 @cindex lazy strings in python
 @tindex gdb.LazyString
