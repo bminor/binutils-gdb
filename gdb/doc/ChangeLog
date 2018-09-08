@@ -1,5 +1,12 @@
 2018-09-10  Tom Tromey  <tom@tromey.com>
 
+	PR python/19808:
+	* python.texi (Unwinding Frames in Python): Rewrite
+	create_unwind_info documentation.  Update read_register
+	documentation and add a note about unwinder caution.
+
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
 	PR python/18909:
 	* python.texi (Events In Python): Fix inferior_call
 	documentation.
