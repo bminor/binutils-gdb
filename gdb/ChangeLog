@@ -1,5 +1,10 @@
 2018-09-08  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_exception_sal): Replace gdb_assert calls
+	by calls to error.
+
+2018-09-08  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_unhandled_exception_name_addr_from_raise):
 	Move update of loop variable "fi".
 

@@ -13215,14 +13215,11 @@ ada_exception_sal (enum ada_exception_catchpoint_kind ex,
   sym_name = ada_exception_sym_name (ex);
   sym = standard_lookup (sym_name, NULL, VAR_DOMAIN);
 
-  /* We can assume that SYM is not NULL at this stage.  If the symbol
-     did not exist, ada_exception_support_info_sniffer would have
-     raised an exception.
+  if (sym == NULL)
+    error (_("Catchpoint symbol not found: %s"), sym_name);
 
-     Also, ada_exception_support_info_sniffer should have already
-     verified that SYM is a function symbol.  */
-  gdb_assert (sym != NULL);
-  gdb_assert (SYMBOL_CLASS (sym) == LOC_BLOCK);
+  if (SYMBOL_CLASS (sym) != LOC_BLOCK)
+    error (_("Unable to insert catchpoint. %s is not a function."), sym_name);
 
   /* Set ADDR_STRING.  */
   *addr_string = xstrdup (sym_name);
