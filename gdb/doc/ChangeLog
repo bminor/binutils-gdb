@@ -1,5 +1,11 @@
 2018-09-10  Tom Tromey  <tom@tromey.com>
 
+	PR python/16461:
+	* python.texi (Values From Inferior): Mention use of virtual
+	table.
+
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
 	* python.texi (Basic Python): Parenthesize argument to
 	decode_line.
 
