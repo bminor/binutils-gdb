@@ -1,5 +1,11 @@
 2018-09-10  Tom Tromey  <tom@tromey.com>
 
+	PR python/16484:
+	* python.texi (Frames In Python): Document that Frame.block can
+	throw.
+
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
 	PR python/23487:
 	* gdb.texinfo (Pretty-Printer Commands): Fix typo in example.
 

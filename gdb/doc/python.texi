@@ -4321,7 +4321,10 @@ Returns the frame's resume address.
 @end defun
 
 @defun Frame.block ()
-Return the frame's code block.  @xref{Blocks In Python}.
+Return the frame's code block.  @xref{Blocks In Python}.  If the frame
+does not have a block -- for example, if there is no debugging
+information for the code in question -- then this will throw an
+exception.
 @end defun
 
 @defun Frame.function ()
