@@ -2019,7 +2019,7 @@ the @sc{gnu} C compiler, provides macro information if you are using
 the DWARF debugging format, and specify the option @option{-g3}.
 
 @xref{Debugging Options,,Options for Debugging Your Program or GCC,
-gcc.info, Using the @sc{gnu} Compiler Collection (GCC)}, for more
+gcc, Using the @sc{gnu} Compiler Collection (GCC)}, for more
 information on @value{NGCC} options affecting debug information.
 
 You will have the best debugging experience if you use the latest
@@ -8938,7 +8938,7 @@ This command controls the passing of target specific information to
 the disassembler.  For a list of valid options, please refer to the
 @code{-M}/@code{--disassembler-options} section of the @samp{objdump}
 manual and/or the output of @kbd{objdump --help}
-(@pxref{objdump,,objdump,binutils.info,The GNU Binary Utilities}).
+(@pxref{objdump,,objdump,binutils,The GNU Binary Utilities}).
 The default value is the empty string.
 
 If it is necessary to specify more than one disassembler option, then
@@ -19699,7 +19699,7 @@ also present in the corresponding debug info file.  (This is supported
 only on some operating systems, when using the ELF or PE file formats
 for binary files and the @sc{gnu} Binutils.)  For more details about
 this feature, see the description of the @option{--build-id}
-command-line option in @ref{Options, , Command Line Options, ld.info,
+command-line option in @ref{Options, , Command Line Options, ld,
 The GNU Linker}.  The debug info file's name is not specified
 explicitly by the build ID, but can be computed from the build ID, see
 below.

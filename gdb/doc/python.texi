@@ -4057,7 +4057,7 @@ is the build ID of the objfile.  Otherwise, @var{name} is a file name.
 This is supported only on some operating systems, notably those which use
 the ELF format for binary files and the @sc{gnu} Binutils.  For more details
 about this feature, see the description of the @option{--build-id}
-command-line option in @ref{Options, , Command Line Options, ld.info,
+command-line option in @ref{Options, , Command Line Options, ld,
 The GNU Linker}.
 @end defun
 
@@ -4093,7 +4093,7 @@ If the objfile does not have a build ID then the value is @code{None}.
 This is supported only on some operating systems, notably those which use
 the ELF format for binary files and the @sc{gnu} Binutils.  For more details
 about this feature, see the description of the @option{--build-id}
-command-line option in @ref{Options, , Command Line Options, ld.info,
+command-line option in @ref{Options, , Command Line Options, ld,
 The GNU Linker}.
 @end defvar
 
