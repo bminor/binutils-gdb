@@ -1,5 +1,9 @@
 2018-09-10  Tom Tromey  <tom@tromey.com>
 
+	* python.texi (Pretty Printing API): Swap sentence order.
+
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
 	PR python/16461:
 	* python.texi (Values From Inferior): Mention use of virtual
 	table.

@@ -1253,10 +1253,9 @@ Python module (@pxref{gdb.types}).
 @subsubsection Pretty Printing API
 @cindex python pretty printing api
 
-An example output is provided (@pxref{Pretty Printing}).
-
 A pretty-printer is just an object that holds a value and implements a
-specific interface, defined here.
+specific interface, defined here.  An example output is provided
+(@pxref{Pretty Printing}).
 
 @defun pretty_printer.children (self)
 @value{GDBN} will call this method on a pretty-printer to compute the
