@@ -1,3 +1,9 @@
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
+	PR python/18380:
+	* python/python.c (_initialize_python): Make example in "python"
+	help work in Python 3.
+
 2018-09-10  Eli Zaretskii  <eliz@gnu.org>
 
 	* Makefile.in (transformed_name): Use INSTALL_SCRIPT instead of

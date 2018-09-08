@@ -1875,7 +1875,7 @@ Evaluate a Python command.\n\
 \n\
 The command can be given as an argument, for instance:\n\
 \n\
-    python print 23\n\
+    python print (23)\n\
 \n\
 If no argument is given, the following lines are read and used\n\
 as the Python commands.  Type a line containing \"end\" to indicate\n\
