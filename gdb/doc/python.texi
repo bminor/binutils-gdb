@@ -1625,7 +1625,7 @@ order to avoid holding information that could become stale as the
 inferior changed.
 
 @node Frame Filter API
-@subsubsection Filtering Frames.
+@subsubsection Filtering Frames
 @cindex frame filters api
 
 Frame filters are Python objects that manipulate the visibility of a
@@ -1777,11 +1777,11 @@ frame filters.  Although @code{priority} can be negative, it is
 recommended practice to assume zero is the lowest priority that a
 frame filter can be assigned.  Frame filters that have the same
 priority are executed in unsorted order in that priority slot.  This
-attribute is mandatory.
+attribute is mandatory.  100 is a good default priority.
 @end defvar
 
 @node Frame Decorator API
-@subsubsection Decorating Frames.
+@subsubsection Decorating Frames
 @cindex frame decorator api
 
 Frame decorators are sister objects to frame filters (@pxref{Frame
@@ -1804,6 +1804,13 @@ Frame decorators have a mandatory interface, defined below.
 boilerplate code to decorate the content of a @code{gdb.Frame}.  It is
 recommended that other frame decorators inherit and extend this
 object, and only to override the methods needed.
+
+@tindex gdb.FrameDecorator
+@code{FrameDecorator} is defined in the Python module
+@code{gdb.FrameDecorator}, so your code can import it like:
+@smallexample
+from gdb.FrameDecorator import FrameDecorator
+@end smallexample
 
 @defun FrameDecorator.elided (self)
 

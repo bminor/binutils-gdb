@@ -1,5 +1,13 @@
 2018-09-10  Tom Tromey  <tom@tromey.com>
 
+	PR python/17752:
+	* python.texi (Frame Filter API): Remove period from subsection
+	title.  Mention 100 as good default priority.
+	(Frame Decorator API): Remove period from subsection title.
+	Mention FrameDecorator module.
+
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
 	PR python/23108:
 	* python.texi (Exception Handling): Rearrange gdb.GdbError text
 	and add a table.
