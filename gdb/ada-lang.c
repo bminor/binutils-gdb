@@ -2809,11 +2809,18 @@ value_assign_to_component (struct value *container, struct value *component,
     bits = value_bitsize (component);
 
   if (gdbarch_bits_big_endian (get_type_arch (value_type (container))))
-    move_bits (value_contents_writeable (container) + offset_in_container,
-	       value_bitpos (container) + bit_offset_in_container,
-	       value_contents (val),
-	       TYPE_LENGTH (value_type (component)) * TARGET_CHAR_BIT - bits,
-	       bits, 1);
+    {
+      int src_offset;
+
+      if (is_scalar_type (check_typedef (value_type (component))))
+        src_offset
+	  = TYPE_LENGTH (value_type (component)) * TARGET_CHAR_BIT - bits;
+      else
+	src_offset = 0;
+      move_bits (value_contents_writeable (container) + offset_in_container,
+		 value_bitpos (container) + bit_offset_in_container,
+		 value_contents (val), src_offset, bits, 1);
+    }
   else
     move_bits (value_contents_writeable (container) + offset_in_container,
 	       value_bitpos (container) + bit_offset_in_container,

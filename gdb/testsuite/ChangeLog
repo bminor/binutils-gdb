@@ -1,3 +1,7 @@
+2018-09-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/packed_array_assign: New testcase.
+
 2018-09-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/watchpoint.exp (test_complex_watchpoint): Extend test
