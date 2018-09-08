@@ -10798,7 +10798,7 @@ library2.so:
   bar
     bar1
     bar2
-(gdb) disable pretty-printer library2 bar:bar1
+(gdb) disable pretty-printer library2 bar;bar1
 1 printer disabled
 1 of 3 printers enabled
 (gdb) info pretty-printer library2

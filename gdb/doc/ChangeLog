@@ -1,5 +1,10 @@
 2018-09-10  Tom Tromey  <tom@tromey.com>
 
+	PR python/23487:
+	* gdb.texinfo (Pretty-Printer Commands): Fix typo in example.
+
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
 	PR python/16033:
 	* python.texi (Blocks In Python): Document that Block.end is
 	exclusive.
