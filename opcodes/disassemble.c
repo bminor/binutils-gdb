@@ -77,6 +77,7 @@
 #define ARCH_rs6000
 #define ARCH_rl78
 #define ARCH_rx
+#define ARCH_s12z
 #define ARCH_s390
 #define ARCH_score
 #define ARCH_sh

@@ -1,3 +1,7 @@
+2018-09-08  John Darrington  <john@darrington.wattle.id.au>
+
+	* disassemble.c (ARCH_s12z): Define if ARCH_all.
+
 2018-08-31  Kito Cheng  <kito@andestech.com>
 
 	* riscv-opc.c (riscv_opcodes): Fix incorrect subset info for
