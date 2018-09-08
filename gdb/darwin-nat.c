@@ -1854,11 +1854,39 @@ darwin_execvp (const char *file, char * const argv[], char * const env[])
   posix_spawnp (NULL, argv[0], NULL, &attr, argv, env);
 }
 
+/* Read kernel version, and return TRUE on Sierra or later.  */
+
+static bool
+should_disable_startup_with_shell ()
+{
+  char str[16];
+  size_t sz = sizeof (str);
+  int ret;
+
+  ret = sysctlbyname ("kern.osrelease", str, &sz, NULL, 0);
+  if (ret == 0 && sz < sizeof (str))
+    {
+      unsigned long ver = strtoul (str, NULL, 10);
+      if (ver >= 16)
+        return true;
+    }
+  return false;
+}
+
 void
 darwin_nat_target::create_inferior (const char *exec_file,
 				    const std::string &allargs,
 				    char **env, int from_tty)
 {
+  gdb::optional<scoped_restore_tmpl<int>> restore_startup_with_shell;
+
+  if (startup_with_shell && should_disable_startup_with_shell ())
+    {
+      warning (_("startup-with-shell not supported on this macOS version,"
+	         " disabling it."));
+      restore_startup_with_shell.emplace (&startup_with_shell, 0);
+    }
+
   /* Do the hard work.  */
   fork_inferior (exec_file, allargs, env, darwin_ptrace_me,
 		 darwin_ptrace_him, darwin_pre_ptrace, NULL,
