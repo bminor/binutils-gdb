@@ -684,6 +684,31 @@ class gdbpy_enter_varobj : public gdbpy_enter
 
 };
 
+/* The opposite of gdb_enter: this releases the GIL around a region,
+   allowing other Python threads to run.  No Python APIs may be used
+   while this is active.  */
+class gdbpy_allow_threads
+{
+public:
+
+  gdbpy_allow_threads ()
+    : m_save (PyEval_SaveThread ())
+  {
+    gdb_assert (m_save != nullptr);
+  }
+
+  ~gdbpy_allow_threads ()
+  {
+    PyEval_RestoreThread (m_save);
+  }
+
+  DISABLE_COPY_AND_ASSIGN (gdbpy_allow_threads);
+
+private:
+
+  PyThreadState *m_save;
+};
+
 extern struct gdbarch *python_gdbarch;
 extern const struct language_defn *python_language;
 

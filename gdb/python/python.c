@@ -576,6 +576,8 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
 
   TRY
     {
+      gdbpy_allow_threads allow_threads;
+
       struct interp *interp;
 
       std::string arg_copy = arg;
@@ -898,6 +900,7 @@ gdbpy_parse_and_eval (PyObject *self, PyObject *args)
 
   TRY
     {
+      gdbpy_allow_threads allow_threads;
       result = parse_and_eval (expr_str);
     }
   CATCH (except, RETURN_MASK_ALL)

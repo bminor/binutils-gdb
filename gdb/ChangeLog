@@ -1,3 +1,10 @@
+2019-01-30  Tom Tromey  <tom@tromey.com>
+
+	PR python/23615:
+	* python/python.c (execute_gdb_command): Use gdbpy_allow_threads.
+	(gdbpy_parse_and_eval): Likewise.
+	* python/python-internal.h (gdbpy_allow_threads): New class.
+
 2019-01-28  John Baldwin  <jhb@FreeBSD.org>
 
 	* aarch64-fbsd-tdep.c (aarch64_fbsd_gregmap)
