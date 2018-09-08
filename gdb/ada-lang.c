@@ -9312,9 +9312,7 @@ struct value *
 ada_to_fixed_value (struct value *val)
 {
   val = unwrap_value (val);
-  val = ada_to_fixed_value_create (value_type (val),
-				      value_address (val),
-				      val);
+  val = ada_to_fixed_value_create (value_type (val), value_address (val), val);
   return val;
 }
 

@@ -1,3 +1,8 @@
+2018-09-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_to_fixed_value): Minor reformatting in
+	call to ada_to_fixed_value_create.
+
 2018-09-08  Jerome Guitton  <guitton@adacore.com>
 
 	* ada-lang.c (ada_decode): strip dot prefix in symbol name.
