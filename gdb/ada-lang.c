@@ -3515,7 +3515,7 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
           && (TYPE_CODE (SYMBOL_TYPE (exp->elts[pc + 2].symbol))
               == TYPE_CODE_FUNC))
         {
-          replace_operator_with_call (expp, pc, 0, 0,
+          replace_operator_with_call (expp, pc, 0, 4,
                                       exp->elts[pc + 2].symbol,
                                       exp->elts[pc + 1].block);
           exp = expp->get ();

@@ -1,5 +1,10 @@
 2018-09-08  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (resolve_subexp): Pass correct OPLEN in call to
+	replace_operator_with_call.
+
+2018-09-08  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_value_cast): Remove unnecessary parentheses.
 
 2018-09-08  Joel Brobecker  <brobecker@adacore.com>
