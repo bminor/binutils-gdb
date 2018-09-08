@@ -602,30 +602,33 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
 
       counted_command_line lines = read_command_lines_1 (reader, 1, nullptr);
 
-      scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
+      {
+	scoped_restore save_async = make_scoped_restore (&current_ui->async,
+							 0);
 
-      scoped_restore save_uiout = make_scoped_restore (&current_uiout);
+	scoped_restore save_uiout = make_scoped_restore (&current_uiout);
 
-      /* Use the console interpreter uiout to have the same print format
-	for console or MI.  */
-      interp = interp_lookup (current_ui, "console");
-      current_uiout = interp->interp_ui_out ();
+	/* Use the console interpreter uiout to have the same print format
+	   for console or MI.  */
+	interp = interp_lookup (current_ui, "console");
+	current_uiout = interp->interp_ui_out ();
 
-      scoped_restore preventer = prevent_dont_repeat ();
-      if (to_string)
-	to_string_res = execute_control_commands_to_string (lines.get (),
-							    from_tty);
-      else
-	execute_control_commands (lines.get (), from_tty);
+	scoped_restore preventer = prevent_dont_repeat ();
+	if (to_string)
+	  to_string_res = execute_control_commands_to_string (lines.get (),
+							      from_tty);
+	else
+	  execute_control_commands (lines.get (), from_tty);
+      }
+
+      /* Do any commands attached to breakpoint we stopped at.  */
+      bpstat_do_actions ();
     }
   CATCH (except, RETURN_MASK_ALL)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
   END_CATCH
-
-  /* Do any commands attached to breakpoint we stopped at.  */
-  bpstat_do_actions ();
 
   if (to_string)
     return PyString_FromString (to_string_res.c_str ());

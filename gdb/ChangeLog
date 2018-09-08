@@ -1,3 +1,8 @@
+2018-09-07  Tom Tromey  <tom@tromey.com>
+
+	* python/python.c (execute_gdb_command): Call bpstat_do_actions
+	inside the TRY.
+
 2018-09-14  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* nios2-tdep.c (nios2_type_align): New.
