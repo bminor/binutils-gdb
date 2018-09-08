@@ -271,10 +271,12 @@ bug_14741()
    when looking for a printer.  */
 typedef int int_type;
 typedef int_type int_type2;
+typedef int_type int_type3;
 
 int an_int = -1;
 int_type an_int_type = 1;
 int_type2 an_int_type2 = 2;
+int_type3 an_int_type3 = 3;
 
 int
 main ()

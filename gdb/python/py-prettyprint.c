@@ -195,18 +195,23 @@ pretty_print_one_value (PyObject *printer, struct value **out_value)
   *out_value = NULL;
   TRY
     {
-      result.reset (PyObject_CallMethodObjArgs (printer, gdbpy_to_string_cst,
-						NULL));
-      if (result != NULL)
+      if (!PyObject_HasAttr (printer, gdbpy_to_string_cst))
+	result = gdbpy_ref<>::new_reference (Py_None);
+      else
 	{
-	  if (! gdbpy_is_string (result.get ())
-	      && ! gdbpy_is_lazy_string (result.get ())
-	      && result != Py_None)
+	  result.reset (PyObject_CallMethodObjArgs (printer, gdbpy_to_string_cst,
+						    NULL));
+	  if (result != NULL)
 	    {
-	      *out_value = convert_value_from_python (result.get ());
-	      if (PyErr_Occurred ())
-		*out_value = NULL;
-	      result = NULL;
+	      if (! gdbpy_is_string (result.get ())
+		  && ! gdbpy_is_lazy_string (result.get ())
+		  && result != Py_None)
+		{
+		  *out_value = convert_value_from_python (result.get ());
+		  if (PyErr_Occurred ())
+		    *out_value = NULL;
+		  result = NULL;
+		}
 	    }
 	}
     }

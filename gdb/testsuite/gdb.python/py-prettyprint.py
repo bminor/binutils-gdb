@@ -253,6 +253,15 @@ class pp_int_typedef (object):
     def to_string(self):
         return "type=%s, val=%s" % (self.val.type, int(self.val))
 
+class pp_int_typedef3 (object):
+    "A printer without a to_string method"
+
+    def __init__(self, val):
+        self.val = val
+
+    def children(self):
+        yield 's', 27
+
 def lookup_function (val):
     "Look-up and return a pretty-printer that can print val."
 
@@ -362,6 +371,7 @@ def register_pretty_printers ():
 
     typedefs_pretty_printers_dict[re.compile ('^int_type$')] = pp_int_typedef
     typedefs_pretty_printers_dict[re.compile ('^int_type2$')] = pp_int_typedef
+    typedefs_pretty_printers_dict[re.compile ('^int_type3$')] = pp_int_typedef3
 
 # Dict for struct types with typedefs fully stripped.
 pretty_printers_dict = {}

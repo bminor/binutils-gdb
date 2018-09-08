@@ -1,3 +1,13 @@
+2018-09-08  Tom Tromey  <tom@tromey.com>
+
+	PR python/16047:
+	* gdb.python/py-prettyprint.py (pp_int_typedef3): New class.
+	(register_pretty_printers): Register new printer.
+	* gdb.python/py-prettyprint.exp (run_lang_tests): Add int_type3
+	test.
+	* gdb.python/py-prettyprint.c (int_type3): New typedef.
+	(an_int_type3): New global.
+
 2018-09-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/expr_with_funcall: New testcase.

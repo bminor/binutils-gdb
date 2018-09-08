@@ -1,3 +1,9 @@
+2018-09-08  Tom Tromey  <tom@tromey.com>
+
+	PR python/16047:
+	* python/py-prettyprint.c (pretty_print_one_value): Check for
+	to_string method.
+
 2018-09-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (resolve_subexp): Pass correct OPLEN in call to
