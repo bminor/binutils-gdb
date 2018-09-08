@@ -1,5 +1,11 @@
 2018-09-10  Tom Tromey  <tom@tromey.com>
 
+	PR python/23108:
+	* python.texi (Exception Handling): Rearrange gdb.GdbError text
+	and add a table.
+
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
 	* gdb.texinfo (Compilation): Use "gcc", not "gcc.info", in @xref.
 	(Machine Code): Use "binutils", not "binutils.info", in @pxref.
 	(Separate Debug Files): Use "ld", not "ld.info", in @ref.
