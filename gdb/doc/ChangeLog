@@ -1,3 +1,9 @@
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
+	PR python/16033:
+	* python.texi (Blocks In Python): Document that Block.end is
+	exclusive.
+
 2018-08-29  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.texinfo (Compiling and injecting code in GDB): Document

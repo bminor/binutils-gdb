@@ -4455,7 +4455,8 @@ The start address of the block.  This attribute is not writable.
 @end defvar
 
 @defvar Block.end
-The end address of the block.  This attribute is not writable.
+One past the last address that appears in the block.  This attribute
+is not writable.
 @end defvar
 
 @defvar Block.function
