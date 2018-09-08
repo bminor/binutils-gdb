@@ -2987,9 +2987,16 @@ A reference to the program space (@code{gdb.Progspace}) whose objfile list has
 been cleared.  @xref{Progspaces In Python}.
 @end defvar
 
-@item events.inferior_call_pre
-Emits @code{gdb.InferiorCallPreEvent} which indicates that a function in
-the inferior is about to be called.
+@item events.inferior_call
+Emits events just before and after a function in the inferior is
+called by @value{GDBN}.  Before an inferior call, this emits an event
+of type @code{gdb.InferiorCallPreEvent}, and after an inferior call,
+this emits an event of type @code{gdb.InferiorCallPostEvent}.
+
+@table @code
+@tindex gdb.InferiorCallPreEvent
+@item @code{gdb.InferiorCallPreEvent}
+Indicates that a function in the inferior is about to be called.
 
 @defvar InferiorCallPreEvent.ptid
 The thread in which the call will be run.
@@ -2999,9 +3006,9 @@ The thread in which the call will be run.
 The location of the function to be called.
 @end defvar
 
-@item events.inferior_call_post
-Emits @code{gdb.InferiorCallPostEvent} which indicates that a function in
-the inferior has returned.
+@tindex gdb.InferiorCallPostEvent
+@item @code{gdb.InferiorCallPostEvent}
+Indicates that a function in the inferior has just been called.
 
 @defvar InferiorCallPostEvent.ptid
 The thread in which the call was run.
@@ -3010,6 +3017,7 @@ The thread in which the call was run.
 @defvar InferiorCallPostEvent.address
 The location of the function that was called.
 @end defvar
+@end table
 
 @item events.memory_changed
 Emits @code{gdb.MemoryChangedEvent} which indicates that the memory of the
