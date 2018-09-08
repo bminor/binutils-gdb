@@ -1,5 +1,10 @@
 2018-09-08  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-typeprint.c (print_range): Print the bounds using TYPE
+	rather than its TYPE_TARGET_TYPE.
+
+2018-09-08  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_to_fixed_value): Minor reformatting in
 	call to ada_to_fixed_value_create.
 

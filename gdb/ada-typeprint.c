@@ -159,13 +159,8 @@ print_range (struct type *type, struct ui_file *stream,
     case TYPE_CODE_RANGE:
     case TYPE_CODE_ENUM:
       {
-	struct type *target_type;
 	LONGEST lo = 0, hi = 0; /* init for gcc -Wall */
 	int got_error = 0;
-
-	target_type = TYPE_TARGET_TYPE (type);
-	if (target_type == NULL)
-	  target_type = type;
 
 	TRY
 	  {
@@ -186,9 +181,9 @@ print_range (struct type *type, struct ui_file *stream,
 
 	if (!got_error)
 	  {
-	    ada_print_scalar (target_type, lo, stream);
+	    ada_print_scalar (type, lo, stream);
 	    fprintf_filtered (stream, " .. ");
-	    ada_print_scalar (target_type, hi, stream);
+	    ada_print_scalar (type, hi, stream);
 	  }
       }
       break;
