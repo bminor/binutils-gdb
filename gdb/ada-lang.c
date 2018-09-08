@@ -10233,7 +10233,7 @@ ada_value_cast (struct type *type, struct value *arg2)
     return arg2;
 
   if (ada_is_fixed_point_type (type))
-    return (cast_to_fixed (type, arg2));
+    return cast_to_fixed (type, arg2);
 
   if (ada_is_fixed_point_type (value_type (arg2)))
     return cast_from_fixed (type, arg2);
