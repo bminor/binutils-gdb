@@ -1,5 +1,10 @@
 2018-09-08  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_unhandled_exception_name_addr_from_raise):
+	Move update of loop variable "fi".
+
+2018-09-08  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (value_assign_to_component): In the case of
 	big-endian targets, extract the bits of the given VAL
 	using an src_offset of zero if container is not a scalar.

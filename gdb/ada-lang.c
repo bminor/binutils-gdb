@@ -12242,8 +12242,8 @@ ada_unhandled_exception_name_addr_from_raise (void)
           if (strcmp (func_name.get (),
 		      data->exception_info->catch_exception_sym) == 0)
 	    break; /* We found the frame we were looking for...  */
-	  fi = get_prev_frame (fi);
 	}
+      fi = get_prev_frame (fi);
     }
 
   if (fi == NULL)
