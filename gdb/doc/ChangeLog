@@ -1,5 +1,10 @@
 2018-09-10  Tom Tromey  <tom@tromey.com>
 
+	* python.texi (Basic Python): Parenthesize argument to
+	decode_line.
+
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
 	* python.texi (Python): Mention Python versions.  Don't mention
 	execfile.
 

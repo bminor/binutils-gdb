@@ -448,7 +448,7 @@ as a string, or @code{None}.
 @end defun
 
 @findex gdb.decode_line 
-@defun gdb.decode_line @r{[}expression@r{]}
+@defun gdb.decode_line (@r{[}expression@r{]})
 Return locations of the line specified by @var{expression}, or of the
 current line if no argument was given.  This function returns a Python
 tuple containing two elements.  The first element contains a string
