@@ -18,6 +18,8 @@
 You can extend @value{GDBN} using the @uref{http://www.python.org/,
 Python programming language}.  This feature is available only if
 @value{GDBN} was configured using @option{--with-python}.
+@value{GDBN} can be built against either Python 2 or Python 3; which
+one you have depends on this configure-time option.
 
 @cindex python directory
 Python scripts used by @value{GDBN} should be installed in
@@ -113,10 +115,6 @@ interpreter:
 The script name must end with @samp{.py} and @value{GDBN} must be configured
 to recognize the script language based on filename extension using
 the @code{script-extension} setting.  @xref{Extending GDB, ,Extending GDB}.
-
-@item python execfile ("script-name")
-This method is based on the @code{execfile} Python built-in function,
-and thus is always available.
 @end table
 
 @node Python API

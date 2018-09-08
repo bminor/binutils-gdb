@@ -1,5 +1,10 @@
 2018-09-10  Tom Tromey  <tom@tromey.com>
 
+	* python.texi (Python): Mention Python versions.  Don't mention
+	execfile.
+
+2018-09-10  Tom Tromey  <tom@tromey.com>
+
 	PR python/19808:
 	* python.texi (Unwinding Frames in Python): Rewrite
 	create_unwind_info documentation.  Update read_register
