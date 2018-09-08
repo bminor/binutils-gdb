@@ -1164,6 +1164,11 @@ ada_decode (const char *encoded)
   static char *decoding_buffer = NULL;
   static size_t decoding_buffer_size = 0;
 
+  /* With function descriptors on PPC64, the value of a symbol named
+     ".FN", if it exists, is the entry point of the function "FN".  */
+  if (encoded[0] == '.')
+    encoded += 1;
+
   /* The name of the Ada main procedure starts with "_ada_".
      This prefix is not part of the decoded name, so skip this part
      if we see this prefix.  */
