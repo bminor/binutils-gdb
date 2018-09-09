@@ -2318,9 +2318,9 @@ varobj_value_get_print_value (struct value *value,
 	    {
 	      struct value *replacement;
 
-	      gdbpy_ref<> output (apply_varobj_pretty_printer (value_formatter,
-							       &replacement,
-							       &stb));
+	      gdbpy_ref<> output = apply_varobj_pretty_printer (value_formatter,
+								&replacement,
+								&stb);
 
 	      /* If we have string like output ...  */
 	      if (output != NULL)

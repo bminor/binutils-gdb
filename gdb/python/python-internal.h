@@ -99,6 +99,7 @@
    from including our python/python.h header file.  */
 #include <Python.h>
 #include <frameobject.h>
+#include "py-ref.h"
 
 #if PY_MAJOR_VERSION >= 3
 #define IS_PY3K 1
@@ -691,9 +692,9 @@ int gdbpy_is_value_object (PyObject *obj);
 
 /* Note that these are declared here, and not in python.h with the
    other pretty-printer functions, because they refer to PyObject.  */
-PyObject *apply_varobj_pretty_printer (PyObject *print_obj,
-				       struct value **replacement,
-				       struct ui_file *stream);
+gdbpy_ref<> apply_varobj_pretty_printer (PyObject *print_obj,
+					 struct value **replacement,
+					 struct ui_file *stream);
 PyObject *gdbpy_get_varobj_pretty_printer (struct value *value);
 gdb::unique_xmalloc_ptr<char> gdbpy_get_display_hint (PyObject *printer);
 PyObject *gdbpy_default_visualizer (PyObject *self, PyObject *args);

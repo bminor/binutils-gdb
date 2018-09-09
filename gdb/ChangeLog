@@ -1,3 +1,13 @@
+2018-09-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python/py-prettyprint.c (pretty_print_one_value): Return
+	gdbpy_ref<>.
+	(print_string_repr): Adjust.
+	(apply_varobj_pretty_printer): Return gdbpy_ref<>.
+	* python/python-internal.h (apply_varobj_pretty_printer): Return
+	gdbpy_ref<>.
+	* varobj.c (varobj_value_get_print_value): Adjust.
+
 2018-09-08  Tom Tromey  <tom@tromey.com>
 
 	PR python/16047:
