@@ -509,19 +509,6 @@ arc_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc,
   *offset_ptr = 0;
 }
 
-/* Implement the "dummy_id" gdbarch method.
-
-   Tear down a dummy frame created by arc_push_dummy_call ().  This data has
-   to be constructed manually from the data in our hand.  The stack pointer
-   and program counter can be obtained from the frame info.  */
-
-static struct frame_id
-arc_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
-{
-  return frame_id_build (get_frame_sp (this_frame),
-			 get_frame_pc (this_frame));
-}
-
 /* Implement the "push_dummy_call" gdbarch method.
 
    Stack Frame Layout
@@ -1512,34 +1499,6 @@ arc_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
     }
 }
 
-/* Implement the "unwind_pc" gdbarch method.  */
-
-static CORE_ADDR
-arc_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  int pc_regnum = gdbarch_pc_regnum (gdbarch);
-  CORE_ADDR pc = frame_unwind_register_unsigned (next_frame, pc_regnum);
-
-  if (arc_debug)
-    debug_printf ("arc: unwind PC: %s\n", paddress (gdbarch, pc));
-
-  return pc;
-}
-
-/* Implement the "unwind_sp" gdbarch method.  */
-
-static CORE_ADDR
-arc_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  int sp_regnum = gdbarch_sp_regnum (gdbarch);
-  CORE_ADDR sp = frame_unwind_register_unsigned (next_frame, sp_regnum);
-
-  if (arc_debug)
-    debug_printf ("arc: unwind SP: %s\n", paddress (gdbarch, sp));
-
-  return sp;
-}
-
 /* Implement the "frame_align" gdbarch method.  */
 
 static CORE_ADDR
@@ -2034,7 +1993,6 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_ps_regnum (gdbarch, ARC_STATUS32_REGNUM);
   set_gdbarch_fp0_regnum (gdbarch, -1);	/* No FPU registers.  */
 
-  set_gdbarch_dummy_id (gdbarch, arc_dummy_id);
   set_gdbarch_push_dummy_call (gdbarch, arc_push_dummy_call);
   set_gdbarch_push_dummy_code (gdbarch, arc_push_dummy_code);
 
@@ -2056,9 +2014,6 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_decr_pc_after_break (gdbarch, 0);
   else
     set_gdbarch_decr_pc_after_break (gdbarch, 2);
-
-  set_gdbarch_unwind_pc (gdbarch, arc_unwind_pc);
-  set_gdbarch_unwind_sp (gdbarch, arc_unwind_sp);
 
   set_gdbarch_frame_align (gdbarch, arc_frame_align);
 

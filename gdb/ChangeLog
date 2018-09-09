@@ -1,5 +1,12 @@
 2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb/arc-tdep.c (arc_dummy_id): Delete.
+	(arc_unwind_pc): Delete.
+	(arc_unwind_sp): Delete.
+	(arc_gdbarch_init): Don't register deleted functions with gdbarch.
+
+2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb/alpha-tdep.c (alpha_dummy_id): Delete.
 	(alpha_unwind_pc): Delete.
 	(alpha_gdbarch_init): Don't register deleted functions with
