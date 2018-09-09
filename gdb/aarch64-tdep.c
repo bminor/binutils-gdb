@@ -998,39 +998,6 @@ struct frame_base aarch64_normal_base =
   aarch64_normal_frame_base
 };
 
-/* Assuming THIS_FRAME is a dummy, return the frame ID of that
-   dummy frame.  The frame ID's base needs to match the TOS value
-   saved by save_dummy_frame_tos () and returned from
-   aarch64_push_dummy_call, and the PC needs to match the dummy
-   frame's breakpoint.  */
-
-static struct frame_id
-aarch64_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
-{
-  return frame_id_build (get_frame_register_unsigned (this_frame,
-						      AARCH64_SP_REGNUM),
-			 get_frame_pc (this_frame));
-}
-
-/* Implement the "unwind_pc" gdbarch method.  */
-
-static CORE_ADDR
-aarch64_unwind_pc (struct gdbarch *gdbarch, struct frame_info *this_frame)
-{
-  CORE_ADDR pc
-    = frame_unwind_register_unsigned (this_frame, AARCH64_PC_REGNUM);
-
-  return pc;
-}
-
-/* Implement the "unwind_sp" gdbarch method.  */
-
-static CORE_ADDR
-aarch64_unwind_sp (struct gdbarch *gdbarch, struct frame_info *this_frame)
-{
-  return frame_unwind_register_unsigned (this_frame, AARCH64_SP_REGNUM);
-}
-
 /* Return the value of the REGNUM register in the previous frame of
    *THIS_FRAME.  */
 
@@ -3090,11 +3057,6 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_push_dummy_call (gdbarch, aarch64_push_dummy_call);
   set_gdbarch_frame_align (gdbarch, aarch64_frame_align);
-
-  /* Frame handling.  */
-  set_gdbarch_dummy_id (gdbarch, aarch64_dummy_id);
-  set_gdbarch_unwind_pc (gdbarch, aarch64_unwind_pc);
-  set_gdbarch_unwind_sp (gdbarch, aarch64_unwind_sp);
 
   /* Advance PC across function entry code.  */
   set_gdbarch_skip_prologue (gdbarch, aarch64_skip_prologue);

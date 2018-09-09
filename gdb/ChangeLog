@@ -1,5 +1,13 @@
 2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb/aarch64-tdep.c (aarch64_dummy_id): Delete.
+	(aarch64_unwind_pc): Delete.
+	(aarch64_unwind_sp): Delete.
+	(aarch64_gdbarch_init): Don't register deleted functions with
+	gdbarch.
+
+2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdbtypes.c (type_align): Don't consider static members when
 	computing structure alignment.
 
