@@ -1,3 +1,11 @@
+2018-09-11  Xavier Roirand  <roirand@adacore.com>
+
+	* darwin-nat.h (struct darwin_thread_info) <gdb_port,
+	inf_port, msg_state>: Initialize.
+	(struct darwin_thread_info) <signaled, single_step>: Change
+	type and initialize.
+	(struct darwin_thread_info) <event>: Initialize.
+
 2018-09-10  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR gdb/23555
