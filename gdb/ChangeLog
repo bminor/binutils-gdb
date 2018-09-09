@@ -1,5 +1,12 @@
 2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb/alpha-tdep.c (alpha_dummy_id): Delete.
+	(alpha_unwind_pc): Delete.
+	(alpha_gdbarch_init): Don't register deleted functions with
+	gdbarch.
+
+2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb/aarch64-tdep.c (aarch64_dummy_id): Delete.
 	(aarch64_unwind_pc): Delete.
 	(aarch64_unwind_sp): Delete.
