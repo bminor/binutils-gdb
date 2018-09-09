@@ -1,5 +1,9 @@
 2018-09-08  Tom Tromey  <tom@tromey.com>
 
+	* gdb.python/py-prettyprint.exp: Use with_test_prefix.
+
+2018-09-08  Tom Tromey  <tom@tromey.com>
+
 	PR python/16047:
 	* gdb.python/py-prettyprint.py (pp_int_typedef3): New class.
 	(register_pretty_printers): Register new printer.
