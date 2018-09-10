@@ -174,10 +174,10 @@ cmdpy_function (struct cmd_list_element *command,
    and then a "complete"-completion sequentially.  Therefore, we just
    recalculate everything twice for TAB-completions.
 
-   This function returns the PyObject representing the Python method
-   call.  */
+   This function returns a reference to the PyObject representing the
+   Python method call.  */
 
-static PyObject *
+static gdbpy_ref<>
 cmdpy_completer_helper (struct cmd_list_element *command,
 			const char *text, const char *word)
 {
@@ -220,7 +220,7 @@ cmdpy_completer_helper (struct cmd_list_element *command,
       PyErr_Clear ();
     }
 
-  return resultobj.release ();
+  return resultobj;
 }
 
 /* Python function called to determine the break characters of a
@@ -235,9 +235,9 @@ cmdpy_completer_handle_brkchars (struct cmd_list_element *command,
 {
   gdbpy_enter enter_py (get_current_arch (), current_language);
 
-  /* Calling our helper to obtain the PyObject of the Python
+  /* Calling our helper to obtain a reference to the PyObject of the Python
      function.  */
-  gdbpy_ref<> resultobj (cmdpy_completer_helper (command, text, word));
+  gdbpy_ref<> resultobj = cmdpy_completer_helper (command, text, word);
 
   /* Check if there was an error.  */
   if (resultobj == NULL)
@@ -278,9 +278,9 @@ cmdpy_completer (struct cmd_list_element *command,
 {
   gdbpy_enter enter_py (get_current_arch (), current_language);
 
-  /* Calling our helper to obtain the PyObject of the Python
+  /* Calling our helper to obtain a reference to the PyObject of the Python
      function.  */
-  gdbpy_ref<> resultobj (cmdpy_completer_helper (command, text, word));
+  gdbpy_ref<> resultobj = cmdpy_completer_helper (command, text, word);
 
   /* If the result object of calling the Python function is NULL, it
      means that there was an error.  In this case, just give up.  */
