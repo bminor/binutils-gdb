@@ -1,5 +1,10 @@
 2018-09-10  Xavier Roirand  <roirand@adacore.com>
 
+	* ada-valprint.c (ada_value_print): Use type instead of
+	enclosing type.
+
+2018-09-10  Xavier Roirand  <roirand@adacore.com>
+
 	* ada-lang.c (ada_value_subscript): Handle case when parameter is
 	an array of access to unconstrained array.
 
