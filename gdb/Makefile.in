@@ -1765,8 +1765,8 @@ install-only: $(CONFIG_INSTALL)
 	else \
 	  true ; \
 	fi ; \
-	$(INSTALL_PROGRAM) $(srcdir)/contrib/gdb-add-index.sh \
-		$(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT)
+	$(INSTALL_SCRIPT) $(srcdir)/contrib/gdb-add-index.sh \
+		$(DESTDIR)$(bindir)/$$transformed_name
 	@$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do
 
 install-strip:
