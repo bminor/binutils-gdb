@@ -1,5 +1,10 @@
 2018-09-10  Xavier Roirand  <roirand@adacore.com>
 
+	* ada-lang.c (ada_is_access_to_unconstrained_array): New function.
+	(ada_check_typedef): Use it.
+
+2018-09-10  Xavier Roirand  <roirand@adacore.com>
+
 	* ada-varobj.c (ada_varobj_describe_struct_child)
 	(ada_varobj_describe_child): Handle union case like struct one.
 

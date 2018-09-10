@@ -2832,6 +2832,15 @@ value_assign_to_component (struct value *container, struct value *component,
 	       value_contents (val), 0, bits, 0);
 }
 
+/* Determine if TYPE is an access to an unconstrained array.  */
+
+static bool
+ada_is_access_to_unconstrained_array (struct type *type)
+{
+  return (TYPE_CODE (type) == TYPE_CODE_TYPEDEF
+	  && is_thick_pntr (ada_typedef_target_type (type)));
+}
+
 /* The value of the element of array ARR at the ARITY indices given in IND.
    ARR may be either a simple array, GNAT array descriptor, or pointer
    thereto.  */
@@ -9245,13 +9254,13 @@ ada_check_typedef (struct type *type)
   if (type == NULL)
     return NULL;
 
-  /* If our type is a typedef type of a fat pointer, then we're done.
+  /* If our type is an access to an unconstrained array, which is encoded
+     as a TYPE_CODE_TYPEDEF of a fat pointer, then we're done.
      We don't want to strip the TYPE_CODE_TYPDEF layer, because this is
      what allows us to distinguish between fat pointers that represent
      array types, and fat pointers that represent array access types
      (in both cases, the compiler implements them as fat pointers).  */
-  if (TYPE_CODE (type) == TYPE_CODE_TYPEDEF
-      && is_thick_pntr (ada_typedef_target_type (type)))
+  if (ada_is_access_to_unconstrained_array (type))
     return type;
 
   type = check_typedef (type);
