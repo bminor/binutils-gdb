@@ -34,7 +34,10 @@ extern PyTypeObject fnpy_object_type
 
 
 
-static PyObject *
+/* Return a reference to a tuple ARGC elements long.  Each element of the
+   tuple is a PyObject converted from the corresponding element of ARGV.  */
+
+static gdbpy_ref<>
 convert_values_to_python (int argc, struct value **argv)
 {
   int i;
@@ -50,7 +53,7 @@ convert_values_to_python (int argc, struct value **argv)
 	return NULL;
       PyTuple_SetItem (result.get (), i, elt.release ());
     }
-  return result.release ();
+  return result;
 }
 
 /* Call a Python function object's invoke method.  */
@@ -64,7 +67,7 @@ fnpy_call (struct gdbarch *gdbarch, const struct language_defn *language,
   gdbpy_enter enter_py (gdbarch, language);
   struct value *value;
   gdbpy_ref<> result;
-  gdbpy_ref<> args (convert_values_to_python (argc, argv));
+  gdbpy_ref<> args = convert_values_to_python (argc, argv);
 
   /* convert_values_to_python can return NULL on error.  If we
      encounter this, do not call the function, but allow the Python ->
