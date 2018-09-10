@@ -1,5 +1,12 @@
 2018-09-10  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	PR gdb/23555
+	PR gdb/23558
+	* gnulib/import/m4/getcwd-path-max.m4: Add cross-compilation
+	guesses.
+
+2018-09-10  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	Revert:
 	2018-08-29  Sergio Durigan Junior  <sergiodj@redhat.com>
 
