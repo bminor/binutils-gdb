@@ -1,5 +1,13 @@
 2018-09-10  Xavier Roirand  <roirand@adacore.com>
 
+	* ada-lang.c (ada_is_access_to_unconstrained_array): Remove static
+	declaration.
+	* ada-lang.h: add ada_is_access_to_unconstrained_array prototype.
+	* ada-varobj.c (ada_varobj_get_number_of_children,
+	ada_varobj_describe_child, ada_value_is_changeable_p): Cleanup code.
+
+2018-09-10  Xavier Roirand  <roirand@adacore.com>
+
 	* ada-valprint.c (ada_value_print): Use type instead of
 	enclosing type.
 

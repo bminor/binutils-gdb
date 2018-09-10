@@ -2834,7 +2834,7 @@ value_assign_to_component (struct value *container, struct value *component,
 
 /* Determine if TYPE is an access to an unconstrained array.  */
 
-static bool
+bool
 ada_is_access_to_unconstrained_array (struct type *type)
 {
   return (TYPE_CODE (type) == TYPE_CODE_TYPEDEF

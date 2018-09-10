@@ -350,8 +350,7 @@ ada_varobj_get_number_of_children (struct value *parent_value,
   /* A typedef to an array descriptor in fact represents a pointer
      to an unconstrained array.  These types always have one child
      (the unconstrained array).  */
-  if (ada_is_array_descriptor_type (parent_type)
-      && TYPE_CODE (parent_type) == TYPE_CODE_TYPEDEF)
+  if (ada_is_access_to_unconstrained_array (parent_type))
     return 1;
 
   if (TYPE_CODE (parent_type) == TYPE_CODE_ARRAY)
@@ -680,8 +679,7 @@ ada_varobj_describe_child (struct value *parent_value,
   if (child_path_expr)
     *child_path_expr = std::string ();
 
-  if (ada_is_array_descriptor_type (parent_type)
-      && TYPE_CODE (parent_type) == TYPE_CODE_TYPEDEF)
+  if (ada_is_access_to_unconstrained_array (parent_type))
     {
       ada_varobj_describe_ptr_child (parent_value, parent_type,
 				     parent_name, parent_path_expr,
@@ -937,8 +935,7 @@ ada_value_is_changeable_p (const struct varobj *var)
   struct type *type = (var->value != nullptr
 		       ? value_type (var->value.get ()) : var->type);
 
-  if (ada_is_array_descriptor_type (type)
-      && TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
+  if (ada_is_access_to_unconstrained_array (type))
     {
       /* This is in reality a pointer to an unconstrained array.
 	 its value is changeable.  */
