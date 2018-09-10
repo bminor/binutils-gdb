@@ -1,3 +1,11 @@
+2018-09-10  Jerome Guitton  <guitton@adacore.com>
+
+	* ada-lang.c (ada_value_struct_elt): Call ada_to_fixed_type
+	with check_tag to 1 if and only if the type is tagged and the
+	component being searched cannot been found in the current
+	view. Otherwise, always call ada_to_fixed_type with
+	check_tag to 0.
+
 2018-09-10  Xavier Roirand  <roirand@adacore.com>
 
 	* ada-lang.c (ada_is_access_to_unconstrained_array): Remove static

@@ -26,10 +26,12 @@ clean_restart ${testfile}
 set bp_top_location [gdb_get_line_number "BREAK_TOP" ${testdir}/pck.adb]
 set bp_middle_location [gdb_get_line_number "BREAK_MIDDLE" ${testdir}/pck.adb]
 set bp_bottom_location [gdb_get_line_number "BREAK_BOTTOM" ${testdir}/pck.adb]
+set bp_dyn_middle_location [gdb_get_line_number "BREAK_DYN_MIDDLE" ${testdir}/pck.adb]
 
 gdb_breakpoint "pck.adb:$bp_top_location"
 gdb_breakpoint "pck.adb:$bp_middle_location"
 gdb_breakpoint "pck.adb:$bp_bottom_location"
+gdb_breakpoint "pck.adb:$bp_dyn_middle_location"
 
 gdb_run_cmd
 
@@ -58,3 +60,11 @@ gdb_test "continue" \
 
 gdb_test "print obj.x" " = 6" \
          "Print field existing only in bottom component"
+
+gdb_test "continue" \
+         ".*Breakpoint $decimal, pck.dyn_middle.assign \\(.*\\).*" \
+         "continue to dyn_middle assign breakpoint"
+
+gdb_test "print obj.u" " = 42" \
+         "Print field existing only in dyn_middle component"
+

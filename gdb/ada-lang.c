@@ -7554,6 +7554,7 @@ ada_value_struct_elt (struct value *arg, const char *name, int no_err)
 {
   struct type *t, *t1;
   struct value *v;
+  int check_tag;
 
   v = NULL;
   t1 = t = ada_check_typedef (value_type (arg));
@@ -7617,12 +7618,17 @@ ada_value_struct_elt (struct value *arg, const char *name, int no_err)
           if (!find_struct_field (name, t1, 0,
                                   &field_type, &byte_offset, &bit_offset,
                                   &bit_size, NULL))
-	    t1 = ada_to_fixed_type (ada_get_base_type (t1), NULL,
-                                    address, NULL, 1);
+	    check_tag = 1;
+	  else
+	    check_tag = 0;
         }
       else
-        t1 = ada_to_fixed_type (ada_get_base_type (t1), NULL,
-                                address, NULL, 1);
+	check_tag = 0;
+
+      /* Convert to fixed type in all cases, so that we have proper
+	 offsets to each field in unconstrained record types.  */
+      t1 = ada_to_fixed_type (ada_get_base_type (t1), NULL,
+			      address, NULL, check_tag);
 
       if (find_struct_field (name, t1, 0,
                              &field_type, &byte_offset, &bit_offset,

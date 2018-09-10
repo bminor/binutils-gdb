@@ -48,4 +48,29 @@ package Pck is
 
    procedure Do_Nothing (A : System.Address);
 
+   type Integer_Array is array (Natural range <>) of Integer;
+
+   package Dyn_Top is
+      type Dyn_Top_T (Disc : Natural) is tagged private;
+      type Dyn_Top_A is access Dyn_Top_T'Class;
+      procedure Assign (Obj: in out Dyn_Top_T; TV : Integer);
+   private
+      type Dyn_Top_T (Disc : Natural) is tagged record
+         S : Integer_Array (1 .. Disc) := (others => Disc);
+         N : Integer := 1;
+         A : Integer := 48;
+      end record;
+   end Dyn_Top;
+
+   package Dyn_Middle is
+      type Dyn_Middle_T is new Dyn_Top.Dyn_Top_T with private;
+      type Dyn_Middle_A is access Dyn_Middle_T'Class;
+      procedure Assign (Obj: in out Dyn_Middle_T; MV : Character);
+   private
+      type Dyn_Middle_T is new Dyn_Top.Dyn_Top_T with record
+         N : Character := 'a';
+         U : Integer := 42;
+      end record;
+   end Dyn_Middle;
+
 end Pck;

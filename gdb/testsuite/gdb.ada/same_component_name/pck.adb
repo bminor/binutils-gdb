@@ -39,4 +39,19 @@ package body Pck is
    begin
       null;
    end Do_Nothing;
+
+   package body Dyn_Top is
+      procedure Assign (Obj: in out Dyn_Top_T; TV : Integer) is
+      begin
+         Do_Nothing (Obj'Address); -- BREAK_DYN_TOP
+      end Assign;
+   end Dyn_Top;
+
+   package body Dyn_Middle is
+      procedure Assign (Obj: in out Dyn_Middle_T; MV : Character) is
+      begin
+         Do_Nothing (Obj'Address); -- BREAK_DYN_MIDDLE
+      end Assign;
+   end Dyn_Middle;
+
 end Pck;

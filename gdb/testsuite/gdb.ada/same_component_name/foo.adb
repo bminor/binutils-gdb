@@ -17,15 +17,20 @@ with Pck;
 use Pck;
 use Pck.Middle;
 use Pck.Top;
+use Pck.Dyn_Middle;
+use Pck.Dyn_Top;
 
 procedure Foo is
-   B : Bottom_T;
-   M : Middle_T;
-
+   B  : Bottom_T;
+   M  : Middle_T;
+   DM : Dyn_Middle_T (24);
 begin
    Assign (Top_T (B), 12);
    Assign (B, 10.0);
 
    Assign (M, 'V');
    Assign (B, 5.0);
+
+   Assign (Dyn_Top_T (DM), 12);
+   Assign (DM, 'V');
 end Foo;
