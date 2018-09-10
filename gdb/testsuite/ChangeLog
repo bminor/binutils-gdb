@@ -1,5 +1,12 @@
 2018-09-10  Xavier Roirand  <roirand@adacore.com>
 
+	* gdb.ada/mi_string_access.exp: New testcase.
+	* gdb.ada/mi_string_access/bar.adb: New file.
+	* gdb.ada/mi_string_access/pck.adb: New file.
+	* gdb.ada/mi_string_access/pck.asd: New file.
+
+2018-09-10  Xavier Roirand  <roirand@adacore.com>
+
 	* gdb.ada/mi_var_union.exp: New testcase.
 	* gdb.ada/mi_var_union/bar.adb: New file.
 	* gdb.ada/mi_var_union/pck.adb: New file.

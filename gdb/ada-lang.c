@@ -2861,10 +2861,34 @@ ada_value_subscript (struct value *arr, int arity, struct value **ind)
 
   for (k = 0; k < arity; k += 1)
     {
+      struct type *saved_elt_type = TYPE_TARGET_TYPE (elt_type);
+
       if (TYPE_CODE (elt_type) != TYPE_CODE_ARRAY)
         error (_("too many subscripts (%d expected)"), k);
+
       elt = value_subscript (elt, pos_atr (ind[k]));
+
+      if (ada_is_access_to_unconstrained_array (saved_elt_type)
+	  && TYPE_CODE (value_type (elt)) != TYPE_CODE_TYPEDEF)
+	{
+	  /* The element is a typedef to an unconstrained array,
+	     except that the value_subscript call stripped the
+	     typedef layer.  The typedef layer is GNAT's way to
+	     specify that the element is, at the source level, an
+	     access to the unconstrained array, rather than the
+	     unconstrained array.  So, we need to restore that
+	     typedef layer, which we can do by forcing the element's
+	     type back to its original type. Otherwise, the returned
+	     value is going to be printed as the array, rather
+	     than as an access.  Another symptom of the same issue
+	     would be that an expression trying to dereference the
+	     element would also be improperly rejected.  */
+	  deprecated_set_value_type (elt, saved_elt_type);
+	}
+
+      elt_type = ada_check_typedef (value_type (elt));
     }
+
   return elt;
 }
 
