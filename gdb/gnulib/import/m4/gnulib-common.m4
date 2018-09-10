@@ -1,5 +1,5 @@
-# gnulib-common.m4 serial 39
-dnl Copyright (C) 2007-2018 Free Software Foundation, Inc.
+# gnulib-common.m4 serial 36
+dnl Copyright (C) 2007-2016 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -71,13 +71,6 @@ AC_DEFUN([gl_COMMON_BODY], [
 # define _GL_ATTRIBUTE_CONST __attribute__ ((__const__))
 #else
 # define _GL_ATTRIBUTE_CONST /* empty */
-#endif
-
-/* The __malloc__ attribute was added in gcc 3.  */
-#if 3 <= __GNUC__
-# define _GL_ATTRIBUTE_MALLOC __attribute__ ((__malloc__))
-#else
-# define _GL_ATTRIBUTE_MALLOC /* empty */
 #endif
 ])
   dnl Preparation for running test programs:
@@ -235,13 +228,13 @@ m4_ifndef([AS_VAR_IF],
 # This is like AC_PROG_CC_C99, except that
 # - AC_PROG_CC_C99 did not exist in Autoconf versions < 2.60,
 # - AC_PROG_CC_C99 does not mix well with AC_PROG_CC_STDC
-#   <https://lists.gnu.org/r/bug-gnulib/2011-09/msg00367.html>,
+#   <http://lists.gnu.org/archive/html/bug-gnulib/2011-09/msg00367.html>,
 #   but many more packages use AC_PROG_CC_STDC than AC_PROG_CC_C99
-#   <https://lists.gnu.org/r/bug-gnulib/2011-09/msg00441.html>.
+#   <http://lists.gnu.org/archive/html/bug-gnulib/2011-09/msg00441.html>.
 # Remaining problems:
 # - When AC_PROG_CC_STDC is invoked twice, it adds the C99 enabling options
 #   to CC twice
-#   <https://lists.gnu.org/r/bug-gnulib/2011-09/msg00431.html>.
+#   <http://lists.gnu.org/archive/html/bug-gnulib/2011-09/msg00431.html>.
 # - AC_PROG_CC_STDC is likely to change now that C11 is an ISO standard.
 AC_DEFUN([gl_PROG_CC_C99],
 [
@@ -263,8 +256,7 @@ AC_DEFUN([gl_PROG_AR_RANLIB],
   dnl library formats. In particular, the GNU binutils programs ar and ranlib
   dnl produce libraries that work only with gcc, not with cc.
   AC_REQUIRE([AC_PROG_CC])
-  dnl The '][' hides this use from 'aclocal'.
-  AC_BEFORE([$0], [A][M_PROG_AR])
+  AC_BEFORE([$0], [AM_PROG_AR])
   AC_CACHE_CHECK([for Minix Amsterdam compiler], [gl_cv_c_amsterdam_compiler],
     [
       AC_EGREP_CPP([Amsterdam],
@@ -296,9 +288,7 @@ Amsterdam
     dnl __ACK__.  It may seem like its easier to avoid calling the macro here,
     dnl but we need to AC_SUBST both AR/ARFLAGS (thus those must have some good
     dnl default value and automake should usually know them).
-    dnl
-    dnl The '][' hides this use from 'aclocal'.
-    m4_ifdef([A][M_PROG_AR], [A][M_PROG_AR], [:])
+    m4_ifdef([AM_PROG_AR], [AM_PROG_AR], [:])
   fi
 
   dnl In case the code above has not helped with setting AR/ARFLAGS, use
@@ -354,16 +344,16 @@ AC_DEFUN([AC_C_RESTRICT],
    for ac_kw in __restrict __restrict__ _Restrict restrict; do
      AC_COMPILE_IFELSE(
       [AC_LANG_PROGRAM(
-         [[typedef int *int_ptr;
-           int foo (int_ptr $ac_kw ip) { return ip[0]; }
-           int bar (int [$ac_kw]); /* Catch GCC bug 14050.  */
-           int bar (int ip[$ac_kw]) { return ip[0]; }
-         ]],
-         [[int s[1];
-           int *$ac_kw t = s;
-           t[0] = 0;
-           return foo (t) + bar (t);
-         ]])],
+	 [[typedef int *int_ptr;
+	   int foo (int_ptr $ac_kw ip) { return ip[0]; }
+	   int bar (int [$ac_kw]); /* Catch GCC bug 14050.  */
+	   int bar (int ip[$ac_kw]) { return ip[0]; }
+	 ]],
+	 [[int s[1];
+	   int *$ac_kw t = s;
+	   t[0] = 0;
+	   return foo (t) + bar (t);
+	 ]])],
       [ac_cv_c_restrict=$ac_kw])
      test "$ac_cv_c_restrict" != no && break
    done
@@ -466,9 +456,7 @@ m4_ifndef([AC_PROG_SED],
      else
        ac_cv_path_SED=$SED
      fi
-    ])
  SED="$ac_cv_path_SED"
  AC_SUBST([SED])dnl
  rm -f conftest.sed
-])
-])
+])])])

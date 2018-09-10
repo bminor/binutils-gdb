@@ -1,5 +1,5 @@
-# strstr.m4 serial 19
-dnl Copyright (C) 2008-2018 Free Software Foundation, Inc.
+# strstr.m4 serial 17
+dnl Copyright (C) 2008-2016 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -9,10 +9,10 @@ AC_DEFUN([gl_FUNC_STRSTR_SIMPLE],
 [
   AC_REQUIRE([gl_HEADER_STRING_H_DEFAULTS])
   AC_REQUIRE([gl_FUNC_MEMCHR])
-  if test $HAVE_MEMCHR = 0 || test $REPLACE_MEMCHR = 1; then
+  if test "$gl_cv_func_memchr_works" != yes; then
     REPLACE_STRSTR=1
   else
-    dnl Detect https://sourceware.org/bugzilla/show_bug.cgi?id=12092.
+    dnl Detect http://sourceware.org/bugzilla/show_bug.cgi?id=12092.
     AC_CACHE_CHECK([whether strstr works],
       [gl_cv_func_strstr_works_always],
       [AC_RUN_IFELSE([AC_LANG_PROGRAM([[
@@ -99,9 +99,6 @@ static void quit (int sig) { _exit (sig + 128); }
         if (!strstr (haystack, needle))
           result |= 1;
       }
-    /* Free allocated memory, in case some sanitizer is watching.  */
-    free (haystack);
-    free (needle);
     return result;
     ]])],
         [gl_cv_func_strstr_linear=yes], [gl_cv_func_strstr_linear=no],

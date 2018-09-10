@@ -1,5 +1,5 @@
 /* Program name management.
-   Copyright (C) 2016-2018 Free Software Foundation, Inc.
+   Copyright (C) 2016 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <config.h>
 
@@ -43,14 +43,6 @@
 # include <string.h>
 #endif
 
-#ifdef __sgi
-# include <string.h>
-# include <unistd.h>
-# include <stdio.h>
-# include <fcntl.h>
-# include <sys/procfs.h>
-#endif
-
 #include "dirname.h"
 
 #ifndef HAVE_GETPROGNAME             /* not Mac OS X, FreeBSD, NetBSD, OpenBSD >= 5.4, Cygwin */
@@ -64,7 +56,7 @@ getprogname (void)
   /* https://www.gnu.org/software/libc/manual/html_node/Error-Messages.html */
   return last_component (program_invocation_name);
 # elif HAVE_GETEXECNAME                                     /* Solaris */
-  /* https://docs.oracle.com/cd/E19253-01/816-5168/6mbb3hrb1/index.html */
+  /* http://docs.oracle.com/cd/E19253-01/816-5168/6mbb3hrb1/index.html */
   const char *p = getexecname ();
   if (!p)
     p = "?";
@@ -74,7 +66,7 @@ getprogname (void)
   const char *p = __argv && __argv[0] ? __argv[0] : "?";
   return last_component (p);
 # elif HAVE_VAR___PROGNAME                                  /* OpenBSD, QNX */
-  /* https://man.openbsd.org/style.9 */
+  /* http://man.openbsd.org/style.9 */
   /* http://www.qnx.de/developers/docs/6.5.0/index.jsp?topic=%2Fcom.qnx.doc.neutrino_lib_ref%2Fp%2F__progname.html */
   /* Be careful to declare this only when we absolutely need it
      (OpenBSD 5.1), rather than when it's available.  Otherwise,
@@ -85,8 +77,9 @@ getprogname (void)
   return p && p[0] ? p : "?";
 # elif _AIX                                                 /* AIX */
   /* Idea by Bastien ROUCARIÈS,
-     https://lists.gnu.org/r/bug-gnulib/2010-12/msg00095.html
-     Reference: https://www.ibm.com/support/knowledgecenter/en/ssw_aix_61/com.ibm.aix.basetrf1/getprocs.htm
+     http://lists.gnu.org/archive/html/bug-gnulib/2010-12/msg00095.html
+     Reference: http://
+   ibm.biz/knowctr#ssw_aix_53/com.ibm.aix.basetechref/doc/basetrf1/getprocs.htm
   */
   static char *p;
   static int first = 1;
@@ -150,42 +143,9 @@ getprogname (void)
       free (buf.ps_pathptr);
     }
   return p;
-# elif defined __sgi                                        /* IRIX */
-  char filename[50];
-  int fd;
-
-  sprintf (filename, "/proc/pinfo/%d", (int) getpid ());
-  fd = open (filename, O_RDONLY);
-  if (0 <= fd)
-    {
-      prpsinfo_t buf;
-      int ioctl_ok = 0 <= ioctl (fd, PIOCPSINFO, &buf);
-      close (fd);
-      if (ioctl_ok)
-        {
-          char *name = buf.pr_fname;
-          size_t namesize = sizeof buf.pr_fname;
-          char *namenul = memchr (name, '\0', namesize);
-          size_t namelen = namenul ? namenul - name : namesize;
-          char *namecopy = malloc (namelen + 1);
-          if (namecopy)
-            {
-              namecopy[namelen] = 0;
-              return memcpy (namecopy, name, namelen);
-            }
-        }
-    }
-  return NULL;
 # else
 #  error "getprogname module not ported to this OS"
 # endif
 }
 
 #endif
-
-/*
- * Hey Emacs!
- * Local Variables:
- * coding: utf-8
- * End:
- */

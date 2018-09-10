@@ -1,12 +1,12 @@
 # getcwd.m4 - check for working getcwd that is compatible with glibc
 
-# Copyright (C) 2001, 2003-2007, 2009-2018 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2003-2007, 2009-2016 Free Software Foundation, Inc.
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
 
 # Written by Paul Eggert.
-# serial 16
+# serial 13
 
 AC_DEFUN([gl_FUNC_GETCWD_NULL],
   [
@@ -25,7 +25,7 @@ AC_DEFUN([gl_FUNC_GETCWD_NULL],
          char *getcwd ();
 #        endif
 ]], [[
-#if defined _WIN32 && ! defined __CYGWIN__
+#if (defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__
 /* mingw cwd does not start with '/', but getcwd does allocate.
    However, mingw fails to honor non-zero size.  */
 #else
@@ -37,9 +37,9 @@ AC_DEFUN([gl_FUNC_GETCWD_NULL],
                if (! f)
                  return 2;
                if (f[0] != '/')
-                 { free (f); return 3; }
+                 return 3;
                if (f[1] != '\0')
-                 { free (f); return 4; }
+                 return 4;
                free (f);
                return 0;
              }
@@ -48,12 +48,12 @@ AC_DEFUN([gl_FUNC_GETCWD_NULL],
         [gl_cv_func_getcwd_null=yes],
         [gl_cv_func_getcwd_null=no],
         [[case "$host_os" in
-                           # Guess yes on glibc systems.
-            *-gnu* | gnu*) gl_cv_func_getcwd_null="guessing yes";;
-                           # Guess yes on Cygwin.
-            cygwin*)       gl_cv_func_getcwd_null="guessing yes";;
-                           # If we don't know, assume the worst.
-            *)             gl_cv_func_getcwd_null="guessing no";;
+                     # Guess yes on glibc systems.
+            *-gnu*)  gl_cv_func_getcwd_null="guessing yes";;
+                     # Guess yes on Cygwin.
+            cygwin*) gl_cv_func_getcwd_null="guessing yes";;
+                     # If we don't know, assume the worst.
+            *)       gl_cv_func_getcwd_null="guessing no";;
           esac
         ]])])
 ])

@@ -1,5 +1,5 @@
-/* getdtablesize() function: Return maximum possible file descriptor value + 1.
-   Copyright (C) 2008-2018 Free Software Foundation, Inc.
+/* getdtablesize() function for platforms that don't have it.
+   Copyright (C) 2008-2016 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2008.
 
    This program is free software: you can redistribute it and/or modify
@@ -13,20 +13,18 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <config.h>
 
 /* Specification.  */
 #include <unistd.h>
 
-#if defined _WIN32 && ! defined __CYGWIN__
+#if (defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__
 
 # include <stdio.h>
 
-# if HAVE_MSVC_INVALID_PARAMETER_HANDLER
-#  include "msvc-inval.h"
-# endif
+# include "msvc-inval.h"
 
 # if HAVE_MSVC_INVALID_PARAMETER_HANDLER
 static int
@@ -46,8 +44,7 @@ _setmaxstdio_nothrow (int newmax)
 
   return result;
 }
-# else
-#  define _setmaxstdio_nothrow _setmaxstdio
+#  define _setmaxstdio _setmaxstdio_nothrow
 # endif
 
 /* Cache for the previous getdtablesize () result.  Safe to cache because
@@ -79,9 +76,9 @@ getdtablesize (void)
          freed when we call _setmaxstdio with the original value.  */
       int orig_max_stdio = _getmaxstdio ();
       unsigned int bound;
-      for (bound = 0x10000; _setmaxstdio_nothrow (bound) < 0; bound = bound / 2)
+      for (bound = 0x10000; _setmaxstdio (bound) < 0; bound = bound / 2)
         ;
-      _setmaxstdio_nothrow (orig_max_stdio);
+      _setmaxstdio (orig_max_stdio);
       dtablesize = bound;
     }
   return dtablesize;

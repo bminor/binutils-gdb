@@ -1,5 +1,5 @@
-# frexpl.m4 serial 21
-dnl Copyright (C) 2007-2018 Free Software Foundation, Inc.
+# frexpl.m4 serial 20
+dnl Copyright (C) 2007-2016 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -131,7 +131,7 @@ AC_DEFUN([gl_FUNC_FREXPL_WORKS],
 # undef LDBL_MIN_EXP
 # define LDBL_MIN_EXP    (-16381)
 #endif
-#if defined __i386__ && (defined __FreeBSD__ || defined __DragonFly__)
+#if defined __i386__ && defined __FreeBSD__
 # undef LDBL_MIN_EXP
 # define LDBL_MIN_EXP    (-16381)
 #endif

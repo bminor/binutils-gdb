@@ -1,5 +1,5 @@
 /* Convert multibyte character to wide character.
-   Copyright (C) 1999-2002, 2005-2018 Free Software Foundation, Inc.
+   Copyright (C) 1999-2002, 2005-2016 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2008.
 
    This program is free software: you can redistribute it and/or modify
@@ -13,7 +13,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <config.h>
 
@@ -35,61 +35,6 @@
 # include "streq.h"
 # include "verify.h"
 
-# ifndef FALLTHROUGH
-#  if __GNUC__ < 7
-#   define FALLTHROUGH ((void) 0)
-#  else
-#   define FALLTHROUGH __attribute__ ((__fallthrough__))
-#  endif
-# endif
-
-/* Returns a classification of special values of the encoding of the current
-   locale.  */
-typedef enum {
-  enc_other,      /* other */
-  enc_utf8,       /* UTF-8 */
-  enc_eucjp,      /* EUC-JP */
-  enc_94,         /* EUC-KR, GB2312, BIG5 */
-  enc_euctw,      /* EUC-TW */
-  enc_gb18030,    /* GB18030 */
-  enc_sjis        /* SJIS */
-} enc_t;
-static inline enc_t
-locale_enc (void)
-{
-  const char *encoding = locale_charset ();
-  if (STREQ_OPT (encoding, "UTF-8", 'U', 'T', 'F', '-', '8', 0, 0, 0, 0))
-    return enc_utf8;
-  if (STREQ_OPT (encoding, "EUC-JP", 'E', 'U', 'C', '-', 'J', 'P', 0, 0, 0))
-    return enc_eucjp;
-  if (STREQ_OPT (encoding, "EUC-KR", 'E', 'U', 'C', '-', 'K', 'R', 0, 0, 0)
-      || STREQ_OPT (encoding, "GB2312", 'G', 'B', '2', '3', '1', '2', 0, 0, 0)
-      || STREQ_OPT (encoding, "BIG5", 'B', 'I', 'G', '5', 0, 0, 0, 0, 0))
-    return enc_94;
-  if (STREQ_OPT (encoding, "EUC-TW", 'E', 'U', 'C', '-', 'T', 'W', 0, 0, 0))
-    return enc_euctw;
-  if (STREQ_OPT (encoding, "GB18030", 'G', 'B', '1', '8', '0', '3', '0', 0, 0))
-    return enc_gb18030;
-  if (STREQ_OPT (encoding, "SJIS", 'S', 'J', 'I', 'S', 0, 0, 0, 0, 0))
-    return enc_sjis;
-  return enc_other;
-}
-
-#if GNULIB_WCHAR_SINGLE
-/* When we know that the locale does not change, provide a speedup by
-   caching the value of locale_enc.  */
-static int cached_locale_enc = -1;
-static inline enc_t
-locale_enc_cached (void)
-{
-  if (cached_locale_enc < 0)
-    cached_locale_enc = locale_enc ();
-  return cached_locale_enc;
-}
-#else
-/* By default, don't make assumptions, hence no caching.  */
-# define locale_enc_cached locale_enc
-#endif
 
 verify (sizeof (mbstate_t) >= 4);
 
@@ -129,10 +74,10 @@ mbrtowc (wchar_t *pwc, const char *s, size_t n, mbstate_t *ps)
         break;
       case 3:
         buf[2] = pstate[3];
-        FALLTHROUGH;
+        /*FALLTHROUGH*/
       case 2:
         buf[1] = pstate[2];
-        FALLTHROUGH;
+        /*FALLTHROUGH*/
       case 1:
         buf[0] = pstate[1];
         p = buf;
@@ -153,7 +98,7 @@ mbrtowc (wchar_t *pwc, const char *s, size_t n, mbstate_t *ps)
     /* Here m > 0.  */
 
 # if __GLIBC__ || defined __UCLIBC__
-    /* Work around bug <https://sourceware.org/bugzilla/show_bug.cgi?id=9674> */
+    /* Work around bug <http://sourceware.org/bugzilla/show_bug.cgi?id=9674> */
     mbtowc (NULL, NULL, 0);
 # endif
     {
@@ -185,9 +130,10 @@ mbrtowc (wchar_t *pwc, const char *s, size_t n, mbstate_t *ps)
       if (m >= 4 || m >= MB_CUR_MAX)
         goto invalid;
       /* Here MB_CUR_MAX > 1 and 0 < m < 4.  */
-      switch (locale_enc_cached ())
-        {
-        case enc_utf8: /* UTF-8 */
+      {
+        const char *encoding = locale_charset ();
+
+        if (STREQ_OPT (encoding, "UTF-8", 'U', 'T', 'F', '-', '8', 0, 0, 0, 0))
           {
             /* Cf. unistr/u8-mblen.c.  */
             unsigned char c = (unsigned char) p[0];
@@ -244,7 +190,8 @@ mbrtowc (wchar_t *pwc, const char *s, size_t n, mbstate_t *ps)
         /* As a reference for this code, you can use the GNU libiconv
            implementation.  Look for uses of the RET_TOOFEW macro.  */
 
-        case enc_eucjp: /* EUC-JP */
+        if (STREQ_OPT (encoding,
+                       "EUC-JP", 'E', 'U', 'C', '-', 'J', 'P', 0, 0, 0))
           {
             if (m == 1)
               {
@@ -267,8 +214,12 @@ mbrtowc (wchar_t *pwc, const char *s, size_t n, mbstate_t *ps)
               }
             goto invalid;
           }
-
-        case enc_94: /* EUC-KR, GB2312, BIG5 */
+        if (STREQ_OPT (encoding,
+                       "EUC-KR", 'E', 'U', 'C', '-', 'K', 'R', 0, 0, 0)
+            || STREQ_OPT (encoding,
+                          "GB2312", 'G', 'B', '2', '3', '1', '2', 0, 0, 0)
+            || STREQ_OPT (encoding,
+                          "BIG5", 'B', 'I', 'G', '5', 0, 0, 0, 0, 0))
           {
             if (m == 1)
               {
@@ -279,8 +230,8 @@ mbrtowc (wchar_t *pwc, const char *s, size_t n, mbstate_t *ps)
               }
             goto invalid;
           }
-
-        case enc_euctw: /* EUC-TW */
+        if (STREQ_OPT (encoding,
+                       "EUC-TW", 'E', 'U', 'C', '-', 'T', 'W', 0, 0, 0))
           {
             if (m == 1)
               {
@@ -298,8 +249,8 @@ mbrtowc (wchar_t *pwc, const char *s, size_t n, mbstate_t *ps)
               }
             goto invalid;
           }
-
-        case enc_gb18030: /* GB18030 */
+        if (STREQ_OPT (encoding,
+                       "GB18030", 'G', 'B', '1', '8', '0', '3', '0', 0, 0))
           {
             if (m == 1)
               {
@@ -332,8 +283,7 @@ mbrtowc (wchar_t *pwc, const char *s, size_t n, mbstate_t *ps)
               }
             goto invalid;
           }
-
-        case enc_sjis: /* SJIS */
+        if (STREQ_OPT (encoding, "SJIS", 'S', 'J', 'I', 'S', 0, 0, 0, 0, 0))
           {
             if (m == 1)
               {
@@ -346,10 +296,9 @@ mbrtowc (wchar_t *pwc, const char *s, size_t n, mbstate_t *ps)
             goto invalid;
           }
 
-        default:
-          /* An unknown multibyte encoding.  */
-          goto incomplete;
-        }
+        /* An unknown multibyte encoding.  */
+        goto incomplete;
+      }
 
      incomplete:
       {

@@ -1,5 +1,5 @@
-# mbrtowc.m4 serial 31  -*- coding: utf-8 -*-
-dnl Copyright (C) 2001-2002, 2004-2005, 2008-2018 Free Software Foundation,
+# mbrtowc.m4 serial 27  -*- coding: utf-8 -*-
+dnl Copyright (C) 2001-2002, 2004-2005, 2008-2016 Free Software Foundation,
 dnl Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
@@ -164,7 +164,7 @@ int main ()
       memset (&state, '\0', sizeof (mbstate_t));
       if (mbrtowc (&wc, input + 1, 1, &state) == (size_t)(-2))
         if (mbsinit (&state))
-          return 2;
+          return 1;
     }
   return 0;
 }]])],
@@ -224,7 +224,7 @@ int main ()
       memset (&state, '\0', sizeof (mbstate_t));
       if (mbrtowc (&wc, input + 3, 6, &state) != 4
           && mbtowc (&wc, input + 3, 6) == 4)
-        return 2;
+        return 1;
     }
   return 0;
 }]])],
@@ -352,7 +352,7 @@ int main ()
       mbrtowc (&wc, NULL, 5, &state);
       /* Check that wc was not modified.  */
       if (wc != (wchar_t) 0xBADFACE)
-        return 2;
+        return 1;
     }
   return 0;
 }]])],
@@ -539,7 +539,7 @@ int main ()
 
       memset (&state, '\0', sizeof (mbstate_t));
       if (mbrtowc (&wc, "", 1, &state) != 0)
-        return 2;
+        return 1;
     }
   return 0;
 }]])],
@@ -563,11 +563,10 @@ AC_DEFUN([gl_MBRTOWC_EMPTY_INPUT],
       dnl is present.
 changequote(,)dnl
       case "$host_os" in
-                              # Guess no on AIX and glibc systems.
-        aix* | *-gnu* | gnu*) gl_cv_func_mbrtowc_empty_input="guessing no" ;;
-                              # Guess yes on native Windows.
-        mingw*)               gl_cv_func_mbrtowc_empty_input="guessing yes" ;;
-        *)                    gl_cv_func_mbrtowc_empty_input="guessing yes" ;;
+                     # Guess no on AIX and glibc systems.
+        aix* | *-gnu*)
+                    gl_cv_func_mbrtowc_empty_input="guessing no" ;;
+        *)          gl_cv_func_mbrtowc_empty_input="guessing yes" ;;
       esac
 changequote([,])dnl
       AC_RUN_IFELSE(
@@ -593,7 +592,6 @@ dnl https://sourceware.org/bugzilla/show_bug.cgi?id=19932
 
 AC_DEFUN([gl_MBRTOWC_C_LOCALE],
 [
-  AC_REQUIRE([AC_CANONICAL_HOST]) dnl for cross-compiles
   AC_CACHE_CHECK([whether the C locale is free of encoding errors],
     [gl_cv_C_locale_sans_EILSEQ],
     [
@@ -610,7 +608,7 @@ AC_DEFUN([gl_MBRTOWC_C_LOCALE],
             int i;
             char *locale = setlocale (LC_ALL, "C");
             if (! locale)
-              return 2;
+              return 1;
             for (i = CHAR_MIN; i <= CHAR_MAX; i++)
               {
                 char c = i;
@@ -618,23 +616,17 @@ AC_DEFUN([gl_MBRTOWC_C_LOCALE],
                 mbstate_t mbs = { 0, };
                 size_t ss = mbrtowc (&wc, &c, 1, &mbs);
                 if (1 < ss)
-                  return 3;
+                  return 1;
               }
             return 0;
           ]])],
       [gl_cv_C_locale_sans_EILSEQ=yes],
       [gl_cv_C_locale_sans_EILSEQ=no],
-      [case "$host_os" in
-                 # Guess yes on native Windows.
-         mingw*) gl_cv_C_locale_sans_EILSEQ="guessing yes" ;;
-       esac
-      ])
-    ])
+      [:])])
 ])
 
 # Prerequisites of lib/mbrtowc.c.
 AC_DEFUN([gl_PREREQ_MBRTOWC], [
-  AC_REQUIRE([AC_C_INLINE])
   :
 ])
 
@@ -647,7 +639,7 @@ AC_DEFUN([AC_FUNC_MBRTOWC],
 [
   dnl Same as AC_FUNC_MBRTOWC in autoconf-2.60.
   AC_CACHE_CHECK([whether mbrtowc and mbstate_t are properly declared],
-    [gl_cv_func_mbrtowc],
+    gl_cv_func_mbrtowc,
     [AC_LINK_IFELSE(
        [AC_LANG_PROGRAM(
             [[/* Tru64 with Desktop Toolkit C has a bug: <stdio.h> must be
@@ -663,8 +655,8 @@ AC_DEFUN([AC_FUNC_MBRTOWC],
               size_t n = 1;
               mbstate_t state;
               return ! (sizeof state && (mbrtowc) (&wc, s, n, &state));]])],
-       [gl_cv_func_mbrtowc=yes],
-       [gl_cv_func_mbrtowc=no])])
+       gl_cv_func_mbrtowc=yes,
+       gl_cv_func_mbrtowc=no)])
   if test $gl_cv_func_mbrtowc = yes; then
     AC_DEFINE([HAVE_MBRTOWC], [1],
       [Define to 1 if mbrtowc and mbstate_t are properly declared.])

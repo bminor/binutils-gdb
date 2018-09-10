@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2018 Free Software Foundation, Inc.
+# Copyright (C) 2002-2016 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -11,7 +11,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this file.  If not, see <https://www.gnu.org/licenses/>.
+# along with this file.  If not, see <http://www.gnu.org/licenses/>.
 #
 # As a special exception to the GNU General Public License,
 # this file may be distributed as part of a program that
@@ -27,48 +27,7 @@
 
 
 # Specification in the form of a command-line invocation:
-# gnulib-tool --import \
-#  --lib=libgnu \
-#  --source-base=import \
-#  --m4-base=import/m4 \
-#  --doc-base=doc \
-#  --tests-base=tests \
-#  --aux-dir=import/extra \
-#  --no-conditional-dependencies \
-#  --no-libtool \
-#  --macro-prefix=gl \
-#  --no-vc-files \
-#  alloca \
-#  canonicalize-lgpl \
-#  dirent \
-#  dirfd \
-#  errno \
-#  fnmatch-gnu \
-#  frexpl \
-#  getcwd \
-#  glob \
-#  inttypes \
-#  limits-h \
-#  lstat \
-#  memchr \
-#  memmem \
-#  mkdir \
-#  mkstemp \
-#  pathmax \
-#  rawmemchr \
-#  readlink \
-#  rename \
-#  setenv \
-#  signal-h \
-#  strchrnul \
-#  strstr \
-#  strtok_r \
-#  sys_stat \
-#  unistd \
-#  unsetenv \
-#  update-copyright \
-#  wchar \
-#  wctype-h
+#   gnulib-tool --import --lib=libgnu --source-base=import --m4-base=import/m4 --doc-base=doc --tests-base=tests --aux-dir=import/extra --no-conditional-dependencies --no-libtool --macro-prefix=gl --no-vc-files alloca canonicalize-lgpl dirent dirfd errno fnmatch-gnu frexpl getcwd glob inttypes limits-h lstat memchr memmem mkdir mkstemp pathmax rawmemchr readlink rename setenv signal-h strchrnul strstr strtok_r sys_stat unistd unsetenv update-copyright wchar wctype-h
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])

@@ -1,6 +1,6 @@
 /* save-cwd.c -- Save and restore current working directory.
 
-   Copyright (C) 1995, 1997-1998, 2003-2006, 2009-2018 Free Software
+   Copyright (C) 1995, 1997-1998, 2003-2006, 2009-2016 Free Software
    Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -14,7 +14,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* Written by Jim Meyering.  */
 
@@ -30,6 +30,7 @@
 
 #include "chdir-long.h"
 #include "unistd--.h"
+#include "cloexec.h"
 
 #if GNULIB_FCNTL_SAFER
 # include "fcntl--.h"
@@ -63,15 +64,16 @@ save_cwd (struct saved_cwd *cwd)
 {
   cwd->name = NULL;
 
-  cwd->desc = open (".", O_SEARCH | O_CLOEXEC);
+  cwd->desc = open (".", O_SEARCH);
   if (!GNULIB_FCNTL_SAFER)
-    cwd->desc = fd_safer_flag (cwd->desc, O_CLOEXEC);
+    cwd->desc = fd_safer (cwd->desc);
   if (cwd->desc < 0)
     {
       cwd->name = getcwd (NULL, 0);
       return cwd->name ? 0 : -1;
     }
 
+  set_cloexec_flag (cwd->desc, true);
   return 0;
 }
 
