@@ -1,3 +1,8 @@
+2018-09-10  Xavier Roirand  <roirand@adacore.com>
+
+	* ada-varobj.c (ada_varobj_describe_struct_child)
+	(ada_varobj_describe_child): Handle union case like struct one.
+
 2018-09-10  Tom Tromey  <tom@tromey.com>
 
 	PR python/18380:

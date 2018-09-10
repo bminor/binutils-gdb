@@ -1,3 +1,10 @@
+2018-09-10  Xavier Roirand  <roirand@adacore.com>
+
+	* gdb.ada/mi_var_union.exp: New testcase.
+	* gdb.ada/mi_var_union/bar.adb: New file.
+	* gdb.ada/mi_var_union/pck.adb: New file.
+	* gdb.ada/mi_var_union/pck.asd: New file.
+
 2018-09-08  Tom Tromey  <tom@tromey.com>
 
 	* gdb.python/py-prettyprint.exp: Use with_test_prefix.

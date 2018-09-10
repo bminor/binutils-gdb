@@ -419,7 +419,8 @@ ada_varobj_describe_struct_child (struct value *parent_value,
   int fieldno;
   int childno = 0;
 
-  gdb_assert (TYPE_CODE (parent_type) == TYPE_CODE_STRUCT);
+  gdb_assert (TYPE_CODE (parent_type) == TYPE_CODE_STRUCT
+	      || TYPE_CODE (parent_type) == TYPE_CODE_UNION);
 
   for (fieldno = 0; fieldno < TYPE_NFIELDS (parent_type); fieldno++)
     {
@@ -699,7 +700,8 @@ ada_varobj_describe_child (struct value *parent_value,
       return;
     }
 
-  if (TYPE_CODE (parent_type) == TYPE_CODE_STRUCT)
+  if (TYPE_CODE (parent_type) == TYPE_CODE_STRUCT
+      || TYPE_CODE (parent_type) == TYPE_CODE_UNION)
     {
       ada_varobj_describe_struct_child (parent_value, parent_type,
 					parent_name, parent_path_expr,
