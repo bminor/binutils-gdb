@@ -1223,3 +1223,36 @@ proc objcopy_test_without_global_symbol { } {
 setup_xfail aarch64*-*-* arm*-*-*
 
 objcopy_test_without_global_symbol
+
+# objcopy remove relocation from executable test
+
+proc objcopy_remove_relocations_from_executable { } {
+    global OBJCOPY
+    global srcdir
+    global subdir
+    global READELF
+
+    set test "remove-section relocation sections"
+
+    if { [target_compile $srcdir/$subdir/testprog.c tmpdir/pr23611 executable debug] != "" } {
+	untested $test
+	return
+    }
+
+    if [is_remote host] {
+	set objfile [remote_download host tmpdir/pr23611]
+    } else {
+	set objfile tmpdir/pr23611
+    }
+    set out tmpdir/pr23611.out
+
+    set exec_output1 [binutils_run $OBJCOPY "-R .rela.plt -R .rela.dyn -R .rel.plt -R .rel.dyn $objfile $out"]
+    set exec_output2 [binutils_run $READELF "-S $out"]
+    if { [string match "*.rel.plt*" $exec_output2] || [string match "*.rela.plt*" $exec_output2] || [string match "*.rel.dyn*" $exec_output2] || [string match "*.rela.dyn*" $exec_output2] } {
+	fail $test
+	return
+    }
+    pass $test
+}
+
+objcopy_remove_relocations_from_executable

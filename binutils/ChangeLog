@@ -1,3 +1,14 @@
+2018-09-10  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/23611
+	* objcopy.c (handle_remove_section_option): Consider .rela and
+	.rel sections for stripping directly as well as attached to the
+	associated section they relocate.
+	* doc/binutils.texi (remove-relocations): Specify that this
+	option removes non-dynamic relocation sections.
+	* testsuite/binutils-all/objcopy.exp
+	(objcopy_remove_relocations_from_executable): New test.
+
 2018-09-03  Nick Clifton  <nickc@redhat.com>
 
 	* po/ja.po: Updated Japanese translation.
@@ -234,8 +245,8 @@
 
 2018-08-08  Kevin Buettner  <kevinb@redhat.com>
 
-    	* dwarf.c (decode_location_expresion): Add case for
-    	DW_OP_GNU_variable_value.
+	* dwarf.c (decode_location_expresion): Add case for
+	DW_OP_GNU_variable_value.
 
 2018-08-06  Claudiu Zissulescu  <claziss@synopsys.com>
 
@@ -914,7 +925,7 @@
 2018-02-19  Matthias Klose  <doko@debian.org>
 
 	* strings.c (long_options): Include-all-whitespace does not take
-        an extra agument.
+	an extra agument.
 
 2018-02-13  Alan Modra  <amodra@gmail.com>
 

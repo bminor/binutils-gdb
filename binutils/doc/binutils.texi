@@ -1321,17 +1321,20 @@ will remove all sections matching the pattern '.text.*', but will not
 remove the section '.text.foo'.
 
 @item --remove-relocations=@var{sectionpattern}
-Remove relocations from the output file for any section matching
-@var{sectionpattern}.  This option may be given more than once.  Note
-that using this option inappropriately may make the output file
-unusable.  Wildcard characters are accepted in @var{sectionpattern}.
+Remove non-dynamic relocations from the output file for any section
+matching @var{sectionpattern}.  This option may be given more than
+once.  Note that using this option inappropriately may make the output
+file unusable, and attempting to remove a dynamic relocation section
+such as @samp{.rela.plt} from an executable or shared library with
+@option{--remove-relocations=.plt} will not work.  Wildcard characters
+are accepted in @var{sectionpattern}.
 For example:
 
 @smallexample
   --remove-relocations=.text.*
 @end smallexample
 
-will remove the relocations for all sections matching the patter
+will remove the relocations for all sections matching the pattern
 '.text.*'.
 
 If the first character of @var{sectionpattern} is the exclamation
