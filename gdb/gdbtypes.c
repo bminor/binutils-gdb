@@ -233,10 +233,19 @@ alloc_type_copy (const struct type *type)
 struct gdbarch *
 get_type_arch (const struct type *type)
 {
+  struct gdbarch *arch;
+
   if (TYPE_OBJFILE_OWNED (type))
-    return get_objfile_arch (TYPE_OWNER (type).objfile);
+    arch = get_objfile_arch (TYPE_OWNER (type).objfile);
   else
-    return TYPE_OWNER (type).gdbarch;
+    arch = TYPE_OWNER (type).gdbarch;
+
+  /* The ARCH can be NULL if TYPE is associated with neither an objfile nor
+     a gdbarch, however, this is very rare, and even then, in most cases
+     that get_type_arch is called, we assume that a non-NULL value is
+     returned.  */
+  gdb_assert (arch != NULL);
+  return arch;
 }
 
 /* See gdbtypes.h.  */
@@ -277,7 +286,7 @@ alloc_type_instance (struct type *oldtype)
   /* Allocate the structure.  */
 
   if (! TYPE_OBJFILE_OWNED (oldtype))
-    type = XCNEW (struct type);
+    type = GDBARCH_OBSTACK_ZALLOC (get_type_arch (oldtype), struct type);
   else
     type = OBSTACK_ZALLOC (&TYPE_OBJFILE (oldtype)->objfile_obstack,
 			   struct type);
@@ -4903,7 +4912,8 @@ copy_type_recursive (struct objfile *objfile,
       int i, nfields;
 
       nfields = TYPE_NFIELDS (type);
-      TYPE_FIELDS (new_type) = XCNEWVEC (struct field, nfields);
+      TYPE_FIELDS (new_type) = (struct field *)
+        TYPE_ZALLOC (new_type, nfields * sizeof (struct field));
       for (i = 0; i < nfields; i++)
 	{
 	  TYPE_FIELD_ARTIFICIAL (new_type, i) = 
@@ -4946,7 +4956,8 @@ copy_type_recursive (struct objfile *objfile,
   /* For range types, copy the bounds information.  */
   if (TYPE_CODE (type) == TYPE_CODE_RANGE)
     {
-      TYPE_RANGE_DATA (new_type) = XNEW (struct range_bounds);
+      TYPE_RANGE_DATA (new_type) = (struct range_bounds *)
+        TYPE_ALLOC (new_type, sizeof (struct range_bounds));
       *TYPE_RANGE_DATA (new_type) = *TYPE_RANGE_DATA (type);
     }
 

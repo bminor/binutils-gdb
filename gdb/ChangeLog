@@ -1,3 +1,18 @@
+2018-09-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* eval.c (fake_method::fake_method): Call xzalloc directly for a
+	type that is neither object file owned, nor gdbarch owned.
+	* gdbtypes.c (get_type_gdbarch): Add an assert that returned
+	gdbarch is non-NULL.
+	(alloc_type_instance): Allocate non-objfile owned types on the
+	gdbarch obstack.
+	(copy_type_recursive): Allocate TYPE_FIELDS and TYPE_RANGE_DATA
+	using TYPE_ALLOC to ensure memory is allocated on the correct
+	obstack.
+	* gdbtypes.h (TYPE_ALLOC): Allocate space on either the objfile
+	obstack, or the gdbarch obstack.
+	(TYPE_ZALLOC): Rewrite using TYPE_ALLOC.
+
 2018-09-14  Tom Tromey  <tom@tromey.com>
 
 	* infcall.c (call_function_by_hand_dummy): Remove unnecessary

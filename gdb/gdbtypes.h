@@ -49,6 +49,7 @@
 #include "common/enum-flags.h"
 #include "common/underlying.h"
 #include "common/print-utils.h"
+#include "gdbarch.h"
 
 /* Forward declarations for prototypes.  */
 struct field;
@@ -1717,26 +1718,30 @@ extern const struct floatformat *floatformats_vax_d[BFD_ENDIAN_UNKNOWN];
 extern const struct floatformat *floatformats_ibm_long_double[BFD_ENDIAN_UNKNOWN];
 
 
-/* * Allocate space for storing data associated with a particular
+/* Allocate space for storing data associated with a particular
    type.  We ensure that the space is allocated using the same
    mechanism that was used to allocate the space for the type
    structure itself.  I.e.  if the type is on an objfile's
    objfile_obstack, then the space for data associated with that type
-   will also be allocated on the objfile_obstack.  If the type is not
-   associated with any particular objfile (such as builtin types),
-   then the data space will be allocated with xmalloc, the same as for
-   the type structure.  */
+   will also be allocated on the objfile_obstack.  If the type is
+   associated with a gdbarch, then the space for data associated with that
+   type will also be allocated on the gdbarch_obstack.
 
-#define TYPE_ALLOC(t,size)  \
-   (TYPE_OBJFILE_OWNED (t) \
-    ? obstack_alloc (&TYPE_OBJFILE (t) -> objfile_obstack, size) \
-    : xmalloc (size))
+   If a type is not associated with neither an objfile or a gdbarch then
+   you should not use this macro to allocate space for data, instead you
+   should call xmalloc directly, and ensure the memory is correctly freed
+   when it is no longer needed.  */
 
-#define TYPE_ZALLOC(t,size)  \
-   (TYPE_OBJFILE_OWNED (t) \
-    ? memset (obstack_alloc (&TYPE_OBJFILE (t)->objfile_obstack, size),  \
-	      0, size)  \
-    : xzalloc (size))
+#define TYPE_ALLOC(t,size)                                              \
+  (obstack_alloc ((TYPE_OBJFILE_OWNED (t)                               \
+                   ? &TYPE_OBJFILE (t)->objfile_obstack                 \
+                   : gdbarch_obstack (TYPE_OWNER (t).gdbarch)),         \
+                  size))
+
+
+/* See comment on TYPE_ALLOC.  */
+
+#define TYPE_ZALLOC(t,size) (memset (TYPE_ALLOC (t, size), 0, size))
 
 /* Use alloc_type to allocate a type owned by an objfile.  Use
    alloc_type_arch to allocate a type owned by an architecture.  Use

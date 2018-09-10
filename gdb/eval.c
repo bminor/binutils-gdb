@@ -683,9 +683,13 @@ fake_method::fake_method (type_instance_flags flags,
 	}
     }
 
+  /* We don't use TYPE_ZALLOC here to allocate space as TYPE is owned by
+     neither an objfile nor a gdbarch.  As a result we must manually
+     allocate memory for auxiliary fields, and free the memory ourselves
+     when we are done with it.  */
   TYPE_NFIELDS (type) = num_types;
   TYPE_FIELDS (type) = (struct field *)
-    TYPE_ZALLOC (type, sizeof (struct field) * num_types);
+    xzalloc (sizeof (struct field) * num_types);
 
   while (num_types-- > 0)
     TYPE_FIELD_TYPE (type, num_types) = param_types[num_types];
