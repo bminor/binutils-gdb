@@ -1,3 +1,8 @@
+2018-09-10  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* record-btrace.c (get_thread_current_frame): Remove
+	old_inferior_ptid.
+
 2018-09-10  Jerome Guitton  <guitton@adacore.com>
 
 	* ada-lang.c (ada_value_struct_elt): Call ada_to_fixed_type

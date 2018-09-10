@@ -1971,7 +1971,6 @@ static struct frame_info *
 get_thread_current_frame (struct thread_info *tp)
 {
   struct frame_info *frame;
-  ptid_t old_inferior_ptid;
   int executing;
 
   /* Set current thread, which is implicitly used by
