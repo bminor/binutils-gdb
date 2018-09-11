@@ -6391,6 +6391,18 @@ _bfd_elf_write_object_contents (bfd *abfd)
   if (! abfd->output_has_begun
       && ! _bfd_elf_compute_section_file_positions (abfd, NULL))
     return FALSE;
+  /* Do not rewrite ELF data when the BFD has been opened for update.
+     abfd->output_has_begun was set to TRUE on opening, so creation of new
+     sections, and modification of existing section sizes was restricted.
+     This means the ELF header, program headers and section headers can't have
+     changed.
+     If the contents of any sections has been modified, then those changes have
+     already been written to the BFD.  */
+  else if (abfd->direction == both_direction)
+    {
+      BFD_ASSERT (abfd->output_has_begun);
+      return TRUE;
+    }
 
   i_shdrp = elf_elfsections (abfd);
 

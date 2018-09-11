@@ -1,3 +1,9 @@
+2018-09-24  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	PR gdb/20948
+	* elf.c (_bfd_elf_write_object_contents): Return from function
+	early if abfd->direction == both_direction.
+
 2018-09-21  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* configure.ac: Check for fls.
