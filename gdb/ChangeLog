@@ -1,3 +1,11 @@
+2018-09-13  Tom Tromey  <tom@tromey.com>
+
+	PR rust/23626:
+	* rust-lang.c (rust_enum_variant): Now static.
+	(rust_empty_enum_p): New function.
+	(rust_print_enum, rust_evaluate_subexp, rust_print_struct_def):
+	Handle empty enum.
+
 2018-09-10  Eli Zaretskii  <eliz@gnu.org>
 
 	* Makefile.in (transformed_name): Use INSTALL_SCRIPT instead of

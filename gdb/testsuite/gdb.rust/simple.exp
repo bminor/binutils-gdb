@@ -303,6 +303,18 @@ gdb_test_sequence "ptype/o SimpleLayout" "" {
     "                         }"
 }
 
+# PR rust/23626 - this used to crash.  Note that the results are
+# fairly lax because most existing versions of Rust (those before the
+# DW_TAG_variant patches) do not emit what gdb wants here; and there
+# was little point fixing gdb to cope with these cases as the fixed
+# compilers will be available soon
+gdb_test "print empty_enum_value" \
+    " = simple::EmptyEnum.*"
+gdb_test "ptype empty_enum_value" "simple::EmptyEnum.*"
+# Just make sure these don't crash, for the same reason.
+gdb_test "print empty_enum_value.0" ""
+gdb_test "print empty_enum_value.something" ""
+
 load_lib gdb-python.exp
 if {[skip_python_tests]} {
     continue
