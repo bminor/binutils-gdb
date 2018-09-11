@@ -1,3 +1,13 @@
+2018-09-14  Alan Modra  <amodra@gmail.com>
+
+	PR 23425
+	* reloc.c (bfd_generic_get_relocated_section_contents): Zero reloc
+	fields in debug sections when reloc is against an undefined symbol
+	and called from bfd_simple_get_relocated_section_contents or
+	similar.
+	* dwarf2.c (find_abstract_instance): Return true for zero offset
+	DW_FORM_ref_addr without returning values.
+
 2018-09-06  Alan Modra  <amodra@gmail.com>
 
 	PR 23570

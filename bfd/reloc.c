@@ -8259,7 +8259,18 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 	      goto error_return;
 	    }
 
-	  if (symbol->section && discarded_section (symbol->section))
+	  /* Zap reloc field when the symbol is from a discarded
+	     section, ignoring any addend.  Do the same when called
+	     from bfd_simple_get_relocated_section_contents for
+	     undefined symbols in debug sections.  This is to keep
+	     debug info reasonably sane, in particular so that
+	     DW_FORM_ref_addr to another file's .debug_info isn't
+	     confused with an offset into the current file's
+	     .debug_info.  */
+	  if ((symbol->section != NULL && discarded_section (symbol->section))
+	      || (symbol->section == bfd_und_section_ptr
+		  && (input_section->flags & SEC_DEBUGGING) != 0
+		  && link_info->input_bfds == link_info->output_bfd))
 	    {
 	      bfd_byte *p;
 	      static reloc_howto_type none_howto
