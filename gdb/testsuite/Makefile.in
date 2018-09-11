@@ -241,7 +241,7 @@ check-parallel-racy:
 	  $(SHELL) $(srcdir)/../../contrib/dg-extract-results.sh \
 	    `find racy_outputs/$$n -name gdb.sum -print` > \
 	    racy_outputs/$$n/gdb.sum; \
-	  $(SHELL) $(srcdir)/../../dg-extract-results.sh -L \
+	  $(SHELL) $(srcdir)/../../contrib/dg-extract-results.sh -L \
 	    `find racy_outputs/$$n -name gdb.log -print` > \
 	    racy_outputs/$$n/gdb.log; \
 	  sed -n '/=== gdb Summary ===/,$$ p' racy_outputs/$$n/gdb.sum; \

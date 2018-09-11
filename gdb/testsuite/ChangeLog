@@ -1,3 +1,7 @@
+2018-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in (check-parallel-racy): Fix dg-extract-results.sh path.
+
 2018-09-10  Jerome Guitton  <guitton@adacore.com>
 
 	* gdb.ada/same_component_name: Add test for case of tagged record
