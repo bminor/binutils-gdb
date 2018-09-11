@@ -1,3 +1,8 @@
+2018-09-12  John Baldwin  <jhb@FreeBSD.org>
+
+	* aarch64-fbsd-tdep.h (AARCH64_FBSD_SIZEOF_GREGSET): Fix comment
+	typo.
+
 2018-09-12  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* common/common-utils.c: Don't include '<sys/stat.h>'.

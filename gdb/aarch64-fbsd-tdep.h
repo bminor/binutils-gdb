@@ -21,7 +21,7 @@
 
 /* The general-purpose regset consists of 30 X registers, plus LR, SP,
    ELR, and SPSR registers.  SPSR is 32 bits but the structure is
-   passed to 64 bit alignment.  */
+   padded to 64 bit alignment.  */
 #define AARCH64_FBSD_SIZEOF_GREGSET  (34 * X_REGISTER_SIZE)
 
 /* The fp regset consists of 32 V registers, plus FPSR and FPCR which
