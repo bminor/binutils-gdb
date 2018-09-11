@@ -92,6 +92,8 @@ struct SimpleLayout {
     f2: u16
 }
 
+enum EmptyEnum {}
+
 fn main () {
     let a = ();
     let b : [i32; 0] = [];
@@ -167,6 +169,8 @@ fn main () {
 
     let u = Union { f2: 255 };
     let simplelayout = SimpleLayout { f1: 8, f2: 9 };
+
+    let empty_enum_value: EmptyEnum = unsafe { ::std::mem::zeroed() };
 
     println!("{}, {}", x.0, x.1);        // set breakpoint here
     println!("{}", diff2(92, 45));

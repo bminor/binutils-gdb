@@ -74,9 +74,22 @@ rust_enum_p (const struct type *type)
 	  && TYPE_FLAG_DISCRIMINATED_UNION (TYPE_FIELD_TYPE (type, 0)));
 }
 
+/* Return true if TYPE, which must be an enum type, has no
+   variants.  */
+
+static bool
+rust_empty_enum_p (const struct type *type)
+{
+  gdb_assert (rust_enum_p (type));
+  /* In Rust the enum always fills the containing structure.  */
+  gdb_assert (TYPE_FIELD_BITPOS (type, 0) == 0);
+
+  return TYPE_NFIELDS (TYPE_FIELD_TYPE (type, 0)) == 0;
+}
+
 /* Given an enum type and contents, find which variant is active.  */
 
-struct field *
+static struct field *
 rust_enum_variant (struct type *type, const gdb_byte *contents)
 {
   /* In Rust the enum always fills the containing structure.  */
@@ -429,6 +442,13 @@ rust_print_enum (struct type *type, int embedded_offset,
 
   opts.deref_ref = 0;
 
+  if (rust_empty_enum_p (type))
+    {
+      /* Print the enum type name here to be more clear.  */
+      fprintf_filtered (stream, _("%s {<No data fields>}"), TYPE_NAME (type));
+      return;
+    }
+
   const gdb_byte *valaddr = value_contents_for_printing (val);
   struct field *variant_field = rust_enum_variant (type, valaddr);
   embedded_offset += FIELD_BITPOS (*variant_field) / 8;
@@ -664,6 +684,18 @@ rust_print_struct_def (struct type *type, const char *varstring,
       if (is_enum)
 	{
 	  fputs_filtered ("enum ", stream);
+
+	  if (rust_empty_enum_p (type))
+	    {
+	      if (tagname != NULL)
+		{
+		  fputs_filtered (tagname, stream);
+		  fputs_filtered (" ", stream);
+		}
+	      fputs_filtered ("{}", stream);
+	      return;
+	    }
+
 	  type = TYPE_FIELD_TYPE (type, 0);
 
 	  struct dynamic_prop *discriminant_prop
@@ -1604,6 +1636,10 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
 	    if (rust_enum_p (type))
 	      {
+		if (rust_empty_enum_p (type))
+		  error (_("Cannot access field %d of empty enum %s"),
+			 field_number, TYPE_NAME (type));
+
 		const gdb_byte *valaddr = value_contents (lhs);
 		struct field *variant_field = rust_enum_variant (type, valaddr);
 
@@ -1672,6 +1708,10 @@ tuple structs, and tuple-like enum variants"));
         type = value_type (lhs);
         if (TYPE_CODE (type) == TYPE_CODE_STRUCT && rust_enum_p (type))
 	  {
+	    if (rust_empty_enum_p (type))
+	      error (_("Cannot access field %s of empty enum %s"),
+		     field_name, TYPE_NAME (type));
+
 	    const gdb_byte *valaddr = value_contents (lhs);
 	    struct field *variant_field = rust_enum_variant (type, valaddr);
 

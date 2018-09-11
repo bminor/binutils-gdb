@@ -1,3 +1,10 @@
+2018-09-13  Tom Tromey  <tom@tromey.com>
+
+	PR rust/23626:
+	* gdb.rust/simple.rs (EmptyEnum): New type.
+	(main): Use it.
+	* gdb.rust/simple.exp (test_one_slice): Add empty enum test.
+
 2018-09-13  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.python/py-inferior.exp: Test repr() of gdb.Inferior.
