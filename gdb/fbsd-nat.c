@@ -261,7 +261,6 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
   int nfd = 0;
 #endif
   struct kinfo_proc kp;
-  char *tmp;
   pid_t pid;
   bool do_cmdline = false;
   bool do_cwd = false;

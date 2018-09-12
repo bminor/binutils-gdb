@@ -1,5 +1,9 @@
 2018-09-12  John Baldwin  <jhb@FreeBSD.org>
 
+	* fbsd-nat.c (fbsd_nat_target::info_proc): Remove unused variable.
+
+2018-09-12  John Baldwin  <jhb@FreeBSD.org>
+
 	* aarch64-fbsd-tdep.h (AARCH64_FBSD_SIZEOF_GREGSET): Fix comment
 	typo.
 
