@@ -2272,35 +2272,16 @@ gdb_caching_proc support_complex_tests {
 	return 0
     }
 
-    # Set up, compile, and execute a test program containing _Complex types.
-    # Include the current process ID in the file names to prevent conflicts
-    # with invocations for multiple testsuites.
-    set src [standard_temp_file complex[pid].c]
-    set exe [standard_temp_file complex[pid].x]
+    # Compile a test program containing _Complex types.
 
-    gdb_produce_source $src {
+    return [gdb_can_simple_compile complex {
 	int main() {
 	    _Complex float cf;
 	    _Complex double cd;
 	    _Complex long double cld;
 	    return 0;
 	}
-    }
-
-    verbose "compiling testfile $src" 2
-    set compile_flags {debug nowarnings quiet}
-    set lines [gdb_compile $src $exe executable $compile_flags]
-    file delete $src
-    file delete $exe
-
-    if ![string match "" $lines] then {
-        verbose "testfile compilation failed, returning 0" 2
-        set result 0
-    } else {
-	set result 1
-    }
-
-    return $result
+    } executable]
 }
 
 # Return 1 if GDB can get a type for siginfo from the target, otherwise
@@ -2462,86 +2443,32 @@ proc gdb_produce_source { name sources } {
 # This cannot be decided simply from looking at the target string,
 # as it might depend on externally passed compiler options like -m64.
 gdb_caching_proc is_ilp32_target {
-    set me "is_ilp32_target"
-
-    set src [standard_temp_file ilp32[pid].c]
-    set obj [standard_temp_file ilp32[pid].o]
-
-    gdb_produce_source $src {
+    return [gdb_can_simple_compile is_ilp32_target {
 	int dummy[sizeof (int) == 4
 		  && sizeof (void *) == 4
 		  && sizeof (long) == 4 ? 1 : -1];
-    }
-
-    verbose "$me:  compiling testfile $src" 2
-    set lines [gdb_compile $src $obj object {quiet}]
-    file delete $src
-    file delete $obj
-
-    if ![string match "" $lines] then {
-        verbose "$me:  testfile compilation failed, returning 0" 2
-        return 0
-    }
-
-    verbose "$me:  returning 1" 2
-    return 1
+    }]
 }
 
 # Return 1 if target is LP64.
 # This cannot be decided simply from looking at the target string,
 # as it might depend on externally passed compiler options like -m64.
 gdb_caching_proc is_lp64_target {
-    set me "is_lp64_target"
-
-    set src [standard_temp_file lp64[pid].c]
-    set obj [standard_temp_file lp64[pid].o]
-
-    gdb_produce_source $src {
+    return [gdb_can_simple_compile is_lp64_target {
 	int dummy[sizeof (int) == 4
 		  && sizeof (void *) == 8
 		  && sizeof (long) == 8 ? 1 : -1];
-    }
-
-    verbose "$me:  compiling testfile $src" 2
-    set lines [gdb_compile $src $obj object {quiet}]
-    file delete $src
-    file delete $obj
-
-    if ![string match "" $lines] then {
-        verbose "$me:  testfile compilation failed, returning 0" 2
-        return 0
-    }
-
-    verbose "$me:  returning 1" 2
-    return 1
+    }]
 }
 
 # Return 1 if target has 64 bit addresses.
 # This cannot be decided simply from looking at the target string,
 # as it might depend on externally passed compiler options like -m64.
 gdb_caching_proc is_64_target {
-    set me "is_64_target"
-
-    set src [standard_temp_file is64[pid].c]
-    set obj [standard_temp_file is64[pid].o]
-
-    gdb_produce_source $src {
+    return [gdb_can_simple_compile is_64_target {
 	int function(void) { return 3; }
 	int dummy[sizeof (&function) == 8 ? 1 : -1];
-    }
-
-    verbose "$me:  compiling testfile $src" 2
-    set lines [gdb_compile $src $obj object {quiet}]
-    file delete $src
-    file delete $obj
-
-    if ![string match "" $lines] then {
-        verbose "$me:  testfile compilation failed, returning 0" 2
-        return 0
-    }
-
-    verbose "$me:  returning 1" 2
-    return 1
+    }]
 }
 
 # Return 1 if target has x86_64 registers - either amd64 or x32.
@@ -2552,30 +2479,13 @@ gdb_caching_proc is_amd64_regs_target {
 	return 0
     }
 
-    set me "is_amd64_regs_target"
-
-    set src [standard_temp_file reg64[pid].s]
-    set obj [standard_temp_file reg64[pid].o]
-
     set list {}
     foreach reg \
 	{rax rbx rcx rdx rsi rdi rbp rsp r8 r9 r10 r11 r12 r13 r14 r15} {
 	    lappend list "\tincq %$reg"
 	}
-    gdb_produce_source $src [join $list \n]
 
-    verbose "$me:  compiling testfile $src" 2
-    set lines [gdb_compile $src $obj object {quiet}]
-    file delete $src
-    file delete $obj
-
-    if ![string match "" $lines] then {
-        verbose "$me:  testfile compilation failed, returning 0" 2
-        return 0
-    }
-
-    verbose "$me:  returning 1" 2
-    return 1
+    return [gdb_can_simple_compile is_amd64_regs_target [join $list \n]]
 }
 
 # Return 1 if this target is an x86 or x86-64 with -m32.
@@ -2597,30 +2507,13 @@ gdb_caching_proc is_aarch32_target {
 	return 0
     }
 
-    set me "is_aarch32_target"
-
-    set src [standard_temp_file aarch32[pid].s]
-    set obj [standard_temp_file aarch32[pid].o]
-
     set list {}
     foreach reg \
 	{r0 r1 r2 r3} {
 	    lappend list "\tmov $reg, $reg"
 	}
-    gdb_produce_source $src [join $list \n]
 
-    verbose "$me:  compiling testfile $src" 2
-    set lines [gdb_compile $src $obj object {quiet}]
-    file delete $src
-    file delete $obj
-
-    if ![string match "" $lines] then {
-	verbose "$me:  testfile compilation failed, returning 0" 2
-	return 0
-    }
-
-    verbose "$me:  returning 1" 2
-    return 1
+    return [gdb_can_simple_compile aarch32 [join $list \n]]
 }
 
 # Return 1 if this target is an aarch64, either lp64 or ilp32.
@@ -3006,22 +2899,10 @@ gdb_caching_proc skip_btrace_pt_tests {
 
 # A helper that compiles a test case to see if __int128 is supported.
 proc gdb_int128_helper {lang} {
-    set src [standard_temp_file i128[pid].c]
-    set obj [standard_temp_file i128[pid].o]
-
-    verbose -log "checking $lang for __int128"
-    gdb_produce_source $src {
+    return [gdb_can_simple_compile "i128-for-$lang" {
 	__int128 x;
 	int main() { return 0; }
-    }
-
-    set lines [gdb_compile $src $obj object [list nowarnings quiet $lang]]
-    file delete $src
-    file delete $obj
-
-    set result [expr {!![string match "" $lines]}]
-    verbose -log "__int128 for $lang result = $result"
-    return $result
+    } executable $lang]
 }
 
 # Return true if the C compiler understands the __int128 type.
@@ -3522,6 +3403,46 @@ gdb_caching_proc universal_compile_options {
 
     verbose "$me:  returning $options" 2
     return $options
+}
+
+# Compile the code in $code to a file based on $name, using the flags
+# $compile_flag as well as debug, nowarning and quiet.
+# Return 1 if code can be compiled
+# Delete all created files and objects.
+
+proc gdb_can_simple_compile {name code {type object} {compile_flags {}}} {
+
+    switch -regexp -- $type {
+        "executable" {
+            set postfix "x"
+        }
+        "object" {
+            set postfix "o"
+        }
+        "preprocess" {
+            set postfix "i"
+        }
+        "assembly" {
+            set postfix "s"
+        }
+    }
+    set src [standard_temp_file $name-[pid].c]
+    set obj [standard_temp_file $name-[pid].$postfix]
+    set compile_flags [concat $compile_flags {debug nowarnings quiet}]
+
+    gdb_produce_source $src $code
+
+    verbose "$name:  compiling testfile $src" 2
+    set lines [gdb_compile $src $obj $type $compile_flags]
+
+    file delete $src
+    file delete $obj
+
+    if ![string match "" $lines] then {
+        verbose "$name:  compilation failed, returning 0" 2
+        return 0
+    }
+    return 1
 }
 
 # Some targets need to always link a special object in.  Save its path here.

@@ -1,3 +1,14 @@
+2018-09-12  Alan Hayward  <alan.hayward@arm.com>
+
+	* lib/gdb.exp (gdb_can_simple_compile): Add proc.
+	(support_complex_tests): Use gdb_can_simple_compile.
+	(is_ilp32_target): Likewise.
+	(is_lp64_target): Likewise.
+	(is_64_target): Likewise.
+	(is_amd64_regs_target): Likewise.
+	(is_aarch32_target): Likewise.
+	(gdb_int128_helper): Likewise.
+
 2018-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* Makefile.in (check-parallel-racy): Fix dg-extract-results.sh path.
