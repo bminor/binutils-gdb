@@ -5895,6 +5895,14 @@ skips.
 Disable the specified skip(s).  If @var{range} is not specified, disable all
 skips.
 
+@kindex set debug skip
+@item set debug skip @r{[}on|off@r{]}
+Set whether to print the debug output about skipping files and functions.
+
+@kindex show debug skip
+@item show debug skip
+Show whether the debug output about skipping files and functions is printed.
+
 @end table
 
 @node Signals

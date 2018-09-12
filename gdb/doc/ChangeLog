@@ -1,3 +1,8 @@
+2018-09-12  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Skipping Over Functions and Files): Document
+	set/show debug skip.
+
 2018-09-10  Tom Tromey  <tom@tromey.com>
 
 	* python.texi (Frames In Python, Blocks In Python)

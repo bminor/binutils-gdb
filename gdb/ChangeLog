@@ -1,3 +1,12 @@
+2018-09-12  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* skip.c (debug_skip): New variable.
+	(skiplist_entry::do_skip_file_p): Add debug output.
+	(skiplist_entry::do_skip_gfile_p): Likewise.
+	(skiplist_entry::skip_function_p): Likewise.
+	(_initialize_step_skip): Create debug command.
+	* NEWS: Mention set/show debug skip.
+
 2018-09-11  Xavier Roirand  <roirand@adacore.com>
 
 	* darwin-nat.c (should_disable_startup_with_shell):

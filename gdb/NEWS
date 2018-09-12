@@ -29,6 +29,11 @@ show debug compile-cplus-types
   C++ compile feature.  Commands have no effect while compiliong
   for other languages.
 
+set debug skip
+show debug skip
+  Control whether debug output about files/functions skipping is
+  displayed.
+
 frame apply [all | COUNT | -COUNT | level LEVEL...] [FLAG]... COMMAND
   Apply a command to some frames.
   FLAG arguments allow to control what output to produce and how to handle
