@@ -253,6 +253,19 @@ with_test_prefix "is_valid" {
 
     gdb_test "python print (my_inferior_count)" "1" \
 	"test inferior-deleted event handler"
+
+    # Test that other properties and methods handle the removed inferior
+    # correctly.
+    gdb_test "python print (inf_list\[1\].num)" \
+	"RuntimeError: Inferior no longer exists.*"
+    gdb_test "python print (inf_list\[1\].pid)" \
+	"RuntimeError: Inferior no longer exists.*"
+    gdb_test "python print (inf_list\[1\].was_attached)" \
+	"RuntimeError: Inferior no longer exists.*"
+    gdb_test "python print (inf_list\[1\].threads ())" \
+	"RuntimeError: Inferior no longer exists.*"
+    gdb_test "python print (inf_list\[1\].thread_from_thread_handle (1))" \
+	"RuntimeError: Inferior no longer exists.*"
 }
 
 # Test gdb.selected_inferior()

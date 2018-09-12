@@ -1,3 +1,8 @@
+2018-09-12  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.python/py-inferior.exp: Test using an invalid gdb.Inferior
+	object.
+
 2018-09-12  Alan Hayward  <alan.hayward@arm.com>
 
 	* lib/gdb.exp (gdb_can_simple_compile): Add proc.
