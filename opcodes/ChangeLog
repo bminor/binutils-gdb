@@ -1,3 +1,11 @@
+2018-09-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.tbl: Add VexW=1 to VEX.W0 VEX movd, cvtsi2ss, cvtsi2sd,
+	pextrd, pinsrd, vcvtsi2sd, vcvtsi2ss, vmovd, vpextrd and vpinsrd.
+	Add VexW=2 to VEX.W1 VEX movq, pextrq, pinsrq, vmovq, vpextrq and
+	vpinsrq.  Remove VexW=1 from WIG VEX movq and vmovq.
+	* i386-tbl.h: Regenerated.
+
 2018-09-13  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-opc.tbl (mov, movq, movdir64b): Drop IgnoreSize where
