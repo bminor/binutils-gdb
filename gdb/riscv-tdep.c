@@ -1227,7 +1227,11 @@ riscv_insn::decode (struct gdbarch *gdbarch, CORE_ADDR pc)
 	  m_imm.s = EXTRACT_RVC_ADDI4SPN_IMM (ival);
 	}
       else if (is_c_lui_insn (ival))
-	m_opcode = OTHER;
+        {
+          m_opcode = LUI;
+          m_rd = decode_register_index (ival, OP_SH_CRS1S);
+          m_imm.s = EXTRACT_RVC_LUI_IMM (ival);
+        }
       /* C_SD and C_FSW have the same opcode.  C_SD is RV64 and RV128 only,
 	 and C_FSW is RV32 only.  */
       else if (xlen != 4 && is_c_sd_insn (ival))
@@ -1359,28 +1363,41 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
           gdb_assert (insn.rs1 () < RISCV_NUM_INTEGER_REGS);
           regs[insn.rd ()] = pv_add_constant (regs[insn.rs1 ()], 0);
 	}
-      else if ((insn.rd () == RISCV_GP_REGNUM
-		&& (insn.opcode () == riscv_insn::AUIPC
-		    || insn.opcode () == riscv_insn::LUI
-		    || (insn.opcode () == riscv_insn::ADDI
-			&& insn.rs1 () == RISCV_GP_REGNUM)
-		    || (insn.opcode () == riscv_insn::ADD
-			&& (insn.rs1 () == RISCV_GP_REGNUM
-			    || insn.rs2 () == RISCV_GP_REGNUM))))
-	       || (insn.opcode () == riscv_insn::ADDI
-		   && insn.rd () == RISCV_ZERO_REGNUM
-		   && insn.rs1 () == RISCV_ZERO_REGNUM
-		   && insn.imm_signed () == 0))
+      else if ((insn.opcode () == riscv_insn::ADDI
+                && insn.rd () == RISCV_ZERO_REGNUM
+                && insn.rs1 () == RISCV_ZERO_REGNUM
+                && insn.imm_signed () == 0))
 	{
-	  /* Handle: auipc gp, n
-	     or:     addi gp, gp, n
-	     or:     add gp, gp, reg
-	     or:     add gp, reg, gp
-	     or:     lui gp, n
-	     or:     add x0, x0, 0   (NOP)  */
-	  /* These instructions are part of the prologue, but we don't need
-	     to do anything special to handle them.  */
+	  /* Handle: add x0, x0, 0   (NOP)  */
 	}
+      else if (insn.opcode () == riscv_insn::AUIPC)
+        {
+          gdb_assert (insn.rd () < RISCV_NUM_INTEGER_REGS);
+          regs[insn.rd ()] = pv_constant (cur_pc + insn.imm_signed ());
+        }
+      else if (insn.opcode () == riscv_insn::LUI)
+        {
+	  /* Handle: lui REG, n
+             Where REG is not gp register.  */
+          gdb_assert (insn.rd () < RISCV_NUM_INTEGER_REGS);
+          regs[insn.rd ()] = pv_constant (insn.imm_signed ());
+        }
+      else if (insn.opcode () == riscv_insn::ADDI)
+        {
+          /* Handle: addi REG1, REG2, IMM  */
+          gdb_assert (insn.rd () < RISCV_NUM_INTEGER_REGS);
+          gdb_assert (insn.rs1 () < RISCV_NUM_INTEGER_REGS);
+          regs[insn.rd ()]
+            = pv_add_constant (regs[insn.rs1 ()], insn.imm_signed ());
+        }
+      else if (insn.opcode () == riscv_insn::ADD)
+        {
+          /* Handle: addi REG1, REG2, IMM  */
+          gdb_assert (insn.rd () < RISCV_NUM_INTEGER_REGS);
+          gdb_assert (insn.rs1 () < RISCV_NUM_INTEGER_REGS);
+          gdb_assert (insn.rs2 () < RISCV_NUM_INTEGER_REGS);
+          regs[insn.rd ()] = pv_add (regs[insn.rs1 ()], regs[insn.rs2 ()]);
+        }
       else
 	{
 	  end_prologue_addr = cur_pc;

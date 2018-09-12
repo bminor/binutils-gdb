@@ -1,3 +1,10 @@
+2018-09-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/large-frame-1.c: New file.
+	* gdb.base/large-frame-2.c: New file.
+	* gdb.base/large-frame.exp: New file.
+	* gdb.base/large-frame.h: New file.
+
 2018-09-24  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	PR gdb/20948

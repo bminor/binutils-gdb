@@ -1,3 +1,9 @@
+2018-09-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-tdep.c (riscv_insn::decode): Decode c.lui.
+	(riscv_scan_prologue): Split handling of AUIPC, LUI, ADD, ADDI,
+	and NOP.
+
 2018-09-26  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* elf32-nds32.c (elf32_nds32_allocate_dynrelocs): Remove.
