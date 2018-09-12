@@ -1,5 +1,17 @@
 2018-09-17  Alan Modra  <amodra@gmail.com>
 
+	* objcopy.c (handle_remove_section_option): Don't require a dot
+	after .rela and .rel to handle a possible relocation section.
+	* testsuite/binutils-all/remove-relocs-07.s,
+	* testsuite/binutils-all/remove-relocs-07.d,
+	* testsuite/binutils-all/remove-relocs-08.d: New tests.
+	* testsuite/binutils-all/remove-relocs-01.d,
+	* testsuite/binutils-all/remove-relocs-04.d,
+	* testsuite/binutils-all/remove-relocs-05.d,
+	* testsuite/binutils-all/remove-relocs-06.d: Exclude mips64-openbsd.
+
+2018-09-17  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/lib/binutils-common.exp (is_som_format): New proc.
 	(run_dump_test): Correct target test for alternate .comm syntax.
 	(get_standard_section_names): Handle som format.

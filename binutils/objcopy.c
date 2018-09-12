@@ -3943,18 +3943,21 @@ discard_relocations (bfd *ibfd ATTRIBUTE_UNUSED, asection *isection)
 
 /* Wrapper for dealing with --remove-section (-R) command line arguments.
    A special case is detected here, if the user asks to remove a relocation
-   section (one starting with ".rela." or ".rel.") then this removal must
+   section (one starting with ".rela" or ".rel") then this removal must
    be done using a different technique in a relocatable object.  */
 
 static void
 handle_remove_section_option (const char *section_pattern)
 {
-  if (strncmp (section_pattern, ".rela.", 6) == 0)
-    handle_remove_relocations_option (section_pattern + 5);
-  else if (strncmp (section_pattern, ".rel.", 5) == 0)
-    handle_remove_relocations_option (section_pattern + 4);
-
   find_section_list (section_pattern, TRUE, SECTION_CONTEXT_REMOVE);
+  if (strncmp (section_pattern, ".rel", 4) == 0)
+    {
+      section_pattern += 4;
+      if (*section_pattern == 'a')
+	section_pattern++;
+      if (*section_pattern)
+	handle_remove_relocations_option (section_pattern);
+    }
   sections_removed = TRUE;
 }
 
