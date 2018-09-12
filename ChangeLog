@@ -1,3 +1,7 @@
+2018-09-12  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* src-release.sh (GDB_SUPPORT_DIRS): Add "contrib".
+
 2018-07-16  Nick Clifton  <nickc@redhat.com>
 
 	* src-release.sh (DEVO_SUPPORT): Add test-driver and ar-lib.

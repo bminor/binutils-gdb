@@ -313,7 +313,7 @@ gas_release()
     tar_compress $package $tool "$GAS_SUPPORT_DIRS" "$compressors"
 }
 
-GDB_SUPPORT_DIRS="bfd include libiberty opcodes readline sim intl libdecnumber cpu zlib"
+GDB_SUPPORT_DIRS="bfd include libiberty opcodes readline sim intl libdecnumber cpu zlib contrib"
 gdb_release()
 {
     compressors=$1
