@@ -117,4 +117,9 @@ struct gdb_dir_deleter
 
 typedef std::unique_ptr<DIR, gdb_dir_deleter> gdb_dir_up;
 
+/* Return true if the file NAME exists and is a regular file.
+   If the result is false then *ERRNO_PTR is set to a useful value assuming
+   we're expecting a regular file.  */
+extern bool is_regular_file (const char *name, int *errno_ptr);
+
 #endif /* FILESTUFF_H */

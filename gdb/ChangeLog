@@ -1,3 +1,11 @@
+2018-09-12  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* common/common-utils.c: Don't include '<sys/stat.h>'.
+	(is_regular_file): Move to...
+	* common/filestuff.c (is_regular_file): ... here.
+	* common/common-utils.h (is_regular_file): Move to...
+	* common/filestuff.h (is_regular_file): ... here.
+
 2018-09-12  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* skip.c (debug_skip): New variable.

@@ -20,7 +20,6 @@
 #include "common-defs.h"
 #include "common-utils.h"
 #include "host-defs.h"
-#include <sys/stat.h>
 #include <ctype.h>
 
 /* The xmalloc() (libiberty.h) family of memory management routines.
@@ -408,37 +407,6 @@ stringify_argv (const std::vector<char *> &args)
     }
 
   return ret;
-}
-
-/* See common/common-utils.h.  */
-
-bool
-is_regular_file (const char *name, int *errno_ptr)
-{
-  struct stat st;
-  const int status = stat (name, &st);
-
-  /* Stat should never fail except when the file does not exist.
-     If stat fails, analyze the source of error and return true
-     unless the file does not exist, to avoid returning false results
-     on obscure systems where stat does not work as expected.  */
-
-  if (status != 0)
-    {
-      if (errno != ENOENT)
-	return true;
-      *errno_ptr = ENOENT;
-      return false;
-    }
-
-  if (S_ISREG (st.st_mode))
-    return true;
-
-  if (S_ISDIR (st.st_mode))
-    *errno_ptr = EISDIR;
-  else
-    *errno_ptr = EINVAL;
-  return false;
 }
 
 /* See common/common-utils.h.  */
