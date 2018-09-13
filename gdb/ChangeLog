@@ -1,5 +1,23 @@
 2018-09-16  Tom Tromey  <tom@tromey.com>
 
+	* python/py-progspace.c (pspy_get_objfiles): Update.
+	* python/python-internal.h (objfile_to_objfile_object): Change
+	return type.
+	* python/py-newobjfileevent.c (create_new_objfile_event_object):
+	Update.
+	* python/py-xmethods.c (gdbpy_get_matching_xmethod_workers):
+	Update.
+	* python/python.c (gdbpy_get_current_objfile): Update.
+	(gdbpy_objfiles): Update.
+	* python/py-objfile.c (objfpy_get_owner, gdbpy_lookup_objfile):
+	Update.
+	(objfile_to_objfile_object): Return a new reference.
+	* python/py-symtab.c (stpy_get_objfile): Update.
+	* python/py-prettyprint.c (find_pretty_printer_from_objfiles):
+	Update.
+
+2018-09-16  Tom Tromey  <tom@tromey.com>
+
 	* python/py-inferior.c (infpy_get_progspace): Update.
 	* python/python-internal.h (pspace_to_pspace_object): Change
 	return type.

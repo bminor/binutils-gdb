@@ -344,9 +344,10 @@ pspy_get_objfiles (PyObject *self_, PyObject *args)
 
       ALL_PSPACE_OBJFILES (self->pspace, objf)
 	{
-	  PyObject *item = objfile_to_objfile_object (objf);
+	  gdbpy_ref<> item = objfile_to_objfile_object (objf);
 
-	  if (!item || PyList_Append (list.get (), item) == -1)
+	  if (item == nullptr
+	      || PyList_Append (list.get (), item.get ()) == -1)
 	    return NULL;
 	}
     }

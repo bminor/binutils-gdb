@@ -147,7 +147,7 @@ gdbpy_get_matching_xmethod_workers
      list individually, but there's no data yet to show it's needed.  */
   ALL_OBJFILES (objfile)
     {
-      PyObject *py_objfile = objfile_to_objfile_object (objfile);
+      gdbpy_ref<> py_objfile = objfile_to_objfile_object (objfile);
 
       if (py_objfile == NULL)
 	{
@@ -155,7 +155,8 @@ gdbpy_get_matching_xmethod_workers
 	  return EXT_LANG_RC_ERROR;
 	}
 
-      gdbpy_ref<> objfile_matchers (objfpy_get_xmethods (py_objfile, NULL));
+      gdbpy_ref<> objfile_matchers (objfpy_get_xmethods (py_objfile.get (),
+							 NULL));
       gdbpy_ref<> temp (PySequence_Concat (py_xmethod_matcher_list.get (),
 					   objfile_matchers.get ()));
       if (temp == NULL)

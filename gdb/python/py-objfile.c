@@ -115,12 +115,7 @@ objfpy_get_owner (PyObject *self, void *closure)
 
   owner = objfile->separate_debug_objfile_backlink;
   if (owner != NULL)
-    {
-      PyObject *result = objfile_to_objfile_object (owner);
-
-      Py_XINCREF (result);
-      return result;
-    }
+    return objfile_to_objfile_object (owner).release ();
   Py_RETURN_NONE;
 }
 
@@ -602,12 +597,7 @@ gdbpy_lookup_objfile (PyObject *self, PyObject *args, PyObject *kw)
     objfile = objfpy_lookup_objfile_by_name (name);
 
   if (objfile != NULL)
-    {
-      PyObject *result = objfile_to_objfile_object (objfile);
-
-      Py_XINCREF (result);
-      return result;
-    }
+    return objfile_to_objfile_object (objfile).release ();
 
   PyErr_SetString (PyExc_ValueError, _("Objfile not found."));
   return NULL;
@@ -625,30 +615,31 @@ py_free_objfile (struct objfile *objfile, void *datum)
   object->objfile = NULL;
 }
 
-/* Return a borrowed reference to the Python object of type Objfile
+/* Return a new reference to the Python object of type Objfile
    representing OBJFILE.  If the object has already been created,
    return it.  Otherwise, create it.  Return NULL and set the Python
    error on failure.  */
 
-PyObject *
+gdbpy_ref<>
 objfile_to_objfile_object (struct objfile *objfile)
 {
-  gdbpy_ref<objfile_object> object
-    ((objfile_object *) objfile_data (objfile, objfpy_objfile_data_key));
-  if (object == NULL)
+  PyObject *result
+    = ((PyObject *) objfile_data (objfile, objfpy_objfile_data_key));
+  if (result == NULL)
     {
-      object.reset (PyObject_New (objfile_object, &objfile_object_type));
-      if (object != NULL)
-	{
-	  if (!objfpy_initialize (object.get ()))
-	    return NULL;
+      gdbpy_ref<objfile_object> object
+	((objfile_object *) PyObject_New (objfile_object, &objfile_object_type));
+      if (object == NULL)
+	return NULL;
+      if (!objfpy_initialize (object.get ()))
+	return NULL;
 
-	  object->objfile = objfile;
-	  set_objfile_data (objfile, objfpy_objfile_data_key, object.get ());
-	}
+      object->objfile = objfile;
+      set_objfile_data (objfile, objfpy_objfile_data_key, object.get ());
+      result = (PyObject *) object.release ();
     }
 
-  return (PyObject *) object.release ();
+  return gdbpy_ref<>::new_reference (result);
 }
 
 int

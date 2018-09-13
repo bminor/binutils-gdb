@@ -1359,15 +1359,10 @@ gdbpy_execute_objfile_script (const struct extension_language_defn *extlang,
 static PyObject *
 gdbpy_get_current_objfile (PyObject *unused1, PyObject *unused2)
 {
-  PyObject *result;
-
   if (! gdbpy_current_objfile)
     Py_RETURN_NONE;
 
-  result = objfile_to_objfile_object (gdbpy_current_objfile);
-  if (result)
-    Py_INCREF (result);
-  return result;
+  return objfile_to_objfile_object (gdbpy_current_objfile).release ();
 }
 
 /* Compute the list of active python type printers and store them in

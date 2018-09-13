@@ -28,12 +28,10 @@ create_new_objfile_event_object (struct objfile *objfile)
   if (objfile_event == NULL)
     return NULL;
 
-  /* Note that objfile_to_objfile_object returns a borrowed reference,
-     so we don't need a decref here.  */
-  PyObject *py_objfile = objfile_to_objfile_object (objfile);
-  if (!py_objfile || evpy_add_attribute (objfile_event.get (),
-                                         "new_objfile",
-                                         py_objfile) < 0)
+  gdbpy_ref<> py_objfile = objfile_to_objfile_object (objfile);
+  if (py_objfile == NULL || evpy_add_attribute (objfile_event.get (),
+						"new_objfile",
+						py_objfile.get ()) < 0)
     return NULL;
 
   return objfile_event;

@@ -117,13 +117,10 @@ static PyObject *
 stpy_get_objfile (PyObject *self, void *closure)
 {
   struct symtab *symtab = NULL;
-  PyObject *result;
 
   STPY_REQUIRE_VALID (self, symtab);
 
-  result = objfile_to_objfile_object (SYMTAB_OBJFILE (symtab));
-  Py_XINCREF (result);
-  return result;
+  return objfile_to_objfile_object (SYMTAB_OBJFILE (symtab)).release ();
 }
 
 /* Getter function for symtab.producer.  */
