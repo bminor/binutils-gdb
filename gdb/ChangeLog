@@ -1,5 +1,10 @@
 2018-09-13  Tom Tromey  <tom@tromey.com>
 
+	* python/py-inferior.c (infpy_thread_from_thread_handle): Now
+	static.
+
+2018-09-13  Tom Tromey  <tom@tromey.com>
+
 	* exec.c (try_open_exec_file): Use std::string.
 
 2018-09-13  Tom Tromey  <tom@tromey.com>

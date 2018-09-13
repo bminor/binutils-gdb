@@ -831,7 +831,7 @@ infpy_is_valid (PyObject *self, PyObject *args)
 /* Implementation of gdb.Inferior.thread_from_thread_handle (self, handle)
                         ->  gdb.InferiorThread.  */
 
-PyObject *
+static PyObject *
 infpy_thread_from_thread_handle (PyObject *self, PyObject *args, PyObject *kw)
 {
   PyObject *handle_obj, *result;
