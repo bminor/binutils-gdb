@@ -1,5 +1,21 @@
 2018-09-15  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-d10v/reloc-007.d,
+	* testsuite/ld-d10v/reloc-008.d,
+	* testsuite/ld-d10v/reloc-015.d,
+	* testsuite/ld-d10v/reloc-016.d: Remove "error:".
+	* testsuite/ld-elf/eh-frame-hdr.d,
+	* testsuite/ld-elf/eh5.d,
+	* testsuite/ld-gc/personality.d: Replace "cfi" and "shared" in
+	target list with appropriate proc.
+	* testsuite/ld-elf/frame.exp: Use check_shared_lib_support rather
+	than "istarget shared".
+	* testsuite/lib/ld-lib.exp (proc big_or_little_endian): Delete.
+	(run_dump_test, slurp_options, file_contents): Delete.
+	(set_file_contents, istarget): Delete.
+
+2018-09-15  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/lib/ld-lib.exp (run_dump_test): Replace PROG
 	with DUMPPROG.
 

@@ -1,5 +1,28 @@
 2018-09-15  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/binutils-all/add-symbol.d: Add "section_subst: no".
+	* testsuite/binutils-all/elfedit.exp: Don't set tempfile or copyfile.
+	* testsuite/binutils-all/symbols-1.d,
+	* testsuite/binutils-all/symbols-2.d,
+	* testsuite/binutils-all/symbols-3.d,
+	* testsuite/binutils-all/symbols-4.d: Quote '*' and '!'.
+	* testsuite/binutils-all/add-empty-section.d,
+	* testsuite/binutils-all/add-section.d,
+	* testsuite/binutils-all/elfedit.exp,
+	* testsuite/binutils-all/note-1.d,
+	* testsuite/binutils-all/pr23633.d: Add $subdir after $srcdir.
+	* testsuite/config/default.exp (AS, ASFLAGS): Define.
+	* testsuite/config/hppa.sed: Handle all common symbols.
+	* testsuite/lib/binutils-common.exp (run_dump_test): New proc,
+	merged from three other versions.
+	(slurp_options, file_contents, set_file_contents): Likewise.
+	(big_or_little_endian, get_standard_section_names): Likewise.
+	* testsuite/lib/utils-lib.exp (run_dump_test): Delete.
+	(slurp_options, proc file_contents): Delete.
+	(get_standard_section_names): Delete.
+
+2018-09-15  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/binutils-all/copy-2.d,
 	* testsuite/binutils-all/copy-3.d,
 	* testsuite/binutils-all/copy-4.d,

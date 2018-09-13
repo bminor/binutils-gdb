@@ -20,14 +20,6 @@ if ![is_elf_format] {
     return
 }
 
-if ![is_remote host] {
-    set tempfile tmpdir/bintest.o
-    set copyfile tmpdir/bintest
-} else {
-    set tempfile [remote_download host tmpdir/bintest.o]
-    set copyfile bintest
-}
-
 run_dump_test "elfedit-1"
 run_dump_test "elfedit-2"
 run_dump_test "elfedit-3"

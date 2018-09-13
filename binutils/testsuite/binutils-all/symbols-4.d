@@ -1,6 +1,6 @@
 #name: weaken '*' but not 'foo' or 'bar'
 #PROG: objcopy
-#objcopy: -w -W !foo -W !bar -W *
+#objcopy: -w -W \!foo -W \!bar -W \*
 #source: symbols.s
 #nm: -n
 

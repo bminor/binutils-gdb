@@ -1,6 +1,6 @@
 #name: weaken 'fo*' but not 'foo', localize foo.
 #PROG: objcopy
-#objcopy: -w -W !foo -W fo* -L foo
+#objcopy: -w -W \!foo -W fo\* -L foo
 #source: symbols.s
 #nm: -n
 

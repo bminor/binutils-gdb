@@ -3,7 +3,7 @@
 #source: eh5b.s
 #ld:
 #readelf: -wf
-#target: cfi
+#target: [check_as_cfi]
 #xfail: alpha-*-*ecoff hppa64-*-* tile*-*-* visium-*-*
 
 Contents of the .eh_frame section:

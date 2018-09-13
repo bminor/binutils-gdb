@@ -21,6 +21,13 @@
 
 load_lib utils-lib.exp
 
+if ![info exists AS] then {
+    set AS [findfile $base_dir/../gas/as-new $base_dir/../gas/as-new [transform as]]
+}
+if ![info exists ASFLAGS] then {
+    set ASFLAGS ""
+}
+
 if ![info exists NM] then {
     set NM [findfile $base_dir/nm-new $base_dir/nm-new [transform nm]]
 }

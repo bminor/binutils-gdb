@@ -70,4 +70,6 @@ if ![info exists ADDR2LINEFLAGS] then {
     set ADDR2LINEFLAGS {}
 }
 
+if ![file isdirectory tmpdir] {catch "exec mkdir tmpdir" status}
+
 gas_init

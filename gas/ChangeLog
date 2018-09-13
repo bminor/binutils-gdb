@@ -1,5 +1,11 @@
 2018-09-15  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/config/default.exp: Make tmpdir.
+	* testsuite/lib/gas-defs.exp (run_dump_test): Delete.
+	(get_standard_section_names, slurp_options): Delete.
+
+2018-09-15  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/gas/mips/aent-2.d,
 	* testsuite/gas/mips/aent-mdebug-2.d,
 	* testsuite/gas/mips/attr-gnu-4-0.d,

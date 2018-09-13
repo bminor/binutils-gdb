@@ -1,6 +1,6 @@
 #source: pr23633.s
 #PROG: objcopy
-#objcopy: -S --keep-symbols=$srcdir/pr23633.list
+#objcopy: -S --keep-symbols=$srcdir/$subdir/pr23633.list
 #objdump: -s
 
 #...
