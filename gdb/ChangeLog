@@ -1,5 +1,10 @@
 2018-09-16  Tom Tromey  <tom@tromey.com>
 
+	* python/python-internal.h (CPYCHECKER_RETURNS_BORROWED_REF):
+	Remove.
+
+2018-09-16  Tom Tromey  <tom@tromey.com>
+
 	* python/python-internal.h (thread_to_thread_object): Change
 	return type.
 	* python/py-inferior.c (thread_to_thread_object): Return a new

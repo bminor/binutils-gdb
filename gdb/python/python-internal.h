@@ -27,14 +27,9 @@
    comes with the Python plugin for GCC.  See:
    https://gcc-python-plugin.readthedocs.org/en/latest/cpychecker.html
    The checker defines a WITH_ macro for each attribute it
-   exposes.  */
-
-#ifdef WITH_CPYCHECKER_RETURNS_BORROWED_REF_ATTRIBUTE
-#define CPYCHECKER_RETURNS_BORROWED_REF			\
-  __attribute__ ((cpychecker_returns_borrowed_ref))
-#else
-#define CPYCHECKER_RETURNS_BORROWED_REF
-#endif
+   exposes.  Note that we intentionally do not use
+   'cpychecker_returns_borrowed_ref' -- that idiom is forbidden in
+   gdb.  */
 
 #ifdef WITH_CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF_ATTRIBUTE
 #define CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF(ARG)		\
