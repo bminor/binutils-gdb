@@ -1,5 +1,10 @@
 2018-09-13  Tom Tromey  <tom@tromey.com>
 
+	PR rust/23650:
+	* rust-lang.c (rust_evaluate_subexp): Use field name, not "foo".
+
+2018-09-13  Tom Tromey  <tom@tromey.com>
+
 	PR rust/23626:
 	* rust-lang.c (rust_enum_variant): Now static.
 	(rust_empty_enum_p): New function.

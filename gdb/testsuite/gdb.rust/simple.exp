@@ -134,6 +134,8 @@ gdb_test "print univariant" " = simple::Univariant::Foo{a: 1}"
 gdb_test "print univariant.a" " = 1"
 gdb_test "print univariant_anon" " = simple::UnivariantAnon::Foo\\(1\\)"
 gdb_test "print univariant_anon.0" " = 1"
+gdb_test "print univariant_anon.sss" \
+    "Attempting to access named field sss of tuple variant simple::UnivariantAnon::Foo, which has only anonymous fields"
 
 gdb_test_sequence "ptype simple::Univariant" "" {
     "type = enum simple::Univariant \\{"

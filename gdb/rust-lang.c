@@ -1726,9 +1726,9 @@ tuple structs, and tuple-like enum variants"));
 	    struct type *outer_type = type;
 	    type = value_type (lhs);
 	    if (rust_tuple_type_p (type) || rust_tuple_struct_type_p (type))
-		error (_("Attempting to access named field foo of tuple "
+		error (_("Attempting to access named field %s of tuple "
 			 "variant %s::%s, which has only anonymous fields"),
-		       TYPE_NAME (outer_type),
+		       field_name, TYPE_NAME (outer_type),
 		       rust_last_path_segment (TYPE_NAME (type)));
 
 	    TRY
