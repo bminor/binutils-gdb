@@ -152,6 +152,8 @@ typedef struct cached_reg
   gdb_byte *data;
 } cached_reg_t;
 
+DEF_VEC_O(cached_reg_t);
+
 /* Buffer of registers.  */
 
 class reg_buffer : public reg_buffer_common

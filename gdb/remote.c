@@ -6842,8 +6842,6 @@ remote_console_output (char *msg)
   gdb_flush (gdb_stdtarg);
 }
 
-DEF_VEC_O(cached_reg_t);
-
 typedef struct stop_reply
 {
   struct notif_event base;

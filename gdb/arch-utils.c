@@ -996,6 +996,24 @@ default_type_align (struct gdbarch *gdbarch, struct type *type)
   return type_length_units (check_typedef (type));
 }
 
+/* See arch-utils.h.  */
+
+bool
+default_target_description_changed_p (struct gdbarch *gdbarch,
+				      ptid_t ptid,
+				      VEC (cached_reg_t) *registers)
+{
+  return false;
+}
+
+/* See arch-utils.h.  */
+
+union gdbarch_target_info
+default_target_get_tdep_info (VEC (cached_reg_t) *registers)
+{
+  return {0};
+}
+
 void
 _initialize_gdbarch_utils (void)
 {

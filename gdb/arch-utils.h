@@ -271,4 +271,13 @@ extern bool default_in_indirect_branch_thunk (gdbarch *gdbarch,
 extern ULONGEST default_type_align (struct gdbarch *gdbarch,
 				    struct type *type);
 
+/* Default implementation of target_description_changed_p.  Returns False.  */
+extern bool default_target_description_changed_p
+  (struct gdbarch *gdbarch, ptid_t ptid, VEC (cached_reg_t) *registers);
+
+/* Default implementation of default_target_get_tdep_info.  Returns null
+   info.  */
+extern union gdbarch_target_info default_target_get_tdep_info
+  (VEC (cached_reg_t) *registers);
+
 #endif

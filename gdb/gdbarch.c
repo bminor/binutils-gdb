@@ -354,6 +354,8 @@ struct gdbarch
   char ** disassembler_options;
   const disasm_options_and_args_t * valid_disassembler_options;
   gdbarch_type_align_ftype *type_align;
+  gdbarch_target_description_changed_p_ftype *target_description_changed_p;
+  gdbarch_target_get_tdep_info_ftype *target_get_tdep_info;
 };
 
 /* Create a new ``struct gdbarch'' based on information provided by
@@ -466,6 +468,8 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->gnu_triplet_regexp = default_gnu_triplet_regexp;
   gdbarch->addressable_memory_unit_size = default_addressable_memory_unit_size;
   gdbarch->type_align = default_type_align;
+  gdbarch->target_description_changed_p = default_target_description_changed_p;
+  gdbarch->target_get_tdep_info = default_target_get_tdep_info;
   /* gdbarch_alloc() */
 
   return gdbarch;
@@ -712,6 +716,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of disassembler_options, invalid_p == 0 */
   /* Skip verify of valid_disassembler_options, invalid_p == 0 */
   /* Skip verify of type_align, invalid_p == 0 */
+  /* Skip verify of target_description_changed_p, invalid_p == 0 */
+  /* Skip verify of target_get_tdep_info, invalid_p == 0 */
   if (!log.empty ())
     internal_error (__FILE__, __LINE__,
                     _("verify_gdbarch: the following are invalid ...%s"),
@@ -1437,6 +1443,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: target_desc = %s\n",
                       host_address_to_string (gdbarch->target_desc));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: target_description_changed_p = <%s>\n",
+                      host_address_to_string (gdbarch->target_description_changed_p));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: target_get_tdep_info = <%s>\n",
+                      host_address_to_string (gdbarch->target_get_tdep_info));
   fprintf_unfiltered (file,
                       "gdbarch_dump: type_align = <%s>\n",
                       host_address_to_string (gdbarch->type_align));
@@ -5115,6 +5127,40 @@ set_gdbarch_type_align (struct gdbarch *gdbarch,
                         gdbarch_type_align_ftype type_align)
 {
   gdbarch->type_align = type_align;
+}
+
+bool
+gdbarch_target_description_changed_p (struct gdbarch *gdbarch, ptid_t ptid, VEC (cached_reg_t) *registers)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->target_description_changed_p != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_target_description_changed_p called\n");
+  return gdbarch->target_description_changed_p (gdbarch, ptid, registers);
+}
+
+void
+set_gdbarch_target_description_changed_p (struct gdbarch *gdbarch,
+                                          gdbarch_target_description_changed_p_ftype target_description_changed_p)
+{
+  gdbarch->target_description_changed_p = target_description_changed_p;
+}
+
+union gdbarch_target_info
+gdbarch_target_get_tdep_info (struct gdbarch *gdbarch, VEC (cached_reg_t) *registers)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->target_get_tdep_info != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_target_get_tdep_info called\n");
+  return gdbarch->target_get_tdep_info (registers);
+}
+
+void
+set_gdbarch_target_get_tdep_info (struct gdbarch *gdbarch,
+                                  gdbarch_target_get_tdep_info_ftype target_get_tdep_info)
+{
+  gdbarch->target_get_tdep_info = target_get_tdep_info;
 }
 
 
