@@ -2,7 +2,7 @@
 #name: group section with multiple sections of same name
 #source: group1.s
 # The RX port uses non-standard section names.
-#not-target: rx-*
+#notarget: rx-*
 
 #...
 [ 	]*\[.*\][ 	]+\.group[ 	]+GROUP.*

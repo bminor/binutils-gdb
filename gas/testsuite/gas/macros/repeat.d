@@ -1,7 +1,7 @@
 #objdump: -r
 #name: nested irp/irpc/rept
 # darwin (mach-o) reverse relocs.
-#not-target: *-*-darwin*
+#notarget: *-*-darwin*
 
 .*: +file format .*
 

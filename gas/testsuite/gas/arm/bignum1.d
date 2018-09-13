@@ -2,7 +2,7 @@
 # as:
 # objdump: --full-contents
 # This test is only valid on ELF based ports.
-#not-target: *-*-pe *-*-wince
+#notarget: *-*-pe *-*-wince
 
 .*: +file format .*arm.*
 

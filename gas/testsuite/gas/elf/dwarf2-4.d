@@ -1,7 +1,7 @@
 #as:  --compress-debug-sections
 #readelf: -w
 #name: DWARF2 4
-#not-target: ia64-*-*
+#notarget: ia64-*-*
 
 Contents of the .[z]?debug_abbrev section:
 

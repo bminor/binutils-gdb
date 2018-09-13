@@ -2,7 +2,7 @@
 #name: Barrier Instruction Operands
 #as: -mcpu=cortex-a8
 # This test is only valid on ELF based ports.
-#not-target: *-*-pe *-*-wince
+#notarget: *-*-pe *-*-wince
 
 # Test Barrier Instruction Operands
 

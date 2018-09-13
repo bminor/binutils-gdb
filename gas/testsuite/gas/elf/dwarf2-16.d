@@ -5,7 +5,7 @@
 # The mep target tries to relay code sections which breaks symbolic view computations.
 # The riscv targets do not support the subtraction of symbols.
 # The tile targets require 8-byte instructions, but the test only simulates 4-byte instructions.
-#not-target: am3*-* avr-* cr16-* crx-* ft32*-* mep-* mn10*-* msp430-* nds32*-* pru-* riscv*-* rl78-* tile*-* xtensa-*
+#notarget: am3*-* avr-* cr16-* crx-* ft32*-* mep-* mn10*-* msp430-* nds32*-* pru-* riscv*-* rl78-* tile*-* xtensa-*
 
 Hex dump of section '\.rodata':
   0x00000000 01 *.*
