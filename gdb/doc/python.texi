@@ -2836,6 +2836,10 @@ Boolean signaling whether the inferior was created using `attach', or
 started by @value{GDBN} itself.
 @end defvar
 
+@defvar Inferior.progspace
+The inferior's program space.  @xref{Progspaces In Python}.
+@end defvar
+
 A @code{gdb.Inferior} object has the following methods:
 
 @defun Inferior.is_valid ()
@@ -3995,7 +3999,9 @@ The following progspace-related functions are available in the
 @findex gdb.current_progspace
 @defun gdb.current_progspace ()
 This function returns the program space of the currently selected inferior.
-@xref{Inferiors and Programs}.
+@xref{Inferiors and Programs}.  This is identical to
+@code{gdb.selected_inferior().progspace} (@pxref{Inferiors In Python}) and is
+included for historical compatibility.
 @end defun
 
 @findex gdb.progspaces

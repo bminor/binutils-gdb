@@ -1,3 +1,9 @@
+2018-09-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python/py-inferior.c (infpy_get_progspace): New function.
+	(inferior_object_getset): Add progspace property.
+	* NEWS: Mention the new property.
+
 2018-09-13  Tom Tromey  <tom@tromey.com>
 
 	PR rust/23650:

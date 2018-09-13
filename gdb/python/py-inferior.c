@@ -459,6 +459,23 @@ infpy_get_was_attached (PyObject *self, void *closure)
   Py_RETURN_FALSE;
 }
 
+/* Getter of gdb.Inferior.progspace.  */
+
+static PyObject *
+infpy_get_progspace (PyObject *self, void *closure)
+{
+  inferior_object *inf = (inferior_object *) self;
+
+  INFPY_REQUIRE_VALID (inf);
+
+  program_space *pspace = inf->inferior->pspace;
+  gdb_assert (pspace != nullptr);
+
+  PyObject *py_pspace = pspace_to_pspace_object (pspace);
+  Py_XINCREF (py_pspace);
+  return py_pspace;
+}
+
 static int
 build_inferior_list (struct inferior *inf, void *arg)
 {
@@ -966,6 +983,7 @@ static gdb_PyGetSetDef inferior_object_getset[] =
     NULL },
   { "was_attached", infpy_get_was_attached, NULL,
     "True if the inferior was created using 'attach'.", NULL },
+  { "progspace", infpy_get_progspace, NULL, "Program space of this inferior" },
   { NULL }
 };
 

@@ -1,4 +1,13 @@
 2018-09-13  Simon Marchi  <simon.marchi@ericsson.com>
+2018-09-13  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (Inferiors In Python): Document
+	Inferior.progspace.
+	(Program Spaces In Python): Document that
+	gdb.current_progspace() is the same as
+	gdb.selected_inferior().progspace.
+
+2018-09-13  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* python.texi (Basic Python): Mention the string representation
 	of GDB Python objects.

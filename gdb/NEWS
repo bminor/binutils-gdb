@@ -84,6 +84,11 @@ GNU/Linux/RISC-V		riscv*-*-linux*
 CSKY ELF			csky*-*-elf
 CSKY GNU/LINUX			csky*-*-linux
 
+* Python API
+
+  ** The gdb.Inferior type has a new 'progspace' property, which is the program
+     space associated to that inferior.
+
 *** Changes in GDB 8.2
 
 * The 'set disassembler-options' command now supports specifying options

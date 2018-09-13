@@ -55,6 +55,9 @@ gdb_test "python print ('result = %s' % i0.pid)" " = \[0-9\]+" "test Inferior.pi
 gdb_test "python print ('result = %s' % i0.was_attached)" " = False" "test Inferior.was_attached"
 gdb_test "python print (i0.threads ())" "\\(<gdb.InferiorThread object at 0x\[\[:xdigit:\]\]+>,\\)" "test Inferior.threads"
 
+gdb_test "python print (i0.progspace)" "<gdb.Progspace object at $hex>"
+gdb_test "python print (i0.progspace == gdb.progspaces()\[0\])" "True"
+
 # Test the number of inferior threads.
 
 gdb_breakpoint check_threads
@@ -262,6 +265,8 @@ with_test_prefix "is_valid" {
     gdb_test "python print (inf_list\[1\].pid)" \
 	"RuntimeError: Inferior no longer exists.*"
     gdb_test "python print (inf_list\[1\].was_attached)" \
+	"RuntimeError: Inferior no longer exists.*"
+    gdb_test "python print (inf_list\[1\].progspace)" \
 	"RuntimeError: Inferior no longer exists.*"
     gdb_test "python print (inf_list\[1\].threads ())" \
 	"RuntimeError: Inferior no longer exists.*"
