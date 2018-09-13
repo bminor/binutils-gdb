@@ -1752,25 +1752,25 @@ xsaveopt64, 1, 0xfae, 0x6, 2, CpuXsaveopt|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|N
 
 // AES instructions.
 
-aesdec, 2, 0x66de, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=1|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|SSE2AVX, { Xmmword|Unspecified|BaseIndex|RegXMM, RegXMM }
-aesdec, 2, 0x660f38de, None, 3, CpuAES, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Unspecified|BaseIndex|RegXMM, RegXMM }
-aesdeclast, 2, 0x66df, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=1|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|SSE2AVX, { Xmmword|Unspecified|BaseIndex|RegXMM, RegXMM }
-aesdeclast, 2, 0x660f38df, None, 3, CpuAES, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Unspecified|BaseIndex|RegXMM, RegXMM }
-aesenc, 2, 0x66dc, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=1|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|SSE2AVX, { Xmmword|Unspecified|BaseIndex|RegXMM, RegXMM }
-aesenc, 2, 0x660f38dc, None, 3, CpuAES, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Unspecified|BaseIndex|RegXMM, RegXMM }
-aesenclast, 2, 0x66dd, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=1|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|SSE2AVX, { Xmmword|Unspecified|BaseIndex|RegXMM, RegXMM }
-aesenclast, 2, 0x660f38dd, None, 3, CpuAES, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Unspecified|BaseIndex|RegXMM, RegXMM }
-aesimc, 2, 0x66db, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|SSE2AVX, { Xmmword|Unspecified|BaseIndex|RegXMM, RegXMM }
-aesimc, 2, 0x660f38db, None, 3, CpuAES, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Unspecified|BaseIndex|RegXMM, RegXMM }
-aeskeygenassist, 3, 0x66df, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=2|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|SSE2AVX, { Imm8, Xmmword|Unspecified|BaseIndex|RegXMM, RegXMM }
-aeskeygenassist, 3, 0x660f3adf, None, 3, CpuAES, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, Xmmword|Unspecified|BaseIndex|RegXMM, RegXMM }
+aesdec, 2, 0x66de, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=1|VexVVVV=1|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|SSE2AVX, { RegXMM|Unspecified|BaseIndex, RegXMM }
+aesdec, 2, 0x660f38de, None, 3, CpuAES, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+aesdeclast, 2, 0x66df, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=1|VexVVVV=1|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|SSE2AVX, { RegXMM|Unspecified|BaseIndex, RegXMM }
+aesdeclast, 2, 0x660f38df, None, 3, CpuAES, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+aesenc, 2, 0x66dc, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=1|VexVVVV=1|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|SSE2AVX, { RegXMM|Unspecified|BaseIndex, RegXMM }
+aesenc, 2, 0x660f38dc, None, 3, CpuAES, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+aesenclast, 2, 0x66dd, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=1|VexVVVV=1|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|SSE2AVX, { RegXMM|Unspecified|BaseIndex, RegXMM }
+aesenclast, 2, 0x660f38dd, None, 3, CpuAES, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+aesimc, 2, 0x66db, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=1|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|SSE2AVX, { RegXMM|Unspecified|BaseIndex, RegXMM }
+aesimc, 2, 0x660f38db, None, 3, CpuAES, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
+aeskeygenassist, 3, 0x66df, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=2|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|SSE2AVX, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
+aeskeygenassist, 3, 0x660f3adf, None, 3, CpuAES, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
 
 // VAES
 
-vaesdec, 3, 0x66de, None, 1, CpuVAES, Modrm|Vex=2|VexOpcode=1|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Ymmword|Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
-vaesdeclast, 3, 0x66df, None, 1, CpuVAES, Modrm|Vex=2|VexOpcode=1|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Ymmword|Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
-vaesenc, 3, 0x66dc, None, 1, CpuVAES, Modrm|Vex=2|VexOpcode=1|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Ymmword|Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
-vaesenclast, 3, 0x66dd, None, 1, CpuVAES, Modrm|Vex=2|VexOpcode=1|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Ymmword|Unspecified|BaseIndex|RegYMM, RegYMM, RegYMM }
+vaesdec, 3, 0x66de, None, 1, CpuVAES, Modrm|Vex=2|VexOpcode=1|VexVVVV=1|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegYMM|Unspecified|BaseIndex, RegYMM, RegYMM }
+vaesdeclast, 3, 0x66df, None, 1, CpuVAES, Modrm|Vex=2|VexOpcode=1|VexVVVV=1|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegYMM|Unspecified|BaseIndex, RegYMM, RegYMM }
+vaesenc, 3, 0x66dc, None, 1, CpuVAES, Modrm|Vex=2|VexOpcode=1|VexVVVV=1|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegYMM|Unspecified|BaseIndex, RegYMM, RegYMM }
+vaesenclast, 3, 0x66dd, None, 1, CpuVAES, Modrm|Vex=2|VexOpcode=1|VexVVVV=1|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegYMM|Unspecified|BaseIndex, RegYMM, RegYMM }
 
 // PCLMUL
 
@@ -2390,12 +2390,12 @@ vpgatherqq, 3, 0x6691, None, 1, CpuAVX2, Modrm|Vex=2|VexOpcode=1|VexVVVV=1|VexW=
 
 // AES + AVX
 
-vaesdec, 3, 0x66de, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=1|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
-vaesdeclast, 3, 0x66df, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=1|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
-vaesenc, 3, 0x66dc, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=1|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
-vaesenclast, 3, 0x66dd, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=1|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
-vaesimc, 2, 0x66db, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Unspecified|BaseIndex|RegXMM, RegXMM }
-vaeskeygenassist, 3, 0x66df, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=2|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, Xmmword|Unspecified|BaseIndex|RegXMM, RegXMM }
+vaesdec, 3, 0x66de, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=1|VexVVVV=1|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
+vaesdeclast, 3, 0x66df, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=1|VexVVVV=1|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
+vaesenc, 3, 0x66dc, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=1|VexVVVV=1|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
+vaesenclast, 3, 0x66dd, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=1|VexVVVV=1|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM, RegXMM, RegXMM }
+vaesimc, 2, 0x66db, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=1|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM, RegXMM }
+vaeskeygenassist, 3, 0x66df, None, 1, CpuAVX|CpuAES, Modrm|Vex|VexOpcode=2|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, Unspecified|BaseIndex|RegXMM, RegXMM }
 
 // PCLMUL + AVX
 
