@@ -1,3 +1,9 @@
+2018-09-13  Nick Clifton  <nickc@redhat.com>
+
+	PR 23633
+	* objcopy.c (add_specific_symbols): Do not free the buffer at the
+	end of the function.
+
 2018-09-10  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/23611

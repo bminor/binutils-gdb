@@ -1143,7 +1143,8 @@ add_specific_symbols (const char *filename, htab_t htab)
       line_count ++;
     }
 
-  free (buffer);
+  /* Do not free the buffer.  Parts of it will have been referenced
+     in the calls to add_specific_symbol.  */
 }
 
 /* See whether a symbol should be stripped or kept
