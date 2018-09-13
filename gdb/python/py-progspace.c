@@ -492,30 +492,31 @@ py_free_pspace (struct program_space *pspace, void *datum)
   object->pspace = NULL;
 }
 
-/* Return a borrowed reference to the Python object of type Pspace
+/* Return a new reference to the Python object of type Pspace
    representing PSPACE.  If the object has already been created,
    return it.  Otherwise, create it.  Return NULL and set the Python
    error on failure.  */
 
-PyObject *
+gdbpy_ref<>
 pspace_to_pspace_object (struct program_space *pspace)
 {
-  gdbpy_ref<pspace_object> object
-    ((pspace_object *) program_space_data (pspace, pspy_pspace_data_key));
-  if (object == NULL)
+  PyObject *result
+    ((PyObject *) program_space_data (pspace, pspy_pspace_data_key));
+  if (result == NULL)
     {
-      object.reset (PyObject_New (pspace_object, &pspace_object_type));
-      if (object != NULL)
-	{
-	  if (!pspy_initialize (object.get ()))
-	    return NULL;
+      gdbpy_ref<pspace_object> object
+	((pspace_object *) PyObject_New (pspace_object, &pspace_object_type));
+      if (object == NULL)
+	return NULL;
+      if (!pspy_initialize (object.get ()))
+	return NULL;
 
-	  object->pspace = pspace;
-	  set_program_space_data (pspace, pspy_pspace_data_key, object.get ());
-	}
+      object->pspace = pspace;
+      set_program_space_data (pspace, pspy_pspace_data_key, object.get ());
+      result = (PyObject *) object.release ();
     }
 
-  return (PyObject *) object.release ();
+  return gdbpy_ref<>::new_reference (result);
 }
 
 int

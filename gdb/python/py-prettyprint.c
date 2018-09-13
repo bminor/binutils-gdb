@@ -128,11 +128,11 @@ find_pretty_printer_from_objfiles (PyObject *value)
 static PyObject *
 find_pretty_printer_from_progspace (PyObject *value)
 {
-  PyObject *obj = pspace_to_pspace_object (current_program_space);
+  gdbpy_ref<> obj = pspace_to_pspace_object (current_program_space);
 
-  if (!obj)
+  if (obj == NULL)
     return NULL;
-  gdbpy_ref<> pp_list (pspy_get_printers (obj, NULL));
+  gdbpy_ref<> pp_list (pspy_get_printers (obj.get (), NULL));
   return search_pp_list (pp_list.get (), value);
 }
 

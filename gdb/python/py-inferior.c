@@ -471,9 +471,7 @@ infpy_get_progspace (PyObject *self, void *closure)
   program_space *pspace = inf->inferior->pspace;
   gdb_assert (pspace != nullptr);
 
-  PyObject *py_pspace = pspace_to_pspace_object (pspace);
-  Py_XINCREF (py_pspace);
-  return py_pspace;
+  return pspace_to_pspace_object (pspace).release ();
 }
 
 static int

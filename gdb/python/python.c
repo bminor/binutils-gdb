@@ -1293,9 +1293,9 @@ gdbpy_progspaces (PyObject *unused1, PyObject *unused2)
 
   ALL_PSPACES (ps)
   {
-    PyObject *item = pspace_to_pspace_object (ps);
+    gdbpy_ref<> item = pspace_to_pspace_object (ps);
 
-    if (!item || PyList_Append (list.get (), item) == -1)
+    if (item == NULL || PyList_Append (list.get (), item.get ()) == -1)
       return NULL;
   }
 

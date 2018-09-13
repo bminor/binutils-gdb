@@ -516,8 +516,7 @@ PyObject *value_to_value_object (struct value *v);
 PyObject *type_to_type_object (struct type *);
 PyObject *frame_info_to_frame_object (struct frame_info *frame);
 PyObject *symtab_to_linetable_object (PyObject *symtab);
-PyObject *pspace_to_pspace_object (struct program_space *)
-    CPYCHECKER_RETURNS_BORROWED_REF;
+gdbpy_ref<> pspace_to_pspace_object (struct program_space *);
 PyObject *pspy_get_printers (PyObject *, void *);
 PyObject *pspy_get_frame_filters (PyObject *, void *);
 PyObject *pspy_get_frame_unwinders (PyObject *, void *);

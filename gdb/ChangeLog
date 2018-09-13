@@ -1,5 +1,22 @@
 2018-09-16  Tom Tromey  <tom@tromey.com>
 
+	* python/py-inferior.c (infpy_get_progspace): Update.
+	* python/python-internal.h (pspace_to_pspace_object): Change
+	return type.
+	* python/py-newobjfileevent.c
+	(create_clear_objfiles_event_object): Update.
+	* python/py-xmethods.c (gdbpy_get_matching_xmethod_workers):
+	Update.
+	* python/python.c (gdbpy_get_current_progspace): Update.
+	(gdbpy_progspaces): Update.
+	* python/py-progspace.c (pspace_to_pspace_object): Return a new
+	reference.
+	* python/py-objfile.c (objfpy_get_progspace): Update.
+	* python/py-prettyprint.c (find_pretty_printer_from_progspace):
+	Update.
+
+2018-09-16  Tom Tromey  <tom@tromey.com>
+
 	* python/lib/gdb/__init__.py (current_progspace, objfiles)
 	(solib_name, block_for_pc, find_pc_line): New functions.
 	(execute_unwinders): Update.

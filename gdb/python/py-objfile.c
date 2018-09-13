@@ -166,12 +166,7 @@ objfpy_get_progspace (PyObject *self, void *closure)
   objfile_object *obj = (objfile_object *) self;
 
   if (obj->objfile)
-    {
-      PyObject *pspace =  pspace_to_pspace_object (obj->objfile->pspace);
-
-      Py_XINCREF (pspace);
-      return pspace;
-    }
+    return pspace_to_pspace_object (obj->objfile->pspace).release ();
 
   Py_RETURN_NONE;
 }
