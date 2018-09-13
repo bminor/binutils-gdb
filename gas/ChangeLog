@@ -1,5 +1,10 @@
 2018-09-13  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (parse_insn): Extend comment ahead of pseudo-
+	suffix handling.
+
+2018-09-13  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/i386/x86-64-mpx.s: And BNDMK case with RIP-
 	relative memory operand.
 	* testsuite/gas/i386/x86-64-mpx.d: Adjust expectations.

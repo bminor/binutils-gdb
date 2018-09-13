@@ -4516,7 +4516,8 @@ parse_insn (char *line, char *mnemonic)
 
   if (!current_templates)
     {
-      /* Check if we should swap operand or force 32bit displacement in
+      /* Deprecated functionality (new code should use pseudo-prefixes instead):
+	 Check if we should swap operand or force 32bit displacement in
 	 encoding.  */
       if (mnem_p - 2 == dot_p && dot_p[1] == 's')
 	i.dir_encoding = dir_encoding_store;
