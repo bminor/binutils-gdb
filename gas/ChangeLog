@@ -1,3 +1,8 @@
+2018-09-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (build_vex_prefix): Swap destination and
+	source only if there are more than 1 register operand.
+
 2018-09-13  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (operand_size_match): Also deal with three
