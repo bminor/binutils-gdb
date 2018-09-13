@@ -1,5 +1,10 @@
 2018-09-13  Tom Tromey  <tom@tromey.com>
 
+	PR rust/23650:
+	* gdb.rust/simple.exp: Add test for enum field access error.
+
+2018-09-13  Tom Tromey  <tom@tromey.com>
+
 	PR rust/23626:
 	* gdb.rust/simple.rs (EmptyEnum): New type.
 	(main): Use it.
