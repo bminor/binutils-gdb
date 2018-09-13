@@ -6576,6 +6576,15 @@ linux_get_ipa_tdesc_idx (void)
   return (*the_low_target.get_ipa_tdesc_idx) ();
 }
 
+static bool
+linux_validate_tdesc (struct thread_info *thread)
+{
+  if (the_low_target.validate_tdesc == NULL)
+    return true;
+
+  return (*the_low_target.validate_tdesc) (thread);
+}
+
 static int
 linux_supports_tracepoints (void)
 {
@@ -7526,6 +7535,8 @@ static struct target_ops linux_target_ops = {
 #else
   NULL,
 #endif
+  linux_arch_setup,
+  linux_validate_tdesc,
 };
 
 #ifdef HAVE_LINUX_REGSETS
