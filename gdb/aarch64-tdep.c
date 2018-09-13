@@ -2950,7 +2950,7 @@ aarch64_get_tdesc_vq (const struct target_desc *tdesc)
 {
   const struct tdesc_feature *feature_sve;
 
-  if (!tdesc_has_registers (tdesc))
+  if (tdesc == nullptr || !tdesc_has_registers (tdesc))
     return 0;
 
   feature_sve = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.sve");
@@ -2986,10 +2986,23 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   const struct tdesc_feature *feature_sve;
   int num_regs = 0;
   int num_pseudo_regs = 0;
+  uint64_t vq = 0;
 
-  /* Ensure we always have a target description.  */
-  if (!tdesc_has_registers (tdesc))
-    tdesc = aarch64_read_description (0);
+  /* Use the vector length passed via the target info.  Otherwise use the vector
+     length from the existing tdesc.  Otherwise assume no SVE.  */
+  if (info.id != 0)
+    vq = (uint64_t) info.id;
+  else
+    vq = aarch64_get_tdesc_vq (tdesc);
+
+  if (vq > AARCH64_MAX_SVE_VQ)
+    internal_error (__FILE__, __LINE__, _("VQ out of bounds: %ld (max %d)"),
+		    vq, AARCH64_MAX_SVE_VQ);
+
+  /* Ensure we always have a target descriptor, and that it is for the current
+     VQ value.  */
+  if (!tdesc_has_registers (tdesc) || vq > 0)
+    tdesc = aarch64_read_description (vq);
   gdb_assert (tdesc);
 
   feature_core = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.core");
@@ -3063,15 +3076,14 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        best_arch != NULL;
        best_arch = gdbarch_list_lookup_by_info (best_arch->next, &info))
     {
-      /* Found a match.  */
-      break;
-    }
-
-  if (best_arch != NULL)
-    {
-      if (tdesc_data != NULL)
-	tdesc_data_cleanup (tdesc_data);
-      return best_arch->gdbarch;
+      tdep = gdbarch_tdep (best_arch->gdbarch);
+      if (tdep && tdep->vq == vq)
+	{
+	  /* Found a valid match.  */
+	  if (tdesc_data != NULL)
+	  tdesc_data_cleanup (tdesc_data);
+	  return best_arch->gdbarch;
+	}
     }
 
   tdep = XCNEW (struct gdbarch_tdep);
@@ -3081,7 +3093,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->lowest_pc = 0x20;
   tdep->jb_pc = -1;		/* Longjump support not enabled by default.  */
   tdep->jb_elt_size = 8;
-  tdep->vq = aarch64_get_tdesc_vq (tdesc);
+  tdep->vq = vq;
 
   set_gdbarch_push_dummy_call (gdbarch, aarch64_push_dummy_call);
   set_gdbarch_frame_align (gdbarch, aarch64_frame_align);
