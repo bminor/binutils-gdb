@@ -3,4 +3,4 @@
 #objdump: -dr
 #skip: *-*-pe *-*-wince
 #source: armv8-a+rdma.s
-#error-output: armv8-a+rdma.l
+#warning_output: armv8-a+rdma.l

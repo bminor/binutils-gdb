@@ -1,7 +1,7 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: MIPS16 PC-relative operation in delay slot 1
 #as: -32
-#stderr: mips16-pcrel-delay-1.l
+#warning_output: mips16-pcrel-delay-1.l
 
 .*: +file format .*mips.*
 

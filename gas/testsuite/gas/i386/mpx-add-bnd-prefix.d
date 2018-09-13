@@ -1,5 +1,5 @@
 #as: -madd-bnd-prefix
-#stderr: mpx-add-bnd-prefix.e
+#warning_output: mpx-add-bnd-prefix.e
 #objdump: -drw
 #name: Check -madd-bnd-prefix
 

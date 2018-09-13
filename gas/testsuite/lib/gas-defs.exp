@@ -420,13 +420,13 @@ proc run_dump_tests { testcases {extra_options {}} } {
 #	Expect a gas warning matching REGEX.  It is an error to issue
 #	both "error" and "warning".
 #
-#   stderr: FILE
+#   warning_output: FILE
 #       FILE contains regexp lines to be matched against the diagnostic
 #       output of the assembler.  This does not preclude the use of
 #       PROG, addr2line, nm, objdump, or readelf.
 #
-#   error-output: FILE
-#       Means the same as 'stderr', but also indicates that the assembler
+#   error_output: FILE
+#       Means the same as 'warning_output', but also indicates that the assembler
 #       is expected to exit unsuccessfully (therefore PROG, addr2line, nm,
 #	objdump, and readelf have no meaning and should not be supplied).
 #
@@ -469,9 +469,9 @@ proc run_dump_test { name {extra_options {}} } {
     set opts(PROG) {}
     set opts(source) {}
     set opts(dump) {}
-    set opts(stderr) {}
+    set opts(warning_output) {}
     set opts(error) {}
-    set opts(error-output) {}
+    set opts(error_output) {}
     set opts(warning) {}
     set opts(target) {}
     set opts(notarget) {}
@@ -523,22 +523,22 @@ proc run_dump_test { name {extra_options {}} } {
     verbose "Testing $testname"
 
     if { (($opts(warning) != "") && ($opts(error) != "")) \
-	 || (($opts(warning) != "") && ($opts(stderr) != "")) \
-	 || (($opts(error-output) != "") && ($opts(stderr) != "")) \
-	 || (($opts(error-output) != "") && ($opts(error) != "")) \
-	 || (($opts(error-output) != "") && ($opts(warning) != "")) } {
-	perror "$testname: bad mix of stderr, error-output, error, and warning test-directives"
+	 || (($opts(warning) != "") && ($opts(warning_output) != "")) \
+	 || (($opts(error_output) != "") && ($opts(warning_output) != "")) \
+	 || (($opts(error_output) != "") && ($opts(error) != "")) \
+	 || (($opts(error_output) != "") && ($opts(warning) != "")) } {
+	perror "$testname: bad mix of warning_output, error_output, error, and warning test-directives"
 	unresolved $testname
 	return
     }
-    if { $opts(error-output) != "" } then {
-	set opts(stderr) $opts(error-output)
+    if { $opts(error_output) != "" } then {
+	set opts(warning_output) $opts(error_output)
     }
 
     set program ""
     # It's meaningless to require an output-testing method when we
     # expect an error.
-    if { $opts(error) == "" && $opts(error-output) == "" } {
+    if { $opts(error) == "" && $opts(error_output) == "" } {
 	if {$opts(PROG) != ""} {
 	    switch -- $opts(PROG) {
 		addr2line { set program addr2line }
@@ -665,7 +665,7 @@ proc run_dump_test { name {extra_options {}} } {
 
 	send_log "$comp_output\n"
 	verbose "$comp_output" 3
-	if { $opts(stderr) == "" }  then {
+	if { $opts(warning_output) == "" }  then {
 	    if { [regexp $expmsg $comp_output] \
 		    && (($cmdret == 0) == ($opts(warning) != "")) } {
 		# We have the expected output from gas.
@@ -690,7 +690,7 @@ proc run_dump_test { name {extra_options {}} } {
 		fail $testname
 		return
 	    }
-	    set stderrfile $srcdir/$subdir/$opts(stderr)
+	    set stderrfile $srcdir/$subdir/$opts(warning_output)
 	    verbose "wrote pruned stderr to dump.stderr" 3
 	    if { [regexp_diff "dump.stderr" "$stderrfile"] } then {
 		if { $opts(error) != "" } {
@@ -703,13 +703,13 @@ proc run_dump_test { name {extra_options {}} } {
 		fail $testname
 		verbose "pruned stderr is [file_contents "dump.stderr"]" 2
 		return
-	    } elseif { $opts(error-output) != "" } then {
+	    } elseif { $opts(error_output) != "" } then {
 		pass $testname
 		return
 	    }
 	}
     } else {
-	if { $opts(error) != "" || $opts(error-output) != "" } {
+	if { $opts(error) != "" || $opts(error_output) != "" } {
 	    fail $testname
 	}
     }
@@ -781,8 +781,8 @@ proc slurp_options { file } {
     set ws  {[ 	]*}
     set nws {[^ 	]*}
     # whitespace is ignored anywhere except within the options list;
-    # option names are alphabetic plus dash
-    set pat "^#${ws}(\[a-zA-Z0-9-\]*)$ws:${ws}(.*)$ws\$"
+    # option names are alphanumeric plus underscore.
+    set pat "^#${ws}(\[a-zA-Z0-9_\]*)$ws:${ws}(.*)$ws\$"
     while { [gets $f line] != -1 } {
 	set line [string trim $line]
 	# Whitespace here is space-tab.

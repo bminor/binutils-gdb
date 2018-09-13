@@ -2,7 +2,7 @@
 #objdump: -dwMintel
 #name: i386 intel
 #source: intel.s
-#stderr: intel.e
+#warning_output: intel.e
 
 .*: +file format .*
 

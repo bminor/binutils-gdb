@@ -1,7 +1,7 @@
 #as: -J
 #objdump: -dw
 #name: i386 intel
-#stderr: intel.e
+#warning_output: intel.e
 
 .*: +file format .*
 

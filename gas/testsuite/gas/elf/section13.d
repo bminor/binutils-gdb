@@ -1,2 +1,2 @@
 #name: mbind sections without SHF_ALLOC
-#error-output: section13.l
+#error_output: section13.l

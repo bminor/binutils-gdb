@@ -1,4 +1,4 @@
-#error-output: attr-rf16.err
+#warning_output: attr-rf16.err
 #as:
 #readelf: -A
 

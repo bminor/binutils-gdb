@@ -1,6 +1,6 @@
 #objdump: -dr -M notes
 #as: -march=armv8-a
-#error-output: sysreg-diagnostic.l
+#warning_output: sysreg-diagnostic.l
 
 .*:     file format .*
 
