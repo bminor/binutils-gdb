@@ -2057,9 +2057,16 @@ mismatch:
 
   for (j = 0; j < 2; j++)
     {
-      if ((t->operand_types[j].bitfield.reg
-	   || t->operand_types[j].bitfield.acc)
+      if (t->operand_types[j].bitfield.reg
 	  && !match_operand_size (t, j, !j))
+	goto mismatch;
+
+      if (t->operand_types[j].bitfield.regsimd
+	  && !match_simd_size (t, j, !j))
+	goto mismatch;
+
+      if (t->operand_types[j].bitfield.acc
+	  && (!match_operand_size (t, j, !j) || !match_simd_size (t, j, !j)))
 	goto mismatch;
 
       if ((i.flags[!j] & Operand_Mem) && !match_mem_size (t, j, !j))
@@ -3359,8 +3366,9 @@ build_vex_prefix (const insn_template *t)
   if (i.vec_encoding != vex_encoding_vex3
       && i.dir_encoding == dir_encoding_default
       && i.operands == i.reg_operands
+      && operand_type_equal (&i.types[0], &i.types[i.operands - 1])
       && i.tm.opcode_modifier.vexopcode == VEX0F
-      && i.tm.opcode_modifier.load
+      && (i.tm.opcode_modifier.load || i.tm.opcode_modifier.d)
       && i.rex == REX_B)
     {
       unsigned int xchg = i.operands - 1;
@@ -3381,8 +3389,11 @@ build_vex_prefix (const insn_template *t)
       i.rm.regmem = i.rm.reg;
       i.rm.reg = xchg;
 
-      /* Use the next insn.  */
-      i.tm = t[1];
+      if (i.tm.opcode_modifier.d)
+	i.tm.base_opcode ^= (i.tm.base_opcode & 0xee) != 0x6e
+			    ? Opcode_SIMD_FloatD : Opcode_SIMD_IntD;
+      else /* Use the next insn.  */
+	i.tm = t[1];
     }
 
   if (i.tm.opcode_modifier.vex == VEXScalar)
@@ -5527,6 +5538,7 @@ match_template (char mnem_suffix)
   for (t = current_templates->start; t < current_templates->end; t++)
     {
       addr_prefix_disp = -1;
+      found_reverse_match = 0;
 
       if (i.operands != t->operands)
 	continue;
@@ -5777,6 +5789,13 @@ check_reverse:
 		found_reverse_match = 0;
 	      else if (operand_types[0].bitfield.tbyte)
 		found_reverse_match = Opcode_FloatD;
+	      else if (operand_types[0].bitfield.xmmword
+		       || operand_types[1].bitfield.xmmword
+		       || operand_types[0].bitfield.regmmx
+		       || operand_types[1].bitfield.regmmx
+		       || is_any_vex_encoding(t))
+		found_reverse_match = (t->base_opcode & 0xee) != 0x6e
+				      ? Opcode_SIMD_FloatD : Opcode_SIMD_IntD;
 	      else
 		found_reverse_match = Opcode_D;
 	      if (t->opcode_modifier.floatr)
@@ -5847,10 +5866,7 @@ check_reverse:
 	     slip through to break.  */
 	}
       if (!found_cpu_match)
-	{
-	  found_reverse_match = 0;
-	  continue;
-	}
+	continue;
 
       /* Check if vector and VEX operands are valid.  */
       if (check_VecOperands (t) || VEX_check_operands (t))

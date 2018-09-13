@@ -65,6 +65,26 @@ _start:
 	{load} mov %eax, %dr7
 	{store} mov %dr0, %edi
 	{store} mov %eax, %dr7
+	{load} kmovb %k0, %edi
+	{load} kmovb %eax, %k7
+	{store} kmovb %k0, %edi
+	{store} kmovb %eax, %k7
+	{load} kmovd %k0, %edi
+	{load} kmovd %eax, %k7
+	{store} kmovd %k0, %edi
+	{store} kmovd %eax, %k7
+	{load} kmovw %k0, %edi
+	{load} kmovw %eax, %k7
+	{store} kmovw %k0, %edi
+	{store} kmovw %eax, %k7
+	{load} kmovb %k0, %k7
+	{store} kmovb %k0, %k7
+	{load} kmovd %k0, %k7
+	{store} kmovd %k0, %k7
+	{load} kmovq %k0, %k7
+	{store} kmovq %k0, %k7
+	{load} kmovw %k0, %k7
+	{store} kmovw %k0, %k7
 	{load} adc %eax, (%edi)
 	{load} adc (%edi), %eax
 	{store} adc %eax, (%edi)

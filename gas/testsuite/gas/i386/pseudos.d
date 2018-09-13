@@ -68,6 +68,26 @@ Disassembly of section .text:
  +[a-f0-9]+:	0f 23 f8             	mov    %eax,%db7
  +[a-f0-9]+:	0f 21 c7             	mov    %db0,%edi
  +[a-f0-9]+:	0f 23 f8             	mov    %eax,%db7
+ +[a-f0-9]+:	c5 f9 93 f8          	kmovb  %k0,%edi
+ +[a-f0-9]+:	c5 f9 92 f8          	kmovb  %eax,%k7
+ +[a-f0-9]+:	c5 f9 93 f8          	kmovb  %k0,%edi
+ +[a-f0-9]+:	c5 f9 92 f8          	kmovb  %eax,%k7
+ +[a-f0-9]+:	c5 fb 93 f8          	kmovd  %k0,%edi
+ +[a-f0-9]+:	c5 fb 92 f8          	kmovd  %eax,%k7
+ +[a-f0-9]+:	c5 fb 93 f8          	kmovd  %k0,%edi
+ +[a-f0-9]+:	c5 fb 92 f8          	kmovd  %eax,%k7
+ +[a-f0-9]+:	c5 f8 93 f8          	kmovw  %k0,%edi
+ +[a-f0-9]+:	c5 f8 92 f8          	kmovw  %eax,%k7
+ +[a-f0-9]+:	c5 f8 93 f8          	kmovw  %k0,%edi
+ +[a-f0-9]+:	c5 f8 92 f8          	kmovw  %eax,%k7
+ +[a-f0-9]+:	c5 f9 90 f8          	kmovb  %k0,%k7
+ +[a-f0-9]+:	c5 f9 90 f8          	kmovb  %k0,%k7
+ +[a-f0-9]+:	c4 e1 f9 90 f8       	kmovd  %k0,%k7
+ +[a-f0-9]+:	c4 e1 f9 90 f8       	kmovd  %k0,%k7
+ +[a-f0-9]+:	c4 e1 f8 90 f8       	kmovq  %k0,%k7
+ +[a-f0-9]+:	c4 e1 f8 90 f8       	kmovq  %k0,%k7
+ +[a-f0-9]+:	c5 f8 90 f8          	kmovw  %k0,%k7
+ +[a-f0-9]+:	c5 f8 90 f8          	kmovw  %k0,%k7
  +[a-f0-9]+:	11 07                	adc    %eax,\(%edi\)
  +[a-f0-9]+:	13 07                	adc    \(%edi\),%eax
  +[a-f0-9]+:	11 07                	adc    %eax,\(%edi\)
