@@ -27,8 +27,6 @@
 #include "common-regcache.h"
 #include "common/byte-vector.h"
 
-static bool vq_change_warned = false;
-
 /* See nat/aarch64-sve-linux-ptrace.h.  */
 
 uint64_t
@@ -64,13 +62,24 @@ aarch64_sve_get_vq (int tid)
 /* See nat/aarch64-sve-linux-ptrace.h.  */
 
 std::unique_ptr<gdb_byte[]>
-aarch64_sve_get_sveregs (int tid)
+aarch64_sve_get_sveregs (struct reg_buffer_common *reg_buf, int tid)
 {
   struct iovec iovec;
   uint64_t vq = aarch64_sve_get_vq (tid);
 
   if (vq == 0)
     perror_with_name (_("Unable to fetch SVE register header"));
+
+  /* If the vector length in the regcache has increased, then use that to
+     ensure enough space is reserved in case we later use the buffer to write
+     back to the kernel.  */
+  if (REG_VALID == reg_buf->get_register_status (AARCH64_SVE_VG_REGNUM))
+    {
+      uint64_t vg_reg_buf = 0;
+      reg_buf->raw_collect (AARCH64_SVE_VG_REGNUM, &vg_reg_buf);
+      if (sve_vq_from_vg (vg_reg_buf) > vq)
+	vq = sve_vq_from_vg (vg_reg_buf);
+    }
 
   /* A ptrace call with NT_ARM_SVE will return a header followed by either a
      dump of all the SVE and FP registers, or an fpsimd structure (identical to
@@ -95,37 +104,19 @@ aarch64_sve_regs_copy_to_reg_buf (struct reg_buffer_common *reg_buf,
 {
   char *base = (char *) buf;
   struct user_sve_header *header = (struct user_sve_header *) buf;
-  uint64_t vq, vg_reg_buf = 0;
 
-  vq = sve_vq_from_vl (header->vl);
+  uint64_t vq = sve_vq_from_vl (header->vl);
+  uint64_t vg = sve_vg_from_vl (header->vl);
 
   /* Sanity check the data in the header.  */
   if (!sve_vl_valid (header->vl)
       || SVE_PT_SIZE (vq, header->flags) != header->size)
     error (_("Invalid SVE header from kernel."));
 
-  if (REG_VALID == reg_buf->get_register_status (AARCH64_SVE_VG_REGNUM))
-    reg_buf->raw_collect (AARCH64_SVE_VG_REGNUM, &vg_reg_buf);
-
-  if (vg_reg_buf == 0)
-    {
-      /* VG has not been set.  */
-      vg_reg_buf = sve_vg_from_vl (header->vl);
-      reg_buf->raw_supply (AARCH64_SVE_VG_REGNUM, &vg_reg_buf);
-    }
-  else if (vg_reg_buf != sve_vg_from_vl (header->vl) && !vq_change_warned)
-    {
-      /* Vector length on the running process has changed.  GDB currently does
-	 not support this and will result in GDB showing incorrect partially
-	 incorrect data for the vector registers.  Warn once and continue.  We
-	 do not expect many programs to exhibit this behaviour.  To fix this
-	 we need to spot the change earlier and generate a new target
-	 descriptor.  */
-      warning (_("SVE Vector length has changed (%ld to %d). "
-		 "Vector registers may show incorrect data."),
-	       vg_reg_buf, sve_vg_from_vl (header->vl));
-      vq_change_warned = true;
-    }
+  /* Need to make sure the vector length in the regcache is correct.  The
+     registers in the regcache will already be of the correct length.  Just need
+     to make sure the regcache VG register matches this.  */
+  reg_buf->raw_supply (AARCH64_SVE_VG_REGNUM, &vg);
 
   if (HAS_SVE_STATE (*header))
     {
@@ -187,28 +178,24 @@ aarch64_sve_regs_copy_from_reg_buf (const struct reg_buffer_common *reg_buf,
 {
   struct user_sve_header *header = (struct user_sve_header *) buf;
   char *base = (char *) buf;
-  uint64_t vq, vg_reg_buf = 0;
-
-  vq = sve_vq_from_vl (header->vl);
+  uint64_t vq = sve_vq_from_vl (header->vl);
 
   /* Sanity check the data in the header.  */
   if (!sve_vl_valid (header->vl)
       || SVE_PT_SIZE (vq, header->flags) != header->size)
     error (_("Invalid SVE header from kernel."));
 
+  /* Get the vector length from VG register in the regcache, which may be out of
+     sync with the actual length of the registers in the regcache.  This would
+     have happened, for example due to the user manually setting VG.  We will
+     be changing the vector length in the kernel to match this value and will
+     need to ensure the registers in the kernel dump match this.  */
+  uint64_t vq_new = vq;
   if (REG_VALID == reg_buf->get_register_status (AARCH64_SVE_VG_REGNUM))
-    reg_buf->raw_collect (AARCH64_SVE_VG_REGNUM, &vg_reg_buf);
-
-  if (vg_reg_buf != 0 && vg_reg_buf != sve_vg_from_vl (header->vl))
     {
-      /* Vector length on the running process has changed.  GDB currently does
-	 not support this and will result in GDB writing invalid data back to
-	 the vector registers.  Error and exit.  We do not expect many programs
-	 to exhibit this behaviour.  To fix this we need to spot the change
-	 earlier and generate a new target descriptor.  */
-      error (_("SVE Vector length has changed (%ld to %d). "
-	       "Cannot write back registers."),
-	     vg_reg_buf, sve_vg_from_vl (header->vl));
+      uint64_t vg_new = 0;
+      reg_buf->raw_collect (AARCH64_SVE_VG_REGNUM, &vg_new);
+      vq_new = sve_vq_from_vg (vg_new);
     }
 
   if (!HAS_SVE_STATE (*header))
@@ -285,40 +272,104 @@ aarch64_sve_regs_copy_from_reg_buf (const struct reg_buffer_common *reg_buf,
 	 for base.  */
 
       header->flags |= SVE_PT_REGS_SVE;
-      header->size = SVE_PT_SIZE (vq, SVE_PT_REGS_SVE);
+      header->size = SVE_PT_SIZE (vq_new, SVE_PT_REGS_SVE);
 
-      memcpy (base + SVE_PT_SVE_FPSR_OFFSET (vq), &fpsimd->fpsr,
+      memcpy (base + SVE_PT_SVE_FPSR_OFFSET (vq_new), &fpsimd->fpsr,
 	      sizeof (uint32_t));
-      memcpy (base + SVE_PT_SVE_FPCR_OFFSET (vq), &fpsimd->fpcr,
+      memcpy (base + SVE_PT_SVE_FPCR_OFFSET (vq_new), &fpsimd->fpcr,
 	      sizeof (uint32_t));
 
       for (int i = AARCH64_SVE_Z_REGS_NUM; i >= 0 ; i--)
 	{
-	  memcpy (base + SVE_PT_SVE_ZREG_OFFSET (vq, i), &fpsimd->vregs[i],
-		  sizeof (__int128_t));
+	  memcpy (base + SVE_PT_SVE_ZREG_OFFSET (vq_new, i),
+		  &fpsimd->vregs[i], sizeof (__int128_t));
 	}
     }
+  else if (vq_new > vq)
+    {
+      /* Vector length has increased.  Move up all the registers in the kernel
+	 dump, iterating backwards and ensuring the extra space is cleared.
+	 Note that enough space for a full SVE dump was originally allocated for
+	 base.  */
 
-  /* Replace the kernel values with those from reg_buf.  */
+      header->vl = sve_vl_from_vq (vq_new);
+      header->size = SVE_PT_SIZE (vq_new, SVE_PT_REGS_SVE);
+
+      memcpy (base + SVE_PT_SVE_FPCR_OFFSET (vq_new),
+	      base + SVE_PT_SVE_FPCR_OFFSET (vq), SVE_PT_SVE_FPCR_SIZE);
+      memcpy (base + SVE_PT_SVE_FPSR_OFFSET (vq_new),
+	      base + SVE_PT_SVE_FPSR_OFFSET (vq), SVE_PT_SVE_FPSR_SIZE);
+      memcpy (base + SVE_PT_SVE_FFR_OFFSET (vq_new),
+	      base + SVE_PT_SVE_FFR_OFFSET (vq), SVE_PT_SVE_FFR_SIZE (vq));
+      memset (base + SVE_PT_SVE_FFR_OFFSET (vq_new) + SVE_PT_SVE_FFR_SIZE (vq),
+	      0, SVE_PT_SVE_FFR_SIZE (vq_new) - SVE_PT_SVE_FFR_SIZE (vq));
+
+      for (int i = AARCH64_SVE_P_REGS_NUM; i >= 0 ; i--)
+	{
+	  memmove (base + SVE_PT_SVE_PREG_OFFSET (vq_new, i),
+		   base + SVE_PT_SVE_PREG_OFFSET (vq, i),
+		   SVE_PT_SVE_PREG_SIZE (vq));
+	  memset (base + SVE_PT_SVE_PREG_OFFSET (vq_new, i)
+		       + SVE_PT_SVE_PREG_SIZE (vq),
+		  0, SVE_PT_SVE_PREG_SIZE (vq_new) - SVE_PT_SVE_PREG_SIZE (vq));
+	}
+
+      for (int i = AARCH64_SVE_Z_REGS_NUM; i >= 0 ; i--)
+	{
+	  memmove (base + SVE_PT_SVE_ZREG_OFFSET (vq_new, i),
+		   base + SVE_PT_SVE_ZREG_OFFSET (vq, i),
+		   SVE_PT_SVE_ZREG_SIZE (vq));
+	  memset (base + SVE_PT_SVE_ZREG_OFFSET (vq_new, i)
+		       + SVE_PT_SVE_ZREG_SIZE (vq),
+		  0, SVE_PT_SVE_ZREG_SIZE (vq_new) - SVE_PT_SVE_ZREG_SIZE (vq));
+	}
+    }
+  else if (vq_new < vq)
+    {
+      /* Vector length has decreased.  Move down all the registers in the kernel
+	 dump.  */
+
+      header->vl = sve_vl_from_vq (vq_new);
+      header->size = SVE_PT_SIZE (vq_new, SVE_PT_REGS_SVE);
+
+      for (int i = 1; i < AARCH64_SVE_Z_REGS_NUM; i++)
+	memmove (base + SVE_PT_SVE_ZREG_OFFSET (vq_new, i),
+		 base + SVE_PT_SVE_ZREG_OFFSET (vq, i),
+		 SVE_PT_SVE_ZREG_SIZE (vq_new));
+      for (int i = 1; i < AARCH64_SVE_P_REGS_NUM; i++)
+	memmove (base + SVE_PT_SVE_PREG_OFFSET (vq_new, i),
+		 base + SVE_PT_SVE_PREG_OFFSET (vq, i),
+		 SVE_PT_SVE_PREG_SIZE (vq_new));
+      memcpy (base + SVE_PT_SVE_FFR_OFFSET (vq_new),
+	      base + SVE_PT_SVE_FFR_OFFSET (vq), SVE_PT_SVE_FFR_SIZE (vq_new));
+      memcpy (base + SVE_PT_SVE_FPSR_OFFSET (vq_new),
+	      base + SVE_PT_SVE_FPSR_OFFSET (vq), SVE_PT_SVE_FPSR_SIZE);
+      memcpy (base + SVE_PT_SVE_FPCR_OFFSET (vq_new),
+	      base + SVE_PT_SVE_FPCR_OFFSET (vq), SVE_PT_SVE_FPCR_SIZE);
+    }
+
+  /* At this point we have a kernel SVE data dump with the vector length that
+     matches VG in the regcache.  Replace the kernel register values with those
+     from reg_buf.  */
 
   for (int i = 0; i < AARCH64_SVE_Z_REGS_NUM; i++)
     if (REG_VALID == reg_buf->get_register_status (AARCH64_SVE_Z0_REGNUM + i))
       reg_buf->raw_collect (AARCH64_SVE_Z0_REGNUM + i,
-			    base + SVE_PT_SVE_ZREG_OFFSET (vq, i));
+			    base + SVE_PT_SVE_ZREG_OFFSET (vq_new, i));
 
   for (int i = 0; i < AARCH64_SVE_P_REGS_NUM; i++)
     if (REG_VALID == reg_buf->get_register_status (AARCH64_SVE_P0_REGNUM + i))
       reg_buf->raw_collect (AARCH64_SVE_P0_REGNUM + i,
-			    base + SVE_PT_SVE_PREG_OFFSET (vq, i));
+			    base + SVE_PT_SVE_PREG_OFFSET (vq_new, i));
 
   if (REG_VALID == reg_buf->get_register_status (AARCH64_SVE_FFR_REGNUM))
     reg_buf->raw_collect (AARCH64_SVE_FFR_REGNUM,
-			  base + SVE_PT_SVE_FFR_OFFSET (vq));
+			  base + SVE_PT_SVE_FFR_OFFSET (vq_new));
   if (REG_VALID == reg_buf->get_register_status (AARCH64_FPSR_REGNUM))
     reg_buf->raw_collect (AARCH64_FPSR_REGNUM,
-			  base + SVE_PT_SVE_FPSR_OFFSET (vq));
+			  base + SVE_PT_SVE_FPSR_OFFSET (vq_new));
   if (REG_VALID == reg_buf->get_register_status (AARCH64_FPCR_REGNUM))
     reg_buf->raw_collect (AARCH64_FPCR_REGNUM,
-			  base + SVE_PT_SVE_FPCR_OFFSET (vq));
+			  base + SVE_PT_SVE_FPCR_OFFSET (vq_new));
 
 }

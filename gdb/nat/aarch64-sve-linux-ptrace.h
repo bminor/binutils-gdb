@@ -42,7 +42,8 @@ uint64_t aarch64_sve_get_vq (int tid);
 /* Read the current SVE register set using ptrace, allocating space as
    required.  */
 
-extern std::unique_ptr<gdb_byte[]> aarch64_sve_get_sveregs (int tid);
+extern std::unique_ptr<gdb_byte[]> aarch64_sve_get_sveregs
+  (struct reg_buffer_common *reg_buf, int tid);
 
 /* Put the registers from linux structure buf into register buffer.  */
 
