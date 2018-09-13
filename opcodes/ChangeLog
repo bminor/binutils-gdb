@@ -1,5 +1,11 @@
 2018-09-13  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl: Drop IgnoreSize from AVX insns where
+	meaningless.
+	* i386-tbl.h: Re-generate.
+
+2018-09-13  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl: Drop IgnoreSize from GNFI insns.
 	* i386-tbl.h: Re-generate.
 
