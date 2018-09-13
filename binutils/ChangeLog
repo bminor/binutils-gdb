@@ -1,3 +1,11 @@
+2018-09-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/23633
+	* testsuite/binutils-all/objcopy.exp: Run pr23633.
+	* testsuite/binutils-all/pr23633.d: New file.
+	* testsuite/binutils-all/pr23633.list: Likewise.
+	* testsuite/binutils-all/pr23633.s: Likewise.
+
 2018-09-13  Nick Clifton  <nickc@redhat.com>
 
 	PR 23633

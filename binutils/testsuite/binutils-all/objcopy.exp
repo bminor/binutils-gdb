@@ -1256,3 +1256,5 @@ proc objcopy_remove_relocations_from_executable { } {
 }
 
 objcopy_remove_relocations_from_executable
+
+run_dump_test "pr23633"
