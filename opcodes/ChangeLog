@@ -1,5 +1,11 @@
 2018-09-13  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl: Drop IgnoreSize from AVX512_4FMAPS and
+	AVX512_4VNNIW insns.
+	* i386-tbl.h: Re-generate.
+
+2018-09-13  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl: Drop IgnoreSize from AVX512DQ insns where
 	meaningless.
 	* i386-tbl.h: Re-generate.
