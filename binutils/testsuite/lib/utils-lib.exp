@@ -229,11 +229,11 @@ proc exe_ext {} {
 #	in the space-separated list each glob is passed to "istarget" and
 #	each proc is called as a TCL procedure.  List items are interpreted
 #	such that procs are denoted by surrounding square brackets, and any
-#	other items are consired globs.  If the call evaluates true for any
-#	of them, the test will be run, otherwise it will be marked
+#	other items are considered globs.  If the call evaluates true for
+#	any of them, the test will be run, otherwise it will be marked
 #	unsupported.
 #
-#   not-target: GLOB|PROC ...
+#   notarget: GLOB|PROC ...
 #	Do not run this test on a specified list of targets.  Again, each
 #	glob in the space-separated list is passed to "istarget" and each
 #	proc is called as a TCL procedure, and the test is run if it
@@ -241,8 +241,8 @@ proc exe_ext {} {
 #	unsupported.
 #
 #   skip: GLOB|PROC ...
-#   not-skip: GLOB|PROC ...
-#       These are exactly the same as "not-target" and "target",
+#   noskip: GLOB|PROC ...
+#       These are exactly the same as "notarget" and "target",
 #       respectively, except that they do nothing at all if the check
 #       fails.  They should only be used in groups, to construct a single
 #       test which is run on all targets but with variant options or
@@ -320,9 +320,9 @@ proc run_dump_test { name {extra_options {}} } {
     set opts(error_output) {}
     set opts(warning_output) {}
     set opts(target) {}
-    set opts(not-target) {}
+    set opts(notarget) {}
     set opts(skip) {}
-    set opts(not-skip) {}
+    set opts(noskip) {}
 
     foreach i $opt_array {
 	set opt_name [lindex $i 0]
@@ -440,11 +440,11 @@ proc run_dump_test { name {extra_options {}} } {
     }
 
     # Handle skipping the test on specified targets.
-    # You can have both skip/not-skip and target/not-target, but you can't
-    # have both skip and not-skip, or target and not-target, in the same file.
+    # You can have both skip/noskip and target/notarget, but you can't
+    # have both skip and noskip, or target and notarget, in the same file.
     if { $opts(skip) != "" } then {
-	if { $opts(not-skip) != "" } then {
-	    perror "$testname: mixing skip and not-skip directives is invalid"
+	if { $opts(noskip) != "" } then {
+	    perror "$testname: mixing skip and noskip directives is invalid"
 	    unresolved $testname
 	    return
 	}
@@ -452,9 +452,9 @@ proc run_dump_test { name {extra_options {}} } {
 	    if {[match_target $glob]} { return }
 	}
     }
-    if { $opts(not-skip) != "" } then {
+    if { $opts(noskip) != "" } then {
 	set skip 1
-	foreach glob $opts(not-skip) {
+	foreach glob $opts(noskip) {
 	    if {[match_target $glob]} {
 		set skip 0
 		break
@@ -475,8 +475,8 @@ proc run_dump_test { name {extra_options {}} } {
 	    return
 	}
     }
-    if { $opts(not-target) != "" } then {
-	foreach glob $opts(not-target) {
+    if { $opts(notarget) != "" } then {
+	foreach glob $opts(notarget) {
 	    if {[match_target $glob]} {
 		unsupported $testname
 		return

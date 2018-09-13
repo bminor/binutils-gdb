@@ -3,7 +3,7 @@
 #objcopy: --merge-notes
 #name: merge notes section (64-bits)
 #source: note-2-64.s
-#not-target: sparc64-*-*
+#notarget: sparc64-*-*
 # Internally the Sparc64 backend uses two relocs for every one reloc visible externally.
 # Unfortunately the BFD library does not provide a target specific way to delete individual
 # relocs, so the note merging feature fails.

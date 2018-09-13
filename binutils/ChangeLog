@@ -1,5 +1,30 @@
 2018-09-15  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/binutils-all/copy-2.d,
+	* testsuite/binutils-all/copy-3.d,
+	* testsuite/binutils-all/copy-4.d,
+	* testsuite/binutils-all/elfedit-1.d,
+	* testsuite/binutils-all/note-1.d,
+	* testsuite/binutils-all/note-2-64.d,
+	* testsuite/binutils-all/strip-11.d,
+	* testsuite/binutils-all/strip-13.d,
+	* testsuite/binutils-all/strip-14.d,
+	* testsuite/binutils-all/testranges.d,
+	* testsuite/binutils-all/x86-64/pr23494a-x32.d,
+	* testsuite/binutils-all/x86-64/pr23494a.d,
+	* testsuite/binutils-all/x86-64/pr23494b-x32.d,
+	* testsuite/binutils-all/x86-64/pr23494b.d,
+	* testsuite/binutils-all/x86-64/pr23494c-x32.d,
+	* testsuite/binutils-all/x86-64/pr23494c.d,
+	* testsuite/binutils-all/x86-64/pr23494d-x32.d,
+	* testsuite/binutils-all/x86-64/pr23494d.d,
+	* testsuite/binutils-all/x86-64/pr23494e-x32.d,
+	* testsuite/binutils-all/x86-64/pr23494e.d,
+	* testsuite/lib/utils-lib.exp (run_dump_test): Replace not-target
+	and not-skip with notarget and noskip.
+
+2018-09-15  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/binutils-all/group-7a.d,
 	* testsuite/binutils-all/group-7b.d,
 	* testsuite/binutils-all/group-7c.d,
