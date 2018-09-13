@@ -1,7 +1,7 @@
-#PROG: nm
 #name: SEGMENT_START expression not absolute
 #source: segment-start.s
 #ld: -e 0 -u __executable_start -T segment-start.ld
+#nm: -B
 #xfail: mmix-*-* pdp11-*-* powerpc-*-aix* powerpc-*-beos* rs6000-*-* sh-*-pe
 #xfail: c30-*-*aout* tic30-*-*aout* c54x*-*-*coff* tic54x-*-*coff*
 # XFAIL targets that are not expected to handle SEGMENT_START correctly.

@@ -1,6 +1,6 @@
 #source: provide-5.s
 #ld: -T provide-6.t
-#PROG: nm
+#nm: -B
 #xfail: x86_64-*-cygwin
 
 #...

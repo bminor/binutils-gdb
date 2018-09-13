@@ -2,7 +2,6 @@
 #PROG: objcopy
 #objcopy: -w -W !foo -W fo* -L foo
 #source: symbols.s
-#DUMPPROG: nm
 #nm: -n
 
 #...

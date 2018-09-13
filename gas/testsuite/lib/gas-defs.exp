@@ -359,14 +359,13 @@ proc run_dump_tests { testcases {extra_options {}} } {
 #
 #   addr2line: FLAGS
 #   nm: FLAGS
-#   objcopy: FLAGS
 #   objdump: FLAGS
 #   readelf: FLAGS
 #	Use the specified program to analyze the .o file, and pass it
 #	FLAGS, in addition to the .o file name.  Note that they are run
 #	with LC_ALL=C in the environment to give consistent sorting
 #	of symbols.  If no FLAGS are needed then use:
-#        PROG: [nm objcopy objdump readelf addr2line]
+#        PROG: [nm objdump readelf addr2line]
 #       instead.
 #	Note: for objdump, we automatically replaces the standard section
 #	names (.text, .data and .bss) by target ones if any (eg. rx-elf
@@ -414,8 +413,8 @@ proc run_dump_tests { testcases {extra_options {}} } {
 #
 #   error: REGEX
 #	An error with message matching REGEX must be emitted for the test
-#	to pass.  The PROG, objdump, nm and objcopy options have no
-#	meaning and need not supplied if this is present.
+#	to pass.  The PROG, addr2line, nm, objdump, and readelf options
+#	have no meaning and need not supplied if this is present.
 #
 #   warning: REGEX
 #	Expect a gas warning matching REGEX.  It is an error to issue
@@ -424,12 +423,12 @@ proc run_dump_tests { testcases {extra_options {}} } {
 #   stderr: FILE
 #       FILE contains regexp lines to be matched against the diagnostic
 #       output of the assembler.  This does not preclude the use of
-#       PROG, nm, objdump, or objcopy.
+#       PROG, addr2line, nm, objdump, or readelf.
 #
 #   error-output: FILE
 #       Means the same as 'stderr', but also indicates that the assembler
-#       is expected to exit unsuccessfully (therefore PROG, objdump, nm,
-#       and objcopy have no meaning and should not be supplied).
+#       is expected to exit unsuccessfully (therefore PROG, addr2line, nm,
+#	objdump, and readelf have no meaning and should not be supplied).
 #
 #   section-subst: no
 #       Means that the section substitution for objdump is disabled.
@@ -465,7 +464,6 @@ proc run_dump_test { name {extra_options {}} } {
     set opts(as) {}
     set opts(objdump) {}
     set opts(nm) {}
-    set opts(objcopy) {}
     set opts(readelf) {}
     set opts(name) {}
     set opts(PROG) {}
@@ -546,7 +544,6 @@ proc run_dump_test { name {extra_options {}} } {
 		addr2line { set program addr2line }
 		objdump	{ set program objdump }
 		nm	{ set program nm }
-		objcopy	{ set program objcopy }
 		readelf	{ set program readelf }
 		default	{
 		    perror "unrecognized program option $opts(PROG) in $file.d"
@@ -555,7 +552,7 @@ proc run_dump_test { name {extra_options {}} } {
 	    }
 	} else {
 	    # Guess which program to run, by seeing which option was specified.
-	    foreach p {objdump objcopy nm readelf addr2line} {
+	    foreach p {objdump nm readelf addr2line} {
 		if {$opts($p) != ""} {
 		    if {$program != ""} {
 			perror "ambiguous dump program in $file.d"
@@ -741,15 +738,8 @@ proc run_dump_test { name {extra_options {}} } {
     if { $progopts1 == "" } { set $progopts1 "-r" }
     verbose "running $binary $progopts $progopts1" 3
 
-    # Objcopy, unlike the other two, won't send its output to stdout,
-    # so we have to run it specially.
     set cmd "$binary $progopts $progopts1 dump.o"
     set redir ">dump.out"
-    if { $program == "objcopy" } {
-	set cmd "$binary $progopts $progopts1 dump.o dump.out"
-	set redir ""
-    }
-
     send_log "$cmd\n"
     set status [gas_host_run "$cmd" "$redir"]
     set comp_output [prune_warnings [lindex $status 1]]

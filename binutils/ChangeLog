@@ -1,3 +1,13 @@
+2018-09-15  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/group-7a.d,
+	* testsuite/binutils-all/group-7b.d,
+	* testsuite/binutils-all/group-7c.d,
+	* testsuite/binutils-all/symbols-1.d,
+	* testsuite/binutils-all/symbols-2.d,
+	* testsuite/binutils-all/symbols-3.d,
+	* testsuite/binutils-all/symbols-4.d: Remove DUMPPROG.
+
 2018-09-14  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/23633

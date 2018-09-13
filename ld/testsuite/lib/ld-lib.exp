@@ -511,7 +511,6 @@ proc ld_link_defsyms {} {
 #   readelf: FLAGS
 #   objdump: FLAGS
 #   nm: FLAGS
-#   objcopy: FLAGS
 #	Use the specified program to analyze the assembler or linker
 #       output file, and pass it FLAGS, in addition to the output name.
 #	Note that they are run with LC_ALL=C in the environment to give
@@ -568,7 +567,7 @@ proc ld_link_defsyms {} {
 #
 #   error: REGEX
 #	An error with message matching REGEX must be emitted for the test
-#	to pass.  The PROG, readelf, objdump, nm and objcopy options have
+#	to pass.  The PROG, readelf, objdump, and nm options have
 #	no meaning and need not be supplied if this is present.  Multiple
 #	"error" directives append to the expected linker error message.
 #
@@ -647,7 +646,6 @@ proc run_dump_test { name {extra_options {}} } {
     set opts(noskip) {}
     set opts(objdump) {}
     set opts(nm) {}
-    set opts(objcopy) {}
     set opts(readelf) {}
     set opts(name) {}
     set opts(PROG) {}
@@ -825,7 +823,6 @@ proc run_dump_test { name {extra_options {}} } {
 	    switch -- $opts(PROG) {
 		objdump	{ set program objdump }
 		nm	{ set program nm }
-		objcopy	{ set program objcopy }
 		readelf	{ set program readelf }
 		default
 		{ perror "unrecognized program option $opts(PROG) in $file.d"
@@ -834,7 +831,7 @@ proc run_dump_test { name {extra_options {}} } {
 	    }
 	} else {
 	# Guess which program to run, by seeing which option was specified.
-	    foreach p {objdump objcopy nm readelf} {
+	    foreach p {objdump nm readelf} {
 		if {$opts($p) != ""} {
 		    if {$program != ""} {
 			perror "ambiguous dump program in $file.d"
@@ -1104,13 +1101,7 @@ proc run_dump_test { name {extra_options {}} } {
 
     if { $progopts1 == "" } { set $progopts1 "-r" }
     verbose "running $binary $progopts $progopts1" 3
-
-    # Objcopy, unlike the other two, won't send its output to stdout,
-    # so we have to run it specially.
     set cmd "$binary $progopts $progopts1 $objfile > $dumpfile"
-    if { $program == "objcopy" } {
-	set cmd "$binary $progopts $progopts1 $objfile $dumpfile"
-    }
 
     # Ensure consistent sorting of symbols
     if {[info exists env(LC_ALL)]} {

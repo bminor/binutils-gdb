@@ -1,3 +1,19 @@
+2018-09-15  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/interleave-0.d,
+	* testsuite/ld-elf/interleave-4.d: Don't objcopy to srec,
+	objdump instead.
+	* testsuite/ld-gc/all-debug-sections.d,
+	* testsuite/ld-scripts/provide-4.d,
+	* testsuite/ld-scripts/provide-5.d,
+	* testsuite/ld-scripts/provide-6.d,
+	* testsuite/ld-scripts/provide-7.d,
+	* testsuite/ld-scripts/provide-8.d,
+	* testsuite/ld-scripts/segment-start.d: Remove PROG, specify
+	nm instead.
+	* testsuite/lib/ld-lib.exp (run_dump_test): Remove support
+	for objcopy as a dump tool.
+
 2018-09-14  Maciej W. Rozycki  <macro@mips.com>
 
 	PR ld/21375
