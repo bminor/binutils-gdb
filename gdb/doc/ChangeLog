@@ -1,4 +1,8 @@
 2018-09-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python.texi (Objfiles In Python): Update gdb.objfiles() doc.
+
+2018-09-13  Simon Marchi  <simon.marchi@ericsson.com>
 2018-09-13  Tom Tromey  <tom@tromey.com>
 
 	* python.texi (Program Spaces In Python): Document the

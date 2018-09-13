@@ -4112,10 +4112,10 @@ this function returns @code{None}.
 
 @findex gdb.objfiles
 @defun gdb.objfiles ()
-Return a sequence of all the objfiles current known to @value{GDBN}.
-@xref{Objfiles In Python}.  This is identical to
-@code{gdb.selected_inferior().progspace.objfiles()} (@pxref{Progspaces In
-Python}) and is included for historical compatibility.
+Return a sequence of objfiles referenced by the current program space.
+@xref{Objfiles In Python}, and @ref{Progspaces In Python}.  This is identical
+to @code{gdb.selected_inferior().progspace.objfiles()} and is included for
+historical compatibility.
 @end defun
 
 @findex gdb.lookup_objfile
