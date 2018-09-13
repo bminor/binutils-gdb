@@ -1733,7 +1733,7 @@ pcmpistrm, 3, 0x660f3a62, None, 3, CpuSSE4_2, Modrm|IgnoreSize|No_bSuf|No_wSuf|N
 // We put non-8bit version before 8bit so that crc32 with memory operand
 // defaults to non-8bit.
 crc32, 2, 0xf20f38f1, None, 3, CpuSSE4_2, Modrm|No_bSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { Reg16|Reg32|Word|Dword|Unspecified|BaseIndex, Reg32 }
-crc32, 2, 0xf20f38f1, None, 3, CpuSSE4_2|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|Rex64|NoAVX, { Reg64|Qword|Unspecified|BaseIndex, Reg64 }
+crc32, 2, 0xf20f38f1, None, 3, CpuSSE4_2|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|NoAVX, { Reg64|Qword|Unspecified|BaseIndex, Reg64 }
 crc32, 2, 0xf20f38f0, None, 3, CpuSSE4_2, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { Reg8|Byte|Unspecified|BaseIndex, Reg32 }
 crc32, 2, 0xf20f38f0, None, 3, CpuSSE4_2|Cpu64, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64|NoAVX, { Reg8|Byte|Unspecified|BaseIndex, Reg64 }
 
@@ -4245,7 +4245,7 @@ vpsravw, 3, 0x6611, None, 1, CpuAVX512BW, Modrm|Masking=3|VexOpcode=1|VexVVVV=1|
 vpsrlvw, 3, 0x6610, None, 1, CpuAVX512BW, Modrm|Masking=3|VexOpcode=1|VexVVVV=1|VexW=2|Disp8ShiftVL|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
 
 vpbroadcastw, 2, 0x6679, None, 1, CpuAVX512BW, Modrm|Masking=3|VexOpcode=1|VexW=1|Disp8MemShift=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|Word|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
-vpbroadcastw, 2, 0x667B, None, 1, CpuAVX512BW, Modrm|Masking=3|VexOpcode=1|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg32, RegXMM|RegYMM|RegZMM }
+vpbroadcastw, 2, 0x667B, None, 1, CpuAVX512BW, Modrm|Masking=3|VexOpcode=1|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32, RegXMM|RegYMM|RegZMM }
 
 vpcmpeqb, 3, 0x6674, None, 1, CpuAVX512BW, Modrm|Masking=2|VexOpcode=0|VexVVVV=1|Disp8ShiftVL|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegMask }
 vpcmpgtb, 3, 0x6664, None, 1, CpuAVX512BW, Modrm|Masking=2|VexOpcode=0|VexVVVV=1|Disp8ShiftVL|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegMask }
@@ -4626,7 +4626,7 @@ wrpkru, 0, 0xf01ef, None, 3, CpuOSPKE, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|N
 
 // RDPID instructions.
 
-rdpid, 1, 0xf30fc7, 0x7, 2, CpuRDPID|CpuNo64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg32 }
+rdpid, 1, 0xf30fc7, 0x7, 2, CpuRDPID|CpuNo64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32 }
 rdpid, 1, 0xf30fc7, 0x7, 2, CpuRDPID|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg64 }
 
 // RDPID instructions end.
@@ -4640,9 +4640,9 @@ ptwrite, 1, 0xf30fae, 0x4, 2, CpuPTWRITE, Modrm|No_bSuf|No_wSuf|No_sSuf|No_ldSuf
 // CET instructions.
 
 incsspd, 1, 0xf30fae, 0x5, 2, CpuSHSTK, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32 }
-incsspq, 1, 0xf30fae, 0x5, 2, CpuSHSTK|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Reg64 }
+incsspq, 1, 0xf30fae, 0x5, 2, CpuSHSTK|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg64 }
 rdsspd, 1, 0xf30f1e, 0x1, 2, CpuSHSTK, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32 }
-rdsspq, 1, 0xf30f1e, 0x1, 2, CpuSHSTK|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Reg64 }
+rdsspq, 1, 0xf30f1e, 0x1, 2, CpuSHSTK|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg64 }
 saveprevssp, 0, 0xf30f01ea, None, 3, CpuSHSTK, IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 rstorssp, 1, 0xf30f01, 0x5, 2, CpuSHSTK, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Qword|Unspecified|BaseIndex }
 wrssd, 2, 0x0f38f6, None, 3, CpuSHSTK, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32, Dword|Unspecified|BaseIndex }
