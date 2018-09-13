@@ -272,9 +272,7 @@ execv_argv::init_for_shell (const char *exec_file,
 static const char *
 get_startup_shell ()
 {
-  static const char *ret;
-
-  ret = getenv ("SHELL");
+  const char *ret = getenv ("SHELL");
   if (ret == NULL)
     ret = SHELL_FILE;
 

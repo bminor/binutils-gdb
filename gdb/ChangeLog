@@ -1,3 +1,7 @@
+2018-09-14  Tom Tromey  <tom@tromey.com>
+
+	* nat/fork-inferior.c (get_startup_shell): Remove "static".
+
 2018-09-13  Tom Tromey  <tom@tromey.com>
 
 	* python/py-inferior.c (infpy_thread_from_thread_handle): Now
