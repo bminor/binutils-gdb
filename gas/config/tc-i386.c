@@ -376,7 +376,8 @@ struct _i386_insn
       {
 	dir_encoding_default = 0,
 	dir_encoding_load,
-	dir_encoding_store
+	dir_encoding_store,
+	dir_encoding_swap
       } dir_encoding;
 
     /* Prefer 8bit or 32bit displacement in encoding.  */
@@ -4520,7 +4521,7 @@ parse_insn (char *line, char *mnemonic)
 	 Check if we should swap operand or force 32bit displacement in
 	 encoding.  */
       if (mnem_p - 2 == dot_p && dot_p[1] == 's')
-	i.dir_encoding = dir_encoding_store;
+	i.dir_encoding = dir_encoding_swap;
       else if (mnem_p - 3 == dot_p
 	       && dot_p[1] == 'd'
 	       && dot_p[2] == '8')
@@ -5700,15 +5701,40 @@ match_template (char mnem_suffix)
 	    continue;
 	  if (!(size_match & MATCH_STRAIGHT))
 	    goto check_reverse;
-	  /* If we want store form, we reverse direction of operands.  */
-	  if (i.dir_encoding == dir_encoding_store
-	      && t->opcode_modifier.d)
-	    goto check_reverse;
+	  /* Reverse direction of operands if swapping is possible in the first
+	     place (operands need to be symmetric) and
+	     - the load form is requested, and the template is a store form,
+	     - the store form is requested, and the template is a load form,
+	     - the non-default (swapped) form is requested.  */
+	  overlap1 = operand_type_and (operand_types[0], operand_types[1]);
+	  if (t->opcode_modifier.d && i.reg_operands == 2
+	      && !operand_type_all_zero (&overlap1))
+	    switch (i.dir_encoding)
+	      {
+	      case dir_encoding_load:
+		if (operand_type_check (operand_types[i.operands - 1], anymem)
+		    || operand_types[i.operands - 1].bitfield.regmem)
+		  goto check_reverse;
+		break;
+
+	      case dir_encoding_store:
+		if (!operand_type_check (operand_types[i.operands - 1], anymem)
+		    && !operand_types[i.operands - 1].bitfield.regmem)
+		  goto check_reverse;
+		break;
+
+	      case dir_encoding_swap:
+		goto check_reverse;
+
+	      case dir_encoding_default:
+		break;
+	      }
 	  /* Fall through.  */
 
 	case 3:
 	  /* If we want store form, we skip the current load.  */
-	  if (i.dir_encoding == dir_encoding_store
+	  if ((i.dir_encoding == dir_encoding_store
+	       || i.dir_encoding == dir_encoding_swap)
 	      && i.mem_operands == 0
 	      && t->opcode_modifier.load)
 	    continue;

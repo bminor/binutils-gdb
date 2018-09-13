@@ -16,9 +16,247 @@ _start:
 	{disp32} vmovaps (%rax),%xmm2
 	{evex} {disp8} vmovaps (%rax),%xmm2
 	{evex} {disp32} vmovaps (%rax),%xmm2
+
 	mov %rcx, %rax
 	{load} mov %rcx, %rax
 	{store} mov %rcx, %rax
+	adc %ecx, %eax
+	{load} adc %ecx, %eax
+	{store} adc %ecx, %eax
+	add %ecx, %eax
+	{load} add %ecx, %eax
+	{store} add %ecx, %eax
+	and %ecx, %eax
+	{load} and %ecx, %eax
+	{store} and %ecx, %eax
+	cmp %ecx, %eax
+	{load} cmp %ecx, %eax
+	{store} cmp %ecx, %eax
+	or %ecx, %eax
+	{load} or %ecx, %eax
+	{store} or %ecx, %eax
+	sbb %ecx, %eax
+	{load} sbb %ecx, %eax
+	{store} sbb %ecx, %eax
+	sub %ecx, %eax
+	{load} sub %ecx, %eax
+	{store} sub %ecx, %eax
+	xor %ecx, %eax
+	{load} xor %ecx, %eax
+	{store} xor %ecx, %eax
+
+	{load} mov 0x12345678, %eax
+	{load} mov %eax, 0x12345678
+	{store} mov 0x12345678, %eax
+	{store} mov %eax, 0x12345678
+	{load} mov 0x123456789abcdef0, %eax
+	{load} mov %eax, 0x123456789abcdef0
+	{store} mov 0x123456789abcdef0, %eax
+	{store} mov %eax, 0x123456789abcdef0
+	{load} movabs 0x123456789abcdef0, %eax
+	{load} movabs %eax, 0x123456789abcdef0
+	{store} movabs 0x123456789abcdef0, %eax
+	{store} movabs %eax, 0x123456789abcdef0
+	{load} mov %eax, (%rdi)
+	{load} mov (%rdi), %eax
+	{store} mov %eax, (%rdi)
+	{store} mov (%rdi), %eax
+	{load} mov %es, %edi
+	{load} mov %eax, %gs
+	{store} mov %es, %edi
+	{store} mov %eax, %gs
+	{load} mov %cr0, %rdi
+	{load} mov %rax, %cr7
+	{store} mov %cr0, %rdi
+	{store} mov %rax, %cr7
+	{load} mov %dr0, %rdi
+	{load} mov %rax, %dr7
+	{store} mov %dr0, %rdi
+	{store} mov %rax, %dr7
+	{load} adc %eax, (%rdi)
+	{load} adc (%rdi), %eax
+	{store} adc %eax, (%rdi)
+	{store} adc (%rdi), %eax
+	{load} add %eax, (%rdi)
+	{load} add (%rdi), %eax
+	{store} add %eax, (%rdi)
+	{store} add (%rdi), %eax
+	{load} and %eax, (%rdi)
+	{load} and (%rdi), %eax
+	{store} and %eax, (%rdi)
+	{store} and (%rdi), %eax
+	{load} cmp %eax, (%rdi)
+	{load} cmp (%rdi), %eax
+	{store} cmp %eax, (%rdi)
+	{store} cmp (%rdi), %eax
+	{load} or %eax, (%rdi)
+	{load} or (%rdi), %eax
+	{store} or %eax, (%rdi)
+	{store} or (%rdi), %eax
+	{load} sbb %eax, (%rdi)
+	{load} sbb (%rdi), %eax
+	{store} sbb %eax, (%rdi)
+	{store} sbb (%rdi), %eax
+	{load} sub %eax, (%rdi)
+	{load} sub (%rdi), %eax
+	{store} sub %eax, (%rdi)
+	{store} sub (%rdi), %eax
+	{load} xor %eax, (%rdi)
+	{load} xor (%rdi), %eax
+	{store} xor %eax, (%rdi)
+	{store} xor (%rdi), %eax
+
+	fadd %st, %st
+	{load} fadd %st, %st
+	{store} fadd %st, %st
+	fdiv %st, %st
+	{load} fdiv %st, %st
+	{store} fdiv %st, %st
+	fdivr %st, %st
+	{load} fdivr %st, %st
+	{store} fdivr %st, %st
+	fmul %st, %st
+	{load} fmul %st, %st
+	{store} fmul %st, %st
+	fsub %st, %st
+	{load} fsub %st, %st
+	{store} fsub %st, %st
+	fsubr %st, %st
+	{load} fsubr %st, %st
+	{store} fsubr %st, %st
+
+	movq %mm0, %mm7
+	{load} movq %mm0, %mm7
+	{store} movq %mm0, %mm7
+
+	movaps %xmm0, %xmm7
+	{load} movaps %xmm0, %xmm7
+	{store} movaps %xmm0, %xmm7
+	movups %xmm0, %xmm7
+	{load} movups %xmm0, %xmm7
+	{store} movups %xmm0, %xmm7
+	movss %xmm0, %xmm7
+	{load} movss %xmm0, %xmm7
+	{store} movss %xmm0, %xmm7
+	movapd %xmm0, %xmm7
+	{load} movapd %xmm0, %xmm7
+	{store} movapd %xmm0, %xmm7
+	movupd %xmm0, %xmm7
+	{load} movupd %xmm0, %xmm7
+	{store} movupd %xmm0, %xmm7
+	movsd %xmm0, %xmm7
+	{load} movsd %xmm0, %xmm7
+	{store} movsd %xmm0, %xmm7
+	movdqa %xmm0, %xmm7
+	{load} movdqa %xmm0, %xmm7
+	{store} movdqa %xmm0, %xmm7
+	movdqu %xmm0, %xmm7
+	{load} movdqu %xmm0, %xmm7
+	{store} movdqu %xmm0, %xmm7
+	movq %xmm0, %xmm7
+	{load} movq %xmm0, %xmm7
+	{store} movq %xmm0, %xmm7
+	vmovaps %xmm0, %xmm7
+	{load} vmovaps %xmm0, %xmm7
+	{store} vmovaps %xmm0, %xmm7
+	vmovaps %zmm0, %zmm7
+	{load} vmovaps %zmm0, %zmm7
+	{store} vmovaps %zmm0, %zmm7
+	vmovaps %xmm0, %xmm7{%k7}
+	{load} vmovaps %xmm0, %xmm7{%k7}
+	{store} vmovaps %xmm0, %xmm7{%k7}
+	vmovups %zmm0, %zmm7
+	{load} vmovups %zmm0, %zmm7
+	{store} vmovups %zmm0, %zmm7
+	vmovups %xmm0, %xmm7
+	{load} vmovups %xmm0, %xmm7
+	{store} vmovups %xmm0, %xmm7
+	vmovups %xmm0, %xmm7{%k7}
+	{load} vmovups %xmm0, %xmm7{%k7}
+	{store} vmovups %xmm0, %xmm7{%k7}
+	vmovss %xmm0, %xmm1, %xmm7
+	{load} vmovss %xmm0, %xmm1, %xmm7
+	{store} vmovss %xmm0, %xmm1, %xmm7
+	vmovss %xmm0, %xmm1, %xmm7{%k7}
+	{load} vmovss %xmm0, %xmm1, %xmm7{%k7}
+	{store} vmovss %xmm0, %xmm1, %xmm7{%k7}
+	vmovapd %xmm0, %xmm7
+	{load} vmovapd %xmm0, %xmm7
+	{store} vmovapd %xmm0, %xmm7
+	vmovapd %zmm0, %zmm7
+	{load} vmovapd %zmm0, %zmm7
+	{store} vmovapd %zmm0, %zmm7
+	vmovapd %xmm0, %xmm7{%k7}
+	{load} vmovapd %xmm0, %xmm7{%k7}
+	{store} vmovapd %xmm0, %xmm7{%k7}
+	vmovupd %xmm0, %xmm7
+	{load} vmovupd %xmm0, %xmm7
+	{store} vmovupd %xmm0, %xmm7
+	vmovupd %zmm0, %zmm7
+	{load} vmovupd %zmm0, %zmm7
+	{store} vmovupd %zmm0, %zmm7
+	vmovupd %xmm0, %xmm7{%k7}
+	{load} vmovupd %xmm0, %xmm7{%k7}
+	{store} vmovupd %xmm0, %xmm7{%k7}
+	vmovsd %xmm0, %xmm1, %xmm7
+	{load} vmovsd %xmm0, %xmm1, %xmm7
+	{store} vmovsd %xmm0, %xmm1, %xmm7
+	vmovsd %xmm0, %xmm1, %xmm7{%k7}
+	{load} vmovsd %xmm0, %xmm1, %xmm7{%k7}
+	{store} vmovsd %xmm0, %xmm1, %xmm7{%k7}
+	vmovdqa %xmm0, %xmm7
+	{load} vmovdqa %xmm0, %xmm7
+	{store} vmovdqa %xmm0, %xmm7
+	vmovdqa32 %zmm0, %zmm7
+	{load} vmovdqa32 %zmm0, %zmm7
+	{store} vmovdqa32 %zmm0, %zmm7
+	vmovdqa32 %xmm0, %xmm7
+	{load} vmovdqa32 %xmm0, %xmm7
+	{store} vmovdqa32 %xmm0, %xmm7
+	vmovdqa64 %zmm0, %zmm7
+	{load} vmovdqa64 %zmm0, %zmm7
+	{store} vmovdqa64 %zmm0, %zmm7
+	vmovdqa64 %xmm0, %xmm7
+	{load} vmovdqa64 %xmm0, %xmm7
+	{store} vmovdqa64 %xmm0, %xmm7
+	vmovdqu %xmm0, %xmm7
+	{load} vmovdqu %xmm0, %xmm7
+	{store} vmovdqu %xmm0, %xmm7
+	vmovdqu8 %zmm0, %zmm7
+	{load} vmovdqu8 %zmm0, %zmm7
+	{store} vmovdqu8 %zmm0, %zmm7
+	vmovdqu8 %xmm0, %xmm7
+	{load} vmovdqu8 %xmm0, %xmm7
+	{store} vmovdqu8 %zmm0, %zmm7
+	vmovdqu16 %zmm0, %zmm7
+	{load} vmovdqu16 %zmm0, %zmm7
+	{store} vmovdqu16 %zmm0, %zmm7
+	vmovdqu16 %xmm0, %xmm7
+	{load} vmovdqu16 %xmm0, %xmm7
+	{store} vmovdqu16 %xmm0, %xmm7
+	vmovdqu32 %zmm0, %zmm7
+	{load} vmovdqu32 %zmm0, %zmm7
+	{store} vmovdqu32 %zmm0, %zmm7
+	vmovdqu32 %xmm0, %xmm7
+	{load} vmovdqu32 %xmm0, %xmm7
+	{store} vmovdqu32 %xmm0, %xmm7
+	vmovdqu64 %zmm0, %zmm7
+	{load} vmovdqu64 %zmm0, %zmm7
+	{store} vmovdqu64 %zmm0, %zmm7
+	vmovdqu64 %xmm0, %xmm7
+	{load} vmovdqu64 %xmm0, %xmm7
+	{store} vmovdqu64 %xmm0, %xmm7
+	vmovq %xmm0, %xmm7
+	{load} vmovq %xmm0, %xmm7
+	{store} vmovq %xmm0, %xmm7
+	{evex} vmovq %xmm0, %xmm7
+	{load} {evex} vmovq %xmm0, %xmm7
+	{store} {evex} vmovq %xmm0, %xmm7
+
+	bndmov %bnd3, %bnd0
+	{load} bndmov %bnd3, %bnd0
+	{store} bndmov %bnd3, %bnd0
+
 	movaps (%rax),%xmm2
 	{load} movaps (%rax),%xmm2
 	{store} movaps (%rax),%xmm2
