@@ -1,4 +1,4 @@
-#PROG: readelf
+#DUMPPROG: readelf
 #readelf: -wl
 #name: MIPS DWARF-2 location information with branch swapping
 #as: -32

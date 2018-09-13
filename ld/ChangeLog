@@ -1,5 +1,10 @@
 2018-09-15  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/lib/ld-lib.exp (run_dump_test): Replace PROG
+	with DUMPPROG.
+
+2018-09-15  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-elf/interleave-0.d,
 	* testsuite/ld-elf/interleave-4.d: Don't objcopy to srec,
 	objdump instead.

@@ -1,5 +1,41 @@
 2018-09-15  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/gas/mips/aent-2.d,
+	* testsuite/gas/mips/aent-mdebug-2.d,
+	* testsuite/gas/mips/attr-gnu-4-0.d,
+	* testsuite/gas/mips/attr-gnu-4-1.d,
+	* testsuite/gas/mips/attr-gnu-4-2.d,
+	* testsuite/gas/mips/attr-gnu-4-3.d,
+	* testsuite/gas/mips/attr-gnu-4-5.d,
+	* testsuite/gas/mips/attr-gnu-4-6.d,
+	* testsuite/gas/mips/attr-gnu-4-7.d,
+	* testsuite/gas/mips/attr-none-double.d,
+	* testsuite/gas/mips/attr-none-o32-fp64-nooddspreg.d,
+	* testsuite/gas/mips/attr-none-o32-fp64.d,
+	* testsuite/gas/mips/attr-none-o32-fpxx.d,
+	* testsuite/gas/mips/attr-none-single-float.d,
+	* testsuite/gas/mips/attr-none-soft-float.d,
+	* testsuite/gas/mips/elf-rel27.d,
+	* testsuite/gas/mips/loc-swap-2.d,
+	* testsuite/gas/mips/loc-swap-3.d,
+	* testsuite/gas/mips/loc-swap.d,
+	* testsuite/gas/mips/micromips@loc-swap-2.d,
+	* testsuite/gas/mips/micromips@loc-swap.d,
+	* testsuite/gas/mips/micromips@stabs-symbol-type.d,
+	* testsuite/gas/mips/mips16-intermix.d,
+	* testsuite/gas/mips/mips16@loc-swap-2.d,
+	* testsuite/gas/mips/mips16@loc-swap.d,
+	* testsuite/gas/mips/mips16@stabs-symbol-type.d,
+	* testsuite/gas/mips/mips16e@loc-swap.d,
+	* testsuite/gas/mips/no-odd-spreg.d,
+	* testsuite/gas/mips/odd-spreg.d,
+	* testsuite/gas/mips/r6-attr-none-double.d,
+	* testsuite/gas/mips/stabs-symbol-type.d,
+	* testsuite/lib/gas-defs.exp (run_dump_test): Replace PROG
+	with DUMPPROG.
+
+2018-09-15  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/gas/elf/symver.d,
 	* testsuite/gas/ft32/insn.d,
 	* testsuite/gas/ft32/insnsc.d,

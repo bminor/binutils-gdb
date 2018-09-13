@@ -502,7 +502,7 @@ proc ld_link_defsyms {} {
 #	result is analyzed by an analyzer program specified below (which
 #	may in turn *also* be objcopy).
 #
-#   PROG: PROGRAM-NAME
+#   DUMPPROG: PROGRAM-NAME
 #       The name of the program to run to analyze the .o file produced
 #       by the assembler or the linker output.  This can be omitted;
 #       run_dump_test will guess which program to run by seeing which of
@@ -567,7 +567,7 @@ proc ld_link_defsyms {} {
 #
 #   error: REGEX
 #	An error with message matching REGEX must be emitted for the test
-#	to pass.  The PROG, readelf, objdump, and nm options have
+#	to pass.  The DUMPPROG, readelf, objdump, and nm options have
 #	no meaning and need not be supplied if this is present.  Multiple
 #	"error" directives append to the expected linker error message.
 #
@@ -648,7 +648,7 @@ proc run_dump_test { name {extra_options {}} } {
     set opts(nm) {}
     set opts(readelf) {}
     set opts(name) {}
-    set opts(PROG) {}
+    set opts(DUMPPROG) {}
     set opts(source) {}
     set opts(dump) {}
     set opts(error) {}
@@ -815,35 +815,36 @@ proc run_dump_test { name {extra_options {}} } {
 	}
     }
 
-    set program ""
+    set dumpprogram ""
     # It's meaningless to require an output-testing method when we
     # expect an error.
     if { $opts(error) == "" && $opts(error_output) == "" } {
-	if {$opts(PROG) != ""} {
-	    switch -- $opts(PROG) {
-		objdump	{ set program objdump }
-		nm	{ set program nm }
-		readelf	{ set program readelf }
-		default
-		{ perror "unrecognized program option $opts(PROG) in $file.d"
-		  unresolved $testname
-		  return }
+	if { $opts(DUMPPROG) != "" } {
+	    switch -- $opts(DUMPPROG) {
+		objdump	{ set dumpprogram objdump }
+		nm	{ set dumpprogram nm }
+		readelf	{ set dumpprogram readelf }
+		default {
+		    perror "unrecognized DUMPPROG option $opts(DUMPPROG) in $file.d"
+		    unresolved $testname
+		    return
+		}
 	    }
 	} else {
 	# Guess which program to run, by seeing which option was specified.
 	    foreach p {objdump nm readelf} {
 		if {$opts($p) != ""} {
-		    if {$program != ""} {
+		    if {$dumpprogram != ""} {
 			perror "ambiguous dump program in $file.d"
 			unresolved $testname
 			return
 		    } else {
-			set program $p
+			set dumpprogram $p
 		    }
 		}
 	    }
 	}
-	if { $program == "" \
+	if { $dumpprogram == "" \
                  && $opts(map) == "" \
                  && $opts(warning) == "" \
                  && $opts(warning_output) == "" \
@@ -1056,7 +1057,7 @@ proc run_dump_test { name {extra_options {}} } {
                      || (($check_ld(source) == "file") \
                          && (![regexp_diff "tmpdir/ld.messages" "$srcdir/$subdir/$check_ld(file)"]))) } {
                 # We have the expected output from ld.
-		if { $check_ld(terminal) || $program == "" } {
+		if { $check_ld(terminal) || $dumpprogram == "" } {
 		    pass $testname
 		    return
 		}
@@ -1076,7 +1077,7 @@ proc run_dump_test { name {extra_options {}} } {
                 pass "$testname (map file check)"
             }
 
-            if { $program == "" } then {
+            if { $dumpprogram == "" } then {
                 return
             }
         }
@@ -1090,9 +1091,9 @@ proc run_dump_test { name {extra_options {}} } {
 	return
     }
 
-    set progopts1 $opts($program)
-    eval set progopts \$[string toupper $program]FLAGS
-    eval set binary \$[string toupper $program]
+    set progopts1 $opts($dumpprogram)
+    eval set progopts \$[string toupper $dumpprogram]FLAGS
+    eval set binary \$[string toupper $dumpprogram]
 
     if { ![is_remote host] && [which $binary] == 0 } {
 	untested $testname
