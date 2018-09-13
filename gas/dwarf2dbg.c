@@ -251,6 +251,7 @@ generic_dwarf2_emit_offset (symbolS *symbol, unsigned int size)
 {
   expressionS exp;
 
+  memset (&exp, 0, sizeof exp);
   exp.X_op = O_symbol;
   exp.X_add_symbol = symbol;
   exp.X_add_number = 0;
@@ -379,6 +380,7 @@ set_or_check_view (struct line_entry *e, struct line_entry *p,
 	  if (view_assert_failed)
 	    {
 	      expressionS chk;
+
 	      memset (&chk, 0, sizeof (chk));
 	      chk.X_unsigned = 1;
 	      chk.X_op = O_add;
@@ -1108,6 +1110,7 @@ out_set_addr (symbolS *sym)
 {
   expressionS exp;
 
+  memset (&exp, 0, sizeof exp);
   out_opcode (DW_LNS_extended_op);
   out_uleb128 (sizeof_address + 1);
 
@@ -1373,6 +1376,7 @@ emit_fixed_inc_line_addr (int line_delta, addressT addr_delta, fragS *frag,
       symbolS *to_sym;
       expressionS exp;
 
+      memset (&exp, 0, sizeof exp);
       gas_assert (pexp->X_op == O_subtract);
       to_sym = pexp->X_add_symbol;
 
@@ -1413,6 +1417,7 @@ relax_inc_line_addr (int line_delta, symbolS *to_sym, symbolS *from_sym)
   expressionS exp;
   int max_chars;
 
+  memset (&exp, 0, sizeof exp);
   exp.X_op = O_subtract;
   exp.X_add_symbol = to_sym;
   exp.X_op_symbol = from_sym;
@@ -1780,6 +1785,7 @@ out_debug_line (segT line_seg)
   struct line_seg *s;
   int sizeof_offset;
 
+  memset (&exp, 0, sizeof exp);
   sizeof_offset = out_header (line_seg, &exp);
   line_end = exp.X_add_symbol;
 
@@ -1850,6 +1856,7 @@ out_debug_ranges (segT ranges_seg)
   expressionS exp;
   unsigned int i;
 
+  memset (&exp, 0, sizeof exp);
   subseg_set (ranges_seg, 0);
 
   /* Base Address Entry.  */
@@ -1903,6 +1910,7 @@ out_debug_aranges (segT aranges_seg, segT info_seg)
   char *p;
   int sizeof_offset;
 
+  memset (&exp, 0, sizeof exp);
   sizeof_offset = out_header (aranges_seg, &exp);
   aranges_end = exp.X_add_symbol;
   size = -exp.X_add_number;
@@ -2012,6 +2020,7 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT ranges_seg,
   symbolS *info_end;
   int sizeof_offset;
 
+  memset (&exp, 0, sizeof exp);
   sizeof_offset = out_header (info_seg, &exp);
   info_end = exp.X_add_symbol;
 

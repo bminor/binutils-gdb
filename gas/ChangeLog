@@ -1,3 +1,16 @@
+2018-09-13  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf2dbg.c (generic_dwarf2_emit_offset): Use memset to
+	initialise expression structure.
+	(set_or_check_view): Likewise.
+	(out_set_addr): Likewise.
+	(emit_fixed_inc_line_addr): Likewise.
+	(relax_inc_line_addr): Likewise.
+	(out_debug_line): Likewise.
+	(out_debug_ranges): Likewise.
+	(out_debug_aranges): Likewise.
+	(out_debug_info): Likewise.
+
 2018-09-06  Alan Modra  <amodra@gmail.com>
 
 	PR 23570
