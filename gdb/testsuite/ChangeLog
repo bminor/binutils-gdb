@@ -1,3 +1,8 @@
+2018-09-13  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (TAGS): Recognize proc_with_prefix and
+	gdb_caching_proc.
+
 2018-09-13  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.python/py-progspace.exp: Test the Progspace.objfiles
