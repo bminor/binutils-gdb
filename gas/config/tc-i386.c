@@ -2053,23 +2053,26 @@ mismatch:
     }
 
   /* Check reverse.  */
-  gas_assert (i.operands == 2);
+  gas_assert (i.operands >= 2 && i.operands <= 3);
 
-  for (j = 0; j < 2; j++)
+  for (j = 0; j < i.operands; j++)
     {
+      unsigned int given = i.operands - j - 1;
+
       if (t->operand_types[j].bitfield.reg
-	  && !match_operand_size (t, j, !j))
+	  && !match_operand_size (t, j, given))
 	goto mismatch;
 
       if (t->operand_types[j].bitfield.regsimd
-	  && !match_simd_size (t, j, !j))
+	  && !match_simd_size (t, j, given))
 	goto mismatch;
 
       if (t->operand_types[j].bitfield.acc
-	  && (!match_operand_size (t, j, !j) || !match_simd_size (t, j, !j)))
+	  && (!match_operand_size (t, j, given)
+	      || !match_simd_size (t, j, given)))
 	goto mismatch;
 
-      if ((i.flags[!j] & Operand_Mem) && !match_mem_size (t, j, !j))
+      if ((i.flags[given] & Operand_Mem) && !match_mem_size (t, j, given))
 	goto mismatch;
     }
 
@@ -5711,6 +5714,9 @@ match_template (char mnem_suffix)
 	      && i.types[0].bitfield.acc
 	      && operand_type_check (i.types[1], anymem))
 	    continue;
+	  /* Fall through.  */
+
+	case 3:
 	  if (!(size_match & MATCH_STRAIGHT))
 	    goto check_reverse;
 	  /* Reverse direction of operands if swapping is possible in the first
@@ -5719,7 +5725,7 @@ match_template (char mnem_suffix)
 	     - the store form is requested, and the template is a load form,
 	     - the non-default (swapped) form is requested.  */
 	  overlap1 = operand_type_and (operand_types[0], operand_types[1]);
-	  if (t->opcode_modifier.d && i.reg_operands == 2
+	  if (t->opcode_modifier.d && i.reg_operands == i.operands
 	      && !operand_type_all_zero (&overlap1))
 	    switch (i.dir_encoding)
 	      {
@@ -5741,9 +5747,6 @@ match_template (char mnem_suffix)
 	      case dir_encoding_default:
 		break;
 	      }
-	  /* Fall through.  */
-
-	case 3:
 	  /* If we want store form, we skip the current load.  */
 	  if ((i.dir_encoding == dir_encoding_store
 	       || i.dir_encoding == dir_encoding_swap)
@@ -5770,14 +5773,14 @@ check_reverse:
 	      if (!(size_match & MATCH_REVERSE))
 		continue;
 	      /* Try reversing direction of operands.  */
-	      overlap0 = operand_type_and (i.types[0], operand_types[1]);
-	      overlap1 = operand_type_and (i.types[1], operand_types[0]);
+	      overlap0 = operand_type_and (i.types[0], operand_types[i.operands - 1]);
+	      overlap1 = operand_type_and (i.types[i.operands - 1], operand_types[0]);
 	      if (!operand_type_match (overlap0, i.types[0])
-		  || !operand_type_match (overlap1, i.types[1])
+		  || !operand_type_match (overlap1, i.types[i.operands - 1])
 		  || (check_register
 		      && !operand_type_register_match (i.types[0],
-						       operand_types[1],
-						       i.types[1],
+						       operand_types[i.operands - 1],
+						       i.types[i.operands - 1],
 						       operand_types[0])))
 		{
 		  /* Does not match either direction.  */
@@ -5790,9 +5793,9 @@ check_reverse:
 	      else if (operand_types[0].bitfield.tbyte)
 		found_reverse_match = Opcode_FloatD;
 	      else if (operand_types[0].bitfield.xmmword
-		       || operand_types[1].bitfield.xmmword
+		       || operand_types[i.operands - 1].bitfield.xmmword
 		       || operand_types[0].bitfield.regmmx
-		       || operand_types[1].bitfield.regmmx
+		       || operand_types[i.operands - 1].bitfield.regmmx
 		       || is_any_vex_encoding(t))
 		found_reverse_match = (t->base_opcode & 0xee) != 0x6e
 				      ? Opcode_SIMD_FloatD : Opcode_SIMD_IntD;
@@ -5990,8 +5993,8 @@ check_reverse:
 
       i.tm.base_opcode ^= found_reverse_match;
 
-      i.tm.operand_types[0] = operand_types[1];
-      i.tm.operand_types[1] = operand_types[0];
+      i.tm.operand_types[0] = operand_types[i.operands - 1];
+      i.tm.operand_types[i.operands - 1] = operand_types[0];
     }
 
   return t;
