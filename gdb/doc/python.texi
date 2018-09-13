@@ -4079,6 +4079,14 @@ Hello.
 [Inferior 1 (process 4242) exited normally]
 @end smallexample
 
+A @code{gdb.Progspace} object has the following methods:
+
+@findex Progspace.objfiles
+@defun Progspace.objfiles ()
+Return a sequence of all the objfiles referenced by this program
+space.  @xref{Objfiles In Python}.
+@end defun
+
 @node Objfiles In Python
 @subsubsection Objfiles In Python
 
@@ -4105,7 +4113,9 @@ this function returns @code{None}.
 @findex gdb.objfiles
 @defun gdb.objfiles ()
 Return a sequence of all the objfiles current known to @value{GDBN}.
-@xref{Objfiles In Python}.
+@xref{Objfiles In Python}.  This is identical to
+@code{gdb.selected_inferior().progspace.objfiles()} (@pxref{Progspaces In
+Python}) and is included for historical compatibility.
 @end defun
 
 @findex gdb.lookup_objfile

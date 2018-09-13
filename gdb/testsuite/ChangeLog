@@ -1,5 +1,10 @@
 2018-09-13  Simon Marchi  <simon.marchi@ericsson.com>
 
+	* gdb.python/py-progspace.exp: Test the Progspace.objfiles
+	method.
+
+2018-09-13  Simon Marchi  <simon.marchi@ericsson.com>
+
 	* gdb.python/py-inferior.exp: Add tests for Inferior.progspace
 	and a few other Inferior properties when the Inferior is no
 	longer valid.

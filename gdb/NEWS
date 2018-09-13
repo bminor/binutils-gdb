@@ -89,6 +89,9 @@ CSKY GNU/LINUX			csky*-*-linux
   ** The gdb.Inferior type has a new 'progspace' property, which is the program
      space associated to that inferior.
 
+  ** The gdb.Progspace type has a new 'objfiles' method, which returns the list
+     of objfiles associated to that program space.
+
 *** Changes in GDB 8.2
 
 * The 'set disassembler-options' command now supports specifying options

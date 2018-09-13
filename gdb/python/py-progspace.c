@@ -58,7 +58,16 @@ extern PyTypeObject pspace_object_type
 
 static const struct program_space_data *pspy_pspace_data_key;
 
-
+/* Require that PSPACE_OBJ be a valid program space ID.  */
+#define PSPY_REQUIRE_VALID(pspace_obj)				\
+  do {								\
+    if (pspace_obj->pspace == nullptr)				\
+      {								\
+	PyErr_SetString (PyExc_RuntimeError,			\
+			 _("Program space no longer exists."));	\
+	return NULL;						\
+      }								\
+  } while (0)
 
 /* An Objfile method which returns the objfile's file name, or None.  */
 
@@ -314,7 +323,17 @@ pspy_set_type_printers (PyObject *o, PyObject *value, void *ignore)
   return 0;
 }
 
-
+/* Implement the objfiles method.  */
+
+static PyObject *
+pspy_get_objfiles (PyObject *self_, PyObject *args)
+{
+  pspace_object *self = (pspace_object *) self_;
+
+  PSPY_REQUIRE_VALID (self);
+
+  return build_objfiles_list (self->pspace).release ();
+}
 
 /* Clear the PSPACE pointer in a Pspace object and remove the reference.  */
 
@@ -397,6 +416,13 @@ static gdb_PyGetSetDef pspace_getset[] =
   { NULL }
 };
 
+static PyMethodDef progspace_object_methods[] =
+{
+  { "objfiles", pspy_get_objfiles, METH_NOARGS,
+    "Return a sequence of objfiles associated to this program space." },
+  { NULL }
+};
+
 PyTypeObject pspace_object_type =
 {
   PyVarObject_HEAD_INIT (NULL, 0)
@@ -426,7 +452,7 @@ PyTypeObject pspace_object_type =
   0,				  /* tp_weaklistoffset */
   0,				  /* tp_iter */
   0,				  /* tp_iternext */
-  0,				  /* tp_methods */
+  progspace_object_methods,	  /* tp_methods */
   0,				  /* tp_members */
   pspace_getset,		  /* tp_getset */
   0,				  /* tp_base */

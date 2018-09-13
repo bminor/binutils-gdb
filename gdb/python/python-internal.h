@@ -549,6 +549,10 @@ struct symtab_and_line *sal_object_to_symtab_and_line (PyObject *obj);
 struct frame_info *frame_object_to_frame_info (PyObject *frame_obj);
 struct gdbarch *arch_object_to_gdbarch (PyObject *obj);
 
+/* Return a Python list containing an Objfile object for each objfile in
+   PSPACE.  */
+gdbpy_ref<> build_objfiles_list (program_space *pspace);
+
 void gdbpy_initialize_gdb_readline (void);
 int gdbpy_initialize_auto_load (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;

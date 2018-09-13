@@ -1,4 +1,17 @@
 2018-09-13  Simon Marchi  <simon.marchi@ericsson.com>
+2018-09-13  Tom Tromey  <tom@tromey.com>
+
+	* python/py-progspace.c (PSPY_REQUIRE_VALID): New macro.
+	(pspy_get_objfiles): New function.
+	(progspace_object_methods): New.
+	(pspace_object_type): Add tp_methods callback.
+	* python/python-internal.h (build_objfiles_list): New
+	declaration.
+	* python/python.c (build_objfiles_list): New function.
+	(gdbpy_objfiles): Implement using build_objfiles_list.
+	* NEWS: Mention the Progspace.objfiles method.
+
+2018-09-13  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* python/py-inferior.c (infpy_get_progspace): New function.
 	(inferior_object_getset): Add progspace property.

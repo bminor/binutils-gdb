@@ -1437,10 +1437,10 @@ gdbpy_get_current_objfile (PyObject *unused1, PyObject *unused2)
   return result;
 }
 
-/* Return a sequence holding all the Objfiles.  */
+/* See python-internal.h.  */
 
-static PyObject *
-gdbpy_objfiles (PyObject *unused1, PyObject *unused2)
+gdbpy_ref<>
+build_objfiles_list (program_space *pspace)
 {
   struct objfile *objf;
 
@@ -1448,15 +1448,23 @@ gdbpy_objfiles (PyObject *unused1, PyObject *unused2)
   if (list == NULL)
     return NULL;
 
-  ALL_OBJFILES (objf)
-  {
-    PyObject *item = objfile_to_objfile_object (objf);
+  ALL_PSPACE_OBJFILES (pspace, objf)
+    {
+      PyObject *item = objfile_to_objfile_object (objf);
 
-    if (!item || PyList_Append (list.get (), item) == -1)
-      return NULL;
-  }
+      if (item == nullptr || PyList_Append (list.get (), item) == -1)
+	return NULL;
+    }
 
-  return list.release ();
+  return list;
+}
+
+/* Return a sequence holding all the Objfiles.  */
+
+static PyObject *
+gdbpy_objfiles (PyObject *unused1, PyObject *unused2)
+{
+  return build_objfiles_list (current_program_space).release ();
 }
 
 /* Compute the list of active python type printers and store them in

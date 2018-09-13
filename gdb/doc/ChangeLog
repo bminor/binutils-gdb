@@ -1,6 +1,14 @@
 2018-09-13  Simon Marchi  <simon.marchi@ericsson.com>
 2018-09-13  Tom Tromey  <tom@tromey.com>
 
+	* python.texi (Program Spaces In Python): Document the
+	Progspace.objfiles method.
+	(Objfiles In Python): Mention that gdb.objfiles() is identical
+	to gdb.selected_inferior().progspace.objfiles().
+
+2018-09-13  Simon Marchi  <simon.marchi@ericsson.com>
+2018-09-13  Tom Tromey  <tom@tromey.com>
+
 	* python.texi (Inferiors In Python): Document
 	Inferior.progspace.
 	(Program Spaces In Python): Document that
