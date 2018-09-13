@@ -284,15 +284,7 @@ PyObject *
 gdbpy_selected_thread (PyObject *self, PyObject *args)
 {
   if (inferior_ptid != null_ptid)
-    {
-      PyObject *thread_obj
-	= (PyObject *) thread_to_thread_object (inferior_thread ());
-      if (thread_obj != NULL)
-	{
-	  Py_INCREF (thread_obj);
-	  return thread_obj;
-	}
-    }
+    return thread_to_thread_object (inferior_thread ()).release ();
 
   Py_RETURN_NONE;
 }

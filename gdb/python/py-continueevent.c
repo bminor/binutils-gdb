@@ -32,12 +32,13 @@
 static gdbpy_ref<>
 create_continue_event_object (ptid_t ptid)
 {
-  PyObject *py_thr = py_get_event_thread (ptid);
+  gdbpy_ref<> py_thr = py_get_event_thread (ptid);
 
   if (py_thr == nullptr)
     return nullptr;
 
-  return create_thread_event_object (&continue_event_object_type, py_thr);
+  return create_thread_event_object (&continue_event_object_type,
+				     py_thr.get ());
 }
 
 /* Callback function which notifies observers when a continue event occurs.

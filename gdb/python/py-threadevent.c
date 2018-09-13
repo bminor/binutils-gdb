@@ -22,19 +22,19 @@
 
 /* See py-event.h.  */
 
-PyObject *
+gdbpy_ref<>
 py_get_event_thread (ptid_t ptid)
 {
-  PyObject *pythread = nullptr;
+  gdbpy_ref<> pythread;
 
   if (non_stop)
     {
       thread_info *thread = find_thread_ptid (ptid);
       if (thread != nullptr)
-	pythread = (PyObject *) thread_to_thread_object (thread);
+	pythread = thread_to_thread_object (thread);
     }
   else
-    pythread = Py_None;
+    pythread = gdbpy_ref<>::new_reference (Py_None);
 
   if (pythread == nullptr)
     {

@@ -1,5 +1,21 @@
 2018-09-16  Tom Tromey  <tom@tromey.com>
 
+	* python/python-internal.h (thread_to_thread_object): Change
+	return type.
+	* python/py-inferior.c (thread_to_thread_object): Return a new
+	reference.
+	(infpy_thread_from_thread_handle): Update.
+	* python/py-infthread.c (gdbpy_selected_thread): Update.
+	* python/py-stopevent.c (create_stop_event_object): Update.
+	* python/py-threadevent.c (py_get_event_thread): Return a new
+	reference.
+	(py_get_event_thread): Update.
+	* python/py-event.h (py_get_event_thread): Change return type.
+	* python/py-continueevent.c (create_continue_event_object):
+	Update.
+
+2018-09-16  Tom Tromey  <tom@tromey.com>
+
 	* python/py-progspace.c (pspy_get_objfiles): Update.
 	* python/python-internal.h (objfile_to_objfile_object): Change
 	return type.

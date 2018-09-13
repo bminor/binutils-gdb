@@ -68,9 +68,8 @@ extern gdbpy_ref<> create_event_object (PyTypeObject *py_type);
    running in non-stop mode then the event is thread specific, otherwise
    it is process wide.
    This function returns the currently stopped thread in non-stop mode and
-   Py_None otherwise.  In each case it returns a borrowed reference.  */
-extern PyObject *py_get_event_thread (ptid_t ptid)
-  CPYCHECKER_RETURNS_BORROWED_REF;
+   Py_None otherwise.  */
+extern gdbpy_ref<> py_get_event_thread (ptid_t ptid);
 
 extern gdbpy_ref<> create_thread_event_object (PyTypeObject *py_type,
 					       PyObject *thread);

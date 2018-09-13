@@ -306,7 +306,7 @@ find_inferior_object (int pid)
   return NULL;
 }
 
-thread_object *
+gdbpy_ref<>
 thread_to_thread_object (thread_info *thr)
 {
   gdbpy_ref<inferior_object> inf_obj (inferior_to_inferior_object (thr->inf));
@@ -317,7 +317,7 @@ thread_to_thread_object (thread_info *thr)
        thread != NULL;
        thread = thread->next)
     if (thread->thread_obj->thread == thr)
-      return thread->thread_obj;
+      return gdbpy_ref<>::new_reference ((PyObject *) thread->thread_obj);
 
   return NULL;
 }
@@ -832,7 +832,7 @@ infpy_is_valid (PyObject *self, PyObject *args)
 static PyObject *
 infpy_thread_from_thread_handle (PyObject *self, PyObject *args, PyObject *kw)
 {
-  PyObject *handle_obj, *result;
+  PyObject *handle_obj;
   inferior_object *inf_obj = (inferior_object *) self;
   static const char *keywords[] = { "thread_handle", NULL };
 
@@ -841,8 +841,6 @@ infpy_thread_from_thread_handle (PyObject *self, PyObject *args, PyObject *kw)
   if (! gdb_PyArg_ParseTupleAndKeywords (args, kw, "O", keywords, &handle_obj))
     return NULL;
 
-  result = Py_None;
-
   if (!gdbpy_is_value_object (handle_obj))
     {
       PyErr_SetString (PyExc_TypeError,
@@ -850,29 +848,27 @@ infpy_thread_from_thread_handle (PyObject *self, PyObject *args, PyObject *kw)
 
       return NULL;
     }
-  else
+
+  gdbpy_ref<> result;
+  TRY
     {
-      TRY
-	{
-	  struct thread_info *thread_info;
-	  struct value *val = value_object_to_value (handle_obj);
+      struct thread_info *thread_info;
+      struct value *val = value_object_to_value (handle_obj);
 
-	  thread_info = find_thread_by_handle (val, inf_obj->inferior);
-	  if (thread_info != NULL)
-	    {
-	      result = (PyObject *) thread_to_thread_object (thread_info);
-	      if (result != NULL)
-		Py_INCREF (result);
-	    }
-	}
-      CATCH (except, RETURN_MASK_ALL)
-	{
-	  GDB_PY_HANDLE_EXCEPTION (except);
-	}
-      END_CATCH
+      thread_info = find_thread_by_handle (val, inf_obj->inferior);
+      if (thread_info != NULL)
+	result = thread_to_thread_object (thread_info);
     }
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+  END_CATCH
 
-  return result;
+  if (result == NULL)
+    result = gdbpy_ref<>::new_reference (Py_None);
+
+  return result.release ();
 }
 
 /* Implement repr() for gdb.Inferior.  */
