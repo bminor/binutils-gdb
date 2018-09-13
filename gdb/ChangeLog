@@ -1,3 +1,10 @@
+2018-09-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python/py-inferior.c (infpy_repr): New.
+	(inferior_object_type): Register infpy_repr.
+	* python/py-objfile.c (objfpy_repr): New.
+	(objfile_object_type): Register objfpy_repr.
+
 2018-09-12  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-nat.c (fbsd_nat_target::info_proc): Remove unused variable.

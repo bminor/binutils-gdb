@@ -860,6 +860,21 @@ infpy_thread_from_thread_handle (PyObject *self, PyObject *args, PyObject *kw)
   return result;
 }
 
+/* Implement repr() for gdb.Inferior.  */
+
+static PyObject *
+infpy_repr (PyObject *obj)
+{
+  inferior_object *self = (inferior_object *) obj;
+  inferior *inf = self->inferior;
+
+  if (inf == nullptr)
+    return PyString_FromString ("<gdb.Inferior (invalid)>");
+
+  return PyString_FromFormat ("<gdb.Inferior num=%d, pid=%d>",
+			      inf->num, inf->pid);
+}
+
 
 static void
 infpy_dealloc (PyObject *obj)
@@ -991,7 +1006,7 @@ PyTypeObject inferior_object_type =
   0,				  /* tp_getattr */
   0,				  /* tp_setattr */
   0,				  /* tp_compare */
-  0,				  /* tp_repr */
+  infpy_repr,			  /* tp_repr */
   0,				  /* tp_as_number */
   0,				  /* tp_as_sequence */
   0,				  /* tp_as_mapping */

@@ -207,6 +207,10 @@ methods and classes added by @value{GDBN} are placed in this module.
 @value{GDBN} automatically @code{import}s the @code{gdb} module for
 use in all scripts evaluated by the @code{python} command.
 
+Some types of the @code{gdb} module come with a textual representation
+(accessible through the @code{repr} or @code{str} functions).  These are
+offered for debugging purposes only, expect them to change over time.
+
 @findex gdb.PYTHONDIR
 @defvar gdb.PYTHONDIR
 A string containing the python directory (@pxref{Python}).

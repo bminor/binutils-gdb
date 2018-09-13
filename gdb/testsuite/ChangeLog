@@ -1,3 +1,9 @@
+2018-09-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.python/py-inferior.exp: Test repr() of gdb.Inferior.
+	* gdb.python/py-objfile.exp: Test repr() of gdb.Objfile.
+	* gdb.python/py-symtab.exp: Update test printing an objfile.
+
 2018-09-12  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.python/py-inferior.exp: Test using an invalid gdb.Inferior

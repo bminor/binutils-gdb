@@ -1,3 +1,8 @@
+2018-09-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* python.texi (Basic Python): Mention the string representation
+	of GDB Python objects.
+
 2018-09-12  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.texinfo (Skipping Over Functions and Files): Document

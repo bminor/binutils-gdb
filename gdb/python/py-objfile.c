@@ -456,6 +456,21 @@ objfpy_add_separate_debug_file (PyObject *self, PyObject *args, PyObject *kw)
   Py_RETURN_NONE;
 }
 
+/* Implement repr() for gdb.Objfile.  */
+
+static PyObject *
+objfpy_repr (PyObject *self_)
+{
+  objfile_object *self = (objfile_object *) self_;
+  objfile *obj = self->objfile;
+
+  if (obj == nullptr)
+    return PyString_FromString ("<gdb.Objfile (invalid)>");
+
+  return PyString_FromFormat ("<gdb.Objfile filename=%s>",
+			      objfile_filename (obj));
+}
+
 /* Subroutine of gdbpy_lookup_objfile_by_build_id to simplify it.
    Return non-zero if STRING is a potentially valid build id.  */
 
@@ -709,7 +724,7 @@ PyTypeObject objfile_object_type =
   0,				  /*tp_getattr*/
   0,				  /*tp_setattr*/
   0,				  /*tp_compare*/
-  0,				  /*tp_repr*/
+  objfpy_repr,			  /*tp_repr*/
   0,				  /*tp_as_number*/
   0,				  /*tp_as_sequence*/
   0,				  /*tp_as_mapping*/
