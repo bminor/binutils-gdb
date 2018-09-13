@@ -1,5 +1,10 @@
 2018-09-13  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl: Drop IgnoreSize from SSE2 insns where meaningless.
+	* i386-tbl.h: Re-generate.
+
+2018-09-13  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl: Drop IgnoreSize from SSE insns where meaningless.
 	* i386-tbl.h: Re-generate.
 
