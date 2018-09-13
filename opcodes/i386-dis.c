@@ -273,6 +273,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Mo { OP_M, o_mode }
 #define Mp { OP_M, f_mode }		/* 32 or 48 bit memory operand for LDS, LES etc */
 #define Mq { OP_M, q_mode }
+#define Mv_bnd { OP_M, v_bndmk_mode }
 #define Mx { OP_M, x_mode }
 #define Mxmm { OP_M, xmm_mode }
 #define Gb { OP_G, b_mode }
@@ -561,6 +562,8 @@ enum
   cond_jump_mode,
   loop_jcxz_mode,
   v_bnd_mode,
+  /* like v_bnd_mode in 32bit, no RIP-rel in 64bit mode.  */
+  v_bndmk_mode,
   /* operand size depends on REX prefixes.  */
   dq_mode,
   /* registers like dq_mode, memory like w_mode.  */
@@ -11646,17 +11649,17 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0F1A_PREFIX_0 */
-    { "bndldx",		{ Gbnd, Ev_bnd }, 0 },
+    { "bndldx",		{ Gbnd, Mv_bnd }, 0 },
     { "nopQ",		{ Ev }, 0 },
   },
   {
     /* MOD_0F1B_PREFIX_0 */
-    { "bndstx",		{ Ev_bnd, Gbnd }, 0 },
+    { "bndstx",		{ Mv_bnd, Gbnd }, 0 },
     { "nopQ",		{ Ev }, 0 },
   },
   {
     /* MOD_0F1B_PREFIX_1 */
-    { "bndmk",		{ Gbnd, Ev_bnd }, 0 },
+    { "bndmk",		{ Gbnd, Mv_bnd }, 0 },
     { "nopQ",		{ Ev }, 0 },
   },
   {
@@ -15083,6 +15086,7 @@ intel_operand_size (int bytemode, int sizeflag)
 	oappend ("WORD PTR ");
       break;
     case v_bnd_mode:
+    case v_bndmk_mode:
     default:
       break;
     }
@@ -15343,6 +15347,7 @@ OP_E_memory (int bytemode, int sizeflag)
       int scale = 0;
       int addr32flag = !((sizeflag & AFLAG)
 			 || bytemode == v_bnd_mode
+			 || bytemode == v_bndmk_mode
 			 || bytemode == bnd_mode
 			 || bytemode == bnd_swap_mode);
       const char **indexes64 = names64;
@@ -15419,6 +15424,11 @@ OP_E_memory (int bytemode, int sizeflag)
 	      if (address_mode == mode_64bit && !havesib)
 		riprel = 1;
 	      disp = get32s ();
+	      if (riprel && bytemode == v_bndmk_mode)
+		{
+		  oappend ("(bad)");
+		  return;
+		}
 	    }
 	  break;
 	case 1:
@@ -15476,6 +15486,7 @@ OP_E_memory (int bytemode, int sizeflag)
 
       if ((havebase || haveindex || needaddr32 || riprel)
 	  && (bytemode != v_bnd_mode)
+	  && (bytemode != v_bndmk_mode)
 	  && (bytemode != bnd_mode)
 	  && (bytemode != bnd_swap_mode))
 	used_prefixes |= PREFIX_ADDR;

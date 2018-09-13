@@ -186,4 +186,5 @@ Disassembly of section .text:
 [a-f0-9]+ <bad>:
 [ 	]*[a-f0-9]+:	0f 1a 30             	bndldx \(%rax\),\(bad\)
 [ 	]*[a-f0-9]+:	66 0f 1a c4          	bndmov \(bad\),%bnd0
+[ 	]*[a-f0-9]+:	f3 0f 1b 05 90 90 90 90 	bndmk  \(bad\),%bnd0
 #pass

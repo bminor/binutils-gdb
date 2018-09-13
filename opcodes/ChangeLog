@@ -1,3 +1,10 @@
+2018-09-13  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (Mv_bnd, v_bndmk_mode): New.
+	(mod_table): Use Mv_bnd for bndldx, bndstx, and bndmk.
+	(intel_operand_size): Handle v_bndmk_mode.
+	(OP_E_memory): Likewise. Produce (bad) when also riprel.
+
 2018-09-08  John Darrington  <john@darrington.wattle.id.au>
 
 	* disassemble.c (ARCH_s12z): Define if ARCH_all.
