@@ -1,5 +1,13 @@
 2018-09-13  Jan Beulich  <jbeulich@suse.com>
 
+	testsuite/gas/i386/ilp32/x86-64-opts.d,
+	testsuite/gas/i386/ilp32/x86-64-opts-intel.d,
+	testsuite/gas/i386/ilp32/x86-64-sse2avx-opts.d,
+	testsuite/gas/i386/ilp32/x86-64-sse2avx-opts-intel.d: Refer to
+	non-ILP32 output.
+
+2018-09-13  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (dir_encoding_swap): New enumerator.
 	(parse_insn): Use it.
 	(match_template): Re-write reversal check.
