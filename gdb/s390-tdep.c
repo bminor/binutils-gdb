@@ -6932,7 +6932,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   struct gdbarch_tdep *tdep = s390_gdbarch_tdep_alloc ();
   struct gdbarch *gdbarch = gdbarch_alloc (&info, tdep);
   struct tdesc_arch_data *tdesc_data = tdesc_data_alloc ();
-  info.tdesc_data = tdesc_data;
+  info.target_info.tdesc_data = tdesc_data;
 
   set_gdbarch_believe_pcc_promotion (gdbarch, 0);
   set_gdbarch_char_signed (gdbarch, 0);

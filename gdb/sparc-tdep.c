@@ -1925,7 +1925,7 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
         }
 
       /* Target description may have changed. */
-      info.tdesc_data = tdesc_data;
+      info.target_info.tdesc_data = tdesc_data;
       tdesc_use_registers (gdbarch, tdesc, tdesc_data);
     }
 

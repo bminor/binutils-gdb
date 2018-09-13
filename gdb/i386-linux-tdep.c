@@ -825,7 +825,7 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   const struct target_desc *tdesc = info.target_desc;
-  struct tdesc_arch_data *tdesc_data = info.tdesc_data;
+  struct tdesc_arch_data *tdesc_data = info.target_info.tdesc_data;
   const struct tdesc_feature *feature;
   int valid_p;
 

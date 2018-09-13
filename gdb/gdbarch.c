@@ -5402,8 +5402,8 @@ gdbarch_find_by_info (struct gdbarch_info info)
 			  "gdbarch_find_by_info: info.abfd %s\n",
 			  host_address_to_string (info.abfd));
       fprintf_unfiltered (gdb_stdlog,
-			  "gdbarch_find_by_info: info.tdep_info %s\n",
-			  host_address_to_string (info.tdep_info));
+			  "gdbarch_find_by_info: info.target_info.tdep_info %s\n",
+			  host_address_to_string (info.target_info.tdep_info));
     }
 
   /* Find the tdep code that knows about this architecture.  */

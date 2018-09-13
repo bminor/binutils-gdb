@@ -1327,6 +1327,24 @@ typedef int (iterate_over_objfiles_in_search_order_cb_ftype)
 typedef void (iterate_over_regset_sections_cb)
   (const char *sect_name, int supply_size, int collect_size,
    const struct regset *regset, const char *human_name, void *cb_data);
+
+/* Different targets need different indentification data for gdbarch_info.  */
+union gdbarch_target_info
+{
+  /* Architecture-specific information.  The generic form for targets
+     that have extra requirements.  */
+  struct gdbarch_tdep_info *tdep_info;
+
+  /* Architecture-specific target description data.  Numerous targets
+     need only this, so give them an easy way to hold it.  */
+  struct tdesc_arch_data *tdesc_data;
+
+  /* SPU file system ID.  This is a single integer, so using the
+     generic form would only complicate code.  Other targets may
+     reuse this member if suitable.  */
+  int *id;
+};
+
 EOF
 
 # function typedef's
@@ -1476,21 +1494,7 @@ struct gdbarch_info
   bfd *abfd;
 
   /* Use default: NULL (ZERO).  */
-  union
-    {
-      /* Architecture-specific information.  The generic form for targets
-	 that have extra requirements.  */
-      struct gdbarch_tdep_info *tdep_info;
-
-      /* Architecture-specific target description data.  Numerous targets
-	 need only this, so give them an easy way to hold it.  */
-      struct tdesc_arch_data *tdesc_data;
-
-      /* SPU file system ID.  This is a single integer, so using the
-	 generic form would only complicate code.  Other targets may
-	 reuse this member if suitable.  */
-      int *id;
-    };
+  union gdbarch_target_info target_info;
 
   /* Use default: GDB_OSABI_UNINITIALIZED (-1).  */
   enum gdb_osabi osabi;
@@ -2420,8 +2424,8 @@ gdbarch_find_by_info (struct gdbarch_info info)
 			  "gdbarch_find_by_info: info.abfd %s\n",
 			  host_address_to_string (info.abfd));
       fprintf_unfiltered (gdb_stdlog,
-			  "gdbarch_find_by_info: info.tdep_info %s\n",
-			  host_address_to_string (info.tdep_info));
+			  "gdbarch_find_by_info: info.target_info.tdep_info %s\n",
+			  host_address_to_string (info.target_info.tdep_info));
     }
 
   /* Find the tdep code that knows about this architecture.  */

@@ -143,7 +143,7 @@ spu_gdbarch (int spufs_fd)
   info.bfd_arch_info = bfd_lookup_arch (bfd_arch_spu, bfd_mach_spu);
   info.byte_order = BFD_ENDIAN_BIG;
   info.osabi = GDB_OSABI_LINUX;
-  info.id = &spufs_fd;
+  info.target_info.id = &spufs_fd;
   return gdbarch_find_by_info (info);
 }
 
