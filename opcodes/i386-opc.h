@@ -499,9 +499,11 @@ enum
      0: Set by the REX.W bit.
      1: VEX.W0.  Should always be 0.
      2: VEX.W1.  Should always be 1.
+     3: VEX.WIG. The VEX.W bit is ignored.
    */
 #define VEXW0	1
 #define VEXW1	2
+#define VEXWIG	3
   VexW,
   /* VEX opcode prefix:
      0: VEX 0x0F opcode prefix.

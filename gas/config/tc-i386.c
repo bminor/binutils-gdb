@@ -3499,10 +3499,13 @@ build_vex_prefix (const insn_template *t)
 	 of RXB bits from REX.  */
       i.vex.bytes[1] = (~i.rex & 0x7) << 5 | m;
 
-      /* Check the REX.W bit.  */
-      w = (i.rex & REX_W) ? 1 : 0;
-      if (i.tm.opcode_modifier.vexw == VEXW1)
-	w = 1;
+      /* Check the REX.W bit and VEXW.  */
+      if (i.tm.opcode_modifier.vexw == VEXWIG)
+	w = (i.rex & REX_W) ? 1 : 0;
+      else if (i.tm.opcode_modifier.vexw)
+	w = i.tm.opcode_modifier.vexw == VEXW1 ? 1 : 0;
+      else
+	w = (i.rex & REX_W) ? 1 : 0;
 
       i.vex.bytes[2] = (w << 7
 			| register_specifier << 3
@@ -3629,19 +3632,13 @@ build_evex_prefix (void)
   i.vrex &= ~vrex_used;
   gas_assert (i.vrex == 0);
 
-  /* Check the REX.W bit.  */
-  w = (i.rex & REX_W) ? 1 : 0;
-  if (i.tm.opcode_modifier.vexw)
-    {
-      if (i.tm.opcode_modifier.vexw == VEXW1)
-	w = 1;
-    }
-  /* If w is not set it means we are dealing with WIG instruction.  */
-  else if (!w)
-    {
-      if (evexwig == evexw1)
-        w = 1;
-    }
+  /* Check the REX.W bit and VEXW.  */
+  if (i.tm.opcode_modifier.vexw == VEXWIG)
+    w = (evexwig == evexw1 || (i.rex & REX_W)) ? 1 : 0;
+  else if (i.tm.opcode_modifier.vexw)
+    w = i.tm.opcode_modifier.vexw == VEXW1 ? 1 : 0;
+  else
+    w = (i.rex & REX_W) ? 1 : 0;
 
   /* Encode the U bit.  */
   implied_prefix |= 0x4;

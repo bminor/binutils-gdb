@@ -1,5 +1,12 @@
 2018-09-14  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gas/23642
+	* i386-opc.h (VEXWIG): New.
+	* i386-opc.tbl: Set VexW=3 on VEX/EVEX WIG instructions.
+	* i386-tbl.h: Regenerated.
+
+2018-09-14  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/23655
 	* i386-dis-evex.h: Replace EXxEVexR with EXxEVexR64 for
 	vcvtsi2sd%LQ and vcvtusi2sd%LQ.
