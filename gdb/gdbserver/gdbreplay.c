@@ -448,7 +448,7 @@ gdbreplay_version (void)
 static void
 gdbreplay_usage (FILE *stream)
 {
-  fprintf (stream, "Usage:\tgdbreplay <logfile> <host:port>\n");
+  fprintf (stream, "Usage:\tgdbreplay LOGFILE HOST:PORT\n");
   if (REPORT_BUGS_TO[0] && stream == stdout)
     fprintf (stream, "Report bugs to \"%s\".\n", REPORT_BUGS_TO);
 }
