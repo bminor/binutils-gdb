@@ -15297,11 +15297,11 @@ OP_E_memory (int bytemode, int sizeflag)
 	case d_scalar_swap_mode:
 	  shift = 2;
 	  break;
-    case w_scalar_mode:
+	case w_scalar_mode:
 	case xmm_mw_mode:
 	  shift = 1;
 	  break;
-    case b_scalar_mode:
+	case b_scalar_mode:
 	case xmm_mb_mode:
 	  shift = 0;
 	  break;

@@ -1,3 +1,7 @@
+2018-09-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (OP_E_memory): Reformat.
+
 2018-09-14  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-opc.tbl (crc32): Fold byte and word forms.
