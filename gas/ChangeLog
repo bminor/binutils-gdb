@@ -1,3 +1,12 @@
+2018-09-10  Lifang Xia <lifang_xia@c-sky.com>
+
+	* config/tc-csky.c (md_apply_fix): Transmit BFD_RELOC_32_PCREL to
+	BFD_RELOC_CKCORE_PCREL32.
+	(tc_gen_reloc): Trasmit BFD_RELOC_CKCORE_ADDR32 to
+	BFD_RELOC_CKCORE_PCREL32 while pc-relative.
+	* config/tc-csky.h (DIFF_EXPR_OK): Define to enable PC relative diff
+	relocs.
+
 2018-09-14  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (process_suffix): Simplify CRC32 special

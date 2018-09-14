@@ -62,6 +62,9 @@
 #define DWARF2_DEFAULT_RETURN_COLUMN 15
 #define DWARF2_CIE_DATA_ALIGNMENT (-4)
 
+/* .-foo gets turned into PC relative relocs.  */
+#define DIFF_EXPR_OK 1
+
 typedef enum
 {
   MAP_UNDEFINED = 0,

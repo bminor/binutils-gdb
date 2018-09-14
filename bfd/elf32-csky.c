@@ -150,7 +150,7 @@ static reloc_howto_type csky_elf_howto_table[] =
 	 TRUE,                        /* pc_relative */
 	 0,                           /* bitpos */
 	 complain_overflow_dont,      /* complain_on_overflow */
-	 NULL,                        /* special_function */
+	 bfd_elf_generic_reloc,       /* special_function */
 	 "R_CKCORE_PCREL32",          /* name */
 	 FALSE,                       /* partial_inplace */
 	 0x0,                         /* src_mask */
@@ -4307,6 +4307,10 @@ csky_elf_relocate_section (bfd *                  output_bfd,
 	  if (h == NULL && (addend & 0x80000000))
 	    addend &= 0xffffffff;
 	  break;
+
+	case R_CKCORE_PCREL32:
+	  break;
+
 	case R_CKCORE_GOT12:
 	case R_CKCORE_PLT12:
 	case R_CKCORE_GOT_HI16:
@@ -5027,6 +5031,7 @@ csky_elf_relocate_section (bfd *                  output_bfd,
 
       if (howto->size == 2
 	  && (howto->type == R_CKCORE_ADDR32
+	      || howto->type == R_CKCORE_PCREL32
 	      || howto->type == R_CKCORE_GOT32
 	      || howto->type == R_CKCORE_GOTOFF
 	      || howto->type == R_CKCORE_GOTPC
