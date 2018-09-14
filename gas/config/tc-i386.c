@@ -6056,27 +6056,23 @@ process_suffix (void)
 	     Destination register type is more significant than source
 	     register type.  crc32 in SSE4.2 prefers source register
 	     type. */
-	  if (i.tm.base_opcode == 0xf20f38f1)
+	  if (i.tm.base_opcode == 0xf20f38f0 && i.types[0].bitfield.reg)
 	    {
-	      if (i.types[0].bitfield.reg && i.types[0].bitfield.word)
-		i.suffix = WORD_MNEM_SUFFIX;
-	      else if (i.types[0].bitfield.reg && i.types[0].bitfield.dword)
-		i.suffix = LONG_MNEM_SUFFIX;
-	      else if (i.types[0].bitfield.reg && i.types[0].bitfield.qword)
-		i.suffix = QWORD_MNEM_SUFFIX;
-	    }
-	  else if (i.tm.base_opcode == 0xf20f38f0)
-	    {
-	      if (i.types[0].bitfield.reg && i.types[0].bitfield.byte)
+	      if (i.types[0].bitfield.byte)
 		i.suffix = BYTE_MNEM_SUFFIX;
+	      else if (i.types[0].bitfield.word)
+		i.suffix = WORD_MNEM_SUFFIX;
+	      else if (i.types[0].bitfield.dword)
+		i.suffix = LONG_MNEM_SUFFIX;
+	      else if (i.types[0].bitfield.qword)
+		i.suffix = QWORD_MNEM_SUFFIX;
 	    }
 
 	  if (!i.suffix)
 	    {
 	      int op;
 
-	      if (i.tm.base_opcode == 0xf20f38f1
-		  || i.tm.base_opcode == 0xf20f38f0)
+	      if (i.tm.base_opcode == 0xf20f38f0)
 		{
 		  /* We have to know the operand size for crc32.  */
 		  as_bad (_("ambiguous memory operand size for `%s`"),

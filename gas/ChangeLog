@@ -1,3 +1,8 @@
+2018-09-14  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (process_suffix): Simplify CRC32 special
+	casing code.
+
 2018-09-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (build_vex_prefix): Swap destination and

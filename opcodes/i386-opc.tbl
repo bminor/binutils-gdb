@@ -1730,12 +1730,8 @@ pcmpistri, 3, 0x6663, None, 1, CpuAVX, Modrm|Vex|VexOpcode=2|VexW=1|No_bSuf|No_w
 pcmpistri, 3, 0x660f3a63, None, 3, CpuSSE4_2, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
 pcmpistrm, 3, 0x6662, None, 1, CpuAVX, Modrm|Vex|VexOpcode=2|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|SSE2AVX, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
 pcmpistrm, 3, 0x660f3a62, None, 3, CpuSSE4_2, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
-// We put non-8bit version before 8bit so that crc32 with memory operand
-// defaults to non-8bit.
-crc32, 2, 0xf20f38f1, None, 3, CpuSSE4_2, Modrm|No_bSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { Reg16|Reg32|Word|Dword|Unspecified|BaseIndex, Reg32 }
-crc32, 2, 0xf20f38f1, None, 3, CpuSSE4_2|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|NoAVX, { Reg64|Qword|Unspecified|BaseIndex, Reg64 }
-crc32, 2, 0xf20f38f0, None, 3, CpuSSE4_2, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { Reg8|Byte|Unspecified|BaseIndex, Reg32 }
-crc32, 2, 0xf20f38f0, None, 3, CpuSSE4_2|Cpu64, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64|NoAVX, { Reg8|Byte|Unspecified|BaseIndex, Reg64 }
+crc32, 2, 0xf20f38f0, None, 3, CpuSSE4_2, W|Modrm|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { Reg8|Reg16|Reg32|Unspecified|BaseIndex, Reg32 }
+crc32, 2, 0xf20f38f0, None, 3, CpuSSE4_2|Cpu64, W|Modrm|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|Rex64|NoAVX, { Reg8|Reg64|Unspecified|BaseIndex, Reg64 }
 
 // xsave/xrstor New Instructions.
 

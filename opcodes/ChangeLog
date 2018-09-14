@@ -1,3 +1,8 @@
+2018-09-14  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (crc32): Fold byte and word forms.
+	* i386-tbl.h: Re-generate.
+
 2018-09-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.tbl: Add VexW=1 to VEX.W0 VEX movd, cvtsi2ss, cvtsi2sd,
