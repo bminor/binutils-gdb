@@ -1,3 +1,8 @@
+2018-09-14  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* ldexp.c (fold_binary): Check that `config.maxpagesize' is
+	non-zero before using it as a divisor.
+
 2018-09-03  Nick Clifton  <nickc@redhat.com>
 
 	* po/fi.po: Updated Finnish translation.
