@@ -1008,19 +1008,24 @@ show_disassembler_options_sfunc (struct ui_file *file, int from_tty,
   if (options == NULL)
     options = "";
 
-  fprintf_filtered (file, _("The current disassembler options are '%s'\n"),
+  fprintf_filtered (file, _("The current disassembler options are '%s'\n\n"),
 		    options);
 
   valid_options_and_args = gdbarch_valid_disassembler_options (gdbarch);
 
   if (valid_options_and_args == NULL)
-    return;
+    {
+      fputs_filtered (_("There are no disassembler options available "
+			"for this architecture.\n"),
+		      file);
+      return;
+    }
 
   valid_options = &valid_options_and_args->options;
 
-  fprintf_filtered (file, _("\n\
+  fprintf_filtered (file, _("\
 The following disassembler options are supported for use with the\n\
-'set disassembler-options <option>[,<option>...]' command:\n"));
+'set disassembler-options OPTION [,OPTION]...' command:\n"));
 
   if (valid_options->description != NULL)
     {

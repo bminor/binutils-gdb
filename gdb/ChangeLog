@@ -1,3 +1,9 @@
+2018-09-16  Tom Tromey  <tom@tromey.com>
+
+	* disasm.c (show_disassembler_options_sfunc): Use GNU style for
+	metasyntactic variables.  Print message if no disassembler options
+	are available.
+
 2018-09-15  Tom Tromey  <tom@tromey.com>
 
 	* infcmd.c (get_inferior_args): Return const char *.
