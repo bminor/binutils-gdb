@@ -1,5 +1,35 @@
 2018-09-14  Maciej W. Rozycki  <macro@mips.com>
 
+	PR ld/21375
+	* elfxx-mips.h (_bfd_mips_elf_hide_symbol): New prototype.
+	(_bfd_mips_elf_linker_flags): Update prototype.
+	* elf32-mips.c (elf_backend_hide_symbol): New macro.
+	* elf64-mips.c (elf_backend_hide_symbol): Likewise.
+	* elfn32-mips.c (elf_backend_hide_symbol): Likewise.
+	* elfxx-mips.c (mips_elf_link_hash_table): Add
+	`use_absolute_zero' and `gnu_target' members.
+	(mips_elf_record_global_got_symbol): Call
+	`_bfd_mips_elf_hide_symbol' rather than
+	`_bfd_elf_link_hash_hide_symbol'.
+	(mips_use_local_got_p): Return FALSE if the symbol is absolute.
+	(mips_elf_obtain_contents): Reorder function.
+	(mips_elf_nullify_got_load): New function.
+	(mips_elf_calculate_relocation): Add `contents' parameter.
+	Nullify GOT loads or if it is not possible, then redirect GOT
+	relocations to the `__gnu_absolute_zero' symbol, for references
+	that are supposed to resolve to zero.
+	(mips_elf_define_absolute_zero): New function.
+	(_bfd_mips_elf_check_relocs): Prepare for arrangements made in
+	`mips_elf_calculate_relocation' for references made via the GOT
+	that are supposed to resolve to zero.
+	(_bfd_mips_elf_hide_symbol): New function.
+	(_bfd_mips_elf_linker_flags): Add the `gnu_target' parameter,
+	set the `gnu_target' member of the MIPS hash table.
+	(MIPS_LIBC_ABI_ABSOLUTE): New enumeration constant.
+	(_bfd_mips_post_process_headers): Use it.
+
+2018-09-14  Maciej W. Rozycki  <macro@mips.com>
+
 	* elfxx-mips.c (mips_elf_store_contents): New function...
 	(mips_elf_perform_relocation): ... factored out from here.
 

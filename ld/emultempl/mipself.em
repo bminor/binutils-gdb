@@ -18,6 +18,15 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
+case ${target} in
+  *-*-*gnu*)
+    gnu_target=TRUE
+    ;;
+  *)
+    gnu_target=FALSE
+    ;;
+esac
+
 fragment <<EOF
 
 #include "ldctor.h"
@@ -203,7 +212,8 @@ mips_create_output_section_statements (void)
 
   htab = elf_hash_table (&link_info);
   if (is_elf_hash_table (htab) && is_mips_elf (link_info.output_bfd))
-    _bfd_mips_elf_linker_flags (&link_info, insn32, ignore_branch_isa);
+    _bfd_mips_elf_linker_flags (&link_info, insn32, ignore_branch_isa,
+				${gnu_target});
 
   if (is_mips_elf (link_info.output_bfd))
     _bfd_mips_elf_init_stubs (&link_info, mips_add_stub_section);

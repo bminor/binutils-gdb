@@ -2534,6 +2534,7 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #define elf_backend_gc_mark_hook	_bfd_mips_elf_gc_mark_hook
 #define elf_backend_copy_indirect_symbol \
 					_bfd_mips_elf_copy_indirect_symbol
+#define elf_backend_hide_symbol		_bfd_mips_elf_hide_symbol
 #define elf_backend_fixup_symbol	elf32_mips_fixup_symbol
 #define elf_backend_grok_prstatus	elf32_mips_grok_prstatus
 #define elf_backend_grok_psinfo		elf32_mips_grok_psinfo

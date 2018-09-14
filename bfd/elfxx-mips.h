@@ -81,6 +81,8 @@ extern asection * _bfd_mips_elf_gc_mark_hook
 extern void _bfd_mips_elf_copy_indirect_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *,
    struct elf_link_hash_entry *);
+extern void _bfd_mips_elf_hide_symbol
+  (struct bfd_link_info *, struct elf_link_hash_entry *, bfd_boolean);
 extern bfd_boolean _bfd_mips_elf_ignore_discarded_relocs
   (asection *);
 extern bfd_boolean _bfd_mips_elf_is_target_special_symbol
@@ -147,7 +149,7 @@ extern bfd_boolean _bfd_mips_elf_ignore_undef_symbol
 extern void _bfd_mips_elf_use_plts_and_copy_relocs
   (struct bfd_link_info *);
 extern void _bfd_mips_elf_linker_flags
-  (struct bfd_link_info *, bfd_boolean, bfd_boolean);
+  (struct bfd_link_info *, bfd_boolean, bfd_boolean, bfd_boolean);
 extern bfd_boolean _bfd_mips_elf_init_stubs
   (struct bfd_link_info *,
    asection *(*) (const char *, asection *, asection *));

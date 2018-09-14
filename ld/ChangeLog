@@ -1,4 +1,13 @@
 2018-09-14  Maciej W. Rozycki  <macro@mips.com>
+
+	PR ld/21375
+	* emultempl/mipself.em: Set `gnu_target' according to ${target}.
+	(mips_create_output_section_statements): Update call to
+	`_bfd_mips_elf_linker_flags'.
+	* testsuite/ld-mips-elf/pr21334.s: Use LWL rather than LW.
+	* testsuite/ld-mips-elf/pr21334.dd: Update accordingly.
+
+2018-09-14  Maciej W. Rozycki  <macro@mips.com>
 	    Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* ldexp.c (fold_binary): Always make the result of SEGMENT_START
