@@ -1,7 +1,7 @@
 #name: PR 14480 - correct assembly of 'jsr pc, @(r0)'
 #objdump: -dw
 
-dump.o: +file format .*
+.*: +file format .*
 
 Disassembly of section .text:
 

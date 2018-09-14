@@ -1,7 +1,7 @@
 #name: PR 23481 - correct assembly of '@rN' and '(rN)'
 #objdump: -dw
 
-dump.o: +file format .*
+.*: +file format .*
 
 Disassembly of section .text:
 
