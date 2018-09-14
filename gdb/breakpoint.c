@@ -9591,7 +9591,7 @@ stopat_command (const char *arg, int from_tty)
     }
 
   if (badInput)
-    printf_filtered (_("Usage: stop at <line>\n"));
+    printf_filtered (_("Usage: stop at LINE\n"));
   else
     break_command_1 (arg, 0, from_tty);
 }

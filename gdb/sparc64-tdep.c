@@ -449,7 +449,7 @@ do_assign (CORE_ADDR start, size_t bcnt, int version)
 
    Command syntax:
 
-     adi (examine|x)/count <addr> */
+     adi (examine|x)[/COUNT] [ADDR] */
 
 static void
 adi_examine_command (const char *args, int from_tty)
@@ -473,7 +473,7 @@ adi_examine_command (const char *args, int from_tty)
   if (p != 0 && *p != 0)
     next_address = parse_and_eval_address (p);
   if (!cnt || !next_address)
-    error (_("Usage: adi examine|x[/count] <addr>"));
+    error (_("Usage: adi examine|x[/COUNT] [ADDR]"));
 
   do_examine (next_address, cnt);
 }
@@ -482,11 +482,14 @@ adi_examine_command (const char *args, int from_tty)
 
    Command syntax:
 
-     adi (assign|a)/count <addr> = <version>  */
+     adi (assign|a)[/COUNT] ADDR = VERSION  */
 
 static void
 adi_assign_command (const char *args, int from_tty)
 {
+  static const char *adi_usage
+    = N_("Usage: adi assign|a[/COUNT] ADDR = VERSION");
+
   /* make sure program is active and adi is available */
   if (!target_has_execution)
     error (_("ADI command requires a live process/thread"));
@@ -496,13 +499,13 @@ adi_assign_command (const char *args, int from_tty)
 
   const char *exp = args;
   if (exp == 0)
-    error_no_arg (_("Usage: adi assign|a[/count] <addr> = <version>"));
+    error_no_arg (_(adi_usage));
 
   char *q = (char *) strchr (exp, '=');
   if (q)
     *q++ = 0;
   else
-    error (_("Usage: adi assign|a[/count] <addr> = <version>"));
+    error ("%s", _(adi_usage));
 
   size_t cnt = 1;
   const char *p = args;
@@ -516,7 +519,7 @@ adi_assign_command (const char *args, int from_tty)
   if (p != 0 && *p != 0)
     next_address = parse_and_eval_address (p);
   else
-    error (_("Usage: adi assign|a[/count] <addr> = <version>"));
+    error ("%s", _(adi_usage));
 
   int version = 0;
   if (q != NULL)           /* parse version tag */

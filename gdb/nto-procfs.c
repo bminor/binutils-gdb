@@ -143,7 +143,7 @@ class nto_procfs_target_native final : public nto_procfs_target
 static const target_info nto_procfs_target_info = {
   "procfs",
   N_("QNX Neutrino local or remote process"),
-  N_("QNX Neutrino process.  target procfs <node>")
+  N_("QNX Neutrino process.  target procfs NODE")
 };
 
 struct nto_procfs_target_procfs final : public nto_procfs_target

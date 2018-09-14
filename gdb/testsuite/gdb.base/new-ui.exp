@@ -87,7 +87,7 @@ proc_with_prefix do_test {} {
     }
 
     gdb_test "new-ui" \
-	"usage: new-ui <interpreter> <tty>" \
+	"Usage: new-ui INTERPRETER TTY" \
 	"new-ui without arguments"
 
     set test "new-ui does not repeat"

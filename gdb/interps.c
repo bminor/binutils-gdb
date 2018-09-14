@@ -375,7 +375,7 @@ interpreter_exec_cmd (const char *args, int from_tty)
   nrules = prules.count ();
 
   if (nrules < 2)
-    error (_("usage: interpreter-exec <interpreter> [ <command> ... ]"));
+    error (_("Usage: interpreter-exec INTERPRETER [ COMMAND... ]"));
 
   old_interp = ui_interp->current_interpreter;
 

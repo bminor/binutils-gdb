@@ -1,3 +1,8 @@
+2018-09-16  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/new-ui.exp (do_execution_tests): Update.
+	* gdb.base/dbx.exp (test_breakpoints): Update.
+
 2018-09-14  Alan Hayward  <alan.hayward@arm.com>
 
 	* lib/gdb.exp (gdb_simple_compile): Add proc.

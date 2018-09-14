@@ -2427,7 +2427,7 @@ tfind_range_command (const char *args, int from_tty)
 
   if (args == 0 || *args == 0)
     { /* XXX FIXME: what should default behavior be?  */
-      printf_filtered ("Usage: tfind range <startaddr>,<endaddr>\n");
+      printf_filtered ("Usage: tfind range STARTADDR, ENDADDR\n");
       return;
     }
 
@@ -2461,7 +2461,7 @@ tfind_outside_command (const char *args, int from_tty)
 
   if (args == 0 || *args == 0)
     { /* XXX FIXME: what should default behavior be?  */
-      printf_filtered ("Usage: tfind outside <startaddr>,<endaddr>\n");
+      printf_filtered ("Usage: tfind outside STARTADDR, ENDADDR\n");
       return;
     }
 
@@ -4031,12 +4031,12 @@ No argument means forward by one frame; '-' means backward by one frame."),
 
   add_cmd ("outside", class_trace, tfind_outside_command, _("\
 Select a trace frame whose PC is outside the given range (exclusive).\n\
-Usage: tfind outside addr1, addr2"),
+Usage: tfind outside ADDR1, ADDR2"),
 	   &tfindlist);
 
   add_cmd ("range", class_trace, tfind_range_command, _("\
 Select a trace frame whose PC is in the given range (inclusive).\n\
-Usage: tfind range addr1,addr2"),
+Usage: tfind range ADDR1, ADDR2"),
 	   &tfindlist);
 
   add_cmd ("line", class_trace, tfind_line_command, _("\

@@ -10158,7 +10158,7 @@ Remote replied unexpectedly while setting startup-with-shell: %s"),
       if (remote_exec_file[0])
 	error (_("Remote target does not support \"set remote exec-file\""));
       if (!args.empty ())
-	error (_("Remote target does not support \"set args\" or run <ARGS>"));
+	error (_("Remote target does not support \"set args\" or run ARGS"));
 
       /* Fall back to "R".  */
       extended_remote_restart ();

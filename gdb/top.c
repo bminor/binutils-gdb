@@ -338,7 +338,7 @@ new_ui_command (const char *args, int from_tty)
   argc = argv.count ();
 
   if (argc < 2)
-    error (_("usage: new-ui <interpreter> <tty>"));
+    error (_("Usage: new-ui INTERPRETER TTY"));
 
   interpreter_name = argv[0];
   tty_name = argv[1];

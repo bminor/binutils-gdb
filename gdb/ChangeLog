@@ -1,5 +1,27 @@
 2018-09-16  Tom Tromey  <tom@tromey.com>
 
+	* top.c (new_ui_command): Use GNU style for metasyntactic
+	variables.
+	* breakpoint.c (stopat_command): Use GNU style for metasyntactic
+	variables.
+	* maint.c (maintenance_translate_address): Remove "<>" around
+	text.
+	* interps.c (interpreter_exec_cmd): Use GNU style for
+	metasyntactic variables.
+	* nto-procfs.c (nto_procfs_target_info): Use GNU style for
+	metasyntactic variables.
+	* tracepoint.c (tfind_range_command): Use GNU style for
+	metasyntactic variables.
+	(tfind_outside_command): Likewise.
+	(_initialize_tracepoint): Likewise.
+	* remote.c (extended_remote_target::create_inferior): Use GNU
+	style for metasyntactic variables.
+	* sparc64-tdep.c (adi_examine_command): Use GNU style for
+	metasyntactic variables.
+	(adi_assign_command): Likewise.
+
+2018-09-16  Tom Tromey  <tom@tromey.com>
+
 	* disasm.c (show_disassembler_options_sfunc): Use GNU style for
 	metasyntactic variables.  Print message if no disassembler options
 	are available.
