@@ -1,3 +1,14 @@
+2018-10-27  Tom Tromey  <tom@tromey.com>
+
+	* procfs.c (procfs_target::create_inferior): Use get_shell.
+	* cli/cli-cmds.c (shell_escape): Use get_shell.
+	* windows-nat.c (windows_nat_target::create_inferior): Use
+	get_shell.
+	* common/pathstuff.c (get_shell): New function.
+	* nat/fork-inferior.c (SHELL_FILE, get_startup_shell): Remove.
+	(fork_inferior): Use get_shell.
+	* common/pathstuff.h (get_shell): Declare.
+
 2018-10-27  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* NEWS: Mention changes to 'info [args|functions|locals|variables]'

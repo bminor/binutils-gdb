@@ -50,6 +50,7 @@
 #include "cli/cli-utils.h"
 
 #include "extension.h"
+#include "common/pathstuff.h"
 
 #ifdef TUI
 #include "tui/tui.h"	/* For tui_active et.al.  */
@@ -726,12 +727,9 @@ shell_escape (const char *arg, int from_tty)
 
   if ((pid = vfork ()) == 0)
     {
-      const char *p, *user_shell;
+      const char *p, *user_shell = get_shell ();
 
       close_most_fds ();
-
-      if ((user_shell = getenv ("SHELL")) == NULL)
-	user_shell = "/bin/sh";
 
       /* Get the name of the shell for arg0.  */
       p = lbasename (user_shell);

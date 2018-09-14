@@ -190,3 +190,15 @@ get_standard_cache_dir ()
 
   return {};
 }
+
+/* See common/pathstuff.h.  */
+
+const char *
+get_shell ()
+{
+  const char *ret = getenv ("SHELL");
+  if (ret == NULL)
+    ret = "/bin/sh";
+
+  return ret;
+}

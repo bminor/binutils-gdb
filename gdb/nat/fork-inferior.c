@@ -24,15 +24,12 @@
 #include "target/target.h"
 #include "common-inferior.h"
 #include "common-gdbthread.h"
+#include "common/pathstuff.h"
 #include "signals-state-save-restore.h"
 #include "gdb_tilde_expand.h"
 #include <vector>
 
 extern char **environ;
-
-/* Default shell file to be used if 'startup-with-shell' is set but
-   $SHELL is not.  */
-#define SHELL_FILE "/bin/sh"
 
 /* Build the argument vector for execv(3).  */
 
@@ -265,20 +262,6 @@ execv_argv::init_for_shell (const char *exec_file,
   m_argv.push_back (NULL);
 }
 
-/* Return the shell that must be used to startup the inferior.  The
-   first attempt is the environment variable SHELL; if it is not set,
-   then we default to SHELL_FILE.  */
-
-static const char *
-get_startup_shell ()
-{
-  const char *ret = getenv ("SHELL");
-  if (ret == NULL)
-    ret = SHELL_FILE;
-
-  return ret;
-}
-
 /* See nat/fork-inferior.h.  */
 
 pid_t
@@ -316,7 +299,7 @@ fork_inferior (const char *exec_file_arg, const std::string &allargs,
 
       /* Figure out what shell to start up the user program under.  */
       if (shell_file == NULL)
-	shell_file = get_startup_shell ();
+	shell_file = get_shell ();
 
       gdb_assert (shell_file != NULL);
     }

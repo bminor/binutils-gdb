@@ -68,6 +68,7 @@
 #include "complaints.h"
 #include "inf-child.h"
 #include "gdb_tilde_expand.h"
+#include "common/pathstuff.h"
 
 #define AdjustTokenPrivileges		dyn_AdjustTokenPrivileges
 #define DebugActiveProcessStop		dyn_DebugActiveProcessStop
@@ -2578,9 +2579,7 @@ windows_nat_target::create_inferior (const char *exec_file,
     }
   else
     {
-      sh = getenv ("SHELL");
-      if (!sh)
-	sh = "/bin/sh";
+      sh = get_shell ();
       if (cygwin_conv_path (CCP_POSIX_TO_WIN_W, sh, shell, __PMAX) < 0)
       	error (_("Error starting executable via shell: %d"), errno);
 #ifdef __USEWIDE

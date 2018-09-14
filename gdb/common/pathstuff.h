@@ -64,4 +64,9 @@ extern bool contains_dir_separator (const char *path);
 
 extern std::string get_standard_cache_dir ();
 
+/* Return the file name of the user's shell.  Normally this comes from
+   the SHELL environment variable.  */
+
+extern const char *get_shell ();
+
 #endif /* PATHSTUFF_H */
