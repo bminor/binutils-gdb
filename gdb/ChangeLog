@@ -1,5 +1,13 @@
 2018-10-27  Tom Tromey  <tom@tromey.com>
 
+	* dwarf-index-write.c (write_psymtabs_to_index): Move
+	make_temp_filename to common/pathstuff.c.
+	* common/pathstuff.h (make_temp_filename): Declare.
+	* common/pathstuff.c (make_temp_filename): New function, moved
+	from dwarf-index-write.c.
+
+2018-10-27  Tom Tromey  <tom@tromey.com>
+
 	* procfs.c (procfs_target::create_inferior): Use get_shell.
 	* cli/cli-cmds.c (shell_escape): Use get_shell.
 	* windows-nat.c (windows_nat_target::create_inferior): Use

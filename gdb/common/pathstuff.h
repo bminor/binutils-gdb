@@ -20,6 +20,8 @@
 #ifndef PATHSTUFF_H
 #define PATHSTUFF_H
 
+#include "common/byte-vector.h"
+
 /* Path utilities.  */
 
 /* Return the real path of FILENAME, expanding all the symbolic links.
@@ -68,5 +70,10 @@ extern std::string get_standard_cache_dir ();
    the SHELL environment variable.  */
 
 extern const char *get_shell ();
+
+/* Make a filename suitable to pass to mkstemp based on F (e.g.
+   /tmp/foo -> /tmp/foo-XXXXXX).  */
+
+extern gdb::char_vector make_temp_filename (const std::string &f);
 
 #endif /* PATHSTUFF_H */

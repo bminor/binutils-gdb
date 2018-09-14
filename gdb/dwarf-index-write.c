@@ -24,6 +24,7 @@
 #include "common/byte-vector.h"
 #include "common/filestuff.h"
 #include "common/gdb_unlinker.h"
+#include "common/pathstuff.h"
 #include "common/scoped_fd.h"
 #include "complaints.h"
 #include "dwarf-index-common.h"
@@ -1559,16 +1560,6 @@ write_psymtabs_to_index (struct dwarf2_per_objfile *dwarf2_per_objfile,
   struct stat st;
   if (stat (objfile_name (objfile), &st) < 0)
     perror_with_name (objfile_name (objfile));
-
-  /* Make a filename suitable to pass to mkstemp based on F (e.g.
-     /tmp/foo -> /tmp/foo-XXXXXX).  */
-  auto make_temp_filename = [] (const std::string &f) -> gdb::char_vector
-    {
-      gdb::char_vector filename_temp (f.length () + 8);
-      strcpy (filename_temp.data (), f.c_str ());
-      strcat (filename_temp.data () + f.size (), "-XXXXXX");
-      return filename_temp;
-    };
 
   std::string filename (std::string (dir) + SLASH_STRING + basename
 			+ (index_kind == dw_index_kind::DEBUG_NAMES

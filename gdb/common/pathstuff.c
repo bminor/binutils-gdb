@@ -202,3 +202,14 @@ get_shell ()
 
   return ret;
 }
+
+/* See common/pathstuff.h.  */
+
+gdb::char_vector
+make_temp_filename (const std::string &f)
+{
+  gdb::char_vector filename_temp (f.length () + 8);
+  strcpy (filename_temp.data (), f.c_str ());
+  strcat (filename_temp.data () + f.size (), "-XXXXXX");
+  return filename_temp;
+}
