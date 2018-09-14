@@ -1,3 +1,8 @@
+2018-09-29  Tom Tromey  <tom@tromey.com>
+
+	* PROBLEMS: Rewrite.
+	* README: Update.
+
 2018-09-28  John Baldwin  <jhb@FreeBSD.org>
 
 	* disasm-selftests.c (print_one_insn_test): Add bfd_arch_riscv to

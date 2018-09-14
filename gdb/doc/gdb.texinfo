@@ -35222,10 +35222,13 @@ Other packages will be used only if they are found.
 
 @heading Tools/Packages Necessary for Building @value{GDBN}
 @table @asis
-@item ISO C90 compiler
-@value{GDBN} is written in ISO C90.  It should be buildable with any
-working C90 compiler, e.g.@: GCC.
+@item C@t{++}11 compiler
+@value{GDBN} is written in C@t{++}11.  It should be buildable with any
+recent C@t{++}11 compiler, e.g.@: GCC.
 
+@item GNU make
+@value{GDBN}'s build system relies on features only found in the GNU
+make program.  Other variants of @code{make} will not work.
 @end table
 
 @heading Tools/Packages Optional for Building @value{GDBN}
@@ -35258,6 +35261,51 @@ Branch trace (@pxref{Branch Trace Format},
 @pxref{Branch Trace Configuration Format})
 @end itemize
 
+@item Guile
+@value{GDBN} can be scripted using GNU Guile.  @xref{Guile}.  By
+default, @value{GDBN} will be compiled if the Guile libraries are
+installed and are found by @file{configure}.  You can use the
+@code{--with-guile} option to request Guile, and pass either the Guile
+version number or the file name of the relevant @code{pkg-config}
+program to choose a particular version of Guile.
+
+@item iconv
+@value{GDBN}'s features related to character sets (@pxref{Character
+Sets}) require a functioning @code{iconv} implementation.  If you are
+on a GNU system, then this is provided by the GNU C Library.  Some
+other systems also provide a working @code{iconv}.
+
+If @value{GDBN} is using the @code{iconv} program which is installed
+in a non-standard place, you will need to tell @value{GDBN} where to
+find it.  This is done with @option{--with-iconv-bin} which specifies
+the directory that contains the @code{iconv} program.  This program is
+run in order to make a list of the available character sets.
+
+On systems without @code{iconv}, you can install GNU Libiconv.  If
+Libiconv is installed in a standard place, @value{GDBN} will
+automatically use it if it is needed.  If you have previously
+installed Libiconv in a non-standard place, you can use the
+@option{--with-libiconv-prefix} option to @file{configure}.
+
+@value{GDBN}'s top-level @file{configure} and @file{Makefile} will
+arrange to build Libiconv if a directory named @file{libiconv} appears
+in the top-most source directory.  If Libiconv is built this way, and
+if the operating system does not provide a suitable @code{iconv}
+implementation, then the just-built library will automatically be used
+by @value{GDBN}.  One easy way to set this up is to download GNU
+Libiconv, unpack it inside the top-level directory of the @value{GDBN}
+source tree, and then rename the directory holding the Libiconv source
+code to @samp{libiconv}.
+
+@item lzma
+@value{GDBN} can support debugging sections that are compressed with
+the LZMA library.  @xref{MiniDebugInfo}.  If this library is not
+included with your operating system, you can find it in the xz package
+at @url{http://tukaani.org/xz/}.  If the LZMA library is available in
+the usual place, then the @file{configure} script will use it
+automatically.  If it is installed in an unusual path, you can use the
+@option{--with-lzma-prefix} option to specify its location.
+
 @item MPFR
 @anchor{MPFR}
 @value{GDBN} can use the GNU MPFR multiple-precision floating-point
@@ -35273,6 +35321,15 @@ expression evaluation when the target uses different floating-point
 formats than the host.  If GNU MPFR it is not available, @value{GDBN}
 will fall back to using host floating-point arithmetic.
 
+@item Python
+@value{GDBN} can be scripted using Python language.  @xref{Python}.
+By default, @value{GDBN} will be compiled if the Python libraries are
+installed and are found by @file{configure}.  You can use the
+@code{--with-python} option to request Python, and pass either the
+file name of the relevant @code{python} executable, or the name of the
+directory in which Python is installed, to choose a particular
+installation of Python.
+
 @item zlib
 @cindex compressed debug sections 
 @value{GDBN} will use the @samp{zlib} library, if available, to read
@@ -35284,30 +35341,6 @@ information in such binaries.
 The @samp{zlib} library is likely included with your operating system
 distribution; if it is not, you can get the latest version from
 @url{http://zlib.net}.
-
-@item iconv
-@value{GDBN}'s features related to character sets (@pxref{Character
-Sets}) require a functioning @code{iconv} implementation.  If you are
-on a GNU system, then this is provided by the GNU C Library.  Some
-other systems also provide a working @code{iconv}.
-
-If @value{GDBN} is using the @code{iconv} program which is installed
-in a non-standard place, you will need to tell @value{GDBN} where to find it.
-This is done with @option{--with-iconv-bin} which specifies the
-directory that contains the @code{iconv} program.
-
-On systems without @code{iconv}, you can install GNU Libiconv.  If you
-have previously installed Libiconv, you can use the
-@option{--with-libiconv-prefix} option to configure.
-
-@value{GDBN}'s top-level @file{configure} and @file{Makefile} will
-arrange to build Libiconv if a directory named @file{libiconv} appears
-in the top-most source directory.  If Libiconv is built this way, and
-if the operating system does not provide a suitable @code{iconv}
-implementation, then the just-built library will automatically be used
-by @value{GDBN}.  One easy way to set this up is to download GNU
-Libiconv, unpack it, and then rename the directory holding the
-Libiconv source code to @samp{libiconv}.
 @end table
 
 @node Running Configure
@@ -35351,13 +35384,9 @@ source for the library of opcode tables and disassemblers
 
 @item gdb-@value{GDBVN}/readline
 source for the @sc{gnu} command-line interface
-
-@item gdb-@value{GDBVN}/glob
-source for the @sc{gnu} filename pattern-matching subroutine
-
-@item gdb-@value{GDBVN}/mmalloc
-source for the @sc{gnu} memory-mapped malloc package
 @end table
+
+There may be other subdirectories as well.
 
 The simplest way to configure and build @value{GDBN} is to run @file{configure}
 from the @file{gdb-@var{version-number}} source directory, which in
@@ -35372,20 +35401,14 @@ For example:
 
 @smallexample
 cd gdb-@value{GDBVN}
-./configure @var{host}
+./configure
 make
 @end smallexample
 
-@noindent
-where @var{host} is an identifier such as @samp{sun4} or
-@samp{decstation}, that identifies the platform where @value{GDBN} will run.
-(You can often leave off @var{host}; @file{configure} tries to guess the
-correct value by examining your system.)
-
-Running @samp{configure @var{host}} and then running @code{make} builds the
-@file{bfd}, @file{readline}, @file{mmalloc}, and @file{libiberty}
-libraries, then @code{gdb} itself.  The configured source files, and the
-binaries, are left in the corresponding source directories.
+Running @samp{configure} and then running @code{make} builds the
+included supporting libraries, then @code{gdb} itself.  The configured
+source files, and the binaries, are left in the corresponding source
+directories.
 
 @need 750
 @file{configure} is a Bourne-shell (@code{/bin/sh}) script; if your
@@ -35393,15 +35416,8 @@ system does not recognize this automatically when you run a different
 shell, you may need to run @code{sh} on it explicitly:
 
 @smallexample
-sh configure @var{host}
+sh configure
 @end smallexample
-
-If you run @file{configure} from a directory that contains source
-directories for multiple libraries or programs, such as the
-@file{gdb-@value{GDBVN}} source directory for version @value{GDBVN},
-@file{configure}
-creates configuration files for every directory level underneath (unless
-you tell it not to, with the @samp{--norecursion} option).
 
 You should run the @file{configure} script from the top directory in the
 source tree, the @file{gdb-@var{version-number}} directory.  If you run
@@ -35413,11 +35429,9 @@ configuration of @file{bfd}, @file{readline}, and other sibling
 directories of the @file{gdb} subdirectory.  This leads to build errors
 about missing include files such as @file{bfd/bfd.h}.
 
-You can install @code{@value{GDBP}} anywhere; it has no hardwired paths.
-However, you should make sure that the shell on your path (named by
-the @samp{SHELL} environment variable) is publicly readable.  Remember
-that @value{GDBN} uses the shell to start your program---some systems refuse to
-let @value{GDBN} debug child processes whose programs are not readable.
+You can install @code{@value{GDBN}} anywhere.  The best way to do this
+is to pass the @code{--prefix} option to @code{configure}, and then
+install it with @code{make install}.
 
 @node Separate Objdir
 @section Compiling @value{GDBN} in Another Directory
@@ -35446,7 +35460,7 @@ separate directory for a Sun 4 like this:
 cd gdb-@value{GDBVN}
 mkdir ../gdb-sun4
 cd ../gdb-sun4
-../gdb-@value{GDBVN}/configure sun4
+../gdb-@value{GDBVN}/configure
 make
 @end group
 @end smallexample
@@ -35532,18 +35546,17 @@ directory (@file{gdb-@value{GDBVN}}, for version @value{GDBVN}).
 @section @file{configure} Options
 
 Here is a summary of the @file{configure} options and arguments that
-are most often useful for building @value{GDBN}.  @file{configure} also has
-several other options not listed here.  @inforef{What Configure
-Does,,configure.info}, for a full explanation of @file{configure}.
+are most often useful for building @value{GDBN}.  @file{configure}
+also has several other options not listed here.  @inforef{Running
+configure scripts,,autoconf.info}, for a full
+explanation of @file{configure}.
 
 @smallexample
 configure @r{[}--help@r{]}
           @r{[}--prefix=@var{dir}@r{]}
           @r{[}--exec-prefix=@var{dir}@r{]}
           @r{[}--srcdir=@var{dirname}@r{]}
-          @r{[}--norecursion@r{]} @r{[}--rm@r{]}
           @r{[}--target=@var{target}@r{]}
-          @var{host}
 @end smallexample
 
 @noindent
@@ -35566,8 +35579,6 @@ Configure the source to install programs under directory
 @c avoid splitting the warning from the explanation:
 @need 2000
 @item --srcdir=@var{dirname}
-@strong{Warning: using this option requires @sc{gnu} @code{make}, or another
-@code{make} that implements the @code{VPATH} feature.}@*
 Use this option to make configurations in directories separate from the
 @value{GDBN} source directories.  Among other things, you can use this to
 build (or maintain) several configurations simultaneously, in separate
@@ -35577,21 +35588,12 @@ directory @var{dirname}.  @file{configure} creates directories under
 the working directory in parallel to the source directories below
 @var{dirname}.
 
-@item --norecursion
-Configure only the directory level where @file{configure} is executed; do not
-propagate configuration to subdirectories.
-
 @item --target=@var{target}
 Configure @value{GDBN} for cross-debugging programs running on the specified
 @var{target}.  Without this option, @value{GDBN} is configured to debug
 programs that run on the same machine (@var{host}) as @value{GDBN} itself.
 
 There is no convenient way to generate a list of all available targets.
-
-@item @var{host} @dots{}
-Configure @value{GDBN} to run on the specified @var{host}.
-
-There is no convenient way to generate a list of all available hosts.
 @end table
 
 There are many other options available as well, but they are generally

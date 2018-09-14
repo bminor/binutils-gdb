@@ -1,3 +1,11 @@
+2018-09-29  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Requirements): Mention C++, GNU make.
+	(Requirements): Sort the table.  Add more libraries.
+	(Running Configure): Remove obsolete text.
+	(Separate Objdir): Likewise.
+	(Configure Options): Likewise.
+
 2018-09-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (Frames): Rewrite the description of 'frame number'
