@@ -6,3 +6,4 @@
 #...
 Contents of section .text:
  0000 00000000.*
+#pass

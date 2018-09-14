@@ -1,3 +1,9 @@
+2018-09-14  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/23633
+	* testsuite/binutils-all/pr23633.d: Don't fail when assembler
+	generates sections other than .text.
+
 2018-09-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/23633
