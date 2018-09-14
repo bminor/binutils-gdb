@@ -164,6 +164,13 @@ contains_dir_separator (const char *path)
 std::string
 get_standard_cache_dir ()
 {
+#ifdef __APPLE__
+#define HOME_CACHE_DIR "Library/Caches"
+#else
+#define HOME_CACHE_DIR ".cache"
+#endif
+
+#ifndef __APPLE__
   char *xdg_cache_home = getenv ("XDG_CACHE_HOME");
   if (xdg_cache_home != NULL)
     {
@@ -171,13 +178,14 @@ get_standard_cache_dir ()
       gdb::unique_xmalloc_ptr<char> abs (gdb_abspath (xdg_cache_home));
       return string_printf ("%s/gdb", abs.get ());
     }
+#endif
 
   char *home = getenv ("HOME");
   if (home != NULL)
     {
       /* Make sure the path is absolute and tilde-expanded.  */
       gdb::unique_xmalloc_ptr<char> abs (gdb_abspath (home));
-      return string_printf ("%s/.cache/gdb", abs.get ());
+      return string_printf ("%s/" HOME_CACHE_DIR "/gdb", abs.get ());
     }
 
   return {};

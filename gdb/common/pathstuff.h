@@ -53,10 +53,14 @@ extern bool contains_dir_separator (const char *path);
 /* Get the usual user cache directory for the current platform.
 
    On Linux, it follows the XDG Base Directory specification: use
-   $XDG_CACHE_HOME/gdb if the XDG_CACHE_HOME environment variable is defined,
-   otherwise $HOME/.cache.  The return value is absolute and tilde-expanded.
+   $XDG_CACHE_HOME/gdb if the XDG_CACHE_HOME environment variable is
+   defined, otherwise $HOME/.cache.
 
-   Return an empty string if neither XDG_CACHE_HOME or HOME are defined.  */
+   On macOS, it follows the local convention and uses
+   ~/Library/Caches/gdb.
+
+  The return value is absolute and tilde-expanded.  Return an empty
+  string if neither XDG_CACHE_HOME (on Linux) or HOME are defined.  */
 
 extern std::string get_standard_cache_dir ();
 

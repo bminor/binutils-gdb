@@ -1,3 +1,9 @@
+2018-09-17  Tom Tromey  <tom@tromey.com>
+
+	* common/pathstuff.c (get_standard_cache_dir): Use
+	~/Library/Caches on macOS.
+	* common/pathstuff.h (get_standard_cache_dir): Update comment.
+
 2018-09-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR python/23669

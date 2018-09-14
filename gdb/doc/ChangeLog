@@ -1,3 +1,8 @@
+2018-09-17  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Index Files): Update for cache directory change on
+	macOS.
+
 2018-09-16  Tom Tromey  <tom@tromey.com>
 
 	* python.texi (Basic Python): Update docs for find_pc_line,
