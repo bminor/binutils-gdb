@@ -1,3 +1,8 @@
+2018-09-14  Maciej W. Rozycki  <macro@mips.com>
+
+	* elfxx-mips.c (mips_elf_store_contents): New function...
+	(mips_elf_perform_relocation): ... factored out from here.
+
 2018-09-14  Lifang Xia <lifang_xia@c-sky.com>
 
 	* elf32-csky.c (csky_elf_howto_table): Fill special_function of

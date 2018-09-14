@@ -5234,6 +5234,21 @@ mips_elf_relocation_needs_la25_stub (bfd *input_bfd, int r_type,
     }
 }
 
+/* Store the field relocated by RELOCATION.  */
+
+static void
+mips_elf_store_contents (reloc_howto_type *howto,
+			 const Elf_Internal_Rela *relocation,
+			 bfd *input_bfd, bfd_byte *contents, bfd_vma x)
+{
+  bfd_byte *location = contents + relocation->r_offset;
+  unsigned int size = bfd_get_reloc_size (howto);
+
+  /* Put the value into the output.  */
+  if (size != 0)
+    bfd_put (8 * size, input_bfd, x, location);
+}
+
 /* Calculate the value produced by the RELOCATION (which comes from
    the INPUT_BFD).  The ADDEND is the addend to use for this
    RELOCATION; RELOCATION->R_ADDEND is ignored.
@@ -6346,7 +6361,6 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
   bfd_vma x;
   bfd_byte *location;
   int r_type = ELF_R_TYPE (input_bfd, relocation->r_info);
-  unsigned int size;
 
   /* Figure out where the relocation is occurring.  */
   location = contents + relocation->r_offset;
@@ -6505,9 +6519,7 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
     }
 
   /* Put the value into the output.  */
-  size = bfd_get_reloc_size (howto);
-  if (size != 0)
-    bfd_put (8 * size, input_bfd, x, location);
+  mips_elf_store_contents (howto, relocation, input_bfd, contents, x);
 
   _bfd_mips_elf_reloc_shuffle (input_bfd, r_type, !bfd_link_relocatable (info),
 			       location);
