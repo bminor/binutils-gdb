@@ -1,6 +1,91 @@
 2018-09-14  Maciej W. Rozycki  <macro@mips.com>
 
 	PR ld/21375
+	* testsuite/ld-mips-elf/pr21375-abi.hd: New test.
+	* testsuite/ld-mips-elf/pr21375-noabi.hd: New test.
+	* testsuite/ld-mips-elf/pr21375.dd: New test.
+	* testsuite/ld-mips-elf/pr21375h.dd: New test.
+	* testsuite/ld-mips-elf/pr21375p.dd: New test.
+	* testsuite/ld-mips-elf/pr21375ph.dd: New test.
+	* testsuite/ld-mips-elf/pr21375s.dd: New test.
+	* testsuite/ld-mips-elf/pr21375s-n32.dd: New test.
+	* testsuite/ld-mips-elf/pr21375s-n64.dd: New test.
+	* testsuite/ld-mips-elf/pr21375sh.dd: New test.
+	* testsuite/ld-mips-elf/pr21375sh-n32.dd: New test.
+	* testsuite/ld-mips-elf/pr21375sh-n64.dd: New test.
+	* testsuite/ld-mips-elf/pr21375shg.dd: New test.
+	* testsuite/ld-mips-elf/pr21375sx.dd: New test.
+	* testsuite/ld-mips-elf/pr21375sxh.dd: New test.
+	* testsuite/ld-mips-elf/pr21375sm16.dd: New test.
+	* testsuite/ld-mips-elf/pr21375sm16h.dd: New test.
+	* testsuite/ld-mips-elf/pr21375su.dd: New test.
+	* testsuite/ld-mips-elf/pr21375su-n32.dd: New test.
+	* testsuite/ld-mips-elf/pr21375su-n64.dd: New test.
+	* testsuite/ld-mips-elf/pr21375suh.dd: New test.
+	* testsuite/ld-mips-elf/pr21375suh-n32.dd: New test.
+	* testsuite/ld-mips-elf/pr21375suh-n64.dd: New test.
+	* testsuite/ld-mips-elf/pr21375sux.dd: New test.
+	* testsuite/ld-mips-elf/pr21375suxh.dd: New test.
+	* testsuite/ld-mips-elf/pr21375.gd: New test.
+	* testsuite/ld-mips-elf/pr21375h.gd: New test.
+	* testsuite/ld-mips-elf/pr21375p.gd: New test.
+	* testsuite/ld-mips-elf/pr21375ph.gd: New test.
+	* testsuite/ld-mips-elf/pr21375s.gd: New test.
+	* testsuite/ld-mips-elf/pr21375s-n32.gd: New test.
+	* testsuite/ld-mips-elf/pr21375s-n64.gd: New test.
+	* testsuite/ld-mips-elf/pr21375sh.gd: New test.
+	* testsuite/ld-mips-elf/pr21375sh-n32.gd: New test.
+	* testsuite/ld-mips-elf/pr21375sh-n64.gd: New test.
+	* testsuite/ld-mips-elf/pr21375shg.gd: New test.
+	* testsuite/ld-mips-elf/pr21375shl.gd: New test.
+	* testsuite/ld-mips-elf/pr21375shv.gd: New test.
+	* testsuite/ld-mips-elf/pr21375sx.gd: New test.
+	* testsuite/ld-mips-elf/pr21375sxh.gd: New test.
+	* testsuite/ld-mips-elf/pr21375.sd: New test.
+	* testsuite/ld-mips-elf/pr21375-irix.sd: New test.
+	* testsuite/ld-mips-elf/pr21375h.sd: New test.
+	* testsuite/ld-mips-elf/pr21375h-irix.sd: New test.
+	* testsuite/ld-mips-elf/pr21375p.sd: New test.
+	* testsuite/ld-mips-elf/pr21375p-irix.sd: New test.
+	* testsuite/ld-mips-elf/pr21375ph.sd: New test.
+	* testsuite/ld-mips-elf/pr21375ph-irix.sd: New test.
+	* testsuite/ld-mips-elf/pr21375s.sd: New test.
+	* testsuite/ld-mips-elf/pr21375s-irix.sd: New test.
+	* testsuite/ld-mips-elf/pr21375s-n32.sd: New test.
+	* testsuite/ld-mips-elf/pr21375s-n32-irix.sd: New test.
+	* testsuite/ld-mips-elf/pr21375s-n64.sd: New test.
+	* testsuite/ld-mips-elf/pr21375s-n64-irix.sd: New test.
+	* testsuite/ld-mips-elf/pr21375sh.sd: New test.
+	* testsuite/ld-mips-elf/pr21375sh-irix.sd: New test.
+	* testsuite/ld-mips-elf/pr21375sh-n32.sd: New test.
+	* testsuite/ld-mips-elf/pr21375sh-n32-irix.sd: New test.
+	* testsuite/ld-mips-elf/pr21375sh-n64.sd: New test.
+	* testsuite/ld-mips-elf/pr21375sh-n64-irix.sd: New test.
+	* testsuite/ld-mips-elf/pr21375shg.sd: New test.
+	* testsuite/ld-mips-elf/pr21375shg-irix.sd: New test.
+	* testsuite/ld-mips-elf/pr21375shl.sd: New test.
+	* testsuite/ld-mips-elf/pr21375shl-irix.sd: New test.
+	* testsuite/ld-mips-elf/pr21375shv.sd: New test.
+	* testsuite/ld-mips-elf/pr21375shv-irix.sd: New test.
+	* testsuite/ld-mips-elf/pr21375sx.sd: New test.
+	* testsuite/ld-mips-elf/pr21375sx-irix.sd: New test.
+	* testsuite/ld-mips-elf/pr21375sxh.sd: New test.
+	* testsuite/ld-mips-elf/pr21375sxh-irix.sd: New test.
+	* testsuite/ld-mips-elf/pr21375.ld: New test linker script.
+	* testsuite/ld-mips-elf/pr21375-xgot.ld: New test linker script.
+	* testsuite/ld-mips-elf/pr21375.ver: New test version script.
+	* testsuite/ld-mips-elf/pr21375v.ver: New test version script.
+	* testsuite/ld-mips-elf/pr21375.s: New test source.
+	* testsuite/ld-mips-elf/pr21375-mips16.s: New test source.
+	* testsuite/ld-mips-elf/pr21375-n32.s: New test source.
+	* testsuite/ld-mips-elf/pr21375-n64.s: New test source.
+	* testsuite/ld-mips-elf/pr21375-xgot.s: New test source.
+	* testsuite/ld-mips-elf/mips-elf.exp (run_mips_undefweak_test):
+	New procedure; run the new tests.
+
+2018-09-14  Maciej W. Rozycki  <macro@mips.com>
+
+	PR ld/21375
 	* emultempl/mipself.em: Set `gnu_target' according to ${target}.
 	(mips_create_output_section_statements): Update call to
 	`_bfd_mips_elf_linker_flags'.

@@ -1437,3 +1437,195 @@ run_dump_test "mips-abiflags-2r"
 
 # Test that _gp_disp symbol is not present in symbol tables.
 run_dump_test_o32 "gp-disp-sym"
+
+# PR ld/21375 undefined weak PIC references.
+proc run_mips_undefweak_test { name abi args } {
+    global abi_asflags
+    global abi_ldflags
+    global irixemul
+
+    set name "PR ld/21375 in $name"
+
+    set pic 0
+    set abisuf -noabi
+    set srcsuf ""
+    set scrsuf ""
+    set binsuf ""
+    set dsosuf ""
+    set objsuf ""
+    set rdesuf ""
+    set asxtra ""
+    set ldxtra ""
+    foreach arg $args {
+	switch -- $arg {
+	    dso {
+		set pic 1
+		set dsosuf .so
+		append objsuf s
+		append rdesuf s
+		append ldxtra " -shared"
+	    }
+	    gc {
+		set abisuf -noabi
+		append binsuf g
+		append objsuf g
+		append rdesuf g
+		append ldxtra " --gc-sections"
+	    }
+	    hidden {
+		if { $pic && [istarget "*-*-*gnu*"] } { set abisuf -abi }
+		append binsuf h
+		append objsuf h
+		append rdesuf h
+		append asxtra " --defsym hidn=1"
+	    }
+	    internal {
+		if { $pic && [istarget "*-*-*gnu*"] } { set abisuf -abi }
+		append binsuf h
+		append objsuf h
+		append rdesuf h
+		append asxtra " --defsym intr=1"
+	    }
+	    local {
+		append binsuf l
+		append rdesuf l
+		append ldxtra " --version-script pr21375.ver"
+	    }
+	    mips16 {
+		set srcsuf -mips16
+		append binsuf m16
+		append objsuf m16
+		append asxtra " -mips16"
+	    }
+	    pie {
+		set pic 1
+		set dsosuf -pie
+		append objsuf p
+		append rdesuf p
+		append ldxtra " -pie"
+	    }
+	    protected {
+		if { $pic && [istarget "*-*-*gnu*"] } { set abisuf -abi }
+		append binsuf h
+		append objsuf h
+		append rdesuf h
+		append asxtra " --defsym prot=1"
+	    }
+	    umips {
+		append binsuf u
+		append objsuf u
+		append asxtra " -mmicromips"
+	    }
+	    version {
+		append binsuf v
+		append rdesuf v
+		append ldxtra " --version-script pr21375v.ver"
+	    }
+	    xgot {
+		set srcsuf -xgot
+		set scrsuf -xgot
+		append binsuf x
+		append objsuf x
+		append rdesuf x
+	    }
+	}
+    }
+    switch -- $abi {
+	n32 {
+	    set srcsuf -n32
+	    append binsuf -n32
+	    append objsuf -n32
+	    append rdesuf -n32
+	}
+	n64 {
+	    set srcsuf -n64
+	    append binsuf -n64
+	    append objsuf -n64
+	    append rdesuf -n64
+	}
+    }
+    if $irixemul {
+	set irixsuf -irix
+    } else {
+	set irixsuf ""
+    }
+
+    if { $pic && ![check_shared_lib_support] } {
+	unsupported "$name"
+    } else {
+	run_ld_link_tests [list \
+	    [list \
+		"$name" \
+		"$abi_ldflags($abi) -e foo -T pr21375${scrsuf}.ld ${ldxtra}" \
+		"" \
+		"$abi_asflags($abi) ${asxtra}" \
+		[list pr21375${srcsuf}.s] \
+		[list \
+		    [list objdump -d pr21375${objsuf}.dd] \
+		    [list readelf -A pr21375${rdesuf}.gd] \
+		    [list readelf --dyn-syms pr21375${rdesuf}${irixsuf}.sd] \
+		    [list readelf -h pr21375${abisuf}.hd]] \
+		"pr21375${binsuf}${dsosuf}"]]
+    }
+}
+
+if $has_abi(o32) {
+    run_mips_undefweak_test "SVR4 executable" \
+						    o32
+    run_mips_undefweak_test "SVR4 executable (hidden)" \
+						    o32 hidden
+    run_mips_undefweak_test "PIE executable" \
+						    o32 pie
+    run_mips_undefweak_test "PIE executable (hidden)" \
+						    o32 pie hidden
+    run_mips_undefweak_test "shared library" \
+						    o32 dso
+    run_mips_undefweak_test "shared library (hidden)" \
+						    o32 dso hidden
+    run_mips_undefweak_test "shared library (hidden, forced local)" \
+						    o32 dso hidden local
+    run_mips_undefweak_test "shared library (hidden, versioned)" \
+						    o32 dso hidden version
+    run_mips_undefweak_test "shared library (hidden, section GC)" \
+						    o32 dso hidden gc
+    run_mips_undefweak_test "shared library (protected)" \
+						    o32 dso protected
+    run_mips_undefweak_test "shared library (internal)" \
+						    o32 dso internal
+    run_mips_undefweak_test "shared library (large GOT)" \
+						    o32 dso xgot
+    run_mips_undefweak_test "shared library (large GOT, hidden)" \
+						    o32 dso xgot hidden
+    run_mips_undefweak_test "shared library (MIPS16)" \
+						    o32 dso mips16
+    run_mips_undefweak_test "shared library (MIPS16, hidden)" \
+						    o32 dso mips16 hidden
+    run_mips_undefweak_test "shared library (microMIPS)" \
+						    o32 dso umips
+    run_mips_undefweak_test "shared library (microMIPS, hidden)" \
+						    o32 dso umips hidden
+    run_mips_undefweak_test "shared library (microMIPS, large GOT)" \
+						    o32 dso umips xgot
+    run_mips_undefweak_test "shared library (microMIPS, large GOT, hidden)" \
+						    o32 dso umips xgot hidden
+}
+if $has_abi(n32) {
+    run_mips_undefweak_test "shared library (n32)" \
+						    n32 dso
+    run_mips_undefweak_test "shared library (n32, hidden)" \
+						    n32 dso hidden
+    run_mips_undefweak_test "shared library (n32, microMIPS)" \
+						    n32 dso umips
+    run_mips_undefweak_test "shared library (n32, microMIPS, hidden)" \
+						    n32 dso umips hidden
+}
+if $has_abi(n64) {
+    run_mips_undefweak_test "shared library (n64)" \
+						    n64 dso
+    run_mips_undefweak_test "shared library (n64, hidden)" \
+						    n64 dso hidden
+    run_mips_undefweak_test "shared library (n64, microMIPS)" \
+						    n64 dso umips
+    run_mips_undefweak_test "shared library (n64, microMIPS, hidden)" \
+						    n64 dso umips hidden
+}
