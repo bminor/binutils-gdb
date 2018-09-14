@@ -260,6 +260,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Edb { OP_E, db_mode }
 #define Edw { OP_E, dw_mode }
 #define Edqd { OP_E, dqd_mode }
+#define Edqa { OP_E, dqa_mode }
 #define Eq { OP_E, q_mode }
 #define indirEv { OP_indirE, indir_v_mode }
 #define indirEp { OP_indirE, f_mode }
@@ -591,6 +592,8 @@ enum
   dw_mode,
   /* registers like dq_mode, memory like d_mode.  */
   dqd_mode,
+  /* operand size depends on the W bit as well as address mode.  */
+  dqa_mode,
   /* normal vex mode */
   vex_mode,
   /* 128bit vex mode */
@@ -14805,6 +14808,7 @@ intel_operand_size (int bytemode, int sizeflag)
     case q_swap_mode:
       oappend ("QWORD PTR ");
       break;
+    case dqa_mode:
     case m_mode:
       if (address_mode == mode_64bit)
 	oappend ("QWORD PTR ");
@@ -15163,6 +15167,7 @@ OP_E_register (int bytemode, int sizeflag)
     case dqb_mode:
     case dqd_mode:
     case dqw_mode:
+    case dqa_mode:
       USED_REX (REX_W);
       if (rex & REX_W)
 	names = names64;
@@ -15304,6 +15309,9 @@ OP_E_memory (int bytemode, int sizeflag)
 	case b_scalar_mode:
 	case xmm_mb_mode:
 	  shift = 0;
+	  break;
+	case dqa_mode:
+	  shift = address_mode == mode_64bit ? 3 : 2;
 	  break;
 	default:
 	  abort ();

@@ -1,5 +1,16 @@
 2018-09-14  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/23655
+	* i386-dis-evex.h (evex_table): Replace Eq with Edqa for
+	vcvtsi2ss%LQ, vcvtsi2sd%LQ, vcvtusi2ss%LQ and vcvtusi2sd%LQ.
+	* i386-dis.c (Edqa): New.
+	(dqa_mode): Likewise.
+	(intel_operand_size): Handle dqa_mode as m_mode.
+	(OP_E_register): Handle dqa_mode as dq_mode.
+	(OP_E_memory): Set shift for dqa_mode based on address_mode.
+
+2018-09-14  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c (OP_E_memory): Reformat.
 
 2018-09-14  Jan Beulich  <jbeulich@suse.com>
