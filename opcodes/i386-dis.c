@@ -448,6 +448,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define VPCOM { VPCOM_Fixup, 0 }
 
 #define EXxEVexR { OP_Rounding, evex_rounding_mode }
+#define EXxEVexR64 { OP_Rounding, evex_rounding_64_mode }
 #define EXxEVexS { OP_Rounding, evex_sae_mode }
 
 #define XMask { OP_Mask, mask_mode }
@@ -633,6 +634,8 @@ enum
 
   /* Static rounding.  */
   evex_rounding_mode,
+  /* Static rounding, 64-bit mode only.  */
+  evex_rounding_64_mode,
   /* Supress all exceptions.  */
   evex_sae_mode,
 
@@ -17950,11 +17953,19 @@ OP_Rounding (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 {
   if (!vex.evex
       || (bytemode != evex_rounding_mode
+	  && bytemode != evex_rounding_64_mode
 	  && bytemode != evex_sae_mode))
     abort ();
   if (modrm.mod == 3 && vex.b)
     switch (bytemode)
       {
+      case evex_rounding_64_mode:
+	if (address_mode != mode_64bit)
+	  {
+	    oappend ("(bad)");
+	    break;
+	  }
+	/* Fall through.  */
       case evex_rounding_mode:
 	oappend (names_rounding[vex.ll]);
 	break;

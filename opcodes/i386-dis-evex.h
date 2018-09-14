@@ -3051,7 +3051,7 @@ static const struct dis386 evex_table[][256] = {
   /* EVEX_W_0F2A_P_3 */
   {
     { "vcvtsi2sd%LQ",	{ XMScalar, VexScalar, Ed }, 0 },
-    { "vcvtsi2sd%LQ",	{ XMScalar, VexScalar, EXxEVexR, Edqa }, 0 },
+    { "vcvtsi2sd%LQ",	{ XMScalar, VexScalar, EXxEVexR64, Edqa }, 0 },
   },
   /* EVEX_W_0F2B_P_0 */
   {
@@ -3393,7 +3393,7 @@ static const struct dis386 evex_table[][256] = {
   /* EVEX_W_0F7B_P_3 */
   {
     { "vcvtusi2sd%LQ",	{ XMScalar, VexScalar, Ed }, 0 },
-    { "vcvtusi2sd%LQ",	{ XMScalar, VexScalar, EXxEVexR, Edqa }, 0 },
+    { "vcvtusi2sd%LQ",	{ XMScalar, VexScalar, EXxEVexR64, Edqa }, 0 },
   },
   /* EVEX_W_0F7E_P_1 */
   {

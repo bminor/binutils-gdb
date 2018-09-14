@@ -1,6 +1,15 @@
 2018-09-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/23655
+	* i386-dis-evex.h: Replace EXxEVexR with EXxEVexR64 for
+	vcvtsi2sd%LQ and vcvtusi2sd%LQ.
+	* i386-dis.c (EXxEVexR64): New.
+	(evex_rounding_64_mode): Likewise.
+	(OP_Rounding): Handle evex_rounding_64_mode.
+
+2018-09-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/23655
 	* i386-dis-evex.h (evex_table): Replace Eq with Edqa for
 	vcvtsi2ss%LQ, vcvtsi2sd%LQ, vcvtusi2ss%LQ and vcvtusi2sd%LQ.
 	* i386-dis.c (Edqa): New.
