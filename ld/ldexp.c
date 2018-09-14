@@ -534,6 +534,7 @@ fold_binary (etree_type *tree)
      operand, binary.rhs is first operand.  */
   if (expld.result.valid_p && tree->type.node_code == SEGMENT_START)
     {
+      bfd_vma value = expld.result.value;
       const char *segment_name;
       segment_type *seg;
 
@@ -551,9 +552,10 @@ fold_binary (etree_type *tree)
 		       "isn't multiple of maximum page size\n"),
 		     segment_name);
 	    seg->used = TRUE;
-	    new_rel_from_abs (seg->value);
+	    value = seg->value;
 	    break;
 	  }
+      new_rel_from_abs (value);
       return;
     }
 

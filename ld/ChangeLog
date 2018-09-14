@@ -1,3 +1,13 @@
+2018-09-14  Maciej W. Rozycki  <macro@mips.com>
+	    Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* ldexp.c (fold_binary): Always make the result of SEGMENT_START
+	section-relative.
+	* testsuite/ld-scripts/segment-start.d: New test.
+	* testsuite/ld-scripts/segment-start.ld: New test linker script.
+	* testsuite/ld-scripts/segment-start.s: New test source.
+	* testsuite/ld-scripts/script.exp: Run the new test.
+
 2018-09-14  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* ldexp.c (fold_binary): Check that `config.maxpagesize' is
