@@ -970,50 +970,46 @@ call_function_by_hand_dummy (struct value *function,
   if (nargs < TYPE_NFIELDS (ftype))
     error (_("Too few arguments in function call."));
 
-  {
-    int i;
-
-    for (i = nargs - 1; i >= 0; i--)
-      {
-	int prototyped;
-	struct type *param_type;
+  for (int i = nargs - 1; i >= 0; i--)
+    {
+      int prototyped;
+      struct type *param_type;
 	
-	/* FIXME drow/2002-05-31: Should just always mark methods as
-	   prototyped.  Can we respect TYPE_VARARGS?  Probably not.  */
-	if (TYPE_CODE (ftype) == TYPE_CODE_METHOD)
+      /* FIXME drow/2002-05-31: Should just always mark methods as
+	 prototyped.  Can we respect TYPE_VARARGS?  Probably not.  */
+      if (TYPE_CODE (ftype) == TYPE_CODE_METHOD)
+	prototyped = 1;
+      if (TYPE_TARGET_TYPE (ftype) == NULL && TYPE_NFIELDS (ftype) == 0
+	  && default_return_type != NULL)
+	{
+	  /* Calling a no-debug function with the return type
+	     explicitly cast.  Assume the function is prototyped,
+	     with a prototype matching the types of the arguments.
+	     E.g., with:
+	     float mult (float v1, float v2) { return v1 * v2; }
+	     This:
+	     (gdb) p (float) mult (2.0f, 3.0f)
+	     Is a simpler alternative to:
+	     (gdb) p ((float (*) (float, float)) mult) (2.0f, 3.0f)
+	  */
 	  prototyped = 1;
-	if (TYPE_TARGET_TYPE (ftype) == NULL && TYPE_NFIELDS (ftype) == 0
-	    && default_return_type != NULL)
-	  {
-	    /* Calling a no-debug function with the return type
-	       explicitly cast.  Assume the function is prototyped,
-	       with a prototype matching the types of the arguments.
-	       E.g., with:
-		 float mult (float v1, float v2) { return v1 * v2; }
-	       This:
-		 (gdb) p (float) mult (2.0f, 3.0f)
-	       Is a simpler alternative to:
-		 (gdb) p ((float (*) (float, float)) mult) (2.0f, 3.0f)
-	     */
-	    prototyped = 1;
-	  }
-	else if (i < TYPE_NFIELDS (ftype))
-	  prototyped = TYPE_PROTOTYPED (ftype);
-	else
-	  prototyped = 0;
+	}
+      else if (i < TYPE_NFIELDS (ftype))
+	prototyped = TYPE_PROTOTYPED (ftype);
+      else
+	prototyped = 0;
 
-	if (i < TYPE_NFIELDS (ftype))
-	  param_type = TYPE_FIELD_TYPE (ftype, i);
-	else
-	  param_type = NULL;
+      if (i < TYPE_NFIELDS (ftype))
+	param_type = TYPE_FIELD_TYPE (ftype, i);
+      else
+	param_type = NULL;
 
-	args[i] = value_arg_coerce (gdbarch, args[i],
-				    param_type, prototyped, &sp);
+      args[i] = value_arg_coerce (gdbarch, args[i],
+				  param_type, prototyped, &sp);
 
-	if (param_type != NULL && language_pass_by_reference (param_type))
-	  args[i] = value_addr (args[i]);
-      }
-  }
+      if (param_type != NULL && language_pass_by_reference (param_type))
+	args[i] = value_addr (args[i]);
+    }
 
   /* Reserve space for the return structure to be written on the
      stack, if necessary.  Make certain that the value is correctly
