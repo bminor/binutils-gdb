@@ -14,8 +14,8 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 fd 2e 21          	vucomisd \(%ecx\),%xmm4
 [ 	]*[a-f0-9]+:	c5 ff 10 21          	vmovsd \(%ecx\),%xmm4
 [ 	]*[a-f0-9]+:	c5 ff 11 21          	vmovsd %xmm4,\(%ecx\)
-[ 	]*[a-f0-9]+:	c5 fd d6 21          	vmovq  %xmm4,\(%ecx\)
-[ 	]*[a-f0-9]+:	c5 fe 7e 21          	vmovq  \(%ecx\),%xmm4
+[ 	]*[a-f0-9]+:	c5 f9 d6 21          	vmovq  %xmm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fa 7e 21          	vmovq  \(%ecx\),%xmm4
 [ 	]*[a-f0-9]+:	c5 ff 2d cc          	vcvtsd2si %xmm4,%ecx
 [ 	]*[a-f0-9]+:	c5 ff 2d 09          	vcvtsd2si \(%ecx\),%ecx
 [ 	]*[a-f0-9]+:	c5 ff 2c cc          	vcvttsd2si %xmm4,%ecx
@@ -210,7 +210,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 ce c2 11 07       	vcmpordss \(%ecx\),%xmm6,%xmm2
 [ 	]*[a-f0-9]+:	c4 e3 4d 0a d4 07    	vroundss \$0x7,%xmm4,%xmm6,%xmm2
 [ 	]*[a-f0-9]+:	c4 e3 4d 0a 11 07    	vroundss \$0x7,\(%ecx\),%xmm6,%xmm2
-[ 	]*[a-f0-9]+:	c5 fe 7e f4          	vmovq  %xmm4,%xmm6
+[ 	]*[a-f0-9]+:	c5 fa 7e f4          	vmovq  %xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c5 cf 10 d4          	vmovsd %xmm4,%xmm6,%xmm2
 [ 	]*[a-f0-9]+:	c5 ce 10 d4          	vmovss %xmm4,%xmm6,%xmm2
 [ 	]*[a-f0-9]+:	c5 fd 7e 05 34 12 00 00 	vmovd  %xmm0,0x1234
@@ -245,10 +245,10 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 ff 10 21          	vmovsd \(%ecx\),%xmm4
 [ 	]*[a-f0-9]+:	c5 ff 11 21          	vmovsd %xmm4,\(%ecx\)
 [ 	]*[a-f0-9]+:	c5 ff 11 21          	vmovsd %xmm4,\(%ecx\)
-[ 	]*[a-f0-9]+:	c5 fd d6 21          	vmovq  %xmm4,\(%ecx\)
-[ 	]*[a-f0-9]+:	c5 fe 7e 21          	vmovq  \(%ecx\),%xmm4
-[ 	]*[a-f0-9]+:	c5 fd d6 21          	vmovq  %xmm4,\(%ecx\)
-[ 	]*[a-f0-9]+:	c5 fe 7e 21          	vmovq  \(%ecx\),%xmm4
+[ 	]*[a-f0-9]+:	c5 f9 d6 21          	vmovq  %xmm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fa 7e 21          	vmovq  \(%ecx\),%xmm4
+[ 	]*[a-f0-9]+:	c5 f9 d6 21          	vmovq  %xmm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fa 7e 21          	vmovq  \(%ecx\),%xmm4
 [ 	]*[a-f0-9]+:	c5 ff 2d cc          	vcvtsd2si %xmm4,%ecx
 [ 	]*[a-f0-9]+:	c5 ff 2d 09          	vcvtsd2si \(%ecx\),%ecx
 [ 	]*[a-f0-9]+:	c5 ff 2d 09          	vcvtsd2si \(%ecx\),%ecx
@@ -541,7 +541,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 e3 4d 0a d4 07    	vroundss \$0x7,%xmm4,%xmm6,%xmm2
 [ 	]*[a-f0-9]+:	c4 e3 4d 0a 11 07    	vroundss \$0x7,\(%ecx\),%xmm6,%xmm2
 [ 	]*[a-f0-9]+:	c4 e3 4d 0a 11 07    	vroundss \$0x7,\(%ecx\),%xmm6,%xmm2
-[ 	]*[a-f0-9]+:	c5 fe 7e f4          	vmovq  %xmm4,%xmm6
+[ 	]*[a-f0-9]+:	c5 fa 7e f4          	vmovq  %xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c5 cf 10 d4          	vmovsd %xmm4,%xmm6,%xmm2
 [ 	]*[a-f0-9]+:	c5 ce 10 d4          	vmovss %xmm4,%xmm6,%xmm2
 [ 	]*[a-f0-9]+:	c5 fd 7e 05 34 12 00 00 	vmovd  %xmm0,0x1234

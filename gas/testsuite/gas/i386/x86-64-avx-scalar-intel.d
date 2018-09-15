@@ -19,8 +19,8 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 e1 fd 6e e1       	vmovq  xmm4,rcx
 [ 	]*[a-f0-9]+:	c4 e1 fd 7e e1       	vmovq  rcx,xmm4
 [ 	]*[a-f0-9]+:	c4 e1 fd 6e e1       	vmovq  xmm4,rcx
-[ 	]*[a-f0-9]+:	c5 fd d6 21          	vmovq  QWORD PTR \[rcx\],xmm4
-[ 	]*[a-f0-9]+:	c5 fe 7e 21          	vmovq  xmm4,QWORD PTR \[rcx\]
+[ 	]*[a-f0-9]+:	c5 f9 d6 21          	vmovq  QWORD PTR \[rcx\],xmm4
+[ 	]*[a-f0-9]+:	c5 fa 7e 21          	vmovq  xmm4,QWORD PTR \[rcx\]
 [ 	]*[a-f0-9]+:	c5 ff 2d cc          	vcvtsd2si ecx,xmm4
 [ 	]*[a-f0-9]+:	c5 ff 2d 09          	vcvtsd2si ecx,QWORD PTR \[rcx\]
 [ 	]*[a-f0-9]+:	c5 ff 2c cc          	vcvttsd2si ecx,xmm4
@@ -227,7 +227,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 ce c2 11 07       	vcmpordss xmm2,xmm6,DWORD PTR \[rcx\]
 [ 	]*[a-f0-9]+:	c4 e3 4d 0a d4 07    	vroundss xmm2,xmm6,xmm4,0x7
 [ 	]*[a-f0-9]+:	c4 e3 4d 0a 11 07    	vroundss xmm2,xmm6,DWORD PTR \[rcx\],0x7
-[ 	]*[a-f0-9]+:	c5 fe 7e f4          	vmovq  xmm6,xmm4
+[ 	]*[a-f0-9]+:	c5 fa 7e f4          	vmovq  xmm6,xmm4
 [ 	]*[a-f0-9]+:	c5 cf 10 d4          	vmovsd xmm2,xmm6,xmm4
 [ 	]*[a-f0-9]+:	c5 ce 10 d4          	vmovss xmm2,xmm6,xmm4
 [ 	]*[a-f0-9]+:	c5 7d 7e 04 25 78 56 34 12 	vmovd  DWORD PTR ds:0x12345678,xmm8
@@ -283,10 +283,10 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 fd 6e 21          	vmovd  xmm4,DWORD PTR \[rcx\]
 [ 	]*[a-f0-9]+:	c4 e1 fd 7e e1       	vmovq  rcx,xmm4
 [ 	]*[a-f0-9]+:	c4 e1 fd 6e e1       	vmovq  xmm4,rcx
-[ 	]*[a-f0-9]+:	c5 fd d6 21          	vmovq  QWORD PTR \[rcx\],xmm4
-[ 	]*[a-f0-9]+:	c5 fe 7e 21          	vmovq  xmm4,QWORD PTR \[rcx\]
-[ 	]*[a-f0-9]+:	c5 fd d6 21          	vmovq  QWORD PTR \[rcx\],xmm4
-[ 	]*[a-f0-9]+:	c5 fe 7e 21          	vmovq  xmm4,QWORD PTR \[rcx\]
+[ 	]*[a-f0-9]+:	c5 f9 d6 21          	vmovq  QWORD PTR \[rcx\],xmm4
+[ 	]*[a-f0-9]+:	c5 fa 7e 21          	vmovq  xmm4,QWORD PTR \[rcx\]
+[ 	]*[a-f0-9]+:	c5 f9 d6 21          	vmovq  QWORD PTR \[rcx\],xmm4
+[ 	]*[a-f0-9]+:	c5 fa 7e 21          	vmovq  xmm4,QWORD PTR \[rcx\]
 [ 	]*[a-f0-9]+:	c5 ff 2d cc          	vcvtsd2si ecx,xmm4
 [ 	]*[a-f0-9]+:	c5 ff 2d 09          	vcvtsd2si ecx,QWORD PTR \[rcx\]
 [ 	]*[a-f0-9]+:	c5 ff 2d 09          	vcvtsd2si ecx,QWORD PTR \[rcx\]
@@ -595,7 +595,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 e3 4d 0a d4 07    	vroundss xmm2,xmm6,xmm4,0x7
 [ 	]*[a-f0-9]+:	c4 e3 4d 0a 11 07    	vroundss xmm2,xmm6,DWORD PTR \[rcx\],0x7
 [ 	]*[a-f0-9]+:	c4 e3 4d 0a 11 07    	vroundss xmm2,xmm6,DWORD PTR \[rcx\],0x7
-[ 	]*[a-f0-9]+:	c5 fe 7e f4          	vmovq  xmm6,xmm4
+[ 	]*[a-f0-9]+:	c5 fa 7e f4          	vmovq  xmm6,xmm4
 [ 	]*[a-f0-9]+:	c5 cf 10 d4          	vmovsd xmm2,xmm6,xmm4
 [ 	]*[a-f0-9]+:	c5 ce 10 d4          	vmovss xmm2,xmm6,xmm4
 [ 	]*[a-f0-9]+:	c5 7d 7e 04 25 78 56 34 12 	vmovd  DWORD PTR ds:0x12345678,xmm8

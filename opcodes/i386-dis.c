@@ -9848,7 +9848,6 @@ static const struct dis386 vex_len_table[][2] = {
   /* VEX_LEN_0F7E_P_1 */
   {
     { VEX_W_TABLE (VEX_W_0F7E_P_1) },
-    { VEX_W_TABLE (VEX_W_0F7E_P_1) },
   },
 
   /* VEX_LEN_0F7E_P_2 */
@@ -9961,7 +9960,6 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0FD6_P_2 */
   {
-    { VEX_W_TABLE (VEX_W_0FD6_P_2) },
     { VEX_W_TABLE (VEX_W_0FD6_P_2) },
   },
 

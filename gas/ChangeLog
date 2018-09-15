@@ -1,3 +1,11 @@
+2018-09-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/23665
+	* testsuite/gas/i386/avx-scalar-intel.d: Updated.
+	* testsuite/gas/i386/avx-scalar.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx-scalar-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx-scalar.d: Likewise.
+
 2018-09-15  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/config/default.exp: Make tmpdir.
