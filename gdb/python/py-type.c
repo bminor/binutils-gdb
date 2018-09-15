@@ -930,6 +930,13 @@ typy_template_argument (PyObject *self, PyObject *args)
   if (! PyArg_ParseTuple (args, "i|O", &argno, &block_obj))
     return NULL;
 
+  if (argno < 0)
+    {
+      PyErr_SetString (PyExc_RuntimeError,
+		       _("Template argument number must be non-negative"));
+      return NULL;
+    }
+
   if (block_obj)
     {
       block = block_object_to_block (block_obj);

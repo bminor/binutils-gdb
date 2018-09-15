@@ -1,5 +1,11 @@
 2018-09-23  Tom Tromey  <tom@tromey.com>
 
+	PR python/17284:
+	* gdb.python/py-template.exp (test_template_arg): Add test for
+	negative template argument number.
+
+2018-09-23  Tom Tromey  <tom@tromey.com>
+
 	PR python/14062:
 	* gdb.python/python.exp: Add test for post_event error.
 
