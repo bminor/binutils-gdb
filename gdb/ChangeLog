@@ -1,5 +1,11 @@
 2018-09-23  Tom Tromey  <tom@tromey.com>
 
+	PR python/18170:
+	* python/py-value.c (valpy_int): Allow conversion from pointer
+	type.
+
+2018-09-23  Tom Tromey  <tom@tromey.com>
+
 	PR python/20126:
 	* python/py-value.c (valpy_int): Respect type sign.
 

@@ -1503,7 +1503,8 @@ valpy_int (PyObject *self)
 	  value = value_cast (type, value);
 	}
 
-      if (!is_integral_type (type))
+      if (!is_integral_type (type)
+	  && TYPE_CODE (type) != TYPE_CODE_PTR)
 	error (_("Cannot convert value to int."));
 
       l = value_as_long (value);

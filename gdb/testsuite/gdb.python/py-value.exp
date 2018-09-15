@@ -130,6 +130,11 @@ proc test_value_numeric_ops {} {
   gdb_test "print (void *) 5" ".*" ""
   gdb_test_no_output "python b = gdb.history (0)" ""
 
+  gdb_test "python print(int(b))" "5" "convert pointer to int"
+  if {!$gdb_py_is_py3k} {
+    gdb_test "python print(long(b))" "5" "convert pointer to long"
+  }
+
   gdb_test "python print ('result = ' + str(a+5))" " = 0x7( <.*>)?" "add pointer value with python integer"
   gdb_test "python print ('result = ' + str(b-2))" " = 0x3( <.*>)?" "subtract python integer from pointer value"
   gdb_test "python print ('result = ' + str(b-a))" " = 3" "subtract two pointer values"
@@ -138,8 +143,10 @@ proc test_value_numeric_ops {} {
     "result = r" "use value as string index"
   gdb_test "python print ('result = ' + str((1,2,3)\[gdb.Value(0)\]))" \
     "result = 1" "use value as tuple index"
-  gdb_test "python print ('result = ' + str(\[1,2,3\]\[gdb.Value(0)\]))" \
-    "result = 1" "use value as array index"
+  if {!$gdb_py_is_py3k} {
+    gdb_test "python print ('result = ' + str(\[1,2,3\]\[gdb.Value(0)\]))" \
+      "result = 1" "use value as array index"
+  }
 
   gdb_test "python print('%x' % int(gdb.parse_and_eval('-1ull')))" \
       "f+" "int conversion respect type sign"
