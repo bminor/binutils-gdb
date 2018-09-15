@@ -154,7 +154,7 @@ show_inferior_tty_command (struct ui_file *file, int from_tty,
 		      "is \"%s\".\n"), inferior_io_terminal);
 }
 
-char *
+const char *
 get_inferior_args (void)
 {
   if (current_inferior ()->argc != 0)

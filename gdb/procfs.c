@@ -3848,7 +3848,7 @@ procfs_target::make_corefile_notes (bfd *obfd, int *note_size)
   char psargs[80] = {'\0'};
   procinfo *pi = find_procinfo_or_die (inferior_ptid.pid (), 0);
   char *note_data = NULL;
-  char *inf_args;
+  const char *inf_args;
   struct procfs_corefile_thread_data thread_args;
   enum gdb_signal stop_signal;
 

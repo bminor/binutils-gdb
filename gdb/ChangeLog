@@ -1,3 +1,10 @@
+2018-09-15  Tom Tromey  <tom@tromey.com>
+
+	* infcmd.c (get_inferior_args): Return const char *.
+	* inferior.h (get_inferior_args): Return type now const.
+	* linux-tdep.c (linux_fill_prpsinfo): Update.
+	* procfs.c (procfs_target::make_corefile_notes): Update.
+
 2018-09-07  Tom Tromey  <tom@tromey.com>
 
 	* python/python.c (execute_gdb_command): Call bpstat_do_actions
