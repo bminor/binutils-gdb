@@ -49,7 +49,18 @@ munmap_list::add (CORE_ADDR addr, CORE_ADDR size)
 munmap_list::~munmap_list ()
 {
   for (auto &item : items)
-    gdbarch_infcall_munmap (target_gdbarch (), item.addr, item.size);
+    {
+      TRY
+	{
+	  gdbarch_infcall_munmap (target_gdbarch (), item.addr, item.size);
+	}
+      CATCH (ex, RETURN_MASK_ERROR)
+	{
+	  /* There's not much the user can do, so just ignore
+	     this.  */
+	}
+      END_CATCH
+    }
 }
 
 /* Helper data for setup_sections.  */
@@ -282,22 +293,26 @@ static const struct bfd_link_callbacks link_callbacks =
 
 struct link_hash_table_cleanup_data
 {
+  explicit link_hash_table_cleanup_data (bfd *abfd_)
+    : abfd (abfd_),
+      link_next (abfd->link.next)
+  {
+  }
+
+  ~link_hash_table_cleanup_data ()
+  {
+    if (abfd->is_linker_output)
+      (*abfd->link.hash->hash_table_free) (abfd);
+    abfd->link.next = link_next;
+  }
+
+  DISABLE_COPY_AND_ASSIGN (link_hash_table_cleanup_data);
+
+private:
+
   bfd *abfd;
   bfd *link_next;
 };
-
-/* Cleanup callback for struct bfd_link_info.  */
-
-static void
-link_hash_table_free (void *d)
-{
-  struct link_hash_table_cleanup_data *data
-    = (struct link_hash_table_cleanup_data *) d;
-
-  if (data->abfd->is_linker_output)
-    (*data->abfd->link.hash->hash_table_free) (data->abfd);
-  data->abfd->link.next = data->link_next;
-}
 
 /* Relocate and store into inferior memory each section SECT of ABFD.  */
 
@@ -305,12 +320,10 @@ static void
 copy_sections (bfd *abfd, asection *sect, void *data)
 {
   asymbol **symbol_table = (asymbol **) data;
-  bfd_byte *sect_data, *sect_data_got;
-  struct cleanup *cleanups;
+  bfd_byte *sect_data_got;
   struct bfd_link_info link_info;
   struct bfd_link_order link_order;
   CORE_ADDR inferior_addr;
-  struct link_hash_table_cleanup_data cleanup_data;
 
   if ((bfd_get_section_flags (abfd, sect) & (SEC_ALLOC | SEC_LOAD))
       != (SEC_ALLOC | SEC_LOAD))
@@ -326,13 +339,11 @@ copy_sections (bfd *abfd, asection *sect, void *data)
   link_info.input_bfds = abfd;
   link_info.input_bfds_tail = &abfd->link.next;
 
-  cleanup_data.abfd = abfd;
-  cleanup_data.link_next = abfd->link.next;
+  struct link_hash_table_cleanup_data cleanup_data (abfd);
 
   abfd->link.next = NULL;
   link_info.hash = bfd_link_hash_table_create (abfd);
 
-  cleanups = make_cleanup (link_hash_table_free, &cleanup_data);
   link_info.callbacks = &link_callbacks;
 
   memset (&link_order, 0, sizeof (link_order));
@@ -342,21 +353,22 @@ copy_sections (bfd *abfd, asection *sect, void *data)
   link_order.size = bfd_get_section_size (sect);
   link_order.u.indirect.section = sect;
 
-  sect_data = (bfd_byte *) xmalloc (bfd_get_section_size (sect));
-  make_cleanup (xfree, sect_data);
+  gdb::unique_xmalloc_ptr<gdb_byte> sect_data
+    ((bfd_byte *) xmalloc (bfd_get_section_size (sect)));
 
   sect_data_got = bfd_get_relocated_section_contents (abfd, &link_info,
-						      &link_order, sect_data,
+						      &link_order,
+						      sect_data.get (),
 						      FALSE, symbol_table);
 
   if (sect_data_got == NULL)
     error (_("Cannot map compiled module \"%s\" section \"%s\": %s"),
 	   bfd_get_filename (abfd), bfd_get_section_name (abfd, sect),
 	   bfd_errmsg (bfd_get_error ()));
-  gdb_assert (sect_data_got == sect_data);
+  gdb_assert (sect_data_got == sect_data.get ());
 
   inferior_addr = bfd_get_section_vma (abfd, sect);
-  if (0 != target_write_memory (inferior_addr, sect_data,
+  if (0 != target_write_memory (inferior_addr, sect_data.get (),
 				bfd_get_section_size (sect)))
     error (_("Cannot write compiled module \"%s\" section \"%s\" "
 	     "to inferior memory range %s-%s."),
@@ -364,8 +376,6 @@ copy_sections (bfd *abfd, asection *sect, void *data)
 	   paddress (target_gdbarch (), inferior_addr),
 	   paddress (target_gdbarch (),
 		     inferior_addr + bfd_get_section_size (sect)));
-
-  do_cleanups (cleanups);
 }
 
 /* Fetch the type of COMPILE_I_EXPR_PTR_TYPE and COMPILE_I_EXPR_VAL

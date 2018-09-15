@@ -1,5 +1,14 @@
 2018-09-18  Tom Tromey  <tom@tromey.com>
 
+	* compile/compile-object-load.c (struct
+	link_hash_table_cleanup_data): Add constructor and destructor.
+	Use DISABLE_COPY_AND_ASSIGN.
+	(~link_hash_table_cleanup_data): Rename from
+	link_hash_table_free.  Now a destructor.
+	(copy_sections): Use gdb::unique_xmalloc_ptr.  Remove cleanups.
+
+2018-09-18  Tom Tromey  <tom@tromey.com>
+
 	* compile/compile-object-run.c (do_module_cleanup): Use delete.
 	* compile/compile-object-load.c (struct munmap_list): Move to
 	header file.
