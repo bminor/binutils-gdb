@@ -1,3 +1,12 @@
+2018-09-15  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/23663
+	* common/common-utils.c: Don't include '<sys/stat.h>'.
+	(is_regular_file): Move to...
+	* common/filestuff.c (is_regular_file): ... here.
+	* common/common-utils.h (is_regular_file): Move to...
+	* common/filestuff.h (is_regular_file): ... here.
+
 2018-09-13  Tom Tromey  <tom@tromey.com>
 
 	PR rust/23650:
