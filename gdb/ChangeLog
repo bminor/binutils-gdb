@@ -1,3 +1,15 @@
+2018-09-18  Tom Tromey  <tom@tromey.com>
+
+	* compile/compile-object-run.c (do_module_cleanup): Use delete.
+	* compile/compile-object-load.c (struct munmap_list): Move to
+	header file.
+	(munmap_list::add): Rename from munmap_list_add; rewrite.
+	(munmap_list::~munmap_list): Rename from munmap_list_free.
+	(munmap_listp_free_cleanup): Remove.
+	(compile_object_load): Update.
+	* compile/compile-object-load.h (struct munmap_list): Move from
+	compile-object-load.c.  Rewrite.
+
 2018-09-18  Alan Hayward  <alan.hayward@arm.com>
 
 	* aarch64-tdep.c (pass_in_v): Use register size.

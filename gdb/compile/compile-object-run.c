@@ -99,7 +99,7 @@ do_module_cleanup (void *arg, int registers_valid)
   unlink (data->source_file);
   xfree (data->source_file);
 
-  munmap_list_free (data->munmap_list_head);
+  delete data->munmap_list_head;
 
   /* Delete the .o file.  */
   unlink (data->objfile_name_string);
