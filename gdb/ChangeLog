@@ -1,5 +1,10 @@
 2018-09-23  Tom Tromey  <tom@tromey.com>
 
+	PR python/20126:
+	* python/py-value.c (valpy_int): Respect type sign.
+
+2018-09-23  Tom Tromey  <tom@tromey.com>
+
 	PR python/18352;
 	* python/py-value.c (valpy_float): Allow conversions from int or
 	char.

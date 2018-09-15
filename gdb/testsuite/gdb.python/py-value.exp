@@ -79,6 +79,7 @@ proc test_value_creation {} {
 
 proc test_value_numeric_ops {} {
   global gdb_prompt
+  global gdb_py_is_py3k
 
   gdb_py_test_silent_cmd "python i = gdb.Value (5)" "create first integer value" 0
   gdb_py_test_silent_cmd "python j = gdb.Value (2)" "create second integer value" 0
@@ -139,6 +140,13 @@ proc test_value_numeric_ops {} {
     "result = 1" "use value as tuple index"
   gdb_test "python print ('result = ' + str(\[1,2,3\]\[gdb.Value(0)\]))" \
     "result = 1" "use value as array index"
+
+  gdb_test "python print('%x' % int(gdb.parse_and_eval('-1ull')))" \
+      "f+" "int conversion respect type sign"
+  if {!$gdb_py_is_py3k} {
+    gdb_test "python print('%x' % long(gdb.parse_and_eval('-1ull')))" \
+      "f+" "long conversion respect type sign"
+  }
 
   # Test some invalid operations.
 
