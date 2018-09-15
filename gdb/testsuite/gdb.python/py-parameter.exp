@@ -203,3 +203,18 @@ foreach kind {PARAM_ZUINTEGER PARAM_ZUINTEGER_UNLIMITED} {
 	    "check that PARAM_ZUINTEGER value is -1 after setting"
     }
 }
+
+gdb_py_test_multiple "Throwing gdb parameter" \
+    "python" "" \
+    "class TestThrowParam (gdb.Parameter):" "" \
+    "   def __init__ (self, name):" "" \
+    "      super (TestThrowParam, self).__init__ (name, gdb.COMMAND_DATA, gdb.PARAM_STRING)" "" \
+    "      self.value = True" "" \
+    "   def get_set_string (self):" "" \
+    "      raise gdb.GdbError('Ordinary gdb error')" "" \
+    "test_throw_param = TestThrowParam ('print test-throw-param')" ""\
+    "end"
+
+gdb_test "set print test-throw-param whoops" \
+    "Ordinary gdb error" \
+    "gdb.GdbError does not show Python stack"

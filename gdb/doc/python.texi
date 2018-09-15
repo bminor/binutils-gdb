@@ -3828,6 +3828,30 @@ example, @kbd{set foo off}).  The @code{value} attribute has already
 been populated with the new value and may be used in output.  This
 method must return a string.  If the returned string is not empty,
 @value{GDBN} will present it to the user.
+
+If this method raises the @code{gdb.GdbError} exception
+(@pxref{Exception Handling}), then @value{GDBN} will print the
+exception's string and the @code{set} command will fail.  Note,
+however, that the @code{value} attribute will not be reset in this
+case.  So, if your parameter must validate values, it should store the
+old value internally and reset the exposed value, like so:
+
+@smallexample
+class ExampleParam (gdb.Parameter):
+   def __init__ (self, name):
+      super (ExampleParam, self).__init__ (name,
+                   gdb.COMMAND_DATA,
+                   gdb.PARAM_BOOLEAN)
+      self.value = True
+      self.saved_value = True
+   def validate(self):
+      return False
+   def get_set_string (self):
+      if not self.validate():
+        self.value = self.saved_value
+        raise gdb.GdbError('Failed to validate')
+      self.saved_value = self.value
+@end smallexample
 @end defun
 
 @defun Parameter.get_show_string (self, svalue)

@@ -1,3 +1,9 @@
+2018-09-23  Tom Tromey  <tom@tromey.com>
+
+	PR python/18852:
+	* python.texi (Parameters In Python): Document exception behavior
+	of get_set_string.
+
 2018-09-18  John Baldwin  <jhb@FreeBSD.org>
 
 	* gdb.texinfo (info proc): Remove "running".

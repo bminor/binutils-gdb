@@ -1,5 +1,11 @@
 2018-09-23  Tom Tromey  <tom@tromey.com>
 
+	PR python/18852:
+	* gdb.python/py-parameter.exp: Add test for parameter that throws
+	on "set".
+
+2018-09-23  Tom Tromey  <tom@tromey.com>
+
 	PR python/17284:
 	* gdb.python/py-template.exp (test_template_arg): Add test for
 	negative template argument number.

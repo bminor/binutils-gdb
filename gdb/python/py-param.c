@@ -396,10 +396,7 @@ get_set_value (const char *args, int from_tty,
     {
       set_doc_string = call_doc_function (obj, set_doc_func.get (), NULL);
       if (! set_doc_string)
-	{
-	  gdbpy_print_stack ();
-	  return;
-	}
+	gdbpy_handle_exception ();
     }
 
   const char *str = set_doc_string.get ();

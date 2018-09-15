@@ -1,5 +1,10 @@
 2018-09-23  Tom Tromey  <tom@tromey.com>
 
+	PR python/18852:
+	* python/py-param.c (get_set_value): Use gdbpy_handle_exception.
+
+2018-09-23  Tom Tromey  <tom@tromey.com>
+
 	* python/py-function.c (fnpy_call): Use gdbpy_handle_exception.
 	* python/py-cmd.c (cmdpy_function): Use gdbpy_handle_exception.
 	* python/python-internal.h (gdbpy_handle_exception): Declare.
