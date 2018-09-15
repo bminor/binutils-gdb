@@ -2230,6 +2230,15 @@ nios2_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
   return 1;
 }
 
+/* Implement the type_align gdbarch function.  */
+
+static ULONGEST
+nios2_type_align (struct gdbarch *gdbarch, struct type *type)
+{
+  type = check_typedef (type);
+  return std::min<ULONGEST> (4, TYPE_LENGTH (type));
+}
+
 /* Initialize the Nios II gdbarch.  */
 
 static struct gdbarch *
@@ -2292,6 +2301,8 @@ nios2_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_long_bit (gdbarch, 64);
   set_gdbarch_float_bit (gdbarch, 32);
   set_gdbarch_double_bit (gdbarch, 64);
+
+  set_gdbarch_type_align (gdbarch, nios2_type_align);
 
   set_gdbarch_float_format (gdbarch, floatformats_ieee_single);
   set_gdbarch_double_format (gdbarch, floatformats_ieee_double);
