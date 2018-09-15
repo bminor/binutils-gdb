@@ -1,5 +1,12 @@
 2018-09-23  Tom Tromey  <tom@tromey.com>
 
+	* python/py-function.c (fnpy_call): Use gdbpy_handle_exception.
+	* python/py-cmd.c (cmdpy_function): Use gdbpy_handle_exception.
+	* python/python-internal.h (gdbpy_handle_exception): Declare.
+	* python/py-utils.c (gdbpy_handle_exception): New function.
+
+2018-09-23  Tom Tromey  <tom@tromey.com>
+
 	PR python/17284:
 	* python/py-type.c (typy_template_argument): Check for negative
 	argument number.

@@ -654,6 +654,7 @@ extern const struct language_defn *python_language;
 
 int gdbpy_print_python_errors_p (void);
 void gdbpy_print_stack (void);
+void gdbpy_handle_exception () ATTRIBUTE_NORETURN;
 
 PyObject *python_string_to_unicode (PyObject *obj);
 gdb::unique_xmalloc_ptr<char> unicode_to_target_string (PyObject *unicode_str);
