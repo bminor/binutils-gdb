@@ -987,10 +987,9 @@ gdbpy_run_events (int error, gdb_client_data client_data)
       if (gdbpy_event_list == NULL)
 	gdbpy_event_list_end = &gdbpy_event_list;
 
-      /* Ignore errors.  */
       gdbpy_ref<> call_result (PyObject_CallObject (item->event, NULL));
       if (call_result == NULL)
-	PyErr_Clear ();
+	gdbpy_print_stack ();
 
       Py_DECREF (item->event);
       xfree (item);

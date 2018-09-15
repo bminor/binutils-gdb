@@ -1,5 +1,10 @@
 2018-09-23  Tom Tromey  <tom@tromey.com>
 
+	PR python/14062:
+	* python/python.c (gdbpy_run_events): Do not ignore exceptions.
+
+2018-09-23  Tom Tromey  <tom@tromey.com>
+
 	PR python/18170:
 	* python/py-value.c (valpy_int): Allow conversion from pointer
 	type.

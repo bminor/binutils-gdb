@@ -134,7 +134,18 @@ gdb_py_test_multiple "post event insertion" \
   "end" ""
 
 gdb_test "python print (someVal)" "1" "test post event execution"
-gdb_test "python gdb.post_event(str(1))" "RuntimeError: Posted event is not callable.*" "test non callable class"
+gdb_test "python gdb.post_event(str(1))" "RuntimeError: Posted event is not callable.*" \
+    "test non callable class"
+
+send_gdb "python gdb.post_event(lambda: invalid())\n"
+gdb_expect {
+    -re "name 'invalid' is not defined" {
+	pass "test post_event error on receipt"
+    }
+    default {
+	fail "test post_event error on receipt"
+    }
+}
 
 # Test (no) pagination of the executed command.
 gdb_test "show height" {Number of lines gdb thinks are in a page is unlimited\.}

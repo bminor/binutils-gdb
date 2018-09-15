@@ -1,5 +1,10 @@
 2018-09-23  Tom Tromey  <tom@tromey.com>
 
+	PR python/14062:
+	* gdb.python/python.exp: Add test for post_event error.
+
+2018-09-23  Tom Tromey  <tom@tromey.com>
+
 	PR python/18170:
 	* gdb.python/py-value.exp (test_value_numeric_ops): Add tests to
 	convert pointers to int and long.
