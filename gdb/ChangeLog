@@ -1,5 +1,12 @@
 2018-09-23  Tom Tromey  <tom@tromey.com>
 
+	PR python/18352;
+	* python/py-value.c (valpy_float): Allow conversions from int or
+	char.
+	(valpy_int, valpy_long): Allow conversions from float.
+
+2018-09-23  Tom Tromey  <tom@tromey.com>
+
 	* ctf.c (ctf_start): Use gdb_fopen_cloexec.
 	* common/scoped_mmap.c (mmap_file): Use gdb_open_cloexec.
 

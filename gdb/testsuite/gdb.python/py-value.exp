@@ -483,6 +483,18 @@ proc test_value_hash {} {
     gdb_test "python print (one.__hash__() == hash(one))" "True" "test inbuilt hash"
 }
 
+proc test_float_conversion {} {
+    global gdb_py_is_py3k
+    gdb_test "python print(int(gdb.Value(0)))" "0"
+    gdb_test "python print(int(gdb.Value(2.5)))" "2"
+    if {!$gdb_py_is_py3k} {
+	gdb_test "python print(long(gdb.Value(0)))" "0"
+	gdb_test "python print(long(gdb.Value(2.5)))" "2"
+    }
+    gdb_test "python print(float(gdb.Value(2.5)))" "2\\.5"
+    gdb_test "python print(float(gdb.Value(0)))" "0\\.0"
+}
+
 # Build C version of executable.  C++ is built later.
 if { [build_inferior "${binfile}" "c"] < 0 } {
     return -1
@@ -501,6 +513,7 @@ test_value_compare
 test_objfiles
 test_parse_and_eval
 test_value_hash
+test_float_conversion
 
 # The following tests require execution.
 
