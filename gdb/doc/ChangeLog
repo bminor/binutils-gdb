@@ -1,3 +1,8 @@
+2019-04-08  Kevin Buettner  <kevinb@redhat.com>
+
+	* python.texi (Threads In Python): Add description for method
+	InferiorThread.handle.
+
 2019-04-07  Tom Tromey  <tom@tromey.com>
 
 	* Makefile.in (all): Depend on "info".

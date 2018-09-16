@@ -3334,6 +3334,14 @@ Return a Boolean indicating whether the thread is running.
 Return a Boolean indicating whether the thread is exited.
 @end defun
 
+@defun InferiorThread.handle ()
+Return the thread object's handle, represented as a Python @code{bytes}
+object.  A @code{gdb.Value} representation of the handle may be
+constructed via @code{gdb.Value(bufobj, type)} where @var{bufobj} is
+the Python @code{bytes} representation of the handle and @var{type} is
+a @code{gdb.Type} for the handle type.
+@end defun
+
 @node Recordings In Python
 @subsubsection Recordings In Python
 @cindex recordings in python
