@@ -38,13 +38,6 @@
 #define CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF(ARG)
 #endif
 
-#ifdef WITH_CPYCHECKER_STEALS_REFERENCE_TO_ARG_ATTRIBUTE
-#define CPYCHECKER_STEALS_REFERENCE_TO_ARG(n) \
-   __attribute__ ((cpychecker_steals_reference_to_arg (n)))
-#else
-#define CPYCHECKER_STEALS_REFERENCE_TO_ARG(n)
-#endif
-
 #ifdef WITH_CPYCHECKER_SETS_EXCEPTION_ATTRIBUTE
 #define CPYCHECKER_SETS_EXCEPTION __attribute__ ((cpychecker_sets_exception))
 #else

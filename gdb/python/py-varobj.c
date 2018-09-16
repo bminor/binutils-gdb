@@ -130,14 +130,14 @@ static const struct varobj_iter_ops py_varobj_iter_ops =
    whose children the iterator will be iterating over.  PYITER is the
    python iterator actually responsible for the iteration.  */
 
-static void CPYCHECKER_STEALS_REFERENCE_TO_ARG (3)
+static void
 py_varobj_iter_ctor (struct py_varobj_iter *self,
-		      struct varobj *var, PyObject *pyiter)
+		     struct varobj *var, gdbpy_ref<> &&pyiter)
 {
   self->base.var = var;
   self->base.ops = &py_varobj_iter_ops;
   self->base.next_raw_index = 0;
-  self->iter = pyiter;
+  self->iter = pyiter.release ();
 }
 
 /* Allocate and construct a pretty-printed varobj iterator.  VAR is
@@ -145,13 +145,13 @@ py_varobj_iter_ctor (struct py_varobj_iter *self,
    PYITER is the python iterator actually responsible for the
    iteration.  */
 
-static struct py_varobj_iter * CPYCHECKER_STEALS_REFERENCE_TO_ARG (2)
-py_varobj_iter_new (struct varobj *var, PyObject *pyiter)
+static struct py_varobj_iter *
+py_varobj_iter_new (struct varobj *var, gdbpy_ref<> &&pyiter)
 {
   struct py_varobj_iter *self;
 
   self = XNEW (struct py_varobj_iter);
-  py_varobj_iter_ctor (self, var, pyiter);
+  py_varobj_iter_ctor (self, var, std::move (pyiter));
   return self;
 }
 
@@ -161,7 +161,6 @@ py_varobj_iter_new (struct varobj *var, PyObject *pyiter)
 struct varobj_iter *
 py_varobj_get_iterator (struct varobj *var, PyObject *printer)
 {
-  PyObject *iter;
   struct py_varobj_iter *py_iter;
 
   gdbpy_enter_varobj enter_py (var);
@@ -177,14 +176,14 @@ py_varobj_get_iterator (struct varobj *var, PyObject *printer)
       error (_("Null value returned for children"));
     }
 
-  iter = PyObject_GetIter (children.get ());
+  gdbpy_ref<> iter (PyObject_GetIter (children.get ()));
   if (iter == NULL)
     {
       gdbpy_print_stack ();
       error (_("Could not get children iterator"));
     }
 
-  py_iter = py_varobj_iter_new (var, iter);
+  py_iter = py_varobj_iter_new (var, std::move (iter));
 
   return &py_iter->base;
 }

@@ -1,5 +1,14 @@
 2018-09-16  Tom Tromey  <tom@tromey.com>
 
+	* python/python-internal.h (CPYCHECKER_STEALS_REFERENCE_TO_ARG):
+	Remove.
+	* python/py-varobj.c (py_varobj_iter_ctor): Change pyiter to
+	rvalue reference.  Remove CPYCHECKER_STEALS_REFERENCE_TO_ARG.
+	(py_varobj_iter_new): Likewise.
+	(py_varobj_get_iterator): Use gdbpy_ref.
+
+2018-09-16  Tom Tromey  <tom@tromey.com>
+
 	* python/py-threadevent.c (py_get_event_thread): Simplify.
 	* python/py-inferior.c (infpy_thread_from_thread_handle):
 	Return immediately after calling thread_to_thread_object.  Use
