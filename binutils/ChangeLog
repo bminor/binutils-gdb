@@ -1,5 +1,13 @@
 2018-09-17  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/lib/binutils-common.exp (is_som_format): New proc.
+	(run_dump_test): Correct target test for alternate .comm syntax.
+	(get_standard_section_names): Handle som format.
+	* testsuite/lib/utils-lib.exp (default_binutils_assemble_flags):
+	Correct target test for alternate .comm syntax.
+
+2018-09-17  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/binutils-all/strip-13mips64.s: Add section flags
 	for reloc section.
 	* testsuite/binutils-all/strip-13rel.s: Likewise.

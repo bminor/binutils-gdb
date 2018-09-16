@@ -117,7 +117,9 @@ proc default_binutils_assemble_flags { source object asflags } {
     # This is a hack in that it won't scale well if other targets need
     # similar transformations to assemble.  We'll generalize the hack
     # if/when other targets need similar handling.
-    if { [istarget "hppa*-*-*"] && ![istarget "*-*-linux*" ] } then {
+    if { [istarget "hppa*-*-*"] \
+	     && ![istarget "*-*-linux*"] \
+	     && ![istarget "*-*-netbsd*" ] } {
         set sed_file $srcdir/config/hppa.sed
 	send_log "sed -f $sed_file < $source > asm.s\n"
 	verbose "sed -f $sed_file < $source > asm.s"

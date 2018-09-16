@@ -1,3 +1,10 @@
+2018-09-17  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/all/gas.exp (redef3): Don't xfail for hppa.
+	(octa): Run for hppa.
+	* testsuite/gas/elf/elf.exp (common1, common2): Likewise.
+	* testsuite/gas/elf/symver.d: Delete notarget.
+
 2018-09-17  Nick Clifton  <nickc@redhat.com>
 
 	* testuite/gas/elf/group0a.d: Add extra details to the test

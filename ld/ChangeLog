@@ -1,3 +1,8 @@
+2018-09-17  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/comm-data5.d: Remove notarget for hppa.
+	* testsuite/ld-scripts/defined6.d: Likewise.
+
 2018-09-17  Nick Clifton  <nickc@redhat.com>
 
 	* testuite/ld/ld-elf/audit.exp: Differentiate the names of the

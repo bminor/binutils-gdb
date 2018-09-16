@@ -170,8 +170,6 @@ case $target_triplet in {
 	setup_xfail "riscv*-*-*" "rx-*-*" "vax*-*-*" "xgate*-*-*" "z8k-*-*"
 	# rs6000-aix disallows redefinition via .comm.
 	setup_xfail "*-*-aix*"
-	# SOM uses a different syntax for .comm
-	setup_xfail "hppa*-*-hpux*"
 	# These targets fail redef3 because section contents for the
 	# word referencing the .comm sym is not zero and/or its reloc
 	# has a non-zero addend.  Relaxing the test would hide real
@@ -414,17 +412,7 @@ if { ![istarget "powerpc*-*-*"] && ![istarget "rs6000*-*-*"] && ![istarget "s390
 }
 
 run_dump_test quad
-
-# som doesn't use .data section.
-case $target_triplet in {
-    { hppa*64*-*-* } {
-	run_dump_test octa
-    }
-    { hppa*-*-hpux* } { }
-    default {
-	run_dump_test octa
-    }
-}
+run_dump_test octa
 
 # .set works differently on some targets.
 case $target_triplet in {
