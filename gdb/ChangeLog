@@ -1,5 +1,11 @@
 2018-09-17  Tom Tromey  <tom@tromey.com>
 
+	PR python/20445:
+	* configure: Rebuild.
+	* configure.ac: Conditionally use -DNDEBUG for Python.
+
+2018-09-17  Tom Tromey  <tom@tromey.com>
+
 	* configure: Rebuild.
 	* configure.ac: Use gmp as a library dependency when checking for
 	mpfr.

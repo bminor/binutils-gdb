@@ -965,7 +965,11 @@ if test "${have_libpython}" != no; then
   # would make the python-related objects be compiled differently from the
   # rest of GDB (e.g., -O2 and -fPIC).
   if test "${GCC}" = yes; then
-    tentative_python_cflags="-fno-strict-aliasing -DNDEBUG -fwrapv"
+    tentative_python_cflags="-fno-strict-aliasing -fwrapv"
+    # Python headers recommend -DNDEBUG, but it's unclear if that just
+    # refers to building Python itself.  In release mode, though, it
+    # doesn't hurt for the Python code in gdb to follow.
+    $development || tentative_python_cflags="$tentative_python_cflags -DNDEBUG"
   fi
 
   if test "x${tentative_python_cflags}" != x; then
