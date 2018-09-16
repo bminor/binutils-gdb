@@ -1,3 +1,11 @@
+2018-09-16  Tom Tromey  <tom@tromey.com>
+
+	* python/py-threadevent.c (py_get_event_thread): Simplify.
+	* python/py-inferior.c (infpy_thread_from_thread_handle):
+	Return immediately after calling thread_to_thread_object.  Use
+	Py_RETURN_NONE.
+	(thread_to_thread_object): Set the exception on a NULL return.
+
 2018-09-16  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* Makefile.in (LIBGDB_OBS): Sort COMMON_OBS.

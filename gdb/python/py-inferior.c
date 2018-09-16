@@ -319,6 +319,8 @@ thread_to_thread_object (thread_info *thr)
     if (thread->thread_obj->thread == thr)
       return gdbpy_ref<>::new_reference ((PyObject *) thread->thread_obj);
 
+  PyErr_SetString (PyExc_SystemError,
+		   _("could not find gdb thread object"));
   return NULL;
 }
 
@@ -849,7 +851,6 @@ infpy_thread_from_thread_handle (PyObject *self, PyObject *args, PyObject *kw)
       return NULL;
     }
 
-  gdbpy_ref<> result;
   TRY
     {
       struct thread_info *thread_info;
@@ -857,7 +858,7 @@ infpy_thread_from_thread_handle (PyObject *self, PyObject *args, PyObject *kw)
 
       thread_info = find_thread_by_handle (val, inf_obj->inferior);
       if (thread_info != NULL)
-	result = thread_to_thread_object (thread_info);
+	return thread_to_thread_object (thread_info).release ();
     }
   CATCH (except, RETURN_MASK_ALL)
     {
@@ -865,10 +866,7 @@ infpy_thread_from_thread_handle (PyObject *self, PyObject *args, PyObject *kw)
     }
   END_CATCH
 
-  if (result == NULL)
-    result = gdbpy_ref<>::new_reference (Py_None);
-
-  return result.release ();
+  Py_RETURN_NONE;
 }
 
 /* Implement repr() for gdb.Inferior.  */

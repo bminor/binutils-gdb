@@ -25,24 +25,15 @@
 gdbpy_ref<>
 py_get_event_thread (ptid_t ptid)
 {
-  gdbpy_ref<> pythread;
-
   if (non_stop)
     {
       thread_info *thread = find_thread_ptid (ptid);
       if (thread != nullptr)
-	pythread = thread_to_thread_object (thread);
-    }
-  else
-    pythread = gdbpy_ref<>::new_reference (Py_None);
-
-  if (pythread == nullptr)
-    {
+	return thread_to_thread_object (thread);
       PyErr_SetString (PyExc_RuntimeError, "Could not find event thread");
       return NULL;
     }
-
-  return pythread;
+  return gdbpy_ref<>::new_reference (Py_None);
 }
 
 gdbpy_ref<>
