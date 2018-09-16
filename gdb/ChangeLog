@@ -1,3 +1,9 @@
+2018-09-17  Tom Tromey  <tom@tromey.com>
+
+	* configure: Rebuild.
+	* configure.ac: Use gmp as a library dependency when checking for
+	mpfr.
+
 2018-09-17  Pedro Alves  <palves@redhat.com>
 
 	* python/py-inferior.c (find_inferior_object): Delete.

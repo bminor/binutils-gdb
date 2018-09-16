@@ -682,7 +682,7 @@ if test "${with_mpfr}" = no; then
   AC_MSG_WARN([MPFR support disabled; some features may be unavailable.])
   HAVE_LIBMPFR=no
 else
-  AC_LIB_HAVE_LINKFLAGS([mpfr], [], [#include <mpfr.h>],
+  AC_LIB_HAVE_LINKFLAGS([mpfr], [gmp], [#include <mpfr.h>],
 			[mpfr_exp_t exp; mpfr_t x;
 			 mpfr_frexp (&exp, x, x, MPFR_RNDN);])
   if test "$HAVE_LIBMPFR" != yes; then

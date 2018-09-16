@@ -9837,7 +9837,7 @@ fi
   rpathdirs=
   ltrpathdirs=
   names_already_handled=
-  names_next_round='mpfr '
+  names_next_round='mpfr gmp'
   while test -n "$names_next_round"; do
     names_this_round="$names_next_round"
     names_next_round=
