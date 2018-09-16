@@ -1,3 +1,7 @@
+2018-09-16  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in (LIBGDB_OBS): Sort COMMON_OBS.
+
 2018-09-16  Tom Tromey  <tom@tromey.com>
 
 	* python/python-internal.h (CPYCHECKER_RETURNS_BORROWED_REF):
