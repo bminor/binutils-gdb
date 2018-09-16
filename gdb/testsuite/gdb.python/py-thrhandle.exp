@@ -16,11 +16,12 @@
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@gnu.org
 
-# This file verifies that gdb.Inferior.thread_from_thread_handle works
-# as expected.
+# This file verifies that methods Inferior.thread_from_thread_handle
+# and InferiorThread.handle work as expected.
+
+load_lib gdb-python.exp
 
 standard_testfile
-
 
 if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable debug] != "" } {
     return -1
@@ -104,3 +105,38 @@ gdb_test "python print(gdb.selected_inferior().thread_from_thread_handle(gdb.par
 gdb_test "python print(gdb.selected_inferior().thread_from_thread_handle(gdb.parse_and_eval('\"S\"')))" \
          ".*Thread handle size mismatch.*" \
 	 "Pass too small of an object to thread_from_thread_handle"
+
+# Test the thread_handle method
+
+gdb_py_test_silent_cmd "python tp=gdb.lookup_type('pthread_t')" \
+		       "Get pthread_t type" 0
+gdb_py_test_silent_cmd "python inf=gdb.selected_inferior()" "Get inferior" 0
+
+foreach thrN {0 1 2} {
+    with_test_prefix "thread $thrN" {
+
+	gdb_py_test_silent_cmd \
+	    "python hand = gdb.parse_and_eval('thrs\[$thrN\]')" \
+	    "fetch thread handle from inferior" \
+	    1
+
+	gdb_py_test_silent_cmd \
+	    "python hand_bytes = inf.thread_from_thread_handle(hand).handle()" \
+	    "fetch thread handle from thread" \
+	    1
+
+
+	# It'd be nice to be able to use this comparison expression:
+	#
+	#    hand == hand_bytes
+	#
+	# But this won't work because hand is a gdb.Value and hand_bytes
+	# is a Python bytes object.  Therefore, we convert the bytes
+	# object into a gdb.value by calling the two argument form of
+	# its constructor.
+
+        gdb_test "python print(gdb.Value(hand_bytes, tp) == hand)" \
+	         "True" \
+	         "verify that handles are the same"
+    }
+}
