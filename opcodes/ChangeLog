@@ -1,5 +1,10 @@
 2018-09-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-opc.tbl: Set VexW=3 on AVX vrsqrtss.
+	* i386-tbl.h: Regenerated.
+
+2018-09-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/23665
 	* i386-dis.c (vex_len_table): Update VEX_LEN_0F7E_P_1 and
 	VEX_LEN_0FD6_P_2 entries.
