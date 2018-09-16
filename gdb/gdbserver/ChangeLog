@@ -1,3 +1,7 @@
+2018-09-16  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in: Remove references to $(ADD_DEPS).
+
 2018-09-16  Tom Tromey  <tom@tromey.com>
 
 	* remote-utils.c (remote_open): Use GNU style for metasyntactic
