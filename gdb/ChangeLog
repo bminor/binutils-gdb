@@ -1,3 +1,7 @@
+2018-09-17  Pedro Alves  <palves@redhat.com>
+
+	* python/py-inferior.c (find_inferior_object): Delete.
+
 2018-09-17  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* compile/compile-cplus-types.c

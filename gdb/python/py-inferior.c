@@ -292,20 +292,6 @@ python_inferior_deleted (struct inferior *inf)
     gdbpy_print_stack ();
 }
 
-/* Finds the Python Inferior object for the given PID.  Returns a
-   reference, or NULL if PID does not match any inferior object. */
-
-PyObject *
-find_inferior_object (int pid)
-{
-  struct inferior *inf = find_inferior_pid (pid);
-
-  if (inf)
-    return (PyObject *) inferior_to_inferior_object (inf);
-
-  return NULL;
-}
-
 gdbpy_ref<>
 thread_to_thread_object (thread_info *thr)
 {
