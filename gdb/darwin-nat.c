@@ -38,6 +38,7 @@
 #include "bfd.h"
 #include "bfd/mach-o.h"
 
+#include <copyfile.h>
 #include <sys/ptrace.h>
 #include <sys/signal.h>
 #include <setjmp.h>
@@ -61,7 +62,11 @@
 #include <mach/port.h>
 
 #include "darwin-nat.h"
+#include "filenames.h"
 #include "common/filestuff.h"
+#include "common/gdb_unlinker.h"
+#include "common/pathstuff.h"
+#include "common/scoped_fd.h"
 #include "nat/fork-inferior.h"
 
 /* Quick overview.
@@ -118,6 +123,10 @@ static int enable_mach_exceptions;
 
 /* Inferior that should report a fake stop event.  */
 static struct inferior *darwin_inf_fake_stop;
+
+/* If non-NULL, the shell we actually invoke.  See maybe_cache_shell
+   for details.  */
+static const char *copied_shell;
 
 #define PAGE_TRUNC(x) ((x) & ~(mach_page_size - 1))
 #define PAGE_ROUND(x) PAGE_TRUNC((x) + mach_page_size - 1)
@@ -1833,10 +1842,11 @@ darwin_execvp (const char *file, char * const argv[], char * const env[])
   posix_spawnp (NULL, argv[0], NULL, &attr, argv, env);
 }
 
-/* Read kernel version, and return TRUE on Sierra or later.  */
+/* Read kernel version, and return TRUE if this host may have System
+   Integrity Protection (Sierra or later).  */
 
 static bool
-should_disable_startup_with_shell ()
+may_have_sip ()
 {
   char str[16];
   size_t sz = sizeof (str);
@@ -1852,6 +1862,131 @@ should_disable_startup_with_shell ()
   return false;
 }
 
+/* A helper for maybe_cache_shell.  This copies the shell to the
+   cache.  It will throw an exception on any failure.  */
+
+static void
+copy_shell_to_cache (const char *shell, const std::string &new_name)
+{
+  scoped_fd from_fd (gdb_open_cloexec (shell, O_RDONLY, 0));
+  if (from_fd.get () < 0)
+    error (_("Could not open shell (%s) for reading: %s"),
+	   shell, safe_strerror (errno));
+
+  std::string new_dir = ldirname (new_name.c_str ());
+  if (!mkdir_recursive (new_dir.c_str ()))
+    error (_("Could not make cache directory \"%s\": %s"),
+	   new_dir.c_str (), safe_strerror (errno));
+
+  gdb::char_vector temp_name = make_temp_filename (new_name);
+  scoped_fd to_fd (gdb_mkostemp_cloexec (&temp_name[0]));
+  gdb::unlinker unlink_file_on_error (temp_name.data ());
+
+  if (to_fd.get () < 0)
+    error (_("Could not open temporary file \"%s\" for writing: %s"),
+	   temp_name.data (), safe_strerror (errno));
+
+  if (fcopyfile (from_fd.get (), to_fd.get (), nullptr,
+		 COPYFILE_STAT | COPYFILE_DATA) != 0)
+    error (_("Could not copy shell to cache as \"%s\": %s"),
+	   temp_name.data (), safe_strerror (errno));
+
+  /* Be sure that the caching is atomic so that we don't get bad
+     results from multiple copies of gdb running at the same time.  */
+  if (rename (temp_name.data (), new_name.c_str ()) != 0)
+    error (_("Could not rename shell cache file to \"%s\": %s"),
+	   new_name.c_str (), safe_strerror (errno));
+
+  unlink_file_on_error.keep ();
+}
+
+/* If $SHELL is restricted, try to cache a copy.  Starting with El
+   Capitan, macOS introduced System Integrity Protection.  Among other
+   things, this prevents certain executables from being ptrace'd.  In
+   particular, executables in /bin, like most shells, are affected.
+   To work around this, while preserving command-line glob expansion
+   and redirections, gdb will cache a copy of the shell.  Return true
+   if all is well -- either the shell is not subject to SIP or it has
+   been successfully cached.  Returns false if something failed.  */
+
+static bool
+maybe_cache_shell ()
+{
+  /* SF_RESTRICTED is defined in sys/stat.h and lets us determine if a
+     given file is subject to SIP.  */
+#ifdef SF_RESTRICTED
+
+  /* If a check fails we want to revert -- maybe the user deleted the
+     cache while gdb was running, or something like that.  */
+  copied_shell = nullptr;
+
+  const char *shell = get_shell ();
+  if (!IS_ABSOLUTE_PATH (shell))
+    {
+      warning (_("This version of macOS has System Integrity Protection.\n\
+Normally gdb would try to work around this by caching a copy of your shell,\n\
+but because your shell (%s) is not an absolute path, this is being skipped."),
+	       shell);
+      return false;
+    }
+
+  struct stat sb;
+  if (stat (shell, &sb) < 0)
+    {
+      warning (_("This version of macOS has System Integrity Protection.\n\
+Normally gdb would try to work around this by caching a copy of your shell,\n\
+but because gdb could not stat your shell (%s), this is being skipped.\n\
+The error was: %s"),
+	       shell, safe_strerror (errno));
+      return false;
+    }
+
+  if ((sb.st_flags & SF_RESTRICTED) == 0)
+    return true;
+
+  /* Put the copy somewhere like ~/Library/Caches/gdb/bin/sh.  */
+  std::string new_name = get_standard_cache_dir ();
+  /* There's no need to insert a directory separator here, because
+     SHELL is known to be absolute.  */
+  new_name.append (shell);
+
+  /* Maybe it was cached by some earlier gdb.  */
+  if (stat (new_name.c_str (), &sb) != 0 || !S_ISREG (sb.st_mode))
+    {
+      TRY
+	{
+	  copy_shell_to_cache (shell, new_name);
+	}
+      CATCH (ex, RETURN_MASK_ERROR)
+	{
+	  warning (_("This version of macOS has System Integrity Protection.\n\
+Because `startup-with-shell' is enabled, gdb tried to work around SIP by\n\
+caching a copy of your shell.  However, this failed:\n\
+%s\n\
+If you correct the problem, gdb will automatically try again the next time\n\
+you \"run\".  To prevent these attempts, you can use:\n\
+    set startup-with-shell off"),
+		   ex.message);
+	  return false;
+	}
+      END_CATCH
+
+      printf_filtered (_("Note: this version of macOS has System Integrity Protection.\n\
+Because `startup-with-shell' is enabled, gdb has worked around this by\n\
+caching a copy of your shell.  The shell used by \"run\" is now:\n\
+    %s\n"),
+		       new_name.c_str ());
+    }
+
+  /* We need to make sure that the new name has the correct lifetime.  */
+  static std::string saved_shell = std::move (new_name);
+  copied_shell = saved_shell.c_str ();
+
+#endif /* SF_RESTRICTED */
+
+  return true;
+}
+
 void
 darwin_nat_target::create_inferior (const char *exec_file,
 				    const std::string &allargs,
@@ -1859,16 +1994,18 @@ darwin_nat_target::create_inferior (const char *exec_file,
 {
   gdb::optional<scoped_restore_tmpl<int>> restore_startup_with_shell;
 
-  if (startup_with_shell && should_disable_startup_with_shell ())
+  if (startup_with_shell && may_have_sip ())
     {
-      warning (_("startup-with-shell not supported on this macOS version,"
-	         " disabling it."));
-      restore_startup_with_shell.emplace (&startup_with_shell, 0);
+      if (!maybe_cache_shell ())
+	{
+	  warning (_("startup-with-shell is now temporarily disabled"));
+	  restore_startup_with_shell.emplace (&startup_with_shell, 0);
+	}
     }
 
   /* Do the hard work.  */
   fork_inferior (exec_file, allargs, env, darwin_ptrace_me,
-		 darwin_ptrace_him, darwin_pre_ptrace, NULL,
+		 darwin_ptrace_him, darwin_pre_ptrace, copied_shell,
 		 darwin_execvp);
 }
 

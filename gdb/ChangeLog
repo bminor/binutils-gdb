@@ -1,5 +1,14 @@
 2018-10-27  Tom Tromey  <tom@tromey.com>
 
+	PR cli/23364:
+	* darwin-nat.c (copied_shell): New global.
+	(may_have_sip): Rename from should_disable_startup_with_shell.
+	(copy_shell_to_cache, maybe_cache_shell): New functions.
+	(darwin_nat_target::create_inferior): Update.  Use
+	copied_shell.
+
+2018-10-27  Tom Tromey  <tom@tromey.com>
+
 	* unittests/scoped_fd-selftests.c (test_to_file): New function.
 	(run_tests): Call test_to_file.
 	* dwarf-index-write.c (write_psymtabs_to_index): Do not reopen
