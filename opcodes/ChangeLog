@@ -1,3 +1,8 @@
+2018-09-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.tbl (VexWIG): New.
+	Replace VexW=3 with VexWIG.
+
 2018-09-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.tbl: Set VexW=3 on AVX vrsqrtss.
