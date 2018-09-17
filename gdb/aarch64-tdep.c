@@ -1366,7 +1366,9 @@ pass_in_v (struct gdbarch *gdbarch,
   if (info->nsrn < 8)
     {
       int regnum = AARCH64_V0_REGNUM + info->nsrn;
-      gdb_byte reg[V_REGISTER_SIZE];
+      /* Enough space for a full vector register.  */
+      gdb_byte reg[register_size (gdbarch, regnum)];
+      gdb_assert (len <= sizeof (reg));
 
       info->argnum++;
       info->nsrn++;
@@ -1937,7 +1939,9 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
       for (int i = 0; i < elements; i++)
 	{
 	  int regno = AARCH64_V0_REGNUM + i;
-	  bfd_byte buf[V_REGISTER_SIZE];
+	  /* Enough space for a full vector register.  */
+	  gdb_byte buf[register_size (gdbarch, regno)];
+	  gdb_assert (len <= sizeof (buf));
 
 	  if (aarch64_debug)
 	    {
@@ -2047,7 +2051,9 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
       for (int i = 0; i < elements; i++)
 	{
 	  int regno = AARCH64_V0_REGNUM + i;
-	  bfd_byte tmpbuf[V_REGISTER_SIZE];
+	  /* Enough space for a full vector register.  */
+	  gdb_byte tmpbuf[register_size (gdbarch, regno)];
+	  gdb_assert (len <= sizeof (tmpbuf));
 
 	  if (aarch64_debug)
 	    {

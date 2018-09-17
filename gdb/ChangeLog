@@ -1,3 +1,9 @@
+2018-09-18  Alan Hayward  <alan.hayward@arm.com>
+
+	* aarch64-tdep.c (pass_in_v): Use register size.
+	(aarch64_extract_return_value): Likewise.
+	(aarch64_store_return_value): Likewise.
+
 2018-09-18  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* utils.c (dump_core) [HAVE_SETRLIMIT]: Cast RLIM_INFINITY to
