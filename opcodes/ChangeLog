@@ -1,3 +1,7 @@
+2018-09-17  Kito Cheng  <kito@andestech.com>
+
+	* riscv-opc.c (riscv_opcodes): Adjust the order of ble and bleu.
+
 2018-09-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/23670

@@ -1,3 +1,8 @@
+2018-09-17  Kito Cheng  <kito@andestech.com>
+
+	* testsuite/gas/riscv/bge.d: New.
+	* testsuite/gas/riscv/bge.s: Likewise.
+
 2018-09-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/23670
