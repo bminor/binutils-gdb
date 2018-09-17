@@ -25,6 +25,7 @@
 #include "ui-out.h"
 #include "top.h"
 #include "breakpoint.h"
+#include "tracepoint.h"
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
 #include "cli/cli-script.h"
@@ -33,6 +34,8 @@
 #include "interps.h"
 #include "compile/compile.h"
 #include "common/gdb_string_view.h"
+#include "python/python.h"
+#include "guile/guile.h"
 
 #include <vector>
 
@@ -57,6 +60,15 @@ static int command_nest_depth = 1;
 
 /* This is to prevent certain commands being printed twice.  */
 static int suppress_next_print_command_trace = 0;
+
+/* Command element for the 'while' command.  */
+static cmd_list_element *while_cmd_element = nullptr;
+
+/* Command element for the 'if' command.  */
+static cmd_list_element *if_cmd_element = nullptr;
+
+/* Command element for the 'define' command.  */
+static cmd_list_element *define_cmd_element = nullptr;
 
 /* Structure for arguments to user defined functions.  */
 
@@ -906,16 +918,6 @@ read_next_line (void)
   return command_line_input (prompt_ptr, "commands");
 }
 
-/* Return true if CMD's name is NAME.  */
-
-static bool
-command_name_equals (struct cmd_list_element *cmd, const char *name)
-{
-  return (cmd != NULL
-	  && cmd != CMD_LIST_AMBIGUOUS
-	  && strcmp (cmd->name, name) == 0);
-}
-
 /* Given an input line P, skip the command and return a pointer to the
    first argument.  */
 
@@ -990,7 +992,7 @@ process_next_line (const char *p, struct command_line **command,
 
       /* Check for while, if, break, continue, etc and build a new
 	 command line structure for them.  */
-      if (command_name_equals (cmd, "while-stepping"))
+      if (cmd == while_stepping_cmd_element)
 	{
 	  /* Because validate_actionline and encode_action lookup
 	     command's line as command, we need the line to
@@ -1005,34 +1007,28 @@ process_next_line (const char *p, struct command_line **command,
 	     not.  */
 	  *command = build_command_line (while_stepping_control, p);
 	}
-      else if (command_name_equals (cmd, "while"))
-	{
-	  *command = build_command_line (while_control, line_first_arg (p));
-	}
-      else if (command_name_equals (cmd, "if"))
-	{
-	  *command = build_command_line (if_control, line_first_arg (p));
-	}
-      else if (command_name_equals (cmd, "commands"))
-	{
-	  *command = build_command_line (commands_control, line_first_arg (p));
-	}
-      else if (command_name_equals (cmd, "define"))
+      else if (cmd == while_cmd_element)
+	*command = build_command_line (while_control, line_first_arg (p));
+      else if (cmd == if_cmd_element)
+	*command = build_command_line (if_control, line_first_arg (p));
+      else if (cmd == commands_cmd_element)
+	*command = build_command_line (commands_control, line_first_arg (p));
+      else if (cmd == define_cmd_element)
 	*command = build_command_line (define_control, line_first_arg (p));
-      else if (command_name_equals (cmd, "python") && !inline_cmd)
+      else if (cmd == python_cmd_element && !inline_cmd)
 	{
 	  /* Note that we ignore the inline "python command" form
 	     here.  */
 	  *command = build_command_line (python_control, "");
 	}
-      else if (command_name_equals (cmd, "compile") && !inline_cmd)
+      else if (cmd == compile_cmd_element && !inline_cmd)
 	{
 	  /* Note that we ignore the inline "compile command" form
 	     here.  */
 	  *command = build_command_line (compile_control, "");
 	  (*command)->control_u.compile.scope = COMPILE_I_INVALID_SCOPE;
 	}
-      else if (command_name_equals (cmd, "guile") && !inline_cmd)
+      else if (cmd == guile_cmd_element && !inline_cmd)
 	{
 	  /* Note that we ignore the inline "guile command" form here.  */
 	  *command = build_command_line (guile_control, "");
@@ -1597,7 +1593,7 @@ _initialize_cli_script (void)
 Document a user-defined command.\n\
 Give command name as argument.  Give documentation on following lines.\n\
 End with a line of just \"end\"."));
-  add_com ("define", class_support, define_command, _("\
+  define_cmd_element = add_com ("define", class_support, define_command, _("\
 Define a new command name.  Command name is argument.\n\
 Definition appears on following lines, one command per line.\n\
 End with a line of just \"end\".\n\
@@ -1606,13 +1602,13 @@ Commands defined in this way may accept an unlimited number of arguments\n\
 accessed via $arg0 .. $argN.  $argc tells how many arguments have\n\
 been passed."));
 
-  add_com ("while", class_support, while_command, _("\
+  while_cmd_element = add_com ("while", class_support, while_command, _("\
 Execute nested commands WHILE the conditional expression is non zero.\n\
 The conditional expression must follow the word `while' and must in turn be\n\
 followed by a new line.  The nested commands must be entered one per line,\n\
 and should be terminated by the word `end'."));
 
-  add_com ("if", class_support, if_command, _("\
+  if_cmd_element = add_com ("if", class_support, if_command, _("\
 Execute nested commands once IF the conditional expression is non zero.\n\
 The conditional expression must follow the word `if' and must in turn be\n\
 followed by a new line.  The nested commands must be entered one per line,\n\

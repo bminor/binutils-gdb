@@ -25,4 +25,7 @@
 /* This is all that guile exports to gdb.  */
 extern const struct extension_language_defn extension_language_guile;
 
+/* Command element for the 'guile' command.  */
+extern cmd_list_element *guile_cmd_element;
+
 #endif /* GDB_GUILE_H */
