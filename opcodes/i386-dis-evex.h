@@ -1208,7 +1208,7 @@ static const struct dis386 evex_table[][256] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { VEX_W_TABLE (EVEX_W_0F6E_P_2) },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F6E_P_2) },
   },
   /* PREFIX_EVEX_0F6F */
   {
@@ -1345,8 +1345,8 @@ static const struct dis386 evex_table[][256] = {
   /* PREFIX_EVEX_0F7E */
   {
     { Bad_Opcode },
-    { VEX_W_TABLE (EVEX_W_0F7E_P_1) },
-    { VEX_W_TABLE (EVEX_W_0F7E_P_2) },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F7E_P_1) },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F7E_P_2) },
   },
   /* PREFIX_EVEX_0F7F */
   {
@@ -1414,7 +1414,7 @@ static const struct dis386 evex_table[][256] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { VEX_W_TABLE (EVEX_W_0FD6_P_2) },
+    { EVEX_LEN_TABLE (EVEX_LEN_0FD6_P_2) },
   },
   /* PREFIX_EVEX_0FD8 */
   {
@@ -4100,3 +4100,25 @@ static const struct dis386 evex_table[][256] = {
   },
 #endif /* NEED_MOD_TABLE */
 
+#ifdef NEED_EVEX_LEN_TABLE
+  /* EVEX_LEN_0F6E_P_2 */
+  {
+    { VEX_W_TABLE (EVEX_W_0F6E_P_2) },
+  },
+
+  /* EVEX_LEN_0F7E_P_1 */
+  {
+    { VEX_W_TABLE (EVEX_W_0F7E_P_1) },
+  },
+
+  /* EVEX_LEN_0F7E_P_2 */
+  {
+    { VEX_W_TABLE (EVEX_W_0F7E_P_2) },
+  },
+
+  /* EVEX_LEN_0FD6_P_2 */
+  {
+    { VEX_W_TABLE (EVEX_W_0FD6_P_2) },
+  },
+
+#endif /* NEED_EVEX_LEN_TABLE */

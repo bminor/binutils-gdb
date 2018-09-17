@@ -1,5 +1,25 @@
 2018-09-17  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gas/23670
+	* i386-dis-evex.h (evex_table): Use EVEX_LEN_0F6E_P_2,
+	EVEX_LEN_0F7E_P_1, EVEX_LEN_0F7E_P_2 and EVEX_LEN_0FD6_P_2.
+	(EVEX_LEN_0F6E_P_2): New EVEX_LEN_TABLE entry.
+	(EVEX_LEN_0F7E_P_1): Likewise.
+	(EVEX_LEN_0F7E_P_2): Likewise.
+	(EVEX_LEN_0FD6_P_2): Likewise.
+	* i386-dis.c (USE_EVEX_LEN_TABLE): New.
+	(EVEX_LEN_TABLE): Likewise.
+	(EVEX_LEN_0F6E_P_2): New enum.
+	(EVEX_LEN_0F7E_P_1): Likewise.
+	(EVEX_LEN_0F7E_P_2): Likewise.
+	(EVEX_LEN_0FD6_P_2): Likewise.
+	(evex_len_table): New.
+	(get_valid_dis386): Handle USE_EVEX_LEN_TABLE.
+	* i386-opc.tbl: Set EVex=2 on EVEX.128 only vmovd and vmovq.
+	* i386-tbl.h: Regenerated.
+
+2018-09-17  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/23665
 	* i386-dis.c (vex_len_table): Update VEX_LEN_0F6E_P_2 and
 	VEX_LEN_0F7E_P_2 entries.

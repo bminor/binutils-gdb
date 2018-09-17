@@ -703,7 +703,8 @@ enum
   USE_VEX_C5_TABLE,
   USE_VEX_LEN_TABLE,
   USE_VEX_W_TABLE,
-  USE_EVEX_TABLE
+  USE_EVEX_TABLE,
+  USE_EVEX_LEN_TABLE
 };
 
 #define FLOAT			NULL, { { NULL, FLOATCODE } }, 0
@@ -723,6 +724,7 @@ enum
 #define VEX_LEN_TABLE(I)	DIS386 (USE_VEX_LEN_TABLE, (I))
 #define VEX_W_TABLE(I)		DIS386 (USE_VEX_W_TABLE, (I))
 #define EVEX_TABLE(I)		DIS386 (USE_EVEX_TABLE, (I))
+#define EVEX_LEN_TABLE(I)	DIS386 (USE_EVEX_LEN_TABLE, (I))
 
 enum
 {
@@ -1927,6 +1929,14 @@ enum
   VEX_LEN_0FXOP_08_EF,
   VEX_LEN_0FXOP_09_80,
   VEX_LEN_0FXOP_09_81
+};
+
+enum
+{
+  EVEX_LEN_0F6E_P_2 = 0,
+  EVEX_LEN_0F7E_P_1,
+  EVEX_LEN_0F7E_P_2,
+  EVEX_LEN_0FD6_P_2
 };
 
 enum
@@ -9882,6 +9892,12 @@ static const struct dis386 vex_len_table[][2] = {
   },
 };
 
+static const struct dis386 evex_len_table[][3] = {
+#define NEED_EVEX_LEN_TABLE
+#include "i386-dis-evex.h"
+#undef NEED_EVEX_LEN_TABLE
+};
+
 static const struct dis386 vex_w_table[][2] = {
   {
     /* VEX_W_0F41_P_0_LEN_1 */
@@ -11540,6 +11556,29 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	}
 
       dp = &vex_len_table[dp->op[1].bytemode][vindex];
+      break;
+
+    case USE_EVEX_LEN_TABLE:
+      if (!vex.evex)
+	abort ();
+
+      switch (vex.length)
+	{
+	case 128:
+	  vindex = 0;
+	  break;
+	case 256:
+	  vindex = 1;
+	  break;
+	case 512:
+	  vindex = 2;
+	  break;
+	default:
+	  abort ();
+	  break;
+	}
+
+      dp = &evex_len_table[dp->op[1].bytemode][vindex];
       break;
 
     case USE_XOP_8F_TABLE:
