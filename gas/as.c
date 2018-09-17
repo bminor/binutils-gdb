@@ -1254,14 +1254,27 @@ main (int argc, char ** argv)
 	{
 	  struct stat sib;
 
-	  if (stat (argv[i], &sib) == 0)
+	  /* Check that the input file and output file are different.  */
+	  if (stat (argv[i], &sib) == 0
+	      && sib.st_ino == sob.st_ino
+	      /* POSIX emulating systems may support stat() but if the
+		 underlying file system does not support a file serial number
+		 of some kind then they will return 0 for the inode.  So
+		 two files with an inode of 0 may not actually be the same.
+		 On real POSIX systems no ordinary file will ever have an
+		 inode of 0.  */
+	      && sib.st_ino != 0
+	      /* Different files may have the same inode number if they
+		 reside on different devices, so check the st_dev field as
+		 well.  */
+	      && sib.st_dev == sob.st_dev)
 	    {
-	      if (sib.st_ino == sob.st_ino && sib.st_ino != 0)
-		{
-		  /* Don't let as_fatal remove the output file!  */
-		  out_file_name = NULL;
-		  as_fatal (_("The input and output files must be distinct"));
-		}
+	      const char *saved_out_file_name = out_file_name;
+
+	      /* Don't let as_fatal remove the output file!  */
+	      out_file_name = NULL;
+	      as_fatal (_("The input '%s' and output '%s' files are the same"),
+			argv[i], saved_out_file_name);
 	    }
 	}
     }
