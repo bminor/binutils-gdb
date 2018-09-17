@@ -261,7 +261,7 @@ compile_cplus_instance::enter_scope (compile_scope &&new_scope)
       if (debug_compile_cplus_scopes)
 	{
 	  fprintf_unfiltered (gdb_stdlog, "entering new scope %s\n",
-			      host_address_to_string (&new_scope));
+			      host_address_to_string (&m_scopes.back ()));
 	}
 
       /* Push the global namespace. */
@@ -270,7 +270,7 @@ compile_cplus_instance::enter_scope (compile_scope &&new_scope)
       /* Push all other namespaces.  Note that we do not push the last
 	 scope_component -- that's the actual type we are converting.  */
       std::for_each
-	(new_scope.begin (), new_scope.end () - 1,
+	(m_scopes.back ().begin (), m_scopes.back ().end () - 1,
 	 [this] (const scope_component &comp)
 	 {
 	  gdb_assert (TYPE_CODE (SYMBOL_TYPE (comp.bsymbol.symbol))

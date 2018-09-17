@@ -1,3 +1,9 @@
+2018-09-17  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* compile/compile-cplus-types.c
+	(compile_cplus_instance::enter_scope): Don't use new_scope after
+	std::move.
+
 2018-09-17  Tom Tromey  <tom@tromey.com>
 
 	* common/pathstuff.c (get_standard_cache_dir): Use
