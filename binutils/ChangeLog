@@ -1,3 +1,18 @@
+2018-09-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* objcopy.c (strip_specific_buffer): New.
+	(strip_unneeded_buffer): Likewise.
+	(keep_specific_buffer): Likewise.
+	(localize_specific_buffer): Likewise.
+	(globalize_specific_buffer): Likewise.
+	(keepglobal_specific_buffer): Likewise.
+	(weaken_specific_buffer): Likewise.
+	(add_specific_symbols): Add an argument to return pointer to
+	allocated buffer.
+	(copy_main): Update add_specific_symbols to update pointers to
+	allocated buffer.  Free pointers to allocated buffer before
+	return.
+
 2018-09-17  Alan Modra  <amodra@gmail.com>
 
 	* objcopy.c (handle_remove_section_option): Don't require a dot

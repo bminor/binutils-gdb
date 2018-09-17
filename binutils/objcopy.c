@@ -253,6 +253,14 @@ static htab_t redefine_specific_reverse_htab = NULL;
 static struct addsym_node *add_sym_list = NULL, **add_sym_tail = &add_sym_list;
 static int add_symbols = 0;
 
+static char *strip_specific_buffer = NULL;
+static char *strip_unneeded_buffer = NULL;
+static char *keep_specific_buffer = NULL;
+static char *localize_specific_buffer = NULL;
+static char *globalize_specific_buffer = NULL;
+static char *keepglobal_specific_buffer = NULL;
+static char *weaken_specific_buffer = NULL;
+
 /* If this is TRUE, we weaken global symbols (set BSF_WEAK).  */
 static bfd_boolean weaken = FALSE;
 
@@ -1034,7 +1042,7 @@ add_specific_symbol_node (const void *node, htab_t htab)
 #define IS_LINE_TERMINATOR(c) ((c) == '\n' || (c) == '\r' || (c) == '\0')
 
 static void
-add_specific_symbols (const char *filename, htab_t htab)
+add_specific_symbols (const char *filename, htab_t htab, char **buffer_p)
 {
   off_t  size;
   FILE * f;
@@ -1145,6 +1153,7 @@ add_specific_symbols (const char *filename, htab_t htab)
 
   /* Do not free the buffer.  Parts of it will have been referenced
      in the calls to add_specific_symbol.  */
+  *buffer_p = buffer;
 }
 
 /* See whether a symbol should be stripped or kept
@@ -5262,15 +5271,18 @@ copy_main (int argc, char *argv[])
 	  break;
 
 	case OPTION_STRIP_SYMBOLS:
-	  add_specific_symbols (optarg, strip_specific_htab);
+	  add_specific_symbols (optarg, strip_specific_htab,
+				&strip_specific_buffer);
 	  break;
 
 	case OPTION_STRIP_UNNEEDED_SYMBOLS:
-	  add_specific_symbols (optarg, strip_unneeded_htab);
+	  add_specific_symbols (optarg, strip_unneeded_htab,
+				&strip_unneeded_buffer);
 	  break;
 
 	case OPTION_KEEP_SYMBOLS:
-	  add_specific_symbols (optarg, keep_specific_htab);
+	  add_specific_symbols (optarg, keep_specific_htab,
+				&keep_specific_buffer);
 	  break;
 
 	case OPTION_LOCALIZE_HIDDEN:
@@ -5278,7 +5290,8 @@ copy_main (int argc, char *argv[])
 	  break;
 
 	case OPTION_LOCALIZE_SYMBOLS:
-	  add_specific_symbols (optarg, localize_specific_htab);
+	  add_specific_symbols (optarg, localize_specific_htab,
+				&localize_specific_buffer);
 	  break;
 
 	case OPTION_LONG_SECTION_NAMES:
@@ -5293,15 +5306,18 @@ copy_main (int argc, char *argv[])
 	  break;
 
 	case OPTION_GLOBALIZE_SYMBOLS:
-	  add_specific_symbols (optarg, globalize_specific_htab);
+	  add_specific_symbols (optarg, globalize_specific_htab,
+				&globalize_specific_buffer);
 	  break;
 
 	case OPTION_KEEPGLOBAL_SYMBOLS:
-	  add_specific_symbols (optarg, keepglobal_specific_htab);
+	  add_specific_symbols (optarg, keepglobal_specific_htab,
+				&keepglobal_specific_buffer);
 	  break;
 
 	case OPTION_WEAKEN_SYMBOLS:
-	  add_specific_symbols (optarg, weaken_specific_htab);
+	  add_specific_symbols (optarg, weaken_specific_htab,
+				&weaken_specific_buffer);
 	  break;
 
 	case OPTION_ALT_MACH_CODE:
@@ -5587,6 +5603,27 @@ copy_main (int argc, char *argv[])
 	    }
 	}
     }
+
+  if (strip_specific_buffer)
+    free (strip_specific_buffer);
+
+  if (strip_unneeded_buffer)
+    free (strip_unneeded_buffer);
+
+  if (keep_specific_buffer)
+    free (keep_specific_buffer);
+
+  if (localize_specific_buffer)
+    free (globalize_specific_buffer);
+
+  if (globalize_specific_buffer)
+    free (globalize_specific_buffer);
+
+  if (keepglobal_specific_buffer)
+    free (keepglobal_specific_buffer);
+
+  if (weaken_specific_buffer)
+    free (weaken_specific_buffer);
 
   return 0;
 }
