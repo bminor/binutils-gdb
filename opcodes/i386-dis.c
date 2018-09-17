@@ -9433,7 +9433,6 @@ static const struct dis386 vex_len_table[][2] = {
   /* VEX_LEN_0F6E_P_2 */
   {
     { "vmovK",		{ XMScalar, Edq }, 0 },
-    { "vmovK",		{ XMScalar, Edq }, 0 },
   },
 
   /* VEX_LEN_0F77_P_1 */
@@ -9449,7 +9448,6 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0F7E_P_2 */
   {
-    { "vmovK",		{ Edq, XMScalar }, 0 },
     { "vmovK",		{ Edq, XMScalar }, 0 },
   },
 

@@ -1,5 +1,13 @@
 2018-09-17  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gas/23665
+	* i386-dis.c (vex_len_table): Update VEX_LEN_0F6E_P_2 and
+	VEX_LEN_0F7E_P_2 entries.
+	* i386-opc.tbl: Set Vex=1 on VEX.128 only vmovd and vmovq.
+	* i386-tbl.h: Regenerated.
+
+2018-09-17  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c (VZERO_Fixup): Removed.
 	(VZERO): Likewise.
 	(VEX_LEN_0F10_P_1): Likewise.
