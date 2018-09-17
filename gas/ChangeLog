@@ -1,3 +1,25 @@
+2018-09-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/NEWS: Mention -mvexwig=[0|1] option.
+	* config/tc-i386.c (vexwig): New.
+	(build_vex_prefix): Set the VEX.W bit for -mvexwig=1 for WIG
+	VEX instructions.
+	(OPTION_MVEXWIG): New.
+	(md_longopts): Add -mvexwig=.
+	(md_parse_option): Handle OPTION_MVEXWIG.
+	(md_show_usage): Show -mvexwig=[0|1].
+	* doc/c-i386.texi: Document -mvexwig=[0|1].
+	* testsuite/gas/i386/avx-wig.d: New file.
+	* testsuite/gas/i386/avx-wig.s: Likewise.
+	* testsuite/gas/i386/avx2-wig.d: Likewise.
+	* testsuite/gas/i386/avx2-wig.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx-wig.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx-wig.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx2-wig.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx2-wig.s: Likewise.
+	* testsuite/gas/i386/i386.exp: Run avx-wig, avx2-wig,
+	x86-64-avx-wig and x86-64-avx2-wig.
+
 2018-09-17  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/arm/arch7.d: Delete notarget.

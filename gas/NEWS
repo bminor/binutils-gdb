@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add -mvexwig=[0|1] option to x86 assembler to control encoding of
+  VEX.W-ignored (WIG) VEX instructions.
+
 * Add -mx86-used-note=[yes|no] option to generate (or not) x86 GNU property
   notes.  Add a --enable-x86-used-note configure time option to set the
   default behavior.  Set the default if the configure option is not used

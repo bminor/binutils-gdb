@@ -684,6 +684,13 @@ static enum
     vex256
   } avxscalar;
 
+/* Encode VEX WIG instructions with specific vex.w.  */
+static enum
+  {
+    vexw0 = 0,
+    vexw1
+  } vexwig;
+
 /* Encode scalar EVEX LIG instructions with specific vector length.  */
 static enum
   {
@@ -3353,6 +3360,7 @@ build_vex_prefix (const insn_template *t)
   unsigned int register_specifier;
   unsigned int implied_prefix;
   unsigned int vector_length;
+  unsigned int w;
 
   /* Check register specifier.  */
   if (i.vex.register_specifier)
@@ -3439,10 +3447,18 @@ build_vex_prefix (const insn_template *t)
       abort ();
     }
 
+  /* Check the REX.W bit and VEXW.  */
+  if (i.tm.opcode_modifier.vexw == VEXWIG)
+    w = (vexwig == vexw1 || (i.rex & REX_W)) ? 1 : 0;
+  else if (i.tm.opcode_modifier.vexw)
+    w = i.tm.opcode_modifier.vexw == VEXW1 ? 1 : 0;
+  else
+    w = (i.rex & REX_W) ? 1 : 0;
+
   /* Use 2-byte VEX prefix if possible.  */
-  if (i.vec_encoding != vex_encoding_vex3
+  if (w == 0
+      && i.vec_encoding != vex_encoding_vex3
       && i.tm.opcode_modifier.vexopcode == VEX0F
-      && i.tm.opcode_modifier.vexw != VEXW1
       && (i.rex & (REX_W | REX_X | REX_B)) == 0)
     {
       /* 2-byte VEX prefix.  */
@@ -3461,7 +3477,7 @@ build_vex_prefix (const insn_template *t)
   else
     {
       /* 3-byte VEX prefix.  */
-      unsigned int m, w;
+      unsigned int m;
 
       i.vex.length = 3;
 
@@ -3498,14 +3514,6 @@ build_vex_prefix (const insn_template *t)
       /* The high 3 bits of the second VEX byte are 1's compliment
 	 of RXB bits from REX.  */
       i.vex.bytes[1] = (~i.rex & 0x7) << 5 | m;
-
-      /* Check the REX.W bit and VEXW.  */
-      if (i.tm.opcode_modifier.vexw == VEXWIG)
-	w = (i.rex & REX_W) ? 1 : 0;
-      else if (i.tm.opcode_modifier.vexw)
-	w = i.tm.opcode_modifier.vexw == VEXW1 ? 1 : 0;
-      else
-	w = (i.rex & REX_W) ? 1 : 0;
 
       i.vex.bytes[2] = (w << 7
 			| register_specifier << 3
@@ -10878,6 +10886,7 @@ const char *md_shortopts = "qnO::";
 #define OPTION_MINTEL64 (OPTION_MD_BASE + 23)
 #define OPTION_MFENCE_AS_LOCK_ADD (OPTION_MD_BASE + 24)
 #define OPTION_X86_USED_NOTE (OPTION_MD_BASE + 25)
+#define OPTION_MVEXWIG (OPTION_MD_BASE + 26)
 
 struct option md_longopts[] =
 {
@@ -10902,6 +10911,7 @@ struct option md_longopts[] =
   {"msse-check", required_argument, NULL, OPTION_MSSE_CHECK},
   {"moperand-check", required_argument, NULL, OPTION_MOPERAND_CHECK},
   {"mavxscalar", required_argument, NULL, OPTION_MAVXSCALAR},
+  {"mvexwig", required_argument, NULL, OPTION_MVEXWIG},
   {"madd-bnd-prefix", no_argument, NULL, OPTION_MADD_BND_PREFIX},
   {"mevexlig", required_argument, NULL, OPTION_MEVEXLIG},
   {"mevexwig", required_argument, NULL, OPTION_MEVEXWIG},
@@ -11219,6 +11229,15 @@ md_parse_option (int c, const char *arg)
 	as_fatal (_("invalid -mavxscalar= option: `%s'"), arg);
       break;
 
+    case OPTION_MVEXWIG:
+      if (strcmp (arg, "0") == 0)
+	vexwig = evexw0;
+      else if (strcmp (arg, "1") == 0)
+	vexwig = evexw1;
+      else
+	as_fatal (_("invalid -mvexwig= option: `%s'"), arg);
+      break;
+
     case OPTION_MADD_BND_PREFIX:
       add_bnd_prefix = 1;
       break;
@@ -11476,6 +11495,10 @@ md_show_usage (FILE *stream)
   -mavxscalar=[128|256] (default: 128)\n\
                           encode scalar AVX instructions with specific vector\n\
                            length\n"));
+  fprintf (stream, _("\
+  -mvexwig=[0|1] (default: 0)\n\
+                          encode VEX instructions with specific VEX.W value\n\
+                           for VEX.W bit ignored instructions\n"));
   fprintf (stream, _("\
   -mevexlig=[128|256|512] (default: 128)\n\
                           encode scalar EVEX instructions with specific vector\n\

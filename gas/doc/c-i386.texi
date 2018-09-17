@@ -298,6 +298,16 @@ AVX instructions with 128bit vector length, which is the default.
 @option{-mavxscalar=@var{256}} will encode scalar AVX instructions
 with 256bit vector length.
 
+@cindex @samp{-mvexwig=} option, i386
+@cindex @samp{-mvexwig=} option, x86-64
+@item -mvexwig=@var{0}
+@itemx -mvexwig=@var{1}
+These options control how the assembler should encode VEX.W-ignored (WIG)
+VEX instructions.  @option{-mvexwig=@var{0}} will encode WIG VEX
+instructions with vex.w = 0, which is the default.
+@option{-mvexwig=@var{1}} will encode WIG EVEX instructions with
+vex.w = 1.
+
 @cindex @samp{-mevexlig=} option, i386
 @cindex @samp{-mevexlig=} option, x86-64
 @item -mevexlig=@var{128}
