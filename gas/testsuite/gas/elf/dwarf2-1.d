@@ -1,7 +1,6 @@
 #as:  --compress-debug-sections
 #readelf: -w
 #name: DWARF2 1
-#notarget: ia64-*-* m68hc1*-*-* m681*-*-*
 
 Contents of the .[z]?debug_info section:
 

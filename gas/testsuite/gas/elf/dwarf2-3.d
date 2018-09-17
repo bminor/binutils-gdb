@@ -1,6 +1,6 @@
 #readelf: -wl
 #name: DWARF2 3
-#notarget: ft32*-* ia64-*-* h8300-*-*
+#xfail: ft32*-* h8300-*-*
 
 Raw dump of debug contents of section \.z?debug_line:
 

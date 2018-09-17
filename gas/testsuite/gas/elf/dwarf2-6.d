@@ -2,7 +2,7 @@
 #readelf: -wlL
 #name: DWARF2 6
 # These targets either do not support or do not evaluate the subtraction of symbols at assembly time.
-#notarget: am3*-* avr-* cr16-* crx-* mn10*-* msp430-* nds32*-* pru-* riscv*-* rl78-* xtensa-*
+#xfail: cr16-* crx-* riscv*-*
 
 Raw dump of debug contents of section .debug_line:
 

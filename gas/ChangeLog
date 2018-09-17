@@ -1,5 +1,22 @@
 2018-09-17  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/gas/arm/arch7.d: Delete notarget.
+	* testsuite/gas/arm/arch7a-mp.d: Likewise.
+	* testsuite/gas/arm/arch7em.d: Likewise.
+	* testsuite/gas/arm/archv8m-main-dsp-5.d: Likewise.
+	* testsuite/gas/arm/barrier.d: Likewise.
+	* testsuite/gas/arm/bignum1.d: Likewise.
+	* testsuite/gas/arm/thumb32.d: Likewise.
+	* testsuite/gas/elf/dwarf2-1.d: Likewise.
+	* testsuite/gas/elf/dwarf2-2.d: Likewise.
+	* testsuite/gas/elf/dwarf2-4.d: Likewise.
+	* testsuite/gas/elf/group2.d: Likewise.
+	* testsuite/gas/arm/mapshort-elf.d: Only notarget pe and wince.
+	* testsuite/gas/elf/dwarf2-3.d: Delete notarget, xfail ft32 and h8300.
+	* testsuite/gas/elf/dwarf2-6.d: Delete notarget, xfail a few.
+
+2018-09-17  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/gas/all/gas.exp (redef3): Don't xfail for hppa.
 	(octa): Run for hppa.
 	* testsuite/gas/elf/elf.exp (common1, common2): Likewise.
