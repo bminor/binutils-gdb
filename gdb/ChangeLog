@@ -1,5 +1,19 @@
 2018-10-27  Tom Tromey  <tom@tromey.com>
 
+	* unittests/mkdir-recursive-selftests.c: New file.
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/mkdir-recursive-selftests.c.
+	* dwarf-index-cache.c (mkdir_recursive): Move to
+	common/filestuff.c.
+	(index_cache::store): Check return value of mkdir_recursive.
+	(create_dir_and_check, test_mkdir_recursive): Move to new file.
+	(_initialize_index_cache): Don't register test.
+	* common/filestuff.h (mkdir_recursive): Declare.
+	* common/filestuff.c (mkdir_recursive): Move from
+	dwarf-index-cache.c.  Return bool.
+
+2018-10-27  Tom Tromey  <tom@tromey.com>
+
 	* dwarf-index-write.c (write_psymtabs_to_index): Move
 	make_temp_filename to common/pathstuff.c.
 	* common/pathstuff.h (make_temp_filename): Declare.

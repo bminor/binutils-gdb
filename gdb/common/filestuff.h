@@ -122,4 +122,14 @@ typedef std::unique_ptr<DIR, gdb_dir_deleter> gdb_dir_up;
    we're expecting a regular file.  */
 extern bool is_regular_file (const char *name, int *errno_ptr);
 
+
+/* A cheap (as in low-quality) recursive mkdir.  Try to create all the
+   parents directories up to DIR and DIR itself.  Stop if we hit an
+   error along the way.  There is no attempt to remove created
+   directories in case of failure.
+
+   Returns false on failure and sets errno.  */
+
+extern bool mkdir_recursive (const char *dir);
+
 #endif /* FILESTUFF_H */

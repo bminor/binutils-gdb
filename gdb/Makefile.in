@@ -419,6 +419,7 @@ SUBDIR_UNITTESTS_SRCS = \
 	unittests/optional-selftests.c \
 	unittests/parse-connection-spec-selftests.c \
 	unittests/ptid-selftests.c \
+	unittests/mkdir-recursive-selftests.c \
 	unittests/rsp-low-selftests.c \
 	unittests/scoped_fd-selftests.c \
 	unittests/scoped_mmap-selftests.c \

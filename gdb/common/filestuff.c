@@ -447,3 +447,48 @@ is_regular_file (const char *name, int *errno_ptr)
     *errno_ptr = EINVAL;
   return false;
 }
+
+/* See common/filestuff.h.  */
+
+bool
+mkdir_recursive (const char *dir)
+{
+  gdb::unique_xmalloc_ptr<char> holder (xstrdup (dir));
+  char * const start = holder.get ();
+  char *component_start = start;
+  char *component_end = start;
+
+  while (1)
+    {
+      /* Find the beginning of the next component.  */
+      while (*component_start == '/')
+	component_start++;
+
+      /* Are we done?  */
+      if (*component_start == '\0')
+	return true;
+
+      /* Find the slash or null-terminator after this component.  */
+      component_end = component_start;
+      while (*component_end != '/' && *component_end != '\0')
+	component_end++;
+
+      /* Temporarily replace the slash with a null terminator, so we can create
+         the directory up to this component.  */
+      char saved_char = *component_end;
+      *component_end = '\0';
+
+      /* If we get EEXIST and the existing path is a directory, then we're
+         happy.  If it exists, but it's a regular file and this is not the last
+         component, we'll fail at the next component.  If this is the last
+         component, the caller will fail with ENOTDIR when trying to
+         open/create a file under that path.  */
+      if (mkdir (start, 0700) != 0)
+	if (errno != EEXIST)
+	  return false;
+
+      /* Restore the overwritten char.  */
+      *component_end = saved_char;
+      component_start = component_end;
+    }
+}

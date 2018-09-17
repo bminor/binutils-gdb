@@ -45,53 +45,6 @@ index_cache global_index_cache;
 static cmd_list_element *set_index_cache_prefix_list;
 static cmd_list_element *show_index_cache_prefix_list;
 
-/* A cheap (as in low-quality) recursive mkdir.  Try to create all the parents
-   directories up to DIR and DIR itself.  Stop if we hit an error along the way.
-   There is no attempt to remove created directories in case of failure.  */
-
-static void
-mkdir_recursive (const char *dir)
-{
-  gdb::unique_xmalloc_ptr<char> holder (xstrdup (dir));
-  char * const start = holder.get ();
-  char *component_start = start;
-  char *component_end = start;
-
-  while (1)
-    {
-      /* Find the beginning of the next component.  */
-      while (*component_start == '/')
-	component_start++;
-
-      /* Are we done?  */
-      if (*component_start == '\0')
-	return;
-
-      /* Find the slash or null-terminator after this component.  */
-      component_end = component_start;
-      while (*component_end != '/' && *component_end != '\0')
-	component_end++;
-
-      /* Temporarily replace the slash with a null terminator, so we can create
-         the directory up to this component.  */
-      char saved_char = *component_end;
-      *component_end = '\0';
-
-      /* If we get EEXIST and the existing path is a directory, then we're
-         happy.  If it exists, but it's a regular file and this is not the last
-         component, we'll fail at the next component.  If this is the last
-         component, the caller will fail with ENOTDIR when trying to
-         open/create a file under that path.  */
-      if (mkdir (start, 0700) != 0)
-	if (errno != EEXIST)
-	  return;
-
-      /* Restore the overwritten char.  */
-      *component_end = saved_char;
-      component_start = component_end;
-    }
-}
-
 /* Default destructor of index_cache_resource.  */
 index_cache_resource::~index_cache_resource () = default;
 
@@ -160,7 +113,12 @@ index_cache::store (struct dwarf2_per_objfile *dwarf2_per_objfile)
   TRY
     {
       /* Try to create the containing directory.  */
-      mkdir_recursive (m_dir.c_str ());
+      if (!mkdir_recursive (m_dir.c_str ()))
+	{
+	  warning (_("index cache: could not make cache directory: %s\n"),
+		   safe_strerror (errno));
+	  return;
+	}
 
       if (debug_index_cache)
         printf_unfiltered ("index cache: writing index cache for objfile %s\n",
@@ -346,62 +304,6 @@ show_index_cache_stats_command (const char *arg, int from_tty)
 		     indent, global_index_cache.n_misses ());
 }
 
-#if GDB_SELF_TEST && defined (HAVE_MKDTEMP)
-namespace selftests
-{
-
-/* Try to create DIR using mkdir_recursive and make sure it exists.  */
-
-static bool
-create_dir_and_check (const char *dir)
-{
-  mkdir_recursive (dir);
-
-  struct stat st;
-  if (stat (dir, &st) != 0)
-    perror_with_name (("stat"));
-
-  return (st.st_mode & S_IFDIR) != 0;
-}
-
-/* Test mkdir_recursive.  */
-
-static void
-test_mkdir_recursive ()
-{
-  char base[] = "/tmp/gdb-selftests-XXXXXX";
-
-  if (mkdtemp (base) == NULL)
-    perror_with_name (("mkdtemp"));
-
-  /* Try not to leave leftover directories.  */
-  struct cleanup_dirs {
-    cleanup_dirs (const char *base)
-      : m_base (base)
-    {}
-
-    ~cleanup_dirs () {
-      rmdir (string_printf ("%s/a/b/c/d/e", m_base).c_str ());
-      rmdir (string_printf ("%s/a/b/c/d", m_base).c_str ());
-      rmdir (string_printf ("%s/a/b/c", m_base).c_str ());
-      rmdir (string_printf ("%s/a/b", m_base).c_str ());
-      rmdir (string_printf ("%s/a", m_base).c_str ());
-      rmdir (m_base);
-    }
-
-  private:
-    const char *m_base;
-  } cleanup_dirs (base);
-
-  std::string dir = string_printf ("%s/a/b", base);
-  SELF_CHECK (create_dir_and_check (dir.c_str ()));
-
-  dir = string_printf ("%s/a/b/c//d/e/", base);
-  SELF_CHECK (create_dir_and_check (dir.c_str ()));
-}
-}
-#endif /*  GDB_SELF_TEST && defined (HAVE_MKDTEMP) */
-
 void
 _initialize_index_cache ()
 {
@@ -456,8 +358,4 @@ _initialize_index_cache ()
 When non-zero, debugging output for the index cache is displayed."),
 			    NULL, NULL,
 			    &setdebuglist, &showdebuglist);
-
-#if GDB_SELF_TEST && defined (HAVE_MKDTEMP)
-  selftests::register_test ("mkdir_recursive", selftests::test_mkdir_recursive);
-#endif
 }
