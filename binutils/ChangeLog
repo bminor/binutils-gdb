@@ -1,3 +1,16 @@
+2018-09-17  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/strip-13mips64.s: Add section flags
+	for reloc section.
+	* testsuite/binutils-all/strip-13rel.s: Likewise.
+	* testsuite/binutils-all/strip-13rela.s: Likewise.
+	* testsuite/binutils-all/strip-14mips64.s: Likewise.
+	* testsuite/binutils-all/strip-14rel.s: Likewise.
+	* testsuite/binutils-all/strip-14rela.s: Likewise.
+	* testsuite/binutils-all/strip-15mips64.s: Likewise.
+	* testsuite/binutils-all/strip-15rel.s: Likewise.
+	* testsuite/binutils-all/strip-15rela.s: Likewise.
+
 2018-09-17  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/binutils-all/compress.exp: Rename second "objcopy

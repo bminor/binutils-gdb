@@ -2,7 +2,7 @@
 foo:
 	.dc.l    0x12345678
 
-	.section .rela.text
+	.section .rela.text,""
  .ifdef ELF64
 	.8byte	0
 	.8byte	RELOC
