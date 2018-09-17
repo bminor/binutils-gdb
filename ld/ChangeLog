@@ -1,3 +1,19 @@
+2018-09-17  Nick Clifton  <nickc@redhat.com>
+
+	* testuite/ld/ld-elf/audit.exp: Differentiate the names of the
+	two "Run with shared with --audit" tests.
+	* testuite/ld/ld-elf/compress.exp: Differentiate the zlib
+	compressed debug output test names.
+	* testuite/ld/ld-i386/tlspie1.d: Add extra details to the test
+	name.
+	* testuite/ld/ld-i386/tlspie2.d: Likewise.
+	* testuite/ld/ld-size/size.exp: Add missing escapes to the end
+	of lines in the size-3e test.
+	* testuite/ld/ld-unique/unique.exp: Differentiate the names of
+	the two "Checking unique PIC object" tests.
+	* testuite/ld/ld-x86-64/tlspie1.d: Add extra details to the test
+	name.
+
 2018-09-15  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-d10v/reloc-007.d,

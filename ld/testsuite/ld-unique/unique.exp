@@ -229,7 +229,7 @@ if {[contains_unique_symbol tmpdir/unique_shared.o] != 1} {
 }
 
 if { $fails == 0 } {
-  pass "Checking unique PIC object"
+  pass "Checking unique PIC object 1"
 }
 
 # Check the unique shared library.
@@ -255,7 +255,7 @@ if {[contains_unique_symbol tmpdir/libunique_shared_ref.so] != 1} {
 }
 
 if { $fails == 0 } {
-  pass "Checking unique PIC object"
+  pass "Checking unique PIC object 2"
 }
 
 # Check the empty executable linked against unique shared library.

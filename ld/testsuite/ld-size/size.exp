@@ -226,9 +226,9 @@ run_ld_link_exec_tests [list \
 	"size-3.out" \
     ] \
     [list \
-    {"Run size-3e"
-     "-Wl,--no-as-needed tmpdir/libsize-3c.so" ""
-     {size-3.c} "size-3e" "size-3.out"}
+    {"Run size-3e" \
+     "-Wl,--no-as-needed tmpdir/libsize-3c.so" "" \
+     {size-3.c} "size-3e" "size-3.out"} \
     ] \
     [list \
 	"Run size-4a" \

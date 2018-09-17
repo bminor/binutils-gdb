@@ -1045,10 +1045,10 @@ if [is_elf_format] {
     objcopy_test_symbol_manipulation
     objcopy_test_elf_common_symbols
     objcopy_test "ELF unknown section type" unknown.s
-    objcopy_test_readelf "ELF group" group.s
-    objcopy_test_readelf "ELF group" group-2.s
-    objcopy_test_readelf "ELF group" group-3.s
-    objcopy_test_readelf "ELF group" group-4.s
+    objcopy_test_readelf "ELF group 1" group.s
+    objcopy_test_readelf "ELF group 2" group-2.s
+    objcopy_test_readelf "ELF group 3" group-3.s
+    objcopy_test_readelf "ELF group 4" group-4.s
     objcopy_test_readelf "GNU_MBIND section" mbind1.s
     run_dump_test "group-5"
     run_dump_test "group-6"

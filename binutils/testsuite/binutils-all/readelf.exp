@@ -40,13 +40,13 @@ proc file_contents { filename } {
 # Find out the size by reading the output of the EI_CLASS field.
 # Similar to the test for readelf -h, but we're just looking for the
 # EI_CLASS line here.
-proc readelf_find_size { binary_file } {
+proc readelf_find_size { binary_file test_iteration } {
     global READELF
     global READELFFLAGS
     global readelf_size
 
     set readelf_size ""
-    set testname "finding out ELF size with readelf -h"
+    set testname "finding out ELF size with readelf -h ($test_iteration)"
     set got [remote_exec host "$READELF $READELFFLAGS -h $binary_file" "" "/dev/null" "readelf.out"]
     if [is_remote host] then {
         remote_upload host "readelf.out"
@@ -335,7 +335,7 @@ if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o]} then {
     }
 
     # First, determine the size, so specific output matchers can be used.
-    readelf_find_size $tempfile
+    readelf_find_size $tempfile 1
 
     # Run the tests.
     readelf_test -h $tempfile readelf.h  {}
@@ -444,7 +444,7 @@ if ![istarget "riscv*-*-*"] then {
 	}
 
 	# First, determine the size, so specific output matchers can be used.
-	readelf_find_size $tempfile
+	readelf_find_size $tempfile 2
 
 	# Make sure that readelf can decode the contents.
 	readelf_test -wiaoRlL $tempfile dw5.W { nds32*-elf }
@@ -463,7 +463,7 @@ if {![binutils_assemble_flags $srcdir/$subdir/dwarf-attributes.S tmpdir/dwarf-at
     }
 
     # First, determine the size, so specific output matchers can be used.
-    readelf_find_size $tempfile
+    readelf_find_size $tempfile 3
 
     # Make sure that readelf can decode the contents.
     readelf_test -wi $tempfile dwarf-attributes.W {}

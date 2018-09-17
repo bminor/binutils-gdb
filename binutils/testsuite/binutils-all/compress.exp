@@ -505,16 +505,16 @@ if ![string match "" $exec_output] then {
     pass "objcopy ($testname)"
 }
 
-set testname "objcopy zlib-gnu compress debug sections 3"
-set got [binutils_run $OBJCOPY "${compressedfile3}gnu.o ${copyfile}gnu.o"]
+set testname "objcopy zlib-gabi compress debug sections 3"
+set got [binutils_run $OBJCOPY "${compressedfile3}gabi.o ${copyfile}gabi.o"]
 if ![string match "" $got] then {
     fail "objcopy ($testname)"
     return
 }
-send_log "cmp ${compressedfile3}gnu.o ${copyfile}gnu.o\n"
-verbose "cmp ${compressedfile3}gnu.o ${copyfile}gnu.o"
-set src1 ${compressedfile3}gnu.o
-set src2 ${copyfile}gnu.o
+send_log "cmp ${compressedfile3}gabi.o ${copyfile}gabi.o\n"
+verbose "cmp ${compressedfile3}gabi.o ${copyfile}gabi.o"
+set src1 ${compressedfile3}gabi.o
+set src2 ${copyfile}gabi.o
 set status [remote_exec build cmp "${src1} ${src2}"]
 set exec_output [lindex $status 1]
 set exec_output [prune_warnings $exec_output]

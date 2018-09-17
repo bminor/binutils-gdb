@@ -1,3 +1,15 @@
+2018-09-17  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/binutils-all/compress.exp: Rename second "objcopy
+	zlib-gnu compress debug sections 3" test to "objcopy zlib-gabi
+	compress debug sections 3" and use gabi object files instead
+	of gnu object files.
+	* testsuite/binutils-all/objcopy.exp: Add suffix to the names
+	of the "ELF group" tests.
+	* testsuite/binutils-all/readelf.exp (proc readelf_find_size):
+	Add an iteration parameter and include it in the name of the
+	test.  Update callers to include an iteration count.
+
 2018-09-15  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/binutils-all/add-symbol.d: Add "section_subst: no".

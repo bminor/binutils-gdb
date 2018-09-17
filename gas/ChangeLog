@@ -1,3 +1,15 @@
+2018-09-17  Nick Clifton  <nickc@redhat.com>
+
+	* testuite/gas/elf/group0a.d: Add extra details to the test
+	name.
+	* testuite/gas/elf/group0b.d: Likewise.
+	* testuite/gas/elf/group1a.d: Likewise.
+	* testuite/gas/elf/group1b.d: Likewise.
+	* testuite/gas/elf/group0b.d: Likewise.
+	* testuite/gas/elf/section9.d: Likewise.
+	* testuite/gas/i386/ilp32/lns/lns-common-1.d: Likewise.
+	* testuite/gas/i386/ilp32/lns/lns-duplicate-1.d: Likewise.
+
 2018-09-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/23665
