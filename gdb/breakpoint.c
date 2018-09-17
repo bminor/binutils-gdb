@@ -15506,6 +15506,10 @@ initialize_breakpoint_ops (void)
 
 static struct cmd_list_element *enablebreaklist = NULL;
 
+/* See breakpoint.h.  */
+
+cmd_list_element *commands_cmd_element = nullptr;
+
 void
 _initialize_breakpoint (void)
 {
@@ -15531,7 +15535,8 @@ _initialize_breakpoint (void)
 Set ignore-count of breakpoint number N to COUNT.\n\
 Usage is `ignore N COUNT'."));
 
-  add_com ("commands", class_breakpoint, commands_command, _("\
+  commands_cmd_element = add_com ("commands", class_breakpoint,
+				  commands_command, _("\
 Set commands to be executed when the given breakpoints are hit.\n\
 Give a space-separated breakpoint list as argument after \"commands\".\n\
 A list element can be a breakpoint number (e.g. `5') or a range of numbers\n\

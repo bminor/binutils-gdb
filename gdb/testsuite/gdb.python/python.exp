@@ -497,3 +497,7 @@ gdb_test "python print(gdb.convenience_variable('cvar3'))" "None" \
     "print reset convenience variable from python"
 gdb_test "print \$cvar3" "= void" \
     "print reset convenience variable from CLI"
+
+# Test PR 23669, the following would invoke the "commands" command instead of
+# "show commands".
+gdb_test "python gdb.execute(\"show commands\")" "$decimal  print \\\$cvar3.*"

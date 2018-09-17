@@ -700,6 +700,9 @@ gdbscm_set_backtrace (int enable)
 
 #endif /* HAVE_GUILE */
 
+/* See guile.h.  */
+cmd_list_element *guile_cmd_element = nullptr;
+
 /* Install the various gdb commands used by Guile.  */
 
 static void
@@ -725,7 +728,7 @@ This command is only a placeholder.")
 
   /* Since "help guile" is easy to type, and intuitive, we add general help
      in using GDB+Guile to this command.  */
-  add_com ("guile", class_obscure, guile_command,
+  guile_cmd_element = add_com ("guile", class_obscure, guile_command,
 #ifdef HAVE_GUILE
 	   _("\
 Evaluate one or more Guile expressions.\n\

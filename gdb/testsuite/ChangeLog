@@ -1,3 +1,8 @@
+2018-09-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR python/23669
+	* gdb.python/python.exp: Test gdb.execute("show commands").
+
 2018-09-16  Tom Tromey  <tom@tromey.com>
 
 	* gdb.base/new-ui.exp (do_execution_tests): Update.

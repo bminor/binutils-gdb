@@ -3977,6 +3977,9 @@ static const struct internalvar_funcs sdata_funcs =
   NULL
 };
 
+/* See tracepoint.h.  */
+cmd_list_element *while_stepping_cmd_element = nullptr;
+
 /* module initialization */
 void
 _initialize_tracepoint (void)
@@ -4088,7 +4091,8 @@ Entering \"end\" on a line by itself is the normal way to terminate\n\
 such a list.\n\n\
 Note: the \"end\" command cannot be used at the gdb prompt."));
 
-  add_com ("while-stepping", class_trace, while_stepping_pseudocommand, _("\
+  while_stepping_cmd_element = add_com ("while-stepping", class_trace,
+					while_stepping_pseudocommand, _("\
 Specify single-stepping behavior at a tracepoint.\n\
 Argument is number of instructions to trace in single-step mode\n\
 following the tracepoint.  This command is normally followed by\n\

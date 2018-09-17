@@ -103,4 +103,7 @@ extern void compile_dwarf_bounds_to_c (string_file *stream,
 
 extern void compile_print_value (struct value *val, void *data_voidp);
 
+/* Command element for the 'compile' command.  */
+extern cmd_list_element *compile_cmd_element;
+
 #endif /* GDB_COMPILE_H */

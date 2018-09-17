@@ -1745,6 +1745,9 @@ do_start_initialization ()
 
 #endif /* HAVE_PYTHON */
 
+/* See python.h.  */
+cmd_list_element *python_cmd_element = nullptr;
+
 void
 _initialize_python (void)
 {
@@ -1774,7 +1777,7 @@ This command is only a placeholder.")
 	   );
   add_com_alias ("pi", "python-interactive", class_obscure, 1);
 
-  add_com ("python", class_obscure, python_command,
+  python_cmd_element = add_com ("python", class_obscure, python_command,
 #ifdef HAVE_PYTHON
 	   _("\
 Evaluate a Python command.\n\

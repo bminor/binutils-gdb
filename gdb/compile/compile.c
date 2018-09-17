@@ -908,14 +908,16 @@ compile_instance::compile (const char *filename, int verbose_level)
 
 #undef FORWARD
 
+/* See compile.h.  */
+cmd_list_element *compile_cmd_element = nullptr;
 
 void
 _initialize_compile (void)
 {
   struct cmd_list_element *c = NULL;
 
-  add_prefix_cmd ("compile", class_obscure, compile_command,
-		  _("\
+  compile_cmd_element = add_prefix_cmd ("compile", class_obscure,
+					compile_command, _("\
 Command to compile source code and inject it into the inferior."),
 		  &compile_command_list, "compile ", 1, &cmdlist);
   add_com_alias ("expression", "compile", class_obscure, 0);

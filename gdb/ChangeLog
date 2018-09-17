@@ -1,3 +1,28 @@
+2018-09-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR python/23669
+	* breakpoint.c (commands_cmd_element): New.
+	(_initialize_breakpoint): Assign commands_cmd_element.
+	* breakpoint.h (commands_cmd_element): New.
+	* cli/cli-script.c (while_cmd_element, if_command,
+	define_cmd_element): New.
+	(command_name_equals): Remove.
+	(process_next_line): Compare commands by pointer, not by name.
+	(_initialize_cli_script): Assign the various cmd_list_element
+	variables.
+	* compile/compile.c (compile_cmd_element): New.
+	(_initialize_compile): Assign compile_cmd_element.
+	* compile/compile.h (compile_cmd_element): New.
+	* guile/guile.c (guile_cmd_element): New.
+	(install_gdb_commands): Assign guile_cmd_element.
+	* guile/guile.h (guile_cmd_element): New.
+	* python/python.c (python_cmd_element): New.
+	(_initialize_python): Assign python_cmd_element.
+	* python/python.h (python_cmd_element): New.
+	* tracepoint.c (while_stepping_cmd_element): New.
+	(_initialize_tracepoint): Assign while_stepping_cmd_element.
+	* tracepoint.h (while_stepping_cmd_element): New.
+
 2018-09-17  Tom Tromey  <tom@tromey.com>
 
 	* infrun.c (save_infcall_suspend_state): Return

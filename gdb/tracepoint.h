@@ -436,4 +436,7 @@ extern struct traceframe_info *get_traceframe_info (void);
 
 extern struct bp_location *get_traceframe_location (int *stepping_frame_p);
 
+/* Command element for the 'while-stepping' command.  */
+extern cmd_list_element *while_stepping_cmd_element;
+
 #endif	/* TRACEPOINT_H */
