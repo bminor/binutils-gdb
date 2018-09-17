@@ -207,7 +207,7 @@ def _complete_frame_filter_name(word, printer_dict):
     return flist
 
 class EnableFrameFilter(gdb.Command):
-    """GDB command to disable the specified frame-filter.
+    """GDB command to enable the specified frame-filter.
 
     Usage: enable frame-filter enable DICTIONARY [NAME]
 
