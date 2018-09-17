@@ -38,7 +38,7 @@ gdb_expect {
 	gdb_assert "$num_ran > 0" $test
     }
 
-    -re "Selftests are not available in a non-development build.\r\n$" {
+    -re "Selftests have been disabled for this build.\r\n$" {
 	unsupported $test
     }
 

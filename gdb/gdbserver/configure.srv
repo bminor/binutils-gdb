@@ -24,7 +24,7 @@
 # Default hostio_last_error implementation
 srv_hostio_err_objs="hostio-errno.o"
 
-if $development; then
+if $enable_unittests; then
    srv_i386_linux_regobj="i386-linux.o i386-avx-linux.o i386-avx-avx512-linux.o i386-avx-mpx-avx512-pku-linux.o i386-mpx-linux.o i386-avx-mpx-linux.o i386-mmx-linux.o linux-x86-tdesc-selftest.o"
    srv_amd64_linux_regobj="amd64-linux.o amd64-avx-linux.o amd64-avx-avx512-linux.o amd64-avx-mpx-avx512-pku-linux.o amd64-mpx-linux.o amd64-avx-mpx-linux.o x32-linux.o x32-avx-linux.o x32-avx-avx512-linux.o"
 else

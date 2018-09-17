@@ -3790,7 +3790,7 @@ captured_main (int argc, char *argv[])
 #if GDB_SELF_TEST
       selftests::run_tests (selftest_filter);
 #else
-      printf (_("Selftests are not available in a non-development build.\n"));
+      printf (_("Selftests have been disabled for this build.\n"));
 #endif
       throw_quit ("Quit");
     }

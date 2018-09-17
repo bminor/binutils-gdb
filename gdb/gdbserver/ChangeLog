@@ -1,3 +1,15 @@
+2018-10-10  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Simon Marchi <simark@simark.ca>
+
+	* acinclude.m4: Include "../selftest.m4".
+	* configure: Regenerate.
+	* configure.ac: Use "GDB_AC_SELFTEST".
+	* configure.srv: Use "$enable_unittests" instead of
+	"$development" when checking whether unit tests have been
+	enabled.
+	* server.c (captured_main): Update message informing that
+	selftests have been disabled.
+
 2018-10-04  Tom Tromey  <tom@tromey.com>
 
 	* configure: Rebuild.

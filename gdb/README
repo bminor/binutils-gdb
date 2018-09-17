@@ -545,6 +545,12 @@ more obscure GDB `configure' options are not listed here.
      behavior.  It has a performance cost, so if you are looking at
      GDB's performance, you should disable it.
 
+`--enable-unit-tests[=yes|no]'
+     Enable (i.e., include) support for unit tests when compiling GDB
+     and GDBServer.  Note that if this option is not passed, GDB will
+     have selftests if it is a development build, and will *not* have
+     selftests if it is a non-development build.
+
 `configure' accepts other options, for compatibility with configuring
 other GNU tools recursively.
 

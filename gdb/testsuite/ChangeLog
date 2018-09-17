@@ -1,3 +1,9 @@
+2018-10-10  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.gdb/unittest.exp: Update expected message informing that
+	selftests have been disabled.
+	* gdb.server/unittest.exp: Likewise.
+
 2018-10-09  Tom de Vries  <tdevries@suse.de>
 
 	* lib/gdb.exp (target_supports_scheduler_locking): Replace gdb_start_cmd

@@ -1,3 +1,16 @@
+2018-10-10  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Simon Marchi <simark@simark.ca>
+
+	* README (`configure' options): Add documentation for new
+	"--enable-unit-tests" option.
+	* acinclude.m4: Include "selftest.m4".
+	* configure: Regenerate.
+	* configure.ac: Use "GDB_AC_SELFTEST".
+	* maint.c (maintenance_selftest): Update message informing
+	that selftests have been disabled.
+	(maintenance_info_selftests): Likewise.
+	* selftest.m4: New file.
+
 2018-10-10  Gary Benson <gbenson@redhat.com>
 
 	* remote.c (remote_target::remote_send_printf): Add

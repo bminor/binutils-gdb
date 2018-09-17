@@ -24,7 +24,7 @@ gdb_test_multiple $test $test {
 	gdb_assert "$num_ran > 0" $test
   }
 
-  -re "Selftests are not available in a non-development build.\r\n$gdb_prompt $" {
+  -re "Selftests have been disabled for this build.\r\n$gdb_prompt $" {
 	unsupported $test
   }
 }

@@ -722,6 +722,7 @@ enable_option_checking
 enable_maintainer_mode
 enable_largefile
 enable_libmcheck
+enable_unit_tests
 with_ust
 with_ust_include
 with_ust_lib
@@ -1367,6 +1368,8 @@ Optional Features:
                           sometimes confusing) to the casual installer
   --disable-largefile     omit support for large files
   --enable-libmcheck      Try linking with -lmcheck if available
+  --enable-unit-tests     Enable the inclusion of unit tests when compiling
+                          GDB
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings if gcc is used
   --enable-gdb-build-warnings
@@ -5889,12 +5892,34 @@ fi
   fi
 
 
-if $development; then
-  srv_selftest_objs="common/selftest.o"
+
+# Check whether we will enable the inclusion of unit tests when
+# compiling GDB.
+#
+# The default value of this option changes depending whether we're on
+# development mode (in which case it's "true") or not (in which case
+# it's "false").
+# Check whether --enable-unit-tests was given.
+if test "${enable_unit_tests+set}" = set; then :
+  enableval=$enable_unit_tests; case "${enableval}" in
+  yes)  enable_unittests=true  ;;
+  no)   enable_unittests=false ;;
+  *)    as_fn_error $? "bad value ${enableval} for --{enable,disable}-unit-tests option" "$LINENO" 5 ;;
+esac
+else
+  enable_unittests=$development
+fi
+
+
+if $enable_unittests; then
 
 $as_echo "#define GDB_SELF_TEST 1" >>confdefs.h
 
+
+  srv_selftest_objs="common/selftest.o"
+
 fi
+
 
  case ${build_alias} in
   "") build_noncanonical=${build} ;;
