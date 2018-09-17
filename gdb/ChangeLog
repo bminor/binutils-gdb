@@ -1,3 +1,8 @@
+2018-09-17  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* python/lib/gdb/command/frame_filters.py (EnableFrameFilter):
+	Fix short help line.
+
 2018-09-17  Tom Tromey  <tom@tromey.com>
 
 	PR python/20445:
