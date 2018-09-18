@@ -1,5 +1,10 @@
 2018-09-18  John Baldwin  <jhb@FreeBSD.org>
 
+	* fbsd-nat.c (fbsd_nat_target::info_proc): List open file
+	descriptors for IP_FILES and IP_ALL.
+
+2018-09-18  John Baldwin  <jhb@FreeBSD.org>
+
 	* fbsd-tdep.c (KF_FLAGS, KF_OFFSET, KF_VNODE_TYPE, KF_SOCK_DOMAIN)
 	(KF_SOCK_TYPE, KF_SOCK_PROTOCOL, KF_SA_LOCAL, KF_SA_PEER)
 	(KINFO_FILE_TYPE_SOCKET, KINFO_FILE_TYPE_PIPE)

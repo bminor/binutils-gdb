@@ -265,6 +265,9 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
   bool do_cmdline = false;
   bool do_cwd = false;
   bool do_exe = false;
+#ifdef HAVE_KINFO_GETFILE
+  bool do_files = false;
+#endif
 #ifdef HAVE_KINFO_GETVMMAP
   bool do_mappings = false;
 #endif
@@ -295,10 +298,18 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
     case IP_CWD:
       do_cwd = true;
       break;
+#ifdef HAVE_KINFO_GETFILE
+    case IP_FILES:
+      do_files = true;
+      break;
+#endif
     case IP_ALL:
       do_cmdline = true;
       do_cwd = true;
       do_exe = true;
+#ifdef HAVE_KINFO_GETFILE
+      do_files = true;
+#endif
 #ifdef HAVE_KINFO_GETVMMAP
       do_mappings = true;
 #endif
@@ -322,7 +333,7 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
 
   printf_filtered (_("process %d\n"), pid);
 #ifdef HAVE_KINFO_GETFILE
-  if (do_cwd || do_exe)
+  if (do_cwd || do_exe || do_files)
     fdtbl.reset (kinfo_getfile (pid, &nfd));
 #endif
 
@@ -374,6 +385,25 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
       else
 	warning (_("unable to fetch executable path name"));
     }
+#ifdef HAVE_KINFO_GETFILE
+  if (do_files)
+    {
+      struct kinfo_file *kf = fdtbl.get ();
+
+      if (nfd > 0)
+	{
+	  fbsd_info_proc_files_header ();
+	  for (int i = 0; i < nfd; i++, kf++)
+	    fbsd_info_proc_files_entry (kf->kf_type, kf->kf_fd, kf->kf_flags,
+					kf->kf_offset, kf->kf_vnode_type,
+					kf->kf_sock_domain, kf->kf_sock_type,
+					kf->kf_sock_protocol, &kf->kf_sa_local,
+					&kf->kf_sa_peer, kf->kf_path);
+	}
+      else
+	warning (_("unable to fetch list of open files"));
+    }
+#endif
 #ifdef HAVE_KINFO_GETVMMAP
   if (do_mappings)
     {
