@@ -22219,7 +22219,7 @@ systems.
 @cindex process ID
 @item info proc
 @itemx info proc @var{process-id}
-Summarize available information about any running process.  If a
+Summarize available information about a process.  If a
 process ID is specified by @var{process-id}, display information about
 that process; otherwise display information about the program being
 debugged.  The summary includes the debugged process ID, the command
@@ -22280,7 +22280,7 @@ Open files:
 
 @item info proc mappings
 @cindex memory address space mappings
-Report the memory address space ranges accessible in the program.  On
+Report the memory address space ranges accessible in a process.  On
 Solaris and FreeBSD systems, each memory range includes information on
 whether the process has read, write, or execute access rights to each
 range.  On @sc{gnu}/Linux and FreeBSD systems, each memory range

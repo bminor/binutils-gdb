@@ -1,5 +1,10 @@
 2018-09-18  John Baldwin  <jhb@FreeBSD.org>
 
+	* gdb.texinfo (info proc): Remove "running".
+	(info proc mappings): Replace "program" with "process".
+
+2018-09-18  John Baldwin  <jhb@FreeBSD.org>
+
 	* gdb.texinfo (Process Information): Document "info proc files"
 	command.
 

@@ -1,5 +1,11 @@
 2018-09-18  John Baldwin  <jhb@FreeBSD.org>
 
+	* infcmd.c (_initialize_infcmd): Remove "running" from "info proc"
+	description.  Make "info proc" command descriptions more
+	consistent.
+
+2018-09-18  John Baldwin  <jhb@FreeBSD.org>
+
 	* NEWS: Mention 'info proc files' command.
 
 2018-09-18  John Baldwin  <jhb@FreeBSD.org>

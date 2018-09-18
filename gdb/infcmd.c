@@ -3522,13 +3522,13 @@ in the named register groups."));
 
   add_prefix_cmd ("proc", class_info, info_proc_cmd,
 		  _("\
-Show /proc process information about any running process.\n\
+Show additional information about a process.\n\
 Specify any process id, or use the program being debugged by default."),
 		  &info_proc_cmdlist, "info proc ",
 		  1/*allow-unknown*/, &infolist);
 
   add_cmd ("mappings", class_info, info_proc_cmd_mappings, _("\
-List of mapped memory regions."),
+List memory regions mapped by the specified process."),
 	   &info_proc_cmdlist);
 
   add_cmd ("stat", class_info, info_proc_cmd_stat, _("\
@@ -3540,15 +3540,15 @@ List process info from /proc/PID/status."),
 	   &info_proc_cmdlist);
 
   add_cmd ("cwd", class_info, info_proc_cmd_cwd, _("\
-List current working directory of the process."),
+List current working directory of the specified process."),
 	   &info_proc_cmdlist);
 
   add_cmd ("cmdline", class_info, info_proc_cmd_cmdline, _("\
-List command line arguments of the process."),
+List command line arguments of the specified process."),
 	   &info_proc_cmdlist);
 
   add_cmd ("exe", class_info, info_proc_cmd_exe, _("\
-List absolute filename for executable of the process."),
+List absolute filename for executable of the specified process."),
 	   &info_proc_cmdlist);
 
   add_cmd ("files", class_info, info_proc_cmd_files, _("\
@@ -3556,6 +3556,6 @@ List files opened by the specified process."),
 	   &info_proc_cmdlist);
 
   add_cmd ("all", class_info, info_proc_cmd_all, _("\
-List all available /proc info."),
+List all available info about the specified process."),
 	   &info_proc_cmdlist);
 }
