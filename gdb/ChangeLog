@@ -1,5 +1,37 @@
 2018-09-18  John Baldwin  <jhb@FreeBSD.org>
 
+	* fbsd-tdep.c (KF_FLAGS, KF_OFFSET, KF_VNODE_TYPE, KF_SOCK_DOMAIN)
+	(KF_SOCK_TYPE, KF_SOCK_PROTOCOL, KF_SA_LOCAL, KF_SA_PEER)
+	(KINFO_FILE_TYPE_SOCKET, KINFO_FILE_TYPE_PIPE)
+	(KINFO_FILE_TYPE_FIFO, KINFO_FILE_TYPE_KQUEUE)
+	(KINFO_FILE_TYPE_CRYPTO, KINFO_FILE_TYPE_MQUEUE)
+	(KINFO_FILE_TYPE_SHM, KINFO_FILE_TYPE_SEM, KINFO_FILE_TYPE_PTS)
+	(KINFO_FILE_TYPE_PROCDESC, KINFO_FILE_FD_TYPE_ROOT)
+	(KINFO_FILE_FD_TYPE_JAIL, KINFO_FILE_FD_TYPE_TRACE)
+	(KINFO_FILE_FD_TYPE_CTTY, KINFO_FILE_FLAG_READ)
+	(KINFO_FILE_FLAG_WRITE, KINFO_FILE_FLAG_APPEND)
+	(KINFO_FILE_FLAG_ASYNC, KINFO_FILE_FLAG_FSYNC)
+	(KINFO_FILE_FLAG_NONBLOCK, KINFO_FILE_FLAG_DIRECT)
+	(KINFO_FILE_FLAG_HASLOCK, KINFO_FILE_FLAG_EXEC)
+	(KINFO_FILE_VTYPE_VREG, KINFO_FILE_VTYPE_VDIR)
+	(KINFO_FILE_VTYPE_VCHR, KINFO_FILE_VTYPE_VLNK)
+	(KINFO_FILE_VTYPE_VSOCK, KINFO_FILE_VTYPE_VFIFO, FBSD_AF_UNIX)
+	(FBSD_AF_INET, FBSD_AF_INET6, FBSD_SOCK_STREAM, FBSD_SOCK_DGRAM)
+	(FBSD_SOCK_SEQPACKET, FBSD_IPPROTO_ICMP, FBSD_IPPROTO_TCP)
+	(FBSD_IPPROTO_UDP, FBSD_IPPROTO_SCTP): New defines.
+	(struct fbsd_sockaddr_in, struct fbsd_sockaddr_in6)
+	(struct fbsd_sockaddr_un): New types.
+	(fbsd_file_fd, fbsd_file_type, fbsd_file_flags, fbsd_ipproto)
+	(fbsd_print_sockaddr_in, fbsd_print_sockaddr_in6)
+	(fbsd_info_proc_files_header, fbsd_info_proc_files_entry)
+	(fbsd_core_info_proc_files): New functions.
+	(fbsd_core_info_proc): List open file descriptors for IP_FILES and
+	IP_ALL.
+	* fbsd-tdep.h (fbsd_info_proc_files_header)
+	(fbsd_info_proc_files_entry): New.
+
+2018-09-18  John Baldwin  <jhb@FreeBSD.org>
+
 	* defs.h (enum info_proc_what) [IP_FILES]: New value.
 	* infcmd.c (info_proc_cmd_files): New function.
 	(_initialize_infcmd): Register 'info proc files' command.

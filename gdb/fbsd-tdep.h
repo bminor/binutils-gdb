@@ -22,6 +22,26 @@
 
 extern void fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch);
 
+/* Output the header for "info proc files".  */
+
+extern void fbsd_info_proc_files_header ();
+
+/* Output description of a single file descriptor for "info proc
+   files".  The KF_TYPE, KF_FD, KF_FLAGS, KF_OFFSET, KF_VNODE_TYPE,
+   KF_SOCK_DOMAIN, KF_SOCK_TYPE, and KF_SOCK_PROTOCOL parameters
+   should contain the value of the corresponding fields in a 'struct
+   kinfo_file'.  The KF_SA_LOCAL, KF_SA_PEER, and KF_PATH parameters
+   should contain pointers to the corresponding fields in a 'struct
+   kinfo_file'. */
+
+extern void fbsd_info_proc_files_entry (int kf_type, int kf_fd, int kf_flags,
+					LONGEST kf_offset, int kf_vnode_type,
+					int kf_sock_domain, int kf_sock_type,
+					int kf_sock_protocol,
+					const void *kf_sa_local,
+					const void *kf_sa_peer,
+					const void *kf_path);
+
 /* Helper function to generate mappings flags for a single VM map
    entry in 'info proc mappings'.  The KVE_FLAGS and KVE_PROTECTION
    parameters should contain the values of the corresponding fields in
