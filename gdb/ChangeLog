@@ -1,3 +1,8 @@
+2018-09-18  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-tdep.c (fbsd_core_vnode_path): Use KF_PATH instead of
+	KVE_PATH.
+
 2018-09-18  Tom Tromey  <tom@tromey.com>
 
 	* compile/compile-object-load.c (struct

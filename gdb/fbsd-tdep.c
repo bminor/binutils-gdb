@@ -781,13 +781,13 @@ fbsd_core_vnode_path (struct gdbarch *gdbarch, int fd)
   /* Skip over the structure size.  */
   descdata += 4;
 
-  while (descdata + KVE_PATH < descend)
+  while (descdata + KF_PATH < descend)
     {
       ULONGEST structsize;
 
       structsize = bfd_get_32 (core_bfd, descdata + KF_STRUCTSIZE);
-      if (structsize < KVE_PATH)
-	error (_("malformed core note - vmmap entry too small"));
+      if (structsize < KF_PATH)
+	error (_("malformed core note - file structure too small"));
 
       if (bfd_get_32 (core_bfd, descdata + KF_TYPE) == KINFO_FILE_TYPE_VNODE
 	  && bfd_get_signed_32 (core_bfd, descdata + KF_FD) == fd)
