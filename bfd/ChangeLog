@@ -1,3 +1,9 @@
+2018-09-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 23657
+	* elfcode.h (elf_swap_shdr_in): Generate a warning message if an
+	ELF section has contents and size larger than the file size.
+
 2018-09-14  Maciej W. Rozycki  <macro@mips.com>
 
 	PR ld/21375

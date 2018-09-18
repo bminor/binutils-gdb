@@ -314,6 +314,14 @@ elf_swap_shdr_in (bfd *abfd,
     dst->sh_addr = H_GET_WORD (abfd, src->sh_addr);
   dst->sh_offset = H_GET_WORD (abfd, src->sh_offset);
   dst->sh_size = H_GET_WORD (abfd, src->sh_size);
+  /* PR 23657.  Check for invalid section size, in sections with contents.
+     Note - we do not set an error value here because the contents
+     of this particular section might not be needed by the consumer.  */
+  if (dst->sh_type != SHT_NOBITS
+      && dst->sh_size > bfd_get_file_size (abfd))
+    _bfd_error_handler
+      (_("warning: %pB has a corrupt section with a size (%" BFD_VMA_FMT "x) larger than the file size"),
+       abfd, dst->sh_size);
   dst->sh_link = H_GET_32 (abfd, src->sh_link);
   dst->sh_info = H_GET_32 (abfd, src->sh_info);
   dst->sh_addralign = H_GET_WORD (abfd, src->sh_addralign);
