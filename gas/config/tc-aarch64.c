@@ -4809,7 +4809,7 @@ output_operand_error_report (char *str, bfd_boolean non_fatal_only)
       /* If we don't want to print non-fatal errors then don't consider them
 	 at all.  */
       if (curr->detail.kind != kind
-	  || (non_fatal_only && !head->detail.non_fatal))
+	  || (non_fatal_only && !curr->detail.non_fatal))
 	continue;
       /* If there are multiple errors, pick up the one with the highest
 	 mismatching operand index.  In the case of multiple errors with

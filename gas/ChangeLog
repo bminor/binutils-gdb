@@ -1,3 +1,8 @@
+2018-09-18 Tamar Christina  <tamar.christina@arm.com>
+
+	* config/tc-aarch64.c (output_operand_error_report): Apply filtering to
+	current instead of head message.
+
 2018-09-17  Kito Cheng  <kito@andestech.com>
 
 	* testsuite/gas/riscv/bge.d: New.
