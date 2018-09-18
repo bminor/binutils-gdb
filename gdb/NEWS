@@ -56,6 +56,9 @@ maint set dwarf unwinders (on|off)
 maint show dwarf unwinders
   Control whether DWARF unwinders can be used.
 
+info proc files
+  Display a list of open files for a process.
+
 * Changed commands
 
 thread apply [all | COUNT | -COUNT] [FLAG]... COMMAND

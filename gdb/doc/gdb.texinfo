@@ -22248,6 +22248,36 @@ supported on @sc{gnu}/Linux and FreeBSD.
 Show the name of executable of the process.  This command is supported
 on @sc{gnu}/Linux and FreeBSD.
 
+@item info proc files
+@cindex info proc files
+Show the file descriptors open by the process.  For each open file
+descriptor, @value{GDBN} shows its number, type (file, directory,
+character device, socket), file pointer offset, and the name of the
+resource open on the descriptor.  The resource name can be a file name
+(for files, directories, and devices) or a protocol followed by socket
+address (for network connections).  This command is supported on
+FreeBSD.
+
+This example shows the open file descriptors for a process using a
+tty for standard input and output as well as two network sockets:
+
+@smallexample
+(gdb) info proc files 22136
+process 22136
+Open files:
+
+      FD   Type     Offset   Flags   Name
+    text   file          - r-------- /usr/bin/ssh
+    ctty    chr          - rw------- /dev/pts/20
+     cwd    dir          - r-------- /usr/home/john
+    root    dir          - r-------- /
+       0    chr  0x32933a4 rw------- /dev/pts/20
+       1    chr  0x32933a4 rw------- /dev/pts/20
+       2    chr  0x32933a4 rw------- /dev/pts/20
+       3 socket        0x0 rw----n-- tcp4 10.0.1.2:53014 -> 10.0.1.10:22
+       4 socket        0x0 rw------- unix stream:/tmp/ssh-FIt89oAzOn5f/agent.2456
+@end smallexample
+
 @item info proc mappings
 @cindex memory address space mappings
 Report the memory address space ranges accessible in the program.  On

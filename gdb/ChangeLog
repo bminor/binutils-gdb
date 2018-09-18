@@ -1,5 +1,9 @@
 2018-09-18  John Baldwin  <jhb@FreeBSD.org>
 
+	* NEWS: Mention 'info proc files' command.
+
+2018-09-18  John Baldwin  <jhb@FreeBSD.org>
+
 	* fbsd-nat.c (fbsd_nat_target::info_proc): List open file
 	descriptors for IP_FILES and IP_ALL.
 
