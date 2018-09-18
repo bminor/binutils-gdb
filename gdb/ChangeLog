@@ -1,3 +1,8 @@
+2018-09-23  Tom Tromey  <tom@tromey.com>
+
+	* ctf.c (ctf_start): Use gdb_fopen_cloexec.
+	* common/scoped_mmap.c (mmap_file): Use gdb_open_cloexec.
+
 2018-09-23  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* amd64-sol2-tdep.c (amd64_sol2_sigtramp_p): Also recognize

@@ -31,6 +31,7 @@
 #include "tracefile.h"
 #include <ctype.h>
 #include <algorithm>
+#include "common/filestuff.h"
 
 /* The CTF target.  */
 
@@ -354,7 +355,8 @@ ctf_start (struct trace_file_writer *self, const char *dirname)
 
   std::string file_name = string_printf ("%s/%s", dirname, CTF_METADATA_NAME);
 
-  writer->tcs.metadata_fd = fopen (file_name.c_str (), "w");
+  writer->tcs.metadata_fd
+    = gdb_fopen_cloexec (file_name.c_str (), "w").release ();
   if (writer->tcs.metadata_fd == NULL)
     error (_("Unable to open file '%s' for saving trace data (%s)"),
 	   file_name.c_str (), safe_strerror (errno));
@@ -362,7 +364,8 @@ ctf_start (struct trace_file_writer *self, const char *dirname)
   ctf_save_metadata_header (&writer->tcs);
 
   file_name = string_printf ("%s/%s", dirname, CTF_DATASTREAM_NAME);
-  writer->tcs.datastream_fd = fopen (file_name.c_str (), "w");
+  writer->tcs.datastream_fd
+    = gdb_fopen_cloexec (file_name.c_str (), "w").release ();
   if (writer->tcs.datastream_fd == NULL)
     error (_("Unable to open file '%s' for saving trace data (%s)"),
 	   file_name.c_str (), safe_strerror (errno));
