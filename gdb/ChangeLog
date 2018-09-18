@@ -1,5 +1,11 @@
 2018-09-18  John Baldwin  <jhb@FreeBSD.org>
 
+	* gnulib/aclocal-m4-deps.mk: New file.
+	* gnulib/update-gnulib.sh: Generate "aclocal-m4-deps.mk"
+	deterministically.
+
+2018-09-18  John Baldwin  <jhb@FreeBSD.org>
+
 	* fbsd-tdep.c (fbsd_core_vnode_path): Use KF_PATH instead of
 	KVE_PATH.
 

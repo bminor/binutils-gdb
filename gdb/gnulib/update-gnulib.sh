@@ -172,7 +172,8 @@ ACLOCAL_M4_DEPS_FILE=aclocal-m4-deps.mk
 cat > ${ACLOCAL_M4_DEPS_FILE}.tmp <<EOF
 # THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi :set ro:
 aclocal_m4_deps = \\
-$(find import/m4 -type f -name "*.m4" | sed 's/^/\t/; s/$/ \\/; $s/ \\//g')
+$(find import/m4 -type f -name "*.m4" | LC_COLLATE=C sort | \
+  sed 's/^/	/; s/$/ \\/; $s/ \\//g')
 EOF
 
 ../../move-if-change ${ACLOCAL_M4_DEPS_FILE}.tmp ${ACLOCAL_M4_DEPS_FILE}
