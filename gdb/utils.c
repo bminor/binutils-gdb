@@ -220,7 +220,7 @@ void
 dump_core (void)
 {
 #ifdef HAVE_SETRLIMIT
-  struct rlimit rlim = { RLIM_INFINITY, RLIM_INFINITY };
+  struct rlimit rlim = { (rlim_t) RLIM_INFINITY, (rlim_t) RLIM_INFINITY };
 
   setrlimit (RLIMIT_CORE, &rlim);
 #endif /* HAVE_SETRLIMIT */
