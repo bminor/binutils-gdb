@@ -389,6 +389,9 @@ enum info_proc_what
     /* * Display `info proc cwd'.  */
     IP_CWD,
 
+    /* * Display `info proc files'.  */
+    IP_FILES,
+
     /* * Display all of the above.  */
     IP_ALL
   };

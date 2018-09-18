@@ -1,5 +1,11 @@
 2018-09-18  John Baldwin  <jhb@FreeBSD.org>
 
+	* defs.h (enum info_proc_what) [IP_FILES]: New value.
+	* infcmd.c (info_proc_cmd_files): New function.
+	(_initialize_infcmd): Register 'info proc files' command.
+
+2018-09-18  John Baldwin  <jhb@FreeBSD.org>
+
 	* gnulib/aclocal-m4-deps.mk: Re-generate.
 	* gnulib/aclocal.m4: Re-generate.
 	* gnulib/config.in: Re-generate.

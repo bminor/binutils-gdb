@@ -3218,6 +3218,14 @@ info_proc_cmd_exe (const char *args, int from_tty)
   info_proc_cmd_1 (args, IP_EXE, from_tty);
 }
 
+/* Implement `info proc files'.  */
+
+static void
+info_proc_cmd_files (const char *args, int from_tty)
+{
+  info_proc_cmd_1 (args, IP_FILES, from_tty);
+}
+
 /* Implement `info proc all'.  */
 
 static void
@@ -3541,6 +3549,10 @@ List command line arguments of the process."),
 
   add_cmd ("exe", class_info, info_proc_cmd_exe, _("\
 List absolute filename for executable of the process."),
+	   &info_proc_cmdlist);
+
+  add_cmd ("files", class_info, info_proc_cmd_files, _("\
+List files opened by the specified process."),
 	   &info_proc_cmdlist);
 
   add_cmd ("all", class_info, info_proc_cmd_all, _("\
