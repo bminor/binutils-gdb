@@ -1,3 +1,7 @@
+2018-09-20  Hafiz Abid Qadeer  <abidh@codesourcery.com>
+
+	gdb.base/reggroups.exp (fetch_reggroups): Add '_' in match pattern.
+
 2018-09-18  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.base/complete-empty.exp: Skip tab-completion tests if
