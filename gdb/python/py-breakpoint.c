@@ -391,7 +391,12 @@ bppy_get_location (PyObject *self, void *closure)
   if (obj->bp->type != bp_breakpoint)
     Py_RETURN_NONE;
 
-  str = event_location_to_string (obj->bp->location.get ());
+  struct event_location *location = obj->bp->location.get ();
+  /* "catch throw" makes a breakpoint of type bp_breakpoint that does
+     not have a location.  */
+  if (location == nullptr)
+    Py_RETURN_NONE;
+  str = event_location_to_string (location);
   if (! str)
     str = "";
   return host_string_to_python_string (str);

@@ -1,5 +1,10 @@
 2018-10-06  Tom Tromey  <tom@tromey.com>
 
+	* python/py-breakpoint.c (bppy_get_location): Handle a
+	bp_breakpoint without a location.
+
+2018-10-06  Tom Tromey  <tom@tromey.com>
+
 	* python/lib/gdb/function/strfns.py (_MemEq, _StrLen, _StrEq)
 	(_RegEx): Reformat help text.
 	* python/lib/gdb/function/caller_is.py (CallerIs, CallerMatches)

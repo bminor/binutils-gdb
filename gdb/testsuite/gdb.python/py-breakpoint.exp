@@ -616,6 +616,11 @@ proc_with_prefix test_bkpt_explicit_loc {} {
     gdb_test "python bp1 = gdb.Breakpoint (function=\"blah\")" \
 	"Function \"blah\" not defined.*" \
 	"set invalid explicit breakpoint by missing function"
+
+    delete_breakpoints
+    gdb_test "catch throw" "Catchpoint .* \\(throw\\)"
+    gdb_test "python print (gdb.breakpoints()\[0\].location)" None \
+	"Examine location of catchpoint"
 }
 
 proc_with_prefix test_bkpt_qualified {} {

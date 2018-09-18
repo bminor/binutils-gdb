@@ -1,3 +1,8 @@
+2018-10-06  Tom Tromey  <tom@tromey.com>
+
+	* gdb.python/py-breakpoint.exp (check_last_event): Check location
+	of a "throw" catchpoint.
+
 2018-10-06  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.base/info-proc.exp: Update string expected from "help info
