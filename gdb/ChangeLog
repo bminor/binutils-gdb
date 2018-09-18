@@ -1,5 +1,32 @@
 2018-09-18  John Baldwin  <jhb@FreeBSD.org>
 
+	* gnulib/aclocal-m4-deps.mk: Re-generate.
+	* gnulib/aclocal.m4: Re-generate.
+	* gnulib/config.in: Re-generate.
+	* gnulib/configure: Re-generate.
+	* gnulib/import/Makefile.am: Re-generate.
+	* gnulib/import/Makefile.in: Re-generate.
+	* gnulib/import/m4/gnulib-cache.m4: Re-generate.
+	* gnulib/import/m4/gnulib-comp.m4: Re-generate.
+	* gnulib/import/arpa_inet.in.h: New file.
+	* gnulib/import/inet_ntop.c: New file.
+	* gnulib/import/m4/arpa_inet_h.m4: New file.
+	* gnulib/import/m4/inet_ntop.m4: New file.
+	* gnulib/import/m4/netinet_in_h.m4: New file.
+	* gnulib/import/m4/socklen.m4: New file.
+	* gnulib/import/m4/sockpfaf.m4: New file.
+	* gnulib/import/m4/stdalign.m4: New file.
+	* gnulib/import/m4/sys_uio_h.m4: New file.
+	* gnulib/import/netinet_in.in.h: New file.
+	* gnulib/import/stdalign.in.h: New file.
+	* gnulib/import/sys_socket.c: New file.
+	* gnulib/import/sys_socket.in.h: New file.
+	* gnulib/import/sys_uio.in.h: New file.
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add inet_ntop
+	module.
+
+2018-09-18  John Baldwin  <jhb@FreeBSD.org>
+
 	* gnulib/aclocal-m4-deps.mk: New file.
 	* gnulib/update-gnulib.sh: Generate "aclocal-m4-deps.mk"
 	deterministically.

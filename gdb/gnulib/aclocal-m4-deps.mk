@@ -3,6 +3,7 @@ aclocal_m4_deps = \
 	import/m4/00gnulib.m4 \
 	import/m4/absolute-header.m4 \
 	import/m4/alloca.m4 \
+	import/m4/arpa_inet_h.m4 \
 	import/m4/canonicalize.m4 \
 	import/m4/chdir-long.m4 \
 	import/m4/close.m4 \
@@ -54,6 +55,7 @@ aclocal_m4_deps = \
 	import/m4/gnulib-tool.m4 \
 	import/m4/hard-locale.m4 \
 	import/m4/include_next.m4 \
+	import/m4/inet_ntop.m4 \
 	import/m4/inttypes-pri.m4 \
 	import/m4/inttypes.m4 \
 	import/m4/isnand.m4 \
@@ -84,6 +86,7 @@ aclocal_m4_deps = \
 	import/m4/msvc-inval.m4 \
 	import/m4/msvc-nothrow.m4 \
 	import/m4/multiarch.m4 \
+	import/m4/netinet_in_h.m4 \
 	import/m4/nocrash.m4 \
 	import/m4/off_t.m4 \
 	import/m4/onceonly.m4 \
@@ -102,8 +105,11 @@ aclocal_m4_deps = \
 	import/m4/secure_getenv.m4 \
 	import/m4/setenv.m4 \
 	import/m4/signal_h.m4 \
+	import/m4/socklen.m4 \
+	import/m4/sockpfaf.m4 \
 	import/m4/ssize_t.m4 \
 	import/m4/stat.m4 \
+	import/m4/stdalign.m4 \
 	import/m4/stdbool.m4 \
 	import/m4/stddef_h.m4 \
 	import/m4/stdint.m4 \
@@ -119,6 +125,7 @@ aclocal_m4_deps = \
 	import/m4/sys_stat_h.m4 \
 	import/m4/sys_time_h.m4 \
 	import/m4/sys_types_h.m4 \
+	import/m4/sys_uio_h.m4 \
 	import/m4/tempname.m4 \
 	import/m4/time_h.m4 \
 	import/m4/unistd-safer.m4 \

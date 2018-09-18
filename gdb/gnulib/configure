@@ -619,8 +619,8 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-gl_func_list=
 gl_header_list=
+gl_func_list=
 gl_fnmatch_required=POSIX
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
@@ -686,7 +686,6 @@ GNULIB_ISWCTYPE
 GNULIB_WCTYPE
 GNULIB_ISWBLANK
 HAVE_WINT_T
-HAVE_FEATURES_H
 NEXT_AS_FIRST_DIRECTIVE_WCHAR_H
 NEXT_WCHAR_H
 HAVE_UNISTD_H
@@ -714,10 +713,12 @@ GNULIB_TIMEGM
 GNULIB_STRPTIME
 GNULIB_NANOSLEEP
 GNULIB_MKTIME
+HAVE_SYS_UIO_H
+NEXT_AS_FIRST_DIRECTIVE_SYS_UIO_H
+NEXT_SYS_UIO_H
 WINDOWS_64_BIT_OFF_T
 NEXT_AS_FIRST_DIRECTIVE_SYS_TYPES_H
 NEXT_SYS_TYPES_H
-MKDIR_P
 NEXT_AS_FIRST_DIRECTIVE_STRING_H
 NEXT_STRING_H
 NEXT_AS_FIRST_DIRECTIVE_STDLIB_H
@@ -736,6 +737,9 @@ HAVE__BOOL
 GL_GENERATE_STDBOOL_H_FALSE
 GL_GENERATE_STDBOOL_H_TRUE
 STDBOOL_H
+GL_GENERATE_STDALIGN_H_FALSE
+GL_GENERATE_STDALIGN_H_TRUE
+STDALIGN_H
 NEXT_AS_FIRST_DIRECTIVE_SIGNAL_H
 NEXT_SIGNAL_H
 REPLACE_RAISE
@@ -855,6 +859,12 @@ GNULIB_FFLUSH
 GNULIB_FDOPEN
 GNULIB_FCLOSE
 GNULIB_DPRINTF
+GL_GENERATE_NETINET_IN_H_FALSE
+GL_GENERATE_NETINET_IN_H_TRUE
+NETINET_IN_H
+HAVE_NETINET_IN_H
+NEXT_AS_FIRST_DIRECTIVE_NETINET_IN_H
+NEXT_NETINET_IN_H
 UNDEFINE_STRTOK_R
 REPLACE_STRTOK_R
 REPLACE_STRSIGNAL
@@ -1078,6 +1088,30 @@ GL_GENERATE_LIMITS_H_TRUE
 LIMITS_H
 NEXT_AS_FIRST_DIRECTIVE_LIMITS_H
 NEXT_LIMITS_H
+HAVE_WS2TCPIP_H
+HAVE_SYS_SOCKET_H
+NEXT_AS_FIRST_DIRECTIVE_SYS_SOCKET_H
+NEXT_SYS_SOCKET_H
+HAVE_ACCEPT4
+HAVE_SA_FAMILY_T
+HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY
+HAVE_STRUCT_SOCKADDR_STORAGE
+GNULIB_ACCEPT4
+GNULIB_SHUTDOWN
+GNULIB_SETSOCKOPT
+GNULIB_SENDTO
+GNULIB_RECVFROM
+GNULIB_SEND
+GNULIB_RECV
+GNULIB_LISTEN
+GNULIB_GETSOCKOPT
+GNULIB_GETSOCKNAME
+GNULIB_GETPEERNAME
+GNULIB_BIND
+GNULIB_ACCEPT
+GNULIB_CONNECT
+GNULIB_SOCKET
+INET_NTOP_LIB
 HAVE_SYS_CDEFS_H
 GL_GENERATE_GLOB_H_FALSE
 GL_GENERATE_GLOB_H_TRUE
@@ -1420,10 +1454,6 @@ NEXT_ERRNO_H
 HAVE_DIRENT_H
 NEXT_AS_FIRST_DIRECTIVE_DIRENT_H
 NEXT_DIRENT_H
-PRAGMA_COLUMNS
-PRAGMA_SYSTEM_HEADER
-INCLUDE_NEXT_AS_FIRST_DIRECTIVE
-INCLUDE_NEXT
 pkglibexecdir
 runstatedir
 lispdir
@@ -1652,6 +1682,21 @@ GNULIB_CANONICALIZE_FILE_NAME
 GNULIB_CALLOC_POSIX
 GNULIB_ATOLL
 GNULIB__EXIT
+MKDIR_P
+HAVE_FEATURES_H
+NEXT_AS_FIRST_DIRECTIVE_ARPA_INET_H
+NEXT_ARPA_INET_H
+PRAGMA_COLUMNS
+PRAGMA_SYSTEM_HEADER
+INCLUDE_NEXT_AS_FIRST_DIRECTIVE
+INCLUDE_NEXT
+HAVE_ARPA_INET_H
+REPLACE_INET_PTON
+REPLACE_INET_NTOP
+HAVE_DECL_INET_PTON
+HAVE_DECL_INET_NTOP
+GNULIB_INET_PTON
+GNULIB_INET_NTOP
 GL_GENERATE_ALLOCA_H_FALSE
 GL_GENERATE_ALLOCA_H_TRUE
 ALLOCA_H
@@ -3092,6 +3137,63 @@ rm -f conftest.val
   as_fn_set_status $ac_retval
 
 } # ac_fn_c_compute_int
+
+# ac_fn_c_check_member LINENO AGGR MEMBER VAR INCLUDES
+# ----------------------------------------------------
+# Tries to find if the field MEMBER exists in type AGGR, after including
+# INCLUDES, setting cache variable VAR accordingly.
+ac_fn_c_check_member ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2.$3" >&5
+$as_echo_n "checking for $2.$3... " >&6; }
+if eval \${$4+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$5
+int
+main ()
+{
+static $2 ac_aggr;
+if (ac_aggr.$3)
+return 0;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  eval "$4=yes"
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$5
+int
+main ()
+{
+static $2 ac_aggr;
+if (sizeof ac_aggr.$3)
+return 0;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  eval "$4=yes"
+else
+  eval "$4=no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+eval ac_res=\$$4
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+
+} # ac_fn_c_check_member
 cat >config.log <<_ACEOF
 This file contains any messages produced by compilers while
 running configure, to aid debugging if configure makes a mistake.
@@ -3376,6 +3478,8 @@ $as_echo "$as_me: creating cache $cache_file" >&6;}
   >$cache_file
 fi
 
+gl_header_list="$gl_header_list arpa/inet.h"
+gl_header_list="$gl_header_list features.h"
 gl_func_list="$gl_func_list canonicalize_file_name"
 gl_func_list="$gl_func_list getcwd"
 gl_func_list="$gl_func_list readlink"
@@ -3409,6 +3513,8 @@ gl_header_list="$gl_header_list sys/time.h"
 gl_func_list="$gl_func_list gettimeofday"
 gl_header_list="$gl_header_list sys/cdefs.h"
 gl_func_list="$gl_func_list getpwnam_r"
+gl_header_list="$gl_header_list netdb.h"
+gl_header_list="$gl_header_list netinet/in.h"
 gl_header_list="$gl_header_list limits.h"
 gl_header_list="$gl_header_list wchar.h"
 gl_header_list="$gl_header_list stdint.h"
@@ -3429,8 +3535,8 @@ gl_func_list="$gl_func_list getgid"
 gl_func_list="$gl_func_list getegid"
 gl_func_list="$gl_func_list setenv"
 gl_func_list="$gl_func_list strdup"
+gl_header_list="$gl_header_list sys/uio.h"
 gl_func_list="$gl_func_list pipe"
-gl_header_list="$gl_header_list features.h"
 gl_func_list="$gl_func_list iswcntrl"
 # Check that the precious variables saved in the cache have kept the same
 # value.
@@ -5659,6 +5765,7 @@ fi
   # Code from module absolute-header:
   # Code from module alloca:
   # Code from module alloca-opt:
+  # Code from module arpa_inet:
   # Code from module assure:
   # Code from module at-internal:
   # Code from module canonicalize-lgpl:
@@ -5711,6 +5818,7 @@ fi
   # Code from module glob:
   # Code from module hard-locale:
   # Code from module include_next:
+  # Code from module inet_ntop:
   # Code from module intprops:
   # Code from module inttypes:
   # Code from module inttypes-incomplete:
@@ -5737,6 +5845,7 @@ fi
   # Code from module msvc-inval:
   # Code from module msvc-nothrow:
   # Code from module multiarch:
+  # Code from module netinet_in:
   # Code from module nocrash:
   # Code from module open:
   # Code from module openat:
@@ -5760,8 +5869,10 @@ fi
   # Code from module snippet/arg-nonnull:
   # Code from module snippet/c++defs:
   # Code from module snippet/warn-on-use:
+  # Code from module socklen:
   # Code from module ssize_t:
   # Code from module stat:
+  # Code from module stdalign:
   # Code from module stdbool:
   # Code from module stddef:
   # Code from module stdint:
@@ -5777,9 +5888,11 @@ fi
   # Code from module strstr:
   # Code from module strstr-simple:
   # Code from module strtok_r:
+  # Code from module sys_socket:
   # Code from module sys_stat:
   # Code from module sys_time:
   # Code from module sys_types:
+  # Code from module sys_uio:
   # Code from module tempname:
   # Code from module time:
   # Code from module unistd:
@@ -6671,6 +6784,211 @@ _ACEOF
 fi
 
 
+  GNULIB_INET_NTOP=0;
+  GNULIB_INET_PTON=0;
+    HAVE_DECL_INET_NTOP=1;
+  HAVE_DECL_INET_PTON=1;
+  REPLACE_INET_NTOP=0;
+  REPLACE_INET_PTON=0;
+
+
+
+
+
+  for ac_header in $gl_header_list
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+
+
+
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the preprocessor supports include_next" >&5
+$as_echo_n "checking whether the preprocessor supports include_next... " >&6; }
+if ${gl_cv_have_include_next+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  rm -rf conftestd1a conftestd1b conftestd2
+     mkdir conftestd1a conftestd1b conftestd2
+                                                  cat <<EOF > conftestd1a/conftest.h
+#define DEFINED_IN_CONFTESTD1
+#include_next <conftest.h>
+#ifdef DEFINED_IN_CONFTESTD2
+int foo;
+#else
+#error "include_next doesn't work"
+#endif
+EOF
+     cat <<EOF > conftestd1b/conftest.h
+#define DEFINED_IN_CONFTESTD1
+#include <stdio.h>
+#include_next <conftest.h>
+#ifdef DEFINED_IN_CONFTESTD2
+int foo;
+#else
+#error "include_next doesn't work"
+#endif
+EOF
+     cat <<EOF > conftestd2/conftest.h
+#ifndef DEFINED_IN_CONFTESTD1
+#error "include_next test doesn't work"
+#endif
+#define DEFINED_IN_CONFTESTD2
+EOF
+     gl_save_CPPFLAGS="$CPPFLAGS"
+     CPPFLAGS="$gl_save_CPPFLAGS -Iconftestd1b -Iconftestd2"
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <conftest.h>
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_have_include_next=yes
+else
+  CPPFLAGS="$gl_save_CPPFLAGS -Iconftestd1a -Iconftestd2"
+        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <conftest.h>
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_have_include_next=buggy
+else
+  gl_cv_have_include_next=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+     CPPFLAGS="$gl_save_CPPFLAGS"
+     rm -rf conftestd1a conftestd1b conftestd2
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_have_include_next" >&5
+$as_echo "$gl_cv_have_include_next" >&6; }
+  PRAGMA_SYSTEM_HEADER=
+  if test $gl_cv_have_include_next = yes; then
+    INCLUDE_NEXT=include_next
+    INCLUDE_NEXT_AS_FIRST_DIRECTIVE=include_next
+    if test -n "$GCC"; then
+      PRAGMA_SYSTEM_HEADER='#pragma GCC system_header'
+    fi
+  else
+    if test $gl_cv_have_include_next = buggy; then
+      INCLUDE_NEXT=include
+      INCLUDE_NEXT_AS_FIRST_DIRECTIVE=include_next
+    else
+      INCLUDE_NEXT=include
+      INCLUDE_NEXT_AS_FIRST_DIRECTIVE=include
+    fi
+  fi
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether system header files limit the line length" >&5
+$as_echo_n "checking whether system header files limit the line length... " >&6; }
+if ${gl_cv_pragma_columns+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#ifdef __TANDEM
+choke me
+#endif
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "choke me" >/dev/null 2>&1; then :
+  gl_cv_pragma_columns=yes
+else
+  gl_cv_pragma_columns=no
+fi
+rm -f conftest*
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_pragma_columns" >&5
+$as_echo "$gl_cv_pragma_columns" >&6; }
+  if test $gl_cv_pragma_columns = yes; then
+    PRAGMA_COLUMNS="#pragma COLUMNS 10000"
+  else
+    PRAGMA_COLUMNS=
+  fi
+
+
+
+
+
+
+
+
+
+  :
+
+
+
+
+
+  if test $ac_cv_header_features_h = yes; then
+    HAVE_FEATURES_H=1
+  else
+    HAVE_FEATURES_H=0
+  fi
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for a thread-safe mkdir -p" >&5
+$as_echo_n "checking for a thread-safe mkdir -p... " >&6; }
+if test -z "$MKDIR_P"; then
+  if ${ac_cv_path_mkdir+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH$PATH_SEPARATOR/opt/sfw/bin
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_prog in mkdir gmkdir; do
+	 for ac_exec_ext in '' $ac_executable_extensions; do
+	   as_fn_executable_p "$as_dir/$ac_prog$ac_exec_ext" || continue
+	   case `"$as_dir/$ac_prog$ac_exec_ext" --version 2>&1` in #(
+	     'mkdir (GNU coreutils) '* | \
+	     'mkdir (coreutils) '* | \
+	     'mkdir (fileutils) '4.1*)
+	       ac_cv_path_mkdir=$as_dir/$ac_prog$ac_exec_ext
+	       break 3;;
+	   esac
+	 done
+       done
+  done
+IFS=$as_save_IFS
+
+fi
+
+  test -d ./--version && rmdir ./--version
+  if test "${ac_cv_path_mkdir+set}" = set; then
+    MKDIR_P="$ac_cv_path_mkdir -p"
+  else
+    # As a last resort, use the slow shell script.  Don't cache a
+    # value for MKDIR_P within a source directory, because that will
+    # break other packages using the cache if that directory is
+    # removed, or if the value is a relative name.
+    MKDIR_P="$ac_install_sh -d"
+  fi
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $MKDIR_P" >&5
+$as_echo "$MKDIR_P" >&6; }
+
+
   GNULIB__EXIT=0;
   GNULIB_ATOLL=0;
   GNULIB_CALLOC_POSIX=0;
@@ -7035,22 +7353,6 @@ $as_echo "#define FUNC_REALPATH_WORKS 1" >>confdefs.h
 
 
 
-  for ac_header in $gl_header_list
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-
-done
-
-
-
-
 
 
 
@@ -7275,120 +7577,6 @@ $as_echo "#define HAVE_MSVC_INVALID_PARAMETER_HANDLER 1" >>confdefs.h
   REPLACE_CLOSEDIR=0;
   REPLACE_DIRFD=0;
   REPLACE_FDOPENDIR=0;
-
-
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the preprocessor supports include_next" >&5
-$as_echo_n "checking whether the preprocessor supports include_next... " >&6; }
-if ${gl_cv_have_include_next+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  rm -rf conftestd1a conftestd1b conftestd2
-     mkdir conftestd1a conftestd1b conftestd2
-                                                  cat <<EOF > conftestd1a/conftest.h
-#define DEFINED_IN_CONFTESTD1
-#include_next <conftest.h>
-#ifdef DEFINED_IN_CONFTESTD2
-int foo;
-#else
-#error "include_next doesn't work"
-#endif
-EOF
-     cat <<EOF > conftestd1b/conftest.h
-#define DEFINED_IN_CONFTESTD1
-#include <stdio.h>
-#include_next <conftest.h>
-#ifdef DEFINED_IN_CONFTESTD2
-int foo;
-#else
-#error "include_next doesn't work"
-#endif
-EOF
-     cat <<EOF > conftestd2/conftest.h
-#ifndef DEFINED_IN_CONFTESTD1
-#error "include_next test doesn't work"
-#endif
-#define DEFINED_IN_CONFTESTD2
-EOF
-     gl_save_CPPFLAGS="$CPPFLAGS"
-     CPPFLAGS="$gl_save_CPPFLAGS -Iconftestd1b -Iconftestd2"
-     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <conftest.h>
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  gl_cv_have_include_next=yes
-else
-  CPPFLAGS="$gl_save_CPPFLAGS -Iconftestd1a -Iconftestd2"
-        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <conftest.h>
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  gl_cv_have_include_next=buggy
-else
-  gl_cv_have_include_next=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-     CPPFLAGS="$gl_save_CPPFLAGS"
-     rm -rf conftestd1a conftestd1b conftestd2
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_have_include_next" >&5
-$as_echo "$gl_cv_have_include_next" >&6; }
-  PRAGMA_SYSTEM_HEADER=
-  if test $gl_cv_have_include_next = yes; then
-    INCLUDE_NEXT=include_next
-    INCLUDE_NEXT_AS_FIRST_DIRECTIVE=include_next
-    if test -n "$GCC"; then
-      PRAGMA_SYSTEM_HEADER='#pragma GCC system_header'
-    fi
-  else
-    if test $gl_cv_have_include_next = buggy; then
-      INCLUDE_NEXT=include
-      INCLUDE_NEXT_AS_FIRST_DIRECTIVE=include_next
-    else
-      INCLUDE_NEXT=include
-      INCLUDE_NEXT_AS_FIRST_DIRECTIVE=include
-    fi
-  fi
-
-
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether system header files limit the line length" >&5
-$as_echo_n "checking whether system header files limit the line length... " >&6; }
-if ${gl_cv_pragma_columns+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#ifdef __TANDEM
-choke me
-#endif
-
-_ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "choke me" >/dev/null 2>&1; then :
-  gl_cv_pragma_columns=yes
-else
-  gl_cv_pragma_columns=no
-fi
-rm -f conftest*
-
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_pragma_columns" >&5
-$as_echo "$gl_cv_pragma_columns" >&6; }
-  if test $gl_cv_pragma_columns = yes; then
-    PRAGMA_COLUMNS="#pragma COLUMNS 10000"
-  else
-    PRAGMA_COLUMNS=
-  fi
-
 
 
 
@@ -9440,6 +9628,495 @@ fi
 
 
 
+
+
+
+
+
+
+
+  GNULIB_SOCKET=0;
+  GNULIB_CONNECT=0;
+  GNULIB_ACCEPT=0;
+  GNULIB_BIND=0;
+  GNULIB_GETPEERNAME=0;
+  GNULIB_GETSOCKNAME=0;
+  GNULIB_GETSOCKOPT=0;
+  GNULIB_LISTEN=0;
+  GNULIB_RECV=0;
+  GNULIB_SEND=0;
+  GNULIB_RECVFROM=0;
+  GNULIB_SENDTO=0;
+  GNULIB_SETSOCKOPT=0;
+  GNULIB_SHUTDOWN=0;
+  GNULIB_ACCEPT4=0;
+  HAVE_STRUCT_SOCKADDR_STORAGE=1;
+  HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY=1;
+
+  HAVE_SA_FAMILY_T=1;
+  HAVE_ACCEPT4=1;
+
+
+  :
+
+
+
+
+
+   if test $ac_cv_header_sys_socket_h = no; then
+                         for ac_header in ws2tcpip.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "ws2tcpip.h" "ac_cv_header_ws2tcpip_h" "$ac_includes_default"
+if test "x$ac_cv_header_ws2tcpip_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_WS2TCPIP_H 1
+_ACEOF
+
+fi
+
+done
+
+   fi
+
+
+
+
+
+        case "$host_os" in
+    osf*)
+
+$as_echo "#define _POSIX_PII_SOCKET 1" >>confdefs.h
+
+      ;;
+  esac
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether <sys/socket.h> is self-contained" >&5
+$as_echo_n "checking whether <sys/socket.h> is self-contained... " >&6; }
+if ${gl_cv_header_sys_socket_h_selfcontained+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/socket.h>
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_header_sys_socket_h_selfcontained=yes
+else
+  gl_cv_header_sys_socket_h_selfcontained=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_header_sys_socket_h_selfcontained" >&5
+$as_echo "$gl_cv_header_sys_socket_h_selfcontained" >&6; }
+  if test $gl_cv_header_sys_socket_h_selfcontained = yes; then
+            for ac_func in shutdown
+do :
+  ac_fn_c_check_func "$LINENO" "shutdown" "ac_cv_func_shutdown"
+if test "x$ac_cv_func_shutdown" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SHUTDOWN 1
+_ACEOF
+
+fi
+done
+
+    if test $ac_cv_func_shutdown = yes; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether <sys/socket.h> defines the SHUT_* macros" >&5
+$as_echo_n "checking whether <sys/socket.h> defines the SHUT_* macros... " >&6; }
+if ${gl_cv_header_sys_socket_h_shut+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+          cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/socket.h>
+int
+main ()
+{
+int a[] = { SHUT_RD, SHUT_WR, SHUT_RDWR };
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_header_sys_socket_h_shut=yes
+else
+  gl_cv_header_sys_socket_h_shut=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_header_sys_socket_h_shut" >&5
+$as_echo "$gl_cv_header_sys_socket_h_shut" >&6; }
+      if test $gl_cv_header_sys_socket_h_shut = no; then
+        SYS_SOCKET_H='sys/socket.h'
+      fi
+    fi
+  fi
+  # We need to check for ws2tcpip.h now.
+
+
+
+
+
+
+
+
+  :
+
+
+
+
+
+
+
+
+     if test $gl_cv_have_include_next = yes; then
+       gl_cv_next_sys_socket_h='<'sys/socket.h'>'
+     else
+       { $as_echo "$as_me:${as_lineno-$LINENO}: checking absolute name of <sys/socket.h>" >&5
+$as_echo_n "checking absolute name of <sys/socket.h>... " >&6; }
+if ${gl_cv_next_sys_socket_h+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+             if test $ac_cv_header_sys_socket_h = yes; then
+
+
+
+
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/socket.h>
+_ACEOF
+                case "$host_os" in
+    aix*) gl_absname_cpp="$ac_cpp -C" ;;
+    *)    gl_absname_cpp="$ac_cpp" ;;
+  esac
+
+  case "$host_os" in
+    mingw*)
+                                          gl_dirsep_regex='[/\\]'
+      ;;
+    *)
+      gl_dirsep_regex='\/'
+      ;;
+  esac
+      gl_make_literal_regex_sed='s,[]$^\\.*/[],\\&,g'
+  gl_header_literal_regex=`echo 'sys/socket.h' \
+                           | sed -e "$gl_make_literal_regex_sed"`
+  gl_absolute_header_sed="/${gl_dirsep_regex}${gl_header_literal_regex}/"'{
+      s/.*"\(.*'"${gl_dirsep_regex}${gl_header_literal_regex}"'\)".*/\1/
+      s|^/[^/]|//&|
+      p
+      q
+    }'
+
+        gl_cv_absolute_sys_socket_h=`(eval "$gl_absname_cpp conftest.$ac_ext") 2>&5 |
+  sed -n "$gl_absolute_header_sed"`
+
+           gl_header=$gl_cv_absolute_sys_socket_h
+           gl_cv_next_sys_socket_h='"'$gl_header'"'
+          else
+               gl_cv_next_sys_socket_h='<'sys/socket.h'>'
+             fi
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_next_sys_socket_h" >&5
+$as_echo "$gl_cv_next_sys_socket_h" >&6; }
+     fi
+     NEXT_SYS_SOCKET_H=$gl_cv_next_sys_socket_h
+
+     if test $gl_cv_have_include_next = yes || test $gl_cv_have_include_next = buggy; then
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include_next'
+       gl_next_as_first_directive='<'sys/socket.h'>'
+     else
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include'
+       gl_next_as_first_directive=$gl_cv_next_sys_socket_h
+     fi
+     NEXT_AS_FIRST_DIRECTIVE_SYS_SOCKET_H=$gl_next_as_first_directive
+
+
+
+
+  if test $ac_cv_header_sys_socket_h = yes; then
+    HAVE_SYS_SOCKET_H=1
+    HAVE_WS2TCPIP_H=0
+  else
+    HAVE_SYS_SOCKET_H=0
+    if test $ac_cv_header_ws2tcpip_h = yes; then
+      HAVE_WS2TCPIP_H=1
+    else
+      HAVE_WS2TCPIP_H=0
+    fi
+  fi
+
+
+
+  ac_fn_c_check_type "$LINENO" "struct sockaddr_storage" "ac_cv_type_struct_sockaddr_storage" "
+  /* sys/types.h is not needed according to POSIX, but the
+     sys/socket.h in i386-unknown-freebsd4.10 and
+     powerpc-apple-darwin5.5 required it. */
+#include <sys/types.h>
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
+#endif
+
+"
+if test "x$ac_cv_type_struct_sockaddr_storage" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_SOCKADDR_STORAGE 1
+_ACEOF
+
+
+fi
+ac_fn_c_check_type "$LINENO" "sa_family_t" "ac_cv_type_sa_family_t" "
+  /* sys/types.h is not needed according to POSIX, but the
+     sys/socket.h in i386-unknown-freebsd4.10 and
+     powerpc-apple-darwin5.5 required it. */
+#include <sys/types.h>
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
+#endif
+
+"
+if test "x$ac_cv_type_sa_family_t" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_SA_FAMILY_T 1
+_ACEOF
+
+
+fi
+
+  if test $ac_cv_type_struct_sockaddr_storage = no; then
+    HAVE_STRUCT_SOCKADDR_STORAGE=0
+  fi
+  if test $ac_cv_type_sa_family_t = no; then
+    HAVE_SA_FAMILY_T=0
+  fi
+  if test $ac_cv_type_struct_sockaddr_storage != no; then
+    ac_fn_c_check_member "$LINENO" "struct sockaddr_storage" "ss_family" "ac_cv_member_struct_sockaddr_storage_ss_family" "#include <sys/types.h>
+       #ifdef HAVE_SYS_SOCKET_H
+       #include <sys/socket.h>
+       #endif
+       #ifdef HAVE_WS2TCPIP_H
+       #include <ws2tcpip.h>
+       #endif
+
+"
+if test "x$ac_cv_member_struct_sockaddr_storage_ss_family" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY 1
+_ACEOF
+
+
+else
+  HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY=0
+fi
+
+  fi
+  if test $HAVE_STRUCT_SOCKADDR_STORAGE = 0 || test $HAVE_SA_FAMILY_T = 0 \
+     || test $HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY = 0; then
+    SYS_SOCKET_H='sys/socket.h'
+  fi
+
+
+
+
+  :
+
+
+
+
+
+  if test $ac_cv_header_sys_socket_h != yes; then
+                    for ac_header in winsock2.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "winsock2.h" "ac_cv_header_winsock2_h" "$ac_includes_default"
+if test "x$ac_cv_header_winsock2_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_WINSOCK2_H 1
+_ACEOF
+
+fi
+
+done
+
+  fi
+  if test "$ac_cv_header_winsock2_h" = yes; then
+    HAVE_WINSOCK2_H=1
+    UNISTD_H_HAVE_WINSOCK2_H=1
+    SYS_IOCTL_H_HAVE_WINSOCK2_H=1
+  else
+    HAVE_WINSOCK2_H=0
+  fi
+
+
+
+
+    for gl_func in socket connect accept bind getpeername getsockname getsockopt     listen recv send recvfrom sendto setsockopt shutdown accept4; do
+    as_gl_Symbol=`$as_echo "gl_cv_have_raw_decl_$gl_func" | $as_tr_sh`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $gl_func is declared without a macro" >&5
+$as_echo_n "checking whether $gl_func is declared without a macro... " >&6; }
+if eval \${$as_gl_Symbol+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Some systems require prerequisite headers.  */
+#include <sys/types.h>
+#include <sys/socket.h>
+
+int
+main ()
+{
+#undef $gl_func
+  (void) $gl_func;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  eval "$as_gl_Symbol=yes"
+else
+  eval "$as_gl_Symbol=no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+eval ac_res=\$$as_gl_Symbol
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+    if eval test \"x\$"$as_gl_Symbol"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_RAW_DECL_$gl_func" | $as_tr_cpp` 1
+_ACEOF
+
+                     eval ac_cv_have_decl_$gl_func=yes
+fi
+      done
+
+
+
+
+
+
+
+
+
+
+  :
+
+
+
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for IPv4 sockets" >&5
+$as_echo_n "checking for IPv4 sockets... " >&6; }
+  if ${gl_cv_socket_ipv4+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/types.h>
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif
+int
+main ()
+{
+int x = AF_INET; struct in_addr y; struct sockaddr_in z;
+ if (&x && &y && &z) return 0;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_socket_ipv4=yes
+else
+  gl_cv_socket_ipv4=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_socket_ipv4" >&5
+$as_echo "$gl_cv_socket_ipv4" >&6; }
+  if test $gl_cv_socket_ipv4 = yes; then
+
+$as_echo "#define HAVE_IPV4 1" >>confdefs.h
+
+  fi
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for IPv6 sockets" >&5
+$as_echo_n "checking for IPv6 sockets... " >&6; }
+  if ${gl_cv_socket_ipv6+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/types.h>
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif
+#ifdef HAVE_WS2TCPIP_H
+#include <ws2tcpip.h>
+#endif
+int
+main ()
+{
+int x = AF_INET6; struct in6_addr y; struct sockaddr_in6 z;
+ if (&x && &y && &z) return 0;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_socket_ipv6=yes
+else
+  gl_cv_socket_ipv6=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_socket_ipv6" >&5
+$as_echo "$gl_cv_socket_ipv6" >&6; }
+  if test $gl_cv_socket_ipv6 = yes; then
+
+$as_echo "#define HAVE_IPV6 1" >>confdefs.h
+
+  fi
 
 
 
@@ -13383,48 +14060,6 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for a thread-safe mkdir -p" >&5
-$as_echo_n "checking for a thread-safe mkdir -p... " >&6; }
-if test -z "$MKDIR_P"; then
-  if ${ac_cv_path_mkdir+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH$PATH_SEPARATOR/opt/sfw/bin
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_prog in mkdir gmkdir; do
-	 for ac_exec_ext in '' $ac_executable_extensions; do
-	   as_fn_executable_p "$as_dir/$ac_prog$ac_exec_ext" || continue
-	   case `"$as_dir/$ac_prog$ac_exec_ext" --version 2>&1` in #(
-	     'mkdir (GNU coreutils) '* | \
-	     'mkdir (coreutils) '* | \
-	     'mkdir (fileutils) '4.1*)
-	       ac_cv_path_mkdir=$as_dir/$ac_prog$ac_exec_ext
-	       break 3;;
-	   esac
-	 done
-       done
-  done
-IFS=$as_save_IFS
-
-fi
-
-  test -d ./--version && rmdir ./--version
-  if test "${ac_cv_path_mkdir+set}" = set; then
-    MKDIR_P="$ac_cv_path_mkdir -p"
-  else
-    # As a last resort, use the slow shell script.  Don't cache a
-    # value for MKDIR_P within a source directory, because that will
-    # break other packages using the cache if that directory is
-    # removed, or if the value is a relative name.
-    MKDIR_P="$ac_install_sh -d"
-  fi
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $MKDIR_P" >&5
-$as_echo "$MKDIR_P" >&6; }
-
 
 
 
@@ -13502,6 +14137,13 @@ $as_echo "$gl_cv_next_sys_types_h" >&6; }
        gl_next_as_first_directive=$gl_cv_next_sys_types_h
      fi
      NEXT_AS_FIRST_DIRECTIVE_SYS_TYPES_H=$gl_next_as_first_directive
+
+
+
+
+
+
+
 
 
 
@@ -13841,26 +14483,6 @@ Configuration aborted." "$LINENO" 5
   fi
 
 
-
-
-
-
-
-
-  :
-
-
-
-
-
-  if test $ac_cv_header_features_h = yes; then
-    HAVE_FEATURES_H=1
-  else
-    HAVE_FEATURES_H=0
-  fi
-
-
-
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for wint_t" >&5
 $as_echo_n "checking for wint_t... " >&6; }
 if ${gt_cv_c_wint_t+:} false; then :
@@ -13993,6 +14615,159 @@ else
   GL_GENERATE_ALLOCA_H_TRUE='#'
   GL_GENERATE_ALLOCA_H_FALSE=
 fi
+
+
+
+
+
+
+  :
+
+
+
+
+
+  if test $ac_cv_header_arpa_inet_h = yes; then
+    HAVE_ARPA_INET_H=1
+  else
+    HAVE_ARPA_INET_H=0
+  fi
+
+
+
+
+
+
+
+  :
+
+
+
+
+
+
+
+
+     if test $gl_cv_have_include_next = yes; then
+       gl_cv_next_arpa_inet_h='<'arpa/inet.h'>'
+     else
+       { $as_echo "$as_me:${as_lineno-$LINENO}: checking absolute name of <arpa/inet.h>" >&5
+$as_echo_n "checking absolute name of <arpa/inet.h>... " >&6; }
+if ${gl_cv_next_arpa_inet_h+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+             if test $ac_cv_header_arpa_inet_h = yes; then
+
+
+
+
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <arpa/inet.h>
+_ACEOF
+                case "$host_os" in
+    aix*) gl_absname_cpp="$ac_cpp -C" ;;
+    *)    gl_absname_cpp="$ac_cpp" ;;
+  esac
+
+  case "$host_os" in
+    mingw*)
+                                          gl_dirsep_regex='[/\\]'
+      ;;
+    *)
+      gl_dirsep_regex='\/'
+      ;;
+  esac
+      gl_make_literal_regex_sed='s,[]$^\\.*/[],\\&,g'
+  gl_header_literal_regex=`echo 'arpa/inet.h' \
+                           | sed -e "$gl_make_literal_regex_sed"`
+  gl_absolute_header_sed="/${gl_dirsep_regex}${gl_header_literal_regex}/"'{
+      s/.*"\(.*'"${gl_dirsep_regex}${gl_header_literal_regex}"'\)".*/\1/
+      s|^/[^/]|//&|
+      p
+      q
+    }'
+
+        gl_cv_absolute_arpa_inet_h=`(eval "$gl_absname_cpp conftest.$ac_ext") 2>&5 |
+  sed -n "$gl_absolute_header_sed"`
+
+           gl_header=$gl_cv_absolute_arpa_inet_h
+           gl_cv_next_arpa_inet_h='"'$gl_header'"'
+          else
+               gl_cv_next_arpa_inet_h='<'arpa/inet.h'>'
+             fi
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_next_arpa_inet_h" >&5
+$as_echo "$gl_cv_next_arpa_inet_h" >&6; }
+     fi
+     NEXT_ARPA_INET_H=$gl_cv_next_arpa_inet_h
+
+     if test $gl_cv_have_include_next = yes || test $gl_cv_have_include_next = buggy; then
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include_next'
+       gl_next_as_first_directive='<'arpa/inet.h'>'
+     else
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include'
+       gl_next_as_first_directive=$gl_cv_next_arpa_inet_h
+     fi
+     NEXT_AS_FIRST_DIRECTIVE_ARPA_INET_H=$gl_next_as_first_directive
+
+
+
+
+
+
+
+
+    for gl_func in inet_ntop inet_pton; do
+    as_gl_Symbol=`$as_echo "gl_cv_have_raw_decl_$gl_func" | $as_tr_sh`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $gl_func is declared without a macro" >&5
+$as_echo_n "checking whether $gl_func is declared without a macro... " >&6; }
+if eval \${$as_gl_Symbol+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* On some systems, this header is not self-consistent.  */
+#if !(defined __GLIBC__ || defined __UCLIBC__)
+# include <sys/socket.h>
+#endif
+#ifdef __TANDEM
+# include <netdb.h>
+#endif
+#include <arpa/inet.h>
+
+int
+main ()
+{
+#undef $gl_func
+  (void) $gl_func;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  eval "$as_gl_Symbol=yes"
+else
+  eval "$as_gl_Symbol=no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+eval ac_res=\$$as_gl_Symbol
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+    if eval test \"x\$"$as_gl_Symbol"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_RAW_DECL_$gl_func" | $as_tr_cpp` 1
+_ACEOF
+
+                     eval ac_cv_have_decl_$gl_func=yes
+fi
+      done
+
 
 
 
@@ -18123,6 +18898,203 @@ fi
 
 
 
+
+
+              HAVE_INET_NTOP=1
+  INET_NTOP_LIB=
+
+
+
+
+  :
+
+
+
+
+
+  if test $ac_cv_header_sys_socket_h != yes; then
+                    for ac_header in winsock2.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "winsock2.h" "ac_cv_header_winsock2_h" "$ac_includes_default"
+if test "x$ac_cv_header_winsock2_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_WINSOCK2_H 1
+_ACEOF
+
+fi
+
+done
+
+  fi
+  if test "$ac_cv_header_winsock2_h" = yes; then
+    HAVE_WINSOCK2_H=1
+    UNISTD_H_HAVE_WINSOCK2_H=1
+    SYS_IOCTL_H_HAVE_WINSOCK2_H=1
+  else
+    HAVE_WINSOCK2_H=0
+  fi
+
+
+  if test $HAVE_WINSOCK2_H = 1; then
+    ac_fn_c_check_decl "$LINENO" "inet_ntop" "ac_cv_have_decl_inet_ntop" "#include <ws2tcpip.h>
+"
+if test "x$ac_cv_have_decl_inet_ntop" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_INET_NTOP $ac_have_decl
+_ACEOF
+
+    if test $ac_cv_have_decl_inet_ntop = yes; then
+                  REPLACE_INET_NTOP=1
+      INET_NTOP_LIB="-lws2_32"
+    else
+      HAVE_DECL_INET_NTOP=0
+      HAVE_INET_NTOP=0
+    fi
+  else
+    gl_save_LIBS=$LIBS
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing inet_ntop" >&5
+$as_echo_n "checking for library containing inet_ntop... " >&6; }
+if ${ac_cv_search_inet_ntop+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char inet_ntop ();
+int
+main ()
+{
+return inet_ntop ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' nsl resolv; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_inet_ntop=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_inet_ntop+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_inet_ntop+:} false; then :
+
+else
+  ac_cv_search_inet_ntop=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_inet_ntop" >&5
+$as_echo "$ac_cv_search_inet_ntop" >&6; }
+ac_res=$ac_cv_search_inet_ntop
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+else
+  for ac_func in inet_ntop
+do :
+  ac_fn_c_check_func "$LINENO" "inet_ntop" "ac_cv_func_inet_ntop"
+if test "x$ac_cv_func_inet_ntop" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_INET_NTOP 1
+_ACEOF
+
+fi
+done
+
+       if test $ac_cv_func_inet_ntop = no; then
+         HAVE_INET_NTOP=0
+       fi
+
+fi
+
+    LIBS=$gl_save_LIBS
+
+    if test "$ac_cv_search_inet_ntop" != "no" \
+       && test "$ac_cv_search_inet_ntop" != "none required"; then
+      INET_NTOP_LIB="$ac_cv_search_inet_ntop"
+    fi
+
+
+  :
+
+
+
+
+
+    ac_fn_c_check_decl "$LINENO" "inet_ntop" "ac_cv_have_decl_inet_ntop" "#include <arpa/inet.h>
+        #if HAVE_NETDB_H
+        # include <netdb.h>
+        #endif
+
+"
+if test "x$ac_cv_have_decl_inet_ntop" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_INET_NTOP $ac_have_decl
+_ACEOF
+
+    if test $ac_cv_have_decl_inet_ntop = no; then
+      HAVE_DECL_INET_NTOP=0
+    fi
+  fi
+
+
+  if test $HAVE_INET_NTOP = 0 || test $REPLACE_INET_NTOP = 1; then
+
+
+
+
+
+
+
+
+  gl_LIBOBJS="$gl_LIBOBJS inet_ntop.$ac_objext"
+
+
+
+
+  fi
+
+
+
+
+
+          GNULIB_INET_NTOP=1
+
+
+
+
+
+
+
+
+
   PRIPTR_PREFIX=
   if test -n "$STDINT_H"; then
         PRIPTR_PREFIX='"l"'
@@ -21050,6 +22022,152 @@ $as_echo "#define GNULIB_TEST_MKSTEMP 1" >>confdefs.h
   fi
 
 
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether <netinet/in.h> is self-contained" >&5
+$as_echo_n "checking whether <netinet/in.h> is self-contained... " >&6; }
+if ${gl_cv_header_netinet_in_h_selfcontained+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <netinet/in.h>
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_header_netinet_in_h_selfcontained=yes
+else
+  gl_cv_header_netinet_in_h_selfcontained=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_header_netinet_in_h_selfcontained" >&5
+$as_echo "$gl_cv_header_netinet_in_h_selfcontained" >&6; }
+  if test $gl_cv_header_netinet_in_h_selfcontained = yes; then
+    NETINET_IN_H=''
+  else
+    NETINET_IN_H='netinet/in.h'
+    for ac_header in netinet/in.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "netinet/in.h" "ac_cv_header_netinet_in_h" "$ac_includes_default"
+if test "x$ac_cv_header_netinet_in_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_NETINET_IN_H 1
+_ACEOF
+
+fi
+
+done
+
+
+
+
+
+
+
+  :
+
+
+
+
+
+
+
+
+     if test $gl_cv_have_include_next = yes; then
+       gl_cv_next_netinet_in_h='<'netinet/in.h'>'
+     else
+       { $as_echo "$as_me:${as_lineno-$LINENO}: checking absolute name of <netinet/in.h>" >&5
+$as_echo_n "checking absolute name of <netinet/in.h>... " >&6; }
+if ${gl_cv_next_netinet_in_h+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+             if test $ac_cv_header_netinet_in_h = yes; then
+
+
+
+
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <netinet/in.h>
+_ACEOF
+                case "$host_os" in
+    aix*) gl_absname_cpp="$ac_cpp -C" ;;
+    *)    gl_absname_cpp="$ac_cpp" ;;
+  esac
+
+  case "$host_os" in
+    mingw*)
+                                          gl_dirsep_regex='[/\\]'
+      ;;
+    *)
+      gl_dirsep_regex='\/'
+      ;;
+  esac
+      gl_make_literal_regex_sed='s,[]$^\\.*/[],\\&,g'
+  gl_header_literal_regex=`echo 'netinet/in.h' \
+                           | sed -e "$gl_make_literal_regex_sed"`
+  gl_absolute_header_sed="/${gl_dirsep_regex}${gl_header_literal_regex}/"'{
+      s/.*"\(.*'"${gl_dirsep_regex}${gl_header_literal_regex}"'\)".*/\1/
+      s|^/[^/]|//&|
+      p
+      q
+    }'
+
+        gl_cv_absolute_netinet_in_h=`(eval "$gl_absname_cpp conftest.$ac_ext") 2>&5 |
+  sed -n "$gl_absolute_header_sed"`
+
+           gl_header=$gl_cv_absolute_netinet_in_h
+           gl_cv_next_netinet_in_h='"'$gl_header'"'
+          else
+               gl_cv_next_netinet_in_h='<'netinet/in.h'>'
+             fi
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_next_netinet_in_h" >&5
+$as_echo "$gl_cv_next_netinet_in_h" >&6; }
+     fi
+     NEXT_NETINET_IN_H=$gl_cv_next_netinet_in_h
+
+     if test $gl_cv_have_include_next = yes || test $gl_cv_have_include_next = buggy; then
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include_next'
+       gl_next_as_first_directive='<'netinet/in.h'>'
+     else
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include'
+       gl_next_as_first_directive=$gl_cv_next_netinet_in_h
+     fi
+     NEXT_AS_FIRST_DIRECTIVE_NETINET_IN_H=$gl_next_as_first_directive
+
+
+
+
+    if test $ac_cv_header_netinet_in_h = yes; then
+      HAVE_NETINET_IN_H=1
+    else
+      HAVE_NETINET_IN_H=0
+    fi
+
+  fi
+
+   if test -n "$NETINET_IN_H"; then
+  GL_GENERATE_NETINET_IN_H_TRUE=
+  GL_GENERATE_NETINET_IN_H_FALSE='#'
+else
+  GL_GENERATE_NETINET_IN_H_TRUE='#'
+  GL_GENERATE_NETINET_IN_H_FALSE=
+fi
+
+
+
+
 
   case "$host_os" in
     mingw* | pw*)
@@ -22369,6 +23487,69 @@ fi
       done
 
 
+     ac_fn_c_check_type "$LINENO" "socklen_t" "ac_cv_type_socklen_t" "
+/* <sys/types.h> is not needed according to POSIX, but the
+   <sys/socket.h> in i386-unknown-freebsd4.10 and
+   powerpc-apple-darwin5.5 required it. */
+#include <sys/types.h>
+#if HAVE_SYS_SOCKET_H
+# include <sys/socket.h>
+#elif HAVE_WS2TCPIP_H
+# include <ws2tcpip.h>
+#endif
+
+"
+if test "x$ac_cv_type_socklen_t" = xyes; then :
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for socklen_t equivalent" >&5
+$as_echo_n "checking for socklen_t equivalent... " >&6; }
+      if ${gl_cv_socklen_t_equiv+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  # Systems have either "struct sockaddr *" or
+         # "void *" as the second argument to getpeername
+         gl_cv_socklen_t_equiv=
+         for arg2 in "struct sockaddr" void; do
+           for t in int size_t "unsigned int" "long int" "unsigned long int"; do
+             cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/types.h>
+                   #include <sys/socket.h>
+
+                   int getpeername (int, $arg2 *, $t *);
+int
+main ()
+{
+$t len;
+                  getpeername (0, 0, &len);
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_socklen_t_equiv="$t"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+             test "$gl_cv_socklen_t_equiv" != "" && break
+           done
+           test "$gl_cv_socklen_t_equiv" != "" && break
+         done
+
+fi
+
+      if test "$gl_cv_socklen_t_equiv" = ""; then
+        as_fn_error $? "Cannot find a type to use in place of socklen_t" "$LINENO" 5
+      fi
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_socklen_t_equiv" >&5
+$as_echo "$gl_cv_socklen_t_equiv" >&6; }
+
+cat >>confdefs.h <<_ACEOF
+#define socklen_t $gl_cv_socklen_t_equiv
+_ACEOF
+
+fi
+
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ssize_t" >&5
 $as_echo_n "checking for ssize_t... " >&6; }
@@ -22538,6 +23719,78 @@ $as_echo "#define REPLACE_FUNC_STAT_FILE 1" >>confdefs.h
 
 $as_echo "#define GNULIB_TEST_STAT 1" >>confdefs.h
 
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for working stdalign.h" >&5
+$as_echo_n "checking for working stdalign.h... " >&6; }
+if ${gl_cv_header_working_stdalign_h+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <stdalign.h>
+            #include <stddef.h>
+
+            /* Test that alignof yields a result consistent with offsetof.
+               This catches GCC bug 52023
+               <http://gcc.gnu.org/bugzilla/show_bug.cgi?id=52023>.  */
+            #ifdef __cplusplus
+               template <class t> struct alignof_helper { char a; t b; };
+            # define ao(type) offsetof (alignof_helper<type>, b)
+            #else
+            # define ao(type) offsetof (struct { char a; type b; }, b)
+            #endif
+            char test_double[ao (double) % _Alignof (double) == 0 ? 1 : -1];
+            char test_long[ao (long int) % _Alignof (long int) == 0 ? 1 : -1];
+            char test_alignof[alignof (double) == _Alignof (double) ? 1 : -1];
+
+            /* Test _Alignas only on platforms where gnulib can help.  */
+            #if \
+                ((defined __cplusplus && 201103 <= __cplusplus) \
+                 || (defined __APPLE__ && defined __MACH__ \
+                     ? 4 < __GNUC__ + (1 <= __GNUC_MINOR__) \
+                     : __GNUC__) \
+                 || __HP_cc || __HP_aCC || __IBMC__ || __IBMCPP__ \
+                 || __ICC || 0x5110 <= __SUNPRO_C \
+                 || 1300 <= _MSC_VER)
+              struct alignas_test { char c; char alignas (8) alignas_8; };
+              char test_alignas[offsetof (struct alignas_test, alignas_8) == 8
+                                ? 1 : -1];
+            #endif
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_header_working_stdalign_h=yes
+else
+  gl_cv_header_working_stdalign_h=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_header_working_stdalign_h" >&5
+$as_echo "$gl_cv_header_working_stdalign_h" >&6; }
+
+  if test $gl_cv_header_working_stdalign_h = yes; then
+    STDALIGN_H=''
+  else
+    STDALIGN_H='stdalign.h'
+  fi
+
+
+   if test -n "$STDALIGN_H"; then
+  GL_GENERATE_STDALIGN_H_TRUE=
+  GL_GENERATE_STDALIGN_H_FALSE='#'
+else
+  GL_GENERATE_STDALIGN_H_TRUE='#'
+  GL_GENERATE_STDALIGN_H_FALSE=
+fi
 
 
 
@@ -23671,6 +24924,8 @@ $as_echo "#define GNULIB_TEST_STRTOK_R 1" >>confdefs.h
 
 
 
+
+
   :
 
 
@@ -23819,6 +25074,100 @@ fi
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+  :
+
+
+
+
+
+
+
+
+     if test $gl_cv_have_include_next = yes; then
+       gl_cv_next_sys_uio_h='<'sys/uio.h'>'
+     else
+       { $as_echo "$as_me:${as_lineno-$LINENO}: checking absolute name of <sys/uio.h>" >&5
+$as_echo_n "checking absolute name of <sys/uio.h>... " >&6; }
+if ${gl_cv_next_sys_uio_h+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+             if test $ac_cv_header_sys_uio_h = yes; then
+
+
+
+
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/uio.h>
+_ACEOF
+                case "$host_os" in
+    aix*) gl_absname_cpp="$ac_cpp -C" ;;
+    *)    gl_absname_cpp="$ac_cpp" ;;
+  esac
+
+  case "$host_os" in
+    mingw*)
+                                          gl_dirsep_regex='[/\\]'
+      ;;
+    *)
+      gl_dirsep_regex='\/'
+      ;;
+  esac
+      gl_make_literal_regex_sed='s,[]$^\\.*/[],\\&,g'
+  gl_header_literal_regex=`echo 'sys/uio.h' \
+                           | sed -e "$gl_make_literal_regex_sed"`
+  gl_absolute_header_sed="/${gl_dirsep_regex}${gl_header_literal_regex}/"'{
+      s/.*"\(.*'"${gl_dirsep_regex}${gl_header_literal_regex}"'\)".*/\1/
+      s|^/[^/]|//&|
+      p
+      q
+    }'
+
+        gl_cv_absolute_sys_uio_h=`(eval "$gl_absname_cpp conftest.$ac_ext") 2>&5 |
+  sed -n "$gl_absolute_header_sed"`
+
+           gl_header=$gl_cv_absolute_sys_uio_h
+           gl_cv_next_sys_uio_h='"'$gl_header'"'
+          else
+               gl_cv_next_sys_uio_h='<'sys/uio.h'>'
+             fi
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_next_sys_uio_h" >&5
+$as_echo "$gl_cv_next_sys_uio_h" >&6; }
+     fi
+     NEXT_SYS_UIO_H=$gl_cv_next_sys_uio_h
+
+     if test $gl_cv_have_include_next = yes || test $gl_cv_have_include_next = buggy; then
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include_next'
+       gl_next_as_first_directive='<'sys/uio.h'>'
+     else
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include'
+       gl_next_as_first_directive=$gl_cv_next_sys_uio_h
+     fi
+     NEXT_AS_FIRST_DIRECTIVE_SYS_UIO_H=$gl_next_as_first_directive
+
+
+
+
+  if test $ac_cv_header_sys_uio_h = yes; then
+    HAVE_SYS_UIO_H=1
+  else
+    HAVE_SYS_UIO_H=0
+  fi
 
 
 
@@ -25847,6 +27196,14 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
 
+if test -z "${GL_GENERATE_NETINET_IN_H_TRUE}" && test -z "${GL_GENERATE_NETINET_IN_H_FALSE}"; then
+  as_fn_error $? "conditional \"GL_GENERATE_NETINET_IN_H\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${GL_GENERATE_STDALIGN_H_TRUE}" && test -z "${GL_GENERATE_STDALIGN_H_FALSE}"; then
+  as_fn_error $? "conditional \"GL_GENERATE_STDALIGN_H\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 if test -z "${GL_GENERATE_STDBOOL_H_TRUE}" && test -z "${GL_GENERATE_STDBOOL_H_FALSE}"; then
   as_fn_error $? "conditional \"GL_GENERATE_STDBOOL_H\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5

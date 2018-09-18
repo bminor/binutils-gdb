@@ -39,6 +39,7 @@ IMPORTED_GNULIB_MODULES="\
     frexpl \
     getcwd \
     glob \
+    inet_ntop
     inttypes \
     lstat \
     limits-h \
