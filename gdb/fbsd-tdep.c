@@ -892,7 +892,7 @@ fbsd_print_sockaddr_in (const void *sockaddr)
     reinterpret_cast<const struct fbsd_sockaddr_in *> (sockaddr);
   char buf[INET_ADDRSTRLEN];
 
-  if (inet_ntop(AF_INET, sin->sin_addr, buf, sizeof buf) == nullptr)
+  if (inet_ntop (AF_INET, sin->sin_addr, buf, sizeof buf) == nullptr)
     error (_("Failed to format IPv4 address"));
   printf_filtered ("%s:%u", buf,
 		   (sin->sin_port[0] << 8) | sin->sin_port[1]);
@@ -907,7 +907,7 @@ fbsd_print_sockaddr_in6 (const void *sockaddr)
     reinterpret_cast<const struct fbsd_sockaddr_in6 *> (sockaddr);
   char buf[INET6_ADDRSTRLEN];
 
-  if (inet_ntop(AF_INET6, sin6->sin6_addr, buf, sizeof buf) == nullptr)
+  if (inet_ntop (AF_INET6, sin6->sin6_addr, buf, sizeof buf) == nullptr)
     error (_("Failed to format IPv6 address"));
   printf_filtered ("%s.%u", buf,
 		   (sin6->sin6_port[0] << 8) | sin6->sin6_port[1]);

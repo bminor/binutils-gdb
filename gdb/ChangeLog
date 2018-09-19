@@ -1,3 +1,8 @@
+2018-09-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-tdep.c (fbsd_print_sockaddr_in): Style fix.
+	(fbsd_print_sockaddr_in6): Likewise.
+
 2018-09-19  Richard Bunt  <richard.bunt@arm.com>
 	    Chris January  <chris.january@arm.com>
 
