@@ -819,7 +819,6 @@ origin_spec:
 	ORIGIN '=' mustbe_exp
 		{
 		  region->origin_exp = $3;
-		  region->current = region->origin;
 		}
 	;
 

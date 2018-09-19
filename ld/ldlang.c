@@ -7180,6 +7180,9 @@ lang_process (void)
   current_target = default_target;
   lang_statement_iteration++;
   open_input_bfds (statement_list.head, OPEN_BFD_NORMAL);
+  /* open_input_bfds also handles assignments, so we can give values
+     to symbolic origin/length now.  */
+  lang_do_memory_regions ();
 
 #ifdef ENABLE_PLUGINS
   if (link_info.lto_plugin_active)
@@ -7322,8 +7325,6 @@ lang_process (void)
   /* PR 13683: We must rerun the assignments prior to running garbage
      collection in order to make sure that all symbol aliases are resolved.  */
   lang_do_assignments (lang_mark_phase_enum);
-
-  lang_do_memory_regions();
   expld.phase = lang_first_phase_enum;
 
   /* Size up the common data.  */
@@ -7408,8 +7409,11 @@ lang_process (void)
   /* Fix any __start, __stop, .startof. or .sizeof. symbols.  */
   lang_finalize_start_stop ();
 
-  /* Do all the assignments, now that we know the final resting places
-     of all the symbols.  */
+  /* Do all the assignments again, to report errors.  Assignment
+     statements are processed multiple times, updating symbols; In
+     open_input_bfds, lang_do_assignments, and lang_size_sections.
+     Since lang_relax_sections calls lang_do_assignments, symbols are
+     also updated in ldemul_after_allocation.  */
   lang_do_assignments (lang_final_phase_enum);
 
   ldemul_finish ();

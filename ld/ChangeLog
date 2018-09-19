@@ -1,5 +1,12 @@
 2018-09-19  Alan Modra  <amodra@gmail.com>
 
+	PR ld/23648
+	* ldlang.c (lang_process): Move lang_do_memory_regions earlier.
+	Comment on lang_do_assignments call.
+	* ldgram.y (origin_exp): Don't assign region->current.
+
+2018-09-19  Alan Modra  <amodra@gmail.com>
+
 	* ldmain.c (add_archive_element): Handle auto-inport symbols
 	when printing map.
 
