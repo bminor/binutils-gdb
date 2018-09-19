@@ -1,3 +1,8 @@
+2018-09-19  Alan Modra  <amodra@gmail.com>
+
+	* ldmain.c (add_archive_element): Handle auto-inport symbols
+	when printing map.
+
 2018-09-17  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/comm-data5.d: Remove notarget for hppa.

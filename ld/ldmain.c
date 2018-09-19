@@ -850,6 +850,10 @@ add_archive_element (struct bfd_link_info *info,
       int len;
 
       h = bfd_link_hash_lookup (info->hash, name, FALSE, FALSE, TRUE);
+      if (h == NULL
+	  && info->pei386_auto_import
+	  && CONST_STRNEQ (name, "__imp_"))
+	h = bfd_link_hash_lookup (info->hash, name + 6, FALSE, FALSE, TRUE);
 
       if (h == NULL)
 	from = NULL;
