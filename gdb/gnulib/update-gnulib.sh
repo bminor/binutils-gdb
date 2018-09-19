@@ -158,6 +158,18 @@ if [ $? -ne 0 ]; then
    exit 1
 fi
 
+# Apply our local patches.
+apply_patches ()
+{
+    patch -p3 -f -i "$1"
+    if [ $? -ne 0 ]; then
+        echo "Failed to apply some patches.  Aborting."
+        exit 1
+    fi
+}
+
+apply_patches "patches/0001-Fix-PR-gdb-23558-Use-system-s-getcwd-when-cross-comp.patch"
+
 # Regenerate all necessary files...
 aclocal -Iimport/m4 &&
 autoconf &&

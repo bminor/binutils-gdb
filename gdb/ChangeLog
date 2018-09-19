@@ -1,3 +1,10 @@
+2018-09-18  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* patches/0001-Fix-PR-gdb-23558-Use-system-s-getcwd-when-cross-comp.patch:
+	New file.
+	* update-gnulib.sh: Apply patch.
+	* configure: Re-generate.
+
 2018-09-18  John Baldwin  <jhb@FreeBSD.org>
 
 	* infcmd.c (_initialize_infcmd): Remove "running" from "info proc"
