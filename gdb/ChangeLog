@@ -1,3 +1,7 @@
+2018-09-19  George Vasick <george.vasick@oracle.com>
+
+	* solib-svr4.c (svr4_same_1): Also handle amd64 ld.so.1.
+
 2018-09-19  Stefan Teleman <stefan.teleman@oracle.com>
 	    April Chin <april.chin@oracle.com>
 	    Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>

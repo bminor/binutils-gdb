@@ -153,8 +153,12 @@ svr4_same_1 (const char *gdb_so_name, const char *inferior_so_name)
       && strcmp (inferior_so_name, "/lib/ld.so.1") == 0)
     return 1;
 
-  /* Similarly, we observed the same issue with sparc64, but with
+  /* Similarly, we observed the same issue with amd64 and sparcv9, but with
      different locations.  */
+  if (strcmp (gdb_so_name, "/usr/lib/amd64/ld.so.1") == 0
+      && strcmp (inferior_so_name, "/lib/amd64/ld.so.1") == 0)
+    return 1;
+
   if (strcmp (gdb_so_name, "/usr/lib/sparcv9/ld.so.1") == 0
       && strcmp (inferior_so_name, "/lib/sparcv9/ld.so.1") == 0)
     return 1;
