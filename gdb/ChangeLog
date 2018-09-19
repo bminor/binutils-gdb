@@ -1,3 +1,11 @@
+2018-09-19  Stefan Teleman <stefan.teleman@oracle.com>
+	    April Chin <april.chin@oracle.com>
+	    Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* procfs.c (MAX_PROC_NAME_SIZE): Allow for 6-digit PID_MAX and
+	uint_t lwpid_t.
+	(create_procinfo): Print pids in /proc without leading zeros.
+
 2018-09-18  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* nios2-tdep.c (nios2_gcc_target_options): New.
