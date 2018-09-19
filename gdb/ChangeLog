@@ -1,3 +1,12 @@
+2018-09-19  Richard Bunt  <richard.bunt@arm.com>
+	    Chris January  <chris.january@arm.com>
+
+	* eval.c (skip_undetermined_arglist): Skip argument list helper.
+	(evaluate_subexp_standard): Return a dummy type when
+	honoring EVAL_SKIP in OP_VAR_VALUE and handle skipping in the
+	OP_F77_UNDETERMINED_ARGLIST case.
+	* expression.h (enum noside): Update comment.
+
 2018-09-19  George Vasick <george.vasick@oracle.com>
 
 	* solib-svr4.c (svr4_same_1): Also handle amd64 ld.so.1.

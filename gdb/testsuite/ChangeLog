@@ -1,3 +1,10 @@
+2018-09-19  Richard Bunt  <richard.bunt@arm.com>
+	    Chris January  <chris.january@arm.com>
+
+	* gdb.cp/koenig.exp: Extend to test logical short circuiting.
+	* gdb.fortran/short-circuit-argument-list.exp: New file.
+	* gdb.fortran/short-circuit-argument-list.f90: New test.
+
 2018-09-18  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.arch/amd64-invalid-stack-top.exp: Expect optional

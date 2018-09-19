@@ -118,7 +118,9 @@ extern int parse_completion;
 enum noside
   {
     EVAL_NORMAL,
-    EVAL_SKIP,			/* Only effect is to increment pos.  */
+    EVAL_SKIP,			/* Only effect is to increment pos.
+				   Return type information where
+				   possible.  */
     EVAL_AVOID_SIDE_EFFECTS	/* Don't modify any variables or
 				   call any functions.  The value
 				   returned will have the correct

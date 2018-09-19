@@ -1238,6 +1238,19 @@ evaluate_funcall (type *expect_type, expression *exp, int *pos,
   return eval_call (exp, noside, nargs, argvec, var_func_name, expect_type);
 }
 
+/* Helper for skipping all the arguments in an undetermined argument list.
+   This function was designed for use in the OP_F77_UNDETERMINED_ARGLIST
+   case of evaluate_subexp_standard as multiple, but not all, code paths
+   require a generic skip.  */
+
+static void
+skip_undetermined_arglist (int nargs, struct expression *exp, int *pos,
+			   enum noside noside)
+{
+  for (int i = 0; i < nargs; ++i)
+    evaluate_subexp (NULL_TYPE, exp, pos, noside);
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -1286,16 +1299,19 @@ evaluate_subexp_standard (struct type *expect_type,
 
     case OP_ADL_FUNC:
     case OP_VAR_VALUE:
-      (*pos) += 3;
-      if (noside == EVAL_SKIP)
-	return eval_skip_value (exp);
-
       {
+	(*pos) += 3;
 	symbol *var = exp->elts[pc + 2].symbol;
 	if (TYPE_CODE (SYMBOL_TYPE (var)) == TYPE_CODE_ERROR)
 	  error_unknown_type (SYMBOL_PRINT_NAME (var));
-
-	return evaluate_var_value (noside, exp->elts[pc + 1].block, var);
+	if (noside != EVAL_SKIP)
+	    return evaluate_var_value (noside, exp->elts[pc + 1].block, var);
+	else
+	  {
+	    /* Return a dummy value of the correct type when skipping, so
+	       that parent functions know what is to be skipped.  */
+	    return allocate_value (SYMBOL_TYPE (var));
+	  }
       }
 
     case OP_VAR_MSYM_VALUE:
@@ -1933,13 +1949,27 @@ evaluate_subexp_standard (struct type *expect_type,
 	  if (exp->elts[*pos].opcode == OP_RANGE)
 	    return value_f90_subarray (arg1, exp, pos, noside);
 	  else
-	    goto multi_f77_subscript;
+	    {
+	      if (noside == EVAL_SKIP)
+		{
+		  skip_undetermined_arglist (nargs, exp, pos, noside);
+		  /* Return the dummy value with the correct type.  */
+		  return arg1;
+		}
+	      goto multi_f77_subscript;
+	    }
 
 	case TYPE_CODE_STRING:
 	  if (exp->elts[*pos].opcode == OP_RANGE)
 	    return value_f90_subarray (arg1, exp, pos, noside);
 	  else
 	    {
+	      if (noside == EVAL_SKIP)
+		{
+		  skip_undetermined_arglist (nargs, exp, pos, noside);
+		  /* Return the dummy value with the correct type.  */
+		  return arg1;
+		}
 	      arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
 	      return value_subscript (arg1, value_as_long (arg2));
 	    }
