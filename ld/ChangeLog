@@ -4,6 +4,9 @@
 	* ldlang.c (lang_process): Move lang_do_memory_regions earlier.
 	Comment on lang_do_assignments call.
 	* ldgram.y (origin_exp): Don't assign region->current.
+	* testsuite/ld-elf/pr23648.d,
+	* testsuite/ld-elf/pr23648.s,
+	* testsuite/ld-elf/pr23648.t: New test.
 
 2018-09-19  Alan Modra  <amodra@gmail.com>
 
