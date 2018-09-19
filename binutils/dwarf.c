@@ -4357,7 +4357,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		printf ("%s:\n", file_table[0].name);
 	    }
 
-	  printf (_("File name                            Line number    Starting address    View\n"));
+	  printf (_("File name                            Line number    Starting address    View    Stmt\n"));
 	  saved_linfo = linfo;
 	}
 
@@ -4695,9 +4695,14 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		}
 
 	      if (state_machine_regs.view)
-		printf ("  %6u\n", state_machine_regs.view);
+		printf ("  %6u", state_machine_regs.view);
 	      else
-		putchar ('\n');
+		printf ("        ");
+
+	      if (state_machine_regs.is_stmt)
+		printf ("       x");
+
+	      putchar ('\n');
 	      state_machine_regs.view++;
 
 	      if (xop == -DW_LNE_end_sequence)
