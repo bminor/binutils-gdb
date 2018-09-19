@@ -2239,6 +2239,14 @@ nios2_type_align (struct gdbarch *gdbarch, struct type *type)
   return std::min<ULONGEST> (4, TYPE_LENGTH (type));
 }
 
+/* Implement the gcc_target_options gdbarch method.  */
+static char *
+nios2_gcc_target_options (struct gdbarch *gdbarch)
+{
+  /* GCC doesn't know "-m32".  */
+  return NULL;
+}
+
 /* Initialize the Nios II gdbarch.  */
 
 static struct gdbarch *
@@ -2343,6 +2351,9 @@ nios2_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Single stepping.  */
   set_gdbarch_software_single_step (gdbarch, nios2_software_single_step);
+
+  /* Target options for compile.  */
+  set_gdbarch_gcc_target_options (gdbarch, nios2_gcc_target_options);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);

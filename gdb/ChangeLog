@@ -1,3 +1,8 @@
+2018-09-18  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-tdep.c (nios2_gcc_target_options): New.
+	(nios2_gdb_arch_init): Install new hook.
+
 2018-09-18  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* patches/0001-Fix-PR-gdb-23558-Use-system-s-getcwd-when-cross-comp.patch:
