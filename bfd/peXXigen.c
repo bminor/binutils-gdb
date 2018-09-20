@@ -1661,7 +1661,8 @@ pe_print_edata (bfd * abfd, void * vfile)
 
       dataoff = addr - section->vma;
       datasize = extra->DataDirectory[PE_EXPORT_TABLE].Size;
-      if (datasize > section->size - dataoff)
+      if (dataoff > section->size
+	  || datasize > section->size - dataoff)
 	{
 	  fprintf (file,
 		   _("\nThere is an export table in %s, but it does not fit into that section\n"),
@@ -1778,11 +1779,11 @@ pe_print_edata (bfd * abfd, void * vfile)
 	  edt.base);
 
   /* PR 17512: Handle corrupt PE binaries.  */
-  if (edt.eat_addr + (edt.num_functions * 4) - adj >= datasize
+  /* PR 17512 file: 140-165018-0.004.  */
+  if (edt.eat_addr - adj >= datasize
       /* PR 17512: file: 092b1829 */
-      || (edt.num_functions * 4) < edt.num_functions
-      /* PR 17512 file: 140-165018-0.004.  */
-      || data + edt.eat_addr - adj < data)
+      || (edt.num_functions + 1) * 4 < edt.num_functions
+      || edt.eat_addr - adj + (edt.num_functions + 1) * 4 > datasize)
     fprintf (file, _("\tInvalid Export Address Table rva (0x%lx) or entry count (0x%lx)\n"),
 	     (long) edt.eat_addr,
 	     (long) edt.num_functions);

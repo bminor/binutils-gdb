@@ -1,5 +1,11 @@
 2018-09-20  Alan Modra  <amodra@gmail.com>
 
+	PR 23685
+	* peXXigen.c (pe_print_edata): Correct export address table
+	overflow checks.  Check dataoff against section size too.
+
+2018-09-20  Alan Modra  <amodra@gmail.com>
+
 	PR 23686
 	* dwarf2.c (read_section): Error when attempting to malloc
 	"(bfd_size_type) -1".
