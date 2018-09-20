@@ -614,31 +614,33 @@ lex_opr (uint8_t *buffer, int *n_bytes, expressionS *exp)
       buffer[3] = 0;
       if (exp->X_op == O_constant)
 	{
-	  if (exp->X_add_number < (0x1U << 14))
+	  valueT value = exp->X_add_number;
+
+	  if (value < (0x1U << 14))
 	    {
 	      *xb = 0x00;
 	      *n_bytes = 2;
-	      *xb |= exp->X_add_number >> 8;
-	      buffer[1] = exp->X_add_number;
+	      *xb |= value >> 8;
+	      buffer[1] = value;
 	    }
-	  else if (exp->X_add_number < (0x1U << 19))
+	  else if (value < (0x1U << 19))
 	    {
 	      *xb = 0xf8;
-	      if (exp->X_add_number & (0x1U << 17))
+	      if (value & (0x1U << 17))
 		*xb |= 0x04;
-	      if (exp->X_add_number & (0x1U << 16))
+	      if (value & (0x1U << 16))
 		*xb |= 0x01;
 	      *n_bytes = 3;
-	      buffer[1] = exp->X_add_number >> 8;
-	      buffer[2] = exp->X_add_number;
+	      buffer[1] = value >> 8;
+	      buffer[2] = value;
 	    }
 	  else
 	    {
 	      *xb = 0xfa;
 	      *n_bytes = 4;
-	      buffer[1] = exp->X_add_number >> 16;
-	      buffer[2] = exp->X_add_number >> 8;
-	      buffer[3] = exp->X_add_number;
+	      buffer[1] = value >> 16;
+	      buffer[2] = value >> 8;
+	      buffer[3] = value;
 	    }
 	}
       return 1;

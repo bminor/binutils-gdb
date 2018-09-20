@@ -1,5 +1,10 @@
 2018-09-20  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* config/tc-s12z.c (lex_opr): Use an auxiliary unsigned variable
+	in encoding a constant operand.
+
+2018-09-20  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* config/tc-ppc.c (ppc_dwsect): Use `valueT' rather than
 	`offsetT' as the type of `flag'.
 
