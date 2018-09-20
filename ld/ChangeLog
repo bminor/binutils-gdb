@@ -1,3 +1,22 @@
+2018-09-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-checks/over2.s: Add "_main" for LynxOS targets.
+	* testsuite/ld-elf/comm-data4.s: Likewise.
+	* testsuite/ld-elf/comm-data5.s: Likewise.
+	* testsuite/ld-elf/eh5b.s: Likewise.
+	* testsuite/ld-elf/empty.s: Likewise.
+	* testsuite/ld-elf/empty2.s: Likewise.
+	* testsuite/ld-elf/exclude3.s: Likewise.
+	* testsuite/ld-elf/fini0.s: Likewise.
+	* testsuite/ld-elf/init0.s: Likewise.
+	* testsuite/ld-elf/linkonce1b.s: Likewise.
+	* testsuite/ld-elf/orphan3a.s: Likewise.
+	* testsuite/ld-elf/pr14926.s: Likewise.
+	* testsuite/ld-elf/pr20513a.s: Likewise.
+	* testsuite/ld-elf/sec64k.exp: Likewise.
+	* testsuite/ld-elf/start.s: Likewise.
+	* testsuite/ld-elf/var1.s: Likewise.
+
 2018-09-20  Kito Cheng  <kito@andestech.com>
 
 	* emulparams/elf32lriscv.sh: Correct the library search path.

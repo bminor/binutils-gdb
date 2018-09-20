@@ -79,6 +79,8 @@ for { set i 0 } { $i < $max_sec / $secs_per_file } { incr i } {
 	puts $ofd "__start:"
 	puts $ofd " .global main"
 	puts $ofd "main:"
+	puts $ofd " .global _main"
+	puts $ofd "_main:"
 	puts $ofd " .global foo_0"
 	puts $ofd "foo_0: .dc.a 0"
     }
