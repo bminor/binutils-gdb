@@ -1,3 +1,15 @@
+2018-09-20  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* i386-v4-nat.c (regmap, supply_gregset, fill_gregset)
+	(supply_fpregset, fill_fpregset): Move ...
+	* i386-sol2-nat.c [PR_MODEL_NATIVE != PR_MODEL_LP64]: ... here.
+	Remove HAVE_GREGSET_T, HAVE_FPREGET_T guards.
+	Remove references to ioctl-based procfs.
+	Include <sys/reg.h>.
+	Remove PR_MODEL_NATIVE guards.
+	* configure.nat <sol2, i386> (NATDEPFILES): Remove i386-v4-nat.o.
+	* Makefile.in (ALLDEPFILES): Remove i386-v4-nat.c.
+
 2018-09-19  Xavier Roirand  <roirand@adacore.com>
 
 	PR gdb/20981:
