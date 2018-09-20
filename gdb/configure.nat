@@ -465,7 +465,7 @@ case ${gdb_host} in
 	    i386)
 		# Host: Solaris x86_64
 		NATDEPFILES="${NATDEPFILES} \
-		amd64-nat.o i386-v4-nat.o i386-sol2-nat.o"
+		amd64-nat.o i386-sol2-nat.o"
 		;;
 	    sparc)
 		# Host: Solaris SPARC & UltraSPARC
