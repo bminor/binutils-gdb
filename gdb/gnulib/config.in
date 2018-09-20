@@ -96,6 +96,10 @@
 #undef GNULIB_GETCWD
 
 /* Define to a C preprocessor expression that evaluates to 1 or 0, depending
+   whether the gnulib module mkostemp shall be considered present. */
+#undef GNULIB_MKOSTEMP
+
+/* Define to a C preprocessor expression that evaluates to 1 or 0, depending
    whether the gnulib module openat shall be considered present. */
 #undef GNULIB_OPENAT
 
@@ -199,8 +203,8 @@
 /* Define to 1 when the gnulib module memrchr should be tested. */
 #undef GNULIB_TEST_MEMRCHR
 
-/* Define to 1 when the gnulib module mkstemp should be tested. */
-#undef GNULIB_TEST_MKSTEMP
+/* Define to 1 when the gnulib module mkostemp should be tested. */
+#undef GNULIB_TEST_MKOSTEMP
 
 /* Define to 1 when the gnulib module open should be tested. */
 #undef GNULIB_TEST_OPEN
@@ -544,8 +548,8 @@
    when it succeeds. */
 #undef HAVE_MINIMALLY_WORKING_GETCWD
 
-/* Define to 1 if you have the 'mkstemp' function. */
-#undef HAVE_MKSTEMP
+/* Define to 1 if you have the 'mkostemp' function. */
+#undef HAVE_MKOSTEMP
 
 /* Define to 1 if you have the 'mprotect' function. */
 #undef HAVE_MPROTECT

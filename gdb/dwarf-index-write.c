@@ -1567,7 +1567,7 @@ write_psymtabs_to_index (struct dwarf2_per_objfile *dwarf2_per_objfile,
   gdb::char_vector filename_temp = make_temp_filename (filename);
 
   gdb::optional<scoped_fd> out_file_fd
-    (gdb::in_place, mkstemp (filename_temp.data ()));
+    (gdb::in_place, gdb_mkostemp_cloexec (filename_temp.data (), O_BINARY));
   if (out_file_fd->get () == -1)
     perror_with_name (("mkstemp"));
 
@@ -1591,7 +1591,8 @@ write_psymtabs_to_index (struct dwarf2_per_objfile *dwarf2_per_objfile,
       gdb::char_vector filename_str_temp = make_temp_filename (filename_str);
 
       gdb::optional<scoped_fd> out_file_str_fd
-	(gdb::in_place, mkstemp (filename_str_temp.data ()));
+	(gdb::in_place, gdb_mkostemp_cloexec (filename_str_temp.data (),
+					      O_BINARY));
       if (out_file_str_fd->get () == -1)
         perror_with_name (("mkstemp"));
 

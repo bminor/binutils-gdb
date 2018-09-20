@@ -24,7 +24,7 @@
 #if !_LIBC
 # include "tempname.h"
 # define __gen_tempname gen_tempname
-# ifndef __GT_FILE
+# ifndef __GTFILE
 #  define __GT_FILE GT_FILE
 # endif
 #endif
@@ -38,13 +38,9 @@
 /* Generate a unique temporary file name from XTEMPLATE.
    The last six characters of XTEMPLATE must be "XXXXXX";
    they are replaced with a string that makes the file name unique.
-   Then open the file and return a fd.
-
-   If you are creating temporary files which will later be removed,
-   consider using the clean-temp module, which avoids several pitfalls
-   of using mkstemp directly. */
+   Then open the file and return a fd. */
 int
-mkstemp (char *xtemplate)
+mkostemp (char *xtemplate, int flags)
 {
-  return __gen_tempname (xtemplate, 0, 0, __GT_FILE);
+  return __gen_tempname (xtemplate, 0, flags, __GT_FILE);
 }

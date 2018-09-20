@@ -19,6 +19,7 @@
 
 #include "defs.h"
 
+#include "common/filestuff.h"
 #include "common/scoped_fd.h"
 #include "config.h"
 #include "selftest.h"
@@ -31,7 +32,7 @@ static void
 test_destroy ()
 {
   char filename[] = "scoped_fd-selftest-XXXXXX";
-  int fd = mkstemp (filename);
+  int fd = gdb_mkostemp_cloexec (filename);
   SELF_CHECK (fd >= 0);
 
   unlink (filename);
@@ -50,7 +51,7 @@ static void
 test_release ()
 {
   char filename[] = "scoped_fd-selftest-XXXXXX";
-  int fd = mkstemp (filename);
+  int fd = gdb_mkostemp_cloexec (filename);
   SELF_CHECK (fd >= 0);
 
   unlink (filename);

@@ -19,6 +19,7 @@
 
 #include "defs.h"
 
+#include "common/filestuff.h"
 #include "common/scoped_mmap.h"
 #include "config.h"
 
@@ -88,7 +89,7 @@ static void
 test_normal ()
 {
   char filename[] = "scoped_mmapped_file-selftest-XXXXXX";
-  int fd = mkstemp (filename);
+  int fd = gdb_mkostemp_cloexec (filename);
   SELF_CHECK (fd >= 0);
 
   SELF_CHECK (write (fd, "Hello!", 7) == 7);

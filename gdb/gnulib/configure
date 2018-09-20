@@ -3525,7 +3525,7 @@ gl_func_list="$gl_func_list mbsinit"
 gl_func_list="$gl_func_list mbrtowc"
 gl_header_list="$gl_header_list sys/mman.h"
 gl_func_list="$gl_func_list mprotect"
-gl_func_list="$gl_func_list mkstemp"
+gl_func_list="$gl_func_list mkostemp"
 gl_func_list="$gl_func_list openat"
 gl_func_list="$gl_func_list link"
 gl_func_list="$gl_func_list secure_getenv"
@@ -5841,7 +5841,7 @@ fi
   # Code from module mempcpy:
   # Code from module memrchr:
   # Code from module mkdir:
-  # Code from module mkstemp:
+  # Code from module mkostemp:
   # Code from module msvc-inval:
   # Code from module msvc-nothrow:
   # Code from module multiarch:
@@ -21893,91 +21893,37 @@ $as_echo "#define FUNC_MKDIR_DOT_BUG 1" >>confdefs.h
 
 
 
+
+
   :
 
 
 
 
 
-  if test $ac_cv_func_mkstemp = yes; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for working mkstemp" >&5
-$as_echo_n "checking for working mkstemp... " >&6; }
-if ${gl_cv_func_working_mkstemp+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
+  if test $ac_cv_func_mkostemp != yes; then
+    HAVE_MKOSTEMP=0
+  fi
 
-        mkdir conftest.mkstemp
-        if test "$cross_compiling" = yes; then :
-  case "$host_os" in
-                     # Guess yes on glibc systems.
-             *-gnu*) gl_cv_func_working_mkstemp="guessing yes" ;;
-                     # If we don't know, assume the worst.
-             *)      gl_cv_func_working_mkstemp="guessing no" ;;
-           esac
+  if test $HAVE_MKOSTEMP = 0; then
 
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$ac_includes_default
-int
-main ()
-{
-int result = 0;
-              int i;
-              off_t large = (off_t) 4294967295u;
-              if (large < 0)
-                large = 2147483647;
-              umask (0);
-              for (i = 0; i < 70; i++)
-                {
-                  char templ[] = "conftest.mkstemp/coXXXXXX";
-                  int (*mkstemp_function) (char *) = mkstemp;
-                  int fd = mkstemp_function (templ);
-                  if (fd < 0)
-                    result |= 1;
-                  else
-                    {
-                      struct stat st;
-                      if (lseek (fd, large, SEEK_SET) != large)
-                        result |= 2;
-                      if (fstat (fd, &st) < 0)
-                        result |= 4;
-                      else if (st.st_mode & 0077)
-                        result |= 8;
-                      if (close (fd))
-                        result |= 16;
-                    }
-                }
-              return result;
-  ;
-  return 0;
-}
+
+
+
+
+
+
+
+  gl_LIBOBJS="$gl_LIBOBJS mkostemp.$ac_objext"
+
+
+
+  fi
+
+
+cat >>confdefs.h <<_ACEOF
+#define GNULIB_MKOSTEMP 1
 _ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
-  gl_cv_func_working_mkstemp=yes
-else
-  gl_cv_func_working_mkstemp=no
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-        rm -rf conftest.mkstemp
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_func_working_mkstemp" >&5
-$as_echo "$gl_cv_func_working_mkstemp" >&6; }
-    case "$gl_cv_func_working_mkstemp" in
-      *yes) ;;
-      *)
-        REPLACE_MKSTEMP=1
-        ;;
-    esac
-  else
-    HAVE_MKSTEMP=0
-  fi
-
-  if test $HAVE_MKSTEMP = 0 || test $REPLACE_MKSTEMP = 1; then
 
 
 
@@ -21985,24 +21931,13 @@ $as_echo "$gl_cv_func_working_mkstemp" >&6; }
 
 
 
-
-  gl_LIBOBJS="$gl_LIBOBJS mkstemp.$ac_objext"
-
-
-
-  fi
+          GNULIB_MKOSTEMP=1
 
 
 
 
 
-          GNULIB_MKSTEMP=1
-
-
-
-
-
-$as_echo "#define GNULIB_TEST_MKSTEMP 1" >>confdefs.h
+$as_echo "#define GNULIB_TEST_MKOSTEMP 1" >>confdefs.h
 
 
 

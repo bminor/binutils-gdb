@@ -46,7 +46,7 @@ IMPORTED_GNULIB_MODULES="\
     memchr \
     memmem \
     mkdir \
-    mkstemp \
+    mkostemp \
     pathmax \
     rawmemchr \
     readlink \
@@ -169,6 +169,7 @@ apply_patches ()
 }
 
 apply_patches "patches/0001-Fix-PR-gdb-23558-Use-system-s-getcwd-when-cross-comp.patch"
+apply_patches "patches/0002-mkostemp-mkostemps-Fix-compilation-error-in-C-mode-o.patch"
 
 # Regenerate all necessary files...
 aclocal -Iimport/m4 &&

@@ -1,5 +1,29 @@
 2018-10-27  Tom Tromey  <tom@tromey.com>
 
+	* unittests/scoped_mmap-selftests.c (test_normal): Use
+	gdb_mkostemp_cloexec.
+	* unittests/scoped_fd-selftests.c (test_destroy, test_release):
+	Use gdb_mkostemp_cloexec.
+	* gnulib/aclocal-m4-deps.mk, gnulib/aclocal.m4,
+	gnulib/config.in, gnulib/configure,
+	gnulib/import/Makefile.am, gnulib/import/Makefile.in,
+	gnulib/import/m4/gnulib-cache.m4,
+	gnulib/import/m4/gnulib-comp.m4: Update.
+	* gnulib/import/m4/mkostemp.m4: New file.
+	* gnulib/import/m4/mkstemp.m4: Remove.
+	* gnulib/import/mkostemp.c: New file.
+	* gnulib/import/mkstemp.m4: Remove.
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Remove
+	mkstemp, add mkostemp.  Apply new patch.
+	* gnulib/import/stdlib.in.h: Apply patch.
+	* gnulib/patches/0002-mkostemp-mkostemps-Fix-compilation-error-in-C-mode-o.patch:
+	New file.
+	* dwarf-index-write.c (write_psymtabs_to_index): Use
+	gdb_mkostemp_cloexec.
+	* common/filestuff.h (gdb_mkostemp_cloexec): New function.
+
+2018-10-27  Tom Tromey  <tom@tromey.com>
+
 	* unittests/mkdir-recursive-selftests.c: New file.
 	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
 	unittests/mkdir-recursive-selftests.c.
