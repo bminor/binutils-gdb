@@ -1,3 +1,13 @@
+2018-09-18  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.base/complete-empty.exp: Skip tab-completion tests if
+	no readline.
+	* gdb.base/utf8-identifiers.exp: Likewise.
+	* gdb.cp/cpcompletion.exp: Likewise.
+	* gdb.linespec/cpcompletion.exp: Likewise.
+	* gdb.linespec/cpls-abi-tag.exp: Likewise.
+	* gdb.linespec/cpls-ops.exp: Likewise.
+
 2018-09-19  Richard Bunt  <richard.bunt@arm.com>
 	    Chris January  <chris.january@arm.com>
 
