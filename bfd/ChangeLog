@@ -1,3 +1,12 @@
+2018-09-20  Alan Modra  <amodra@gmail.com>
+
+	PR 23686
+	* dwarf2.c (read_section): Error when attempting to malloc
+	"(bfd_size_type) -1".
+	* syms.c (_bfd_stab_section_find_nearest_line): Bounds check
+	function_name.  Bounds check reloc address.  Formatting.  Ensure
+	.stabstr zero terminated.
+
 2018-09-18  Nick Clifton  <nickc@redhat.com>
 
 	PR 23657

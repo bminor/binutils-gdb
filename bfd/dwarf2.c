@@ -527,6 +527,7 @@ read_section (bfd *	      abfd,
   asection *msec;
   const char *section_name = sec->uncompressed_name;
   bfd_byte *contents = *section_buffer;
+  bfd_size_type amt;
 
   /* The section may have already been read.  */
   if (contents == NULL)
@@ -549,7 +550,13 @@ read_section (bfd *	      abfd,
       *section_size = msec->rawsize ? msec->rawsize : msec->size;
       /* Paranoia - alloc one extra so that we can make sure a string
 	 section is NUL terminated.  */
-      contents = (bfd_byte *) bfd_malloc (*section_size + 1);
+      amt = *section_size + 1;
+      if (amt == 0)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  return FALSE;
+	}
+      contents = (bfd_byte *) bfd_malloc (amt);
       if (contents == NULL)
 	return FALSE;
       if (syms
