@@ -1,5 +1,13 @@
 2018-10-27  Tom Tromey  <tom@tromey.com>
 
+	* unittests/scoped_fd-selftests.c (test_to_file): New function.
+	(run_tests): Call test_to_file.
+	* dwarf-index-write.c (write_psymtabs_to_index): Do not reopen
+	temporary files.
+	* common/scoped_fd.h (scoped_fd::to_file): New method.
+
+2018-10-27  Tom Tromey  <tom@tromey.com>
+
 	* unittests/scoped_mmap-selftests.c (test_normal): Use
 	gdb_mkostemp_cloexec.
 	* unittests/scoped_fd-selftests.c (test_destroy, test_release):

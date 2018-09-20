@@ -1566,23 +1566,21 @@ write_psymtabs_to_index (struct dwarf2_per_objfile *dwarf2_per_objfile,
 			   ? INDEX5_SUFFIX : INDEX4_SUFFIX));
   gdb::char_vector filename_temp = make_temp_filename (filename);
 
-  gdb::optional<scoped_fd> out_file_fd
-    (gdb::in_place, gdb_mkostemp_cloexec (filename_temp.data (), O_BINARY));
-  if (out_file_fd->get () == -1)
+  /* Order matters here; we want FILE to be closed before
+     FILENAME_TEMP is unlinked, because on MS-Windows one cannot
+     delete a file that is still open.  So, we wrap the unlinker in an
+     optional and emplace it once we know the file name.  */
+  gdb::optional<gdb::unlinker> unlink_file;
+  scoped_fd out_file_fd (gdb_mkostemp_cloexec (filename_temp.data (),
+					       O_BINARY));
+  if (out_file_fd.get () == -1)
     perror_with_name (("mkstemp"));
 
-  FILE *out_file = gdb_fopen_cloexec (filename_temp.data (), "wb").release ();
+  gdb_file_up out_file = out_file_fd.to_file ("wb");
   if (out_file == nullptr)
     error (_("Can't open `%s' for writing"), filename_temp.data ());
 
-  /* Order matters here; we want FILE to be closed before FILENAME_TEMP is
-     unlinked, because on MS-Windows one cannot delete a file that is
-     still open.  (Don't call anything here that might throw until
-     file_closer is created.)  We don't need OUT_FILE_FD anymore, so we might
-     as well close it now.  */
-  out_file_fd.reset ();
-  gdb::unlinker unlink_file (filename_temp.data ());
-  gdb_file_up close_out_file (out_file);
+  unlink_file.emplace (filename_temp.data ());
 
   if (index_kind == dw_index_kind::DEBUG_NAMES)
     {
@@ -1590,45 +1588,45 @@ write_psymtabs_to_index (struct dwarf2_per_objfile *dwarf2_per_objfile,
 				+ basename + DEBUG_STR_SUFFIX);
       gdb::char_vector filename_str_temp = make_temp_filename (filename_str);
 
-      gdb::optional<scoped_fd> out_file_str_fd
-	(gdb::in_place, gdb_mkostemp_cloexec (filename_str_temp.data (),
-					      O_BINARY));
-      if (out_file_str_fd->get () == -1)
+      /* As above, arrange to unlink the file only after the file
+	 descriptor has been closed.  */
+      gdb::optional<gdb::unlinker> unlink_file_str;
+      scoped_fd out_file_str_fd
+	(gdb_mkostemp_cloexec (filename_str_temp.data (), O_BINARY));
+      if (out_file_str_fd.get () == -1)
         perror_with_name (("mkstemp"));
 
-      FILE *out_file_str
-	= gdb_fopen_cloexec (filename_str_temp.data (), "wb").release ();
+      gdb_file_up out_file_str = out_file_str_fd.to_file ("wb");
       if (out_file_str == nullptr)
 	error (_("Can't open `%s' for writing"), filename_str_temp.data ());
 
-      out_file_str_fd.reset ();
-      gdb::unlinker unlink_file_str (filename_str_temp.data ());
-      gdb_file_up close_out_file_str (out_file_str);
+      unlink_file_str.emplace (filename_str_temp.data ());
 
       const size_t total_len
-	= write_debug_names (dwarf2_per_objfile, out_file, out_file_str);
-      assert_file_size (out_file, filename_temp.data (), total_len);
+	= write_debug_names (dwarf2_per_objfile, out_file.get (),
+			     out_file_str.get ());
+      assert_file_size (out_file.get (), filename_temp.data (), total_len);
 
       /* We want to keep the file .debug_str file too.  */
-      unlink_file_str.keep ();
+      unlink_file_str->keep ();
 
       /* Close and move the str file in place.  */
-      close_out_file_str.reset ();
+      out_file_str.reset ();
       if (rename (filename_str_temp.data (), filename_str.c_str ()) != 0)
 	perror_with_name (("rename"));
     }
   else
     {
       const size_t total_len
-	= write_gdbindex (dwarf2_per_objfile, out_file);
-      assert_file_size (out_file, filename_temp.data (), total_len);
+	= write_gdbindex (dwarf2_per_objfile, out_file.get ());
+      assert_file_size (out_file.get (), filename_temp.data (), total_len);
     }
 
   /* We want to keep the file.  */
-  unlink_file.keep ();
+  unlink_file->keep ();
 
   /* Close and move the file in place.  */
-  close_out_file.reset ();
+  out_file.reset ();
   if (rename (filename_temp.data (), filename.c_str ()) != 0)
 	perror_with_name (("rename"));
 }

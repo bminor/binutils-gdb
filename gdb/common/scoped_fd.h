@@ -21,6 +21,7 @@
 #define SCOPED_FD_H
 
 #include <unistd.h>
+#include "filestuff.h"
 
 /* A smart-pointer-like class to automatically close a file descriptor.  */
 
@@ -41,6 +42,18 @@ public:
     int fd = m_fd;
     m_fd = -1;
     return fd;
+  }
+
+  /* Like release, but return a gdb_file_up that owns the file
+     descriptor.  On success, this scoped_fd will be released.  On
+     failure, return NULL and leave this scoped_fd in possession of
+     the fd.  */
+  gdb_file_up to_file (const char *mode) noexcept
+  {
+    gdb_file_up result (fdopen (m_fd, mode));
+    if (result != nullptr)
+      m_fd = -1;
+    return result;
   }
 
   int get () const noexcept
