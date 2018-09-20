@@ -1,5 +1,11 @@
 2018-09-20  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
+	PR tdep/17903
+	* procfs.c (procfs_target): Declare pid_to_exec_file.
+	(procfs_target::pid_to_exec_file): New.
+
+2018-09-20  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
 	* auxv.c (default_print_auxv_entry): Reflect AT_SUN_CAP_HW1
 	renaming.
 	Handle AT_SUN_EMULATOR, AT_SUN_BRANDNAME, AT_SUN_BRAND_AUX1,

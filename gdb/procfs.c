@@ -128,6 +128,8 @@ public:
 
   const char *pid_to_str (ptid_t) override;
 
+  char *pid_to_exec_file (int pid) override;
+
   thread_control_capabilities get_thread_control_capabilities () override
   { return tc_schedlock; }
 
@@ -3210,6 +3212,35 @@ procfs_target::pid_to_str (ptid_t ptid)
     sprintf (buf, "process %d", ptid.pid ());
   else
     sprintf (buf, "LWP %ld", ptid.lwp ());
+
+  return buf;
+}
+
+/* Accepts an integer PID; Returns a string representing a file that
+   can be opened to get the symbols for the child process.  */
+
+char *
+procfs_target::pid_to_exec_file (int pid)
+{
+  static char buf[PATH_MAX];
+  char name[PATH_MAX];
+
+  /* Solaris 11 introduced /proc/<proc-id>/execname.  */
+  xsnprintf (name, PATH_MAX, "/proc/%d/execname", pid);
+  scoped_fd fd (gdb_open_cloexec (name, O_RDONLY, 0));
+  if (fd.get () < 0 || read (fd.get (), buf, PATH_MAX - 1) < 0)
+    {
+      /* If that fails, fall back to /proc/<proc-id>/path/a.out introduced in
+	 Solaris 10.  */
+      ssize_t len;
+
+      xsnprintf (name, PATH_MAX, "/proc/%d/path/a.out", pid);
+      len = readlink (name, buf, PATH_MAX - 1);
+      if (len <= 0)
+	strcpy (buf, name);
+      else
+	buf[len] = '\0';
+    }
 
   return buf;
 }
