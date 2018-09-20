@@ -552,6 +552,7 @@ struct dwarf2_cu
   unsigned int producer_is_gxx_lt_4_6 : 1;
   unsigned int producer_is_gcc_lt_4_3 : 1;
   unsigned int producer_is_icc_lt_14 : 1;
+  bool producer_is_codewarrior : 1;
 
   /* When set, the file that we're processing is known to have
      debugging info for C++ namespaces.  GCC 3.3.x did not produce
@@ -14901,6 +14902,8 @@ check_producer (struct dwarf2_cu *cu)
     }
   else if (producer_is_icc (cu->producer, &major, &minor))
     cu->producer_is_icc_lt_14 = major < 14;
+  else if (startswith (cu->producer, "CodeWarrior S12/L-ISA"))
+    cu->producer_is_codewarrior = true;
   else
     {
       /* For other non-GCC compilers, expect their behavior is DWARF version
@@ -14921,6 +14924,19 @@ producer_is_gxx_lt_4_6 (struct dwarf2_cu *cu)
     check_producer (cu);
 
   return cu->producer_is_gxx_lt_4_6;
+}
+
+
+/* Codewarrior (at least as of version 5.0.40) generates dwarf line information
+   with incorrect is_stmt attributes.  */
+
+static bool
+producer_is_codewarrior (struct dwarf2_cu *cu)
+{
+  if (!cu->checked_producer)
+    check_producer (cu);
+
+  return cu->producer_is_codewarrior;
 }
 
 /* Return the default accessibility type if it is not overriden by
@@ -20787,7 +20803,7 @@ lnp_state_machine::record_line (bool end_sequence)
   else if (m_op_index == 0 || end_sequence)
     {
       fe->included_p = 1;
-      if (m_record_lines_p && m_is_stmt)
+      if (m_record_lines_p && (producer_is_codewarrior (m_cu) || m_is_stmt))
 	{
 	  if (m_last_subfile != m_cu->builder->get_current_subfile ()
 	      || end_sequence)
@@ -25118,6 +25134,7 @@ dwarf2_cu::dwarf2_cu (struct dwarf2_per_cu_data *per_cu_)
     producer_is_gxx_lt_4_6 (0),
     producer_is_gcc_lt_4_3 (0),
     producer_is_icc_lt_14 (0),
+    producer_is_codewarrior (false),
     processing_has_namespace_info (0)
 {
   per_cu->cu = this;

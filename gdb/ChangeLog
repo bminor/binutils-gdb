@@ -1,3 +1,12 @@
+2018-10-08   John Darrington <john@darrington.wattle.id.au>
+
+    * dwarf2read.c (dwarf2_cu) <producer_is_codewarrior>: New field.
+      (check_producer): Check if the producer is codewarrior.
+      (producer_is_codewarrior): New function.
+      (lnp_state_machine::record_line): Ignore is_stmt flag for records
+       produced by codewarrior.
+      (dwarf2_cu::dwarf2_cu): Initialize producer_is_codewarrior.
+
 2018-10-06  Tom Tromey  <tom@tromey.com>
 
 	PR python/19399:
