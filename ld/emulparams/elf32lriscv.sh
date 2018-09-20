@@ -9,7 +9,7 @@ case "$target" in
   riscv32*-linux*)
     case "$EMULATION_NAME" in
       *32*)
-	LIBPATH_SUFFIX="/ilp32d" ;;
+	LIBPATH_SUFFIX="32/ilp32d 32" ;;
     esac
     ;;
 esac

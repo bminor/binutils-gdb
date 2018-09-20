@@ -1,3 +1,9 @@
+2018-09-20  Kito Cheng  <kito@andestech.com>
+
+	* emulparams/elf32lriscv.sh: Correct the library search path.
+	* emulparams/elf32lriscv_ilp32.sh: Likewise.
+	* emulparams/elf32lriscv_ilp32f.sh: Likewise.
+
 2018-09-20  Nelson Chu <nelson.chu1990@gmail.com>
 
 	* emultempl/nds32elf.em (hyper_relax): New variable.
