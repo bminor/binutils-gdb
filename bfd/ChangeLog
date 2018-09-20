@@ -1,3 +1,8 @@
+2018-09-20  Maciej W. Rozycki  <macro@linux-mips.org>
+
+    	* config.bfd <rs6000-*-aix5.[01], rs6000-*-aix[5-9]*>: Remove
+    	duplicate `case' selectors.
+
 2018-09-20  Nelson Chu <nelson.chu1990@gmail.com>
 
 	* elf32-nds32.c (nds32_elf_relax_loadstore):
