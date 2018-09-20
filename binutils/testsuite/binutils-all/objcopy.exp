@@ -1098,7 +1098,11 @@ if [is_elf_format] {
 	set reloc_format mips64
     }
     # A relocation type not supported by any target
-    set reloc 215
+    if { [istarget "nds32*-*"] } {
+	set reloc 255
+    } else {
+	set reloc 215
+    }
     run_dump_test "strip-13" [list \
 				  [list source strip-13${reloc_format}.s] \
 				  [list as "${elf64} --defsym RELOC=${reloc}"]]

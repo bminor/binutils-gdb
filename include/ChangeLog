@@ -1,3 +1,16 @@
+2018-09-20  Nelson Chu <nelson.chu1990@gmail.com>
+
+	* elf/nds32.h: Remove the unused target features.
+	* dis-asm.h (disassemble_init_nds32): Declared.
+	* elf/nds32.h (E_NDS32_NULL): Removed.
+	(E_NDS32_HAS_DSP_INST, E_NDS32_HAS_ZOL): New.
+	* opcode/nds32.h: Ident.
+	(N32_SUB6, INSN_LW): New macros.
+	(enum n32_opcodes): Updated.
+	* elf/nds32.h: Doc fixes.
+	* elf/nds32.h: Add R_NDS32_LSI.
+	* elf/nds32.h: Add new relocations for TLS.
+
 2018-09-20  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* elf/common.h (AT_SUN_HWCAP): Rename to ...

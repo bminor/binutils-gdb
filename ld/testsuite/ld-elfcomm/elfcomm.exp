@@ -59,7 +59,7 @@ proc test_sort_common {} {
     }
 
     if { ![ld_link $ld tmpdir/sort-common.dx "--sort-common=descending tmpdir/sort-common.o"] } {
-	fail "$test"
+	fail "$test (could not link)"
 	return 0
     }
 
@@ -73,7 +73,7 @@ proc test_sort_common {} {
     #  section and large commons in a .bss section.
     if {   ![regexp ".*var_16.*var_8.*var_4.*var_2.*var_1.*" $exec_output]
         && ![regexp ".*sbss.*var_8.*var_4.*var_2.*var_1.*bss.*var_16.*" $exec_output] } {      
-	fail $test
+	fail "$test (variables in wrong order)"
     } else {
 	pass $test
     }
@@ -83,7 +83,7 @@ proc test_sort_common {} {
     verbose "Check to see that --sort-common=ascending sorts in ascending alignment"
 
     if { ![ld_link $ld tmpdir/sort-common.ax "--sort-common=ascending tmpdir/sort-common.o"] } {
-	fail "$test"
+	fail "$test (could not link)"
 	return 0
     }
 
@@ -91,7 +91,7 @@ proc test_sort_common {} {
     set exec_output [run_host_cmd "$objdump" "--syms tmpdir/sort-common.ax | grep var | sort"]
 
     if {![regexp ".*var_1.*var_2.*var_4.*var_8.*var_16.*" $exec_output]} {      
-	fail $test
+	fail "$test (variables in wrong order)"
 	return 0
     }
 

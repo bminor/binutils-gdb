@@ -7,7 +7,9 @@
 # cr16 and crx use non-standard scripts with memory regions, which don't play
 # well with unique group sections under ld -r.
 
-COMDAT group section \[[ 0-9]+\] `.group' \[foo\] contains 2 sections:
+COMDAT group section \[[ 0-9]+\] `.group' \[foo\] contains . sections:
    \[Index\]    Name
    \[[ 0-9]+\]   .text.foo
+#...
    \[[ 0-9]+\]   .data.foo
+#pass

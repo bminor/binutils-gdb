@@ -1,3 +1,82 @@
+2018-09-20  Nelson Chu <nelson.chu1990@gmail.com>
+
+	* config/tc-nds32.c: Remove the unused target features.
+	(nds32_relax_relocs, md_pseudo_table, nds32_elf_record_fixup_exp,
+	nds32_set_elf_flags_by_insn, nds32_insert_relax_entry,
+	nds32_apply_fix): Likewise.
+	(nds32_no_ex9_begin): Removed.
+	* config/tc-nds32.c (add_mapping_symbol_for_align,
+	make_mapping_symbol, add_mapping_symbol): New functions.
+	* config/tc-nds32.h (enum mstate): New.
+	(nds32_segment_info_type): Likewise.
+	* configure.ac (--enable-dsp-ext, --enable-zol-ext): New options.
+	* config.in: Regenerated.
+	* configure: Regenerated.
+	* config/tc-nds32.c (nds32_dx_regs):
+	Set the value according to the configuration.
+	(nds32_perf_ext, nds32_perf_ext2, nds32_string_ext, nds32_audio_ext):
+	Likewise.
+	(nds32_dsp_ext): New variable. Set the value according to the
+	configuration.
+	(nds32_zol_ext): Likewise.
+	(asm_desc, nds32_pseudo_opcode_table): Make them static.
+	(nds32_set_elf_flags_by_insn): Updated.
+	(nds32_check_insn_available): Updated.
+	(nds32_str_tolower): New function.
+	* config/tc-nds32.c (relax_table): Updated.
+	(md_begin): Updated.
+	(md_assemble): Use XNEW macro to allocate space for `insn.info',
+	and then remember to free it.
+	(md_section_align): Cast (-1) to ValueT.
+	(nds32_get_align): Cast (~0U) to addressT.
+	(nds32_relax_branch_instructions): Updated.
+	(md_convert_frag): Add new local variable `final_r_type'.
+	(invalid_prev_frag): Add new bfd_boolean parameter `relax'.
+	All callers changed.
+	* config/tc-nds32.c (struct nds32_relocs_pattern): Add `insn' field.
+	(struct nds32_hint_map): Add `option_list' field.
+	(struct suffix_name, suffix_table): Remove the unused `pic' field.
+	(do_pseudo_b, do_pseudo_bal): Remove the suffix checking.
+	(do_pseudo_la_internal, do_pseudo_pushpopm): Indent.
+	(relax_hint_bias, relax_hint_id_current): New static variables.
+	(reset_bias, relax_hint_begin): New variables.
+	(nds_itoa): New function.
+	(CLEAN_REG, GET_OPCODE): New macros.
+	(struct relax_hint_id): New.
+	(nds32_relax_hint): For .relax_hint directive, we can use `begin'
+	and `end' to mark the relax pattern without giving exactly id number.
+	(nds32_elf_append_relax_relocs): Handle the case that the .relax_hint
+	directives are attached to pseudo instruction.
+	(nds32_elf_save_pseudo_pattern): Change the second parameter from
+	instruction's opcode to byte code.
+	(nds32_elf_build_relax_relation): Add new bfd_boolean parameter
+	`pseudo_hint'.
+	(nds32_lookup_pseudo_opcode): Fix the overflow issue.
+	(enum nds32_insn_type): Add N32_RELAX_ALU1 and N32_RELAX_16BIT.
+	(nds32_elf_record_fixup_exp, relax_ls_table, hint_map,
+	nds32_find_reloc_table, nds32_match_hint_insn, nds32_parse_name):
+	Updated.
+	* config/tc-nds32.h (MAX_RELAX_NUM): Extend it to 6.
+	(enum nds32_relax_hint_type): Merge NDS32_RELAX_HINT_LA and
+	NDS32_RELAX_HINT_LS into NDS32_RELAX_HINT_LALS. Add
+	NDS32_RELAX_HINT_LA_PLT, NDS32_RELAX_HINT_LA_GOT and
+	NDS32_RELAX_HINT_LA_GOTOFF.
+	* config/tc-nds32.h (relax_ls_table): Add floating load/store
+	to gp relax pattern.
+	(hint_map, nds32_find_reloc_table): Likewise.
+	* configure.ac: Define NDS32_LINUX_TOOLCHAIN.
+	* configure: Regenerated.
+	* config.in: Regenerated.
+	* config/tc-nds32.h (enum nds32_ramp): Updated.
+	(enum nds32_relax_hint_type): Likewise.
+	* config/tc-nds32.c: Include "errno.h" and "limits.h".
+	(relax_ls_table): Add TLS relax patterns.
+	(nds32_elf_append_relax_relocs): Attach BFD_RELOC_NDS32_GROUP on
+	each instructions of TLS patterns.
+	(nds32_elf_record_fixup_exp): Updated.
+	(nds32_apply_fix): Likewise.
+	(suffix_table): Add TLSDESC suffix.
+
 2018-09-18 Tamar Christina  <tamar.christina@arm.com>
 
 	* config/tc-aarch64.c (output_operand_error_report): Apply filtering to

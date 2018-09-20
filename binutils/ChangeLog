@@ -1,3 +1,8 @@
+2018-09-20  Nelson Chu <nelson.chu1990@gmail.com>
+
+	* testsuite/binutils-all/objcopy.exp: Set the unsupported reloc number
+	from 215 to 255 for NDS32.
+
 2018-09-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* objcopy.c (strip_specific_buffer): New.

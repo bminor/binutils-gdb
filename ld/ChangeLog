@@ -1,3 +1,17 @@
+2018-09-20  Nelson Chu <nelson.chu1990@gmail.com>
+
+	* emultempl/nds32elf.em (hyper_relax): New variable.
+	(nds32_elf_create_output_section_statements):
+	the parameters of bfd_elf32_nds32_set_target_option
+	(PARSE_AND_LIST_PROLOGUE, PARSE_AND_LIST_OPTIONS,
+	PARSE_AND_LIST_ARGS_CASES): Add new option --mhyper-relax.
+	* emultempl/nds32elf.em (nds32_elf_after_open): Updated.
+	* emultempl/nds32elf.em (tls_desc_trampoline): New variable.
+	* (nds32_elf_create_output_section_statements): Updated.
+	* (nds32_elf_after_parse): Disable relaxations when PIC is enable.
+	* (PARSE_AND_LIST_PROLOGUE, PARSE_AND_LIST_OPTIONS,
+	PARSE_AND_LIST_ARGS_CASES): Add new option --m[no-]tlsdesc-trampoline.
+
 2018-09-19  Alan Modra  <amodra@gmail.com>
 
 	PR ld/23648

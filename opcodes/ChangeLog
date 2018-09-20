@@ -1,3 +1,43 @@
+2018-09-20  Nelson Chu <nelson.chu1990@gmail.com>
+
+	* nds32-asm.c (operand_fields): Remove the unused fields.
+	(nds32_opcodes): Remove the unused instructions.
+	* nds32-dis.c (nds32_ex9_info): Removed.
+	(nds32_parse_opcode): Updated.
+	(print_insn_nds32): Likewise.
+	* nds32-asm.c (config.h, stdlib.h, string.h): New includes.
+	(LEX_SET_FIELD, LEX_GET_FIELD): Update defines.
+	(nds32_asm_init, build_operand_hash_table, build_keyword_hash_table,
+	build_opcode_hash_table): New functions.
+	(nds32_keyword_table, nds32_keyword_count_table, nds32_field_table,
+	nds32_opcode_table): New.
+	(hw_ktabs): Declare it to a pointer rather than an array.
+	(build_hash_table): Removed.
+	* nds32-asm.h (enum): Add SYN_INPUT, SYN_OUTPUT, SYN_LOPT,
+	SYN_ROPT and upadte HW_GPR and HW_INT.
+	* nds32-dis.c (keywords): Remove const.
+	(match_field): New function.
+	(nds32_parse_opcode): Updated.
+	* disassemble.c (disassemble_init_for_target):
+	Add disassemble_init_nds32.
+	* nds32-dis.c (eum map_type): New.
+	(nds32_private_data): Likewise.
+	(get_mapping_symbol_type, is_mapping_symbol, nds32_symbol_is_valid,
+	nds32_add_opcode_hash_table, disassemble_init_nds32): New functions.
+	(print_insn_nds32): Updated.
+	* nds32-asm.c (parse_aext_reg): Add new parameter.
+	(parse_re, parse_re2, parse_aext_reg): Only reduced registers
+	are allowed to use.
+	All callers changed.
+	* nds32-asm.c (keyword_usr, keyword_sr): Updated.
+	(operand_fields): Add new fields.
+	(nds32_opcodes): Add new instructions.
+	(keyword_aridxi_mx): New keyword.
+	* nds32-asm.h (enum): Add NASM_ATTR_DSP_ISAEXT, HW_AEXT_ARIDXI_MX
+	and NASM_ATTR_ZOL.
+	(ALU2_1, ALU2_2, ALU2_3): New macros.
+	* nds32-dis.c (nds32_filter_unknown_insn): Updated.
+
 2018-09-17  Kito Cheng  <kito@andestech.com>
 
 	* riscv-opc.c (riscv_opcodes): Adjust the order of ble and bleu.

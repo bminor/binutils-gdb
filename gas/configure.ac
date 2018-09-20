@@ -446,6 +446,15 @@ changequote([,])dnl
 	;;
 
       nds32)
+	# setup NDS32_LINUX_TOOLCHAIN definition
+	if test "linux" = $em; then
+	  AC_DEFINE(NDS32_LINUX_TOOLCHAIN, 1,
+	    [Define value for nds32_linux_toolchain])
+	else
+	  AC_DEFINE(NDS32_LINUX_TOOLCHAIN, 0,
+	    [Define default value for nds32_linux_toolchain])
+	fi
+
 	# Decide BASELINE, REDUCED_REGS, FPU_DP_EXT, FPU_SP_EXT features
 	# based on arch_name.
 	AC_MSG_CHECKING(for default configuration of --with-arch)
@@ -512,6 +521,26 @@ changequote([,])dnl
 		    [Define default value for nds32_audio_ext])
 	fi
 	AC_MSG_RESULT($enable_audio_ext)
+
+	AC_MSG_CHECKING(for default configuration of --enable-dsp-ext)
+	if test "x${enable_dsp_ext}" = xno; then
+	  AC_DEFINE(NDS32_DEFAULT_DSP_EXT, 0,
+		    [Define value for nds32_dsp_ext])
+	else
+	  AC_DEFINE(NDS32_DEFAULT_DSP_EXT, 1,
+		    [Define default value for nds32_dsp_ext])
+	fi
+	AC_MSG_RESULT($enable_dsp_ext)
+
+	AC_MSG_CHECKING(for default configuration of --enable-zol-ext)
+	if test "x${enable_zol_ext}" = xno; then
+	  AC_DEFINE(NDS32_DEFAULT_ZOL_EXT, 0,
+		    [Define value for nds32_zol_ext])
+	else
+	  AC_DEFINE(NDS32_DEFAULT_ZOL_EXT, 1,
+		    [Define default value for nds32_zol_ext])
+	fi
+	AC_MSG_RESULT($enable_zol_ext)
 	;;
 
       aarch64 | i386 | riscv | s390 | sparc)

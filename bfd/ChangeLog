@@ -1,3 +1,92 @@
+2018-09-20  Nelson Chu <nelson.chu1990@gmail.com>
+
+	* elf32-nds32.c (nds32_elf_relax_loadstore):
+	Remove the unused target features.
+	(bfd_elf32_nds32_set_target_option): Remove the unused parameters.
+	(nds32_elf_relax_piclo12, nds32_elf_relax_letlslo12,
+	nds32_elf_relax_letlsadd, nds32_elf_relax_letlsls,
+	nds32_elf_relax_pltgot_suff, nds32_elf_relax_got_suff
+	nds32_elf_relax_gotoff_suff, calculate_plt_memory_address,
+	calculate_plt_offset, calculate_got_memory_address,
+	nds32_elf_check_dup_relocs): Removed.
+	All callers changed.
+	* elf32-nds32.h: Remove the unused macros and defines.
+	(elf_nds32_link_hash_table): Remove the unused variable.
+	(bfd_elf32_nds32_set_target_option): Update prototype.
+	(nds32_elf_ex9_init): Removed.
+	* elf32-nds32.c (nds32_convert_32_to_16): Updated.
+	* elf32-nds32.c (HOWTO2, HOWTO3): Define new HOWTO macros
+	to initialize array nds32_elf_howto_table in any order
+	without lots of EMPTY_HOWTO.
+	(nds32_reloc_map): Updated.
+	* reloc.c: Add BFD_RELOC_NDS32_LSI.
+	* bfd-in2.h: Regenerated.
+	* bfd/libbfd.h: Regenerated.
+	* elf32-nds32.c (nds32_elf_relax_howto_table): Add R_NDS32_LSI.
+	(nds32_reloc_map): Likewise.
+	(nds32_elf_relax_flsi): New function.
+	(nds32_elf_relax_section): Support floating load/store relaxation.
+	* elf32-nds32.c (NDS32_GUARD_SEC_P, elf32_nds32_local_gp_offset):
+	New macro.
+	(struct elf_nds32_link_hash_entry): New `offset_to_gp' field.
+	(struct elf_nds32_obj_tdata): New `offset_to_gp' and `hdr_size' fields.
+	(elf32_nds32_allocate_local_sym_info, nds32_elf_relax_guard,
+	nds32_elf_is_target_special_symbol, nds32_elf_maybe_function_sym):
+	New functions.
+	(nds32_info_to_howto_rel): Add BFD_ASSERT.
+	(bfd_elf32_bfd_reloc_type_table_lookup, nds32_elf_link_hash_newfunc,
+	nds32_elf_link_hash_table_create, nds32_elf_relocate_section,
+	nds32_elf_relax_loadstore, nds32_elf_relax_lo12, nds32_relax_adjust_label,
+	bfd_elf32_nds32_set_target_option, nds32_fag_mark_relax): Updated.
+	(nds32_elf_final_sda_base): Improve it to find the better gp value.
+	(insert_nds32_elf_blank): Must consider `len' when inserting blanks.
+	* elf32-nds32.h (bfd_elf32_nds32_set_target_option): Update prototype.
+	(struct elf_nds32_link_hash_table): Add new variable `hyper_relax'.
+	* elf32-nds32.c (elf32_nds32_allocate_dynrelocs): New function.
+	(create_got_section): Likewise.
+	(allocate_dynrelocs, nds32_elf_size_dynamic_sections,
+	nds32_elf_relocate_section, nds32_elf_finish_dynamic_symbol): Updated.
+	(nds32_elf_check_relocs): Fix the issue that the shared library may
+	has TEXTREL entry in the dynamic section.
+	(nds32_elf_create_dynamic_sections): Enable to call readonly_dynrelocs
+	since the TEXTREL issue is fixed in the nds32_elf_check_relocs.
+	(nds32_elf_finish_dynamic_sections): Update and add DT_RELASZ
+	dynamic entry.
+	(calculate_offset): Remove the unused parameter `pic_ext_target' and
+	related codes.
+	All callers changed.
+	(elf_backend_dtrel_excludes_plt): Disable it temporarily since it
+	will cause some errors for our test cases.
+	* elf32-nds32.c (nds32_elf_merge_private_bfd_data): Allow to link the
+	generic object.
+	* reloc.c: Add TLS relocations.
+	* libbfd.h: Regenerated.
+	* bfd-in2.h: Regenerated.
+	* elf32-nds32.h (struct section_id_list_t): New.
+	(elf32_nds32_lookup_section_id, elf32_nds32_check_relax_group,
+	elf32_nds32_unify_relax_group, nds32_elf_unify_tls_model):
+	New prototypes.
+	(elf32_nds32_compute_jump_table_size, elf32_nds32_local_tlsdesc_gotent):
+	New macro.
+	(nds32_insertion_sort, bfd_elf32_nds32_set_target_option,
+	elf_nds32_link_hash_table): Updated.
+	* elf32-nds32.c (enum elf_nds32_tls_type): New.
+	(struct elf32_nds32_relax_group_t, struct relax_group_list_t): New.
+	(elf32_nds32_add_dynreloc, patch_tls_desc_to_ie, get_tls_type,
+	fls, ones32, list_insert, list_insert_sibling, dump_chain,
+	elf32_nds32_check_relax_group, elf32_nds32_lookup_section_id,
+	elf32_nds32_unify_relax_group, nds32_elf_unify_tls_model): New functions.
+	(elf_nds32_obj_tdata): Add new fields.
+	(elf32_nds32_relax_group_ptr, nds32_elf_local_tlsdesc_gotent): New macros.
+	(nds32_elf_howto_table): Add TLS relocations.
+	(nds32_reloc_map): Likewise.
+	(nds32_elf_copy_indirect_symbol, nds32_elf_size_dynamic_sections,
+	nds32_elf_finish_dynamic_symbol, elf32_nds32_allocate_local_sym_info,
+	nds32_elf_relocate_section, bfd_elf32_nds32_set_target_option,
+	nds32_elf_check_relocs, allocate_dynrelocs): Updated.
+	(nds32_elf_relax_section): Call nds32_elf_unify_tls_model.
+	(dtpoff_base): Rename it to `gottpof' and then update it.
+
 2018-09-20  Alan Modra  <amodra@gmail.com>
 
 	PR 23685

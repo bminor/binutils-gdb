@@ -26,7 +26,7 @@
 #...
   \[[ 0-9]+\] \.mbind\.text[ 	]+PROGBITS[ 	]+0+0 0+[0-9a-f]+ 0+1 00 AXGD  0   3  1
 #...
-COMDAT group section \[    1\] `\.group' \[\.foo_group\] contains 4 sections:
+COMDAT group section \[    1\] `\.group' \[\.foo_group\] contains . sections:
 [ 	]+\[Index\][ 	]+Name
 [ 	]+\[[ 0-9]+][ 	]+\.mbind\.rodata
 [ 	]+\[[ 0-9]+][ 	]+\.mbind\.data

@@ -12841,6 +12841,17 @@ _ACEOF
 	;;
 
       nds32)
+	# setup NDS32_LINUX_TOOLCHAIN definition
+	if test "linux" = $em; then
+
+$as_echo "#define NDS32_LINUX_TOOLCHAIN 1" >>confdefs.h
+
+	else
+
+$as_echo "#define NDS32_LINUX_TOOLCHAIN 0" >>confdefs.h
+
+	fi
+
 	# Decide BASELINE, REDUCED_REGS, FPU_DP_EXT, FPU_SP_EXT features
 	# based on arch_name.
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --with-arch" >&5
@@ -12932,6 +12943,34 @@ $as_echo "#define NDS32_DEFAULT_AUDIO_EXT 1" >>confdefs.h
 	fi
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_audio_ext" >&5
 $as_echo "$enable_audio_ext" >&6; }
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --enable-dsp-ext" >&5
+$as_echo_n "checking for default configuration of --enable-dsp-ext... " >&6; }
+	if test "x${enable_dsp_ext}" = xno; then
+
+$as_echo "#define NDS32_DEFAULT_DSP_EXT 0" >>confdefs.h
+
+	else
+
+$as_echo "#define NDS32_DEFAULT_DSP_EXT 1" >>confdefs.h
+
+	fi
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_dsp_ext" >&5
+$as_echo "$enable_dsp_ext" >&6; }
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --enable-zol-ext" >&5
+$as_echo_n "checking for default configuration of --enable-zol-ext... " >&6; }
+	if test "x${enable_zol_ext}" = xno; then
+
+$as_echo "#define NDS32_DEFAULT_ZOL_EXT 0" >>confdefs.h
+
+	else
+
+$as_echo "#define NDS32_DEFAULT_ZOL_EXT 1" >>confdefs.h
+
+	fi
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_zol_ext" >&5
+$as_echo "$enable_zol_ext" >&6; }
 	;;
 
       aarch64 | i386 | riscv | s390 | sparc)
