@@ -1,5 +1,10 @@
 2018-09-20  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* config/tc-ppc.c (ppc_dwsect): Use `valueT' rather than
+	`offsetT' as the type of `flag'.
+
+2018-09-20  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* config/tc-arc.c (md_number_to_chars_midend): Append `ull' to
 	large constants.
 

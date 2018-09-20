@@ -4077,7 +4077,7 @@ ppc_change_debug_section (unsigned int idx, subsegT subseg)
 static void
 ppc_dwsect (int ignore ATTRIBUTE_UNUSED)
 {
-  offsetT flag;
+  valueT flag;
   symbolS *opt_label;
   const struct xcoff_dwsect_name *dw;
   struct dw_subsection *subseg;
