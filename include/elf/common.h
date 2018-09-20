@@ -1236,9 +1236,9 @@
 #define AT_SUN_LDNAME   2006    /* String giving name of dynamic linker.  */
 #define AT_SUN_LPAGESZ  2007    /* Large pagesize.   */
 #define AT_SUN_PLATFORM 2008    /* Platform name string.  */
-#undef AT_SUN_HWCAP
-#define AT_SUN_HWCAP    2009	/* Machine dependent hints about
+#define AT_SUN_CAP_HW1	2009	/* Machine dependent hints about
 				   processor capabilities.  */
+#define AT_SUN_HWCAP	AT_SUN_CAP_HW1 /* For backward compat only.  */
 #define AT_SUN_IFLUSH   2010    /* Should flush icache? */
 #define AT_SUN_CPU      2011    /* CPU name string.  */
 #define AT_SUN_EMUL_ENTRY 2012	/* COFF entry point address.  */
@@ -1247,6 +1247,12 @@
 #define AT_SUN_MMU      2015    /* String for name of MMU module.   */
 #define AT_SUN_LDDATA   2016    /* Dynamic linker's data segment address.  */
 #define AT_SUN_AUXFLAGS	2017	/* AF_SUN_ flags passed from the kernel.  */
-
+#define	AT_SUN_EMULATOR	2018	/* Name of emulation binary for runtime
+				   linker.  */
+#define	AT_SUN_BRANDNAME 2019	/* Name of brand library.  */
+#define	AT_SUN_BRAND_AUX1 2020	/* Aux vectors for brand modules.  */
+#define	AT_SUN_BRAND_AUX2 2021
+#define	AT_SUN_BRAND_AUX3 2022
+#define	AT_SUN_CAP_HW2	2023	/* Extension of AT_SUN_CAP_HW1.  */
 
 #endif /* _ELF_COMMON_H */

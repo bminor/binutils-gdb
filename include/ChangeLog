@@ -1,3 +1,11 @@
+2018-09-20  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* elf/common.h (AT_SUN_HWCAP): Rename to ...
+	(AT_SUN_CAP_HW1): ... this.  Retain old name for backward
+	compatibility.
+	(AT_SUN_EMULATOR, AT_SUN_BRANDNAME, AT_SUN_BRAND_AUX1)
+	(AT_SUN_BRAND_AUX2, AT_SUN_BRAND_AUX3, AT_SUN_CAP_HW2): Define.
+
 2018-09-05  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* diagnostics.h (DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL): New macro.

@@ -493,7 +493,7 @@ default_print_auxv_entry (struct gdbarch *gdbarch, struct ui_file *file,
 	   AUXV_FORMAT_STR);
       TAG (AT_SUN_LPAGESZ, _("Large pagesize"), AUXV_FORMAT_DEC);
       TAG (AT_SUN_PLATFORM, _("Platform name string"), AUXV_FORMAT_STR);
-      TAG (AT_SUN_HWCAP, _("Machine-dependent CPU capability hints"),
+      TAG (AT_SUN_CAP_HW1, _("Machine-dependent CPU capability hints"),
 	   AUXV_FORMAT_HEX);
       TAG (AT_SUN_IFLUSH, _("Should flush icache?"), AUXV_FORMAT_DEC);
       TAG (AT_SUN_CPU, _("CPU name string"), AUXV_FORMAT_STR);
@@ -507,6 +507,17 @@ default_print_auxv_entry (struct gdbarch *gdbarch, struct ui_file *file,
 	   AUXV_FORMAT_HEX);
       TAG (AT_SUN_AUXFLAGS,
 	   _("AF_SUN_ flags passed from the kernel"), AUXV_FORMAT_HEX);
+      TAG (AT_SUN_EMULATOR, _("Name of emulation binary for runtime linker"),
+	   AUXV_FORMAT_STR);
+      TAG (AT_SUN_BRANDNAME, _("Name of brand library"), AUXV_FORMAT_STR);
+      TAG (AT_SUN_BRAND_AUX1, _("Aux vector for brand modules 1"),
+	   AUXV_FORMAT_HEX);
+      TAG (AT_SUN_BRAND_AUX2, _("Aux vector for brand modules 2"),
+	   AUXV_FORMAT_HEX);
+      TAG (AT_SUN_BRAND_AUX3, _("Aux vector for brand modules 3"),
+	   AUXV_FORMAT_HEX);
+      TAG (AT_SUN_CAP_HW2, _("Machine-dependent CPU capability hints 2"),
+	   AUXV_FORMAT_HEX);
     }
 
   fprint_auxv_entry (file, name, description, format, type, val);

@@ -1,5 +1,12 @@
 2018-09-20  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
+	* auxv.c (default_print_auxv_entry): Reflect AT_SUN_CAP_HW1
+	renaming.
+	Handle AT_SUN_EMULATOR, AT_SUN_BRANDNAME, AT_SUN_BRAND_AUX1,
+	AT_SUN_BRAND_AUX2, AT_SUN_BRAND_AUX3, AT_SUN_CAP_HW2.
+
+2018-09-20  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
 	* i386-v4-nat.c (regmap, supply_gregset, fill_gregset)
 	(supply_fpregset, fill_fpregset): Move ...
 	* i386-sol2-nat.c [PR_MODEL_NATIVE != PR_MODEL_LP64]: ... here.
