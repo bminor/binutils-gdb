@@ -1,3 +1,7 @@
+2018-09-20  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* arc-nps400-tbl.h: Append `ull' to large constants throughout.
+
 2018-09-20  Nelson Chu <nelson.chu1990@gmail.com>
 
 	* nds32-asm.c (operand_fields): Remove the unused fields.

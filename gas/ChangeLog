@@ -1,3 +1,8 @@
+2018-09-20  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* config/tc-arc.c (md_number_to_chars_midend): Append `ull' to
+	large constants.
+
 2018-09-20  Nelson Chu <nelson.chu1990@gmail.com>
 
 	* config/tc-nds32.c: Remove the unused target features.
