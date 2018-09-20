@@ -12,8 +12,8 @@ Hex dump of section '\.rodata':
 Contents of the \.debug_line section:
 
 CU: dwarf2-15\.c:
-File name  *Line number  *Starting address  *View
-dwarf2-15\.c  *1  *0
-dwarf2-15\.c  *2  *0x4
-dwarf2-15\.c  *3  *0x4  *1
-dwarf2-15\.c  *3  *0x8
+File name  *Line number  *Starting address  *View +Stmt
+dwarf2-15\.c  *1  *0 +x
+dwarf2-15\.c  *2  *0x4 +x
+dwarf2-15\.c  *3  *0x4  *1 +x
+dwarf2-15\.c  *3  *0x8 +x

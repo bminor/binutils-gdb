@@ -1,3 +1,19 @@
+2018-09-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/23695
+	* testsuite/gas/elf/dwarf2-11.d: Update expected outputs of
+	"readelf -wL".
+	* testsuite/gas/elf/dwarf2-12.d: Likewise.
+	* testsuite/gas/elf/dwarf2-13.d: Likewise.
+	* testsuite/gas/elf/dwarf2-14.d: Likewise.
+	* testsuite/gas/elf/dwarf2-15.d: Likewise.
+	* testsuite/gas/elf/dwarf2-16.d: Likewise.
+	* testsuite/gas/elf/dwarf2-17.d: Likewise.
+	* testsuite/gas/elf/dwarf2-18.d: Likewise.
+	* testsuite/gas/elf/dwarf2-5.d: Likewise.
+	* testsuite/gas/elf/dwarf2-6.d: Likewise.
+	* testsuite/gas/elf/dwarf2-7.d: Likewise.
+
 2018-09-20  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* config/tc-s12z.c (lex_opr): Use an auxiliary unsigned variable
