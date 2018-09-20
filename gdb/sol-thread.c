@@ -705,9 +705,11 @@ sol_thread_target::thread_alive (ptid_t ptid)
       int pid;
 
       pid = ptid.tid ();
-      if ((val = p_td_ta_map_id2thr (main_ta, pid, &th)) != TD_OK)
+      val = p_td_ta_map_id2thr (main_ta, pid, &th);
+      if (val != TD_OK)
 	return false;		/* Thread not found.  */
-      if ((val = p_td_thr_validate (&th)) != TD_OK)
+      val = p_td_thr_validate (&th);
+      if (val != TD_OK)
 	return false;		/* Thread not valid.  */
       return true;		/* Known thread.  */
     }
@@ -943,7 +945,6 @@ ps_lsetfpregs (struct ps_prochandle *ph, lwpid_t lwpid,
   return PS_OK;
 }
 
-#ifdef PR_MODEL_LP64
 /* Identify process as 32-bit or 64-bit.  At the moment we're using
    BFD to do this.  There might be a more Solaris-specific
    (e.g. procfs) method, but this ought to work.  */
@@ -960,7 +961,6 @@ ps_pdmodel (struct ps_prochandle *ph, int *data_model)
 
   return PS_OK;
 }
-#endif /* PR_MODEL_LP64 */
 
 #if (defined(__i386__) || defined(__x86_64__)) && defined (sun)
 
@@ -970,8 +970,7 @@ ps_pdmodel (struct ps_prochandle *ph, int *data_model)
    of libthread_db would fail because of ps_lgetLDT being undefined.  */
 
 ps_err_e
-ps_lgetLDT (struct ps_prochandle *ph, lwpid_t lwpid,
-	    struct ssd *pldt)
+ps_lgetLDT (struct ps_prochandle *ph, lwpid_t lwpid, struct ssd *pldt)	/* ARI: editCase function */
 {
   /* NOTE: only used on Solaris, therefore OK to refer to procfs.c.  */
   struct ssd *ret;

@@ -1,5 +1,56 @@
 2018-09-20  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
+	* proc-utils.h (PROC_CTL_WORD_TYPE): Remove.
+
+	* procfs.c: Don't check for PR_MODEL_NATIVE definition.
+	* sparc-sol2-nat.c: Likewise.  Remove Linux, __arch64__ references.
+	* sol-thread.c (ps_pdmodel): Don't guard definition.
+
+	* procfs.c: Fix formatting.
+
+	* procfs.c (sysset_t_alloc): Remove.
+	(create_procinfo): Use XNEW instead of sysset_t_alloc.
+	(procfs_debug_inferior): Likewise.
+	(procfs_set_exec_trap): Likewise.
+	(proc_set_traced_sysentry): Don't allocate argp dynamically.
+	(proc_set_traced_sysexit): Likewise.
+
+	* procfs.c (create_procinfo): Use xsnprintf to fix ARI warning.
+	(dead_procinfo): Likewise.
+	(proc_warn): Likewise.
+	(proc_error): Likewise.
+	(proc_get_LDT_entry): Likewise.
+	(do_attach): Likewise.
+	(procfs_target::pid_to_str): Likewise.
+	(iterate_over_mappings): Likewise.
+
+	* procfs.c (create_procinfo): Fix ARI warning.
+	(proc_get_status): Likewise.
+	(proc_stop_process): Likewise.
+	(proc_run_process): Likewise.
+	(proc_kill): Likewise.
+	(proc_get_LDT_entry): Likewise.
+	(procfs_find_LDT_entry): Likewise.
+	(proc_update_threads): Likewise.
+	(proc_iterate_over_threads): Likewise.
+	(do_attach): Likewise.
+	(procfs_xfer_memory): Likewise.
+	(invalidate_cache): Likewise.
+	(procfs_target::resume): Likewise.
+	(procfs_init_inferior): Likewise.
+	(procfs_set_exec_trap): Likewise.
+	(procfs_target::thread_alive): Likewise.
+	(procfs_target::pid_to_exec_file): Likewise.
+	(iterate_over_mappings): Likewise.
+	(procfs_target::make_corefile_notes): Likewise.
+	* sol-thread.c (sol_thread_target::thread_alive): Likewise.
+
+	* procfs.c (procfs_find_LDT_entry): Silence ARI warning.
+	(procfs_find_LDT_entry): Likewise.
+	* sol-thread.c (ps_lgetLDT): Likewise.
+
+2018-09-20  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
 	PR tdep/17903
 	* procfs.c (procfs_target): Declare pid_to_exec_file.
 	(procfs_target::pid_to_exec_file): New.
