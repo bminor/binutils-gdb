@@ -1,6 +1,6 @@
 2018-09-21  H.J. Lu  <hongjiu.lu@intel.com>
 
-	PR gas/23692
+	PR gas/23691
 	* Makefile.am (bfin-parse.c): Depend on $(srcdir)/../bfd/reloc.c.
 	(rl78-parse.c): Likewise.
 	(rx-parse.c): Likewise.
