@@ -5083,11 +5083,13 @@ ones32 (register unsigned int x)
   return (x & 0x0000003f);
 }
 
+#if !HAVE_FLS
 static unsigned int
 fls (register unsigned int x)
 {
   return ffs (x & (-x));
 }
+#endif /* !HAVE_FLS */
 
 #define nds32_elf_local_tlsdesc_gotent(bfd) \
   (elf_nds32_tdata (bfd)->local_tlsdesc_gotent)

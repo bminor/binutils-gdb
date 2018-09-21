@@ -1,3 +1,10 @@
+2018-09-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* configure.ac: Check for fls.
+	* elf32-nds32.c (fls): Only define if !HAVE_FLS.
+	* config.in: Re-generate.
+	* configure: Re-generate.
+
 2018-09-20  Maciej W. Rozycki  <macro@linux-mips.org>
 
     	* config.bfd <rs6000-*-aix5.[01], rs6000-*-aix[5-9]*>: Remove

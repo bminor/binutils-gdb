@@ -229,7 +229,7 @@ AC_HEADER_TIME
 AC_HEADER_DIRENT
 
 ACX_HEADER_STRING
-AC_CHECK_FUNCS(fcntl getpagesize setitimer sysconf fdopen getuid getgid fileno)
+AC_CHECK_FUNCS(fcntl getpagesize setitimer sysconf fdopen getuid getgid fileno fls)
 AC_CHECK_FUNCS(strtoull getrlimit)
 
 AC_CHECK_DECLS(basename)
