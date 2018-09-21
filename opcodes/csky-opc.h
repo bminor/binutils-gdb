@@ -2327,7 +2327,7 @@ const struct csky_opcode csky_v1_opcodes[] =
 				(NONE, FEREG, OPRND_SHIFT_0_BIT)),
 		  CSKY_ISA_FLOAT_E1,
 		  v1_work_fpu_readd),
-  {NULL}
+  {NULL, 0, {}, {}, 0, 0, 0, 0, 0, NULL}
 };
 
 #undef _TRANSFER
@@ -8123,5 +8123,5 @@ const struct csky_opcode csky_v2_opcodes[] =
 	   OPCODE_INFO1 (0xc4007c40,
 			 (0_4or16_20, DUP_AREG, OPRND_SHIFT_0_BIT)),
 	   CSKYV2_ISA_1E2),
-    {NULL}
+    {NULL, 0, {}, {}, 0, 0, 0, 0, 0, NULL}
   };

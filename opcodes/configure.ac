@@ -51,8 +51,6 @@ AC_ARG_ENABLE(targets,
 esac])dnl
 
 AM_BINUTILS_WARNINGS
-ACX_PROG_CC_WARNING_OPTS([-Wno-missing-field-initializers],
-			 [NO_WMISSING_FIELD_INITIALIZERS])
 
 AC_CONFIG_HEADERS(config.h:config.in)
 

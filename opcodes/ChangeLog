@@ -1,3 +1,13 @@
+2018-09-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* Makefile.am: Remove NO_WMISSING_FIELD_INITIALIZERS.
+	* Makefile.in: Re-generate.
+	* aclocal.m4: Re-generate.
+	* configure: Re-generate.
+	* configure.ac: Remove check for -Wno-missing-field-initializers.
+	* csky-opc.h (csky_v1_opcodes): Initialize all fields of last element.
+	(csky_v2_opcodes): Likewise.
+
 2018-09-20  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* arc-nps400-tbl.h: Append `ull' to large constants throughout.
