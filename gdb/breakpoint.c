@@ -2898,7 +2898,7 @@ update_inserted_breakpoint_locations (void)
       /* We only want to update locations that are already inserted
 	 and need updating.  This is to avoid unwanted insertion during
 	 deletion of breakpoints.  */
-      if (!bl->inserted || (bl->inserted && !bl->needs_update))
+      if (!bl->inserted || !bl->needs_update)
 	continue;
 
       switch_to_program_space_and_thread (bl->pspace);

@@ -1,3 +1,8 @@
+2018-09-21  Yacov Simhony  <ysimhony@gmail.com>
+
+	* breakpoint.c (update_inserted_breakpoint_locations): Remove
+	redundant condition.
+
 2018-09-20  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* proc-utils.h (PROC_CTL_WORD_TYPE): Remove.
