@@ -1,3 +1,9 @@
+2018-09-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/23694
+	* include/elf/internal.h (ELF_SECTION_IN_SEGMENT_1): Don't
+	include zero size sections at start of PT_NOTE segment.
+
 2018-09-20  Nelson Chu <nelson.chu1990@gmail.com>
 
 	* elf/nds32.h: Remove the unused target features.
