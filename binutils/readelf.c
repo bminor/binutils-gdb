@@ -13032,7 +13032,6 @@ apply_relocations (Filedata *                 filedata,
 {
   Elf_Internal_Shdr * relsec;
   unsigned char * end = start + size;
-  bfd_boolean res = TRUE;
 
   if (relocs_return != NULL)
     {
@@ -13161,7 +13160,6 @@ apply_relocations (Filedata *                 filedata,
 		warn (_("unable to apply unsupported reloc type %d to section %s\n"),
 		      reloc_type, printable_section_name (filedata, section));
 	      prev_reloc = reloc_type;
-	      res = FALSE;
 	      continue;
 	    }
 
@@ -13171,7 +13169,6 @@ apply_relocations (Filedata *                 filedata,
 	      warn (_("skipping invalid relocation offset 0x%lx in section %s\n"),
 		    (unsigned long) rp->r_offset,
 		    printable_section_name (filedata, section));
-	      res = FALSE;
 	      continue;
 	    }
 
@@ -13180,7 +13177,6 @@ apply_relocations (Filedata *                 filedata,
 	    {
 	      warn (_("skipping invalid relocation symbol index 0x%lx in section %s\n"),
 		    sym_index, printable_section_name (filedata, section));
-	      res = FALSE;
 	      continue;
 	    }
 	  sym = symtab + sym_index;
@@ -13206,7 +13202,6 @@ apply_relocations (Filedata *                 filedata,
 		    get_symbol_type (filedata, ELF_ST_TYPE (sym->st_info)),
 		    printable_section_name (filedata, relsec),
 		    (long int)(rp - relocs));
-	      res = FALSE;
 	      continue;
 	    }
 
@@ -13273,7 +13268,7 @@ apply_relocations (Filedata *                 filedata,
       break;
     }
 
-  return res;
+  return TRUE;
 }
 
 #ifdef SUPPORT_DISASSEMBLY
