@@ -1,3 +1,11 @@
+2018-09-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/23692
+	* Makefile.am (bfin-parse.c): Depend on $(srcdir)/../bfd/reloc.c.
+	(rl78-parse.c): Likewise.
+	(rx-parse.c): Likewise.
+	* Makefile.in: Regenerated.
+
 2018-09-21  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/avr/large-debug-line-table.d: Update.

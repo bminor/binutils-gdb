@@ -481,7 +481,7 @@ m68k-parse.h: ; @true
 $(srcdir)/config/m68k-parse.h: ; @true
 
 EXTRA_as_new_SOURCES += config/bfin-parse.y
-bfin-parse.c: $(srcdir)/config/bfin-parse.y
+bfin-parse.c: $(srcdir)/config/bfin-parse.y $(srcdir)/../bfd/reloc.c
 	$(SHELL) $(YLWRAP) $(srcdir)/config/bfin-parse.y y.tab.c bfin-parse.c y.tab.h bfin-parse.h -- $(YACCCOMPILE) -d ;
 bfin-parse.h: bfin-parse.c
 bfin-parse.h: ; @true
@@ -502,14 +502,14 @@ endif
 endif
 
 EXTRA_as_new_SOURCES += config/rl78-parse.y
-rl78-parse.c: $(srcdir)/config/rl78-parse.y
+rl78-parse.c: $(srcdir)/config/rl78-parse.y $(srcdir)/../bfd/reloc.c
 	$(SHELL) $(YLWRAP) $(srcdir)/config/rl78-parse.y y.tab.c rl78-parse.c y.tab.h rl78-parse.h -- $(YACCCOMPILE) -d ;
 rl78-parse.h: rl78-parse.c
 rl78-defs.h: ; @true
 $(srcdir)/config/rl78-defs.h: ; @true
 
 EXTRA_as_new_SOURCES += config/rx-parse.y
-rx-parse.c: $(srcdir)/config/rx-parse.y
+rx-parse.c: $(srcdir)/config/rx-parse.y $(srcdir)/../bfd/reloc.c
 	$(SHELL) $(YLWRAP) $(srcdir)/config/rx-parse.y y.tab.c rx-parse.c y.tab.h rx-parse.h -- $(YACCCOMPILE) -d ;
 rx-parse.h: rx-parse.c
 rx-defs.h: ; @true
