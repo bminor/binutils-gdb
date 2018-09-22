@@ -56,6 +56,7 @@ parse_connection_spec_without_prefix (std::string spec, struct addrinfo *hint)
 		      && (spec[0] == '['
 			  || std::count (spec.begin (),
 					 spec.end (), ':') > 1)));
+  bool is_unix = hint->ai_family == AF_UNIX;
 
   if (is_ipv6)
     {
@@ -109,6 +110,12 @@ parse_connection_spec_without_prefix (std::string spec, struct addrinfo *hint)
   if (ret.host_str.empty ())
     ret.host_str = "localhost";
 
+  if (is_unix && ret.host_str != "localhost")
+    error (_("The host name must be empty or 'localhost' for a unix domain socket."));
+
+  if (is_unix && ret.port_str.empty ())
+    error (_("A path name must be specified for a unix domain socket."));
+
   return ret;
 }
 
@@ -138,6 +145,7 @@ parse_connection_spec (const char *spec, struct addrinfo *hint)
       { "tcp4:", AF_INET,   SOCK_STREAM },
       { "udp6:", AF_INET6,  SOCK_DGRAM },
       { "tcp6:", AF_INET6,  SOCK_STREAM },
+      { "unix:", AF_LOCAL,  SOCK_STREAM },
     };
 
   for (const host_prefix prefix : prefixes)
