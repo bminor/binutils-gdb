@@ -1,3 +1,8 @@
+2018-09-23  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* aarch64-linux-tdep.c (aarch64_linux_supply_sve_regset): Change type
+	of vl to ULONGEST.
+
 2018-09-21  Yacov Simhony  <ysimhony@gmail.com>
 
 	* breakpoint.c (update_inserted_breakpoint_locations): Remove
