@@ -1,3 +1,9 @@
+2018-09-23  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-dis.c (nios2_print_insn_arg): Make sure signed conversions
+	are used when extracting signed fields and converting them to
+	potentially 64-bit types.
+
 2018-09-21  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* Makefile.am: Remove NO_WMISSING_FIELD_INITIALIZERS.

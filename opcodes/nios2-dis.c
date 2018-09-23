@@ -275,6 +275,8 @@ nios2_print_insn_arg (const char *argptr,
 		      const struct nios2_opcode *op)
 {
   unsigned long i = 0;
+  long s = 0;
+  bfd_signed_vma o = 0;
   struct nios2_reg *reg_base;
 
   switch (*argptr)
@@ -552,15 +554,15 @@ nios2_print_insn_arg (const char *argptr,
       switch (op->format)
 	{
 	case iw_i_type:
-	  i = (signed) (GET_IW_I_IMM16 (opcode) << 16) >> 16;
+	  s = (int32_t) (GET_IW_I_IMM16 (opcode) << 16) >> 16;
 	  break;
 	case iw_F2I16_type:
-	  i = (signed) (GET_IW_F2I16_IMM16 (opcode) << 16) >> 16;
+	  s = (int32_t) (GET_IW_F2I16_IMM16 (opcode) << 16) >> 16;
 	  break;
 	default:
 	  bad_opcode (op);
 	}
-      (*info->fprintf_func) (info->stream, "%ld", i);
+      (*info->fprintf_func) (info->stream, "%ld", s);
       break;
 
     case 'I':
@@ -568,15 +570,15 @@ nios2_print_insn_arg (const char *argptr,
       switch (op->format)
 	{
 	case iw_F2X4I12_type:
-	  i = (signed) (GET_IW_F2X4I12_IMM12 (opcode) << 20) >> 20;
+	  s = (int32_t) (GET_IW_F2X4I12_IMM12 (opcode) << 20) >> 20;
 	  break;
 	case iw_F1X4I12_type:
-	  i = (signed) (GET_IW_F1X4I12_IMM12 (opcode) << 20) >> 20;
+	  s = (int32_t) (GET_IW_F1X4I12_IMM12 (opcode) << 20) >> 20;
 	  break;
 	default:
 	  bad_opcode (op);
 	}
-      (*info->fprintf_func) (info->stream, "%ld", i);
+      (*info->fprintf_func) (info->stream, "%ld", s);
       break;
 
     case 'u':
@@ -671,15 +673,15 @@ nios2_print_insn_arg (const char *argptr,
       switch (op->format)
 	{
 	case iw_i_type:
-	  i = (signed) (GET_IW_I_IMM16 (opcode) << 16) >> 16;
+	  o = (int32_t) (GET_IW_I_IMM16 (opcode) << 16) >> 16;
 	  break;
 	case iw_F2I16_type:
-	  i = (signed) (GET_IW_F2I16_IMM16 (opcode) << 16) >> 16;
+	  o = (int32_t) (GET_IW_F2I16_IMM16 (opcode) << 16) >> 16;
 	  break;
 	default:
 	  bad_opcode (op);
 	}
-      address = address + 4 + i;
+      address = address + 4 + o;
       (*info->print_address_func) (address, info);
       break;
 
@@ -688,12 +690,12 @@ nios2_print_insn_arg (const char *argptr,
       switch (op->format)
 	{
 	case iw_I10_type:
-	  i = (signed) (GET_IW_I10_IMM10 (opcode) << 22) >> 21;
+	  o = (int32_t) (GET_IW_I10_IMM10 (opcode) << 22) >> 21;
 	  break;
 	default:
 	  bad_opcode (op);
 	}
-      address = address + 2 + i;
+      address = address + 2 + o;
       (*info->print_address_func) (address, info);
       break;
 
@@ -702,12 +704,12 @@ nios2_print_insn_arg (const char *argptr,
       switch (op->format)
 	{
 	case iw_T1I7_type:
-	  i = (signed) (GET_IW_T1I7_IMM7 (opcode) << 25) >> 24;
+	  o = (int32_t) (GET_IW_T1I7_IMM7 (opcode) << 25) >> 24;
 	  break;
 	default:
 	  bad_opcode (op);
 	}
-      address = address + 2 + i;
+      address = address + 2 + o;
       (*info->print_address_func) (address, info);
       break;
 
