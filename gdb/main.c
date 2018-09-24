@@ -208,7 +208,7 @@ get_init_files (const char **system_gdbinit,
   if (!initialized)
     {
       struct stat homebuf, cwdbuf, s;
-      char *homedir;
+      const char *homedir;
 
       if (SYSTEM_GDBINIT[0])
 	{

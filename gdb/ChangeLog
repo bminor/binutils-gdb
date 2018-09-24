@@ -1,3 +1,10 @@
+2018-09-24  Tom Tromey  <tom@tromey.com>
+
+	* common/pathstuff.c (get_standard_cache_dir): Make
+	"xdg_cache_home" and "home" const.
+	* top.c (init_history): Make "tmpenv" const.
+	* main.c (get_init_files): Make "homedir" const.
+
 2018-09-23  Tom Tromey  <tom@tromey.com>
 
 	PR python/18852:

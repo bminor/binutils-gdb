@@ -1846,7 +1846,7 @@ set_verbose (const char *args, int from_tty, struct cmd_list_element *c)
 void
 init_history (void)
 {
-  char *tmpenv;
+  const char *tmpenv;
 
   tmpenv = getenv ("GDBHISTSIZE");
   if (tmpenv)

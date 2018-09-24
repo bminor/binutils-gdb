@@ -171,7 +171,7 @@ get_standard_cache_dir ()
 #endif
 
 #ifndef __APPLE__
-  char *xdg_cache_home = getenv ("XDG_CACHE_HOME");
+  const char *xdg_cache_home = getenv ("XDG_CACHE_HOME");
   if (xdg_cache_home != NULL)
     {
       /* Make sure the path is absolute and tilde-expanded.  */
@@ -180,7 +180,7 @@ get_standard_cache_dir ()
     }
 #endif
 
-  char *home = getenv ("HOME");
+  const char *home = getenv ("HOME");
   if (home != NULL)
     {
       /* Make sure the path is absolute and tilde-expanded.  */
