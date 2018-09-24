@@ -1,3 +1,11 @@
+2018-09-24  Jim Wilson  <jimw@sifive.com>
+
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Run pcrel-lo-addend-2.
+	* testsuite/ld-riscv/elf/ld-riscv-elf/pcrel-lo-addend-2.d: New.
+	* testsuite/ld-riscv/elf/ld-riscv-elf/pcrel-lo-addend-2.s: New.
+	* testsuite/ld-riscv/elf/ld-riscv-elf/pcrel-lo-addend.d: Update name
+	and error string.
+
 2018-09-21  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-avr/gc-section-debugline.d: Update.

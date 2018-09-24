@@ -1651,11 +1651,16 @@ riscv_resolve_pcrel_lo_relocs (riscv_pcrel_relocs *p)
 
       riscv_pcrel_hi_reloc search = {r->addr, 0};
       riscv_pcrel_hi_reloc *entry = htab_find (p->hi_relocs, &search);
-      if (entry == NULL)
+      if (entry == NULL
+	  /* Check for overflow into bit 11 when adding reloc addend.  */
+	  || (! (entry->value & 0x800)
+	      && ((entry->value + r->reloc->r_addend) & 0x800)))
 	{
-	  ((*r->info->callbacks->reloc_overflow)
-	   (r->info, NULL, r->name, r->howto->name, (bfd_vma) 0,
-	    input_bfd, r->input_section, r->reloc->r_offset));
+	  char *string = (entry == NULL
+			  ? "%pcrel_lo missing matching %pcrel_hi"
+			  : "%pcrel_lo overflow with an addend");
+	  (*r->info->callbacks->reloc_dangerous)
+	    (r->info, string, input_bfd, r->input_section, r->reloc->r_offset);
 	  return TRUE;
 	}
 
@@ -2026,11 +2031,12 @@ riscv_elf_relocate_section (bfd *output_bfd,
 
 	case R_RISCV_PCREL_LO12_I:
 	case R_RISCV_PCREL_LO12_S:
-	  /* Addends are not allowed, because then riscv_relax_delete_bytes
-	     would have to search through all relocs to update the addends.
-	     Also, riscv_resolve_pcrel_lo_relocs does not support addends
-	     when searching for a matching hi reloc.  */
-	  if (rel->r_addend)
+	  /* We don't allow section symbols plus addends as the auipc address,
+	     because then riscv_relax_delete_bytes would have to search through
+	     all relocs to update these addends.  This is also ambiguous, as
+	     we do allow offsets to be added to the target address, which are
+	     not to be used to find the auipc address.  */
+	  if ((ELF_ST_TYPE (sym->st_info) == STT_SECTION) && rel->r_addend)
 	    {
 	      r = bfd_reloc_dangerous;
 	      break;
@@ -2288,8 +2294,8 @@ riscv_elf_relocate_section (bfd *output_bfd,
 
 	case bfd_reloc_dangerous:
 	  info->callbacks->reloc_dangerous
-	    (info, "%pcrel_lo with addend", input_bfd, input_section,
-	     rel->r_offset);
+	    (info, "%pcrel_lo section symbol with an addend", input_bfd,
+	     input_section, rel->r_offset);
 	  break;
 
 	default:
