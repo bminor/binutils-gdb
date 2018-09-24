@@ -1,5 +1,9 @@
 2018-09-24  Jim Wilson  <jimw@sifive.com>
 
+	* elfnn-riscv.c (_bfd_riscv_relax_pc) <R_RISCV_PCREL_LO12_I>: New local
+	hi_sec_off which is symbol address with addend subtracted.  Use in
+	riscv_find_pcgp_hi_reloc and riscv_record_pcgp_lo_reloc calls.
+
 	* elfnn-riscv.c (riscv_resolve_pcrel_lo_relocs): Add check for reloc
 	overflow with addend.  Use reloc_dangerous instead of reloc_overflow.
 	Add strings for the two errors handled here.

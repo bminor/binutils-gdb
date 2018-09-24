@@ -3226,11 +3226,16 @@ _bfd_riscv_relax_pc  (bfd *abfd,
     case R_RISCV_PCREL_LO12_I:
     case R_RISCV_PCREL_LO12_S:
       {
+	/* If the %lo has an addend, it isn't for the label pointing at the
+	   hi part instruction, but rather for the symbol pointed at by the
+	   hi part instruction.  So we must subtract it here for the lookup.
+	   It is still used below in the final symbol address.  */
+	bfd_vma hi_sec_off = symval - sec_addr (sym_sec) - rel->r_addend;
 	riscv_pcgp_hi_reloc *hi = riscv_find_pcgp_hi_reloc (pcgp_relocs,
-							    symval - sec_addr(sym_sec));
+							    hi_sec_off);
 	if (hi == NULL)
 	  {
-	    riscv_record_pcgp_lo_reloc (pcgp_relocs, symval - sec_addr(sym_sec));
+	    riscv_record_pcgp_lo_reloc (pcgp_relocs, hi_sec_off);
 	    return TRUE;
 	  }
 
