@@ -1,3 +1,13 @@
+2018-09-25  Jim Wilson  <jimw@sifive.com>
+
+	* elfnn-riscv.c (riscv_make_plt_header): New arg output_bfd.  Change
+	return type to bfd_boolean.  If	EF_RISCV_RVE call _bfd_error_handler
+	and return FALSE.  Return TRUE at end.
+	(riscv_make_plt_entry): Likewise.
+	(riscv_elf_finish_dynamic_symbol): Update call to riscv_make_plt_entry.
+	(riscv_elf_finish_dynamic_sections): Update call to
+	riscv_make_plt_header.
+
 2018-09-24  Jim Wilson  <jimw@sifive.com>
 
 	* elfnn-riscv.c (_bfd_riscv_relax_pc) <R_RISCV_PCREL_LO12_I>: New local

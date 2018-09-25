@@ -169,11 +169,20 @@ riscv_elf_got_plt_val (bfd_vma plt_index, struct bfd_link_info *info)
 
 /* Generate a PLT header.  */
 
-static void
-riscv_make_plt_header (bfd_vma gotplt_addr, bfd_vma addr, uint32_t *entry)
+static bfd_boolean
+riscv_make_plt_header (bfd *output_bfd, bfd_vma gotplt_addr, bfd_vma addr,
+		       uint32_t *entry)
 {
   bfd_vma gotplt_offset_high = RISCV_PCREL_HIGH_PART (gotplt_addr, addr);
   bfd_vma gotplt_offset_low = RISCV_PCREL_LOW_PART (gotplt_addr, addr);
+
+  /* RVE has no t3 register, so this won't work, and is not supported.  */
+  if (elf_elfheader (output_bfd)->e_flags & EF_RISCV_RVE)
+    {
+      _bfd_error_handler (_("%pB: warning: RVE PLT generation not supported"),
+			  output_bfd);
+      return FALSE;
+    }
 
   /* auipc  t2, %hi(.got.plt)
      sub    t1, t1, t3		     # shifted .got.plt offset + hdr size + 12
@@ -192,13 +201,24 @@ riscv_make_plt_header (bfd_vma gotplt_addr, bfd_vma addr, uint32_t *entry)
   entry[5] = RISCV_ITYPE (SRLI, X_T1, X_T1, 4 - RISCV_ELF_LOG_WORD_BYTES);
   entry[6] = RISCV_ITYPE (LREG, X_T0, X_T0, RISCV_ELF_WORD_BYTES);
   entry[7] = RISCV_ITYPE (JALR, 0, X_T3, 0);
+
+  return TRUE;
 }
 
 /* Generate a PLT entry.  */
 
-static void
-riscv_make_plt_entry (bfd_vma got, bfd_vma addr, uint32_t *entry)
+static bfd_boolean
+riscv_make_plt_entry (bfd *output_bfd, bfd_vma got, bfd_vma addr,
+		      uint32_t *entry)
 {
+  /* RVE has no t3 register, so this won't work, and is not supported.  */
+  if (elf_elfheader (output_bfd)->e_flags & EF_RISCV_RVE)
+    {
+      _bfd_error_handler (_("%pB: warning: RVE PLT generation not supported"),
+			  output_bfd);
+      return FALSE;
+    }
+
   /* auipc  t3, %hi(.got.plt entry)
      l[w|d] t3, %lo(.got.plt entry)(t3)
      jalr   t1, t3
@@ -208,6 +228,8 @@ riscv_make_plt_entry (bfd_vma got, bfd_vma addr, uint32_t *entry)
   entry[1] = RISCV_ITYPE (LREG,  X_T3, X_T3, RISCV_PCREL_LOW_PART (got, addr));
   entry[2] = RISCV_ITYPE (JALR, X_T1, X_T3, 0);
   entry[3] = RISCV_NOP;
+
+  return TRUE;
 }
 
 /* Create an entry in an RISC-V ELF linker hash table.  */
@@ -2353,8 +2375,11 @@ riscv_elf_finish_dynamic_symbol (bfd *output_bfd,
       loc = htab->elf.splt->contents + h->plt.offset;
 
       /* Fill in the PLT entry itself.  */
-      riscv_make_plt_entry (got_address, header_address + h->plt.offset,
-			    plt_entry);
+      if (! riscv_make_plt_entry (output_bfd, got_address,
+				  header_address + h->plt.offset,
+				  plt_entry))
+	return FALSE;
+
       for (i = 0; i < PLT_ENTRY_INSNS; i++)
 	bfd_put_32 (output_bfd, plt_entry[i], loc + 4*i);
 
@@ -2529,8 +2554,11 @@ riscv_elf_finish_dynamic_sections (bfd *output_bfd,
 	{
 	  int i;
 	  uint32_t plt_header[PLT_HEADER_INSNS];
-	  riscv_make_plt_header (sec_addr (htab->elf.sgotplt),
-				 sec_addr (splt), plt_header);
+	  ret = riscv_make_plt_header (output_bfd,
+				       sec_addr (htab->elf.sgotplt),
+				       sec_addr (splt), plt_header);
+	  if (!ret)
+	    return ret;
 
 	  for (i = 0; i < PLT_HEADER_INSNS; i++)
 	    bfd_put_32 (output_bfd, plt_header[i], splt->contents + 4*i);
