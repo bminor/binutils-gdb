@@ -1,3 +1,8 @@
+2018-09-25  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* testsuite/ld-elf/pr14156b.d: Adjust for extra symbols.
+	* testsuite/ld-elf/pr22677.s: Define main/start/_start/__start.
+
 2018-09-24  Jim Wilson  <jimw@sifive.com>
 
 	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Run pcrel-lo-addend-2.
