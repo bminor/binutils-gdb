@@ -23,6 +23,10 @@
 #include <pthread.h>
 #include <errno.h>
 
+/* This barrier ensures we only reach the initial breakpoint after both threads
+   have set errno.  */
+pthread_barrier_t start_threads_barrier;
+
 static void
 break_here (void)
 {
@@ -32,6 +36,7 @@ static void *
 thread_routine (void *arg)
 {
   errno = 42;
+  pthread_barrier_wait (&start_threads_barrier);
 
   break_here ();
 
@@ -47,6 +52,8 @@ main (int argc, char *argv)
   pthread_t the_thread;
   int err;
 
+  pthread_barrier_init (&start_threads_barrier, NULL, 2);
+
   err = pthread_create (&the_thread, NULL, thread_routine, NULL);
   if (err != 0)
     {
@@ -55,6 +62,7 @@ main (int argc, char *argv)
     }
 
   errno = 23;
+  pthread_barrier_wait (&start_threads_barrier);
 
   err = pthread_join (the_thread, NULL);
   if (err != 0)
