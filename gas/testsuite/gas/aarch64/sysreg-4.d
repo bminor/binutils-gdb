@@ -13,3 +13,9 @@ Disassembly of section \.text:
 .*:	d50b7d24 	dc	cvadp, x4
 .*:	d53b2405 	mrs	x5, rndr
 .*:	d53b2426 	mrs	x6, rndrrs
+.*:	d53bd0e7 	mrs	x7, scxtnum_el0
+.*:	d538d0e7 	mrs	x7, scxtnum_el1
+.*:	d53cd0e7 	mrs	x7, scxtnum_el2
+.*:	d53ed0e7 	mrs	x7, scxtnum_el3
+.*:	d53dd0e7 	mrs	x7, scxtnum_el12
+.*:	d5380388 	mrs	x8, id_pfr2_el1

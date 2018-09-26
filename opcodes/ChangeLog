@@ -1,5 +1,11 @@
 2018-10-09  Sudakshina Das  <sudi.das@arm.com>
 
+	* aarch64-opc.c (aarch64_sys_regs): New entries for
+	scxtnum_el[0,1,2,3,12] and id_pfr2_el1.
+	(aarch64_sys_reg_supported_p): New checks for above.
+
+2018-10-09  Sudakshina Das  <sudi.das@arm.com>
+
 	* aarch64-opc.h (HINT_OPD_NOPRINT, HINT_ENCODE): New.
 	(HINT_FLAG, HINT_VALUE): New macros to encode NO_PRINT flag
 	with the hint immediate.

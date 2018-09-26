@@ -78,6 +78,11 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_RNG		0x80000000000ULL
 /* BTI instructions.  */
 #define AARCH64_FEATURE_BTI		0x100000000000ULL
+/* SCXTNUM_ELx.  */
+#define AARCH64_FEATURE_SCXTNUM		0x200000000000ULL
+/* ID_PFR2 instructions.  */
+#define AARCH64_FEATURE_ID_PFR2		0x400000000000ULL
+
 
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8		AARCH64_FEATURE (AARCH64_FEATURE_V8, \
@@ -108,7 +113,9 @@ typedef uint32_t aarch64_insn;
 						 | AARCH64_FEATURE_SB   \
 						 | AARCH64_FEATURE_PREDRES \
 						 | AARCH64_FEATURE_CVADP \
-						 | AARCH64_FEATURE_BTI)
+						 | AARCH64_FEATURE_BTI	\
+						 | AARCH64_FEATURE_SCXTNUM \
+						 | AARCH64_FEATURE_ID_PFR2)
 
 
 #define AARCH64_ARCH_NONE	AARCH64_FEATURE (0, 0)

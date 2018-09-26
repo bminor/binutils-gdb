@@ -1,5 +1,12 @@
 2018-10-09  Sudakshina Das  <sudi.das@arm.com>
 
+	* testsuite/gas/aarch64/sysreg-4.s: Test registers
+	scxtnum_el[0,1,2,3,12] and id_pfr2_el1.
+	* testsuite/gas/aarch64/sysreg-4.d: Likewise.
+	* testsuite/gas/aarch64/illegal-sysreg-4.l: Likewise.
+
+2018-10-09  Sudakshina Das  <sudi.das@arm.com>
+
 	* config/tc-aarch64.c (parse_bti_operand): New.
 	(process_omitted_operand): Add case for AARCH64_OPND_BTI_TARGET.
 	(parse_operands): Likewise.

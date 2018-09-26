@@ -3733,6 +3733,7 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   { "id_dfr0_el1",      CPENC(3,0,C0,C1,2),	F_REG_READ }, /* RO */
   { "id_pfr0_el1",      CPENC(3,0,C0,C1,0),	F_REG_READ }, /* RO */
   { "id_pfr1_el1",      CPENC(3,0,C0,C1,1),	F_REG_READ }, /* RO */
+  { "id_pfr2_el1",      CPENC(3,0,C0,C3,4),	F_ARCHEXT | F_REG_READ}, /* RO */
   { "id_afr0_el1",      CPENC(3,0,C0,C1,3),	F_REG_READ }, /* RO */
   { "id_mmfr0_el1",     CPENC(3,0,C0,C1,4),	F_REG_READ }, /* RO */
   { "id_mmfr1_el1",     CPENC(3,0,C0,C1,5),	F_REG_READ }, /* RO */
@@ -3869,6 +3870,11 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   { "tpidr_el1",        CPENC(3,0,C13,C0,4),	0 },
   { "tpidr_el2",        CPENC(3,4,C13,C0,2),	0 },
   { "tpidr_el3",        CPENC(3,6,C13,C0,2),	0 },
+  { "scxtnum_el0",      CPENC(3,3,C13,C0,7), F_ARCHEXT },
+  { "scxtnum_el1",      CPENC(3,0,C13,C0,7), F_ARCHEXT },
+  { "scxtnum_el2",      CPENC(3,4,C13,C0,7), F_ARCHEXT },
+  { "scxtnum_el12",     CPENC(3,5,C13,C0,7), F_ARCHEXT },
+  { "scxtnum_el3",      CPENC(3,6,C13,C0,7), F_ARCHEXT },
   { "teecr32_el1",      CPENC(2,2,C0, C0,0),	0 }, /* See section 3.9.7.1 */
   { "cntfrq_el0",       CPENC(3,3,C14,C0,0),	0 }, /* RW */
   { "cntpct_el0",       CPENC(3,3,C14,C0,1),	F_REG_READ }, /* RO */
@@ -4106,6 +4112,20 @@ aarch64_sys_reg_supported_p (const aarch64_feature_set features,
   /* PAN.  Values are from aarch64_sys_regs.  */
   if (reg->value == CPEN_(0,C2,3)
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_PAN))
+    return FALSE;
+
+  /* SCXTNUM_ELx registers.  */
+  if ((reg->value == CPENC (3, 3, C13, C0, 7)
+       || reg->value == CPENC (3, 0, C13, C0, 7)
+       || reg->value == CPENC (3, 4, C13, C0, 7)
+       || reg->value == CPENC (3, 6, C13, C0, 7)
+       || reg->value == CPENC (3, 5, C13, C0, 7))
+      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_SCXTNUM))
+      return FALSE;
+
+  /* ID_PFR2_EL1 register.  */
+  if (reg->value == CPENC(3, 0, C0, C3, 4)
+      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_ID_PFR2))
     return FALSE;
 
   /* Virtualization host extensions: system registers.  */

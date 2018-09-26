@@ -6,3 +6,9 @@ func:
 	dc cvadp, x4
 	mrs x5, rndr
 	mrs x6, rndrrs
+	mrs x7, scxtnum_el0
+	mrs x7, scxtnum_el1
+	mrs x7, scxtnum_el2
+	mrs x7, scxtnum_el3
+	mrs x7, scxtnum_el12
+	mrs x8, id_pfr2_el1
