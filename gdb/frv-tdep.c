@@ -29,7 +29,7 @@
 #include "dis-asm.h"
 #include "sim-regno.h"
 #include "gdb/sim-frv.h"
-#include "opcodes/frv-desc.h"	/* for the H_SPR_... enums */
+#include "../opcodes/frv-desc.h"	/* for the H_SPR_... enums */
 #include "symtab.h"
 #include "elf-bfd.h"
 #include "elf/frv.h"

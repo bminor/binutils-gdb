@@ -1,5 +1,13 @@
 2018-10-06  Tom Tromey  <tom@tromey.com>
 
+	PR build/17077:
+	* Makefile.in (OPCODES_CFLAGS): Remove "-I$(OPCODES_SRC)/..".
+	* arc-tdep.c, frv-tdep.c, lm32-tdep.c, mep-tdep.c,
+	microblaze-tdep.c, or1k-tdep.h: Use ../opcodes, not opcodes, in
+	#include.
+
+2018-10-06  Tom Tromey  <tom@tromey.com>
+
 	* python/py-breakpoint.c (bppy_get_location): Handle a
 	bp_breakpoint without a location.
 

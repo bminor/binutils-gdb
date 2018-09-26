@@ -33,7 +33,7 @@
 
 /* ARC header files.  */
 #include "opcode/arc.h"
-#include "opcodes/arc-dis.h"
+#include "../opcodes/arc-dis.h"
 #include "arc-tdep.h"
 
 /* Standard headers.  */

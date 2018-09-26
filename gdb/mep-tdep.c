@@ -48,8 +48,8 @@
 
 /* Get the user's customized MeP coprocessor register names from
    libopcodes.  */
-#include "opcodes/mep-desc.h"
-#include "opcodes/mep-opc.h"
+#include "../opcodes/mep-desc.h"
+#include "../opcodes/mep-opc.h"
 
 
 /* The gdbarch_tdep structure.  */
