@@ -72,6 +72,8 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_SB		0x10000000000ULL
 /* Execution and Data Prediction Restriction instructions.  */
 #define AARCH64_FEATURE_PREDRES		0x20000000000ULL
+/* DC CVADP.  */
+#define AARCH64_FEATURE_CVADP		0x40000000000ULL
 
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8		AARCH64_FEATURE (AARCH64_FEATURE_V8, \
@@ -100,7 +102,8 @@ typedef uint32_t aarch64_insn;
 						 | AARCH64_FEATURE_FLAGMANIP \
 						 | AARCH64_FEATURE_FRINTTS \
 						 | AARCH64_FEATURE_SB   \
-						 | AARCH64_FEATURE_PREDRES)
+						 | AARCH64_FEATURE_PREDRES \
+						 | AARCH64_FEATURE_CVADP)
 
 
 #define AARCH64_ARCH_NONE	AARCH64_FEATURE (0, 0)

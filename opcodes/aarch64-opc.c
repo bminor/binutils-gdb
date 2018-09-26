@@ -4349,6 +4349,7 @@ const aarch64_sys_ins_reg aarch64_sys_regs_dc[] =
     { "csw",	    CPENS (0, C7, C10, 2), F_HASXT },
     { "cvau",       CPENS (3, C7, C11, 1), F_HASXT },
     { "cvap",       CPENS (3, C7, C12, 1), F_HASXT | F_ARCHEXT },
+    { "cvadp",      CPENS (3, C7, C13, 1), F_HASXT | F_ARCHEXT },
     { "civac",      CPENS (3, C7, C14, 1), F_HASXT },
     { "cisw",       CPENS (0, C7, C14, 2), F_HASXT },
     { 0,       CPENS(0,0,0,0), 0 }
@@ -4486,6 +4487,11 @@ aarch64_sys_ins_reg_supported_p (const aarch64_feature_set features,
   /* DC CVAP.  Values are from aarch64_sys_regs_dc.  */
   if (reg->value == CPENS (3, C7, C12, 1)
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_2))
+    return FALSE;
+
+  /* DC CVADP.  Values are from aarch64_sys_regs_dc.  */
+  if (reg->value == CPENS (3, C7, C13, 1)
+      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_CVADP))
     return FALSE;
 
   /* AT S1E1RP, AT S1E1WP.  Values are from aarch64_sys_regs_at.  */

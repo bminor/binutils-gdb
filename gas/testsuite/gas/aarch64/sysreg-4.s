@@ -3,3 +3,4 @@ func:
 	cfp rctx, x1
 	dvp rctx, x2
 	cpp rctx, x3
+	dc cvadp, x4

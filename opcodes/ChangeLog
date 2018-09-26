@@ -1,5 +1,10 @@
 2018-10-09  Sudakshina Das  <sudi.das@arm.com>
 
+	* aarch64-opc.c (aarch64_sys_regs_dc): New entry for cvadp.
+	(aarch64_sys_ins_reg_supported_p): New check for above.
+
+2018-10-09  Sudakshina Das  <sudi.das@arm.com>
+
 	* aarch64-dis.c (aarch64_ext_sysins_op): Add case for
 	AARCH64_OPND_SYSREG_SR.
 	* aarch64-opc.c (aarch64_print_operand): Likewise.

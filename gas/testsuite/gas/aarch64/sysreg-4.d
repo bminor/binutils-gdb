@@ -10,3 +10,4 @@ Disassembly of section \.text:
 .*:	d50b7381 	cfp	rctx, x1
 .*:	d50b73a2 	dvp	rctx, x2
 .*:	d50b73e3 	cpp	rctx, x3
+.*:	d50b7d24 	dc	cvadp, x4

@@ -1,5 +1,11 @@
 2018-10-09  Sudakshina Das  <sudi.das@arm.com>
 
+	* testsuite/gas/aarch64/sysreg-4.s: Test instruction.
+	* testsuite/gas/aarch64/sysreg-4.d: Likewise.
+	* testsuite/gas/aarch64/illegal-sysreg-4.l: Likewise.
+
+2018-10-09  Sudakshina Das  <sudi.das@arm.com>
+
 	* config/tc-aarch64.c (aarch64_sys_regs_sr_hsh): New.
 	(parse_operands): Add entry for AARCH64_OPND_SYSREG_SR.
 	(md_begin): Allocate and initialize aarch64_sys_regs_sr_hsh
