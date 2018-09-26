@@ -102,13 +102,6 @@ static void find_method_list (struct value **, const char *,
 			      std::vector<xmethod_worker_up> *,
 			      struct type **, LONGEST *);
 
-#if 0
-/* Flag for whether we want to abandon failed expression evals by
-   default.  */
-
-static int auto_abandon = 0;
-#endif
-
 int overload_resolution = 0;
 static void
 show_overload_resolution (struct ui_file *file, int from_tty,

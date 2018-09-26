@@ -1,5 +1,9 @@
 2018-09-26  Tom Tromey  <tom@tromey.com>
 
+	* valops.c (auto_abandon): Remove dead code.
+
+2018-09-26  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-win.c (WIN_HEIGHT_USAGE): Remove extra ">"s.
 
 2018-09-24  Tom Tromey  <tom@tromey.com>
