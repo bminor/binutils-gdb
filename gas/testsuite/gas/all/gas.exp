@@ -73,7 +73,11 @@ if {    ![istarget alpha*-*-*vms*]
 gas_test_error "equiv1.s" "" ".equiv for symbol already set to another one"
 gas_test_error "equiv2.s" "" ".equiv for symbol already set to an expression"
 
-gas_test_error "none.s" "-o $srcdir/$subdir/none.s" "Output file must be distinct from input"
+# The inode comparison used to detect identical input and output files
+# doesn't work on non-Posix hosts.
+if { ![ishost "*-*-mingw*"] } then {
+    gas_test_error "none.s" "-o $srcdir/$subdir/none.s" "Output file must be distinct from input"
+}
 
 # .equ works differently on some targets.
 case $target_triplet in {

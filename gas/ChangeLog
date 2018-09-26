@@ -1,3 +1,8 @@
+2018-09-26  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* testsuite/gas/all/gas.exp: Skip "Output file must be distinct
+	from input" test on Windows host.
+
 2018-09-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/23691
