@@ -1,5 +1,11 @@
 2018-10-01  Tom Tromey  <tom@tromey.com>
 
+	* unittests/scoped_mmap-selftests.c: Don't check HAVE_UNISTD_H.
+	* unittests/scoped_fd-selftests.c: Don't check HAVE_UNISTD_H.
+	* common/scoped_fd.h: Don't check HAVE_UNISTD_H.
+
+2018-10-01  Tom Tromey  <tom@tromey.com>
+
 	* README: Minor change.
 
 2018-09-30  Pedro Alves  <palves@redhat.com>

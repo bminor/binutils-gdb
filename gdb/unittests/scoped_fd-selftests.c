@@ -21,9 +21,6 @@
 
 #include "common/scoped_fd.h"
 #include "config.h"
-
-#ifdef HAVE_UNISTD_H
-
 #include "selftest.h"
 
 namespace selftests {
@@ -78,13 +75,9 @@ run_tests ()
 } /* namespace scoped_fd */
 } /* namespace selftests */
 
-#endif /* HAVE_UNISTD_H */
-
 void
 _initialize_scoped_fd_selftests ()
 {
-#ifdef HAVE_UNISTD_H
   selftests::register_test ("scoped_fd",
 			    selftests::scoped_fd::run_tests);
-#endif
 }

@@ -22,7 +22,7 @@
 #include "common/scoped_mmap.h"
 #include "config.h"
 
-#if defined(HAVE_SYS_MMAN_H) && defined(HAVE_UNISTD_H)
+#if defined(HAVE_SYS_MMAN_H)
 
 #include "selftest.h"
 #include "common/gdb_unlinker.h"
@@ -132,12 +132,12 @@ run_tests ()
 } /* namespace mmap_file */
 } /* namespace selftests */
 
-#endif /* !defined(HAVE_SYS_MMAN_H) || !defined(HAVE_UNISTD_H) */
+#endif /* !defined(HAVE_SYS_MMAN_H) */
 
 void
 _initialize_scoped_mmap_selftests ()
 {
-#if defined(HAVE_SYS_MMAN_H) && defined(HAVE_UNISTD_H)
+#if defined(HAVE_SYS_MMAN_H)
   selftests::register_test ("scoped_mmap",
 			    selftests::scoped_mmap::run_tests);
   selftests::register_test ("mmap_file",

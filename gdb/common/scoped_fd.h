@@ -20,10 +20,6 @@
 #ifndef SCOPED_FD_H
 #define SCOPED_FD_H
 
-#include "config.h"
-
-#ifdef HAVE_UNISTD_H
-
 #include <unistd.h>
 
 /* A smart-pointer-like class to automatically close a file descriptor.  */
@@ -56,5 +52,4 @@ private:
   int m_fd;
 };
 
-#endif /* HAVE_UNISTD_H */
 #endif /* SCOPED_FD_H */
