@@ -462,6 +462,7 @@ static struct hash_control *aarch64_sys_regs_ic_hsh;
 static struct hash_control *aarch64_sys_regs_dc_hsh;
 static struct hash_control *aarch64_sys_regs_at_hsh;
 static struct hash_control *aarch64_sys_regs_tlbi_hsh;
+static struct hash_control *aarch64_sys_regs_sr_hsh;
 static struct hash_control *aarch64_reg_hsh;
 static struct hash_control *aarch64_barrier_opt_hsh;
 static struct hash_control *aarch64_nzcv_hsh;
@@ -6422,14 +6423,22 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  inst.base.operands[i].sysins_op =
 	    parse_sys_ins_reg (&str, aarch64_sys_regs_ic_hsh);
 	  goto sys_reg_ins;
+
 	case AARCH64_OPND_SYSREG_DC:
 	  inst.base.operands[i].sysins_op =
 	    parse_sys_ins_reg (&str, aarch64_sys_regs_dc_hsh);
 	  goto sys_reg_ins;
+
 	case AARCH64_OPND_SYSREG_AT:
 	  inst.base.operands[i].sysins_op =
 	    parse_sys_ins_reg (&str, aarch64_sys_regs_at_hsh);
 	  goto sys_reg_ins;
+
+	case AARCH64_OPND_SYSREG_SR:
+	  inst.base.operands[i].sysins_op =
+	    parse_sys_ins_reg (&str, aarch64_sys_regs_sr_hsh);
+	  goto sys_reg_ins;
+
 	case AARCH64_OPND_SYSREG_TLBI:
 	  inst.base.operands[i].sysins_op =
 	    parse_sys_ins_reg (&str, aarch64_sys_regs_tlbi_hsh);
@@ -8439,6 +8448,7 @@ md_begin (void)
       || (aarch64_sys_regs_dc_hsh = hash_new ()) == NULL
       || (aarch64_sys_regs_at_hsh = hash_new ()) == NULL
       || (aarch64_sys_regs_tlbi_hsh = hash_new ()) == NULL
+      || (aarch64_sys_regs_sr_hsh = hash_new ()) == NULL
       || (aarch64_reg_hsh = hash_new ()) == NULL
       || (aarch64_barrier_opt_hsh = hash_new ()) == NULL
       || (aarch64_nzcv_hsh = hash_new ()) == NULL
@@ -8476,6 +8486,11 @@ md_begin (void)
     checked_hash_insert (aarch64_sys_regs_tlbi_hsh,
 			 aarch64_sys_regs_tlbi[i].name,
 			 (void *) (aarch64_sys_regs_tlbi + i));
+
+  for (i = 0; aarch64_sys_regs_sr[i].name != NULL; i++)
+    checked_hash_insert (aarch64_sys_regs_sr_hsh,
+			 aarch64_sys_regs_sr[i].name,
+			 (void *) (aarch64_sys_regs_sr + i));
 
   for (i = 0; i < ARRAY_SIZE (reg_names); i++)
     checked_hash_insert (aarch64_reg_hsh, reg_names[i].name,
@@ -8748,6 +8763,8 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"sha2",		AARCH64_FEATURE (AARCH64_FEATURE_SHA2, 0),
 			AARCH64_ARCH_NONE},
   {"sb",		AARCH64_FEATURE (AARCH64_FEATURE_SB, 0),
+			AARCH64_ARCH_NONE},
+  {"predres",		AARCH64_FEATURE (AARCH64_FEATURE_PREDRES, 0),
 			AARCH64_ARCH_NONE},
   {"aes",		AARCH64_FEATURE (AARCH64_FEATURE_AES, 0),
 			AARCH64_ARCH_NONE},

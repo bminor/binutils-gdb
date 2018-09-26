@@ -2167,6 +2167,8 @@ static const aarch64_feature_set aarch64_feature_frintts =
   AARCH64_FEATURE (AARCH64_FEATURE_FRINTTS, 0);
 static const aarch64_feature_set aarch64_feature_sb =
   AARCH64_FEATURE (AARCH64_FEATURE_SB, 0);
+static const aarch64_feature_set aarch64_feature_predres =
+  AARCH64_FEATURE (AARCH64_FEATURE_PREDRES, 0);
 
 
 #define CORE		&aarch64_feature_v8
@@ -2199,6 +2201,7 @@ static const aarch64_feature_set aarch64_feature_sb =
 #define FLAGMANIP	&aarch64_feature_flagmanip
 #define FRINTTS		&aarch64_feature_frintts
 #define SB		&aarch64_feature_sb
+#define PREDRES		&aarch64_feature_predres
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2258,6 +2261,8 @@ static const aarch64_feature_set aarch64_feature_sb =
   { NAME, OPCODE, MASK, CLASS, 0, FRINTTS, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define SB_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, SB, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define PREDRES_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, PREDRES, OPS, QUALS, FLAGS, 0, 0, NULL }
 
 struct aarch64_opcode aarch64_opcode_table[] =
 {
@@ -3529,6 +3534,9 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("dc",  0xd5080000, 0xfff80000, ic_system, 0, OP2 (SYSREG_DC, Rt), QL_SRC_X, F_ALIAS),
   CORE_INSN ("ic",  0xd5080000, 0xfff80000, ic_system, 0, OP2 (SYSREG_IC, Rt_SYS), QL_SRC_X, F_ALIAS | F_OPD1_OPT | F_DEFAULT (0x1F)),
   CORE_INSN ("tlbi",0xd5080000, 0xfff80000, ic_system, 0, OP2 (SYSREG_TLBI, Rt_SYS), QL_SRC_X, F_ALIAS | F_OPD1_OPT | F_DEFAULT (0x1F)),
+  PREDRES_INSN ("cfp", 0xd50b7380, 0xffffffe0, ic_system, OP2 (SYSREG_SR, Rt), QL_SRC_X, F_ALIAS),
+  PREDRES_INSN ("dvp", 0xd50b73a0, 0xffffffe0, ic_system, OP2 (SYSREG_SR, Rt), QL_SRC_X, F_ALIAS),
+  PREDRES_INSN ("cpp", 0xd50b73e0, 0xffffffe0, ic_system, OP2 (SYSREG_SR, Rt), QL_SRC_X, F_ALIAS),
   CORE_INSN ("msr", 0xd5000000, 0xffe00000, ic_system, 0, OP2 (SYSREG, Rt), QL_SRC_X, F_SYS_WRITE),
   CORE_INSN ("sysl",0xd5280000, 0xfff80000, ic_system, 0, OP5 (Rt, UIMM3_OP1, CRn, CRm, UIMM3_OP2), QL_SYSL, 0),
   CORE_INSN ("mrs", 0xd5200000, 0xffe00000, ic_system, 0, OP2 (Rt, SYSREG), QL_DST_X, F_SYS_READ),
@@ -4611,6 +4619,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
       "an instruction cache maintenance operation specifier")		\
     Y(SYSTEM, sysins_op, "SYSREG_TLBI", 0, F(),				\
       "a TBL invalidation operation specifier")				\
+    Y(SYSTEM, sysins_op, "SYSREG_SR", 0, F(),				\
+      "a Speculation Restriction option name (RCTX)")			\
     Y(SYSTEM, barrier, "BARRIER", 0, F(),				\
       "a barrier option name")						\
     Y(SYSTEM, barrier, "BARRIER_ISB", 0, F(),				\

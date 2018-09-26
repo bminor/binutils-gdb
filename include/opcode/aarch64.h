@@ -70,6 +70,8 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_FRINTTS		0x8000000000ULL
 /* SB instruction.  */
 #define AARCH64_FEATURE_SB		0x10000000000ULL
+/* Execution and Data Prediction Restriction instructions.  */
+#define AARCH64_FEATURE_PREDRES		0x20000000000ULL
 
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8		AARCH64_FEATURE (AARCH64_FEATURE_V8, \
@@ -97,7 +99,8 @@ typedef uint32_t aarch64_insn;
 						 AARCH64_FEATURE_V8_5   \
 						 | AARCH64_FEATURE_FLAGMANIP \
 						 | AARCH64_FEATURE_FRINTTS \
-						 | AARCH64_FEATURE_SB)
+						 | AARCH64_FEATURE_SB   \
+						 | AARCH64_FEATURE_PREDRES)
 
 
 #define AARCH64_ARCH_NONE	AARCH64_FEATURE (0, 0)
@@ -272,6 +275,7 @@ enum aarch64_opnd
   AARCH64_OPND_SYSREG_DC,	/* System register <dc_op> operand.  */
   AARCH64_OPND_SYSREG_IC,	/* System register <ic_op> operand.  */
   AARCH64_OPND_SYSREG_TLBI,	/* System register <tlbi_op> operand.  */
+  AARCH64_OPND_SYSREG_SR,	/* System register RCTX operand.  */
   AARCH64_OPND_BARRIER,		/* Barrier operand.  */
   AARCH64_OPND_BARRIER_ISB,	/* Barrier operand for ISB.  */
   AARCH64_OPND_PRFOP,		/* Prefetch operation.  */
@@ -915,6 +919,7 @@ extern const aarch64_sys_ins_reg aarch64_sys_regs_ic [];
 extern const aarch64_sys_ins_reg aarch64_sys_regs_dc [];
 extern const aarch64_sys_ins_reg aarch64_sys_regs_at [];
 extern const aarch64_sys_ins_reg aarch64_sys_regs_tlbi [];
+extern const aarch64_sys_ins_reg aarch64_sys_regs_sr [];
 
 /* Shift/extending operator kinds.
    N.B. order is important; keep aarch64_operand_modifiers synced.  */

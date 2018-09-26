@@ -1,5 +1,12 @@
 2018-10-09  Sudakshina Das  <sudi.das@arm.com>
 
+	* opcode/aarch64.h (AARCH64_FEATURE_PREDRES): New.
+	(AARCH64_ARCH_V8_5): Add AARCH64_FEATURE_PREDRES by default.
+	(aarch64_opnd): Add AARCH64_OPND_SYSREG_SR.
+	(aarch64_sys_regs_sr): Declare new table.
+
+2018-10-09  Sudakshina Das  <sudi.das@arm.com>
+
 	* opcode/aarch64.h (AARCH64_FEATURE_SB): New.
 	(AARCH64_ARCH_V8_5): Add AARCH64_FEATURE_SB by default.
 

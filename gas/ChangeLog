@@ -1,5 +1,21 @@
 2018-10-09  Sudakshina Das  <sudi.das@arm.com>
 
+	* config/tc-aarch64.c (aarch64_sys_regs_sr_hsh): New.
+	(parse_operands): Add entry for AARCH64_OPND_SYSREG_SR.
+	(md_begin): Allocate and initialize aarch64_sys_regs_sr_hsh
+	with aarch64_sys_regs_sr.
+	(aarch64_features): Add new "predres" option for older
+	architectures.
+	* doc/c-aarch64.texi: Document the same.
+	* testsuite/gas/aarch64/sysreg-4.s: New.
+	* testsuite/gas/aarch64/sysreg-4.d: New.
+	* testsuite/gas/aarch64/illegal-sysreg-4.d: New.
+	* testsuite/gas/aarch64/illegal-sysreg-4.l: New.
+	* testsuite/gas/aarch64/predres.s: New.
+	* testsuite/gas/aarch64/predres.d: New.
+
+2018-10-09  Sudakshina Das  <sudi.das@arm.com>
+
 	* config/tc-aarch64.c (aarch64_features): Add new "sb" option
 	for older architectures.
 	* doc/c-aarch64.texi: Document the same.

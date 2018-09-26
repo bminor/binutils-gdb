@@ -3630,6 +3630,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SYSREG_DC:
     case AARCH64_OPND_SYSREG_IC:
     case AARCH64_OPND_SYSREG_TLBI:
+    case AARCH64_OPND_SYSREG_SR:
       snprintf (buf, size, "%s", opnd->sysins_op->name);
       break;
 
@@ -4458,6 +4459,17 @@ const aarch64_sys_ins_reg aarch64_sys_regs_tlbi[] =
     { 0,       CPENS(0,0,0,0), 0 }
 };
 
+const aarch64_sys_ins_reg aarch64_sys_regs_sr[] =
+{
+    /* RCTX is somewhat unique in a way that it has different values
+       (op2) based on the instruction in which it is used (cfp/dvp/cpp).
+       Thus op2 is masked out and instead encoded directly in the
+       aarch64_opcode_table entries for the respective instructions.  */
+    { "rctx",   CPENS(3,C7,C3,0), F_HASXT | F_ARCHEXT | F_REG_WRITE}, /* WO */
+
+    { 0,       CPENS(0,0,0,0), 0 }
+};
+
 bfd_boolean
 aarch64_sys_ins_reg_has_xt (const aarch64_sys_ins_reg *sys_ins_reg)
 {
@@ -4480,6 +4492,11 @@ aarch64_sys_ins_reg_supported_p (const aarch64_feature_set features,
   if ((reg->value == CPENS (0, C7, C9, 0)
        || reg->value == CPENS (0, C7, C9, 1))
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_2))
+    return FALSE;
+
+  /* CFP/DVP/CPP RCTX : Value are from aarch64_sys_regs_sr. */
+  if (reg->value == CPENS (3, C7, C3, 0)
+      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_PREDRES))
     return FALSE;
 
   return TRUE;

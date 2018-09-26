@@ -1,5 +1,21 @@
 2018-10-09  Sudakshina Das  <sudi.das@arm.com>
 
+	* aarch64-dis.c (aarch64_ext_sysins_op): Add case for
+	AARCH64_OPND_SYSREG_SR.
+	* aarch64-opc.c (aarch64_print_operand): Likewise.
+	(aarch64_sys_regs_sr): Define table.
+	(aarch64_sys_ins_reg_supported_p): Check for RCTX with
+	AARCH64_FEATURE_PREDRES.
+	* aarch64-tbl.h (aarch64_feature_predres): New.
+	(PREDRES, PREDRES_INSN): New.
+	(aarch64_opcode_table): Add entries for cfp, dvp and cpp.
+	(AARCH64_OPERANDS): Add new description for SYSREG_SR.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2018-10-09  Sudakshina Das  <sudi.das@arm.com>
+
 	* aarch64-tbl.h (aarch64_feature_sb): New.
 	(SB, SB_INSN): New.
 	(aarch64_opcode_table): Add entry for sb.
