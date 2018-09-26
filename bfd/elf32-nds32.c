@@ -3165,19 +3165,6 @@ static const struct nds32_reloc_map_entry nds32_reloc_map[] =
 
 /* Patch tag.  */
 
-/* Reserve space for COUNT dynamic relocations in relocation selection
-   SRELOC.  */
-
-static inline void
-elf32_nds32_allocate_dynrelocs (struct bfd_link_info *info, asection *sreloc,
-				bfd_size_type count)
-{
-  BFD_ASSERT (elf_hash_table (info)->dynamic_sections_created);
-  if (sreloc == NULL)
-    abort ();
-  sreloc->size += sizeof (Elf32_External_Rela) * count;
-}
-
 static reloc_howto_type *
 bfd_elf32_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 				 const char *r_name)

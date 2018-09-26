@@ -1,3 +1,7 @@
+2018-09-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* elf32-nds32.c (elf32_nds32_allocate_dynrelocs): Remove.
+
 2018-09-26  Tom Tromey  <tom@tromey.com>
 
 	* valops.c (auto_abandon): Remove dead code.
