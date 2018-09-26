@@ -2161,6 +2161,10 @@ static const aarch64_feature_set aarch64_feature_fp_16_v8_2 =
 		   | AARCH64_FEATURE_F16 | AARCH64_FEATURE_FP, 0);
 static const aarch64_feature_set aarch64_feature_v8_5 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_5, 0);
+static const aarch64_feature_set aarch64_feature_flagmanip =
+  AARCH64_FEATURE (AARCH64_FEATURE_FLAGMANIP, 0);
+static const aarch64_feature_set aarch64_feature_frintts =
+  AARCH64_FEATURE (AARCH64_FEATURE_FRINTTS, 0);
 
 
 #define CORE		&aarch64_feature_v8
@@ -2190,6 +2194,8 @@ static const aarch64_feature_set aarch64_feature_v8_5 =
 #define FP_F16_V8_2	&aarch64_feature_fp_16_v8_2
 #define DOTPROD		&aarch64_feature_dotprod
 #define ARMV8_5		&aarch64_feature_v8_5
+#define FLAGMANIP	&aarch64_feature_flagmanip
+#define FRINTTS		&aarch64_feature_frintts
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2243,6 +2249,10 @@ static const aarch64_feature_set aarch64_feature_v8_5 =
   { NAME, OPCODE, MASK, CLASS, 0, DOTPROD, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define V8_5_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, ARMV8_5, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define FLAGMANIP_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, FLAGMANIP, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define FRINTTS_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, FRINTTS, OPS, QUALS, FLAGS, 0, 0, NULL }
 
 struct aarch64_opcode aarch64_opcode_table[] =
 {
@@ -2413,6 +2423,10 @@ struct aarch64_opcode aarch64_opcode_table[] =
   SIMD_INSN ("ins", 0x6e000400, 0xffe08400, asimdins, 0, OP2 (Ed, En), QL_S_2SAME, F_HAS_ALIAS),
   SIMD_INSN ("mov", 0x6e000400, 0xffe08400, asimdins, 0, OP2 (Ed, En), QL_S_2SAME, F_ALIAS),
   /* AdvSIMD two-reg misc.  */
+  FRINTTS_INSN ("frint32z", 0x0e21e800, 0xbfbffc00, asimdmisc, OP2 (Vd, Vn), QL_V2SAMESD, F_SIZEQ),
+  FRINTTS_INSN ("frint32x", 0x2e21e800, 0xbfbffc00, asimdmisc, OP2 (Vd, Vn), QL_V2SAMESD, F_SIZEQ),
+  FRINTTS_INSN ("frint64z", 0x0e21f800, 0xbfbffc00, asimdmisc, OP2 (Vd, Vn), QL_V2SAMESD, F_SIZEQ),
+  FRINTTS_INSN ("frint64x", 0x2e21f800, 0xbfbffc00, asimdmisc, OP2 (Vd, Vn), QL_V2SAMESD, F_SIZEQ),
   SIMD_INSN ("rev64", 0x0e200800, 0xbf3ffc00, asimdmisc, 0, OP2 (Vd, Vn), QL_V2SAMEBHS, F_SIZEQ),
   SIMD_INSN ("rev16", 0x0e201800, 0xbf3ffc00, asimdmisc, 0, OP2 (Vd, Vn), QL_V2SAMEB, F_SIZEQ),
   SIMD_INSN ("saddlp",0x0e202800, 0xbf3ffc00, asimdmisc, 0, OP2 (Vd, Vn), QL_V2PAIRWISELONGBHS, F_SIZEQ),
@@ -3094,6 +3108,13 @@ struct aarch64_opcode aarch64_opcode_table[] =
   FF16_INSN ("fcmp",  0x1ee02008, 0xff20fc1f, floatcmp, OP2 (Fn, FPIMM0), QL_FP2_H, F_FPTYPE),
   __FP_INSN ("fcmpe", 0x1e202018, 0xff20fc1f, floatcmp, 0, OP2 (Fn, FPIMM0), QL_DST_SD,F_FPTYPE),
   FF16_INSN ("fcmpe", 0x1ee02018, 0xff20fc1f, floatcmp, OP2 (Fn, FPIMM0), QL_FP2_H, F_FPTYPE),
+  /* Data processing instructions ARMv8.5-A.  */
+  FLAGMANIP_INSN ("xaflag",   0xd500403f, 0xffffffff, 0, OP0 (), {}, 0),
+  FLAGMANIP_INSN ("axflag",   0xd500405f, 0xffffffff, 0, OP0 (), {}, 0),
+  FRINTTS_INSN ("frint32z", 0x1e284000, 0xffbffc00, floatdp1, OP2 (Fd, Fn), QL_FP2, F_FPTYPE),
+  FRINTTS_INSN ("frint32x", 0x1e28c000, 0xffbffc00, floatdp1, OP2 (Fd, Fn), QL_FP2, F_FPTYPE),
+  FRINTTS_INSN ("frint64z", 0x1e294000, 0xffbffc00, floatdp1, OP2 (Fd, Fn), QL_FP2, F_FPTYPE),
+  FRINTTS_INSN ("frint64x", 0x1e29c000, 0xffbffc00, floatdp1, OP2 (Fd, Fn), QL_FP2, F_FPTYPE),
   /* Floating-point data-processing (1 source).  */
   __FP_INSN ("fmov",  0x1e204000, 0xff3ffc00, floatdp1, 0, OP2 (Fd, Fn), QL_FP2,   F_FPTYPE),
   FF16_INSN ("fmov",  0x1ee04000, 0xff3ffc00, floatdp1, OP2 (Fd, Fn), QL_FP2_H, F_FPTYPE),

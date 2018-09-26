@@ -64,6 +64,11 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_F16_FML	0x1000000000ULL	/* v8.2 FP16FML ins.  */
 #define AARCH64_FEATURE_V8_5	0x2000000000ULL	/* ARMv8.5 processors.  */
 
+/* Flag Manipulation insns.  */
+#define AARCH64_FEATURE_FLAGMANIP	0x4000000000ULL
+/* FRINT[32,64][Z,X] insns.  */
+#define AARCH64_FEATURE_FRINTTS		0x8000000000ULL
+
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8		AARCH64_FEATURE (AARCH64_FEATURE_V8, \
 						 AARCH64_FEATURE_FP  \
@@ -87,7 +92,9 @@ typedef uint32_t aarch64_insn;
 						 | AARCH64_FEATURE_DOTPROD \
 						 | AARCH64_FEATURE_F16_FML)
 #define AARCH64_ARCH_V8_5	AARCH64_FEATURE (AARCH64_ARCH_V8_4,	\
-						 AARCH64_FEATURE_V8_5)
+						 AARCH64_FEATURE_V8_5   \
+						 | AARCH64_FEATURE_FLAGMANIP \
+						 | AARCH64_FEATURE_FRINTTS)
 
 
 #define AARCH64_ARCH_NONE	AARCH64_FEATURE (0, 0)

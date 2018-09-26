@@ -1,5 +1,10 @@
 2018-10-09  Sudakshina Das  <sudi.das@arm.com>
 
+	* testsuite/gas/aarch64/armv8_5-a-dp.s: New.
+	* testsuite/gas/aarch64/armv8_5-a-dp.d: New.
+
+2018-10-09  Sudakshina Das  <sudi.das@arm.com>
+
 	* config/tc-aarch64.c (aarch64_archs): New entry for armv8.5-a.
 	* doc/c-aarch64.texi: Add documentation for the same.
 

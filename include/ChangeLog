@@ -1,5 +1,11 @@
 2018-10-09  Sudakshina Das  <sudi.das@arm.com>
 
+	* opcode/aarch64.h (AARCH64_FEATURE_FLAGMANIP): New.
+	(AARCH64_FEATURE_FRINTTS): New.
+	(AARCH64_ARCH_V8_5): Add both by default.
+
+2018-10-09  Sudakshina Das  <sudi.das@arm.com>
+
 	* opcode/aarch64.h (AARCH64_FEATURE_V8_5): New.
 	(AARCH64_ARCH_V8_5): New.
 

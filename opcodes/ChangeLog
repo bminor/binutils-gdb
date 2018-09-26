@@ -1,5 +1,16 @@
 2018-10-09  Sudakshina Das  <sudi.das@arm.com>
 
+	* aarch64-tbl.h (aarch64_feature_flagmanip): New.
+	(aarch64_feature_frintts): New.
+	(FLAGMANIP, FRINTTS): New.
+	(aarch64_opcode_table): Add entries for xaflag, axflag
+	and frint[32,64][x,z] instructions.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2018-10-09  Sudakshina Das  <sudi.das@arm.com>
+
 	* aarch64-tbl.h (aarch64_feature_set aarch64_feature_v8_5): New.
 	(ARMV8_5, V8_5_INSN): New.
 
