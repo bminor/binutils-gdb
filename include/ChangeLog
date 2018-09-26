@@ -1,3 +1,8 @@
+2018-10-09  Sudakshina Das  <sudi.das@arm.com>
+
+	* opcode/aarch64.h (AARCH64_FEATURE_V8_5): New.
+	(AARCH64_ARCH_V8_5): New.
+
 2018-10-08  Alan Modra  <amodra@gmail.com>
 
 	* bfdlink.h (struct bfd_link_info): Add load_phdrs field.

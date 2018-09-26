@@ -2159,6 +2159,9 @@ static const aarch64_feature_set aarch64_feature_sha3 =
 static const aarch64_feature_set aarch64_feature_fp_16_v8_2 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_F16_FML
 		   | AARCH64_FEATURE_F16 | AARCH64_FEATURE_FP, 0);
+static const aarch64_feature_set aarch64_feature_v8_5 =
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_5, 0);
+
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -2186,6 +2189,7 @@ static const aarch64_feature_set aarch64_feature_fp_16_v8_2 =
 #define CRYPTO_V8_2	&aarch64_feature_crypto_v8_2
 #define FP_F16_V8_2	&aarch64_feature_fp_16_v8_2
 #define DOTPROD		&aarch64_feature_dotprod
+#define ARMV8_5		&aarch64_feature_v8_5
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2237,6 +2241,8 @@ static const aarch64_feature_set aarch64_feature_fp_16_v8_2 =
   { NAME, OPCODE, MASK, CLASS, 0, FP_F16_V8_2, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define DOT_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, DOTPROD, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define V8_5_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, ARMV8_5, OPS, QUALS, FLAGS, 0, 0, NULL }
 
 struct aarch64_opcode aarch64_opcode_table[] =
 {

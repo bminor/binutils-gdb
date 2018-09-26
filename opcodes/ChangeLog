@@ -1,3 +1,8 @@
+2018-10-09  Sudakshina Das  <sudi.das@arm.com>
+
+	* aarch64-tbl.h (aarch64_feature_set aarch64_feature_v8_5): New.
+	(ARMV8_5, V8_5_INSN): New.
+
 2018-10-08  Tamar Christina  <tamar.christina@arm.com>
 
 	* aarch64-opc.c (verify_constraints): Use memset instead of {0}.
