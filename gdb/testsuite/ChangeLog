@@ -1,3 +1,8 @@
+2018-10-01  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* lib/gdb.exp (is_amd64_regs_target): Change assembly to C inline
+	assembly.
+
 2018-09-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/frame-selection.exp: New file.

@@ -2467,13 +2467,14 @@ gdb_caching_proc is_amd64_regs_target {
 	return 0
     }
 
-    set list {}
-    foreach reg \
-	{rax rbx rcx rdx rsi rdi rbp rsp r8 r9 r10 r11 r12 r13 r14 r15} {
-	    lappend list "\tincq %$reg"
-	}
+    return [gdb_can_simple_compile is_amd64_regs_target {
+	int main (void) {
+	    asm ("incq %rax");
+	    asm ("incq %r15");
 
-    return [gdb_can_simple_compile is_amd64_regs_target [join $list \n]]
+	    return 0;
+	}
+    }]
 }
 
 # Return 1 if this target is an x86 or x86-64 with -m32.
