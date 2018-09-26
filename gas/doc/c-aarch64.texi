@@ -181,6 +181,8 @@ automatically cause those extensions to be disabled.
 @item @code{fp16fml} @tab ARMv8.2-A @tab ARMv8.4-A or later
  @tab Enable ARMv8.2 16-bit floating-point multiplication variant support.
  This implies @code{fp16}.
+@item @code{sb} @tab ARMv8-A @tab ARMv8.5-A or later
+ @tab Enable the speculation barrier instruction sb.
 @end multitable
 
 @node AArch64 Syntax

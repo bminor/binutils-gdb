@@ -1,5 +1,14 @@
 2018-10-09  Sudakshina Das  <sudi.das@arm.com>
 
+	* aarch64-tbl.h (aarch64_feature_sb): New.
+	(SB, SB_INSN): New.
+	(aarch64_opcode_table): Add entry for sb.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2018-10-09  Sudakshina Das  <sudi.das@arm.com>
+
 	* aarch64-tbl.h (aarch64_feature_flagmanip): New.
 	(aarch64_feature_frintts): New.
 	(FLAGMANIP, FRINTTS): New.

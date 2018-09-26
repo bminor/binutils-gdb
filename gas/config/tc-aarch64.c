@@ -8747,6 +8747,8 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
 			AARCH64_ARCH_NONE},
   {"sha2",		AARCH64_FEATURE (AARCH64_FEATURE_SHA2, 0),
 			AARCH64_ARCH_NONE},
+  {"sb",		AARCH64_FEATURE (AARCH64_FEATURE_SB, 0),
+			AARCH64_ARCH_NONE},
   {"aes",		AARCH64_FEATURE (AARCH64_FEATURE_AES, 0),
 			AARCH64_ARCH_NONE},
   {"sm4",		AARCH64_FEATURE (AARCH64_FEATURE_SM4, 0),

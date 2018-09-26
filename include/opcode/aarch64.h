@@ -68,6 +68,8 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_FLAGMANIP	0x4000000000ULL
 /* FRINT[32,64][Z,X] insns.  */
 #define AARCH64_FEATURE_FRINTTS		0x8000000000ULL
+/* SB instruction.  */
+#define AARCH64_FEATURE_SB		0x10000000000ULL
 
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8		AARCH64_FEATURE (AARCH64_FEATURE_V8, \
@@ -94,7 +96,8 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_ARCH_V8_5	AARCH64_FEATURE (AARCH64_ARCH_V8_4,	\
 						 AARCH64_FEATURE_V8_5   \
 						 | AARCH64_FEATURE_FLAGMANIP \
-						 | AARCH64_FEATURE_FRINTTS)
+						 | AARCH64_FEATURE_FRINTTS \
+						 | AARCH64_FEATURE_SB)
 
 
 #define AARCH64_ARCH_NONE	AARCH64_FEATURE (0, 0)

@@ -1,5 +1,13 @@
 2018-10-09  Sudakshina Das  <sudi.das@arm.com>
 
+	* config/tc-aarch64.c (aarch64_features): Add new "sb" option
+	for older architectures.
+	* doc/c-aarch64.texi: Document the same.
+	* testsuite/gas/aarch64/sb.s: New.
+	* testsuite/gas/aarch64/sb.d: New.
+
+2018-10-09  Sudakshina Das  <sudi.das@arm.com>
+
 	* testsuite/gas/aarch64/armv8_5-a-dp.s: New.
 	* testsuite/gas/aarch64/armv8_5-a-dp.d: New.
 

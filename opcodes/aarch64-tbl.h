@@ -2165,6 +2165,8 @@ static const aarch64_feature_set aarch64_feature_flagmanip =
   AARCH64_FEATURE (AARCH64_FEATURE_FLAGMANIP, 0);
 static const aarch64_feature_set aarch64_feature_frintts =
   AARCH64_FEATURE (AARCH64_FEATURE_FRINTTS, 0);
+static const aarch64_feature_set aarch64_feature_sb =
+  AARCH64_FEATURE (AARCH64_FEATURE_SB, 0);
 
 
 #define CORE		&aarch64_feature_v8
@@ -2196,6 +2198,7 @@ static const aarch64_feature_set aarch64_feature_frintts =
 #define ARMV8_5		&aarch64_feature_v8_5
 #define FLAGMANIP	&aarch64_feature_flagmanip
 #define FRINTTS		&aarch64_feature_frintts
+#define SB		&aarch64_feature_sb
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2253,6 +2256,8 @@ static const aarch64_feature_set aarch64_feature_frintts =
   { NAME, OPCODE, MASK, CLASS, 0, FLAGMANIP, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define FRINTTS_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, FRINTTS, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define SB_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, SB, OPS, QUALS, FLAGS, 0, 0, NULL }
 
 struct aarch64_opcode aarch64_opcode_table[] =
 {
@@ -3518,6 +3523,7 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("pssbb", 0xd503349f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
   CORE_INSN ("dmb", 0xd50330bf, 0xfffff0ff, ic_system, 0, OP1 (BARRIER), {}, 0),
   CORE_INSN ("isb", 0xd50330df, 0xfffff0ff, ic_system, 0, OP1 (BARRIER_ISB), {}, F_OPD0_OPT | F_DEFAULT (0xF)),
+  SB_INSN ("sb", 0xd50330ff, 0xffffffff, ic_system, OP0 (), {}, 0),
   CORE_INSN ("sys", 0xd5080000, 0xfff80000, ic_system, 0, OP5 (UIMM3_OP1, CRn, CRm, UIMM3_OP2, Rt), QL_SYS, F_HAS_ALIAS | F_OPD4_OPT | F_DEFAULT (0x1F)),
   CORE_INSN ("at",  0xd5080000, 0xfff80000, ic_system, 0, OP2 (SYSREG_AT, Rt), QL_SRC_X, F_ALIAS),
   CORE_INSN ("dc",  0xd5080000, 0xfff80000, ic_system, 0, OP2 (SYSREG_DC, Rt), QL_SRC_X, F_ALIAS),
