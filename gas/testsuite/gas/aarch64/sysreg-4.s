@@ -4,3 +4,5 @@ func:
 	dvp rctx, x2
 	cpp rctx, x3
 	dc cvadp, x4
+	mrs x5, rndr
+	mrs x6, rndrrs

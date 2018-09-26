@@ -1,5 +1,13 @@
 2018-10-09  Sudakshina Das  <sudi.das@arm.com>
 
+	* config/tc-aarch64.c (aarch64_features): New "rng" option.
+	* doc/c-aarch64.texi: Document the same.
+	* testsuite/gas/aarch64/sysreg-4.s: Test both instructions.
+	* testsuite/gas/aarch64/sysreg-4.d: Likewise.
+	* testsuite/gas/aarch64/illegal-sysreg-4.l: Likewise.
+
+2018-10-09  Sudakshina Das  <sudi.das@arm.com>
+
 	* testsuite/gas/aarch64/sysreg-4.s: Test instruction.
 	* testsuite/gas/aarch64/sysreg-4.d: Likewise.
 	* testsuite/gas/aarch64/illegal-sysreg-4.l: Likewise.

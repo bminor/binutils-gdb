@@ -185,6 +185,8 @@ automatically cause those extensions to be disabled.
  @tab Enable the speculation barrier instruction sb.
 @item @code{predres} @tab ARMv8-A @tab ARMv8.5-A or later
  @tab Enable the Execution and Data and Prediction instructions.
+@item @code{rng} @tab ARMv8.5-A @tab No
+ @tab Enable ARMv8.5-A random number instructions.
 @end multitable
 
 @node AArch64 Syntax

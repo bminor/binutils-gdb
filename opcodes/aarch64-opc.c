@@ -3855,6 +3855,8 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   { "contextidr_el1",   CPENC(3,0,C13,C0,1),	0 },
   { "contextidr_el2",	CPENC (3, 4, C13, C0, 1), F_ARCHEXT },
   { "contextidr_el12",	CPENC (3, 5, C13, C0, 1), F_ARCHEXT },
+  { "rndr",		CPENC(3,3,C2,C4,0), F_ARCHEXT | F_REG_READ }, /* RO */
+  { "rndrrs",		CPENC(3,3,C2,C4,1), F_ARCHEXT | F_REG_READ }, /* RO */
   { "tpidr_el0",        CPENC(3,3,C13,C0,2),	0 },
   { "tpidrro_el0",      CPENC(3,3,C13,C0,3),	0 }, /* RW */
   { "tpidr_el1",        CPENC(3,0,C13,C0,4),	0 },
@@ -4284,6 +4286,14 @@ aarch64_sys_reg_supported_p (const aarch64_feature_set features,
        || reg->value == CPENS (6, C8, C5, 1)
        || reg->value == CPENS (6, C8, C5, 5))
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_4))
+    return FALSE;
+
+  /* Random Number Instructions.  For now they are available
+     (and optional) only with ARMv8.5-A.  */
+  if ((reg->value == CPENC (3, 3, C2, C4, 0)
+       || reg->value == CPENC (3, 3, C2, C4, 1))
+      && !(AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_RNG)
+	   && AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_5)))
     return FALSE;
 
   return TRUE;

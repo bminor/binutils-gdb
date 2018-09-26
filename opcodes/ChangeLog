@@ -1,5 +1,11 @@
 2018-10-09  Sudakshina Das  <sudi.das@arm.com>
 
+	* aarch64-opc.c (aarch64_sys_regs): New entries for
+	rndr and rndrrs.
+	(aarch64_sys_reg_supported_p): New check for above.
+
+2018-10-09  Sudakshina Das  <sudi.das@arm.com>
+
 	* aarch64-opc.c (aarch64_sys_regs_dc): New entry for cvadp.
 	(aarch64_sys_ins_reg_supported_p): New check for above.
 

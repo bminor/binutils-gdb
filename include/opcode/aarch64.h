@@ -74,6 +74,8 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_PREDRES		0x20000000000ULL
 /* DC CVADP.  */
 #define AARCH64_FEATURE_CVADP		0x40000000000ULL
+/* Random Number instructions.  */
+#define AARCH64_FEATURE_RNG		0x80000000000ULL
 
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8		AARCH64_FEATURE (AARCH64_FEATURE_V8, \

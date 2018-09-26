@@ -6,3 +6,5 @@
 [^:]*:[0-9]+: Error: selected processor does not support system register name 'rctx'
 [^:]*:[0-9]+: Error: selected processor does not support `cpp rctx,x3'
 [^:]*:[0-9]+: Error: selected processor does not support system register name 'cvadp'
+[^:]*:[0-9]+: Error: selected processor does not support system register name 'rndr'
+[^:]*:[0-9]+: Error: selected processor does not support system register name 'rndrrs'
