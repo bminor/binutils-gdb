@@ -1,5 +1,16 @@
 2018-10-09  Sudakshina Das  <sudi.das@arm.com>
 
+	* config/tc-aarch64.c (parse_bti_operand): New.
+	(process_omitted_operand): Add case for AARCH64_OPND_BTI_TARGET.
+	(parse_operands): Likewise.
+	* testsuite/gas/aarch64/system.d: Update for BTI.
+	* testsuite/gas/aarch64/bti.s: New.
+	* testsuite/gas/aarch64/bti.d: New.
+	* testsuite/gas/aarch64/illegal-bti.d: New.
+	* testsuite/gas/aarch64/illegal-bti.l: New.
+
+2018-10-09  Sudakshina Das  <sudi.das@arm.com>
+
 	* config/tc-aarch64.c (aarch64_features): New "rng" option.
 	* doc/c-aarch64.texi: Document the same.
 	* testsuite/gas/aarch64/sysreg-4.s: Test both instructions.

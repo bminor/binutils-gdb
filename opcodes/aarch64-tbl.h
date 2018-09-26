@@ -2169,6 +2169,8 @@ static const aarch64_feature_set aarch64_feature_sb =
   AARCH64_FEATURE (AARCH64_FEATURE_SB, 0);
 static const aarch64_feature_set aarch64_feature_predres =
   AARCH64_FEATURE (AARCH64_FEATURE_PREDRES, 0);
+static const aarch64_feature_set aarch64_feature_bti =
+  AARCH64_FEATURE (AARCH64_FEATURE_BTI, 0);
 
 
 #define CORE		&aarch64_feature_v8
@@ -2202,6 +2204,7 @@ static const aarch64_feature_set aarch64_feature_predres =
 #define FRINTTS		&aarch64_feature_frintts
 #define SB		&aarch64_feature_sb
 #define PREDRES		&aarch64_feature_predres
+#define BTI		&aarch64_feature_bti
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2263,6 +2266,8 @@ static const aarch64_feature_set aarch64_feature_predres =
   { NAME, OPCODE, MASK, CLASS, 0, SB, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define PREDRES_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, PREDRES, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define BTI_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, BTI, OPS, QUALS, FLAGS, 0, 0, NULL }
 
 struct aarch64_opcode aarch64_opcode_table[] =
 {
@@ -3510,6 +3515,7 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("hint",0xd503201f, 0xfffff01f, ic_system, 0, OP1 (UIMM7), {}, F_HAS_ALIAS),
   CORE_INSN ("nop", 0xd503201f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
   CORE_INSN ("csdb",0xd503229f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
+  BTI_INSN ("bti",0xd503241f, 0xffffff3f, ic_system, OP1 (BTI_TARGET), {}, F_ALIAS | F_OPD0_OPT | F_DEFAULT (0x0)),
   CORE_INSN ("yield", 0xd503203f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
   CORE_INSN ("wfe", 0xd503205f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
   CORE_INSN ("wfi", 0xd503207f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
@@ -4629,6 +4635,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
       "a prefetch operation specifier")					\
     Y(SYSTEM, hint, "BARRIER_PSB", 0, F (),				\
       "the PSB option name CSYNC")					\
+    Y(SYSTEM, hint, "BTI", 0, F (),					\
+      "BTI targets j/c/jc")						\
     Y(ADDRESS, sve_addr_ri_s4, "SVE_ADDR_RI_S4x16",			\
       4 << OPD_F_OD_LSB, F(FLD_Rn),					\
       "an address with a 4-bit signed offset, multiplied by 16")	\

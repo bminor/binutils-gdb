@@ -466,8 +466,13 @@ const struct aarch64_name_value_pair aarch64_barrier_options[16] =
 
 const struct aarch64_name_value_pair aarch64_hint_options[] =
 {
-  { "csync", 0x11 },    /* PSB CSYNC.  */
-  { NULL, 0x0 },
+  /* BTI.  This is also the F_DEFAULT entry for AARCH64_OPND_BTI_TARGET.  */
+  { " ",	HINT_ENCODE (HINT_OPD_F_NOPRINT, 0x20) },
+  { "csync",	HINT_OPD_CSYNC },	/* PSB CSYNC.  */
+  { "c",	HINT_OPD_C },		/* BTI C.  */
+  { "j",	HINT_OPD_J },		/* BTI J.  */
+  { "jc",	HINT_OPD_JC },		/* BTI JC.  */
+  { NULL,	HINT_OPD_NULL },
 };
 
 /* op -> op:       load = 0 instruction = 1 store = 2
@@ -3654,7 +3659,9 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       break;
 
     case AARCH64_OPND_BARRIER_PSB:
-      snprintf (buf, size, "%s", opnd->hint_option->name);
+    case AARCH64_OPND_BTI_TARGET:
+      if ((HINT_FLAG (opnd->hint_option->value) & HINT_OPD_F_NOPRINT) == 0)
+	snprintf (buf, size, "%s", opnd->hint_option->name);
       break;
 
     default:

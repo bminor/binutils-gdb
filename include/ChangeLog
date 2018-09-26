@@ -1,5 +1,14 @@
 2018-10-09  Sudakshina Das  <sudi.das@arm.com>
 
+	* opcode/aarch64.h (AARCH64_FEATURE_BTI): New.
+	(AARCH64_ARCH_V8_5): Add AARCH64_FEATURE_BTI by default.
+	(aarch64_opnd): Add AARCH64_OPND_BTI_TARGET.
+	(HINT_OPD_CSYNC, HINT_OPD_C, HINT_OPD_J): New macros to
+	define HINT #imm values.
+	(HINT_OPD_JC, HINT_OPD_NULL): Likewise.
+
+2018-10-09  Sudakshina Das  <sudi.das@arm.com>
+
 	* opcode/aarch64.h (AARCH64_FEATURE_RNG): New.
 
 2018-10-09  Sudakshina Das  <sudi.das@arm.com>

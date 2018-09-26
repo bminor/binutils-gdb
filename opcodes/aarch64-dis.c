@@ -1312,7 +1312,7 @@ aarch64_ext_hint (const aarch64_operand *self ATTRIBUTE_UNUSED,
 
   for (i = 0; aarch64_hint_options[i].name != NULL; i++)
     {
-      if (hint_number == aarch64_hint_options[i].value)
+      if (hint_number == HINT_VAL (aarch64_hint_options[i].value))
 	{
 	  info->hint_option = &(aarch64_hint_options[i]);
 	  return TRUE;

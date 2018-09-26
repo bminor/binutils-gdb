@@ -1,5 +1,23 @@
 2018-10-09  Sudakshina Das  <sudi.das@arm.com>
 
+	* aarch64-opc.h (HINT_OPD_NOPRINT, HINT_ENCODE): New.
+	(HINT_FLAG, HINT_VALUE): New macros to encode NO_PRINT flag
+	with the hint immediate.
+	* aarch64-opc.c (aarch64_hint_options): New entries for
+	c, j, jc and default (with HINT_OPD_F_NOPRINT flag) for BTI.
+	(aarch64_print_operand): Add case for AARCH64_OPND_BTI_TARGET
+	while checking for HINT_OPD_F_NOPRINT flag.
+	* aarch64-dis.c (aarch64_ext_hint): Use new HINT_VALUE to
+	extract value.
+	* aarch64-tbl.h (aarch64_feature_bti, BTI, BTI_INSN): New.
+	(aarch64_opcode_table): Add entry for BTI.
+	(AARCH64_OPERANDS): Add new description for BTI targets.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2018-10-09  Sudakshina Das  <sudi.das@arm.com>
+
 	* aarch64-opc.c (aarch64_sys_regs): New entries for
 	rndr and rndrrs.
 	(aarch64_sys_reg_supported_p): New check for above.

@@ -76,6 +76,8 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_CVADP		0x40000000000ULL
 /* Random Number instructions.  */
 #define AARCH64_FEATURE_RNG		0x80000000000ULL
+/* BTI instructions.  */
+#define AARCH64_FEATURE_BTI		0x100000000000ULL
 
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8		AARCH64_FEATURE (AARCH64_FEATURE_V8, \
@@ -105,7 +107,8 @@ typedef uint32_t aarch64_insn;
 						 | AARCH64_FEATURE_FRINTTS \
 						 | AARCH64_FEATURE_SB   \
 						 | AARCH64_FEATURE_PREDRES \
-						 | AARCH64_FEATURE_CVADP)
+						 | AARCH64_FEATURE_CVADP \
+						 | AARCH64_FEATURE_BTI)
 
 
 #define AARCH64_ARCH_NONE	AARCH64_FEATURE (0, 0)
@@ -285,6 +288,7 @@ enum aarch64_opnd
   AARCH64_OPND_BARRIER_ISB,	/* Barrier operand for ISB.  */
   AARCH64_OPND_PRFOP,		/* Prefetch operation.  */
   AARCH64_OPND_BARRIER_PSB,	/* Barrier operand for PSB.  */
+  AARCH64_OPND_BTI_TARGET,	/* BTI {<target>}.  */
 
   AARCH64_OPND_SVE_ADDR_RI_S4x16,   /* SVE [<Xn|SP>, #<simm4>*16].  */
   AARCH64_OPND_SVE_ADDR_RI_S4xVL,   /* SVE [<Xn|SP>, #<simm4>, MUL VL].  */
@@ -1089,6 +1093,13 @@ struct aarch64_inst
   /* Operands information.  */
   aarch64_opnd_info operands[AARCH64_MAX_OPND_NUM];
 };
+
+/* Defining the HINT #imm values for the aarch64_hint_options.  */
+#define HINT_OPD_CSYNC	0x11
+#define HINT_OPD_C	0x22
+#define HINT_OPD_J	0x24
+#define HINT_OPD_JC	0x26
+#define HINT_OPD_NULL	0x00
 
 
 /* Diagnosis related declaration and interface.  */

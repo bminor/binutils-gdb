@@ -220,6 +220,14 @@ verify_constraints (const struct aarch64_inst *, const aarch64_insn, bfd_vma,
 #define F_REG_WRITE	(1 << 4)  /* Register can only be written to but not
 				     read from.  */
 
+/* HINT operand flags.  */
+#define HINT_OPD_F_NOPRINT	(1 << 0)  /* Should not be printed.  */
+
+/* Encode 7-bit HINT #imm in the lower 8 bits.  Use higher bits for flags.  */
+#define HINT_ENCODE(flag, val) ((flag << 8) | val)
+#define HINT_FLAG(val) (val >> 8)
+#define HINT_VAL(val) (val & 0xff)
+
 static inline bfd_boolean
 operand_has_inserter (const aarch64_operand *operand)
 {
