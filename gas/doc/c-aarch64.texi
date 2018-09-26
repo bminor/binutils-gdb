@@ -187,6 +187,8 @@ automatically cause those extensions to be disabled.
  @tab Enable the Execution and Data and Prediction instructions.
 @item @code{rng} @tab ARMv8.5-A @tab No
  @tab Enable ARMv8.5-A random number instructions.
+@item @code{ssbs} @tab ARMv8-A @tab ARMv8.5-A or later
+ @tab Enable Speculative Store Bypassing Safe state read and write.
 @end multitable
 
 @node AArch64 Syntax

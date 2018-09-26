@@ -82,6 +82,8 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_SCXTNUM		0x200000000000ULL
 /* ID_PFR2 instructions.  */
 #define AARCH64_FEATURE_ID_PFR2		0x400000000000ULL
+/* SSBS mechanism enabled.  */
+#define AARCH64_FEATURE_SSBS		0x800000000000ULL
 
 
 /* Architectures are the sum of the base and extensions.  */
@@ -115,7 +117,8 @@ typedef uint32_t aarch64_insn;
 						 | AARCH64_FEATURE_CVADP \
 						 | AARCH64_FEATURE_BTI	\
 						 | AARCH64_FEATURE_SCXTNUM \
-						 | AARCH64_FEATURE_ID_PFR2)
+						 | AARCH64_FEATURE_ID_PFR2 \
+						 | AARCH64_FEATURE_SSBS)
 
 
 #define AARCH64_ARCH_NONE	AARCH64_FEATURE (0, 0)

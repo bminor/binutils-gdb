@@ -1,5 +1,10 @@
 2018-10-09  Sudakshina Das  <sudi.das@arm.com>
 
+	* opcode/aarch64.h (AARCH64_FEATURE_SSBS): New.
+	(AARCH64_ARCH_V8_5): Add AARCH64_FEATURE_SSBS by default.
+
+2018-10-09  Sudakshina Das  <sudi.das@arm.com>
+
 	* opcode/aarch64.h (AARCH64_FEATURE_SCXTNUM): New.
 	(AARCH64_FEATURE_ID_PFR2): New.
 	(AARCH64_ARCH_V8_5): Add both by default.

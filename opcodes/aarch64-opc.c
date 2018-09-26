@@ -2490,9 +2490,11 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  assert (idx == 0 && opnds[1].type == AARCH64_OPND_UIMM4);
 	  /* MSR UAO, #uimm4
 	     MSR PAN, #uimm4
+	     MSR SSBS,#uimm4
 	     The immediate must be #0 or #1.  */
 	  if ((opnd->pstatefield == 0x03	/* UAO.  */
 	       || opnd->pstatefield == 0x04	/* PAN.  */
+	       || opnd->pstatefield == 0x19     /* SSBS.  */
 	       || opnd->pstatefield == 0x1a)	/* DIT.  */
 	      && opnds[1].imm.value > 1)
 	    {
@@ -3708,6 +3710,7 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   { "pan",		CPEN_(0,C2,3),	F_ARCHEXT },
   { "uao",		CPEN_ (0, C2, 4), F_ARCHEXT },
   { "nzcv",             CPEN_(3,C2,0),	0 },
+  { "ssbs",		CPEN_(3,C2,6),  F_ARCHEXT },
   { "fpcr",             CPEN_(3,C4,0),	0 },
   { "fpsr",             CPEN_(3,C4,1),	0 },
   { "dspsr_el0",        CPEN_(3,C5,0),	0 },
@@ -4128,6 +4131,11 @@ aarch64_sys_reg_supported_p (const aarch64_feature_set features,
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_ID_PFR2))
     return FALSE;
 
+  /* SSBS.  Values are from aarch64_sys_regs.  */
+  if (reg->value == CPEN_(3,C2,6)
+      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_SSBS))
+    return FALSE;
+
   /* Virtualization host extensions: system registers.  */
   if ((reg->value == CPENC (3, 4, C2, C0, 1)
        || reg->value == CPENC (3, 4, C13, C0, 1)
@@ -4340,6 +4348,7 @@ const aarch64_sys_reg aarch64_pstatefields [] =
   { "daifclr",          0x1f,	0 },
   { "pan",		0x04,	F_ARCHEXT },
   { "uao",		0x03,	F_ARCHEXT },
+  { "ssbs",		0x19,   F_ARCHEXT },
   { "dit",		0x1a,	F_ARCHEXT },
   { 0,          CPENC(0,0,0,0,0), 0 },
 };
@@ -4359,6 +4368,11 @@ aarch64_pstatefield_supported_p (const aarch64_feature_set features,
   /* UAO.  Values are from aarch64_pstatefields.  */
   if (reg->value == 0x03
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_2))
+    return FALSE;
+
+  /* SSBS.  Values are from aarch64_pstatefields.  */
+  if (reg->value == 0x19
+      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_SSBS))
     return FALSE;
 
   /* DIT.  Values are from aarch64_pstatefields.  */

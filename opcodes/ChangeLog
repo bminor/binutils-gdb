@@ -1,5 +1,14 @@
 2018-10-09  Sudakshina Das  <sudi.das@arm.com>
 
+	* aarch64-opc.c (operand_general_constraint_met_p): Add
+	SSBS in the check for one-bit immediate.
+	(aarch64_sys_regs): New entry for SSBS.
+	(aarch64_sys_reg_supported_p): New check for above.
+	(aarch64_pstatefields): New entry for SSBS.
+	(aarch64_pstatefield_supported_p): New check for above.
+
+2018-10-09  Sudakshina Das  <sudi.das@arm.com>
+
 	* aarch64-opc.c (aarch64_sys_regs): New entries for
 	scxtnum_el[0,1,2,3,12] and id_pfr2_el1.
 	(aarch64_sys_reg_supported_p): New checks for above.

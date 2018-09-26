@@ -1,5 +1,17 @@
 2018-10-09  Sudakshina Das  <sudi.das@arm.com>
 
+	* config/tc-aarch64.c (aarch64_features): Add new "ssbs".
+	* doc/c-aarch64.texi: Document the same.
+	* testsuite/gas/aarch64/ssbs-illegal1.d: New test.
+	* testsuite/gas/aarch64/ssbs-illegal1.l: New test.
+	* testsuite/gas/aarch64/ssbs-illegal2.d: New test.
+	* testsuite/gas/aarch64/ssbs-illegal2.l: New test.
+	* testsuite/gas/aarch64/ssbs.s: New test.
+	* testsuite/gas/aarch64/ssbs1.d: Test with +ssbs
+	* testsuite/gas/aarch64/ssbs2.d: Test with armv8.5-a.
+
+2018-10-09  Sudakshina Das  <sudi.das@arm.com>
+
 	* testsuite/gas/aarch64/sysreg-4.s: Test registers
 	scxtnum_el[0,1,2,3,12] and id_pfr2_el1.
 	* testsuite/gas/aarch64/sysreg-4.d: Likewise.
