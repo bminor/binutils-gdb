@@ -1,3 +1,8 @@
+2018-09-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-properties.c (_bfd_elf_link_setup_gnu_properties): Use
+	elfclass instead of bed->s->elfclass.
+
 2018-09-27  Jim Wilson  <jimw@sifive.com>
 
 	* elfnn-riscv.c (riscv_init_pcgp_relocs): Add explanatory comment.
@@ -239,7 +244,7 @@
 	to calculate header and padding size.  Use filepos of the first
 	section otherwise.
 
-018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+2018-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23600
 	* archures.c (bfd_arch_get_compatible): Allow an IR object with

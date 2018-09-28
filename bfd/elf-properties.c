@@ -488,7 +488,7 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
     {
       bfd_size_type size;
       bfd_byte *contents;
-      unsigned int align_size = bed->s->elfclass == ELFCLASS64 ? 8 : 4;
+      unsigned int align_size = elfclass == ELFCLASS64 ? 8 : 4;
 
       sec = bfd_get_section_by_name (first_pbfd,
 				     NOTE_GNU_PROPERTY_SECTION_NAME);
