@@ -22,7 +22,7 @@ if {![dwarf2_support]} {
 
 standard_testfile .c
 
-set asm_file "${testfile}-dbg.s"
+set asm_file [standard_output_file "${testfile}-dbg.s"]
 set opts {}
 
 if  { [gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile}1.o \

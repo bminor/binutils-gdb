@@ -76,7 +76,7 @@ proc build {resolver_attr resolver_debug final_debug} {
 	lappend final_opts "debug"
     }
 
-    set final_o $final_file-$suffix.o
+    set final_o [standard_output_file $final_file-$suffix.o]
 
     if { [gdb_compile_shlib ${srcdir}/${subdir}/$libsrc \
 	      $lib_so $lib_opts] != ""
