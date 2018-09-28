@@ -2830,6 +2830,8 @@ typedef struct
   riscv_pcgp_lo_reloc *lo;
 } riscv_pcgp_relocs;
 
+/* Initialize the pcgp reloc info in P.  */
+
 static bfd_boolean
 riscv_init_pcgp_relocs (riscv_pcgp_relocs *p)
 {
@@ -2837,6 +2839,8 @@ riscv_init_pcgp_relocs (riscv_pcgp_relocs *p)
   p->lo = NULL;
   return TRUE;
 }
+
+/* Free the pcgp reloc info in P.  */
 
 static void
 riscv_free_pcgp_relocs (riscv_pcgp_relocs *p,
@@ -2861,6 +2865,10 @@ riscv_free_pcgp_relocs (riscv_pcgp_relocs *p,
     }
 }
 
+/* Record pcgp hi part reloc info in P, using HI_SEC_OFF as the lookup index.
+   The HI_ADDEND, HI_ADDR, HI_SYM, and SYM_SEC args contain info required to
+   relax the corresponding lo part reloc.  */
+
 static bfd_boolean
 riscv_record_pcgp_hi_reloc (riscv_pcgp_relocs *p, bfd_vma hi_sec_off,
 			    bfd_vma hi_addend, bfd_vma hi_addr,
@@ -2879,6 +2887,9 @@ riscv_record_pcgp_hi_reloc (riscv_pcgp_relocs *p, bfd_vma hi_sec_off,
   return TRUE;
 }
 
+/* Look up hi part pcgp reloc info in P, using HI_SEC_OFF as the lookup index.
+   This is used by a lo part reloc to find the corresponding hi part reloc.  */
+
 static riscv_pcgp_hi_reloc *
 riscv_find_pcgp_hi_reloc(riscv_pcgp_relocs *p, bfd_vma hi_sec_off)
 {
@@ -2890,31 +2901,8 @@ riscv_find_pcgp_hi_reloc(riscv_pcgp_relocs *p, bfd_vma hi_sec_off)
   return NULL;
 }
 
-static bfd_boolean
-riscv_delete_pcgp_hi_reloc(riscv_pcgp_relocs *p, bfd_vma hi_sec_off)
-{
-  bfd_boolean out = FALSE;
-  riscv_pcgp_hi_reloc *c;
-
-  for (c = p->hi; c != NULL; c = c->next)
-      if (c->hi_sec_off == hi_sec_off)
-	out = TRUE;
-
-  return out;
-}
-
-static bfd_boolean
-riscv_use_pcgp_hi_reloc(riscv_pcgp_relocs *p, bfd_vma hi_sec_off)
-{
-  bfd_boolean out = FALSE;
-  riscv_pcgp_hi_reloc *c;
-
-  for (c = p->hi; c != NULL; c = c->next)
-    if (c->hi_sec_off == hi_sec_off)
-      out = TRUE;
-
-  return out;
-}
+/* Record pcgp lo part reloc info in P, using HI_SEC_OFF as the lookup info.
+   This is used to record relocs that can't be relaxed.  */
 
 static bfd_boolean
 riscv_record_pcgp_lo_reloc (riscv_pcgp_relocs *p, bfd_vma hi_sec_off)
@@ -2928,6 +2916,9 @@ riscv_record_pcgp_lo_reloc (riscv_pcgp_relocs *p, bfd_vma hi_sec_off)
   return TRUE;
 }
 
+/* Look up lo part pcgp reloc info in P, using HI_SEC_OFF as the lookup index.
+   This is used by a hi part reloc to find the corresponding lo part reloc.  */
+
 static bfd_boolean
 riscv_find_pcgp_lo_reloc (riscv_pcgp_relocs *p, bfd_vma hi_sec_off)
 {
@@ -2937,14 +2928,6 @@ riscv_find_pcgp_lo_reloc (riscv_pcgp_relocs *p, bfd_vma hi_sec_off)
     if (c->hi_sec_off == hi_sec_off)
       return TRUE;
   return FALSE;
-}
-
-static bfd_boolean
-riscv_delete_pcgp_lo_reloc (riscv_pcgp_relocs *p ATTRIBUTE_UNUSED,
-			    bfd_vma lo_sec_off ATTRIBUTE_UNUSED,
-			    size_t bytes ATTRIBUTE_UNUSED)
-{
-  return TRUE;
 }
 
 typedef bfd_boolean (*relax_func_t) (bfd *, asection *, asection *,
@@ -3230,7 +3213,7 @@ _bfd_riscv_relax_align (bfd *abfd, asection *sec,
 /* Relax PC-relative references to GP-relative references.  */
 
 static bfd_boolean
-_bfd_riscv_relax_pc  (bfd *abfd,
+_bfd_riscv_relax_pc  (bfd *abfd ATTRIBUTE_UNUSED,
 		      asection *sec,
 		      asection *sym_sec,
 		      struct bfd_link_info *link_info,
@@ -3270,11 +3253,6 @@ _bfd_riscv_relax_pc  (bfd *abfd,
 	hi_reloc = *hi;
 	symval = hi_reloc.hi_addr;
 	sym_sec = hi_reloc.sym_sec;
-	if (!riscv_use_pcgp_hi_reloc(pcgp_relocs, hi->hi_sec_off))
-	  _bfd_error_handler
-	    (_("%pB(%pA+%#" PRIx64 "): Unable to clear RISCV_PCREL_HI20 reloc "
-	       "for corresponding RISCV_PCREL_LO12 reloc"),
-	     abfd, sec, (uint64_t) rel->r_offset);
       }
       break;
 
@@ -3318,12 +3296,12 @@ _bfd_riscv_relax_pc  (bfd *abfd,
 	case R_RISCV_PCREL_LO12_I:
 	  rel->r_info = ELFNN_R_INFO (sym, R_RISCV_GPREL_I);
 	  rel->r_addend += hi_reloc.hi_addend;
-	  return riscv_delete_pcgp_lo_reloc (pcgp_relocs, rel->r_offset, 4);
+	  return TRUE;
 
 	case R_RISCV_PCREL_LO12_S:
 	  rel->r_info = ELFNN_R_INFO (sym, R_RISCV_GPREL_S);
 	  rel->r_addend += hi_reloc.hi_addend;
-	  return riscv_delete_pcgp_lo_reloc (pcgp_relocs, rel->r_offset, 4);
+	  return TRUE;
 
 	case R_RISCV_PCREL_HI20:
 	  riscv_record_pcgp_hi_reloc (pcgp_relocs,
@@ -3335,7 +3313,7 @@ _bfd_riscv_relax_pc  (bfd *abfd,
 	  /* We can delete the unnecessary AUIPC and reloc.  */
 	  rel->r_info = ELFNN_R_INFO (0, R_RISCV_DELETE);
 	  rel->r_addend = 4;
-	  return riscv_delete_pcgp_hi_reloc (pcgp_relocs, rel->r_offset);
+	  return TRUE;
 
 	default:
 	  abort ();

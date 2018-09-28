@@ -1,3 +1,15 @@
+2018-09-27  Jim Wilson  <jimw@sifive.com>
+
+	* elfnn-riscv.c (riscv_init_pcgp_relocs): Add explanatory comment.
+	(riscv_free_pcgp_relocs, riscv_record_pcgp_reloc): Likewise.
+	(riscv_find_pcgp_hi_reloc, riscv_reocrd_pcgp_lo_reloc): Likewise.
+	(riscv_find_pcgp_lo_reloc): Likewise.
+	(riscv_delete_pcgp_hi_reloc, riscv_use_pcgp_hi_reloc): Delete.
+	(riscv_delete_pcgp_lo_reloc): Likewise.
+	(_bfd_riscv_relax_pc): Don't call riscv_use_pcgp_hi_reloc. Replace
+	calls to riscv_delete_pcgp_lo_reloc and riscv_delete_pcgp_hi_reloc
+	with TRUE.  Mark abfd arg as ATTRIBUTE_UNUSED.
+
 2018-09-25  Jim Wilson  <jimw@sifive.com>
 
 	* elfnn-riscv.c (riscv_make_plt_header): New arg output_bfd.  Change
