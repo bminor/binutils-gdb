@@ -210,20 +210,9 @@ show_use_compressed_breakpoints (struct ui_file *file, int from_tty,
 				 struct cmd_list_element *c,
 				 const char *value)
 {
-  const char *additional_info;
-  struct gdbarch *gdbarch = target_gdbarch ();
-
-  if (use_compressed_breakpoints == AUTO_BOOLEAN_AUTO)
-    if (riscv_has_feature (gdbarch, 'C'))
-      additional_info = _(" (currently on)");
-    else
-      additional_info = _(" (currently off)");
-  else
-    additional_info = "";
-
   fprintf_filtered (file,
 		    _("Debugger's use of compressed breakpoints is set "
-		      "to %s%s.\n"), value, additional_info);
+		      "to %s.\n"), value);
 }
 
 /* The set and show lists for 'set riscv' and 'show riscv' prefixes.  */
@@ -283,6 +272,11 @@ show_riscv_debug_variable (struct ui_file *file, int from_tty,
 		    _("RiscV debug variable `%s' is set to: %s\n"),
 		    c->name, value);
 }
+
+/* When this is set to non-zero debugging information about breakpoint
+   kinds will be printed.  */
+
+static unsigned int riscv_debug_breakpoints = 0;
 
 /* When this is set to non-zero debugging information about inferior calls
    will be printed.  */
@@ -417,7 +411,18 @@ riscv_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 {
   if (use_compressed_breakpoints == AUTO_BOOLEAN_AUTO)
     {
-      if (riscv_has_feature (gdbarch, 'C'))
+      gdb_byte buf[1];
+
+      /* Read the opcode byte to determine the instruction length.  */
+      read_code (*pcptr, buf, 1);
+
+      if (riscv_debug_breakpoints)
+	fprintf_unfiltered
+	  (gdb_stdlog,
+	   "Using %s for breakpoint at %s (instruction length %d)\n",
+	   riscv_insn_length (buf[0]) == 2 ? "C.EBREAK" : "EBREAK",
+	   paddress (gdbarch, *pcptr), riscv_insn_length (buf[0]));
+      if (riscv_insn_length (buf[0]) == 2)
 	return 2;
       else
 	return 4;
@@ -2953,6 +2958,16 @@ _initialize_riscv_tdep (void)
 		  &showdebugriscvcmdlist, "show debug riscv ", 0,
 		  &showdebuglist);
 
+  add_setshow_zuinteger_cmd ("breakpoints", class_maintenance,
+			     &riscv_debug_breakpoints,  _("\
+Set riscv breakpoint debugging."), _("\
+Show riscv breakpoint debugging."), _("\
+When non-zero, print debugging information for the riscv specific parts\n\
+of the breakpoint mechanism."),
+			     NULL,
+			     show_riscv_debug_variable,
+			     &setdebugriscvcmdlist, &showdebugriscvcmdlist);
+
   add_setshow_zuinteger_cmd ("infcall", class_maintenance,
 			     &riscv_debug_infcall,  _("\
 Set riscv inferior call debugging."), _("\
@@ -2989,10 +3004,10 @@ of the stack unwinding mechanism."),
 				_("\
 Set debugger's use of compressed breakpoints."), _("	\
 Show debugger's use of compressed breakpoints."), _("\
-Debugging compressed code requires compressed breakpoints to be used. If\n \
-left to 'auto' then gdb will use them if $misa indicates the C extension\n \
-is supported. If that doesn't give the correct behavior, then this option\n\
-can be used."),
+Debugging compressed code requires compressed breakpoints to be used. If\n\
+left to 'auto' then gdb will use them if the existing instruction is a\n\
+compressed instruction. If that doesn't give the correct behavior, then\n\
+this option can be used."),
 				NULL,
 				show_use_compressed_breakpoints,
 				&setriscvcmdlist,

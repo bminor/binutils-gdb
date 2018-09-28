@@ -1,3 +1,16 @@
+2018-09-28  John Baldwin  <jhb@FreeBSD.org>
+
+	* disasm-selftests.c (print_one_insn_test): Add bfd_arch_riscv to
+	case with explicit breakpoint kind.
+	* riscv-tdep.c (show_use_compressed_breakpoints): Remove
+	'additional_info' and related logic.
+	(riscv_debug_breakpoints): New variable.
+	(riscv_breakpoint_kind_from_pc): Use the length of the existing
+	instruction to determine the breakpoint kind.
+	(_initialize_riscv_tdep): Add 'set/show debug riscv breakpoints'
+	flag.  Update description of 'set/show riscv
+	use-compressed-breakpoints' flag.
+
 2018-09-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	(NEWS): Mention changes to frame related commands.
