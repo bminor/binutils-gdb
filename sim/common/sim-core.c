@@ -587,7 +587,7 @@ sim_core_set_xor (SIM_DESC sd,
 	    mask = 0;
 	  while (i - 1 < WITH_XOR_ENDIAN)
 	    {
-	      cpu_core->xor[i-1] = mask;
+	      cpu_core->byte_xor[i-1] = mask;
 	      mask = (mask << 1) & (WITH_XOR_ENDIAN - 1);
 	      i = (i << 1);
 	    }
@@ -634,7 +634,8 @@ sim_core_xor_read_buffer (SIM_DESC sd,
 			  address_word addr,
 			  unsigned nr_bytes)
 {
-  address_word byte_xor = (cpu == NULL ? STATE_CORE (sd)->byte_xor : CPU_CORE (cpu)->xor[0]);
+  address_word byte_xor
+    = (cpu == NULL ? STATE_CORE (sd)->byte_xor : CPU_CORE (cpu)->byte_xor[0]);
   if (!WITH_XOR_ENDIAN || !byte_xor)
     return sim_core_read_buffer (sd, cpu, map, buffer, addr, nr_bytes);
   else
@@ -686,7 +687,8 @@ sim_core_xor_write_buffer (SIM_DESC sd,
 			   address_word addr,
 			   unsigned nr_bytes)
 {
-  address_word byte_xor = (cpu == NULL ? STATE_CORE (sd)->byte_xor : CPU_CORE (cpu)->xor[0]);
+  address_word byte_xor
+    = (cpu == NULL ? STATE_CORE (sd)->byte_xor : CPU_CORE (cpu)->byte_xor[0]);
   if (!WITH_XOR_ENDIAN || !byte_xor)
     return sim_core_write_buffer (sd, cpu, map, buffer, addr, nr_bytes);
   else
