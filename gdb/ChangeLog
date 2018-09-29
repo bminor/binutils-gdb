@@ -1,5 +1,9 @@
 2018-09-29  Tom Tromey  <tom@tromey.com>
 
+	* README: Remove some leftover text.
+
+2018-09-29  Tom Tromey  <tom@tromey.com>
+
 	* PROBLEMS: Rewrite.
 	* README: Update.
 

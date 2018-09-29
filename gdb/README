@@ -496,9 +496,6 @@ more obscure GDB `configure' options are not listed here.
      be either the name of a Python executable, or the name of the
      directory in which Python is installed.
 
-names a Python executable, which will be queried to find
-     the Python headers and libraries.
-
 `--with-guile[=GUILE]'
      Build GDB with GNU Guile scripting support.  (Done by default if
      libguile is present and found at configure time.)  If your host
