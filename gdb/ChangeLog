@@ -1,3 +1,7 @@
+2018-10-01  Tom Tromey  <tom@tromey.com>
+
+	* README: Minor change.
+
 2018-09-30  Pedro Alves  <palves@redhat.com>
 
 	* darwin-nat-info.c (darwin_debug_regions_recurse)

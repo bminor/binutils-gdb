@@ -1,3 +1,7 @@
+2018-10-01  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Configure Options): Document configure options.
+
 2018-09-29  Tom Tromey  <tom@tromey.com>
 
 	* gdb.texinfo (Requirements): Mention C++, GNU make.

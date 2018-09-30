@@ -35593,11 +35593,158 @@ Configure @value{GDBN} for cross-debugging programs running on the specified
 @var{target}.  Without this option, @value{GDBN} is configured to debug
 programs that run on the same machine (@var{host}) as @value{GDBN} itself.
 
-There is no convenient way to generate a list of all available targets.
+There is no convenient way to generate a list of all available
+targets.  Also see the @code{--enable-targets} option, below.
 @end table
 
-There are many other options available as well, but they are generally
-needed for special purposes only.
+There are many other options that are specific to @value{GDBN}.  This
+lists just the most common ones; there are some very specialized
+options not described here.
+
+@table @code
+@item --enable-targets=@r{[}@var{target}@r{]}@dots{}
+@itemx --enable-targets=all
+Configure @value{GDBN} for cross-debugging programs running on the
+specified list of targets.  The special value @samp{all} configures
+@value{GDBN} for debugging programs running on any target it supports.
+
+@item --with-gdb-datadir=@var{path}
+Set the @value{GDBN}-specific data directory.  @value{GDBN} will look
+here for certain supporting files or scripts.  This defaults to the
+@file{gdb} subdirectory of @samp{datadi} (which can be set using
+@code{--datadir}).
+
+@item --with-relocated-sources=@var{dir}
+Sets up the default source path substitution rule so that directory
+names recorded in debug information will be automatically adjusted for
+any directory under @var{dir}.  @var{dir} should be a subdirectory of
+@value{GDBN}'s configured prefix, the one mentioned in the
+@code{--prefix} or @code{--exec-prefix} options to configure.  This
+option is useful if GDB is supposed to be moved to a different place
+after it is built.
+
+@item --enable-64-bit-bfd
+Enable 64-bit support in BFD on 32-bit hosts.
+
+@item --disable-gdbmi
+Build @value{GDBN} without the GDB/MI machine interface
+(@pxref{GDB/MI}).
+
+@item --enable-tui
+Build @value{GDBN} with the text-mode full-screen user interface
+(TUI).  Requires a curses library (ncurses and cursesX are also
+supported).
+
+@item --with-curses
+Use the curses library instead of the termcap library, for text-mode
+terminal operations.
+
+@item --with-libunwind-ia64
+Use the libunwind library for unwinding function call stack on ia64
+target platforms.  See http://www.nongnu.org/libunwind/index.html for
+details.
+
+@item --with-system-readline
+Use the readline library installed on the host, rather than the
+library supplied as part of @value{GDBN}.
+
+@item --with-system-zlib
+Use the zlib library installed on the host, rather than the library
+supplied as part of @value{GDBN}.
+
+@item --with-expat
+Build @value{GDBN} with Expat, a library for XML parsing.  (Done by
+default if libexpat is installed and found at configure time.)  This
+library is used to read XML files supplied with @value{GDBN}.  If it
+is unavailable, some features, such as remote protocol memory maps,
+target descriptions, and shared library lists, that are based on XML
+files, will not be available in @value{GDBN}.  If your host does not
+have libexpat installed, you can get the latest version from
+`http://expat.sourceforge.net'.
+
+@item --with-libiconv-prefix@r{[}=@var{dir}@r{]}
+
+Build @value{GDBN} with GNU libiconv, a character set encoding
+conversion library.  This is not done by default, as on GNU systems
+the @code{iconv} that is built in to the C library is sufficient.  If
+your host does not have a working @code{iconv}, you can get the latest
+version of GNU iconv from `https://www.gnu.org/software/libiconv/'.
+
+@value{GDBN}'s build system also supports building GNU libiconv as
+part of the overall build.   @xref{Requirements}.
+
+@item --with-lzma
+Build @value{GDBN} with LZMA, a compression library.  (Done by default
+if liblzma is installed and found at configure time.)  LZMA is used by
+@value{GDBN}'s "mini debuginfo" feature, which is only useful on
+platforms using the ELF object file format.  If your host does not
+have liblzma installed, you can get the latest version from
+`https://tukaani.org/xz/'.
+
+@item --with-mpfr
+Build @value{GDBN} with GNU MPFR, a library for multiple-precision
+floating-point computation with correct rounding.  (Done by default if
+GNU MPFR is installed and found at configure time.)  This library is
+used to emulate target floating-point arithmetic during expression
+evaluation when the target uses different floating-point formats than
+the host.  If GNU MPFR is not available, @value{GDBN} will fall back
+to using host floating-point arithmetic.  If your host does not have
+GNU MPFR installed, you can get the latest version from
+`http://www.mpfr.org'.
+
+@item --with-python@r{[}=@var{python}@r{]}
+Build @value{GDBN} with Python scripting support.  (Done by default if
+libpython is present and found at configure time.)  Python makes
+@value{GDBN} scripting much more powerful than the restricted CLI
+scripting language.  If your host does not have Python installed, you
+can find it on `http://www.python.org/download/'.  The oldest version
+of Python supported by GDB is 2.4.  The optional argument @var{python}
+is used to find the Python headers and libraries.  It can be either
+the name of a Python executable, or the name of the directory in which
+Python is installed.
+
+@item --with-guile[=GUILE]'
+Build @value{GDBN} with GNU Guile scripting support.  (Done by default
+if libguile is present and found at configure time.)  If your host
+does not have Guile installed, you can find it at
+`https://www.gnu.org/software/guile/'.  The optional argument GUILE
+can be a version number, which will cause @code{configure} to try to
+use that version of Guile; or the file name of a @code{pkg-config}
+executable, which will be queried to find the information needed to
+compile and link against Guile.
+
+@item --without-included-regex
+Don't use the regex library included with @value{GDBN} (as part of the
+libiberty library).  This is the default on hosts with version 2 of
+the GNU C library.
+
+@item --with-sysroot=@var{dir}
+Use @var{dir} as the default system root directory for libraries whose
+file names begin with @file{/lib}' or @file{/usr/lib'}.  (The value of
+@var{dir} can be modified at run time by using the @command{set
+sysroot} command.)  If @var{dir} is under the @value{GDBN} configured
+prefix (set with @code{--prefix} or @code{--exec-prefix options}, the
+default system root will be automatically adjusted if and when
+@value{GDBN} is moved to a different location.
+
+@item --with-system-gdbinit=@var{file}
+Configure @value{GDBN} to automatically load a system-wide init file.
+@var{file} should be an absolute file name.  If @var{file} is in a
+directory under the configured prefix, and @value{GDBN} is moved to
+another location after being built, the location of the system-wide
+init file will be adjusted accordingly.
+
+@item --enable-build-warnings
+When building the @value{GDBN} sources, ask the compiler to warn about
+any code which looks even vaguely suspicious.  It passes many
+different warning flags, depending on the exact version of the
+compiler you are using.
+
+@item --enable-werror
+Treat compiler warnings as werrors.  It adds the @code{-Werror} flag
+to the compiler, which will fail the compilation if the compiler
+outputs any warning messages.
+@end table
 
 @node System-wide configuration
 @section System-wide configuration and settings

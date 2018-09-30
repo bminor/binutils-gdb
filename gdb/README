@@ -439,11 +439,11 @@ more obscure GDB `configure' options are not listed here.
 
 `--with-system-readline'
      Use the readline library installed on the host, rather than the
-     library supplied as part of GDB tarball.
+     library supplied as part of GDB.
 
 `--with-system-zlib
      Use the zlib library installed on the host, rather than the
-     library supplied as part of GDB tarball.
+     library supplied as part of GDB.
 
 `--with-expat'
      Build GDB with Expat, a library for XML parsing.  (Done by
