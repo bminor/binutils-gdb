@@ -607,14 +607,12 @@ darwin_debug_regions (task_t task, mach_vm_address_t address, int max)
 static void
 darwin_debug_regions_recurse (task_t task)
 {
-  mach_vm_address_t r_addr;
   mach_vm_address_t r_start;
   mach_vm_size_t r_size;
   natural_t r_depth;
   mach_msg_type_number_t r_info_size;
   vm_region_submap_short_info_data_64_t r_info;
   kern_return_t kret;
-  int ret;
   struct ui_out *uiout = current_uiout;
 
   ui_out_emit_table table_emitter (uiout, 9, -1, "regions");
@@ -792,8 +790,6 @@ disp_exception (const darwin_exception_info *info)
 static void
 info_mach_exceptions_command (const char *args, int from_tty)
 {
-  int i;
-  task_t task;
   kern_return_t kret;
   darwin_exception_info info;
 

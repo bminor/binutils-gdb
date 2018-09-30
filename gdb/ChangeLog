@@ -1,3 +1,17 @@
+2018-09-30  Pedro Alves  <palves@redhat.com>
+
+	* darwin-nat-info.c (darwin_debug_regions_recurse)
+	(info_mach_exceptions_command): Remove unused local variables.
+	* darwin-nat.c (darwin_decode_notify_message)
+	(darwin_nat_target::resume, darwin_nat_target::mourn_inferior)
+	(darwin_stop_inferior, darwin_setup_exceptions)
+	(darwin_nat_target::kill, darwin_attach_pid, darwin_ptrace_him)
+	(darwin_nat_target::attach, darwin_nat_target::detach)
+	(darwin_read_write_inferior, darwin_read_dyld_info): Remove unused
+	local variables.
+	* i386-darwin-nat.c (i386_darwin_dr_set): Remove unused local
+	variables.
+
 2018-09-29  Tom Tromey  <tom@tromey.com>
 
 	* README: Remove some leftover text.

@@ -746,11 +746,7 @@ darwin_decode_notify_message (mach_msg_header_t *hdr, struct inferior **pinf)
   NDR_record_t *ndr = (NDR_record_t *)(hdr + 1);
   integer_t *data = (integer_t *)(ndr + 1);
   struct inferior *inf;
-  darwin_thread_t *thread;
   task_t task_port;
-  thread_t thread_port;
-  kern_return_t kret;
-  int i;
 
   /* Check message header.  */
   if (hdr->msgh_bits & MACH_MSGH_BITS_COMPLEX)
@@ -939,12 +935,8 @@ void
 darwin_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
 {
   struct target_waitstatus status;
-  int pid;
 
-  kern_return_t kret;
-  int res;
   int nsignal;
-  struct inferior *inf;
 
   inferior_debug
     (2, _("darwin_resume: pid=%d, tid=0x%lx, step=%d, signal=%d\n"),
@@ -1361,7 +1353,6 @@ darwin_nat_target::mourn_inferior ()
   darwin_inferior *priv = get_darwin_inferior (inf);
   kern_return_t kret;
   mach_port_t prev;
-  int i;
 
   /* Deallocate threads.  */
   darwin_deallocate_threads (inf);
@@ -1420,8 +1411,6 @@ darwin_stop_inferior (struct inferior *inf)
 {
   struct target_waitstatus wstatus;
   ptid_t ptid;
-  kern_return_t kret;
-  int status;
   int res;
   darwin_inferior *priv = get_darwin_inferior (inf);
 
@@ -1502,7 +1491,6 @@ darwin_setup_exceptions (struct inferior *inf)
 {
   darwin_inferior *priv = get_darwin_inferior (inf);
   kern_return_t kret;
-  int traps_expected;
   exception_mask_t mask;
 
   kret = darwin_save_exception_ports (priv);
@@ -1532,7 +1520,6 @@ darwin_nat_target::kill ()
   struct target_waitstatus wstatus;
   ptid_t ptid;
   kern_return_t kret;
-  int status;
   int res;
 
   if (inferior_ptid == null_ptid)
@@ -1611,10 +1598,6 @@ static void
 darwin_attach_pid (struct inferior *inf)
 {
   kern_return_t kret;
-  mach_port_t prev_port;
-  int traps_expected;
-  mach_port_t prev_not;
-  exception_mask_t mask;
 
   darwin_inferior *priv = new darwin_inferior;
   inf->priv.reset (priv);
@@ -1800,10 +1783,6 @@ darwin_pre_ptrace (void)
 static void
 darwin_ptrace_him (int pid)
 {
-  task_t itask;
-  kern_return_t kret;
-  mach_port_t prev_port;
-  int traps_expected;
   struct inferior *inf = current_inferior ();
 
   darwin_attach_pid (inf);
@@ -1927,11 +1906,7 @@ void
 darwin_nat_target::attach (const char *args, int from_tty)
 {
   pid_t pid;
-  pid_t pid2;
-  int wstatus;
-  int res;
   struct inferior *inf;
-  kern_return_t kret;
 
   pid = parse_pid_to_attach (args);
 
@@ -1987,7 +1962,6 @@ darwin_nat_target::attach (const char *args, int from_tty)
 void
 darwin_nat_target::detach (inferior *inf, int from_tty)
 {
-  pid_t pid = inferior_ptid.pid ();
   darwin_inferior *priv = get_darwin_inferior (inf);
   kern_return_t kret;
   int res;
@@ -2056,11 +2030,6 @@ darwin_read_write_inferior (task_t task, CORE_ADDR addr,
 {
   kern_return_t kret;
   mach_vm_size_t res_length = 0;
-  pointer_t copied;
-  mach_msg_type_number_t copy_count;
-  mach_vm_size_t remaining_length;
-  mach_vm_address_t region_address;
-  mach_vm_size_t region_length;
 
   inferior_debug (8, _("darwin_read_write_inferior(task=0x%x, %s, len=%s)\n"),
 		  task, core_addr_to_string (addr), pulongest (length));
@@ -2214,7 +2183,6 @@ darwin_read_dyld_info (task_t task, CORE_ADDR addr, gdb_byte *rdaddr,
 {
   struct task_dyld_info task_dyld_info;
   mach_msg_type_number_t count = TASK_DYLD_INFO_COUNT;
-  int sz = TASK_DYLD_INFO_COUNT * sizeof (natural_t);
   kern_return_t kret;
 
   if (addr != 0 || length > sizeof (mach_vm_address_t))
