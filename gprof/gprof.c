@@ -452,7 +452,7 @@ This program is free software.  This program has absolutely no warranty.\n"));
 	    {
 	      output_style &= ~STYLE_EXEC_COUNTS;
 	    }
-	  user_specified |= STYLE_ANNOTATED_SOURCE;
+	  user_specified |= STYLE_EXEC_COUNTS;
 	  break;
 	case OPTION_DEMANGLE:
 	  demangle = TRUE;
