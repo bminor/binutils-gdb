@@ -1,5 +1,13 @@
 2018-10-01  Gary Benson <gbenson@redhat.com>
 
+	* configure.ac: Check if sys/procfs.h defines elf_fpregset_t.
+	(AC_CHECK_HEADERS): Check for linux/elf.h.
+	* configure, config.in: Rebuild.
+	* gdb_proc_service.h: Include linux/elf.h if sys/procfs.h
+	doesn't define elf_fpregset_t.
+
+2018-10-01  Gary Benson <gbenson@redhat.com>
+
 	* gdb_proc_service.h: Whitespace change.
 
 2018-10-01  Tom Tromey  <tom@tromey.com>

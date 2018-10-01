@@ -156,6 +156,9 @@
 /* Define if ELF support should be included. */
 #undef HAVE_ELF
 
+/* Define if <sys/procfs.h> has elf_fpregset_t. */
+#undef HAVE_ELF_FPREGSET_T
+
 /* Define to 1 if you have the <elf_hp.h> header file. */
 #undef HAVE_ELF_HP_H
 
@@ -260,6 +263,9 @@
 
 /* Define to 1 if you have the <libunwind-ia64.h> header file. */
 #undef HAVE_LIBUNWIND_IA64_H
+
+/* Define to 1 if you have the <linux/elf.h> header file. */
+#undef HAVE_LINUX_ELF_H
 
 /* Define to 1 if you have the <linux/perf_event.h> header file. */
 #undef HAVE_LINUX_PERF_EVENT_H

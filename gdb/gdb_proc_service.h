@@ -64,6 +64,15 @@ EXTERN_C_POP
 #include <sys/procfs.h>
 #endif
 
+/* Not all platforms bring in <linux/elf.h> via <sys/procfs.h>.  If
+   <sys/procfs.h> wasn't enough to find elf_fpregset_t, try the kernel
+   headers also (but don't if we don't need to).  */
+#ifndef HAVE_ELF_FPREGSET_T
+# ifdef HAVE_LINUX_ELF_H
+#  include <linux/elf.h>
+# endif
+#endif
+
 EXTERN_C_PUSH
 
 /* Functions in this interface return one of these status codes.  */

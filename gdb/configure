@@ -12165,7 +12165,7 @@ fi
 
 # elf_hp.h is for HP/UX 64-bit shared library support.
 for ac_header in nlist.h machine/reg.h poll.h sys/poll.h proc_service.h \
-                  thread_db.h \
+                  thread_db.h linux/elf.h \
 		  sys/file.h sys/filio.h sys/ioctl.h sys/param.h \
 		  sys/resource.h sys/procfs.h sys/ptrace.h ptrace.h \
 		  sys/reg.h sys/debugreg.h sys/select.h \
@@ -14635,6 +14635,43 @@ $as_echo "#define HAVE_PSADDR_T 1" >>confdefs.h
  fi
  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_procfs_type_psaddr_t" >&5
 $as_echo "$bfd_cv_have_sys_procfs_type_psaddr_t" >&6; }
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for elf_fpregset_t in sys/procfs.h" >&5
+$as_echo_n "checking for elf_fpregset_t in sys/procfs.h... " >&6; }
+ if ${bfd_cv_have_sys_procfs_type_elf_fpregset_t+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
+#include <sys/procfs.h>
+int
+main ()
+{
+elf_fpregset_t avar
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  bfd_cv_have_sys_procfs_type_elf_fpregset_t=yes
+else
+  bfd_cv_have_sys_procfs_type_elf_fpregset_t=no
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+
+ if test $bfd_cv_have_sys_procfs_type_elf_fpregset_t = yes; then
+
+$as_echo "#define HAVE_ELF_FPREGSET_T 1" >>confdefs.h
+
+ fi
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_procfs_type_elf_fpregset_t" >&5
+$as_echo "$bfd_cv_have_sys_procfs_type_elf_fpregset_t" >&6; }
 
 
 
