@@ -173,7 +173,8 @@ ps_lsetregs (struct ps_prochandle *ph, lwpid_t lwpid, const prgregset_t gregset)
    process PH and store them in FPREGSET.  */
 
 ps_err_e
-ps_lgetfpregs (struct ps_prochandle *ph, lwpid_t lwpid, gdb_prfpregset_t *fpregset)
+ps_lgetfpregs (struct ps_prochandle *ph, lwpid_t lwpid,
+	       prfpregset_t *fpregset)
 {
   struct regcache *regcache = get_ps_regcache (ph, lwpid);
 
@@ -188,7 +189,7 @@ ps_lgetfpregs (struct ps_prochandle *ph, lwpid_t lwpid, gdb_prfpregset_t *fpregs
 
 ps_err_e
 ps_lsetfpregs (struct ps_prochandle *ph, lwpid_t lwpid,
-	       const gdb_prfpregset_t *fpregset)
+	       const prfpregset_t *fpregset)
 {
   struct regcache *regcache = get_ps_regcache (ph, lwpid);
 

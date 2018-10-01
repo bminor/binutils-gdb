@@ -21,21 +21,7 @@
 
 #include "common/gdb_proc_service.h"
 
-#include "gregset.h"
-
 struct thread_info;
-
-/* Fix-up some broken systems.  */
-
-/* Unfortunately glibc 2.1.3 was released with a broken prfpregset_t
-   type.  We let configure check for this lossage, and make
-   appropriate typedefs here.  */
-
-#ifdef PRFPREGSET_T_BROKEN
-typedef gdb_fpregset_t gdb_prfpregset_t;
-#else
-typedef prfpregset_t gdb_prfpregset_t;
-#endif
 
 /* GDB specific structure that identifies the target process.  */
 struct ps_prochandle

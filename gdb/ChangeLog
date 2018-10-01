@@ -1,5 +1,13 @@
 2018-10-01  Gary Benson <gbenson@redhat.com>
 
+	* gdb_proc_service.h (gdb_prfpregset_t): Remove typedef.
+	* proc-service.c (ps_lgetfpregs, ps_lsetfpregs): Use
+	prfpregset_t instead of gdb_prfpregset_t.
+	* configure.ac (PRFPREGSET_T_BROKEN): Remove check.
+	* configure, config.in: Rebuild.
+
+2018-10-01  Gary Benson <gbenson@redhat.com>
+
 	* common/gdb_proc_service.h: New file, factored out from...
 	* gdb_proc_service.h: Moved common code to the above file.
 	* Makefile.in (HFILES_NO_SRCDIR): Add the above new file.
