@@ -1,3 +1,8 @@
+2018-10-01  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.arch/i386-avx512.exp: Fix setting of nr_regs based on
+	is_amd64_regs_target.
+
 2018-10-01  Alan Hayward  <alan.hayward@arm.com>
 
 	* gdb.arch/aarch64-sighandler-regs.c: New test.

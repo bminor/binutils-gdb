@@ -93,9 +93,9 @@ gdb_test "break [gdb_get_line_number "third breakpoint here"]" \
 gdb_continue_to_breakpoint "continue to third breakpoint in main"
 
 if [is_amd64_regs_target] {
-    set nr_regs 8
-} else {
     set nr_regs 32
+} else {
+    set nr_regs 8
 }
 
 for { set r 0 } { $r < $nr_regs } { incr r } {
