@@ -1,3 +1,20 @@
+2018-10-01  Cupertino Miranda <cmiranda@synopsys.com>
+
+	* arc-got.h (relocate_fix_got_relocs_for_got_info): Changed. Take TLS
+	section alignment in consideration for this relocation. Fixed TCB_SIZE
+	offset size to include section alignment.
+	(get_got_entry_list_for_symbol): Changed.
+	* elf32-arc.c (FINAL_SECTSTART): Added this formula macro.
+	(ARC_TLS_DTPOFF) Updated reloc to use new created macro instead.
+	(arc_special_overflow_checks): Fixed TCB_SIZE offsize to include
+	section alignment.
+	(elf_arc_check_relocs): Changed.
+	(elf_arc_finish_dynamic_symbol) Return FALSE in case arc_htab is NULL.
+	(struct elf_arc_link_hash_entry): Moved and changed.
+	(elf_arc_link_hash_newfunc): Changed.
+	(arc_elf_link_hash_table_create): Removed old initializations.
+	(elf_arc_relocate_section, elf_arc_finish_dynamic_symbol): Changed.
+
 2018-09-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-properties.c (_bfd_elf_link_setup_gnu_properties): Use

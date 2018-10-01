@@ -1,3 +1,7 @@
+2018-10-01  Cupertino Miranda <cmiranda@synopsys.com>
+
+	* arc-reloc.def (ARC_TLS_LE_32): Updated reloc formula.
+
 2018-09-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/23694
