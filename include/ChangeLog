@@ -1,3 +1,7 @@
+2018-10-03  John Darrington <john@darrington.wattle.id.au>
+
+	* dis-asm.h (print_insn_s12z): New declaration.
+
 2018-10-02  Palmer Dabbelt  <palmer@sifive.com>
 
 	* opcode/riscv-opc.h (MATCH_FENCE_TSO): New define.
