@@ -1,5 +1,10 @@
 2018-10-01  Gary Benson <gbenson@redhat.com>
 
+	* gdb_proc_service.h: Use elf_gregset_t if prgregset_t is
+	undefined.  Use elf_fpregset_t if prfpregset_t is undefined.
+
+2018-10-01  Gary Benson <gbenson@redhat.com>
+
 	* configure.ac: Check if sys/procfs.h defines elf_fpregset_t.
 	(AC_CHECK_HEADERS): Check for linux/elf.h.
 	* configure, config.in: Rebuild.

@@ -96,11 +96,11 @@ typedef void *psaddr_t;
 #endif
 
 #ifndef HAVE_PRGREGSET_T
-typedef gdb_gregset_t prgregset_t;
+typedef elf_gregset_t prgregset_t;
 #endif
 
 #ifndef HAVE_PRFPREGSET_T
-typedef gdb_fpregset_t prfpregset_t;
+typedef elf_fpregset_t prfpregset_t;
 #endif
 
 /* This type is opaque in this interface.  It's defined by the user of
