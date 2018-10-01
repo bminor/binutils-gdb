@@ -70,7 +70,7 @@ EXTERN_C_PUSH
 typedef enum
 {
   PS_OK,		/* Generic "call succeeded".  */
-  PS_ERR,		/* Generic error. */
+  PS_ERR,		/* Generic error.  */
   PS_BADPID,		/* Bad process handle.  */
   PS_BADLID,		/* Bad LWP identifier.  */
   PS_BADADDR,		/* Bad address.  */

@@ -31,7 +31,30 @@ EXTERN_C_PUSH
 
 EXTERN_C_POP
 
-#else
+#else /* HAVE_PROC_SERVICE_H */
+
+/* The following fallback definitions have been imported and adjusted
+   from glibc's proc_service.h  */
+
+/* Callback interface for libthread_db, functions users must define.
+   Copyright (C) 1999,2002,2003 Free Software Foundation, Inc.
+   This file is part of the GNU C Library.
+
+   The GNU C Library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public
+   License as published by the Free Software Foundation; either
+   version 2.1 of the License, or (at your option) any later version.
+
+   The GNU C Library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+
+   You should have received a copy of the GNU Lesser General Public
+   License along with the GNU C Library; if not, see
+   <http://www.gnu.org/licenses/>.  */
+
+/* The definitions in this file must correspond to those in the debugger.  */
 
 #ifdef HAVE_SYS_PROCFS_H
 #include <sys/procfs.h>
@@ -48,15 +71,16 @@ EXTERN_C_POP
 
 EXTERN_C_PUSH
 
+/* Functions in this interface return one of these status codes.  */
 typedef enum
 {
-  PS_OK,			/* Success.  */
-  PS_ERR,			/* Generic error.  */
-  PS_BADPID,			/* Bad process handle.  */
-  PS_BADLID,			/* Bad LWP id.  */
-  PS_BADADDR,			/* Bad address.  */
-  PS_NOSYM,			/* Symbol not found.  */
-  PS_NOFREGS			/* FPU register set not available.  */
+  PS_OK,		/* Generic "call succeeded".  */
+  PS_ERR,		/* Generic error.  */
+  PS_BADPID,		/* Bad process handle.  */
+  PS_BADLID,		/* Bad LWP identifier.  */
+  PS_BADADDR,		/* Bad address.  */
+  PS_NOSYM,		/* Could not find given symbol.  */
+  PS_NOFREGS		/* FPU register set not available for given LWP.  */
 } ps_err_e;
 
 #ifndef HAVE_LWPID_T
