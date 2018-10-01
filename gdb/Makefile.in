@@ -1433,6 +1433,7 @@ HFILES_NO_SRCDIR = \
 	common/gdb_assert.h \
 	common/gdb_tilde_expand.h \
 	common/gdb_locale.h \
+	common/gdb_proc_service.h \
 	common/gdb_setjmp.h \
 	common/gdb_signals.h \
 	common/gdb_sys_time.h \

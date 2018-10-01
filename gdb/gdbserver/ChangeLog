@@ -1,5 +1,10 @@
 2018-10-01  Gary Benson <gbenson@redhat.com>
 
+	* gdb_proc_service.h: Moved common code to
+	common/gdb_proc_service.h.
+
+2018-10-01  Gary Benson <gbenson@redhat.com>
+
 	* gdb_proc_service.h: Synchronize comments and whitespace with
 	GDB's version of this file.
 

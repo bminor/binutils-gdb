@@ -1,5 +1,11 @@
 2018-10-01  Gary Benson <gbenson@redhat.com>
 
+	* common/gdb_proc_service.h: New file, factored out from...
+	* gdb_proc_service.h: Moved common code to the above file.
+	* Makefile.in (HFILES_NO_SRCDIR): Add the above new file.
+
+2018-10-01  Gary Benson <gbenson@redhat.com>
+
 	* gdb_proc_service.h: Use elf_gregset_t if prgregset_t is
 	undefined.  Use elf_fpregset_t if prfpregset_t is undefined.
 
