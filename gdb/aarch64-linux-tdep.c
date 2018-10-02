@@ -247,8 +247,8 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
 	    vq = sve_vq_from_vl (extract_unsigned_integer (buf, 2, byte_order));
 
 	    if (vq != tdep->vq)
-	      error (_("Invalid vector length in signal frame %d vs %ld."), vq,
-		     tdep->vq);
+	      error (_("Invalid vector length in signal frame %d vs %s."), vq,
+		     pulongest (tdep->vq));
 
 	    if (size >= AARCH64_SVE_CONTEXT_SIZE (vq))
 	      sve_regs = section + AARCH64_SVE_CONTEXT_REGS_OFFSET;
