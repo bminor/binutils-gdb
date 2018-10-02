@@ -776,15 +776,17 @@ recpy_bt_goto (PyObject *self, PyObject *args)
   const recpy_record_object * const record = (recpy_record_object *) self;
   thread_info *const tinfo = record->thread;
   const recpy_element_object *obj;
+  PyObject *parse_obj;
 
   if (tinfo == NULL || btrace_is_empty (tinfo))
 	return PyErr_Format (gdbpy_gdb_error, _("Empty branch trace."));
 
-  if (!PyArg_ParseTuple (args, "O", &obj))
+  if (!PyArg_ParseTuple (args, "O", &parse_obj))
     return NULL;
 
-  if (Py_TYPE (obj) != &recpy_insn_type)
+  if (Py_TYPE (parse_obj) != &recpy_insn_type)
     return PyErr_Format (PyExc_TypeError, _("Argument must be instruction."));
+  obj = (const recpy_element_object *) parse_obj;
 
   TRY
     {

@@ -1,3 +1,8 @@
+2018-10-05  Tom de Vries  <tdevries@suse.de>
+
+	* python/py-record-btrace.c (recpy_bt_goto): Fix type mismatch in
+	PyArg_ParseTuple call.
+
 2018-10-04  Joel Brobecker  <brobecker@adacore.com>
 
 	* psymtab.c (recursively_search_psymtabs): Reformat parameters
