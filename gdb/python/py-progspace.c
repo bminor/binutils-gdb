@@ -362,7 +362,7 @@ static PyObject *
 pspy_solib_name (PyObject *o, PyObject *args)
 {
   char *soname;
-  gdb_py_longest pc;
+  gdb_py_ulongest pc;
   pspace_object *self = (pspace_object *) o;
 
   PSPY_REQUIRE_VALID (self);
