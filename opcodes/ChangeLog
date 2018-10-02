@@ -1,3 +1,7 @@
+2018-10-02  Palmer Dabbelt  <palmer@sifive.com>
+
+	* riscv-opc.c (riscv_opcodes) <fence.tso>: New opcode.
+
 2018-09-23  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* nios2-dis.c (nios2_print_insn_arg): Make sure signed conversions

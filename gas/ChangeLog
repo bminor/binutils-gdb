@@ -1,3 +1,8 @@
+2018-10-02  Palmer Dabbelt  <palmer@sifive.com>
+
+	* testsuite/gas/riscv/fence-tso.d: New file.
+	* testsuite/gas/riscv/fence-tso.s: Likewise.
+
 2018-09-26  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* testsuite/gas/all/gas.exp: Skip "Output file must be distinct

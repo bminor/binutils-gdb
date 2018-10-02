@@ -1,3 +1,8 @@
+2018-10-02  Palmer Dabbelt  <palmer@sifive.com>
+
+	* opcode/riscv-opc.h (MATCH_FENCE_TSO): New define.
+	(MASK_FENCE_TSO): Likewise.
+
 2018-10-01  Cupertino Miranda <cmiranda@synopsys.com>
 
 	* arc-reloc.def (ARC_TLS_LE_32): Updated reloc formula.
