@@ -4371,23 +4371,22 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
   for (s = abfd->sections; s != NULL; s = s->next)
     {
       if ((s->flags & SEC_LOAD) != 0
-	  && CONST_STRNEQ (s->name, ".note"))
+	  && elf_section_type (s) == SHT_NOTE)
 	{
+	  unsigned int alignment_power;
 	  /* We need a PT_NOTE segment.  */
 	  ++segs;
-	  /* Try to create just one PT_NOTE segment
-	     for all adjacent loadable .note* sections.
-	     gABI requires that within a PT_NOTE segment
-	     (and also inside of each SHT_NOTE section)
-	     each note is padded to a multiple of 4 size,
-	     so we check whether the sections are correctly
-	     aligned.  */
-	  if (s->alignment_power == 2)
-	    while (s->next != NULL
-		   && s->next->alignment_power == 2
-		   && (s->next->flags & SEC_LOAD) != 0
-		   && CONST_STRNEQ (s->next->name, ".note"))
-	      s = s->next;
+	  /* Try to create just one PT_NOTE segment for all adjacent
+	     loadable SHT_NOTE sections.  gABI requires that within a
+	     PT_NOTE segment (and also inside of each SHT_NOTE section)
+	     each note should have the same alignment.  So we check
+	     whether the sections are correctly aligned.  */
+	  alignment_power = s->alignment_power;
+	  while (s->next != NULL
+		 && s->next->alignment_power == alignment_power
+		 && (s->next->flags & SEC_LOAD) != 0
+		 && elf_section_type (s->next) == SHT_NOTE)
+	    s = s->next;
 	}
     }
 
@@ -4885,33 +4884,33 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	  pm = &m->next;
 	}
 
-      /* For each batch of consecutive loadable .note sections,
+      /* For each batch of consecutive loadable SHT_NOTE  sections,
 	 add a PT_NOTE segment.  We don't use bfd_get_section_by_name,
 	 because if we link together nonloadable .note sections and
 	 loadable .note sections, we will generate two .note sections
-	 in the output file.  FIXME: Using names for section types is
-	 bogus anyhow.  */
+	 in the output file.  */
       for (s = abfd->sections; s != NULL; s = s->next)
 	{
 	  if ((s->flags & SEC_LOAD) != 0
-	      && CONST_STRNEQ (s->name, ".note"))
+	      && elf_section_type (s) == SHT_NOTE)
 	    {
 	      asection *s2;
+	      unsigned int alignment_power = s->alignment_power;
 
 	      count = 1;
 	      amt = sizeof (struct elf_segment_map);
-	      if (s->alignment_power == 2)
-		for (s2 = s; s2->next != NULL; s2 = s2->next)
-		  {
-		    if (s2->next->alignment_power == 2
-			&& (s2->next->flags & SEC_LOAD) != 0
-			&& CONST_STRNEQ (s2->next->name, ".note")
-			&& align_power (s2->lma + s2->size, 2)
-			   == s2->next->lma)
-		      count++;
-		    else
-		      break;
-		  }
+	      for (s2 = s; s2->next != NULL; s2 = s2->next)
+		{
+		  if (s2->next->alignment_power == alignment_power
+		      && (s2->next->flags & SEC_LOAD) != 0
+		      && elf_section_type (s2->next) == SHT_NOTE
+		      && align_power (s2->lma + s2->size,
+				      alignment_power)
+		      == s2->next->lma)
+		    count++;
+		  else
+		    break;
+		}
 	      amt += (count - 1) * sizeof (asection *);
 	      m = (struct elf_segment_map *) bfd_zalloc (abfd, amt);
 	      if (m == NULL)

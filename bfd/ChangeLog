@@ -1,3 +1,11 @@
+2018-10-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23658
+	* elf.c (get_program_header_size): Put all adjacent SHT_NOTE
+	sections with the same section alignment into a single PT_NOTE
+	segment.  Check SHT_NOTE section type instead of section name.
+	(_bfd_elf_map_sections_to_segments): Likewise.
+
 2018-10-03  Millan Wolff  <mail@milianw.de>
 
 	PR 23715
