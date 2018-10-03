@@ -12386,7 +12386,8 @@ is_32bit_abs_reloc (Filedata * filedata, unsigned int reloc_type)
     case EM_68HC12:
       return reloc_type == 6; /* R_M68HC11_32.  */
     case EM_S12Z:
-      return reloc_type == 6; /* R_S12Z_EXT32.  */
+      return reloc_type == 7 || /* R_S12Z_EXT32 */
+	reloc_type == 6;        /* R_S12Z_CW32.  */
     case EM_MCORE:
       return reloc_type == 1; /* R_MCORE_ADDR32.  */
     case EM_CYGNUS_MEP:
