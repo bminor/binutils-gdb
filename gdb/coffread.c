@@ -781,7 +781,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 		  struct objfile *objfile)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
-  struct context_stack *newobj;
+  struct context_stack *newobj = nullptr;
   struct coff_symbol coff_symbol;
   struct coff_symbol *cs = &coff_symbol;
   static struct internal_syment main_sym;

@@ -966,7 +966,8 @@ gdbscm_value_to_string (SCM self, SCM rest)
   int encoding_arg_pos = -1, errors_arg_pos = -1, length_arg_pos = -1;
   char *encoding = NULL;
   SCM errors = SCM_BOOL_F;
-  gdb_byte *buffer_contents;
+  /* Avoid an uninitialized warning from gcc.  */
+  gdb_byte *buffer_contents = nullptr;
   int length = -1;
   const char *la_encoding = NULL;
   struct type *char_type = NULL;

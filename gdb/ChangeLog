@@ -1,3 +1,9 @@
+2018-10-03  Tom Tromey  <tom@tromey.com>
+
+	* guile/scm-value.c (gdbscm_value_to_string): Initialize
+	"buffer_contents".
+	* coffread.c (coff_symtab_read): Initialize "newobj".
+
 2018-10-03  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* dwarf2read.c (read_func_scope): Remove struct keyword in
