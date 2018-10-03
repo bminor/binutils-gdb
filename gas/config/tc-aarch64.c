@@ -4807,10 +4807,12 @@ output_operand_error_report (char *str, bfd_boolean non_fatal_only)
     {
       gas_assert (curr->detail.kind != AARCH64_OPDE_NIL);
       DEBUG_TRACE ("\t%s", operand_mismatch_kind_names[curr->detail.kind]);
-      if (operand_error_higher_severity_p (curr->detail.kind, kind))
+      if (operand_error_higher_severity_p (curr->detail.kind, kind)
+	  && (!non_fatal_only || (non_fatal_only && curr->detail.non_fatal)))
 	kind = curr->detail.kind;
     }
-  gas_assert (kind != AARCH64_OPDE_NIL);
+
+  gas_assert (kind != AARCH64_OPDE_NIL || non_fatal_only);
 
   /* Pick up one of errors of KIND to report.  */
   largest_error_pos = -2; /* Index can be -1 which means unknown index.  */

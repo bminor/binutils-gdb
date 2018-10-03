@@ -183,6 +183,10 @@ typedef struct aarch64_operand aarch64_operand;
 
 extern const aarch64_operand aarch64_operands[];
 
+enum err_type
+verify_constraints (const struct aarch64_inst *, const aarch64_insn, bfd_vma,
+		    bfd_boolean, aarch64_operand_error *, aarch64_instr_sequence*);
+
 /* Operand flags.  */
 
 #define OPD_F_HAS_INSERTER	0x00000001

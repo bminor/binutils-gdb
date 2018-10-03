@@ -1,5 +1,11 @@
 2018-10-03  Tamar Christina  <tamar.christina@arm.com>
 
+	* aarch64-opc.c (init_insn_block): New.
+	(verify_constraints, aarch64_is_destructive_by_operands): New.
+	* aarch64-opc.h (verify_constraints): New.
+
+2018-10-03  Tamar Christina  <tamar.christina@arm.com>
+
 	* aarch64-dis.c (aarch64_opcode_decode): Update verifier call.
 	* aarch64-opc.c (verify_ldpsw): Update arguments.
 

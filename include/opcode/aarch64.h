@@ -648,6 +648,7 @@ enum err_type
   ERR_UND,
   ERR_UNP,
   ERR_NYI,
+  ERR_VFI,
   ERR_NR_ENTRIES
 };
 
@@ -1065,7 +1066,6 @@ struct aarch64_inst
   aarch64_opnd_info operands[AARCH64_MAX_OPND_NUM];
 };
 
-typedef struct aarch64_inst aarch64_inst;
 
 /* Diagnosis related declaration and interface.  */
 
@@ -1190,6 +1190,9 @@ extern aarch64_opnd_qualifier_t
 aarch64_get_expected_qualifier (const aarch64_opnd_qualifier_seq_t *, int,
 				const aarch64_opnd_qualifier_t, int);
 
+extern bfd_boolean
+aarch64_is_destructive_by_operands (const aarch64_opcode *);
+
 extern int
 aarch64_num_of_operands (const aarch64_opcode *);
 
@@ -1201,7 +1204,10 @@ aarch64_zero_register_p (const aarch64_opnd_info *);
 
 extern enum err_type
 aarch64_decode_insn (aarch64_insn, aarch64_inst *, bfd_boolean,
-		     aarch64_operand_error *errors);
+		     aarch64_operand_error *);
+
+extern void
+init_insn_sequence (const struct aarch64_inst *, aarch64_instr_sequence *);
 
 /* Given an operand qualifier, return the expected data element size
    of a qualified operand.  */

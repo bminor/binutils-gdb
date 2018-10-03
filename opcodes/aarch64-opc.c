@@ -832,6 +832,25 @@ dump_match_qualifiers (const struct aarch64_opnd_info *opnd,
 }
 #endif /* DEBUG_AARCH64 */
 
+/* This function checks if the given instruction INSN is a destructive
+   instruction based on the usage of the registers.  It does not recognize
+   unary destructive instructions.  */
+bfd_boolean
+aarch64_is_destructive_by_operands (const aarch64_opcode *opcode)
+{
+  int i = 0;
+  const enum aarch64_opnd *opnds = opcode->operands;
+
+  if (opnds[0] == AARCH64_OPND_NIL)
+    return FALSE;
+
+  while (opnds[++i] != AARCH64_OPND_NIL)
+    if (opnds[i] == opnds[0])
+      return TRUE;
+
+  return FALSE;
+}
+
 /* TODO improve this, we can have an extra field at the runtime to
    store the number of operands rather than calculating it every time.  */
 
@@ -4491,7 +4510,7 @@ verify_ldpsw (const struct aarch64_inst *inst ATTRIBUTE_UNUSED,
 	      const aarch64_insn insn, bfd_vma pc ATTRIBUTE_UNUSED,
 	      bfd_boolean encoding ATTRIBUTE_UNUSED,
 	      aarch64_operand_error *mismatch_detail ATTRIBUTE_UNUSED,
-	      aarch64_instr_sequence *insn_block ATTRIBUTE_UNUSED)
+	      aarch64_instr_sequence *insn_sequence ATTRIBUTE_UNUSED)
 {
   int t  = BITS (insn, 4, 0);
   int n  = BITS (insn, 9, 5);
@@ -4513,6 +4532,334 @@ verify_ldpsw (const struct aarch64_inst *inst ATTRIBUTE_UNUSED,
 
   return ERR_OK;
 }
+
+/* Initialize an instruction sequence insn_sequence with the instruction INST.
+   If INST is NULL the given insn_sequence is cleared and the sequence is left
+   uninitialized.  */
+
+void
+init_insn_sequence (const struct aarch64_inst *inst,
+		    aarch64_instr_sequence *insn_sequence)
+{
+  int num_req_entries = 0;
+  insn_sequence->next_insn = 0;
+  insn_sequence->num_insns = num_req_entries;
+  if (insn_sequence->instr)
+    XDELETE (insn_sequence->instr);
+  insn_sequence->instr = NULL;
+
+  if (inst)
+    {
+      insn_sequence->instr = XNEW (aarch64_inst);
+      memcpy (insn_sequence->instr, inst, sizeof (aarch64_inst));
+    }
+
+  /* Handle all the cases here.  May need to think of something smarter than
+     a giant if/else chain if this grows.  At that time, a lookup table may be
+     best.  */
+  if (inst && inst->opcode->constraints & C_SCAN_MOVPRFX)
+    num_req_entries = 1;
+
+  if (insn_sequence->current_insns)
+    XDELETEVEC (insn_sequence->current_insns);
+  insn_sequence->current_insns = NULL;
+
+  if (num_req_entries != 0)
+    {
+      size_t size = num_req_entries * sizeof (aarch64_inst);
+      insn_sequence->current_insns
+	= (aarch64_inst**) XNEWVEC (aarch64_inst, num_req_entries);
+      memset (insn_sequence->current_insns, 0, size);
+    }
+}
+
+
+/*  This function verifies that the instruction INST adheres to its specified
+    constraints.  If it does then ERR_OK is returned, if not then ERR_VFI is
+    returned and MISMATCH_DETAIL contains the reason why verification failed.
+
+    The function is called both during assembly and disassembly.  If assembling
+    then ENCODING will be TRUE, else FALSE.  If dissassembling PC will be set
+    and will contain the PC of the current instruction w.r.t to the section.
+
+    If ENCODING and PC=0 then you are at a start of a section.  The constraints
+    are verified against the given state insn_sequence which is updated as it
+    transitions through the verification.  */
+
+enum err_type
+verify_constraints (const struct aarch64_inst *inst,
+		    const aarch64_insn insn ATTRIBUTE_UNUSED,
+		    bfd_vma pc,
+		    bfd_boolean encoding,
+		    aarch64_operand_error *mismatch_detail,
+		    aarch64_instr_sequence *insn_sequence)
+{
+  assert (inst);
+  assert (inst->opcode);
+
+  const struct aarch64_opcode *opcode = inst->opcode;
+  if (!opcode->constraints && !insn_sequence->instr)
+    return ERR_OK;
+
+  assert (insn_sequence);
+
+  enum err_type res = ERR_OK;
+
+  /* This instruction puts a constraint on the insn_sequence.  */
+  if (opcode->flags & F_SCAN)
+    {
+      if (insn_sequence->instr)
+	{
+	  mismatch_detail->kind = AARCH64_OPDE_SYNTAX_ERROR;
+	  mismatch_detail->error = _("instruction opens new dependency "
+				     "sequence without ending previous one");
+	  mismatch_detail->index = -1;
+	  mismatch_detail->non_fatal = TRUE;
+	  res = ERR_VFI;
+	}
+
+      init_insn_sequence (inst, insn_sequence);
+      return res;
+    }
+
+  /* Verify constraints on an existing sequence.  */
+  if (insn_sequence->instr)
+    {
+      const struct aarch64_opcode* inst_opcode = insn_sequence->instr->opcode;
+      /* If we're decoding and we hit PC=0 with an open sequence then we haven't
+	 closed a previous one that we should have.  */
+      if (!encoding && pc == 0)
+	{
+	  mismatch_detail->kind = AARCH64_OPDE_SYNTAX_ERROR;
+	  mismatch_detail->error = _("previous `movprfx' sequence not closed");
+	  mismatch_detail->index = -1;
+	  mismatch_detail->non_fatal = TRUE;
+	  res = ERR_VFI;
+	  /* Reset the sequence.  */
+	  init_insn_sequence (NULL, insn_sequence);
+	  return res;
+	}
+
+      /* Validate C_SCAN_MOVPRFX constraints.  Move this to a lookup table.  */
+      if (inst_opcode->constraints & C_SCAN_MOVPRFX)
+	{
+	  /* Check to see if the MOVPRFX SVE instruction is followed by an SVE
+	     instruction for better error messages.  */
+	  if (!opcode->avariant || !(*opcode->avariant & AARCH64_FEATURE_SVE))
+	    {
+	      mismatch_detail->kind = AARCH64_OPDE_SYNTAX_ERROR;
+	      mismatch_detail->error = _("SVE instruction expected after "
+					 "`movprfx'");
+	      mismatch_detail->index = -1;
+	      mismatch_detail->non_fatal = TRUE;
+	      res = ERR_VFI;
+	      goto done;
+	    }
+
+	  /* Check to see if the MOVPRFX SVE instruction is followed by an SVE
+	     instruction that is allowed to be used with a MOVPRFX.  */
+	  if (!(opcode->constraints & C_SCAN_MOVPRFX))
+	    {
+	      mismatch_detail->kind = AARCH64_OPDE_SYNTAX_ERROR;
+	      mismatch_detail->error = _("SVE `movprfx' compatible instruction "
+					 "expected");
+	      mismatch_detail->index = -1;
+	      mismatch_detail->non_fatal = TRUE;
+	      res = ERR_VFI;
+	      goto done;
+	    }
+
+	  /* Next check for usage of the predicate register.  */
+	  aarch64_opnd_info blk_dest = insn_sequence->instr->operands[0];
+	  aarch64_opnd_info blk_pred = {0}, inst_pred = {0};
+	  bfd_boolean predicated = FALSE;
+	  assert (blk_dest.type == AARCH64_OPND_SVE_Zd);
+
+	  /* Determine if the movprfx instruction used is predicated or not.  */
+	  if (insn_sequence->instr->operands[1].type == AARCH64_OPND_SVE_Pg3)
+	    {
+	      predicated = TRUE;
+	      blk_pred = insn_sequence->instr->operands[1];
+	    }
+
+	  unsigned char max_elem_size = 0;
+	  unsigned char current_elem_size;
+	  int num_op_used = 0, last_op_usage = 0;
+	  int i, inst_pred_idx = -1;
+	  int num_ops = aarch64_num_of_operands (opcode);
+	  for (i = 0; i < num_ops; i++)
+	    {
+	      aarch64_opnd_info inst_op = inst->operands[i];
+	      switch (inst_op.type)
+		{
+		  case AARCH64_OPND_SVE_Zd:
+		  case AARCH64_OPND_SVE_Zm_5:
+		  case AARCH64_OPND_SVE_Zm_16:
+		  case AARCH64_OPND_SVE_Zn:
+		  case AARCH64_OPND_SVE_Zt:
+		  case AARCH64_OPND_SVE_Vm:
+		  case AARCH64_OPND_SVE_Vn:
+		  case AARCH64_OPND_Va:
+		  case AARCH64_OPND_Vn:
+		  case AARCH64_OPND_Vm:
+		  case AARCH64_OPND_Sn:
+		  case AARCH64_OPND_Sm:
+		  case AARCH64_OPND_Rn:
+		  case AARCH64_OPND_Rm:
+		  case AARCH64_OPND_Rn_SP:
+		  case AARCH64_OPND_Rm_SP:
+		    if (inst_op.reg.regno == blk_dest.reg.regno)
+		      {
+			num_op_used++;
+			last_op_usage = i;
+		      }
+		    current_elem_size
+		      = aarch64_get_qualifier_esize (inst_op.qualifier);
+		    if (current_elem_size > max_elem_size)
+		      max_elem_size = current_elem_size;
+		    break;
+		  case AARCH64_OPND_SVE_Pd:
+		  case AARCH64_OPND_SVE_Pg3:
+		  case AARCH64_OPND_SVE_Pg4_5:
+		  case AARCH64_OPND_SVE_Pg4_10:
+		  case AARCH64_OPND_SVE_Pg4_16:
+		  case AARCH64_OPND_SVE_Pm:
+		  case AARCH64_OPND_SVE_Pn:
+		  case AARCH64_OPND_SVE_Pt:
+		    inst_pred = inst_op;
+		    inst_pred_idx = i;
+		    break;
+		  default:
+		    break;
+		}
+	    }
+
+	   assert (max_elem_size != 0);
+	   aarch64_opnd_info inst_dest = inst->operands[0];
+	   /* Determine the size that should be used to compare against the
+	      movprfx size.  */
+	   current_elem_size
+	     = opcode->constraints & C_MAX_ELEM
+	       ? max_elem_size
+	       : aarch64_get_qualifier_esize (inst_dest.qualifier);
+
+	  /* If movprfx is predicated do some extra checks.  */
+	  if (predicated)
+	    {
+	      /* The instruction must be predicated.  */
+	      if (inst_pred_idx < 0)
+		{
+		  mismatch_detail->kind = AARCH64_OPDE_SYNTAX_ERROR;
+		  mismatch_detail->error = _("predicated instruction expected "
+					     "after `movprfx'");
+		  mismatch_detail->index = -1;
+		  mismatch_detail->non_fatal = TRUE;
+		  res = ERR_VFI;
+		  goto done;
+		}
+
+	      /* The instruction must have a merging predicate.  */
+	      if (inst_pred.qualifier != AARCH64_OPND_QLF_P_M)
+		{
+		  mismatch_detail->kind = AARCH64_OPDE_SYNTAX_ERROR;
+		  mismatch_detail->error = _("merging predicate expected due "
+					     "to preceding `movprfx'");
+		  mismatch_detail->index = inst_pred_idx;
+		  mismatch_detail->non_fatal = TRUE;
+		  res = ERR_VFI;
+		  goto done;
+		}
+
+	      /* The same register must be used in instruction.  */
+	      if (blk_pred.reg.regno != inst_pred.reg.regno)
+		{
+		  mismatch_detail->kind = AARCH64_OPDE_SYNTAX_ERROR;
+		  mismatch_detail->error = _("predicate register differs "
+					     "from that in preceding "
+					     "`movprfx'");
+		  mismatch_detail->index = inst_pred_idx;
+		  mismatch_detail->non_fatal = TRUE;
+		  res = ERR_VFI;
+		  goto done;
+		}
+	    }
+
+	  /* Destructive operations by definition must allow one usage of the
+	     same register.  */
+	  int allowed_usage
+	    = aarch64_is_destructive_by_operands (opcode) ? 2 : 1;
+
+	  /* Operand is not used at all.  */
+	  if (num_op_used == 0)
+	    {
+	      mismatch_detail->kind = AARCH64_OPDE_SYNTAX_ERROR;
+	      mismatch_detail->error = _("output register of preceding "
+					 "`movprfx' not used in current "
+					 "instruction");
+	      mismatch_detail->index = 0;
+	      mismatch_detail->non_fatal = TRUE;
+	      res = ERR_VFI;
+	      goto done;
+	    }
+
+	  /* We now know it's used, now determine exactly where it's used.  */
+	  if (blk_dest.reg.regno != inst_dest.reg.regno)
+	    {
+	      mismatch_detail->kind = AARCH64_OPDE_SYNTAX_ERROR;
+	      mismatch_detail->error = _("output register of preceding "
+					 "`movprfx' expected as output");
+	      mismatch_detail->index = 0;
+	      mismatch_detail->non_fatal = TRUE;
+	      res = ERR_VFI;
+	      goto done;
+	    }
+
+	  /* Operand used more than allowed for the specific opcode type.  */
+	  if (num_op_used > allowed_usage)
+	    {
+	      mismatch_detail->kind = AARCH64_OPDE_SYNTAX_ERROR;
+	      mismatch_detail->error = _("output register of preceding "
+					 "`movprfx' used as input");
+	      mismatch_detail->index = last_op_usage;
+	      mismatch_detail->non_fatal = TRUE;
+	      res = ERR_VFI;
+	      goto done;
+	    }
+
+	  /* Now the only thing left is the qualifiers checks.  The register
+	     must have the same maximum element size.  */
+	  if (inst_dest.qualifier
+	      && blk_dest.qualifier
+	      && current_elem_size
+		 != aarch64_get_qualifier_esize (blk_dest.qualifier))
+	    {
+	      mismatch_detail->kind = AARCH64_OPDE_SYNTAX_ERROR;
+	      mismatch_detail->error = _("register size not compatible with "
+					 "previous `movprfx'");
+	      mismatch_detail->index = 0;
+	      mismatch_detail->non_fatal = TRUE;
+	      res = ERR_VFI;
+	      goto done;
+	    }
+	}
+
+done:
+      /* Add the new instruction to the sequence.  */
+      memcpy (insn_sequence->current_insns + insn_sequence->next_insn++,
+	      inst, sizeof (aarch64_inst));
+
+      /* Check if sequence is now full.  */
+      if (insn_sequence->next_insn >= insn_sequence->num_insns)
+	{
+	  /* Sequence is full, but we don't have anything special to do for now,
+	     so clear and reset it.  */
+	  init_insn_sequence (NULL, insn_sequence);
+	}
+    }
+
+  return res;
+}
+
 
 /* Return true if VALUE cannot be moved into an SVE register using DUP
    (with any element size, not just ESIZE) and if using DUPM would

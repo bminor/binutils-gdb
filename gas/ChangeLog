@@ -1,5 +1,9 @@
 2018-10-03  Tamar Christina  <tamar.christina@arm.com>
 
+	* config/tc-aarch64.c (output_operand_error_report): Order warnings.
+
+2018-10-03  Tamar Christina  <tamar.christina@arm.com>
+
 	* config/tc-aarch64.c (now_instr_sequence):
 	(*insn_sequence, now_instr_sequence): New.
 	(output_operand_error_record, do_encode): Add insn_sequence.
