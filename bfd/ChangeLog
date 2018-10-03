@@ -1,3 +1,8 @@
+2018-10-09  Egeyar Bagcioglu  <egeyar.bagcioglu@oracle.com>
+
+	* elflink.c (elf_link_output_extsym): Do not place symbols into a
+	discarded .dynsym.
+
 2018-10-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23428
