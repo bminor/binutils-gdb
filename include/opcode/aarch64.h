@@ -727,7 +727,9 @@ struct aarch64_opcode
   unsigned char tied_operand;
 
   /* If non-NULL, a function to verify that a given instruction is valid.  */
-  bfd_boolean (* verifier) (const struct aarch64_opcode *, const aarch64_insn);
+  enum err_type (* verifier) (const struct aarch64_inst *, const aarch64_insn,
+			      bfd_vma, bfd_boolean, aarch64_operand_error *,
+			      struct aarch64_instr_sequence *);
 };
 
 typedef struct aarch64_opcode aarch64_opcode;

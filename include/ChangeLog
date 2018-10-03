@@ -1,5 +1,10 @@
 2018-10-03  Tamar Christina  <tamar.christina@arm.com>
 
+	* opcode/aarch64.h (struct aarch64_opcode): Expand verifiers to take
+	more arguments.
+
+2018-10-03  Tamar Christina  <tamar.christina@arm.com>
+
 	* opcode/aarch64.h (enum err_type): New.
 	(aarch64_decode_insn): Use it.
 

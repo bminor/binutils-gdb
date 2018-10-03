@@ -2885,7 +2885,8 @@ aarch64_opcode_decode (const aarch64_opcode *opcode, const aarch64_insn code,
     }
 
   /* If the opcode has a verifier, then check it now.  */
-  if (opcode->verifier && ! opcode->verifier (opcode, code))
+  if (opcode->verifier
+      && opcode->verifier (inst, code, 0, FALSE, errors, NULL) != ERR_OK)
     {
       DEBUG_TRACE ("operand verifier FAIL");
       goto decode_fail;

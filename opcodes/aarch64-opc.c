@@ -4486,9 +4486,12 @@ aarch64_sys_ins_reg_supported_p (const aarch64_feature_set features,
 #define BIT(INSN,BT)     (((INSN) >> (BT)) & 1)
 #define BITS(INSN,HI,LO) (((INSN) >> (LO)) & ((1 << (((HI) - (LO)) + 1)) - 1))
 
-static bfd_boolean
-verify_ldpsw (const struct aarch64_opcode * opcode ATTRIBUTE_UNUSED,
-	      const aarch64_insn insn)
+static enum err_type
+verify_ldpsw (const struct aarch64_inst *inst ATTRIBUTE_UNUSED,
+	      const aarch64_insn insn, bfd_vma pc ATTRIBUTE_UNUSED,
+	      bfd_boolean encoding ATTRIBUTE_UNUSED,
+	      aarch64_operand_error *mismatch_detail ATTRIBUTE_UNUSED,
+	      aarch64_instr_sequence *insn_block ATTRIBUTE_UNUSED)
 {
   int t  = BITS (insn, 4, 0);
   int n  = BITS (insn, 9, 5);
@@ -4498,17 +4501,17 @@ verify_ldpsw (const struct aarch64_opcode * opcode ATTRIBUTE_UNUSED,
     {
       /* Write back enabled.  */
       if ((t == n || t2 == n) && n != 31)
-	return FALSE;
+	return ERR_UND;
     }
 
   if (BIT (insn, 22))
     {
       /* Load */
       if (t == t2)
-	return FALSE;
+	return ERR_UND;
     }
 
-  return TRUE;
+  return ERR_OK;
 }
 
 /* Return true if VALUE cannot be moved into an SVE register using DUP
