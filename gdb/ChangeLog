@@ -1,3 +1,7 @@
+2018-10-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* tid-parse.c (tid_is_in_list): Fix wrong 'See' comment.
+
 2018-10-02  Tom Tromey  <tom@tromey.com>
 
 	* aarch64-linux-tdep.c (aarch64_linux_sigframe_init): Use pulongest.

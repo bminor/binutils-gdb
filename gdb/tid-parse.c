@@ -301,7 +301,7 @@ tid_range_parser::in_star_range () const
   return m_state == STATE_STAR_RANGE;
 }
 
-/* See gdbthread.h.  */
+/* See tid-parse.h.  */
 
 int
 tid_is_in_list (const char *list, int default_inferior,
