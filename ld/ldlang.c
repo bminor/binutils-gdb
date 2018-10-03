@@ -1875,6 +1875,7 @@ lang_insert_orphan (asection *s,
   if (after != NULL && os->bfd_section != NULL)
     {
       asection *snew, *as;
+      bfd_boolean place_after = place->stmt == NULL;
 
       snew = os->bfd_section;
 
@@ -1912,6 +1913,142 @@ lang_insert_orphan (asection *s,
 	  /* Now tack it back on in the right place.  */
 	  bfd_section_list_append (link_info.output_bfd, snew);
 	}
+      else if ((bfd_get_flavour (link_info.output_bfd)
+		== bfd_target_elf_flavour)
+	       && (bfd_get_flavour (s->owner)
+		   == bfd_target_elf_flavour)
+	       && ((elf_section_type (s) == SHT_NOTE
+		    && (s->flags & SEC_LOAD) != 0)
+		   || (elf_section_type (as) == SHT_NOTE
+		       && (as->flags & SEC_LOAD) != 0)))
+	{
+	  /* Make sure that output note sections are grouped and sorted
+	     by alignments when inserting a note section or insert a
+	     section after a note section,  */
+	  asection *sec;
+	  /* A specific section after which the output note section
+	     should be placed.  */
+	  asection *after_sec;
+	  /* True if we need to insert the orphan section after a
+	     specific section to maintain output note section order.  */
+	  bfd_boolean after_sec_note;
+
+	  /* Group and sort output note section by alignments in
+	     ascending order.  */
+	  after_sec = NULL;
+	  if (elf_section_type (s) == SHT_NOTE
+	      && (s->flags & SEC_LOAD) != 0)
+	    {
+	      /* Search forward for the last output note section
+		 with equal or larger alignments.  */
+	      asection *first_note = NULL;
+
+	      for (sec = as;
+		   (sec != NULL
+		    && !bfd_is_abs_section (sec));
+		   sec = sec->next)
+		if (sec != snew
+		    && elf_section_type (sec) == SHT_NOTE
+		    && (sec->flags & SEC_LOAD) != 0)
+		  {
+		    if (!first_note)
+		      first_note = sec;
+		    if (sec->alignment_power >= s->alignment_power)
+		      after_sec = sec;
+		  }
+
+	      if (after_sec)
+		after_sec_note = TRUE;
+	      else
+		{
+		  /* Search backward for the first output note section
+		     as well as the last output note section with equal
+		     or larger alignments.  */
+		  after_sec = NULL;
+		  for (sec = as;
+		       (sec != NULL
+			&& !bfd_is_abs_section (sec));
+		       sec = sec->prev)
+		    if (sec != snew
+			&& elf_section_type (sec) == SHT_NOTE
+			&& (sec->flags & SEC_LOAD) != 0)
+		      {
+			first_note = sec;
+			if (!after_sec
+			    && sec->alignment_power >= s->alignment_power)
+			  after_sec = sec;
+		      }
+
+		  /* If this will be the first note section, it can be
+		     placed at the default location.  */
+		  after_sec_note = first_note != NULL;
+		  if (after_sec == NULL && after_sec_note)
+		    {
+		      /* If all output note sections have smaller
+			 alignments, place the section before all
+			 output note sections.  AFTER_SEC will be
+			 NULL if FIRST_NOTE is the first output
+			 section.  */
+		      after_sec = first_note->prev;
+		    }
+		}
+	    }
+	  else
+	    {
+	      /* Don't place non-note sections in the middle of note
+		 sections.  */
+	      after_sec_note = TRUE;
+	      after_sec = as;
+	      for (sec = as->next;
+		   (sec != NULL
+		    && !bfd_is_abs_section (sec));
+		   sec = sec->next)
+		if (elf_section_type (sec) == SHT_NOTE
+		    && (sec->flags & SEC_LOAD) != 0)
+		  after_sec = sec;
+	    }
+
+	  if (after_sec_note)
+	    {
+	      if (after_sec)
+		{
+		  /* Insert OS after AFTER_SEC output statement.  */
+		  lang_output_section_statement_type *stmt;
+		  for (stmt = after;
+		       stmt != NULL;
+		       stmt = stmt->next)
+		    if (stmt->bfd_section == after_sec)
+		      {
+			place_after = TRUE;
+			after = stmt;
+			break;
+		      }
+		}
+
+	      if (after_sec == NULL || after_sec->next != snew)
+		{
+		  /* Unlink the section.  */
+		  bfd_section_list_remove (link_info.output_bfd, snew);
+
+		  /* Place SNEW after AFTER_SEC.  If AFTER_SEC is NULL,
+		     prepend SNEW.  */
+		  if (after_sec)
+		    bfd_section_list_insert_after (link_info.output_bfd,
+						   after_sec, snew);
+		  else
+		    bfd_section_list_prepend (link_info.output_bfd, snew);
+		}
+	    }
+	  else if (as != snew && as->prev != snew)
+	    {
+	      /* Unlink the section.  */
+	      bfd_section_list_remove (link_info.output_bfd, snew);
+
+	      /* Now tack it back on in the right place.  */
+	      bfd_section_list_insert_before (link_info.output_bfd,
+					      as, snew);
+	    }
+	}
       else if (as != snew && as->prev != snew)
 	{
 	  /* Unlink the section.  */
@@ -1938,7 +2075,8 @@ lang_insert_orphan (asection *s,
 	{
 	  lang_output_section_statement_type *newly_added_os;
 
-	  if (place->stmt == NULL)
+	  /* Place OS after AFTER if AFTER_NOTE is TRUE.  */
+	  if (place_after)
 	    {
 	      lang_statement_union_type **where = insert_os_after (after);
 

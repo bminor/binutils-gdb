@@ -1,3 +1,9 @@
+2018-10-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23658
+	* ldlang.c (lang_insert_orphan): Group and sort output note
+	sections by section alignments.
+
 2018-09-25  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* testsuite/ld-elf/pr14156b.d: Adjust for extra symbols.
