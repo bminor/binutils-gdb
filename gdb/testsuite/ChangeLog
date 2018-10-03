@@ -1,3 +1,10 @@
+2018-10-03  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* lib/gdb.exp (skip_ifunc_tests): New.
+	* gdb.base/gnu-ifunc.exp: Skip if no ifunc support.  Handle
+	other compile failures.
+	* gdb.compile/compile-ifunc.exp: Skip if no ifunc support.
+
 2018-10-01  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.arch/i386-avx512.exp: Fix setting of nr_regs based on

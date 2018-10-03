@@ -17,6 +17,10 @@ if {[skip_shlib_tests]} {
     return 0
 }
 
+if {[skip_ifunc_tests]} {
+    return 0
+}
+
 standard_testfile .c
 set staticexecutable ${testfile}-static
 set staticbinfile [standard_output_file ${staticexecutable}]
@@ -365,9 +369,10 @@ proc misc_tests {resolver_attr resolver_debug final_debug} {
 foreach_with_prefix resolver_attr {0 1} {
     foreach_with_prefix resolver_debug {0 1} {
 	foreach_with_prefix final_debug {0 1} {
-	    build $resolver_attr $resolver_debug $final_debug
-	    misc_tests $resolver_attr $resolver_debug $final_debug
-	    set-break $resolver_attr $resolver_debug $final_debug
+	    if { [build $resolver_attr $resolver_debug $final_debug] != 0 } {
+		misc_tests $resolver_attr $resolver_debug $final_debug
+		set-break $resolver_attr $resolver_debug $final_debug
+	    }
 	}
     }
 }

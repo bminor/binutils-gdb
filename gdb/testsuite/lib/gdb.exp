@@ -2893,6 +2893,20 @@ gdb_caching_proc has_int128_cxx {
     return [gdb_int128_helper c++]
 }
 
+# Return true if the IFUNC feature is unsupported.
+gdb_caching_proc skip_ifunc_tests {
+    if [gdb_can_simple_compile ifunc {
+	extern void f_ ();
+	typedef void F (void);
+	F* g (void) { return &f_; }
+	void f () __attribute__ ((ifunc ("g")));
+    } object] {
+	return 0
+    } else {
+	return 1
+    }
+}
+
 # Return whether we should skip tests for showing inlined functions in
 # backtraces.  Requires get_compiler_info and get_debug_format.
 
