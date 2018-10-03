@@ -1,5 +1,79 @@
 2018-10-03  Tamar Christina  <tamar.christina@arm.com>
 
+	* testsuite/gas/aarch64/sve-movprfx_1.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_1.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_10.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_10.l: New test.
+	* testsuite/gas/aarch64/sve-movprfx_10.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_11.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_11.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_12.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_12.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_13.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_13.l: New test.
+	* testsuite/gas/aarch64/sve-movprfx_13.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_14.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_14.l: New test.
+	* testsuite/gas/aarch64/sve-movprfx_14.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_15.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_15.l: New test.
+	* testsuite/gas/aarch64/sve-movprfx_15.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_16.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_16.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_17.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_17.l: New test.
+	* testsuite/gas/aarch64/sve-movprfx_17.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_18.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_18.l: New test.
+	* testsuite/gas/aarch64/sve-movprfx_18.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_19.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_19.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_2.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_2.l: New test.
+	* testsuite/gas/aarch64/sve-movprfx_2.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_20.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_20.l: New test.
+	* testsuite/gas/aarch64/sve-movprfx_20.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_21.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_21.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_22.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_22.l: New test.
+	* testsuite/gas/aarch64/sve-movprfx_22.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_23.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_23.l: New test.
+	* testsuite/gas/aarch64/sve-movprfx_23.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_24.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_24.l: New test.
+	* testsuite/gas/aarch64/sve-movprfx_24.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_25.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_25.l: New test.
+	* testsuite/gas/aarch64/sve-movprfx_25.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_26.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_26.l: New test.
+	* testsuite/gas/aarch64/sve-movprfx_26.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_3.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_3.l: New test.
+	* testsuite/gas/aarch64/sve-movprfx_3.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_4.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_4.l: New test.
+	* testsuite/gas/aarch64/sve-movprfx_4.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_5.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_5.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_6.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_6.l: New test.
+	* testsuite/gas/aarch64/sve-movprfx_6.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_7.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_7.l: New test.
+	* testsuite/gas/aarch64/sve-movprfx_7.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_8.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_8.l: New test.
+	* testsuite/gas/aarch64/sve-movprfx_8.s: New test.
+	* testsuite/gas/aarch64/sve-movprfx_9.d: New test.
+	* testsuite/gas/aarch64/sve-movprfx_9.l: New test.
+	* testsuite/gas/aarch64/sve-movprfx_9.s: New test.
+
+2018-10-03  Tamar Christina  <tamar.christina@arm.com>
+
 	* testsuite/gas/aarch64/sve-movprfx.d: New test.
 	* testsuite/gas/aarch64/sve-movprfx.s: New test.
 	* testsuite/gas/aarch64/sve.d: Refactor.
