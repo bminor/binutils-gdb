@@ -2962,7 +2962,7 @@ find_abstract_instance (struct comp_unit *   unit,
 		  break;
 		case DW_AT_specification:
 		  if (!find_abstract_instance (unit, info_ptr, &attr,
-					       pname, is_linkage,
+					       &name, is_linkage,
 					       filename_ptr, linenumber_ptr))
 		    return FALSE;
 		  break;

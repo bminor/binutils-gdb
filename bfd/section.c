@@ -1457,16 +1457,20 @@ SYNOPSIS
 
 DESCRIPTION
 	Sets the contents of the section @var{section} in BFD
-	@var{abfd} to the data starting in memory at @var{data}. The
-	data is written to the output section starting at offset
+	@var{abfd} to the data starting in memory at @var{location}.
+	The data is written to the output section starting at offset
 	@var{offset} for @var{count} octets.
 
-	Normally <<TRUE>> is returned, else <<FALSE>>. Possible error
-	returns are:
+	Normally <<TRUE>> is returned, but <<FALSE>> is returned if
+	there was an error.  Possible error returns are:
 	o <<bfd_error_no_contents>> -
 	The output section does not have the <<SEC_HAS_CONTENTS>>
 	attribute, so nothing can be written to it.
-	o and some more too
+	o <<bfd_error_bad_value>> -
+	The section is unable to contain all of the data.
+	o <<bfd_error_invalid_operation>> -
+	The BFD is not writeable.
+	o and some more too.
 
 	This routine is front end to the back end function
 	<<_bfd_set_section_contents>>.
