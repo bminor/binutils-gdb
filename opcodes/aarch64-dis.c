@@ -26,11 +26,6 @@
 #include "aarch64-dis.h"
 #include "elf-bfd.h"
 
-#define ERR_OK   0
-#define ERR_UND -1
-#define ERR_UNP -3
-#define ERR_NYI -5
-
 #define INSNLEN 4
 
 /* Cached mapping symbol state.  */
@@ -2945,7 +2940,7 @@ user_friendly_fixup (aarch64_inst *inst)
    opcode may be filled in *INSN if NOALIASES_P is FALSE.  Return zero on
    success.  */
 
-int
+enum err_type
 aarch64_decode_insn (aarch64_insn insn, aarch64_inst *inst,
 		     bfd_boolean noaliases_p,
 		     aarch64_operand_error *errors)
@@ -3097,15 +3092,15 @@ print_insn_aarch64_word (bfd_vma pc,
 			 struct disassemble_info *info,
 			 aarch64_operand_error *errors)
 {
-  static const char *err_msg[6] =
+  static const char *err_msg[ERR_NR_ENTRIES+1] =
     {
-      [ERR_OK]   = "_",
-      [-ERR_UND] = "undefined",
-      [-ERR_UNP] = "unpredictable",
-      [-ERR_NYI] = "NYI"
+      [ERR_OK]  = "_",
+      [ERR_UND] = "undefined",
+      [ERR_UNP] = "unpredictable",
+      [ERR_NYI] = "NYI"
     };
 
-  int ret;
+  enum err_type ret;
   aarch64_inst inst;
 
   info->insn_info_valid = 1;
@@ -3139,7 +3134,7 @@ print_insn_aarch64_word (bfd_vma pc,
       /* Handle undefined instructions.  */
       info->insn_type = dis_noninsn;
       (*info->fprintf_func) (info->stream,".inst\t0x%08x ; %s",
-			     word, err_msg[-ret]);
+			     word, err_msg[ret]);
       break;
     case ERR_OK:
       user_friendly_fixup (&inst);

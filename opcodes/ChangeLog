@@ -1,5 +1,10 @@
 2018-10-03  Tamar Christina  <tamar.christina@arm.com>
 
+	* aarch64-dis.c (ERR_OK, ERR_UND, ERR_UNP, ERR_NYI): Remove.
+	(aarch64_decode_insn, print_insn_aarch64_word): Use err_type.
+
+2018-10-03  Tamar Christina  <tamar.christina@arm.com>
+
 	* aarch64-asm.c (aarch64_opcode_encode): Add insn_sequence.
 	* aarch64-dis.c (insn_sequence): New.
 

@@ -641,6 +641,16 @@ enum aarch64_op
   OP_TOTAL_NUM,		/* Pseudo.  */
 };
 
+/* Error types.  */
+enum err_type
+{
+  ERR_OK,
+  ERR_UND,
+  ERR_UNP,
+  ERR_NYI,
+  ERR_NR_ENTRIES
+};
+
 /* Maximum number of operands an instruction can have.  */
 #define AARCH64_MAX_OPND_NUM 6
 /* Maximum number of qualifier sequences an instruction can have.  */
@@ -1187,7 +1197,7 @@ aarch64_stack_pointer_p (const aarch64_opnd_info *);
 extern int
 aarch64_zero_register_p (const aarch64_opnd_info *);
 
-extern int
+extern enum err_type
 aarch64_decode_insn (aarch64_insn, aarch64_inst *, bfd_boolean,
 		     aarch64_operand_error *errors);
 
