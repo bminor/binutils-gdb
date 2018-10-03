@@ -1,5 +1,14 @@
 2018-10-03  Tamar Christina  <tamar.christina@arm.com>
 
+	* aarch64-asm.c (aarch64_opcode_encode): Apply constraint verifier.
+	* aarch64-dis.c (print_operands): Refactor to take notes.
+	(print_verifier_notes): New.
+	(print_aarch64_insn): Apply constraint verifier.
+	(print_insn_aarch64_word): Update call to print_aarch64_insn.
+	* aarch64-opc.c (aarch64_print_operand): Remove attribute, update notes format.
+
+2018-10-03  Tamar Christina  <tamar.christina@arm.com>
+
 	* aarch64-opc.c (init_insn_block): New.
 	(verify_constraints, aarch64_is_destructive_by_operands): New.
 	* aarch64-opc.h (verify_constraints): New.

@@ -3052,7 +3052,7 @@ void
 aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 		       const aarch64_opcode *opcode,
 		       const aarch64_opnd_info *opnds, int idx, int *pcrel_p,
-		       bfd_vma *address, char** notes ATTRIBUTE_UNUSED)
+		       bfd_vma *address, char** notes)
 {
   unsigned int i, num_conds;
   const char *name = NULL;
@@ -3600,9 +3600,9 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 		 F_REG_READ is there, that means we were looking for a write
 		 register.  See aarch64_ext_sysreg.  */
 	      if (aarch64_sys_regs[i].flags & F_REG_WRITE)
-		*notes = _("reading from a write-only register.");
+		*notes = _("reading from a write-only register");
 	      else if (aarch64_sys_regs[i].flags & F_REG_READ)
-		*notes = _("writing to a read-only register.");
+		*notes = _("writing to a read-only register");
 	    }
 	}
 

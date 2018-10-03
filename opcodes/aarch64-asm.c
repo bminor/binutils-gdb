@@ -1949,7 +1949,7 @@ aarch64_opcode_encode (const aarch64_opcode *opcode,
 		       const aarch64_inst *inst_ori, aarch64_insn *code,
 		       aarch64_opnd_qualifier_t *qlf_seq,
 		       aarch64_operand_error *mismatch_detail,
-		       aarch64_instr_sequence* insn_sequence ATTRIBUTE_UNUSED)
+		       aarch64_instr_sequence* insn_sequence)
 {
   int i;
   const aarch64_opcode *aliased;
@@ -2035,6 +2035,38 @@ aarch64_opcode_encode (const aarch64_opcode *opcode,
   /* Possibly use the instruction class to encode the chosen qualifier
      variant.  */
   aarch64_encode_variant_using_iclass (inst);
+
+  /* Run a verifier if the instruction has one set.  */
+  if (opcode->verifier)
+    {
+      enum err_type result = opcode->verifier (inst, *code, 0, TRUE,
+					       mismatch_detail, insn_sequence);
+      switch (result)
+	{
+	case ERR_UND:
+	case ERR_UNP:
+	case ERR_NYI:
+	  return FALSE;
+	default:
+	  break;
+	}
+    }
+
+  /* Always run constrain verifiers, this is needed because constrains need to
+     maintain a global state.  Regardless if the instruction has the flag set
+     or not.  */
+  enum err_type result = verify_constraints (inst, *code, 0, TRUE,
+					     mismatch_detail, insn_sequence);
+  switch (result)
+    {
+    case ERR_UND:
+    case ERR_UNP:
+    case ERR_NYI:
+      return FALSE;
+    default:
+      break;
+    }
+
 
 encoding_exit:
   DEBUG_TRACE ("exit with %s", opcode->name);
