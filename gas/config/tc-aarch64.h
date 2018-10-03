@@ -183,6 +183,7 @@ struct aarch64_segment_info_type
 {
   enum mstate mapstate;
   unsigned int marked_pr_dependency;
+  aarch64_instr_sequence insn_sequence;
 };
 
 /* We want .cfi_* pseudo-ops for generating unwind info.  */

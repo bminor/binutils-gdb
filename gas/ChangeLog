@@ -1,3 +1,14 @@
+2018-10-03  Tamar Christina  <tamar.christina@arm.com>
+
+	* config/tc-aarch64.c (now_instr_sequence):
+	(*insn_sequence, now_instr_sequence): New.
+	(output_operand_error_record, do_encode): Add insn_sequence.
+	(md_assemble): Update insn_sequence.
+	(try_to_encode_as_unscaled_ldst, fix_mov_imm_insn, fix_insn):
+	Pass insn_sequence.
+	* config/tc-aarch64.h (struct aarch64_segment_info_type):
+	Add insn_sequence.
+
 2018-10-02  Palmer Dabbelt  <palmer@sifive.com>
 
 	* testsuite/gas/riscv/fence-tso.d: New file.

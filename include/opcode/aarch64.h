@@ -662,6 +662,13 @@ empty_qualifier_sequence_p (const aarch64_opnd_qualifier_t *qualifiers)
   return TRUE;
 }
 
+/*  Forward declare error reporting type.  */
+typedef struct aarch64_operand_error aarch64_operand_error;
+/* Forward declare instruction sequence type.  */
+typedef struct aarch64_instr_sequence aarch64_instr_sequence;
+/* Forward declare instruction definition.  */
+typedef struct aarch64_inst aarch64_inst;
+
 /* This structure holds information for a particular opcode.  */
 
 struct aarch64_opcode
@@ -1124,14 +1131,27 @@ struct aarch64_operand_error
   bfd_boolean non_fatal;
 };
 
-typedef struct aarch64_operand_error aarch64_operand_error;
+/* AArch64 sequence structure used to track instructions with F_SCAN
+   dependencies for both assembler and disassembler.  */
+struct aarch64_instr_sequence
+{
+  /* The instruction that caused this sequence to be opened.  */
+  aarch64_inst *instr;
+  /* The number of instructions the above instruction allows to be kept in the
+     sequence before an automatic close is done.  */
+  int num_insns;
+  /* The instructions currently added to the sequence.  */
+  aarch64_inst **current_insns;
+  /* The number of instructions already in the sequence.  */
+  int next_insn;
+};
 
 /* Encoding entrypoint.  */
 
 extern int
 aarch64_opcode_encode (const aarch64_opcode *, const aarch64_inst *,
 		       aarch64_insn *, aarch64_opnd_qualifier_t *,
-		       aarch64_operand_error *);
+		       aarch64_operand_error *, aarch64_instr_sequence *);
 
 extern const aarch64_opcode *
 aarch64_replace_opcode (struct aarch64_inst *,

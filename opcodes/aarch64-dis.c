@@ -49,6 +49,9 @@ static int no_aliases = 0;	/* If set disassemble as most general inst.  */
 static int no_notes = 1;	/* If set do not print disassemble notes in the
 				  output as comments.  */
 
+/* Currently active instruction sequence.  */
+static aarch64_instr_sequence insn_sequence ATTRIBUTE_UNUSED;
+
 static void
 set_default_aarch64_dis_options (struct disassemble_info *info ATTRIBUTE_UNUSED)
 {

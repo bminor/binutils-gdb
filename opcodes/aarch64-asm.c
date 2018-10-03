@@ -1948,7 +1948,8 @@ bfd_boolean
 aarch64_opcode_encode (const aarch64_opcode *opcode,
 		       const aarch64_inst *inst_ori, aarch64_insn *code,
 		       aarch64_opnd_qualifier_t *qlf_seq,
-		       aarch64_operand_error *mismatch_detail)
+		       aarch64_operand_error *mismatch_detail,
+		       aarch64_instr_sequence* insn_sequence ATTRIBUTE_UNUSED)
 {
   int i;
   const aarch64_opcode *aliased;
