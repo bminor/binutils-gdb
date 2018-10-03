@@ -13835,7 +13835,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	 though they don't appear in this symtab directly, other parts
 	 of gdb assume that symbols do, and this is reasonably
 	 true.  */
-      for (struct symbol *sym : template_args)
+      for (symbol *sym : template_args)
 	symbol_set_symtab (sym, symbol_symtab (templ_func));
     }
 
