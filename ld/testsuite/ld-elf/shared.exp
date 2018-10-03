@@ -49,6 +49,12 @@ if [istarget "sparc*-*-*"] {
     append AFLAGS_PIC " -K PIC"
 }
 
+# GAS options to disable program property note.
+set AFLAGS_NOTE ""
+if { [istarget "i?86-*-*"] || [istarget "x86_64-*-*"] } {
+    append AFLAGS_NOTE "-mx86-used-note=no"
+}
+
 # This target requires a non-default emulation for successful shared
 # library/executable builds.
 set LFLAGS ""
@@ -1474,3 +1480,18 @@ if { [istarget "i?86-*-*"]
 	] \
     ]
 }
+
+run_ld_link_tests [list \
+    [list "Build pr23658.so" \
+	"-shared" "" "$AFLAGS_PIC" \
+	{pr23658-1a.s} {} "pr23658.so"] \
+    [list \
+	"Build pr23658-2" \
+	"--dynamic-linker tmpdir/pr23658.so --no-as-needed tmpdir/pr23658.so" \
+	"" \
+	$AFLAGS_NOTE \
+	{ pr23658-1a.s pr23658-1b.s pr23658-1c.s pr23658-1d.s start.s } \
+	{{readelf {-lW} pr23658-2.rd}} \
+	"pr23658-2" \
+    ] \
+]

@@ -1,6 +1,20 @@
 2018-10-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23658
+	* testsuite/ld-elf/pr23658-1.d: New file.
+	* testsuite/ld-elf/pr23658-1a.s: Likewise.
+	* testsuite/ld-elf/pr23658-1b.s: Likewise.
+	* testsuite/ld-elf/pr23658-1c.s: Likewise.
+	* testsuite/ld-elf/pr23658-1d.s: Likewise.
+	* testsuite/ld-elf/pr23658-2.rd: Likewise.
+	* testsuite/ld-elf/pr23658-3.d: Likewise.
+	* testsuite/ld-elf/pr23658-3.s: Likewise.
+	* testsuite/ld-elf/pr23658-3.t: Likewise.
+	* testsuite/ld-elf/shared.exp: Run PR ld/23658 tests.
+
+2018-10-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23658
 	* ldlang.c (lang_insert_orphan): Group and sort output note
 	sections by section alignments.
 
