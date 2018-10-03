@@ -1,3 +1,23 @@
+2018-10-03  Tamar Christina  <tamar.christina@arm.com>
+
+	* aarch64-tbl.h (CORE_INSN, __FP_INSN, SIMD_INSN, CRYP_INSN, _CRC_INSN,
+	_LSE_INSN, _LOR_INSN, RDMA_INSN, FF16_INSN, SF16_INSN, V8_2_INSN,
+	_SVE_INSN, V8_3_INSN, CNUM_INSN, RCPC_INSN, SHA2_INSN, AES_INSN,
+	V8_4_INSN, SHA3_INSN, SM4_INSN, FP16_V8_2_INSN, DOT_INSN): Initialize
+	constraints.
+	(_SVE_INSNC): New.
+	(struct aarch64_opcode): (fjcvtzs, ldpsw, ldpsw, esb, psb): Initialize
+	constraints.
+	(movprfx): Change _SVE_INSN into _SVE_INSNC, add C_SCAN_MOVPRFX and
+	F_SCAN flags.
+	(msb, mul, neg, not, orr, rbit, revb, revh, revw, sabd, scvtf,
+	sdiv, sdivr, sdot, smax, smin, smulh, splice, sqadd, sqdecd, sqdech,
+	sqdecp, sqdecw, sqincd, sqinch, sqincp, sqincw, sqsub, sub, subr, sxtb,
+	sxth, sxtw, uabd, ucvtf, udiv, udivr, udot, umax, umin, umulh, uqadd,
+	uqdecd, uqdech, uqdecp, uqdecw, uqincd, uqinch, uqincp, uqincw, uqsub,
+	uxtb, uxth, uxtw, bic, eon, orn, mov, fmov): Change _SVE_INSN into _SVE_INSNC and add
+	C_SCAN_MOVPRFX and C_MAX_ELEM constraints.
+
 2018-10-02  Palmer Dabbelt  <palmer@sifive.com>
 
 	* riscv-opc.c (riscv_opcodes) <fence.tso>: New opcode.

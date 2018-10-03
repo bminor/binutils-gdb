@@ -700,7 +700,10 @@ struct aarch64_opcode
   aarch64_opnd_qualifier_seq_t qualifiers_list[AARCH64_MAX_QLF_SEQ_NUM];
 
   /* Flags providing information about this instruction */
-  uint32_t flags;
+  uint64_t flags;
+
+  /* Extra constraints on the instruction that the verifier checks.  */
+  uint32_t constraints;
 
   /* If nonzero, this operand and operand 0 are both registers and
      are required to have the same register number.  */
@@ -771,7 +774,18 @@ extern aarch64_opcode aarch64_opcode_table[];
 #define F_SYS_READ (1ULL << 29)
 /* This system instruction is used to write system registers.  */
 #define F_SYS_WRITE (1ULL << 30)
-/* Next bit is 31.  */
+/* This instruction has an extra constraint on it that imposes a requirement on
+   subsequent instructions.  */
+#define F_SCAN (1ULL << 31)
+/* Next bit is 32.  */
+
+/* Instruction constraints.  */
+/* This instruction has a predication constraint on the instruction at PC+4.  */
+#define C_SCAN_MOVPRFX (1U << 0)
+/* This instruction's operation width is determined by the operand with the
+   largest element size.  */
+#define C_MAX_ELEM (1U << 1)
+/* Next bit is 2.  */
 
 static inline bfd_boolean
 alias_opcode_p (const aarch64_opcode *opcode)
