@@ -1,5 +1,11 @@
 2018-10-03  Tamar Christina  <tamar.christina@arm.com>
 
+	* config/tc-aarch64.c (force_automatic_sequence_close,
+	aarch64_frob_section): New.
+	* config/tc-aarch64.h (tc_frob_section, aarch64_frob_section): New.
+
+2018-10-03  Tamar Christina  <tamar.christina@arm.com>
+
 	* config/tc-aarch64.c (output_operand_error_report): Order warnings.
 
 2018-10-03  Tamar Christina  <tamar.christina@arm.com>

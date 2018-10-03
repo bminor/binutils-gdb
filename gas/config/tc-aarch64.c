@@ -6738,6 +6738,17 @@ warn_unpredictable_ldst (aarch64_instruction *instr, char *str)
     }
 }
 
+static void
+force_automatic_sequence_close (void)
+{
+  if (now_instr_sequence.instr)
+    {
+      as_warn (_("previous `%s' sequence has not been closed"),
+	       now_instr_sequence.instr->opcode->name);
+      init_insn_sequence (NULL, &now_instr_sequence);
+    }
+}
+
 /* A wrapper function to interface with libopcodes on encoding and
    record the error message if there is any.
 
@@ -6929,6 +6940,13 @@ aarch64_frob_label (symbolS * sym)
   last_label_seen = sym;
 
   dwarf2_emit_label (sym);
+}
+
+void
+aarch64_frob_section (asection *sec ATTRIBUTE_UNUSED)
+{
+  /* Check to see if we have a block to close.  */
+  force_automatic_sequence_close ();
 }
 
 int

@@ -78,6 +78,8 @@ struct aarch64_fix
 /* We also need to mark assembler created symbols:  */
 #define tc_frob_fake_label(S) aarch64_frob_label (S)
 
+#define tc_frob_section(S) aarch64_frob_section (S)
+
 #define TC_FIX_TYPE struct aarch64_fix
 #define TC_INIT_FIX_DATA(FIX) { (FIX)->tc_fix_data.inst = NULL;	\
     (FIX)->tc_fix_data.opnd = AARCH64_OPND_NIL; }
@@ -218,6 +220,7 @@ extern int aarch64_force_relocation (struct fix *);
 extern void aarch64_cleanup (void);
 extern void aarch64_start_line_hook (void);
 extern void aarch64_frob_label (symbolS *);
+extern void aarch64_frob_section (asection *sec);
 extern int aarch64_data_in_code (void);
 extern char * aarch64_canonicalize_symbol_name (char *);
 extern void aarch64_adjust_symtab (void);
