@@ -1274,7 +1274,8 @@ riscv_elf_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	  || s == htab->elf.sgot
 	  || s == htab->elf.sgotplt
 	  || s == htab->elf.sdynbss
-	  || s == htab->elf.sdynrelro)
+	  || s == htab->elf.sdynrelro
+	  || s == htab->sdyntdata)
 	{
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */

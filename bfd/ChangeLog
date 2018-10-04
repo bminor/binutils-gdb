@@ -1,3 +1,8 @@
+2018-10-04  Jim Wilson  <jimw@sifive.com>
+
+	* elfnn-riscv.c (riscv_elf_size_dynamic_sections): In dynobj->sections
+	loop, handle htab->sdyntdata section.
+
 2018-10-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* elf64-sparc.c (elf64_sparc_output_arch_syms): Do notcorrect the
