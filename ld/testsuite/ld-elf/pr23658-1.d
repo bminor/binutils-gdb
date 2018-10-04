@@ -7,8 +7,8 @@
 #readelf: -l --wide
 # Since generic linker targets don't place SHT_NOTE sections as orphan,
 # SHT_NOTE sections aren't grouped nor sorted.
-#xfail: cr16-* crx-* d30v-* dlx-* fr30-* frv-* iq2000-*
-#xfail: m68hc12-* mn10200-* moxie-* mt-* msp430-* pj-*
+#xfail: cr16-* crx-* d30v-* dlx-* fr30-* frv-* ft32-* iq2000-*
+#xfail: m68hc12-* mn10200-* moxie-* mt-* msp430-* pj-* xgate-*
 
 #...
  +[0-9]+ +\.note\.4 \.note\.1 +

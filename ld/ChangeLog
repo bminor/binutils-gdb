@@ -1,3 +1,8 @@
+2018-10-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23658
+	* testsuite/ld-elf/pr23658-1.d: Also xfail ft32-* and xgate-*.
+
 2018-10-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23658
