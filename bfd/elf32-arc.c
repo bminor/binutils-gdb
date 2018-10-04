@@ -1989,36 +1989,35 @@ elf_arc_check_relocs (bfd *			 abfd,
 
       switch (r_type)
 	{
-	  case R_ARC_32:
-	  case R_ARC_32_ME:
-	    /* During shared library creation, these relocs should not
-	       appear in a shared library (as memory will be read only
-	       and the dynamic linker can not resolve these.  However
-	       the error should not occur for e.g. debugging or
-	       non-readonly sections.  */
-	    if (h != NULL
-		&& (bfd_link_dll (info) && !bfd_link_pie (info))
-		&& (sec->flags & SEC_ALLOC) != 0
-		&& (sec->flags & SEC_READONLY) != 0
-		&& ((sec->flags & SEC_CODE) != 0
-		    || (sec->flags & SEC_DEBUGGING) != 0))
-	      {
-		const char *name;
-		if (h)
-		  name = h->root.root.string;
-		else
-		  /* bfd_elf_sym_name (abfd, symtab_hdr, isym, NULL);  */
-		  name = "UNKNOWN";
-		_bfd_error_handler
-		  /* xgettext:c-format */
-		  (_("%pB: relocation %s against `%s' can not be used"
-		     " when making a shared object; recompile with -fPIC"),
-		   abfd,
-		   arc_elf_howto (r_type)->name,
-		   name);
-		bfd_set_error (bfd_error_bad_value);
-		return FALSE;
-	      }
+	case R_ARC_32:
+	case R_ARC_32_ME:
+	  /* During shared library creation, these relocs should not
+	     appear in a shared library (as memory will be read only
+	     and the dynamic linker can not resolve these.  However
+	     the error should not occur for e.g. debugging or
+	     non-readonly sections.  */
+	  if (h != NULL
+	      && (bfd_link_dll (info) && !bfd_link_pie (info))
+	      && (sec->flags & SEC_ALLOC) != 0
+	      && (sec->flags & SEC_READONLY) != 0
+	      && ((sec->flags & SEC_CODE) != 0
+		  || (sec->flags & SEC_DEBUGGING) != 0))
+	    {
+	      const char *name;
+	      if (h)
+		name = h->root.root.string;
+	      else
+		name = "UNKNOWN";
+	      _bfd_error_handler
+	      /* xgettext:c-format */
+	      (_("%pB: relocation %s against `%s' can not be used"
+		 " when making a shared object; recompile with -fPIC"),
+		 abfd,
+		 arc_elf_howto (r_type)->name,
+		 name);
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
 
 	    /* In some cases we are not setting the 'non_got_ref'
 	       flag, even though the relocations don't require a GOT
@@ -2068,6 +2067,25 @@ elf_arc_check_relocs (bfd *			 abfd,
       if (is_reloc_for_GOT (howto)
 	  || is_reloc_for_TLS (howto))
 	{
+	  if (bfd_link_dll (info) && !bfd_link_pie (info)
+	      && (r_type == R_ARC_TLS_LE_32 || r_type == R_ARC_TLS_LE_S9))
+	    {
+	      const char *name;
+	      if (h)
+		name = h->root.root.string;
+	      else
+		/* bfd_elf_sym_name (abfd, symtab_hdr, isym, NULL);  */
+		name = "UNKNOWN";
+	      _bfd_error_handler
+		/* xgettext:c-format */
+		(_("%pB: relocation %s against `%s' can not be used"
+		   " when making a shared object; recompile with -fPIC"),
+		   abfd,
+		   arc_elf_howto (r_type)->name,
+		   name);
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
 	  if (! _bfd_elf_create_got_section (dynobj, info))
 	    return FALSE;
 
@@ -2490,6 +2508,38 @@ elf_arc_finish_dynamic_symbol (bfd * output_bfd,
     s = bfd_get_linker_section (dynobj, SECTION);		\
   break;
 
+
+struct obfd_info_group {
+  bfd *output_bfd;
+  struct bfd_link_info *info;
+};
+
+static bfd_boolean
+arc_create_forced_local_got_entries_for_tls (struct bfd_hash_entry *bh,
+					     void *data)
+{
+  struct elf_arc_link_hash_entry * h =
+    (struct elf_arc_link_hash_entry *) bh;
+  struct obfd_info_group *tmp = (struct obfd_info_group *) data;
+
+  if (h->got_ents != NULL)
+    {
+      BFD_ASSERT (h);
+
+      struct got_entry *list = h->got_ents;
+
+      while (list != NULL)
+	{
+	  create_got_dynrelocs_for_single_entry (list, tmp->output_bfd,
+						 tmp->info, h);
+	  list = list->next;
+	}
+    }
+
+  return TRUE;
+}
+
+
 /* Function :  elf_arc_finish_dynamic_sections
    Brief    :  Finish up the dynamic sections handling.
    Args     :  output_bfd :
@@ -2622,6 +2672,12 @@ elf_arc_finish_dynamic_sections (bfd * output_bfd,
 	  bfd_put_32 (output_bfd, (bfd_vma) 0, sec->contents + 8);
 	}
     }
+
+  struct obfd_info_group group;
+  group.output_bfd = output_bfd;
+  group.info = info;
+  bfd_hash_traverse (&info->hash->table,
+		     arc_create_forced_local_got_entries_for_tls, &group);
 
   return TRUE;
 }
