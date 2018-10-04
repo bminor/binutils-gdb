@@ -539,7 +539,7 @@ Ruslan Kabatsayev				b7.10110111@gmail.com
 Geoff Keating					geoffk@redhat.com
 Mark Kettenis					kettenis@gnu.org
 Marc Khouzam					marc.khouzam@ericsson.com
-Toshihito Kikuchi					k.toshihito@yahoo.de
+Toshihito Kikuchi				k.toshihito@yahoo.de
 Jim Kingdon					kingdon@panix.com
 Anton Kolesov					anton.kolesov@synopsys.com
 Paul Koning					paul_koning@dell.com
@@ -556,7 +556,7 @@ Yan-Ting Lin					currygt52@gmail.com
 Robert Lipe					rjl@sco.com
 Lei Liu						lei.liu2@windriver.com
 Sandra Loosemore				sandra@codesourcery.com
-Carl Love                  cel@us.ibm.com
+Carl Love                  			cel@us.ibm.com
 H.J. Lu						hjl.tools@gmail.com
 Michal Ludvig                                   mludvig@suse.cz
 Edjunior B. Machado				emachado@linux.vnet.ibm.com
@@ -587,6 +587,7 @@ Nathanael Nerode				neroden@gcc.gnu.org
 Hans-Peter Nilsson				hp@bitrange.com
 David O'Brien					obrien@freebsd.org
 Alexandre Oliva					aoliva@redhat.com
+Rainer Orth					ro@cebitec.uni-bielefeld.de
 Karen Osmond					karen.osmond@gmail.com
 Pawandeep Oza					oza.pawandeep@gmail.com
 Patrick Palka					patrick@parcs.ath.cx

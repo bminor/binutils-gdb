@@ -1,3 +1,7 @@
+2018-10-04  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* MAINTAINERS (Write After Approval): Add self.
+
 2018-10-03  Tom Tromey  <tom@tromey.com>
 
 	* guile/scm-value.c (gdbscm_value_to_string): Initialize
