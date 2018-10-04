@@ -1,3 +1,8 @@
+2018-10-09  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (target_supports_scheduler_locking): Replace gdb_start_cmd
+	with runto_main.
+
 2018-10-08  Weimin Pan  <weimin.pan@oracle.com>
 
 	PR c++/16841

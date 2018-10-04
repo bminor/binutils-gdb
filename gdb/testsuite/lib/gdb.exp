@@ -5971,7 +5971,9 @@ gdb_caching_proc target_supports_scheduler_locking {
     }
 
     clean_restart $obj
-    gdb_start_cmd
+    if ![runto_main] {
+        return 0
+    }
 
     set supports_schedule_locking -1
     set current_schedule_locking_mode ""
