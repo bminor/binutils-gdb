@@ -1,3 +1,7 @@
+2018-10-08  Andreas Schwab  <schwab@suse.de>
+
+	* readelf.c (is_32bit_pcrel_reloc): Handle R_RISCV_32_PCREL.
+
 2018-10-03  Nick Clifton  <nickc@redhat.com>
 
 	* po/pt.po: Updated Portuguese translation.

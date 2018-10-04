@@ -12538,6 +12538,8 @@ is_32bit_pcrel_reloc (Filedata * filedata, unsigned int reloc_type)
       return reloc_type == 26; /* R_PPC_REL32.  */
     case EM_PPC64:
       return reloc_type == 26; /* R_PPC64_REL32.  */
+    case EM_RISCV:
+      return reloc_type == 57;	/* R_RISCV_32_PCREL.  */
     case EM_S390_OLD:
     case EM_S390:
       return reloc_type == 5;  /* R_390_PC32.  */
