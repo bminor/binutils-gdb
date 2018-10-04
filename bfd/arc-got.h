@@ -208,7 +208,7 @@ arc_got_entry_type_for_reloc (reloc_howto_type *howto)
 		     __LINE__, name_for_global_symbol (H));		\
       }									\
     if (H)								\
-      if (h->dynindx == -1 && !h->forced_local)				\
+      if (H->dynindx == -1 && !H->forced_local)				\
 	if (! bfd_elf_link_record_dynamic_symbol (info, H))		\
 	  return FALSE;							\
      htab->s##SECNAME->size += 4;					\
@@ -284,6 +284,7 @@ relocate_fix_got_relocs_for_got_info (struct got_entry **	   list_p,
   BFD_ASSERT (entry);
 
   if (h == NULL
+      || h->forced_local == TRUE
       || (! elf_hash_table (info)->dynamic_sections_created
 	  || (bfd_link_pic (info)
 	      && SYMBOL_REFERENCES_LOCAL (info, h))))
@@ -331,27 +332,31 @@ relocate_fix_got_relocs_for_got_info (struct got_entry **	   list_p,
 		BFD_ASSERT (tls_sec && tls_sec->output_section);
 		bfd_vma sec_vma = tls_sec->output_section->vma;
 
-		bfd_put_32 (output_bfd,
+		if (h == NULL || h->forced_local
+		   || !elf_hash_table (info)->dynamic_sections_created)
+		  {
+		    bfd_put_32 (output_bfd,
 			    sym_value - sec_vma
 			    + (elf_hash_table (info)->dynamic_sections_created
 			       ? 0
-			       : (align_power (TCB_SIZE,
+			       : (align_power (0,
 					       tls_sec->alignment_power))),
 			    htab->sgot->contents + entry->offset
 			    + (entry->existing_entries == TLS_GOT_MOD_AND_OFF
 			       ? 4 : 0));
 
-		ARC_DEBUG ("arc_info: FIXED -> %s value = %#lx "
-			   "@ %lx, for symbol %s\n",
-			   (entry->type == GOT_TLS_GD ? "GOT_TLS_GD" :
-			    "GOT_TLS_IE"),
-			   (long) (sym_value - sec_vma),
-			   (long) (htab->sgot->output_section->vma
-			      + htab->sgot->output_offset
-			      + entry->offset
-			      + (entry->existing_entries == TLS_GOT_MOD_AND_OFF
-				 ? 4 : 0)),
-			   symbol_name);
+		    ARC_DEBUG ("arc_info: FIXED -> %s value = %#lx "
+			  "@ %lx, for symbol %s\n",
+			  (entry->type == GOT_TLS_GD ? "GOT_TLS_GD" :
+			   "GOT_TLS_IE"),
+			  (long) (sym_value - sec_vma),
+			  (long) (htab->sgot->output_section->vma
+			     + htab->sgot->output_offset
+			     + entry->offset
+			     + (entry->existing_entries == TLS_GOT_MOD_AND_OFF
+				? 4 : 0)),
+			  symbol_name);
+		  }
 	      }
 	      break;
 
