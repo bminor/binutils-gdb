@@ -18,12 +18,11 @@
 
 standard_testfile
 
-if {[build_executable "failed to prepare" $testfile $srcfile debug] == -1} {
-    return -1
-}
-
-if { ![remote_file target exists /bin/bash] } {
-    unsupported "no bash"
+if { [target_info gdb_protocol] != "" } {
+    # Even though the feature under features being tested are supported by
+    # gdbserver, the way this test is written doesn't make it easy with a
+    # remote target.
+    unsupported "not native"
     return
 }
 
@@ -32,9 +31,13 @@ if { ![remote_file target exists /bin/ls] } {
     return
 }
 
+if { [build_executable "failed to prepare" $testfile $srcfile debug] == -1 } {
+    return -1
+}
+
 proc catch_follow_exec { } {
     global binfile
-    global GDB
+    global gdb_spawn_id
 
     set test "catch-follow-exec"
 
@@ -45,13 +48,36 @@ proc catch_follow_exec { } {
     append FLAGS " -ex \"run\""
     append FLAGS " -ex \"info prog\""
 
-    catch {exec /bin/bash -c "$GDB $FLAGS"} catchlog
-    send_log "$catchlog\n"
+    gdb_exit
+    if {[gdb_spawn_with_cmdline_opts "$FLAGS"] != 0} {
+	fail "spawn"
+	return
+    }
 
-    if { [regexp {No selected thread} $catchlog] } {
-	pass $test
-    } else {
-	fail $test
+    gdb_test_multiple "" "run til exit" {
+	"runtime error:" {
+	    # Error in case of --enable-ubsan
+	    fail "no runtime error"
+	}
+	eof {
+	    set result [wait -i $gdb_spawn_id]
+	    verbose $result
+
+	    gdb_assert { [lindex $result 2] == 0 }
+
+	    # We suspect this will be zero instead of one after fixing PR23368
+	    # - "gdb goes to into background when hitting exec catchpoint with
+	    # follow-exec-mode new"
+	    gdb_assert { [lindex $result 3] != 0 }
+
+	    # Error in case of --disable-ubsan, we get
+	    # "CHILDKILLED SIGSEGV {segmentation violation}" as extra
+	    # argument(s).
+	    gdb_assert { [llength $result] == 4 }
+	}
+
+	remote_close host
+	clear_gdb_spawn_id
     }
 }
 

@@ -1,3 +1,10 @@
+2018-10-16  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/23730
+	* gdb.base/catch-follow-exec.c: Add copyright notice.
+	* gdb.base/catch-follow-exec.exp: Rewrite to use
+	gdb_spawn_with_cmdline_opts.  Require gdb-native.
+
 2018-10-12  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.trace/actions-changed.exp: Check for arch support.
