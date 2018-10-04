@@ -1,7 +1,7 @@
 2018-10-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* elf64-sparc.c (elf64_sparc_output_arch_syms): Do notcorrect the
-	impact of STT_REGISTER symbols in the dynsym sh_index here...
+	impact of STT_REGISTER symbols in the dynsym sh_info here...
 	* elfxx-sparc.c (_bfd_sparc_elf_finish_dynamic_sections): ...but
 	do it here.
 
