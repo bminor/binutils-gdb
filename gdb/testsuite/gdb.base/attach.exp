@@ -376,7 +376,8 @@ proc do_command_attach_tests {} {
 
     gdb_exit
 
-    set res [gdb_spawn_with_cmdline_opts "--pid=$testpid"]
+    set res [gdb_spawn_with_cmdline_opts \
+		 "-quiet -iex \"set height 0\" -iex \"set width 0\" --pid=$testpid"]
     set test "starting with --pid"
     gdb_test_multiple "" $test {
 	-re "Reading symbols from.*$gdb_prompt $" {
@@ -408,7 +409,7 @@ proc test_command_line_attach_run {} {
 	gdb_exit
 
 	set res [gdb_spawn_with_cmdline_opts \
-		     "-iex \"set height 0\" -iex \"set width 0\" --pid=$testpid -ex \"start\""]
+		     "-quiet -iex \"set height 0\" -iex \"set width 0\" --pid=$testpid -ex \"start\""]
 	if { $res != 0} {
 	    fail $test
 	    kill_wait_spawned_process $test_spawn_id

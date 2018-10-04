@@ -1,3 +1,9 @@
+2018-10-04  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/attach.exp (test_command_line_attach_run): Use -quiet;
+	set width and height to 0.
+	(test_command_line_attach_run): Use -quiet.
+
 2018-10-03  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* lib/gdb.exp (skip_ifunc_tests): New.
