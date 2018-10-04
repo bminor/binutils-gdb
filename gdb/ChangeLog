@@ -1,3 +1,8 @@
+2018-10-04  Joel Brobecker  <brobecker@adacore.com>
+
+	* psymtab.c (recursively_search_psymtabs): Reformat parameters
+	to avoid exceeding 80 characters per line limit.
+
 2018-10-04  Tom Tromey  <tom@tromey.com>
 
 	* symfile.c (syms_from_objfile_1, finish_new_objfile)
