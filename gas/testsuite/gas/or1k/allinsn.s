@@ -667,6 +667,8 @@ l_lo:
 	l.addi	r1, r1, lo(0xdeadbeef)
 l_hi:	
 	l.movhi	r1, hi(0xdeadbeef)
+l_ha:	
+	l.movhi	r1, ha(0xdeadbeef)
 
 l_mac:
 	l.mac r1,r2

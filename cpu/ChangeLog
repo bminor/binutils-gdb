@@ -1,3 +1,17 @@
+2018-10-05  Richard Henderson  <rth@twiddle.net>
+
+	* or1k.opc: Add RTYPE_ enum.
+	(INVALID_STORE_RELOC): New string.
+	(or1k_imm16_relocs): New array array.
+	(parse_reloc): New static function that just does the parsing.
+	(parse_imm16): New static function for generic parsing.
+	(parse_simm16): Change to just call parse_imm16.
+	(parse_simm16_split): New function.
+	(parse_uimm16): Change to call parse_imm16.
+	(parse_uimm16_split): New function.
+	* or1korbis.cpu (simm16-split): Change to use new simm16_split.
+	(uimm16-split): Change to use new uimm16_split.
+
 2018-07-24  Alan Modra  <amodra@gmail.com>
 
 	PR 23430

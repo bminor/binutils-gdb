@@ -27,6 +27,8 @@
 #include "elf/or1k.h"
 #include "libiberty.h"
 
+#define N_ONES(X)	(((bfd_vma)2 << (X)) - 1)
+
 #define PLT_ENTRY_SIZE 20
 
 #define PLT0_ENTRY_WORD0 0x19800000 /* l.movhi r12, 0 <- hi(.got+4) */
@@ -278,7 +280,7 @@ static reloc_howto_type or1k_elf_howto_table[] =
 	 26,			/* Bitsize.  */
 	 TRUE,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
-	 complain_overflow_dont, /* Complain on overflow.  */
+	 complain_overflow_signed, /* Complain on overflow.  */
 	 bfd_elf_generic_reloc,/* Special Function.  */
 	 "R_OR1K_PLT26",	/* Name.  */
 	 FALSE,		/* Partial Inplace.  */
@@ -510,6 +512,145 @@ static reloc_howto_type or1k_elf_howto_table[] =
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
+  HOWTO (R_OR1K_TLS_TPOFF,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_OR1K_TLS_TPOFF",    /* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_OR1K_TLS_DTPOFF,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_OR1K_TLS_DTPOFF",   /* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_OR1K_TLS_DTPMOD,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_OR1K_TLS_DTPMOD",   /* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_OR1K_AHI16,		/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_OR1K_AHI16",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0x0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_OR1K_GOTOFF_AHI16,	/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_OR1K_GOTOFF_AHI16", /* name */
+	 FALSE,			/* partial_inplace */
+	 0x0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_OR1K_TLS_IE_AHI16,   /* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_OR1K_TLS_IE_AHI16", /* name */
+	 FALSE,			/* partial_inplace */
+	 0x0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_OR1K_TLS_LE_AHI16,	/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_OR1K_TLS_LE_AHI16", /* name */
+	 FALSE,			/* partial_inplace */
+	 0x0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_OR1K_SLO16,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_OR1K_SLO16",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0x0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_OR1K_GOTOFF_SLO16,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_OR1K_GOTOFF_SLO16", /* name */
+	 FALSE,			/* partial_inplace */
+	 0x0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_OR1K_TLS_LE_SLO16,   /* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_OR1K_TLS_LE_SLO16", /* name */
+	 FALSE,			/* partial_inplace */
+	 0x0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 };
 
 /* Map BFD reloc types to Or1k ELF reloc types.  */
@@ -528,18 +669,20 @@ static const struct or1k_reloc_map or1k_reloc_map[] =
   { BFD_RELOC_8,		R_OR1K_8 },
   { BFD_RELOC_LO16,		R_OR1K_LO_16_IN_INSN },
   { BFD_RELOC_HI16,		R_OR1K_HI_16_IN_INSN },
+  { BFD_RELOC_HI16_S,		R_OR1K_AHI16 },
   { BFD_RELOC_OR1K_REL_26,	R_OR1K_INSN_REL_26 },
   { BFD_RELOC_VTABLE_ENTRY,	R_OR1K_GNU_VTENTRY },
   { BFD_RELOC_VTABLE_INHERIT,	R_OR1K_GNU_VTINHERIT },
   { BFD_RELOC_32_PCREL,		R_OR1K_32_PCREL },
   { BFD_RELOC_16_PCREL,		R_OR1K_16_PCREL },
   { BFD_RELOC_8_PCREL,		R_OR1K_8_PCREL },
+  { BFD_RELOC_LO16_GOTOFF,	R_OR1K_GOTOFF_LO16 },
+  { BFD_RELOC_HI16_GOTOFF,	R_OR1K_GOTOFF_HI16 },
+  { BFD_RELOC_HI16_S_GOTOFF,	R_OR1K_GOTOFF_AHI16 },
   { BFD_RELOC_OR1K_GOTPC_HI16,	R_OR1K_GOTPC_HI16 },
   { BFD_RELOC_OR1K_GOTPC_LO16,	R_OR1K_GOTPC_LO16 },
   { BFD_RELOC_OR1K_GOT16,	R_OR1K_GOT16 },
   { BFD_RELOC_OR1K_PLT26,	R_OR1K_PLT26 },
-  { BFD_RELOC_OR1K_GOTOFF_HI16, R_OR1K_GOTOFF_HI16 },
-  { BFD_RELOC_OR1K_GOTOFF_LO16, R_OR1K_GOTOFF_LO16 },
   { BFD_RELOC_OR1K_GLOB_DAT,	R_OR1K_GLOB_DAT },
   { BFD_RELOC_OR1K_COPY,	R_OR1K_COPY },
   { BFD_RELOC_OR1K_JMP_SLOT,	R_OR1K_JMP_SLOT },
@@ -552,8 +695,13 @@ static const struct or1k_reloc_map or1k_reloc_map[] =
   { BFD_RELOC_OR1K_TLS_LDO_LO16,	R_OR1K_TLS_LDO_LO16 },
   { BFD_RELOC_OR1K_TLS_IE_HI16, R_OR1K_TLS_IE_HI16 },
   { BFD_RELOC_OR1K_TLS_IE_LO16, R_OR1K_TLS_IE_LO16 },
+  { BFD_RELOC_OR1K_TLS_IE_AHI16, R_OR1K_TLS_IE_AHI16 },
   { BFD_RELOC_OR1K_TLS_LE_HI16, R_OR1K_TLS_LE_HI16 },
   { BFD_RELOC_OR1K_TLS_LE_LO16, R_OR1K_TLS_LE_LO16 },
+  { BFD_RELOC_OR1K_TLS_LE_AHI16, R_OR1K_TLS_LE_AHI16 },
+  { BFD_RELOC_OR1K_SLO16,	R_OR1K_SLO16 },
+  { BFD_RELOC_OR1K_GOTOFF_SLO16, R_OR1K_GOTOFF_SLO16 },
+  { BFD_RELOC_OR1K_TLS_LE_SLO16, R_OR1K_TLS_LE_SLO16 },
 };
 
 #define TLS_UNKNOWN    0
@@ -671,13 +819,19 @@ or1k_elf_link_hash_table_create (bfd *abfd)
 
 static reloc_howto_type *
 or1k_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
-			bfd_reloc_code_real_type code)
+			bfd_reloc_code_real_type bcode)
 {
   unsigned int i;
 
-  for (i = ARRAY_SIZE (or1k_reloc_map); i--;)
-    if (or1k_reloc_map[i].bfd_reloc_val == code)
-      return & or1k_elf_howto_table[or1k_reloc_map[i].or1k_reloc_val];
+  for (i = 0; i < ARRAY_SIZE (or1k_reloc_map); i++)
+    if (or1k_reloc_map[i].bfd_reloc_val == bcode)
+      {
+	unsigned int ocode = or1k_reloc_map[i].or1k_reloc_val;
+	if (ocode < (unsigned int) R_OR1K_max)
+	  return &or1k_elf_howto_table[ocode];
+	else
+	  break;
+      }
 
   return NULL;
 }
@@ -688,10 +842,7 @@ or1k_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 {
   unsigned int i;
 
-  for (i = 0;
-       i < (sizeof (or1k_elf_howto_table)
-	    / sizeof (or1k_elf_howto_table[0]));
-       i++)
+  for (i = 0; i < R_OR1K_max; i++)
     if (or1k_elf_howto_table[i].name != NULL
 	&& strcasecmp (or1k_elf_howto_table[i].name, r_name) == 0)
       return &or1k_elf_howto_table[i];
@@ -734,6 +885,109 @@ tpoff (struct bfd_link_info *info, bfd_vma address)
      the data is, just compute the difference. No need to compensate
      for the size of TCB.  */
   return (address - elf_hash_table (info)->tls_sec->vma);
+}
+
+/* Like _bfd_final_link_relocate, but handles non-contiguous fields.  */
+
+static bfd_reloc_status_type
+or1k_final_link_relocate (reloc_howto_type *howto, bfd *input_bfd,
+			  asection *input_section, bfd_byte *contents,
+			  bfd_vma offset, bfd_vma value)
+{
+  bfd_reloc_status_type status = bfd_reloc_ok;
+  int size = bfd_get_reloc_size (howto);
+  bfd_vma x;
+
+  /* Sanity check the address.  */
+  if (offset + size > bfd_get_section_limit_octets (input_bfd, input_section))
+    return bfd_reloc_outofrange;
+
+  if (howto->pc_relative)
+    {
+      value -= (input_section->output_section->vma
+		+ input_section->output_offset);
+      if (howto->pcrel_offset)
+	value -= offset;
+    }
+
+  switch (howto->type)
+    {
+    case R_OR1K_AHI16:
+    case R_OR1K_GOTOFF_AHI16:
+    case R_OR1K_TLS_IE_AHI16:
+    case R_OR1K_TLS_LE_AHI16:
+      /* Adjust the operand to match with a signed LO16.  */
+      value += 0x8000;
+      break;
+
+    case R_OR1K_INSN_REL_26:
+      /* Diagnose mis-aligned branch targets.  */
+      if (value & 3)
+	status = bfd_reloc_dangerous;
+      break;
+    }
+
+  status = bfd_check_overflow (howto->complain_on_overflow,
+			       howto->bitsize,
+			       howto->rightshift,
+			       bfd_arch_bits_per_address (input_bfd),
+			       value);
+  value >>= howto->rightshift;
+
+  /* If we're overwriting the entire destination,
+     then no need to read the current contents.  */
+  if (size == 0 || howto->dst_mask == N_ONES (size))
+    x = 0;
+  else
+    {
+      BFD_ASSERT (size == 4);
+      x = bfd_get_32 (input_bfd, contents + offset);
+    }
+
+  switch (howto->type)
+    {
+    case R_OR1K_SLO16:
+    case R_OR1K_GOTOFF_SLO16:
+    case R_OR1K_TLS_LE_SLO16:
+      /* The split imm16 field used for stores.  */
+      x = (x & ~0x3e007ff) | ((value & 0xf800) << 10) | (value & 0x7ff);
+      break;
+
+    default:
+      {
+	bfd_vma fieldmask = howto->dst_mask;
+	value <<= howto->bitpos;
+	x = (x & ~fieldmask) | (value & fieldmask);
+      }
+      break;
+    }
+
+  /* Put the relocated value back in the object file.  */
+  switch (size)
+    {
+    case 0:
+      break;
+    case 1:
+      bfd_put_8 (input_bfd, x, contents + offset);
+      break;
+    case 2:
+      bfd_put_16 (input_bfd, x, contents + offset);
+      break;
+    case 4:
+      bfd_put_32 (input_bfd, x, contents + offset);
+      break;
+#ifdef BFD64
+    case 8:
+      bfd_put_64 (input_bfd, x, contents + offset);
+      break;
+#endif
+    default:
+      _bfd_error_handler
+	(_("%pB: Cannot handle relocation value size of %d"),
+	 input_bfd, size);
+      abort ();
+    }
+  return status;
 }
 
 /* Relocate an Or1k ELF section.
@@ -972,6 +1226,8 @@ or1k_elf_relocate_section (bfd *output_bfd,
 
 	case R_OR1K_GOTOFF_LO16:
 	case R_OR1K_GOTOFF_HI16:
+	case R_OR1K_GOTOFF_AHI16:
+	case R_OR1K_GOTOFF_SLO16:
 	  /* Relocation is offset from GOT.  */
 	  BFD_ASSERT (sgot != NULL);
 	  relocation
@@ -983,6 +1239,8 @@ or1k_elf_relocate_section (bfd *output_bfd,
 	case R_OR1K_INSN_REL_26:
 	case R_OR1K_HI_16_IN_INSN:
 	case R_OR1K_LO_16_IN_INSN:
+	case R_OR1K_AHI16:
+	case R_OR1K_SLO16:
 	case R_OR1K_32:
 	  /* R_OR1K_16? */
 	  {
@@ -1080,11 +1338,11 @@ or1k_elf_relocate_section (bfd *output_bfd,
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 
-
 	case R_OR1K_TLS_GD_HI16:
 	case R_OR1K_TLS_GD_LO16:
 	case R_OR1K_TLS_IE_HI16:
 	case R_OR1K_TLS_IE_LO16:
+	case R_OR1K_TLS_IE_AHI16:
 	  {
 	    bfd_vma gotoff;
 	    Elf_Internal_Rela rela;
@@ -1196,9 +1454,11 @@ or1k_elf_relocate_section (bfd *output_bfd,
 	    relocation = sgot->output_offset + gotoff;
 	    break;
 	  }
+
 	case R_OR1K_TLS_LE_HI16:
 	case R_OR1K_TLS_LE_LO16:
-
+	case R_OR1K_TLS_LE_AHI16:
+	case R_OR1K_TLS_LE_SLO16:
 	  /* Relocation is offset from TP.  */
 	  relocation = tpoff (info, relocation);
 	  break;
@@ -1218,8 +1478,9 @@ or1k_elf_relocate_section (bfd *output_bfd,
 	default:
 	  break;
 	}
-      r = _bfd_final_link_relocate (howto, input_bfd, input_section, contents,
-				    rel->r_offset, relocation, rel->r_addend);
+
+      r = or1k_final_link_relocate (howto, input_bfd, input_section, contents,
+				    rel->r_offset, relocation + rel->r_addend);
 
       if (r != bfd_reloc_ok)
 	{
@@ -1329,6 +1590,7 @@ or1k_elf_check_relocs (bfd *abfd,
       struct elf_link_hash_entry *h;
       unsigned long r_symndx;
       unsigned char tls_type;
+      int r_type;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       if (r_symndx < symtab_hdr->sh_info)
@@ -1341,7 +1603,8 @@ or1k_elf_check_relocs (bfd *abfd,
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	}
 
-      switch (ELF32_R_TYPE (rel->r_info))
+      r_type = ELF32_R_TYPE (rel->r_info);
+      switch (r_type)
 	{
 	case R_OR1K_TLS_GD_HI16:
 	case R_OR1K_TLS_GD_LO16:
@@ -1355,10 +1618,13 @@ or1k_elf_check_relocs (bfd *abfd,
 	  break;
 	case R_OR1K_TLS_IE_HI16:
 	case R_OR1K_TLS_IE_LO16:
+	case R_OR1K_TLS_IE_AHI16:
 	  tls_type = TLS_IE;
 	  break;
 	case R_OR1K_TLS_LE_HI16:
 	case R_OR1K_TLS_LE_LO16:
+	case R_OR1K_TLS_LE_AHI16:
+	case R_OR1K_TLS_LE_SLO16:
 	  tls_type = TLS_LE;
 	  break;
 	default:
@@ -1387,7 +1653,7 @@ or1k_elf_check_relocs (bfd *abfd,
 	  local_tls_type[r_symndx] = tls_type;
 	}
 
-      switch (ELF32_R_TYPE (rel->r_info))
+      switch (r_type)
 	{
 	  /* This relocation describes the C++ object vtable hierarchy.
 	     Reconstruct it for later use during GC.  */
@@ -1415,23 +1681,11 @@ or1k_elf_check_relocs (bfd *abfd,
 	  break;
 
 	case R_OR1K_GOT16:
-	case R_OR1K_GOTOFF_HI16:
-	case R_OR1K_GOTOFF_LO16:
 	case R_OR1K_TLS_GD_HI16:
 	case R_OR1K_TLS_GD_LO16:
 	case R_OR1K_TLS_IE_HI16:
 	case R_OR1K_TLS_IE_LO16:
-	  if (htab->root.sgot == NULL)
-	    {
-	      if (dynobj == NULL)
-		htab->root.dynobj = dynobj = abfd;
-	      if (!_bfd_elf_create_got_section (dynobj, info))
-		return FALSE;
-	    }
-
-	  if (ELF32_R_TYPE (rel->r_info) != R_OR1K_GOTOFF_HI16 &&
-	      ELF32_R_TYPE (rel->r_info) != R_OR1K_GOTOFF_LO16)
-	    {
+	case R_OR1K_TLS_IE_AHI16:
 	      if (h != NULL)
 		h->got.refcount += 1;
 	      else
@@ -1453,14 +1707,27 @@ or1k_elf_check_relocs (bfd *abfd,
 		    }
 		  local_got_refcounts[r_symndx] += 1;
 		}
+	  /* FALLTHRU */
+
+	case R_OR1K_GOTOFF_HI16:
+	case R_OR1K_GOTOFF_LO16:
+	case R_OR1K_GOTOFF_AHI16:
+	case R_OR1K_GOTOFF_SLO16:
+	  if (htab->root.sgot == NULL)
+	    {
+	      if (dynobj == NULL)
+		htab->root.dynobj = dynobj = abfd;
+	      if (!_bfd_elf_create_got_section (dynobj, info))
+		return FALSE;
 	    }
 	  break;
 
 	case R_OR1K_INSN_REL_26:
 	case R_OR1K_HI_16_IN_INSN:
 	case R_OR1K_LO_16_IN_INSN:
+	case R_OR1K_AHI16:
+	case R_OR1K_SLO16:
 	case R_OR1K_32:
-	  /* R_OR1K_16? */
 	  {
 	    if (h != NULL && !bfd_link_pic (info))
 	      {
@@ -1469,7 +1736,7 @@ or1k_elf_check_relocs (bfd *abfd,
 
 		/* We may also need a .plt entry.  */
 		h->plt.refcount += 1;
-		if (ELF32_R_TYPE (rel->r_info) != R_OR1K_INSN_REL_26)
+		if (r_type != R_OR1K_INSN_REL_26)
 		  h->pointer_equality_needed = 1;
 	      }
 
@@ -1497,7 +1764,7 @@ or1k_elf_check_relocs (bfd *abfd,
 
 	    if ((bfd_link_pic (info)
 		 && (sec->flags & SEC_ALLOC) != 0
-		 && (ELF32_R_TYPE (rel->r_info) != R_OR1K_INSN_REL_26
+		 && (r_type != R_OR1K_INSN_REL_26
 		     || (h != NULL
 			 && (!SYMBOLIC_BIND (info, h)
 			     || h->root.type == bfd_link_hash_defweak
@@ -1593,7 +1860,7 @@ or1k_elf_check_relocs (bfd *abfd,
 		  }
 
 		p->count += 1;
-		if (ELF32_R_TYPE (rel->r_info) == R_OR1K_INSN_REL_26)
+		if (r_type == R_OR1K_INSN_REL_26)
 		  p->pc_count += 1;
 	      }
 	  }

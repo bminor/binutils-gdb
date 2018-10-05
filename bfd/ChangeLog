@@ -1,3 +1,34 @@
+2018-10-05  Richard Henderson  <rth@twiddle.net>
+	    Stafford Horne  <shorne@gmail.com>
+
+	* bfd-in2.h: Regenerated.
+	* elf32-or1k.c (N_ONES): New macro.
+	(or1k_elf_howto_table): Fix R_OR1K_PLT26 to complain on overflow.
+	Add definitions for R_OR1K_TLS_TPOFF, R_OR1K_TLS_DTPOFF,
+	R_OR1K_TLS_DTPMOD, R_OR1K_AHI16, R_OR1K_GOTOFF_AHI16,
+	R_OR1K_TLS_IE_AHI16, R_OR1K_TLS_LE_AHI16, R_OR1K_SLO16,
+	R_OR1K_GOTOFF_SLO16, R_OR1K_TLS_LE_SLO16.
+	(or1k_reloc_map): Add entries for BFD_RELOC_HI16_S,
+	BFD_RELOC_LO16_GOTOFF, BFD_RELOC_HI16_GOTOFF, BFD_RELOC_HI16_S_GOTOFF,
+	BFD_RELOC_OR1K_TLS_IE_AHI16, BFD_RELOC_OR1K_TLS_LE_AHI16,
+	BFD_RELOC_OR1K_SLO16, BFD_RELOC_OR1K_GOTOFF_SLO16,
+	BFD_RELOC_OR1K_TLS_LE_SLO16.
+	(or1k_reloc_type_lookup): Change search loop to start ad index 0 and
+	also check results before returning.
+	(or1k_reloc_name_lookup): Simplify loop to use R_OR1K_max as index
+	limit.
+	(or1k_final_link_relocate): New function.
+	(or1k_elf_relocate_section): Add support for new AHI and SLO
+	relocations.  Use or1k_final_link_relocate instead of generic
+	_bfd_final_link_relocate.
+	(or1k_elf_check_relocs): Add support for new AHI and SLO relocations.
+	* reloc.c: Add new enums for BFD_RELOC_OR1K_SLO16,
+	BFD_RELOC_OR1K_GOTOFF_SLO16, BFD_RELOC_OR1K_TLS_IE_AHI16,
+	BFD_RELOC_OR1K_TLS_IE_AHI16, BFD_RELOC_OR1K_TLS_LE_AHI16,
+	BFD_RELOC_OR1K_TLS_LE_SLO16.  Remove unused BFD_RELOC_OR1K_GOTOFF_HI16
+	and BFD_RELOC_OR1K_GOTOFF_LO16.
+	* libbfd.h: Regenerated.
+
 2018-10-04  Jim Wilson  <jimw@sifive.com>
 
 	* elfnn-riscv.c (riscv_elf_size_dynamic_sections): In dynobj->sections

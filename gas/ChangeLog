@@ -1,3 +1,14 @@
+2018-10-05  Richard Henderson  <rth@twiddle.net>
+
+	* testsuite/gas/or1k/allinsn.d (l_ha): Add result for ha() relocation.
+	* testsuite/gas/or1k/allinsn.s (l_ha): Add test for ha() relocations.
+	* testsuite/gas/or1k/allinsn.exp: Renamed to or1k.exp.
+	* testsuite/gas/or1k/or1k.exp: Add reloc-2 list test.
+	* testsuite/gas/or1k/reloc-1.d: New file.
+	* testsuite/gas/or1k/reloc-1.s: New file.
+	* testsuite/gas/or1k/reloc-2.l: New file.
+	* testsuite/gas/or1k/reloc-2.s: New file.
+
 2018-10-03  Tamar Christina  <tamar.christina@arm.com>
 
 	* testsuite/gas/aarch64/sve-movprfx_1.d: New test.

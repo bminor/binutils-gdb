@@ -335,7 +335,7 @@
   (attrs (MACH ORBIS-MACHS) SIGN-OPT)
   (type h-simm16)
   (index f-simm16-split)
-  (handlers (parse "simm16"))
+  (handlers (parse "simm16_split"))
 )
 
 (define-operand
@@ -344,7 +344,7 @@
   (attrs (MACH ORBIS-MACHS))
   (type h-uimm16)
   (index f-uimm16-split)
-  (handlers (parse "uimm16"))
+  (handlers (parse "uimm16_split"))
 )
 
 ; Instructions.

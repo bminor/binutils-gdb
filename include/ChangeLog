@@ -1,3 +1,9 @@
+2018-10-05  Richard Henderson  <rth@twiddle.net>
+
+	* elf/or1k.h (elf_or1k_reloc_type): Add R_OR1K_AHI16,
+	R_OR1K_GOTOFF_AHI16, R_OR1K_TLS_IE_AHI16, R_OR1K_TLS_LE_AHI16,
+	R_OR1K_SLO16, R_OR1K_GOTOFF_SLO16, R_OR1K_TLS_LE_SLO16.
+
 2018-10-03  Tamar Christina  <tamar.christina@arm.com>
 
 	* opcode/aarch64.h (aarch64_inst): Remove.
