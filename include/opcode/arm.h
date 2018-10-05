@@ -70,6 +70,7 @@
 #define ARM_EXT2_FP16_FML 0x00000800	/* ARM V8.2A FP16-FML instructions.  */
 #define ARM_EXT2_V8_5A	 0x00001000	/* ARM V8.5A.  */
 #define ARM_EXT2_SB	 0x00002000	/* Speculation Barrier instruction.  */
+#define ARM_EXT2_PREDRES 0x00004000	/* Prediction Restriction insns.  */
 
 /* Co-processor space extensions.  */
 #define ARM_CEXT_XSCALE   0x00000001	/* Allow MIA etc.          */
@@ -297,7 +298,8 @@
 				     CRC_EXT_ARMV8 | FPU_NEON_EXT_RDMA \
 				     | FPU_NEON_EXT_DOTPROD)
 #define ARM_ARCH_V8_5A	ARM_FEATURE (ARM_AEXT_V8A,	\
-				     ARM_AEXT2_V8_5A | ARM_EXT2_SB,	\
+				     ARM_AEXT2_V8_5A | ARM_EXT2_SB	\
+				     | ARM_EXT2_PREDRES,		\
 				     CRC_EXT_ARMV8 | FPU_NEON_EXT_RDMA \
 				     | FPU_NEON_EXT_DOTPROD)
 #define ARM_ARCH_V8M_BASE ARM_FEATURE_CORE (ARM_AEXT_V8M_BASE, ARM_AEXT2_V8M)

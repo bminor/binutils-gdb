@@ -1,5 +1,17 @@
 2018-10-05  Sudakshina Das  <sudi.das@arm.com>
 
+	* config/tc-arm.c (arm_ext_predres): New.
+	(insns): Add new cfprctx, dvprctx and cpprctx instructions.
+	(arm_extensions): Add "predres".
+	* doc/c-arm.texi: Document the above.
+	* testsuite/gas/arm/predres-bad.d: New test.
+	* testsuite/gas/arm/predres-bad.l: New test.
+	* testsuite/gas/arm/predres.s: New test.
+	* testsuite/gas/arm/predres1.d: New test.
+	* testsuite/gas/arm/predres2.d: New test.
+
+2018-10-05  Sudakshina Das  <sudi.das@arm.com>
+
 	* config/tc-arm.c (arm_ext_sb): New.
 	(insns): Add new sb instruction.
 	(arm_extensions): Add "sb".

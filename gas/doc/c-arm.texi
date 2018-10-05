@@ -189,6 +189,8 @@ The following extensions are currently supported:
 @code{mp} (Multiprocessing Extensions for v7-A and v7-R
 architectures),
 @code{os} (Operating System for v6M architecture),
+@code{predres} (Execution and Data Prediction Restriction Instruction for
+v8-A architectures, added by default from v8.5-A),
 @code{sb} (Speculation Barrier Instruction for v8-A architectures, added by
 default from v8.5-A),
 @code{sec} (Security Extensions for v6K and v7-A architectures),

@@ -258,6 +258,8 @@ static const arm_feature_set arm_ext_v8_3 =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_3A);
 static const arm_feature_set arm_ext_sb =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_SB);
+static const arm_feature_set arm_ext_predres =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_PREDRES);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
 #ifdef OBJ_ELF
@@ -21525,6 +21527,14 @@ static const struct asm_opcode insns[] =
 #define THUMB_VARIANT & arm_ext_sb
  TUF("sb", 57ff070, f3bf8f70, 0, (), noargs, noargs),
 
+#undef  ARM_VARIANT
+#define ARM_VARIANT   & arm_ext_predres
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT & arm_ext_predres
+ CE("cfprctx", e070f93, 1, (RRnpc), rd),
+ CE("dvprctx", e070fb3, 1, (RRnpc), rd),
+ CE("cpprctx", e070ff3, 1, (RRnpc), rd),
+
  /* ARMv8-M instructions.  */
 #undef  ARM_VARIANT
 #define ARM_VARIANT NULL
@@ -26421,6 +26431,9 @@ static const struct arm_option_extension_value_table arm_extensions[] =
   ARM_EXT_OPT ("pan",	ARM_FEATURE_CORE_HIGH (ARM_EXT2_PAN),
 			ARM_FEATURE (ARM_EXT_V8, ARM_EXT2_PAN, 0),
 			ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8A)),
+  ARM_EXT_OPT ("predres", ARM_FEATURE_CORE_HIGH (ARM_EXT2_PREDRES),
+			ARM_FEATURE_CORE_HIGH (ARM_EXT2_PREDRES),
+			ARM_ARCH_V8A),
   ARM_EXT_OPT ("ras",	ARM_FEATURE_CORE_HIGH (ARM_EXT2_RAS),
 			ARM_FEATURE (ARM_EXT_V8, ARM_EXT2_RAS, 0),
 			ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8A)),
