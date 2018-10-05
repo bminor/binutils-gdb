@@ -584,10 +584,16 @@ target_terminal::info (const char *arg, int from_tty)
 
 /* See target.h.  */
 
-int
+bool
 target_supports_terminal_ours (void)
 {
-  return current_top_target ()->supports_terminal_ours ();
+  /* This can be called before there is any target, so we must check
+     for nullptr here.  */
+  target_ops *top = current_top_target ();
+
+  if (top == nullptr)
+    return false;
+  return top->supports_terminal_ours ();
 }
 
 static void

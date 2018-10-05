@@ -1,3 +1,9 @@
+2018-11-08  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/23555:
+	PR gdb/23838:
+	* gdb.base/warning.exp: New file.
+
 2018-09-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR python/23669
