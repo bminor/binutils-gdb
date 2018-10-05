@@ -1906,6 +1906,9 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V6K),
     0x01e00f90, 0x0ff00ff0, "strexh%c\t%12-15R, %0-3R, [%16-19R]"},
 
+  /* ARMv8.5-A instructions.  */
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_SB), 0xf57ff070, 0xffffffff, "sb"},
+
   /* ARM V6K NOP hints.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V6K),
     0x0320f001, 0x0fffffff, "yield%c"},
@@ -2828,6 +2831,9 @@ static const struct opcode32 thumb32_opcodes[] =
 
   /* Security extension instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_SEC),  0xf7f08000, 0xfff0f000, "smc%c\t%K"},
+
+  /* ARMv8.5-A instructions.  */
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_SB), 0xf3bf8f70, 0xffffffff, "sb"},
 
   /* Instructions defined in the basic V6T2 set.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V6T2), 0xf3af8000, 0xffffffff, "nop%c.w"},

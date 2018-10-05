@@ -1,3 +1,8 @@
+2018-10-05  Sudakshina Das  <sudi.das@arm.com>
+
+	* arm-dis.c (arm_opcodes): Add sb.
+	(thumb32_opcodes): Likewise.
+
 2018-10-05  Richard Henderson  <rth@twiddle.net>
 	    Stafford Horne  <shorne@gmail.com>
 

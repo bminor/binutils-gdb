@@ -1,5 +1,19 @@
 2018-10-05  Sudakshina Das  <sudi.das@arm.com>
 
+	* config/tc-arm.c (arm_ext_sb): New.
+	(insns): Add new sb instruction.
+	(arm_extensions): Add "sb".
+	* doc/c-arm.texi: Document the above.
+	* testsuite/gas/arm/sb-bad.d: New test.
+	* testsuite/gas/arm/sb-bad.l: New test.
+	* testsuite/gas/arm/sb-thumb1.d: New test.
+	* testsuite/gas/arm/sb-thumb2.d: New test.
+	* testsuite/gas/arm/sb.s: New test.
+	* testsuite/gas/arm/sb1.d: New test.
+	* testsuite/gas/arm/sb2.d: New test.
+
+2018-10-05  Sudakshina Das  <sudi.das@arm.com>
+
 	* config/tc-arm.c (arm_archs): New entry for armv8.5-a.
 	(cpu_arch_ver): Likewise.
 	* doc/c-arm.texi: Add documentation for the same.
