@@ -1,3 +1,9 @@
+2018-10-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (rm_table): Add enclv.
+	* i386-opc.tbl: Add enclv.
+	* i386-tbl.h: Regenerated.
+
 2018-07-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/23418
