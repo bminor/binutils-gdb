@@ -1,3 +1,8 @@
+2018-10-05  Sudakshina Das  <sudi.das@arm.com>
+
+	* opcode/arm.h (ARM_EXT2_V8_5A): New.
+	(ARM_AEXT2_V8_5A, ARM_ARCH_V8_5A): New.
+
 2018-10-05  Richard Henderson  <rth@twiddle.net>
 
 	* elf/or1k.h (elf_or1k_reloc_type): Add R_OR1K_PCREL_PG21,

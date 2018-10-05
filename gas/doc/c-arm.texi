@@ -241,6 +241,7 @@ names are recognized:
 @code{armv8.3-a},
 @code{armv8-r},
 @code{armv8.4-a},
+@code{armv8.5-a},
 @code{iwmmxt}
 @code{iwmmxt2}
 and

@@ -1,3 +1,10 @@
+2018-10-05  Sudakshina Das  <sudi.das@arm.com>
+
+	* config/tc-arm.c (arm_archs): New entry for armv8.5-a.
+	(cpu_arch_ver): Likewise.
+	* doc/c-arm.texi: Add documentation for the same.
+	* testsuite/gas/arm/attr-march-armv8_5-a.d: New.
+
 2018-10-05  Stafford Horne  <shorne@gmail.com>
 
 	* doc/Makefile.am (CPU_DOCS): Add entry for OpenRISC.

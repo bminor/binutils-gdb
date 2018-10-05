@@ -26335,6 +26335,7 @@ static const struct arm_arch_option_table arm_archs[] =
   ARM_ARCH_OPT ("armv8.3-a",	ARM_ARCH_V8_3A,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv8-r",	ARM_ARCH_V8R,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv8.4-a",	ARM_ARCH_V8_4A,	 FPU_ARCH_VFP),
+  ARM_ARCH_OPT ("armv8.5-a",	ARM_ARCH_V8_5A,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("xscale",	ARM_ARCH_XSCALE, FPU_ARCH_VFP),
   ARM_ARCH_OPT ("iwmmxt",	ARM_ARCH_IWMMXT, FPU_ARCH_VFP),
   ARM_ARCH_OPT ("iwmmxt2",	ARM_ARCH_IWMMXT2,FPU_ARCH_VFP),
@@ -27046,6 +27047,7 @@ static const cpu_arch_ver_table cpu_arch_ver[] =
     {TAG_CPU_ARCH_V8M_MAIN, ARM_ARCH_V8M_MAIN},
     {TAG_CPU_ARCH_V8R,	    ARM_ARCH_V8R},
     {TAG_CPU_ARCH_V8,	    ARM_ARCH_V8_4A},
+    {TAG_CPU_ARCH_V8,	    ARM_ARCH_V8_5A},
     {-1,		    ARM_ARCH_NONE}
 };
 
