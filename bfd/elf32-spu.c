@@ -5231,7 +5231,7 @@ spu_elf_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
 {
   asection *toe, *s;
   struct elf_segment_map *m, *m_overlay;
-  struct elf_segment_map **p, **p_overlay;
+  struct elf_segment_map **p, **p_overlay, **first_load;
   unsigned int i;
 
   if (info == NULL)
@@ -5290,24 +5290,40 @@ spu_elf_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
   /* Move all overlay segments onto a separate list.  */
   p = &elf_seg_map (abfd);
   p_overlay = &m_overlay;
+  m_overlay = NULL;
+  first_load = NULL;
   while (*p != NULL)
     {
-      if ((*p)->p_type == PT_LOAD && (*p)->count == 1
-	  && spu_elf_section_data ((*p)->sections[0])->u.o.ovl_index != 0)
+      if ((*p)->p_type == PT_LOAD)
 	{
-	  m = *p;
-	  *p = m->next;
-	  *p_overlay = m;
-	  p_overlay = &m->next;
-	  continue;
+	  if (!first_load)
+	    first_load = p;
+	  if ((*p)->count == 1
+	      && spu_elf_section_data ((*p)->sections[0])->u.o.ovl_index != 0)
+	    {
+	      m = *p;
+	      *p = m->next;
+	      *p_overlay = m;
+	      p_overlay = &m->next;
+	      continue;
+	    }
 	}
-
       p = &((*p)->next);
     }
 
   /* Re-insert overlay segments at the head of the segment map.  */
-  *p_overlay = elf_seg_map (abfd);
-  elf_seg_map (abfd) = m_overlay;
+  if (m_overlay != NULL)
+    {
+      p = first_load;
+      if (*p != NULL && (*p)->p_type == PT_LOAD && (*p)->includes_filehdr)
+	/* It doesn't really make sense for someone to include the ELF
+	   file header into an spu image, but if they do the code that
+	   assigns p_offset needs to see the segment containing the
+	   header first.  */
+	p = &(*p)->next;
+      *p_overlay = *p;
+      *p = m_overlay;
+    }
 
   return TRUE;
 }

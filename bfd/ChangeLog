@@ -1,5 +1,10 @@
 2018-10-08  Alan Modra  <amodra@gmail.com>
 
+	* elf32-spu.c (spu_elf_modify_segment_map): Don't insert
+	overlays before segment containing headers.
+
+2018-10-08  Alan Modra  <amodra@gmail.com>
+
 	* elf.c (make_mapping): Cope with zero size array at end of
 	struct elf_segment_map.
 	(_bfd_elf_map_sections_to_segments): Likewise.
