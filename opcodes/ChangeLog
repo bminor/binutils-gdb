@@ -1,4 +1,13 @@
 2018-10-05  Richard Henderson  <rth@twiddle.net>
+	    Stafford Horne  <shorne@gmail.com>
+
+	* or1k-desc.c: Regenerate.
+	* or1k-desc.h: Regenerate.
+	* or1k-opc.c: Regenerate.
+	* or1k-opc.h: Regenerate.
+	* or1k-opinst.c: Regenerate.
+
+2018-10-05  Richard Henderson  <rth@twiddle.net>
 
 	* or1k-asm.c: Regenerated.
 	* or1k-desc.c: Regenerated.

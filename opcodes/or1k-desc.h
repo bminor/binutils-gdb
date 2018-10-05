@@ -306,7 +306,7 @@ typedef enum insn_opcode_movehimacrc {
 
 /* Enum declaration for multiply/accumulate insn opcode enums.  */
 typedef enum insn_opcode_mac {
-  OPC_MAC_MAC = 1, OPC_MAC_MSB = 2
+  OPC_MAC_MAC = 1, OPC_MAC_MSB = 2, OPC_MAC_MACU = 3, OPC_MAC_MSBU = 4
 } INSN_OPCODE_MAC;
 
 /* Enum declaration for shift/rotate insn opcode enums.  */
@@ -327,9 +327,10 @@ typedef enum insn_opcode_extws {
 /* Enum declaration for alu reg/reg insn opcode enums.  */
 typedef enum insn_opcode_alu_regreg {
   OPC_ALU_REGREG_ADD = 0, OPC_ALU_REGREG_ADDC = 1, OPC_ALU_REGREG_SUB = 2, OPC_ALU_REGREG_AND = 3
- , OPC_ALU_REGREG_OR = 4, OPC_ALU_REGREG_XOR = 5, OPC_ALU_REGREG_MUL = 6, OPC_ALU_REGREG_SHROT = 8
- , OPC_ALU_REGREG_DIV = 9, OPC_ALU_REGREG_DIVU = 10, OPC_ALU_REGREG_MULU = 11, OPC_ALU_REGREG_EXTBH = 12
- , OPC_ALU_REGREG_EXTW = 13, OPC_ALU_REGREG_CMOV = 14, OPC_ALU_REGREG_FFL1 = 15
+ , OPC_ALU_REGREG_OR = 4, OPC_ALU_REGREG_XOR = 5, OPC_ALU_REGREG_MUL = 6, OPC_ALU_REGREG_MULD = 7
+ , OPC_ALU_REGREG_SHROT = 8, OPC_ALU_REGREG_DIV = 9, OPC_ALU_REGREG_DIVU = 10, OPC_ALU_REGREG_MULU = 11
+ , OPC_ALU_REGREG_EXTBH = 12, OPC_ALU_REGREG_EXTW = 13, OPC_ALU_REGREG_MULDU = 13, OPC_ALU_REGREG_CMOV = 14
+ , OPC_ALU_REGREG_FFL1 = 15
 } INSN_OPCODE_ALU_REGREG;
 
 /* Enum declaration for setflag insn opcode enums.  */
@@ -632,7 +633,7 @@ typedef enum cgen_operand_type {
 #define MAX_OPERANDS 32
 
 /* Maximum number of operands referenced by any insn.  */
-#define MAX_OPERAND_INSTANCES 9
+#define MAX_OPERAND_INSTANCES 10
 
 /* Insn attribute indices.  */
 

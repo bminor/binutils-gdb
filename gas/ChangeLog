@@ -1,3 +1,10 @@
+2018-10-05  Stafford Horne  <shorne@gmail.com>
+
+	* testsuite/gas/or1k/allinsn.s: Add instruction tests for
+	l.muld, l.muldu, l.macu, l.msb, l.msbu.
+	* testsuite/gas/or1k/allinsn.d: Add test results for new
+	instructions.
+
 2018-10-05  Richard Henderson  <rth@twiddle.net>
 
 	* config/tc-or1k.c (or1k_apply_fix): Add BFD_RELOC_OR1K_TLS_GD_PG21,

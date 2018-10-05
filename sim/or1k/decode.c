@@ -47,6 +47,7 @@ static const struct insn_sem or1k32bf_insn_sem[] =
   { VIRTUAL_INSN_X_CHAIN, OR1K32BF_INSN_X_CHAIN, OR1K32BF_SFMT_EMPTY },
   { VIRTUAL_INSN_X_BEGIN, OR1K32BF_INSN_X_BEGIN, OR1K32BF_SFMT_EMPTY },
   { OR1K_INSN_L_J, OR1K32BF_INSN_L_J, OR1K32BF_SFMT_L_J },
+  { OR1K_INSN_L_ADRP, OR1K32BF_INSN_L_ADRP, OR1K32BF_SFMT_L_ADRP },
   { OR1K_INSN_L_JAL, OR1K32BF_INSN_L_JAL, OR1K32BF_SFMT_L_JAL },
   { OR1K_INSN_L_JR, OR1K32BF_INSN_L_JR, OR1K32BF_SFMT_L_JR },
   { OR1K_INSN_L_JALR, OR1K32BF_INSN_L_JALR, OR1K32BF_SFMT_L_JALR },
@@ -88,10 +89,12 @@ static const struct insn_sem or1k32bf_insn_sem[] =
   { OR1K_INSN_L_ADD, OR1K32BF_INSN_L_ADD, OR1K32BF_SFMT_L_ADD },
   { OR1K_INSN_L_SUB, OR1K32BF_INSN_L_SUB, OR1K32BF_SFMT_L_ADD },
   { OR1K_INSN_L_ADDC, OR1K32BF_INSN_L_ADDC, OR1K32BF_SFMT_L_ADDC },
-  { OR1K_INSN_L_MUL, OR1K32BF_INSN_L_MUL, OR1K32BF_SFMT_L_ADD },
-  { OR1K_INSN_L_MULU, OR1K32BF_INSN_L_MULU, OR1K32BF_SFMT_L_ADD },
+  { OR1K_INSN_L_MUL, OR1K32BF_INSN_L_MUL, OR1K32BF_SFMT_L_MUL },
+  { OR1K_INSN_L_MULD, OR1K32BF_INSN_L_MULD, OR1K32BF_SFMT_L_MULD },
+  { OR1K_INSN_L_MULU, OR1K32BF_INSN_L_MULU, OR1K32BF_SFMT_L_MULU },
+  { OR1K_INSN_L_MULDU, OR1K32BF_INSN_L_MULDU, OR1K32BF_SFMT_L_MULD },
   { OR1K_INSN_L_DIV, OR1K32BF_INSN_L_DIV, OR1K32BF_SFMT_L_DIV },
-  { OR1K_INSN_L_DIVU, OR1K32BF_INSN_L_DIVU, OR1K32BF_SFMT_L_DIV },
+  { OR1K_INSN_L_DIVU, OR1K32BF_INSN_L_DIVU, OR1K32BF_SFMT_L_DIVU },
   { OR1K_INSN_L_FF1, OR1K32BF_INSN_L_FF1, OR1K32BF_SFMT_L_FF1 },
   { OR1K_INSN_L_FL1, OR1K32BF_INSN_L_FL1, OR1K32BF_SFMT_L_FF1 },
   { OR1K_INSN_L_ANDI, OR1K32BF_INSN_L_ANDI, OR1K32BF_SFMT_L_MFSPR },
@@ -99,7 +102,7 @@ static const struct insn_sem or1k32bf_insn_sem[] =
   { OR1K_INSN_L_XORI, OR1K32BF_INSN_L_XORI, OR1K32BF_SFMT_L_XORI },
   { OR1K_INSN_L_ADDI, OR1K32BF_INSN_L_ADDI, OR1K32BF_SFMT_L_ADDI },
   { OR1K_INSN_L_ADDIC, OR1K32BF_INSN_L_ADDIC, OR1K32BF_SFMT_L_ADDIC },
-  { OR1K_INSN_L_MULI, OR1K32BF_INSN_L_MULI, OR1K32BF_SFMT_L_ADDI },
+  { OR1K_INSN_L_MULI, OR1K32BF_INSN_L_MULI, OR1K32BF_SFMT_L_MULI },
   { OR1K_INSN_L_EXTHS, OR1K32BF_INSN_L_EXTHS, OR1K32BF_SFMT_L_EXTHS },
   { OR1K_INSN_L_EXTBS, OR1K32BF_INSN_L_EXTBS, OR1K32BF_SFMT_L_EXTHS },
   { OR1K_INSN_L_EXTHZ, OR1K32BF_INSN_L_EXTHZ, OR1K32BF_SFMT_L_EXTHS },
@@ -128,8 +131,10 @@ static const struct insn_sem or1k32bf_insn_sem[] =
   { OR1K_INSN_L_SFNE, OR1K32BF_INSN_L_SFNE, OR1K32BF_SFMT_L_SFGTS },
   { OR1K_INSN_L_SFNEI, OR1K32BF_INSN_L_SFNEI, OR1K32BF_SFMT_L_SFGTSI },
   { OR1K_INSN_L_MAC, OR1K32BF_INSN_L_MAC, OR1K32BF_SFMT_L_MAC },
-  { OR1K_INSN_L_MSB, OR1K32BF_INSN_L_MSB, OR1K32BF_SFMT_L_MAC },
   { OR1K_INSN_L_MACI, OR1K32BF_INSN_L_MACI, OR1K32BF_SFMT_L_MACI },
+  { OR1K_INSN_L_MACU, OR1K32BF_INSN_L_MACU, OR1K32BF_SFMT_L_MACU },
+  { OR1K_INSN_L_MSB, OR1K32BF_INSN_L_MSB, OR1K32BF_SFMT_L_MAC },
+  { OR1K_INSN_L_MSBU, OR1K32BF_INSN_L_MSBU, OR1K32BF_SFMT_L_MACU },
   { OR1K_INSN_L_CUST1, OR1K32BF_INSN_L_CUST1, OR1K32BF_SFMT_L_MSYNC },
   { OR1K_INSN_L_CUST2, OR1K32BF_INSN_L_CUST2, OR1K32BF_SFMT_L_MSYNC },
   { OR1K_INSN_L_CUST3, OR1K32BF_INSN_L_CUST3, OR1K32BF_SFMT_L_MSYNC },
@@ -297,6 +302,38 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 61 : /* fall through */
       case 62 : /* fall through */
       case 63 : itype = OR1K32BF_INSN_L_JAL; goto extract_sfmt_l_jal;
+      case 64 : /* fall through */
+      case 65 : /* fall through */
+      case 66 : /* fall through */
+      case 67 : /* fall through */
+      case 68 : /* fall through */
+      case 69 : /* fall through */
+      case 70 : /* fall through */
+      case 71 : /* fall through */
+      case 72 : /* fall through */
+      case 73 : /* fall through */
+      case 74 : /* fall through */
+      case 75 : /* fall through */
+      case 76 : /* fall through */
+      case 77 : /* fall through */
+      case 78 : /* fall through */
+      case 79 : /* fall through */
+      case 80 : /* fall through */
+      case 81 : /* fall through */
+      case 82 : /* fall through */
+      case 83 : /* fall through */
+      case 84 : /* fall through */
+      case 85 : /* fall through */
+      case 86 : /* fall through */
+      case 87 : /* fall through */
+      case 88 : /* fall through */
+      case 89 : /* fall through */
+      case 90 : /* fall through */
+      case 91 : /* fall through */
+      case 92 : /* fall through */
+      case 93 : /* fall through */
+      case 94 : /* fall through */
+      case 95 : itype = OR1K32BF_INSN_L_ADRP; goto extract_sfmt_l_adrp;
       case 96 : /* fall through */
       case 97 : /* fall through */
       case 98 : /* fall through */
@@ -998,7 +1035,7 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 1436 : /* fall through */
       case 1437 : /* fall through */
       case 1438 : /* fall through */
-      case 1439 : itype = OR1K32BF_INSN_L_MULI; goto extract_sfmt_l_addi;
+      case 1439 : itype = OR1K32BF_INSN_L_MULI; goto extract_sfmt_l_muli;
       case 1440 : /* fall through */
       case 1441 : /* fall through */
       case 1442 : /* fall through */
@@ -1211,6 +1248,14 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
       case 1570 :
         if ((entire_insn & 0xffe007ff) == 0xc4000002)
           { itype = OR1K32BF_INSN_L_MSB; goto extract_sfmt_l_mac; }
+        itype = OR1K32BF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 1571 :
+        if ((entire_insn & 0xffe007ff) == 0xc4000003)
+          { itype = OR1K32BF_INSN_L_MACU; goto extract_sfmt_l_macu; }
+        itype = OR1K32BF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 1572 :
+        if ((entire_insn & 0xffe007ff) == 0xc4000004)
+          { itype = OR1K32BF_INSN_L_MSBU; goto extract_sfmt_l_macu; }
         itype = OR1K32BF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 1600 :
         if ((entire_insn & 0xfc0007ff) == 0xc8000000)
@@ -1426,7 +1471,11 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
         itype = OR1K32BF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 1798 :
         if ((entire_insn & 0xfc0007ff) == 0xe0000306)
-          { itype = OR1K32BF_INSN_L_MUL; goto extract_sfmt_l_add; }
+          { itype = OR1K32BF_INSN_L_MUL; goto extract_sfmt_l_mul; }
+        itype = OR1K32BF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 1799 :
+        if ((entire_insn & 0xffe007ff) == 0xe0000307)
+          { itype = OR1K32BF_INSN_L_MULD; goto extract_sfmt_l_muld; }
         itype = OR1K32BF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 1800 :
         {
@@ -1450,11 +1499,11 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
         itype = OR1K32BF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 1802 :
         if ((entire_insn & 0xfc0007ff) == 0xe000030a)
-          { itype = OR1K32BF_INSN_L_DIVU; goto extract_sfmt_l_div; }
+          { itype = OR1K32BF_INSN_L_DIVU; goto extract_sfmt_l_divu; }
         itype = OR1K32BF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 1803 :
         if ((entire_insn & 0xfc0007ff) == 0xe000030b)
-          { itype = OR1K32BF_INSN_L_MULU; goto extract_sfmt_l_add; }
+          { itype = OR1K32BF_INSN_L_MULU; goto extract_sfmt_l_mulu; }
         itype = OR1K32BF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 1804 :
         {
@@ -1473,9 +1522,21 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
           }
         }
       case 1805 :
-        if ((entire_insn & 0xfc00ffff) == 0xe000000d)
-          { itype = OR1K32BF_INSN_L_EXTWS; goto extract_sfmt_l_exths; }
-        itype = OR1K32BF_INSN_X_INVALID; goto extract_sfmt_empty;
+        {
+          unsigned int val = (((insn >> 8) & (3 << 0)));
+          switch (val)
+          {
+          case 0 :
+            if ((entire_insn & 0xfc00ffff) == 0xe000000d)
+              { itype = OR1K32BF_INSN_L_EXTWS; goto extract_sfmt_l_exths; }
+            itype = OR1K32BF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0xffe007ff) == 0xe000030d)
+              { itype = OR1K32BF_INSN_L_MULDU; goto extract_sfmt_l_muld; }
+            itype = OR1K32BF_INSN_X_INVALID; goto extract_sfmt_empty;
+          default : itype = OR1K32BF_INSN_X_INVALID; goto extract_sfmt_empty;
+          }
+        }
       case 1806 :
         if ((entire_insn & 0xfc0007ff) == 0xe000000e)
           { itype = OR1K32BF_INSN_L_CMOV; goto extract_sfmt_l_cmov; }
@@ -1633,6 +1694,26 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
     return idesc;
   }
 
+ extract_sfmt_l_adrp:
+  {
+    const IDESC *idesc = &or1k32bf_insn_data[itype];
+    CGEN_INSN_WORD insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_l_adrp.f
+    UINT f_r1;
+    USI f_disp21;
+
+    f_r1 = EXTRACT_LSB0_UINT (insn, 32, 25, 5);
+    f_disp21 = ((((EXTRACT_LSB0_SINT (insn, 32, 20, 21)) + (((SI) (pc) >> (13))))) << (13));
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_r1) = f_r1;
+  FLD (i_disp21) = f_disp21;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_l_adrp", "f_r1 0x%x", 'x', f_r1, "disp21 0x%x", 'x', f_disp21, (char *) 0));
+
+#undef FLD
+    return idesc;
+  }
+
  extract_sfmt_l_jal:
   {
     const IDESC *idesc = &or1k32bf_insn_data[itype];
@@ -1768,7 +1849,7 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
   {
     const IDESC *idesc = &or1k32bf_insn_data[itype];
     CGEN_INSN_WORD insn = entire_insn;
-#define FLD(f) abuf->fields.sfmt_l_slli.f
+#define FLD(f) abuf->fields.sfmt_l_adrp.f
     UINT f_r1;
 
     f_r1 = EXTRACT_LSB0_UINT (insn, 32, 25, 5);
@@ -2215,6 +2296,72 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
     return idesc;
   }
 
+ extract_sfmt_l_mul:
+  {
+    const IDESC *idesc = &or1k32bf_insn_data[itype];
+    CGEN_INSN_WORD insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_l_sll.f
+    UINT f_r1;
+    UINT f_r2;
+    UINT f_r3;
+
+    f_r1 = EXTRACT_LSB0_UINT (insn, 32, 25, 5);
+    f_r2 = EXTRACT_LSB0_UINT (insn, 32, 20, 5);
+    f_r3 = EXTRACT_LSB0_UINT (insn, 32, 15, 5);
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_r2) = f_r2;
+  FLD (f_r3) = f_r3;
+  FLD (f_r1) = f_r1;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_l_mul", "f_r2 0x%x", 'x', f_r2, "f_r3 0x%x", 'x', f_r3, "f_r1 0x%x", 'x', f_r1, (char *) 0));
+
+#undef FLD
+    return idesc;
+  }
+
+ extract_sfmt_l_muld:
+  {
+    const IDESC *idesc = &or1k32bf_insn_data[itype];
+    CGEN_INSN_WORD insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_l_sll.f
+    UINT f_r2;
+    UINT f_r3;
+
+    f_r2 = EXTRACT_LSB0_UINT (insn, 32, 20, 5);
+    f_r3 = EXTRACT_LSB0_UINT (insn, 32, 15, 5);
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_r2) = f_r2;
+  FLD (f_r3) = f_r3;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_l_muld", "f_r2 0x%x", 'x', f_r2, "f_r3 0x%x", 'x', f_r3, (char *) 0));
+
+#undef FLD
+    return idesc;
+  }
+
+ extract_sfmt_l_mulu:
+  {
+    const IDESC *idesc = &or1k32bf_insn_data[itype];
+    CGEN_INSN_WORD insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_l_sll.f
+    UINT f_r1;
+    UINT f_r2;
+    UINT f_r3;
+
+    f_r1 = EXTRACT_LSB0_UINT (insn, 32, 25, 5);
+    f_r2 = EXTRACT_LSB0_UINT (insn, 32, 20, 5);
+    f_r3 = EXTRACT_LSB0_UINT (insn, 32, 15, 5);
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_r2) = f_r2;
+  FLD (f_r3) = f_r3;
+  FLD (f_r1) = f_r1;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_l_mulu", "f_r2 0x%x", 'x', f_r2, "f_r3 0x%x", 'x', f_r3, "f_r1 0x%x", 'x', f_r1, (char *) 0));
+
+#undef FLD
+    return idesc;
+  }
+
  extract_sfmt_l_div:
   {
     const IDESC *idesc = &or1k32bf_insn_data[itype];
@@ -2233,6 +2380,29 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
   FLD (f_r3) = f_r3;
   FLD (f_r1) = f_r1;
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_l_div", "f_r2 0x%x", 'x', f_r2, "f_r3 0x%x", 'x', f_r3, "f_r1 0x%x", 'x', f_r1, (char *) 0));
+
+#undef FLD
+    return idesc;
+  }
+
+ extract_sfmt_l_divu:
+  {
+    const IDESC *idesc = &or1k32bf_insn_data[itype];
+    CGEN_INSN_WORD insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_l_sll.f
+    UINT f_r1;
+    UINT f_r2;
+    UINT f_r3;
+
+    f_r1 = EXTRACT_LSB0_UINT (insn, 32, 25, 5);
+    f_r2 = EXTRACT_LSB0_UINT (insn, 32, 20, 5);
+    f_r3 = EXTRACT_LSB0_UINT (insn, 32, 15, 5);
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_r2) = f_r2;
+  FLD (f_r3) = f_r3;
+  FLD (f_r1) = f_r1;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_l_divu", "f_r2 0x%x", 'x', f_r2, "f_r3 0x%x", 'x', f_r3, "f_r1 0x%x", 'x', f_r1, (char *) 0));
 
 #undef FLD
     return idesc;
@@ -2322,6 +2492,29 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
   FLD (f_simm16) = f_simm16;
   FLD (f_r1) = f_r1;
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_l_addic", "f_r2 0x%x", 'x', f_r2, "f_simm16 0x%x", 'x', f_simm16, "f_r1 0x%x", 'x', f_r1, (char *) 0));
+
+#undef FLD
+    return idesc;
+  }
+
+ extract_sfmt_l_muli:
+  {
+    const IDESC *idesc = &or1k32bf_insn_data[itype];
+    CGEN_INSN_WORD insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_l_lwz.f
+    UINT f_r1;
+    UINT f_r2;
+    INT f_simm16;
+
+    f_r1 = EXTRACT_LSB0_UINT (insn, 32, 25, 5);
+    f_r2 = EXTRACT_LSB0_UINT (insn, 32, 20, 5);
+    f_simm16 = EXTRACT_LSB0_SINT (insn, 32, 15, 16);
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_r2) = f_r2;
+  FLD (f_simm16) = f_simm16;
+  FLD (f_r1) = f_r1;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_l_muli", "f_r2 0x%x", 'x', f_r2, "f_simm16 0x%x", 'x', f_simm16, "f_r1 0x%x", 'x', f_r1, (char *) 0));
 
 #undef FLD
     return idesc;
@@ -2445,6 +2638,26 @@ or1k32bf_decode (SIM_CPU *current_cpu, IADDR pc,
   FLD (f_r2) = f_r2;
   FLD (f_simm16) = f_simm16;
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_l_maci", "f_r2 0x%x", 'x', f_r2, "f_simm16 0x%x", 'x', f_simm16, (char *) 0));
+
+#undef FLD
+    return idesc;
+  }
+
+ extract_sfmt_l_macu:
+  {
+    const IDESC *idesc = &or1k32bf_insn_data[itype];
+    CGEN_INSN_WORD insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_l_sll.f
+    UINT f_r2;
+    UINT f_r3;
+
+    f_r2 = EXTRACT_LSB0_UINT (insn, 32, 20, 5);
+    f_r3 = EXTRACT_LSB0_UINT (insn, 32, 15, 5);
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_r2) = f_r2;
+  FLD (f_r3) = f_r3;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_l_macu", "f_r2 0x%x", 'x', f_r2, "f_r3 0x%x", 'x', f_r3, (char *) 0));
 
 #undef FLD
     return idesc;

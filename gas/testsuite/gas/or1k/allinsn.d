@@ -696,3 +696,28 @@ Disassembly of section \.text:
 			840: R_OR1K_PCREL_PG21	globaldata
  844:	08 60 00 00 	l\.adrp r3,0 <localtext>
 			844: R_OR1K_PCREL_PG21	\.data
+
+00000848 <l_muld>:
+ 848:	e0 00 03 07 	l\.muld r0,r0
+ 84c:	e0 1f fb 07 	l\.muld r31,r31
+ 850:	e0 03 23 07 	l\.muld r3,r4
+
+00000854 <l_muldu>:
+ 854:	e0 00 03 0d 	l\.muldu r0,r0
+ 858:	e0 1f fb 0d 	l\.muldu r31,r31
+ 85c:	e0 03 23 0d 	l\.muldu r3,r4
+
+00000860 <l_macu>:
+ 860:	c4 00 00 03 	l\.macu r0,r0
+ 864:	c4 1f f8 03 	l\.macu r31,r31
+ 868:	c4 03 20 03 	l\.macu r3,r4
+
+0000086c <l_msb>:
+ 86c:	c4 00 00 02 	l\.msb r0,r0
+ 870:	c4 1f f8 02 	l\.msb r31,r31
+ 874:	c4 03 20 02 	l\.msb r3,r4
+
+00000878 <l_msbu>:
+ 878:	c4 00 00 04 	l\.msbu r0,r0
+ 87c:	c4 1f f8 04 	l\.msbu r31,r31
+ 880:	c4 03 20 04 	l\.msbu r3,r4

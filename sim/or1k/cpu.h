@@ -4516,6 +4516,10 @@ union sem_fields {
     IADDR i_disp26;
   } sfmt_l_j;
   struct { /*  */
+    IADDR i_disp21;
+    UINT f_r1;
+  } sfmt_l_adrp;
+  struct { /*  */
     UINT f_r1;
     UINT f_r2;
     UINT f_uimm6;
@@ -4613,6 +4617,17 @@ struct scache {
   length = 4; \
   f_opcode = EXTRACT_LSB0_UINT (insn, 32, 31, 6); \
   f_disp26 = ((((EXTRACT_LSB0_SINT (insn, 32, 25, 26)) << (2))) + (pc)); \
+
+#define EXTRACT_IFMT_L_ADRP_VARS \
+  UINT f_opcode; \
+  UINT f_r1; \
+  USI f_disp21; \
+  unsigned int length;
+#define EXTRACT_IFMT_L_ADRP_CODE \
+  length = 4; \
+  f_opcode = EXTRACT_LSB0_UINT (insn, 32, 31, 6); \
+  f_r1 = EXTRACT_LSB0_UINT (insn, 32, 25, 5); \
+  f_disp21 = ((((EXTRACT_LSB0_SINT (insn, 32, 20, 21)) + (((SI) (pc) >> (13))))) << (13)); \
 
 #define EXTRACT_IFMT_L_JR_VARS \
   UINT f_opcode; \
@@ -4826,6 +4841,23 @@ struct scache {
   length = 4; \
   f_opcode = EXTRACT_LSB0_UINT (insn, 32, 31, 6); \
   f_r1 = EXTRACT_LSB0_UINT (insn, 32, 25, 5); \
+  f_r2 = EXTRACT_LSB0_UINT (insn, 32, 20, 5); \
+  f_r3 = EXTRACT_LSB0_UINT (insn, 32, 15, 5); \
+  f_resv_10_7 = EXTRACT_LSB0_UINT (insn, 32, 10, 7); \
+  f_op_3_4 = EXTRACT_LSB0_UINT (insn, 32, 3, 4); \
+
+#define EXTRACT_IFMT_L_MULD_VARS \
+  UINT f_opcode; \
+  UINT f_resv_25_5; \
+  UINT f_r2; \
+  UINT f_r3; \
+  UINT f_resv_10_7; \
+  UINT f_op_3_4; \
+  unsigned int length;
+#define EXTRACT_IFMT_L_MULD_CODE \
+  length = 4; \
+  f_opcode = EXTRACT_LSB0_UINT (insn, 32, 31, 6); \
+  f_resv_25_5 = EXTRACT_LSB0_UINT (insn, 32, 25, 5); \
   f_r2 = EXTRACT_LSB0_UINT (insn, 32, 20, 5); \
   f_r3 = EXTRACT_LSB0_UINT (insn, 32, 15, 5); \
   f_resv_10_7 = EXTRACT_LSB0_UINT (insn, 32, 10, 7); \

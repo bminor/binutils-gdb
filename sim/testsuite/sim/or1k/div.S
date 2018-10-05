@@ -75,29 +75,29 @@
 # output: report(0x0000000c);\n
 # output: report(0x00000000);\n
 # output: report(0xfffffffd);\n
-# output: report(0x00000001);\n
 # output: report(0x00000000);\n
+# output: report(0x00000001);\n
 # output: report(0x00000000);\n
 # output: \n
 # output: report(0xfffffff4);\n
 # output: report(0x00000000);\n
 # output: report(0xfffffffd);\n
-# output: report(0x00000001);\n
 # output: report(0x00000000);\n
+# output: report(0x00000001);\n
 # output: report(0x00000000);\n
 # output: \n
 # output: report(0x0000000c);\n
 # output: report(0x00000000);\n
 # output: report(0xfffffffd);\n
-# output: report(0x00000001);\n
 # output: report(0x00000000);\n
+# output: report(0x00000001);\n
 # output: report(0x00000001);\n
 # output: \n
 # output: report(0xfffffff4);\n
 # output: report(0x00000000);\n
 # output: report(0xfffffffd);\n
-# output: report(0x00000001);\n
 # output: report(0x00000000);\n
+# output: report(0x00000001);\n
 # output: report(0x00000001);\n
 # output: \n
 # output: report(0x0000000c);\n
@@ -233,7 +233,7 @@ start_tests:
 	TEST_INST_I32_I32 l.div, 0x0000000c, 0xfffffffd
 	TEST_INST_I32_I32 l.div, 0x0000000b, 0xfffffffd
 
-	/* Divide by zero.  This will set the carry flag.  */
+	/* Divide by zero.  This will set the overflow flag.  */
 	TEST_INST_I32_I32 l.div, 0x0000000c, 0x00000000
 	TEST_INST_I32_I32 l.div, 0xfffffff4, 0x00000000
 
@@ -241,7 +241,7 @@ start_tests:
 
 	SET_SPR_SR_FLAGS SPR_SR_OVE, r2, r3
 
-	/* Divide by zero.  This will set the carry flag and trigger an
+	/* Divide by zero.  This will set the overflow flag and trigger an
 	   exception.  */
 	TEST_INST_I32_I32 l.div, 0x0000000c, 0x00000000
 	TEST_INST_I32_I32 l.div, 0xfffffff4, 0x00000000

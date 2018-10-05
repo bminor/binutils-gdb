@@ -647,6 +647,38 @@ MUL1OFSI (USI a, USI b)
   return res;
 }
 
+SEMOPS_INLINE BI
+ADDCFDI (DI a, DI b, BI c)
+{
+  DI tmp = ADDDI (a, ADDDI (b, c));
+  BI res = ((UDI) tmp < (UDI) a) || (c && tmp == a);
+  return res;
+}
+
+SEMOPS_INLINE BI
+ADDOFDI (DI a, DI b, BI c)
+{
+  DI tmp = ADDDI (a, ADDDI (b, c));
+  BI res = (((a < 0) == (b < 0))
+	    && ((a < 0) != (tmp < 0)));
+  return res;
+}
+
+SEMOPS_INLINE BI
+SUBCFDI (DI a, DI b, BI c)
+{
+  BI res = ((UDI) a < (UDI) b) || (c && a == b);
+  return res;
+}
+
+SEMOPS_INLINE BI
+SUBOFDI (DI a, DI b, BI c)
+{
+  DI tmp = SUBDI (a, ADDSI (b, c));
+  BI res = (((a < 0) != (b < 0))
+	    && ((a < 0) != (tmp < 0)));
+  return res;
+}
 #else
 
 SI ADDCSI (SI, SI, BI);
@@ -669,6 +701,10 @@ UBI SUBCFQI (QI, QI, BI);
 UBI SUBOFQI (QI, QI, BI);
 BI MUL1OFSI (SI a, SI b);
 BI MUL2OFSI (SI a, SI b);
+BI ADDCFDI (DI a, DI b, BI c);
+BI ADDOFDI (DI a, DI b, BI c);
+BI SUBCFDI (DI a, DI b, BI c);
+BI SUBOFDI (DI a, DI b, BI c);
 
 #endif
 

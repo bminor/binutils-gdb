@@ -680,3 +680,23 @@ l_maci:
 l_adrp:
 	l.adrp r3,globaldata
 	l.adrp r3,localdata
+l_muld:
+	l.muld r0,r0
+	l.muld r31,r31
+	l.muld r3,r4
+l_muldu:
+	l.muldu r0,r0
+	l.muldu r31,r31
+	l.muldu r3,r4
+l_macu:
+	l.macu r0,r0
+	l.macu r31,r31
+	l.macu r3,r4
+l_msb:
+	l.msb r0,r0
+	l.msb r31,r31
+	l.msb r3,r4
+l_msbu:
+	l.msbu r0,r0
+	l.msbu r31,r31
+	l.msbu r3,r4

@@ -1,4 +1,17 @@
 2018-10-05  Richard Henderson  <rth@twiddle.net>
+	    Stafford Horne  <shorne@gmail.com>
+
+	* or1korbis.cpu (insn-opcode-mac): Add opcodes for MACU and MSBU.
+	(insn-opcode-alu-regreg): Add opcodes for MULD and MULDU.
+	(l-mul): Fix overflow support and indentation.
+	(l-mulu): Fix overflow support and indentation.
+	(l-muld, l-muldu, l-msbu, l-macu): New instructions.
+	(l-div); Remove incorrect carry behavior.
+	(l-divu): Fix carry and overflow behavior.
+	(l-mac): Add overflow support.
+	(l-msb, l-msbu): Add carry and overflow support.
+
+2018-10-05  Richard Henderson  <rth@twiddle.net>
 
 	* or1k.opc (parse_disp26): Add support for plta() relocations.
 	(parse_disp21): New function.
