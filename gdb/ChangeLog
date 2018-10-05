@@ -1,3 +1,11 @@
+2018-11-08  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/23555:
+	PR gdb/23838:
+	* target.h (target_supports_terminal_ours): Return bool.
+	* target.c (target_supports_terminal_ours): Handle case where
+	current_top_target returns nullptr.  Return bool.
+
 2018-11-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* aarch64-tdep.c (aapcs_is_vfp_call_or_return_candidate_1):

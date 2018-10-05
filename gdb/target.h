@@ -1577,7 +1577,7 @@ extern int target_remove_breakpoint (struct gdbarch *gdbarch,
 /* Return true if the target stack has a non-default
   "terminal_ours" method.  */
 
-extern int target_supports_terminal_ours (void);
+extern bool target_supports_terminal_ours (void);
 
 /* Kill the inferior process.   Make it go away.  */
 

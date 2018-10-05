@@ -1,3 +1,9 @@
+2018-11-08  Tom Tromey  <tom@tromey.com>
+
+	PR gdb/23555:
+	PR gdb/23838:
+	* gdb.base/warning.exp: New file.
+
 2018-11-08  Jan Beulich  <jbeulich@suse.com>
 
 	* testsuite/gdb.arch/i386-avx512.c,
