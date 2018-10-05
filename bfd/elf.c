@@ -4597,7 +4597,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
       unsigned int hdr_index;
       bfd_vma maxpagesize;
       asection **hdrpp;
-      bfd_boolean phdr_in_segment = TRUE;
+      bfd_boolean phdr_in_segment;
       bfd_boolean writable;
       bfd_boolean executable;
       int tls_count = 0;
@@ -4606,7 +4606,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
       asection *dynsec, *eh_frame_hdr;
       bfd_size_type amt;
       bfd_vma addr_mask, wrap_to = 0;
-      bfd_boolean linker_created_pt_phdr_segment = FALSE;
+      bfd_size_type phdr_size;
 
       /* Select the allocated sections, and sort them.  */
 
@@ -4638,8 +4638,23 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 
       qsort (sections, (size_t) count, sizeof (asection *), elf_sort_sections);
 
-      /* Build the mapping.  */
+      phdr_size = elf_program_header_size (abfd);
+      if (phdr_size == (bfd_size_type) -1)
+	phdr_size = get_program_header_size (abfd, info);
+      phdr_size += bed->s->sizeof_ehdr;
+      maxpagesize = bed->maxpagesize;
+      if (maxpagesize == 0)
+	maxpagesize = 1;
+      phdr_in_segment = info != NULL && info->load_phdrs;
+      if (count != 0
+	  && (((sections[0]->lma & addr_mask) & (maxpagesize - 1))
+	      >= (phdr_size & (maxpagesize - 1))))
+	/* For compatibility with old scripts that may not be using
+	   SIZEOF_HEADERS, add headers when it looks like space has
+	   been left for them.  */
+	phdr_in_segment = TRUE;
 
+      /* Build the mapping.  */
       mfirst = NULL;
       pm = &mfirst;
 
@@ -4658,7 +4673,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	  m->p_flags = PF_R;
 	  m->p_flags_valid = 1;
 	  m->includes_phdrs = 1;
-	  linker_created_pt_phdr_segment = TRUE;
+	  phdr_in_segment = TRUE;
 	  *pm = m;
 	  pm = &m->next;
 
@@ -4681,12 +4696,6 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
       last_hdr = NULL;
       last_size = 0;
       hdr_index = 0;
-      maxpagesize = bed->maxpagesize;
-      /* PR 17512: file: c8455299.
-	 Avoid divide-by-zero errors later on.
-	 FIXME: Should we abort if the maxpagesize is zero ?  */
-      if (maxpagesize == 0)
-	maxpagesize = 1;
       writable = FALSE;
       executable = FALSE;
       dynsec = bfd_get_section_by_name (abfd, ".dynamic");
@@ -4694,34 +4703,62 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	  && (dynsec->flags & SEC_LOAD) == 0)
 	dynsec = NULL;
 
+      if ((abfd->flags & D_PAGED) == 0)
+	phdr_in_segment = FALSE;
+
       /* Deal with -Ttext or something similar such that the first section
 	 is not adjacent to the program headers.  This is an
 	 approximation, since at this point we don't know exactly how many
 	 program headers we will need.  */
-      if (count > 0)
+      if (phdr_in_segment && count > 0)
 	{
-	  bfd_size_type phdr_size = elf_program_header_size (abfd);
+	  bfd_vma phdr_lma;
+	  bfd_boolean separate_phdr = FALSE;
 
-	  if (phdr_size == (bfd_size_type) -1)
-	    phdr_size = get_program_header_size (abfd, info);
-	  phdr_size += bed->s->sizeof_ehdr;
-	  if ((abfd->flags & D_PAGED) == 0
-	      || (sections[0]->lma & addr_mask) < phdr_size
-	      || ((sections[0]->lma & addr_mask) % maxpagesize
-		  < phdr_size % maxpagesize)
-	      || (sections[0]->lma & addr_mask & -maxpagesize) < wrap_to)
+	  phdr_lma = (sections[0]->lma - phdr_size) & addr_mask & -maxpagesize;
+	  if (info != NULL
+	      && info->separate_code
+	      && (sections[0]->flags & SEC_CODE) != 0)
 	    {
-	      /* PR 20815: The ELF standard says that a PT_PHDR segment, if
-		 present, must be included as part of the memory image of the
-		 program.  Ie it must be part of a PT_LOAD segment as well.
-		 If we have had to create our own PT_PHDR segment, but it is
-		 not going to be covered by the first PT_LOAD segment, then
-		 force the inclusion if we can...  */
-	      if ((abfd->flags & D_PAGED) != 0
-		  && linker_created_pt_phdr_segment)
-		phdr_in_segment = TRUE;
-	      else
-		phdr_in_segment = FALSE;
+	      /* If data sections should be separate from code and
+		 thus not executable, and the first section is
+		 executable then put the file and program headers in
+		 their own PT_LOAD.  */
+	      separate_phdr = TRUE;
+	      if ((((phdr_lma + phdr_size - 1) & addr_mask & -maxpagesize)
+		   == (sections[0]->lma & addr_mask & -maxpagesize)))
+		{
+		  /* The file and program headers are currently on the
+		     same page as the first section.  Put them on the
+		     previous page if we can.  */
+		  if (phdr_lma >= maxpagesize)
+		    phdr_lma -= maxpagesize;
+		  else
+		    separate_phdr = FALSE;
+		}
+	    }
+	  if ((sections[0]->lma & addr_mask) < phdr_lma
+	      || (sections[0]->lma & addr_mask) < phdr_size)
+	    /* If file and program headers would be placed at the end
+	       of memory then it's probably better to omit them.  */
+	    phdr_in_segment = FALSE;
+	  else if (phdr_lma < wrap_to)
+	    /* If a section wraps around to where we'll be placing
+	       file and program headers, then the headers will be
+	       overwritten.  */
+	    phdr_in_segment = FALSE;
+	  else if (separate_phdr)
+	    {
+	      m = make_mapping (abfd, sections, 0, 0, phdr_in_segment);
+	      if (m == NULL)
+		goto error_return;
+	      m->p_paddr = phdr_lma;
+	      m->p_vaddr_offset
+		= (sections[0]->vma - phdr_size) & addr_mask & -maxpagesize;
+	      m->p_paddr_valid = 1;
+	      *pm = m;
+	      pm = &m->next;
+	      phdr_in_segment = FALSE;
 	    }
 	}
 

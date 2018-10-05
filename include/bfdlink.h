@@ -475,6 +475,9 @@ struct bfd_link_info
   /* TRUE if the linker script contained an explicit PHDRS command.  */
   unsigned int user_phdrs: 1;
 
+  /* TRUE if program headers ought to be loaded.  */
+  unsigned int load_phdrs: 1;
+
   /* TRUE if we should check relocations after all input files have
      been opened.  */
   unsigned int check_relocs_after_open_input: 1;

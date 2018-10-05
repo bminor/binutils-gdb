@@ -692,6 +692,7 @@ fold_name (etree_type *tree)
   switch (tree->type.node_code)
     {
     case SIZEOF_HEADERS:
+      link_info.load_phdrs = 1;
       if (expld.phase != lang_first_phase_enum)
 	{
 	  bfd_vma hdr_size = 0;

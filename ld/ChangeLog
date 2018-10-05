@@ -1,5 +1,19 @@
 2018-10-08  Alan Modra  <amodra@gmail.com>
 
+	* ldexp.c (fold_name <SIZEOF_HEADERS>): Set link_info.load_phdrs.
+	* testsuite/ld-elf/loadaddr1.d: Pass -z noseparate-code.
+	* testsuite/ld-elf/loadaddr2.d: Likewise.
+	* testsuite/ld-i386/vxworks2.sd: Adjust expected output.
+	* testsuite/ld-powerpc/vxworks2.sd: Likewise.
+	* testsuite/ld-elf/overlay.d: Remove spu xfail.
+	* testsuite/ld-spu/ovl.lnk: Don't use SIZEOF_HEADERS.
+	* testsuite/ld-tic6x/dsbt-be.ld: Likewise.
+	* testsuite/ld-tic6x/dsbt-inrange.ld: Likewise.
+	* testsuite/ld-tic6x/dsbt-overflow.ld: Likewise.
+	* testsuite/ld-tic6x/dsbt.ld: Likewise.
+
+2018-10-08  Alan Modra  <amodra@gmail.com>
+
 	* ldlang.c (insert_os_after): Clear ignore_first on assignment to
 	dot, not any assignment.  Clear ignore_first on output section
 	statement contents too.
