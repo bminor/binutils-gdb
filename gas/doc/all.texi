@@ -59,6 +59,7 @@
 @set NIOSII
 @set NDS32
 @set NS32K
+@set OPENRISC
 @set PDP11
 @set PJ
 @set PPC

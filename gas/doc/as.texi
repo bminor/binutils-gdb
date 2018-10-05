@@ -482,6 +482,9 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
     [@b{-mfull-regs}] [@b{-m[no-]dx-regs}] [@b{-mpic}] [@b{-mno-relax}]
     [@b{-mb2bb}]
 @end ifset
+@ifset OPENRISC
+@c OpenRISC has no machine-dependent assembler options.
+@end ifset
 @ifset PDP11
 
 @emph{Target PDP11 options:}
@@ -7678,6 +7681,9 @@ subject, see the hardware manufacturer's manual.
 @ifset NS32K
 * NS32K-Dependent::		NS32K Dependent Features
 @end ifset
+@ifset OPENRISC
+* OpenRISC-Dependent::		OpenRISC 1000 Features
+@end ifset
 @ifset PDP11
 * PDP-11-Dependent::            PDP-11 Dependent Features
 @end ifset
@@ -7903,6 +7909,10 @@ family.
 
 @ifset NS32K
 @include c-ns32k.texi
+@end ifset
+
+@ifset OPENRISC
+@include c-or1k.texi
 @end ifset
 
 @ifset PDP11

@@ -1,5 +1,13 @@
 2018-10-05  Stafford Horne  <shorne@gmail.com>
 
+	* doc/Makefile.am (CPU_DOCS): Add entry for OpenRISC.
+	* doc/Makefile.in: Regenerated.
+	* doc/all.texi: Set OPENRISC.
+	* doc/as.texi: Document OpenRISC.
+	* doc/c-or1k.texi: New file.
+
+2018-10-05  Stafford Horne  <shorne@gmail.com>
+
 	* testsuite/gas/or1k/allinsn.s: Add instruction tests for
 	l.muld, l.muldu, l.macu, l.msb, l.msbu.
 	* testsuite/gas/or1k/allinsn.d: Add test results for new

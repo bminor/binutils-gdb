@@ -431,6 +431,7 @@ CPU_DOCS = \
 	c-nios2.texi \
 	c-nds32.texi \
 	c-ns32k.texi \
+	c-or1k.texi \
 	c-pdp11.texi \
 	c-pj.texi \
 	c-ppc.texi \
