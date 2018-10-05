@@ -440,14 +440,14 @@ sol_thread_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
   if (ptid.pid () != -1)
     {
-      ptid_t save_ptid = ptid;
+      ptid_t ptid_for_warning = ptid;
 
       ptid = thread_to_lwp (ptid, -2);
       if (ptid.pid () == -2)		/* Inactive thread.  */
 	error (_("This version of Solaris can't start inactive threads."));
       if (info_verbose && ptid.pid () == -1)
 	warning (_("Specified thread %ld seems to have terminated"),
-		 save_ptid.tid ());
+		 ptid_for_warning.tid ());
     }
 
   rtnval = beneath ()->wait (ptid, ourstatus, options);
