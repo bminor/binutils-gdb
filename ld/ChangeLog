@@ -1,3 +1,7 @@
+2018-10-08  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/pr22423.d: Pass --dynamic-linker to ld.
+
 2018-10-05  Richard Henderson  <rth@twiddle.net>
 
 	* testsuite/ld-or1k/or1k.exp: Add test cases for plt generation.

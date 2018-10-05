@@ -1,6 +1,6 @@
 #source: start.s
 #readelf: -l -W
-#ld: -pie
+#ld: -pie --dynamic-linker=/usr/lib/ld.so.1
 #target: *-*-linux* *-*-gnu* arm*-*-uclinuxfdpiceabi
 
 #...

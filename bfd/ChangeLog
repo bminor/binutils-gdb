@@ -1,5 +1,12 @@
 2018-10-08  Alan Modra  <amodra@gmail.com>
 
+	* elf.c (get_program_header_size): Don't count PT_INTERP if
+	.interp is empty.
+	(_bfd_elf_map_sections_to_segments): Don't create PT_INTERP if
+	.interp is empty.
+
+2018-10-08  Alan Modra  <amodra@gmail.com>
+
 	* elf32-spu.c (spu_elf_modify_segment_map): Don't insert
 	overlays before segment containing headers.
 

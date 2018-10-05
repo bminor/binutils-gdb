@@ -4335,7 +4335,7 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
   segs = 2;
 
   s = bfd_get_section_by_name (abfd, ".interp");
-  if (s != NULL && (s->flags & SEC_LOAD) != 0)
+  if (s != NULL && (s->flags & SEC_LOAD) != 0 && s->size != 0)
     {
       /* If we have a loadable interpreter section, we need a
 	 PT_INTERP segment.  In this case, assume we also need a
@@ -4647,7 +4647,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	 the program headers and a PT_INTERP segment for the .interp
 	 section.  */
       s = bfd_get_section_by_name (abfd, ".interp");
-      if (s != NULL && (s->flags & SEC_LOAD) != 0)
+      if (s != NULL && (s->flags & SEC_LOAD) != 0 && s->size != 0)
 	{
 	  amt = sizeof (struct elf_segment_map);
 	  m = (struct elf_segment_map *) bfd_zalloc (abfd, amt);
