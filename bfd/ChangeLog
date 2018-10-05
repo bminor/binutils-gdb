@@ -1,3 +1,8 @@
+2018-10-05  Alan Modra  <amodra@gmail.com>
+
+	* elf32-spu.c (spu_elf_create_sections): Make .note.spu_name
+	SHT_NOTE.
+
 2018-10-05  Richard Henderson  <rth@twiddle.net>
 
 	* bfd-in2.h: Regenerated.

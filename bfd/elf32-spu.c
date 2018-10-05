@@ -580,11 +580,16 @@ spu_elf_create_sections (struct bfd_link_info *info)
       flagword flags;
 
       ibfd = info->input_bfds;
+      /* This should really be SEC_LINKER_CREATED, but then we'd need
+	 to write out the section ourselves.  */
       flags = SEC_LOAD | SEC_READONLY | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
       s = bfd_make_section_anyway_with_flags (ibfd, SPU_PTNOTE_SPUNAME, flags);
       if (s == NULL
 	  || !bfd_set_section_alignment (ibfd, s, 4))
 	return FALSE;
+      /* Because we didn't set SEC_LINKER_CREATED we need to set the
+	 proper section type.  */
+      elf_section_type (s) = SHT_NOTE;
 
       name_len = strlen (bfd_get_filename (info->output_bfd)) + 1;
       size = 12 + ((sizeof (SPU_PLUGIN_NAME) + 3) & -4);
