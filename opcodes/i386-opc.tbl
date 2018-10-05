@@ -3992,6 +3992,7 @@ xsavec64, 1, 0xfc7, 0x4, 2, CpuXSAVEC|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sS
 
 encls, 0, 0xf01cf, None, 3, CpuSE1, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 enclu, 0, 0xf01d7, None, 3, CpuSE1, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+enclv, 0, 0xf01c0, None, 3, CpuSE1, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 
 // SGX instructions end.
 

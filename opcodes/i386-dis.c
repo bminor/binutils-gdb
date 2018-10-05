@@ -11027,7 +11027,7 @@ static const struct dis386 rm_table[][8] = {
   },
   {
     /* RM_0F01_REG_0 */
-    { Bad_Opcode },
+    { "enclv",		{ Skip_MODRM }, 0 },
     { "vmcall",		{ Skip_MODRM }, 0 },
     { "vmlaunch",	{ Skip_MODRM }, 0 },
     { "vmresume",	{ Skip_MODRM }, 0 },
