@@ -8,3 +8,4 @@
 .*:9: Error: relocation invalid for store .*
 .*:11: Error: relocation invalid for store .*
 .*:12: Error: relocation invalid for store .*
+.*:13: Error: relocation invalid for store .*

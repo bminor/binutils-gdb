@@ -1,5 +1,16 @@
 2018-10-05  Richard Henderson  <rth@twiddle.net>
 
+	* or1k-asm.c: Regenerated.
+	* or1k-desc.c: Regenerated.
+	* or1k-desc.h: Regenerated.
+	* or1k-dis.c: Regenerated.
+	* or1k-ibld.c: Regenerated.
+	* or1k-opc.c: Regenerated.
+	* or1k-opc.h: Regenerated.
+	* or1k-opinst.c: Regenerated.
+
+2018-10-05  Richard Henderson  <rth@twiddle.net>
+
 	* or1k-asm.c: Regenerate.
 
 2018-10-03  Tamar Christina  <tamar.christina@arm.com>

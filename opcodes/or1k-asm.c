@@ -61,155 +61,251 @@ static const char *
 parse_disp26 (CGEN_CPU_DESC cd,
 	      const char ** strp,
 	      int opindex,
-	      int opinfo,
+	      int opinfo ATTRIBUTE_UNUSED,
 	      enum cgen_parse_operand_result * resultp,
 	      bfd_vma * valuep)
 {
+  const char *str = *strp;
   const char *errmsg = NULL;
-  enum cgen_parse_operand_result result_type;
+  bfd_reloc_code_real_type reloc = BFD_RELOC_OR1K_REL_26;
 
-  if (strncasecmp (*strp, "plt(", 4) == 0)
+  if (strncasecmp (str, "plta(", 5) == 0)
     {
-      bfd_vma value;
-
-      *strp += 4;
-      errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_OR1K_PLT26,
-				   & result_type, & value);
-      if (**strp != ')')
-	return MISSING_CLOSING_PARENTHESIS;
-      ++*strp;
-      if (errmsg == NULL
-	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-	value = (value >> 2) & 0xffff;
-      *valuep = value;
-      return errmsg;
+      *strp = str + 5;
+      reloc = BFD_RELOC_OR1K_PLTA26;
     }
-  return cgen_parse_address (cd, strp, opindex, opinfo, resultp, valuep);
+  else if (strncasecmp (str, "plt(", 4) == 0)
+    {
+      *strp = str + 4;
+      reloc = BFD_RELOC_OR1K_PLT26;
+    }
+
+  errmsg = cgen_parse_address (cd, strp, opindex, reloc, resultp, valuep);
+
+  if (reloc != BFD_RELOC_OR1K_REL_26)
+    {
+      if (**strp != ')')
+	errmsg = MISSING_CLOSING_PARENTHESIS;
+      else
+	++*strp;
+    }
+
+  return errmsg;
 }
 
-enum {
-  RTYPE_LO = 0,
-  RTYPE_HI = 1,
-  RTYPE_AHI = 2,
-  RTYPE_SLO = 3,
+static const char *
+parse_disp21 (CGEN_CPU_DESC cd,
+	      const char ** strp,
+	      int opindex,
+	      int opinfo ATTRIBUTE_UNUSED,
+	      enum cgen_parse_operand_result * resultp,
+	      bfd_vma * valuep)
+{
+  const char *str = *strp;
+  const char *errmsg = NULL;
+  bfd_reloc_code_real_type reloc = BFD_RELOC_OR1K_PCREL_PG21;
 
-  RTYPE_GOT      = (1 << 2),
-  RTYPE_GOTPC    = (2 << 2),
-  RTYPE_GOTOFF   = (3 << 2),
-  RTYPE_TLSGD    = (4 << 2),
-  RTYPE_TLSLDM   = (5 << 2),
-  RTYPE_DTPOFF   = (6 << 2),
-  RTYPE_GOTTPOFF = (7 << 2),
-  RTYPE_TPOFF    = (8 << 2),
+  if (strncasecmp (str, "got(", 4) == 0)
+    {
+      *strp = str + 4;
+      reloc = BFD_RELOC_OR1K_GOT_PG21;
+    }
+  else if (strncasecmp (str, "tlsgd(", 6) == 0)
+    {
+      *strp = str + 6;
+      reloc = BFD_RELOC_OR1K_TLS_GD_PG21;
+    }
+  else if (strncasecmp (str, "tlsldm(", 7) == 0)
+    {
+      *strp = str + 7;
+      reloc = BFD_RELOC_OR1K_TLS_LDM_PG21;
+    }
+  else if (strncasecmp (str, "gottp(", 6) == 0)
+    {
+      *strp = str + 6;
+      reloc = BFD_RELOC_OR1K_TLS_IE_PG21;
+    }
+
+  errmsg = cgen_parse_address (cd, strp, opindex, reloc, resultp, valuep);
+
+  if (reloc != BFD_RELOC_OR1K_PCREL_PG21)
+    {
+      if (**strp != ')')
+	errmsg = MISSING_CLOSING_PARENTHESIS;
+      else
+	++*strp;
+    }
+
+  return errmsg;
+}
+
+enum or1k_rclass
+{
+  RCLASS_DIRECT   = 0,
+  RCLASS_GOT      = 1,
+  RCLASS_GOTPC    = 2,
+  RCLASS_GOTOFF   = 3,
+  RCLASS_TLSGD    = 4,
+  RCLASS_TLSLDM   = 5,
+  RCLASS_DTPOFF   = 6,
+  RCLASS_GOTTPOFF = 7,
+  RCLASS_TPOFF    = 8,
 };
 
-static const bfd_reloc_code_real_type or1k_imm16_relocs[][4] = {
+enum or1k_rtype
+{
+  RTYPE_LO = 0,
+  RTYPE_SLO = 1,
+  RTYPE_PO = 2,
+  RTYPE_SPO = 3,
+  RTYPE_HI = 4,
+  RTYPE_AHI = 5,
+};
+
+#define RCLASS_SHIFT 3
+#define RTYPE_MASK   7
+
+static const bfd_reloc_code_real_type or1k_imm16_relocs[][6] = {
   { BFD_RELOC_LO16,
+    BFD_RELOC_OR1K_SLO16,
+    BFD_RELOC_OR1K_LO13,
+    BFD_RELOC_OR1K_SLO13,
     BFD_RELOC_HI16,
-    BFD_RELOC_HI16_S,
-    BFD_RELOC_OR1K_SLO16 },
+    BFD_RELOC_HI16_S, },
   { BFD_RELOC_OR1K_GOT16,
+    BFD_RELOC_UNUSED,
+    BFD_RELOC_OR1K_GOT_LO13,
     BFD_RELOC_UNUSED,
     BFD_RELOC_UNUSED,
     BFD_RELOC_UNUSED },
   { BFD_RELOC_OR1K_GOTPC_LO16,
-    BFD_RELOC_OR1K_GOTPC_HI16,
     BFD_RELOC_UNUSED,
+    BFD_RELOC_UNUSED,
+    BFD_RELOC_UNUSED,
+    BFD_RELOC_OR1K_GOTPC_HI16,
     BFD_RELOC_UNUSED },
   { BFD_RELOC_LO16_GOTOFF,
-    BFD_RELOC_HI16_GOTOFF,
-    BFD_RELOC_HI16_S_GOTOFF,
-    BFD_RELOC_OR1K_GOTOFF_SLO16 },
-  { BFD_RELOC_OR1K_TLS_GD_LO16,
-    BFD_RELOC_OR1K_TLS_GD_HI16,
+    BFD_RELOC_OR1K_GOTOFF_SLO16,
     BFD_RELOC_UNUSED,
+    BFD_RELOC_UNUSED,
+    BFD_RELOC_HI16_GOTOFF,
+    BFD_RELOC_HI16_S_GOTOFF },
+  { BFD_RELOC_OR1K_TLS_GD_LO16,
+    BFD_RELOC_UNUSED,
+    BFD_RELOC_OR1K_TLS_GD_LO13,
+    BFD_RELOC_UNUSED,
+    BFD_RELOC_OR1K_TLS_GD_HI16,
     BFD_RELOC_UNUSED },
   { BFD_RELOC_OR1K_TLS_LDM_LO16,
-    BFD_RELOC_OR1K_TLS_LDM_HI16,
     BFD_RELOC_UNUSED,
+    BFD_RELOC_OR1K_TLS_LDM_LO13,
+    BFD_RELOC_UNUSED,
+    BFD_RELOC_OR1K_TLS_LDM_HI16,
     BFD_RELOC_UNUSED },
   { BFD_RELOC_OR1K_TLS_LDO_LO16,
-    BFD_RELOC_OR1K_TLS_LDO_HI16,
     BFD_RELOC_UNUSED,
+    BFD_RELOC_UNUSED,
+    BFD_RELOC_UNUSED,
+    BFD_RELOC_OR1K_TLS_LDO_HI16,
     BFD_RELOC_UNUSED },
   { BFD_RELOC_OR1K_TLS_IE_LO16,
+    BFD_RELOC_UNUSED,
+    BFD_RELOC_OR1K_TLS_IE_LO13,
+    BFD_RELOC_UNUSED,
     BFD_RELOC_OR1K_TLS_IE_HI16,
-    BFD_RELOC_OR1K_TLS_IE_AHI16,
-    BFD_RELOC_UNUSED },
+    BFD_RELOC_OR1K_TLS_IE_AHI16 },
   { BFD_RELOC_OR1K_TLS_LE_LO16,
+    BFD_RELOC_OR1K_TLS_LE_SLO16,
+    BFD_RELOC_UNUSED,
+    BFD_RELOC_UNUSED,
     BFD_RELOC_OR1K_TLS_LE_HI16,
-    BFD_RELOC_OR1K_TLS_LE_AHI16,
-    BFD_RELOC_OR1K_TLS_LE_SLO16 }
+    BFD_RELOC_OR1K_TLS_LE_AHI16 },
 };
 
 static int
-parse_reloc(const char **strp)
+parse_reloc (const char **strp)
 {
     const char *str = *strp;
-    int ret = 0;
+    enum or1k_rclass cls = RCLASS_DIRECT;
+    enum or1k_rtype typ;
 
     if (strncasecmp (str, "got(", 4) == 0)
-	{
+      {
 	*strp = str + 4;
-	return RTYPE_GOT | RTYPE_LO;
-	}
+	return (RCLASS_GOT << RCLASS_SHIFT) | RTYPE_LO;
+      }
+    if (strncasecmp (str, "gotpo(", 6) == 0)
+      {
+	*strp = str + 6;
+	return (RCLASS_GOT << RCLASS_SHIFT) | RTYPE_PO;
+      }
+    if (strncasecmp (str, "gottppo(", 8) == 0)
+      {
+	*strp = str + 8;
+	return (RCLASS_GOTTPOFF << RCLASS_SHIFT) | RTYPE_PO;
+      }
 
     if (strncasecmp (str, "gotpc", 5) == 0)
-	{
+      {
 	str += 5;
-	ret = RTYPE_GOTPC;
-	}
+	cls = RCLASS_GOTPC;
+      }
     else if (strncasecmp (str, "gotoff", 6) == 0)
-    {
+      {
 	str += 6;
-	ret = RTYPE_GOTOFF;
-    }
+	cls = RCLASS_GOTOFF;
+      }
     else if (strncasecmp (str, "tlsgd", 5) == 0)
-    {
+      {
 	str += 5;
-	ret = RTYPE_TLSGD;
-    }
+	cls = RCLASS_TLSGD;
+      }
     else if (strncasecmp (str, "tlsldm", 6) == 0)
-    {
+      {
 	str += 6;
-	ret = RTYPE_TLSLDM;
-    }
+	cls = RCLASS_TLSLDM;
+      }
     else if (strncasecmp (str, "dtpoff", 6) == 0)
-    {
+      {
 	str += 6;
-	ret = RTYPE_DTPOFF;
-    }
+	cls = RCLASS_DTPOFF;
+      }
     else if (strncasecmp (str, "gottpoff", 8) == 0)
-    {
+      {
 	str += 8;
-	ret = RTYPE_GOTTPOFF;
-    }
+	cls = RCLASS_GOTTPOFF;
+      }
     else if (strncasecmp (str, "tpoff", 5) == 0)
-    {
+      {
 	str += 5;
-	ret = RTYPE_TPOFF;
-    }
+	cls = RCLASS_TPOFF;
+      }
 
     if (strncasecmp (str, "hi(", 3) == 0)
-    {
+      {
 	str += 3;
-	ret |= RTYPE_HI;
-    }
+	typ = RTYPE_HI;
+      }
     else if (strncasecmp (str, "lo(", 3) == 0)
-    {
+      {
 	str += 3;
-	ret |= RTYPE_LO;
-    }
+	typ = RTYPE_LO;
+      }
     else if (strncasecmp (str, "ha(", 3) == 0)
-    {
+      {
 	str += 3;
-	ret |= RTYPE_AHI;
-    }
+	typ = RTYPE_AHI;
+      }
+    else if (strncasecmp (str, "po(", 3) == 0 && cls != RCLASS_GOTTPOFF)
+      {
+	str += 3;
+	typ = RTYPE_PO;
+      }
     else
       return -1;
 
     *strp = str;
-    return ret;
+    return (cls << RCLASS_SHIFT) | typ;
 }
 
 static const char *
@@ -219,23 +315,28 @@ parse_imm16 (CGEN_CPU_DESC cd, const char **strp, int opindex,
   const char *errmsg;
   enum cgen_parse_operand_result result_type;
   bfd_reloc_code_real_type reloc = BFD_RELOC_UNUSED;
-  int reloc_type;
+  enum or1k_rtype reloc_type;
+  int reloc_code;
   bfd_vma ret;
 
   if (**strp == '#')
-      ++*strp;
+    ++*strp;
 
-  reloc_type = parse_reloc (strp);
-  if (reloc_type >= 0)
+  reloc_code = parse_reloc (strp);
+  reloc_type = reloc_code & RTYPE_MASK;
+  if (reloc_code >= 0)
     {
+      enum or1k_rclass reloc_class = reloc_code >> RCLASS_SHIFT;
       if (splitp)
 	{
-	  if ((reloc_type & 3) == RTYPE_LO && reloc_type != RTYPE_GOT)
-	    reloc_type |= RTYPE_SLO;
+	  if ((reloc_type == RTYPE_LO || reloc_type == RTYPE_PO)
+	      && reloc_class != RCLASS_GOT)
+	    /* If split we or up the type to RTYPE_SLO or RTYPE_SPO.  */
+	    reloc_type |= 1;
 	  else
 	    return INVALID_STORE_RELOC;
-    }
-      reloc = or1k_imm16_relocs[reloc_type >> 2][reloc_type & 3];
+	}
+      reloc = or1k_imm16_relocs[reloc_class][reloc_type];
     }
 
   if (reloc != BFD_RELOC_UNUSED)
@@ -251,8 +352,8 @@ parse_imm16 (CGEN_CPU_DESC cd, const char **strp, int opindex,
       ret = value;
 
       if (errmsg == NULL && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-	switch (reloc_type & 3)
-    {
+	switch (reloc_type)
+	  {
 	  case RTYPE_AHI:
 	    ret += 0x8000;
 	    /* FALLTHRU */
@@ -263,6 +364,10 @@ parse_imm16 (CGEN_CPU_DESC cd, const char **strp, int opindex,
 	  case RTYPE_SLO:
 	    ret &= 0xffff;
 	    ret = (ret ^ 0x8000) - 0x8000;
+	    break;
+	  case RTYPE_PO:
+	  case RTYPE_SPO:
+	    ret &= 0x1fff;
 	    break;
 	  default:
 	    errmsg = INVALID_RELOC_TYPE;
@@ -344,6 +449,13 @@ or1k_cgen_parse_operand (CGEN_CPU_DESC cd,
 
   switch (opindex)
     {
+    case OR1K_OPERAND_DISP21 :
+      {
+        bfd_vma value = 0;
+        errmsg = parse_disp21 (cd, strp, OR1K_OPERAND_DISP21, 0, NULL,  & value);
+        fields->f_disp21 = value;
+      }
+      break;
     case OR1K_OPERAND_DISP26 :
       {
         bfd_vma value = 0;

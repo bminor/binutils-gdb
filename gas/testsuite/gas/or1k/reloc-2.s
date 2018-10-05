@@ -10,3 +10,4 @@
 	l.sw	tpofflo(x)(r4),r3
 	l.sw	tpoffhi(x)(r4),r3
 	l.sw	tpoffha(x)(r4),r3
+	l.sw	gotpo(x)(r4),r3

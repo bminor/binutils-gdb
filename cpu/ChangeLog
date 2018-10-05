@@ -1,5 +1,19 @@
 2018-10-05  Richard Henderson  <rth@twiddle.net>
 
+	* or1k.opc (parse_disp26): Add support for plta() relocations.
+	(parse_disp21): New function.
+	(or1k_rclass): New enum.
+	(or1k_rtype): New enum.
+	(or1k_imm16_relocs): Define new PO and SPO relocation mappings.
+	(parse_reloc): Add new po(), gotpo() and gottppo() for LO13 relocations.
+	(parse_imm16): Add support for the new 21bit and 13bit relocations.
+	* or1korbis.cpu (f-disp26): Don't assume SI.
+	(f-disp21): New pc-relative 21-bit 13 shifted to right.
+	(insn-opcode): Add ADRP.
+	(l-adrp): New instruction.
+
+2018-10-05  Richard Henderson  <rth@twiddle.net>
+
 	* or1k.opc: Add RTYPE_ enum.
 	(INVALID_STORE_RELOC): New string.
 	(or1k_imm16_relocs): New array array.

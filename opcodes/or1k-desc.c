@@ -967,6 +967,7 @@ const CGEN_IFLD or1k_cgen_ifld_table[] =
   { OR1K_F_IMM16_25_5, "f-imm16-25-5", 0, 32, 25, 5, { 0, { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
   { OR1K_F_IMM16_10_11, "f-imm16-10-11", 0, 32, 10, 11, { 0, { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
   { OR1K_F_DISP26, "f-disp26", 0, 32, 25, 26, { 0|A(PCREL_ADDR), { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
+  { OR1K_F_DISP21, "f-disp21", 0, 32, 20, 21, { 0|A(ABS_ADDR), { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
   { OR1K_F_UIMM16, "f-uimm16", 0, 32, 15, 16, { 0, { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
   { OR1K_F_SIMM16, "f-simm16", 0, 32, 15, 16, { 0|A(SIGN_OPT), { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
   { OR1K_F_UIMM6, "f-uimm6", 0, 32, 5, 6, { 0, { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
@@ -1091,6 +1092,10 @@ const CGEN_OPERAND or1k_cgen_operand_table[] =
   { "disp26", OR1K_OPERAND_DISP26, HW_H_IADDR, 25, 26,
     { 0, { (const PTR) &or1k_cgen_ifld_table[OR1K_F_DISP26] } },
     { 0|A(PCREL_ADDR), { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
+/* disp21: pc-rel 21 bit */
+  { "disp21", OR1K_OPERAND_DISP21, HW_H_IADDR, 20, 21,
+    { 0, { (const PTR) &or1k_cgen_ifld_table[OR1K_F_DISP21] } },
+    { 0|A(ABS_ADDR), { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }  },
 /* simm16: 16-bit signed immediate */
   { "simm16", OR1K_OPERAND_SIMM16, HW_H_SIMM16, 15, 16,
     { 0, { (const PTR) &or1k_cgen_ifld_table[OR1K_F_SIMM16] } },
@@ -1155,6 +1160,11 @@ static const CGEN_IBASE or1k_cgen_insn_table[MAX_INSNS] =
   {
     OR1K_INSN_L_J, "l-j", "l.j", 32,
     { 0|A(UNCOND_CTI)|A(NOT_IN_DELAY_SLOT)|A(DELAYED_CTI)|A(SKIP_CTI)|A(DELAY_SLOT), { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }
+  },
+/* l.adrp $rD,${disp21} */
+  {
+    OR1K_INSN_L_ADRP, "l-adrp", "l.adrp", 32,
+    { 0, { { { (1<<MACH_OR32)|(1<<MACH_OR32ND)|(1<<MACH_OR64)|(1<<MACH_OR64ND), 0 } } } }
   },
 /* l.jal ${disp26} */
   {

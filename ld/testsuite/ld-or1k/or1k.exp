@@ -38,6 +38,23 @@ set or1ktests {
      "offsets1"}
 }
 
+set or1kplttests {
+    {"PLTA -fpic -shared" "-fpic -shared" ""
+     "" {plta1.s}
+     {{objdump -dr plta1.dd}}
+     "libplta1.so"}
+    {"PLT -fpic -shared" "-fpic -shared" ""
+     "" {plt1.s}
+     {{objdump -dr plt1.dd}}
+     "libplt1.so"}
+    {"Helper shared library" "-fpic -shared" ""
+     "" {pltlib.s} {} "libpltlib.so"}
+    {"PLT -fno-pic exec -relax" "-relax tmpdir/libpltlib.so" ""
+     "" {plt1.s}
+     {{objdump -dr plt1.x.dd}}
+     "plt1.x"}
+}
+
 # Not implemented yet
 #   {"TLS -fpic -shared" "-shared -melf64alpha" ""
 #    "" {align.s tlspic1.s tlspic2.s}
@@ -66,4 +83,9 @@ set or1ktests {
 #    "" {tlsg.s}
 #    {{objdump -sj.debug_foobar tlsg.sd}} "tlsg"}
 
+# Shared objects not supported on newlib
 run_ld_link_tests $or1ktests
+if { ![istarget "or1k*-*-elf*"] } {
+    run_ld_link_tests $or1kplttests
+    return
+}

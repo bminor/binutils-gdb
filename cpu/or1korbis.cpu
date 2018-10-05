@@ -74,8 +74,23 @@
     25
     26
     INT
-    ((value pc) (sra SI (sub IAI value pc) (const 2)))
+    ((value pc) (sra IAI (sub IAI value pc) (const 2)))
     ((value pc) (add IAI (sll IAI value (const 2)) pc))
+    )
+
+; PC relative, 21-bit, 13 shifted to right, aligned.
+; Note that the alignment means that we can't simplify relocations in the
+; same way as we do for pc-relative, so we use ABS-ADDR instead of PCREL-ADDR.
+(df f-disp21
+    "disp21"
+    ((MACH ORBIS-MACHS) ABS-ADDR)
+    20
+    21
+    INT
+    ((value pc)
+     (sub IAI (sra IAI value (const 13)) (sra IAI pc (const 13))))
+    ((value pc)
+     (sll IAI (add IAI value (sra IAI pc (const 13))) (const 13)))
     )
 
 ; Immediates.
@@ -134,6 +149,7 @@
   insn-opcode "insn main opcode enums" ((MACH ORBIS-MACHS)) OPC_ f-opcode
   (("J"            #x00)
    ("JAL"          #x01)
+   ("ADRP"	   #x02)
    ("BNF"          #x03)
    ("BF"           #x04)
    ("NOP"          #x05)
@@ -312,6 +328,15 @@
   )
 
 (define-operand
+  (name disp21)
+  (comment "pc-rel 21 bit")
+  (attrs (MACH ORBIS-MACHS))
+  (type h-iaddr)
+  (index f-disp21)
+  (handlers (parse "disp21"))
+  )
+
+(define-operand
   (name simm16)
   (comment "16-bit signed immediate")
   (attrs (MACH ORBIS-MACHS) SIGN-OPT)
@@ -401,6 +426,14 @@
   (.pmacro ()
            (cti-transfer-control 1 disp26)
            )
+  )
+
+(dni l-adrp "adrp reg/disp21"
+    ((MACH ORBIS-MACHS))
+    "l.adrp $rD,${disp21}"
+    (+ OPC_ADRP rD disp21)
+    (set UWI rD disp21)
+    ()
   )
 
 (define-cti

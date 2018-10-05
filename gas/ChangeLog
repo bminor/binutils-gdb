@@ -1,5 +1,25 @@
 2018-10-05  Richard Henderson  <rth@twiddle.net>
 
+	* config/tc-or1k.c (or1k_apply_fix): Add BFD_RELOC_OR1K_TLS_GD_PG21,
+	BFD_RELOC_OR1K_TLS_GD_LO13, BFD_RELOC_OR1K_TLS_LDM_PG21,
+	BFD_RELOC_OR1K_TLS_LDM_LO13, BFD_RELOC_OR1K_TLS_IE_PG21,
+	BFD_RELOC_OR1K_TLS_IE_LO13.
+	* testsuite/gas/or1k/allinsn.s: Add test for l.adrp.
+	* testsuite/gas/or1k/allinsn.d: Add test results for new
+	instructions.
+	* testsuite/gas/or1k/reloc-1.s: Add tests to generate
+	R_OR1K_PLTA26, R_OR1K_GOT_PG21, R_OR1K_TLS_GD_PG21, R_OR1K_TLS_LDM_PG21,
+	R_OR1K_TLS_IE_PG21, R_OR1K_LO13, R_OR1K_GOT_LO13, R_OR1K_TLS_GD_LO13,
+	R_OR1K_TLD_LDM_LO13, R_OR1K_TLS_IE_LO13, R_OR1K_LO13, R_OR1K_SLO13
+	relocations.
+	* testsuite/gas/or1k/reloc-1.d: Add relocation results for
+	tests.
+	* testsuite/gas/or1k/reloc-2.s: Add negative tests for store to
+	gotpo().
+	* testsuite/gas/or1k/reloc-2.l: Add expected error test results.
+
+2018-10-05  Richard Henderson  <rth@twiddle.net>
+
 	* testsuite/gas/or1k/allinsn.d (l_ha): Add result for ha() relocation.
 	* testsuite/gas/or1k/allinsn.s (l_ha): Add test for ha() relocations.
 	* testsuite/gas/or1k/allinsn.exp: Renamed to or1k.exp.

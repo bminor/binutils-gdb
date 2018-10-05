@@ -54,3 +54,23 @@
 	l.movhi	r3,tpoffha(x)
 	l.lwz	r3,tpofflo(x)(r3)
 	l.sw	tpofflo(x)(r3),r3
+
+	l.j	plta(x)
+	l.jal	plta(x)
+	l.bf	plta(x)
+	l.bnf	plta(x)
+
+	l.adrp	r3,got(x)
+	l.adrp	r3,tlsgd(x)
+	l.adrp	r3,tlsldm(x)
+	l.adrp	r3,gottp(x)
+
+	l.ori	r4,r3,po(x)
+	l.ori	r4,r3,gotpo(x)
+	l.ori	r4,r3,tlsgdpo(x)
+	l.ori	r4,r3,tlsldmpo(x)
+	l.ori	r4,r3,gottppo(x)
+
+	l.lbz	r5,po(x)(r3)
+	l.lbz	r5,gotpo(x)(r3)
+	l.sb	po(x)(r3),r6

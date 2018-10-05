@@ -1,5 +1,35 @@
 2018-10-05  Richard Henderson  <rth@twiddle.net>
 
+	* bfd-in2.h: Regenerated.
+	* elf32-or1k.c: (or1k_elf_howto_table): Fix formatting for
+	R_OR1K_PLT26, Add R_OR1K_PCREL_PG21, R_OR1K_GOT_PG21,
+	R_OR1K_TLS_GD_PG21, R_OR1K_TLS_LDM_PG21, R_OR1K_TLS_IE_PG21,
+	R_OR1K_LO13, R_OR1K_GOT_LO13, R_OR1K_TLS_GD_LO13, R_OR1K_TLS_LDM_LO13,
+	R_OR1K_TLS_IE_LO13, R_OR1K_SLO13, R_OR1K_PLTA26.
+	(or1k_reloc_map): Add BFD_RELOC_OR1K_PCREL_PG21,
+	BFD_RELOC_OR1K_GOT_PG21, BFD_RELOC_OR1K_TLS_GD_PG21,
+	BFD_RELOC_OR1K_TLS_LDM_PG21, BFD_RELOC_OR1K_TLS_IE_PG21,
+	BFD_RELOC_OR1K_LO13, BFD_RELOC_OR1K_GOT_LO13,
+	BFD_RELOC_OR1K_TLS_GD_LO13, BFD_RELOC_OR1K_TLS_GD_LO13,
+	BFD_RELOC_OR1K_TLS_LDM_LO13, BFD_RELOC_OR1K_TLS_IE_LO13,
+	BFD_RELOC_OR1K_SLO13, BFD_RELOC_OR1K_PLTA26.
+	(elf_or1k_link_hash_table): Add field saw_plta.
+	(or1k_final_link_relocate): Add value calculations for new relocations.
+	(or1k_elf_relocate_section): Add section relocations for new
+	relocations.
+	(or1k_write_plt_entry): New function.
+	(or1k_elf_finish_dynamic_sections): Add support for PLTA relocations
+	using new l.adrp instruction.  Cleanup PLT relocation code generation.
+	* libbfd.h: Regenerated.
+	* reloc.c: Add BFD_RELOC_OR1K_PCREL_PG21, BFD_RELOC_OR1K_LO13,
+	BFD_RELOC_OR1K_SLO13, BFD_RELOC_OR1K_GOT_PG21, BFD_RELOC_OR1K_GOT_LO13,
+	BFD_RELOC_OR1K_PLTA26, BFD_RELOC_OR1K_TLS_GD_PG21,
+	BFD_RELOC_OR1K_TLS_GD_LO13, BFD_RELOC_OR1K_TLS_LDM_PG21,
+	BFD_RELOC_OR1K_TLS_LDM_LO13, BFD_RELOC_OR1K_TLS_IE_PG21,
+	BFD_RELOC_OR1K_TLS_IE_LO13.
+
+2018-10-05  Richard Henderson  <rth@twiddle.net>
+
 	* elf32-or1k.c (or1k_elf_relocate_section): Add error for unknown
 	relocations.  Add error for non zero addend with plt and got
 	relocations.  Add error for got and plt references against dynamic, non

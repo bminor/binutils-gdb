@@ -677,3 +677,6 @@ l_maci:
 	l.maci r2,-1
 	l.maci r2,32767
 	l.maci r2,-32768
+l_adrp:
+	l.adrp r3,globaldata
+	l.adrp r3,localdata

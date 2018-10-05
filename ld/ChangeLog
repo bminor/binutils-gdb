@@ -1,5 +1,15 @@
 2018-10-05  Richard Henderson  <rth@twiddle.net>
 
+	* testsuite/ld-or1k/or1k.exp: Add test cases for plt generation.
+	* testsuite/ld-or1k/plt1.dd: New file.
+	* testsuite/ld-or1k/plt1.s: New file.
+	* testsuite/ld-or1k/plt1.x.dd: New file.
+	* testsuite/ld-or1k/plta1.dd: New file.
+	* testsuite/ld-or1k/plta1.s: New file.
+	* testsuite/ld-or1k/pltlib.s: New file.
+
+2018-10-05  Richard Henderson  <rth@twiddle.net>
+
 	* testsuite/ld-or1k/offsets1.d: New file.
 	* testsuite/ld-or1k/offsets1.s: New file.
 	* testsuite/ld-or1k/or1k.exp: New file.

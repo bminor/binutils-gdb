@@ -690,3 +690,9 @@ Disassembly of section \.text:
  834:	4c 02 ff ff 	l\.maci r2,-1
  838:	4c 02 7f ff 	l\.maci r2,32767
  83c:	4c 02 80 00 	l\.maci r2,-32768
+
+00000840 <l_adrp>:
+ 840:	08 60 00 00 	l\.adrp r3,0 <localtext>
+			840: R_OR1K_PCREL_PG21	globaldata
+ 844:	08 60 00 00 	l\.adrp r3,0 <localtext>
+			844: R_OR1K_PCREL_PG21	\.data

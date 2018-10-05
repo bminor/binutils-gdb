@@ -49,6 +49,12 @@ static const CGEN_OPINST sfmt_l_j_ops[] ATTRIBUTE_UNUSED = {
   { END, (const char *)0, (enum cgen_hw_type)0, (enum cgen_mode)0, (enum cgen_operand_type)0, 0, 0 }
 };
 
+static const CGEN_OPINST sfmt_l_adrp_ops[] ATTRIBUTE_UNUSED = {
+  { INPUT, "disp21", HW_H_IADDR, CGEN_MODE_UDI, OP_ENT (DISP21), 0, 0 },
+  { OUTPUT, "rD", HW_H_GPR, CGEN_MODE_UDI, OP_ENT (RD), 0, 0 },
+  { END, (const char *)0, (enum cgen_hw_type)0, (enum cgen_mode)0, (enum cgen_operand_type)0, 0, 0 }
+};
+
 static const CGEN_OPINST sfmt_l_jal_ops[] ATTRIBUTE_UNUSED = {
   { INPUT, "disp26", HW_H_IADDR, CGEN_MODE_UDI, OP_ENT (DISP26), 0, 0 },
   { INPUT, "pc", HW_H_PC, CGEN_MODE_UDI, 0, 0, 0 },
@@ -453,6 +459,7 @@ static const CGEN_OPINST sfmt_lf_madd_d_ops[] ATTRIBUTE_UNUSED = {
 static const CGEN_OPINST *or1k_cgen_opinst_table[MAX_INSNS] = {
   0,
   & sfmt_l_j_ops[0],
+  & sfmt_l_adrp_ops[0],
   & sfmt_l_jal_ops[0],
   & sfmt_l_jr_ops[0],
   & sfmt_l_jalr_ops[0],
