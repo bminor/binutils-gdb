@@ -4475,8 +4475,8 @@ make_mapping (bfd *abfd,
   asection **hdrpp;
   bfd_size_type amt;
 
-  amt = sizeof (struct elf_segment_map);
-  amt += (to - from - 1) * sizeof (asection *);
+  amt = sizeof (struct elf_segment_map) - sizeof (asection *);
+  amt += (to - from) * sizeof (asection *);
   m = (struct elf_segment_map *) bfd_zalloc (abfd, amt);
   if (m == NULL)
     return NULL;
@@ -4594,7 +4594,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
       struct elf_segment_map **pm;
       asection *last_hdr;
       bfd_vma last_size;
-      unsigned int phdr_index;
+      unsigned int hdr_index;
       bfd_vma maxpagesize;
       asection **hdrpp;
       bfd_boolean phdr_in_segment = TRUE;
@@ -4680,7 +4680,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	 a few bytes of the end of the first section.  */
       last_hdr = NULL;
       last_size = 0;
-      phdr_index = 0;
+      hdr_index = 0;
       maxpagesize = bed->maxpagesize;
       /* PR 17512: file: c8455299.
 	 Avoid divide-by-zero errors later on.
@@ -4834,9 +4834,9 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	    }
 
 	  /* We need a new program segment.  We must create a new program
-	     header holding all the sections from phdr_index until hdr.  */
+	     header holding all the sections from hdr_index until hdr.  */
 
-	  m = make_mapping (abfd, sections, phdr_index, i, phdr_in_segment);
+	  m = make_mapping (abfd, sections, hdr_index, i, phdr_in_segment);
 	  if (m == NULL)
 	    goto error_return;
 
@@ -4856,17 +4856,17 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	  last_hdr = hdr;
 	  /* .tbss sections effectively have zero size.  */
 	  last_size = !IS_TBSS (hdr) ? hdr->size : 0;
-	  phdr_index = i;
+	  hdr_index = i;
 	  phdr_in_segment = FALSE;
 	}
 
       /* Create a final PT_LOAD program segment, but not if it's just
 	 for .tbss.  */
       if (last_hdr != NULL
-	  && (i - phdr_index != 1
+	  && (i - hdr_index != 1
 	      || !IS_TBSS (last_hdr)))
 	{
-	  m = make_mapping (abfd, sections, phdr_index, i, phdr_in_segment);
+	  m = make_mapping (abfd, sections, hdr_index, i, phdr_in_segment);
 	  if (m == NULL)
 	    goto error_return;
 
@@ -4898,7 +4898,6 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	      unsigned int alignment_power = s->alignment_power;
 
 	      count = 1;
-	      amt = sizeof (struct elf_segment_map);
 	      for (s2 = s; s2->next != NULL; s2 = s2->next)
 		{
 		  if (s2->next->alignment_power == alignment_power
@@ -4911,7 +4910,8 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 		  else
 		    break;
 		}
-	      amt += (count - 1) * sizeof (asection *);
+	      amt = sizeof (struct elf_segment_map) - sizeof (asection *);
+	      amt += count * sizeof (asection *);
 	      m = (struct elf_segment_map *) bfd_zalloc (abfd, amt);
 	      if (m == NULL)
 		goto error_return;
@@ -4943,8 +4943,8 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
       /* If there are any SHF_TLS output sections, add PT_TLS segment.  */
       if (tls_count > 0)
 	{
-	  amt = sizeof (struct elf_segment_map);
-	  amt += (tls_count - 1) * sizeof (asection *);
+	  amt = sizeof (struct elf_segment_map) - sizeof (asection *);
+	  amt += tls_count * sizeof (asection *);
 	  m = (struct elf_segment_map *) bfd_zalloc (abfd, amt);
 	  if (m == NULL)
 	    goto error_return;
@@ -6824,8 +6824,8 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 
       /* Allocate a segment map big enough to contain
 	 all of the sections we have selected.  */
-      amt = sizeof (struct elf_segment_map);
-      amt += ((bfd_size_type) section_count - 1) * sizeof (asection *);
+      amt = sizeof (struct elf_segment_map) - sizeof (asection *);
+      amt += (bfd_size_type) section_count * sizeof (asection *);
       map = (struct elf_segment_map *) bfd_zalloc (obfd, amt);
       if (map == NULL)
 	return FALSE;
@@ -7136,8 +7136,8 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	      /* We still have not allocated all of the sections to
 		 segments.  Create a new segment here, initialise it
 		 and carry on looping.  */
-	      amt = sizeof (struct elf_segment_map);
-	      amt += ((bfd_size_type) section_count - 1) * sizeof (asection *);
+	      amt = sizeof (struct elf_segment_map) - sizeof (asection *);
+	      amt += (bfd_size_type) section_count * sizeof (asection *);
 	      map = (struct elf_segment_map *) bfd_zalloc (obfd, amt);
 	      if (map == NULL)
 		{
@@ -7266,9 +7266,8 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 
       /* Allocate a segment map big enough to contain
 	 all of the sections we have selected.  */
-      amt = sizeof (struct elf_segment_map);
-      if (section_count != 0)
-	amt += ((bfd_size_type) section_count - 1) * sizeof (asection *);
+      amt = sizeof (struct elf_segment_map) - sizeof (asection *);
+      amt += (bfd_size_type) section_count * sizeof (asection *);
       map = (struct elf_segment_map *) bfd_zalloc (obfd, amt);
       if (map == NULL)
 	return FALSE;
