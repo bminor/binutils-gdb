@@ -1,4 +1,12 @@
 2018-10-05  Richard Henderson  <rth@twiddle.net>
+
+	* elf32-or1k.c (or1k_elf_relocate_section): Add error for unknown
+	relocations.  Add error for non zero addend with plt and got
+	relocations.  Add error for got and plt references against dynamic, non
+	local, symbols.  Add error when linking non shared liraries with
+	flag_pic.
+
+2018-10-05  Richard Henderson  <rth@twiddle.net>
 	    Stafford Horne  <shorne@gmail.com>
 
 	* bfd-in2.h: Regenerated.
