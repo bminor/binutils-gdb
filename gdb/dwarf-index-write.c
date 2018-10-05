@@ -80,7 +80,8 @@ template<typename Elem, typename Alloc>
 static void
 file_write (FILE *file, const std::vector<Elem, Alloc> &vec)
 {
-  file_write (file, vec.data (), vec.size () * sizeof (vec[0]));
+  if (!vec.empty ())
+    file_write (file, vec.data (), vec.size () * sizeof (vec[0]));
 }
 
 /* In-memory buffer to prepare data to be written later to a file.  */

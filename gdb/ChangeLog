@@ -1,3 +1,8 @@
+2018-10-04  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* dwarf-index-write.c (file_write): Don't write if the vector is
+	empty.
+
 2018-10-05  Tom de Vries  <tdevries@suse.de>
 
 	* python/py-progspace.c (pspy_solib_name): Fix type mismatch in
