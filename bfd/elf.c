@@ -5358,16 +5358,16 @@ assign_file_positions_for_load_sections (bfd *abfd,
       p->p_flags = m->p_flags;
 
       if (m->count == 0)
-	p->p_vaddr = 0;
+	p->p_vaddr = m->p_vaddr_offset;
       else
-	p->p_vaddr = m->sections[0]->vma - m->p_vaddr_offset;
+	p->p_vaddr = m->sections[0]->vma + m->p_vaddr_offset;
 
       if (m->p_paddr_valid)
 	p->p_paddr = m->p_paddr;
       else if (m->count == 0)
 	p->p_paddr = 0;
       else
-	p->p_paddr = m->sections[0]->lma - m->p_vaddr_offset;
+	p->p_paddr = m->sections[0]->lma + m->p_vaddr_offset;
 
       if (p->p_type == PT_LOAD
 	  && (abfd->flags & D_PAGED) != 0)
@@ -6881,6 +6881,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 		 " at vaddr=%#" PRIx64 ", is this intentional?"),
 	       ibfd, (uint64_t) segment->p_vaddr);
 
+	  map->p_vaddr_offset = segment->p_vaddr;
 	  map->count = 0;
 	  *pointer_to_map = map;
 	  pointer_to_map = &map->next;
@@ -7005,7 +7006,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	    /* There is some padding before the first section in the
 	       segment.  So, we must account for that in the output
 	       segment's vma.  */
-	    map->p_vaddr_offset = matching_lma->lma - map->p_paddr;
+	    map->p_vaddr_offset = map->p_paddr - matching_lma->lma;
 
 	  free (sections);
 	  continue;
@@ -7367,12 +7368,14 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 	    map->header_size = lowest_section->filepos;
 	}
 
-      if (!map->includes_phdrs
-	  && !map->includes_filehdr
-	  && map->p_paddr_valid)
-	/* There is some other padding before the first section.  */
-	map->p_vaddr_offset = ((lowest_section ? lowest_section->lma : 0)
-			       - segment->p_paddr);
+      if (section_count == 0)
+	map->p_vaddr_offset = segment->p_vaddr;
+      else if (!map->includes_phdrs
+	       && !map->includes_filehdr
+	       && map->p_paddr_valid)
+	/* Account for padding before the first section.  */
+	map->p_vaddr_offset = (segment->p_paddr
+			       - (lowest_section ? lowest_section->lma : 0));
 
       map->count = section_count;
       *pointer_to_map = map;

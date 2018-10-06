@@ -1,5 +1,14 @@
 2018-10-08  Alan Modra  <amodra@gmail.com>
 
+	* elf.c (assign_file_positions_for_load_sections): Set p_vaddr
+	from m->p_vaddr_offset for segments without sections.  Invert
+	sign of p_vaddr_offset.
+	(rewrite_elf_program_header, copy_elf_program_header): Save
+	old segment p_vaddr to p_vaddr_offset.  Invert sign of
+	p_vaddr_offset.
+
+2018-10-08  Alan Modra  <amodra@gmail.com>
+
 	* elf.c (get_program_header_size): Don't count PT_INTERP if
 	.interp is empty.
 	(_bfd_elf_map_sections_to_segments): Don't create PT_INTERP if
