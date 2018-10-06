@@ -1,3 +1,8 @@
+2018-10-06  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/info-proc.exp: Update string expected from "help info
+	proc".
+
 2018-10-04  Tom Tromey  <tom@tromey.com>
 
 	* gdb.cp/maint.exp (test_invalid_name): Update expected output.

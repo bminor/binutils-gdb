@@ -25,7 +25,7 @@ if {[prepare_for_testing "failed to prepare" $testfile \
     return -1
 }
 
-gdb_test "help info proc" "Show /proc process information about .*"
+gdb_test "help info proc" "Show additional information about a process.*"
 
 gdb_test_multiple "info proc" "info proc without a process" {
     -re "No current process.*$gdb_prompt $" {
