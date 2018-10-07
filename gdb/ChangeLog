@@ -1,5 +1,30 @@
 2018-10-06  Tom Tromey  <tom@tromey.com>
 
+	* python/lib/gdb/function/strfns.py (_MemEq, _StrLen, _StrEq)
+	(_RegEx): Reformat help text.
+	* python/lib/gdb/function/caller_is.py (CallerIs, CallerMatches)
+	(AnyCallerIs, AnyCallerMatches): Reformat help text.
+	* python/lib/gdb/function/as_string.py (_AsString): Reformat help
+	text.
+	* python/lib/gdb/command/xmethods.py (InfoXMethod)
+	(EnableXMethod, DisableXMethod): Remove help indentation.
+	Capitalize meta-syntactic variables.
+	* python/lib/gdb/command/unwinders.py (InfoUnwinder)
+	(EnableUnwinder, DisableUnwinder): Remove help indentation.
+	Capitalize meta-syntactic variables.
+	* python/lib/gdb/command/explore.py (ExploreCommand)
+	(ExploreValueCommand, ExploreTypeCommand): Reformat help text.
+	* python/lib/gdb/command/type_printers.py (InfoTypePrinter)
+	(EnableTypePrinter, DisableTypePrinter): Remove help indentation.
+	* python/lib/gdb/command/pretty_printers.py (InfoPrettyPrinter):
+	Remove help indentation.
+	(EnablePrettyPrinter, DisablePrettyPrinter): Likewise.
+	* python/lib/gdb/command/frame_filters.py (EnableFrameFilter)
+	(DisableFrameFilter, SetFrameFilterPriority)
+	(ShowFrameFilterPriority, InfoFrameFilter): Reword help text.
+
+2018-10-06  Tom Tromey  <tom@tromey.com>
+
 	PR tui/28819:
 	* tui/tui-io.c (gdb_wgetch): New function.
 	(tui_mld_getc, tui_getc): Use it.
