@@ -537,6 +537,8 @@ gdbpy_initialize_symbols (void)
 				  LOC_OPTIMIZED_OUT) < 0
       || PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_COMPUTED",
 				  LOC_COMPUTED) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_COMMON_BLOCK",
+				  LOC_COMMON_BLOCK) < 0
       || PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_REGPARM_ADDR",
 				  LOC_REGPARM_ADDR) < 0
       || PyModule_AddIntConstant (gdb_module, "SYMBOL_UNDEF_DOMAIN",
@@ -545,14 +547,24 @@ gdbpy_initialize_symbols (void)
 				  VAR_DOMAIN) < 0
       || PyModule_AddIntConstant (gdb_module, "SYMBOL_STRUCT_DOMAIN",
 				  STRUCT_DOMAIN) < 0
-      || PyModule_AddIntConstant (gdb_module, "SYMBOL_LABEL_DOMAIN",
-				  LABEL_DOMAIN) < 0
-      || PyModule_AddIntConstant (gdb_module, "SYMBOL_VARIABLES_DOMAIN",
-				  VARIABLES_DOMAIN) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_MODULE_DOMAIN",
+				  MODULE_DOMAIN) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_COMMON_BLOCK_DOMAIN",
+				  COMMON_BLOCK_DOMAIN) < 0)
+    return -1;
+
+  /* These remain defined for compatibility, but as they were never
+     correct, they are no longer documented.  Eventually we can remove
+     them.  These exist because at one time, enum search_domain and
+     enum domain_enum_tag were combined -- but different values were
+     used differently.  Here we try to give them values that will make
+     sense if they are passed to gdb.lookup_symbol.  */
+  if (PyModule_AddIntConstant (gdb_module, "SYMBOL_VARIABLES_DOMAIN",
+			       VAR_DOMAIN) < 0
       || PyModule_AddIntConstant (gdb_module, "SYMBOL_FUNCTIONS_DOMAIN",
-				  FUNCTIONS_DOMAIN) < 0
+				  VAR_DOMAIN) < 0
       || PyModule_AddIntConstant (gdb_module, "SYMBOL_TYPES_DOMAIN",
-				  TYPES_DOMAIN) < 0)
+				  VAR_DOMAIN) < 0)
     return -1;
 
   return gdb_pymodule_addobject (gdb_module, "Symbol",

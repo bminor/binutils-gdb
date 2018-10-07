@@ -1,5 +1,13 @@
 2018-10-06  Tom Tromey  <tom@tromey.com>
 
+	PR python/21765:
+	* python/py-symbol.c (gdbpy_initialize_symbols): Redefine
+	SYMBOL_VARIABLES_DOMAIN, SYMBOL_FUNCTIONS_DOMAIN,
+	SYMBOL_TYPES_DOMAIN.  Define SYMBOL_MODULE_DOMAIN,
+	SYMBOL_COMMON_BLOCK_DOMAIN, SYMBOL_LOC_COMMON_BLOCK.
+
+2018-10-06  Tom Tromey  <tom@tromey.com>
+
 	PR build/17077:
 	* Makefile.in (OPCODES_CFLAGS): Remove "-I$(OPCODES_SRC)/..".
 	* arc-tdep.c, frv-tdep.c, lm32-tdep.c, mep-tdep.c,

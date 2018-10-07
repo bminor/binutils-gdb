@@ -1,3 +1,10 @@
+2018-10-06  Tom Tromey  <tom@tromey.com>
+
+	PR python/21765:
+	* python.texi (Symbols In Python): Document the module and
+	common-block domains.  Remove documentation for incorrect
+	domains.
+
 2018-10-03  Tom Tromey  <tom@tromey.com>
 
 	* gdb.texinfo (Configure Options): Document --enable-ubsan.

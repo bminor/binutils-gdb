@@ -108,6 +108,14 @@ CSKY GNU/LINUX			csky*-*-linux
   ** The gdb.Progspace type has a new 'objfiles' method, which returns the list
      of objfiles associated to that program space.
 
+  ** gdb.SYMBOL_LOC_COMMON_BLOCK, gdb.SYMBOL_MODULE_DOMAIN, and
+     gdb.SYMBOL_COMMON_BLOCK_DOMAIN were added to reflect changes to
+     the gdb core.
+
+  ** gdb.SYMBOL_VARIABLES_DOMAIN, gdb.SYMBOL_FUNCTIONS_DOMAIN, and
+     gdb.SYMBOL_TYPES_DOMAIN are now deprecated.  These were never
+     correct and did not work properly.
+
 * Configure changes
 
 --enable-ubsan
