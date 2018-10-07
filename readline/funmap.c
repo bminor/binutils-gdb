@@ -1,6 +1,6 @@
 /* funmap.c -- attach names to functions. */
 
-/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2016 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -68,6 +68,7 @@ static const FUNMAP default_funmap[] = {
   { "backward-word", rl_backward_word },
   { "beginning-of-history", rl_beginning_of_history },
   { "beginning-of-line", rl_beg_of_line },
+  { "bracketed-paste-begin", rl_bracketed_paste_begin },
   { "call-last-kbd-macro", rl_call_last_kbd_macro },
   { "capitalize-word", rl_capitalize_word },
   { "character-search", rl_char_search },
@@ -98,6 +99,8 @@ static const FUNMAP default_funmap[] = {
   { "forward-word", rl_forward_word },
   { "history-search-backward", rl_history_search_backward },
   { "history-search-forward", rl_history_search_forward },
+  { "history-substring-search-backward", rl_history_substr_search_backward },
+  { "history-substring-search-forward", rl_history_substr_search_forward },
   { "insert-comment", rl_insert_comment },
   { "insert-completions", rl_insert_completions },
   { "kill-whole-line", rl_kill_full_line },
@@ -113,11 +116,12 @@ static const FUNMAP default_funmap[] = {
   { "non-incremental-reverse-search-history-again", rl_noninc_reverse_search_again },
   { "old-menu-complete", rl_old_menu_complete },
   { "overwrite-mode", rl_overwrite_mode },
-#ifdef _WIN32
+#if defined (_WIN32)
   { "paste-from-clipboard", rl_paste_from_clipboard },
 #endif
   { "possible-completions", rl_possible_completions },
   { "previous-history", rl_get_previous_history },
+  { "print-last-kbd-macro", rl_print_last_kbd_macro },
   { "quoted-insert", rl_quoted_insert },
   { "re-read-init-file", rl_re_read_init_file },
   { "redraw-current-line", rl_refresh_line},
@@ -174,7 +178,7 @@ static const FUNMAP default_funmap[] = {
   { "vi-fword", rl_vi_fword },
   { "vi-goto-mark", rl_vi_goto_mark },
   { "vi-insert-beg", rl_vi_insert_beg },
-  { "vi-insertion-mode", rl_vi_insertion_mode },
+  { "vi-insertion-mode", rl_vi_insert_mode },
   { "vi-match", rl_vi_match },
   { "vi-movement-mode", rl_vi_movement_mode },
   { "vi-next-word", rl_vi_next_word },
@@ -190,7 +194,9 @@ static const FUNMAP default_funmap[] = {
   { "vi-set-mark", rl_vi_set_mark },
   { "vi-subst", rl_vi_subst },
   { "vi-tilde-expand", rl_vi_tilde_expand },
+  { "vi-unix-word-rubout", rl_vi_unix_word_rubout },
   { "vi-yank-arg", rl_vi_yank_arg },
+  { "vi-yank-pop", rl_vi_yank_pop },
   { "vi-yank-to", rl_vi_yank_to },
 #endif /* VI_MODE */
 
@@ -236,7 +242,7 @@ rl_initialize_funmap ()
 
 /* Produce a NULL terminated array of known function names.  The array
    is sorted.  The array itself is allocated, but not the strings inside.
-   You should free () the array when you done, but not the pointrs. */
+   You should free () the array when you done, but not the pointers. */
 const char **
 rl_funmap_names ()
 {

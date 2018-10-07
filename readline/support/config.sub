@@ -2,7 +2,7 @@
 # Configuration validation subroutine script.
 #   Copyright 1992-2019 Free Software Foundation, Inc.
 
-timestamp='2019-05-23'
+timestamp='2019-08-04'
 
 # This file is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -1600,6 +1600,9 @@ case $cpu-$vendor in
 		;;
 	mips*-*)
 		os=elf
+		;;
+	or1k-*)
+		os=-elf
 		;;
 	or32-*)
 		os=coff

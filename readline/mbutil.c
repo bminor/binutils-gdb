@@ -1,6 +1,6 @@
 /* mbutil.c -- readline multibyte character utility functions */
 
-/* Copyright (C) 2001-2009 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2015 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -64,6 +64,9 @@ int rl_byte_oriented = 0;
 int rl_byte_oriented = 1;
 #endif
 
+/* Ditto */
+int _rl_utf8locale = 0;
+
 /* **************************************************************** */
 /*								    */
 /*		Multibyte Character Utility Functions		    */
@@ -119,7 +122,7 @@ _rl_find_next_mbchar_internal (string, seed, count, find_non_zero)
 	  point += tmp;
 	  if (find_non_zero)
 	    {
-	      if (wcwidth (wc) == 0)
+	      if (WCWIDTH (wc) == 0)
 		continue;
 	      else
 		count--;
@@ -132,7 +135,7 @@ _rl_find_next_mbchar_internal (string, seed, count, find_non_zero)
   if (find_non_zero)
     {
       tmp = mbrtowc (&wc, string + point, strlen (string + point), &ps);
-      while (MB_NULLWCH (tmp) == 0 && MB_INVALIDCH (tmp) == 0 && wcwidth (wc) == 0)
+      while (MB_NULLWCH (tmp) == 0 && MB_INVALIDCH (tmp) == 0 && WCWIDTH (wc) == 0)
 	{
 	  point += tmp;
 	  tmp = mbrtowc (&wc, string + point, strlen (string + point), &ps);
@@ -142,7 +145,7 @@ _rl_find_next_mbchar_internal (string, seed, count, find_non_zero)
   return point;
 }
 
-static int
+/*static*/ int
 _rl_find_prev_mbchar_internal (string, seed, find_non_zero)
      char *string;
      int seed, find_non_zero;
@@ -184,7 +187,7 @@ _rl_find_prev_mbchar_internal (string, seed, find_non_zero)
 	{
 	  if (find_non_zero)
 	    {
-	      if (wcwidth (wc) != 0)
+	      if (WCWIDTH (wc) != 0)
 		prev = point;
 	    }
 	  else
@@ -263,7 +266,7 @@ _rl_compare_chars (buf1, pos1, ps1, buf2, pos2, ps2)
    if point is invalied (point < 0 || more than string length),
    it returns -1 */
 int
-_rl_adjust_point(string, point, ps)
+_rl_adjust_point (string, point, ps)
      char *string;
      int point;
      mbstate_t *ps;

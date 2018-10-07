@@ -1,6 +1,6 @@
 /* util.c -- readline utility functions */
 
-/* Copyright (C) 1987-2010 Free Software Foundation, Inc.
+/* Copyright (C) 1987-2015 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library (Readline), a library
    for reading lines of text with interactive input and history editing.      
@@ -108,8 +108,11 @@ _rl_abort_internal ()
   while (rl_executing_macro)
     _rl_pop_executing_macro ();
 
+  RL_UNSETSTATE (RL_STATE_MULTIKEY);	/* XXX */
+
   rl_last_func = (rl_command_func_t *)NULL;
-  longjmp (_rl_top_level, 1);
+
+  _rl_longjmp (_rl_top_level, 1);
   return (0);
 }
 
@@ -195,12 +198,14 @@ rl_tilde_expand (ignore, key)
       xfree (homedir);
       return (0);
     }
-  else if (rl_line_buffer[start] != '~')
+  else if (start >= 0 && rl_line_buffer[start] != '~')
     {
       for (; !whitespace (rl_line_buffer[start]) && start >= 0; start--)
         ;
       start++;
     }
+  else if (start < 0)
+    start = 0;
 
   end = start;
   do
@@ -370,11 +375,13 @@ _rl_strpbrk (string1, string2)
    doesn't matter (strncasecmp). */
 int
 _rl_strnicmp (string1, string2, count)
-     char *string1, *string2;
+     const char *string1;
+     const char *string2;
      int count;
 {
-  register char *s1, *s2;
-  int d;
+  register const char *s1;
+  register const char *s2;
+  register int d;
 
   if (count <= 0 || (string1 == string2))
     return 0;
@@ -398,10 +405,12 @@ _rl_strnicmp (string1, string2, count)
 /* strcmp (), but caseless (strcasecmp). */
 int
 _rl_stricmp (string1, string2)
-     char *string1, *string2;
+     const char *string1;
+     const char *string2;
 {
-  register char *s1, *s2;
-  int d;
+  register const char *s1;
+  register const char *s2;
+  register int d;
 
   s1 = string1;
   s2 = string2;
@@ -469,6 +478,7 @@ _rl_savestring (s)
   return (strcpy ((char *)xmalloc (1 + (int)strlen (s)), (s)));
 }
 
+#if defined (DEBUG)
 #if defined (USE_VARARGS)
 static FILE *_rl_tracefp;
 
@@ -504,7 +514,7 @@ _rl_trace (va_alist)
 int
 _rl_tropen ()
 {
-  char fnbuf[128];
+  char fnbuf[128], *x;
 
   if (_rl_tracefp)
     fclose (_rl_tracefp);
@@ -534,4 +544,54 @@ _rl_trclose ()
   return r;
 }
 
+void
+_rl_settracefp (fp)
+     FILE *fp;
+{
+  _rl_tracefp = fp;
+}
+#endif
+#endif /* DEBUG */
+
+
+#if HAVE_DECL_AUDIT_USER_TTY && defined (HAVE_LIBAUDIT_H) && defined (ENABLE_TTY_AUDIT_SUPPORT)
+#include <sys/socket.h>
+#include <libaudit.h>
+#include <linux/audit.h>
+#include <linux/netlink.h>
+
+/* Report STRING to the audit system. */
+void
+_rl_audit_tty (string)
+     char *string;
+{
+  struct audit_message req;
+  struct sockaddr_nl addr;
+  size_t size;
+  int fd;
+
+  fd = socket (PF_NETLINK, SOCK_RAW, NETLINK_AUDIT);
+  if (fd < 0)
+    return;
+  size = strlen (string) + 1;
+
+  if (NLMSG_SPACE (size) > MAX_AUDIT_MESSAGE_LENGTH)
+    return;
+
+  memset (&req, 0, sizeof(req));
+  req.nlh.nlmsg_len = NLMSG_SPACE (size);
+  req.nlh.nlmsg_type = AUDIT_USER_TTY;
+  req.nlh.nlmsg_flags = NLM_F_REQUEST;
+  req.nlh.nlmsg_seq = 0;
+  if (size && string)
+    memcpy (NLMSG_DATA(&req.nlh), string, size);
+  memset (&addr, 0, sizeof(addr));
+
+  addr.nl_family = AF_NETLINK;
+  addr.nl_pid = 0;
+  addr.nl_groups = 0;
+
+  sendto (fd, &req, req.nlh.nlmsg_len, 0, (struct sockaddr*)&addr, sizeof(addr));
+  close (fd);
+}
 #endif

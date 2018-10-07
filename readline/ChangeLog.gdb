@@ -1,3 +1,7 @@
+2019-08-12  Tom Tromey  <tom@tromey.com>
+
+	* Imported readline 7.0 patch 5.
+
 2019-07-12  Tom de Vries  <tdevries@suse.de>
 	    Chet Ramey  <chet.ramey@case.edu>
 

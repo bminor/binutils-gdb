@@ -2,7 +2,7 @@
 # Attempt to guess a canonical system name.
 #   Copyright 1992-2019 Free Software Foundation, Inc.
 
-timestamp='2019-04-28'
+timestamp='2019-08-04'
 
 # This file is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -245,6 +245,10 @@ case "$UNAME_MACHINE:$UNAME_SYSTEM:$UNAME_RELEASE:$UNAME_VERSION" in
 	UNAME_MACHINE_ARCH=`arch | sed 's/Bitrig.//'`
 	echo "$UNAME_MACHINE_ARCH"-unknown-bitrig"$UNAME_RELEASE"
 	exit ;;
+    *:Bitrig:*:*)
+	UNAME_MACHINE_ARCH=`arch | sed 's/Bitrig.//'`
+	echo ${UNAME_MACHINE_ARCH}-unknown-bitrig${UNAME_RELEASE}
+	exit ;;
     *:OpenBSD:*:*)
 	UNAME_MACHINE_ARCH=`arch | sed 's/OpenBSD.//'`
 	echo "$UNAME_MACHINE_ARCH"-unknown-openbsd"$UNAME_RELEASE"
@@ -389,6 +393,9 @@ case "$UNAME_MACHINE:$UNAME_SYSTEM:$UNAME_RELEASE:$UNAME_VERSION" in
 	exit ;;
     i86pc:AuroraUX:5.*:* | i86xen:AuroraUX:5.*:*)
 	echo i386-pc-auroraux"$UNAME_RELEASE"
+	exit ;;
+    i86pc:AuroraUX:5.*:* | i86xen:AuroraUX:5.*:*)
+	echo i386-pc-auroraux${UNAME_RELEASE}
 	exit ;;
     i86pc:SunOS:5.*:* | i86xen:SunOS:5.*:*)
 	set_cc_for_build
@@ -869,6 +876,9 @@ EOF
     *:MINGW64*:*)
 	echo "$UNAME_MACHINE"-pc-mingw64
 	exit ;;
+    *:MINGW64*:*)
+	echo ${UNAME_MACHINE}-pc-mingw64
+	exit ;;
     *:MINGW*:*)
 	echo "$UNAME_MACHINE"-pc-mingw32
 	exit ;;
@@ -933,6 +943,30 @@ EOF
 	exit ;;
     arc:Linux:*:* | arceb:Linux:*:*)
 	echo "$UNAME_MACHINE"-unknown-linux-"$LIBC"
+	exit ;;
+    aarch64:Linux:*:*)
+	echo ${UNAME_MACHINE}-unknown-linux-${LIBC}
+	exit ;;
+    aarch64_be:Linux:*:*)
+	UNAME_MACHINE=aarch64_be
+	echo ${UNAME_MACHINE}-unknown-linux-${LIBC}
+	exit ;;
+    alpha:Linux:*:*)
+	case `sed -n '/^cpu model/s/^.*: \(.*\)/\1/p' < /proc/cpuinfo` in
+	  EV5)   UNAME_MACHINE=alphaev5 ;;
+	  EV56)  UNAME_MACHINE=alphaev56 ;;
+	  PCA56) UNAME_MACHINE=alphapca56 ;;
+	  PCA57) UNAME_MACHINE=alphapca56 ;;
+	  EV6)   UNAME_MACHINE=alphaev6 ;;
+	  EV67)  UNAME_MACHINE=alphaev67 ;;
+	  EV68*) UNAME_MACHINE=alphaev68 ;;
+	esac
+	objdump --private-headers /bin/sh | grep -q ld.so.1
+	if test "$?" = 0 ; then LIBC="gnulibc1" ; fi
+	echo ${UNAME_MACHINE}-unknown-linux-${LIBC}
+	exit ;;
+    arc:Linux:*:* | arceb:Linux:*:*)
+	echo ${UNAME_MACHINE}-unknown-linux-${LIBC}
 	exit ;;
     arm*:Linux:*:*)
 	set_cc_for_build
@@ -1458,6 +1492,12 @@ EOF
 	exit ;;
     *:Unleashed:*:*)
 	echo "$UNAME_MACHINE"-unknown-unleashed"$UNAME_RELEASE"
+	exit ;;
+    i*86:AROS:*:*)
+	echo ${UNAME_MACHINE}-pc-aros
+	exit ;;
+    x86_64:VMkernel:*:*)
+	echo ${UNAME_MACHINE}-unknown-esx
 	exit ;;
 esac
 
