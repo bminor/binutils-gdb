@@ -1,5 +1,11 @@
 2018-10-06  Tom Tromey  <tom@tromey.com>
 
+	PR python/19399:
+	* python/py-inferior.c: Add "architecture" entry.
+	(infpy_architecture): New function.
+
+2018-10-06  Tom Tromey  <tom@tromey.com>
+
 	PR python/21765:
 	* python/py-symbol.c (gdbpy_initialize_symbols): Redefine
 	SYMBOL_VARIABLES_DOMAIN, SYMBOL_FUNCTIONS_DOMAIN,

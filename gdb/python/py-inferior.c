@@ -855,6 +855,18 @@ infpy_thread_from_thread_handle (PyObject *self, PyObject *args, PyObject *kw)
   Py_RETURN_NONE;
 }
 
+/* Implementation of gdb.Inferior.architecture.  */
+
+static PyObject *
+infpy_architecture (PyObject *self, PyObject *args)
+{
+  inferior_object *inf = (inferior_object *) self;
+
+  INFPY_REQUIRE_VALID (inf);
+
+  return gdbarch_to_arch_object (inf->inferior->gdbarch);
+}
+
 /* Implement repr() for gdb.Inferior.  */
 
 static PyObject *
@@ -988,6 +1000,9 @@ Return a long with the address of a match, or None." },
     METH_VARARGS | METH_KEYWORDS,
     "thread_from_thread_handle (handle) -> gdb.InferiorThread.\n\
 Return thread object corresponding to thread handle." },
+  { "architecture", (PyCFunction) infpy_architecture, METH_NOARGS,
+    "architecture () -> gdb.Architecture\n\
+Return architecture of this inferior." },
   { NULL }
 };
 

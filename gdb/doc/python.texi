@@ -2860,6 +2860,13 @@ when it is called.  If there are no valid threads, the method will
 return an empty tuple.
 @end defun
 
+@defun Inferior.architecture ()
+Return the @code{gdb.Architecture} (@pxref{Architectures In Python})
+for this inferior.  This represents the architecture of the inferior
+as a whole.  Some platforms can have multiple architectures in a
+single address space, so this may not match the architecture of a
+particular frame (@pxref{Frames in Python}).
+
 @findex Inferior.read_memory
 @defun Inferior.read_memory (address, length)
 Read @var{length} addressable memory units from the inferior, starting at

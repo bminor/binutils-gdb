@@ -299,3 +299,11 @@ with_test_prefix "__repr__" {
 	"\\\(<gdb.Inferior num=1, pid=$decimal>, <gdb.Inferior \\\(invalid\\\)>\\\)" \
 	"print all inferiors 2"
 }
+
+# Test architecture.
+with_test_prefix "architecture" {
+    gdb_test "inferior 1" ".*" "switch to first inferior"
+    gdb_test "python print(gdb.selected_frame().architecture() is gdb.selected_inferior().architecture())" \
+	"True" \
+	"inferior architecture matches frame architecture"
+}

@@ -1,5 +1,11 @@
 2018-10-06  Tom Tromey  <tom@tromey.com>
 
+	PR python/19399:
+	* python.texi (Inferiors In Python): Document
+	Inferior.Architecture.
+
+2018-10-06  Tom Tromey  <tom@tromey.com>
+
 	PR python/21765:
 	* python.texi (Symbols In Python): Document the module and
 	common-block domains.  Remove documentation for incorrect
