@@ -528,17 +528,12 @@ get_y_or_n (for_pager)
 {
   int c;
 
-/* Disabled for GDB due to the gdb.base/readline-ask.exp regression.
-   [patch] testsuite: Test readline-6.2 "ask" regression
-   http://sourceware.org/ml/gdb-patches/2011-05/msg00002.html  */
-#if 0
   /* For now, disable pager in callback mode, until we later convert to state
      driven functions.  Have to wait until next major version to add new
      state definition, since it will change value of RL_STATE_DONE. */
 #if defined (READLINE_CALLBACKS)
   if (RL_ISSTATE (RL_STATE_CALLBACK))
     return 1;
-#endif
 #endif
 
   for (;;)
