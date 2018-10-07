@@ -31,10 +31,7 @@
 #  include "ansi_stdlib.h"
 #endif /* HAVE_STDLIB_H */
 
-#include <stdio.h>
-
 #include "xmalloc.h"
-#include "readline.h"
 
 /* **************************************************************** */
 /*								    */
@@ -48,10 +45,6 @@ void
 xfree (string)
      PTR_T string;
 {
-  /* Leak a bit.  */
-  if (RL_ISSTATE(RL_STATE_SIGHANDLER))
-    return;
-
   if (string)
     free (string);
 }
