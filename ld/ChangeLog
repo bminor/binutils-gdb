@@ -1,5 +1,12 @@
 2018-10-08  Alan Modra  <amodra@gmail.com>
 
+	* ldlang.c (insert_os_after): Clear ignore_first on assignment to
+	dot, not any assignment.  Clear ignore_first on output section
+	statement contents too.
+	* testsuite/ld-elf/pr19539.d: Remove alpha xfail.
+
+2018-10-08  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-elf/pr22423.d: Pass --dynamic-linker to ld.
 
 2018-10-05  Richard Henderson  <rth@twiddle.net>

@@ -3,7 +3,7 @@
 #ld: -pie -T pr19539.t
 #readelf : --dyn-syms --wide
 #target: *-*-linux* *-*-gnu* *-*-solaris* arm*-*-uclinuxfdpiceabi
-#xfail: cris*-*-* alpha-*-*
+#xfail: cris*-*-*
 
 Symbol table '\.dynsym' contains [0-9]+ entr(y|ies):
 #pass

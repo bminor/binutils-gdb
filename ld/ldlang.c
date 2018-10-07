@@ -1777,11 +1777,13 @@ insert_os_after (lang_output_section_statement_type *after)
 	      ass = &(*where)->assignment_statement;
 	      if (ass->exp->type.node_class != etree_assert
 		  && ass->exp->assign.dst[0] == '.'
-		  && ass->exp->assign.dst[1] == 0
-		  && !ignore_first)
-		assign = where;
+		  && ass->exp->assign.dst[1] == 0)
+		{
+		  if (!ignore_first)
+		    assign = where;
+		  ignore_first = FALSE;
+		}
 	    }
-	  ignore_first = FALSE;
 	  continue;
 	case lang_wild_statement_enum:
 	case lang_input_section_enum:
@@ -1792,6 +1794,7 @@ insert_os_after (lang_output_section_statement_type *after)
 	case lang_padding_statement_enum:
 	case lang_constructors_statement_enum:
 	  assign = NULL;
+	  ignore_first = FALSE;
 	  continue;
 	case lang_output_section_statement_enum:
 	  if (assign != NULL)
