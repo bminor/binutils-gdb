@@ -4671,7 +4671,9 @@ verify_constraints (const struct aarch64_inst *inst,
 
 	  /* Next check for usage of the predicate register.  */
 	  aarch64_opnd_info blk_dest = insn_sequence->instr->operands[0];
-	  aarch64_opnd_info blk_pred = {0}, inst_pred = {0};
+	  aarch64_opnd_info blk_pred, inst_pred;
+	  memset (&blk_pred, 0, sizeof (aarch64_opnd_info));
+	  memset (&inst_pred, 0, sizeof (aarch64_opnd_info));
 	  bfd_boolean predicated = FALSE;
 	  assert (blk_dest.type == AARCH64_OPND_SVE_Zd);
 

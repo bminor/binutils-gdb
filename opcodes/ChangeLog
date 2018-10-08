@@ -1,3 +1,7 @@
+2018-10-08  Tamar Christina  <tamar.christina@arm.com>
+
+	* aarch64-opc.c (verify_constraints): Use memset instead of {0}.
+
 2018-10-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (rm_table): Add enclv.
