@@ -3439,9 +3439,9 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 		        mem_offset += boff;
 		      else
 		        {
-		          struct type *t = check_typedef (value_type (this_v));
-		          t = check_typedef (TYPE_TARGET_TYPE (t));
-		          if (get_baseclass_offset (t, curtype, this_v,
+		          struct type *p = check_typedef (value_type (this_v));
+		          p = check_typedef (TYPE_TARGET_TYPE (p));
+		          if (get_baseclass_offset (p, curtype, this_v,
 						    &boff, &isvirt))
 		            mem_offset += boff;
 		        }

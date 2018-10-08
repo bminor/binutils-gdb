@@ -1,3 +1,7 @@
+2018-10-08  Weimin Pan  <weimin.pan@oracle.com>
+	* valops.c (value_struct_elt_for_reference): Rename local variable
+	to work around the shadowing a previous local warning.
+
 2018-10-08  John Baldwin  <jhb@FreeBSD.org>
 
 	* Makefile.in (ALLDEPFILES): Add riscv-fbsd-nat.c.
