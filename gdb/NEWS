@@ -99,6 +99,7 @@ GNU/Linux/RISC-V		riscv*-*-linux*
 GNU/Linux/RISC-V		riscv*-*-linux*
 CSKY ELF			csky*-*-elf
 CSKY GNU/LINUX			csky*-*-linux
+FreeBSD/riscv			riscv*-*-freebsd*
 
 * Python API
 

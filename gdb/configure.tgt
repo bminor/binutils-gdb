@@ -528,6 +528,11 @@ s390*-*-linux*)
 	build_gdbserver=yes
 	;;
 
+riscv*-*-freebsd*)
+	# Target: FreeBSD/riscv
+	gdb_target_obs="riscv-fbsd-tdep.o riscv-tdep.o"
+	;;
+
 riscv*-*-linux*)
 	# Target: Linux/RISC-V
 	gdb_target_obs="riscv-linux-tdep.o riscv-tdep.o glibc-tdep.o \

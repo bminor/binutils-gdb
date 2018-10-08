@@ -1,5 +1,15 @@
 2018-10-08  John Baldwin  <jhb@FreeBSD.org>
 
+	* Makefile.in (ALL_TARGET_OBS): Add riscv-fbsd-tdep.o.
+	(HFILES_NO_SRCDIR): Add riscv-fbsd-tdep.h.
+	(ALLDEPFILES): Add riscv-fbsd-tdep.c.
+	* NEWS: Mention new FreeBSD/riscv target.
+	* configure.tgt: Add riscv*-*-freebsd*.
+	* riscv-fbsd-tdep.c: New file.
+	* riscv-fbsd-tdep.h: New file.
+
+2018-10-08  John Baldwin  <jhb@FreeBSD.org>
+
 	* regcache.h (struct regcache_map_entry): Note that this type can
 	be used with traditional frame caches.
 	* trad-frame.c (trad_frame_set_reg_regmap): New.
