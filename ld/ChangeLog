@@ -1,3 +1,14 @@
+2018-10-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23658
+	* ldlang.c (lang_insert_orphan): Properly group and place orphan
+	note sections.  Properly handle orphan note section before all
+	note sections.
+	* testsuite/ld-elf/pr23658-1.d: Renamed to ...
+	* testsuite/ld-elf/pr23658-1a.d: This.  Updated.
+	* testsuite/ld-elf/pr23658-1b.d: New test.
+	* testsuite/ld-elf/pr23658-1c.d: Likewise.
+
 2018-10-08  Alan Modra  <amodra@gmail.com>
 
 	* ldexp.c (fold_name <SIZEOF_HEADERS>): Set link_info.load_phdrs.
