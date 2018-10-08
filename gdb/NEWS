@@ -93,6 +93,7 @@ thread apply [all | COUNT | -COUNT] [FLAG]... COMMAND
 * New native configurations
 
 GNU/Linux/RISC-V		riscv*-*-linux*
+FreeBSD/riscv			riscv*-*-freebsd*
 
 * New targets
 

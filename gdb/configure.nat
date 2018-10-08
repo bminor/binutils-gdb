@@ -177,6 +177,10 @@ case ${gdb_host} in
 		# systems running FreeBSD.
 		NATDEPFILES="${NATDEPFILES} ppc-fbsd-nat.o bsd-kvm.o"
 		;;
+	    riscv*)
+		# Host: FreeBSD/riscv
+		NATDEPFILES="${NATDEPFILES} riscv-fbsd-nat.o"
+		;;
 	    sparc)
 		# Host: FreeBSD/sparc64
 		NATDEPFILES="${NATDEPFILES} sparc-nat.o sparc64-nat.o \

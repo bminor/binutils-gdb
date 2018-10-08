@@ -1,3 +1,8 @@
+2018-10-08  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdb.texinfo (Contributors): Add SRI International and University
+	of Cambridge for FreeBSD/riscv.
+
 2018-10-06  Tom Tromey  <tom@tromey.com>
 
 	PR python/19399:
