@@ -134,7 +134,6 @@ riscv_fbsd_sigframe_init (const struct tramp_frame *self,
        + RISCV_SIGFRAME_UCONTEXT_OFFSET
        + RISCV_UCONTEXT_MCONTEXT_OFFSET);
   gdb_byte buf[4];
-  int i;
 
   trad_frame_set_reg_regmap (this_cache, riscv_fbsd_gregmap, mcontext_addr,
 			     RISCV_FBSD_NUM_GREGS * riscv_isa_xlen (gdbarch));
@@ -180,8 +179,6 @@ static const struct tramp_frame riscv_fbsd_sigframe =
 static void
 riscv_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
   /* Generic FreeBSD support.  */
   fbsd_init_abi (info, gdbarch);
 

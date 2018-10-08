@@ -1,3 +1,9 @@
+2018-10-08  Tom Tromey  <tom@tromey.com>
+
+	* riscv-fbsd-tdep.c (riscv_fbsd_sigframe_init): Remove unused
+	variable.
+	(riscv_fbsd_init_abi): Likewise.
+
 2018-10-08  Weimin Pan  <weimin.pan@oracle.com>
 	* valops.c (value_struct_elt_for_reference): Rename local variable
 	to work around the shadowing a previous local warning.
