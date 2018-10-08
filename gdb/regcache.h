@@ -72,13 +72,30 @@ extern void regcache_cooked_write_unsigned (struct regcache *regcache,
 extern void regcache_write_pc (struct regcache *regcache, CORE_ADDR pc);
 
 /* Mapping between register numbers and offsets in a buffer, for use
-   in the '*regset' functions below.  In an array of
-   'regcache_map_entry' each element is interpreted like follows:
+   in the '*regset' functions below and with traditional frame caches.
+   In an array of 'regcache_map_entry' each element is interpreted
+   like follows:
 
    - If 'regno' is a register number: Map register 'regno' to the
      current offset (starting with 0) and increase the current offset
      by 'size' (or the register's size, if 'size' is zero).  Repeat
      this with consecutive register numbers up to 'regno+count-1'.
+
+     For each described register, if 'size' is larger than the
+     register's size, the register's value is assumed to be stored in
+     the first N (where N is the register size) bytes at the current
+     offset.  The remaining 'size' - N bytes are filled with zeroes by
+     'regcache_collect_regset' and ignored by other consumers.
+
+     If 'size' is smaller than the register's size, only the first
+     'size' bytes of a register's value are assumed to be stored at
+     the current offset.  'regcache_collect_regset' copies the first
+     'size' bytes of a register's value to the output buffer.
+     'regcache_supply_regset' copies the bytes from the input buffer
+     into the first 'size' bytes of the register's value leaving the
+     remaining bytes of the register's value unchanged.  Frame caches
+     read the 'size' bytes from the stack frame and zero extend them
+     to generate the register's value.
 
    - If 'regno' is REGCACHE_MAP_SKIP: Add 'count*size' to the current
      offset.

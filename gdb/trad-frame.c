@@ -22,6 +22,7 @@
 #include "trad-frame.h"
 #include "regcache.h"
 #include "frame-unwind.h"
+#include "target.h"
 #include "value.h"
 
 struct trad_frame_cache
@@ -146,6 +147,62 @@ trad_frame_set_reg_addr (struct trad_frame_cache *this_trad_cache,
 			 int regnum, CORE_ADDR addr)
 {
   trad_frame_set_addr (this_trad_cache->prev_regs, regnum, addr);
+}
+
+void
+trad_frame_set_reg_regmap (struct trad_frame_cache *this_trad_cache,
+			   const struct regcache_map_entry *regmap,
+			   CORE_ADDR addr, size_t size)
+{
+  struct gdbarch *gdbarch = get_frame_arch (this_trad_cache->this_frame);
+  int offs = 0, count;
+
+  for (; (count = regmap->count) != 0; regmap++)
+    {
+      int regno = regmap->regno;
+      int slot_size = regmap->size;
+
+      if (slot_size == 0 && regno != REGCACHE_MAP_SKIP)
+	slot_size = register_size (gdbarch, regno);
+
+      if (offs + slot_size > size)
+	break;
+
+      if (regno == REGCACHE_MAP_SKIP)
+	offs += count * slot_size;
+      else
+	for (; count--; regno++, offs += slot_size)
+	  {
+	    /* Mimic the semantics of regcache::transfer_regset if a
+	       register slot's size does not match the size of a
+	       register.
+
+	       If a register slot is larger than a register, assume
+	       the register's value is stored in the first N bytes of
+	       the slot and ignore the remaining bytes.
+
+	       If the register slot is smaller than the register,
+	       assume that the slot contains the low N bytes of the
+	       register's value.  Since trad_frame assumes that
+	       registers stored by address are sized according to the
+	       register, read the low N bytes and zero-extend them to
+	       generate a register value.  */
+	    if (slot_size >= register_size (gdbarch, regno))
+	      trad_frame_set_reg_addr (this_trad_cache, regno, addr + offs);
+	    else
+	      {
+		enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+		gdb_byte buf[slot_size];
+
+		if (target_read_memory (addr + offs, buf, sizeof buf) == 0)
+		  {
+		    LONGEST val
+		      = extract_unsigned_integer (buf, sizeof buf, byte_order);
+		    trad_frame_set_reg_value (this_trad_cache, regno, val);
+		  }
+	      }
+	  }
+    }
 }
 
 void

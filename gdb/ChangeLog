@@ -1,3 +1,10 @@
+2018-10-08  John Baldwin  <jhb@FreeBSD.org>
+
+	* regcache.h (struct regcache_map_entry): Note that this type can
+	be used with traditional frame caches.
+	* trad-frame.c (trad_frame_set_reg_regmap): New.
+	* trad-frame.h (trad_frame_set_reg_regmap): New.
+
 2018-10-08  Weimin Pan  <weimin.pan@oracle.com>
 
 	PR c++/16841

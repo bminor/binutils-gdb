@@ -23,6 +23,7 @@
 #include "frame.h"		/* For "struct frame_id".  */
 
 struct frame_info;
+struct regcache_map_entry;
 struct trad_frame_cache;
 
 /* A simple, or traditional frame cache.
@@ -45,6 +46,9 @@ void trad_frame_set_reg_realreg (struct trad_frame_cache *this_trad_cache,
 				 int regnum, int realreg);
 void trad_frame_set_reg_addr (struct trad_frame_cache *this_trad_cache,
 			      int regnum, CORE_ADDR addr);
+void trad_frame_set_reg_regmap (struct trad_frame_cache *this_trad_cache,
+				const struct regcache_map_entry *regmap,
+				CORE_ADDR addr, size_t size);
 void trad_frame_set_reg_value (struct trad_frame_cache *this_cache,
 			       int regnum, LONGEST val);
 
