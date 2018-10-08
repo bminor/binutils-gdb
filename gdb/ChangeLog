@@ -1,3 +1,10 @@
+2018-10-08  Weimin Pan  <weimin.pan@oracle.com>
+
+	PR c++/16841
+	* valops.c (get_virtual_base_offset): New function.
+	(value_struct_elt_for_reference): Use it to get virtual base offset
+	and add it in calculating class member address.
+
 2018-10-08   John Darrington <john@darrington.wattle.id.au>
 
     * dwarf2read.c (dwarf2_cu) <producer_is_codewarrior>: New field.

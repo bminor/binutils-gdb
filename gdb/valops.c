@@ -3321,6 +3321,49 @@ compare_parameters (struct type *t1, struct type *t2, int skip_artificial)
   return 0;
 }
 
+/* C++: Given an aggregate type VT, and a class type CLS, search
+   recursively for CLS using value V; If found, store the offset
+   which is either fetched from the virtual base pointer if CLS
+   is virtual or accumulated offset of its parent classes if
+   CLS is non-virtual in *BOFFS, set ISVIRT to indicate if CLS
+   is virtual, and return true.  If not found, return false.  */
+
+static bool
+get_baseclass_offset (struct type *vt, struct type *cls,
+		      struct value *v, int *boffs, bool *isvirt)
+{
+  for (int i = 0; i < TYPE_N_BASECLASSES (vt); i++)
+    {
+      struct type *t = TYPE_FIELD_TYPE (vt, i);
+      if (types_equal (t, cls))
+        {
+          if (BASETYPE_VIA_VIRTUAL (vt, i))
+            {
+	      const gdb_byte *adr = value_contents_for_printing (v);
+	      *boffs = baseclass_offset (vt, i, adr, value_offset (v),
+					 value_as_long (v), v);
+	      *isvirt = true;
+            }
+          else
+	    *isvirt = false;
+          return true;
+        }
+
+      if (get_baseclass_offset (check_typedef (t), cls, v, boffs, isvirt))
+        {
+	  if (*isvirt == false)	/* Add non-virtual base offset.  */
+	    {
+	      const gdb_byte *adr = value_contents_for_printing (v);
+	      *boffs += baseclass_offset (vt, i, adr, value_offset (v),
+					  value_as_long (v), v);
+	    }
+	  return true;
+	}
+    }
+
+  return false;
+}
+
 /* C++: Given an aggregate type CURTYPE, and a member name NAME,
    return the address of this member as a "pointer to member" type.
    If INTYPE is non-null, then it will be the type of the member we
@@ -3374,7 +3417,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	      struct value *v = value_of_this_silent (current_language);
 	      if (v != NULL)
 		{
-		  struct value *ptr;
+		  struct value *ptr, *this_v = v;
 		  long mem_offset;
 		  struct type *type, *tmp;
 
@@ -3385,6 +3428,24 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 		  tmp = lookup_pointer_type (TYPE_SELF_TYPE (type));
 		  v = value_cast_pointers (tmp, v, 1);
 		  mem_offset = value_as_long (ptr);
+		  if (domain != curtype)
+		    {
+		      /* Find class offset of type CURTYPE from either its
+			 parent type DOMAIN or the type of implied this.  */
+		      int boff = 0;
+		      bool isvirt = false;
+		      if (get_baseclass_offset (domain, curtype, v, &boff,
+						&isvirt))
+		        mem_offset += boff;
+		      else
+		        {
+		          struct type *t = check_typedef (value_type (this_v));
+		          t = check_typedef (TYPE_TARGET_TYPE (t));
+		          if (get_baseclass_offset (t, curtype, this_v,
+						    &boff, &isvirt))
+		            mem_offset += boff;
+		        }
+		    }
 		  tmp = lookup_pointer_type (TYPE_TARGET_TYPE (type));
 		  result = value_from_pointer (tmp,
 					       value_as_long (v) + mem_offset);
