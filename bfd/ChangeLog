@@ -1,3 +1,10 @@
+2018-10-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23428
+	* elfxx-x86.c (_bfd_x86_elf_link_setup_gnu_properties): Don't
+	add GNU_PROPERTY_X86_FEATURE_2_NEEDED to force program header
+	in non-code PT_LOAD segment.
+
 2018-10-08  Alan Modra  <amodra@gmail.com>
 
 	* elf-nacl.c (nacl_modify_segment_map): Cope with header PT_LOAD

@@ -2542,7 +2542,6 @@ _bfd_x86_elf_link_setup_gnu_properties
   const struct elf_backend_data *bed;
   unsigned int class_align = ABI_64_P (info->output_bfd) ? 3 : 2;
   unsigned int got_align;
-  bfd_boolean has_text = FALSE;
 
   features = 0;
   if (info->ibt)
@@ -2557,14 +2556,6 @@ _bfd_x86_elf_link_setup_gnu_properties
     if (bfd_get_flavour (pbfd) == bfd_target_elf_flavour
 	&& bfd_count_sections (pbfd) != 0)
       {
-	if (!has_text)
-	  {
-	    /* Check if there is no non-empty text section.  */
-	    sec = bfd_get_section_by_name (pbfd, ".text");
-	    if (sec != NULL && sec->size != 0)
-	      has_text = TRUE;
-	  }
-
 	ebfd = pbfd;
 
 	if (elf_properties (pbfd) != NULL)
@@ -2589,42 +2580,6 @@ _bfd_x86_elf_link_setup_gnu_properties
 					4);
 	  prop->u.number |= features;
 	  prop->pr_kind = property_number;
-	}
-      else if (has_text
-	       && elf_tdata (info->output_bfd)->o->build_id.sec == NULL
-	       && !htab->elf.dynamic_sections_created
-	       && !info->traditional_format
-	       && (info->output_bfd->flags & D_PAGED) != 0
-	       && info->separate_code)
-	{
-	  /* If the separate code program header is needed, make sure
-	     that the first read-only PT_LOAD segment has no code by
-	     adding a GNU_PROPERTY_X86_FEATURE_2_NEEDED note.  */
-	  elf_property_list *list;
-	  bfd_boolean need_property = TRUE;
-
-	  for (list = elf_properties (ebfd); list; list = list->next)
-	    {
-	      unsigned int pr_type = list->property.pr_type;
-	      if (pr_type == GNU_PROPERTY_STACK_SIZE
-		  || pr_type == GNU_PROPERTY_NO_COPY_ON_PROTECTED
-		  || pr_type == GNU_PROPERTY_X86_COMPAT_ISA_1_NEEDED
-		  || (pr_type >= GNU_PROPERTY_X86_UINT32_OR_LO
-		      && pr_type <= GNU_PROPERTY_X86_UINT32_OR_HI))
-		{
-		  /* These properties won't be removed during merging.  */
-		  need_property = FALSE;
-		  break;
-		}
-	    }
-
-	  if (need_property)
-	    {
-	      prop = _bfd_elf_get_property
-		(ebfd, GNU_PROPERTY_X86_FEATURE_2_NEEDED, 4);
-	      prop->u.number = GNU_PROPERTY_X86_FEATURE_2_X86;
-	      prop->pr_kind = property_number;
-	    }
 	}
 
       /* Create the GNU property note section if needed.  */
