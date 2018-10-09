@@ -1,5 +1,9 @@
 2018-12-28  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.c (tui_show_source_line): Use wclrtoeol.
+
+2018-12-28  Tom Tromey  <tom@tromey.com>
+
 	PR tui/14126:
 	* tui/tui.c (tui_enable): Call start_color and
 	use_default_colors.

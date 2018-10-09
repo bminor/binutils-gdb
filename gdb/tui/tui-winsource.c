@@ -272,7 +272,6 @@ static void
 tui_show_source_line (struct tui_win_info *win_info, int lineno)
 {
   struct tui_win_element *line;
-  int x;
 
   line = win_info->generic.content[lineno - 1];
   if (line->which_element.source.is_exec_point)
@@ -284,12 +283,7 @@ tui_show_source_line (struct tui_win_info *win_info, int lineno)
     wattroff (win_info->generic.handle, A_STANDOUT);
 
   /* Clear to end of line but stop before the border.  */
-  x = getcurx (win_info->generic.handle);
-  while (x + 1 < win_info->generic.width)
-    {
-      waddch (win_info->generic.handle, ' ');
-      x = getcurx (win_info->generic.handle);
-    }
+  wclrtoeol (win_info->generic.handle);
 }
 
 void
