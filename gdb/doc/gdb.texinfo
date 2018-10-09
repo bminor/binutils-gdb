@@ -35771,12 +35771,13 @@ to the compiler, which will fail the compilation if the compiler
 outputs any warning messages.
 
 @item --enable-ubsan
-Enable the GCC undefined behavior sanitizer.  By default this is
-disabled in @value{GDBN} releases, but enabled, when available, when
-building from git.  The undefined behavior sanitizer checks for
-C@t{++} undefined behavior.  It has a performance cost, so if you are
-looking at @value{GDBN}'s performance, you should disable it.  The
-undefined behavior sanitizer was first introduced in GCC 4.9.
+Enable the GCC undefined behavior sanitizer.  This is disabled by
+default, but passing @code{--enable-ubsan=yes} or
+@code{--enable-ubsan=auto} to @code{configure} will enable it.  The
+undefined behavior sanitizer checks for C@t{++} undefined behavior.
+It has a performance cost, so if you are looking at @value{GDBN}'s
+performance, you should disable it.  The undefined behavior sanitizer
+was first introduced in GCC 4.9.
 @end table
 
 @node System-wide configuration

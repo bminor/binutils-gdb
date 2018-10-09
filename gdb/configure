@@ -15614,7 +15614,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 if test "${enable_ubsan+set}" = set; then :
   enableval=$enable_ubsan;
 else
-  enable_ubsan=auto
+  enable_ubsan=no
 fi
 
 if test "x$enable_ubsan" = xauto; then

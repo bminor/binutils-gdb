@@ -20,7 +20,7 @@ AC_DEFUN([AM_GDB_UBSAN],[
 AC_ARG_ENABLE(ubsan,
   AS_HELP_STRING([--enable-ubsan],
                  [enable undefined behavior sanitizer (auto/yes/no)]),
-  [],enable_ubsan=auto)
+  [],enable_ubsan=no)
 if test "x$enable_ubsan" = xauto; then
   if $development; then
     enable_ubsan=yes
