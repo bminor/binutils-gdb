@@ -2865,7 +2865,7 @@ Return the @code{gdb.Architecture} (@pxref{Architectures In Python})
 for this inferior.  This represents the architecture of the inferior
 as a whole.  Some platforms can have multiple architectures in a
 single address space, so this may not match the architecture of a
-particular frame (@pxref{Unwinding Frames in Python}).
+particular frame (@pxref{Frames In Python}).
 @end defun
 
 @findex Inferior.read_memory

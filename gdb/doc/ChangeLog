@@ -1,5 +1,10 @@
 2018-10-09  Tom Tromey  <tom@tromey.com>
 
+	* python.texi (Inferiors In Python): Link to "Frames In Python",
+	not "Unwinding Frames in Python".
+
+2018-10-09  Tom Tromey  <tom@tromey.com>
+
 	* gdb.texinfo (Configure Options): Update --enable-ubsan
 	documentation.
 
