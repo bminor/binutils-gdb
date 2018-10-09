@@ -12196,6 +12196,7 @@ create_dwp_hash_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
     {
       const gdb_byte *ids_ptr = htab->unit_table + sizeof (uint32_t) * nr_slots;
       int *ids = htab->section_pool.v2.section_ids;
+      size_t sizeof_ids = sizeof (htab->section_pool.v2.section_ids);
       /* Reverse map for error checking.  */
       int ids_seen[DW_SECT_MAX + 1];
       int i;
@@ -12212,8 +12213,8 @@ create_dwp_hash_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
 		   " in section table [in module %s]"),
 		 dwp_file->name);
 	}
-      memset (ids, 255, (DW_SECT_MAX + 1) * sizeof (int32_t));
-      memset (ids_seen, 255, (DW_SECT_MAX + 1) * sizeof (int32_t));
+      memset (ids, 255, sizeof_ids);
+      memset (ids_seen, 255, sizeof (ids_seen));
       for (i = 0; i < nr_columns; ++i)
 	{
 	  int id = read_4_bytes (dbfd, ids_ptr + i * sizeof (uint32_t));

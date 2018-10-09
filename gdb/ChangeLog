@@ -1,3 +1,8 @@
+2018-10-09  Gary Benson <gbenson@redhat.com>
+
+	* dwarf2read.c (create_dwp_hash_table): Fix buffer overrun
+	found by Coverity.
+
 2018-10-08  Tom Tromey  <tom@tromey.com>
 
 	* riscv-fbsd-tdep.c (riscv_fbsd_sigframe_init): Remove unused
