@@ -1,3 +1,7 @@
+2018-11-19  Tom Tromey  <tom@tromey.com>
+
+	* source.c (get_filename_and_charpos): Return void.
+
 2018-11-19  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* skip.c (_initialize_step_skip): Fix "info skip" help.

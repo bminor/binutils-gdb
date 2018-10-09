@@ -49,10 +49,6 @@
 #define OPEN_MODE (O_RDONLY | O_BINARY)
 #define FDOPEN_MODE FOPEN_RB
 
-/* Prototypes for local functions.  */
-
-static int get_filename_and_charpos (struct symtab *, char **);
-
 /* Path of directories to search for source files.
    Same format as the PATH environment variable's value.  */
 
@@ -1209,29 +1205,23 @@ find_source_lines (struct symtab *s, int desc)
 
 
 /* Get full pathname and line number positions for a symtab.
-   Return nonzero if line numbers may have changed.
    Set *FULLNAME to actual name of the file as found by `openp',
    or to 0 if the file is not found.  */
 
-static int
+static void
 get_filename_and_charpos (struct symtab *s, char **fullname)
 {
-  int linenums_changed = 0;
-
   scoped_fd desc = open_source_file (s);
   if (desc.get () < 0)
     {
       if (fullname)
 	*fullname = NULL;
-      return 0;
+      return;
     }
   if (fullname)
     *fullname = s->fullname;
   if (s->line_charpos == 0)
-    linenums_changed = 1;
-  if (linenums_changed)
     find_source_lines (s, desc.get ());
-  return linenums_changed;
 }
 
 /* Print text describing the full name of the source file S
