@@ -1,5 +1,9 @@
 2018-10-19  Alan Hayward  <alan.hayward@arm.com>
 
+	* gdb.python/py-cmd.exp: Check for gdb_prompt.
+
+2018-10-19  Alan Hayward  <alan.hayward@arm.com>
+
 	* gdb.base/vla-optimized-out.exp: Allow either optimized out or 6.
 
 2018-10-19  Alan Hayward  <alan.hayward@arm.com>
