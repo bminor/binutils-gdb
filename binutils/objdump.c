@@ -2759,6 +2759,12 @@ dump_dwarf (bfd *abfd)
       init_dwarf_regnames_riscv ();
       break;
 
+    case bfd_arch_s12z:
+      /* S12Z has a 24 bit address space.  But the only known
+	 producer of dwarf_info encodes addresses into 32 bits.  */
+      eh_addr_size = 4;
+      break;
+
     default:
       break;
     }

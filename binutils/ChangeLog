@@ -1,3 +1,7 @@
+2018-10-10  Alan Modra  <amodra@gmail.com>
+
+	* objdump.c (dump_dwarf): Set s12z eh_addr_size to 4.
+
 2018-10-08  Andreas Schwab  <schwab@suse.de>
 
 	* readelf.c (is_32bit_pcrel_reloc): Handle R_RISCV_32_PCREL.
