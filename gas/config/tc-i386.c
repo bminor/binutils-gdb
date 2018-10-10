@@ -4450,10 +4450,10 @@ parse_insn (char *line, char *mnemonic)
 	    }
 	  /* If we are in 16-bit mode, do not allow addr16 or data16.
 	     Similarly, in 32-bit mode, do not allow addr32 or data32.  */
-	  if ((current_templates->start->opcode_modifier.size16
-	       || current_templates->start->opcode_modifier.size32)
+	  if ((current_templates->start->opcode_modifier.size == SIZE16
+	       || current_templates->start->opcode_modifier.size == SIZE32)
 	      && flag_code != CODE_64BIT
-	      && (current_templates->start->opcode_modifier.size32
+	      && ((current_templates->start->opcode_modifier.size == SIZE32)
 		  ^ (flag_code == CODE_16BIT)))
 	    {
 	      as_bad (_("redundant %s prefix"),
@@ -6045,11 +6045,11 @@ process_suffix (void)
 {
   /* If matched instruction specifies an explicit instruction mnemonic
      suffix, use it.  */
-  if (i.tm.opcode_modifier.size16)
+  if (i.tm.opcode_modifier.size == SIZE16)
     i.suffix = WORD_MNEM_SUFFIX;
-  else if (i.tm.opcode_modifier.size32)
+  else if (i.tm.opcode_modifier.size == SIZE32)
     i.suffix = LONG_MNEM_SUFFIX;
-  else if (i.tm.opcode_modifier.size64)
+  else if (i.tm.opcode_modifier.size == SIZE64)
     i.suffix = QWORD_MNEM_SUFFIX;
   else if (i.reg_operands)
     {

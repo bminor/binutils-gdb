@@ -1,3 +1,8 @@
+2018-10-10  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (parse_insn, process_suffix): Replace
+	opcode_modifier.size<N> uses.
+
 2018-10-09  Sudakshina Das  <sudi.das@arm.com>
 
 	* config/tc-aarch64.c (aarch64_features): Add new "ssbs".

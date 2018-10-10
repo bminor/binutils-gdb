@@ -399,11 +399,12 @@ enum
   /* src/dest swap for floats. */
   FloatR,
   /* needs size prefix if in 32-bit mode */
-  Size16,
+#define SIZE16 1
   /* needs size prefix if in 16-bit mode */
-  Size32,
+#define SIZE32 2
   /* needs size prefix if in 64-bit mode */
-  Size64,
+#define SIZE64 3
+  Size,
   /* check register size.  */
   CheckRegSize,
   /* instruction ignores operand size prefix and in Intel mode ignores
@@ -627,9 +628,7 @@ typedef struct i386_opcode_modifier
   unsigned int jumpintersegment:1;
   unsigned int floatmf:1;
   unsigned int floatr:1;
-  unsigned int size16:1;
-  unsigned int size32:1;
-  unsigned int size64:1;
+  unsigned int size:2;
   unsigned int checkregsize:1;
   unsigned int ignoresize:1;
   unsigned int defaultsize:1;

@@ -22,6 +22,10 @@
 #include "i386-opc.h"
 #undef None
 
+#define Size16 Size=SIZE16
+#define Size32 Size=SIZE32
+#define Size64 Size=SIZE64
+
 ### MARKER ###
 
 #define VexWIG VexW=VEXWIG

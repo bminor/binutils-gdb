@@ -1,3 +1,15 @@
+2018-10-10  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (opcode_modifiers): Drop Size16, Size32, and
+	Size64. Add Size.
+	* i386-opc.h (Size16, Size32, Size64): Delete.
+	(Size): New.
+	(SIZE16, SIZE32, SIZE64): Define.
+	(struct i386_opcode_modifier): Drop size16, size32, and size64.
+	Add size.
+	* i386-opc.tbl (Size16, Size32, Size64): Define.
+	* i386-tbl.h: Re-generate.
+
 2018-10-09  Sudakshina Das  <sudi.das@arm.com>
 
 	* aarch64-opc.c (operand_general_constraint_met_p): Add
