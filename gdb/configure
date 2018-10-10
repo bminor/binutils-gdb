@@ -701,6 +701,8 @@ ALLOCA
 LTLIBIPT
 LIBIPT
 HAVE_LIBIPT
+SRCHIGH_CFLAGS
+SRCHIGH_LIBS
 HAVE_GUILE_FALSE
 HAVE_GUILE_TRUE
 GUILE_LIBS
@@ -11467,6 +11469,34 @@ else
   HAVE_GUILE_TRUE='#'
   HAVE_GUILE_FALSE=
 fi
+
+
+# ---------------------------- #
+# Check for source highlight.  #
+# ---------------------------- #
+
+SRCHIGH_LIBS=
+SRCHIGH_CFLAGS=
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for source highlight" >&5
+$as_echo_n "checking for source highlight... " >&6; }
+if test "${pkg_config_prog_path}" = "missing"; then
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no - pkg-config not found" >&5
+$as_echo "no - pkg-config not found" >&6; }
+else
+   if ${pkg_config_prog_path} --exists source-highlight; then
+      SRCHIGH_CFLAGS=`${pkg_config_prog_path} --cflags source-highlight`
+      SRCHIGH_LIBS=`${pkg_config_prog_path} --libs source-highlight`
+
+$as_echo "#define HAVE_SOURCE_HIGHLIGHT 1" >>confdefs.h
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+   else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+   fi
+fi
+
 
 
 # --------------------- #

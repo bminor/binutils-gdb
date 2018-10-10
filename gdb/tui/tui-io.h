@@ -22,11 +22,13 @@
 #ifndef TUI_IO_H
 #define TUI_IO_H
 
+#include "gdb_curses.h"
+
 struct ui_out;
 class cli_ui_out;
 
 /* Print the string in the curses command window.  */
-extern void tui_puts (const char *);
+extern void tui_puts (const char *, WINDOW * = nullptr);
 
 /* Print LENGTH characters from the buffer pointed to by BUF to the
    curses command window.  */

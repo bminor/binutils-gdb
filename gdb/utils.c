@@ -1444,9 +1444,9 @@ emit_style_escape (const ui_file_style &style)
   wrap_buffer.append (style.to_ansi ());
 }
 
-/* Return true if ANSI escapes can be used on STREAM.  */
+/* See utils.h.  */
 
-static bool
+bool
 can_emit_style_escape (struct ui_file *stream)
 {
   if (stream != gdb_stdout

@@ -1226,6 +1226,29 @@ AC_SUBST(GUILE_CPPFLAGS)
 AC_SUBST(GUILE_LIBS)
 AM_CONDITIONAL(HAVE_GUILE, test "${have_libguile}" != no)
 
+# ---------------------------- #
+# Check for source highlight.  #
+# ---------------------------- #
+
+SRCHIGH_LIBS=
+SRCHIGH_CFLAGS=
+AC_MSG_CHECKING([for the source-highlight library])
+if test "${pkg_config_prog_path}" = "missing"; then
+   AC_MSG_RESULT([no - pkg-config not found])
+else
+   if ${pkg_config_prog_path} --exists source-highlight; then
+      SRCHIGH_CFLAGS=`${pkg_config_prog_path} --cflags source-highlight`
+      SRCHIGH_LIBS=`${pkg_config_prog_path} --libs source-highlight`
+      AC_DEFINE([HAVE_SOURCE_HIGHLIGHT], 1,
+                [Define to 1 if the source-highlight library is available])
+      AC_MSG_RESULT([yes])
+   else
+      AC_MSG_RESULT([no])
+   fi
+fi
+AC_SUBST(SRCHIGH_LIBS)
+AC_SUBST(SRCHIGH_CFLAGS)
+
 # --------------------- #
 # Check for libmcheck.  #
 # --------------------- #

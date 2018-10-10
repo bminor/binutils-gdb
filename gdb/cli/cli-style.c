@@ -20,6 +20,7 @@
 #include "defs.h"
 #include "cli/cli-cmds.h"
 #include "cli/cli-style.h"
+#include "source-cache.h"
 
 /* True if styling is enabled.  */
 
@@ -217,6 +218,12 @@ show_style (const char *arg, int from_tty)
 }
 
 static void
+set_style_enabled  (const char *args, int from_tty, struct cmd_list_element *c)
+{
+  g_source_cache.clear ();
+}
+
+static void
 show_style_enabled (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
 {
@@ -245,7 +252,7 @@ Configure various style-related variables, such as colors"),
 Set whether CLI styling is enabled."), _("\
 Show whether CLI is enabled."), _("\
 If enabled, output to the terminal is styled."),
-			   NULL, show_style_enabled,
+			   set_style_enabled, show_style_enabled,
 			   &style_set_list, &style_show_list);
 
   file_name_style.add_setshow_commands ("filename", no_class,

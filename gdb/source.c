@@ -45,6 +45,7 @@
 #include "common/scoped_fd.h"
 #include <algorithm>
 #include "common/pathstuff.h"
+#include "source-cache.h"
 
 #define OPEN_MODE (O_RDONLY | O_BINARY)
 #define FDOPEN_MODE FOPEN_RB
@@ -393,6 +394,7 @@ forget_cached_source_info (void)
       forget_cached_source_info_for_objfile (objfile);
     }
 
+  g_source_cache.clear ();
   last_source_visited = NULL;
 }
 
@@ -1344,25 +1346,18 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 
   last_source_error = 0;
 
-  if (s->line_charpos == 0)
-    find_source_lines (s, desc.get ());
-
-  if (line < 1 || line > s->nlines)
+  std::string lines;
+  if (!g_source_cache.get_source_lines (s, line, stopline - 1, &lines))
     error (_("Line number %d out of range; %s has %d lines."),
 	   line, symtab_to_filename_for_display (s), s->nlines);
 
-  if (lseek (desc.get (), s->line_charpos[line - 1], 0) < 0)
-    perror_with_name (symtab_to_filename_for_display (s));
-
-  gdb_file_up stream = desc.to_file (FDOPEN_MODE);
-  clearerr (stream.get ());
-
+  const char *iter = lines.c_str ();
   while (nlines-- > 0)
     {
       char buf[20];
 
-      c = fgetc (stream.get ());
-      if (c == EOF)
+      c = *iter++;
+      if (c == '\0')
 	break;
       last_line_listed = current_source_line;
       if (flags & PRINT_SOURCE_LINES_FILENAME)
@@ -1374,7 +1369,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
       uiout->text (buf);
       do
 	{
-	  if (c < 040 && c != '\t' && c != '\n' && c != '\r')
+	  if (c < 040 && c != '\t' && c != '\n' && c != '\r' && c != '\033')
 	    {
 	      xsnprintf (buf, sizeof (buf), "^%c", c + 0100);
 	      uiout->text (buf);
@@ -1384,12 +1379,13 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	  else if (c == '\r')
 	    {
 	      /* Skip a \r character, but only before a \n.  */
-	      int c1 = fgetc (stream.get ());
-
-	      if (c1 != '\n')
+	      if (iter[1] == '\n')
+		{
+		  ++iter;
+		  c = '\n';
+		}
+	      else
 		printf_filtered ("^%c", c + 0100);
-	      if (c1 != EOF)
-		ungetc (c1, stream.get ());
 	    }
 	  else
 	    {
@@ -1397,8 +1393,12 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	      uiout->text (buf);
 	    }
 	}
-      while (c != '\n' && (c = fgetc (stream.get ())) >= 0);
+      while (c != '\n' && (c = *iter++) != '\0');
+      if (c == '\0')
+	break;
     }
+  if (lines.back () != '\n')
+    uiout->text ("\n");
 }
 
 /* Show source lines from the file of symtab S, starting with line

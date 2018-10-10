@@ -1,5 +1,34 @@
 2018-12-28  Tom Tromey  <tom@tromey.com>
 
+	* utils.h (can_emit_style_escape): Declare.
+	* utils.c (can_emit_style_escape): No longer static.
+	* cli/cli-style.c (set_style_enabled): New function.
+	(_initialize_cli_style): Use it.
+	* tui/tui-winsource.c (tui_show_source_line): Use tui_puts.
+	(tui_alloc_source_buffer): Change how source lines are allocated.
+	* tui/tui-source.c (copy_source_line): New function.
+	(tui_set_source_content): Use source cache.
+	* tui/tui-io.h (tui_puts): Update.
+	* tui/tui-io.c (tui_puts_internal): Add window parameter.
+	(tui_puts): Likewise.
+	(tui_redisplay_readline): Update.
+	* tui/tui-data.c (free_content_elements): Change how source window
+	contents are freed.
+	* source.c (forget_cached_source_info): Clear the source cache.
+	(print_source_lines_base): Use the source cache.
+	* source-cache.h: New file.
+	* source-cache.c: New file.
+	* configure.ac: Check for GNU Source Highlight library.
+	* configure: Update.
+	* config.in: Update.
+	* Makefile.in (SRCHIGH_LIBS, SRCHIGH_CFLAGS): New variables.
+	(INTERNAL_CFLAGS_BASE): Add SRCHIGH_CFLAGS.
+	(CLIBS): Add SRCHIGH_LIBS.
+	(COMMON_SFILES): Add source-cache.c.
+	(HFILES_NO_SRCDIR): Add source-cache.h.
+
+2018-12-28  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.c (tui_show_source_line): Use wclrtoeol.
 
 2018-12-28  Tom Tromey  <tom@tromey.com>

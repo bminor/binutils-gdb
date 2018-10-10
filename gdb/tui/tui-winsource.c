@@ -31,6 +31,7 @@
 
 #include "tui/tui.h"
 #include "tui/tui-data.h"
+#include "tui/tui-io.h"
 #include "tui/tui-stack.h"
 #include "tui/tui-win.h"
 #include "tui/tui-wingeneral.h"
@@ -277,8 +278,9 @@ tui_show_source_line (struct tui_win_info *win_info, int lineno)
   if (line->which_element.source.is_exec_point)
     wattron (win_info->generic.handle, A_STANDOUT);
 
-  mvwaddstr (win_info->generic.handle, lineno, 1,
-	     line->which_element.source.line);
+  wmove (win_info->generic.handle, lineno, 1);
+  tui_puts (line->which_element.source.line,
+	    win_info->generic.handle);
   if (line->which_element.source.is_exec_point)
     wattroff (win_info->generic.handle, A_STANDOUT);
 
@@ -595,7 +597,6 @@ tui_update_exec_info (struct tui_win_info *win_info)
 enum tui_status
 tui_alloc_source_buffer (struct tui_win_info *win_info)
 {
-  char *src_line_buf;
   int i, line_width, max_lines;
 
   /* The window width/height includes the highlight box.  Determine actual
@@ -603,20 +604,14 @@ tui_alloc_source_buffer (struct tui_win_info *win_info)
   max_lines = win_info->generic.height - 2;
   line_width = win_info->generic.width - 2 + 1;
 
-  /*
-   * Allocate the buffer for the source lines.  Do this only once
-   * since they will be re-used for all source displays.  The only
-   * other time this will be done is when a window's size changes.
-   */
+  /* Allocate the buffer for the source lines.  */
   if (win_info->generic.content == NULL)
     {
-      src_line_buf = (char *) 
-	xmalloc ((max_lines * line_width) * sizeof (char));
       /* Allocate the content list.  */
       win_info->generic.content = tui_alloc_content (max_lines, SRC_WIN);
       for (i = 0; i < max_lines; i++)
 	win_info->generic.content[i]->which_element.source.line
-	  = src_line_buf + (line_width * i);
+	  = (char *) xmalloc (line_width);
     }
 
   return TUI_SUCCESS;

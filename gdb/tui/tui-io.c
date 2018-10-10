@@ -367,9 +367,8 @@ tui_write (const char *buf, size_t length)
 }
 
 static void
-tui_puts_internal (const char *string, int *height)
+tui_puts_internal (WINDOW *w, const char *string, int *height)
 {
-  WINDOW *w = TUI_CMD_WIN->generic.handle;
   char c;
   int prev_col = 0;
 
@@ -410,9 +409,11 @@ tui_puts_internal (const char *string, int *height)
    necessary.  */
 
 void
-tui_puts (const char *string)
+tui_puts (const char *string, WINDOW *w)
 {
-  tui_puts_internal (string, nullptr);
+  if (w == nullptr)
+    w = TUI_CMD_WIN->generic.handle;
+  tui_puts_internal (w, string, nullptr);
 }
 
 /* Readline callback.
@@ -453,7 +454,7 @@ tui_redisplay_readline (void)
   prev_col = 0;
   height = 1;
   if (prompt != nullptr)
-    tui_puts_internal (prompt, &height);
+    tui_puts_internal (TUI_CMD_WIN->generic.handle, prompt, &height);
 
   prev_col = getcurx (w);
   for (in = 0; in <= rl_end; in++)

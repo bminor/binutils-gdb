@@ -838,7 +838,7 @@ free_content_elements (tui_win_content content,
     {
       int i;
 
-      if (type == SRC_WIN || type == DISASSEM_WIN)
+      if (type == DISASSEM_WIN)
 	{
 	  /* Free whole source block.  */
 	  xfree (content[0]->which_element.source.line);
@@ -854,6 +854,9 @@ free_content_elements (tui_win_content content,
 		{
 		  switch (type)
 		    {
+		    case SRC_WIN:
+		      xfree (element->which_element.source.line);
+		      break;
 		    case DATA_WIN:
 		      xfree (element);
 		      break;
