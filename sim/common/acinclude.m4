@@ -851,11 +851,17 @@ AC_ARG_ENABLE(cgen-maint,
   yes)	cgen_maint=yes ;;
   no)	cgen_maint=no ;;
   *)
-	# argument is cgen install directory (not implemented yet).
-	# Having a `share' directory might be more appropriate for the .scm,
-	# .cpu, etc. files.
-	cgendir=${cgen_maint}/lib/cgen
-	cgen=guile
+	# Argument is a directory where cgen can be found.  In some
+	# future world cgen could be installable, but right now this
+	# is not the case.  Instead we assume the directory is a path
+	# to the cgen source tree.
+	cgen_maint=yes
+        if test -r ${enableval}/iformat.scm; then
+          # This looks like a cgen source tree.
+	  cgendir=${enableval}
+        else
+	  AC_MSG_ERROR(${enableval} doesn't look like a cgen source tree)
+        fi
 	;;
 esac])dnl
 dnl AM_CONDITIONAL(CGEN_MAINT, test x${cgen_maint} != xno)

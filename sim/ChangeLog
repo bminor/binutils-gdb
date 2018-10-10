@@ -1,3 +1,15 @@
+2018-12-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* common/acinclude.m4 (enable-cgen-maint): Support passing path to
+	cgen source tree.
+	* cris/configure: Regenerate.
+	* frv/configure: Regenerate.
+	* iq2000/configure: Regenerate.
+	* lm32/configure: Regenerate.
+	* m32r/configure: Regenerate.
+	* or1k/configure: Regenerate.
+	* sh64/configure: Regenerate.
+
 2018-10-05  Stafford Horne  <shorne@gmail.com>
 
 	* or1k/cpu.h: Regenerate.
