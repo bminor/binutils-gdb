@@ -1,3 +1,8 @@
+2018-10-10  Gary Benson <gbenson@redhat.com>
+
+	* remote.c (remote_target::remote_send_printf): Add
+	missing va_end found by Coverity.
+
 2018-10-10  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* btrace.c (ftrace_update_function): Add indirect jump heuristic.

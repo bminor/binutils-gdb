@@ -8938,7 +8938,11 @@ remote_target::remote_send_printf (const char *format, ...)
   va_start (ap, format);
 
   rs->buf[0] = '\0';
-  if (vsnprintf (rs->buf, max_size, format, ap) >= max_size)
+  int size = vsnprintf (rs->buf, max_size, format, ap);
+
+  va_end (ap);
+
+  if (size >= max_size)
     internal_error (__FILE__, __LINE__, _("Too long remote packet."));
 
   if (putpkt (rs->buf) < 0)
