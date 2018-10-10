@@ -8065,7 +8065,7 @@ slurp_hppa_unwind_table (Filedata *                  filedata,
 
 	  i = rp->r_offset / unw_ent_size;
 
-	  switch ((rp->r_offset % unw_ent_size) / eh_addr_size)
+	  switch ((rp->r_offset % unw_ent_size) / 4)
 	    {
 	    case 0:
 	      aux->table[i].start.section = sym->st_shndx;
@@ -8133,7 +8133,7 @@ hppa_process_unwind (Filedata * filedata)
     {
       if (streq (SECTION_NAME (sec), ".PARISC.unwind"))
 	{
-	  unsigned long num_unwind = sec->sh_size / (2 * eh_addr_size + 8);
+	  unsigned long num_unwind = sec->sh_size / 16;
 
 	  printf (ngettext ("\nUnwind section '%s' at offset 0x%lx "
 			    "contains %lu entry:\n",
