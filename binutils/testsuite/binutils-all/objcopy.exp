@@ -1074,6 +1074,8 @@ if [is_elf_format] {
 run_dump_test "copy-2"
 run_dump_test "copy-3"
 run_dump_test "copy-4"
+run_dump_test "copy-5"
+
 # Use bintest.o from the copy-4 test to determine ELF reloc type
 set reloc_format rel
 if { [is_elf_format] && [is_rela tmpdir/bintest.o] } {

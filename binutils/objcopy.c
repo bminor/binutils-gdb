@@ -4753,6 +4753,8 @@ copy_main (int argc, char *argv[])
   bfd_boolean show_version = FALSE;
   bfd_boolean change_warn = TRUE;
   bfd_boolean formats_info = FALSE;
+  bfd_boolean use_globalize = FALSE;
+  bfd_boolean use_keep_global = FALSE;
   int c;
   struct stat statbuf;
   const bfd_arch_info_type *input_arch = NULL;
@@ -4871,10 +4873,12 @@ copy_main (int argc, char *argv[])
 	  break;
 
 	case OPTION_GLOBALIZE_SYMBOL:
+	  use_globalize = TRUE;
 	  add_specific_symbol (optarg, globalize_specific_htab);
 	  break;
 
 	case 'G':
+	  use_keep_global = TRUE;
 	  add_specific_symbol (optarg, keepglobal_specific_htab);
 	  break;
 
@@ -5306,11 +5310,13 @@ copy_main (int argc, char *argv[])
 	  break;
 
 	case OPTION_GLOBALIZE_SYMBOLS:
+	  use_globalize = TRUE;
 	  add_specific_symbols (optarg, globalize_specific_htab,
 				&globalize_specific_buffer);
 	  break;
 
 	case OPTION_KEEPGLOBAL_SYMBOLS:
+	  use_keep_global = TRUE;
 	  add_specific_symbols (optarg, keepglobal_specific_htab,
 				&keepglobal_specific_buffer);
 	  break;
@@ -5445,6 +5451,9 @@ copy_main (int argc, char *argv[])
 	  copy_usage (stderr, 1);
 	}
     }
+
+  if (use_globalize && use_keep_global)
+    fatal(_("--globalize-symbol(s) is incompatible with -G/--keep-global-symbol(s)"));
 
   if (formats_info)
     {

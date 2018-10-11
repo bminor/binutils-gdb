@@ -1,3 +1,14 @@
+2018-10-11  Jordan Rupprecht  <rupprecht@google.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (copy_main): Issue a fata error if the
+	--keep-global-symbol(s) and the --globalize-symbol(s) options are
+	used together.
+	* doc/binutils.texi: Document that the two options are
+	incompatible.
+	* testsuite/binutils-all/copy-5.d: New test.
+	* testsuite/binutils-all/objcopy.exp: Run the new test.
+
 2018-10-10  Helge Deller <deller@gmx.de>
 	    Alan Modra  <amodra@gmail.com>
 

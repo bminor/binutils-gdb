@@ -1129,6 +1129,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--localize-hidden}]
         [@option{-L} @var{symbolname}|@option{--localize-symbol=}@var{symbolname}]
         [@option{--globalize-symbol=}@var{symbolname}]
+        [@option{--globalize-symbols=}@var{filename}]
         [@option{-W} @var{symbolname}|@option{--weaken-symbol=}@var{symbolname}]
         [@option{-w}|@option{--wildcard}]
         [@option{-x}|@option{--discard-all}]
@@ -1169,7 +1170,6 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--strip-unneeded-symbols=}@var{filename}]
         [@option{--keep-global-symbols=}@var{filename}]
         [@option{--localize-symbols=}@var{filename}]
-        [@option{--globalize-symbols=}@var{filename}]
         [@option{--weaken-symbols=}@var{filename}]
         [@option{--add-symbol} @var{name}=[@var{section}:]@var{value}[,@var{flags}]]
         [@option{--alt-machine-code=}@var{index}]
@@ -1380,7 +1380,9 @@ by a relocation.  This option may be given more than once.
 @itemx --keep-global-symbol=@var{symbolname}
 Keep only symbol @var{symbolname} global.  Make all other symbols local
 to the file, so that they are not visible externally.  This option may
-be given more than once.
+be given more than once.  Note: this option cannot be used in
+conjunction with the @option{--globalize-symbol} or
+@option{--globalize-symbols} options.
 
 @item --localize-hidden
 In an ELF object, mark all symbols that have hidden or internal visibility
@@ -1400,7 +1402,8 @@ Make symbol @var{symbolname} weak. This option may be given more than once.
 @item --globalize-symbol=@var{symbolname}
 Give symbol @var{symbolname} global scoping so that it is visible
 outside of the file in which it is defined.  This option may be given
-more than once.
+more than once.  Note: this option cannot be used in conjunction with
+the @option{-G} or @option{--keep-global-symbol} options.
 
 @item -w
 @itemx --wildcard
@@ -1774,7 +1777,9 @@ This option may be given more than once.
 Apply @option{--globalize-symbol} option to each symbol listed in the file
 @var{filename}.  @var{filename} is simply a flat file, with one symbol
 name per line.  Line comments may be introduced by the hash character.
-This option may be given more than once.
+This option may be given more than once.  Note: this option cannot be
+used in conjunction with the @option{-G} or @option{--keep-global-symbol}
+options.
 
 @item --weaken-symbols=@var{filename}
 Apply @option{--weaken-symbol} option to each symbol listed in the file
