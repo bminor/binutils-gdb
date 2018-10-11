@@ -84,7 +84,9 @@ interp::interp (const char *name)
 }
 
 interp::~interp ()
-{}
+{
+  xfree (m_name);
+}
 
 /* An interpreter factory.  Maps an interpreter name to the factory
    function that instantiates an interpreter by that name.  */

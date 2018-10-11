@@ -80,10 +80,12 @@ public:
   }
 
   /* This is the name in "-i=" and "set interpreter".  */
-  const char *m_name;
+private:
+  char *m_name;
 
   /* Interpreters are stored in a linked list, this is the next
      one...  */
+public:
   struct interp *next;
 
   /* Has the init method been run?  */

@@ -1,3 +1,8 @@
+2018-10-11  Gary Benson <gbenson@redhat.com>
+
+	* interps.h (interp::m_name): Make private and mutable.
+	* interps.c (interp::~interp): Free m_name.
+
 2018-10-10  Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Simon Marchi <simark@simark.ca>
 
