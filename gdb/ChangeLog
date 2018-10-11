@@ -1,5 +1,11 @@
 2018-11-16  Alan Hayward  <alan.hayward@arm.com>
 
+	PR gdb/22736:
+	* aarch64-tdep.c (aarch64_push_dummy_call): Remove
+	lang_struct_return code.
+
+2018-11-16  Alan Hayward  <alan.hayward@arm.com>
+
 	* aarch64-tdep.c (aarch64_push_dummy_call): Replace arg with
 	return_method.
 	* alpha-tdep.c (alpha_push_dummy_call): Likewise.

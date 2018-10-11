@@ -1,3 +1,10 @@
+2018-11-16  Alan Hayward  <alan.hayward@arm.com>
+
+	PR gdb/22736:
+	* gdb.cp/infcall-nodebug-lib.c: New test.
+	* gdb.cp/infcall-nodebug-main.c: New test.
+	* gdb.cp/infcall-nodebug.exp: New file.
+
 2018-11-12  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.base/skip.exp: Add standard_testfile.  Add "skip delete"
