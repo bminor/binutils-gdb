@@ -1,3 +1,8 @@
+2018-10-11  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.base/solib-vanish.exp: Fix regexp not to require a POSIX
+	directory prefix on the filename.
+
 2018-10-10  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.gdb/unittest.exp: Update expected message informing that
