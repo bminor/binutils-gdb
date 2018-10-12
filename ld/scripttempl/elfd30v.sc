@@ -52,6 +52,9 @@ cat <<EOF
 OUTPUT_FORMAT("${OUTPUT_FORMAT}")
 OUTPUT_ARCH(${ARCH})
 
+EOF
+
+test -n "${RELOCATING}" && cat <<EOF
 MEMORY
 {
   text ${TEXT_DEF_SECTION} : ORIGIN = ${TEXT_START_ADDR}, LENGTH = ${TEXT_SIZE}
@@ -60,6 +63,9 @@ MEMORY
   eit			   : ORIGIN = ${EIT_START_ADDR},  LENGTH = ${EIT_SIZE}
 }
 
+EOF
+
+cat <<EOF
 SECTIONS
 {
   /* Read-only sections, merged into text segment: */
@@ -71,12 +77,12 @@ SECTIONS
   .gnu.version_d	${RELOCATING-0} : { *(.gnu.version_d) }
   .gnu.version_r	${RELOCATING-0} : { *(.gnu.version_r) }
 
-  .rel.text		${RELOCATING-0} : { *(.rel.text) *(.rel.gnu.linkonce.t*) }
-  .rela.text		${RELOCATING-0} : { *(.rela.text) *(.rela.gnu.linkonce.t*) }
-  .rel.data		${RELOCATING-0} : { *(.rel.data) *(.rel.gnu.linkonce.d*) }
-  .rela.data		${RELOCATING-0} : { *(.rela.data) *(.rela.gnu.linkonce.d*) }
-  .rel.rodata		${RELOCATING-0} : { *(.rel.rodata) *(.rel.gnu.linkonce.r*) }
-  .rela.rodata		${RELOCATING-0} : { *(.rela.rodata) *(.rela.gnu.linkonce.r*) }
+  .rel.text		${RELOCATING-0} : { *(.rel.text${RELOCATING+ .rel.gnu.linkonce.t*}) }
+  .rela.text		${RELOCATING-0} : { *(.rela.text${RELOCATING+ .rela.gnu.linkonce.t*}) }
+  .rel.data		${RELOCATING-0} : { *(.rel.data${RELOCATING+ .rel.gnu.linkonce.d*}) }
+  .rela.data		${RELOCATING-0} : { *(.rela.data${RELOCATING+ .rela.gnu.linkonce.d*}) }
+  .rel.rodata		${RELOCATING-0} : { *(.rel.rodata${RELOCATING+ .rel.gnu.linkonce.r*}) }
+  .rela.rodata		${RELOCATING-0} : { *(.rela.rodata${RELOCATING+ .rela.gnu.linkonce.r*}) }
   .rel.stext		${RELOCATING-0} : { *(.rel.stest) }
   .rela.stext		${RELOCATING-0} : { *(.rela.stest) }
   .rel.etext		${RELOCATING-0} : { *(.rel.etest) }
@@ -120,10 +126,10 @@ SECTIONS
   .text :
   {
     *(.text)
-    *(.gnu.linkonce.t*)
+    ${RELOCATING+*(.gnu.linkonce.t*)
     *(SORT_NONE(.init))
     *(SORT_NONE(.fini))
-    ${RELOCATING+ _etext = . ; }
+    _etext = . ;}
   } ${RELOCATING+ > ${TEXT_MEMORY}}
 
   /* Internal data space */
@@ -146,7 +152,7 @@ SECTIONS
   .data		${RELOCATING-0} :
   {
     *(.data)
-    *(.gnu.linkonce.d*)
+    ${RELOCATING+*(.gnu.linkonce.d*)}
     ${CONSTRUCTING+CONSTRUCTORS}
     ${RELOCATING+ _edata = . ; }
   } ${RELOCATING+ > ${DATA_MEMORY}}
@@ -180,7 +186,7 @@ SECTIONS
   {
     ${RELOCATING+ PROVIDE (__bss_start = .) ; }
     *(.bss)
-    *(COMMON)
+    ${RELOCATING+*(COMMON)}
     ${RELOCATING+ PROVIDE (__bss_end = .) ; }
     ${RELOCATING+ _end = . ;  }
   } ${RELOCATING+ > ${DATA_MEMORY}}
@@ -207,10 +213,9 @@ EOF
 . $srcdir/scripttempl/DWARF.sc
 
 cat <<EOF
-  PROVIDE (__stack = ${STACK_START_ADDR});
+  ${RELOCATING+PROVIDE (__stack = ${STACK_START_ADDR});}
 }
 EOF
-
 
 
 

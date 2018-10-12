@@ -1,3 +1,53 @@
+2018-10-13  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (eelf32btsmip_fbsd.c, eelf32btsmipn32_fbsd.c),
+	(eelf32epiphany.c, eelf32epiphany_4x4.c, eelf32ltsmip_fbsd.c),
+	(eelf32ltsmipn32_fbsd.c, eelf32xc16x.c, eelf32xc16xl.c),
+	(eelf32xc16xs.c, emcorepe.c, enios2elf.c, enios2linux.c),
+	(eelf64btsmip_fbsd.c, eelf64ltsmip_fbsd.c): Correct dependencies.
+	* Makefile.in: Regenerate.
+	* emulparams/aarch64cloudabi.sh, * emulparams/aarch64fbsd.sh,
+	* emulparams/aarch64linux.sh, * emulparams/aarch64linux32.sh,
+	* emulparams/arc-nps.sh, * emulparams/elf32_spu.sh,
+	* emulparams/elf32_tic6x_le.sh, * emulparams/elf32bmip.sh,
+	* emulparams/elf32btsmipn32.sh, * emulparams/elf32lr5900n32.sh,
+	* emulparams/elf32mep.sh, * emulparams/elf32metag.sh,
+	* emulparams/elf64btsmip.sh, * emulparams/shelf_vxworks.sh,
+	* emulparams/shlelf_fd.sh, * scripttempl/DWARF.sc,
+	* scripttempl/alpha.sc, * scripttempl/alphavms.sc,
+	* scripttempl/arclinux.sc, * scripttempl/armbpabi.sc,
+	* scripttempl/avr.sc, * scripttempl/dlx.sc, * scripttempl/elf.sc,
+	* scripttempl/elf32cr16.sc, * scripttempl/elf32cr16c.sc,
+	* scripttempl/elf32crx.sc, * scripttempl/elf32msp430.sc,
+	* scripttempl/elf32msp430_3.sc, * scripttempl/elf32xc16x.sc,
+	* scripttempl/elf32xc16xl.sc, * scripttempl/elf32xc16xs.sc,
+	* scripttempl/elf64hppa.sc, * scripttempl/elf_chaos.sc,
+	* scripttempl/elfarc.sc, * scripttempl/elfarcv2.sc,
+	* scripttempl/elfd10v.sc, * scripttempl/elfd30v.sc,
+	* scripttempl/elfm68hc11.sc, * scripttempl/elfm68hc12.sc,
+	* scripttempl/elfm9s12z.sc, * scripttempl/elfmicroblaze.sc,
+	* scripttempl/elfxgate.sc, * scripttempl/elfxtensa.sc,
+	* scripttempl/epiphany_4x4.sc, * scripttempl/ft32.sc,
+	* scripttempl/hppaelf.sc, * scripttempl/ia64vms.sc,
+	* scripttempl/ip2k.sc, * scripttempl/iq2000.sc,
+	* scripttempl/mep.sc, * scripttempl/mmo.sc,
+	* scripttempl/nds32elf.sc, * scripttempl/pru.sc,
+	* scripttempl/sh.sc, * scripttempl/v850.sc,
+	* scripttempl/v850_rh850.sc, * scripttempl/visium.sc,
+	* scripttempl/xstormy16.sc: Condition various parts of scripts on
+	${RELOCATABLE} in order to prevent ld -r merging sections or
+	defining symbols.  Remove MEMORY and VERSION definitions from
+	ld -r scripts too.
+	* testsuite/ld-elf/group2.d, * testsuite/ld-elf/group4.d,
+	* testsuite/ld-elf/group5.d, * testsuite/ld-elf/group6.d,
+	* testsuite/ld-elf/group7.d, * testsuite/ld-elf/group8a.d,
+	* testsuite/ld-elf/group8b.d, * testsuite/ld-elf/group9a.d,
+	* testsuite/ld-elf/group9b.d, * testsuite/ld-elf/pr17550a.d,
+	* testsuite/ld-elf/pr17550b.d,
+	* testsuite/ld-elf/pr17550d.d: Don't xfail cr16 and crx.
+	* testsuite/ld-elf/init-fini-arrays.d,
+	* testsuite/ld-elf/pr22677.d: Likewise, and dont' xfail mep.
+
 2018-10-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23428

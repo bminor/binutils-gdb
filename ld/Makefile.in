@@ -2594,6 +2594,7 @@ eelf32btsmip.c: $(srcdir)/emulparams/elf32btsmip.sh \
   $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf32btsmip_fbsd.c: $(srcdir)/emulparams/elf32btsmip_fbsd.sh \
+  ${srcdir}/emulparams/elf32btsmip.sh ${srcdir}/emulparams/elf_fbsd.sh \
   $(srcdir)/emulparams/elf32bmip.sh $(ELF_DEPS) \
   $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
@@ -2602,6 +2603,8 @@ eelf32btsmipn32.c: $(srcdir)/emulparams/elf32btsmipn32.sh \
   $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf32btsmipn32_fbsd.c: $(srcdir)/emulparams/elf32btsmipn32_fbsd.sh \
+  ${srcdir}/emulparams/elf32ltsmipn32.sh ${srcdir}/emulparams/elf_fbsd.sh \
+  ${srcdir}/emulparams/elf32btsmipn32.sh \
   $(srcdir)/emulparams/elf32bmipn32-defs.sh $(ELF_DEPS) \
   $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
@@ -2646,10 +2649,9 @@ eelf32lr5900n32.c: $(srcdir)/emulparams/elf32lr5900n32.sh \
   ${GEN_DEPENDS}
 
 eelf32epiphany.c: $(srcdir)/emulparams/elf32epiphany.sh \
-  $(ELF_DEPS) ${GEN_DEPENDS}
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf32epiphany_4x4.c: $(srcdir)/emulparams/elf32epiphany_4x4.sh \
-  $(srcdir)/emultempl/elf32.em \
   $(ELF_DEPS) $(srcdir)/scripttempl/epiphany_4x4.sc ${GEN_DEPENDS}
 
 eelf32fr30.c: $(srcdir)/emulparams/elf32fr30.sh \
@@ -2663,7 +2665,7 @@ eelf32frvfd.c: $(srcdir)/emulparams/elf32frvfd.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf32ft32.c: $(srcdir)/emulparams/elf32ft32.sh \
-  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/ft32.sc ${GEN_DEPENDS}
 
 eelf32ip2k.c: $(srcdir)/emulparams/elf32ip2k.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
@@ -2743,6 +2745,7 @@ eelf32ltsmip.c: $(srcdir)/emulparams/elf32ltsmip.sh \
   ${GEN_DEPENDS}
 
 eelf32ltsmip_fbsd.c: $(srcdir)/emulparams/elf32ltsmip_fbsd.sh \
+  ${srcdir}/emulparams/elf32ltsmip.sh ${srcdir}/emulparams/elf_fbsd.sh \
   $(srcdir)/emulparams/elf32btsmip.sh $(srcdir)/emulparams/elf32bmip.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc \
   ${GEN_DEPENDS}
@@ -2753,6 +2756,7 @@ eelf32ltsmipn32.c: $(srcdir)/emulparams/elf32ltsmipn32.sh \
   $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf32ltsmipn32_fbsd.c: $(srcdir)/emulparams/elf32ltsmipn32_fbsd.sh \
+  ${srcdir}/emulparams/elf32ltsmipn32.sh ${srcdir}/emulparams/elf_fbsd.sh \
   $(srcdir)/emulparams/elf32btsmipn32.sh \
   $(srcdir)/emulparams/elf32bmipn32-defs.sh $(ELF_DEPS) \
   $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
@@ -2867,15 +2871,15 @@ eelf32visium.c: $(srcdir)/emulparams/elf32visium.sh \
 
 eelf32xc16x.c: $(srcdir)/emulparams/elf32xc16x.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/needrelax.em \
-  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/scripttempl/elf32xc16x.sc ${GEN_DEPENDS}
 
 eelf32xc16xl.c: $(srcdir)/emulparams/elf32xc16xl.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/needrelax.em \
-  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/scripttempl/elf32xc16xl.sc ${GEN_DEPENDS}
 
 eelf32xc16xs.c: $(srcdir)/emulparams/elf32xc16xs.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/needrelax.em \
-  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/scripttempl/elf32xc16xs.sc ${GEN_DEPENDS}
 
 eelf32xstormy16.c: $(srcdir)/emulparams/elf32xstormy16.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/needrelax.em \
@@ -3053,7 +3057,7 @@ em9s12zelf.c: $(srcdir)/emulparams/m9s12zelf.sh \
   $(srcdir)/scripttempl/elfm9s12z.sc ${GEN_DEPENDS}
 
 emcorepe.c: $(srcdir)/emulparams/mcorepe.sh \
-  $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/pe.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/mcorepe.sc ${GEN_DEPENDS}
 
 emn10200.c: $(srcdir)/emulparams/mn10200.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
@@ -3096,11 +3100,11 @@ ends32belf_linux.c: $(srcdir)/emulparams/nds32belf_linux.sh \
 
 enios2elf.c: $(srcdir)/emulparams/nios2elf.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/nios2elf.em \
-  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/scripttempl/elf.sc $(srcdir)/scripttempl/DWARF.sc ${GEN_DEPENDS}
 
 enios2linux.c: $(srcdir)/emulparams/nios2linux.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/nios2elf.em \
-  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/scripttempl/elf.sc $(srcdir)/scripttempl/DWARF.sc ${GEN_DEPENDS}
 
 ens32knbsd.c:	$(srcdir)/emulparams/ns32knbsd.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/emultempl/netbsd.em \
@@ -3362,6 +3366,7 @@ eelf64btsmip.c: $(srcdir)/emulparams/elf64btsmip.sh \
   $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf64btsmip_fbsd.c: $(srcdir)/emulparams/elf64btsmip_fbsd.sh \
+  ${srcdir}/emulparams/elf64btsmip.sh ${srcdir}/emulparams/elf_fbsd.sh \
   $(srcdir)/emulparams/elf64bmip-defs.sh \
   $(srcdir)/emulparams/elf32bmipn32-defs.sh $(ELF_DEPS) \
   $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
@@ -3399,7 +3404,8 @@ eelf64ltsmip.c: $(srcdir)/emulparams/elf64ltsmip.sh \
   $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf64ltsmip_fbsd.c: $(srcdir)/emulparams/elf64ltsmip_fbsd.sh \
-  $(srcdir)/emulparams/elf64btsmip_fbsd.sh $(srcdir)/emulparams/elf64bmip-defs.sh \
+  ${srcdir}/emulparams/elf64ltsmip.sh ${srcdir}/emulparams/elf_fbsd.sh \
+  $(srcdir)/emulparams/elf64btsmip.sh $(srcdir)/emulparams/elf64bmip-defs.sh \
   $(srcdir)/emulparams/elf32bmipn32-defs.sh $(ELF_DEPS) \
   $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 

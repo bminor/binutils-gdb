@@ -58,9 +58,9 @@ OTHER_SDATA_SECTIONS="
 TEXT_START_SYMBOLS="${CREATE_SHLIB+PROVIDE (}_ftext = .${CREATE_SHLIB+)};"
 DATA_START_SYMBOLS="${CREATE_SHLIB+PROVIDE (}_fdata = .${CREATE_SHLIB+)};"
 OTHER_BSS_SYMBOLS="${CREATE_SHLIB+PROVIDE (}_fbss = .${CREATE_SHLIB+)};"
-OTHER_SECTIONS='
-  .gptab.sdata : { *(.gptab.data) *(.gptab.sdata) }
-  .gptab.sbss : { *(.gptab.bss) *(.gptab.sbss) }
+OTHER_SECTIONS="
+  .gptab.sdata : {${RELOCATING+ *(.gptab.data)} *(.gptab.sdata) }
+  .gptab.sbss : {${RELOCATING+ *(.gptab.bss)} *(.gptab.sbss) }
   .mdebug.abi32 0 : { KEEP(*(.mdebug.abi32)) }
   .mdebug.abiN32 0 : { KEEP(*(.mdebug.abiN32)) }
   .mdebug.abi64 0 : { KEEP(*(.mdebug.abi64)) }
@@ -69,7 +69,7 @@ OTHER_SECTIONS='
   .mdebug.eabi64 0 : { KEEP(*(.mdebug.eabi64)) }
   .gcc_compiled_long32 0 : { KEEP(*(.gcc_compiled_long32)) }
   .gcc_compiled_long64 0 : { KEEP(*(.gcc_compiled_long64)) }
-'
+"
 ARCH=mips
 MACHINE=
 TEMPLATE_NAME=elf32

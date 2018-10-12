@@ -15,8 +15,8 @@ case ${target} in
 	TEXT_START_ADDR=0x0
 	GOT="
 .got ${RELOCATING-0} : {
-  *(.dsbt)
-  *(.got.plt) *(.igot.plt) *(.got) *(.igot)
+  ${RELOCATING+*(.dsbt)
+  *(.got.plt) *(.igot.plt) }*(.got)${RELOCATING+ *(.igot)}
 }"
 	;;
 esac

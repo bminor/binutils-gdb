@@ -14,6 +14,9 @@ cat <<EOF
 OUTPUT_FORMAT("${OUTPUT_FORMAT}","${OUTPUT_FORMAT}","${OUTPUT_FORMAT}")
 OUTPUT_ARCH(${ARCH})
 
+EOF
+
+test -n "${RELOCATING}" && cat <<EOF
 MEMORY
 {
   text   (rx)   : ORIGIN = $ROM_START,  LENGTH = $ROM_SIZE
@@ -21,6 +24,9 @@ MEMORY
   vectors (rw)  : ORIGIN = 0xffe0,      LENGTH = 0x20
 }
 
+EOF
+
+cat <<EOF
 SECTIONS
 {
   /* Read-only sections, merged into text segment.  */
@@ -86,7 +92,7 @@ SECTIONS
   /* Internal text space.  */
   .text :
   {
-    ${RELOCATING+. = ALIGN(2);}
+    ${RELOCATING+. = ALIGN(2);
     *(SORT_NONE(.init))
     *(SORT_NONE(.init0))  /* Start here after reset.  */
     *(SORT_NONE(.init1))
@@ -97,7 +103,7 @@ SECTIONS
     *(SORT_NONE(.init6)) /* C++ constructors.  */
     *(SORT_NONE(.init7))
     *(SORT_NONE(.init8))
-    *(SORT_NONE(.init9))  /* Call main().  */
+    *(SORT_NONE(.init9))  /* Call main().  */}
 
     ${CONSTRUCTING+ __ctors_start = . ; }
     ${CONSTRUCTING+ *(.ctors) }
@@ -108,12 +114,12 @@ SECTIONS
 
     ${RELOCATING+. = ALIGN(2);}
     *(.text)
-    ${RELOCATING+. = ALIGN(2);}
+    ${RELOCATING+. = ALIGN(2);
     *(.text.*)
-    ${RELOCATING+. = ALIGN(2);}
+    . = ALIGN(2);
     *(.text:*)
 
-    ${RELOCATING+. = ALIGN(2);}
+    . = ALIGN(2);
     *(SORT_NONE(.fini9))
     *(SORT_NONE(.fini8))
     *(SORT_NONE(.fini7))
@@ -126,14 +132,14 @@ SECTIONS
     *(SORT_NONE(.fini0))  /* Infinite loop after program termination.  */
     *(SORT_NONE(.fini))
 
-    ${RELOCATING+ _etext = . ; }
+    _etext = . ;}
   } ${RELOCATING+ > text}
 
   .rodata :
   {
-    *(.rodata .rodata.* .gnu.linkonce.r.*)
-    *(.const)
-    *(.const:*)
+    *(.rodata${RELOCATING+ .rodata.* .gnu.linkonce.r.*})
+    ${RELOCATING+*(.const)}
+    ${RELOCATING+*(.const:*)}
   } ${RELOCATING+ > text}
 
   .data ${RELOCATING-0} :
@@ -141,11 +147,11 @@ SECTIONS
     ${RELOCATING+ PROVIDE (__data_start = .) ; }
     ${RELOCATING+. = ALIGN(2);}
     *(.data)
-    *(.data.*)
-    *(.gnu.linkonce.d*)
+    ${RELOCATING+*(.data.*)}
+    ${RELOCATING+*(.gnu.linkonce.d*)}
     ${RELOCATING+. = ALIGN(2);}
     ${RELOCATING+ _edata = . ; }
-  } ${RELOCATING+ > data ${RELOCATING+AT> text}}
+  } ${RELOCATING+ > data AT> text}
 
   __romdatastart = LOADADDR(.data);
   __romdatacopysize = SIZEOF(.data);
@@ -181,7 +187,7 @@ SECTIONS
   .vectors ${RELOCATING-0}:
   {
     ${RELOCATING+ PROVIDE (__vectors_start = .) ; }
-    *(.vectors*)
+    *(.vectors${RELOCATING+*})
     ${RELOCATING+ _vectors_end = . ; }
   } ${RELOCATING+ > vectors}
 
@@ -205,11 +211,14 @@ EOF
 
 . $srcdir/scripttempl/DWARF.sc
 
-cat <<EOF
+test -n "${RELOCATING}" && cat <<EOF
   PROVIDE (__stack = ${STACK}) ;
   PROVIDE (__data_start_rom = _etext) ;
   PROVIDE (__data_end_rom   = _etext + SIZEOF (.data)) ;
   PROVIDE (__noinit_start_rom = _etext + SIZEOF (.data)) ;
   PROVIDE (__noinit_end_rom = _etext + SIZEOF (.data) + SIZEOF (.noinit)) ;
+EOF
+
+cat <<EOF
 }
 EOF

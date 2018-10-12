@@ -32,16 +32,16 @@ SECTIONS
 {
   ${RELOCATING+. = ${TEXT_START_ADDR};}
   .text : {
-    ${RELOCATING+ _ftext = . };
-    ${RELOCATING+ __istart = . };
-    ${RELOCATING+ *(.init) }
+    ${RELOCATING+ _ftext = .;}
+    ${RELOCATING+ __istart = .;}
+    ${RELOCATING+ *(.init)}
     ${RELOCATING+ LONG (0x6bfa8001)}
-    ${RELOCATING+ eprol  =  .};
+    ${RELOCATING+ eprol = .;}
     *(.text)
-    ${RELOCATING+ __fstart = . };
+    ${RELOCATING+ __fstart = .;}
     ${RELOCATING+ *(.fini)}
     ${RELOCATING+ LONG (0x6bfa8001)}
-    ${RELOCATING+ _etext  =  .};
+    ${RELOCATING+ _etext = .;}
   }
   .rdata : {
     *(.rdata)
@@ -76,11 +76,11 @@ SECTIONS
   ${RELOCATING+ _FBSS = .;}
   .sbss : {
     *(.sbss)
-    *(.scommon)
+    ${RELOCATING+*(.scommon)}
   }
   .bss : {
     *(.bss)
-    *(COMMON)
+    ${RELOCATING+*(COMMON)}
   }
   ${RELOCATING+ _end = .;}
 }

@@ -13,7 +13,10 @@ cat <<EOF
 
 OUTPUT_FORMAT("${OUTPUT_FORMAT}")
 OUTPUT_ARCH(${ARCH})
-${RELOCATING+ENTRY ("_start")}
+EOF
+
+test -n "${RELOCATING}" && cat <<EOF
+ENTRY ("_start")
 MEMORY
 {
 	vectarea : o =0xc00000, l = 0x0300
@@ -26,6 +29,10 @@ MEMORY
 
 	ldata	: o =0x4000 ,l = 0x0200
 }
+
+EOF
+
+cat <<EOF
 SECTIONS
 {
 /*.vects :
@@ -39,15 +46,15 @@ SECTIONS
 
 .text :
 	{
-	  *(.rodata)
-	  *(.text.*)
+	  ${RELOCATING+*(.rodata)}
+	  ${RELOCATING+*(.text.*)}
 	  *(.text)
 	  ${RELOCATING+ _etext = . ; }
 	} ${RELOCATING+ > introm}
 .data :
 	{
 	  *(.data)
-	  *(.data.*)
+	  ${RELOCATING+*(.data.*)}
 
 	  ${RELOCATING+ _edata = . ; }
 	} ${RELOCATING+ > dram}
@@ -56,7 +63,7 @@ SECTIONS
 	{
 	  ${RELOCATING+ _bss_start = . ;}
 	  *(.bss)
-	  *(COMMON)
+	  ${RELOCATING+*(COMMON)}
 	  ${RELOCATING+ _end = . ;  }
 	} ${RELOCATING+ > dram}
 

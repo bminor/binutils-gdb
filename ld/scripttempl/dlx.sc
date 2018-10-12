@@ -21,7 +21,7 @@ SECTIONS
   ${RELOCATING+. = ${TEXT_START_ADDR};}
   .text :
   {
-    CREATE_OBJECT_SYMBOLS
+    ${RELOCATING+CREATE_OBJECT_SYMBOLS}
     *(.text)
     ${RELOCATING+etext = ${DATA_ALIGNMENT};}
   }
@@ -35,8 +35,8 @@ SECTIONS
   .bss :
   {
    *(.bss)
-   *(COMMON)
-   ${RELOCATING+end = . };
+   ${RELOCATING+*(COMMON)}
+   ${RELOCATING+end = .;}
   }
 }
 EOF

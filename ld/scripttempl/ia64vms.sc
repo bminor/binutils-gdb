@@ -7,6 +7,10 @@
 # are permitted in any medium without royalty provided the copyright
 # notice and this notice are preserved.
 
+# Using an empty script for ld -r is better than mashing together
+# sections.  This hack likely leaves ld -Ur broken.
+test -n "${RELOCATING}" || exit 0
+
 PAGESIZE=0x10000
 BLOCKSIZE=0x200
 

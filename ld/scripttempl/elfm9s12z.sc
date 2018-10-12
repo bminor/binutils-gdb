@@ -173,7 +173,7 @@ ${RELOCATING+${LIB_SEARCH_DIRS}}
 ${RELOCATING+${EXECUTABLE_SYMBOLS}}
 ${RELOCATING+${MEMORY_DEF}}
 
-PROVIDE (_start = $[$ROM_TOP - $ROM_SIZE + 1]);
+${RELOCATING+PROVIDE (_start = $[$ROM_TOP - $ROM_SIZE + 1]);}
 SECTIONS
 {
   .hash        ${RELOCATING-0} : { *(.hash)		}
@@ -403,12 +403,11 @@ SECTIONS
     ${RELOCATING+*(.sbss)}
     ${RELOCATING+*(.common)}
     ${RELOCATING+*(.scommon)}
-
-    *(.dynbss)
+    ${RELOCATING+*(.dynbss)}
     *(.bss)
     ${RELOCATING+*(.bss.*)}
     ${RELOCATING+*(.gnu.linkonce.b.*)}
-    *(COMMON)
+    ${RELOCATING+*(COMMON)}
     ${RELOCATING+PROVIDE (_end = .);}
   } ${RELOCATING+ > ${DATA_MEMORY}}
   ${RELOCATING+__bss_size = SIZEOF(.bss);}
@@ -417,7 +416,7 @@ SECTIONS
   .eeprom ${RELOCATING-0} :
   {
     *(.eeprom)
-    *(.eeprom.*)
+    ${RELOCATING+*(.eeprom.*)}
   } ${RELOCATING+ > ${EEPROM_MEMORY}}
 
   ${RELOCATING+${VECTORS}}

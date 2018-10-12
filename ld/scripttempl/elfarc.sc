@@ -84,7 +84,7 @@ if test -n "${COMMONPAGESIZE}"; then
 fi
 INTERP=".interp       ${RELOCATING-0} : { *(.interp) }"
 PLT=".plt          ${RELOCATING-0} : { *(.plt) }"
-test -z "$GOT" && GOT=".got          ${RELOCATING-0} : { *(.got.plt) *(.got) }"
+test -z "$GOT" && GOT=".got          ${RELOCATING-0} : {${RELOCATING+ *(.got.plt)} *(.got) }"
 DYNAMIC=".dynamic      ${RELOCATING-0} : { *(.dynamic) }"
 RODATA=".rodata       ${RELOCATING-0} : { *(.rodata${RELOCATING+ .rodata.* .gnu.linkonce.r.*}) }"
 STACKNOTE="/DISCARD/ : { *(.note.GNU-stack) }"
@@ -93,9 +93,9 @@ if test -z "${NO_SMALL_DATA}"; then
   {
     ${RELOCATING+PROVIDE (__sbss_start = .);}
     ${RELOCATING+PROVIDE (___sbss_start = .);}
-    *(.dynsbss)
+    ${RELOCATING+*(.dynsbss)}
     *(.sbss${RELOCATING+ .sbss.* .gnu.linkonce.sb.*})
-    *(.scommon)
+    ${RELOCATING+*(.scommon)}
     ${RELOCATING+PROVIDE (__sbss_end = .);}
     ${RELOCATING+PROVIDE (___sbss_end = .);}
   }"
@@ -265,8 +265,8 @@ cat <<EOF
   .jlitab       ${RELOCATING-0} :
   {
     ${RELOCATING+${JLI_START_TABLE}}
-    jlitab*.o(.jlitab*)
-    *(.jlitab*)
+    ${RELOCATING+jlitab*.o(.jlitab*)}
+    *(.jlitab${RELOCATING+*})
   } =${NOP-0}
   .text         ${RELOCATING-0} :
   {
@@ -295,7 +295,7 @@ cat <<EOF
   ${CREATE_SHLIB-${SBSS2}}
   ${OTHER_READONLY_SECTIONS}
   .eh_frame_hdr : { *(.eh_frame_hdr) }
-  .gcc_except_table ${RELOCATING-0} : ONLY_IF_RO { *(.gcc_except_table .gcc_except_table.*) }
+  .gcc_except_table ${RELOCATING-0} : ONLY_IF_RO { *(.gcc_except_table${RELOCATING+ .gcc_except_table.*}) }
 
   /* Adjust the address for the data segment.  We want to adjust up to
      the same address within the page on the next page up.  */
@@ -304,7 +304,7 @@ cat <<EOF
   ${CREATE_PIE+${RELOCATING+. = ${SHLIB_DATA_ADDR-${DATA_SEGMENT_ALIGN}};}}
 
   /* Exception handling  */
-  .gcc_except_table ${RELOCATING-0} : ONLY_IF_RW { *(.gcc_except_table .gcc_except_table.*) }
+  .gcc_except_table ${RELOCATING-0} : ONLY_IF_RW { *(.gcc_except_table${RELOCATING+ .gcc_except_table.*}) }
 
   /* Ensure the __preinit_array_start label is properly aligned.  We
      could instead move the label definition inside the section, but
@@ -360,13 +360,13 @@ cat <<EOF
   ${BSS_PLT+${PLT}}
   .bss          ${RELOCATING-0} :
   {
-   *(.dynbss)
-   *(.bss${RELOCATING+ .bss.* .gnu.linkonce.b.*})
-   *(COMMON)
-   /* Align here to ensure that the .bss section occupies space up to
-      _end.  Align after .bss to ensure correct alignment even if the
-      .bss section disappears because there are no input sections.  */
-   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
+    ${RELOCATING+*(.dynbss)}
+    *(.bss${RELOCATING+ .bss.* .gnu.linkonce.b.*})
+    ${RELOCATING+*(COMMON)
+    /* Align here to ensure that the .bss section occupies space up to
+       _end.  Align after .bss to ensure correct alignment even if the
+       .bss section disappears because there are no input sections.  */
+    . = ALIGN(${ALIGNMENT});}
   }
   ${OTHER_BSS_SECTIONS}
   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
@@ -374,27 +374,31 @@ cat <<EOF
   ${RELOCATING+${OTHER_BSS_END_SYMBOLS}}
   ${RELOCATING+PROVIDE (end = .);}
   ${RELOCATING+${DATA_SEGMENT_END}}
+EOF
 
+test -n "${RELOCATING}" && cat <<EOF
   /* We want to be able to set a default stack / heap size in a dejagnu
      board description file, but override it for selected test cases.
      The options appear in the wrong order to do this with a single symbol -
      ldflags comes after flags injected with per-file stanzas, and thus
      the setting from ldflags prevails.  */
-  .heap ${RELOCATING-0} :
+  .heap :
   {
-	${RELOCATING+ __start_heap = . ; }
-	${RELOCATING+ . = . + (DEFINED(__HEAP_SIZE) ? __HEAP_SIZE : (DEFINED(__DEFAULT_HEAP_SIZE) ? __DEFAULT_HEAP_SIZE : 20k)) ; }
-	${RELOCATING+ __end_heap = . ; }
+	__start_heap = . ;
+	. = . + (DEFINED(__HEAP_SIZE) ? __HEAP_SIZE : (DEFINED(__DEFAULT_HEAP_SIZE) ? __DEFAULT_HEAP_SIZE : 20k)) ;
+	__end_heap = . ;
   }
 
-  ${RELOCATING+. = ALIGN(0x8);}
-  .stack ${RELOCATING-0} :
+  . = ALIGN(0x8);
+  .stack :
   {
-	${RELOCATING+ __stack = . ; }
-	${RELOCATING+ . = . + (DEFINED(__STACK_SIZE) ? __STACK_SIZE : (DEFINED(__DEFAULT_STACK_SIZE) ? __DEFAULT_STACK_SIZE : 64k)) ; }
-	${RELOCATING+ __stack_top = . ; }
+	__stack = . ;
+	. = . + (DEFINED(__STACK_SIZE) ? __STACK_SIZE : (DEFINED(__DEFAULT_STACK_SIZE) ? __DEFAULT_STACK_SIZE : 64k)) ;
+	__stack_top = . ;
   }
+EOF
 
+cat <<EOF
   /* Stabs debugging sections.  */
   .stab          0 : { *(.stab) }
   .stabstr       0 : { *(.stabstr) }
@@ -422,7 +426,7 @@ cat <<EOF
   .debug_pubnames 0 : { *(.debug_pubnames) }
 
   /* DWARF 2 */
-  .debug_info     0 : { *(.debug_info .gnu.linkonce.wi.*) }
+  .debug_info     0 : { *(.debug_info${RELOCATING+ .gnu.linkonce.wi.*}) }
   .debug_abbrev   0 : { *(.debug_abbrev) }
   .debug_line     0 : { *(.debug_line) }
   .debug_frame    0 : { *(.debug_frame) }

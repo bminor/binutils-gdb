@@ -139,9 +139,9 @@ cat <<EOF
     *(.MMIX.reg_contents);
   }
 
-  /* By default, put the high end of the stack where the register stack
+  ${RELOCATING+/* By default, put the high end of the stack where the register stack
      begins.  They grow in opposite directions.  */
-  PROVIDE (__Stack_start = 0x6000000000000000);
+  PROVIDE (__Stack_start = 0x6000000000000000);}
 
   /* Unfortunately, stabs are not mappable from ELF to MMO.
      It can probably be fixed with some amount of work.  */

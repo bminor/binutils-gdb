@@ -12,7 +12,7 @@ ENTRY=__start
 NOP=0xa0fffffe
 EXTRA_EM_FILE=metagelf
 USER_LABEL_PREFIX=_
-OTHER_SECTIONS="
+test -n "${RELOCATING}" && OTHER_SECTIONS="
   .core_text 0x80000000	:
   {
     *(.core_text)

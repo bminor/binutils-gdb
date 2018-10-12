@@ -238,7 +238,7 @@ cat <<EOF
 EOF
 fi
 cat <<EOF
-  . = ALIGN(0x1000);
+  ${RELOCATING+. = ALIGN(0x1000);}
   .rel.plt      ${RELOCATING-0} : { *(.rel.plt) }
   .rela.plt     ${RELOCATING-0} : { *(.rela.plt) }
   ${OTHER_PLT_RELOC_SECTIONS}
@@ -260,36 +260,36 @@ cat <<EOF
   ${RELOCATING+PROVIDE (__etext = .);}
   ${RELOCATING+PROVIDE (_etext = .);}
   ${RELOCATING+PROVIDE (etext = .);}
-  . = ALIGN(0x1000);
+  ${RELOCATING+. = ALIGN(0x1000);}
   ${CREATE_SHLIB-${SDATA2}}
   ${CREATE_SHLIB-${SBSS2}}
   ${OTHER_READONLY_SECTIONS}
   .eh_frame_hdr : { *(.eh_frame_hdr) }
 
-  . = ALIGN(0x1000);
+  ${RELOCATING+. = ALIGN(0x1000);}
   .data         ${RELOCATING-0} :
   {
-    *(.rodata .rodata.*)
+    ${RELOCATING+*(.rodata .rodata.*)
     *(.rodata1)
     *(.gnu.linkonce.r.*)
-    ${RELOCATING+${DATA_START_SYMBOLS}}
+    ${DATA_START_SYMBOLS}}
     *(.data${RELOCATING+ .data.* .gnu.linkonce.d.*})
     ${CONSTRUCTING+SORT(CONSTRUCTORS)}
-    KEEP (*(.eh_frame))
+    ${RELOCATING+KEEP (*(.eh_frame))
     *(.gcc_except_table)
     ${CTOR}
     ${DTOR}
-    KEEP (*(.jcr))
+    KEEP (*(.jcr))}
   }
   .data1        ${RELOCATING-0} : { *(.data1) }
-  . = ALIGN(0x1000);
+  ${RELOCATING+. = ALIGN(0x1000);}
   .gcc_except_table ${RELOCATING-0} : { *(.gcc_except_table) }
   ${WRITABLE_RODATA+${RODATA}}
   ${OTHER_READWRITE_SECTIONS}
   ${TEXT_DYNAMIC-${DYNAMIC}}
   ${DATA_PLT+${PLT}}
   ${RELOCATING+${OTHER_GOT_SYMBOLS}}
-  .got          ${RELOCATING-0} : { *(.got.plt) *(.got) }
+  .got          ${RELOCATING-0} : {${RELOCATING+ *(.got.plt)} *(.got) }
   ${OTHER_GOT_SECTIONS}
   ${CREATE_SHLIB+${SDATA2}}
   ${CREATE_SHLIB+${SBSS2}}
@@ -301,16 +301,16 @@ cat <<EOF
   ${RELOCATING+${OTHER_BSS_SYMBOLS}}
   ${SBSS}
   ${BSS_PLT+${PLT}}
-  . = ALIGN(0x1000);
+  ${RELOCATING+. = ALIGN(0x1000);}
   .bss          ${RELOCATING-0} :
   {
-   *(.dynbss)
+   ${RELOCATING+*(.dynbss)}
    *(.bss${RELOCATING+ .bss.* .gnu.linkonce.b.*})
-   *(COMMON)
+   ${RELOCATING+*(COMMON)
    /* Align here to ensure that the .bss section occupies space up to
       _end.  Align after .bss to ensure correct alignment even if the
       .bss section disappears because there are no input sections.  */
-   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
+   . = ALIGN(${ALIGNMENT});}
   }
   ${RELOCATING+${OTHER_BSS_END_SYMBOLS}}
   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
@@ -320,7 +320,6 @@ cat <<EOF
   ${STACK_ADDR+${STACK}}
 
   /* Stabs debugging sections.  */
-  . = ALIGN(0x1000);
   .stab          0 : { *(.stab) }
   .stabstr       0 : { *(.stabstr) }
   .stab.excl     0 : { *(.stab.excl) }
@@ -328,7 +327,6 @@ cat <<EOF
   .stab.index    0 : { *(.stab.index) }
   .stab.indexstr 0 : { *(.stab.indexstr) }
 
-  . = ALIGN(0x1000);
   .comment       0 : { *(.comment) }
 
 EOF

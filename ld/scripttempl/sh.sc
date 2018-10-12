@@ -12,7 +12,7 @@ TORS=".tors :
     ___dtors = . ;
     *(.dtors)
     ___dtors_end = . ;
-  } > ram"
+  }${RELOCATING+ > ram}"
 
 cat <<EOF
 /* Copyright (C) 2014-2018 Free Software Foundation, Inc.
@@ -24,11 +24,17 @@ cat <<EOF
 OUTPUT_FORMAT("${OUTPUT_FORMAT}")
 OUTPUT_ARCH(${ARCH})
 
+EOF
+
+test -n "${RELOCATING}" && cat <<EOF
 MEMORY
 {
   ram : o = 0x1000, l = 512k
 }
 
+EOF
+
+cat <<EOF
 SECTIONS
 {
   .text :

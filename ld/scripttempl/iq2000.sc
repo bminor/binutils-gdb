@@ -333,9 +333,9 @@ cat <<EOF
   {
     ${RELOCATING+PROVIDE (__eh_frame_begin = .);}
     *(.eh_frame)
-    LONG (0);
+    ${RELOCATING+LONG (0);}
     ${RELOCATING+PROVIDE (__eh_frame_end = .);}
-  } ${RELOCATING+}
+  }
   .gcc_except_table : { *(.gcc_except_table) }
   ${INITIAL_READONLY_SECTIONS}
   .hash        ${RELOCATING-0} : { *(.hash)		}
@@ -356,7 +356,7 @@ cat <<EOF
   .jcr : { KEEP (*(.jcr)) }
   ${DATA_PLT+${PLT}}
   ${RELOCATING+${OTHER_GOT_SYMBOLS}}
-  .got		${RELOCATING-0} : { *(.got.plt) *(.got) }
+  .got		${RELOCATING-0} : {${RELOCATING+ *(.got.plt)} *(.got) }
   ${RELOCATING+${OTHER_GOT_SECTIONS}}
   ${CREATE_SHLIB+${SDATA2}}
   ${CREATE_SHLIB+${SBSS2}}
@@ -379,26 +379,26 @@ cat <<EOF
   {
     ${RELOCATING+PROVIDE (__sbss_start = .);}
     ${RELOCATING+PROVIDE (___sbss_start = .);}
-    *(.dynsbss)
+    ${RELOCATING+*(.dynsbss)}
     *(.sbss)
     ${RELOCATING+*(.sbss.*)}
     ${RELOCATING+*(.gnu.linkonce.sb.*)}
-    *(.scommon)
+    ${RELOCATING+*(.scommon)}
     ${RELOCATING+PROVIDE (__sbss_end = .);}
     ${RELOCATING+PROVIDE (___sbss_end = .);}
   }
   ${BSS_PLT+${PLT}}
   .bss     ${RELOCATING-0} :
   {
-   *(.dynbss)
+   ${RELOCATING+*(.dynbss)}
    *(.bss)
    ${RELOCATING+*(.bss.*)}
    ${RELOCATING+*(.gnu.linkonce.b.*)}
-   *(COMMON)
+   ${RELOCATING+*(COMMON)
    /* Align here to ensure that the .bss section occupies space up to
       _end.  Align after .bss to ensure correct alignment even if the
       .bss section disappears because there are no input sections.  */
-   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
+   . = ALIGN(${ALIGNMENT});}
   }
   ${RELOCATING+${OTHER_BSS_END_SYMBOLS}}
   ${RELOCATING+. = ALIGN(${ALIGNMENT});}

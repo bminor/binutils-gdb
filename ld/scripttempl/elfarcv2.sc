@@ -12,7 +12,7 @@ test -z "$ENTRY" && ENTRY=start
 test -z "${BIG_OUTPUT_FORMAT}" && BIG_OUTPUT_FORMAT=${OUTPUT_FORMAT}
 test -z "${LITTLE_OUTPUT_FORMAT}" && LITTLE_OUTPUT_FORMAT=${OUTPUT_FORMAT}
 # If we request a big endian toolchain, give a big endian linker
-test -z "$GOT" && GOT=".got          ${RELOCATING-0} : { *(.got.plt) *(.got) } ${RELOCATING+ > ${DATA_MEMORY}}"
+test -z "$GOT" && GOT=".got          ${RELOCATING-0} : {${RELOCATING+ *(.got.plt)} *(.got) } ${RELOCATING+ > ${DATA_MEMORY}}"
 test "${ARC_ENDIAN}" == "big" && OUTPUT_FORMAT=${BIG_OUTPUT_FORMAT}
 if [ -z "$MACHINE" ]; then OUTPUT_ARCH=${ARCH}; else OUTPUT_ARCH=${ARCH}:${MACHINE}; fi
 test -z "${ELFSIZE}" && ELFSIZE=32
@@ -177,12 +177,13 @@ SECTIONS
 
   .jcr : { KEEP (*(.jcr)) } ${RELOCATING+> ${TEXT_MEMORY}}
   .eh_frame : { KEEP (*(.eh_frame)) } ${RELOCATING+> ${TEXT_MEMORY}}
-  .gcc_except_table : { *(.gcc_except_table) *(.gcc_except_table.*) } ${RELOCATING+> ${TEXT_MEMORY}}
+  .gcc_except_table : { *(.gcc_except_table${RELOCATING+ .gcc_except_table.*}) } ${RELOCATING+> ${TEXT_MEMORY}}
   .plt : { *(.plt) } ${RELOCATING+> ${TEXT_MEMORY}}
   .jlitab :
   {
     ${RELOCATING+${JLI_START_TABLE}}
-     jlitab*.o:(.jlitab*) *(.jlitab*)
+    ${RELOCATING+jlitab*.o:(.jlitab*)}
+    *(.jlitab${RELOCATING+*})
   } ${RELOCATING+> ${TEXT_MEMORY}}
 
   .rodata ${RELOCATING-0} :
@@ -236,7 +237,7 @@ SECTIONS
        line will have no effect, see PR13697.  Thus, keep .data  */
     KEEP (*(.data))
     ${RELOCATING+${DATA_START_SYMBOLS}}
-    *(.data${RELOCATING+ .data.* .gnu.linkonce.d.*})
+    ${RELOCATING+*(.data.* .gnu.linkonce.d.*)}
     ${CONSTRUCTING+SORT(CONSTRUCTORS)}
 
   } ${RELOCATING+ > ${DATA_MEMORY}}
@@ -251,13 +252,13 @@ SECTIONS
   ${RELOCATING+${SBSS2}}
   .bss          ${RELOCATING-0} :
   {
-   *(.dynbss)
-   *(.bss${RELOCATING+ .bss.* .gnu.linkonce.b.*})
-   *(COMMON)
-   /* Align here to ensure that the .bss section occupies space up to
-      _end.  Align after .bss to ensure correct alignment even if the
-      .bss section disappears because there are no input sections.  */
-   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
+    ${RELOCATING+*(.dynbss)}
+    *(.bss${RELOCATING+ .bss.* .gnu.linkonce.b.*})
+    ${RELOCATING+*(COMMON)
+    /* Align here to ensure that the .bss section occupies space up to
+       _end.  Align after .bss to ensure correct alignment even if the
+       .bss section disappears because there are no input sections.  */
+    . = ALIGN(${ALIGNMENT});}
    ${RELOCATING+_end = .;}
    ${RELOCATING+PROVIDE (end = .);}
   } ${RELOCATING+ > ${DATA_MEMORY}}
@@ -298,7 +299,7 @@ SECTIONS
   .debug_pubnames 0 : { *(.debug_pubnames) }
 
   /* DWARF 2 */
-  .debug_info     0 : { *(.debug_info) *(.gnu.linkonce.wi.*) }
+  .debug_info     0 : { *(.debug_info${RELOCATING+ .gnu.linkonce.wi.*}) }
   .debug_abbrev   0 : { *(.debug_abbrev) }
   .debug_line     0 : { *(.debug_line) }
   .debug_frame    0 : { *(.debug_frame) }
