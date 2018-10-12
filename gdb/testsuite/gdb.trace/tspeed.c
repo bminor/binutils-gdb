@@ -28,6 +28,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <unistd.h>
 
 int trace_speed_test (void);
 
@@ -84,7 +85,7 @@ main(int argc, char **argv)
 	    }
 	  if (problem < 0)
 	    {
-	      printf ("Negative times, giving up\n", max_iters);
+	      printf ("Negative times, giving up\n");
 	      break;
 	    }
 

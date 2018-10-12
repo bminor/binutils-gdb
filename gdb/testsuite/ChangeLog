@@ -1,3 +1,10 @@
+2018-10-12  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.trace/tspeed.exp: Remove nowarnings.
+	(prepare_for_trace_test): Declare "global ipalib".
+	* gdb.trace/tspeed.c: Include unistd.h.
+	(main): Remove superfluous printf argument.
+
 2018-10-11  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.base/solib-vanish.exp: Fix regexp not to require a POSIX
