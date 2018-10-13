@@ -43958,7 +43958,7 @@ Usage (host side):
 @end ifset
 
 You need an unstripped copy of the target program on your host system, since
-@value{GDBN} needs to examine it's symbol tables and such.  Start up @value{GDBN} as you normally
+@value{GDBN} needs to examine its symbol tables and such.  Start up @value{GDBN} as you normally
 would, with the target program as the first argument.  (You may need to use the
 @option{--baud} option if the serial line is running at anything except 9600 baud.)
 That is @code{gdb TARGET-PROG}, or @code{gdb --baud BAUD TARGET-PROG}.  After that, the only
