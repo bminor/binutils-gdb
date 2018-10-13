@@ -210,7 +210,7 @@ serial_open (const char *name)
   /* Check for a colon, suggesting an IP address/port pair.
      Do this *after* checking for all the interesting prefixes.  We
      don't want to constrain the syntax of what can follow them.  */
-  else if (strchr (name, ':'))
+  else if (!startswith (name, "unix:") && (strchr (name, ':')))
     ops = serial_interface_lookup ("tcp");
   else
     {
@@ -218,7 +218,8 @@ serial_open (const char *name)
       /* Check to see if name is a socket.  If it is, then treat it
          as such.  Otherwise assume that it's a character device.  */
       struct stat sb;
-      if (stat (name, &sb) == 0 && (sb.st_mode & S_IFMT) == S_IFSOCK)
+      if (startswith (name, "unix:") ||
+	  (stat (name, &sb) == 0 && (sb.st_mode & S_IFMT) == S_IFSOCK))
 	ops = serial_interface_lookup ("local");
       else
 #endif

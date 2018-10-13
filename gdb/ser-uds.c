@@ -23,6 +23,8 @@
 
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <netdb.h>
+#include "netstuff.h"
 
 #ifndef UNIX_PATH_MAX
 #define UNIX_PATH_MAX sizeof(((struct sockaddr_un *) NULL)->sun_path)
@@ -33,9 +35,21 @@
 static int
 uds_open (struct serial *scb, const char *name)
 {
+  struct addrinfo hint;
+
+  memset (&hint, 0, sizeof (hint));
+  /* Assume no prefix will be passed, therefore we should use
+     AF_UNSPEC.  */
+  hint.ai_family = AF_UNSPEC;
+  hint.ai_socktype = SOCK_STREAM;
+
+  parsed_connection_spec parsed = parse_connection_spec (name, &hint);
+
+  const char *socket_name = parsed.port_str.empty() ? name : parsed.port_str.c_str ();
+
   struct sockaddr_un addr;
 
-  if (strlen (name) > UNIX_PATH_MAX - 1)
+  if (strlen (socket_name) > UNIX_PATH_MAX - 1)
     {
       warning
         (_("The socket name is too long.  It may be no longer than %s bytes."),
@@ -45,7 +59,7 @@ uds_open (struct serial *scb, const char *name)
 
   memset (&addr, 0, sizeof addr);
   addr.sun_family = AF_UNIX;
-  strncpy (addr.sun_path, name, UNIX_PATH_MAX - 1);
+  strncpy (addr.sun_path, socket_name, UNIX_PATH_MAX - 1);
 
   int sock = socket (AF_UNIX, SOCK_STREAM, 0);
 
