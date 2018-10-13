@@ -1504,15 +1504,21 @@ _bfd_relocate_contents (reloc_howto_type *howto,
    relocations against discarded symbols, to make ignorable debug or unwind
    information more obvious.  */
 
-void
+bfd_reloc_status_type
 _bfd_clear_contents (reloc_howto_type *howto,
 		     bfd *input_bfd,
 		     asection *input_section,
-		     bfd_byte *location)
+		     bfd_byte *buf,
+		     bfd_vma off)
 {
   bfd_vma x;
+  bfd_byte *location;
+
+  if (!bfd_reloc_offset_in_range (howto, input_bfd, input_section, off))
+    return bfd_reloc_outofrange;
 
   /* Get the value we are going to relocate.  */
+  location = buf + off;
   x = read_reloc (input_bfd, location, howto);
 
   /* Zero out the unwanted bits of X.  */
@@ -1527,6 +1533,7 @@ _bfd_clear_contents (reloc_howto_type *howto,
 
   /* Put the relocated value back in the object file.  */
   write_reloc (input_bfd, x, location, howto);
+  return bfd_reloc_ok;
 }
 
 /*
@@ -8336,14 +8343,14 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 		  && (input_section->flags & SEC_DEBUGGING) != 0
 		  && link_info->input_bfds == link_info->output_bfd))
 	    {
-	      bfd_byte *p;
+	      bfd_vma off;
 	      static reloc_howto_type none_howto
 		= HOWTO (0, 0, 0, 0, FALSE, 0, complain_overflow_dont, NULL,
 			 "unused", FALSE, 0, 0, FALSE);
 
-	      p = data + (*parent)->address * bfd_octets_per_byte (input_bfd);
-	      _bfd_clear_contents ((*parent)->howto, input_bfd, input_section,
-				   p);
+	      off = (*parent)->address * bfd_octets_per_byte (input_bfd);
+	      _bfd_clear_contents ((*parent)->howto, input_bfd,
+				   input_section, data, off);
 	      (*parent)->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 	      (*parent)->addend = 0;
 	      (*parent)->howto = &none_howto;

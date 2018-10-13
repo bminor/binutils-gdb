@@ -1396,7 +1396,7 @@ metag_final_link_relocate (reloc_howto_type *howto,
 					      rel, relend, howto, contents) \
   {									\
     _bfd_clear_contents (howto, input_bfd, input_section,		\
-			 contents + rel->r_offset);			\
+			 contents, rel->r_offset);			\
 									\
     if (bfd_link_relocatable (info)					\
 	&& (input_section->flags & SEC_DEBUGGING))			\

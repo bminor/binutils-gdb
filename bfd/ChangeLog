@@ -1,3 +1,23 @@
+2018-10-13  Alan Modra  <amodra@gmail.com>
+
+	PR 23770
+	PR 23425
+	* reloc.c (_bfd_clear_contents): Replace "location" param with
+	"buf" and "off".  Bounds check "off".  Return status.
+	* cofflink.c (_bfd_coff_generic_relocate_section): Update
+	_bfd_clear_contents call.
+	* elf-bfd.h (RELOC_AGAINST_DISCARDED_SECTION): Likewise.
+	* elf32-arc.c (elf_arc_relocate_section): Likewise.
+	* elf32-i386.c (elf_i386_relocate_section): Likewise.
+	* elf32-metag.c (metag_final_link_relocate): Likewise.
+	* elf32-nds32.c (nds32_elf_get_relocated_section_contents): Likewise.
+	* elf32-ppc.c (ppc_elf_relocate_section): Likewise.
+	* elf32-visium.c (visium_elf_relocate_section): Likewise.
+	* elf64-ppc.c (ppc64_elf_relocate_section): Likewise.
+	* elf64-x86-64.c *(elf_x86_64_relocate_section): Likewise.
+	* libbfd-in.h (_bfd_clear_contents): Update prototype.
+	* libbfd.h: Regenerate.
+
 2018-10-09  Egeyar Bagcioglu  <egeyar.bagcioglu@oracle.com>
 
 	* elflink.c (elf_link_output_extsym): Do not place symbols into a

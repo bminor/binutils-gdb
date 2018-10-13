@@ -1568,7 +1568,7 @@ elf_arc_relocate_section (bfd *			  output_bfd,
       if (sec != NULL && discarded_section (sec))
 	{
 	  _bfd_clear_contents (howto, input_bfd, input_section,
-			       contents + rel->r_offset);
+			       contents, rel->r_offset);
 	  rel->r_info = 0;
 	  rel->r_addend = 0;
 

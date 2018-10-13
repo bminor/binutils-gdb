@@ -2847,7 +2847,7 @@ extern asection _bfd_elf_large_com_section;
   {									\
     int i_;								\
     _bfd_clear_contents (howto, input_bfd, input_section,		\
-			 contents + rel[index].r_offset);		\
+			 contents, rel[index].r_offset);		\
 									\
     if (bfd_link_relocatable (info)					\
 	&& (input_section->flags & SEC_DEBUGGING))			\
