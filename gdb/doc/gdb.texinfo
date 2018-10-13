@@ -21097,9 +21097,19 @@ syntax is:
 target> gdbserver @var{comm} @var{program} [ @var{args} @dots{} ]
 @end smallexample
 
-@var{comm} is either a device name (to use a serial line), or a TCP
-hostname and portnumber, or @code{-} or @code{stdio} to use
-stdin/stdout of @code{gdbserver}.
+@code{gdbserver} waits passively for the host @value{GDBN} to communicate
+with it.
+
+@var{comm} may take several forms:
+
+@table @code
+@item @var{device}
+A serial line device.
+
+@item -
+@itemx stdio
+To use the stdin/stdout of @code{gdbserver}.
+
 For example, to debug Emacs with the argument
 @samp{foo.txt} and communicate with @value{GDBN} over the serial port
 @file{/dev/com1}:
@@ -21108,8 +21118,27 @@ For example, to debug Emacs with the argument
 target> gdbserver /dev/com1 emacs foo.txt
 @end smallexample
 
-@code{gdbserver} waits passively for the host @value{GDBN} to communicate
-with it.
+The @code{stdio} connection is useful when starting @code{gdbserver}
+with ssh:
+
+@smallexample
+(gdb) target remote | ssh -T hostname gdbserver - hello
+@end smallexample
+
+The @samp{-T} option to ssh is provided because we don't need a remote pty,
+and we don't want escape-character handling.  Ssh does this by default when
+a command is provided, the flag is provided to make it explicit.
+You could elide it if you want to.
+
+Programs started with stdio-connected gdbserver have @file{/dev/null} for
+@code{stdin}, and @code{stdout},@code{stderr} are sent back to gdb for
+display through a pipe connected to gdbserver.
+Both @code{stdout} and @code{stderr} use the same pipe.
+
+@item @var{host}:@var{port}
+@itemx tcp:@var{host}:@var{port}
+@itemx tcp4:@var{host}:@var{port}
+To use a @acronym{TCP} @acronym{IPv4} socket connection on port number @var{port}.
 
 To use a TCP connection instead of a serial line:
 
@@ -21129,22 +21158,21 @@ conflicts with another service, @code{gdbserver} prints an error message
 and exits.}  You must use the same port number with the host @value{GDBN}
 @code{target remote} command.
 
-The @code{stdio} connection is useful when starting @code{gdbserver}
-with ssh:
+
+@item tcp6:@var{host}:@var{port}
+To use a @acronym{TCP} @acronym{IPv6} socket connection on port number @var{port}.
+
+@item unix:@var{host}:@var{local-socket}
+To use a Unix domain socket.  This will create a socket with the file
+system entry @var{local-socket} and listen on that.  For example:
 
 @smallexample
-(gdb) target remote | ssh -T hostname gdbserver - hello
+target> gdbserver unix:localhost:/tmp/gdb-socket0 emacs foo.txt
 @end smallexample
 
-The @samp{-T} option to ssh is provided because we don't need a remote pty,
-and we don't want escape-character handling.  Ssh does this by default when
-a command is provided, the flag is provided to make it explicit.
-You could elide it if you want to.
+@var{host} must either be the empty string or the literal string @code{localhost}.
+@end table
 
-Programs started with stdio-connected gdbserver have @file{/dev/null} for
-@code{stdin}, and @code{stdout},@code{stderr} are sent back to gdb for
-display through a pipe connected to gdbserver.
-Both @code{stdout} and @code{stderr} use the same pipe.
 
 @anchor{Attaching to a program}
 @subsubsection Attaching to a Running Program
