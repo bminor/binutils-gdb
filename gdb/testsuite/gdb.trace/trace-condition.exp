@@ -14,12 +14,21 @@
 
 load_lib "trace-support.exp"
 
+if {[skip_shlib_tests]} {
+    return 0
+}
+
 standard_testfile
 set executable $testfile
 set expfile $testfile.exp
 
 # Some targets have leading underscores on assembly symbols.
 set additional_flags [gdb_target_symbol_prefix_flags]
+
+if ![gdb_trace_common_supports_arch] {
+    unsupported "no trace-common.h support for arch"
+    return -1
+}
 
 if [prepare_for_testing "failed to prepare" $executable $srcfile \
 	[list debug $additional_flags]] {

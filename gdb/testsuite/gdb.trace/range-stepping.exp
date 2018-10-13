@@ -66,6 +66,10 @@ proc range_stepping_with_tracepoint { type } {
 
 range_stepping_with_tracepoint "trace"
 
+if {[skip_shlib_tests]} {
+    return 0
+}
+
 set libipa [get_in_proc_agent]
 set remote_libipa [gdb_load_shlib $libipa]
 

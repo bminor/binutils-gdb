@@ -18,6 +18,10 @@ load_lib trace-support.exp
 if {[skip_shlib_tests]} {
     return 0
 }
+if ![gdb_trace_common_supports_arch] {
+    unsupported "no trace-common.h support for arch"
+    return -1
+}
 
 standard_testfile pending.c
 set libfile1 "pendshr1"

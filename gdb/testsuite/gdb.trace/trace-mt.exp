@@ -21,9 +21,14 @@ set expfile $testfile.exp
 # Some targets have leading underscores on assembly symbols.
 set additional_flags [gdb_target_symbol_prefix_flags]
 
+if ![gdb_trace_common_supports_arch] {
+    unsupported "no trace-common.h support for arch"
+    return -1
+}
+
 if { [gdb_compile_pthreads "$srcdir/$subdir/$srcfile" $binfile \
 	  executable [list debug $additional_flags] ] != "" } {
-    untested "failed to compile"
+    # gdb_compile_pthreads provides an appropriate unsupported message.
     return -1
 }
 
@@ -105,6 +110,10 @@ foreach break_always_inserted { "on" "off" } {
 }
 
 step_over_tracepoint "trace"
+
+if {[skip_shlib_tests]} {
+    return 0
+}
 
 set libipa [get_in_proc_agent]
 set remote_libipa [gdb_load_shlib $libipa]

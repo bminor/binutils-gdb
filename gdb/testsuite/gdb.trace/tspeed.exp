@@ -15,9 +15,32 @@
 
 load_lib "trace-support.exp"
 
+if {[skip_shlib_tests]} {
+    return 0
+}
+
 standard_testfile
 set executable $testfile
 
+# Check that the target supports trace.
+if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile executable $options] != "" } {
+    untested "failed to compile"
+    return -1
+}
+
+clean_restart ${testfile}
+
+if ![runto_main] {
+    fail "can't run to main to check for trace support"
+    return -1
+}
+
+if ![gdb_target_supports_trace] {
+    unsupported "target does not support trace"
+    return -1
+}
+
+# Compile the test case with the in-process agent library.
 set ipalib [get_in_proc_agent]
 
 if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \

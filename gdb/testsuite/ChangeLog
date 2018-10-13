@@ -1,3 +1,39 @@
+2018-10-12  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.trace/actions-changed.exp: Check for arch support.
+	* gdb.trace/actions.exp: Likewise.
+	* gdb.trace/ax.exp: Likewise.
+	* gdb.trace/backtrace.exp: Likewise.
+	* gdb.trace/change-loc.exp: Likewise.
+	* gdb.trace/deltrace.exp: Likewise.
+	* gdb.trace/ftrace-lock.exp: Check for shlib and arch support.
+	* gdb.trace/ftrace.exp: Likewise.
+	* gdb.trace/infotrace.exp: Check for arch support.
+	* gdb.trace/mi-trace-frame-collected.exp: Likewise.
+	* gdb.trace/mi-tracepoint-changed.exp: Likewise.
+	* gdb.trace/mi-tsv-changed.exp: Likewise.
+	* gdb.trace/packetlen.exp: Likewise.
+	* gdb.trace/passc-dyn.exp: Likewise.
+	* gdb.trace/passcount.exp: Likewise.
+	* gdb.trace/pending.exp: Likewise.
+	* gdb.trace/range-stepping.exp: Check for shlib support.
+	* gdb.trace/report.exp: Check for arch support.
+	* gdb.trace/save-trace.exp: Likewise.
+	* gdb.trace/signal.exp: Check for signal support.
+	* gdb.trace/tfind.exp: Check for arch support.
+	* gdb.trace/trace-break.exp: Check for arch and shlib support.
+	* gdb.trace/trace-common.h: Add comment.
+	* gdb.trace/trace-condition.exp: Check for shlib and arch support.
+	* gdb.trace/trace-enable-disable.exp: Likewise.
+	* gdb.trace/trace-mt.exp: Likewise.  Remove redundant untested call.
+	* gdb.trace/tracecmd.exp: Check for arch support.
+	* gdb.trace/tspeed.exp: Check for shlib and target support.
+	* gdb.trace/tstatus.exp: Check for arch support.
+	* gdb.trace/tsv.exp: Likewise.
+	* gdb.trace/while-dyn.exp: Likewise.
+	* gdb.trace/while-stepping.exp: Likewise.
+	* lib/trace-support.exp (gdb_trace_common_supports_arch): New.
+
 2018-10-12  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.trace/tspeed.exp: Remove nowarnings.

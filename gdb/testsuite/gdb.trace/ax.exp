@@ -24,6 +24,12 @@ load_lib "trace-support.exp"
 gdb_exit
 gdb_start
 standard_testfile actions.c
+
+if ![gdb_trace_common_supports_arch] {
+    unsupported "no trace-common.h support for arch"
+    return -1
+}
+
 if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 	  executable {debug nowarnings}] != "" } {
     untested "failed to compile"

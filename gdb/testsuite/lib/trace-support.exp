@@ -51,6 +51,25 @@ if [is_amd64_regs_target] {
 }
 
 #
+# Procedure: gdb_trace_common_supports_arch
+# Returns true if gdb.trace/trace-common.h knows about this target.
+# Allows skipping tests that depend on being able to include this file.
+# Please keep this in sync with the supported targets in the header.
+#
+
+proc gdb_trace_common_supports_arch { } {
+  if { [istarget "x86_64*-*-*"]
+	|| [istarget "i386*-*-*"]
+	|| [istarget "aarch64*-*-*"]
+	|| [istarget "powerpc*-*-*"]
+	|| [istarget "s390*-*-*"] } {
+	return 1
+    } else {
+	return 0
+    }
+}
+
+#
 # Procedure: gdb_target_supports_trace
 # Returns true if GDB is connected to a target that supports tracing.
 # Allows tests to abort early if not running on a trace-aware target.

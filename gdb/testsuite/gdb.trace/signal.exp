@@ -28,6 +28,11 @@
 
 load_lib "trace-support.exp"
 
+if [target_info exists gdb,nosignals] {
+    verbose "Skipping signal.exp because of nosignals."
+    return -1
+}
+
 standard_testfile
 
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
