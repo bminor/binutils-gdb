@@ -375,7 +375,7 @@ tui_partial_win_by_name (const char *name)
 {
   struct tui_win_info *win_info = NULL;
 
-  if (name != (char *) NULL)
+  if (name != NULL)
     {
       int i = 0;
 
@@ -766,7 +766,7 @@ tui_free_win_content (struct tui_gen_win_info *win_info)
 {
   if (win_info->content != NULL)
     {
-      free_content ((tui_win_content) win_info->content,
+      free_content (win_info->content,
 		   win_info->content_size,
 		   win_info->type);
       win_info->content = NULL;

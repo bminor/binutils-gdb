@@ -247,8 +247,7 @@ tui_show_register_group (struct reggroup *group,
 	  TUI_DATA_WIN->generic.content = NULL;
 	  TUI_DATA_WIN->generic.content_size = 0;
 	  tui_add_content_elements (&TUI_DATA_WIN->generic, nr_regs);
-	  display_info->regs_content
-            = (tui_win_content) TUI_DATA_WIN->generic.content;
+	  display_info->regs_content = TUI_DATA_WIN->generic.content;
 	  display_info->regs_content_count = nr_regs;
 	}
 

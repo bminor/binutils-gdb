@@ -384,7 +384,7 @@ tui_vertical_disassem_scroll (enum tui_scroll_direction scroll_direction,
       struct tui_line_or_address val;
       int dir;
 
-      content = (tui_win_content) TUI_DISASM_WIN->generic.content;
+      content = TUI_DISASM_WIN->generic.content;
 
       pc = content[0]->which_element.source.line_or_addr.u.addr;
       num_to_scroll++;

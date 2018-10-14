@@ -793,7 +793,7 @@ tui_resize_all (void)
        {
 	case SRC_COMMAND:
 	case DISASSEM_COMMAND:
-	  first_win = (struct tui_win_info *) (tui_source_windows ())->list[0];
+	  first_win = tui_source_windows ()->list[0];
 	  first_win->generic.width += width_diff;
 	  locator->width += width_diff;
 	  /* Check for invalid heights.  */
@@ -830,8 +830,7 @@ tui_resize_all (void)
 	    {
 	      first_win = TUI_DATA_WIN;
 	      first_win->generic.width += width_diff;
-	      second_win = (struct tui_win_info *)
-		(tui_source_windows ())->list[0];
+	      second_win = tui_source_windows ()->list[0];
 	      second_win->generic.width += width_diff;
 	    }
 	  /* Change the first window's height/width.  */
@@ -984,7 +983,7 @@ tui_scroll_forward_command (const char *arg, int from_tty)
 
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
-  if (arg == (char *) NULL)
+  if (arg == NULL)
     parse_scrolling_args (arg, &win_to_scroll, (int *) NULL);
   else
     parse_scrolling_args (arg, &win_to_scroll, &num_to_scroll);
@@ -1000,7 +999,7 @@ tui_scroll_backward_command (const char *arg, int from_tty)
 
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
-  if (arg == (char *) NULL)
+  if (arg == NULL)
     parse_scrolling_args (arg, &win_to_scroll, (int *) NULL);
   else
     parse_scrolling_args (arg, &win_to_scroll, &num_to_scroll);
@@ -1038,9 +1037,9 @@ tui_scroll_right_command (const char *arg, int from_tty)
 static void
 tui_set_focus (const char *arg, int from_tty)
 {
-  if (arg != (char *) NULL)
+  if (arg != NULL)
     {
-      char *buf_ptr = (char *) xstrdup (arg);
+      char *buf_ptr = xstrdup (arg);
       int i;
       struct tui_win_info *win_info = NULL;
 
@@ -1121,7 +1120,7 @@ tui_set_tab_width_command (const char *arg, int from_tty)
 {
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
-  if (arg != (char *) NULL)
+  if (arg != NULL)
     {
       int ts;
 
@@ -1160,7 +1159,7 @@ tui_set_win_height (const char *arg, int from_tty)
 {
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
-  if (arg != (char *) NULL)
+  if (arg != NULL)
     {
       std::string copy = arg;
       char *buf = &copy[0];
@@ -1171,7 +1170,7 @@ tui_set_win_height (const char *arg, int from_tty)
 
       wname = buf_ptr;
       buf_ptr = strchr (buf_ptr, ' ');
-      if (buf_ptr != (char *) NULL)
+      if (buf_ptr != NULL)
 	{
 	  *buf_ptr = (char) 0;
 
@@ -1444,9 +1443,8 @@ make_invisible_and_set_new_height (struct tui_win_info *win_info,
       /* Delete all data item windows.  */
       for (i = 0; i < win_info->generic.content_size; i++)
 	{
-	  gen_win_info = (struct tui_gen_win_info *)
-	    &((struct tui_win_element *)
-	      win_info->generic.content[i])->which_element.data_window;
+	  gen_win_info
+	    = &win_info->generic.content[i]->which_element.data_window;
 	  tui_delete_win (gen_win_info->handle);
 	  gen_win_info->handle = NULL;
 	}
@@ -1653,7 +1651,7 @@ parse_scrolling_args (const char *arg,
 
   /* First set up the default window to scroll, in case there is no
      window name arg.  */
-  if (arg != (char *) NULL)
+  if (arg != NULL)
     {
       char *buf_ptr;
 
@@ -1666,7 +1664,7 @@ parse_scrolling_args (const char *arg,
 
 	  num_str = buf_ptr;
 	  buf_ptr = strchr (buf_ptr, ' ');
-	  if (buf_ptr != (char *) NULL)
+	  if (buf_ptr != NULL)
 	    {
 	      *buf_ptr = (char) 0;
 	      if (num_to_scroll)
@@ -1678,7 +1676,7 @@ parse_scrolling_args (const char *arg,
 	}
 
       /* Process the window name if one is specified.  */
-      if (buf_ptr != (char *) NULL)
+      if (buf_ptr != NULL)
 	{
 	  const char *wname;
 

@@ -279,7 +279,7 @@ tui_show_source_line (struct tui_win_info *win_info, int lineno)
     wattron (win_info->generic.handle, A_STANDOUT);
 
   mvwaddstr (win_info->generic.handle, lineno, 1,
-             (char *) line->which_element.source.line);
+	     line->which_element.source.line);
   if (line->which_element.source.is_exec_point)
     wattroff (win_info->generic.handle, A_STANDOUT);
 
@@ -364,7 +364,7 @@ tui_set_is_exec_point_at (struct tui_line_or_address l,
 {
   int changed = 0;
   int i;
-  tui_win_content content = (tui_win_content) win_info->generic.content;
+  tui_win_content content = win_info->generic.content;
 
   i = 0;
   while (i < win_info->generic.content_size)
@@ -651,7 +651,7 @@ tui_line_is_displayed (int line,
 	= win_info->generic.content[i]
 	    ->which_element.source.line_or_addr.loa == LOA_LINE
 	  && win_info->generic.content[i]
-	       ->which_element.source.line_or_addr.u.line_no == (int) line;
+	       ->which_element.source.line_or_addr.u.line_no == line;
       i++;
     }
 

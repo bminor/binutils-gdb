@@ -562,7 +562,7 @@ void
 strcat_to_buf (char *buf, int buflen, 
 	       const char *item_to_add)
 {
-  if (item_to_add != (char *) NULL && buf != (char *) NULL)
+  if (item_to_add != NULL && buf != NULL)
     {
       if ((strlen (buf) + strlen (item_to_add)) <= buflen)
 	strcat (buf, item_to_add);

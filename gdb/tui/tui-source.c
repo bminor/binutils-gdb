@@ -351,7 +351,7 @@ tui_vertical_source_scroll (enum tui_scroll_direction scroll_direction,
     {
       struct tui_line_or_address l;
       struct symtab *s;
-      tui_win_content content = (tui_win_content) TUI_SRC_WIN->generic.content;
+      tui_win_content content = TUI_SRC_WIN->generic.content;
       struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
       if (cursal.symtab == (struct symtab *) NULL)

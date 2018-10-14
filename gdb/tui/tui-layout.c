@@ -401,7 +401,7 @@ tui_set_layout_by_name (const char *layout_name)
 {
   enum tui_status status = TUI_SUCCESS;
 
-  if (layout_name != (char *) NULL)
+  if (layout_name != NULL)
     {
       int i;
       enum tui_layout_type new_layout = UNDEFINED_LAYOUT;
