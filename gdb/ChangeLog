@@ -1,3 +1,10 @@
+2018-10-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2read.c (recursively_compute_inclusions): Use std::vector.
+	(compute_compunit_symtab_includes): Update.
+	* symtab.h: (symtab_ptr): Remove typedef.  Don't define a VEC.
+	(compunit_symtab_ptr): Likewise.
+
 2018-10-26  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-tdep.c (fbsd_print_auxv_entry): Only use

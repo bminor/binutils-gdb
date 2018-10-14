@@ -10210,7 +10210,7 @@ get_compunit_symtab (struct dwarf2_per_cu_data *per_cu)
    included by PER_CU.  */
 
 static void
-recursively_compute_inclusions (VEC (compunit_symtab_ptr) **result,
+recursively_compute_inclusions (std::vector<compunit_symtab *> *result,
 				htab_t all_children, htab_t all_type_symtabs,
 				struct dwarf2_per_cu_data *per_cu,
 				struct compunit_symtab *immediate_parent)
@@ -10240,14 +10240,14 @@ recursively_compute_inclusions (VEC (compunit_symtab_ptr) **result,
 	  if (*slot == NULL)
 	    {
 	      *slot = cust;
-	      VEC_safe_push (compunit_symtab_ptr, *result, cust);
+	      result->push_back (cust);
 	      if (cust->user == NULL)
 		cust->user = immediate_parent;
 	    }
 	}
       else
 	{
-	  VEC_safe_push (compunit_symtab_ptr, *result, cust);
+	  result->push_back (cust);
 	  if (cust->user == NULL)
 	    cust->user = immediate_parent;
 	}
@@ -10274,8 +10274,7 @@ compute_compunit_symtab_includes (struct dwarf2_per_cu_data *per_cu)
     {
       int ix, len;
       struct dwarf2_per_cu_data *per_cu_iter;
-      struct compunit_symtab *compunit_symtab_iter;
-      VEC (compunit_symtab_ptr) *result_symtabs = NULL;
+      std::vector<compunit_symtab *> result_symtabs;
       htab_t all_children, all_type_symtabs;
       struct compunit_symtab *cust = get_compunit_symtab (per_cu);
 
@@ -10299,18 +10298,14 @@ compute_compunit_symtab_includes (struct dwarf2_per_cu_data *per_cu)
 	}
 
       /* Now we have a transitive closure of all the included symtabs.  */
-      len = VEC_length (compunit_symtab_ptr, result_symtabs);
+      len = result_symtabs.size ();
       cust->includes
 	= XOBNEWVEC (&per_cu->dwarf2_per_objfile->objfile->objfile_obstack,
 		     struct compunit_symtab *, len + 1);
-      for (ix = 0;
-	   VEC_iterate (compunit_symtab_ptr, result_symtabs, ix,
-			compunit_symtab_iter);
-	   ++ix)
-	cust->includes[ix] = compunit_symtab_iter;
+      memcpy (cust->includes, result_symtabs.data (),
+	      len * sizeof (compunit_symtab *));
       cust->includes[len] = NULL;
 
-      VEC_free (compunit_symtab_ptr, result_symtabs);
       htab_delete (all_children);
       htab_delete (all_type_symtabs);
     }

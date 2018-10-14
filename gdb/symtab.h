@@ -1357,9 +1357,6 @@ struct symtab
 #define SYMTAB_DIRNAME(symtab) \
   COMPUNIT_DIRNAME (SYMTAB_COMPUNIT (symtab))
 
-typedef struct symtab *symtab_ptr;
-DEF_VEC_P (symtab_ptr);
-
 /* Compunit symtabs contain the actual "symbol table", aka blockvector, as well
    as the list of all source files (what gdb has historically associated with
    the term "symtab").
@@ -1500,9 +1497,6 @@ extern struct symtab *
 /* Return the language of CUST.  */
 
 extern enum language compunit_language (const struct compunit_symtab *cust);
-
-typedef struct compunit_symtab *compunit_symtab_ptr;
-DEF_VEC_P (compunit_symtab_ptr);
 
 
 
