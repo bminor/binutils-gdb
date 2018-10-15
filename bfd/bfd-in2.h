@@ -1080,8 +1080,12 @@ extern void elf32_csky_next_input_section
 extern int elf32_csky_setup_section_lists
   (bfd *, struct bfd_link_info *);
 /* Extracted from init.c.  */
-void bfd_init (void);
+size_t bfd_init (void);
 
+
+/* Value returned by bfd_init.  */
+
+#define BFD_INIT_MAGIC (sizeof (struct bfd_section))
 /* Extracted from opncls.c.  */
 /* Set to N to open the next N BFDs using an alternate id space.  */
 extern unsigned int bfd_use_reserved_id;

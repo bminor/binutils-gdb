@@ -718,7 +718,8 @@ main (int argc, char **argv)
 
   START_PROGRESS (program_name, 0);
 
-  bfd_init ();
+  if (bfd_init () != BFD_INIT_MAGIC)
+    fatal (_("fatal error: libbfd ABI mismatch"));
   set_default_bfd_target ();
 
   xatexit (remove_output);

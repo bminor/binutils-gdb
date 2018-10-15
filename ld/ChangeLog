@@ -1,3 +1,9 @@
+2018-10-15  Alan Modra  <amodra@gmail.com>
+
+	PR 23534
+	* ldmain.c (main): Exit with fatal error if bfd_init returns
+	an unexpected value.
+
 2018-10-13  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am (eelf32btsmip_fbsd.c, eelf32btsmipn32_fbsd.c),

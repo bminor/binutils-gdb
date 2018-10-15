@@ -3504,7 +3504,8 @@ identify_dll_for_implib (void)
   search_data.symname = "__NULL_IMPORT_DESCRIPTOR";
   search_data.found = FALSE;
 
-  bfd_init ();
+  if (bfd_init () != BFD_INIT_MAGIC)
+    fatal (_("fatal error: libbfd ABI mismatch"));
 
   abfd = bfd_openr (identify_imp_name, 0);
   if (abfd == NULL)

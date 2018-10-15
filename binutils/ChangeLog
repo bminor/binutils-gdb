@@ -1,3 +1,18 @@
+2018-10-15  Alan Modra  <amodra@gmail.com>
+
+	PR 23534
+	* addr2line.c (main): Exit with fatal error if bfd_init
+	returns an unexpected value.
+	* ar.c (main): Likewise.
+	* dlltool.c (identify_dll_for_implib): Likewise.
+	* nm.c (main): Likewise.
+	* objcopy.c (main): Likewise.
+	* objdump.c (main): Likewise.
+	* size.c (main): Likewise.
+	* strings.c (main): Likewise.
+	* windmc.c (main): Likewise.
+	* windres.c (main): Likewise.
+
 2018-10-11  Jordan Rupprecht  <rupprecht@google.com>
 	    Nick Clifton  <nickc@redhat.com>
 

@@ -1,3 +1,10 @@
+2018-10-15  Alan Modra  <amodra@gmail.com>
+
+	PR 23534
+	* init.c (BFD_INIT_MAGIC): Define.
+	(bfd_init): Return BFD_INIT_MAGIC.
+	bfd-in2.h: Regenerate.
+
 2018-10-13  Alan Modra  <amodra@gmail.com>
 
 	PR 23770

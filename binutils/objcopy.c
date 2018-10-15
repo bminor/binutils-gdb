@@ -5659,7 +5659,8 @@ main (int argc, char *argv[])
   strip_symbols = STRIP_UNDEF;
   discard_locals = LOCALS_UNDEF;
 
-  bfd_init ();
+  if (bfd_init () != BFD_INIT_MAGIC)
+    fatal (_("fatal error: libbfd ABI mismatch"));
   set_default_bfd_target ();
 
   if (is_strip < 0)

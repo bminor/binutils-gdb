@@ -1,3 +1,9 @@
+2018-10-15  Alan Modra  <amodra@gmail.com>
+
+	PR 23534
+	* as.c (main): Exit with fatal error if bfd_init returns an
+	unexpected value.
+
 2018-10-11  Jan Beulich  <jbeulich@suse.com>
 
 	* testsuite/gas/i386/xmmword.s: Add MOVQ / VMOVQ cases.

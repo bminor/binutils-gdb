@@ -287,7 +287,8 @@ main (int argc, char **argv)
       usage (stderr, 1);
     }
 
-  bfd_init ();
+  if (bfd_init () != BFD_INIT_MAGIC)
+    fatal (_("fatal error: libbfd ABI mismatch"));
   set_default_bfd_target ();
 
   if (optind >= argc)

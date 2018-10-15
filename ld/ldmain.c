@@ -209,7 +209,8 @@ main (int argc, char **argv)
 
   expandargv (&argc, &argv);
 
-  bfd_init ();
+  if (bfd_init () != BFD_INIT_MAGIC)
+    einfo (_("%F%P: fatal error: libbfd ABI mismatch\n"));
 
   bfd_set_error_program_name (program_name);
 

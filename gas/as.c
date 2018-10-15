@@ -1239,7 +1239,8 @@ main (int argc, char ** argv)
   out_file_name = OBJ_DEFAULT_OUTPUT_FILE_NAME;
 
   hex_init ();
-  bfd_init ();
+  if (bfd_init () != BFD_INIT_MAGIC)
+    as_fatal (_("libbfd ABI mismatch"));
   bfd_set_error_program_name (myname);
 
 #ifdef USE_EMULATIONS
