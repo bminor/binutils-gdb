@@ -38,7 +38,7 @@ FUNCTION
 	bfd_init
 
 SYNOPSIS
-	size_t bfd_init (void);
+	unsigned int bfd_init (void);
 
 DESCRIPTION
 	This routine must be called before any other BFD function to
@@ -54,7 +54,7 @@ DESCRIPTION
 /* Actually, there is currently nothing for this function to do.
    However, someday it may be needed, so keep it around.  */
 
-size_t
+unsigned int
 bfd_init (void)
 {
   return BFD_INIT_MAGIC;

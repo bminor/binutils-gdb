@@ -1080,7 +1080,7 @@ extern void elf32_csky_next_input_section
 extern int elf32_csky_setup_section_lists
   (bfd *, struct bfd_link_info *);
 /* Extracted from init.c.  */
-size_t bfd_init (void);
+unsigned int bfd_init (void);
 
 
 /* Value returned by bfd_init.  */
