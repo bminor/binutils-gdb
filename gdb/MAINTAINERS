@@ -235,9 +235,13 @@ The Target/Architecture maintainer works with the host maintainer when
 resolving build issues.  The Target/Architecture maintainer works with
 the native maintainer when resolving ABI issues.
 
+	aarch64		--target=aarch64-elf ,-Werror
+			Alan Hayward		alan.hayward@arm.com
+
 	alpha		--target=alpha-elf ,-Werror
 
 	arm		--target=arm-elf ,-Werror
+			Alan Hayward		alan.hayward@arm.com
 
 	avr		--target=avr ,-Werror
 

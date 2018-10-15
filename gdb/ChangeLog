@@ -1,3 +1,8 @@
+2018-10-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* MAINTAINERS (Responsible Maintainers): Add Alan Hayward as
+	AArch64/ARM maintainer.
+
 2018-10-11  Gary Benson <gbenson@redhat.com>
 
 	* interps.h (interp::m_name): Make private and mutable.
