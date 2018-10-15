@@ -1,3 +1,11 @@
+2018-10-15  Jim Wilson  <jimw@sifive.com>
+
+	* emulparams/elf32lriscv-defs.sh (DATA_START_SYMBOLS): New.
+	(SDATA_START_SYMBOLS): Define __SDATA_BEGIN__.  Don't define
+	__global_pointer$.
+	(OTHER_END_SYMBOLS): New.  Define __global_pointer$.
+	* testsuite/ld-riscv-elf/pcrel-lo-addend-2.d (#ld): Add --no-relax.
+
 2018-10-15  Alan Modra  <amodra@gmail.com>
 
 	PR 23534
