@@ -1,5 +1,10 @@
 2018-10-16  Alan Modra  <amodra@gmail.com>
 
+	* peXXigen.c (_bfd_XX_bfd_copy_private_bfd_data_common): Simplify
+	PE_DEBUG_DATA size checks.
+
+2018-10-16  Alan Modra  <amodra@gmail.com>
+
 	PR 23781
 	* peXXigen.c (_bfd_XX_bfd_copy_private_bfd_data_common): Free data
 	before returning.

@@ -2984,8 +2984,8 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
 	    (struct external_IMAGE_DEBUG_DIRECTORY *)(data + (addr - section->vma));
 
 	  /* PR 17512: file: 0f15796a.  */
-	  if (ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size + (addr - section->vma)
-	      > bfd_get_section_size (section))
+	  if ((unsigned long) ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size
+	      > section->size - (addr - section->vma))
 	    {
 	      /* xgettext:c-format */
 	      _bfd_error_handler
@@ -2993,16 +2993,6 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
 		   "exceeds space left in section (%" PRIx64 ")"),
 		 obfd, ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size,
 		 (uint64_t) (section->size - (addr - section->vma)));
-	      free (data);
-	      return FALSE;
-	    }
-	  /* PR 23110.  */
-	  else if (ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size < 0)
-	    {
-	      /* xgettext:c-format */
-	      _bfd_error_handler
-		(_("%pB: Data Directory size (%#lx) is negative"),
-		 obfd, ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size);
 	      free (data);
 	      return FALSE;
 	    }
