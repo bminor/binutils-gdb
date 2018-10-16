@@ -1,3 +1,8 @@
+2018-10-16  Alan Modra  <amodra@gmail.com>
+
+	PR 23780
+	* readelf.c (display_raw_attribute): Correct assertion.
+
 2018-10-15  Alan Modra  <amodra@gmail.com>
 
 	PR 23534

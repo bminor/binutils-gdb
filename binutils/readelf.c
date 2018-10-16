@@ -15221,7 +15221,7 @@ display_raw_attribute (unsigned char * p, unsigned char const * const end)
   unsigned long addr = 0;
   size_t bytes = end - p;
 
-  assert (end > p);
+  assert (end >= p);
   while (bytes)
     {
       int j;
