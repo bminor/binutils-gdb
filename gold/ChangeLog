@@ -1,3 +1,8 @@
+2018-10-16  Cherry Zhang  <cherryyz@google.com>
+
+	PR 23769
+	* gold.cc (queue_middle_tasks): Correct split-stack error message.
+
 2018-08-29  Chenghua Xu  <paul.hua.gm@gmail.com>
 
 	* mips.cc (Mips_mach, add_machine_extensions, elf_mips_mach):
