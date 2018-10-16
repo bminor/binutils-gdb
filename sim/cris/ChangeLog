@@ -1,3 +1,8 @@
+2018-12-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* Makefile.in: Replace uses of CGEN_CPU_DIR with CPU_DIR, and
+	remove the definition of CGEN_CPU_DIR.
+
 2017-09-06  John Baldwin  <jhb@FreeBSD.org>
 
 	* configure: Regenerate.
