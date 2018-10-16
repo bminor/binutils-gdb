@@ -95,24 +95,25 @@ struct riscv_unwind_cache
   CORE_ADDR frame_base;
 };
 
-/* Architectural name for core registers.  */
+/* The preferred register names for all the general purpose and floating
+   point registers.  These are what GDB will use when referencing a
+   register.  */
 
 static const char * const riscv_gdb_reg_names[RISCV_LAST_FP_REGNUM + 1] =
 {
-  "x0",  "x1",  "x2",  "x3",  "x4",  "x5",  "x6",  "x7",
-  "x8",  "x9",  "x10", "x11", "x12", "x13", "x14", "x15",
-  "x16", "x17", "x18", "x19", "x20", "x21", "x22", "x23",
-  "x24", "x25", "x26", "x27", "x28", "x29", "x30", "x31",
-  "pc",
-  "f0",  "f1",  "f2",  "f3",  "f4",  "f5",  "f6",  "f7",
-  "f8",  "f9",  "f10", "f11", "f12", "f13", "f14", "f15",
-  "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23",
-  "f24", "f25", "f26", "f27", "f28", "f29", "f30", "f31",
+ "zero", "ra", "sp", "gp", "tp", "t0", "t1", "t2", "fp", "s1",
+ "a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7", "s2", "s3", "s4",
+ "s5", "s6", "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6",
+ "pc",
+ "ft0", "ft1", "ft2", "ft3", "ft4", "ft5", "ft6", "ft7", "fs0", "fs1",
+ "fa0", "fa1", "fa2", "fa3", "fa4", "fa5", "fa6", "fa7", "fs2", "fs3",
+ "fs4", "fs5", "fs6", "fs7", "fs8", "fs9", "fs10", "fs11", "ft8", "ft9",
+ "ft10", "ft11",
 };
 
-/* Maps "pretty" register names onto their GDB register number.  */
+/* Map alternative register names onto their GDB register number.  */
 
-struct register_alias
+struct riscv_register_alias
 {
   /* The register alias.  Usually more descriptive than the
      architectural name of the register.  */
@@ -124,77 +125,78 @@ struct register_alias
 
 /* Table of register aliases.  */
 
-static const struct register_alias riscv_register_aliases[] =
+static const struct riscv_register_alias riscv_register_aliases[] =
 {
-  { "zero", 0 },
-  { "ra", 1 },
-  { "sp", 2 },
-  { "gp", 3 },
-  { "tp", 4 },
-  { "t0", 5 },
-  { "t1", 6 },
-  { "t2", 7 },
-  { "s0", 8 },
-  { "fp", 8 },
-  { "s1", 9 },
-  { "a0", 10 },
-  { "a1", 11 },
-  { "a2", 12 },
-  { "a3", 13 },
-  { "a4", 14 },
-  { "a5", 15 },
-  { "a6", 16 },
-  { "a7", 17 },
-  { "s2", 18 },
-  { "s3", 19 },
-  { "s4", 20 },
-  { "s5", 21 },
-  { "s6", 22 },
-  { "s7", 23 },
-  { "s8", 24 },
-  { "s9", 25 },
-  { "s10", 26 },
-  { "s11", 27 },
-  { "t3", 28 },
-  { "t4", 29 },
-  { "t5", 30 },
-  { "t6", 31 },
-  /* pc is 32.  */
-  { "ft0", 33 },
-  { "ft1", 34 },
-  { "ft2", 35 },
-  { "ft3", 36 },
-  { "ft4", 37 },
-  { "ft5", 38 },
-  { "ft6", 39 },
-  { "ft7", 40 },
-  { "fs0", 41 },
-  { "fs1", 42 },
-  { "fa0", 43 },
-  { "fa1", 44 },
-  { "fa2", 45 },
-  { "fa3", 46 },
-  { "fa4", 47 },
-  { "fa5", 48 },
-  { "fa6", 49 },
-  { "fa7", 50 },
-  { "fs2", 51 },
-  { "fs3", 52 },
-  { "fs4", 53 },
-  { "fs5", 54 },
-  { "fs6", 55 },
-  { "fs7", 56 },
-  { "fs8", 57 },
-  { "fs9", 58 },
-  { "fs10", 59 },
-  { "fs11", 60 },
-  { "ft8", 61 },
-  { "ft9", 62 },
-  { "ft10", 63 },
-  { "ft11", 64 },
-#define DECLARE_CSR(name, num) { #name, (num) + 65 },
-#include "opcode/riscv-opc.h"
-#undef DECLARE_CSR
+ /* Aliases for general purpose registers.  These are the architectural
+    names, as GDB uses the more user friendly names by default.  */
+ { "x0", (RISCV_ZERO_REGNUM + 0) },
+ { "x1", (RISCV_ZERO_REGNUM + 1) },
+ { "x2", (RISCV_ZERO_REGNUM + 2) },
+ { "x3", (RISCV_ZERO_REGNUM + 3) },
+ { "x4", (RISCV_ZERO_REGNUM + 4) },
+ { "x5", (RISCV_ZERO_REGNUM + 5) },
+ { "x6", (RISCV_ZERO_REGNUM + 6) },
+ { "x7", (RISCV_ZERO_REGNUM + 7) },
+ { "x8", (RISCV_ZERO_REGNUM + 8) },
+ { "s0", (RISCV_ZERO_REGNUM + 8) },	/* fp, s0, and x8 are all aliases.  */
+ { "x9", (RISCV_ZERO_REGNUM + 9) },
+ { "x10", (RISCV_ZERO_REGNUM + 10) },
+ { "x11", (RISCV_ZERO_REGNUM + 11) },
+ { "x12", (RISCV_ZERO_REGNUM + 12) },
+ { "x13", (RISCV_ZERO_REGNUM + 13) },
+ { "x14", (RISCV_ZERO_REGNUM + 14) },
+ { "x15", (RISCV_ZERO_REGNUM + 15) },
+ { "x16", (RISCV_ZERO_REGNUM + 16) },
+ { "x17", (RISCV_ZERO_REGNUM + 17) },
+ { "x18", (RISCV_ZERO_REGNUM + 18) },
+ { "x19", (RISCV_ZERO_REGNUM + 19) },
+ { "x20", (RISCV_ZERO_REGNUM + 20) },
+ { "x21", (RISCV_ZERO_REGNUM + 21) },
+ { "x22", (RISCV_ZERO_REGNUM + 22) },
+ { "x23", (RISCV_ZERO_REGNUM + 23) },
+ { "x24", (RISCV_ZERO_REGNUM + 24) },
+ { "x25", (RISCV_ZERO_REGNUM + 25) },
+ { "x26", (RISCV_ZERO_REGNUM + 26) },
+ { "x27", (RISCV_ZERO_REGNUM + 27) },
+ { "x28", (RISCV_ZERO_REGNUM + 28) },
+ { "x29", (RISCV_ZERO_REGNUM + 29) },
+ { "x30", (RISCV_ZERO_REGNUM + 30) },
+ { "x31", (RISCV_ZERO_REGNUM + 31) },
+
+ /* Aliases for the floating-point registers.  These are the architectural
+    names as GDB uses the more user friendly names by default.  */
+ { "f0", (RISCV_FIRST_FP_REGNUM + 0) },
+ { "f1", (RISCV_FIRST_FP_REGNUM + 1) },
+ { "f2", (RISCV_FIRST_FP_REGNUM + 2) },
+ { "f3", (RISCV_FIRST_FP_REGNUM + 3) },
+ { "f4", (RISCV_FIRST_FP_REGNUM + 4) },
+ { "f5", (RISCV_FIRST_FP_REGNUM + 5) },
+ { "f6", (RISCV_FIRST_FP_REGNUM + 6) },
+ { "f7", (RISCV_FIRST_FP_REGNUM + 7) },
+ { "f8", (RISCV_FIRST_FP_REGNUM + 8) },
+ { "f9", (RISCV_FIRST_FP_REGNUM + 9) },
+ { "f10", (RISCV_FIRST_FP_REGNUM + 10) },
+ { "f11", (RISCV_FIRST_FP_REGNUM + 11) },
+ { "f12", (RISCV_FIRST_FP_REGNUM + 12) },
+ { "f13", (RISCV_FIRST_FP_REGNUM + 13) },
+ { "f14", (RISCV_FIRST_FP_REGNUM + 14) },
+ { "f15", (RISCV_FIRST_FP_REGNUM + 15) },
+ { "f16", (RISCV_FIRST_FP_REGNUM + 16) },
+ { "f17", (RISCV_FIRST_FP_REGNUM + 17) },
+ { "f18", (RISCV_FIRST_FP_REGNUM + 18) },
+ { "f19", (RISCV_FIRST_FP_REGNUM + 19) },
+ { "f20", (RISCV_FIRST_FP_REGNUM + 20) },
+ { "f21", (RISCV_FIRST_FP_REGNUM + 21) },
+ { "f22", (RISCV_FIRST_FP_REGNUM + 22) },
+ { "f23", (RISCV_FIRST_FP_REGNUM + 23) },
+ { "f24", (RISCV_FIRST_FP_REGNUM + 24) },
+ { "f25", (RISCV_FIRST_FP_REGNUM + 25) },
+ { "f26", (RISCV_FIRST_FP_REGNUM + 26) },
+ { "f27", (RISCV_FIRST_FP_REGNUM + 27) },
+ { "f28", (RISCV_FIRST_FP_REGNUM + 28) },
+ { "f29", (RISCV_FIRST_FP_REGNUM + 29) },
+ { "f30", (RISCV_FIRST_FP_REGNUM + 30) },
+ { "f31", (RISCV_FIRST_FP_REGNUM + 31) },
 };
 
 /* Controls whether we place compressed breakpoints or not.  When in auto
@@ -468,17 +470,15 @@ static const char *
 riscv_register_name (struct gdbarch *gdbarch, int regnum)
 {
   /* Prefer to use the alias. */
-  if (regnum >= RISCV_ZERO_REGNUM && regnum <= RISCV_LAST_REGNUM)
+  if (regnum >= RISCV_ZERO_REGNUM && regnum <= RISCV_LAST_FP_REGNUM)
     {
-      int i;
-
-      for (i = 0; i < ARRAY_SIZE (riscv_register_aliases); ++i)
-	if (regnum == riscv_register_aliases[i].regnum)
-	  return riscv_register_aliases[i].name;
+      gdb_assert (regnum < ARRAY_SIZE (riscv_gdb_reg_names));
+      return riscv_gdb_reg_names[regnum];
     }
 
-  if (regnum >= RISCV_ZERO_REGNUM && regnum <= RISCV_LAST_FP_REGNUM)
-    return riscv_gdb_reg_names[regnum];
+  /* Check that there's no gap between the set of registers handled above,
+     and the set of registers handled next.  */
+  gdb_assert ((RISCV_LAST_FP_REGNUM + 1) == RISCV_FIRST_CSR_REGNUM);
 
   if (regnum >= RISCV_FIRST_CSR_REGNUM && regnum <= RISCV_LAST_CSR_REGNUM)
     {
@@ -838,6 +838,27 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
   fprintf_filtered (file, "\n");
 }
 
+/* Return true if REGNUM is a valid CSR register.  The CSR register space
+   is sparsely populated, so not every number is a named CSR.  */
+
+static bool
+riscv_is_regnum_a_named_csr (int regnum)
+{
+  gdb_assert (regnum >= RISCV_FIRST_CSR_REGNUM
+	      && regnum <= RISCV_LAST_CSR_REGNUM);
+
+  switch (regnum)
+    {
+#define DECLARE_CSR(name, num) case RISCV_ ## num ## _REGNUM:
+#include "opcode/riscv-opc.h"
+#undef DECLARE_CSR
+      return true;
+
+    default:
+      return false;
+    }
+}
+
 /* Implement the register_reggroup_p gdbarch method.  Is REGNUM a member
    of REGGROUP?  */
 
@@ -845,8 +866,6 @@ static int
 riscv_register_reggroup_p (struct gdbarch  *gdbarch, int regnum,
 			   struct reggroup *reggroup)
 {
-  unsigned int i;
-
   /* Used by 'info registers' and 'info registers <groupname>'.  */
 
   if (gdbarch_register_name (gdbarch, regnum) == NULL
@@ -857,12 +876,8 @@ riscv_register_reggroup_p (struct gdbarch  *gdbarch, int regnum,
     {
       if (regnum < RISCV_FIRST_CSR_REGNUM || regnum == RISCV_PRIV_REGNUM)
 	return 1;
-      /* Only include CSRs that have aliases.  */
-      for (i = 0; i < ARRAY_SIZE (riscv_register_aliases); ++i)
-	{
-	  if (regnum == riscv_register_aliases[i].regnum)
-	    return 1;
-	}
+      if (riscv_is_regnum_a_named_csr (regnum))
+        return 1;
       return 0;
     }
   else if (reggroup == float_reggroup)
@@ -885,12 +900,8 @@ riscv_register_reggroup_p (struct gdbarch  *gdbarch, int regnum,
 	return 1;
       if (regnum < RISCV_FIRST_CSR_REGNUM || regnum > RISCV_LAST_CSR_REGNUM)
 	return 0;
-      /* Only include CSRs that have aliases.  */
-      for (i = 0; i < ARRAY_SIZE (riscv_register_aliases); ++i)
-	{
-	  if (regnum == riscv_register_aliases[i].regnum)
-	    return 1;
-	}
+      if (riscv_is_regnum_a_named_csr (regnum))
+        return 1;
       return 0;
     }
   else if (reggroup == vector_reggroup)

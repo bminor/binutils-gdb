@@ -1,3 +1,16 @@
+2018-10-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-tdep.c (riscv_gdb_reg_names): Update comment, and all
+	register names.
+	(struct register_alias): Rename to...
+	(struct riscv_register_alias): ...this, and update comment.
+	(riscv_register_aliases): Update type, and alias names.  Remove
+	CSR names from this list.
+	(riscv_register_name): Use riscv_gdb_reg_names for int and float
+	register names.  Add an extra assertion.
+	(riscv_is_regnum_a_named_csr): New function.
+	(riscv_register_reggroup_p): Use riscv_is_regnum_a_named_csr.
+
 2018-10-22  Jim Wilson  <jimw@sifive.com>
 
 	* riscv-tdep.c (riscv_push_dummy_call) <in_reg>: Check for value in

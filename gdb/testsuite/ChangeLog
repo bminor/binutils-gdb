@@ -1,3 +1,8 @@
+2018-10-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.arch/riscv-reg-aliases.c: New file.
+	* gdb.arch/riscv-reg-aliases.exp: New file.
+
 2018-10-19  Alan Hayward  <alan.hayward@arm.com>
 
 	* gdb.python/py-cmd.exp: Check for gdb_prompt.
