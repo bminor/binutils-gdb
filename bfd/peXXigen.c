@@ -2993,6 +2993,7 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
 		   "exceeds space left in section (%" PRIx64 ")"),
 		 obfd, ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size,
 		 (uint64_t) (section->size - (addr - section->vma)));
+	      free (data);
 	      return FALSE;
 	    }
 	  /* PR 23110.  */
@@ -3002,6 +3003,7 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
 	      _bfd_error_handler
 		(_("%pB: Data Directory size (%#lx) is negative"),
 		 obfd, ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size);
+	      free (data);
 	      return FALSE;
 	    }
 
@@ -3030,8 +3032,10 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
 	  if (!bfd_set_section_contents (obfd, section, data, 0, section->size))
 	    {
 	      _bfd_error_handler (_("failed to update file offsets in debug directory"));
+	      free (data);
 	      return FALSE;
 	    }
+	  free (data);
 	}
       else if (section)
 	{

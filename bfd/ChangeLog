@@ -1,5 +1,11 @@
 2018-10-16  Alan Modra  <amodra@gmail.com>
 
+	PR 23781
+	* peXXigen.c (_bfd_XX_bfd_copy_private_bfd_data_common): Free data
+	before returning.
+
+2018-10-16  Alan Modra  <amodra@gmail.com>
+
 	PR 23534
 	* init.c (bfd_init): Return an unsigned int.
 	bfd-in2.h: Regenerate.
