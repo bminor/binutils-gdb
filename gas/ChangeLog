@@ -1,3 +1,10 @@
+2018-10-16  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* testsuite/gas/aarch64/illegal-dotproduct.d: New test.
+	* testsuite/gas/aarch64/illegal-dotproduct.l: New test.
+	* testsuite/gas/aarch64/illegal-dotproduct.s: New test.
+
+
 2018-10-15  Alan Modra  <amodra@gmail.com>
 
 	PR 23534

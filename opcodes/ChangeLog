@@ -1,3 +1,8 @@
+2018-10-16  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* aarch64-opc.c (struct operand_qualifier_data): Change qualifier data
+	corresponding to AARCH64_OPND_QLF_S_4B qualifier.
+
 2018-10-10  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-gen.c (opcode_modifiers): Drop Size16, Size32, and
