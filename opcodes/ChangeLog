@@ -1,3 +1,8 @@
+2018-10-16  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* aarch64-opc.c (struct operand_qualifier_data): Change qualifier data
+	corresponding to AARCH64_OPND_QLF_S_4B qualifier.
+
 2018-10-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (rm_table): Add enclv.

@@ -1,3 +1,9 @@
+2018-10-16  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* testsuite/gas/aarch64/illegal-dotproduct.d: New test.
+	* testsuite/gas/aarch64/illegal-dotproduct.l: New test.
+	* testsuite/gas/aarch64/illegal-dotproduct.s: New test.
+
 2018-10-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/gas/i386/se1.s: Add enclv.
