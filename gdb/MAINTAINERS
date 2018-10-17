@@ -354,7 +354,7 @@ Darwin			Tristan Gingold		tgingold@free.fr
 djgpp native		Eli Zaretskii		eliz@gnu.org
 FreeBSD			John Baldwin		jhb@freebsd.org
 GNU/Linux m68k		Andreas Schwab		schwab@linux-m68k.org
-
+Solaris			Rainer Orth		ro@CeBiTec.Uni-Bielefeld.DE
 
 
 Core: Generic components used by all of GDB

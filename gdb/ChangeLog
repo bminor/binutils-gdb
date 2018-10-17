@@ -1,3 +1,8 @@
+2018-10-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* MAINTAINERS (Responsible Maintainers): Add Rainer Orth as
+	Solaris Maintainer.
+
 2018-10-15  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui.c (strcat_to_buf): Remove casts.
