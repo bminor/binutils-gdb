@@ -1,3 +1,7 @@
+2018-10-17  Paul Koning  <paul_koning@dell.com>
+
+	* charset.c (convert_between_encodings): Fix unsigned overflow.
+
 2018-10-17  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-nat.c (fbsd_nat_target::info_proc) Use
