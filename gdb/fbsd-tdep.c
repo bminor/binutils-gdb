@@ -1047,7 +1047,7 @@ fbsd_core_info_proc_files (struct gdbarch *gdbarch)
 /* Helper function to generate mappings flags for a single VM map
    entry in 'info proc mappings'.  */
 
-const char *
+static const char *
 fbsd_vm_map_entry_flags (int kve_flags, int kve_protection)
 {
   static char vm_flags[9];
@@ -1064,6 +1064,58 @@ fbsd_vm_map_entry_flags (int kve_flags, int kve_protection)
   vm_flags[8] = '\0';
 
   return vm_flags;
+}
+
+/* See fbsd-tdep.h.  */
+
+void
+fbsd_info_proc_mappings_header (int addr_bit)
+{
+  printf_filtered (_("Mapped address spaces:\n\n"));
+  if (addr_bit == 64)
+    {
+      printf_filtered ("  %18s %18s %10s %10s %9s %s\n",
+		       "Start Addr",
+		       "  End Addr",
+		       "      Size", "    Offset", "Flags  ", "File");
+    }
+  else
+    {
+      printf_filtered ("\t%10s %10s %10s %10s %9s %s\n",
+		       "Start Addr",
+		       "  End Addr",
+		       "      Size", "    Offset", "Flags  ", "File");
+    }
+}
+
+/* See fbsd-tdep.h.  */
+
+void
+fbsd_info_proc_mappings_entry (int addr_bit, ULONGEST kve_start,
+			       ULONGEST kve_end, ULONGEST kve_offset,
+			       int kve_flags, int kve_protection,
+			       const void *kve_path)
+{
+  if (addr_bit == 64)
+    {
+      printf_filtered ("  %18s %18s %10s %10s %9s %s\n",
+		       hex_string (kve_start),
+		       hex_string (kve_end),
+		       hex_string (kve_end - kve_start),
+		       hex_string (kve_offset),
+		       fbsd_vm_map_entry_flags (kve_flags, kve_protection),
+		       reinterpret_cast<const char *> (kve_path));
+    }
+  else
+    {
+      printf_filtered ("\t%10s %10s %10s %10s %9s %s\n",
+		       hex_string (kve_start),
+		       hex_string (kve_end),
+		       hex_string (kve_end - kve_start),
+		       hex_string (kve_offset),
+		       fbsd_vm_map_entry_flags (kve_flags, kve_protection),
+		       reinterpret_cast<const char *> (kve_path));
+    }
 }
 
 /* Implement "info proc mappings" for a corefile.  */
@@ -1097,55 +1149,20 @@ fbsd_core_info_proc_mappings (struct gdbarch *gdbarch)
   /* Skip over the structure size.  */
   descdata += 4;
 
-  printf_filtered (_("Mapped address spaces:\n\n"));
-  if (gdbarch_addr_bit (gdbarch) == 64)
-    {
-      printf_filtered ("  %18s %18s %10s %10s %9s %s\n",
-		       "Start Addr",
-		       "  End Addr",
-		       "      Size", "    Offset", "Flags  ", "File");
-    }
-  else
-    {
-      printf_filtered ("\t%10s %10s %10s %10s %9s %s\n",
-		       "Start Addr",
-		       "  End Addr",
-		       "      Size", "    Offset", "Flags  ", "File");
-    }
-
+  fbsd_info_proc_mappings_header (gdbarch_addr_bit (gdbarch));
   while (descdata + KVE_PATH < descend)
     {
-      ULONGEST start, end, offset, flags, prot, structsize;
-
-      structsize = bfd_get_32 (core_bfd, descdata + KVE_STRUCTSIZE);
+      ULONGEST structsize = bfd_get_32 (core_bfd, descdata + KVE_STRUCTSIZE);
       if (structsize < KVE_PATH)
 	error (_("malformed core note - vmmap entry too small"));
 
-      start = bfd_get_64 (core_bfd, descdata + KVE_START);
-      end = bfd_get_64 (core_bfd, descdata + KVE_END);
-      offset = bfd_get_64 (core_bfd, descdata + KVE_OFFSET);
-      flags = bfd_get_32 (core_bfd, descdata + KVE_FLAGS);
-      prot = bfd_get_32 (core_bfd, descdata + KVE_PROTECTION);
-      if (gdbarch_addr_bit (gdbarch) == 64)
-	{
-	  printf_filtered ("  %18s %18s %10s %10s %9s %s\n",
-			   paddress (gdbarch, start),
-			   paddress (gdbarch, end),
-			   hex_string (end - start),
-			   hex_string (offset),
-			   fbsd_vm_map_entry_flags (flags, prot),
-			   descdata + KVE_PATH);
-	}
-      else
-	{
-	  printf_filtered ("\t%10s %10s %10s %10s %9s %s\n",
-			   paddress (gdbarch, start),
-			   paddress (gdbarch, end),
-			   hex_string (end - start),
-			   hex_string (offset),
-			   fbsd_vm_map_entry_flags (flags, prot),
-			   descdata + KVE_PATH);
-	}
+      ULONGEST start = bfd_get_64 (core_bfd, descdata + KVE_START);
+      ULONGEST end = bfd_get_64 (core_bfd, descdata + KVE_END);
+      ULONGEST offset = bfd_get_64 (core_bfd, descdata + KVE_OFFSET);
+      LONGEST flags = bfd_get_signed_32 (core_bfd, descdata + KVE_FLAGS);
+      LONGEST prot = bfd_get_signed_32 (core_bfd, descdata + KVE_PROTECTION);
+      fbsd_info_proc_mappings_entry (gdbarch_addr_bit (gdbarch), start, end,
+				     offset, flags, prot, descdata + KVE_PATH);
 
       descdata += structsize;
     }

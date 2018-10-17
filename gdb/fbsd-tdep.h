@@ -42,11 +42,22 @@ extern void fbsd_info_proc_files_entry (int kf_type, int kf_fd, int kf_flags,
 					const void *kf_sa_peer,
 					const void *kf_path);
 
-/* Helper function to generate mappings flags for a single VM map
-   entry in 'info proc mappings'.  The KVE_FLAGS and KVE_PROTECTION
-   parameters should contain the values of the corresponding fields in
-   a 'struct kinfo_vmentry'.  */
+/* Output the header for "info proc mappings".  ADDR_BIT is the size
+   of a virtual address in bits.  */
 
-extern const char *fbsd_vm_map_entry_flags (int kve_flags, int kve_protection);
+extern void fbsd_info_proc_mappings_header (int addr_bit);
+
+/* Output description of a single memory range for "info proc
+   mappings".  ADDR_BIT is the size of a virtual address in bits.  The
+   KVE_START, KVE_END, KVE_OFFSET, KVE_FLAGS, and KVE_PROTECTION
+   parameters should contain the value of the corresponding fields in
+   a 'struct kinfo_vmentry'.  The KVE_PATH parameter should contain a
+   pointer to the 'kve_path' field in a 'struct kinfo_vmentry'. */
+
+extern void fbsd_info_proc_mappings_entry (int addr_bit, ULONGEST kve_start,
+					   ULONGEST kve_end,
+					   ULONGEST kve_offset,
+					   int kve_flags, int kve_protection,
+					   const void *kve_path);
 
 #endif /* fbsd-tdep.h */

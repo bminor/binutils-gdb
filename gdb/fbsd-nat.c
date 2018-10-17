@@ -413,46 +413,15 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
 
       if (vmentl != nullptr)
 	{
-	  printf_filtered (_("Mapped address spaces:\n\n"));
-#ifdef __LP64__
-	  printf_filtered ("  %18s %18s %10s %10s %9s %s\n",
-			   "Start Addr",
-			   "  End Addr",
-			   "      Size", "    Offset", "Flags  ", "File");
-#else
-	  printf_filtered ("\t%10s %10s %10s %10s %9s %s\n",
-			   "Start Addr",
-			   "  End Addr",
-			   "      Size", "    Offset", "Flags  ", "File");
-#endif
+	  int addr_bit = TARGET_CHAR_BIT * sizeof (void *);
+	  fbsd_info_proc_mappings_header (addr_bit);
 
 	  struct kinfo_vmentry *kve = vmentl.get ();
 	  for (int i = 0; i < nvment; i++, kve++)
-	    {
-	      ULONGEST start, end;
-
-	      start = kve->kve_start;
-	      end = kve->kve_end;
-#ifdef __LP64__
-	      printf_filtered ("  %18s %18s %10s %10s %9s %s\n",
-			       hex_string (start),
-			       hex_string (end),
-			       hex_string (end - start),
-			       hex_string (kve->kve_offset),
-			       fbsd_vm_map_entry_flags (kve->kve_flags,
-							kve->kve_protection),
-			       kve->kve_path);
-#else
-	      printf_filtered ("\t%10s %10s %10s %10s %9s %s\n",
-			       hex_string (start),
-			       hex_string (end),
-			       hex_string (end - start),
-			       hex_string (kve->kve_offset),
-			       fbsd_vm_map_entry_flags (kve->kve_flags,
-							kve->kve_protection),
-			       kve->kve_path);
-#endif
-	    }
+	    fbsd_info_proc_mappings_entry (addr_bit, kve->kve_start,
+					   kve->kve_end, kve->kve_offset,
+					   kve->kve_flags, kve->kve_protection,
+					   kve->kve_path);
 	}
       else
 	warning (_("unable to fetch virtual memory map"));

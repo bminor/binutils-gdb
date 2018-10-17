@@ -1,3 +1,16 @@
+2018-10-17  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (fbsd_nat_target::info_proc) Use
+	fbsd_info_proc_mappings_header and fbsd_info_proc_mappings_entry.
+	* fbsd-tdep.c (fbsd_vm_map_entry_flags): Mark static.
+	(fbsd_info_proc_mappings_header, fbsd_info_proc_mappings_entry):
+	New functions.
+	(fbsd_core_info_proc_mappings): Use fbsd_info_proc_mappings_header
+	and fbsd_info_proc_mappings_header.
+	* fbsd-tdep.h (fbsd_vm_map_entry_flags): Remove.
+	(fbsd_info_proc_mappings_header, fbsd_info_proc_mappings_entry):
+	New.
+
 2018-10-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* MAINTAINERS (Responsible Maintainers): Add Rainer Orth as
