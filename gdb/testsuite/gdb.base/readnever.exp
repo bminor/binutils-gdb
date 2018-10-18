@@ -16,7 +16,7 @@
 standard_testfile .c
 
 if { [build_executable "failed to build" $testfile $srcfile { debug }] == -1 } {
-    untested "Couldn't compile ${srcfile}"
+    untested "couldn't compile ${srcfile}"
     return -1
 }
 

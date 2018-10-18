@@ -33,7 +33,7 @@ if { [skip_guile_tests] } { continue }
 # The following tests require execution.
 
 if ![gdb_guile_runto_main] {
-    fail "Can't run to main"
+    fail "can't run to main"
     return
 }
 

@@ -43,7 +43,7 @@ set catchpoint_storage_error_msg \
 ############################################
 
 if ![runto_main] then {
-   fail "Cannot run to main, testcase aborted"
+   fail "cannot run to main, testcase aborted"
    return 0
 }
 

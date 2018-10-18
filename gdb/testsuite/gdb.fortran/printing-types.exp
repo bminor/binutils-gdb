@@ -22,7 +22,7 @@ if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug f90}]} {
 }
 
 if {![runto MAIN__]} then {
-    untested "Could not run to breakpoint MAIN__"
+    untested "could not run to breakpoint MAIN__"
     return -1
 }
 

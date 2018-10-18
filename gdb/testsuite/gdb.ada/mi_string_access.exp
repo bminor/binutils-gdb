@@ -34,7 +34,7 @@ mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_load ${binfile}
 
 if ![mi_run_to_main] then {
-   fail "Cannot run to main, testcase aborted"
+   fail "cannot run to main, testcase aborted"
    return 0
 }
 

@@ -1,3 +1,15 @@
+2018-10-18  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.ada/bp_inlined_func.exp: Fix capitalized test name.
+	* gdb.ada/excep_handle.exp: Same.
+	* gdb.ada/mi_string_access.exp: Same.
+	* gdb.ada/mi_var_union.exp: Same.
+	* gdb.arch/arc-analyze-prologue.exp: Same.
+	* gdb.arch/arc-decode-insn.exp: Same.
+	* gdb.base/readnever.exp: Same.
+	* gdb.fortran/printing-types.exp: Same.
+	* gdb.guile/scm-lazy-string.exp: Same.
+
 2018-10-16  Tom de Vries  <tdevries@suse.de>
 
 	PR gdb/23730
