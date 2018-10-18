@@ -1,3 +1,9 @@
+2018-10-18  Nick Clifton  <nickc@redhat.com>
+
+	* doc/binutils.texi (readelf): Document alternatives to the
+	--unwind option if it is not supported for the target
+	architecture.
+
 2018-10-16  Alan Modra  <amodra@gmail.com>
 
 	PR 23780

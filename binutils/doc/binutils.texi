@@ -4620,7 +4620,11 @@ Displays the contents of the file's relocation section, if it has one.
 @cindex unwind information
 Displays the contents of the file's unwind section, if it has one.  Only
 the unwind sections for IA64 ELF files, as well as ARM unwind tables
-(@code{.ARM.exidx} / @code{.ARM.extab}) are currently supported.
+(@code{.ARM.exidx} / @code{.ARM.extab}) are currently supported.  If
+support is not yet implemented for your architecture you could try
+dumping the contents of the @var{.eh_frames} section using the
+@option{--debug-dump=frames} or @option{--debug-dump=frames-interp}
+options.
 
 @item -d
 @itemx --dynamic
