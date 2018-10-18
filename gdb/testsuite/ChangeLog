@@ -1,3 +1,8 @@
+2018-10-31  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.dwarf2/void-type.c: New file.
+	* gdb.dwarf2/void-type.exp: New file.
+
 2018-10-27  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.base/info_qt.c: New file.

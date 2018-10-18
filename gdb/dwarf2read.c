@@ -551,6 +551,7 @@ struct dwarf2_cu
   unsigned int checked_producer : 1;
   unsigned int producer_is_gxx_lt_4_6 : 1;
   unsigned int producer_is_gcc_lt_4_3 : 1;
+  bool producer_is_icc : 1;
   unsigned int producer_is_icc_lt_14 : 1;
   bool producer_is_codewarrior : 1;
 
@@ -11363,6 +11364,19 @@ producer_is_icc_lt_14 (struct dwarf2_cu *cu)
   return cu->producer_is_icc_lt_14;
 }
 
+/* ICC generates a DW_AT_type for C void functions.  This was observed on
+   ICC 14.0.5.212, and appears to be against the DWARF spec (V5 3.3.2)
+   which says that void functions should not have a DW_AT_type.  */
+
+static bool
+producer_is_icc (struct dwarf2_cu *cu)
+{
+  if (!cu->checked_producer)
+    check_producer (cu);
+
+  return cu->producer_is_icc;
+}
+
 /* Check for possibly missing DW_AT_comp_dir with relative .debug_line
    directory paths.  GCC SVN r127613 (new option -fdebug-prefix-map) fixed
    this, it was first present in GCC release 4.3.0.  */
@@ -14897,7 +14911,10 @@ check_producer (struct dwarf2_cu *cu)
       cu->producer_is_gcc_lt_4_3 = major < 4 || (major == 4 && minor < 3);
     }
   else if (producer_is_icc (cu->producer, &major, &minor))
-    cu->producer_is_icc_lt_14 = major < 14;
+    {
+      cu->producer_is_icc = true;
+      cu->producer_is_icc_lt_14 = major < 14;
+    }
   else if (startswith (cu->producer, "CodeWarrior S12/L-ISA"))
     cu->producer_is_codewarrior = true;
   else
@@ -17494,6 +17511,25 @@ dwarf2_init_float_type (struct objfile *objfile, int bits, const char *name,
   return type;
 }
 
+/* Allocate an integer type of size BITS and name NAME.  */
+
+static struct type *
+dwarf2_init_integer_type (struct dwarf2_cu *cu, struct objfile *objfile,
+			  int bits, int unsigned_p, const char *name)
+{
+  struct type *type;
+
+  /* Versions of Intel's C Compiler generate an integer type called "void"
+     instead of using DW_TAG_unspecified_type.  This has been seen on
+     at least versions 14, 17, and 18.  */
+  if (bits == 0 && producer_is_icc (cu) && strcmp (name, "void") == 0)
+    type = objfile_type (objfile)->builtin_void;
+  else
+    type = init_integer_type (objfile, bits, unsigned_p, name);
+
+  return type;
+}
+
 /* Find a representation of a given base type and install
    it in the TYPE field of the die.  */
 
@@ -17543,7 +17579,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	type = dwarf2_init_float_type (objfile, bits, name, name);
 	break;
       case DW_ATE_signed:
-	type = init_integer_type (objfile, bits, 0, name);
+	type = dwarf2_init_integer_type (cu, objfile, bits, 0, name);
 	break;
       case DW_ATE_unsigned:
 	if (cu->language == language_fortran
@@ -17551,7 +17587,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	    && startswith (name, "character("))
 	  type = init_character_type (objfile, bits, 1, name);
 	else
-	  type = init_integer_type (objfile, bits, 1, name);
+	  type = dwarf2_init_integer_type (cu, objfile, bits, 1, name);
 	break;
       case DW_ATE_signed_char:
 	if (cu->language == language_ada || cu->language == language_m2
@@ -17559,7 +17595,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	    || cu->language == language_fortran)
 	  type = init_character_type (objfile, bits, 0, name);
 	else
-	  type = init_integer_type (objfile, bits, 0, name);
+	  type = dwarf2_init_integer_type (cu, objfile, bits, 0, name);
 	break;
       case DW_ATE_unsigned_char:
 	if (cu->language == language_ada || cu->language == language_m2
@@ -17568,7 +17604,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	    || cu->language == language_rust)
 	  type = init_character_type (objfile, bits, 1, name);
 	else
-	  type = init_integer_type (objfile, bits, 1, name);
+	  type = dwarf2_init_integer_type (cu, objfile, bits, 1, name);
 	break;
       case DW_ATE_UTF:
 	{
@@ -17582,7 +17618,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	    {
 	      complaint (_("unsupported DW_ATE_UTF bit size: '%d'"),
 			 bits);
-	      type = init_integer_type (objfile, bits, 1, name);
+	      type = dwarf2_init_integer_type (cu, objfile, bits, 1, name);
 	    }
 	  return set_die_type (die, type, cu);
 	}
@@ -25129,6 +25165,7 @@ dwarf2_cu::dwarf2_cu (struct dwarf2_per_cu_data *per_cu_)
     checked_producer (0),
     producer_is_gxx_lt_4_6 (0),
     producer_is_gcc_lt_4_3 (0),
+    producer_is_icc (false),
     producer_is_icc_lt_14 (0),
     producer_is_codewarrior (false),
     processing_has_namespace_info (0)

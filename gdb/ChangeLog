@@ -1,3 +1,15 @@
+2018-10-31  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* dwarf2read.c (struct dwarf2_cu): Add producer_is_icc field.
+	(producer_is_icc): New function.
+	(check_producer): Set producer_is_icc field on dwarf2_cu.
+	(dwarf2_init_integer_type): New function.
+	(read_base_type): Call dwarf2_init_integer_type instead of
+	init_integer_type in all cases.
+	(dwarf2_cu::dwarf2_cu): Initialise producer_is_icc field.
+	* valprint.c (maybe_negate_by_bytes): Add an assertion that the
+	LEN is greater than 0.
+
 2018-10-30  Tom Tromey  <tom@tromey.com>
 
 	* main.c (captured_main_1): Check return value of bfd_init.

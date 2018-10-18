@@ -1604,6 +1604,7 @@ maybe_negate_by_bytes (const gdb_byte *bytes, unsigned len,
 		       gdb::byte_vector *out_vec)
 {
   gdb_byte sign_byte;
+  gdb_assert (len > 0);
   if (byte_order == BFD_ENDIAN_BIG)
     sign_byte = bytes[0];
   else
