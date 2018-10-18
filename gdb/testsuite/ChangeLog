@@ -1,3 +1,7 @@
+2018-10-19  Alan Hayward  <alan.hayward@arm.com>
+
+	* gdb.compile/compile-cplus-print.exp: Start inferior earlier.
+
 2018-10-18  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR cli/23785

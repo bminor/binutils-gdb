@@ -33,6 +33,10 @@ if { [eval build_executable_from_specs ${testfile}.exp $testfile {$options} ${sr
 
 clean_restart ${testfile}
 
+if ![runto_main] {
+    return -1
+}
+
 if {[skip_compile_feature_tests]} {
     untested "compile command not supported (could not find libcc1 shared library?)"
     return -1
@@ -40,10 +44,6 @@ if {[skip_compile_feature_tests]} {
 
 gdb_test_no_output "set language c++" \
     "Set language to C++"
-
-if ![runto_main] {
-    return -1
-}
 
 gdb_test "compile print varint" " = 10"
 gdb_test "compile print vararray" " = \\{1, 2, 3, 4, 5\\}"
