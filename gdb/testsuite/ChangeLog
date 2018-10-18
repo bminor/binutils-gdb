@@ -1,5 +1,9 @@
 2018-10-19  Alan Hayward  <alan.hayward@arm.com>
 
+	* gdb.base/vla-optimized-out.exp: Allow either optimized out or 6.
+
+2018-10-19  Alan Hayward  <alan.hayward@arm.com>
+
 	* gdb.cp/ovldbreak.exp: Fix regexps.
 
 2018-10-19  Alan Hayward  <alan.hayward@arm.com>

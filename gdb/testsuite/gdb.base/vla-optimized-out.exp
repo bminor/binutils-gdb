@@ -70,10 +70,10 @@ proc vla_optimized_out {exe_suffix options} {
 
 foreach {test_prefix options} \
     { "o1" {{debug optimize=-O1 additional_flags=-DNOCLONE} "6"} \
-      "o3" {{debug optimize=-O3} "<optimized out>"} \
+      "o3" {{debug optimize=-O3} "<optimized out>|6"} \
       "o3_strict" {{debug optimize=-O3 \
 			additional_flags=-gstrict-dwarf} \
-		       "<optimized out>"}} {
+		       "<optimized out>|6"}} {
     with_test_prefix $test_prefix {
 	vla_optimized_out $test_prefix $options
     }
