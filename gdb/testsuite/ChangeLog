@@ -1,3 +1,9 @@
+2018-10-18  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR cli/23785
+	* gdb.base/restore.exp: New test to check if "restore" with an
+	invalid file doesn't segfault.
+
 2018-10-18  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.ada/bp_inlined_func.exp: Fix capitalized test name.
