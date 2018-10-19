@@ -1,3 +1,9 @@
+2018-10-19  Andreas Arnez  <arnez@linux.ibm.com>
+
+	* s390-tdep.c (s390_pseudo_register_type): For v0-v15 don't yield
+	the possibly non-existent tdesc type 'vec128', but the type of raw
+	register v16 instead.
+
 2018-10-19  Gary Benson <gbenson@redhat.com>
 
 	* cli/cli-interp.c (cli_interp::~cli_interp): New function.

@@ -1275,8 +1275,9 @@ s390_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum_is_gpr_full (tdep, regnum))
     return builtin_type (gdbarch)->builtin_uint64;
 
+  /* For the "concatenated" vector registers use the same type as v16.  */
   if (regnum_is_vxr_full (tdep, regnum))
-    return tdesc_find_type (gdbarch, "vec128");
+    return tdesc_register_type (gdbarch, S390_V16_REGNUM);
 
   internal_error (__FILE__, __LINE__, _("invalid regnum"));
 }
