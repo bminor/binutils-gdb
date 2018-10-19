@@ -137,6 +137,8 @@
 #define AARCH64_SIGCONTEXT_XO_OFFSET            8
 #define AARCH64_SIGCONTEXT_RESERVED_OFFSET      288
 
+#define AARCH64_SIGCONTEXT_RESERVED_SIZE	4096
+
 /* Unique identifiers that may be used for aarch64_ctx.magic.  */
 #define AARCH64_EXTRA_MAGIC			0x45585401
 #define AARCH64_FPSIMD_MAGIC			0x46508001
@@ -197,9 +199,11 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
   CORE_ADDR sigcontext_addr = (sp + AARCH64_RT_SIGFRAME_UCONTEXT_OFFSET
 			       + AARCH64_UCONTEXT_SIGCONTEXT_OFFSET );
   CORE_ADDR section = sigcontext_addr + AARCH64_SIGCONTEXT_RESERVED_OFFSET;
+  CORE_ADDR section_end = section + AARCH64_SIGCONTEXT_RESERVED_SIZE;
   CORE_ADDR fpsimd = 0;
   CORE_ADDR sve_regs = 0;
   uint32_t size, magic;
+  bool extra_found = false;
   int num_regs = gdbarch_num_regs (gdbarch);
 
   /* Read in the integer registers.  */
@@ -218,8 +222,9 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
 			   sigcontext_addr + AARCH64_SIGCONTEXT_XO_OFFSET
 			     + 32 * AARCH64_SIGCONTEXT_REG_SIZE);
 
-  /* Find the FP and SVE sections.  */
-  while ((magic = read_aarch64_ctx (section, byte_order, &size)) != 0)
+  /* Search for the FP and SVE sections, stopping at null.  */
+  while ((magic = read_aarch64_ctx (section, byte_order, &size)) != 0
+	 && size != 0)
     {
       switch (magic)
 	{
@@ -273,12 +278,20 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
 	      }
 
 	    section = extract_unsigned_integer (buf, 8, byte_order);
+	    extra_found = true;
 	    break;
 	  }
 
 	default:
+	  section += size;
 	  break;
 	}
+
+      /* Prevent searching past the end of the reserved section.  The extra
+	 section does not have a hard coded limit - we have to rely on it ending
+	 with nulls.  */
+      if (!extra_found && section > section_end)
+	break;
     }
 
   if (sve_regs != 0)

@@ -1,3 +1,9 @@
+2018-10-19  Alan Hayward  <alan.hayward@arm.com>
+
+	* aarch64-linux-tdep.c (AARCH64_SIGCONTEXT_RESERVED_SIZE): New
+	define.
+	(aarch64_linux_sigframe_init): Extra boundary checks.
+
 2018-10-19  Andreas Arnez  <arnez@linux.ibm.com>
 
 	* s390-tdep.c (s390_pseudo_register_type): For v0-v15 don't yield
