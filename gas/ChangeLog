@@ -1,3 +1,12 @@
+2018-10-19  Fredrik Noring  <noring@nocrew.org>
+
+	* testsuite/gas/mips/r5900.s: Extend the R5900 short loop fix
+	test with border cases.
+	* testsuite/gas/mips/r5900.d: Add extra expected disassembly.
+	* config/tc-mips.c (can_swap_branch_p): Clarify the R5900 short
+	loop hardware bug conditions.  Correct note on the R5900
+	instruction count short loop fix.
+
 2018-10-16  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* testsuite/gas/aarch64/illegal-dotproduct.d: New test.

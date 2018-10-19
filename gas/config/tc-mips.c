@@ -6982,9 +6982,21 @@ can_swap_branch_p (struct mips_cl_insn *ip, expressionS *address_expr,
       && insn_length (history) != 4)
     return FALSE;
 
-  /* On R5900 short loops need to be fixed by inserting a nop in
-     the branch delay slots.
-     A short loop can be terminated too early.  */
+  /* On the R5900 short loops need to be fixed by inserting a NOP in the
+     branch delay slot.
+
+     The short loop bug under certain conditions causes loops to execute
+     only once or twice.  We must ensure that the assembler never
+     generates loops that satisfy all of the following conditions:
+
+     - a loop consists of less than or equal to six instructions
+       (including the branch delay slot);
+     - a loop contains only one conditional branch instruction at the end
+       of the loop;
+     - a loop does not contain any other branch or jump instructions;
+     - a branch delay slot of the loop is not NOP (EE 2.9 or later).
+
+     We need to do this because of a hardware bug in the R5900 chip.  */
   if (mips_opts.arch == CPU_R5900
       /* Check if instruction has a parameter, ignore "j $31". */
       && (address_expr != NULL)
@@ -7002,8 +7014,8 @@ can_swap_branch_p (struct mips_cl_insn *ip, expressionS *address_expr,
 	|| (ip->insn_opcode & 0xffff0000) == 0x04110000)) /* bgezal $0 */
     {
       int distance;
-      /* Check if loop is shorter than 6 instructions including
-         branch and delay slot.  */
+      /* Check if loop is shorter than or equal to 6 instructions
+         including branch and delay slot.  */
       distance = frag_now_fix () - S_GET_VALUE (address_expr->X_add_symbol);
       if (distance <= 20)
         {
