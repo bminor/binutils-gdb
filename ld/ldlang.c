@@ -6383,8 +6383,10 @@ lang_end (void)
     warn = TRUE;
 
   /* Force the user to specify a root when generating a relocatable with
-     --gc-sections.  */
-  if (link_info.gc_sections && bfd_link_relocatable (&link_info)
+     --gc-sections, unless --gc-keep-exported was also given.  */
+  if (bfd_link_relocatable (&link_info)
+      && link_info.gc_sections
+      && !link_info.gc_keep_exported
       && !(entry_from_cmdline || undef_from_cmdline))
     einfo (_("%F%P: gc-sections requires either an entry or "
 	     "an undefined symbol\n"));

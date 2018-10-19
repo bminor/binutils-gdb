@@ -1,3 +1,8 @@
+2018-10-20  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (lang_end): Don't error if no --entry or --undefined
+	is given with -r -gc-sections if --gc-keep-exported.
+
 2018-10-15  Jim Wilson  <jimw@sifive.com>
 
 	* emulparams/elf32lriscv-defs.sh (DATA_START_SYMBOLS): New.
