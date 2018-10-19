@@ -1,3 +1,9 @@
+2018-10-19  Tamar Christina  <tamar.christina@arm.com>
+
+	* arm-dis.c (UNKNOWN_INSTRUCTION_32BIT): Format specifier for arm mode.
+	(UNKNOWN_INSTRUCTION_16BIT): Format specifier for thumb mode.
+	(print_insn_arm, print_insn_thumb16, print_insn_thumb32): Use them.
+
 2018-10-16  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* aarch64-opc.c (struct operand_qualifier_data): Change qualifier data
