@@ -1,5 +1,10 @@
 2018-10-19  Tamar Christina  <tamar.christina@arm.com>
 
+	* testsuite/gas/arm/undefined-insn-arm.d: Widen pe skip.
+	* testsuite/gas/arm/undefined-insn-thumb.d: Likewise.
+
+2018-10-19  Tamar Christina  <tamar.christina@arm.com>
+
 	* testsuite/gas/arm/undefined-insn-arm.d: New test.
 	* testsuite/gas/arm/undefined-insn-thumb.d: New test.
 	* testsuite/gas/arm/undefined-insn.s: New test.
