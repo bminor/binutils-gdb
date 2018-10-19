@@ -141,6 +141,8 @@ enum opcode_sentinel_enum
 } opcode_sentinels;
 
 #define UNDEFINED_INSTRUCTION      "\t\t; <UNDEFINED> instruction: %0-31x"
+#define UNKNOWN_INSTRUCTION_32BIT  "\t\t; <UNDEFINED> instruction: %08x"
+#define UNKNOWN_INSTRUCTION_16BIT  "\t\t; <UNDEFINED> instruction: %04x"
 #define UNPREDICTABLE_INSTRUCTION  "\t; <UNPREDICTABLE>"
 
 /* Common coprocessor opcodes shared between Arm and Thumb-2.  */
@@ -5188,7 +5190,8 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 	  return;
 	}
     }
-  abort ();
+  func (stream, UNKNOWN_INSTRUCTION_32BIT, (unsigned)given);
+  return;
 }
 
 /* Print one 16-bit Thumb instruction from PC on INFO->STREAM.  */
@@ -5459,7 +5462,8 @@ print_insn_thumb16 (bfd_vma pc, struct disassemble_info *info, long given)
       }
 
   /* No match.  */
-  abort ();
+  func (stream, UNKNOWN_INSTRUCTION_16BIT, (unsigned)given);
+  return;
 }
 
 /* Return the name of an V7M special register.  */
@@ -6083,7 +6087,8 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
       }
 
   /* No match.  */
-  abort ();
+  func (stream, UNKNOWN_INSTRUCTION_32BIT, (unsigned)given);
+  return;
 }
 
 /* Print data bytes on INFO->STREAM.  */
