@@ -1,3 +1,9 @@
+2018-10-20  Alan Modra  <amodra@gmail.com>
+
+	PR 23788
+	* elf.c (section_match): Don't require a size match for SHT_SYMTAB
+	or SHT_STRTAB.
+
 2018-10-17  Alan Modra  <amodra@gmail.com>
 
 	PR 23653
