@@ -86,6 +86,9 @@ extern cli_style_option function_name_style;
 /* The variable name style.  */
 extern cli_style_option variable_name_style;
 
+/* The address style.  */
+extern cli_style_option address_style;
+
 /* True if styling is enabled.  */
 extern int cli_styling;
 

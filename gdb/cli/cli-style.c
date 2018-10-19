@@ -66,6 +66,10 @@ cli_style_option variable_name_style (ui_file_style::CYAN);
 
 /* See cli-style.h.  */
 
+cli_style_option address_style (ui_file_style::BLUE);
+
+/* See cli-style.h.  */
+
 cli_style_option::cli_style_option (ui_file_style::basic_color fg)
   : m_foreground (cli_colors[fg - ui_file_style::NONE]),
     m_background (cli_colors[0]),
@@ -265,4 +269,11 @@ Variable name display styling\n\
 Configure variable name colors and display intensity"),
 					    &style_set_list,
 					    &style_show_list);
+  address_style.add_setshow_commands ("address", no_class,
+				      "style address",
+				      _("\
+Address display styling\n\
+Configure address colors and display intensity"),
+				      &style_set_list,
+				      &style_show_list);
 }

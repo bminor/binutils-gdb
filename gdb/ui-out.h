@@ -77,7 +77,9 @@ enum class ui_out_style_kind
   /* Function name.  */
   FUNCTION,
   /* Variable name.  */
-  VARIABLE
+  VARIABLE,
+  /* Address.  */
+  ADDRESS
 };
 
 class ui_out

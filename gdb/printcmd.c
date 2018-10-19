@@ -693,7 +693,7 @@ void
 print_address (struct gdbarch *gdbarch,
 	       CORE_ADDR addr, struct ui_file *stream)
 {
-  fputs_filtered (paddress (gdbarch, addr), stream);
+  fputs_styled (paddress (gdbarch, addr), address_style.style (), stream);
   print_address_symbolic (gdbarch, addr, stream, asm_demangle, " ");
 }
 
@@ -726,7 +726,7 @@ print_address_demangle (const struct value_print_options *opts,
 {
   if (opts->addressprint)
     {
-      fputs_filtered (paddress (gdbarch, addr), stream);
+      fputs_styled (paddress (gdbarch, addr), address_style.style (), stream);
       print_address_symbolic (gdbarch, addr, stream, do_demangle, " ");
     }
   else
@@ -1404,14 +1404,17 @@ info_address_command (const char *exp, int from_tty)
 	  fprintf_symbol_filtered (gdb_stdout, exp,
 				   current_language->la_language, DMGL_ANSI);
 	  printf_filtered ("\" is at ");
-	  fputs_filtered (paddress (gdbarch, load_addr), gdb_stdout);
+	  fputs_styled (paddress (gdbarch, load_addr), address_style.style (),
+			gdb_stdout);
 	  printf_filtered (" in a file compiled without debugging");
 	  section = MSYMBOL_OBJ_SECTION (objfile, msymbol.minsym);
 	  if (section_is_overlay (section))
 	    {
 	      load_addr = overlay_unmapped_address (load_addr, section);
 	      printf_filtered (",\n -- loaded at ");
-	      fputs_filtered (paddress (gdbarch, load_addr), gdb_stdout);
+	      fputs_styled (paddress (gdbarch, load_addr),
+			    address_style.style (),
+			    gdb_stdout);
 	      printf_filtered (" in overlay section %s",
 			       section->the_bfd_section->name);
 	    }
@@ -1451,12 +1454,14 @@ info_address_command (const char *exp, int from_tty)
     case LOC_LABEL:
       printf_filtered ("a label at address ");
       load_addr = SYMBOL_VALUE_ADDRESS (sym);
-      fputs_filtered (paddress (gdbarch, load_addr), gdb_stdout);
+      fputs_styled (paddress (gdbarch, load_addr), address_style.style (),
+		    gdb_stdout);
       if (section_is_overlay (section))
 	{
 	  load_addr = overlay_unmapped_address (load_addr, section);
 	  printf_filtered (",\n -- loaded at ");
-	  fputs_filtered (paddress (gdbarch, load_addr), gdb_stdout);
+	  fputs_styled (paddress (gdbarch, load_addr), address_style.style (),
+			gdb_stdout);
 	  printf_filtered (" in overlay section %s",
 			   section->the_bfd_section->name);
 	}
@@ -1485,12 +1490,14 @@ info_address_command (const char *exp, int from_tty)
     case LOC_STATIC:
       printf_filtered (_("static storage at address "));
       load_addr = SYMBOL_VALUE_ADDRESS (sym);
-      fputs_filtered (paddress (gdbarch, load_addr), gdb_stdout);
+      fputs_styled (paddress (gdbarch, load_addr), address_style.style (),
+		    gdb_stdout);
       if (section_is_overlay (section))
 	{
 	  load_addr = overlay_unmapped_address (load_addr, section);
 	  printf_filtered (_(",\n -- loaded at "));
-	  fputs_filtered (paddress (gdbarch, load_addr), gdb_stdout);
+	  fputs_styled (paddress (gdbarch, load_addr), address_style.style (),
+			gdb_stdout);
 	  printf_filtered (_(" in overlay section %s"),
 			   section->the_bfd_section->name);
 	}
@@ -1522,12 +1529,14 @@ info_address_command (const char *exp, int from_tty)
     case LOC_BLOCK:
       printf_filtered (_("a function at address "));
       load_addr = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym));
-      fputs_filtered (paddress (gdbarch, load_addr), gdb_stdout);
+      fputs_styled (paddress (gdbarch, load_addr), address_style.style (),
+		    gdb_stdout);
       if (section_is_overlay (section))
 	{
 	  load_addr = overlay_unmapped_address (load_addr, section);
 	  printf_filtered (_(",\n -- loaded at "));
-	  fputs_filtered (paddress (gdbarch, load_addr), gdb_stdout);
+	  fputs_styled (paddress (gdbarch, load_addr), address_style.style (),
+			gdb_stdout);
 	  printf_filtered (_(" in overlay section %s"),
 			   section->the_bfd_section->name);
 	}
@@ -1557,12 +1566,15 @@ info_address_command (const char *exp, int from_tty)
 	      {
 		load_addr = BMSYMBOL_VALUE_ADDRESS (msym);
 		printf_filtered (_("static storage at address "));
-		fputs_filtered (paddress (gdbarch, load_addr), gdb_stdout);
+		fputs_styled (paddress (gdbarch, load_addr),
+			      address_style.style (), gdb_stdout);
 		if (section_is_overlay (section))
 		  {
 		    load_addr = overlay_unmapped_address (load_addr, section);
 		    printf_filtered (_(",\n -- loaded at "));
-		    fputs_filtered (paddress (gdbarch, load_addr), gdb_stdout);
+		    fputs_styled (paddress (gdbarch, load_addr),
+				  address_style.style (),
+				  gdb_stdout);
 		    printf_filtered (_(" in overlay section %s"),
 				     section->the_bfd_section->name);
 		  }

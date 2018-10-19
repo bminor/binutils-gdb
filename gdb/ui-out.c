@@ -469,7 +469,8 @@ void
 ui_out::field_core_addr (const char *fldname, struct gdbarch *gdbarch,
 			 CORE_ADDR address)
 {
-  field_string (fldname, print_core_address (gdbarch, address));
+  field_string (fldname, print_core_address (gdbarch, address),
+		ui_out_style_kind::ADDRESS);
 }
 
 void

@@ -1,5 +1,18 @@
 2018-12-28  Tom Tromey  <tom@tromey.com>
 
+	* ui-out.h (enum class ui_out_style_kind) <ADDRESS>: New
+	constant.
+	* ui-out.c (ui_out::field_core_addr): Add styling.
+	* stack.c (print_frame): Add styling.
+	* printcmd.c (print_address): Add styling.
+	(print_address_demangle, info_address_command): Likewise.
+	* cli/cli-style.h (address_style): Declare.
+	* cli/cli-style.c (address_style): New global.
+	(_initialize_cli_style): Register new commands.
+	* cli-out.c (cli_ui_out::do_field_string): Update.
+
+2018-12-28  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (symbol_file_add_with_addrs): Style file name.
 
 2018-12-28  Tom Tromey  <tom@tromey.com>

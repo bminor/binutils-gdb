@@ -1,5 +1,9 @@
 2018-12-28  Tom Tromey  <tom@tromey.com>
 
+	* gdb.base/style.exp: Update test to check for address styling.
+
+2018-12-28  Tom Tromey  <tom@tromey.com>
+
 	* gdb.base/style.exp: Add test for styling of "Reading symbols"
 	message.
 

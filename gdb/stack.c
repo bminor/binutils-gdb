@@ -1176,7 +1176,8 @@ print_frame (struct frame_info *frame, int print_level,
 	  if (pc_p)
 	    uiout->field_core_addr ("addr", gdbarch, pc);
 	  else
-	    uiout->field_string ("addr", "<unavailable>");
+	    uiout->field_string ("addr", "<unavailable>",
+				 ui_out_style_kind::ADDRESS);
 	  annotate_frame_address_end ();
 	  uiout->text (" in ");
 	}
