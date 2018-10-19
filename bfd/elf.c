@@ -1299,15 +1299,15 @@ static bfd_boolean
 section_match (const Elf_Internal_Shdr * a,
 	       const Elf_Internal_Shdr * b)
 {
-  return
-    a->sh_type	       == b->sh_type
-    && (a->sh_flags & ~ SHF_INFO_LINK)
-    == (b->sh_flags & ~ SHF_INFO_LINK)
-    && a->sh_addralign == b->sh_addralign
-    && a->sh_size      == b->sh_size
-    && a->sh_entsize   == b->sh_entsize
-    /* FIXME: Check sh_addr ?  */
-    ;
+  if (a->sh_type != b->sh_type
+      || ((a->sh_flags ^ b->sh_flags) & ~SHF_INFO_LINK) != 0
+      || a->sh_addralign != b->sh_addralign
+      || a->sh_entsize != b->sh_entsize)
+    return FALSE;
+  if (a->sh_type == SHT_SYMTAB
+      || a->sh_type == SHT_STRTAB)
+    return TRUE;
+  return a->sh_size == b->sh_size;
 }
 
 /* Find a section in OBFD that has the same characteristics
