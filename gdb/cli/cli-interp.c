@@ -44,6 +44,7 @@ class cli_interp final : public cli_interp_base
 {
  public:
   explicit cli_interp (const char *name);
+  ~cli_interp ();
 
   void init (bool top_level) override;
   void resume () override;
@@ -60,6 +61,11 @@ cli_interp::cli_interp (const char *name)
 {
   /* Create a default uiout builder for the CLI.  */
   this->cli_uiout = cli_out_new (gdb_stdout);
+}
+
+cli_interp::~cli_interp ()
+{
+  delete cli_uiout;
 }
 
 /* Suppress notification struct.  */

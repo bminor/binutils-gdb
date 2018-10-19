@@ -1,3 +1,7 @@
+2018-10-19  Gary Benson <gbenson@redhat.com>
+
+	* cli/cli-interp.c (cli_interp::~cli_interp): New function.
+
 2018-10-18  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR cli/23785
