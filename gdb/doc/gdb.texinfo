@@ -26779,6 +26779,7 @@ lines.  Positive counts increase the height, while negative counts
 decrease it.  The @var{name} parameter can be one of @code{src} (the
 source window), @code{cmd} (the command window), @code{asm} (the
 disassembly window), or @code{regs} (the register display window).
+@end table
 
 @node TUI Configuration
 @section TUI Configuration Variables
@@ -26838,7 +26839,6 @@ Use extra bright or bold and standout mode.
 Set the width of tab stops to be @var{nchars} characters.  This
 setting affects the display of TAB characters in the source and
 assembly windows.
-@end table
 @end table
 
 @node Emacs

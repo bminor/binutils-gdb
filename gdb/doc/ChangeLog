@@ -1,3 +1,8 @@
+2018-10-20  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (TUI Commands): Add @end table.
+	(TUI Configuration): Remove stray @end table.
+
 2018-10-19  Tom Tromey  <tom@tromey.com>
 
 	PR tui/18388:
