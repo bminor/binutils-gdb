@@ -619,9 +619,22 @@ symbol_clone (symbolS *orgsymP, int replace)
   return newsymP;
 }
 
+/* If S is a local symbol that has been converted, return the
+   converted symbol.  Otherwise return S.  */
+
+static inline symbolS *
+get_real_sym (symbolS *s)
+{
+  if (s != NULL
+      && s->sy_flags.sy_local_symbol
+      && local_symbol_converted_p ((struct local_symbol *) s))
+    s = local_symbol_get_real_symbol ((struct local_symbol *) s);
+  return s;
+}
+
 /* Referenced symbols, if they are forward references, need to be cloned
    (without replacing the original) so that the value of the referenced
-   symbols at the point of use .  */
+   symbols at the point of use is saved by the clone.  */
 
 #undef symbol_clone_if_forward_ref
 symbolS *
@@ -629,8 +642,10 @@ symbol_clone_if_forward_ref (symbolS *symbolP, int is_forward)
 {
   if (symbolP && !LOCAL_SYMBOL_CHECK (symbolP))
     {
-      symbolS *add_symbol = symbolP->sy_value.X_add_symbol;
-      symbolS *op_symbol = symbolP->sy_value.X_op_symbol;
+      symbolS *orig_add_symbol = get_real_sym (symbolP->sy_value.X_add_symbol);
+      symbolS *orig_op_symbol = get_real_sym (symbolP->sy_value.X_op_symbol);
+      symbolS *add_symbol = orig_add_symbol;
+      symbolS *op_symbol = orig_op_symbol;
 
       if (symbolP->sy_flags.sy_forward_ref)
 	is_forward = 1;
@@ -659,8 +674,8 @@ symbol_clone_if_forward_ref (symbolS *symbolP, int is_forward)
 	}
 
       if (symbolP->sy_flags.sy_forward_ref
-	  || add_symbol != symbolP->sy_value.X_add_symbol
-	  || op_symbol != symbolP->sy_value.X_op_symbol)
+	  || add_symbol != orig_add_symbol
+	  || op_symbol != orig_op_symbol)
 	{
 	  if (symbolP != &dot_symbol)
 	    {
@@ -2462,12 +2477,8 @@ symbol_set_value_expression (symbolS *s, const expressionS *exp)
 int
 symbol_same_p (symbolS *s1, symbolS *s2)
 {
-  if (s1->sy_flags.sy_local_symbol
-      && local_symbol_converted_p ((struct local_symbol *) s1))
-    s1 = local_symbol_get_real_symbol ((struct local_symbol *) s1);
-  if (s2->sy_flags.sy_local_symbol
-      && local_symbol_converted_p ((struct local_symbol *) s2))
-    s2 = local_symbol_get_real_symbol ((struct local_symbol *) s2);
+  s1 = get_real_sym (s1);
+  s2 = get_real_sym (s2);
   return s1 == s2;
 }
 

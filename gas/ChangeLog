@@ -1,3 +1,17 @@
+2018-10-22  Alan Modra  <amodra@gmail.com>
+
+	PR 23040
+	* symbols.c (get_real_sym): New function.
+	(symbol_same_p): Use get_real_sym.
+	(symbol_clone_if_forward_ref): Save real original add_symbol and
+	op_symbol for comparison against that returned from lookup or
+	recursive calls.
+	* dwarf2dbg.c (set_or_check_view): Use expr_section for
+	expression symbols, not absolute_section.
+	(dwarf2_directive_loc): Check symbol_equated_p and tidy cloning
+	of view symbols.
+	* read.c (s_leb128): Don't use deferred_expression.
+
 2018-10-20  Alan Modra  <amodra@gmail.com>
 
 	PR 23800

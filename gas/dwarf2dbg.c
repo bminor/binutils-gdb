@@ -426,7 +426,7 @@ set_or_check_view (struct line_entry *e, struct line_entry *p,
   if (!S_IS_DEFINED (e->loc.view))
     {
       symbol_set_value_expression (e->loc.view, &viewx);
-      S_SET_SEGMENT (e->loc.view, absolute_section);
+      S_SET_SEGMENT (e->loc.view, expr_section);
       symbol_set_frag (e->loc.view, &zero_address_frag);
     }
 
@@ -960,16 +960,19 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 	      if (!name)
 		return;
 	      sym = symbol_find_or_make (name);
-	      if (S_IS_DEFINED (sym))
+	      if (S_IS_DEFINED (sym) || symbol_equated_p (sym))
 		{
-		  if (!S_CAN_BE_REDEFINED (sym))
-		    as_bad (_("symbol `%s' is already defined"), name);
-		  else
+		  if (S_IS_VOLATILE (sym))
 		    sym = symbol_clone (sym, 1);
-		  S_SET_SEGMENT (sym, undefined_section);
-		  S_SET_VALUE (sym, 0);
-		  symbol_set_frag (sym, &zero_address_frag);
+		  else if (!S_CAN_BE_REDEFINED (sym))
+		    {
+		      as_bad (_("symbol `%s' is already defined"), name);
+		      return;
+		    }
 		}
+	      S_SET_SEGMENT (sym, undefined_section);
+	      S_SET_VALUE (sym, 0);
+	      symbol_set_frag (sym, &zero_address_frag);
 	    }
 	  current.view = sym;
 	}
