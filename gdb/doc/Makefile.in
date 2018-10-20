@@ -182,7 +182,7 @@ HAVE_NATIVE_GCORE_TARGET = @HAVE_NATIVE_GCORE_TARGET@
 
 ###
 
-all:
+all: info
 
 info: $(INFO_DEPS)
 dvi: gdb.dvi stabs.dvi refcard.dvi annotate.dvi

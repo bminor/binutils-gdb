@@ -1,3 +1,7 @@
+2019-04-07  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (all): Depend on "info".
+
 2019-04-01  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (Convenience Funs): Document '$_creal' and
