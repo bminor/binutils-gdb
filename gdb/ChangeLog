@@ -1,3 +1,8 @@
+2018-10-19  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* typeprint.c (_initialize_typeprint): Fix wrong prefixname arg
+	in add_prefix_cmd of set print type.
+
 2018-10-19  Tom Tromey  <tom@tromey.com>
 
 	PR tui/18388:
