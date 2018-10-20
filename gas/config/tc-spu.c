@@ -815,6 +815,11 @@ spu_cons (int nbytes)
 
   do
     {
+      char *save = input_line_pointer;
+
+      /* Use deferred_expression here so that an expression involving
+	 a symbol that happens to be defined already as an spu symbol,
+	 is not resolved.  */
       deferred_expression (&exp);
       if ((exp.X_op == O_symbol
 	   || exp.X_op == O_constant)
@@ -829,9 +834,12 @@ spu_cons (int nbytes)
 	    {
 	      expressionS new_exp;
 
+	      save = input_line_pointer;
 	      expression (&new_exp);
 	      if (new_exp.X_op == O_constant)
 		exp.X_add_number += new_exp.X_add_number;
+	      else
+		input_line_pointer = save;
 	    }
 
 	  reloc = nbytes == 4 ? BFD_RELOC_SPU_PPU32 : BFD_RELOC_SPU_PPU64;
@@ -839,7 +847,14 @@ spu_cons (int nbytes)
 		       &exp, 0, reloc);
 	}
       else
-	emit_expr (&exp, nbytes);
+	{
+	  /* Don't use deferred_expression for anything else.
+	     deferred_expression won't evaulate dot at the point it is
+	     used.  */
+	  input_line_pointer = save;
+	  expression (&exp);
+	  emit_expr (&exp, nbytes);
+	}
     }
   while (*input_line_pointer++ == ',');
 

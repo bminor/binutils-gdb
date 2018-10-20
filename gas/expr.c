@@ -1838,6 +1838,13 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	  right.X_op_symbol = NULL;
 	}
 
+      if (mode == expr_defer
+	  && ((resultP->X_add_symbol != NULL
+	       && S_IS_FORWARD_REF (resultP->X_add_symbol))
+	      || (right.X_add_symbol != NULL
+		  && S_IS_FORWARD_REF (right.X_add_symbol))))
+	goto general;
+
       /* Optimize common cases.  */
 #ifdef md_optimize_expr
       if (md_optimize_expr (resultP, op_left, &right))

@@ -1,3 +1,14 @@
+2018-10-20  Alan Modra  <amodra@gmail.com>
+
+	PR 23800
+	* expr.c (expr): Don't simplify expressions involving forward_ref
+	symbols when mode is expr_defer.
+	* config/tc-spu.c (spu_cons): Parse expression using normal
+	expression evaluation if @ppu is not detected.
+	* testsuite/gas/all/eqv-dot.d,
+	* testsuite/gas/all/eqv-dot.s: New test.
+	* testsuite/gas/all/gas.exp: Run it.
+
 2018-10-19  Tamar Christina  <tamar.christina@arm.com>
 
 	* testsuite/gas/arm/undefined-insn-arm.d: Widen pe skip.
