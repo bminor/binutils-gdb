@@ -1,3 +1,11 @@
+2018-10-22  Jim Wilson  <jimw@sifive.com>
+
+	* riscv-tdep.c (riscv_fpreg_d_type, riscv_fpreg_q_type): New.
+	(riscv_register_type): Use them.
+	(riscv_print_one_register_info): Handle union of floats same as float.
+	* riscv-tdep.h (struct gdbarch_tdep): Add riscv_fpreg_d_type and
+	riscv_fpreg_q_type fields.
+
 2018-10-21  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdbarch.sh (gdbarch_num_cooked_regs): New.

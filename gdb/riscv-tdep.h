@@ -78,6 +78,10 @@ struct gdbarch_tdep
      features that are supported on the target.  These could be cached from
      the target, or read from the executable when available.  */
   unsigned core_features;
+
+  /* ISA-specific data types.  */
+  struct type *riscv_fpreg_d_type;
+  struct type *riscv_fpreg_q_type;
 };
 
 /* Return the width in bytes of the general purpose registers for GDBARCH.  */

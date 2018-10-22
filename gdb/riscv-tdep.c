@@ -495,6 +495,76 @@ riscv_register_name (struct gdbarch *gdbarch, int regnum)
   return NULL;
 }
 
+/* Construct a type for 64-bit FP registers.  */
+
+static struct type *
+riscv_fpreg_d_type (struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (tdep->riscv_fpreg_d_type == nullptr)
+    {
+      const struct builtin_type *bt = builtin_type (gdbarch);
+
+      /* The type we're building is this: */
+#if 0
+      union __gdb_builtin_type_fpreg_d
+      {
+	float f;
+	double d;
+      };
+#endif
+
+      struct type *t;
+
+      t = arch_composite_type (gdbarch,
+			       "__gdb_builtin_type_fpreg_d", TYPE_CODE_UNION);
+      append_composite_type_field (t, "float", bt->builtin_float);
+      append_composite_type_field (t, "double", bt->builtin_double);
+      TYPE_VECTOR (t) = 1;
+      TYPE_NAME (t) = "builtin_type_fpreg_d";
+      tdep->riscv_fpreg_d_type = t;
+    }
+
+  return tdep->riscv_fpreg_d_type;
+}
+
+/* Construct a type for 128-bit FP registers.  */
+
+static struct type *
+riscv_fpreg_q_type (struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (tdep->riscv_fpreg_q_type == nullptr)
+    {
+      const struct builtin_type *bt = builtin_type (gdbarch);
+
+      /* The type we're building is this: */
+#if 0
+      union __gdb_builtin_type_fpreg_d
+      {
+	float f;
+	double d;
+	long double ld;
+      };
+#endif
+
+      struct type *t;
+
+      t = arch_composite_type (gdbarch,
+			       "__gdb_builtin_type_fpreg_q", TYPE_CODE_UNION);
+      append_composite_type_field (t, "float", bt->builtin_float);
+      append_composite_type_field (t, "double", bt->builtin_double);
+      append_composite_type_field (t, "long double", bt->builtin_long_double);
+      TYPE_VECTOR (t) = 1;
+      TYPE_NAME (t) = "builtin_type_fpreg_q";
+      tdep->riscv_fpreg_q_type = t;
+    }
+
+  return tdep->riscv_fpreg_q_type;
+}
+
 /* Implement the register_type gdbarch method.  */
 
 static struct type *
@@ -537,9 +607,9 @@ riscv_register_type (struct gdbarch *gdbarch, int regnum)
 	case 4:
 	  return builtin_type (gdbarch)->builtin_float;
 	case 8:
-	  return builtin_type (gdbarch)->builtin_double;
+	  return riscv_fpreg_d_type (gdbarch);
 	case 16:
-	  return builtin_type (gdbarch)->builtin_long_double;
+	  return riscv_fpreg_q_type (gdbarch);
 	default:
 	  internal_error (__FILE__, __LINE__,
 			  _("unknown isa regsize %i"), regsize);
@@ -591,7 +661,16 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
   print_raw_format = (value_entirely_available (val)
 		      && !value_optimized_out (val));
 
-  if (TYPE_CODE (regtype) == TYPE_CODE_FLT)
+  if (TYPE_CODE (regtype) == TYPE_CODE_FLT
+      || (TYPE_CODE (regtype) == TYPE_CODE_UNION
+	  && TYPE_NFIELDS (regtype) == 2
+	  && TYPE_CODE (TYPE_FIELD_TYPE (regtype, 0)) == TYPE_CODE_FLT
+	  && TYPE_CODE (TYPE_FIELD_TYPE (regtype, 1)) == TYPE_CODE_FLT)
+      || (TYPE_CODE (regtype) == TYPE_CODE_UNION
+	  && TYPE_NFIELDS (regtype) == 3
+	  && TYPE_CODE (TYPE_FIELD_TYPE (regtype, 0)) == TYPE_CODE_FLT
+	  && TYPE_CODE (TYPE_FIELD_TYPE (regtype, 1)) == TYPE_CODE_FLT
+	  && TYPE_CODE (TYPE_FIELD_TYPE (regtype, 2)) == TYPE_CODE_FLT))
     {
       struct value_print_options opts;
       const gdb_byte *valaddr = value_contents_for_printing (val);
