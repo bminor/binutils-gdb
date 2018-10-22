@@ -1,5 +1,8 @@
 2018-10-22  Jim Wilson  <jimw@sifive.com>
 
+	* riscv-tdep.c (riscv_push_dummy_call) <in_reg>: Check for value in
+	FP reg smaller than FP reg size, and fill with -1 instead of 0.
+
 	* riscv-tdep.c (riscv_fpreg_d_type, riscv_fpreg_q_type): New.
 	(riscv_register_type): Use them.
 	(riscv_print_one_register_info): Handle union of floats same as float.

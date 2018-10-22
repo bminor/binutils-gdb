@@ -2408,7 +2408,12 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 	    gdb_byte tmp [sizeof (ULONGEST)];
 
 	    gdb_assert (info->argloc[0].c_length <= info->length);
-	    memset (tmp, 0, sizeof (tmp));
+	    /* FP values in FP registers must be NaN-boxed.  */
+	    if (riscv_is_fp_regno_p (info->argloc[0].loc_data.regno)
+		&& info->argloc[0].c_length < call_info.flen)
+	      memset (tmp, -1, sizeof (tmp));
+	    else
+	      memset (tmp, 0, sizeof (tmp));
 	    memcpy (tmp, info->contents, info->argloc[0].c_length);
 	    regcache->cooked_write (info->argloc[0].loc_data.regno, tmp);
 	    second_arg_length =
@@ -2447,7 +2452,12 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 		gdb_assert ((riscv_is_fp_regno_p (info->argloc[1].loc_data.regno)
 			     && second_arg_length <= call_info.flen)
 			    || second_arg_length <= call_info.xlen);
-		memset (tmp, 0, sizeof (tmp));
+		/* FP values in FP registers must be NaN-boxed.  */
+		if (riscv_is_fp_regno_p (info->argloc[1].loc_data.regno)
+		    && second_arg_length < call_info.flen)
+		  memset (tmp, -1, sizeof (tmp));
+		else
+		  memset (tmp, 0, sizeof (tmp));
 		memcpy (tmp, second_arg_data, second_arg_length);
 		regcache->cooked_write (info->argloc[1].loc_data.regno, tmp);
 	      }
