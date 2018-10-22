@@ -5769,6 +5769,12 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
       md_number_to_chars (fixpos, value, 2);
       break;
 
+    case BFD_RELOC_8:
+      if (fixP->fx_pcrel)
+	fixP->fx_r_type = BFD_RELOC_8_PCREL;
+      size = 1;
+      goto do_reloc_xx;
+
     case BFD_RELOC_16:
       if (fixP->fx_pcrel)
 	fixP->fx_r_type = BFD_RELOC_16_PCREL;

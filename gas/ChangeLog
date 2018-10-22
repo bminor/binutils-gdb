@@ -1,5 +1,12 @@
 2018-10-22  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-alpha.c (md_apply_fix): Handle BFD_RELOC_8 for fixups
+	without a symbol.
+	* testsuite/gas/all/gas.exp: Don't xfail forward test here..
+	* testsuite/gas/all/forward.d: ..do so here, removing alpha.
+
+2018-10-22  Alan Modra  <amodra@gmail.com>
+
 	PR 23040
 	* symbols.c (get_real_sym): New function.
 	(symbol_same_p): Use get_real_sym.

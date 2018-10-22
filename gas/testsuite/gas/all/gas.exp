@@ -111,10 +111,6 @@ case $target_triplet in {
     { microblaze-*-* } { }
     { mn10\[23\]00*-*-* } { }
     default {
-	# Some targets don't manage to resolve BFD_RELOC_8 for constants.
-	setup_xfail "alpha*-*-*" "*c30*-*-*" "*c4x*-*-*" \
-	    "d\[13\]0v*-*-*" \
-	    "pdp11-*-*" "xtensa*-*-*"
 	run_dump_test forward
     }
 }
