@@ -1,3 +1,10 @@
+2018-10-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* amd64-tdep.c (amd64_pseudo_register_read_value): Use
+	correctly-sized buffer with raw_read.
+	(amd64_pseudo_register_write): Use correctly-sized buffer for
+	raw_read/raw_write.
+
 2018-10-19  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* typeprint.c (_initialize_typeprint): Fix wrong prefixname arg

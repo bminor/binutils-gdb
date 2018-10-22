@@ -352,16 +352,12 @@ amd64_pseudo_register_read_value (struct gdbarch *gdbarch,
 				  readable_regcache *regcache,
 				  int regnum)
 {
-  gdb_byte *raw_buf = (gdb_byte *) alloca (register_size (gdbarch, regnum));
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  enum register_status status;
-  struct value *result_value;
-  gdb_byte *buf;
 
-  result_value = allocate_value (register_type (gdbarch, regnum));
+  value *result_value = allocate_value (register_type (gdbarch, regnum));
   VALUE_LVAL (result_value) = lval_register;
   VALUE_REGNUM (result_value) = regnum;
-  buf = value_contents_raw (result_value);
+  gdb_byte *buf = value_contents_raw (result_value);
 
   if (i386_byte_regnum_p (gdbarch, regnum))
     {
@@ -370,9 +366,11 @@ amd64_pseudo_register_read_value (struct gdbarch *gdbarch,
       /* Extract (always little endian).  */
       if (gpnum >= AMD64_NUM_LOWER_BYTE_REGS)
 	{
+	  gpnum -= AMD64_NUM_LOWER_BYTE_REGS;
+	  gdb_byte raw_buf[register_size (gdbarch, gpnum)];
+
 	  /* Special handling for AH, BH, CH, DH.  */
-	  status = regcache->raw_read (gpnum - AMD64_NUM_LOWER_BYTE_REGS,
-				       raw_buf);
+	  register_status status = regcache->raw_read (gpnum, raw_buf);
 	  if (status == REG_VALID)
 	    memcpy (buf, raw_buf + 1, 1);
 	  else
@@ -381,7 +379,8 @@ amd64_pseudo_register_read_value (struct gdbarch *gdbarch,
 	}
       else
 	{
-	  status = regcache->raw_read (gpnum, raw_buf);
+	  gdb_byte raw_buf[register_size (gdbarch, gpnum)];
+	  register_status status = regcache->raw_read (gpnum, raw_buf);
 	  if (status == REG_VALID)
 	    memcpy (buf, raw_buf, 1);
 	  else
@@ -392,8 +391,9 @@ amd64_pseudo_register_read_value (struct gdbarch *gdbarch,
   else if (i386_dword_regnum_p (gdbarch, regnum))
     {
       int gpnum = regnum - tdep->eax_regnum;
+      gdb_byte raw_buf[register_size (gdbarch, gpnum)];
       /* Extract (always little endian).  */
-      status = regcache->raw_read (gpnum, raw_buf);
+      register_status status = regcache->raw_read (gpnum, raw_buf);
       if (status == REG_VALID)
 	memcpy (buf, raw_buf, 4);
       else
@@ -412,7 +412,6 @@ amd64_pseudo_register_write (struct gdbarch *gdbarch,
 			     struct regcache *regcache,
 			     int regnum, const gdb_byte *buf)
 {
-  gdb_byte *raw_buf = (gdb_byte *) alloca (register_size (gdbarch, regnum));
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (i386_byte_regnum_p (gdbarch, regnum))
@@ -421,15 +420,20 @@ amd64_pseudo_register_write (struct gdbarch *gdbarch,
 
       if (gpnum >= AMD64_NUM_LOWER_BYTE_REGS)
 	{
+	  gpnum -= AMD64_NUM_LOWER_BYTE_REGS;
+	  gdb_byte raw_buf[register_size (gdbarch, gpnum)];
+
 	  /* Read ... AH, BH, CH, DH.  */
-	  regcache->raw_read (gpnum - AMD64_NUM_LOWER_BYTE_REGS, raw_buf);
+	  regcache->raw_read (gpnum, raw_buf);
 	  /* ... Modify ... (always little endian).  */
 	  memcpy (raw_buf + 1, buf, 1);
 	  /* ... Write.  */
-	  regcache->raw_write (gpnum - AMD64_NUM_LOWER_BYTE_REGS, raw_buf);
+	  regcache->raw_write (gpnum, raw_buf);
 	}
       else
 	{
+	  gdb_byte raw_buf[register_size (gdbarch, gpnum)];
+
 	  /* Read ...  */
 	  regcache->raw_read (gpnum, raw_buf);
 	  /* ... Modify ... (always little endian).  */
@@ -441,6 +445,7 @@ amd64_pseudo_register_write (struct gdbarch *gdbarch,
   else if (i386_dword_regnum_p (gdbarch, regnum))
     {
       int gpnum = regnum - tdep->eax_regnum;
+      gdb_byte raw_buf[register_size (gdbarch, gpnum)];
 
       /* Read ...  */
       regcache->raw_read (gpnum, raw_buf);
