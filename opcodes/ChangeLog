@@ -1,3 +1,8 @@
+2018-10-22  John Darrington  <john@darrington.wattle.id.au>
+
+	* s12z-dis.c (decode_possible_symbol): Add fallback case.
+	(rel_15_7): Likewise.
+
 2018-10-19  Tamar Christina  <tamar.christina@arm.com>
 
 	* arm-dis.c (UNKNOWN_INSTRUCTION_32BIT): Format specifier for arm mode.

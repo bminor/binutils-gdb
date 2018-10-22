@@ -378,6 +378,8 @@ decode_possible_symbol (bfd_vma addr, struct disassemble_info *info)
 	}
       if (j < info->symtab_size)
 	(*info->fprintf_func) (info->stream, "%s", bfd_asymbol_name (sym));
+      else
+        (*info->fprintf_func) (info->stream, "%" BFD_VMA_FMT "d", addr);
     }
 }
 
@@ -922,6 +924,8 @@ rel_15_7 (bfd_vma memaddr, struct disassemble_info* info, int offset)
 	}
       if (i < info->symtab_size)
 	(*info->fprintf_func) (info->stream, "%s", bfd_asymbol_name (sym));
+      else
+        (*info->fprintf_func) (info->stream, "*%+d", addr);
     }
 }
 
