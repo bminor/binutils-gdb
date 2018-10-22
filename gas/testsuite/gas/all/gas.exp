@@ -98,6 +98,8 @@ if { ![istarget "bfin-*-*"] } then {
 }
 gas_test_error "assign-bad.s" "" "== assignment for symbol already set"
 
+run_dump_test simple-forward
+
 # .equ works differently on some targets.
 # linkrelax-ing prevents most forward references from working.
 case $target_triplet in {

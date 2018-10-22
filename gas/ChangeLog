@@ -1,5 +1,12 @@
 2018-10-22  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/gas/all/simple-forward.d,
+	* testsuite/gas/all/simple-forward.s: New test.
+	* testsuite/gas/all/gas.exp: Run it.
+	* testsuite/gas/all/eqv-dot.d: xfail tic30 and tic54x.
+
+2018-10-22  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-alpha.c (md_apply_fix): Handle BFD_RELOC_8 for fixups
 	without a symbol.
 	* testsuite/gas/all/gas.exp: Don't xfail forward test here..
