@@ -890,7 +890,7 @@ mi_cmd_data_list_register_names (const char *command, char **argv, int argc)
      debugged.  */
 
   gdbarch = get_current_arch ();
-  numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
+  numregs = gdbarch_num_cooked_regs (gdbarch);
 
   ui_out_emit_list list_emitter (uiout, "register-names");
 
@@ -949,7 +949,7 @@ mi_cmd_data_list_changed_registers (const char *command, char **argv, int argc)
      debugged.  */
 
   gdbarch = this_regs->arch ();
-  numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
+  numregs = gdbarch_num_cooked_regs (gdbarch);
 
   ui_out_emit_list list_emitter (uiout, "changed-registers");
 
@@ -1076,7 +1076,7 @@ mi_cmd_data_list_register_values (const char *command, char **argv, int argc)
 
   frame = get_selected_frame (NULL);
   gdbarch = get_frame_arch (frame);
-  numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
+  numregs = gdbarch_num_cooked_regs (gdbarch);
 
   ui_out_emit_list list_emitter (uiout, "register-values");
 
@@ -1164,7 +1164,7 @@ mi_cmd_data_write_register_values (const char *command, char **argv, int argc)
 
   regcache = get_current_regcache ();
   gdbarch = regcache->arch ();
-  numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
+  numregs = gdbarch_num_cooked_regs (gdbarch);
 
   if (argc == 0)
     error (_("-data-write-register-values: Usage: -data-write-register-"
@@ -2638,7 +2638,7 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 
     frame = get_selected_frame (NULL);
     gdbarch = get_frame_arch (frame);
-    numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
+    numregs = gdbarch_num_cooked_regs (gdbarch);
 
     for (regnum = 0; regnum < numregs; regnum++)
       {

@@ -116,8 +116,7 @@ register_to_value_test (struct gdbarch *gdbarch)
     = make_scoped_restore (&inferior_ptid, mock_ptid);
 
   struct frame_info *frame = get_current_frame ();
-  const int num_regs = (gdbarch_num_regs (gdbarch)
-			+ gdbarch_num_pseudo_regs (gdbarch));
+  const int num_regs = gdbarch_num_cooked_regs (gdbarch);
 
   /* Test gdbarch methods register_to_value and value_to_register with
      different combinations of register numbers and types.  */

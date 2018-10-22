@@ -854,12 +854,11 @@ tdesc_register_name (struct gdbarch *gdbarch, int regno)
 {
   struct tdesc_reg *reg = tdesc_find_register (gdbarch, regno);
   int num_regs = gdbarch_num_regs (gdbarch);
-  int num_pseudo_regs = gdbarch_num_pseudo_regs (gdbarch);
 
   if (reg != NULL)
     return reg->name.c_str ();
 
-  if (regno >= num_regs && regno < num_regs + num_pseudo_regs)
+  if (regno >= num_regs && regno < gdbarch_num_cooked_regs (gdbarch))
     {
       struct tdesc_arch_data *data
 	= (struct tdesc_arch_data *) gdbarch_data (gdbarch, tdesc_data);

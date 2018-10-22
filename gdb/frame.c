@@ -1416,7 +1416,7 @@ get_frame_register_bytes (struct frame_info *frame, int regnum,
   /* Ensure that we will not read beyond the end of the register file.
      This can only ever happen if the debug information is bad.  */
   maxsize = -offset;
-  numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
+  numregs = gdbarch_num_cooked_regs (gdbarch);
   for (i = regnum; i < numregs; i++)
     {
       int thissize = register_size (gdbarch, i);

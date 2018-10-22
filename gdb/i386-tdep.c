@@ -518,7 +518,7 @@ i386_dbx_reg_to_regnum (struct gdbarch *gdbarch, int reg)
     }
 
   /* This will hopefully provoke a warning.  */
-  return gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
+  return gdbarch_num_cooked_regs (gdbarch);
 }
 
 /* Convert SVR4 DWARF register number REG to the appropriate register number
@@ -575,7 +575,7 @@ i386_svr4_reg_to_regnum (struct gdbarch *gdbarch, int reg)
   int regnum = i386_svr4_dwarf_reg_to_regnum (gdbarch, reg);
 
   if (regnum == -1)
-    return gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
+    return gdbarch_num_cooked_regs (gdbarch);
   return regnum;
 }
 

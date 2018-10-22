@@ -972,8 +972,7 @@ static struct dwarf2_frame_cache *
 dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  const int num_regs = gdbarch_num_regs (gdbarch)
-		       + gdbarch_num_pseudo_regs (gdbarch);
+  const int num_regs = gdbarch_num_cooked_regs (gdbarch);
   struct dwarf2_frame_cache *cache;
   struct dwarf2_fde *fde;
   CORE_ADDR entry_pc;

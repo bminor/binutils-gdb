@@ -206,10 +206,7 @@ tui_show_register_group (struct reggroup *group,
 
   /* See how many registers must be displayed.  */
   nr_regs = 0;
-  for (regnum = 0;
-       regnum < gdbarch_num_regs (gdbarch)
-		+ gdbarch_num_pseudo_regs (gdbarch);
-       regnum++)
+  for (regnum = 0; regnum < gdbarch_num_cooked_regs (gdbarch); regnum++)
     {
       const char *name;
 
@@ -253,10 +250,7 @@ tui_show_register_group (struct reggroup *group,
 
       /* Now set the register names and values.  */
       pos = 0;
-      for (regnum = 0;
-	   regnum < gdbarch_num_regs (gdbarch)
-		    + gdbarch_num_pseudo_regs (gdbarch);
-	   regnum++)
+      for (regnum = 0; regnum < gdbarch_num_cooked_regs (gdbarch); regnum++)
         {
 	  struct tui_gen_win_info *data_item_win;
           struct tui_data_element *data;

@@ -48,7 +48,7 @@ struct trad_frame_saved_reg *
 trad_frame_alloc_saved_regs (struct gdbarch *gdbarch)
 {
   int regnum;
-  int numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
+  int numregs = gdbarch_num_cooked_regs (gdbarch);
   struct trad_frame_saved_reg *this_saved_regs
     = FRAME_OBSTACK_CALLOC (numregs, struct trad_frame_saved_reg);
 

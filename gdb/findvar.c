@@ -267,8 +267,7 @@ value_of_register (int regnum, struct frame_info *frame)
 
   /* User registers lie completely outside of the range of normal
      registers.  Catch them early so that the target never sees them.  */
-  if (regnum >= gdbarch_num_regs (gdbarch)
-		+ gdbarch_num_pseudo_regs (gdbarch))
+  if (regnum >= gdbarch_num_cooked_regs (gdbarch))
     return value_of_user_reg (regnum, frame);
 
   reg_val = value_of_register_lazy (frame, regnum);
@@ -287,8 +286,7 @@ value_of_register_lazy (struct frame_info *frame, int regnum)
   struct value *reg_val;
   struct frame_info *next_frame;
 
-  gdb_assert (regnum < (gdbarch_num_regs (gdbarch)
-			+ gdbarch_num_pseudo_regs (gdbarch)));
+  gdb_assert (regnum < gdbarch_num_cooked_regs (gdbarch));
 
   gdb_assert (frame != NULL);
 
@@ -957,8 +955,7 @@ address_from_register (int regnum, struct frame_info *frame)
   struct type *type = builtin_type (gdbarch)->builtin_data_ptr;
   struct value *value;
   CORE_ADDR result;
-  int regnum_max_excl = (gdbarch_num_regs (gdbarch)
-			 + gdbarch_num_pseudo_regs (gdbarch));
+  int regnum_max_excl = gdbarch_num_cooked_regs (gdbarch);
 
   if (regnum < 0 || regnum >= regnum_max_excl)
     error (_("Invalid register #%d, expecting 0 <= # < %d"), regnum,

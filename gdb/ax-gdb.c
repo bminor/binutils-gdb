@@ -2036,8 +2036,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	  internal_error (__FILE__, __LINE__,
 			  _("Register $%s not available"), name);
 	/* No support for tracing user registers yet.  */
-	if (reg >= gdbarch_num_regs (ax->gdbarch)
-	    + gdbarch_num_pseudo_regs (ax->gdbarch))
+	if (reg >= gdbarch_num_cooked_regs (ax->gdbarch))
 	  error (_("'%s' is a user-register; "
 		   "GDB cannot yet trace user-register contents."),
 		 name);

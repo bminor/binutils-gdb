@@ -234,9 +234,7 @@ xtensa_find_register_by_name (struct gdbarch *gdbarch, const char *name)
 {
   int i;
 
-  for (i = 0; i < gdbarch_num_regs (gdbarch)
-	 + gdbarch_num_pseudo_regs (gdbarch);
-       i++)
+  for (i = 0; i < gdbarch_num_cooked_regs (gdbarch); i++)
 
     if (strcasecmp (gdbarch_tdep (gdbarch)->regmap[i].name, name) == 0)
       return i;
@@ -249,8 +247,7 @@ static const char *
 xtensa_register_name (struct gdbarch *gdbarch, int regnum)
 {
   /* Return the name stored in the register map.  */
-  if (regnum >= 0 && regnum < gdbarch_num_regs (gdbarch)
-			      + gdbarch_num_pseudo_regs (gdbarch))
+  if (regnum >= 0 && regnum < gdbarch_num_cooked_regs (gdbarch))
     return gdbarch_tdep (gdbarch)->regmap[regnum].name;
 
   internal_error (__FILE__, __LINE__, _("invalid register %d"), regnum);
@@ -276,8 +273,7 @@ xtensa_register_type (struct gdbarch *gdbarch, int regnum)
     return builtin_type (gdbarch)->builtin_data_ptr;
 
   /* Return the stored type for all other registers.  */
-  else if (regnum >= 0 && regnum < gdbarch_num_regs (gdbarch)
-				   + gdbarch_num_pseudo_regs (gdbarch))
+  else if (regnum >= 0 && regnum < gdbarch_num_cooked_regs (gdbarch))
     {
       xtensa_register_t* reg = &tdep->regmap[regnum];
 
@@ -352,9 +348,7 @@ xtensa_reg_to_regnum (struct gdbarch *gdbarch, int regnum)
   if (regnum >= 0 && regnum < 16)
     return gdbarch_tdep (gdbarch)->a0_base + regnum;
 
-  for (i = 0;
-       i < gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
-       i++)
+  for (i = 0; i < gdbarch_num_cooked_regs (gdbarch); i++)
     if (regnum == gdbarch_tdep (gdbarch)->regmap[i].target_number)
       return i;
 
@@ -585,9 +579,7 @@ xtensa_pseudo_register_read (struct gdbarch *gdbarch,
       return REG_VALID;
     }
   /* Pseudo registers.  */
-  else if (regnum >= 0
-	    && regnum < gdbarch_num_regs (gdbarch)
-			+ gdbarch_num_pseudo_regs (gdbarch))
+  else if (regnum >= 0 && regnum < gdbarch_num_cooked_regs (gdbarch))
     {
       xtensa_register_t *reg = &gdbarch_tdep (gdbarch)->regmap[regnum];
       xtensa_register_type_t type = reg->type;
@@ -670,9 +662,7 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
       return;
     }
   /* Pseudo registers.  */
-  else if (regnum >= 0
-	   && regnum < gdbarch_num_regs (gdbarch)
-		       + gdbarch_num_pseudo_regs (gdbarch))
+  else if (regnum >= 0 && regnum < gdbarch_num_cooked_regs (gdbarch))
     {
       xtensa_register_t *reg = &gdbarch_tdep (gdbarch)->regmap[regnum];
       xtensa_register_type_t type = reg->type;

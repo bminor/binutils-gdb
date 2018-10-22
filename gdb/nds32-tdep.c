@@ -2099,7 +2099,7 @@ nds32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Add NDS32 register aliases.  To avoid search in user register name space,
      user_reg_map_name_to_regnum is not used.  */
-  maxregs = (gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch));
+  maxregs = gdbarch_num_cooked_regs (gdbarch);
   for (i = 0; i < ARRAY_SIZE (nds32_register_aliases); i++)
     {
       int regnum, j;

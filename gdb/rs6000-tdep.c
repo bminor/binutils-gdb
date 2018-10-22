@@ -357,9 +357,7 @@ rs6000_register_sim_regno (struct gdbarch *gdbarch, int reg)
   if (tdep->sim_regno == NULL)
     init_sim_regno_table (gdbarch);
 
-  gdb_assert (0 <= reg 
-	      && reg <= gdbarch_num_regs (gdbarch)
-			+ gdbarch_num_pseudo_regs (gdbarch));
+  gdb_assert (0 <= reg && reg <= gdbarch_num_cooked_regs (gdbarch));
   sim_regno = tdep->sim_regno[reg];
 
   if (sim_regno >= 0)
@@ -6475,8 +6473,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       cur_reg += 32;
     }
 
-  gdb_assert (gdbarch_num_regs (gdbarch)
-	      + gdbarch_num_pseudo_regs (gdbarch) == cur_reg);
+  gdb_assert (gdbarch_num_cooked_regs (gdbarch) == cur_reg);
 
   /* Register the ravenscar_arch_ops.  */
   if (mach == bfd_mach_ppc_e500)

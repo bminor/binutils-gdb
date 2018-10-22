@@ -1806,4 +1806,12 @@ extern unsigned int gdbarch_debug;
 
 extern void gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file);
 
+/* Return the number of cooked registers (raw + pseudo) for ARCH.  */
+
+static inline int
+gdbarch_num_cooked_regs (gdbarch *arch)
+{
+  return gdbarch_num_regs (arch) + gdbarch_num_pseudo_regs (arch);
+}
+
 #endif

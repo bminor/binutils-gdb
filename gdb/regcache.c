@@ -86,8 +86,7 @@ init_regcache_descr (struct gdbarch *gdbarch)
   /* Total size of the register space.  The raw registers are mapped
      directly onto the raw register cache while the pseudo's are
      either mapped onto raw-registers or memory.  */
-  descr->nr_cooked_registers = gdbarch_num_regs (gdbarch)
-			       + gdbarch_num_pseudo_regs (gdbarch);
+  descr->nr_cooked_registers = gdbarch_num_cooked_regs (gdbarch);
 
   /* Fill in a table of register types.  */
   descr->register_type
@@ -163,9 +162,7 @@ register_size (struct gdbarch *gdbarch, int regnum)
   struct regcache_descr *descr = regcache_descr (gdbarch);
   int size;
 
-  gdb_assert (regnum >= 0
-	      && regnum < (gdbarch_num_regs (gdbarch)
-			   + gdbarch_num_pseudo_regs (gdbarch)));
+  gdb_assert (regnum >= 0 && regnum < gdbarch_num_cooked_regs (gdbarch));
   size = descr->sizeof_register[regnum];
   return size;
 }
@@ -1311,8 +1308,7 @@ register_dump::dump (ui_file *file)
   long register_offset = 0;
 
   gdb_assert (descr->nr_cooked_registers
-	      == (gdbarch_num_regs (m_gdbarch)
-		  + gdbarch_num_pseudo_regs (m_gdbarch)));
+	      == gdbarch_num_cooked_regs (m_gdbarch));
 
   for (regnum = -1; regnum < descr->nr_cooked_registers; regnum++)
     {
@@ -1637,9 +1633,7 @@ cooked_read_test (struct gdbarch *gdbarch)
   mock_target.reset ();
   /* Then, read all raw and pseudo registers, and don't expect calling
      to_{fetch,store}_registers.  */
-  for (int regnum = 0;
-       regnum < gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
-       regnum++)
+  for (int regnum = 0; regnum < gdbarch_num_cooked_regs (gdbarch); regnum++)
     {
       if (register_size (gdbarch, regnum) == 0)
 	continue;
@@ -1665,9 +1659,7 @@ cooked_read_test (struct gdbarch *gdbarch)
      readonly regcache.  */
   mock_target.reset ();
 
-  for (int regnum = 0;
-       regnum < gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
-       regnum++)
+  for (int regnum = 0; regnum < gdbarch_num_cooked_regs (gdbarch); regnum++)
     {
       if (register_size (gdbarch, regnum) == 0)
 	continue;
@@ -1762,8 +1754,7 @@ cooked_write_test (struct gdbarch *gdbarch)
 
   readwrite_regcache readwrite (gdbarch);
 
-  const int num_regs = (gdbarch_num_regs (gdbarch)
-			+ gdbarch_num_pseudo_regs (gdbarch));
+  const int num_regs = gdbarch_num_cooked_regs (gdbarch);
 
   for (auto regnum = 0; regnum < num_regs; regnum++)
     {

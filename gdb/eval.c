@@ -1395,8 +1395,7 @@ evaluate_subexp_standard (struct type *expect_type,
            So for these registers, we fetch the register value regardless
            of the evaluation mode.  */
 	if (noside == EVAL_AVOID_SIDE_EFFECTS
-	    && regno < gdbarch_num_regs (exp->gdbarch)
-			+ gdbarch_num_pseudo_regs (exp->gdbarch))
+	    && regno < gdbarch_num_cooked_regs (exp->gdbarch))
 	  val = value_zero (register_type (exp->gdbarch, regno), not_lval);
 	else
 	  val = value_of_register (regno, get_selected_frame (NULL));

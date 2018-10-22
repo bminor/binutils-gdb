@@ -1,3 +1,55 @@
+2018-10-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdbarch.sh (gdbarch_num_cooked_regs): New.
+	* gdbarch.h: Re-generate.
+	* ax-gdb.c (gen_expr): Use gdbarch_num_cooked_regs.
+	* dwarf2-frame.c (dwarf2_frame_cache): Likewise.
+	* eval.c (evaluate_subexp_standard): Likewise.
+	* findvar.c (value_of_register): Likewise.
+	(value_of_register_lazy): Likewise.
+	(address_from_register): Likewise.
+	* frame.c (get_frame_register_bytes): Likewise.
+	* gdbarch-selftests.c (register_to_value_test): Likewise.
+	* h8300-tdep.c (h8300_register_type): Likewise.
+	* i386-tdep.c (i386_dbx_reg_to_regnum): Likewise.
+	(i386_svr4_reg_to_regnum): Likewise.
+	* infcmd.c (default_print_registers_info): Likewise.
+	(registers_info): Likewise.
+	(print_vector_info): Likewise.
+	(default_print_float_info): Likewise.
+	* m68hc11-tdep.c (m68hc11_frame_unwind_cache): Likewise.
+	* mdebugread.c (mdebug_reg_to_regnum): Likewise.
+	* mi/mi-main.c (mi_cmd_data_list_register_names): Likewise.
+	(mi_cmd_data_list_changed_registers): Likewise.
+	(mi_cmd_data_list_register_values): Likewise.
+	(mi_cmd_data_write_register_values): Likewise.
+	(mi_cmd_trace_frame_collected): Likewise.
+	* mips-tdep.c (print_gp_register_row): Likewise.
+	(mips_print_registers_info): Likewise.
+	* nds32-tdep.c (nds32_gdbarch_init): Likewise.
+	* regcache.c (init_regcache_descr): Likewise.
+	(register_size): Likewise.
+	(register_dump::dump): Likewise.
+	(cooked_read_test): Likewise.
+	(cooked_write_test): Likewise.
+	* rs6000-tdep.c (rs6000_register_sim_regno): Likewise.
+	(rs6000_gdbarch_init): Likewise.
+	* stabsread.c (stab_reg_to_regnum): Likewise.
+	* stack.c (info_frame_command): Likewise.
+	* target-descriptions.c (tdesc_register_name): Likewise.
+	* trad-frame.c (trad_frame_alloc_saved_regs): Likewise.
+	* tui/tui-regs.c (tui_show_register_group): Likewise.
+	* user-regs.c (user_reg_map_name_to_regnum): Likewise.
+	(user_reg_map_regnum_to_name): Likewise.
+	(value_of_user_reg): Likewise.
+	(maintenance_print_user_registers): Likewise.
+	* xtensa-tdep.c (xtensa_find_register_by_name): Likewise.
+	(xtensa_register_name): Likewise.
+	(xtensa_register_type): Likewise.
+	(xtensa_reg_to_regnum): Likewise.
+	(xtensa_pseudo_register_read): Likewise.
+	(xtensa_pseudo_register_write): Likewise.
+
 2018-10-21  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* amd64-tdep.c (amd64_pseudo_register_read_value): Use

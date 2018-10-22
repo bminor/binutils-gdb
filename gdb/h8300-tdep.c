@@ -1128,8 +1128,7 @@ h8300_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 static struct type *
 h8300_register_type (struct gdbarch *gdbarch, int regno)
 {
-  if (regno < 0 || regno >= gdbarch_num_regs (gdbarch)
-			    + gdbarch_num_pseudo_regs (gdbarch))
+  if (regno < 0 || regno >= gdbarch_num_cooked_regs (gdbarch))
     internal_error (__FILE__, __LINE__,
 		    _("h8300_register_type: illegal register number %d"),
 		    regno);

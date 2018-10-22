@@ -537,13 +537,9 @@ mdebug_reg_to_regnum (struct symbol *sym, struct gdbarch *gdbarch)
 {
   int regno = gdbarch_ecoff_reg_to_regnum (gdbarch, SYMBOL_VALUE (sym));
 
-  if (regno < 0
-      || regno >= (gdbarch_num_regs (gdbarch)
-		   + gdbarch_num_pseudo_regs (gdbarch)))
+  if (regno < 0 || regno >= gdbarch_num_cooked_regs (gdbarch))
     {
-      reg_value_complaint (regno,
-			   gdbarch_num_regs (gdbarch)
-			     + gdbarch_num_pseudo_regs (gdbarch),
+      reg_value_complaint (regno, gdbarch_num_cooked_regs (gdbarch),
 			   SYMBOL_PRINT_NAME (sym));
 
       regno = gdbarch_sp_regnum (gdbarch); /* Known safe, though useless.  */

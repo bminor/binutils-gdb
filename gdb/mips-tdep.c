@@ -6497,8 +6497,7 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
 
   /* For GP registers, we print a separate row of names above the vals.  */
   for (col = 0, regnum = start_regnum;
-       col < ncols && regnum < gdbarch_num_regs (gdbarch)
-			       + gdbarch_num_pseudo_regs (gdbarch);
+       col < ncols && regnum < gdbarch_num_cooked_regs (gdbarch);
        regnum++)
     {
       if (*gdbarch_register_name (gdbarch, regnum) == '\0')
@@ -6536,8 +6535,7 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
 
   /* Now print the values in hex, 4 or 8 to the row.  */
   for (col = 0, regnum = start_regnum;
-       col < ncols && regnum < gdbarch_num_regs (gdbarch)
-			       + gdbarch_num_pseudo_regs (gdbarch);
+       col < ncols && regnum < gdbarch_num_cooked_regs (gdbarch);
        regnum++)
     {
       if (*gdbarch_register_name (gdbarch, regnum) == '\0')
@@ -6603,8 +6601,7 @@ mips_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
     /* Do all (or most) registers.  */
     {
       regnum = gdbarch_num_regs (gdbarch);
-      while (regnum < gdbarch_num_regs (gdbarch)
-		      + gdbarch_num_pseudo_regs (gdbarch))
+      while (regnum < gdbarch_num_cooked_regs (gdbarch))
 	{
 	  if (mips_float_register_p (gdbarch, regnum))
 	    {

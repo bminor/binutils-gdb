@@ -2387,8 +2387,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
 			      int regnum, int print_all)
 {
   int i;
-  const int numregs = gdbarch_num_regs (gdbarch)
-		      + gdbarch_num_pseudo_regs (gdbarch);
+  const int numregs = gdbarch_num_cooked_regs (gdbarch);
 
   for (i = 0; i < numregs; i++)
     {
@@ -2475,8 +2474,7 @@ registers_info (const char *addr_exp, int fpregs)
 	    /* User registers lie completely outside of the range of
 	       normal registers.  Catch them early so that the target
 	       never sees them.  */
-	    if (regnum >= gdbarch_num_regs (gdbarch)
-			  + gdbarch_num_pseudo_regs (gdbarch))
+	    if (regnum >= gdbarch_num_cooked_regs (gdbarch))
 	      {
 		struct value *regval = value_of_user_reg (regnum, frame);
 		const char *regname = user_reg_map_regnum_to_name (gdbarch,
@@ -2515,8 +2513,7 @@ registers_info (const char *addr_exp, int fpregs)
 	    int regnum;
 
 	    for (regnum = 0;
-		 regnum < gdbarch_num_regs (gdbarch)
-			  + gdbarch_num_pseudo_regs (gdbarch);
+		 regnum < gdbarch_num_cooked_regs (gdbarch);
 		 regnum++)
 	      {
 		if (gdbarch_register_reggroup_p (gdbarch, regnum, group))
@@ -2558,10 +2555,7 @@ print_vector_info (struct ui_file *file,
       int regnum;
       int printed_something = 0;
 
-      for (regnum = 0;
-	   regnum < gdbarch_num_regs (gdbarch)
-		    + gdbarch_num_pseudo_regs (gdbarch);
-	   regnum++)
+      for (regnum = 0; regnum < gdbarch_num_cooked_regs (gdbarch); regnum++)
 	{
 	  if (gdbarch_register_reggroup_p (gdbarch, regnum, vector_reggroup))
 	    {
@@ -3110,10 +3104,7 @@ default_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
   int regnum;
   int printed_something = 0;
 
-  for (regnum = 0;
-       regnum < gdbarch_num_regs (gdbarch)
-	 + gdbarch_num_pseudo_regs (gdbarch);
-       regnum++)
+  for (regnum = 0; regnum < gdbarch_num_cooked_regs (gdbarch); regnum++)
     {
       if (gdbarch_register_reggroup_p (gdbarch, regnum, float_reggroup))
 	{
