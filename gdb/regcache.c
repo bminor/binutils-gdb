@@ -1679,7 +1679,7 @@ cooked_read_test (struct gdbarch *gdbarch)
 	      || bfd_arch == bfd_arch_mips || bfd_arch == bfd_arch_v850_rh850
 	      || bfd_arch == bfd_arch_tic6x || bfd_arch == bfd_arch_mn10300
 	      || bfd_arch == bfd_arch_rl78 || bfd_arch == bfd_arch_score
-	      || bfd_arch == bfd_arch_riscv)
+	      || bfd_arch == bfd_arch_riscv || bfd_arch == bfd_arch_csky)
 	    {
 	      /* Raw registers.  If raw registers are not in save_reggroup,
 		 their status are unknown.  */
