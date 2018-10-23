@@ -1,5 +1,9 @@
 2018-10-24  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/catch-follow-exec.exp: Rewrite using gdb_test.
+
+2018-10-24  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/valgrind-db-attach.exp: Handle removed support for
 	--db-attach in valgrind.
 
