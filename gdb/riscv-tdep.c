@@ -290,34 +290,44 @@ static unsigned int riscv_debug_infcall = 0;
 
 static unsigned int riscv_debug_unwinder = 0;
 
-/* Read the MISA register from the target.  The register will only be read
-   once, and the value read will be cached.  If the register can't be read
-   from the target then a default value (0) will be returned.  If the
-   pointer READ_P is not null, then the bool pointed to is updated  to
-   indicate if the value returned was read from the target (true) or is the
-   default (false).  */
+/* Read the MISA register from the target.  There are a couple of locations
+   that the register might be found, these are all tried.  If the MISA
+   register can't be found at all then the default value of 0 is returned,
+   this is inline with the RISC-V specification.  */
 
 static uint32_t
-riscv_read_misa_reg (bool *read_p)
+riscv_read_misa_reg ()
 {
   uint32_t value = 0;
 
   if (target_has_registers)
     {
+      /* Old cores might have MISA located at a different offset.  */
+      static int misa_regs[] =
+	{ RISCV_CSR_MISA_REGNUM, RISCV_CSR_LEGACY_MISA_REGNUM };
+
       struct frame_info *frame = get_current_frame ();
 
-      TRY
+      for (int i = 0; i < ARRAY_SIZE (misa_regs); ++i)
 	{
-	  value = get_frame_register_unsigned (frame,
-					       RISCV_CSR_MISA_REGNUM);
+	  bool success = false;
+
+	  TRY
+	    {
+	      value = get_frame_register_unsigned (frame, misa_regs[i]);
+	      success = true;
+	    }
+	  CATCH (ex, RETURN_MASK_ERROR)
+	    {
+	      /* Ignore errors, it is acceptable for a target to not
+		 provide a MISA register, in which case the default value
+		 of 0 should be used.  */
+	    }
+	  END_CATCH
+
+	  if (success)
+	    break;
 	}
-      CATCH (ex, RETURN_MASK_ERROR)
-	{
-	  /* Old cores might have MISA located at a different offset.  */
-	  value = get_frame_register_unsigned (frame,
-					       RISCV_CSR_LEGACY_MISA_REGNUM);
-	}
-      END_CATCH
     }
 
   return value;
@@ -330,13 +340,10 @@ riscv_read_misa_reg (bool *read_p)
 static bool
 riscv_has_feature (struct gdbarch *gdbarch, char feature)
 {
-  bool have_read_misa = false;
-  uint32_t misa;
-
   gdb_assert (feature >= 'A' && feature <= 'Z');
 
-  misa = riscv_read_misa_reg (&have_read_misa);
-  if (!have_read_misa || misa == 0)
+  uint32_t misa = riscv_read_misa_reg ();
+  if (misa == 0)
     misa = gdbarch_tdep (gdbarch)->core_features;
 
   return (misa & (1 << (feature - 'A'))) != 0;

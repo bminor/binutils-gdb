@@ -1,3 +1,10 @@
+2018-10-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-tdep.c (riscv_read_misa_reg): Update comment, remove
+	READ_P parameter, catch and ignore register access errors from
+	either the old or new MISA location.
+	(riscv_has_feature): Update call to riscv_read_misa_reg.
+
 2018-10-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* python/py-function.c (convert_values_to_python): Return
