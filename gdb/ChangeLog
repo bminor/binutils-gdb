@@ -1,3 +1,11 @@
+2018-10-23  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/23368
+	* infrun.c (follow_exec): In the follow_exec_mode_new case,
+	transfer terminal state from old new new inferior.
+	* terminal.h (swap_terminal_info): New function.
+	* inflow.c (swap_terminal_info): New function.
+
 2018-10-23  Tom Tromey  <tom@tromey.com>
 
 	* record-btrace.c (get_thread_current_frame_id): Rename from

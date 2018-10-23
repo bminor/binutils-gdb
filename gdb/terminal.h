@@ -29,6 +29,9 @@ extern void new_tty_postfork (void);
 
 extern void copy_terminal_info (struct inferior *to, struct inferior *from);
 
+/* Exchange the terminal info and state between inferiors A and B.  */
+extern void swap_terminal_info (inferior *a, inferior *b);
+
 extern pid_t create_tty_session (void);
 
 /* Set up a serial structure describing standard input.  In inflow.c.  */

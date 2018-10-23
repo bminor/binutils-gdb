@@ -702,6 +702,22 @@ copy_terminal_info (struct inferior *to, struct inferior *from)
   to->terminal_state = from->terminal_state;
 }
 
+/* See terminal.h.  */
+
+void
+swap_terminal_info (inferior *a, inferior *b)
+{
+  terminal_info *info_a
+    = (terminal_info *) inferior_data (a, inflow_inferior_data);
+  terminal_info *info_b
+    = (terminal_info *) inferior_data (a, inflow_inferior_data);
+
+  set_inferior_data (a, inflow_inferior_data, info_b);
+  set_inferior_data (b, inflow_inferior_data, info_a);
+
+  std::swap (a->terminal_state, b->terminal_state);
+}
+
 void
 info_terminal_command (const char *arg, int from_tty)
 {
