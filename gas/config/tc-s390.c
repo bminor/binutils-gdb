@@ -1510,6 +1510,21 @@ md_gather_operands (char *str,
 	  if (*str++ != ')')
 	    as_bad (_("syntax error; missing ')' after base register"));
 	  skip_optional = 0;
+
+	  if ((opcode->flags & (S390_INSTR_FLAG_OPTPARM
+				| S390_INSTR_FLAG_OPTPARM2))
+	      && opindex_ptr[1] != '\0'
+	      && opindex_ptr[2] == '\0'
+	      && *str == '\0')
+	    continue;
+
+	  if ((opcode->flags & S390_INSTR_FLAG_OPTPARM2)
+	      && opindex_ptr[1] != '\0'
+	      && opindex_ptr[2] != '\0'
+	      && opindex_ptr[3] == '\0'
+	      && *str == '\0')
+	    continue;
+
 	  /* If there is a next operand it must be separated by a comma.  */
 	  if (opindex_ptr[1] != '\0')
 	    {
