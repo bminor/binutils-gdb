@@ -2856,6 +2856,7 @@ riscv_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_return_value (gdbarch, riscv_return_value);
   set_gdbarch_breakpoint_kind_from_pc (gdbarch, riscv_breakpoint_kind_from_pc);
   set_gdbarch_sw_breakpoint_from_kind (gdbarch, riscv_sw_breakpoint_from_kind);
+  set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);
 
   /* Register architecture.  */
   set_gdbarch_num_regs (gdbarch, RISCV_LAST_REGNUM + 1);

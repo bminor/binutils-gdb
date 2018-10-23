@@ -1,3 +1,8 @@
+2018-10-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* riscv-tdep.c (riscv_gdbarch_init): Set the gdbarch's
+	have_nonsteppable_watchpoint attribute to 1.
+
 2018-10-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* riscv-tdep.c (riscv_gdb_reg_names): Update comment, and all
