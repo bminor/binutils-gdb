@@ -376,6 +376,9 @@ _bfd_add_merge_section (bfd *abfd, void **psinfo, asection *sec,
       || sec->entsize == 0)
     return TRUE;
 
+  if (sec->size % sec->entsize != 0)
+    return TRUE;
+
   if ((sec->flags & SEC_RELOC) != 0)
     {
       /* We aren't prepared to handle relocations in merged sections.  */

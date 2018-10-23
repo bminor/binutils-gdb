@@ -1,3 +1,9 @@
+2018-10-23  Alan Modra  <amodra@gmail.com>
+
+	PR 23804
+	* merge.c (_bfd_add_merge_section): Don't attempt to merge
+	sections where size is not a multiple of entsize.
+
 2018-10-20  Alan Modra  <amodra@gmail.com>
 
 	PR 23788
