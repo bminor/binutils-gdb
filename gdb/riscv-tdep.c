@@ -482,11 +482,22 @@ riscv_register_name (struct gdbarch *gdbarch, int regnum)
 
   if (regnum >= RISCV_FIRST_CSR_REGNUM && regnum <= RISCV_LAST_CSR_REGNUM)
     {
-      static char buf[20];
+#define DECLARE_CSR(NAME,VALUE) \
+      case RISCV_ ## VALUE ## _REGNUM: return # NAME;
 
-      xsnprintf (buf, sizeof (buf), "csr%d",
-		 regnum - RISCV_FIRST_CSR_REGNUM);
-      return buf;
+      switch (regnum)
+	{
+	  #include "opcode/riscv-opc.h"
+	default:
+          {
+            static char buf[20];
+
+            xsnprintf (buf, sizeof (buf), "csr%d",
+                       regnum - RISCV_FIRST_CSR_REGNUM);
+            return buf;
+          }
+	}
+#undef DECLARE_CSR
     }
 
   if (regnum == RISCV_PRIV_REGNUM)
