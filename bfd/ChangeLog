@@ -1,5 +1,12 @@
 2018-10-23  Alan Modra  <amodra@gmail.com>
 
+	PR 23805
+	* elflink.c (elf_link_input_bfd): Don't segfault on finding
+	STT_TLS symbols without any TLS sections.  Instead, change the
+	symbol type to STT_NOTYPE.
+
+2018-10-23  Alan Modra  <amodra@gmail.com>
+
 	PR 23804
 	* merge.c (_bfd_add_merge_section): Don't attempt to merge
 	sections where size is not a multiple of entsize.

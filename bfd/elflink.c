@@ -10489,8 +10489,11 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	  if (ELF_ST_TYPE (osym.st_info) == STT_TLS)
 	    {
 	      /* STT_TLS symbols are relative to PT_TLS segment base.  */
-	      BFD_ASSERT (elf_hash_table (flinfo->info)->tls_sec != NULL);
-	      osym.st_value -= elf_hash_table (flinfo->info)->tls_sec->vma;
+	      if (elf_hash_table (flinfo->info)->tls_sec != NULL)
+		osym.st_value -= elf_hash_table (flinfo->info)->tls_sec->vma;
+	      else
+		osym.st_info = ELF_ST_INFO (ELF_ST_BIND (osym.st_info),
+					    STT_NOTYPE);
 	    }
 	}
 
@@ -11046,12 +11049,17 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 			      sym.st_value += osec->vma;
 			      if (ELF_ST_TYPE (sym.st_info) == STT_TLS)
 				{
+				  struct elf_link_hash_table *htab
+				    = elf_hash_table (flinfo->info);
+
 				  /* STT_TLS symbols are relative to PT_TLS
 				     segment base.  */
-				  BFD_ASSERT (elf_hash_table (flinfo->info)
-					      ->tls_sec != NULL);
-				  sym.st_value -= (elf_hash_table (flinfo->info)
-						   ->tls_sec->vma);
+				  if (htab->tls_sec != NULL)
+				    sym.st_value -= htab->tls_sec->vma;
+				  else
+				    sym.st_info
+				      = ELF_ST_INFO (ELF_ST_BIND (sym.st_info),
+						     STT_NOTYPE);
 				}
 			    }
 
