@@ -1,3 +1,8 @@
+2018-10-23  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/shared.exp: Don't build pr19073 test on alpha.
+	* testsuite/ld-elf/pr18720b.c: Don't use .set on alpha.
+
 2018-10-20  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (lang_end): Don't error if no --entry or --undefined
