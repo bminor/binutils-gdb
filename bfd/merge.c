@@ -24,6 +24,7 @@
    as used in ELF SHF_MERGE.  */
 
 #include "sysdep.h"
+#include <limits.h>
 #include "bfd.h"
 #include "elf-bfd.h"
 #include "libbfd.h"
@@ -385,12 +386,18 @@ _bfd_add_merge_section (bfd *abfd, void **psinfo, asection *sec,
       return TRUE;
     }
 
-  align = sec->alignment_power;
-  if ((sec->entsize < (unsigned) 1 << align
+#ifndef CHAR_BIT
+#define CHAR_BIT 8
+#endif
+  if (sec->alignment_power >= sizeof (align) * CHAR_BIT)
+    return TRUE;
+
+  align = 1u << sec->alignment_power;
+  if ((sec->entsize < align
        && ((sec->entsize & (sec->entsize - 1))
 	   || !(sec->flags & SEC_STRINGS)))
-      || (sec->entsize > (unsigned) 1 << align
-	  && (sec->entsize & (((unsigned) 1 << align) - 1))))
+      || (sec->entsize > align
+	  && (sec->entsize & (align - 1))))
     {
       /* Sanity check.  If string character size is smaller than
 	 alignment, then we require character size to be a power
