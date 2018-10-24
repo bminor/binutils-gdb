@@ -980,6 +980,17 @@ proc gdb_test_multiple { command message user_code } {
 	    set result -1
 	}
 
+	-i $gdb_spawn_id
+	eof {
+	    perror "GDB process no longer exists"
+	    set wait_status [wait -i $gdb_spawn_id]
+	    verbose -log "GDB process exited with wait status $wait_status"
+	    if { $message != "" } {
+		fail "$message"
+	    }
+	    return -1
+	}
+
 	# Patterns below apply to any spawn id specified.
 	-i $any_spawn_id
 	eof {

@@ -1,5 +1,10 @@
 2018-10-24  Tom de Vries  <tdevries@suse.de>
 
+	* lib/gdb.exp (gdb_test_multiple): Log wait status on process no
+	longer exists error.
+
+2018-10-24  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/catch-follow-exec.exp: Rewrite using gdb_test.
 
 2018-10-24  Tom de Vries  <tdevries@suse.de>
