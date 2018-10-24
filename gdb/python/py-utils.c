@@ -295,47 +295,47 @@ get_addr_from_python (PyObject *obj, CORE_ADDR *addr)
 /* Convert a LONGEST to the appropriate Python object -- either an
    integer object or a long object, depending on its value.  */
 
-PyObject *
+gdbpy_ref<>
 gdb_py_object_from_longest (LONGEST l)
 {
 #ifdef IS_PY3K
   if (sizeof (l) > sizeof (long))
-    return PyLong_FromLongLong (l);
-  return PyLong_FromLong (l);
+    return gdbpy_ref<> (PyLong_FromLongLong (l));
+  return gdbpy_ref<> (PyLong_FromLong (l));
 #else
 #ifdef HAVE_LONG_LONG		/* Defined by Python.  */
   /* If we have 'long long', and the value overflows a 'long', use a
      Python Long; otherwise use a Python Int.  */
   if (sizeof (l) > sizeof (long)
       && (l > PyInt_GetMax () || l < (- (LONGEST) PyInt_GetMax ()) - 1))
-    return PyLong_FromLongLong (l);
+    return gdbpy_ref<> (PyLong_FromLongLong (l));
 #endif
-  return PyInt_FromLong (l);
+  return gdbpy_ref<> (PyInt_FromLong (l));
 #endif
 }
 
 /* Convert a ULONGEST to the appropriate Python object -- either an
    integer object or a long object, depending on its value.  */
 
-PyObject *
+gdbpy_ref<>
 gdb_py_object_from_ulongest (ULONGEST l)
 {
 #ifdef IS_PY3K
   if (sizeof (l) > sizeof (unsigned long))
-    return PyLong_FromUnsignedLongLong (l);
-  return PyLong_FromUnsignedLong (l);
+    return gdbpy_ref<> (PyLong_FromUnsignedLongLong (l));
+  return gdbpy_ref<> (PyLong_FromUnsignedLong (l));
 #else
 #ifdef HAVE_LONG_LONG		/* Defined by Python.  */
   /* If we have 'long long', and the value overflows a 'long', use a
      Python Long; otherwise use a Python Int.  */
   if (sizeof (l) > sizeof (unsigned long) && l > PyInt_GetMax ())
-    return PyLong_FromUnsignedLongLong (l);
+    return gdbpy_ref<> (PyLong_FromUnsignedLongLong (l));
 #endif
 
   if (l > PyInt_GetMax ())
-    return PyLong_FromUnsignedLong (l);
+    return gdbpy_ref<> (PyLong_FromUnsignedLong (l));
 
-  return PyInt_FromLong (l);
+  return gdbpy_ref<> (PyInt_FromLong (l));
 #endif
 }
 

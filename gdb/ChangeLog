@@ -1,3 +1,16 @@
+2018-11-04  Tom Tromey  <tom@tromey.com>
+
+	* python/python-internal.h (gdb_py_object_from_longest)
+	(gdb_py_object_from_ulongest): Return gdbpy_ref.
+	* python/py-value.c (valpy_int): Update.
+	* python/py-utils.c (gdb_py_object_from_longest): Return
+	gdbpy_ref.
+	(gdb_py_object_from_ulongest): Likewise.
+	* python/py-type.c (typy_get_alignof): Update.
+	* python/py-linetable.c (ltpy_get_all_source_lines)
+	(ltpy_entry_get_line, ltpy_entry_get_pc): Update.
+	* python/py-block.c (blpy_get_start, blpy_get_end): Update.
+
 2018-11-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* ada-lang.c (_initialize_ada_language): Fix typo.

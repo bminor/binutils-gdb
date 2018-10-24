@@ -1516,9 +1516,9 @@ valpy_int (PyObject *self)
   END_CATCH
 
   if (TYPE_UNSIGNED (type))
-    return gdb_py_object_from_ulongest (l);
+    return gdb_py_object_from_ulongest (l).release ();
   else
-    return gdb_py_object_from_longest (l);
+    return gdb_py_object_from_longest (l).release ();
 }
 #endif
 

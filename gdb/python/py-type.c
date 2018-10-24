@@ -755,7 +755,7 @@ typy_get_alignof (PyObject *self, void *closure)
 
   /* Ignore exceptions.  */
 
-  return gdb_py_object_from_ulongest (align);
+  return gdb_py_object_from_ulongest (align).release ();
 }
 
 static struct type *
