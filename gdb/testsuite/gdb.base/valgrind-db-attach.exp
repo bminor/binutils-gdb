@@ -51,6 +51,10 @@ set use_gdb_stub 1
 set test "valgrind started"
 # The trailing '.' differs for different memcheck versions.
 gdb_test_multiple "" $test {
+    -re "valgrind: Unknown option: --db-attach=yes" {
+	unsupported $test
+	return -1
+    }
     -re "Memcheck, a memory error detector\\.?\r\n" {
 	pass $test
     }

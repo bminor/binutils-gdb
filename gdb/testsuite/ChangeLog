@@ -1,3 +1,8 @@
+2018-10-24  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/valgrind-db-attach.exp: Handle removed support for
+	--db-attach in valgrind.
+
 2018-10-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.arch/riscv-reg-aliases.c: New file.
