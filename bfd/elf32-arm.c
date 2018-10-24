@@ -6449,7 +6449,8 @@ elf32_arm_size_stubs (bfd *output_bfd,
 	  asection *section;
 	  Elf_Internal_Sym *local_syms = NULL;
 
-	  if (!is_arm_elf (input_bfd))
+	  if (!is_arm_elf (input_bfd)
+	      || (elf_dyn_lib_class (input_bfd) & DYN_AS_NEEDED) != 0)
 	    continue;
 
 	  num_a8_relocs = 0;
