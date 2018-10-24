@@ -1,5 +1,29 @@
 2018-11-04  Tom Tromey  <tom@tromey.com>
 
+	* python/python.c (gdbpy_parameter_value): Update.
+	* python/python-internal.h (python_string_to_unicode)
+	(python_string_to_target_python_string)
+	(host_string_to_python_string): Return gdbpy_ref.
+	* python/py-utils.c (python_string_to_unicode)
+	(unicode_to_encoded_python_string)
+	(unicode_to_target_python_string)
+	(python_string_to_target_string)
+	(python_string_to_target_python_string): Return gdbpy_ref.
+	(python_string_to_host_string): Update.
+	(host_string_to_python_string): Return gdbpy_ref.
+	* python/py-symtab.c (stpy_get_filename, stpy_get_producer)
+	(stpy_fullname): Update.
+	* python/py-progspace.c (pspy_get_filename, pspy_solib_name):
+	Update.
+	* python/py-prettyprint.c (print_string_repr): Update.
+	* python/py-objfile.c (objfpy_get_filename, objfpy_get_username)
+	(objfpy_get_build_id): Update.
+	* python/py-breakpoint.c (bppy_get_location)
+	(bppy_get_expression, bppy_get_condition, bppy_get_commands):
+	Update.
+
+2018-11-04  Tom Tromey  <tom@tromey.com>
+
 	* python/python-internal.h (gdb_py_object_from_longest)
 	(gdb_py_object_from_ulongest): Return gdbpy_ref.
 	* python/py-value.c (valpy_int): Update.

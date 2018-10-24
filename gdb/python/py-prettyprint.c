@@ -316,7 +316,7 @@ print_string_repr (PyObject *printer, const char *hint,
       else
 	{
 	  gdbpy_ref<> string
-	    (python_string_to_target_python_string (py_str.get ()));
+	    = python_string_to_target_python_string (py_str.get ());
 	  if (string != NULL)
 	    {
 	      char *output;

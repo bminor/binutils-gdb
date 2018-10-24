@@ -399,7 +399,7 @@ bppy_get_location (PyObject *self, void *closure)
   str = event_location_to_string (location);
   if (! str)
     str = "";
-  return host_string_to_python_string (str);
+  return host_string_to_python_string (str).release ();
 }
 
 /* Python function to get the breakpoint expression.  */
@@ -421,7 +421,7 @@ bppy_get_expression (PyObject *self, void *closure)
   if (! str)
     str = "";
 
-  return host_string_to_python_string (str);
+  return host_string_to_python_string (str).release ();
 }
 
 /* Python function to get the condition expression of a breakpoint.  */
@@ -437,7 +437,7 @@ bppy_get_condition (PyObject *self, void *closure)
   if (! str)
     Py_RETURN_NONE;
 
-  return host_string_to_python_string (str);
+  return host_string_to_python_string (str).release ();
 }
 
 /* Returns 0 on success.  Returns -1 on error, with a python exception set.
@@ -512,7 +512,7 @@ bppy_get_commands (PyObject *self, void *closure)
   END_CATCH
 
   current_uiout->redirect (NULL);
-  return host_string_to_python_string (stb.c_str ());
+  return host_string_to_python_string (stb.c_str ()).release ();
 }
 
 /* Set the commands attached to a breakpoint.  Returns 0 on success.

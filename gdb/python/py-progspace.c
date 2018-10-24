@@ -83,7 +83,8 @@ pspy_get_filename (PyObject *self, void *closure)
       struct objfile *objfile = obj->pspace->symfile_object_file;
 
       if (objfile)
-	return host_string_to_python_string (objfile_name (objfile));
+	return (host_string_to_python_string (objfile_name (objfile))
+		.release ());
     }
   Py_RETURN_NONE;
 }
@@ -373,7 +374,7 @@ pspy_solib_name (PyObject *o, PyObject *args)
   soname = solib_name_from_address (self->pspace, pc);
   if (soname == nullptr)
     Py_RETURN_NONE;
-  return host_string_to_python_string (soname);
+  return host_string_to_python_string (soname).release ();
 }
 
 /* Return the innermost lexical block containing the specified pc value,

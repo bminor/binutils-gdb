@@ -656,12 +656,12 @@ int gdbpy_print_python_errors_p (void);
 void gdbpy_print_stack (void);
 void gdbpy_handle_exception () ATTRIBUTE_NORETURN;
 
-PyObject *python_string_to_unicode (PyObject *obj);
+gdbpy_ref<> python_string_to_unicode (PyObject *obj);
 gdb::unique_xmalloc_ptr<char> unicode_to_target_string (PyObject *unicode_str);
 gdb::unique_xmalloc_ptr<char> python_string_to_target_string (PyObject *obj);
-PyObject *python_string_to_target_python_string (PyObject *obj);
+gdbpy_ref<> python_string_to_target_python_string (PyObject *obj);
 gdb::unique_xmalloc_ptr<char> python_string_to_host_string (PyObject *obj);
-PyObject *host_string_to_python_string (const char *str);
+gdbpy_ref<> host_string_to_python_string (const char *str);
 int gdbpy_is_string (PyObject *obj);
 gdb::unique_xmalloc_ptr<char> gdbpy_obj_to_string (PyObject *obj);
 gdb::unique_xmalloc_ptr<char> gdbpy_exception_to_string (PyObject *ptype,

@@ -79,7 +79,8 @@ objfpy_get_filename (PyObject *self, void *closure)
   objfile_object *obj = (objfile_object *) self;
 
   if (obj->objfile)
-    return host_string_to_python_string (objfile_name (obj->objfile));
+    return (host_string_to_python_string (objfile_name (obj->objfile))
+	    .release ());
   Py_RETURN_NONE;
 }
 
@@ -95,7 +96,7 @@ objfpy_get_username (PyObject *self, void *closure)
     {
       const char *username = obj->objfile->original_name;
 
-      return host_string_to_python_string (username);
+      return host_string_to_python_string (username).release ();
     }
 
   Py_RETURN_NONE;
@@ -145,7 +146,7 @@ objfpy_get_build_id (PyObject *self, void *closure)
       char *hex_form = make_hex_string (build_id->data, build_id->size);
       PyObject *result;
 
-      result = host_string_to_python_string (hex_form);
+      result = host_string_to_python_string (hex_form).release ();
       xfree (hex_form);
       return result;
     }

@@ -34,7 +34,7 @@
 
    If the given object is not one of the mentioned string types, NULL is
    returned, with the TypeError python exception set.  */
-PyObject *
+gdbpy_ref<>
 python_string_to_unicode (PyObject *obj)
 {
   PyObject *unicode_str;
@@ -57,7 +57,7 @@ python_string_to_unicode (PyObject *obj)
       unicode_str = NULL;
     }
 
-  return unicode_str;
+  return gdbpy_ref<> (unicode_str);
 }
 
 /* Returns a newly allocated string with the contents of the given unicode
@@ -88,11 +88,11 @@ unicode_to_encoded_string (PyObject *unicode_str, const char *charset)
    object converted to a named charset.  If an error occurs during
    the conversion, NULL will be returned and a python exception will
    be set.  */
-static PyObject *
+static gdbpy_ref<>
 unicode_to_encoded_python_string (PyObject *unicode_str, const char *charset)
 {
   /* Translate string to named charset.  */
-  return PyUnicode_AsEncodedString (unicode_str, charset, NULL);
+  return gdbpy_ref<> (PyUnicode_AsEncodedString (unicode_str, charset, NULL));
 }
 
 /* Returns a newly allocated string with the contents of the given
@@ -110,7 +110,7 @@ unicode_to_target_string (PyObject *unicode_str)
    object converted to the target's charset.  If an error occurs
    during the conversion, NULL will be returned and a python exception
    will be set.  */
-static PyObject *
+static gdbpy_ref<>
 unicode_to_target_python_string (PyObject *unicode_str)
 {
   return unicode_to_encoded_python_string (unicode_str,
@@ -123,7 +123,7 @@ unicode_to_target_python_string (PyObject *unicode_str)
 gdb::unique_xmalloc_ptr<char>
 python_string_to_target_string (PyObject *obj)
 {
-  gdbpy_ref<> str (python_string_to_unicode (obj));
+  gdbpy_ref<> str = python_string_to_unicode (obj);
   if (str == NULL)
     return NULL;
 
@@ -135,12 +135,12 @@ python_string_to_target_string (PyObject *obj)
    set.
 
    In Python 3, the returned object is a "bytes" object (not a string).  */
-PyObject *
+gdbpy_ref<>
 python_string_to_target_python_string (PyObject *obj)
 {
-  gdbpy_ref<> str (python_string_to_unicode (obj));
+  gdbpy_ref<> str = python_string_to_unicode (obj);
   if (str == NULL)
-    return NULL;
+    return str;
 
   return unicode_to_target_python_string (str.get ());
 }
@@ -151,7 +151,7 @@ python_string_to_target_python_string (PyObject *obj)
 gdb::unique_xmalloc_ptr<char>
 python_string_to_host_string (PyObject *obj)
 {
-  gdbpy_ref<> str (python_string_to_unicode (obj));
+  gdbpy_ref<> str = python_string_to_unicode (obj);
   if (str == NULL)
     return NULL;
 
@@ -160,10 +160,11 @@ python_string_to_host_string (PyObject *obj)
 
 /* Convert a host string to a python string.  */
 
-PyObject *
+gdbpy_ref<>
 host_string_to_python_string (const char *str)
 {
-  return PyString_Decode (str, strlen (str), host_charset (), NULL);
+  return gdbpy_ref<> (PyString_Decode (str, strlen (str), host_charset (),
+				       NULL));
 }
 
 /* Return true if OBJ is a Python string or unicode object, false

@@ -438,7 +438,7 @@ gdbpy_parameter_value (enum var_types type, void *var)
 
 	if (! str)
 	  str = "";
-	return host_string_to_python_string (str);
+	return host_string_to_python_string (str).release ();
       }
 
     case var_boolean:
