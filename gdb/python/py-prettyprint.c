@@ -45,7 +45,7 @@ enum string_repr_result
    will return None.  On error, it will set the Python error and
    return NULL.  */
 
-static PyObject *
+static gdbpy_ref<>
 search_pp_list (PyObject *list, PyObject *value)
 {
   Py_ssize_t pp_list_size, list_index;
@@ -78,10 +78,10 @@ search_pp_list (PyObject *list, PyObject *value)
       if (printer == NULL)
 	return NULL;
       else if (printer != Py_None)
-	return printer.release ();
+	return printer;
     }
 
-  Py_RETURN_NONE;
+  return gdbpy_ref<>::new_reference (Py_None);
 }
 
 /* Subroutine of find_pretty_printer to simplify it.
@@ -125,7 +125,7 @@ find_pretty_printer_from_objfiles (PyObject *value)
    The result is Py_None, suitably inc-ref'd, if no pretty-printer was found.
    Otherwise the result is the pretty-printer function, suitably inc-ref'd.  */
 
-static PyObject *
+static gdbpy_ref<>
 find_pretty_printer_from_progspace (PyObject *value)
 {
   gdbpy_ref<> obj = pspace_to_pspace_object (current_program_space);
@@ -142,17 +142,17 @@ find_pretty_printer_from_progspace (PyObject *value)
    The result is Py_None, suitably inc-ref'd, if no pretty-printer was found.
    Otherwise the result is the pretty-printer function, suitably inc-ref'd.  */
 
-static PyObject *
+static gdbpy_ref<>
 find_pretty_printer_from_gdb (PyObject *value)
 {
   /* Fetch the global pretty printer list.  */
   if (gdb_python_module == NULL
       || ! PyObject_HasAttrString (gdb_python_module, "pretty_printers"))
-    Py_RETURN_NONE;
+    return gdbpy_ref<>::new_reference (Py_None);
   gdbpy_ref<> pp_list (PyObject_GetAttrString (gdb_python_module,
 					       "pretty_printers"));
   if (pp_list == NULL || ! PyList_Check (pp_list.get ()))
-    Py_RETURN_NONE;
+    return gdbpy_ref<>::new_reference (Py_None);
 
   return search_pp_list (pp_list.get (), value);
 }
@@ -161,19 +161,19 @@ find_pretty_printer_from_gdb (PyObject *value)
    pretty-printer exists, return None.  If one exists, return a new
    reference.  On error, set the Python error and return NULL.  */
 
-static PyObject *
+static gdbpy_ref<>
 find_pretty_printer (PyObject *value)
 {
   /* Look at the pretty-printer list for each objfile
      in the current program-space.  */
   gdbpy_ref<> function (find_pretty_printer_from_objfiles (value));
   if (function == NULL || function != Py_None)
-    return function.release ();
+    return function;
 
   /* Look at the pretty-printer list for the current program-space.  */
-  function.reset (find_pretty_printer_from_progspace (value));
+  function = find_pretty_printer_from_progspace (value);
   if (function == NULL || function != Py_None)
-    return function.release ();
+    return function;
 
   /* Look at the pretty-printer list in the gdb module.  */
   return find_pretty_printer_from_gdb (value);
@@ -744,7 +744,7 @@ apply_varobj_pretty_printer (PyObject *printer_obj,
    reference to the object if successful; returns NULL if not.  VALUE
    is the value for which a printer tests to determine if it
    can pretty-print the value.  */
-PyObject *
+gdbpy_ref<>
 gdbpy_get_varobj_pretty_printer (struct value *value)
 {
   TRY
@@ -772,7 +772,6 @@ PyObject *
 gdbpy_default_visualizer (PyObject *self, PyObject *args)
 {
   PyObject *val_obj;
-  PyObject *cons;
   struct value *value;
 
   if (! PyArg_ParseTuple (args, "O", &val_obj))
@@ -785,6 +784,5 @@ gdbpy_default_visualizer (PyObject *self, PyObject *args)
       return NULL;
     }
 
-  cons = find_pretty_printer (val_obj);
-  return cons;
+  return find_pretty_printer (val_obj).release ();
 }

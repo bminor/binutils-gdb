@@ -1115,25 +1115,22 @@ install_default_visualizer (struct varobj *var)
 
   if (pretty_printing)
     {
-      PyObject *pretty_printer = NULL;
+      gdbpy_ref<> pretty_printer;
 
       if (var->value != nullptr)
 	{
 	  pretty_printer = gdbpy_get_varobj_pretty_printer (var->value.get ());
-	  if (! pretty_printer)
+	  if (pretty_printer == nullptr)
 	    {
 	      gdbpy_print_stack ();
 	      error (_("Cannot instantiate printer for default visualizer"));
 	    }
 	}
-      
+
       if (pretty_printer == Py_None)
-	{
-	  Py_DECREF (pretty_printer);
-	  pretty_printer = NULL;
-	}
+	pretty_printer.release ();
   
-      install_visualizer (var->dynamic, NULL, pretty_printer);
+      install_visualizer (var->dynamic, NULL, pretty_printer.release ());
     }
 }
 

@@ -680,7 +680,7 @@ int gdbpy_is_value_object (PyObject *obj);
 gdbpy_ref<> apply_varobj_pretty_printer (PyObject *print_obj,
 					 struct value **replacement,
 					 struct ui_file *stream);
-PyObject *gdbpy_get_varobj_pretty_printer (struct value *value);
+gdbpy_ref<> gdbpy_get_varobj_pretty_printer (struct value *value);
 gdb::unique_xmalloc_ptr<char> gdbpy_get_display_hint (PyObject *printer);
 PyObject *gdbpy_default_visualizer (PyObject *self, PyObject *args);
 

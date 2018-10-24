@@ -1,5 +1,17 @@
 2018-11-04  Tom Tromey  <tom@tromey.com>
 
+	* varobj.c (install_default_visualizer): Update.
+	* python/python-internal.h (gdbpy_get_varobj_pretty_printer):
+	Return gdbpy_ref.
+	* python/py-prettyprint.c (search_pp_list): Return gdbpy_ref.
+	(find_pretty_printer_from_progspace)
+	(find_pretty_printer_from_gdb, find_pretty_printer)
+	(gdbpy_get_varobj_pretty_printer): Return gdbpy_ref.
+	(gdbpy_get_varobj_pretty_printer, gdbpy_default_visualizer):
+	Update.
+
+2018-11-04  Tom Tromey  <tom@tromey.com>
+
 	* python/python.c (gdbpy_parameter_value): Update.
 	* python/python-internal.h (python_string_to_unicode)
 	(python_string_to_target_python_string)
