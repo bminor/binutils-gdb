@@ -28,8 +28,9 @@ if { [gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile} executable {debug}] 
 clean_restart ${binfile}
 
 # make sure $pc is sane, in case we're talking to a board.
-if { ![runto_main] } {
-    gdb_suppress_tests
+if ![runto_main] then {
+    fail "can't run to main"
+    return 0
 }
 
 #

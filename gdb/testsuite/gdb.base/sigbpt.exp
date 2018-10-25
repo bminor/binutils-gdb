@@ -45,7 +45,8 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
 #
 
 if ![runto_main] then {
-    gdb_suppress_tests
+    fail "can't run to main"
+    return 0
 }
 
 # If we can examine what's at memory address 0, it is possible that we

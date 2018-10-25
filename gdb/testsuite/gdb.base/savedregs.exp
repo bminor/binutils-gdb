@@ -41,8 +41,9 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 clean_restart ${binfile}
 
 # Advance to main
-if { ![runto_main] } {
-    gdb_suppress_tests
+if ![runto_main] then {
+    fail "can't run to main"
+    return 0
 }
 
 proc process_saved_regs { current inner outer } {

@@ -53,7 +53,8 @@ gdb_load ${binfile}
 # Run to `main' where we begin our tests.
 
 if ![runto_main] then {
-    gdb_suppress_tests
+    fail "can't run to main"
+    return 0
 }
 
 set endianness [get_endianness]

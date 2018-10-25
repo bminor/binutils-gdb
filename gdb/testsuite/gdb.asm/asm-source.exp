@@ -294,7 +294,8 @@ gdb_load ${binfile}
 #
 
 if ![runto_main] then {
-    gdb_suppress_tests
+    fail "can't run to main"
+    return 0
 }
 
 # Execute the `f' command and see if the result includes source info.

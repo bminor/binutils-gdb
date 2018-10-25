@@ -36,8 +36,9 @@ if  {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" \
 clean_restart $binfile
 
 # Advance to main
-if { ![runto_main] } then {
-    gdb_suppress_tests
+if ![runto_main] then {
+    fail "can't run to main"
+    return 0
 }
 
 # Run to the signal.

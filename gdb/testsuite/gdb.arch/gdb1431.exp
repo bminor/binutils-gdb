@@ -49,7 +49,8 @@ gdb_load ${binfile}
 #
 
 if ![runto_main] then {
-    gdb_suppress_tests
+    fail "can't run to main"
+    return 0
 }
 
 gdb_test "advance sub1" "hello world\r\n$hex in sub1 \\(\\)" "get to sub1"

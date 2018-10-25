@@ -44,8 +44,9 @@ gdb_test "handle SIGVTALRM print pass nostop"
 gdb_test "handle SIGPROF print pass nostop"
 
 # Advance to main
-if { ![runto_main] } then {
-    gdb_suppress_tests
+if ![runto_main] then {
+    fail "can't run to main"
+    return 0
 }
 
 # Stop in handle, when at the inner most level

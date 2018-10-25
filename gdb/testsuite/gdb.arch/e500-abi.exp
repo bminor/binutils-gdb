@@ -46,7 +46,8 @@ gdb_load ${binfile}
 #
 
 if ![runto_main] then {
-    gdb_suppress_tests
+    fail "can't run to main"
+    return 0
 }
 
 gdb_test "b marker" "Breakpoint 2 at.*file.*e500-abi.c, line \[0-9\]+." "break marker"

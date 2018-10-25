@@ -35,8 +35,9 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile \
     return -1
 }
 
-if { ![runto_main] } then {
-    gdb_suppress_tests
+if ![runto_main] then {
+    fail "can't run to main"
+    return 0
 }
 
 gdb_test_multiple "next" "check for TE support" {
