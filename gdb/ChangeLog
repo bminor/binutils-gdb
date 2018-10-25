@@ -1,3 +1,8 @@
+2018-10-29  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* common/offset-type.h (DEFINE_OFFSET_REL_OP): Delete.
+	Adjust comments.
+
 2018-10-29  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* procfs.c: Include common/pathstuff.h.
