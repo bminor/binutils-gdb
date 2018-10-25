@@ -1,3 +1,9 @@
+2018-10-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23818
+	* elflink.c (_bfd_elf_link_assign_sym_version): Hide symbols
+	defined in discarded input sections.
+
 2018-10-24  Alan Modra  <amodra@gmail.com>
 
 	* elf32-arm.c (elf32_arm_size_stubs): Ignore as-needed libs that

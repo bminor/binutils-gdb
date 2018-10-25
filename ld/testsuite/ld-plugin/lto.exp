@@ -219,6 +219,12 @@ set lto_link_tests [list \
   [list "Build pr22751.a" \
    "$plug_opt" "-flto $lto_no_fat $INT128_CFLAGS" \
    {pr22751.c} {} "pr22751.a"] \
+  [list "Build libpr23818.so" \
+   "-shared -flto -g -Wl,-version-script,pr23818.t" \
+   "-g -flto $lto_fat" \
+   {pr23818a.c pr23818b.c} \
+   {{"readelf" {-s --wide} "pr23818.d"}} \
+   "libpr23818.so"] \
 ]
 
 if { [at_least_gcc_version 4 7] } {

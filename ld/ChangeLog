@@ -1,3 +1,12 @@
+2018-10-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23818
+	* testsuite/ld-plugin/lto.exp: Run PR ld/23818 test.
+	* testsuite/ld-plugin/pr23818.d: New file.
+	* testsuite/ld-plugin/pr23818.t: Likewise.
+	* testsuite/ld-plugin/pr23818a.c: Likewise.
+	* testsuite/ld-plugin/pr23818b.c: Likewise.
+
 2018-10-23  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/shared.exp: Don't build pr19073 test on alpha.
