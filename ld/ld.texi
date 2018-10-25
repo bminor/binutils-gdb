@@ -1605,12 +1605,14 @@ referenced by dynamic objects.  Note that when building shared
 libraries, the linker must assume that any visible symbol is
 referenced.  Once this initial set of sections has been determined,
 the linker recursively marks as used any section referenced by their
-relocations.  See @samp{--entry} and @samp{--undefined}.
+relocations.  See @samp{--entry}, @samp{--undefined}, and
+@samp{--gc-keep-exported}.
 
 This option can be set when doing a partial link (enabled with option
 @samp{-r}).  In this case the root of symbols kept must be explicitly
-specified either by an @samp{--entry} or @samp{--undefined} option or by
-a @code{ENTRY} command in the linker script.
+specified either by one of the options @samp{--entry},
+@samp{--undefined}, or @samp{--gc-keep-exported} or by a @code{ENTRY}
+command in the linker script.
 
 @kindex --print-gc-sections
 @kindex --no-print-gc-sections

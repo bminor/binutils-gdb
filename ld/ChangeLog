@@ -1,3 +1,7 @@
+2018-10-26  Christoph Conrads  <christoph.conrads@fluent.ai>
+
+	* ld.texi (--gc-sections): Update.
+
 2018-10-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23818
