@@ -1,3 +1,22 @@
+2018-10-29  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (ei386beos.c, ei386go32.c): Correct dependencies.
+	* Makefile.in: Regenerate.
+	* scripttempl/elf.sc (.note.gnu.build-id, .eh_frame_hdr): Set
+	address with ${RELOCATING-0}.
+	* scripttempl/arclinux.sc: Likewise.
+	* scripttempl/armbpabi.sc: Likewise.
+	* scripttempl/avr.sc: Likewise.
+	* scripttempl/elf64hppa.sc: Likewise.
+	* scripttempl/elf_chaos.sc: Likewise.
+	* scripttempl/elfarc.sc: Likewise.
+	* scripttempl/elfxtensa.sc: Likewise.
+	* scripttempl/mep.sc: Likewise.
+	* scripttempl/nds32elf.sc: Likewise.
+	* scripttempl/pru.sc: Likewise.
+	* scripttempl/elf32msp430.sc: Likewise, and for other sections.
+	* scripttempl/epiphany_4x4.sc: Similarly.
+
 2018-10-26  Christoph Conrads  <christoph.conrads@fluent.ai>
 
 	* ld.texi (--gc-sections): Update.

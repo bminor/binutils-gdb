@@ -375,7 +375,7 @@ cat <<EOF
   ${CREATE_SHLIB+${RELOCATING+. = ${SHLIB_TEXT_START_ADDR:-0} + SIZEOF_HEADERS;}}
   ${CREATE_PIE+${RELOCATING+. = ${SHLIB_TEXT_START_ADDR:-0} + SIZEOF_HEADERS;}}
   ${INITIAL_READONLY_SECTIONS}
-  .note.gnu.build-id : { *(.note.gnu.build-id) }
+  .note.gnu.build-id ${RELOCATING-0}: { *(.note.gnu.build-id) }
 EOF
 
 test -n "${RELOCATING+0}" || unset NON_ALLOC_DYN
@@ -469,7 +469,7 @@ fi
 
 cat <<EOF
 
-  .init  ${RELOCATING+__init_start}  :
+  .init  ${RELOCATING-0}${RELOCATING+__init_start}  :
   {
     ${RELOCATING+${INIT_START}}
     KEEP (*(.init))
@@ -479,14 +479,14 @@ cat <<EOF
   ${TEXT_PLT+${PLT}}
   ${TINY_READONLY_SECTION}
 
-  .fini ${RELOCATING+ADDR(.init)+SIZEOF(.init)} ${RELOCATING-0} :
+  .fini ${RELOCATING-0}${RELOCATING+ADDR(.init)+SIZEOF(.init)} :
   {
     ${RELOCATING+${FINI_START}}
     KEEP (*(.fini))
     ${RELOCATING+${FINI_END}}
   } /* ${RELOCATING+ > INTERNAL_RAM} */ =${NOP-0}
 
-  .text ${RELOCATING+ADDR(.fini)+SIZEOF(.fini)} ${RELOCATING-0} :
+  .text ${RELOCATING-0}${RELOCATING+ADDR(.fini)+SIZEOF(.fini)} :
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
     *(.text .stub${RELOCATING+ .text.* .gnu.linkonce.t.*})
@@ -503,7 +503,7 @@ cat <<EOF
   ${CREATE_SHLIB-${SDATA2}}
   ${CREATE_SHLIB-${SBSS2}}
   ${OTHER_READONLY_SECTIONS}
-  .eh_frame_hdr : { *(.eh_frame_hdr) }
+  .eh_frame_hdr ${RELOCATING-0} : { *(.eh_frame_hdr) }
   .eh_frame     ${RELOCATING-0} : ONLY_IF_RO { KEEP (*(.eh_frame)) }
   .gcc_except_table ${RELOCATING-0} : ONLY_IF_RO { *(.gcc_except_table${RELOCATING+ .gcc_except_table.*}) }
 
@@ -557,7 +557,7 @@ cat <<EOF
 
   ${DATA_PLT+${PLT_BEFORE_GOT-${PLT}}}
 
-  .data ${RELOCATING+ADDR(.dtors)+SIZEOF(.dtors)} ${RELOCATING-0} :
+  .data ${RELOCATING-0}${RELOCATING+ADDR(.dtors)+SIZEOF(.dtors)} :
   {
     ${RELOCATING+${DATA_START_SYMBOLS}}
     *(.data${RELOCATING+ .data.* .gnu.linkonce.d.*})
@@ -583,7 +583,7 @@ cat <<EOF
   ${RELOCATING+${OTHER_BSS_SYMBOLS}}
   ${SBSS}
   ${BSS_PLT+${PLT}}
-  .bss ${RELOCATING+ADDR(.rodata)+SIZEOF(.rodata)} ${RELOCATING-0} :
+  .bss ${RELOCATING-0}${RELOCATING+ADDR(.rodata)+SIZEOF(.rodata)} :
   {
    ${RELOCATING+*(.dynbss)}
    *(.bss${RELOCATING+ .bss.* .gnu.linkonce.b.*})
@@ -606,7 +606,7 @@ cat <<EOF
   ${RELOCATING+${DATA_SEGMENT_END}}
 
   ${RELOCATING+PROVIDE ( __stack_start_ = ORIGIN(EXTERNAL_DRAM_0) + __PROG_SIZE_FOR_CORE__ * __CORE_NUM_ + __PROG_SIZE_FOR_CORE__  - 0x10) ;}
-  .stack ${RELOCATING+__stack_start_} :  {    ${RELOCATING+___stack = .;}    *(.stack)  }
+  .stack ${RELOCATING-0}${RELOCATING+__stack_start_} :  {    ${RELOCATING+___stack = .;}    *(.stack)  }
 
   ${RELOCATING+PROVIDE (  ___heap_start = ORIGIN(EXTERNAL_DRAM_1)  + __HEAP_SIZE_FOR_CORE__ * __CORE_NUM_ );}
   ${RELOCATING+PROVIDE (  ___heap_end =   ORIGIN(EXTERNAL_DRAM_1)  + __HEAP_SIZE_FOR_CORE__ * __CORE_NUM_  + __HEAP_SIZE_FOR_CORE__ - 4 );}

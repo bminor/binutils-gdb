@@ -378,7 +378,7 @@ emit_early_ro()
 {
   cat <<EOF
   ${INITIAL_READONLY_SECTIONS}
-  .note.gnu.build-id : { *(.note.gnu.build-id) }
+  .note.gnu.build-id ${RELOCATING-0}: { *(.note.gnu.build-id) }
 EOF
 }
 
@@ -564,7 +564,7 @@ cat <<EOF
   ${CREATE_SHLIB-${SDATA2}}
   ${CREATE_SHLIB-${SBSS2}}
   ${OTHER_READONLY_SECTIONS}
-  .eh_frame_hdr : { *(.eh_frame_hdr)${RELOCATING+ *(.eh_frame_entry .eh_frame_entry.*)} }
+  .eh_frame_hdr ${RELOCATING-0} : { *(.eh_frame_hdr)${RELOCATING+ *(.eh_frame_entry .eh_frame_entry.*)} }
   .eh_frame     ${RELOCATING-0} : ONLY_IF_RO { KEEP (*(.eh_frame))${RELOCATING+ *(.eh_frame.*)} }
   .gcc_except_table ${RELOCATING-0} : ONLY_IF_RO { *(.gcc_except_table${RELOCATING+ .gcc_except_table.*}) }
   .gnu_extab ${RELOCATING-0} : ONLY_IF_RO { *(.gnu_extab*) }

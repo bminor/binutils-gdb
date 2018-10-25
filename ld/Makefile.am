@@ -1382,13 +1382,15 @@ ehppaobsd.c: $(srcdir)/emulparams/hppaobsd.sh \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 ei386beos.c: $(srcdir)/emulparams/i386beos.sh \
-  $(srcdir)/emultempl/beos.em $(srcdir)/scripttempl/i386beos.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/beos.em $(srcdir)/scripttempl/i386beos.sc \
+  $(srcdir)/scripttempl/DWARF.sc ${GEN_DEPENDS}
 
 ei386bsd.c: $(srcdir)/emulparams/i386bsd.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 
 ei386go32.c: $(srcdir)/emulparams/i386go32.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/i386go32.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/i386go32.sc \
+  $(srcdir)/scripttempl/DWARF.sc ${GEN_DEPENDS}
 
 ei386lynx.c: $(srcdir)/emulparams/i386lynx.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}

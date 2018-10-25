@@ -164,7 +164,7 @@ SECTIONS
   } ${RELOCATING+ > dmem}
 
   /* Global data not cleared after reset.  */
-  .noinit ${RELOCATING-0}:
+  .noinit ${RELOCATING-0} :
   {
     ${RELOCATING+ PROVIDE (_noinit_start = .) ; }
     *(.noinit)
@@ -185,7 +185,7 @@ SECTIONS
   .stab.index 0 : { *(.stab.index) }
   .stab.indexstr 0 : { *(.stab.indexstr) }
   .comment 0 : { *(.comment) }
-  .note.gnu.build-id : { *(.note.gnu.build-id) }
+  .note.gnu.build-id ${RELOCATING-0} : { *(.note.gnu.build-id) }
 EOF
 
 . $srcdir/scripttempl/DWARF.sc

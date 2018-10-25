@@ -294,7 +294,7 @@ cat <<EOF
   ${CREATE_SHLIB-${SDATA2}}
   ${CREATE_SHLIB-${SBSS2}}
   ${OTHER_READONLY_SECTIONS}
-  .eh_frame_hdr : { *(.eh_frame_hdr) }
+  .eh_frame_hdr ${RELOCATING-0} : { *(.eh_frame_hdr) }
   .gcc_except_table ${RELOCATING-0} : ONLY_IF_RO { *(.gcc_except_table${RELOCATING+ .gcc_except_table.*}) }
 
   /* Adjust the address for the data segment.  We want to adjust up to

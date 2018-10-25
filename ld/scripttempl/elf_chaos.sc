@@ -264,7 +264,7 @@ cat <<EOF
   ${CREATE_SHLIB-${SDATA2}}
   ${CREATE_SHLIB-${SBSS2}}
   ${OTHER_READONLY_SECTIONS}
-  .eh_frame_hdr : { *(.eh_frame_hdr) }
+  .eh_frame_hdr ${RELOCATING-0} : { *(.eh_frame_hdr) }
 
   ${RELOCATING+. = ALIGN(0x1000);}
   .data         ${RELOCATING-0} :

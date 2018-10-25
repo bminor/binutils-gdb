@@ -137,7 +137,7 @@ SECTIONS
   .rela.plt    ${RELOCATING-0} : { *(.rela.plt)         }
 
   /* Internal text space.  */
-  .text :
+  .text ${RELOCATING-0} :
   {
     ${RELOCATING+. = ALIGN(2);
     *(SORT_NONE(.init))
@@ -187,7 +187,7 @@ SECTIONS
     _etext = .;}
   } ${RELOCATING+ > text}
 
-  .rodata :
+  .rodata ${RELOCATING-0} :
   {
     ${RELOCATING+. = ALIGN(2);
     *(.lower.rodata.* .lower.rodata)
@@ -239,7 +239,7 @@ SECTIONS
     KEEP (*(.dtors))}
   } ${RELOCATING+ > text}
 
-  .vectors ${RELOCATING-0}:
+  .vectors ${RELOCATING-0} :
   {
     ${RELOCATING+ PROVIDE (__vectors_start = .) ; }
     *(.vectors${RELOCATING+*})
@@ -277,7 +277,7 @@ SECTIONS
   ${RELOCATING+__romdatastart = LOADADDR(.data);
   __romdatacopysize = SIZEOF(.data);}
 
-  .bss ${RELOCATING+ SIZEOF(.data) + ADDR(.data)} :
+  .bss ${RELOCATING-0}${RELOCATING+SIZEOF(.data) + ADDR(.data)} :
   {
     ${RELOCATING+. = ALIGN(2);}
     ${RELOCATING+ PROVIDE (__bss_start = .); }
@@ -291,14 +291,14 @@ SECTIONS
   } ${RELOCATING+ > data}
   ${RELOCATING+ PROVIDE (__bsssize = SIZEOF(.bss)); }
 
-  .noinit ${RELOCATING+ SIZEOF(.bss) + ADDR(.bss)} :
+  .noinit ${RELOCATING-0}${RELOCATING+SIZEOF(.bss) + ADDR(.bss)} :
   {
     ${RELOCATING+ PROVIDE (__noinit_start = .) ; }
     *(.noinit)
     ${RELOCATING+ PROVIDE (__noinit_end = .) ; }
   } ${RELOCATING+ > data}
 
-  .persistent ${RELOCATING+ SIZEOF(.noinit) + ADDR(.noinit)} :
+  .persistent ${RELOCATING-0}${RELOCATING+SIZEOF(.noinit) + ADDR(.noinit)} :
   {
     ${RELOCATING+ PROVIDE (__persistent_start = .) ; }
     *(.persistent)
