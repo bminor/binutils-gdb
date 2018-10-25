@@ -1,3 +1,7 @@
+2018-10-30  Tom Tromey  <tom@tromey.com>
+
+	* main.c (captured_main_1): Check return value of bfd_init.
+
 2018-10-29  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* common/offset-type.h (DEFINE_OFFSET_REL_OP): Delete.

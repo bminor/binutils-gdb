@@ -506,7 +506,6 @@ captured_main_1 (struct captured_main_args *context)
   textdomain (PACKAGE);
 #endif
 
-  bfd_init ();
   notice_open_fds ();
 
   saved_command_line = (char *) xstrdup ("");
@@ -517,11 +516,16 @@ captured_main_1 (struct captured_main_args *context)
   setvbuf (stderr, NULL, _IONBF, BUFSIZ);
 #endif
 
+  /* Note: `error' cannot be called before this point, because the
+     caller will crash when trying to print the exception.  */
   main_ui = new ui (stdin, stdout, stderr);
   current_ui = main_ui;
 
   gdb_stdtargerr = gdb_stderr;	/* for moment */
   gdb_stdtargin = gdb_stdin;	/* for moment */
+
+  if (bfd_init () != BFD_INIT_MAGIC)
+    error (_("fatal error: libbfd ABI mismatch"));
 
 #ifdef __MINGW32__
   /* On Windows, argv[0] is not necessarily set to absolute form when
