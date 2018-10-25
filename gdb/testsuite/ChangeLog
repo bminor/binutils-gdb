@@ -1,3 +1,7 @@
+2018-10-25  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/valgrind-db-attach.exp: Rewrite to use vgdb.
+
 2018-10-24  Tom de Vries  <tdevries@suse.de>
 
 	* lib/gdb.exp (gdb_test_multiple): Log wait status on process no
