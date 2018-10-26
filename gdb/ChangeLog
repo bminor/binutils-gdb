@@ -1,3 +1,8 @@
+2018-10-26  Sangamesh Mallayya <sangamesh.swamy@in.ibm.com>
+
+	* xcoffread.c (read_xcoff_symtab): Pass deduced language to
+	symtab_start instead of always using language_unknown.
+
 2018-10-26  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* riscv-tdep.c (riscv_read_misa_reg): Update comment, remove
