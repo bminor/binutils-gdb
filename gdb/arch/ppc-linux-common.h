@@ -35,6 +35,15 @@ struct target_desc;
 #define PPC_LINUX_SIZEOF_TARREGSET 8
 #define PPC_LINUX_SIZEOF_EBBREGSET (3*8)
 #define PPC_LINUX_SIZEOF_PMUREGSET (5*8)
+#define PPC_LINUX_SIZEOF_TM_SPRREGSET (3*8)
+#define PPC32_LINUX_SIZEOF_CGPRREGSET (48*4)
+#define PPC64_LINUX_SIZEOF_CGPRREGSET (48*8)
+#define PPC_LINUX_SIZEOF_CFPRREGSET (32*8+8)
+#define PPC_LINUX_SIZEOF_CVMXREGSET (34*16)
+#define PPC_LINUX_SIZEOF_CVSXREGSET (32*8)
+#define PPC_LINUX_SIZEOF_CPPRREGSET 8
+#define PPC_LINUX_SIZEOF_CDSCRREGSET 8
+#define PPC_LINUX_SIZEOF_CTARREGSET 8
 
 /* Check if the hwcap auxv entry indicates that isa205 is supported.  */
 bool ppc_linux_has_isa205 (CORE_ADDR hwcap);
@@ -48,12 +57,14 @@ struct ppc_linux_features
   bool isa205;
   bool ppr_dscr;
   bool isa207;
+  bool htm;
   bool cell;
 };
 
 /* Base value for ppc_linux_features variables.  */
 const struct ppc_linux_features ppc_linux_no_features = {
   0,
+  false,
   false,
   false,
   false,

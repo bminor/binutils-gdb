@@ -3,6 +3,10 @@
 
 *** Changes since GDB 8.2
 
+* GDB and GDBserver now support access to additional registers on
+  PowerPC GNU/Linux targets: PPR, DSCR, TAR, EBB/PMU registers, and
+  HTM registers.
+
 * GDB now has experimental support for the compilation and injection of
   C++ source code into the inferior.  This beta release does not include
   support for several language features, such as templates, constructors,

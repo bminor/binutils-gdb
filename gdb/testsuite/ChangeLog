@@ -1,5 +1,10 @@
 2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
+	* gdb.arch/powerpc-htm-regs.c: New file.
+	* gdb.arch/powerpc-htm-regs.exp: New file.
+
+2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
 	* gdb.arch/powerpc-tar.c: New file.
 	* gdb.arch/powerpc-tar.exp: New file.
 

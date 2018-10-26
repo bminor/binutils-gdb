@@ -105,6 +105,22 @@
     && (regnum) >= (tdep)->ppc_efpr0_regnum \
     && (regnum) < (tdep)->ppc_efpr0_regnum + ppc_num_efprs)
 
+/* Determine if regnum is a checkpointed decimal float
+   pseudo-register.  */
+#define IS_CDFP_PSEUDOREG(tdep, regnum) ((tdep)->ppc_cdl0_regnum >= 0 \
+    && (regnum) >= (tdep)->ppc_cdl0_regnum \
+    && (regnum) < (tdep)->ppc_cdl0_regnum + 16)
+
+/* Determine if regnum is a Checkpointed POWER7 VSX register.  */
+#define IS_CVSX_PSEUDOREG(tdep, regnum) ((tdep)->ppc_cvsr0_regnum >= 0 \
+    && (regnum) >= (tdep)->ppc_cvsr0_regnum \
+    && (regnum) < (tdep)->ppc_cvsr0_regnum + ppc_num_vsrs)
+
+/* Determine if regnum is a Checkpointed POWER7 Extended FP register.  */
+#define IS_CEFP_PSEUDOREG(tdep, regnum) ((tdep)->ppc_cefpr0_regnum >= 0 \
+    && (regnum) >= (tdep)->ppc_cefpr0_regnum \
+    && (regnum) < (tdep)->ppc_cefpr0_regnum + ppc_num_efprs)
+
 /* Holds the current set of options to be passed to the disassembler.  */
 static char *powerpc_disassembler_options;
 
@@ -2322,6 +2338,11 @@ rs6000_register_name (struct gdbarch *gdbarch, int regno)
       && regno < tdep->ppc_vsr0_upper_regnum + ppc_num_gprs)
     return "";
 
+  /* Hide the upper halves of the cvs0~cvs31 registers.  */
+  if (PPC_CVSR0_UPPER_REGNUM <= regno
+      && regno < PPC_CVSR0_UPPER_REGNUM + ppc_num_gprs)
+    return "";
+
   /* Check if the SPE pseudo registers are available.  */
   if (IS_SPE_PSEUDOREG (tdep, regno))
     {
@@ -2376,6 +2397,48 @@ rs6000_register_name (struct gdbarch *gdbarch, int regno)
       return efpr_regnames[regno - tdep->ppc_efpr0_regnum];
     }
 
+  /* Check if this is a Checkpointed DFP pseudo-register.  */
+  if (IS_CDFP_PSEUDOREG (tdep, regno))
+    {
+      static const char *const cdfp128_regnames[] = {
+	"cdl0", "cdl1", "cdl2", "cdl3",
+	"cdl4", "cdl5", "cdl6", "cdl7",
+	"cdl8", "cdl9", "cdl10", "cdl11",
+	"cdl12", "cdl13", "cdl14", "cdl15"
+      };
+      return cdfp128_regnames[regno - tdep->ppc_cdl0_regnum];
+    }
+
+  /* Check if this is a Checkpointed VSX pseudo-register.  */
+  if (IS_CVSX_PSEUDOREG (tdep, regno))
+    {
+      static const char *const cvsx_regnames[] = {
+	"cvs0", "cvs1", "cvs2", "cvs3", "cvs4", "cvs5", "cvs6", "cvs7",
+	"cvs8", "cvs9", "cvs10", "cvs11", "cvs12", "cvs13", "cvs14",
+	"cvs15", "cvs16", "cvs17", "cvs18", "cvs19", "cvs20", "cvs21",
+	"cvs22", "cvs23", "cvs24", "cvs25", "cvs26", "cvs27", "cvs28",
+	"cvs29", "cvs30", "cvs31", "cvs32", "cvs33", "cvs34", "cvs35",
+	"cvs36", "cvs37", "cvs38", "cvs39", "cvs40", "cvs41", "cvs42",
+	"cvs43", "cvs44", "cvs45", "cvs46", "cvs47", "cvs48", "cvs49",
+	"cvs50", "cvs51", "cvs52", "cvs53", "cvs54", "cvs55", "cvs56",
+	"cvs57", "cvs58", "cvs59", "cvs60", "cvs61", "cvs62", "cvs63"
+      };
+      return cvsx_regnames[regno - tdep->ppc_cvsr0_regnum];
+    }
+
+  /* Check if the this is a Checkpointed Extended FP pseudo-register.  */
+  if (IS_CEFP_PSEUDOREG (tdep, regno))
+    {
+      static const char *const cefpr_regnames[] = {
+	"cf32", "cf33", "cf34", "cf35", "cf36", "cf37", "cf38",
+	"cf39", "cf40", "cf41", "cf42", "cf43", "cf44", "cf45",
+	"cf46", "cf47", "cf48", "cf49", "cf50", "cf51",
+	"cf52", "cf53", "cf54", "cf55", "cf56", "cf57",
+	"cf58", "cf59", "cf60", "cf61", "cf62", "cf63"
+      };
+      return cefpr_regnames[regno - tdep->ppc_cefpr0_regnum];
+    }
+
   return tdesc_register_name (gdbarch, regno);
 }
 
@@ -2387,24 +2450,26 @@ rs6000_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  /* These are the only pseudo-registers we support.  */
-  gdb_assert (IS_SPE_PSEUDOREG (tdep, regnum)
-	      || IS_DFP_PSEUDOREG (tdep, regnum)
-	      || IS_VSX_PSEUDOREG (tdep, regnum)
-	      || IS_EFP_PSEUDOREG (tdep, regnum));
-
   /* These are the e500 pseudo-registers.  */
   if (IS_SPE_PSEUDOREG (tdep, regnum))
     return rs6000_builtin_type_vec64 (gdbarch);
-  else if (IS_DFP_PSEUDOREG (tdep, regnum))
+  else if (IS_DFP_PSEUDOREG (tdep, regnum)
+	   || IS_CDFP_PSEUDOREG (tdep, regnum))
     /* PPC decimal128 pseudo-registers.  */
     return builtin_type (gdbarch)->builtin_declong;
-  else if (IS_VSX_PSEUDOREG (tdep, regnum))
+  else if (IS_VSX_PSEUDOREG (tdep, regnum)
+	   || IS_CVSX_PSEUDOREG (tdep, regnum))
     /* POWER7 VSX pseudo-registers.  */
     return rs6000_builtin_type_vec128 (gdbarch);
-  else
+  else if (IS_EFP_PSEUDOREG (tdep, regnum)
+	   || IS_CEFP_PSEUDOREG (tdep, regnum))
     /* POWER7 Extended FP pseudo-registers.  */
     return builtin_type (gdbarch)->builtin_double;
+  else
+    internal_error (__FILE__, __LINE__,
+		    _("rs6000_pseudo_register_type: "
+		      "called on unexpected register '%s' (%d)"),
+		    gdbarch_register_name (gdbarch, regnum), regnum);
 }
 
 /* The register format for RS/6000 floating point registers is always
@@ -2580,25 +2645,35 @@ dfp_pseudo_register_read (struct gdbarch *gdbarch, readable_regcache *regcache,
 			   int reg_nr, gdb_byte *buffer)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  int reg_index = reg_nr - tdep->ppc_dl0_regnum;
+  int reg_index, fp0;
   enum register_status status;
+
+  if (IS_DFP_PSEUDOREG (tdep, reg_nr))
+    {
+      reg_index = reg_nr - tdep->ppc_dl0_regnum;
+      fp0 = PPC_F0_REGNUM;
+    }
+  else
+    {
+      gdb_assert (IS_CDFP_PSEUDOREG (tdep, reg_nr));
+
+      reg_index = reg_nr - tdep->ppc_cdl0_regnum;
+      fp0 = PPC_CF0_REGNUM;
+    }
 
   if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
     {
       /* Read two FP registers to form a whole dl register.  */
-      status = regcache->raw_read (tdep->ppc_fp0_regnum +
-				   2 * reg_index, buffer);
+      status = regcache->raw_read (fp0 + 2 * reg_index, buffer);
       if (status == REG_VALID)
-	status = regcache->raw_read (tdep->ppc_fp0_regnum +
-				     2 * reg_index + 1, buffer + 8);
+	status = regcache->raw_read (fp0 + 2 * reg_index + 1,
+				     buffer + 8);
     }
   else
     {
-      status = regcache->raw_read (tdep->ppc_fp0_regnum +
-				   2 * reg_index + 1, buffer);
+      status = regcache->raw_read (fp0 + 2 * reg_index + 1, buffer);
       if (status == REG_VALID)
-	status = regcache->raw_read (tdep->ppc_fp0_regnum +
-				     2 * reg_index, buffer + 8);
+	status = regcache->raw_read (fp0 + 2 * reg_index, buffer + 8);
     }
 
   return status;
@@ -2610,23 +2685,32 @@ dfp_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 			    int reg_nr, const gdb_byte *buffer)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  int reg_index = reg_nr - tdep->ppc_dl0_regnum;
+  int reg_index, fp0;
+
+  if (IS_DFP_PSEUDOREG (tdep, reg_nr))
+    {
+      reg_index = reg_nr - tdep->ppc_dl0_regnum;
+      fp0 = PPC_F0_REGNUM;
+    }
+  else
+    {
+      gdb_assert (IS_CDFP_PSEUDOREG (tdep, reg_nr));
+
+      reg_index = reg_nr - tdep->ppc_cdl0_regnum;
+      fp0 = PPC_CF0_REGNUM;
+    }
 
   if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
     {
       /* Write each half of the dl register into a separate
-      FP register.  */
-      regcache->raw_write (tdep->ppc_fp0_regnum +
-			  2 * reg_index, buffer);
-      regcache->raw_write (tdep->ppc_fp0_regnum +
-			  2 * reg_index + 1, buffer + 8);
+	 FP register.  */
+      regcache->raw_write (fp0 + 2 * reg_index, buffer);
+      regcache->raw_write (fp0 + 2 * reg_index + 1, buffer + 8);
     }
   else
     {
-      regcache->raw_write (tdep->ppc_fp0_regnum +
-			  2 * reg_index + 1, buffer);
-      regcache->raw_write (tdep->ppc_fp0_regnum +
-			  2 * reg_index, buffer + 8);
+      regcache->raw_write (fp0 + 2 * reg_index + 1, buffer);
+      regcache->raw_write (fp0 + 2 * reg_index, buffer + 8);
     }
 }
 
@@ -2636,30 +2720,43 @@ vsx_pseudo_register_read (struct gdbarch *gdbarch, readable_regcache *regcache,
 			   int reg_nr, gdb_byte *buffer)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  int reg_index = reg_nr - tdep->ppc_vsr0_regnum;
+  int reg_index, vr0, fp0, vsr0_upper;
   enum register_status status;
+
+  if (IS_VSX_PSEUDOREG (tdep, reg_nr))
+    {
+      reg_index = reg_nr - tdep->ppc_vsr0_regnum;
+      vr0 = PPC_VR0_REGNUM;
+      fp0 = PPC_F0_REGNUM;
+      vsr0_upper = PPC_VSR0_UPPER_REGNUM;
+    }
+  else
+    {
+      gdb_assert (IS_CVSX_PSEUDOREG (tdep, reg_nr));
+
+      reg_index = reg_nr - tdep->ppc_cvsr0_regnum;
+      vr0 = PPC_CVR0_REGNUM;
+      fp0 = PPC_CF0_REGNUM;
+      vsr0_upper = PPC_CVSR0_UPPER_REGNUM;
+    }
 
   /* Read the portion that overlaps the VMX registers.  */
   if (reg_index > 31)
-    status = regcache->raw_read (tdep->ppc_vr0_regnum +
-				 reg_index - 32, buffer);
+    status = regcache->raw_read (vr0 + reg_index - 32, buffer);
   else
     /* Read the portion that overlaps the FPR registers.  */
     if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
       {
-	status = regcache->raw_read (tdep->ppc_fp0_regnum +
-				     reg_index, buffer);
+	status = regcache->raw_read (fp0 + reg_index, buffer);
 	if (status == REG_VALID)
-	  status = regcache->raw_read (tdep->ppc_vsr0_upper_regnum +
-				       reg_index, buffer + 8);
+	  status = regcache->raw_read (vsr0_upper + reg_index,
+				       buffer + 8);
       }
     else
       {
-	status = regcache->raw_read (tdep->ppc_fp0_regnum +
-				     reg_index, buffer + 8);
+	status = regcache->raw_read (fp0 + reg_index, buffer + 8);
 	if (status == REG_VALID)
-	  status = regcache->raw_read (tdep->ppc_vsr0_upper_regnum +
-				       reg_index, buffer);
+	  status = regcache->raw_read (vsr0_upper + reg_index, buffer);
       }
 
   return status;
@@ -2671,56 +2768,103 @@ vsx_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 			    int reg_nr, const gdb_byte *buffer)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  int reg_index = reg_nr - tdep->ppc_vsr0_regnum;
+  int reg_index, vr0, fp0, vsr0_upper;
+
+  if (IS_VSX_PSEUDOREG (tdep, reg_nr))
+    {
+      reg_index = reg_nr - tdep->ppc_vsr0_regnum;
+      vr0 = PPC_VR0_REGNUM;
+      fp0 = PPC_F0_REGNUM;
+      vsr0_upper = PPC_VSR0_UPPER_REGNUM;
+    }
+  else
+    {
+      gdb_assert (IS_CVSX_PSEUDOREG (tdep, reg_nr));
+
+      reg_index = reg_nr - tdep->ppc_cvsr0_regnum;
+      vr0 = PPC_CVR0_REGNUM;
+      fp0 = PPC_CF0_REGNUM;
+      vsr0_upper = PPC_CVSR0_UPPER_REGNUM;
+    }
 
   /* Write the portion that overlaps the VMX registers.  */
   if (reg_index > 31)
-    regcache->raw_write (tdep->ppc_vr0_regnum +
-			reg_index - 32, buffer);
+    regcache->raw_write (vr0 + reg_index - 32, buffer);
   else
     /* Write the portion that overlaps the FPR registers.  */
     if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
       {
-	regcache->raw_write (tdep->ppc_fp0_regnum +
-			reg_index, buffer);
-	regcache->raw_write (tdep->ppc_vsr0_upper_regnum +
-			reg_index, buffer + 8);
+	regcache->raw_write (fp0 + reg_index, buffer);
+	regcache->raw_write (vsr0_upper + reg_index, buffer + 8);
       }
     else
       {
-	regcache->raw_write (tdep->ppc_fp0_regnum +
-			reg_index, buffer + 8);
-	regcache->raw_write (tdep->ppc_vsr0_upper_regnum +
-			reg_index, buffer);
+	regcache->raw_write (fp0 + reg_index, buffer + 8);
+	regcache->raw_write (vsr0_upper + reg_index, buffer);
       }
 }
 
 /* Read method for POWER7 Extended FP pseudo-registers.  */
 static enum register_status
-efpr_pseudo_register_read (struct gdbarch *gdbarch, readable_regcache *regcache,
+efp_pseudo_register_read (struct gdbarch *gdbarch, readable_regcache *regcache,
 			   int reg_nr, gdb_byte *buffer)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  int reg_index = reg_nr - tdep->ppc_efpr0_regnum;
+  int reg_index, vr0;
+
+  if (IS_EFP_PSEUDOREG (tdep, reg_nr))
+    {
+      reg_index = reg_nr - tdep->ppc_efpr0_regnum;
+      vr0 = PPC_VR0_REGNUM;
+    }
+  else
+    {
+      gdb_assert (IS_CEFP_PSEUDOREG (tdep, reg_nr));
+
+      reg_index = reg_nr - tdep->ppc_cefpr0_regnum;
+      vr0 = PPC_CVR0_REGNUM;
+    }
+
   int offset = gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG ? 0 : 8;
 
   /* Read the portion that overlaps the VMX register.  */
-  return regcache->raw_read_part (tdep->ppc_vr0_regnum + reg_index,
-				  offset, register_size (gdbarch, reg_nr),
+  return regcache->raw_read_part (vr0 + reg_index, offset,
+				  register_size (gdbarch, reg_nr),
 				  buffer);
 }
 
 /* Write method for POWER7 Extended FP pseudo-registers.  */
 static void
-efpr_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
+efp_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 			    int reg_nr, const gdb_byte *buffer)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  int reg_index = reg_nr - tdep->ppc_efpr0_regnum;
+  int reg_index, vr0;
   int offset = gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG ? 0 : 8;
 
+  if (IS_EFP_PSEUDOREG (tdep, reg_nr))
+    {
+      reg_index = reg_nr - tdep->ppc_efpr0_regnum;
+      vr0 = PPC_VR0_REGNUM;
+    }
+  else
+    {
+      gdb_assert (IS_CEFP_PSEUDOREG (tdep, reg_nr));
+
+      reg_index = reg_nr - tdep->ppc_cefpr0_regnum;
+      vr0 = PPC_CVR0_REGNUM;
+
+      /* The call to raw_write_part fails silently if the initial read
+	 of the read-update-write sequence returns an invalid status,
+	 so we check this manually and throw an error if needed.  */
+      regcache->raw_update (vr0 + reg_index);
+      if (regcache->get_register_status (vr0 + reg_index) != REG_VALID)
+	error (_("Cannot write to the checkpointed EFP register, "
+		 "the corresponding vector register is unavailable."));
+    }
+
   /* Write the portion that overlaps the VMX register.  */
-  regcache->raw_write_part (tdep->ppc_vr0_regnum + reg_index, offset,
+  regcache->raw_write_part (vr0 + reg_index, offset,
 			    register_size (gdbarch, reg_nr), buffer);
 }
 
@@ -2736,12 +2880,15 @@ rs6000_pseudo_register_read (struct gdbarch *gdbarch,
 
   if (IS_SPE_PSEUDOREG (tdep, reg_nr))
     return e500_pseudo_register_read (gdbarch, regcache, reg_nr, buffer);
-  else if (IS_DFP_PSEUDOREG (tdep, reg_nr))
+  else if (IS_DFP_PSEUDOREG (tdep, reg_nr)
+	   || IS_CDFP_PSEUDOREG (tdep, reg_nr))
     return dfp_pseudo_register_read (gdbarch, regcache, reg_nr, buffer);
-  else if (IS_VSX_PSEUDOREG (tdep, reg_nr))
+  else if (IS_VSX_PSEUDOREG (tdep, reg_nr)
+	   || IS_CVSX_PSEUDOREG (tdep, reg_nr))
     return vsx_pseudo_register_read (gdbarch, regcache, reg_nr, buffer);
-  else if (IS_EFP_PSEUDOREG (tdep, reg_nr))
-    return efpr_pseudo_register_read (gdbarch, regcache, reg_nr, buffer);
+  else if (IS_EFP_PSEUDOREG (tdep, reg_nr)
+	   || IS_CEFP_PSEUDOREG (tdep, reg_nr))
+    return efp_pseudo_register_read (gdbarch, regcache, reg_nr, buffer);
   else
     internal_error (__FILE__, __LINE__,
 		    _("rs6000_pseudo_register_read: "
@@ -2761,17 +2908,111 @@ rs6000_pseudo_register_write (struct gdbarch *gdbarch,
 
   if (IS_SPE_PSEUDOREG (tdep, reg_nr))
     e500_pseudo_register_write (gdbarch, regcache, reg_nr, buffer);
-  else if (IS_DFP_PSEUDOREG (tdep, reg_nr))
+  else if (IS_DFP_PSEUDOREG (tdep, reg_nr)
+	   || IS_CDFP_PSEUDOREG (tdep, reg_nr))
     dfp_pseudo_register_write (gdbarch, regcache, reg_nr, buffer);
-  else if (IS_VSX_PSEUDOREG (tdep, reg_nr))
+  else if (IS_VSX_PSEUDOREG (tdep, reg_nr)
+	   || IS_CVSX_PSEUDOREG (tdep, reg_nr))
     vsx_pseudo_register_write (gdbarch, regcache, reg_nr, buffer);
-  else if (IS_EFP_PSEUDOREG (tdep, reg_nr))
-    efpr_pseudo_register_write (gdbarch, regcache, reg_nr, buffer);
+  else if (IS_EFP_PSEUDOREG (tdep, reg_nr)
+	   || IS_CEFP_PSEUDOREG (tdep, reg_nr))
+    efp_pseudo_register_write (gdbarch, regcache, reg_nr, buffer);
   else
     internal_error (__FILE__, __LINE__,
 		    _("rs6000_pseudo_register_write: "
 		    "called on unexpected register '%s' (%d)"),
 		    gdbarch_register_name (gdbarch, reg_nr), reg_nr);
+}
+
+/* Set the register mask in AX with the registers that form the DFP or
+   checkpointed DFP pseudo-register REG_NR.  */
+
+static void
+dfp_ax_pseudo_register_collect (struct gdbarch *gdbarch,
+				struct agent_expr *ax, int reg_nr)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int reg_index, fp0;
+
+  if (IS_DFP_PSEUDOREG (tdep, reg_nr))
+    {
+      reg_index = reg_nr - tdep->ppc_dl0_regnum;
+      fp0 = PPC_F0_REGNUM;
+    }
+  else
+    {
+      gdb_assert (IS_CDFP_PSEUDOREG (tdep, reg_nr));
+
+      reg_index = reg_nr - tdep->ppc_cdl0_regnum;
+      fp0 = PPC_CF0_REGNUM;
+    }
+
+  ax_reg_mask (ax, fp0 + 2 * reg_index);
+  ax_reg_mask (ax, fp0 + 2 * reg_index + 1);
+}
+
+/* Set the register mask in AX with the registers that form the VSX or
+   checkpointed VSX pseudo-register REG_NR.  */
+
+static void
+vsx_ax_pseudo_register_collect (struct gdbarch *gdbarch,
+				struct agent_expr *ax, int reg_nr)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int reg_index, vr0, fp0, vsr0_upper;
+
+  if (IS_VSX_PSEUDOREG (tdep, reg_nr))
+    {
+      reg_index = reg_nr - tdep->ppc_vsr0_regnum;
+      vr0 = PPC_VR0_REGNUM;
+      fp0 = PPC_F0_REGNUM;
+      vsr0_upper = PPC_VSR0_UPPER_REGNUM;
+    }
+  else
+    {
+      gdb_assert (IS_CVSX_PSEUDOREG (tdep, reg_nr));
+
+      reg_index = reg_nr - tdep->ppc_cvsr0_regnum;
+      vr0 = PPC_CVR0_REGNUM;
+      fp0 = PPC_CF0_REGNUM;
+      vsr0_upper = PPC_CVSR0_UPPER_REGNUM;
+    }
+
+  if (reg_index > 31)
+    {
+      ax_reg_mask (ax, vr0 + reg_index - 32);
+    }
+  else
+    {
+      ax_reg_mask (ax, fp0 + reg_index);
+      ax_reg_mask (ax, vsr0_upper + reg_index);
+    }
+}
+
+/* Set the register mask in AX with the register that corresponds to
+   the EFP or checkpointed EFP pseudo-register REG_NR.  */
+
+static void
+efp_ax_pseudo_register_collect (struct gdbarch *gdbarch,
+				struct agent_expr *ax, int reg_nr)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int reg_index, vr0;
+
+  if (IS_EFP_PSEUDOREG (tdep, reg_nr))
+    {
+      reg_index = reg_nr - tdep->ppc_efpr0_regnum;
+      vr0 = PPC_VR0_REGNUM;
+    }
+  else
+    {
+      gdb_assert (IS_CEFP_PSEUDOREG (tdep, reg_nr));
+
+      reg_index = reg_nr - tdep->ppc_cefpr0_regnum;
+      vr0 = PPC_CVR0_REGNUM;
+    }
+
+  ax_reg_mask (ax, vr0 + reg_index);
 }
 
 static int
@@ -2785,29 +3026,20 @@ rs6000_ax_pseudo_register_collect (struct gdbarch *gdbarch,
       ax_reg_mask (ax, tdep->ppc_gp0_regnum + reg_index);
       ax_reg_mask (ax, tdep->ppc_ev0_upper_regnum + reg_index);
     }
-  else if (IS_DFP_PSEUDOREG (tdep, reg_nr))
+  else if (IS_DFP_PSEUDOREG (tdep, reg_nr)
+	   || IS_CDFP_PSEUDOREG (tdep, reg_nr))
     {
-      int reg_index = reg_nr - tdep->ppc_dl0_regnum;
-      ax_reg_mask (ax, tdep->ppc_fp0_regnum + 2 * reg_index);
-      ax_reg_mask (ax, tdep->ppc_fp0_regnum + 2 * reg_index + 1);
+      dfp_ax_pseudo_register_collect (gdbarch, ax, reg_nr);
     }
-  else if (IS_VSX_PSEUDOREG (tdep, reg_nr))
+  else if (IS_VSX_PSEUDOREG (tdep, reg_nr)
+	   || IS_CVSX_PSEUDOREG (tdep, reg_nr))
     {
-      int reg_index = reg_nr - tdep->ppc_vsr0_regnum;
-      if (reg_index > 31)
-        {
-          ax_reg_mask (ax, tdep->ppc_vr0_regnum + reg_index - 32);
-	}
-      else
-        {
-          ax_reg_mask (ax, tdep->ppc_fp0_regnum + reg_index);
-          ax_reg_mask (ax, tdep->ppc_vsr0_upper_regnum + reg_index);
-        }
+      vsx_ax_pseudo_register_collect (gdbarch, ax, reg_nr);
     }
-  else if (IS_EFP_PSEUDOREG (tdep, reg_nr))
+  else if (IS_EFP_PSEUDOREG (tdep, reg_nr)
+	   || IS_CEFP_PSEUDOREG (tdep, reg_nr))
     {
-      int reg_index = reg_nr - tdep->ppc_efpr0_regnum;
-      ax_reg_mask (ax, tdep->ppc_vr0_regnum + reg_index);
+      efp_ax_pseudo_register_collect (gdbarch, ax, reg_nr);
     }
   else
     internal_error (__FILE__, __LINE__,
@@ -5817,7 +6049,10 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   enum powerpc_elf_abi elf_abi = POWERPC_ELF_AUTO;
   int have_fpu = 0, have_spe = 0, have_mq = 0, have_altivec = 0;
   int have_dfp = 0, have_vsx = 0, have_ppr = 0, have_dscr = 0;
-  int have_tar = 0, have_ebb = 0, have_pmu = 0;
+  int have_tar = 0, have_ebb = 0, have_pmu = 0, have_htm_spr = 0;
+  int have_htm_core = 0, have_htm_fpu = 0, have_htm_altivec = 0;
+  int have_htm_vsx = 0, have_htm_ppr = 0, have_htm_dscr = 0;
+  int have_htm_tar = 0;
   int tdesc_wordsize = -1;
   const struct target_desc *tdesc = info.target_desc;
   struct tdesc_arch_data *tdesc_data = NULL;
@@ -6216,6 +6451,201 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	}
       else
 	have_pmu = 0;
+
+      /* Hardware Transactional Memory Registers.  */
+      feature = tdesc_find_feature (tdesc,
+				    "org.gnu.gdb.power.htm.spr");
+      if (feature != NULL)
+	{
+	  static const char *const tm_spr_regs[] = {
+	    "tfhar", "texasr", "tfiar"
+	  };
+
+	  valid_p = 1;
+	  for (i = 0; i < ARRAY_SIZE (tm_spr_regs); i++)
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+						PPC_TFHAR_REGNUM + i,
+						tm_spr_regs[i]);
+	  if (!valid_p)
+	    {
+	      tdesc_data_cleanup (tdesc_data);
+	      return NULL;
+	    }
+
+	  have_htm_spr = 1;
+	}
+      else
+	have_htm_spr = 0;
+
+      feature = tdesc_find_feature (tdesc,
+				    "org.gnu.gdb.power.htm.core");
+      if (feature != NULL)
+	{
+	  static const char *const cgprs[] = {
+	    "cr0", "cr1", "cr2", "cr3", "cr4", "cr5", "cr6", "cr7",
+	    "cr8", "cr9", "cr10", "cr11", "cr12", "cr13", "cr14",
+	    "cr15", "cr16", "cr17", "cr18", "cr19", "cr20", "cr21",
+	    "cr22", "cr23", "cr24", "cr25", "cr26", "cr27", "cr28",
+	    "cr29", "cr30", "cr31", "ccr", "cxer", "clr", "cctr"
+	  };
+
+	  valid_p = 1;
+
+	  for (i = 0; i < ARRAY_SIZE (cgprs); i++)
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+						PPC_CR0_REGNUM + i,
+						cgprs[i]);
+	  if (!valid_p)
+	    {
+	      tdesc_data_cleanup (tdesc_data);
+	      return NULL;
+	    }
+
+	  have_htm_core = 1;
+	}
+      else
+	have_htm_core = 0;
+
+      feature = tdesc_find_feature (tdesc,
+				    "org.gnu.gdb.power.htm.fpu");
+      if (feature != NULL)
+	{
+	  valid_p = 1;
+
+	  static const char *const cfprs[] = {
+	    "cf0", "cf1", "cf2", "cf3", "cf4", "cf5", "cf6", "cf7",
+	    "cf8", "cf9", "cf10", "cf11", "cf12", "cf13", "cf14", "cf15",
+	    "cf16", "cf17", "cf18", "cf19", "cf20", "cf21", "cf22",
+	    "cf23", "cf24", "cf25", "cf26", "cf27", "cf28", "cf29",
+	    "cf30", "cf31", "cfpscr"
+	  };
+
+	  for (i = 0; i < ARRAY_SIZE (cfprs); i++)
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+						PPC_CF0_REGNUM + i,
+						cfprs[i]);
+
+	  if (!valid_p)
+	    {
+	      tdesc_data_cleanup (tdesc_data);
+	      return NULL;
+	    }
+	  have_htm_fpu = 1;
+	}
+      else
+	have_htm_fpu = 0;
+
+      feature = tdesc_find_feature (tdesc,
+				    "org.gnu.gdb.power.htm.altivec");
+      if (feature != NULL)
+	{
+	  valid_p = 1;
+
+	  static const char *const cvmx[] = {
+	    "cvr0", "cvr1", "cvr2", "cvr3", "cvr4", "cvr5", "cvr6",
+	    "cvr7", "cvr8", "cvr9", "cvr10", "cvr11", "cvr12", "cvr13",
+	    "cvr14", "cvr15","cvr16", "cvr17", "cvr18", "cvr19", "cvr20",
+	    "cvr21", "cvr22", "cvr23", "cvr24", "cvr25", "cvr26",
+	    "cvr27", "cvr28", "cvr29", "cvr30", "cvr31", "cvscr",
+	    "cvrsave"
+	  };
+
+	  for (i = 0; i < ARRAY_SIZE (cvmx); i++)
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+						PPC_CVR0_REGNUM + i,
+						cvmx[i]);
+
+	  if (!valid_p)
+	    {
+	      tdesc_data_cleanup (tdesc_data);
+	      return NULL;
+	    }
+	  have_htm_altivec = 1;
+	}
+      else
+	have_htm_altivec = 0;
+
+      feature = tdesc_find_feature (tdesc,
+				    "org.gnu.gdb.power.htm.vsx");
+      if (feature != NULL)
+	{
+	  valid_p = 1;
+
+	  static const char *const cvsx[] = {
+	    "cvs0h", "cvs1h", "cvs2h", "cvs3h", "cvs4h", "cvs5h",
+	    "cvs6h", "cvs7h", "cvs8h", "cvs9h", "cvs10h", "cvs11h",
+	    "cvs12h", "cvs13h", "cvs14h", "cvs15h", "cvs16h", "cvs17h",
+	    "cvs18h", "cvs19h", "cvs20h", "cvs21h", "cvs22h", "cvs23h",
+	    "cvs24h", "cvs25h", "cvs26h", "cvs27h", "cvs28h", "cvs29h",
+	    "cvs30h", "cvs31h"
+	  };
+
+	  for (i = 0; i < ARRAY_SIZE (cvsx); i++)
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+						(PPC_CVSR0_UPPER_REGNUM
+						 + i),
+						cvsx[i]);
+
+	  if (!valid_p || !have_htm_fpu || !have_htm_altivec)
+	    {
+	      tdesc_data_cleanup (tdesc_data);
+	      return NULL;
+	    }
+	  have_htm_vsx = 1;
+	}
+      else
+	have_htm_vsx = 0;
+
+      feature = tdesc_find_feature (tdesc,
+				    "org.gnu.gdb.power.htm.ppr");
+      if (feature != NULL)
+	{
+	  valid_p = tdesc_numbered_register (feature, tdesc_data,
+					     PPC_CPPR_REGNUM, "cppr");
+
+	  if (!valid_p)
+	    {
+	      tdesc_data_cleanup (tdesc_data);
+	      return NULL;
+	    }
+	  have_htm_ppr = 1;
+	}
+      else
+	have_htm_ppr = 0;
+
+      feature = tdesc_find_feature (tdesc,
+				    "org.gnu.gdb.power.htm.dscr");
+      if (feature != NULL)
+	{
+	  valid_p = tdesc_numbered_register (feature, tdesc_data,
+					     PPC_CDSCR_REGNUM, "cdscr");
+
+	  if (!valid_p)
+	    {
+	      tdesc_data_cleanup (tdesc_data);
+	      return NULL;
+	    }
+	  have_htm_dscr = 1;
+	}
+      else
+	have_htm_dscr = 0;
+
+      feature = tdesc_find_feature (tdesc,
+				    "org.gnu.gdb.power.htm.tar");
+      if (feature != NULL)
+	{
+	  valid_p = tdesc_numbered_register (feature, tdesc_data,
+					     PPC_CTAR_REGNUM, "ctar");
+
+	  if (!valid_p)
+	    {
+	      tdesc_data_cleanup (tdesc_data);
+	      return NULL;
+	    }
+	  have_htm_tar = 1;
+	}
+      else
+	have_htm_tar = 0;
     }
 
   /* If we have a 64-bit binary on a 32-bit target, complain.  Also
@@ -6428,6 +6858,15 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->ppc_sdar_regnum = have_pmu ? PPC_SDAR_REGNUM : -1;
   tdep->ppc_sier_regnum = have_pmu ? PPC_SIER_REGNUM : -1;
 
+  tdep->have_htm_spr = have_htm_spr;
+  tdep->have_htm_core = have_htm_core;
+  tdep->have_htm_fpu = have_htm_fpu;
+  tdep->have_htm_altivec = have_htm_altivec;
+  tdep->have_htm_vsx = have_htm_vsx;
+  tdep->ppc_cppr_regnum = have_htm_ppr ? PPC_CPPR_REGNUM : -1;
+  tdep->ppc_cdscr_regnum = have_htm_dscr ? PPC_CDSCR_REGNUM : -1;
+  tdep->ppc_ctar_regnum = have_htm_tar ? PPC_CTAR_REGNUM : -1;
+
   set_gdbarch_pc_regnum (gdbarch, PPC_PC_REGNUM);
   set_gdbarch_sp_regnum (gdbarch, PPC_R0_REGNUM + 1);
   set_gdbarch_fp0_regnum (gdbarch, tdep->ppc_fp0_regnum);
@@ -6449,7 +6888,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   else
     tdep->lr_frame_offset = 4;
 
-  if (have_spe || have_dfp || have_vsx)
+  if (have_spe || have_dfp || have_vsx || have_htm_fpu || have_htm_vsx)
     {
       set_gdbarch_pseudo_register_read (gdbarch, rs6000_pseudo_register_read);
       set_gdbarch_pseudo_register_write (gdbarch,
@@ -6471,6 +6910,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (have_vsx)
     /* Include both VSX and Extended FP registers.  */
     num_pseudoregs += 96;
+  if (have_htm_fpu)
+    num_pseudoregs += 16;
+  /* Include both checkpointed VSX and EFP registers.  */
+  if (have_htm_vsx)
+    num_pseudoregs += 64 + 32;
 
   set_gdbarch_num_pseudo_regs (gdbarch, num_pseudoregs);
 
@@ -6586,6 +7030,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->ppc_dl0_regnum = -1;
   tdep->ppc_vsr0_regnum = -1;
   tdep->ppc_efpr0_regnum = -1;
+  tdep->ppc_cdl0_regnum = -1;
+  tdep->ppc_cvsr0_regnum = -1;
+  tdep->ppc_cefpr0_regnum = -1;
 
   cur_reg = gdbarch_num_regs (gdbarch);
 
@@ -6604,6 +7051,18 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       tdep->ppc_vsr0_regnum = cur_reg;
       cur_reg += 64;
       tdep->ppc_efpr0_regnum = cur_reg;
+      cur_reg += 32;
+    }
+  if (have_htm_fpu)
+    {
+      tdep->ppc_cdl0_regnum = cur_reg;
+      cur_reg += 16;
+    }
+  if (have_htm_vsx)
+    {
+      tdep->ppc_cvsr0_regnum = cur_reg;
+      cur_reg += 64;
+      tdep->ppc_cefpr0_regnum = cur_reg;
       cur_reg += 32;
     }
 

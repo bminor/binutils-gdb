@@ -600,6 +600,158 @@ ppc_store_pmuregset (struct regcache *regcache, const void *buf)
   supply_register_by_name (regcache, "mmcr0", &regset[32]);
 }
 
+/* Hardware Transactional Memory special-purpose register regset fill
+   function.  */
+
+static void
+ppc_fill_tm_sprregset (struct regcache *regcache, void *buf)
+{
+  int i, base;
+  char *regset = (char *) buf;
+
+  base = find_regno (regcache->tdesc, "tfhar");
+  for (i = 0; i < 3; i++)
+    collect_register (regcache, base + i, &regset[i * 8]);
+}
+
+/* Hardware Transactional Memory special-purpose register regset store
+   function.  */
+
+static void
+ppc_store_tm_sprregset (struct regcache *regcache, const void *buf)
+{
+  int i, base;
+  const char *regset = (const char *) buf;
+
+  base = find_regno (regcache->tdesc, "tfhar");
+  for (i = 0; i < 3; i++)
+    supply_register (regcache, base + i, &regset[i * 8]);
+}
+
+/* For the same reasons as the EBB regset, none of the HTM
+   checkpointed regsets have a fill function.  These registers are
+   only available if the inferior is in a transaction.  */
+
+/* Hardware Transactional Memory checkpointed general-purpose regset
+   store function.  */
+
+static void
+ppc_store_tm_cgprregset (struct regcache *regcache, const void *buf)
+{
+  int i, base, size, endian_offset;
+  const char *regset = (const char *) buf;
+
+  base = find_regno (regcache->tdesc, "cr0");
+  size = register_size (regcache->tdesc, base);
+
+  gdb_assert (size == 4 || size == 8);
+
+  for (i = 0; i < 32; i++)
+    supply_register (regcache, base + i, &regset[i * size]);
+
+  endian_offset = 0;
+
+  if ((size == 8) && (__BYTE_ORDER == __BIG_ENDIAN))
+    endian_offset = 4;
+
+  supply_register_by_name (regcache, "ccr",
+			   &regset[PT_CCR * size + endian_offset]);
+
+  supply_register_by_name (regcache, "cxer",
+			   &regset[PT_XER * size + endian_offset]);
+
+  supply_register_by_name (regcache, "clr", &regset[PT_LNK * size]);
+  supply_register_by_name (regcache, "cctr", &regset[PT_CTR * size]);
+}
+
+/* Hardware Transactional Memory checkpointed floating-point regset
+   store function.  */
+
+static void
+ppc_store_tm_cfprregset (struct regcache *regcache, const void *buf)
+{
+  int i, base;
+  const char *regset = (const char *) buf;
+
+  base = find_regno (regcache->tdesc, "cf0");
+
+  for (i = 0; i < 32; i++)
+    supply_register (regcache, base + i, &regset[i * 8]);
+
+  supply_register_by_name (regcache, "cfpscr", &regset[32 * 8]);
+}
+
+/* Hardware Transactional Memory checkpointed vector regset store
+   function.  */
+
+static void
+ppc_store_tm_cvrregset (struct regcache *regcache, const void *buf)
+{
+  int i, base;
+  const char *regset = (const char *) buf;
+  int vscr_offset = 0;
+
+  base = find_regno (regcache->tdesc, "cvr0");
+
+  for (i = 0; i < 32; i++)
+    supply_register (regcache, base + i, &regset[i * 16]);
+
+  if (__BYTE_ORDER == __BIG_ENDIAN)
+    vscr_offset = 12;
+
+  supply_register_by_name (regcache, "cvscr",
+			   &regset[32 * 16 + vscr_offset]);
+
+  supply_register_by_name (regcache, "cvrsave", &regset[33 * 16]);
+}
+
+/* Hardware Transactional Memory checkpointed vector-scalar regset
+   store function.  */
+
+static void
+ppc_store_tm_cvsxregset (struct regcache *regcache, const void *buf)
+{
+  int i, base;
+  const char *regset = (const char *) buf;
+
+  base = find_regno (regcache->tdesc, "cvs0h");
+  for (i = 0; i < 32; i++)
+    supply_register (regcache, base + i, &regset[i * 8]);
+}
+
+/* Hardware Transactional Memory checkpointed Program Priority
+   Register regset store function.  */
+
+static void
+ppc_store_tm_cpprregset (struct regcache *regcache, const void *buf)
+{
+  const char *cppr = (const char *) buf;
+
+  supply_register_by_name (regcache, "cppr", cppr);
+}
+
+/* Hardware Transactional Memory checkpointed Data Stream Control
+   Register regset store function.  */
+
+static void
+ppc_store_tm_cdscrregset (struct regcache *regcache, const void *buf)
+{
+  const char *cdscr = (const char *) buf;
+
+  supply_register_by_name (regcache, "cdscr", cdscr);
+}
+
+/* Hardware Transactional Memory checkpointed Target Address Register
+   regset store function.  */
+
+static void
+ppc_store_tm_ctarregset (struct regcache *regcache, const void *buf)
+{
+  const char *ctar = (const char *) buf;
+
+  supply_register_by_name (regcache, "ctar", ctar);
+}
+
 static void
 ppc_fill_vsxregset (struct regcache *regcache, void *buf)
 {
@@ -709,6 +861,22 @@ static struct regset_info ppc_regsets[] = {
      fetch them every time, but still fall back to PTRACE_PEEKUSER for the
      general registers.  Some kernels support these, but not the newer
      PPC_PTRACE_GETREGS.  */
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TM_CTAR, 0, EXTENDED_REGS,
+    NULL, ppc_store_tm_ctarregset },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TM_CDSCR, 0, EXTENDED_REGS,
+    NULL, ppc_store_tm_cdscrregset },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TM_CPPR, 0, EXTENDED_REGS,
+    NULL, ppc_store_tm_cpprregset },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TM_CVSX, 0, EXTENDED_REGS,
+    NULL, ppc_store_tm_cvsxregset },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TM_CVMX, 0, EXTENDED_REGS,
+    NULL, ppc_store_tm_cvrregset },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TM_CFPR, 0, EXTENDED_REGS,
+    NULL, ppc_store_tm_cfprregset },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TM_CGPR, 0, EXTENDED_REGS,
+    NULL, ppc_store_tm_cgprregset },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TM_SPR, 0, EXTENDED_REGS,
+    ppc_fill_tm_sprregset, ppc_store_tm_sprregset },
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_EBB, 0, EXTENDED_REGS,
     NULL, ppc_store_ebbregset },
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_PMU, 0, EXTENDED_REGS,
@@ -800,7 +968,13 @@ ppc_arch_setup (void)
 			       PPC_LINUX_SIZEOF_EBBREGSET)
 	  && ppc_check_regset (tid, NT_PPC_PMU,
 			       PPC_LINUX_SIZEOF_PMUREGSET))
-	features.isa207 = true;
+	{
+	  features.isa207 = true;
+	  if ((ppc_hwcap2 & PPC_FEATURE2_HTM)
+	      && ppc_check_regset (tid, NT_PPC_TM_SPR,
+				   PPC_LINUX_SIZEOF_TM_SPRREGSET))
+	    features.htm = true;
+	}
     }
 
   if (ppc_hwcap & PPC_FEATURE_CELL)
@@ -869,6 +1043,42 @@ ppc_arch_setup (void)
 	  case NT_PPC_PMU:
 	    regset->size = (features.isa207 ?
 			    PPC_LINUX_SIZEOF_PMUREGSET : 0);
+	    break;
+	  case NT_PPC_TM_SPR:
+	    regset->size = (features.htm ?
+			    PPC_LINUX_SIZEOF_TM_SPRREGSET : 0);
+	    break;
+	  case NT_PPC_TM_CGPR:
+	    if (features.wordsize == 4)
+	      regset->size = (features.htm ?
+			      PPC32_LINUX_SIZEOF_CGPRREGSET : 0);
+	    else
+	      regset->size = (features.htm ?
+			      PPC64_LINUX_SIZEOF_CGPRREGSET : 0);
+	    break;
+	  case NT_PPC_TM_CFPR:
+	    regset->size = (features.htm ?
+			    PPC_LINUX_SIZEOF_CFPRREGSET : 0);
+	    break;
+	  case NT_PPC_TM_CVMX:
+	    regset->size = (features.htm ?
+			    PPC_LINUX_SIZEOF_CVMXREGSET : 0);
+	    break;
+	  case NT_PPC_TM_CVSX:
+	    regset->size = (features.htm ?
+			    PPC_LINUX_SIZEOF_CVSXREGSET : 0);
+	    break;
+	  case NT_PPC_TM_CPPR:
+	    regset->size = (features.htm ?
+			    PPC_LINUX_SIZEOF_CPPRREGSET : 0);
+	    break;
+	  case NT_PPC_TM_CDSCR:
+	    regset->size = (features.htm ?
+			    PPC_LINUX_SIZEOF_CDSCRREGSET : 0);
+	    break;
+	  case NT_PPC_TM_CTAR:
+	    regset->size = (features.htm ?
+			    PPC_LINUX_SIZEOF_CTARREGSET : 0);
 	    break;
 	  default:
 	    break;
@@ -3253,6 +3463,8 @@ ppc_get_ipa_tdesc_idx (void)
     return PPC_TDESC_ISA205_PPR_DSCR_VSX;
   if (tdesc == tdesc_powerpc_isa207_vsx64l)
     return PPC_TDESC_ISA207_VSX;
+  if (tdesc == tdesc_powerpc_isa207_htm_vsx64l)
+    return PPC_TDESC_ISA207_HTM_VSX;
 #endif
 
   if (tdesc == tdesc_powerpc_32l)
@@ -3273,6 +3485,8 @@ ppc_get_ipa_tdesc_idx (void)
     return PPC_TDESC_ISA205_PPR_DSCR_VSX;
   if (tdesc == tdesc_powerpc_isa207_vsx32l)
     return PPC_TDESC_ISA207_VSX;
+  if (tdesc == tdesc_powerpc_isa207_htm_vsx32l)
+    return PPC_TDESC_ISA207_HTM_VSX;
   if (tdesc == tdesc_powerpc_e500l)
     return PPC_TDESC_E500;
 
@@ -3333,6 +3547,7 @@ initialize_low_arch (void)
   init_registers_powerpc_isa205_vsx32l ();
   init_registers_powerpc_isa205_ppr_dscr_vsx32l ();
   init_registers_powerpc_isa207_vsx32l ();
+  init_registers_powerpc_isa207_htm_vsx32l ();
   init_registers_powerpc_e500l ();
 #if __powerpc64__
   init_registers_powerpc_64l ();
@@ -3344,6 +3559,7 @@ initialize_low_arch (void)
   init_registers_powerpc_isa205_vsx64l ();
   init_registers_powerpc_isa205_ppr_dscr_vsx64l ();
   init_registers_powerpc_isa207_vsx64l ();
+  init_registers_powerpc_isa207_htm_vsx64l ();
 #endif
 
   initialize_regsets_info (&ppc_regsets_info);

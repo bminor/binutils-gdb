@@ -63,6 +63,9 @@
 #ifndef PPC_FEATURE2_EBB
 #define PPC_FEATURE2_EBB 0x10000000
 #endif
+#ifndef PPC_FEATURE2_HTM
+#define PPC_FEATURE2_HTM 0x40000000
+#endif
 
 /* Glibc's headers don't define PTRACE_GETVRREGS so we cannot use a
    configure time check.  Some older glibc's (for instance 2.2.1)
@@ -117,6 +120,46 @@
 /* Performance Monitor Registers.  */
 #ifndef NT_PPC_PMU
 #define NT_PPC_PMU 0x107
+#endif
+
+/* TM checkpointed GPR Registers.  */
+#ifndef NT_PPC_TM_CGPR
+#define NT_PPC_TM_CGPR 0x108
+#endif
+
+/* TM checkpointed FPR Registers.  */
+#ifndef NT_PPC_TM_CFPR
+#define NT_PPC_TM_CFPR 0x109
+#endif
+
+/* TM checkpointed VMX Registers.  */
+#ifndef NT_PPC_TM_CVMX
+#define NT_PPC_TM_CVMX 0x10a
+#endif
+
+/* TM checkpointed VSX Registers.  */
+#ifndef NT_PPC_TM_CVSX
+#define NT_PPC_TM_CVSX 0x10b
+#endif
+
+/* TM Special Purpose Registers.  */
+#ifndef NT_PPC_TM_SPR
+#define NT_PPC_TM_SPR 0x10c
+#endif
+
+/* TM checkpointed Target Address Register.  */
+#ifndef NT_PPC_TM_CTAR
+#define NT_PPC_TM_CTAR 0x10d
+#endif
+
+/* TM checkpointed Program Priority Register.  */
+#ifndef NT_PPC_TM_CPPR
+#define NT_PPC_TM_CPPR 0x10e
+#endif
+
+/* TM checkpointed Data Stream Control Register.  */
+#ifndef NT_PPC_TM_CDSCR
+#define NT_PPC_TM_CDSCR 0x10f
 #endif
 
 /* Return the wordsize of the target, either 4 or 8 bytes.  */

@@ -1,3 +1,118 @@
+2018-10-26  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+	    Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* arch/ppc-linux-tdesc.h (tdesc_powerpc_isa207_htm_vsx32l)
+	(tdesc_powerpc_isa207_htm_vsx64l): Declare.
+	* arch/ppc-linux-common.h (PPC_LINUX_SIZEOF_TM_SPRREGSET)
+	(PPC32_LINUX_SIZEOF_CGPRREGSET, PPC64_LINUX_SIZEOF_CGPRREGSET)
+	(PPC_LINUX_SIZEOF_CFPRREGSET, PPC_LINUX_SIZEOF_CVMXREGSET)
+	(PPC_LINUX_SIZEOF_CVSXREGSET, PPC_LINUX_SIZEOF_CPPRREGSET)
+	(PPC_LINUX_SIZEOF_CDSCRREGSET, PPC_LINUX_SIZEOF_CTARREGSET):
+	Define.
+	(struct ppc_linux_features) <htm>: New field.
+	(ppc_linux_no_features): Add initializer for htm field.
+	* arch/ppc-linux-common.c (ppc_linux_match_description): Return
+	new tdescs.
+	* nat/ppc-linux.h (PPC_FEATURE2_HTM, NT_PPC_TM_CGPR)
+	(NT_PPC_TM_CFPR, NT_PPC_TM_CVMX, NT_PPC_TM_CVSX)
+	(NT_PPC_TM_SPR, NT_PPC_TM_CTAR, NT_PPC_TM_CPPR, NT_PPC_TM_CDSCR):
+	Define if not already defined.
+	* features/Makefile (WHICH): Add rs6000/powerpc-isa207-htm-vsx32l
+	and rs6000/powerpc-isa207-htm-vsx64l.
+	(XMLTOC): Add rs6000/powerpc-isa207-htm-vsx32l.xml and
+	rs6000/powerpc-isa207-htm-vsx64l.xml.
+	* features/rs6000/power-htm-spr.xml: New file.
+	* features/rs6000/power-htm-core.xml: New file.
+	* features/rs6000/power64-htm-core.xml: New file.
+	* features/rs6000/power-htm-fpu.xml: New file.
+	* features/rs6000/power-htm-altivec.xml: New file.
+	* features/rs6000/power-htm-vsx.xml: New file.
+	* features/rs6000/power-htm-ppr.xml: New file.
+	* features/rs6000/power-htm-dscr.xml: New file.
+	* features/rs6000/power-htm-tar.xml: New file.
+	* features/rs6000/powerpc-isa207-htm-vsx32l.xml: New file.
+	* features/rs6000/powerpc-isa207-htm-vsx64l.xml: New file.
+	* features/rs6000/powerpc-isa207-htm-vsx32l.c: Generate.
+	* features/rs6000/powerpc-isa207-htm-vsx64l.c: Generate.
+	* regformats/rs6000/powerpc-isa207-htm-vsx32l.dat: Generate.
+	* regformats/rs6000/powerpc-isa207-htm-vsx64l.dat: Generate.
+	* ppc-linux-nat.c (fetch_register, fetch_ppc_registers): Call
+	fetch_regset with HTM regsets.
+	(store_register, store_ppc_registers): Call store_regset with HTM
+	regsets.
+	(ppc_linux_nat_target::read_description): Set htm field in the
+	features struct if needed.
+	* ppc-linux-tdep.c: Include
+	features/rs6000/powerpc-isa207-htm-vsx32l.c and
+	features/rs6000/powerpc-isa207-htm-vsx64l.c.
+	(ppc32_regmap_tm_spr, ppc32_regmap_cgpr, ppc64_le_regmap_cgpr)
+	(ppc64_be_regmap_cgpr, ppc32_regmap_cfpr, ppc32_le_regmap_cvmx)
+	(ppc32_be_regmap_cvmx, ppc32_regmap_cvsx, ppc32_regmap_cppr)
+	(ppc32_regmap_cdscr, ppc32_regmap_ctar): New globals.
+	(ppc32_linux_tm_sprregset, ppc32_linux_cgprregset)
+	(ppc64_be_linux_cgprregset, ppc64_le_linux_cgprregset)
+	(ppc32_linux_cfprregset, ppc32_le_linux_cvmxregset)
+	(ppc32_be_linux_cvmxregset, ppc32_linux_cvsxregset)
+	(ppc32_linux_cpprregset, ppc32_linux_cdscrregset)
+	(ppc32_linux_ctarregset): New globals.
+	(ppc_linux_cgprregset, ppc_linux_cvmxregset): New functions.
+	(ppc_linux_collect_core_cpgrregset): New function.
+	(ppc_linux_iterate_over_regset_sections): Call back with the htm
+	regsets.
+	(ppc_linux_core_read_description): Check if the tm spr section is
+	present and set htm in the features struct.
+	(_initialize_ppc_linux_tdep): Call
+	initialize_tdesc_powerpc_isa207_htm_vsx32l and
+	initialize_tdesc_powerpc_isa207_htm_vsx64l.
+	* ppc-linux-tdep.h (ppc_linux_cgprregset, ppc_linux_cvmxregset):
+	Declare.
+	(ppc32_linux_tm_sprregset, ppc32_linux_cfprregset)
+	(ppc32_linux_cvsxregset, ppc32_linux_cpprregset)
+	(ppc32_linux_cdscrregset, ppc32_linux_ctarregset): Declare.
+	* ppc-tdep.h (struct gdbarch_tdep) <have_htm_spr, have_htm_core>:
+	New fields.
+	<have_htm_fpu, have_htm_altivec, have_htm_vsx>:
+	Likewise.
+	<ppc_cppr_regnum, ppc_cdscr_regnum, ppc_ctar_regnum>: Likewise.
+	<ppc_cdl0_regnum, ppc_cvsr0_regnum, ppc_cefpr0_regnum>: Likewise.
+	(enum) <PPC_TFHAR_REGNUM, PPC_TEXASR_REGNUM, PPC_TFIAR_REGNUM>:
+	New enum fields.
+	<PPC_CR0_REGNUM, PPC_CCR_REGNUM, PPC_CXER_REGNUM>: Likewise.
+	<PPC_CLR_REGNUM, PPC_CCTR_REGNUM, PPC_CF0_REGNUM>: Likewise.
+	<PPC_CFPSCR_REGNUM, PPC_CVR0_REGNUM, PPC_CVSCR_REGNUM>: Likewise.
+	<PPC_CVRSAVE_REGNUM, PPC_CVSR0_UPPER_REGNUM>: Likewise.
+	<PPC_CPPR_REGNUM, PPC_CDSCR_REGNUM>: Likewise.
+	<PPC_CTAR_REGNUM>: Likewise.
+	(PPC_IS_TMSPR_REGNUM, PPC_IS_CKPTGP_REGNUM, PPC_IS_CKPTFP_REGNUM)
+	(PPC_IS_CKPTVMX_REGNUM, PPC_IS_CKPTVSX_REGNUM): Define.
+	* rs6000-tdep.c (IS_CDFP_PSEUDOREG, IS_CVSX_PSEUDOREG)
+	(IS_CEFP_PSEUDOREG): Define.
+	(rs6000_register_name): Hide the upper halves of checkpointed VSX
+	registers.  Return names for the checkpointed DFP, VSX, and EFP
+	pseudo registers.
+	(rs6000_pseudo_register_type): Remove initial assert and raise an
+	internal error in the else clause instead.  Return types for the
+	checkpointed DFP, VSX, and EFP pseudo registers.
+	(dfp_pseudo_register_read, dfp_pseudo_register_write): Handle
+	checkpointed DFP pseudo registers.
+	(vsx_pseudo_register_read, vsx_pseudo_register_write): Handle
+	checkpointed VSX pseudo registers.
+	(efp_pseudo_register_read, efp_pseudo_register_write): Rename
+	from efpr_pseudo_register_read and
+	efpr_pseudo_register_write.  Handle checkpointed EFP pseudo
+	registers.
+	(rs6000_pseudo_register_read, rs6000_pseudo_register_write):
+	Handle checkpointed DFP, VSX, and EFP registers.
+	(dfp_ax_pseudo_register_collect, vsx_ax_pseudo_register_collect)
+	(efp_ax_pseudo_register_collect): New functions.
+	(rs6000_ax_pseudo_register_collect): Move DFP, VSX and EFP pseudo
+	register logic to new functions.  Handle checkpointed DFP, VSX,
+	and EFP pseudo registers.
+	(rs6000_gdbarch_init): Look for and validate the htm features.
+	Include checkpointed DFP, VSX and EFP pseudo-registers.
+	* NEWS: Mention access to PPR, DSCR, TAR, EBB/PMU registers and
+	HTM registers.
+
 2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
 	* rs6000-tdep.c (rs6000_gdbarch_init): Reject tdescs with vsx but

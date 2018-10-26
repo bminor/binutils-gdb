@@ -73,6 +73,7 @@
 #include "features/rs6000/powerpc-isa205-vsx32l.c"
 #include "features/rs6000/powerpc-isa205-ppr-dscr-vsx32l.c"
 #include "features/rs6000/powerpc-isa207-vsx32l.c"
+#include "features/rs6000/powerpc-isa207-htm-vsx32l.c"
 #include "features/rs6000/powerpc-64l.c"
 #include "features/rs6000/powerpc-altivec64l.c"
 #include "features/rs6000/powerpc-cell64l.c"
@@ -82,6 +83,7 @@
 #include "features/rs6000/powerpc-isa205-vsx64l.c"
 #include "features/rs6000/powerpc-isa205-ppr-dscr-vsx64l.c"
 #include "features/rs6000/powerpc-isa207-vsx64l.c"
+#include "features/rs6000/powerpc-isa207-htm-vsx64l.c"
 #include "features/rs6000/powerpc-e500l.c"
 
 /* Shared library operations for PowerPC-Linux.  */
@@ -637,6 +639,239 @@ const struct regset ppc32_linux_pmuregset = {
   regcache_collect_regset
 };
 
+/* Hardware Transactional Memory special-purpose register regmap.  */
+
+static const struct regcache_map_entry ppc32_regmap_tm_spr[] =
+  {
+      { 1, PPC_TFHAR_REGNUM, 8 },
+      { 1, PPC_TEXASR_REGNUM, 8 },
+      { 1, PPC_TFIAR_REGNUM, 8 },
+      { 0 }
+  };
+
+/* Hardware Transactional Memory special-purpose register regset.  */
+
+const struct regset ppc32_linux_tm_sprregset = {
+  ppc32_regmap_tm_spr,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+/* Regmaps for the Hardware Transactional Memory checkpointed
+   general-purpose regsets for 32-bit, 64-bit big-endian, and 64-bit
+   little endian targets.  The ptrace and core file buffers for 64-bit
+   targets use 8-byte fields for the 4-byte registers, and the
+   position of the register in the fields depends on the endianess.
+   The 32-bit regmap is the same for both endian types because the
+   fields are all 4-byte long.
+
+   The layout of checkpointed GPR regset is the same as a regular
+   struct pt_regs, but we skip all registers that are not actually
+   checkpointed by the processor (e.g. msr, nip), except when
+   generating a core file.  The 64-bit regset is 48 * 8 bytes long.
+   In some 64-bit kernels, the regset for a 32-bit inferior has the
+   same length, but all the registers are squeezed in the first half
+   (48 * 4 bytes).  The pt_regs struct calls the regular cr ccr, but
+   we use ccr for "checkpointed condition register".  Note that CR
+   (condition register) field 0 is not checkpointed, but the kernel
+   returns all 4 bytes.  The skipped registers should not be touched
+   when writing the regset to the inferior (with
+   PTRACE_SETREGSET).  */
+
+static const struct regcache_map_entry ppc32_regmap_cgpr[] =
+  {
+      { 32, PPC_CR0_REGNUM, 4 },
+      { 3, REGCACHE_MAP_SKIP, 4 }, /* nip, msr, orig_gpr3.  */
+      { 1, PPC_CCTR_REGNUM, 4 },
+      { 1, PPC_CLR_REGNUM, 4 },
+      { 1, PPC_CXER_REGNUM, 4 },
+      { 1, PPC_CCR_REGNUM, 4 },
+      { 9, REGCACHE_MAP_SKIP, 4 }, /* All the rest.  */
+      { 0 }
+  };
+
+static const struct regcache_map_entry ppc64_le_regmap_cgpr[] =
+  {
+      { 32, PPC_CR0_REGNUM, 8 },
+      { 3, REGCACHE_MAP_SKIP, 8 },
+      { 1, PPC_CCTR_REGNUM, 8 },
+      { 1, PPC_CLR_REGNUM, 8 },
+      { 1, PPC_CXER_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 4 }, /* CXER padding.  */
+      { 1, PPC_CCR_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 4}, /* CCR padding.  */
+      { 9, REGCACHE_MAP_SKIP, 8},
+      { 0 }
+  };
+
+static const struct regcache_map_entry ppc64_be_regmap_cgpr[] =
+  {
+      { 32, PPC_CR0_REGNUM, 8 },
+      { 3, REGCACHE_MAP_SKIP, 8 },
+      { 1, PPC_CCTR_REGNUM, 8 },
+      { 1, PPC_CLR_REGNUM, 8 },
+      { 1, REGCACHE_MAP_SKIP, 4}, /* CXER padding.  */
+      { 1, PPC_CXER_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 4}, /* CCR padding.  */
+      { 1, PPC_CCR_REGNUM, 4 },
+      { 9, REGCACHE_MAP_SKIP, 8},
+      { 0 }
+  };
+
+/* Regsets for the Hardware Transactional Memory checkpointed
+   general-purpose registers for 32-bit, 64-bit big-endian, and 64-bit
+   little endian targets.
+
+   Some 64-bit kernels generate a checkpointed gpr note section with
+   48*8 bytes for a 32-bit thread, of which only 48*4 are actually
+   used, so we set the variable size flag in the corresponding regset
+   to accept this case.  */
+
+static const struct regset ppc32_linux_cgprregset = {
+  ppc32_regmap_cgpr,
+  regcache_supply_regset,
+  regcache_collect_regset,
+  REGSET_VARIABLE_SIZE
+};
+
+static const struct regset ppc64_be_linux_cgprregset = {
+  ppc64_be_regmap_cgpr,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+static const struct regset ppc64_le_linux_cgprregset = {
+  ppc64_le_regmap_cgpr,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+/* Hardware Transactional Memory checkpointed floating-point regmap.  */
+
+static const struct regcache_map_entry ppc32_regmap_cfpr[] =
+  {
+      { 32, PPC_CF0_REGNUM, 8 },
+      { 1, PPC_CFPSCR_REGNUM, 8 },
+      { 0 }
+  };
+
+/* Hardware Transactional Memory checkpointed floating-point regset.  */
+
+const struct regset ppc32_linux_cfprregset = {
+  ppc32_regmap_cfpr,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+/* Regmaps for the Hardware Transactional Memory checkpointed vector
+   regsets, for big and little endian targets.  The position of the
+   4-byte VSCR in its 16-byte field depends on the endianess.  */
+
+static const struct regcache_map_entry ppc32_le_regmap_cvmx[] =
+  {
+      { 32, PPC_CVR0_REGNUM, 16 },
+      { 1, PPC_CVSCR_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 12 },
+      { 1, PPC_CVRSAVE_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 12 },
+      { 0 }
+  };
+
+static const struct regcache_map_entry ppc32_be_regmap_cvmx[] =
+  {
+      { 32, PPC_CVR0_REGNUM, 16 },
+      { 1, REGCACHE_MAP_SKIP, 12 },
+      { 1, PPC_CVSCR_REGNUM, 4 },
+      { 1, PPC_CVRSAVE_REGNUM, 4 },
+      { 1, REGCACHE_MAP_SKIP, 12},
+      { 0 }
+  };
+
+/* Hardware Transactional Memory checkpointed vector regsets, for little
+   and big endian targets.  */
+
+static const struct regset ppc32_le_linux_cvmxregset = {
+  ppc32_le_regmap_cvmx,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+static const struct regset ppc32_be_linux_cvmxregset = {
+  ppc32_be_regmap_cvmx,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+/* Hardware Transactional Memory checkpointed vector-scalar regmap.  */
+
+static const struct regcache_map_entry ppc32_regmap_cvsx[] =
+  {
+      { 32, PPC_CVSR0_UPPER_REGNUM, 8 },
+      { 0 }
+  };
+
+/* Hardware Transactional Memory checkpointed vector-scalar regset.  */
+
+const struct regset ppc32_linux_cvsxregset = {
+  ppc32_regmap_cvsx,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+/* Hardware Transactional Memory checkpointed Program Priority Register
+   regmap.  */
+
+static const struct regcache_map_entry ppc32_regmap_cppr[] =
+  {
+      { 1, PPC_CPPR_REGNUM, 8 },
+      { 0 }
+  };
+
+/* Hardware Transactional Memory checkpointed Program Priority Register
+   regset.  */
+
+const struct regset ppc32_linux_cpprregset = {
+  ppc32_regmap_cppr,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+/* Hardware Transactional Memory checkpointed Data Stream Control
+   Register regmap.  */
+
+static const struct regcache_map_entry ppc32_regmap_cdscr[] =
+  {
+      { 1, PPC_CDSCR_REGNUM, 8 },
+      { 0 }
+  };
+
+/* Hardware Transactional Memory checkpointed Data Stream Control
+   Register regset.  */
+
+const struct regset ppc32_linux_cdscrregset = {
+  ppc32_regmap_cdscr,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+/* Hardware Transactional Memory checkpointed Target Address Register
+   regmap.  */
+
+static const struct regcache_map_entry ppc32_regmap_ctar[] =
+  {
+      { 1, PPC_CTAR_REGNUM, 8 },
+      { 0 }
+  };
+
+/* Hardware Transactional Memory checkpointed Target Address Register
+   regset.  */
+
+const struct regset ppc32_linux_ctarregset = {
+  ppc32_regmap_ctar,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
 const struct regset *
 ppc_linux_gregset (int wordsize)
 {
@@ -662,6 +897,88 @@ const struct regset *
 ppc_linux_vsxregset (void)
 {
   return &ppc32_linux_vsxregset;
+}
+
+const struct regset *
+ppc_linux_cgprregset (struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (tdep->wordsize == 4)
+    {
+      return &ppc32_linux_cgprregset;
+    }
+  else
+    {
+      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
+	return &ppc64_be_linux_cgprregset;
+      else
+	return &ppc64_le_linux_cgprregset;
+    }
+}
+
+const struct regset *
+ppc_linux_cvmxregset (struct gdbarch *gdbarch)
+{
+  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
+    return &ppc32_be_linux_cvmxregset;
+  else
+    return &ppc32_le_linux_cvmxregset;
+}
+
+/* Collect function used to generate the core note for the
+   checkpointed GPR regset.  Here, we don't want to skip the
+   "checkpointed" NIP and MSR, so that the note section we generate is
+   similar to the one generated by the kernel.  To avoid having to
+   define additional registers in GDB which are not actually
+   checkpointed in the architecture, we copy TFHAR to the checkpointed
+   NIP slot, which is what the kernel does, and copy the regular MSR
+   to the checkpointed MSR slot, which will have a similar value in
+   most cases.  */
+
+static void
+ppc_linux_collect_core_cpgrregset (const struct regset *regset,
+				   const struct regcache *regcache,
+				   int regnum, void *buf, size_t len)
+{
+  struct gdbarch *gdbarch = regcache->arch ();
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  const struct regset *cgprregset = ppc_linux_cgprregset (gdbarch);
+
+  /* We collect the checkpointed GPRs already defined in the regular
+     regmap, then overlay TFHAR/MSR on the checkpointed NIP/MSR
+     slots.  */
+  cgprregset->collect_regset (cgprregset, regcache, regnum, buf, len);
+
+  /* Check that we are collecting all the registers, which should be
+     the case when generating a core file.  */
+  if (regnum != -1)
+    return;
+
+  /* PT_NIP and PT_MSR are 32 and 33 for powerpc.  Don't redefine
+     these symbols since this file can run on clients in other
+     architectures where they can already be defined to other
+     values.  */
+  int pt_offset = 32;
+
+  /* Check that our buffer is long enough to hold two slots at
+     pt_offset * wordsize, one for NIP and one for MSR.  */
+  gdb_assert ((pt_offset + 2) * tdep->wordsize <= len);
+
+  /* TFHAR is 8 bytes wide, but the NIP slot for a 32-bit thread is
+     4-bytes long.  We use raw_collect_integer which handles
+     differences in the sizes for the source and destination buffers
+     for both endian modes.  */
+  (regcache->raw_collect_integer
+   (PPC_TFHAR_REGNUM, ((gdb_byte *) buf) + pt_offset * tdep->wordsize,
+    tdep->wordsize, false));
+
+  pt_offset = 33;
+
+  (regcache->raw_collect_integer
+   (PPC_MSR_REGNUM, ((gdb_byte *) buf) + pt_offset * tdep->wordsize,
+    tdep->wordsize, false));
 }
 
 /* Iterate over supported core file register note sections. */
@@ -728,6 +1045,121 @@ ppc_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 	PPC_LINUX_SIZEOF_PMUREGSET,
 	&ppc32_linux_pmuregset, "Performance Monitor Registers",
 	cb_data);
+
+  if (tdep->have_htm_spr)
+    cb (".reg-ppc-tm-spr", PPC_LINUX_SIZEOF_TM_SPRREGSET,
+	PPC_LINUX_SIZEOF_TM_SPRREGSET,
+	&ppc32_linux_tm_sprregset,
+	"Hardware Transactional Memory Special Purpose Registers",
+	cb_data);
+
+  /* Checkpointed registers can be unavailable, don't call back if
+     we are generating a core file.  */
+
+  if (tdep->have_htm_core)
+    {
+      /* Only generate the checkpointed GPR core note if we also have
+	 access to the HTM SPRs, because we need TFHAR to fill the
+	 "checkpointed" NIP slot.  We can read a core file without it
+	 since GDB is not aware of this NIP as a visible register.  */
+      if (regcache == NULL ||
+	  (REG_VALID == regcache->get_register_status (PPC_CR0_REGNUM)
+	   && tdep->have_htm_spr))
+	{
+	  int cgpr_size = (tdep->wordsize == 4?
+			   PPC32_LINUX_SIZEOF_CGPRREGSET
+			   : PPC64_LINUX_SIZEOF_CGPRREGSET);
+
+	  const struct regset *cgprregset =
+	    ppc_linux_cgprregset (gdbarch);
+
+	  if (regcache != NULL)
+	    {
+	      struct regset core_cgprregset = *cgprregset;
+
+	      core_cgprregset.collect_regset
+		= ppc_linux_collect_core_cpgrregset;
+
+	      cb (".reg-ppc-tm-cgpr",
+		  cgpr_size, cgpr_size,
+		  &core_cgprregset,
+		  "Checkpointed General Purpose Registers", cb_data);
+	    }
+	  else
+	    {
+	      cb (".reg-ppc-tm-cgpr",
+		  cgpr_size, cgpr_size,
+		  cgprregset,
+		  "Checkpointed General Purpose Registers", cb_data);
+	    }
+	}
+    }
+
+  if (tdep->have_htm_fpu)
+    {
+      if (regcache == NULL ||
+	  REG_VALID == regcache->get_register_status (PPC_CF0_REGNUM))
+	cb (".reg-ppc-tm-cfpr", PPC_LINUX_SIZEOF_CFPRREGSET,
+	    PPC_LINUX_SIZEOF_CFPRREGSET,
+	    &ppc32_linux_cfprregset,
+	    "Checkpointed Floating Point Registers", cb_data);
+    }
+
+  if (tdep->have_htm_altivec)
+    {
+      if (regcache == NULL ||
+	  REG_VALID == regcache->get_register_status (PPC_CVR0_REGNUM))
+	{
+	  const struct regset *cvmxregset =
+	    ppc_linux_cvmxregset (gdbarch);
+
+	  cb (".reg-ppc-tm-cvmx", PPC_LINUX_SIZEOF_CVMXREGSET,
+	      PPC_LINUX_SIZEOF_CVMXREGSET,
+	      cvmxregset,
+	      "Checkpointed Altivec (VMX) Registers", cb_data);
+	}
+    }
+
+  if (tdep->have_htm_vsx)
+    {
+      if (regcache == NULL ||
+	  (REG_VALID
+	   == regcache->get_register_status (PPC_CVSR0_UPPER_REGNUM)))
+	cb (".reg-ppc-tm-cvsx", PPC_LINUX_SIZEOF_CVSXREGSET,
+	    PPC_LINUX_SIZEOF_CVSXREGSET,
+	    &ppc32_linux_cvsxregset,
+	    "Checkpointed VSX Registers", cb_data);
+    }
+
+  if (tdep->ppc_cppr_regnum != -1)
+    {
+      if (regcache == NULL ||
+	  REG_VALID == regcache->get_register_status (PPC_CPPR_REGNUM))
+	cb (".reg-ppc-tm-cppr", PPC_LINUX_SIZEOF_CPPRREGSET,
+	    PPC_LINUX_SIZEOF_CPPRREGSET,
+	    &ppc32_linux_cpprregset,
+	    "Checkpointed Priority Program Register", cb_data);
+    }
+
+  if (tdep->ppc_cdscr_regnum != -1)
+    {
+      if (regcache == NULL ||
+	  REG_VALID == regcache->get_register_status (PPC_CDSCR_REGNUM))
+	cb (".reg-ppc-tm-cdscr", PPC_LINUX_SIZEOF_CDSCRREGSET,
+	    PPC_LINUX_SIZEOF_CDSCRREGSET,
+	    &ppc32_linux_cdscrregset,
+	    "Checkpointed Data Stream Control Register", cb_data);
+    }
+
+  if (tdep->ppc_ctar_regnum)
+    {
+      if ( regcache == NULL ||
+	   REG_VALID == regcache->get_register_status (PPC_CTAR_REGNUM))
+	cb (".reg-ppc-tm-ctar", PPC_LINUX_SIZEOF_CTARREGSET,
+	    PPC_LINUX_SIZEOF_CTARREGSET,
+	    &ppc32_linux_ctarregset,
+	    "Checkpointed Target Address Register", cb_data);
+    }
 }
 
 static void
@@ -1143,6 +1575,7 @@ ppc_linux_core_read_description (struct gdbarch *gdbarch,
   asection *dscr = bfd_get_section_by_name (abfd, ".reg-ppc-dscr");
   asection *tar = bfd_get_section_by_name (abfd, ".reg-ppc-tar");
   asection *pmu = bfd_get_section_by_name (abfd, ".reg-ppc-pmu");
+  asection *htmspr = bfd_get_section_by_name (abfd, ".reg-ppc-tm-spr");
 
   if (! section)
     return NULL;
@@ -1184,7 +1617,11 @@ ppc_linux_core_read_description (struct gdbarch *gdbarch,
 	 been unavailable when the core file was created.  They will
 	 be in the tdep but will show as unavailable.  */
       if (tar && pmu)
-	features.isa207 = true;
+	{
+	  features.isa207 = true;
+	  if (htmspr)
+	    features.htm = true;
+	}
     }
 
   return ppc_linux_match_description (features);
@@ -2062,6 +2499,7 @@ _initialize_ppc_linux_tdep (void)
   initialize_tdesc_powerpc_isa205_vsx32l ();
   initialize_tdesc_powerpc_isa205_ppr_dscr_vsx32l ();
   initialize_tdesc_powerpc_isa207_vsx32l ();
+  initialize_tdesc_powerpc_isa207_htm_vsx32l ();
   initialize_tdesc_powerpc_64l ();
   initialize_tdesc_powerpc_altivec64l ();
   initialize_tdesc_powerpc_cell64l ();
@@ -2071,5 +2509,6 @@ _initialize_ppc_linux_tdep (void)
   initialize_tdesc_powerpc_isa205_vsx64l ();
   initialize_tdesc_powerpc_isa205_ppr_dscr_vsx64l ();
   initialize_tdesc_powerpc_isa207_vsx64l ();
+  initialize_tdesc_powerpc_isa207_htm_vsx64l ();
   initialize_tdesc_powerpc_e500l ();
 }

@@ -43210,6 +43210,48 @@ contain registers @samp{mmcr0}, @samp{mmcr2}, @samp{siar}, @samp{sdar}
 and @samp{sier}, all 64-bit wide.  This is the subset of the isa 2.07
 server PMU registers provided by @sc{gnu}/Linux.
 
+The @samp{org.gnu.gdb.power.htm.spr} feature is optional.  It should
+contain registers @samp{tfhar}, @samp{texasr} and @samp{tfiar}, all
+64-bit wide.
+
+The @samp{org.gnu.gdb.power.htm.core} feature is optional.  It should
+contain the checkpointed general-purpose registers @samp{cr0} through
+@samp{cr31}, as well as the checkpointed registers @samp{clr} and
+@samp{cctr}.  These registers may all be either 32-bit or 64-bit
+depending on the target.  It should also contain the checkpointed
+registers @samp{ccr} and @samp{cxer}, which should both be 32-bit
+wide.
+
+The @samp{org.gnu.gdb.power.htm.fpu} feature is optional.  It should
+contain the checkpointed 64-bit floating-point registers @samp{cf0}
+through @samp{cf31}, as well as the checkpointed 64-bit register
+@samp{cfpscr}.
+
+The @samp{org.gnu.gdb.power.htm.altivec} feature is optional.  It
+should contain the checkpointed altivec registers @samp{cvr0} through
+@samp{cvr31}, all 128-bit wide.  It should also contain the
+checkpointed registers @samp{cvscr} and @samp{cvrsave}, both 32-bit
+wide.
+
+The @samp{org.gnu.gdb.power.htm.vsx} feature is optional.  It should
+contain registers @samp{cvs0h} through @samp{cvs31h}.  @value{GDBN}
+will combine these registers with the checkpointed floating point
+registers (@samp{cf0} through @samp{cf31}) and the checkpointed
+altivec registers (@samp{cvr0} through @samp{cvr31}) to present the
+128-bit wide checkpointed vector-scalar registers @samp{cvs0} through
+@samp{cvs63}.  Therefore, this feature requires both
+@samp{org.gnu.gdb.power.htm.altivec} and
+@samp{org.gnu.gdb.power.htm.fpu}.
+
+The @samp{org.gnu.gdb.power.htm.ppr} feature is optional.  It should
+contain the 64-bit checkpointed register @samp{cppr}.
+
+The @samp{org.gnu.gdb.power.htm.dscr} feature is optional.  It should
+contain the 64-bit checkpointed register @samp{cdscr}.
+
+The @samp{org.gnu.gdb.power.htm.tar} feature is optional.  It should
+contain the 64-bit checkpointed register @samp{ctar}.
+
 @node S/390 and System z Features
 @subsection S/390 and System z Features
 @cindex target descriptions, S/390 features

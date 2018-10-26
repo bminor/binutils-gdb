@@ -1,5 +1,40 @@
 2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
+	* configure.srv (ipa_ppc_linux_regobj): Add
+	powerpc-isa207-htm-vsx32l-ipa.o and
+	powerpc-isa207-htm-vsx64l-ipa.o.
+	(powerpc*-*-linux*): Add powerpc-isa207-htm-vsx32l.o and
+	powerpc-isa207-htm-vsx64l.o to srv_regobj.  Add
+	rs6000/power-htm-spr.xml, rs6000/power-htm-core.xml,
+	rs6000/power64-htm-core.xml, rs6000/power-htm-fpu.xml,
+	rs6000/power-htm-altivec.xml, rs6000/power-htm-vsx.xml,
+	rs6000/power-htm-ppr.xml, rs6000/power-htm-dscr.xml,
+	rs6000/power-htm-tar.xml, rs6000/powerpc-isa207-htm-vsx32l.xml,
+	and rs6000/powerpc-isa207-htm-vsx64l.xml to srv_xmlfiles.
+	* linux-ppc-tdesc-init.h (enum ppc_linux_tdesc)
+	<PPC_TDESC_ISA207_HTM_VSX>: New enum value.
+	(init_registers_powerpc_isa207_htm_vsx32l)
+	(init_registers_powerpc_isa207_htm_vsx64l): Declare.
+	* linux-ppc-low.c (ppc_fill_tm_sprregset, ppc_store_tm_sprregset)
+	(ppc_store_tm_cgprregset, ppc_store_tm_cfprregset)
+	(ppc_store_tm_cvrregset, ppc_store_tm_cvsxregset)
+	(ppc_store_tm_cpprregset, ppc_store_tm_cdscrregset)
+	(ppc_store_tm_ctarregset): New functions.
+	(ppc_regsets): Add entries for HTM regsets.
+	(ppc_arch_setup): Set htm in features struct when needed.  Set
+	sizes for the HTM regsets.
+	(ppc_get_ipa_tdesc_idx): Return PPC_TDESC_ISA207_HTM_VSX.
+	(initialize_low_arch): Call
+	init_registers_powerpc_isa207_htm_vsx32l and
+	init_registers_powerpc_isa207_htm_vsx64l.
+	* linux-ppc-ipa.c (get_ipa_tdesc): Handle
+	PPC_TDESC_ISA207_HTM_VSX.
+	(initialize_low_tracepoint): Call
+	init_registers_powerpc_isa207_htm_vsx32l and
+	init_registers_powerpc_isa207_htm_vsx64l.
+
+2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
 	* configure.srv (powerpc*-*-linux*): Add rs6000/power-ebb.xml and
 	rs6000/power-linux-pmu.xml to srv_xmlfiles.
 	* linux-ppc-low.c (ppc_store_ebbregset, ppc_fill_pmuregset)

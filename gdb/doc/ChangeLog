@@ -1,6 +1,14 @@
 2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
 	* gdb.texinfo (PowerPC Features): Describe new features
+	"org.gnu.gdb.power.htm.spr", "org.gnu.gdb.power.htm.core",
+	"org.gnu.gdb.power.htm.fpu", "org.gnu.gdb.power.htm.altivec",
+	"org.gnu.gdb.power.htm.vsx", "org.gnu.gdb.power.htm.ppr",
+	"org.gnu.gdb.power.htm.dscr", "org.gnu.gdb.power.htm.tar".
+
+2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* gdb.texinfo (PowerPC Features): Describe new features
 	"org.gnu.gdb.power.ebb" and "org.gnu.gdb.power.linux.pmu".
 
 2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>

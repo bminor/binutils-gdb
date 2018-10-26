@@ -274,6 +274,21 @@ struct gdbarch_tdep
     int ppc_sdar_regnum;
     int ppc_sier_regnum;
 
+    /* Hardware Transactional Memory registers.  */
+    int have_htm_spr;
+    int have_htm_core;
+    int have_htm_fpu;
+    int have_htm_altivec;
+    int have_htm_vsx;
+    int ppc_cppr_regnum;
+    int ppc_cdscr_regnum;
+    int ppc_ctar_regnum;
+
+    /* HTM pseudo registers.  */
+    int ppc_cdl0_regnum;
+    int ppc_cvsr0_regnum;
+    int ppc_cefpr0_regnum;
+
     /* Offset to ABI specific location where link register is saved.  */
     int lr_frame_offset;	
 
@@ -343,6 +358,29 @@ enum {
   PPC_SDAR_REGNUM = 181,
   PPC_SIER_REGNUM = 182,
 
+  /* Hardware transactional memory registers.  */
+  PPC_TFHAR_REGNUM = 183,
+  PPC_TEXASR_REGNUM = 184,
+  PPC_TFIAR_REGNUM = 185,
+
+  PPC_CR0_REGNUM = 186,
+  PPC_CCR_REGNUM = 218,
+  PPC_CXER_REGNUM = 219,
+  PPC_CLR_REGNUM = 220,
+  PPC_CCTR_REGNUM = 221,
+
+  PPC_CF0_REGNUM = 222,
+  PPC_CFPSCR_REGNUM = 254,
+
+  PPC_CVR0_REGNUM = 255,
+  PPC_CVSCR_REGNUM = 287,
+  PPC_CVRSAVE_REGNUM = 288,
+
+  PPC_CVSR0_UPPER_REGNUM = 289,
+
+  PPC_CPPR_REGNUM = 321,
+  PPC_CDSCR_REGNUM = 322,
+  PPC_CTAR_REGNUM = 323,
   PPC_NUM_REGS
 };
 
@@ -354,6 +392,21 @@ enum {
 
 #define PPC_IS_PMU_REGNUM(i) \
 	((i) >= PPC_MMCR0_REGNUM && (i) <= PPC_SIER_REGNUM)
+
+#define PPC_IS_TMSPR_REGNUM(i) \
+  ((i) >= PPC_TFHAR_REGNUM && (i) <= PPC_TFIAR_REGNUM)
+
+#define PPC_IS_CKPTGP_REGNUM(i) \
+  ((i) >= PPC_CR0_REGNUM && (i) <= PPC_CCTR_REGNUM)
+
+#define PPC_IS_CKPTFP_REGNUM(i) \
+  ((i) >= PPC_CF0_REGNUM && (i) <= PPC_CFPSCR_REGNUM)
+
+#define PPC_IS_CKPTVMX_REGNUM(i) \
+  ((i) >= PPC_CVR0_REGNUM && (i) <= PPC_CVRSAVE_REGNUM)
+
+#define PPC_IS_CKPTVSX_REGNUM(i) \
+  ((i) >= PPC_CVSR0_UPPER_REGNUM && (i) < (PPC_CVSR0_UPPER_REGNUM + 32))
 
 /* An instruction to match.  */
 
