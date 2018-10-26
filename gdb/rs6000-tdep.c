@@ -5791,8 +5791,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   enum powerpc_long_double_abi long_double_abi = POWERPC_LONG_DOUBLE_AUTO;
   enum powerpc_vector_abi vector_abi = powerpc_vector_abi_global;
   enum powerpc_elf_abi elf_abi = POWERPC_ELF_AUTO;
-  int have_fpu = 1, have_spe = 0, have_mq = 0, have_altivec = 0, have_dfp = 0,
-      have_vsx = 0;
+  int have_fpu = 0, have_spe = 0, have_mq = 0, have_altivec = 0;
+  int have_dfp = 0, have_vsx = 0;
   int tdesc_wordsize = -1;
   const struct target_desc *tdesc = info.target_desc;
   struct tdesc_arch_data *tdesc_data = NULL;

@@ -1,5 +1,11 @@
 2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
+	* rs6000-tdep.c (rs6000_gdbarch_init): Replace line wrapping by a
+	second initializer line for the have_* variables.  Initialize
+	have_fpu to 0 instead of 1.
+
+2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
 	* arch/ppc-linux-common.c (ppc_linux_match_description):
 	Parenthesize tdesc assignements and indent them properly.
 
