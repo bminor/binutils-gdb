@@ -1,3 +1,7 @@
+2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* linux-ppc-low.c (ppc_fill_vrregset): Remove memset calls.
+
 2018-10-10  Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Simon Marchi <simark@simark.ca>
 

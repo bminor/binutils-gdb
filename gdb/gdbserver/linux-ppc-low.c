@@ -495,13 +495,9 @@ ppc_fill_vrregset (struct regcache *regcache, void *buf)
   if (__BYTE_ORDER == __BIG_ENDIAN)
     vscr_offset = 12;
 
-  /* Zero-pad the unused bytes in the fields for vscr and vrsave in
-     case they get displayed somewhere.  */
-  memset (&regset[32 * 16], 0, 16);
   collect_register_by_name (regcache, "vscr",
 			    &regset[32 * 16 + vscr_offset]);
 
-  memset (&regset[33 * 16], 0, 16);
   collect_register_by_name (regcache, "vrsave", &regset[33 * 16]);
 }
 

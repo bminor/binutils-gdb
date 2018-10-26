@@ -1,5 +1,11 @@
 2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
+	* ppc-linux-tdep.c (ppc_linux_collect_vrregset): Remove.
+	(ppc32_le_linux_vrregset, ppc32_be_linux_vrregset): Replace
+	ppc_linux_collect_vrregset by regcache_collect_regset.
+
+2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
 	* linux-tdep.c (linux_collect_regset_section_cb): Use
 	std::vector<gdb_byte> instead of char * and malloc for buf.
 	Remove xfree.

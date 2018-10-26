@@ -444,24 +444,6 @@ ppc_linux_collect_gregset (const struct regset *regset,
     }
 }
 
-static void
-ppc_linux_collect_vrregset (const struct regset *regset,
-			    const struct regcache *regcache,
-			    int regnum, void *buf, size_t len)
-{
-  gdb_byte *vrregs = (gdb_byte *) buf;
-
-  /* Zero-pad the unused bytes in the fields for vscr and vrsave
-     in case they get displayed somewhere (e.g. in core files).  */
-  if (regnum == PPC_VSCR_REGNUM || regnum == -1)
-    memset (&vrregs[32 * 16], 0, 16);
-
-  if (regnum == PPC_VRSAVE_REGNUM || regnum == -1)
-    memset (&vrregs[33 * 16], 0, 16);
-
-  regcache_collect_regset (regset, regcache, regnum, buf, len);
-}
-
 /* Regset descriptions.  */
 static const struct ppc_reg_offsets ppc32_linux_reg_offsets =
   {
@@ -544,13 +526,13 @@ static const struct regcache_map_entry ppc32_be_linux_vrregmap[] =
 static const struct regset ppc32_le_linux_vrregset = {
   ppc32_le_linux_vrregmap,
   regcache_supply_regset,
-  ppc_linux_collect_vrregset
+  regcache_collect_regset
 };
 
 static const struct regset ppc32_be_linux_vrregset = {
   ppc32_be_linux_vrregmap,
   regcache_supply_regset,
-  ppc_linux_collect_vrregset
+  regcache_collect_regset
 };
 
 static const struct regcache_map_entry ppc32_linux_vsxregmap[] =
