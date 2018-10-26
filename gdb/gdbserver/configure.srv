@@ -249,6 +249,8 @@ case "${target}" in
 			srv_xmlfiles="${srv_xmlfiles} rs6000/power-dscr.xml"
 			srv_xmlfiles="${srv_xmlfiles} rs6000/power-ppr.xml"
 			srv_xmlfiles="${srv_xmlfiles} rs6000/power-tar.xml"
+			srv_xmlfiles="${srv_xmlfiles} rs6000/power-ebb.xml"
+			srv_xmlfiles="${srv_xmlfiles} rs6000/power-linux-pmu.xml"
 			srv_xmlfiles="${srv_xmlfiles} rs6000/powerpc-e500l.xml"
 			srv_xmlfiles="${srv_xmlfiles} rs6000/power-spe.xml"
 			srv_xmlfiles="${srv_xmlfiles} rs6000/powerpc-64l.xml"

@@ -43201,6 +43201,15 @@ contain the 64-bit register @samp{dscr}.
 The @samp{org.gnu.gdb.power.tar} feature is optional.  It should
 contain the 64-bit register @samp{tar}.
 
+The @samp{org.gnu.gdb.power.ebb} feature is optional.  It should
+contain registers @samp{bescr}, @samp{ebbhr} and @samp{ebbrr}, all
+64-bit wide.
+
+The @samp{org.gnu.gdb.power.linux.pmu} feature is optional.  It should
+contain registers @samp{mmcr0}, @samp{mmcr2}, @samp{siar}, @samp{sdar}
+and @samp{sier}, all 64-bit wide.  This is the subset of the isa 2.07
+server PMU registers provided by @sc{gnu}/Linux.
+
 @node S/390 and System z Features
 @subsection S/390 and System z Features
 @cindex target descriptions, S/390 features

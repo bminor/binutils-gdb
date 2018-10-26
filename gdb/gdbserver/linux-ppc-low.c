@@ -545,6 +545,61 @@ ppc_store_tarregset (struct regcache *regcache, const void *buf)
   supply_register_by_name (regcache, "tar", tar);
 }
 
+/* Event-Based Branching regset store function.  Unless the inferior
+   has a perf event open, ptrace can return in error when reading and
+   writing to the regset, with ENODATA.  For reading, the registers
+   will correctly show as unavailable.  For writing, gdbserver
+   currently only caches any register writes from P and G packets and
+   the stub always tries to write all the regsets when resuming the
+   inferior, which would result in frequent warnings.  For this
+   reason, we don't define a fill function.  This also means that the
+   client-side regcache will be dirty if the user tries to write to
+   the EBB registers.  G packets that the client sends to write to
+   unrelated registers will also include data for EBB registers, even
+   if they are unavailable.  */
+
+static void
+ppc_store_ebbregset (struct regcache *regcache, const void *buf)
+{
+  const char *regset = (const char *) buf;
+
+  /* The order in the kernel regset is: EBBRR, EBBHR, BESCR.  In the
+     .dat file is BESCR, EBBHR, EBBRR.  */
+  supply_register_by_name (regcache, "ebbrr", &regset[0]);
+  supply_register_by_name (regcache, "ebbhr", &regset[8]);
+  supply_register_by_name (regcache, "bescr", &regset[16]);
+}
+
+/* Performance Monitoring Unit regset fill function.  */
+
+static void
+ppc_fill_pmuregset (struct regcache *regcache, void *buf)
+{
+  char *regset = (char *) buf;
+
+  /* The order in the kernel regset is SIAR, SDAR, SIER, MMCR2, MMCR0.
+     In the .dat file is MMCR0, MMCR2, SIAR, SDAR, SIER.  */
+  collect_register_by_name (regcache, "siar", &regset[0]);
+  collect_register_by_name (regcache, "sdar", &regset[8]);
+  collect_register_by_name (regcache, "sier", &regset[16]);
+  collect_register_by_name (regcache, "mmcr2", &regset[24]);
+  collect_register_by_name (regcache, "mmcr0", &regset[32]);
+}
+
+/* Performance Monitoring Unit regset store function.  */
+
+static void
+ppc_store_pmuregset (struct regcache *regcache, const void *buf)
+{
+  const char *regset = (const char *) buf;
+
+  supply_register_by_name (regcache, "siar", &regset[0]);
+  supply_register_by_name (regcache, "sdar", &regset[8]);
+  supply_register_by_name (regcache, "sier", &regset[16]);
+  supply_register_by_name (regcache, "mmcr2", &regset[24]);
+  supply_register_by_name (regcache, "mmcr0", &regset[32]);
+}
+
 static void
 ppc_fill_vsxregset (struct regcache *regcache, void *buf)
 {
@@ -654,6 +709,10 @@ static struct regset_info ppc_regsets[] = {
      fetch them every time, but still fall back to PTRACE_PEEKUSER for the
      general registers.  Some kernels support these, but not the newer
      PPC_PTRACE_GETREGS.  */
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_EBB, 0, EXTENDED_REGS,
+    NULL, ppc_store_ebbregset },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_PMU, 0, EXTENDED_REGS,
+    ppc_fill_pmuregset, ppc_store_pmuregset },
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TAR, 0, EXTENDED_REGS,
     ppc_fill_tarregset, ppc_store_tarregset },
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_PPR, 0, EXTENDED_REGS,
@@ -734,8 +793,13 @@ ppc_arch_setup (void)
       features.ppr_dscr = true;
       if ((ppc_hwcap2 & PPC_FEATURE2_ARCH_2_07)
 	  && (ppc_hwcap2 & PPC_FEATURE2_TAR)
+	  && (ppc_hwcap2 & PPC_FEATURE2_EBB)
 	  && ppc_check_regset (tid, NT_PPC_TAR,
-			       PPC_LINUX_SIZEOF_TARREGSET))
+			       PPC_LINUX_SIZEOF_TARREGSET)
+	  && ppc_check_regset (tid, NT_PPC_EBB,
+			       PPC_LINUX_SIZEOF_EBBREGSET)
+	  && ppc_check_regset (tid, NT_PPC_PMU,
+			       PPC_LINUX_SIZEOF_PMUREGSET))
 	features.isa207 = true;
     }
 
@@ -797,6 +861,14 @@ ppc_arch_setup (void)
 	  case NT_PPC_TAR:
 	    regset->size = (features.isa207 ?
 			    PPC_LINUX_SIZEOF_TARREGSET : 0);
+	    break;
+	  case NT_PPC_EBB:
+	    regset->size = (features.isa207 ?
+			    PPC_LINUX_SIZEOF_EBBREGSET : 0);
+	    break;
+	  case NT_PPC_PMU:
+	    regset->size = (features.isa207 ?
+			    PPC_LINUX_SIZEOF_PMUREGSET : 0);
 	    break;
 	  default:
 	    break;

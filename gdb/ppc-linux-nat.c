@@ -666,6 +666,24 @@ fetch_register (struct regcache *regcache, int tid, int regno)
 		    &ppc32_linux_tarregset);
       return;
     }
+  else if (PPC_IS_EBB_REGNUM (regno))
+    {
+      gdb_assert (tdep->have_ebb);
+
+      fetch_regset (regcache, tid, NT_PPC_EBB,
+		    PPC_LINUX_SIZEOF_EBBREGSET,
+		    &ppc32_linux_ebbregset);
+      return;
+    }
+  else if (PPC_IS_PMU_REGNUM (regno))
+    {
+      gdb_assert (tdep->ppc_mmcr0_regnum != -1);
+
+      fetch_regset (regcache, tid, NT_PPC_PMU,
+		    PPC_LINUX_SIZEOF_PMUREGSET,
+		    &ppc32_linux_pmuregset);
+      return;
+    }
 
   if (regaddr == -1)
     {
@@ -871,6 +889,14 @@ fetch_ppc_registers (struct regcache *regcache, int tid)
     fetch_regset (regcache, tid, NT_PPC_TAR,
 		  PPC_LINUX_SIZEOF_TARREGSET,
 		  &ppc32_linux_tarregset);
+  if (tdep->have_ebb)
+    fetch_regset (regcache, tid, NT_PPC_EBB,
+		  PPC_LINUX_SIZEOF_EBBREGSET,
+		  &ppc32_linux_ebbregset);
+  if (tdep->ppc_mmcr0_regnum != -1)
+    fetch_regset (regcache, tid, NT_PPC_PMU,
+		  PPC_LINUX_SIZEOF_PMUREGSET,
+		  &ppc32_linux_pmuregset);
 }
 
 /* Fetch registers from the child process.  Fetch all registers if
@@ -1076,6 +1102,24 @@ store_register (const struct regcache *regcache, int tid, int regno)
       store_regset (regcache, tid, regno, NT_PPC_TAR,
 		    PPC_LINUX_SIZEOF_TARREGSET,
 		    &ppc32_linux_tarregset);
+      return;
+    }
+  else if (PPC_IS_EBB_REGNUM (regno))
+    {
+      gdb_assert (tdep->have_ebb);
+
+      store_regset (regcache, tid, regno, NT_PPC_EBB,
+		    PPC_LINUX_SIZEOF_EBBREGSET,
+		    &ppc32_linux_ebbregset);
+      return;
+    }
+  else if (PPC_IS_PMU_REGNUM (regno))
+    {
+      gdb_assert (tdep->ppc_mmcr0_regnum != -1);
+
+      store_regset (regcache, tid, regno, NT_PPC_PMU,
+		    PPC_LINUX_SIZEOF_PMUREGSET,
+		    &ppc32_linux_pmuregset);
       return;
     }
 
@@ -1301,6 +1345,15 @@ store_ppc_registers (const struct regcache *regcache, int tid)
     store_regset (regcache, tid, -1, NT_PPC_TAR,
 		  PPC_LINUX_SIZEOF_TARREGSET,
 		  &ppc32_linux_tarregset);
+
+  if (tdep->ppc_mmcr0_regnum != -1)
+    store_regset (regcache, tid, -1, NT_PPC_PMU,
+		  PPC_LINUX_SIZEOF_PMUREGSET,
+		  &ppc32_linux_pmuregset);
+
+  /* Because the EBB registers can be unavailable, attempts to store
+     them here would cause this function to fail most of the time, so
+     we ignore them.  */
 }
 
 /* Fetch the AT_HWCAP entry from the aux vector.  */
@@ -2429,7 +2482,10 @@ ppc_linux_nat_target::read_description ()
       features.ppr_dscr = true;
       if ((hwcap2 & PPC_FEATURE2_ARCH_2_07)
 	  && (hwcap2 & PPC_FEATURE2_TAR)
-	  && check_regset (tid, NT_PPC_TAR, PPC_LINUX_SIZEOF_TARREGSET))
+	  && (hwcap2 & PPC_FEATURE2_EBB)
+	  && check_regset (tid, NT_PPC_TAR, PPC_LINUX_SIZEOF_TARREGSET)
+	  && check_regset (tid, NT_PPC_EBB, PPC_LINUX_SIZEOF_EBBREGSET)
+	  && check_regset (tid, NT_PPC_PMU, PPC_LINUX_SIZEOF_PMUREGSET))
 	features.isa207 = true;
     }
 

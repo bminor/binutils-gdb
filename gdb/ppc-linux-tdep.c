@@ -599,6 +599,44 @@ const struct regset ppc32_linux_tarregset = {
   regcache_collect_regset
 };
 
+/* Event-Based Branching regmap.  */
+
+static const struct regcache_map_entry ppc32_regmap_ebb[] =
+  {
+      { 1, PPC_EBBRR_REGNUM, 8 },
+      { 1, PPC_EBBHR_REGNUM, 8 },
+      { 1, PPC_BESCR_REGNUM, 8 },
+      { 0 }
+  };
+
+/* Event-Based Branching regset.  */
+
+const struct regset ppc32_linux_ebbregset = {
+  ppc32_regmap_ebb,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
+/* Performance Monitoring Unit regmap.  */
+
+static const struct regcache_map_entry ppc32_regmap_pmu[] =
+  {
+      { 1, PPC_SIAR_REGNUM, 8 },
+      { 1, PPC_SDAR_REGNUM, 8 },
+      { 1, PPC_SIER_REGNUM, 8 },
+      { 1, PPC_MMCR2_REGNUM, 8 },
+      { 1, PPC_MMCR0_REGNUM, 8 },
+      { 0 }
+  };
+
+/* Performance Monitoring Unit regset.  */
+
+const struct regset ppc32_linux_pmuregset = {
+  ppc32_regmap_pmu,
+  regcache_supply_regset,
+  regcache_collect_regset
+};
+
 const struct regset *
 ppc_linux_gregset (int wordsize)
 {
@@ -674,6 +712,22 @@ ppc_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
     cb (".reg-ppc-tar", PPC_LINUX_SIZEOF_TARREGSET,
 	PPC_LINUX_SIZEOF_TARREGSET,
 	&ppc32_linux_tarregset, "Target Address Register", cb_data);
+
+  /* EBB registers are unavailable when ptrace returns ENODATA.  Check
+     availability when generating a core file (regcache != NULL).  */
+  if (tdep->have_ebb)
+    if (regcache == NULL
+	|| REG_VALID == regcache->get_register_status (PPC_BESCR_REGNUM))
+      cb (".reg-ppc-ebb", PPC_LINUX_SIZEOF_EBBREGSET,
+	  PPC_LINUX_SIZEOF_EBBREGSET,
+	  &ppc32_linux_ebbregset, "Event-based Branching Registers",
+	  cb_data);
+
+  if (tdep->ppc_mmcr0_regnum != -1)
+    cb (".reg-ppc-pmu", PPC_LINUX_SIZEOF_PMUREGSET,
+	PPC_LINUX_SIZEOF_PMUREGSET,
+	&ppc32_linux_pmuregset, "Performance Monitor Registers",
+	cb_data);
 }
 
 static void
@@ -1088,6 +1142,7 @@ ppc_linux_core_read_description (struct gdbarch *gdbarch,
   asection *ppr = bfd_get_section_by_name (abfd, ".reg-ppc-ppr");
   asection *dscr = bfd_get_section_by_name (abfd, ".reg-ppc-dscr");
   asection *tar = bfd_get_section_by_name (abfd, ".reg-ppc-tar");
+  asection *pmu = bfd_get_section_by_name (abfd, ".reg-ppc-pmu");
 
   if (! section)
     return NULL;
@@ -1123,7 +1178,12 @@ ppc_linux_core_read_description (struct gdbarch *gdbarch,
   if (ppr && dscr)
     {
       features.ppr_dscr = true;
-      if (tar)
+
+      /* We don't require the EBB note section to be present in the
+	 core file to select isa207 because these registers could have
+	 been unavailable when the core file was created.  They will
+	 be in the tdep but will show as unavailable.  */
+      if (tar && pmu)
 	features.isa207 = true;
     }
 

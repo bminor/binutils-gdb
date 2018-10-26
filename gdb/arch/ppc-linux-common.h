@@ -33,6 +33,8 @@ struct target_desc;
 #define PPC_LINUX_SIZEOF_PPRREGSET 8
 #define PPC_LINUX_SIZEOF_DSCRREGSET 8
 #define PPC_LINUX_SIZEOF_TARREGSET 8
+#define PPC_LINUX_SIZEOF_EBBREGSET (3*8)
+#define PPC_LINUX_SIZEOF_PMUREGSET (5*8)
 
 /* Check if the hwcap auxv entry indicates that isa205 is supported.  */
 bool ppc_linux_has_isa205 (CORE_ADDR hwcap);

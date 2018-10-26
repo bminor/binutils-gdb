@@ -1,5 +1,15 @@
 2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
+	* configure.srv (powerpc*-*-linux*): Add rs6000/power-ebb.xml and
+	rs6000/power-linux-pmu.xml to srv_xmlfiles.
+	* linux-ppc-low.c (ppc_store_ebbregset, ppc_fill_pmuregset)
+	(ppc_store_pmuregset): New functions.
+	(ppc_regsets): Add entries for ebb and pmu regsets.
+	(ppc_arch_setup): Set isa207 in features struct if the ebb and
+	pmu regsets are available.  Set sizes for these regsets.
+
+2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
 	* configure.srv (ipa_ppc_linux_regobj): Add
 	powerpc-isa207-vsx64l-ipa.o and powerpc-isa207-vsx32l-ipa.o.
 	(powerpc*-*-linux*): Add powerpc-isa207-vsx32l.o and

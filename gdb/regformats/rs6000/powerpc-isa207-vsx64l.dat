@@ -145,3 +145,11 @@ expedite:r1,pc
 64:ppr
 64:dscr
 64:tar
+64:bescr
+64:ebbhr
+64:ebbrr
+64:mmcr0
+64:mmcr2
+64:siar
+64:sdar
+64:sier

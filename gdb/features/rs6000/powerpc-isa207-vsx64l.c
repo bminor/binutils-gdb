@@ -199,5 +199,17 @@ initialize_tdesc_powerpc_isa207_vsx64l (void)
   feature = tdesc_create_feature (result, "org.gnu.gdb.power.tar");
   tdesc_create_reg (feature, "tar", 141, 1, NULL, 64, "uint64");
 
+  feature = tdesc_create_feature (result, "org.gnu.gdb.power.ebb");
+  tdesc_create_reg (feature, "bescr", 142, 0, NULL, 64, "uint64");
+  tdesc_create_reg (feature, "ebbhr", 143, 0, NULL, 64, "uint64");
+  tdesc_create_reg (feature, "ebbrr", 144, 0, NULL, 64, "uint64");
+
+  feature = tdesc_create_feature (result, "org.gnu.gdb.power.linux.pmu");
+  tdesc_create_reg (feature, "mmcr0", 145, 0, NULL, 64, "uint64");
+  tdesc_create_reg (feature, "mmcr2", 146, 0, NULL, 64, "uint64");
+  tdesc_create_reg (feature, "siar", 147, 0, NULL, 64, "uint64");
+  tdesc_create_reg (feature, "sdar", 148, 0, NULL, 64, "uint64");
+  tdesc_create_reg (feature, "sier", 149, 0, NULL, 64, "uint64");
+
   tdesc_powerpc_isa207_vsx64l = result;
 }

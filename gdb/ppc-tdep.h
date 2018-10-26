@@ -265,6 +265,15 @@ struct gdbarch_tdep
     /* Decimal 128 registers.  */
     int ppc_dl0_regnum;		/* First Decimal128 argument register pair.  */
 
+    int have_ebb;
+
+    /* PMU registers.  */
+    int ppc_mmcr0_regnum;
+    int ppc_mmcr2_regnum;
+    int ppc_siar_regnum;
+    int ppc_sdar_regnum;
+    int ppc_sier_regnum;
+
     /* Offset to ABI specific location where link register is saved.  */
     int lr_frame_offset;	
 
@@ -321,11 +330,30 @@ enum {
   PPC_PPR_REGNUM = 172,
   PPC_DSCR_REGNUM = 173,
   PPC_TAR_REGNUM = 174,
+
+  /* EBB registers.  */
+  PPC_BESCR_REGNUM = 175,
+  PPC_EBBHR_REGNUM = 176,
+  PPC_EBBRR_REGNUM = 177,
+
+  /* PMU registers.  */
+  PPC_MMCR0_REGNUM = 178,
+  PPC_MMCR2_REGNUM = 179,
+  PPC_SIAR_REGNUM = 180,
+  PPC_SDAR_REGNUM = 181,
+  PPC_SIER_REGNUM = 182,
+
   PPC_NUM_REGS
 };
 
 /* Big enough to hold the size of the largest register in bytes.  */
 #define PPC_MAX_REGISTER_SIZE	64
+
+#define PPC_IS_EBB_REGNUM(i) \
+	((i) >= PPC_BESCR_REGNUM && (i) <= PPC_EBBRR_REGNUM)
+
+#define PPC_IS_PMU_REGNUM(i) \
+	((i) >= PPC_MMCR0_REGNUM && (i) <= PPC_SIER_REGNUM)
 
 /* An instruction to match.  */
 

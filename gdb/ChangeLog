@@ -1,6 +1,48 @@
 2018-10-26  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
 	    Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
+	* arch/ppc-linux-common.h (PPC_LINUX_SIZEOF_EBBREGSET)
+	(PPC_LINUX_SIZEOF_PMUREGSET): Declare.
+	* nat/ppc-linux.h (PPC_FEATURE2_EBB, NT_PPC_EBB, NT_PPC_PMU):
+	Define if not already defined.
+	* features/rs6000/power-ebb.xml: New file.
+	* features/rs6000/power-linux-pmu.xml: New file.
+	* features/rs6000/powerpc-isa207-vsx32l.xml: Include ebb and pmu
+	features.
+	* features/rs6000/powerpc-isa207-vsx64l.xml: Likewise.
+	* features/rs6000/powerpc-isa207-vsx32l.c: Re-generate.
+	* features/rs6000/powerpc-isa207-vsx64l.c: Re-generate.
+	* regformats/rs6000/powerpc-isa207-vsx32l.dat: Re-generate.
+	* regformats/rs6000/powerpc-isa207-vsx64l.dat: Re-generate.
+	* ppc-linux-nat.c (fetch_register, fetch_ppc_registers): Call
+	fetch_regset with ebb and pmu regsets.
+	(store_register, store_ppc_registers): Call store_regset with ebb
+	and pmu regsets.
+	(ppc_linux_nat_target::read_description): Set isa207 field in the
+	features struct if ebb and pmu are avaiable.
+	* ppc-linux-tdep.c (ppc32_regmap_ebb, ppc32_regmap_pmu)
+	(ppc32_linux_ebbregset, ppc32_linux_pmuregset): New globals.
+	(ppc_linux_iterate_over_regset_sections): Call back with the ebb
+	and pmu regsets.
+	(ppc_linux_core_read_description): Check if the pmu section is
+	present and set isa207 in the features struct.
+	* ppc-linux-tdep.h (ppc32_linux_ebbregset)
+	(ppc32_linux_pmuregset): Declare.
+	* ppc-tdep.h (struct gdbarch_tdep) <ppc_mmcr0_regnum>: New field.
+	<ppc_mmcr2_regnum, ppc_siar_regnum, ppc_sdar_regnum>: New fields.
+	<ppc_sier_regnum>: New field.
+	(enum): <PPC_BESCR_REGNUM, PPC_EBBHR_REGNUM, PPC_EBBRR_REGNUM>:
+	New enum values.
+	<PPC_MMCR0_REGNUM, PPC_MMCR2_REGNUM, PPC_SIAR_REGNUM>: New enum
+	values.
+	<PPC_SDAR_REGNUM, PPC_SIER_REGNUM>: New enum values.
+	(PPC_IS_EBB_REGNUM, PPC_IS_PMU_REGNUM): Define.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Look for and validate the
+	ebb and pmu features.
+
+2018-10-26  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+	    Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
 	* arch/ppc-linux-tdesc.h (tdesc_powerpc_isa207_vsx32l)
 	(tdesc_powerpc_isa207_vsx64l): Declare.
 	* arch/ppc-linux-common.h (PPC_LINUX_SIZEOF_TARREGSET): Define.

@@ -5817,7 +5817,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   enum powerpc_elf_abi elf_abi = POWERPC_ELF_AUTO;
   int have_fpu = 0, have_spe = 0, have_mq = 0, have_altivec = 0;
   int have_dfp = 0, have_vsx = 0, have_ppr = 0, have_dscr = 0;
-  int have_tar = 0;
+  int have_tar = 0, have_ebb = 0, have_pmu = 0;
   int tdesc_wordsize = -1;
   const struct target_desc *tdesc = info.target_desc;
   struct tdesc_arch_data *tdesc_data = NULL;
@@ -6157,6 +6157,64 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	}
       else
 	have_tar = 0;
+
+      /* Event-based Branching Registers.  */
+      feature = tdesc_find_feature (tdesc,
+				    "org.gnu.gdb.power.ebb");
+      if (feature != NULL)
+	{
+	  static const char *const ebb_regs[] = {
+	    "bescr", "ebbhr", "ebbrr"
+	  };
+
+	  valid_p = 1;
+	  for (i = 0; i < ARRAY_SIZE (ebb_regs); i++)
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+						PPC_BESCR_REGNUM + i,
+						ebb_regs[i]);
+	  if (!valid_p)
+	    {
+	      tdesc_data_cleanup (tdesc_data);
+	      return NULL;
+	    }
+	  have_ebb = 1;
+	}
+      else
+	have_ebb = 0;
+
+      /* Subset of the ISA 2.07 Performance Monitor Registers provided
+	 by Linux.  */
+      feature = tdesc_find_feature (tdesc,
+				    "org.gnu.gdb.power.linux.pmu");
+      if (feature != NULL)
+	{
+	  valid_p = 1;
+
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					      PPC_MMCR0_REGNUM,
+					      "mmcr0");
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					      PPC_MMCR2_REGNUM,
+					      "mmcr2");
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					      PPC_SIAR_REGNUM,
+					      "siar");
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					      PPC_SDAR_REGNUM,
+					      "sdar");
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					      PPC_SIER_REGNUM,
+					      "sier");
+
+	  if (!valid_p)
+	    {
+	      tdesc_data_cleanup (tdesc_data);
+	      return NULL;
+	    }
+	  have_pmu = 1;
+	}
+      else
+	have_pmu = 0;
     }
 
   /* If we have a 64-bit binary on a 32-bit target, complain.  Also
@@ -6354,6 +6412,20 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->ppc_ppr_regnum = have_ppr ? PPC_PPR_REGNUM : -1;
   tdep->ppc_dscr_regnum = have_dscr ? PPC_DSCR_REGNUM : -1;
   tdep->ppc_tar_regnum = have_tar ? PPC_TAR_REGNUM : -1;
+  tdep->have_ebb = have_ebb;
+
+  /* If additional pmu registers are added, care must be taken when
+     setting new fields in the tdep below, to maintain compatibility
+     with features that only provide some of the registers.  Currently
+     gdb access to the pmu registers is only supported in linux, and
+     linux only provides a subset of the pmu registers defined in the
+     architecture.  */
+
+  tdep->ppc_mmcr0_regnum = have_pmu ? PPC_MMCR0_REGNUM : -1;
+  tdep->ppc_mmcr2_regnum = have_pmu ? PPC_MMCR2_REGNUM : -1;
+  tdep->ppc_siar_regnum = have_pmu ? PPC_SIAR_REGNUM : -1;
+  tdep->ppc_sdar_regnum = have_pmu ? PPC_SDAR_REGNUM : -1;
+  tdep->ppc_sier_regnum = have_pmu ? PPC_SIER_REGNUM : -1;
 
   set_gdbarch_pc_regnum (gdbarch, PPC_PC_REGNUM);
   set_gdbarch_sp_regnum (gdbarch, PPC_R0_REGNUM + 1);

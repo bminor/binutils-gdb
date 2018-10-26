@@ -48,5 +48,7 @@ int ppc_linux_trap_reg_p (struct gdbarch *gdbarch);
 extern const struct regset ppc32_linux_pprregset;
 extern const struct regset ppc32_linux_dscrregset;
 extern const struct regset ppc32_linux_tarregset;
+extern const struct regset ppc32_linux_ebbregset;
+extern const struct regset ppc32_linux_pmuregset;
 
 #endif /* PPC_LINUX_TDEP_H */

@@ -60,6 +60,9 @@
 #ifndef PPC_FEATURE2_TAR
 #define PPC_FEATURE2_TAR 0x04000000
 #endif
+#ifndef PPC_FEATURE2_EBB
+#define PPC_FEATURE2_EBB 0x10000000
+#endif
 
 /* Glibc's headers don't define PTRACE_GETVRREGS so we cannot use a
    configure time check.  Some older glibc's (for instance 2.2.1)
@@ -104,6 +107,16 @@
 /* Data Stream Control Register.  */
 #ifndef NT_PPC_DSCR
 #define NT_PPC_DSCR 0x105
+#endif
+
+/* Event Based Branch Registers.  */
+#ifndef NT_PPC_EBB
+#define NT_PPC_EBB 0x106
+#endif
+
+/* Performance Monitor Registers.  */
+#ifndef NT_PPC_PMU
+#define NT_PPC_PMU 0x107
 #endif
 
 /* Return the wordsize of the target, either 4 or 8 bytes.  */
