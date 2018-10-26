@@ -1,3 +1,9 @@
+2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* linux-tdep.c (linux_collect_regset_section_cb): Use
+	std::vector<gdb_byte> instead of char * and malloc for buf.
+	Remove xfree.
+
 2018-10-26  Sangamesh Mallayya <sangamesh.swamy@in.ibm.com>
 
 	* xcoffread.c (read_xcoff_symtab): Pass deduced language to

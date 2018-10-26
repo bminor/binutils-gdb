@@ -1584,7 +1584,6 @@ linux_collect_regset_section_cb (const char *sect_name, int supply_size,
 				 int collect_size, const struct regset *regset,
 				 const char *human_name, void *cb_data)
 {
-  char *buf;
   struct linux_collect_regset_section_cb_data *data
     = (struct linux_collect_regset_section_cb_data *) cb_data;
   bool variable_size_section = (regset != NULL
@@ -1598,19 +1597,22 @@ linux_collect_regset_section_cb (const char *sect_name, int supply_size,
 
   gdb_assert (regset && regset->collect_regset);
 
-  buf = (char *) xmalloc (collect_size);
-  regset->collect_regset (regset, data->regcache, -1, buf, collect_size);
+  /* This is intentionally zero-initialized by using std::vector, so
+     that any padding bytes in the core file will show as 0.  */
+  std::vector<gdb_byte> buf (collect_size);
+
+  regset->collect_regset (regset, data->regcache, -1, buf.data (),
+			  collect_size);
 
   /* PRSTATUS still needs to be treated specially.  */
   if (strcmp (sect_name, ".reg") == 0)
     data->note_data = (char *) elfcore_write_prstatus
       (data->obfd, data->note_data, data->note_size, data->lwp,
-       gdb_signal_to_host (data->stop_signal), buf);
+       gdb_signal_to_host (data->stop_signal), buf.data ());
   else
     data->note_data = (char *) elfcore_write_register_note
       (data->obfd, data->note_data, data->note_size,
-       sect_name, buf, collect_size);
-  xfree (buf);
+       sect_name, buf.data (), collect_size);
 
   if (data->note_data == NULL)
     data->abort_iteration = 1;
