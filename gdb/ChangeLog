@@ -1,3 +1,9 @@
+2018-12-19  Sangamesh Mallayya <sangamesh.swamy@in.ibm.com>
+
+	PR gdb/23999:
+	* xcoffread.c (read_xcoff_symtab): Pass deduced language to
+	symtab_start instead of always using language_unknown.
+
 2018-11-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Keith Seitz  <keiths@redhat.com>
 	    Tom Tromey  <tom@tromey.com>
