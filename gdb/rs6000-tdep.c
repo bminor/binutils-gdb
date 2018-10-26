@@ -6042,7 +6042,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
 						PPC_VSR0_UPPER_REGNUM + i,
 						vsx_regs[i]);
-	  if (!valid_p)
+
+	  if (!valid_p || !have_fpu || !have_altivec)
 	    {
 	      tdesc_data_cleanup (tdesc_data);
 	      return NULL;
