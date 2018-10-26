@@ -349,9 +349,7 @@ riscv_has_feature (struct gdbarch *gdbarch, char feature)
   return (misa & (1 << (feature - 'A'))) != 0;
 }
 
-/* Return the width in bytes  of the general purpose registers for GDBARCH.
-   Possible return values are 4, 8, or 16 for RiscV variants RV32, RV64, or
-   RV128.  */
+/* See riscv-tdep.h.  */
 
 int
 riscv_isa_xlen (struct gdbarch *gdbarch)
@@ -370,12 +368,9 @@ riscv_isa_xlen (struct gdbarch *gdbarch)
     }
 }
 
-/* Return the width in bytes of the floating point registers for GDBARCH.
-   If this architecture has no floating point registers, then return 0.
-   Possible values are 4, 8, or 16 for depending on which of single, double
-   or quad floating point support is available.  */
+/* See riscv-tdep.h.  */
 
-static int
+int
 riscv_isa_flen (struct gdbarch *gdbarch)
 {
   if (riscv_has_feature (gdbarch, 'Q'))

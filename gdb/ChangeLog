@@ -1,3 +1,10 @@
+2018-10-26  Jim Wilson  <jimw@sifive.com>
+
+	* riscv-tdep.c (riscv_isa_xlen): Refer to riscv-tdep.h comment.
+	(riscv_isa_flen): Likewise.  Drop static.
+	* riscv-tdep.h (riscv_isa_xlen): Move riscv-tdep.c comment to here.
+	(riscv_isa_flen): Likewise.  Declare.
+
 2018-10-26  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
 	    Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 

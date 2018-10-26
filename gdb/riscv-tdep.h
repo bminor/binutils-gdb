@@ -84,8 +84,17 @@ struct gdbarch_tdep
   struct type *riscv_fpreg_q_type;
 };
 
-/* Return the width in bytes of the general purpose registers for GDBARCH.  */
+
+/* Return the width in bytes  of the general purpose registers for GDBARCH.
+   Possible return values are 4, 8, or 16 for RiscV variants RV32, RV64, or
+   RV128.  */
 extern int riscv_isa_xlen (struct gdbarch *gdbarch);
+
+/* Return the width in bytes of the floating point registers for GDBARCH.
+   If this architecture has no floating point registers, then return 0.
+   Possible values are 4, 8, or 16 for depending on which of single, double
+   or quad floating point support is available.  */
+extern int riscv_isa_flen (struct gdbarch *gdbarch);
 
 /* Single step based on where the current instruction will take us.  */
 extern std::vector<CORE_ADDR> riscv_software_single_step
