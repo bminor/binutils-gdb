@@ -1521,6 +1521,7 @@ fbsd_print_auxv_entry (struct gdbarch *gdbarch, struct ui_file *file,
       TAG (STACKPROT, _("Initial stack protection"), AUXV_FORMAT_HEX);
       TAG (EHDRFLAGS, _("ELF header e_flags"), AUXV_FORMAT_HEX);
       TAG (HWCAP, _("Machine-dependent CPU capability hints"), AUXV_FORMAT_HEX);
+      TAG (HWCAP2, _("Extension of AT_HWCAP"), AUXV_FORMAT_HEX);
     default:
       default_print_auxv_entry (gdbarch, file, type, val);
       return;

@@ -1,3 +1,7 @@
+2018-10-26  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf/common.h (AT_FREEBSD_HWCAP2): Define.
+
 2018-10-09  Sudakshina Das  <sudi.das@arm.com>
 
 	* opcode/aarch64.h (AARCH64_FEATURE_SSBS): New.
