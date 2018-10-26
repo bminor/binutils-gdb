@@ -75,6 +75,7 @@ WHICH = aarch64 \
 	rs6000/powerpc-isa205-vsx32l rs6000/powerpc-isa205-vsx64l \
 	rs6000/powerpc-isa205-ppr-dscr-vsx32l \
 	rs6000/powerpc-isa205-ppr-dscr-vsx64l \
+	rs6000/powerpc-isa207-vsx32l rs6000/powerpc-isa207-vsx64l \
 	s390-linux32 s390-linux64 s390x-linux64 \
 	s390-linux32v1 s390-linux64v1 s390x-linux64v1 \
 	s390-linux32v2 s390-linux64v2 s390x-linux64v2 \
@@ -171,6 +172,8 @@ XMLTOC = \
 	rs6000/powerpc-isa205-vsx64l.xml \
 	rs6000/powerpc-isa205-ppr-dscr-vsx32l.xml \
 	rs6000/powerpc-isa205-ppr-dscr-vsx64l.xml \
+	rs6000/powerpc-isa207-vsx32l.xml \
+	rs6000/powerpc-isa207-vsx64l.xml \
 	rs6000/powerpc-vsx32.xml \
 	rs6000/powerpc-vsx32l.xml \
 	rs6000/powerpc-vsx64.xml \

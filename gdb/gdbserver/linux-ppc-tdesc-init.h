@@ -30,6 +30,7 @@ enum ppc_linux_tdesc {
   PPC_TDESC_ISA205_ALTIVEC,
   PPC_TDESC_ISA205_VSX,
   PPC_TDESC_ISA205_PPR_DSCR_VSX,
+  PPC_TDESC_ISA207_VSX,
   PPC_TDESC_E500,
 };
 
@@ -58,6 +59,9 @@ void init_registers_powerpc_isa205_vsx32l (void);
 
 /* Defined in auto-generated file powerpc-isa205-ppr-dscr-vsx32l.c.  */
 void init_registers_powerpc_isa205_ppr_dscr_vsx32l (void);
+
+/* Defined in auto-generated file powerpc-isa207-vsx32l.c.  */
+void init_registers_powerpc_isa207_vsx32l (void);
 
 /* Defined in auto-generated file powerpc-e500l.c.  */
 void init_registers_powerpc_e500l (void);
@@ -89,5 +93,8 @@ void init_registers_powerpc_isa205_vsx64l (void);
 
 /* Defined in auto-generated file powerpc-isa205-ppr-dscr-vsx64l.c.  */
 void init_registers_powerpc_isa205_ppr_dscr_vsx64l (void);
+
+/* Defined in auto-generated file powerpc-isa207-vsx64l.c.  */
+void init_registers_powerpc_isa207_vsx64l (void);
 
 #endif

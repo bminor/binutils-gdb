@@ -54,6 +54,12 @@
 #ifndef PPC_FEATURE2_DSCR
 #define PPC_FEATURE2_DSCR 0x20000000
 #endif
+#ifndef PPC_FEATURE2_ARCH_2_07
+#define PPC_FEATURE2_ARCH_2_07 0x80000000
+#endif
+#ifndef PPC_FEATURE2_TAR
+#define PPC_FEATURE2_TAR 0x04000000
+#endif
 
 /* Glibc's headers don't define PTRACE_GETVRREGS so we cannot use a
    configure time check.  Some older glibc's (for instance 2.2.1)
@@ -83,6 +89,11 @@
 #ifndef PTRACE_GETEVRREGS
 #define PTRACE_GETEVRREGS 20
 #define PTRACE_SETEVRREGS 21
+#endif
+
+/* Target Address Register.  */
+#ifndef NT_PPC_TAR
+#define NT_PPC_TAR 0x103
 #endif
 
 /* Program Priority Register.  */

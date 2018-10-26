@@ -1,5 +1,10 @@
 2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
+	* gdb.texinfo (PowerPC Features): Describe new feature
+	"org.gnu.gdb.power.tar".
+
+2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
 	* gdb.texinfo (PowerPC Features): Describe new features
 	"org.gnu.gdb.power.ppr" and "org.gnu.gdb.power.dscr".
 

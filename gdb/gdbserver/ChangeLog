@@ -1,3 +1,28 @@
+2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* configure.srv (ipa_ppc_linux_regobj): Add
+	powerpc-isa207-vsx64l-ipa.o and powerpc-isa207-vsx32l-ipa.o.
+	(powerpc*-*-linux*): Add powerpc-isa207-vsx32l.o and
+	powerpc-isa207-vsx64l.o to srv_regobj, add rs6000/power-tar.xml,
+	rs6000/powerpc-isa207-vsx32l.xml, and
+	rs6000/powerpc-isa207-vsx64l.xml to srv_xmlfiles.
+	* linux-ppc-tdesc-init.h (enum ppc_linux_tdesc)
+	<PPC_TDESC_ISA207_VSX>: New enum value.
+	(init_registers_powerpc_isa207_vsx32l): Declare.
+	(init_registers_powerpc_isa207_vsx64l): Declare.
+	* linux-ppc-low.c (ppc_fill_tarregset): New function.
+	(ppc_store_tarregset): New function.
+	(ppc_regsets): Add entry for the TAR regset.
+	(ppc_arch_setup): Set isa207 in features struct when needed.  Set
+	size for the TAR regsets.
+	(ppc_get_ipa_tdesc_idx): Return PPC_TDESC_ISA207_VSX.
+	(initialize_low_arch): Call init_registers_powerpc_isa207_vsx32l
+	and init_registers_powerpc_isa207_vsx64l.
+	* linux-ppc-ipa.c (get_ipa_tdesc): Handle PPC_TDESC_ISA207_VSX.
+	(initialize_low_tracepoint): Call
+	init_registers_powerpc_isa207_vsx32l and
+	init_registers_powerpc_isa207_vsx64l.
+
 2018-10-26  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
 	    Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 

@@ -525,6 +525,26 @@ ppc_store_dscrregset (struct regcache *regcache, const void *buf)
   supply_register_by_name (regcache, "dscr", dscr);
 }
 
+/* Target Address Register regset fill function.  */
+
+static void
+ppc_fill_tarregset (struct regcache *regcache, void *buf)
+{
+  char *tar = (char *) buf;
+
+  collect_register_by_name (regcache, "tar", tar);
+}
+
+/* Target Address Register regset store function.  */
+
+static void
+ppc_store_tarregset (struct regcache *regcache, const void *buf)
+{
+  const char *tar = (const char *) buf;
+
+  supply_register_by_name (regcache, "tar", tar);
+}
+
 static void
 ppc_fill_vsxregset (struct regcache *regcache, void *buf)
 {
@@ -634,6 +654,8 @@ static struct regset_info ppc_regsets[] = {
      fetch them every time, but still fall back to PTRACE_PEEKUSER for the
      general registers.  Some kernels support these, but not the newer
      PPC_PTRACE_GETREGS.  */
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_TAR, 0, EXTENDED_REGS,
+    ppc_fill_tarregset, ppc_store_tarregset },
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_PPR, 0, EXTENDED_REGS,
     ppc_fill_pprregset, ppc_store_pprregset },
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PPC_DSCR, 0, EXTENDED_REGS,
@@ -708,7 +730,14 @@ ppc_arch_setup (void)
   if ((ppc_hwcap2 & PPC_FEATURE2_DSCR)
       && ppc_check_regset (tid, NT_PPC_DSCR, PPC_LINUX_SIZEOF_DSCRREGSET)
       && ppc_check_regset (tid, NT_PPC_PPR, PPC_LINUX_SIZEOF_PPRREGSET))
-    features.ppr_dscr = true;
+    {
+      features.ppr_dscr = true;
+      if ((ppc_hwcap2 & PPC_FEATURE2_ARCH_2_07)
+	  && (ppc_hwcap2 & PPC_FEATURE2_TAR)
+	  && ppc_check_regset (tid, NT_PPC_TAR,
+			       PPC_LINUX_SIZEOF_TARREGSET))
+	features.isa207 = true;
+    }
 
   if (ppc_hwcap & PPC_FEATURE_CELL)
     features.cell = true;
@@ -764,6 +793,10 @@ ppc_arch_setup (void)
 	  case NT_PPC_DSCR:
 	    regset->size = (features.ppr_dscr ?
 			    PPC_LINUX_SIZEOF_DSCRREGSET : 0);
+	    break;
+	  case NT_PPC_TAR:
+	    regset->size = (features.isa207 ?
+			    PPC_LINUX_SIZEOF_TARREGSET : 0);
 	    break;
 	  default:
 	    break;
@@ -3146,6 +3179,8 @@ ppc_get_ipa_tdesc_idx (void)
     return PPC_TDESC_ISA205_VSX;
   if (tdesc == tdesc_powerpc_isa205_ppr_dscr_vsx64l)
     return PPC_TDESC_ISA205_PPR_DSCR_VSX;
+  if (tdesc == tdesc_powerpc_isa207_vsx64l)
+    return PPC_TDESC_ISA207_VSX;
 #endif
 
   if (tdesc == tdesc_powerpc_32l)
@@ -3164,6 +3199,8 @@ ppc_get_ipa_tdesc_idx (void)
     return PPC_TDESC_ISA205_VSX;
   if (tdesc == tdesc_powerpc_isa205_ppr_dscr_vsx32l)
     return PPC_TDESC_ISA205_PPR_DSCR_VSX;
+  if (tdesc == tdesc_powerpc_isa207_vsx32l)
+    return PPC_TDESC_ISA207_VSX;
   if (tdesc == tdesc_powerpc_e500l)
     return PPC_TDESC_E500;
 
@@ -3223,6 +3260,7 @@ initialize_low_arch (void)
   init_registers_powerpc_isa205_altivec32l ();
   init_registers_powerpc_isa205_vsx32l ();
   init_registers_powerpc_isa205_ppr_dscr_vsx32l ();
+  init_registers_powerpc_isa207_vsx32l ();
   init_registers_powerpc_e500l ();
 #if __powerpc64__
   init_registers_powerpc_64l ();
@@ -3233,6 +3271,7 @@ initialize_low_arch (void)
   init_registers_powerpc_isa205_altivec64l ();
   init_registers_powerpc_isa205_vsx64l ();
   init_registers_powerpc_isa205_ppr_dscr_vsx64l ();
+  init_registers_powerpc_isa207_vsx64l ();
 #endif
 
   initialize_regsets_info (&ppc_regsets_info);

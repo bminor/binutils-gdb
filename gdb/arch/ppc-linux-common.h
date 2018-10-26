@@ -32,6 +32,7 @@ struct target_desc;
 #define PPC_LINUX_SIZEOF_VSXREGSET 256
 #define PPC_LINUX_SIZEOF_PPRREGSET 8
 #define PPC_LINUX_SIZEOF_DSCRREGSET 8
+#define PPC_LINUX_SIZEOF_TARREGSET 8
 
 /* Check if the hwcap auxv entry indicates that isa205 is supported.  */
 bool ppc_linux_has_isa205 (CORE_ADDR hwcap);
@@ -44,12 +45,14 @@ struct ppc_linux_features
   bool vsx;
   bool isa205;
   bool ppr_dscr;
+  bool isa207;
   bool cell;
 };
 
 /* Base value for ppc_linux_features variables.  */
 const struct ppc_linux_features ppc_linux_no_features = {
   0,
+  false,
   false,
   false,
   false,

@@ -657,6 +657,15 @@ fetch_register (struct regcache *regcache, int tid, int regno)
 		    &ppc32_linux_pprregset);
       return;
     }
+  else if (regno == PPC_TAR_REGNUM)
+    {
+      gdb_assert (tdep->ppc_tar_regnum != -1);
+
+      fetch_regset (regcache, tid, NT_PPC_TAR,
+		    PPC_LINUX_SIZEOF_TARREGSET,
+		    &ppc32_linux_tarregset);
+      return;
+    }
 
   if (regaddr == -1)
     {
@@ -858,6 +867,10 @@ fetch_ppc_registers (struct regcache *regcache, int tid)
     fetch_regset (regcache, tid, NT_PPC_DSCR,
 		  PPC_LINUX_SIZEOF_DSCRREGSET,
 		  &ppc32_linux_dscrregset);
+  if (tdep->ppc_tar_regnum != -1)
+    fetch_regset (regcache, tid, NT_PPC_TAR,
+		  PPC_LINUX_SIZEOF_TARREGSET,
+		  &ppc32_linux_tarregset);
 }
 
 /* Fetch registers from the child process.  Fetch all registers if
@@ -1054,6 +1067,15 @@ store_register (const struct regcache *regcache, int tid, int regno)
       store_regset (regcache, tid, regno, NT_PPC_PPR,
 		    PPC_LINUX_SIZEOF_PPRREGSET,
 		    &ppc32_linux_pprregset);
+      return;
+    }
+  else if (regno == PPC_TAR_REGNUM)
+    {
+      gdb_assert (tdep->ppc_tar_regnum != -1);
+
+      store_regset (regcache, tid, regno, NT_PPC_TAR,
+		    PPC_LINUX_SIZEOF_TARREGSET,
+		    &ppc32_linux_tarregset);
       return;
     }
 
@@ -1275,6 +1297,10 @@ store_ppc_registers (const struct regcache *regcache, int tid)
     store_regset (regcache, tid, -1, NT_PPC_DSCR,
 		  PPC_LINUX_SIZEOF_DSCRREGSET,
 		  &ppc32_linux_dscrregset);
+  if (tdep->ppc_tar_regnum != -1)
+    store_regset (regcache, tid, -1, NT_PPC_TAR,
+		  PPC_LINUX_SIZEOF_TARREGSET,
+		  &ppc32_linux_tarregset);
 }
 
 /* Fetch the AT_HWCAP entry from the aux vector.  */
@@ -2399,7 +2425,13 @@ ppc_linux_nat_target::read_description ()
   if ((hwcap2 & PPC_FEATURE2_DSCR)
       && check_regset (tid, NT_PPC_PPR, PPC_LINUX_SIZEOF_PPRREGSET)
       && check_regset (tid, NT_PPC_DSCR, PPC_LINUX_SIZEOF_DSCRREGSET))
-    features.ppr_dscr = true;
+    {
+      features.ppr_dscr = true;
+      if ((hwcap2 & PPC_FEATURE2_ARCH_2_07)
+	  && (hwcap2 & PPC_FEATURE2_TAR)
+	  && check_regset (tid, NT_PPC_TAR, PPC_LINUX_SIZEOF_TARREGSET))
+	features.isa207 = true;
+    }
 
   return ppc_linux_match_description (features);
 }

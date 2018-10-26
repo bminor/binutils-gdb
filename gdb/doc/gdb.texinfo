@@ -43198,6 +43198,9 @@ contain the 64-bit register @samp{ppr}.
 The @samp{org.gnu.gdb.power.dscr} feature is optional.  It should
 contain the 64-bit register @samp{dscr}.
 
+The @samp{org.gnu.gdb.power.tar} feature is optional.  It should
+contain the 64-bit register @samp{tar}.
+
 @node S/390 and System z Features
 @subsection S/390 and System z Features
 @cindex target descriptions, S/390 features

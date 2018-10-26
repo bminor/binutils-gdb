@@ -4645,6 +4645,10 @@ ppc_process_record_op31 (struct gdbarch *gdbarch, struct regcache *regcache,
 	case 256:		/* VRSAVE */
 	  record_full_arch_list_add_reg (regcache, tdep->ppc_vrsave_regnum);
 	  return 0;
+	case 815:		/* TAR */
+	  if (tdep->ppc_tar_regnum >= 0)
+	    record_full_arch_list_add_reg (regcache, tdep->ppc_tar_regnum);
+	  return 0;
 	case 896:
 	case 898:		/* PPR */
 	  if (tdep->ppc_ppr_regnum >= 0)
@@ -5813,6 +5817,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   enum powerpc_elf_abi elf_abi = POWERPC_ELF_AUTO;
   int have_fpu = 0, have_spe = 0, have_mq = 0, have_altivec = 0;
   int have_dfp = 0, have_vsx = 0, have_ppr = 0, have_dscr = 0;
+  int have_tar = 0;
   int tdesc_wordsize = -1;
   const struct target_desc *tdesc = info.target_desc;
   struct tdesc_arch_data *tdesc_data = NULL;
@@ -6133,6 +6138,25 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	}
       else
 	have_dscr = 0;
+
+      /* Target Address Register.  */
+      feature = tdesc_find_feature (tdesc,
+				    "org.gnu.gdb.power.tar");
+      if (feature != NULL)
+	{
+	  valid_p = 1;
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+					      PPC_TAR_REGNUM, "tar");
+
+	  if (!valid_p)
+	    {
+	      tdesc_data_cleanup (tdesc_data);
+	      return NULL;
+	    }
+	  have_tar = 1;
+	}
+      else
+	have_tar = 0;
     }
 
   /* If we have a 64-bit binary on a 32-bit target, complain.  Also
@@ -6329,6 +6353,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->ppc_spefscr_regnum = have_spe ? PPC_SPE_FSCR_REGNUM : -1;
   tdep->ppc_ppr_regnum = have_ppr ? PPC_PPR_REGNUM : -1;
   tdep->ppc_dscr_regnum = have_dscr ? PPC_DSCR_REGNUM : -1;
+  tdep->ppc_tar_regnum = have_tar ? PPC_TAR_REGNUM : -1;
 
   set_gdbarch_pc_regnum (gdbarch, PPC_PC_REGNUM);
   set_gdbarch_sp_regnum (gdbarch, PPC_R0_REGNUM + 1);
