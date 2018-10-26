@@ -1,5 +1,13 @@
 2018-10-26  Jim Wilson  <jimw@sifive.com>
 
+	* riscv-linux-tdep.c: Include tramp-frame.h and trad-frame.h.
+	(riscv_linux_sigframe_init): Declare.
+	(RISCV_INST_LI_A7_SIGRETURN, RISCV_INT_ECALL): New.
+	(riscv_linux_sigframe): New.
+	(SIGFRAME_SIGINFO_SIZE, UCONTEXT_MCONTEXT_OFFSET): New.
+	(riscv_linux_sigframe_init): Define.
+	(riscv_linux_init_abi): Call tramp_frame_prepend_unwinder.
+
 	* riscv-tdep.c (riscv_isa_xlen): Refer to riscv-tdep.h comment.
 	(riscv_isa_flen): Likewise.  Drop static.
 	* riscv-tdep.h (riscv_isa_xlen): Move riscv-tdep.c comment to here.

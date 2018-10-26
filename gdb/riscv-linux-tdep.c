@@ -23,6 +23,8 @@
 #include "linux-tdep.h"
 #include "solib-svr4.h"
 #include "regset.h"
+#include "tramp-frame.h"
+#include "trad-frame.h"
 
 /* Define the general register mapping.  The kernel puts the PC at offset 0,
    gdb puts it at offset 32.  Register x0 is always 0 and can be ignored.
@@ -56,6 +58,82 @@ riscv_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
   /* TODO: Add FP register support.  */
 }
 
+/* Signal trampoline support.  */
+
+static void riscv_linux_sigframe_init (const struct tramp_frame *self,
+				       struct frame_info *this_frame,
+				       struct trad_frame_cache *this_cache,
+				       CORE_ADDR func);
+
+#define RISCV_INST_LI_A7_SIGRETURN	0x08b00893
+#define RISCV_INST_ECALL		0x00000073
+
+static const struct tramp_frame riscv_linux_sigframe = {
+  SIGTRAMP_FRAME,
+  4,
+  {
+    { RISCV_INST_LI_A7_SIGRETURN, ULONGEST_MAX },
+    { RISCV_INST_ECALL, ULONGEST_MAX },
+    { TRAMP_SENTINEL_INSN }
+  },
+  riscv_linux_sigframe_init,
+  NULL
+};
+
+/* Runtime signal frames look like this:
+   struct rt_sigframe {
+     struct siginfo info;
+     struct ucontext uc;
+   };
+
+   struct ucontext {
+     unsigned long __uc_flags;
+     struct ucontext *uclink;
+     stack_t uc_stack;
+     sigset_t uc_sigmask;
+     char __glibc_reserved[1024 / 8 - sizeof (sigset_t)];
+     mcontext_t uc_mcontext;
+   }; */
+
+#define SIGFRAME_SIGINFO_SIZE		128
+#define UCONTEXT_MCONTEXT_OFFSET	176
+
+static void
+riscv_linux_sigframe_init (const struct tramp_frame *self,
+			   struct frame_info *this_frame,
+			   struct trad_frame_cache *this_cache,
+			   CORE_ADDR func)
+{
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  int xlen = riscv_isa_xlen (gdbarch);
+  int flen = riscv_isa_flen (gdbarch);
+  CORE_ADDR frame_sp = get_frame_sp (this_frame);
+  CORE_ADDR mcontext_base;
+  CORE_ADDR regs_base;
+
+  mcontext_base = frame_sp + SIGFRAME_SIGINFO_SIZE + UCONTEXT_MCONTEXT_OFFSET;
+
+  /* Handle the integer registers.  The first one is PC, followed by x1
+     through x31.  */
+  regs_base = mcontext_base;
+  trad_frame_set_reg_addr (this_cache, RISCV_PC_REGNUM, regs_base);
+  for (int i = 1; i < 32; i++)
+    trad_frame_set_reg_addr (this_cache, RISCV_ZERO_REGNUM + i,
+			     regs_base + (i * xlen));
+
+  /* Handle the FP registers.  First comes the 32 FP registers, followed by
+     fcsr.  */
+  regs_base += 32 * xlen;
+  for (int i = 0; i < 32; i++)
+    trad_frame_set_reg_addr (this_cache, RISCV_FIRST_FP_REGNUM + i,
+			     regs_base + (i * flen));
+  regs_base += 32 * flen;
+  trad_frame_set_reg_addr (this_cache, RISCV_CSR_FCSR_REGNUM, regs_base);
+
+  /* Choice of the bottom of the sigframe is somewhat arbitrary.  */
+  trad_frame_set_id (this_cache, frame_id_build (frame_sp, func));
+}
+
 /* Initialize RISC-V Linux ABI info.  */
 
 static void
@@ -82,6 +160,8 @@ riscv_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_iterate_over_regset_sections
     (gdbarch, riscv_linux_iterate_over_regset_sections);
+
+  tramp_frame_prepend_unwinder (gdbarch, &riscv_linux_sigframe);
 }
 
 /* Initialize RISC-V Linux target support.  */
