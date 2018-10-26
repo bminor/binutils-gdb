@@ -51,6 +51,9 @@
 #ifndef PPC_FEATURE_HAS_SPE
 #define PPC_FEATURE_HAS_SPE 0x00800000
 #endif
+#ifndef PPC_FEATURE2_DSCR
+#define PPC_FEATURE2_DSCR 0x20000000
+#endif
 
 /* Glibc's headers don't define PTRACE_GETVRREGS so we cannot use a
    configure time check.  Some older glibc's (for instance 2.2.1)
@@ -80,6 +83,16 @@
 #ifndef PTRACE_GETEVRREGS
 #define PTRACE_GETEVRREGS 20
 #define PTRACE_SETEVRREGS 21
+#endif
+
+/* Program Priority Register.  */
+#ifndef NT_PPC_PPR
+#define NT_PPC_PPR 0x104
+#endif
+
+/* Data Stream Control Register.  */
+#ifndef NT_PPC_DSCR
+#define NT_PPC_DSCR 0x105
 #endif
 
 /* Return the wordsize of the target, either 4 or 8 bytes.  */

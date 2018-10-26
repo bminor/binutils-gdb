@@ -29,6 +29,7 @@ extern struct target_desc *tdesc_powerpc_vsx32l;
 extern struct target_desc *tdesc_powerpc_isa205_32l;
 extern struct target_desc *tdesc_powerpc_isa205_altivec32l;
 extern struct target_desc *tdesc_powerpc_isa205_vsx32l;
+extern struct target_desc *tdesc_powerpc_isa205_ppr_dscr_vsx32l;
 extern struct target_desc *tdesc_powerpc_e500l;
 
 extern struct target_desc *tdesc_powerpc_64l;
@@ -38,5 +39,6 @@ extern struct target_desc *tdesc_powerpc_vsx64l;
 extern struct target_desc *tdesc_powerpc_isa205_64l;
 extern struct target_desc *tdesc_powerpc_isa205_altivec64l;
 extern struct target_desc *tdesc_powerpc_isa205_vsx64l;
+extern struct target_desc *tdesc_powerpc_isa205_ppr_dscr_vsx64l;
 
 #endif /* ARCH_PPC_LINUX_TDESC_H */

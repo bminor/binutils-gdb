@@ -43192,6 +43192,12 @@ contain registers @samp{ev0h} through @samp{ev31h}, @samp{acc}, and
 these to present registers @samp{ev0} through @samp{ev31} to the
 user.
 
+The @samp{org.gnu.gdb.power.ppr} feature is optional.  It should
+contain the 64-bit register @samp{ppr}.
+
+The @samp{org.gnu.gdb.power.dscr} feature is optional.  It should
+contain the 64-bit register @samp{dscr}.
+
 @node S/390 and System z Features
 @subsection S/390 and System z Features
 @cindex target descriptions, S/390 features

@@ -1,3 +1,36 @@
+2018-10-26  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+	    Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* configure.srv (ipa_ppc_linux_regobj): Add
+	powerpc-isa205-ppr-dscr-vsx32l-ipa.o and
+	powerpc-isa205-ppr-dscr-vsx64l-ipa.o.
+	(powerpc*-*-linux*): Add powerpc-isa205-ppr-dscr-vsx32l.o and
+	powerpc-isa205-ppr-dscr-vsx64l.o to srv_regobj, add
+	rs6000/power-dscr.xml, rs6000/power-ppr.xml,
+	rs6000/powerpc-isa205-ppr-dscr-vsx32l.xml and
+	rs6000/powerpc-isa205-ppr-dscr-vsx64l.xml to srv_xmlfiles.
+	* linux-ppc-tdesc-init.h (enum ppc_linux_tdesc)
+	<PPC_TDESC_ISA205_PPR_DSCR_VSX>: New enum value.
+	(init_registers_powerpc_isa205_ppr_dscr_vsx32l)
+	(init_registers_powerpc_isa205_ppr_dscr_vsx64l): Declare.
+	* linux-ppc-low.c: Include "elf/common.h" and <sys/uio.h>.
+	(ppc_hwcap): Add comment.
+	(ppc_hwcap2): New global.
+	(ppc_check_regset, ppc_fill_pprregset, ppc_store_pprregset)
+	(ppc_fill_dscrregset, ppc_store_dscrregset): New functions.
+	(ppc_regsets): Add entries for the DSCR and PPR regsets.
+	(ppc_arch_setup): Get AT_HWCAP2.  Set ppr_dscr in features struct
+	when needed.  Set sizes for the the DSCR and PPR regsets.
+	(ppc_get_ipa_tdesc_idx): Return PPC_TDESC_ISA205_PPR_DSCR_VSX.
+	(initialize_low_arch): Call
+	init_registers_powerpc_isa205_ppr_dscr_vsx32l and
+	init_registers_powerpc_isa205_ppr_dscr_vsx64l.
+	* linux-ppc-ipa.c (get_ipa_tdesc): Handle
+	PPC_TDESC_ISA205_PPR_DSCR_VSX.
+	(initialize_low_tracepoint): Call
+	init_registers_powerpc_isa205_ppr_dscr_vsx32l and
+	init_registers_powerpc_isa205_ppr_dscr_vsx64l.
+
 2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
 	* linux-ppc-low.c (ppc_fill_vrregset): Remove memset calls.

@@ -31,6 +31,7 @@
 #include <signal.h>
 #include <sys/user.h>
 #include <sys/ioctl.h>
+#include <sys/uio.h>
 #include "gdb_wait.h"
 #include <fcntl.h>
 #include <sys/procfs.h>
@@ -528,10 +529,83 @@ fetch_spe_register (struct regcache *regcache, int tid, int regno)
     regcache->raw_supply (tdep->ppc_spefscr_regnum, &evrregs.spefscr);
 }
 
+/* Use ptrace to fetch all registers from the register set with note
+   type REGSET_ID, size REGSIZE, and layout described by REGSET, from
+   process/thread TID and supply their values to REGCACHE.  If ptrace
+   returns ENODATA to indicate the regset is unavailable, mark the
+   registers as unavailable in REGCACHE.  */
+
+static void
+fetch_regset (struct regcache *regcache, int tid,
+	      int regset_id, int regsetsize, const struct regset *regset)
+{
+  void *buf = alloca (regsetsize);
+  struct iovec iov;
+
+  iov.iov_base = buf;
+  iov.iov_len = regsetsize;
+
+  if (ptrace (PTRACE_GETREGSET, tid, regset_id, &iov) < 0)
+    {
+      if (errno == ENODATA)
+	regset->supply_regset (regset, regcache, -1, NULL, regsetsize);
+      else
+	perror_with_name (_("Couldn't get register set"));
+    }
+  else
+    regset->supply_regset (regset, regcache, -1, buf, regsetsize);
+}
+
+/* Use ptrace to store register REGNUM of the regset with note type
+   REGSET_ID, size REGSETSIZE, and layout described by REGSET, from
+   REGCACHE back to process/thread TID.  If REGNUM is -1 all registers
+   in the set are collected and stored.  */
+
+static void
+store_regset (const struct regcache *regcache, int tid, int regnum,
+	      int regset_id, int regsetsize, const struct regset *regset)
+{
+  void *buf = alloca (regsetsize);
+  struct iovec iov;
+
+  iov.iov_base = buf;
+  iov.iov_len = regsetsize;
+
+  /* Make sure that the buffer that will be stored has up to date values
+     for the registers that won't be collected.  */
+  if (ptrace (PTRACE_GETREGSET, tid, regset_id, &iov) < 0)
+    perror_with_name (_("Couldn't get register set"));
+
+  regset->collect_regset (regset, regcache, regnum, buf, regsetsize);
+
+  if (ptrace (PTRACE_SETREGSET, tid, regset_id, &iov) < 0)
+    perror_with_name (_("Couldn't set register set"));
+}
+
+/* Check whether the kernel provides a register set with number
+   REGSET_ID of size REGSETSIZE for process/thread TID.  */
+
+static bool
+check_regset (int tid, int regset_id, int regsetsize)
+{
+  void *buf = alloca (regsetsize);
+  struct iovec iov;
+
+  iov.iov_base = buf;
+  iov.iov_len = regsetsize;
+
+  if (ptrace (PTRACE_GETREGSET, tid, regset_id, &iov) >= 0
+      || errno == ENODATA)
+    return true;
+  else
+    return false;
+}
+
 static void
 fetch_register (struct regcache *regcache, int tid, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr = ppc_register_u_addr (gdbarch, regno);
   int bytes_transferred;
@@ -563,6 +637,24 @@ fetch_register (struct regcache *regcache, int tid, int regno)
   else if (spe_register_p (gdbarch, regno))
     {
       fetch_spe_register (regcache, tid, regno);
+      return;
+    }
+  else if (regno == PPC_DSCR_REGNUM)
+    {
+      gdb_assert (tdep->ppc_dscr_regnum != -1);
+
+      fetch_regset (regcache, tid, NT_PPC_DSCR,
+		    PPC_LINUX_SIZEOF_DSCRREGSET,
+		    &ppc32_linux_dscrregset);
+      return;
+    }
+  else if (regno == PPC_PPR_REGNUM)
+    {
+      gdb_assert (tdep->ppc_ppr_regnum != -1);
+
+      fetch_regset (regcache, tid, NT_PPC_PPR,
+		    PPC_LINUX_SIZEOF_PPRREGSET,
+		    &ppc32_linux_pprregset);
       return;
     }
 
@@ -758,6 +850,14 @@ fetch_ppc_registers (struct regcache *regcache, int tid)
       fetch_vsx_registers (regcache, tid, -1);
   if (tdep->ppc_ev0_upper_regnum >= 0)
     fetch_spe_register (regcache, tid, -1);
+  if (tdep->ppc_ppr_regnum != -1)
+    fetch_regset (regcache, tid, NT_PPC_PPR,
+		  PPC_LINUX_SIZEOF_PPRREGSET,
+		  &ppc32_linux_pprregset);
+  if (tdep->ppc_dscr_regnum != -1)
+    fetch_regset (regcache, tid, NT_PPC_DSCR,
+		  PPC_LINUX_SIZEOF_DSCRREGSET,
+		  &ppc32_linux_dscrregset);
 }
 
 /* Fetch registers from the child process.  Fetch all registers if
@@ -936,6 +1036,24 @@ store_register (const struct regcache *regcache, int tid, int regno)
   else if (spe_register_p (gdbarch, regno))
     {
       store_spe_register (regcache, tid, regno);
+      return;
+    }
+  else if (regno == PPC_DSCR_REGNUM)
+    {
+      gdb_assert (tdep->ppc_dscr_regnum != -1);
+
+      store_regset (regcache, tid, regno, NT_PPC_DSCR,
+		    PPC_LINUX_SIZEOF_DSCRREGSET,
+		    &ppc32_linux_dscrregset);
+      return;
+    }
+  else if (regno == PPC_PPR_REGNUM)
+    {
+      gdb_assert (tdep->ppc_ppr_regnum != -1);
+
+      store_regset (regcache, tid, regno, NT_PPC_PPR,
+		    PPC_LINUX_SIZEOF_PPRREGSET,
+		    &ppc32_linux_pprregset);
       return;
     }
 
@@ -1149,6 +1267,14 @@ store_ppc_registers (const struct regcache *regcache, int tid)
       store_vsx_registers (regcache, tid, -1);
   if (tdep->ppc_ev0_upper_regnum >= 0)
     store_spe_register (regcache, tid, -1);
+  if (tdep->ppc_ppr_regnum != -1)
+    store_regset (regcache, tid, -1, NT_PPC_PPR,
+		  PPC_LINUX_SIZEOF_PPRREGSET,
+		  &ppc32_linux_pprregset);
+  if (tdep->ppc_dscr_regnum != -1)
+    store_regset (regcache, tid, -1, NT_PPC_DSCR,
+		  PPC_LINUX_SIZEOF_DSCRREGSET,
+		  &ppc32_linux_dscrregset);
 }
 
 /* Fetch the AT_HWCAP entry from the aux vector.  */
@@ -1158,6 +1284,19 @@ ppc_linux_get_hwcap (void)
   CORE_ADDR field;
 
   if (target_auxv_search (current_top_target (), AT_HWCAP, &field) != 1)
+    return 0;
+
+  return field;
+}
+
+/* Fetch the AT_HWCAP2 entry from the aux vector.  */
+
+static CORE_ADDR
+ppc_linux_get_hwcap2 (void)
+{
+  CORE_ADDR field;
+
+  if (target_auxv_search (current_top_target (), AT_HWCAP2, &field) != 1)
     return 0;
 
   return field;
@@ -2222,6 +2361,7 @@ ppc_linux_nat_target::read_description ()
   features.wordsize = ppc_linux_target_wordsize (tid);
 
   CORE_ADDR hwcap = ppc_linux_get_hwcap ();
+  CORE_ADDR hwcap2 = ppc_linux_get_hwcap2 ();
 
   if (have_ptrace_getsetvsxregs
       && (hwcap & PPC_FEATURE_HAS_VSX))
@@ -2255,6 +2395,11 @@ ppc_linux_nat_target::read_description ()
     features.cell = true;
 
   features.isa205 = ppc_linux_has_isa205 (hwcap);
+
+  if ((hwcap2 & PPC_FEATURE2_DSCR)
+      && check_regset (tid, NT_PPC_PPR, PPC_LINUX_SIZEOF_PPRREGSET)
+      && check_regset (tid, NT_PPC_DSCR, PPC_LINUX_SIZEOF_DSCRREGSET))
+    features.ppr_dscr = true;
 
   return ppc_linux_match_description (features);
 }

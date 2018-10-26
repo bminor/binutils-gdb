@@ -191,6 +191,8 @@ get_ipa_tdesc (int idx)
       return tdesc_powerpc_isa205_altivec64l;
     case PPC_TDESC_ISA205_VSX:
       return tdesc_powerpc_isa205_vsx64l;
+    case PPC_TDESC_ISA205_PPR_DSCR_VSX:
+      return tdesc_powerpc_isa205_ppr_dscr_vsx64l;
 #else
     case PPC_TDESC_BASE:
       return tdesc_powerpc_32l;
@@ -206,6 +208,8 @@ get_ipa_tdesc (int idx)
       return tdesc_powerpc_isa205_altivec32l;
     case PPC_TDESC_ISA205_VSX:
       return tdesc_powerpc_isa205_vsx32l;
+    case PPC_TDESC_ISA205_PPR_DSCR_VSX:
+      return tdesc_powerpc_isa205_ppr_dscr_vsx32l;
     case PPC_TDESC_E500:
       return tdesc_powerpc_e500l;
 #endif
@@ -234,6 +238,7 @@ initialize_low_tracepoint (void)
   init_registers_powerpc_isa205_64l ();
   init_registers_powerpc_isa205_altivec64l ();
   init_registers_powerpc_isa205_vsx64l ();
+  init_registers_powerpc_isa205_ppr_dscr_vsx64l ();
 #else
   init_registers_powerpc_32l ();
   init_registers_powerpc_altivec32l ();
@@ -242,6 +247,7 @@ initialize_low_tracepoint (void)
   init_registers_powerpc_isa205_32l ();
   init_registers_powerpc_isa205_altivec32l ();
   init_registers_powerpc_isa205_vsx32l ();
+  init_registers_powerpc_isa205_ppr_dscr_vsx32l ();
   init_registers_powerpc_e500l ();
 #endif
 }

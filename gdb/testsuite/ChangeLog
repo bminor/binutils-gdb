@@ -1,3 +1,8 @@
+2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* gdb.arch/powerpc-ppr-dscr.c: New file.
+	* gdb.arch/powerpc-ppr-dscr.exp: New file.
+
 2018-10-25  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/valgrind-db-attach.exp: Rewrite to use vgdb.

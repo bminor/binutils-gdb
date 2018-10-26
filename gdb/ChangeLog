@@ -1,3 +1,60 @@
+2018-10-26  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+	    Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* arch/ppc-linux-tdesc.h (tdesc_powerpc_isa205_ppr_dscr_vsx32l)
+	(tdesc_powerpc_isa205_ppr_dscr_vsx64l): Declare.
+	* arch/ppc-linux-common.h (PPC_LINUX_SIZEOF_PPRREGSET)
+	(PPC_LINUX_SIZEOF_DSCRREGSET): Define.
+	(struct ppc_linux_features) <ppr_dscr>: New field.
+	(ppc_linux_no_features): Add initializer for ppr_dscr field.
+	* arch/ppc-linux-common.c (ppc_linux_match_description): Return
+	new tdescs.
+	* nat/ppc-linux.h (PPC_FEATURE2_DSCR, NT_PPC_PPR, NT_PPC_DSCR):
+	Define if not already defined.
+	* features/Makefile (WHICH): Add
+	rs6000/powerpc-isa205-ppr-dscr-vsx32l and
+	rs6000/powerpc-isa205-ppr-dscr-vsx64l.
+	(XMLTOC): Add rs6000/powerpc-isa205-ppr-dscr-vsx32l.xml and
+	rs6000/powerpc-isa205-ppr-dscr-vsx64l.xml.
+	* features/rs6000/power-dscr.xml: New file.
+	* features/rs6000/power-ppr.xml: New file.
+	* features/rs6000/powerpc-isa205-ppr-dscr-vsx32l.xml: New file.
+	* features/rs6000/powerpc-isa205-ppr-dscr-vsx64l.xml: New file.
+	* features/rs6000/powerpc-isa205-ppr-dscr-vsx32l.c: Generate.
+	* features/rs6000/powerpc-isa205-ppr-dscr-vsx64l.c: Generate.
+	* regformats/rs6000/powerpc-isa205-ppr-dscr-vsx32l.dat: Generate.
+	* regformats/rs6000/powerpc-isa205-ppr-dscr-vsx64l.dat: Generate.
+	* ppc-linux-nat.c: Include <sys/uio.h>.
+	(fetch_regset, store_regset, check_regset): New functions.
+	(fetch_register, fetch_ppc_registers): Call fetch_regset with
+	DSCR and PPR regsets.
+	(store_register, store_ppc_registers): Call store_regset with
+	DSCR and PPR regsets.
+	(ppc_linux_get_hwcap2): New function.
+	(ppc_linux_nat_target::read_description): Call
+	ppc_linux_get_hwcap2 and check_regset, set ppr_dscr field in the
+	features struct if needed.
+	* ppc-linux-tdep.c: Include
+	features/rs6000/powerpc-isa205-ppr-dscr-vsx32l.c and
+	features/rs6000/powerpc-isa205-ppr-dscr-vsx64l.c.
+	(ppc32_regmap_ppr, ppc32_regmap_dscr, ppc32_linux_pprregset)
+	(ppc32_linux_dscrregset): New globals.
+	(ppc_linux_iterate_over_regset_sections): Call back with the ppr
+	and dscr regsets.
+	(ppc_linux_core_read_description): Check if the ppr and dscr
+	sections are present and set ppr_dscr in the features struct.
+	(_initialize_ppc_linux_tdep): Call
+	initialize_tdesc_powerpc_isa205_ppr_dscr_vsx32l and
+	initialize_tdesc_powerpc_isa205_ppr_dscr_vsx64l.
+	* ppc-linux-tdep.h (ppc32_linux_pprregset)
+	(ppc32_linux_dscrregset): Declare.
+	* ppc-tdep.h (struct gdbarch_tdep) <ppc_ppr_regnum>: New field.
+	<ppc_dscr_regnum>: New field.
+	(enum) <PPC_PPR_REGNUM, PPC_DSCR_REGNUM>: New enum values.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Look for and validate ppr
+	and dscr features.
+	(ppc_process_record_op31): Record changes to PPR and DSCR.
+
 2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
 	* rs6000-tdep.c (rs6000_gdbarch_init): Replace line wrapping by a

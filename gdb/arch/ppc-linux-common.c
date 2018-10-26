@@ -53,7 +53,8 @@ ppc_linux_match_description (struct ppc_linux_features features)
       if (features.cell)
 	tdesc = tdesc_powerpc_cell64l;
       else if (features.vsx)
-	tdesc = (features.isa205? tdesc_powerpc_isa205_vsx64l
+	tdesc = (features.ppr_dscr? tdesc_powerpc_isa205_ppr_dscr_vsx64l
+		 : features.isa205? tdesc_powerpc_isa205_vsx64l
 		 : tdesc_powerpc_vsx64l);
       else if (features.altivec)
 	tdesc = (features.isa205? tdesc_powerpc_isa205_altivec64l
@@ -69,7 +70,8 @@ ppc_linux_match_description (struct ppc_linux_features features)
       if (features.cell)
 	tdesc = tdesc_powerpc_cell32l;
       else if (features.vsx)
-	tdesc = (features.isa205? tdesc_powerpc_isa205_vsx32l
+	tdesc = (features.ppr_dscr? tdesc_powerpc_isa205_ppr_dscr_vsx32l
+		 : features.isa205? tdesc_powerpc_isa205_vsx32l
 		 : tdesc_powerpc_vsx32l);
       else if (features.altivec)
 	tdesc = (features.isa205? tdesc_powerpc_isa205_altivec32l
