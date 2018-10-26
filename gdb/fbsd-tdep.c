@@ -1500,12 +1500,29 @@ static void
 fbsd_print_auxv_entry (struct gdbarch *gdbarch, struct ui_file *file,
 		       CORE_ADDR type, CORE_ADDR val)
 {
-  const char *name;
-  const char *description;
-  enum auxv_format format;
+  const char *name = "???";
+  const char *description = "";
+  enum auxv_format format = AUXV_FORMAT_HEX;
 
   switch (type)
     {
+    case AT_NULL:
+    case AT_IGNORE:
+    case AT_EXECFD:
+    case AT_PHDR:
+    case AT_PHENT:
+    case AT_PHNUM:
+    case AT_PAGESZ:
+    case AT_BASE:
+    case AT_FLAGS:
+    case AT_ENTRY:
+    case AT_NOTELF:
+    case AT_UID:
+    case AT_EUID:
+    case AT_GID:
+    case AT_EGID:
+      default_print_auxv_entry (gdbarch, file, type, val);
+      return;
 #define _TAGNAME(tag) #tag
 #define TAGNAME(tag) _TAGNAME(AT_##tag)
 #define TAG(tag, text, kind) \
@@ -1522,9 +1539,6 @@ fbsd_print_auxv_entry (struct gdbarch *gdbarch, struct ui_file *file,
       TAG (EHDRFLAGS, _("ELF header e_flags"), AUXV_FORMAT_HEX);
       TAG (HWCAP, _("Machine-dependent CPU capability hints"), AUXV_FORMAT_HEX);
       TAG (HWCAP2, _("Extension of AT_HWCAP"), AUXV_FORMAT_HEX);
-    default:
-      default_print_auxv_entry (gdbarch, file, type, val);
-      return;
     }
 
   fprint_auxv_entry (file, name, description, format, type, val);
