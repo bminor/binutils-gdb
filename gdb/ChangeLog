@@ -1,5 +1,10 @@
 2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
+	* arch/ppc-linux-common.c (ppc_linux_match_description):
+	Parenthesize tdesc assignements and indent them properly.
+
+2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
 	* ppc-linux-nat.c (fetch_register): Change if statement to else
 	if.
 	(store_register): Likewise.
