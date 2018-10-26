@@ -1,5 +1,10 @@
 2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
+	* reggroups.c (default_register_reggroup_p): Return true for
+	decfloat registers and float_reggroup.
+
+2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
 	* ppc-linux-tdep.c (ppc_linux_collect_vrregset): Remove.
 	(ppc32_le_linux_vrregset, ppc32_be_linux_vrregset): Replace
 	ppc_linux_collect_vrregset by regcache_collect_regset.
