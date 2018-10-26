@@ -1,5 +1,12 @@
 2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
+	* rs6000-tdep.c: Remove reggroups.h include.
+	(rs6000_pseudo_register_reggroup_p): Remove.
+	(rs6000_gdbarch_init): Remove call to
+	set_tdesc_pseudo_register_reggroup_p.
+
+2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
 	* reggroups.c (default_register_reggroup_p): Return true for
 	decfloat registers and float_reggroup.
 

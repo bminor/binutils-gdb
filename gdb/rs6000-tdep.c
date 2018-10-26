@@ -36,7 +36,6 @@
 #include "infcall.h"
 #include "sim-regno.h"
 #include "gdb/sim-ppc.h"
-#include "reggroups.h"
 #include "dwarf2-frame.h"
 #include "target-descriptions.h"
 #include "user-regs.h"
@@ -2406,27 +2405,6 @@ rs6000_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
   else
     /* POWER7 Extended FP pseudo-registers.  */
     return builtin_type (gdbarch)->builtin_double;
-}
-
-/* Is REGNUM a member of REGGROUP?  */
-static int
-rs6000_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-				   struct reggroup *group)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  /* These are the only pseudo-registers we support.  */
-  gdb_assert (IS_SPE_PSEUDOREG (tdep, regnum)
-	      || IS_DFP_PSEUDOREG (tdep, regnum)
-	      || IS_VSX_PSEUDOREG (tdep, regnum)
-	      || IS_EFP_PSEUDOREG (tdep, regnum));
-
-  /* These are the e500 pseudo-registers or the POWER7 VSX registers.  */
-  if (IS_SPE_PSEUDOREG (tdep, regnum) || IS_VSX_PSEUDOREG (tdep, regnum))
-    return group == all_reggroup || group == vector_reggroup;
-  else
-    /* PPC decimal128 or Extended FP pseudo-registers.  */
-    return group == all_reggroup || group == float_reggroup;
 }
 
 /* The register format for RS/6000 floating point registers is always
@@ -6439,8 +6417,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   set_tdesc_pseudo_register_type (gdbarch, rs6000_pseudo_register_type);
-  set_tdesc_pseudo_register_reggroup_p (gdbarch,
-					rs6000_pseudo_register_reggroup_p);
   tdesc_use_registers (gdbarch, tdesc, tdesc_data);
 
   /* Override the normal target description method to make the SPE upper
