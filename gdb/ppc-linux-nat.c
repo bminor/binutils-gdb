@@ -552,7 +552,7 @@ fetch_register (struct regcache *regcache, int tid, int regno)
         AltiVec registers, fall through and return zeroes, because
         regaddr will be -1 in this case.  */
     }
-  if (vsx_register_p (gdbarch, regno))
+  else if (vsx_register_p (gdbarch, regno))
     {
       if (have_ptrace_getsetvsxregs)
 	{
@@ -928,7 +928,7 @@ store_register (const struct regcache *regcache, int tid, int regno)
       store_altivec_registers (regcache, tid, regno);
       return;
     }
-  if (vsx_register_p (gdbarch, regno))
+  else if (vsx_register_p (gdbarch, regno))
     {
       store_vsx_registers (regcache, tid, regno);
       return;
