@@ -1,3 +1,8 @@
+2018-10-31  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.arch/riscv-reg-aliases.exp: Rewrite to take account of float
+	registers being unions.
+
 2018-10-31  Tom de Vries  <tdevries@suse.de>
 
 	* lib/valgrind.exp: New file.
