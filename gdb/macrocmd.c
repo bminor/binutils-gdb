@@ -199,13 +199,9 @@ info_macro_command (const char *args, int from_tty)
 	     e.g. Scheme's (defmacro ->foo () "bar\n")  */
 	processing_args = 0;
       else
-	{
-	  error (_("Unrecognized option '%.*s' to info macro command.  "
-		   "Try \"help info macro\"."),
-		 int (p - arg_start), arg_start);
-	}
+	report_unrecognized_option_error ("info macro", arg_start);
 
-        arg_start = skip_spaces (p);
+      arg_start = skip_spaces (p);
     }
 
   name = arg_start;
