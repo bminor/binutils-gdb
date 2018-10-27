@@ -969,7 +969,9 @@ rewrite_source_path (const char *path)
   return gdb::unique_xmalloc_ptr<char> (new_path);
 }
 
-int
+/* See source.h.  */
+
+scoped_fd
 find_and_open_source (const char *filename,
 		      const char *dirname,
 		      gdb::unique_xmalloc_ptr<char> *fullname)
@@ -995,7 +997,7 @@ find_and_open_source (const char *filename,
       if (result >= 0)
 	{
 	  *fullname = gdb_realpath (fullname->get ());
-	  return result;
+	  return scoped_fd (result);
 	}
 
       /* Didn't work -- free old one, try again.  */
@@ -1056,7 +1058,7 @@ find_and_open_source (const char *filename,
 			OPEN_MODE, fullname);
     }
 
-  return result;
+  return scoped_fd (result);
 }
 
 /* Open a source file given a symtab S.  Returns a file descriptor or
@@ -1064,15 +1066,16 @@ find_and_open_source (const char *filename,
    
    This function is a convience function to find_and_open_source.  */
 
-int
+scoped_fd
 open_source_file (struct symtab *s)
 {
   if (!s)
-    return -1;
+    return scoped_fd (-1);
 
-  gdb::unique_xmalloc_ptr<char> fullname (s->fullname);
+  gdb::unique_xmalloc_ptr<char> fullname;
   s->fullname = NULL;
-  int fd = find_and_open_source (s->filename, SYMTAB_DIRNAME (s), &fullname);
+  scoped_fd fd = find_and_open_source (s->filename, SYMTAB_DIRNAME (s),
+				       &fullname);
   s->fullname = fullname.release ();
   return fd;
 }
@@ -1094,11 +1097,9 @@ symtab_to_fullname (struct symtab *s)
      to handle cases like the file being moved.  */
   if (s->fullname == NULL)
     {
-      int fd = open_source_file (s);
+      scoped_fd fd = open_source_file (s);
 
-      if (fd >= 0)
-	close (fd);
-      else
+      if (fd.get () < 0)
 	{
 	  gdb::unique_xmalloc_ptr<char> fullname;
 
@@ -1217,7 +1218,7 @@ get_filename_and_charpos (struct symtab *s, char **fullname)
 {
   int linenums_changed = 0;
 
-  scoped_fd desc (open_source_file (s));
+  scoped_fd desc = open_source_file (s);
   if (desc.get () < 0)
     {
       if (fullname)
@@ -1271,7 +1272,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 			 print_source_lines_flags flags)
 {
   int c;
-  int desc;
+  scoped_fd desc;
   int noprint = 0;
   int nlines = stopline - line;
   struct ui_out *uiout = current_uiout;
@@ -1290,24 +1291,26 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	{
 	  last_source_visited = s;
 	  desc = open_source_file (s);
+	  if (desc.get () < 0)
+	    {
+	      last_source_error = desc.get ();
+	      noprint = 1;
+	    }
 	}
       else
 	{
-	  desc = last_source_error;
 	  flags |= PRINT_SOURCE_LINES_NOERROR;
+	  noprint = 1;
 	}
     }
   else
     {
-      desc = last_source_error;
       flags |= PRINT_SOURCE_LINES_NOERROR;
       noprint = 1;
     }
 
-  if (desc < 0 || noprint)
+  if (noprint)
     {
-      last_source_error = desc;
-
       if (!(flags & PRINT_SOURCE_LINES_NOERROR))
 	{
 	  const char *filename = symtab_to_filename_for_display (s);
@@ -1351,22 +1354,16 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
   last_source_error = 0;
 
   if (s->line_charpos == 0)
-    find_source_lines (s, desc);
+    find_source_lines (s, desc.get ());
 
   if (line < 1 || line > s->nlines)
-    {
-      close (desc);
-      error (_("Line number %d out of range; %s has %d lines."),
-	     line, symtab_to_filename_for_display (s), s->nlines);
-    }
+    error (_("Line number %d out of range; %s has %d lines."),
+	   line, symtab_to_filename_for_display (s), s->nlines);
 
-  if (lseek (desc, s->line_charpos[line - 1], 0) < 0)
-    {
-      close (desc);
-      perror_with_name (symtab_to_filename_for_display (s));
-    }
+  if (lseek (desc.get (), s->line_charpos[line - 1], 0) < 0)
+    perror_with_name (symtab_to_filename_for_display (s));
 
-  gdb_file_up stream (fdopen (desc, FDOPEN_MODE));
+  gdb_file_up stream = desc.to_file (FDOPEN_MODE);
   clearerr (stream.get ());
 
   while (nlines-- > 0)
@@ -1550,7 +1547,7 @@ forward_search_command (const char *regex, int from_tty)
   if (current_source_symtab == 0)
     select_source_symtab (0);
 
-  scoped_fd desc (open_source_file (current_source_symtab));
+  scoped_fd desc = open_source_file (current_source_symtab);
   if (desc.get () < 0)
     perror_with_name (symtab_to_filename_for_display (current_source_symtab));
 
@@ -1564,7 +1561,7 @@ forward_search_command (const char *regex, int from_tty)
       < 0)
     perror_with_name (symtab_to_filename_for_display (current_source_symtab));
 
-  gdb_file_up stream (fdopen (desc.release (), FDOPEN_MODE));
+  gdb_file_up stream = desc.to_file (FDOPEN_MODE);
   clearerr (stream.get ());
   while (1)
     {
@@ -1632,7 +1629,7 @@ reverse_search_command (const char *regex, int from_tty)
   if (current_source_symtab == 0)
     select_source_symtab (0);
 
-  scoped_fd desc (open_source_file (current_source_symtab));
+  scoped_fd desc = open_source_file (current_source_symtab);
   if (desc.get () < 0)
     perror_with_name (symtab_to_filename_for_display (current_source_symtab));
 
@@ -1646,7 +1643,7 @@ reverse_search_command (const char *regex, int from_tty)
       < 0)
     perror_with_name (symtab_to_filename_for_display (current_source_symtab));
 
-  gdb_file_up stream (fdopen (desc.release (), FDOPEN_MODE));
+  gdb_file_up stream = desc.to_file (FDOPEN_MODE);
   clearerr (stream.get ());
   while (line > 1)
     {

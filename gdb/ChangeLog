@@ -1,3 +1,19 @@
+2018-11-09  Tom Tromey  <tom@tromey.com>
+
+	* common/scoped_fd.h (class scoped_fd): Add move constructor and
+	move assignment operator.
+	* psymtab.c (psymtab_to_fullname): Update.
+	* source.h (open_source_file): Return scoped_fd.
+	(find_and_open_source): Likewise.
+	* source.c (open_source_file): Return scoped_fd.
+	(get_filename_and_charpos): Update.
+	(print_source_lines_base): Update.  Use scoped_fd::to_file.
+	(forward_search_command): Likewise.
+	(reverse_search_command): Likewise.
+	(find_and_open_source): Return scoped_fd.
+	* tui/tui-source.c (tui_set_source_content): Update.  Use
+	gdb_file_up.
+
 2018-11-09  John Baldwin  <jhb@FreeBSD.org>
 
 	* minsyms.c (minimal_symbol_reader::install): Fix unsigned

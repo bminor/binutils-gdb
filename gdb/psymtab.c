@@ -1129,12 +1129,11 @@ psymtab_to_fullname (struct partial_symtab *ps)
   if (ps->fullname == NULL)
     {
       gdb::unique_xmalloc_ptr<char> fullname;
-      int fd = find_and_open_source (ps->filename, ps->dirname, &fullname);
+      scoped_fd fd = find_and_open_source (ps->filename, ps->dirname,
+					   &fullname);
       ps->fullname = fullname.release ();
 
-      if (fd >= 0)
-	close (fd);
-      else
+      if (fd.get () < 0)
 	{
 	  /* rewrite_source_path would be applied by find_and_open_source, we
 	     should report the pathname where GDB tried to find the file.  */

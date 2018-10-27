@@ -29,10 +29,29 @@ class scoped_fd
 {
 public:
   explicit scoped_fd (int fd = -1) noexcept : m_fd (fd) {}
+
+  scoped_fd (scoped_fd &&other)
+    : m_fd (other.m_fd)
+  {
+    other.m_fd = -1;
+  }
+
   ~scoped_fd ()
   {
     if (m_fd >= 0)
       close (m_fd);
+  }
+
+  scoped_fd &operator= (scoped_fd &&other)
+  {
+    if (m_fd != other.m_fd)
+      {
+	if (m_fd >= 0)
+	  close (m_fd);
+	m_fd = other.m_fd;
+	other.m_fd = -1;
+      }
+    return *this;
   }
 
   DISABLE_COPY_AND_ASSIGN (scoped_fd);

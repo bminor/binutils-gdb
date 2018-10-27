@@ -19,6 +19,8 @@
 #ifndef SOURCE_H
 #define SOURCE_H
 
+#include "common/scoped_fd.h"
+
 struct symtab;
 
 /* See openp function definition for their description.  */
@@ -66,13 +68,13 @@ extern void init_source_path (void);
    On Failure
      An invalid file descriptor is returned (the return value is negative).
      FULLNAME is set to NULL.  */
-extern int find_and_open_source (const char *filename,
-				 const char *dirname,
-				 gdb::unique_xmalloc_ptr<char> *fullname);
+extern scoped_fd find_and_open_source (const char *filename,
+				       const char *dirname,
+				       gdb::unique_xmalloc_ptr<char> *fullname);
 
 /* Open a source file given a symtab S.  Returns a file descriptor or
    negative number for error.  */
-extern int open_source_file (struct symtab *s);
+extern scoped_fd open_source_file (struct symtab *s);
 
 extern gdb::unique_xmalloc_ptr<char> rewrite_source_path (const char *path);
 

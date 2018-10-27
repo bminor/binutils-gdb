@@ -46,8 +46,7 @@ tui_set_source_content (struct symtab *s,
 
   if (s != (struct symtab *) NULL)
     {
-      FILE *stream;
-      int i, desc, c, line_width, nlines;
+      int i, c, line_width, nlines;
       char *src_line = 0;
 
       if ((ret = tui_alloc_source_buffer (TUI_SRC_WIN)) == TUI_SUCCESS)
@@ -56,8 +55,8 @@ tui_set_source_content (struct symtab *s,
 	  /* Take hilite (window border) into account, when
 	     calculating the number of lines.  */
 	  nlines = (line_no + (TUI_SRC_WIN->generic.height - 2)) - line_no;
-	  desc = open_source_file (s);
-	  if (desc < 0)
+	  scoped_fd desc = open_source_file (s);
+	  if (desc.get () < 0)
 	    {
 	      if (!noerror)
 		{
@@ -72,22 +71,17 @@ tui_set_source_content (struct symtab *s,
 	  else
 	    {
 	      if (s->line_charpos == 0)
-		find_source_lines (s, desc);
+		find_source_lines (s, desc.get ());
 
 	      if (line_no < 1 || line_no > s->nlines)
-		{
-		  close (desc);
-		  printf_unfiltered ("Line number %d out of range; "
-				     "%s has %d lines.\n",
-				     line_no,
-				     symtab_to_filename_for_display (s),
-				     s->nlines);
-		}
-	      else if (lseek (desc, s->line_charpos[line_no - 1], 0) < 0)
-		{
-		  close (desc);
-		  perror_with_name (symtab_to_filename_for_display (s));
-		}
+		printf_unfiltered ("Line number %d out of range; "
+				   "%s has %d lines.\n",
+				   line_no,
+				   symtab_to_filename_for_display (s),
+				   s->nlines);
+	      else if (lseek (desc.get (), s->line_charpos[line_no - 1], 0)
+		       < 0)
+		perror_with_name (symtab_to_filename_for_display (s));
 	      else
 		{
 		  int offset, cur_line_no, cur_line, cur_len, threshold;
@@ -108,8 +102,8 @@ tui_set_source_content (struct symtab *s,
                      line and the offset to start the display.  */
 		  offset = src->horizontal_offset;
 		  threshold = (line_width - 1) + offset;
-		  stream = fdopen (desc, FOPEN_RT);
-		  clearerr (stream);
+		  gdb_file_up stream = desc.to_file (FOPEN_RT);
+		  clearerr (stream.get ());
 		  cur_line = 0;
 		  src->gdbarch = get_objfile_arch (SYMTAB_OBJFILE (s));
 		  src->start_line_or_addr.loa = LOA_LINE;
@@ -123,7 +117,7 @@ tui_set_source_content (struct symtab *s,
 			= TUI_SRC_WIN->generic.content[cur_line];
 
 		      /* Get the first character in the line.  */
-		      c = fgetc (stream);
+		      c = fgetc (stream.get ());
 
 		      if (offset == 0)
 			src_line = TUI_SRC_WIN->generic.content[cur_line]
@@ -200,21 +194,21 @@ tui_set_source_content (struct symtab *s,
 				{ /* If we have not reached EOL, then
 				     eat chars until we do.  */
 				  while (c != EOF && c != '\n' && c != '\r')
-				    c = fgetc (stream);
+				    c = fgetc (stream.get ());
 				  /* Handle non-'\n' end-of-line.  */
 				  if (c == '\r' 
-				      && (c = fgetc (stream)) != '\n' 
+				      && (c = fgetc (stream.get ())) != '\n'
 				      && c != EOF)
 				    {
-				       ungetc (c, stream);
-				       c = '\r';
+				      ungetc (c, stream.get ());
+				      c = '\r';
 				    }
 				  
 				}
 			    }
 			  while (c != EOF && c != '\n' && c != '\r' 
 				 && i < threshold 
-				 && (c = fgetc (stream)));
+				 && (c = fgetc (stream.get ())));
 			}
 		      /* Now copy the line taking the offset into
 			 account.  */
@@ -232,7 +226,6 @@ tui_set_source_content (struct symtab *s,
 		    }
 		  if (offset > 0)
 		    xfree (src_line);
-		  fclose (stream);
 		  TUI_SRC_WIN->generic.content_size = nlines;
 		  ret = TUI_SUCCESS;
 		}
