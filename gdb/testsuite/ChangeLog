@@ -1,5 +1,12 @@
 2018-11-20  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* gdb.ada/info_auto_lang.exp: New testcase.
+	* gdb.ada/info_auto_lang/global_pack.ads: New file.
+	* gdb.ada/info_auto_lang/proc_in_ada.adb: New file.
+	* gdb.ada/info_auto_lang/some_c.c: New file.
+
+2018-11-20  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* gdb.dwarf2/dw2-case-insensitive.exp: Update due to auto switch to
 	FUNC_lang language syntax.
 
