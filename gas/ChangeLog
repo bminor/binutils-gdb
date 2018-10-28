@@ -2,7 +2,7 @@
 
 	PR 23837
 	* config/tc-hppa.c: Don't include struc-symbol.h.
-	(pa_build_unwind_subspace): Call get_symbol_frag rather than
+	(pa_build_unwind_subspace): Call symbol_get_frag rather than
 	referencing sy_frag.
 
 2018-10-23  John Darrington  <john@darrington.wattle.id.au>
