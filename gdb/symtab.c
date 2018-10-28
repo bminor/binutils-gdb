@@ -4288,15 +4288,12 @@ treg_matches_sym_type_name (const compiled_regex &treg,
   if (sym_type == NULL)
     return false;
 
-  if (language_mode == language_mode_auto)
-    {
-      scoped_restore_current_language l;
+  {
+    scoped_switch_to_sym_language_if_auto l (sym);
 
-      set_language (SYMBOL_LANGUAGE (sym));
-      printed_sym_type_name = type_to_string (sym_type);
-    }
-  else
     printed_sym_type_name = type_to_string (sym_type);
+  }
+
 
   if (symbol_lookup_debug > 1)
     {
@@ -4600,6 +4597,7 @@ print_symbol_info (enum search_domain kind,
 		   struct symbol *sym,
 		   int block, const char *last)
 {
+  scoped_switch_to_sym_language_if_auto l (sym);
   struct symtab *s = symbol_symtab (sym);
 
   if (last != NULL)
