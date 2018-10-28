@@ -145,7 +145,9 @@ parse_connection_spec (const char *spec, struct addrinfo *hint)
       { "tcp4:", AF_INET,   SOCK_STREAM },
       { "udp6:", AF_INET6,  SOCK_DGRAM },
       { "tcp6:", AF_INET6,  SOCK_STREAM },
+#if HAVE_AF_LOCAL
       { "unix:", AF_LOCAL,  SOCK_STREAM },
+#endif
     };
 
   for (const host_prefix prefix : prefixes)
