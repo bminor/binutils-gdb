@@ -3873,6 +3873,13 @@ breakpoints are set, they are treated just like the breakpoints set with
 the @code{break} command.  You can delete them, disable them, or make
 them conditional the same way as any other breakpoint.
 
+In programs using different languages, @value{GDBN} chooses the syntax
+to print the list of all breakpoints it sets according to the
+@samp{set language} value: using @samp{set language auto}
+(see @ref{Automatically, ,Set Language Automatically}) means to use the
+language of the breakpoint's function, other values mean to use
+the manually specified language (see @ref{Manually, ,Set Language Manually}).
+
 The syntax of the regular expression is the standard one used with tools
 like @file{grep}.  Note that this is different from the syntax used by
 shells, so for instance @code{foo*} matches all functions that include
@@ -17903,6 +17910,13 @@ types in your program whose names include the string @code{value}, but
 @samp{i type ^value$} gives information only on types whose complete
 name is @code{value}.
 
+In programs using different languages, @value{GDBN} chooses the syntax
+to print the type description according to the
+@samp{set language} value: using @samp{set language auto}
+(see @ref{Automatically, ,Set Language Automatically}) means to use the
+language of the type, other values mean to use
+the manually specified language (see @ref{Manually, ,Set Language Manually}).
+
 This command differs from @code{ptype} in two ways: first, like
 @code{whatis}, it does not print a detailed description; second, it
 lists all source files and line numbers where a type is defined.
@@ -17987,6 +18001,13 @@ Similarly to @samp{info types}, this command groups its output by source
 files and annotates each function definition with its source line
 number.
 
+In programs using different languages, @value{GDBN} chooses the syntax
+to print the function name and type according to the
+@samp{set language} value: using @samp{set language auto}
+(see @ref{Automatically, ,Set Language Automatically}) means to use the
+language of the function, other values mean to use
+the manually specified language (see @ref{Manually, ,Set Language Manually}).
+
 The optional flag @samp{-q}, which stands for @samp{quiet}, disables
 printing header information and messages explaining why no functions
 have been printed.
@@ -18026,6 +18047,13 @@ Print the names and data types of all variables that are defined
 outside of functions (i.e.@: excluding local variables).
 The printed variables are grouped by source files and annotated with
 their respective source line numbers.
+
+In programs using different languages, @value{GDBN} chooses the syntax
+to print the variable name and type according to the
+@samp{set language} value: using @samp{set language auto}
+(see @ref{Automatically, ,Set Language Automatically}) means to use the
+language of the variable, other values mean to use
+the manually specified language (see @ref{Manually, ,Set Language Manually}).
 
 The optional flag @samp{-q}, which stands for @samp{quiet}, disables
 printing header information and messages explaining why no variables

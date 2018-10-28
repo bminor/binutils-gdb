@@ -1,3 +1,10 @@
+2018-11-20  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Examining the Symbol Table): Document language choice
+	for 'info types|functions|variables' commands.
+	(Setting Breakpoints): Document language choice to print
+	the functions in which a breakpoint is set.
+
 2018-11-09  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
 	* gdb.texinfo (PowerPC Features): Document the altivec and fpu
