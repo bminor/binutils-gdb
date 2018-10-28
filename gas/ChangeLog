@@ -1,3 +1,10 @@
+2018-10-28  Alan Modra  <amodra@gmail.com>
+
+	PR 23837
+	* config/tc-hppa.c: Don't include struc-symbol.h.
+	(pa_build_unwind_subspace): Call get_symbol_frag rather than
+	referencing sy_frag.
+
 2018-10-23  John Darrington  <john@darrington.wattle.id.au>
 
 	* config/tc-s12z.c (md_apply_fix): Handle BFD_RELOC_16 for fixups
