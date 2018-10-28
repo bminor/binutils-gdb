@@ -1,5 +1,10 @@
 2018-11-20  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* NEWS: Document the language choice done by
+	'info [types|functions|variables]|rbreak'.
+
+2018-11-20  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* symtab.c (treg_matches_sym_type_name): Use
 	scoped_switch_to_sym_language_if_auto instead of local logic.
 	(print_symbol_info): Use scoped_switch_to_sym_language_if_auto

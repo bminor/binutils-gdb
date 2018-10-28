@@ -96,6 +96,15 @@ info variables [-q] [-t TYPEREGEXP] [NAMEREGEXP]
   on the entity names or entity types.  The flag -q disables
   printing headers or informations messages.
 
+info functions
+info types
+info variables
+rbreak
+  These commands now determine the syntax for the shown entities
+  according to the language chosen by `set language'.  In particular,
+  `set language auto' means to automatically choose the language of
+  the shown entities.
+
 thread apply [all | COUNT | -COUNT] [FLAG]... COMMAND
   The 'thread apply' command accepts new FLAG arguments.
   FLAG arguments allow to control what output to produce and how to handle
