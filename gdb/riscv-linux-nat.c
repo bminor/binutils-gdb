@@ -201,8 +201,10 @@ riscv_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 
   if ((regnum == RISCV_CSR_MISA_REGNUM)
       || (regnum == -1))
-    /* TODO: Need to add a ptrace call for this.  */
-    regcache->raw_supply_zeroed (RISCV_CSR_MISA_REGNUM);
+    {
+      /* TODO: Need to add a ptrace call for this.  */
+      regcache->raw_supply_zeroed (RISCV_CSR_MISA_REGNUM);
+    }
 
   /* Access to other CSRs has potential security issues, don't support them for
      now.  */

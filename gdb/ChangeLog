@@ -1,3 +1,8 @@
+2018-10-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-linux-nat.c (riscv_linux_nat_target::fetch_registers):
+	Add missing braces.  No functional change.
+
 2018-10-27  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* macrocmd.c (info_macro_command): Use report_unrecognized_option_error
