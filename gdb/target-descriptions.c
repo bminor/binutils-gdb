@@ -1716,6 +1716,7 @@ maint_print_c_tdesc_cmd (const char *args, int from_tty)
   if (startswith (filename_after_features.c_str (), "i386/32bit-")
       || startswith (filename_after_features.c_str (), "i386/64bit-")
       || startswith (filename_after_features.c_str (), "i386/x32-core.xml")
+      || startswith (filename_after_features.c_str (), "riscv/")
       || startswith (filename_after_features.c_str (), "tic6x-")
       || startswith (filename_after_features.c_str (), "aarch64"))
     {

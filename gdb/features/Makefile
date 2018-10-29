@@ -207,6 +207,7 @@ GDB = false
 #Targets which use feature based target descriptions.
 aarch64-feature = 1
 i386-feature = 1
+riscv-feature = 1
 tic6x-feature = 1
 
 all: $(OUTPUTS)
@@ -242,6 +243,12 @@ FEATURE_XMLFILES = aarch64-core.xml \
 	i386/64bit-pkeys.xml \
 	i386/64bit-sse.xml \
 	i386/x32-core.xml \
+	riscv/32bit-cpu.xml \
+	riscv/32bit-csr.xml \
+	riscv/32bit-fpu.xml \
+	riscv/64bit-cpu.xml \
+	riscv/64bit-csr.xml \
+	riscv/64bit-fpu.xml \
 	tic6x-c6xp.xml \
 	tic6x-core.xml \
 	tic6x-gp.xml
@@ -338,6 +345,10 @@ $(outdir)/i386/x32-avx-avx512.dat: i386/x32-core.xml i386/64bit-avx.xml \
 $(outdir)/i386/x32-avx-avx512-linux.dat: i386/x32-core.xml i386/64bit-avx.xml \
 			       i386/64bit-avx512.xml i386/64bit-linux.xml \
 			       i386/64bit-segments.xml
+
+# Regenerate RISC-V CSR feature lists.
+riscv/32bit-csr.xml riscv/64bit-csr.xml: ../../include/opcode/riscv-opc.h
+	./riscv/rebuild-csr-xml.sh ../../include/opcode/riscv-opc.h ./riscv
 
 # 'all' doesn't build the C files, so don't delete them in 'clean'
 # either.

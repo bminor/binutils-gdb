@@ -1,3 +1,8 @@
+2018-11-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Standard Target Features): Add RISC-V Features
+	sub-section.
+
 2018-11-20  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.texinfo (Examining the Symbol Table): Document language choice

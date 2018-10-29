@@ -667,6 +667,7 @@ ALL_TARGET_OBS = \
 	arch/arm-linux.o \
 	arch/i386.o \
 	arch/ppc-linux-common.o \
+	arch/riscv.o \
 	arm-bsd-tdep.o \
 	arm-fbsd-tdep.o \
 	arm-linux-tdep.o \
@@ -1418,6 +1419,7 @@ HFILES_NO_SRCDIR = \
 	arch/i386.h \
 	arch/ppc-linux-common.h \
 	arch/ppc-linux-tdesc.h \
+	arch/riscv.h \
 	cli/cli-cmds.h \
 	cli/cli-decode.h \
 	cli/cli-script.h \

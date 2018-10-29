@@ -81,6 +81,9 @@ ia64*-*-*)
 	cpu_obs="ia64-tdep.o"
 	;;
 
+riscv*-*-*)
+	cpu_obs="riscv-tdep.o arch/riscv.o";;
+
 x86_64-*-*)
 	cpu_obs="${i386_tobjs} ${amd64_tobjs}";;
 
@@ -532,18 +535,18 @@ s390*-*-linux*)
 
 riscv*-*-freebsd*)
 	# Target: FreeBSD/riscv
-	gdb_target_obs="riscv-fbsd-tdep.o riscv-tdep.o"
+	gdb_target_obs="riscv-fbsd-tdep.o"
 	;;
 
 riscv*-*-linux*)
 	# Target: Linux/RISC-V
-	gdb_target_obs="riscv-linux-tdep.o riscv-tdep.o glibc-tdep.o \
+	gdb_target_obs="riscv-linux-tdep.o glibc-tdep.o \
  			linux-tdep.o solib-svr4.o symfile-mem.o linux-record.o"
 	;;
 
 riscv*-*-*)
 	# Target: RISC-V architecture
-	gdb_target_obs="riscv-tdep.o"
+	gdb_target_obs=""
 	;;
 
 rl78-*-elf)

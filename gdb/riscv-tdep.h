@@ -21,6 +21,8 @@
 #ifndef RISCV_TDEP_H
 #define RISCV_TDEP_H
 
+#include "arch/riscv.h"
+
 /* RiscV register numbers.  */
 enum
 {
@@ -57,31 +59,12 @@ enum
 /* RISC-V specific per-architecture information.  */
 struct gdbarch_tdep
 {
-  union
-  {
-    /* Provide access to the whole ABI in one value.  */
-    unsigned value;
-
-    struct
-    {
-      /* Encode the base machine length following the same rules as in the
-	 MISA register.  */
-      unsigned base_len : 2;
-
-      /* Encode which floating point ABI is in use following the same rules
-	 as the ELF e_flags field.  */
-      unsigned float_abi : 2;
-    } fields;
-  } abi;
-
-  /* Only the least significant 26 bits are (possibly) valid, and indicate
-     features that are supported on the target.  These could be cached from
-     the target, or read from the executable when available.  */
-  unsigned core_features;
+  /* Features about the target that impact how the gdbarch is configured.
+     Two gdbarch instances are compatible only if this field matches.  */
+  struct riscv_gdbarch_features features;
 
   /* ISA-specific data types.  */
-  struct type *riscv_fpreg_d_type;
-  struct type *riscv_fpreg_q_type;
+  struct type *riscv_fpreg_d_type = nullptr;
 };
 
 

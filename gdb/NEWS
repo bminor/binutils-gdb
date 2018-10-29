@@ -38,6 +38,8 @@
   requires the use of a keyword.  Selecting a frame by level is
   unchanged.  The MI comment "-stack-select-frame" is unchanged.
 
+* The RISC-V target now supports target descriptions.
+
 * New targets
 
   NXP S12Z		s12z-*-elf

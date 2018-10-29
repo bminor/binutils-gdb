@@ -42944,6 +42944,7 @@ registers using the capitalization used in the description.
 * Nios II Features::
 * OpenRISC 1000 Features::
 * PowerPC Features::
+* RISC-V Features::
 * S/390 and System z Features::
 * Sparc Features::
 * TIC6x Features::
@@ -43333,6 +43334,41 @@ contain the 64-bit checkpointed register @samp{cdscr}.
 
 The @samp{org.gnu.gdb.power.htm.tar} feature is optional.  It should
 contain the 64-bit checkpointed register @samp{ctar}.
+
+
+@node RISC-V Features
+@subsection RISC-V Features
+@cindex target descriptions, RISC-V Features
+
+The @samp{org.gnu.gdb.riscv.cpu} feature is required for RISC-V
+targets.  It should contain the registers @samp{x0} through
+@samp{x31}, and @samp{pc}.  Either the architectural names (@samp{x0},
+@samp{x1}, etc) can be used, or the ABI names (@samp{zero}, @samp{ra},
+etc).
+
+The @samp{org.gnu.gdb.riscv.fpu} feature is optional.  If present, it
+should contain registers @samp{f0} through @samp{f31}, @samp{fflags},
+@samp{frm}, and @samp{fcsr}.  As with the cpu feature, either the
+architectural register names, or the ABI names can be used.
+
+The @samp{org.gnu.gdb.riscv.virtual} feature is optional.  If present,
+it should contain registers that are not backed by real registers on
+the target, but are instead virtual, where the register value is
+derived from other target state.  In many ways these are like
+@value{GDBN}s pseudo-registers, except implemented by the target.
+Currently the only register expected in this set is the one byte
+@samp{priv} register that contains the target's privilege level in the
+least significant two bits.
+
+The @samp{org.gnu.gdb.riscv.csr} feature is optional.  If present, it
+should contain all of the target's standard CSRs.  Standard CSRs are
+those defined in the RISC-V specification documents.  There is some
+overlap between this feature and the fpu feature; the @samp{fflags},
+@samp{frm}, and @samp{fcsr} registers could be in either feature.  The
+expectation is that these registers will be in the fpu feature if the
+target has floating point hardware, but can be moved into the csr
+feature if the target has the floating point control registers, but no
+other floating point hardware.
 
 @node S/390 and System z Features
 @subsection S/390 and System z Features

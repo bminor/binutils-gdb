@@ -1,3 +1,69 @@
+2018-11-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Add arch/riscv.o.
+	(HFILES_NO_SRCDIR): Add arch/riscv.h.
+	* arch/riscv.c: New file.
+	* arch/riscv.h: New file.
+	* configure.tgt: Add cpu_obs list of riscv, move riscv-tdep.o into
+	this list, and add arch/riscv.o.
+	* features/Makefile: Add riscv features.
+	* features/riscv/32bit-cpu.c: New file.
+	* features/riscv/32bit-cpu.xml: New file.
+	* features/riscv/32bit-csr.c: New file.
+	* features/riscv/32bit-csr.xml: New file.
+	* features/riscv/32bit-fpu.c: New file.
+	* features/riscv/32bit-fpu.xml: New file.
+	* features/riscv/64bit-cpu.c: New file.
+	* features/riscv/64bit-cpu.xml: New file.
+	* features/riscv/64bit-csr.c: New file.
+	* features/riscv/64bit-csr.xml: New file.
+	* features/riscv/64bit-fpu.c: New file.
+	* features/riscv/64bit-fpu.xml: New file.
+	* features/riscv/rebuild-csr-xml.sh: New file.
+	* riscv-tdep.c: Add 'arch/riscv.h' include.
+	(riscv_gdb_reg_names): Delete.
+	(csr_reggroup): New global.
+	(struct riscv_register_alias): Delete.
+	(struct riscv_register_feature): New structure.
+	(riscv_register_aliases): Delete.
+	(riscv_xreg_feature): New global.
+	(riscv_freg_feature): New global.
+	(riscv_virtual_feature): New global.
+	(riscv_csr_feature): New global.
+	(riscv_create_csr_aliases): New function.
+	(riscv_read_misa_reg): Delete.
+	(riscv_has_feature): Delete.
+	(riscv_isa_xlen): Simplify, just return cached xlen.
+	(riscv_isa_flen): Simplify, just return cached flen.
+	(riscv_has_fp_abi): Update for changes in struct gdbarch_tdep.
+	(riscv_register_name): Update to make use of tdesc_register_name.
+	Look up xreg and freg names in the new globals riscv_xreg_feature
+	and riscv_freg_feature.  Don't supply csr aliases here.
+	(riscv_fpreg_q_type): Delete.
+	(riscv_register_type): Use tdesc_register_type in almost all
+	cases, override the returned type in a few specific cases only.
+	(riscv_print_one_register_info): Handle errors reading registers.
+	(riscv_register_reggroup_p): Use tdesc_register_in_reggroup_p for
+	registers that are otherwise unknown to GDB.  Also check the
+	csr_reggroup.
+	(riscv_print_registers_info): Remove assert about upper register
+	number, and use gdbarch_register_reggroup_p instead of
+	short-cutting.
+	(riscv_find_default_target_description): New function.
+	(riscv_check_tdesc_feature): New function.
+	(riscv_add_reggroups): New function.
+	(riscv_setup_register_aliases): New function.
+	(riscv_init_reggroups): New function.
+	(_initialize_riscv_tdep): Add calls to setup CSR aliases, and
+	setup register groups.  Register new riscv debug variable.
+	* riscv-tdep.h: Add 'arch/riscv.h' include.
+	(struct gdbarch_tdep): Remove abi union, and add
+	riscv_gdbarch_features field.  Remove cached quad floating point
+	type, and provide initialisation for double type field.
+	* target-descriptions.c (maint_print_c_tdesc_cmd): Add riscv to
+	the list of targets using the feature based target descriptions.
+	* NEWS: Mention target description support.
+
 2018-11-21  Pedro Alves  <palves@redhat.com>
 
 	* valops.c (find_method_list, value_find_oload_method_list)
