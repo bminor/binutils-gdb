@@ -47,6 +47,7 @@
 #include "procfs.h"
 #include "observable.h"
 #include "common/scoped_fd.h"
+#include "common/pathstuff.h"
 
 /* This module provides the interface between GDB and the
    /proc file system, which is used on many versions of Unix
