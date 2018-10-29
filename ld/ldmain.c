@@ -584,21 +584,25 @@ static const char *
 get_sysroot (int argc, char **argv)
 {
   int i;
-  const char *path;
+  const char *path = NULL;
 
   for (i = 1; i < argc; i++)
     if (CONST_STRNEQ (argv[i], "--sysroot="))
-      return argv[i] + strlen ("--sysroot=");
+      path = argv[i] + strlen ("--sysroot=");
 
-  path = get_relative_sysroot (BINDIR);
-  if (path)
-    return path;
+  if (!path)
+    path = get_relative_sysroot (BINDIR);
 
-  path = get_relative_sysroot (TOOLBINDIR);
-  if (path)
-    return path;
+  if (!path)
+    path = get_relative_sysroot (TOOLBINDIR);
 
-  return TARGET_SYSTEM_ROOT;
+  if (!path)
+    path = TARGET_SYSTEM_ROOT;
+
+  if (IS_DIR_SEPARATOR (*path) && path[1] == 0)
+    path = "";
+
+  return path;
 }
 
 /* We need to find any explicitly given emulation in order to initialize the

@@ -1,5 +1,9 @@
 2018-10-29  Alan Modra  <amodra@gmail.com>
 
+	* ldmain.c (get_sysroot): Return "" for "--sysroot=/".
+
+2018-10-29  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am (ei386beos.c, ei386go32.c): Correct dependencies.
 	* Makefile.in: Regenerate.
 	* scripttempl/elf.sc (.note.gnu.build-id, .eh_frame_hdr): Set
