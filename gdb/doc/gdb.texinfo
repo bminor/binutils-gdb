@@ -20930,15 +20930,6 @@ Note that this command has the same form as the command to connect
 to a serial line.  @value{GDBN} will automatically determine which
 kind of file you have specified and will make the appropriate kind
 of connection.
-The above command is identical to the command:
-
-@smallexample
-target remote unix::/tmp/gdb-socket1
-@end smallexample
-@noindent
-
-See below for the explanation of this syntax.
-
 This feature is not available if the host system does not support
 Unix domain sockets.
 
@@ -20949,7 +20940,6 @@ Unix domain sockets.
 @itemx target remote @code{tcp4:@var{host}:@var{port}}
 @itemx target remote @code{tcp6:@var{host}:@var{port}}
 @itemx target remote @code{tcp6:@var{[host]}:@var{port}}
-@itemx target remote @code{unix::@var{local-socket}}
 @itemx target extended-remote @code{@var{host}:@var{port}}
 @itemx target extended-remote @code{@var{[host]}:@var{port}}
 @itemx target extended-remote @code{tcp:@var{host}:@var{port}}
@@ -20957,10 +20947,8 @@ Unix domain sockets.
 @itemx target extended-remote @code{tcp4:@var{host}:@var{port}}
 @itemx target extended-remote @code{tcp6:@var{host}:@var{port}}
 @itemx target extended-remote @code{tcp6:@var{[host]}:@var{port}}
-@itemx target extended-remote @code{unix::@var{local-socket}}
 @cindex @acronym{TCP} port, @code{target remote}
-Debug using a @acronym{TCP} connection to @var{port} on @var{host}
-or using the Unix domain socket @var{local-socket} on the local machine.
+Debug using a @acronym{TCP} connection to @var{port} on @var{host}.
 The @var{host} may be either a host name, a numeric @acronym{IPv4}
 address, or a numeric @acronym{IPv6} address (with or without the
 square brackets to separate the address from the port); @var{port}
@@ -21008,16 +20996,6 @@ target remote :1234
 @noindent
 
 Note that the colon is still required here.
-Alternatively you can use a Unix domain socket:
-
-@smallexample
-target remote unix::/tmp/gdb-socket1
-@end smallexample
-@noindent
-
-This has the advantage that it'll not fail if the port number is already
-in use.
-
 
 @item target remote @code{udp:@var{host}:@var{port}}
 @itemx target remote @code{udp:@var{[host]}:@var{port}}
