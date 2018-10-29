@@ -38,9 +38,6 @@
 #if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#if HAVE_SYS_UN_H
-#include <sys/un.h>
-#endif
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -196,36 +193,20 @@ handle_accept_event (int err, gdb_client_data client_data)
      descriptor open for add_file_handler to wait for a new connection.  */
   delete_file_handler (listen_desc);
 
-#if HAVE_SYS_UN_H
-  if (sockaddr.ss_family == AF_UNIX)
-    {
-      struct sockaddr_un su;
-      socklen_t socklen = sizeof (su);
+  /* Convert IP address to string.  */
+  char orig_host[GDB_NI_MAX_ADDR], orig_port[GDB_NI_MAX_PORT];
 
-      if (getsockname (listen_desc, (struct sockaddr *) &su, &socklen) != 0)
-	perror (_("Could not obtain remote address"));
+  int r = getnameinfo ((struct sockaddr *) &sockaddr, len,
+		       orig_host, sizeof (orig_host),
+		       orig_port, sizeof (orig_port),
+		       NI_NUMERICHOST | NI_NUMERICSERV);
 
-      fprintf (stderr, _("Remote debugging on local socket bound to %s\n"),
-	       su.sun_path);
-    }
+  if (r != 0)
+    fprintf (stderr, _("Could not obtain remote address: %s\n"),
+	     gai_strerror (r));
   else
-#endif
-    {
-      /* Convert IP address to string.  */
-      char orig_host[GDB_NI_MAX_ADDR], orig_port[GDB_NI_MAX_PORT];
-
-      int r = getnameinfo ((struct sockaddr *) &sockaddr, len,
-			   orig_host, sizeof (orig_host),
-			   orig_port, sizeof (orig_port),
-			   NI_NUMERICHOST | NI_NUMERICSERV);
-
-      if (r != 0)
-	fprintf (stderr, _("Could not obtain remote address: %s\n"),
-		 gai_strerror (r));
-      else
-	fprintf (stderr, _("Remote debugging from host %s, port %s\n"),
-		 orig_host, orig_port);
-    }
+    fprintf (stderr, _("Remote debugging from host %s, port %s\n"),
+	     orig_host, orig_port);
 
   enable_async_notification (remote_desc);
 
@@ -269,9 +250,6 @@ remote_prepare (const char *name)
   struct addrinfo hint;
   struct addrinfo *ainfo;
 
-  struct sockaddr *addr;
-  socklen_t addrlen;
-
   memset (&hint, 0, sizeof (hint));
   /* Assume no prefix will be passed, therefore we should use
      AF_UNSPEC.  */
@@ -280,7 +258,7 @@ remote_prepare (const char *name)
   hint.ai_protocol = IPPROTO_TCP;
 
   parsed_connection_spec parsed
-    = parse_connection_spec (name, &hint);
+    = parse_connection_spec_without_prefix (name, &hint);
 
   if (parsed.port_str.empty ())
     {
@@ -298,92 +276,47 @@ remote_prepare (const char *name)
     }
 #endif
 
-#if HAVE_SYS_UN_H
-  struct sockaddr_un unix_addr;
+  int r = getaddrinfo (parsed.host_str.c_str (), parsed.port_str.c_str (),
+		       &hint, &ainfo);
 
-#ifndef UNIX_PATH_MAX
-#define UNIX_PATH_MAX sizeof (((struct sockaddr_un *) NULL)->sun_path)
-#endif
+  if (r != 0)
+    error (_("%s: cannot resolve name: %s"), name, gai_strerror (r));
 
-  if (hint.ai_family == AF_LOCAL)
+  scoped_free_addrinfo freeaddrinfo (ainfo);
+
+  struct addrinfo *iter;
+
+  for (iter = ainfo; iter != NULL; iter = iter->ai_next)
     {
-      const char *sock_name = parsed.port_str.c_str ();
-      if (parsed.port_str.length () > UNIX_PATH_MAX - 1)
-	{
-	  error
-	    (_("%s is too long.  Socket names may be no longer than %s bytes."),
-	     sock_name, pulongest (UNIX_PATH_MAX - 1));
-	  return;
-	}
-      listen_desc = socket (AF_UNIX,  SOCK_STREAM,  0);
-      if (listen_desc < 0)
-	perror_with_name ("Can't open socket");
+      listen_desc = gdb_socket_cloexec (iter->ai_family, iter->ai_socktype,
+					iter->ai_protocol);
 
-      memset (&unix_addr, 0, sizeof (unix_addr));
-      unix_addr.sun_family = AF_UNIX;
-      strncpy (unix_addr.sun_path, sock_name, UNIX_PATH_MAX - 1);
-
-      struct stat statbuf;
-      int stat_result = stat (sock_name, &statbuf);
-
-      if (stat_result == 0
-	  && S_ISSOCK (statbuf.st_mode))
-	unlink (sock_name);
-
-      addr = (struct sockaddr *) &unix_addr;
-      addrlen = sizeof (unix_addr);
-    }
-  else
-#endif
-    {
-      struct addrinfo *iter;
-
-      int r = getaddrinfo (parsed.host_str.c_str (),
-			   parsed.port_str.c_str (),
-			   &hint, &ainfo);
-
-      if (r != 0)
-	error (_("%s: cannot resolve name: %s"), name, gai_strerror (r));
-
-      scoped_free_addrinfo freeaddrinfo (ainfo);
-
-      for (iter = ainfo; iter != NULL; iter = iter->ai_next)
-	{
-	  listen_desc = gdb_socket_cloexec (iter->ai_family, iter->ai_socktype,
-					    iter->ai_protocol);
-
-	  if (listen_desc >= 0)
-	    break;
-	}
-
-      if (iter == NULL)
-	perror_with_name ("Can't open socket");
-
-      /* Allow rapid reuse of this port. */
-      tmp = 1;
-      setsockopt (listen_desc, SOL_SOCKET, SO_REUSEADDR, (char *) &tmp,
-		  sizeof (tmp));
-
-      if (iter->ai_socktype == SOCK_DGRAM)
-	error (_("Only stream orientated protocols are currently supported."));
-
-      switch (iter->ai_family)
-	{
-	case AF_INET:
-	  ((struct sockaddr_in *) iter->ai_addr)->sin_addr.s_addr = INADDR_ANY;
-	  break;
-	case AF_INET6:
-	  ((struct sockaddr_in6 *) iter->ai_addr)->sin6_addr = in6addr_any;
-	  break;
-	default:
-	  internal_error (__FILE__, __LINE__,
-			  _("Invalid 'ai_family' %d\n"), iter->ai_family);
-	}
-      addr = iter->ai_addr;
-      addrlen = iter->ai_addrlen;
+      if (listen_desc >= 0)
+	break;
     }
 
-  if (bind (listen_desc, addr, addrlen) != 0)
+  if (iter == NULL)
+    perror_with_name ("Can't open socket");
+
+  /* Allow rapid reuse of this port. */
+  tmp = 1;
+  setsockopt (listen_desc, SOL_SOCKET, SO_REUSEADDR, (char *) &tmp,
+	      sizeof (tmp));
+
+  switch (iter->ai_family)
+    {
+    case AF_INET:
+      ((struct sockaddr_in *) iter->ai_addr)->sin_addr.s_addr = INADDR_ANY;
+      break;
+    case AF_INET6:
+      ((struct sockaddr_in6 *) iter->ai_addr)->sin6_addr = in6addr_any;
+      break;
+    default:
+      internal_error (__FILE__, __LINE__,
+		      _("Invalid 'ai_family' %d\n"), iter->ai_family);
+    }
+
+  if (bind (listen_desc, iter->ai_addr, iter->ai_addrlen) != 0)
     perror_with_name ("Can't bind address");
 
   if (listen (listen_desc, 1) != 0)
@@ -421,11 +354,11 @@ remote_open (const char *name)
     }
 #ifndef USE_WIN32API
   else if (port_str == NULL)
-     {
+    {
       struct stat statbuf;
 
       if (stat (name, &statbuf) == 0
-       && (S_ISCHR (statbuf.st_mode) || S_ISFIFO (statbuf.st_mode)))
+	  && (S_ISCHR (statbuf.st_mode) || S_ISFIFO (statbuf.st_mode)))
 	remote_desc = open (name, O_RDWR);
       else
 	{
@@ -1220,7 +1153,7 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 	struct regcache *regcache;
 
 	if ((status->kind == TARGET_WAITKIND_FORKED && cs.report_fork_events)
-	    || (status->kind == TARGET_WAITKIND_VFORKED
+	    || (status->kind == TARGET_WAITKIND_VFORKED 
 		&& cs.report_vfork_events))
 	  {
 	    enum gdb_signal signal = GDB_SIGNAL_TRAP;
@@ -1232,7 +1165,7 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 	    buf = write_ptid (buf, status->value.related_pid);
 	    strcat (buf, ";");
 	  }
-	else if (status->kind == TARGET_WAITKIND_VFORK_DONE
+	else if (status->kind == TARGET_WAITKIND_VFORK_DONE 
 		 && cs.report_vfork_events)
 	  {
 	    enum gdb_signal signal = GDB_SIGNAL_TRAP;

@@ -19,10 +19,6 @@
   can be passed using the '[ADDRESS]:PORT' notation, or the regular
   'ADDRESS:PORT' method.
 
-* GDB and GDBserver now support local domain socket connections.  The
-  name of a local domain socket may be provided instead of the
-  [ADDRESS]:PORT notation.
-
 * DWARF index cache: GDB can now automatically save indices of DWARF
   symbols on disk to speed up further loading of the same binaries.
 
