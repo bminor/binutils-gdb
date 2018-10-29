@@ -413,7 +413,7 @@ main (int argc, char **argv)
       einfo (_("%F%P: no input files\n"));
     }
 
-  if (trace_files)
+  if (verbose)
     info_msg (_("%P: mode %s\n"), emulation);
 
   ldemul_after_parse ();
@@ -478,7 +478,7 @@ main (int argc, char **argv)
      want to ignore for relocatable output?)  */
   if (!config.make_executable && !force_make_executable)
     {
-      if (trace_files)
+      if (verbose)
 	einfo (_("%P: link errors found, deleting executable `%s'\n"),
 	       output_filename);
 
@@ -833,7 +833,7 @@ add_archive_element (struct bfd_link_info *info,
 	    {
 	      /* Don't claim new IR symbols after all IR symbols have
 		 been claimed.  */
-	      if (trace_files || verbose)
+	      if (verbose)
 		info_msg ("%pI: no new IR symbols to claimi\n",
 			  &orig_input);
 	      input->flags.claimed = 0;

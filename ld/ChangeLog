@@ -1,5 +1,11 @@
 2018-10-29  Alan Modra  <amodra@gmail.com>
 
+	* ldmain.c (main): Print emulation mode and "deleting executable"
+	for --verbose, not --trace.
+	(add_archive_element): Only print "no new IR symbols" for --verbose.
+
+2018-10-29  Alan Modra  <amodra@gmail.com>
+
 	* ldmain.c (get_sysroot): Return "" for "--sysroot=/".
 
 2018-10-29  Alan Modra  <amodra@gmail.com>
