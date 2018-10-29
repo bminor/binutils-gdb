@@ -49,7 +49,6 @@
 
 #include "as.h"
 #include "subsegs.h"
-#include "struc-symbol.h"
 #include "ecoff.h"
 
 #include "opcode/alpha.h"
@@ -3400,7 +3399,9 @@ add_to_link_pool (symbolS *sym, offsetT addend)
 	    && fixp->fx_offset == (valueT)addend
 	    && fixp->tc_fix_data.info
 	    && fixp->tc_fix_data.info->sym
-	    && fixp->tc_fix_data.info->sym->sy_value.X_op_symbol == basesym)
+	    && symbol_symbolS (fixp->tc_fix_data.info->sym)
+	    && (symbol_get_value_expression (fixp->tc_fix_data.info->sym)
+		->X_op_symbol == basesym))
 	  return fixp->tc_fix_data.info->sym;
       }
 
@@ -3628,7 +3629,7 @@ s_alpha_comm (int ignore ATTRIBUTE_UNUSED)
     }
 
 #ifndef OBJ_EVAX
-  know (symbolP->sy_frag == &zero_address_frag);
+  know (symbol_get_frag (symbolP) == &zero_address_frag);
 #endif
   demand_empty_rest_of_line ();
 }

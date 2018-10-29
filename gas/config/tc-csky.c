@@ -29,7 +29,6 @@
 #include "subsegs.h"
 #include "obstack.h"
 #include "libiberty.h"
-#include "struc-symbol.h"
 
 #ifdef OBJ_ELF
 #include "elf/csky.h"
@@ -6783,8 +6782,9 @@ v2_work_movih (void)
 	   || (csky_insn.e1.X_op == O_symbol && insn_reloc != BFD_RELOC_NONE))
     {
       if (csky_insn.e1.X_op_symbol != 0
-	  && csky_insn.e1.X_op_symbol->sy_value.X_op == O_constant
-	  && 16 == csky_insn.e1.X_op_symbol->sy_value.X_add_number)
+	  && symbol_constant_p (csky_insn.e1.X_op_symbol)
+	  && S_GET_SEGMENT (csky_insn.e1.X_op_symbol) == absolute_section
+	  && 16 == S_GET_VALUE (csky_insn.e1.X_op_symbol))
 	{
 	  csky_insn.e1.X_op = O_symbol;
 	  if (insn_reloc == BFD_RELOC_CKCORE_GOT32)
@@ -6833,8 +6833,9 @@ v2_work_ori (void)
     }
   else if (csky_insn.e1.X_op == O_bit_and)
     {
-      if (csky_insn.e1.X_op_symbol->sy_value.X_op == O_constant
-	  && 0xffff == csky_insn.e1.X_op_symbol->sy_value.X_add_number)
+      if (symbol_constant_p (csky_insn.e1.X_op_symbol)
+	  && S_GET_SEGMENT (csky_insn.e1.X_op_symbol) == absolute_section
+	  && 0xffff == S_GET_VALUE (csky_insn.e1.X_op_symbol))
 	{
 	  csky_insn.e1.X_op = O_symbol;
 	  if (insn_reloc == BFD_RELOC_CKCORE_GOT32)

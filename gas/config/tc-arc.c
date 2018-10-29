@@ -22,7 +22,6 @@
 
 #include "as.h"
 #include "subsegs.h"
-#include "struc-symbol.h"
 #include "dwarf2dbg.h"
 #include "dw2gencfi.h"
 #include "safe-ctype.h"
@@ -4211,7 +4210,7 @@ arc_check_reloc (expressionS *exp,
   if (*r_type_p == BFD_RELOC_32
       && exp->X_op == O_subtract
       && exp->X_op_symbol != NULL
-      && exp->X_op_symbol->bsym->section == now_seg)
+      && S_GET_SEGMENT (exp->X_op_symbol) == now_seg)
     *r_type_p = BFD_RELOC_ARC_32_PCREL;
 }
 

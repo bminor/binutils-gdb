@@ -27,7 +27,6 @@
 #include "bfd.h"
 #include "vms.h"
 #include "subsegs.h"
-#include "struc-symbol.h"
 #include "safe-ctype.h"
 
 static void s_evax_weak (int);

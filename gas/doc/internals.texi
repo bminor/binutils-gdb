@@ -41,11 +41,10 @@ This section describes some fundamental GAS data types.
 @cindex symbolS structure
 
 The definition for the symbol structure, @code{symbolS}, is located in
-@file{struc-symbol.h}.
+@file{symbols.c}.
 
-In general, the fields of this structure may not be referred to directly.
+The fields of this structure may not be referred to directly.
 Instead, you must use one of the accessor functions defined in @file{symbol.h}.
-These accessor functions should work for any GAS version.
 
 Symbol structures contain the following fields:
 
@@ -397,12 +396,6 @@ structures and use the accessor functions.  The accessor functions correctly
 deal with local symbols.  @code{struct local_symbol} is much smaller than
 @code{symbolS} (which also automatically creates a bfd @code{asymbol}
 structure), so this saves space when assembling large files.
-
-The first field of @code{symbolS} is @code{bsym}, the pointer to the BFD
-symbol.  The first field of @code{struct local_symbol} is a pointer which is
-always set to NULL.  This is how the symbol accessor functions can distinguish
-local symbols from ordinary symbols.  The symbol accessor functions
-automatically convert a local symbol into an ordinary symbol when necessary.
 
 @node Expressions
 @subsection Expressions

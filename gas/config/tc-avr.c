@@ -23,7 +23,6 @@
 #include "as.h"
 #include "safe-ctype.h"
 #include "subsegs.h"
-#include "struc-symbol.h"
 #include "dwarf2dbg.h"
 #include "dw2gencfi.h"
 #include "elf/avr.h"
@@ -2628,8 +2627,7 @@ avr_patch_gccisr_frag (fragS *fr, int reg)
       symbolS *sy = avr_isr.sym_n_pushed;
       /* Turn magic `__gcc_isr.n_pushed' into its now known value.  */
 
-      sy->sy_value.X_op = O_constant;
-      sy->sy_value.X_add_number = n_pushed;
+      S_SET_VALUE (sy, n_pushed);
       S_SET_SEGMENT (sy, expr_section);
       avr_isr.sym_n_pushed = NULL;
     }

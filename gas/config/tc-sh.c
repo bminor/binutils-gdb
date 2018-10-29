@@ -25,7 +25,6 @@
 #define DEFINE_TABLE
 #include "opcodes/sh-opc.h"
 #include "safe-ctype.h"
-#include "struc-symbol.h"
 
 #ifdef OBJ_ELF
 #include "elf/sh.h"
@@ -1911,6 +1910,7 @@ insert_loop_bounds (char *output, sh_operand_info *operand)
     {
       static int count = 0;
       char name[11];
+      expressionS *symval;
 
       /* If the last loop insn is a two-byte-insn, it is in danger of being
 	 swapped with the insn after it.  To prevent this, create a new
@@ -1926,8 +1926,9 @@ insert_loop_bounds (char *output, sh_operand_info *operand)
       SF_SET_LOCAL (end_sym);
 #endif /* OBJ_COFF */
       symbol_table_insert (end_sym);
-      end_sym->sy_value = operand[1].immediate;
-      end_sym->sy_value.X_add_number += 2;
+      symval = symbol_get_value_expression (end_sym);
+      *symval = operand[1].immediate;
+      symval->X_add_number += 2;
       fix_new (frag_now, frag_now_fix (), 2, end_sym, 0, 1, BFD_RELOC_SH_LABEL);
     }
 
@@ -2922,21 +2923,6 @@ sh_frob_section (bfd *abfd ATTRIBUTE_UNUSED, segT sec,
   seginfo = seg_info (sec);
   if (seginfo == NULL)
     return;
-
-  for (fix = seginfo->fix_root; fix != NULL; fix = fix->fx_next)
-    {
-      symbolS *sym;
-
-      sym = fix->fx_addsy;
-      /* Check for a local_symbol.  */
-      if (sym && sym->bsym == NULL)
-	{
-	  struct local_symbol *ls = (struct local_symbol *)sym;
-	  /* See if it's been converted.  If so, canonicalize.  */
-	  if (local_symbol_converted_p (ls))
-	    fix->fx_addsy = local_symbol_get_real_symbol (ls);
-	}
-    }
 
   for (fix = seginfo->fix_root; fix != NULL; fix = fix->fx_next)
     {

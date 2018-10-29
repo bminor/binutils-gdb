@@ -27,7 +27,6 @@
 #include "xtensa-relax.h"
 #include "dwarf2dbg.h"
 #include "xtensa-istack.h"
-#include "struc-symbol.h"
 #include "xtensa-config.h"
 #include "elf/xtensa.h"
 
@@ -7215,10 +7214,8 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
       frag_now->tc_frag_data.slot_offsets[slot] = tinsn->offset;
       frag_now->tc_frag_data.literal_frags[slot] = tinsn->literal_frag;
       if (tinsn->opcode == xtensa_l32r_opcode)
-	{
-	  frag_now->tc_frag_data.literal_frags[slot] =
-		  tinsn->tok[1].X_add_symbol->sy_frag;
-	}
+	frag_now->tc_frag_data.literal_frags[slot]
+	  = symbol_get_frag (tinsn->tok[1].X_add_symbol);
       if (tinsn->literal_space != 0)
 	xg_assemble_literal_space (tinsn->literal_space, slot);
       frag_now->tc_frag_data.free_reg[slot] = tinsn->extra_arg;
@@ -7683,14 +7680,15 @@ static int xg_order_trampoline_chain (const void *a, const void *b)
   const struct trampoline_chain_entry *pb = &_pb->target;
   symbolS *s1 = pa->sym;
   symbolS *s2 = pb->sym;
+  symbolS *tmp;
 
-  if (s1->sy_flags.sy_local_symbol
-      && local_symbol_converted_p ((struct local_symbol *) s1))
-    s1 = local_symbol_get_real_symbol ((struct local_symbol *) s1);
+  tmp = symbol_symbolS (s1);
+  if (tmp)
+    s1 = tmp;
 
-  if (s2->sy_flags.sy_local_symbol
-      && local_symbol_converted_p ((struct local_symbol *) s2))
-    s2 = local_symbol_get_real_symbol ((struct local_symbol *) s2);
+  tmp = symbol_symbolS (s2);
+  if (tmp)
+    s2 = tmp;
 
   if (s1 == s2)
     if (pa->offset == pb->offset)

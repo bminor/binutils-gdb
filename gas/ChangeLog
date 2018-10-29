@@ -1,3 +1,68 @@
+2018-10-29  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (HFILES): Delete struc-symbol.h.
+	* doc/internals.texi: Delete struc-symbol.h reference and out
+	of date local symbol description.
+	* struc-symbol.h: Delete.  Move contents to..
+	* symbols.c: ..here.
+	(symbol_on_chain, symbol_symbolS): New functions.
+	* symbols.h (symbol_on_chain, symbol_symbolS): Declare.
+	* cgen.c: Don't #include struc-symbol.h.
+	(gas_cgen_parse_operand): Don't test for local_symbol using
+	bsym, instead call symbol_symbolS.  Use symbol_get_bfdsym.
+	(weak_operand_overflow_check, make_right_shifted_expr): Use
+	symbol accessors.
+	* config/obj-coff.c: Don't #include struc-symbol.h.
+	(GET_FILENAME_STRING): Delete.
+	* config/obj-elf.c: Don't #include struc-symbol.h.
+	(elf_file_symbol): Use symbol accessors.
+	(elf_adjust_symtab): Call symbol_on_chain.
+	* config/obj-evax.c: Don't #include struc-symbol.h.
+	* config/tc-nds32.c: Likewise.
+	* config/tc-rl78.c: Likewise.
+	* config/tc-rx.c: Likewise.
+	* config/tc-alpha.c: Likewise.
+	(add_to_link_pool, s_alpha_comm): Use symbol accessors.
+	* config/tc-arc.c: Don't #include struc-symbol.h.
+	(arc_check_relocs): Use symbol accessors, testing gas symbol
+	section rather than bfd symbol section.
+	* config/tc-avr.c: Don't #include struc-symbol.h.
+	(avr_patch_gccisr_frag): Use symbol accessors.
+	* config/tc-bfin.c: Don't #include struc-symbol.h.
+	(bfin_loop_beginend): Use symbol accessors.
+	* config/tc-csky.c: Don't #include struc-symbol.h.
+	(v2_work_movih, v2_work_ori): Use symbol accessors.  Check for
+	absolute symbol as well as O_constant.
+	* config/tc-riscv.c: Don't #include struc-symbol.h.
+	(riscv_pre_output_hook): Use symbol accessors.
+	* config/tc-s390.c: Don't #include struc-symbol.h.
+	(s390_literals): Use symbol accessors.
+	* config/tc-score.c (s3_build_la_pic, s3_build_lwst_pic): Use
+	symbol accessors.
+	(s3_relax_branch_inst16, s3_relax_cmpbranch_inst32): Don't
+	test symbol bsym.
+	* config/tc-score7.c: Don't #include struc-symbol.h.
+	(s7_build_la_pic, s7_build_lwst_pic): Use symbol accessors.
+	(s7_b32_relax_to_b16): Don't test symbol bsym.
+	* config/tc-sh.c: Don't #include struc-symbol.h.
+	(insert_loop_bounds): Use symbol accessors.
+	(sh_frob_section): Remove bogus symbol canonicalization.
+	* config/tc-tic54x.c: Don't #include struc-symbol.h.
+	(tic54x_bss): Use symbol accessors.
+	* config/tc-tilegx.c: Don't #include struc-symbol.h.
+	(emit_tilegx_instruction, tilegx_parse_name): Use symbol accessors.
+	* config/tc-tilepro.c: Don't #include struc-symbol.h.
+	(emit_tilepro_instruction, tilepro_parse_name): Use accessors.
+	* config/tc-xtensa.c: Don't #include struc-symbol.h.
+	(xg_assemble_vliw_tokens): Use symbol accessors.
+	(xg_order_trampoline_chain): Likewise.
+	* ehopt.c: Don't #include struc-symbol.h.
+	(check_eh_frame): Correct local symbol test.  Use symbol accessors.
+	* write.c: Don't #include struc-symbol.h.
+	(create_note_reloc, maybe_generate_build_notes): Use symbol accessors.
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2018-10-28  Alan Modra  <amodra@gmail.com>
 
 	PR 23837

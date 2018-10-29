@@ -254,7 +254,6 @@ remap.c
 sb.c
 sb.h
 stabs.c
-struc-symbol.h
 subsegs.c
 subsegs.h
 symbols.c

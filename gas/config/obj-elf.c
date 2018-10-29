@@ -23,7 +23,6 @@
 #include "safe-ctype.h"
 #include "subsegs.h"
 #include "obstack.h"
-#include "struc-symbol.h"
 #include "dwarf2dbg.h"
 
 #ifndef ECOFF_DEBUGGING
@@ -261,10 +260,12 @@ elf_sec_sym_ok_for_reloc (asection *sec)
 void
 elf_file_symbol (const char *s, int appfile)
 {
+  asymbol *bsym;
+
   if (!appfile
       || symbol_rootP == NULL
-      || symbol_rootP->bsym == NULL
-      || (symbol_rootP->bsym->flags & BSF_FILE) == 0)
+      || (bsym = symbol_get_bfdsym (symbol_rootP)) == NULL
+      || (bsym->flags & BSF_FILE) == 0)
     {
       symbolS *sym;
       size_t name_length;
@@ -284,8 +285,8 @@ elf_file_symbol (const char *s, int appfile)
       symbol_get_bfdsym (sym)->flags |= BSF_FILE;
 
       if (symbol_rootP != sym
-	  && (symbol_rootP->bsym == NULL
-	      || !(symbol_rootP->bsym->flags & BSF_FILE)))
+	  && ((bsym = symbol_get_bfdsym (symbol_rootP)) == NULL
+	      || (bsym->flags & BSF_FILE) == 0))
 	{
 	  symbol_remove (sym, &symbol_rootP, &symbol_lastP);
 	  symbol_insert (sym, symbol_rootP, &symbol_rootP, &symbol_lastP);
@@ -2469,11 +2470,7 @@ elf_adjust_symtab (void)
       /* Make sure that the signature symbol for the group has the
 	 name of the group.  */
       sy = symbol_find_exact (group_name);
-      if (!sy
-	  || (sy != symbol_lastP
-	      && (sy->sy_flags.sy_local_symbol
-		  || sy->sy_next == NULL
-		  || sy->sy_next->sy_previous != sy)))
+      if (!sy || !symbol_on_chain (sy, symbol_rootP, symbol_lastP))
 	{
 	  /* Create the symbol now.  */
 	  sy = symbol_new (group_name, now_seg, (valueT) 0, frag_now);

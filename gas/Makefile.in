@@ -509,7 +509,6 @@ HFILES = \
 	output-file.h \
 	read.h \
 	sb.h \
-	struc-symbol.h \
 	subsegs.h \
 	symbols.h \
 	tc.h \

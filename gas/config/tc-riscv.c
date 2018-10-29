@@ -28,7 +28,6 @@
 #include "itbl-ops.h"
 #include "dwarf2dbg.h"
 #include "dw2gencfi.h"
-#include "struc-symbol.h"
 
 #include "elf/riscv.h"
 #include "opcode/riscv.h"
@@ -2620,14 +2619,13 @@ riscv_pre_output_hook (void)
 	    if (frag->fr_type == rs_cfa)
 	      {
 		expressionS exp;
+		expressionS *symval;
 
-		symbolS *add_symbol = frag->fr_symbol->sy_value.X_add_symbol;
-		symbolS *op_symbol = frag->fr_symbol->sy_value.X_op_symbol;
-
+		symval = symbol_get_value_expression (frag->fr_symbol);
 		exp.X_op = O_subtract;
-		exp.X_add_symbol = add_symbol;
+		exp.X_add_symbol = symval->X_add_symbol;
 		exp.X_add_number = 0;
-		exp.X_op_symbol = op_symbol;
+		exp.X_op_symbol = symval->X_op_symbol;
 
 		fix_new_exp (frag, (int) frag->fr_offset, 1, &exp, 0,
 			     BFD_RELOC_RISCV_CFA);

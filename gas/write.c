@@ -1886,8 +1886,6 @@ create_obj_attrs_section (void)
   size_seg (stdoutput, s, NULL);
 }
 
-#include "struc-symbol.h"
-
 /* Create a relocation against an entry in a GNU Build attribute section.  */
 
 static void
@@ -1904,7 +1902,7 @@ create_note_reloc (segT           sec,
 
   /* We create a .b type reloc as resolve_reloc_expr_symbols() has already been called.  */
   reloc->u.b.sec   = sec;
-  reloc->u.b.s     = sym->bsym;
+  reloc->u.b.s     = symbol_get_bfdsym (sym);
   reloc->u.b.r.sym_ptr_ptr = & reloc->u.b.s;
   reloc->u.b.r.address     = offset;
   reloc->u.b.r.addend      = addend;
@@ -1951,6 +1949,7 @@ maybe_generate_build_notes (void)
   offsetT   desc2_offset;
   int       desc_reloc;
   symbolS * sym;
+  asymbol * bsym;
 
   if (! flag_generate_build_notes
       || bfd_get_section_by_name (stdoutput,
@@ -2004,12 +2003,12 @@ maybe_generate_build_notes (void)
   total_size = 0;
   note = NULL;
 
-  for (sym = symbol_rootP; sym != NULL; sym = sym->sy_next)
-    if (sym->bsym != NULL
-	&& sym->bsym->flags & BSF_SECTION_SYM
-	&& sym->bsym->section != NULL
+  for (sym = symbol_rootP; sym != NULL; sym = symbol_next (sym))
+    if ((bsym = symbol_get_bfdsym (sym)) != NULL
+	&& bsym->flags & BSF_SECTION_SYM
+	&& bsym->section != NULL
 	/* Skip linkonce sections - we cannot use these section symbols as they may disappear.  */
-	&& (sym->bsym->section->flags & (SEC_CODE | SEC_LINK_ONCE)) == SEC_CODE
+	&& (bsym->section->flags & (SEC_CODE | SEC_LINK_ONCE)) == SEC_CODE
 	/* Not all linkonce sections are flagged...  */
 	&& strncmp (S_GET_NAME (sym), ".gnu.linkonce", sizeof ".gnu.linkonce" - 1) != 0)
       {
@@ -2042,7 +2041,7 @@ maybe_generate_build_notes (void)
 
 	/* ...and another one to install the end address.  */
 	create_note_reloc (sec, sym, total_size + desc2_offset, desc_reloc,
-			   bfd_get_section_size (sym->bsym->section),
+			   bfd_get_section_size (bsym->section),
 			   note);
 
 	total_size += note_size;

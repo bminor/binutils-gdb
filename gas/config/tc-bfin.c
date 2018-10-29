@@ -19,7 +19,6 @@
    02110-1301, USA.  */
 
 #include "as.h"
-#include "struc-symbol.h"
 #include "bfin-defs.h"
 #include "obstack.h"
 #include "safe-ctype.h"
@@ -1930,7 +1929,7 @@ bfin_loop_beginend (Expr_Node *exp, int begin)
   /* LOOP_END follows the last instruction in the loop.
      Adjust label address.  */
   if (!begin)
-    ((struct local_symbol *) linelabel)->lsy_value -= last_insn_size;
+    *symbol_X_add_number (linelabel) -= last_insn_size;
 }
 
 bfd_boolean

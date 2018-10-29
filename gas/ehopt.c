@@ -21,7 +21,6 @@
 
 #include "as.h"
 #include "subsegs.h"
-#include "struc-symbol.h"
 
 /* We include this ELF file, even though we may not be assembling for
    ELF, since the exception frame information is always in a format
@@ -434,23 +433,28 @@ check_eh_frame (expressionS *exp, unsigned int *pnbytes)
 		|| exp->X_op == O_right_shift)
 	       && d->cie_info.code_alignment > 1)
 	{
-	  if (exp->X_add_symbol->bsym
-	      && exp->X_op_symbol->bsym
-	      && exp->X_add_symbol->sy_value.X_op == O_subtract
-	      && exp->X_op_symbol->sy_value.X_op == O_constant
+	  if (symbol_symbolS (exp->X_add_symbol)
+	      && symbol_constant_p (exp->X_op_symbol)
+	      && S_GET_SEGMENT (exp->X_op_symbol) == absolute_section
 	      && ((exp->X_op == O_divide
-		   ? exp->X_op_symbol->sy_value.X_add_number
-		   : (offsetT) 1 << exp->X_op_symbol->sy_value.X_add_number)
+		   ? *symbol_X_add_number (exp->X_op_symbol)
+		   : (offsetT) 1 << *symbol_X_add_number (exp->X_op_symbol))
 		  == (offsetT) d->cie_info.code_alignment))
 	    {
-	      /* This is a case we can optimize as well.  The expression was
-		 not reduced, so we can not finish the optimization until the
-		 end of the assembly.  We set up a variant frag which we
-		 handle later.  */
-	      frag_var (rs_cfa, 4, 0, d->cie_info.code_alignment << 3,
-			make_expr_symbol (&exp->X_add_symbol->sy_value),
-			d->loc4_fix, (char *) d->loc4_frag);
-	      return 1;
+	      expressionS *symval;
+
+	      symval = symbol_get_value_expression (exp->X_add_symbol);
+	      if (symval->X_op == O_subtract)
+		{
+		  /* This is a case we can optimize as well.  The
+		     expression was not reduced, so we can not finish
+		     the optimization until the end of the assembly.
+		     We set up a variant frag which we handle later.  */
+		  frag_var (rs_cfa, 4, 0, d->cie_info.code_alignment << 3,
+			    make_expr_symbol (symval),
+			    d->loc4_fix, (char *) d->loc4_frag);
+		  return 1;
+		}
 	    }
 	}
       break;

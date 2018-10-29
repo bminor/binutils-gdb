@@ -168,6 +168,8 @@ void symbol_remove (symbolS * symbolP, symbolS ** rootP,
 
 extern symbolS *symbol_previous (symbolS *);
 
+extern int symbol_on_chain (symbolS *s, symbolS *rootPP, symbolS *lastPP);
+
 void verify_symbol_chain (symbolS * rootP, symbolS * lastP);
 
 void symbol_append (symbolS * addme, symbolS * target,
@@ -200,6 +202,7 @@ extern int symbol_equated_p (symbolS *);
 extern int symbol_equated_reloc_p (symbolS *);
 extern int symbol_constant_p (symbolS *);
 extern int symbol_shadow_p (symbolS *);
+extern symbolS *symbol_symbolS (symbolS *);
 extern asymbol *symbol_get_bfdsym (symbolS *);
 extern void symbol_set_bfdsym (symbolS *, asymbol *);
 extern int symbol_same_p (symbolS *, symbolS *);

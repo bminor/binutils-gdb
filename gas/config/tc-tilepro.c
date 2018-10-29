@@ -19,7 +19,6 @@
    MA 02110-1301, USA.  */
 
 #include "as.h"
-#include "struc-symbol.h"
 #include "subsegs.h"
 
 #include "elf/tilepro.h"
@@ -628,16 +627,18 @@ emit_tilepro_instruction (tilepro_bundle_bits bits,
 	    }
 	  else if (use_subexp)
 	    {
+	      expressionS *sval = NULL;
 	      /* Now that we've changed the reloc, change ha16(x) into x,
 		 etc.  */
 
-	      if (!operand_exp->X_add_symbol->sy_flags.sy_local_symbol
-                  && operand_exp->X_add_symbol->sy_value.X_md)
+	      if (symbol_symbolS (operand_exp->X_add_symbol))
+		sval = symbol_get_value_expression (operand_exp->X_add_symbol);
+	      if (sval && sval->X_md)
 		{
 		  /* HACK: We used X_md to mark this symbol as a fake wrapper
 		     around a real expression. To unwrap it, we just grab its
 		     value here.  */
-		  operand_exp = &operand_exp->X_add_symbol->sy_value;
+		  operand_exp = sval;
 
 		  if (require_symbol)
 		    {
@@ -958,7 +959,7 @@ tilepro_parse_name (char *name, expressionS *e, char *nextcharP)
 	  /* HACK: mark this symbol as a temporary wrapper around a proper
 	     expression, so we can unwrap it later once we have communicated
 	     the relocation type.  */
-	  sym->sy_value.X_md = 1;
+	  symbol_get_value_expression (sym)->X_md = 1;
 	}
 
       memset (e, 0, sizeof *e);

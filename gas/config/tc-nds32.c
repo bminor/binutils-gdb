@@ -31,7 +31,6 @@
 #include "hash.h"
 #include "sb.h"
 #include "macro.h"
-#include "struc-symbol.h"
 #include "opcode/nds32.h"
 
 #include <stdio.h>
