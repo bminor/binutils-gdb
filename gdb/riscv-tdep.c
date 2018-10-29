@@ -1256,7 +1256,9 @@ riscv_insn::fetch_instruction (struct gdbarch *gdbarch,
   return extract_unsigned_integer (buf, instlen, byte_order);
 }
 
-/* Fetch from target memory an instruction at PC and decode it.  */
+/* Fetch from target memory an instruction at PC and decode it.  This can
+   throw an error if the memory access fails, callers are responsible for
+   handling this error if that is appropriate.  */
 
 void
 riscv_insn::decode (struct gdbarch *gdbarch, CORE_ADDR pc)
@@ -2752,8 +2754,17 @@ riscv_frame_this_id (struct frame_info *this_frame,
 {
   struct riscv_unwind_cache *cache;
 
-  cache = riscv_frame_cache (this_frame, prologue_cache);
-  *this_id = cache->this_id;
+  TRY
+    {
+      cache = riscv_frame_cache (this_frame, prologue_cache);
+      *this_id = cache->this_id;
+    }
+  CATCH (ex, RETURN_MASK_ERROR)
+    {
+      /* Ignore errors, this leaves the frame id as the predefined outer
+         frame id which terminates the backtrace at this point.  */
+    }
+  END_CATCH
 }
 
 /* Implement the prev_register callback for RiscV frame unwinder.  */

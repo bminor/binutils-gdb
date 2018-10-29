@@ -1,3 +1,10 @@
+2018-11-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-tdep.c (riscv_insn::decode): Update header comment.
+	(riscv_frame_this_id): Catch errors thrown while building the
+	frame cache, leave the frame id as the default, which is the outer
+	frame id.
+
 2018-11-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (read_atcb): Only set task_info->called_task if
