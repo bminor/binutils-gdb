@@ -36,6 +36,7 @@
 #include <fcntl.h>
 #include <sys/procfs.h>
 #include "nat/gdb_ptrace.h"
+#include "nat/linux-ptrace.h"
 #include "inf-ptrace.h"
 
 /* Prototypes for supply_gregset etc.  */

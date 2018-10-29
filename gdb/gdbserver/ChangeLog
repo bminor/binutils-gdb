@@ -1,3 +1,7 @@
+2018-10-31  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* linux-ppc-low.c: Include nat/linux-ptrace.h.
+
 2018-10-26  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
 	* configure.srv (ipa_ppc_linux_regobj): Add

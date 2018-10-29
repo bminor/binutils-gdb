@@ -28,6 +28,7 @@
 #include "arch/ppc-linux-common.h"
 #include "arch/ppc-linux-tdesc.h"
 #include "nat/ppc-linux.h"
+#include "nat/linux-ptrace.h"
 #include "linux-ppc-tdesc-init.h"
 #include "ax.h"
 #include "tracepoint.h"
