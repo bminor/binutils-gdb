@@ -1366,16 +1366,6 @@ GDB_AC_COMMON
 # Check the return and argument types of ptrace.
 GDB_AC_PTRACE
 
-dnl Check to see if sys/socket.h knows about AF_LOCAL
-AC_COMPILE_IFELSE(
-     [AC_LANG_PROGRAM([[
-#include <sys/socket.h>
-]],
-	 [[int x = AF_LOCAL]])],
-[AC_DEFINE([HAVE_AF_LOCAL], [1],
-     [Define to 1 if AF_LOCAL is defined or declared by sys/socket.h.])])
-
-
 dnl AC_FUNC_SETPGRP does not work when cross compiling
 dnl Instead, assume we will have a prototype for setpgrp if cross compiling.
 if test "$cross_compiling" = no; then
