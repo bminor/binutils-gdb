@@ -2935,6 +2935,9 @@ load_symbols (lang_input_statement_type *entry,
   if (entry->flags.missing_file)
     return TRUE;
 
+  if (trace_files || verbose)
+    info_msg ("%pI\n", entry);
+
   if (!bfd_check_format (entry->the_bfd, bfd_archive)
       && !bfd_check_format_matches (entry->the_bfd, bfd_object, &matching))
     {
@@ -3010,8 +3013,6 @@ load_symbols (lang_input_statement_type *entry,
     case bfd_object:
       if (!entry->flags.reload)
 	ldlang_add_file (entry);
-      if (trace_files || verbose)
-	info_msg ("%pI\n", entry);
       break;
 
     case bfd_archive:

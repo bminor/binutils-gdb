@@ -1,5 +1,17 @@
 2018-10-29  Alan Modra  <amodra@gmail.com>
 
+	* ldlang.c (load_symbols): When -t, print file names for script
+	files and archives.
+	* ldmain.c (trace_files): Make an int.
+	(add_archive_element): Print archive elements only with multiple
+	-t options, or when archive is thin.
+	* ldmain.h (trace_files): Update.
+	* ldmisc.c (vfinfo): Don't print both original path and path in
+	sysroot.
+	* lexsup.c (parse_args <t>): Increment trace_files.
+
+2018-10-29  Alan Modra  <amodra@gmail.com>
+
 	* ldmain.c (main): Print emulation mode and "deleting executable"
 	for --verbose, not --trace.
 	(add_archive_element): Only print "no new IR symbols" for --verbose.

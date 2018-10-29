@@ -77,7 +77,7 @@ int ld_canon_sysroot_len;
 int g_switch_value = 8;
 
 /* Nonzero means print names of input files as processed.  */
-bfd_boolean trace_files;
+unsigned int trace_files;
 
 /* Nonzero means report actions taken by the linker, and describe the linker script in use.  */
 bfd_boolean verbose;
@@ -926,7 +926,9 @@ add_archive_element (struct bfd_link_info *info,
 	minfo ("(%s)\n", name);
     }
 
-  if (trace_files || verbose)
+  if (verbose
+      || trace_files > 1
+      || (trace_files && bfd_is_thin_archive (orig_input.the_bfd->my_archive)))
     info_msg ("%pI\n", &orig_input);
   return TRUE;
 }

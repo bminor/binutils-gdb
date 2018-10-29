@@ -1233,7 +1233,7 @@ parse_args (unsigned argc, char **argv)
 	  command_line.symbolic = symbolic_functions;
 	  break;
 	case 't':
-	  trace_files = TRUE;
+	  ++trace_files;
 	  break;
 	case 'T':
 	  previous_script_handle = saved_script_handle;

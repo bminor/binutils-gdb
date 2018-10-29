@@ -476,15 +476,13 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 		  fmt++;
 		  i = (lang_input_statement_type *) args[arg_no].p;
 		  ++arg_count;
-		  if (i->the_bfd->my_archive != NULL
+		  if (i->the_bfd != NULL
+		      && i->the_bfd->my_archive != NULL
 		      && !bfd_is_thin_archive (i->the_bfd->my_archive))
-		    fprintf (fp, "(%s)",
-			     bfd_get_filename (i->the_bfd->my_archive));
-		  fprintf (fp, "%s", i->local_sym_name);
-		  if ((i->the_bfd->my_archive == NULL
-		       || bfd_is_thin_archive (i->the_bfd->my_archive))
-		      && filename_cmp (i->local_sym_name, i->filename) != 0)
-		    fprintf (fp, " (%s)", i->filename);
+		    fprintf (fp, "(%s)%s", i->the_bfd->my_archive->filename,
+			     i->local_sym_name);
+		  else
+		    fprintf (fp, "%s", i->filename);
 		}
 	      else if (*fmt == 'R')
 		{
