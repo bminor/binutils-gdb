@@ -13548,11 +13548,9 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_cv_os_cygwin" >&5
 $as_echo "$sim_cv_os_cygwin" >&6; }
 
-if test x$sim_cv_os_cygwin = xyes; then
-  TERMCAP='`if test -r ../../libtermcap/libtermcap.a; then echo ../../libtermcap/libtermcap.a; else echo -ltermcap; fi` -luser32'
-else
-  # Keep in sync with gdb's configure.ac list.
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing tgetent" >&5
+
+# Keep in sync with gdb's configure.ac list.
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing tgetent" >&5
 $as_echo_n "checking for library containing tgetent... " >&6; }
 if ${ac_cv_search_tgetent+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -13610,6 +13608,8 @@ else
   TERMCAP=""
 fi
 
+if test x$sim_cv_os_cygwin = xyes; then
+  TERMCAP="${TERMCAP} -luser32"
 fi
 
 
