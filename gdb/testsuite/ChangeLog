@@ -1,3 +1,8 @@
+2018-11-20  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.base/info_minsym.c: New file.
+	* gdb.base/info_minsym.exp: New file.
+
 2018-11-19  Tom Tromey  <tom@tromey.com>
 
 	PR rust/23625:
