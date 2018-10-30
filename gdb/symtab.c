@@ -4544,9 +4544,12 @@ search_symbols (const char *regexp, enum search_domain kind,
     sort_search_symbols_remove_dups (&result);
 
   /* If there are no eyes, avoid all contact.  I mean, if there are
-     no debug symbols, then add matching minsyms.  */
+     no debug symbols, then add matching minsyms.  But if the user wants
+     to see symbols matching a type regexp, then never give a minimal symbol,
+     as we assume that a minimal symbol does not have a type.  */
 
-  if (found_misc || (nfiles == 0 && kind != FUNCTIONS_DOMAIN))
+  if ((found_misc || (nfiles == 0 && kind != FUNCTIONS_DOMAIN))
+      && !treg.has_value ())
     {
       ALL_MSYMBOLS (objfile, msymbol)
       {
@@ -4560,13 +4563,9 @@ search_symbols (const char *regexp, enum search_domain kind,
 	    || MSYMBOL_TYPE (msymbol) == ourtype3
 	    || MSYMBOL_TYPE (msymbol) == ourtype4)
 	  {
-	    /* If the user wants to see var matching a type regexp,
-	       then never give a minimal symbol.  */
-	    if (kind != VARIABLES_DOMAIN
-		&& !treg.has_value () /* minimal symbol has never a type ???? */
-		&& (!preg.has_value ()
-		    || preg->exec (MSYMBOL_NATURAL_NAME (msymbol), 0,
-				   NULL, 0) == 0))
+	    if (!preg.has_value ()
+		|| preg->exec (MSYMBOL_NATURAL_NAME (msymbol), 0,
+			       NULL, 0) == 0)
 	      {
 		/* For functions we can do a quick check of whether the
 		   symbol might be found via find_pc_symtab.  */

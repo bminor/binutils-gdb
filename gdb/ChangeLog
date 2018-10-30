@@ -1,3 +1,8 @@
+2018-11-20  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* symtab.c (search_symbols): Properly check absence of type regexp
+	before entering the loop scanning the minimal symbols.
+
 2018-11-20  John Darrington  <john@darrington.wattle.id.au>
 
 	* s12z-tdep.c (s12z_extract_return_value): New function.
