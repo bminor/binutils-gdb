@@ -1,3 +1,9 @@
+2018-10-31  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/23835
+	* common/common-defs.h: Don't redefine _FORTIFY_SOURCE if it's
+	already defined.
+
 2018-10-31  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
 	* ppc-linux-nat.c: Include nat/linux-ptrace.h.
