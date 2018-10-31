@@ -1,3 +1,7 @@
+2018-10-31  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (get_valueof): Don't output read value in test name.
+
 2018-10-31  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.dwarf2/void-type.c: New file.

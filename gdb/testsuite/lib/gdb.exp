@@ -5636,7 +5636,7 @@ proc get_valueof { fmt exp default {test ""} } {
     gdb_test_multiple "print${fmt} ${exp}" "$test" {
 	-re "\\$\[0-9\]* = (\[^\r\n\]*)\[\r\n\]*$gdb_prompt $" {
 	    set val $expect_out(1,string)
-	    pass "$test ($val)"
+	    pass "$test"
 	}
 	timeout {
 	    fail "$test (timeout)"
