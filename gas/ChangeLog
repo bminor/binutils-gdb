@@ -1,5 +1,9 @@
 2018-10-31  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* testsuite/gas/arm/armv8-a+rdma-warning.d: Remove objdump execution.
+
+2018-10-31  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* testsuite/gas/arm/udf.d: Update expected output.
 
 2018-10-31  Andre Vieira  <andre.simoesdiasvieira@arm.com>
