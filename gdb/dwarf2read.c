@@ -536,30 +536,30 @@ struct dwarf2_cu
   std::vector<struct type *> rust_unions;
 
   /* Mark used when releasing cached dies.  */
-  unsigned int mark : 1;
+  bool mark : 1;
 
   /* This CU references .debug_loc.  See the symtab->locations_valid field.
      This test is imperfect as there may exist optimized debug code not using
      any location list and still facing inlining issues if handled as
      unoptimized code.  For a future better test see GCC PR other/32998.  */
-  unsigned int has_loclist : 1;
+  bool has_loclist : 1;
 
-  /* These cache the results for producer_is_* fields.  CHECKED_PRODUCER is set
+  /* These cache the results for producer_is_* fields.  CHECKED_PRODUCER is true
      if all the producer_is_* fields are valid.  This information is cached
      because profiling CU expansion showed excessive time spent in
      producer_is_gxx_lt_4_6.  */
-  unsigned int checked_producer : 1;
-  unsigned int producer_is_gxx_lt_4_6 : 1;
-  unsigned int producer_is_gcc_lt_4_3 : 1;
+  bool checked_producer : 1;
+  bool producer_is_gxx_lt_4_6 : 1;
+  bool producer_is_gcc_lt_4_3 : 1;
   bool producer_is_icc : 1;
-  unsigned int producer_is_icc_lt_14 : 1;
+  bool producer_is_icc_lt_14 : 1;
   bool producer_is_codewarrior : 1;
 
-  /* When set, the file that we're processing is known to have
+  /* When true, the file that we're processing is known to have
      debugging info for C++ namespaces.  GCC 3.3.x did not produce
      this information, but later versions do.  */
 
-  unsigned int processing_has_namespace_info : 1;
+  bool processing_has_namespace_info : 1;
 
   struct partial_die_info *find_partial_die (sect_offset sect_off);
 };
@@ -10648,21 +10648,21 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_common_inclusion:
       break;
     case DW_TAG_namespace:
-      cu->processing_has_namespace_info = 1;
+      cu->processing_has_namespace_info = true;
       read_namespace (die, cu);
       break;
     case DW_TAG_module:
-      cu->processing_has_namespace_info = 1;
+      cu->processing_has_namespace_info = true;
       read_module (die, cu);
       break;
     case DW_TAG_imported_declaration:
-      cu->processing_has_namespace_info = 1;
+      cu->processing_has_namespace_info = true;
       if (read_namespace_alias (die, cu))
 	break;
       /* The declaration is not a global namespace alias.  */
       /* Fall through.  */
     case DW_TAG_imported_module:
-      cu->processing_has_namespace_info = 1;
+      cu->processing_has_namespace_info = true;
       if (die->child != NULL && (die->tag == DW_TAG_imported_declaration
 				 || cu->language != language_fortran))
 	complaint (_("Tag '%s' has unexpected children"),
@@ -11361,7 +11361,7 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
    types, but gives them a size of zero.  Starting with version 14,
    ICC is compatible with GCC.  */
 
-static int
+static bool
 producer_is_icc_lt_14 (struct dwarf2_cu *cu)
 {
   if (!cu->checked_producer)
@@ -11387,7 +11387,7 @@ producer_is_icc (struct dwarf2_cu *cu)
    directory paths.  GCC SVN r127613 (new option -fdebug-prefix-map) fixed
    this, it was first present in GCC release 4.3.0.  */
 
-static int
+static bool
 producer_is_gcc_lt_4_3 (struct dwarf2_cu *cu)
 {
   if (!cu->checked_producer)
@@ -14929,14 +14929,14 @@ check_producer (struct dwarf2_cu *cu)
 	 compliant.  */
     }
 
-  cu->checked_producer = 1;
+  cu->checked_producer = true;
 }
 
 /* Check for GCC PR debug/45124 fix which is not present in any G++ version up
    to 4.5.any while it is present already in G++ 4.6.0 - the PR has been fixed
    during 4.6.0 experimental.  */
 
-static int
+static bool
 producer_is_gxx_lt_4_6 (struct dwarf2_cu *cu)
 {
   if (!cu->checked_producer)
@@ -21271,7 +21271,7 @@ dwarf2_start_symtab (struct dwarf2_cu *cu,
   cu->builder->record_debugformat ("DWARF 2");
   cu->builder->record_producer (cu->producer);
 
-  cu->processing_has_namespace_info = 0;
+  cu->processing_has_namespace_info = false;
 
   return cu->builder->get_compunit_symtab ();
 }
@@ -21338,7 +21338,7 @@ var_decode_location (struct attribute *attr, struct symbol *sym,
   dwarf2_symbol_mark_computed (attr, sym, cu, 0);
 
   if (SYMBOL_COMPUTED_OPS (sym)->location_has_loclist)
-    cu->has_loclist = 1;
+    cu->has_loclist = true;
 }
 
 /* Given a pointer to a DWARF information entry, figure out if we need
@@ -25168,15 +25168,15 @@ dwarf2_find_containing_comp_unit (sect_offset sect_off,
 
 dwarf2_cu::dwarf2_cu (struct dwarf2_per_cu_data *per_cu_)
   : per_cu (per_cu_),
-    mark (0),
-    has_loclist (0),
-    checked_producer (0),
-    producer_is_gxx_lt_4_6 (0),
-    producer_is_gcc_lt_4_3 (0),
+    mark (false),
+    has_loclist (false),
+    checked_producer (false),
+    producer_is_gxx_lt_4_6 (false),
+    producer_is_gcc_lt_4_3 (false),
     producer_is_icc (false),
-    producer_is_icc_lt_14 (0),
+    producer_is_icc_lt_14 (false),
     producer_is_codewarrior (false),
-    processing_has_namespace_info (0)
+    processing_has_namespace_info (false)
 {
   per_cu->cu = this;
 }
@@ -25509,7 +25509,7 @@ dwarf2_mark_helper (void **slot, void *data)
 
   if (per_cu->cu->mark)
     return 1;
-  per_cu->cu->mark = 1;
+  per_cu->cu->mark = true;
 
   if (per_cu->cu->dependencies != NULL)
     htab_traverse (per_cu->cu->dependencies, dwarf2_mark_helper, NULL);
@@ -25525,7 +25525,7 @@ dwarf2_mark (struct dwarf2_cu *cu)
 {
   if (cu->mark)
     return;
-  cu->mark = 1;
+  cu->mark = true;
   if (cu->dependencies != NULL)
     htab_traverse (cu->dependencies, dwarf2_mark_helper, NULL);
 }
@@ -25535,7 +25535,7 @@ dwarf2_clear_marks (struct dwarf2_per_cu_data *per_cu)
 {
   while (per_cu)
     {
-      per_cu->cu->mark = 0;
+      per_cu->cu->mark = false;
       per_cu = per_cu->cu->read_in_chain;
     }
 }

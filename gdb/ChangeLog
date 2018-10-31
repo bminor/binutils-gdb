@@ -1,3 +1,23 @@
+2018-12-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* dwarf2read.c (struct dwarf2_cu): Convert the fields 'mark',
+	'has_loclist', 'checked_producer', 'producer_is_gxx_lt_4_6',
+	'producer_is_gcc_lt_4_3', 'producer_is_icc_lt_14',
+	'processing_has_namespace_info' from unsigned int to bool.  Update
+	comments.
+	(producer_is_icc_lt_14): Update return type.
+	(producer_is_gcc_lt_4_3): Likewise.
+	(producer_is_gxx_lt_4_6): Likewise.
+	(process_die): Write true instead of 1 into predicate fields.
+	(dwarf2_start_symtab): Likewise.
+	(var_decode_location): Likewise.
+	(dwarf2_mark_helper): Likewise.
+	(dwarf2_mark): Likewise.
+	(dwarf2_clear_marks): Write false instead of 0 into predicate
+	field.
+	(dwarf2_cu::dwarf2_cu): Initialise predicate fields to false, not
+	0.
+
 2018-12-17  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* nat/aarch64-sve-linux-ptrace.h: Include signal.h instead of
