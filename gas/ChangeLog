@@ -1,3 +1,8 @@
+2018-10-31  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* testsuite/gas/arm/armv1.d: Assemble for Armv1 and disassemble for
+	Armv2.
+
 2018-10-29  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am (HFILES): Delete struc-symbol.h.
