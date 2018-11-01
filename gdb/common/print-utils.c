@@ -250,10 +250,10 @@ hex_string_custom: insufficient space to store result"));
 /* See print-utils.h.  */
 
 char *
-int_string (LONGEST val, int radix, int is_signed, int width, 
+int_string (LONGEST val, int radix, int is_signed, int width,
 	    int use_c_format)
 {
-  switch (radix) 
+  switch (radix)
     {
     case 16:
       {
@@ -287,7 +287,7 @@ int_string (LONGEST val, int radix, int is_signed, int width,
       internal_error (__FILE__, __LINE__,
 		      _("failed internal consistency check"));
     }
-}	
+}
 
 /* See print-utils.h.  */
 

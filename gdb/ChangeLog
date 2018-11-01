@@ -1,5 +1,9 @@
 2018-11-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* print-utils.c (int_string): Remove unnecessary trailing spaces.
+
+2018-11-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* rs6000-tdep.c (skip_prologue): Fix potential negative left
 	shifting.
 
