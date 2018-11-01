@@ -1975,16 +1975,19 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 
       else
 	{
-	  unsigned int all_mask = ~((1U << fdata->saved_gpr) - 1);
-
 	  /* Not a recognized prologue instruction.
 	     Handle optimizer code motions into the prologue by continuing
 	     the search if we have no valid frame yet or if the return
 	     address is not yet saved in the frame.  Also skip instructions
 	     if some of the GPRs expected to be saved are not yet saved.  */
 	  if (fdata->frameless == 0 && fdata->nosavedpc == 0
-	      && (fdata->gpr_mask & all_mask) == all_mask)
-	    break;
+	      && fdata->saved_gpr != -1)
+	    {
+	      unsigned int all_mask = ~((1U << fdata->saved_gpr) - 1);
+
+	      if ((fdata->gpr_mask & all_mask) == all_mask)
+		break;
+	    }
 
 	  if (op == 0x4e800020		/* blr */
 	      || op == 0x4e800420)	/* bctr */
