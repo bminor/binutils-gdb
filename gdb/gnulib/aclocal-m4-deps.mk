@@ -80,6 +80,7 @@ aclocal_m4_deps = \
 	import/m4/mempcpy.m4 \
 	import/m4/memrchr.m4 \
 	import/m4/mkdir.m4 \
+	import/m4/mkdtemp.m4 \
 	import/m4/mkostemp.m4 \
 	import/m4/mmap-anon.m4 \
 	import/m4/mode_t.m4 \

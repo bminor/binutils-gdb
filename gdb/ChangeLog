@@ -1,3 +1,28 @@
+2018-11-01  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* common/pathstuff.c (get_standard_temp_dir): New.
+	* common/pathstuff.h (get_standard_temp_dir): New.
+	* config.in: Re-generate.
+	* configure: Re-generate.
+	* configure.ac: Don't check for mkdtemp.
+	* gnulib/aclocal-m4-deps.mk: Re-generate.
+	* gnulib/aclocal.m4: Re-generate.
+	* gnulib/config.in: Re-generate.
+	* gnulib/configure: Re-generate.
+	* gnulib/import/Makefile.am: Re-generate.
+	* gnulib/import/Makefile.in: Re-generate.
+	* gnulib/import/m4/gnulib-cache.m4: Re-generate.
+	* gnulib/import/m4/gnulib-comp.m4: Re-generate.
+	* gnulib/import/m4/mkdtemp.m4: New file.
+	* gnulib/import/mkdtemp.c: New file.
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES):
+	Add mkdtemp module.
+	* unittests/mkdir-recursive-selftests.c (test): Use
+	get_standard_temp_dir.
+	(_initialize_mkdir_recursive_selftests): Remove HAVE_MKDTEMP
+	ifdef.
+	* compile/compile.c (get_compile_file_tempdir): Likewise.
+
 2018-11-01  Sangamesh Mallayya <sangamesh.swamy@in.ibm.com>
 
 	* rs6000-aix-tdep.c: Include "trad-frame.h" and "frame-unwind.h".

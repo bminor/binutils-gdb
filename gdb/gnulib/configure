@@ -5841,6 +5841,7 @@ fi
   # Code from module mempcpy:
   # Code from module memrchr:
   # Code from module mkdir:
+  # Code from module mkdtemp:
   # Code from module mkostemp:
   # Code from module msvc-inval:
   # Code from module msvc-nothrow:
@@ -21889,6 +21890,52 @@ $as_echo "#define FUNC_MKDIR_DOT_BUG 1" >>confdefs.h
   gl_LIBOBJS="$gl_LIBOBJS mkdir.$ac_objext"
 
   fi
+
+
+  for ac_func in mkdtemp
+do :
+  ac_fn_c_check_func "$LINENO" "mkdtemp" "ac_cv_func_mkdtemp"
+if test "x$ac_cv_func_mkdtemp" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_MKDTEMP 1
+_ACEOF
+
+fi
+done
+
+  if test $ac_cv_func_mkdtemp = no; then
+    HAVE_MKDTEMP=0
+  fi
+
+  if test $HAVE_MKDTEMP = 0; then
+
+
+
+
+
+
+
+
+  gl_LIBOBJS="$gl_LIBOBJS mkdtemp.$ac_objext"
+
+    :
+
+  fi
+
+
+
+
+
+          GNULIB_MKDTEMP=1
+
+
+
+
+
+$as_echo "#define GNULIB_TEST_MKDTEMP 1" >>confdefs.h
+
+
+
 
 
 

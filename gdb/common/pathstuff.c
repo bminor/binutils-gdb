@@ -193,6 +193,31 @@ get_standard_cache_dir ()
 
 /* See common/pathstuff.h.  */
 
+std::string
+get_standard_temp_dir ()
+{
+#ifdef WIN32
+  const char *tmp = getenv ("TMP");
+  if (tmp != nullptr)
+    return tmp;
+
+  tmp = getenv ("TEMP");
+  if (tmp != nullptr)
+    return tmp;
+
+  error (_("Couldn't find temp dir path, both TMP and TEMP are unset."));
+
+#else
+  const char *tmp = getenv ("TMPDIR");
+  if (tmp != nullptr)
+    return tmp;
+
+  return "/tmp";
+#endif
+}
+
+/* See common/pathstuff.h.  */
+
 const char *
 get_shell ()
 {

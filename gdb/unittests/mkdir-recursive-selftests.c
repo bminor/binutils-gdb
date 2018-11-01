@@ -21,6 +21,8 @@
 
 #include "common/filestuff.h"
 #include "selftest.h"
+#include "common/byte-vector.h"
+#include "common/pathstuff.h"
 
 namespace selftests {
 namespace mkdir_recursive {
@@ -44,9 +46,10 @@ create_dir_and_check (const char *dir)
 static void
 test ()
 {
-  char base[] = "/tmp/gdb-selftests-XXXXXX";
+  std::string tmp = get_standard_temp_dir () + "/gdb-selftests";
+  gdb::char_vector base = make_temp_filename (tmp);
 
-  if (mkdtemp (base) == NULL)
+  if (mkdtemp (base.data ()) == NULL)
     perror_with_name (("mkdtemp"));
 
   /* Try not to leave leftover directories.  */
@@ -66,12 +69,12 @@ test ()
 
   private:
     const char *m_base;
-  } cleanup_dirs (base);
+  } cleanup_dirs (base.data ());
 
-  std::string dir = string_printf ("%s/a/b", base);
+  std::string dir = string_printf ("%s/a/b", base.data ());
   SELF_CHECK (create_dir_and_check (dir.c_str ()));
 
-  dir = string_printf ("%s/a/b/c//d/e/", base);
+  dir = string_printf ("%s/a/b/c//d/e/", base.data ());
   SELF_CHECK (create_dir_and_check (dir.c_str ()));
 }
 
@@ -81,9 +84,7 @@ test ()
 void
 _initialize_mkdir_recursive_selftests ()
 {
-#if defined (HAVE_MKDTEMP)
   selftests::register_test ("mkdir_recursive",
 			    selftests::mkdir_recursive::test);
-#endif
 }
 

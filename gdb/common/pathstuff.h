@@ -66,6 +66,16 @@ extern bool contains_dir_separator (const char *path);
 
 extern std::string get_standard_cache_dir ();
 
+/* Get the usual temporary directory for the current platform.
+
+   On Windows, this is the TMP or TEMP environment variable.
+
+   On the rest, this is the TMPDIR environment variable, if defined, else /tmp.
+
+   Throw an exception on error.  */
+
+extern std::string get_standard_temp_dir ();
+
 /* Return the file name of the user's shell.  Normally this comes from
    the SHELL environment variable.  */
 

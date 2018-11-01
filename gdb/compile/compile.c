@@ -395,11 +395,7 @@ get_compile_file_tempdir (void)
 
   strcpy (tname, TEMPLATE);
 #undef TEMPLATE
-#ifdef HAVE_MKDTEMP
   tempdir_name = mkdtemp (tname);
-#else
-  error (_("Command not supported on this host."));
-#endif
   if (tempdir_name == NULL)
     perror_with_name (_("Could not make temporary directory"));
 

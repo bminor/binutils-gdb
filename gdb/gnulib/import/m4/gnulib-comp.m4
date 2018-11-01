@@ -121,6 +121,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module mempcpy:
   # Code from module memrchr:
   # Code from module mkdir:
+  # Code from module mkdtemp:
   # Code from module mkostemp:
   # Code from module msvc-inval:
   # Code from module msvc-nothrow:
@@ -444,6 +445,12 @@ AC_DEFUN([gl_INIT],
   if test $REPLACE_MKDIR = 1; then
     AC_LIBOBJ([mkdir])
   fi
+  gl_FUNC_MKDTEMP
+  if test $HAVE_MKDTEMP = 0; then
+    AC_LIBOBJ([mkdtemp])
+    gl_PREREQ_MKDTEMP
+  fi
+  gl_STDLIB_MODULE_INDICATOR([mkdtemp])
   gl_FUNC_MKOSTEMP
   if test $HAVE_MKOSTEMP = 0; then
     AC_LIBOBJ([mkostemp])
@@ -845,6 +852,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/mempcpy.c
   lib/memrchr.c
   lib/mkdir.c
+  lib/mkdtemp.c
   lib/mkostemp.c
   lib/msvc-inval.c
   lib/msvc-inval.h
@@ -992,6 +1000,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/mempcpy.m4
   m4/memrchr.m4
   m4/mkdir.m4
+  m4/mkdtemp.m4
   m4/mkostemp.m4
   m4/mmap-anon.m4
   m4/mode_t.m4

@@ -203,6 +203,9 @@
 /* Define to 1 when the gnulib module memrchr should be tested. */
 #undef GNULIB_TEST_MEMRCHR
 
+/* Define to 1 when the gnulib module mkdtemp should be tested. */
+#undef GNULIB_TEST_MKDTEMP
+
 /* Define to 1 when the gnulib module mkostemp should be tested. */
 #undef GNULIB_TEST_MKOSTEMP
 
@@ -547,6 +550,9 @@
 /* Define to 1 if getcwd minimally works, that is, its result can be trusted
    when it succeeds. */
 #undef HAVE_MINIMALLY_WORKING_GETCWD
+
+/* Define to 1 if you have the `mkdtemp' function. */
+#undef HAVE_MKDTEMP
 
 /* Define to 1 if you have the 'mkostemp' function. */
 #undef HAVE_MKOSTEMP
