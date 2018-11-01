@@ -38,6 +38,8 @@
 #include "solib-aix.h"
 #include "target-float.h"
 #include "xml-utils.h"
+#include "trad-frame.h"
+#include "frame-unwind.h"
 
 /* If the kernel has to deliver a signal, it pushes a sigcontext
    structure on the stack and then calls the signal handler, passing
@@ -45,11 +47,122 @@
    the signal handler doesn't save this register, so we have to
    access the sigcontext structure via an offset from the signal handler
    frame.
-   The following constants were determined by experimentation on AIX 3.2.  */
+   The following constants were determined by experimentation on AIX 3.2.
+
+   sigcontext structure have the mstsave saved under the
+   sc_jmpbuf.jmp_context. STKMIN(minimum stack size) is 56 for 32-bit
+   processes, and iar offset under sc_jmpbuf.jmp_context is 40.
+   ie offsetof(struct sigcontext, sc_jmpbuf.jmp_context.iar).
+   so PC offset in this case is STKMIN+iar offset, which is 96. */
+
 #define SIG_FRAME_PC_OFFSET 96
 #define SIG_FRAME_LR_OFFSET 108
+/* STKMIN+grp1 offset, which is 56+228=284 */
 #define SIG_FRAME_FP_OFFSET 284
 
+/* 64 bit process.
+   STKMIN64  is 112 and iar offset is 312. So 112+312=424 */
+#define SIG_FRAME_LR_OFFSET64 424
+/* STKMIN64+grp1 offset. 112+56=168 */
+#define SIG_FRAME_FP_OFFSET64 168
+
+static struct trad_frame_cache *
+aix_sighandle_frame_cache (struct frame_info *this_frame,
+			   void **this_cache)
+{
+  LONGEST backchain;
+  CORE_ADDR base, base_orig, func;
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  struct trad_frame_cache *this_trad_cache;
+
+  if ((*this_cache) != NULL)
+    return (struct trad_frame_cache *) (*this_cache);
+
+  this_trad_cache = trad_frame_cache_zalloc (this_frame);
+  (*this_cache) = this_trad_cache;
+
+  base = get_frame_register_unsigned (this_frame,
+                                      gdbarch_sp_regnum (gdbarch));
+  base_orig = base;
+
+  if (tdep->wordsize == 4)
+    {
+      func = read_memory_unsigned_integer (base_orig +
+					   SIG_FRAME_PC_OFFSET + 8,
+					   tdep->wordsize, byte_order);
+      safe_read_memory_integer (base_orig + SIG_FRAME_FP_OFFSET + 8,
+				tdep->wordsize, byte_order, &backchain);
+      base = (CORE_ADDR)backchain;
+    }
+  else
+    {
+      func = read_memory_unsigned_integer (base_orig +
+					   SIG_FRAME_LR_OFFSET64,
+					   tdep->wordsize, byte_order);
+      safe_read_memory_integer (base_orig + SIG_FRAME_FP_OFFSET64,
+				tdep->wordsize, byte_order, &backchain);
+      base = (CORE_ADDR)backchain;
+    }
+
+  trad_frame_set_reg_value (this_trad_cache, gdbarch_pc_regnum (gdbarch), func);
+  trad_frame_set_reg_value (this_trad_cache, gdbarch_sp_regnum (gdbarch), base);
+
+  if (tdep->wordsize == 4)
+    trad_frame_set_reg_addr (this_trad_cache, tdep->ppc_lr_regnum,
+                             base_orig + 0x38 + 52 + 8);
+  else
+    trad_frame_set_reg_addr (this_trad_cache, tdep->ppc_lr_regnum,
+                             base_orig + 0x70 + 320);
+
+  trad_frame_set_id (this_trad_cache, frame_id_build (base, func));
+  trad_frame_set_this_base (this_trad_cache, base);
+
+  return this_trad_cache;
+}
+
+static void
+aix_sighandle_frame_this_id (struct frame_info *this_frame,
+			     void **this_prologue_cache,
+			     struct frame_id *this_id)
+{
+  struct trad_frame_cache *this_trad_cache
+    = aix_sighandle_frame_cache (this_frame, this_prologue_cache);
+  trad_frame_get_id (this_trad_cache, this_id);
+}
+
+static struct value *
+aix_sighandle_frame_prev_register (struct frame_info *this_frame,
+				   void **this_prologue_cache, int regnum)
+{
+  struct trad_frame_cache *this_trad_cache
+    = aix_sighandle_frame_cache (this_frame, this_prologue_cache);
+  return trad_frame_get_register (this_trad_cache, this_frame, regnum);
+}
+
+int
+aix_sighandle_frame_sniffer (const struct frame_unwind *self,
+			     struct frame_info *this_frame,
+			     void **this_prologue_cache)
+{
+  CORE_ADDR pc = get_frame_pc (this_frame);
+  if (pc && pc < AIX_TEXT_SEGMENT_BASE)
+    return 1;
+
+  return 0;
+}
+
+/* AIX signal handler frame unwinder */
+
+static const struct frame_unwind aix_sighandle_frame_unwind = {
+  SIGTRAMP_FRAME,
+  default_frame_unwind_stop_reason,
+  aix_sighandle_frame_this_id,
+  aix_sighandle_frame_prev_register,
+  NULL,
+  aix_sighandle_frame_sniffer
+};
 
 /* Core file support.  */
 
@@ -1061,6 +1174,7 @@ rs6000_aix_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_auto_wide_charset (gdbarch, rs6000_aix_auto_wide_charset);
 
   set_solib_ops (gdbarch, &solib_aix_so_ops);
+  frame_unwind_append_unwinder (gdbarch, &aix_sighandle_frame_unwind);
 }
 
 void

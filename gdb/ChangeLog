@@ -1,3 +1,15 @@
+2018-11-01  Sangamesh Mallayya <sangamesh.swamy@in.ibm.com>
+
+	* rs6000-aix-tdep.c: Include "trad-frame.h" and "frame-unwind.h".
+	(SIG_FRAME_LR_OFFSET64): New define.
+	(SIG_FRAME_FP_OFFSET64): New define.
+	(aix_sighandle_frame_cache): New Function.
+	(aix_sighandle_frame_this_id): New Function.
+	(aix_sighandle_frame_prev_register): New Function.
+	(aix_sighandle_frame_sniffer): New Function.
+	(aix_sighandle_frame_unwind): New global variable.
+	(rs6000_aix_init_osabi): Install new frame unwinder.
+
 2018-10-31  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR gdb/23835

@@ -1,3 +1,8 @@
+2018-11-01  Sangamesh Mallayya <sangamesh.swamy@in.ibm.com>
+
+	* gdb.arch/aix-sighandle.c: New file.
+	* gdb.arch/aix-sighandle.exp: New file.
+
 2018-10-31  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.arch/riscv-reg-aliases.exp: Rewrite to take account of float
