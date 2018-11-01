@@ -498,6 +498,7 @@ enum gdb_osabi
   GDB_OSABI_LYNXOS178,
   GDB_OSABI_NEWLIB,
   GDB_OSABI_SDE,
+  GDB_OSABI_PIKEOS,
 
   GDB_OSABI_INVALID		/* keep this last */
 };

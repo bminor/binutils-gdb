@@ -1,3 +1,13 @@
+2018-11-01  Jerome Guitton  <guitton@adacore.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	* defs.h (enum gdb_osabi): Add GDB_OSABI_PIKEOS.
+	* osabi.c (gdb_osabi_names): Add name for GDB_OSABI_PIKEOS.
+	* arm-pikeos-tdep.c: New file.
+	* configure.tgt: Add arm-pikeos-tdep.o to the case of ARM
+	embedded system.
+	* Makefile.in (ALL_TARGET_OBS): Add arm-pikeos-tdep.o.
+
 2018-11-01  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* common/pathstuff.c (get_standard_temp_dir): New.

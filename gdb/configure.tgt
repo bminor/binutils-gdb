@@ -180,6 +180,7 @@ arm*-*-symbianelf*)
 	;;
 arm*-*-*)
 	# Target: ARM embedded system
+	gdb_target_obs="arm-pikeos-tdep.o"
 	gdb_sim=../sim/arm/libsim.a
 	;;
 

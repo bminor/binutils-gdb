@@ -80,6 +80,7 @@ static const struct osabi_names gdb_osabi_names[] =
   { "LynxOS178", NULL },
   { "Newlib", NULL },
   { "SDE", NULL },
+  { "PikeOS", NULL },
 
   { "<invalid>", NULL }
 };

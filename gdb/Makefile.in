@@ -670,6 +670,7 @@ ALL_TARGET_OBS = \
 	arm-linux-tdep.o \
 	arm-nbsd-tdep.o \
 	arm-obsd-tdep.o \
+	arm-pikeos-tdep.o \
 	arm-symbian-tdep.o \
 	arm-tdep.o \
 	arm-wince-tdep.o \
