@@ -761,7 +761,7 @@ x86_64-*-openbsd*)
 x86_64-*-rtems*)
 	gdb_target_obs="${amd64_tobjs} ${i386_tobjs} i386-bsd-tdep.o"
 	;;
-xtensa*-*-linux*)
+xtensa*-*-*linux*)
 	# Target: GNU/Linux Xtensa
 	gdb_target_obs="xtensa-linux-tdep.o symfile-mem.o linux-tdep.o"
 	build_gdbserver=yes

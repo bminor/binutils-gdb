@@ -1,3 +1,8 @@
+2018-11-06  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* configure.tgt (xtensa*-*-linux*): Change to xtensa*-*-*linux*
+	so that it applies to uclinux as well.
+
 2018-11-06  Marius Muench  <marius.muench@eurecom.fr>
 
 	* arm-tdep.c (arm_scan_prologue): Don't dereference FP reg
