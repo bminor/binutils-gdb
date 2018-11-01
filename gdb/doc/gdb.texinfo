@@ -17161,7 +17161,8 @@ the following example:
 (@value{GDBP}) info task 2
 Ada Task: 0x807c468
 Name: task_1
-Thread: 0x807f378
+Thread: 0
+LWP: 0x1fac
 Parent: 1 (main_task)
 Base Priority: 15
 State: Runnable

@@ -1,3 +1,8 @@
+2018-11-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Ada Tasks): Update the "info task 2" example
+	output to match the current implementation.
+
 2018-10-27  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.texinfo (Information About a Frame): Document changes
