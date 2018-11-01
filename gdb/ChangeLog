@@ -1,3 +1,8 @@
+2018-11-06  Tom de Vries  <tdevries@suse.de>
+
+	* linux-tdep.c (linux_vsyscall_range_raw): Use xmalloc to allocate
+	program headers.
+
 2018-11-06  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* configure.tgt (xtensa*-*-linux*): Change to xtensa*-*-*linux*

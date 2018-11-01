@@ -2269,7 +2269,6 @@ linux_vsyscall_range_raw (struct gdbarch *gdbarch, struct mem_range *range)
      the vDSO.  */
   if (!target_has_execution)
     {
-      Elf_Internal_Phdr *phdrs;
       long phdrs_size;
       int num_phdrs, i;
 
@@ -2277,16 +2276,17 @@ linux_vsyscall_range_raw (struct gdbarch *gdbarch, struct mem_range *range)
       if (phdrs_size == -1)
 	return 0;
 
-      phdrs = (Elf_Internal_Phdr *) alloca (phdrs_size);
-      num_phdrs = bfd_get_elf_phdrs (core_bfd, phdrs);
+      gdb::unique_xmalloc_ptr<Elf_Internal_Phdr>
+	phdrs ((Elf_Internal_Phdr *) xmalloc (phdrs_size));
+      num_phdrs = bfd_get_elf_phdrs (core_bfd, phdrs.get ());
       if (num_phdrs == -1)
 	return 0;
 
       for (i = 0; i < num_phdrs; i++)
-	if (phdrs[i].p_type == PT_LOAD
-	    && phdrs[i].p_vaddr == range->start)
+	if (phdrs.get ()[i].p_type == PT_LOAD
+	    && phdrs.get ()[i].p_vaddr == range->start)
 	  {
-	    range->length = phdrs[i].p_memsz;
+	    range->length = phdrs.get ()[i].p_memsz;
 	    return 1;
 	  }
 
