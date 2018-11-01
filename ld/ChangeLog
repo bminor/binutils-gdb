@@ -1,3 +1,8 @@
+2018-11-01  Thomas Preud'homme  <thomas.preudhomme@linaro.org>
+
+	* testsuite/lib/ld-lib.exp (check_shared_lib_support): Moved to
+	binutils-common.exp.
+
 2018-10-29  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (load_symbols): When -t, print file names for script

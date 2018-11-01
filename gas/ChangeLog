@@ -1,3 +1,8 @@
+2018-11-01  Thomas Preud'homme  <thomas.preudhomme@linaro.org>
+
+	* testsuite/config/default.exp: Define LD, LDFLAGS and
+	ld_elf_shared_opt.
+
 2018-10-31  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	* testsuite/gas/arm/armv8-a+rdma-warning.d: Remove objdump execution.

@@ -26,6 +26,14 @@ if ![info exists ASFLAGS] then {
     set ASFLAGS ""
 }
 
+if ![info exists LD] then {
+    set LD [findfile $base_dir/../../ld/ld-new $base_dir/../../ld/ld-new [transform ld]]
+}
+if ![info exists LDFLAGS] then {
+    set LDFLAGS ""
+}
+set ld_elf_shared_opt "-z norelro"
+
 if ![info exists OBJDUMP] then {
     set OBJDUMP [findfile $base_dir/../../binutils/objdump \
 			  $base_dir/../../binutils/objdump \

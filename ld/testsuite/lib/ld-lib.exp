@@ -1069,23 +1069,6 @@ proc check_gc_sections_available { } {
     return $gc_sections_available_saved
 }
 
-# Returns true if -shared is supported on the target
-
-proc check_shared_lib_support { } {
-    global shared_available_saved
-    global ld
-
-    if {![info exists shared_available_saved]} {
-	set ld_output [remote_exec host $ld "-shared"]
-	if { [ string first "not supported" $ld_output ] >= 0 } {
-	    set shared_available_saved 0
-	} else {
-	    set shared_available_saved 1
-	}
-    }
-    return $shared_available_saved
-}
-
 # Return true if target uses genelf.em (assuming it is ELF).
 proc is_generic_elf { } {
     if { [istarget "d30v-*-*"]

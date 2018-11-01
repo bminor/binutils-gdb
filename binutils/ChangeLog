@@ -1,3 +1,11 @@
+2018-11-01  Thomas Preud'homme  <thomas.preudhomme@linaro.org>
+
+	* testsuite/config/default.exp: Define LD, LDFLAGS and
+	ld_elf_shared_opt.
+	* testsuite/lib/binutils-common.exp (check_shared_lib_support): Moved
+	from ld-lib.exp.
+	(run_dump_test): Set ld to $LD.
+
 2018-10-18  Nick Clifton  <nickc@redhat.com>
 
 	* doc/binutils.texi (readelf): Document alternatives to the

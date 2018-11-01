@@ -248,6 +248,23 @@ proc is_bad_symtab {} {
     return 0;
 }
 
+# Returns true if -shared is supported on the target
+
+proc check_shared_lib_support { } {
+    global shared_available_saved
+    global ld
+
+    if {![info exists shared_available_saved]} {
+	set ld_output [remote_exec host $ld "-shared"]
+	if { [ string first "not supported" $ld_output ] >= 0 } {
+	    set shared_available_saved 0
+	} else {
+	    set shared_available_saved 1
+	}
+    }
+    return $shared_available_saved
+}
+
 # Compare two files line-by-line.  FILE_1 is the actual output and FILE_2
 # is the expected output.  Ignore blank lines in either file.
 #
@@ -1002,6 +1019,8 @@ proc run_dump_test { name {extra_options {}} } {
 	catch "exec rm -f $objfile" exec_output
 
 	set ld_extra_opt ""
+	global ld
+	set ld "$LD"
 	if { [is_elf_format] && [check_shared_lib_support] } {
 	    set ld_extra_opt "$ld_elf_shared_opt"
 	}
