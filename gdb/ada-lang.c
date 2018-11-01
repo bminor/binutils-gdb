@@ -565,6 +565,17 @@ ada_print_array_index (struct value *index_value, struct ui_file *stream,
   fprintf_filtered (stream, " => ");
 }
 
+/* la_watch_location_expression for Ada.  */
+
+gdb::unique_xmalloc_ptr<char>
+ada_watch_location_expression (struct type *type, CORE_ADDR addr)
+{
+  type = check_typedef (TYPE_TARGET_TYPE (check_typedef (type)));
+  std::string name = type_to_string (type);
+  return gdb::unique_xmalloc_ptr<char>
+    (xstrprintf ("{%s} %s", name.c_str (), core_addr_to_string (addr)));
+}
+
 /* Assuming VECT points to an array of *SIZE objects of size
    ELEMENT_SIZE, grow it to contain at least MIN_SIZE objects,
    updating *SIZE as necessary and returning the (new) array.  */
@@ -14425,7 +14436,7 @@ extern const struct language_defn ada_language_defn = {
   ada_print_array_index,
   default_pass_by_reference,
   c_get_string,
-  c_watch_location_expression,
+  ada_watch_location_expression,
   ada_get_symbol_name_matcher,	/* la_get_symbol_name_matcher */
   ada_iterate_over_symbols,
   default_search_name_hash,

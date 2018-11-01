@@ -1,3 +1,7 @@
+2018-11-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/watch_minus_l: New testcase.
+
 2018-11-01  Sangamesh Mallayya <sangamesh.swamy@in.ibm.com>
 
 	* gdb.arch/aix-sighandle.c: New file.

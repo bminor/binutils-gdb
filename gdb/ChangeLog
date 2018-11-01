@@ -1,5 +1,11 @@
 2018-11-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_watch_location_expression): New function.
+	(ada_language_defn): Set la_watch_location_expression to
+	ada_watch_location_expression.
+
+2018-11-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* print-utils.c (int_string): Remove unnecessary trailing spaces.
 
 2018-11-01  Joel Brobecker  <brobecker@adacore.com>
