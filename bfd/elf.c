@@ -2384,15 +2384,18 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	    && ! bfd_section_from_shdr (abfd, hdr->sh_link))
 	  goto fail;
 
-	/* If this reloc section does not use the main symbol table we
-	   don't treat it as a reloc section.  BFD can't adequately
-	   represent such a section, so at least for now, we don't
-	   try.  We just present it as a normal section.  We also
-	   can't use it as a reloc section if it points to the null
-	   section, an invalid section, another reloc section, or its
-	   sh_link points to the null section.  */
-	if (hdr->sh_link != elf_onesymtab (abfd)
+	/* If this is an alloc section in an executable or shared
+	   library, or the reloc section does not use the main symbol
+	   table we don't treat it as a reloc section.  BFD can't
+	   adequately represent such a section, so at least for now,
+	   we don't try.  We just present it as a normal section.  We
+	   also can't use it as a reloc section if it points to the
+	   null section, an invalid section, another reloc section, or
+	   its sh_link points to the null section.  */
+	if (((abfd->flags & (DYNAMIC | EXEC_P)) != 0
+	     && (hdr->sh_flags & SHF_ALLOC) != 0)
 	    || hdr->sh_link == SHN_UNDEF
+	    || hdr->sh_link != elf_onesymtab (abfd)
 	    || hdr->sh_info == SHN_UNDEF
 	    || hdr->sh_info >= num_sec
 	    || elf_elfsections (abfd)[hdr->sh_info]->sh_type == SHT_REL
