@@ -1,3 +1,9 @@
+2018-11-01  Jim Wilson  <jimw@sifive.com>
+
+	* riscv-tdep.c (riscv_breakpoint_kind_from_pc): New local unaligned_p.
+	Set if pcptr if unaligned.  Return 2 if unaligned_p true.  Update
+	debugging messages.
+
 2018-11-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_watch_location_expression): New function.

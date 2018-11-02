@@ -415,18 +415,34 @@ riscv_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 {
   if (use_compressed_breakpoints == AUTO_BOOLEAN_AUTO)
     {
+      bool unaligned_p = false;
       gdb_byte buf[1];
 
-      /* Read the opcode byte to determine the instruction length.  */
-      read_code (*pcptr, buf, 1);
+      /* Some targets don't support unaligned reads.  The address can only
+	 be unaligned if the C extension is supported.  So it is safe to
+	 use a compressed breakpoint in this case.  */
+      if (*pcptr & 0x2)
+	unaligned_p = true;
+      else
+	{
+	  /* Read the opcode byte to determine the instruction length.  */
+	  read_code (*pcptr, buf, 1);
+	}
 
       if (riscv_debug_breakpoints)
-	fprintf_unfiltered
-	  (gdb_stdlog,
-	   "Using %s for breakpoint at %s (instruction length %d)\n",
-	   riscv_insn_length (buf[0]) == 2 ? "C.EBREAK" : "EBREAK",
-	   paddress (gdbarch, *pcptr), riscv_insn_length (buf[0]));
-      if (riscv_insn_length (buf[0]) == 2)
+	{
+	  const char *bp = (unaligned_p || riscv_insn_length (buf[0]) == 2
+			    ? "C.EBREAK" : "EBREAK");
+
+	  fprintf_unfiltered (gdb_stdlog, "Using %s for breakpoint at %s ",
+			      bp, paddress (gdbarch, *pcptr));
+	  if (unaligned_p)
+	    fprintf_unfiltered (gdb_stdlog, "(unaligned address)\n");
+	  else
+	    fprintf_unfiltered (gdb_stdlog, "(instruction length %d)\n",
+				riscv_insn_length (buf[0]));
+	}
+      if (unaligned_p || riscv_insn_length (buf[0]) == 2)
 	return 2;
       else
 	return 4;
