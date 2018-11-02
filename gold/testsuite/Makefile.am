@@ -1875,6 +1875,7 @@ ver_test_13.o: ver_test_13.c
 
 check_SCRIPTS += ver_test_14.sh
 check_DATA += ver_test_14.syms
+MOSTLYCLEANFILES += ver_test_14
 ver_test_14.syms: ver_test_14
 	$(TEST_OBJDUMP) -T $< | $(TEST_CXXFILT) >$@
 ver_test_14: gcctestdir/ld ver_test_main.o ver_test_1.so ver_test_2.so ver_test_4.so ver_test_14.script
@@ -3267,6 +3268,7 @@ endif DEFAULT_TARGET_X86_64
 if DEFAULT_TARGET_X86_64
 check_SCRIPTS += gnu_property_test.sh
 check_DATA += gnu_property_test.stdout
+MOSTLYCLEANFILES += gnu_property_test
 gnu_property_test.stdout: gnu_property_test
 	$(TEST_READELF) -n $< >$@
 gnu_property_test: gcctestdir/ld gnu_property_a.o gnu_property_b.o gnu_property_c.o

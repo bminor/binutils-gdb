@@ -315,6 +315,7 @@ bootstrap-test-r: ld2-r
 
 check_PROGRAMS = ld1 ld2 ld1-r ld2-r
 TESTS = bootstrap-test bootstrap-test-r
+MOSTLYCLEANFILES = bootstrap-test bootstrap-test-r
 
 # Verify that changing the number of threads doesn't change the
 # treehash computation, by building ld1 and ld3 the same way except
@@ -324,6 +325,7 @@ TESTS = bootstrap-test bootstrap-test-r
 # because the treehash can still operate in that mode.
 check_PROGRAMS += ld4
 TESTS += bootstrap-test-treehash-chunksize
+MOSTLYCLEANFILES += bootstrap-test-treehash-chunksize
 
 gcctestdir3/ld: ld-new
 	test -d gcctestdir3 || mkdir -p gcctestdir3
@@ -358,6 +360,7 @@ ld3_LDFLAGS += -Wl,--thread-count=13
 ld4_LDFLAGS += -Wl,--thread-count=3
 check_PROGRAMS += ld3
 TESTS += bootstrap-test-treehash-chunksize
+MOSTLYCLEANFILES += bootstrap-test-treehash-chunksize
 
 bootstrap-test-treehash: ld1 ld3
 	rm -f $@

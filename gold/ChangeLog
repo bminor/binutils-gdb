@@ -1,3 +1,11 @@
+2018-11-02  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (MOSTLYCLEANFILES): Define.
+	* Makefile.in: Regnerate.
+	* testsuite/Makefile.am (MOSTLYCLEANFILES): Add ver_test_14 and
+	gnu_property_test.
+	* testsuite/Makefile.in: Regnerate.
+
 2018-10-16  Cherry Zhang  <cherryyz@google.com>
 
 	PR 23769

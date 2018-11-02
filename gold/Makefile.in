@@ -120,6 +120,7 @@ noinst_PROGRAMS = ld-new$(EXEEXT) incremental-dump$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@THREADS_TRUE@am__append_4 = -Wl,--thread-count=3
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@THREADS_TRUE@am__append_5 = ld3
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@THREADS_TRUE@am__append_6 = bootstrap-test-treehash-chunksize
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@THREADS_TRUE@am__append_7 = bootstrap-test-treehash-chunksize
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../config/ax_pthread.m4 \
@@ -866,6 +867,10 @@ POTFILES = $(CCFILES) $(HFILES) $(TARGETSOURCES)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@TESTS = bootstrap-test bootstrap-test-r \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	bootstrap-test-treehash-chunksize \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(am__append_6)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@MOSTLYCLEANFILES = bootstrap-test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	bootstrap-test-r \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	bootstrap-test-treehash-chunksize \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(am__append_7)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ld3_SOURCES = $(sources_var)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ld3_DEPENDENCIES = $(deps_var) gcctestdir3/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ld3_LDADD = $(ldadd_var)
@@ -1448,6 +1453,7 @@ install-strip:
 	    "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'" install; \
 	fi
 mostlyclean-generic:
+	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
 	-test -z "$(TEST_LOGS)" || rm -f $(TEST_LOGS)
 	-test -z "$(TEST_LOGS:.log=.trs)" || rm -f $(TEST_LOGS:.log=.trs)
 	-test -z "$(TEST_SUITE_LOG)" || rm -f $(TEST_SUITE_LOG)
