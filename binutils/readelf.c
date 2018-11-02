@@ -6299,14 +6299,21 @@ process_section_headers (Filedata * filedata)
       /* Check the sh_link field.  */
       switch (section->sh_type)
 	{
+	case SHT_REL:
+	case SHT_RELA:
+	  if (section->sh_link == 0
+	      && (filedata->file_header.e_type == ET_EXEC
+		  || filedata->file_header.e_type == ET_DYN))
+	    /* A dynamic relocation section where all entries use a
+	       zero symbol index need not specify a symtab section.  */
+	    break;
+	  /* Fall through.  */
 	case SHT_SYMTAB_SHNDX:
 	case SHT_GROUP:
 	case SHT_HASH:
 	case SHT_GNU_HASH:
 	case SHT_GNU_versym:
-	case SHT_REL:
-	case SHT_RELA:
-	  if (section->sh_link < 1
+	  if (section->sh_link == 0
 	      || section->sh_link >= filedata->file_header.e_shnum
 	      || (filedata->section_headers[section->sh_link].sh_type != SHT_SYMTAB
 		  && filedata->section_headers[section->sh_link].sh_type != SHT_DYNSYM))
@@ -6320,7 +6327,7 @@ process_section_headers (Filedata * filedata)
 	case SHT_GNU_verneed:
 	case SHT_GNU_verdef:
 	case SHT_GNU_LIBLIST:
-	  if (section->sh_link < 1
+	  if (section->sh_link == 0
 	      || section->sh_link >= filedata->file_header.e_shnum
 	      || filedata->section_headers[section->sh_link].sh_type != SHT_STRTAB)
 	    warn (_("[%2u]: Link field (%u) should index a string section.\n"),
@@ -6353,7 +6360,13 @@ process_section_headers (Filedata * filedata)
 	{
 	case SHT_REL:
 	case SHT_RELA:
-	  if (section->sh_info < 1
+	  if (section->sh_info == 0
+	      && (filedata->file_header.e_type == ET_EXEC
+		  || filedata->file_header.e_type == ET_DYN))
+	    /* Dynamic relocations apply to segments, so they do not
+	       need to specify the section they relocate.  */
+	    break;
+	  if (section->sh_info == 0
 	      || section->sh_info >= filedata->file_header.e_shnum
 	      || (filedata->section_headers[section->sh_info].sh_type != SHT_PROGBITS
 		  && filedata->section_headers[section->sh_info].sh_type != SHT_NOBITS
@@ -6363,21 +6376,8 @@ process_section_headers (Filedata * filedata)
 		  && filedata->section_headers[section->sh_info].sh_type != SHT_PREINIT_ARRAY
 		  /* FIXME: Are other section types valid ?  */
 		  && filedata->section_headers[section->sh_info].sh_type < SHT_LOOS))
-	    {
-	      if (section->sh_info == 0
-		  && (filedata->file_header.e_type == ET_EXEC
-		      || filedata->file_header.e_type == ET_DYN
-		      /* These next two tests may be redundant, but
-			 they have been left in for paranoia's sake.  */
-		      || streq (SECTION_NAME (section), ".rel.dyn")
-		      || streq (SECTION_NAME (section), ".rela.dyn")))
-		/* Dynamic relocations apply to segments, not sections, so
-		   they do not need an sh_info value.  */
-		;
-	      else
-		warn (_("[%2u]: Info field (%u) should index a relocatable section.\n"),
-		      i, section->sh_info);
-	    }
+	    warn (_("[%2u]: Info field (%u) should index a relocatable section.\n"),
+		  i, section->sh_info);
 	  break;
 
 	case SHT_DYNAMIC:
