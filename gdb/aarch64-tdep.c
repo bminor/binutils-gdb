@@ -46,6 +46,7 @@
 #include "selftest.h"
 
 #include "aarch64-tdep.h"
+#include "aarch64-ravenscar-thread.h"
 
 #include "elf-bfd.h"
 #include "elf/aarch64.h"
@@ -3172,6 +3173,8 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     user_reg_add (gdbarch, aarch64_register_aliases[i].name,
 		  value_of_aarch64_user_reg,
 		  &aarch64_register_aliases[i].regnum);
+
+  register_aarch64_ravenscar_ops (gdbarch);
 
   return gdbarch;
 }

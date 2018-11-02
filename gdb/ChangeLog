@@ -1,3 +1,16 @@
+2018-12-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* aarch64-ravenscar-thread.h, aarch64-ravenscar-thread.c: New files.
+	* aarch64-tdep.c: #include "aarch64-ravenscar-thread.h".
+	(aarch64_gdbarch_init): Add call to register_aarch64_ravenscar_ops.
+	* Makefile.in (ALL_64_TARGET_OBS): Add aarch64-ravenscar-thread.o.
+	(HFILES_NO_SRCDIR): Add aarch64-ravenscar-thread.h.
+	(ALLDEPFILES): Add aarch64-ravenscar-thread.c.
+	* configure.tgt (cpu_obs) [aarch64*-*-*]: Add ravenscar-thread.o
+	and aarch64-ravenscar-thread.o.
+	* NEWS: Add entry documenting Ravenscar tasking support
+	on AArch64 ELF.
+
 2018-11-02  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* symtab.c (info_functions_command): Initialize quiet flag.

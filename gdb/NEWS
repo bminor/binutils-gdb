@@ -22,6 +22,11 @@
 * DWARF index cache: GDB can now automatically save indices of DWARF
   symbols on disk to speed up further loading of the same binaries.
 
+* Ada task switching is now supported on aarch64-elf targets when
+  debugging a program using the Ravenscar Profile.  For more information,
+  see the "Tasking Support when using the Ravenscar Profile" section
+  in the GDB user manual.
+
 * GDB in batch mode now exits with status 1 if the last command to be
   executed failed.
 

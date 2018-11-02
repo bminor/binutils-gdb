@@ -627,6 +627,7 @@ ALL_64_TARGET_OBS = \
 	aarch64-fbsd-tdep.o \
 	aarch64-linux-tdep.o \
 	aarch64-newlib-tdep.o \
+	aarch64-ravenscar-thread.o \
 	aarch64-tdep.o \
 	alpha-bsd-tdep.o \
 	alpha-linux-tdep.o \
@@ -1168,6 +1169,7 @@ SFILES = \
 # right, it is probably easiest just to list .h files here directly.
 
 HFILES_NO_SRCDIR = \
+	aarch64-ravenscar-thread.h \
 	aarch64-tdep.h \
 	ada-lang.h \
 	addrmap.h \
@@ -2174,6 +2176,7 @@ ALLDEPFILES = \
 	aarch64-linux-nat.c \
 	aarch64-linux-tdep.c \
 	aarch64-newlib-tdep.c \
+	aarch64-ravenscar-thread.c \
 	aarch64-tdep.c \
 	aix-thread.c \
 	alpha-bsd-nat.c \

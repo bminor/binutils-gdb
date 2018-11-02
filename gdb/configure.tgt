@@ -48,7 +48,8 @@ amd64_tobjs="amd64-tdep.o arch/amd64.o ${x86_tobjs}"
 
 case "${targ}" in
 aarch64*-*-*)
-	cpu_obs="aarch64-tdep.o arch/aarch64-insn.o arch/aarch64.o";;
+	cpu_obs="aarch64-tdep.o arch/aarch64-insn.o arch/aarch64.o \
+		 ravenscar-thread.o aarch64-ravenscar-thread.o";;
 
 alpha*-*-*)
 	# Target: Alpha
