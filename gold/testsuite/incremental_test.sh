@@ -49,7 +49,7 @@ check()
 
 # Extract actual command line from linker's -v output.
 cat incremental_test.cmdline |
-  grep "gcctestdir/ld " |
+  grep "gcctestdir/\(collect-\)\?ld " |
   sed "s/--incremental[-a-z]* //g" |
   cut -d ' ' -f 2- > actual
 
