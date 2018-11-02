@@ -130,6 +130,7 @@ AC_CHECK_HEADERS(string.h strings.h stdlib.h unistd.h fcntl.h sys/file.h limits.
 AC_HEADER_SYS_WAIT
 ACX_HEADER_STRING
 AC_FUNC_ALLOCA
+AC_FUNC_MMAP
 AC_CHECK_FUNCS(sbrk utimes setmode getc_unlocked strcoll setlocale)
 AC_CHECK_FUNC([mkstemp],
 	      AC_DEFINE([HAVE_MKSTEMP], 1,

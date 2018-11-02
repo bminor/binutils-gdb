@@ -1,3 +1,9 @@
+2018-11-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.ac (AC_FUNC_MMAP): New.
+	* config.in: Regenerated.
+	* configure: Likewise.
+
 2018-11-02  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (process_section_headers): Don't warn on a zero
