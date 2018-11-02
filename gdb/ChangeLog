@@ -1,3 +1,8 @@
+2018-11-02  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* symtab.c (info_functions_command): Initialize quiet flag.
+	* stack.c (info_args_command): Likewise.
+
 2018-11-01  Jim Wilson  <jimw@sifive.com>
 
 	* riscv-tdep.c (riscv_breakpoint_kind_from_pc): New local unaligned_p.

@@ -2303,7 +2303,7 @@ info_args_command (const char *args, int from_tty)
 {
   std::string regexp;
   std::string t_regexp;
-  bool quiet;
+  bool quiet = false;
 
   while (args != NULL
 	 && extract_info_print_args (&args, &quiet, &regexp, &t_regexp))
