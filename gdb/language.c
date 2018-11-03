@@ -105,10 +105,9 @@ static const struct language_defn *languages[] = {
   &ada_language_defn,
 };
 
-/* The current values of the "set language/type/range" enum
+/* The current values of the "set language/range/case-sensitive" enum
    commands.  */
 static const char *language;
-static const char *type;
 static const char *range;
 static const char *case_sensitive;
 
@@ -1174,7 +1173,6 @@ For Fortran the default is off; for other languages the default is on."),
   add_set_language_command ();
 
   language = xstrdup ("auto");
-  type = xstrdup ("auto");
   range = xstrdup ("auto");
   case_sensitive = xstrdup ("auto");
 
