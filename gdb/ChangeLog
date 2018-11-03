@@ -1,4 +1,4 @@
-2018-12-02  Joel Brobecker  <brobecker@adacore.com>
+2018-11-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* aarch64-ravenscar-thread.h, aarch64-ravenscar-thread.c: New files.
 	* aarch64-tdep.c: #include "aarch64-ravenscar-thread.h".
