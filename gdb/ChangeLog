@@ -1,3 +1,11 @@
+2018-12-16  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* nat/linux-ptrace.c (kill_child): New function.
+	(linux_ptrace_test_ret_to_nx): Use kill_child instead of local code.
+	Add a call to kill_child in case of early return after fork.
+	(linux_check_ptrace_features): Use kill_child instead of local code.
+	(linux_test_for_tracefork): Likewise.
+
 2018-12-14  Tom Tromey  <tom@tromey.com>
 
 	* Makefile.in: Remove "alloca" comment.
