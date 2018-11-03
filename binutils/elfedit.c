@@ -91,17 +91,6 @@ update_elf_header (const char *file_name, FILE *file)
 {
   int class, machine, type, status, osabi;
 
-  if (elf_header.e_ident[EI_MAG0] != ELFMAG0
-      || elf_header.e_ident[EI_MAG1] != ELFMAG1
-      || elf_header.e_ident[EI_MAG2] != ELFMAG2
-      || elf_header.e_ident[EI_MAG3] != ELFMAG3)
-    {
-      error
-	(_("%s: Not an ELF file - wrong magic bytes at the start\n"),
-	 file_name);
-      return 0;
-    }
-
   if (elf_header.e_ident[EI_VERSION] != EV_CURRENT)
     {
       error
@@ -212,6 +201,12 @@ get_file_header (FILE * file)
   if (fread (elf_header.e_ident, EI_NIDENT, 1, file) != 1)
     return 0;
 
+  if (elf_header.e_ident[EI_MAG0] != ELFMAG0
+      || elf_header.e_ident[EI_MAG1] != ELFMAG1
+      || elf_header.e_ident[EI_MAG2] != ELFMAG2
+      || elf_header.e_ident[EI_MAG3] != ELFMAG3)
+    return 0;
+
   /* Determine how to read the rest of the header.  */
   switch (elf_header.e_ident[EI_DATA])
     {
@@ -232,8 +227,6 @@ get_file_header (FILE * file)
   switch (elf_header.e_ident[EI_CLASS])
     {
     default:
-      error (_("Unsupported EI_CLASS: %d\n"),
-		 elf_header.e_ident[EI_CLASS]);
       return 0;
 
     case ELFCLASS32:

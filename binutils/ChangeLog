@@ -1,3 +1,8 @@
+2018-11-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfedit.c (update_elf_header): Move EI_MAG? check to ...
+	(get_file_header): Here.
+
 2018-11-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.ac (AC_FUNC_MMAP): New.
