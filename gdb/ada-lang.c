@@ -14538,7 +14538,7 @@ _initialize_ada_language (void)
   initialize_ada_catchpoint_ops ();
 
   add_prefix_cmd ("ada", no_class, set_ada_command,
-                  _("Prefix command for changing Ada-specfic settings"),
+                  _("Prefix command for changing Ada-specific settings"),
                   &set_ada_list, "set ada ", 0, &setlist);
 
   add_prefix_cmd ("ada", no_class, show_ada_command,

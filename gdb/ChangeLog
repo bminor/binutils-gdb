@@ -1,5 +1,9 @@
 2018-11-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* ada-lang.c (_initialize_ada_language): Fix typo.
+
+2018-11-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* language.c (type): Remove.
 	(_initialize_language): Remove assignment to type.
 
