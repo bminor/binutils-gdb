@@ -1,3 +1,12 @@
+2018-12-09  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.threads/tid-reuse.c (REUSE_TIME_CAP): Declare as 60.
+	(reuse_time): Initialize to REUSE_TIME_CAP.
+	(check_rc): New function.
+	(main): Use REUSE_TIME_CAP instead of hardcoded 60.
+	Check pthread_create rc.
+	(spawner_thread_func): Check pthread_create and pthread_join rc.
+
 2018-12-08  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/list.exp (test_forward_search): Rename to ...
