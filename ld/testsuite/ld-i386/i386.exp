@@ -464,6 +464,7 @@ run_dump_test "pr23372a"
 run_dump_test "pr23372b"
 run_dump_test "pr23486a"
 run_dump_test "pr23486b"
+run_dump_test "pr23854"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]
