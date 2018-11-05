@@ -1,6 +1,6 @@
 2018-11-05  H.J. Lu  <hongjiu.lu@intel.com>
 
-	PR gas/r23854
+	PR gas/23854
 	* config/tc-i386.c (output_disp): Disable GOT relaxation with
 	data prefix.
 	* testsuite/gas/i386/mixed-mode-reloc32.d: Updated.
