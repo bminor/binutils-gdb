@@ -1,3 +1,9 @@
+2018-11-04  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* source.c (open_source_file): Fix leak by transferring the
+	current s->fullname to the unique_xmalloc_ptr fullname given
+	to find_and_open_source.
+
 2018-11-04  Tom Tromey  <tom@tromey.com>
 
 	* varobj.c (install_default_visualizer): Update.
