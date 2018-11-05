@@ -1,3 +1,14 @@
+2018-11-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/r23854
+	* testsuite/ld-i386/i386.exp: Run pr23854.
+	* testsuite/ld-x86-64/x86-64.exp: Likewwise.
+	* testsuite/ld-i386/pr23854.d: New file.
+	* testsuite/ld-i386/pr23854.s: Likewwise.
+	* testsuite/ld-i386/pr23854.d: Likewwise.
+	* testsuite/ld-x86-64/pr23854.d: Likewwise.
+	* testsuite/ld-x86-64/pr23854.s: Likewwise.
+
 2018-11-01  Thomas Preud'homme  <thomas.preudhomme@linaro.org>
 
 	* testsuite/lib/ld-lib.exp (check_shared_lib_support): Moved to
