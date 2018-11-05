@@ -1,3 +1,8 @@
+2018-11-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.arch/riscv-reg-aliases.exp: Handle targets without floating
+	point hardware.
+
 2018-11-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.dwarf2/void-type.exp: Rename types, and make var_a an 'int'.

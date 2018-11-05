@@ -151,15 +151,21 @@ check_zero_register_value "after write to \$x0"
 # we should access the register using 'REG_NAME.float'.  In the following we
 # figure out if the field name is needed or not by looking at how GDB prints
 # on register.
+set skip_freg_tests 0
 set freg_extension "INVALID"
 set message "check format of float registers"
-gdb_test_multiple "p \$ft0" $message {
-    -re " = {float = \[^\r\n\]+}\r\n$gdb_prompt $" {
-	set freg_extension ".float"
+gdb_test_multiple "info registers \$ft0" $message {
+    -re "Invalid register `ft0'\r\n$gdb_prompt $" {
+	set skip_freg_tests 1
+	set freg_extension "NONE"
 	pass $message
     }
-    -re " = \[^{}\r\n\]+\r\n$gdb_prompt $" {
+    -re "ft0 \+\[0-9\]\+.*\r\n$gdb_prompt $" {
 	set freg_extension ""
+	pass $message
+    }
+    -re "ft0 \+\{float = .*\r\n$gdb_prompt $" {
+	set freg_extension ".float"
 	pass $message
     }
 }
@@ -169,7 +175,10 @@ gdb_assert ![string eq "${freg_extension}" "INVALID"] \
 # Now check that we can write zero, and read zero back to all of the integer
 # and floating point registers.
 check_setting_registers_to_zero ${xreg_names} ""
-check_setting_registers_to_zero ${freg_names} ${freg_extension}
+
+if { ! $skip_freg_tests } {
+    check_setting_registers_to_zero ${freg_names} ${freg_extension}
+}
 
 # Set each register in turn to a new value, and confirm that the new value can
 # be read back from the primary name, and from all of the alias names.  The
@@ -177,4 +186,7 @@ check_setting_registers_to_zero ${freg_names} ${freg_extension}
 # significantly different so that the float tests don't reuse value from the
 # integer tests.
 check_setting_registers_to_value ${xreg_names} "" 100
-check_setting_registers_to_value ${freg_names} ${freg_extension} 500
+
+if { ! $skip_freg_tests } {
+    check_setting_registers_to_value ${freg_names} ${freg_extension} 500
+}
