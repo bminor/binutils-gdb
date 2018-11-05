@@ -691,6 +691,7 @@ enum
   REG_0F18,
   REG_0F1C_P_0_MOD_0,
   REG_0F1E_P_1_MOD_3,
+  REG_0F38D8_PREFIX_1,
   REG_0F71,
   REG_0F72,
   REG_0F73,
@@ -797,12 +798,18 @@ enum
   MOD_VEX_0F385E_X86_64_P_1_W_0,
   MOD_VEX_0F385E_X86_64_P_2_W_0,
   MOD_VEX_0F385E_X86_64_P_3_W_0,
+  MOD_0F38DC_PREFIX_1,
+  MOD_0F38DD_PREFIX_1,
+  MOD_0F38DE_PREFIX_1,
+  MOD_0F38DF_PREFIX_1,
   MOD_0F38F5,
   MOD_0F38F6_PREFIX_0,
   MOD_0F38F8_PREFIX_1,
   MOD_0F38F8_PREFIX_2,
   MOD_0F38F8_PREFIX_3,
   MOD_0F38F9,
+  MOD_0F38FA_PREFIX_1,
+  MOD_0F38FB_PREFIX_1,
   MOD_62_32BIT,
   MOD_C4_32BIT,
   MOD_C5_32BIT,
@@ -1011,10 +1018,17 @@ enum
   PREFIX_0FE7,
   PREFIX_0FF0,
   PREFIX_0FF7,
+  PREFIX_0F38D8,
+  PREFIX_0F38DC,
+  PREFIX_0F38DD,
+  PREFIX_0F38DE,
+  PREFIX_0F38DF,
   PREFIX_0F38F0,
   PREFIX_0F38F1,
   PREFIX_0F38F6,
   PREFIX_0F38F8,
+  PREFIX_0F38FA,
+  PREFIX_0F38FB,
   PREFIX_VEX_0F10,
   PREFIX_VEX_0F11,
   PREFIX_VEX_0F12,
@@ -2890,6 +2904,13 @@ static const struct dis386 reg_table[][8] = {
     { "nopQ",		{ Ev }, 0 },
     { RM_TABLE (RM_0F1E_P_1_MOD_3_REG_7) },
   },
+  /* REG_0F38D8_PREFIX_1 */
+  {
+    { "aesencwide128kl",	{ M }, 0 },
+    { "aesdecwide128kl",	{ M }, 0 },
+    { "aesencwide256kl",	{ M }, 0 },
+    { "aesdecwide256kl",	{ M }, 0 },
+  },
   /* REG_0F71 */
   {
     { Bad_Opcode },
@@ -3543,6 +3564,40 @@ static const struct dis386 prefix_table[][4] = {
     { "maskmovdqu", { XM, XS }, PREFIX_OPCODE },
   },
 
+  /* PREFIX_0F38D8 */
+  {
+    { Bad_Opcode },
+    { REG_TABLE (REG_0F38D8_PREFIX_1) },
+  },
+
+  /* PREFIX_0F38DC */
+  {
+    { Bad_Opcode },
+    { MOD_TABLE (MOD_0F38DC_PREFIX_1) },
+    { "aesenc", { XM, EXx }, 0 },
+  },
+
+  /* PREFIX_0F38DD */
+  {
+    { Bad_Opcode },
+    { MOD_TABLE (MOD_0F38DD_PREFIX_1) },
+    { "aesenclast", { XM, EXx }, 0 },
+  },
+
+  /* PREFIX_0F38DE */
+  {
+    { Bad_Opcode },
+    { MOD_TABLE (MOD_0F38DE_PREFIX_1) },
+    { "aesdec", { XM, EXx }, 0 },
+  },
+
+  /* PREFIX_0F38DF */
+  {
+    { Bad_Opcode },
+    { MOD_TABLE (MOD_0F38DF_PREFIX_1) },
+    { "aesdeclast", { XM, EXx }, 0 },
+  },
+
   /* PREFIX_0F38F0 */
   {
     { "movbeS",	{ Gv, Mv }, PREFIX_OPCODE },
@@ -3573,6 +3628,17 @@ static const struct dis386 prefix_table[][4] = {
     { MOD_TABLE (MOD_0F38F8_PREFIX_1) },
     { MOD_TABLE (MOD_0F38F8_PREFIX_2) },
     { MOD_TABLE (MOD_0F38F8_PREFIX_3) },
+  },
+  /* PREFIX_0F38FA */
+  {
+    { Bad_Opcode },
+    { MOD_TABLE (MOD_0F38FA_PREFIX_1) },
+  },
+
+  /* PREFIX_0F38FB */
+  {
+    { Bad_Opcode },
+    { MOD_TABLE (MOD_0F38FB_PREFIX_1) },
   },
 
   /* PREFIX_VEX_0F10 */
@@ -4434,14 +4500,14 @@ static const struct dis386 three_byte_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     /* d8 */
-    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_0F38D8) },
     { Bad_Opcode },
     { Bad_Opcode },
     { "aesimc", { XM, EXx }, PREFIX_DATA },
-    { "aesenc", { XM, EXx }, PREFIX_DATA },
-    { "aesenclast", { XM, EXx }, PREFIX_DATA },
-    { "aesdec", { XM, EXx }, PREFIX_DATA },
-    { "aesdeclast", { XM, EXx }, PREFIX_DATA },
+    { PREFIX_TABLE (PREFIX_0F38DC) },
+    { PREFIX_TABLE (PREFIX_0F38DD) },
+    { PREFIX_TABLE (PREFIX_0F38DE) },
+    { PREFIX_TABLE (PREFIX_0F38DF) },
     /* e0 */
     { Bad_Opcode },
     { Bad_Opcode },
@@ -4472,8 +4538,8 @@ static const struct dis386 three_byte_table[][256] = {
     /* f8 */
     { PREFIX_TABLE (PREFIX_0F38F8) },
     { MOD_TABLE (MOD_0F38F9) },
-    { Bad_Opcode },
-    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_0F38FA) },
+    { PREFIX_TABLE (PREFIX_0F38FB) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -8213,6 +8279,23 @@ static const struct dis386 mod_table[][2] = {
     { VEX_LEN_TABLE (VEX_LEN_0F385E_X86_64_P_3_W_0_M_0) },
   },
   {
+    /* MOD_0F38DC_PREFIX_1 */
+    { "aesenc128kl",    { XM, M }, 0 },
+    { "loadiwkey",      { XM, EXx }, 0 },
+  },
+  {
+    /* MOD_0F38DD_PREFIX_1 */
+    { "aesdec128kl",    { XM, M }, 0 },
+  },
+  {
+    /* MOD_0F38DE_PREFIX_1 */
+    { "aesenc256kl",    { XM, M }, 0 },
+  },
+  {
+    /* MOD_0F38DF_PREFIX_1 */
+    { "aesdec256kl",    { XM, M }, 0 },
+  },
+  {
     /* MOD_0F38F5 */
     { "wrussK",		{ M, Gdq }, PREFIX_DATA },
   },
@@ -8235,6 +8318,16 @@ static const struct dis386 mod_table[][2] = {
   {
     /* MOD_0F38F9 */
     { "movdiri",	{ Edq, Gdq }, PREFIX_OPCODE },
+  },
+  {
+    /* MOD_0F38FA_PREFIX_1 */
+    { Bad_Opcode },
+    { "encodekey128", { Gd, Ed }, 0 },
+  },
+  {
+    /* MOD_0F38FB_PREFIX_1 */
+    { Bad_Opcode },
+    { "encodekey256", { Gd, Ed }, 0 },
   },
   {
     /* MOD_62_32BIT */

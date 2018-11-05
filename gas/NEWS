@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for Intel Key Locker instructions.
+
 * Added a .nop directive to generate a single no-op instruction in a target
   neutral manner.  This instruction does have an effect on DWARF line number
   generation, if that is active.

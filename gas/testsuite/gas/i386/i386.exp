@@ -493,6 +493,8 @@ if [gas_32_check] then {
     run_dump_test "vp2intersect"
     run_dump_test "vp2intersect-intel"
     run_list_test "vp2intersect-inval-bcast"
+    run_dump_test "keylocker"
+    run_dump_test "keylocker-intel"
     run_list_test "avx512vl-1" "-al"
     run_list_test "avx512vl-2" "-al"
     run_list_test "avx512vl-ambig"
@@ -639,6 +641,7 @@ if [gas_32_check] then {
 	run_dump_test "property-4"
 	run_dump_test "property-5"
 	run_dump_test "property-6"
+	run_dump_test "property-10"
 
 	if {[istarget "*-*-linux*"]} then {
 	    run_dump_test "align-branch-3"
@@ -1098,6 +1101,8 @@ if [gas_64_check] then {
     run_dump_test "x86-64-vp2intersect"
     run_dump_test "x86-64-vp2intersect-intel"
     run_list_test "x86-64-vp2intersect-inval-bcast"
+    run_dump_test "x86-64-keylocker"
+    run_dump_test "x86-64-keylocker-intel"
     run_dump_test "x86-64-fence-as-lock-add-yes"
     run_dump_test "x86-64-fence-as-lock-add-no"
     run_dump_test "x86-64-pr20141"
@@ -1244,6 +1249,7 @@ if [gas_64_check] then {
 	run_dump_test "x86-64-property-7"
 	run_dump_test "x86-64-property-8"
 	run_dump_test "x86-64-property-9"
+	run_dump_test "x86-64-property-10"
 
 	if {[istarget "*-*-linux*"]} then {
 	    run_dump_test "x86-64-align-branch-3"

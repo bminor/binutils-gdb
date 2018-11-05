@@ -321,6 +321,10 @@ static initializer cpu_flag_init[] =
     "CpuSEV_ES" },
   { "CPU_TSXLDTRK_FLAGS",
     "CpuTSXLDTRK"},
+  { "CPU_KL_FLAGS",
+    "CpuKL" },
+  { "CPU_WIDEKL_FLAGS",
+    "CpuWideKL" },
   { "CPU_ANY_X87_FLAGS",
     "CPU_ANY_287_FLAGS|Cpu8087" },
   { "CPU_ANY_287_FLAGS",
@@ -407,6 +411,10 @@ static initializer cpu_flag_init[] =
     "CpuAVX512_VP2INTERSECT" },
   { "CPU_ANY_TSXLDTRK_FLAGS",
     "CpuTSXLDTRK" },
+  { "CPU_ANY_KL_FLAGS",
+    "CpuKL|CpuWideKL" },
+  { "CPU_ANY_WIDEKL_FLAGS",
+    "CpuWideKL" },
 };
 
 static initializer operand_type_init[] =
@@ -636,6 +644,8 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuMCOMMIT),
   BITFIELD (CpuSEV_ES),
   BITFIELD (CpuTSXLDTRK),
+  BITFIELD (CpuKL),
+  BITFIELD (CpuWideKL),
 #ifdef CpuUnused
   BITFIELD (CpuUnused),
 #endif

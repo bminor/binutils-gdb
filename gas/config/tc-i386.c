@@ -1232,6 +1232,10 @@ static const arch_entry cpu_arch[] =
     CPU_SEV_ES_FLAGS, 0 },
   { STRING_COMMA_LEN (".tsxldtrk"), PROCESSOR_UNKNOWN,
     CPU_TSXLDTRK_FLAGS, 0 },
+  { STRING_COMMA_LEN (".kl"), PROCESSOR_UNKNOWN,
+    CPU_KL_FLAGS, 0 },
+  { STRING_COMMA_LEN (".widekl"), PROCESSOR_UNKNOWN,
+    CPU_WIDEKL_FLAGS, 0 },
 };
 
 static const noarch_entry cpu_noarch[] =
@@ -1281,6 +1285,8 @@ static const noarch_entry cpu_noarch[] =
   { STRING_COMMA_LEN ("noenqcmd"), CPU_ANY_ENQCMD_FLAGS },
   { STRING_COMMA_LEN ("noserialize"), CPU_ANY_SERIALIZE_FLAGS },
   { STRING_COMMA_LEN ("notsxldtrk"), CPU_ANY_TSXLDTRK_FLAGS },
+  { STRING_COMMA_LEN ("nokl"), CPU_ANY_KL_FLAGS },
+  { STRING_COMMA_LEN ("nowidekl"), CPU_ANY_WIDEKL_FLAGS },
 };
 
 #ifdef I386COFF
@@ -9199,7 +9205,9 @@ output_insn (void)
 	  || i.tm.base_opcode == 0xf77 /* emms */
 	  || i.tm.base_opcode == 0xf0e /* femms */)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_MMX;
-      if ((i.xstate & xstate_xmm))
+      if ((i.xstate & xstate_xmm)
+	  || i.tm.cpu_flags.bitfield.cpuwidekl
+	  || i.tm.cpu_flags.bitfield.cpukl)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XMM;
       if ((i.xstate & xstate_ymm) == xstate_ymm)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_YMM;

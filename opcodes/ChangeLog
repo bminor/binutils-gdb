@@ -1,3 +1,24 @@
+2020-09-23  Lili Cui  <lili.cui@intel.com>
+
+	* i386-dis.c (enum): Add REG_0F38D8_PREFIX_1,
+	MOD_0F38FA_PREFIX_1, MOD_0F38FB_PREFIX_1,
+	MOD_0F38DC_PREFIX_1, MOD_0F38DD_PREFIX_1,
+	MOD_0F38DE_PREFIX_1, MOD_0F38DF_PREFIX_1,
+	PREFIX_0F38D8, PREFIX_0F38FA, PREFIX_0F38FB.
+	(reg_table): New instructions (see prefixes above).
+	(prefix_table): Likewise.
+	(three_byte_table): Likewise.
+	(mod_table): Likewise
+	* i386-gen.c (cpu_flag_init): Add CPU_KL_FLAGS, CPU_WIDE_KL_FLAGS,
+	CPU_ANY_KL_FLAGS and CPU_ANY_WIDE_KL_FLAGS.
+	(cpu_flags): Likewise.
+	(operand_type_init): Likewise.
+	* i386-opc.h (enum): Add CpuKL and CpuWide_KL.
+	(i386_cpu_flags): Add cpukl and cpuwide_kl.
+	* i386-opc.tbl: Add KL and WIDE_KL insns.
+	* i386-init.h: Regenerate.
+	* i386-tbl.h: Likewise.
+
 2020-09-21  Alan Modra  <amodra@gmail.com>
 
 	* rx-dis.c (flag_names): Add missing comma.

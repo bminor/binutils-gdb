@@ -4117,3 +4117,19 @@ tilerelease, 0, 0x49c0, None, 2, CpuAMX_TILE|Cpu64, Vex128|VexOpcode=1|VexW0|No_
 tilezero, 1, 0xf249, None, 1, CpuAMX_TILE|Cpu64, Modrm|Vex128|VexOpcode=1|VexW0|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegTMM }
 
 // AMX instructions end.
+
+// KEYLOCKER instructions.
+
+loadiwkey, 2, 0xf30f38dc, None, 3, CpuKL, Load|Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { RegXMM, RegXMM }
+encodekey128, 2, 0xf30f38fa, None, 3, CpuKL, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg32, Reg32 }
+encodekey256, 2, 0xf30f38fb, None, 3, CpuKL, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg32, Reg32 }
+aesenc128kl, 2, 0xf30f38dc, None, 3, CpuKL, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex, RegXMM }
+aesdec128kl, 2, 0xf30f38dd, None, 3, CpuKL, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex, RegXMM }
+aesenc256kl, 2, 0xf30f38de, None, 3, CpuKL, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex, RegXMM }
+aesdec256kl, 2, 0xf30f38df, None, 3, CpuKL, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex, RegXMM }
+aesencwide128kl, 1, 0xf30f38d8, 0x0, 3, CpuWideKL, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
+aesdecwide128kl, 1, 0xf30f38d8, 0x1, 3, CpuWideKL, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
+aesencwide256kl, 1, 0xf30f38d8, 0x2, 3, CpuWideKL, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
+aesdecwide256kl, 1, 0xf30f38d8, 0x3, 3, CpuWideKL, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
+
+// KEYLOCKER instructions end.
