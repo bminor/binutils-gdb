@@ -1971,8 +1971,6 @@ enum
   VEX_W_0F98_P_2_LEN_0,
   VEX_W_0F99_P_0_LEN_0,
   VEX_W_0F99_P_2_LEN_0,
-  VEX_W_0FC4_P_2,
-  VEX_W_0FC5_P_2,
   VEX_W_0F380C_P_2,
   VEX_W_0F380D_P_2,
   VEX_W_0F380E_P_2,
@@ -1999,11 +1997,8 @@ enum
   VEX_W_0F3A04_P_2,
   VEX_W_0F3A05_P_2,
   VEX_W_0F3A06_P_2,
-  VEX_W_0F3A14_P_2,
-  VEX_W_0F3A15_P_2,
   VEX_W_0F3A18_P_2,
   VEX_W_0F3A19_P_2,
-  VEX_W_0F3A20_P_2,
   VEX_W_0F3A30_P_2_LEN_0,
   VEX_W_0F3A31_P_2_LEN_0,
   VEX_W_0F3A32_P_2_LEN_0,
@@ -2238,14 +2233,12 @@ enum
   EVEX_W_0F3A09_P_2,
   EVEX_W_0F3A0A_P_2,
   EVEX_W_0F3A0B_P_2,
-  EVEX_W_0F3A16_P_2,
   EVEX_W_0F3A18_P_2,
   EVEX_W_0F3A19_P_2,
   EVEX_W_0F3A1A_P_2,
   EVEX_W_0F3A1B_P_2,
   EVEX_W_0F3A1D_P_2,
   EVEX_W_0F3A21_P_2,
-  EVEX_W_0F3A22_P_2,
   EVEX_W_0F3A23_P_2,
   EVEX_W_0F3A38_P_2,
   EVEX_W_0F3A39_P_2,
@@ -9543,12 +9536,12 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0FC4_P_2 */
   {
-    { VEX_W_TABLE (VEX_W_0FC4_P_2) },
+    { "vpinsrw",	{ XM, Vex128, Edqw, Ib }, 0 },
   },
 
   /* VEX_LEN_0FC5_P_2 */
   {
-    { VEX_W_TABLE (VEX_W_0FC5_P_2) },
+    { "vpextrw",	{ Gdq, XS, Ib }, 0 },
   },
 
   /* VEX_LEN_0FD6_P_2 */
@@ -9681,12 +9674,12 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0F3A14_P_2 */
   {
-    { VEX_W_TABLE (VEX_W_0F3A14_P_2) },
+    { "vpextrb",	{ Edqb, XM, Ib }, 0 },
   },
 
   /* VEX_LEN_0F3A15_P_2 */
   {
-    { VEX_W_TABLE (VEX_W_0F3A15_P_2) },
+    { "vpextrw",	{ Edqw, XM, Ib }, 0 },
   },
 
   /* VEX_LEN_0F3A16_P_2  */
@@ -9713,7 +9706,7 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0F3A20_P_2 */
   {
-    { VEX_W_TABLE (VEX_W_0F3A20_P_2) },
+    { "vpinsrb",	{ XM, Vex128, Edqb, Ib }, 0 },
   },
 
   /* VEX_LEN_0F3A21_P_2 */
@@ -10045,14 +10038,6 @@ static const struct dis386 vex_w_table[][2] = {
     { MOD_TABLE (MOD_VEX_W_1_0F99_P_2_LEN_0) },
   },
   {
-    /* VEX_W_0FC4_P_2 */
-    { "vpinsrw",	{ XM, Vex128, Edqw, Ib }, 0 },
-  },
-  {
-    /* VEX_W_0FC5_P_2 */
-    { "vpextrw",	{ Gdq, XS, Ib }, 0 },
-  },
-  {
     /* VEX_W_0F380C_P_2  */
     { "vpermilps",	{ XM, Vex, EXx }, 0 },
   },
@@ -10159,24 +10144,12 @@ static const struct dis386 vex_w_table[][2] = {
     { "vperm2f128",	{ XM, Vex256, EXx, Ib }, 0 },
   },
   {
-    /* VEX_W_0F3A14_P_2 */
-    { "vpextrb",	{ Edqb, XM, Ib }, 0 },
-  },
-  {
-    /* VEX_W_0F3A15_P_2 */
-    { "vpextrw",	{ Edqw, XM, Ib }, 0 },
-  },
-  {
     /* VEX_W_0F3A18_P_2 */
     { "vinsertf128",	{ XM, Vex256, EXxmm, Ib }, 0 },
   },
   {
     /* VEX_W_0F3A19_P_2 */
     { "vextractf128",	{ EXxmm, XM, Ib }, 0 },
-  },
-  {
-    /* VEX_W_0F3A20_P_2 */
-    { "vpinsrb",	{ XM, Vex128, Edqb, Ib }, 0 },
   },
   {
     /* VEX_W_0F3A30_P_2_LEN_0 */
@@ -13967,6 +13940,13 @@ OP_E_memory (int bytemode, int sizeflag)
 	case db_mode:
 	  shift = 0;
 	  break;
+	case dq_mode:
+	  if (address_mode != mode_64bit)
+	    {
+	      shift = 2;
+	      break;
+	    }
+	    /* fall through */
 	case vex_vsib_d_w_dq_mode:
 	case vex_vsib_d_w_d_mode:
 	case vex_vsib_q_w_dq_mode:

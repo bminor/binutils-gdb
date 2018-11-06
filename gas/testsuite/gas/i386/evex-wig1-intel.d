@@ -29,11 +29,15 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f3 fd 08 17 40 01 00 	vextractps DWORD PTR \[eax\+0x4\],xmm0,0x0
 [ 	]*[a-f0-9]+:	62 f3 fd 08 14 c0 00 	vpextrb eax,xmm0,0x0
 [ 	]*[a-f0-9]+:	62 f3 fd 08 14 40 01 00 	vpextrb BYTE PTR \[eax\+0x1\],xmm0,0x0
+[ 	]*[a-f0-9]+:	62 f3 fd 08 16 c0 00 	vpextrd eax,xmm0,0x0
+[ 	]*[a-f0-9]+:	62 f3 fd 08 16 40 01 00 	vpextrd DWORD PTR \[eax\+0x4\],xmm0,0x0
 [ 	]*[a-f0-9]+:	62 f1 fd 08 c5 c0 00 	vpextrw eax,xmm0,0x0
 [ 	]*[a-f0-9]+:	62 f3 fd 08 15 c0 00 	vpextrw eax,xmm0,0x0
 [ 	]*[a-f0-9]+:	62 f3 fd 08 15 40 01 00 	vpextrw WORD PTR \[eax\+0x2\],xmm0,0x0
 [ 	]*[a-f0-9]+:	62 f3 fd 08 20 c0 00 	vpinsrb xmm0,xmm0,eax,0x0
 [ 	]*[a-f0-9]+:	62 f3 fd 08 20 40 01 00 	vpinsrb xmm0,xmm0,BYTE PTR \[eax\+0x1\],0x0
+[ 	]*[a-f0-9]+:	62 f3 fd 08 22 c0 00 	vpinsrd xmm0,xmm0,eax,0x0
+[ 	]*[a-f0-9]+:	62 f3 fd 08 22 40 01 00 	vpinsrd xmm0,xmm0,DWORD PTR \[eax\+0x4\],0x0
 [ 	]*[a-f0-9]+:	62 f1 fd 08 c4 c0 00 	vpinsrw xmm0,xmm0,eax,0x0
 [ 	]*[a-f0-9]+:	62 f1 fd 08 c4 40 01 00 	vpinsrw xmm0,xmm0,WORD PTR \[eax\+0x2\],0x0
 [ 	]*[a-f0-9]+:	62 f2 fd 4f 21 f5    	vpmovsxbd zmm6\{k7\},xmm5

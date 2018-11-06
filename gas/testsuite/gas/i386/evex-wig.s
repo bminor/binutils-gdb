@@ -38,12 +38,18 @@ _start:
 	{evex} vpextrb $0, %xmm0, %eax
 	{evex} vpextrb $0, %xmm0, 1(%eax)
 
+	{evex} vpextrd $0, %xmm0, %eax
+	{evex} vpextrd $0, %xmm0, 4(%eax)
+
 	{evex} vpextrw $0, %xmm0, %eax
 	{evex} {store} vpextrw $0, %xmm0, %eax
 	{evex} vpextrw $0, %xmm0, 2(%eax)
 
 	{evex} vpinsrb $0, %eax, %xmm0, %xmm0
 	{evex} vpinsrb $0, 1(%eax), %xmm0, %xmm0
+
+	{evex} vpinsrd $0, %eax, %xmm0, %xmm0
+	{evex} vpinsrd $0, 4(%eax), %xmm0, %xmm0
 
 	{evex} vpinsrw $0, %eax, %xmm0, %xmm0
 	{evex} vpinsrw $0, 2(%eax), %xmm0, %xmm0

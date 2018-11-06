@@ -29,11 +29,15 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f3 fd 08 17 40 01 00 	vextractps \$0x0,%xmm0,0x4\(%eax\)
 [ 	]*[a-f0-9]+:	62 f3 fd 08 14 c0 00 	vpextrb \$0x0,%xmm0,%eax
 [ 	]*[a-f0-9]+:	62 f3 fd 08 14 40 01 00 	vpextrb \$0x0,%xmm0,0x1\(%eax\)
+[ 	]*[a-f0-9]+:	62 f3 fd 08 16 c0 00 	vpextrd \$0x0,%xmm0,%eax
+[ 	]*[a-f0-9]+:	62 f3 fd 08 16 40 01 00 	vpextrd \$0x0,%xmm0,0x4\(%eax\)
 [ 	]*[a-f0-9]+:	62 f1 fd 08 c5 c0 00 	vpextrw \$0x0,%xmm0,%eax
 [ 	]*[a-f0-9]+:	62 f3 fd 08 15 c0 00 	vpextrw \$0x0,%xmm0,%eax
 [ 	]*[a-f0-9]+:	62 f3 fd 08 15 40 01 00 	vpextrw \$0x0,%xmm0,0x2\(%eax\)
 [ 	]*[a-f0-9]+:	62 f3 fd 08 20 c0 00 	vpinsrb \$0x0,%eax,%xmm0,%xmm0
 [ 	]*[a-f0-9]+:	62 f3 fd 08 20 40 01 00 	vpinsrb \$0x0,0x1\(%eax\),%xmm0,%xmm0
+[ 	]*[a-f0-9]+:	62 f3 fd 08 22 c0 00 	vpinsrd \$0x0,%eax,%xmm0,%xmm0
+[ 	]*[a-f0-9]+:	62 f3 fd 08 22 40 01 00 	vpinsrd \$0x0,0x4\(%eax\),%xmm0,%xmm0
 [ 	]*[a-f0-9]+:	62 f1 fd 08 c4 c0 00 	vpinsrw \$0x0,%eax,%xmm0,%xmm0
 [ 	]*[a-f0-9]+:	62 f1 fd 08 c4 40 01 00 	vpinsrw \$0x0,0x2\(%eax\),%xmm0,%xmm0
 [ 	]*[a-f0-9]+:	62 f2 fd 4f 21 f5    	vpmovsxbd %xmm5,%zmm6\{%k7\}

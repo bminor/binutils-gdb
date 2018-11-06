@@ -191,8 +191,13 @@ _start:
 	vpcmpgtw %xmm4,%xmm6,%xmm2
 	vpcmpistri $7,%xmm4,%xmm6
 	vpcmpistrm $7,%xmm4,%xmm6
+	vpextrb $0, %xmm0, %eax
+	vpextrb $0, %xmm0, (%eax)
 	vpextrd $0, %xmm0, %eax
 	vpextrd $0, %xmm0, (%eax)
+	vpextrw $0, %xmm0, %eax
+	{store} vpextrw $0, %xmm0, %eax
+	vpextrw $0, %xmm0, (%eax)
 	vphaddd %xmm4,%xmm6,%xmm2
 	vphaddsw %xmm4,%xmm6,%xmm2
 	vphaddw %xmm4,%xmm6,%xmm2
@@ -200,8 +205,12 @@ _start:
 	vphsubd %xmm4,%xmm6,%xmm2
 	vphsubsw %xmm4,%xmm6,%xmm2
 	vphsubw %xmm4,%xmm6,%xmm2
+	vpinsrb $0, %eax, %xmm0, %xmm0
+	vpinsrb $0, (%eax), %xmm0, %xmm0
 	vpinsrd $0, %eax, %xmm0, %xmm0
 	vpinsrd $0, (%eax), %xmm0, %xmm0
+	vpinsrw $0, %eax, %xmm0, %xmm0
+	vpinsrw $0, (%eax), %xmm0, %xmm0
 	vpmaddubsw %xmm4,%xmm6,%xmm2
 	vpmaddwd %xmm4,%xmm6,%xmm2
 	vpmaxsb %xmm4,%xmm6,%xmm2

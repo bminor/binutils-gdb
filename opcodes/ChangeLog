@@ -1,5 +1,20 @@
 2018-11-06  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (VEX_W_0FC4_P_2, VEX_W_0FC5_P_2, VEX_W_0F3A14_P_2,
+	VEX_W_0F3A15_P_2, VEX_W_0F3A20_P_2, EVEX_W_0F3A16_P_2,
+	EVEX_W_0F3A22_P_2): Delete.
+	(vex_len_table, vex_w_table): Move vpextr{b,w} and vpinsr{b,w}
+	entries up one level in the hierarchy.
+	(OP_E_memory): Handle dq_mode when determining Disp8 shift
+	value.
+	* i386-dis-evex.h (evex_table): Move vpextr{d,q} and vpinsr{d,q}
+	entries up one level in the hierarchy.
+	* i386-opc.tbl (vpextrb, vpextrw, vpinsrb, vpinsrw): Change to
+	VexWIG for AVX flavors.
+	* i386-tbl.h: Re-generate.
+
+2018-11-06  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (vcvtsi2sd, vcvtsi2ss, vmovd, vpcmpestri,
 	vpcmpestrm, vpextrd, vpinsrd, vpbroadcastd, vcvtusi2sd,
 	vcvtusi2ss, kmovd): Drop VexW=1.
