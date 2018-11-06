@@ -1,5 +1,9 @@
 2018-11-06  Matthew Malcomson  <matthew.malcomson@arm.com>
 
+	* testsuite/gas/arm/neon-cond-bad_t2.d: Fix testcase for PE target.
+
+2018-11-06  Matthew Malcomson  <matthew.malcomson@arm.com>
+
 	* config/tc-arm.c (do_neon_cvt_1): Add check for neon and condition
 	codes to half-precision conversion.
 	* testsuite/gas/arm/neon-cond-bad-inc.s: Check vcvteq disallowed.
