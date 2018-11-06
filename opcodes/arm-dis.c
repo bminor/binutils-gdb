@@ -6452,11 +6452,11 @@ select_arm_features (unsigned long mach,
     case bfd_mach_arm_7EM:	 ARM_SET_FEATURES (ARM_ARCH_V7EM); break;
     case bfd_mach_arm_8:
 	{
-	  /* Add bits for extensions that Armv8.4-A recognizes.  */
-	  arm_feature_set armv8_4_ext_fset
-	    = ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST | ARM_EXT2_FP16_FML);
-	  ARM_SET_FEATURES (ARM_ARCH_V8_4A);
-	  ARM_MERGE_FEATURE_SETS (arch_fset, arch_fset, armv8_4_ext_fset);
+	  /* Add bits for extensions that Armv8.5-A recognizes.  */
+	  arm_feature_set armv8_5_ext_fset
+	    = ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST);
+	  ARM_SET_FEATURES (ARM_ARCH_V8_5A);
+	  ARM_MERGE_FEATURE_SETS (arch_fset, arch_fset, armv8_5_ext_fset);
 	  break;
 	}
     case bfd_mach_arm_8R:	 ARM_SET_FEATURES (ARM_ARCH_V8R); break;

@@ -1,3 +1,9 @@
+2018-11-06  Sudakshina Das  <sudi.das@arm.com>
+
+	* opcode/arm.h (ARM_ARCH_V8_5A): Move ARM_EXT2_PREDRES and
+	ARM_EXT2_SB to ...
+	(ARM_AEXT2_V8_5A): Here.
+
 2018-10-26  John Baldwin  <jhb@FreeBSD.org>
 
 	* elf/common.h (AT_FREEBSD_HWCAP2): Define.

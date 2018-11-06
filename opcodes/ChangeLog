@@ -1,3 +1,8 @@
+2018-11-06  Sudakshina Das  <sudi.das@arm.com>
+
+	* arm-dis.c (select_arm_features): Update bfd_mach_arm_8
+	with Armv8.5-A. Remove reduntant ARM_EXT2_FP16_FML.
+
 2018-11-06  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc.c (insert_arx, insert_ary, insert_rx, insert_ry, insert_ls),
