@@ -1514,6 +1514,7 @@ insn_validate (const struct powerpc_opcode *op)
   /* The operands must not overlap the opcode or each other.  */
   for (o = op->operands; *o; ++o)
     {
+      bfd_boolean optional = FALSE;
       if (*o >= num_powerpc_operands)
         {
 	  as_bad (_("operand index error for %s"), op->name);
@@ -1537,6 +1538,14 @@ insn_validate (const struct powerpc_opcode *op)
 		  return TRUE;
 		}
 	      omask |= mask;
+	    }
+	  if ((operand->flags & PPC_OPERAND_OPTIONAL) != 0)
+	    optional = TRUE;
+	  else if (optional)
+	    {
+	      as_bad (_("non-optional operand %d follows optional operand in %s"),
+		      (int) (o - op->operands), op->name);
+	      return TRUE;
 	    }
         }
     }
