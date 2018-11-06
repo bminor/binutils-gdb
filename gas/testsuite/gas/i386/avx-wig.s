@@ -3,6 +3,33 @@
 	.allow_index_reg
 	.text
 _start:
+	andn (%eax), %eax, %eax
+	bextr %eax, (%eax), %eax
+	bextr $0, (%eax), %eax
+	blcfill (%eax), %eax
+	blci (%eax), %eax
+	blcic (%eax), %eax
+	blcmsk (%eax), %eax
+	blcs (%eax), %eax
+	blsfill (%eax), %eax
+	blsi (%eax), %eax
+	blsic (%eax), %eax
+	blsmsk (%eax), %eax
+	blsr (%eax), %eax
+	bzhi %eax, (%eax), %eax
+	llwpcb %eax
+	lwpins $0, (%eax), %eax
+	lwpval $0, (%eax), %eax
+	mulx (%eax), %eax, %eax
+	pdep (%eax), %eax, %eax
+	pext (%eax), %eax, %eax
+	rorx $0, (%eax), %eax
+	sarx %eax, (%eax), %eax
+	shlx %eax, (%eax), %eax
+	shrx %eax, (%eax), %eax
+	slwpcb %eax
+	t1mskc (%eax), %eax
+	tzmsk (%eax), %eax
 	vaddpd %ymm4,%ymm6,%ymm2
 	vaddps %ymm4,%ymm6,%ymm2
 	vaddsd %xmm4,%xmm6,%xmm2
@@ -42,11 +69,19 @@ _start:
 	vcvtps2dq %ymm4,%ymm6
 	vcvtps2pd %xmm4,%ymm4
 	vcvtsd2ss %xmm4,%xmm6,%xmm2
+	vcvtsi2ss %eax, %xmm0, %xmm0
+	vcvtsi2ss (%eax), %xmm0, %xmm0
+	vcvtsi2sd %eax, %xmm0, %xmm0
+	vcvtsi2sd (%eax), %xmm0, %xmm0
 	vcvtss2sd %xmm4,%xmm6,%xmm2
+	vcvtss2si %xmm0, %eax
+	vcvtsd2si %xmm0, %eax
 	vcvttpd2dqy %ymm4,%xmm4
 	vcvttpd2dqx %xmm4,%xmm6
 	vcvttpd2dqy %ymm4,%xmm4
 	vcvttps2dq %ymm4,%ymm6
+	vcvttss2si %xmm0, %eax
+	vcvttsd2si %xmm0, %eax
 	vdivpd %ymm4,%ymm6,%ymm2
 	vdivps %ymm4,%ymm6,%ymm2
 	vdivsd %xmm4,%xmm6,%xmm2
@@ -74,6 +109,10 @@ _start:
 	vmovaps %ymm4,%ymm6
 	{store} vmovapd %ymm4,%ymm6
 	{store} vmovaps %ymm4,%ymm6
+	vmovd %eax, %xmm0
+	vmovd (%eax), %xmm0
+	vmovd %xmm0, %eax
+	vmovd %xmm0, (%eax)
 	vmovddup %ymm4,%ymm6
 	vmovdqa %ymm4,%ymm6
 	vmovdqu %ymm4,%ymm6
@@ -144,12 +183,16 @@ _start:
 	vpcmpeqd %xmm4,%xmm6,%xmm2
 	vpcmpeqq %xmm4,%xmm6,%xmm2
 	vpcmpeqw %xmm4,%xmm6,%xmm2
+	vpcmpestri $0, %xmm0, %xmm0
+	vpcmpestrm $0, %xmm0, %xmm0
 	vpcmpgtb %xmm4,%xmm6,%xmm2
 	vpcmpgtd %xmm4,%xmm6,%xmm2
 	vpcmpgtq %xmm4,%xmm6,%xmm2
 	vpcmpgtw %xmm4,%xmm6,%xmm2
 	vpcmpistri $7,%xmm4,%xmm6
 	vpcmpistrm $7,%xmm4,%xmm6
+	vpextrd $0, %xmm0, %eax
+	vpextrd $0, %xmm0, (%eax)
 	vphaddd %xmm4,%xmm6,%xmm2
 	vphaddsw %xmm4,%xmm6,%xmm2
 	vphaddw %xmm4,%xmm6,%xmm2
@@ -157,6 +200,8 @@ _start:
 	vphsubd %xmm4,%xmm6,%xmm2
 	vphsubsw %xmm4,%xmm6,%xmm2
 	vphsubw %xmm4,%xmm6,%xmm2
+	vpinsrd $0, %eax, %xmm0, %xmm0
+	vpinsrd $0, (%eax), %xmm0, %xmm0
 	vpmaddubsw %xmm4,%xmm6,%xmm2
 	vpmaddwd %xmm4,%xmm6,%xmm2
 	vpmaxsb %xmm4,%xmm6,%xmm2

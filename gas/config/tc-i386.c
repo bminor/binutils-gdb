@@ -3453,7 +3453,7 @@ build_vex_prefix (const insn_template *t)
   else if (i.tm.opcode_modifier.vexw)
     w = i.tm.opcode_modifier.vexw == VEXW1 ? 1 : 0;
   else
-    w = (i.rex & REX_W) ? 1 : 0;
+    w = (flag_code == CODE_64BIT ? i.rex & REX_W : vexwig == vexw1) ? 1 : 0;
 
   /* Use 2-byte VEX prefix if possible.  */
   if (w == 0
@@ -3646,7 +3646,7 @@ build_evex_prefix (void)
   else if (i.tm.opcode_modifier.vexw)
     w = i.tm.opcode_modifier.vexw == VEXW1 ? 1 : 0;
   else
-    w = (i.rex & REX_W) ? 1 : 0;
+    w = (flag_code == CODE_64BIT ? i.rex & REX_W : evexwig == evexw1) ? 1 : 0;
 
   /* Encode the U bit.  */
   implied_prefix |= 0x4;

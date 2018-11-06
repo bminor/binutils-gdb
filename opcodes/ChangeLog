@@ -1,5 +1,12 @@
 2018-11-06  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (vcvtsi2sd, vcvtsi2ss, vmovd, vpcmpestri,
+	vpcmpestrm, vpextrd, vpinsrd, vpbroadcastd, vcvtusi2sd,
+	vcvtusi2ss, kmovd): Drop VexW=1.
+	* i386-tbl.h: Re-generate.
+
+2018-11-06  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (Vex128, Vex256, VexLIG, EVex128, EVex256,
 	EVex512, EVexLIG, EVexDYN): New.
 	(ldmxcsr, stmxcsr, vldmxcsr, vstmxcsr, all BMI, BMI2, and TBM

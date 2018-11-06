@@ -1,5 +1,25 @@
 2018-11-06  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (build_vex_prefix, build_evex_prefix):
+	Consider execution mode when .vexw is not set.
+	* testsuite/gas/i386/avx-wig.s,
+	testsuite/gas/i386/x86-64-avx-wig.s: Add BMI, BMI2, TBM, LWP,
+	vcvtsi2s*, vcvt*2si, vmovd, vpcmpestr*, vpextrd, and vpinsrd
+	cases.
+	* testsuite/gas/i386/evex-wig.s: Add vcvt*si2s*, vcvt*2*si,
+	vextractps, vpextrb, vpextrw, vpinsrb, and vpinsrw cases.
+	* testsuite/gas/i386/x86-64-evex-wig.s: Add vpextrb, vpextrw,
+	vpinsrb, and vpinsrw cases.
+	* testsuite/gas/i386/avx-wig.d, testsuite/gas/i386/evex-wig.d,
+	testsuite/gas/i386/evex-wig1-intel.d,
+	testsuite/gas/i386/x86-64-evex-wig1.d,
+	testsuite/gas/i386/x86-64-evex-wig1-intel.d: Adjust expectations.
+	* testsuite/gas/i386/evex-wig2.d,
+	testsuite/gas/i386/evex-wig2.s: Delete.
+	* testsuite/gas/i386/i386.exp: Drop deleted test.
+
+2018-11-06  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/i386/evex-lig-2.s,
 	testsuite/gas/i386/x86-64-evex-lig-2.s: Add extract and insert
 	cases.
