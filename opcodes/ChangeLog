@@ -1,5 +1,11 @@
 2018-11-06  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (pextrw, vpextrw): Add Load to 0F C5 forms.
+	(vpmaxub): Re-order attributes on AVX512BW flavor.
+	* i386-tbl.h: Re-generate.
+
+2018-11-06  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (vandnp*, vandp*, vcmp*, vcvtss2sd, vorp*,
 	vpmaxub, vmovntdqa, vmpsadbw, vphsub*): Use VexWIG instead of
 	Vex=1 on AVX / AVX2 flavors.

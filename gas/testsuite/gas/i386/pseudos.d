@@ -1,5 +1,5 @@
 #objdump: -drw
-#name: pseudo prefxes
+#name: pseudo prefixes
 
 .*: +file format .*
 
@@ -264,6 +264,15 @@ Disassembly of section .text:
  +[a-f0-9]+:	62 f1 fe 08 7e f8    	vmovq  %xmm0,%xmm7
  +[a-f0-9]+:	62 f1 fe 08 7e f8    	vmovq  %xmm0,%xmm7
  +[a-f0-9]+:	62 f1 fd 08 d6 c7    	vmovq  %xmm0,%xmm7
+ +[a-f0-9]+:	66 0f c5 f8 00       	pextrw \$0x0,%xmm0,%edi
+ +[a-f0-9]+:	66 0f c5 f8 00       	pextrw \$0x0,%xmm0,%edi
+ +[a-f0-9]+:	66 0f 3a 15 c7 00    	pextrw \$0x0,%xmm0,%edi
+ +[a-f0-9]+:	c5 f9 c5 f8 00       	vpextrw \$0x0,%xmm0,%edi
+ +[a-f0-9]+:	c5 f9 c5 f8 00       	vpextrw \$0x0,%xmm0,%edi
+ +[a-f0-9]+:	c4 e3 79 15 c7 00    	vpextrw \$0x0,%xmm0,%edi
+ +[a-f0-9]+:	62 f1 7d 08 c5 f8 00 	vpextrw \$0x0,%xmm0,%edi
+ +[a-f0-9]+:	62 f1 7d 08 c5 f8 00 	vpextrw \$0x0,%xmm0,%edi
+ +[a-f0-9]+:	62 f3 7d 08 15 c7 00 	vpextrw \$0x0,%xmm0,%edi
  +[a-f0-9]+:	66 0f 1a c3          	bndmov %bnd3,%bnd0
  +[a-f0-9]+:	66 0f 1a c3          	bndmov %bnd3,%bnd0
  +[a-f0-9]+:	66 0f 1b d8          	bndmov %bnd3,%bnd0

@@ -277,6 +277,18 @@ _start:
 	{load} {evex} vmovq %xmm0, %xmm7
 	{store} {evex} vmovq %xmm0, %xmm7
 
+	pextrw $0, %xmm0, %edi
+	{load} pextrw $0, %xmm0, %edi
+	{store} pextrw $0, %xmm0, %edi
+
+	vpextrw $0, %xmm0, %edi
+	{load} vpextrw $0, %xmm0, %edi
+	{store} vpextrw $0, %xmm0, %edi
+
+	{evex} vpextrw $0, %xmm0, %edi
+	{load} {evex} vpextrw $0, %xmm0, %edi
+	{store} {evex} vpextrw $0, %xmm0, %edi
+
 	bndmov %bnd3, %bnd0
 	{load} bndmov %bnd3, %bnd0
 	{store} bndmov %bnd3, %bnd0
