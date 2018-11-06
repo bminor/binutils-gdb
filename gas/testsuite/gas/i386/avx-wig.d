@@ -22,6 +22,8 @@ Disassembly of section .text:
  +[a-f0-9]+:	c4 e2 f8 f3 10       	blsmsk \(%eax\),%eax
  +[a-f0-9]+:	c4 e2 f8 f3 08       	blsr   \(%eax\),%eax
  +[a-f0-9]+:	c4 e2 f8 f5 00       	bzhi   %eax,\(%eax\),%eax
+ +[a-f0-9]+:	c4 e1 fb 92 c0       	kmovd  %eax,%k0
+ +[a-f0-9]+:	c4 e1 fb 93 c0       	kmovd  %k0,%eax
  +[a-f0-9]+:	8f e9 f8 12 c0       	llwpcb %eax
  +[a-f0-9]+:	8f ea f8 12 00 00 00 00 00 	lwpins \$0x0,\(%eax\),%eax
  +[a-f0-9]+:	8f ea f8 12 08 00 00 00 00 	lwpval \$0x0,\(%eax\),%eax

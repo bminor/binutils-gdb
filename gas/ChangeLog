@@ -1,5 +1,10 @@
 2018-11-06  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/gas/i386/avx-wig.s: Add kmovd cases.
+	* testsuite/gas/i386/avx-wig.d: Adjust expectations.
+
+2018-11-06  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/i386/avx-wig.s,
 	testsuite/gas/i386/x86-64-avx-wig.s: Add vpextrb, vpextrw,
 	vpinsrb, and vpinsrw cases.

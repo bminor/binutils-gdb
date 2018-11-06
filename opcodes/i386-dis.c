@@ -903,12 +903,10 @@ enum
   MOD_VEX_W_1_0F91_P_2_LEN_0,
   MOD_VEX_W_0_0F92_P_0_LEN_0,
   MOD_VEX_W_0_0F92_P_2_LEN_0,
-  MOD_VEX_W_0_0F92_P_3_LEN_0,
-  MOD_VEX_W_1_0F92_P_3_LEN_0,
+  MOD_VEX_0F92_P_3_LEN_0,
   MOD_VEX_W_0_0F93_P_0_LEN_0,
   MOD_VEX_W_0_0F93_P_2_LEN_0,
-  MOD_VEX_W_0_0F93_P_3_LEN_0,
-  MOD_VEX_W_1_0F93_P_3_LEN_0,
+  MOD_VEX_0F93_P_3_LEN_0,
   MOD_VEX_W_0_0F98_P_0_LEN_0,
   MOD_VEX_W_1_0F98_P_0_LEN_0,
   MOD_VEX_W_0_0F98_P_2_LEN_0,
@@ -1963,10 +1961,8 @@ enum
   VEX_W_0F91_P_2_LEN_0,
   VEX_W_0F92_P_0_LEN_0,
   VEX_W_0F92_P_2_LEN_0,
-  VEX_W_0F92_P_3_LEN_0,
   VEX_W_0F93_P_0_LEN_0,
   VEX_W_0F93_P_2_LEN_0,
-  VEX_W_0F93_P_3_LEN_0,
   VEX_W_0F98_P_0_LEN_0,
   VEX_W_0F98_P_2_LEN_0,
   VEX_W_0F99_P_0_LEN_0,
@@ -9486,7 +9482,7 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0F92_P_3 */
   {
-    { VEX_W_TABLE (VEX_W_0F92_P_3_LEN_0) },
+    { MOD_TABLE (MOD_VEX_0F92_P_3_LEN_0) },
   },
 
   /* VEX_LEN_0F93_P_0 */
@@ -9501,7 +9497,7 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0F93_P_3 */
   {
-    { VEX_W_TABLE (VEX_W_0F93_P_3_LEN_0) },
+    { MOD_TABLE (MOD_VEX_0F93_P_3_LEN_0) },
   },
 
   /* VEX_LEN_0F98_P_0 */
@@ -10000,22 +9996,12 @@ static const struct dis386 vex_w_table[][2] = {
     { MOD_TABLE (MOD_VEX_W_0_0F92_P_2_LEN_0) },
   },
   {
-    /* VEX_W_0F92_P_3_LEN_0 */
-    { MOD_TABLE (MOD_VEX_W_0_0F92_P_3_LEN_0) },
-    { MOD_TABLE (MOD_VEX_W_1_0F92_P_3_LEN_0) },
-  },
-  {
     /* VEX_W_0F93_P_0_LEN_0 */
     { MOD_TABLE (MOD_VEX_W_0_0F93_P_0_LEN_0) },
   },
   {
     /* VEX_W_0F93_P_2_LEN_0 */
     { MOD_TABLE (MOD_VEX_W_0_0F93_P_2_LEN_0) },
-  },
-  {
-    /* VEX_W_0F93_P_3_LEN_0 */
-    { MOD_TABLE (MOD_VEX_W_0_0F93_P_3_LEN_0) },
-    { MOD_TABLE (MOD_VEX_W_1_0F93_P_3_LEN_0) },
   },
   {
     /* VEX_W_0F98_P_0_LEN_0 */
@@ -10818,14 +10804,9 @@ static const struct dis386 mod_table[][2] = {
     { "kmovb",		{ MaskG, Rdq }, 0 },
   },
   {
-    /* MOD_VEX_W_0_0F92_P_3_LEN_0 */
+    /* MOD_VEX_0F92_P_3_LEN_0 */
     { Bad_Opcode },
-    { "kmovd",		{ MaskG, Rdq }, 0 },
-  },
-  {
-    /* MOD_VEX_W_1_0F92_P_3_LEN_0 */
-    { Bad_Opcode },
-    { "kmovq",		{ MaskG, Rdq }, 0 },
+    { "kmovK",		{ MaskG, Rdq }, 0 },
   },
   {
     /* MOD_VEX_W_0_0F93_P_0_LEN_0 */
@@ -10838,14 +10819,9 @@ static const struct dis386 mod_table[][2] = {
     { "kmovb",		{ Gdq, MaskR }, 0 },
   },
   {
-    /* MOD_VEX_W_0_0F93_P_3_LEN_0 */
+    /* MOD_VEX_0F93_P_3_LEN_0 */
     { Bad_Opcode },
-    { "kmovd",		{ Gdq, MaskR }, 0 },
-  },
-  {
-    /* MOD_VEX_W_1_0F93_P_3_LEN_0 */
-    { Bad_Opcode },
-    { "kmovq",		{ Gdq, MaskR }, 0 },
+    { "kmovK",		{ Gdq, MaskR }, 0 },
   },
   {
     /* MOD_VEX_W_0_0F98_P_0_LEN_0 */

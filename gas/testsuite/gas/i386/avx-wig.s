@@ -17,6 +17,8 @@ _start:
 	blsmsk (%eax), %eax
 	blsr (%eax), %eax
 	bzhi %eax, (%eax), %eax
+	kmovd %eax, %k0
+	kmovd %k0, %eax
 	llwpcb %eax
 	lwpins $0, (%eax), %eax
 	lwpval $0, (%eax), %eax

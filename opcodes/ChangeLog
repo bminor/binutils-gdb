@@ -1,5 +1,14 @@
 2018-11-06  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (MOD_VEX_W_0_0F92_P_3_LEN_0,
+	MOD_VEX_W_1_0F92_P_3_LEN_0): Fold into MOD_VEX_0F92_P_3_LEN_0.
+	(MOD_VEX_W_0_0F93_P_3_LEN_0, MOD_VEX_W_1_0F93_P_3_LEN_0): Fold
+	into MOD_VEX_0F93_P_3_LEN_0.
+	(vex_len_table, vex_w_table, mod_table): Move kmov[dq} with GPR
+	operand cases up one level in the hierarchy.
+
+2018-11-06  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (VEX_W_0FC4_P_2, VEX_W_0FC5_P_2, VEX_W_0F3A14_P_2,
 	VEX_W_0F3A15_P_2, VEX_W_0F3A20_P_2, EVEX_W_0F3A16_P_2,
 	EVEX_W_0F3A22_P_2): Delete.
