@@ -1,3 +1,8 @@
+2018-11-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.dwarf2/void-type.exp: Rename types, and make var_a an 'int'.
+	* gdb.dwarf2/missing-type-name.exp: New file.
+
 2018-11-06  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/many-headers.c: New test.

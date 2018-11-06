@@ -17522,7 +17522,8 @@ dwarf2_init_integer_type (struct dwarf2_cu *cu, struct objfile *objfile,
   /* Versions of Intel's C Compiler generate an integer type called "void"
      instead of using DW_TAG_unspecified_type.  This has been seen on
      at least versions 14, 17, and 18.  */
-  if (bits == 0 && producer_is_icc (cu) && strcmp (name, "void") == 0)
+  if (bits == 0 && producer_is_icc (cu) && name != nullptr
+      && strcmp (name, "void") == 0)
     type = objfile_type (objfile)->builtin_void;
   else
     type = init_integer_type (objfile, bits, unsigned_p, name);
