@@ -1,3 +1,9 @@
+2018-11-06  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (VexW0, VexW1): New.
+	(vphadd*, vphsub*): Use VexW0 on XOP variants.
+	* i386-tbl.h: Re-generate.
+
 2018-10-22  John Darrington  <john@darrington.wattle.id.au>
 
 	* s12z-dis.c (decode_possible_symbol): Add fallback case.
