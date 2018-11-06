@@ -1,3 +1,14 @@
+2018-11-06  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* config/tc-arm.c (do_neon_cvt_1): Add check for neon and condition
+	codes to half-precision conversion.
+	* testsuite/gas/arm/neon-cond-bad-inc.s: Check vcvteq disallowed.
+	* testsuite/gas/arm/neon-cond-bad.l: Likewise.
+	* testsuite/gas/arm/neon-cond-bad_t2.d: Check vcvteq allowed in IT
+	block.
+	* testsuite/gas/arm/vfp-bad.l: Ensure vcvt doesn't work without neon.
+	* testsuite/gas/arm/vfp-bad.s: Likewise.
+
 2018-11-06  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (insn_validate): Don't ignore mask in

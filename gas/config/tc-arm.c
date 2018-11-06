@@ -15914,6 +15914,8 @@ do_neon_cvt_1 (enum neon_cvt_mode mode)
     /* Half-precision conversions for Advanced SIMD -- neon.  */
     case NS_QD:
     case NS_DQ:
+      if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH) == FAIL)
+	return;
 
       if ((rs == NS_DQ)
 	  && (inst.vectype.el[0].size != 16 || inst.vectype.el[1].size != 32))
