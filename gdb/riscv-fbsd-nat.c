@@ -42,7 +42,8 @@ static riscv_fbsd_nat_target the_riscv_fbsd_nat_target;
 static bool
 getregs_supplies (struct gdbarch *gdbarch, int regnum)
 {
-  return (regnum >= RISCV_RA_REGNUM && regnum <= RISCV_PC_REGNUM);
+  return ((regnum >= RISCV_RA_REGNUM && regnum <= RISCV_PC_REGNUM)
+	  || regnum == RISCV_CSR_SSTATUS_REGNUM);
 }
 
 /* Determine if PT_GETFPREGS fetches REGNUM.  */
