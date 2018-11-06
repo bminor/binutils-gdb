@@ -4,7 +4,6 @@
 	.text
 _start:
 	vmovntdqa (%rcx),%ymm4
-	vmovntdqa (%rcx),%ymm4
 	vmpsadbw $7,%ymm4,%ymm6,%ymm2
 	vpabsb %ymm4,%ymm6
 	vpabsd %ymm4,%ymm6

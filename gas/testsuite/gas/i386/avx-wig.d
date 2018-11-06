@@ -20,8 +20,16 @@ Disassembly of section .text:
  +[a-f0-9]+:	c4 e2 c9 dd d4       	vaesenclast %xmm4,%xmm6,%xmm2
  +[a-f0-9]+:	c4 e2 f9 db f4       	vaesimc %xmm4,%xmm6
  +[a-f0-9]+:	c4 e3 f9 df f4 07    	vaeskeygenassist \$0x7,%xmm4,%xmm6
+ +[a-f0-9]+:	c4 e1 cd 55 d4       	vandnpd %ymm4,%ymm6,%ymm2
+ +[a-f0-9]+:	c4 e1 cc 55 d4       	vandnps %ymm4,%ymm6,%ymm2
+ +[a-f0-9]+:	c4 e1 cd 54 d4       	vandpd %ymm4,%ymm6,%ymm2
+ +[a-f0-9]+:	c4 e1 cc 54 d4       	vandps %ymm4,%ymm6,%ymm2
  +[a-f0-9]+:	c4 e3 cd 0d d4 07    	vblendpd \$0x7,%ymm4,%ymm6,%ymm2
  +[a-f0-9]+:	c4 e3 cd 0c d4 07    	vblendps \$0x7,%ymm4,%ymm6,%ymm2
+ +[a-f0-9]+:	c4 e1 cd c2 d4 00    	vcmpeqpd %ymm4,%ymm6,%ymm2
+ +[a-f0-9]+:	c4 e1 cc c2 d4 00    	vcmpeqps %ymm4,%ymm6,%ymm2
+ +[a-f0-9]+:	c4 e1 cb c2 d4 00    	vcmpeqsd %xmm4,%xmm6,%xmm2
+ +[a-f0-9]+:	c4 e1 ca c2 d4 00    	vcmpeqss %xmm4,%xmm6,%xmm2
  +[a-f0-9]+:	c4 e1 cd c2 d4 07    	vcmpordpd %ymm4,%ymm6,%ymm2
  +[a-f0-9]+:	c4 e1 cc c2 d4 07    	vcmpordps %ymm4,%ymm6,%ymm2
  +[a-f0-9]+:	c4 e1 cb c2 d4 07    	vcmpordsd %xmm4,%xmm6,%xmm2
@@ -39,6 +47,7 @@ Disassembly of section .text:
  +[a-f0-9]+:	c4 e1 fd 5b f4       	vcvtps2dq %ymm4,%ymm6
  +[a-f0-9]+:	c4 e1 fc 5a e4       	vcvtps2pd %xmm4,%ymm4
  +[a-f0-9]+:	c4 e1 cb 5a d4       	vcvtsd2ss %xmm4,%xmm6,%xmm2
+ +[a-f0-9]+:	c4 e1 ca 5a d4       	vcvtss2sd %xmm4,%xmm6,%xmm2
  +[a-f0-9]+:	c4 e1 fd e6 e4       	vcvttpd2dq %ymm4,%xmm4
  +[a-f0-9]+:	c4 e1 f9 e6 f4       	vcvttpd2dq %xmm4,%xmm6
  +[a-f0-9]+:	c4 e1 fd e6 e4       	vcvttpd2dq %ymm4,%xmm4
@@ -108,6 +117,8 @@ Disassembly of section .text:
  +[a-f0-9]+:	c4 e1 cc 59 d4       	vmulps %ymm4,%ymm6,%ymm2
  +[a-f0-9]+:	c4 e1 cb 59 d4       	vmulsd %xmm4,%xmm6,%xmm2
  +[a-f0-9]+:	c4 e1 ca 59 d4       	vmulss %xmm4,%xmm6,%xmm2
+ +[a-f0-9]+:	c4 e1 cd 56 d4       	vorpd  %ymm4,%ymm6,%ymm2
+ +[a-f0-9]+:	c4 e1 cc 56 d4       	vorps  %ymm4,%ymm6,%ymm2
  +[a-f0-9]+:	c4 e2 f9 1c f4       	vpabsb %xmm4,%xmm6
  +[a-f0-9]+:	c4 e2 f9 1e f4       	vpabsd %xmm4,%xmm6
  +[a-f0-9]+:	c4 e2 f9 1d f4       	vpabsw %xmm4,%xmm6
@@ -156,7 +167,7 @@ Disassembly of section .text:
  +[a-f0-9]+:	c4 e2 c9 3c d4       	vpmaxsb %xmm4,%xmm6,%xmm2
  +[a-f0-9]+:	c4 e2 c9 3d d4       	vpmaxsd %xmm4,%xmm6,%xmm2
  +[a-f0-9]+:	c4 e1 c9 ee d4       	vpmaxsw %xmm4,%xmm6,%xmm2
- +[a-f0-9]+:	c5 c9 de d4          	vpmaxub %xmm4,%xmm6,%xmm2
+ +[a-f0-9]+:	c4 e1 c9 de d4       	vpmaxub %xmm4,%xmm6,%xmm2
  +[a-f0-9]+:	c4 e2 c9 3f d4       	vpmaxud %xmm4,%xmm6,%xmm2
  +[a-f0-9]+:	c4 e2 c9 3e d4       	vpmaxuw %xmm4,%xmm6,%xmm2
  +[a-f0-9]+:	c4 e2 c9 38 d4       	vpminsb %xmm4,%xmm6,%xmm2

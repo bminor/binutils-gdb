@@ -8,9 +8,8 @@
 Disassembly of section .text:
 
 0+ <_start>:
- +[a-f0-9]+:	c4 e2 7d 2a 21       	vmovntdqa \(%ecx\),%ymm4
- +[a-f0-9]+:	c4 e2 7d 2a 21       	vmovntdqa \(%ecx\),%ymm4
- +[a-f0-9]+:	c4 e3 4d 42 d4 07    	vmpsadbw \$0x7,%ymm4,%ymm6,%ymm2
+ +[a-f0-9]+:	c4 e2 fd 2a 21       	vmovntdqa \(%ecx\),%ymm4
+ +[a-f0-9]+:	c4 e3 cd 42 d4 07    	vmpsadbw \$0x7,%ymm4,%ymm6,%ymm2
  +[a-f0-9]+:	c4 e2 fd 1c f4       	vpabsb %ymm4,%ymm6
  +[a-f0-9]+:	c4 e2 fd 1e f4       	vpabsd %ymm4,%ymm6
  +[a-f0-9]+:	c4 e2 fd 1d f4       	vpabsw %ymm4,%ymm6
@@ -43,15 +42,15 @@ Disassembly of section .text:
  +[a-f0-9]+:	c4 e2 cd 02 d4       	vphaddd %ymm4,%ymm6,%ymm2
  +[a-f0-9]+:	c4 e2 cd 03 d4       	vphaddsw %ymm4,%ymm6,%ymm2
  +[a-f0-9]+:	c4 e2 cd 01 d4       	vphaddw %ymm4,%ymm6,%ymm2
- +[a-f0-9]+:	c4 e2 4d 06 d4       	vphsubd %ymm4,%ymm6,%ymm2
- +[a-f0-9]+:	c4 e2 4d 07 d4       	vphsubsw %ymm4,%ymm6,%ymm2
- +[a-f0-9]+:	c4 e2 4d 05 d4       	vphsubw %ymm4,%ymm6,%ymm2
+ +[a-f0-9]+:	c4 e2 cd 06 d4       	vphsubd %ymm4,%ymm6,%ymm2
+ +[a-f0-9]+:	c4 e2 cd 07 d4       	vphsubsw %ymm4,%ymm6,%ymm2
+ +[a-f0-9]+:	c4 e2 cd 05 d4       	vphsubw %ymm4,%ymm6,%ymm2
  +[a-f0-9]+:	c4 e2 cd 04 d4       	vpmaddubsw %ymm4,%ymm6,%ymm2
  +[a-f0-9]+:	c4 e1 cd f5 d4       	vpmaddwd %ymm4,%ymm6,%ymm2
  +[a-f0-9]+:	c4 e2 cd 3c d4       	vpmaxsb %ymm4,%ymm6,%ymm2
  +[a-f0-9]+:	c4 e2 cd 3d d4       	vpmaxsd %ymm4,%ymm6,%ymm2
  +[a-f0-9]+:	c4 e1 cd ee d4       	vpmaxsw %ymm4,%ymm6,%ymm2
- +[a-f0-9]+:	c5 cd de d4          	vpmaxub %ymm4,%ymm6,%ymm2
+ +[a-f0-9]+:	c4 e1 cd de d4       	vpmaxub %ymm4,%ymm6,%ymm2
  +[a-f0-9]+:	c4 e2 cd 3f d4       	vpmaxud %ymm4,%ymm6,%ymm2
  +[a-f0-9]+:	c4 e2 cd 3e d4       	vpmaxuw %ymm4,%ymm6,%ymm2
  +[a-f0-9]+:	c4 e2 cd 38 d4       	vpminsb %ymm4,%ymm6,%ymm2

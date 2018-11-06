@@ -15,8 +15,16 @@ _start:
 	vaesenclast %xmm4,%xmm6,%xmm2
 	vaesimc %xmm4,%xmm6
 	vaeskeygenassist $7,%xmm4,%xmm6
+	vandnpd %ymm4,%ymm6,%ymm2
+	vandnps %ymm4,%ymm6,%ymm2
+	vandpd %ymm4,%ymm6,%ymm2
+	vandps %ymm4,%ymm6,%ymm2
 	vblendpd $7,%ymm4,%ymm6,%ymm2
 	vblendps $7,%ymm4,%ymm6,%ymm2
+	vcmpeqpd %ymm4,%ymm6,%ymm2
+	vcmpeqps %ymm4,%ymm6,%ymm2
+	vcmpeqsd %xmm4,%xmm6,%xmm2
+	vcmpeqss %xmm4,%xmm6,%xmm2
 	vcmppd $7,%ymm4,%ymm6,%ymm2
 	vcmpps $7,%ymm4,%ymm6,%ymm2
 	vcmpsd $7,%xmm4,%xmm6,%xmm2
@@ -34,6 +42,7 @@ _start:
 	vcvtps2dq %ymm4,%ymm6
 	vcvtps2pd %xmm4,%ymm4
 	vcvtsd2ss %xmm4,%xmm6,%xmm2
+	vcvtss2sd %xmm4,%xmm6,%xmm2
 	vcvttpd2dqy %ymm4,%xmm4
 	vcvttpd2dqx %xmm4,%xmm6
 	vcvttpd2dqy %ymm4,%xmm4
@@ -105,6 +114,8 @@ _start:
 	vmulps %ymm4,%ymm6,%ymm2
 	vmulsd %xmm4,%xmm6,%xmm2
 	vmulss %xmm4,%xmm6,%xmm2
+	vorpd %ymm4,%ymm6,%ymm2
+	vorps %ymm4,%ymm6,%ymm2
 	vpabsb %xmm4,%xmm6
 	vpabsd %xmm4,%xmm6
 	vpabsw %xmm4,%xmm6
