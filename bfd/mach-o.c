@@ -4888,6 +4888,9 @@ bfd_mach_o_read_command (bfd *abfd, bfd_mach_o_load_command *command)
       if (!bfd_mach_o_read_source_version (abfd, command))
 	return FALSE;
       break;
+    case BFD_MACH_O_LC_LINKER_OPTIONS:
+    case BFD_MACH_O_LC_BUILD_VERSION:
+      break;
     default:
       command->len = 0;
       _bfd_error_handler (_("%pB: unknown load command %#x"),

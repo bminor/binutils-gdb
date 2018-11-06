@@ -185,7 +185,8 @@ typedef enum bfd_mach_o_load_command_type
   BFD_MACH_O_LC_ENCRYPTION_INFO_64 = 0x2c, /* Encrypted 64 bit seg info.  */
   BFD_MACH_O_LC_LINKER_OPTIONS = 0x2d,	/* Linker options.  */
   BFD_MACH_O_LC_LINKER_OPTIMIZATION_HINT = 0x2e, /* Optimization hints.  */
-  BFD_MACH_O_LC_VERSION_MIN_WATCHOS = 0x30 /* Minimal WatchOS version.  */
+  BFD_MACH_O_LC_VERSION_MIN_WATCHOS = 0x30, /* Minimal WatchOS version.  */
+  BFD_MACH_O_LC_BUILD_VERSION = 0x32     /* Records linker, SDK, OS, and tools version used.  */
 }
 bfd_mach_o_load_command_type;
 
