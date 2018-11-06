@@ -42,7 +42,7 @@ section entitled ``GNU Free Documentation License''.
 * size: (binutils)size.           List section sizes and total size.
 * strings: (binutils)strings.     List printable strings from files.
 * strip: (binutils)strip.         Discard symbols.
-* elfedit: (binutils)elfedit.     Update the ELF header of ELF files.
+* elfedit: (binutils)elfedit.     Update ELF header and property of ELF files.
 * windmc: (binutils)windmc.	  Generator for Windows message resources.
 * windres: (binutils)windres.	  Manipulate Windows resources.
 @end direntry
@@ -111,7 +111,7 @@ List printable strings from files
 Discard symbols
 
 @item elfedit
-Update the ELF header of ELF files.
+Update the ELF header and program property of ELF files.
 
 @item c++filt
 Demangle encoded C++ symbols (on MS-DOS, this program is named
@@ -151,7 +151,7 @@ in the section entitled ``GNU Free Documentation License''.
 * windres::			Manipulate Windows resources
 * dlltool::			Create files needed to build and use DLLs
 * readelf::                     Display the contents of ELF format files
-* elfedit::                     Update the ELF header of ELF files
+* elfedit::                     Update ELF header and property of ELF files
 * Common Options::              Command-line options for all utilities
 * Selecting the Target System:: How these utilities determine the target
 * Reporting Bugs::              Reporting Bugs
@@ -4725,7 +4725,7 @@ objdump(1), and the Info entries for @file{binutils}.
 @cindex Update ELF header
 @kindex elfedit
 
-@c man title elfedit Update the ELF header of ELF files.
+@c man title elfedit Update ELF header and program property of ELF files.
 
 @smallexample
 @c man begin SYNOPSIS elfedit
@@ -4735,6 +4735,8 @@ elfedit [@option{--input-mach=}@var{machine}]
         @option{--output-mach=}@var{machine}
         @option{--output-type=}@var{type}
         @option{--output-osabi=}@var{osabi}
+        @option{--enable-x86-feature=}@var{feature}
+        @option{--disable-x86-feature=}@var{feature}
         [@option{-v}|@option{--version}]
         [@option{-h}|@option{--help}]
         @var{elffile}@dots{}
@@ -4743,9 +4745,10 @@ elfedit [@option{--input-mach=}@var{machine}]
 
 @c man begin DESCRIPTION elfedit
 
-@command{elfedit} updates the ELF header of ELF files which have
-the matching ELF machine and file types.  The options control how and
-which fields in the ELF header should be updated.
+@command{elfedit} updates the ELF header and program property of ELF
+files which have the matching ELF machine and file types.  The options
+control how and which fields in the ELF header and program property
+should be updated.
 
 @var{elffile}@dots{} are the ELF files to be updated.  32-bit and
 64-bit ELF files are supported, as are archives containing ELF files.
@@ -4755,7 +4758,9 @@ which fields in the ELF header should be updated.
 
 The long and short forms of options, shown here as alternatives, are
 equivalent. At least one of the @option{--output-mach},
-@option{--output-type} and @option{--output-osabi} options must be given.
+@option{--output-type}, @option{--output-osabi},
+@option{--enable-x86-feature} and @option{--disable-x86-feature}
+options must be given.
 
 @table @env
 
@@ -4794,6 +4799,19 @@ The supported ELF OSABIs are, @var{none}, @var{HPUX}, @var{NetBSD},
 @item --output-osabi=@var{osabi}
 Change the ELF OSABI in the ELF header to @var{osabi}.  The
 supported ELF OSABI are the same as @option{--input-osabi}.
+
+@item --enable-x86-feature=@var{feature}
+Set the @var{feature} bit in program property in @var{exec} or @var{dyn}
+ELF files with machine types of @var{i386} or @var{x86-64}.  The
+supported features are, @var{ibt} and @var{shstk}.
+
+@item --disable-x86-feature=@var{feature}
+Clear the @var{feature} bit in program property in @var{exec} or
+@var{dyn} ELF files with machine types of @var{i386} or @var{x86-64}.
+The supported features are the same as @option{--enable-x86-feature}.
+
+Note: @option{--enable-x86-feature} and @option{--disable-x86-feature}
+are available only on hosts with @samp{mmap} support.
 
 @item -v
 @itemx --version

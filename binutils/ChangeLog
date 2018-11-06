@@ -1,3 +1,21 @@
+2018-11-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* doc/binutils.texi: Document --enable-x86-feature and
+	--disable-x86-feature options for elfedit.
+	* elfedit.c: Include "config.h" and <sys/mman.h>.
+	(enable_x86_features): New.
+	(disable_x86_features): Likewise.
+	(update_gnu_property): Likewise.
+	(elf_x86_feature): Likewise.
+	(process_file): Call update_gnu_property on ET_EXEC or ET_DYN
+	file.
+	(command_line_switch): Add OPTION_ENABLE_X86_FEATURE and
+	OPTION_DISABLE_X86_FEATURE.
+	(options): Add--enable-x86-feature and --disable-x86-feature.
+	(usage): Likewise.
+	(main): Handle OPTION_ENABLE_X86_FEATURE and
+	OPTION_DISABLE_X86_FEATURE.
+
 2018-11-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfedit.c (update_elf_header): Move EI_MAG? check to ...

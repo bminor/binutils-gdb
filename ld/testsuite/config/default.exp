@@ -243,6 +243,10 @@ if ![info exists READELFFLAGS] then {
     set READELFFLAGS {}
 }
 
+if ![info exists ELFEDIT] then {
+    set ELFEDIT [findfile $base_dir/../binutils/elfedit]
+}
+
 if ![info exists LD] then {
     set LD [findfile $base_dir/ld-new ./ld-new [transform ld]]
 }

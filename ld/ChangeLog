@@ -1,3 +1,14 @@
+2018-11-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/config/default.exp (ELFEDIT): New.
+	* testsuite/ld-elf/linux-x86.exp (elfedit_test): New proc.
+	Run elfedit tests.
+	* testsuite/ld-elf/x86-feature-1a.rd: New file.
+	* testsuite/ld-elf/x86-feature-1b.rd: Likewise.
+	* testsuite/ld-elf/x86-feature-1c.rd: Likewise.
+	* testsuite/ld-elf/x86-feature-1d.rd: Likewise.
+	* testsuite/ld-elf/x86-feature-1e.rd: Likewise.
+
 2018-11-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/23854
