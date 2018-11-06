@@ -41,6 +41,8 @@ _start:
 	{evex} vmovd %xmm0, %eax
 	{evex} vmovd %xmm0, 4(%eax)
 
+	vpbroadcastd %eax, %xmm0
+
 	{evex} vpextrb $0, %xmm0, %eax
 	{evex} vpextrb $0, %xmm0, 1(%eax)
 

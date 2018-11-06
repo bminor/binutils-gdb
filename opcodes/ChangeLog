@@ -1,5 +1,10 @@
 2018-11-06  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis-evex.h (evex_table): Use K suffix instead of %LW for
+	vpbroadcast{d,q} with GPR operand.
+
+2018-11-06  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (EVEX_W_0F6E_P_2, EVEX_W_0F7E_P_2): Delete.
 	* i386-dis-evex.h (evex_table): Move vmov[dq} with GPR operand
 	cases up one level in the hierarchy.

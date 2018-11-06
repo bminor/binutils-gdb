@@ -31,6 +31,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f1 fd 08 6e 40 01 	vmovd  xmm0,DWORD PTR \[eax\+0x4\]
 [ 	]*[a-f0-9]+:	62 f1 fd 08 7e c0    	vmovd  eax,xmm0
 [ 	]*[a-f0-9]+:	62 f1 fd 08 7e 40 01 	vmovd  DWORD PTR \[eax\+0x4\],xmm0
+[ 	]*[a-f0-9]+:	62 f2 fd 08 7c c0    	vpbroadcastd xmm0,eax
 [ 	]*[a-f0-9]+:	62 f3 fd 08 14 c0 00 	vpextrb eax,xmm0,0x0
 [ 	]*[a-f0-9]+:	62 f3 fd 08 14 40 01 00 	vpextrb BYTE PTR \[eax\+0x1\],xmm0,0x0
 [ 	]*[a-f0-9]+:	62 f3 fd 08 16 c0 00 	vpextrd eax,xmm0,0x0
