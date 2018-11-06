@@ -12,3 +12,28 @@ _start:
 	{evex} vmovq (%ecx),%xmm4
 
 	{evex} vmovq %xmm4,%xmm6
+
+	{evex} vextractps $0, %xmm0, %eax
+	{evex} vextractps $0, %xmm0, (%eax)
+
+	{evex} vpextrb $0, %xmm0, %eax
+	{evex} vpextrb $0, %xmm0, (%eax)
+
+	{evex} vpextrw $0, %xmm0, %eax
+	{evex} {store} vpextrw $0, %xmm0, %eax
+	{evex} vpextrw $0, %xmm0, (%eax)
+
+	{evex} vpextrd $0, %xmm0, %eax
+	{evex} vpextrd $0, %xmm0, (%eax)
+
+	{evex} vinsertps $0, %xmm0, %xmm0, %xmm0
+	{evex} vinsertps $0, (%eax), %xmm0, %xmm0
+
+	{evex} vpinsrb $0, %eax, %xmm0, %xmm0
+	{evex} vpinsrb $0, (%eax), %xmm0, %xmm0
+
+	{evex} vpinsrw $0, %eax, %xmm0, %xmm0
+	{evex} vpinsrw $0, (%eax), %xmm0, %xmm0
+
+	{evex} vpinsrd $0, %eax, %xmm0, %xmm0
+	{evex} vpinsrd $0, (%eax), %xmm0, %xmm0

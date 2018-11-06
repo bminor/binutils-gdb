@@ -1,5 +1,15 @@
 2018-11-06  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (Vex128, Vex256, VexLIG, EVex128, EVex256,
+	EVex512, EVexLIG, EVexDYN): New.
+	(ldmxcsr, stmxcsr, vldmxcsr, vstmxcsr, all BMI, BMI2, and TBM
+	insns): Use Vex128 instead of Vex=3 (aka VexLIG).
+	(vextractps, vinsertps, vpextr*, vpinsr*): Use EVex128 instead
+	of EVex=4 (aka EVexLIG).
+	* i386-tbl.h: Re-generate.
+
+2018-11-06  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (pextrw, vpextrw): Add Load to 0F C5 forms.
 	(vpmaxub): Re-order attributes on AVX512BW flavor.
 	* i386-tbl.h: Re-generate.
