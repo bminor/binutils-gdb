@@ -45,13 +45,13 @@ insert_arx (uint64_t insn,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
-  if (value >= 8 && value < 24)
-    return insn | ((value - 8) & 0xf);
-  else
+  value -= 8;
+  if (value < 0 || value >= 16)
     {
       *errmsg = _("invalid register");
-      return 0;
+      value = 0xf;
     }
+  return insn | value;
 }
 
 static int64_t
@@ -68,13 +68,13 @@ insert_ary (uint64_t insn,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
-  if (value >= 8 && value < 24)
-    return insn | (((value - 8) & 0xf) << 4);
-  else
+  value -= 8;
+  if (value < 0 || value >= 16)
     {
       *errmsg = _("invalid register");
-      return 0;
+      value = 0xf;
     }
+  return insn | (value << 4);
 }
 
 static int64_t
@@ -92,14 +92,15 @@ insert_rx (uint64_t insn,
 	   const char **errmsg)
 {
   if (value >= 0 && value < 8)
-    return insn | value;
+    ;
   else if (value >= 24 && value <= 31)
-    return insn | (value - 16);
+    value -= 16;
   else
     {
       *errmsg = _("invalid register");
-      return 0;
+      value = 0xf;
     }
+  return insn | value;
 }
 
 static int64_t
@@ -121,14 +122,15 @@ insert_ry (uint64_t insn,
 	   const char **errmsg)
 {
   if (value >= 0 && value < 8)
-    return insn | (value << 4);
+    ;
   else if (value >= 24 && value <= 31)
-    return insn | ((value - 16) << 4);
+    value -= 16;
   else
     {
       *errmsg = _("invalid register");
-      return 0;
+      value = 0xf;
     }
+  return insn | (value << 4);
 }
 
 static int64_t
@@ -601,10 +603,7 @@ insert_ls (uint64_t insn,
     {
       int64_t max_lvalue = (dialect & PPC_OPCODE_POWER4) ? 2 : 1;
       if (value > max_lvalue)
-	{
-	  *errmsg = _("illegal L operand value");
-	  return insn;
-	}
+	*errmsg = _("illegal L operand value");
     }
 
   return insn | ((value & 0x3) << 21);
@@ -1086,40 +1085,6 @@ extract_sci8n (uint64_t insn,
 }
 
 static uint64_t
-insert_sd4h (uint64_t insn,
-	     int64_t value,
-	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
-	     const char **errmsg ATTRIBUTE_UNUSED)
-{
-  return insn | ((value & 0x1e) << 7);
-}
-
-static int64_t
-extract_sd4h (uint64_t insn,
-	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
-	      int *invalid ATTRIBUTE_UNUSED)
-{
-  return ((insn >> 8) & 0xf) << 1;
-}
-
-static uint64_t
-insert_sd4w (uint64_t insn,
-	     int64_t value,
-	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
-	     const char **errmsg ATTRIBUTE_UNUSED)
-{
-  return insn | ((value & 0x3c) << 6);
-}
-
-static int64_t
-extract_sd4w (uint64_t insn,
-	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
-	      int *invalid ATTRIBUTE_UNUSED)
-{
-  return ((insn >> 8) & 0xf) << 2;
-}
-
-static uint64_t
 insert_oimm (uint64_t insn,
 	     int64_t value,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
@@ -1144,11 +1109,7 @@ insert_sh6 (uint64_t insn,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
-  /* SH6 operand in the rldixor instructions.  */
-  if (PPC_OP (insn) == 4)
-    return insn | ((value & 0x1f) << 6) | ((value & 0x20) >> 5);
-  else
-    return insn | ((value & 0x1f) << 11) | ((value & 0x20) >> 4);
+  return insn | ((value & 0x1f) << 11) | ((value & 0x20) >> 4);
 }
 
 static int64_t
@@ -1156,11 +1117,7 @@ extract_sh6 (uint64_t insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid ATTRIBUTE_UNUSED)
 {
-  /* SH6 operand in the rldixor instructions.  */
-  if (PPC_OP (insn) == 4)
-    return ((insn >> 6) & 0x1f) | ((insn << 5) & 0x20);
-  else
-    return ((insn >> 11) & 0x1f) | ((insn << 4) & 0x20);
+  return ((insn >> 11) & 0x1f) | ((insn << 4) & 0x20);
 }
 
 /* The SPR field in an XFX form instruction.  This is flipped--the
@@ -1192,12 +1149,12 @@ insert_sprbat (uint64_t insn,
 	       ppc_cpu_t dialect,
 	       const char **errmsg)
 {
-  if (value > 7
-      || (value > 3 && (dialect & ALLOW8_BAT) == 0))
+  if ((uint64_t) value > 7
+      || ((uint64_t) value > 3 && (dialect & ALLOW8_BAT) == 0))
     *errmsg = _("invalid bat number");
 
   /* If this is [di]bat4..7 then use spr 560..575, otherwise 528..543.  */
-  if (value > 3)
+  if ((uint64_t) value > 3)
     value = ((value & 3) << 6) | 1;
   else
     value = value << 6;
@@ -1227,13 +1184,13 @@ insert_sprg (uint64_t insn,
 	     ppc_cpu_t dialect,
 	     const char **errmsg)
 {
-  if (value > 7
-      || (value > 3 && (dialect & ALLOW8_SPRG) == 0))
+  if ((uint64_t) value > 7
+      || ((uint64_t) value > 3 && (dialect & ALLOW8_SPRG) == 0))
     *errmsg = _("invalid sprg number");
 
   /* If this is mfsprg4..7 then use spr 260..263 which can be read in
      user mode.  Anything else must use spr 272..279.  */
-  if (value <= 3 || (insn & 0x100) != 0)
+  if ((uint64_t) value <= 3 || (insn & 0x100) != 0)
     value |= 0x10;
 
   return insn | ((value & 0x17) << 16);
@@ -1513,13 +1470,9 @@ insert_evuimm1_ex0 (uint64_t insn,
 		    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		    const char **errmsg)
 {
-  if (value > 0 && value <= 0x1f)
-    return insn | ((value & 0x1f) << 11);
-  else
-    {
-      *errmsg = _("UIMM = 00000 is illegal");
-      return 0;
-    }
+  if (value <= 0 || value > 0x1f)
+    *errmsg = _("UIMM = 00000 is illegal");
+  return insn | ((value & 0x1f) << 11);
 }
 
 static int64_t
@@ -1540,13 +1493,9 @@ insert_evuimm2_ex0 (uint64_t insn,
 		    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		    const char **errmsg)
 {
-  if (value > 0 && value <= 0x3e)
-    return insn | ((value & 0x3e) << 10);
-  else
-    {
-      *errmsg = _("UIMM = 00000 is illegal");
-      return 0;
-    }
+  if (value <= 0 || value > 0x3e)
+    *errmsg = _("UIMM = 00000 is illegal");
+  return insn | ((value & 0x3e) << 10);
 }
 
 static int64_t
@@ -1567,13 +1516,9 @@ insert_evuimm4_ex0 (uint64_t insn,
 		    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		    const char **errmsg)
 {
-  if (value > 0 && value <= 0x7c)
-    return insn | ((value & 0x7c) << 9);
-  else
-    {
-      *errmsg = _("UIMM = 00000 is illegal");
-      return 0;
-    }
+  if (value <= 0 || value > 0x7c)
+    *errmsg = _("UIMM = 00000 is illegal");
+  return insn | ((value & 0x7c) << 9);
 }
 
 static int64_t
@@ -1594,13 +1539,9 @@ insert_evuimm8_ex0 (uint64_t insn,
 		    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		    const char **errmsg)
 {
-  if (value > 0 && value <= 0xf8)
-    return insn | ((value & 0xf8) << 8);
-  else
-    {
-      *errmsg = _("UIMM = 00000 is illegal");
-      return 0;
-    }
+  if (value <= 0 || value > 0xf8)
+    *errmsg = _("UIMM = 00000 is illegal");
+  return insn | ((value & 0xf8) << 8);
 }
 
 static int64_t
@@ -1621,13 +1562,9 @@ insert_evuimm_lt8 (uint64_t insn,
 		   ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		   const char **errmsg)
 {
-  if (value >= 0 && value <= 7)
-    return insn | ((value & 0x7) << 11);
-  else
-    {
-      *errmsg = _("UIMM values >7 are illegal");
-      return 0;
-    }
+  if (value < 0 || value > 7)
+    *errmsg = _("UIMM values >7 are illegal");
+  return insn | ((value & 0x7) << 11);
 }
 
 static int64_t
@@ -1648,13 +1585,9 @@ insert_evuimm_lt16 (uint64_t insn,
 		    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		    const char **errmsg)
 {
-  if (value >= 0 && value <= 15)
-    return insn | ((value & 0xf) << 11);
-  else
-    {
-      *errmsg = _("UIMM values >15 are illegal");
-      return 0;
-    }
+  if (value < 0 || value > 15)
+    *errmsg = _("UIMM values >15 are illegal");
+  return insn | ((value & 0xf) << 11);
 }
 
 static int64_t
@@ -1675,13 +1608,9 @@ insert_rD_rS_even (uint64_t insn,
 		   ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		   const char **errmsg)
 {
-  if ((value & 0x1) == 0)
-    return insn | ((value & 0x1e) << 21);
-  else
-    {
-      *errmsg = _("GPR odd is illegal");
-      return 0;
-    }
+  if ((value & 0x1) != 0)
+    *errmsg = _("GPR odd is illegal");
+  return insn | ((value & 0x1e) << 21);
 }
 
 static int64_t
@@ -1702,13 +1631,9 @@ insert_off_lsp (uint64_t insn,
 		ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		const char **errmsg)
 {
-  if (value > 0 && value <= 0x3)
-    return insn | (value & 0x3);
-  else
-    {
-      *errmsg = _("invalid offset");
-      return 0;
-    }
+  if (value <= 0 || value > 0x3)
+    *errmsg = _("invalid offset");
+  return insn | (value & 0x3);
 }
 
 static int64_t
@@ -1729,13 +1654,9 @@ insert_off_spe2 (uint64_t insn,
 		 ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 		 const char **errmsg)
 {
-  if (value > 0 && value <= 0x7)
-    return insn | (value & 0x7);
-  else
-    {
-      *errmsg = _("invalid offset");
-      return 0;
-    }
+  if (value <= 0 || value > 0x7)
+    *errmsg = _("invalid offset");
+  return insn | (value & 0x7);
 }
 
 static int64_t
@@ -1756,13 +1677,9 @@ insert_Ddd (uint64_t insn,
 	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg)
 {
-  if (value >= 0 && value <= 0x7)
-    return insn | ((value & 0x3) << 11) | ((value & 0x4) >> 2);
-  else
-    {
-      *errmsg = _("invalid Ddd value");
-      return 0;
-    }
+  if (value < 0 || value > 0x7)
+    *errmsg = _("invalid Ddd value");
+  return insn | ((value & 0x3) << 11) | ((value & 0x4) >> 2);
 }
 
 static int64_t
@@ -2296,11 +2213,11 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The SD field of the SD4 form instruction, for halfword.  */
 #define SE_SDH SE_SD + 1
-  { 0x1e, PPC_OPSHIFT_INV, insert_sd4h, extract_sd4h, PPC_OPERAND_PARENS },
+  { 0x1e, 7, NULL, NULL, PPC_OPERAND_PARENS },
 
   /* The SD field of the SD4 form instruction, for word.  */
 #define SE_SDW SE_SDH + 1
-  { 0x3c, PPC_OPSHIFT_INV, insert_sd4w, extract_sd4w, PPC_OPERAND_PARENS },
+  { 0x3c, 6, NULL, NULL, PPC_OPERAND_PARENS },
 
   /* The SH field in an X or M form instruction.  */
 #define SH SE_SDW + 1
@@ -2414,7 +2331,7 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The OIMM field in an SE_OIM5 instruction.  */
 #define OIMM5 UI5 + 1
-  { 0x1f, PPC_OPSHIFT_INV, insert_oimm, extract_oimm, PPC_OPERAND_PLUS1 },
+  { 0x1f, 4, insert_oimm, extract_oimm, PPC_OPERAND_PLUS1 },
 
   /* The UI7 field in an SE_LI instruction.  */
 #define UI7 OIMM5 + 1

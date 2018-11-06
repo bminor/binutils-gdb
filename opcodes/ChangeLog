@@ -1,3 +1,17 @@
+2018-11-06  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (insert_arx, insert_ary, insert_rx, insert_ry, insert_ls),
+	(insert_evuimm1_ex0, insert_evuimm2_ex0, insert_evuimm4_ex0),
+	(insert_evuimm8_ex0, insert_evuimm_lt8, insert_evuimm_lt16),
+	(insert_rD_rS_even, insert_off_lsp, insert_off_spe2, insert_Ddd):
+	Don't return zero on error, insert mask bits instead.
+	(insert_sd4h, extract_sd4h, insert_sd4w, extract_sd4w): Delete.
+	(insert_sh6, extract_sh6): Delete dead code.
+	(insert_sprbat, insert_sprg): Use unsigned comparisions.
+	(powerpc_operands <OIMM>): Set shift count rather than using
+	PPC_OPSHIFT_INV.
+	<SE_SDH, SE_SDW>: Likewise.  Don't use insert/extract functions.
+
 2018-11-06  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis-evex.h (evex_table): Use K suffix instead of %LW for

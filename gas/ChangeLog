@@ -1,5 +1,11 @@
 2018-11-06  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-ppc.c (insn_validate): Don't ignore mask in
+	PPC_OPSHIFT_INV case.  Call the insert function to calculate
+	a mask.
+
+2018-11-06  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-ppc.c (insn_validate): Check that optional operands
 	are not followed by non-optional operands.
 
