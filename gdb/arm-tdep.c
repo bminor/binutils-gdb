@@ -1801,6 +1801,10 @@ arm_scan_prologue (struct frame_info *this_frame,
       CORE_ADDR frame_loc;
       ULONGEST return_value;
 
+      /* AAPCS does not use a frame register, so we can abort here.  */
+      if (gdbarch_tdep (gdbarch)->arm_abi == ARM_ABI_AAPCS)
+        return;
+
       frame_loc = get_frame_register_unsigned (this_frame, ARM_FP_REGNUM);
       if (!safe_read_memory_unsigned_integer (frame_loc, 4, byte_order,
 					      &return_value))

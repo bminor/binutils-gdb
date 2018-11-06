@@ -1,3 +1,8 @@
+2018-11-06  Marius Muench  <marius.muench@eurecom.fr>
+
+	* arm-tdep.c (arm_scan_prologue): Don't dereference FP reg
+	when on AAPCS.
+
 2018-11-06  John Baldwin  <jhb@FreeBSD.org>
 
 	* riscv-fbsd-nat.c (getregs_supplies): Return true for
