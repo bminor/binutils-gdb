@@ -1,5 +1,11 @@
 2018-11-06  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (EVEX_W_0F6E_P_2, EVEX_W_0F7E_P_2): Delete.
+	* i386-dis-evex.h (evex_table): Move vmov[dq} with GPR operand
+	cases up one level in the hierarchy.
+
+2018-11-06  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (MOD_VEX_W_0_0F92_P_3_LEN_0,
 	MOD_VEX_W_1_0F92_P_3_LEN_0): Fold into MOD_VEX_0F92_P_3_LEN_0.
 	(MOD_VEX_W_0_0F93_P_3_LEN_0, MOD_VEX_W_1_0F93_P_3_LEN_0): Fold

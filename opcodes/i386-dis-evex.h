@@ -3299,11 +3299,6 @@ static const struct dis386 evex_table[][256] = {
     { Bad_Opcode },
     { "vpunpckhqdq",	{ XM, Vex, EXx }, 0 },
   },
-  /* EVEX_W_0F6E_P_2 */
-  {
-    { "vmovd",	{ XMScalar, Ed }, 0 },
-    { "vmovq",	{ XMScalar, Eq }, 0 },
-  },
   /* EVEX_W_0F6F_P_1 */
   {
     { "vmovdqu32",	{ XM, EXEvexXNoBcst }, 0 },
@@ -3399,11 +3394,6 @@ static const struct dis386 evex_table[][256] = {
   {
     { Bad_Opcode },
     { "vmovq",	{ XMScalar, EXxmm_mq }, 0 },
-  },
-  /* EVEX_W_0F7E_P_2 */
-  {
-    { "vmovd",	{ Ed, XMScalar }, 0 },
-    { "vmovq",	{ Eq, XMScalar }, 0 },
   },
   /* EVEX_W_0F7F_P_1 */
   {
@@ -4093,7 +4083,7 @@ static const struct dis386 evex_table[][256] = {
 #ifdef NEED_EVEX_LEN_TABLE
   /* EVEX_LEN_0F6E_P_2 */
   {
-    { VEX_W_TABLE (EVEX_W_0F6E_P_2) },
+    { "vmovK",	{ XMScalar, Edq }, 0 },
   },
 
   /* EVEX_LEN_0F7E_P_1 */
@@ -4103,7 +4093,7 @@ static const struct dis386 evex_table[][256] = {
 
   /* EVEX_LEN_0F7E_P_2 */
   {
-    { VEX_W_TABLE (EVEX_W_0F7E_P_2) },
+    { "vmovK",	{ Edq, XMScalar }, 0 },
   },
 
   /* EVEX_LEN_0FD6_P_2 */

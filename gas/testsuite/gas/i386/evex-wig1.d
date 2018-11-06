@@ -27,6 +27,10 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f1 ff 08 78 c0    	vcvttsd2usi %xmm0,%eax
 [ 	]*[a-f0-9]+:	62 f3 fd 08 17 c0 00 	vextractps \$0x0,%xmm0,%eax
 [ 	]*[a-f0-9]+:	62 f3 fd 08 17 40 01 00 	vextractps \$0x0,%xmm0,0x4\(%eax\)
+[ 	]*[a-f0-9]+:	62 f1 fd 08 6e c0    	vmovd  %eax,%xmm0
+[ 	]*[a-f0-9]+:	62 f1 fd 08 6e 40 01 	vmovd  0x4\(%eax\),%xmm0
+[ 	]*[a-f0-9]+:	62 f1 fd 08 7e c0    	vmovd  %xmm0,%eax
+[ 	]*[a-f0-9]+:	62 f1 fd 08 7e 40 01 	vmovd  %xmm0,0x4\(%eax\)
 [ 	]*[a-f0-9]+:	62 f3 fd 08 14 c0 00 	vpextrb \$0x0,%xmm0,%eax
 [ 	]*[a-f0-9]+:	62 f3 fd 08 14 40 01 00 	vpextrb \$0x0,%xmm0,0x1\(%eax\)
 [ 	]*[a-f0-9]+:	62 f3 fd 08 16 c0 00 	vpextrd \$0x0,%xmm0,%eax

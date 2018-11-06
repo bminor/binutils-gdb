@@ -35,6 +35,12 @@ _start:
 	{evex} vextractps $0, %xmm0, %eax
 	{evex} vextractps $0, %xmm0, 4(%eax)
 
+	{evex} vmovd %eax, %xmm0
+	{evex} vmovd 4(%eax), %xmm0
+
+	{evex} vmovd %xmm0, %eax
+	{evex} vmovd %xmm0, 4(%eax)
+
 	{evex} vpextrb $0, %xmm0, %eax
 	{evex} vpextrb $0, %xmm0, 1(%eax)
 
