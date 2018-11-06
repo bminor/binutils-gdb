@@ -2358,10 +2358,19 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
       return FALSE;
     }
 
+  bed = get_elf_backend_data (info->output_bfd);
+
   /* We only need version numbers for symbols defined in regular
      objects.  */
   if (!h->def_regular)
-    return TRUE;
+    {
+      /* Hide symbols defined in discarded input sections.  */
+      if ((h->root.type == bfd_link_hash_defined
+	   || h->root.type == bfd_link_hash_defweak)
+	  && discarded_section (h->root.u.def.section))
+	(*bed->elf_backend_hide_symbol) (info, h, TRUE);
+      return TRUE;
+    }
 
   hide = FALSE;
   bed = get_elf_backend_data (info->output_bfd);
