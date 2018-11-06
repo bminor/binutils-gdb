@@ -1,3 +1,8 @@
+2018-11-06  Jim Wilson  <jimw@sifive.com>
+
+	* gdb.base/code_elim.exp: For riscv, set additional_flags
+	to include -msmall-data-limit=0.
+
 2018-11-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/watch_minus_l: New testcase.

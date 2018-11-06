@@ -28,6 +28,11 @@ lappend opts "additional_flags=-fdata-sections"
 lappend opts "additional_flags=-Wl,-gc-sections"
 lappend opts "additional_flags=-Wl,-e,main"
 
+# Place variables in .data instead of .sdata.
+if {[istarget "riscv*-*-*"]} {
+   lappend opts "additional_flags=-msmall-data-limit=0"
+}
+
 remote_exec build "rm -f ${binfile1}"
 remote_exec build "rm -f ${binfile2}"
 
