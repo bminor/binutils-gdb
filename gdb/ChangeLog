@@ -1,5 +1,9 @@
 2018-11-08  Tom Tromey  <tom@tromey.com>
 
+	* record.c (require_record_target): Upper-case "<TAB>".
+
+2018-11-08  Tom Tromey  <tom@tromey.com>
+
 	* python/lib/gdb/command/pretty_printers.py
 	(InfoPrettyPrinter.invoke): Don't indent "objfile" heading.
 

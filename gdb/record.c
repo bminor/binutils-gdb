@@ -75,7 +75,7 @@ require_record_target (void)
   t = find_record_target ();
   if (t == NULL)
     error (_("No record target is currently active.\n"
-	     "Use one of the \"target record-<tab><tab>\" commands first."));
+	     "Use one of the \"target record-<TAB><TAB>\" commands first."));
 
   return t;
 }
