@@ -478,6 +478,16 @@ struct target_ops
      false for failure.  Return pointer to thread handle via HANDLE
      and the handle's length via HANDLE_LEN.  */
   bool (*thread_handle) (ptid_t ptid, gdb_byte **handle, int *handle_len);
+
+  /* Call the target arch_setup function on the current thread.  */
+  void (*arch_setup) (void);
+
+  /* Check that the current target description is still valid for the current
+     inferior, returning false if not.  For example, if the size of some
+     registers (see aarch64 SVE), or the number of registers, had changed.
+     This check does not include the contents of the registers.  Default
+     implementation will always return true.  */
+  bool (*validate_tdesc) (struct thread_info *thread);
 };
 
 extern struct target_ops *the_target;
@@ -564,6 +574,14 @@ int kill_inferior (process_info *proc);
 #define target_get_min_fast_tracepoint_insn_len()	\
   (the_target->get_min_fast_tracepoint_insn_len		\
    ? (*the_target->get_min_fast_tracepoint_insn_len) () : 0)
+
+#define target_arch_setup(thread)			\
+  if (the_target->arch_setup)				\
+    (*the_target->arch_setup) ();
+
+#define target_validate_tdesc(thread)			\
+  (the_target->validate_tdesc				\
+    ? (*the_target->validate_tdesc) (thread) : true)
 
 #define thread_stopped(thread) \
   (*the_target->thread_stopped) (thread)

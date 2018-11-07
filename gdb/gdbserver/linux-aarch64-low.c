@@ -3037,6 +3037,14 @@ aarch64_supports_hardware_single_step (void)
   return 1;
 }
 
+/* Implementation of the linux_target_ops method "validate_tdesc ".  */
+
+static bool
+aarch64_validate_tdesc (struct thread_info *thread)
+{
+  return true;
+}
+
 struct linux_target_ops the_low_target =
 {
   aarch64_arch_setup,
@@ -3075,6 +3083,8 @@ struct linux_target_ops the_low_target =
   aarch64_breakpoint_kind_from_current_state,
   aarch64_supports_hardware_single_step,
   aarch64_get_syscall_trapinfo,
+  NULL, /* get_ipa_tdesc_idx.  */
+  aarch64_validate_tdesc,
 };
 
 void

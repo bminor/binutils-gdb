@@ -256,6 +256,9 @@ struct linux_target_ops
 
   /* See target.h.  */
   int (*get_ipa_tdesc_idx) (void);
+
+  /* See target.h.  */
+  bool (*validate_tdesc) (struct thread_info *thread);
 };
 
 extern struct linux_target_ops the_low_target;
