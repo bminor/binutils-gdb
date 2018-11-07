@@ -1,3 +1,13 @@
+2018-11-07  Roman Bolshakov <r.bolshakov@yadro.com>
+	    Saagar Jha  <saagar@saagarjha.com>
+
+	* mach-o/external.h (mach_o_nversion_min_command_external): Rename
+	reserved to sdk.
+	(mach_o_note_command_external): New.
+	(mach_o_build_version_command_external): New.
+	* mach-o/loader.h (BFD_MACH_O_LC_VERSION_MIN_TVOS): Define.
+	(BFD_MACH_O_LC_NOTE): Define.
+
 2018-11-06  Romain Margheriti  <lilrom13@gmail.com>
 
 	PR 23742

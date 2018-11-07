@@ -4598,16 +4598,12 @@ bfd_mach_o_read_version_min (bfd *abfd, bfd_mach_o_load_command *command)
 {
   bfd_mach_o_version_min_command *cmd = &command->command.version_min;
   struct mach_o_version_min_command_external raw;
-  unsigned int ver;
 
   if (bfd_bread (&raw, sizeof (raw), abfd) != sizeof (raw))
     return FALSE;
 
-  ver = bfd_get_32 (abfd, raw.version);
-  cmd->rel = ver >> 16;
-  cmd->maj = ver >> 8;
-  cmd->min = ver;
-  cmd->reserved = bfd_get_32 (abfd, raw.reserved);
+  cmd->version = bfd_get_32 (abfd, raw.version);
+  cmd->sdk = bfd_get_32 (abfd, raw.sdk);
   return TRUE;
 }
 
@@ -4678,6 +4674,37 @@ bfd_mach_o_read_source_version (bfd *abfd, bfd_mach_o_load_command *command)
   cmd->b = ver & 0x3ff;
   ver >>= 10;
   cmd->a = ver & 0xffffff;
+  return TRUE;
+}
+
+static bfd_boolean
+bfd_mach_o_read_note (bfd *abfd, bfd_mach_o_load_command *command)
+{
+  bfd_mach_o_note_command *cmd = &command->command.note;
+  struct mach_o_note_command_external raw;
+
+  if (bfd_bread (&raw, sizeof (raw), abfd) != sizeof (raw))
+    return FALSE;
+
+  memcpy (cmd->data_owner, raw.data_owner, 16);
+  cmd->offset = bfd_get_64 (abfd, raw.offset);
+  cmd->size = bfd_get_64 (abfd, raw.size);
+  return TRUE;
+}
+
+static bfd_boolean
+bfd_mach_o_read_build_version (bfd *abfd, bfd_mach_o_load_command *command)
+{
+  bfd_mach_o_build_version_command *cmd = &command->command.build_version;
+  struct mach_o_build_version_command_external raw;
+
+  if (bfd_bread (&raw, sizeof (raw), abfd) != sizeof (raw))
+    return FALSE;
+
+  cmd->platform = bfd_get_32 (abfd, raw.platform);
+  cmd->minos = bfd_get_32 (abfd, raw.minos);
+  cmd->sdk = bfd_get_32 (abfd, raw.sdk);
+  cmd->ntools = bfd_get_32 (abfd, raw.ntools);
   return TRUE;
 }
 
@@ -4877,6 +4904,7 @@ bfd_mach_o_read_command (bfd *abfd, bfd_mach_o_load_command *command)
     case BFD_MACH_O_LC_VERSION_MIN_MACOSX:
     case BFD_MACH_O_LC_VERSION_MIN_IPHONEOS:
     case BFD_MACH_O_LC_VERSION_MIN_WATCHOS:
+    case BFD_MACH_O_LC_VERSION_MIN_TVOS:
       if (!bfd_mach_o_read_version_min (abfd, command))
 	return FALSE;
       break;
@@ -4889,7 +4917,14 @@ bfd_mach_o_read_command (bfd *abfd, bfd_mach_o_load_command *command)
 	return FALSE;
       break;
     case BFD_MACH_O_LC_LINKER_OPTIONS:
+      break;
+    case BFD_MACH_O_LC_NOTE:
+      if (!bfd_mach_o_read_note (abfd, command))
+        return FALSE;
+      break;
     case BFD_MACH_O_LC_BUILD_VERSION:
+      if (!bfd_mach_o_read_build_version (abfd, command))
+        return FALSE;
       break;
     default:
       command->len = 0;

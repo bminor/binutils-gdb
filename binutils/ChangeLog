@@ -1,4 +1,16 @@
+2018-11-06  Roman Bolshakov  <r.bolshakov@yadro.com>
+	    Saagar Jha  <saagar@saagarjha.com>
+
+	PR 23728
+	* od-macho.c (printf_version): New.
+	(dump_load_command): Use it to print version. Print sdk version. Print
+	version info for watchOS and tvOS. Print LC_NOTE, LC_BUILD_VERSION.
+	(dump_buld_version): New.
+	(bfd_mach_o_platform_name): New
+	(bfd_mach_o_tool_name): New
+
 2018-11-07  Yoshinori Sato  <ysato@users.sourceforge.jp>
+
 	* testsuite/lib/binutils-common.exp: Special section name
 	use only rx-*-elf.
 

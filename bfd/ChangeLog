@@ -1,3 +1,22 @@
+2018-11-06  Roman Bolshakov <r.bolshakov@yadro.com>
+	    Saagar Jha  <saagar@saagarjha.com>
+
+	* mach-o.h: Add new enums for BFD_MACH_O_PLATFORM_MACOS,
+	BFD_MACH_O_PLATFORM_IOS, BFD_MACH_O_PLATFORM_TVOS,
+	BFD_MACH_O_PLATFORM_WATCHOS, BFD_MACH_O_PLATFORM_BRIDGEOS,
+	BFD_MACH_O_TOOL_CLANG, BFD_MACH_O_TOOL_SWIFT, BFD_MACH_O_TOOL_LD.
+	(struct bfd_mach_o_note_command): New.
+	(struct bfd_mach_o_build_version_tool): New.
+	(struct bfd_mach_o_build_version_command): New.
+	(bfd_mach_o_read_version_min): Don't split version into
+	a few fields. Rename reserved to sdk.
+	* mach-o.c (bfd_mach_o_read_version_min): Don't split version into a
+	few fields. Rename reserved to sdk.
+	(bfd_mach_o_read_command): Handle LC_VERSION_MIN_TVOS, LC_NOTE,
+	LC_BUILD_VERSION.
+	(bfd_mach_o_read_note): New.
+	(bfd_mach_o_read_build_version): New.
+
 2018-11-07  Yoshinori Sato  <ysato@users.sourceforge.jp>
 
 	* config.bfd: Add rx-*-linux.
