@@ -709,10 +709,11 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
       value_as_address (value_field (common_value,
 				     pspace_data->atcb_fieldno.parent));
 
-  /* If the ATCB contains some information about entry calls, then
-     compute the "called_task" as well.  Otherwise, zero.  */
+  /* If the task is in an entry call waiting for another task,
+     then determine which task it is.  */
 
-  if (pspace_data->atcb_fieldno.atc_nesting_level > 0
+  if (task_info->state == Entry_Caller_Sleep
+      && pspace_data->atcb_fieldno.atc_nesting_level > 0
       && pspace_data->atcb_fieldno.entry_calls > 0)
     {
       /* Let My_ATCB be the Ada task control block of a task calling the
@@ -1126,8 +1127,7 @@ print_ada_task_info (struct ui_out *uiout,
 			  _("Accepting RV with %-4d"),
 			  get_task_number_from_id (task_info->caller_task,
 						   inf));
-      else if (task_info->state == Entry_Caller_Sleep
-	       && task_info->called_task)
+      else if (task_info->called_task)
 	uiout->field_fmt ("state",
 			  _("Waiting on RV with %-3d"),
 			  get_task_number_from_id (task_info->called_task,
@@ -1213,7 +1213,7 @@ info_task (struct ui_out *uiout, const char *taskno_str, struct inferior *inf)
         printf_filtered (_("State: Accepting rendezvous with %d"),
                          target_taskno);
       }
-    else if (task_info->state == Entry_Caller_Sleep && task_info->called_task)
+    else if (task_info->called_task)
       {
         target_taskno = get_task_number_from_id (task_info->called_task, inf);
         printf_filtered (_("State: Waiting on task %d's entry"),

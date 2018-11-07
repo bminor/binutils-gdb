@@ -1,5 +1,13 @@
 2018-11-07  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (read_atcb): Only set task_info->called_task if
+	task_info->state == Entry_Caller_Sleep.
+	(print_ada_task_info): Do not check task_info->state before
+	checking task_info->called_task.
+	(info_task): Likewise.
+
+2018-11-07  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-tasks.c (read_atcb): Clear task_info before computing
 	the value of each of its fields.
 
