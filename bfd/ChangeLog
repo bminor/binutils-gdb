@@ -6,6 +6,7 @@
 	(TARGET_LITTLE_SYM, TARGET_LITTLE_NAME)
 	(elf_backend_object_p, elf32_bed): Define rx-*-linux.
 	* targets.c: Add rx_elf32_linux_le_vec.
+	* configure: Regenerate.
 
 2018-11-06  Romain Margheriti  <lilrom13@gmail.com>
 
