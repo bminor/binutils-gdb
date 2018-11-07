@@ -2754,6 +2754,251 @@ struct ppc_fixup
 
 #define MAX_INSN_FIXUPS (5)
 
+/* Return the field size operated on by RELOC, and whether it is
+   pc-relative in PC_RELATIVE.  */
+
+static unsigned int
+fixup_size (bfd_reloc_code_real_type reloc, bfd_boolean *pc_relative)
+{
+  unsigned int size = 0;
+  bfd_boolean pcrel = FALSE;
+
+  switch (reloc)
+    {
+      /* This switch statement must handle all BFD_RELOC values
+	 possible in instruction fixups.  As is, it handles all
+	 BFD_RELOC values used in bfd/elf64-ppc.c, bfd/elf32-ppc.c,
+	 bfd/coff-ppc, bfd/coff-rs6000.c and bfd/coff64-rs6000.c.
+	 Overkill since data and marker relocs need not be handled
+	 here, but this way we can be sure a needed fixup reloc isn't
+	 accidentally omitted.  */
+    case BFD_RELOC_PPC_EMB_MRKREF:
+    case BFD_RELOC_VTABLE_ENTRY:
+    case BFD_RELOC_VTABLE_INHERIT:
+      break;
+
+    case BFD_RELOC_8:
+      size = 1;
+      break;
+
+    case BFD_RELOC_16:
+    case BFD_RELOC_16_BASEREL:
+    case BFD_RELOC_16_GOTOFF:
+    case BFD_RELOC_GPREL16:
+    case BFD_RELOC_HI16:
+    case BFD_RELOC_HI16_BASEREL:
+    case BFD_RELOC_HI16_GOTOFF:
+    case BFD_RELOC_HI16_PLTOFF:
+    case BFD_RELOC_HI16_S:
+    case BFD_RELOC_HI16_S_BASEREL:
+    case BFD_RELOC_HI16_S_GOTOFF:
+    case BFD_RELOC_HI16_S_PLTOFF:
+    case BFD_RELOC_LO16:
+    case BFD_RELOC_LO16_BASEREL:
+    case BFD_RELOC_LO16_GOTOFF:
+    case BFD_RELOC_LO16_PLTOFF:
+    case BFD_RELOC_PPC64_ADDR16_DS:
+    case BFD_RELOC_PPC64_ADDR16_HIGH:
+    case BFD_RELOC_PPC64_ADDR16_HIGHA:
+    case BFD_RELOC_PPC64_ADDR16_LO_DS:
+    case BFD_RELOC_PPC64_DTPREL16_DS:
+    case BFD_RELOC_PPC64_DTPREL16_HIGH:
+    case BFD_RELOC_PPC64_DTPREL16_HIGHA:
+    case BFD_RELOC_PPC64_DTPREL16_HIGHER:
+    case BFD_RELOC_PPC64_DTPREL16_HIGHERA:
+    case BFD_RELOC_PPC64_DTPREL16_HIGHEST:
+    case BFD_RELOC_PPC64_DTPREL16_HIGHESTA:
+    case BFD_RELOC_PPC64_DTPREL16_LO_DS:
+    case BFD_RELOC_PPC64_GOT16_DS:
+    case BFD_RELOC_PPC64_GOT16_LO_DS:
+    case BFD_RELOC_PPC64_HIGHER:
+    case BFD_RELOC_PPC64_HIGHER_S:
+    case BFD_RELOC_PPC64_HIGHEST:
+    case BFD_RELOC_PPC64_HIGHEST_S:
+    case BFD_RELOC_PPC64_PLT16_LO_DS:
+    case BFD_RELOC_PPC64_PLTGOT16:
+    case BFD_RELOC_PPC64_PLTGOT16_DS:
+    case BFD_RELOC_PPC64_PLTGOT16_HA:
+    case BFD_RELOC_PPC64_PLTGOT16_HI:
+    case BFD_RELOC_PPC64_PLTGOT16_LO:
+    case BFD_RELOC_PPC64_PLTGOT16_LO_DS:
+    case BFD_RELOC_PPC64_SECTOFF_DS:
+    case BFD_RELOC_PPC64_SECTOFF_LO_DS:
+    case BFD_RELOC_PPC64_TOC16_DS:
+    case BFD_RELOC_PPC64_TOC16_HA:
+    case BFD_RELOC_PPC64_TOC16_HI:
+    case BFD_RELOC_PPC64_TOC16_LO:
+    case BFD_RELOC_PPC64_TOC16_LO_DS:
+    case BFD_RELOC_PPC64_TPREL16_DS:
+    case BFD_RELOC_PPC64_TPREL16_HIGH:
+    case BFD_RELOC_PPC64_TPREL16_HIGHA:
+    case BFD_RELOC_PPC64_TPREL16_HIGHER:
+    case BFD_RELOC_PPC64_TPREL16_HIGHERA:
+    case BFD_RELOC_PPC64_TPREL16_HIGHEST:
+    case BFD_RELOC_PPC64_TPREL16_HIGHESTA:
+    case BFD_RELOC_PPC64_TPREL16_LO_DS:
+#ifdef OBJ_XCOFF
+    case BFD_RELOC_PPC_BA16:
+#endif
+    case BFD_RELOC_PPC_DTPREL16:
+    case BFD_RELOC_PPC_DTPREL16_HA:
+    case BFD_RELOC_PPC_DTPREL16_HI:
+    case BFD_RELOC_PPC_DTPREL16_LO:
+    case BFD_RELOC_PPC_EMB_NADDR16:
+    case BFD_RELOC_PPC_EMB_NADDR16_HA:
+    case BFD_RELOC_PPC_EMB_NADDR16_HI:
+    case BFD_RELOC_PPC_EMB_NADDR16_LO:
+    case BFD_RELOC_PPC_EMB_RELSDA:
+    case BFD_RELOC_PPC_EMB_RELSEC16:
+    case BFD_RELOC_PPC_EMB_RELST_LO:
+    case BFD_RELOC_PPC_EMB_RELST_HI:
+    case BFD_RELOC_PPC_EMB_RELST_HA:
+    case BFD_RELOC_PPC_EMB_SDA2I16:
+    case BFD_RELOC_PPC_EMB_SDA2REL:
+    case BFD_RELOC_PPC_EMB_SDAI16:
+    case BFD_RELOC_PPC_GOT_DTPREL16:
+    case BFD_RELOC_PPC_GOT_DTPREL16_HA:
+    case BFD_RELOC_PPC_GOT_DTPREL16_HI:
+    case BFD_RELOC_PPC_GOT_DTPREL16_LO:
+    case BFD_RELOC_PPC_GOT_TLSGD16:
+    case BFD_RELOC_PPC_GOT_TLSGD16_HA:
+    case BFD_RELOC_PPC_GOT_TLSGD16_HI:
+    case BFD_RELOC_PPC_GOT_TLSGD16_LO:
+    case BFD_RELOC_PPC_GOT_TLSLD16:
+    case BFD_RELOC_PPC_GOT_TLSLD16_HA:
+    case BFD_RELOC_PPC_GOT_TLSLD16_HI:
+    case BFD_RELOC_PPC_GOT_TLSLD16_LO:
+    case BFD_RELOC_PPC_GOT_TPREL16:
+    case BFD_RELOC_PPC_GOT_TPREL16_HA:
+    case BFD_RELOC_PPC_GOT_TPREL16_HI:
+    case BFD_RELOC_PPC_GOT_TPREL16_LO:
+    case BFD_RELOC_PPC_TOC16:
+    case BFD_RELOC_PPC_TPREL16:
+    case BFD_RELOC_PPC_TPREL16_HA:
+    case BFD_RELOC_PPC_TPREL16_HI:
+    case BFD_RELOC_PPC_TPREL16_LO:
+      size = 2;
+      break;
+
+    case BFD_RELOC_16_PCREL:
+    case BFD_RELOC_HI16_PCREL:
+    case BFD_RELOC_HI16_S_PCREL:
+    case BFD_RELOC_LO16_PCREL:
+    case BFD_RELOC_PPC64_REL16_HIGH:
+    case BFD_RELOC_PPC64_REL16_HIGHA:
+    case BFD_RELOC_PPC64_REL16_HIGHER:
+    case BFD_RELOC_PPC64_REL16_HIGHERA:
+    case BFD_RELOC_PPC64_REL16_HIGHEST:
+    case BFD_RELOC_PPC64_REL16_HIGHESTA:
+#ifdef OBJ_XCOFF
+    case BFD_RELOC_PPC_B16:
+#endif
+    case BFD_RELOC_PPC_VLE_REL8:
+      size = 2;
+      pcrel = TRUE;
+      break;
+
+    case BFD_RELOC_16_GOT_PCREL: /* coff reloc, bad name re size.  */
+    case BFD_RELOC_32:
+    case BFD_RELOC_32_GOTOFF:
+    case BFD_RELOC_32_PLTOFF:
+#ifdef OBJ_XCOFF
+    case BFD_RELOC_CTOR:
+#endif
+    case BFD_RELOC_PPC64_ENTRY:
+    case BFD_RELOC_PPC_16DX_HA:
+#ifndef OBJ_XCOFF
+    case BFD_RELOC_PPC_BA16:
+#endif
+    case BFD_RELOC_PPC_BA16_BRNTAKEN:
+    case BFD_RELOC_PPC_BA16_BRTAKEN:
+    case BFD_RELOC_PPC_BA26:
+    case BFD_RELOC_PPC_EMB_BIT_FLD:
+    case BFD_RELOC_PPC_EMB_NADDR32:
+    case BFD_RELOC_PPC_EMB_SDA21:
+    case BFD_RELOC_PPC_TLS:
+    case BFD_RELOC_PPC_TLSGD:
+    case BFD_RELOC_PPC_TLSLD:
+    case BFD_RELOC_PPC_VLE_HA16A:
+    case BFD_RELOC_PPC_VLE_HA16D:
+    case BFD_RELOC_PPC_VLE_HI16A:
+    case BFD_RELOC_PPC_VLE_HI16D:
+    case BFD_RELOC_PPC_VLE_LO16A:
+    case BFD_RELOC_PPC_VLE_LO16D:
+    case BFD_RELOC_PPC_VLE_SDA21:
+    case BFD_RELOC_PPC_VLE_SDA21_LO:
+    case BFD_RELOC_PPC_VLE_SDAREL_HA16A:
+    case BFD_RELOC_PPC_VLE_SDAREL_HA16D:
+    case BFD_RELOC_PPC_VLE_SDAREL_HI16A:
+    case BFD_RELOC_PPC_VLE_SDAREL_HI16D:
+    case BFD_RELOC_PPC_VLE_SDAREL_LO16A:
+    case BFD_RELOC_PPC_VLE_SDAREL_LO16D:
+    case BFD_RELOC_RVA:
+      size = 4;
+      break;
+
+    case BFD_RELOC_24_PLT_PCREL:
+    case BFD_RELOC_32_PCREL:
+    case BFD_RELOC_32_PLT_PCREL:
+    case BFD_RELOC_PPC64_REL24_NOTOC:
+#ifndef OBJ_XCOFF
+    case BFD_RELOC_PPC_B16:
+#endif
+    case BFD_RELOC_PPC_B16_BRNTAKEN:
+    case BFD_RELOC_PPC_B16_BRTAKEN:
+    case BFD_RELOC_PPC_B26:
+    case BFD_RELOC_PPC_LOCAL24PC:
+    case BFD_RELOC_PPC_REL16DX_HA:
+    case BFD_RELOC_PPC_VLE_REL15:
+    case BFD_RELOC_PPC_VLE_REL24:
+      size = 4;
+      pcrel = TRUE;
+      break;
+
+#ifndef OBJ_XCOFF
+    case BFD_RELOC_CTOR:
+#endif
+    case BFD_RELOC_PPC_COPY:
+    case BFD_RELOC_PPC_DTPMOD:
+    case BFD_RELOC_PPC_DTPREL:
+    case BFD_RELOC_PPC_GLOB_DAT:
+    case BFD_RELOC_PPC_TPREL:
+      size = ppc_obj64 ? 8 : 4;
+      break;
+
+    case BFD_RELOC_64:
+    case BFD_RELOC_64_PLTOFF:
+    case BFD_RELOC_PPC64_ADDR64_LOCAL:
+    case BFD_RELOC_PPC64_TOC:
+      size = 8;
+      break;
+
+    case BFD_RELOC_64_PCREL:
+    case BFD_RELOC_64_PLT_PCREL:
+      size = 8;
+      pcrel = TRUE;
+      break;
+
+    default:
+      abort ();
+    }
+
+  if (ENABLE_CHECKING)
+    {
+      reloc_howto_type *reloc_howto = bfd_reloc_type_lookup (stdoutput, reloc);
+      if (reloc_howto != NULL
+	  && (size != bfd_get_reloc_size (reloc_howto)
+	      || pcrel != reloc_howto->pc_relative))
+	{
+	  as_bad (_("%s howto doesn't match size/pcrel in gas"),
+		  reloc_howto->name);
+	  abort ();
+	}
+    }
+  *pc_relative = pcrel;
+  return size;
+}
+
 /* This routine is called for each instruction to be assembled.  */
 
 void
@@ -3569,22 +3814,15 @@ md_assemble (char *str)
       fixS *fixP;
       if (fixups[i].reloc != BFD_RELOC_NONE)
 	{
-	  reloc_howto_type *reloc_howto;
-	  int size;
-	  int offset;
-
-	  reloc_howto = bfd_reloc_type_lookup (stdoutput, fixups[i].reloc);
-	  if (!reloc_howto)
-	    abort ();
-
-	  size = bfd_get_reloc_size (reloc_howto);
-	  offset = target_big_endian ? (insn_length - size) : 0;
+	  bfd_boolean pcrel;
+	  unsigned int size = fixup_size (fixups[i].reloc, &pcrel);
+	  int offset = target_big_endian ? (insn_length - size) : 0;
 
 	  fixP = fix_new_exp (frag_now,
 			      f - frag_now->fr_literal + offset,
 			      size,
 			      &fixups[i].exp,
-			      reloc_howto->pc_relative,
+			      pcrel,
 			      fixups[i].reloc);
 	}
       else
