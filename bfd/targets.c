@@ -777,6 +777,7 @@ extern const bfd_target rs6000_xcoff_vec;
 extern const bfd_target rx_elf32_be_vec;
 extern const bfd_target rx_elf32_be_ns_vec;
 extern const bfd_target rx_elf32_le_vec;
+extern const bfd_target rx_elf32_linux_le_vec;
 extern const bfd_target s390_elf32_vec;
 extern const bfd_target s390_elf64_vec;
 extern const bfd_target score_elf32_be_vec;

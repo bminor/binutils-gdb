@@ -1,3 +1,7 @@
+2018-11-07  Yoshinori Sato  <ysato@users.sourceforge.jp>
+	* testsuite/lib/binutils-common.exp: Special section name
+	use only rx-*-elf.
+
 2018-11-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* doc/binutils.texi: Document --enable-x86-feature and

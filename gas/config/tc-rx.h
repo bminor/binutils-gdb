@@ -31,7 +31,11 @@ extern int target_big_endian;
 /* Instruction bytes are big endian, data bytes can be either.  */
 #define TARGET_BYTES_BIG_ENDIAN 0
 
+#ifndef TE_LINUX
 #define TARGET_FORMAT (target_big_endian ? "elf32-rx-be" : "elf32-rx-le")
+#else
+#define TARGET_FORMAT "elf32-rx-linux"
+#endif
 
 /* We don't need to handle .word strangely.  */
 #define WORKING_DOT_WORD

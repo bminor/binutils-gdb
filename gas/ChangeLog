@@ -1,3 +1,8 @@
+2018-11-07  Yoshinori Sato  <ysato@users.sourceforge.jp>
+
+	* configure.tgt: Add rx-*-linux.
+	* config/tc-rx.h (TARGET_FORMAT): Add "elf32-rx-linux".
+
 2018-11-06  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* testsuite/gas/arm/neon-cond-bad_t2.d: Fix testcase for PE target.

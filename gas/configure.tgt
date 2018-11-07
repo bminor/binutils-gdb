@@ -366,6 +366,8 @@ case ${generic_target} in
 
   riscv*-*-*)				fmt=elf endian=little ;;
 
+  rx-*-linux*)				fmt=elf em=linux ;;
+
   s390-*-linux-*)			fmt=elf em=linux ;;
   s390-*-tpf*)				fmt=elf ;;
 

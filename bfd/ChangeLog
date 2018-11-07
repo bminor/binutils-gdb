@@ -1,3 +1,12 @@
+2018-11-07  Yoshinori Sato  <ysato@users.sourceforge.jp>
+
+	* config.bfd: Add rx-*-linux.
+	* congigure.ac: Likewise.
+	* elf32-rx.c (rx_linux_object_p): New function.
+	(TARGET_LITTLE_SYM, TARGET_LITTLE_NAME)
+	(elf_backend_object_p, elf32_bed): Define rx-*-linux.
+	* targets.c: Add rx_elf32_linux_le_vec.
+
 2018-11-06  Romain Margheriti  <lilrom13@gmail.com>
 
 	PR 23742

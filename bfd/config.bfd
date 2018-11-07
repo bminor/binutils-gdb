@@ -1202,6 +1202,10 @@ case "${targ}" in
     targ_selvecs="rx_elf32_be_vec rx_elf32_le_vec rx_elf32_be_ns_vec"
     targ_underscore=yes
     ;;
+  rx-*-linux*)
+    targ_defvec=rx_elf32_linux_le_vec
+    targ_selvecs="rx_elf32_linux_le_vec"
+    ;;
 
   s390-*-linux*)
     targ_defvec=s390_elf32_vec

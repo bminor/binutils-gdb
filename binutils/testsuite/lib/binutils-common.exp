@@ -1359,7 +1359,7 @@ proc big_or_little_endian {} {
 # Internal procedure: return the names of the standard sections
 #
 proc get_standard_section_names {} {
-    if [istarget "rx-*-*"] {
+    if [istarget "rx-*-elf"] {
 	return { "P" "D_1" "B_1" }
     }
     if { [istarget "alpha*-*-*vms*"] || [is_som_format] } {
