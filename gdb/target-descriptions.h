@@ -31,9 +31,10 @@ struct target_desc_info;
 struct inferior;
 
 /* Fetch the current inferior's description, and switch its current
-   architecture to one which incorporates that description.  */
+   architecture to one which incorporates that description.  If given, use the
+   tdep_info when finding the description.  */
 
-void target_find_description (void);
+void target_find_description (gdbarch_target_info target_info = {0});
 
 /* Discard any description fetched from the target for the current
    inferior, and switch the current architecture to one with no target

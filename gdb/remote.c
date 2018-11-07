@@ -7686,9 +7686,24 @@ remote_target::process_stop_reply (struct stop_reply *stop_reply,
       && status->kind != TARGET_WAITKIND_SIGNALLED
       && status->kind != TARGET_WAITKIND_NO_RESUMED)
     {
+      VEC (cached_reg_t) *stop_regs = stop_reply->regcache;
+
       /* Expedited registers.  */
-      if (stop_reply->regcache)
+      if (stop_regs)
 	{
+	  struct gdbarch *gdbarch = target_gdbarch ();
+
+	  /* Check the target descriptor is still valid for the current target.
+	     If not, then clear it find the correct one.  */
+	  if (gdbarch_target_description_changed_p (gdbarch, ptid, stop_regs))
+	    {
+	      gdbarch_target_info info
+		= gdbarch_target_get_tdep_info (gdbarch, stop_regs);
+	      registers_changed ();
+	      target_clear_description ();
+	      target_find_description (info);
+	    }
+
 	  struct regcache *regcache
 	    = get_thread_arch_regcache (ptid, stop_reply->arch);
 	  cached_reg_t *reg;

@@ -28,6 +28,18 @@ get_thread_regcache (struct thread_info *thread, int fetch)
 {
   struct regcache *regcache;
 
+  /* Check the target descriptor is still valid for the current target.  If
+     not, then clear it and create a new one.  */
+  if (!target_validate_tdesc (thread))
+    {
+      /* Clear regcache.  */
+      free_register_cache (thread_regcache_data (thread));
+      set_thread_regcache_data (thread, NULL);
+      regcache = NULL;
+
+      target_arch_setup ();
+    }
+
   regcache = thread_regcache_data (thread);
 
   /* Threads' regcaches are created lazily, because biarch targets add
