@@ -80,6 +80,7 @@ proc objcopy_test {testname srcfile} {
 	setup_xfail "hppa*-*-*"
 	setup_xfail "m8*-*"
 	setup_xfail "sh-*-coff*"
+	setup_xfail "tic54x-*-*"
 	setup_xfail "tic80-*-*"
 
 	clear_xfail "hppa*64*-*-hpux*" "hppa*-*-linux*" "hppa*-*-lites*"

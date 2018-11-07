@@ -1,5 +1,5 @@
 
-Symbol table '.symtab' contains 14 entries:
+Symbol table '.symtab' contains 16 entries:
  +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
  +0: 00000000 +0 +NOTYPE +LOCAL +DEFAULT +UND 
  +1: 00000000 +0 +SECTION +LOCAL +DEFAULT +. (|\.text)
@@ -15,3 +15,5 @@ Symbol table '.symtab' contains 14 entries:
  +11: 00000000 +0 +OBJECT +GLOBAL +DEFAULT +. data_symbol
  +12: 00000000 +0 +NOTYPE +LOCAL +DEFAULT +. static_data_symbol
  +13: 00000004 +4 +(COMMON|OBJECT) +GLOBAL +DEFAULT +(PRC|COM) common_symbol
+ +14: 00000008 +0 +OBJECT +GLOBAL +DEFAULT +. text_symbol2
+ +15: 0000000c +0 +OBJECT +GLOBAL +DEFAULT +. text_symbol3

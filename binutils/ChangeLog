@@ -1,3 +1,27 @@
+2018-11-07  Masatake Yamato  <yamato@redhat.com>
+
+	* objdump.c (long_options): Have the --disassemble option take an
+	optional argument.
+	(usage): Add description for the `symbol' argument to the
+	--disassemble option.
+	(disasm_sym): New file private variable.
+	(struct objdump_disasm_info): New field `symbol'.
+	(disassemble_section): Introduce `do_print' local variable
+	to control whether objdump displays the result of disassembling
+	for a symbol or not.
+	(main): Set `symbol' file private variable if the option argument
+	for the --disassemble option is given.
+	* doc/binutils.texi (objdump): Add description for the option
+	argument.
+	* NEWS: Mention the new feature.
+	* testsuite/binutils-all/objdump.exp: Add tests of the -d and
+	--disassemble=<symbol> options.
+	* testsuite/binutils-all/bintest.s: Add more symbols and code.
+	* testsuite/binutils-all/readelf.s: Update expected output.
+	* testsuite/binutils-all/readelf.ss-64: Likewise.
+	* testsuite/binutils-all/readelf.ss-mips: Likewise.
+	* testsuite/binutils-all/readelf.ss-tmips: Likewise.
+
 2018-11-07  Nick Clifton  <nickc@redhat.com>
 
 	* po/pt.po: Updated Portuguese translation.

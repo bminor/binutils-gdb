@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Objdump's --disassemble option can now take a parameter, specifying the
+  starting symbol for disassembly.  Disassembly will continue from this
+  symbol up to the next symbol.
+
 * The MIPS port now supports the Loongson 2K1000 processor which implements
   the MIPS64r2 ISA, the Loongson-mmi ASE, Loongson-cam ASE, Loongson-ext ASE,
   Loongson-ext2 ASE and MSA ASE instructions. Add -march=gs264e option for

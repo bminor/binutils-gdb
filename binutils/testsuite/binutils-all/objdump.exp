@@ -206,6 +206,85 @@ if { [ remote_file host exists $testarchive ] } then {
     test_objdump_r $testarchive bintest2.o
 }
 
+# Test objdump -d
+proc test_objdump_d { testfile dumpfile } {
+    global OBJDUMP
+    global OBJDUMPFLAGS
+
+    set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -d $testfile"]
+
+    set want "$dumpfile:.*Disassembly of section"
+    if ![regexp $want $got] then {
+	fail "objdump -d $testfile: No disassembly title"
+	return
+    }
+
+    set want "$dumpfile:.*00+0 <text_symbol>"
+    if ![regexp $want $got] then {
+	fail "objdump -d $testfile: Missing symbol name and address"
+	return
+    }
+
+    set want "$dumpfile:.*00+. <text_symbol2>"
+    if ![regexp $want $got] then {
+	fail "objdump -d $testfile: Missing second symbol"
+	return
+    }
+
+    set want "$dumpfile:.*00+. <text_symbol3>"
+    if ![regexp $want $got] then {
+	fail "objdump -d $testfile: Missing third symbol"
+	return
+    }
+
+    pass "objdump -d $testfile"
+}
+
+test_objdump_d $testfile $testfile
+if { [ remote_file host exists $testarchive ] } then {
+    test_objdump_d $testarchive bintest2.o
+}
+
+# Test objdump --disassemble=<symbol>
+proc test_objdump_d_sym { testfile dumpfile } {
+    global OBJDUMP
+    global OBJDUMPFLAGS
+
+    set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS --disassemble=text_symbol2 $testfile"]
+
+    set want "$dumpfile:.*Disassembly of section"
+    if ![regexp $want $got] then {
+	fail "objdump --disassemble=text_symbol2 $testfile: No disassembly title"
+	return
+    }
+
+    set want "$dumpfile:.*00+0 <text_symbol>"
+    if [regexp $want $got] then {
+	fail "objdump --disassemble=text_symbol2 $testfile: First symbol displayed, when it should be absent"
+	return
+    }
+
+    set want "$dumpfile:.*00+. <text_symbol2>"
+    if ![regexp $want $got] then {
+	fail "objdump --disassemble=text_symbol2 $testfile: Missing second symbol"
+	return
+    }
+
+    set want "$dumpfile:.*00+. <text_symbol3>"
+    if [regexp $want $got] then {
+	fail "objdump --disassemble=text_symbol2 $testfile: Third symbol displayed when it should be absent"
+	return
+    }
+
+    pass "objdump --disassemble=text_symbol2 $testfile"
+}
+
+test_objdump_d_sym $testfile $testfile
+if { [ remote_file host exists $testarchive ] } then {
+    test_objdump_d_sym $testarchive bintest2.o
+}
+
+
 # Test objdump -s
 
 proc test_objdump_s { testfile dumpfile } {
@@ -505,8 +584,7 @@ if {[is_elf_format]} then {
     test_follow_debuglink
 }
 
-
-# Options which are not tested: -a -d -D -R -T -x -l --stabs
+# Options which are not tested: -a -D -R -T -x -l --stabs
 # I don't see any generic way to test any of these other than -a.
 # Tests could be written for specific targets, and that should be done
 # if specific problems are found.

@@ -118,6 +118,7 @@ static const char *prefix;		/* --prefix */
 static int prefix_strip;		/* --prefix-strip */
 static size_t prefix_length;
 static bfd_boolean unwind_inlines;	/* --inlines.  */
+static const char * disasm_sym;		/* Disassembly start symbol.  */
 
 /* A structure to record the sections mentioned in -j switches.  */
 struct only
@@ -145,6 +146,7 @@ struct objdump_disasm_info
   long               dynrelcount;
   disassembler_ftype disassemble_fn;
   arelent *          reloc;
+  const char *       symbol;
 };
 
 /* Architecture to disassemble for, or default if NULL.  */
@@ -209,6 +211,7 @@ usage (FILE *stream, int status)
   -x, --all-headers        Display the contents of all headers\n\
   -d, --disassemble        Display assembler contents of executable sections\n\
   -D, --disassemble-all    Display assembler contents of all sections\n\
+      --disassemble=<sym>  Display assembler contents from <sym>\n\
   -S, --source             Intermix source code with disassembly\n\
   -s, --full-contents      Display the full contents of all sections requested\n\
   -g, --debugging          Display debug information in object file\n\
@@ -313,7 +316,7 @@ static struct option long_options[]=
   {"debugging", no_argument, NULL, 'g'},
   {"debugging-tags", no_argument, NULL, 'e'},
   {"demangle", optional_argument, NULL, 'C'},
-  {"disassemble", no_argument, NULL, 'd'},
+  {"disassemble", optional_argument, NULL, 'd'},
   {"disassemble-all", no_argument, NULL, 'D'},
   {"disassembler-options", required_argument, NULL, 'M'},
   {"disassemble-zeroes", no_argument, NULL, 'z'},
@@ -2253,6 +2256,7 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
       asymbol *nextsym;
       bfd_vma nextstop_offset;
       bfd_boolean insns;
+      bfd_boolean do_print = TRUE;
 
       addr = section->vma + addr_offset;
       addr = ((addr & ((sign_adjust << 1) - 1)) ^ sign_adjust) - sign_adjust;
@@ -2278,7 +2282,23 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 	  pinfo->symtab_pos = -1;
 	}
 
-      if (! prefix_addresses)
+      if (sym && paux->symbol)
+	{
+	  const char *name = bfd_asymbol_name (sym);
+	  char *alloc = NULL;
+
+	  if (do_demangle && name[0] != '\0')
+	    {
+	      /* Demangle the name.  */
+	      alloc = bfd_demangle (abfd, name, DMGL_ANSI | DMGL_PARAMS);
+	      if (alloc != NULL)
+		name = alloc;
+	    }
+	  do_print = streq (name, paux->symbol);
+	  free (alloc);
+	}
+
+      if (! prefix_addresses && do_print)
 	{
 	  pinfo->fprintf_func (pinfo->stream, "\n");
 	  objdump_print_addr_with_sym (abfd, section, sym, addr,
@@ -2339,9 +2359,14 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
       else
 	insns = FALSE;
 
-      disassemble_bytes (pinfo, paux->disassemble_fn, insns, data,
-			 addr_offset, nextstop_offset,
-			 rel_offset, &rel_pp, rel_ppend);
+      if (do_print)
+	{
+	  disassemble_bytes (pinfo, paux->disassemble_fn, insns, data,
+			     addr_offset, nextstop_offset,
+			     rel_offset, &rel_pp, rel_ppend);
+	  if (paux->symbol)
+	    break;
+	}
 
       addr_offset = nextstop_offset;
       sym = nextsym;
@@ -2394,6 +2419,7 @@ disassemble_data (bfd *abfd)
   aux.dynrelbuf = NULL;
   aux.dynrelcount = 0;
   aux.reloc = NULL;
+  aux.symbol = disasm_sym;
 
   disasm_info.print_address_func = objdump_print_address;
   disasm_info.symbol_at_address_func = objdump_symbol_at_address;
@@ -3995,6 +4021,7 @@ main (int argc, char **argv)
 	case 'd':
 	  disassemble = TRUE;
 	  seenflag = TRUE;
+	  disasm_sym = optarg;
 	  break;
 	case 'z':
 	  disassemble_zeroes = TRUE;

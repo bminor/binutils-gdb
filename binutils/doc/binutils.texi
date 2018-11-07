@@ -2063,7 +2063,7 @@ ld(1), objdump(1), and the Info entries for @file{binutils}.
 objdump [@option{-a}|@option{--archive-headers}]
         [@option{-b} @var{bfdname}|@option{--target=@var{bfdname}}]
         [@option{-C}|@option{--demangle}[=@var{style}] ]
-        [@option{-d}|@option{--disassemble}]
+        [@option{-d}|@option{--disassemble}[=@var{symbol}]]
         [@option{-D}|@option{--disassemble-all}]
         [@option{-z}|@option{--disassemble-zeroes}]
         [@option{-EB}|@option{-EL}|@option{--endian=}@{big | little @}]
@@ -2189,11 +2189,15 @@ with ctags tool.
 
 @item -d
 @itemx --disassemble
+@itemx --disassemble=@var{symbol}
 @cindex disassembling object code
 @cindex machine instructions
-Display the assembler mnemonics for the machine instructions from
-@var{objfile}.  This option only disassembles those sections which are
-expected to contain instructions.
+Display the assembler mnemonics for the machine instructions from the
+input file.  This option only disassembles those sections which are 
+expected to contain instructions.  If the optional @var{symbol}
+argument is given, then display the assembler mnemonics only from
+@var{symbol} up to next symbol.  If there are no matches for
+@var{symbol} then nothing will be displayed.
 
 @item -D
 @itemx --disassemble-all
