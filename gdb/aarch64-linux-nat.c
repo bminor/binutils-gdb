@@ -45,6 +45,7 @@
 
 /* Defines ps_err_e, struct ps_prochandle.  */
 #include "gdb_proc_service.h"
+#include "arch-utils.h"
 
 #ifndef TRAP_HWBKPT
 #define TRAP_HWBKPT 0x0004
@@ -94,6 +95,8 @@ public:
   /* Add our siginfo layout converter.  */
   bool low_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
     override;
+
+  struct gdbarch *thread_architecture (ptid_t) override;
 };
 
 static aarch64_linux_nat_target the_aarch64_linux_nat_target;
@@ -898,6 +901,22 @@ int
 aarch64_linux_nat_target::can_do_single_step ()
 {
   return 1;
+}
+
+/* Implement the "thread_architecture" target_ops method.  */
+
+struct gdbarch *
+aarch64_linux_nat_target::thread_architecture (ptid_t ptid)
+{
+  /* Get the current VQ and use it to find the gdbarch.  */
+
+  uint64_t vq = aarch64_sve_get_vq (ptid.lwp ());
+
+  struct gdbarch_info info;
+  gdbarch_info_init (&info);
+  info.bfd_arch_info = bfd_lookup_arch (bfd_arch_spu, bfd_mach_spu);
+  info.id = (int *) vq;
+  return gdbarch_find_by_info (info);
 }
 
 /* Define AArch64 maintenance commands.  */
