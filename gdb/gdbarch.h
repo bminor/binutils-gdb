@@ -1587,6 +1587,23 @@ typedef ULONGEST (gdbarch_type_align_ftype) (struct gdbarch *gdbarch, struct typ
 extern ULONGEST gdbarch_type_align (struct gdbarch *gdbarch, struct type *type);
 extern void set_gdbarch_type_align (struct gdbarch *gdbarch, gdbarch_type_align_ftype *type_align);
 
+/* Given a list of register values (in a VEC of reg_info_t structures) received
+   from the inferior, check if the current target descriptor is no longer valid
+   for the inferior (for example, register sizes have changed), and if so return
+   true.  The default implementation will always return false. */
+
+typedef bool (gdbarch_target_description_changed_p_ftype) (struct gdbarch *gdbarch, ptid_t ptid, VEC (cached_reg_t) *registers);
+extern bool gdbarch_target_description_changed_p (struct gdbarch *gdbarch, ptid_t ptid, VEC (cached_reg_t) *registers);
+extern void set_gdbarch_target_description_changed_p (struct gdbarch *gdbarch, gdbarch_target_description_changed_p_ftype *target_description_changed_p);
+
+/* Given a list of registers, return a tdep info which then can be used when
+   creating/finding a valid target descriptor for that inferior. The default
+   implementation will always return null. */
+
+typedef union gdbarch_target_info (gdbarch_target_get_tdep_info_ftype) (VEC (cached_reg_t) *registers);
+extern union gdbarch_target_info gdbarch_target_get_tdep_info (struct gdbarch *gdbarch, VEC (cached_reg_t) *registers);
+extern void set_gdbarch_target_get_tdep_info (struct gdbarch *gdbarch, gdbarch_target_get_tdep_info_ftype *target_get_tdep_info);
+
 /* Definition for an unknown syscall, used basically in error-cases.  */
 #define UNKNOWN_SYSCALL (-1)
 

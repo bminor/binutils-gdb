@@ -1166,6 +1166,17 @@ v;const disasm_options_and_args_t *;valid_disassembler_options;;;0;0;;0;host_add
 # Type alignment.
 m;ULONGEST;type_align;struct type *type;type;;default_type_align;;0
 
+# Given a list of register values (in a VEC of reg_info_t structures) received
+# from the inferior, check if the current target descriptor is no longer valid
+# for the inferior (for example, register sizes have changed), and if so return
+# true.  The default implementation will always return false.
+m;bool;target_description_changed_p;ptid_t ptid, VEC (cached_reg_t) *registers;ptid, registers;;default_target_description_changed_p;;0
+
+# Given a list of registers, return a tdep info which then can be used when
+# creating/finding a valid target descriptor for that inferior. The default
+# implementation will always return null.
+f;union gdbarch_target_info;target_get_tdep_info;VEC (cached_reg_t) *registers;registers;;default_target_get_tdep_info;;0
+
 EOF
 }
 

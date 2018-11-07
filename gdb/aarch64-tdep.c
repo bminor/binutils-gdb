@@ -2963,6 +2963,24 @@ aarch64_get_tdesc_vq (const struct target_desc *tdesc)
 }
 
 
+/* Implement the "target_description_changed_p" gdbarch method.  */
+
+static bool
+aarch64_target_description_changed_p (struct gdbarch *gdbarch,
+				      ptid_t ptid,
+				      VEC (cached_reg_t) *registers)
+{
+  return false;
+}
+
+/* Implement the "target_get_tdep_info" gdbarch method.  */
+
+static union gdbarch_target_info
+aarch64_target_get_tdep_info (VEC (cached_reg_t) *registers)
+{
+  return {0};
+}
+
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
@@ -3128,6 +3146,9 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_tdesc_pseudo_register_type (gdbarch, aarch64_pseudo_register_type);
   set_tdesc_pseudo_register_reggroup_p (gdbarch,
 					aarch64_pseudo_register_reggroup_p);
+  set_gdbarch_target_description_changed_p
+    (gdbarch, aarch64_target_description_changed_p);
+  set_gdbarch_target_get_tdep_info (gdbarch, aarch64_target_get_tdep_info);
 
   /* ABI */
   set_gdbarch_short_bit (gdbarch, 16);
