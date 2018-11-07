@@ -2130,7 +2130,7 @@ nds32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   nds32_add_reggroups (gdbarch);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
-  info.tdesc_data = tdesc_data;
+  info.target_info.tdesc_data = tdesc_data;
   gdbarch_init_osabi (info, gdbarch);
 
   /* Override tdesc_register callbacks for system registers.  */

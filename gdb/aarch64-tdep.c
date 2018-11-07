@@ -2989,8 +2989,8 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Use the vector length passed via the target info.  Otherwise use the vector
      length from the existing tdesc.  Otherwise assume no SVE.  */
-  if (info.id != 0)
-    vq = (uint64_t) info.id;
+  if (info.target_info.id != 0)
+    vq = (uint64_t) info.target_info.id;
   else
     vq = aarch64_get_tdesc_vq (tdesc);
 
@@ -3158,7 +3158,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Hook in the ABI-specific overrides, if they have been registered.  */
   info.target_desc = tdesc;
-  info.tdesc_data = tdesc_data;
+  info.target_info.tdesc_data = tdesc_data;
   gdbarch_init_osabi (info, gdbarch);
 
   dwarf2_frame_set_init_reg (gdbarch, aarch64_dwarf2_frame_init_reg);

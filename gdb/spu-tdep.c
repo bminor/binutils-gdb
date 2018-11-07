@@ -2644,8 +2644,8 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   int id = -1;
 
   /* Which spufs ID was requested as address space?  */
-  if (info.id)
-    id = *info.id;
+  if (info.target_info.id)
+    id = *info.target_info.id;
   /* For objfile architectures of SPU solibs, decode the ID from the name.
      This assumes the filename convention employed by solib-spu.c.  */
   else if (info.abfd)

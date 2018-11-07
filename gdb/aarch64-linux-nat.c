@@ -915,7 +915,7 @@ aarch64_linux_nat_target::thread_architecture (ptid_t ptid)
   struct gdbarch_info info;
   gdbarch_info_init (&info);
   info.bfd_arch_info = bfd_lookup_arch (bfd_arch_spu, bfd_mach_spu);
-  info.id = (int *) vq;
+  info.target_info.id = (int *) vq;
   return gdbarch_find_by_info (info);
 }
 

@@ -3109,7 +3109,7 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
       const struct tdesc_feature *feature =
 	  tdesc_find_feature (tdesc, "org.gnu.gdb.i386.segments");
       struct tdesc_arch_data *tdesc_data_segments =
-	  (struct tdesc_arch_data *) info.tdep_info;
+	  (struct tdesc_arch_data *) info.target_info.tdep_info;
 
       tdesc_numbered_register (feature, tdesc_data_segments,
 		       AMD64_FSBASE_REGNUM, "fs_base");

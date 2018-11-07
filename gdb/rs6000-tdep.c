@@ -6997,7 +6997,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   info.target_desc = tdesc;
-  info.tdesc_data = tdesc_data;
+  info.target_info.tdesc_data = tdesc_data;
   gdbarch_init_osabi (info, gdbarch);
 
   switch (info.osabi)
