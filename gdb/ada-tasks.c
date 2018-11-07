@@ -611,6 +611,10 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
   const struct ada_tasks_pspace_data *pspace_data
     = get_ada_tasks_pspace_data (current_program_space);
 
+  /* Clear the whole structure to start with, so that everything
+     is always initialized the same.  */
+  memset (task_info, 0, sizeof (struct ada_task_info));
+
   if (!pspace_data->initialized_p)
     {
       const char *err_msg = ada_get_tcb_types_info ();
@@ -704,9 +708,6 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
     task_info->parent =
       value_as_address (value_field (common_value,
 				     pspace_data->atcb_fieldno.parent));
-  else
-    task_info->parent = 0;
-  
 
   /* If the ATCB contains some information about entry calls, then
      compute the "called_task" as well.  Otherwise, zero.  */
@@ -732,15 +733,10 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
         value_as_address (value_field (entry_calls_value_element,
                                        called_task_fieldno));
     }
-  else
-    {
-      task_info->called_task = 0;
-    }
 
-  /* If the ATCB cotnains some information about RV callers,
-     then compute the "caller_task".  Otherwise, zero.  */
+  /* If the ATCB cotnains some information about RV callers, then
+     compute the "caller_task".  Otherwise, leave it as zero.  */
 
-  task_info->caller_task = 0;
   if (pspace_data->atcb_fieldno.call >= 0)
     {
       /* Get the ID of the caller task from Common_ATCB.Call.all.Self.

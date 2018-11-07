@@ -1,3 +1,8 @@
+2018-11-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-tasks.c (read_atcb): Clear task_info before computing
+	the value of each of its fields.
+
 2018-11-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* dwarf2read.c (dwarf2_init_integer_type): Check for name being
