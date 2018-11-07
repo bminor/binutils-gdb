@@ -393,8 +393,8 @@ store_fpregs_to_thread (const struct regcache *regcache)
 static void
 fetch_sveregs_from_thread (struct regcache *regcache)
 {
-  std::unique_ptr<gdb_byte[]> base
-    = aarch64_sve_get_sveregs (regcache->ptid ().lwp ());
+  int tid = regcache->ptid ().lwp ();
+  std::unique_ptr<gdb_byte[]> base = aarch64_sve_get_sveregs (regcache, tid);
   aarch64_sve_regs_copy_to_reg_buf (regcache, base.get ());
 }
 
@@ -409,7 +409,7 @@ store_sveregs_to_thread (struct regcache *regcache)
   int tid = regcache->ptid ().lwp ();
 
   /* Obtain a dump of SVE registers from ptrace.  */
-  std::unique_ptr<gdb_byte[]> base = aarch64_sve_get_sveregs (tid);
+  std::unique_ptr<gdb_byte[]> base = aarch64_sve_get_sveregs (regcache, tid);
 
   /* Overwrite with regcache state.  */
   aarch64_sve_regs_copy_from_reg_buf (regcache, base.get ());
