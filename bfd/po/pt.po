@@ -107,7 +107,7 @@ msgstr "%pB: ligação relocalizável de %s para %s não suportado"
 
 #: archive.c:2216
 msgid "warning: writing archive was slow: rewriting timestamp"
-msgstr "Aviso: escrita do arquivo lenta: a reescrever o carimbo"
+msgstr "Aviso: escrita do arquivo lenta: a reescrever a datação"
 
 #: archive.c:2332 linker.c:1416
 #, c-format
@@ -116,11 +116,11 @@ msgstr "%pB: extensão precisou de gerir objecto lto"
 
 #: archive.c:2561
 msgid "Reading archive file mod timestamp"
-msgstr "A ler carimbo de mod de ficheiro de arquivo"
+msgstr "A ler datação de mod de ficheiro de arquivo"
 
 #: archive.c:2585
 msgid "Writing updated armap timestamp"
-msgstr "A escrever carimbo armap actualizado"
+msgstr "A escrever datação armap actualizado"
 
 #: bfd.c:449
 msgid "no error"

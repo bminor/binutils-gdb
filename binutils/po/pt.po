@@ -194,22 +194,22 @@ msgstr "  [b]          - põe ficheiro(s) antes de [nome-membro] (tal como [i])\
 #: ar.c:303
 #, c-format
 msgid "  [D]          - use zero for timestamps and uids/gids (default)\n"
-msgstr "  [D]          - usa zero para carimbos e uids/gids (predefinição)\n"
+msgstr "  [D]          - usa zero para datações e uids/gids (predefinição)\n"
 
 #: ar.c:305
 #, c-format
 msgid "  [U]          - use actual timestamps and uids/gids\n"
-msgstr "  [U]          - usa carimbos e uids/gids actuais\n"
+msgstr "  [U]          - usa datações e uids/gids actuais\n"
 
 #: ar.c:310
 #, c-format
 msgid "  [D]          - use zero for timestamps and uids/gids\n"
-msgstr "  [D]          - usa zero para carimbos e uids/gids\n"
+msgstr "  [D]          - usa zero para datações e uids/gids\n"
 
 #: ar.c:312
 #, c-format
 msgid "  [U]          - use actual timestamps and uids/gids (default)\n"
-msgstr "  [U]          - usa carimbos e uids/gids actuais (predefinição)\n"
+msgstr "  [U]          - usa datações e uids/gids actuais (predefinição)\n"
 
 #: ar.c:315
 #, c-format
@@ -326,8 +326,8 @@ msgid ""
 "  -D                           Use zero for symbol map timestamp (default)\n"
 "  -U                           Use an actual symbol map timestamp\n"
 msgstr ""
-"  -D                           Usa zero para carimbo do mapa de símbolos (predefinição)\n"
-"  -U                           Usa um carimbo actual do mapa de símbolos\n"
+"  -D                           Usa zero para datação do mapa de símbolos (predefinição)\n"
+"  -U                           Usa uma datação actual do mapa de símbolos\n"
 
 #: ar.c:366
 #, c-format
@@ -335,8 +335,8 @@ msgid ""
 "  -D                           Use zero for symbol map timestamp\n"
 "  -U                           Use actual symbol map timestamp (default)\n"
 msgstr ""
-"  -D                           Usa zero para carimbo do mapa de símbolos\n"
-"  -U                           Usa um carimbo actual do mapa de símbolos (predefinição)\n"
+"  -D                           Usa zero para datação do mapa de símbolos\n"
+"  -U                           Usa uma datação actual do mapa de símbolos (predefinição)\n"
 
 #: ar.c:369
 #, c-format
@@ -345,7 +345,7 @@ msgid ""
 "  -h --help                    Print this help message\n"
 "  -v --version                 Print version information\n"
 msgstr ""
-"  -t                           Actualiza o carimbo do mapa de símbolos\n"
+"  -t                           Actualiza a datação do mapa de símbolos\n"
 "  -h --help                    Mostra esta informação\n"
 "  -V --version                 Mostra a versão do programa\n"
 
@@ -4563,7 +4563,7 @@ msgstr ""
 "  -B --binary-architecture <arq>   Define arquitectura de saída, quando não existe na entrada\n"
 "  -F --target <nomebfd>            Define formatos de entrada e saída para <nomebfd>\n"
 "     --debugging                   Converte informação de depuração, se possível\n"
-"  -p --preserve-dates              Copia carimbos modificados/acedidos para a saída\n"
+"  -p --preserve-dates              Copia datações modificado/acedido para a saída\n"
 
 #: objcopy.c:540 objcopy.c:675
 #, c-format
@@ -4824,7 +4824,7 @@ msgstr ""
 "  -I --input-target=<nomebfd>      Assume que o ficheiro de entrada tem formato <nomebfd>\n"
 "  -O --output-target=<nomebfd>     Cria o ficheiro de saída com formato <nomebfd>\n"
 "  -F --target=<nomebfd>            Define ficheiros de entrada e saída com formato <nomebfd>\n"
-"  -p --preserve-dates              Copia carimbos modificados/acedidos para a saída\n"
+"  -p --preserve-dates              Copia datações modificado/acedido para a saída\n"
 
 #: objcopy.c:686
 #, c-format
