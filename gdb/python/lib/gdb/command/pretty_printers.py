@@ -158,7 +158,7 @@ printer-name;subprinter-name."""
                      cp.pretty_printers, "progspace",
                      object_re, name_re, subname_re)
         for objfile in gdb.objfiles():
-            self.invoke1("  objfile %s pretty-printers:" % objfile.filename,
+            self.invoke1("objfile %s pretty-printers:" % objfile.filename,
                          objfile.pretty_printers, objfile.filename,
                          object_re, name_re, subname_re)
 
