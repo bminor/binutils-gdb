@@ -320,6 +320,7 @@ s12z_frame_cache (struct frame_info *this_frame, void **prologue_cache)
     }
   else
     {
+      gdb_assert (this_sp == this_sp_for_id);
       /* The stack pointer of the prev frame is frame_size greater
          than the stack pointer of this frame plus one address
          size (caused by the JSR or BSR).  */

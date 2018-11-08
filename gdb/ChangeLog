@@ -1,3 +1,7 @@
+2018-11-19  John Darrington <john@darrington.wattle.id.au>
+
+	*s12z-tdep.c (s12z_frame_cache): Add an assertion.
+
 2018-11-19  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* infrun.c (displaced_step_inferior_state) <next>: Remove.
