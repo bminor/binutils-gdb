@@ -924,6 +924,12 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   const gdb_byte *regs = (const gdb_byte *) xsave;
   int i;
+  /* In 64-bit mode the split between "low" and "high" ZMM registers is at
+     ZMM16.  Outside of 64-bit mode there are no "high" ZMM registers at all.
+     Precalculate the number to be used for the split point, with the all
+     registers in the "low" portion outside of 64-bit mode.  */
+  unsigned int zmm_endlo_regnum = I387_ZMM0H_REGNUM (tdep)
+				  + std::min (tdep->num_zmm_regs, 16);
   ULONGEST clear_bv;
   static const gdb_byte zero[I386_MAX_REGISTER_SIZE] = { 0 };
   enum
@@ -1002,7 +1008,8 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
       return;
 
     case avx512_zmm_h:
-      if ((clear_bv & (X86_XSTATE_ZMM_H | X86_XSTATE_ZMM)))
+      if ((clear_bv & (regnum < zmm_endlo_regnum ? X86_XSTATE_ZMM_H
+						 : X86_XSTATE_ZMM)))
 	regcache->raw_supply (regnum, zero);
       else
 	regcache->raw_supply (regnum,
@@ -1080,21 +1087,17 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 	    }
 	}
 
-      /* Handle the upper ZMM registers.  */
-      if ((tdep->xcr0 & (X86_XSTATE_ZMM_H | X86_XSTATE_ZMM)))
+      /* Handle the upper halves of the low 8/16 ZMM registers.  */
+      if ((tdep->xcr0 & X86_XSTATE_ZMM_H))
 	{
-	  if ((clear_bv & (X86_XSTATE_ZMM_H | X86_XSTATE_ZMM)))
+	  if ((clear_bv & X86_XSTATE_ZMM_H))
 	    {
-	      for (i = I387_ZMM0H_REGNUM (tdep);
-		   i < I387_ZMMENDH_REGNUM (tdep);
-		   i++)
+	      for (i = I387_ZMM0H_REGNUM (tdep); i < zmm_endlo_regnum; i++)
 		regcache->raw_supply (i, zero);
 	    }
 	  else
 	    {
-	      for (i = I387_ZMM0H_REGNUM (tdep);
-		   i < I387_ZMMENDH_REGNUM (tdep);
-		   i++)
+	      for (i = I387_ZMM0H_REGNUM (tdep); i < zmm_endlo_regnum; i++)
 		regcache->raw_supply (i,
 				      XSAVE_AVX512_ZMM_H_ADDR (tdep, regs, i));
 	    }
@@ -1119,11 +1122,13 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 	    }
 	}
 
-      /* Handle the YMM_AVX512 registers.  */
+      /* Handle the upper 16 ZMM/YMM/XMM registers (if any).  */
       if ((tdep->xcr0 & X86_XSTATE_ZMM))
 	{
 	  if ((clear_bv & X86_XSTATE_ZMM))
 	    {
+	      for (i = zmm_endlo_regnum; i < I387_ZMMENDH_REGNUM (tdep); i++)
+		regcache->raw_supply (i, zero);
 	      for (i = I387_YMM16H_REGNUM (tdep);
 		   i < I387_YMMH_AVX512_END_REGNUM (tdep);
 		   i++)
@@ -1135,6 +1140,9 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 	    }
 	  else
 	    {
+	      for (i = zmm_endlo_regnum; i < I387_ZMMENDH_REGNUM (tdep); i++)
+		regcache->raw_supply (i,
+				      XSAVE_AVX512_ZMM_H_ADDR (tdep, regs, i));
 	      for (i = I387_YMM16H_REGNUM (tdep);
 		   i < I387_YMMH_AVX512_END_REGNUM (tdep);
 		   i++)
@@ -1341,6 +1349,9 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
   gdb_byte raw[I386_MAX_REGISTER_SIZE];
   ULONGEST initial_xstate_bv, clear_bv, xstate_bv = 0;
   unsigned int i;
+  /* See the comment in i387_supply_xsave().  */
+  unsigned int zmm_endlo_regnum = I387_ZMM0H_REGNUM (tdep)
+				  + std::min (tdep->num_zmm_regs, 16);
   enum
     {
       x87_ctrl_or_mxcsr = 0x1,
@@ -1441,9 +1452,8 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	     i < I387_MPXEND_REGNUM (tdep); i++)
 	  memset (XSAVE_MPX_ADDR (tdep, regs, i), 0, 8);
 
-      if ((clear_bv & (X86_XSTATE_ZMM_H | X86_XSTATE_ZMM)))
-	for (i = I387_ZMM0H_REGNUM (tdep);
-	     i < I387_ZMMENDH_REGNUM (tdep); i++)
+      if ((clear_bv & X86_XSTATE_ZMM_H))
+	for (i = I387_ZMM0H_REGNUM (tdep); i < zmm_endlo_regnum; i++)
 	  memset (XSAVE_AVX512_ZMM_H_ADDR (tdep, regs, i), 0, 32);
 
       if ((clear_bv & X86_XSTATE_K))
@@ -1453,6 +1463,8 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 
       if ((clear_bv & X86_XSTATE_ZMM))
 	{
+	  for (i = zmm_endlo_regnum; i < I387_ZMMENDH_REGNUM (tdep); i++)
+	    memset (XSAVE_AVX512_ZMM_H_ADDR (tdep, regs, i), 0, 32);
 	  for (i = I387_YMM16H_REGNUM (tdep);
 	       i < I387_YMMH_AVX512_END_REGNUM (tdep); i++)
 	    memset (XSAVE_YMM_AVX512_ADDR (tdep, regs, i), 0, 16);

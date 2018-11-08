@@ -1,3 +1,8 @@
+2018-11-08  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gdb.arch/i386-avx512.c,
+	testsuite/gdb.arch/i386-avx512.exp: Add 7th test.
+
 2018-11-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.arch/riscv-reg-aliases.exp: Handle targets without floating

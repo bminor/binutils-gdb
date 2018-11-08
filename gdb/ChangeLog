@@ -1,3 +1,9 @@
+2018-11-08  Jan Beulich  <jbeulich@suse.com>
+
+	* i387-tdep.c (i387_supply_xsave): Split handling of
+	X86_XSTATE_ZMM_H and X86_XSTATE_ZMM.
+	(i387_collect_xsave): Likewise.
+
 2018-11-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* riscv-tdep.c (riscv_insn::decode): Update header comment.
