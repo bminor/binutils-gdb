@@ -1,3 +1,8 @@
+2018-11-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* aarch64-tdep.c (aapcs_is_vfp_call_or_return_candidate_1):
+	return the correct count for potential HFAs.
+
 2018-11-08  Jan Beulich  <jbeulich@suse.com>
 
 	* i387-tdep.c (i387_supply_xsave): Split handling of

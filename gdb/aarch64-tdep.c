@@ -1212,7 +1212,7 @@ aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
 	    if (count == -1)
 	      return count;
 
-	    count *= TYPE_LENGTH (type);
+	    count *= (TYPE_LENGTH (type) / TYPE_LENGTH (target_type));
 	      return count;
 	  }
       }
