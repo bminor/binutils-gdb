@@ -2531,7 +2531,8 @@ arc_create_forced_local_got_entries_for_tls (struct bfd_hash_entry *bh,
       while (list != NULL)
 	{
 	  create_got_dynrelocs_for_single_entry (list, tmp->output_bfd,
-						 tmp->info, h);
+	    tmp->info,
+	    (struct elf_link_hash_entry *) h);
 	  list = list->next;
 	}
     }
