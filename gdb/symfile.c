@@ -1433,14 +1433,17 @@ find_separate_debug_file (const char *dir,
      Keep backward compatibility so that DEBUG_FILE_DIRECTORY being "" will
      cause "/..." lookups.  */
 
+  bool target_prefix = startswith (dir, "target:");
+  const char *dir_notarget = target_prefix ? dir + strlen ("target:") : dir;
   std::vector<gdb::unique_xmalloc_ptr<char>> debugdir_vec
     = dirnames_to_char_ptr_vec (debug_file_directory);
 
   for (const gdb::unique_xmalloc_ptr<char> &debugdir : debugdir_vec)
     {
-      debugfile = debugdir.get ();
+      debugfile = target_prefix ? "target:" : "";
+      debugfile += debugdir.get ();
       debugfile += "/";
-      debugfile += dir;
+      debugfile += dir_notarget;
       debugfile += debuglink;
 
       if (separate_debug_file_exists (debugfile, crc32, objfile))
@@ -1453,7 +1456,8 @@ find_separate_debug_file (const char *dir,
 			    strlen (gdb_sysroot)) == 0
 	  && IS_DIR_SEPARATOR (canon_dir[strlen (gdb_sysroot)]))
 	{
-	  debugfile = debugdir.get ();
+	  debugfile = target_prefix ? "target:" : "";
+	  debugfile += debugdir.get ();
 	  debugfile += (canon_dir + strlen (gdb_sysroot));
 	  debugfile += "/";
 	  debugfile += debuglink;

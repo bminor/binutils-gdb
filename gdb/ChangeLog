@@ -1,3 +1,8 @@
+2019-01-02  Andrey Utkin  <autkin@undo.io>
+
+	* symfile.c (find_separate_debug_file): Fix search of debug files for
+	remote debuggee.
+
 2019-01-02  Tom Tromey  <tom@tromey.com>
 
 	* python/py-inferior.c (gdbpy_initialize_inferior): Fix
