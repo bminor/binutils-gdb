@@ -1,3 +1,11 @@
+2018-11-09  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-got.h (arc_get_local_got_ents): Revamp it; use
+	elf_local_got_ents to store the local got list.
+	(get_got_entry_list_for_symbo): Restructure it.
+	* elf32-arc.c (elf_arc_relocate_section): Correct the call to
+	get_got_entry_list_for_symbol.
+
 2018-11-07  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.
