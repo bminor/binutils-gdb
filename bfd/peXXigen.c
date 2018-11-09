@@ -877,7 +877,8 @@ _bfd_XXi_only_swap_filehdr_out (bfd * abfd, void * in, void * out)
   H_PUT_16 (abfd, filehdr_in->f_magic, filehdr_out->f_magic);
   H_PUT_16 (abfd, filehdr_in->f_nscns, filehdr_out->f_nscns);
 
-  /* Only use a real timestamp if the option was chosen.  */
+  /* Use a real timestamp by default, unless the no-insert-timestamp
+     option was chosen.  */
   if ((pe_data (abfd)->insert_timestamp))
     H_PUT_32 (abfd, time (0), filehdr_out->f_timdat);
   else

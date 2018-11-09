@@ -1,15 +1,20 @@
+2018-11-09  Bernhard M. Wiedemann  <bwiedemann@suse.de>
+
+	* peXXigen.c (_bfd_XXi_only_swap_filehdr_out): Correct comment
+	concerning timestamp insertion.
+
 2018-11-09  Cupertino Miranda  <cmiranda@synopsys.com>
 
 	* arc-got.h (arc_got_entry_type_for_reloc): Changed to
-	  correct static TLS relocs.
+	correct static TLS relocs.
 	* elf32-arc.c (elf_arc_check_relocs): Introduced warning to
-	  TLS relocs which require -fPIC.
-	  (arc_create_forced_local_got_entries_for_tls): Created.
-	  Traverses list of GOT entries to be resolved statically
-	  when needed.
-	  (elf_arc_finish_dynamic_sections): Changed. Calls
-	  arc_create_forced_local_got_entries_for_tls for each known
-	  possibly GOT symbol.
+	TLS relocs which require -fPIC.
+	(arc_create_forced_local_got_entries_for_tls): Created.
+	Traverses list of GOT entries to be resolved statically
+	when needed.
+	(elf_arc_finish_dynamic_sections): Changed. Calls
+	arc_create_forced_local_got_entries_for_tls for each known
+	possibly GOT symbol.
 
 2018-11-09  rhn  <sowaac.rhn@porcupinefactory.org>
 
