@@ -54,27 +54,26 @@ struct got_entry
   enum tls_got_entries existing_entries;
 };
 
+/* Return the local got list, if not defined, create an empty one.  */
+
 static struct got_entry **
 arc_get_local_got_ents (bfd * abfd)
 {
-  static struct got_entry **local_got_ents = NULL;
-
-  if (local_got_ents == NULL)
+  if (elf_local_got_ents (abfd) == NULL)
     {
-      size_t	   size;
-      Elf_Internal_Shdr *symtab_hdr = &((elf_tdata (abfd))->symtab_hdr);
-
-      size = symtab_hdr->sh_info * sizeof (bfd_vma);
-      local_got_ents = (struct got_entry **)
-	bfd_alloc (abfd, sizeof (struct got_entry *) * size);
-      if (local_got_ents == NULL)
-	return FALSE;
-
-      memset (local_got_ents, 0, sizeof (struct got_entry *) * size);
-      elf_local_got_ents (abfd) = local_got_ents;
+      bfd_size_type amt = (elf_tdata (abfd)->symtab_hdr.sh_info
+			   * sizeof (*elf_local_got_ents (abfd)));
+      elf_local_got_ents (abfd) = bfd_zmalloc (amt);
+      if (elf_local_got_ents (abfd) == NULL)
+	{
+	  _bfd_error_handler (_("%pB: cannot allocate memory for local "
+				"GOT entries"), abfd);
+	  bfd_set_error (bfd_error_bad_value);
+	  return NULL;
+	}
     }
 
-  return local_got_ents;
+  return elf_local_got_ents (abfd);
 }
 
 static struct got_entry *
@@ -167,9 +166,7 @@ get_got_entry_list_for_symbol (bfd *abfd,
     }
   else
     {
-      struct got_entry **local_got_ents
-	= arc_get_local_got_ents (abfd);
-      return &local_got_ents[r_symndx];
+      return arc_get_local_got_ents (abfd) + r_symndx;
     }
 }
 
