@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: ld 2.30.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2018-06-24 19:43+0100\n"
-"PO-Revision-Date: 2018-07-22 09:28+0800\n"
+"PO-Revision-Date: 2018-11-09 12:10+0800\n"
 "Last-Translator: Grégoire Scano <gregoire.scano@malloc.fr>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "Language: fr\n"
@@ -295,7 +295,7 @@ msgstr "%F%P : cible BFD invalide « %s »\n"
 
 #: ldfile.c:265 ldfile.c:295
 msgid "%P: skipping incompatible %s when searching for %s\n"
-msgstr "%P : escamotage incompatible %s lors de la recherche de %s\n"
+msgstr "%P : %s ignoré car incompatible lors de la recherche de %s\n"
 
 #: ldfile.c:278
 msgid "%F%P: attempted static link of dynamic object `%s'\n"
@@ -915,7 +915,7 @@ msgstr "%P : avertissement : constructeur global %s est utilisé\n"
 
 #: ldmain.c:1166
 msgid "%F%P: BFD backend error: BFD_RELOC_CTOR unsupported\n"
-msgstr "%F%P : BFD erreur de terminaison arrière (backend) : BFD_RELOC_CTOR non pris en charge\n"
+msgstr "%F%P : erreur du moteur BFD : BFD_RELOC_CTOR non pris en charge\n"
 
 #. We found a reloc for the symbol we are looking for.
 #: ldmain.c:1238 ldmain.c:1240 ldmain.c:1242 ldmain.c:1250 ldmain.c:1293
