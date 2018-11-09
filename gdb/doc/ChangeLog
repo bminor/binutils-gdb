@@ -1,3 +1,8 @@
+2018-11-09  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* gdb.texinfo (PowerPC Features): Document the altivec and fpu
+	requirements for the org.gnu.gdb.power.vsx feature.
+
 2018-11-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Ada Tasks): Update the "info task 2" example

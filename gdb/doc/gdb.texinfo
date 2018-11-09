@@ -43230,11 +43230,13 @@ contain registers @samp{vr0} through @samp{vr31}, @samp{vscr},
 and @samp{vrsave}.
 
 The @samp{org.gnu.gdb.power.vsx} feature is optional.  It should
-contain registers @samp{vs0h} through @samp{vs31h}.  @value{GDBN}
-will combine these registers with the floating point registers
-(@samp{f0} through @samp{f31}) and the altivec registers (@samp{vr0}
-through @samp{vr31}) to present the 128-bit wide registers @samp{vs0}
-through @samp{vs63}, the set of vector registers for POWER7.
+contain registers @samp{vs0h} through @samp{vs31h}.  @value{GDBN} will
+combine these registers with the floating point registers (@samp{f0}
+through @samp{f31}) and the altivec registers (@samp{vr0} through
+@samp{vr31}) to present the 128-bit wide registers @samp{vs0} through
+@samp{vs63}, the set of vector-scalar registers for POWER7.
+Therefore, this feature requires both @samp{org.gnu.gdb.power.fpu} and
+@samp{org.gnu.gdb.power.altivec}.
 
 The @samp{org.gnu.gdb.power.spe} feature is optional.  It should
 contain registers @samp{ev0h} through @samp{ev31h}, @samp{acc}, and
