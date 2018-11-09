@@ -1,3 +1,8 @@
+2018-11-09  John Baldwin  <jhb@FreeBSD.org>
+
+	* minsyms.c (minimal_symbol_reader::install): Fix unsigned
+	overflow.
+
 2018-11-09  Hafiz Abid Qadeer  <abidh@codesourcery.com>
 
 	* configure: Regenerate.

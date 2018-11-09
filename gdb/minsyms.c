@@ -1375,8 +1375,9 @@ minimal_symbol_reader::install ()
 
       mcount = compact_minimal_symbols (msymbols, mcount, m_objfile);
 
-      obstack_blank_fast (&m_objfile->per_bfd->storage_obstack,
-	       (mcount + 1 - alloc_count) * sizeof (struct minimal_symbol));
+      ssize_t shrink_bytes
+	= (mcount + 1 - alloc_count) * sizeof (struct minimal_symbol);
+      obstack_blank_fast (&m_objfile->per_bfd->storage_obstack, shrink_bytes);
       msymbols = (struct minimal_symbol *)
 	obstack_finish (&m_objfile->per_bfd->storage_obstack);
 
