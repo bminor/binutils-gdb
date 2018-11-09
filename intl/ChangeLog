@@ -1,3 +1,7 @@
+2018-11-09  Hafiz Abid Qadeer  <abidh@codesourcery.com>
+
+	* configure: Regenerate.
+
 2018-08-02  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* libgnuintl.h (_INTL_MAY_RETURN_STRING_ARG, gettext, dgettext,

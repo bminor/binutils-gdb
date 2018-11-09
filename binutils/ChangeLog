@@ -1,3 +1,7 @@
+2018-11-09  Hafiz Abid Qadeer  <abidh@codesourcery.com>
+
+	* configure: Regenerate.
+
 2018-11-09  Mathias   <m4tze@exitno.de>
 
 	* strings.c (print_strings): Check for multibyte encodings.
