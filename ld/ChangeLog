@@ -1,3 +1,10 @@
+2018-11-09  Marc  <marc@groundctl.com>
+
+	PR 23872
+	* scripttempl/pep.sc (pe.sc): Ensure rdata_runtime_pseudo_relocs
+	are aligned.
+	* scripttempl/pep.sc (pep.sc): Likewise.
+
 2018-11-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/config/default.exp (ELFEDIT): New.

@@ -161,6 +161,7 @@ SECTIONS
   .rdata ${RELOCATING+BLOCK(__section_alignment__)} :
   {
     ${R_RDATA}
+    . = ALIGN(4);
     ${RELOCATING+__rt_psrelocs_start = .;}
     ${RELOCATING+KEEP(*(.rdata_runtime_pseudo_reloc))}
     ${RELOCATING+__rt_psrelocs_end = .;}
