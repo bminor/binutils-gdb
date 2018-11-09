@@ -540,9 +540,48 @@ print_strings (const char *filename, FILE *stream, file_ptr address,
 	      free (buf);
 	      return;
 	    }
+
 	  if (! STRING_ISGRAPHIC (c))
-	    /* Found a non-graphic.  Try again starting with next char.  */
-	    goto tryline;
+	    {
+	      /* Found a non-graphic. Try again starting with next char.  */
+	      if (encoding_bytes > 1)
+		{
+		  /* In case of multibyte encodings rewind using magic buffer.  */
+		  if (magiccount == 0)
+		    {
+		      /* If no magic buffer exists: use memory of c.  */
+		      switch (encoding)
+			{
+			default:
+			  break;
+			case 'b':
+			  c = c & 0xff;
+			  magiccount += 1;
+			  break;
+			case 'l':
+			case 'L':
+			  c = c >> 8;
+			  magiccount += (encoding_bytes -1);
+			  break;
+			case 'B':
+			  c = (( c & 0xff0000) >> 16) | ( c & 0xff00)
+			    | (( c & 0xff) << 16);
+			  magiccount += 3;
+			  break;
+			}
+		      magic = (char *) &c;
+		    }
+		  else
+		    {
+		      /* If magic buffer exists: rewind.  */
+		      magic = magic - (encoding_bytes -1);
+		    }
+
+		  address = address - (encoding_bytes -1);
+		}
+
+	      goto tryline;
+	    }
 	  buf[i] = c;
 	}
 

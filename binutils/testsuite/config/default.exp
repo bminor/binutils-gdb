@@ -63,6 +63,12 @@ if ![info exists OBJCOPYFLAGS] then {
 if ![info exists AR] then {
     set AR [findfile $base_dir/ar]
 }
+if ![info exists STRINGS] then {
+    set STRINGS [findfile $base_dir/strings]
+}
+if ![info exists STRINGSFLAGS] then {
+    set STRINGSFLAGS ""
+}
 if ![info exists STRIP] then {
     set STRIP [findfile $base_dir/strip-new $base_dir/strip-new [transform strip]]
 }

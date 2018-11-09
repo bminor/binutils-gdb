@@ -1,3 +1,12 @@
+2018-11-09  Mathias   <m4tze@exitno.de>
+
+	* strings.c (print_strings): Check for multibyte encodings.
+	* binutils-all/strings-1.bin: New file.  Test binary for string decoding.
+	* testsuite/binutils-all/strings.exp: New file.  Test the strings program.
+	* testsuite/config/default.exp (STRINGS): Define if not provided
+	by the environment.
+	(STRINGSFLAGS): Likewise.
+
 2018-11-07  Masatake Yamato  <yamato@redhat.com>
 
 	* objdump.c (long_options): Have the --disassemble option take an
