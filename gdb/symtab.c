@@ -818,6 +818,11 @@ symbol_set_names (struct general_symbol_info *gsymbol,
   else
     linkage_name_copy = linkage_name;
 
+  /* Set the symbol language.  */
+  char *demangled_name_ptr
+    = symbol_find_demangled_name (gsymbol, linkage_name_copy);
+  gdb::unique_xmalloc_ptr<char> demangled_name (demangled_name_ptr);
+
   entry.mangled = linkage_name_copy;
   slot = ((struct demangled_name_entry **)
 	  htab_find_slot (per_bfd->demangled_names_hash,
@@ -830,9 +835,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
       || (gsymbol->language == language_go
 	  && (*slot)->demangled[0] == '\0'))
     {
-      char *demangled_name = symbol_find_demangled_name (gsymbol,
-							 linkage_name_copy);
-      int demangled_len = demangled_name ? strlen (demangled_name) : 0;
+      int demangled_len = demangled_name ? strlen (demangled_name.get ()) : 0;
 
       /* Suppose we have demangled_name==NULL, copy_name==0, and
 	 linkage_name_copy==linkage_name.  In this case, we already have the
@@ -870,10 +873,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	}
 
       if (demangled_name != NULL)
-	{
-	  strcpy ((*slot)->demangled, demangled_name);
-	  xfree (demangled_name);
-	}
+	strcpy ((*slot)->demangled, demangled_name.get());
       else
 	(*slot)->demangled[0] = '\0';
     }

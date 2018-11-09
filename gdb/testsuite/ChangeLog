@@ -1,3 +1,9 @@
+2018-11-09  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/msym-lang.c: New test.
+	* gdb.base/msym-lang.exp: New file.
+	* gdb.base/msym-lang-main.c: New test.
+
 2018-11-08  Tom Tromey  <tom@tromey.com>
 
 	PR gdb/23555:
