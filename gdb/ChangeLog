@@ -1,5 +1,15 @@
 2018-12-28  Tom Tromey  <tom@tromey.com>
 
+	* unittests/style-selftests.c: New file.
+	* ui-style.c: New file.
+	* ui-style.h: New file.
+	* ui-file.h: Include ui-style.h.
+	* Makefile.in (COMMON_SFILES): Add ui-style.c.
+	(HFILES_NO_SRCDIR): Add ui-style.h.
+	(SUBDIR_UNITTESTS_SRCS): Add style-selftests.c.
+
+2018-12-28  Tom Tromey  <tom@tromey.com>
+
 	* command.h (add_setshow_enum_cmd): Add "context" argument.
 	* cli/cli-decode.c (add_setshow_enum_cmd): Add "context"
 	argument.  Call set_cmd_context.

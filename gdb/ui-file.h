@@ -20,6 +20,7 @@
 #define UI_FILE_H
 
 #include <string>
+#include "ui-style.h"
 
 /* The abstract ui_file base class.  */
 

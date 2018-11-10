@@ -426,6 +426,7 @@ SUBDIR_UNITTESTS_SRCS = \
 	unittests/scoped_mmap-selftests.c \
 	unittests/scoped_restore-selftests.c \
 	unittests/string_view-selftests.c \
+	unittests/style-selftests.c \
 	unittests/tracepoint-selftests.c \
 	unittests/unpack-selftests.c \
 	unittests/utils-selftests.c \
@@ -1125,6 +1126,7 @@ COMMON_SFILES = \
 	typeprint.c \
 	ui-file.c \
 	ui-out.c \
+	ui-style.c \
 	user-regs.c \
 	utils.c \
 	valarith.c \
@@ -1398,6 +1400,7 @@ HFILES_NO_SRCDIR = \
 	typeprint.h \
 	ui-file.h \
 	ui-out.h \
+	ui-style.h \
 	user-regs.h \
 	utils.h \
 	valprint.h \
