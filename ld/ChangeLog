@@ -1,5 +1,11 @@
 2018-11-12  Nick Clifton  <nickc@redhat.com>
 
+	PR 10865
+	* ld.texi (Entry Point): Make it clear that the text refers to
+	PE-based systems rather than just a PE system.
+
+2018-11-12  Nick Clifton  <nickc@redhat.com>
+
 	* po/es.po: Updated Spanish translation.
 
 2018-11-09  Nick Clifton  <nickc@redhat.com>

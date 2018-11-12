@@ -3409,7 +3409,7 @@ the @samp{-e} @var{entry} command-line option;
 the @code{ENTRY(@var{symbol})} command in a linker script;
 @item
 the value of a target specific symbol, if it is defined;  For many
-targets this is @code{start}, but PE and BeOS based systems for example
+targets this is @code{start}, but PE- and BeOS-based systems for example
 check a list of possible entry symbols, matching the first one found.
 @item
 the address of the first byte of the @samp{.text} section, if present;
