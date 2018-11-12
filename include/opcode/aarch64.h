@@ -286,7 +286,11 @@ enum aarch64_opnd
 				   the mnemonic name for LDUR/STUR instructions
 				   wherever there is no ambiguity.  */
   AARCH64_OPND_ADDR_SIMM10,	/* Address of signed 10-bit immediate.  */
+  AARCH64_OPND_ADDR_SIMM11,	/* Address with a signed 11-bit (multiple of
+				   16) immediate.  */
   AARCH64_OPND_ADDR_UIMM12,	/* Address of unsigned 12-bit immediate.  */
+  AARCH64_OPND_ADDR_SIMM13,	/* Address with a signed 13-bit (multiple of
+				   16) immediate.  */
   AARCH64_OPND_SIMD_ADDR_SIMPLE,/* Address of ld/st multiple structures.  */
   AARCH64_OPND_ADDR_OFFSET,     /* Address with an optional 9-bit immediate.  */
   AARCH64_OPND_SIMD_ADDR_POST,	/* Address of ld/st multiple post-indexed.  */
@@ -466,6 +470,10 @@ enum aarch64_opnd_qualifier
 
   AARCH64_OPND_QLF_P_Z,
   AARCH64_OPND_QLF_P_M,
+
+  /* Used in scaled signed immediate that are scaled by a Tag granule
+     like in stg, st2g, etc.   */
+  AARCH64_OPND_QLF_imm_tag,
 
   /* Constraint on value.  */
   AARCH64_OPND_QLF_CR,		/* CRn, CRm. */

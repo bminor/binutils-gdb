@@ -55,3 +55,61 @@ Disassembly of section \.text:
 .*:	badb037f 	cmpp	x27, x27
 .*:	bac003ff 	cmpp	sp, x0
 .*:	badf001f 	cmpp	x0, sp
+.*:	d920081f 	stg	\[x0\]
+.*:	d9200b7f 	stg	\[x27\]
+.*:	d93fb81f 	stg	\[x0, #-80\]
+.*:	d9200c1f 	stg	\[x0, #0\]!
+.*:	d920ac1f 	stg	\[x0, #160\]!
+.*:	d920041f 	stg	\[x0\], #0
+.*:	d93a641f 	stg	\[x0\], #-1440
+.*:	d92ffbff 	stg	\[sp, #4080\]
+.*:	d9300bff 	stg	\[sp, #-4096\]
+.*:	d92fffff 	stg	\[sp, #4080\]!
+.*:	d93007ff 	stg	\[sp\], #-4096
+.*:	d960081f 	stzg	\[x0\]
+.*:	d9600b7f 	stzg	\[x27\]
+.*:	d97fb81f 	stzg	\[x0, #-80\]
+.*:	d9600c1f 	stzg	\[x0, #0\]!
+.*:	d960ac1f 	stzg	\[x0, #160\]!
+.*:	d960041f 	stzg	\[x0\], #0
+.*:	d97a641f 	stzg	\[x0\], #-1440
+.*:	d96ffbff 	stzg	\[sp, #4080\]
+.*:	d9700bff 	stzg	\[sp, #-4096\]
+.*:	d96fffff 	stzg	\[sp, #4080\]!
+.*:	d97007ff 	stzg	\[sp\], #-4096
+.*:	d9a0081f 	st2g	\[x0\]
+.*:	d9a00b7f 	st2g	\[x27\]
+.*:	d9bfb81f 	st2g	\[x0, #-80\]
+.*:	d9a00c1f 	st2g	\[x0, #0\]!
+.*:	d9a0ac1f 	st2g	\[x0, #160\]!
+.*:	d9a0041f 	st2g	\[x0\], #0
+.*:	d9ba641f 	st2g	\[x0\], #-1440
+.*:	d9affbff 	st2g	\[sp, #4080\]
+.*:	d9b00bff 	st2g	\[sp, #-4096\]
+.*:	d9afffff 	st2g	\[sp, #4080\]!
+.*:	d9b007ff 	st2g	\[sp\], #-4096
+.*:	d9e0081f 	stz2g	\[x0\]
+.*:	d9e00b7f 	stz2g	\[x27\]
+.*:	d9ffb81f 	stz2g	\[x0, #-80\]
+.*:	d9e00c1f 	stz2g	\[x0, #0\]!
+.*:	d9e0ac1f 	stz2g	\[x0, #160\]!
+.*:	d9e0041f 	stz2g	\[x0\], #0
+.*:	d9fa641f 	stz2g	\[x0\], #-1440
+.*:	d9effbff 	stz2g	\[sp, #4080\]
+.*:	d9f00bff 	stz2g	\[sp, #-4096\]
+.*:	d9efffff 	stz2g	\[sp, #4080\]!
+.*:	d9f007ff 	stz2g	\[sp\], #-4096
+.*:	69000000 	stgp	x0, x0, \[x0\]
+.*:	69006c00 	stgp	x0, x27, \[x0\]
+.*:	6900001b 	stgp	x27, x0, \[x0\]
+.*:	69006c1b 	stgp	x27, x27, \[x0\]
+.*:	69000360 	stgp	x0, x0, \[x27\]
+.*:	693d8000 	stgp	x0, x0, \[x0, #-80\]
+.*:	69800000 	stgp	x0, x0, \[x0, #0\]!
+.*:	69850000 	stgp	x0, x0, \[x0, #160\]!
+.*:	68800000 	stgp	x0, x0, \[x0\], #0
+.*:	68bb8000 	stgp	x0, x0, \[x0\], #-144
+.*:	691f801f 	stgp	xzr, x0, \[x0, #1008\]
+.*:	69207c00 	stgp	x0, xzr, \[x0, #-1024\]
+.*:	699f83e0 	stgp	x0, x0, \[sp, #1008\]!
+.*:	68a003e0 	stgp	x0, x0, \[sp\], #-1024

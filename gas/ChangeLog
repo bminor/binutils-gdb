@@ -1,5 +1,17 @@
 2018-11-12  Sudakshina Das  <sudi.das@arm.com>
 
+	* config/tc-aarch64.c (parse_operands): Add switch case for
+	AARCH64_OPND_ADDR_SIMM11 and AARCH64_OPND_ADDR_SIMM13.
+	(fix_insn): Likewise.
+	(warn_unpredictable_ldst): Exempt STGP.
+	* testsuite/gas/aarch64/armv8_5-a-memtag.s: Add tests for stg, st2g,
+	stzg, stz2g and stgp.
+	* testsuite/gas/aarch64/armv8_5-a-memtag.d: Likewise.
+	* testsuite/gas/aarch64/illegal-memtag.s: Likewise.
+	* testsuite/gas/aarch64/illegal-memtag.l: Likewise.
+
+2018-11-12  Sudakshina Das  <sudi.das@arm.com>
+
 	* testsuite/gas/aarch64/armv8_5-a-memtag.s: Add tests for subp,
 	subps and cmpp.
 	* testsuite/gas/aarch64/armv8_5-a-memtag.d: Likewise.

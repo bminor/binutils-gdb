@@ -1067,7 +1067,8 @@ aarch64_ext_addr_simm (const aarch64_operand *self, aarch64_opnd_info *info,
   /* simm (imm9 or imm7)  */
   imm = extract_field (self->fields[0], code, 0);
   info->addr.offset.imm = sign_extend (imm, fields[self->fields[0]].width - 1);
-  if (self->fields[0] == FLD_imm7)
+  if (self->fields[0] == FLD_imm7
+      || info->qualifier == AARCH64_OPND_QLF_imm_tag)
     /* scaled immediate in ld/st pair instructions.  */
     info->addr.offset.imm *= aarch64_get_qualifier_esize (info->qualifier);
   /* qualifier */

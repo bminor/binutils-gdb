@@ -16,6 +16,20 @@ func:
 	\op x27, x27, #0, #0
 	.endm
 
+	.macro expand_stg op
+	\op [x0, #0]
+	\op [x27, #0]
+	\op [x0, #-80]
+	\op [x0, #0]!
+	\op [x0, #160]!
+	\op [x0], #0
+	\op [x0], #-1440
+	\op [sp, #4080]
+	\op [sp, #-4096]
+	\op [sp, #4080]!
+	\op [sp], #-4096
+	.endm
+
 	# IRG
 	expand_3_reg irg
 	irg sp, x0
@@ -55,3 +69,23 @@ func:
 	cmpp x27, x27
 	cmpp sp, x0
 	cmpp x0, sp
+
+	expand_stg stg
+	expand_stg stzg
+	expand_stg st2g
+	expand_stg stz2g
+
+	stgp x0, x0, [x0, #0]
+	stgp x0, x27, [x0, #0]
+	stgp x27, x0, [x0, #0]
+	stgp x27, x27, [x0, #0]
+	stgp x0, x0, [x27, #0]
+	stgp x0, x0, [x0, #-80]
+	stgp x0, x0, [x0, #0]!
+	stgp x0, x0, [x0, #160]!
+	stgp x0, x0, [x0], #0
+	stgp x0, x0, [x0], #-144
+	stgp xzr, x0, [x0, #1008]
+	stgp x0, xzr, [x0, #-1024]
+	stgp x0, x0, [sp, #1008]!
+	stgp x0, x0, [sp], #-1024

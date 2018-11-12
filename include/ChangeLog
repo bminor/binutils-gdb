@@ -1,5 +1,11 @@
 2018-11-12  Sudakshina Das  <sudi.das@arm.com>
 
+	* opcode/aarch64.h (aarch64_opnd): Add AARCH64_OPND_ADDR_SIMM11
+	and AARCH64_OPND_ADDR_SIMM13.
+	(aarch64_opnd_qualifier): Add new AARCH64_OPND_QLF_imm_tag.
+
+2018-11-12  Sudakshina Das  <sudi.das@arm.com>
+
 	* opcode/aarch64.h (aarch64_opnd): Add
 	AARCH64_OPND_UIMM4_ADDG and AARCH64_OPND_UIMM10 as new enums.
 

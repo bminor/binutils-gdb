@@ -721,6 +721,9 @@ struct operand_qualifier_data aarch64_opnd_qualifiers[] =
   {0, 0, 0, "z", OQK_OPD_VARIANT},
   {0, 0, 0, "m", OQK_OPD_VARIANT},
 
+  /* Qualifier for scaled immediate for Tag granule (stg,st2g,etc).  */
+  {16, 0, 0, "tag", OQK_OPD_VARIANT},
+
   /* Qualifiers constraining the value range.
      First 3 fields:
      Lower bound, higher bound, unused.  */
@@ -1664,6 +1667,36 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (!value_aligned_p (opnd->addr.offset.imm, 8))
 	    {
 	      set_unaligned_error (mismatch_detail, idx, 8);
+	      return 0;
+	    }
+	  break;
+
+	case AARCH64_OPND_ADDR_SIMM11:
+	  /* Signed 11 bits immediate offset (multiple of 16).  */
+	  if (!value_in_range_p (opnd->addr.offset.imm, -1024, 1008))
+	    {
+	      set_offset_out_of_range_error (mismatch_detail, idx, -1024, 1008);
+	      return 0;
+	    }
+
+	  if (!value_aligned_p (opnd->addr.offset.imm, 16))
+	    {
+	      set_unaligned_error (mismatch_detail, idx, 16);
+	      return 0;
+	    }
+	  break;
+
+	case AARCH64_OPND_ADDR_SIMM13:
+	  /* Signed 13 bits immediate offset (multiple of 16).  */
+	  if (!value_in_range_p (opnd->addr.offset.imm, -4096, 4080))
+	    {
+	      set_offset_out_of_range_error (mismatch_detail, idx, -4096, 4080);
+	      return 0;
+	    }
+
+	  if (!value_aligned_p (opnd->addr.offset.imm, 16))
+	    {
+	      set_unaligned_error (mismatch_detail, idx, 16);
 	      return 0;
 	    }
 	  break;
@@ -3559,6 +3592,8 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_ADDR_SIMM9:
     case AARCH64_OPND_ADDR_SIMM9_2:
     case AARCH64_OPND_ADDR_SIMM10:
+    case AARCH64_OPND_ADDR_SIMM11:
+    case AARCH64_OPND_ADDR_SIMM13:
     case AARCH64_OPND_ADDR_OFFSET:
     case AARCH64_OPND_SVE_ADDR_RI_S4x16:
     case AARCH64_OPND_SVE_ADDR_RI_S4xVL:

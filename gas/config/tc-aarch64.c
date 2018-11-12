@@ -6214,6 +6214,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 
 	case AARCH64_OPND_ADDR_SIMM9:
 	case AARCH64_OPND_ADDR_SIMM9_2:
+	case AARCH64_OPND_ADDR_SIMM11:
+	case AARCH64_OPND_ADDR_SIMM13:
 	  po_misc_or_fail (parse_address (&str, info));
 	  if (info->addr.pcrel || info->addr.offset.is_reg
 	      || (!info->addr.preind && !info->addr.postind)
@@ -6773,6 +6775,8 @@ warn_unpredictable_ldst (aarch64_instruction *instr, char *str)
 	  && (opnds[0].reg.regno == opnds[2].addr.base_regno
 	    || opnds[1].reg.regno == opnds[2].addr.base_regno)
 	  && opnds[2].addr.base_regno != REG_SP
+	  /* Exempt STGP.  */
+	  && !(opnds[2].type == AARCH64_OPND_ADDR_SIMM11)
 	  && opnds[2].addr.writeback)
 	    as_warn (_("unpredictable transfer with writeback -- `%s'"), str);
       /* Load operations must load different registers.  */
@@ -7674,6 +7678,8 @@ fix_insn (fixS *fixP, uint32_t flags, offsetT value)
     case AARCH64_OPND_ADDR_SIMM9_2:
     case AARCH64_OPND_ADDR_SIMM10:
     case AARCH64_OPND_ADDR_UIMM12:
+    case AARCH64_OPND_ADDR_SIMM11:
+    case AARCH64_OPND_ADDR_SIMM13:
       /* Immediate offset in an address.  */
       insn = get_aarch64_insn (buf);
 
