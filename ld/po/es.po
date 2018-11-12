@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: ld 2.30.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2018-06-24 19:43+0100\n"
-"PO-Revision-Date: 2018-07-17 00:51+0200\n"
+"PO-Revision-Date: 2018-11-11 16:53+0100\n"
 "Last-Translator: Antonio Ceballos Roa <aceballos@gmail.com>\n"
 "Language-Team: Spanish <es@tp.org.es>\n"
 "Language: es\n"
@@ -1699,14 +1699,12 @@ msgid "Set address of text segment"
 msgstr "Establece la dirección del segmento de texto"
 
 #: lexsup.c:473
-#, fuzzy
 msgid "Set address of rodata segment"
-msgstr "Establece la dirección del segmento de texto"
+msgstr "Establece la dirección del segmento de datos de solo lectura"
 
 #: lexsup.c:475
-#, fuzzy
 msgid "Set address of ldata segment"
-msgstr "Establece la dirección del segmento de texto"
+msgstr "Establece la dirección del segmento de datos (ldata)"
 
 #: lexsup.c:478
 msgid ""
@@ -2476,9 +2474,8 @@ msgstr "%F%P: no se admite el tamaño de fichero de entrada: %s (%ld bytes)\n"
 
 #. We should not have a new, indirect or warning symbol here.
 #: plugin.c:726
-#, fuzzy
 msgid "%F%P: %s: plugin symbol table corrupt (sym type %d)\n"
-msgstr "%F%P: %s: el plugin reportó error al reclamar el fichero\n"
+msgstr "%F%P: %s: la tabla de símbolos de plugin está corrupta (tipo de símbolo %d)\n"
 
 #: plugin.c:786
 msgid "%P: %pB: symbol `%s' definition: %d, visibility: %d, resolution: %d\n"
@@ -2693,9 +2690,8 @@ msgstr ""
 #: ehppalinux.c:282 ehppanbsd.c:282 ehppaobsd.c:282 em68hc11elf.c:349
 #: em68hc11elfb.c:349 em68hc12elf.c:349 em68hc12elfb.c:349 enios2elf.c:275
 #: enios2linux.c:275
-#, fuzzy
 msgid "%X%P: can not make stub section: %E\n"
-msgstr "%X%P: no se puede crear la sección .edata: %E\n"
+msgstr "%X%P: no se puede crear la sección stub: %E\n"
 
 #: eaarch64cloudabi.c:315 eaarch64cloudabib.c:315 eaarch64elf.c:315
 #: eaarch64elf32.c:315 eaarch64elf32b.c:315 eaarch64elfb.c:315
@@ -2788,9 +2784,8 @@ msgstr ""
 #: earmelfb_linux.c:470 earmelfb_linux_eabi.c:470
 #: earmelfb_linux_fdpiceabi.c:470 earmelfb_nacl.c:470 earmelfb_nbsd.c:470
 #: earmnto.c:470 earmsymbian.c:470
-#, fuzzy
 msgid "%X%P: could not compute sections lists for stub generation: %E\n"
-msgstr "%X%P: no se puede crear la sección .reloc: %E\n"
+msgstr "%X%P: no se han podido calcular las listas para la generación de stub: %E\n"
 
 #: eaarch64cloudabi.c:346 eaarch64cloudabib.c:346 eaarch64elf.c:346
 #: eaarch64elf32.c:346 eaarch64elf32b.c:346 eaarch64elfb.c:346
@@ -2819,9 +2814,8 @@ msgstr "%X%P: no se puede crear la sección .reloc: %E\n"
 #: em68hc11elfb.c:152 em68hc11elfb.c:371 em68hc12elf.c:142 em68hc12elf.c:152
 #: em68hc12elf.c:371 em68hc12elfb.c:142 em68hc12elfb.c:152 em68hc12elfb.c:371
 #: enios2elf.c:342 enios2elf.c:355 enios2linux.c:342 enios2linux.c:355
-#, fuzzy
 msgid "%X%P: can not size stub section: %E\n"
-msgstr "%X%P: no se puede crear la sección .edata: %E\n"
+msgstr "%X%P: no se puede medir la sección de stub: %E\n"
 
 #: eaarch64cloudabi.c:365 eaarch64cloudabib.c:365 eaarch64elf.c:365
 #: eaarch64elf32.c:365 eaarch64elf32b.c:365 eaarch64elfb.c:365
@@ -2841,9 +2835,8 @@ msgstr "%X%P: no se puede crear la sección .edata: %E\n"
 #: eelf64ppc_fbsd.c:672 ehppaelf.c:384 ehppalinux.c:384 ehppanbsd.c:384
 #: ehppaobsd.c:384 em68hc11elf.c:375 em68hc11elfb.c:375 em68hc12elf.c:375
 #: em68hc12elfb.c:375 enios2elf.c:370 enios2linux.c:370
-#, fuzzy
 msgid "%X%P: can not build stubs: %E\n"
-msgstr "%P: no se puede encontrar %s: %E\n"
+msgstr "%X%P: no se pueden construir los stubs: %E\n"
 
 #. The arm backend needs special fields in the output hash structure.
 #. These will only be created if the output format is an arm format,
@@ -2970,9 +2963,8 @@ msgstr "%F%P: error: no se puede cambiar el formato de salida mientras se enlaza
 #: eshelf_nto.c:128 eshelf_uclinux.c:128 eshelf_vxworks.c:157 eshlelf.c:128
 #: eshlelf_fd.c:128 eshlelf_linux.c:128 eshlelf_nbsd.c:128 eshlelf_nto.c:128
 #: eshlelf_vxworks.c:157 ev850.c:174 ev850_rh850.c:174 exgateelf.c:128
-#, fuzzy
 msgid "%P: warning: -z dynamic-undefined-weak ignored\n"
-msgstr "%B: aviso: se definió aquí\n"
+msgstr "%P: aviso: se ha hecho caso omiso de -z dynamic-undefined-weak\n"
 
 #: eaarch64cloudabi.c:470 eaarch64cloudabib.c:470 eaarch64elf.c:470
 #: eaarch64elf32.c:470 eaarch64elf32b.c:470 eaarch64elfb.c:470
@@ -3271,9 +3263,8 @@ msgstr ""
 #: eshelf_nto.c:376 eshelf_uclinux.c:376 eshelf_vxworks.c:405 eshlelf.c:376
 #: eshlelf_fd.c:376 eshlelf_linux.c:376 eshlelf_nbsd.c:376 eshlelf_nto.c:376
 #: eshlelf_vxworks.c:405 ev850.c:422 ev850_rh850.c:422 exgateelf.c:376
-#, fuzzy
 msgid "%F%P: %pB: bfd_elf_get_bfd_needed_list failed: %E\n"
-msgstr "%F%P: falló bfd_hash_table_init: %E\n"
+msgstr "%F%P: %pB: bfd_elf_get_bfd_needed_list falló: %E\n"
 
 #: eaarch64cloudabi.c:740 eaarch64cloudabib.c:740 eaarch64elf.c:740
 #: eaarch64elf32.c:740 eaarch64elf32b.c:740 eaarch64elfb.c:740
@@ -3347,9 +3338,8 @@ msgstr "%F%P: falló bfd_hash_table_init: %E\n"
 #: eshelf_nto.c:425 eshelf_uclinux.c:425 eshelf_vxworks.c:454 eshlelf.c:425
 #: eshlelf_fd.c:425 eshlelf_linux.c:425 eshlelf_nbsd.c:425 eshlelf_nto.c:425
 #: eshlelf_vxworks.c:454 ev850.c:471 ev850_rh850.c:471 exgateelf.c:425
-#, fuzzy
 msgid "%F%P: %pB: bfd_stat failed: %E\n"
-msgstr "%F%P: falló bfd_hash_table_init: %E\n"
+msgstr "%F%P: %pB: bfd_stat falló: %E\n"
 
 #: eaarch64cloudabi.c:746 eaarch64cloudabib.c:746 eaarch64elf.c:746
 #: eaarch64elf32.c:746 eaarch64elf32b.c:746 eaarch64elfb.c:746
@@ -3579,9 +3569,8 @@ msgstr ""
 #: eshelf_vxworks.c:795 eshlelf.c:766 eshlelf_fd.c:766 eshlelf_linux.c:766
 #: eshlelf_nbsd.c:766 eshlelf_nto.c:766 eshlelf_vxworks.c:795 ev850.c:812
 #: ev850_rh850.c:812 exgateelf.c:766
-#, fuzzy
 msgid "%P: warning: .note.gnu.build-id section discarded, --build-id ignored\n"
-msgstr "%P: aviso: se descarta la sección .buildid, se hace caso omiso de --build-id.\n"
+msgstr "%P: aviso: se descarta la sección .note.gnu.build-id, se hace caso omiso de --build-id\n"
 
 #: eaarch64cloudabi.c:1127 eaarch64cloudabib.c:1127 eaarch64elf.c:1127
 #: eaarch64elf32.c:1127 eaarch64elf32b.c:1127 eaarch64elfb.c:1127
@@ -3736,9 +3725,8 @@ msgstr "%P: aviso: se descarta estilo --build-id no reconocido\n"
 #: eshelf_uclinux.c:830 eshelf_vxworks.c:859 eshlelf.c:830 eshlelf_fd.c:830
 #: eshlelf_linux.c:830 eshlelf_nbsd.c:830 eshlelf_nto.c:830
 #: eshlelf_vxworks.c:859 ev850.c:876 ev850_rh850.c:876 exgateelf.c:830
-#, fuzzy
 msgid "%P: warning: cannot create .note.gnu.build-id section, --build-id ignored\n"
-msgstr "%P: aviso: no se puede crear la sección .buildid, se descarta --build-id.\n"
+msgstr "%P: aviso: no se puede crear la sección .note.gnu.build-id, se hace caso omiso de --build-id\n"
 
 #: eaarch64cloudabi.c:1175 eaarch64cloudabib.c:1175 eaarch64elf.c:1175
 #: eaarch64elf32.c:1175 eaarch64elf32b.c:1175 eaarch64elfb.c:1175
@@ -3814,9 +3802,8 @@ msgstr "%P: aviso: no se puede crear la sección .buildid, se descarta --build-i
 #: eshelf_uclinux.c:860 eshelf_vxworks.c:889 eshlelf.c:860 eshlelf_fd.c:860
 #: eshlelf_linux.c:860 eshlelf_nbsd.c:860 eshlelf_nto.c:860
 #: eshlelf_vxworks.c:889 ev850.c:906 ev850_rh850.c:906 exgateelf.c:860
-#, fuzzy
 msgid "%F%P: %s: can't open for writing: %E\n"
-msgstr "%F%P: no se puede abrir %s para %s: %E\n"
+msgstr "%F%P: %s: no se puede abrir para escritura: %E\n"
 
 #: eaarch64cloudabi.c:1251 eaarch64cloudabib.c:1251 eaarch64elf.c:1251
 #: eaarch64elf32.c:1251 eaarch64elf32b.c:1251 eaarch64elfb.c:1251
@@ -3971,9 +3958,8 @@ msgstr ""
 #: eshelf_uclinux.c:971 eshelf_vxworks.c:1000 eshlelf.c:971 eshlelf_fd.c:971
 #: eshlelf_linux.c:971 eshlelf_nbsd.c:971 eshlelf_nto.c:971
 #: eshlelf_vxworks.c:1000 ev850.c:1017 ev850_rh850.c:1017 exgateelf.c:971
-#, fuzzy
 msgid "%P: warning: cannot create .eh_frame_hdr section, --eh-frame-hdr ignored\n"
-msgstr "%P: aviso: no se puede crear la sección .buildid, se descarta --build-id.\n"
+msgstr "%P: aviso: no se puede crear la sección .eh_frame_hdr, se hace caso omiso de --eh-frame-hdr.\n"
 
 #: eaarch64cloudabi.c:1341 eaarch64cloudabib.c:1341 eaarch64elf.c:1341
 #: eaarch64elf32.c:1341 eaarch64elf32b.c:1341 eaarch64elfb.c:1341
@@ -4298,9 +4284,8 @@ msgstr ""
 #: eshlelf.c:1115 eshlelf_fd.c:1115 eshlelf_linux.c:1115 eshlelf_nbsd.c:1115
 #: eshlelf_nto.c:1115 eshlelf_vxworks.c:1144 ev850.c:1161 ev850_rh850.c:1161
 #: exgateelf.c:1115
-#, fuzzy
 msgid "%F%P: failed to record assignment to %s: %E\n"
-msgstr "%F%P: falló la creación de la sección `%s': %E\n"
+msgstr "%F%P: no se ha podido grabar la asignación a %s: %E\n"
 
 #: eaarch64cloudabi.c:1617 eaarch64cloudabi.c:1679 eaarch64cloudabib.c:1617
 #: eaarch64cloudabib.c:1679 eaarch64elf.c:1617 eaarch64elf.c:1679
@@ -4455,9 +4440,8 @@ msgstr "%F%P: falló la creación de la sección `%s': %E\n"
 #: eshlelf_nto.c:1364 eshlelf_vxworks.c:1331 eshlelf_vxworks.c:1393
 #: ev850.c:1348 ev850.c:1410 ev850_rh850.c:1348 ev850_rh850.c:1410
 #: exgateelf.c:1302 exgateelf.c:1364
-#, fuzzy
 msgid "%F%P: failed to set dynamic section sizes: %E\n"
-msgstr "%F%P: falló la creación de la sección `%s': %E\n"
+msgstr "%F%P: no se han podido establecer los tamaños de las secciones dinámicas: %E\n"
 
 #: eaarch64cloudabi.c:1651 eaarch64cloudabib.c:1651 eaarch64elf.c:1651
 #: eaarch64elf32.c:1651 eaarch64elf32b.c:1651 eaarch64elfb.c:1651
@@ -4537,9 +4521,8 @@ msgstr "%F%P: falló la creación de la sección `%s': %E\n"
 #: eshlelf_fd.c:1336 eshlelf_linux.c:1336 eshlelf_nbsd.c:1336
 #: eshlelf_nto.c:1336 eshlelf_vxworks.c:1365 ev850.c:1382 ev850_rh850.c:1382
 #: exgateelf.c:1336
-#, fuzzy
 msgid "%F%P: %pB: can't read contents of section .gnu.warning: %E\n"
-msgstr "%F%P: no se puede crear el nombre de sección dividida para %s\n"
+msgstr "%F%P: %pB: no se puede leer el contenido de la sección .gnu.warning: %E\n"
 
 #: eaarch64cloudabi.c:2314 eaarch64cloudabib.c:2314 eaarch64elf.c:2314
 #: eaarch64elf32.c:2314 eaarch64elf32b.c:2314 eaarch64elfb.c:2314
@@ -4619,9 +4602,8 @@ msgstr "%F%P: no se puede crear el nombre de sección dividida para %s\n"
 #: eshlelf_fd.c:1991 eshlelf_linux.c:1991 eshlelf_nbsd.c:1966
 #: eshlelf_nto.c:1966 eshlelf_vxworks.c:2003 ev850.c:1966 ev850_rh850.c:1966
 #: exgateelf.c:1920
-#, fuzzy
 msgid "%F%P: invalid --compress-debug-sections option: `%s'\n"
-msgstr "%F%P: opción de ordenado de sección común inválida: %s\n"
+msgstr "%F%P: opción --compress-debug-sections no válida: `%s'\n"
 
 #: eaarch64cloudabi.c:2365 eaarch64cloudabib.c:2365 eaarch64elf.c:2365
 #: eaarch64elf32.c:2365 eaarch64elf32b.c:2365 eaarch64elfb.c:2365
@@ -4679,9 +4661,8 @@ msgstr "%F%P: opción de ordenado de sección común inválida: %s\n"
 #: eshelf_uclinux.c:2017 eshelf_vxworks.c:2054 eshlelf.c:2017
 #: eshlelf_fd.c:2042 eshlelf_linux.c:2042 eshlelf_nbsd.c:2017
 #: eshlelf_nto.c:2017 eshlelf_vxworks.c:2054
-#, fuzzy
 msgid "%F%P: invalid hash style `%s'\n"
-msgstr "%F%P: objetivo BFD inválido `%s'\n"
+msgstr "%F%P: estilo de hash no válido `%s'\n"
 
 #: eaarch64cloudabi.c:2381 eaarch64cloudabib.c:2381 eaarch64elf.c:2381
 #: eaarch64elf32.c:2381 eaarch64elf32b.c:2381 eaarch64elfb.c:2381
@@ -4761,9 +4742,8 @@ msgstr "%F%P: objetivo BFD inválido `%s'\n"
 #: eshlelf_fd.c:2058 eshlelf_linux.c:2058 eshlelf_nbsd.c:2033
 #: eshlelf_nto.c:2033 eshlelf_vxworks.c:2070 ev850.c:1982 ev850_rh850.c:1982
 #: exgateelf.c:1936
-#, fuzzy
 msgid "%F%P: invalid maxium page size `%s'\n"
-msgstr "%F%P: objetivo BFD inválido `%s'\n"
+msgstr "%F%P: tamaño de página máximo no válido `%s'\n"
 
 #: eaarch64cloudabi.c:2390 eaarch64cloudabib.c:2390 eaarch64elf.c:2390
 #: eaarch64elf32.c:2390 eaarch64elf32b.c:2390 eaarch64elfb.c:2390
@@ -4843,9 +4823,8 @@ msgstr "%F%P: objetivo BFD inválido `%s'\n"
 #: eshlelf_fd.c:2067 eshlelf_linux.c:2067 eshlelf_nbsd.c:2042
 #: eshlelf_nto.c:2042 eshlelf_vxworks.c:2079 ev850.c:1991 ev850_rh850.c:1991
 #: exgateelf.c:1945
-#, fuzzy
 msgid "%F%P: invalid common page size `%s'\n"
-msgstr "%F%P: objetivo BFD inválido `%s'\n"
+msgstr "%F%P: tamaño de página normal no válido `%s'\n"
 
 #: eaarch64cloudabi.c:2398 eaarch64cloudabib.c:2398 eaarch64elf.c:2398
 #: eaarch64elf32.c:2398 eaarch64elf32b.c:2398 eaarch64elfb.c:2398
@@ -4925,9 +4904,8 @@ msgstr "%F%P: objetivo BFD inválido `%s'\n"
 #: eshlelf_fd.c:2075 eshlelf_linux.c:2075 eshlelf_nbsd.c:2050
 #: eshlelf_nto.c:2050 eshlelf_vxworks.c:2087 ev850.c:1999 ev850_rh850.c:1999
 #: exgateelf.c:1953
-#, fuzzy
 msgid "%F%P: invalid stack size `%s'\n"
-msgstr "%F%P: objetivo BFD inválido `%s'\n"
+msgstr "%F%P: tamaño de pila no válido `%s'\n"
 
 #: eaarch64cloudabi.c:2474 eaarch64cloudabib.c:2474 eaarch64elf.c:2474
 #: eaarch64elf32.c:2474 eaarch64elf32b.c:2474 eaarch64elfb.c:2474
@@ -5007,9 +4985,8 @@ msgstr "%F%P: objetivo BFD inválido `%s'\n"
 #: eshlelf_fd.c:2151 eshlelf_linux.c:2151 eshlelf_nbsd.c:2126
 #: eshlelf_nto.c:2126 eshlelf_vxworks.c:2163 ev850.c:2020 ev850_rh850.c:2020
 #: exgateelf.c:1974
-#, fuzzy
 msgid "%P: warning: -z %s ignored\n"
-msgstr "%B: aviso: common está aquí\n"
+msgstr "%P: aviso: se hace caso omiso de -z %s\n"
 
 #: eaarch64cloudabi.c:2525 eaarch64cloudabib.c:2525 eaarch64elf.c:2525
 #: eaarch64elf32.c:2525 eaarch64elf32b.c:2525 eaarch64elfb.c:2525
@@ -5088,7 +5065,7 @@ msgstr ""
 #: eaarch64linux32.c:2547 eaarch64linux32b.c:2547 eaarch64linuxb.c:2547
 #, c-format
 msgid "  --fix-cortex-a53-843419      Fix erratum 843419\n"
-msgstr ""
+msgstr "  --fix-cortex-a53-843419      Corrige el error 843419\n"
 
 #: eaarch64cloudabi.c:2541 eaarch64cloudabib.c:2541 eaarch64elf.c:2541
 #: eaarch64elf32.c:2541 eaarch64elf32b.c:2541 eaarch64elfb.c:2541
@@ -5096,32 +5073,27 @@ msgstr ""
 #: eaarch64linux32.c:2548 eaarch64linux32b.c:2548 eaarch64linuxb.c:2548
 #, c-format
 msgid "  --no-apply-dynamic-relocs    Do not apply link-time values for dynamic relocations\n"
-msgstr ""
+msgstr "  --no-apply-dynamic-relocs    No aplica valores de tiempo de enlazamiento a reubicaciones dinámicas\n"
 
 #: eaix5ppc.c:315 eaix5rs6.c:315 eaixppc.c:315 eaixrs6.c:315 eppcmacos.c:315
-#, fuzzy
 msgid "%F%P: cannot open %s\n"
-msgstr "%F%P: no se puede abrir %s: %E\n"
+msgstr "%F%P: no se puede abrir %s\n"
 
 #: eaix5ppc.c:362 eaix5rs6.c:362 eaixppc.c:362 eaixrs6.c:362 eppcmacos.c:362
-#, fuzzy
 msgid "%F%P: cannot read %s\n"
-msgstr "%P: no se puede encontrar %s\n"
+msgstr "%F%P: no se puede leer %s\n"
 
 #: eaix5ppc.c:390 eaix5rs6.c:390 eaixppc.c:390 eaixrs6.c:390 eppcmacos.c:390
-#, fuzzy
 msgid "%P: warning: ignoring invalid -D number %s\n"
-msgstr "%P%F: número `%s' inválido\n"
+msgstr "%P: aviso: se hace caso omiso del número -D no válido %s\n"
 
 #: eaix5ppc.c:398 eaix5rs6.c:398 eaixppc.c:398 eaixrs6.c:398 eppcmacos.c:398
-#, fuzzy
 msgid "%P: warning: ignoring invalid -H number %s\n"
-msgstr "%P%F: número `%s' inválido\n"
+msgstr "%P: aviso: se hace caso omiso del número -H no válido %s\n"
 
 #: eaix5ppc.c:510 eaix5rs6.c:510 eaixppc.c:510 eaixrs6.c:510 eppcmacos.c:510
-#, fuzzy
 msgid "%P: warning: ignoring invalid -bmaxdata number %s\n"
-msgstr "%P: aviso: no se puede encontrar el símbolo de inicio thumb %s\n"
+msgstr "%P: aviso: se hace caso omiso del número -bmaxdata no válido %s\n"
 
 #: eaix5ppc.c:519 eaix5rs6.c:519 eaixppc.c:519 eaixrs6.c:519 eppcmacos.c:519
 #, fuzzy
