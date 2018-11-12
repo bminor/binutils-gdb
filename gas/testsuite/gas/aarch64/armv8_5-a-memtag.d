@@ -33,3 +33,25 @@ Disassembly of section \.text:
 .*:	d180037b 	subg	x27, x27, #0x0, #0x0
 .*:	d1bf3fe0 	subg	x0, sp, #0x3f0, #0xf
 .*:	d1bf141f 	subg	sp, x0, #0x3f0, #0x5
+.*:	9ac00000 	subp	x0, x0, x0
+.*:	9ac0001b 	subp	x27, x0, x0
+.*:	9ac00360 	subp	x0, x27, x0
+.*:	9adb0000 	subp	x0, x0, x27
+.*:	9adb037b 	subp	x27, x27, x27
+.*:	9ac003e0 	subp	x0, sp, x0
+.*:	9adf0000 	subp	x0, x0, sp
+.*:	9ac0001f 	subp	xzr, x0, x0
+.*:	bac00000 	subps	x0, x0, x0
+.*:	bac0001b 	subps	x27, x0, x0
+.*:	bac00360 	subps	x0, x27, x0
+.*:	badb0000 	subps	x0, x0, x27
+.*:	badb037b 	subps	x27, x27, x27
+.*:	bac003e0 	subps	x0, sp, x0
+.*:	badf0000 	subps	x0, x0, sp
+.*:	bac0001f 	cmpp	x0, x0
+.*:	bac0001f 	cmpp	x0, x0
+.*:	bac0037f 	cmpp	x27, x0
+.*:	badb001f 	cmpp	x0, x27
+.*:	badb037f 	cmpp	x27, x27
+.*:	bac003ff 	cmpp	sp, x0
+.*:	badf001f 	cmpp	x0, sp

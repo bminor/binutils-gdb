@@ -1,5 +1,12 @@
 2018-11-12  Sudakshina Das  <sudi.das@arm.com>
 
+	* aarch64-tbl.h (aarch64_opcode_table): Add subp, subps and cmpp.
+	* aarch64-asm-2.c: Regenerated.
+	* aarch64-dis-2.c: Regenerated.
+	* aarch64-opc-2.c: Regenerated.
+
+2018-11-12  Sudakshina Das  <sudi.das@arm.com>
+
 	* aarch64-opc.h (aarch64_field_kind): New FLD_imm4_3.
 	(OPD_F_SHIFT_BY_4, operand_need_shift_by_four): New.
 	* aarch64-opc.c (fields): Add entry for imm4_3.

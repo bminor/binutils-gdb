@@ -35,3 +35,23 @@ func:
 	expand_2_reg subg
 	subg x0, sp, #0x3f0, #0xf
 	subg sp, x0, #0x3f0, #0x5
+
+	# SUBP
+	expand_3_reg subp
+	subp x0, sp, x0
+	subp x0, x0, sp
+	subp xzr, x0, x0
+
+	# SUBPS
+	expand_3_reg subps
+	subps x0, sp, x0
+	subps x0, x0, sp
+	subps xzr, x0, x0
+
+	# CMPP
+	cmpp x0, x0
+	cmpp x27, x0
+	cmpp x0, x27
+	cmpp x27, x27
+	cmpp sp, x0
+	cmpp x0, sp

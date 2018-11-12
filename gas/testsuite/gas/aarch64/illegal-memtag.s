@@ -17,3 +17,11 @@ func:
 	gmi x1, xzr, x3
 	addg xzr, x2, #0, #0
 	subg x1, xzr, #0, #0
+	subp sp, x1, x2
+	subp x1, xzr, x2
+	subp x1, x2, xzr
+	subps sp, x1, x2
+	subps x1, xzr, x2
+	subps x1, x2, xzr
+	cmpp xzr, x2
+	cmpp x2, xzr
