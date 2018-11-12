@@ -12,3 +12,29 @@ func:
 	mrs x7, scxtnum_el3
 	mrs x7, scxtnum_el12
 	mrs x8, id_pfr2_el1
+
+	# ARMv8.5-a+memtag
+	# MRS (register)
+	mrs x1, tco
+	mrs x2, TCO
+	mrs x1, tfsre0_el1
+	mrs x1, TFSR_EL1
+	mrs x2, TFSR_EL2
+	mrs x3, TFSR_EL3
+	mrs x12, TFSR_EL12
+	mrs x1, rgsr_el1
+	mrs x3, gcr_el1
+
+	# MSR (register)
+	msr tco, x1
+	msr TCO, x2
+	msr tfsre0_el1, x1
+	msr TFSR_EL1, x1
+	msr TFSR_EL2, x2
+	msr TFSR_EL3, x3
+	msr TFSR_EL12, x12
+	msr rgsr_el1, x1
+	msr gcr_el1, x3
+
+	# MSR (immediate)
+	msr TCO, #8

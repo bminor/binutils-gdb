@@ -1,5 +1,14 @@
 2018-11-12  Sudakshina Das  <sudi.das@arm.com>
 
+	* aarch64-opc.c (aarch64_sys_regs): New entries for TCO,
+	TFSRE0_SL1, TFSR_EL1, TFSR_EL2, TFSR_EL3, TFSR_EL12,
+	RGSR_EL1 and GCR_EL1.
+	(aarch64_sys_reg_supported_p): New check for above.
+	(aarch64_pstatefields): New entry for TCO.
+	(aarch64_pstatefield_supported_p): New check for above.
+
+2018-11-12  Sudakshina Das  <sudi.das@arm.com>
+
 	* aarch64-asm.c (aarch64_ins_addr_simple_2): New.
 	* aarch64-asm.h (ins_addr_simple_2): Declare the above.
 	* aarch64-dis.c (aarch64_ext_addr_simple_2): New.

@@ -3929,6 +3929,14 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   { "contextidr_el12",	CPENC (3, 5, C13, C0, 1), F_ARCHEXT },
   { "rndr",		CPENC(3,3,C2,C4,0), F_ARCHEXT | F_REG_READ }, /* RO */
   { "rndrrs",		CPENC(3,3,C2,C4,1), F_ARCHEXT | F_REG_READ }, /* RO */
+  { "tco",		CPENC(3,3,C4,C2,7), F_ARCHEXT },
+  { "tfsre0_el1",	CPENC(3,0,C6,C6,1), F_ARCHEXT },
+  { "tfsr_el1",		CPENC(3,0,C6,C5,0), F_ARCHEXT },
+  { "tfsr_el2",		CPENC(3,4,C6,C5,0), F_ARCHEXT },
+  { "tfsr_el3",		CPENC(3,6,C6,C6,0), F_ARCHEXT },
+  { "tfsr_el12",	CPENC(3,5,C6,C6,0), F_ARCHEXT },
+  { "rgsr_el1",		CPENC(3,0,C1,C0,5), F_ARCHEXT },
+  { "gcr_el1",		CPENC(3,0,C1,C0,6), F_ARCHEXT },
   { "tpidr_el0",        CPENC(3,3,C13,C0,2),	0 },
   { "tpidrro_el0",      CPENC(3,3,C13,C0,3),	0 }, /* RW */
   { "tpidr_el1",        CPENC(3,0,C13,C0,4),	0 },
@@ -4392,6 +4400,18 @@ aarch64_sys_reg_supported_p (const aarch64_feature_set features,
 	   && AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_5)))
     return FALSE;
 
+  /* System Registers in ARMv8.5-A with AARCH64_FEATURE_MEMTAG.  */
+  if ((reg->value == CPENC (3, 3, C4, C2, 7)
+       || reg->value == CPENC (3, 0, C6, C6, 1)
+       || reg->value == CPENC (3, 0, C6, C5, 0)
+       || reg->value == CPENC (3, 4, C6, C5, 0)
+       || reg->value == CPENC (3, 6, C6, C6, 0)
+       || reg->value == CPENC (3, 5, C6, C6, 0)
+       || reg->value == CPENC (3, 0, C1, C0, 5)
+       || reg->value == CPENC (3, 0, C1, C0, 6))
+      && !(AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_MEMTAG)))
+    return FALSE;
+
   return TRUE;
 }
 
@@ -4411,6 +4431,7 @@ const aarch64_sys_reg aarch64_pstatefields [] =
   { "uao",		0x03,	F_ARCHEXT },
   { "ssbs",		0x19,   F_ARCHEXT },
   { "dit",		0x1a,	F_ARCHEXT },
+  { "tco",		0x1c,	F_ARCHEXT },
   { 0,          CPENC(0,0,0,0,0), 0 },
 };
 
@@ -4439,6 +4460,11 @@ aarch64_pstatefield_supported_p (const aarch64_feature_set features,
   /* DIT.  Values are from aarch64_pstatefields.  */
   if (reg->value == 0x1a
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_4))
+    return FALSE;
+
+  /* TCO.  Values are from aarch64_pstatefields.  */
+  if (reg->value == 0x1c
+      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_MEMTAG))
     return FALSE;
 
   return TRUE;
