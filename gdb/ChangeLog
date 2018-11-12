@@ -1,3 +1,8 @@
+2018-11-12  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* skip.c (complete_skip_number): New function.
+	(_initialize_step_skip): Add completers to some skip commands.
+
 2018-11-09  Tom Tromey  <tom@tromey.com>
 
 	* remote.c (remote_g_packet_guess_s): Remove typedef and DEF_VEC.

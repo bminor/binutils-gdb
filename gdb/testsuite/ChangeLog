@@ -1,3 +1,8 @@
+2018-11-12  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.base/skip.exp: Add standard_testfile.  Add "skip delete"
+	completer tests.
+
 2018-11-09  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/msym-lang.c: New test.

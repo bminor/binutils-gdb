@@ -641,6 +641,23 @@ function_name_is_marked_for_skip (const char *function_name,
   return false;
 }
 
+/* Completer for skip numbers.  */
+
+static void
+complete_skip_number (cmd_list_element *cmd,
+		      completion_tracker &completer,
+		      const char *text, const char *word)
+{
+  size_t word_len = strlen (word);
+
+  for (const skiplist_entry &entry : skiplist_entries)
+    {
+      gdb::unique_xmalloc_ptr<char> name (xstrprintf ("%d", entry.number ()));
+      if (strncmp (word, name.get (), word_len) == 0)
+	completer.add_completion (std::move (name));
+    }
+}
+
 void
 _initialize_step_skip (void)
 {
@@ -676,28 +693,31 @@ If no function name is given, skip the current function."),
 	       &skiplist);
   set_cmd_completer (c, location_completer);
 
-  add_cmd ("enable", class_breakpoint, skip_enable_command, _("\
+  c = add_cmd ("enable", class_breakpoint, skip_enable_command, _("\
 Enable skip entries.  You can specify numbers (e.g. \"skip enable 1 3\"), \
 ranges (e.g. \"skip enable 4-8\"), or both (e.g. \"skip enable 1 3 4-8\").\n\n\
 If you don't specify any numbers or ranges, we'll enable all skip entries.\n\n\
 Usage: skip enable [NUMBER | RANGE]..."),
-	   &skiplist);
+	       &skiplist);
+  set_cmd_completer (c, complete_skip_number);
 
-  add_cmd ("disable", class_breakpoint, skip_disable_command, _("\
+  c = add_cmd ("disable", class_breakpoint, skip_disable_command, _("\
 Disable skip entries.  You can specify numbers (e.g. \"skip disable 1 3\"), \
 ranges (e.g. \"skip disable 4-8\"), or both (e.g. \"skip disable 1 3 4-8\").\n\n\
 If you don't specify any numbers or ranges, we'll disable all skip entries.\n\n\
 Usage: skip disable [NUMBER | RANGE]..."),
-	   &skiplist);
+	       &skiplist);
+  set_cmd_completer (c, complete_skip_number);
 
-  add_cmd ("delete", class_breakpoint, skip_delete_command, _("\
+  c = add_cmd ("delete", class_breakpoint, skip_delete_command, _("\
 Delete skip entries.  You can specify numbers (e.g. \"skip delete 1 3\"), \
 ranges (e.g. \"skip delete 4-8\"), or both (e.g. \"skip delete 1 3 4-8\").\n\n\
 If you don't specify any numbers or ranges, we'll delete all skip entries.\n\n\
 Usage: skip delete [NUMBER | RANGES]..."),
-           &skiplist);
+	       &skiplist);
+  set_cmd_completer (c, complete_skip_number);
 
-  add_info ("skip", info_skip_command, _("\
+  c = add_info ("skip", info_skip_command, _("\
 Display the status of skips.  You can specify numbers (e.g. \"skip info 1 3\"), \
 ranges (e.g. \"skip info 4-8\"), or both (e.g. \"skip info 1 3 4-8\").\n\n\
 If you don't specify any numbers or ranges, we'll show all skips.\n\n\
@@ -705,6 +725,7 @@ Usage: skip info [NUMBER | RANGES]...\n\
 The \"Type\" column indicates one of:\n\
 \tfile        - ignored file\n\
 \tfunction    - ignored function"));
+  set_cmd_completer (c, complete_skip_number);
 
   add_setshow_boolean_cmd ("skip", class_maintenance,
 			   &debug_skip, _("\
