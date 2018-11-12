@@ -84,6 +84,8 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_ID_PFR2		0x400000000000ULL
 /* SSBS mechanism enabled.  */
 #define AARCH64_FEATURE_SSBS		0x800000000000ULL
+/* Memory Tagging Extension.  */
+#define AARCH64_FEATURE_MEMTAG		0x1000000000000ULL
 
 
 /* Architectures are the sum of the base and extensions.  */

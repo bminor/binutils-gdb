@@ -1,3 +1,8 @@
+2018-11-12  Sudakshina Das  <sudi.das@arm.com>
+
+	* aarch64-tbl.h (aarch64_feature_memtag): New.
+	(MEMTAG, MEMTAG_INSN): New.
+
 2018-11-06  Sudakshina Das  <sudi.das@arm.com>
 
 	* arm-dis.c (select_arm_features): Update bfd_mach_arm_8

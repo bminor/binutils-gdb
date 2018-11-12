@@ -2171,6 +2171,8 @@ static const aarch64_feature_set aarch64_feature_predres =
   AARCH64_FEATURE (AARCH64_FEATURE_PREDRES, 0);
 static const aarch64_feature_set aarch64_feature_bti =
   AARCH64_FEATURE (AARCH64_FEATURE_BTI, 0);
+static const aarch64_feature_set aarch64_feature_memtag =
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_5 | AARCH64_FEATURE_MEMTAG, 0);
 
 
 #define CORE		&aarch64_feature_v8
@@ -2205,6 +2207,7 @@ static const aarch64_feature_set aarch64_feature_bti =
 #define SB		&aarch64_feature_sb
 #define PREDRES		&aarch64_feature_predres
 #define BTI		&aarch64_feature_bti
+#define MEMTAG		&aarch64_feature_memtag
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2268,6 +2271,8 @@ static const aarch64_feature_set aarch64_feature_bti =
   { NAME, OPCODE, MASK, CLASS, 0, PREDRES, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define BTI_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, BTI, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define MEMTAG_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, MEMTAG, OPS, QUALS, FLAGS, 0, 0, NULL }
 
 struct aarch64_opcode aarch64_opcode_table[] =
 {
