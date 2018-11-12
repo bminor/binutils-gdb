@@ -1218,6 +1218,12 @@
   QLF2(NIL, S_D),		\
 }
 
+/* e.g. LDG <Xt>, [<Xn|SP>{, #<simm>}].  */
+#define QL_LDG			\
+{				\
+  QLF2(X, imm_tag),		\
+}
+
 /* e.g. LDPSW <Xt1>, <Xt2>, [<Xn|SP>{, #<imm>}].  */
 #define QL_LDST_PAIR_X32	\
 {				\
@@ -3288,6 +3294,7 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("ldur", 0xb8400000, 0xbfe00c00, ldst_unscaled, OP_LDUR, OP2 (Rt, ADDR_SIMM9), QL_LDST_R, F_GPRSIZE_IN_Q),
   CORE_INSN ("ldursw", 0xb8800000, 0xffe00c00, ldst_unscaled, OP_LDURSW, OP2 (Rt, ADDR_SIMM9), QL_LDST_X32, 0),
   CORE_INSN ("prfum", 0xf8800000, 0xffe00c00, ldst_unscaled, OP_PRFUM, OP2 (PRFOP, ADDR_SIMM9), QL_LDST_PRFM, 0),
+  MEMTAG_INSN ("ldg",  0xd9600000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_SIMM13), QL_LDG, 0),
   /* Load/store register (scaled signed immediate).  */
   V8_3_INSN ("ldraa", 0xf8200400, 0xffa00400, ldst_imm10, OP2 (Rt, ADDR_SIMM10), QL_X1NIL, 0),
   V8_3_INSN ("ldrab", 0xf8a00400, 0xffa00400, ldst_imm10, OP2 (Rt, ADDR_SIMM10), QL_X1NIL, 0),

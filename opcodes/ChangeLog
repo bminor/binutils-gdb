@@ -1,5 +1,13 @@
 2018-11-12  Sudakshina Das  <sudi.das@arm.com>
 
+	* aarch64-tbl.h (QL_LDG): New.
+	(aarch64_opcode_table): Add ldg.
+	* aarch64-asm-2.c: Regenerated.
+	* aarch64-dis-2.c: Regenerated.
+	* aarch64-opc-2.c: Regenerated.
+
+2018-11-12  Sudakshina Das  <sudi.das@arm.com>
+
 	* aarch64-opc.c (aarch64_opnd_qualifiers): Add new data
 	for AARCH64_OPND_QLF_imm_tag.
 	(operand_general_constraint_met_p): Add case for

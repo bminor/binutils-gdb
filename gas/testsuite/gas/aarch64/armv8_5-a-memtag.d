@@ -113,3 +113,11 @@ Disassembly of section \.text:
 .*:	69207c00 	stgp	x0, xzr, \[x0, #-1024\]
 .*:	699f83e0 	stgp	x0, x0, \[sp, #1008\]!
 .*:	68a003e0 	stgp	x0, x0, \[sp\], #-1024
+.*:	d9600000 	ldg	x0, \[x0\]
+.*:	d960001b 	ldg	x27, \[x0\]
+.*:	d9600360 	ldg	x0, \[x27\]
+.*:	d960037b 	ldg	x27, \[x27\]
+.*:	d96003e0 	ldg	x0, \[sp\]
+.*:	d960001f 	ldg	xzr, \[x0\]
+.*:	d96ff000 	ldg	x0, \[x0, #4080\]
+.*:	d9700000 	ldg	x0, \[x0, #-4096\]

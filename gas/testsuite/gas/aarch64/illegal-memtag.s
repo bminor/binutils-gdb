@@ -8,10 +8,12 @@ func:
 	addg x1, x2, #0x3f0, #0x10
 	subg x1, x2, #0x3f0, -4
 
-	# STG/STZG/ST2G : Fail imm
+	# STG/STZG/ST2G/LDG : Fail imm
 	stg [x1, #15]
 	stzg [x1, #-4097]!
 	st2g [x1], #4096
+	ldg x1, [x2, #33]
+	ldg x1, [x2, #4112]
 
 	# STGP : Fail imm
 	stgp x1, x2, [x3, #1009]
@@ -42,3 +44,5 @@ func:
 	stgp sp, x2, [x3]
 	stgp x1, sp, [x3]
 	stgp x0, x0, [xzr]
+	ldg sp, [x0, #16]
+	ldg x0, [xzr, #16]

@@ -89,3 +89,12 @@ func:
 	stgp x0, xzr, [x0, #-1024]
 	stgp x0, x0, [sp, #1008]!
 	stgp x0, x0, [sp], #-1024
+
+	ldg x0, [x0, #0]
+	ldg x27, [x0, #0]
+	ldg x0, [x27, #0]
+	ldg x27, [x27, #0]
+	ldg x0, [sp, #0]
+	ldg xzr, [x0, #0]
+	ldg x0, [x0, #4080]
+	ldg x0, [x0, #-4096]
