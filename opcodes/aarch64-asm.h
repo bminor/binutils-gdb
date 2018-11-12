@@ -59,6 +59,7 @@ AARCH64_DECL_OPD_INSERTER (ins_limm);
 AARCH64_DECL_OPD_INSERTER (ins_inv_limm);
 AARCH64_DECL_OPD_INSERTER (ins_ft);
 AARCH64_DECL_OPD_INSERTER (ins_addr_simple);
+AARCH64_DECL_OPD_INSERTER (ins_addr_simple_2);
 AARCH64_DECL_OPD_INSERTER (ins_addr_offset);
 AARCH64_DECL_OPD_INSERTER (ins_addr_regoff);
 AARCH64_DECL_OPD_INSERTER (ins_addr_simm);

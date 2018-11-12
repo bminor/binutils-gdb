@@ -121,3 +121,14 @@ Disassembly of section \.text:
 .*:	d960001f 	ldg	xzr, \[x0\]
 .*:	d96ff000 	ldg	x0, \[x0, #4080\]
 .*:	d9700000 	ldg	x0, \[x0, #-4096\]
+.*:	d9e0001b 	ldgv	x27, \[x0\]!
+.*:	d9e00360 	ldgv	x0, \[x27\]!
+.*:	d9e00379 	ldgv	x25, \[x27\]!
+.*:	d9e003e0 	ldgv	x0, \[sp\]!
+.*:	d9e0001f 	ldgv	xzr, \[x0\]!
+.*:	d9a00000 	stgv	x0, \[x0\]!
+.*:	d9a0001b 	stgv	x27, \[x0\]!
+.*:	d9a00360 	stgv	x0, \[x27\]!
+.*:	d9a00379 	stgv	x25, \[x27\]!
+.*:	d9a003e0 	stgv	x0, \[sp\]!
+.*:	d9a0001f 	stgv	xzr, \[x0\]!

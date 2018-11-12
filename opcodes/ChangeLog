@@ -1,5 +1,20 @@
 2018-11-12  Sudakshina Das  <sudi.das@arm.com>
 
+	* aarch64-asm.c (aarch64_ins_addr_simple_2): New.
+	* aarch64-asm.h (ins_addr_simple_2): Declare the above.
+	* aarch64-dis.c (aarch64_ext_addr_simple_2): New.
+	* aarch64-dis.h (ext_addr_simple_2): Declare the above.
+	* aarch64-opc.c (operand_general_constraint_met_p): Add case for
+	AARCH64_OPND_ADDR_SIMPLE_2 and ldstgv_indexed.
+	(aarch64_print_operand): Add case for AARCH64_OPND_ADDR_SIMPLE_2.
+	* aarch64-tbl.h (aarch64_opcode_table): Add stgv and ldgv.
+	(AARCH64_OPERANDS): Define ADDR_SIMPLE_2.
+	* aarch64-asm-2.c: Regenerated.
+	* aarch64-dis-2.c: Regenerated.
+	* aarch64-opc-2.c: Regenerated.
+
+2018-11-12  Sudakshina Das  <sudi.das@arm.com>
+
 	* aarch64-tbl.h (QL_LDG): New.
 	(aarch64_opcode_table): Add ldg.
 	* aarch64-asm-2.c: Regenerated.

@@ -3324,6 +3324,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
   RCPC_INSN ("ldaprb", 0x38bfc000, 0xfffffc00, ldstexcl, OP2 (Rt, ADDR_SIMPLE), QL_W1_LDST_EXC, 0),
   RCPC_INSN ("ldaprh", 0x78bfc000, 0xfffffc00, ldstexcl, OP2 (Rt, ADDR_SIMPLE), QL_W1_LDST_EXC, 0),
   RCPC_INSN ("ldapr", 0xb8bfc000, 0xbffffc00, ldstexcl, OP2 (Rt, ADDR_SIMPLE), QL_R1NIL, F_GPRSIZE_IN_Q),
+  MEMTAG_INSN ("ldgv", 0xd9e00000, 0xfffffc00, ldstgv_indexed, OP2 (Rt, ADDR_SIMPLE_2), QL_STLX, 0),
+  MEMTAG_INSN ("stgv", 0xd9a00000, 0xfffffc00, ldstgv_indexed, OP2 (Rt, ADDR_SIMPLE_2), QL_STLX, 0),
   /* Limited Ordering Regions load/store instructions.  */
   _LOR_INSN ("ldlar",  0x88df7c00, 0xbfe08000, ldstexcl, OP2 (Rt, ADDR_SIMPLE), QL_R1NIL,       F_GPRSIZE_IN_Q),
   _LOR_INSN ("ldlarb", 0x08df7c00, 0xffe08000, ldstexcl, OP2 (Rt, ADDR_SIMPLE), QL_W1_LDST_EXC, 0),
@@ -4648,6 +4650,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
       F(FLD_imm26), "26-bit PC-relative address")			\
     Y(ADDRESS, addr_simple, "ADDR_SIMPLE", 0, F(),			\
       "an address with base register (no offset)")			\
+    Y(ADDRESS, addr_simple_2, "ADDR_SIMPLE_2", 0, F(),			\
+      "a writeback address with base register (no offset)")		\
     Y(ADDRESS, addr_regoff, "ADDR_REGOFF", 0, F(),			\
       "an address with register offset")				\
     Y(ADDRESS, addr_simm, "ADDR_SIMM7", 0, F(FLD_imm7,FLD_index2),	\
