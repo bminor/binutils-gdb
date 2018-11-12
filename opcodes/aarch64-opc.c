@@ -4481,15 +4481,33 @@ const aarch64_sys_ins_reg aarch64_sys_regs_ic[] =
 const aarch64_sys_ins_reg aarch64_sys_regs_dc[] =
 {
     { "zva",	    CPENS (3, C7, C4, 1),  F_HASXT },
+    { "gva",	    CPENS (3, C7, C4, 3),  F_HASXT | F_ARCHEXT },
+    { "gzva",	    CPENS (3, C7, C4, 4),  F_HASXT | F_ARCHEXT },
     { "ivac",       CPENS (0, C7, C6, 1),  F_HASXT },
+    { "igvac",      CPENS (0, C7, C6, 3),  F_HASXT | F_ARCHEXT },
+    { "igsw",       CPENS (0, C7, C6, 4),  F_HASXT | F_ARCHEXT },
     { "isw",	    CPENS (0, C7, C6, 2),  F_HASXT },
+    { "igdvac",	    CPENS (0, C7, C6, 5),  F_HASXT | F_ARCHEXT },
+    { "igdsw",	    CPENS (0, C7, C6, 6),  F_HASXT | F_ARCHEXT },
     { "cvac",       CPENS (3, C7, C10, 1), F_HASXT },
+    { "cgvac",      CPENS (3, C7, C10, 3), F_HASXT | F_ARCHEXT },
+    { "cgdvac",     CPENS (3, C7, C10, 5), F_HASXT | F_ARCHEXT },
     { "csw",	    CPENS (0, C7, C10, 2), F_HASXT },
+    { "cgsw",       CPENS (0, C7, C10, 4), F_HASXT | F_ARCHEXT },
+    { "cgdsw",	    CPENS (0, C7, C10, 6), F_HASXT | F_ARCHEXT },
     { "cvau",       CPENS (3, C7, C11, 1), F_HASXT },
     { "cvap",       CPENS (3, C7, C12, 1), F_HASXT | F_ARCHEXT },
+    { "cgvap",      CPENS (3, C7, C12, 3), F_HASXT | F_ARCHEXT },
+    { "cgdvap",     CPENS (3, C7, C12, 5), F_HASXT | F_ARCHEXT },
     { "cvadp",      CPENS (3, C7, C13, 1), F_HASXT | F_ARCHEXT },
+    { "cgvadp",     CPENS (3, C7, C13, 3), F_HASXT | F_ARCHEXT },
+    { "cgdvadp",    CPENS (3, C7, C13, 5), F_HASXT | F_ARCHEXT },
     { "civac",      CPENS (3, C7, C14, 1), F_HASXT },
+    { "cigvac",     CPENS (3, C7, C14, 3), F_HASXT | F_ARCHEXT },
+    { "cigdvac",    CPENS (3, C7, C14, 5), F_HASXT | F_ARCHEXT },
     { "cisw",       CPENS (0, C7, C14, 2), F_HASXT },
+    { "cigsw",      CPENS (0, C7, C14, 4), F_HASXT | F_ARCHEXT },
+    { "cigdsw",     CPENS (0, C7, C14, 6), F_HASXT | F_ARCHEXT },
     { 0,       CPENS(0,0,0,0), 0 }
 };
 
@@ -4630,6 +4648,28 @@ aarch64_sys_ins_reg_supported_p (const aarch64_feature_set features,
   /* DC CVADP.  Values are from aarch64_sys_regs_dc.  */
   if (reg->value == CPENS (3, C7, C13, 1)
       && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_CVADP))
+    return FALSE;
+
+  /* DC <dc_op> for ARMv8.5-A Memory Tagging Extension.  */
+  if ((reg->value == CPENS (0, C7, C6, 3)
+       || reg->value == CPENS (0, C7, C6, 4)
+       || reg->value == CPENS (0, C7, C10, 4)
+       || reg->value == CPENS (0, C7, C14, 4)
+       || reg->value == CPENS (3, C7, C10, 3)
+       || reg->value == CPENS (3, C7, C12, 3)
+       || reg->value == CPENS (3, C7, C13, 3)
+       || reg->value == CPENS (3, C7, C14, 3)
+       || reg->value == CPENS (3, C7, C4, 3)
+       || reg->value == CPENS (0, C7, C6, 5)
+       || reg->value == CPENS (0, C7, C6, 6)
+       || reg->value == CPENS (0, C7, C10, 6)
+       || reg->value == CPENS (0, C7, C14, 6)
+       || reg->value == CPENS (3, C7, C10, 5)
+       || reg->value == CPENS (3, C7, C12, 5)
+       || reg->value == CPENS (3, C7, C13, 5)
+       || reg->value == CPENS (3, C7, C14, 5)
+       || reg->value == CPENS (3, C7, C4, 4))
+      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_MEMTAG))
     return FALSE;
 
   /* AT S1E1RP, AT S1E1WP.  Values are from aarch64_sys_regs_at.  */

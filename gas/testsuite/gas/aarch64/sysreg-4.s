@@ -38,3 +38,26 @@ func:
 
 	# MSR (immediate)
 	msr TCO, #8
+
+	# Data cache
+	dc igvac, x1
+	dc igsw, x2
+	dc cgsw, x3
+	dc cigsw, x4
+	dc cgvac, x5
+	dc cgvap, x6
+	dc cgvadp, x7
+	dc cigvac, x8
+
+	dc gva, x9
+
+	dc igdvac, x10
+	dc igdsw, x11
+	dc cgdsw, x12
+	dc cigdsw, x13
+	dc cgdvac, x14
+	dc cgdvap, x15
+	dc cgdvadp, x16
+	dc cigdvac, x17
+
+	dc gzva, x18
