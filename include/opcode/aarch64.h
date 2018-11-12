@@ -246,7 +246,9 @@ enum aarch64_opnd
   AARCH64_OPND_UIMM3_OP1,/* Unsigned 3-bit immediate in the op1 field.  */
   AARCH64_OPND_UIMM3_OP2,/* Unsigned 3-bit immediate in the op2 field.  */
   AARCH64_OPND_UIMM4,	/* Unsigned 4-bit immediate in the CRm field.  */
+  AARCH64_OPND_UIMM4_ADDG,/* Unsigned 4-bit immediate in addg/subg.  */
   AARCH64_OPND_UIMM7,	/* Unsigned 7-bit immediate in the CRm:op2 fields.  */
+  AARCH64_OPND_UIMM10,	/* Unsigned 10-bit immediate in addg/subg.  */
   AARCH64_OPND_BIT_NUM,	/* Immediate.  */
   AARCH64_OPND_EXCEPTION,/* imm16 operand in exception instructions.  */
   AARCH64_OPND_CCMP_IMM,/* Immediate in conditional compare instructions.  */

@@ -1,5 +1,22 @@
 2018-11-12  Sudakshina Das  <sudi.das@arm.com>
 
+	* aarch64-opc.h (aarch64_field_kind): New FLD_imm4_3.
+	(OPD_F_SHIFT_BY_4, operand_need_shift_by_four): New.
+	* aarch64-opc.c (fields): Add entry for imm4_3.
+	(operand_general_constraint_met_p): Add cases for
+	AARCH64_OPND_UIMM4_ADDG and AARCH64_OPND_UIMM10.
+	(aarch64_print_operand): Likewise.
+	* aarch64-tbl.h (QL_ADDG): New.
+	(aarch64_opcode_table): Add addg, subg, irg and gmi.
+	(AARCH64_OPERANDS): Define UIMM4_ADDG and UIMM10.
+	* aarch64-asm.c (aarch64_ins_imm): Add case for
+	operand_need_shift_by_four.
+	* aarch64-asm-2.c: Regenerated.
+	* aarch64-dis-2.c: Regenerated.
+	* aarch64-opc-2.c: Regenerated.
+
+2018-11-12  Sudakshina Das  <sudi.das@arm.com>
+
 	* aarch64-tbl.h (aarch64_feature_memtag): New.
 	(MEMTAG, MEMTAG_INSN): New.
 

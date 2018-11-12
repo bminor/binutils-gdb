@@ -381,6 +381,8 @@ aarch64_ins_imm (const aarch64_operand *self, const aarch64_opnd_info *info,
   imm = info->imm.value;
   if (operand_need_shift_by_two (self))
     imm >>= 2;
+  if (operand_need_shift_by_four (self))
+    imm >>= 4;
   insert_all_fields (self, code, imm);
   return TRUE;
 }

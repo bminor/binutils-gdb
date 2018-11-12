@@ -5742,6 +5742,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SIMM5:
 	case AARCH64_OPND_FBITS:
 	case AARCH64_OPND_UIMM4:
+	case AARCH64_OPND_UIMM4_ADDG:
+	case AARCH64_OPND_UIMM10:
 	case AARCH64_OPND_UIMM3_OP1:
 	case AARCH64_OPND_UIMM3_OP2:
 	case AARCH64_OPND_IMM_VLSL:

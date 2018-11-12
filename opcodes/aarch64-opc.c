@@ -243,6 +243,7 @@ const aarch64_field fields[] =
     { 15,  6 },	/* imm6_2: in rmif instructions.  */
     { 11,  4 },	/* imm4: in advsimd ext and advsimd ins instructions.  */
     {  0,  4 },	/* imm4_2: in rmif instructions.  */
+    { 10,  4 },	/* imm4_3: in adddg/subg instructions.  */
     { 16,  5 },	/* imm5: in conditional compare (immediate) instructions.  */
     { 15,  7 },	/* imm7: in load/store pair pre/post index instructions.  */
     { 13,  8 },	/* imm8: in floating-point scalar move immediate inst.  */
@@ -2091,6 +2092,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_CCMP_IMM:
 	case AARCH64_OPND_EXCEPTION:
 	case AARCH64_OPND_UIMM4:
+	case AARCH64_OPND_UIMM4_ADDG:
 	case AARCH64_OPND_UIMM7:
 	case AARCH64_OPND_UIMM3_OP1:
 	case AARCH64_OPND_UIMM3_OP2:
@@ -2104,6 +2106,21 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_imm_out_of_range_error (mismatch_detail, idx, 0,
 					  (1 << size) - 1);
+	      return 0;
+	    }
+	  break;
+
+	case AARCH64_OPND_UIMM10:
+	  /* Scaled unsigned 10 bits immediate offset.  */
+	  if (!value_in_range_p (opnd->imm.value, 0, 1008))
+	    {
+	      set_imm_out_of_range_error (mismatch_detail, idx, 0, 1008);
+	      return 0;
+	    }
+
+	  if (!value_aligned_p (opnd->imm.value, 16))
+	    {
+	      set_unaligned_error (mismatch_detail, idx, 16);
 	      return 0;
 	    }
 	  break;
@@ -3434,7 +3451,9 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_NZCV:
     case AARCH64_OPND_EXCEPTION:
     case AARCH64_OPND_UIMM4:
+    case AARCH64_OPND_UIMM4_ADDG:
     case AARCH64_OPND_UIMM7:
+    case AARCH64_OPND_UIMM10:
       if (optional_operand_p (opcode, idx) == TRUE
 	  && (opnd->imm.value ==
 	      (int64_t) get_optional_operand_default_value (opcode)))

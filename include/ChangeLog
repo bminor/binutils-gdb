@@ -1,5 +1,10 @@
 2018-11-12  Sudakshina Das  <sudi.das@arm.com>
 
+	* opcode/aarch64.h (aarch64_opnd): Add
+	AARCH64_OPND_UIMM4_ADDG and AARCH64_OPND_UIMM10 as new enums.
+
+2018-11-12  Sudakshina Das  <sudi.das@arm.com>
+
 	* opcode/aarch64.h (AARCH64_FEATURE_MEMTAG): New.
 
 2018-11-07  Roman Bolshakov <r.bolshakov@yadro.com>

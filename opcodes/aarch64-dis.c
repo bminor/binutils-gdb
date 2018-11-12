@@ -665,6 +665,8 @@ aarch64_ext_imm (const aarch64_operand *self, aarch64_opnd_info *info,
 
   if (operand_need_shift_by_two (self))
     imm <<= 2;
+  else if (operand_need_shift_by_four (self))
+    imm <<= 4;
 
   if (info->type == AARCH64_OPND_ADDR_ADRP)
     imm <<= 12;

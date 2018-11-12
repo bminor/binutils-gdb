@@ -240,6 +240,12 @@
   QLF4(X,X,imm_0_63,imm_0_63),	\
 }
 
+/* e.g. ADDG <Xd>, <Xn>, #<uimm10>, #<uimm4>.  */
+#define QL_ADDG			\
+{				\
+  QLF4(X,X,NIL,imm_0_15),	\
+}				\
+
 /* e.g. BFC <Wd>, #<immr>, #<imms>.  */
 #define QL_BF1					\
 {						\
@@ -2298,6 +2304,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("sub",  0x51000000, 0x7f000000, addsub_imm, 0, OP3 (Rd_SP, Rn_SP, AIMM), QL_R2NIL, F_SF),
   CORE_INSN ("subs", 0x71000000, 0x7f000000, addsub_imm, 0, OP3 (Rd, Rn_SP, AIMM),    QL_R2NIL, F_HAS_ALIAS | F_SF),
   CORE_INSN ("cmp",  0x7100001f, 0x7f00001f, addsub_imm, 0, OP2 (Rn_SP, AIMM),        QL_R1NIL, F_ALIAS | F_SF),
+  MEMTAG_INSN ("addg",  0x91800000, 0xffc0c000, addsub_imm, OP4 (Rd_SP, Rn_SP, UIMM10, UIMM4_ADDG), QL_ADDG, 0),
+  MEMTAG_INSN ("subg",  0xd1800000, 0xffc0c000, addsub_imm, OP4 (Rd_SP, Rn_SP, UIMM10, UIMM4_ADDG), QL_ADDG, 0),
   /* Add/subtract (shifted register).  */
   CORE_INSN ("add",  0x0b000000, 0x7f200000, addsub_shift, 0, OP3 (Rd, Rn, Rm_SFT), QL_I3SAMER, F_SF),
   CORE_INSN ("adds", 0x2b000000, 0x7f200000, addsub_shift, 0, OP3 (Rd, Rn, Rm_SFT), QL_I3SAMER, F_HAS_ALIAS | F_SF),
@@ -3036,6 +3044,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("asr",   0x1ac02800, 0x7fe0fc00, dp_2src, 0, OP3 (Rd, Rn, Rm), QL_I3SAMER, F_SF | F_ALIAS),
   CORE_INSN ("rorv",  0x1ac02c00, 0x7fe0fc00, dp_2src, 0, OP3 (Rd, Rn, Rm), QL_I3SAMER, F_SF | F_HAS_ALIAS),
   CORE_INSN ("ror",   0x1ac02c00, 0x7fe0fc00, dp_2src, 0, OP3 (Rd, Rn, Rm), QL_I3SAMER, F_SF | F_ALIAS),
+  MEMTAG_INSN ("irg",    0x9ac01000, 0xffe0fc00, dp_2src, OP3 (Rd_SP, Rn_SP, Rm), QL_I3SAMEX, F_OPD2_OPT | F_DEFAULT (0x1f)),
+  MEMTAG_INSN ("gmi",    0x9ac01400, 0xffe0fc00, dp_2src, OP3 (Rd, Rn_SP, Rm), QL_I3SAMEX, 0),
   V8_3_INSN ("pacga", 0x9ac03000, 0xffe0fc00, dp_2src, OP3 (Rd, Rn, Rm_SP), QL_I3SAMEX, 0),
   /* CRC instructions.  */
   _CRC_INSN ("crc32b", 0x1ac04000, 0xffe0fc00, dp_2src, OP3 (Rd, Rn, Rm), QL_I3SAMEW, 0),
@@ -4559,8 +4569,12 @@ struct aarch64_opcode aarch64_opcode_table[] =
       "a 3-bit unsigned immediate")					\
     Y(IMMEDIATE, imm, "UIMM4", 0, F(FLD_CRm),				\
       "a 4-bit unsigned immediate")					\
+    Y(IMMEDIATE, imm, "UIMM4_ADDG", 0, F(FLD_imm4_3),			\
+      "a 4-bit unsigned Logical Address Tag modifier")			\
     Y(IMMEDIATE, imm, "UIMM7", 0, F(FLD_CRm, FLD_op2),			\
       "a 7-bit unsigned immediate")					\
+    Y(IMMEDIATE, imm, "UIMM10", OPD_F_SHIFT_BY_4, F(FLD_immr),		\
+      "a 10-bit unsigned multiple of 16")				\
     Y(IMMEDIATE, imm, "BIT_NUM", 0, F(FLD_b5, FLD_b40),			\
       "the bit number to be tested")					\
     Y(IMMEDIATE, imm, "EXCEPTION", 0, F(FLD_imm16),			\

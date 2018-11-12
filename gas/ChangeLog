@@ -1,5 +1,15 @@
 2018-11-12  Sudakshina Das  <sudi.das@arm.com>
 
+	* config/tc-aarch64.c (parse_operands): Add switch case for
+	AARCH64_OPND_UIMM4_ADDG and AARCH64_OPND_UIMM10.
+	* testsuite/gas/aarch64/armv8_5-a-memtag.s: New.
+	* testsuite/gas/aarch64/armv8_5-a-memtag.d: Likewise.
+	* testsuite/gas/aarch64/illegal-memtag.s: Likewise.
+	* testsuite/gas/aarch64/illegal-memtag.l: Likewise.
+	* testsuite/gas/aarch64/illegal-memtag.d: Likewise.
+
+2018-11-12  Sudakshina Das  <sudi.das@arm.com>
+
 	* config/tc-aarch64.c (aarch64_features): Add "memtag"
 	as a new option.
 	* doc/c-aarch64.texi: Document the same.

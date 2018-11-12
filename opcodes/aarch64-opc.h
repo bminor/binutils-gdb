@@ -70,6 +70,7 @@ enum aarch64_field_kind
   FLD_imm6_2,
   FLD_imm4,
   FLD_imm4_2,
+  FLD_imm4_3,
   FLD_imm5,
   FLD_imm7,
   FLD_imm8,
@@ -199,6 +200,10 @@ verify_constraints (const struct aarch64_inst *, const aarch64_insn, bfd_vma,
 #define OPD_F_OD_MASK		0x000000e0	/* Operand-dependent data.  */
 #define OPD_F_OD_LSB		5
 #define OPD_F_NO_ZR		0x00000100	/* ZR index not allowed.  */
+#define OPD_F_SHIFT_BY_4	0x00000200	/* Need to left shift the field
+						   value by 4 to get the value
+						   of an immediate operand.  */
+
 
 /* Register flags.  */
 
@@ -250,6 +255,12 @@ static inline bfd_boolean
 operand_need_shift_by_two (const aarch64_operand *operand)
 {
   return (operand->flags & OPD_F_SHIFT_BY_2) ? TRUE : FALSE;
+}
+
+static inline bfd_boolean
+operand_need_shift_by_four (const aarch64_operand *operand)
+{
+  return (operand->flags & OPD_F_SHIFT_BY_4) ? TRUE : FALSE;
 }
 
 static inline bfd_boolean
