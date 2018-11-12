@@ -1,3 +1,8 @@
+2018-11-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-i386/plt-main-ibt.dd: Accept both .plt.got and
+	.plt.sec sections.
+
 2018-11-12  Nick Clifton  <nickc@redhat.com>
 
 	PR 10865
