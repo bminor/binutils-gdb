@@ -1,3 +1,7 @@
+2018-11-13  Francois H. Theron <francois.theron@netronome.com>
+
+	* nfp-dis.c: Fix crc[] disassembly if operands are swapped.
+
 2018-11-12  Sudakshina Das  <sudi.das@arm.com>
 
 	* aarch64-opc.c (aarch64_sys_regs_dc): New entries for
