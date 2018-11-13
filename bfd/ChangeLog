@@ -1,3 +1,8 @@
+2018-11-13  Jim Wilson  <jimw@sifive.com>
+
+	* elfnn-riscv.c (riscv_float_abi_string): New.
+	(_bfd_riscv_elf_merge_private_bfd_data): Use it for error message.
+
 2018-11-09  Bernhard M. Wiedemann  <bwiedemann@suse.de>
 
 	* peXXigen.c (_bfd_XXi_only_swap_filehdr_out): Correct comment

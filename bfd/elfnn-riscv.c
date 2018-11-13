@@ -2638,6 +2638,31 @@ riscv_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
     }
 }
 
+/* Given the ELF header flags in FLAGS, it returns a string that describes the
+   float ABI.  */
+
+static const char *
+riscv_float_abi_string (flagword flags)
+{
+  switch (flags & EF_RISCV_FLOAT_ABI)
+    {
+    case EF_RISCV_FLOAT_ABI_SOFT:
+      return "soft-float";
+      break;
+    case EF_RISCV_FLOAT_ABI_SINGLE:
+      return "single-float";
+      break;
+    case EF_RISCV_FLOAT_ABI_DOUBLE:
+      return "double-float";
+      break;
+    case EF_RISCV_FLOAT_ABI_QUAD:
+      return "quad-float";
+      break;
+    default:
+      abort ();
+    }
+}
+
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 
@@ -2674,7 +2699,9 @@ _bfd_riscv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   if ((old_flags ^ new_flags) & EF_RISCV_FLOAT_ABI)
     {
       (*_bfd_error_handler)
-	(_("%pB: can't link hard-float modules with soft-float modules"), ibfd);
+	(_("%pB: can't link %s modules with %s modules"), ibfd,
+	 riscv_float_abi_string (new_flags),
+	 riscv_float_abi_string (old_flags));
       goto fail;
     }
 
