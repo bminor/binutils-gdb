@@ -4732,10 +4732,9 @@ proc gdb_init { test_file_name } {
     # read from this file.
     setenv INPUTRC "/dev/null"
 
-    # The gdb.base/readline.exp arrow key test relies on the standard VT100
-    # bindings, so make sure that an appropriate terminal is selected.
-    # The same bug doesn't show up if we use ^P / ^N instead.
-    setenv TERM "vt100"
+    # This disables style output, which would interfere with many
+    # tests.
+    setenv TERM "dumb"
 
     # Some tests (for example gdb.base/maint.exp) shell out from gdb to use
     # grep.  Clear GREP_OPTIONS to make the behavior predictable,
