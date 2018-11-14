@@ -1925,12 +1925,13 @@ riscv_call_arg_scalar_int (struct riscv_arg_info *ainfo,
     }
   else
     {
-      int len = (ainfo->length > cinfo->xlen) ? cinfo->xlen : ainfo->length;
+      int len = std::min (ainfo->length, cinfo->xlen);
+      int align = std::max (ainfo->align, cinfo->xlen);
 
       if (!riscv_assign_reg_location (&ainfo->argloc[0],
 				      &cinfo->int_regs, len, 0))
 	riscv_assign_stack_location (&ainfo->argloc[0],
-				     &cinfo->memory, len, ainfo->align);
+				     &cinfo->memory, len, align);
 
       if (len < ainfo->length)
 	{

@@ -1,3 +1,9 @@
+2018-11-14  Jim Wilson  <jimw@sifive.com>
+
+	* riscv-tdep.c (riscv_call_arg_scalar_int): Use std::min when
+	setting len.  New local align, set to max of arg align and xlen,
+	and pass to first riscv_assign_stack_location call.
+
 2018-11-12  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* skip.c (complete_skip_number): New function.
