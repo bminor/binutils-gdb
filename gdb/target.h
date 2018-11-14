@@ -554,7 +554,7 @@ struct target_ops
       TARGET_DEFAULT_RETURN (1);
     virtual bool stopped_by_watchpoint ()
       TARGET_DEFAULT_RETURN (false);
-    virtual int have_steppable_watchpoint ()
+    virtual bool have_steppable_watchpoint ()
       TARGET_DEFAULT_RETURN (false);
     virtual bool stopped_data_address (CORE_ADDR *)
       TARGET_DEFAULT_RETURN (false);

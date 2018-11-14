@@ -35,7 +35,7 @@ struct dummy_target : public target_ops
   int insert_mask_watchpoint (CORE_ADDR arg0, CORE_ADDR arg1, enum target_hw_bp_type arg2) override;
   int remove_mask_watchpoint (CORE_ADDR arg0, CORE_ADDR arg1, enum target_hw_bp_type arg2) override;
   bool stopped_by_watchpoint () override;
-  int have_steppable_watchpoint () override;
+  bool have_steppable_watchpoint () override;
   bool stopped_data_address (CORE_ADDR *arg0) override;
   bool watchpoint_addr_within_range (CORE_ADDR arg0, CORE_ADDR arg1, int arg2) override;
   int region_ok_for_hw_watchpoint (CORE_ADDR arg0, int arg1) override;
@@ -202,7 +202,7 @@ struct debug_target : public target_ops
   int insert_mask_watchpoint (CORE_ADDR arg0, CORE_ADDR arg1, enum target_hw_bp_type arg2) override;
   int remove_mask_watchpoint (CORE_ADDR arg0, CORE_ADDR arg1, enum target_hw_bp_type arg2) override;
   bool stopped_by_watchpoint () override;
-  int have_steppable_watchpoint () override;
+  bool have_steppable_watchpoint () override;
   bool stopped_data_address (CORE_ADDR *arg0) override;
   bool watchpoint_addr_within_range (CORE_ADDR arg0, CORE_ADDR arg1, int arg2) override;
   int region_ok_for_hw_watchpoint (CORE_ADDR arg0, int arg1) override;
@@ -989,27 +989,27 @@ debug_target::stopped_by_watchpoint ()
   return result;
 }
 
-int
+bool
 target_ops::have_steppable_watchpoint ()
 {
   return this->beneath ()->have_steppable_watchpoint ();
 }
 
-int
+bool
 dummy_target::have_steppable_watchpoint ()
 {
   return false;
 }
 
-int
+bool
 debug_target::have_steppable_watchpoint ()
 {
-  int result;
+  bool result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->have_steppable_watchpoint (...)\n", this->beneath ()->shortname ());
   result = this->beneath ()->have_steppable_watchpoint ();
   fprintf_unfiltered (gdb_stdlog, "<- %s->have_steppable_watchpoint (", this->beneath ()->shortname ());
   fputs_unfiltered (") = ", gdb_stdlog);
-  target_debug_print_int (result);
+  target_debug_print_bool (result);
   fputs_unfiltered ("\n", gdb_stdlog);
   return result;
 }

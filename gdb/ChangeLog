@@ -1,3 +1,16 @@
+2018-11-18  Tom Tromey  <tom@tromey.com>
+
+	PR build/23814:
+	* target-delegates.c: Rebuild.
+	* ia64-linux-nat.c (class ia64_linux_nat_target)
+	<have_steppable_watchpoint>: Use override.  Return true, not 1.
+	(ia64_linux_nat_target::can_use_hw_breakpoint): Rename.  Remove
+	"self" argument.
+	(ia64_linux_nat_target::low_new_thread): Rename.
+	(class ia64_linux_nat_target) <read_description>: Don't declare.
+	* target.h (struct target_ops) <have_steppable_watchpoint>: Return
+	bool.
+
 2018-11-16  Alan Hayward  <alan.hayward@arm.com>
 
 	PR gdb/22736:
