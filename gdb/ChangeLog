@@ -1,5 +1,9 @@
 2018-11-14  Jim Wilson  <jimw@sifive.com>
 
+	* riscv-tdep.c (BIGGEST_ALIGNMENT): New.
+	(riscv_type_alignment) <TYPE_CODE_ARRAY>: If TYPE_VECTOR, return min
+	of TYPE_LENGTH and BIGGEST_ALIGNMENT.
+
 	* riscv-tdep.c (riscv_call_arg_scalar_int): Use std::min when
 	setting len.  New local align, set to max of arg align and xlen,
 	and pass to first riscv_assign_stack_location call.

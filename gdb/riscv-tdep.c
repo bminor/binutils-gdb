@@ -59,6 +59,9 @@
 /* The stack must be 16-byte aligned.  */
 #define SP_ALIGNMENT 16
 
+/* The biggest alignment that the target supports.  */
+#define BIGGEST_ALIGNMENT 16
+
 /* Forward declarations.  */
 static bool riscv_has_feature (struct gdbarch *gdbarch, char feature);
 
@@ -1642,6 +1645,10 @@ riscv_type_alignment (struct type *t)
       return TYPE_LENGTH (t);
 
     case TYPE_CODE_ARRAY:
+      if (TYPE_VECTOR (t))
+	return std::min (TYPE_LENGTH (t), (unsigned) BIGGEST_ALIGNMENT);
+      /* FALLTHROUGH */
+
     case TYPE_CODE_COMPLEX:
       return riscv_type_alignment (TYPE_TARGET_TYPE (t));
 
