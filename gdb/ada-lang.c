@@ -190,8 +190,6 @@ static int ada_is_unconstrained_packed_array_type (struct type *);
 static struct value *value_subscript_packed (struct value *, int,
                                              struct value **);
 
-static void move_bits (gdb_byte *, int, const gdb_byte *, int, int, int);
-
 static struct value *coerce_unspec_val_to_type (struct value *,
                                                 struct type *);
 
@@ -2669,72 +2667,6 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
   return v;
 }
 
-/* Move N bits from SOURCE, starting at bit offset SRC_OFFSET to
-   TARGET, starting at bit offset TARG_OFFSET.  SOURCE and TARGET must
-   not overlap.  */
-static void
-move_bits (gdb_byte *target, int targ_offset, const gdb_byte *source,
-	   int src_offset, int n, int bits_big_endian_p)
-{
-  unsigned int accum, mask;
-  int accum_bits, chunk_size;
-
-  target += targ_offset / HOST_CHAR_BIT;
-  targ_offset %= HOST_CHAR_BIT;
-  source += src_offset / HOST_CHAR_BIT;
-  src_offset %= HOST_CHAR_BIT;
-  if (bits_big_endian_p)
-    {
-      accum = (unsigned char) *source;
-      source += 1;
-      accum_bits = HOST_CHAR_BIT - src_offset;
-
-      while (n > 0)
-        {
-          int unused_right;
-
-          accum = (accum << HOST_CHAR_BIT) + (unsigned char) *source;
-          accum_bits += HOST_CHAR_BIT;
-          source += 1;
-          chunk_size = HOST_CHAR_BIT - targ_offset;
-          if (chunk_size > n)
-            chunk_size = n;
-          unused_right = HOST_CHAR_BIT - (chunk_size + targ_offset);
-          mask = ((1 << chunk_size) - 1) << unused_right;
-          *target =
-            (*target & ~mask)
-            | ((accum >> (accum_bits - chunk_size - unused_right)) & mask);
-          n -= chunk_size;
-          accum_bits -= chunk_size;
-          target += 1;
-          targ_offset = 0;
-        }
-    }
-  else
-    {
-      accum = (unsigned char) *source >> src_offset;
-      source += 1;
-      accum_bits = HOST_CHAR_BIT - src_offset;
-
-      while (n > 0)
-        {
-          accum = accum + ((unsigned char) *source << accum_bits);
-          accum_bits += HOST_CHAR_BIT;
-          source += 1;
-          chunk_size = HOST_CHAR_BIT - targ_offset;
-          if (chunk_size > n)
-            chunk_size = n;
-          mask = ((1 << chunk_size) - 1) << targ_offset;
-          *target = (*target & ~mask) | ((accum << targ_offset) & mask);
-          n -= chunk_size;
-          accum_bits -= chunk_size;
-          accum >>= chunk_size;
-          target += 1;
-          targ_offset = 0;
-        }
-    }
-}
-
 /* Store the contents of FROMVAL into the location of TOVAL.
    Return a new value with the location of TOVAL and contents of
    FROMVAL.   Handles assignment into packed fields that have
@@ -2777,11 +2709,11 @@ ada_value_assign (struct value *toval, struct value *fromval)
       if (from_size == 0)
 	from_size = TYPE_LENGTH (value_type (fromval)) * TARGET_CHAR_BIT;
       if (gdbarch_bits_big_endian (get_type_arch (type)))
-        move_bits (buffer, value_bitpos (toval),
-		   value_contents (fromval), from_size - bits, bits, 1);
+        copy_bitwise (buffer, value_bitpos (toval),
+		      value_contents (fromval), from_size - bits, bits, 1);
       else
-        move_bits (buffer, value_bitpos (toval),
-		   value_contents (fromval), 0, bits, 0);
+        copy_bitwise (buffer, value_bitpos (toval),
+		      value_contents (fromval), 0, bits, 0);
       write_memory_with_notification (to_addr, buffer, len);
 
       val = value_copy (toval);
@@ -2833,14 +2765,14 @@ value_assign_to_component (struct value *container, struct value *component,
 	  = TYPE_LENGTH (value_type (component)) * TARGET_CHAR_BIT - bits;
       else
 	src_offset = 0;
-      move_bits (value_contents_writeable (container) + offset_in_container,
-		 value_bitpos (container) + bit_offset_in_container,
-		 value_contents (val), src_offset, bits, 1);
+      copy_bitwise (value_contents_writeable (container) + offset_in_container,
+		    value_bitpos (container) + bit_offset_in_container,
+		    value_contents (val), src_offset, bits, 1);
     }
   else
-    move_bits (value_contents_writeable (container) + offset_in_container,
-	       value_bitpos (container) + bit_offset_in_container,
-	       value_contents (val), 0, bits, 0);
+    copy_bitwise (value_contents_writeable (container) + offset_in_container,
+		  value_bitpos (container) + bit_offset_in_container,
+		  value_contents (val), 0, bits, 0);
 }
 
 /* Determine if TYPE is an access to an unconstrained array.  */

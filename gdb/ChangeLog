@@ -1,3 +1,18 @@
+2018-11-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (move_bits): Delete. Update all callers to use
+	copy_bitwise instead.
+	* dwarf2loc.c (copy_bitwise, bits_to_str::bits_to_str)
+	(selftests::check_copy_bitwise, selftests::copy_bitwise_tests):
+	Move from here to utils.c.
+	(_initialize_dwarf2loc): Remove call to register copy_bitwise
+	selftests.
+	* utils.h (copy_bitwise): Add declaration.
+	* utils.c (copy_bitwise, bits_to_str::bits_to_str)
+	(selftests::check_copy_bitwise, selftests::copy_bitwise_tests):
+	Moved here from dwarf2loc.c.
+	(_initialize_utils): Register copy_bitwise selftests.
+
 2018-11-14  Jim Wilson  <jimw@sifive.com>
 
 	* riscv-tdep.c (struct riscv_arg_info): New field is_unnamed.

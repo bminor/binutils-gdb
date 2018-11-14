@@ -519,4 +519,12 @@ extern void dump_core (void);
 
 extern char *make_hex_string (const gdb_byte *data, size_t length);
 
+/* Copy NBITS bits from SOURCE to DEST starting at the given bit
+   offsets.  Use the bit order as specified by BITS_BIG_ENDIAN.
+   Source and destination buffers must not overlap.  */
+
+extern void copy_bitwise (gdb_byte *dest, ULONGEST dest_offset,
+			  const gdb_byte *source, ULONGEST source_offset,
+			  ULONGEST nbits, int bits_big_endian);
+
 #endif /* UTILS_H */
