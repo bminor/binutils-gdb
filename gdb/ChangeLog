@@ -1,5 +1,14 @@
 2018-11-14  Jim Wilson  <jimw@sifive.com>
 
+	* riscv-tdep.c (struct riscv_arg_info): New field is_unnamed.
+	(riscv_call_arg_scalar_int): If unnamed arg with twice xlen alignment,
+	then increment next_regnum if odd.
+	(riscv_arg_location): New arg is_unnamed.  Set ainfo->is_unnamed.
+	(riscv_push_dummy_call): New local ftype.  Call check_typedef to set
+	function type.  Pass new arg to riscv_arg_location based on function
+	type.
+	(riscv_return_value): Pass new arg to riscv_arg_location.
+
 	* riscv-tdep.c (BIGGEST_ALIGNMENT): New.
 	(riscv_type_alignment) <TYPE_CODE_ARRAY>: If TYPE_VECTOR, return min
 	of TYPE_LENGTH and BIGGEST_ALIGNMENT.

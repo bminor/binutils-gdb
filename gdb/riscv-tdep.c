@@ -1739,6 +1739,9 @@ struct riscv_arg_info
        then this offset will be set to 0.  */
     int c_offset;
   } argloc[2];
+
+  /* TRUE if this is an unnamed argument.  */
+  bool is_unnamed;
 };
 
 /* Information about a set of registers being used for passing arguments as
@@ -1934,6 +1937,12 @@ riscv_call_arg_scalar_int (struct riscv_arg_info *ainfo,
     {
       int len = std::min (ainfo->length, cinfo->xlen);
       int align = std::max (ainfo->align, cinfo->xlen);
+
+      /* Unnamed arguments in registers that require 2*XLEN alignment are
+	 passed in an aligned register pair.  */
+      if (ainfo->is_unnamed && (align == cinfo->xlen * 2)
+	  && cinfo->int_regs.next_regnum & 1)
+	cinfo->int_regs.next_regnum++;
 
       if (!riscv_assign_reg_location (&ainfo->argloc[0],
 				      &cinfo->int_regs, len, 0))
@@ -2215,7 +2224,9 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
    selected from CINFO which holds information about what call argument
    locations are available for use next.  The TYPE is the type of the
    argument being passed, this information is recorded into AINFO (along
-   with some additional information derived from the type).
+   with some additional information derived from the type).  IS_UNNAMED
+   is true if this is an unnamed (stdarg) argument, this info is also
+   recorded into AINFO.
 
    After assigning a location to AINFO, CINFO will have been updated.  */
 
@@ -2223,11 +2234,12 @@ static void
 riscv_arg_location (struct gdbarch *gdbarch,
 		    struct riscv_arg_info *ainfo,
 		    struct riscv_call_info *cinfo,
-		    struct type *type)
+		    struct type *type, bool is_unnamed)
 {
   ainfo->type = type;
   ainfo->length = TYPE_LENGTH (ainfo->type);
   ainfo->align = riscv_type_alignment (ainfo->type);
+  ainfo->is_unnamed = is_unnamed;
   ainfo->contents = nullptr;
 
   switch (TYPE_CODE (ainfo->type))
@@ -2376,6 +2388,11 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 
   CORE_ADDR osp = sp;
 
+  struct type *ftype = check_typedef (value_type (function));
+
+  if (TYPE_CODE (ftype) == TYPE_CODE_PTR)
+    ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
+
   /* We'll use register $a0 if we're returning a struct.  */
   if (struct_return)
     ++call_info.int_regs.next_regnum;
@@ -2389,7 +2406,8 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
       arg_value = args[i];
       arg_type = check_typedef (value_type (arg_value));
 
-      riscv_arg_location (gdbarch, info, &call_info, arg_type);
+      riscv_arg_location (gdbarch, info, &call_info, arg_type,
+			  TYPE_VARARGS (ftype) && i >= TYPE_NFIELDS (ftype));
 
       if (info->type != arg_type)
 	arg_value = value_cast (info->type, arg_value);
@@ -2566,7 +2584,7 @@ riscv_return_value (struct gdbarch  *gdbarch,
   struct type *arg_type;
 
   arg_type = check_typedef (type);
-  riscv_arg_location (gdbarch, &info, &call_info, arg_type);
+  riscv_arg_location (gdbarch, &info, &call_info, arg_type, false);
 
   if (riscv_debug_infcall > 0)
     {
