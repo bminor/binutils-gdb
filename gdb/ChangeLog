@@ -1,3 +1,13 @@
+2018-11-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* unittests/copy_bitwise-selftests.c: New file.
+	* utils.c (selftests::bits_to_str, selftests::check_copy_bitwise)
+	(selftests::copy_bitwise_tests): Delete, moving this code to
+	unittests/copy_bitwise-selftests.c instead.
+	(_initialize_utils): Do not register copy_bitwise tests.
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/copy_bitwise-selftests.c.
+
 2018-11-14  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (move_bits): Delete. Update all callers to use
