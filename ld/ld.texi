@@ -5357,11 +5357,14 @@ Same as @samp{I}
 Invert the sense of any of the attributes that follow
 @end table
 
-If a unmapped section matches any of the listed attributes other than
+If an unmapped section matches any of the listed attributes other than
 @samp{!}, it will be placed in the memory region.  The @samp{!}
-attribute reverses this test, so that an unmapped section will be placed
-in the memory region only if it does not match any of the listed
-attributes.
+attribute reverses the test for the characters that follow, so that an
+unmapped section will be placed in the memory region only if it does
+not match any of the attributes listed afterwards.  Thus an attribute
+string of @samp{RW!X} will match any unmapped section that has either
+or both of the @samp{R} and @samp{W} attributes, but only as long as
+the section does not also have the @samp{X} attribute.
 
 @kindex ORIGIN =
 @kindex o =

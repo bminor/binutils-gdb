@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: ld 2.30.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2018-06-24 19:43+0100\n"
-"PO-Revision-Date: 2018-11-15 01:15+0100\n"
+"PO-Revision-Date: 2018-11-16 01:19+0100\n"
 "Last-Translator: Antonio Ceballos Roa <aceballos@gmail.com>\n"
 "Language-Team: Spanish <es@tp.org.es>\n"
 "Language: es\n"
@@ -6226,37 +6226,35 @@ msgstr ""
 #: eelf32_tic6x_be.c:2273 eelf32_tic6x_elf_be.c:2273
 #: eelf32_tic6x_elf_le.c:2273 eelf32_tic6x_le.c:2273
 #: eelf32_tic6x_linux_be.c:2273 eelf32_tic6x_linux_le.c:2273
-#, fuzzy
 msgid "%F%P: invalid --dsbt-index %s\n"
-msgstr "%F%P: objetivo BFD inválido `%s'\n"
+msgstr "%F%P: --dsbt-index no válido %s\n"
 
 #: eelf32_tic6x_be.c:2283 eelf32_tic6x_elf_be.c:2283
 #: eelf32_tic6x_elf_le.c:2283 eelf32_tic6x_le.c:2283
 #: eelf32_tic6x_linux_be.c:2283 eelf32_tic6x_linux_le.c:2283
-#, fuzzy
 msgid "%F%P: invalid --dsbt-size %s\n"
-msgstr "%F%P: objetivo BFD inválido `%s'\n"
+msgstr "%F%P: --dsbt-size no válido %s\n"
 
 #: eelf32_tic6x_be.c:2299 eelf32_tic6x_elf_be.c:2299
 #: eelf32_tic6x_elf_le.c:2299 eelf32_tic6x_le.c:2299
 #: eelf32_tic6x_linux_be.c:2299 eelf32_tic6x_linux_le.c:2299
 #, c-format
 msgid "  --dsbt-index <index>    Use this as the DSBT index for the output object\n"
-msgstr ""
+msgstr "  --dsbt-index <índice>   Indica el índice DSBT del objeto de salida\n"
 
 #: eelf32_tic6x_be.c:2300 eelf32_tic6x_elf_be.c:2300
 #: eelf32_tic6x_elf_le.c:2300 eelf32_tic6x_le.c:2300
 #: eelf32_tic6x_linux_be.c:2300 eelf32_tic6x_linux_le.c:2300
 #, c-format
 msgid "  --dsbt-size <index>     Use this as the number of entries in the DSBT table\n"
-msgstr ""
+msgstr "  --dsbt-size <índice>    Indica el número de entradas en la tabla DSBT\n"
 
 #: eelf32_tic6x_be.c:2301 eelf32_tic6x_elf_be.c:2301
 #: eelf32_tic6x_elf_le.c:2301 eelf32_tic6x_le.c:2301
 #: eelf32_tic6x_linux_be.c:2301 eelf32_tic6x_linux_le.c:2301
 #, c-format
 msgid "  --no-merge-exidx-entries\n"
-msgstr ""
+msgstr "  --no-merge-exidx-entries\n"
 
 # DLL son las siglas en inglés de `Biblioteca de Enlace Dinámico'.
 # El problema es que las siglas en español (BED) no están muy extendidas.
@@ -6264,9 +6262,9 @@ msgstr ""
 #: eelf32_tic6x_be.c:2302 eelf32_tic6x_elf_be.c:2302
 #: eelf32_tic6x_elf_le.c:2302 eelf32_tic6x_le.c:2302
 #: eelf32_tic6x_linux_be.c:2302 eelf32_tic6x_linux_le.c:2302
-#, fuzzy, c-format
+#, c-format
 msgid "                          Disable merging exidx entries\n"
-msgstr "                               Predeterminado: none\n"
+msgstr "                          Desactiva la fusión de entradas exidx\n"
 
 #: eelf32_x86_64.c:7469 eelf32_x86_64_nacl.c:2189 eelf_i386.c:7084
 #: eelf_i386_be.c:2151 eelf_i386_chaos.c:2131 eelf_i386_fbsd.c:2193
@@ -6275,9 +6273,8 @@ msgstr "                               Predeterminado: none\n"
 #: eelf_k1om_fbsd.c:7077 eelf_l1om.c:7422 eelf_l1om_fbsd.c:7077
 #: eelf_x86_64.c:7469 eelf_x86_64_cloudabi.c:2189 eelf_x86_64_fbsd.c:2196
 #: eelf_x86_64_nacl.c:2189 eelf_x86_64_sol2.c:2320
-#, fuzzy
 msgid "%F%P: invalid number for -z call-nop=prefix-: %s\n"
-msgstr "%F%P: número hexadecimal inválido para el parámetro PE '%s'\n"
+msgstr "%F%P: número no válido para -z call-nop=prefix-: %s\n"
 
 #: eelf32_x86_64.c:7478 eelf32_x86_64_nacl.c:2198 eelf_i386.c:7093
 #: eelf_i386_be.c:2160 eelf_i386_chaos.c:2140 eelf_i386_fbsd.c:2202
@@ -6286,9 +6283,8 @@ msgstr "%F%P: número hexadecimal inválido para el parámetro PE '%s'\n"
 #: eelf_k1om_fbsd.c:7086 eelf_l1om.c:7431 eelf_l1om_fbsd.c:7086
 #: eelf_x86_64.c:7478 eelf_x86_64_cloudabi.c:2198 eelf_x86_64_fbsd.c:2205
 #: eelf_x86_64_nacl.c:2198 eelf_x86_64_sol2.c:2329
-#, fuzzy
 msgid "%F%P: invalid number for -z call-nop=suffix-: %s\n"
-msgstr "%F%P: número hexadecimal inválido para el parámetro PE '%s'\n"
+msgstr "%F%P: número no válido para -z call-nop=suffix-: %s\n"
 
 #: eelf32_x86_64.c:7483 eelf32_x86_64_nacl.c:2203 eelf_i386.c:7098
 #: eelf_i386_be.c:2165 eelf_i386_chaos.c:2145 eelf_i386_fbsd.c:2207
@@ -6297,9 +6293,8 @@ msgstr "%F%P: número hexadecimal inválido para el parámetro PE '%s'\n"
 #: eelf_k1om_fbsd.c:7091 eelf_l1om.c:7436 eelf_l1om_fbsd.c:7091
 #: eelf_x86_64.c:7483 eelf_x86_64_cloudabi.c:2203 eelf_x86_64_fbsd.c:2210
 #: eelf_x86_64_nacl.c:2203 eelf_x86_64_sol2.c:2334
-#, fuzzy
 msgid "%F%P: unsupported option: -z %s\n"
-msgstr "%F%P: no se reconoce la opción %s\n"
+msgstr "%F%P: no se admite la opción: -z %s\n"
 
 #: eelf32_x86_64.c:7515 eelf32_x86_64_nacl.c:2235 eelf_i386.c:7130
 #: eelf_i386_be.c:2181 eelf_i386_chaos.c:2170 eelf_i386_fbsd.c:2239
@@ -6362,7 +6357,7 @@ msgstr "  -z nodelete                 Indica que el DSO no es borrable en tiempo
 #: eelf_x86_64_sol2.c:2384
 #, c-format
 msgid "  -z ibt                      Generate GNU_PROPERTY_X86_FEATURE_1_IBT\n"
-msgstr ""
+msgstr "  -z ibt                      Genera GNU_PROPERTY_X86_FEATURE_1_IBT\n"
 
 #: eelf32_x86_64.c:7532 eelf32_x86_64_nacl.c:2252 eelf_i386.c:7144
 #: eelf_i386_fbsd.c:2253 eelf_i386_nacl.c:2246 eelf_x86_64.c:7535
@@ -6370,7 +6365,7 @@ msgstr ""
 #: eelf_x86_64_sol2.c:2386
 #, c-format
 msgid "  -z shstk                    Generate GNU_PROPERTY_X86_FEATURE_1_SHSTK\n"
-msgstr ""
+msgstr "  -z shstk                    Genera GNU_PROPERTY_X86_FEATURE_1_SHSTK\n"
 
 #: eelf32b4300.c:125 eelf32bmip.c:125 eelf32bmipn32.c:143 eelf32bsmip.c:143
 #: eelf32btsmip.c:125 eelf32btsmip_fbsd.c:125 eelf32btsmipn32.c:125
@@ -6382,7 +6377,7 @@ msgstr ""
 #: eelf64btsmip.c:125 eelf64btsmip_fbsd.c:125 eelf64ltsmip.c:125
 #: eelf64ltsmip_fbsd.c:125
 msgid "%X%P: .gnu.hash is incompatible with the MIPS ABI\n"
-msgstr ""
+msgstr "%X%P: .gnu.hash es incompatible con la MIPS ABI\n"
 
 #: eelf32b4300.c:2421 eelf32bmip.c:2421 eelf32bmipn32.c:2439
 #: eelf32bsmip.c:2439 eelf32btsmip.c:2421 eelf32btsmip_fbsd.c:2428
@@ -6395,7 +6390,7 @@ msgstr ""
 #: eelf64btsmip_fbsd.c:2428 eelf64ltsmip.c:2421 eelf64ltsmip_fbsd.c:2428
 #, c-format
 msgid "  --insn32                    Only generate 32-bit microMIPS instructions\n"
-msgstr ""
+msgstr "  --insn32                    Solo genera instrucciones microMIPS de 32 bits\n"
 
 #: eelf32b4300.c:2424 eelf32bmip.c:2424 eelf32bmipn32.c:2442
 #: eelf32bsmip.c:2442 eelf32btsmip.c:2424 eelf32btsmip_fbsd.c:2431
@@ -6443,30 +6438,28 @@ msgstr ""
 #: eelf32bfin.c:2163 eelf32bfinfd.c:2188
 #, c-format
 msgid "  --code-in-l1                Put code in L1\n"
-msgstr ""
+msgstr "  --code-in-l1                Pone el código en L1\n"
 
 #: eelf32bfin.c:2165 eelf32bfinfd.c:2190
 #, c-format
 msgid "  --data-in-l1                Put data in L1\n"
-msgstr ""
+msgstr "  --data-in-l1                Pone los datos en L1\n"
 
 #: eelf32cr16.c:136
 msgid "%F%P: %pB: all input objects must be COFF or ELF for --embedded-relocs\n"
-msgstr ""
+msgstr "%F%P: %pB: todos los objetos de entrada deben ser COFF o ELF para --embedded-relocs\n"
 
 #: eelf32cr16.c:162 em68kelf.c:164 em68kelfnbsd.c:164
-#, fuzzy
 msgid "%F%P: %pB: can not create .emreloc section: %E\n"
-msgstr "%X%P: no se puede crear la sección .reloc: %E\n"
+msgstr "%F%P: %pB: no se puede crear la sección .emreloc: %E\n"
 
 #: eelf32cr16.c:181 em68kelf.c:185 em68kelfnbsd.c:185
 msgid "%X%P: %pB: section %s has relocs; can not use --embedded-relocs\n"
-msgstr ""
+msgstr "%X%P: %pB: la sección %s tiene reubicaciones; no se puede utilizar --embedded-relocs\n"
 
 #: eelf32cr16.c:237 em68kelf.c:228 em68kelfnbsd.c:228
-#, fuzzy
 msgid "%X%P: %pB: can not create runtime reloc information: %E\n"
-msgstr "%X%P: no se puede crear la sección .reloc: %E\n"
+msgstr "%X%P: %pB: no se puede crear información de reubicación para tiempo de ejecución: %E\n"
 
 #: eelf32cr16.c:240 em68kelf.c:232 em68kelfnbsd.c:232
 #, fuzzy
@@ -6509,17 +6502,15 @@ msgstr ""
 #: eelf32ppclinux.c:2444 eelf32ppcnto.c:2444 eelf32ppcsim.c:2444
 #: eelf32ppcvxworks.c:2418 eelf32ppcwindiss.c:2444 eelf64lppc.c:2901
 #: eelf64ppc.c:2901 eelf64ppc_fbsd.c:2908 eppclynx.c:2451
-#, fuzzy
 msgid "%F%P: invalid --plt-align `%s'\n"
-msgstr "%F%P: objetivo BFD inválido `%s'\n"
+msgstr "%F%P: --plt-align no válido `%s'\n"
 
 #: eelf32lppc.c:2477 eelf32lppclinux.c:2477 eelf32lppcnto.c:2477
 #: eelf32lppcsim.c:2477 eelf32ppc.c:2477 eelf32ppc_fbsd.c:2484
 #: eelf32ppclinux.c:2477 eelf32ppcnto.c:2477 eelf32ppcsim.c:2477
 #: eelf32ppcvxworks.c:2451 eelf32ppcwindiss.c:2477 eppclynx.c:2484
-#, fuzzy
 msgid "%F%P: invalid pagesize `%s'\n"
-msgstr "%F%P: objetivo BFD inválido `%s'\n"
+msgstr "%F%P: tamaño de página no válido `%s'\n"
 
 #: eelf32lppc.c:2507 eelf32lppclinux.c:2507 eelf32lppcnto.c:2507
 #: eelf32lppcsim.c:2507 eelf32ppc.c:2507 eelf32ppc_fbsd.c:2514
@@ -6546,7 +6537,7 @@ msgstr ""
 #: eelf64ppc.c:3061 eelf64ppc_fbsd.c:3068 eppclynx.c:2520
 #, c-format
 msgid "  --no-tls-optimize           Don't try to optimize TLS accesses\n"
-msgstr ""
+msgstr "  --no-tls-optimize           No trata de optimizar los accesos TLS\n"
 
 #: eelf32lppc.c:2516 eelf32lppclinux.c:2516 eelf32lppcnto.c:2516
 #: eelf32lppcsim.c:2516 eelf32ppc.c:2516 eelf32ppc_fbsd.c:2523
@@ -6555,7 +6546,7 @@ msgstr ""
 #: eelf64ppc.c:3067 eelf64ppc_fbsd.c:3074 eppclynx.c:2523
 #, c-format
 msgid "  --no-tls-get-addr-optimize  Don't use a special __tls_get_addr call\n"
-msgstr ""
+msgstr "  --no-tls-get-addr-optimize  No utiliza una llamada __tls_get_addr especial\n"
 
 #: eelf32lppc.c:2519 eelf32lppclinux.c:2519 eelf32lppcnto.c:2519
 #: eelf32lppcsim.c:2519 eelf32ppc.c:2519 eelf32ppc_fbsd.c:2526
@@ -6563,7 +6554,7 @@ msgstr ""
 #: eelf32ppcwindiss.c:2519 eppclynx.c:2526
 #, c-format
 msgid "  --secure-plt                Use new-style PLT if possible\n"
-msgstr ""
+msgstr "  --secure-plt                Utiliza el nuevo estilo PLT si es posible\n"
 
 #: eelf32lppc.c:2522 eelf32lppclinux.c:2522 eelf32lppcnto.c:2522
 #: eelf32lppcsim.c:2522 eelf32ppc.c:2522 eelf32ppc_fbsd.c:2529
@@ -6623,7 +6614,7 @@ msgstr ""
 #: eelf32ppcvxworks.c:2501 eelf32ppcwindiss.c:2541 eppclynx.c:2548
 #, c-format
 msgid "  --no-ppc476-workaround      Disable workaround\n"
-msgstr ""
+msgstr "  --no-ppc476-workaround      Desactiva la solución alternativa\n"
 
 #: eelf32lppc.c:2544 eelf32lppclinux.c:2544 eelf32lppcnto.c:2544
 #: eelf32lppcsim.c:2544 eelf32ppc.c:2544 eelf32ppc_fbsd.c:2551
