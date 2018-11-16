@@ -1,3 +1,9 @@
+2018-11-16  Alan Hayward  <alan.hayward@arm.com>
+
+	* gdbarch.sh (enum function_call_return_method): Add enum.
+	* gdbarch.h: Regenerate.
+	* infcall.c (call_function_by_hand_dummy): Replace vars with enum.
+
 2018-11-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* unittests/copy_bitwise-selftests.c: New file.

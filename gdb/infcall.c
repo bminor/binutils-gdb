@@ -719,7 +719,7 @@ call_function_by_hand_dummy (struct value *function,
 {
   CORE_ADDR sp;
   struct type *target_values_type;
-  unsigned char struct_return = 0, hidden_first_param_p = 0;
+  function_call_return_method return_method = return_method_normal;
   CORE_ADDR struct_addr = 0;
   CORE_ADDR real_pc;
   CORE_ADDR bp_addr;
@@ -876,20 +876,11 @@ call_function_by_hand_dummy (struct value *function,
 
   values_type = check_typedef (values_type);
 
-  /* Are we returning a value using a structure return (passing a
-     hidden argument pointing to storage) or a normal value return?
-     There are two cases: language-mandated structure return and
-     target ABI structure return.  The variable STRUCT_RETURN only
-     describes the latter.  The language version is handled by passing
-     the return location as the first parameter to the function,
-     even preceding "this".  This is different from the target
-     ABI version, which is target-specific; for instance, on ia64
-     the first argument is passed in out0 but the hidden structure
-     return pointer would normally be passed in r8.  */
+  /* Are we returning a value using a structure return?  */
 
   if (gdbarch_return_in_first_hidden_param_p (gdbarch, values_type))
     {
-      hidden_first_param_p = 1;
+      return_method = return_method_hidden_param;
 
       /* Tell the target specific argument pushing routine not to
 	 expect a value.  */
@@ -897,7 +888,8 @@ call_function_by_hand_dummy (struct value *function,
     }
   else
     {
-      struct_return = using_struct_return (gdbarch, function, values_type);
+      if (using_struct_return (gdbarch, function, values_type))
+	return_method = return_method_struct;
       target_values_type = values_type;
     }
 
@@ -1020,7 +1012,7 @@ call_function_by_hand_dummy (struct value *function,
      is being evaluated is OK because the thread is stopped until the
      expression is completely evaluated.  */
 
-  if (struct_return || hidden_first_param_p
+  if (return_method != return_method_normal
       || (stack_temporaries && class_or_union_p (values_type)))
     {
       if (gdbarch_inner_than (gdbarch, 1, 2))
@@ -1046,7 +1038,7 @@ call_function_by_hand_dummy (struct value *function,
     }
 
   std::vector<struct value *> new_args;
-  if (hidden_first_param_p)
+  if (return_method == return_method_hidden_param)
     {
       /* Add the new argument to the front of the argument list.  */
       new_args.push_back
@@ -1060,8 +1052,9 @@ call_function_by_hand_dummy (struct value *function,
      presumably, the ABI code knows where, in the call dummy, the
      return address should be pointed.  */
   sp = gdbarch_push_dummy_call (gdbarch, function, get_current_regcache (),
-				bp_addr, nargs, args,
-				sp, struct_return, struct_addr);
+				bp_addr, nargs, args, sp,
+				(return_method == return_method_struct),
+				struct_addr);
 
   /* Set up a frame ID for the dummy frame so we can pass it to
      set_momentary_breakpoint.  We need to give the breakpoint a frame
@@ -1157,7 +1150,7 @@ call_function_by_hand_dummy (struct value *function,
     sm = new_call_thread_fsm (current_ui, command_interp (),
 			      gdbarch, function,
 			      values_type,
-			      struct_return || hidden_first_param_p,
+			      return_method != return_method_normal,
 			      struct_addr);
 
     e = run_inferior_call (sm, call_thread.get (), real_pc);
