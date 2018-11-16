@@ -918,6 +918,20 @@ rust_internal_print_type (struct type *type, const char *varstring,
       }
       break;
 
+    case TYPE_CODE_PTR:
+      {
+	if (TYPE_NAME (type) != nullptr)
+	  fputs_filtered (TYPE_NAME (type), stream);
+	else
+	  {
+	    /* We currently can't distinguish between pointers and
+	       references.  */
+	    fputs_filtered ("*mut ", stream);
+	    type_print (TYPE_TARGET_TYPE (type), "", stream, 0);
+	  }
+      }
+      break;
+
     default:
     c_printer:
       c_print_type (type, varstring, stream, show, level, flags);

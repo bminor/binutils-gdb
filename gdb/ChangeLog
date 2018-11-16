@@ -1,3 +1,8 @@
+2018-11-16  Tom Tromey  <tom@tromey.com>
+
+	PR rust/23625:
+	* rust-lang.c (rust_internal_print_type): Handle TYPE_CODE_PTR.
+
 2018-11-19  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* infrun.c (displaced_step_inferior_states): Change type to

@@ -54,6 +54,7 @@ gdb_test "print *&c" " = 0"
 gdb_test "print *(&c as &i32)" " = 0"
 gdb_test "print *(&c as *const i32)" " = 0"
 gdb_test "print *(&c as *mut i32)" " = 0"
+gdb_test "ptype &c as *mut i32" "\\*mut i32"
 
 gdb_test "print/c f\[0\]" " = 104 'h'"
 
@@ -68,8 +69,8 @@ gdb_test "print f" " = \"hi bob\""
 gdb_test "print fslice" " = \"bob\""
 gdb_test "print &f\[3..\]" " = \"bob\""
 
-gdb_test "print g" " = \\(u8 \\(\\*\\)\\\[6\\\]\\) $hex b\"hi bob\""
-gdb_test "ptype g" " = u8 \\(\\*\\)\\\[6\\\]"
+gdb_test "print g" " = \\(\\*mut \\\[u8; 6\\\]\\) $hex b\"hi bob\""
+gdb_test "ptype g" " = \\*mut \\\[u8; 6\\\]"
 
 gdb_test "print v" " = simple::Something::Three"
 gdb_test_sequence "ptype v" "" {
@@ -91,19 +92,19 @@ gdb_test "print slice as &\[i32\]\[0\]" " = 3"
 
 gdb_test_sequence "ptype slice" "" {
     " = struct &\\\[i32\\\] \\{"
-    "  data_ptr: i32 \\*,"
+    "  data_ptr: \\*mut i32,"
     "  length: usize,"
     "\\}"
 }
 gdb_test_sequence "ptype &slice\[..\]" "" {
     " = struct &\\\[i32\\\] \\{"
-    "  data_ptr: i32 \\*,"
+    "  data_ptr: \\*mut i32,"
     "  length: usize,"
     "\\}"
 }
 gdb_test_sequence "ptype &b\[..\]" "" {
     " = struct &\\\[\\*gdb\\*\\\] \\{"
-    "  data_ptr: i32 \\*,"
+    "  data_ptr: \\*mut i32,"
     "  length: usize,"
     "\\}"
 }
@@ -281,7 +282,7 @@ gdb_test "print 23..97.0" "Range expression with different types"
 gdb_test "print (*parametrized.next.val)" \
     " = simple::ParametrizedStruct<i32> {next: simple::ParametrizedEnum<\[a-z:\]*Box<simple::ParametrizedStruct<i32>>>::Empty, value: 1}"
 gdb_test "print parametrized.next.val" \
-    " = \\(simple::ParametrizedStruct<i32> \\*\\) $hex"
+    " = \\(\\*mut simple::ParametrizedStruct<i32>\\) $hex"
 gdb_test "print parametrized" \
     " = simple::ParametrizedStruct<i32> \\{next: simple::ParametrizedEnum<\[a-z:\]*Box<simple::ParametrizedStruct<i32>>>::Val\\{val: $hex\\}, value: 0\\}"
 

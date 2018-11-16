@@ -1,5 +1,11 @@
 2018-11-19  Tom Tromey  <tom@tromey.com>
 
+	PR rust/23625:
+	* gdb.rust/simple.exp: Add ptype test.  Update expected output.
+	* gdb.rust/expr.exp: Update expected output.  Change one test.
+
+2018-11-19  Tom Tromey  <tom@tromey.com>
+
 	* gdb.rust/simple.rs: Don't initialize empty_enum_value.
 
 2018-11-19  Pedro Alves  <palves@redhat.com>
