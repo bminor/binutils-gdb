@@ -1013,7 +1013,7 @@ v850_push_dummy_call (struct gdbarch *gdbarch,
 		      int nargs,
 		      struct value **args,
 		      CORE_ADDR sp,
-		      int struct_return,
+		      function_call_return_method return_method,
 		      CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -1039,7 +1039,7 @@ v850_push_dummy_call (struct gdbarch *gdbarch,
 
   argreg = E_ARG0_REGNUM;
   /* The struct_return pointer occupies the first parameter register.  */
-  if (struct_return)
+  if (return_method == return_method_struct)
     regcache_cooked_write_unsigned (regcache, argreg++, struct_addr);
 
   /* Now load as many as possible of the first arguments into

@@ -1865,7 +1865,8 @@ static CORE_ADDR
 s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct regcache *regcache, CORE_ADDR bp_addr,
 		      int nargs, struct value **args, CORE_ADDR sp,
-		      int struct_return, CORE_ADDR struct_addr)
+		      function_call_return_method return_method,
+		      CORE_ADDR struct_addr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
@@ -1879,7 +1880,7 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
 
   arg_prep.copy = sp;
-  arg_prep.gr = struct_return ? 3 : 2;
+  arg_prep.gr = (return_method == return_method_struct) ? 3 : 2;
   arg_prep.fr = 0;
   arg_prep.vr = 0;
   arg_prep.argp = 0;
@@ -1908,7 +1909,7 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     error (_("Stack overflow"));
 
   /* Pass the structure return address in general register 2.  */
-  if (struct_return)
+  if (return_method == return_method_struct)
     regcache_cooked_write_unsigned (regcache, S390_R2_REGNUM, struct_addr);
 
   /* Initialize arg_state for "write mode".  */

@@ -875,7 +875,8 @@ static CORE_ADDR
 tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		       struct regcache *regcache, CORE_ADDR bp_addr,
 		       int nargs, struct value **args, CORE_ADDR sp,
-		       int struct_return, CORE_ADDR struct_addr)
+		       function_call_return_method return_method,
+		       CORE_ADDR struct_addr)
 {
   int argreg = 0;
   int argnum;
@@ -894,7 +895,7 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* The caller must pass an argument in A3 containing a destination address
      for the returned value.  The callee returns the object by copying it to
      the address in A3.  */
-  if (struct_return)
+  if (return_method == return_method_struct)
     regcache_cooked_write_unsigned (regcache, 3, struct_addr);
 
   /* Determine the type of this function.  */

@@ -33,7 +33,8 @@ rs6000_lynx178_push_dummy_call (struct gdbarch *gdbarch,
 				struct value *function,
 				struct regcache *regcache, CORE_ADDR bp_addr,
 				int nargs, struct value **args, CORE_ADDR sp,
-				int struct_return, CORE_ADDR struct_addr)
+				function_call_return_method return_method,
+				CORE_ADDR struct_addr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -63,7 +64,7 @@ rs6000_lynx178_push_dummy_call (struct gdbarch *gdbarch,
      (which will be passed in r3) is used for struct return address.
      In that case we should advance one word and start from r4
      register to copy parameters.  */
-  if (struct_return)
+  if (return_method == return_method_struct)
     {
       regcache_raw_write_unsigned (regcache, tdep->ppc_gp0_regnum + 3,
 				   struct_addr);

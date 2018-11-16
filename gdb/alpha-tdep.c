@@ -295,11 +295,12 @@ static CORE_ADDR
 alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		       struct regcache *regcache, CORE_ADDR bp_addr,
 		       int nargs, struct value **args, CORE_ADDR sp,
-		       int struct_return, CORE_ADDR struct_addr)
+		       function_call_return_method return_method,
+		       CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int i;
-  int accumulate_size = struct_return ? 8 : 0;
+  int accumulate_size = (return_method == return_method_struct) ? 8 : 0;
   struct alpha_arg
     {
       const gdb_byte *contents;
@@ -446,7 +447,7 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       /* Everything else goes to the stack.  */
       write_memory (sp + offset - sizeof(arg_reg_buffer), contents, len);
     }
-  if (struct_return)
+  if (return_method == return_method_struct)
     store_unsigned_integer (arg_reg_buffer, ALPHA_REGISTER_SIZE,
 			    byte_order, struct_addr);
 

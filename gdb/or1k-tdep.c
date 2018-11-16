@@ -595,7 +595,8 @@ static CORE_ADDR
 or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct regcache *regcache, CORE_ADDR bp_addr,
 		      int nargs, struct value **args, CORE_ADDR sp,
-		      int struct_return, CORE_ADDR struct_addr)
+		      function_call_return_method return_method,
+		      CORE_ADDR struct_addr)
 {
 
   int argreg;
@@ -617,7 +618,7 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Location for a returned structure.  This is passed as a silent first
      argument.  */
-  if (struct_return)
+  if (return_method == return_method_struct)
     {
       regcache_cooked_write_unsigned (regcache, OR1K_FIRST_ARG_REGNUM,
 				      struct_addr);

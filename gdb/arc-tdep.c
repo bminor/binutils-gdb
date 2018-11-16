@@ -592,7 +592,8 @@ arc_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 static CORE_ADDR
 arc_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		     struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
-		     struct value **args, CORE_ADDR sp, int struct_return,
+		     struct value **args, CORE_ADDR sp,
+		     function_call_return_method return_method,
 		     CORE_ADDR struct_addr)
 {
   if (arc_debug)
@@ -607,7 +608,7 @@ arc_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      value return?  If so, struct_addr is the address of the reserved space for
      the return structure to be written on the stack, and that address is
      passed to that function as a hidden first argument.  */
-  if (struct_return)
+  if (return_method == return_method_struct)
     {
       /* Pass the return address in the first argument register.  */
       regcache_cooked_write_unsigned (regcache, arg_reg, struct_addr);

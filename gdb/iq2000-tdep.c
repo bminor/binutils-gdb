@@ -645,7 +645,8 @@ static CORE_ADDR
 iq2000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		        struct regcache *regcache, CORE_ADDR bp_addr,
 		        int nargs, struct value **args, CORE_ADDR sp,
-		        int struct_return, CORE_ADDR struct_addr)
+			function_call_return_method return_method,
+			CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   const bfd_byte *val;
@@ -657,7 +658,9 @@ iq2000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   CORE_ADDR struct_ptr;
 
   /* First determine how much stack space we will need.  */
-  for (i = 0, argreg = E_1ST_ARGREG + (struct_return != 0); i < nargs; i++)
+  for (i = 0, argreg = E_1ST_ARGREG + (return_method == return_method_struct);
+       i < nargs;
+       i++)
     {
       type = value_type (args[i]);
       typelen = TYPE_LENGTH (type);
@@ -716,7 +719,7 @@ iq2000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   stackspace = 0;
 
   argreg = E_1ST_ARGREG;
-  if (struct_return)
+  if (return_method == return_method_struct)
     {
       /* A function that returns a struct will consume one argreg to do so.
        */

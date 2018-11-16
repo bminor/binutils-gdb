@@ -2356,13 +2356,13 @@ gdbarch_push_dummy_call_p (struct gdbarch *gdbarch)
 }
 
 CORE_ADDR
-gdbarch_push_dummy_call (struct gdbarch *gdbarch, struct value *function, struct regcache *regcache, CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr)
+gdbarch_push_dummy_call (struct gdbarch *gdbarch, struct value *function, struct regcache *regcache, CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp, function_call_return_method return_method, CORE_ADDR struct_addr)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->push_dummy_call != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_push_dummy_call called\n");
-  return gdbarch->push_dummy_call (gdbarch, function, regcache, bp_addr, nargs, args, sp, struct_return, struct_addr);
+  return gdbarch->push_dummy_call (gdbarch, function, regcache, bp_addr, nargs, args, sp, return_method, struct_addr);
 }
 
 void

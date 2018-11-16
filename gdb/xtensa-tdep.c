@@ -1685,7 +1685,7 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 			int nargs,
 			struct value **args,
 			CORE_ADDR sp,
-			int struct_return,
+			function_call_return_method return_method,
 			CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -1715,9 +1715,9 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
   if (xtensa_debug_level > 3)
     {
       DEBUGINFO ("[xtensa_push_dummy_call] nargs = %d\n", nargs);
-      DEBUGINFO ("[xtensa_push_dummy_call] sp=0x%x, struct_return=%d, "
+      DEBUGINFO ("[xtensa_push_dummy_call] sp=0x%x, return_method=%d, "
 		 "struct_addr=0x%x\n",
-		 (int) sp, (int) struct_return, (int) struct_addr);
+		 (int) sp, (int) return_method, (int) struct_addr);
 
       for (int i = 0; i < nargs; i++)
         {
@@ -1751,7 +1751,7 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
   size = 0;
   onstack_size = 0;
 
-  if (struct_return)
+  if (return_method == return_method_struct)
     size = REGISTER_SIZE;
 
   for (int i = 0; i < nargs; i++)
@@ -1828,7 +1828,7 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 
   /* Second Loop: Load arguments.  */
 
-  if (struct_return)
+  if (return_method == return_method_struct)
     {
       store_unsigned_integer (buf, REGISTER_SIZE, byte_order, struct_addr);
       regcache->cooked_write (ARG_1ST (gdbarch), buf);

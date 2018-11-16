@@ -492,7 +492,8 @@ m68k_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 static CORE_ADDR
 m68k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
-		      struct value **args, CORE_ADDR sp, int struct_return,
+		      struct value **args, CORE_ADDR sp,
+		      function_call_return_method return_method,
 		      CORE_ADDR struct_addr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -522,7 +523,7 @@ m68k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     }
 
   /* Store struct value address.  */
-  if (struct_return)
+  if (return_method == return_method_struct)
     {
       store_unsigned_integer (buf, 4, byte_order, struct_addr);
       regcache->cooked_write (tdep->struct_value_regnum, buf);

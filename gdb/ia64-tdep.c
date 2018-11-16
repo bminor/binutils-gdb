@@ -3673,7 +3673,8 @@ static CORE_ADDR
 ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct regcache *regcache, CORE_ADDR bp_addr,
 		      int nargs, struct value **args, CORE_ADDR sp,
-		      int struct_return, CORE_ADDR struct_addr)
+		      function_call_return_method return_method,
+		      CORE_ADDR struct_addr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -3828,11 +3829,9 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     }
 
   /* Store the struct return value in r8 if necessary.  */
-  if (struct_return)
-    {
-      regcache_cooked_write_unsigned (regcache, IA64_GR8_REGNUM,
-				      (ULONGEST) struct_addr);
-    }
+  if (return_method == return_method_struct)
+    regcache_cooked_write_unsigned (regcache, IA64_GR8_REGNUM,
+				    (ULONGEST) struct_addr);
 
   global_pointer = ia64_find_global_pointer (gdbarch, func_addr);
 

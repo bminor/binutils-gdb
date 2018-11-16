@@ -1367,7 +1367,8 @@ sparc64_extract_floating_fields (struct regcache *regcache, struct type *type,
 static CORE_ADDR
 sparc64_store_arguments (struct regcache *regcache, int nargs,
 			 struct value **args, CORE_ADDR sp,
-			 int struct_return, CORE_ADDR struct_addr)
+			 function_call_return_method return_method,
+			 CORE_ADDR struct_addr)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   /* Number of extended words in the "parameter array".  */
@@ -1381,7 +1382,7 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
   /* First we calculate the number of extended words in the "parameter
      array".  While doing so we also convert some of the arguments.  */
 
-  if (struct_return)
+  if (return_method == return_method_struct)
     num_elements++;
 
   for (i = 0; i < nargs; i++)
@@ -1477,7 +1478,7 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
      contents of any unused memory or registers in the "parameter
      array" are undefined.  */
 
-  if (struct_return)
+  if (return_method == return_method_struct)
     {
       regcache_cooked_write_unsigned (regcache, SPARC_O0_REGNUM, struct_addr);
       element++;
@@ -1621,14 +1622,15 @@ static CORE_ADDR
 sparc64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			 struct regcache *regcache, CORE_ADDR bp_addr,
 			 int nargs, struct value **args, CORE_ADDR sp,
-			 int struct_return, CORE_ADDR struct_addr)
+			 function_call_return_method return_method,
+			 CORE_ADDR struct_addr)
 {
   /* Set return address.  */
   regcache_cooked_write_unsigned (regcache, SPARC_O7_REGNUM, bp_addr - 8);
 
   /* Set up function arguments.  */
-  sp = sparc64_store_arguments (regcache, nargs, args, sp,
-				struct_return, struct_addr);
+  sp = sparc64_store_arguments (regcache, nargs, args, sp, return_method,
+				struct_addr);
 
   /* Allocate the register save area.  */
   sp -= 16 * 8;

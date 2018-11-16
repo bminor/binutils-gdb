@@ -3683,7 +3683,8 @@ arm_vfp_abi_for_function (struct gdbarch *gdbarch, struct type *func_type)
 static CORE_ADDR
 arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		     struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
-		     struct value **args, CORE_ADDR sp, int struct_return,
+		     struct value **args, CORE_ADDR sp,
+		     function_call_return_method return_method,
 		     CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -3718,7 +3719,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* The struct_return pointer occupies the first parameter
      passing register.  */
-  if (struct_return)
+  if (return_method == return_method_struct)
     {
       if (arm_debug)
 	fprintf_unfiltered (gdb_stdlog, "struct return in %s = %s\n",

@@ -1401,7 +1401,8 @@ static CORE_ADDR
 spu_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		     struct regcache *regcache, CORE_ADDR bp_addr,
 		     int nargs, struct value **args, CORE_ADDR sp,
-		     int struct_return, CORE_ADDR struct_addr)
+		     function_call_return_method return_method,
+		     CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR sp_delta;
@@ -1418,7 +1419,7 @@ spu_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* If STRUCT_RETURN is true, then the struct return address (in
      STRUCT_ADDR) will consume the first argument-passing register.
      Both adjust the register count and store that value.  */
-  if (struct_return)
+  if (return_method == return_method_struct)
     {
       memset (buf, 0, sizeof buf);
       store_unsigned_integer (buf, 4, byte_order, SPUADDR_ADDR (struct_addr));

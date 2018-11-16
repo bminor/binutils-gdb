@@ -511,7 +511,8 @@ static CORE_ADDR
 score_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
                        struct regcache *regcache, CORE_ADDR bp_addr,
                        int nargs, struct value **args, CORE_ADDR sp,
-                       int struct_return, CORE_ADDR struct_addr)
+		       function_call_return_method return_method,
+		       CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int argnum;
@@ -535,7 +536,7 @@ score_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Step 3, Check if struct return then save the struct address to
      r4 and increase the stack_offset by 4.  */
-  if (struct_return)
+  if (return_method == return_method_struct)
     {
       regcache_cooked_write_unsigned (regcache, argreg++, struct_addr);
       stack_offset += SCORE_REGSIZE;

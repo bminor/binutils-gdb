@@ -1191,7 +1191,7 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
 			 CORE_ADDR bp_addr, 
 			 int nargs, struct value **args,
 			 CORE_ADDR sp, 
-			 int struct_return,
+			 function_call_return_method return_method,
 			 CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -1211,7 +1211,7 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
 
      XXX This doesn't appear to handle pass-by-invisible reference
      arguments.  */
-  regs_used = struct_return ? 1 : 0;
+  regs_used = (return_method == return_method_struct) ? 1 : 0;
   for (len = 0, argnum = 0; argnum < nargs; argnum++)
     {
       arg_len = (TYPE_LENGTH (value_type (args[argnum])) + 3) & ~3;
@@ -1226,7 +1226,7 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
   /* Allocate stack space.  */
   sp -= len;
 
-  if (struct_return)
+  if (return_method == return_method_struct)
     {
       regs_used = 1;
       regcache_cooked_write_unsigned (regcache, E_D0_REGNUM, struct_addr);

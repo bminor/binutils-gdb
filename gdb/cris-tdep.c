@@ -808,7 +808,8 @@ static CORE_ADDR
 cris_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct regcache *regcache, CORE_ADDR bp_addr,
 		      int nargs, struct value **args, CORE_ADDR sp,
-		      int struct_return, CORE_ADDR struct_addr)
+		      function_call_return_method return_method,
+		      CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int argreg;
@@ -822,10 +823,8 @@ cris_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Are we returning a value using a structure return or a normal value
      return?  struct_addr is the address of the reserved space for the return
      structure to be written on the stack.  */
-  if (struct_return)
-    {
-      regcache_cooked_write_unsigned (regcache, STR_REGNUM, struct_addr);
-    }
+  if (return_method == return_method_struct)
+    regcache_cooked_write_unsigned (regcache, STR_REGNUM, struct_addr);
 
   /* Now load as many as possible of the first arguments into registers,
      and push the rest onto the stack.  */

@@ -2374,7 +2374,7 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 		       int nargs,
 		       struct value **args,
 		       CORE_ADDR sp,
-		       int struct_return,
+		       function_call_return_method return_method,
 		       CORE_ADDR struct_addr)
 {
   int i;
@@ -2394,7 +2394,7 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
     ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
 
   /* We'll use register $a0 if we're returning a struct.  */
-  if (struct_return)
+  if (return_method == return_method_struct)
     ++call_info.int_regs.next_regnum;
 
   for (i = 0; i < nargs; ++i)
@@ -2425,7 +2425,7 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 	       (riscv_has_fp_abi (gdbarch) ? "is" : "is not"));
       fprintf_unfiltered (gdb_stdlog, ": xlen: %d\n: flen: %d\n",
 	       call_info.xlen, call_info.flen);
-      if (struct_return)
+      if (return_method == return_method_struct)
 	fprintf_unfiltered (gdb_stdlog,
 			    "[*] struct return pointer in register $A0\n");
       for (i = 0; i < nargs; ++i)
@@ -2452,7 +2452,7 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 
   /* Now load the argument into registers, or onto the stack.  */
 
-  if (struct_return)
+  if (return_method == return_method_struct)
     {
       gdb_byte buf[sizeof (LONGEST)];
 

@@ -39,20 +39,17 @@ enum return_value_convention ppc_sysv_abi_broken_return_value (struct gdbarch *g
 							       struct regcache *regcache,
 							       gdb_byte *readbuf,
 							       const gdb_byte *writebuf);
-CORE_ADDR ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
-					struct value *function,
-					struct regcache *regcache,
-					CORE_ADDR bp_addr, int nargs,
-					struct value **args, CORE_ADDR sp,
-					int struct_return,
-					CORE_ADDR struct_addr);
-CORE_ADDR ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
-					  struct value *function,
-					  struct regcache *regcache,
-					  CORE_ADDR bp_addr, int nargs,
-					  struct value **args, CORE_ADDR sp,
-					  int struct_return,
-					  CORE_ADDR struct_addr);
+
+CORE_ADDR ppc_sysv_abi_push_dummy_call
+  (struct gdbarch *gdbarch, struct value *function, struct regcache *regcache,
+   CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp,
+   function_call_return_method return_method, CORE_ADDR struct_addr);
+
+CORE_ADDR ppc64_sysv_abi_push_dummy_call
+  (struct gdbarch *gdbarch, struct value *function, struct regcache *regcache,
+   CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp,
+   function_call_return_method return_method, CORE_ADDR struct_addr);
+
 enum return_value_convention ppc64_sysv_abi_return_value (struct gdbarch *gdbarch,
 							  struct value *function,
 							  struct type *valtype,

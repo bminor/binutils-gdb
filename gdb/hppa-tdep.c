@@ -714,7 +714,8 @@ static CORE_ADDR
 hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			struct regcache *regcache, CORE_ADDR bp_addr,
 			int nargs, struct value **args, CORE_ADDR sp,
-			int struct_return, CORE_ADDR struct_addr)
+			function_call_return_method return_method,
+			CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
@@ -849,7 +850,7 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* If a structure has to be returned, set up register 28 to hold its
      address.  */
-  if (struct_return)
+  if (return_method == return_method_struct)
     regcache_cooked_write_unsigned (regcache, 28, struct_addr);
 
   gp = tdep->find_global_pointer (gdbarch, function);
@@ -969,7 +970,8 @@ static CORE_ADDR
 hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			struct regcache *regcache, CORE_ADDR bp_addr,
 			int nargs, struct value **args, CORE_ADDR sp,
-			int struct_return, CORE_ADDR struct_addr)
+			function_call_return_method return_method,
+			CORE_ADDR struct_addr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -1113,7 +1115,7 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* If a structure has to be returned, set up GR 28 (%ret0) to hold
      its address.  */
-  if (struct_return)
+  if (return_method == return_method_struct)
     regcache_cooked_write_unsigned (regcache, HPPA_RET0_REGNUM, struct_addr);
 
   /* Set up GR27 (%dp) to hold the global pointer (gp).  */

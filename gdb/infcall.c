@@ -1052,8 +1052,7 @@ call_function_by_hand_dummy (struct value *function,
      presumably, the ABI code knows where, in the call dummy, the
      return address should be pointed.  */
   sp = gdbarch_push_dummy_call (gdbarch, function, get_current_regcache (),
-				bp_addr, nargs, args, sp,
-				(return_method == return_method_struct),
+				bp_addr, nargs, args, sp, return_method,
 				struct_addr);
 
   /* Set up a frame ID for the dummy frame so we can pass it to

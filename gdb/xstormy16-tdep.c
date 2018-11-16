@@ -226,7 +226,8 @@ xstormy16_push_dummy_call (struct gdbarch *gdbarch,
 			   struct regcache *regcache,
 			   CORE_ADDR bp_addr, int nargs,
 			   struct value **args,
-			   CORE_ADDR sp, int struct_return,
+			   CORE_ADDR sp,
+			   function_call_return_method return_method,
 			   CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -236,9 +237,9 @@ xstormy16_push_dummy_call (struct gdbarch *gdbarch,
   int typelen, slacklen;
   gdb_byte buf[xstormy16_pc_size];
 
-  /* If struct_return is true, then the struct return address will
-     consume one argument-passing register.  */
-  if (struct_return)
+  /* If returning a struct using target ABI method, then the struct return
+     address will consume one argument-passing register.  */
+  if (return_method == return_method_struct)
     {
       regcache_cooked_write_unsigned (regcache, E_PTR_RET_REGNUM, struct_addr);
       argreg++;

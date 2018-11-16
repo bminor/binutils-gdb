@@ -612,7 +612,8 @@ sparc32_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
 static CORE_ADDR
 sparc32_store_arguments (struct regcache *regcache, int nargs,
 			 struct value **args, CORE_ADDR sp,
-			 int struct_return, CORE_ADDR struct_addr)
+			 function_call_return_method return_method,
+			 CORE_ADDR struct_addr)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -697,7 +698,7 @@ sparc32_store_arguments (struct regcache *regcache, int nargs,
 
   gdb_assert (element == num_elements);
 
-  if (struct_return)
+  if (return_method == return_method_struct)
     {
       gdb_byte buf[4];
 
@@ -712,16 +713,18 @@ static CORE_ADDR
 sparc32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			 struct regcache *regcache, CORE_ADDR bp_addr,
 			 int nargs, struct value **args, CORE_ADDR sp,
-			 int struct_return, CORE_ADDR struct_addr)
+			 function_call_return_method return_method,
+			 CORE_ADDR struct_addr)
 {
-  CORE_ADDR call_pc = (struct_return ? (bp_addr - 12) : (bp_addr - 8));
+  CORE_ADDR call_pc = (return_method == return_method_struct
+		       ? (bp_addr - 12) : (bp_addr - 8));
 
   /* Set return address.  */
   regcache_cooked_write_unsigned (regcache, SPARC_O7_REGNUM, call_pc);
 
   /* Set up function arguments.  */
-  sp = sparc32_store_arguments (regcache, nargs, args, sp,
-				struct_return, struct_addr);
+  sp = sparc32_store_arguments (regcache, nargs, args, sp, return_method,
+				struct_addr);
 
   /* Allocate the 16-word window save area.  */
   sp -= 16 * 4;

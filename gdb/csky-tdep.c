@@ -336,7 +336,8 @@ static CORE_ADDR
 csky_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct regcache *regcache, CORE_ADDR bp_addr,
 		      int nargs, struct value **args, CORE_ADDR sp,
-		      int struct_return, CORE_ADDR struct_addr)
+		      function_call_return_method return_method,
+		      CORE_ADDR struct_addr)
 {
   int argnum;
   int argreg = CSKY_ABI_A0_REGNUM;
@@ -351,7 +352,7 @@ csky_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* The struct_return pointer occupies the first parameter
      passing register.  */
-  if (struct_return)
+  if (return_method == return_method_struct)
     {
       if (csky_debug)
 	{

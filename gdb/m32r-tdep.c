@@ -659,7 +659,8 @@ m32r_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 static CORE_ADDR
 m32r_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
-		      struct value **args, CORE_ADDR sp, int struct_return,
+		      struct value **args, CORE_ADDR sp,
+		      function_call_return_method return_method,
 		      CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -683,7 +684,7 @@ m32r_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* If STRUCT_RETURN is true, then the struct return address (in
      STRUCT_ADDR) will consume the first argument-passing register.
      Both adjust the register count and store that value.  */
-  if (struct_return)
+  if (return_method == return_method_struct)
     {
       regcache_cooked_write_unsigned (regcache, argreg, struct_addr);
       argreg++;
