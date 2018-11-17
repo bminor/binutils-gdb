@@ -689,6 +689,8 @@ echo_command (const char *text, int from_tty)
 	  printf_filtered ("%c", c);
       }
 
+  reset_terminal_style (gdb_stdout);
+
   /* Force this output to appear now.  */
   wrap_here ("");
   gdb_flush (gdb_stdout);

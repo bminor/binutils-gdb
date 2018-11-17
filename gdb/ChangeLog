@@ -1,5 +1,14 @@
 2018-12-28  Tom Tromey  <tom@tromey.com>
 
+	* utils.h (reset_terminal_style): Declare.
+	* utils.c (can_emit_style_escape): New function.
+	(set_output_style): Use it.
+	(reset_terminal_style): New function.
+	* printcmd.c (printf_command): Call reset_terminal_style.
+	* cli/cli-cmds.c (echo_command): Call reset_terminal_style.
+
+2018-12-28  Tom Tromey  <tom@tromey.com>
+
 	* utils.h (set_output_style, fprintf_styled)
 	(fputs_styled): Declare.
 	* utils.c (applied_style, desired_style): New globals.

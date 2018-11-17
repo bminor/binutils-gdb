@@ -1444,23 +1444,48 @@ emit_style_escape (const ui_file_style &style)
   wrap_buffer.append (style.to_ansi ());
 }
 
+/* Return true if ANSI escapes can be used on STREAM.  */
+
+static bool
+can_emit_style_escape (struct ui_file *stream)
+{
+  if (stream != gdb_stdout
+      || !cli_styling
+      || !ui_file_isatty (stream))
+    return false;
+  const char *term = getenv ("TERM");
+  if (term == nullptr || !strcmp (term, "dumb"))
+    return false;
+  return true;
+}
+
 /* Set the current output style.  This will affect future uses of the
    _filtered output functions.  */
 
 static void
 set_output_style (struct ui_file *stream, const ui_file_style &style)
 {
-  if (stream != gdb_stdout
-      || !cli_styling
-      || style == desired_style
-      || !ui_file_isatty (stream))
-    return;
-  const char *term = getenv ("TERM");
-  if (term == nullptr || !strcmp (term, "dumb"))
+  if (!can_emit_style_escape (stream)
+      || style == desired_style)
     return;
 
   desired_style = style;
   emit_style_escape (style);
+}
+
+/* See utils.h.  */
+
+void
+reset_terminal_style (struct ui_file *stream)
+{
+  if (can_emit_style_escape (stream))
+    {
+      /* Force the setting, regardless of what we think the setting
+	 might already be.  */
+      desired_style = ui_file_style ();
+      applied_style = desired_style;
+      wrap_buffer.append (desired_style.to_ansi ());
+    }
 }
 
 /* Wait, so the user can read what's on the screen.  Prompt the user

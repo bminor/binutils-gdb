@@ -439,6 +439,10 @@ extern void fputs_styled (const char *linebuffer,
 			  const ui_file_style &style,
 			  struct ui_file *stream);
 
+/* Reset the terminal style to the default, if needed.  */
+
+extern void reset_terminal_style (struct ui_file *stream);
+
 /* Display the host ADDR on STREAM formatted as ``0x%x''.  */
 extern void gdb_print_host_address_1 (const void *addr, struct ui_file *stream);
 
