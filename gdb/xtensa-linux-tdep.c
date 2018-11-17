@@ -101,7 +101,13 @@ xtensa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (tdep->num_nopriv_regs < tdep->num_regs)
-    tdep->num_regs = tdep->num_nopriv_regs;
+    {
+      tdep->num_pseudo_regs += tdep->num_regs - tdep->num_nopriv_regs;
+      tdep->num_regs = tdep->num_nopriv_regs;
+
+      set_gdbarch_num_regs (gdbarch, tdep->num_regs);
+      set_gdbarch_num_pseudo_regs (gdbarch, tdep->num_pseudo_regs);
+    }
 
   linux_init_abi (info, gdbarch);
 

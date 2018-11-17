@@ -1,3 +1,9 @@
+2019-01-13  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* xtensa-linux-tdep.c (xtensa_linux_init_abi): Update
+	tdep->num_pseudo_regs. Add calls to set_gdbarch_num_regs and
+	set_gdbarch_num_pseudo_regs.
+
 2019-01-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* cli/cli-style.h (class cli_style_option): <add_setshow_commands>
