@@ -25,12 +25,12 @@ set fd [open $tname w]
 puts $fd "anything"
 close $fd
 
-set save $INTERNAL_GDBFLAGS
-set INTERNAL_GDBFLAGS "-nw -nx -data-directory $tname"
+gdb_spawn_with_cmdline_opts \
+    "-iex \"set pagination off\" -data-directory $tname"
 
-gdb_start
+# Make sure we see the warning.
+gdb_test "" "warning: $tname is not a directory.*" \
+    "got warning"
 
 # Make sure gdb started up.
 gdb_test "echo 23\\n" "23"
-
-set INTERNAL_GDBFLAGS $save

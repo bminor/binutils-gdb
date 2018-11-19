@@ -1,3 +1,9 @@
+2018-11-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/warning.exp: Don't override INTERNAL_FLAGS.  Use
+	gdb_spawn_with_cmdline_opts instead of gdb_start.  Check that we
+	see the expected warning.
+
 2018-11-16  Alan Hayward  <alan.hayward@arm.com>
 
 	PR gdb/22736:
