@@ -1,3 +1,7 @@
+2018-11-19  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* skip.c (_initialize_step_skip): Fix "info skip" help.
+
 2018-11-16  Tom Tromey  <tom@tromey.com>
 
 	PR rust/23625:

@@ -717,14 +717,11 @@ Usage: skip delete [NUMBER | RANGES]..."),
 	       &skiplist);
   set_cmd_completer (c, complete_skip_number);
 
-  c = add_info ("skip", info_skip_command, _("\
-Display the status of skips.  You can specify numbers (e.g. \"skip info 1 3\"), \
-ranges (e.g. \"skip info 4-8\"), or both (e.g. \"skip info 1 3 4-8\").\n\n\
+  add_info ("skip", info_skip_command, _("\
+Display the status of skips.  You can specify numbers (e.g. \"info skip 1 3\"), \
+ranges (e.g. \"info skip 4-8\"), or both (e.g. \"info skip 1 3 4-8\").\n\n\
 If you don't specify any numbers or ranges, we'll show all skips.\n\n\
-Usage: skip info [NUMBER | RANGES]...\n\
-The \"Type\" column indicates one of:\n\
-\tfile        - ignored file\n\
-\tfunction    - ignored function"));
+Usage: info skip [NUMBER | RANGES]..."));
   set_cmd_completer (c, complete_skip_number);
 
   add_setshow_boolean_cmd ("skip", class_maintenance,
