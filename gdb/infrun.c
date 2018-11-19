@@ -1516,39 +1516,36 @@ struct displaced_step_inferior_state
 
 /* The list of states of processes involved in displaced stepping
    presently.  */
-static struct displaced_step_inferior_state *displaced_step_inferior_states;
+static std::forward_list<displaced_step_inferior_state *>
+  displaced_step_inferior_states;
 
 /* Get the displaced stepping state of process PID.  */
 
-static struct displaced_step_inferior_state *
+static displaced_step_inferior_state *
 get_displaced_stepping_state (inferior *inf)
 {
-  struct displaced_step_inferior_state *state;
+  for (auto *state : displaced_step_inferior_states)
+    {
+      if (state->inf == inf)
+	return state;
+    }
 
-  for (state = displaced_step_inferior_states;
-       state != NULL;
-       state = state->next)
-    if (state->inf == inf)
-      return state;
-
-  return NULL;
+  return nullptr;
 }
 
 /* Returns true if any inferior has a thread doing a displaced
    step.  */
 
-static int
-displaced_step_in_progress_any_inferior (void)
+static bool
+displaced_step_in_progress_any_inferior ()
 {
-  struct displaced_step_inferior_state *state;
+  for (auto *state : displaced_step_inferior_states)
+    {
+      if (state->step_thread != nullptr)
+	return true;
+    }
 
-  for (state = displaced_step_inferior_states;
-       state != NULL;
-       state = state->next)
-    if (state->step_thread != nullptr)
-      return 1;
-
-  return 0;
+  return false;
 }
 
 /* Return true if thread represented by PTID is doing a displaced
@@ -1584,21 +1581,19 @@ displaced_step_in_progress (inferior *inf)
    stepping state list, or return a pointer to an already existing
    entry, if it already exists.  Never returns NULL.  */
 
-static struct displaced_step_inferior_state *
+static displaced_step_inferior_state *
 add_displaced_stepping_state (inferior *inf)
 {
-  struct displaced_step_inferior_state *state;
+  displaced_step_inferior_state *state
+    = get_displaced_stepping_state (inf);
 
-  for (state = displaced_step_inferior_states;
-       state != NULL;
-       state = state->next)
-    if (state->inf == inf)
-      return state;
+  if (state != nullptr)
+    return state;
 
   state = XCNEW (struct displaced_step_inferior_state);
   state->inf = inf;
-  state->next = displaced_step_inferior_states;
-  displaced_step_inferior_states = state;
+
+  displaced_step_inferior_states.push_front (state);
 
   return state;
 }
@@ -1627,24 +1622,19 @@ get_displaced_step_closure_by_addr (CORE_ADDR addr)
 static void
 remove_displaced_stepping_state (inferior *inf)
 {
-  struct displaced_step_inferior_state *it, **prev_next_p;
-
   gdb_assert (inf != nullptr);
 
-  it = displaced_step_inferior_states;
-  prev_next_p = &displaced_step_inferior_states;
-  while (it)
-    {
-      if (it->inf == inf)
-	{
-	  *prev_next_p = it->next;
-	  xfree (it);
-	  return;
-	}
-
-      prev_next_p = &it->next;
-      it = *prev_next_p;
-    }
+  displaced_step_inferior_states.remove_if
+    ([inf] (displaced_step_inferior_state *state)
+      {
+	if (state->inf == inf)
+	  {
+	    xfree (state);
+	    return true;
+	  }
+	else
+	  return false;
+      });
 }
 
 static void
