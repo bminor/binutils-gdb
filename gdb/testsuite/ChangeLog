@@ -1,3 +1,7 @@
+2018-11-19  Tom Tromey  <tom@tromey.com>
+
+	* gdb.rust/simple.rs: Don't initialize empty_enum_value.
+
 2018-11-19  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/warning.exp: Don't override INTERNAL_FLAGS.  Use
