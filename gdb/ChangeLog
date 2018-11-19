@@ -969,6 +969,12 @@
 	(riscv_is_regnum_a_named_csr): New function.
 	(riscv_register_reggroup_p): Use riscv_is_regnum_a_named_csr.
 
+2018-10-23  John Darrington  <john@darrington.wattle.id.au>
+
+	* configure.tgt: Add configuration for s12z.
+	* s12z-tdep.c:  New file.
+	* NEWS: Mention new target.
+
 2018-10-22  Jim Wilson  <jimw@sifive.com>
 
 	* riscv-tdep.c (riscv_push_dummy_call) <in_reg>: Check for value in
