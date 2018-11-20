@@ -3142,7 +3142,9 @@ static const struct instruction opcodes[] = {
   {"bhi", 1,   0x22,  rel, 0},
   {"bls", 1,   0x23,  rel, 0},
   {"bcc", 1,   0x24,  rel, 0},
+  {"bhs", 1,   0x24,  rel, 0}, /* Alias for bcc */
   {"bcs", 1,   0x25,  rel, 0},
+  {"blo", 1,   0x25,  rel, 0}, /* Alias for bcs */
   {"bne", 1,   0x26,  rel, 0},
   {"beq", 1,   0x27,  rel, 0},
   {"bvc", 1,   0x28,  rel, 0},

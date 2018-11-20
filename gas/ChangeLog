@@ -1,3 +1,9 @@
+2018-11-21 John Darrington <john@darrington.wattle.id.au>
+
+	* config/tc-s12z.c (opcodes): bhs, blo: New members.
+	* testsuite/gas/s12z/bra.d: Add tests for aliases.
+	* testsuite/gas/s12z/bra.s: Add tests for aliases.
+
 2018-11-13  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* config/tc-arm.c (arm_archs): Reindent.
