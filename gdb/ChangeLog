@@ -1,3 +1,11 @@
+2018-11-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* breakpoint.c (print_one_breakpoint_location): Reduce whitespace,
+	and remove insertion of extra spaces in GDB's output.
+	* cli-out.c (cli_ui_out::do_field_fmt): Update header comment.
+	Layout field into a temporary buffer, and then output it as a
+	string field.
+
 2018-11-20  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* NEWS: Document the language choice done by

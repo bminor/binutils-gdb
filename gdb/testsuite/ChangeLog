@@ -1,3 +1,8 @@
+2018-11-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.opt/inline-break.exp: Add test that info breakpoint output
+	is correctly aligned.
+
 2018-11-20  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.ada/info_auto_lang.exp: New testcase.

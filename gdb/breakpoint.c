@@ -6058,16 +6058,13 @@ print_one_breakpoint_location (struct breakpoint *b,
   else
     uiout->field_string ("disp", bpdisp_text (b->disposition));
 
-
   /* 4 */
   annotate_field (3);
   if (part_of_multiple)
     uiout->field_string ("enabled", loc->enabled ? "y" : "n");
   else
     uiout->field_fmt ("enabled", "%c", bpenables[(int) b->enable_state]);
-  uiout->spaces (2);
 
-  
   /* 5 and 6 */
   if (b->ops != NULL && b->ops->print_one != NULL)
     {

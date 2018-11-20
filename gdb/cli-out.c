@@ -165,7 +165,7 @@ cli_ui_out::do_field_string (int fldno, int width, ui_align align,
     field_separator ();
 }
 
-/* This is the only field function that does not align.  */
+/* Output field containing ARGS using printf formatting in FORMAT.  */
 
 void
 cli_ui_out::do_field_fmt (int fldno, int width, ui_align align,
@@ -175,10 +175,9 @@ cli_ui_out::do_field_fmt (int fldno, int width, ui_align align,
   if (m_suppress_output)
     return;
 
-  vfprintf_filtered (m_streams.back (), format, args);
+  std::string str = string_vprintf (format, args);
 
-  if (align != ui_noalign)
-    field_separator ();
+  do_field_string (fldno, width, align, fldname, str.c_str ());
 }
 
 void

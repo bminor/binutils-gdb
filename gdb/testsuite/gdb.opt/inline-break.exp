@@ -304,4 +304,40 @@ with_test_prefix "address" {
 	"breakpoint hit presents stop at inlined function"
 }
 
+with_test_prefix "check alignment" {
+
+    clean_restart $binfile
+
+    if {![runto main]} {
+	untested "could not run to main"
+	continue
+    }
+
+    gdb_test "break func4b" \
+	"Breakpoint.*at.*func4b.*\\(2 locations\\)"
+
+    set expected_line_length -1
+    gdb_test_multiple "info break \$bpnum" "xxxx" {
+	-re "Num     Type           Disp Enb Address            What\r\n" {
+	    exp_continue
+	}
+	-re "($decimal \[^\r\n\]+)<MULTIPLE>\[^\r\n\]+\r\n" {
+	    if {$expected_line_length != -1} {
+		fail "multiple header lines seen"
+	    }
+	    set expected_line_length [string length $expect_out(1,string)]
+	    exp_continue
+	}
+	-re "($decimal\.($decimal) \[^\r\n\]+)$hex\[^\r\n\]+\r\n" {
+	    set len [string length $expect_out(1,string)]
+	    set loc $expect_out(2,string)
+	    gdb_assert {$len == $expected_line_length} \
+		"check alignment of location line $loc"
+	    exp_continue
+	}
+	-re "$gdb_prompt $" {
+	}
+    }
+}
+
 unset -nocomplain results
