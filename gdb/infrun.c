@@ -1484,9 +1484,6 @@ displaced_step_closure::~displaced_step_closure () = default;
 /* Per-inferior displaced stepping state.  */
 struct displaced_step_inferior_state
 {
-  /* Pointer to next in linked list.  */
-  struct displaced_step_inferior_state *next;
-
   /* The process this displaced step state refers to.  */
   inferior *inf;
 
