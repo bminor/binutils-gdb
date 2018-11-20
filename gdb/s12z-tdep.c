@@ -37,7 +37,9 @@
 #define N_PHYSICAL_REGISTERS (S12Z_N_REGISTERS - 2)
 
 
-/*  A permutation of all the physical registers.  */
+/*  A permutation of all the physical registers.   Indexing this array
+    with an integer from gdb's internal representation will return the
+    register enum.  */
 static const int reg_perm[N_PHYSICAL_REGISTERS] =
   {
    REG_D0,
@@ -55,6 +57,16 @@ static const int reg_perm[N_PHYSICAL_REGISTERS] =
    REG_CCW
   };
 
+/*  The inverse of the above permutation.  Indexing this
+    array with a register enum (e.g. REG_D2) will return the register
+    number in gdb's internal representation.  */
+static const int inv_reg_perm[N_PHYSICAL_REGISTERS] =
+  {
+   2, 3, 4, 5,      /* d2, d3, d4, d5 */
+   0, 1,            /* d0, d1 */
+   6, 7,            /* d6, d7 */
+   8, 9, 10, 11, 12 /* x, y, s, p, ccw */
+  };
 
 /*  Return the name of the register REGNUM.  */
 static const char *
@@ -467,11 +479,56 @@ s12z_print_registers_info (struct gdbarch *gdbarch,
 
 
 
+
+static void
+s12z_extract_return_value (struct type *type, struct regcache *regcache,
+                              void *valbuf)
+{
+  int reg = -1;
+
+  switch (TYPE_LENGTH (type))
+    {
+    case 0:   /* Nothing to do */
+      return;
+
+    case 1:
+      reg = REG_D0;
+      break;
+
+    case 2:
+      reg = REG_D2;
+      break;
+
+    case 3:
+      reg = REG_X;
+      break;
+
+    case 4:
+      reg = REG_D6;
+      break;
+
+    default:
+      error (_("bad size for return value"));
+      return;
+    }
+
+  regcache->cooked_read (inv_reg_perm[reg], (gdb_byte *) valbuf);
+}
+
 static enum return_value_convention
 s12z_return_value (struct gdbarch *gdbarch, struct value *function,
                    struct type *type, struct regcache *regcache,
                    gdb_byte *readbuf, const gdb_byte *writebuf)
 {
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
+      || TYPE_CODE (type) == TYPE_CODE_UNION
+      || TYPE_CODE (type) == TYPE_CODE_ARRAY
+      || TYPE_LENGTH (type) > 4)
+    return RETURN_VALUE_STRUCT_CONVENTION;
+
+  if (readbuf)
+    s12z_extract_return_value (type, regcache, readbuf);
+
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
 

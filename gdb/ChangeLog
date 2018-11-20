@@ -1,3 +1,9 @@
+2018-11209  John Darrington <john@darrington.wattle.id.au>
+
+	* s12z-tdep.c (s12z_extract_return_value): New function.
+	(inv_reg_perm) New array.
+	(s12z_return_value): Populate readbuf if non-null.
+
 2018-11-20  Eli Zaretskii  <eliz@gnu.org>
 
 	* common/filestuff.c (gdb_fopen_cloexec): Disable use of "e" mode
