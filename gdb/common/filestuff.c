@@ -300,8 +300,10 @@ gdb_fopen_cloexec (const char *filename, const char *opentype)
      skip it.  E.g., the Windows runtime issues an "Invalid parameter
      passed to C runtime function" OutputDebugString warning for
      unknown modes.  Assume that if O_CLOEXEC is zero, then "e" isn't
-     supported.  */
-  static int fopen_e_ever_failed_einval = O_CLOEXEC == 0;
+     supported.  On MinGW, O_CLOEXEC is an alias of O_NOINHERIT, and
+     "e" isn't supported.  */
+  static int fopen_e_ever_failed_einval =
+    O_CLOEXEC == 0 || O_CLOEXEC == O_NOINHERIT;
 
   if (!fopen_e_ever_failed_einval)
     {
