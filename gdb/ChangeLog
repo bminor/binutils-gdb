@@ -1,4 +1,4 @@
-2018-11209  John Darrington <john@darrington.wattle.id.au>
+2018-11-20  John Darrington  <john@darrington.wattle.id.au>
 
 	* s12z-tdep.c (s12z_extract_return_value): New function.
 	(inv_reg_perm) New array.
@@ -11,9 +11,9 @@
 	to MinGW fixed by Gnulib.
 	(O_NOINHERIT): Define if not defined.
 
-2018-11-19  John Darrington <john@darrington.wattle.id.au>
+2018-11-19  John Darrington  <john@darrington.wattle.id.au>
 
-	*s12z-tdep.c (s12z_frame_cache): Add an assertion.
+	* s12z-tdep.c (s12z_frame_cache): Add an assertion.
 
 2018-11-19  Simon Marchi  <simon.marchi@polymtl.ca>
 
@@ -1275,14 +1275,14 @@
 	(value_struct_elt_for_reference): Use it to get virtual base offset
 	and add it in calculating class member address.
 
-2018-10-08   John Darrington <john@darrington.wattle.id.au>
+2018-10-08  John Darrington  <john@darrington.wattle.id.au>
 
-    * dwarf2read.c (dwarf2_cu) <producer_is_codewarrior>: New field.
-      (check_producer): Check if the producer is codewarrior.
-      (producer_is_codewarrior): New function.
-      (lnp_state_machine::record_line): Ignore is_stmt flag for records
-       produced by codewarrior.
-      (dwarf2_cu::dwarf2_cu): Initialize producer_is_codewarrior.
+	* dwarf2read.c (dwarf2_cu) <producer_is_codewarrior>: New field.
+	(check_producer): Check if the producer is codewarrior.
+	(producer_is_codewarrior): New function.
+	(lnp_state_machine::record_line): Ignore is_stmt flag for records
+	produced by codewarrior.
+	(dwarf2_cu::dwarf2_cu): Initialize producer_is_codewarrior.
 
 2018-10-06  Tom Tromey  <tom@tromey.com>
 
@@ -1683,7 +1683,7 @@
 
 	* aarch64-linux-tdep.c (aarch64_linux_sigframe_init): Use pulongest.
 
-2018-10-02  John Darrington <john@darrington.wattle.id.au>
+2018-10-02  John Darrington  <john@darrington.wattle.id.au>
 
 	* NEWS: Mention changed commands.
 	* ser-uds.c: New file.
@@ -1691,7 +1691,7 @@
 	* configure: Regenerate.
 	* Makefile.in: Add new file.
 	* serial.c (serial_open): Check if filename is a socket
-	  and lookup the appropriate interface accordingly.
+	and lookup the appropriate interface accordingly.
 
 2018-10-01  Alan Hayward  <alan.hayward@arm.com>
 
@@ -4247,14 +4247,16 @@
 	* mips-fbsd-tdep.c (mips_fbsd_iterate_over_regset_sections): Likewise.
 	* mips-linux-tdep.c (mips_linux_iterate_over_regset_sections): Likewise.
 	* mips-nbsd-tdep.c (mipsnbsd_iterate_over_regset_sections): Likewise.
-	* mips64-obsd-tdep.c (mips64obsd_iterate_over_regset_sections): Likewise.
+	* mips64-obsd-tdep.c (mips64obsd_iterate_over_regset_sections):
+	Likewise.
 	* mn10300-linux-tdep.c (am33_iterate_over_regset_sections): Likewise.
 	* nios2-linux-tdep.c (nios2_iterate_over_regset_sections): Likewise.
 	* ppc-fbsd-tdep.c (ppcfbsd_iterate_over_regset_sections): Likewise.
 	* ppc-linux-tdep.c (ppc_linux_iterate_over_regset_sections): Likewise.
 	* ppc-nbsd-tdep.c (ppcnbsd_iterate_over_regset_sections): Likewise.
 	* ppc-obsd-tdep.c (ppcobsd_iterate_over_regset_sections): Likewise.
-	* riscv-linux-tdep.c (riscv_linux_iterate_over_regset_sections): Likewise.
+	* riscv-linux-tdep.c (riscv_linux_iterate_over_regset_sections):
+	Likewise.
 	* rs6000-aix-tdep.c (rs6000_aix_iterate_over_regset_sections): Likewise.
 	* s390-linux-tdep.c (s390_iterate_over_regset_sections): Likewise.
 	* score-tdep.c (score7_linux_iterate_over_regset_sections): Likewise.
@@ -4659,8 +4661,8 @@
 2018-08-02  Xavier Roirand  <roirand@adacore.com>
 
 	PR gdb/22629:
-        * darwin-nat.c (darwin_kill_inferior): Fix handling of
-        kill inferior.
+	* darwin-nat.c (darwin_kill_inferior): Fix handling of
+	kill inferior.
 
 2018-08-02  Tom Tromey  <tom@tromey.com>
 
@@ -6625,7 +6627,8 @@
 2018-06-27  Omair Javaid  <omair.javaid@linaro.org>
 
 	PR gdb/21695
-	* dwarf2read.c (lnp_state_machine::check_line_address): Update declaration.
+	* dwarf2read.c (lnp_state_machine::check_line_address): Update
+	declaration.
 	(dwarf_decode_lines_1): Adjust.
 
 2018-06-27  Simon Marchi  <simon.marchi@ericsson.com>
@@ -7027,13 +7030,13 @@
 
 2018-06-21  Alan Hayward  <alan.hayward@arm.com>
 
-        * regcache.c (readable_regcache::read_part): Avoid memcpy when
-        possible.
-        (regcache::write_part): Likewise.
-        (readable_regcache::cooked_read_part): Update comment.
-        (readable_regcache::cooked_write_part): Likewise.
-        * regcache.h: (readable_regcache::read_part): Likewise.
-        (regcache::write_part): Likewise.
+	* regcache.c (readable_regcache::read_part): Avoid memcpy when
+	possible.
+	(regcache::write_part): Likewise.
+	(readable_regcache::cooked_read_part): Update comment.
+	(readable_regcache::cooked_write_part): Likewise.
+	* regcache.h: (readable_regcache::read_part): Likewise.
+	(regcache::write_part): Likewise.
 
 2018-06-21  Richard Bunt  <richard.bunt@arm.com>
 	    Dirk Schubert  <dirk.schubert@arm.com>
@@ -7329,7 +7332,7 @@
 
 2018-06-11  John David Anglin  <danglin@gcc.gnu.org>
 
-	* gdb/hppa-linux-nat.c
+	* hppa-linux-nat.c
 	(hppa_linux_nat_target::fetch_inferior_registers): Rename to
 	hppa_linux_nat_target::fetch_registers.
 
