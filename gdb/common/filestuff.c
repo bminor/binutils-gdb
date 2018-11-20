@@ -44,6 +44,10 @@
 #define O_CLOEXEC 0
 #endif
 
+#ifndef O_NOINHERIT
+#define O_NOINHERIT 0
+#endif
+
 #ifndef SOCK_CLOEXEC
 #define SOCK_CLOEXEC 0
 #endif

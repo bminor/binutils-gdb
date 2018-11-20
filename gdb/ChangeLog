@@ -3,6 +3,7 @@
 	* common/filestuff.c (gdb_fopen_cloexec): Disable use of "e" mode
 	with 'fopen' also if O_CLOEXEC is equal to O_NOINHERIT, to cater
 	to MinGW fixed by Gnulib.
+	(O_NOINHERIT): Define if not defined.
 
 2018-11-19  John Darrington <john@darrington.wattle.id.au>
 
