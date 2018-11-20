@@ -1,3 +1,9 @@
+2018-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/23898
+	* testsuite/lib/binutils-common.exp (prune_warnings_extra):
+	Prune gaps in build notes.
+
 2018-11-13  Francois H. Theron <francois.theron@netronome.com>
 
 	* testsuite/binutils-all/nfp/test1.d: Test for swapped operand crc[].

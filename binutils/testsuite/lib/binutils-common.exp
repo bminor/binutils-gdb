@@ -442,6 +442,8 @@ proc prune_warnings_extra { text } {
 	# The "\\1" is to try to preserve a "\n" but only if necessary.
 	regsub -all "(^|\n)(\[^\n\]*: warning:\[^\n\]*unsupported GNU_PROPERTY_TYPE\[^\n\]*\n?)+" $text "\\1" text
     }
+    # PR binutils/23898: It is OK to have gaps in build notes.
+    regsub -all "(^|\n)(\[^\n\]*: Warning: Gap in build notes detected from\[^\n\]*\n?)+" $text "\\1" text
     return $text
 }
 
