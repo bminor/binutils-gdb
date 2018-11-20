@@ -1,5 +1,10 @@
 2018-11-20  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* cli-out.c (cli_ui_out::do_field_int): Use string_printf rather
+	than a fixed size buffer.
+
+2018-11-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* breakpoint.c (print_one_breakpoint_location): Reduce whitespace,
 	and remove insertion of extra spaces in GDB's output.
 	* cli-out.c (cli_ui_out::do_field_fmt): Update header comment.
