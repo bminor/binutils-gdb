@@ -2363,25 +2363,31 @@ print_insn_shift (bfd_vma memaddr, struct disassemble_info* info, uint8_t byte)
       break;
 
     case SB_REG_REG_N:
-      if (sb & 0x08)
-	{
-	  operand_separator (info);
-	  if (byte & 0x10)
-	    {
-	      uint8_t xb;
-	      read_memory (memaddr + 1, &xb, 1, info);
-	      int shift = ((sb & 0x08) >> 3) | ((xb & 0x0f) << 1);
-	      (*info->fprintf_func) (info->stream, "#%d", shift);
-	    }
-	  else
-	    {
-	      (*info->fprintf_func) (info->stream, "%s:%d", __FILE__, __LINE__);
-	    }
-	}
-      else
-	{
-	  opr_decode (memaddr + 1, info);
-	}
+      {
+        uint8_t xb;
+        read_memory (memaddr + 1, &xb, 1, info);
+        /* This case is slightly unusual.
+           If XB matches the binary pattern 0111XXXX, then instead of
+           interpreting this as a general OPR postbyte in the IMMe4 mode,
+           the XB byte is interpreted in s special way.  */
+        if ((xb & 0xF0) == 0x70)
+          {
+            operand_separator (info);
+            if (byte & 0x10)
+              {
+                int shift = ((sb & 0x08) >> 3) | ((xb & 0x0f) << 1);
+                (*info->fprintf_func) (info->stream, "#%d", shift);
+              }
+            else
+              {
+                (*info->fprintf_func) (info->stream, "%s:%d", __FILE__, __LINE__);
+              }
+          }
+        else
+          {
+            opr_decode (memaddr + 1, info);
+          }
+      }
       break;
     case SB_REG_OPR_OPR:
       {

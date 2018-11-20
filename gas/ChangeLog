@@ -1,5 +1,10 @@
 2018-11-21 John Darrington <john@darrington.wattle.id.au>
 
+	* testsuite/gas/s12z/shift.s: Add new test case.
+	* testsuite/gas/s12z/shift.d: Add expected result.
+
+2018-11-21 John Darrington <john@darrington.wattle.id.au>
+
 	* config/tc-s12z.c (opcodes): bhs, blo: New members.
 	* testsuite/gas/s12z/bra.d: Add tests for aliases.
 	* testsuite/gas/s12z/bra.s: Add tests for aliases.
