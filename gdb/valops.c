@@ -57,27 +57,26 @@ static struct value *search_struct_method (const char *, struct value **,
 static int find_oload_champ_namespace (gdb::array_view<value *> args,
 				       const char *, const char *,
 				       std::vector<symbol *> *oload_syms,
-				       struct badness_vector **,
+				       badness_vector *,
 				       const int no_adl);
 
 static int find_oload_champ_namespace_loop (gdb::array_view<value *> args,
 					    const char *, const char *,
 					    int, std::vector<symbol *> *oload_syms,
-					    struct badness_vector **, int *,
+					    badness_vector *, int *,
 					    const int no_adl);
 
 static int find_oload_champ (gdb::array_view<value *> args, int,
 			     struct fn_field *,
 			     const std::vector<xmethod_worker_up> *,
-			     struct symbol **, struct badness_vector **);
+			     struct symbol **, badness_vector *);
 
 static int oload_method_static_p (struct fn_field *, int);
 
 enum oload_classification { STANDARD, NON_STANDARD, INCOMPATIBLE };
 
-static enum
-oload_classification classify_oload_match (struct badness_vector *,
-					   int, int);
+static enum oload_classification classify_oload_match
+  (const badness_vector &, int, int);
 
 static struct value *value_struct_elt_for_reference (struct type *,
 						     int, struct type *,
@@ -2508,10 +2507,10 @@ find_overload_match (gdb::array_view<value *> args,
   int ext_method_oload_champ = -1;
 
   /* The measure for the current best match.  */
-  struct badness_vector *method_badness = NULL;
-  struct badness_vector *func_badness = NULL;
-  struct badness_vector *ext_method_badness = NULL;
-  struct badness_vector *src_method_badness = NULL;
+  badness_vector method_badness;
+  badness_vector func_badness;
+  badness_vector ext_method_badness;
+  badness_vector src_method_badness;
 
   struct value *temp = obj;
   /* For methods, the list of overloaded methods.  */
@@ -2584,8 +2583,6 @@ find_overload_match (gdb::array_view<value *> args,
 	  src_method_match_quality = classify_oload_match
 	    (src_method_badness, args.size (),
 	     oload_method_static_p (fns_ptr, src_method_oload_champ));
-
-	  make_cleanup (xfree, src_method_badness);
 	}
 
       if (!xm_worker_vec.empty ())
@@ -2594,7 +2591,6 @@ find_overload_match (gdb::array_view<value *> args,
 						     NULL, &ext_method_badness);
 	  ext_method_match_quality = classify_oload_match (ext_method_badness,
 							   args.size (), 0);
-	  make_cleanup (xfree, ext_method_badness);
 	}
 
       if (src_method_oload_champ >= 0 && ext_method_oload_champ >= 0)
@@ -2716,8 +2712,6 @@ find_overload_match (gdb::array_view<value *> args,
       if (func_oload_champ >= 0)
 	func_match_quality = classify_oload_match (func_badness,
 						   args.size (), 0);
-
-      make_cleanup (xfree, func_badness);
     }
 
   /* Did we find a match ?  */
@@ -2847,17 +2841,15 @@ find_overload_match (gdb::array_view<value *> args,
 /* Find the best overload match, searching for FUNC_NAME in namespaces
    contained in QUALIFIED_NAME until it either finds a good match or
    runs out of namespaces.  It stores the overloaded functions in
-   *OLOAD_SYMS, and the badness vector in *OLOAD_CHAMP_BV.  The
-   calling function is responsible for freeing *OLOAD_SYMS and
-   *OLOAD_CHAMP_BV.  If NO_ADL, argument dependent lookup is not 
-   performned.  */
+   *OLOAD_SYMS, and the badness vector in *OLOAD_CHAMP_BV.  If NO_ADL,
+   argument dependent lookup is not performned.  */
 
 static int
 find_oload_champ_namespace (gdb::array_view<value *> args,
 			    const char *func_name,
 			    const char *qualified_name,
 			    std::vector<symbol *> *oload_syms,
-			    struct badness_vector **oload_champ_bv,
+			    badness_vector *oload_champ_bv,
 			    const int no_adl)
 {
   int oload_champ;
@@ -2876,10 +2868,7 @@ find_oload_champ_namespace (gdb::array_view<value *> args,
    how deep we've looked for namespaces, and the champ is stored in
    OLOAD_CHAMP.  The return value is 1 if the champ is a good one, 0
    if it isn't.  Other arguments are the same as in
-   find_oload_champ_namespace
-
-   It is the caller's responsibility to free *OLOAD_SYMS and
-   *OLOAD_CHAMP_BV.  */
+   find_oload_champ_namespace.  */
 
 static int
 find_oload_champ_namespace_loop (gdb::array_view<value *> args,
@@ -2887,15 +2876,13 @@ find_oload_champ_namespace_loop (gdb::array_view<value *> args,
 				 const char *qualified_name,
 				 int namespace_len,
 				 std::vector<symbol *> *oload_syms,
-				 struct badness_vector **oload_champ_bv,
+				 badness_vector *oload_champ_bv,
 				 int *oload_champ,
 				 const int no_adl)
 {
   int next_namespace_len = namespace_len;
   int searched_deeper = 0;
-  struct cleanup *old_cleanups;
   int new_oload_champ;
-  struct badness_vector *new_oload_champ_bv;
   char *new_namespace;
 
   if (next_namespace_len != 0)
@@ -2905,9 +2892,6 @@ find_oload_champ_namespace_loop (gdb::array_view<value *> args,
     }
   next_namespace_len +=
     cp_find_first_component (qualified_name + next_namespace_len);
-
-  /* Initialize these to values that can safely be xfree'd.  */
-  *oload_champ_bv = NULL;
 
   /* First, see if we have a deeper namespace we can search in.
      If we get a good match there, use it.  */
@@ -2934,7 +2918,6 @@ find_oload_champ_namespace_loop (gdb::array_view<value *> args,
      because this overload mechanism only gets called if there's a
      function symbol to start off with.)  */
 
-  old_cleanups = make_cleanup (xfree, *oload_champ_bv);
   new_namespace = (char *) alloca (namespace_len + 1);
   strncpy (new_namespace, qualified_name, namespace_len);
   new_namespace[namespace_len] = '\0';
@@ -2958,6 +2941,7 @@ find_oload_champ_namespace_loop (gdb::array_view<value *> args,
 				    &new_oload_syms);
     }
 
+  badness_vector new_oload_champ_bv;
   new_oload_champ = find_oload_champ (args, new_oload_syms.size (),
 				      NULL, NULL, new_oload_syms.data (),
 				      &new_oload_champ_bv);
@@ -2974,22 +2958,18 @@ find_oload_champ_namespace_loop (gdb::array_view<value *> args,
     {
       *oload_syms = std::move (new_oload_syms);
       *oload_champ = new_oload_champ;
-      *oload_champ_bv = new_oload_champ_bv;
-      do_cleanups (old_cleanups);
+      *oload_champ_bv = std::move (new_oload_champ_bv);
       return 1;
     }
   else if (searched_deeper)
     {
-      xfree (new_oload_champ_bv);
-      discard_cleanups (old_cleanups);
       return 0;
     }
   else
     {
       *oload_syms = std::move (new_oload_syms);
       *oload_champ = new_oload_champ;
-      *oload_champ_bv = new_oload_champ_bv;
-      do_cleanups (old_cleanups);
+      *oload_champ_bv = std::move (new_oload_champ_bv);
       return 0;
     }
 }
@@ -3003,20 +2983,18 @@ find_oload_champ_namespace_loop (gdb::array_view<value *> args,
    or OLOAD_SYMS (whichever is non-NULL) is specified in NUM_FNS.
 
    Return the index of the best match; store an indication of the
-   quality of the match in OLOAD_CHAMP_BV.
-
-   It is the caller's responsibility to free *OLOAD_CHAMP_BV.  */
+   quality of the match in OLOAD_CHAMP_BV.  */
 
 static int
 find_oload_champ (gdb::array_view<value *> args,
 		  int num_fns, struct fn_field *fns_ptr,
 		  const std::vector<xmethod_worker_up> *xm_worker_vec,
 		  struct symbol **oload_syms,
-		  struct badness_vector **oload_champ_bv)
+		  badness_vector *oload_champ_bv)
 {
   int ix;
   /* A measure of how good an overloaded instance is.  */
-  struct badness_vector *bv;
+  badness_vector bv;
   /* Index of best overloaded function.  */
   int oload_champ = -1;
   /* Current ambiguity state for overload resolution.  */
@@ -3028,8 +3006,6 @@ find_oload_champ (gdb::array_view<value *> args,
      groups.  */
   gdb_assert ((fns_ptr != NULL) + (oload_syms != NULL) + (xm_worker_vec != NULL)
 	      == 1);
-
-  *oload_champ_bv = NULL;
 
   int fn_count = xm_worker_vec != NULL ? xm_worker_vec->size () : num_fns;
 
@@ -3073,9 +3049,9 @@ find_oload_champ (gdb::array_view<value *> args,
       bv = rank_function (parm_types,
 			  args.slice (static_offset));
 
-      if (!*oload_champ_bv)
+      if (oload_champ_bv->empty ())
 	{
-	  *oload_champ_bv = bv;
+	  *oload_champ_bv = std::move (bv);
 	  oload_champ = 0;
 	}
       else /* See whether current candidate is better or worse than
@@ -3089,7 +3065,7 @@ find_oload_champ (gdb::array_view<value *> args,
 	    oload_ambiguous = 2;
 	    break;
 	  case 2:		/* New champion, record details.  */
-	    *oload_champ_bv = bv;
+	    *oload_champ_bv = std::move (bv);
 	    oload_ambiguous = 0;
 	    oload_champ = ix;
 	    break;
@@ -3116,7 +3092,7 @@ find_oload_champ (gdb::array_view<value *> args,
 	  for (jj = 0; jj < args.size () - static_offset; jj++)
 	    fprintf_filtered (gdb_stderr,
 			      "...Badness @ %d : %d\n", 
-			      jj, bv->rank[jj].rank);
+			      jj, bv[jj].rank);
 	  fprintf_filtered (gdb_stderr, "Overload resolution "
 			    "champion is %d, ambiguous? %d\n", 
 			    oload_champ, oload_ambiguous);
@@ -3141,7 +3117,7 @@ oload_method_static_p (struct fn_field *fns_ptr, int index)
 /* Check how good an overload match OLOAD_CHAMP_BV represents.  */
 
 static enum oload_classification
-classify_oload_match (struct badness_vector *oload_champ_bv,
+classify_oload_match (const badness_vector &oload_champ_bv,
 		      int nargs,
 		      int static_offset)
 {
@@ -3152,12 +3128,12 @@ classify_oload_match (struct badness_vector *oload_champ_bv,
     {
       /* If this conversion is as bad as INCOMPATIBLE_TYPE_BADNESS
          or worse return INCOMPATIBLE.  */
-      if (compare_ranks (oload_champ_bv->rank[ix],
+      if (compare_ranks (oload_champ_bv[ix],
                          INCOMPATIBLE_TYPE_BADNESS) <= 0)
 	return INCOMPATIBLE;	/* Truly mismatched types.  */
       /* Otherwise If this conversion is as bad as
          NS_POINTER_CONVERSION_BADNESS or worse return NON_STANDARD.  */
-      else if (compare_ranks (oload_champ_bv->rank[ix],
+      else if (compare_ranks (oload_champ_bv[ix],
                               NS_POINTER_CONVERSION_BADNESS) <= 0)
 	worst = NON_STANDARD;	/* Non-standard type conversions
 				   needed.  */

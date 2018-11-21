@@ -1,5 +1,25 @@
 2018-11-21  Pedro Alves  <palves@redhat.com>
 
+	* gdbtypes.c (compare_badness): Change type of parameters to const
+	reference.  Adjust to badness_vector being a std::vector now.
+	(rank_function): Adjust to badness_vector being a std::vector now.
+	* gdbtypes.h (badness_vector): Now a typedef to std::vector.
+	(LENGTH_MATCH): Delete.
+	(compare_badness): Change type of parameters to const reference.
+	(rank_function): Return a badness_vector by value now.
+	(find_overload_match): Adjust to badness_vector being a
+	std::vector now.  Remove cleanups.
+	(find_oload_champ_namespace): 'oload_champ_bv' parameter now a
+	badness_vector pointer.
+	(find_oload_champ_namespace_loop): 'oload_champ_bv' parameter now
+	a badness_vector pointer.  Adjust to badness_vector being a
+	std::vector now.  Remove cleanups.
+	(find_oload_champ): 'oload_champ_bv' parameter now
+	a badness_vector pointer.  Adjust to badness_vector being a
+	std::vector now.  Remove cleanups.
+
+2018-11-21  Pedro Alves  <palves@redhat.com>
+
 	* cp-support.c (sym_return_val_size, sym_return_val_index)
 	(sym_return_val): Delete.
 	(overload_list_add_symbol): Add std::vector parameter.  Adjust to

@@ -3426,21 +3426,21 @@ compare_ranks (struct rank a, struct rank b)
    3 => A is worse than B  */
 
 int
-compare_badness (struct badness_vector *a, struct badness_vector *b)
+compare_badness (const badness_vector &a, const badness_vector &b)
 {
   int i;
   int tmp;
   short found_pos = 0;		/* any positives in c? */
   short found_neg = 0;		/* any negatives in c? */
 
-  /* differing lengths => incomparable */
-  if (a->length != b->length)
+  /* differing sizes => incomparable */
+  if (a.size () != b.size ())
     return 1;
 
   /* Subtract b from a */
-  for (i = 0; i < a->length; i++)
+  for (i = 0; i < a.size (); i++)
     {
-      tmp = compare_ranks (b->rank[i], a->rank[i]);
+      tmp = compare_ranks (b[i], a[i]);
       if (tmp > 0)
 	found_pos = 1;
       else if (tmp < 0)
@@ -3465,19 +3465,16 @@ compare_badness (struct badness_vector *a, struct badness_vector *b)
 }
 
 /* Rank a function by comparing its parameter types (PARMS), to the
-   types of an argument list (ARGS).  Return a pointer to a badness
-   vector.  This has ARGS.size() + 1 entries.  */
+   types of an argument list (ARGS).  Return the badness vector.  This
+   has ARGS.size() + 1 entries.  */
 
-struct badness_vector *
+badness_vector
 rank_function (gdb::array_view<type *> parms,
 	       gdb::array_view<value *> args)
 {
-  int i;
-  struct badness_vector *bv = XNEW (struct badness_vector);
-  size_t min_len = std::min (parms.size (), args.size ());
-
-  bv->length = args.size () + 1;	/* add 1 for the length-match rank.  */
-  bv->rank = XNEWVEC (struct rank, args.size () + 1);
+  /* add 1 for the length-match rank.  */
+  badness_vector bv;
+  bv.reserve (1 + args.size ());
 
   /* First compare the lengths of the supplied lists.
      If there is a mismatch, set it to a high value.  */
@@ -3486,18 +3483,20 @@ rank_function (gdb::array_view<type *> parms,
      arguments and ellipsis parameter lists, we should consider those
      and rank the length-match more finely.  */
 
-  LENGTH_MATCH (bv) = (args.size () != parms.size ())
-		      ? LENGTH_MISMATCH_BADNESS
-		      : EXACT_MATCH_BADNESS;
+  bv.push_back ((args.size () != parms.size ())
+		? LENGTH_MISMATCH_BADNESS
+		: EXACT_MATCH_BADNESS);
 
   /* Now rank all the parameters of the candidate function.  */
-  for (i = 1; i <= min_len; i++)
-    bv->rank[i] = rank_one_type (parms[i - 1], value_type (args[i - 1]),
-				 args[i - 1]);
+  size_t min_len = std::min (parms.size (), args.size ());
+
+  for (size_t i = 0; i < min_len; i++)
+    bv.push_back (rank_one_type (parms[i], value_type (args[i]),
+				 args[i]));
 
   /* If more arguments than parameters, add dummy entries.  */
-  for (i = min_len + 1; i <= args.size (); i++)
-    bv->rank[i] = TOO_FEW_PARAMS_BADNESS;
+  for (size_t i = min_len; i < args.size (); i++)
+    bv.push_back (TOO_FEW_PARAMS_BADNESS);
 
   return bv;
 }

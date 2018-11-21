@@ -1095,13 +1095,9 @@ struct rank
     short subrank;
   };
 
-/* * Struct used for ranking a function for overload resolution.  */
+/* * Used for ranking a function for overload resolution.  */
 
-struct badness_vector
-  {
-    int length;
-    struct rank *rank;
-  };
+typedef std::vector<rank> badness_vector;
 
 /* * GNAT Ada-specific information for various Ada types.  */
 
@@ -1983,8 +1979,6 @@ extern int is_unique_ancestor (struct type *, struct value *);
 
 /* Overload resolution */
 
-#define LENGTH_MATCH(bv) ((bv)->rank[0])
-
 /* * Badness if parameter list length doesn't match arg list length.  */
 extern const struct rank LENGTH_MISMATCH_BADNESS;
 
@@ -2043,10 +2037,11 @@ extern const struct rank NS_INTEGER_POINTER_CONVERSION_BADNESS;
 extern struct rank sum_ranks (struct rank a, struct rank b);
 extern int compare_ranks (struct rank a, struct rank b);
 
-extern int compare_badness (struct badness_vector *, struct badness_vector *);
+extern int compare_badness (const badness_vector &,
+			    const badness_vector &);
 
-extern struct badness_vector *rank_function (gdb::array_view<type *> parms,
-					     gdb::array_view<value *> args);
+extern badness_vector rank_function (gdb::array_view<type *> parms,
+				     gdb::array_view<value *> args);
 
 extern struct rank rank_one_type (struct type *, struct type *,
 				  struct value *);
