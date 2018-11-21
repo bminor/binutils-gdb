@@ -1,5 +1,15 @@
 2018-11-21  Pedro Alves  <palves@redhat.com>
 
+	* valops.c (find_method_list): Replace pointer and length
+	parameters with an gdb::array_view.  Adjust.
+	(value_find_oload_method_list): Likewise.
+	(find_overload_match): Use gdb::array_view for methods list.
+	Adjust to find_oload_champ interface change.
+	(find_oload_champ): 'xm_worker_vec' parameter now a pointer/array.
+	'num_fns' parameter now a size_t.  Eliminate 'fn_count' local.
+
+2018-11-21  Pedro Alves  <palves@redhat.com>
+
 	* gdbtypes.c (compare_badness): Change type of parameters to const
 	reference.  Adjust to badness_vector being a std::vector now.
 	(rank_function): Adjust to badness_vector being a std::vector now.

@@ -66,10 +66,12 @@ static int find_oload_champ_namespace_loop (gdb::array_view<value *> args,
 					    badness_vector *, int *,
 					    const int no_adl);
 
-static int find_oload_champ (gdb::array_view<value *> args, int,
-			     struct fn_field *,
-			     const std::vector<xmethod_worker_up> *,
-			     struct symbol **, badness_vector *);
+static int find_oload_champ (gdb::array_view<value *> args,
+			     size_t num_fns,
+			     fn_field *fns_ptr,
+			     xmethod_worker_up *xm_worker_vec,
+			     symbol **oload_syms,
+			     badness_vector *oload_champ_bv);
 
 static int oload_method_static_p (struct fn_field *, int);
 
@@ -94,11 +96,6 @@ static struct value *value_maybe_namespace_elt (const struct type *,
 static CORE_ADDR allocate_space_in_inferior (int);
 
 static struct value *cast_into_complex (struct type *, struct value *);
-
-static void find_method_list (struct value **, const char *,
-			      LONGEST, struct type *, struct fn_field **, int *,
-			      std::vector<xmethod_worker_up> *,
-			      struct type **, LONGEST *);
 
 int overload_resolution = 0;
 static void
@@ -2292,7 +2289,7 @@ value_union_variant (struct type *union_type, const gdb_byte *contents)
 }
 
 /* Search through the methods of an object (and its bases) to find a
-   specified method.  Return the pointer to the fn_field list FN_LIST of
+   specified method.  Return a reference to the fn_field list FN_LIST of
    overloaded instances defined in the source language.  If available
    and matching, a vector of matching xmethods defined in extension
    languages are also returned in XM_WORKER_VEC
@@ -2316,7 +2313,7 @@ value_union_variant (struct type *union_type, const gdb_byte *contents)
 static void
 find_method_list (struct value **argp, const char *method,
 		  LONGEST offset, struct type *type,
-		  struct fn_field **fn_list, int *num_fns,
+		  gdb::array_view<fn_field> *fn_list,
 		  std::vector<xmethod_worker_up> *xm_worker_vec,
 		  struct type **basetype, LONGEST *boffset)
 {
@@ -2330,7 +2327,7 @@ find_method_list (struct value **argp, const char *method,
      This function is called recursively to search through base classes.
      If there is a source method match found at some stage, then we need not
      look for source methods in consequent recursive calls.  */
-  if ((*fn_list) == NULL)
+  if (fn_list->empty ())
     {
       for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; i--)
 	{
@@ -2341,9 +2338,8 @@ find_method_list (struct value **argp, const char *method,
 	    {
 	      int len = TYPE_FN_FIELDLIST_LENGTH (type, i);
 	      f = TYPE_FN_FIELDLIST1 (type, i);
-	      *fn_list = f;
+	      *fn_list = gdb::make_array_view (f, len);
 
-	      *num_fns = len;
 	      *basetype = type;
 	      *boffset = offset;
 
@@ -2385,7 +2381,7 @@ find_method_list (struct value **argp, const char *method,
 	}
 
       find_method_list (argp, method, base_offset + offset,
-			TYPE_BASECLASS (type, i), fn_list, num_fns,
+			TYPE_BASECLASS (type, i), fn_list,
 			xm_worker_vec, basetype, boffset);
     }
 }
@@ -2398,9 +2394,8 @@ find_method_list (struct value **argp, const char *method,
    ARGP is a pointer to a pointer to a value (the object).
    METHOD is the method name.
    OFFSET is the offset within the value contents.
-   FN_LIST is the pointer to matching overloaded instances defined in
+   FN_LIST is the list of matching overloaded instances defined in
       source language.
-   NUM_FNS is the number of overloaded instances.
    XM_WORKER_VEC is the vector of matching xmethod workers defined in
       extension languages.
    BASETYPE is set to the type of the base subobject that defines the
@@ -2409,8 +2404,8 @@ find_method_list (struct value **argp, const char *method,
 
 static void
 value_find_oload_method_list (struct value **argp, const char *method,
-                              LONGEST offset, struct fn_field **fn_list,
-                              int *num_fns,
+			      LONGEST offset,
+			      gdb::array_view<fn_field> *fn_list,
 			      std::vector<xmethod_worker_up> *xm_worker_vec,
 			      struct type **basetype, LONGEST *boffset)
 {
@@ -2436,11 +2431,10 @@ value_find_oload_method_list (struct value **argp, const char *method,
   gdb_assert (fn_list != NULL && xm_worker_vec != NULL);
 
   /* Clear the lists.  */
-  *fn_list = NULL;
-  *num_fns = 0;
+  *fn_list = {};
   xm_worker_vec->clear ();
 
-  find_method_list (argp, method, 0, t, fn_list, num_fns, xm_worker_vec,
+  find_method_list (argp, method, 0, t, fn_list, xm_worker_vec,
 		    basetype, boffset);
 }
 
@@ -2514,13 +2508,11 @@ find_overload_match (gdb::array_view<value *> args,
 
   struct value *temp = obj;
   /* For methods, the list of overloaded methods.  */
-  struct fn_field *fns_ptr = NULL;
+  gdb::array_view<fn_field> fns_list;
   /* For non-methods, the list of overloaded function symbols.  */
   std::vector<symbol *> oload_syms;
   /* For xmethods, the vector of xmethod workers.  */
   std::vector<xmethod_worker_up> xm_worker_vec;
-  /* Number of overloaded instances being considered.  */
-  int num_fns = 0;
   struct type *basetype = NULL;
   LONGEST boffset;
 
@@ -2560,11 +2552,11 @@ find_overload_match (gdb::array_view<value *> args,
 	}
 
       /* Retrieve the list of methods with the name NAME.  */
-      value_find_oload_method_list (&temp, name, 0, &fns_ptr, &num_fns,
+      value_find_oload_method_list (&temp, name, 0, &fns_list,
 				    &xm_worker_vec, &basetype, &boffset);
       /* If this is a method only search, and no methods were found
          the search has failed.  */
-      if (method == METHOD && (!fns_ptr || !num_fns) && xm_worker_vec.empty ())
+      if (method == METHOD && fns_list.empty () && xm_worker_vec.empty ())
 	error (_("Couldn't find method %s%s%s"),
 	       obj_type_name,
 	       (obj_type_name && *obj_type_name) ? "::" : "",
@@ -2572,23 +2564,28 @@ find_overload_match (gdb::array_view<value *> args,
       /* If we are dealing with stub method types, they should have
 	 been resolved by find_method_list via
 	 value_find_oload_method_list above.  */
-      if (fns_ptr)
+      if (!fns_list.empty ())
 	{
-	  gdb_assert (TYPE_SELF_TYPE (fns_ptr[0].type) != NULL);
+	  gdb_assert (TYPE_SELF_TYPE (fns_list[0].type) != NULL);
 
-	  src_method_oload_champ = find_oload_champ (args,
-						     num_fns, fns_ptr, NULL,
-						     NULL, &src_method_badness);
+	  src_method_oload_champ
+	    = find_oload_champ (args,
+				fns_list.size (),
+				fns_list.data (), NULL, NULL,
+				&src_method_badness);
 
 	  src_method_match_quality = classify_oload_match
 	    (src_method_badness, args.size (),
-	     oload_method_static_p (fns_ptr, src_method_oload_champ));
+	     oload_method_static_p (fns_list.data (), src_method_oload_champ));
 	}
 
       if (!xm_worker_vec.empty ())
 	{
-	  ext_method_oload_champ = find_oload_champ (args, 0, NULL, &xm_worker_vec,
-						     NULL, &ext_method_badness);
+	  ext_method_oload_champ
+	    = find_oload_champ (args,
+				xm_worker_vec.size (),
+				NULL, xm_worker_vec.data (), NULL,
+				&ext_method_badness);
 	  ext_method_match_quality = classify_oload_match (ext_method_badness,
 							   args.size (), 0);
 	}
@@ -2787,22 +2784,22 @@ find_overload_match (gdb::array_view<value *> args,
     }
 
   if (staticp != NULL)
-    *staticp = oload_method_static_p (fns_ptr, method_oload_champ);
+    *staticp = oload_method_static_p (fns_list.data (), method_oload_champ);
 
   if (method_oload_champ >= 0)
     {
       if (src_method_oload_champ >= 0)
 	{
-	  if (TYPE_FN_FIELD_VIRTUAL_P (fns_ptr, method_oload_champ)
+	  if (TYPE_FN_FIELD_VIRTUAL_P (fns_list, method_oload_champ)
 	      && noside != EVAL_AVOID_SIDE_EFFECTS)
 	    {
-	      *valp = value_virtual_fn_field (&temp, fns_ptr,
+	      *valp = value_virtual_fn_field (&temp, fns_list.data (),
 					      method_oload_champ, basetype,
 					      boffset);
 	    }
 	  else
-	    *valp = value_fn_field (&temp, fns_ptr, method_oload_champ,
-				    basetype, boffset);
+	    *valp = value_fn_field (&temp, fns_list.data (),
+				    method_oload_champ, basetype, boffset);
 	}
       else
 	*valp = value_from_xmethod
@@ -2942,7 +2939,8 @@ find_oload_champ_namespace_loop (gdb::array_view<value *> args,
     }
 
   badness_vector new_oload_champ_bv;
-  new_oload_champ = find_oload_champ (args, new_oload_syms.size (),
+  new_oload_champ = find_oload_champ (args,
+				      new_oload_syms.size (),
 				      NULL, NULL, new_oload_syms.data (),
 				      &new_oload_champ_bv);
 
@@ -2979,20 +2977,20 @@ find_oload_champ_namespace_loop (gdb::array_view<value *> args,
    or XM_WORKER_VEC, respectively.  One, and only one of FNS_PTR,
    OLOAD_SYMS and XM_WORKER_VEC can be non-NULL.
 
-   If XM_WORKER_VEC is NULL, then the length of the arrays FNS_PTR
-   or OLOAD_SYMS (whichever is non-NULL) is specified in NUM_FNS.
+   NUM_FNS is the length of the array pointed at by FNS_PTR,
+   OLOAD_SYMS or XM_WORKER_VEC, whichever is non-NULL.
 
    Return the index of the best match; store an indication of the
    quality of the match in OLOAD_CHAMP_BV.  */
 
 static int
 find_oload_champ (gdb::array_view<value *> args,
-		  int num_fns, struct fn_field *fns_ptr,
-		  const std::vector<xmethod_worker_up> *xm_worker_vec,
-		  struct symbol **oload_syms,
+		  size_t num_fns,
+		  fn_field *fns_ptr,
+		  xmethod_worker_up *xm_worker_vec,
+		  symbol **oload_syms,
 		  badness_vector *oload_champ_bv)
 {
-  int ix;
   /* A measure of how good an overloaded instance is.  */
   badness_vector bv;
   /* Index of best overloaded function.  */
@@ -3007,20 +3005,15 @@ find_oload_champ (gdb::array_view<value *> args,
   gdb_assert ((fns_ptr != NULL) + (oload_syms != NULL) + (xm_worker_vec != NULL)
 	      == 1);
 
-  int fn_count = xm_worker_vec != NULL ? xm_worker_vec->size () : num_fns;
-
   /* Consider each candidate in turn.  */
-  for (ix = 0; ix < fn_count; ix++)
+  for (size_t ix = 0; ix < num_fns; ix++)
     {
       int jj;
       int static_offset = 0;
       std::vector<type *> parm_types;
 
       if (xm_worker_vec != NULL)
-	{
-	  xmethod_worker *worker = (*xm_worker_vec)[ix].get ();
-	  parm_types = worker->get_arg_types ();
-	}
+	parm_types = xm_worker_vec[ix]->get_arg_types ();
       else
 	{
 	  size_t nparms;
