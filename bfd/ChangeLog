@@ -1,3 +1,9 @@
+2018-11-21  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* elf32-msp430.c (elf32_msp430_merge_mspabi_attributes): Do not
+	error when .MSP430.attributes section is missing from objects
+	created by LTO.
+
 2018-11-13  Jim Wilson  <jimw@sifive.com>
 
 	* elfnn-riscv.c (riscv_float_abi_string): New.

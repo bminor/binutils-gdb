@@ -2424,6 +2424,12 @@ elf32_msp430_merge_mspabi_attributes (bfd *ibfd, struct bfd_link_info *info)
   if (ibfd->flags & BFD_LINKER_CREATED)
     return TRUE;
 
+  /* LTO can create temporary files for linking which may not have an attribute
+     section.  */
+  if (ibfd->lto_output
+      && bfd_get_section_by_name (ibfd, ".MSP430.attributes") == NULL)
+    return TRUE;
+
   /* If this is the first real object just copy the attributes.  */
   if (!elf_known_obj_attributes_proc (obfd)[0].i)
     {
