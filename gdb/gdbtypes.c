@@ -3464,21 +3464,20 @@ compare_badness (struct badness_vector *a, struct badness_vector *b)
     }
 }
 
-/* Rank a function by comparing its parameter types (PARMS, length
-   NPARMS), to the types of an argument list (ARGS, length NARGS).
-   Return a pointer to a badness vector.  This has NARGS + 1
-   entries.  */
+/* Rank a function by comparing its parameter types (PARMS), to the
+   types of an argument list (ARGS).  Return a pointer to a badness
+   vector.  This has ARGS.size() + 1 entries.  */
 
 struct badness_vector *
-rank_function (struct type **parms, int nparms, 
-	       struct value **args, int nargs)
+rank_function (gdb::array_view<type *> parms,
+	       gdb::array_view<value *> args)
 {
   int i;
   struct badness_vector *bv = XNEW (struct badness_vector);
-  int min_len = nparms < nargs ? nparms : nargs;
+  size_t min_len = std::min (parms.size (), args.size ());
 
-  bv->length = nargs + 1;	/* add 1 for the length-match rank.  */
-  bv->rank = XNEWVEC (struct rank, nargs + 1);
+  bv->length = args.size () + 1;	/* add 1 for the length-match rank.  */
+  bv->rank = XNEWVEC (struct rank, args.size () + 1);
 
   /* First compare the lengths of the supplied lists.
      If there is a mismatch, set it to a high value.  */
@@ -3487,7 +3486,7 @@ rank_function (struct type **parms, int nparms,
      arguments and ellipsis parameter lists, we should consider those
      and rank the length-match more finely.  */
 
-  LENGTH_MATCH (bv) = (nargs != nparms)
+  LENGTH_MATCH (bv) = (args.size () != parms.size ())
 		      ? LENGTH_MISMATCH_BADNESS
 		      : EXACT_MATCH_BADNESS;
 
@@ -3497,7 +3496,7 @@ rank_function (struct type **parms, int nparms,
 				 args[i - 1]);
 
   /* If more arguments than parameters, add dummy entries.  */
-  for (i = min_len + 1; i <= nargs; i++)
+  for (i = min_len + 1; i <= args.size (); i++)
     bv->rank[i] = TOO_FEW_PARAMS_BADNESS;
 
   return bv;

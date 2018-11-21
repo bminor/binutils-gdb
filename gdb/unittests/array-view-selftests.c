@@ -496,6 +496,28 @@ run_tests ()
     for (size_t i = 0; i < len; i++)
       SELF_CHECK (view[i] == data[i]);
   }
+
+  /* Test slicing.  */
+  {
+    gdb_byte data[] = {0x55, 0x66, 0x77, 0x88, 0x99};
+    gdb::array_view<gdb_byte> view = data;
+
+    {
+      auto slc = view.slice (1, 3);
+      SELF_CHECK (slc.data () == data + 1);
+      SELF_CHECK (slc.size () == 3);
+      SELF_CHECK (slc[0] == data[1]);
+      SELF_CHECK (slc[0] == view[1]);
+    }
+
+    {
+      auto slc = view.slice (2);
+      SELF_CHECK (slc.data () == data + 2);
+      SELF_CHECK (slc.size () == 3);
+      SELF_CHECK (slc[0] == view[2]);
+      SELF_CHECK (slc[0] == data[2]);
+    }
+  }
 }
 
 } /* namespace array_view_tests */

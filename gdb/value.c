@@ -2583,24 +2583,23 @@ value_from_xmethod (xmethod_worker_up &&worker)
 /* Return the type of the result of TYPE_CODE_XMETHOD value METHOD.  */
 
 struct type *
-result_type_of_xmethod (struct value *method, int argc, struct value **argv)
+result_type_of_xmethod (struct value *method, gdb::array_view<value *> argv)
 {
   gdb_assert (TYPE_CODE (value_type (method)) == TYPE_CODE_XMETHOD
-	      && method->lval == lval_xcallable && argc > 0);
+	      && method->lval == lval_xcallable && !argv.empty ());
 
-  return method->location.xm_worker->get_result_type
-    (argv[0], argv + 1, argc - 1);
+  return method->location.xm_worker->get_result_type (argv[0], argv.slice (1));
 }
 
 /* Call the xmethod corresponding to the TYPE_CODE_XMETHOD value METHOD.  */
 
 struct value *
-call_xmethod (struct value *method, int argc, struct value **argv)
+call_xmethod (struct value *method, gdb::array_view<value *> argv)
 {
   gdb_assert (TYPE_CODE (value_type (method)) == TYPE_CODE_XMETHOD
-	      && method->lval == lval_xcallable && argc > 0);
+	      && method->lval == lval_xcallable && !argv.empty ());
 
-  return method->location.xm_worker->invoke (argv[0], argv + 1, argc - 1);
+  return method->location.xm_worker->invoke (argv[0], argv.slice (1));
 }
 
 /* Extract a value as a C number (either long or double).

@@ -1,5 +1,38 @@
 2018-11-21  Pedro Alves  <palves@redhat.com>
 
+	* common/array-view.h (array_view::splice(size_type, size_t)): New.
+	(array_view::splice(size_type)): New.
+	* eval.c (eval_call, evaluate_funcall): Adjust to use array_view.
+	* extension.c (xmethod_worker::get_arg_types): Adjust to return an
+	std::vector.
+	(xmethod_worker::get_result_type): Adjust to use gdb::array_view.
+	* extension.h: Include "common/array-view.h".
+	(xmethod_worker::invoke): Adjust to use gdb::array_view.
+	(xmethod_worker::get_arg_types): Adjust to return an std::vector.
+	(xmethod_worker::get_result_type): Adjust to use gdb::array_view.
+	(xmethod_worker::do_get_arg_types): Adjust to use std::vector.
+	(xmethod_worker::do_get_result_type): Adjust to use
+	gdb::array_view.
+	* gdbtypes.c (rank_function): Adjust to use gdb::array_view.
+	* gdbtypes.h: Include "common/array-view.h".
+	(rank_function): Adjust to use gdb::array_view.
+	* python/py-xmethods.c (python_xmethod_worker::invoke)
+	(python_xmethod_worker::do_get_arg_types)
+	(python_xmethod_worker::do_get_result_type)
+	(python_xmethod_worker::invoke): Adjust to new interfaces.
+	* valarith.c (value_user_defined_cpp_op, value_user_defined_op)
+	(value_x_binop, value_x_unop): Adjust to use gdb::array_view.
+	* valops.c (find_overload_match, find_oload_champ_namespace)
+	(find_oload_champ_namespace_loop, find_oload_champ): Adjust to use
+	gdb:array_view and the new xmethod_worker interfaces.
+	* value.c (result_type_of_xmethod, call_xmethod): Adjust to use
+	gdb::array_view.
+	* value.h (find_overload_match, result_type_of_xmethod)
+	(call_xmethod): Adjust to use gdb::array_view.
+	* unittests/array-view-selftests.c: Add slicing tests.
+
+2018-11-21  Pedro Alves  <palves@redhat.com>
+
 	* ada-lang.c (ada_evaluate_subexp): Adjust to pass an array_view.
 	* common/array-view.h (make_array_view): New.
 	* compile/compile-object-run.c (compile_object_run): Adjust to

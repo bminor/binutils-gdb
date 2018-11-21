@@ -870,12 +870,12 @@ get_matching_xmethod_workers (struct type *type, const char *method_name,
 
 /* See extension.h.  */
 
-type **
-xmethod_worker::get_arg_types (int *nargs)
+std::vector<type *>
+xmethod_worker::get_arg_types ()
 {
-  type **type_array = NULL;
+  std::vector<type *> type_array;
 
-  ext_lang_rc rc = do_get_arg_types (nargs, &type_array);
+  ext_lang_rc rc = do_get_arg_types (&type_array);
   if (rc == EXT_LANG_RC_ERROR)
     error (_("Error while looking for arg types of a xmethod worker "
 	     "defined in %s."), m_extlang->capitalized_name);
@@ -886,11 +886,11 @@ xmethod_worker::get_arg_types (int *nargs)
 /* See extension.h.  */
 
 struct type *
-xmethod_worker::get_result_type (value *object, value **args, int nargs)
+xmethod_worker::get_result_type (value *object, gdb::array_view<value *> args)
 {
   type *result_type;
 
-  ext_lang_rc rc = do_get_result_type (object, args, nargs, &result_type);
+  ext_lang_rc rc = do_get_result_type (object, args, &result_type);
   if (rc == EXT_LANG_RC_ERROR)
     {
       error (_("Error while fetching result type of an xmethod worker "

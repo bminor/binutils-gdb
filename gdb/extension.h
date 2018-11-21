@@ -22,6 +22,7 @@
 
 #include "mi/mi-cmds.h" /* For PRINT_NO_VALUES, etc.  */
 #include "common/vec.h"
+#include "common/array-view.h"
 
 struct breakpoint;
 struct command_line;
@@ -186,38 +187,35 @@ struct xmethod_worker
   virtual ~xmethod_worker () = default;
 
   /* Invoke the xmethod encapsulated in this worker and return the result.
-     The method is invoked on OBJ with arguments in the ARGS array.  NARGS is
-     the length of the this array.  */
+     The method is invoked on OBJ with arguments in the ARGS array.  */
 
-  virtual value *invoke (value *obj, value **args, int nargs) = 0;
+  virtual value *invoke (value *obj, gdb::array_view<value *> args) = 0;
 
   /* Return the arg types of the xmethod encapsulated in this worker.
-     An array of arg types is returned.  The length of the array is returned in
-     NARGS.  The type of the 'this' object is returned as the first element of
-     array.  */
+     The type of the 'this' object is returned as the first element of
+     the vector.  */
 
-  type **get_arg_types (int *nargs);
+  std::vector<type *> get_arg_types ();
 
   /* Return the type of the result of the xmethod encapsulated in this worker.
-     OBJECT, ARGS, NARGS are the same as for invoke.  */
+     OBJECT and ARGS are the same as for invoke.  */
 
-  type *get_result_type (value *object, value **args, int nargs);
+  type *get_result_type (value *object, gdb::array_view<value *> args);
 
 private:
 
-  /* Return the types of the arguments the method takes.  The number of
-     arguments is returned in NARGS, and their types are returned in the array
-     ARGTYPES.  */
+  /* Return the types of the arguments the method takes.  The types
+     are returned in TYPE_ARGS, one per argument.  */
 
   virtual enum ext_lang_rc do_get_arg_types
-    (int *nargs, struct type ***arg_types) = 0;
+    (std::vector<type *> *type_args) = 0;
 
-  /* Fetch the type of the result of the method implemented by this worker.
-     OBJECT, ARGS, NARGS are the same as for the invoked method.  The result
-     type is stored in *RESULT_TYPE.  */
+  /* Fetch the type of the result of the method implemented by this
+     worker.  OBJECT and ARGS are the same as for the invoked method.
+     The result type is stored in *RESULT_TYPE.  */
 
   virtual enum ext_lang_rc do_get_result_type
-    (struct value *obj, struct value **args, int nargs,
+    (struct value *obj, gdb::array_view<value *> args,
      struct type **result_type_ptr) = 0;
 
   /* The language the xmethod worker is implemented in.  */

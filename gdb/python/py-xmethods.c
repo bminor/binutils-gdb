@@ -46,11 +46,11 @@ struct python_xmethod_worker : xmethod_worker
 
   /* Implementation of xmethod_worker::invoke for Python.  */
 
-  value *invoke (value *obj, value **args, int nargs) override;
+  value *invoke (value *obj, gdb::array_view<value *> args) override;
 
   /* Implementation of xmethod_worker::do_get_arg_types for Python.  */
 
-  ext_lang_rc do_get_arg_types (int *nargs, type ***arg_types) override;
+  ext_lang_rc do_get_arg_types (std::vector<type *> *type_args) override;
 
   /* Implementation of xmethod_worker::do_get_result_type for Python.
 
@@ -58,7 +58,7 @@ struct python_xmethod_worker : xmethod_worker
      result type, if the get_result_type operation is not provided by WORKER
      then EXT_LANG_RC_OK is returned and NULL is returned in *RESULT_TYPE.  */
 
-  ext_lang_rc do_get_result_type (value *obj, value **args, int nargs,
+  ext_lang_rc do_get_result_type (value *obj, gdb::array_view<value *> args,
 				  type **result_type_ptr) override;
 
 private:
@@ -293,7 +293,7 @@ gdbpy_get_matching_xmethod_workers
 /* See declaration.  */
 
 ext_lang_rc
-python_xmethod_worker::do_get_arg_types (int *nargs, type ***arg_types)
+python_xmethod_worker::do_get_arg_types (std::vector<type *> *arg_types)
 {
   /* The gdbpy_enter object needs to be placed first, so that it's the last to
      be destroyed.  */
@@ -301,10 +301,6 @@ python_xmethod_worker::do_get_arg_types (int *nargs, type ***arg_types)
   struct type *obj_type;
   int i = 1, arg_count;
   gdbpy_ref<> list_iter;
-
-  /* Set nargs to -1 so that any premature return from this function returns
-     an invalid/unusable number of arg types.  */
-  *nargs = -1;
 
   gdbpy_ref<> get_arg_types_method
     (PyObject_GetAttrString (m_py_worker, get_arg_types_method_name));
@@ -345,8 +341,7 @@ python_xmethod_worker::do_get_arg_types (int *nargs, type ***arg_types)
     arg_count = 1;
 
   /* Include the 'this' argument in the size.  */
-  gdb::unique_xmalloc_ptr<struct type *> type_array
-    (XCNEWVEC (struct type *, arg_count + 1));
+  arg_types->resize (arg_count + 1);
   i = 1;
   if (list_iter != NULL)
     {
@@ -373,7 +368,7 @@ python_xmethod_worker::do_get_arg_types (int *nargs, type ***arg_types)
 	      return EXT_LANG_RC_ERROR;
 	    }
 
-	  (type_array.get ())[i] = arg_type;
+	  (*arg_types)[i] = arg_type;
 	  i++;
 	}
     }
@@ -393,7 +388,7 @@ python_xmethod_worker::do_get_arg_types (int *nargs, type ***arg_types)
 	}
       else
 	{
-	  (type_array.get ())[i] = arg_type;
+	  (*arg_types)[i] = arg_type;
 	  i++;
 	}
     }
@@ -402,10 +397,8 @@ python_xmethod_worker::do_get_arg_types (int *nargs, type ***arg_types)
      be a 'const' value.  Hence, create a 'const' variant of the 'this' pointer
      type.  */
   obj_type = type_object_to_type (m_this_type);
-  (type_array.get ())[0] = make_cv_type (1, 0, lookup_pointer_type (obj_type),
-					 NULL);
-  *nargs = i;
-  *arg_types = type_array.release ();
+  (*arg_types)[0] = make_cv_type (1, 0, lookup_pointer_type (obj_type),
+				  NULL);
 
   return EXT_LANG_RC_OK;
 }
@@ -413,7 +406,8 @@ python_xmethod_worker::do_get_arg_types (int *nargs, type ***arg_types)
 /* See declaration.  */
 
 ext_lang_rc
-python_xmethod_worker::do_get_result_type (value *obj, value **args, int nargs,
+python_xmethod_worker::do_get_result_type (value *obj,
+					   gdb::array_view<value *> args,
 					   type **result_type_ptr)
 {
   struct type *obj_type, *this_type;
@@ -461,7 +455,7 @@ python_xmethod_worker::do_get_result_type (value *obj, value **args, int nargs,
       return EXT_LANG_RC_ERROR;
     }
 
-  gdbpy_ref<> py_arg_tuple (PyTuple_New (nargs + 1));
+  gdbpy_ref<> py_arg_tuple (PyTuple_New (args.size () + 1));
   if (py_arg_tuple == NULL)
     {
       gdbpy_print_stack ();
@@ -472,7 +466,7 @@ python_xmethod_worker::do_get_result_type (value *obj, value **args, int nargs,
      release.  */
   PyTuple_SET_ITEM (py_arg_tuple.get (), 0, py_value_obj.release ());
 
-  for (i = 0; i < nargs; i++)
+  for (i = 0; i < args.size (); i++)
     {
       PyObject *py_value_arg = value_to_value_object (args[i]);
 
@@ -508,8 +502,8 @@ python_xmethod_worker::do_get_result_type (value *obj, value **args, int nargs,
 /* See declaration.  */
 
 struct value *
-python_xmethod_worker::invoke (struct value *obj, struct value **args,
-			       int nargs)
+python_xmethod_worker::invoke (struct value *obj,
+			       gdb::array_view<value *> args)
 {
   gdbpy_enter enter_py (get_current_arch (), current_language);
 
@@ -546,7 +540,7 @@ python_xmethod_worker::invoke (struct value *obj, struct value **args,
       error (_("Error while executing Python code."));
     }
 
-  gdbpy_ref<> py_arg_tuple (PyTuple_New (nargs + 1));
+  gdbpy_ref<> py_arg_tuple (PyTuple_New (args.size () + 1));
   if (py_arg_tuple == NULL)
     {
       gdbpy_print_stack ();
@@ -557,7 +551,7 @@ python_xmethod_worker::invoke (struct value *obj, struct value **args,
      release.  */
   PyTuple_SET_ITEM (py_arg_tuple.get (), 0, py_value_obj.release ());
 
-  for (i = 0; i < nargs; i++)
+  for (i = 0; i < args.size (); i++)
     {
       PyObject *py_value_arg = value_to_value_object (args[i]);
 
