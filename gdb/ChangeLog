@@ -1,5 +1,43 @@
 2018-11-21  Pedro Alves  <palves@redhat.com>
 
+	* cp-support.c (sym_return_val_size, sym_return_val_index)
+	(sym_return_val): Delete.
+	(overload_list_add_symbol): Add std::vector parameter.  Adjust to
+	add to the vector.
+	(make_symbol_overload_list): Adjust to return a std::vector
+	instead of maintaining a global open coded vector.
+	(make_symbol_overload_list_block): Add std::vector parameter.
+	(make_symbol_overload_list_block): Rename to ...
+	(add_symbol_overload_list_block): ... this and add std::vector
+	parameter.
+	(make_symbol_overload_list_namespace): Rename to ...
+	(add_symbol_overload_list_namespace): ... this and add std::vector
+	parameter.
+	(make_symbol_overload_list_adl_namespace): Rename to ...
+	(add_symbol_overload_list_adl_namespace): ... this and add
+	std::vector parameter.
+	(make_symbol_overload_list_adl): Delete.
+	(add_symbol_overload_list_adl): New.
+	(make_symbol_overload_list_using): Rename to ...
+	(add_symbol_overload_list_using): ... this and add std::vector
+	parameter.
+	(make_symbol_overload_list_qualified): Rename to ...
+	(add_symbol_overload_list_qualified): ... this and add std::vector
+	parameter.
+	* cp-support.h: Include "common/array-view.h" and <vector>.
+	(make_symbol_overload_list): Change return type to std::vector.
+	(make_symbol_overload_list_adl): Delete declaration.
+	(add_symbol_overload_list_adl): New declaration.
+	* valops.c (find_overload_match): Local 'oload_syms' now a
+	std::vector.
+	(find_oload_champ_namespace): 'oload_syms' parameter now a
+	std::vector pointer.
+	(find_oload_champ_namespace_loop): 'oload_syms' parameter now a
+	std::vector pointer.  Adjust to new make_symbol_overload_list
+	interface.
+
+2018-11-21  Pedro Alves  <palves@redhat.com>
+
 	* common/array-view.h (array_view::splice(size_type, size_t)): New.
 	(array_view::splice(size_type)): New.
 	* eval.c (eval_call, evaluate_funcall): Adjust to use array_view.

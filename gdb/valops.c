@@ -56,13 +56,13 @@ static struct value *search_struct_method (const char *, struct value **,
 
 static int find_oload_champ_namespace (gdb::array_view<value *> args,
 				       const char *, const char *,
-				       struct symbol ***,
+				       std::vector<symbol *> *oload_syms,
 				       struct badness_vector **,
 				       const int no_adl);
 
 static int find_oload_champ_namespace_loop (gdb::array_view<value *> args,
 					    const char *, const char *,
-					    int, struct symbol ***,
+					    int, std::vector<symbol *> *oload_syms,
 					    struct badness_vector **, int *,
 					    const int no_adl);
 
@@ -2517,7 +2517,7 @@ find_overload_match (gdb::array_view<value *> args,
   /* For methods, the list of overloaded methods.  */
   struct fn_field *fns_ptr = NULL;
   /* For non-methods, the list of overloaded function symbols.  */
-  struct symbol **oload_syms = NULL;
+  std::vector<symbol *> oload_syms;
   /* For xmethods, the vector of xmethod workers.  */
   std::vector<xmethod_worker_up> xm_worker_vec;
   /* Number of overloaded instances being considered.  */
@@ -2717,7 +2717,6 @@ find_overload_match (gdb::array_view<value *> args,
 	func_match_quality = classify_oload_match (func_badness,
 						   args.size (), 0);
 
-      make_cleanup (xfree, oload_syms);
       make_cleanup (xfree, func_badness);
     }
 
@@ -2857,7 +2856,7 @@ static int
 find_oload_champ_namespace (gdb::array_view<value *> args,
 			    const char *func_name,
 			    const char *qualified_name,
-			    struct symbol ***oload_syms,
+			    std::vector<symbol *> *oload_syms,
 			    struct badness_vector **oload_champ_bv,
 			    const int no_adl)
 {
@@ -2887,17 +2886,15 @@ find_oload_champ_namespace_loop (gdb::array_view<value *> args,
 				 const char *func_name,
 				 const char *qualified_name,
 				 int namespace_len,
-				 struct symbol ***oload_syms,
+				 std::vector<symbol *> *oload_syms,
 				 struct badness_vector **oload_champ_bv,
 				 int *oload_champ,
 				 const int no_adl)
 {
   int next_namespace_len = namespace_len;
   int searched_deeper = 0;
-  int num_fns = 0;
   struct cleanup *old_cleanups;
   int new_oload_champ;
-  struct symbol **new_oload_syms;
   struct badness_vector *new_oload_champ_bv;
   char *new_namespace;
 
@@ -2910,7 +2907,6 @@ find_oload_champ_namespace_loop (gdb::array_view<value *> args,
     cp_find_first_component (qualified_name + next_namespace_len);
 
   /* Initialize these to values that can safely be xfree'd.  */
-  *oload_syms = NULL;
   *oload_champ_bv = NULL;
 
   /* First, see if we have a deeper namespace we can search in.
@@ -2938,13 +2934,13 @@ find_oload_champ_namespace_loop (gdb::array_view<value *> args,
      because this overload mechanism only gets called if there's a
      function symbol to start off with.)  */
 
-  old_cleanups = make_cleanup (xfree, *oload_syms);
-  make_cleanup (xfree, *oload_champ_bv);
+  old_cleanups = make_cleanup (xfree, *oload_champ_bv);
   new_namespace = (char *) alloca (namespace_len + 1);
   strncpy (new_namespace, qualified_name, namespace_len);
   new_namespace[namespace_len] = '\0';
-  new_oload_syms = make_symbol_overload_list (func_name,
-					      new_namespace);
+
+  std::vector<symbol *> new_oload_syms
+    = make_symbol_overload_list (func_name, new_namespace);
 
   /* If we have reached the deepest level perform argument
      determined lookup.  */
@@ -2958,14 +2954,12 @@ find_oload_champ_namespace_loop (gdb::array_view<value *> args,
 	alloca (args.size () * (sizeof (struct type *)));
       for (ix = 0; ix < args.size (); ix++)
 	arg_types[ix] = value_type (args[ix]);
-      make_symbol_overload_list_adl (arg_types, args.size (), func_name);
+      add_symbol_overload_list_adl ({arg_types, args.size ()}, func_name,
+				    &new_oload_syms);
     }
 
-  while (new_oload_syms[num_fns])
-    ++num_fns;
-
-  new_oload_champ = find_oload_champ (args, num_fns,
-				      NULL, NULL, new_oload_syms,
+  new_oload_champ = find_oload_champ (args, new_oload_syms.size (),
+				      NULL, NULL, new_oload_syms.data (),
 				      &new_oload_champ_bv);
 
   /* Case 1: We found a good match.  Free earlier matches (if any),
@@ -2978,7 +2972,7 @@ find_oload_champ_namespace_loop (gdb::array_view<value *> args,
   if (new_oload_champ != -1
       && classify_oload_match (new_oload_champ_bv, args.size (), 0) == STANDARD)
     {
-      *oload_syms = new_oload_syms;
+      *oload_syms = std::move (new_oload_syms);
       *oload_champ = new_oload_champ;
       *oload_champ_bv = new_oload_champ_bv;
       do_cleanups (old_cleanups);
@@ -2986,14 +2980,13 @@ find_oload_champ_namespace_loop (gdb::array_view<value *> args,
     }
   else if (searched_deeper)
     {
-      xfree (new_oload_syms);
       xfree (new_oload_champ_bv);
       discard_cleanups (old_cleanups);
       return 0;
     }
   else
     {
-      *oload_syms = new_oload_syms;
+      *oload_syms = std::move (new_oload_syms);
       *oload_champ = new_oload_champ;
       *oload_champ_bv = new_oload_champ_bv;
       do_cleanups (old_cleanups);
