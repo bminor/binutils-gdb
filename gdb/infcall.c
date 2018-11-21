@@ -334,7 +334,7 @@ find_function_addr (struct value *function,
 static CORE_ADDR
 push_dummy_code (struct gdbarch *gdbarch,
 		 CORE_ADDR sp, CORE_ADDR funaddr,
-		 struct value **args, int nargs,
+		 gdb::array_view<value *> args,
 		 struct type *value_type,
 		 CORE_ADDR *real_pc, CORE_ADDR *bp_addr,
 		 struct regcache *regcache)
@@ -342,7 +342,8 @@ push_dummy_code (struct gdbarch *gdbarch,
   gdb_assert (gdbarch_push_dummy_code_p (gdbarch));
 
   return gdbarch_push_dummy_code (gdbarch, sp, funaddr,
-				  args, nargs, value_type, real_pc, bp_addr,
+				  args.data (), args.size (),
+				  value_type, real_pc, bp_addr,
 				  regcache);
 }
 
@@ -686,10 +687,10 @@ cleanup_delete_std_terminate_breakpoint (void *ignore)
 struct value *
 call_function_by_hand (struct value *function,
 		       type *default_return_type,
-		       int nargs, struct value **args)
+		       gdb::array_view<value *> args)
 {
   return call_function_by_hand_dummy (function, default_return_type,
-				      nargs, args, NULL, NULL);
+				      args, NULL, NULL);
 }
 
 /* All this stuff with a dummy frame may seem unnecessarily complicated
@@ -713,7 +714,7 @@ call_function_by_hand (struct value *function,
 struct value *
 call_function_by_hand_dummy (struct value *function,
 			     type *default_return_type,
-			     int nargs, struct value **args,
+			     gdb::array_view<value *> args,
 			     dummy_frame_dtor_ftype *dummy_dtor,
 			     void *dummy_dtor_data)
 {
@@ -912,7 +913,7 @@ call_function_by_hand_dummy (struct value *function,
 	/* Be careful BP_ADDR is in inferior PC encoding while
 	   BP_ADDR_AS_ADDRESS is a plain memory address.  */
 
-	sp = push_dummy_code (gdbarch, sp, funaddr, args, nargs,
+	sp = push_dummy_code (gdbarch, sp, funaddr, args,
 			      target_values_type, &real_pc, &bp_addr,
 			      get_current_regcache ());
 
@@ -953,14 +954,14 @@ call_function_by_hand_dummy (struct value *function,
       internal_error (__FILE__, __LINE__, _("bad switch"));
     }
 
-  if (nargs < TYPE_NFIELDS (ftype))
+  if (args.size () < TYPE_NFIELDS (ftype))
     error (_("Too few arguments in function call."));
 
-  for (int i = nargs - 1; i >= 0; i--)
+  for (int i = args.size () - 1; i >= 0; i--)
     {
       int prototyped;
       struct type *param_type;
-	
+
       /* FIXME drow/2002-05-31: Should just always mark methods as
 	 prototyped.  Can we respect TYPE_VARARGS?  Probably not.  */
       if (TYPE_CODE (ftype) == TYPE_CODE_METHOD)
@@ -1041,19 +1042,19 @@ call_function_by_hand_dummy (struct value *function,
   if (return_method == return_method_hidden_param)
     {
       /* Add the new argument to the front of the argument list.  */
+      new_args.reserve (args.size ());
       new_args.push_back
 	(value_from_pointer (lookup_pointer_type (values_type), struct_addr));
-      std::copy (&args[0], &args[nargs], std::back_inserter (new_args));
-      args = new_args.data ();
-      nargs++;
+      new_args.insert (new_args.end (), args.begin (), args.end ());
+      args = new_args;
     }
 
   /* Create the dummy stack frame.  Pass in the call dummy address as,
      presumably, the ABI code knows where, in the call dummy, the
      return address should be pointed.  */
   sp = gdbarch_push_dummy_call (gdbarch, function, get_current_regcache (),
-				bp_addr, nargs, args, sp, return_method,
-				struct_addr);
+				bp_addr, args.size (), args.data (),
+				sp, return_method, struct_addr);
 
   /* Set up a frame ID for the dummy frame so we can pass it to
      set_momentary_breakpoint.  We need to give the breakpoint a frame

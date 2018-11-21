@@ -21,6 +21,7 @@
 #define INFCALL_H
 
 #include "dummy-frame.h"
+#include "common/array-view.h"
 
 struct value;
 struct type;
@@ -37,10 +38,10 @@ extern CORE_ADDR find_function_addr (struct value *function,
 
 /* Perform a function call in the inferior.
 
-   ARGS is a vector of values of arguments (NARGS of them).  FUNCTION
-   is a value, the function to be called.  Returns a value
-   representing what the function returned.  May fail to return, if a
-   breakpoint or signal is hit during the execution of the function.
+   ARGS is a vector of values of arguments.  FUNCTION is a value, the
+   function to be called.  Returns a value representing what the
+   function returned.  May fail to return, if a breakpoint or signal
+   is hit during the execution of the function.
 
    DFEAULT_RETURN_TYPE is used as function return type if the return
    type is unknown.  This is used when calling functions with no debug
@@ -50,8 +51,7 @@ extern CORE_ADDR find_function_addr (struct value *function,
 
 extern struct value *call_function_by_hand (struct value *function,
 					    type *default_return_type,
-					    int nargs,
-					    struct value **args);
+					    gdb::array_view<value *> args);
 
 /* Similar to call_function_by_hand and additional call
    register_dummy_frame_dtor with DUMMY_DTOR and DUMMY_DTOR_DATA for the
@@ -60,8 +60,7 @@ extern struct value *call_function_by_hand (struct value *function,
 extern struct value *
   call_function_by_hand_dummy (struct value *function,
 			       type *default_return_type,
-			       int nargs,
-			       struct value **args,
+			       gdb::array_view<value *> args,
 			       dummy_frame_dtor_ftype *dummy_dtor,
 			       void *dummy_dtor_data);
 

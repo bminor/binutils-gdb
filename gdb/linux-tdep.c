@@ -2400,7 +2400,7 @@ linux_infcall_mmap (CORE_ADDR size, unsigned prot)
   arg[ARG_FD] = value_from_longest (builtin_type (gdbarch)->builtin_int, -1);
   arg[ARG_OFFSET] = value_from_longest (builtin_type (gdbarch)->builtin_int64,
 					0);
-  addr_val = call_function_by_hand (mmap_val, NULL, ARG_LAST, arg);
+  addr_val = call_function_by_hand (mmap_val, NULL, arg);
   retval = value_as_address (addr_val);
   if (retval == (CORE_ADDR) -1)
     error (_("Failed inferior mmap call for %s bytes, errno is changed."),
@@ -2429,7 +2429,7 @@ linux_infcall_munmap (CORE_ADDR addr, CORE_ADDR size)
   /* Assuming sizeof (unsigned long) == sizeof (size_t).  */
   arg[ARG_LENGTH] = value_from_ulongest
 		    (builtin_type (gdbarch)->builtin_unsigned_long, size);
-  retval_val = call_function_by_hand (munmap_val, NULL, ARG_LAST, arg);
+  retval_val = call_function_by_hand (munmap_val, NULL, arg);
   retval = value_as_long (retval_val);
   if (retval != 0)
     warning (_("Failed inferior munmap call at %s for %s bytes, "

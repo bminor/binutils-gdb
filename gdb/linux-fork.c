@@ -456,7 +456,7 @@ inferior_call_waitpid (ptid_t pptid, int pid)
 {
   struct objfile *waitpid_objf;
   struct value *waitpid_fn = NULL;
-  struct value *argv[4], *retv;
+  struct value *argv[3], *retv;
   struct gdbarch *gdbarch = get_current_arch ();
   struct fork_info *oldfp = NULL, *newfp = NULL;
   struct cleanup *old_cleanup;
@@ -490,9 +490,8 @@ inferior_call_waitpid (ptid_t pptid, int pid)
   argv[0] = value_from_longest (builtin_type (gdbarch)->builtin_int, pid);
   argv[1] = value_from_pointer (builtin_type (gdbarch)->builtin_data_ptr, 0);
   argv[2] = value_from_longest (builtin_type (gdbarch)->builtin_int, 0);
-  argv[3] = 0;
 
-  retv = call_function_by_hand (waitpid_fn, NULL, 3, argv);
+  retv = call_function_by_hand (waitpid_fn, NULL, argv);
   if (value_as_long (retv) < 0)
     goto out;
 
@@ -704,7 +703,7 @@ checkpoint_command (const char *args, int from_tty)
     scoped_restore save_pid
       = make_scoped_restore (&checkpointing_pid, inferior_ptid.pid ());
 
-    ret = call_function_by_hand (fork_fn, NULL, 0, &ret);
+    ret = call_function_by_hand (fork_fn, NULL, {});
   }
 
   if (!ret)	/* Probably can't happen.  */

@@ -1172,7 +1172,7 @@ rust_evaluate_funcall (struct expression *exp, int *pos, enum noside noside)
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     result = value_zero (TYPE_TARGET_TYPE (fn_type), not_lval);
   else
-    result = call_function_by_hand (function, NULL, num_args + 1, args.data ());
+    result = call_function_by_hand (function, NULL, args);
   return result;
 }
 

@@ -1,3 +1,33 @@
+2018-11-21  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_evaluate_subexp): Adjust to pass an array_view.
+	* common/array-view.h (make_array_view): New.
+	* compile/compile-object-run.c (compile_object_run): Adjust to
+	pass an array_view.
+	* elfread.c (elf_gnu_ifunc_resolve_addr): Adjust.
+	* eval.c (eval_call): Adjust to pass an array_view.
+	(evaluate_subexp_standard): Adjust to pass an array_view.
+	* gcore.c (call_target_sbrk): Adjust to pass an array_view.
+	* guile/scm-value.c (gdbscm_value_call): Likewise.
+	* infcall.c (push_dummy_code): Replace pointer + size parameters
+	with an array_view parameter.
+	(call_function_by_hand, call_function_by_hand_dummy): Likewise and
+	adjust.
+	* infcall.h: Include "common/array-view.h".
+	(call_function_by_hand, call_function_by_hand_dummy): Replace
+	pointer + size parameters with an array_view parameter.
+	* linux-fork.c (inferior_call_waitpid): Adjust to use array_view.
+	* linux-tdep.c (linux_infcall_mmap): Likewise.
+	* objc-lang.c (lookup_objc_class, lookup_child_selector)
+	(value_nsstring, print_object_command): Likewise.
+	* python/py-value.c (valpy_call): Likewise.
+	* rust-lang.c (rust_evaluate_funcall): Likewise.
+	* spu-tdep.c (flush_ea_cache): Likewise.
+	* valarith.c (value_x_binop, value_x_unop): Likewise.
+	* valops.c (value_allocate_space_in_inferior): Likewise.
+	* unittests/array-view-selftests.c (run_tests): Add
+	gdb::make_array_view test.
+
 2018-11-20  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* cli-out.c (cli_ui_out::do_field_int): Use string_printf rather

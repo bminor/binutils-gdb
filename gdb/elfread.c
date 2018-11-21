@@ -904,7 +904,7 @@ elf_gnu_ifunc_resolve_addr (struct gdbarch *gdbarch, CORE_ADDR pc)
   target_auxv_search (current_top_target (), AT_HWCAP, &hwcap);
   hwcap_val = value_from_longest (builtin_type (gdbarch)
 				  ->builtin_unsigned_long, hwcap);
-  address_val = call_function_by_hand (function, NULL, 1, &hwcap_val);
+  address_val = call_function_by_hand (function, NULL, hwcap_val);
   address = value_as_address (address_val);
   address = gdbarch_convert_from_func_ptr_addr (gdbarch, address, current_top_target ());
   address = gdbarch_addr_bits_remove (gdbarch, address);

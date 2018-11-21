@@ -483,6 +483,19 @@ run_tests ()
     gdb::array_view<Vec> view_elem = elem;
     SELF_CHECK (view_elem.size () == 1);
   }
+
+  /* gdb::make_array_view, int length.  */
+  {
+    gdb_byte data[] = {0x55, 0x66, 0x77, 0x88};
+    int len = sizeof (data) / sizeof (data[0]);
+    auto view = gdb::make_array_view (data, len);
+
+    SELF_CHECK (view.data () == data);
+    SELF_CHECK (view.size () == len);
+
+    for (size_t i = 0; i < len; i++)
+      SELF_CHECK (view[i] == data[i]);
+  }
 }
 
 } /* namespace array_view_tests */
