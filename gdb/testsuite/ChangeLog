@@ -1,3 +1,9 @@
+2018-11-21  Benno Fünfstück  <benno.fuenfstueck@gmail.com>
+
+	PR python/23714
+	* gdb.python/python.exp: Test command repetition after
+	gdb.execute.
+
 2018-11-19  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/warning.exp: Don't override INTERNAL_FLAGS.  Use
