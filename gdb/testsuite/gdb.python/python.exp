@@ -121,6 +121,7 @@ gdb_test "python print (x)" "23"
 
 gdb_test "python gdb.execute('echo 2\\necho 3\\\\n\\n')" "23" \
     "multi-line execute"
+gdb_test " " "23" "gdb.execute does not affect repeat history"
 
 # Test post_event.
 gdb_py_test_multiple "post event insertion" \

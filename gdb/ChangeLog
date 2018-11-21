@@ -1,3 +1,9 @@
+2018-11-21  Benno Fünfstück  <benno.fuenfstueck@gmail.com>
+
+	PR python/23714
+	* gdb/python/python.c (execute_gdb_command): Call
+	prevent_dont_repeat earlier to avoid affecting dont_repeat.
+
 2018-11-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* Makefile.in (ALL_TARGET_OBS): Add arch/riscv.o.

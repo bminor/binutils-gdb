@@ -583,6 +583,8 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
 
   std::string to_string_res;
 
+  scoped_restore preventer = prevent_dont_repeat ();
+
   TRY
     {
       struct interp *interp;
@@ -612,7 +614,6 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
 	interp = interp_lookup (current_ui, "console");
 	current_uiout = interp->interp_ui_out ();
 
-	scoped_restore preventer = prevent_dont_repeat ();
 	if (to_string)
 	  to_string_res = execute_control_commands_to_string (lines.get (),
 							      from_tty);
