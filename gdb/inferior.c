@@ -122,9 +122,14 @@ add_inferior (int pid)
   struct inferior *inf = add_inferior_silent (pid);
 
   if (print_inferior_events)
-    printf_unfiltered (_("[New inferior %d (%s)]\n"),
-		       inf->num,
-		       target_pid_to_str (ptid_t (pid)));
+    {
+      if (pid != 0)
+	printf_unfiltered (_("[New inferior %d (%s)]\n"),
+			   inf->num,
+			   target_pid_to_str (ptid_t (pid)));
+      else
+	printf_unfiltered (_("[New inferior %d]\n"), inf->num);
+    }
 
   return inf;
 }

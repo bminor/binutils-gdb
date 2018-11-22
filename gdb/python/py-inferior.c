@@ -86,8 +86,8 @@ python_on_normal_stop (struct bpstats *bs, int print_frame)
   if (!gdb_python_initialized)
     return;
 
-  if (!find_thread_ptid (inferior_ptid))
-      return;
+  if (inferior_ptid == null_ptid)
+    return;
 
   stop_signal = inferior_thread ()->suspend.stop_signal;
 

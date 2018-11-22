@@ -1,3 +1,16 @@
+2018-11-22  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-interp.c (cli_on_user_selected_context_changed): Use
+	inferior_thread instead of find_thread_ptid, and only when
+	inferior_ptid is not null_ptid.
+	* inferior.c (add_inferior): Don't include target_pid_to_str
+	output when the inferior is not started.
+	* python/py-inferior.c (python_on_normal_stop): Don't use
+	find_thread_ptid.
+	(tui_on_user_selected_context_changed): Use inferior_thread
+	instead of find_thread_ptid, and only when inferior_ptid is not
+	null_ptid.
+
 2018-11-21  Benno Fünfstück  <benno.fuenfstueck@gmail.com>
 
 	PR python/23714

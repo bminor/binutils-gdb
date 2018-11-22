@@ -210,13 +210,11 @@ tui_on_command_error (void)
 static void
 tui_on_user_selected_context_changed (user_selected_what selection)
 {
-  struct thread_info *tp;
-
   /* This event is suppressed.  */
   if (cli_suppress_notification.user_selected_context)
     return;
 
-  tp = find_thread_ptid (inferior_ptid);
+  thread_info *tp = inferior_ptid != null_ptid ? inferior_thread () : NULL;
 
   SWITCH_THRU_ALL_UIS ()
     {
