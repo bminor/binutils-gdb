@@ -25,7 +25,8 @@
 #include "regcache.h"
 #include "target.h"
 #include "value.h"
-#include "gdbcore.h"		/* for get_exec_file */
+#include "gdbcore.h"
+#include "inferior.h"          /* for get_exec_file */
 #include "gdbthread.h"
 
 #include <fcntl.h>

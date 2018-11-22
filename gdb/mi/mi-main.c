@@ -587,8 +587,7 @@ mi_cmd_thread_list_ids (const char *command, char **argv, int argc)
   {
     ui_out_emit_tuple tuple_emitter (current_uiout, "thread-ids");
 
-    struct thread_info *tp;
-    ALL_NON_EXITED_THREADS (tp)
+    for (thread_info *tp : all_non_exited_threads ())
       {
 	if (tp->ptid == inferior_ptid)
 	  current_thread = tp->global_num;
@@ -1995,7 +1994,7 @@ mi_execute_command (const char *cmd, int from_tty)
 	  top_level_interpreter ()->interp_ui_out ()->is_mi_like_p ()
 	  /* Don't try report anything if there are no threads --
 	     the program is dead.  */
-	  && thread_count () != 0
+	  && any_thread_p ()
 	  /* If the command already reports the thread change, no need to do it
 	     again.  */
 	  && !command_notifies_uscc_observer (command.get ()))

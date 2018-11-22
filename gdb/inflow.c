@@ -546,9 +546,8 @@ void
 child_interrupt (struct target_ops *self)
 {
   /* Interrupt the first inferior that has a resumed thread.  */
-  thread_info *thr;
   thread_info *resumed = NULL;
-  ALL_NON_EXITED_THREADS (thr)
+  for (thread_info *thr : all_non_exited_threads ())
     {
       if (thr->executing)
 	{
@@ -605,8 +604,7 @@ child_pass_ctrlc (struct target_ops *self)
 
   /* Otherwise, pass the Ctrl-C to the first inferior that was resumed
      in the foreground.  */
-  inferior *inf;
-  ALL_INFERIORS (inf)
+  for (inferior *inf : all_inferiors ())
     {
       if (inf->terminal_state != target_terminal_state::is_ours)
 	{

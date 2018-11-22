@@ -134,34 +134,10 @@ add_inferior (int pid)
   return inf;
 }
 
-struct delete_thread_of_inferior_arg
-{
-  int pid;
-  int silent;
-};
-
-static int
-delete_thread_of_inferior (struct thread_info *tp, void *data)
-{
-  struct delete_thread_of_inferior_arg *arg
-    = (struct delete_thread_of_inferior_arg *) data;
-
-  if (tp->ptid.pid () == arg->pid)
-    {
-      if (arg->silent)
-	delete_thread_silent (tp);
-      else
-	delete_thread (tp);
-    }
-
-  return 0;
-}
-
 void
 delete_inferior (struct inferior *todel)
 {
   struct inferior *inf, *infprev;
-  struct delete_thread_of_inferior_arg arg;
 
   infprev = NULL;
 
@@ -172,10 +148,8 @@ delete_inferior (struct inferior *todel)
   if (!inf)
     return;
 
-  arg.pid = inf->pid;
-  arg.silent = 1;
-
-  iterate_over_threads (delete_thread_of_inferior, &arg);
+  for (thread_info *tp : inf->threads_safe ())
+    delete_thread_silent (tp);
 
   if (infprev)
     infprev->next = inf->next;
@@ -198,7 +172,6 @@ static void
 exit_inferior_1 (struct inferior *inftoex, int silent)
 {
   struct inferior *inf;
-  struct delete_thread_of_inferior_arg arg;
 
   for (inf = inferior_list; inf; inf = inf->next)
     if (inf == inftoex)
@@ -207,10 +180,13 @@ exit_inferior_1 (struct inferior *inftoex, int silent)
   if (!inf)
     return;
 
-  arg.pid = inf->pid;
-  arg.silent = silent;
-
-  iterate_over_threads (delete_thread_of_inferior, &arg);
+  for (thread_info *tp : inf->threads_safe ())
+    {
+      if (silent)
+	delete_thread_silent (tp);
+      else
+	delete_thread (tp);
+    }
 
   gdb::observers::inferior_exit.notify (inf);
 
@@ -273,6 +249,11 @@ detach_inferior (inferior *inf)
 void
 inferior_appeared (struct inferior *inf, int pid)
 {
+  /* If this is the first inferior with threads, reset the global
+     thread id.  */
+  if (!any_thread_p ())
+    init_thread_list ();
+
   inf->pid = pid;
   inf->has_exit_code = 0;
   inf->exit_code = 0;
@@ -283,21 +264,14 @@ inferior_appeared (struct inferior *inf, int pid)
 void
 discard_all_inferiors (void)
 {
-  struct inferior *inf;
-
-  for (inf = inferior_list; inf; inf = inf->next)
-    {
-      if (inf->pid != 0)
-	exit_inferior_silent (inf);
-    }
+  for (inferior *inf : all_non_exited_inferiors ())
+    exit_inferior_silent (inf);
 }
 
 struct inferior *
 find_inferior_id (int num)
 {
-  struct inferior *inf;
-
-  for (inf = inferior_list; inf; inf = inf->next)
+  for (inferior *inf : all_inferiors ())
     if (inf->num == num)
       return inf;
 
@@ -307,14 +281,12 @@ find_inferior_id (int num)
 struct inferior *
 find_inferior_pid (int pid)
 {
-  struct inferior *inf;
-
   /* Looking for inferior pid == 0 is always wrong, and indicative of
      a bug somewhere else.  There may be more than one with pid == 0,
      for instance.  */
   gdb_assert (pid != 0);
 
-  for (inf = inferior_list; inf; inf = inf->next)
+  for (inferior *inf : all_inferiors ())
     if (inf->pid == pid)
       return inf;
 
@@ -334,16 +306,14 @@ find_inferior_ptid (ptid_t ptid)
 struct inferior *
 find_inferior_for_program_space (struct program_space *pspace)
 {
-  struct inferior *inf = current_inferior ();
+  struct inferior *cur_inf = current_inferior ();
 
-  if (inf->pspace == pspace)
-    return inf;
+  if (cur_inf->pspace == pspace)
+    return cur_inf;
 
-  for (inf = inferior_list; inf != NULL; inf = inf->next)
-    {
-      if (inf->pspace == pspace)
-	return inf;
-    }
+  for (inferior *inf : all_inferiors ())
+    if (inf->pspace == pspace)
+      return inf;
 
   return NULL;
 }
@@ -352,14 +322,9 @@ struct inferior *
 iterate_over_inferiors (int (*callback) (struct inferior *, void *),
 			void *data)
 {
-  struct inferior *inf, *infnext;
-
-  for (inf = inferior_list; inf; inf = infnext)
-    {
-      infnext = inf->next;
-      if ((*callback) (inf, data))
-	return inf;
-    }
+  for (inferior *inf : all_inferiors_safe ())
+    if ((*callback) (inf, data))
+      return inf;
 
   return NULL;
 }
@@ -367,11 +332,8 @@ iterate_over_inferiors (int (*callback) (struct inferior *, void *),
 int
 have_inferiors (void)
 {
-  struct inferior *inf;
-
-  for (inf = inferior_list; inf; inf = inf->next)
-    if (inf->pid != 0)
-      return 1;
+  for (inferior *inf ATTRIBUTE_UNUSED : all_non_exited_inferiors ())
+    return 1;
 
   return 0;
 }
@@ -383,24 +345,17 @@ have_inferiors (void)
 int
 number_of_live_inferiors (void)
 {
-  struct inferior *inf;
   int num_inf = 0;
 
-  for (inf = inferior_list; inf; inf = inf->next)
-    if (inf->pid != 0)
-      {
-	struct thread_info *tp;
-
-	ALL_NON_EXITED_THREADS (tp)
-	 if (tp && tp->ptid.pid () == inf->pid)
-	   if (target_has_execution_1 (tp->ptid))
-	     {
-	       /* Found a live thread in this inferior, go to the next
-		  inferior.  */
-	       ++num_inf;
-	       break;
-	     }
-      }
+  for (inferior *inf : all_non_exited_inferiors ())
+    if (target_has_execution_1 (ptid_t (inf->pid)))
+      for (thread_info *tp ATTRIBUTE_UNUSED : inf->non_exited_threads ())
+	{
+	  /* Found a live thread in this inferior, go to the next
+	     inferior.  */
+	  ++num_inf;
+	  break;
+	}
 
   return num_inf;
 }
@@ -445,13 +400,8 @@ prune_inferiors (void)
 int
 number_of_inferiors (void)
 {
-  struct inferior *inf;
-  int count = 0;
-
-  for (inf = inferior_list; inf != NULL; inf = inf->next)
-    count++;
-
-  return count;
+  auto rng = all_inferiors ();
+  return std::distance (rng.begin (), rng.end ());
 }
 
 /* Converts an inferior process id to a string.  Like
@@ -491,11 +441,10 @@ print_selected_inferior (struct ui_out *uiout)
 static void
 print_inferior (struct ui_out *uiout, const char *requested_inferiors)
 {
-  struct inferior *inf;
   int inf_count = 0;
 
   /* Compute number of inferiors we will print.  */
-  for (inf = inferior_list; inf; inf = inf->next)
+  for (inferior *inf : all_inferiors ())
     {
       if (!number_is_in_list (requested_inferiors, inf->num))
 	continue;
@@ -516,7 +465,7 @@ print_inferior (struct ui_out *uiout, const char *requested_inferiors)
   uiout->table_header (17, ui_left, "exec", "Executable");
 
   uiout->table_body ();
-  for (inf = inferior_list; inf; inf = inf->next)
+  for (inferior *inf : all_inferiors ())
     {
       if (!number_is_in_list (requested_inferiors, inf->num))
 	continue;

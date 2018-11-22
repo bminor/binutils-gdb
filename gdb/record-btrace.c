@@ -379,7 +379,6 @@ record_btrace_target_open (const char *args, int from_tty)
   /* If we fail to enable btrace for one thread, disable it for the threads for
      which it was successfully enabled.  */
   scoped_btrace_disable btrace_disable;
-  struct thread_info *tp;
 
   DEBUG ("open");
 
@@ -388,7 +387,7 @@ record_btrace_target_open (const char *args, int from_tty)
   if (!target_has_execution)
     error (_("The program is not being run."));
 
-  ALL_NON_EXITED_THREADS (tp)
+  for (thread_info *tp : all_non_exited_threads ())
     if (args == NULL || *args == 0 || number_is_in_list (args, tp->global_num))
       {
 	btrace_enable (tp, &record_btrace_conf);
@@ -406,13 +405,11 @@ record_btrace_target_open (const char *args, int from_tty)
 void
 record_btrace_target::stop_recording ()
 {
-  struct thread_info *tp;
-
   DEBUG ("stop recording");
 
   record_btrace_auto_disable ();
 
-  ALL_NON_EXITED_THREADS (tp)
+  for (thread_info *tp : all_non_exited_threads ())
     if (tp->btrace.target != NULL)
       btrace_disable (tp);
 }
@@ -437,8 +434,6 @@ record_btrace_target::disconnect (const char *args,
 void
 record_btrace_target::close ()
 {
-  struct thread_info *tp;
-
   if (record_btrace_async_inferior_event_handler != NULL)
     delete_async_event_handler (&record_btrace_async_inferior_event_handler);
 
@@ -448,7 +443,7 @@ record_btrace_target::close ()
 
   /* We should have already stopped recording.
      Tear down btrace in case we have not.  */
-  ALL_NON_EXITED_THREADS (tp)
+  for (thread_info *tp : all_non_exited_threads ())
     btrace_teardown (tp);
 }
 
@@ -1398,10 +1393,8 @@ record_btrace_target::record_method (ptid_t ptid)
 bool
 record_btrace_target::record_is_replaying (ptid_t ptid)
 {
-  struct thread_info *tp;
-
-  ALL_NON_EXITED_THREADS (tp)
-    if (tp->ptid.matches (ptid) && btrace_is_replaying (tp))
+  for (thread_info *tp : all_non_exited_threads (ptid))
+    if (btrace_is_replaying (tp))
       return true;
 
   return false;
@@ -2129,7 +2122,6 @@ record_btrace_stop_replaying_at_end (struct thread_info *tp)
 void
 record_btrace_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
 {
-  struct thread_info *tp;
   enum btrace_thread_flag flag, cflag;
 
   DEBUG ("resume %s: %s%s", target_pid_to_str (ptid),
@@ -2174,20 +2166,18 @@ record_btrace_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
     {
       gdb_assert (inferior_ptid.matches (ptid));
 
-      ALL_NON_EXITED_THREADS (tp)
-	if (tp->ptid.matches (ptid))
-	  {
-	    if (tp->ptid.matches (inferior_ptid))
-	      record_btrace_resume_thread (tp, flag);
-	    else
-	      record_btrace_resume_thread (tp, cflag);
-	  }
+      for (thread_info *tp : all_non_exited_threads (ptid))
+	{
+	  if (tp->ptid.matches (inferior_ptid))
+	    record_btrace_resume_thread (tp, flag);
+	  else
+	    record_btrace_resume_thread (tp, cflag);
+	}
     }
   else
     {
-      ALL_NON_EXITED_THREADS (tp)
-	if (tp->ptid.matches (ptid))
-	  record_btrace_resume_thread (tp, flag);
+      for (thread_info *tp : all_non_exited_threads (ptid))
+	record_btrace_resume_thread (tp, flag);
     }
 
   /* Async support.  */
@@ -2544,16 +2534,9 @@ record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
     }
 
   /* Keep a work list of moving threads.  */
-  {
-    thread_info *tp;
-
-    ALL_NON_EXITED_THREADS (tp)
-      {
-	if (tp->ptid.matches (ptid)
-	    && ((tp->btrace.flags & (BTHR_MOVE | BTHR_STOP)) != 0))
-	  moving.push_back (tp);
-      }
-  }
+  for (thread_info *tp : all_non_exited_threads (ptid))
+    if ((tp->btrace.flags & (BTHR_MOVE | BTHR_STOP)) != 0)
+      moving.push_back (tp);
 
   if (moving.empty ())
     {
@@ -2634,9 +2617,7 @@ record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
   /* Stop all other threads. */
   if (!target_is_non_stop_p ())
     {
-      thread_info *tp;
-
-      ALL_NON_EXITED_THREADS (tp)
+      for (thread_info *tp : all_non_exited_threads ())
 	record_btrace_cancel_resume (tp);
     }
 
@@ -2673,14 +2654,11 @@ record_btrace_target::stop (ptid_t ptid)
     }
   else
     {
-      struct thread_info *tp;
-
-      ALL_NON_EXITED_THREADS (tp)
-       if (tp->ptid.matches (ptid))
-         {
-           tp->btrace.flags &= ~BTHR_MOVE;
-           tp->btrace.flags |= BTHR_STOP;
-         }
+      for (thread_info *tp : all_non_exited_threads (ptid))
+	{
+	  tp->btrace.flags &= ~BTHR_MOVE;
+	  tp->btrace.flags |= BTHR_STOP;
+	}
     }
  }
 
@@ -2873,9 +2851,7 @@ record_btrace_target::goto_record (ULONGEST insn)
 void
 record_btrace_target::record_stop_replaying ()
 {
-  struct thread_info *tp;
-
-  ALL_NON_EXITED_THREADS (tp)
+  for (thread_info *tp : all_non_exited_threads ())
     record_btrace_stop_replaying (tp);
 }
 

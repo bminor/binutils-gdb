@@ -26,13 +26,14 @@ struct symtab;
 #include "breakpoint.h"
 #include "frame.h"
 #include "ui-out.h"
-#include "inferior.h"
 #include "btrace.h"
 #include "common/vec.h"
 #include "target/waitstatus.h"
 #include "cli/cli-utils.h"
 #include "common/refcounted-object.h"
 #include "common-gdbthread.h"
+
+struct inferior;
 
 /* Frontend view of the thread state.  Possible extensions: stepping,
    finishing, until(ling),...  */
@@ -42,6 +43,17 @@ enum thread_state
   THREAD_RUNNING,
   THREAD_EXITED,
 };
+
+/* STEP_OVER_ALL means step over all subroutine calls.
+   STEP_OVER_UNDEBUGGABLE means step over calls to undebuggable functions.
+   STEP_OVER_NONE means don't step over any subroutine calls.  */
+
+enum step_over_calls_kind
+  {
+    STEP_OVER_NONE,
+    STEP_OVER_ALL,
+    STEP_OVER_UNDEBUGGABLE
+  };
 
 /* Inferior thread specific part of `struct infcall_control_state'.
 
@@ -213,12 +225,7 @@ public:
   explicit thread_info (inferior *inf, ptid_t ptid);
   ~thread_info ();
 
-  bool deletable () const
-  {
-    /* If this is the current thread, or there's code out there that
-       relies on it existing (refcount > 0) we can't delete yet.  */
-    return (refcount () == 0 && ptid != inferior_ptid);
-  }
+  bool deletable () const;
 
   /* Mark this thread as running and notify observers.  */
   void set_running (bool running);
@@ -449,6 +456,10 @@ extern int valid_global_thread_id (int global_id);
 /* Search function to lookup a thread by 'pid'.  */
 extern struct thread_info *find_thread_ptid (ptid_t ptid);
 
+/* Search function to lookup a thread by 'ptid'.  Only searches in
+   threads of INF.  */
+extern struct thread_info *find_thread_ptid (inferior *inf, ptid_t ptid);
+
 /* Find thread by GDB global thread ID.  */
 struct thread_info *find_thread_global_id (int global_id);
 
@@ -475,31 +486,60 @@ void thread_change_ptid (ptid_t old_ptid, ptid_t new_ptid);
 typedef int (*thread_callback_func) (struct thread_info *, void *);
 extern struct thread_info *iterate_over_threads (thread_callback_func, void *);
 
-/* Traverse all threads.  */
-#define ALL_THREADS(T)				\
-  for (T = thread_list; T; T = T->next)		\
+/* Pull in the internals of the inferiors/threads ranges and
+   iterators.  Must be done after struct thread_info is defined.  */
+#include "thread-iter.h"
 
-/* Traverse over all threads, sorted by inferior.  */
-#define ALL_THREADS_BY_INFERIOR(inf, tp) \
-  ALL_INFERIORS (inf) \
-    ALL_THREADS (tp) \
-      if (inf == tp->inf)
+/* Return a range that can be used to walk over all threads of all
+   inferiors, with range-for.  Used like this:
 
-/* Traverse all threads, except those that have THREAD_EXITED
-   state.  */
+       for (thread_info *thr : all_threads ())
+	 { .... }
+*/
+inline all_threads_range
+all_threads ()
+{
+  return {};
+}
 
-#define ALL_NON_EXITED_THREADS(T)				\
-  for (T = thread_list; T; T = T->next) \
-    if ((T)->state != THREAD_EXITED)
+/* Likewise, but accept a filter PTID.  */
 
-/* Traverse all threads, including those that have THREAD_EXITED
-   state.  Allows deleting the currently iterated thread.  */
-#define ALL_THREADS_SAFE(T, TMP)	\
-  for ((T) = thread_list;			\
-       (T) != NULL ? ((TMP) = (T)->next, 1): 0;	\
-       (T) = (TMP))
+inline all_matching_threads_range
+all_threads (ptid_t filter_ptid)
+{
+  return all_matching_threads_range (filter_ptid);
+}
+
+/* Return a range that can be used to walk over all non-exited threads
+   of all inferiors, with range-for.  FILTER_PTID can be used to
+   filter out thread that don't match.  */
+
+inline all_non_exited_threads_range
+all_non_exited_threads (ptid_t filter_ptid = minus_one_ptid)
+{
+  return all_non_exited_threads_range (filter_ptid);
+}
+
+/* Return a range that can be used to walk over all threads of all
+   inferiors, with range-for, safely.  I.e., it is safe to delete the
+   currently-iterated thread.  When combined with range-for, this
+   allow convenient patterns like this:
+
+     for (thread_info *t : all_threads_safe ())
+       if (some_condition ())
+	 delete f;
+*/
+
+inline all_threads_safe_range
+all_threads_safe ()
+{
+  return all_threads_safe_range ();
+}
 
 extern int thread_count (void);
+
+/* Return true if we have any thread in any inferior.  */
+extern bool any_thread_p ();
 
 /* Switch context to thread THR.  Also sets the STOP_PC global.  */
 extern void switch_to_thread (struct thread_info *thr);
@@ -747,7 +787,5 @@ extern void print_selected_thread_frame (struct ui_out *uiout,
    was parsed from.  This is used in the error message if THR is not
    alive anymore.  */
 extern void thread_select (const char *tidstr, class thread_info *thr);
-
-extern struct thread_info *thread_list;
 
 #endif /* GDBTHREAD_H */

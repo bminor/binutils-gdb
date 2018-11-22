@@ -1201,8 +1201,6 @@ record_full_wait_1 (struct target_ops *ops,
 
 	  while (1)
 	    {
-	      struct thread_info *tp;
-
 	      ret = ops->beneath ()->wait (ptid, status, options);
 	      if (status->kind == TARGET_WAITKIND_IGNORE)
 		{
@@ -1213,7 +1211,7 @@ record_full_wait_1 (struct target_ops *ops,
 		  return ret;
 		}
 
-	      ALL_NON_EXITED_THREADS (tp)
+	      for (thread_info *tp : all_non_exited_threads ())
                 delete_single_step_breakpoints (tp);
 
 	      if (record_full_resume_step)

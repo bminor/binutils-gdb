@@ -1,5 +1,173 @@
 2018-11-22  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (COMMON_SFILES): Add thread-iter.c.
+	* breakpoint.c (breakpoints_should_be_inserted_now): Replace
+	ALL_NON_EXITED_THREADS with all_non_exited_threads.
+	(print_one_breakpoint_location): Replace ALL_INFERIORS with
+	all_inferiors.
+	* bsd-kvm.c: Include inferior.h.
+	* btrace.c (btrace_free_objfile): Replace ALL_NON_EXITED_THREADS
+	with all_non_exited_threads.
+	* common/filtered-iterator.h: New.
+	* common/safe-iterator.h: New.
+	* corelow.c (core_target_open): Don't call init_thread_list here.
+	* darwin-nat.c (thread_info_from_private_thread_info): Replace
+	ALL_THREADS with all_threads.
+	* fbsd-nat.c (fbsd_nat_target::resume): Replace
+	ALL_NON_EXITED_THREADS with inf->non_exited_threads.
+	* fbsd-tdep.c (fbsd_make_corefile_notes): Replace
+	ALL_NON_EXITED_THREADS with inf->non_exited_threads.
+	* fork-child.c (postfork_hook): Don't call init_thread_list here.
+	* gdbarch-selftests.c (register_to_value_test): Adjust.
+	* gdbthread.h: Don't include "inferior.h" here.
+	(struct inferior): Forward declare.
+	(enum step_over_calls_kind): Moved here from inferior.h.
+	(thread_info::deletable): Definition moved to thread.c.
+	(find_thread_ptid (inferior *, ptid_t)): Declare.
+	(ALL_THREADS, ALL_THREADS_BY_INFERIOR, ALL_THREADS_SAFE): Delete.
+	Include "thread-iter.h".
+	(all_threads, all_non_exited_threads, all_threads_safe): New.
+	(any_thread_p): Declare.
+	(thread_list): Delete.
+	* infcmd.c (signal_command): Replace ALL_NON_EXITED_THREADS with
+	all_non_exited_threads.
+	(proceed_after_attach_callback): Delete.
+	(proceed_after_attach): Take an inferior pointer instead of an
+	integer PID.  Adjust to use range-for.
+	(attach_post_wait): Pass down inferior pointer instead of pid.
+	Use range-for instead of ALL_NON_EXITED_THREADS.
+	(detach_command): Remove init_thread_list call.
+	* inferior-iter.h: New.
+	* inferior.c (struct delete_thread_of_inferior_arg): Delete.
+	(delete_thread_of_inferior): Delete.
+	(delete_inferior, exit_inferior_1): Use range-for with
+	inf->threads_safe() instead of iterate_over_threads.
+	(inferior_appeared): Call init_thread_list here.
+	(discard_all_inferiors): Use all_non_exited_inferiors.
+	(find_inferior_id, find_inferior_pid): Use all_inferiors.
+	(iterate_over_inferiors): Use all_inferiors_safe.
+	(have_inferiors, number_of_live_inferiors): Use
+	all_non_exited_inferiors.
+	(number_of_inferiors): Use all_inferiors and std::distance.
+	(print_inferior): Use all_inferiors.
+	* inferior.h: Include gdbthread.h.
+	(enum step_over_calls_kind): Moved to gdbthread.h.
+	(struct inferior) <thread_list>: New field.
+	<threads, non_exited_threads, threads_safe>: New methods.
+	(ALL_INFERIORS): Delete.
+	Include "inferior-iter.h".
+	(ALL_NON_EXITED_INFERIORS): Delete.
+	(all_inferiors_safe, all_inferiors, all_non_exited_inferiors): New
+	functions.
+	* inflow.c (child_interrupt, child_pass_ctrlc): Replace
+	ALL_NON_EXITED_THREADS with all_non_exited_threads.
+	* infrun.c (follow_exec): Use all_threads_safe.
+	(clear_proceed_status, proceed): Use all_non_exited_threads.
+	(init_wait_for_inferior): Don't clear inline frame state here.
+	(infrun_thread_stop_requested, for_each_just_stopped_thread): Use
+	all_threads instead of ALL_NON_EXITED_THREADS.
+	(random_pending_event_thread): Use all_non_exited_threads instead
+	of ALL_NON_EXITED_THREADS.  Use a lambda for repeated code.
+	(clean_up_just_stopped_threads_fsms): Use all_non_exited_threads
+	instead of ALL_NON_EXITED_THREADS.
+	(handle_no_resumed): Use all_non_exited_threads instead of
+	ALL_NON_EXITED_THREADS.  Use all_inferiors instead of
+	ALL_INFERIORS.
+	(restart_threads, switch_back_to_stepped_thread): Use
+	all_non_exited_threads instead of ALL_NON_EXITED_THREADS.
+	* linux-nat.c (check_zombie_leaders): Replace ALL_INFERIORS with
+	all_inferiors.
+	(kill_unfollowed_fork_children): Use inf->non_exited_threads
+	instead of ALL_NON_EXITED_THREADS.
+	* linux-tdep.c (linux_make_corefile_notes): Use
+	inf->non_exited_threads instead of ALL_NON_EXITED_THREADS.
+	* linux-thread-db.c (thread_db_target::update_thread_list):
+	Replace ALL_INFERIORS with all_inferiors.
+	(thread_db_target::thread_handle_to_thread_info): Use
+	inf->non_exited_threads instead of ALL_NON_EXITED_THREADS.
+	* mi/mi-interp.c (multiple_inferiors_p): New.
+	(mi_on_resume_1): Simplify using all_non_exited_threads and
+	multiple_inferiors_p.
+	* mi/mi-main.c (mi_cmd_thread_list_ids): Use all_non_exited_threads
+	instead of ALL_NON_EXITED_THREADS.
+	* nto-procfs.c (nto_procfs_target::open): Don't call
+	init_thread_list here.
+	* record-btrace.c (record_btrace_target_open)
+	(record_btrace_target::stop_recording)
+	(record_btrace_target::close)
+	(record_btrace_target::record_is_replaying)
+	(record_btrace_target::resume, record_btrace_target::wait)
+	(record_btrace_target::record_stop_replaying): Use
+	all_non_exited_threads instead of ALL_NON_EXITED_THREADS.
+	* record-full.c (record_full_wait_1): Use all_non_exited_threads
+	instead of ALL_NON_EXITED_THREADS.
+	* regcache.c (cooked_read_test): Remove reference to global
+	thread_list.
+	* remote-sim.c (gdbsim_target::create_inferior): Don't call
+	init_thread_list here.
+	* remote.c (remote_target::update_thread_list): Use
+	all_threads_safe instead of ALL_NON_EXITED_THREADS.
+	(remote_target::process_initial_stop_replies): Replace
+	ALL_INFERIORS with all_non_exited_inferiors and use
+	all_non_exited_threads instead of ALL_NON_EXITED_THREADS.
+	(remote_target::open_1): Don't call init_thread_list here.
+	(remote_target::append_pending_thread_resumptions)
+	(remote_target::remote_resume_with_hc): Use all_non_exited_threads
+	instead of ALL_NON_EXITED_THREADS.
+	(remote_target::commit_resume)
+	(remote_target::remove_new_fork_children): Replace ALL_INFERIORS
+	with all_non_exited_inferiors and use all_non_exited_threads
+	instead of ALL_NON_EXITED_THREADS.
+	(remote_target::kill_new_fork_children): Use
+	all_non_exited_threads instead of ALL_NON_EXITED_THREADS.  Remove
+	init_thread_list and init_wait_for_inferior calls.
+	(remote_target::remote_btrace_maybe_reopen)
+	(remote_target::thread_handle_to_thread_info): Use
+	all_non_exited_threads instead of ALL_NON_EXITED_THREADS.
+	* target.c (target_terminal::restore_inferior)
+	(target_terminal_is_ours_kind): Replace ALL_INFERIORS with
+	all_non_exited_inferiors.
+	* thread-iter.c: New file.
+	* thread-iter.h: New file.
+	* thread.c: Include "inline-frame.h".
+	(thread_list): Delete.
+	(clear_thread_inferior_resources): Call clear_inline_frame_state.
+	(init_thread_list): Use all_threads_safe instead of
+	ALL_THREADS_SAFE.  Adjust to per-inferior thread lists.
+	(new_thread): Adjust to per-inferior thread lists.
+	(add_thread_silent): Pass inferior to find_thread_ptid.
+	(thread_info::deletable): New, moved from the header.
+	(delete_thread_1): Adjust to per-inferior thread lists.
+	(find_thread_global_id): Use inf->threads().
+	(find_thread_ptid): Use find_inferior_ptid and pass inferior to
+	find_thread_ptid.
+	(find_thread_ptid(inferior*, ptid_t)): New overload.
+	(iterate_over_threads): Use all_threads_safe.
+	(any_thread_p): New.
+	(thread_count): Use all_threads and std::distance.
+	(live_threads_count): Use all_non_exited_threads and
+	std::distance.
+	(valid_global_thread_id): Use all_threads.
+	(in_thread_list): Use find_thread_ptid.
+	(first_thread_of_inferior): Adjust to per-inferior thread lists.
+	(any_thread_of_inferior, any_live_thread_of_inferior): Use
+	inf->non_exited_threads().
+	(prune_threads, delete_exited_threads): Use all_threads_safe.
+	(thread_change_ptid): Pass inferior pointer to find_thread_ptid.
+	(set_resumed, set_running): Use all_non_exited_threads.
+	(is_thread_state, is_stopped, is_exited, is_running)
+	(is_executing): Delete.
+	(set_executing, set_stop_requested, finish_thread_state): Use
+	all_non_exited_threads.
+	(print_thread_info_1): Use all_inferiors and all_threads.
+	(thread_apply_all_command): Use all_non_exited_threads.
+	(thread_find_command): Use all_threads.
+	(update_threads_executing): Use all_non_exited_threads.
+	* tid-parse.c (parse_thread_id): Use inf->threads.
+	* x86-bsd-nat.c (x86bsd_dr_set): Use inf->non_exited_threads ().
+
+2018-11-22  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (follow_exec) <set follow-exec new>: Add thread and
 	switch to it before calling into try_open_exec_file.
 

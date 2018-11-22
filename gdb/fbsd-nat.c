@@ -1158,13 +1158,11 @@ fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
   if (ptid.lwp_p ())
     {
       /* If ptid is a specific LWP, suspend all other LWPs in the process.  */
-      struct thread_info *tp;
-      int request;
+      inferior *inf = find_inferior_ptid (ptid);
 
-      ALL_NON_EXITED_THREADS (tp)
+      for (thread_info *tp : inf->non_exited_threads ())
         {
-	  if (tp->ptid.pid () != ptid.pid ())
-	    continue;
+	  int request;
 
 	  if (tp->ptid.lwp () == ptid.lwp ())
 	    request = PT_RESUME;
@@ -1179,16 +1177,9 @@ fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
     {
       /* If ptid is a wildcard, resume all matching threads (they won't run
 	 until the process is continued however).  */
-      struct thread_info *tp;
-
-      ALL_NON_EXITED_THREADS (tp)
-        {
-	  if (!tp->ptid.matches (ptid))
-	    continue;
-
-	  if (ptrace (PT_RESUME, tp->ptid.lwp (), NULL, 0) == -1)
-	    perror_with_name (("ptrace"));
-	}
+      for (thread_info *tp : all_non_exited_threads (ptid))
+	if (ptrace (PT_RESUME, tp->ptid.lwp (), NULL, 0) == -1)
+	  perror_with_name (("ptrace"));
       ptid = inferior_ptid;
     }
 

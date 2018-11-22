@@ -653,7 +653,7 @@ fbsd_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
   struct fbsd_corefile_thread_data thread_args;
   char *note_data = NULL;
   Elf_Internal_Ehdr *i_ehdrp;
-  struct thread_info *curr_thr, *signalled_thr, *thr;
+  struct thread_info *curr_thr, *signalled_thr;
 
   /* Put a "FreeBSD" label in the ELF header.  */
   i_ehdrp = elf_elfheader (obfd);
@@ -706,11 +706,9 @@ fbsd_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
   thread_args.stop_signal = signalled_thr->suspend.stop_signal;
 
   fbsd_corefile_thread (signalled_thr, &thread_args);
-  ALL_NON_EXITED_THREADS (thr)
+  for (thread_info *thr : current_inferior ()->non_exited_threads ())
     {
       if (thr == signalled_thr)
-	continue;
-      if (thr->ptid.pid () != inferior_ptid.pid ())
 	continue;
 
       fbsd_corefile_thread (thr, &thread_args);

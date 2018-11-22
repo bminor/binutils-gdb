@@ -1111,6 +1111,7 @@ COMMON_SFILES = \
 	target-descriptions.c \
 	target-memory.c \
 	thread.c \
+	thread-iter.c \
 	thread-fsm.c \
 	tid-parse.c \
 	top.c \

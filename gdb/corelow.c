@@ -421,12 +421,6 @@ core_target_open (const char *arg, int from_tty)
   push_target (target);
   target_holder.release ();
 
-  /* Do this before acknowledging the inferior, so if
-     post_create_inferior throws (can happen easilly if you're loading
-     a core file with the wrong exec), we aren't left with threads
-     from the previous inferior.  */
-  init_thread_list ();
-
   inferior_ptid = null_ptid;
 
   /* Need to flush the register cache (and the frame cache) from a

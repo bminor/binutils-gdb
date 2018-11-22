@@ -55,7 +55,6 @@ parse_thread_id (const char *tidstr, const char **end)
 {
   const char *number = tidstr;
   const char *dot, *p1;
-  struct thread_info *tp;
   struct inferior *inf;
   int thr_num;
   int explicit_inf_id = 0;
@@ -90,12 +89,13 @@ parse_thread_id (const char *tidstr, const char **end)
   if (thr_num == 0)
     invalid_thread_id_error (number);
 
-  ALL_THREADS (tp)
-    {
-      if (tp->ptid.pid () == inf->pid
-	  && tp->per_inf_num == thr_num)
+  thread_info *tp = nullptr;
+  for (thread_info *it : inf->threads ())
+    if (it->per_inf_num == thr_num)
+      {
+	tp = it;
 	break;
-    }
+      }
 
   if (tp == NULL)
     {

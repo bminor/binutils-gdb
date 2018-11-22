@@ -78,12 +78,7 @@ prefork_hook (const char *args)
 void
 postfork_hook (pid_t pid)
 {
-  struct inferior *inf;
-
-  if (!have_inferiors ())
-    init_thread_list ();
-
-  inf = current_inferior ();
+  inferior *inf = current_inferior ();
 
   inferior_appeared (inf, pid);
 

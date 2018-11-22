@@ -1573,9 +1573,6 @@ cooked_read_test (struct gdbarch *gdbarch)
   mock_inferior.aspace = &mock_aspace;
   thread_info mock_thread (&mock_inferior, mock_ptid);
 
-  scoped_restore restore_thread_list
-    = make_scoped_restore (&thread_list, &mock_thread);
-
   /* Add the mock inferior to the inferior list so that look ups by
      target+ptid can find it.  */
   scoped_restore restore_inferior_list

@@ -1339,19 +1339,15 @@ signal_command (const char *signum_exp, int from_tty)
      of the wrong thread.  */
   if (!non_stop)
     {
-      struct thread_info *tp;
-      ptid_t resume_ptid;
       int must_confirm = 0;
 
       /* This indicates what will be resumed.  Either a single thread,
 	 a whole process, or all threads of all processes.  */
-      resume_ptid = user_visible_resume_ptid (0);
+      ptid_t resume_ptid = user_visible_resume_ptid (0);
 
-      ALL_NON_EXITED_THREADS (tp)
+      for (thread_info *tp : all_non_exited_threads (resume_ptid))
 	{
 	  if (tp->ptid == inferior_ptid)
-	    continue;
-	  if (!tp->ptid.matches (resume_ptid))
 	    continue;
 
 	  if (tp->suspend.stop_signal != GDB_SIGNAL_0
@@ -2620,34 +2616,13 @@ kill_command (const char *arg, int from_tty)
   bfd_cache_close_all ();
 }
 
-/* Used in `attach&' command.  ARG is a point to an integer
-   representing a process id.  Proceed threads of this process iff
+/* Used in `attach&' command.  Proceed threads of inferior INF iff
    they stopped due to debugger request, and when they did, they
-   reported a clean stop (GDB_SIGNAL_0).  Do not proceed threads
-   that have been explicitly been told to stop.  */
-
-static int
-proceed_after_attach_callback (struct thread_info *thread,
-			       void *arg)
-{
-  int pid = * (int *) arg;
-
-  if (thread->ptid.pid () == pid
-      && thread->state != THREAD_EXITED
-      && !thread->executing
-      && !thread->stop_requested
-      && thread->suspend.stop_signal == GDB_SIGNAL_0)
-    {
-      switch_to_thread (thread);
-      clear_proceed_status (0);
-      proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
-    }
-
-  return 0;
-}
+   reported a clean stop (GDB_SIGNAL_0).  Do not proceed threads that
+   have been explicitly been told to stop.  */
 
 static void
-proceed_after_attach (int pid)
+proceed_after_attach (inferior *inf)
 {
   /* Don't error out if the current thread is running, because
      there may be other stopped threads.  */
@@ -2655,7 +2630,15 @@ proceed_after_attach (int pid)
   /* Backup current thread and selected frame.  */
   scoped_restore_current_thread restore_thread;
 
-  iterate_over_threads (proceed_after_attach_callback, &pid);
+  for (thread_info *thread : inf->non_exited_threads ())
+    if (!thread->executing
+	&& !thread->stop_requested
+	&& thread->suspend.stop_signal == GDB_SIGNAL_0)
+      {
+	switch_to_thread (thread);
+	clear_proceed_status (0);
+	proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
+      }
 }
 
 /* See inferior.h.  */
@@ -2722,7 +2705,7 @@ attach_post_wait (const char *args, int from_tty, enum attach_post_wait_mode mod
 	 already running threads.  If a thread has been stopped with a
 	 signal, leave it be.  */
       if (non_stop)
-	proceed_after_attach (inferior->pid);
+	proceed_after_attach (inferior);
       else
 	{
 	  if (inferior_thread ()->suspend.stop_signal == GDB_SIGNAL_0)
@@ -2748,9 +2731,7 @@ attach_post_wait (const char *args, int from_tty, enum attach_post_wait_mode mod
 	target_stop (ptid_t (inferior->pid));
       else if (target_is_non_stop_p ())
 	{
-	  struct thread_info *thread;
 	  struct thread_info *lowest = inferior_thread ();
-	  int pid = current_inferior ()->pid;
 
 	  stop_all_threads ();
 
@@ -2758,15 +2739,10 @@ attach_post_wait (const char *args, int from_tty, enum attach_post_wait_mode mod
 	     stop.  For consistency, always select the thread with
 	     lowest GDB number, which should be the main thread, if it
 	     still exists.  */
-	  ALL_NON_EXITED_THREADS (thread)
-	    {
-	      if (thread->ptid.pid () == pid)
-		{
-		  if (thread->inf->num < lowest->inf->num
-		      || thread->per_inf_num < lowest->per_inf_num)
-		    lowest = thread;
-		}
-	    }
+	  for (thread_info *thread : current_inferior ()->non_exited_threads ())
+	    if (thread->inf->num < lowest->inf->num
+		|| thread->per_inf_num < lowest->per_inf_num)
+	      lowest = thread;
 
 	  switch_to_thread (lowest);
 	}
@@ -3013,11 +2989,6 @@ detach_command (const char *args, int from_tty)
      detach from a single inferior.  */
   if (!gdbarch_has_global_solist (target_gdbarch ()))
     no_shared_libraries (NULL, from_tty);
-
-  /* If we still have inferiors to debug, then don't mess with their
-     threads.  */
-  if (!have_inferiors ())
-    init_thread_list ();
 
   if (deprecated_detach_hook)
     deprecated_detach_hook ();

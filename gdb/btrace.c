@@ -2003,11 +2003,9 @@ btrace_clear (struct thread_info *tp)
 void
 btrace_free_objfile (struct objfile *objfile)
 {
-  struct thread_info *tp;
-
   DEBUG ("free objfile");
 
-  ALL_NON_EXITED_THREADS (tp)
+  for (thread_info *tp : all_non_exited_threads ())
     btrace_clear (tp);
 }
 

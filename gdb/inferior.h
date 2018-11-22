@@ -53,6 +53,7 @@ struct thread_info;
 #include "common/refcounted-object.h"
 
 #include "common-inferior.h"
+#include "gdbthread.h"
 
 struct infcall_suspend_state;
 struct infcall_control_state;
@@ -245,17 +246,6 @@ extern int stopped_by_random_signal;
    `set print inferior-events'.  */
 extern int print_inferior_events;
 
-/* STEP_OVER_ALL means step over all subroutine calls.
-   STEP_OVER_UNDEBUGGABLE means step over calls to undebuggable functions.
-   STEP_OVER_NONE means don't step over any subroutine calls.  */
-
-enum step_over_calls_kind
-  {
-    STEP_OVER_NONE,
-    STEP_OVER_ALL,
-    STEP_OVER_UNDEBUGGABLE
-  };
-
 /* Anything but NO_STOP_QUIETLY means we expect a trap and the caller
    will handle it themselves.  STOP_QUIETLY is used when running in
    the shell before the child program has been exec'd and when running
@@ -359,6 +349,38 @@ public:
 
   /* Pointer to next inferior in singly-linked list of inferiors.  */
   struct inferior *next = NULL;
+
+  /* This inferior's thread list.  */
+  thread_info *thread_list = nullptr;
+
+  /* Returns a range adapter covering the inferior's threads,
+     including exited threads.  Used like this:
+
+       for (thread_info *thr : inf->threads ())
+	 { .... }
+  */
+  inf_threads_range threads ()
+  { return inf_threads_range (this->thread_list); }
+
+  /* Returns a range adapter covering the inferior's non-exited
+     threads.  Used like this:
+
+       for (thread_info *thr : inf->non_exited_threads ())
+	 { .... }
+  */
+  inf_non_exited_threads_range non_exited_threads ()
+  { return inf_non_exited_threads_range (this->thread_list); }
+
+  /* Like inferior::threads(), but returns a range adapter that can be
+     used with range-for, safely.  I.e., it is safe to delete the
+     currently-iterated thread, like this:
+
+     for (thread_info *t : inf->threads_safe ())
+       if (some_condition ())
+	 delete f;
+  */
+  inline safe_inf_threads_range threads_safe ()
+  { return safe_inf_threads_range (this->thread_list); }
 
   /* Convenient handle (GDB inferior id).  Unique across all
      inferiors.  */
@@ -575,16 +597,49 @@ private:
 
 /* Traverse all inferiors.  */
 
-#define ALL_INFERIORS(I) \
-  for ((I) = inferior_list; (I); (I) = (I)->next)
-
-/* Traverse all non-exited inferiors.  */
-
-#define ALL_NON_EXITED_INFERIORS(I) \
-  ALL_INFERIORS (I)		    \
-    if ((I)->pid != 0)
-
 extern struct inferior *inferior_list;
+
+/* Pull in the internals of the inferiors ranges and iterators.  Must
+   be done after struct inferior is defined.  */
+#include "inferior-iter.h"
+
+/* Return a range that can be used to walk over all inferiors
+   inferiors, with range-for, safely.  I.e., it is safe to delete the
+   currently-iterated inferior.  When combined with range-for, this
+   allow convenient patterns like this:
+
+     for (inferior *inf : all_inferiors_safe ())
+       if (some_condition ())
+	 delete inf;
+*/
+
+inline all_inferiors_safe_range
+all_inferiors_safe ()
+{
+  return {};
+}
+
+/* Returns a range representing all inferiors, suitable to use with
+   range-for, like this:
+
+   for (inferior *inf : all_inferiors ())
+     [...]
+*/
+
+inline all_inferiors_range
+all_inferiors ()
+{
+  return {};
+}
+
+/* Return a range that can be used to walk over all inferiors with PID
+   not zero, with range-for.  */
+
+inline all_non_exited_inferiors_range
+all_non_exited_inferiors ()
+{
+  return {};
+}
 
 /* Prune away automatically added inferiors that aren't required
    anymore.  */

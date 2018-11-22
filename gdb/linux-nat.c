@@ -3171,9 +3171,7 @@ linux_nat_filter_event (int lwpid, int status)
 static void
 check_zombie_leaders (void)
 {
-  struct inferior *inf;
-
-  ALL_INFERIORS (inf)
+  for (inferior *inf : all_inferiors ())
     {
       struct lwp_info *leader_lp;
 
@@ -3678,28 +3676,25 @@ kill_wait_callback (struct lwp_info *lp, void *data)
 static void
 kill_unfollowed_fork_children (struct inferior *inf)
 {
-  struct thread_info *thread;
+  for (thread_info *thread : inf->non_exited_threads ())
+    {
+      struct target_waitstatus *ws = &thread->pending_follow;
 
-  ALL_NON_EXITED_THREADS (thread)
-    if (thread->inf == inf)
-      {
-	struct target_waitstatus *ws = &thread->pending_follow;
+      if (ws->kind == TARGET_WAITKIND_FORKED
+	  || ws->kind == TARGET_WAITKIND_VFORKED)
+	{
+	  ptid_t child_ptid = ws->value.related_pid;
+	  int child_pid = child_ptid.pid ();
+	  int child_lwp = child_ptid.lwp ();
 
-	if (ws->kind == TARGET_WAITKIND_FORKED
-	    || ws->kind == TARGET_WAITKIND_VFORKED)
-	  {
-	    ptid_t child_ptid = ws->value.related_pid;
-	    int child_pid = child_ptid.pid ();
-	    int child_lwp = child_ptid.lwp ();
+	  kill_one_lwp (child_lwp);
+	  kill_wait_one_lwp (child_lwp);
 
-	    kill_one_lwp (child_lwp);
-	    kill_wait_one_lwp (child_lwp);
-
-	    /* Let the arch-specific native code know this process is
-	       gone.  */
-	    linux_target->low_forget_process (child_pid);
-	  }
-      }
+	  /* Let the arch-specific native code know this process is
+	     gone.  */
+	  linux_target->low_forget_process (child_pid);
+	}
+    }
 }
 
 void

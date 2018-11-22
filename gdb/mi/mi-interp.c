@@ -951,6 +951,24 @@ mi_output_running (struct thread_info *thread)
     }
 }
 
+/* Return true if there are multiple inferiors loaded.  This is used
+   for backwards compatibility -- if there's only one inferior, output
+   "all", otherwise, output each resumed thread individually.  */
+
+static bool
+multiple_inferiors_p ()
+{
+  int count = 0;
+  for (inferior *inf ATTRIBUTE_UNUSED : all_non_exited_inferiors ())
+    {
+      count++;
+      if (count > 1)
+	return true;
+    }
+
+  return false;
+}
+
 static void
 mi_on_resume_1 (struct mi_interp *mi, ptid_t ptid)
 {
@@ -968,43 +986,15 @@ mi_on_resume_1 (struct mi_interp *mi, ptid_t ptid)
 			  current_token ? current_token : "");
     }
 
-  if (ptid.pid () == -1)
+  /* Backwards compatibility.  If doing a wildcard resume and there's
+     only one inferior, output "all", otherwise, output each resumed
+     thread individually.  */
+  if ((ptid == minus_one_ptid || ptid.is_pid ())
+      && !multiple_inferiors_p ())
     fprintf_unfiltered (mi->raw_stdout, "*running,thread-id=\"all\"\n");
-  else if (ptid.is_pid ())
-    {
-      int count = 0;
-      inferior *inf;
-
-      /* Backwards compatibility.  If there's only one inferior,
-	 output "all", otherwise, output each resumed thread
-	 individually.  */
-      ALL_INFERIORS (inf)
-	if (inf->pid != 0)
-	  {
-	    count++;
-	    if (count > 1)
-	      break;
-	  }
-
-      if (count == 1)
-	fprintf_unfiltered (mi->raw_stdout, "*running,thread-id=\"all\"\n");
-      else
-	{
-	  thread_info *tp;
-	  inferior *curinf = current_inferior ();
-
-	  ALL_NON_EXITED_THREADS (tp)
-	    if (tp->inf == curinf)
-	      mi_output_running (tp);
-	}
-    }
   else
-    {
-      thread_info *ti = find_thread_ptid (ptid);
-
-      gdb_assert (ti);
-      mi_output_running (ti);
-    }
+    for (thread_info *tp : all_non_exited_threads (ptid))
+      mi_output_running (tp);
 
   if (!running_result_record_printed && mi_proceeded)
     {

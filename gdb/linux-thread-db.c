@@ -1587,11 +1587,10 @@ void
 thread_db_target::update_thread_list ()
 {
   struct thread_db_info *info;
-  struct inferior *inf;
 
   prune_threads ();
 
-  ALL_INFERIORS (inf)
+  for (inferior *inf : all_inferiors ())
     {
       struct thread_info *thread;
 
@@ -1671,7 +1670,6 @@ thread_db_target::thread_handle_to_thread_info (const gdb_byte *thread_handle,
 						int handle_len,
 						inferior *inf)
 {
-  struct thread_info *tp;
   thread_t handle_tid;
 
   /* Thread handle sizes must match in order to proceed.  We don't use an
@@ -1684,11 +1682,11 @@ thread_db_target::thread_handle_to_thread_info (const gdb_byte *thread_handle,
 
   handle_tid = * (const thread_t *) thread_handle;
 
-  ALL_NON_EXITED_THREADS (tp)
+  for (thread_info *tp : inf->non_exited_threads ())
     {
       thread_db_thread_info *priv = get_thread_db_thread_info (tp);
 
-      if (tp->inf == inf && priv != NULL && handle_tid == priv->tid)
+      if (priv != NULL && handle_tid == priv->tid)
         return tp;
     }
 

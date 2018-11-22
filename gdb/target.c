@@ -473,9 +473,8 @@ target_terminal::restore_inferior (void)
 
   {
     scoped_restore_current_inferior restore_inferior;
-    struct inferior *inf;
 
-    ALL_INFERIORS (inf)
+    for (struct inferior *inf : all_inferiors ())
       {
 	if (inf->terminal_state == target_terminal_state::is_ours_for_output)
 	  {
@@ -501,14 +500,13 @@ static void
 target_terminal_is_ours_kind (target_terminal_state desired_state)
 {
   scoped_restore_current_inferior restore_inferior;
-  struct inferior *inf;
 
   /* Must do this in two passes.  First, have all inferiors save the
      current terminal settings.  Then, after all inferiors have add a
      chance to safely save the terminal settings, restore GDB's
      terminal settings.  */
 
-  ALL_INFERIORS (inf)
+  for (inferior *inf : all_inferiors ())
     {
       if (inf->terminal_state == target_terminal_state::is_inferior)
 	{
@@ -517,7 +515,7 @@ target_terminal_is_ours_kind (target_terminal_state desired_state)
 	}
     }
 
-  ALL_INFERIORS (inf)
+  for (inferior *inf : all_inferiors ())
     {
       /* Note we don't check is_inferior here like above because we
 	 need to handle 'is_ours_for_output -> is_ours' too.  Careful
