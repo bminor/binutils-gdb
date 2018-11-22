@@ -1,5 +1,10 @@
 2018-11-22  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (follow_exec) <set follow-exec new>: Add thread and
+	switch to it before calling into try_open_exec_file.
+
+2018-11-22  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-interp.c (cli_on_user_selected_context_changed): Use
 	inferior_thread instead of find_thread_ptid, and only when
 	inferior_ptid is not null_ptid.
