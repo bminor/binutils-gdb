@@ -273,6 +273,26 @@ can do:
 Note that only a hostname/address can be provided, without a port
 number.
 
+TS
+
+This variable turns on the timestamp printing for each line of "make
+check".  Note that the timestamp will be printed on stdout output
+only.  In other words, there will be no timestamp output on either
+gdb.sum and gdb.log files.  If you would like to enable timestamp
+printing, you can do:
+
+	make check TS=1
+
+TS_FORMAT
+
+You can provide a custom format for timestamp printing with this
+variable.  The format must be a string compatible with "strftime".
+This variable is only useful when the TS variable is also provided.
+If you would like to change the output format of the timestamp, you
+can do:
+
+	make check TS=1 TS_FORMAT='[%b %H:%S]'
+
 Race detection
 **************
 

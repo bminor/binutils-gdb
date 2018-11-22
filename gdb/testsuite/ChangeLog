@@ -1,3 +1,17 @@
+2018-11-25  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* Makefile.in (TIMESTAMP): New variable.
+	(check-single): Add $(TIMESTAMP) to the end of $(DO_RUNTEST)
+	command.
+	(check-single-racy): Likewise.
+	(check/%.exp): Likewise.
+	(check-racy/%.exp): Likewise.
+	(workers/%.worker): Likewise.
+	(build-perf): Likewise.
+	(check-perf): Likewise.
+	* README: Describe new "TS" and "TS_FORMAT" variables.
+	* print-ts.py: New file.
+
 2018-11-21  Benno Fünfstück  <benno.fuenfstueck@gmail.com>
 
 	PR python/23714

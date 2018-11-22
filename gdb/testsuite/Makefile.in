@@ -158,6 +158,10 @@ check: all $(abs_builddir)/site.exp
 check-read1:
 	$(MAKE) READ1="1" check
 
+# Check whether we need to print the timestamp for each line of
+# status.
+TIMESTAMP = $(if $(TS),| $(srcdir)/print-ts.py $(if $(TS_FORMAT),$(TS_FORMAT),),)
+
 # All the hair to invoke dejagnu.  A given invocation can just append
 # $(RUNTESTFLAGS)
 DO_RUNTEST = \
@@ -192,7 +196,7 @@ check-gdb.%:
 	$(MAKE) check TESTS="gdb.$*/*.exp"
 
 check-single:
-	$(DO_RUNTEST) $(RUNTESTFLAGS) $(expanded_tests_or_none)
+	$(DO_RUNTEST) $(RUNTESTFLAGS) $(expanded_tests_or_none) $(TIMESTAMP)
 
 check-single-racy:
 	-rm -rf cache racy_outputs temp
@@ -208,7 +212,7 @@ check-single-racy:
 	for n in `seq $$racyiter` ; do \
 	  mkdir -p racy_outputs/$$n; \
 	  $(DO_RUNTEST) --outdir=racy_outputs/$$n $(RUNTESTFLAGS) \
-	    $(expanded_tests_or_none); \
+	    $(expanded_tests_or_none) $(TIMESTAMP); \
 	done; \
 	$(srcdir)/analyze-racy-logs.py \
 	  `ls racy_outputs/*/gdb.sum` > racy.sum; \
@@ -273,7 +277,7 @@ do-check-parallel: $(TEST_TARGETS)
 
 check/%.exp:
 	-mkdir -p outputs/$*
-	@$(DO_RUNTEST) GDB_PARALLEL=yes --outdir=outputs/$* $*.exp $(RUNTESTFLAGS)
+	@$(DO_RUNTEST) GDB_PARALLEL=yes --outdir=outputs/$* $*.exp $(RUNTESTFLAGS) $(TIMESTAMP)
 
 do-check-parallel-racy: $(TEST_TARGETS)
 	@:
@@ -282,7 +286,7 @@ check-racy/%.exp:
 	-mkdir -p racy_outputs/$(RACY_OUTPUT_N)/$*
 	$(DO_RUNTEST) GDB_PARALLEL=yes \
 	  --outdir=racy_outputs/$(RACY_OUTPUT_N)/$* $*.exp \
-	  $(RUNTESTFLAGS)
+	  $(RUNTESTFLAGS) $(TIMESTAMP)
 
 check/no-matching-tests-found:
 	@echo ""
@@ -292,7 +296,7 @@ check/no-matching-tests-found:
 # Utility rule invoked by step 2 of the build-perf rule.
 workers/%.worker:
 	mkdir -p gdb.perf/outputs/$*
-	$(DO_RUNTEST) --outdir=gdb.perf/outputs/$* lib/build-piece.exp WORKER=$* GDB_PARALLEL=gdb.perf $(RUNTESTFLAGS) GDB_PERFTEST_MODE=compile GDB_PERFTEST_SUBMODE=build-pieces
+	$(DO_RUNTEST) --outdir=gdb.perf/outputs/$* lib/build-piece.exp WORKER=$* GDB_PARALLEL=gdb.perf $(RUNTESTFLAGS) GDB_PERFTEST_MODE=compile GDB_PERFTEST_SUBMODE=build-pieces $(TIMESTAMP)
 
 # Utility rule to build tests that support it in parallel.
 # The build is broken into 3 steps distinguished by GDB_PERFTEST_SUBMODE:
@@ -312,18 +316,18 @@ build-perf: $(abs_builddir)/site.exp
 	rm -rf gdb.perf/workers
 	mkdir -p gdb.perf/workers
 	@: Step 1: Generate the build .worker files.
-	$(DO_RUNTEST) --directory=gdb.perf --outdir gdb.perf/workers GDB_PARALLEL=gdb.perf $(RUNTESTFLAGS) GDB_PERFTEST_MODE=compile GDB_PERFTEST_SUBMODE=gen-workers
+	$(DO_RUNTEST) --directory=gdb.perf --outdir gdb.perf/workers GDB_PARALLEL=gdb.perf $(RUNTESTFLAGS) GDB_PERFTEST_MODE=compile GDB_PERFTEST_SUBMODE=gen-workers $(TIMESTAMP)
 	@: Step 2: Compile the pieces.  Here is the build parallelism.
 	$(MAKE) $$(cd gdb.perf && echo workers/*/*.worker)
 	@: Step 3: Do the final link.
-	$(DO_RUNTEST) --directory=gdb.perf --outdir gdb.perf GDB_PARALLEL=gdb.perf $(RUNTESTFLAGS) GDB_PERFTEST_MODE=compile GDB_PERFTEST_SUBMODE=final
+	$(DO_RUNTEST) --directory=gdb.perf --outdir gdb.perf GDB_PARALLEL=gdb.perf $(RUNTESTFLAGS) GDB_PERFTEST_MODE=compile GDB_PERFTEST_SUBMODE=final $(TIMESTAMP)
 
 # The default is to both compile and run the tests.
 GDB_PERFTEST_MODE = both
 
 check-perf: all $(abs_builddir)/site.exp
 	@if test ! -d gdb.perf; then mkdir gdb.perf; fi
-	$(DO_RUNTEST) --directory=gdb.perf --outdir gdb.perf GDB_PERFTEST_MODE=$(GDB_PERFTEST_MODE) $(RUNTESTFLAGS)
+	$(DO_RUNTEST) --directory=gdb.perf --outdir gdb.perf GDB_PERFTEST_MODE=$(GDB_PERFTEST_MODE) $(RUNTESTFLAGS) $(TIMESTAMP)
 
 force:;
 
