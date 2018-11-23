@@ -2351,12 +2351,16 @@ remove_symbol_file_command (const char *args, int from_tty)
 
       addr = parse_and_eval_address (argv[1]);
 
-      ALL_OBJFILES (objf)
+      for (objfile *objfile : all_objfiles (current_program_space))
 	{
-	  if ((objf->flags & OBJF_USERLOADED) != 0
-	      && (objf->flags & OBJF_SHARED) != 0
-	      && objf->pspace == pspace && is_addr_in_objfile (addr, objf))
-	    break;
+	  if ((objfile->flags & OBJF_USERLOADED) != 0
+	      && (objfile->flags & OBJF_SHARED) != 0
+	      && objfile->pspace == pspace
+	      && is_addr_in_objfile (addr, objfile))
+	    {
+	      objf = objfile;
+	      break;
+	    }
 	}
     }
   else if (argv[0] != NULL)
@@ -2368,13 +2372,16 @@ remove_symbol_file_command (const char *args, int from_tty)
 
       gdb::unique_xmalloc_ptr<char> filename (tilde_expand (argv[0]));
 
-      ALL_OBJFILES (objf)
+      for (objfile *objfile : all_objfiles (current_program_space))
 	{
-	  if ((objf->flags & OBJF_USERLOADED) != 0
-	      && (objf->flags & OBJF_SHARED) != 0
-	      && objf->pspace == pspace
-	      && filename_cmp (filename.get (), objfile_name (objf)) == 0)
-	    break;
+	  if ((objfile->flags & OBJF_USERLOADED) != 0
+	      && (objfile->flags & OBJF_SHARED) != 0
+	      && objfile->pspace == pspace
+	      && filename_cmp (filename.get (), objfile_name (objfile)) == 0)
+	    {
+	      objf = objfile;
+	      break;
+	    }
 	}
     }
 
@@ -3791,16 +3798,14 @@ expand_symtabs_matching
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    enum search_domain kind)
 {
-  struct objfile *objfile;
-
-  ALL_OBJFILES (objfile)
-  {
-    if (objfile->sf)
-      objfile->sf->qf->expand_symtabs_matching (objfile, file_matcher,
-						lookup_name,
-						symbol_matcher,
-						expansion_notify, kind);
-  }
+  for (objfile *objfile : all_objfiles (current_program_space))
+    {
+      if (objfile->sf)
+	objfile->sf->qf->expand_symtabs_matching (objfile, file_matcher,
+						  lookup_name,
+						  symbol_matcher,
+						  expansion_notify, kind);
+    }
 }
 
 /* Wrapper around the quick_symbol_functions map_symbol_filenames "method".
@@ -3811,14 +3816,12 @@ void
 map_symbol_filenames (symbol_filename_ftype *fun, void *data,
 		      int need_fullname)
 {
-  struct objfile *objfile;
-
-  ALL_OBJFILES (objfile)
-  {
-    if (objfile->sf)
-      objfile->sf->qf->map_symbol_filenames (objfile, fun, data,
-					     need_fullname);
-  }
+  for (objfile *objfile : all_objfiles (current_program_space))
+    {
+      if (objfile->sf)
+	objfile->sf->qf->map_symbol_filenames (objfile, fun, data,
+					       need_fullname);
+    }
 }
 
 #if GDB_SELF_TEST

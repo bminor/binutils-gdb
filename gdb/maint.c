@@ -348,7 +348,6 @@ maintenance_info_sections (const char *arg, int from_tty)
       printf_filtered (_("file type %s.\n"), bfd_get_target (exec_bfd));
       if (arg && *arg && match_substring (arg, "ALLOBJ"))
 	{
-	  struct objfile *ofile;
 	  struct obj_section *osect;
 
 	  /* Only this function cares about the 'ALLOBJ' argument; 
@@ -358,7 +357,7 @@ maintenance_info_sections (const char *arg, int from_tty)
 	  if (strcmp (arg, "ALLOBJ") == 0)
 	    arg = NULL;
 
-	  ALL_OBJFILES (ofile)
+	  for (objfile *ofile : all_objfiles (current_program_space))
 	    {
 	      printf_filtered (_("  Object file: %s\n"), 
 			       bfd_get_filename (ofile->obfd));

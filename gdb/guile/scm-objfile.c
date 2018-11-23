@@ -366,17 +366,16 @@ gdbscm_get_current_objfile (void)
 static SCM
 gdbscm_objfiles (void)
 {
-  struct objfile *objf;
   SCM result;
 
   result = SCM_EOL;
 
-  ALL_OBJFILES (objf)
-  {
-    SCM item = ofscm_scm_from_objfile (objf);
+  for (objfile *objf : all_objfiles (current_program_space))
+    {
+      SCM item = ofscm_scm_from_objfile (objf);
 
-    result = scm_cons (item, result);
-  }
+      result = scm_cons (item, result);
+    }
 
   return scm_reverse_x (result, SCM_EOL);
 }

@@ -62,7 +62,6 @@ static void
 do_module_cleanup (void *arg, int registers_valid)
 {
   struct do_module_cleanup *data = (struct do_module_cleanup *) arg;
-  struct objfile *objfile;
 
   if (data->executedp != NULL)
     {
@@ -83,7 +82,7 @@ do_module_cleanup (void *arg, int registers_valid)
 	}
     }
 
-  ALL_OBJFILES (objfile)
+  for (objfile *objfile : all_objfiles (current_program_space))
     if ((objfile->flags & OBJF_USERLOADED) == 0
         && (strcmp (objfile_name (objfile), data->objfile_name_string) == 0))
       {

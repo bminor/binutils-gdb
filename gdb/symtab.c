@@ -464,7 +464,6 @@ void
 iterate_over_symtabs (const char *name,
 		      gdb::function_view<bool (symtab *)> callback)
 {
-  struct objfile *objfile;
   gdb::unique_xmalloc_ptr<char> real_path;
 
   /* Here we are interested in canonicalizing an absolute path, not
@@ -475,7 +474,7 @@ iterate_over_symtabs (const char *name,
       gdb_assert (IS_ABSOLUTE_PATH (real_path.get ()));
     }
 
-  ALL_OBJFILES (objfile)
+  for (objfile *objfile : all_objfiles (current_program_space))
     {
       if (iterate_over_some_symtabs (name, real_path.get (),
 				     objfile->compunit_symtabs, NULL,
@@ -486,7 +485,7 @@ iterate_over_symtabs (const char *name,
   /* Same search rules as above apply here, but now we look thru the
      psymtabs.  */
 
-  ALL_OBJFILES (objfile)
+  for (objfile *objfile : all_objfiles (current_program_space))
     {
       if (objfile->sf
 	  && objfile->sf->qf->map_symtabs_matching_filename (objfile,
@@ -1013,9 +1012,12 @@ matching_obj_sections (struct obj_section *obj_first,
 
   /* Otherwise check that they are in corresponding objfiles.  */
 
-  ALL_OBJFILES (obj)
-    if (obj->obfd == first->owner)
-      break;
+  for (objfile *objfile : all_objfiles (current_program_space))
+    if (objfile->obfd == first->owner)
+      {
+	obj = objfile;
+	break;
+      }
   gdb_assert (obj != NULL);
 
   if (obj->separate_debug_objfile != NULL
@@ -1033,7 +1035,6 @@ matching_obj_sections (struct obj_section *obj_first,
 void
 expand_symtab_containing_pc (CORE_ADDR pc, struct obj_section *section)
 {
-  struct objfile *objfile;
   struct bound_minimal_symbol msymbol;
 
   /* If we know that this is not a text address, return failure.  This is
@@ -1048,16 +1049,16 @@ expand_symtab_containing_pc (CORE_ADDR pc, struct obj_section *section)
 	  || MSYMBOL_TYPE (msymbol.minsym) == mst_file_bss))
     return;
 
-  ALL_OBJFILES (objfile)
-  {
-    struct compunit_symtab *cust = NULL;
+  for (objfile *objfile : all_objfiles (current_program_space))
+    {
+      struct compunit_symtab *cust = NULL;
 
-    if (objfile->sf)
-      cust = objfile->sf->qf->find_pc_sect_compunit_symtab (objfile, msymbol,
-							    pc, section, 0);
-    if (cust)
-      return;
-  }
+      if (objfile->sf)
+	cust = objfile->sf->qf->find_pc_sect_compunit_symtab (objfile, msymbol,
+							      pc, section, 0);
+      if (cust)
+	return;
+    }
 }
 
 /* Hash function for the symbol cache.  */
@@ -2576,7 +2577,6 @@ struct block_symbol
 lookup_static_symbol (const char *name, const domain_enum domain)
 {
   struct symbol_cache *cache = get_symbol_cache (current_program_space);
-  struct objfile *objfile;
   struct block_symbol result;
   struct block_symbol_cache *bsc;
   struct symbol_cache_slot *slot;
@@ -2592,7 +2592,7 @@ lookup_static_symbol (const char *name, const domain_enum domain)
       return result;
     }
 
-  ALL_OBJFILES (objfile)
+  for (objfile *objfile : all_objfiles (current_program_space))
     {
       result = lookup_symbol_in_objfile (objfile, STATIC_BLOCK, name, domain);
       if (result.symbol != NULL)
@@ -2793,7 +2793,6 @@ basic_lookup_transparent_type_1 (struct objfile *objfile, int block_index,
 struct type *
 basic_lookup_transparent_type (const char *name)
 {
-  struct objfile *objfile;
   struct type *t;
 
   /* Now search all the global symbols.  Do the symtab's first, then
@@ -2801,19 +2800,19 @@ basic_lookup_transparent_type (const char *name)
      of the desired name as a global, then do psymtab-to-symtab
      conversion on the fly and return the found symbol.  */
 
-  ALL_OBJFILES (objfile)
-  {
-    t = basic_lookup_transparent_type_1 (objfile, GLOBAL_BLOCK, name);
-    if (t)
-      return t;
-  }
+  for (objfile *objfile : all_objfiles (current_program_space))
+    {
+      t = basic_lookup_transparent_type_1 (objfile, GLOBAL_BLOCK, name);
+      if (t)
+	return t;
+    }
 
-  ALL_OBJFILES (objfile)
-  {
-    t = basic_lookup_transparent_type_quick (objfile, GLOBAL_BLOCK, name);
-    if (t)
-      return t;
-  }
+  for (objfile *objfile : all_objfiles (current_program_space))
+    {
+      t = basic_lookup_transparent_type_quick (objfile, GLOBAL_BLOCK, name);
+      if (t)
+	return t;
+    }
 
   /* Now search the static file-level symbols.
      Not strictly correct, but more useful than an error.
@@ -2822,19 +2821,19 @@ basic_lookup_transparent_type (const char *name)
      of the desired name as a file-level static, then do psymtab-to-symtab
      conversion on the fly and return the found symbol.  */
 
-  ALL_OBJFILES (objfile)
-  {
-    t = basic_lookup_transparent_type_1 (objfile, STATIC_BLOCK, name);
-    if (t)
-      return t;
-  }
+  for (objfile *objfile : all_objfiles (current_program_space))
+    {
+      t = basic_lookup_transparent_type_1 (objfile, STATIC_BLOCK, name);
+      if (t)
+	return t;
+    }
 
-  ALL_OBJFILES (objfile)
-  {
-    t = basic_lookup_transparent_type_quick (objfile, STATIC_BLOCK, name);
-    if (t)
-      return t;
-  }
+  for (objfile *objfile : all_objfiles (current_program_space))
+    {
+      t = basic_lookup_transparent_type_quick (objfile, STATIC_BLOCK, name);
+      if (t)
+	return t;
+    }
 
   return (struct type *) 0;
 }
@@ -2877,7 +2876,7 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 {
   struct compunit_symtab *cust;
   struct compunit_symtab *best_cust = NULL;
-  struct objfile *objfile;
+  struct objfile *obj_file;
   CORE_ADDR distance = 0;
   struct bound_minimal_symbol msymbol;
 
@@ -2910,7 +2909,7 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
      It also happens for objfiles that have their functions reordered.
      For these, the symtab we are looking for is not necessarily read in.  */
 
-  ALL_COMPUNITS (objfile, cust)
+  ALL_COMPUNITS (obj_file, cust)
   {
     struct block *b;
     const struct blockvector *bv;
@@ -2929,15 +2928,15 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 	/* In order to better support objfiles that contain both
 	   stabs and coff debugging info, we continue on if a psymtab
 	   can't be found.  */
-	if ((objfile->flags & OBJF_REORDERED) && objfile->sf)
+	if ((obj_file->flags & OBJF_REORDERED) && obj_file->sf)
 	  {
 	    struct compunit_symtab *result;
 
 	    result
-	      = objfile->sf->qf->find_pc_sect_compunit_symtab (objfile,
-							       msymbol,
-							       pc, section,
-							       0);
+	      = obj_file->sf->qf->find_pc_sect_compunit_symtab (obj_file,
+								msymbol,
+								pc, section,
+								0);
 	    if (result != NULL)
 	      return result;
 	  }
@@ -2948,8 +2947,8 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 
 	    ALL_BLOCK_SYMBOLS (b, iter, sym)
 	      {
-		fixup_symbol_section (sym, objfile);
-		if (matching_obj_sections (SYMBOL_OBJ_SECTION (objfile, sym),
+		fixup_symbol_section (sym, obj_file);
+		if (matching_obj_sections (SYMBOL_OBJ_SECTION (obj_file, sym),
 					   section))
 		  break;
 	      }
@@ -2967,19 +2966,19 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 
   /* Not found in symtabs, search the "quick" symtabs (e.g. psymtabs).  */
 
-  ALL_OBJFILES (objfile)
-  {
-    struct compunit_symtab *result;
+  for (objfile *objf : all_objfiles (current_program_space))
+    {
+      struct compunit_symtab *result;
 
-    if (!objfile->sf)
-      continue;
-    result = objfile->sf->qf->find_pc_sect_compunit_symtab (objfile,
-							    msymbol,
-							    pc, section,
-							    1);
-    if (result != NULL)
-      return result;
-  }
+      if (!objf->sf)
+	continue;
+      result = objf->sf->qf->find_pc_sect_compunit_symtab (objf,
+							   msymbol,
+							   pc, section,
+							   1);
+      if (result != NULL)
+	return result;
+    }
 
   return NULL;
 }
@@ -2999,35 +2998,33 @@ find_pc_compunit_symtab (CORE_ADDR pc)
 struct symbol *
 find_symbol_at_address (CORE_ADDR address)
 {
-  struct objfile *objfile;
+  for (objfile *objfile : all_objfiles (current_program_space))
+    {
+      if (objfile->sf == NULL
+	  || objfile->sf->qf->find_compunit_symtab_by_address == NULL)
+	continue;
 
-  ALL_OBJFILES (objfile)
-  {
-    if (objfile->sf == NULL
-	|| objfile->sf->qf->find_compunit_symtab_by_address == NULL)
-      continue;
+      struct compunit_symtab *symtab
+	= objfile->sf->qf->find_compunit_symtab_by_address (objfile, address);
+      if (symtab != NULL)
+	{
+	  const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (symtab);
 
-    struct compunit_symtab *symtab
-      = objfile->sf->qf->find_compunit_symtab_by_address (objfile, address);
-    if (symtab != NULL)
-      {
-	const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (symtab);
-
-	for (int i = GLOBAL_BLOCK; i <= STATIC_BLOCK; ++i)
-	  {
-	    struct block *b = BLOCKVECTOR_BLOCK (bv, i);
-	    struct block_iterator iter;
-	    struct symbol *sym;
-
-	    ALL_BLOCK_SYMBOLS (b, iter, sym)
+	  for (int i = GLOBAL_BLOCK; i <= STATIC_BLOCK; ++i)
 	    {
-	      if (SYMBOL_CLASS (sym) == LOC_STATIC
-		  && SYMBOL_VALUE_ADDRESS (sym) == address)
-		return sym;
+	      struct block *b = BLOCKVECTOR_BLOCK (bv, i);
+	      struct block_iterator iter;
+	      struct symbol *sym;
+
+	      ALL_BLOCK_SYMBOLS (b, iter, sym)
+		{
+		  if (SYMBOL_CLASS (sym) == LOC_STATIC
+		      && SYMBOL_VALUE_ADDRESS (sym) == address)
+		    return sym;
+		}
 	    }
-	  }
-      }
-  }
+	}
+    }
 
   return NULL;
 }
@@ -3352,7 +3349,6 @@ find_line_symtab (struct symtab *symtab, int line,
          BEST_INDEX and BEST_LINETABLE identify the item for it.  */
       int best;
 
-      struct objfile *objfile;
       struct compunit_symtab *cu;
       struct symtab *s;
 
@@ -3361,13 +3357,14 @@ find_line_symtab (struct symtab *symtab, int line,
       else
 	best = 0;
 
-      ALL_OBJFILES (objfile)
-      {
-	if (objfile->sf)
-	  objfile->sf->qf->expand_symtabs_with_fullname (objfile,
-						   symtab_to_fullname (symtab));
-      }
+      for (objfile *objfile : all_objfiles (current_program_space))
+	{
+	  if (objfile->sf)
+	    objfile->sf->qf->expand_symtabs_with_fullname
+	      (objfile, symtab_to_fullname (symtab));
+	}
 
+      struct objfile *objfile;
       ALL_FILETABS (objfile, cu, s)
       {
 	struct linetable *l;
@@ -5691,7 +5688,6 @@ static void
 find_main_name (void)
 {
   const char *new_main_name;
-  struct objfile *objfile;
 
   /* First check the objfiles to see whether a debuginfo reader has
      picked up the appropriate main name.  Historically the main name
@@ -5699,15 +5695,15 @@ find_main_name (void)
      relies on the order of objfile creation -- which still isn't
      guaranteed to get the correct answer, but is just probably more
      accurate.  */
-  ALL_OBJFILES (objfile)
-  {
-    if (objfile->per_bfd->name_of_main != NULL)
-      {
-	set_main_name (objfile->per_bfd->name_of_main,
-		       objfile->per_bfd->language_of_main);
-	return;
-      }
-  }
+  for (objfile *objfile : all_objfiles (current_program_space))
+    {
+      if (objfile->per_bfd->name_of_main != NULL)
+	{
+	  set_main_name (objfile->per_bfd->name_of_main,
+			 objfile->per_bfd->language_of_main);
+	  return;
+	}
+    }
 
   /* Try to see if the main procedure is in Ada.  */
   /* FIXME: brobecker/2005-03-07: Another way of doing this would

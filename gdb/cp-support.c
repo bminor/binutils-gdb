@@ -1374,17 +1374,16 @@ add_symbol_overload_list_qualified (const char *func_name,
 				    std::vector<symbol *> *overload_list)
 {
   struct compunit_symtab *cust;
-  struct objfile *objfile;
   const struct block *b, *surrounding_static_block = 0;
 
   /* Look through the partial symtabs for all symbols which begin by
      matching FUNC_NAME.  Make sure we read that symbol table in.  */
 
-  ALL_OBJFILES (objfile)
-  {
-    if (objfile->sf)
-      objfile->sf->qf->expand_symtabs_for_function (objfile, func_name);
-  }
+  for (objfile *objf : all_objfiles (current_program_space))
+    {
+      if (objf->sf)
+	objf->sf->qf->expand_symtabs_for_function (objf, func_name);
+    }
 
   /* Search upwards from currently selected frame (so that we can
      complete on local vars.  */
@@ -1397,6 +1396,7 @@ add_symbol_overload_list_qualified (const char *func_name,
   /* Go through the symtabs and check the externs and statics for
      symbols which match.  */
 
+  struct objfile *objfile;
   ALL_COMPUNITS (objfile, cust)
   {
     QUIT;

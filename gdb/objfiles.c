@@ -1016,13 +1016,11 @@ objfile_has_symbols (struct objfile *objfile)
 int
 have_partial_symbols (void)
 {
-  struct objfile *ofp;
-
-  ALL_OBJFILES (ofp)
-  {
-    if (objfile_has_partial_symbols (ofp))
-      return 1;
-  }
+  for (objfile *ofp : all_objfiles (current_program_space))
+    {
+      if (objfile_has_partial_symbols (ofp))
+	return 1;
+    }
   return 0;
 }
 
@@ -1033,13 +1031,11 @@ have_partial_symbols (void)
 int
 have_full_symbols (void)
 {
-  struct objfile *ofp;
-
-  ALL_OBJFILES (ofp)
-  {
-    if (objfile_has_full_symbols (ofp))
-      return 1;
-  }
+  for (objfile *ofp : all_objfiles (current_program_space))
+    {
+      if (objfile_has_full_symbols (ofp))
+	return 1;
+    }
   return 0;
 }
 
@@ -1072,15 +1068,13 @@ objfile_purge_solibs (void)
 int
 have_minimal_symbols (void)
 {
-  struct objfile *ofp;
-
-  ALL_OBJFILES (ofp)
-  {
-    if (ofp->per_bfd->minimal_symbol_count > 0)
-      {
-	return 1;
-      }
-  }
+  for (objfile *ofp : all_objfiles (current_program_space))
+    {
+      if (ofp->per_bfd->minimal_symbol_count > 0)
+	{
+	  return 1;
+	}
+    }
   return 0;
 }
 
@@ -1145,9 +1139,7 @@ qsort_cmp (const void *a, const void *b)
 	{
 	  /* Sort on sequence number of the objfile in the chain.  */
 
-	  const struct objfile *objfile;
-
-	  ALL_OBJFILES (objfile)
+	  for (objfile *objfile : all_objfiles (current_program_space))
 	    if (objfile == objfile1)
 	      return -1;
 	    else if (objfile == objfile2)
@@ -1502,7 +1494,7 @@ shared_objfile_contains_address_p (struct program_space *pspace,
 }
 
 /* The default implementation for the "iterate_over_objfiles_in_search_order"
-   gdbarch method.  It is equivalent to use the ALL_OBJFILES macro,
+   gdbarch method.  It is equivalent to use the all_objfiles iterable,
    searching the objfiles in the order they are stored internally,
    ignoring CURRENT_OBJFILE.
 
@@ -1516,9 +1508,8 @@ default_iterate_over_objfiles_in_search_order
    void *cb_data, struct objfile *current_objfile)
 {
   int stop = 0;
-  struct objfile *objfile;
 
-  ALL_OBJFILES (objfile)
+  for (objfile *objfile : all_objfiles (current_program_space))
     {
        stop = cb (objfile, cb_data);
        if (stop)

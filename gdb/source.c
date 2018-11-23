@@ -288,13 +288,13 @@ select_source_symtab (struct symtab *s)
   if (current_source_symtab)
     return;
 
-  ALL_OBJFILES (ofp)
-  {
-    if (ofp->sf)
-      s = ofp->sf->qf->find_last_source_symtab (ofp);
-    if (s)
-      current_source_symtab = s;
-  }
+  for (objfile *objfile : all_objfiles (current_program_space))
+    {
+      if (objfile->sf)
+	s = objfile->sf->qf->find_last_source_symtab (objfile);
+      if (s)
+	current_source_symtab = s;
+    }
   if (current_source_symtab)
     return;
 

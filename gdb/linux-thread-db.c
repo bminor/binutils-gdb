@@ -1053,12 +1053,10 @@ try_thread_db_load_from_pdir_1 (struct objfile *obj, const char *subdir)
 static int
 try_thread_db_load_from_pdir (const char *subdir)
 {
-  struct objfile *obj;
-
   if (!auto_load_thread_db)
     return 0;
 
-  ALL_OBJFILES (obj)
+  for (objfile *obj : all_objfiles (current_program_space))
     if (libpthread_name_p (objfile_name (obj)))
       {
 	if (try_thread_db_load_from_pdir_1 (obj, subdir))
@@ -1167,9 +1165,7 @@ thread_db_load_search (void)
 static int
 has_libpthread (void)
 {
-  struct objfile *obj;
-
-  ALL_OBJFILES (obj)
+  for (objfile *obj : all_objfiles (current_program_space))
     if (libpthread_name_p (objfile_name (obj)))
       return 1;
 

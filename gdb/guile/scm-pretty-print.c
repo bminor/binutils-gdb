@@ -427,19 +427,18 @@ ppscm_search_pp_list (SCM list, SCM value)
 static SCM
 ppscm_find_pretty_printer_from_objfiles (SCM value)
 {
-  struct objfile *objfile;
+  for (objfile *objfile : all_objfiles (current_program_space))
+    {
+      objfile_smob *o_smob = ofscm_objfile_smob_from_objfile (objfile);
+      SCM pp
+	= ppscm_search_pp_list (ofscm_objfile_smob_pretty_printers (o_smob),
+				value);
 
-  ALL_OBJFILES (objfile)
-  {
-    objfile_smob *o_smob = ofscm_objfile_smob_from_objfile (objfile);
-    SCM pp = ppscm_search_pp_list (ofscm_objfile_smob_pretty_printers (o_smob),
-				   value);
-
-    /* Note: This will return if pp is a <gdb:exception> object,
-       which is what we want.  */
-    if (gdbscm_is_true (pp))
-      return pp;
-  }
+      /* Note: This will return if pp is a <gdb:exception> object,
+	 which is what we want.  */
+      if (gdbscm_is_true (pp))
+	return pp;
+    }
 
   return SCM_BOOL_F;
 }

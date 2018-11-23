@@ -972,8 +972,6 @@ find_methods (char type, const char *theclass, const char *category,
 	      const char *selector,
 	      std::vector<const char *> *symbol_names)
 {
-  struct objfile *objfile = NULL;
-
   const char *symname = NULL;
 
   char ntype = '\0';
@@ -986,7 +984,7 @@ find_methods (char type, const char *theclass, const char *category,
 
   gdb_assert (symbol_names != NULL);
 
-  ALL_OBJFILES (objfile)
+  for (objfile *objfile : all_objfiles (current_program_space))
     {
       unsigned int *objc_csym;
       struct minimal_symbol *msymbol = NULL;

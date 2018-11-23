@@ -244,29 +244,28 @@ find_probes_in_objfile (struct objfile *objfile, const char *provider,
 struct bound_probe
 find_probe_by_pc (CORE_ADDR pc)
 {
-  struct objfile *objfile;
   struct bound_probe result;
 
   result.objfile = NULL;
   result.prob = NULL;
 
-  ALL_OBJFILES (objfile)
-  {
-    if (!objfile->sf || !objfile->sf->sym_probe_fns
-	|| objfile->sect_index_text == -1)
-      continue;
+  for (objfile *objfile : all_objfiles (current_program_space))
+    {
+      if (!objfile->sf || !objfile->sf->sym_probe_fns
+	  || objfile->sect_index_text == -1)
+	continue;
 
-    /* If this proves too inefficient, we can replace with a hash.  */
-    const std::vector<probe *> &probes
-      = objfile->sf->sym_probe_fns->sym_get_probes (objfile);
-    for (probe *p : probes)
-      if (p->get_relocated_address (objfile) == pc)
-	{
-	  result.objfile = objfile;
-	  result.prob = p;
-	  return result;
-	}
-  }
+      /* If this proves too inefficient, we can replace with a hash.  */
+      const std::vector<probe *> &probes
+	= objfile->sf->sym_probe_fns->sym_get_probes (objfile);
+      for (probe *p : probes)
+	if (p->get_relocated_address (objfile) == pc)
+	  {
+	    result.objfile = objfile;
+	    result.prob = p;
+	    return result;
+	  }
+    }
 
   return result;
 }
@@ -282,7 +281,6 @@ static std::vector<bound_probe>
 collect_probes (const std::string &objname, const std::string &provider,
 		const std::string &probe_name, const static_probe_ops *spops)
 {
-  struct objfile *objfile;
   std::vector<bound_probe> result;
   gdb::optional<compiled_regex> obj_pat, prov_pat, probe_pat;
 
@@ -296,7 +294,7 @@ collect_probes (const std::string &objname, const std::string &provider,
     obj_pat.emplace (objname.c_str (), REG_NOSUB,
 		     _("Invalid object file regexp"));
 
-  ALL_OBJFILES (objfile)
+  for (objfile *objfile : all_objfiles (current_program_space))
     {
       if (! objfile->sf || ! objfile->sf->sym_probe_fns)
 	continue;

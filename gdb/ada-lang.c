@@ -5604,7 +5604,6 @@ add_nonlocal_symbols (struct obstack *obstackp,
 		      const lookup_name_info &lookup_name,
 		      domain_enum domain, int global)
 {
-  struct objfile *objfile;
   struct compunit_symtab *cu;
   struct match_data data;
 
@@ -5613,7 +5612,7 @@ add_nonlocal_symbols (struct obstack *obstackp,
 
   bool is_wild_match = lookup_name.ada ().wild_match_p ();
 
-  ALL_OBJFILES (objfile)
+  for (objfile *objfile : all_objfiles (current_program_space))
     {
       data.objfile = objfile;
 
@@ -5646,7 +5645,7 @@ add_nonlocal_symbols (struct obstack *obstackp,
       const char *name = ada_lookup_name (lookup_name);
       std::string name1 = std::string ("<_ada_") + name + '>';
 
-      ALL_OBJFILES (objfile)
+      for (objfile *objfile : all_objfiles (current_program_space))
         {
 	  data.objfile = objfile;
 	  objfile->sf->qf->map_matching_symbols (objfile, name1.c_str (),

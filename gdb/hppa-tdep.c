@@ -483,7 +483,6 @@ struct unwind_table_entry *
 find_unwind_entry (CORE_ADDR pc)
 {
   int first, middle, last;
-  struct objfile *objfile;
   struct hppa_objfile_private *priv;
 
   if (hppa_debug)
@@ -498,61 +497,61 @@ find_unwind_entry (CORE_ADDR pc)
       return NULL;
     }
 
-  ALL_OBJFILES (objfile)
-  {
-    struct hppa_unwind_info *ui;
-    ui = NULL;
-    priv = ((struct hppa_objfile_private *)
-	    objfile_data (objfile, hppa_objfile_priv_data));
-    if (priv)
-      ui = ((struct hppa_objfile_private *) priv)->unwind_info;
+  for (objfile *objfile : all_objfiles (current_program_space))
+    {
+      struct hppa_unwind_info *ui;
+      ui = NULL;
+      priv = ((struct hppa_objfile_private *)
+	      objfile_data (objfile, hppa_objfile_priv_data));
+      if (priv)
+	ui = ((struct hppa_objfile_private *) priv)->unwind_info;
 
-    if (!ui)
-      {
-	read_unwind_info (objfile);
-        priv = ((struct hppa_objfile_private *)
-		objfile_data (objfile, hppa_objfile_priv_data));
-	if (priv == NULL)
-	  error (_("Internal error reading unwind information."));
-        ui = ((struct hppa_objfile_private *) priv)->unwind_info;
-      }
+      if (!ui)
+	{
+	  read_unwind_info (objfile);
+	  priv = ((struct hppa_objfile_private *)
+		  objfile_data (objfile, hppa_objfile_priv_data));
+	  if (priv == NULL)
+	    error (_("Internal error reading unwind information."));
+	  ui = ((struct hppa_objfile_private *) priv)->unwind_info;
+	}
 
-    /* First, check the cache.  */
+      /* First, check the cache.  */
 
-    if (ui->cache
-	&& pc >= ui->cache->region_start
-	&& pc <= ui->cache->region_end)
-      {
-	if (hppa_debug)
-	  fprintf_unfiltered (gdb_stdlog, "%s (cached) }\n",
-            hex_string ((uintptr_t) ui->cache));
-        return ui->cache;
-      }
+      if (ui->cache
+	  && pc >= ui->cache->region_start
+	  && pc <= ui->cache->region_end)
+	{
+	  if (hppa_debug)
+	    fprintf_unfiltered (gdb_stdlog, "%s (cached) }\n",
+				hex_string ((uintptr_t) ui->cache));
+	  return ui->cache;
+	}
 
-    /* Not in the cache, do a binary search.  */
+      /* Not in the cache, do a binary search.  */
 
-    first = 0;
-    last = ui->last;
+      first = 0;
+      last = ui->last;
 
-    while (first <= last)
-      {
-	middle = (first + last) / 2;
-	if (pc >= ui->table[middle].region_start
-	    && pc <= ui->table[middle].region_end)
-	  {
-	    ui->cache = &ui->table[middle];
-	    if (hppa_debug)
-	      fprintf_unfiltered (gdb_stdlog, "%s }\n",
-                hex_string ((uintptr_t) ui->cache));
-	    return &ui->table[middle];
-	  }
+      while (first <= last)
+	{
+	  middle = (first + last) / 2;
+	  if (pc >= ui->table[middle].region_start
+	      && pc <= ui->table[middle].region_end)
+	    {
+	      ui->cache = &ui->table[middle];
+	      if (hppa_debug)
+		fprintf_unfiltered (gdb_stdlog, "%s }\n",
+				    hex_string ((uintptr_t) ui->cache));
+	      return &ui->table[middle];
+	    }
 
-	if (pc < ui->table[middle].region_start)
-	  last = middle - 1;
-	else
-	  first = middle + 1;
-      }
-  }				/* ALL_OBJFILES() */
+	  if (pc < ui->table[middle].region_start)
+	    last = middle - 1;
+	  else
+	    first = middle + 1;
+	}
+    }
 
   if (hppa_debug)
     fprintf_unfiltered (gdb_stdlog, "NULL (not found) }\n");

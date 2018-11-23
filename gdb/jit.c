@@ -986,9 +986,7 @@ jit_unregister_code (struct objfile *objfile)
 static struct objfile *
 jit_find_objf_with_entry_addr (CORE_ADDR entry_addr)
 {
-  struct objfile *objf;
-
-  ALL_OBJFILES (objf)
+  for (objfile *objf : all_objfiles (current_program_space))
     {
       struct jit_objfile_data *objf_data;
 

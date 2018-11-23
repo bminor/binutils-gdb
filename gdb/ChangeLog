@@ -1,5 +1,64 @@
 2019-01-09  Tom Tromey  <tom@tromey.com>
 
+	* symtab.c (iterate_over_symtabs, matching_obj_sections)
+	(expand_symtab_containing_pc, lookup_static_symbol)
+	(basic_lookup_transparent_type, find_pc_sect_compunit_symtab)
+	(find_symbol_at_address, find_line_symtab, find_main_name): Use
+	all_objfiles.
+	* probe.c (find_probe_by_pc, collect_probes): Use all_objfiles.
+	* breakpoint.c (create_overlay_event_breakpoint)
+	(create_longjmp_master_breakpoint)
+	(create_std_terminate_master_breakpoint)
+	(create_exception_master_breakpoint): Use all_objfiles.
+	* linux-thread-db.c (try_thread_db_load_from_pdir)
+	(has_libpthread): Use all_objfiles.
+	* ada-lang.c (add_nonlocal_symbols): Use all_objfiles.
+	* linespec.c (iterate_over_all_matching_symtabs)
+	(search_minsyms_for_name): Use all_objfiles.
+	* maint.c (maintenance_info_sections): Use all_objfiles.
+	* main.c (captured_main_1): Use all_objfiles.
+	* spu-tdep.c (spu_objfile_from_frame): Use all_objfiles.
+	* guile/scm-objfile.c (gdbscm_objfiles): Use all_objfiles.
+	* guile/scm-pretty-print.c
+	(ppscm_find_pretty_printer_from_objfiles): Use all_objfiles.
+	* solib-spu.c (append_ocl_sos): Use all_objfiles.
+	* symmisc.c (maintenance_print_symbols): Use all_objfiles.
+	(maintenance_print_msymbols): Use all_objfiles.
+	* source.c (select_source_symtab): Use all_objfiles.
+	* jit.c (jit_find_objf_with_entry_addr): Use all_objfiles.
+	* symfile.c (remove_symbol_file_command)
+	(expand_symtabs_matching, map_symbol_filenames): Use
+	all_objfiles.
+	* ppc-linux-tdep.c (ppc_linux_spe_context_inferior_created): Use
+	all_objfiles.
+	* dwarf2-frame.c (dwarf2_frame_find_fde): Use all_objfiles.
+	* objc-lang.c (find_methods): Use all_objfiles.
+	* objfiles.c (have_partial_symbols, have_full_symbols)
+	(have_minimal_symbols, qsort_cmp)
+	(default_iterate_over_objfiles_in_search_order): Use
+	all_objfiles.
+	* hppa-tdep.c (find_unwind_entry): Use all_objfiles.
+	* psymtab.c (maintenance_print_psymbols): Use all_objfiles.
+	(maintenance_check_psymtabs): Use all_objfiles.
+	(ALL_PSYMTABS): Remove.
+	* compile/compile-object-run.c (do_module_cleanup): Use
+	all_objfiles.
+	* blockframe.c (find_pc_partial_function): Use all_objfiles.
+	* cp-support.c (add_symbol_overload_list_qualified): Use
+	all_objfiles.
+	* windows-tdep.c (windows_iterate_over_objfiles_in_search_order):
+	Use all_objfiles.
+	* dwarf-index-write.c (save_gdb_index_command): Use all_objfiles.
+	* python/py-xmethods.c (gdbpy_get_matching_xmethod_workers): Use
+	all_objfiles.
+	* python/py-objfile.c (objfpy_lookup_objfile_by_name)
+	(objfpy_lookup_objfile_by_build_id): Use all_objfiles.
+	* python/py-prettyprint.c (find_pretty_printer_from_objfiles):
+	Uses all_objfiles.
+	* solib.c (solib_read_symbols): Use all_objfiles
+
+2019-01-09  Tom Tromey  <tom@tromey.com>
+
 	* probe.c (parse_probes_in_pspace): Use all_objfiles.
 	* guile/scm-progspace.c (gdbscm_progspace_objfiles): Use
 	all_objfiles.

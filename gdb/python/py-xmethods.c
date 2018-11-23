@@ -121,8 +121,6 @@ gdbpy_get_matching_xmethod_workers
    struct type *obj_type, const char *method_name,
    std::vector<xmethod_worker_up> *dm_vec)
 {
-  struct objfile *objfile;
-
   gdb_assert (obj_type != NULL && method_name != NULL);
 
   gdbpy_enter enter_py (get_current_arch (), current_language);
@@ -145,7 +143,7 @@ gdbpy_get_matching_xmethod_workers
   /* Gather debug method matchers registered with the object files.
      This could be done differently by iterating over each objfile's matcher
      list individually, but there's no data yet to show it's needed.  */
-  ALL_OBJFILES (objfile)
+  for (objfile *objfile : all_objfiles (current_program_space))
     {
       gdbpy_ref<> py_objfile = objfile_to_objfile_object (objfile);
 

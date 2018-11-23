@@ -1640,7 +1640,6 @@ write_psymtabs_to_index (struct dwarf2_per_objfile *dwarf2_per_objfile,
 static void
 save_gdb_index_command (const char *arg, int from_tty)
 {
-  struct objfile *objfile;
   const char dwarf5space[] = "-dwarf-5 ";
   dw_index_kind index_kind = dw_index_kind::GDB_INDEX;
 
@@ -1658,35 +1657,35 @@ save_gdb_index_command (const char *arg, int from_tty)
   if (!*arg)
     error (_("usage: save gdb-index [-dwarf-5] DIRECTORY"));
 
-  ALL_OBJFILES (objfile)
-  {
-    struct stat st;
+  for (objfile *objfile : all_objfiles (current_program_space))
+    {
+      struct stat st;
 
-    /* If the objfile does not correspond to an actual file, skip it.  */
-    if (stat (objfile_name (objfile), &st) < 0)
-      continue;
+      /* If the objfile does not correspond to an actual file, skip it.  */
+      if (stat (objfile_name (objfile), &st) < 0)
+	continue;
 
-    struct dwarf2_per_objfile *dwarf2_per_objfile
-      = get_dwarf2_per_objfile (objfile);
+      struct dwarf2_per_objfile *dwarf2_per_objfile
+	= get_dwarf2_per_objfile (objfile);
 
-    if (dwarf2_per_objfile != NULL)
-      {
-	TRY
-	  {
-	    const char *basename = lbasename (objfile_name (objfile));
-	    write_psymtabs_to_index (dwarf2_per_objfile, arg, basename,
-				     index_kind);
-	  }
-	CATCH (except, RETURN_MASK_ERROR)
-	  {
-	    exception_fprintf (gdb_stderr, except,
-			       _("Error while writing index for `%s': "),
-			       objfile_name (objfile));
-	  }
-	END_CATCH
-      }
+      if (dwarf2_per_objfile != NULL)
+	{
+	  TRY
+	    {
+	      const char *basename = lbasename (objfile_name (objfile));
+	      write_psymtabs_to_index (dwarf2_per_objfile, arg, basename,
+				       index_kind);
+	    }
+	  CATCH (except, RETURN_MASK_ERROR)
+	    {
+	      exception_fprintf (gdb_stderr, except,
+				 _("Error while writing index for `%s': "),
+				 objfile_name (objfile));
+	    }
+	  END_CATCH
+	    }
 
-  }
+    }
 }
 
 void

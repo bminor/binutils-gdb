@@ -677,11 +677,15 @@ solib_read_symbols (struct so_list *so, symfile_add_flags flags)
       TRY
 	{
 	  /* Have we already loaded this shared object?  */
-	  ALL_OBJFILES (so->objfile)
+	  so->objfile = nullptr;
+	  for (objfile *objfile : all_objfiles (current_program_space))
 	    {
-	      if (filename_cmp (objfile_name (so->objfile), so->so_name) == 0
-		  && so->objfile->addr_low == so->addr_low)
-		break;
+	      if (filename_cmp (objfile_name (objfile), so->so_name) == 0
+		  && objfile->addr_low == so->addr_low)
+		{
+		  so->objfile = objfile;
+		  break;
+		}
 	    }
 	  if (so->objfile == NULL)
 	    {

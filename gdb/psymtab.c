@@ -108,12 +108,6 @@ require_partial_symbols (struct objfile *objfile, int verbose)
 
 #undef ALL_OBJFILE_PSYMTABS
 
-/* Traverse all psymtabs in all objfiles.  */
-
-#define ALL_PSYMTABS(objfile, p) \
-  ALL_OBJFILES (objfile)	 \
-    ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, p)
-
 /* Helper function for psym_map_symtabs_matching_filename that
    expands the symtabs and calls the iterator.  */
 
@@ -1874,7 +1868,6 @@ maintenance_print_psymbols (const char *args, int from_tty)
 {
   struct ui_file *outfile = gdb_stdout;
   char *address_arg = NULL, *source_arg = NULL, *objfile_arg = NULL;
-  struct objfile *objfile;
   struct partial_symtab *ps;
   int i, outfile_idx, found;
   CORE_ADDR pc = 0;
@@ -1944,7 +1937,7 @@ maintenance_print_psymbols (const char *args, int from_tty)
     }
 
   found = 0;
-  ALL_OBJFILES (objfile)
+  for (objfile *objfile : all_objfiles (current_program_space))
     {
       int printed_objfile_header = 0;
       int print_for_objfile = 1;
@@ -2148,93 +2141,93 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
   struct compunit_symtab *cust = NULL;
   struct partial_symtab *ps;
   const struct blockvector *bv;
-  struct objfile *objfile;
   struct block *b;
   int length;
 
-  ALL_PSYMTABS (objfile, ps)
-  {
-    struct gdbarch *gdbarch = get_objfile_arch (objfile);
-
-    /* We don't call psymtab_to_symtab here because that may cause symtab
-       expansion.  When debugging a problem it helps if checkers leave
-       things unchanged.  */
-    cust = ps->compunit_symtab;
-
-    /* First do some checks that don't require the associated symtab.  */
-    if (ps->text_high (objfile) < ps->text_low (objfile))
+  for (objfile *objfile : all_objfiles (current_program_space))
+    ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, ps)
       {
-	printf_filtered ("Psymtab ");
-	puts_filtered (ps->filename);
-	printf_filtered (" covers bad range ");
-	fputs_filtered (paddress (gdbarch, ps->text_low (objfile)),
-			gdb_stdout);
-	printf_filtered (" - ");
-	fputs_filtered (paddress (gdbarch, ps->text_high (objfile)),
-			gdb_stdout);
-	printf_filtered ("\n");
-	continue;
-      }
+	struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
-    /* Now do checks requiring the associated symtab.  */
-    if (cust == NULL)
-      continue;
-    bv = COMPUNIT_BLOCKVECTOR (cust);
-    b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-    partial_symbol **psym = &objfile->static_psymbols[ps->statics_offset];
-    length = ps->n_static_syms;
-    while (length--)
-      {
-	sym = block_lookup_symbol (b, symbol_search_name (*psym),
-				   symbol_name_match_type::SEARCH_NAME,
-				   (*psym)->domain);
-	if (!sym)
+	/* We don't call psymtab_to_symtab here because that may cause symtab
+	   expansion.  When debugging a problem it helps if checkers leave
+	   things unchanged.  */
+	cust = ps->compunit_symtab;
+
+	/* First do some checks that don't require the associated symtab.  */
+	if (ps->text_high (objfile) < ps->text_low (objfile))
 	  {
-	    printf_filtered ("Static symbol `");
-	    puts_filtered ((*psym)->name);
-	    printf_filtered ("' only found in ");
+	    printf_filtered ("Psymtab ");
 	    puts_filtered (ps->filename);
-	    printf_filtered (" psymtab\n");
+	    printf_filtered (" covers bad range ");
+	    fputs_filtered (paddress (gdbarch, ps->text_low (objfile)),
+			    gdb_stdout);
+	    printf_filtered (" - ");
+	    fputs_filtered (paddress (gdbarch, ps->text_high (objfile)),
+			    gdb_stdout);
+	    printf_filtered ("\n");
+	    continue;
 	  }
-	psym++;
-      }
-    b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-    psym = &objfile->global_psymbols[ps->globals_offset];
-    length = ps->n_global_syms;
-    while (length--)
-      {
-	sym = block_lookup_symbol (b, symbol_search_name (*psym),
-				   symbol_name_match_type::SEARCH_NAME,
-				   (*psym)->domain);
-	if (!sym)
+
+	/* Now do checks requiring the associated symtab.  */
+	if (cust == NULL)
+	  continue;
+	bv = COMPUNIT_BLOCKVECTOR (cust);
+	b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+	partial_symbol **psym = &objfile->static_psymbols[ps->statics_offset];
+	length = ps->n_static_syms;
+	while (length--)
 	  {
-	    printf_filtered ("Global symbol `");
-	    puts_filtered ((*psym)->name);
-	    printf_filtered ("' only found in ");
-	    puts_filtered (ps->filename);
-	    printf_filtered (" psymtab\n");
+	    sym = block_lookup_symbol (b, symbol_search_name (*psym),
+				       symbol_name_match_type::SEARCH_NAME,
+				       (*psym)->domain);
+	    if (!sym)
+	      {
+		printf_filtered ("Static symbol `");
+		puts_filtered ((*psym)->name);
+		printf_filtered ("' only found in ");
+		puts_filtered (ps->filename);
+		printf_filtered (" psymtab\n");
+	      }
+	    psym++;
 	  }
-	psym++;
+	b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+	psym = &objfile->global_psymbols[ps->globals_offset];
+	length = ps->n_global_syms;
+	while (length--)
+	  {
+	    sym = block_lookup_symbol (b, symbol_search_name (*psym),
+				       symbol_name_match_type::SEARCH_NAME,
+				       (*psym)->domain);
+	    if (!sym)
+	      {
+		printf_filtered ("Global symbol `");
+		puts_filtered ((*psym)->name);
+		printf_filtered ("' only found in ");
+		puts_filtered (ps->filename);
+		printf_filtered (" psymtab\n");
+	      }
+	    psym++;
+	  }
+	if (ps->raw_text_high () != 0
+	    && (ps->text_low (objfile) < BLOCK_START (b)
+		|| ps->text_high (objfile) > BLOCK_END (b)))
+	  {
+	    printf_filtered ("Psymtab ");
+	    puts_filtered (ps->filename);
+	    printf_filtered (" covers ");
+	    fputs_filtered (paddress (gdbarch, ps->text_low (objfile)),
+			    gdb_stdout);
+	    printf_filtered (" - ");
+	    fputs_filtered (paddress (gdbarch, ps->text_high (objfile)),
+			    gdb_stdout);
+	    printf_filtered (" but symtab covers only ");
+	    fputs_filtered (paddress (gdbarch, BLOCK_START (b)), gdb_stdout);
+	    printf_filtered (" - ");
+	    fputs_filtered (paddress (gdbarch, BLOCK_END (b)), gdb_stdout);
+	    printf_filtered ("\n");
+	  }
       }
-    if (ps->raw_text_high () != 0
-	&& (ps->text_low (objfile) < BLOCK_START (b)
-	    || ps->text_high (objfile) > BLOCK_END (b)))
-      {
-	printf_filtered ("Psymtab ");
-	puts_filtered (ps->filename);
-	printf_filtered (" covers ");
-	fputs_filtered (paddress (gdbarch, ps->text_low (objfile)),
-			gdb_stdout);
-	printf_filtered (" - ");
-	fputs_filtered (paddress (gdbarch, ps->text_high (objfile)),
-			gdb_stdout);
-	printf_filtered (" but symtab covers only ");
-	fputs_filtered (paddress (gdbarch, BLOCK_START (b)), gdb_stdout);
-	printf_filtered (" - ");
-	fputs_filtered (paddress (gdbarch, BLOCK_END (b)), gdb_stdout);
-	printf_filtered ("\n");
-      }
-  }
 }
 
 void

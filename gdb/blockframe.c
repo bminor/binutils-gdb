@@ -217,7 +217,6 @@ find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
   struct symbol *f;
   struct bound_minimal_symbol msymbol;
   struct compunit_symtab *compunit_symtab = NULL;
-  struct objfile *objfile;
   CORE_ADDR mapped_pc;
 
   /* To ensure that the symbol returned belongs to the correct setion
@@ -237,18 +236,19 @@ find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
     goto return_cached_value;
 
   msymbol = lookup_minimal_symbol_by_pc_section (mapped_pc, section);
-  ALL_OBJFILES (objfile)
-  {
-    if (objfile->sf)
-      {
-	compunit_symtab
-	  = objfile->sf->qf->find_pc_sect_compunit_symtab (objfile, msymbol,
-							   mapped_pc, section,
-							   0);
-      }
-    if (compunit_symtab != NULL)
-      break;
-  }
+  for (objfile *objfile : all_objfiles (current_program_space))
+    {
+      if (objfile->sf)
+	{
+	  compunit_symtab
+	    = objfile->sf->qf->find_pc_sect_compunit_symtab (objfile, msymbol,
+							     mapped_pc,
+							     section,
+							     0);
+	}
+      if (compunit_symtab != NULL)
+	break;
+    }
 
   if (compunit_symtab != NULL)
     {
