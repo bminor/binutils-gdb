@@ -1,3 +1,10 @@
+2018-11-23  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* testsuite/gas/arm/bl-local-v4t.d: Remove
+	warning check.
+	* testsuite/gas/arm/blx-local-thumb.s: New.
+	* testsuite/gas/arm/blx-local-thumb.d: New.
+
 2018-11-21 John Darrington <john@darrington.wattle.id.au>
 
 	* testsuite/gas/s12z/shift.s: Add new test case.
