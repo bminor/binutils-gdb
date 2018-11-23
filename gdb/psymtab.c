@@ -2031,106 +2031,112 @@ static void
 maintenance_info_psymtabs (const char *regexp, int from_tty)
 {
   struct program_space *pspace;
-  struct objfile *objfile;
 
   if (regexp)
     re_comp (regexp);
 
   ALL_PSPACES (pspace)
-    ALL_PSPACE_OBJFILES (pspace, objfile)
-    {
-      struct gdbarch *gdbarch = get_objfile_arch (objfile);
-      struct partial_symtab *psymtab;
+    for (objfile *objfile : all_objfiles (pspace))
+      {
+	struct gdbarch *gdbarch = get_objfile_arch (objfile);
+	struct partial_symtab *psymtab;
 
-      /* We don't want to print anything for this objfile until we
-         actually find a symtab whose name matches.  */
-      int printed_objfile_start = 0;
+	/* We don't want to print anything for this objfile until we
+	   actually find a symtab whose name matches.  */
+	int printed_objfile_start = 0;
 
-      ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, psymtab)
-	{
-	  QUIT;
+	ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, psymtab)
+	  {
+	    QUIT;
 
-	  if (! regexp
-	      || re_exec (psymtab->filename))
-	    {
-	      if (! printed_objfile_start)
-		{
-		  printf_filtered ("{ objfile %s ", objfile_name (objfile));
-		  wrap_here ("  ");
-		  printf_filtered ("((struct objfile *) %s)\n",
-				   host_address_to_string (objfile));
-		  printed_objfile_start = 1;
-		}
+	    if (! regexp
+		|| re_exec (psymtab->filename))
+	      {
+		if (! printed_objfile_start)
+		  {
+		    printf_filtered ("{ objfile %s ", objfile_name (objfile));
+		    wrap_here ("  ");
+		    printf_filtered ("((struct objfile *) %s)\n",
+				     host_address_to_string (objfile));
+		    printed_objfile_start = 1;
+		  }
 
-	      printf_filtered ("  { psymtab %s ", psymtab->filename);
-	      wrap_here ("    ");
-	      printf_filtered ("((struct partial_symtab *) %s)\n",
-			       host_address_to_string (psymtab));
+		printf_filtered ("  { psymtab %s ", psymtab->filename);
+		wrap_here ("    ");
+		printf_filtered ("((struct partial_symtab *) %s)\n",
+				 host_address_to_string (psymtab));
 
-	      printf_filtered ("    readin %s\n",
-			       psymtab->readin ? "yes" : "no");
-	      printf_filtered ("    fullname %s\n",
-			       psymtab->fullname
-			       ? psymtab->fullname : "(null)");
-	      printf_filtered ("    text addresses ");
-	      fputs_filtered (paddress (gdbarch, psymtab->text_low (objfile)),
-			      gdb_stdout);
-	      printf_filtered (" -- ");
-	      fputs_filtered (paddress (gdbarch, psymtab->text_high (objfile)),
-			      gdb_stdout);
-	      printf_filtered ("\n");
-	      printf_filtered ("    psymtabs_addrmap_supported %s\n",
-			       (psymtab->psymtabs_addrmap_supported
-				? "yes" : "no"));
-	      printf_filtered ("    globals ");
-	      if (psymtab->n_global_syms)
-		{
-		  auto p = &objfile->global_psymbols[psymtab->globals_offset];
+		printf_filtered ("    readin %s\n",
+				 psymtab->readin ? "yes" : "no");
+		printf_filtered ("    fullname %s\n",
+				 psymtab->fullname
+				 ? psymtab->fullname : "(null)");
+		printf_filtered ("    text addresses ");
+		fputs_filtered (paddress (gdbarch,
+					  psymtab->text_low (objfile)),
+				gdb_stdout);
+		printf_filtered (" -- ");
+		fputs_filtered (paddress (gdbarch,
+					  psymtab->text_high (objfile)),
+				gdb_stdout);
+		printf_filtered ("\n");
+		printf_filtered ("    psymtabs_addrmap_supported %s\n",
+				 (psymtab->psymtabs_addrmap_supported
+				  ? "yes" : "no"));
+		printf_filtered ("    globals ");
+		if (psymtab->n_global_syms)
+		  {
+		    auto p
+		      = &objfile->global_psymbols[psymtab->globals_offset];
 
-		  printf_filtered ("(* (struct partial_symbol **) %s @ %d)\n",
-				   host_address_to_string (p),
-				   psymtab->n_global_syms);
-		}
-	      else
-		printf_filtered ("(none)\n");
-	      printf_filtered ("    statics ");
-	      if (psymtab->n_static_syms)
-		{
-		  auto p = &objfile->static_psymbols[psymtab->statics_offset];
+		    printf_filtered
+		      ("(* (struct partial_symbol **) %s @ %d)\n",
+		       host_address_to_string (p),
+		       psymtab->n_global_syms);
+		  }
+		else
+		  printf_filtered ("(none)\n");
+		printf_filtered ("    statics ");
+		if (psymtab->n_static_syms)
+		  {
+		    auto p
+		      = &objfile->static_psymbols[psymtab->statics_offset];
 
-		  printf_filtered ("(* (struct partial_symbol **) %s @ %d)\n",
-				   host_address_to_string (p),
-				   psymtab->n_static_syms);
-		}
-	      else
-		printf_filtered ("(none)\n");
-	      printf_filtered ("    dependencies ");
-	      if (psymtab->number_of_dependencies)
-		{
-		  int i;
+		    printf_filtered
+		      ("(* (struct partial_symbol **) %s @ %d)\n",
+		       host_address_to_string (p),
+		       psymtab->n_static_syms);
+		  }
+		else
+		  printf_filtered ("(none)\n");
+		printf_filtered ("    dependencies ");
+		if (psymtab->number_of_dependencies)
+		  {
+		    int i;
 
-		  printf_filtered ("{\n");
-		  for (i = 0; i < psymtab->number_of_dependencies; i++)
-		    {
-		      struct partial_symtab *dep = psymtab->dependencies[i];
+		    printf_filtered ("{\n");
+		    for (i = 0; i < psymtab->number_of_dependencies; i++)
+		      {
+			struct partial_symtab *dep = psymtab->dependencies[i];
 
-		      /* Note the string concatenation there --- no comma.  */
-		      printf_filtered ("      psymtab %s "
-				       "((struct partial_symtab *) %s)\n",
-				       dep->filename,
-				       host_address_to_string (dep));
-		    }
-		  printf_filtered ("    }\n");
-		}
-	      else
-		printf_filtered ("(none)\n");
-	      printf_filtered ("  }\n");
-	    }
-	}
+			/* Note the string concatenation there --- no
+			   comma.  */
+			printf_filtered ("      psymtab %s "
+					 "((struct partial_symtab *) %s)\n",
+					 dep->filename,
+					 host_address_to_string (dep));
+		      }
+		    printf_filtered ("    }\n");
+		  }
+		else
+		  printf_filtered ("(none)\n");
+		printf_filtered ("  }\n");
+	      }
+	  }
 
-      if (printed_objfile_start)
-        printf_filtered ("}\n");
-    }
+	if (printed_objfile_start)
+	  printf_filtered ("}\n");
+      }
 }
 
 /* Check consistency of currently expanded psymtabs vs symtabs.  */

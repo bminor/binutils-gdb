@@ -1322,7 +1322,6 @@ update_section_map (struct program_space *pspace,
   struct objfile_pspace_info *pspace_info;
   int alloc_size, map_size, i;
   struct obj_section *s, **map;
-  struct objfile *objfile;
 
   pspace_info = get_objfile_pspace_data (pspace);
   gdb_assert (pspace_info->section_map_dirty != 0
@@ -1332,7 +1331,7 @@ update_section_map (struct program_space *pspace,
   xfree (map);
 
   alloc_size = 0;
-  ALL_PSPACE_OBJFILES (pspace, objfile)
+  for (objfile *objfile : all_objfiles (pspace))
     ALL_OBJFILE_OSECTIONS (objfile, s)
       if (insert_section_p (objfile->obfd, s->the_bfd_section))
 	alloc_size += 1;
@@ -1348,7 +1347,7 @@ update_section_map (struct program_space *pspace,
   map = XNEWVEC (struct obj_section *, alloc_size);
 
   i = 0;
-  ALL_PSPACE_OBJFILES (pspace, objfile)
+  for (objfile *objfile : all_objfiles (pspace))
     ALL_OBJFILE_OSECTIONS (objfile, s)
       if (insert_section_p (objfile->obfd, s->the_bfd_section))
 	map[i++] = s;
@@ -1492,9 +1491,7 @@ int
 shared_objfile_contains_address_p (struct program_space *pspace,
 				   CORE_ADDR address)
 {
-  struct objfile *objfile;
-
-  ALL_PSPACE_OBJFILES (pspace, objfile)
+  for (objfile *objfile : all_objfiles (pspace))
     {
       if ((objfile->flags & OBJF_SHARED) != 0
 	  && is_addr_in_objfile (address, objfile))

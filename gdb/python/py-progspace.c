@@ -333,9 +333,7 @@ pspy_get_objfiles (PyObject *self_, PyObject *args)
 
   if (self->pspace != NULL)
     {
-      struct objfile *objf;
-
-      ALL_PSPACE_OBJFILES (self->pspace, objf)
+      for (objfile *objf : all_objfiles (self->pspace))
 	{
 	  gdbpy_ref<> item = objfile_to_objfile_object (objf);
 

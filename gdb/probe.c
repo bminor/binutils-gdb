@@ -73,9 +73,7 @@ parse_probes_in_pspace (const static_probe_ops *spops,
 			const char *name,
 			std::vector<symtab_and_line> *result)
 {
-  struct objfile *objfile;
-
-  ALL_PSPACE_OBJFILES (search_pspace, objfile)
+  for (objfile *objfile : all_objfiles (search_pspace))
     {
       if (!objfile->sf || !objfile->sf->sym_probe_fns)
 	continue;

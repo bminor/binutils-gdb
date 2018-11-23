@@ -586,11 +586,6 @@ public:
    ALL_OBJFILES_SAFE works even if you delete the objfile during the
    traversal.  */
 
-/* Traverse all object files in program space SS.  */
-
-#define ALL_PSPACE_OBJFILES(ss, obj)					\
-  for ((obj) = ss->objfiles; (obj) != NULL; (obj) = (obj)->next)
-
 #define ALL_OBJFILES(obj)			    \
   for ((obj) = current_program_space->objfiles; \
        (obj) != NULL;				    \

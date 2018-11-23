@@ -660,22 +660,21 @@ static void
 set_debug_symfile (const char *args, int from_tty, struct cmd_list_element *c)
 {
   struct program_space *pspace;
-  struct objfile *objfile;
 
   ALL_PSPACES (pspace)
-    ALL_PSPACE_OBJFILES (pspace, objfile)
-    {
-      if (debug_symfile)
-	{
-	  if (!symfile_debug_installed (objfile))
-	    install_symfile_debug_logging (objfile);
-	}
-      else
-	{
-	  if (symfile_debug_installed (objfile))
-	    uninstall_symfile_debug_logging (objfile);
-	}
-    }
+    for (objfile *objfile : all_objfiles (pspace))
+      {
+	if (debug_symfile)
+	  {
+	    if (!symfile_debug_installed (objfile))
+	      install_symfile_debug_logging (objfile);
+	  }
+	else
+	  {
+	    if (symfile_debug_installed (objfile))
+	      uninstall_symfile_debug_logging (objfile);
+	  }
+      }
 }
 
 static void

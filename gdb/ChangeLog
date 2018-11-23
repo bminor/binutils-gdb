@@ -1,5 +1,25 @@
 2019-01-09  Tom Tromey  <tom@tromey.com>
 
+	* probe.c (parse_probes_in_pspace): Use all_objfiles.
+	* guile/scm-progspace.c (gdbscm_progspace_objfiles): Use
+	all_objfiles.
+	* objfiles.h (ALL_PSPACE_OBJFILES): Remove.
+	* symmisc.c (print_symbol_bcache_statistics)
+	(print_objfile_statistics, maintenance_print_objfiles)
+	(maintenance_info_symtabs, maintenance_check_symtabs)
+	(maintenance_expand_symtabs, maintenance_info_line_tables): Use
+	all_objfiles.
+	* source.c (forget_cached_source_info): Use all_objfiles.
+	* symfile-debug.c (set_debug_symfile): Use all_objfiles.
+	* elfread.c (elf_gnu_ifunc_resolve_by_cache)
+	(elf_gnu_ifunc_resolve_by_got): Use all_objfiles.
+	* objfiles.c (update_section_map): Use all_objfiles.
+	(shared_objfile_contains_address_p): Likewise.
+	* psymtab.c (maintenance_info_psymtabs): Use all_objfiles.
+	* python/py-progspace.c (pspy_get_objfiles): Use all_objfiles.
+
+2019-01-09  Tom Tromey  <tom@tromey.com>
+
 	* common/next-iterator.h: New file.
 	* objfiles.h (class all_objfiles): New.
 	(struct objfile_iterator): New.

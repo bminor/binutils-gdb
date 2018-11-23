@@ -377,13 +377,12 @@ void
 forget_cached_source_info (void)
 {
   struct program_space *pspace;
-  struct objfile *objfile;
 
   ALL_PSPACES (pspace)
-    ALL_PSPACE_OBJFILES (pspace, objfile)
-    {
-      forget_cached_source_info_for_objfile (objfile);
-    }
+    for (objfile *objfile : all_objfiles (pspace))
+      {
+	forget_cached_source_info_for_objfile (objfile);
+      }
 
   g_source_cache.clear ();
   last_source_visited = NULL;
