@@ -36,11 +36,32 @@ struct symtab;
 struct inferior;
 
 /* Frontend view of the thread state.  Possible extensions: stepping,
-   finishing, until(ling),...  */
+   finishing, until(ling),...
+
+   NOTE: Since the thread state is not a boolean, most times, you do
+   not want to check it with negation.  If you really want to check if
+   the thread is stopped,
+
+    use (good):
+
+     if (tp->state == THREAD_STOPPED)
+
+    instead of (bad):
+
+     if (tp->state != THREAD_RUNNING)
+
+   The latter is also true for exited threads, most likely not what
+   you want.  */
 enum thread_state
 {
+  /* In the frontend's perpective, the thread is stopped.  */
   THREAD_STOPPED,
+
+  /* In the frontend's perpective, the thread is running.  */
   THREAD_RUNNING,
+
+  /* The thread is listed, but known to have exited.  We keep it
+     listed (but not visible) until it's safe to delete it.  */
   THREAD_EXITED,
 };
 
@@ -565,31 +586,6 @@ extern void set_running (ptid_t ptid, int running);
    pointed at by PTID.  If STOP, then the THREAD_STOP_REQUESTED
    observer is called with PTID as argument.  */
 extern void set_stop_requested (ptid_t ptid, int stop);
-
-/* NOTE: Since the thread state is not a boolean, most times, you do
-   not want to check it with negation.  If you really want to check if
-   the thread is stopped,
-
-    use (good):
-
-     if (is_stopped (ptid))
-
-    instead of (bad):
-
-     if (!is_running (ptid))
-
-   The latter also returns true on exited threads, most likelly not
-   what you want.  */
-
-/* Reports if in the frontend's perpective, thread PTID is running.  */
-extern int is_running (ptid_t ptid);
-
-/* Is this thread listed, but known to have exited?  We keep it listed
-   (but not visible) until it's safe to delete.  */
-extern int is_exited (ptid_t ptid);
-
-/* In the frontend's perpective, is this thread stopped?  */
-extern int is_stopped (ptid_t ptid);
 
 /* Marks thread PTID as executing, or not.  If PTID is minus_one_ptid,
    marks all threads.
