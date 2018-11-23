@@ -84,22 +84,6 @@ is_sve_tdesc (void)
   return regcache->tdesc->reg_defs.size () == AARCH64_SVE_NUM_REGS;
 }
 
-/* Implementation of linux_target_ops method "cannot_store_register".  */
-
-static int
-aarch64_cannot_store_register (int regno)
-{
-  return regno >= AARCH64_NUM_REGS;
-}
-
-/* Implementation of linux_target_ops method "cannot_fetch_register".  */
-
-static int
-aarch64_cannot_fetch_register (int regno)
-{
-  return regno >= AARCH64_NUM_REGS;
-}
-
 static void
 aarch64_fill_gregset (struct regcache *regcache, void *buf)
 {
@@ -3041,8 +3025,8 @@ struct linux_target_ops the_low_target =
 {
   aarch64_arch_setup,
   aarch64_regs_info,
-  aarch64_cannot_fetch_register,
-  aarch64_cannot_store_register,
+  NULL, /* cannot_fetch_register */
+  NULL, /* cannot_store_register */
   NULL, /* fetch_register */
   aarch64_get_pc,
   aarch64_set_pc,

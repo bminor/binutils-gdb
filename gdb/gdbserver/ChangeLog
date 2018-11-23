@@ -1,3 +1,9 @@
+2018-11-23  Alan Hayward  <alan.hayward@arm.com>
+
+	* linux-aarch64-low.c (aarch64_cannot_store_register): Remove.
+	(aarch64_cannot_fetch_register): Likewise.
+	(struct linux_target_ops): Update references.
+
 2018-10-31  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
 	* linux-ppc-low.c: Include nat/linux-ptrace.h.
