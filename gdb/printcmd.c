@@ -1273,7 +1273,6 @@ static void
 info_symbol_command (const char *arg, int from_tty)
 {
   struct minimal_symbol *msymbol;
-  struct objfile *objfile;
   struct obj_section *osect;
   CORE_ADDR addr, sect_addr;
   int matches = 0;
@@ -1283,78 +1282,81 @@ info_symbol_command (const char *arg, int from_tty)
     error_no_arg (_("address"));
 
   addr = parse_and_eval_address (arg);
-  ALL_OBJSECTIONS (objfile, osect)
-  {
-    /* Only process each object file once, even if there's a separate
-       debug file.  */
-    if (objfile->separate_debug_objfile_backlink)
-      continue;
-
-    sect_addr = overlay_mapped_address (addr, osect);
-
-    if (obj_section_addr (osect) <= sect_addr
-	&& sect_addr < obj_section_endaddr (osect)
-	&& (msymbol
-	    = lookup_minimal_symbol_by_pc_section (sect_addr, osect).minsym))
+  for (objfile *objfile : all_objfiles (current_program_space))
+    ALL_OBJFILE_OSECTIONS (objfile, osect)
       {
-	const char *obj_name, *mapped, *sec_name, *msym_name;
-	const char *loc_string;
+	/* Only process each object file once, even if there's a separate
+	   debug file.  */
+	if (objfile->separate_debug_objfile_backlink)
+	  continue;
 
-	matches = 1;
-	offset = sect_addr - MSYMBOL_VALUE_ADDRESS (objfile, msymbol);
-	mapped = section_is_mapped (osect) ? _("mapped") : _("unmapped");
-	sec_name = osect->the_bfd_section->name;
-	msym_name = MSYMBOL_PRINT_NAME (msymbol);
+	sect_addr = overlay_mapped_address (addr, osect);
 
-	/* Don't print the offset if it is zero.
-	   We assume there's no need to handle i18n of "sym + offset".  */
-	std::string string_holder;
-	if (offset)
+	if (obj_section_addr (osect) <= sect_addr
+	    && sect_addr < obj_section_endaddr (osect)
+	    && (msymbol
+		= lookup_minimal_symbol_by_pc_section (sect_addr,
+						       osect).minsym))
 	  {
-	    string_holder = string_printf ("%s + %u", msym_name, offset);
-	    loc_string = string_holder.c_str ();
+	    const char *obj_name, *mapped, *sec_name, *msym_name;
+	    const char *loc_string;
+
+	    matches = 1;
+	    offset = sect_addr - MSYMBOL_VALUE_ADDRESS (objfile, msymbol);
+	    mapped = section_is_mapped (osect) ? _("mapped") : _("unmapped");
+	    sec_name = osect->the_bfd_section->name;
+	    msym_name = MSYMBOL_PRINT_NAME (msymbol);
+
+	    /* Don't print the offset if it is zero.
+	       We assume there's no need to handle i18n of "sym + offset".  */
+	    std::string string_holder;
+	    if (offset)
+	      {
+		string_holder = string_printf ("%s + %u", msym_name, offset);
+		loc_string = string_holder.c_str ();
+	      }
+	    else
+	      loc_string = msym_name;
+
+	    gdb_assert (osect->objfile && objfile_name (osect->objfile));
+	    obj_name = objfile_name (osect->objfile);
+
+	    if (MULTI_OBJFILE_P ())
+	      if (pc_in_unmapped_range (addr, osect))
+		if (section_is_overlay (osect))
+		  printf_filtered (_("%s in load address range of "
+				     "%s overlay section %s of %s\n"),
+				   loc_string, mapped, sec_name, obj_name);
+		else
+		  printf_filtered (_("%s in load address range of "
+				     "section %s of %s\n"),
+				   loc_string, sec_name, obj_name);
+	      else
+		if (section_is_overlay (osect))
+		  printf_filtered (_("%s in %s overlay section %s of %s\n"),
+				   loc_string, mapped, sec_name, obj_name);
+		else
+		  printf_filtered (_("%s in section %s of %s\n"),
+				   loc_string, sec_name, obj_name);
+	    else
+	      if (pc_in_unmapped_range (addr, osect))
+		if (section_is_overlay (osect))
+		  printf_filtered (_("%s in load address range of %s overlay "
+				     "section %s\n"),
+				   loc_string, mapped, sec_name);
+		else
+		  printf_filtered
+		    (_("%s in load address range of section %s\n"),
+		     loc_string, sec_name);
+	      else
+		if (section_is_overlay (osect))
+		  printf_filtered (_("%s in %s overlay section %s\n"),
+				   loc_string, mapped, sec_name);
+		else
+		  printf_filtered (_("%s in section %s\n"),
+				   loc_string, sec_name);
 	  }
-	else
-	  loc_string = msym_name;
-
-	gdb_assert (osect->objfile && objfile_name (osect->objfile));
-	obj_name = objfile_name (osect->objfile);
-
-	if (MULTI_OBJFILE_P ())
-	  if (pc_in_unmapped_range (addr, osect))
-	    if (section_is_overlay (osect))
-	      printf_filtered (_("%s in load address range of "
-				 "%s overlay section %s of %s\n"),
-			       loc_string, mapped, sec_name, obj_name);
-	    else
-	      printf_filtered (_("%s in load address range of "
-				 "section %s of %s\n"),
-			       loc_string, sec_name, obj_name);
-	  else
-	    if (section_is_overlay (osect))
-	      printf_filtered (_("%s in %s overlay section %s of %s\n"),
-			       loc_string, mapped, sec_name, obj_name);
-	    else
-	      printf_filtered (_("%s in section %s of %s\n"),
-			       loc_string, sec_name, obj_name);
-	else
-	  if (pc_in_unmapped_range (addr, osect))
-	    if (section_is_overlay (osect))
-	      printf_filtered (_("%s in load address range of %s overlay "
-				 "section %s\n"),
-			       loc_string, mapped, sec_name);
-	    else
-	      printf_filtered (_("%s in load address range of section %s\n"),
-			       loc_string, sec_name);
-	  else
-	    if (section_is_overlay (osect))
-	      printf_filtered (_("%s in %s overlay section %s\n"),
-			       loc_string, mapped, sec_name);
-	    else
-	      printf_filtered (_("%s in section %s\n"),
-			       loc_string, sec_name);
       }
-  }
   if (matches == 0)
     printf_filtered (_("No symbol matches %s.\n"), arg);
 }

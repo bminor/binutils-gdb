@@ -1,5 +1,18 @@
 2019-01-09  Tom Tromey  <tom@tromey.com>
 
+	* symfile.c (overlay_invalidate_all, find_pc_overlay)
+	(find_pc_mapped_section, list_overlays_command)
+	(map_overlay_command, unmap_overlay_command)
+	(simple_overlay_update): Use all_objfiles.
+	* spu-tdep.c (spu_overlay_update): Use all_objfiles.
+	* printcmd.c (info_symbol_command): Use all_objfiles.
+	* objfiles.h (ALL_OBJSECTIONS): Remove.
+	* maint.c (maintenance_translate_address): Use all_objfiles.
+	* gcore.c (gcore_create_callback): Use all_objfiles.
+	(objfile_find_memory_regions): Likewise.
+
+2019-01-09  Tom Tromey  <tom@tromey.com>
+
 	* symtab.c (find_line_symtab, info_sources_command)
 	(make_source_files_completion_list): Use objfile_compunits.
 	* source.c (select_source_symtab): Use objfile_compunits.

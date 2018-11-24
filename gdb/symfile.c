@@ -2988,12 +2988,12 @@ section_is_overlay (struct obj_section *section)
 static void
 overlay_invalidate_all (void)
 {
-  struct objfile *objfile;
   struct obj_section *sect;
 
-  ALL_OBJSECTIONS (objfile, sect)
-    if (section_is_overlay (sect))
-      sect->ovly_mapped = -1;
+  for (objfile *objfile : all_objfiles (current_program_space))
+    ALL_OBJFILE_OSECTIONS (objfile, sect)
+      if (section_is_overlay (sect))
+	sect->ovly_mapped = -1;
 }
 
 /* Function: section_is_mapped (SECTION)
@@ -3164,24 +3164,24 @@ symbol_overlayed_address (CORE_ADDR address, struct obj_section *section)
 struct obj_section *
 find_pc_overlay (CORE_ADDR pc)
 {
-  struct objfile *objfile;
   struct obj_section *osect, *best_match = NULL;
 
   if (overlay_debugging)
     {
-      ALL_OBJSECTIONS (objfile, osect)
-	if (section_is_overlay (osect))
-	  {
-	    if (pc_in_mapped_range (pc, osect))
-	      {
-		if (section_is_mapped (osect))
-		  return osect;
-		else
-		  best_match = osect;
-	      }
-	    else if (pc_in_unmapped_range (pc, osect))
-	      best_match = osect;
-	  }
+      for (objfile *objfile : all_objfiles (current_program_space))
+	ALL_OBJFILE_OSECTIONS (objfile, osect)
+	  if (section_is_overlay (osect))
+	    {
+	      if (pc_in_mapped_range (pc, osect))
+		{
+		  if (section_is_mapped (osect))
+		    return osect;
+		  else
+		    best_match = osect;
+		}
+	      else if (pc_in_unmapped_range (pc, osect))
+		best_match = osect;
+	    }
     }
   return best_match;
 }
@@ -3193,14 +3193,14 @@ find_pc_overlay (CORE_ADDR pc)
 struct obj_section *
 find_pc_mapped_section (CORE_ADDR pc)
 {
-  struct objfile *objfile;
   struct obj_section *osect;
 
   if (overlay_debugging)
     {
-      ALL_OBJSECTIONS (objfile, osect)
-	if (pc_in_mapped_range (pc, osect) && section_is_mapped (osect))
-	  return osect;
+      for (objfile *objfile : all_objfiles (current_program_space))
+	ALL_OBJFILE_OSECTIONS (objfile, osect)
+	  if (pc_in_mapped_range (pc, osect) && section_is_mapped (osect))
+	    return osect;
     }
 
   return NULL;
@@ -3213,36 +3213,36 @@ static void
 list_overlays_command (const char *args, int from_tty)
 {
   int nmapped = 0;
-  struct objfile *objfile;
   struct obj_section *osect;
 
   if (overlay_debugging)
     {
-      ALL_OBJSECTIONS (objfile, osect)
-      if (section_is_mapped (osect))
-	{
-	  struct gdbarch *gdbarch = get_objfile_arch (objfile);
-	  const char *name;
-	  bfd_vma lma, vma;
-	  int size;
+      for (objfile *objfile : all_objfiles (current_program_space))
+	ALL_OBJFILE_OSECTIONS (objfile, osect)
+	  if (section_is_mapped (osect))
+	    {
+	      struct gdbarch *gdbarch = get_objfile_arch (objfile);
+	      const char *name;
+	      bfd_vma lma, vma;
+	      int size;
 
-	  vma = bfd_section_vma (objfile->obfd, osect->the_bfd_section);
-	  lma = bfd_section_lma (objfile->obfd, osect->the_bfd_section);
-	  size = bfd_get_section_size (osect->the_bfd_section);
-	  name = bfd_section_name (objfile->obfd, osect->the_bfd_section);
+	      vma = bfd_section_vma (objfile->obfd, osect->the_bfd_section);
+	      lma = bfd_section_lma (objfile->obfd, osect->the_bfd_section);
+	      size = bfd_get_section_size (osect->the_bfd_section);
+	      name = bfd_section_name (objfile->obfd, osect->the_bfd_section);
 
-	  printf_filtered ("Section %s, loaded at ", name);
-	  fputs_filtered (paddress (gdbarch, lma), gdb_stdout);
-	  puts_filtered (" - ");
-	  fputs_filtered (paddress (gdbarch, lma + size), gdb_stdout);
-	  printf_filtered (", mapped at ");
-	  fputs_filtered (paddress (gdbarch, vma), gdb_stdout);
-	  puts_filtered (" - ");
-	  fputs_filtered (paddress (gdbarch, vma + size), gdb_stdout);
-	  puts_filtered ("\n");
+	      printf_filtered ("Section %s, loaded at ", name);
+	      fputs_filtered (paddress (gdbarch, lma), gdb_stdout);
+	      puts_filtered (" - ");
+	      fputs_filtered (paddress (gdbarch, lma + size), gdb_stdout);
+	      printf_filtered (", mapped at ");
+	      fputs_filtered (paddress (gdbarch, vma), gdb_stdout);
+	      puts_filtered (" - ");
+	      fputs_filtered (paddress (gdbarch, vma + size), gdb_stdout);
+	      puts_filtered ("\n");
 
-	  nmapped++;
-	}
+	      nmapped++;
+	    }
     }
   if (nmapped == 0)
     printf_filtered (_("No sections are mapped.\n"));
@@ -3254,7 +3254,6 @@ list_overlays_command (const char *args, int from_tty)
 static void
 map_overlay_command (const char *args, int from_tty)
 {
-  struct objfile *objfile, *objfile2;
   struct obj_section *sec, *sec2;
 
   if (!overlay_debugging)
@@ -3266,29 +3265,33 @@ map_overlay_command (const char *args, int from_tty)
     error (_("Argument required: name of an overlay section"));
 
   /* First, find a section matching the user supplied argument.  */
-  ALL_OBJSECTIONS (objfile, sec)
-    if (!strcmp (bfd_section_name (objfile->obfd, sec->the_bfd_section), args))
-    {
-      /* Now, check to see if the section is an overlay.  */
-      if (!section_is_overlay (sec))
-	continue;		/* not an overlay section */
-
-      /* Mark the overlay as "mapped".  */
-      sec->ovly_mapped = 1;
-
-      /* Next, make a pass and unmap any sections that are
-         overlapped by this new section: */
-      ALL_OBJSECTIONS (objfile2, sec2)
-	if (sec2->ovly_mapped && sec != sec2 && sections_overlap (sec, sec2))
+  for (objfile *obj_file : all_objfiles (current_program_space))
+    ALL_OBJFILE_OSECTIONS (obj_file, sec)
+      if (!strcmp (bfd_section_name (obj_file->obfd, sec->the_bfd_section),
+		   args))
 	{
-	  if (info_verbose)
-	    printf_unfiltered (_("Note: section %s unmapped by overlap\n"),
-			     bfd_section_name (objfile->obfd,
-					       sec2->the_bfd_section));
-	  sec2->ovly_mapped = 0;	/* sec2 overlaps sec: unmap sec2.  */
+	  /* Now, check to see if the section is an overlay.  */
+	  if (!section_is_overlay (sec))
+	    continue;		/* not an overlay section */
+
+	  /* Mark the overlay as "mapped".  */
+	  sec->ovly_mapped = 1;
+
+	  /* Next, make a pass and unmap any sections that are
+	     overlapped by this new section: */
+	  for (objfile *objfile2 : all_objfiles (current_program_space))
+	    ALL_OBJFILE_OSECTIONS (objfile2, sec2)
+	      if (sec2->ovly_mapped && sec != sec2 && sections_overlap (sec,
+									sec2))
+		{
+		  if (info_verbose)
+		    printf_unfiltered (_("Note: section %s unmapped by overlap\n"),
+				       bfd_section_name (obj_file->obfd,
+							 sec2->the_bfd_section));
+		  sec2->ovly_mapped = 0; /* sec2 overlaps sec: unmap sec2.  */
+		}
+	  return;
 	}
-      return;
-    }
   error (_("No overlay section called %s"), args);
 }
 
@@ -3299,7 +3302,6 @@ map_overlay_command (const char *args, int from_tty)
 static void
 unmap_overlay_command (const char *args, int from_tty)
 {
-  struct objfile *objfile;
   struct obj_section *sec = NULL;
 
   if (!overlay_debugging)
@@ -3311,14 +3313,15 @@ unmap_overlay_command (const char *args, int from_tty)
     error (_("Argument required: name of an overlay section"));
 
   /* First, find a section matching the user supplied argument.  */
-  ALL_OBJSECTIONS (objfile, sec)
-    if (!strcmp (bfd_section_name (objfile->obfd, sec->the_bfd_section), args))
-    {
-      if (!sec->ovly_mapped)
-	error (_("Section %s is not mapped"), args);
-      sec->ovly_mapped = 0;
-      return;
-    }
+  for (objfile *objfile : all_objfiles (current_program_space))
+    ALL_OBJFILE_OSECTIONS (objfile, sec)
+      if (!strcmp (bfd_section_name (objfile->obfd, sec->the_bfd_section), args))
+	{
+	  if (!sec->ovly_mapped)
+	    error (_("Section %s is not mapped"), args);
+	  sec->ovly_mapped = 0;
+	  return;
+	}
   error (_("No overlay section called %s"), args);
 }
 
@@ -3550,8 +3553,6 @@ simple_overlay_update_1 (struct obj_section *osect)
 void
 simple_overlay_update (struct obj_section *osect)
 {
-  struct objfile *objfile;
-
   /* Were we given an osect to look up?  NULL means do all of them.  */
   if (osect)
     /* Have we got a cached copy of the target's overlay table?  */
@@ -3583,20 +3584,21 @@ simple_overlay_update (struct obj_section *osect)
     return;
 
   /* Now may as well update all sections, even if only one was requested.  */
-  ALL_OBJSECTIONS (objfile, osect)
-    if (section_is_overlay (osect))
-    {
-      int i;
-      asection *bsect = osect->the_bfd_section;
+  for (objfile *objfile : all_objfiles (current_program_space))
+    ALL_OBJFILE_OSECTIONS (objfile, osect)
+      if (section_is_overlay (osect))
+	{
+	  int i;
+	  asection *bsect = osect->the_bfd_section;
 
-      for (i = 0; i < cache_novlys; i++)
-	if (cache_ovly_table[i][VMA] == bfd_section_vma (obfd, bsect)
-	    && cache_ovly_table[i][LMA] == bfd_section_lma (obfd, bsect))
-	  { /* obj_section matches i'th entry in ovly_table.  */
-	    osect->ovly_mapped = cache_ovly_table[i][MAPPED];
-	    break;		/* finished with inner for loop: break out.  */
-	  }
-    }
+	  for (i = 0; i < cache_novlys; i++)
+	    if (cache_ovly_table[i][VMA] == bfd_section_vma (obfd, bsect)
+		&& cache_ovly_table[i][LMA] == bfd_section_lma (obfd, bsect))
+	      { /* obj_section matches i'th entry in ovly_table.  */
+		osect->ovly_mapped = cache_ovly_table[i][MAPPED];
+		break;		/* finished with inner for loop: break out.  */
+	      }
+	}
 }
 
 /* Set the output sections and output offsets for section SECTP in

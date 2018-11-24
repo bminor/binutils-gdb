@@ -424,34 +424,34 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size, int read,
     {
       /* See if this region of memory lies inside a known file on disk.
 	 If so, we can avoid copying its contents by clearing SEC_LOAD.  */
-      struct objfile *objfile;
       struct obj_section *objsec;
 
-      ALL_OBJSECTIONS (objfile, objsec)
-	{
-	  bfd *abfd = objfile->obfd;
-	  asection *asec = objsec->the_bfd_section;
-	  bfd_vma align = (bfd_vma) 1 << bfd_get_section_alignment (abfd,
-								    asec);
-	  bfd_vma start = obj_section_addr (objsec) & -align;
-	  bfd_vma end = (obj_section_endaddr (objsec) + align - 1) & -align;
+      for (objfile *objfile : all_objfiles (current_program_space))
+	ALL_OBJFILE_OSECTIONS (objfile, objsec)
+	  {
+	    bfd *abfd = objfile->obfd;
+	    asection *asec = objsec->the_bfd_section;
+	    bfd_vma align = (bfd_vma) 1 << bfd_get_section_alignment (abfd,
+								      asec);
+	    bfd_vma start = obj_section_addr (objsec) & -align;
+	    bfd_vma end = (obj_section_endaddr (objsec) + align - 1) & -align;
 
-	  /* Match if either the entire memory region lies inside the
-	     section (i.e. a mapping covering some pages of a large
-	     segment) or the entire section lies inside the memory region
-	     (i.e. a mapping covering multiple small sections).
+	    /* Match if either the entire memory region lies inside the
+	       section (i.e. a mapping covering some pages of a large
+	       segment) or the entire section lies inside the memory region
+	       (i.e. a mapping covering multiple small sections).
 
-	     This BFD was synthesized from reading target memory,
-	     we don't want to omit that.  */
-	  if (objfile->separate_debug_objfile_backlink == NULL
-	      && ((vaddr >= start && vaddr + size <= end)
-	          || (start >= vaddr && end <= vaddr + size))
-	      && !(bfd_get_file_flags (abfd) & BFD_IN_MEMORY))
-	    {
-	      flags &= ~(SEC_LOAD | SEC_HAS_CONTENTS);
-	      goto keep;	/* Break out of two nested for loops.  */
-	    }
-	}
+	       This BFD was synthesized from reading target memory,
+	       we don't want to omit that.  */
+	    if (objfile->separate_debug_objfile_backlink == NULL
+		&& ((vaddr >= start && vaddr + size <= end)
+		    || (start >= vaddr && end <= vaddr + size))
+		&& !(bfd_get_file_flags (abfd) & BFD_IN_MEMORY))
+	      {
+		flags &= ~(SEC_LOAD | SEC_HAS_CONTENTS);
+		goto keep;	/* Break out of two nested for loops.  */
+	      }
+	  }
 
     keep:;
     }
@@ -489,36 +489,36 @@ objfile_find_memory_regions (struct target_ops *self,
 			     find_memory_region_ftype func, void *obfd)
 {
   /* Use objfile data to create memory sections.  */
-  struct objfile *objfile;
   struct obj_section *objsec;
   bfd_vma temp_bottom, temp_top;
 
   /* Call callback function for each objfile section.  */
-  ALL_OBJSECTIONS (objfile, objsec)
-    {
-      bfd *ibfd = objfile->obfd;
-      asection *isec = objsec->the_bfd_section;
-      flagword flags = bfd_get_section_flags (ibfd, isec);
+  for (objfile *objfile : all_objfiles (current_program_space))
+    ALL_OBJFILE_OSECTIONS (objfile, objsec)
+      {
+	bfd *ibfd = objfile->obfd;
+	asection *isec = objsec->the_bfd_section;
+	flagword flags = bfd_get_section_flags (ibfd, isec);
 
-      /* Separate debug info files are irrelevant for gcore.  */
-      if (objfile->separate_debug_objfile_backlink != NULL)
-	continue;
+	/* Separate debug info files are irrelevant for gcore.  */
+	if (objfile->separate_debug_objfile_backlink != NULL)
+	  continue;
 
-      if ((flags & SEC_ALLOC) || (flags & SEC_LOAD))
-	{
-	  int size = bfd_section_size (ibfd, isec);
-	  int ret;
+	if ((flags & SEC_ALLOC) || (flags & SEC_LOAD))
+	  {
+	    int size = bfd_section_size (ibfd, isec);
+	    int ret;
 
-	  ret = (*func) (obj_section_addr (objsec), size, 
-			 1, /* All sections will be readable.  */
-			 (flags & SEC_READONLY) == 0, /* Writable.  */
-			 (flags & SEC_CODE) != 0, /* Executable.  */
-			 1, /* MODIFIED is unknown, pass it as true.  */
-			 obfd);
-	  if (ret != 0)
-	    return ret;
-	}
-    }
+	    ret = (*func) (obj_section_addr (objsec), size, 
+			   1, /* All sections will be readable.  */
+			   (flags & SEC_READONLY) == 0, /* Writable.  */
+			   (flags & SEC_CODE) != 0, /* Executable.  */
+			   1, /* MODIFIED is unknown, pass it as true.  */
+			   obfd);
+	    if (ret != 0)
+	      return ret;
+	  }
+      }
 
   /* Make a stack segment.  */
   if (derive_stack_segment (&temp_bottom, &temp_top))
