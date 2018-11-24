@@ -927,7 +927,6 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
 						int section, int expandable)
 {
   struct compunit_symtab *cu = m_compunit_symtab;
-  struct symtab *symtab;
   struct blockvector *blockvector;
   struct subfile *subfile;
   CORE_ADDR end_addr;
@@ -979,7 +978,7 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
       /* Allocate a symbol table if necessary.  */
       if (subfile->symtab == NULL)
 	subfile->symtab = allocate_symtab (cu, subfile->name);
-      symtab = subfile->symtab;
+      struct symtab *symtab = subfile->symtab;
 
       /* Fill in its components.  */
 
@@ -1011,7 +1010,7 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
 
     main_symtab = m_main_subfile->symtab;
     prev_symtab = NULL;
-    ALL_COMPUNIT_FILETABS (cu, symtab)
+    for (symtab *symtab : compunit_filetabs (cu))
       {
 	if (symtab == main_symtab)
 	  {
@@ -1061,7 +1060,7 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
     int block_i;
 
     /* The main source file's symtab.  */
-    symtab = COMPUNIT_FILETABS (cu);
+    struct symtab *symtab = COMPUNIT_FILETABS (cu);
 
     for (block_i = 0; block_i < BLOCKVECTOR_NBLOCKS (blockvector); block_i++)
       {

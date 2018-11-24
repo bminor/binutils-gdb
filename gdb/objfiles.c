@@ -788,8 +788,6 @@ objfile_relocate1 (struct objfile *objfile,
 
   /* OK, get all the symtabs.  */
   {
-    struct symtab *s;
-
     ALL_OBJFILE_FILETABS (objfile, cust, s)
     {
       struct linetable *l;

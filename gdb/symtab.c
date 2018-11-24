@@ -405,12 +405,11 @@ iterate_over_some_symtabs (const char *name,
 			   gdb::function_view<bool (symtab *)> callback)
 {
   struct compunit_symtab *cust;
-  struct symtab *s;
   const char* base_name = lbasename (name);
 
   for (cust = first; cust != NULL && cust != after_last; cust = cust->next)
     {
-      ALL_COMPUNIT_FILETABS (cust, s)
+      for (symtab *s : compunit_filetabs (cust))
 	{
 	  if (compare_filenames_for_search (s->filename, name))
 	    {
@@ -3050,7 +3049,6 @@ struct symtab_and_line
 find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 {
   struct compunit_symtab *cust;
-  struct symtab *iter_s;
   struct linetable *l;
   int len;
   struct linetable_entry *item;
@@ -3187,7 +3185,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
      They all have the same apriori range, that we found was right;
      but they have different line tables.  */
 
-  ALL_COMPUNIT_FILETABS (cust, iter_s)
+  for (symtab *iter_s : compunit_filetabs (cust))
     {
       /* Find the best line in this symtab.  */
       l = SYMTAB_LINETABLE (iter_s);
@@ -3319,7 +3317,7 @@ find_pc_line_symtab (CORE_ADDR pc)
    If not found, return NULL.  */
 
 struct symtab *
-find_line_symtab (struct symtab *symtab, int line,
+find_line_symtab (struct symtab *sym_tab, int line,
 		  int *index, int *exact_match)
 {
   int exact = 0;  /* Initialized here to avoid a compiler warning.  */
@@ -3332,8 +3330,8 @@ find_line_symtab (struct symtab *symtab, int line,
   struct symtab *best_symtab;
 
   /* First try looking it up in the given symtab.  */
-  best_linetable = SYMTAB_LINETABLE (symtab);
-  best_symtab = symtab;
+  best_linetable = SYMTAB_LINETABLE (sym_tab);
+  best_symtab = sym_tab;
   best_index = find_line_common (best_linetable, line, &exact, 0);
   if (best_index < 0 || !exact)
     {
@@ -3349,8 +3347,6 @@ find_line_symtab (struct symtab *symtab, int line,
          BEST_INDEX and BEST_LINETABLE identify the item for it.  */
       int best;
 
-      struct symtab *s;
-
       if (best_index >= 0)
 	best = best_linetable->item[best_index].line;
       else
@@ -3360,7 +3356,7 @@ find_line_symtab (struct symtab *symtab, int line,
 	{
 	  if (objfile->sf)
 	    objfile->sf->qf->expand_symtabs_with_fullname
-	      (objfile, symtab_to_fullname (symtab));
+	      (objfile, symtab_to_fullname (sym_tab));
 	}
 
       struct objfile *objfile;
@@ -3369,9 +3365,9 @@ find_line_symtab (struct symtab *symtab, int line,
 	struct linetable *l;
 	int ind;
 
-	if (FILENAME_CMP (symtab->filename, s->filename) != 0)
+	if (FILENAME_CMP (sym_tab->filename, s->filename) != 0)
 	  continue;
-	if (FILENAME_CMP (symtab_to_fullname (symtab),
+	if (FILENAME_CMP (symtab_to_fullname (sym_tab),
 			  symtab_to_fullname (s)) != 0)
 	  continue;	
 	l = SYMTAB_LINETABLE (s);
@@ -4184,7 +4180,6 @@ output_partial_symbol_filename (const char *filename, const char *fullname,
 static void
 info_sources_command (const char *ignore, int from_tty)
 {
-  struct symtab *s;
   struct objfile *objfile;
   struct output_source_filename_data data;
 
@@ -5586,7 +5581,6 @@ maybe_add_partial_symtab_filename (const char *filename, const char *fullname,
 completion_list
 make_source_files_completion_list (const char *text, const char *word)
 {
-  struct symtab *s;
   struct objfile *objfile;
   size_t text_len = strlen (text);
   completion_list list;

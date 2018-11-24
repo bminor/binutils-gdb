@@ -82,7 +82,6 @@ void
 print_objfile_statistics (void)
 {
   struct program_space *pspace;
-  struct symtab *s;
   int i, linetables, blockvectors;
 
   ALL_PSPACES (pspace)
@@ -144,8 +143,6 @@ print_objfile_statistics (void)
 static void
 dump_objfile (struct objfile *objfile)
 {
-  struct symtab *symtab;
-
   printf_filtered ("\nObject file %s:  ", objfile_name (objfile));
   printf_filtered ("Objfile at ");
   gdb_print_host_address (objfile, gdb_stdout);
@@ -467,7 +464,6 @@ maintenance_print_symbols (const char *args, int from_tty)
     }
   else
     {
-      struct symtab *s;
       int found = 0;
 
       for (objfile *objfile : all_objfiles (current_program_space))
@@ -772,8 +768,6 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
   ALL_PSPACES (pspace)
     for (objfile *objfile : all_objfiles (pspace))
       {
-	struct symtab *symtab;
-
 	/* We don't want to print anything for this objfile until we
 	   actually find a symtab whose name matches.  */
 	int printed_objfile_start = 0;
@@ -782,7 +776,7 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 	  {
 	    int printed_compunit_symtab_start = 0;
 
-	    ALL_COMPUNIT_FILETABS (cust, symtab)
+	    for (symtab *symtab : compunit_filetabs (cust))
 	      {
 		QUIT;
 
@@ -1026,11 +1020,9 @@ maintenance_info_line_tables (const char *regexp, int from_tty)
   ALL_PSPACES (pspace)
     for (objfile *objfile : all_objfiles (pspace))
       {
-	struct symtab *symtab;
-
 	for (compunit_symtab *cust : objfile_compunits (objfile))
 	  {
-	    ALL_COMPUNIT_FILETABS (cust, symtab)
+	    for (symtab *symtab : compunit_filetabs (cust))
 	      {
 		QUIT;
 

@@ -616,7 +616,7 @@ public:
 
 #define ALL_OBJFILE_FILETABS(objfile, cu, s) \
   for (compunit_symtab *cu : objfile_compunits (objfile)) \
-    ALL_COMPUNIT_FILETABS (cu, s)
+    for (symtab *s : compunit_filetabs (cu))
 
 /* A range adapter that makes it possible to iterate over all
    compunits in one objfile.  */

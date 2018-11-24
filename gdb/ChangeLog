@@ -1,5 +1,28 @@
 2019-01-09  Tom Tromey  <tom@tromey.com>
 
+	* symtab.h (ALL_COMPUNIT_FILETABS): Remove.
+	(compunit_filetabs): New.
+	* symtab.c (iterate_over_some_symtabs, find_pc_sect_line): Use
+	compunit_filetabs.
+	(info_sources_command, make_source_files_completion_list): Remove
+	declaration.
+	* symmisc.c (print_objfile_statistics, dump_objfile)
+	(maintenance_print_symbols): Remove declaration.
+	(maintenance_info_symtabs): Use compunit_filetabs.
+	(maintenance_info_line_tables): Likewise.
+	* source.c (select_source_symtab): Change local variable name.
+	(forget_cached_source_info_for_objfile): Remove declaration.
+	* objfiles.h (ALL_OBJFILE_FILETABS): Use compunit_filetabs.
+	* objfiles.c (objfile_relocate1): Remove declaration.
+	* mi/mi-cmd-file.c (mi_cmd_file_list_exec_source_files): Remove
+	declaration.
+	* maint.c (count_symtabs_and_blocks): Use compunit_filetabs.
+	* coffread.c (coff_symtab_read): Remove declaration.
+	* buildsym.c (buildsym_compunit::end_symtab_with_blockvector): Use
+	compunit_filetabs.
+
+2019-01-09  Tom Tromey  <tom@tromey.com>
+
 	* symtab.c (lookup_objfile_from_block)
 	(find_pc_sect_compunit_symtab, search_symbols)
 	(default_collect_symbol_completion_matches_break_on): Use

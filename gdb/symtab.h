@@ -29,6 +29,7 @@
 #include "common/enum-flags.h"
 #include "common/function-view.h"
 #include "common/gdb_optional.h"
+#include "common/next-iterator.h"
 #include "completer.h"
 
 /* Opaque declarations.  */
@@ -1485,10 +1486,16 @@ struct compunit_symtab
 #define COMPUNIT_CALL_SITE_HTAB(cust) ((cust)->call_site_htab)
 #define COMPUNIT_MACRO_TABLE(cust) ((cust)->macro_table)
 
-/* Iterate over all file tables (struct symtab) within a compunit.  */
+/* A range adapter to allowing iterating over all the file tables
+   within a compunit.  */
 
-#define ALL_COMPUNIT_FILETABS(cu, s) \
-  for ((s) = (cu) -> filetabs; (s) != NULL; (s) = (s) -> next)
+struct compunit_filetabs : public next_adapter<struct symtab>
+{
+  compunit_filetabs (struct compunit_symtab *cu)
+    : next_adapter<struct symtab> (cu->filetabs)
+  {
+  }
+};
 
 /* Return the primary symtab of CUST.  */
 

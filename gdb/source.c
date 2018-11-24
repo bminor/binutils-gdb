@@ -271,16 +271,16 @@ select_source_symtab (struct symtab *s)
 
   current_source_line = 1;
 
-  ALL_FILETABS (ofp, cu, s)
+  ALL_FILETABS (ofp, cu, symtab)
     {
-      const char *name = s->filename;
+      const char *name = symtab->filename;
       int len = strlen (name);
 
       if (!(len > 2 && (strcmp (&name[len - 2], ".h") == 0
 			|| strcmp (name, "<<C++-namespaces>>") == 0)))
 	{
 	  current_source_pspace = current_program_space;
-	  current_source_symtab = s;
+	  current_source_symtab = symtab;
 	}
     }
 
@@ -349,8 +349,6 @@ show_directories_command (struct ui_file *file, int from_tty,
 void
 forget_cached_source_info_for_objfile (struct objfile *objfile)
 {
-  struct symtab *s;
-
   ALL_OBJFILE_FILETABS (objfile, cu, s)
     {
       if (s->line_charpos != NULL)
