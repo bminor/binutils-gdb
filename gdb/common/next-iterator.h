@@ -72,7 +72,7 @@ private:
 
 /* A range adapter that allows iterating over a linked list.  */
 
-template<typename T>
+template<typename T, typename Iterator = next_iterator<T>>
 class next_adapter
 {
 public:
@@ -82,7 +82,7 @@ public:
   {
   }
 
-  using iterator = next_iterator<T>;
+  using iterator = Iterator;
 
   iterator begin () const
   {

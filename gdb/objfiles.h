@@ -29,6 +29,7 @@
 #include "gdb_bfd.h"
 #include <vector>
 #include "common/next-iterator.h"
+#include "common/safe-iterator.h"
 
 struct bcache;
 struct htab;
@@ -581,20 +582,35 @@ public:
   }
 };
 
+/* An iterarable object that can be used to iterate over all
+   objfiles.  The basic use is in a foreach, like:
 
-/* Traverse all object files in the current program space.
-   ALL_OBJFILES_SAFE works even if you delete the objfile during the
-   traversal.  */
+   for (objfile *objf : all_objfiles_safe (pspace)) { ... }
+
+   This variant uses a basic_safe_iterator so that objfiles can be
+   deleted during iteration.  */
+
+class all_objfiles_safe
+  : public next_adapter<struct objfile,
+			basic_safe_iterator<next_iterator<objfile>>>
+{
+public:
+
+  explicit all_objfiles_safe (struct program_space *pspace)
+    : next_adapter<struct objfile,
+		   basic_safe_iterator<next_iterator<objfile>>>
+        (pspace->objfiles)
+  {
+  }
+};
+
+
+/* Traverse all object files in the current program space.  */
 
 #define ALL_OBJFILES(obj)			    \
   for ((obj) = current_program_space->objfiles; \
        (obj) != NULL;				    \
        (obj) = (obj)->next)
-
-#define ALL_OBJFILES_SAFE(obj,nxt)			\
-  for ((obj) = current_program_space->objfiles;	\
-       (obj) != NULL? ((nxt)=(obj)->next,1) :0;	\
-       (obj) = (nxt))
 
 /* Traverse all symtabs in one objfile.  */
 

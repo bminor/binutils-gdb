@@ -1,5 +1,17 @@
 2019-01-09  Tom Tromey  <tom@tromey.com>
 
+	* common/next-iterator.h (next_adapter): Add Iterator template
+	parameter.
+	* objfiles.h (ALL_OBJFILES_SAFE): Remove.
+	(class all_objfiles_safe): New.
+	* jit.c (jit_inferior_exit_hook): Use all_objfiles_safe.
+	* objfiles.c (put_objfile_before): Update comment.
+	(add_separate_debug_objfile): Likewise.
+	(free_all_objfiles): Use all_objfiles_safe.
+	(objfile_purge_solibs): Likewise.
+
+2019-01-09  Tom Tromey  <tom@tromey.com>
+
 	* symtab.c (iterate_over_symtabs, matching_obj_sections)
 	(expand_symtab_containing_pc, lookup_static_symbol)
 	(basic_lookup_transparent_type, find_pc_sect_compunit_symtab)

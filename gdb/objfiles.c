@@ -514,7 +514,7 @@ objfile_separate_debug_iterate (const struct objfile *parent,
 
 /* Put one object file before a specified on in the global list.
    This can be used to make sure an object file is destroyed before
-   another when using ALL_OBJFILES_SAFE to free all objfiles.  */
+   another when using all_objfiles_safe to free all objfiles.  */
 void
 put_objfile_before (struct objfile *objfile, struct objfile *before_this)
 {
@@ -587,7 +587,7 @@ add_separate_debug_objfile (struct objfile *objfile, struct objfile *parent)
   parent->separate_debug_objfile = objfile;
 
   /* Put the separate debug object before the normal one, this is so that
-     usage of the ALL_OBJFILES_SAFE macro will stay safe.  */
+     usage of all_objfiles_safe will stay safe.  */
   put_objfile_before (objfile, parent);
 }
 
@@ -730,17 +730,14 @@ objfile::~objfile ()
 void
 free_all_objfiles (void)
 {
-  struct objfile *objfile, *temp;
   struct so_list *so;
 
   /* Any objfile referencewould become stale.  */
   for (so = master_so_list (); so; so = so->next)
     gdb_assert (so->objfile == NULL);
 
-  ALL_OBJFILES_SAFE (objfile, temp)
-  {
+  for (objfile *objfile : all_objfiles_safe (current_program_space))
     delete objfile;
-  }
   clear_symtab_users (0);
 }
 
@@ -1047,17 +1044,14 @@ have_full_symbols (void)
 void
 objfile_purge_solibs (void)
 {
-  struct objfile *objf;
-  struct objfile *temp;
+  for (objfile *objf : all_objfiles_safe (current_program_space))
+    {
+      /* We assume that the solib package has been purged already, or will
+	 be soon.  */
 
-  ALL_OBJFILES_SAFE (objf, temp)
-  {
-    /* We assume that the solib package has been purged already, or will
-       be soon.  */
-
-    if (!(objf->flags & OBJF_USERLOADED) && (objf->flags & OBJF_SHARED))
-      delete objf;
-  }
+      if (!(objf->flags & OBJF_USERLOADED) && (objf->flags & OBJF_SHARED))
+	delete objf;
+    }
 }
 
 
