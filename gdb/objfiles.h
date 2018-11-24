@@ -718,12 +718,6 @@ private:
   ALL_OBJFILES (objfile)			\
     ALL_OBJFILE_FILETABS (objfile, ps, s)
 
-/* Traverse all compunits in all objfiles in the current program space.  */
-
-#define ALL_COMPUNITS(objfile, cu)	\
-  ALL_OBJFILES (objfile)		\
-    for (compunit_symtab *cu : objfile_compunits (objfile))
-
 #define ALL_OBJFILE_OSECTIONS(objfile, osect)	\
   for (osect = objfile->sections; osect < objfile->sections_end; osect++) \
     if (osect->the_bfd_section == NULL)					\

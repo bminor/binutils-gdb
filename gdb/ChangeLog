@@ -1,5 +1,18 @@
 2019-01-09  Tom Tromey  <tom@tromey.com>
 
+	* symtab.c (lookup_objfile_from_block)
+	(find_pc_sect_compunit_symtab, search_symbols)
+	(default_collect_symbol_completion_matches_break_on): Use
+	objfile_compunits.
+	* objfiles.h (ALL_COMPUNITS): Remove.
+	* maint.c (count_symtabs_and_blocks): Use objfile_compunits.
+	* cp-support.c (add_symbol_overload_list_qualified): Use
+	objfile_compunits.
+	* ada-lang.c (ada_collect_symbol_completion_matches)
+	(ada_add_global_exceptions): Use objfile_compunits.
+
+2019-01-09  Tom Tromey  <tom@tromey.com>
+
 	* source.c (select_source_symtab)
 	(forget_cached_source_info_for_objfile): Remove declaration.
 	* mi/mi-cmd-file.c (mi_cmd_file_list_exec_source_files): Remove

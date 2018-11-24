@@ -762,7 +762,6 @@ static void
 count_symtabs_and_blocks (int *nr_symtabs_ptr, int *nr_compunit_symtabs_ptr,
 			  int *nr_blocks_ptr)
 {
-  struct objfile *o;
   struct symtab *s;
   int nr_symtabs = 0;
   int nr_compunit_symtabs = 0;
@@ -773,12 +772,15 @@ count_symtabs_and_blocks (int *nr_symtabs_ptr, int *nr_compunit_symtabs_ptr,
      current_program_space may be NULL.  */
   if (current_program_space != NULL)
     {
-      ALL_COMPUNITS (o, cu)
+      for (objfile *o : all_objfiles (current_program_space))
 	{
-	  ++nr_compunit_symtabs;
-	  nr_blocks += BLOCKVECTOR_NBLOCKS (COMPUNIT_BLOCKVECTOR (cu));
-	  ALL_COMPUNIT_FILETABS (cu, s)
-	    ++nr_symtabs;
+	  for (compunit_symtab *cu : objfile_compunits (o))
+	    {
+	      ++nr_compunit_symtabs;
+	      nr_blocks += BLOCKVECTOR_NBLOCKS (COMPUNIT_BLOCKVECTOR (cu));
+	      ALL_COMPUNIT_FILETABS (cu, s)
+		++nr_symtabs;
+	    }
 	}
     }
 

@@ -1395,23 +1395,28 @@ add_symbol_overload_list_qualified (const char *func_name,
   /* Go through the symtabs and check the externs and statics for
      symbols which match.  */
 
-  struct objfile *objfile;
-  ALL_COMPUNITS (objfile, cust)
-  {
-    QUIT;
-    b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), GLOBAL_BLOCK);
-    add_symbol_overload_list_block (func_name, b, overload_list);
-  }
+  for (objfile *objfile : all_objfiles (current_program_space))
+    {
+      for (compunit_symtab *cust : objfile_compunits (objfile))
+	{
+	  QUIT;
+	  b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), GLOBAL_BLOCK);
+	  add_symbol_overload_list_block (func_name, b, overload_list);
+	}
+    }
 
-  ALL_COMPUNITS (objfile, cust)
-  {
-    QUIT;
-    b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), STATIC_BLOCK);
-    /* Don't do this block twice.  */
-    if (b == surrounding_static_block)
-      continue;
-    add_symbol_overload_list_block (func_name, b, overload_list);
-  }
+  for (objfile *objfile : all_objfiles (current_program_space))
+    {
+      for (compunit_symtab *cust : objfile_compunits (objfile))
+	{
+	  QUIT;
+	  b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), STATIC_BLOCK);
+	  /* Don't do this block twice.  */
+	  if (b == surrounding_static_block)
+	    continue;
+	  add_symbol_overload_list_block (func_name, b, overload_list);
+	}
+    }
 }
 
 /* Lookup the rtti type for a class name.  */

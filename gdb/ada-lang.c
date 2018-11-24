@@ -6465,41 +6465,46 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
   /* Go through the symtabs and check the externs and statics for
      symbols which match.  */
 
-  struct objfile *objfile;
-  ALL_COMPUNITS (objfile, s)
-  {
-    QUIT;
-    b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (s), GLOBAL_BLOCK);
-    ALL_BLOCK_SYMBOLS (b, iter, sym)
+  for (objfile *objfile : all_objfiles (current_program_space))
     {
-      if (completion_skip_symbol (mode, sym))
-	continue;
+      for (compunit_symtab *s : objfile_compunits (objfile))
+	{
+	  QUIT;
+	  b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (s), GLOBAL_BLOCK);
+	  ALL_BLOCK_SYMBOLS (b, iter, sym)
+	    {
+	      if (completion_skip_symbol (mode, sym))
+		continue;
 
-      completion_list_add_name (tracker,
-				SYMBOL_LANGUAGE (sym),
-				SYMBOL_LINKAGE_NAME (sym),
-				lookup_name, text, word);
+	      completion_list_add_name (tracker,
+					SYMBOL_LANGUAGE (sym),
+					SYMBOL_LINKAGE_NAME (sym),
+					lookup_name, text, word);
+	    }
+	}
     }
-  }
 
-  ALL_COMPUNITS (objfile, s)
-  {
-    QUIT;
-    b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (s), STATIC_BLOCK);
-    /* Don't do this block twice.  */
-    if (b == surrounding_static_block)
-      continue;
-    ALL_BLOCK_SYMBOLS (b, iter, sym)
+  for (objfile *objfile : all_objfiles (current_program_space))
     {
-      if (completion_skip_symbol (mode, sym))
-	continue;
+      for (compunit_symtab *s : objfile_compunits (objfile))
+	{
+	  QUIT;
+	  b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (s), STATIC_BLOCK);
+	  /* Don't do this block twice.  */
+	  if (b == surrounding_static_block)
+	    continue;
+	  ALL_BLOCK_SYMBOLS (b, iter, sym)
+	    {
+	      if (completion_skip_symbol (mode, sym))
+		continue;
 
-      completion_list_add_name (tracker,
-				SYMBOL_LANGUAGE (sym),
-				SYMBOL_LINKAGE_NAME (sym),
-				lookup_name, text, word);
+	      completion_list_add_name (tracker,
+					SYMBOL_LANGUAGE (sym),
+					SYMBOL_LINKAGE_NAME (sym),
+					lookup_name, text, word);
+	    }
+	}
     }
-  }
 }
 
                                 /* Field Access */
@@ -13548,8 +13553,6 @@ static void
 ada_add_global_exceptions (compiled_regex *preg,
 			   std::vector<ada_exc_info> *exceptions)
 {
-  struct objfile *objfile;
-
   /* In Ada, the symbol "search name" is a linkage name, whereas the
      regular expression used to do the matching refers to the natural
      name.  So match against the decoded name.  */
@@ -13563,26 +13566,29 @@ ada_add_global_exceptions (compiled_regex *preg,
 			   NULL,
 			   VARIABLES_DOMAIN);
 
-  ALL_COMPUNITS (objfile, s)
+  for (objfile *objfile : all_objfiles (current_program_space))
     {
-      const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (s);
-      int i;
-
-      for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)
+      for (compunit_symtab *s : objfile_compunits (objfile))
 	{
-	  struct block *b = BLOCKVECTOR_BLOCK (bv, i);
-	  struct block_iterator iter;
-	  struct symbol *sym;
+	  const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (s);
+	  int i;
 
-	  ALL_BLOCK_SYMBOLS (b, iter, sym)
-	    if (ada_is_non_standard_exception_sym (sym)
-		&& name_matches_regex (SYMBOL_NATURAL_NAME (sym), preg))
-	      {
-		struct ada_exc_info info
-		  = {SYMBOL_PRINT_NAME (sym), SYMBOL_VALUE_ADDRESS (sym)};
+	  for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)
+	    {
+	      struct block *b = BLOCKVECTOR_BLOCK (bv, i);
+	      struct block_iterator iter;
+	      struct symbol *sym;
 
-		exceptions->push_back (info);
-	      }
+	      ALL_BLOCK_SYMBOLS (b, iter, sym)
+		if (ada_is_non_standard_exception_sym (sym)
+		    && name_matches_regex (SYMBOL_NATURAL_NAME (sym), preg))
+		  {
+		    struct ada_exc_info info
+		      = {SYMBOL_PRINT_NAME (sym), SYMBOL_VALUE_ADDRESS (sym)};
+
+		    exceptions->push_back (info);
+		  }
+	    }
 	}
     }
 }
