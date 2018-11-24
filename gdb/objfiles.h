@@ -612,12 +612,6 @@ public:
        (obj) != NULL;				    \
        (obj) = (obj)->next)
 
-/* Traverse all symtabs in one objfile.  */
-
-#define ALL_OBJFILE_FILETABS(objfile, cu, s) \
-  for (compunit_symtab *cu : objfile_compunits (objfile)) \
-    for (symtab *s : compunit_filetabs (cu))
-
 /* A range adapter that makes it possible to iterate over all
    compunits in one objfile.  */
 
@@ -714,9 +708,10 @@ private:
 /* Traverse all symtabs in all objfiles in the current symbol
    space.  */
 
-#define ALL_FILETABS(objfile, ps, s)		\
-  ALL_OBJFILES (objfile)			\
-    ALL_OBJFILE_FILETABS (objfile, ps, s)
+#define ALL_FILETABS(objfile, ps, s)					\
+  ALL_OBJFILES (objfile)						\
+    for (compunit_symtab *ps : objfile_compunits (objfile))	\
+      for (symtab *s : compunit_filetabs (cu))
 
 #define ALL_OBJFILE_OSECTIONS(objfile, osect)	\
   for (osect = objfile->sections; osect < objfile->sections_end; osect++) \

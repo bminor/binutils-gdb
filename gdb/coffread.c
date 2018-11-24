@@ -1203,8 +1203,11 @@ coff_symtab_read (minimal_symbol_reader &reader,
   /* Patch up any opaque types (references to types that are not defined
      in the file where they are referenced, e.g. "struct foo *bar").  */
   {
-    ALL_OBJFILE_FILETABS (objfile, cu, s)
-      patch_opaque_types (s);
+    for (compunit_symtab *cu : objfile_compunits (objfile))
+      {
+	for (symtab *s : compunit_filetabs (cu))
+	  patch_opaque_types (s);
+      }
   }
 
   coffread_objfile = NULL;

@@ -349,17 +349,20 @@ show_directories_command (struct ui_file *file, int from_tty,
 void
 forget_cached_source_info_for_objfile (struct objfile *objfile)
 {
-  ALL_OBJFILE_FILETABS (objfile, cu, s)
+  for (compunit_symtab *cu : objfile_compunits (objfile))
     {
-      if (s->line_charpos != NULL)
+      for (symtab *s : compunit_filetabs (cu))
 	{
-	  xfree (s->line_charpos);
-	  s->line_charpos = NULL;
-	}
-      if (s->fullname != NULL)
-	{
-	  xfree (s->fullname);
-	  s->fullname = NULL;
+	  if (s->line_charpos != NULL)
+	    {
+	      xfree (s->line_charpos);
+	      s->line_charpos = NULL;
+	    }
+	  if (s->fullname != NULL)
+	    {
+	      xfree (s->fullname);
+	      s->fullname = NULL;
+	    }
 	}
     }
 

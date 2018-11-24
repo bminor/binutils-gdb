@@ -107,11 +107,14 @@ print_objfile_statistics (void)
       if (objfile->sf)
 	objfile->sf->qf->print_stats (objfile);
       i = linetables = 0;
-      ALL_OBJFILE_FILETABS (objfile, cu, s)
+      for (compunit_symtab *cu : objfile_compunits (objfile))
 	{
-	  i++;
-	  if (SYMTAB_LINETABLE (s) != NULL)
-	    linetables++;
+	  for (symtab *s : compunit_filetabs (cu))
+	    {
+	      i++;
+	      if (SYMTAB_LINETABLE (s) != NULL)
+		linetables++;
+	    }
 	}
       blockvectors = std::distance (objfile_compunits (objfile).begin (),
 				    objfile_compunits (objfile).end ());
@@ -157,16 +160,20 @@ dump_objfile (struct objfile *objfile)
   if (objfile->compunit_symtabs != NULL)
     {
       printf_filtered ("Symtabs:\n");
-      ALL_OBJFILE_FILETABS (objfile, cust, symtab)
+      for (compunit_symtab *cu : objfile_compunits (objfile))
 	{
-	  printf_filtered ("%s at ", symtab_to_filename_for_display (symtab));
-	  gdb_print_host_address (symtab, gdb_stdout);
-	  printf_filtered (", ");
-	  if (SYMTAB_OBJFILE (symtab) != objfile)
+	  for (symtab *symtab : compunit_filetabs (cu))
 	    {
-	      printf_filtered ("NOT ON CHAIN!  ");
+	      printf_filtered ("%s at ",
+			       symtab_to_filename_for_display (symtab));
+	      gdb_print_host_address (symtab, gdb_stdout);
+	      printf_filtered (", ");
+	      if (SYMTAB_OBJFILE (symtab) != objfile)
+		{
+		  printf_filtered ("NOT ON CHAIN!  ");
+		}
+	      wrap_here ("  ");
 	    }
-	  wrap_here ("  ");
 	}
       printf_filtered ("\n\n");
     }
@@ -477,21 +484,24 @@ maintenance_print_symbols (const char *args, int from_tty)
 	  if (!print_for_objfile)
 	    continue;
 
-	  ALL_OBJFILE_FILETABS (objfile, cu, s)
+	  for (compunit_symtab *cu : objfile_compunits (objfile))
 	    {
-	      int print_for_source = 0;
-
-	      QUIT;
-	      if (source_arg != NULL)
+	      for (symtab *s : compunit_filetabs (cu))
 		{
-		  print_for_source
-		    = compare_filenames_for_search
-		        (symtab_to_filename_for_display (s), source_arg);
-		  found = 1;
+		  int print_for_source = 0;
+
+		  QUIT;
+		  if (source_arg != NULL)
+		    {
+		      print_for_source
+			= compare_filenames_for_search
+			(symtab_to_filename_for_display (s), source_arg);
+		      found = 1;
+		    }
+		  if (source_arg == NULL
+		      || print_for_source)
+		    dump_symtab (s, outfile);
 		}
-	      if (source_arg == NULL
-		  || print_for_source)
-		dump_symtab (s, outfile);
 	    }
 	}
 

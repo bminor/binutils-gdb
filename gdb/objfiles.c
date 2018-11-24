@@ -788,20 +788,23 @@ objfile_relocate1 (struct objfile *objfile,
 
   /* OK, get all the symtabs.  */
   {
-    ALL_OBJFILE_FILETABS (objfile, cust, s)
-    {
-      struct linetable *l;
+    for (compunit_symtab *cust : objfile_compunits (objfile))
+      {
+	for (symtab *s : compunit_filetabs (cust))
+	  {
+	    struct linetable *l;
 
-      /* First the line table.  */
-      l = SYMTAB_LINETABLE (s);
-      if (l)
-	{
-	  for (int i = 0; i < l->nitems; ++i)
-	    l->item[i].pc += ANOFFSET (delta,
-				       COMPUNIT_BLOCK_LINE_SECTION
-					 (cust));
-	}
-    }
+	    /* First the line table.  */
+	    l = SYMTAB_LINETABLE (s);
+	    if (l)
+	      {
+		for (int i = 0; i < l->nitems; ++i)
+		  l->item[i].pc += ANOFFSET (delta,
+					     COMPUNIT_BLOCK_LINE_SECTION
+					     (cust));
+	      }
+	  }
+      }
 
     for (compunit_symtab *cust : objfile_compunits (objfile))
       {

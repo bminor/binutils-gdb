@@ -1,5 +1,16 @@
 2019-01-09  Tom Tromey  <tom@tromey.com>
 
+	* symmisc.c (print_objfile_statistics, dump_objfile)
+	(maintenance_print_symbols): Use compunit_filetabs.
+	* source.c (forget_cached_source_info_for_objfile): Use
+	compunit_filetabs.
+	* objfiles.h (ALL_OBJFILE_FILETABS): Remove.
+	(ALL_FILETABS): Use compunit_filetabs.
+	* objfiles.c (objfile_relocate1): Use compunit_filetabs.
+	* coffread.c (coff_symtab_read): Use compunit_filetabs.
+
+2019-01-09  Tom Tromey  <tom@tromey.com>
+
 	* symtab.h (ALL_COMPUNIT_FILETABS): Remove.
 	(compunit_filetabs): New.
 	* symtab.c (iterate_over_some_symtabs, find_pc_sect_line): Use
