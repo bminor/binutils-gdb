@@ -562,8 +562,6 @@ compare_selectors (const void *a, const void *b)
 static void
 info_selectors_command (const char *regexp, int from_tty)
 {
-  struct objfile	*objfile;
-  struct minimal_symbol *msymbol;
   const char            *name;
   char                  *val;
   int                    matches = 0;
@@ -607,33 +605,36 @@ info_selectors_command (const char *regexp, int from_tty)
     }
 
   /* First time thru is JUST to get max length and count.  */
-  ALL_MSYMBOLS (objfile, msymbol)
+  for (objfile *objfile : all_objfiles (current_program_space))
     {
-      QUIT;
-      name = MSYMBOL_NATURAL_NAME (msymbol);
-      if (name
-          && (name[0] == '-' || name[0] == '+')
-	  && name[1] == '[')		/* Got a method name.  */
+      for (minimal_symbol *msymbol : objfile_msymbols (objfile))
 	{
-	  /* Filter for class/instance methods.  */
-	  if (plusminus && name[0] != plusminus)
-	    continue;
-	  /* Find selector part.  */
-	  name = (char *) strchr (name+2, ' ');
-	  if (name == NULL)
+	  QUIT;
+	  name = MSYMBOL_NATURAL_NAME (msymbol);
+	  if (name
+	      && (name[0] == '-' || name[0] == '+')
+	      && name[1] == '[')		/* Got a method name.  */
 	    {
-	      complaint (_("Bad method name '%s'"),
-			 MSYMBOL_NATURAL_NAME (msymbol));
-	      continue;
-	    }
-	  if (regexp == NULL || re_exec(++name) != 0)
-	    { 
-	      const char *mystart = name;
-	      const char *myend   = strchr (mystart, ']');
+	      /* Filter for class/instance methods.  */
+	      if (plusminus && name[0] != plusminus)
+		continue;
+	      /* Find selector part.  */
+	      name = (char *) strchr (name+2, ' ');
+	      if (name == NULL)
+		{
+		  complaint (_("Bad method name '%s'"),
+			     MSYMBOL_NATURAL_NAME (msymbol));
+		  continue;
+		}
+	      if (regexp == NULL || re_exec(++name) != 0)
+		{ 
+		  const char *mystart = name;
+		  const char *myend   = strchr (mystart, ']');
 	      
-	      if (myend && (myend - mystart > maxlen))
-		maxlen = myend - mystart;	/* Get longest selector.  */
-	      matches++;
+		  if (myend && (myend - mystart > maxlen))
+		    maxlen = myend - mystart;	/* Get longest selector.  */
+		  matches++;
+		}
 	    }
 	}
     }
@@ -644,21 +645,24 @@ info_selectors_command (const char *regexp, int from_tty)
 
       sym_arr = XALLOCAVEC (struct symbol *, matches);
       matches = 0;
-      ALL_MSYMBOLS (objfile, msymbol)
+      for (objfile *objfile : all_objfiles (current_program_space))
 	{
-	  QUIT;
-	  name = MSYMBOL_NATURAL_NAME (msymbol);
-	  if (name &&
-	     (name[0] == '-' || name[0] == '+') &&
-	      name[1] == '[')		/* Got a method name.  */
+	  for (minimal_symbol *msymbol : objfile_msymbols (objfile))
 	    {
-	      /* Filter for class/instance methods.  */
-	      if (plusminus && name[0] != plusminus)
-		continue;
-	      /* Find selector part.  */
-	      name = (char *) strchr(name+2, ' ');
-	      if (regexp == NULL || re_exec(++name) != 0)
-		sym_arr[matches++] = (struct symbol *) msymbol;
+	      QUIT;
+	      name = MSYMBOL_NATURAL_NAME (msymbol);
+	      if (name &&
+		  (name[0] == '-' || name[0] == '+') &&
+		  name[1] == '[')		/* Got a method name.  */
+		{
+		  /* Filter for class/instance methods.  */
+		  if (plusminus && name[0] != plusminus)
+		    continue;
+		  /* Find selector part.  */
+		  name = (char *) strchr(name+2, ' ');
+		  if (regexp == NULL || re_exec(++name) != 0)
+		    sym_arr[matches++] = (struct symbol *) msymbol;
+		}
 	    }
 	}
 
@@ -723,8 +727,6 @@ compare_classes (const void *a, const void *b)
 static void
 info_classes_command (const char *regexp, int from_tty)
 {
-  struct objfile	*objfile;
-  struct minimal_symbol *msymbol;
   const char            *name;
   char                  *val;
   int                    matches = 0;
@@ -757,23 +759,26 @@ info_classes_command (const char *regexp, int from_tty)
     }
 
   /* First time thru is JUST to get max length and count.  */
-  ALL_MSYMBOLS (objfile, msymbol)
+  for (objfile *objfile : all_objfiles (current_program_space))
     {
-      QUIT;
-      name = MSYMBOL_NATURAL_NAME (msymbol);
-      if (name &&
-	 (name[0] == '-' || name[0] == '+') &&
-	  name[1] == '[')			/* Got a method name.  */
-	if (regexp == NULL || re_exec(name+2) != 0)
-	  { 
-	    /* Compute length of classname part.  */
-	    const char *mystart = name + 2;
-	    const char *myend   = strchr (mystart, ' ');
+      for (minimal_symbol *msymbol : objfile_msymbols (objfile))
+	{
+	  QUIT;
+	  name = MSYMBOL_NATURAL_NAME (msymbol);
+	  if (name &&
+	      (name[0] == '-' || name[0] == '+') &&
+	      name[1] == '[')			/* Got a method name.  */
+	    if (regexp == NULL || re_exec(name+2) != 0)
+	      { 
+		/* Compute length of classname part.  */
+		const char *mystart = name + 2;
+		const char *myend   = strchr (mystart, ' ');
 	    
-	    if (myend && (myend - mystart > maxlen))
-	      maxlen = myend - mystart;
-	    matches++;
-	  }
+		if (myend && (myend - mystart > maxlen))
+		  maxlen = myend - mystart;
+		matches++;
+	      }
+	}
     }
   if (matches)
     {
@@ -781,15 +786,18 @@ info_classes_command (const char *regexp, int from_tty)
 		       regexp ? regexp : "*");
       sym_arr = XALLOCAVEC (struct symbol *, matches);
       matches = 0;
-      ALL_MSYMBOLS (objfile, msymbol)
+      for (objfile *objfile : all_objfiles (current_program_space))
 	{
-	  QUIT;
-	  name = MSYMBOL_NATURAL_NAME (msymbol);
-	  if (name &&
-	     (name[0] == '-' || name[0] == '+') &&
-	      name[1] == '[')			/* Got a method name.  */
-	    if (regexp == NULL || re_exec(name+2) != 0)
-		sym_arr[matches++] = (struct symbol *) msymbol;
+	  for (minimal_symbol *msymbol : objfile_msymbols (objfile))
+	    {
+	      QUIT;
+	      name = MSYMBOL_NATURAL_NAME (msymbol);
+	      if (name &&
+		  (name[0] == '-' || name[0] == '+') &&
+		  name[1] == '[') /* Got a method name.  */
+		if (regexp == NULL || re_exec(name+2) != 0)
+		  sym_arr[matches++] = (struct symbol *) msymbol;
+	    }
 	}
 
       qsort (sym_arr, matches, sizeof (struct minimal_symbol *), 
@@ -987,7 +995,6 @@ find_methods (char type, const char *theclass, const char *category,
   for (objfile *objfile : all_objfiles (current_program_space))
     {
       unsigned int *objc_csym;
-      struct minimal_symbol *msymbol = NULL;
 
       /* The objfile_csym variable counts the number of ObjC methods
 	 that this objfile defines.  We save that count as a private
@@ -1001,7 +1008,7 @@ find_methods (char type, const char *theclass, const char *category,
 	/* There are no ObjC symbols in this objfile.  Skip it entirely.  */
 	continue;
 
-      ALL_OBJFILE_MSYMBOLS (objfile, msymbol)
+      for (minimal_symbol *msymbol : objfile_msymbols (objfile))
 	{
 	  QUIT;
 

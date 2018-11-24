@@ -4344,8 +4344,6 @@ search_symbols (const char *regexp, enum search_domain kind,
   int i = 0;
   struct block_iterator iter;
   struct symbol *sym;
-  struct objfile *objfile;
-  struct minimal_symbol *msymbol;
   int found_misc = 0;
   static const enum minimal_symbol_type types[]
     = {mst_data, mst_text, mst_abs};
@@ -4454,81 +4452,93 @@ search_symbols (const char *regexp, enum search_domain kind,
 
   if (nfiles == 0 && (kind == VARIABLES_DOMAIN || kind == FUNCTIONS_DOMAIN))
     {
-      ALL_MSYMBOLS (objfile, msymbol)
-      {
-        QUIT;
+      for (objfile *objfile : all_objfiles (current_program_space))
+	{
+	  for (minimal_symbol *msymbol : objfile_msymbols (objfile))
+	    {
+	      QUIT;
 
-	if (msymbol->created_by_gdb)
-	  continue;
+	      if (msymbol->created_by_gdb)
+		continue;
 
-	if (MSYMBOL_TYPE (msymbol) == ourtype
-	    || MSYMBOL_TYPE (msymbol) == ourtype2
-	    || MSYMBOL_TYPE (msymbol) == ourtype3
-	    || MSYMBOL_TYPE (msymbol) == ourtype4)
-	  {
-	    if (!preg.has_value ()
-		|| preg->exec (MSYMBOL_NATURAL_NAME (msymbol), 0,
-			       NULL, 0) == 0)
-	      {
-		/* Note: An important side-effect of these lookup functions
-		   is to expand the symbol table if msymbol is found, for the
-		   benefit of the next loop on ALL_COMPUNITS.  */
-		if (kind == FUNCTIONS_DOMAIN
-		    ? (find_pc_compunit_symtab
-		       (MSYMBOL_VALUE_ADDRESS (objfile, msymbol)) == NULL)
-		    : (lookup_symbol_in_objfile_from_linkage_name
-		       (objfile, MSYMBOL_LINKAGE_NAME (msymbol), VAR_DOMAIN)
-		       .symbol == NULL))
-		  found_misc = 1;
-	      }
-	  }
-      }
+	      if (MSYMBOL_TYPE (msymbol) == ourtype
+		  || MSYMBOL_TYPE (msymbol) == ourtype2
+		  || MSYMBOL_TYPE (msymbol) == ourtype3
+		  || MSYMBOL_TYPE (msymbol) == ourtype4)
+		{
+		  if (!preg.has_value ()
+		      || preg->exec (MSYMBOL_NATURAL_NAME (msymbol), 0,
+				     NULL, 0) == 0)
+		    {
+		      /* Note: An important side-effect of these
+			 lookup functions is to expand the symbol
+			 table if msymbol is found, for the benefit of
+			 the next loop on ALL_COMPUNITS.  */
+		      if (kind == FUNCTIONS_DOMAIN
+			  ? (find_pc_compunit_symtab
+			     (MSYMBOL_VALUE_ADDRESS (objfile, msymbol))
+			     == NULL)
+			  : (lookup_symbol_in_objfile_from_linkage_name
+			     (objfile, MSYMBOL_LINKAGE_NAME (msymbol),
+			      VAR_DOMAIN)
+			     .symbol == NULL))
+			found_misc = 1;
+		    }
+		}
+	    }
+	}
     }
 
-  ALL_COMPUNITS (objfile, cust)
   {
-    bv = COMPUNIT_BLOCKVECTOR (cust);
-    for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)
+    struct objfile *objfile;
+    ALL_COMPUNITS (objfile, cust)
       {
-	b = BLOCKVECTOR_BLOCK (bv, i);
-	ALL_BLOCK_SYMBOLS (b, iter, sym)
+	bv = COMPUNIT_BLOCKVECTOR (cust);
+	for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)
 	  {
-	    struct symtab *real_symtab = symbol_symtab (sym);
-
-	    QUIT;
-
-	    /* Check first sole REAL_SYMTAB->FILENAME.  It does not need to be
-	       a substring of symtab_to_fullname as it may contain "./" etc.  */
-	    if ((file_matches (real_symtab->filename, files, nfiles, 0)
-		 || ((basenames_may_differ
-		      || file_matches (lbasename (real_symtab->filename),
-				       files, nfiles, 1))
-		     && file_matches (symtab_to_fullname (real_symtab),
-				      files, nfiles, 0)))
-		&& ((!preg.has_value ()
-		     || preg->exec (SYMBOL_NATURAL_NAME (sym), 0,
-				    NULL, 0) == 0)
-		    && ((kind == VARIABLES_DOMAIN
-			 && SYMBOL_CLASS (sym) != LOC_TYPEDEF
-			 && SYMBOL_CLASS (sym) != LOC_UNRESOLVED
-			 && SYMBOL_CLASS (sym) != LOC_BLOCK
-			 /* LOC_CONST can be used for more than just enums,
-			    e.g., c++ static const members.
-			    We only want to skip enums here.  */
-			 && !(SYMBOL_CLASS (sym) == LOC_CONST
-			      && (TYPE_CODE (SYMBOL_TYPE (sym))
-				  == TYPE_CODE_ENUM))
-			 && (!treg.has_value ()
-			     || treg_matches_sym_type_name (*treg, sym)))
-			|| (kind == FUNCTIONS_DOMAIN
-			    && SYMBOL_CLASS (sym) == LOC_BLOCK
-			    && (!treg.has_value ()
-				|| treg_matches_sym_type_name (*treg, sym)))
-			|| (kind == TYPES_DOMAIN
-			    && SYMBOL_CLASS (sym) == LOC_TYPEDEF))))
+	    b = BLOCKVECTOR_BLOCK (bv, i);
+	    ALL_BLOCK_SYMBOLS (b, iter, sym)
 	      {
-		/* match */
-		result.emplace_back (i, sym);
+		struct symtab *real_symtab = symbol_symtab (sym);
+
+		QUIT;
+
+		/* Check first sole REAL_SYMTAB->FILENAME.  It does
+		   not need to be a substring of symtab_to_fullname as
+		   it may contain "./" etc.  */
+		if ((file_matches (real_symtab->filename, files, nfiles, 0)
+		     || ((basenames_may_differ
+			  || file_matches (lbasename (real_symtab->filename),
+					   files, nfiles, 1))
+			 && file_matches (symtab_to_fullname (real_symtab),
+					  files, nfiles, 0)))
+		    && ((!preg.has_value ()
+			 || preg->exec (SYMBOL_NATURAL_NAME (sym), 0,
+					NULL, 0) == 0)
+			&& ((kind == VARIABLES_DOMAIN
+			     && SYMBOL_CLASS (sym) != LOC_TYPEDEF
+			     && SYMBOL_CLASS (sym) != LOC_UNRESOLVED
+			     && SYMBOL_CLASS (sym) != LOC_BLOCK
+			     /* LOC_CONST can be used for more than
+				just enums, e.g., c++ static const
+				members.  We only want to skip enums
+				here.  */
+			     && !(SYMBOL_CLASS (sym) == LOC_CONST
+				  && (TYPE_CODE (SYMBOL_TYPE (sym))
+				      == TYPE_CODE_ENUM))
+			     && (!treg.has_value ()
+				 || treg_matches_sym_type_name (*treg, sym)))
+			    || (kind == FUNCTIONS_DOMAIN
+				&& SYMBOL_CLASS (sym) == LOC_BLOCK
+				&& (!treg.has_value ()
+				    || treg_matches_sym_type_name (*treg,
+								   sym)))
+			    || (kind == TYPES_DOMAIN
+				&& SYMBOL_CLASS (sym) == LOC_TYPEDEF))))
+		  {
+		    /* match */
+		    result.emplace_back (i, sym);
+		  }
 	      }
 	  }
       }
@@ -4545,39 +4555,44 @@ search_symbols (const char *regexp, enum search_domain kind,
   if ((found_misc || (nfiles == 0 && kind != FUNCTIONS_DOMAIN))
       && !treg.has_value ())
     {
-      ALL_MSYMBOLS (objfile, msymbol)
-      {
-        QUIT;
+      for (objfile *objfile : all_objfiles (current_program_space))
+	{
+	  for (minimal_symbol *msymbol : objfile_msymbols (objfile))
+	    {
+	      QUIT;
 
-	if (msymbol->created_by_gdb)
-	  continue;
+	      if (msymbol->created_by_gdb)
+		continue;
 
-	if (MSYMBOL_TYPE (msymbol) == ourtype
-	    || MSYMBOL_TYPE (msymbol) == ourtype2
-	    || MSYMBOL_TYPE (msymbol) == ourtype3
-	    || MSYMBOL_TYPE (msymbol) == ourtype4)
-	  {
-	    if (!preg.has_value ()
-		|| preg->exec (MSYMBOL_NATURAL_NAME (msymbol), 0,
-			       NULL, 0) == 0)
-	      {
-		/* For functions we can do a quick check of whether the
-		   symbol might be found via find_pc_symtab.  */
-		if (kind != FUNCTIONS_DOMAIN
-		    || (find_pc_compunit_symtab
-			(MSYMBOL_VALUE_ADDRESS (objfile, msymbol)) == NULL))
-		  {
-		    if (lookup_symbol_in_objfile_from_linkage_name
-			(objfile, MSYMBOL_LINKAGE_NAME (msymbol), VAR_DOMAIN)
-			.symbol == NULL)
-		      {
-			/* match */
-			result.emplace_back (i, msymbol, objfile);
-		      }
-		  }
-	      }
-	  }
-      }
+	      if (MSYMBOL_TYPE (msymbol) == ourtype
+		  || MSYMBOL_TYPE (msymbol) == ourtype2
+		  || MSYMBOL_TYPE (msymbol) == ourtype3
+		  || MSYMBOL_TYPE (msymbol) == ourtype4)
+		{
+		  if (!preg.has_value ()
+		      || preg->exec (MSYMBOL_NATURAL_NAME (msymbol), 0,
+				     NULL, 0) == 0)
+		    {
+		      /* For functions we can do a quick check of whether the
+			 symbol might be found via find_pc_symtab.  */
+		      if (kind != FUNCTIONS_DOMAIN
+			  || (find_pc_compunit_symtab
+			      (MSYMBOL_VALUE_ADDRESS (objfile, msymbol))
+			      == NULL))
+			{
+			  if (lookup_symbol_in_objfile_from_linkage_name
+			      (objfile, MSYMBOL_LINKAGE_NAME (msymbol),
+			       VAR_DOMAIN)
+			      .symbol == NULL)
+			    {
+			      /* match */
+			      result.emplace_back (i, msymbol, objfile);
+			    }
+			}
+		    }
+		}
+	    }
+	}
     }
 
   return result;
@@ -5188,8 +5203,6 @@ default_collect_symbol_completion_matches_break_on
 
   struct symbol *sym;
   struct compunit_symtab *cust;
-  struct minimal_symbol *msymbol;
-  struct objfile *objfile;
   const struct block *b;
   const struct block *surrounding_static_block, *surrounding_global_block;
   struct block_iterator iter;
@@ -5259,22 +5272,26 @@ default_collect_symbol_completion_matches_break_on
 
   if (code == TYPE_CODE_UNDEF)
     {
-      ALL_MSYMBOLS (objfile, msymbol)
+      for (objfile *objfile : all_objfiles (current_program_space))
 	{
-	  QUIT;
+	  for (minimal_symbol *msymbol : objfile_msymbols (objfile))
+	    {
+	      QUIT;
 
-	  if (completion_skip_symbol (mode, msymbol))
-	    continue;
+	      if (completion_skip_symbol (mode, msymbol))
+		continue;
 
-	  completion_list_add_msymbol (tracker, msymbol, lookup_name,
-				       sym_text, word);
+	      completion_list_add_msymbol (tracker, msymbol, lookup_name,
+					   sym_text, word);
 
-	  completion_list_objc_symbol (tracker, msymbol, lookup_name,
-				       sym_text, word);
+	      completion_list_objc_symbol (tracker, msymbol, lookup_name,
+					   sym_text, word);
+	    }
 	}
     }
 
   /* Add completions for all currently loaded symbol tables.  */
+  struct objfile *objfile;
   ALL_COMPUNITS (objfile, cust)
     add_symtab_completions (cust, tracker, mode, lookup_name,
 			    sym_text, word, code);

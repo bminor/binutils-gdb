@@ -623,12 +623,85 @@ public:
 #define ALL_OBJFILE_COMPUNITS(objfile, cu) \
   for ((cu) = (objfile) -> compunit_symtabs; (cu) != NULL; (cu) = (cu) -> next)
 
-/* Traverse all minimal symbols in one objfile.  */
+/* A range adapter that makes it possible to iterate over all
+   minimal symbols of an objfile.  */
 
-#define	ALL_OBJFILE_MSYMBOLS(objfile, m)	\
-    for ((m) = (objfile)->per_bfd->msymbols;	\
-	 MSYMBOL_LINKAGE_NAME (m) != NULL;	\
-	 (m)++)
+class objfile_msymbols
+{
+public:
+
+  explicit objfile_msymbols (struct objfile *objfile)
+    : m_objfile (objfile)
+  {
+  }
+
+  struct iterator
+  {
+    typedef iterator self_type;
+    typedef struct minimal_symbol *value_type;
+    typedef struct minimal_symbol *&reference;
+    typedef struct minimal_symbol **pointer;
+    typedef std::forward_iterator_tag iterator_category;
+    typedef int difference_type;
+
+    explicit iterator (struct objfile *objfile)
+      : m_msym (objfile->per_bfd->msymbols)
+    {
+      /* Make sure to properly handle the case where there are no
+	 minsyms.  */
+      if (MSYMBOL_LINKAGE_NAME (m_msym) == nullptr)
+	m_msym = nullptr;
+    }
+
+    iterator ()
+      : m_msym (nullptr)
+    {
+    }
+    
+    value_type operator* () const
+    {
+      return m_msym;
+    }
+
+    bool operator== (const self_type &other) const
+    {
+      return m_msym == other.m_msym;
+    }
+
+    bool operator!= (const self_type &other) const
+    {
+      return m_msym != other.m_msym;
+    }
+
+    self_type &operator++ ()
+    {
+      if (m_msym != nullptr)
+	{
+	  ++m_msym;
+	  if (MSYMBOL_LINKAGE_NAME (m_msym) == nullptr)
+	    m_msym = nullptr;
+	}
+      return *this;
+    }
+
+  private:
+    struct minimal_symbol *m_msym;
+  };
+
+  iterator begin () const
+  {
+    return iterator (m_objfile);
+  }
+
+  iterator end () const
+  {
+    return iterator ();
+  }
+
+private:
+
+  struct objfile *m_objfile;
+};
 
 /* Traverse all symtabs in all objfiles in the current symbol
    space.  */
@@ -642,13 +715,6 @@ public:
 #define ALL_COMPUNITS(objfile, cu)	\
   ALL_OBJFILES (objfile)		\
     ALL_OBJFILE_COMPUNITS (objfile, cu)
-
-/* Traverse all minimal symbols in all objfiles in the current symbol
-   space.  */
-
-#define	ALL_MSYMBOLS(objfile, m) \
-  ALL_OBJFILES (objfile)	 \
-    ALL_OBJFILE_MSYMBOLS (objfile, m)
 
 #define ALL_OBJFILE_OSECTIONS(objfile, osect)	\
   for (osect = objfile->sections; osect < objfile->sections_end; osect++) \

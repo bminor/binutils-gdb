@@ -1488,30 +1488,32 @@ lookup_solib_trampoline_symbol_by_pc (CORE_ADDR pc)
 CORE_ADDR
 find_solib_trampoline_target (struct frame_info *frame, CORE_ADDR pc)
 {
-  struct objfile *objfile;
-  struct minimal_symbol *msymbol;
   struct minimal_symbol *tsymbol = lookup_solib_trampoline_symbol_by_pc (pc);
 
   if (tsymbol != NULL)
     {
-      ALL_MSYMBOLS (objfile, msymbol)
-      {
-	/* Also handle minimal symbols pointing to function descriptors.  */
-	if ((MSYMBOL_TYPE (msymbol) == mst_text
-	     || MSYMBOL_TYPE (msymbol) == mst_text_gnu_ifunc
-	     || MSYMBOL_TYPE (msymbol) == mst_data
-	     || MSYMBOL_TYPE (msymbol) == mst_data_gnu_ifunc)
-	    && strcmp (MSYMBOL_LINKAGE_NAME (msymbol),
-		       MSYMBOL_LINKAGE_NAME (tsymbol)) == 0)
-	  {
-	    CORE_ADDR func;
+      for (objfile *objfile : all_objfiles (current_program_space))
+	{
+	  for (minimal_symbol *msymbol : objfile_msymbols (objfile))
+	    {
+	      /* Also handle minimal symbols pointing to function
+		 descriptors.  */
+	      if ((MSYMBOL_TYPE (msymbol) == mst_text
+		   || MSYMBOL_TYPE (msymbol) == mst_text_gnu_ifunc
+		   || MSYMBOL_TYPE (msymbol) == mst_data
+		   || MSYMBOL_TYPE (msymbol) == mst_data_gnu_ifunc)
+		  && strcmp (MSYMBOL_LINKAGE_NAME (msymbol),
+			     MSYMBOL_LINKAGE_NAME (tsymbol)) == 0)
+		{
+		  CORE_ADDR func;
 
-	    /* Ignore data symbols that are not function
-	       descriptors.  */
-	    if (msymbol_is_function (objfile, msymbol, &func))
-	      return func;
-	  }
-      }
+		  /* Ignore data symbols that are not function
+		     descriptors.  */
+		  if (msymbol_is_function (objfile, msymbol, &func))
+		    return func;
+		}
+	    }
+	}
     }
   return 0;
 }

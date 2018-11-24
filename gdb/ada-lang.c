@@ -4913,8 +4913,6 @@ struct bound_minimal_symbol
 ada_lookup_simple_minsym (const char *name)
 {
   struct bound_minimal_symbol result;
-  struct objfile *objfile;
-  struct minimal_symbol *msymbol;
 
   memset (&result, 0, sizeof (result));
 
@@ -4924,16 +4922,19 @@ ada_lookup_simple_minsym (const char *name)
   symbol_name_matcher_ftype *match_name
     = ada_get_symbol_name_matcher (lookup_name);
 
-  ALL_MSYMBOLS (objfile, msymbol)
-  {
-    if (match_name (MSYMBOL_LINKAGE_NAME (msymbol), lookup_name, NULL)
-        && MSYMBOL_TYPE (msymbol) != mst_solib_trampoline)
-      {
-	result.minsym = msymbol;
-	result.objfile = objfile;
-	break;
-      }
-  }
+  for (objfile *objfile : all_objfiles (current_program_space))
+    {
+      for (minimal_symbol *msymbol : objfile_msymbols (objfile))
+	{
+	  if (match_name (MSYMBOL_LINKAGE_NAME (msymbol), lookup_name, NULL)
+	      && MSYMBOL_TYPE (msymbol) != mst_solib_trampoline)
+	    {
+	      result.minsym = msymbol;
+	      result.objfile = objfile;
+	      break;
+	    }
+	}
+    }
 
   return result;
 }
@@ -6391,8 +6392,6 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
 {
   struct symbol *sym;
   struct compunit_symtab *s;
-  struct minimal_symbol *msymbol;
-  struct objfile *objfile;
   const struct block *b, *surrounding_static_block = 0;
   struct block_iterator iter;
 
@@ -6412,35 +6411,38 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
      anything that isn't a text symbol (everything else will be
      handled by the psymtab code above).  */
 
-  ALL_MSYMBOLS (objfile, msymbol)
-  {
-    QUIT;
+  for (objfile *objfile : all_objfiles (current_program_space))
+    {
+      for (minimal_symbol *msymbol : objfile_msymbols (objfile))
+	{
+	  QUIT;
 
-    if (completion_skip_symbol (mode, msymbol))
-      continue;
+	  if (completion_skip_symbol (mode, msymbol))
+	    continue;
 
-    language symbol_language = MSYMBOL_LANGUAGE (msymbol);
+	  language symbol_language = MSYMBOL_LANGUAGE (msymbol);
 
-    /* Ada minimal symbols won't have their language set to Ada.  If
-       we let completion_list_add_name compare using the
-       default/C-like matcher, then when completing e.g., symbols in a
-       package named "pck", we'd match internal Ada symbols like
-       "pckS", which are invalid in an Ada expression, unless you wrap
-       them in '<' '>' to request a verbatim match.
+	  /* Ada minimal symbols won't have their language set to Ada.  If
+	     we let completion_list_add_name compare using the
+	     default/C-like matcher, then when completing e.g., symbols in a
+	     package named "pck", we'd match internal Ada symbols like
+	     "pckS", which are invalid in an Ada expression, unless you wrap
+	     them in '<' '>' to request a verbatim match.
 
-       Unfortunately, some Ada encoded names successfully demangle as
-       C++ symbols (using an old mangling scheme), such as "name__2Xn"
-       -> "Xn::name(void)" and thus some Ada minimal symbols end up
-       with the wrong language set.  Paper over that issue here.  */
-    if (symbol_language == language_auto
-	|| symbol_language == language_cplus)
-      symbol_language = language_ada;
+	     Unfortunately, some Ada encoded names successfully demangle as
+	     C++ symbols (using an old mangling scheme), such as "name__2Xn"
+	     -> "Xn::name(void)" and thus some Ada minimal symbols end up
+	     with the wrong language set.  Paper over that issue here.  */
+	  if (symbol_language == language_auto
+	      || symbol_language == language_cplus)
+	    symbol_language = language_ada;
 
-    completion_list_add_name (tracker,
-			      symbol_language,
-			      MSYMBOL_LINKAGE_NAME (msymbol),
-			      lookup_name, text, word);
-  }
+	  completion_list_add_name (tracker,
+				    symbol_language,
+				    MSYMBOL_LINKAGE_NAME (msymbol),
+				    lookup_name, text, word);
+	}
+    }
 
   /* Search upwards from currently selected frame (so that we can
      complete on local vars.  */
@@ -6465,6 +6467,7 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
   /* Go through the symtabs and check the externs and statics for
      symbols which match.  */
 
+  struct objfile *objfile;
   ALL_COMPUNITS (objfile, s)
   {
     QUIT;

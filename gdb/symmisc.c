@@ -183,7 +183,6 @@ static void
 dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
-  struct minimal_symbol *msymbol;
   int index;
   char ms_type;
 
@@ -194,7 +193,7 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
       return;
     }
   index = 0;
-  ALL_OBJFILE_MSYMBOLS (objfile, msymbol)
+  for (minimal_symbol *msymbol : objfile_msymbols (objfile))
     {
       struct obj_section *section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
 

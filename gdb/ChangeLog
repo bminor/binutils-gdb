@@ -1,5 +1,24 @@
 2019-01-09  Tom Tromey  <tom@tromey.com>
 
+	* symtab.c (search_symbols)
+	(default_collect_symbol_completion_matches_break_on): Use
+	objfile_msymbols.
+	* ada-lang.c (ada_lookup_simple_minsym)
+	(ada_collect_symbol_completion_matches): Use objfile_msymbols.
+	* minsyms.c (find_solib_trampoline_target): Use objfile_msymbols.
+	* hppa-tdep.c (hppa_lookup_stub_minimal_symbol): Use
+	objfile_msymbols.
+	* coffread.c (coff_symfile_read): Use objfile_msymbols.
+	* symmisc.c (dump_msymbols): Use objfile_msymbols.
+	* objc-lang.c (find_methods): Use objfile_msymbols.
+	(info_selectors_command, info_classes_command): Likewise.
+	* stabsread.c (scan_file_globals): Use objfile_msymbols.
+	* objfiles.h (class objfile_msymbols): New.
+	(ALL_OBJFILE_MSYMBOLS): Remove.
+	(ALL_MSYMBOLS): Remove.
+
+2019-01-09  Tom Tromey  <tom@tromey.com>
+
 	* common/next-iterator.h (next_adapter): Add Iterator template
 	parameter.
 	* objfiles.h (ALL_OBJFILES_SAFE): Remove.
