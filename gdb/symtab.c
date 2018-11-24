@@ -2167,7 +2167,6 @@ struct objfile *
 lookup_objfile_from_block (const struct block *block)
 {
   struct objfile *obj;
-  struct compunit_symtab *cust;
 
   if (block == NULL)
     return NULL;
@@ -2255,8 +2254,6 @@ static struct block_symbol
 lookup_symbol_in_objfile_symtabs (struct objfile *objfile, int block_index,
 				  const char *name, const domain_enum domain)
 {
-  struct compunit_symtab *cust;
-
   gdb_assert (block_index == GLOBAL_BLOCK || block_index == STATIC_BLOCK);
 
   if (symbol_lookup_debug > 1)
@@ -2269,7 +2266,7 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile, int block_index,
 			  name, domain_name (domain));
     }
 
-  ALL_OBJFILE_COMPUNITS (objfile, cust)
+  for (compunit_symtab *cust : objfile_compunits (objfile))
     {
       const struct blockvector *bv;
       const struct block *block;
@@ -2763,12 +2760,11 @@ static struct type *
 basic_lookup_transparent_type_1 (struct objfile *objfile, int block_index,
 				 const char *name)
 {
-  const struct compunit_symtab *cust;
   const struct blockvector *bv;
   const struct block *block;
   const struct symbol *sym;
 
-  ALL_OBJFILE_COMPUNITS (objfile, cust)
+  for (compunit_symtab *cust : objfile_compunits (objfile))
     {
       bv = COMPUNIT_BLOCKVECTOR (cust);
       block = BLOCKVECTOR_BLOCK (bv, block_index);
@@ -2874,7 +2870,6 @@ iterate_over_symbols (const struct block *block,
 struct compunit_symtab *
 find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 {
-  struct compunit_symtab *cust;
   struct compunit_symtab *best_cust = NULL;
   struct objfile *obj_file;
   CORE_ADDR distance = 0;
@@ -3349,7 +3344,6 @@ find_line_symtab (struct symtab *symtab, int line,
          BEST_INDEX and BEST_LINETABLE identify the item for it.  */
       int best;
 
-      struct compunit_symtab *cu;
       struct symtab *s;
 
       if (best_index >= 0)
@@ -4185,7 +4179,6 @@ output_partial_symbol_filename (const char *filename, const char *fullname,
 static void
 info_sources_command (const char *ignore, int from_tty)
 {
-  struct compunit_symtab *cu;
   struct symtab *s;
   struct objfile *objfile;
   struct output_source_filename_data data;
@@ -4338,7 +4331,6 @@ search_symbols (const char *regexp, enum search_domain kind,
 		const char *t_regexp,
 		int nfiles, const char *files[])
 {
-  struct compunit_symtab *cust;
   const struct blockvector *bv;
   struct block *b;
   int i = 0;
@@ -5202,7 +5194,6 @@ default_collect_symbol_completion_matches_break_on
      won't be that many.  */
 
   struct symbol *sym;
-  struct compunit_symtab *cust;
   const struct block *b;
   const struct block *surrounding_static_block, *surrounding_global_block;
   struct block_iterator iter;
@@ -5588,7 +5579,6 @@ maybe_add_partial_symtab_filename (const char *filename, const char *fullname,
 completion_list
 make_source_files_completion_list (const char *text, const char *word)
 {
-  struct compunit_symtab *cu;
   struct symtab *s;
   struct objfile *objfile;
   size_t text_len = strlen (text);

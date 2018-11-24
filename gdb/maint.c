@@ -763,7 +763,6 @@ count_symtabs_and_blocks (int *nr_symtabs_ptr, int *nr_compunit_symtabs_ptr,
 			  int *nr_blocks_ptr)
 {
   struct objfile *o;
-  struct compunit_symtab *cu;
   struct symtab *s;
   int nr_symtabs = 0;
   int nr_compunit_symtabs = 0;

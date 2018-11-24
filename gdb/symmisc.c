@@ -82,7 +82,6 @@ void
 print_objfile_statistics (void)
 {
   struct program_space *pspace;
-  struct compunit_symtab *cu;
   struct symtab *s;
   int i, linetables, blockvectors;
 
@@ -108,15 +107,15 @@ print_objfile_statistics (void)
 			 OBJSTAT (objfile, n_types));
       if (objfile->sf)
 	objfile->sf->qf->print_stats (objfile);
-      i = linetables = blockvectors = 0;
+      i = linetables = 0;
       ALL_OBJFILE_FILETABS (objfile, cu, s)
 	{
 	  i++;
 	  if (SYMTAB_LINETABLE (s) != NULL)
 	    linetables++;
 	}
-      ALL_OBJFILE_COMPUNITS (objfile, cu)
-	blockvectors++;
+      blockvectors = std::distance (objfile_compunits (objfile).begin (),
+				    objfile_compunits (objfile).end ());
       printf_filtered (_("  Number of symbol tables: %d\n"), i);
       printf_filtered (_("  Number of symbol tables with line tables: %d\n"),
 		       linetables);
@@ -145,7 +144,6 @@ print_objfile_statistics (void)
 static void
 dump_objfile (struct objfile *objfile)
 {
-  struct compunit_symtab *cust;
   struct symtab *symtab;
 
   printf_filtered ("\nObject file %s:  ", objfile_name (objfile));
@@ -469,7 +467,6 @@ maintenance_print_symbols (const char *args, int from_tty)
     }
   else
     {
-      struct compunit_symtab *cu;
       struct symtab *s;
       int found = 0;
 
@@ -775,14 +772,13 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
   ALL_PSPACES (pspace)
     for (objfile *objfile : all_objfiles (pspace))
       {
-	struct compunit_symtab *cust;
 	struct symtab *symtab;
 
 	/* We don't want to print anything for this objfile until we
 	   actually find a symtab whose name matches.  */
 	int printed_objfile_start = 0;
 
-	ALL_OBJFILE_COMPUNITS (objfile, cust)
+	for (compunit_symtab *cust : objfile_compunits (objfile))
 	  {
 	    int printed_compunit_symtab_start = 0;
 
@@ -863,13 +859,11 @@ maintenance_check_symtabs (const char *ignore, int from_tty)
   ALL_PSPACES (pspace)
     for (objfile *objfile : all_objfiles (pspace))
       {
-	struct compunit_symtab *cust;
-
 	/* We don't want to print anything for this objfile until we
 	   actually find something worth printing.  */
 	int printed_objfile_start = 0;
 
-	ALL_OBJFILE_COMPUNITS (objfile, cust)
+	for (compunit_symtab *cust : objfile_compunits (objfile))
 	  {
 	    int found_something = 0;
 	    struct symtab *symtab = compunit_primary_filetab (cust);
@@ -1032,10 +1026,9 @@ maintenance_info_line_tables (const char *regexp, int from_tty)
   ALL_PSPACES (pspace)
     for (objfile *objfile : all_objfiles (pspace))
       {
-	struct compunit_symtab *cust;
 	struct symtab *symtab;
 
-	ALL_OBJFILE_COMPUNITS (objfile, cust)
+	for (compunit_symtab *cust : objfile_compunits (objfile))
 	  {
 	    ALL_COMPUNIT_FILETABS (cust, symtab)
 	      {

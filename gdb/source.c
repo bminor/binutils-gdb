@@ -239,7 +239,6 @@ void
 select_source_symtab (struct symtab *s)
 {
   struct objfile *ofp;
-  struct compunit_symtab *cu;
 
   if (s)
     {
@@ -350,7 +349,6 @@ show_directories_command (struct ui_file *file, int from_tty,
 void
 forget_cached_source_info_for_objfile (struct objfile *objfile)
 {
-  struct compunit_symtab *cu;
   struct symtab *s;
 
   ALL_OBJFILE_FILETABS (objfile, cu, s)

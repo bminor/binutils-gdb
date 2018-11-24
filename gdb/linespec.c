@@ -1143,8 +1143,6 @@ iterate_over_all_matching_symtabs
 
     for (objfile *objfile : all_objfiles (current_program_space))
       {
-	struct compunit_symtab *cu;
-
 	if (objfile->sf)
 	  objfile->sf->qf->expand_symtabs_matching (objfile,
 						    NULL,
@@ -1152,7 +1150,7 @@ iterate_over_all_matching_symtabs
 						    NULL, NULL,
 						    search_domain);
 
-	ALL_OBJFILE_COMPUNITS (objfile, cu)
+	for (compunit_symtab *cu : objfile_compunits (objfile))
 	  {
 	    struct symtab *symtab = COMPUNIT_FILETABS (cu);
 

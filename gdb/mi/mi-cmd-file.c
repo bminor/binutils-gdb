@@ -84,7 +84,6 @@ void
 mi_cmd_file_list_exec_source_files (const char *command, char **argv, int argc)
 {
   struct ui_out *uiout = current_uiout;
-  struct compunit_symtab *cu;
   struct symtab *s;
   struct objfile *objfile;
 

@@ -1,5 +1,34 @@
 2019-01-09  Tom Tromey  <tom@tromey.com>
 
+	* source.c (select_source_symtab)
+	(forget_cached_source_info_for_objfile): Remove declaration.
+	* mi/mi-cmd-file.c (mi_cmd_file_list_exec_source_files): Remove
+	declaration.
+	* maint.c (count_symtabs_and_blocks): Remove declaration.
+	* cp-support.c (add_symbol_overload_list_qualified): Remove
+	declaration.
+	* coffread.c (coff_symtab_read): Remove declaration.
+	* symtab.c (lookup_symbol_in_objfile_symtabs)
+	(basic_lookup_transparent_type_1): Use objfile_compunits.
+	(lookup_objfile_from_block, find_pc_sect_compunit_symtab)
+	(info_sources_command, search_symbols)
+	(default_collect_symbol_completion_matches_break_on)
+	(make_source_files_completion_list): Remove declaration.
+	* ada-lang.c (add_nonlocal_symbols): Use objfile_compunits.
+	(ada_collect_symbol_completion_matches)
+	(ada_add_global_exceptions): Remove declaration.
+	* linespec.c (iterate_over_all_matching_symtabs): Use
+	objfile_compunits.
+	* objfiles.h (ALL_OBJFILE_COMPUNITS): Remove.
+	(class objfile_compunits): New.
+	(ALL_COMPUNITS): Use objfile_compunits.
+	* symmisc.c (print_objfile_statistics, maintenance_info_symtabs)
+	(maintenance_check_symtabs, maintenance_info_line_tables): Use
+	objfile_compunits.
+	* objfiles.c (objfile_relocate1): Use objfile_compunits.
+
+2019-01-09  Tom Tromey  <tom@tromey.com>
+
 	* symtab.c (search_symbols)
 	(default_collect_symbol_completion_matches_break_on): Use
 	objfile_msymbols.

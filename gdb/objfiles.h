@@ -615,13 +615,21 @@ public:
 /* Traverse all symtabs in one objfile.  */
 
 #define ALL_OBJFILE_FILETABS(objfile, cu, s) \
-  ALL_OBJFILE_COMPUNITS (objfile, cu) \
+  for (compunit_symtab *cu : objfile_compunits (objfile)) \
     ALL_COMPUNIT_FILETABS (cu, s)
 
-/* Traverse all compunits in one objfile.  */
+/* A range adapter that makes it possible to iterate over all
+   compunits in one objfile.  */
 
-#define ALL_OBJFILE_COMPUNITS(objfile, cu) \
-  for ((cu) = (objfile) -> compunit_symtabs; (cu) != NULL; (cu) = (cu) -> next)
+class objfile_compunits : public next_adapter<struct compunit_symtab>
+{
+public:
+
+  explicit objfile_compunits (struct objfile *objfile)
+    : next_adapter<struct compunit_symtab> (objfile->compunit_symtabs)
+  {
+  }
+};
 
 /* A range adapter that makes it possible to iterate over all
    minimal symbols of an objfile.  */
@@ -714,7 +722,7 @@ private:
 
 #define ALL_COMPUNITS(objfile, cu)	\
   ALL_OBJFILES (objfile)		\
-    ALL_OBJFILE_COMPUNITS (objfile, cu)
+    for (compunit_symtab *cu : objfile_compunits (objfile))
 
 #define ALL_OBJFILE_OSECTIONS(objfile, osect)	\
   for (osect = objfile->sections; osect < objfile->sections_end; osect++) \

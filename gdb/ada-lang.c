@@ -5605,7 +5605,6 @@ add_nonlocal_symbols (struct obstack *obstackp,
 		      const lookup_name_info &lookup_name,
 		      domain_enum domain, int global)
 {
-  struct compunit_symtab *cu;
   struct match_data data;
 
   memset (&data, 0, sizeof data);
@@ -5630,7 +5629,7 @@ add_nonlocal_symbols (struct obstack *obstackp,
 					       symbol_name_match_type::FULL,
 					       compare_names);
 
-      ALL_OBJFILE_COMPUNITS (objfile, cu)
+      for (compunit_symtab *cu : objfile_compunits (objfile))
 	{
 	  const struct block *global_block
 	    = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cu), GLOBAL_BLOCK);
@@ -6391,7 +6390,6 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
 				       enum type_code code)
 {
   struct symbol *sym;
-  struct compunit_symtab *s;
   const struct block *b, *surrounding_static_block = 0;
   struct block_iterator iter;
 
@@ -13551,7 +13549,6 @@ ada_add_global_exceptions (compiled_regex *preg,
 			   std::vector<ada_exc_info> *exceptions)
 {
   struct objfile *objfile;
-  struct compunit_symtab *s;
 
   /* In Ada, the symbol "search name" is a linkage name, whereas the
      regular expression used to do the matching refers to the natural
