@@ -1,5 +1,16 @@
 2019-01-09  Tom Tromey  <tom@tromey.com>
 
+	* symtab.c (find_line_symtab, info_sources_command)
+	(make_source_files_completion_list): Use objfile_compunits.
+	* source.c (select_source_symtab): Use objfile_compunits.
+	* objfiles.h (struct objfile): Update comment.
+	(ALL_OBJFILES): Remove.
+	(ALL_FILETABS): Remove.
+	* mi/mi-cmd-file.c (mi_cmd_file_list_exec_source_files): Use
+	objfile_compunits.
+
+2019-01-09  Tom Tromey  <tom@tromey.com>
+
 	* symmisc.c (print_objfile_statistics, dump_objfile)
 	(maintenance_print_symbols): Use compunit_filetabs.
 	* source.c (forget_cached_source_info_for_objfile): Use

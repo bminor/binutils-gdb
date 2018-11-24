@@ -3359,37 +3359,42 @@ find_line_symtab (struct symtab *sym_tab, int line,
 	      (objfile, symtab_to_fullname (sym_tab));
 	}
 
-      struct objfile *objfile;
-      ALL_FILETABS (objfile, cu, s)
-      {
-	struct linetable *l;
-	int ind;
+      for (objfile *objfile : all_objfiles (current_program_space))
+	{
+	  for (compunit_symtab *cu : objfile_compunits (objfile))
+	    {
+	      for (symtab *s : compunit_filetabs (cu))
+		{
+		  struct linetable *l;
+		  int ind;
 
-	if (FILENAME_CMP (sym_tab->filename, s->filename) != 0)
-	  continue;
-	if (FILENAME_CMP (symtab_to_fullname (sym_tab),
-			  symtab_to_fullname (s)) != 0)
-	  continue;	
-	l = SYMTAB_LINETABLE (s);
-	ind = find_line_common (l, line, &exact, 0);
-	if (ind >= 0)
-	  {
-	    if (exact)
-	      {
-		best_index = ind;
-		best_linetable = l;
-		best_symtab = s;
-		goto done;
-	      }
-	    if (best == 0 || l->item[ind].line < best)
-	      {
-		best = l->item[ind].line;
-		best_index = ind;
-		best_linetable = l;
-		best_symtab = s;
-	      }
-	  }
-      }
+		  if (FILENAME_CMP (sym_tab->filename, s->filename) != 0)
+		    continue;
+		  if (FILENAME_CMP (symtab_to_fullname (sym_tab),
+				    symtab_to_fullname (s)) != 0)
+		    continue;	
+		  l = SYMTAB_LINETABLE (s);
+		  ind = find_line_common (l, line, &exact, 0);
+		  if (ind >= 0)
+		    {
+		      if (exact)
+			{
+			  best_index = ind;
+			  best_linetable = l;
+			  best_symtab = s;
+			  goto done;
+			}
+		      if (best == 0 || l->item[ind].line < best)
+			{
+			  best = l->item[ind].line;
+			  best_index = ind;
+			  best_linetable = l;
+			  best_symtab = s;
+			}
+		    }
+		}
+	    }
+	}
     }
 done:
   if (best_index < 0)
@@ -4180,7 +4185,6 @@ output_partial_symbol_filename (const char *filename, const char *fullname,
 static void
 info_sources_command (const char *ignore, int from_tty)
 {
-  struct objfile *objfile;
   struct output_source_filename_data data;
 
   if (!have_full_symbols () && !have_partial_symbols ())
@@ -4195,12 +4199,18 @@ info_sources_command (const char *ignore, int from_tty)
   printf_filtered ("Source files for which symbols have been read in:\n\n");
 
   data.first = 1;
-  ALL_FILETABS (objfile, cu, s)
-  {
-    const char *fullname = symtab_to_fullname (s);
+  for (objfile *objfile : all_objfiles (current_program_space))
+    {
+      for (compunit_symtab *cu : objfile_compunits (objfile))
+	{
+	  for (symtab *s : compunit_filetabs (cu))
+	    {
+	      const char *fullname = symtab_to_fullname (s);
 
-    output_source_filename (fullname, &data);
-  }
+	      output_source_filename (fullname, &data);
+	    }
+	}
+    }
   printf_filtered ("\n\n");
 
   printf_filtered ("Source files for which symbols "
@@ -5581,7 +5591,6 @@ maybe_add_partial_symtab_filename (const char *filename, const char *fullname,
 completion_list
 make_source_files_completion_list (const char *text, const char *word)
 {
-  struct objfile *objfile;
   size_t text_len = strlen (text);
   completion_list list;
   const char *base_name;
@@ -5592,28 +5601,34 @@ make_source_files_completion_list (const char *text, const char *word)
 
   filename_seen_cache filenames_seen;
 
-  ALL_FILETABS (objfile, cu, s)
+  for (objfile *objfile : all_objfiles (current_program_space))
     {
-      if (not_interesting_fname (s->filename))
-	continue;
-      if (!filenames_seen.seen (s->filename)
-	  && filename_ncmp (s->filename, text, text_len) == 0)
+      for (compunit_symtab *cu : objfile_compunits (objfile))
 	{
-	  /* This file matches for a completion; add it to the current
-	     list of matches.  */
-	  add_filename_to_list (s->filename, text, word, &list);
-	}
-      else
-	{
-	  /* NOTE: We allow the user to type a base name when the
-	     debug info records leading directories, but not the other
-	     way around.  This is what subroutines of breakpoint
-	     command do when they parse file names.  */
-	  base_name = lbasename (s->filename);
-	  if (base_name != s->filename
-	      && !filenames_seen.seen (base_name)
-	      && filename_ncmp (base_name, text, text_len) == 0)
-	    add_filename_to_list (base_name, text, word, &list);
+	  for (symtab *s : compunit_filetabs (cu))
+	    {
+	      if (not_interesting_fname (s->filename))
+		continue;
+	      if (!filenames_seen.seen (s->filename)
+		  && filename_ncmp (s->filename, text, text_len) == 0)
+		{
+		  /* This file matches for a completion; add it to the current
+		     list of matches.  */
+		  add_filename_to_list (s->filename, text, word, &list);
+		}
+	      else
+		{
+		  /* NOTE: We allow the user to type a base name when the
+		     debug info records leading directories, but not the other
+		     way around.  This is what subroutines of breakpoint
+		     command do when they parse file names.  */
+		  base_name = lbasename (s->filename);
+		  if (base_name != s->filename
+		      && !filenames_seen.seen (base_name)
+		      && filename_ncmp (base_name, text, text_len) == 0)
+		    add_filename_to_list (base_name, text, word, &list);
+		}
+	    }
 	}
     }
 

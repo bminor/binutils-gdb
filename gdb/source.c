@@ -238,8 +238,6 @@ clear_current_source_symtab_and_line (void)
 void
 select_source_symtab (struct symtab *s)
 {
-  struct objfile *ofp;
-
   if (s)
     {
       current_source_symtab = s;
@@ -271,16 +269,22 @@ select_source_symtab (struct symtab *s)
 
   current_source_line = 1;
 
-  ALL_FILETABS (ofp, cu, symtab)
+  for (objfile *ofp : all_objfiles (current_program_space))
     {
-      const char *name = symtab->filename;
-      int len = strlen (name);
-
-      if (!(len > 2 && (strcmp (&name[len - 2], ".h") == 0
-			|| strcmp (name, "<<C++-namespaces>>") == 0)))
+      for (compunit_symtab *cu : objfile_compunits (ofp))
 	{
-	  current_source_pspace = current_program_space;
-	  current_source_symtab = symtab;
+	  for (symtab *symtab : compunit_filetabs (cu))
+	    {
+	      const char *name = symtab->filename;
+	      int len = strlen (name);
+
+	      if (!(len > 2 && (strcmp (&name[len - 2], ".h") == 0
+				|| strcmp (name, "<<C++-namespaces>>") == 0)))
+		{
+		  current_source_pspace = current_program_space;
+		  current_source_symtab = symtab;
+		}
+	    }
 	}
     }
 

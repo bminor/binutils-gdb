@@ -430,7 +430,7 @@ struct objfile
      Although this is a tree structure, GDB only support one level
      (ie a separate debug for a separate debug is not supported).  Note that
      separate debug object are in the main chain and therefore will be
-     visited by ALL_OBJFILES & co iterators.  Separate debug objfile always
+     visited by all_objfiles & co iterators.  Separate debug objfile always
      has a non-nul separate_debug_objfile_backlink.  */
 
   /* Link to the first separate debug object, if any.  */
@@ -604,14 +604,6 @@ public:
   }
 };
 
-
-/* Traverse all object files in the current program space.  */
-
-#define ALL_OBJFILES(obj)			    \
-  for ((obj) = current_program_space->objfiles; \
-       (obj) != NULL;				    \
-       (obj) = (obj)->next)
-
 /* A range adapter that makes it possible to iterate over all
    compunits in one objfile.  */
 
@@ -704,14 +696,6 @@ private:
 
   struct objfile *m_objfile;
 };
-
-/* Traverse all symtabs in all objfiles in the current symbol
-   space.  */
-
-#define ALL_FILETABS(objfile, ps, s)					\
-  ALL_OBJFILES (objfile)						\
-    for (compunit_symtab *ps : objfile_compunits (objfile))	\
-      for (symtab *s : compunit_filetabs (cu))
 
 #define ALL_OBJFILE_OSECTIONS(objfile, osect)	\
   for (osect = objfile->sections; osect < objfile->sections_end; osect++) \
