@@ -21,6 +21,7 @@
 #define PSYMTAB_H
 
 #include "symfile.h"
+#include "common/next-iterator.h"
 
 /* A bcache for partial symbols.  */
 
@@ -35,12 +36,25 @@ extern const struct quick_symbol_functions psym_functions;
 extern const struct quick_symbol_functions dwarf2_gdb_index_functions;
 extern const struct quick_symbol_functions dwarf2_debug_names_functions;
 
+/* A range adapter that makes it possible to iterate over all
+   psymtabs in one objfile.  */
+
+class objfile_psymtabs : public next_adapter<struct partial_symtab>
+{
+public:
+
+  explicit objfile_psymtabs (struct objfile *objfile)
+    : next_adapter<struct partial_symtab> (objfile->psymtabs)
+  {
+  }
+};
+
 /* Ensure that the partial symbols for OBJFILE have been loaded.  If
    VERBOSE is non-zero, then this will print a message when symbols
-   are loaded.  This function always returns its argument, as a
-   convenience.  */
+   are loaded.  This function returns a range adapter suitable for
+   iterating over the psymtabs of OBJFILE.  */
 
-extern struct objfile *require_partial_symbols (struct objfile *objfile,
-						int verbose);
+extern objfile_psymtabs require_partial_symbols (struct objfile *objfile,
+						 int verbose);
 
 #endif /* PSYMTAB_H */

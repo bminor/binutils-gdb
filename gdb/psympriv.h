@@ -331,9 +331,4 @@ class psymtab_discarder
   struct partial_symtab *m_psymtab;
 };
 
-/* Traverse all psymtabs in one objfile.  */
-
-#define	ALL_OBJFILE_PSYMTABS(objfile, p) \
-    for ((p) = (objfile) -> psymtabs; (p) != NULL; (p) = (p) -> next)
-
 #endif /* PSYMPRIV_H */

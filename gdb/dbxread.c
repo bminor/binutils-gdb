@@ -2014,18 +2014,14 @@ dbx_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
     pst->set_text_low (pst->raw_text_high ());
   else
     {
-      struct partial_symtab *p1;
-
       /* If we know our own starting text address, then walk through all other
          psymtabs for this objfile, and if any didn't know their ending text
          address, set it to our starting address.  Take care to not set our
          own ending address to our starting address.  */
 
-      ALL_OBJFILE_PSYMTABS (objfile, p1)
-      {
+      for (partial_symtab *p1 : objfile_psymtabs (objfile))
 	if (!p1->text_high_valid && p1->text_low_valid && p1 != pst)
 	  p1->set_text_high (pst->raw_text_low ());
-      }
     }
 
   /* End of kludge for patching Solaris textlow and texthigh.  */

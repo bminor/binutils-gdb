@@ -3681,17 +3681,17 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	  && save_pst->text_low_valid
 	  && !(objfile->flags & OBJF_REORDERED))
 	{
-	  ALL_OBJFILE_PSYMTABS (objfile, pst)
-	  {
-	    if (save_pst != pst
-		&& save_pst->raw_text_low () >= pst->raw_text_low ()
-		&& save_pst->raw_text_low () < pst->raw_text_high ()
-		&& save_pst->raw_text_high () > pst->raw_text_high ())
-	      {
-		objfile->flags |= OBJF_REORDERED;
-		break;
-	      }
-	  }
+	  for (partial_symtab *iter : objfile_psymtabs (objfile))
+	    {
+	      if (save_pst != iter
+		  && save_pst->raw_text_low () >= iter->raw_text_low ()
+		  && save_pst->raw_text_low () < iter->raw_text_high ()
+		  && save_pst->raw_text_high () > iter->raw_text_high ())
+		{
+		  objfile->flags |= OBJF_REORDERED;
+		  break;
+		}
+	    }
 	}
     }
 
