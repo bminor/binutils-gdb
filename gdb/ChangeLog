@@ -1,3 +1,11 @@
+2018-11-24  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* source.c (open_source_file): Leak fixed in '8e6a5953e1d Fix 4K
+	leak in open_source_file' has been partially undone by '2179fbc36d23
+	Return scoped_fd from open_source_file'. Re-add the transfer of
+	current s->fullname to the unique_xmalloc_ptr fullname given
+	to find_and_open_source.
+
 2018-11-23  Pedro Alves  <palves@redhat.com>
 
 	* gdbthread.h (enum thread_state): Move comments here.

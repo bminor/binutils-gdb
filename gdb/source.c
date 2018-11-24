@@ -1068,7 +1068,7 @@ open_source_file (struct symtab *s)
   if (!s)
     return scoped_fd (-1);
 
-  gdb::unique_xmalloc_ptr<char> fullname;
+  gdb::unique_xmalloc_ptr<char> fullname (s->fullname);
   s->fullname = NULL;
   scoped_fd fd = find_and_open_source (s->filename, SYMTAB_DIRNAME (s),
 				       &fullname);
