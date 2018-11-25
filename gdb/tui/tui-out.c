@@ -71,8 +71,6 @@ tui_ui_out::do_field_string (int fldno, int width, ui_align align,
   cli_ui_out::do_field_string (fldno, width, align, fldname, string);
 }
 
-/* This is the only field function that does not align.  */
-
 void
 tui_ui_out::do_field_fmt (int fldno, int width, ui_align align,
 			  const char *fldname, const char *format,

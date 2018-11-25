@@ -124,8 +124,6 @@ mi_ui_out::do_field_string (int fldno, int width, ui_align align,
   fprintf_unfiltered (stream, "\"");
 }
 
-/* This is the only field function that does not align.  */
-
 void
 mi_ui_out::do_field_fmt (int fldno, int width, ui_align align,
 			 const char *fldname, const char *format,

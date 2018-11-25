@@ -1,3 +1,9 @@
+2018-11-25  Tom Tromey  <tom@tromey.com>
+
+	* ui-out.c (ui_out::field_fmt): Remove comment.
+	* tui/tui-out.c (tui_ui_out::do_field_fmt): Remove comment.
+	* mi/mi-out.c (mi_ui_out::do_field_fmt): Remove comment.
+
 2018-11-24  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* source.c (open_source_file): Leak fixed in '8e6a5953e1d Fix 4K

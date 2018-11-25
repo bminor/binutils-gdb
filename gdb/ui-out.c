@@ -523,7 +523,6 @@ ui_out::field_fmt (const char *fldname, const char *format, ...)
   int width;
   ui_align align;
 
-  /* Will not align, but has to call anyway.  */
   verify_field (&fldno, &width, &align);
 
   va_start (args, format);
