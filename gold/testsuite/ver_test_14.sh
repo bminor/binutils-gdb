@@ -35,9 +35,9 @@ check()
     fi
 }
 
-check ver_test_14.syms "V1  *t2()$"
-check ver_test_14.syms "V1  *t3()$"
-check ver_test_14.syms "V1  *t4()$"
-check ver_test_14.syms "Base  *t4_2a$"
+check ver_test_14.syms "V1 *\(0x[0-9a-f][048c]\)\? t2()$"
+check ver_test_14.syms "V1 *\(0x[0-9a-f][048c]\)\? t3()$"
+check ver_test_14.syms "V1 *\(0x[0-9a-f][048c]\)\? t4()$"
+check ver_test_14.syms "Base *\(0x[0-9a-f][048c]\)\? t4_2a$"
 
 exit 0

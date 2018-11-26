@@ -1,3 +1,8 @@
+2018-11-26  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ver_test_14.sh: Accept objdump -T display of st_other
+	bits on powerpc64le.
+
 2018-11-08  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am (gcctestdir1/ld): Use $@ and absolute paths.
