@@ -1,5 +1,25 @@
 2018-12-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* infrun.c (infcall_suspend_state::infcall_suspend_state): New.
+	(infcall_suspend_state::registers): New.
+	(infcall_suspend_state::restore): New.
+	(infcall_suspend_state::thread_suspend): Rename to...
+	(infcall_suspend_state::m_thread_suspend): ...this.
+	(infcall_suspend_state::registers): Rename to...
+	(infcall_suspend_state::m_registers): ...this.
+	(infcall_suspend_state::siginfo_gdbarch): Rename to...
+	(infcall_suspend_state::m_siginfo_gdbarch): ...this.
+	(infcall_suspend_state::siginfo_data): Rename to...
+	(infcall_suspend_state::m_siginfo_data): ...this.
+	(save_infcall_suspend_state): Rewrite to use infcall_suspend_state
+	constructor.
+	(restore_infcall_suspend_state): Rewrite to use
+	infcall_suspend_state::restore method.
+	(get_infcall_suspend_state_regcache): Use
+	infcall_suspend_state::registers method.
+
+2018-12-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* riscv-tdep.c (riscv_call_arg_scalar_float): Unnamed (variadic)
 	arguments are passed in integer registers.
 	(riscv_call_arg_complex_float): Likewise.
