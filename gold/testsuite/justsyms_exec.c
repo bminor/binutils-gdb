@@ -47,8 +47,8 @@ check(void *sym, long v, const char *name)
 int
 main(void)
 {
-#ifndef __powerpc64__
-  /* PowerPC64 uses function descriptors.  */
+#if !defined (__powerpc64__) || (defined (_CALL_ELF) && _CALL_ELF == 2)
+  /* PowerPC64 ELFv1 uses function descriptors.  */
   check(exported_func, 0x1000200, "exported_func");
 #endif
   check(&exported_data, 0x2000000, "exported_data");

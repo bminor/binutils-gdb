@@ -1,5 +1,12 @@
 2018-11-26  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/Makefile.am (justsyms_lib): Link with -z norelro.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/justsyms_exec.c (main): Do check exported_func
+	on PowerPC64 ELFv2.
+
+2018-11-26  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ver_test_14.sh: Accept objdump -T display of st_other
 	bits on powerpc64le.
 
