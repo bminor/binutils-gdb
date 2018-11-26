@@ -3133,7 +3133,8 @@ procfs_notice_thread (procinfo *pi, procinfo *thread, void *ptr)
 {
   ptid_t gdb_threadid = ptid_t (pi->pid, thread->tid, 0);
 
-  if (!in_thread_list (gdb_threadid) || is_exited (gdb_threadid))
+  thread_info *thr = find_thread_ptid (gdb_threadid);
+  if (thr == NULL || thr->state == THREAD_EXITED)
     add_thread (gdb_threadid);
 
   return 0;

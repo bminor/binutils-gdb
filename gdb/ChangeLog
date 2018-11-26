@@ -1,3 +1,10 @@
+2018-11-26  Pedro Alves  <palves@redhat.com>
+
+	* procfs.c (procfs_notice_thread): Replace uses of
+	in_thread_list/is_exited with find_thread_ptid/THREAD_EXITED.
+	* sol-thread.c (sol_thread_target::wait)
+	(sol_update_thread_list_callback): Likewise.
+
 2018-11-25  Tom Tromey  <tom@tromey.com>
 
 	* ui-out.c (ui_out::field_fmt): Remove comment.

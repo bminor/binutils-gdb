@@ -460,11 +460,12 @@ sol_thread_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	rtnval = save_ptid;
 
       /* See if we have a new thread.  */
-      if (rtnval.tid_p ()
-	  && rtnval != save_ptid
-	  && (!in_thread_list (rtnval)
-	      || is_exited (rtnval)))
-	add_thread (rtnval);
+      if (rtnval.tid_p () && rtnval != save_ptid)
+	{
+	  thread_info *thr = find_thread_ptid (rtnval);
+	  if (thr == NULL || thr->state == THREAD_EXITED)
+	    add_thread (rtnval);
+	}
     }
 
   /* During process initialization, we may get here without the thread
@@ -1035,14 +1036,14 @@ sol_update_thread_list_callback (const td_thrhandle_t *th, void *ignored)
 {
   td_err_e retval;
   td_thrinfo_t ti;
-  ptid_t ptid;
 
   retval = p_td_thr_get_info (th, &ti);
   if (retval != TD_OK)
     return -1;
 
-  ptid = ptid_t (inferior_ptid.pid (), 0, ti.ti_tid);
-  if (!in_thread_list (ptid) || is_exited (ptid))
+  ptid_t ptid = ptid_t (inferior_ptid.pid (), 0, ti.ti_tid);
+  thread_info *thr = find_thread_ptid (ptid);
+  if (thr == NULL || thr->state == THREAD_EXITED)
     add_thread (ptid);
 
   return 0;
