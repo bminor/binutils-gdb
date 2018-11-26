@@ -1,3 +1,9 @@
+2018-11-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/23917
+	* sparc-linux-nat.c (sparc_linux_nat_target): Remove extraneous
+	semicolon.
+
 2018-11-26  Pedro Alves  <palves@redhat.com>
 
 	* procfs.c (procfs_notice_thread): Replace uses of
