@@ -24219,6 +24219,7 @@ described here.
 * Editing::                     Command editing
 * Command History::             Command history
 * Screen Size::                 Screen size
+* Output Styling::              Output styling
 * Numbers::                     Numbers
 * ABI::                         Configuring the current ABI
 * Auto-loading::                Automatically loading associated files
@@ -24524,6 +24525,70 @@ Options, -batch}) also automatically disables pagination.
 @item show pagination
 @kindex show pagination
 Show the current pagination mode.
+@end table
+
+@node Output Styling
+@section Output Styling
+@cindex styling
+@cindex colors
+
+@kindex set style
+@kindex show style
+@value{GDBN} can style its output on a capable terminal.  This is
+enabled by default on most systems.  Various style settings are
+available; and styles can also be disabled entirely.
+
+@table @code
+@item set style enabled @samp{on|off}
+Enable or disable all styling.  The default is host-dependent, with
+most hosts defaulting to @samp{on}.
+
+@item show style enabled
+Show the current state of styling.
+@end table
+
+Subcommands of @code{set style} control specific forms of styling.
+These subcommands all follow the same pattern: each style-able object
+can be styled with a foreground color, a background color, and an
+intensity.
+
+For example, the style of file names can be controlled using the
+@code{set style filename} group of commands:
+
+@table @code
+@item set style filename background @var{color}
+Set the background to @var{color}.  Valid colors are @samp{none}
+(meaning the terminal's default color), @samp{black}, @samp{red},
+@samp{green}, @samp{yellow}, @samp{vlue}, @samp{magenta}, @samp{cyan},
+and@samp{white}.
+
+@item set style filename foreground @var{color}
+Set the foreground to @var{color}.  Valid colors are @samp{none}
+(meaning the terminal's default color), @samp{black}, @samp{red},
+@samp{green}, @samp{yellow}, @samp{vlue}, @samp{magenta}, @samp{cyan},
+and@samp{white}.
+
+@item set style filename intensity @var{value}
+Set the intensity to @var{value}.  Valid intensities are @samp{normal}
+(the default), @samp{bold}, and @samp{dim}.
+@end table
+
+The style-able objects are:
+@table @code
+@item filename
+Control the styling of file names.
+
+@item function
+Control the styling of function names.  These are managed with the
+@code{set style function} family of commands.
+
+@item variable
+Control the styling of variable names.  These are managed with the
+@code{set style variable} family of commands.
+
+@item address
+Control the styling of addresses.  These are managed with the
+@code{set style address} family of commands.
 @end table
 
 @node Numbers

@@ -1,5 +1,9 @@
 2018-12-28  Tom Tromey  <tom@tromey.com>
 
+	* NEWS: Mention terminal styling.
+
+2018-12-28  Tom Tromey  <tom@tromey.com>
+
 	* utils.h (can_emit_style_escape): Declare.
 	* utils.c (can_emit_style_escape): No longer static.
 	* cli/cli-style.c (set_style_enabled): New function.

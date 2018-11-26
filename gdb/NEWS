@@ -53,6 +53,11 @@
   binaries.  This ensures that 'kevent' system calls are caught for
   binaries using either the old or new ABIs.
 
+* Terminal styling is now available for the CLI and the TUI.  GNU
+  Source Highlight can additionally be used to provide styling of
+  source code snippets.  See the "set style" commands, below, for more
+  information.
+
 * New targets
 
   NXP S12Z		s12z-*-elf
@@ -129,6 +134,31 @@ thread apply [all | COUNT | -COUNT] [FLAG]... COMMAND
 set tui tab-width NCHARS
 show tui tab-width NCHARS
   "set tui tab-width" replaces the "tabset" command, which has been deprecated.
+
+set style enabled [on|off]
+show style enabled
+  Enable or disable terminal styling.  Styling is enabled by default
+  on most hosts.
+
+set style filename foreground COLOR
+set style filename background COLOR
+set style filename intensity VALUE
+  Control the styling of file names.
+
+set style function foreground COLOR
+set style function background COLOR
+set style function intensity VALUE
+  Control the styling of function names.
+
+set style variable foreground COLOR
+set style variable background COLOR
+set style variable intensity VALUE
+  Control the styling of variable names.
+
+set style address foreground COLOR
+set style address background COLOR
+set style address intensity VALUE
+  Control the styling of addresses.
 
 * MI changes
 
