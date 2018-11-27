@@ -1,3 +1,11 @@
+2018-11-27  Thomas Preud'homme  <thomas.preudhomme@linaro.org>
+
+	* cpu-arm.c (processors): Add processors known to GAS but missing here
+	and reindent.
+	(bfd_arm_update_notes): Add comment explaining why the list of
+	architectures in the switch should not be updated.
+	(architectures): Likewise.
+
 2018-11-27  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* elfxx-mips.c (_bfd_mips_elf_check_relocs) <R_MIPS16_HI16>
