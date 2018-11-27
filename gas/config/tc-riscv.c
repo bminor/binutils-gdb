@@ -707,8 +707,10 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 	  case 'F': /* funct */
 	    switch (c = *p++)
 	      {
+		case '6': USE_BITS (OP_MASK_CFUNCT6, OP_SH_CFUNCT6); break;
 		case '4': USE_BITS (OP_MASK_CFUNCT4, OP_SH_CFUNCT4); break;
 		case '3': USE_BITS (OP_MASK_CFUNCT3, OP_SH_CFUNCT3); break;
+		case '2': USE_BITS (OP_MASK_CFUNCT2, OP_SH_CFUNCT2); break;
 		default:
 		  as_bad (_("internal: bad RISC-V opcode"
 			    " (unknown operand type `CF%c'): %s %s"),
@@ -1741,6 +1743,21 @@ rvc_lui:
 		case 'F':
 		  switch (*++args)
 		    {
+		      case '6':
+		        if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
+			    || imm_expr->X_op != O_constant
+			    || imm_expr->X_add_number < 0
+			    || imm_expr->X_add_number >= 64)
+			  {
+			    as_bad (_("bad value for funct6 field, "
+				      "value must be 0...64"));
+			    break;
+			  }
+
+			INSERT_OPERAND (CFUNCT6, *ip, imm_expr->X_add_number);
+			imm_expr->X_op = O_absent;
+			s = expr_end;
+			continue;
 		      case '4':
 		        if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 			    || imm_expr->X_op != O_constant
@@ -1767,6 +1784,20 @@ rvc_lui:
 			    break;
 			  }
 			INSERT_OPERAND (CFUNCT3, *ip, imm_expr->X_add_number);
+			imm_expr->X_op = O_absent;
+			s = expr_end;
+			continue;
+		      case '2':
+			if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
+			    || imm_expr->X_op != O_constant
+			    || imm_expr->X_add_number < 0
+			    || imm_expr->X_add_number >= 4)
+			  {
+			    as_bad (_("bad value for funct2 field, "
+				      "value must be 0...3"));
+			    break;
+			  }
+			INSERT_OPERAND (CFUNCT2, *ip, imm_expr->X_add_number);
 			imm_expr->X_op = O_absent;
 			s = expr_end;
 			continue;

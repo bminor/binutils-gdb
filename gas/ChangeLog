@@ -1,3 +1,13 @@
+2018-11-27  Jim Wilson  <jimw@sifive.com>
+
+	* config/tc-riscv.c (validate_riscv_insn) <'F'>: Add support for CF6
+	and CF2 operands.
+	(riscv_ip) <'F'>: Likewise.
+	* doc/c-riscv.texi (RISC-V-Formats): Add func6 abbreviation.  Use rs2
+	instead of rs1 in CR description.  Add CA docs.
+	* gas/testsuite/riscv/insn.s: Add use of .insn ca.
+	* gas/testsuite/riscv/insn.d: Update to match.
+
 2018-11-27  Thomas Preud'homme  <thomas.preudhomme@linaro.org>
 
 	* testsuite/gas/arm/cpu-arm1020.d: New testcase.

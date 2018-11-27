@@ -1,3 +1,8 @@
+2018-11-27  Jim Wilson  <jimw@sifive.com>
+
+	* opcode/riscv.h (OP_MASK_CFUNCT6, OP_SH_CFUNCT6): New.
+	(OP_MASK_CFUNCT2, OP_SH_CFUNCT2): New.
+
 2018-11-13  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* opcode/arm.h (ARM_AEXT_V6M_ONLY): Merge into its use in ARM_AEXT_V6M.

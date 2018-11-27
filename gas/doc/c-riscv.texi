@@ -190,6 +190,7 @@ instruction formats:
 @item opcode @tab Unsigned immediate or opcode name for 7-bits opcode.
 @item opcode2 @tab Unsigned immediate or opcode name for 2-bits opcode.
 @item func7 @tab Unsigned immediate for 7-bits function code.
+@item func6 @tab Unsigned immediate for 6-bits function code.
 @item func4 @tab Unsigned immediate for 4-bits function code.
 @item func3 @tab Unsigned immediate for 3-bits function code.
 @item func2 @tab Unsigned immediate for 2-bits function code.
@@ -355,7 +356,7 @@ with the @samp{.insn} pseudo directive:
 31           30             21           20              12   7             0
 @end verbatim
 
-@item CR type: .insn cr opcode2, func4, rd, rs1
+@item CR type: .insn cr opcode2, func4, rd, rs2
 @verbatim
 +---------+--------+-----+---------+
 |   func4 | rd/rs1 | rs2 | opcode2 |
@@ -377,6 +378,14 @@ with the @samp{.insn} pseudo directive:
 |   func3 |          imm | rd' | opcode2 |
 +---------+--------------+-----+---------+
 15        13             7     2         0
+@end verbatim
+
+@item CA type: .insn ca opcode2, func6, func2, rd, rs2
+@verbatim
++---------+----------+-------+------+--------+
+|   func6 | rd'/rs1' | func2 | rs2' | opcode |
++---------+----------+-------+------+--------+
+15        10         7       5      2        0
 @end verbatim
 
 @item CB type: .insn cb opcode2, func3, rs1, symbol

@@ -37,15 +37,16 @@ Disassembly of section .text:
 [ 	]+4a:[ 	]+0511[ 	]+addi[ 	]+a0,a0,4
 [ 	]+4c:[ 	]+852e[ 	]+mv[ 	]+a0,a1
 [ 	]+4e:[ 	]+002c[ 	]+addi[ 	]+a1,sp,8
-[ 	]+50:[ 	]+d9c5[ 	]+beqz[ 	]+a1,0 \<target\>
-[	]+50: R_RISCV_RVC_BRANCH[	]+target
-[ 	]+52:[ 	]+b77d[ 	]+j[ 	]+0 \<target\>
-[	]+52: R_RISCV_RVC_JUMP[	]+target
-[ 	]+54:[ 	]+68c58543[ 	]+fmadd.s[ 	]+fa0,fa1,fa2,fa3,rne
-[ 	]+58:[ 	]+00c58533[ 	]+add[ 	]+a0,a1,a2
-[ 	]+5c:[ 	]+00c58533[ 	]+add[ 	]+a0,a1,a2
-[ 	]+60:[ 	]+00c58533[ 	]+add[ 	]+a0,a1,a2
-[ 	]+64:[ 	]+00c58533[ 	]+add[ 	]+a0,a1,a2
-[ 	]+68:[ 	]+00c58533[ 	]+add[ 	]+a0,a1,a2
-[ 	]+6c:[ 	]+00c58533[ 	]+add[ 	]+a0,a1,a2
-[ 	]+70:[ 	]+00c58533[ 	]+add[ 	]+a0,a1,a2
+[ 	]+50:[ 	]+8d6d[ 	]+and[ 	]+a0,a0,a1
+[ 	]+52:[ 	]+d5dd[ 	]+beqz[ 	]+a1,0 \<target\>
+[	]+52: R_RISCV_RVC_BRANCH[	]+target
+[ 	]+54:[ 	]+b775[ 	]+j[ 	]+0 \<target\>
+[	]+54: R_RISCV_RVC_JUMP[	]+target
+[ 	]+56:[ 	]+68c58543[ 	]+fmadd.s[ 	]+fa0,fa1,fa2,fa3,rne
+[ 	]+5a:[ 	]+00c58533[ 	]+add[ 	]+a0,a1,a2
+[ 	]+5e:[ 	]+00c58533[ 	]+add[ 	]+a0,a1,a2
+[ 	]+62:[ 	]+00c58533[ 	]+add[ 	]+a0,a1,a2
+[ 	]+66:[ 	]+00c58533[ 	]+add[ 	]+a0,a1,a2
+[ 	]+6a:[ 	]+00c58533[ 	]+add[ 	]+a0,a1,a2
+[ 	]+6e:[ 	]+00c58533[ 	]+add[ 	]+a0,a1,a2
+[ 	]+72:[ 	]+00c58533[ 	]+add[ 	]+a0,a1,a2

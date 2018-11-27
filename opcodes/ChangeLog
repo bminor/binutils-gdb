@@ -1,3 +1,8 @@
+2018-11-27  Jim Wilson  <jimw@sifive.com>
+
+	* riscv-opc.c (ciw): Fix whitespace to align columns.
+	(ca): New.
+
 2018-11-21  John Darrington  <john@darrington.wattle.id.au>
 
 	* s12z-dis.c (print_insn_shift) [SB_REG_REG_N]: Enter special case

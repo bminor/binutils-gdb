@@ -842,8 +842,13 @@ const struct riscv_opcode riscv_insn_types[] =
 {"ci",      0, {"C", 0},  "O2,CF3,d,Co",        0,    0,  match_opcode, 0 },
 {"ci",      0, {"C", 0},  "O2,CF3,D,Co",        0,    0,  match_opcode, 0 },
 
-{"ciw",     0, {"C", 0},  "O2,CF3,Ct,C8",        0,    0,  match_opcode, 0 },
-{"ciw",     0, {"C", 0},  "O2,CF3,CD,C8",        0,    0,  match_opcode, 0 },
+{"ciw",     0, {"C", 0},  "O2,CF3,Ct,C8",       0,    0,  match_opcode, 0 },
+{"ciw",     0, {"C", 0},  "O2,CF3,CD,C8",       0,    0,  match_opcode, 0 },
+
+{"ca",      0, {"C", 0},  "O2,CF6,CF2,Cs,Ct",   0,    0,  match_opcode, 0 },
+{"ca",      0, {"C", 0},  "O2,CF6,CF2,CS,Ct",   0,    0,  match_opcode, 0 },
+{"ca",      0, {"C", 0},  "O2,CF6,CF2,Cs,CD",   0,    0,  match_opcode, 0 },
+{"ca",      0, {"C", 0},  "O2,CF6,CF2,CS,CD",   0,    0,  match_opcode, 0 },
 
 {"cb",      0, {"C", 0},  "O2,CF3,Cs,Cp",       0,    0,  match_opcode, 0 },
 {"cb",      0, {"C", 0},  "O2,CF3,CS,Cp",       0,    0,  match_opcode, 0 },

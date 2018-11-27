@@ -26,6 +26,7 @@ target:
 	.insn ci C1, 0x0, a0, 4
 	.insn cr C2, 0x8, a0, a1
 	.insn ciw C0, 0x0, a1, 1
+	.insn ca C1, 0x23, 0x3, a0, a1
 	.insn cb C1, 0x6, a1, target
 	.insn cj C1, 0x5, target
 

@@ -247,10 +247,14 @@ static const char * const riscv_pred_succ[16] =
 #define OP_MASK_CRS2S 0x7
 #define OP_SH_CRS2S 2
 
+#define OP_MASK_CFUNCT6                0x3f
+#define OP_SH_CFUNCT6          10
 #define OP_MASK_CFUNCT4                0xf
 #define OP_SH_CFUNCT4          12
 #define OP_MASK_CFUNCT3                0x7
 #define OP_SH_CFUNCT3          13
+#define OP_MASK_CFUNCT2                0x3
+#define OP_SH_CFUNCT2          5
 
 /* ABI names for selected x-registers.  */
 
