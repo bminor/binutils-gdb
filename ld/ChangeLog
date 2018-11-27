@@ -1,5 +1,22 @@
 2018-11-27  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* testsuite/ld-mips-elf/pic-reloc-0.d: New test.
+	* testsuite/ld-mips-elf/pic-reloc-1.d: New test.
+	* testsuite/ld-mips-elf/pic-reloc-2.d: New test.
+	* testsuite/ld-mips-elf/pic-reloc-3.d: New test.
+	* testsuite/ld-mips-elf/pic-reloc-4.d: New test.
+	* testsuite/ld-mips-elf/pic-reloc-absolute-hi.ld: New test
+	linker script.
+	* testsuite/ld-mips-elf/pic-reloc-absolute-lo.ld: New test
+	linker script.
+	* testsuite/ld-mips-elf/pic-reloc-ordinary.ld: New test linker
+	script.
+	* testsuite/ld-mips-elf/pic-reloc-j.s: New test source.
+	* testsuite/ld-mips-elf/pic-reloc-lui.s: New test source.
+	* testsuite/ld-mips-elf/mips-elf.exp: Run the new tests.
+
+2018-11-27  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* ldmain.c (reloc_overflow): Use `%H:' rather than `%P: %H:'
 	with `einfo'.
 	(reloc_dangerous): Likewise.

@@ -1629,3 +1629,10 @@ if $has_abi(n64) {
     run_mips_undefweak_test "shared library (n64, microMIPS, hidden)" \
 						    n64 dso umips hidden
 }
+
+# PIC relocation acceptance tests.
+run_dump_test "pic-reloc-0"
+run_dump_test "pic-reloc-1"
+run_dump_test "pic-reloc-2"
+run_dump_test "pic-reloc-3"
+run_dump_test "pic-reloc-4"

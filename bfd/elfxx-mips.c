@@ -9061,6 +9061,10 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      if (r_symndx == STN_UNDEF)
 		break;
 
+	      /* Likewise an absolute symbol.  */
+	      if (bfd_is_abs_symbol (&h->root))
+		break;
+
 	      /* R_MIPS_HI16 against _gp_disp is used for $gp setup,
 		 and has a special meaning.  */
 	      if (!NEWABI_P (abfd) && h != NULL
