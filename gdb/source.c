@@ -1560,7 +1560,7 @@ forward_search_command (const char *regex, int from_tty)
       int cursize, newsize;
 
       cursize = 256;
-      buf = (char *) xmalloc (cursize);
+      buf = (char *) xrealloc (buf, cursize);
       p = buf;
 
       c = fgetc (stream.get ());

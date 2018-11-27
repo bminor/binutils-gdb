@@ -1,3 +1,9 @@
+2018-11-29  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* source.c (forward_search_command): Fix leak by using
+	xrealloc even for the first allocation in the loop, as buf
+	is static.
+
 2018-11-29  Rajendra SY  <rajendra.sy@gmail.com>
 
 	PR gdb/23093
