@@ -1,5 +1,13 @@
 2018-12-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* riscv-tdep.c (riscv_call_arg_struct): Don't adjust size before
+	assigning locations.
+	(riscv_return_value): Take more care not to read/write outside of
+	argument buffer.  Cast return value between the declared type and
+	the abi type.
+
+2018-12-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* riscv-tdep.c (riscv_register_reggroup_p): Save and restore fcsr,
 	fflags, and frm registers.
 
