@@ -9077,14 +9077,13 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    case R_MIPS_26:
 	    case R_MICROMIPS_26_S1:
 	      howto = MIPS_ELF_RTYPE_TO_HOWTO (abfd, r_type, FALSE);
-	      _bfd_error_handler
+	      info->callbacks->einfo
 		/* xgettext:c-format */
-		(_("%pB: relocation %s against `%s' can not be used"
-		   " when making a shared object; recompile with -fPIC"),
-		 abfd, howto->name,
+		(_("%X%H: relocation %s against `%s' cannot be used"
+		   " when making a shared object; recompile with -fPIC\n"),
+		 abfd, sec, rel->r_offset, howto->name,
 		 (h) ? h->root.root.string : "a local symbol");
-	      bfd_set_error (bfd_error_bad_value);
-	      return FALSE;
+	      break;
 	    default:
 	      break;
 	    }

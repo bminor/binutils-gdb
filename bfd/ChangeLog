@@ -1,3 +1,11 @@
+2018-11-27  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* elfxx-mips.c (_bfd_mips_elf_check_relocs) <R_MIPS16_26>
+	<R_MIPS_26, R_MICROMIPS_26_S1>: Use `info->callbacks->einfo'
+	rather than `_bfd_error_handler' to report refused relocations
+	in PIC code and continue processing.  Fix error message: `can
+	not' -> `cannot'.
+
 2018-11-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/23919
