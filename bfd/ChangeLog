@@ -1,3 +1,15 @@
+2018-11-27  Tamar Christina  <tamar.christina@arm.com>
+
+	PR ld/23904
+	* elfnn-aarch64.c (_bfd_aarch64_adrp_p): Use existing constants.
+	(_bfd_aarch64_erratum_843419_branch_to_stub): Use _bfd_aarch64_adrp_p.
+	(struct erratum_835769_branch_to_stub_clear_data): New.
+	(_bfd_aarch64_erratum_843419_clear_stub): New.
+	(clear_erratum_843419_entry): New.
+	(elfNN_aarch64_tls_relax): Use it.
+	(elfNN_aarch64_relocate_section): Pass input_section.
+	(aarch64_map_one_stub): Handle branch type none as valid.
+
 2018-11-27  Mark Wielaard  <mark@klomp.org>
 
 	PR binutils/23919

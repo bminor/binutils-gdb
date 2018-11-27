@@ -86,6 +86,7 @@ run_ld_link_tests $aarch64elftests
 run_ld_link_tests eh-frame-merge-lp64
 
 run_dump_test "erratum843419"
+run_dump_test "erratum843419_tls_ie"
 
 # Relocation Tests
 run_dump_test_lp64 "weak-undefined"
