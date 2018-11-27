@@ -1421,7 +1421,7 @@ reloc_overflow (struct bfd_link_info *info,
   if (overflow_cutoff_limit == -1)
     return;
 
-  einfo ("%X%P: %H:", abfd, section, address);
+  einfo ("%X%H:", abfd, section, address);
 
   if (overflow_cutoff_limit >= 0
       && overflow_cutoff_limit-- == 0)
@@ -1474,7 +1474,7 @@ reloc_dangerous (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 		 asection *section,
 		 bfd_vma address)
 {
-  einfo (_("%X%P: %H: dangerous relocation: %s\n"),
+  einfo (_("%X%H: dangerous relocation: %s\n"),
 	 abfd, section, address, message);
 }
 
@@ -1488,7 +1488,7 @@ unattached_reloc (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 		  asection *section,
 		  bfd_vma address)
 {
-  einfo (_("%X%P: %H: reloc refers to symbol `%pT' which is not being output\n"),
+  einfo (_("%X%H: reloc refers to symbol `%pT' which is not being output\n"),
 	 abfd, section, address, name);
 }
 

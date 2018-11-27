@@ -1,3 +1,10 @@
+2018-11-27  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* ldmain.c (reloc_overflow): Use `%H:' rather than `%P: %H:'
+	with `einfo'.
+	(reloc_dangerous): Likewise.
+	(unattached_reloc): Likewise.
+
 2018-11-27  Tamar Christina  <tamar.christina@arm.com>
 
 	PR ld/23904
