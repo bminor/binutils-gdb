@@ -1,3 +1,12 @@
+2018-11-27  Mark Wielaard  <mark@klomp.org>
+
+	PR binutils/23919
+	* readelf.c (dump_sections_as_strings): Remove bogus addralign check.
+	(dump_sections_as_bytes): Likewise.
+	(load_specific_debug_sections): Likewise.
+	* testsuite/binutils-all/dw2-3.rS: Adjust alignment.
+	* testsuite/binutils-all/dw2-3.rt: Likewise.
+
 2018-11-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/23898

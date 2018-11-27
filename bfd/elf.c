@@ -1177,11 +1177,12 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
       enum { nothing, compress, decompress } action = nothing;
       int compression_header_size;
       bfd_size_type uncompressed_size;
+      unsigned int uncompressed_align_power;
       bfd_boolean compressed
 	= bfd_is_section_compressed_with_header (abfd, newsect,
 						 &compression_header_size,
-						 &uncompressed_size);
-
+						 &uncompressed_size,
+						 &uncompressed_align_power);
       if (compressed)
 	{
 	  /* Compressed section.  Check if we should decompress.  */
