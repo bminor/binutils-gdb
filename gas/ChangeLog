@@ -1,3 +1,38 @@
+2018-11-27  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* config/tc-msp430.c (is_dint): New.
+	(is_eint): New.
+	(gen_nop): New.
+	(warn_eint_nop): New.
+	(warn_unsure_interrupt): New.
+	(msp430_operands): Determine the effect MOV #N,SR insns have on
+	interrupt state.
+	Only emit NOP warnings for 430 ISA in certain situations.
+	(msp430_md_end): Only warn about an EINT at the end of the file
+	if NOP warnings are enabled.
+	* testsuite/gas/msp430/bad.l: Adjust expected output for new warnings.
+	* testsuite/gas/msp430/msp430.exp: Run new tests.
+	* testsuite/gas/msp430/nop-dint-430.d: New.
+	* testsuite/gas/msp430/nop-dint-430.l: New.
+	* testsuite/gas/msp430/nop-dint-430x-ignore.d: New.
+	* testsuite/gas/msp430/nop-dint-430x-silent.d: New.
+	* testsuite/gas/msp430/nop-dint-430x.d: New.
+	* testsuite/gas/msp430/nop-dint-430x.l: New.
+	* testsuite/gas/msp430/nop-dint.s: New.
+	* testsuite/gas/msp430/nop-eint-430.d: New.
+	* testsuite/gas/msp430/nop-eint-430.l: New.
+	* testsuite/gas/msp430/nop-eint-430x-ignore.d: New.
+	* testsuite/gas/msp430/nop-eint-430x-silent.d: New.
+	* testsuite/gas/msp430/nop-eint-430x.d: New.
+	* testsuite/gas/msp430/nop-eint-430x.l: New.
+	* testsuite/gas/msp430/nop-eint.s: New.
+	* testsuite/gas/msp430/nop-int-430.d: New.
+	* testsuite/gas/msp430/nop-int-430.l: New.
+	* testsuite/gas/msp430/nop-int-430x-silent.d: New.
+	* testsuite/gas/msp430/nop-int-430x.d: New.
+	* testsuite/gas/msp430/nop-int-430x.l: New.
+	* testsuite/gas/msp430/nop-int.s: New.
+
 2018-11-23  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	* testsuite/gas/arm/bl-local-v4t.d: Remove
