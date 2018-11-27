@@ -1,3 +1,9 @@
+2018-11-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/23919
+	* compress.c (bfd_is_section_compressed_with_header): Initialize
+	*uncompressed_align_pow_p to 0.
+
 2018-11-27  Tamar Christina  <tamar.christina@arm.com>
 
 	PR ld/23904

@@ -394,6 +394,8 @@ bfd_is_section_compressed_with_header (bfd *abfd, sec_ptr sec,
   unsigned int saved = sec->compress_status;
   bfd_boolean compressed;
 
+  *uncompressed_align_pow_p = 0;
+
   compression_header_size = bfd_get_compression_header_size (abfd, sec);
   if (compression_header_size > MAX_COMPRESSION_HEADER_SIZE)
     abort ();
