@@ -1,3 +1,10 @@
+2018-11-27  Tamar Christina  <tamar.christina@arm.com>
+
+	PR ld/23904
+	* testsuite/ld-aarch64/aarch64-elf.exp: Add erratum843419_tls_ie.
+	* testsuite/ld-aarch64/erratum843419_tls_ie.d: New test.
+	* testsuite/ld-aarch64/erratum843419_tls_ie.s: New test.
+
 2018-11-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/23854

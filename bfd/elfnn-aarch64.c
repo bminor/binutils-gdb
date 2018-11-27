@@ -3845,7 +3845,7 @@ _bfd_aarch64_erratum_835769_scan (bfd *input_bfd,
 static bfd_boolean
 _bfd_aarch64_adrp_p (uint32_t insn)
 {
-  return ((insn & 0x9f000000) == 0x90000000);
+  return ((insn & AARCH64_ADRP_OP_MASK) == AARCH64_ADRP_OP);
 }
 
 
@@ -5074,7 +5074,7 @@ _bfd_aarch64_erratum_843419_branch_to_stub (struct bfd_hash_entry *gen_entry,
 	   + stub_entry->adrp_offset);
   insn = bfd_getl32 (contents + stub_entry->adrp_offset);
 
-  if ((insn & AARCH64_ADRP_OP_MASK) !=  AARCH64_ADRP_OP)
+  if (!_bfd_aarch64_adrp_p (insn))
     abort ();
 
   bfd_signed_vma imm =
@@ -5939,6 +5939,64 @@ bad_ifunc_reloc:
 # define movz_hw_R0	(0x52c00000)
 #endif
 
+/* Structure to hold payload for _bfd_aarch64_erratum_843419_clear_stub,
+   it is used to identify the stub information to reset.  */
+
+struct erratum_843419_branch_to_stub_clear_data
+{
+  bfd_vma adrp_offset;
+  asection *output_section;
+};
+
+/* Clear the erratum information for GEN_ENTRY if the ADRP_OFFSET and
+   section inside IN_ARG matches.  The clearing is done by setting the
+   stub_type to none.  */
+
+static bfd_boolean
+_bfd_aarch64_erratum_843419_clear_stub (struct bfd_hash_entry *gen_entry,
+					void *in_arg)
+{
+  struct elf_aarch64_stub_hash_entry *stub_entry
+    = (struct elf_aarch64_stub_hash_entry *) gen_entry;
+  struct erratum_843419_branch_to_stub_clear_data *data
+    = (struct erratum_843419_branch_to_stub_clear_data *) in_arg;
+
+  if (stub_entry->target_section != data->output_section
+      || stub_entry->stub_type != aarch64_stub_erratum_843419_veneer
+      || stub_entry->adrp_offset != data->adrp_offset)
+    return TRUE;
+
+  /* Change the stub type instead of removing the entry, removing from the hash
+     table would be slower and we have already reserved the memory for the entry
+     so there wouldn't be much gain.  Changing the stub also keeps around a
+     record of what was there before.  */
+  stub_entry->stub_type = aarch64_stub_none;
+
+  /* We're done and there could have been only one matching stub at that
+     particular offset, so abort further traversal.  */
+  return FALSE;
+}
+
+/* TLS Relaxations may relax an adrp sequence that matches the erratum 843419
+   sequence.  In this case the erratum no longer applies and we need to remove
+   the entry from the pending stub generation.  This clears matching adrp insn
+   at ADRP_OFFSET in INPUT_SECTION in the stub table defined in GLOBALS.  */
+
+static void
+clear_erratum_843419_entry (struct elf_aarch64_link_hash_table *globals,
+			    bfd_vma adrp_offset, asection *input_section)
+{
+  if (globals->fix_erratum_843419)
+    {
+      struct erratum_843419_branch_to_stub_clear_data data;
+      data.adrp_offset = adrp_offset;
+      data.output_section = input_section;
+
+      bfd_hash_traverse (&globals->stub_hash_table,
+			 _bfd_aarch64_erratum_843419_clear_stub, &data);
+    }
+}
+
 /* Handle TLS relaxations.  Relaxing is possible for symbols that use
    R_AARCH64_TLSDESC_ADR_{PAGE, LD64_LO12_NC, ADD_LO12_NC} during a static
    link.
@@ -5949,8 +6007,9 @@ bad_ifunc_reloc:
 
 static bfd_reloc_status_type
 elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
-			 bfd *input_bfd, bfd_byte *contents,
-			 Elf_Internal_Rela *rel, struct elf_link_hash_entry *h)
+			 bfd *input_bfd, asection *input_section,
+			 bfd_byte *contents, Elf_Internal_Rela *rel,
+			 struct elf_link_hash_entry *h)
 {
   bfd_boolean is_local = h == NULL;
   unsigned int r_type = ELFNN_R_TYPE (rel->r_info);
@@ -5971,6 +6030,9 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
 
 	     Where R is x for LP64, and w for ILP32.  */
 	  bfd_putl32 (movz_R0, contents + rel->r_offset);
+	  /* We have relaxed the adrp into a mov, we may have to clear any
+	     pending erratum fixes.  */
+	  clear_erratum_843419_entry (globals, rel->r_offset, input_section);
 	  return bfd_reloc_continue;
 	}
       else
@@ -6261,6 +6323,9 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
 	{
 	  insn = bfd_getl32 (contents + rel->r_offset);
 	  bfd_putl32 (movz_R0 | (insn & 0x1f), contents + rel->r_offset);
+	  /* We have relaxed the adrp into a mov, we may have to clear any
+	     pending erratum fixes.  */
+	  clear_erratum_843419_entry (globals, rel->r_offset, input_section);
 	}
       return bfd_reloc_continue;
 
@@ -6485,7 +6550,8 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	  howto = elfNN_aarch64_howto_from_bfd_reloc (bfd_r_type);
 	  BFD_ASSERT (howto != NULL);
 	  r_type = howto->type;
-	  r = elfNN_aarch64_tls_relax (globals, input_bfd, contents, rel, h);
+	  r = elfNN_aarch64_tls_relax (globals, input_bfd, input_section,
+				       contents, rel, h);
 	  unresolved_reloc = 0;
 	}
       else
@@ -8075,6 +8141,8 @@ aarch64_map_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	return FALSE;
       if (!elfNN_aarch64_output_map_sym (osi, AARCH64_MAP_INSN, addr))
 	return FALSE;
+      break;
+    case aarch64_stub_none:
       break;
 
     default:
