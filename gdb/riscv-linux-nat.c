@@ -21,6 +21,8 @@
 #include "gregset.h"
 #include "linux-nat.h"
 #include "riscv-tdep.h"
+#include "inferior.h"
+#include "target-descriptions.h"
 
 #include "elf/common.h"
 
@@ -34,6 +36,9 @@ public:
   /* Add our register access methods.  */
   void fetch_registers (struct regcache *regcache, int regnum) override;
   void store_registers (struct regcache *regcache, int regnum) override;
+
+  /* Read suitable target description.  */
+  const struct target_desc *read_description () override;
 };
 
 static riscv_linux_nat_target the_riscv_linux_nat_target;
@@ -153,6 +158,39 @@ fill_fpregset (const struct regcache *regcache, prfpregset_t *fpregs,
 			   &fpregs->__d.__f[regnum - RISCV_FIRST_FP_REGNUM]);
   else if (regnum == RISCV_CSR_FCSR_REGNUM)
     regcache->raw_collect (RISCV_CSR_FCSR_REGNUM, &fpregs->__d.__fcsr);
+}
+
+/* Return a target description for the current target.  */
+
+const struct target_desc *
+riscv_linux_nat_target::read_description ()
+{
+  struct riscv_gdbarch_features features;
+  struct iovec iov;
+  elf_fpregset_t regs;
+  int tid;
+
+  /* Figuring out xlen is easy.  */
+  features.xlen = sizeof (elf_greg_t);
+
+  tid = inferior_ptid.lwp ();
+
+  iov.iov_base = &regs;
+  iov.iov_len = sizeof (regs);
+
+  /* Can we fetch the f-registers?  */
+  if (ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET,
+	      (PTRACE_TYPE_ARG3) &iov) == -1)
+    features.flen = 0;		/* No f-registers.  */
+  else
+    {
+      /* TODO: We need a way to figure out the actual length of the
+	 f-registers.  We could have 64-bit x-registers, with 32-bit
+	 f-registers.  For now, just assumed xlen and flen match.  */
+      features.flen = features.xlen;
+    }
+
+  return riscv_create_target_description (features);
 }
 
 /* Fetch REGNUM (or all registers if REGNUM == -1) from the target

@@ -1,5 +1,11 @@
 2018-11-30  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* riscv-linux-nat.c: Add 'inferior.h' and 'target-descriptions.h'
+	header files.
+	(riscv_linux_nat_target::read_description): New method.
+
+2018-11-30  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* arch/riscv.h (riscv_gdbarch_features::hash): New method.
 	* arch/riscv.c (struct riscv_gdbarch_features_hasher): New.
 	(riscv_tdesc_cache): New global.
