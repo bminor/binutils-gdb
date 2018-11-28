@@ -1,3 +1,13 @@
+2018-11-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Keith Seitz  <keiths@redhat.com>
+	    Tom Tromey  <tom@tromey.com>
+	    Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	https://bugzilla.redhat.com/show_bug.cgi?id=1613614
+	* dwarf2read.c (dwarf2_find_containing_comp_unit): Add
+	'mid_cu->length' to '*cu_off' when checking if 'sect_off' is
+	inside the CU.
+
 2018-11-30  Pedro Alves  <palves@redhat.com>
 
 	* aix-thread.c (aix_thread_target) <aix_thread_target>: Delete.

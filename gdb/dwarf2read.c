@@ -25126,7 +25126,8 @@ dwarf2_find_containing_comp_unit (sect_offset sect_off,
       mid_cu = dwarf2_per_objfile->all_comp_units[mid];
       cu_off = &mid_cu->sect_off;
       if (mid_cu->is_dwz > offset_in_dwz
-	  || (mid_cu->is_dwz == offset_in_dwz && *cu_off >= sect_off))
+	  || (mid_cu->is_dwz == offset_in_dwz
+	      && *cu_off + mid_cu->length >= sect_off))
 	high = mid;
       else
 	low = mid + 1;
