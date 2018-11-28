@@ -717,7 +717,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
      PC relative address inline.  */
 
   /* MOV[NZ]:   ((S+A-P) >>  0) & 0xffff */
-  HOWTO64 (AARCH64_R (MOVW_PREL_G0),	/* type */
+  HOWTO (AARCH64_R (MOVW_PREL_G0),	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 17,			/* bitsize */
@@ -732,7 +732,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 TRUE),		/* pcrel_offset */
 
   /* MOVK:   ((S+A-P) >>  0) & 0xffff [no overflow check] */
-  HOWTO64 (AARCH64_R (MOVW_PREL_G0_NC),	/* type */
+  HOWTO (AARCH64_R (MOVW_PREL_G0_NC),	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
@@ -747,7 +747,7 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 TRUE),		/* pcrel_offset */
 
   /* MOV[NZ]:   ((S+A-P) >> 16) & 0xffff */
-  HOWTO64 (AARCH64_R (MOVW_PREL_G1),	/* type */
+  HOWTO (AARCH64_R (MOVW_PREL_G1),	/* type */
 	 16,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 17,			/* bitsize */

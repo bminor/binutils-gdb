@@ -96,6 +96,8 @@ run_dump_test "erratum843419-no-args"
 
 # Relocation Tests
 run_dump_test_lp64 "weak-undefined"
+run_dump_test "emit-relocs-22"
+run_dump_test "emit-relocs-23"
 run_dump_test "emit-relocs-28"
 run_dump_test "emit-relocs-86"
 run_dump_test "emit-relocs-86-overflow"

@@ -1,3 +1,9 @@
+2019-06-14  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* elf/aarch64.h (R_AARCH64_P32_MOVW_PREL_G0): Define.
+	(R_AARCH64_P32_MOVW_PREL_G0_NC): Define.
+	(R_AARCH64_P32_MOVW_PREL_G1): Define.
+
 2019-06-03  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf.h (ctf_enum.cte_value): Fix type to int32_t.

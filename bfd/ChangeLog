@@ -1,3 +1,7 @@
+2019-06-14  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* elfnn-aarch64.c: Enable MOVW_PREL relocs for ELF32.
+
 2019-06-14  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.in: Regenerate.

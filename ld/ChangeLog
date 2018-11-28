@@ -1,3 +1,11 @@
+2019-06-14  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* testsuite/ld-aarch64/aarch64-elf.exp: Add emit-relocs-22 and -23.
+	* testsuite/ld-aarch64/emit-relocs-22.d: New test.
+	* testsuite/ld-aarch64/emit-relocs-22.s: New test.
+	* testsuite/ld-aarch64/emit-relocs-23.d: New test.
+	* testsuite/ld-aarch64/emit-relocs-23.s: New test.
+
 2019-06-14  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.in: Regenerate.
