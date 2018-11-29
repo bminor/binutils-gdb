@@ -2793,7 +2793,7 @@ static const struct frame_unwind riscv_frame_unwind =
    specifically the bfd object being executed, to guide the selection of a
    suitable default target description.  */
 
-static struct target_desc *
+static const struct target_desc *
 riscv_find_default_target_description (const struct gdbarch_info info)
 {
   struct riscv_gdbarch_features features;

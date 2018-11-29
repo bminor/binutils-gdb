@@ -1,3 +1,10 @@
+2018-11-30  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arch/riscv.h (riscv_create_target_description): Make return type
+	const.
+	* arch/riscv.c (riscv_create_target_description): Likewise.
+	* riscv-tdep.c (riscv_find_default_target_description): Likewise.
+
 2018-11-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Keith Seitz  <keiths@redhat.com>
 	    Tom Tromey  <tom@tromey.com>

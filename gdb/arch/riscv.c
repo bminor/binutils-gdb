@@ -26,7 +26,7 @@
 
 /* See arch/riscv.h.  */
 
-target_desc *
+const target_desc *
 riscv_create_target_description (struct riscv_gdbarch_features features)
 {
   target_desc *tdesc = allocate_target_description ();

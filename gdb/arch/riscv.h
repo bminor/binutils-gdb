@@ -58,7 +58,7 @@ struct riscv_gdbarch_features
 /* Create and return a target description that is compatible with
    FEATURES.  */
 
-target_desc *riscv_create_target_description
+const target_desc *riscv_create_target_description
 	(struct riscv_gdbarch_features features);
 
 #endif /* ARCH_RISCV_H */
