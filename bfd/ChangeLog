@@ -1,3 +1,9 @@
+2018-11-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23929
+	* elf-properties.c (_bfd_elf_link_setup_gnu_properties): Don't
+	merge .note.gnu.property section in IR inputs.
+
 2018-11-27  Thomas Preud'homme  <thomas.preudhomme@linaro.org>
 
 	* cpu-arm.c (processors): Add processors known to GAS but missing here
