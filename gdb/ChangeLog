@@ -1,5 +1,12 @@
 2018-11-30  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* arch/riscv.h (riscv_gdb_features::operator==): New.
+	(riscv_gdb_features::operator!=): New.
+	* riscv-tdep.c (riscv_gdbarch_init): Make use of the inequality
+	operator.
+
+2018-11-30  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* arch/riscv.h (riscv_create_target_description): Make return type
 	const.
 	* arch/riscv.c (riscv_create_target_description): Likewise.

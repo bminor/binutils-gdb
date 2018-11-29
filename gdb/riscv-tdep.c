@@ -3025,9 +3025,7 @@ riscv_gdbarch_init (struct gdbarch_info info,
          gdbarch.  */
       struct gdbarch_tdep *other_tdep = gdbarch_tdep (arches->gdbarch);
 
-      if (other_tdep->features.hw_float_abi != features.hw_float_abi
-          || other_tdep->features.xlen != features.xlen
-          || other_tdep->features.flen != features.flen)
+      if (other_tdep->features != features)
         continue;
 
       break;

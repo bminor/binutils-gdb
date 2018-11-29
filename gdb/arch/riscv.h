@@ -53,6 +53,19 @@ struct riscv_gdbarch_features
      this field is true then the hardware floating point abi is in use, and
      values are passed in f-registers matching the size of FLEN.  */
   bool hw_float_abi = false;
+
+  /* Equality operator.  */
+  bool operator== (const struct riscv_gdbarch_features &rhs) const
+  {
+    return (xlen == rhs.xlen && flen == rhs.flen
+	    && hw_float_abi == rhs.hw_float_abi);
+  }
+
+  /* Inequality operator.  */
+  bool operator!= (const struct riscv_gdbarch_features &rhs) const
+  {
+    return !((*this) == rhs);
+  }
 };
 
 /* Create and return a target description that is compatible with
