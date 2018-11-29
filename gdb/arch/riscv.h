@@ -66,6 +66,15 @@ struct riscv_gdbarch_features
   {
     return !((*this) == rhs);
   }
+
+  /* Used by std::unordered_map to hash feature sets.  */
+  std::size_t hash () const noexcept
+  {
+    std::size_t val = ((xlen & 0x1f) << 6
+                       | (flen & 0x1f) << 1
+                       | (hw_float_abi ? 1 : 0));
+    return val;
+  }
 };
 
 /* Create and return a target description that is compatible with
