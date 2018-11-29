@@ -1,3 +1,9 @@
+2018-12-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23929
+	* elf-properties.c (_bfd_elf_link_setup_gnu_properties): Don't
+	merge .note.gnu.property section in IR inputs.
+
 2018-11-30  Alan Modra  <amodra@gmail.com>
 
 	PR 23937
