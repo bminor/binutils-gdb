@@ -88,6 +88,7 @@ enum statement_enum
 
 typedef struct lang_statement_header_struct
 {
+  /* Next pointer for statement_list statement list.  */
   union lang_statement_union *next;
   enum statement_enum type;
 } lang_statement_header_type;
@@ -306,15 +307,10 @@ typedef struct lang_input_statement_struct
 
   struct flag_info *section_flag_list;
 
-  /* Point to the next file - whatever it is, wanders up and down
-     archive elements.  If this input_statement is for an archive, it
-     won't be on file_chain (which uses this list pointer), but if
-     any elements have been extracted from the archive, it will point
-     to the input_statement for the last such element.  */
+  /* Next pointer for file_chain statement list.  */
   union lang_statement_union *next;
 
-  /* Point to the next file, but skips archive contents.  Used by
-     input_file_chain.  */
+  /* Next pointer for input_file_chain statement list.  */
   union lang_statement_union *next_real_file;
 
   const char *target;

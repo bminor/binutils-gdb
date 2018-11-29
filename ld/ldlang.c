@@ -67,6 +67,12 @@ static bfd_boolean map_option_f;
 static bfd_vma print_dot;
 static lang_input_statement_type *first_file;
 static const char *current_target;
+/* Header for list of statements corresponding to any files involved in the
+   link, either specified from the command-line or added implicitely (eg.
+   archive member used to resolved undefined symbol, wildcard statement from
+   linker script, etc.).  Next pointer is in next field of a
+   lang_statement_header_type (reached via header field in a
+   lang_statement_union).  */
 static lang_statement_list_type statement_list;
 static lang_statement_list_type *stat_save[10];
 static lang_statement_list_type **stat_save_ptr = &stat_save[0];
@@ -97,7 +103,17 @@ const char *output_target;
 lang_output_section_statement_type *abs_output_section;
 lang_statement_list_type lang_output_section_statement;
 lang_statement_list_type *stat_ptr = &statement_list;
+/* Header for list of statements corresponding to files used in the final
+   executable.  This can be either object file specified on the command-line
+   or library member resolving an undefined reference.  Next pointer is in next
+   field of a lang_input_statement_type (reached via input_statement field in a
+   lang_statement_union).  */
 lang_statement_list_type file_chain = { NULL, NULL };
+/* Header for list of statements corresponding to files specified on the
+   command-line for linking.  It thus contains real object files and archive
+   but not archive members.  Next pointer is in next_real_file field of a
+   lang_input_statement_type statement (reached via input_statement field in a
+   lang_statement_union).  */
 lang_statement_list_type input_file_chain;
 struct bfd_sym_chain entry_symbol = { NULL, NULL };
 const char *entry_section = ".text";

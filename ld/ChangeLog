@@ -1,3 +1,15 @@
+2018-11-29  Thomas Preud'homme  <thomas.preudhomme@linaro.org>
+
+	* ldlang.c (statement_list): Document purpose and what next field it
+	uses.
+	(file_chain): Likewise.
+	(input_file_chain): Likewise.
+	* ldlang.h (lang_statement_header_type): Document statement list header
+	the next pointer correspond to.
+	(lang_statement_header_type): Replace comment for next and
+	next_real_file field to refer the reader to their corresponding
+	statement list header.
+
 2018-11-27  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* testsuite/ld-mips-elf/pic-reloc-0.d: New test.
