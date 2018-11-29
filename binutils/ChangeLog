@@ -1,3 +1,11 @@
+2018-11-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 23931
+	* objdump.c (dump_relocs_in_section): When checking for an
+	unreasonable amount of relocs in a bfd, allow for the fact that
+	the internal representation of a reloc may be bigger than the
+	external representation.
+
 2018-11-27  Mark Wielaard  <mark@klomp.org>
 
 	PR binutils/23919
