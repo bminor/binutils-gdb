@@ -31,6 +31,46 @@
 #include "elf-bfd.h"
 #include "fbsd-tdep.h"
 
+/* This enum is derived from FreeBSD's <sys/signal.h>.  */
+
+enum
+  {
+    FREEBSD_SIGHUP = 1,
+    FREEBSD_SIGINT = 2,
+    FREEBSD_SIGQUIT = 3,
+    FREEBSD_SIGILL = 4,
+    FREEBSD_SIGTRAP = 5,
+    FREEBSD_SIGABRT = 6,
+    FREEBSD_SIGEMT = 7,
+    FREEBSD_SIGFPE = 8,
+    FREEBSD_SIGKILL = 9,
+    FREEBSD_SIGBUS = 10,
+    FREEBSD_SIGSEGV = 11,
+    FREEBSD_SIGSYS = 12,
+    FREEBSD_SIGPIPE = 13,
+    FREEBSD_SIGALRM = 14,
+    FREEBSD_SIGTERM = 15,
+    FREEBSD_SIGURG = 16,
+    FREEBSD_SIGSTOP = 17,
+    FREEBSD_SIGTSTP = 18,
+    FREEBSD_SIGCONT = 19,
+    FREEBSD_SIGCHLD = 20,
+    FREEBSD_SIGTTIN = 21,
+    FREEBSD_SIGTTOU = 22,
+    FREEBSD_SIGIO = 23,
+    FREEBSD_SIGXCPU = 24,
+    FREEBSD_SIGXFSZ = 25,
+    FREEBSD_SIGVTALRM = 26,
+    FREEBSD_SIGPROF = 27,
+    FREEBSD_SIGWINCH = 28,
+    FREEBSD_SIGINFO = 29,
+    FREEBSD_SIGUSR1 = 30,
+    FREEBSD_SIGUSR2 = 31,
+    FREEBSD_SIGTHR = 32,
+    FREEBSD_SIGLIBRT = 33,
+    FREEBSD_SIGRTMIN = 65,
+    FREEBSD_SIGRTMAX = 126,
+  };
 
 /* FreeBSD kernels 12.0 and later include a copy of the
    'ptrace_lwpinfo' structure returned by the PT_LWPINFO ptrace
@@ -1634,6 +1674,249 @@ fbsd_get_siginfo_type (struct gdbarch *gdbarch)
   return siginfo_type;
 }
 
+/* Implement the "gdb_signal_from_target" gdbarch method.  */
+
+static enum gdb_signal
+fbsd_gdb_signal_from_target (struct gdbarch *gdbarch, int signal)
+{
+  switch (signal)
+    {
+    case 0:
+      return GDB_SIGNAL_0;
+
+    case FREEBSD_SIGHUP:
+      return GDB_SIGNAL_HUP;
+
+    case FREEBSD_SIGINT:
+      return GDB_SIGNAL_INT;
+
+    case FREEBSD_SIGQUIT:
+      return GDB_SIGNAL_QUIT;
+
+    case FREEBSD_SIGILL:
+      return GDB_SIGNAL_ILL;
+
+    case FREEBSD_SIGTRAP:
+      return GDB_SIGNAL_TRAP;
+
+    case FREEBSD_SIGABRT:
+      return GDB_SIGNAL_ABRT;
+
+    case FREEBSD_SIGEMT:
+      return GDB_SIGNAL_EMT;
+
+    case FREEBSD_SIGFPE:
+      return GDB_SIGNAL_FPE;
+
+    case FREEBSD_SIGKILL:
+      return GDB_SIGNAL_KILL;
+
+    case FREEBSD_SIGBUS:
+      return GDB_SIGNAL_BUS;
+
+    case FREEBSD_SIGSEGV:
+      return GDB_SIGNAL_SEGV;
+
+    case FREEBSD_SIGSYS:
+      return GDB_SIGNAL_SYS;
+
+    case FREEBSD_SIGPIPE:
+      return GDB_SIGNAL_PIPE;
+
+    case FREEBSD_SIGALRM:
+      return GDB_SIGNAL_ALRM;
+
+    case FREEBSD_SIGTERM:
+      return GDB_SIGNAL_TERM;
+
+    case FREEBSD_SIGURG:
+      return GDB_SIGNAL_URG;
+
+    case FREEBSD_SIGSTOP:
+      return GDB_SIGNAL_STOP;
+
+    case FREEBSD_SIGTSTP:
+      return GDB_SIGNAL_TSTP;
+
+    case FREEBSD_SIGCONT:
+      return GDB_SIGNAL_CONT;
+
+    case FREEBSD_SIGCHLD:
+      return GDB_SIGNAL_CHLD;
+
+    case FREEBSD_SIGTTIN:
+      return GDB_SIGNAL_TTIN;
+
+    case FREEBSD_SIGTTOU:
+      return GDB_SIGNAL_TTOU;
+
+    case FREEBSD_SIGIO:
+      return GDB_SIGNAL_IO;
+
+    case FREEBSD_SIGXCPU:
+      return GDB_SIGNAL_XCPU;
+
+    case FREEBSD_SIGXFSZ:
+      return GDB_SIGNAL_XFSZ;
+
+    case FREEBSD_SIGVTALRM:
+      return GDB_SIGNAL_VTALRM;
+
+    case FREEBSD_SIGPROF:
+      return GDB_SIGNAL_PROF;
+
+    case FREEBSD_SIGWINCH:
+      return GDB_SIGNAL_WINCH;
+
+    case FREEBSD_SIGINFO:
+      return GDB_SIGNAL_INFO;
+
+    case FREEBSD_SIGUSR1:
+      return GDB_SIGNAL_USR1;
+
+    case FREEBSD_SIGUSR2:
+      return GDB_SIGNAL_USR2;
+
+    /* SIGTHR is the same as SIGLWP on FreeBSD. */
+    case FREEBSD_SIGTHR:
+      return GDB_SIGNAL_LWP;
+
+    case FREEBSD_SIGLIBRT:
+      return GDB_SIGNAL_LIBRT;
+    }
+
+  if (signal >= FREEBSD_SIGRTMIN && signal <= FREEBSD_SIGRTMAX)
+    {
+      int offset = signal - FREEBSD_SIGRTMIN;
+
+      return (enum gdb_signal) ((int) GDB_SIGNAL_REALTIME_65 + offset);
+    }
+
+  return GDB_SIGNAL_UNKNOWN;
+}
+
+/* Implement the "gdb_signal_to_target" gdbarch method.  */
+
+static int
+fbsd_gdb_signal_to_target (struct gdbarch *gdbarch,
+                enum gdb_signal signal)
+{
+  switch (signal)
+    {
+    case GDB_SIGNAL_0:
+      return 0;
+
+    case GDB_SIGNAL_HUP:
+      return FREEBSD_SIGHUP;
+
+    case GDB_SIGNAL_INT:
+      return FREEBSD_SIGINT;
+
+    case GDB_SIGNAL_QUIT:
+      return FREEBSD_SIGQUIT;
+
+    case GDB_SIGNAL_ILL:
+      return FREEBSD_SIGILL;
+
+    case GDB_SIGNAL_TRAP:
+      return FREEBSD_SIGTRAP;
+
+    case GDB_SIGNAL_ABRT:
+      return FREEBSD_SIGABRT;
+
+    case GDB_SIGNAL_EMT:
+      return FREEBSD_SIGEMT;
+
+    case GDB_SIGNAL_FPE:
+      return FREEBSD_SIGFPE;
+
+    case GDB_SIGNAL_KILL:
+      return FREEBSD_SIGKILL;
+
+    case GDB_SIGNAL_BUS:
+      return FREEBSD_SIGBUS;
+
+    case GDB_SIGNAL_SEGV:
+      return FREEBSD_SIGSEGV;
+
+    case GDB_SIGNAL_SYS:
+      return FREEBSD_SIGSYS;
+
+    case GDB_SIGNAL_PIPE:
+      return FREEBSD_SIGPIPE;
+
+    case GDB_SIGNAL_ALRM:
+      return FREEBSD_SIGALRM;
+
+    case GDB_SIGNAL_TERM:
+      return FREEBSD_SIGTERM;
+
+    case GDB_SIGNAL_URG:
+      return FREEBSD_SIGURG;
+
+    case GDB_SIGNAL_STOP:
+      return FREEBSD_SIGSTOP;
+
+    case GDB_SIGNAL_TSTP:
+      return FREEBSD_SIGTSTP;
+
+    case GDB_SIGNAL_CONT:
+      return FREEBSD_SIGCONT;
+
+    case GDB_SIGNAL_CHLD:
+      return FREEBSD_SIGCHLD;
+
+    case GDB_SIGNAL_TTIN:
+      return FREEBSD_SIGTTIN;
+
+    case GDB_SIGNAL_TTOU:
+      return FREEBSD_SIGTTOU;
+
+    case GDB_SIGNAL_IO:
+      return FREEBSD_SIGIO;
+
+    case GDB_SIGNAL_XCPU:
+      return FREEBSD_SIGXCPU;
+
+    case GDB_SIGNAL_XFSZ:
+      return FREEBSD_SIGXFSZ;
+
+    case GDB_SIGNAL_VTALRM:
+      return FREEBSD_SIGVTALRM;
+
+    case GDB_SIGNAL_PROF:
+      return FREEBSD_SIGPROF;
+
+    case GDB_SIGNAL_WINCH:
+      return FREEBSD_SIGWINCH;
+
+    case GDB_SIGNAL_INFO:
+      return FREEBSD_SIGINFO;
+
+    case GDB_SIGNAL_USR1:
+      return FREEBSD_SIGUSR1;
+
+    case GDB_SIGNAL_USR2:
+      return FREEBSD_SIGUSR2;
+
+    case GDB_SIGNAL_LWP:
+      return FREEBSD_SIGTHR;
+
+    case GDB_SIGNAL_LIBRT:
+      return FREEBSD_SIGLIBRT;
+    }
+
+  if (signal >= GDB_SIGNAL_REALTIME_65
+      && signal <= GDB_SIGNAL_REALTIME_126)
+    {
+      int offset = signal - GDB_SIGNAL_REALTIME_65;
+
+      return FREEBSD_SIGRTMIN + offset;
+    }
+
+  return -1;
+}
+
 /* Implement the "get_syscall_number" gdbarch method.  */
 
 static LONGEST
@@ -1661,6 +1944,8 @@ fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_core_info_proc (gdbarch, fbsd_core_info_proc);
   set_gdbarch_print_auxv_entry (gdbarch, fbsd_print_auxv_entry);
   set_gdbarch_get_siginfo_type (gdbarch, fbsd_get_siginfo_type);
+  set_gdbarch_gdb_signal_from_target (gdbarch, fbsd_gdb_signal_from_target);
+  set_gdbarch_gdb_signal_to_target (gdbarch, fbsd_gdb_signal_to_target);
 
   /* `catch syscall' */
   set_xml_syscall_file_name (gdbarch, "syscalls/freebsd.xml");
