@@ -1,3 +1,9 @@
+2018-11-30  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/pr23937.d,
+	* testsuite/ld-powerpc/pr23937.s: New test.
+	* testsuite/ld-powerpc/powerpc.exp: Run it.
+
 2018-11-27  Tamar Christina  <tamar.christina@arm.com>
 
 	PR ld/23904
