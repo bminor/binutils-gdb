@@ -24,6 +24,7 @@
 #include "frame.h"
 #include "regcache.h"
 #include "target.h"
+#include "process-stratum-target.h"
 #include "value.h"
 #include "gdbcore.h"
 #include "inferior.h"          /* for get_exec_file */
@@ -71,11 +72,10 @@ static const target_info bsd_kvm_target_info = {
 Optionally specify the filename of a core dump.")
 };
 
-class bsd_kvm_target final : public target_ops
+class bsd_kvm_target final : public process_stratum_target
 {
 public:
-  bsd_kvm_target ()
-  { this->to_stratum = process_stratum; }
+  bsd_kvm_target () = default;
 
   const target_info &info () const override
   { return bsd_kvm_target_info; }

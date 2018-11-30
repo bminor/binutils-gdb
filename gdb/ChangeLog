@@ -1,5 +1,43 @@
 2018-11-30  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (COMMON_SFILES): Add process-stratum-target.c.
+	* bsd-kvm.c: Include "process-stratum-target.h".
+	(bsd_kvm_target): Now inherits from process_stratum_target.
+	(bsd_kvm_target::bsd_kvm_target): Default it.
+	* corelow.c: Include "process-stratum-target.h".
+	(core_target): Now inherits from process_stratum_target.
+	(core_target::core_target): Don't set to_stratum here.
+	* inf-child.c (inf_child_target::inf_child_target): Delete.
+	* inf-child.h: Include "process-stratum-target.h".
+	(inf_child_target): Inherit from process_stratum_target.
+	(inf_child_target) <inf_child_target>: Default it.
+	<can_async_p, supports_non_stop, supports_disable_randomization>:
+	Delete overrides.
+	* process-stratum-target.c: New file.
+	* process-stratum-target.h: New file.
+	* remote-sim.c: Include "process-stratum-target.h".
+	(gdbsim_target): Inherit from process_stratum_target.
+	<gdbsim_target>: Default it.
+	* remote.c: Include "process-stratum-target.h".
+	(remote_target): Inherit from process_stratum_target.
+	<remote_target>: Default it.
+	* target.c (default_thread_address_space)
+	(default_thread_architecture): Delete.
+	* target.h (target_ops) <thread_architecture>: Now returns NULL by
+	default.
+	<thread_address_space>: Ditto.
+	* test-target.h: Include "process-stratum-target.h" instead of
+	"target.h".
+	(test_target_ops): Inherit from process_stratum_target.
+	<test_target_ops>: Default it.
+	* tracefile.c (tracefile_target::tracefile_target): Delete.
+	* tracefile.h: Include "process-stratum-target.h".
+	(tracefile_target): Inherit from process_stratum_target.
+	<tracefile_target>: Default it.
+	* target-delegates.c: Regenerate.
+
+2018-11-30  Pedro Alves  <palves@redhat.com>
+
 	* Makefile.in (COMMON_SFILES): Add test-target.c.
 	* gdbarch-selftests.c: Include "test-target.h".
 	* regcache.c: Include "test-target.h".

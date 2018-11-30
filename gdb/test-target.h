@@ -20,7 +20,7 @@
 #ifndef TEST_TARGET_H
 #define TEST_TARGET_H
 
-#include "target.h"
+#include "process-stratum-target.h"
 
 #if GDB_SELF_TEST
 namespace selftests {
@@ -28,14 +28,10 @@ namespace selftests {
 /* A mock process_stratum target_ops that doesn't read/write registers
    anywhere.  */
 
-class test_target_ops : public target_ops
+class test_target_ops : public process_stratum_target
 {
 public:
-  test_target_ops ()
-    : target_ops {}
-  {
-    to_stratum = process_stratum;
-  }
+  test_target_ops () = default;
 
   const target_info &info () const override;
 

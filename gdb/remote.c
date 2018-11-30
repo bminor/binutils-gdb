@@ -27,6 +27,7 @@
 #include "bfd.h"
 #include "symfile.h"
 #include "target.h"
+#include "process-stratum-target.h"
 /*#include "terminal.h" */
 #include "gdbcmd.h"
 #include "objfiles.h"
@@ -404,13 +405,10 @@ static const target_info remote_target_info = {
   remote_doc
 };
 
-class remote_target : public target_ops
+class remote_target : public process_stratum_target
 {
 public:
-  remote_target ()
-  {
-    to_stratum = process_stratum;
-  }
+  remote_target () = default;
   ~remote_target () override;
 
   const target_info &info () const override

@@ -470,11 +470,6 @@ tracefile_target::get_trace_status (struct trace_status *ts)
   return -1;
 }
 
-tracefile_target::tracefile_target ()
-{
-  this->to_stratum = process_stratum;
-}
-
 void
 _initialize_tracefile (void)
 {

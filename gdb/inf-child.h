@@ -21,15 +21,16 @@
 #define INF_CHILD_H
 
 #include "target.h"
+#include "process-stratum-target.h"
 
 /* A prototype child target.  The client can override it with local
    methods.  */
 
 class inf_child_target
-  : public memory_breakpoint_target<target_ops>
+  : public memory_breakpoint_target<process_stratum_target>
 {
 public:
-  inf_child_target ();
+  inf_child_target () = default;
   ~inf_child_target () override = 0;
 
   const target_info &info () const override;
@@ -68,12 +69,6 @@ public:
   void attach (const char *, int) override = 0;
 
   void post_attach (int) override;
-
-  /* We must default these because they must be implemented by any
-     target that can run.  */
-  bool can_async_p ()  override { return false; }
-  bool supports_non_stop ()  override { return false; }
-  bool supports_disable_randomization () override { return false; }
 
   char *pid_to_exec_file (int pid) override;
 

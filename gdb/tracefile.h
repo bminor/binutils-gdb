@@ -3,6 +3,7 @@
 
 #include "tracepoint.h"
 #include "target.h"
+#include "process-stratum-target.h"
 
 struct trace_file_writer;
 
@@ -116,10 +117,10 @@ extern struct trace_file_writer *tfile_trace_file_writer_new (void);
 
 /* Base class for tracefile related targets.  */
 
-class tracefile_target : public target_ops
+class tracefile_target : public process_stratum_target
 {
 public:
-  tracefile_target ();
+  tracefile_target () = default;
 
   int get_trace_status (trace_status *ts) override;
   bool has_all_memory () override;

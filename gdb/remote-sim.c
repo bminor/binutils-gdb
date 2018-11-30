@@ -31,6 +31,7 @@
 #include <setjmp.h>
 #include "terminal.h"
 #include "target.h"
+#include "process-stratum-target.h"
 #include "gdbcore.h"
 #include "gdb/callback.h"
 #include "gdb/remote-sim.h"
@@ -82,10 +83,9 @@ static const target_info gdbsim_target_info = {
 };
 
 struct gdbsim_target final
-  : public memory_breakpoint_target<target_ops>
+  : public memory_breakpoint_target<process_stratum_target>
 {
-  gdbsim_target ()
-  { to_stratum = process_stratum; }
+  gdbsim_target () = default;
 
   const target_info &info () const override
   { return gdbsim_target_info; }

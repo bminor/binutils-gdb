@@ -882,18 +882,13 @@ struct target_ops
        to_thread_architecture would return SPU, otherwise PPC32 or PPC64).
        This is architecture used to perform decr_pc_after_break adjustment,
        and also determines the frame architecture of the innermost frame.
-       ptrace operations need to operate according to target_gdbarch ().
-
-       The default implementation always returns target_gdbarch ().  */
+       ptrace operations need to operate according to target_gdbarch ().  */
     virtual struct gdbarch *thread_architecture (ptid_t)
-      TARGET_DEFAULT_FUNC (default_thread_architecture);
+      TARGET_DEFAULT_RETURN (NULL);
 
-    /* Determine current address space of thread PTID.
-
-       The default implementation always returns the inferior's
-       address space.  */
+    /* Determine current address space of thread PTID.  */
     virtual struct address_space *thread_address_space (ptid_t)
-      TARGET_DEFAULT_FUNC (default_thread_address_space);
+      TARGET_DEFAULT_RETURN (NULL);
 
     /* Target file operations.  */
 

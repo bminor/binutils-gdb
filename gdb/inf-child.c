@@ -439,11 +439,6 @@ inf_child_target::can_use_agent ()
   return agent_loaded_p ();
 }
 
-inf_child_target::inf_child_target ()
-{
-  this->to_stratum = process_stratum;
-}
-
 /* See inf-child.h.  */
 
 void

@@ -2808,7 +2808,7 @@ target_ops::thread_architecture (ptid_t arg0)
 struct gdbarch *
 dummy_target::thread_architecture (ptid_t arg0)
 {
-  return default_thread_architecture (this, arg0);
+  return NULL;
 }
 
 struct gdbarch *
@@ -2834,7 +2834,7 @@ target_ops::thread_address_space (ptid_t arg0)
 struct address_space *
 dummy_target::thread_address_space (ptid_t arg0)
 {
-  return default_thread_address_space (this, arg0);
+  return NULL;
 }
 
 struct address_space *
