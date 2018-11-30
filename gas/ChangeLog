@@ -1,3 +1,23 @@
+2018-12-01  Alan Modra  <amodra@gmail.com>
+
+	PR 23938
+	* read.h (get_stab_string_offset): Update prototype.
+	* stabs.c (get_stab_string_offset): Add free_stabstr_secname
+	parameter.  Free stabstr_secname if unused as section name.
+	Don't xstrdup name when used.
+	(s_stab_generic): Remove forward declaration.  Add
+	stab_secname_obstack_end param.  Reference notes obstack via
+	macros.  Delete cached_secname.  Adjust get_stab_string_offset
+	call.  Free stab_secname if unused as section name.
+	(s_stab): Adjust s_stab_generic call.
+	(s_xstab): Likewise.  Delete saved_secname and saved_strsecname.
+	* config/obj-elf.c (obj_elf_init_stab_section): Adjust
+	get_stab_string_offset call.
+	* config/obj-coff.c (obj_coff_init_stab_section): Likewise.
+	* config/obj-som.c (obj_som_init_stab_section): Likewise.
+	* testsuite/gas/all/pr23938.s: New test.
+	* testsuite/gas/all/gas.exp: Run it.
+
 2018-11-30  Fredrik Noring  <noring@nocrew.org>
 
 	* config/tc-mips.c (mips_fix_r5900, mips_fix_r5900_explicit):

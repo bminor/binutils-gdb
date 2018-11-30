@@ -2127,7 +2127,7 @@ obj_elf_init_stab_section (segT seg)
   memset (p, 0, 12);
   file = as_where (NULL);
   stabstr_name = concat (segment_name (seg), "str", (char *) NULL);
-  stroff = get_stab_string_offset (file, stabstr_name);
+  stroff = get_stab_string_offset (file, stabstr_name, TRUE);
   know (stroff == 1 || (stroff == 0 && file[0] == '\0'));
   md_number_to_chars (p, stroff, 4);
   seg_info (seg)->stabu.p = p;

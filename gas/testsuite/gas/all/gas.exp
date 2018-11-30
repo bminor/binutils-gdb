@@ -472,3 +472,5 @@ run_dump_test "org-5"
 run_dump_test "org-6"
 
 run_dump_test "fill-1"
+
+gas_test "pr23938.s" "" "" ".xstabs"
