@@ -939,6 +939,10 @@ static int mips_fix_rm7000;
 /* ...likewise -mfix-cn63xxp1 */
 static bfd_boolean mips_fix_cn63xxp1;
 
+/* ...likewise -mfix-r5900 */
+static bfd_boolean mips_fix_r5900;
+static bfd_boolean mips_fix_r5900_explicit;
+
 /* We don't relax branches by default, since this causes us to expand
    `la .l2 - .l1' if there's a branch between .l1 and .l2, because we
    fail to compute the offset before expanding the macro to the most
@@ -1488,6 +1492,8 @@ enum options
     OPTION_NO_FIX_VR4130,
     OPTION_FIX_CN63XXP1,
     OPTION_NO_FIX_CN63XXP1,
+    OPTION_FIX_R5900,
+    OPTION_NO_FIX_R5900,
     OPTION_TRAP,
     OPTION_BREAK,
     OPTION_EB,
@@ -1636,6 +1642,8 @@ struct option md_longopts[] =
   {"mno-fix-rm7000", no_argument, NULL, OPTION_NO_FIX_RM7000},
   {"mfix-cn63xxp1", no_argument, NULL, OPTION_FIX_CN63XXP1},
   {"mno-fix-cn63xxp1", no_argument, NULL, OPTION_NO_FIX_CN63XXP1},
+  {"mfix-r5900", no_argument, NULL, OPTION_FIX_R5900},
+  {"mno-fix-r5900", no_argument, NULL, OPTION_NO_FIX_R5900},
 
   /* Miscellaneous options.  */
   {"trap", no_argument, NULL, OPTION_TRAP},
@@ -6997,7 +7005,7 @@ can_swap_branch_p (struct mips_cl_insn *ip, expressionS *address_expr,
      - a branch delay slot of the loop is not NOP (EE 2.9 or later).
 
      We need to do this because of a hardware bug in the R5900 chip.  */
-  if (mips_opts.arch == CPU_R5900
+  if (mips_fix_r5900
       /* Check if instruction has a parameter, ignore "j $31". */
       && (address_expr != NULL)
       /* Parameter must be 16 bit. */
@@ -14763,6 +14771,16 @@ md_parse_option (int c, const char *arg)
       mips_fix_cn63xxp1 = FALSE;
       break;
 
+    case OPTION_FIX_R5900:
+      mips_fix_r5900 = TRUE;
+      mips_fix_r5900_explicit = TRUE;
+      break;
+
+    case OPTION_NO_FIX_R5900:
+      mips_fix_r5900 = FALSE;
+      mips_fix_r5900_explicit = TRUE;
+      break;
+
     case OPTION_RELAX_BRANCH:
       mips_relax_branch = 1;
       break;
@@ -15035,6 +15053,10 @@ mips_after_parse_args (void)
 
   /* Set up initial mips_opts state.  */
   mips_opts = file_mips_opts;
+
+  /* For the R5900 default to `-mfix-r5900' unless the user told otherwise.  */
+  if (!mips_fix_r5900_explicit)
+    mips_fix_r5900 = file_mips_opts.arch == CPU_R5900;
 
   /* The register size inference code is now placed in
      file_mips_check_options.  */
@@ -20125,6 +20147,7 @@ MIPS options:\n\
 -mfix-vr4130		work around VR4130 mflo/mfhi errata\n\
 -mfix-24k		insert a nop after ERET and DERET instructions\n\
 -mfix-cn63xxp1		work around CN63XXP1 PREF errata\n\
+-mfix-r5900		work around R5900 short loop errata\n\
 -mgp32			use 32-bit GPRs, regardless of the chosen ISA\n\
 -mfp32			use 32-bit FPRs, regardless of the chosen ISA\n\
 -msym32			assume all symbols have 32-bit values\n\

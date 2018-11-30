@@ -1560,6 +1560,8 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "break-error"	[mips_arch_list_all]
 
     run_dump_test "r5900"
+    run_dump_test "r5900-fix"
+    run_dump_test "r5900-no-fix"
     run_dump_test "r5900-full"
     run_list_test "r5900-nollsc" "-mabi=o64 -march=r5900"
     run_dump_test "r5900-vu0"

@@ -327,6 +327,14 @@ Insert nops to work around the 24K @samp{eret}/@samp{deret} errata.
 Replace @code{pref} hints 0 - 4 and 6 - 24 with hint 28 to work around
 certain CN63XXP1 errata.
 
+@item -mfix-r5900
+@itemx -mno-fix-r5900
+Do not attempt to schedule the preceding instruction into the delay slot
+of a branch instruction placed at the end of a short loop of six
+instructions or fewer and always schedule a @code{nop} instruction there
+instead.  The short loop bug under certain conditions causes loops to
+execute only once or twice, due to a hardware bug in the R5900 chip.
+
 @item -m4010
 @itemx -no-m4010
 Generate code for the LSI R4010 chip.  This tells the assembler to

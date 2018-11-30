@@ -453,6 +453,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mfix-rm7000}] [@b{-mno-fix-rm7000}]
    [@b{-mfix-vr4120}] [@b{-mno-fix-vr4120}]
    [@b{-mfix-vr4130}] [@b{-mno-fix-vr4130}]
+   [@b{-mfix-r5900}] [@b{-mno-fix-r5900}]
    [@b{-mdebug}] [@b{-no-mdebug}]
    [@b{-mpdr}] [@b{-mno-pdr}]
 @end ifset
@@ -1443,6 +1444,14 @@ of an mfhi or mflo instruction occurs in the following two instructions.
 @itemx -mno-fix-rm7000
 Cause nops to be inserted if a dmult or dmultu instruction is
 followed by a load instruction.
+
+@item -mfix-r5900
+@itemx -mno-fix-r5900
+Do not attempt to schedule the preceding instruction into the delay slot
+of a branch instruction placed at the end of a short loop of six
+instructions or fewer and always schedule a @code{nop} instruction there
+instead.  The short loop bug under certain conditions causes loops to
+execute only once or twice, due to a hardware bug in the R5900 chip.
 
 @item -mdebug
 @itemx -no-mdebug

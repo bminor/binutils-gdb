@@ -1,3 +1,21 @@
+2018-11-30  Fredrik Noring  <noring@nocrew.org>
+
+	* config/tc-mips.c (mips_fix_r5900, mips_fix_r5900_explicit):
+	New variables.
+	(options): Add OPTION_FIX_R5900 and OPTION_NO_FIX_R5900
+	enumeration constants.
+	(md_longopts): Add "mfix-r5900" and "mno-fix-r5900" options.
+	(can_swap_branch_p, md_parse_option, mips_after_parse_args):
+	Handle the new options.
+	(md_show_usage): Document the `-mfix-r5900' option.
+	* doc/as.texi: Likewise.
+	* doc/c-mips.texi: Likewise.
+	* testsuite/gas/mips/mips.exp: Run R5900 dump tests.
+	* testsuite/gas/mips/r5900-fix.d: Test `-mfix-r5900' option.
+	* testsuite/gas/mips/r5900-fix.s: Likewise.
+	* testsuite/gas/mips/r5900-no-fix.d: Test `-mno-fix-r5900'.
+	* testsuite/gas/mips/r5900-no-fix.s: Likewise.
+
 2018-11-27  Jim Wilson  <jimw@sifive.com>
 
 	* config/tc-riscv.c (validate_riscv_insn) <'F'>: Add support for CF6
