@@ -77,10 +77,6 @@ enum class linespec_complete_what
   KEYWORD,
 };
 
-/* Typedef for unique_ptrs of vectors of symtabs.  */
-
-typedef std::unique_ptr<std::vector<symtab *>> symtab_vector_up;
-
 /* An address entry is used to ensure that any given location is only
    added to the result a single time.  It holds an address and the
    program space from which the address came.  */
@@ -357,7 +353,7 @@ static std::vector<symtab_and_line> decode_objc (struct linespec_state *self,
 						 linespec_p ls,
 						 const char *arg);
 
-static symtab_vector_up symtabs_from_filename
+static std::vector<symtab *> symtabs_from_filename
   (const char *, struct program_space *pspace);
 
 static std::vector<block_symbol> *find_label_symbols
@@ -389,7 +385,7 @@ static void add_all_symbol_names_from_pspace
     (struct collect_info *info, struct program_space *pspace,
      const std::vector<const char *> &names, enum search_domain search_domain);
 
-static symtab_vector_up
+static std::vector<symtab *>
   collect_symtabs_from_filename (const char *file,
 				 struct program_space *pspace);
 
@@ -2117,9 +2113,8 @@ create_sals_line_offset (struct linespec_state *self,
       set_default_source_symtab_and_line ();
       initialize_defaults (&self->default_symtab, &self->default_line);
       fullname = symtab_to_fullname (self->default_symtab);
-      symtab_vector_up r =
-	collect_symtabs_from_filename (fullname, self->search_pspace);
-      ls->file_symtabs = r.release ();
+      *ls->file_symtabs
+	= collect_symtabs_from_filename (fullname, self->search_pspace);
       use_default = 1;
     }
 
@@ -2401,9 +2396,8 @@ convert_explicit_location_to_linespec (struct linespec_state *self,
     {
       TRY
 	{
-	  result->file_symtabs
-	    = symtabs_from_filename (source_filename,
-				     self->search_pspace).release ();
+	  *result->file_symtabs
+	    = symtabs_from_filename (source_filename, self->search_pspace);
 	}
       CATCH (except, RETURN_MASK_ERROR)
 	{
@@ -2627,10 +2621,9 @@ parse_linespec (linespec_parser *parser, const char *arg,
       /* Check if the input is a filename.  */
       TRY
 	{
-	  symtab_vector_up r
+	  *PARSER_RESULT (parser)->file_symtabs
 	    = symtabs_from_filename (user_filename.get (),
 				     PARSER_STATE (parser)->search_pspace);
-	  PARSER_RESULT (parser)->file_symtabs = r.release ();
 	}
       CATCH (ex, RETURN_MASK_ERROR)
 	{
@@ -3790,7 +3783,6 @@ class symtab_collector
 {
 public:
   symtab_collector ()
-    : m_symtabs (new std::vector<symtab *> ())
   {
     m_symtab_table = htab_create (1, htab_hash_pointer, htab_eq_pointer,
 				  NULL);
@@ -3805,15 +3797,15 @@ public:
   /* Callable as a symbol_found_callback_ftype callback.  */
   bool operator () (symtab *sym);
 
-  /* Releases ownership of the collected symtabs and returns them.  */
-  symtab_vector_up release_symtabs ()
+  /* Return an rvalue reference to the collected symtabs.  */
+  std::vector<symtab *> &&release_symtabs ()
   {
     return std::move (m_symtabs);
   }
 
 private:
   /* The result vector of symtabs.  */
-  symtab_vector_up m_symtabs;
+  std::vector<symtab *> m_symtabs;
 
   /* This is used to ensure the symtabs are unique.  */
   htab_t m_symtab_table;
@@ -3828,7 +3820,7 @@ symtab_collector::operator () (struct symtab *symtab)
   if (!*slot)
     {
       *slot = symtab;
-      m_symtabs->push_back (symtab);
+      m_symtabs.push_back (symtab);
     }
 
   return false;
@@ -3840,7 +3832,7 @@ symtab_collector::operator () (struct symtab *symtab)
    SEARCH_PSPACE is not NULL, the search is restricted to just that
    program space.  */
 
-static symtab_vector_up
+static std::vector<symtab *>
 collect_symtabs_from_filename (const char *file,
 			       struct program_space *search_pspace)
 {
@@ -3872,14 +3864,14 @@ collect_symtabs_from_filename (const char *file,
 /* Return all the symtabs associated to the FILENAME.  If SEARCH_PSPACE is
    not NULL, the search is restricted to just that program space.  */
 
-static symtab_vector_up
+static std::vector<symtab *>
 symtabs_from_filename (const char *filename,
 		       struct program_space *search_pspace)
 {
-  symtab_vector_up result
+  std::vector<symtab *> result
     = collect_symtabs_from_filename (filename, search_pspace);
 
-  if (result->empty ())
+  if (result.empty ())
     {
       if (!have_full_symbols () && !have_partial_symbols ())
 	throw_error (NOT_FOUND_ERROR,

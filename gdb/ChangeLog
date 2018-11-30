@@ -1,3 +1,18 @@
+2018-11-30  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+            Simon Marchi  <simon.marchi@ericsson.com>
+
+	* linespec.c (symtab_vector_up): Remove.
+	(symtabs_from_filename): Change return type to std::vector.
+	(collect_symtabs_from_filename): Likewise.
+	(create_sals_line_offset): Assign return value of
+	collect_symtabs_from_filename to *ls->file_symtabs.
+	(convert_explicit_location_to_linespec): Remove call to release.
+	(parse_linespec): Likewise.
+	(symtab_collector) <symtab_collector>: Remove initialization of
+	m_symtabs.
+	<release_symtabs>: Change return type to std::vector<symtab *>.
+	<operator ()>: Adjust.
+
 2018-11-30  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-nat.c [__FreeBSD_version >= 700009] (USE_SIGINFO): Macro
