@@ -218,10 +218,9 @@ static const char record_doc[]
 class record_full_base_target : public target_ops
 {
 public:
-  record_full_base_target ()
-  { to_stratum = record_stratum; }
-
   const target_info &info () const override = 0;
+
+  strata stratum () const override { return record_stratum; }
 
   void close () override;
   void async (int) override;

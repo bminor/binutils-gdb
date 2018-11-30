@@ -174,7 +174,7 @@ record_unpush (struct target_ops *t)
 void
 record_disconnect (struct target_ops *t, const char *args, int from_tty)
 {
-  gdb_assert (t->to_stratum == record_stratum);
+  gdb_assert (t->stratum () == record_stratum);
 
   DEBUG ("disconnect %s", t->shortname ());
 
@@ -189,7 +189,7 @@ record_disconnect (struct target_ops *t, const char *args, int from_tty)
 void
 record_detach (struct target_ops *t, inferior *inf, int from_tty)
 {
-  gdb_assert (t->to_stratum == record_stratum);
+  gdb_assert (t->stratum () == record_stratum);
 
   DEBUG ("detach %s", t->shortname ());
 
@@ -204,7 +204,7 @@ record_detach (struct target_ops *t, inferior *inf, int from_tty)
 void
 record_mourn_inferior (struct target_ops *t)
 {
-  gdb_assert (t->to_stratum == record_stratum);
+  gdb_assert (t->stratum () == record_stratum);
 
   DEBUG ("mourn inferior %s", t->shortname ());
 
@@ -220,7 +220,7 @@ record_mourn_inferior (struct target_ops *t)
 void
 record_kill (struct target_ops *t)
 {
-  gdb_assert (t->to_stratum == record_stratum);
+  gdb_assert (t->stratum () == record_stratum);
 
   DEBUG ("kill %s", t->shortname ());
 

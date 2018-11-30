@@ -60,11 +60,10 @@ Specify the filename of the executable file.")
 
 struct exec_target final : public target_ops
 {
-  exec_target ()
-  { to_stratum = file_stratum; }
-
   const target_info &info () const override
   { return exec_target_info; }
+
+  strata stratum () const override { return file_stratum; }
 
   void close () override;
   enum target_xfer_status xfer_partial (enum target_object object,

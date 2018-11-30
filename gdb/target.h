@@ -431,6 +431,9 @@ struct target_info
 
 struct target_ops
   {
+    /* Return this target's stratum.  */
+    virtual strata stratum () const = 0;
+
     /* To the target under this one.  */
     target_ops *beneath () const;
 
@@ -672,7 +675,6 @@ struct target_ops
       TARGET_DEFAULT_IGNORE ();
     virtual struct target_section_table *get_section_table ()
       TARGET_DEFAULT_RETURN (NULL);
-    enum strata to_stratum;
 
     /* Provide default values for all "must have" methods.  */
     virtual bool has_all_memory () { return false; }
@@ -1286,7 +1288,7 @@ public:
 
   /* Returns true if T is pushed on the target stack.  */
   bool is_pushed (target_ops *t) const
-  { return at (t->to_stratum) == t; }
+  { return at (t->stratum ()) == t; }
 
   /* Return the target at STRATUM.  */
   target_ops *at (strata stratum) const { return m_stack[stratum]; }

@@ -44,11 +44,10 @@ static const target_info spu_multiarch_target_info = {
 
 struct spu_multiarch_target final : public target_ops
 {
-  spu_multiarch_target ()
-  { to_stratum = arch_stratum; };
-
   const target_info &info () const override
   { return spu_multiarch_target_info; }
+
+  strata stratum () const override { return arch_stratum; }
 
   void mourn_inferior () override;
 

@@ -81,11 +81,10 @@ static const target_info ravenscar_target_info = {
 
 struct ravenscar_thread_target final : public target_ops
 {
-  ravenscar_thread_target ()
-  { to_stratum = thread_stratum; }
-
   const target_info &info () const override
   { return ravenscar_target_info; }
+
+  strata stratum () const override { return thread_stratum; }
 
   ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
   void resume (ptid_t, int, enum gdb_signal) override;

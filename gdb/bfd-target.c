@@ -40,6 +40,8 @@ public:
   const target_info &info () const override
   { return target_bfd_target_info; }
 
+  strata stratum () const override { return file_stratum; }
+
   void close () override;
 
   target_xfer_status
@@ -92,7 +94,6 @@ target_bfd::get_section_table ()
 target_bfd::target_bfd (struct bfd *abfd)
   : m_bfd (gdb_bfd_ref_ptr::new_reference (abfd))
 {
-  this->to_stratum = file_stratum;
   m_table.sections = NULL;
   m_table.sections_end = NULL;
   build_section_table (abfd, &m_table.sections, &m_table.sections_end);

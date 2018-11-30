@@ -78,11 +78,10 @@ static const target_info thread_db_target_info = {
 class sol_thread_target final : public target_ops
 {
 public:
-  sol_thread_target ()
-  { this->to_stratum = thread_stratum; }
-
   const target_info &info () const override
   { return thread_db_target_info; }
+
+  strata stratum () const override { return thread_stratum; }
 
   void detach (inferior *, int) override;
   ptid_t wait (ptid_t, struct target_waitstatus *, int) override;

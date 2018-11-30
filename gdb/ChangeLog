@@ -1,5 +1,61 @@
 2018-11-30  Pedro Alves  <palves@redhat.com>
 
+	* aix-thread.c (aix_thread_target) <aix_thread_target>: Delete.
+	<stratum>: New override.
+	* bfd-target.c (aix_thread_target) <aix_thread_target>: Delete.
+	<stratum>: New override.
+	* bsd-uthread.c (bsd_uthread_target) <bsd_uthread_target>: Delete.
+	<stratum>: New override.
+	* exec.c (exec_target) <exec_target>: Delete.
+	<stratum>: New override.
+	* gdbarch-selftests.c (register_to_value_test): Adjust to use the
+	stratum method instead of the to_stratum field.
+	* linux-thread-db.c (thread_db_target) <thread_db_target>: Delete.
+	<stratum>: New override.
+	(thread_db_target::thread_db_target): Delete.
+	* make-target-delegates (print_class): Don't print a ctor
+	declaration.  Print a stratum method override declaration.
+	* process-stratum-target.h (process_stratum_target)
+	<process_stratum_target>: Delete.
+	<stratum>: New override.
+	* ravenscar-thread.c (ravenscar_thread_target)
+	<ravenscar_thread_target>: Delete.
+	<stratum>: New override.
+	* record-btrace.c (record_btrace_target)
+	<record_btrace_target>: Delete.
+	<stratum>: New override.
+	* record-full.c (record_full_base_target)
+	<record_full_base_target>: Delete.
+	<stratum>: New override.
+	* record.c (record_disconnect, record_detach)
+	(record_mourn_inferior, record_kill): Adjust to use the stratum
+	method instead of the to_stratum field.
+	* regcache.c (cooked_read_test, cooked_write_test): Likewise.
+	* sol-thread.c (sol_thread_target)
+	<sol_thread_target>: Delete.
+	<stratum>: New override.
+	* spu-multiarch.c (spu_multiarch_target)
+	<spu_multiarch_target>: Delete.
+	<stratum>: New override.
+	* target-delegates.c: Regenerate.
+	* target.c (target_stack::push, target_stack::unpush)
+	(pop_all_targets_above, pop_all_targets_at_and_above)
+	(info_target_command, target_require_runnable)
+	(target_stack::find_beneath): Adjust to use the stratum method
+	instead of the to_stratum field.
+	(dummy_target::dummy_target): Delete.
+	(dummy_target::stratum): New.
+	(debug_target::debug_target): Delete.
+	(debug_target::stratum): New.
+	(maintenance_print_target_stack): Adjust to use the stratum method
+	instead of the to_stratum field.
+	* target.h (struct target_ops) <stratum>: New method.
+	<to_stratum>: Delete.
+	<is_pushed>: Adjust to use the stratum method
+	instead of the to_stratum field.
+
+2018-11-30  Pedro Alves  <palves@redhat.com>
+
 	* corelow.c (core_target) <has_all_memory, has_execution>: New
 	overrides.
 	* inf-child.c (inf_child_target::has_all_memory)

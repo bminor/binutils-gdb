@@ -390,9 +390,9 @@ sub print_class($) {
 
     print "struct " . $name . " : public target_ops\n";
     print "{\n";
-    print "  $name ();\n";
-    print "\n";
     print "  const target_info &info () const override;\n";
+    print "\n";
+    print "  strata stratum () const override;\n";
     print "\n";
 
     for $name (@delegators) {

@@ -85,10 +85,10 @@ static const target_info thread_db_target_info = {
 class thread_db_target final : public target_ops
 {
 public:
-  thread_db_target ();
-
   const target_info &info () const override
   { return thread_db_target_info; }
+
+  strata stratum () const override { return thread_stratum; }
 
   void detach (inferior *, int) override;
   ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
@@ -106,11 +106,6 @@ public:
 					     int handle_len,
 					     inferior *inf) override;
 };
-
-thread_db_target::thread_db_target ()
-{
-  this->to_stratum = thread_stratum;
-}
 
 static char *libthread_db_search_path;
 

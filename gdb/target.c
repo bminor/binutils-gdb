@@ -562,18 +562,20 @@ void
 target_stack::push (target_ops *t)
 {
   /* If there's already a target at this stratum, remove it.  */
-  if (m_stack[t->to_stratum] != NULL)
+  strata stratum = t->stratum ();
+
+  if (m_stack[stratum] != NULL)
     {
-      target_ops *prev = m_stack[t->to_stratum];
-      m_stack[t->to_stratum] = NULL;
+      target_ops *prev = m_stack[stratum];
+      m_stack[stratum] = NULL;
       target_close (prev);
     }
 
   /* Now add the new one.  */
-  m_stack[t->to_stratum] = t;
+  m_stack[stratum] = t;
 
-  if (m_top < t->to_stratum)
-    m_top = t->to_stratum;
+  if (m_top < stratum)
+    m_top = stratum;
 }
 
 /* See target.h.  */
@@ -597,7 +599,9 @@ unpush_target (struct target_ops *t)
 bool
 target_stack::unpush (target_ops *t)
 {
-  if (t->to_stratum == dummy_stratum)
+  strata stratum = t->stratum ();
+
+  if (stratum == dummy_stratum)
     internal_error (__FILE__, __LINE__,
 		    _("Attempt to unpush the dummy target"));
 
@@ -606,7 +610,7 @@ target_stack::unpush (target_ops *t)
   /* Look for the specified target.  Note that a target can only occur
      once in the target stack.  */
 
-  if (m_stack[t->to_stratum] != t)
+  if (m_stack[stratum] != t)
     {
       /* If T wasn't pushed, quit.  Only open targets should be
 	 closed.  */
@@ -614,10 +618,10 @@ target_stack::unpush (target_ops *t)
     }
 
   /* Unchain the target.  */
-  m_stack[t->to_stratum] = NULL;
+  m_stack[stratum] = NULL;
 
-  if (m_top == t->to_stratum)
-    m_top = t->beneath ()->to_stratum;
+  if (m_top == stratum)
+    m_top = t->beneath ()->stratum ();
 
   /* Finally close the target.  Note we do this after unchaining, so
      any target method calls from within the target_close
@@ -645,7 +649,7 @@ unpush_target_and_assert (struct target_ops *target)
 void
 pop_all_targets_above (enum strata above_stratum)
 {
-  while ((int) (current_top_target ()->to_stratum) > (int) above_stratum)
+  while ((int) (current_top_target ()->stratum ()) > (int) above_stratum)
     unpush_target_and_assert (current_top_target ());
 }
 
@@ -654,7 +658,7 @@ pop_all_targets_above (enum strata above_stratum)
 void
 pop_all_targets_at_and_above (enum strata stratum)
 {
-  while ((int) (current_top_target ()->to_stratum) >= (int) stratum)
+  while ((int) (current_top_target ()->stratum ()) >= (int) stratum)
     unpush_target_and_assert (current_top_target ());
 }
 
@@ -1881,7 +1885,7 @@ info_target_command (const char *args, int from_tty)
       if (!t->has_memory ())
 	continue;
 
-      if ((int) (t->to_stratum) <= (int) dummy_stratum)
+      if ((int) (t->stratum ()) <= (int) dummy_stratum)
 	continue;
       if (has_all_mem)
 	printf_unfiltered (_("\tWhile running this, "
@@ -2323,7 +2327,7 @@ target_require_runnable (void)
       /* Do not worry about targets at certain strata that can not
 	 create inferiors.  Assume they will be pushed again if
 	 necessary, and continue to the process_stratum.  */
-      if (t->to_stratum > process_stratum)
+      if (t->stratum () > process_stratum)
 	continue;
 
       error (_("The \"%s\" target does not support \"run\".  "
@@ -3110,7 +3114,7 @@ target_ops *
 target_stack::find_beneath (const target_ops *t) const
 {
   /* Look for a non-empty slot at stratum levels beneath T's.  */
-  for (int stratum = t->to_stratum - 1; stratum >= 0; --stratum)
+  for (int stratum = t->stratum () - 1; stratum >= 0; --stratum)
     if (m_stack[stratum] != NULL)
       return m_stack[stratum];
 
@@ -3224,14 +3228,16 @@ static const target_info dummy_target_info = {
   ""
 };
 
-dummy_target::dummy_target ()
+strata
+dummy_target::stratum () const
 {
-  to_stratum = dummy_stratum;
+  return dummy_stratum;
 }
 
-debug_target::debug_target ()
+strata
+debug_target::stratum () const
 {
-  to_stratum = debug_stratum;
+  return debug_stratum;
 }
 
 const target_info &
@@ -3779,7 +3785,7 @@ maintenance_print_target_stack (const char *cmd, int from_tty)
 
   for (target_ops *t = current_top_target (); t != NULL; t = t->beneath ())
     {
-      if (t->to_stratum == debug_stratum)
+      if (t->stratum () == debug_stratum)
 	continue;
       printf_filtered ("  - %s (%s)\n", t->shortname (), t->longname ());
     }

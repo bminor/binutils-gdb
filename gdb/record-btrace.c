@@ -53,11 +53,10 @@ static const target_info record_btrace_target_info = {
 class record_btrace_target final : public target_ops
 {
 public:
-  record_btrace_target ()
-  { to_stratum = record_stratum; }
-
   const target_info &info () const override
   { return record_btrace_target_info; }
+
+  strata stratum () const override { return record_stratum; }
 
   void close () override;
   void async (int) override;

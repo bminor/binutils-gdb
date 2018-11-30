@@ -117,11 +117,10 @@ static const target_info aix_thread_target_info = {
 class aix_thread_target final : public target_ops
 {
 public:
-  aix_thread_target ()
-  { to_stratum = thread_stratum; }
-
   const target_info &info () const override
   { return aix_thread_target_info; }
+
+  strata stratum () const override { return thread_stratum; }
 
   void detach (inferior *, int) override;
   void resume (ptid_t, int, enum gdb_signal) override;
