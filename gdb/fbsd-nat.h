@@ -21,6 +21,7 @@
 #define FBSD_NAT_H
 
 #include "inf-ptrace.h"
+#include <sys/proc.h>
 
 #ifdef TRAP_BRKPT
 /* MIPS does not set si_code for SIGTRAP.  sparc64 reports
@@ -41,14 +42,12 @@ public:
 
   bool info_proc (const char *, enum info_proc_what) override;
 
-#ifdef KERN_PROC_AUXV
   enum target_xfer_status xfer_partial (enum target_object object,
 					const char *annex,
 					gdb_byte *readbuf,
 					const gdb_byte *writebuf,
 					ULONGEST offset, ULONGEST len,
 					ULONGEST *xfered_len) override;
-#endif
 
 #ifdef PT_LWPINFO
   bool thread_alive (ptid_t ptid) override;

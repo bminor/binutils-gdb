@@ -532,9 +532,17 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
   return true;
 }
 
-#ifdef KERN_PROC_AUXV
+/*
+ * The current layout of siginfo_t on FreeBSD was adopted in SVN
+ * revision 153154 which shipped in FreeBSD versions 7.0 and later.
+ * Don't bother supporting the older layout on older kernels.  The
+ * older format was also never used in core dump notes.
+ */
+#if __FreeBSD_version >= 700009
+#define USE_SIGINFO
+#endif
 
-#ifdef PT_LWPINFO
+#ifdef USE_SIGINFO
 /* Return the size of siginfo for the current inferior.  */
 
 #ifdef __LP64__
@@ -676,7 +684,7 @@ fbsd_nat_target::xfer_partial (enum target_object object,
 
   switch (object)
     {
-#ifdef PT_LWPINFO
+#ifdef USE_SIGINFO
     case TARGET_OBJECT_SIGNAL_INFO:
       {
 	struct ptrace_lwpinfo pl;
@@ -708,6 +716,7 @@ fbsd_nat_target::xfer_partial (enum target_object object,
 	return TARGET_XFER_OK;
       }
 #endif
+#ifdef KERN_PROC_AUXV
     case TARGET_OBJECT_AUXV:
       {
 	gdb::byte_vector buf_storage;
@@ -749,6 +758,8 @@ fbsd_nat_target::xfer_partial (enum target_object object,
 	  }
 	return TARGET_XFER_E_IO;
       }
+#endif
+#if defined(KERN_PROC_VMMAP) && defined(KERN_PROC_PS_STRINGS)
     case TARGET_OBJECT_FREEBSD_VMMAP:
     case TARGET_OBJECT_FREEBSD_PS_STRINGS:
       {
@@ -804,13 +815,13 @@ fbsd_nat_target::xfer_partial (enum target_object object,
 	*xfered_len = len;
 	return TARGET_XFER_OK;
       }
+#endif
     default:
       return inf_ptrace_target::xfer_partial (object, annex,
 					      readbuf, writebuf, offset,
 					      len, xfered_len);
     }
 }
-#endif
 
 #ifdef PT_LWPINFO
 static int debug_fbsd_lwp;

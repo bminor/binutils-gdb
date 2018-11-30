@@ -1,3 +1,19 @@
+2018-11-30  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c [__FreeBSD_version >= 700009] (USE_SIGINFO): Macro
+	defined.
+	(union sigval32, struct siginfo32, fbsd_siginfo_size)
+	(fbsd_convert_siginfo): Make conditional on USE_SIGINFO instead
+	of KERN_PROC_AUXV and PT_LWPINFO.
+	(fbsd_nat_target::xfer_partial): Define method unconditionally.
+	Make TARGET_OBJECT_SIGNAL_INFO conditional on USE_SIGINFO.
+	Make TARGET_OBJECT_AUXV conditional on KERN_PROC_AUXV.
+	Make TARGET_OBJECT_FREEBSD_VMMAP and
+	TARGET_OBJECT_FREEBSD_PS_STRINGS conditional on KERN_PROC_VMMAP
+	and KERN_PROC_PS_STRINGS.
+	* fbsd-nat.h: Include <sys/proc.h>.
+	(fbsd_nat_target::xfer_partial): Declare method unconditionally.
+
 2018-11-30  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* riscv-linux-nat.c: Add 'inferior.h' and 'target-descriptions.h'
