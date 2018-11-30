@@ -1,5 +1,6 @@
 2018-11-30  Nick Clifton  <nickc@redhat.com>
 
+	PR 23942
 	* elfcode.h (elf_object_p): Check for corrupt input files with
 	more program headers than can actually fit in the file.
 
