@@ -12882,7 +12882,8 @@ write_plt_relocs_for_local_syms (struct bfd_link_info *info)
 		}
 
 	      val = sym->st_value + ent->addend;
-	      val += PPC64_LOCAL_ENTRY_OFFSET (sym->st_other);
+	      if (ELF_ST_TYPE (sym->st_info) != STT_GNU_IFUNC)
+		val += PPC64_LOCAL_ENTRY_OFFSET (sym->st_other);
 	      if (sym_sec != NULL && sym_sec->output_section != NULL)
 		val += sym_sec->output_offset + sym_sec->output_section->vma;
 
