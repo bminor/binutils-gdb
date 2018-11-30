@@ -36,6 +36,11 @@
 #define HAVE_SOCKETS 1
 #endif
 
+#ifdef HAVE_KINFO_GETFILE
+#include <sys/user.h>
+#include <libutil.h>
+#endif
+
 #ifdef HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
 #endif /* HAVE_SYS_RESOURCE_H */
@@ -105,6 +110,25 @@ fdwalk (int (*func) (void *, int), void *arg)
 
       closedir (dir);
       return result;
+    }
+  /* We may fall through to the next case.  */
+#endif
+#ifdef HAVE_KINFO_GETFILE
+  int nfd;
+  gdb::unique_xmalloc_ptr<struct kinfo_file[]> fdtbl
+    (kinfo_getfile (getpid (), &nfd));
+  if (fdtbl != NULL)
+    {
+      for (int i = 0; i < nfd; i++)
+	{
+	  if (fdtbl[i].kf_fd >= 0)
+	    {
+	      int result = func (arg, fdtbl[i].kf_fd);
+	      if (result != 0)
+		return result;
+	    }
+	}
+      return 0;
     }
   /* We may fall through to the next case.  */
 #endif

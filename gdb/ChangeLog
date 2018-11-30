@@ -1,3 +1,8 @@
+2018-11-30  John Baldwin  <jhb@FreeBSD.org>
+
+	* common/filestuff.c [HAVE_KINFO_GETFILE]: Include headers.
+	(fdwalk) [HAVE_KINFO_GETFILE]: Use kinfo_getfile.
+
 2018-11-30  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
             Simon Marchi  <simon.marchi@ericsson.com>
 
