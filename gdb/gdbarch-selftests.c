@@ -24,6 +24,7 @@
 #include "inferior.h"
 #include "gdbthread.h"
 #include "target.h"
+#include "test-target.h"
 #include "target-float.h"
 #include "common/def-vector.h"
 

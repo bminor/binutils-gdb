@@ -1,3 +1,13 @@
+2018-11-30  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (COMMON_SFILES): Add test-target.c.
+	* gdbarch-selftests.c: Include "test-target.h".
+	* regcache.c: Include "test-target.h".
+	* target.c (test_target_info, test_target_ops::info): Move to ...
+	* test-target.c: ... this new file.
+	* target.h (test_target_ops): Move to ...
+	* test-target.h: ... this new file.
+
 2018-11-29  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* source.c (forward_search_command): Fix leak by using

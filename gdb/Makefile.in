@@ -1110,6 +1110,7 @@ COMMON_SFILES = \
 	target-dcache.c \
 	target-descriptions.c \
 	target-memory.c \
+	test-target.c \
 	thread.c \
 	thread-iter.c \
 	thread-fsm.c \

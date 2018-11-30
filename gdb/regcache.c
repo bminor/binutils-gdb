@@ -21,6 +21,7 @@
 #include "inferior.h"
 #include "gdbthread.h"
 #include "target.h"
+#include "test-target.h"
 #include "gdbarch.h"
 #include "gdbcmd.h"
 #include "regcache.h"
