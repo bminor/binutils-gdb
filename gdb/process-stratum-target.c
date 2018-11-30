@@ -47,3 +47,39 @@ process_stratum_target::thread_architecture (ptid_t ptid)
   gdb_assert (inf != NULL);
   return inf->gdbarch;
 }
+
+bool
+process_stratum_target::has_all_memory ()
+{
+  /* If no inferior selected, then we can't read memory here.  */
+  return inferior_ptid != null_ptid;
+}
+
+bool
+process_stratum_target::has_memory ()
+{
+  /* If no inferior selected, then we can't read memory here.  */
+  return inferior_ptid != null_ptid;
+}
+
+bool
+process_stratum_target::has_stack ()
+{
+  /* If no inferior selected, there's no stack.  */
+  return inferior_ptid != null_ptid;
+}
+
+bool
+process_stratum_target::has_registers ()
+{
+  /* Can't read registers from no inferior.  */
+  return inferior_ptid != null_ptid;
+}
+
+bool
+process_stratum_target::has_execution (ptid_t the_ptid)
+{
+  /* If there's no thread selected, then we can't make it run through
+     hoops.  */
+  return the_ptid != null_ptid;
+}

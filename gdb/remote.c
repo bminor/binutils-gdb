@@ -525,12 +525,6 @@ public:
 				      CORE_ADDR load_module_addr,
 				      CORE_ADDR offset) override;
 
-  bool has_all_memory ()  override { return default_child_has_all_memory (); }
-  bool has_memory ()  override { return default_child_has_memory (); }
-  bool has_stack ()  override { return default_child_has_stack (); }
-  bool has_registers ()  override { return default_child_has_registers (); }
-  bool has_execution (ptid_t ptid)  override { return default_child_has_execution (ptid); }
-
   bool can_execute_reverse () override;
 
   std::vector<mem_region> memory_map () override;

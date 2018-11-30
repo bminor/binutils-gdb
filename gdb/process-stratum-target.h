@@ -46,6 +46,14 @@ public:
 
   /* This default implementation always returns target_gdbarch ().  */
   struct gdbarch *thread_architecture (ptid_t ptid) override;
+
+  /* Default implementations for process_stratum targets.  Return true
+     if there's a selected inferior, false otherwise.  */
+  bool has_all_memory () override;
+  bool has_memory () override;
+  bool has_stack () override;
+  bool has_registers () override;
+  bool has_execution (ptid_t the_ptid) override;
 };
 
 #endif /* !defined (PROCESS_STRATUM_TARGET_H) */

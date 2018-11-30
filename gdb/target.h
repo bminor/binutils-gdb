@@ -1790,15 +1790,6 @@ extern int target_has_execution_current (void);
 
 #define target_has_execution target_has_execution_current ()
 
-/* Default implementations for process_stratum targets.  Return true
-   if there's a selected inferior, false otherwise.  */
-
-extern int default_child_has_all_memory ();
-extern int default_child_has_memory ();
-extern int default_child_has_stack ();
-extern int default_child_has_registers ();
-extern int default_child_has_execution (ptid_t the_ptid);
-
 /* Can the target support the debugger control of thread execution?
    Can it lock the thread scheduler?  */
 

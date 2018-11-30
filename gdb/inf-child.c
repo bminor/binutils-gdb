@@ -243,36 +243,6 @@ inf_child_target::pid_to_exec_file (int pid)
   return NULL;
 }
 
-bool
-inf_child_target::has_all_memory ()
-{
-  return default_child_has_all_memory ();
-}
-
-bool
-inf_child_target::has_memory ()
-{
-  return default_child_has_memory ();
-}
-
-bool
-inf_child_target::has_stack ()
-{
-  return default_child_has_stack ();
-}
-
-bool
-inf_child_target::has_registers ()
-{
-  return default_child_has_registers ();
-}
-
-bool
-inf_child_target::has_execution (ptid_t ptid)
-{
-  return default_child_has_execution (ptid);
-}
-
 /* Implementation of to_fileio_open.  */
 
 int

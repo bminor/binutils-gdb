@@ -128,15 +128,6 @@ struct gdbsim_target final
 
   bool has_all_memory ()  override;
   bool has_memory ()  override;
-
-  bool has_stack ()  override
-  { return default_child_has_stack (); }
-
-  bool has_registers ()  override
-  { return default_child_has_registers (); }
-
-  bool has_execution (ptid_t ptid) override
-  { return default_child_has_execution (ptid); }
 };
 
 static struct gdbsim_target gdbsim_ops;

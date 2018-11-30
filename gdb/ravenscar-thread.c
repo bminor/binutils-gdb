@@ -116,13 +116,6 @@ struct ravenscar_thread_target final : public target_ops
   ptid_t get_ada_task_ptid (long lwp, long thread) override;
 
   void mourn_inferior () override;
-
-  bool has_all_memory ()  override { return default_child_has_all_memory (); }
-  bool has_memory ()  override { return default_child_has_memory (); }
-  bool has_stack ()  override { return default_child_has_stack (); }
-  bool has_registers ()  override { return default_child_has_registers (); }
-  bool has_execution (ptid_t ptid) override
-  { return default_child_has_execution (ptid); }
 };
 
 /* This module's target-specific operations.  */

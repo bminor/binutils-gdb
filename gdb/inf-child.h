@@ -72,12 +72,6 @@ public:
 
   char *pid_to_exec_file (int pid) override;
 
-  bool has_all_memory () override;
-  bool has_memory () override;
-  bool has_stack () override;
-  bool has_registers () override;
-  bool has_execution (ptid_t) override;
-
   int fileio_open (struct inferior *inf, const char *filename,
 		   int flags, int mode, int warn_if_slow,
 		   int *target_errno) override;

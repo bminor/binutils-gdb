@@ -186,60 +186,6 @@ target_command (const char *arg, int from_tty)
 		  gdb_stdout);
 }
 
-/* Default target_has_* methods for process_stratum targets.  */
-
-int
-default_child_has_all_memory ()
-{
-  /* If no inferior selected, then we can't read memory here.  */
-  if (inferior_ptid == null_ptid)
-    return 0;
-
-  return 1;
-}
-
-int
-default_child_has_memory ()
-{
-  /* If no inferior selected, then we can't read memory here.  */
-  if (inferior_ptid == null_ptid)
-    return 0;
-
-  return 1;
-}
-
-int
-default_child_has_stack ()
-{
-  /* If no inferior selected, there's no stack.  */
-  if (inferior_ptid == null_ptid)
-    return 0;
-
-  return 1;
-}
-
-int
-default_child_has_registers ()
-{
-  /* Can't read registers from no inferior.  */
-  if (inferior_ptid == null_ptid)
-    return 0;
-
-  return 1;
-}
-
-int
-default_child_has_execution (ptid_t the_ptid)
-{
-  /* If there's no thread selected, then we can't make it run through
-     hoops.  */
-  if (the_ptid == null_ptid)
-    return 0;
-
-  return 1;
-}
-
-
 int
 target_has_all_memory_1 (void)
 {

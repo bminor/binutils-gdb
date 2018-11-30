@@ -90,9 +90,12 @@ public:
 
   const char *thread_name (struct thread_info *) override;
 
+  bool has_all_memory () override { return false; }
   bool has_memory () override;
   bool has_stack () override;
   bool has_registers () override;
+  bool has_execution (ptid_t) override { return false; }
+
   bool info_proc (const char *, enum info_proc_what) override;
 
   /* A few helpers.  */
