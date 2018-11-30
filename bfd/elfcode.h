@@ -784,6 +784,11 @@ elf_object_p (bfd *abfd)
       if (i_ehdrp->e_phnum > ((bfd_size_type) -1) / sizeof (*i_phdr))
 	goto got_wrong_format_error;
 #endif
+      /* Check for a corrupt input file with an impossibly large number
+	 of program headers.  */
+      if (bfd_get_file_size (abfd) > 0
+	  && i_ehdrp->e_phnum > bfd_get_file_size (abfd))
+	goto got_no_match;
       amt = (bfd_size_type) i_ehdrp->e_phnum * sizeof (*i_phdr);
       elf_tdata (abfd)->phdr = (Elf_Internal_Phdr *) bfd_alloc (abfd, amt);
       if (elf_tdata (abfd)->phdr == NULL)

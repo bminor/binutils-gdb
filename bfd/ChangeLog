@@ -1,5 +1,10 @@
 2018-11-30  Nick Clifton  <nickc@redhat.com>
 
+	* elfcode.h (elf_object_p): Check for corrupt input files with
+	more program headers than can actually fit in the file.
+
+2018-11-30  Nick Clifton  <nickc@redhat.com>
+
 	PR 23932
 	* elf.c (IS_CONTAINED_BY_LMA): Add a check for a negative section
 	size.
