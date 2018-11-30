@@ -1,3 +1,11 @@
+2018-11-30  Nick Clifton  <nickc@redhat.com>
+
+	PR 23932
+	* elf.c (IS_CONTAINED_BY_LMA): Add a check for a negative section
+	size.
+	(rewrite_elf_program_header): If no sections are mapped into a
+	segment return an error.
+
 2018-11-30  Alan Modra  <amodra@gmail.com>
 
 	PR 23937
