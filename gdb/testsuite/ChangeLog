@@ -1,3 +1,8 @@
+2018-12-20  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.ada/info_auto_lang.exp: Normalize some_c source file.
+	Update order of results accordingly.
+
 2018-12-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/annota1.exp: Update a test regexp.

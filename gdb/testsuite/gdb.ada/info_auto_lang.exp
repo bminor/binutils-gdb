@@ -24,7 +24,11 @@ load_lib "ada.exp"
 
 standard_ada_testfile proc_in_ada
 set cfile "some_c"
-set csrcfile ${srcdir}/${subdir}/${testdir}/${cfile}.c
+# gnat normalizes proc_in_ada source file when compiling.
+# As the 'info' commands results are sorted by absolute path names, also normalize
+# the some_c source file to ensure that the 'info' results are always
+# giving Ada results first.
+set csrcfile [file normalize ${srcdir}/${subdir}/${testdir}/${cfile}.c]
 set cobject [standard_output_file ${cfile}.o]
 
 if { [gdb_compile "${csrcfile}" "${cobject}" object [list debug]] != "" } {
@@ -111,41 +115,41 @@ foreach_with_prefix language_choice { "auto" "ada" "c" } {
 		[multi_line \
 		     "All functions matching regular expression \"proc_in_\":" \
 		     "" \
-		     "File .*some_c.c:" \
-		     $func_in_c($c_match) \
-		     "" \
 		     "File .*proc_in_ada.adb:" \
-		     $func_in_ada($ada_match)
+		     $func_in_ada($ada_match) \
+		     "" \
+		     "File .*some_c.c:" \
+		     $func_in_c($c_match)
 		]
 
 	    gdb_test "info types some_type" \
 		[multi_line \
-		     "All types matching regular expression \"some_type\":" \
-		     "" \
-		     "File .*some_c.c:" \
-		     $type_in_c($c_match) \
+		     "All types matching regular expression \"some_type\":"  \
 		     "" \
 		     "File .*global_pack.ads:" \
-		     $type_in_ada($ada_match)
+		     $type_in_ada($ada_match)\
+		     "" \
+		     "File .*some_c.c:" \
+		     $type_in_c($c_match)
 		]
 
 	    gdb_test "info variables some_struct" \
 		[multi_line \
 		     "All variables matching regular expression \"some_struct\":" \
 		     "" \
-		     "File .*some_c.c:" \
-		     $var_in_c($c_match) \
-		     "" \
 		     "File .*global_pack.ads:" \
-		     $var_in_ada($ada_match)
+		     $var_in_ada($ada_match) \
+		     "" \
+		     "File .*some_c.c:" \
+		     $var_in_c($c_match)
 		]
 
 	    gdb_test "rbreak proc_in_" \
 		[multi_line \
-		     "Breakpoint.*file .*some_c.c,.*" \
-		     $rbreak_func_in_c($c_match) \
 		     "Breakpoint.*file .*proc_in_ada.adb,.*" \
-		     $rbreak_func_in_ada($ada_match)
+		     $rbreak_func_in_ada($ada_match) \
+		     "Breakpoint.*file .*some_c.c,.*" \
+		     $rbreak_func_in_c($c_match)
 		]
 	    delete_breakpoints
 	}
