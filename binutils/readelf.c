@@ -7597,9 +7597,9 @@ slurp_ia64_unwind_table (Filedata *                  filedata,
 
       for (rp = rela; rp < rela + nrelas; ++rp)
 	{
+	  unsigned int sym_ndx;
 	  unsigned int r_type = get_reloc_type (filedata, rp->r_info);
 	  relname = elf_ia64_reloc_type (r_type);
-	  sym = aux->symtab + get_reloc_symindex (rp->r_info);
 
 	  /* PR 17531: file: 9fa67536.  */
 	  if (relname == NULL)
@@ -7622,6 +7622,15 @@ slurp_ia64_unwind_table (Filedata *                  filedata,
 	      warn (_("Skipping reloc with overlarge offset: %lx\n"), i);
 	      continue;
 	    }
+
+	  sym_ndx = get_reloc_symindex (rp->r_info);
+	  if (sym_ndx >= aux->nsyms)
+	    {
+	      warn (_("Skipping reloc with invalid symbol index: %u\n"),
+		    sym_ndx);
+	      continue;
+	    }
+	  sym = aux->symtab + sym_ndx;
 
 	  switch (rp->r_offset / eh_addr_size % 3)
 	    {
@@ -8053,9 +8062,9 @@ slurp_hppa_unwind_table (Filedata *                  filedata,
 
       for (rp = rela; rp < rela + nrelas; ++rp)
 	{
+	  unsigned int sym_ndx;
 	  unsigned int r_type = get_reloc_type (filedata, rp->r_info);
 	  relname = elf_hppa_reloc_type (r_type);
-	  sym = aux->symtab + get_reloc_symindex (rp->r_info);
 
 	  if (relname == NULL)
 	    {
@@ -8076,6 +8085,15 @@ slurp_hppa_unwind_table (Filedata *                  filedata,
 	      warn (_("Skipping reloc with overlarge offset: %lx\n"), i);
 	      continue;
 	    }
+
+	  sym_ndx = get_reloc_symindex (rp->r_info);
+	  if (sym_ndx >= aux->nsyms)
+	    {
+	      warn (_("Skipping reloc with invalid symbol index: %u\n"),
+		    sym_ndx);
+	      continue;
+	    }
+	  sym = aux->symtab + sym_ndx;
 
 	  switch ((rp->r_offset % unw_ent_size) / 4)
 	    {

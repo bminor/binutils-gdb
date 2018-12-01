@@ -1,5 +1,12 @@
 2018-12-01  Alan Modra  <amodra@gmail.com>
 
+	PR 23946
+	* readelf.c (slurp_ia64_unwind_table): Bounds check symbol index
+	on reloc.
+	(slurp_hppa_unwind_table): Likewise.
+
+2018-12-01  Alan Modra  <amodra@gmail.com>
+
 	PR 23945
 	* readelf.c (slurp_ia64_unwind_table): Don't call elf_ia64_reloc_type
 	needlessly.
