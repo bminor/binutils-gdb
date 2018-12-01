@@ -7597,14 +7597,14 @@ slurp_ia64_unwind_table (Filedata *                  filedata,
 
       for (rp = rela; rp < rela + nrelas; ++rp)
 	{
-	  relname = elf_ia64_reloc_type (get_reloc_type (filedata, rp->r_info));
+	  unsigned int r_type = get_reloc_type (filedata, rp->r_info);
+	  relname = elf_ia64_reloc_type (r_type);
 	  sym = aux->symtab + get_reloc_symindex (rp->r_info);
 
 	  /* PR 17531: file: 9fa67536.  */
 	  if (relname == NULL)
 	    {
-	      warn (_("Skipping unknown relocation type: %u\n"),
-		    get_reloc_type (filedata, rp->r_info));
+	      warn (_("Skipping unknown relocation type: %u\n"), r_type);
 	      continue;
 	    }
 
@@ -8053,17 +8053,29 @@ slurp_hppa_unwind_table (Filedata *                  filedata,
 
       for (rp = rela; rp < rela + nrelas; ++rp)
 	{
-	  relname = elf_hppa_reloc_type (get_reloc_type (filedata, rp->r_info));
+	  unsigned int r_type = get_reloc_type (filedata, rp->r_info);
+	  relname = elf_hppa_reloc_type (r_type);
 	  sym = aux->symtab + get_reloc_symindex (rp->r_info);
+
+	  if (relname == NULL)
+	    {
+	      warn (_("Skipping unknown relocation type: %u\n"), r_type);
+	      continue;
+	    }
 
 	  /* R_PARISC_SEGREL32 or R_PARISC_SEGREL64.  */
 	  if (! const_strneq (relname, "R_PARISC_SEGREL"))
 	    {
-	      warn (_("Skipping unexpected relocation type %s\n"), relname);
+	      warn (_("Skipping unexpected relocation type: %s\n"), relname);
 	      continue;
 	    }
 
 	  i = rp->r_offset / unw_ent_size;
+	  if (i >= aux->table_len)
+	    {
+	      warn (_("Skipping reloc with overlarge offset: %lx\n"), i);
+	      continue;
+	    }
 
 	  switch ((rp->r_offset % unw_ent_size) / 4)
 	    {
