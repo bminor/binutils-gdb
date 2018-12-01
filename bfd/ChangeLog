@@ -1,3 +1,12 @@
+2018-12-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23930
+	* elfxx-x86.c (_bfd_x86_elf_size_dynamic_sections): Update
+	the iplt section alignment if it is non-empty.
+	(_bfd_x86_elf_link_setup_gnu_properties): Set plt.iplt_alignment
+	and delay setting the iplt section alignment.
+	* elfxx-x86.h (elf_x86_plt_layout): Add iplt_alignment.
+
 2018-11-30  Nick Clifton  <nickc@redhat.com>
 
 	PR 23942

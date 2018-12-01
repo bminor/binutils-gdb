@@ -1275,6 +1275,14 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
       if ((s->flags & SEC_HAS_CONTENTS) == 0)
 	continue;
 
+      /* NB: Initially, the iplt section has minimal alignment to
+	 avoid moving dot of the following section backwards when
+	 it is empty.  Update its section alignment now since it
+	 is non-empty.  */
+      if (s == htab->elf.iplt)
+	bfd_set_section_alignment (s->owner, s,
+				   htab->plt.iplt_alignment);
+
       /* Allocate memory for the section contents.  We use bfd_zalloc
 	 here in case unused entries are not reclaimed before the
 	 section's contents are written out.  This should not happen,
@@ -2907,15 +2915,23 @@ error_alignment:
 	}
     }
 
-  if (normal_target)
+  /* The .iplt section is used for IFUNC symbols in static
+     executables.  */
+  sec = htab->elf.iplt;
+  if (sec != NULL)
     {
-      /* The .iplt section is used for IFUNC symbols in static
-	 executables.  */
-      sec = htab->elf.iplt;
-      if (sec != NULL
-	  && !bfd_set_section_alignment (sec->owner, sec,
-					 plt_alignment))
+      /* NB: Delay setting its alignment until we know it is non-empty.
+	 Otherwise an empty iplt section may change vma and lma of the
+	 following sections, which triggers moving dot of the following
+	 section backwards, resulting in a warning and section lma not
+	 being set properly.  It later leads to a "File truncated"
+	 error.  */
+      if (!bfd_set_section_alignment (sec->owner, sec, 0))
 	goto error_alignment;
+
+      htab->plt.iplt_alignment = (normal_target
+				  ? plt_alignment
+				  : bed->plt_alignment);
     }
 
   return pbfd;

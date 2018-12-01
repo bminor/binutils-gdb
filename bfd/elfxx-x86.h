@@ -389,6 +389,9 @@ struct elf_x86_plt_layout
      This is only used for x86-64.  */
   unsigned int plt_got_insn_size;
 
+  /* Alignment of the .iplt section.  */
+  unsigned int iplt_alignment;
+
   /* .eh_frame covering the .plt section.  */
   const bfd_byte *eh_frame_plt;
   unsigned int eh_frame_plt_size;

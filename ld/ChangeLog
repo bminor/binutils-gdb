@@ -1,3 +1,16 @@
+2018-12-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23930
+	* testsuite/ld-i386/i386.exp: Run pr23930.
+	* testsuite/ld-i386/pr23930.d: New file.
+	* testsuite/ld-x86-64/pr23930-32.t: Likewise.
+	* testsuite/ld-x86-64/pr23930-x32.d: Likewise.
+	* testsuite/ld-x86-64/pr23930.d: Likewise.
+	* testsuite/ld-x86-64/pr23930.t: Likewise.
+	* testsuite/ld-x86-64/pr23930a.s: Likewise.
+	* testsuite/ld-x86-64/pr23930b.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pr23930 and pr23930-x32.
+---
 2018-11-30  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/pr23937.d,
