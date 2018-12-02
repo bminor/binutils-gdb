@@ -751,11 +751,13 @@ build_compressed_section_map(
 	      const unsigned char* contents =
 		  obj->section_contents(i, &len, false);
 	      uint64_t uncompressed_size;
+	      Compressed_section_info info;
 	      if (is_zcompressed)
 		{
 		  // Skip over the ".zdebug" prefix.
 		  name += 7;
 		  uncompressed_size = get_uncompressed_size(contents, len);
+		  info.addralign = shdr.get_sh_addralign();
 		}
 	      else
 		{
@@ -763,8 +765,8 @@ build_compressed_section_map(
 		  name += 6;
 		  elfcpp::Chdr<size, big_endian> chdr(contents);
 		  uncompressed_size = chdr.get_ch_size();
+		  info.addralign = chdr.get_ch_addralign();
 		}
-	      Compressed_section_info info;
 	      info.size = convert_to_section_size_type(uncompressed_size);
 	      info.flag = shdr.get_sh_flags();
 	      info.contents = NULL;
@@ -3064,7 +3066,8 @@ const unsigned char*
 Object::decompressed_section_contents(
     unsigned int shndx,
     section_size_type* plen,
-    bool* is_new)
+    bool* is_new,
+    uint64_t* palign)
 {
   section_size_type buffer_size;
   const unsigned char* buffer = this->do_section_contents(shndx, &buffer_size,
@@ -3091,6 +3094,8 @@ Object::decompressed_section_contents(
     {
       *plen = uncompressed_size;
       *is_new = false;
+      if (palign != NULL)
+	*palign = p->second.addralign;
       return p->second.contents;
     }
 
@@ -3112,6 +3117,8 @@ Object::decompressed_section_contents(
   // once in this pass.
   *plen = uncompressed_size;
   *is_new = true;
+  if (palign != NULL)
+    *palign = p->second.addralign;
   return uncompressed_data;
 }
 

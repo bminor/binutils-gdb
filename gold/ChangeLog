@@ -1,3 +1,19 @@
+2018-12-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/23919
+	* merge.cc (Output_merge_string<Char_type>::do_add_input_section):
+	Get addralign from decompressed_section_contents.
+	* object.cc (build_compressed_section_map): Set info.addralign.
+	(Object::decompressed_section_contents): Add a palign
+	argument and store p->second.addralign in *palign if it isn't
+	NULL.
+	* object.h (Compressed_section_info): Add addralign.
+	(section_is_compressed): Add a palign argument, default it
+	to NULL, store p->second.addralign in *palign if it isn't NULL.
+	(Object::decompressed_section_contents): Likewise.
+	* output.cc (Output_section::add_input_section): Get addralign
+	from section_is_compressed.
+
 2018-11-26  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/Makefile.am (justsyms_lib): Link with -z norelro.
