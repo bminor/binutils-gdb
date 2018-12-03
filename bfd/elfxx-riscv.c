@@ -28,6 +28,7 @@
 #include "opcode/riscv.h"
 #include "libiberty.h"
 #include "elfxx-riscv.h"
+#include "safe-ctype.h"
 #include <stdint.h>
 
 #define MINUS_ONE ((bfd_vma)0 - 1)
@@ -1009,4 +1010,478 @@ riscv_elf_add_sub_reloc (bfd *abfd,
   bfd_put (howto->bitsize, abfd, relocation, data + reloc_entry->address);
 
   return bfd_reloc_ok;
+}
+
+/* Parsing subset version.
+
+   Return Value:
+     Points to the end of version
+
+   Arguments:
+     `rps`: Hooks and status for parsing subset.
+     `march`: Full arch string.
+     `p`: Curent parsing position.
+     `major_version`: Parsing result of major version, using
+      default_major_version if version is not present in arch string.
+     `minor_version`: Parsing result of minor version, set to 0 if version is
+     not present in arch string, but set to `default_minor_version` if
+     `major_version` using default_major_version.
+     `default_major_version`: Default major version.
+     `default_minor_version`: Default minor version.
+     `std_ext_p`: True if parsing std extension.  */
+
+static const char *
+riscv_parsing_subset_version (riscv_parse_subset_t *rps,
+			      const char *march,
+			      const char *p,
+			      unsigned *major_version,
+			      unsigned *minor_version,
+			      unsigned default_major_version,
+			      unsigned default_minor_version,
+			      bfd_boolean std_ext_p)
+{
+  bfd_boolean major_p = TRUE;
+  unsigned version = 0;
+  unsigned major = 0;
+  unsigned minor = 0;
+  char np;
+
+  for (;*p; ++p)
+    {
+      if (*p == 'p')
+	{
+	  np = *(p + 1);
+
+	  if (!ISDIGIT (np))
+	    {
+	      /* Might be beginning of `p` extension.  */
+	      if (std_ext_p)
+		{
+		  *major_version = version;
+		  *minor_version = 0;
+		  return p;
+		}
+	      else
+		{
+		  rps->error_handler ("-march=%s: Expect number after `%dp'.",
+				      march, version);
+		  return NULL;
+		}
+	    }
+
+	  major = version;
+	  major_p = FALSE;
+	  version = 0;
+	}
+      else if (ISDIGIT (*p))
+	version = (version * 10) + (*p - '0');
+      else
+	break;
+    }
+
+  if (major_p)
+    major = version;
+  else
+    minor = version;
+
+  if (major == 0 && minor == 0)
+    {
+      /* We don't found any version string, use default version.  */
+      *major_version = default_major_version;
+      *minor_version = default_minor_version;
+    }
+  else
+    {
+      *major_version = major;
+      *minor_version = minor;
+    }
+  return p;
+}
+
+/* Return string which contain all supported standard extensions in
+   canonical order.  */
+
+const char *
+riscv_supported_std_ext (void)
+{
+  return "mafdqlcbjtpvn";
+}
+
+/* Parsing function for standard extensions.
+
+   Return Value:
+     Points to the end of extensions.
+
+   Arguments:
+     `rps`: Hooks and status for parsing subset.
+     `march`: Full arch string.
+     `p`: Curent parsing position.  */
+
+static const char *
+riscv_parse_std_ext (riscv_parse_subset_t *rps,
+		     const char *march, const char *p)
+{
+  const char *all_std_exts = riscv_supported_std_ext ();
+  const char *std_exts = all_std_exts;
+
+  unsigned major_version = 0;
+  unsigned minor_version = 0;
+  char std_ext = '\0';
+
+  /* First letter must start with i, e or g.  */
+  switch (*p)
+    {
+      case 'i':
+	p++;
+	p = riscv_parsing_subset_version (
+	      rps,
+	      march,
+	      p, &major_version, &minor_version,
+	      /* default_major_version= */ 2,
+	      /* default_minor_version= */ 0,
+	      /* std_ext_p= */TRUE);
+	riscv_add_subset (rps->subset_list, "i", major_version, minor_version);
+	break;
+
+      case 'e':
+	p++;
+	p = riscv_parsing_subset_version (
+	      rps,
+	      march,
+	      p, &major_version, &minor_version,
+	      /* default_major_version= */ 1,
+	      /* default_minor_version= */ 9,
+	      /* std_ext_p= */TRUE);
+
+	riscv_add_subset (rps->subset_list, "e", major_version, minor_version);
+	riscv_add_subset (rps->subset_list, "i", 2, 0);
+
+	if (*rps->xlen > 32)
+	  {
+	    rps->error_handler ("-march=%s: rv%de is not a valid base ISA",
+				march, *rps->xlen);
+	    return NULL;
+	  }
+
+	break;
+
+      case 'g':
+	p++;
+	p = riscv_parsing_subset_version (
+	      rps,
+	      march,
+	      p, &major_version, &minor_version,
+	      /* default_major_version= */ 2,
+	      /* default_minor_version= */ 0,
+	      /* std_ext_p= */TRUE);
+	riscv_add_subset (rps->subset_list, "i", major_version, minor_version);
+
+	for ( ; *std_exts != 'q'; std_exts++)
+	  {
+	    const char subset[] = {*std_exts, '\0'};
+	    riscv_add_subset (
+	      rps->subset_list, subset, major_version, minor_version);
+	  }
+	break;
+
+      default:
+	rps->error_handler (
+	  "-march=%s: first ISA subset must be `e', `i' or `g'", march);
+	return NULL;
+    }
+
+  while (*p)
+    {
+      char subset[2] = {0, 0};
+
+      if (*p == 'x' || *p == 's')
+	break;
+
+      if (*p == '_')
+	{
+	  p++;
+	  continue;
+	}
+
+      std_ext = *p;
+
+      /* Checking canonical order.  */
+      while (*std_exts && std_ext != *std_exts) std_exts++;
+
+      if (std_ext != *std_exts)
+	{
+	  if (strchr (all_std_exts, std_ext) == NULL)
+	    rps->error_handler (
+	      "-march=%s: unsupported ISA subset `%c'", march, *p);
+	  else
+	    rps->error_handler (
+	      "-march=%s: ISA string is not in canonical order. `%c'",
+	      march, *p);
+	  return NULL;
+	}
+
+      std_exts++;
+
+      p++;
+      p = riscv_parsing_subset_version (
+	    rps,
+	    march,
+	    p, &major_version, &minor_version,
+	    /* default_major_version= */ 2,
+	    /* default_minor_version= */ 0,
+	    /* std_ext_p= */TRUE);
+
+      subset[0] = std_ext;
+
+      riscv_add_subset (rps->subset_list, subset, major_version, minor_version);
+    }
+  return p;
+}
+
+/* Parsing function for non-standard and supervisor extensions.
+
+   Return Value:
+     Points to the end of extensions.
+
+   Arguments:
+     `rps`: Hooks and status for parsing subset.
+     `march`: Full arch string.
+     `p`: Curent parsing position.
+     `ext_type`: What kind of extensions, 'x', 's' or 'sx'.
+     `ext_type_str`: Full name for kind of extension.  */
+
+static const char *
+riscv_parse_sv_or_non_std_ext (riscv_parse_subset_t *rps,
+			       const char *march,
+			       const char *p,
+			       const char *ext_type,
+			       const char *ext_type_str)
+{
+  unsigned major_version = 0;
+  unsigned minor_version = 0;
+  size_t ext_type_len = strlen (ext_type);
+
+  while (*p)
+    {
+      if (*p == '_')
+	{
+	  p++;
+	  continue;
+	}
+
+      if (strncmp (p, ext_type, ext_type_len) != 0)
+	break;
+
+      /* It's non-standard supervisor extension if it prefix with sx.  */
+      if ((ext_type[0] == 's') && (ext_type_len == 1)
+	  && (*(p + 1) == 'x'))
+	break;
+
+      char *subset = xstrdup (p);
+      char *q = subset;
+      const char *end_of_version;
+
+      while (*++q != '\0' && *q != '_' && !ISDIGIT (*q))
+	;
+
+      end_of_version =
+	riscv_parsing_subset_version (
+	  rps,
+	  march,
+	  q, &major_version, &minor_version,
+	  /* default_major_version= */ 2,
+	  /* default_minor_version= */ 0,
+	  /* std_ext_p= */FALSE);
+
+      *q = '\0';
+
+      riscv_add_subset (rps->subset_list, subset, major_version, minor_version);
+      free (subset);
+      p += end_of_version - subset;
+
+      if (*p != '\0' && *p != '_')
+	{
+	  rps->error_handler ("-march=%s: %s must seperate with _",
+			      march, ext_type_str);
+	  return NULL;
+	}
+    }
+
+  return p;
+}
+
+/* Function for parsing arch string.
+
+   Return Value:
+     Return TRUE on success.
+
+   Arguments:
+     `rps`: Hooks and status for parsing subset.
+     `arch`: Arch string.  */
+
+bfd_boolean
+riscv_parse_subset (riscv_parse_subset_t *rps,
+		    const char *arch)
+{
+  const char *p = arch;
+
+  if (strncmp (p, "rv32", 4) == 0)
+    {
+      *rps->xlen = 32;
+      p += 4;
+    }
+  else if (strncmp (p, "rv64", 4) == 0)
+    {
+      *rps->xlen = 64;
+      p += 4;
+    }
+  else
+    {
+      rps->error_handler ("-march=%s: ISA string must begin with rv32 or rv64",
+			  arch);
+      return FALSE;
+    }
+
+  /* Parsing standard extension.  */
+  p = riscv_parse_std_ext (rps, arch, p);
+
+  if (p == NULL)
+    return FALSE;
+
+  /* Parsing non-standard extension.  */
+  p = riscv_parse_sv_or_non_std_ext (
+	rps, arch, p, "x", "non-standard extension");
+
+  if (p == NULL)
+    return FALSE;
+
+  /* Parsing supervisor extension.  */
+  p = riscv_parse_sv_or_non_std_ext (
+	rps, arch, p, "s", "supervisor extension");
+
+  if (p == NULL)
+    return FALSE;
+
+  /* Parsing non-standard supervisor extension.  */
+  p = riscv_parse_sv_or_non_std_ext (
+	rps, arch, p, "sx", "non-standard supervisor extension");
+
+  if (p == NULL)
+    return FALSE;
+
+  if (*p != '\0')
+    {
+      rps->error_handler ("-march=%s: unexpected ISA string at end: %s",
+			  arch, p);
+      return FALSE;
+    }
+
+  if (riscv_lookup_subset (rps->subset_list, "e")
+      && riscv_lookup_subset (rps->subset_list, "f"))
+    {
+      rps->error_handler ("-march=%s: rv32e does not support the `f' extension",
+			  arch);
+      return FALSE;
+    }
+
+  if (riscv_lookup_subset (rps->subset_list, "d")
+      && !riscv_lookup_subset (rps->subset_list, "f"))
+    {
+      rps->error_handler ("-march=%s: `d' extension requires `f' extension",
+			  arch);
+      return FALSE;
+    }
+
+  if (riscv_lookup_subset (rps->subset_list, "q")
+      && !riscv_lookup_subset (rps->subset_list, "d"))
+    {
+      rps->error_handler ("-march=%s: `q' extension requires `d' extension",
+			  arch);
+      return FALSE;
+    }
+
+  if (riscv_lookup_subset (rps->subset_list, "q") && *rps->xlen < 64)
+    {
+      rps->error_handler ("-march=%s: rv32 does not support the `q' extension",
+			  arch);
+      return FALSE;
+    }
+  return TRUE;
+}
+
+/* Add new subset to list.  */
+
+void
+riscv_add_subset (riscv_subset_list_t *subset_list,
+		  const char *subset,
+		  int major, int minor)
+{
+  riscv_subset_t *s = xmalloc (sizeof *s);
+
+  if (subset_list->head == NULL)
+    subset_list->head = s;
+
+  s->name = xstrdup (subset);
+  s->major_version = major;
+  s->minor_version = minor;
+  s->next = NULL;
+
+  if (subset_list->tail != NULL)
+    subset_list->tail->next = s;
+
+  subset_list->tail = s;
+}
+
+/* Find subset in list without version checking, return NULL if not found.  */
+
+riscv_subset_t *
+riscv_lookup_subset (const riscv_subset_list_t *subset_list,
+		     const char *subset)
+{
+  return riscv_lookup_subset_version (
+	   subset_list, subset,
+	   RISCV_DONT_CARE_VERSION,
+	   RISCV_DONT_CARE_VERSION);
+}
+
+/* Find subset in list with version checking, return NULL if not found.  */
+
+riscv_subset_t *
+riscv_lookup_subset_version (const riscv_subset_list_t *subset_list,
+			     const char *subset,
+			     int major, int minor)
+{
+  riscv_subset_t *s;
+
+  for (s = subset_list->head; s != NULL; s = s->next)
+    if (strcasecmp (s->name, subset) == 0)
+      {
+	if ((major != RISCV_DONT_CARE_VERSION)
+	    && (s->major_version != major))
+	  return NULL;
+
+	if ((minor != RISCV_DONT_CARE_VERSION)
+	    && (s->minor_version != minor))
+	  return NULL;
+
+	return s;
+      }
+
+  return NULL;
+}
+
+/* Release subset list.  */
+
+void
+riscv_release_subset_list (riscv_subset_list_t *subset_list)
+{
+   while (subset_list->head != NULL)
+    {
+      riscv_subset_t *next = subset_list->head->next;
+      free ((void *)subset_list->head->name);
+      free (subset_list->head);
+      subset_list->head = next;
+    }
+
+  subset_list->tail = NULL;
 }

@@ -1,3 +1,8 @@
+2018-12-03  Kito Cheng  <kito@andestech.com>
+
+	* opcode/riscv.h (riscv_opcode): Change type of xlen_requirement to
+	unsigned.
+
 2018-11-27  Jim Wilson  <jimw@sifive.com>
 
 	* opcode/riscv.h (OP_MASK_CFUNCT6, OP_SH_CFUNCT6): New.

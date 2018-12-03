@@ -29,6 +29,7 @@
 #include "dwarf2dbg.h"
 #include "dw2gencfi.h"
 
+#include "bfd/elfxx-riscv.h"
 #include "elf/riscv.h"
 #include "opcode/riscv.h"
 
@@ -102,62 +103,27 @@ riscv_set_rve (bfd_boolean rve_value)
   riscv_opts.rve = rve_value;
 }
 
-struct riscv_subset
-{
-  const char *name;
-
-  struct riscv_subset *next;
-};
-
-static struct riscv_subset *riscv_subsets;
+static riscv_subset_list_t riscv_subsets;
 
 static bfd_boolean
-riscv_subset_supports (unsigned xlen_required, const char *feature)
+riscv_subset_supports (const char *feature)
 {
-  struct riscv_subset *s;
+  if (riscv_opts.rvc && (strcasecmp (feature, "c") == 0))
+    return TRUE;
 
-  if (xlen_required && xlen != xlen_required)
-    return FALSE;
-
-  for (s = riscv_subsets; s != NULL; s = s->next)
-    if (strcasecmp (s->name, feature) == 0)
-      return TRUE;
-
-  return FALSE;
+  return riscv_lookup_subset (&riscv_subsets, feature) != NULL;
 }
 
 static bfd_boolean
-riscv_multi_subset_supports (unsigned xlen_required, const char *features[])
+riscv_multi_subset_supports (const char *features[])
 {
   unsigned i = 0;
   bfd_boolean supported = TRUE;
 
   for (;features[i]; ++i)
-    supported = supported && riscv_subset_supports (xlen_required, features[i]);
+    supported = supported && riscv_subset_supports (features[i]);
 
   return supported;
-}
-
-static void
-riscv_clear_subsets (void)
-{
-  while (riscv_subsets != NULL)
-    {
-      struct riscv_subset *next = riscv_subsets->next;
-      free ((void *) riscv_subsets->name);
-      free (riscv_subsets);
-      riscv_subsets = next;
-    }
-}
-
-static void
-riscv_add_subset (const char *subset)
-{
-  struct riscv_subset *s = xmalloc (sizeof *s);
-
-  s->name = xstrdup (subset);
-  s->next = riscv_subsets;
-  riscv_subsets = s;
 }
 
 /* Set which ISA and extensions are available.  */
@@ -165,97 +131,13 @@ riscv_add_subset (const char *subset)
 static void
 riscv_set_arch (const char *s)
 {
-  const char *all_subsets = "imafdqc";
-  char *extension = NULL;
-  const char *p = s;
+  riscv_parse_subset_t rps;
+  rps.subset_list = &riscv_subsets;
+  rps.error_handler = as_fatal;
+  rps.xlen = &xlen;
 
-  riscv_clear_subsets();
-
-  if (strncmp (p, "rv32", 4) == 0)
-    {
-      xlen = 32;
-      p += 4;
-    }
-  else if (strncmp (p, "rv64", 4) == 0)
-    {
-      xlen = 64;
-      p += 4;
-    }
-  else
-    as_fatal ("-march=%s: ISA string must begin with rv32 or rv64", s);
-
-  switch (*p)
-    {
-      case 'i':
-	break;
-
-      case 'e':
-	p++;
-	riscv_add_subset ("e");
-	riscv_add_subset ("i");
-
-	if (xlen > 32)
-	  as_fatal ("-march=%s: rv%de is not a valid base ISA", s, xlen);
-
-	break;
-
-      case 'g':
-	p++;
-	for ( ; *all_subsets != 'q'; all_subsets++)
-	  {
-	    const char subset[] = {*all_subsets, '\0'};
-	    riscv_add_subset (subset);
-	  }
-	break;
-
-      default:
-	as_fatal ("-march=%s: first ISA subset must be `e', `i' or `g'", s);
-    }
-
-  while (*p)
-    {
-      if (*p == 'x')
-	{
-	  char *subset = xstrdup (p);
-	  char *q = subset;
-
-	  while (*++q != '\0' && *q != '_')
-	    ;
-	  *q = '\0';
-
-	  if (extension)
-	    as_fatal ("-march=%s: only one non-standard extension is supported"
-		      " (found `%s' and `%s')", s, extension, subset);
-	  extension = subset;
-	  riscv_add_subset (subset);
-	  p += strlen (subset);
-	}
-      else if (*p == '_')
-	p++;
-      else if ((all_subsets = strchr (all_subsets, *p)) != NULL)
-	{
-	  const char subset[] = {*p, 0};
-	  riscv_add_subset (subset);
-	  all_subsets++;
-	  p++;
-	}
-      else
-	as_fatal ("-march=%s: unsupported ISA subset `%c'", s, *p);
-    }
-
-  if (riscv_subset_supports (0, "e") && riscv_subset_supports (0, "f"))
-    as_fatal ("-march=%s: rv32e does not support the `f' extension", s);
-
-  if (riscv_subset_supports (0, "d") && !riscv_subset_supports (0, "f"))
-    as_fatal ("-march=%s: `d' extension requires `f' extension", s);
-
-  if (riscv_subset_supports (0, "q") && !riscv_subset_supports (0, "d"))
-    as_fatal ("-march=%s: `q' extension requires `d' extension", s);
-
-  if (riscv_subset_supports (0, "q") && xlen < 64)
-    as_fatal ("-march=%s: rv32 does not support the `q' extension", s);
-
-  free (extension);
+  riscv_release_subset_list (&riscv_subsets);
+  riscv_parse_subset (&rps, s);
 }
 
 /* Handle of the OPCODE hash table.  */
@@ -1491,7 +1373,10 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
   argsStart = s;
   for ( ; insn && insn->name && strcmp (insn->name, str) == 0; insn++)
     {
-      if (!riscv_multi_subset_supports (insn->xlen_requirement, insn->subset))
+      if ((insn->xlen_requirement != 0) && (xlen != insn->xlen_requirement))
+	continue;
+
+      if (!riscv_multi_subset_supports (insn->subset))
 	continue;
 
       create_insn (ip, insn);
@@ -2332,19 +2217,17 @@ riscv_after_parse_args (void)
 	as_bad ("unknown default architecture `%s'", default_arch);
     }
 
-  if (riscv_subsets == NULL)
+  if (riscv_subsets.head == NULL)
     riscv_set_arch (xlen == 64 ? "rv64g" : "rv32g");
 
   /* Add the RVC extension, regardless of -march, to support .option rvc.  */
   riscv_set_rvc (FALSE);
-  if (riscv_subset_supports (0, "c"))
+  if (riscv_subset_supports ("c"))
     riscv_set_rvc (TRUE);
-  else
-    riscv_add_subset ("c");
 
   /* Enable RVE if specified by the -march option.  */
   riscv_set_rve (FALSE);
-  if (riscv_subset_supports (0, "e"))
+  if (riscv_subset_supports ("e"))
     riscv_set_rve (TRUE);
 
   /* Infer ABI from ISA if not specified on command line.  */
@@ -2357,12 +2240,12 @@ riscv_after_parse_args (void)
 
   if (float_abi == FLOAT_ABI_DEFAULT)
     {
-      struct riscv_subset *subset;
+      riscv_subset_t *subset;
 
       /* Assume soft-float unless D extension is present.  */
       float_abi = FLOAT_ABI_SOFT;
 
-      for (subset = riscv_subsets; subset != NULL; subset = subset->next)
+      for (subset = riscv_subsets.head; subset != NULL; subset = subset->next)
 	{
 	  if (strcasecmp (subset->name, "D") == 0)
 	    float_abi = FLOAT_ABI_DOUBLE;

@@ -295,7 +295,7 @@ struct riscv_opcode
   /* The name of the instruction.  */
   const char *name;
   /* The requirement of xlen for the instruction, 0 if no requirement.  */
-  int xlen_requirement;
+  unsigned xlen_requirement;
   /* An array of ISA subset name (I, M, A, F, D, Xextension), must ended
      with a NULL pointer sential.  */
   const char *subset[MAX_SUBSET_NUM];

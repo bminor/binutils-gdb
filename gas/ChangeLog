@@ -1,4 +1,48 @@
-2018-12-03  Egeyar Bagcioglu  <egeyar.bagcioglu@oracle.com>
+2018-12-03  Kito Cheng  <kito@andestech.com>
+
+	* config/tc-riscv.c: Include elfxx-riscv.h.
+	(struct riscv_subset): Removed.
+	(riscv_subsets): Change type to riscv_subset_list_t.
+	(riscv_subset_supports): Removed argument: xlen_required and move
+	logic into libbfd.
+	(riscv_multi_subset_supports): Removed argument: xlen_required.
+	(riscv_clear_subsets): Removed.
+	(riscv_add_subset): Ditto.
+	(riscv_set_arch): Extract parsing logic into libbfd.
+	(riscv_ip): Update argument for riscv_multi_subset_supports and
+	riscv_subset_supports. Update riscv_subsets due to struct definition
+	changed.
+	(riscv_after_parse_args): Update riscv_subsets due to struct
+	definition changed, update and argument for riscv_subset_supports.
+	* testsuite/gas/riscv/empty.s: New.
+	* testsuite/gas/riscv/march-fail-rv32ef.d: Likewise.
+	* testsuite/gas/riscv/march-fail-rv32ef.l: Likewise.
+	* testsuite/gas/riscv/march-fail-rv32i.d: Likewise.
+	* testsuite/gas/riscv/march-fail-rv32i.l: Likewise.
+	* testsuite/gas/riscv/march-fail-rv32iam.d: Likewise.
+	* testsuite/gas/riscv/march-fail-rv32iam.l: Likewise.
+	* testsuite/gas/riscv/march-fail-rv32ic.d: Likewise.
+	* testsuite/gas/riscv/march-fail-rv32ic.l: Likewise.
+	* testsuite/gas/riscv/march-fail-rv32icx2p.d: Likewise.
+	* testsuite/gas/riscv/march-fail-rv32icx2p.l: Likewise.
+	* testsuite/gas/riscv/march-fail-rv32imc.d: Likewise.
+	* testsuite/gas/riscv/march-fail-rv32imc.l: Likewise.
+	* testsuite/gas/riscv/march-fail-rv64I.d: Likewise.
+	* testsuite/gas/riscv/march-fail-rv64I.l: Likewise.
+	* testsuite/gas/riscv/march-fail-rv64e.d: Likewise.
+	* testsuite/gas/riscv/march-fail-rv64e.l: Likewise.
+	* testsuite/gas/riscv/march-ok-g2.d: Likewise.
+	* testsuite/gas/riscv/march-ok-g2p0.d: Likewise.
+	* testsuite/gas/riscv/march-ok-i2p0.d: Likewise.
+	* testsuite/gas/riscv/march-ok-nse-with-version.: Likewise.d
+	* testsuite/gas/riscv/march-ok-s-with-version.d: Likewise.
+	* testsuite/gas/riscv/march-ok-s.d: Likewise.
+	* testsuite/gas/riscv/march-ok-sx.d: Likewise.
+	* testsuite/gas/riscv/march-ok-two-nse.d: Likewise.
+	* testsuite/gas/riscv/march-ok-g2_p1.d: Likewise.
+	* testsuite/gas/riscv/march-ok-i2p0m2_a2f2.d: Likewise.
+
+018-12-03  Egeyar Bagcioglu  <egeyar.bagcioglu@oracle.com>
 
 	PR 23193
 	PR 19721

@@ -1,3 +1,25 @@
+2018-12-03  Kito Cheng  <kito@andestech.com>
+
+	* elfxx-riscv.h (RISCV_DONT_CARE_VERSION): New macro.
+	(struct riscv_subset_t): New structure.
+	(riscv_subset_t): New typedef.
+	(riscv_subset_list_t): New structure.
+	(riscv_release_subset_list): New prototype.
+	(riscv_add_subset): Likewise.
+	(riscv_lookup_subset): Likewise.
+	(riscv_lookup_subset_version): Likewise.
+	(riscv_release_subset_list): Likewise.
+	* elfxx-riscv.c: Include safe-ctype.h.
+	(riscv_parsing_subset_version): New function.
+	(riscv_supported_std_ext): Likewise.
+	(riscv_parse_std_ext): Likewise.
+	(riscv_parse_sv_or_non_std_ext): Likewise.
+	(riscv_parse_subset): Likewise.
+	(riscv_add_subset): Likewise.
+	(riscv_lookup_subset): Likewise.
+	(riscv_lookup_subset_version): Likewise.
+	(riscv_release_subset_list): Likewise.
+
 2018-12-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23930
