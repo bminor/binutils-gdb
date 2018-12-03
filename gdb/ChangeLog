@@ -1,3 +1,12 @@
+2018-12-05  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-tdep.c (riscv_features_from_gdbarch_info): New function.
+	(riscv_find_default_target_description): Use new function to
+	extract feature from gdbarch_info.
+	(riscv_gdbarch_init): Add error checks for xlen and flen between
+	target description and bfd headers.  Be smarter about when we
+	think the hardware floating point abi should be used.
+
 2018-12-05  Alan Hayward  <alan.hayward@arm.com>
 
 	* nat/aarch64-linux-hw-point.c

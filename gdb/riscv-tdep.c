@@ -2789,19 +2789,15 @@ static const struct frame_unwind riscv_frame_unwind =
   /*.prev_arch     =*/ NULL,
 };
 
-/* Find a suitable default target description.  Use the contents of INFO,
-   specifically the bfd object being executed, to guide the selection of a
-   suitable default target description.  */
+/* Extract a set of required target features out of INFO, specifically the
+   bfd being executed is examined to see what target features it requires.
+   IF there is no current bfd, or the bfd doesn't indicate any useful
+   features then a RISCV_GDBARCH_FEATURES is returned in its default state.  */
 
-static const struct target_desc *
-riscv_find_default_target_description (const struct gdbarch_info info)
+static struct riscv_gdbarch_features
+riscv_features_from_gdbarch_info (const struct gdbarch_info info)
 {
   struct riscv_gdbarch_features features;
-
-  /* Setup some arbitrary defaults.  */
-  features.xlen = 8;
-  features.flen = 0;
-  features.hw_float_abi = false;
 
   /* Now try to improve on the defaults by looking at the binary we are
      going to execute.  We assume the user knows what they are doing and
@@ -2846,6 +2842,26 @@ riscv_find_default_target_description (const struct gdbarch_info info)
 	internal_error (__FILE__, __LINE__, _("unknown bits_per_word %d"),
 			binfo->bits_per_word);
     }
+
+  return features;
+}
+
+/* Find a suitable default target description.  Use the contents of INFO,
+   specifically the bfd object being executed, to guide the selection of a
+   suitable default target description.  */
+
+static const struct target_desc *
+riscv_find_default_target_description (const struct gdbarch_info info)
+{
+  /* Extract desired feature set from INFO.  */
+  struct riscv_gdbarch_features features
+    = riscv_features_from_gdbarch_info (info);
+
+  /* If the XLEN field is still 0 then we got nothing useful from INFO.  In
+     this case we fall back to a minimal useful target, 8-byte x-registers,
+     with no floating point.  */
+  if (features.xlen == 0)
+    features.xlen = 8;
 
   /* Now build a target description based on the feature set.  */
   return riscv_create_target_description (features);
@@ -2981,7 +2997,6 @@ riscv_gdbarch_init (struct gdbarch_info info,
 
       int bitsize = tdesc_register_bitsize (feature_fpu, "ft0");
       features.flen = (bitsize / 8);
-      features.hw_float_abi = true;
 
       if (riscv_debug_gdbarch)
         fprintf_filtered
@@ -2991,7 +3006,6 @@ riscv_gdbarch_init (struct gdbarch_info info,
   else
     {
       features.flen = 0;
-      features.hw_float_abi = false;
 
       if (riscv_debug_gdbarch)
         fprintf_filtered
@@ -3014,6 +3028,29 @@ riscv_gdbarch_init (struct gdbarch_info info,
       tdesc_data_cleanup (tdesc_data);
       return NULL;
     }
+
+  /* Have a look at what the supplied (if any) bfd object requires of the
+     target, then check that this matches with what the target is
+     providing.  */
+  struct riscv_gdbarch_features info_features
+    = riscv_features_from_gdbarch_info (info);
+  if (info_features.xlen != 0 && info_features.xlen != features.xlen)
+    error (_("bfd requires xlen %d, but target has xlen %d"),
+           info_features.xlen, features.xlen);
+  if (info_features.flen != 0 && info_features.flen != features.flen)
+    error (_("bfd requires flen %d, but target has flen %d"),
+           info_features.flen, features.flen);
+
+  /* If the xlen from INFO_FEATURES is 0 then this indicates either there
+     is no bfd object, or nothing useful could be extracted from it, in
+     this case we enable hardware float abi if the target has floating
+     point registers.
+
+     If the xlen from INFO_FEATURES is not 0, and the flen in
+     INFO_FEATURES is also not 0, then this indicates that the supplied
+     bfd does require hardware floating point abi.  */
+  if (info_features.xlen == 0 || info_features.flen != 0)
+    features.hw_float_abi = (features.flen > 0);
 
   /* Find a candidate among the list of pre-declared architectures.  */
   for (arches = gdbarch_list_lookup_by_info (arches, &info);
