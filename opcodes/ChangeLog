@@ -1,3 +1,10 @@
+2018-12-03  Egeyar Bagcioglu <egeyar.bagcioglu@oracle.com>
+
+	PR 23193
+        PR 19721
+        * aarch64-tbl.h (aarch64_opcode_table): Only disassemble an ORR
+	encoding as MOV if the shift operation is a left shift of zero.
+
 2018-11-29  Jim Wilson  <jimw@sifive.com>
 
 	* riscv-opc.c (unimp): Mark compressed unimp as INSN_ALIAS.
