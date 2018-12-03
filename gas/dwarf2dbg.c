@@ -97,9 +97,9 @@
 #define DWARF2_ARANGES_VERSION 2
 #endif
 
-/* This implementation output version 2 .debug_line information. */
+/* This implementation outputs version 3 .debug_line information.  */
 #ifndef DWARF2_LINE_VERSION
-#define DWARF2_LINE_VERSION 2
+#define DWARF2_LINE_VERSION 3
 #endif
 
 #include "subsegs.h"

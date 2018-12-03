@@ -1,3 +1,9 @@
+2018-12-03  Nick Clifton  <nickc@redhat.com>
+
+	PR 23941
+	* testsuite/binutils-all/i386/compressed-1a.d: Update expected output.
+	* testsuite/binutils-all/x86-64/compressed-1a.d: Likewise.
+
 2018-12-01  Alan Modra  <amodra@gmail.com>
 
 	PR 23946

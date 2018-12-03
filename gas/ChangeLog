@@ -1,3 +1,25 @@
+2018-12-03  Nick Clifton  <nickc@redhat.com>
+
+	PR 23941
+	* dwarf2dbg.c (DWARF2_LINE_VERSION): Change to 3.
+	* testsuite/gas/elf/dwarf2-3.d: Update expected output.
+	* testsuite/gas/elf/dwarf2-5.d: Likewise.
+	* testsuite/gas/i386/debug1.d: Likewise.
+	* testsuite/gas/i386/dw2-compress-1.d: Likewise.
+	* testsuite/gas/i386/dw2-compress-3a.d: Likewise.
+	* testsuite/gas/i386/dw2-compress-3b.d: Likewise.
+	* testsuite/gas/i386/dw2-compressed-1.d: Likewise.
+	* testsuite/gas/i386/dw2-compressed-3a.d: Likewise.
+	* testsuite/gas/i386/dw2-compressed-3b.d: Likewise.
+	* testsuite/gas/ia64/pr13167.d: Likewise.
+	* testsuite/gas/mips/loc-swap-2.d: Likewise.
+	* testsuite/gas/mips/loc-swap.d: Likewise.
+	* testsuite/gas/mips/micromips@loc-swap-2.d: Likewise.
+	* testsuite/gas/mips/micromips@loc-swap.d: Likewise.
+	* testsuite/gas/mips/mips16@loc-swap-2.d: Likewise.
+	* testsuite/gas/mips/mips16@loc-swap.d: Likewise.
+	* testsuite/gas/mips/mips16e@loc-swap.d: Likewise.
+
 2018-12-01  Alan Modra  <amodra@gmail.com>
 
 	PR 23938
