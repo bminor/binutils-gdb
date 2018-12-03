@@ -1,3 +1,9 @@
+2018-12-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/tc-riscv.h (FAKE_LABEL_NAME): Define as
+	RISCV_FAKE_LABEL_NAME.
+	(FAKE_LABEL_CHAR): Define as RISCV_FAKE_LABEL_CHAR.
+
 2018-12-05  Sam Tebbs  <sam.tebbs@arm.com>
 
 	* dw2gencfi.c (struct cie_entry): Add tc_cie_entry_extras invocation.

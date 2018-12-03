@@ -38,10 +38,10 @@ struct expressionS;
 /* Symbols named FAKE_LABEL_NAME are emitted when generating DWARF, so make
    sure FAKE_LABEL_NAME is printable.  It still must be distinct from any
    real label name.  So, append a space, which other labels can't contain.  */
-#define FAKE_LABEL_NAME ".L0 "
+#define FAKE_LABEL_NAME RISCV_FAKE_LABEL_NAME
 /* Changing the special character in FAKE_LABEL_NAME requires changing
    FAKE_LABEL_CHAR too.  */
-#define FAKE_LABEL_CHAR ' '
+#define FAKE_LABEL_CHAR RISCV_FAKE_LABEL_CHAR
 
 #define md_relax_frag(segment, fragp, stretch) \
   riscv_relax_frag (segment, fragp, stretch)

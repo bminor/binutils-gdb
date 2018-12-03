@@ -302,6 +302,7 @@ extern void print_wasm32_disassembler_options (FILE *);
 extern bfd_boolean aarch64_symbol_is_valid (asymbol *, struct disassemble_info *);
 extern bfd_boolean arm_symbol_is_valid (asymbol *, struct disassemble_info *);
 extern bfd_boolean csky_symbol_is_valid (asymbol *, struct disassemble_info *);
+extern bfd_boolean riscv_symbol_is_valid (asymbol *, struct disassemble_info *);
 extern void disassemble_init_powerpc (struct disassemble_info *);
 extern void disassemble_init_s390 (struct disassemble_info *);
 extern void disassemble_init_wasm32 (struct disassemble_info *);

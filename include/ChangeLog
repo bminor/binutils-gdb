@@ -1,3 +1,9 @@
+2018-12-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* dis-asm.h (riscv_symbol_is_valid): Declare.
+	* opcode/riscv.h (RISCV_FAKE_LABEL_NAME): Define.
+	(RISCV_FAKE_LABEL_CHAR): Define.
+
 2018-12-03  Kito Cheng  <kito@andestech.com>
 
 	* opcode/riscv.h (riscv_opcode): Change type of xlen_requirement to

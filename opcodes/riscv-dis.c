@@ -518,6 +518,23 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
   return riscv_disassemble_insn (memaddr, insn, info);
 }
 
+/* Prevent use of the fake labels that are generated as part of the DWARF
+   and for relaxable relocations in the assembler.  */
+
+bfd_boolean
+riscv_symbol_is_valid (asymbol * sym,
+                       struct disassemble_info * info ATTRIBUTE_UNUSED)
+{
+  const char * name;
+
+  if (sym == NULL)
+    return FALSE;
+
+  name = bfd_asymbol_name (sym);
+
+  return (strcmp (name, RISCV_FAKE_LABEL_NAME) != 0);
+}
+
 void
 print_riscv_disassembler_options (FILE *stream)
 {

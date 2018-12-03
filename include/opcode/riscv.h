@@ -270,6 +270,12 @@ static const char * const riscv_pred_succ[16] =
 #define NGPR 32
 #define NFPR 32
 
+/* These fake label defines are use by both the assembler, and
+   libopcodes.  The assembler uses this when it needs to generate a fake
+   label, and libopcodes uses it to hide the fake labels in its output.  */
+#define RISCV_FAKE_LABEL_NAME ".L0 "
+#define RISCV_FAKE_LABEL_CHAR ' '
+
 /* Replace bits MASK << SHIFT of STRUCT with the equivalent bits in
    VALUE << SHIFT.  VALUE is evaluated exactly once.  */
 #define INSERT_BITS(STRUCT, VALUE, MASK, SHIFT) \
