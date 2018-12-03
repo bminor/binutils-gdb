@@ -1198,8 +1198,16 @@ dot_cfi_val_encoded_addr (int ignored ATTRIBUTE_UNUSED)
 static void
 dot_cfi_label (int ignored ATTRIBUTE_UNUSED)
 {
-  char *name = read_symbol_name ();
+  char *name;
 
+  if (frchain_now->frch_cfi_data == NULL)
+    {
+      as_bad (_("CFI instruction used without previous .cfi_startproc"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  name = read_symbol_name ();
   if (name == NULL)
     return;
 
