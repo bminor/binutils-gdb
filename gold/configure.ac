@@ -529,7 +529,7 @@ LFS_CFLAGS="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 AC_SUBST(LFS_CFLAGS)
 
 AC_CHECK_HEADERS(sys/mman.h)
-AC_CHECK_FUNCS(chsize mmap)
+AC_CHECK_FUNCS(chsize mmap link)
 AC_REPLACE_FUNCS(pread ftruncate ffsll)
 
 AC_CACHE_CHECK([mremap with MREMAP_MAYMOVE], [gold_cv_lib_mremap_maymove],
@@ -613,7 +613,7 @@ case "$ac_cv_search_dlopen" in
 esac
 AC_SUBST(DLOPEN_LIBS)
 
-AC_CHECK_FUNCS(mallinfo posix_fallocate fallocate readv sysconf times)
+AC_CHECK_FUNCS(mallinfo posix_fallocate fallocate readv sysconf times mkdtemp)
 AC_CHECK_DECLS([basename, ffs, asprintf, vasprintf, snprintf, vsnprintf, strverscmp, strndup, memmem])
 
 # Use of ::std::tr1::unordered_map::rehash causes undefined symbols
