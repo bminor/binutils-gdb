@@ -1172,9 +1172,9 @@ For Fortran the default is off; for other languages the default is on."),
 
   add_set_language_command ();
 
-  language = xstrdup ("auto");
-  range = xstrdup ("auto");
-  case_sensitive = xstrdup ("auto");
+  language = "auto";
+  range = "auto";
+  case_sensitive = "auto";
 
   /* Have the above take effect.  */
   set_language (language_auto);

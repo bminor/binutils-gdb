@@ -1,3 +1,9 @@
+2018-12-05  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* language.c (_initialize_language): Fix leak by assigning
+	a static string to language.  Same for range and case_sensitive,
+	even if no leak is detected for these variables.
+
 2018-12-05  John Baldwin  <jhb@FreeBSD.org>
 
 	* configure: Re-generate.
