@@ -1,3 +1,13 @@
+2018-12-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23372
+	* testsuite/ld-i386/pr23372a.d: Updated.
+	* testsuite/ld-i386/pr23372c.d: Likewise.
+	* testsuite/ld-x86-64/pr23372a-x32.d: Likewise.
+	* testsuite/ld-x86-64/pr23372a.d: Likewise.
+	* testsuite/ld-x86-64/pr23372c-x32.d: Likewise.
+	* testsuite/ld-x86-64/pr23372c.d: Likewise.
+
 2018-12-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23930

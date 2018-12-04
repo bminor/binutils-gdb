@@ -1,3 +1,11 @@
+2018-12-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23372
+	* elfxx-x86.c (_bfd_x86_elf_merge_gnu_properties): Don't remove
+	empty properties for GNU_PROPERTY_X86_COMPAT_ISA_1_USED and
+	GNU_PROPERTY_X86_UINT32_OR_AND.
+	(_bfd_x86_elf_link_fixup_gnu_properties): Likewise.
+
 2018-12-03  Kito Cheng  <kito@andestech.com>
 
 	* elfxx-riscv.h (RISCV_DONT_CARE_VERSION): New macro.

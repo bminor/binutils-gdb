@@ -2422,9 +2422,14 @@ _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
 	      aprop->pr_kind = property_remove;
 	      updated = TRUE;
 	    }
-	  return updated;
 	}
-      goto or_property;
+      else
+	{
+	  number = aprop->u.number;
+	  aprop->u.number = number | bprop->u.number;
+	  updated = number != (unsigned int) aprop->u.number;
+	}
+      return updated;
     }
   else if (pr_type == GNU_PROPERTY_X86_COMPAT_ISA_1_NEEDED
 	   || (pr_type >= GNU_PROPERTY_X86_UINT32_OR_LO
@@ -2432,7 +2437,6 @@ _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
     {
       if (aprop != NULL && bprop != NULL)
 	{
-or_property:
 	  number = aprop->u.number;
 	  aprop->u.number = number | bprop->u.number;
 	  /* Remove the property if all bits are empty.  */
@@ -2957,7 +2961,12 @@ _bfd_x86_elf_link_fixup_gnu_properties (struct bfd_link_info *info,
 	  || (type >= GNU_PROPERTY_X86_UINT32_OR_AND_LO
 	      && type <= GNU_PROPERTY_X86_UINT32_OR_AND_HI))
 	{
-	  if (p->property.u.number == 0)
+	  if (p->property.u.number == 0
+	      && (type == GNU_PROPERTY_X86_COMPAT_ISA_1_NEEDED
+		  || (type >= GNU_PROPERTY_X86_UINT32_AND_LO
+		      && type <= GNU_PROPERTY_X86_UINT32_AND_HI)
+		  || (type >= GNU_PROPERTY_X86_UINT32_OR_LO
+		      && type <= GNU_PROPERTY_X86_UINT32_OR_HI)))
 	    {
 	      /* Remove empty property.  */
 	      *listp = p->next;
