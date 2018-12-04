@@ -1,3 +1,10 @@
+2018-12-05  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/sim.exp (gdb_target_sim): Remove redundant adjustment of
+	local timeout variable before return, and remove all local timeout
+	variable entirely.
+	(gdb_load): Likewise.
+
 2018-12-01  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/gdb-caching-proc.exp: New file.

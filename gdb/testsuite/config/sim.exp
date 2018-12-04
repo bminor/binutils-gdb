@@ -26,9 +26,7 @@ proc gdb_target_sim { } {
     set target_sim_options "[board_info target gdb,target_sim_options]"
 
     send_gdb "target sim $target_sim_options\n"
-    set timeout 60
-    verbose "Timeout is now $timeout seconds" 2
-    gdb_expect {
+    gdb_expect 60 {
 	-re "Connected to the simulator.*$gdb_prompt $"	{
 	    verbose "Set target to sim"
 	}
@@ -37,8 +35,6 @@ proc gdb_target_sim { } {
 	    return -1
 	}
     }
-    set timeout 10
-    verbose "Timeout is now $timeout seconds" 2
     return 0
 }
 
@@ -60,15 +56,11 @@ proc gdb_load { arg } {
     if [gdb_target_sim] then { return -1 }
 
     send_gdb "load\n"
-    set timeout 2400
-    verbose "Timeout is now $timeout seconds" 2
-    gdb_expect {
+    gdb_expect 2400 {
 	-re ".*$gdb_prompt $" {
 	    if $verbose>1 then {
 		send_user "Loaded $arg into $GDB\n"
 	    }
-	    set timeout 30
-	    verbose "Timeout is now $timeout seconds" 2
 	    return 0
 	}
 	-re "$gdb_prompt $"     {
