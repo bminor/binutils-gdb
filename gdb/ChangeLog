@@ -1,3 +1,9 @@
+2018-12-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-tdep.c (riscv_call_arg_scalar_float): Unnamed (variadic)
+	arguments are passed in integer registers.
+	(riscv_call_arg_complex_float): Likewise.
+
 2018-12-11  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* nat/linux-osdata.c (common_getter): New function.

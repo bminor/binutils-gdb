@@ -1935,7 +1935,7 @@ static void
 riscv_call_arg_scalar_float (struct riscv_arg_info *ainfo,
 			     struct riscv_call_info *cinfo)
 {
-  if (ainfo->length > cinfo->flen)
+  if (ainfo->length > cinfo->flen || ainfo->is_unnamed)
     return riscv_call_arg_scalar_int (ainfo, cinfo);
   else
     {
@@ -1955,7 +1955,8 @@ riscv_call_arg_complex_float (struct riscv_arg_info *ainfo,
 			      struct riscv_call_info *cinfo)
 {
   if (ainfo->length <= (2 * cinfo->flen)
-      && riscv_arg_regs_available (&cinfo->float_regs) >= 2)
+      && riscv_arg_regs_available (&cinfo->float_regs) >= 2
+      && !ainfo->is_unnamed)
     {
       bool result;
       int len = ainfo->length / 2;
