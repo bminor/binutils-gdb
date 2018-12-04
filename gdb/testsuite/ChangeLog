@@ -1,3 +1,7 @@
+2018-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/float.exp: Handle RISC-V targets without an FPU.
+
 2018-12-09  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.threads/tid-reuse.c (REUSE_TIME_CAP): Declare as 60.
