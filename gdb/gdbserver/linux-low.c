@@ -951,10 +951,10 @@ add_lwp (ptid_t ptid)
 
   lwp->waitstatus.kind = TARGET_WAITKIND_IGNORE;
 
+  lwp->thread = add_thread (ptid, lwp);
+
   if (the_low_target.new_thread != NULL)
     the_low_target.new_thread (lwp);
-
-  lwp->thread = add_thread (ptid, lwp);
 
   return lwp;
 }

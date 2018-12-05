@@ -182,6 +182,11 @@ int aarch64_handle_watchpoint (enum target_hw_bp_type type, CORE_ADDR addr,
 void aarch64_linux_set_debug_regs (struct aarch64_debug_reg_state *state,
 				   int tid, int watchpoint);
 
+/* Return TRUE if there are any hardware breakpoints.  If WATCHPOINT is TRUE,
+   check hardware watchpoints instead.  */
+bool aarch64_linux_any_set_debug_regs_state (aarch64_debug_reg_state *state,
+					     bool watchpoint);
+
 void aarch64_show_debug_reg_state (struct aarch64_debug_reg_state *state,
 				   const char *func, CORE_ADDR addr,
 				   int len, enum target_hw_bp_type type);

@@ -717,6 +717,26 @@ aarch64_linux_set_debug_regs (struct aarch64_debug_reg_state *state,
     }
 }
 
+/* See nat/aarch64-linux-hw-point.h.  */
+
+bool
+aarch64_linux_any_set_debug_regs_state (aarch64_debug_reg_state *state,
+					bool watchpoint)
+{
+  int count = watchpoint ? aarch64_num_wp_regs : aarch64_num_bp_regs;
+  if (count == 0)
+    return false;
+
+  const CORE_ADDR *addr = watchpoint ? state->dr_addr_wp : state->dr_addr_bp;
+  const unsigned int *ctrl = watchpoint ? state->dr_ctrl_wp : state->dr_ctrl_bp;
+
+  for (int i = 0; i < count; i++)
+    if (addr[i] != 0 || ctrl[i] != 0)
+      return true;
+
+  return false;
+}
+
 /* Print the values of the cached breakpoint/watchpoint registers.  */
 
 void

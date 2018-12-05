@@ -1,3 +1,12 @@
+2018-12-05  Alan Hayward  <alan.hayward@arm.com>
+
+	* nat/aarch64-linux-hw-point.c
+	(aarch64_linux_any_set_debug_regs_state): New function.
+	* nat/aarch64-linux-hw-point.h
+	(aarch64_linux_any_set_debug_regs_state): New declaration.
+	* nat/aarch64-linux.c (aarch64_linux_new_thread): Check if any
+	BPs or WPs are set.
+
 2018-11-30  John Baldwin  <jhb@FreeBSD.org>
 
 	* common/filestuff.c [HAVE_KINFO_GETFILE]: Include headers.
