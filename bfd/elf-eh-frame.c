@@ -797,6 +797,8 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	      while (*aug != '\0')
 		switch (*aug++)
 		  {
+		  case 'B':
+		    break;
 		  case 'L':
 		    REQUIRE (read_byte (&buf, end, &cie->lsda_encoding));
 		    ENSURE_NO_RELOCS (buf);

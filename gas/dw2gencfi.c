@@ -403,6 +403,7 @@ struct cie_entry
   unsigned char per_encoding;
   unsigned char lsda_encoding;
   expressionS personality;
+  enum pointer_auth_key pauth_key;
   struct cfi_insn_data *first, *last;
 };
 
@@ -414,22 +415,6 @@ static struct fde_entry **last_fde_data = &all_fde_data;
 /* List of CIEs so that they could be reused.  */
 static struct cie_entry *cie_root;
 
-/* Stack of old CFI data, for save/restore.  */
-struct cfa_save_data
-{
-  struct cfa_save_data *next;
-  offsetT cfa_offset;
-};
-
-/* Current open FDE entry.  */
-struct frch_cfi_data
-{
-  struct fde_entry *cur_fde_data;
-  symbolS *last_address;
-  offsetT cur_cfa_offset;
-  struct cfa_save_data *cfa_save_stack;
-};
-
 /* Construct a new FDE structure and add it to the end of the fde list.  */
 
 static struct fde_entry *
@@ -448,6 +433,7 @@ alloc_fde_entry (void)
   fde->per_encoding = DW_EH_PE_omit;
   fde->lsda_encoding = DW_EH_PE_omit;
   fde->eh_header_type = EH_COMPACT_UNKNOWN;
+  fde->pauth_key = AARCH64_PAUTH_KEY_A;
 
   return fde;
 }
@@ -1872,6 +1858,8 @@ output_cie (struct cie_entry *cie, bfd_boolean eh_frame, int align)
       if (cie->lsda_encoding != DW_EH_PE_omit)
 	out_one ('L');
       out_one ('R');
+      if (cie->pauth_key == AARCH64_PAUTH_KEY_B)
+	out_one ('B');
     }
   if (cie->signal_frame)
     out_one ('S');
@@ -2052,6 +2040,7 @@ select_cie_for_fde (struct fde_entry *fde, bfd_boolean eh_frame,
       if (CUR_SEG (cie) != CUR_SEG (fde))
 	continue;
       if (cie->return_column != fde->return_column
+	  || cie->pauth_key != fde->pauth_key
 	  || cie->signal_frame != fde->signal_frame
 	  || cie->per_encoding != fde->per_encoding
 	  || cie->lsda_encoding != fde->lsda_encoding)
@@ -2158,6 +2147,7 @@ select_cie_for_fde (struct fde_entry *fde, bfd_boolean eh_frame,
   cie->lsda_encoding = fde->lsda_encoding;
   cie->personality = fde->personality;
   cie->first = fde->data;
+  cie->pauth_key = fde->pauth_key;
 
   for (i = cie->first; i ; i = i->next)
     if (i->insn == DW_CFA_advance_loc

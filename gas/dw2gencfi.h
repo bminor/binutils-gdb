@@ -135,6 +135,27 @@ enum {
   EH_COMPACT_HAS_LSDA
 };
 
+enum pointer_auth_key {
+  AARCH64_PAUTH_KEY_A,
+  AARCH64_PAUTH_KEY_B
+};
+
+/* Stack of old CFI data, for save/restore.  */
+struct cfa_save_data
+{
+  struct cfa_save_data *next;
+  offsetT cfa_offset;
+};
+
+/* Current open FDE entry.  */
+struct frch_cfi_data
+{
+  struct fde_entry *cur_fde_data;
+  symbolS *last_address;
+  offsetT cur_cfa_offset;
+  struct cfa_save_data *cfa_save_stack;
+};
+
 struct fde_entry
 {
   struct fde_entry *next;
@@ -162,6 +183,8 @@ struct fde_entry
   /* For out of line tables and FDEs.  */
   symbolS *eh_loc;
   int sections;
+  /* The pointer authentication key used.  Only used for AArch64.  */
+  enum pointer_auth_key pauth_key;
 };
 
 /* The list of all FDEs that have been collected.  */

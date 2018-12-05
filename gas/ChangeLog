@@ -1,3 +1,22 @@
+2018-12-05  Sam Tebbs  <sam.tebbs@arm.com>
+
+	* dw2gencfi.c (struct cie_entry): Add tc_cie_entry_extras invocation.
+	(alloc_fde_entry): Add tc_fde_entry_init_extra invocation.
+	(output_cie): Add tc_output_cie_extra invocation.
+	(select_cie_for_fde): Add tc_cie_fde_equivalent_extra and
+	tc_cie_entry_init_extra invocation.
+	(frch_cfi_data, cfa_save_data): Move to dwgencfi.h.
+	* config/tc-aarch64.c (s_aarch64_cfi_b_key_frame): Declare.
+	(md_pseudo_table): Add "cfi_b_key_frame".
+	* config/tc-aarch64.h (tc_fde_entry_extras, tc_cie_entry_extras,
+	tc_fde_entry_init_extra, tc_output_cie_extra,
+	tc_cie_fde_equivalent_extra, tc_cie_entry_init_extra): Define.
+	* dw2gencfi.h (struct fde_entry): Add tc_fde_entry_extras invocation.
+	(pointer_auth_key): Define.
+	(frch_cfi_data, cfa_save_data): Move from dwgencfi.c.
+	* doc/c-aarch64.texi (.cfi_b_key_frame): Add documentation.
+	* testsuite/gas/aarch64/(pac_ab_key.d, pac_ab_key.s): New file.
+
 2018-12-04  wu.heng  <wu.heng@zte.com.cn>
 
 	PR 23939

@@ -435,6 +435,14 @@ as the @code{.dword} directive.
 @c YYYYYYYYYYYYYYYYYYYYYYYYYY
 @c ZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
+@cindex @code{.cfi_b_key_frame} directive, AArch64
+@item	@code{.cfi_b_key_frame}
+The @code{.cfi_b_key_frame} directive inserts a 'B' character into the CIE
+corresponding to the current frame's FDE, meaning that its return address has
+been signed with the B-key.  If two frames are signed with differing keys then
+they will not share the same CIE.  This information is intended to be used by
+the stack unwinder in order to properly authenticate return addresses.
+
 @end table
 
 @node AArch64 Opcodes
