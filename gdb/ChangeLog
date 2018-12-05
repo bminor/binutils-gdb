@@ -1,3 +1,9 @@
+2018-12-05  John Baldwin  <jhb@FreeBSD.org>
+
+	* configure: Re-generate.
+	* configure.ac: Use separate sed expressions to escape variables
+	in auto-load directories.
+
 2018-12-05  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* riscv-tdep.c (riscv_features_from_gdbarch_info): New function.
