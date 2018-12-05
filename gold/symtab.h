@@ -914,7 +914,7 @@ class Symbol
   // Instances of this class should always be created at a specific
   // size.
   Symbol()
-  { memset(this, 0, sizeof *this); }
+  { memset(static_cast<void*>(this), 0, sizeof *this); }
 
   // Initialize the general fields.
   void
