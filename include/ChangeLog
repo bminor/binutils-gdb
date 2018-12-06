@@ -1,3 +1,7 @@
+2018-12-06  Alan Modra  <amodra@gmail.com>
+
+	* opcode/ppc.h (E_OPCODE_MASK, E_LI_MASK, E_LI_INSN): Define.
+
 2018-12-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* dis-asm.h (riscv_symbol_is_valid): Declare.

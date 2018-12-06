@@ -1,3 +1,9 @@
+2018-12-06  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (md_assemble): Adjust relocs for VLE before
+	TLS tweaks.  Handle e_li.  Warn on unexpected operand field
+	for lo16/hi16/ha16 relocs.
+
 2018-12-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* config/tc-riscv.h (FAKE_LABEL_NAME): Define as

@@ -3433,39 +3433,6 @@ md_assemble (char *str)
 
 	  if ((reloc = ppc_elf_suffix (&str, &ex)) != BFD_RELOC_NONE)
 	    {
-	      /* Some TLS tweaks.  */
-	      switch (reloc)
-		{
-		default:
-		  break;
-
-		case BFD_RELOC_PPC_TLS:
-		  if (!_bfd_elf_ppc_at_tls_transform (opcode->opcode, 0))
-		    as_bad (_("@tls may not be used with \"%s\" operands"),
-			    opcode->name);
-		  else if (operand->shift != 11)
-		    as_bad (_("@tls may only be used in last operand"));
-		  else
-		    insn = ppc_insert_operand (insn, operand,
-					       ppc_obj64 ? 13 : 2,
-					       ppc_cpu, (char *) NULL, 0);
-		  break;
-
-		  /* We'll only use the 32 (or 64) bit form of these relocations
-		     in constants.  Instructions get the 16 bit form.  */
-		case BFD_RELOC_PPC_DTPREL:
-		  reloc = BFD_RELOC_PPC_DTPREL16;
-		  break;
-		case BFD_RELOC_PPC_TPREL:
-		  reloc = BFD_RELOC_PPC_TPREL16;
-		  break;
-		}
-
-	      /* addpcis.  */
-	      if (opcode->opcode == (19 << 26) + (2 << 1)
-		  && reloc == BFD_RELOC_HI16_S)
-		reloc = BFD_RELOC_PPC_16DX_HA;
-
 	      /* If VLE-mode convert LO/HI/HA relocations.  */
       	      if (opcode->flags & PPC_OPCODE_VLE)
 		{
@@ -3474,6 +3441,7 @@ md_assemble (char *str)
 		  int use_a_reloc = (tmp_insn == E_OR2I_INSN
 				     || tmp_insn == E_AND2I_DOT_INSN
 				     || tmp_insn == E_OR2IS_INSN
+				     || tmp_insn == E_LI_INSN
 				     || tmp_insn == E_LIS_INSN
 				     || tmp_insn == E_AND2IS_DOT_INSN);
 
@@ -3531,6 +3499,60 @@ md_assemble (char *str)
 			reloc = BFD_RELOC_PPC_VLE_SDAREL_HA16D;
 		      break;
 		    }
+		}
+
+	      /* TLS and other tweaks.  */
+	      switch (reloc)
+		{
+		default:
+		  break;
+
+		case BFD_RELOC_PPC_TLS:
+		  if (!_bfd_elf_ppc_at_tls_transform (opcode->opcode, 0))
+		    as_bad (_("@tls may not be used with \"%s\" operands"),
+			    opcode->name);
+		  else if (operand->shift != 11)
+		    as_bad (_("@tls may only be used in last operand"));
+		  else
+		    insn = ppc_insert_operand (insn, operand,
+					       ppc_obj64 ? 13 : 2,
+					       ppc_cpu, (char *) NULL, 0);
+		  break;
+
+		  /* We'll only use the 32 (or 64) bit form of these relocations
+		     in constants.  Instructions get the 16 bit form.  */
+		case BFD_RELOC_PPC_DTPREL:
+		  reloc = BFD_RELOC_PPC_DTPREL16;
+		  break;
+
+		case BFD_RELOC_PPC_TPREL:
+		  reloc = BFD_RELOC_PPC_TPREL16;
+		  break;
+
+		case BFD_RELOC_LO16:
+		  if ((operand->bitm | 0xf) != 0xffff
+		      || operand->shift != 0
+		      || (operand->flags & PPC_OPERAND_NEGATIVE) != 0)
+		    as_warn (_("%s unsupported on this instruction"), "@l");
+		  break;
+
+		case BFD_RELOC_HI16:
+		  if (operand->bitm != 0xffff
+		      || operand->shift != 0
+		      || (operand->flags & PPC_OPERAND_NEGATIVE) != 0)
+		    as_warn (_("%s unsupported on this instruction"), "@h");
+		  break;
+
+		case BFD_RELOC_HI16_S:
+		  if (operand->bitm == 0xffff
+		      && operand->shift == (int) PPC_OPSHIFT_INV
+		      && opcode->opcode == (19 << 26) + (2 << 1))
+		    /* addpcis.  */
+		    reloc = BFD_RELOC_PPC_16DX_HA;
+		  else if (operand->bitm != 0xffff
+			   || operand->shift != 0
+			   || (operand->flags & PPC_OPERAND_NEGATIVE) != 0)
+		    as_warn (_("%s unsupported on this instruction"), "@ha");
 		}
 	    }
 #endif /* OBJ_ELF */

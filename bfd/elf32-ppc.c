@@ -649,8 +649,8 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
        ppc_elf_unhandled_reloc),
 
   /* e_li split20 format.  */
-  HOW (R_PPC_VLE_ADDR20, 2, 20, 0x1f07ff, 16, FALSE, dont,
-       bfd_elf_generic_reloc),
+  HOW (R_PPC_VLE_ADDR20, 2, 20, 0x1f7fff, 0, FALSE, dont,
+       ppc_elf_unhandled_reloc),
 
   HOW (R_PPC_IRELATIVE, 2, 32, 0xffffffff, 0, FALSE, dont,
        ppc_elf_unhandled_reloc),
@@ -3886,10 +3886,10 @@ ppc_elf_vle_split16 (bfd *input_bfd,
 		     split16_format_type split16_format,
 		     bfd_boolean fixup)
 {
-  unsigned int insn, opcode, top5;
+  unsigned int insn, opcode;
 
   insn = bfd_get_32 (input_bfd, loc);
-  opcode = insn & 0xfc00f800;
+  opcode = insn & E_OPCODE_MASK;
   if (opcode == E_OR2I_INSN
       || opcode == E_AND2I_DOT_INSN
       || opcode == E_OR2IS_INSN
@@ -3926,10 +3926,22 @@ ppc_elf_vle_split16 (bfd *input_bfd,
 	       input_bfd, input_section, offset, opcode);
 	}
     }
-  top5 = value & 0xf800;
-  top5 = top5 << (split16_format == split16a_type ? 5 : 10);
-  insn &= (split16_format == split16a_type ? ~0x1f07ff : ~0x3e007ff);
-  insn |= top5;
+  if (split16_format == split16a_type)
+    {
+      insn &= ~((0xf800 << 5) | 0x7ff);
+      insn |= (value & 0xf800) << 5;
+      if ((insn & E_LI_MASK) == E_LI_INSN)
+	{
+	  /* Hack for e_li.  Extend sign.  */
+	  insn &= ~(0xf0000 >> 5);
+	  insn |= (-(value & 0x8000) & 0xf0000) >> 5;
+	}
+    }
+  else
+    {
+      insn &= ~((0xf800 << 10) | 0x7ff);
+      insn |= (value & 0xf800) << 10;
+    }
   insn |= value & 0x7ff;
   bfd_put_32 (input_bfd, insn, loc);
 }

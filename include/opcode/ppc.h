@@ -476,6 +476,8 @@ ppc_optional_operand_value (const struct powerpc_operand *operand,
 }
 
 /* PowerPC VLE insns.  */
+#define E_OPCODE_MASK		0xfc00f800
+
 /* Form I16L, uses 16A relocs.  */
 #define E_OR2I_INSN		0x7000C000
 #define E_AND2I_DOT_INSN	0x7000C800
@@ -491,6 +493,9 @@ ppc_optional_operand_value (const struct powerpc_operand *operand,
 #define E_CMPL16I_INSN		0x7000A800
 #define E_CMPH16I_INSN		0x7000B000
 #define E_CMPHL16I_INSN		0x7000B800
+
+#define E_LI_INSN		0x70000000
+#define E_LI_MASK		0xfc008000
 
 #ifdef __cplusplus
 }
