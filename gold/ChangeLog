@@ -1,3 +1,8 @@
+2018-12-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* archive.cc (Archive::get_elf_object_for_member): Also print
+	archive member and non-ELF/non-IR info on error.
+
 2018-12-05  Alan Modra  <amodra@gmail.com>
 
 	* symtab.h (Symbol::Symbol): Avoid -Wclass-memaccess warning.
