@@ -1954,6 +1954,14 @@ struct bfd_build_id
     bfd_byte data[1];
   };
 
+enum bfd_lto_object_type
+  {
+    lto_non_object,            /* Not an LTO object.  */
+    lto_non_ir_object,         /* An object without LTO IR.  */
+    lto_slim_ir_object,        /* A slim LTO IR object.  */
+    lto_fat_ir_object          /* A fat LTO IR object.  */
+  };
+
 struct bfd
 {
   /* The filename the application opened the BFD with.  */
@@ -2155,12 +2163,12 @@ struct bfd
   /* Set if this is a plugin output file.  */
   unsigned int lto_output : 1;
 
-  /* Set if this is a slim LTO object not loaded with a compiler plugin.  */
-  unsigned int lto_slim_object : 1;
-
   /* Do not attempt to modify this file.  Set when detecting errors
      that BFD is not prepared to handle for objcopy/strip.  */
   unsigned int read_only : 1;
+
+  /* LTO object type.  */
+  ENUM_BITFIELD (bfd_lto_object_type) lto_type : 2;
 
   /* Set to dummy BFD created when claimed by a compiler plug-in
      library.  */
@@ -2301,6 +2309,12 @@ static inline enum bfd_format
 bfd_get_format (const bfd *abfd)
 {
   return abfd->format;
+}
+
+static inline enum bfd_lto_object_type
+bfd_get_lto_type (const bfd *abfd)
+{
+  return abfd->lto_type;
 }
 
 static inline flagword

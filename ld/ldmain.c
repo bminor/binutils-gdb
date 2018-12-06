@@ -902,7 +902,10 @@ add_archive_element (struct bfd_link_info *info,
      BFD, but we still want to output the original BFD filename.  */
   orig_input = *input;
 #if BFD_SUPPORTS_PLUGINS
-  if (link_info.lto_plugin_active)
+  /* Don't claim a fat IR object if no IR object should be claimed.  */
+  if (link_info.lto_plugin_active
+      && (!no_more_claiming
+	  || bfd_get_lto_type (abfd) != lto_fat_ir_object))
     {
       /* We must offer this archive member to the plugins to claim.  */
       plugin_maybe_claim (input);

@@ -278,6 +278,50 @@ null_error_handler (const char *fmt ATTRIBUTE_UNUSED,
 {
 }
 
+/* This a copy of lto_section defined in GCC (lto-streamer.h).  */
+
+struct lto_section
+{
+  int16_t major_version;
+  int16_t minor_version;
+  unsigned char slim_object;
+
+  /* Flags is a private field that is not defined publicly.  */
+  uint16_t flags;
+};
+
+/* Set lto_type in ABFD.  */
+
+static void
+bfd_set_lto_type (bfd *abfd ATTRIBUTE_UNUSED)
+{
+#if BFD_SUPPORTS_PLUGINS
+  if (abfd->format == bfd_object
+      && abfd->lto_type == lto_non_object
+      && (abfd->flags & (DYNAMIC | EXEC_P)) == 0)
+    {
+      asection *sec;
+      enum bfd_lto_object_type type = lto_non_ir_object;
+      struct lto_section lsection;
+      /* GCC uses .gnu.lto_.lto.<some_hash> as a LTO bytecode information
+	 section.  */
+      for (sec = abfd->sections; sec != NULL; sec = sec->next)
+	if (startswith (sec->name, ".gnu.lto_.lto.")
+	    && bfd_get_section_contents (abfd, sec, &lsection, 0,
+					 sizeof (struct lto_section)))
+	  {
+	    if (lsection.slim_object)
+	      type = lto_slim_ir_object;
+	    else
+	      type = lto_fat_ir_object;
+	    break;
+	  }
+
+      abfd->lto_type = type;
+    }
+#endif
+}
+
 /*
 FUNCTION
 	bfd_check_format_matches
@@ -327,7 +371,10 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
     }
 
   if (abfd->format != bfd_unknown)
-    return abfd->format == format;
+    {
+      bfd_set_lto_type (abfd);
+      return abfd->format == format;
+    }
 
   if (matching != NULL || *bfd_associated_vector != NULL)
     {
@@ -600,6 +647,8 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       for (size_t i = 0; i < _bfd_target_vector_entries + 1; i++)
 	clear_warnmsg (list++);
       --in_check_format;
+
+      bfd_set_lto_type (abfd);
 
       /* File position has moved, BTW.  */
       return true;

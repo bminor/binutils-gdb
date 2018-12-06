@@ -1466,9 +1466,9 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
 	free (dyn_syms);
     }
 
-  /* lto_slim_object is set to false when a bfd is loaded with a compiler
-     LTO plugin.  */
-  if (abfd->lto_slim_object)
+  /* lto_type is set to lto_non_ir_object when a bfd is loaded with a
+     compiler LTO plugin.  */
+  if (bfd_get_lto_type (abfd) == lto_slim_ir_object)
     {
       report_plugin_err = false;
       non_fatal (_("%s: plugin needed to handle lto object"),

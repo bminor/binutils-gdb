@@ -964,10 +964,20 @@ proc pr20103 {cflags libs} {
 
     set testname "PR ld/20103 ($cflags $libs)"
     set exec_output [run_host_cmd "$CC_FOR_TARGET" "$cflags $libs"]
-    if { [ regexp "undefined reference to `\\.?dead'" $exec_output ] } {
-        pass "$testname (1)"
+    # NB: Starting from GCC 4.9, -flto is optional for final link.
+    if { [ regexp "fatpr20103" "$libs" ] \
+	 && ([regexp " -flto" "$cflags"] \
+	     || [at_least_gcc_version 4 9]) } {
+	set result1good "fail"
+	set result1bad "pass"
     } {
-        fail "$testname (1)"
+	set result1good "pass"
+	set result1bad "fail"
+    }
+    if { [ regexp "undefined reference to `\\.?dead'" $exec_output ] } {
+	$result1good "$testname (1)"
+    } {
+	$result1bad "$testname (1)"
     }
     if { [ regexp "plugin needed to handle lto object" $exec_output ] } {
         fail "$testname (2)"
@@ -1025,6 +1035,27 @@ if { [check_lto_fat_available] } {
 	    "-O2 -Wl,--start-group tmpdir/fatpr20103a.a tmpdir/fatpr20103b.a tmpdir/fatpr20103c.a -Wl,--end-group" \
 	    "-O2" \
 	    {dummy.c} {} "pr20103c" \
+	] \
+	[list "Build fatpr23935.a" \
+	    "$plug_opt" \
+	    "-flto -fno-builtin -ffat-lto-objects" \
+	    {pr23935a.c} \
+	    "" \
+	    "fatpr23935.a" \
+	] \
+	[list "Build pr23935b.o" \
+	    "$plug_opt" \
+	    "-flto -fno-fat-lto-objects" \
+	    {pr23935b.c} \
+	] \
+	[list \
+	    "Build pr23935" \
+	    "-static -flto -Wl,-emain -nostdlib tmpdir/pr23935b.o \
+	     tmpdir/fatpr23935.a" \
+	    "-flto -fno-fat-lto-objects" \
+	    {dummy.c} \
+	    "" \
+	    "pr23935" \
 	] \
     ]
     pr20103 "-O2 -flto" "tmpdir/thinpr20103a.a tmpdir/thinpr20103b.a tmpdir/thinpr20103c.a"

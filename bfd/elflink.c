@@ -4785,7 +4785,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
     }
 
   if (!bfd_link_relocatable (info)
-      && abfd->lto_slim_object)
+      && bfd_get_lto_type (abfd) == lto_slim_ir_object)
     {
       _bfd_error_handler
 	(_("%pB: plugin needed to handle lto object"), abfd);

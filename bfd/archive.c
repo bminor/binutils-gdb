@@ -2355,7 +2355,8 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
 	  long symcount;
 	  long src_count;
 
-	  if (current->lto_slim_object && report_plugin_err)
+	  if (bfd_get_lto_type (current) == lto_slim_ir_object
+	      && report_plugin_err)
 	    {
 	      report_plugin_err = false;
 	      _bfd_error_handler
