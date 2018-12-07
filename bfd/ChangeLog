@@ -1,3 +1,9 @@
+2018-12-07  Alan Modra  <amodra@gmail.com>
+
+	PR 23952
+	* syms.c (_bfd_generic_read_minisymbols): Free syms before
+	returning with zero symcount.
+
 2018-12-06  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_howto_raw <R_PPC_VLE_ADDR20>): Correct

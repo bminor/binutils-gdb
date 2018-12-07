@@ -822,9 +822,16 @@ _bfd_generic_read_minisymbols (bfd *abfd,
   if (symcount < 0)
     goto error_return;
 
-  *minisymsp = syms;
-  *sizep = sizeof (asymbol *);
-
+  if (symcount == 0)
+    /* We return 0 above when storage is 0.  Exit in the same state
+       here, so as to not complicate callers with having to deal with
+       freeing memory for zero symcount.  */
+    free (syms);
+  else
+    {
+      *minisymsp = syms;
+      *sizep = sizeof (asymbol *);
+    }
   return symcount;
 
  error_return:

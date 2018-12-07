@@ -1175,17 +1175,14 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
       if (synth_count > 0)
 	{
 	  asymbol **symp;
-	  void *new_mini;
 	  long i;
 
-	  new_mini = xmalloc ((symcount + synth_count + 1) * sizeof (*symp));
-	  symp = (asymbol **) new_mini;
-	  memcpy (symp, minisyms, symcount * sizeof (*symp));
-	  symp += symcount;
+	  minisyms = xrealloc (minisyms,
+			       (symcount + synth_count + 1) * sizeof (*symp));
+	  symp = (asymbol **) minisyms + symcount;
 	  for (i = 0; i < synth_count; i++)
 	    *symp++ = synthsyms + i;
 	  *symp = 0;
-	  minisyms = new_mini;
 	  symcount += synth_count;
 	}
     }

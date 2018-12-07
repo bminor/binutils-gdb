@@ -1,3 +1,8 @@
+2018-12-07  Alan Modra  <amodra@gmail.com>
+
+	* nm.c (display_rel_file): Use xrealloc to increase minisyms
+	for synthetic symbols.
+
 2018-12-07  Nick Clifton  <nickc@redhat.com>
 
 	* addr2line.c (demangle_flags): New static variable.
