@@ -6189,7 +6189,13 @@ get_gdb_index_contents_from_section (objfile *obj, T *section_owner)
 
   dwarf2_read_section (obj, section);
 
-  return {section->buffer, section->size};
+  /* dwarf2_section_info::size is a bfd_size_type, while
+     gdb::array_view works with size_t.  On 32-bit hosts, with
+     --enable-64-bit-bfd, bfd_size_type is a 64-bit type, while size_t
+     is 32-bit.  So we need an explicit narrowing conversion here.
+     This is fine, because it's impossible to allocate or mmap an
+     array/buffer larger than what size_t can represent.  */
+  return gdb::make_array_view (section->buffer, section->size);
 }
 
 /* Lookup the index cache for the contents of the index associated to

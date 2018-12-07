@@ -1,3 +1,8 @@
+2018-12-07  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2read.c (get_gdb_index_contents_from_section): Use
+	gdb::make_array_view.
+
 2018-12-05  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* language.c (_initialize_language): Fix leak by assigning
