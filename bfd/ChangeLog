@@ -1,3 +1,8 @@
+2018-12-11  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* elf32-xtensa.c (elf_xtensa_do_reloc): Limit const16 opcode
+	immediate field to 16 least significant bits.
+
 2018-12-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-xc16x.c (elf32_xc16x_rtype_to_howto): New function.

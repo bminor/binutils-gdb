@@ -1957,8 +1957,9 @@ elf_xtensa_do_reloc (reloc_howto_type *howto,
 	}
       else if (opcode == get_const16_opcode ())
 	{
-	  /* ALT used for high 16 bits.  */
-	  newval = relocation >> 16;
+	  /* ALT used for high 16 bits.
+	     Ignore 32-bit overflow.  */
+	  newval = (relocation >> 16) & 0xffff;
 	  opnd = 1;
 	}
       else
