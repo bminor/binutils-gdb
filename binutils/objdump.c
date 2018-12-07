@@ -120,6 +120,8 @@ static size_t prefix_length;
 static bfd_boolean unwind_inlines;	/* --inlines.  */
 static const char * disasm_sym;		/* Disassembly start symbol.  */
 
+static int demangle_flags = DMGL_ANSI | DMGL_PARAMS;
+
 /* A structure to record the sections mentioned in -j switches.  */
 struct only
 {
@@ -252,6 +254,8 @@ usage (FILE *stream, int status)
                                   The STYLE, if specified, can be `auto', `gnu',\n\
                                   `lucid', `arm', `hp', `edg', `gnu-v3', `java'\n\
                                   or `gnat'\n\
+      --recurse-limit            Enable a limit on recursion whilst demangling.  [Default]\n\
+      --no-recurse-limit         Disable a limit on recursion whilst demangling\n\
   -w, --wide                     Format output for more than 80 columns\n\
   -z, --disassemble-zeroes       Do not skip blocks of zeroes when disassembling\n\
       --start-address=ADDR       Only process data whose address is >= ADDR\n\
@@ -302,6 +306,8 @@ enum option_values
     OPTION_DWARF_DEPTH,
     OPTION_DWARF_CHECK,
     OPTION_DWARF_START,
+    OPTION_RECURSE_LIMIT,
+    OPTION_NO_RECURSE_LIMIT,
     OPTION_INLINES
   };
 
@@ -333,6 +339,10 @@ static struct option long_options[]=
   {"line-numbers", no_argument, NULL, 'l'},
   {"no-show-raw-insn", no_argument, &show_raw_insn, -1},
   {"prefix-addresses", no_argument, &prefix_addresses, 1},
+  {"recurse-limit", no_argument, NULL, OPTION_RECURSE_LIMIT},
+  {"recursion-limit", no_argument, NULL, OPTION_RECURSE_LIMIT},
+  {"no-recurse-limit", no_argument, NULL, OPTION_NO_RECURSE_LIMIT},
+  {"no-recursion-limit", no_argument, NULL, OPTION_NO_RECURSE_LIMIT},
   {"reloc", no_argument, NULL, 'r'},
   {"section", required_argument, NULL, 'j'},
   {"section-headers", no_argument, NULL, 'h'},
@@ -884,7 +894,7 @@ objdump_print_symname (bfd *abfd, struct disassemble_info *inf,
   if (do_demangle && name[0] != '\0')
     {
       /* Demangle the name.  */
-      alloc = bfd_demangle (abfd, name, DMGL_ANSI | DMGL_PARAMS);
+      alloc = bfd_demangle (abfd, name, demangle_flags);
       if (alloc != NULL)
 	name = alloc;
     }
@@ -2290,7 +2300,7 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 	  if (do_demangle && name[0] != '\0')
 	    {
 	      /* Demangle the name.  */
-	      alloc = bfd_demangle (abfd, name, DMGL_ANSI | DMGL_PARAMS);
+	      alloc = bfd_demangle (abfd, name, demangle_flags);
 	      if (alloc != NULL)
 		name = alloc;
 	    }
@@ -3268,7 +3278,7 @@ dump_symbols (bfd *abfd ATTRIBUTE_UNUSED, bfd_boolean dynamic)
 	      /* If we want to demangle the name, we demangle it
 		 here, and temporarily clobber it while calling
 		 bfd_print_symbol.  FIXME: This is a gross hack.  */
-	      alloc = bfd_demangle (cur_bfd, name, DMGL_ANSI | DMGL_PARAMS);
+	      alloc = bfd_demangle (cur_bfd, name, demangle_flags);
 	      if (alloc != NULL)
 		(*current)->name = alloc;
 	      bfd_print_symbol (cur_bfd, stdout, *current,
@@ -3926,6 +3936,12 @@ main (int argc, char **argv)
 
 	      cplus_demangle_set_style (style);
 	    }
+	  break;
+	case OPTION_RECURSE_LIMIT:
+	  demangle_flags &= ~ DMGL_NO_RECURSE_LIMIT;
+	  break;
+	case OPTION_NO_RECURSE_LIMIT:
+	  demangle_flags |= DMGL_NO_RECURSE_LIMIT;
 	  break;
 	case 'w':
 	  do_wide = wide_output = TRUE;

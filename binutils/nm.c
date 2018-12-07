@@ -162,6 +162,8 @@ static int line_numbers = 0;	/* Print line numbers for symbols.  */
 static int allow_special_symbols = 0;  /* Allow special symbols.  */
 static int with_symbol_versions = 0; /* Include symbol version information in the output.  */
 
+static int demangle_flags = DMGL_ANSI | DMGL_PARAMS;
+
 /* When to print the names of files.  Not mutually exclusive in SYSV format.  */
 static int filename_per_file = 0;	/* Once per file, on its own line.  */
 static int filename_per_symbol = 0;	/* Once per symbol, at start of line.  */
@@ -194,9 +196,14 @@ static const char *plugin_target = NULL;
 static bfd *lineno_cache_bfd;
 static bfd *lineno_cache_rel_bfd;
 
-#define OPTION_TARGET 200
-#define OPTION_PLUGIN (OPTION_TARGET + 1)
-#define OPTION_SIZE_SORT (OPTION_PLUGIN + 1)
+enum long_option_values
+{
+  OPTION_TARGET = 200,
+  OPTION_PLUGIN,
+  OPTION_SIZE_SORT,
+  OPTION_RECURSE_LIMIT,
+  OPTION_NO_RECURSE_LIMIT
+};
 
 static struct option long_options[] =
 {
@@ -209,6 +216,8 @@ static struct option long_options[] =
   {"line-numbers", no_argument, 0, 'l'},
   {"no-cplus", no_argument, &do_demangle, 0},  /* Linux compatibility.  */
   {"no-demangle", no_argument, &do_demangle, 0},
+  {"no-recurse-limit", no_argument, NULL, OPTION_NO_RECURSE_LIMIT},
+  {"no-recursion-limit", no_argument, NULL, OPTION_NO_RECURSE_LIMIT},
   {"no-sort", no_argument, 0, 'p'},
   {"numeric-sort", no_argument, 0, 'n'},
   {"plugin", required_argument, 0, OPTION_PLUGIN},
@@ -217,6 +226,8 @@ static struct option long_options[] =
   {"print-file-name", no_argument, 0, 'o'},
   {"print-size", no_argument, 0, 'S'},
   {"radix", required_argument, 0, 't'},
+  {"recurse-limit", no_argument, NULL, OPTION_RECURSE_LIMIT},
+  {"recursion-limit", no_argument, NULL, OPTION_RECURSE_LIMIT},
   {"reverse-sort", no_argument, &reverse_sort, 1},
   {"size-sort", no_argument, 0, OPTION_SIZE_SORT},
   {"special-syms", no_argument, &allow_special_symbols, 1},
@@ -245,6 +256,8 @@ usage (FILE *stream, int status)
                           `gnu', `lucid', `arm', `hp', `edg', `gnu-v3', `java'\n\
                           or `gnat'\n\
       --no-demangle      Do not demangle low-level symbol names\n\
+      --recurse-limit    Enable a demangling recursion limit.  This is the default.\n\
+      --no-recurse-limit Disable a demangling recursion limit.\n\
   -D, --dynamic          Display dynamic symbols instead of normal symbols\n\
       --defined-only     Display only defined symbols\n\
   -e                     (ignored)\n\
@@ -407,7 +420,7 @@ print_symname (const char *form, const char *name, bfd *abfd)
 {
   if (do_demangle && *name)
     {
-      char *res = bfd_demangle (abfd, name, DMGL_ANSI | DMGL_PARAMS);
+      char *res = bfd_demangle (abfd, name, demangle_flags);
 
       if (res != NULL)
 	{
@@ -1686,6 +1699,12 @@ main (int argc, char **argv)
 
 	      cplus_demangle_set_style (style);
 	    }
+	  break;
+	case OPTION_RECURSE_LIMIT:
+	  demangle_flags &= ~ DMGL_NO_RECURSE_LIMIT;
+	  break;
+	case OPTION_NO_RECURSE_LIMIT:
+	  demangle_flags |= DMGL_NO_RECURSE_LIMIT;
 	  break;
 	case 'D':
 	  dynamic = 1;

@@ -1,5 +1,16 @@
 -*- text -*-
 
+* The addr2line, c++filt, nm and objdump tools now have a limit on the
+  maximum amount of recursion that is allowed whilst demangling strings.
+  The value for this limit is defined by the DEMANGLE_RECRUSE_LIMIT
+  constant declared in the include/demangle.h header file.  At the time
+  of writing this constant has the value of 1024.
+
+  The --no-recurse-limit option can be used to remove the limit, restoring
+  the behaviour of earlier versions of these tools.  This may be needed in
+  order to dmangle truly complicated names, but it also leaves the tools
+  vulnerable to stack exhaustion from maliciously constructed mangled names.
+
 * Objdump's --disassemble option can now take a parameter, specifying the
   starting symbol for disassembly.  Disassembly will continue from this
   symbol up to the next symbol.

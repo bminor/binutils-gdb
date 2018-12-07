@@ -1,3 +1,8 @@
+2018-12-07  Nick Clifton  <nickc@redhat.com>
+
+	* demangle.h (DMGL_NO_RECURSE_LIMIT): Define.
+        (DEMANGLE_RECURSION_LIMIT): Define
+
 2018-12-06  Alan Modra  <amodra@gmail.com>
 
 	* opcode/ppc.h (E_OPCODE_MASK, E_LI_MASK, E_LI_INSN): Define.

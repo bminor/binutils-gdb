@@ -42,6 +42,10 @@ static const struct option long_options[] =
   {"no-verbose", no_argument, NULL, 'i'},
   {"types", no_argument, NULL, 't'},
   {"version", no_argument, NULL, 'v'},
+  {"recurse-limit", no_argument, NULL, 'R'},
+  {"recursion-limit", no_argument, NULL, 'R'},
+  {"no-recurse-limit", no_argument, NULL, 'r'},
+  {"no-recursion-limit", no_argument, NULL, 'r'},
   {NULL, no_argument, NULL, 0}
 };
 
@@ -102,6 +106,8 @@ Options are:\n\
   fprintf (stream, "\
   [-p|--no-params]            Do not display function arguments\n\
   [-i|--no-verbose]           Do not show implementation details (if any)\n\
+  [-R|--recurse-limit]        Enable a limit on recursion whilst demangling.  [Default]\n\
+  ]-r|--no-recurse-limit]     Disable a limit on recursion whilst demangling\n\
   [-t|--types]                Also attempt to demangle type encodings\n\
   [-s|--format ");
   print_demangler_list (stream);
@@ -180,7 +186,7 @@ main (int argc, char **argv)
 
   expandargv (&argc, &argv);
 
-  while ((c = getopt_long (argc, argv, "_hinps:tv", long_options, (int *) 0)) != EOF)
+  while ((c = getopt_long (argc, argv, "_hinprRs:tv", long_options, (int *) 0)) != EOF)
     {
       switch (c)
 	{
@@ -194,6 +200,12 @@ main (int argc, char **argv)
 	  break;
 	case 'p':
 	  flags &= ~ DMGL_PARAMS;
+	  break;
+	case 'r':
+	  flags |= DMGL_NO_RECURSE_LIMIT;
+	  break;
+	case 'R':
+	  flags &= ~ DMGL_NO_RECURSE_LIMIT;
 	  break;
 	case 't':
 	  flags |= DMGL_TYPES;

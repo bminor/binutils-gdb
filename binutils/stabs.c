@@ -215,6 +215,8 @@ static debug_type stab_demangle_v3_arg
   (void *, struct stab_handle *, struct demangle_component *, debug_type,
    bfd_boolean *);
 
+static int demangle_flags = DMGL_ANSI;
+
 /* Save a string in memory.  */
 
 static char *
@@ -4517,7 +4519,7 @@ stab_demangle_template (struct stab_demangle_info *minfo, const char **pp,
 
       free (s1);
 
-      s3 = cplus_demangle (s2, DMGL_ANSI);
+      s3 = cplus_demangle (s2, demangle_flags);
 
       free (s2);
 
@@ -5243,7 +5245,7 @@ stab_demangle_v3_argtypes (void *dhandle, struct stab_handle *info,
   void *mem;
   debug_type *pargs;
 
-  dc = cplus_demangle_v3_components (physname, DMGL_PARAMS | DMGL_ANSI, &mem);
+  dc = cplus_demangle_v3_components (physname, DMGL_PARAMS | demangle_flags, &mem);
   if (dc == NULL)
     {
       stab_bad_demangle (physname);
@@ -5418,7 +5420,7 @@ stab_demangle_v3_arg (void *dhandle, struct stab_handle *info,
 	/* We print this component to get a class name which we can
 	   use.  FIXME: This probably won't work if the template uses
 	   template parameters which refer to an outer template.  */
-	p = cplus_demangle_print (DMGL_PARAMS | DMGL_ANSI, dc, 20, &alc);
+	p = cplus_demangle_print (DMGL_PARAMS | demangle_flags, dc, 20, &alc);
 	if (p == NULL)
 	  {
 	    fprintf (stderr, _("Failed to print demangled template\n"));
@@ -5498,7 +5500,7 @@ stab_demangle_v3_arg (void *dhandle, struct stab_handle *info,
 	/* We print this component in order to find out the type name.
 	   FIXME: Should we instead expose the
 	   demangle_builtin_type_info structure?  */
-	p = cplus_demangle_print (DMGL_PARAMS | DMGL_ANSI, dc, 20, &alc);
+	p = cplus_demangle_print (DMGL_PARAMS | demangle_flags, dc, 20, &alc);
 	if (p == NULL)
 	  {
 	    fprintf (stderr, _("Couldn't get demangled builtin type\n"));

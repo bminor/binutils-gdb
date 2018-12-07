@@ -769,7 +769,9 @@ nm [@option{-A}|@option{-o}|@option{--print-file-name}] [@option{-a}|@option{--d
    [@option{-s}|@option{--print-armap}] [@option{-t} @var{radix}|@option{--radix=}@var{radix}]
    [@option{-u}|@option{--undefined-only}] [@option{-V}|@option{--version}]
    [@option{-X 32_64}] [@option{--defined-only}] [@option{--no-demangle}]
-   [@option{--plugin} @var{name}] [@option{--size-sort}] [@option{--special-syms}]
+   [@option{--plugin} @var{name}]
+   [@option{--no-recurse-limit}|@option{--recurse-limit}]]
+   [@option{--size-sort}] [@option{--special-syms}]
    [@option{--synthetic}] [@option{--with-symbol-versions}] [@option{--target=}@var{bfdname}]
    [@var{objfile}@dots{}]
 @c man end
@@ -938,6 +940,22 @@ for more information on demangling.
 
 @item --no-demangle
 Do not demangle low-level symbol names.  This is the default.
+
+@item --recurse-limit
+@itemx --no-recurse-limit
+@itemx --recursion-limit
+@itemx --no-recursion-limit
+Enables or disables a limit on the amount of recursion performed
+whilst demangling strings.  Since the name mangling formats allow for
+an inifinite level of recursion it is possible to create strings whose
+decoding will exhaust the amount of stack space available on the host
+machine, triggering a memory fault.  The limit tries to prevent this
+from happening by restricting recursion to 1024 levels of nesting.
+
+The default is for this limit to be enabled, but disabling it may be
+necessary in order to demangle truly complicated names.  Note however
+that if the recursion limit is disabled then stack exhaustion is
+possible and any bug reports about such an event will be rejected.
 
 @item -D
 @itemx --dynamic
@@ -2098,6 +2116,7 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{--adjust-vma=}@var{offset}]
         [@option{--dwarf-depth=@var{n}}]
         [@option{--dwarf-start=@var{n}}]
+        [@option{--no-recurse-limit}|@option{--recurse-limit}]
         [@option{--special-syms}]
         [@option{--prefix=}@var{prefix}]
         [@option{--prefix-strip=}@var{level}]
@@ -2173,6 +2192,22 @@ makes C++ function names readable.  Different compilers have different
 mangling styles. The optional demangling style argument can be used to
 choose an appropriate demangling style for your compiler. @xref{c++filt},
 for more information on demangling.
+
+@item --recurse-limit
+@itemx --no-recurse-limit
+@itemx --recursion-limit
+@itemx --no-recursion-limit
+Enables or disables a limit on the amount of recursion performed
+whilst demangling strings.  Since the name mangling formats allow for
+an inifinite level of recursion it is possible to create strings whose
+decoding will exhaust the amount of stack space available on the host
+machine, triggering a memory fault.  The limit tries to prevent this
+from happening by restricting recursion to 1024 levels of nesting.
+
+The default is for this limit to be enabled, but disabling it may be
+necessary in order to demangle truly complicated names.  Note however
+that if the recursion limit is disabled then stack exhaustion is
+possible and any bug reports about such an event will be rejected.
 
 @item -g
 @itemx --debugging
@@ -3403,6 +3438,8 @@ c++filt [@option{-_}|@option{--strip-underscore}]
         [@option{-p}|@option{--no-params}]
         [@option{-t}|@option{--types}]
         [@option{-i}|@option{--no-verbose}]
+        [@option{-r}|@option{--no-recurse-limit}]
+        [@option{-R}|@option{--recurse-limit}]
         [@option{-s} @var{format}|@option{--format=}@var{format}]
         [@option{--help}]  [@option{--version}]  [@var{symbol}@dots{}]
 @c man end
@@ -3507,6 +3544,28 @@ demangled to ``signed char''.
 Do not include implementation details (if any) in the demangled
 output.
 
+@item -r
+@itemx -R
+@itemx --recurse-limit
+@itemx --no-recurse-limit
+@itemx --recursion-limit
+@itemx --no-recursion-limit
+Enables or disables a limit on the amount of recursion performed
+whilst demangling strings.  Since the name mangling formats allow for
+an inifinite level of recursion it is possible to create strings whose
+decoding will exhaust the amount of stack space available on the host
+machine, triggering a memory fault.  The limit tries to prevent this
+from happening by restricting recursion to 1024 levels of nesting.
+
+The default is for this limit to be enabled, but disabling it may be
+necessary in order to demangle truly complicated names.  Note however
+that if the recursion limit is disabled then stack exhaustion is
+possible and any bug reports about such an event will be rejected.
+
+The @option{-r} option is a synonym for the
+@option{--no-recurse-limit} option.  The @option{-R} option is a
+synonym for the @option{--recurse-limit} option.
+
 @item -s @var{format}
 @itemx --format=@var{format}
 @command{c++filt} can decode various methods of mangling, used by
@@ -3580,6 +3639,8 @@ c++filt @var{option} @var{symbol}
 addr2line [@option{-a}|@option{--addresses}]
           [@option{-b} @var{bfdname}|@option{--target=}@var{bfdname}]
           [@option{-C}|@option{--demangle}[=@var{style}]]
+          [@option{-r}|@option{--no-recurse-limit}]
+          [@option{-R}|@option{--recurse-limit}]
           [@option{-e} @var{filename}|@option{--exe=}@var{filename}]
           [@option{-f}|@option{--functions}] [@option{-s}|@option{--basename}]
           [@option{-i}|@option{--inlines}]
@@ -3705,6 +3766,32 @@ Read offsets relative to the specified section instead of absolute addresses.
 Make the output more human friendly: each location are printed on one line.
 If option @option{-i} is specified, lines for all enclosing scopes are
 prefixed with @samp{(inlined by)}.
+
+@item -r
+@itemx -R
+@itemx --recurse-limit
+@itemx --no-recurse-limit
+@itemx --recursion-limit
+@itemx --no-recursion-limit
+Enables or disables a limit on the amount of recursion performed
+whilst demangling strings.  Since the name mangling formats allow for
+an inifinite level of recursion it is possible to create strings whose
+decoding will exhaust the amount of stack space available on the host
+machine, triggering a memory fault.  The limit tries to prevent this
+from happening by restricting recursion to 1024 levels of nesting.
+
+The default is for this limit to be enabled, but disabling it may be
+necessary in order to demangle truly complicated names.  Note however
+that if the recursion limit is disabled then stack exhaustion is
+possible and any bug reports about such an event will be rejected.
+
+The @option{-r} option is a synonym for the
+@option{--no-recurse-limit} option.  The @option{-R} option is a
+synonym for the @option{--recurse-limit} option.
+
+Note this option is only effective if the @option{-C} or
+@option{--demangle} option has been enabled.
+
 @end table
 
 @c man end

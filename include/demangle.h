@@ -68,6 +68,17 @@ extern "C" {
 /* If none of these are set, use 'current_demangling_style' as the default. */
 #define DMGL_STYLE_MASK (DMGL_AUTO|DMGL_GNU|DMGL_LUCID|DMGL_ARM|DMGL_HP|DMGL_EDG|DMGL_GNU_V3|DMGL_JAVA|DMGL_GNAT|DMGL_DLANG|DMGL_RUST)
 
+/* Disable a limit on the depth of recursion in mangled strings.
+   Note if this limit is disabled then stack exhaustion is possible when
+   demangling pathologically complicated strings.  Bug reports about stack
+   exhaustion when the option is enabled will be rejected.  */  
+#define DMGL_NO_RECURSE_LIMIT (1 << 18)	
+
+/* If DMGL_NO_RECURSE_LIMIT is not enabled, then this is the value used as
+   the maximum depth of recursion allowed.  It should be enough for any
+   real-world mangled name.  */
+#define DEMANGLE_RECURSION_LIMIT 1024
+  
 /* Enumeration of possible demangling styles.
 
    Lucid and ARM styles are still kept logically distinct, even though
@@ -392,6 +403,9 @@ enum demangle_component_type
      template argument, and the right subtree is either NULL or
      another TEMPLATE_ARGLIST node.  */
   DEMANGLE_COMPONENT_TEMPLATE_ARGLIST,
+  /* A template parameter object (C++20).  The left subtree is the
+     corresponding template argument.  */
+  DEMANGLE_COMPONENT_TPARM_OBJ,
   /* An initializer list.  The left subtree is either an explicit type or
      NULL, and the right subtree is a DEMANGLE_COMPONENT_ARGLIST.  */
   DEMANGLE_COMPONENT_INITIALIZER_LIST,

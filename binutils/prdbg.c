@@ -286,6 +286,8 @@ static const struct debug_write_fns tg_fns =
   pr_end_function,		/* Same, does nothing.  */
   tg_lineno
 };
+
+static int demangle_flags = DMGL_ANSI | DMGL_PARAMS;
 
 /* Print out the generic debugging information recorded in dhandle.  */
 
@@ -2600,7 +2602,7 @@ tg_variable (void *p, const char *name, enum debug_var_kind kind,
 
   dname = NULL;
   if (info->demangler)
-    dname = info->demangler (info->abfd, name, DMGL_ANSI | DMGL_PARAMS);
+    dname = info->demangler (info->abfd, name, demangle_flags);
 
   from_class = NULL;
   if (dname != NULL)
@@ -2661,7 +2663,7 @@ tg_start_function (void *p, const char *name, bfd_boolean global)
 
   dname = NULL;
   if (info->demangler)
-    dname = info->demangler (info->abfd, name, DMGL_ANSI | DMGL_PARAMS);
+    dname = info->demangler (info->abfd, name, demangle_flags);
 
   if (! substitute_type (info, dname ? dname : name))
     return FALSE;

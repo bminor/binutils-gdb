@@ -1,3 +1,37 @@
+2018-12-07  Nick Clifton  <nickc@redhat.com>
+
+	* addr2line.c (demangle_flags): New static variable.
+        (long_options): Add --recurse-limit and --no-recurse-limit.
+        (translate_address): Pass demangle_flags to bfd_demangle.
+        (main): Handle --recurse-limit and --no-recurse-limit options.
+        * cxxfilt.c: (long_options): Add --recurse-limit and
+	--no-recurse-limit.
+        (main): Handle new options.
+        * nm.c (demangle_flags): New static variable.
+        (long_options): Add --recurse-limit and --no-recurse-limit.
+        (main): Handle new options.
+        * objdump.c (demangle_flags): New static variable.
+        (usage): Add --recurse-limit and --no-recurse-limit.
+        (long_options): Likewise.
+        (objdump_print_symname): Pass demangle_flags to bfd_demangle.
+        (disassemble_section): Likewise.
+        (dump_dymbols): Likewise.
+        (main): Handle new options.
+        * prdbg.c (demangle_flags): New static variable.
+        (tg_variable): Pass demangle_flags to demangler.
+        (tg_start_function): Likewise.
+        * stabs.c (demangle_flags): New static variable.
+        (stab_demangle_template): Pass demangle_flags to demangler.
+        (stab_demangle_v3_argtypes): Likewise.
+        (stab_demangle_v3_arg): Likewise.
+	* doc/binutuls.texi: Document new command line options.
+	* NEWS: Mention the new feature.
+        * testsuite/config/default.exp (CXXFILT): Define if not already
+        defined.
+        (CXXFILTFLAGS): Likewise.
+        * testsuite/binutils-all/cxxfilt.exp: New file.  Runs a few
+        simple tests of the cxxfilt program.
+
 2018-12-03  Nick Clifton  <nickc@redhat.com>
 
 	PR 23941

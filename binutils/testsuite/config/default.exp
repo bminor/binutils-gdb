@@ -93,6 +93,12 @@ if ![info exists WINDRES] then {
 if ![info exists DLLTOOL] then {
     set DLLTOOL [findfile $base_dir/dlltool]
 }
+if ![info exists CXXFILT] then {
+    set CXXFILT [findfile $base_dir/cxxfilt]
+}
+if ![info exists CXXFILTFLAGS] then {
+    set CXXFILTFLAGS ""
+}
 
 if ![file isdirectory tmpdir] {catch "exec mkdir tmpdir" status}
 
