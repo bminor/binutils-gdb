@@ -1,3 +1,8 @@
+2018-12-07  Jim Wilson  <jimw@sifive.com>
+
+	PR gas/23956
+	* riscv-opc.c (riscv_opcodes) <"add">: Use 1 not 0 for fourth arg.
+
 2018-12-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* configure.ac (enable-cgen-maint): Support passing path to cgen

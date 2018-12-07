@@ -637,6 +637,7 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
       case '[': break;
       case ']': break;
       case '0': break;
+      case '1': break;
       case 'F': /* funct */
 	switch (c = *p++)
 	  {
@@ -1195,6 +1196,11 @@ static const struct percent_op_match percent_op_stype[] =
 static const struct percent_op_match percent_op_rtype[] =
 {
   {"%tprel_add", BFD_RELOC_RISCV_TPREL_ADD},
+  {0, 0}
+};
+
+static const struct percent_op_match percent_op_null[] =
+{
   {0, 0}
 };
 
@@ -1878,8 +1884,8 @@ rvc_lui:
 	      continue;
 
 	    case 'j': /* Sign-extended immediate.  */
-	      *imm_reloc = BFD_RELOC_RISCV_LO12_I;
 	      p = percent_op_itype;
+	      *imm_reloc = BFD_RELOC_RISCV_LO12_I;
 	      goto alu_op;
 	    case 'q': /* Store displacement.  */
 	      p = percent_op_stype;
@@ -1889,9 +1895,11 @@ rvc_lui:
 	      p = percent_op_itype;
 	      *imm_reloc = BFD_RELOC_RISCV_LO12_I;
 	      goto load_store;
-	    case '0': /* AMO "displacement," which must be zero.  */
+	    case '1': /* 4-operand add, must be %tprel_add.  */
 	      p = percent_op_rtype;
-	      *imm_reloc = BFD_RELOC_UNUSED;
+	      goto alu_op;
+	    case '0': /* AMO "displacement," which must be zero.  */
+	      p = percent_op_null;
 load_store:
 	      if (riscv_handle_implicit_zero_offset (imm_expr, s))
 		continue;
@@ -1904,6 +1912,7 @@ alu_op:
 		  normalize_constant_expr (imm_expr);
 		  if (imm_expr->X_op != O_constant
 		      || (*args == '0' && imm_expr->X_add_number != 0)
+		      || (*args == '1')
 		      || imm_expr->X_add_number >= (signed)RISCV_IMM_REACH/2
 		      || imm_expr->X_add_number < -(signed)RISCV_IMM_REACH/2)
 		    break;

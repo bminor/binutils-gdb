@@ -1,3 +1,16 @@
+2018-12-07  Jim Wilson  <jimw@sifive.com>
+
+	PR gas/23956
+	* config/tc-riscv.c (validate_riscv_insn) <'1'>: New case.
+	(percent_op_null): New.
+	(riscv_ip) <'j'>: Set imm_reloc before p.
+	<'1'>: New case.
+	<'0'>: Use percent_op_null and don't set imm_reloc.
+	<alu_op>: Handle *args == '1'.
+	* testsuite/gas/riscv/tprel-add.d: New.
+	* testsuite/gas/riscv/tprel-add.l: New.
+	* testsuite/gas/riscv/tprel-add.s: New.
+
 2018-12-06  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (md_assemble): Adjust relocs for VLE before
