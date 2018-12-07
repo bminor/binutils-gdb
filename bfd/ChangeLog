@@ -1,3 +1,8 @@
+2018-12-08  Stafford Horne  <shorne@gmail.com>
+
+	* elf32-or1k.c (or1k_grok_prstatus): New function.
+	(or1k_grok_psinfo): Likewise.
+
 2018-12-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-properties.c (elf_find_and_remove_property): Add a

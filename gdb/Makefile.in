@@ -740,6 +740,7 @@ ALL_TARGET_OBS = \
 	nios2-tdep.o \
 	nto-tdep.o \
 	obsd-tdep.o \
+	or1k-linux-tdep.o \
 	or1k-tdep.o \
 	ppc-fbsd-tdep.o \
 	ppc-linux-tdep.o \

@@ -471,6 +471,14 @@ nios2*-*-*)
 	gdb_target_obs="nios2-tdep.o"
 	;;
 
+or1k*-*-linux*)
+	# Target: OpenCores OpenRISC 1000 32-bit running Linux
+	gdb_target_obs="or1k-tdep.o or1k-linux-tdep.o solib-svr4.o \
+			symfile-mem.o glibc-tdep.o linux-tdep.o"
+	gdb_sim=../sim/or1k/libsim.a
+	build_gdbserver=yes
+	;;
+
 or1k-*-* | or1knd-*-*)
 	# Target: OpenCores OpenRISC 1000 32-bit implementation bare metal
 	gdb_target_obs="or1k-tdep.o"

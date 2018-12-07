@@ -1256,6 +1256,9 @@ or1k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       tdesc_use_registers (gdbarch, tdesc, tdesc_data);
     }
 
+  /* Hook in ABI-specific overrides, if they have been registered.  */
+  gdbarch_init_osabi (info, gdbarch);
+
   return gdbarch;
 }
 

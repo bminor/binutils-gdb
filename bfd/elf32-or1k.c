@@ -3226,6 +3226,58 @@ elf32_or1k_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 
 }
 
+/* Implement elf_backend_grok_prstatus:
+   Support for core dump NOTE sections.  */
+static bfd_boolean
+or1k_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
+{
+  int offset;
+  size_t size;
+
+  switch (note->descsz)
+    {
+    default:
+      return FALSE;
+
+    case 212:	      /* Linux/OpenRISC */
+      /* pr_cursig */
+      elf_tdata (abfd)->core->signal = bfd_get_16 (abfd, note->descdata + 12);
+
+      /* pr_pid */
+      elf_tdata (abfd)->core->pid = bfd_get_32 (abfd, note->descdata + 24);
+
+      /* pr_reg */
+      offset = 72;
+      size = 132;
+
+      break;
+    }
+
+  /* Make a ".reg/999" section.  */
+  return _bfd_elfcore_make_pseudosection (abfd, ".reg",
+					  size, note->descpos + offset);
+}
+
+/* Implement elf_backend_grok_psinfo.  */
+static bfd_boolean
+or1k_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
+{
+  switch (note->descsz)
+    {
+    default:
+      return FALSE;
+
+    case 128:	      /* Linux/OpenRISC elf_prpsinfo */
+      elf_tdata (abfd)->core->program
+	= _bfd_elfcore_strndup (abfd, note->descdata + 32, 16);
+      elf_tdata (abfd)->core->command
+	= _bfd_elfcore_strndup (abfd, note->descdata + 48, 80);
+    }
+
+  return TRUE;
+}
+
+
 #define ELF_ARCH			bfd_arch_or1k
 #define ELF_MACHINE_CODE		EM_OR1K
 #define ELF_TARGET_ID			OR1K_ELF_DATA
@@ -3268,5 +3320,8 @@ elf32_or1k_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 #define elf_backend_size_dynamic_sections	or1k_elf_size_dynamic_sections
 #define elf_backend_adjust_dynamic_symbol	or1k_elf_adjust_dynamic_symbol
 #define elf_backend_finish_dynamic_symbol	or1k_elf_finish_dynamic_symbol
+
+#define elf_backend_grok_prstatus	  or1k_grok_prstatus
+#define elf_backend_grok_psinfo		  or1k_grok_psinfo
 
 #include "elf32-target.h"

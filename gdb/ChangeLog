@@ -1,3 +1,10 @@
+2018-12-08  Stafford Horne  <shorne@gmail.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Add or1k-linux-tdep.o.
+	* configure.tgt: Add or1k*-*-linux*.
+	* or1k-linux-tdep.c: New file.
+	* or1k-tdep.c (or1k_gdbarch_init): Call gdbarch_init_osabi.
+
 2018-12-07  Pedro Alves  <palves@redhat.com>
 
 	* dwarf2read.c (get_gdb_index_contents_from_section): Use
