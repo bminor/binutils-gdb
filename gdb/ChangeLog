@@ -1,3 +1,11 @@
+2018-12-08  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* linux-thread-db.c (struct thread_db_info): Add td_ta_delete_p.
+	(thread_db_err_str): Forward declare.
+	(delete_thread_db_info): Call td_ta_delete_p if available.
+	(try_thread_db_load_1): Acquire td_ta_delete address.
+	* nat/gdb_thread_db.h (td_ta_delete_ftype): Declare.
+
 2018-12-08  Pedro Alves  <palves@redhat.com>
 
 	* source.c (forward_search_command): Rename to ...

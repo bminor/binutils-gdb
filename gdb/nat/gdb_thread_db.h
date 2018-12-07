@@ -41,6 +41,7 @@ typedef td_err_e (td_init_ftype) (void);
 
 typedef td_err_e (td_ta_new_ftype) (struct ps_prochandle * ps,
 				    td_thragent_t **ta);
+typedef td_err_e (td_ta_delete_ftype) (td_thragent_t *ta_p);
 typedef td_err_e (td_ta_map_lwp2thr_ftype) (const td_thragent_t *ta,
 					    lwpid_t lwpid, td_thrhandle_t *th);
 typedef td_err_e (td_ta_thr_iter_ftype) (const td_thragent_t *ta,
