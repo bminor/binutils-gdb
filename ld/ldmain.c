@@ -434,6 +434,7 @@ main (int argc, char **argv)
 		     config.map_filename);
 	    }
 	}
+      link_info.has_map_file = TRUE;
     }
 
   lang_process ();

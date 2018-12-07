@@ -1,3 +1,16 @@
+2018-12-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-properties.c (elf_find_and_remove_property): Add a
+	bfd_boolean argument to indicate if the property should be
+	removed.
+	(elf_merge_gnu_property_list): Updated.  Report
+	property change in linker map file.
+	(elf_get_gnu_property_section_size): Skip property_remove
+	properties.
+	(elf_write_gnu_properties): Likewise.
+	(_bfd_elf_link_setup_gnu_properties): Report property merge
+	in linker map file.  Pass abfd to elf_merge_gnu_property_list.
+
 2018-12-07  Alan Modra  <amodra@gmail.com>
 
 	PR 23952

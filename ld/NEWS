@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Report property change in linker map file when merging GNU properties.
+
 * Add support for the C-SKY processor series.
 
 Changes in 2.31:

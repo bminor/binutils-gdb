@@ -241,7 +241,7 @@ elf_merge_gnu_properties (struct bfd_link_info *info, bfd *abfd,
 
 static elf_property *
 elf_find_and_remove_property (elf_property_list **listp,
-			      unsigned int type)
+			      unsigned int type, bfd_boolean remove)
 {
   elf_property_list *list;
 
@@ -250,7 +250,8 @@ elf_find_and_remove_property (elf_property_list **listp,
       if (type == list->property.pr_type)
 	{
 	  /* Remove this property.  */
-	  *listp = list->next;
+	  if (remove)
+	    *listp = list->next;
 	  return &list->property;
 	}
       else if (type < list->property.pr_type)
@@ -261,47 +262,144 @@ elf_find_and_remove_property (elf_property_list **listp,
   return NULL;
 }
 
-/* Merge GNU property list *LISTP with ABFD.  */
+/* Merge GNU property list *LISTP in ABFD with FIRST_PBFD.  */
 
 static void
-elf_merge_gnu_property_list (struct bfd_link_info *info, bfd *abfd,
-			     elf_property_list **listp)
+elf_merge_gnu_property_list (struct bfd_link_info *info, bfd *first_pbfd,
+			     bfd *abfd, elf_property_list **listp)
 {
   elf_property_list *p, **lastp;
   elf_property *pr;
+  bfd_boolean number_p;
+  bfd_vma number = 0;
 
-  /* Merge each GNU property in ABFD with the one on *LISTP.  */
-  lastp = &elf_properties (abfd);
+  /* Merge each GNU property in FIRST_PBFD with the one on *LISTP.  */
+  lastp = &elf_properties (first_pbfd);
   for (p = *lastp; p; p = p->next)
-    {
-      pr = elf_find_and_remove_property (listp, p->property.pr_type);
-      /* Pass NULL to elf_merge_gnu_properties for the property which
-	 isn't on *LISTP.  */
-      elf_merge_gnu_properties (info, abfd, &p->property, pr);
-      if (p->property.pr_kind == property_remove)
-	{
-	  /* Remove this property.  */
-	  *lastp = p->next;
-	  continue;
-	}
-      lastp = &p->next;
-    }
-
-  /* Merge the remaining properties on *LISTP with ABFD.  */
-  for (p = *listp; p != NULL; p = p->next)
-    if (elf_merge_gnu_properties (info, abfd, NULL, &p->property))
+    if (p->property.pr_kind != property_remove)
       {
-	if (p->property.pr_type == GNU_PROPERTY_NO_COPY_ON_PROTECTED)
-	  elf_has_no_copy_on_protected (abfd) = TRUE;
-
-	pr = _bfd_elf_get_property (abfd, p->property.pr_type,
-				    p->property.pr_datasz);
-	/* It must be a new property.  */
-	if (pr->pr_kind != property_unknown)
-	  abort ();
-	/* Add a new property.  */
-	*pr = p->property;
+	if (p->property.pr_kind == property_number)
+	  {
+	    number_p = TRUE;
+	    number = p->property.u.number;
+	  }
+	else
+	  number_p = FALSE;
+	pr = elf_find_and_remove_property (listp, p->property.pr_type,
+					   TRUE);
+	/* Pass NULL to elf_merge_gnu_properties for the property which
+	   isn't on *LISTP.  */
+	elf_merge_gnu_properties (info, first_pbfd, &p->property, pr);
+	if (p->property.pr_kind == property_remove)
+	  {
+	    if (info->has_map_file)
+	      {
+		if (number_p)
+		  {
+		    if (pr != NULL)
+		      info->callbacks->minfo
+			(_("Removed property %W to merge %pB (0x%v) "
+			   "and %pB (0x%v)\n"),
+			 (bfd_vma) p->property.pr_type, first_pbfd,
+			 number, abfd, pr->u.number);
+		    else
+		      info->callbacks->minfo
+			(_("Removed property %W to merge %pB (0x%v) "
+			   "and %pB (not found)\n"),
+			 (bfd_vma) p->property.pr_type, first_pbfd,
+			 number, abfd);
+		  }
+		else
+		  {
+		    if (pr != NULL)
+		      info->callbacks->minfo
+			(_("Removed property %W to merge %pB and %pB\n"),
+			 (bfd_vma) p->property.pr_type, first_pbfd, abfd);
+		    else
+		      info->callbacks->minfo
+			(_("Removed property %W to merge %pB and %pB "
+			   "(not found)\n"),
+			 (bfd_vma) p->property.pr_type, first_pbfd, abfd);
+		  }
+	      }
+	    else
+	      {
+		/* Remove this property.  */
+		*lastp = p->next;
+		continue;
+	      }
+	  }
+	else if (number_p)
+	  {
+	    if (pr != NULL)
+	      {
+		if (p->property.u.number != number
+		    || p->property.u.number != pr->u.number)
+		  info->callbacks->minfo
+		    (_("Updated property %W (0x%v) to merge %pB (0x%v) "
+		       "and %pB (0x%v)\n"),
+		     (bfd_vma) p->property.pr_type, p->property.u.number,
+		     first_pbfd, number, abfd, pr->u.number);
+	      }
+	    else
+	      {
+		if (p->property.u.number != number)
+		  info->callbacks->minfo
+		    (_("Updated property %W (%v) to merge %pB (0x%v) "
+		       "and %pB (not found)\n"),
+		     (bfd_vma) p->property.pr_type, p->property.u.number,
+		     first_pbfd, number, abfd);
+	      }
+	  }
+	lastp = &p->next;
       }
+
+  /* Merge the remaining properties on *LISTP with FIRST_PBFD.  */
+  for (p = *listp; p != NULL; p = p->next)
+    {
+      if (p->property.pr_kind == property_number)
+	{
+	  number_p = TRUE;
+	  number = p->property.u.number;
+	}
+      else
+	number_p = FALSE;
+
+      if (elf_merge_gnu_properties (info, first_pbfd, NULL, &p->property))
+	{
+	  if (p->property.pr_type == GNU_PROPERTY_NO_COPY_ON_PROTECTED)
+	    elf_has_no_copy_on_protected (first_pbfd) = TRUE;
+
+	  pr = _bfd_elf_get_property (first_pbfd, p->property.pr_type,
+				      p->property.pr_datasz);
+	  /* It must be a new property.  */
+	  if (pr->pr_kind != property_unknown)
+	    abort ();
+	  /* Add a new property.  */
+	  *pr = p->property;
+	}
+      else
+	{
+	  pr = elf_find_and_remove_property (&elf_properties (first_pbfd),
+					     p->property.pr_type,
+					     FALSE);
+	  if (pr == NULL)
+	    {
+	      if (number_p)
+		info->callbacks->minfo
+		  (_("Removed property %W to merge %pB (not found) and "
+		     "%pB (0x%v)\n"),
+		   (bfd_vma) p->property.pr_type, first_pbfd, abfd,
+		   number);
+	      else
+		info->callbacks->minfo
+		  (_("Removed property %W to merge %pB and %pB\n"),
+		   (bfd_vma) p->property.pr_type, first_pbfd, abfd);
+	    }
+	  else if (pr->pr_kind != property_remove)
+	    abort ();
+	}
+    }
 }
 
 /* Get GNU property section size.  */
@@ -319,8 +417,11 @@ elf_get_gnu_property_section_size (elf_property_list *list,
   size = descsz;
   for (; list != NULL; list = list->next)
     {
-      /* There are 4 byte type + 4 byte datasz for each property.  */
       unsigned int datasz;
+      /* Check if this property should be skipped.  */
+      if (list->property.pr_kind == property_remove)
+	continue;
+      /* There are 4 byte type + 4 byte datasz for each property.  */
       if (list->property.pr_type == GNU_PROPERTY_STACK_SIZE)
 	datasz = align_size;
       else
@@ -355,6 +456,9 @@ elf_write_gnu_properties (bfd *abfd, bfd_byte *contents,
   size = descsz;
   for (; list != NULL; list = list->next)
     {
+      /* Check if this property should be skipped.  */
+      if (list->property.pr_kind == property_remove)
+	continue;
       /* There are 4 byte type + 4 byte datasz for each property.  */
       if (list->property.pr_type == GNU_PROPERTY_STACK_SIZE)
 	datasz = align_size;
@@ -445,6 +549,10 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
     return NULL;
 
   /* Merge .note.gnu.property sections.  */
+  info->callbacks->minfo (_("\n"));
+  info->callbacks->minfo (_("Merging program properties\n"));
+  info->callbacks->minfo (_("\n"));
+
   for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link.next)
     if (abfd != first_pbfd
 	&& (abfd->flags & (DYNAMIC | BFD_PLUGIN)) == 0)
@@ -471,7 +579,7 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 	   when all properties are from ELF objects with different
 	   machine code or class.  */
 	if (first_pbfd != NULL)
-	  elf_merge_gnu_property_list (info, first_pbfd, listp);
+	  elf_merge_gnu_property_list (info, first_pbfd, abfd, listp);
 
 	if (list != NULL)
 	  {

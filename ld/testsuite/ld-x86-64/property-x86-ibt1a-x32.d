@@ -1,8 +1,9 @@
 #source: property-x86-empty.s
 #source: property-x86-ibt.s
 #as: --x32 -mx86-used-note=yes
-#ld: -r -m elf32_x86_64
+#ld: -r -m elf32_x86_64 -Map tmpdir/property-x86-ibt1a-x32.map
 #readelf: -n
+#map: property-x86-ibt1a.map
 
 Displaying notes found in: .note.gnu.property
   Owner                 Data size	Description

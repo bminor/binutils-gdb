@@ -759,6 +759,28 @@ option is used:
 
 See @ref{Expressions} for more information about expressions in linker
 scripts.
+
+@item How GNU properties are merged.
+
+When linker merges input .note.gnu.property sections into one output
+.note.gnu.property section, some properties are removed or updated,
+which are reported in the link map as
+
+@smallexample
+Removed property 0xc0000002 to merge foo.o (0x1) and bar.o (not found)
+@end smallexample
+
+It indicates that property 0xc0000002 is removed from output when
+merging properties in  @file{foo.o}, whose property 0xc0000002 value
+is 0x1, and @file{bar.o}, which doesn't have property 0xc0000002.
+
+@smallexample
+Updated property 0xc0000002 (0x1) to merge foo.o (0x1) and bar.o (0x1)
+@end smallexample
+
+It indicates that property 0xc0010001 value is updated to 0x1 in output
+when merging properties in  @file{foo.o}, whose 0xc0010001 property value
+is 0x1, and @file{bar.o}, whose 0xc0010001 property value is 0x1.
 @end itemize
 
 @kindex -n

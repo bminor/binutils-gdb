@@ -1,3 +1,21 @@
+2018-12-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Updated for property change report.
+	* ld.texi: Document property change report.
+	* ldmain.c (main): Set link_info.has_map_file to TRUE when
+	linker map file is used.
+	* testsuite/ld-scripts/rgn-over1.d: Updated.
+	* testsuite/ld-scripts/rgn-over2.d: Likewise.
+	* testsuite/ld-scripts/rgn-over3.d: Likewise.
+	* testsuite/ld-scripts/rgn-over4.d: Likewise.
+	* testsuite/ld-scripts/rgn-over5.d: Likewise.
+	* testsuite/ld-scripts/rgn-over6.d: Likewise.
+	* testsuite/ld-scripts/rgn-over7.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt1a-x32.d: Check linker map
+	file.
+	* testsuite/ld-x86-64/property-x86-ibt1a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-ibt1a.map: New file.
+
 2018-12-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23372
