@@ -1,5 +1,12 @@
 2018-12-07  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/23958
+	* testsuite/ld-plugin/lto.exp: Run PR ld/23958 test.
+	* testsuite/ld-plugin/pr23958.c: New file.
+	* testsuite/ld-plugin/pr23958.t: Likewise.
+
+2018-12-07  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* NEWS: Updated for property change report.
 	* ld.texi: Document property change report.
 	* ldmain.c (main): Set link_info.has_map_file to TRUE when

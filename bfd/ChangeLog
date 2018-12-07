@@ -1,3 +1,9 @@
+2018-12-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23958
+	* elflink.c (_bfd_elf_add_default_symbol): Override the previous
+	definition from IR object.
+
 2018-12-08  Stafford Horne  <shorne@gmail.com>
 
 	* elf32-or1k.c (or1k_grok_prstatus): New function.

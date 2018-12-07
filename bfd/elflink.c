@@ -1941,6 +1941,15 @@ _bfd_elf_add_default_symbol (bfd *abfd,
       if (! bfd_link_relocatable (info))
 	{
 	  bh = &hi->root;
+	  if (bh->type == bfd_link_hash_defined
+	      && (bh->u.def.section->owner->flags & BFD_PLUGIN) != 0)
+	    {
+	      /* Mark the previous definition from IR object as
+		 undefined so that the generic linker will override
+		 it.  */
+	      bh->type = bfd_link_hash_undefined;
+	      bh->u.undef.abfd = bh->u.def.section->owner;
+	    }
 	  if (! (_bfd_generic_link_add_one_symbol
 		 (info, abfd, shortname, BSF_INDIRECT,
 		  bfd_ind_section_ptr,
