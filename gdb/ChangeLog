@@ -1,3 +1,8 @@
+2018-12-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* .dir-locals.el: Copy most of the settings from c-mode over to
+	c++-mode.
+
 2018-12-08  Stafford Horne  <shorne@gmail.com>
 
 	* Makefile.in (ALL_TARGET_OBS): Add or1k-linux-tdep.o.
