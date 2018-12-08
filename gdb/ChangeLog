@@ -1,5 +1,27 @@
 2018-12-11  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* nat/linux-osdata.c (common_getter): New function.
+	(struct osdata_type): Change getter to take_snapshot.
+	Add LONGEST len_avail and struct buffer buffer.
+	Change all elements in the initializer.
+	Add an element for the list of types.
+	(linux_xfer_osdata_info_os_types): New function.
+	(linux_common_xfer_osdata): Use common_getter for the list of types.
+	Replace getter call by common_getter.
+	(linux_xfer_osdata_cpus): Remove args READBUF, OFFSET, LEN.
+	Add arg BUFFER.  Only keep the code that adds data in BUFFER.
+	(linux_xfer_osdata_fds): Likewise.
+	(linux_xfer_osdata_modules): Likewise.
+	(linux_xfer_osdata_msg): Likewise.
+	(linux_xfer_osdata_processes): Likewise.
+	(linux_xfer_osdata_processgroups): Likewise.
+	(linux_xfer_osdata_sem): Likewise.
+	(linux_xfer_osdata_shm): Likewise.
+	(linux_xfer_osdata_isockets): Likewise.
+	(linux_xfer_osdata_threads): Likewise.
+
+2018-12-11  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* nat/linux-osdata.c: Removed various trailing spaces.
 
 2018-12-10  Andrew Burgess  <andrew.burgess@embecosm.com>
