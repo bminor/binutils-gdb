@@ -1,3 +1,10 @@
+2018-12-08  Alan Modra  <amodra@gmail.com>
+
+	* strings.c (unget_part_char): New function.
+	(print_strings): Use unget_part_char.  Formatting.
+	* testsuite/binutils-all/strings.exp (test_multibyte): Don't
+	use square brackets in fail message.  Expect "String1\nString2".
+
 2018-12-07  Alan Modra  <amodra@gmail.com>
 
 	* nm.c (display_rel_file): Use xrealloc to increase minisyms

@@ -502,6 +502,57 @@ get_char (FILE *stream, file_ptr *address, int *magiccount, char **magic)
 
   return r;
 }
+
+/* Throw away one byte of a (possibly) multi-byte char C, updating
+   address and buffer to suit.  */
+
+static void
+unget_part_char (long c, file_ptr *address, int *magiccount, char **magic)
+{
+  static char tmp[4];
+
+  if (encoding_bytes > 1)
+    {
+      *address -= encoding_bytes - 1;
+
+      if (*magiccount == 0)
+	{
+	  /* If no magic buffer exists, use temp buffer.  */
+	  switch (encoding)
+	    {
+	    default:
+	      break;
+	    case 'b':
+	      tmp[0] = c & 0xff;
+	      *magiccount = 1;
+	      break;
+	    case 'l':
+	      tmp[0] = (c >> 8) & 0xff;
+	      *magiccount = 1;
+	      break;
+	    case 'B':
+	      tmp[0] = (c >> 16) & 0xff;
+	      tmp[1] = (c >> 8) & 0xff;
+	      tmp[2] = c & 0xff;
+	      *magiccount = 3;
+	      break;
+	    case 'L':
+	      tmp[0] = (c >> 8) & 0xff;
+	      tmp[1] = (c >> 16) & 0xff;
+	      tmp[2] = (c >> 24) & 0xff;
+	      *magiccount = 3;
+	      break;
+	    }
+	  *magic = tmp;
+	}
+      else
+	{
+	  /* If magic buffer exists, rewind.  */
+	  *magic -= encoding_bytes - 1;
+	  *magiccount += encoding_bytes - 1;
+	}
+    }
+}
 
 /* Find the strings in file FILENAME, read from STREAM.
    Assume that STREAM is positioned so that the next byte read
@@ -543,43 +594,8 @@ print_strings (const char *filename, FILE *stream, file_ptr address,
 
 	  if (! STRING_ISGRAPHIC (c))
 	    {
-	      /* Found a non-graphic. Try again starting with next char.  */
-	      if (encoding_bytes > 1)
-		{
-		  /* In case of multibyte encodings rewind using magic buffer.  */
-		  if (magiccount == 0)
-		    {
-		      /* If no magic buffer exists: use memory of c.  */
-		      switch (encoding)
-			{
-			default:
-			  break;
-			case 'b':
-			  c = c & 0xff;
-			  magiccount += 1;
-			  break;
-			case 'l':
-			case 'L':
-			  c = c >> 8;
-			  magiccount += (encoding_bytes -1);
-			  break;
-			case 'B':
-			  c = (( c & 0xff0000) >> 16) | ( c & 0xff00)
-			    | (( c & 0xff) << 16);
-			  magiccount += 3;
-			  break;
-			}
-		      magic = (char *) &c;
-		    }
-		  else
-		    {
-		      /* If magic buffer exists: rewind.  */
-		      magic = magic - (encoding_bytes -1);
-		    }
-
-		  address = address - (encoding_bytes -1);
-		}
-
+	      /* Found a non-graphic.  Try again starting with next byte.  */
+	      unget_part_char (c, &address, &magiccount, &magic);
 	      goto tryline;
 	    }
 	  buf[i] = c;
@@ -598,18 +614,18 @@ print_strings (const char *filename, FILE *stream, file_ptr address,
 	    if (sizeof (start) > sizeof (long))
 	      {
 # ifndef __MSVCRT__
-	        printf ("%7llo ", (unsigned long long) start);
+		printf ("%7llo ", (unsigned long long) start);
 # else
-	        printf ("%7I64o ", (unsigned long long) start);
+		printf ("%7I64o ", (unsigned long long) start);
 # endif
 	      }
 	    else
 #elif !BFD_HOST_64BIT_LONG
-	    if (start != (unsigned long) start)
-	      printf ("++%7lo ", (unsigned long) start);
-	    else
+	      if (start != (unsigned long) start)
+		printf ("++%7lo ", (unsigned long) start);
+	      else
 #endif
-	      printf ("%7lo ", (unsigned long) start);
+		printf ("%7lo ", (unsigned long) start);
 	    break;
 
 	  case 10:
@@ -617,18 +633,18 @@ print_strings (const char *filename, FILE *stream, file_ptr address,
 	    if (sizeof (start) > sizeof (long))
 	      {
 # ifndef __MSVCRT__
-	        printf ("%7lld ", (unsigned long long) start);
+		printf ("%7lld ", (unsigned long long) start);
 # else
-	        printf ("%7I64d ", (unsigned long long) start);
+		printf ("%7I64d ", (unsigned long long) start);
 # endif
 	      }
 	    else
 #elif !BFD_HOST_64BIT_LONG
-	    if (start != (unsigned long) start)
-	      printf ("++%7ld ", (unsigned long) start);
-	    else
+	      if (start != (unsigned long) start)
+		printf ("++%7ld ", (unsigned long) start);
+	      else
 #endif
-	      printf ("%7ld ", (long) start);
+		printf ("%7ld ", (long) start);
 	    break;
 
 	  case 16:
@@ -636,19 +652,19 @@ print_strings (const char *filename, FILE *stream, file_ptr address,
 	    if (sizeof (start) > sizeof (long))
 	      {
 # ifndef __MSVCRT__
-	        printf ("%7llx ", (unsigned long long) start);
+		printf ("%7llx ", (unsigned long long) start);
 # else
-	        printf ("%7I64x ", (unsigned long long) start);
+		printf ("%7I64x ", (unsigned long long) start);
 # endif
 	      }
 	    else
 #elif !BFD_HOST_64BIT_LONG
-	    if (start != (unsigned long) start)
-	      printf ("%lx%8.8lx ", (unsigned long) (start >> 32),
-		      (unsigned long) (start & 0xffffffff));
-	    else
+	      if (start != (unsigned long) start)
+		printf ("%lx%8.8lx ", (unsigned long) (start >> 32),
+			(unsigned long) (start & 0xffffffff));
+	      else
 #endif
-	      printf ("%7lx ", (unsigned long) start);
+		printf ("%7lx ", (unsigned long) start);
 	    break;
 	  }
 
@@ -662,49 +678,16 @@ print_strings (const char *filename, FILE *stream, file_ptr address,
 	    break;
 	  if (! STRING_ISGRAPHIC (c))
 	    {
-	      if (encoding_bytes > 1)
-		{
-		  /* In case of multibyte encodings rewind using magic buffer.  */
-		  if (magiccount == 0)
-		    {
-		      /* If no magic buffer exists: use memory of c.  */
-		      switch (encoding)
-			{
-			default:
-			  break;
-			case 'b':
-			  c = c & 0xff;
-			  magiccount += 1;
-			  break;
-			case 'l':
-			case 'L':
-			  c = c >> 8;
-			  magiccount += (encoding_bytes -1);
-			  break;
-			case 'B':
-			  c = (( c & 0xff0000) >> 16) | ( c & 0xff00)
-			    | (( c & 0xff) << 16);
-			  magiccount += 3;
-			  break;
-			}
-		      magic = (char *) &c;
-		    }
-		  else
-		    {
-		      /* If magic buffer exists: rewind.  */
-		      magic = magic - (encoding_bytes -1);
-		    }
-		  address = address - (encoding_bytes -1);
-		}
+	      unget_part_char (c, &address, &magiccount, &magic);
 	      break;
 	    }
 	  putchar (c);
 	}
 
       if (output_separator)
-        fputs (output_separator, stdout);
+	fputs (output_separator, stdout);
       else
-        putchar ('\n');
+	putchar ('\n');
     }
   free (buf);
 }
