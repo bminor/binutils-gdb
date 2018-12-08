@@ -1,3 +1,11 @@
+2018-12-08  Alan Modra  <amodra@gmail.com>
+
+	PR 21128
+	* testsuite/icf_safe_so_test.sh (check_fold): Rewrite to check
+	multiple symbols at once.
+	(arch_specific_safe_fold): Likewise, and call with the four foo*
+	symbols expected to fold.
+
 2018-12-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* archive.cc (Archive::get_elf_object_for_member): Also print
