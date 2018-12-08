@@ -1521,16 +1521,14 @@ info_line_command (const char *arg, int from_tty)
 
 /* Commands to search the source file for a regexp.  */
 
+/* Helper for forward_search_command/reverse_search_command.  FORWARD
+   indicates direction: true for forward, false for
+   backward/reverse.  */
+
 static void
-forward_search_command (const char *regex, int from_tty)
+search_command_helper (const char *regex, int from_tty, bool forward)
 {
-  int c;
-  int line;
-  char *msg;
-
-  line = last_line_listed + 1;
-
-  msg = (char *) re_comp (regex);
+  const char *msg = re_comp (regex);
   if (msg)
     error (("%s"), msg);
 
@@ -1544,6 +1542,10 @@ forward_search_command (const char *regex, int from_tty)
   if (current_source_symtab->line_charpos == 0)
     find_source_lines (current_source_symtab, desc.get ());
 
+  int line = (forward
+	      ? last_line_listed + 1
+	      : last_line_listed - 1);
+
   if (line < 1 || line > current_source_symtab->nlines)
     error (_("Expression not found"));
 
@@ -1553,43 +1555,35 @@ forward_search_command (const char *regex, int from_tty)
 
   gdb_file_up stream = desc.to_file (FDOPEN_MODE);
   clearerr (stream.get ());
+
+  gdb::def_vector<char> buf;
+  buf.reserve (256);
+
   while (1)
     {
-      static char *buf = NULL;
-      char *p;
-      int cursize, newsize;
+      buf.resize (0);
 
-      cursize = 256;
-      buf = (char *) xrealloc (buf, cursize);
-      p = buf;
-
-      c = fgetc (stream.get ());
+      int c = fgetc (stream.get ());
       if (c == EOF)
 	break;
       do
 	{
-	  *p++ = c;
-	  if (p - buf == cursize)
-	    {
-	      newsize = cursize + cursize / 2;
-	      buf = (char *) xrealloc (buf, newsize);
-	      p = buf + cursize;
-	      cursize = newsize;
-	    }
+	  buf.push_back (c);
 	}
       while (c != '\n' && (c = fgetc (stream.get ())) >= 0);
 
       /* Remove the \r, if any, at the end of the line, otherwise
          regular expressions that end with $ or \n won't work.  */
-      if (p - buf > 1 && p[-2] == '\r')
+      size_t sz = buf.size ();
+      if (sz >= 2 && buf[sz - 2] == '\r')
 	{
-	  p--;
-	  p[-1] = '\n';
+	  buf[sz - 2] = '\n';
+	  buf.resize (sz - 1);
 	}
 
       /* We now have a source line in buf, null terminate and match.  */
-      *p = 0;
-      if (re_exec (buf) > 0)
+      buf.push_back ('\0');
+      if (re_exec (buf.data ()) > 0)
 	{
 	  /* Match!  */
 	  print_source_lines (current_source_symtab, line, line + 1, 0);
@@ -1597,90 +1591,35 @@ forward_search_command (const char *regex, int from_tty)
 	  current_source_line = std::max (line - lines_to_list / 2, 1);
 	  return;
 	}
-      line++;
+
+      if (forward)
+	line++;
+      else
+	{
+	  line--;
+	  if (fseek (stream.get (),
+		     current_source_symtab->line_charpos[line - 1], 0) < 0)
+	    {
+	      const char *filename
+		= symtab_to_filename_for_display (current_source_symtab);
+	      perror_with_name (filename);
+	    }
+	}
     }
 
   printf_filtered (_("Expression not found\n"));
 }
 
 static void
+forward_search_command (const char *regex, int from_tty)
+{
+  search_command_helper (regex, from_tty, true);
+}
+
+static void
 reverse_search_command (const char *regex, int from_tty)
 {
-  int c;
-  int line;
-  char *msg;
-
-  line = last_line_listed - 1;
-
-  msg = (char *) re_comp (regex);
-  if (msg)
-    error (("%s"), msg);
-
-  if (current_source_symtab == 0)
-    select_source_symtab (0);
-
-  scoped_fd desc = open_source_file (current_source_symtab);
-  if (desc.get () < 0)
-    perror_with_name (symtab_to_filename_for_display (current_source_symtab));
-
-  if (current_source_symtab->line_charpos == 0)
-    find_source_lines (current_source_symtab, desc.get ());
-
-  if (line < 1 || line > current_source_symtab->nlines)
-    error (_("Expression not found"));
-
-  if (lseek (desc.get (), current_source_symtab->line_charpos[line - 1], 0)
-      < 0)
-    perror_with_name (symtab_to_filename_for_display (current_source_symtab));
-
-  gdb_file_up stream = desc.to_file (FDOPEN_MODE);
-  clearerr (stream.get ());
-  while (line > 1)
-    {
-/* FIXME!!!  We walk right off the end of buf if we get a long line!!!  */
-      char buf[4096];		/* Should be reasonable???  */
-      char *p = buf;
-
-      c = fgetc (stream.get ());
-      if (c == EOF)
-	break;
-      do
-	{
-	  *p++ = c;
-	}
-      while (c != '\n' && (c = fgetc (stream.get ())) >= 0);
-
-      /* Remove the \r, if any, at the end of the line, otherwise
-         regular expressions that end with $ or \n won't work.  */
-      if (p - buf > 1 && p[-2] == '\r')
-	{
-	  p--;
-	  p[-1] = '\n';
-	}
-
-      /* We now have a source line in buf; null terminate and match.  */
-      *p = 0;
-      if (re_exec (buf) > 0)
-	{
-	  /* Match!  */
-	  print_source_lines (current_source_symtab, line, line + 1, 0);
-	  set_internalvar_integer (lookup_internalvar ("_"), line);
-	  current_source_line = std::max (line - lines_to_list / 2, 1);
-	  return;
-	}
-      line--;
-      if (fseek (stream.get (),
-		 current_source_symtab->line_charpos[line - 1], 0) < 0)
-	{
-	  const char *filename;
-
-	  filename = symtab_to_filename_for_display (current_source_symtab);
-	  perror_with_name (filename);
-	}
-    }
-
-  printf_filtered (_("Expression not found\n"));
-  return;
+  search_command_helper (regex, from_tty, false);
 }
 
 /* If the last character of PATH is a directory separator, then strip it.  */

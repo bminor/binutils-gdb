@@ -1,3 +1,9 @@
+2018-12-08  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/list.exp (test_forward_search): Rename to ...
+	(test_forward_reverse_search): ... this.  Also test reverse-search
+	and the forward-search alias.
+
 2018-12-05  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* config/sim.exp (gdb_target_sim): Remove redundant adjustment of

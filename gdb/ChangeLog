@@ -1,3 +1,12 @@
+2018-12-08  Pedro Alves  <palves@redhat.com>
+
+	* source.c (forward_search_command): Rename to ...
+	(search_command_helper): ... this.  Add 'forward' parameter.
+	Tweak to use a gdb::def_vector<char> instead of a xrealloc'ed
+	buffer.  Handle backward searches too.
+	(forward_search_command, reverse_search_command): Reimplement by
+	calling search_command_helper.
+
 2018-12-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* .dir-locals.el: Copy most of the settings from c-mode over to
