@@ -592,7 +592,7 @@ case $host_os in
 esac
 
 # These are the libraries checked by Readline.
-AC_SEARCH_LIBS(tgetent, [termcap tinfo curses ncursesw ncurses])
+AC_SEARCH_LIBS(tgetent, [termcap tinfow tinfo curses ncursesw ncurses])
 
 if test "$ac_cv_search_tgetent" = no; then
   CONFIG_OBS="$CONFIG_OBS stub-termcap.o"

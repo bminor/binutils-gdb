@@ -9027,7 +9027,7 @@ return tgetent ();
   return 0;
 }
 _ACEOF
-for ac_lib in '' termcap tinfo curses ncursesw ncurses; do
+for ac_lib in '' termcap tinfow tinfo curses ncursesw ncurses; do
   if test -z "$ac_lib"; then
     ac_res="none required"
   else

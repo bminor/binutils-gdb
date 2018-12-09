@@ -1,3 +1,10 @@
+2018-12-08  Simon Marchi  <simon.marchi@ericsson.com>
+	    Дилян Палаузов  <dilyan.palauzov@aegee.org>
+
+	PR gdb/23950
+	* configure.ac: Search for tgetent in libtinfow.
+	* configure: Re-generate.
+
 2018-12-08  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* linux-thread-db.c (struct thread_db_info): Add td_ta_delete_p.
