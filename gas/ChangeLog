@@ -1,3 +1,13 @@
+2018-12-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/pr23968
+	* config/tc-i386.h (TC_FORCE_RELOCATION_LOCAL): Put back
+	BFD_RELOC_X86_64_GOTPCREL.
+	* testsuite/gas/i386/i386.exp: Run x86-64-gotpcrel-2.
+	* testsuite/gas/i386/x86-64-gotpcrel-2.d: New file.
+	* testsuite/gas/i386/x86-64-gotpcrel-2.s: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-gotpcrel-2.d: Likewise.
+
 2018-12-07  Jim Wilson  <jimw@sifive.com>
 
 	PR gas/23956
