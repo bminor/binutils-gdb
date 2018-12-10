@@ -514,7 +514,7 @@ riscv_register_name (struct gdbarch *gdbarch, int regnum)
 
       switch (regnum)
 	{
-	  #include "opcode/riscv-opc.h"
+#include "opcode/riscv-opc.h"
 	}
 #undef DECLARE_CSR
     }
