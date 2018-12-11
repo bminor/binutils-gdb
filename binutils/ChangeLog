@@ -1,3 +1,8 @@
+2018-12-11  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS: Note that recursion limit has increased to 2048.
+	* doc/binutils.texi: Likewise.
+
 2018-12-08  Alan Modra  <amodra@gmail.com>
 
 	* strings.c (unget_part_char): New function.

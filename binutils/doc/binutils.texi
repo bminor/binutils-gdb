@@ -950,7 +950,7 @@ whilst demangling strings.  Since the name mangling formats allow for
 an inifinite level of recursion it is possible to create strings whose
 decoding will exhaust the amount of stack space available on the host
 machine, triggering a memory fault.  The limit tries to prevent this
-from happening by restricting recursion to 1024 levels of nesting.
+from happening by restricting recursion to 2048 levels of nesting.
 
 The default is for this limit to be enabled, but disabling it may be
 necessary in order to demangle truly complicated names.  Note however
@@ -2202,7 +2202,7 @@ whilst demangling strings.  Since the name mangling formats allow for
 an inifinite level of recursion it is possible to create strings whose
 decoding will exhaust the amount of stack space available on the host
 machine, triggering a memory fault.  The limit tries to prevent this
-from happening by restricting recursion to 1024 levels of nesting.
+from happening by restricting recursion to 2048 levels of nesting.
 
 The default is for this limit to be enabled, but disabling it may be
 necessary in order to demangle truly complicated names.  Note however
@@ -3555,7 +3555,7 @@ whilst demangling strings.  Since the name mangling formats allow for
 an inifinite level of recursion it is possible to create strings whose
 decoding will exhaust the amount of stack space available on the host
 machine, triggering a memory fault.  The limit tries to prevent this
-from happening by restricting recursion to 1024 levels of nesting.
+from happening by restricting recursion to 2048 levels of nesting.
 
 The default is for this limit to be enabled, but disabling it may be
 necessary in order to demangle truly complicated names.  Note however
@@ -3778,7 +3778,7 @@ whilst demangling strings.  Since the name mangling formats allow for
 an inifinite level of recursion it is possible to create strings whose
 decoding will exhaust the amount of stack space available on the host
 machine, triggering a memory fault.  The limit tries to prevent this
-from happening by restricting recursion to 1024 levels of nesting.
+from happening by restricting recursion to 2048 levels of nesting.
 
 The default is for this limit to be enabled, but disabling it may be
 necessary in order to demangle truly complicated names.  Note however

@@ -1,3 +1,8 @@
+2018-12-11  Nick Clifton  <nickc@redhat.com>
+
+	PR 88409
+	* demangle.h (DEMANGLE_RECURSION_LIMIT): Increase to 2048.
+
 2018-12-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfdlink.h (bfd_link_info): Add has_map_file.

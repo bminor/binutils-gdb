@@ -4,7 +4,7 @@
   maximum amount of recursion that is allowed whilst demangling strings.
   The value for this limit is defined by the DEMANGLE_RECRUSE_LIMIT
   constant declared in the include/demangle.h header file.  At the time
-  of writing this constant has the value of 1024.
+  of writing this constant has the value of 2048.
 
   The --no-recurse-limit option can be used to remove the limit, restoring
   the behaviour of earlier versions of these tools.  This may be needed in
