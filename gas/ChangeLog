@@ -1,3 +1,13 @@
+2018-12-10  Jim Wilson  <jimw@sifive.com>
+
+	PR gas/23954
+	* config/tc-riscv.c (my_getSmallExpression): Expand comment for
+	register support.  Set expr_end if parse a register.
+	(riscv_ip) <'u'>: Break if imm_expr is not a symbol or constant.
+	* testsuite/gas/riscv/auipc-parsing.d: New.
+	* testsuite/gas/riscv/auipc-parsing.l: New.
+	* testsuite/gas/riscv/auipc-parsing.s: New.
+
 2018-12-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/23968

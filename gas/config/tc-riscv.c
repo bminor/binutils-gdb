@@ -1263,11 +1263,15 @@ my_getSmallExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
   unsigned crux_depth, str_depth, regno;
   char *crux;
 
-  /* First, check for integer registers.  */
+  /* First, check for integer registers.  No callers can accept a reg, but
+     we need to avoid accidentally creating a useless undefined symbol below,
+     if this is an instruction pattern that can't match.  A glibc build fails
+     if this is removed.  */
   if (reg_lookup (&str, RCLASS_GPR, &regno))
     {
       ep->X_op = O_register;
       ep->X_add_number = regno;
+      expr_end = str;
       return 0;
     }
 
@@ -1940,6 +1944,9 @@ branch:
 		  *imm_reloc = BFD_RELOC_RISCV_HI20;
 		  imm_expr->X_add_number <<= RISCV_IMM_BITS;
 		}
+	      /* The 'u' format specifier must be a symbol or a constant.  */
+	      if (imm_expr->X_op != O_symbol && imm_expr->X_op != O_constant)
+	        break;
 	      s = expr_end;
 	      continue;
 
