@@ -1,5 +1,5 @@
 /* Linux-specific functions to retrieve OS data.
-   
+
    Copyright (C) 2009-2018 Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -55,7 +55,7 @@ typedef long long TIME_T;
 #define MAX_PID_T_STRLEN  (sizeof ("-9223372036854775808") - 1)
 
 /* Returns the CPU core that thread PTID is currently running on.  */
-					  
+
 /* Compute and return the processor core of a given thread.  */
 
 int
@@ -117,9 +117,9 @@ command_from_pid (char *command, int maxlen, PID_T pid)
 {
   std::string stat_path = string_printf ("/proc/%lld/stat", pid);
   gdb_file_up fp = gdb_fopen_cloexec (stat_path, "r");
-  
+
   command[0] = '\0';
- 
+
   if (fp)
     {
       /* sizeof (cmd) should be greater or equal to TASK_COMM_LEN (in
@@ -128,7 +128,7 @@ command_from_pid (char *command, int maxlen, PID_T pid)
       char cmd[18];
       PID_T stat_pid;
       int items_read = fscanf (fp.get (), "%lld %17s", &stat_pid, cmd);
-	  
+
       if (items_read == 2 && pid == stat_pid)
 	{
 	  cmd[strlen (cmd) - 1] = '\0'; /* Remove trailing parenthesis.  */
@@ -162,7 +162,7 @@ commandline_from_pid (PID_T pid)
 	{
 	  char buf[1024];
 	  size_t read_bytes = fread (buf, 1, sizeof (buf), f.get ());
-     
+
 	  if (read_bytes)
 	    {
 	      commandline = (char *) xrealloc (commandline, len + read_bytes + 1);
@@ -206,7 +206,7 @@ static void
 user_from_uid (char *user, int maxlen, uid_t uid)
 {
   struct passwd *pwentry = getpwuid (uid);
-  
+
   if (pwentry)
     {
       strncpy (user, pwentry->pw_name, maxlen);
@@ -227,7 +227,7 @@ get_process_owner (uid_t *owner, PID_T pid)
   char procentry[sizeof ("/proc/") + MAX_PID_T_STRLEN];
 
   sprintf (procentry, "/proc/%lld", pid);
-  
+
   if (stat (procentry, &statbuf) == 0 && S_ISDIR (statbuf.st_mode))
     {
       *owner = statbuf.st_uid;
@@ -346,7 +346,7 @@ linux_xfer_osdata_processes (gdb_byte *readbuf,
 		  }
 
 	      xfree (cores);
-	      
+
 	      buffer_xml_printf (
 		  &buffer,
 		  "<item>"
@@ -360,10 +360,10 @@ linux_xfer_osdata_processes (gdb_byte *readbuf,
 		  command_line ? command_line : "",
 		  cores_str);
 
-	      xfree (command_line);     
+	      xfree (command_line);
 	      xfree (cores_str);
 	    }
-	  
+
 	  closedir (dirp);
 	}
 
@@ -502,7 +502,7 @@ linux_xfer_osdata_processgroups (gdb_byte *readbuf,
 
 	      xfree (command_line);
 	    }
-	}   
+	}
 
       buffer_grow_str0 (&buffer, "</osdata>\n");
       buf = buffer_finish (&buffer);
@@ -573,7 +573,7 @@ linux_xfer_osdata_threads (gdb_byte *readbuf,
 
 		  std::string pathname
 		    = string_printf ("/proc/%s/task", dp->d_name);
-		  
+
 		  pid = atoi (dp->d_name);
 		  command_from_pid (command, sizeof (command), pid);
 
@@ -946,7 +946,7 @@ print_sockets (unsigned short family, int tcp, struct buffer *buffer)
 			       remote_address, &remote_port,
 			       &state,
 			       &uid);
-	      
+
 	      if (result == 6)
 		{
 		  union socket_addr locaddr, remaddr;
@@ -960,7 +960,7 @@ print_sockets (unsigned short family, int tcp, struct buffer *buffer)
 			      &locaddr.sin.sin_addr.s_addr);
 		      sscanf (remote_address, "%X",
 			      &remaddr.sin.sin_addr.s_addr);
-		      
+
 		      locaddr.sin.sin_port = htons (local_port);
 		      remaddr.sin.sin_port = htons (remote_port);
 
@@ -981,7 +981,7 @@ print_sockets (unsigned short family, int tcp, struct buffer *buffer)
 
 		      locaddr.sin6.sin6_port = htons (local_port);
 		      remaddr.sin6.sin6_port = htons (remote_port);
-		      
+
 		      locaddr.sin6.sin6_flowinfo = 0;
 		      remaddr.sin6.sin6_flowinfo = 0;
 		      locaddr.sin6.sin6_scope_id = 0;
@@ -989,9 +989,9 @@ print_sockets (unsigned short family, int tcp, struct buffer *buffer)
 
 		      addr_size = sizeof (struct sockaddr_in6);
 		    }
-	      
+
 		  locaddr.sa.sa_family = remaddr.sa.sa_family = family;
-		      
+
 		  result = getnameinfo (&locaddr.sa, addr_size,
 					local_address, sizeof (local_address),
 					local_service, sizeof (local_service),
@@ -999,7 +999,7 @@ print_sockets (unsigned short family, int tcp, struct buffer *buffer)
 					| (tcp ? 0 : NI_DGRAM));
 		  if (result)
 		    continue;
-		  
+
 		  result = getnameinfo (&remaddr.sa, addr_size,
 					remote_address,
 					sizeof (remote_address),
@@ -1009,9 +1009,9 @@ print_sockets (unsigned short family, int tcp, struct buffer *buffer)
 					| (tcp ? 0 : NI_DGRAM));
 		  if (result)
 		    continue;
-		  
+
 		  user_from_uid (user, sizeof (user), uid);
-		  
+
 		  buffer_xml_printf (
 		      buffer,
 		      "<item>"
@@ -1021,7 +1021,7 @@ print_sockets (unsigned short family, int tcp, struct buffer *buffer)
 		      "<column name=\"remote port\">%s</column>"
 		      "<column name=\"state\">%s</column>"
 		      "<column name=\"user\">%s</column>"
-		      "<column name=\"family\">%s</column>" 
+		      "<column name=\"family\">%s</column>"
 		      "<column name=\"protocol\">%s</column>"
 		      "</item>",
 		      local_address,
@@ -1095,7 +1095,7 @@ time_from_time_t (char *time, int maxlen, TIME_T seconds)
   else
     {
       time_t t = (time_t) seconds;
-      
+
       strncpy (time, ctime (&t), maxlen);
       time[maxlen - 1] = '\0';
     }
@@ -1108,7 +1108,7 @@ static void
 group_from_gid (char *group, int maxlen, gid_t gid)
 {
   struct group *grentry = getgrgid (gid);
-  
+
   if (grentry)
     {
       strncpy (group, grentry->gr_name, maxlen);
@@ -1156,7 +1156,7 @@ linux_xfer_osdata_shm (gdb_byte *readbuf,
 		  TIME_T atime, dtime, ctime;
 		  unsigned int perms;
 		  int items_read;
-				  
+
 		  items_read = sscanf (buf,
 				       "%d %d %o %d %lld %lld %d %u %u %u %u %lld %lld %lld",
 				       &key, &shmid, &perms, &size,
@@ -1171,19 +1171,19 @@ linux_xfer_osdata_shm (gdb_byte *readbuf,
 		      char cuser[UT_NAMESIZE], cgroup[UT_NAMESIZE];
 		      char ccmd[32], lcmd[32];
 		      char atime_str[32], dtime_str[32], ctime_str[32];
-		      
+
 		      user_from_uid (user, sizeof (user), uid);
 		      group_from_gid (group, sizeof (group), gid);
 		      user_from_uid (cuser, sizeof (cuser), cuid);
 		      group_from_gid (cgroup, sizeof (cgroup), cgid);
-		      
+
 		      command_from_pid (ccmd, sizeof (ccmd), cpid);
 		      command_from_pid (lcmd, sizeof (lcmd), lpid);
-		      
+
 		      time_from_time_t (atime_str, sizeof (atime_str), atime);
 		      time_from_time_t (dtime_str, sizeof (dtime_str), dtime);
 		      time_from_time_t (ctime_str, sizeof (ctime_str), ctime);
-		      
+
 		      buffer_xml_printf (
 		          &buffer,
 			  "<item>"
@@ -1221,7 +1221,7 @@ linux_xfer_osdata_shm (gdb_byte *readbuf,
 	    }
 	  while (!feof (fp.get ()));
 	}
-      
+
       buffer_grow_str0 (&buffer, "</osdata>\n");
       saved_buf = buffer_finish (&buffer);
       len_avail = strlen (saved_buf);
@@ -1267,7 +1267,7 @@ linux_xfer_osdata_sem (gdb_byte *readbuf,
       if (fp)
 	{
 	  char buf[8192];
-	  
+
 	  do
 	    {
 	      if (fgets (buf, sizeof (buf), fp.get ()))
@@ -1279,27 +1279,27 @@ linux_xfer_osdata_sem (gdb_byte *readbuf,
 		  int semid;
 		  TIME_T otime, ctime;
 		  int items_read;
-		  
+
 		  items_read = sscanf (buf,
 				       "%d %d %o %u %d %d %d %d %lld %lld",
 				       &key, &semid, &perms, &nsems,
 				       &uid, &gid, &cuid, &cgid,
 				       &otime, &ctime);
-		  
+
 		  if (items_read == 10)
 		    {
 		      char user[UT_NAMESIZE], group[UT_NAMESIZE];
 		      char cuser[UT_NAMESIZE], cgroup[UT_NAMESIZE];
 		      char otime_str[32], ctime_str[32];
-		      
+
 		      user_from_uid (user, sizeof (user), uid);
 		      group_from_gid (group, sizeof (group), gid);
 		      user_from_uid (cuser, sizeof (cuser), cuid);
 		      group_from_gid (cgroup, sizeof (cgroup), cgid);
-		      
+
 		      time_from_time_t (otime_str, sizeof (otime_str), otime);
 		      time_from_time_t (ctime_str, sizeof (ctime_str), ctime);
-		      
+
 		      buffer_xml_printf (
 			  &buffer,
 			  "<item>"
@@ -1370,12 +1370,12 @@ linux_xfer_osdata_msg (gdb_byte *readbuf,
       saved_buf = NULL;
       buffer_init (&buffer);
       buffer_grow_str (&buffer, "<osdata type=\"message queues\">\n");
-      
+
       gdb_file_up fp = gdb_fopen_cloexec ("/proc/sysvipc/msg", "r");
       if (fp)
 	{
 	  char buf[8192];
-	  
+
 	  do
 	    {
 	      if (fgets (buf, sizeof (buf), fp.get ()))
@@ -1388,32 +1388,32 @@ linux_xfer_osdata_msg (gdb_byte *readbuf,
 		  int msqid;
 		  TIME_T stime, rtime, ctime;
 		  int items_read;
-		  
+
 		  items_read = sscanf (buf,
 				       "%d %d %o %u %u %lld %lld %d %d %d %d %lld %lld %lld",
 				       &key, &msqid, &perms, &cbytes, &qnum,
 				       &lspid, &lrpid, &uid, &gid, &cuid, &cgid,
 				       &stime, &rtime, &ctime);
-		  
+
 		  if (items_read == 14)
 		    {
 		      char user[UT_NAMESIZE], group[UT_NAMESIZE];
 		      char cuser[UT_NAMESIZE], cgroup[UT_NAMESIZE];
 		      char lscmd[32], lrcmd[32];
 		      char stime_str[32], rtime_str[32], ctime_str[32];
-		      
+
 		      user_from_uid (user, sizeof (user), uid);
 		      group_from_gid (group, sizeof (group), gid);
 		      user_from_uid (cuser, sizeof (cuser), cuid);
 		      group_from_gid (cgroup, sizeof (cgroup), cgid);
-		      
+
 		      command_from_pid (lscmd, sizeof (lscmd), lspid);
 		      command_from_pid (lrcmd, sizeof (lrcmd), lrpid);
-		      
+
 		      time_from_time_t (stime_str, sizeof (stime_str), stime);
 		      time_from_time_t (rtime_str, sizeof (rtime_str), rtime);
 		      time_from_time_t (ctime_str, sizeof (ctime_str), ctime);
-		      
+
 		      buffer_xml_printf (
 			  &buffer,
 			  "<item>"
@@ -1497,7 +1497,7 @@ linux_xfer_osdata_modules (gdb_byte *readbuf,
       if (fp)
 	{
 	  char buf[8192];
-	  
+
 	  do
 	    {
 	      if (fgets (buf, sizeof (buf), fp.get ()))
@@ -1670,7 +1670,7 @@ linux_common_xfer_osdata (const char *annex, gdb_byte *readbuf,
 	  if (strcmp (annex, osdata_table[i].type) == 0)
 	    {
 	      gdb_assert (readbuf);
-	      
+
 	      return (osdata_table[i].getter) (readbuf, offset, len);
 	    }
 	}
