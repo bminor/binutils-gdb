@@ -1,4 +1,4 @@
-2018-12-08  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+2018-12-11  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* nat/linux-osdata.c: Removed various trailing spaces.
 
