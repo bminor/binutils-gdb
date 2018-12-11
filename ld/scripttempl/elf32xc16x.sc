@@ -31,7 +31,7 @@ MEMORY
 	ldata  : o =0x4000 ,l = 0x0200
 }
 
-ELF
+EOF
 
 cat <<EOF
 SECTIONS
