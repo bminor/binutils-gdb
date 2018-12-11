@@ -1,3 +1,9 @@
+2018-12-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-xc16x.c (elf32_xc16x_rtype_to_howto): New function.
+	(elf32_xc16x_relocate_section): Call elf32_xc16x_rtype_to_howto
+	instead of xc16x_reloc_type_lookup to get reloc_howto_type.
+
 2018-12-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23958

@@ -220,6 +220,15 @@ xc16x_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   return NULL;
 }
 
+static reloc_howto_type *
+elf32_xc16x_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED, unsigned r_type)
+{
+  if (r_type < ARRAY_SIZE (xc16x_elf_howto_table))
+    return & xc16x_elf_howto_table[r_type];
+
+  return NULL;
+}
+
 /* For a particular operand this function is
    called to finalise the type of relocation.  */
 
@@ -388,7 +397,7 @@ elf32_xc16x_relocate_section (bfd *output_bfd,
 	     or sections discarded by a linker script, we just want the
 	     section contents cleared.  Avoid any special processing.  */
 	  reloc_howto_type *howto;
-	  howto = xc16x_reloc_type_lookup (input_bfd, r_type);
+	  howto = elf32_xc16x_rtype_to_howto (input_bfd, r_type);
 	  RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					   rel, 1, relend, howto, 0, contents);
 	}
