@@ -43,6 +43,7 @@
 * New targets
 
   NXP S12Z		s12z-*-elf
+  GNU/Linux/OpenRISC	or1k*-*-linux*
 
 * New commands
 
