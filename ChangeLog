@@ -1,3 +1,9 @@
+2019-01-03  Дилян Палаузов  <dilyan.palauzov@aegee.org>
+
+	* configure.ac: Don't configure readline if --with-system-readline is
+	used.
+	* configure: Re-generate.
+
 2018-10-31  Joseph Myers  <joseph@codesourcery.com>
 
 	Merge from GCC:
