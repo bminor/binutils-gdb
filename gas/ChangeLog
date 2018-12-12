@@ -1,3 +1,8 @@
+2018-12-12  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* testsuite/gas/arm/blx-local-thumb.d: Skip arm-nto and
+	arm-netbsdelf.
+
 2018-12-10  Jim Wilson  <jimw@sifive.com>
 
 	PR gas/23954
