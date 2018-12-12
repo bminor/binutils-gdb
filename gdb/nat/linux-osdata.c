@@ -1274,8 +1274,7 @@ linux_xfer_osdata_modules (struct buffer *buffer)
   buffer_grow_str0 (buffer, "</osdata>\n");
 }
 
-static void
-linux_xfer_osdata_info_os_types (struct buffer *buffer);
+static void linux_xfer_osdata_info_os_types (struct buffer *buffer);
 
 struct osdata_type {
   const char *type;
