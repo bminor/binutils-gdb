@@ -1592,9 +1592,6 @@ typedef ULONGEST (gdbarch_type_align_ftype) (struct gdbarch *gdbarch, struct typ
 extern ULONGEST gdbarch_type_align (struct gdbarch *gdbarch, struct type *type);
 extern void set_gdbarch_type_align (struct gdbarch *gdbarch, gdbarch_type_align_ftype *type_align);
 
-/* Definition for an unknown syscall, used basically in error-cases.  */
-#define UNKNOWN_SYSCALL (-1)
-
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 

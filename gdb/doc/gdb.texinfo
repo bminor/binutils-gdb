@@ -4560,6 +4560,7 @@ A failed Ada assertion.
 @cindex break on fork/exec
 A call to @code{exec}.
 
+@anchor{catch syscall}
 @item syscall
 @itemx syscall @r{[}@var{name} @r{|} @var{number} @r{|} @r{group:}@var{groupname} @r{|} @r{g:}@var{groupname}@r{]} @dots{}
 @kindex catch syscall
@@ -22357,6 +22358,7 @@ configurations.
 * Cygwin Native::		Features specific to the Cygwin port
 * Hurd Native::                 Features specific to @sc{gnu} Hurd
 * Darwin::			Features specific to Darwin
+* FreeBSD::			Features specific to FreeBSD
 @end menu
 
 @node BSD libkvm Interface
@@ -23241,6 +23243,27 @@ better understand the cause of a fault.  The default is off.
 @kindex show mach-exceptions
 Show the current state of exceptions trapping.
 @end table
+
+@node FreeBSD
+@subsection FreeBSD
+@cindex FreeBSD
+
+When the ABI of a system call is changed in the FreeBSD kernel, this
+is implemented by leaving a compatibility system call using the old
+ABI at the existing number and allocating a new system call number for
+the version using the new ABI.  As a convenience, when a system call
+is caught by name (@pxref{catch syscall}), compatibility system calls
+are also caught.
+
+For example, FreeBSD 12 introduced a new variant of the @code{kevent}
+system call and catching the @code{kevent} system call by name catches
+both variants:
+
+@smallexample
+(@value{GDBP}) catch syscall kevent
+Catchpoint 1 (syscalls 'freebsd11_kevent' [363] 'kevent' [560])
+(@value{GDBP})
+@end smallexample
 
 
 @node Embedded OS

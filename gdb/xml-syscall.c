@@ -61,13 +61,12 @@ get_syscall_by_number (struct gdbarch *gdbarch,
   s->name = NULL;
 }
 
-void
-get_syscall_by_name (struct gdbarch *gdbarch, const char *syscall_name,
-		     struct syscall *s)
+bool
+get_syscalls_by_name (struct gdbarch *gdbarch, const char *syscall_name,
+		      std::vector<int> *syscall_numbers)
 {
   syscall_warn_user ();
-  s->number = UNKNOWN_SYSCALL;
-  s->name = syscall_name;
+  return false;
 }
 
 const char **
@@ -97,8 +96,8 @@ get_syscall_group_names (struct gdbarch *gdbarch)
 /* Structure which describes a syscall.  */
 struct syscall_desc
 {
-  syscall_desc (int number_, std::string name_)
-  : number (number_), name (name_)
+  syscall_desc (int number_, std::string name_, std::string alias_)
+  : number (number_), name (name_), alias (alias_)
   {}
 
   /* The syscall number.  */
@@ -108,6 +107,10 @@ struct syscall_desc
   /* The syscall name.  */
 
   std::string name;
+
+  /* An optional alias.  */
+
+  std::string alias;
 };
 
 typedef std::unique_ptr<syscall_desc> syscall_desc_up;
@@ -207,10 +210,11 @@ syscall_group_add_syscall (struct syscalls_info *syscalls_info,
 
 static void
 syscall_create_syscall_desc (struct syscalls_info *syscalls_info,
-			     const char *name, int number,
+			     const char *name, int number, const char *alias,
 			     char *groups)
 {
-  syscall_desc *sysdesc = new syscall_desc (number, name);
+  syscall_desc *sysdesc = new syscall_desc (number, name,
+					    alias != NULL ? alias : "");
 
   syscalls_info->syscalls.emplace_back (sysdesc);
 
@@ -235,6 +239,7 @@ syscall_start_syscall (struct gdb_xml_parser *parser,
   /* syscall info.  */
   char *name = NULL;
   int number = 0;
+  char *alias = NULL;
   char *groups = NULL;
 
   for (const gdb_xml_value &attr : attributes)
@@ -243,6 +248,8 @@ syscall_start_syscall (struct gdb_xml_parser *parser,
         name = (char *) attr.value.get ();
       else if (strcmp (attr.name, "number") == 0)
         number = * (ULONGEST *) attr.value.get ();
+      else if (strcmp (attr.name, "alias") == 0)
+        alias = (char *) attr.value.get ();
       else if (strcmp (attr.name, "groups") == 0)
         groups = (char *) attr.value.get ();
       else
@@ -251,7 +258,8 @@ syscall_start_syscall (struct gdb_xml_parser *parser,
     }
 
   gdb_assert (name);
-  syscall_create_syscall_desc (data->syscalls_info, name, number, groups);
+  syscall_create_syscall_desc (data->syscalls_info, name, number, alias,
+			       groups);
 }
 
 
@@ -259,6 +267,7 @@ syscall_start_syscall (struct gdb_xml_parser *parser,
 static const struct gdb_xml_attribute syscall_attr[] = {
   { "number", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
   { "name", GDB_XML_AF_NONE, NULL, NULL },
+  { "alias", GDB_XML_AF_OPTIONAL, NULL, NULL },
   { "groups", GDB_XML_AF_OPTIONAL, NULL, NULL },
   { NULL, GDB_XML_AF_NONE, NULL, NULL }
 };
@@ -390,21 +399,22 @@ syscall_group_get_group_by_name (const struct syscalls_info *syscalls_info,
   return NULL;
 }
 
-static int
-xml_get_syscall_number (struct gdbarch *gdbarch,
-                        const char *syscall_name)
+static bool
+xml_get_syscalls_by_name (struct gdbarch *gdbarch, const char *syscall_name,
+			  std::vector<int> *syscall_numbers)
 {
   struct syscalls_info *syscalls_info = gdbarch_syscalls_info (gdbarch);
 
-  if (syscalls_info == NULL
-      || syscall_name == NULL)
-    return UNKNOWN_SYSCALL;
+  bool found = false;
+  if (syscalls_info != NULL && syscall_name != NULL && syscall_numbers != NULL)
+    for (const syscall_desc_up &sysdesc : syscalls_info->syscalls)
+      if (sysdesc->name == syscall_name || sysdesc->alias == syscall_name)
+	{
+	  syscall_numbers->push_back (sysdesc->number);
+	  found = true;
+	}
 
-  for (const syscall_desc_up &sysdesc : syscalls_info->syscalls)
-    if (sysdesc->name == syscall_name)
-      return sysdesc->number;
-
-  return UNKNOWN_SYSCALL;
+  return found;
 }
 
 static const char *
@@ -510,14 +520,13 @@ get_syscall_by_number (struct gdbarch *gdbarch,
   s->name = xml_get_syscall_name (gdbarch, syscall_number);
 }
 
-void
-get_syscall_by_name (struct gdbarch *gdbarch,
-		     const char *syscall_name, struct syscall *s)
+bool
+get_syscalls_by_name (struct gdbarch *gdbarch, const char *syscall_name,
+		      std::vector<int> *syscall_numbers)
 {
   init_syscalls_info (gdbarch);
 
-  s->number = xml_get_syscall_number (gdbarch, syscall_name);
-  s->name = syscall_name;
+  return xml_get_syscalls_by_name (gdbarch, syscall_name, syscall_numbers);
 }
 
 const char **

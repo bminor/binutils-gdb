@@ -12,4 +12,5 @@
 <!ATTLIST syscall
 	name			CDATA	#REQUIRED
 	number			CDATA	#REQUIRED
+	alias			CDATA	#IMPLIED
 	groups			CDATA	#IMPLIED>

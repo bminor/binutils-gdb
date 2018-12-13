@@ -1,3 +1,10 @@
+2018-12-13  John Baldwin  <jhb@FreeBSD.org>
+
+	* gdb.texinfo (Set Catchpoints): Add an anchor for 'catch syscall'.
+	(Native): Add a FreeBSD subsection.
+	(FreeBSD): Document use of system call aliases for compatibility
+	system calls.
+
 2018-11-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (Standard Target Features): Add RISC-V Features

@@ -38,11 +38,13 @@ void set_xml_syscall_file_name (struct gdbarch *gdbarch,
 void get_syscall_by_number (struct gdbarch *gdbarch,
 			    int syscall_number, struct syscall *s);
 
-/* Function that retrieves the syscall number corresponding to the given
-   name.  It puts the requested information inside 'struct syscall'.  */
+/* Function that retrieves the syscall numbers corresponding to the
+   given name.  The numbers of all syscalls with either a name or
+   alias equal to SYSCALL_NAME are appended to SYSCALL_NUMBERS.  If no
+   matching syscalls are found, return false.  */
 
-void get_syscall_by_name (struct gdbarch *gdbarch,
-			  const char *syscall_name, struct syscall *s);
+bool get_syscalls_by_name (struct gdbarch *gdbarch, const char *syscall_name,
+			   std::vector<int> *syscall_numbers);
 
 /* Function used to retrieve the list of syscalls in the system.  This list
    is returned as an array of strings.  Returns the list of syscalls in the

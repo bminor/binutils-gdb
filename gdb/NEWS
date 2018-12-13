@@ -40,6 +40,19 @@
 
 * The RISC-V target now supports target descriptions.
 
+* System call catchpoints now support system call aliases on FreeBSD.
+  When the ABI of a system call changes in FreeBSD, this is
+  implemented by leaving a compatibility system call using the old ABI
+  at the existing number and allocating a new system call number for
+  the new ABI.  For example, FreeBSD 12 altered the layout of 'struct
+  kevent' used by the 'kevent' system call.  As a result, FreeBSD 12
+  kernels ship with both 'kevent' and 'freebsd11_kevent' system calls.
+  The 'freebsd11_kevent' system call is assigned an alias of 'kevent'
+  so that a system call catchpoint for the 'kevent' system call will
+  catch invocations of both the 'kevent' and 'freebsd11_kevent'
+  binaries.  This ensures that 'kevent' system calls are caught for
+  binaries using either the old or new ABIs.
+
 * New targets
 
   NXP S12Z		s12z-*-elf

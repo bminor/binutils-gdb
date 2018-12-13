@@ -419,18 +419,13 @@ catch_syscall_split_args (const char *arg)
 	}
       else
 	{
-	  /* We have a name.  Let's check if it's valid and convert it
-	     to a number.  */
-	  get_syscall_by_name (gdbarch, cur_name, &s);
-
-	  if (s.number == UNKNOWN_SYSCALL)
+	  /* We have a name.  Let's check if it's valid and fetch a
+	     list of matching numbers.  */
+	  if (!get_syscalls_by_name (gdbarch, cur_name, &result))
 	    /* Here we have to issue an error instead of a warning,
 	       because GDB cannot do anything useful if there's no
 	       syscall number to be caught.  */
 	    error (_("Unknown syscall name '%s'."), cur_name);
-
-	  /* Ok, it's valid.  */
-	  result.push_back (s.number);
 	}
     }
 

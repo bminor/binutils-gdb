@@ -1,5 +1,29 @@
 2018-12-13  John Baldwin  <jhb@FreeBSD.org>
 
+	* NEWS: Add entry documenting system call aliases.
+	* break-catch-syscall.c (catch_syscall_split_args): Pass 'result'
+	to get_syscalls_by_name.
+	* gdbarch.sh (UNKNOWN_SYSCALL): Remove.
+	* gdbarch.h: Regenerate.
+	* syscalls/gdb-syscalls.dtd (syscall): Add alias attribute.
+	* xml-syscall.c [!HAVE_LIBEXPAT] (get_syscalls_by_name): Rename
+	from get_syscall_by_name.  Now accepts a pointer to a vector of
+	integers and returns a bool.
+	[HAVE_LIBEXPAT] (struct syscall_desc): Add alias member.
+	(syscall_create_syscall_desc): Add alias parameter and pass it to
+	syscall_desc constructor.
+	(syscall_start_syscall): Handle alias attribute.
+	(syscall_attr): Add alias attribute.
+	(xml_get_syscalls_by_name): Rename from xml_get_syscall_number.
+	Now accepts a pointer to a vector of integers and returns a
+	bool.  Add syscalls whose alias or name matches the requested
+	name.
+	(get_syscalls_by_name): Rename from get_syscall_by_name.  Now
+	accepts a pointer to a vector of integers and returns a bool.
+	* xml-syscall.h (get_syscalls_by_name): Likewise.
+
+2018-12-13  John Baldwin  <jhb@FreeBSD.org>
+
 	* break-catch-syscall.c (catch_syscall_split_args): Pass 'result'
 	to get_syscalls_by_group.
 	* xml-syscall.c [!HAVE_LIBEXPAT] (get_syscalls_by_group): Return
