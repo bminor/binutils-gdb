@@ -20,7 +20,7 @@
 #ifndef AARCH64_SVE_LINUX_PTRACE_H
 #define AARCH64_SVE_LINUX_PTRACE_H
 
-#include <asm/sigcontext.h>
+#include <signal.h>
 #include <sys/utsname.h>
 #include <sys/ptrace.h>
 #include <asm/ptrace.h>
