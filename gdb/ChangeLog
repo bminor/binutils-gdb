@@ -1,3 +1,32 @@
+2019-01-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arch/riscv.h (struct riscv_gdbarch_features) <hw_float_abi>:
+	Delete.
+	<operator==>: Update with for removed field.
+	<hash>: Likewise.
+	* riscv-tdep.h (struct gdbarch_tdep) <features>: Renamed to...
+	<isa_features>: ...this.
+	<abi_features>: New field.
+	(riscv_isa_flen): Update comment.
+	(riscv_abi_xlen): New declaration.
+	(riscv_abi_flen): New declaration.
+	* riscv-tdep.c (riscv_isa_xlen): Update to get answer from
+	isa_features.
+	(riscv_abi_xlen): New function.
+	(riscv_isa_flen): Update to get answer from isa_features.
+	(riscv_abi_flen): New function.
+	(riscv_has_fp_abi): Update to get answer from abi_features.
+	(riscv_call_info::riscv_call_info): Use abi xlen and flen, not isa
+	xlen and flen.
+	(riscv_call_info) <xlen, flen>: Update comment.
+	(riscv_call_arg_struct): Remove invalid assertions
+	(riscv_features_from_gdbarch_info): Update now hw_float_abi field
+	is removed.
+	(riscv_gdbarch_init): Gather isa features and abi features
+	separately, ensure both match on the gdbarch when reusing an old
+	gdbarch.  Relax an error check to allow 32-bit abi float to run on
+	a target with 64-bit float hardware.
+
 2019-01-01  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* source.c (search_command_helper): Stop reverse search

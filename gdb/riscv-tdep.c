@@ -361,7 +361,15 @@ static unsigned int riscv_debug_gdbarch = 0;
 int
 riscv_isa_xlen (struct gdbarch *gdbarch)
 {
-  return gdbarch_tdep (gdbarch)->features.xlen;
+  return gdbarch_tdep (gdbarch)->isa_features.xlen;
+}
+
+/* See riscv-tdep.h.  */
+
+int
+riscv_abi_xlen (struct gdbarch *gdbarch)
+{
+  return gdbarch_tdep (gdbarch)->abi_features.xlen;
 }
 
 /* See riscv-tdep.h.  */
@@ -369,7 +377,15 @@ riscv_isa_xlen (struct gdbarch *gdbarch)
 int
 riscv_isa_flen (struct gdbarch *gdbarch)
 {
-  return gdbarch_tdep (gdbarch)->features.flen;
+  return gdbarch_tdep (gdbarch)->isa_features.flen;
+}
+
+/* See riscv-tdep.h.  */
+
+int
+riscv_abi_flen (struct gdbarch *gdbarch)
+{
+  return gdbarch_tdep (gdbarch)->abi_features.flen;
 }
 
 /* Return true if the target for GDBARCH has floating point hardware.  */
@@ -385,7 +401,7 @@ riscv_has_fp_regs (struct gdbarch *gdbarch)
 static bool
 riscv_has_fp_abi (struct gdbarch *gdbarch)
 {
-  return gdbarch_tdep (gdbarch)->features.hw_float_abi;
+  return gdbarch_tdep (gdbarch)->abi_features.flen > 0;
 }
 
 /* Return true if REGNO is a floating pointer register.  */
@@ -1786,8 +1802,8 @@ struct riscv_call_info
     : int_regs (RISCV_A0_REGNUM, RISCV_A0_REGNUM + 7),
       float_regs (RISCV_FA0_REGNUM, RISCV_FA0_REGNUM + 7)
   {
-    xlen = riscv_isa_xlen (gdbarch);
-    flen = riscv_isa_flen (gdbarch);
+    xlen = riscv_abi_xlen (gdbarch);
+    flen = riscv_abi_flen (gdbarch);
 
     /* Disable use of floating point registers if needed.  */
     if (!riscv_has_fp_abi (gdbarch))
@@ -1807,7 +1823,7 @@ struct riscv_call_info
   struct riscv_arg_reg float_regs;
 
   /* The XLEN and FLEN are copied in to this structure for convenience, and
-     are just the results of calling RISCV_ISA_XLEN and RISCV_ISA_FLEN.  */
+     are just the results of calling RISCV_ABI_XLEN and RISCV_ABI_FLEN.  */
   int xlen;
   int flen;
 };
@@ -2148,9 +2164,6 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
 	{
 	  int len0, len1, offset;
 
-	  gdb_assert (TYPE_LENGTH (ainfo->type)
-		      <= (cinfo->flen + cinfo->xlen));
-
 	  len0 = TYPE_LENGTH (sinfo.field_type (0));
 	  if (!riscv_assign_reg_location (&ainfo->argloc[0],
 					  &cinfo->float_regs, len0, 0))
@@ -2173,9 +2186,6 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
 	      && TYPE_LENGTH (sinfo.field_type (1)) <= cinfo->flen))
 	{
 	  int len0, len1, offset;
-
-	  gdb_assert (TYPE_LENGTH (ainfo->type)
-		      <= (cinfo->flen + cinfo->xlen));
 
 	  len0 = TYPE_LENGTH (sinfo.field_type (0));
 	  len1 = TYPE_LENGTH (sinfo.field_type (1));
@@ -2889,15 +2899,9 @@ riscv_features_from_gdbarch_info (const struct gdbarch_info info)
 			_("unknown ELF header class %d"), eclass);
 
       if (e_flags & EF_RISCV_FLOAT_ABI_DOUBLE)
-	{
-	  features.flen = 8;
-	  features.hw_float_abi = true;
-	}
+	features.flen = 8;
       else if (e_flags & EF_RISCV_FLOAT_ABI_SINGLE)
-	{
-	  features.flen = 4;
-	  features.hw_float_abi = true;
-	}
+	features.flen = 4;
     }
   else
     {
@@ -3115,25 +3119,26 @@ riscv_gdbarch_init (struct gdbarch_info info,
   /* Have a look at what the supplied (if any) bfd object requires of the
      target, then check that this matches with what the target is
      providing.  */
-  struct riscv_gdbarch_features info_features
+  struct riscv_gdbarch_features abi_features
     = riscv_features_from_gdbarch_info (info);
-  if (info_features.xlen != 0 && info_features.xlen != features.xlen)
+  /* In theory a binary compiled for RV32 could run on an RV64 target,
+     however, this has not been tested in GDB yet, so for now we require
+     that the requested xlen match the targets xlen.  */
+  if (abi_features.xlen != 0 && abi_features.xlen != features.xlen)
     error (_("bfd requires xlen %d, but target has xlen %d"),
-           info_features.xlen, features.xlen);
-  if (info_features.flen != 0 && info_features.flen != features.flen)
+            abi_features.xlen, features.xlen);
+  /* We do support running binaries compiled for 32-bit float on targets
+     with 64-bit float, so we only complain if the binary requires more
+     than the target has available.  */
+  if (abi_features.flen > features.flen)
     error (_("bfd requires flen %d, but target has flen %d"),
-           info_features.flen, features.flen);
+            abi_features.flen, features.flen);
 
-  /* If the xlen from INFO_FEATURES is 0 then this indicates either there
-     is no bfd object, or nothing useful could be extracted from it, in
-     this case we enable hardware float abi if the target has floating
-     point registers.
-
-     If the xlen from INFO_FEATURES is not 0, and the flen in
-     INFO_FEATURES is also not 0, then this indicates that the supplied
-     bfd does require hardware floating point abi.  */
-  if (info_features.xlen == 0 || info_features.flen != 0)
-    features.hw_float_abi = (features.flen > 0);
+  /* If the ABI_FEATURES xlen is 0 then this indicates we got no useful abi
+     features from the INFO object.  In this case we assume that the xlen
+     abi matches the hardware.  */
+  if (abi_features.xlen == 0)
+    abi_features.xlen = features.xlen;
 
   /* Find a candidate among the list of pre-declared architectures.  */
   for (arches = gdbarch_list_lookup_by_info (arches, &info);
@@ -3145,7 +3150,8 @@ riscv_gdbarch_init (struct gdbarch_info info,
          gdbarch.  */
       struct gdbarch_tdep *other_tdep = gdbarch_tdep (arches->gdbarch);
 
-      if (other_tdep->features != features)
+      if (other_tdep->isa_features != features
+	  || other_tdep->abi_features != abi_features)
         continue;
 
       break;
@@ -3160,7 +3166,8 @@ riscv_gdbarch_init (struct gdbarch_info info,
   /* None found, so create a new architecture from the information provided.  */
   tdep = new (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
-  tdep->features = features;
+  tdep->isa_features = features;
+  tdep->abi_features = abi_features;
 
   /* Target data types.  */
   set_gdbarch_short_bit (gdbarch, 16);

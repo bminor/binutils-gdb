@@ -46,19 +46,10 @@ struct riscv_gdbarch_features
      that there are no f-registers.  No other value is valid.  */
   int flen = 0;
 
-  /* This indicates if hardware floating point abi is in use.  If the FLEN
-     field is 0 then this value _must_ be false.  If the FLEN field is
-     non-zero and this field is false then this indicates the target has
-     floating point registers, but is still using the soft-float abi.  If
-     this field is true then the hardware floating point abi is in use, and
-     values are passed in f-registers matching the size of FLEN.  */
-  bool hw_float_abi = false;
-
   /* Equality operator.  */
   bool operator== (const struct riscv_gdbarch_features &rhs) const
   {
-    return (xlen == rhs.xlen && flen == rhs.flen
-	    && hw_float_abi == rhs.hw_float_abi);
+    return (xlen == rhs.xlen && flen == rhs.flen);
   }
 
   /* Inequality operator.  */
@@ -70,9 +61,7 @@ struct riscv_gdbarch_features
   /* Used by std::unordered_map to hash feature sets.  */
   std::size_t hash () const noexcept
   {
-    std::size_t val = ((xlen & 0x1f) << 6
-                       | (flen & 0x1f) << 1
-                       | (hw_float_abi ? 1 : 0));
+    std::size_t val = ((xlen & 0x1f) << 5 | (flen & 0x1f) << 0);
     return val;
   }
 };

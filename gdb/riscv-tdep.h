@@ -68,9 +68,14 @@ enum
 /* RISC-V specific per-architecture information.  */
 struct gdbarch_tdep
 {
-  /* Features about the target that impact how the gdbarch is configured.
-     Two gdbarch instances are compatible only if this field matches.  */
-  struct riscv_gdbarch_features features;
+  /* Features about the target hardware that impact how the gdbarch is
+     configured.  Two gdbarch instances are compatible only if this field
+     matches.  */
+  struct riscv_gdbarch_features isa_features;
+
+  /* Features about the abi that impact how the gdbarch is configured.  Two
+     gdbarch instances are compatible only if this field matches.  */
+  struct riscv_gdbarch_features abi_features;
 
   /* ISA-specific data types.  */
   struct type *riscv_fpreg_d_type = nullptr;
@@ -82,11 +87,29 @@ struct gdbarch_tdep
    RV128.  */
 extern int riscv_isa_xlen (struct gdbarch *gdbarch);
 
-/* Return the width in bytes of the floating point registers for GDBARCH.
-   If this architecture has no floating point registers, then return 0.
-   Possible values are 4, 8, or 16 for depending on which of single, double
-   or quad floating point support is available.  */
+/* Return the width in bytes of the hardware floating point registers for
+   GDBARCH.  If this architecture has no floating point registers, then
+   return 0.  Possible values are 4, 8, or 16 for depending on which of
+   single, double or quad floating point support is available.  */
 extern int riscv_isa_flen (struct gdbarch *gdbarch);
+
+/* Return the width in bytes of the general purpose register abi for
+   GDBARCH.  This can be equal to, or less than RISCV_ISA_XLEN and reflects
+   how the binary was compiled rather than the hardware that is available.
+   It is possible that a binary compiled for RV32 is being run on an RV64
+   target, in which case the isa xlen is 8-bytes, and the abi xlen is
+   4-bytes.  This will impact how inferior functions are called.  */
+extern int riscv_abi_xlen (struct gdbarch *gdbarch);
+
+/* Return the width in bytes of the floating point register abi for
+   GDBARCH.  This reflects how the binary was compiled rather than the
+   hardware that is available.  It is possible that a binary is compiled
+   for single precision floating point, and then run on a target with
+   double precision floating point.  A return value of 0 indicates that no
+   floating point abi is in use (floating point arguments will be passed
+   in integer registers) other possible return value are 4, 8, or 16 as
+   with RISCV_ISA_FLEN.  */
+extern int riscv_abi_flen (struct gdbarch *gdbarch);
 
 /* Single step based on where the current instruction will take us.  */
 extern std::vector<CORE_ADDR> riscv_software_single_step
