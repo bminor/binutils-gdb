@@ -1,5 +1,12 @@
 2018-12-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* c-exp.y (field_name): Allow DOUBLE_KEYWORD, INT_KEYWORD, LONG,
+	SHORT, SIGNED_KEYWORD, and UNSIGNED tokens to act as a field
+	names.
+	(typename_stoken): New function.
+
+2018-12-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* c-exp.y (field_name): New %token, and new rule.
 	(exp): Replace uses of 'name' with 'field_name' where appropriate.
 

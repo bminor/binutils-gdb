@@ -1,3 +1,8 @@
+2018-12-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.dwarf2/dw2-unusual-field-names.c: New file.
+	* gdb.dwarf2/dw2-unusual-field-names.exp: New file.
+
 2018-12-24  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.ada/bp_fun_addr/a.adb (a): Rename to bp_fun_addr.

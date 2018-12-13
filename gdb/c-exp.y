@@ -113,6 +113,7 @@ static int type_aggregate_p (struct type *);
 static int parse_number (struct parser_state *par_state,
 			 const char *, int, int, YYSTYPE *);
 static struct stoken operator_stoken (const char *);
+static struct stoken typename_stoken (const char *);
 static void check_parameter_typelist (VEC (type_ptr) *);
 static void write_destructor_name (struct parser_state *par_state,
 				   struct stoken);
@@ -1645,9 +1646,21 @@ oper:	OPERATOR NEW
 			}
 	;
 
-
+/* This rule exists in order to allow some tokens that would not normally
+   match the 'name' rule to appear as fields within a struct.  The example
+   that initially motivated this was the RISC-V target which models the
+   floating point registers as a union with fields called 'float' and
+   'double'.  The 'float' string becomes a TYPENAME token and can appear
+   anywhere a 'name' can, however 'double' is its own token,
+   DOUBLE_KEYWORD, and doesn't match the 'name' rule.*/
 field_name
 	:	name
+	|	DOUBLE_KEYWORD { $$ = typename_stoken ("double"); }
+	|	INT_KEYWORD { $$ = typename_stoken ("int"); }
+	|	LONG { $$ = typename_stoken ("long"); }
+	|	SHORT { $$ = typename_stoken ("short"); }
+	|	SIGNED_KEYWORD { $$ = typename_stoken ("signed"); }
+	|	UNSIGNED { $$ = typename_stoken ("unsigned"); }
 	;
 
 name	:	NAME { $$ = $1.stoken; }
@@ -1717,6 +1730,16 @@ operator_stoken (const char *op)
 
   /* The toplevel (c_parse) will free the memory allocated here.  */
   make_cleanup (free, buf);
+  return st;
+};
+
+/* Returns a stoken of the type named TYPE.  */
+
+static struct stoken
+typename_stoken (const char *type)
+{
+  struct stoken st = { type, 0 };
+  st.length = strlen (type);
   return st;
 };
 
