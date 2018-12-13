@@ -403,7 +403,9 @@ struct cie_entry
   unsigned char per_encoding;
   unsigned char lsda_encoding;
   expressionS personality;
-  enum pointer_auth_key pauth_key;
+#ifdef tc_cie_entry_extras
+  tc_cie_entry_extras
+#endif
   struct cfi_insn_data *first, *last;
 };
 
@@ -433,7 +435,9 @@ alloc_fde_entry (void)
   fde->per_encoding = DW_EH_PE_omit;
   fde->lsda_encoding = DW_EH_PE_omit;
   fde->eh_header_type = EH_COMPACT_UNKNOWN;
-  fde->pauth_key = AARCH64_PAUTH_KEY_A;
+#ifdef tc_fde_entry_init_extra
+  tc_fde_entry_init_extra (fde)
+#endif
 
   return fde;
 }
@@ -1858,8 +1862,9 @@ output_cie (struct cie_entry *cie, bfd_boolean eh_frame, int align)
       if (cie->lsda_encoding != DW_EH_PE_omit)
 	out_one ('L');
       out_one ('R');
-      if (cie->pauth_key == AARCH64_PAUTH_KEY_B)
-	out_one ('B');
+#ifdef tc_output_cie_extra
+      tc_output_cie_extra (cie)
+#endif
     }
   if (cie->signal_frame)
     out_one ('S');
@@ -2039,8 +2044,11 @@ select_cie_for_fde (struct fde_entry *fde, bfd_boolean eh_frame,
     {
       if (CUR_SEG (cie) != CUR_SEG (fde))
 	continue;
+#ifdef tc_cie_fde_equivalent_extra
+      if (!tc_cie_fde_equivalent_extra (cie, fde))
+	continue;
+#endif
       if (cie->return_column != fde->return_column
-	  || cie->pauth_key != fde->pauth_key
 	  || cie->signal_frame != fde->signal_frame
 	  || cie->per_encoding != fde->per_encoding
 	  || cie->lsda_encoding != fde->lsda_encoding)
@@ -2147,7 +2155,9 @@ select_cie_for_fde (struct fde_entry *fde, bfd_boolean eh_frame,
   cie->lsda_encoding = fde->lsda_encoding;
   cie->personality = fde->personality;
   cie->first = fde->data;
-  cie->pauth_key = fde->pauth_key;
+#ifdef tc_cie_entry_init_extra
+  tc_cie_entry_init_extra (cie, fde)
+#endif
 
   for (i = cie->first; i ; i = i->next)
     if (i->insn == DW_CFA_advance_loc

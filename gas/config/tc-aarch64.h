@@ -80,6 +80,43 @@ struct aarch64_fix
 
 #define tc_frob_section(S) aarch64_frob_section (S)
 
+/* The key used to sign a function's return address.  */
+enum pointer_auth_key {
+  AARCH64_PAUTH_KEY_A,
+  AARCH64_PAUTH_KEY_B
+};
+
+/* The extra fields required by AArch64 in fde_entry and cie_entry.  Currently
+   only used to store the key used to sign the frame's return address.  */
+#define tc_fde_entry_extras enum pointer_auth_key pauth_key;
+#define tc_cie_entry_extras enum pointer_auth_key pauth_key;
+
+/* The extra initialisation steps needed by AArch64 in alloc_fde_entry.
+   Currently only used to initialise the key used to sign the return
+   address.  */
+#define tc_fde_entry_init_extra(fde) fde->pauth_key = AARCH64_PAUTH_KEY_A;
+
+/* Extra checks required by AArch64 when outputting the current cie_entry.
+   Currently only used to output a 'B' if the return address is signed with the
+   B key.  */
+#define tc_output_cie_extra(cie) \
+    do \
+      { \
+	if (cie->pauth_key == AARCH64_PAUTH_KEY_B) \
+	  out_one ('B'); \
+      } \
+    while (0)
+
+/* Extra equivalence checks required by AArch64 when selecting the correct cie
+   for some fde.  Currently only used to check for quivalence between keys used
+   to sign ther return address.  */
+#define tc_cie_fde_equivalent_extra(cie, fde) (cie->pauth_key == fde->pauth_key)
+
+/* The extra initialisation steps needed by AArch64 in select_cie_for_fde.
+   Currently only used to initialise the key used to sign the return
+   address.  */
+#define tc_cie_entry_init_extra(cie, fde) cie->pauth_key = fde->pauth_key;
+
 #define TC_FIX_TYPE struct aarch64_fix
 #define TC_INIT_FIX_DATA(FIX) { (FIX)->tc_fix_data.inst = NULL;	\
     (FIX)->tc_fix_data.opnd = AARCH64_OPND_NIL; }

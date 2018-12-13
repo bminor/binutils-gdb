@@ -7401,6 +7401,8 @@ read_cie (unsigned char *start, unsigned char *end,
 	    fc->fde_encoding = *q++;
 	  else if (*p == 'S')
 	    ;
+	  else if (*p == 'B')
+	    ;
 	  else
 	    break;
 	  p++;
