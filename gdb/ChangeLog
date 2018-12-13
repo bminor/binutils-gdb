@@ -1,3 +1,10 @@
+2018-12-13  Jim Wilson  <jimw@sifive.com>
+
+	* riscv-tdep.c (riscv_print_one_register_info): For MSTATUS, add
+	comment for SD field, and correct xlen calculation.  For MISA, add
+	comment for MXL field, add call to register_size, and correct base
+	calculation.
+
 2018-12-13  Stafford Horne  <shorne@gmail.com>
 
 	* NEWS(New targets): Add or1k*-*-linux*.

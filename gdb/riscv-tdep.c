@@ -701,8 +701,10 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 	      int size = register_size (gdbarch, regnum);
 	      unsigned xlen;
 
+	      /* The SD field is always in the upper bit of MSTATUS, regardless
+		 of the number of bits in MSTATUS.  */
 	      d = value_as_long (val);
-	      xlen = size * 4;
+	      xlen = size * 8;
 	      fprintf_filtered (file,
 				"\tSD:%X VM:%02X MXR:%X PUM:%X MPRV:%X XS:%X "
 				"FS:%X MPP:%x HPP:%X SPP:%X MPIE:%X HPIE:%X "
@@ -731,9 +733,13 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 	      int base;
 	      unsigned xlen, i;
 	      LONGEST d;
+	      int size = register_size (gdbarch, regnum);
 
+	      /* The MXL field is always in the upper two bits of MISA,
+		 regardless of the number of bits in MISA.  Mask out other
+		 bits to ensure we have a positive value.  */
 	      d = value_as_long (val);
-	      base = d >> 30;
+	      base = (d >> ((size * 8) - 2)) & 0x3;
 	      xlen = 16;
 
 	      for (; base > 0; base--)
