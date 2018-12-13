@@ -1,3 +1,16 @@
+2018-12-21  Jan Vrany  <jan.vrany@fit.cvut.cz>
+
+	* lib/gdb.exp (gdb_compile): Add new nopie flag enforce
+	non-PIE executables.
+	* README: Mention the gdb,nopie_flag board setting.
+	* gdb.arch/amd64-disp-step.exp: Use nopie flag to enforce
+	non-PIE executable.
+	* gdb.arch/amd64-entry-value.exp: Likewise.
+	* gdb.arch/amd64-invalid-stack-middle.exp: Likewise.
+	* gdb.arch/i386-float.exp: Likewise.
+	* gdb.arch/i386-signal.exp: Likewise.
+	* gdb.mi/mi-reg-undefined.exp: Likewise.
+
 2018-12-21  Paul Marechal  <paul.marechal@ericsson.com>
 
 	PR gdb/23974

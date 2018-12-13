@@ -23,7 +23,7 @@ if { ![istarget "i?86-*-*"] && ![istarget "x86_64-*-*"] } then {
 standard_testfile
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
-	  executable { debug }] != "" } {
+	  executable { debug nopie }] != "" } {
     untested "failed to compile"
     return -1
 }

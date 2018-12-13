@@ -482,6 +482,11 @@ gdb,no_thread_names
 
   The target doesn't support thread names.
 
+gdb,nopie_flag
+
+  The flag required to force the compiler to produce non-position-independent
+  executables.
+
 Testsuite Organization
 **********************
 

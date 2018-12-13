@@ -33,7 +33,7 @@ if [mi_gdb_start] {
 
 standard_testfile .S
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug nopie}] != "" } {
      untested "failed to compile"
      return -1
 }

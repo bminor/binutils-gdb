@@ -28,7 +28,7 @@ standard_testfile .S
 # some targets have leading underscores on assembly symbols.
 set additional_flags [gdb_target_symbol_prefix_flags_asm]
 
-if { [prepare_for_testing "failed to prepare" $testfile $srcfile [list debug $additional_flags]] } {
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile [list debug nopie $additional_flags]] } {
     return -1
 }
 

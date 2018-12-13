@@ -27,7 +27,6 @@
 # run twice, and we restart gdb before testing each different command to
 # ensure that nothing is being cached.
 
-set opts {}
 standard_testfile .S
 
 if { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
@@ -35,7 +34,7 @@ if { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
     return
 }
 
-if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} $opts] } {
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {nopie}] } {
     return -1
 }
 

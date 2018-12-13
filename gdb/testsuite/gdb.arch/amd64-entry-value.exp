@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 standard_testfile .s
-set opts {}
+set opts {nopie}
 
 if [info exists COMPILE] {
     # make check RUNTESTFLAGS="gdb.arch/amd64-entry-value.exp COMPILE=1"

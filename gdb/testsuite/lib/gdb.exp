@@ -3482,6 +3482,7 @@ set gdb_saved_set_unbuffered_mode_obj ""
 #     dynamically load libraries at runtime.  For example, on Linux, this adds
 #     -ldl so that the test can use dlopen.
 #   - nowarnings:  Inhibit all compiler warnings.
+#   - nopie: Prevent creation of PIE executables.
 #
 # And here are some of the not too obscure options understood by DejaGnu that
 # influence the compilation:
@@ -3601,6 +3602,18 @@ proc gdb_compile {source dest type options} {
 	    set flag "additional_flags=-w"
 	}
 	set options [lreplace $options $nowarnings $nowarnings $flag]
+    }
+
+    # Replace the "nopie" option with the appropriate additional_flags
+    # to disable PIE executables.
+    set nopie [lsearch -exact $options nopie]
+    if {$nopie != -1} {
+	if [target_info exists gdb,nopie_flag] {
+	    set flag "ldflags=[target_info gdb,nopie_flag]"
+	} else {
+	    set flag "ldflags=-no-pie"
+	}
+	set options [lreplace $options $nopie $nopie $flag]
     }
 
     if { $type == "executable" } {

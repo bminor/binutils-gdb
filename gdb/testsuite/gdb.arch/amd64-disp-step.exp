@@ -25,9 +25,10 @@ if { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
 
 set newline "\[\r\n\]*"
 
+set opts {debug nopie}
 standard_testfile .S
 
-if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile $opts] } {
     return -1
 }
 
