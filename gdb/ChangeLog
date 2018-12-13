@@ -1,3 +1,15 @@
+2018-12-13  John Baldwin  <jhb@FreeBSD.org>
+
+	* break-catch-syscall.c (catch_syscall_split_args): Pass 'result'
+	to get_syscalls_by_group.
+	* xml-syscall.c [!HAVE_LIBEXPAT] (get_syscalls_by_group): Return
+	false.
+	[HAVE_LIBEXPAT] (xml_list_syscalls_by_group): Append syscall
+	numbers to an existing vector of integers and return a bool.
+	(get_syscalls_by_group): Accept pointer to vector of integers
+	and change return type to bool.
+	* xml-syscall.h (get_syscalls_by_group): Likewise.
+
 2018-12-13  Jim Wilson  <jimw@sifive.com>
 
 	* riscv-tdep.c (riscv_print_one_register_info): For MSTATUS, add

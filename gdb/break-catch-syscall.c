@@ -409,25 +409,13 @@ catch_syscall_split_args (const char *arg)
 	{
 	  /* We have a syscall group.  Let's expand it into a syscall
 	     list before inserting.  */
-	  struct syscall *syscall_list;
 	  const char *group_name;
 
 	  /* Skip over "g:" and "group:" prefix strings.  */
 	  group_name = strchr (cur_name, ':') + 1;
 
-	  syscall_list = get_syscalls_by_group (gdbarch, group_name);
-
-	  if (syscall_list == NULL)
+	  if (!get_syscalls_by_group (gdbarch, group_name, &result))
 	    error (_("Unknown syscall group '%s'."), group_name);
-
-	  for (i = 0; syscall_list[i].name != NULL; i++)
-	    {
-	      /* Insert each syscall that are part of the group.  No
-		 need to check if it is valid.  */
-	      result.push_back (syscall_list[i].number);
-	    }
-
-	  xfree (syscall_list);
 	}
       else
 	{
