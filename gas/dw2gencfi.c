@@ -1863,7 +1863,7 @@ output_cie (struct cie_entry *cie, bfd_boolean eh_frame, int align)
 	out_one ('L');
       out_one ('R');
 #ifdef tc_output_cie_extra
-      tc_output_cie_extra (cie)
+      tc_output_cie_extra (cie);
 #endif
     }
   if (cie->signal_frame)

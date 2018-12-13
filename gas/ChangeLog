@@ -1,3 +1,8 @@
+2018-12-13  Jeff Law  <law@redhat.com>
+
+	* dw2gencfi.c (output_cie): Add missing semicolon in last
+	change.
+
 2018-12-13  Sam Tebbs  <sam.tebbs@arm.com>
 
 	* config/tc-aarch64.h (enum pointer_auth_key,
