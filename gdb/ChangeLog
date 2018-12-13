@@ -1,3 +1,9 @@
+2018-12-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-tdep.c (riscv_dwarf_reg_to_regnum): New function.
+	(riscv_gdbarch_init): Register new function with gdbarch.
+	* riscv-tdep.h: New enum to define RISC-V DWARF register numbers.
+
 2018-12-21  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* minsyms.c (mst_str): New.

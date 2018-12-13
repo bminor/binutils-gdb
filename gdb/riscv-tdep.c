@@ -2946,6 +2946,20 @@ riscv_setup_register_aliases (struct gdbarch *gdbarch,
     }
 }
 
+/* Implement the "dwarf2_reg_to_regnum" gdbarch method.  */
+
+static int
+riscv_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
+{
+  if (reg < RISCV_DWARF_REGNUM_X31)
+    return RISCV_ZERO_REGNUM + (reg - RISCV_DWARF_REGNUM_X0);
+
+  else if (reg < RISCV_DWARF_REGNUM_F31)
+    return RISCV_FIRST_FP_REGNUM + (reg - RISCV_DWARF_REGNUM_F0);
+
+  return -1;
+}
+
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
@@ -3132,6 +3146,9 @@ riscv_gdbarch_init (struct gdbarch_info info,
 
   /* Register architecture.  */
   riscv_add_reggroups (gdbarch);
+
+  /* Internal <-> external register number maps.  */
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, riscv_dwarf_reg_to_regnum);
 
   /* We reserve all possible register numbers for the known registers.
      This means the target description mechanism will add any target

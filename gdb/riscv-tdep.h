@@ -56,6 +56,15 @@ enum
   RISCV_LAST_REGNUM = RISCV_PRIV_REGNUM
 };
 
+/* RiscV DWARF register numbers.  */
+enum
+{
+  RISCV_DWARF_REGNUM_X0 = 0,
+  RISCV_DWARF_REGNUM_X31 = 31,
+  RISCV_DWARF_REGNUM_F0 = 32,
+  RISCV_DWARF_REGNUM_F31 = 63,
+};
+
 /* RISC-V specific per-architecture information.  */
 struct gdbarch_tdep
 {
