@@ -41,8 +41,7 @@ _start:
 	.long 0xc0010000	/* pr_type.  */
 	.long 5f - 4f		/* pr_datasz.  */
 4:
-	/* GNU_PROPERTY_X86_UINT32_VALID */
-	.long 0x80000000
+	.long 0x0
 5:
 .ifdef __64_bit__
 	.p2align 3

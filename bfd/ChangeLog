@@ -1,3 +1,13 @@
+2018-12-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23900
+	* elf.c (get_program_header_size): Add a PT_GNU_PROPERTY
+	segment for NOTE_GNU_PROPERTY_SECTION_NAME.
+	(_bfd_elf_map_sections_to_segments): Create a PT_GNU_PROPERTY
+	segment for NOTE_GNU_PROPERTY_SECTION_NAME.
+	* elfxx-x86.c (_bfd_elf_link_setup_gnu_properties): Don't set
+	GNU_PROPERTY_X86_UINT32_VALID.
+
 2018-12-11  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* elf32-xtensa.c (elf_xtensa_do_reloc): Limit const16 opcode

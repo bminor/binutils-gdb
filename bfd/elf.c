@@ -4372,6 +4372,14 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
       ++segs;
     }
 
+  s = bfd_get_section_by_name (abfd,
+			       NOTE_GNU_PROPERTY_SECTION_NAME);
+  if (s != NULL && s->size != 0)
+    {
+      /* We need a PT_GNU_PROPERTY segment.  */
+      ++segs;
+    }
+
   for (s = abfd->sections; s != NULL; s = s->next)
     {
       if ((s->flags & SEC_LOAD) != 0
@@ -5054,6 +5062,24 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	      *pm = m;
 	      pm = &m->next;
 	    }
+
+      s = bfd_get_section_by_name (abfd,
+				   NOTE_GNU_PROPERTY_SECTION_NAME);
+      if (s != NULL && s->size != 0)
+	{
+	  amt = sizeof (struct elf_segment_map) + sizeof (asection *);
+	  m = bfd_zalloc (abfd, amt);
+	  if (m == NULL)
+	    goto error_return;
+	  m->next = NULL;
+	  m->p_type = PT_GNU_PROPERTY;
+	  m->count = 1;
+	  m->p_flags_valid = 1;
+	  m->sections[0] = s;
+	  m->p_flags = PF_R;
+	  *pm = m;
+	  pm = &m->next;
+	}
 
       /* If there is a .eh_frame_hdr section, throw in a PT_GNU_EH_FRAME
 	 segment.  */

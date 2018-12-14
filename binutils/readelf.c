@@ -3930,6 +3930,7 @@ get_segment_type (Filedata * filedata, unsigned long p_type)
     case PT_GNU_EH_FRAME: return "GNU_EH_FRAME";
     case PT_GNU_STACK:	return "GNU_STACK";
     case PT_GNU_RELRO:  return "GNU_RELRO";
+    case PT_GNU_PROPERTY: return "GNU_PROPERTY";
 
     default:
       if (p_type >= PT_GNU_MBIND_LO && p_type <= PT_GNU_MBIND_HI)
@@ -17048,13 +17049,11 @@ decode_x86_compat_isa (unsigned int bitmask)
 static void
 decode_x86_isa (unsigned int bitmask)
 {
-  if (bitmask == GNU_PROPERTY_X86_UINT32_VALID)
+  if (!bitmask)
     {
       printf (_("<None>"));
       return;
     }
-  else
-    bitmask &= ~GNU_PROPERTY_X86_UINT32_VALID;
 
   while (bitmask)
     {
@@ -17147,13 +17146,11 @@ decode_x86_isa (unsigned int bitmask)
 static void
 decode_x86_feature_1 (unsigned int bitmask)
 {
-  if (bitmask == GNU_PROPERTY_X86_UINT32_VALID)
+  if (!bitmask)
     {
       printf (_("<None>"));
       return;
     }
-  else
-    bitmask &= ~GNU_PROPERTY_X86_UINT32_VALID;
 
   while (bitmask)
     {
@@ -17180,13 +17177,11 @@ decode_x86_feature_1 (unsigned int bitmask)
 static void
 decode_x86_feature_2 (unsigned int bitmask)
 {
-  if (bitmask == GNU_PROPERTY_X86_UINT32_VALID)
+  if (!bitmask)
     {
       printf (_("<None>"));
       return;
     }
-  else
-    bitmask &= ~GNU_PROPERTY_X86_UINT32_VALID;
 
   while (bitmask)
     {
@@ -17282,13 +17277,7 @@ print_gnu_property_note (Filedata * filedata, Elf_Internal_Note * pnote)
 	      unsigned int bitmask;
 
 	      if (datasz == 4)
-		{
-		  bitmask = byte_get (ptr, 4);
-		  if ((filedata->file_header.e_type == ET_EXEC
-		       || filedata->file_header.e_type == ET_DYN)
-		      && !(bitmask & GNU_PROPERTY_X86_UINT32_VALID))
-		    printf ("Invalid ");
-		}
+		bitmask = byte_get (ptr, 4);
 	      else
 		bitmask = 0;
 

@@ -2944,8 +2944,9 @@ error_alignment:
 /* Fix up x86 GNU properties.  */
 
 void
-_bfd_x86_elf_link_fixup_gnu_properties (struct bfd_link_info *info,
-					elf_property_list **listp)
+_bfd_x86_elf_link_fixup_gnu_properties
+  (struct bfd_link_info *info ATTRIBUTE_UNUSED,
+   elf_property_list **listp)
 {
   elf_property_list *p;
 
@@ -2972,11 +2973,6 @@ _bfd_x86_elf_link_fixup_gnu_properties (struct bfd_link_info *info,
 	      *listp = p->next;
 	      continue;
 	    }
-
-	  /* Mark x86-specific properties with X86_UINT32_VALID for
-	     non-relocatable output.  */
-	  if (!bfd_link_relocatable (info))
-	    p->property.u.number |= GNU_PROPERTY_X86_UINT32_VALID;
 
 	  listp = &p->next;
 	}

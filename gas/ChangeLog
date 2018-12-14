@@ -1,3 +1,11 @@
+2018-12-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23900
+	* config/tc-i386.c (x86_cleanup): Don't set
+	GNU_PROPERTY_X86_UINT32_VALID.
+	* testsuite/gas/i386/property-1.s: Change
+	GNU_PROPERTY_X86_ISA_1_USED bits to 0.
+
 2018-12-13  Jeff Law  <law@redhat.com>
 
 	* dw2gencfi.c (output_cie): Add missing semicolon in last

@@ -75,8 +75,10 @@ run_ld_link_tests [list \
 
 if [is_elf64 tmpdir/symbol3w.a] {
     set ASFLAGS "$ASFLAGS --defsym ALIGN=3"
+    set pr23900_1_exp "pr23900-1-64.rd"
 } else {
     set ASFLAGS "$ASFLAGS --defsym ALIGN=2"
+    set pr23900_1_exp "pr23900-1-32.rd"
 }
 
 
@@ -144,14 +146,36 @@ if { [check_gc_sections_available] && ![istarget "v850-*-*"] } {
 if { [istarget *-*-*linux*]
      || [istarget *-*-nacl*]
      || [istarget *-*-gnu*] } {
-    run_ld_link_tests {
-	{"stack exec" "-z execstack" "" "" {stack.s}
-	    {{readelf {-Wl} stack-exec.rd}} "stack-exec.exe"}
-	{"stack noexec" "-z noexecstack" "" "" {stack.s}
-	    {{readelf {-Wl} stack-noexec.rd}} "stack-noexec.exe"}
-	{"stack size" "-z stack-size=0x123400" "" "" {stack.s}
-	    {{readelf {-Wl} stack-size.rd}} "stack-size.exe"}
-    }
+    run_ld_link_tests [list \
+	[list "stack exec" \
+	    "-z execstack" \
+	    "" \
+	    "" \
+	    {stack.s} \
+	    {{readelf {-Wl} stack-exec.rd}} \
+	    "stack-exec.exe"] \
+	[list "stack noexec" \
+	    "-z noexecstack" \
+	    "" \
+	    "" \
+	    {stack.s} \
+	    {{readelf {-Wl} stack-noexec.rd}} \
+	    "stack-noexec.exe"] \
+	[list "stack size" \
+	    "-z stack-size=0x123400" \
+	    "" \
+	    "" \
+	    {stack.s} \
+	    {{readelf {-Wl} stack-size.rd}} \
+	    "stack-size.exe"] \
+	[list "PT_GNU_PROPERTY alignment" \
+	    "" \
+	    "" \
+	    "" \
+	    {pr23900-1.s} \
+	    [list [list "readelf" {-Wl} $pr23900_1_exp]] \
+	    "pr23900-1.exe"] \
+	]
 }
 
 set LDFLAGS $old_ldflags

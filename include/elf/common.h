@@ -469,6 +469,7 @@
 #define PT_SUNW_EH_FRAME PT_GNU_EH_FRAME      /* Solaris uses the same value */
 #define PT_GNU_STACK	(PT_LOOS + 0x474e551) /* Stack flags */
 #define PT_GNU_RELRO	(PT_LOOS + 0x474e552) /* Read-only after relocation */
+#define PT_GNU_PROPERTY	(PT_LOOS + 0x474e553) /* GNU property */
 
 /* Mbind segments */
 #define PT_GNU_MBIND_NUM 4096
@@ -798,9 +799,6 @@
   (GNU_PROPERTY_X86_UINT32_OR_AND_LO + 0)
 #define GNU_PROPERTY_X86_FEATURE_2_USED \
   (GNU_PROPERTY_X86_UINT32_OR_AND_LO + 1)
-
-/* Set by linker to indicate that the property is valid.  */
-#define GNU_PROPERTY_X86_UINT32_VALID		(1U << 31)
 
 #define GNU_PROPERTY_X86_FEATURE_1_IBT		(1U << 0)
 #define GNU_PROPERTY_X86_FEATURE_1_SHSTK	(1U << 1)

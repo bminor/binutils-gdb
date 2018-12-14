@@ -1,3 +1,19 @@
+2018-12-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23900
+	* readelf.c (get_segment_type): Support PT_GNU_PROPERTY.
+	(decode_x86_isa): Don't check GNU_PROPERTY_X86_UINT32_VALID.
+	(decode_x86_feature_1): Likewise.
+	(decode_x86_feature_2): Likewise.
+	(print_gnu_property_note): Remove GNU_PROPERTY_X86_UINT32_VALID
+	check.
+	* testsuite/binutils-all/i386/empty.d: Updated.
+	* testsuite/binutils-all/x86-64/empty-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/empty.d: Likewise.
+	* testsuite/binutils-all/i386/pr21231b.s: Change
+	GNU_PROPERTY_X86_ISA_1_USED bits to 0x7fffffff.
+	* testsuite/binutils-all/x86-64/pr21231b.s: Likewise.
+
 2018-12-13  Sam Tebbs  <sam.tebbs@arm.com>
 
 	* dwarf.c (read_cie):  Add check for 'B'.

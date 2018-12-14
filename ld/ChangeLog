@@ -1,3 +1,38 @@
+2018-12-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23900
+	* testsuite/ld-elf/elf.exp: Run PR ld/23900 test.
+	* testsuite/ld-elf/pr23900-1-32.rd: New file.
+	* testsuite/ld-elf/pr23900-1-64.rd: Likewise.
+	* testsuite/ld-elf/pr23900-1.d: Likewise.
+	* testsuite/ld-elf/pr23900-1.s: Likewise.
+	* testsuite/ld-elf/pr23900-2.s: Likewise.
+	* testsuite/ld-elf/pr23900-2a.d: Likewise.
+	* testsuite/ld-elf/pr23900-2b.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-1.d: Adjusted.
+	* testsuite/ld-i386/ibt-plt-2c.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-2d.d: Likewise.
+	* testsuite/ld-i386/ibt-plt-3d.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-1-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-1.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2c-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2c.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2d-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-2c.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3c-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3c.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3d-x32.d: Likewise.
+	* testsuite/ld-x86-64/ibt-plt-3d.d: Likewise.
+	* testsuite/ld-i386/pr23372c.d: Expect <None>
+	for GNU_PROPERTY_X86_ISA_1_USED.
+	* testsuite/ld-x86-64/pr23372c-x32.d: Likewise.
+	* testsuite/ld-x86-64/pr23372c.d: Likewise.
+	* testsuite/ld-x86-64/pr23372d-x32.d: Likewise.
+	* testsuite/ld-x86-64/pr23372d.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-5a.s: Change
+	GNU_PROPERTY_X86_ISA_1_USED bits to 0.
+	* testsuite/ld-x86-64/property-x86-5b.s: Likewise.
+
 2018-12-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* scripttempl/elf32xc16x.sc: Fix a typo.

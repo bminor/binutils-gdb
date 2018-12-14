@@ -7896,7 +7896,6 @@ x86_cleanup (void)
   if (!IS_ELF || !x86_used_note)
     return;
 
-  x86_isa_1_used |= GNU_PROPERTY_X86_UINT32_VALID;
   x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_X86;
 
   /* The .note.gnu.property section layout:
