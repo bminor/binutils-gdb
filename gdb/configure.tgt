@@ -166,6 +166,12 @@ arm*-*-linux*)
 			solib-svr4.o symfile-mem.o linux-tdep.o linux-record.o"
 	build_gdbserver=yes
 	;;
+arm*-*-uclinuxfdpiceabi)
+	# Target: ARM based machine running GNU/Linux
+	gdb_target_obs="arch/arm-linux.o arm-linux-tdep.o glibc-tdep.o \
+			solib-svr4.o solib-fdpic.o symfile-mem.o linux-tdep.o linux-record.o"
+	# NO YET build_gdbserver=yes
+	;;
 arm*-*-freebsd*)
 	# Target: FreeBSD/arm
 	gdb_target_obs="arm-fbsd-tdep.o"

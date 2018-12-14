@@ -768,6 +768,7 @@ ALL_TARGET_OBS = \
 	solib-aix.o \
 	solib-darwin.o \
 	solib-dsbt.o \
+	solib-fdpic.o \
 	solib-frv.o \
 	solib-spu.o \
 	solib-svr4.o \

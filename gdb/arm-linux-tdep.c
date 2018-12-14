@@ -25,6 +25,7 @@
 #include "frame.h"
 #include "regcache.h"
 #include "solib-svr4.h"
+#include "solib.h"
 #include "osabi.h"
 #include "regset.h"
 #include "trad-frame.h"
@@ -1777,8 +1778,12 @@ arm_linux_init_abi (struct gdbarch_info info,
     }
   tdep->jb_elt_size = ARM_LINUX_JB_ELEMENT_SIZE;
 
+  if (tdep->is_fdpic) {
+    set_solib_ops (gdbarch, &fdpic_so_ops);
+  } else {
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+  }
 
   /* Single stepping.  */
   set_gdbarch_software_single_step (gdbarch, arm_linux_software_single_step);
@@ -1788,8 +1793,13 @@ arm_linux_init_abi (struct gdbarch_info info,
   set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
 
   /* Enable TLS support.  */
+  if (tdep->is_fdpic) {
+    set_gdbarch_fetch_tls_load_module_address (gdbarch,
+                                               fdpic_fetch_objfile_link_map);
+  } else {
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
                                              svr4_fetch_objfile_link_map);
+  }
 
   tramp_frame_prepend_unwinder (gdbarch,
 				&arm_linux_sigreturn_tramp_frame);
