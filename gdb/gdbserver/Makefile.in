@@ -544,9 +544,15 @@ regdat_sh = $(srcdir)/../regformats/regdat.sh
 
 UST_CFLAGS = $(ustinc) -DCONFIG_UST_GDB_INTEGRATION
 
+# Undo gnulib replacements for the IPA shared library build.
+# The gnulib headers are still needed, but gnulib is not linked
+# into the IPA lib so replacement apis don't work.
+UNDO_GNULIB_CFLAGS = -Drpl_strerror=strerror
+
 # Note, we only build the IPA if -fvisibility=hidden is supported in
 # the first place.
 IPAGENT_CFLAGS = $(INTERNAL_CFLAGS) $(UST_CFLAGS) \
+	$(UNDO_GNULIB_CFLAGS) \
 	-fPIC -DIN_PROCESS_AGENT \
 	-fvisibility=hidden
 

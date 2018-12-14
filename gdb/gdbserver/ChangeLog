@@ -1,3 +1,9 @@
+2018-01-30  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	PR gdb/23985
+	* Makefile.in (IPAGENT_CFLAGS): Add UNDO_GNULIB_CFLAGS.
+	(UNDO_GNULIB_CFLAGS): Undo gnulib replacements.
+
 2019-01-25  Tom Tromey  <tom@tromey.com>
 
 	* Makefile.in (INCLUDE_CFLAGS): Don't add -I for common.
