@@ -1,3 +1,9 @@
+2018-12-14  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in: Remove "alloca" comment.
+	(INFOFILES): Remove.
+	(local-maintainer-clean): Don't use INFOFILES.
+
 2018-12-13  John Baldwin  <jhb@FreeBSD.org>
 
 	* syscalls/update-freebsd.sh: New file.

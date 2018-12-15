@@ -579,9 +579,6 @@ INTERNAL_LDFLAGS = \
 	$(CXXFLAGS) $(GLOBAL_CFLAGS) $(MH_LDFLAGS) \
 	$(LDFLAGS) $(CONFIG_LDFLAGS)
 
-# If your system is missing alloca(), or, more likely, it's there but
-# it doesn't work, then refer to libiberty.
-
 # Libraries and corresponding dependencies for compiling gdb.
 # XM_CLIBS, defined in *config files, have host-dependent libs.
 # LIBIBERTY appears twice on purpose.
@@ -1552,9 +1549,6 @@ HFILES_WITH_SRCDIR = \
 	../bfd/bfd.h \
 	jit-reader.h
 
-# GDB "info" files, which should be included in their entirety
-INFOFILES = gdb.info*
-
 # {X,T,NAT}DEPFILES are something of a pain in that it's hard to
 # default their values the way we do for SER_HARDWIRE; in the future
 # maybe much of the stuff now in {X,T,NAT}DEPFILES will go into other
@@ -2004,7 +1998,7 @@ local-maintainer-clean:
 		cp-name-parser.c \
 		ada-lex.c ada-exp.c \
 		d-exp.c f-exp.c go-exp.c m2-exp.c p-exp.c rust-exp.c
-	rm -f TAGS $(INFOFILES)
+	rm -f TAGS
 	rm -f $(YYFILES)
 	rm -f nm.h config.status
 
