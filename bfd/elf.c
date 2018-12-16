@@ -35,6 +35,7 @@ SECTION
 /* For sparc64-cross-sparc32.  */
 #define _SYSCALL32
 #include "sysdep.h"
+#include <limits.h>
 #include "bfd.h"
 #include "bfdlink.h"
 #include "libbfd.h"
@@ -8215,11 +8216,16 @@ error_return:
 long
 _bfd_elf_get_symtab_upper_bound (bfd *abfd)
 {
-  long symcount;
+  bfd_size_type symcount;
   long symtab_size;
   Elf_Internal_Shdr *hdr = &elf_tdata (abfd)->symtab_hdr;
 
   symcount = hdr->sh_size / get_elf_backend_data (abfd)->s->sizeof_sym;
+  if (symcount >= LONG_MAX / sizeof (asymbol *))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      return -1;
+    }
   symtab_size = (symcount + 1) * (sizeof (asymbol *));
   if (symcount > 0)
     symtab_size -= sizeof (asymbol *);
@@ -8230,7 +8236,7 @@ _bfd_elf_get_symtab_upper_bound (bfd *abfd)
 long
 _bfd_elf_get_dynamic_symtab_upper_bound (bfd *abfd)
 {
-  long symcount;
+  bfd_size_type symcount;
   long symtab_size;
   Elf_Internal_Shdr *hdr = &elf_tdata (abfd)->dynsymtab_hdr;
 
@@ -8241,6 +8247,11 @@ _bfd_elf_get_dynamic_symtab_upper_bound (bfd *abfd)
     }
 
   symcount = hdr->sh_size / get_elf_backend_data (abfd)->s->sizeof_sym;
+  if (symcount >= LONG_MAX / sizeof (asymbol *))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      return -1;
+    }
   symtab_size = (symcount + 1) * (sizeof (asymbol *));
   if (symcount > 0)
     symtab_size -= sizeof (asymbol *);
@@ -8310,7 +8321,7 @@ _bfd_elf_canonicalize_dynamic_symtab (bfd *abfd,
 long
 _bfd_elf_get_dynamic_reloc_upper_bound (bfd *abfd)
 {
-  long ret;
+  bfd_size_type count;
   asection *s;
 
   if (elf_dynsymtab (abfd) == 0)
@@ -8319,15 +8330,20 @@ _bfd_elf_get_dynamic_reloc_upper_bound (bfd *abfd)
       return -1;
     }
 
-  ret = sizeof (arelent *);
+  count = 1;
   for (s = abfd->sections; s != NULL; s = s->next)
     if (elf_section_data (s)->this_hdr.sh_link == elf_dynsymtab (abfd)
 	&& (elf_section_data (s)->this_hdr.sh_type == SHT_REL
 	    || elf_section_data (s)->this_hdr.sh_type == SHT_RELA))
-      ret += ((s->size / elf_section_data (s)->this_hdr.sh_entsize)
-	      * sizeof (arelent *));
-
-  return ret;
+      {
+	count += s->size / elf_section_data (s)->this_hdr.sh_entsize;
+	if (count > LONG_MAX / sizeof (arelent *))
+	  {
+	    bfd_set_error (bfd_error_file_too_big);
+	    return -1;
+	  }
+      }
+  return count * sizeof (arelent *);
 }
 
 /* Canonicalize the dynamic relocation entries.  Note that we return the

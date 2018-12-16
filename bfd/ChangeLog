@@ -1,3 +1,15 @@
+2018-12-17  Alan Modra  <amodra@gmail.com>
+
+	PR 23994
+	* aoutx.h: Include limits.h.
+	(get_reloc_upper_bound): Detect long overflow and return a file
+	too big error if it occurs.
+	* elf.c: Include limits.h.
+	(_bfd_elf_get_symtab_upper_bound): Detect long overflow and return
+	a file too big error if it occurs.
+	(_bfd_elf_get_dynamic_symtab_upper_bound): Likewise.
+	(_bfd_elf_get_dynamic_reloc_upper_bound): Likewise.
+
 2018-12-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23900

@@ -117,6 +117,7 @@ DESCRIPTION
 #define KEEPIT udata.i
 
 #include "sysdep.h"
+#include <limits.h>
 #include "bfd.h"
 #include "safe-ctype.h"
 #include "bfdlink.h"
@@ -2491,6 +2492,8 @@ NAME (aout, canonicalize_reloc) (bfd *abfd,
 long
 NAME (aout, get_reloc_upper_bound) (bfd *abfd, sec_ptr asect)
 {
+  bfd_size_type count;
+
   if (bfd_get_format (abfd) != bfd_object)
     {
       bfd_set_error (bfd_error_invalid_operation);
@@ -2498,26 +2501,25 @@ NAME (aout, get_reloc_upper_bound) (bfd *abfd, sec_ptr asect)
     }
 
   if (asect->flags & SEC_CONSTRUCTOR)
-    return sizeof (arelent *) * (asect->reloc_count + 1);
+    count = asect->reloc_count;
+  else if (asect == obj_datasec (abfd))
+    count = exec_hdr (abfd)->a_drsize / obj_reloc_entry_size (abfd);
+  else if (asect == obj_textsec (abfd))
+    count = exec_hdr (abfd)->a_trsize / obj_reloc_entry_size (abfd);
+  else if (asect == obj_bsssec (abfd))
+    count = 0;
+  else
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return -1;
+    }
 
-  if (asect == obj_datasec (abfd))
-    return sizeof (arelent *)
-      * ((exec_hdr (abfd)->a_drsize / obj_reloc_entry_size (abfd))
-	 + 1);
-
-  if (asect == obj_textsec (abfd))
-    return sizeof (arelent *)
-      * ((exec_hdr (abfd)->a_trsize / obj_reloc_entry_size (abfd))
-	 + 1);
-
-  if (asect == obj_bsssec (abfd))
-    return sizeof (arelent *);
-
-  if (asect == obj_bsssec (abfd))
-    return 0;
-
-  bfd_set_error (bfd_error_invalid_operation);
-  return -1;
+  if (count >= LONG_MAX / sizeof (arelent *))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      return -1;
+    }
+  return (count + 1) * sizeof (arelent *);
 }
 
 long
