@@ -89,7 +89,7 @@ kill_child (pid_t child, const char *who)
 
   if (kill (child, SIGKILL) != 0)
     {
-      warning (_("%s: failed to kill child pid %ld %s\n"),
+      warning (_("%s: failed to kill child pid %ld %s"),
 	       who, (long) child, safe_strerror (errno));
       return;
     }
