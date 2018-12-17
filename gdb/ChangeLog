@@ -1,3 +1,8 @@
+2018-12-19  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+	* nat/linux-ptrace.c (linux_ptrace_test_ret_to_nx): Remove
+	sp clobbers.
+
 2018-12-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* dwarf2read.c (struct dwarf2_cu): Convert the fields 'mark',
