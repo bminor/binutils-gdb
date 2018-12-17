@@ -156,7 +156,7 @@ static void c_print_token (FILE *file, int type, YYSTYPE value);
 %token <voidval> COMPLETE
 %token <tsym> TYPENAME
 %token <theclass> CLASSNAME	/* ObjC Class name */
-%type <sval> name
+%type <sval> name field_name
 %type <svec> string_exp
 %type <ssym> name_not_typename
 %type <tsym> type_name
@@ -312,13 +312,13 @@ exp	:	ALIGNOF '(' type_exp ')'	%prec UNARY
 			{ write_exp_elt_opcode (pstate, UNOP_ALIGNOF); }
 	;
 
-exp	:	exp ARROW name
+exp	:	exp ARROW field_name
 			{ write_exp_elt_opcode (pstate, STRUCTOP_PTR);
 			  write_exp_string (pstate, $3);
 			  write_exp_elt_opcode (pstate, STRUCTOP_PTR); }
 	;
 
-exp	:	exp ARROW name COMPLETE
+exp	:	exp ARROW field_name COMPLETE
 			{ mark_struct_expression (pstate);
 			  write_exp_elt_opcode (pstate, STRUCTOP_PTR);
 			  write_exp_string (pstate, $3);
@@ -360,13 +360,13 @@ exp	:	exp ARROW_STAR exp
 			{ write_exp_elt_opcode (pstate, STRUCTOP_MPTR); }
 	;
 
-exp	:	exp '.' name
+exp	:	exp '.' field_name
 			{ write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
 			  write_exp_string (pstate, $3);
 			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT); }
 	;
 
-exp	:	exp '.' name COMPLETE
+exp	:	exp '.' field_name COMPLETE
 			{ mark_struct_expression (pstate);
 			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
 			  write_exp_string (pstate, $3);
@@ -1646,6 +1646,9 @@ oper:	OPERATOR NEW
 	;
 
 
+field_name
+	:	name
+	;
 
 name	:	NAME { $$ = $1.stoken; }
 	|	BLOCKNAME { $$ = $1.stoken; }

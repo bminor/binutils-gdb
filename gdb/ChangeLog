@@ -1,5 +1,10 @@
 2018-12-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* c-exp.y (field_name): New %token, and new rule.
+	(exp): Replace uses of 'name' with 'field_name' where appropriate.
+
+2018-12-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	PR gdb/13368
 	* c-exp.y (typebase): Extend the comment.
 	(ident_tokens): Likewise.
