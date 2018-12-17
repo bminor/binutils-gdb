@@ -1,3 +1,9 @@
+2018-12-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR gdb/13368
+	* c-exp.y (typebase): Extend the comment.
+	(ident_tokens): Likewise.
+
 2018-12-18  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2read.c (dwarf2_find_containing_comp_unit): Don't take

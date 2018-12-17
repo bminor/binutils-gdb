@@ -1224,7 +1224,17 @@ func_mod:	'(' ')'
 type	:	ptype
 	;
 
-typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
+/* Implements (approximately): (type-qualifier)* type-specifier.
+
+   When type-specifier is only ever a single word, like 'float' then these
+   arrive as pre-built TYPENAME tokens thanks to the classify_name
+   function.  However, when a type-specifier can contain multiple words,
+   for example 'double' can appear as just 'double' or 'long double', and
+   similarly 'long' can appear as just 'long' or in 'long double', then
+   these type-specifiers are parsed into their own tokens in the function
+   lex_one_token and the ident_tokens array.  These separate tokens are all
+   recognised here.  */
+typebase
 	:	TYPENAME
 			{ $$ = $1.type; }
 	|	INT_KEYWORD
@@ -2323,7 +2333,10 @@ static const struct token tokentab2[] =
     {".*", DOT_STAR, BINOP_END, FLAG_CXX}
   };
 
-/* Identifier-like tokens.  */
+/* Identifier-like tokens.  Only type-specifiers than can appear in
+   multi-word type names (for example 'double' can appear in 'long
+   double') need to be listed here.  type-specifiers that are only ever
+   single word (like 'float') are handled by the classify_name function.  */
 static const struct token ident_tokens[] =
   {
     {"unsigned", UNSIGNED, OP_NULL, 0},
