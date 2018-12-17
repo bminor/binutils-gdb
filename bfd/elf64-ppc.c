@@ -13360,7 +13360,11 @@ ppc64_elf_relocate_section (bfd *output_bfd,
   if (input_section->owner == htab->params->stub_bfd)
     return TRUE;
 
-  BFD_ASSERT (is_ppc64_elf (input_bfd));
+  if (!is_ppc64_elf (input_bfd))
+    {
+      bfd_set_error (bfd_error_wrong_format);
+      return FALSE;
+    }
 
   local_got_ents = elf_local_got_ents (input_bfd);
   TOCstart = elf_gp (output_bfd);

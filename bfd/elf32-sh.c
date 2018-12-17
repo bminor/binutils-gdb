@@ -3510,7 +3510,11 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
   unsigned isec_segment, got_segment, plt_segment, check_segment[2];
   bfd_boolean fdpic_p = FALSE;
 
-  BFD_ASSERT (is_sh_elf (input_bfd));
+  if (!is_sh_elf (input_bfd))
+    {
+      bfd_set_error (bfd_error_wrong_format);
+      return FALSE;
+    }
 
   htab = sh_elf_hash_table (info);
   if (htab != NULL)

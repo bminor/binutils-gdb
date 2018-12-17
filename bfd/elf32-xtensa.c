@@ -2459,7 +2459,11 @@ elf_xtensa_relocate_section (bfd *output_bfd,
   if (!xtensa_default_isa)
     xtensa_default_isa = xtensa_isa_init (0, 0);
 
-  BFD_ASSERT (is_xtensa_elf (input_bfd));
+  if (!is_xtensa_elf (input_bfd))
+    {
+      bfd_set_error (bfd_error_wrong_format);
+      return FALSE;
+    }
 
   htab = elf_xtensa_hash_table (info);
   if (htab == NULL)

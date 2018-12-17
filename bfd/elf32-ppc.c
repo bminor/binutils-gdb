@@ -7025,6 +7025,12 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		      (bfd_link_relocatable (info)) ? " (relocatable)" : "");
 #endif
 
+  if (!is_ppc_elf (input_bfd))
+    {
+      bfd_set_error (bfd_error_wrong_format);
+      return FALSE;
+    }
+
   got2 = bfd_get_section_by_name (input_bfd, ".got2");
 
   /* Initialize howto table if not already done.  */
