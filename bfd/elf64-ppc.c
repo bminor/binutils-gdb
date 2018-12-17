@@ -6193,6 +6193,9 @@ ppc64_elf_hide_symbol (struct bfd_link_info *info,
   struct ppc_link_hash_entry *eh;
   _bfd_elf_link_hash_hide_symbol (info, h, force_local);
 
+  if (ppc_hash_table (info) == NULL)
+    return;
+
   eh = (struct ppc_link_hash_entry *) h;
   if (eh->is_func_descriptor)
     {
