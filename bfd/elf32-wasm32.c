@@ -22,7 +22,6 @@
 #include "bfd.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
-#include "bfd_stdint.h"
 #include "libiberty.h"
 #include "elf/wasm32.h"
 

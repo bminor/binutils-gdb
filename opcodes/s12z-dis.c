@@ -20,7 +20,7 @@
 
 #include "sysdep.h"
 #include <stdio.h>
-#include <stdint.h>
+#include "bfd_stdint.h"
 #include <stdbool.h>
 #include <assert.h>
 

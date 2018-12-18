@@ -248,8 +248,8 @@ am__can_run_installinfo = \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
 am__bfdinclude_HEADERS_DIST = $(INCDIR)/plugin-api.h bfd.h \
-	$(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/bfdlink.h \
-	$(INCDIR)/diagnostics.h
+	$(INCDIR)/ansidecl.h $(INCDIR)/symcat.h bfd_stdint.h \
+	$(INCDIR)/diagnostics.h $(INCDIR)/bfdlink.h
 HEADERS = $(bfdinclude_HEADERS)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
@@ -468,8 +468,8 @@ libbfd_la_LDFLAGS = $(am__append_1) -release `cat libtool-soversion` \
 @INSTALL_LIBBFD_FALSE@bfdinclude_HEADERS = $(am__append_2)
 @INSTALL_LIBBFD_TRUE@bfdinclude_HEADERS = $(BFD_H) \
 @INSTALL_LIBBFD_TRUE@	$(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
-@INSTALL_LIBBFD_TRUE@	$(INCDIR)/bfdlink.h \
-@INSTALL_LIBBFD_TRUE@	$(INCDIR)/diagnostics.h $(am__append_2)
+@INSTALL_LIBBFD_TRUE@	bfd_stdint.h $(INCDIR)/diagnostics.h \
+@INSTALL_LIBBFD_TRUE@	$(INCDIR)/bfdlink.h $(am__append_2)
 @INSTALL_LIBBFD_FALSE@rpath_bfdlibdir = @bfdlibdir@
 @INSTALL_LIBBFD_FALSE@noinst_LTLIBRARIES = libbfd.la
 
@@ -1146,8 +1146,8 @@ libbfd_la_LIBADD = `cat ofiles` @SHARED_LIBADD@ $(LIBDL) $(ZLIB)
 # everything else starts using libtool.  FIXME.
 noinst_LIBRARIES = libbfd.a
 libbfd_a_SOURCES = 
-BFD_H_DEPS = $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h
-LOCAL_H_DEPS = libbfd.h sysdep.h config.h
+BFD_H_DEPS = $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/diagnostics.h
+LOCAL_H_DEPS = libbfd.h sysdep.h config.h bfd_stdint.h
 BFD_H_FILES = bfd-in.h init.c opncls.c libbfd.c \
 	bfdio.c bfdwin.c section.c archures.c reloc.c \
 	syms.c bfd.c archive.c corefile.c targets.c format.c \

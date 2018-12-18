@@ -33,7 +33,7 @@ bfdlibdir = @bfdlibdir@
 bfdincludedir = @bfdincludedir@
 bfdlib_LTLIBRARIES = libbfd.la
 bfdinclude_HEADERS = $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
-		     $(INCDIR)/bfdlink.h $(INCDIR)/diagnostics.h
+		     bfd_stdint.h $(INCDIR)/diagnostics.h $(INCDIR)/bfdlink.h
 else !INSTALL_LIBBFD
 # Empty these so that the respective installation directories will not be created.
 bfdlibdir =
@@ -873,8 +873,8 @@ pex64igen.c: peXXigen.c
 	$(SED) -e s/XX/pex64/g < $(srcdir)/peXXigen.c > pex64igen.new
 	mv -f pex64igen.new pex64igen.c
 
-BFD_H_DEPS= $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h
-LOCAL_H_DEPS= libbfd.h sysdep.h config.h
+BFD_H_DEPS= $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/diagnostics.h
+LOCAL_H_DEPS= libbfd.h sysdep.h config.h bfd_stdint.h
 $(BFD32_LIBS) \
  $(BFD64_LIBS) \
  $(ALL_MACHINES) \

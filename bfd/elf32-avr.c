@@ -25,7 +25,6 @@
 #include "elf-bfd.h"
 #include "elf/avr.h"
 #include "elf32-avr.h"
-#include "bfd_stdint.h"
 
 /* Enable debugging printout at stdout with this variable.  */
 static bfd_boolean debug_relax = FALSE;

@@ -20,7 +20,6 @@
 
 #include "sysdep.h"
 #include "bfd.h"
-#include "bfd_stdint.h"
 #include "bfdlink.h"
 #include "libbfd.h"
 #define ARCH_SIZE 0

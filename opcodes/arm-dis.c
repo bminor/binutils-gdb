@@ -32,6 +32,7 @@
 /* FIXME: This shouldn't be done here.  */
 #include "coff/internal.h"
 #include "libcoff.h"
+#include "bfd.h"
 #include "elf-bfd.h"
 #include "elf/internal.h"
 #include "elf/arm.h"

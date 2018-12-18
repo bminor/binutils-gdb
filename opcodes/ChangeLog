@@ -1,3 +1,13 @@
+2018-12-18  Alan Modra  <amodra@gmail.com>
+
+	* arm-dis.c: Include bfd.h.
+	* aarch64-opc.c: Include bfd_stdint.h rather than stdint.h.
+	* csky-dis.c: Likewise.
+	* nds32-asm.c: Likewise.
+	* riscv-dis.c: Likewise.
+	* s12z-dis.c: Likewise.
+	* wasm32-dis.c: Likewise.
+
 2018-12-07  Jim Wilson  <jimw@sifive.com>
 
 	PR gas/23956

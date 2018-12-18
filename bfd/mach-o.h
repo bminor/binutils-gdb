@@ -21,7 +21,6 @@
 #ifndef _BFD_MACH_O_H_
 #define _BFD_MACH_O_H_
 
-#include "bfd.h"
 #include "mach-o/loader.h"
 #include "mach-o/external.h"
 

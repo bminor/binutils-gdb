@@ -18,10 +18,6 @@
    along with this program; see the file COPYING3. If not,
    see <http://www.gnu.org/licenses/>.  */
 
-#include "bfd.h"
-#include "elf-bfd.h"
-#include "stdint.h"
-
 /* Take the PAGE component of an address or offset.  */
 #define PG(x)	     ((x) & ~ (bfd_vma) 0xfff)
 #define PG_OFFSET(x) ((x) &   (bfd_vma) 0xfff)

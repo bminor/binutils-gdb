@@ -22,12 +22,10 @@
 
 #include "sysdep.h"
 #include "bfd.h"
-#include "bfd_stdint.h"
 #include "bfdlink.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "libiberty.h"
-#include "bfd_stdint.h"
 #include "elf/nds32.h"
 #include "opcode/nds32.h"
 #include "elf32-nds32.h"

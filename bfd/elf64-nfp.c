@@ -24,7 +24,6 @@
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf/nfp.h"
-#include "bfd_stdint.h"
 
 
 static bfd_reloc_status_type

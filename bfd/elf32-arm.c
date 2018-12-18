@@ -22,7 +22,6 @@
 #include <limits.h>
 
 #include "bfd.h"
-#include "bfd_stdint.h"
 #include "libiberty.h"
 #include "libbfd.h"
 #include "elf-bfd.h"

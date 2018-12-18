@@ -19,10 +19,10 @@
    MA 02110-1301, USA.  */
 
 #include "sysdep.h"
-#include "mach-o.h"
 #include "bfd.h"
 #include "libbfd.h"
 #include "libiberty.h"
+#include "mach-o.h"
 #include "aout/stab_gnu.h"
 #include "mach-o/reloc.h"
 #include "mach-o/external.h"

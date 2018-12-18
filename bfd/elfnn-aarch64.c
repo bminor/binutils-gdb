@@ -139,7 +139,6 @@
 #include "bfd.h"
 #include "libiberty.h"
 #include "libbfd.h"
-#include "bfd_stdint.h"
 #include "elf-bfd.h"
 #include "bfdlink.h"
 #include "objalloc.h"

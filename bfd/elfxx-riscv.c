@@ -29,7 +29,6 @@
 #include "libiberty.h"
 #include "elfxx-riscv.h"
 #include "safe-ctype.h"
-#include <stdint.h>
 
 #define MINUS_ONE ((bfd_vma)0 - 1)
 

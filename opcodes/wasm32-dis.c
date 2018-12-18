@@ -27,7 +27,7 @@
 #include "elf-bfd.h"
 #include "elf/internal.h"
 #include "elf/wasm32.h"
-#include <stdint.h>
+#include "bfd_stdint.h"
 
 /* Type names for blocks and signatures.  */
 #define BLOCK_TYPE_NONE              0x40

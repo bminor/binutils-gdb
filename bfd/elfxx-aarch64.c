@@ -19,6 +19,8 @@
    see <http://www.gnu.org/licenses/>.  */
 
 #include "sysdep.h"
+#include "bfd.h"
+#include "elf-bfd.h"
 #include "elfxx-aarch64.h"
 #include <stdarg.h>
 #include <string.h>

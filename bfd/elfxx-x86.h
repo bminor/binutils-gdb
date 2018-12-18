@@ -23,7 +23,6 @@
 #include "bfdlink.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
-#include "bfd_stdint.h"
 #include "hashtab.h"
 
 #define PLT_CIE_LENGTH		20

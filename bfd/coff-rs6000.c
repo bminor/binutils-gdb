@@ -114,7 +114,6 @@ extern int rs6000coff_core_file_failing_signal (bfd *abfd);
 #define bfd_pe_print_pdata	NULL
 #endif
 
-#include <stdint.h>
 #include "coffcode.h"
 
 /* The main body of code is in coffcode.h.  */

@@ -27,7 +27,6 @@
 #include "elf/ia64.h"
 #include "objalloc.h"
 #include "hashtab.h"
-#include "bfd_stdint.h"
 #include "elfxx-ia64.h"
 
 /* THE RULES for all the stuff the linker creates --

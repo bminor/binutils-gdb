@@ -28,9 +28,7 @@
 #include "sysdep.h"
 #include "alloca-conf.h"
 #include "bfd.h"
-#include "sysdep.h"
 #include <limits.h>
-#include "bfd_stdint.h"
 #include "libiberty.h"
 #include "libbfd.h"
 #include "wasm-module.h"

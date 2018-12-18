@@ -278,7 +278,6 @@ extern int rs6000coff_core_file_failing_signal
 #define bfd_pe_print_pdata	NULL
 #endif
 
-#include <stdint.h>
 #include "coffcode.h"
 
 /* For XCOFF64, the effective width of symndx changes depending on

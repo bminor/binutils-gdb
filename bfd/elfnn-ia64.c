@@ -27,7 +27,6 @@
 #include "elf/ia64.h"
 #include "objalloc.h"
 #include "hashtab.h"
-#include "bfd_stdint.h"
 #include "elfxx-ia64.h"
 
 #define ARCH_SIZE	NN

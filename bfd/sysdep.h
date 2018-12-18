@@ -28,15 +28,12 @@
 
 #include "config.h"
 
-#include "ansidecl.h"
-
 #ifdef HAVE_STDDEF_H
 #include <stddef.h>
 #endif
 
 #include <stdio.h>
 #include <sys/types.h>
-#include <sys/stat.h>
 
 #include <errno.h>
 #if !(defined(errno) || defined(_MSC_VER) && defined(_INC_ERRNO))

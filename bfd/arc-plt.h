@@ -22,8 +22,6 @@
 #ifndef ARC_PLT_H
 #define ARC_PLT_H
 
-#include <stdint.h>
-
 /* Instructions appear in memory as a sequence of half-words (16 bit);
    individual half-words are represented on the target in target byte order.
    We use 'unsigned short' on the host to represent the PLT templates,
