@@ -388,7 +388,7 @@ keep_text_section_prefix: keep_text_section_prefix.o gcctestdir/ld
 keep_text_section_prefix_readelf.stdout: keep_text_section_prefix
 	$(TEST_READELF) -Wl $< >$@
 keep_text_section_prefix_nm.stdout: keep_text_section_prefix
-	$(TEST_NM) -n $< >$@
+	$(TEST_NM) -n --synthetic $< >$@
 
 check_PROGRAMS += icf_virtual_function_folding_test
 MOSTLYCLEANFILES += icf_virtual_function_folding_test icf_virtual_function_folding_test.map

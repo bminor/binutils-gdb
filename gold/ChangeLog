@@ -1,3 +1,9 @@
+2018-12-18  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/Makefile.am (keep_text_section_prefix_nm.stdout):
+	Pass --synthetic to nm.
+	* testsuite/Makefile.in: Regenerate.
+
 2018-12-08  Alan Modra  <amodra@gmail.com>
 
 	PR 21128
