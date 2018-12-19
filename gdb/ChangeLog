@@ -1,5 +1,13 @@
 2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb/csky-tdep.c (csky_dummy_id): Delete.
+	(csky_unwind_pc): Delete.
+	(csky_unwind_sp): Delete.
+	(csky_gdbarch_init): Don't register deleted functions with
+	gdbarch.
+
+2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb/cris-tdep.c (cris_dummy_id): Delete.
 	(cris_unwind_pc): Delete.
 	(cris_unwind_sp): Delete.
