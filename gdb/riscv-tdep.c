@@ -2731,31 +2731,6 @@ riscv_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
   return align_down (addr, 16);
 }
 
-/* Implement the unwind_pc gdbarch method.  */
-
-static CORE_ADDR
-riscv_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  return frame_unwind_register_unsigned (next_frame, RISCV_PC_REGNUM);
-}
-
-/* Implement the unwind_sp gdbarch method.  */
-
-static CORE_ADDR
-riscv_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  return frame_unwind_register_unsigned (next_frame, RISCV_SP_REGNUM);
-}
-
-/* Implement the dummy_id gdbarch method.  */
-
-static struct frame_id
-riscv_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
-{
-  return frame_id_build (get_frame_register_signed (this_frame, RISCV_SP_REGNUM),
-			 get_frame_pc (this_frame));
-}
-
 /* Generate, or return the cached frame cache for the RiscV frame
    unwinder.  */
 
@@ -3193,15 +3168,10 @@ riscv_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_frame_align (gdbarch, riscv_frame_align);
 
-  /* Functions to access frame data.  */
-  set_gdbarch_unwind_pc (gdbarch, riscv_unwind_pc);
-  set_gdbarch_unwind_sp (gdbarch, riscv_unwind_sp);
-
   /* Functions handling dummy frames.  */
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
   set_gdbarch_push_dummy_code (gdbarch, riscv_push_dummy_code);
   set_gdbarch_push_dummy_call (gdbarch, riscv_push_dummy_call);
-  set_gdbarch_dummy_id (gdbarch, riscv_dummy_id);
 
   /* Frame unwinders.  Use DWARF debug info if available, otherwise use our own
      unwinder.  */
