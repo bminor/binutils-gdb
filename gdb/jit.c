@@ -1464,7 +1464,8 @@ free_objfile_data (struct objfile *objfile, void *data)
       if (ps_data != NULL && ps_data->objfile == objfile)
 	{
 	  ps_data->objfile = NULL;
-	  delete_breakpoint (ps_data->jit_breakpoint);
+	  if (ps_data->jit_breakpoint != NULL)
+	    delete_breakpoint (ps_data->jit_breakpoint);
 	  ps_data->cached_code_address = 0;
 	}
     }

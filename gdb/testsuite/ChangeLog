@@ -1,4 +1,11 @@
 2018-12-28  Tom Tromey  <tom@tromey.com>
+	    Simon Marchi <simark@simark.ca>
+
+	* gdb.base/jit-exec.exp: New file.
+	* gdb.base/jit-exec.c: New file.
+	* gdb.base/jit-execd.c: New file.
+
+2018-12-28  Tom Tromey  <tom@tromey.com>
 
 	* gdb.base/style.exp: Update test to check for address styling.
 

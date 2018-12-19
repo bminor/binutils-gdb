@@ -1,5 +1,9 @@
 2018-12-28  Tom Tromey  <tom@tromey.com>
 
+	* jit.c (free_objfile_data): Only delete breakpoint if non-null.
+
+2018-12-28  Tom Tromey  <tom@tromey.com>
+
 	* NEWS: Mention terminal styling.
 
 2018-12-28  Tom Tromey  <tom@tromey.com>
