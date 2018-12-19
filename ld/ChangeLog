@@ -1,5 +1,14 @@
 2018-12-19  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gas/23997
+	* testsuite/ld-i386/i386.exp: Run PR gas/23997 test.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-x86-64/pr23997a.s: New file.
+	* testsuite/ld-x86-64/pr23997b.c: Likewise.
+	* testsuite/ld-x86-64/pr23997c.c: Likewise.
+
+2018-12-19  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-x86-64/x86-64.exp: Rename PR ld/22842 run-time
 	test to "Run pr22842".
 

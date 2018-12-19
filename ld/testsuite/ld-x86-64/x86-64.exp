@@ -1594,6 +1594,14 @@ if { [isnative] && [which $CC] != 0 } {
 	    "pr22842" \
 	    "pass.out" \
 	] \
+	[list \
+	    "Run pr23997" \
+	    "" \
+	    "" \
+	    { pr23997a.s pr23997b.c pr23997c.c } \
+	    "pr23997" \
+	    "pass.out" \
+	] \
     ]
 
     # Run-time tests which require working ifunc attribute support.

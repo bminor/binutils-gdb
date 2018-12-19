@@ -8919,6 +8919,15 @@ x86_cons (expressionS *exp, int size)
 	      as_bad (_("missing or invalid expression `%s'"), save);
 	      *input_line_pointer = c;
 	    }
+	  else if ((got_reloc == BFD_RELOC_386_PLT32
+		    || got_reloc == BFD_RELOC_X86_64_PLT32)
+		   && exp->X_op != O_symbol)
+	    {
+	      char c = *input_line_pointer;
+	      *input_line_pointer = 0;
+	      as_bad (_("invalid PLT expression `%s'"), save);
+	      *input_line_pointer = c;
+	    }
 	}
     }
   else
@@ -10533,9 +10542,11 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       {
       case BFD_RELOC_386_PLT32:
       case BFD_RELOC_X86_64_PLT32:
-	/* Make the jump instruction point to the address of the operand.  At
-	   runtime we merely add the offset to the actual PLT entry.  */
-	value = -4;
+	/* Make the jump instruction point to the address of the operand.
+	   At runtime we merely add the offset to the actual PLT entry.
+	   NB: Subtract the offset size only for jump instructions.  */
+	if (fixP->fx_pcrel)
+	  value = -4;
 	break;
 
       case BFD_RELOC_386_TLS_GD:

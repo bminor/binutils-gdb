@@ -1420,6 +1420,15 @@ if { [isnative]
 	    "pr22842" \
 	    "pass.out" \
 	] \
+	[list \
+	    "Run pr23997" \
+	    "" \
+	    "" \
+	    { ../ld-x86-64/pr23997a.s ../ld-x86-64/pr23997b.c \
+	      ../ld-x86-64/pr23997c.c } \
+	    "pr23997" \
+	    "pass.out" \
+	] \
     ]
 
     if { [at_least_gcc_version 5 0] } {
