@@ -1,5 +1,13 @@
 2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb/frv-tdep.c (frv_dummy_id): Delete.
+	(frv_unwind_pc): Delete.
+	(frv_unwind_sp): Delete.
+	(frv_gdbarch_init): Don't register deleted functions with
+	gdbarch.
+
+2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb/riscv-tdep.c (riscv_dummy_id): Delete.
 	(riscv_unwind_pc): Delete.
 	(riscv_unwind_sp): Delete.
