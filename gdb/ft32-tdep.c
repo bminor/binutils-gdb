@@ -383,14 +383,6 @@ ft32_address_class_name_to_type_flags (struct gdbarch *gdbarch,
     return 0;
 }
 
-/* Implement the "unwind_sp" gdbarch method.  */
-
-static CORE_ADDR
-ft32_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  return frame_unwind_register_unsigned (next_frame, FT32_SP_REGNUM);
-}
-
 /* Given a return value in `regbuf' with a type `valtype',
    extract and copy its value into `valbuf'.  */
 
@@ -492,14 +484,6 @@ ft32_frame_cache (struct frame_info *this_frame, void **this_cache)
   return cache;
 }
 
-/* Implement the "unwind_pc" gdbarch method.  */
-
-static CORE_ADDR
-ft32_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  return frame_unwind_register_unsigned (next_frame, FT32_PC_REGNUM);
-}
-
 /* Given a GDB frame, determine the address of the calling function's
    frame.  This will be used to create a new GDB frame struct.  */
 
@@ -567,14 +551,6 @@ static const struct frame_base ft32_frame_base =
   ft32_frame_base_address
 };
 
-static struct frame_id
-ft32_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
-{
-  CORE_ADDR sp = get_frame_register_unsigned (this_frame, FT32_SP_REGNUM);
-
-  return frame_id_build (sp, get_frame_pc (this_frame));
-}
-
 /* Allocate and initialize the ft32 gdbarch object.  */
 
 static struct gdbarch *
@@ -602,8 +578,6 @@ ft32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				     func_void_type);
   TYPE_INSTANCE_FLAGS (tdep->pc_type) |= TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1;
 
-  set_gdbarch_unwind_sp (gdbarch, ft32_unwind_sp);
-
   set_gdbarch_num_regs (gdbarch, FT32_NUM_REGS);
   set_gdbarch_sp_regnum (gdbarch, FT32_SP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, FT32_PC_REGNUM);
@@ -621,13 +595,6 @@ ft32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_align (gdbarch, ft32_frame_align);
 
   frame_base_set_default (gdbarch, &ft32_frame_base);
-
-  /* Methods for saving / extracting a dummy frame's ID.  The ID's
-     stack address must match the SP value returned by
-     PUSH_DUMMY_CALL, and saved by generic_save_dummy_frame_tos.  */
-  set_gdbarch_dummy_id (gdbarch, ft32_dummy_id);
-
-  set_gdbarch_unwind_pc (gdbarch, ft32_unwind_pc);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);

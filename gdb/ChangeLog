@@ -1,5 +1,13 @@
 2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb/ft32-tdep.c (ft32_dummy_id): Delete.
+	(ft32_unwind_pc): Delete.
+	(ft32_unwind_sp): Delete.
+	(ft32_gdbarch_init): Don't register deleted functions with
+	gdbarch.
+
+2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb/frv-tdep.c (frv_dummy_id): Delete.
 	(frv_unwind_pc): Delete.
 	(frv_unwind_sp): Delete.
