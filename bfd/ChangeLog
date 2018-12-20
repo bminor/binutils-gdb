@@ -1,3 +1,10 @@
+2018-12-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_relocate_section): Call
+	elf_i386_rtype_to_howto to get reloc_howto_type pointer.
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Call
+	elf_x86_64_rtype_to_howto to get reloc_howto_type pointer.
+
 2018-12-18  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am (bfdinclude_HEADERS): Add bfd_stdint.h.

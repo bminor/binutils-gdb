@@ -2080,14 +2080,9 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  continue;
 	}
 
-      if ((indx = r_type) >= R_386_standard
-	  && ((indx = r_type - R_386_ext_offset) - R_386_standard
-	      >= R_386_ext - R_386_standard)
-	  && ((indx = r_type - R_386_tls_offset) - R_386_ext
-	      >= R_386_ext2 - R_386_ext))
+      howto = elf_i386_rtype_to_howto (input_bfd, r_type);
+      if (howto == NULL)
 	return _bfd_unrecognized_reloc (input_bfd, input_section, r_type);
-
-      howto = elf_howto_table + indx;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       h = NULL;
