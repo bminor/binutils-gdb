@@ -175,6 +175,9 @@ expect_multiline "info os semaphores" "$semkey +$semid +666 +1 .*" "get semaphor
 #                               key   msqid   perm  num used bytes  num messages  last msgsnd() command  last msgrcv() command  user  group  creator user  creator group  last msgsnd() time  last msgrcv() time  last msgctl() time
 expect_multiline "info os msg" "$msgkey +$msqid +666 .*" "get message queues"
 
+gdb_test "info os unknown_entry" [multi_line \
+	"warning: Empty data returned by target.  Wrong osdata type\\\?" \
+	"Can not fetch data now."]
 
 # The SysV IPC primitives linger on after the creating process is killed
 # unless they are destroyed explicitly, so allow the test program to tidy

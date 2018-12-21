@@ -1,3 +1,8 @@
+2018-12-21  Paul Marechal  <paul.marechal@ericsson.com>
+
+	PR gdb/23974
+	* target.c (target_read_stralloc): Check for empty vector.
+
 2018-12-21  Дилян Палаузов  <dilyan.palauzov@aegee.org>
 
 	* top.c (print_gdb_configuration): Print "--without-python"

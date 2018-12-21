@@ -1793,7 +1793,7 @@ target_read_stralloc (struct target_ops *ops, enum target_object object,
   if (!buf)
     return {};
 
-  if (buf->back () != '\0')
+  if (buf->empty () || buf->back () != '\0')
     buf->push_back ('\0');
 
   /* Check for embedded NUL bytes; but allow trailing NULs.  */
