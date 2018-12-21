@@ -70,7 +70,7 @@ run_tests ()
      attached.  */
   notify_check_counters (0, 0, 0);
 
-  const gdb::observers::token token1, token2, token3;
+  const gdb::observers::token token1 {}, token2 {} , token3 {};
 
   /* Now, attach one observer, and send a notification.  */
   test_notification.attach (&test_second_notification_function, token2);

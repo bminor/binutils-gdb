@@ -119,7 +119,7 @@ public:
 
 /* SystemTap static_probe_ops.  */
 
-const stap_static_probe_ops stap_static_probe_ops;
+const stap_static_probe_ops stap_static_probe_ops {};
 
 class stap_probe : public probe
 {

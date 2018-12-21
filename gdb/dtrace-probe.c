@@ -100,7 +100,7 @@ public:
 
 /* DTrace static_probe_ops.  */
 
-const dtrace_static_probe_ops dtrace_static_probe_ops;
+const dtrace_static_probe_ops dtrace_static_probe_ops {};
 
 /* The following structure represents a dtrace probe.  */
 

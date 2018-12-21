@@ -1,3 +1,13 @@
+2018-12-21  Dave Murphy  <davem@devkitpro.org>
+
+	* dtrace-probe.c (dtrace_static_probe_ops): Explicit zero
+	initialise.
+	* probe.c (any_static_probe_ops): Ditto.
+	* record-btrace.c (record_btrace_thread_observer_token): Ditto.
+	* stap-probe.c (stap_static_probe_ops): Ditto.
+	* tui/tui-hooks.c (tui_observers_token): Ditto.
+	* unittests/observable-selftests.c (token1, token2, token3): Ditto.
+
 2018-12-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb/dummy-frame.c (default_dummy_id): Defined new function.

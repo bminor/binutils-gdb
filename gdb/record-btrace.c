@@ -143,7 +143,7 @@ static record_btrace_target record_btrace_ops;
 
 /* Token associated with a new-thread observer enabling branch tracing
    for the new thread.  */
-static const gdb::observers::token record_btrace_thread_observer_token;
+static const gdb::observers::token record_btrace_thread_observer_token {};
 
 /* Memory access types used in set/show record btrace replay-memory-access.  */
 static const char replay_memory_access_read_only[] = "read-only";

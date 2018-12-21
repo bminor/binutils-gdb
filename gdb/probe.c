@@ -60,7 +60,7 @@ public:
 
 /* Static operations associated with a generic probe.  */
 
-const any_static_probe_ops any_static_probe_ops;
+const any_static_probe_ops any_static_probe_ops {};
 
 /* A helper for parse_probes that decodes a probe specification in
    SEARCH_PSPACE.  It appends matching SALs to RESULT.  */

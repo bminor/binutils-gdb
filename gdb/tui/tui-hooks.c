@@ -205,7 +205,7 @@ tui_normal_stop (struct bpstats *bs, int print_frame)
 
 /* Token associated with observers registered while TUI hooks are
    installed.  */
-static const gdb::observers::token tui_observers_token;
+static const gdb::observers::token tui_observers_token {};
 
 /* Attach or detach a single observer, according to ATTACH.  */
 
