@@ -1238,8 +1238,14 @@ fbsd_handle_debug_trap (ptid_t ptid, const struct ptrace_lwpinfo &pl)
 {
 
   /* Ignore traps without valid siginfo or for signals other than
-     SIGTRAP.  */
-  if (! (pl.pl_flags & PL_FLAG_SI) || pl.pl_siginfo.si_signo != SIGTRAP)
+     SIGTRAP.
+
+     FreeBSD kernels prior to r341800 can return stale siginfo for at
+     least some events, but those events can be identified by
+     additional flags set in pl_flags.  True breakpoint and
+     single-step traps should not have other flags set in
+     pl_flags.  */
+  if (pl.pl_flags != PL_FLAG_SI || pl.pl_siginfo.si_signo != SIGTRAP)
     return false;
 
   /* Trace traps are either a single step or a hardware watchpoint or
@@ -1517,7 +1523,7 @@ fbsd_nat_target::stopped_by_sw_breakpoint ()
 	      sizeof pl) == -1)
     return false;
 
-  return ((pl.pl_flags & PL_FLAG_SI)
+  return (pl.pl_flags == PL_FLAG_SI
 	  && pl.pl_siginfo.si_signo == SIGTRAP
 	  && pl.pl_siginfo.si_code == TRAP_BRKPT);
 }

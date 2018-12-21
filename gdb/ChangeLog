@@ -1,3 +1,9 @@
+2018-12-21  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (fbsd_handle_debug_trap): Require pl.pl_flags to
+	equal PL_FLAG_SI.
+	(fbsd_nat_target::stopped_by_sw_breakpoint): Likewise.
+
 2018-12-21  Paul Marechal  <paul.marechal@ericsson.com>
 
 	PR gdb/23974
