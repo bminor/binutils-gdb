@@ -1,3 +1,8 @@
+2018-12-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-tdep.c (riscv_scan_prologue): Use plongest to format
+	a signed offset as a string.
+
 2018-12-21  Dave Murphy  <davem@devkitpro.org>
 
 	* dtrace-probe.c (dtrace_static_probe_ops): Explicit zero

@@ -1542,10 +1542,16 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
 	  if (stack.find_reg (gdbarch, i, &offset))
             {
               if (riscv_debug_unwinder)
-                fprintf_unfiltered (gdb_stdlog,
-                                    "Register $%s at stack offset %ld\n",
-                                    gdbarch_register_name (gdbarch, i),
-                                    offset);
+		{
+		  /* Display OFFSET as a signed value, the offsets are from
+		     the frame base address to the registers location on
+		     the stack, with a descending stack this means the
+		     offsets are always negative.  */
+		  fprintf_unfiltered (gdb_stdlog,
+				      "Register $%s at stack offset %s\n",
+				      gdbarch_register_name (gdbarch, i),
+				      plongest ((LONGEST) offset));
+		}
               trad_frame_set_addr (cache->regs, i, offset);
             }
 	}
