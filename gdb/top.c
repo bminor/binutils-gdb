@@ -1428,6 +1428,10 @@ This GDB was configured as follows:\n\
   fprintf_filtered (stream, _("\
              --with-python=%s%s\n\
 "), WITH_PYTHON_PATH, PYTHON_PATH_RELOCATABLE ? " (relocatable)" : "");
+#else
+  fprintf_filtered (stream, _("\
+             --without-python\n\
+"));
 #endif
 #if HAVE_GUILE
   fprintf_filtered (stream, _("\
