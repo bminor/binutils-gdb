@@ -1,3 +1,8 @@
+2018-12-21  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* minsyms.c (mst_str): New.
+	(minimal_symbol_reader::record_full): Add debug output.
+
 2018-12-21  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-nat.c (fbsd_handle_debug_trap): Require pl.pl_flags to

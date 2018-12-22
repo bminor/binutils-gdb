@@ -1080,6 +1080,33 @@ minimal_symbol_reader::record (const char *name, CORE_ADDR address,
   record_with_info (name, address, ms_type, section);
 }
 
+/* Convert an enumerator of type minimal_symbol_type to its string
+   representation.  */
+
+static const char *
+mst_str (minimal_symbol_type t)
+{
+#define MST_TO_STR(x) case x: return #x;
+  switch (t)
+  {
+    MST_TO_STR (mst_unknown);
+    MST_TO_STR (mst_text);
+    MST_TO_STR (mst_text_gnu_ifunc);
+    MST_TO_STR (mst_slot_got_plt);
+    MST_TO_STR (mst_data);
+    MST_TO_STR (mst_bss);
+    MST_TO_STR (mst_abs);
+    MST_TO_STR (mst_solib_trampoline);
+    MST_TO_STR (mst_file_text);
+    MST_TO_STR (mst_file_data);
+    MST_TO_STR (mst_file_bss);
+
+    default:
+      return "mst_???";
+  }
+#undef MST_TO_STR
+}
+
 /* See minsyms.h.  */
 
 struct minimal_symbol *
@@ -1111,6 +1138,10 @@ minimal_symbol_reader::record_full (const char *name, int name_len,
 
   if (ms_type == mst_file_text && startswith (name, "__gnu_compiled"))
     return (NULL);
+
+  if (symtab_create_debug >= 2)
+    printf_unfiltered ("Recording minsym:  %-21s  %18s  %4d  %s\n",
+               mst_str (ms_type), hex_string (address), section, name);
 
   if (m_msym_bunch_index == BUNCH_SIZE)
     {
