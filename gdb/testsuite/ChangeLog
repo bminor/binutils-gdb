@@ -1,3 +1,9 @@
+2018-12-24  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.ada/bp_fun_addr/a.adb (a): Rename to bp_fun_addr.
+	Filename a.adb changed to bp_fun_addr.adb.
+	gdb.ada/bp_fun_addr.exp: Update test accordingly.
+
 2018-12-21  Jan Vrany  <jan.vrany@fit.cvut.cz>
 
 	* lib/gdb.exp (gdb_compile): Add new nopie flag enforce

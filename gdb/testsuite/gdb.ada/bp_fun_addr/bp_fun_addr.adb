@@ -13,7 +13,7 @@
 --  You should have received a copy of the GNU General Public License
 --  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-procedure A is
+procedure Bp_Fun_Addr is
 begin
    null;
-end A;
+end Bp_Fun_Addr;

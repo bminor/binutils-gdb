@@ -17,7 +17,7 @@ load_lib "ada.exp"
 
 if { [skip_ada_tests] } { return -1 }
 
-standard_ada_testfile a
+standard_ada_testfile bp_fun_addr
 
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable {debug}] != ""} {
     return -1
@@ -25,11 +25,11 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable {debug}] != ""} {
 
 clean_restart ${testfile}
 
-gdb_test "break *a'address" \
-         "Breakpoint \[0-9\]+ at.*: file .*a.adb, line \[0-9\]+."
+gdb_test "break *bp_fun_addr'address" \
+         "Breakpoint \[0-9\]+ at.*: file .*bp_fun_addr.adb, line \[0-9\]+."
 
 gdb_run_cmd
 gdb_test "" \
-         "Breakpoint $decimal, a \\(\\).*" \
-         "run until breakpoint at a'address"
+         "Breakpoint $decimal, bp_fun_addr \\(\\).*" \
+         "run until breakpoint at bp_fun_addr'address"
 
