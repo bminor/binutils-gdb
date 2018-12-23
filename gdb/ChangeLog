@@ -1,3 +1,8 @@
+2018-12-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* version.in: Set GDB version number to 8.2.1.
+	* PROBLEMS: Likewise.
+
 2018-12-21  Paul Marechal  <paul.marechal@ericsson.com>
 
 	PR gdb/23974
