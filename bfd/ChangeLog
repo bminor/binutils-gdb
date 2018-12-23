@@ -1,3 +1,11 @@
+2018-12-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_rtype_to_howto): Remove the unused bfd
+	pointer argument.
+	(elf_i386_info_to_howto_rel): Updated.
+	(elf_i386_tls_transition): Likewise.
+	(elf_i386_relocate_section): Likewise.
+
 2018-12-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_relocate_section): Call
