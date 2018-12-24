@@ -525,7 +525,8 @@ CONFIG_INSTALL = @CONFIG_INSTALL@
 CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
 HAVE_NATIVE_GCORE_TARGET = @HAVE_NATIVE_GCORE_TARGET@
 
-CONFIG_SRC_SUBDIR = arch cli mi common compile tui unittests guile python target
+CONFIG_SRC_SUBDIR = arch cli mi common compile tui unittests guile python \
+	target nat
 CONFIG_DEP_SUBDIR = $(addsuffix /$(DEPDIR),$(CONFIG_SRC_SUBDIR))
 
 # -I. for config files.
@@ -1635,10 +1636,6 @@ python/%.o: INTERNAL_CFLAGS += $(PYTHON_CFLAGS)
 	$(COMPILE) $(all_gdbtk_cflags) $<
 	$(POSTCOMPILE)
 
-%.o: ${srcdir}/nat/%.c
-	$(COMPILE) $<
-	$(POSTCOMPILE)
-
 installcheck:
 
 # The check target can not use subdir_do, because subdir_do does not
@@ -1837,7 +1834,7 @@ test-cp-name-parser$(EXEEXT): test-cp-name-parser.o $(LIBIBERTY)
 INIT_FILES = \
 	$(patsubst %.o,%.c, \
 	  $(patsubst %-exp.o,%-exp.y, \
-	    $(filter-out $(NATDEPFILES) init.o version.o %_S.o %_U.o,\
+	    $(filter-out init.o version.o %_S.o %_U.o,\
 	      $(COMMON_OBS))))
 
 init.c: stamp-init; @true
