@@ -941,7 +941,7 @@ indicate the end of the expression."),
 	       _("\
 Evaluate a file containing source code.\n\
 \n\
-Usage: compile file [-r|-raw] [filename]\n\
+Usage: compile file [-r|-raw] [FILENAME]\n\
 -r|-raw: Suppress automatic 'void _gdb_expr () { CODE }' wrapping."),
 	       &compile_command_list);
   set_cmd_completer (c, filename_completer);

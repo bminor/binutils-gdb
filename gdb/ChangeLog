@@ -1,3 +1,17 @@
+2019-01-04  Tom Tromey  <tom@tromey.com>
+
+	* compile/compile.c (_initialize_compile): Use upper case for
+	metasyntactic variables.
+	* symmisc.c (_initialize_symmisc): Use upper case for
+	metasyntactic variables.
+	* psymtab.c (_initialize_psymtab): Use upper case for
+	metasyntactic variables.
+	* demangle.c (demangle_command): Use upper case for metasyntactic
+	variables.
+	(_initialize_demangler): Likewise.
+	* ax-gdb.c (_initialize_ax_gdb): Use upper case for metasyntactic
+	variables.
+
 2019-01-03  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-source.c (tui_set_source_content): Use xstrdup.

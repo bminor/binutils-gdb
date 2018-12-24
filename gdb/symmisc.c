@@ -1072,8 +1072,8 @@ _initialize_symmisc (void)
 
   add_cmd ("symbols", class_maintenance, maintenance_print_symbols, _("\
 Print dump of current symbol definitions.\n\
-Usage: mt print symbols [-pc address] [--] [outfile]\n\
-       mt print symbols [-objfile objfile] [-source source] [--] [outfile]\n\
+Usage: mt print symbols [-pc ADDRESS] [--] [OUTFILE]\n\
+       mt print symbols [-objfile OBJFILE] [-source SOURCE] [--] [OUTFILE]\n\
 Entries in the full symbol table are dumped to file OUTFILE,\n\
 or the terminal if OUTFILE is unspecified.\n\
 If ADDRESS is provided, dump only the file for that address.\n\
@@ -1083,7 +1083,7 @@ If OBJFILE is provided, dump only that file's minimal symbols."),
 
   add_cmd ("msymbols", class_maintenance, maintenance_print_msymbols, _("\
 Print dump of current minimal symbol definitions.\n\
-Usage: mt print msymbols [-objfile objfile] [--] [outfile]\n\
+Usage: mt print msymbols [-objfile OBJFILE] [--] [OUTFILE]\n\
 Entries in the minimal symbol table are dumped to file OUTFILE,\n\
 or the terminal if OUTFILE is unspecified.\n\
 If OBJFILE is provided, dump only that file's minimal symbols."),

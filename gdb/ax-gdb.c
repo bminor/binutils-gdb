@@ -2751,7 +2751,7 @@ _initialize_ax_gdb (void)
   add_cmd ("agent", class_maintenance, agent_command,
 	   _("\
 Translate an expression into remote agent bytecode for tracing.\n\
-Usage: maint agent [-at location,] EXPRESSION\n\
+Usage: maint agent [-at LOCATION,] EXPRESSION\n\
 If -at is given, generate remote agent bytecode for this location.\n\
 If not, generate remote agent bytecode for current frame pc address."),
 	   &maintenancelist);
@@ -2759,7 +2759,7 @@ If not, generate remote agent bytecode for current frame pc address."),
   add_cmd ("agent-eval", class_maintenance, agent_eval_command,
 	   _("\
 Translate an expression into remote agent bytecode for evaluation.\n\
-Usage: maint agent-eval [-at location,] EXPRESSION\n\
+Usage: maint agent-eval [-at LOCATION,] EXPRESSION\n\
 If -at is given, generate remote agent bytecode for this location.\n\
 If not, generate remote agent bytecode for current frame pc address."),
 	   &maintenancelist);

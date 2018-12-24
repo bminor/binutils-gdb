@@ -2236,8 +2236,8 @@ _initialize_psymtab (void)
 {
   add_cmd ("psymbols", class_maintenance, maintenance_print_psymbols, _("\
 Print dump of current partial symbol definitions.\n\
-Usage: mt print psymbols [-objfile objfile] [-pc address] [--] [outfile]\n\
-       mt print psymbols [-objfile objfile] [-source source] [--] [outfile]\n\
+Usage: mt print psymbols [-objfile OBJFILE] [-pc ADDRESS] [--] [OUTFILE]\n\
+       mt print psymbols [-objfile OBJFILE] [-source SOURCE] [--] [OUTFILE]\n\
 Entries in the partial symbol table are dumped to file OUTFILE,\n\
 or the terminal if OUTFILE is unspecified.\n\
 If ADDRESS is provided, dump only the file for that address.\n\

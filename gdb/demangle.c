@@ -188,7 +188,7 @@ demangle_command (const char *args, int from_tty)
   name = arg_start;
 
   if (*name == '\0')
-    error (_("Usage: demangle [-l language] [--] name"));
+    error (_("Usage: demangle [-l LANGUAGE] [--] NAME"));
 
   if (!lang_name.empty ())
     {
@@ -262,7 +262,7 @@ Use `set demangle-style' without arguments for a list of demangling styles."),
 
   add_cmd ("demangle", class_support, demangle_command, _("\
 Demangle a mangled name.\n\
-Usage: demangle [-l language] [--] name\n\
+Usage: demangle [-l LANGUAGE] [--] NAME\n\
 If LANGUAGE is not specified, NAME is demangled in the current language."),
 	   &cmdlist);
 }
