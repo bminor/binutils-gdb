@@ -1830,37 +1830,24 @@ test-cp-name-parser$(EXEEXT): test-cp-name-parser.o $(LIBIBERTY)
 #
 # Note that the set of files with init functions might change, or the names
 # of the functions might change, so this files needs to depend on all the
-# object files that will be linked into gdb.
+# source files that will be linked into gdb.  However, due to the way
+# this Makefile has generally been written, we do this indirectly, by
+# computing the list of source files from the list of object files.
 
-# FIXME: There is a problem with this approach - init.c may force
-# unnecessary files to be linked in.
+INIT_FILES = \
+	$(patsubst %.o,%.c, \
+	  $(patsubst %-exp.o,%-exp.y, \
+	    $(filter-out $(NATDEPFILES) init.o version.o %_S.o %_U.o,\
+	      $(COMMON_OBS))))
 
-# NOTE: cagney/2003-03-18: The sed pattern ``s|^\([^ /]...'' is
-# anchored on the first column and excludes the ``/'' character so
-# that it doesn't add the $(srcdir) prefix to any file that already
-# has an absolute path.  It turns out that $(DEC)'s True64 make
-# automatically adds the $(srcdir) prefixes when it encounters files
-# in sub-directories such as cli/ and mi/.
-
-INIT_FILES = $(COMMON_OBS)
 init.c: stamp-init; @true
 stamp-init: $(INIT_FILES)
 	@$(ECHO_INIT_C) echo "Making init.c"
 	@rm -f init.c-tmp init.l-tmp
 	@touch init.c-tmp
-	@-LANG=C ; export LANG ; \
-	LC_ALL=C ; export LC_ALL ; \
-	echo $(INIT_FILES) | \
-	tr ' ' '\012' | \
-	sed \
-	    -e '/^init.[co]$$/d' \
-	    -e '/version.[co]$$/d' \
-	    -e '/^[a-z0-9A-Z_]*_[SU].[co]$$/d' \
-	    -e 's/-exp\.o$$/-exp.y/' \
-	    -e 's/\.o$$/.c/' \
-	    -e 's|^\([^  /][^     ]*\)|$(srcdir)/\1|g' | \
-	while read f; do \
-	    sed -n -e 's/^_initialize_\([a-z_0-9A-Z]*\).*/\1/p' $$f 2>/dev/null; \
+	@-for f in $(INIT_FILES); do \
+	    sed -n -e 's/^_initialize_\([a-z_0-9A-Z]*\).*/\1/p' \
+	        $(srcdir)/$$f 2>/dev/null; \
 	done > init.l-tmp
 	@echo '/* Do not modify this file.  */' >>init.c-tmp
 	@echo '/* It is created automatically by the Makefile.  */'>>init.c-tmp
