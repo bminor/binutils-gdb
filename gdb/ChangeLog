@@ -1,3 +1,7 @@
+2018-12-27  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (stamp-init): Remove gdbtypes special case.
+
 2018-12-27  John Baldwin  <jhb@FreeBSD.org>
 
 	* config/i386/nm-fbsd.h: Remove file.
