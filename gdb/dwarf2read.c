@@ -25120,7 +25120,6 @@ dwarf2_find_containing_comp_unit (sect_offset sect_off,
 {
   struct dwarf2_per_cu_data *this_cu;
   int low, high;
-  const sect_offset *cu_off;
 
   low = 0;
   high = dwarf2_per_objfile->all_comp_units.size () - 1;
@@ -25130,18 +25129,16 @@ dwarf2_find_containing_comp_unit (sect_offset sect_off,
       int mid = low + (high - low) / 2;
 
       mid_cu = dwarf2_per_objfile->all_comp_units[mid];
-      cu_off = &mid_cu->sect_off;
       if (mid_cu->is_dwz > offset_in_dwz
 	  || (mid_cu->is_dwz == offset_in_dwz
-	      && *cu_off + mid_cu->length >= sect_off))
+	      && mid_cu->sect_off + mid_cu->length >= sect_off))
 	high = mid;
       else
 	low = mid + 1;
     }
   gdb_assert (low == high);
   this_cu = dwarf2_per_objfile->all_comp_units[low];
-  cu_off = &this_cu->sect_off;
-  if (this_cu->is_dwz != offset_in_dwz || *cu_off > sect_off)
+  if (this_cu->is_dwz != offset_in_dwz || this_cu->sect_off > sect_off)
     {
       if (low == 0 || this_cu->is_dwz != offset_in_dwz)
 	error (_("Dwarf Error: could not find partial DIE containing "

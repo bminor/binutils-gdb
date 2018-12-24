@@ -1,3 +1,8 @@
+2018-12-18  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2read.c (dwarf2_find_containing_comp_unit): Don't take
+	address of sect_off.
+
 2018-12-23  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 8.2.1 released.
