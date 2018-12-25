@@ -261,3 +261,43 @@ if { [readline_is_used] } {
 	}
     }
 }
+
+
+# Test that interrupting pagination throws a gdb quit.
+gdb_test_no_output "set height 10"
+
+gdb_py_test_multiple "input multi-line-output command" \
+  "python" "" \
+  "class test_mline (gdb.Command):" "" \
+  "  \"\"\"Docstring\"\"\"" "" \
+  "  def __init__ (self):" "" \
+  "    super (test_mline, self).__init__ (\"test_multiline\", gdb.COMMAND_USER)" "" \
+  "  def invoke (self, arg, from_tty):" "" \
+  "    for f in range(20):" "" \
+  "      print (\"test_multiline output\")" "" \
+  "test_mline ()" "" \
+  "end" ""
+
+set test "verify pagination from test_multiline"
+gdb_test_multiple "test_multiline" $test {
+    -re "--Type <RET>" {
+	exp_continue
+    }
+    -re " for more, q to quit" {
+	exp_continue
+    }
+    -re ", c to continue without paging--$" {
+	pass $test
+    }
+}
+
+send_gdb "q\n"
+set test "verify pagination from test_multiline: q"
+gdb_test_multiple "test_multiline" $test {
+    -re "Error occurred in Python" {
+	fail $test
+    }
+    -re "Quit" {
+	pass $test
+    }
+}

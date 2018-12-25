@@ -422,7 +422,9 @@ gdbpy_handle_exception ()
      for user errors.  However, a missing message for gdb.GdbError
      exceptions is arguably a bug, so we flag it as such.  */
 
-  if (! PyErr_GivenExceptionMatches (ptype, gdbpy_gdberror_exc)
+  if (PyErr_GivenExceptionMatches (ptype, PyExc_KeyboardInterrupt))
+    throw_quit ("Quit");
+  else if (! PyErr_GivenExceptionMatches (ptype, gdbpy_gdberror_exc)
       || msg == NULL || *msg == '\0')
     {
       PyErr_Restore (ptype, pvalue, ptraceback);

@@ -1,5 +1,10 @@
 2018-12-27  Tom Tromey  <tom@tromey.com>
 
+	* python/py-utils.c (gdbpy_handle_exception): Translate
+	PyExc_KeyboardInterrupt to quit.
+
+2018-12-27  Tom Tromey  <tom@tromey.com>
+
 	* python/python-internal.h (gdbpy_print_stack_or_quit): Declare.
 	* python/py-unwind.c (pyuw_sniffer): Use
 	gdbpy_print_stack_or_quit.

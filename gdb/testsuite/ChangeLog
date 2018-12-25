@@ -1,3 +1,8 @@
+2018-12-27  Tom Tromey  <tom@tromey.com>
+
+	* gdb.python/py-cmd.exp (test_python_inline_or_multiline): Add
+	pagination test.
+
 2018-12-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.dwarf2/dw2-unusual-field-names.c: New file.
