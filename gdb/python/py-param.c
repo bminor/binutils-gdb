@@ -738,9 +738,7 @@ parmpy_init (PyObject *self, PyObject *args, PyObject *kwds)
     {
       xfree (cmd_name);
       Py_DECREF (self);
-      PyErr_Format (except.reason == RETURN_QUIT
-		    ? PyExc_KeyboardInterrupt : PyExc_RuntimeError,
-		    "%s", except.message);
+      gdbpy_convert_exception (except);
       return -1;
     }
   END_CATCH

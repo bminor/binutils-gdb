@@ -1,5 +1,14 @@
 2018-12-27  Tom Tromey  <tom@tromey.com>
 
+	* python/py-value.c (convert_value_from_python): Use
+	gdbpy_convert_exception.
+	* python/py-param.c (parmpy_init): Use gdbpy_convert_exception.
+	* python/py-cmd.c (cmdpy_init): Use gdbpy_convert_exception.
+	* python/py-breakpoint.c (bppy_init): Use
+	gdbpy_convert_exception.
+
+2018-12-27  Tom Tromey  <tom@tromey.com>
+
 	* configure.nat (NATDEPFILES): Use nat/ prefix.
 	* Makefile.in (CONFIG_SRC_SUBDIR): Add nat.
 	(%.o: ${srcdir}/nat/%.c): Remove rule.

@@ -1732,9 +1732,7 @@ convert_value_from_python (PyObject *obj)
     }
   CATCH (except, RETURN_MASK_ALL)
     {
-      PyErr_Format (except.reason == RETURN_QUIT
-		    ? PyExc_KeyboardInterrupt : PyExc_RuntimeError,
-		    "%s", except.message);
+      gdbpy_convert_exception (except);
       return NULL;
     }
   END_CATCH
