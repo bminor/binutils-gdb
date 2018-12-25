@@ -2359,6 +2359,8 @@ enum bfd_architecture
 #define bfd_mach_rl78          0x75
   bfd_arch_rx,        /* Renesas RX.  */
 #define bfd_mach_rx            0x75
+#define bfd_mach_rx_v2         0x76
+#define bfd_mach_rx_v3         0x77
   bfd_arch_s390,      /* IBM s390.  */
 #define bfd_mach_s390_31       31
 #define bfd_mach_s390_64       64

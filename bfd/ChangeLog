@@ -1,3 +1,10 @@
+2019-01-05  Yoshinori Sato <ysato@users.sourceforge.jp>
+
+	* bfd/archures.c: Add bfd_mach_rx_v2 and bfd_mach_rx_v3.
+	* bfd/bfd-in2.h: Regenerate.
+	* bfd/cpu-rx.c (arch_info_struct): Add RXv2 and RXv3 entry.
+	* bfd/elf32-rx.c (elf32_rx_machine): Add RXv2 and RXv3 support.
+
 2019-01-04  Lifang Xia  <lifang_xia@c-sky.com>
 
 	* config.bfd (csky-*-elf* | csky-*-linux*): Modify the csky
