@@ -44,7 +44,11 @@ const char FLT_CHARS[]            = "dD";
 /* ELF flags to set in the output file header.  */
 static int elf_flags = E_FLAG_RX_ABI;
 
+#ifndef TE_LINUX
 bfd_boolean rx_use_conventional_section_names = FALSE;
+#else
+bfd_boolean rx_use_conventional_section_names = TRUE;
+#endif
 static bfd_boolean rx_use_small_data_limit = FALSE;
 
 static bfd_boolean rx_pid_mode = FALSE;
@@ -108,15 +112,18 @@ struct cpu_type
 {
   const char *cpu_name;
   enum rx_cpu_types type;
+  int flag;
 };
 
 struct cpu_type  cpu_type_list[] =
 {
-  {"rx100",RX100},
-  {"rx200",RX200},
-  {"rx600",RX600},
-  {"rx610",RX610},
-  {"rxv2",RXV2}
+  {"rx100", RX100, 0},
+  {"rx200", RX200, 0},
+  {"rx600", RX600, 0},
+  {"rx610", RX610, 0},
+  {"rxv2",  RXV2,  E_FLAG_RX_V2},
+  {"rxv3",  RXV3,  E_FLAG_RX_V3},
+  {"rxv3-dfpu",  RXV3FPU,  E_FLAG_RX_V3},
 };
 
 int
@@ -181,8 +188,7 @@ md_parse_option (int c ATTRIBUTE_UNUSED, const char * arg ATTRIBUTE_UNUSED)
 	    if (strcasecmp (arg, cpu_type_list[i].cpu_name) == 0)
 	      {
 		rx_cpu = cpu_type_list[i].type;
-		if (rx_cpu == RXV2)
-		  elf_flags |= E_FLAG_RX_V2;
+		elf_flags |= cpu_type_list[i].flag;
 		return 1;
 	      }
 	  }
@@ -212,7 +218,7 @@ md_show_usage (FILE * stream)
   fprintf (stream, _("  --mrelax\n"));
   fprintf (stream, _("  --mpid\n"));
   fprintf (stream, _("  --mint-register=<value>\n"));
-  fprintf (stream, _("  --mcpu=<rx100|rx200|rx600|rx610|rxv2>\n"));
+  fprintf (stream, _("  --mcpu=<rx100|rx200|rx600|rx610|rxv2|rxv3|rxv3-dfpu>\n"));
   fprintf (stream, _("  --mno-allow-string-insns"));
 }
 
@@ -723,6 +729,8 @@ typedef struct rx_bytesT
     fixS *       fixP;
   } fixups[2];
   int n_fixups;
+  char post[1];
+  int n_post;
   struct
   {
     char type;
@@ -947,6 +955,24 @@ rx_field5s2 (expressionS exp)
   rx_bytes.base[1] |= (val     ) & 0x0f;
 }
 
+void
+rx_bfield(expressionS s, expressionS d, expressionS w)
+{
+  int slsb = s.X_add_number;
+  int dlsb = d.X_add_number;
+  int width = w.X_add_number;
+  unsigned int imm =
+    (((dlsb + width) & 0x1f) << 10 | (dlsb << 5) |
+     ((dlsb - slsb) & 0x1f));
+  if ((slsb + width) > 32)
+        as_warn (_("Value %d and %d out of range"), slsb, width);
+  if ((dlsb + width) > 32)
+        as_warn (_("Value %d and %d out of range"), dlsb, width);
+  rx_bytes.ops[0] = imm & 0xff;
+  rx_bytes.ops[1] = (imm >> 8);
+  rx_bytes.n_ops = 2;
+}
+
 #define OP(x) rx_bytes.ops[rx_bytes.n_ops++] = (x)
 
 #define F_PRECISION 2
@@ -1006,6 +1032,11 @@ rx_op (expressionS exp, int nbytes, int type)
       memset (rx_bytes.ops + rx_bytes.n_ops, 0, nbytes);
       rx_bytes.n_ops += nbytes;
     }
+}
+
+void rx_post(char byte)
+{
+  rx_bytes.post[rx_bytes.n_post++] = byte;
 }
 
 int
@@ -1133,21 +1164,22 @@ md_assemble (char * str)
 		    0 /* offset */,
 		    0 /* opcode */);
       frag_then->fr_opcode = bytes;
-      frag_then->fr_fix += rx_bytes.n_base + rx_bytes.n_ops;
-      frag_then->fr_subtype = rx_bytes.n_base + rx_bytes.n_ops;
+      frag_then->fr_fix += rx_bytes.n_base + rx_bytes.n_ops + rx_bytes.n_post;
+      frag_then->fr_subtype = rx_bytes.n_base + rx_bytes.n_ops + rx_bytes.n_post;
     }
   else
     {
-      bytes = frag_more (rx_bytes.n_base + rx_bytes.n_ops);
+      bytes = frag_more (rx_bytes.n_base + rx_bytes.n_ops + rx_bytes.n_post);
       frag_then = frag_now;
       if (fetchalign_bytes)
-	fetchalign_bytes->n_ops = rx_bytes.n_base + rx_bytes.n_ops;
+	fetchalign_bytes->n_ops = rx_bytes.n_base + rx_bytes.n_ops + rx_bytes.n_post;
     }
 
   fetchalign_bytes = NULL;
 
   APPEND (base, n_base);
   APPEND (ops, n_ops);
+  APPEND (post, n_post);
 
   if (rx_bytes.link_relax && rx_bytes.n_fixups)
     {
@@ -1196,7 +1228,6 @@ md_assemble (char * str)
       if (frag_then->tc_frag_data)
 	frag_then->tc_frag_data->fixups[i].fixP = f;
     }
-
   dwarf2_emit_insn (idx);
 }
 

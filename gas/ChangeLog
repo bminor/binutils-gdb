@@ -1,3 +1,75 @@
+2019-01-05  Yoshinori Sato  <ysato@users.sourceforge.jp>
+
+	* config/rx-defs.h (rx_cpu_types): Add type RXV3 and RXV3FPU.
+	(rx_bfield): Add prototype.
+	(rx_post): Likewise.
+	* config/rx-parse.y: Add v3 instructions and Double FPU registers.
+	(DSIZE): Define.
+	(POST): Define.
+	(rx_check_v3): New. check v3 type.
+	(rx_check_dfpu): New. check have double support.
+	(double_condition_table): New. dcmp<cond> contiditon.
+	(check_condition): Multiple condition support.
+	(rx_lex): RXv3 instructions support.
+	Add parse dcmp<cond> instruction and Double FPU registers.
+	(immediate): Disable optimize in dmov #imm case.
+	(displacement): Add double displacement in dmov instraction.
+	* config/tc-rx.c (rx_use_conventional_section_names):
+	Invert default value in rx-*-linux target.
+	(cpu_type): Add additional ELF flags.
+	(cpu_type_list): Add RXv3.
+	(md_parse_option): Refer elf_flags from cpu_type_list.
+	(md_show_usage): Add rxv3 and rxv3-dfpu.
+	(rx_bytesT): Add post byte.
+	(rx_bfield): New. generate bfmov / bfmovz "imm" field.
+	(rx_post): New. Set instruction post byte.
+	(md_assemble): Add post byte.
+	doc/c-rx.texi: Add cpu types.
+	* testsuite/gas/rx/Xtod.d: New.
+	* testsuite/gas/rx/Xtod.sm: New.
+	* testsuite/gas/rx/bfmov.d: New.
+	* testsuite/gas/rx/bfmov.sm: New.
+	* testsuite/gas/rx/dabs.d: New.
+	* testsuite/gas/rx/dabs.sm: New.
+	* testsuite/gas/rx/dadd.d: New.
+	* testsuite/gas/rx/dadd.sm: New.
+	* testsuite/gas/rx/dcmp.d: New.
+	* testsuite/gas/rx/dcmp.sm: New.
+	* testsuite/gas/rx/ddiv.d: New.
+	* testsuite/gas/rx/ddiv.sm: New.
+	* testsuite/gas/rx/dmov.d: New.
+	* testsuite/gas/rx/dmov.sm: New.
+	* testsuite/gas/rx/dmul.d: New.
+	* testsuite/gas/rx/dmul.sm: New.
+	* testsuite/gas/rx/dneg.d: New.
+	* testsuite/gas/rx/dneg.sm: New.
+	* testsuite/gas/rx/dpopm.d: New.
+	* testsuite/gas/rx/dpopm.sm: New.
+	* testsuite/gas/rx/dpushm.d: New.
+	* testsuite/gas/rx/dpushm.sm: New.
+	* testsuite/gas/rx/dround.d: New.
+	* testsuite/gas/rx/dround.sm: New.
+	* testsuite/gas/rx/dsqrt.d: New.
+	* testsuite/gas/rx/dsqrt.sm: New.
+	* testsuite/gas/rx/dsub.d: New.
+	* testsuite/gas/rx/dsub.sm: New.
+	* testsuite/gas/rx/dtoX.d: New.
+	* testsuite/gas/rx/dtoX.sm: New.
+	* testsuite/gas/rx/macros.inc: Add double FPU registers.
+	* testsuite/gas/rx/mvfdc.d: New.
+	* testsuite/gas/rx/mvfdc.sm: New.
+	* testsuite/gas/rx/mvfdr.d: New.
+	* testsuite/gas/rx/mvfdr.sm: New.
+	* testsuite/gas/rx/mvtdc.d: New.
+	* testsuite/gas/rx/mvtdc.sm: New.
+	* testsuite/gas/rx/rstr.d: New.
+	* testsuite/gas/rx/rstr.sm: New.
+	* testsuite/gas/rx/rx.exp: Use rxv3-dfpu option.
+	* testsuite/gas/rx/save.d: New.
+	* testsuite/gas/rx/save.sm: New.
+	* testsuite/gas/rx/xor.d: New.
+	* testsuite/gas/rx/xor.sm: Add pattern.
+
 2019-01-04  Wu Heng  <wu.heng@zte.com.cn>
 
 	PR 24010

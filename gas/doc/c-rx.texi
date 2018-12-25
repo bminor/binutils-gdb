@@ -108,10 +108,10 @@ alignments.  This option is the default.
 @cindex @samp{-mcpu=}
 @item -mcpu=@var{name}
 This option tells the assembler the target CPU type.  Currently the
-@code{rx100}, @code{rx200}, @code{rx600}, @code{rx610} and @code{rxv2}
-are recognised as valid cpu names.  Attempting to assemble an instruction
-not supported by the indicated cpu type will result in an error message
-being generated.
+@code{rx100}, @code{rx200}, @code{rx600}, @code{rx610}, @code{rxv2},
+@code{rxv3} and @code{rxv3-dfpu} are recognised as valid cpu names.
+Attempting to assemble an instructionnot supported by the indicated
+cpu type will result in an error message being generated.
 
 @cindex @samp{-mno-allow-string-insns}
 @item -mno-allow-string-insns
