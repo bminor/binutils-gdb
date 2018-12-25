@@ -1054,21 +1054,6 @@ bootstrap_python_frame_filters (struct frame_info *frame,
     return iterable.release ();
 }
 
-/* A helper function that will either print an exception or, if it is
-   a KeyboardException, throw a quit.  This can only be called when
-   the Python exception is set.  */
-
-static void
-throw_quit_or_print_exception ()
-{
-  if (PyErr_ExceptionMatches (PyExc_KeyboardInterrupt))
-    {
-      PyErr_Clear ();
-      throw_quit ("Quit");
-    }
-  gdbpy_print_stack ();
-}
-
 /*  This is the only publicly exported function in this file.  FRAME
     is the source frame to start frame-filter invocation.  FLAGS is an
     integer holding the flags for printing.  The following elements of
@@ -1139,7 +1124,7 @@ gdbpy_apply_frame_filter (const struct extension_language_defn *extlang,
 	 initialization error.  This return code will trigger a
 	 default backtrace.  */
 
-      throw_quit_or_print_exception ();
+      gdbpy_print_stack_or_quit ();
       return EXT_LANG_BT_NO_FILTERS;
     }
 
@@ -1162,7 +1147,7 @@ gdbpy_apply_frame_filter (const struct extension_language_defn *extlang,
 	{
 	  if (PyErr_Occurred ())
 	    {
-	      throw_quit_or_print_exception ();
+	      gdbpy_print_stack_or_quit ();
 	      return EXT_LANG_BT_ERROR;
 	    }
 	  break;
@@ -1196,7 +1181,7 @@ gdbpy_apply_frame_filter (const struct extension_language_defn *extlang,
       /* Do not exit on error printing a single frame.  Print the
 	 error and continue with other frames.  */
       if (success == EXT_LANG_BT_ERROR)
-	throw_quit_or_print_exception ();
+	gdbpy_print_stack_or_quit ();
     }
 
   return success;

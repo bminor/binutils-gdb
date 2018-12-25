@@ -1268,6 +1268,20 @@ gdbpy_print_stack (void)
     }
 }
 
+/* Like gdbpy_print_stack, but if the exception is a
+   KeyboardException, throw a gdb "quit" instead.  */
+
+void
+gdbpy_print_stack_or_quit ()
+{
+  if (PyErr_ExceptionMatches (PyExc_KeyboardInterrupt))
+    {
+      PyErr_Clear ();
+      throw_quit ("Quit");
+    }
+  gdbpy_print_stack ();
+}
+
 
 
 /* Return a sequence holding all the Progspaces.  */

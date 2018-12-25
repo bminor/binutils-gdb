@@ -535,12 +535,7 @@ pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
     {
       /* If the unwinder is cancelled due to a Ctrl-C, then propagate
 	 the Ctrl-C as a GDB exception instead of swallowing it.  */
-      if (PyErr_ExceptionMatches (PyExc_KeyboardInterrupt))
-	{
-	  PyErr_Clear ();
-	  quit ();
-	}
-      gdbpy_print_stack ();
+      gdbpy_print_stack_or_quit ();
       return 0;
     }
   if (pyo_unwind_info == Py_None)
