@@ -21,9 +21,9 @@ package body Pkg is
       --  Create a new scope to check that the scope match algorithm is fine in
       --  the front-end.
       declare
-         B : Boolean renames Bits (I);
+         Rename_Subscript_Param_B : Boolean renames Bits (I);
       begin
-         B := not B; -- BREAK
+         Rename_Subscript_Param_B := not Rename_Subscript_Param_B; -- BREAK
          Do_Nothing (Bits'Address);
       end;
    end Flip;
