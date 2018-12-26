@@ -17,8 +17,8 @@ package Aggregates is
    subtype Int is Integer range 0 .. 7;
 
    type Packed_Rec is record
-      X, Y : Int;
-      W    : Integer;
+      Packed_Array_Assign_W    : Integer;
+      Packed_Array_Assign_X, Packed_Array_Assign_Y : Int;
    end record;
    pragma Pack (Packed_Rec);
 
@@ -28,6 +28,8 @@ package Aggregates is
    procedure Run_Test;
 
 private
-   PR : Packed_Rec := (y => 3, w => 104, x => 2);
+   PR : Packed_Rec := (Packed_Array_Assign_Y => 3,
+                       Packed_Array_Assign_W => 104,
+                       Packed_Array_Assign_X  => 2);
    PRA : Packed_RecArr (1 .. 3);
 end Aggregates;

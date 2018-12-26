@@ -26,5 +26,5 @@ clean_restart ${testfile}
 runto "aggregates.run_test"
 
 gdb_test \
-    "print pra := ((x => 2, y => 0, w => 17), pr, (x => 7, y => 1, w => 23))" \
-    " = \\(\\(w => 17, x => 2, y => 0\\), \\(w => 104, x => 2, y => 3\\), \\(w => 23, x => 7, y => 1\\)\\)"
+    "print pra := ((packed_array_assign_x => 2, packed_array_assign_y => 0, packed_array_assign_w => 17), pr, (packed_array_assign_x => 7, packed_array_assign_y => 1, packed_array_assign_w => 23))" \
+    " = \\(\\(packed_array_assign_w => 17, packed_array_assign_x => 2, packed_array_assign_y => 0\\), \\(packed_array_assign_w => 104, packed_array_assign_x => 2, packed_array_assign_y => 3\\), \\(packed_array_assign_w => 23, packed_array_assign_x => 7, packed_array_assign_y => 1\\)\\)"
