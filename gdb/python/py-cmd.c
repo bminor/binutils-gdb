@@ -362,7 +362,6 @@ gdbpy_parse_command_name (const char *name,
   struct cmd_list_element *elt;
   int len = strlen (name);
   int i, lastchar;
-  char *prefix_text;
   const char *prefix_text2;
   char *result;
 
@@ -395,31 +394,26 @@ gdbpy_parse_command_name (const char *name,
       return result;
     }
 
-  prefix_text = (char *) xmalloc (i + 2);
-  memcpy (prefix_text, name, i + 1);
-  prefix_text[i + 1] = '\0';
+  std::string prefix_text (name, i + 1);
 
-  prefix_text2 = prefix_text;
+  prefix_text2 = prefix_text.c_str ();
   elt = lookup_cmd_1 (&prefix_text2, *start_list, NULL, 1);
   if (elt == NULL || elt == CMD_LIST_AMBIGUOUS)
     {
       PyErr_Format (PyExc_RuntimeError, _("Could not find command prefix %s."),
-		    prefix_text);
-      xfree (prefix_text);
+		    prefix_text.c_str ());
       xfree (result);
       return NULL;
     }
 
   if (elt->prefixlist)
     {
-      xfree (prefix_text);
       *base_list = elt->prefixlist;
       return result;
     }
 
   PyErr_Format (PyExc_RuntimeError, _("'%s' is not a prefix command."),
-		prefix_text);
-  xfree (prefix_text);
+		prefix_text.c_str ());
   xfree (result);
   return NULL;
 }

@@ -220,10 +220,8 @@ stpy_get_linetable (PyObject *self, PyObject *args)
 static PyObject *
 salpy_str (PyObject *self)
 {
-  char *s;
   const char *filename;
   sal_object *sal_obj;
-  PyObject *result;
   struct symtab_and_line *sal = NULL;
 
   SALPY_REQUIRE_VALID (self, sal);
@@ -232,13 +230,8 @@ salpy_str (PyObject *self)
   filename = (sal_obj->symtab == (symtab_object *) Py_None)
     ? "<unknown>" : symtab_to_filename_for_display (sal_obj->symtab->symtab);
 
-  s = xstrprintf ("symbol and line for %s, line %d", filename,
-		  sal->line);
-
-  result = PyString_FromString (s);
-  xfree (s);
-
-  return result;
+  return PyString_FromFormat ("symbol and line for %s, line %d", filename,
+			      sal->line);
 }
 
 static void

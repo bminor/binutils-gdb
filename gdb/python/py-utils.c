@@ -62,9 +62,8 @@ python_string_to_unicode (PyObject *obj)
 
 /* Returns a newly allocated string with the contents of the given unicode
    string object converted to CHARSET.  If an error occurs during the
-   conversion, NULL will be returned and a python exception will be set.
-
-   The caller is responsible for xfree'ing the string.  */
+   conversion, NULL will be returned and a python exception will be
+   set.  */
 static gdb::unique_xmalloc_ptr<char>
 unicode_to_encoded_string (PyObject *unicode_str, const char *charset)
 {

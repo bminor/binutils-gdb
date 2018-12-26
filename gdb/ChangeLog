@@ -1,3 +1,17 @@
+2018-12-27  Tom Tromey  <tom@tromey.com>
+
+	* python/python.c (python_interactive_command): Use std::string.
+	(gdbpy_parameter): Likewise.
+	* python/py-utils.c (unicode_to_encoded_string): Update comment.
+	* python/py-symtab.c (salpy_str): Use PyString_FromFormat.
+	* python/py-record-btrace.c (recpy_bt_insn_data): Use
+	byte_vector.
+	* python/py-objfile.c (objfpy_get_build_id): Use
+	unique_xmalloc_ptr.
+	* python/py-inferior.c (infpy_read_memory): Use
+	unique_xmalloc_ptr.
+	* python/py-cmd.c (gdbpy_parse_command_name): Use std::string.
+
 2018-12-26  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* target.c (target_terminal::restore_inferior): Remove struct keyword.

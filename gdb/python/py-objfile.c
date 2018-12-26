@@ -143,12 +143,10 @@ objfpy_get_build_id (PyObject *self, void *closure)
 
   if (build_id != NULL)
     {
-      char *hex_form = make_hex_string (build_id->data, build_id->size);
-      PyObject *result;
+      gdb::unique_xmalloc_ptr<char> hex_form
+	(make_hex_string (build_id->data, build_id->size));
 
-      result = host_string_to_python_string (hex_form).release ();
-      xfree (hex_form);
-      return result;
+      return host_string_to_python_string (hex_form.get ()).release ();
     }
 
   Py_RETURN_NONE;

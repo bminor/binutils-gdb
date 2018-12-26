@@ -499,7 +499,7 @@ static PyObject *
 infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
 {
   CORE_ADDR addr, length;
-  gdb_byte *buffer = NULL;
+  gdb::unique_xmalloc_ptr<gdb_byte> buffer;
   PyObject *addr_obj, *length_obj, *result;
   static const char *keywords[] = { "address", "length", NULL };
 
@@ -513,13 +513,12 @@ infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
 
   TRY
     {
-      buffer = (gdb_byte *) xmalloc (length);
+      buffer.reset ((gdb_byte *) xmalloc (length));
 
-      read_memory (addr, buffer, length);
+      read_memory (addr, buffer.get (), length);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
-      xfree (buffer);
       GDB_PY_HANDLE_EXCEPTION (except);
     }
   END_CATCH
@@ -527,12 +526,9 @@ infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
   gdbpy_ref<membuf_object> membuf_obj (PyObject_New (membuf_object,
 						     &membuf_object_type));
   if (membuf_obj == NULL)
-    {
-      xfree (buffer);
-      return NULL;
-    }
+    return NULL;
 
-  membuf_obj->buffer = buffer;
+  membuf_obj->buffer = buffer.release ();
   membuf_obj->addr = addr;
   membuf_obj->length = length;
 

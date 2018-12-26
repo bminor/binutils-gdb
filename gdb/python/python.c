@@ -296,14 +296,8 @@ python_interactive_command (const char *arg, int from_tty)
 
   if (arg && *arg)
     {
-      int len = strlen (arg);
-      char *script = (char *) xmalloc (len + 2);
-
-      strcpy (script, arg);
-      script[len] = '\n';
-      script[len + 1] = '\0';
-      err = eval_python_command (script);
-      xfree (script);
+      std::string script = std::string (arg) + "\n";
+      err = eval_python_command (script.c_str ());
     }
   else
     {
@@ -495,29 +489,25 @@ gdbpy_parameter_value (enum var_types type, void *var)
 static PyObject *
 gdbpy_parameter (PyObject *self, PyObject *args)
 {
-  struct gdb_exception except = exception_none;
   struct cmd_list_element *alias, *prefix, *cmd;
   const char *arg;
-  char *newarg;
   int found = -1;
 
   if (! PyArg_ParseTuple (args, "s", &arg))
     return NULL;
 
-  newarg = concat ("show ", arg, (char *) NULL);
+  std::string newarg = std::string ("show ") + arg;
 
   TRY
     {
-      found = lookup_cmd_composition (newarg, &alias, &prefix, &cmd);
+      found = lookup_cmd_composition (newarg.c_str (), &alias, &prefix, &cmd);
     }
   CATCH (ex, RETURN_MASK_ALL)
     {
-      except = ex;
+      GDB_PY_HANDLE_EXCEPTION (ex);
     }
   END_CATCH
 
-  xfree (newarg);
-  GDB_PY_HANDLE_EXCEPTION (except);
   if (!found)
     return PyErr_Format (PyExc_RuntimeError,
 			 _("Could not find parameter `%s'."), arg);

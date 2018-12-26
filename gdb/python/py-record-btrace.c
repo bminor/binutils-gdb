@@ -273,7 +273,7 @@ PyObject *
 recpy_bt_insn_data (PyObject *self, void *closure)
 {
   const btrace_insn * const insn = btrace_insn_from_recpy_insn (self);
-  gdb_byte *buffer = NULL;
+  gdb::byte_vector buffer;
   PyObject *object;
 
   if (insn == NULL)
@@ -281,18 +281,17 @@ recpy_bt_insn_data (PyObject *self, void *closure)
 
   TRY
     {
-      buffer = (gdb_byte *) xmalloc (insn->size);
-      read_memory (insn->pc, buffer, insn->size);
+      buffer.resize (insn->size);
+      read_memory (insn->pc, buffer.data (), insn->size);
     }
   CATCH (except, RETURN_MASK_ALL)
     {
-      xfree (buffer);
       GDB_PY_HANDLE_EXCEPTION (except);
     }
   END_CATCH
 
-  object = PyBytes_FromStringAndSize ((const char*) buffer, insn->size);
-  xfree (buffer);
+  object = PyBytes_FromStringAndSize ((const char *) buffer.data (),
+				      insn->size);
 
   if (object == NULL)
     return NULL;
