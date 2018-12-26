@@ -17,5 +17,5 @@ with target_wrapper; use target_wrapper;
 
 procedure Main_P324_051 is
 begin
-   input.u2 := (0.2,0.3,0.4);  -- STOP
+   Assign_Arr_Input.u2 := (0.2,0.3,0.4);  -- STOP
 end Main_P324_051;
