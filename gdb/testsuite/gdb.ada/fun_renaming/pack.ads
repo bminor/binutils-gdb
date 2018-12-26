@@ -15,8 +15,9 @@
 
 package Pack is
 
-   function Next (I : Integer) return Integer;
-   function Renamed_Next (I : Integer) return Integer renames Next;
+   function Fun_Rename_Test_Next (I : Integer) return Integer;
+   function Renamed_Fun_Rename_Test_Next (I : Integer) return Integer
+     renames Fun_Rename_Test_Next;
    procedure Discard (I : Integer);
 
 end Pack;

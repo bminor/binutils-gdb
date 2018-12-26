@@ -16,8 +16,9 @@
 with Pack;
 
 procedure Fun_Renaming is
-   function N (I : Integer) return Integer renames Pack.Next;
+   function Fun_Rename_Test_N (I : Integer) return Integer
+     renames Pack.Fun_Rename_Test_Next;
 begin
-   Pack.Discard (N (1)); --  BREAK
-   Pack.Discard (Pack.Renamed_Next (1)); --  BREAK
+   Pack.Discard (Fun_Rename_Test_N (1)); --  BREAK
+   Pack.Discard (Pack.Renamed_Fun_Rename_Test_Next (1)); --  BREAK
 end Fun_Renaming;
