@@ -1,3 +1,8 @@
+2018-12-26  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* build-id.c (build_id_to_debug_bfd): Enhance debug output.
+	* symfile.c (separate_debug_file_exists): Likewise.
+
 2018-12-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* c-exp.y (field_name): Allow DOUBLE_KEYWORD, INT_KEYWORD, LONG,

@@ -98,7 +98,10 @@ build_id_to_debug_bfd (size_t build_id_len, const bfd_byte *build_id)
       link += ".debug";
 
       if (separate_debug_file_debug)
-	printf_unfiltered (_("  Trying %s\n"), link.c_str ());
+	{
+	  printf_unfiltered (_("  Trying %s..."), link.c_str ());
+	  gdb_flush (gdb_stdout);
+	}
 
       /* lrealpath() is expensive even for the usually non-existent files.  */
       gdb::unique_xmalloc_ptr<char> filename;
@@ -106,16 +109,36 @@ build_id_to_debug_bfd (size_t build_id_len, const bfd_byte *build_id)
 	filename.reset (lrealpath (link.c_str ()));
 
       if (filename == NULL)
-	continue;
+	{
+	  if (separate_debug_file_debug)
+	    printf_unfiltered (_(" no, unable to compute real path\n"));
+
+	  continue;
+	}
 
       /* We expect to be silent on the non-existing files.  */
       abfd = gdb_bfd_open (filename.get (), gnutarget, -1);
 
       if (abfd == NULL)
-	continue;
+	{
+	  if (separate_debug_file_debug)
+	    printf_unfiltered (_(" no, unable to open.\n"));
+
+	  continue;
+	}
 
       if (build_id_verify (abfd.get(), build_id_len, build_id))
-	break;
+	{
+	  if (separate_debug_file_debug)
+	    printf_unfiltered (_(" yes!\n"));
+
+	  break;
+	}
+      else
+	{
+	  if (separate_debug_file_debug)
+	    printf_unfiltered (_(" no, build-id does not match.\n"));
+	}
 
       abfd.release ();
     }
