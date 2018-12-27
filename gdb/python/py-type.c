@@ -319,7 +319,6 @@ static PyObject *
 typy_fields_items (PyObject *self, enum gdbpy_iter_kind kind)
 {
   PyObject *py_type = self;
-  PyObject *result = NULL, *iter = NULL;
   struct type *type = ((type_object *) py_type)->type;
   struct type *checked_type = type;
 
@@ -333,22 +332,19 @@ typy_fields_items (PyObject *self, enum gdbpy_iter_kind kind)
     }
   END_CATCH
 
-  if (checked_type != type)
-    py_type = type_to_type_object (checked_type);
-  iter = typy_make_iter (py_type, kind);
+  gdbpy_ref<> type_holder;
   if (checked_type != type)
     {
-      /* Need to wrap this in braces because Py_DECREF isn't wrapped
-	 in a do{}while(0).  */
-      Py_DECREF (py_type);
+      type_holder.reset (type_to_type_object (checked_type));
+      if (type_holder == nullptr)
+	return nullptr;
+      py_type = type_holder.get ();
     }
-  if (iter != NULL)
-    {
-      result = PySequence_List (iter);
-      Py_DECREF (iter);
-    }
+  gdbpy_ref<> iter (typy_make_iter (py_type, kind));
+  if (iter == nullptr)
+    return nullptr;
 
-  return result;
+  return PySequence_List (iter.get ());
 }
 
 /* Return a sequence of all fields.  Each field is a gdb.Field object.  */

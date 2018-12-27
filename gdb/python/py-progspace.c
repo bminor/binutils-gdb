@@ -164,7 +164,6 @@ pspy_get_printers (PyObject *o, void *ignore)
 static int
 pspy_set_printers (PyObject *o, PyObject *value, void *ignore)
 {
-  PyObject *tmp;
   pspace_object *self = (pspace_object *) o;
 
   if (! value)
@@ -182,10 +181,9 @@ pspy_set_printers (PyObject *o, PyObject *value, void *ignore)
     }
 
   /* Take care in case the LHS and RHS are related somehow.  */
-  tmp = self->printers;
+  gdbpy_ref<> tmp (self->printers);
   Py_INCREF (value);
   self->printers = value;
-  Py_XDECREF (tmp);
 
   return 0;
 }
@@ -205,7 +203,6 @@ pspy_get_frame_filters (PyObject *o, void *ignore)
 static int
 pspy_set_frame_filters (PyObject *o, PyObject *frame, void *ignore)
 {
-  PyObject *tmp;
   pspace_object *self = (pspace_object *) o;
 
   if (! frame)
@@ -223,10 +220,9 @@ pspy_set_frame_filters (PyObject *o, PyObject *frame, void *ignore)
     }
 
   /* Take care in case the LHS and RHS are related somehow.  */
-  tmp = self->frame_filters;
+  gdbpy_ref<> tmp (self->frame_filters);
   Py_INCREF (frame);
   self->frame_filters = frame;
-  Py_XDECREF (tmp);
 
   return 0;
 }
@@ -247,7 +243,6 @@ pspy_get_frame_unwinders (PyObject *o, void *ignore)
 static int
 pspy_set_frame_unwinders (PyObject *o, PyObject *unwinders, void *ignore)
 {
-  PyObject *tmp;
   pspace_object *self = (pspace_object *) o;
 
   if (!unwinders)
@@ -265,10 +260,9 @@ pspy_set_frame_unwinders (PyObject *o, PyObject *unwinders, void *ignore)
     }
 
   /* Take care in case the LHS and RHS are related somehow.  */
-  tmp = self->frame_unwinders;
+  gdbpy_ref<> tmp (self->frame_unwinders);
   Py_INCREF (unwinders);
   self->frame_unwinders = unwinders;
-  Py_XDECREF (tmp);
 
   return 0;
 }
@@ -300,7 +294,6 @@ pspy_get_xmethods (PyObject *o, void *ignore)
 static int
 pspy_set_type_printers (PyObject *o, PyObject *value, void *ignore)
 {
-  PyObject *tmp;
   pspace_object *self = (pspace_object *) o;
 
   if (! value)
@@ -318,10 +311,9 @@ pspy_set_type_printers (PyObject *o, PyObject *value, void *ignore)
     }
 
   /* Take care in case the LHS and RHS are related somehow.  */
-  tmp = self->type_printers;
+  gdbpy_ref<> tmp (self->type_printers);
   Py_INCREF (value);
   self->type_printers = value;
-  Py_XDECREF (tmp);
 
   return 0;
 }

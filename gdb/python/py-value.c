@@ -90,17 +90,8 @@ valpy_dealloc (PyObject *obj)
 
   value_decref (self->value);
 
-  if (self->address)
-    /* Use braces to appease gcc warning.  *sigh*  */
-    {
-      Py_DECREF (self->address);
-    }
-
-  if (self->type)
-    {
-      Py_DECREF (self->type);
-    }
-
+  Py_XDECREF (self->address);
+  Py_XDECREF (self->type);
   Py_XDECREF (self->dynamic_type);
 
   Py_TYPE (self)->tp_free (self);

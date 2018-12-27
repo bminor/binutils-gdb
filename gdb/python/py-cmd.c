@@ -540,7 +540,7 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
   if (! docstring)
     docstring = xstrdup (_("This command is not documented."));
 
-  Py_INCREF (self);
+  gdbpy_ref<> self_ref = gdbpy_ref<>::new_reference (self);
 
   TRY
     {
@@ -566,7 +566,7 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
       cmd->destroyer = cmdpy_destroyer;
 
       obj->command = cmd;
-      set_cmd_context (cmd, self);
+      set_cmd_context (cmd, self_ref.release ());
       set_cmd_completer (cmd, ((completetype == -1) ? cmdpy_completer
 			       : completers[completetype].completer));
       if (completetype == -1)
@@ -578,7 +578,6 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
       xfree (cmd_name);
       xfree (docstring);
       xfree (pfx_name);
-      Py_DECREF (self);
       gdbpy_convert_exception (except);
       return -1;
     }

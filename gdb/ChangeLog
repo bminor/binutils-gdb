@@ -1,5 +1,18 @@
 2019-01-03  Tom Tromey  <tom@tromey.com>
 
+	* python/py-value.c (valpy_dealloc): Use Py_XDECREF.
+	* python/py-type.c (typy_fields_items): Use gdbpy_ref.
+	* python/py-progspace.c (pspy_set_printers): Use gdbpy_ref.
+	(pspy_set_frame_filters, pspy_set_frame_unwinders)
+	(pspy_set_type_printers): Likewise.
+	* python/py-function.c (fnpy_init): Use gdbpy_ref.
+	* python/py-cmd.c (cmdpy_init): Use gdbpy_ref.
+	* python/py-objfile.c (objfpy_set_printers): Use gdbpy_ref.
+	(objfpy_set_frame_filters, objfpy_set_frame_unwinders)
+	(objfpy_set_type_printers): Likewise.
+
+2019-01-03  Tom Tromey  <tom@tromey.com>
+
 	* python/python.c (gdbpy_enter, ~gdbpy_enter): Update.
 	(gdbpy_print_stack): Use gdbpy_err_fetch.
 	* python/python-internal.h (class gdbpy_err_fetch): New class.
