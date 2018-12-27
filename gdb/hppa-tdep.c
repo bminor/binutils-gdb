@@ -2505,14 +2505,6 @@ static const struct frame_unwind hppa_stub_frame_unwind = {
   hppa_stub_unwind_sniffer
 };
 
-static struct frame_id
-hppa_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
-{
-  return frame_id_build (get_frame_register_unsigned (this_frame,
-                                                      HPPA_SP_REGNUM),
-			 get_frame_pc (this_frame));
-}
-
 CORE_ADDR
 hppa_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
@@ -3156,7 +3148,6 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pseudo_register_read (gdbarch, hppa_pseudo_register_read);
 
   /* Frame unwind methods.  */
-  set_gdbarch_dummy_id (gdbarch, hppa_dummy_id);
   set_gdbarch_unwind_pc (gdbarch, hppa_unwind_pc);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
