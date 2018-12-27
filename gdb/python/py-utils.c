@@ -203,28 +203,33 @@ gdbpy_obj_to_string (PyObject *obj)
   return NULL;
 }
 
-/* Return the string representation of the exception represented by
-   TYPE, VALUE which is assumed to have been obtained with PyErr_Fetch,
-   i.e., the error indicator is currently clear.
-   If the result is NULL a python error occurred, the caller must clear it.  */
+/* See python-internal.h.  */
 
 gdb::unique_xmalloc_ptr<char>
-gdbpy_exception_to_string (PyObject *ptype, PyObject *pvalue)
+gdbpy_err_fetch::to_string () const
 {
   /* There are a few cases to consider.
      For example:
-     pvalue is a string when PyErr_SetString is used.
-     pvalue is not a string when raise "foo" is used, instead it is None
-     and ptype is "foo".
-     So the algorithm we use is to print `str (pvalue)' if it's not
-     None, otherwise we print `str (ptype)'.
+     value is a string when PyErr_SetString is used.
+     value is not a string when raise "foo" is used, instead it is None
+     and type is "foo".
+     So the algorithm we use is to print `str (value)' if it's not
+     None, otherwise we print `str (type)'.
      Using str (aka PyObject_Str) will fetch the error message from
      gdb.GdbError ("message").  */
 
-  if (pvalue && pvalue != Py_None)
-    return gdbpy_obj_to_string (pvalue);
+  if (m_error_value && m_error_value != Py_None)
+    return gdbpy_obj_to_string (m_error_value);
   else
-    return gdbpy_obj_to_string (ptype);
+    return gdbpy_obj_to_string (m_error_type);
+}
+
+/* See python-internal.h.  */
+
+gdb::unique_xmalloc_ptr<char>
+gdbpy_err_fetch::type_to_string () const
+{
+  return gdbpy_obj_to_string (m_error_type);
 }
 
 /* Convert a GDB exception to the appropriate Python exception.
@@ -394,16 +399,8 @@ gdb_pymodule_addobject (PyObject *module, const char *name, PyObject *object)
 void
 gdbpy_handle_exception ()
 {
-  PyObject *ptype, *pvalue, *ptraceback;
-
-  PyErr_Fetch (&ptype, &pvalue, &ptraceback);
-
-  /* Try to fetch an error message contained within ptype, pvalue.
-     When fetching the error message we need to make our own copy,
-     we no longer own ptype, pvalue after the call to PyErr_Restore.  */
-
-  gdb::unique_xmalloc_ptr<char>
-    msg (gdbpy_exception_to_string (ptype, pvalue));
+  gdbpy_err_fetch fetched_error;
+  gdb::unique_xmalloc_ptr<char> msg = fetched_error.to_string ();
 
   if (msg == NULL)
     {
@@ -422,12 +419,12 @@ gdbpy_handle_exception ()
      for user errors.  However, a missing message for gdb.GdbError
      exceptions is arguably a bug, so we flag it as such.  */
 
-  if (PyErr_GivenExceptionMatches (ptype, PyExc_KeyboardInterrupt))
+  if (fetched_error.type_matches (PyExc_KeyboardInterrupt))
     throw_quit ("Quit");
-  else if (! PyErr_GivenExceptionMatches (ptype, gdbpy_gdberror_exc)
-      || msg == NULL || *msg == '\0')
+  else if (! fetched_error.type_matches (gdbpy_gdberror_exc)
+	   || msg == NULL || *msg == '\0')
     {
-      PyErr_Restore (ptype, pvalue, ptraceback);
+      fetched_error.restore ();
       gdbpy_print_stack ();
       if (msg != NULL && *msg != '\0')
 	error (_("Error occurred in Python: %s"), msg.get ());
@@ -435,10 +432,5 @@ gdbpy_handle_exception ()
 	error (_("Error occurred in Python."));
     }
   else
-    {
-      Py_XDECREF (ptype);
-      Py_XDECREF (pvalue);
-      Py_XDECREF (ptraceback);
-      error ("%s", msg.get ());
-    }
+    error ("%s", msg.get ());
 }

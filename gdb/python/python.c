@@ -214,7 +214,7 @@ gdbpy_enter::gdbpy_enter  (struct gdbarch *gdbarch,
   python_language = language;
 
   /* Save it and ensure ! PyErr_Occurred () afterwards.  */
-  PyErr_Fetch (&m_error_type, &m_error_value, &m_error_traceback);
+  m_error.emplace ();
 }
 
 gdbpy_enter::~gdbpy_enter ()
@@ -227,7 +227,7 @@ gdbpy_enter::~gdbpy_enter ()
       warning (_("internal error: Unhandled Python exception"));
     }
 
-  PyErr_Restore (m_error_type, m_error_value, m_error_traceback);
+  m_error->restore ();
 
   PyGILState_Release (m_state);
   python_gdbarch = m_gdbarch;
@@ -1234,24 +1234,25 @@ gdbpy_print_stack (void)
   /* Print "message", just error print message.  */
   else
     {
-      PyObject *ptype, *pvalue, *ptraceback;
+      gdbpy_err_fetch fetched_error;
 
-      PyErr_Fetch (&ptype, &pvalue, &ptraceback);
-
-      /* Fetch the error message contained within ptype, pvalue.  */
-      gdb::unique_xmalloc_ptr<char>
-	msg (gdbpy_exception_to_string (ptype, pvalue));
-      gdb::unique_xmalloc_ptr<char> type (gdbpy_obj_to_string (ptype));
+      gdb::unique_xmalloc_ptr<char> msg = fetched_error.to_string ();
+      gdb::unique_xmalloc_ptr<char> type;
+      /* Don't compute TYPE if MSG already indicates that there is an
+	 error.  */
+      if (msg != NULL)
+	type = fetched_error.type_to_string ();
 
       TRY
 	{
-	  if (msg == NULL)
+	  if (msg == NULL || type == NULL)
 	    {
 	      /* An error occurred computing the string representation of the
 		 error message.  */
 	      fprintf_filtered (gdb_stderr,
 				_("Error occurred computing Python error" \
 				  "message.\n"));
+	      PyErr_Clear ();
 	    }
 	  else
 	    fprintf_filtered (gdb_stderr, "Python Exception %s %s: \n",
@@ -1261,10 +1262,6 @@ gdbpy_print_stack (void)
 	{
 	}
       END_CATCH
-
-      Py_XDECREF (ptype);
-      Py_XDECREF (pvalue);
-      Py_XDECREF (ptraceback);
     }
 }
 

@@ -591,6 +591,60 @@ int gdbpy_initialize_xmethods (void)
 int gdbpy_initialize_unwind (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 
+/* A wrapper for PyErr_Fetch that handles reference counting for the
+   caller.  */
+class gdbpy_err_fetch
+{
+public:
+
+  gdbpy_err_fetch ()
+  {
+    PyErr_Fetch (&m_error_type, &m_error_value, &m_error_traceback);
+  }
+
+  ~gdbpy_err_fetch ()
+  {
+    Py_XDECREF (m_error_type);
+    Py_XDECREF (m_error_value);
+    Py_XDECREF (m_error_traceback);
+  }
+
+  /* Call PyErr_Restore using the values stashed in this object.
+     After this call, this object is invalid and neither the to_string
+     nor restore methods may be used again.  */
+
+  void restore ()
+  {
+    PyErr_Restore (m_error_type, m_error_value, m_error_traceback);
+    m_error_type = nullptr;
+    m_error_value = nullptr;
+    m_error_traceback = nullptr;
+  }
+
+  /* Return the string representation of the exception represented by
+     this object.  If the result is NULL a python error occurred, the
+     caller must clear it.  */
+
+  gdb::unique_xmalloc_ptr<char> to_string () const;
+
+  /* Return the string representation of the type of the exception
+     represented by this object.  If the result is NULL a python error
+     occurred, the caller must clear it.  */
+
+  gdb::unique_xmalloc_ptr<char> type_to_string () const;
+
+  /* Return true if the stored type matches TYPE, false otherwise.  */
+
+  bool type_matches (PyObject *type) const
+  {
+    return PyErr_GivenExceptionMatches (m_error_type, type);
+  }
+
+private:
+
+  PyObject *m_error_type, *m_error_value, *m_error_traceback;
+};
+
 /* Called before entering the Python interpreter to install the
    current language and architecture to be used for Python values.
    Also set the active extension language for GDB so that SIGINT's
@@ -612,7 +666,10 @@ class gdbpy_enter
   PyGILState_STATE m_state;
   struct gdbarch *m_gdbarch;
   const struct language_defn *m_language;
-  PyObject *m_error_type, *m_error_value, *m_error_traceback;
+
+  /* An optional is used here because we don't want to call
+     PyErr_Fetch too early.  */
+  gdb::optional<gdbpy_err_fetch> m_error;
 };
 
 /* Like gdbpy_enter, but takes a varobj.  This is a subclass just to
@@ -665,8 +722,6 @@ gdb::unique_xmalloc_ptr<char> python_string_to_host_string (PyObject *obj);
 gdbpy_ref<> host_string_to_python_string (const char *str);
 int gdbpy_is_string (PyObject *obj);
 gdb::unique_xmalloc_ptr<char> gdbpy_obj_to_string (PyObject *obj);
-gdb::unique_xmalloc_ptr<char> gdbpy_exception_to_string (PyObject *ptype,
-							 PyObject *pvalue);
 
 int gdbpy_is_lazy_string (PyObject *result);
 void gdbpy_extract_lazy_string (PyObject *string, CORE_ADDR *addr,

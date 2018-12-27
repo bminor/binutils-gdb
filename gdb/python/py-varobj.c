@@ -70,14 +70,8 @@ py_varobj_iter_next (struct varobj_iter *self)
       /* If we got a memory error, just use the text as the item.  */
       if (PyErr_ExceptionMatches (gdbpy_gdb_memory_error))
 	{
-	  PyObject *type, *value, *trace;
-
-	  PyErr_Fetch (&type, &value, &trace);
-	  gdb::unique_xmalloc_ptr<char>
-	    value_str (gdbpy_exception_to_string (type, value));
-	  Py_XDECREF (type);
-	  Py_XDECREF (value);
-	  Py_XDECREF (trace);
+	  gdbpy_err_fetch fetched_error;
+	  gdb::unique_xmalloc_ptr<char> value_str = fetched_error.to_string ();
 	  if (value_str == NULL)
 	    {
 	      gdbpy_print_stack ();

@@ -259,16 +259,8 @@ print_stack_unless_memory_error (struct ui_file *stream)
 {
   if (PyErr_ExceptionMatches (gdbpy_gdb_memory_error))
     {
-      PyObject *type, *value, *trace;
-
-      PyErr_Fetch (&type, &value, &trace);
-
-      gdbpy_ref<> type_ref (type);
-      gdbpy_ref<> value_ref (value);
-      gdbpy_ref<> trace_ref (trace);
-
-      gdb::unique_xmalloc_ptr<char>
-	msg (gdbpy_exception_to_string (type, value));
+      gdbpy_err_fetch fetched_error;
+      gdb::unique_xmalloc_ptr<char> msg = fetched_error.to_string ();
 
       if (msg == NULL || *msg == '\0')
 	fprintf_filtered (stream, _("<error reading variable>"));

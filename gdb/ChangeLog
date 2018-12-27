@@ -1,3 +1,21 @@
+2019-01-03  Tom Tromey  <tom@tromey.com>
+
+	* python/python.c (gdbpy_enter, ~gdbpy_enter): Update.
+	(gdbpy_print_stack): Use gdbpy_err_fetch.
+	* python/python-internal.h (class gdbpy_err_fetch): New class.
+	(class gdbpy_enter) <m_error_type, m_error_value,
+	m_error_traceback>: Remove.
+	<m_error>: New member.
+	(gdbpy_exception_to_string): Don't declare.
+	* python/py-varobj.c (py_varobj_iter_next): Use gdbpy_err_fetch.
+	* python/py-value.c (convert_value_from_python): Use
+	gdbpy_err_fetch.
+	* python/py-utils.c (gdbpy_err_fetch::to_string): Rename from
+	gdbpy_exception_to_string.
+	(gdbpy_handle_exception): Use gdbpy_err_fetch.
+	* python/py-prettyprint.c (print_stack_unless_memory_error): Use
+	gdbpy_err_fetch.
+
 2019-01-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* linux-nat.c (delete_lwp_cleanup): Delete.
