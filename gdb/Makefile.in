@@ -1477,7 +1477,6 @@ HFILES_NO_SRCDIR = \
 	config/nm-nto.h \
 	config/djgpp/langinfo.h \
 	config/djgpp/nl_types.h \
-	config/i386/nm-fbsd.h \
 	config/i386/nm-i386gnu.h \
 	config/sparc/nm-sol2.h \
 	gnulib/import/inttypes.in.h \

@@ -165,7 +165,6 @@ case ${gdb_host} in
 		# Host: FreeBSD/i386
 		NATDEPFILES="${NATDEPFILES} x86-nat.o x86-dregs.o \
 		x86-bsd-nat.o i386-bsd-nat.o i386-fbsd-nat.o bsd-kvm.o"
-		NAT_FILE='nm-fbsd.h'
 		;;
 	    mips)
 		# Host: FreeBSD/mips

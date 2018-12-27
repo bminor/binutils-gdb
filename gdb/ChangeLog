@@ -1,3 +1,9 @@
+2018-12-27  John Baldwin  <jhb@FreeBSD.org>
+
+	* config/i386/nm-fbsd.h: Remove file.
+	* Makefile.in (HFILES_NO_SRCDIR): Remove config/i386/nm-fbsd.h.
+	* configure.nat: Remove NAT_FILE for FreeBSD/i386.
+
 2018-12-27  Tom Tromey  <tom@tromey.com>
 
 	* minsyms.h (class minimal_symbol_reader): Use
