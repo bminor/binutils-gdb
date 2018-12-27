@@ -1,5 +1,12 @@
 2019-01-03  Tom Tromey  <tom@tromey.com>
 
+	* python/py-symtab.c (salpy_str): Update.
+	(struct salpy_sal_object) <symtab>: Now a PyObject.
+	(salpy_dealloc): Update.
+	(del_objfile_sal): Use gdbpy_ref.
+
+2019-01-03  Tom Tromey  <tom@tromey.com>
+
 	* python/py-type.c (convert_field): Use new_reference.  Return
 	gdbpy_ref.
 	(make_fielditem): Return gdbpy_ref.
