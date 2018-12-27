@@ -1,5 +1,9 @@
 2019-01-03  Tom Tromey  <tom@tromey.com>
 
+	* python/py-record.c (gdbpy_stop_recording): Use Py_RETURN_NONE.
+
+2019-01-03  Tom Tromey  <tom@tromey.com>
+
 	* python/py-value.c (valpy_dealloc): Use Py_XDECREF.
 	* python/py-type.c (typy_fields_items): Use gdbpy_ref.
 	* python/py-progspace.c (pspy_set_printers): Use gdbpy_ref.
