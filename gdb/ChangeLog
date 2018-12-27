@@ -1,5 +1,13 @@
 2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb/h8300-tdep.c (h8300_unwind_pc): Delete.
+	(h8300_unwind_sp): Delete.
+	(h8300_dummy_id): Delete.
+	(h8300_gdbarch_init): Don't register deleted functions with
+	gdbarch.
+
+2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb/ft32-tdep.c (ft32_dummy_id): Delete.
 	(ft32_unwind_pc): Delete.
 	(ft32_unwind_sp): Delete.
