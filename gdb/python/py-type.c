@@ -165,7 +165,7 @@ typy_get_code (PyObject *self, void *closure)
 /* Helper function for typy_fields which converts a single field to a
    gdb.Field object.  Returns NULL on error.  */
 
-static PyObject *
+static gdbpy_ref<>
 convert_field (struct type *type, int field)
 {
   gdbpy_ref<> result (field_new ());
@@ -218,23 +218,21 @@ convert_field (struct type *type, int field)
 	}
     }
   if (arg == NULL)
-    {
-      arg.reset (Py_None);
-      Py_INCREF (arg.get ());
-    }
+    arg = gdbpy_ref<>::new_reference (Py_None);
+
   if (PyObject_SetAttrString (result.get (), "name", arg.get ()) < 0)
     return NULL;
 
-  arg.reset (TYPE_FIELD_ARTIFICIAL (type, field) ? Py_True : Py_False);
-  Py_INCREF (arg.get ());
+  arg = gdbpy_ref<>::new_reference (TYPE_FIELD_ARTIFICIAL (type, field)
+				    ? Py_True : Py_False);
   if (PyObject_SetAttrString (result.get (), "artificial", arg.get ()) < 0)
     return NULL;
 
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
-    arg.reset (field < TYPE_N_BASECLASSES (type) ? Py_True : Py_False);
+    arg = gdbpy_ref<>::new_reference (field < TYPE_N_BASECLASSES (type)
+				      ? Py_True : Py_False);
   else
-    arg.reset (Py_False);
-  Py_INCREF (arg.get ());
+    arg = gdbpy_ref<>::new_reference (Py_False);
   if (PyObject_SetAttrString (result.get (), "is_base_class", arg.get ()) < 0)
     return NULL;
 
@@ -246,10 +244,7 @@ convert_field (struct type *type, int field)
 
   /* A field can have a NULL type in some situations.  */
   if (TYPE_FIELD_TYPE (type, field) == NULL)
-    {
-      arg.reset (Py_None);
-      Py_INCREF (arg.get ());
-    }
+    arg = gdbpy_ref<>::new_reference (Py_None);
   else
     arg.reset (type_to_type_object (TYPE_FIELD_TYPE (type, field)));
   if (arg == NULL)
@@ -257,24 +252,22 @@ convert_field (struct type *type, int field)
   if (PyObject_SetAttrString (result.get (), "type", arg.get ()) < 0)
     return NULL;
 
-  return result.release ();
+  return result;
 }
 
 /* Helper function to return the name of a field, as a gdb.Field object.
    If the field doesn't have a name, None is returned.  */
 
-static PyObject *
+static gdbpy_ref<>
 field_name (struct type *type, int field)
 {
-  PyObject *result;
+  gdbpy_ref<> result;
 
   if (TYPE_FIELD_NAME (type, field))
-    result = PyString_FromString (TYPE_FIELD_NAME (type, field));
+    result.reset (PyString_FromString (TYPE_FIELD_NAME (type, field)));
   else
-    {
-      result = Py_None;
-      Py_INCREF (result);
-    }
+    result = gdbpy_ref<>::new_reference (Py_None);
+
   return result;
 }
 
@@ -284,7 +277,7 @@ field_name (struct type *type, int field)
    the field, or a tuple consisting of field name and gdb.Field
    object.  */
 
-static PyObject *
+static gdbpy_ref<>
 make_fielditem (struct type *type, int i, enum gdbpy_iter_kind kind)
 {
   switch (kind)
@@ -294,7 +287,7 @@ make_fielditem (struct type *type, int i, enum gdbpy_iter_kind kind)
 	gdbpy_ref<> key (field_name (type, i));
 	if (key == NULL)
 	  return NULL;
-	gdbpy_ref<> value (convert_field (type, i));
+	gdbpy_ref<> value = convert_field (type, i);
 	if (value == NULL)
 	  return NULL;
 	gdbpy_ref<> item (PyTuple_New (2));
@@ -302,7 +295,7 @@ make_fielditem (struct type *type, int i, enum gdbpy_iter_kind kind)
 	  return NULL;
 	PyTuple_SET_ITEM (item.get (), 0, key.release ());
 	PyTuple_SET_ITEM (item.get (), 1, value.release ());
-	return item.release ();
+	return item;
       }
     case iter_keys:
       return field_name (type, i);
@@ -371,7 +364,7 @@ typy_fields (PyObject *self, PyObject *args)
   /* Array type.  Handle this as a special case because the common
      machinery wants struct or union or enum types.  Build a list of
      one entry which is the range for the array.  */
-  gdbpy_ref<> r (convert_field (type, 0));
+  gdbpy_ref<> r = convert_field (type, 0);
   if (r == NULL)
     return NULL;
 
@@ -1186,9 +1179,7 @@ typy_getitem (PyObject *self, PyObject *key)
       const char *t_field_name = TYPE_FIELD_NAME (type, i);
 
       if (t_field_name && (strcmp_iw (t_field_name, field.get ()) == 0))
-	{
-	  return convert_field (type, i);
-	}
+	return convert_field (type, i).release ();
     }
   PyErr_SetObject (PyExc_KeyError, key);
   return NULL;
@@ -1325,14 +1316,14 @@ typy_iterator_iternext (PyObject *self)
 {
   typy_iterator_object *iter_obj = (typy_iterator_object *) self;
   struct type *type = iter_obj->source->type;
-  PyObject *result;
 
   if (iter_obj->field < TYPE_NFIELDS (type))
     {
-      result = make_fielditem (type, iter_obj->field, iter_obj->kind);
+      gdbpy_ref<> result = make_fielditem (type, iter_obj->field,
+					   iter_obj->kind);
       if (result != NULL)
 	iter_obj->field++;
-      return result;
+      return result.release ();
     }
 
   return NULL;

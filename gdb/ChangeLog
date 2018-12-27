@@ -1,5 +1,15 @@
 2019-01-03  Tom Tromey  <tom@tromey.com>
 
+	* python/py-type.c (convert_field): Use new_reference.  Return
+	gdbpy_ref.
+	(make_fielditem): Return gdbpy_ref.
+	(typy_fields): Update.
+	(typy_getitem): Update.
+	(field_name): Return gdbpy_ref.  Use new_reference.
+	(typy_iterator_iternext): Update.
+
+2019-01-03  Tom Tromey  <tom@tromey.com>
+
 	* python/py-record.c (gdbpy_stop_recording): Use Py_RETURN_NONE.
 
 2019-01-03  Tom Tromey  <tom@tromey.com>
