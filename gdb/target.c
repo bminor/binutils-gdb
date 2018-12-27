@@ -393,7 +393,7 @@ target_terminal::restore_inferior (void)
   {
     scoped_restore_current_inferior restore_inferior;
 
-    for (struct inferior *inf : all_inferiors ())
+    for (::inferior *inf : all_inferiors ())
       {
 	if (inf->terminal_state == target_terminal_state::is_ours_for_output)
 	  {
