@@ -1,5 +1,10 @@
 2018-12-27  Tom Tromey  <tom@tromey.com>
 
+	* minsyms.h (class minimal_symbol_reader): Use
+	DISABLE_COPY_AND_ASSIGN.
+
+2018-12-27  Tom Tromey  <tom@tromey.com>
+
 	* python/python.c (python_interactive_command): Use std::string.
 	(gdbpy_parameter): Likewise.
 	* python/py-utils.c (unicode_to_encoded_string): Update comment.

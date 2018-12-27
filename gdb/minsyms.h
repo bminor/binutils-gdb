@@ -128,10 +128,7 @@ class minimal_symbol_reader
 
  private:
 
-  /* No need for these.  They are intentionally not defined anywhere.  */
-  minimal_symbol_reader &operator=
-    (const minimal_symbol_reader &);
-  minimal_symbol_reader (const minimal_symbol_reader &);
+  DISABLE_COPY_AND_ASSIGN (minimal_symbol_reader);
 
   struct objfile *m_objfile;
 
