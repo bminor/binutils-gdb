@@ -761,27 +761,27 @@ print_insn_powerpc (bfd_vma memaddr,
 	  /* Print the operand as directed by the flags.  */
 	  if ((operand->flags & PPC_OPERAND_GPR) != 0
 	      || ((operand->flags & PPC_OPERAND_GPR_0) != 0 && value != 0))
-	    (*info->fprintf_func) (info->stream, "r%" PPC_INT_FMT "d", value);
+	    (*info->fprintf_func) (info->stream, "r%" PRId64, value);
 	  else if ((operand->flags & PPC_OPERAND_FPR) != 0)
-	    (*info->fprintf_func) (info->stream, "f%" PPC_INT_FMT "d", value);
+	    (*info->fprintf_func) (info->stream, "f%" PRId64, value);
 	  else if ((operand->flags & PPC_OPERAND_VR) != 0)
-	    (*info->fprintf_func) (info->stream, "v%" PPC_INT_FMT "d", value);
+	    (*info->fprintf_func) (info->stream, "v%" PRId64, value);
 	  else if ((operand->flags & PPC_OPERAND_VSR) != 0)
-	    (*info->fprintf_func) (info->stream, "vs%" PPC_INT_FMT "d", value);
+	    (*info->fprintf_func) (info->stream, "vs%" PRId64, value);
 	  else if ((operand->flags & PPC_OPERAND_RELATIVE) != 0)
 	    (*info->print_address_func) (memaddr + value, info);
 	  else if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0)
 	    (*info->print_address_func) ((bfd_vma) value & 0xffffffff, info);
 	  else if ((operand->flags & PPC_OPERAND_FSL) != 0)
-	    (*info->fprintf_func) (info->stream, "fsl%" PPC_INT_FMT "d", value);
+	    (*info->fprintf_func) (info->stream, "fsl%" PRId64, value);
 	  else if ((operand->flags & PPC_OPERAND_FCR) != 0)
-	    (*info->fprintf_func) (info->stream, "fcr%" PPC_INT_FMT "d", value);
+	    (*info->fprintf_func) (info->stream, "fcr%" PRId64, value);
 	  else if ((operand->flags & PPC_OPERAND_UDI) != 0)
-	    (*info->fprintf_func) (info->stream, "%" PPC_INT_FMT "d", value);
+	    (*info->fprintf_func) (info->stream, "%" PRId64, value);
 	  else if ((operand->flags & PPC_OPERAND_CR_REG) != 0
 		   && (((dialect & PPC_OPCODE_PPC) != 0)
 		       || ((dialect & PPC_OPCODE_VLE) != 0)))
-	    (*info->fprintf_func) (info->stream, "cr%" PPC_INT_FMT "d", value);
+	    (*info->fprintf_func) (info->stream, "cr%" PRId64, value);
 	  else if (((operand->flags & PPC_OPERAND_CR_BIT) != 0)
 		   && (((dialect & PPC_OPCODE_PPC) != 0)
 		       || ((dialect & PPC_OPCODE_VLE) != 0)))
@@ -797,7 +797,7 @@ print_insn_powerpc (bfd_vma memaddr,
 	      (*info->fprintf_func) (info->stream, "%s", cbnames[cc]);
 	    }
 	  else
-	    (*info->fprintf_func) (info->stream, "%" PPC_INT_FMT "d", value);
+	    (*info->fprintf_func) (info->stream, "%" PRId64, value);
 
 	  if (need_paren)
 	    {
@@ -819,7 +819,7 @@ print_insn_powerpc (bfd_vma memaddr,
     }
 
   /* We could not find a match.  */
-  (*info->fprintf_func) (info->stream, ".long 0x%" PPC_INT_FMT "x", insn);
+  (*info->fprintf_func) (info->stream, ".long 0x%" PRIx64, insn);
 
   return 4;
 }

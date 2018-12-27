@@ -1,3 +1,9 @@
+2018-12-28  Alan Modra  <amodra@gmail.com>
+
+	PR 24028
+	* ppc-dis.c (print_insn_powerpc): Replace PPC_INT_FMT uses with
+	PRId64/PRIx64.
+
 2018-12-18  Alan Modra  <amodra@gmail.com>
 
 	* arm-dis.c: Include bfd.h.

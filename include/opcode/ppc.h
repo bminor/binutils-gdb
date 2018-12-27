@@ -30,14 +30,6 @@ extern "C" {
 
 typedef uint64_t ppc_cpu_t;
 
-#if BFD_HOST_64BIT_LONG
-# define PPC_INT_FMT "l"
-#elif defined (__MSVCRT__)
-# define PPC_INT_FMT "I64"
-#else
-# define PPC_INT_FMT "ll"
-#endif
-
 /* The opcode table is an array of struct powerpc_opcode.  */
 
 struct powerpc_opcode

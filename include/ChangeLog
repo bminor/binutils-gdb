@@ -1,3 +1,8 @@
+2018-12-28  Alan Modra  <amodra@gmail.com>
+
+	PR 24028
+	* opcode/ppc.h (PPC_INT_FMT): Delete.
+
 2018-12-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23900
