@@ -3127,7 +3127,7 @@ _bfd_elf_init_reloc_shdr (bfd *abfd,
 int
 bfd_elf_get_default_section_type (flagword flags)
 {
-  if ((flags & SEC_ALLOC) != 0
+  if ((flags & (SEC_ALLOC | SEC_IS_COMMON)) != 0
       && (flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
     return SHT_NOBITS;
   return SHT_PROGBITS;

@@ -3119,7 +3119,7 @@ bfd_generic_define_common_symbol (bfd *output_bfd,
   /* Make sure the section is allocated in memory, and make sure that
      it is no longer a common section.  */
   section->flags |= SEC_ALLOC;
-  section->flags &= ~SEC_IS_COMMON;
+  section->flags &= ~(SEC_IS_COMMON | SEC_HAS_CONTENTS);
   return TRUE;
 }
 

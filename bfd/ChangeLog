@@ -1,5 +1,13 @@
 2018-12-28  Alan Modra  <amodra@gmail.com>
 
+	PR 24015
+	* elf.c (bfd_elf_get_default_section_type): Make common sections
+	SHT_NOBITS.
+	* linker.c (bfd_generic_define_common_symbol): Clear
+	SEC_HAS_CONTENTS.
+
+2018-12-28  Alan Modra  <amodra@gmail.com>
+
 	PR 23966
 	* libbfd.c (SSIZE_MAX): Define.
 	(bfd_malloc, bfd_realloc): Don't cast size to long to check for
