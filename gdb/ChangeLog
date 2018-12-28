@@ -1,3 +1,9 @@
+2018-12-28  Eli Zaretskii  <eliz@gnu.org>
+
+	* coffread.c (coff_symtab_read): Don't record in minsyms symbols
+	that are unresolved.  This avoids triggering an internal error
+	when stepping outside of 'main' in MinGW programs.
+
 2018-12-27  Tom Tromey  <tom@tromey.com>
 
 	* python/py-utils.c (gdbpy_handle_exception): Translate

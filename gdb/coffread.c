@@ -877,8 +877,10 @@ coff_symtab_read (minimal_symbol_reader &reader,
 	  int section = cs_to_section (cs, objfile);
 
 	  tmpaddr = cs->c_value;
-	  record_minimal_symbol (reader, cs, tmpaddr, mst_text,
-				 section, objfile);
+	  /* Don't record unresolved symbols.  */
+	  if (!(cs->c_secnum <= 0 && cs->c_value == 0))
+	    record_minimal_symbol (reader, cs, tmpaddr, mst_text,
+				   section, objfile);
 
 	  fcn_line_ptr = main_aux.x_sym.x_fcnary.x_fcn.x_lnnoptr;
 	  fcn_start_addr = tmpaddr;
