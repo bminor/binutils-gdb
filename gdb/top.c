@@ -1820,7 +1820,7 @@ show_history (const char *args, int from_tty)
 
 int info_verbose = 0;		/* Default verbose msgs off.  */
 
-/* Called by do_setshow_command.  An elaborate joke.  */
+/* Called by do_set_command.  An elaborate joke.  */
 void
 set_verbose (const char *args, int from_tty, struct cmd_list_element *c)
 {
@@ -1830,16 +1830,22 @@ set_verbose (const char *args, int from_tty, struct cmd_list_element *c)
   showcmd = lookup_cmd_1 (&cmdname, showlist, NULL, 1);
   gdb_assert (showcmd != NULL && showcmd != CMD_LIST_AMBIGUOUS);
 
+  if (c->doc && c->doc_allocated)
+    xfree ((char *) c->doc);
+  if (showcmd->doc && showcmd->doc_allocated)
+    xfree ((char *) showcmd->doc);
   if (info_verbose)
     {
-      c->doc = "Set verbose printing of informational messages.";
-      showcmd->doc = "Show verbose printing of informational messages.";
+      c->doc = _("Set verbose printing of informational messages.");
+      showcmd->doc = _("Show verbose printing of informational messages.");
     }
   else
     {
-      c->doc = "Set verbosity.";
-      showcmd->doc = "Show verbosity.";
+      c->doc = _("Set verbosity.");
+      showcmd->doc = _("Show verbosity.");
     }
+  c->doc_allocated = 0;
+  showcmd->doc_allocated = 0;
 }
 
 /* Init the history buffer.  Note that we are called after the init file(s)
