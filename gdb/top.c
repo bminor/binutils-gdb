@@ -900,10 +900,10 @@ gdb_in_secondary_prompt_p (struct ui *ui)
    text.  */
 
 static void
-gdb_readline_wrapper_line (char *line)
+gdb_readline_wrapper_line (gdb::unique_xmalloc_ptr<char> &&line)
 {
   gdb_assert (!gdb_readline_wrapper_done);
-  gdb_readline_wrapper_result = line;
+  gdb_readline_wrapper_result = line.release ();
   gdb_readline_wrapper_done = 1;
 
   /* Prevent operate-and-get-next from acting too early.  */
@@ -972,7 +972,7 @@ public:
 
 private:
 
-  void (*m_handler_orig) (char *);
+  void (*m_handler_orig) (gdb::unique_xmalloc_ptr<char> &&);
   int m_already_prompted_orig;
 
   /* Whether the target was async.  */

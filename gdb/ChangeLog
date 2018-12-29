@@ -1,3 +1,17 @@
+2018-12-30  Tom Tromey  <tom@tromey.com>
+
+	* event-top.h (command_line_handler): Update.
+	* top.c (class gdb_readline_wrapper_cleanup) <m_handler_orig>:
+	Update.
+	(gdb_readline_wrapper_line): Update.
+	* top.h (struct ui) <input_handler>: Take a unique_xmalloc_ptr.
+	(handle_line_of_input): Update.
+	* event-top.c: Update.
+	(gdb_readline_no_editing_callback): Update.
+	(command_line_handler): Take a unique_xmalloc_ptr.
+	(handle_line_of_input): Take a const char *.
+	(command_line_append_input_line): Take a const char *.
+
 2018-12-28  Tom Tromey  <tom@tromey.com>
 
 	* source-cache.c (get_language_name): Conditionally compile.

@@ -43,7 +43,8 @@
    interpreter.  */
 
 static void mi_execute_command_wrapper (const char *cmd);
-static void mi_execute_command_input_handler (char *cmd);
+static void mi_execute_command_input_handler
+  (gdb::unique_xmalloc_ptr<char> &&cmd);
 
 /* These are hooks that we put in place while doing interpreter_exec
    so we can report interesting things that happened "behind the MI's
@@ -294,14 +295,14 @@ mi_on_sync_execution_done (void)
 /* mi_execute_command_wrapper wrapper suitable for INPUT_HANDLER.  */
 
 static void
-mi_execute_command_input_handler (char *cmd)
+mi_execute_command_input_handler (gdb::unique_xmalloc_ptr<char> &&cmd)
 {
   struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
   struct ui *ui = current_ui;
 
   ui->prompt_state = PROMPT_NEEDED;
 
-  mi_execute_command_wrapper (cmd);
+  mi_execute_command_wrapper (cmd.get ());
 
   /* Print a prompt, indicating we're ready for further input, unless
      we just started a synchronous command.  In that case, we're about

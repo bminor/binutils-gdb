@@ -210,7 +210,7 @@ gdb_rl_callback_handler (char *rl) noexcept
 
   TRY
     {
-      ui->input_handler (rl);
+      ui->input_handler (gdb::unique_xmalloc_ptr<char> (rl));
     }
   CATCH (ex, RETURN_MASK_ALL)
     {
@@ -591,10 +591,10 @@ command_handler (const char *command)
    emulations, to CMD_LINE_BUFFER.  Returns the command line if we
    have a whole command line ready to be processed by the command
    interpreter or NULL if the command line isn't complete yet (input
-   line ends in a backslash).  Takes ownership of RL.  */
+   line ends in a backslash).  */
 
 static char *
-command_line_append_input_line (struct buffer *cmd_line_buffer, char *rl)
+command_line_append_input_line (struct buffer *cmd_line_buffer, const char *rl)
 {
   char *cmd;
   size_t len;
@@ -614,9 +614,6 @@ command_line_append_input_line (struct buffer *cmd_line_buffer, char *rl)
       buffer_grow (cmd_line_buffer, rl, len + 1);
       cmd = cmd_line_buffer->buffer;
     }
-
-  /* Allocated in readline.  */
-  xfree (rl);
 
   return cmd;
 }
@@ -643,7 +640,8 @@ command_line_append_input_line (struct buffer *cmd_line_buffer, char *rl)
 
 char *
 handle_line_of_input (struct buffer *cmd_line_buffer,
-		      char *rl, int repeat, const char *annotation_suffix)
+		      const char *rl, int repeat,
+		      const char *annotation_suffix)
 {
   struct ui *ui = current_ui;
   int from_tty = ui->instream == ui->stdin_stream;
@@ -746,13 +744,13 @@ handle_line_of_input (struct buffer *cmd_line_buffer,
    function.  */
 
 void
-command_line_handler (char *rl)
+command_line_handler (gdb::unique_xmalloc_ptr<char> &&rl)
 {
   struct buffer *line_buffer = get_command_line_buffer ();
   struct ui *ui = current_ui;
   char *cmd;
 
-  cmd = handle_line_of_input (line_buffer, rl, 1, "prompt");
+  cmd = handle_line_of_input (line_buffer, rl.get (), 1, "prompt");
   if (cmd == (char *) EOF)
     {
       /* stdin closed.  The connection with the terminal is gone.
@@ -846,7 +844,7 @@ gdb_readline_no_editing_callback (gdb_client_data client_data)
 
   buffer_grow_char (&line_buffer, '\0');
   result = buffer_finish (&line_buffer);
-  ui->input_handler (result);
+  ui->input_handler (gdb::unique_xmalloc_ptr<char> (result));
 }
 
 
