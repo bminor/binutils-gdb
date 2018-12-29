@@ -108,6 +108,8 @@ source_cache::extract_lines (const struct source_text &text, int first_line,
   return false;
 }
 
+#ifdef HAVE_SOURCE_HIGHLIGHT
+
 /* Return the Source Highlight language name, given a gdb language
    LANG.  Returns NULL if the language is not known.  */
 
@@ -159,6 +161,8 @@ get_language_name (enum language lang)
 
   return nullptr;
 }
+
+#endif /* HAVE_SOURCE_HIGHLIGHT */
 
 /* See source-cache.h.  */
 
