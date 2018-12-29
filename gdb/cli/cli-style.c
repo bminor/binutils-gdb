@@ -172,13 +172,13 @@ cli_style_option::add_setshow_commands (const char *name,
 					struct cmd_list_element **set_list,
 					struct cmd_list_element **show_list)
 {
-  m_show_prefix = std::string ("set ") + prefixname + " ";
+  m_set_prefix = std::string ("set ") + prefixname + " ";
   m_show_prefix = std::string ("show ") + prefixname + " ";
 
   add_prefix_cmd (name, no_class, do_set, prefix_doc, &m_set_list,
-		  m_show_prefix.c_str (), 0, set_list);
+		  m_set_prefix.c_str (), 0, set_list);
   add_prefix_cmd (name, no_class, do_show, prefix_doc, &m_show_list,
-		  m_set_prefix.c_str (), 0, show_list);
+		  m_show_prefix.c_str (), 0, show_list);
 
   add_setshow_enum_cmd ("foreground", theclass, cli_colors,
 			&m_foreground,
@@ -270,17 +270,17 @@ Configure function name colors and display intensity"),
 					    &style_set_list,
 					    &style_show_list);
   variable_name_style.add_setshow_commands ("variable", no_class,
-					    "style variable",
 					    _("\
 Variable name display styling\n\
 Configure variable name colors and display intensity"),
+					    "style variable",
 					    &style_set_list,
 					    &style_show_list);
   address_style.add_setshow_commands ("address", no_class,
-				      "style address",
 				      _("\
 Address display styling\n\
 Configure address colors and display intensity"),
+				      "style address",
 				      &style_set_list,
 				      &style_show_list);
 }
