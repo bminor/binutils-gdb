@@ -253,7 +253,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
           if (function != NULL)
             {
               struct type *ret_type =
-                  TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
+		check_typedef (TYPE_TARGET_TYPE (SYMBOL_TYPE (function)));
 
               /* Remember only non-void return types.  */
               if (TYPE_CODE (ret_type) != TYPE_CODE_VOID)

@@ -1706,7 +1706,8 @@ print_return_value_1 (struct ui_out *uiout, struct return_value_info *rv)
 void
 print_return_value (struct ui_out *uiout, struct return_value_info *rv)
 {
-  if (rv->type == NULL || TYPE_CODE (rv->type) == TYPE_CODE_VOID)
+  if (rv->type == NULL
+      || TYPE_CODE (check_typedef (rv->type)) == TYPE_CODE_VOID)
     return;
 
   TRY
@@ -1800,7 +1801,7 @@ finish_command_fsm_should_stop (struct thread_fsm *self,
 	internal_error (__FILE__, __LINE__,
 			_("finish_command: function has no target type"));
 
-      if (TYPE_CODE (rv->type) != TYPE_CODE_VOID)
+      if (TYPE_CODE (check_typedef (rv->type)) != TYPE_CODE_VOID)
 	{
 	  struct value *func;
 
