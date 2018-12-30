@@ -1212,7 +1212,7 @@ command_line_input (const char *prompt_arg, const char *annotation_suffix)
 
   while (1)
     {
-      char *rl;
+      gdb::unique_xmalloc_ptr<char> rl;
 
       /* Make sure that all output has been output.  Some machines may
          let you get away with leaving out some of the gdb_flush, but
@@ -1236,20 +1236,20 @@ command_line_input (const char *prompt_arg, const char *annotation_suffix)
 	  && from_tty
 	  && input_interactive_p (current_ui))
 	{
-	  rl = (*deprecated_readline_hook) (prompt);
+	  rl.reset ((*deprecated_readline_hook) (prompt));
 	}
       else if (command_editing_p
 	       && from_tty
 	       && input_interactive_p (current_ui))
 	{
-	  rl = gdb_readline_wrapper (prompt);
+	  rl.reset (gdb_readline_wrapper (prompt));
 	}
       else
 	{
-	  rl = gdb_readline_no_editing (prompt);
+	  rl.reset (gdb_readline_no_editing (prompt));
 	}
 
-      cmd = handle_line_of_input (&cmd_line_buffer, rl,
+      cmd = handle_line_of_input (&cmd_line_buffer, rl.get (),
 				  0, annotation_suffix);
       if (cmd == (char *) EOF)
 	{

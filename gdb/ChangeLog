@@ -1,3 +1,8 @@
+2018-12-31  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* top.c (command_line_input): Use unique_xmalloc_ptr to
+	manage memory allocated by readline.
+
 2018-12-30  Tom Tromey  <tom@tromey.com>
 
 	* event-top.h (command_line_handler): Update.
