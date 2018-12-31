@@ -265,7 +265,7 @@ print_one_catch_syscall (struct breakpoint *b,
 
       for (int iter : c->syscalls_to_be_caught)
         {
-          char *x = text;
+          char *previous_text = text;
           struct syscall s;
           get_syscall_by_number (gdbarch, iter, &s);
 
@@ -274,14 +274,15 @@ print_one_catch_syscall (struct breakpoint *b,
           else
             text = xstrprintf ("%s%d, ", text, iter);
 
-          /* We have to xfree the last 'text' (now stored at 'x')
-             because xstrprintf dynamically allocates new space for it
-             on every call.  */
-	  xfree (x);
+          /* We have to xfree previous_text because xstrprintf dynamically
+	     allocates new space for text on every call.  */
+	  xfree (previous_text);
         }
       /* Remove the last comma.  */
       text[strlen (text) - 2] = '\0';
       uiout->field_string ("what", text);
+      /* xfree last text.  */
+      xfree (text);
     }
   else
     uiout->field_string ("what", "<any syscall>");
