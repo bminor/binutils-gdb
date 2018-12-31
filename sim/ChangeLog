@@ -1,3 +1,7 @@
+2019-01-03  Pavel I. Kryukov  <kryukov@frtk.ru>
+
+	* sim-base.h: Add 'extern C' if header is compiled with C++.
+
 2018-12-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* common/acinclude.m4 (enable-cgen-maint): Support passing path to

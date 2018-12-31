@@ -55,6 +55,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef SIM_BASE_H
 #define SIM_BASE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Pre-declare certain types. */
 
 /* typedef <target-dependant> sim_cia; */
@@ -223,5 +227,9 @@ typedef struct {
 /* Functions for allocating/freeing a sim_state.  */
 SIM_DESC sim_state_alloc (SIM_OPEN_KIND kind, host_callback *callback);
 void sim_state_free (SIM_DESC);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SIM_BASE_H */
