@@ -96,7 +96,7 @@ extern unsigned int cp_find_first_component (const char *name);
 
 extern unsigned int cp_entire_prefix_len (const char *name);
 
-extern char *cp_func_name (const char *full_name);
+extern gdb::unique_xmalloc_ptr<char> cp_func_name (const char *full_name);
 
 extern gdb::unique_xmalloc_ptr<char> cp_remove_params
   (const char *demanged_name);

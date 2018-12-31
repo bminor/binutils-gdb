@@ -63,9 +63,9 @@ compile_cplus_instance::decl_name (const char *natural)
   if (natural == nullptr)
     return nullptr;
 
-  char *name = cp_func_name (natural);
+  gdb::unique_xmalloc_ptr<char> name = cp_func_name (natural);
   if (name != nullptr)
-    return gdb::unique_xmalloc_ptr<char> (name);
+    return name;
 
   return gdb::unique_xmalloc_ptr<char> (xstrdup (natural));
 }

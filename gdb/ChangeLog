@@ -1,5 +1,17 @@
 2019-01-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* compile/compile-cplus-types.c
+	(compile_cplus_instance::decl_name): Handle changes to
+	cp_func_name.
+	* cp-support.c (cp_func_name): Update header comment, update
+	return type.
+	* cp-support.h (cp_func_name): Update return type in declaration.
+	* valops.c (find_overload_match): Move temp_func local to top
+	level of function and change its type.  Use temp_func to hold and
+	delete temporary string obtained from cp_func_name.
+
+2019-01-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* remote.c (remote_target::remote_check_symbols): Convert `msg` to
 	gdb::char_vector, remove cleanup, and update uses of `msg`.
 

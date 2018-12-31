@@ -2520,6 +2520,7 @@ find_overload_match (gdb::array_view<value *> args,
 
   const char *obj_type_name = NULL;
   const char *func_name = NULL;
+  gdb::unique_xmalloc_ptr<char> temp_func;
   enum oload_classification match_quality;
   enum oload_classification method_match_quality = INCOMPATIBLE;
   enum oload_classification src_method_match_quality = INCOMPATIBLE;
@@ -2666,20 +2667,17 @@ find_overload_match (gdb::array_view<value *> args,
               && TYPE_CODE (check_typedef (SYMBOL_TYPE (fsym)))
 	      == TYPE_CODE_FUNC)
             {
-	      char *temp_func;
-
 	      temp_func = cp_func_name (qualified_name);
 
 	      /* If cp_func_name did not remove anything, the name of the
 	         symbol did not include scope or argument types - it was
 	         probably a C-style function.  */
-	      if (temp_func)
+	      if (temp_func != nullptr)
 		{
-		  make_cleanup (xfree, temp_func);
-		  if (strcmp (temp_func, qualified_name) == 0)
+		  if (strcmp (temp_func.get (), qualified_name) == 0)
 		    func_name = NULL;
 		  else
-		    func_name = temp_func;
+		    func_name = temp_func.get ();
 		}
             }
         }

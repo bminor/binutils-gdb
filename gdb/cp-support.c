@@ -808,10 +808,9 @@ method_name_from_physname (const char *physname)
 /* If FULL_NAME is the demangled name of a C++ function (including an
    arg list, possibly including namespace/class qualifications),
    return a new string containing only the function name (without the
-   arg list/class qualifications).  Otherwise, return NULL.  The
-   caller is responsible for freeing the memory in question.  */
+   arg list/class qualifications).  Otherwise, return NULL.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 cp_func_name (const char *full_name)
 {
   gdb::unique_xmalloc_ptr<char> ret;
@@ -820,14 +819,14 @@ cp_func_name (const char *full_name)
 
   info = cp_demangled_name_to_comp (full_name, NULL);
   if (!info)
-    return NULL;
+    return nullptr;
 
   ret_comp = unqualified_name_from_comp (info->tree);
 
   if (ret_comp != NULL)
     ret = cp_comp_to_string (ret_comp, 10);
 
-  return ret.release ();
+  return ret;
 }
 
 /* Helper for cp_remove_params.  DEMANGLED_NAME is the name of a
