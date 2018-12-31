@@ -282,36 +282,33 @@ opr_emit_disassembly (const struct operand *opr,
         struct memory_operand *mo = (struct memory_operand *) opr;
 	(*info->fprintf_func) (info->stream, "%c", mo->indirect ? '[' : '(');
 
-        if (mo->base_offset != 0)
-          {
-            (*info->fprintf_func) (info->stream, "%d", mo->base_offset);
-          }
-        else if (mo->n_regs > 0)
-          {
-	    const char *fmt;
-	    switch (mo->mutation)
-	      {
-	      case OPND_RM_PRE_DEC:
-		fmt = "-%s";
-		break;
-	      case OPND_RM_PRE_INC:
-		fmt = "+%s";
-		break;
-	      case OPND_RM_POST_DEC:
-		fmt = "%s-";
-		break;
-	      case OPND_RM_POST_INC:
-		fmt = "%s+";
-		break;
-	      case OPND_RM_NONE:
-	      default:
-		fmt = "%s";
-		break;
-	      }
-            (*info->fprintf_func) (info->stream, fmt,
-				   registers[mo->regs[0]].name);
-            used_reg = 1;
-          }
+	const char *fmt;
+	assert (mo->mutation == OPND_RM_NONE || mo->n_regs == 1);
+	switch (mo->mutation)
+	  {
+	  case OPND_RM_PRE_DEC:
+	    fmt = "-%s";
+	    break;
+	  case OPND_RM_PRE_INC:
+	    fmt = "+%s";
+	    break;
+	  case OPND_RM_POST_DEC:
+	    fmt = "%s-";
+	    break;
+	  case OPND_RM_POST_INC:
+	    fmt = "%s+";
+	    break;
+	  case OPND_RM_NONE:
+	  default:
+	    if (mo->n_regs < 2)
+	      (*info->fprintf_func) (info->stream, (mo->n_regs == 0) ? "%d" : "%d,", mo->base_offset);
+	    fmt = "%s";
+	    break;
+	  }
+	if (mo->n_regs > 0)
+	  (*info->fprintf_func) (info->stream, fmt,
+				 registers[mo->regs[0]].name);
+	used_reg = 1;
 
         if (mo->n_regs > used_reg)
           {

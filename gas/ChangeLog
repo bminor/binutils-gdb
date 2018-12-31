@@ -1,3 +1,8 @@
+2019-01-09  John Darrington <john@darrington.wattle.id.au>
+
+        * testsuite/gas/s12z/jsr.s: New case.
+	* testsuite/gas/s12z/jsr.d: New case.
+
 2019-01-09  Andrew Paprocki  <andrew@ishiboo.com>
 
 	* configure: Regenerate.
