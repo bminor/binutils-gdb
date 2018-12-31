@@ -1,5 +1,10 @@
 2019-01-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* valops.c (find_overload_match): Remove use of null_cleanup, and
+	calls to do_cleanups.
+
+2019-01-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* compile/compile-cplus-types.c
 	(compile_cplus_instance::decl_name): Handle changes to
 	cp_func_name.

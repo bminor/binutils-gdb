@@ -2516,8 +2516,6 @@ find_overload_match (gdb::array_view<value *> args,
   struct type *basetype = NULL;
   LONGEST boffset;
 
-  struct cleanup *all_cleanups = make_cleanup (null_cleanup, NULL);
-
   const char *obj_type_name = NULL;
   const char *func_name = NULL;
   gdb::unique_xmalloc_ptr<char> temp_func;
@@ -2547,7 +2545,6 @@ find_overload_match (gdb::array_view<value *> args,
 	  if (*valp)
 	    {
 	      *staticp = 1;
-	      do_cleanups (all_cleanups);
 	      return 0;
 	    }
 	}
@@ -2693,7 +2690,6 @@ find_overload_match (gdb::array_view<value *> args,
       if (func_name == NULL)
         {
 	  *symp = fsym;
-	  do_cleanups (all_cleanups);
           return 0;
         }
 
@@ -2819,8 +2815,6 @@ find_overload_match (gdb::array_view<value *> args,
 	}
       *objp = temp;
     }
-
-  do_cleanups (all_cleanups);
 
   switch (match_quality)
     {
