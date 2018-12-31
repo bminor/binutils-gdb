@@ -1,5 +1,13 @@
 2019-01-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* linux-nat.c (delete_lwp_cleanup): Delete.
+	(struct lwp_deleter): New struct.
+	(lwp_info_up): New typedef.
+	(linux_nat_target::follow_fork): Delete cleanup, and make use of
+	lwp_info_up.
+
+2019-01-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* linux-fork.c (class scoped_switch_fork_info): New class.
 	(inferior_call_waitpid): Update to use scoped_switch_fork_info.
 
