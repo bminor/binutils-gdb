@@ -1954,7 +1954,7 @@ fragment <<EOF
 /* A variant of lang_output_section_find used by place_orphan.  */
 
 static lang_output_section_statement_type *
-output_rel_find (asection *sec, int isdyn)
+output_rel_find (int isdyn, int rela)
 {
   lang_output_section_statement_type *lookup;
   lang_output_section_statement_type *last = NULL;
@@ -1962,7 +1962,6 @@ output_rel_find (asection *sec, int isdyn)
   lang_output_section_statement_type *last_ro_alloc = NULL;
   lang_output_section_statement_type *last_rel = NULL;
   lang_output_section_statement_type *last_rel_alloc = NULL;
-  int rela = sec->name[4] == 'a';
 
   for (lookup = &lang_output_section_statement.head->output_section_statement;
        lookup != NULL;
@@ -2270,8 +2269,9 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
   else if ((flags & SEC_ALLOC) == 0)
     ;
   else if ((flags & SEC_LOAD) != 0
-	   && ((elfinput && sh_type == SHT_NOTE)
-	       || (!elfinput && CONST_STRNEQ (secname, ".note"))))
+	   && (elfinput
+	       ? sh_type == SHT_NOTE
+	       : CONST_STRNEQ (secname, ".note")))
     place = &hold[orphan_interp];
   else if ((flags & (SEC_LOAD | SEC_HAS_CONTENTS | SEC_THREAD_LOCAL)) == 0)
     place = &hold[orphan_bss];
@@ -2281,9 +2281,10 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
     place = &hold[orphan_tdata];
   else if ((flags & SEC_READONLY) == 0)
     place = &hold[orphan_data];
-  else if (((elfinput && (sh_type == SHT_RELA || sh_type == SHT_REL))
-	    || (!elfinput && CONST_STRNEQ (secname, ".rel")))
-	   && (flags & SEC_LOAD) != 0)
+  else if ((flags & SEC_LOAD) != 0
+	   && (elfinput
+	       ? sh_type == SHT_RELA || sh_type == SHT_REL
+	       : CONST_STRNEQ (secname, ".rel")))
     place = &hold[orphan_rel];
   else if ((flags & SEC_CODE) == 0)
     place = &hold[orphan_rodata];
@@ -2298,7 +2299,10 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 	  if (place->name != NULL)
 	    place->os = lang_output_section_find (place->name);
 	  else
-	    place->os = output_rel_find (s, isdyn);
+	    {
+	      int rela = elfinput ? sh_type == SHT_RELA : secname[4] == 'a';
+	      place->os = output_rel_find (isdyn, rela);
+	    }
 	}
       after = place->os;
       if (after == NULL)

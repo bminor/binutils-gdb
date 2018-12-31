@@ -1,3 +1,11 @@
+2018-12-31  Alan Modra  <amodra@gmail.com>
+
+	PR 24042
+	* emultempl/elf32.em (output_rel_find): Drop "sec" param.  Add
+	"rela".
+	(gld${EMULATION_NAME}_place_orphan): Use sh_type to calculate
+	"rela" param of output_rel_find when ELF.  Tidy uses of elfinput.
+
 2018-12-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/23997
