@@ -13841,7 +13841,15 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      bfd_put_32 (input_bfd, insn1,
 			  contents + rel->r_offset - d_offset);
 	      if (offset != (bfd_vma) -1)
-		bfd_put_32 (input_bfd, insn2, contents + offset);
+		{
+		  bfd_put_32 (input_bfd, insn2, contents + offset);
+		  if (offset + 8 <= input_section->size)
+		    {
+		      insn2 = bfd_get_32 (input_bfd, contents + offset + 4);
+		      if (insn2 == LD_R2_0R1 + STK_TOC (htab))
+			bfd_put_32 (input_bfd, NOP, contents + offset + 4);
+		    }
+		}
 	      if ((tls_mask & tls_gd) == 0
 		  && (tls_gd == 0 || toc_symndx != 0))
 		{

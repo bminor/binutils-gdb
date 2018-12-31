@@ -1,3 +1,9 @@
+2018-12-31  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section <tls_ldgd_opt>): When
+	editing an old-style __tls_get_addr call, replace a toc restore
+	insn with a nop.
+
 2018-12-28  Alan Modra  <amodra@gmail.com>
 
 	PR 24015
