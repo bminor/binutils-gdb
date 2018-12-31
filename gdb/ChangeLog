@@ -1,5 +1,10 @@
 2019-01-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* linux-fork.c (class scoped_switch_fork_info): New class.
+	(inferior_call_waitpid): Update to use scoped_switch_fork_info.
+
+2019-01-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* valops.c (find_overload_match): Remove use of null_cleanup, and
 	calls to do_cleanups.
 

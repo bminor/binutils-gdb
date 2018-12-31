@@ -437,45 +437,64 @@ linux_fork_detach (int from_tty)
     delete_fork (inferior_ptid);
 }
 
-static void
-inferior_call_waitpid_cleanup (void *fp)
-{
-  struct fork_info *oldfp = (struct fork_info *) fp;
+/* Temporarily switch to the infrun state stored on the fork_info
+   identified by a given ptid_t.  When this object goes out of scope,
+   restore the currently selected infrun state.   */
 
-  if (oldfp)
-    {
-      /* Switch back to inferior_ptid.  */
-      remove_breakpoints ();
-      fork_load_infrun_state (oldfp);
-      insert_breakpoints ();
-    }
-}
+class scoped_switch_fork_info
+{
+public:
+  /* Switch to the infrun state held on the fork_info identified by
+     PPTID.  If PPTID is the current inferior then no switch is done.  */
+  scoped_switch_fork_info (ptid_t pptid)
+    : m_oldfp (nullptr)
+  {
+    if (pptid != inferior_ptid)
+      {
+	struct fork_info *newfp = nullptr;
+
+	/* Switch to pptid.  */
+	m_oldfp = find_fork_ptid (inferior_ptid);
+	gdb_assert (m_oldfp != nullptr);
+	newfp = find_fork_ptid (pptid);
+	gdb_assert (newfp != nullptr);
+	fork_save_infrun_state (m_oldfp, 1);
+	remove_breakpoints ();
+	fork_load_infrun_state (newfp);
+	insert_breakpoints ();
+      }
+  }
+
+  /* Restore the previously selected infrun state.  If the constructor
+     didn't need to switch states, then nothing is done here either.  */
+  ~scoped_switch_fork_info ()
+  {
+    if (m_oldfp != nullptr)
+      {
+	/* Switch back to inferior_ptid.  */
+	remove_breakpoints ();
+	fork_load_infrun_state (m_oldfp);
+	insert_breakpoints ();
+      }
+  }
+
+  DISABLE_COPY_AND_ASSIGN (scoped_switch_fork_info);
+
+private:
+  /* The fork_info for the previously selected infrun state, or nullptr if
+     we were already in the desired state, and nothing needs to be
+     restored.  */
+  struct fork_info *m_oldfp;
+};
 
 static int
 inferior_call_waitpid (ptid_t pptid, int pid)
 {
   struct objfile *waitpid_objf;
   struct value *waitpid_fn = NULL;
-  struct value *argv[3], *retv;
-  struct gdbarch *gdbarch = get_current_arch ();
-  struct fork_info *oldfp = NULL, *newfp = NULL;
-  struct cleanup *old_cleanup;
   int ret = -1;
 
-  if (pptid != inferior_ptid)
-    {
-      /* Switch to pptid.  */
-      oldfp = find_fork_ptid (inferior_ptid);
-      gdb_assert (oldfp != NULL);
-      newfp = find_fork_ptid (pptid);
-      gdb_assert (newfp != NULL);
-      fork_save_infrun_state (oldfp, 1);
-      remove_breakpoints ();
-      fork_load_infrun_state (newfp);
-      insert_breakpoints ();
-    }
-
-  old_cleanup = make_cleanup (inferior_call_waitpid_cleanup, oldfp);
+  scoped_switch_fork_info switch_fork_info (pptid);
 
   /* Get the waitpid_fn.  */
   if (lookup_minimal_symbol ("waitpid", NULL, NULL).minsym != NULL)
@@ -483,22 +502,22 @@ inferior_call_waitpid (ptid_t pptid, int pid)
   if (!waitpid_fn
       && lookup_minimal_symbol ("_waitpid", NULL, NULL).minsym != NULL)
     waitpid_fn = find_function_in_inferior ("_waitpid", &waitpid_objf);
-  if (!waitpid_fn)
-    goto out;
+  if (waitpid_fn != nullptr)
+    {
+      struct gdbarch *gdbarch = get_current_arch ();
+      struct value *argv[3], *retv;
 
-  /* Get the argv.  */
-  argv[0] = value_from_longest (builtin_type (gdbarch)->builtin_int, pid);
-  argv[1] = value_from_pointer (builtin_type (gdbarch)->builtin_data_ptr, 0);
-  argv[2] = value_from_longest (builtin_type (gdbarch)->builtin_int, 0);
+      /* Get the argv.  */
+      argv[0] = value_from_longest (builtin_type (gdbarch)->builtin_int, pid);
+      argv[1] = value_from_pointer (builtin_type (gdbarch)->builtin_data_ptr, 0);
+      argv[2] = value_from_longest (builtin_type (gdbarch)->builtin_int, 0);
 
-  retv = call_function_by_hand (waitpid_fn, NULL, argv);
-  if (value_as_long (retv) < 0)
-    goto out;
+      retv = call_function_by_hand (waitpid_fn, NULL, argv);
 
-  ret = 0;
+      if (value_as_long (retv) >= 0)
+	ret = 0;
+    }
 
-out:
-  do_cleanups (old_cleanup);
   return ret;
 }
 
