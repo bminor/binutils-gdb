@@ -4883,7 +4883,7 @@ init_all_packet_configs (void)
 void
 remote_target::remote_check_symbols ()
 {
-  char *msg, *reply, *tmp;
+  char *reply, *tmp;
   int end;
   long reply_size;
   struct cleanup *old_chain;
@@ -4905,10 +4905,9 @@ remote_target::remote_check_symbols ()
 
   /* Allocate a message buffer.  We can't reuse the input buffer in RS,
      because we need both at the same time.  */
-  msg = (char *) xmalloc (get_remote_packet_size ());
-  old_chain = make_cleanup (xfree, msg);
+  gdb::char_vector msg (get_remote_packet_size ());
   reply = (char *) xmalloc (get_remote_packet_size ());
-  make_cleanup (free_current_contents, &reply);
+  old_chain = make_cleanup (free_current_contents, &reply);
   reply_size = get_remote_packet_size ();
 
   /* Invite target to request symbol lookups.  */
@@ -4922,11 +4921,13 @@ remote_target::remote_check_symbols ()
       struct bound_minimal_symbol sym;
 
       tmp = &reply[8];
-      end = hex2bin (tmp, (gdb_byte *) msg, strlen (tmp) / 2);
+      end = hex2bin (tmp, reinterpret_cast <gdb_byte *> (msg.data ()),
+		     strlen (tmp) / 2);
       msg[end] = '\0';
-      sym = lookup_minimal_symbol (msg, NULL, NULL);
+      sym = lookup_minimal_symbol (msg.data (), NULL, NULL);
       if (sym.minsym == NULL)
-	xsnprintf (msg, get_remote_packet_size (), "qSymbol::%s", &reply[8]);
+	xsnprintf (msg.data (), get_remote_packet_size (), "qSymbol::%s",
+		   &reply[8]);
       else
 	{
 	  int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
@@ -4938,11 +4939,11 @@ remote_target::remote_check_symbols ()
 							 sym_addr,
 							 current_top_target ());
 
-	  xsnprintf (msg, get_remote_packet_size (), "qSymbol:%s:%s",
+	  xsnprintf (msg.data (), get_remote_packet_size (), "qSymbol:%s:%s",
 		     phex_nz (sym_addr, addr_size), &reply[8]);
 	}
-  
-      putpkt (msg);
+
+      putpkt (msg.data ());
       getpkt (&reply, &reply_size, 0);
     }
 
