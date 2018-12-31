@@ -115,20 +115,6 @@ cli_style_option::style () const
 /* See cli-style.h.  */
 
 void
-cli_style_option::do_set (const char *args, int from_tty)
-{
-}
-
-/* See cli-style.h.  */
-
-void
-cli_style_option::do_show (const char *args, int from_tty)
-{
-}
-
-/* See cli-style.h.  */
-
-void
 cli_style_option::do_show_foreground (struct ui_file *file, int from_tty,
 				      struct cmd_list_element *cmd,
 				      const char *value)
@@ -168,12 +154,15 @@ void
 cli_style_option::add_setshow_commands (const char *name,
 					enum command_class theclass,
 					const char *prefix_doc,
-					const char *prefixname,
 					struct cmd_list_element **set_list,
-					struct cmd_list_element **show_list)
+					void (*do_set) (const char *args,
+							int from_tty),
+					struct cmd_list_element **show_list,
+					void (*do_show) (const char *args,
+							 int from_tty))
 {
-  m_set_prefix = std::string ("set ") + prefixname + " ";
-  m_show_prefix = std::string ("show ") + prefixname + " ";
+  m_set_prefix = std::string ("set style ") + name + " ";
+  m_show_prefix = std::string ("show style ") + name + " ";
 
   add_prefix_cmd (name, no_class, do_set, prefix_doc, &m_set_list,
 		  m_set_prefix.c_str (), 0, set_list);
@@ -198,23 +187,29 @@ cli_style_option::add_setshow_commands (const char *name,
 			&m_set_list, &m_show_list, (void *) name);
   add_setshow_enum_cmd ("intensity", theclass, cli_intensities,
 			&m_intensity,
-			_("Set the display intensity color for this property"),
-			_("\
-Show the display intensity color for this property"),
+			_("Set the display intensity for this property"),
+			_("Show the display intensity for this property"),
 			nullptr,
 			nullptr,
 			do_show_intensity,
 			&m_set_list, &m_show_list, (void *) name);
 }
 
+static cmd_list_element *style_set_list;
+static cmd_list_element *style_show_list;
+
 static void
 set_style (const char *arg, int from_tty)
 {
+  printf_unfiltered (_("\"set style\" must be followed "
+		       "by an appropriate subcommand.\n"));
+  help_list (style_set_list, "set style ", all_commands, gdb_stdout);
 }
 
 static void
 show_style (const char *arg, int from_tty)
 {
+  cmd_show_list (style_show_list, from_tty, "");
 }
 
 static void
@@ -236,9 +231,6 @@ show_style_enabled (struct ui_file *file, int from_tty,
 void
 _initialize_cli_style ()
 {
-  static cmd_list_element *style_set_list;
-  static cmd_list_element *style_show_list;
-
   add_prefix_cmd ("style", no_class, set_style, _("\
 Style-specific settings\n\
 Configure various style-related variables, such as colors"),
@@ -255,32 +247,43 @@ If enabled, output to the terminal is styled."),
 			   set_style_enabled, show_style_enabled,
 			   &style_set_list, &style_show_list);
 
-  file_name_style.add_setshow_commands ("filename", no_class,
-					_("\
+#define STYLE_ADD_SETSHOW_COMMANDS(STYLE, NAME, PREFIX_DOC)	  \
+  STYLE.add_setshow_commands (NAME, no_class, PREFIX_DOC,		\
+			      &style_set_list,				\
+			      [] (const char *args, int from_tty)	\
+			      {						\
+				help_list				\
+				  (STYLE.set_list (),			\
+				   "set style " NAME " ",		\
+				   all_commands,			\
+				   gdb_stdout);				\
+			      },					\
+			      &style_show_list,				\
+			      [] (const char *args, int from_tty)	\
+			      {						\
+				cmd_show_list				\
+				  (STYLE.show_list (),			\
+				   from_tty,				\
+				   "");					\
+			      })
+
+  STYLE_ADD_SETSHOW_COMMANDS (file_name_style, "filename",
+			      _("\
 Filename display styling\n\
-Configure filename colors and display intensity."),
-					"style filename",
-					&style_set_list,
-					&style_show_list);
-  function_name_style.add_setshow_commands ("function", no_class,
-					    _("\
+Configure filename colors and display intensity."));
+
+  STYLE_ADD_SETSHOW_COMMANDS (function_name_style, "function",
+			      _("\
 Function name display styling\n\
-Configure function name colors and display intensity"),
-					    "style function",
-					    &style_set_list,
-					    &style_show_list);
-  variable_name_style.add_setshow_commands ("variable", no_class,
-					    _("\
+Configure function name colors and display intensity"));
+
+  STYLE_ADD_SETSHOW_COMMANDS (variable_name_style, "variable",
+			      _("\
 Variable name display styling\n\
-Configure variable name colors and display intensity"),
-					    "style variable",
-					    &style_set_list,
-					    &style_show_list);
-  address_style.add_setshow_commands ("address", no_class,
-				      _("\
+Configure variable name colors and display intensity"));
+
+  STYLE_ADD_SETSHOW_COMMANDS (address_style, "address",
+			      _("\
 Address display styling\n\
-Configure address colors and display intensity"),
-				      "style address",
-				      &style_set_list,
-				      &style_show_list);
+Configure address colors and display intensity"));
 }

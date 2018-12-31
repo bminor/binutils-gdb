@@ -1,3 +1,16 @@
+2019-01-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* cli/cli-style.h (class cli_style_option): <add_setshow_commands>
+	Remove arg prefixname, add do_set and do_show.
+	Add member functions set_list and show_list.
+	* cli/cli-style.c (class cli_style_option): Update accordingly.
+	(style_set_list): Move to file scope.
+	(style_show_list): Likewise.
+	(set_style): Call help_list.
+	(show_style): Call cmd_show_list.
+	(_initialize_cli_style): New macro STYLE_ADD_SETSHOW_COMMANDS.
+	Update to use the new macro.
+
 2019-10-12  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (_initialize_ada_language): Expand the help text

@@ -38,9 +38,17 @@ public:
   void add_setshow_commands (const char *name,
 			     enum command_class theclass,
 			     const char *prefix_doc,
-			     const char *prefixname,
 			     struct cmd_list_element **set_list,
-			     struct cmd_list_element **show_list);
+			     void (*do_set) (const char *args, int from_tty),
+			     struct cmd_list_element **show_list,
+			     void (*do_show) (const char *args, int from_tty));
+
+  /* Return the 'set style NAME' command list, that can be used
+     to build a lambda DO_SET to call add_setshow_commands.  */
+  struct cmd_list_element *set_list () { return m_set_list; };
+
+  /* Same as SET_LIST but for the show command list.  */
+  struct cmd_list_element *show_list () { return m_show_list; };
 
 private:
 
@@ -59,10 +67,6 @@ private:
   struct cmd_list_element *m_set_list = nullptr;
   struct cmd_list_element *m_show_list = nullptr;
 
-  /* Callback to set a value.  */
-  static void do_set (const char *args, int from_tty);
-  /* Callback to show a value.  */
-  static void do_show (const char *args, int from_tty);
   /* Callback to show the foreground.  */
   static void do_show_foreground (struct ui_file *file, int from_tty,
 				  struct cmd_list_element *cmd,
