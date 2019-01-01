@@ -1014,15 +1014,11 @@ record_full_base_target::close ()
     }
 
   /* Release record_full_core_buf_list.  */
-  if (record_full_core_buf_list)
+  while (record_full_core_buf_list)
     {
-      for (entry = record_full_core_buf_list->prev; entry;
-	   entry = entry->prev)
-	{
-	  xfree (record_full_core_buf_list);
-	  record_full_core_buf_list = entry;
-	}
-      record_full_core_buf_list = NULL;
+      entry = record_full_core_buf_list;
+      record_full_core_buf_list = record_full_core_buf_list->prev;
+      xfree (entry);
     }
 
   if (record_full_async_inferior_event_token)
