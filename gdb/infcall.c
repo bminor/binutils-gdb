@@ -1189,8 +1189,10 @@ call_function_by_hand_dummy (struct value *function,
 	    return retval;
 	  }
 
-	/* Didn't complete.  Restore previous state machine, and
-	   handle the error.  */
+	/* Didn't complete.  Clean up / destroy the call FSM, and restore the
+	   previous state machine, and handle the error.  */
+	thread_fsm_clean_up (call_thread->thread_fsm, call_thread.get ());
+	thread_fsm_delete (call_thread->thread_fsm);
 	call_thread->thread_fsm = saved_sm;
       }
   }
