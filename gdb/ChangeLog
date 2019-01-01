@@ -1,5 +1,9 @@
 2019-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	Update copyright year range in all GDB files.
+
+2019-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* config/djgpp/fnchange.lst: Add entry for gdb/ChangeLog-2018.
 
 For older changes see ChangeLog-2018.

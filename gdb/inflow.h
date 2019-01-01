@@ -1,6 +1,6 @@
 /* Low level interface to ptrace, for GDB when running under Unix.
 
-   Copyright (C) 2003-2018 Free Software Foundation, Inc.
+   Copyright (C) 2003-2019 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

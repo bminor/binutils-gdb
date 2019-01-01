@@ -3,7 +3,7 @@
 // Note: This file has been stolen from the gcc repo
 // (libstdc++-v3/include/experimental/string_view) and has local modifications.
 
-// Copyright (C) 2013-2018 Free Software Foundation, Inc.
+// Copyright (C) 2013-2019 Free Software Foundation, Inc.
 //
 // This file is part of the GNU ISO C++ Library.  This library is free
 // software; you can redistribute it and/or modify it under the

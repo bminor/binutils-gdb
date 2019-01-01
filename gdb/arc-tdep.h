@@ -1,6 +1,6 @@
 /* Target dependent code for ARC arhitecture, for GDB.
 
-   Copyright 2005-2018 Free Software Foundation, Inc.
+   Copyright 2005-2019 Free Software Foundation, Inc.
    Contributed by Synopsys Inc.
 
    This file is part of GDB.
