@@ -1598,6 +1598,8 @@ search_command_helper (const char *regex, int from_tty, bool forward)
       else
 	{
 	  line--;
+	  if (line < 1)
+	    break;
 	  if (fseek (stream.get (),
 		     current_source_symtab->line_charpos[line - 1], 0) < 0)
 	    {

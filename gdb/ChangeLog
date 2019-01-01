@@ -1,5 +1,10 @@
 2019-01-01  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* source.c (search_command_helper): Stop reverse search
+	when line 1 has been searched.
+
+2019-01-01  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* record-full.c (record_full_base_target::close): Rewrite
 	record_full_core_buf_list free logic.
 
