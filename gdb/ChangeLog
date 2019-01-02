@@ -1,5 +1,17 @@
 2019-01-02  Tom Tromey  <tom@tromey.com>
 
+	* xml-tdesc.c (xml_cache): Hold a target_desc_up.
+	(tdesc_parse_xml): Remove cleanups.
+	* target-descriptions.h (make_cleanup_free_target_description):
+	Don't declare.
+	(target_desc_deleter): New struct.
+	(target_desc_up): New typedef.
+	* target-descriptions.c (target_desc_deleter::operator()): Rename
+	from free_target_description.
+	(make_cleanup_free_target_description): Remove.
+
+2019-01-02  Tom Tromey  <tom@tromey.com>
+
 	* linespec.c (struct linespec_parser): Rename from ls_parser.  Add
 	constructor, destructor.
 	(linespec_parser): Remove typedef.

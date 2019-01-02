@@ -1138,18 +1138,10 @@ allocate_target_description (void)
   return new target_desc ();
 }
 
-static void
-free_target_description (void *arg)
+void
+target_desc_deleter::operator() (struct target_desc *target_desc) const
 {
-  struct target_desc *target_desc = (struct target_desc *) arg;
-
   delete target_desc;
-}
-
-struct cleanup *
-make_cleanup_free_target_description (struct target_desc *target_desc)
-{
-  return make_cleanup (free_target_description, target_desc);
 }
 
 void

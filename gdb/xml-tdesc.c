@@ -66,7 +66,7 @@ tdesc_parse_xml (const char *document, xml_fetch_another fetcher,
    then we will create unnecessary duplicate gdbarches.  See
    gdbarch_list_lookup_by_info.  */
 
-static std::unordered_map<std::string, target_desc *> xml_cache;
+static std::unordered_map<std::string, target_desc_up> xml_cache;
 
 /* Callback data for target description parsing.  */
 
@@ -637,25 +637,22 @@ tdesc_parse_xml (const char *document, xml_fetch_another fetcher,
      previously parsed.  */
   const auto it = xml_cache.find (expanded_text);
   if (it != xml_cache.end ())
-    return it->second;
+    return it->second.get ();
 
   memset (&data, 0, sizeof (struct tdesc_parsing_data));
-  data.tdesc = allocate_target_description ();
-  struct cleanup *result_cleanup
-    = make_cleanup_free_target_description (data.tdesc);
+  target_desc_up description (allocate_target_description ());
+  data.tdesc = description.get ();
 
   if (gdb_xml_parse_quick (_("target description"), "gdb-target.dtd",
 			   tdesc_elements, expanded_text.c_str (), &data) == 0)
     {
       /* Parsed successfully.  */
-      xml_cache.emplace (std::move (expanded_text), data.tdesc);
-      discard_cleanups (result_cleanup);
+      xml_cache.emplace (std::move (expanded_text), std::move (description));
       return data.tdesc;
     }
   else
     {
       warning (_("Could not load XML target description; ignoring"));
-      do_cleanups (result_cleanup);
       return NULL;
     }
 }
