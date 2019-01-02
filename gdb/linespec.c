@@ -281,8 +281,18 @@ typedef struct ls_token linespec_token;
 
 /* An instance of the linespec parser.  */
 
-struct ls_parser
+struct linespec_parser
 {
+  linespec_parser (int flags, const struct language_defn *language,
+		   struct program_space *search_pspace,
+		   struct symtab *default_symtab,
+		   int default_line,
+		   struct linespec_result *canonical);
+
+  ~linespec_parser ();
+
+  DISABLE_COPY_AND_ASSIGN (linespec_parser);
+
   /* Lexer internal data  */
   struct
   {
@@ -295,43 +305,42 @@ struct ls_parser
 
     /* The current token.  */
     linespec_token current;
-  } lexer;
+  } lexer {};
 
   /* Is the entire linespec quote-enclosed?  */
-  int is_quote_enclosed;
+  int is_quote_enclosed = 0;
 
   /* The state of the parse.  */
-  struct linespec_state state;
+  struct linespec_state state {};
 #define PARSER_STATE(PPTR) (&(PPTR)->state)
 
   /* The result of the parse.  */
-  struct linespec result;
+  struct linespec result {};
 #define PARSER_RESULT(PPTR) (&(PPTR)->result)
 
   /* What the parser believes the current word point should complete
      to.  */
-  linespec_complete_what complete_what;
+  linespec_complete_what complete_what = linespec_complete_what::NOTHING;
 
   /* The completion word point.  The parser advances this as it skips
      tokens.  At some point the input string will end or parsing will
      fail, and then we attempt completion at the captured completion
      word point, interpreting the string at completion_word as
      COMPLETE_WHAT.  */
-  const char *completion_word;
+  const char *completion_word = nullptr;
 
   /* If the current token was a quoted string, then this is the
      quoting character (either " or ').  */
-  int completion_quote_char;
+  int completion_quote_char = 0;
 
   /* If the current token was a quoted string, then this points at the
      end of the quoted string.  */
-  const char *completion_quote_end;
+  const char *completion_quote_end = nullptr;
 
   /* If parsing for completion, then this points at the completion
      tracker.  Otherwise, this is NULL.  */
-  struct completion_tracker *completion_tracker;
+  struct completion_tracker *completion_tracker = nullptr;
 };
-typedef struct ls_parser linespec_parser;
 
 /* A convenience macro for accessing the explicit location result of
    the parser.  */
@@ -2735,22 +2744,19 @@ linespec_state_constructor (struct linespec_state *self,
 
 /* Initialize a new linespec parser.  */
 
-static void
-linespec_parser_new (linespec_parser *parser,
-		     int flags, const struct language_defn *language,
-		     struct program_space *search_pspace,
-		     struct symtab *default_symtab,
-		     int default_line,
-		     struct linespec_result *canonical)
+linespec_parser::linespec_parser (int flags,
+				  const struct language_defn *language,
+				  struct program_space *search_pspace,
+				  struct symtab *default_symtab,
+				  int default_line,
+				  struct linespec_result *canonical)
 {
-  memset (parser, 0, sizeof (linespec_parser));
-  parser->lexer.current.type = LSTOKEN_CONSUMED;
-  memset (PARSER_RESULT (parser), 0, sizeof (struct linespec));
-  PARSER_RESULT (parser)->file_symtabs = new std::vector<symtab *> ();
-  PARSER_EXPLICIT (parser)->func_name_match_type
+  lexer.current.type = LSTOKEN_CONSUMED;
+  PARSER_RESULT (this)->file_symtabs = new std::vector<symtab *> ();
+  PARSER_EXPLICIT (this)->func_name_match_type
     = symbol_name_match_type::WILD;
-  PARSER_EXPLICIT (parser)->line_offset.sign = LINE_OFFSET_UNKNOWN;
-  linespec_state_constructor (PARSER_STATE (parser), flags, language,
+  PARSER_EXPLICIT (this)->line_offset.sign = LINE_OFFSET_UNKNOWN;
+  linespec_state_constructor (PARSER_STATE (this), flags, language,
 			      search_pspace,
 			      default_symtab, default_line, canonical);
 }
@@ -2765,22 +2771,19 @@ linespec_state_destructor (struct linespec_state *self)
 
 /* Delete a linespec parser.  */
 
-static void
-linespec_parser_delete (void *arg)
+linespec_parser::~linespec_parser ()
 {
-  linespec_parser *parser = (linespec_parser *) arg;
+  xfree (PARSER_EXPLICIT (this)->source_filename);
+  xfree (PARSER_EXPLICIT (this)->label_name);
+  xfree (PARSER_EXPLICIT (this)->function_name);
 
-  xfree (PARSER_EXPLICIT (parser)->source_filename);
-  xfree (PARSER_EXPLICIT (parser)->label_name);
-  xfree (PARSER_EXPLICIT (parser)->function_name);
+  delete PARSER_RESULT (this)->file_symtabs;
+  delete PARSER_RESULT (this)->function_symbols;
+  delete PARSER_RESULT (this)->minimal_symbols;
+  delete PARSER_RESULT (this)->labels.label_symbols;
+  delete PARSER_RESULT (this)->labels.function_symbols;
 
-  delete PARSER_RESULT (parser)->file_symtabs;
-  delete PARSER_RESULT (parser)->function_symbols;
-  delete PARSER_RESULT (parser)->minimal_symbols;
-  delete PARSER_RESULT (parser)->labels.label_symbols;
-  delete PARSER_RESULT (parser)->labels.function_symbols;
-
-  linespec_state_destructor (PARSER_STATE (parser));
+  linespec_state_destructor (PARSER_STATE (this));
 }
 
 /* See description in linespec.h.  */
@@ -2788,16 +2791,13 @@ linespec_parser_delete (void *arg)
 void
 linespec_lex_to_end (const char **stringp)
 {
-  linespec_parser parser;
-  struct cleanup *cleanup;
   linespec_token token;
   const char *orig;
 
   if (stringp == NULL || *stringp == NULL)
     return;
 
-  linespec_parser_new (&parser, 0, current_language, NULL, NULL, 0, NULL);
-  cleanup = make_cleanup (linespec_parser_delete, &parser);
+  linespec_parser parser (0, current_language, NULL, NULL, 0, NULL);
   parser.lexer.saved_arg = *stringp;
   PARSER_STREAM (&parser) = orig = *stringp;
 
@@ -2813,7 +2813,6 @@ linespec_lex_to_end (const char **stringp)
   while (token.type != LSTOKEN_EOI && token.type != LSTOKEN_KEYWORD);
 
   *stringp += PARSER_STREAM (&parser) - orig;
-  do_cleanups (cleanup);
 }
 
 /* See linespec.h.  */
@@ -2939,11 +2938,7 @@ linespec_complete_label (completion_tracker &tracker,
 			 symbol_name_match_type func_name_match_type,
 			 const char *label_name)
 {
-  linespec_parser parser;
-  struct cleanup *cleanup;
-
-  linespec_parser_new (&parser, 0, language, NULL, NULL, 0, NULL);
-  cleanup = make_cleanup (linespec_parser_delete, &parser);
+  linespec_parser parser (0, language, NULL, NULL, 0, NULL);
 
   line_offset unknown_offset = { 0, LINE_OFFSET_UNKNOWN };
 
@@ -2958,14 +2953,11 @@ linespec_complete_label (completion_tracker &tracker,
     }
   CATCH (ex, RETURN_MASK_ERROR)
     {
-      do_cleanups (cleanup);
       return;
     }
   END_CATCH
 
   complete_label (tracker, &parser, label_name);
-
-  do_cleanups (cleanup);
 }
 
 /* See description in linespec.h.  */
@@ -2974,12 +2966,9 @@ void
 linespec_complete (completion_tracker &tracker, const char *text,
 		   symbol_name_match_type match_type)
 {
-  linespec_parser parser;
-  struct cleanup *cleanup;
   const char *orig = text;
 
-  linespec_parser_new (&parser, 0, current_language, NULL, NULL, 0, NULL);
-  cleanup = make_cleanup (linespec_parser_delete, &parser);
+  linespec_parser parser (0, current_language, NULL, NULL, 0, NULL);
   parser.lexer.saved_arg = text;
   PARSER_EXPLICIT (&parser)->func_name_match_type = match_type;
   PARSER_STREAM (&parser) = text;
@@ -3162,8 +3151,6 @@ linespec_complete (completion_tracker &tracker, const char *text,
 				       NULL);
 	}
     }
-
-  do_cleanups (cleanup);
 }
 
 /* A helper function for decode_line_full and decode_line_1 to
@@ -3245,9 +3232,7 @@ decode_line_full (const struct event_location *location, int flags,
 		  const char *select_mode,
 		  const char *filter)
 {
-  struct cleanup *cleanups;
   std::vector<const char *> filters;
-  linespec_parser parser;
   struct linespec_state *state;
 
   gdb_assert (canonical != NULL);
@@ -3259,10 +3244,9 @@ decode_line_full (const struct event_location *location, int flags,
 	      || select_mode == multiple_symbols_cancel);
   gdb_assert ((flags & DECODE_LINE_LIST_MODE) == 0);
 
-  linespec_parser_new (&parser, flags, current_language,
-		       search_pspace, default_symtab,
-		       default_line, canonical);
-  cleanups = make_cleanup (linespec_parser_delete, &parser);
+  linespec_parser parser (flags, current_language,
+			  search_pspace, default_symtab,
+			  default_line, canonical);
 
   scoped_restore_current_program_space restore_pspace;
 
@@ -3274,16 +3258,11 @@ decode_line_full (const struct event_location *location, int flags,
   canonical->pre_expanded = 1;
 
   /* Arrange for allocated canonical names to be freed.  */
-  if (!result.empty ())
+  std::vector<gdb::unique_xmalloc_ptr<char>> hold_names;
+  for (int i = 0; i < result.size (); ++i)
     {
-      int i;
-
-      make_cleanup (xfree, state->canonical_names);
-      for (i = 0; i < result.size (); ++i)
-	{
-	  gdb_assert (state->canonical_names[i].suffix != NULL);
-	  make_cleanup (xfree, state->canonical_names[i].suffix);
-	}
+      gdb_assert (state->canonical_names[i].suffix != NULL);
+      hold_names.emplace_back (state->canonical_names[i].suffix);
     }
 
   if (select_mode == NULL)
@@ -3306,8 +3285,6 @@ decode_line_full (const struct event_location *location, int flags,
     }
   else
     decode_line_2 (state, &result, select_mode);
-
-  do_cleanups (cleanups);
 }
 
 /* See linespec.h.  */
@@ -3318,21 +3295,13 @@ decode_line_1 (const struct event_location *location, int flags,
 	       struct symtab *default_symtab,
 	       int default_line)
 {
-  linespec_parser parser;
-  struct cleanup *cleanups;
-
-  linespec_parser_new (&parser, flags, current_language,
-		       search_pspace, default_symtab,
-		       default_line, NULL);
-  cleanups = make_cleanup (linespec_parser_delete, &parser);
+  linespec_parser parser (flags, current_language,
+			  search_pspace, default_symtab,
+			  default_line, NULL);
 
   scoped_restore_current_program_space restore_pspace;
 
-  std::vector<symtab_and_line> result = event_location_to_sals (&parser,
-								location);
-
-  do_cleanups (cleanups);
-  return result;
+  return event_location_to_sals (&parser, location);
 }
 
 /* See linespec.h.  */

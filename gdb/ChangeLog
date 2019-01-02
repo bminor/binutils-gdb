@@ -1,5 +1,16 @@
 2019-01-02  Tom Tromey  <tom@tromey.com>
 
+	* linespec.c (struct linespec_parser): Rename from ls_parser.  Add
+	constructor, destructor.
+	(linespec_parser): Remove typedef.
+	(~linespec_parser): Rename from linespec_parser_delete.
+	(linespec_lex_to_end, linespec_complete_label)
+	(linespec_complete): Update.
+	(decode_line_full): Remove cleanups.
+	(decode_line_1): Update.
+
+2019-01-02  Tom Tromey  <tom@tromey.com>
+
 	* python/python-internal.h (inferior_to_inferior_object): Change
 	return type.
 	* python/py-exitedevent.c (create_exited_event_object): Update.
