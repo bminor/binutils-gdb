@@ -1,5 +1,9 @@
 2019-01-03  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-source.c (tui_set_source_content): Use xstrdup.
+
+2019-01-03  Tom Tromey  <tom@tromey.com>
+
 	* python/py-symtab.c (salpy_str): Update.
 	(struct salpy_sal_object) <symtab>: Now a PyObject.
 	(salpy_dealloc): Update.

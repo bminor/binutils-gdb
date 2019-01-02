@@ -194,15 +194,9 @@ tui_set_source_content (struct symtab *s,
 
 		  xfree (TUI_SRC_WIN->generic.content[cur_line]
 			 ->which_element.source.line);
-		  int alloc_len = text.size ();
-		  if (alloc_len < line_width)
-		    alloc_len = line_width + 1;
 		  TUI_SRC_WIN->generic.content[cur_line]
 		    ->which_element.source.line
-		    = (char *) xmalloc (alloc_len);
-		  strcpy (TUI_SRC_WIN->generic.content[cur_line]
-			  ->which_element.source.line,
-			  text.c_str ());
+		    = xstrdup (text.c_str ());
 
 		  cur_line++;
 		  cur_line_no++;
