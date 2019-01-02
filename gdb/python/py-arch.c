@@ -97,14 +97,11 @@ archpy_name (PyObject *self, PyObject *args)
 {
   struct gdbarch *gdbarch = NULL;
   const char *name;
-  PyObject *py_name;
 
   ARCHPY_REQUIRE_VALID (self, gdbarch);
 
   name = (gdbarch_bfd_arch_info (gdbarch))->printable_name;
-  py_name = PyString_FromString (name);
-
-  return py_name;
+  return PyString_FromString (name);
 }
 
 /* Implementation of

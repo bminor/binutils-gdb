@@ -1402,7 +1402,7 @@ gdbpy_lookup_type (PyObject *self, PyObject *args, PyObject *kw)
   if (! type)
     return NULL;
 
-  return (PyObject *) type_to_type_object (type);
+  return type_to_type_object (type);
 }
 
 int

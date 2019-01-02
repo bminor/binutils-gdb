@@ -1196,7 +1196,7 @@ local_setattro (PyObject *self, PyObject *name, PyObject *v)
 	}
     }
 
-  return PyObject_GenericSetAttr ((PyObject *)self, name, v);
+  return PyObject_GenericSetAttr (self, name, v);
 }
 
 static gdb_PyGetSetDef breakpoint_object_getset[] = {

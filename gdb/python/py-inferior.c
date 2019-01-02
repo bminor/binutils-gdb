@@ -958,8 +958,8 @@ gdbpy_initialize_inferior (void)
   if (PyType_Ready (&membuf_object_type) < 0)
     return -1;
 
-  return gdb_pymodule_addobject (gdb_module, "Membuf", (PyObject *)
-				 &membuf_object_type);
+  return gdb_pymodule_addobject (gdb_module, "Membuf",
+				 (PyObject *) &membuf_object_type);
 }
 
 static gdb_PyGetSetDef inferior_object_getset[] =

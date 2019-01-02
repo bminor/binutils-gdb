@@ -1,3 +1,13 @@
+2019-01-02  Tom Tromey  <tom@tromey.com>
+
+	* python/py-inferior.c (gdbpy_initialize_inferior): Fix
+	indentation.
+	* python/py-frame.c (frapy_older): Remove cast.
+	(frapy_newer): Likewise.
+	* python/py-breakpoint.c (local_setattro): Remove cast.
+	* python/py-arch.c (archpy_name): Remove local variable.
+	* python/py-type.c (gdbpy_lookup_type): Remove cast.
+
 2019-01-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* unittests/basic_string_view/element_access/char/empty.cc:
