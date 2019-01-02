@@ -503,6 +503,9 @@ public:
      this gdbarch.  */
   struct gdbarch *gdbarch = NULL;
 
+  /* Data related to displaced stepping.  */
+  displaced_step_inferior_state displaced_step_state;
+
   /* Per inferior data-pointers required by other GDB modules.  */
   REGISTRY_FIELDS;
 };

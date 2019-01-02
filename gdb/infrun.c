@@ -1476,53 +1476,12 @@ step_over_info_valid_p (void)
 
 displaced_step_closure::~displaced_step_closure () = default;
 
-/* Per-inferior displaced stepping state.  */
-struct displaced_step_inferior_state
-{
-  /* The process this displaced step state refers to.  */
-  inferior *inf;
-
-  /* True if preparing a displaced step ever failed.  If so, we won't
-     try displaced stepping for this inferior again.  */
-  int failed_before;
-
-  /* If this is not nullptr, this is the thread carrying out a
-     displaced single-step in process PID.  This thread's state will
-     require fixing up once it has completed its step.  */
-  thread_info *step_thread;
-
-  /* The architecture the thread had when we stepped it.  */
-  struct gdbarch *step_gdbarch;
-
-  /* The closure provided gdbarch_displaced_step_copy_insn, to be used
-     for post-step cleanup.  */
-  struct displaced_step_closure *step_closure;
-
-  /* The address of the original instruction, and the copy we
-     made.  */
-  CORE_ADDR step_original, step_copy;
-
-  /* Saved contents of copy area.  */
-  gdb_byte *step_saved_copy;
-};
-
-/* The list of states of processes involved in displaced stepping
-   presently.  */
-static std::forward_list<displaced_step_inferior_state *>
-  displaced_step_inferior_states;
-
 /* Get the displaced stepping state of process PID.  */
 
 static displaced_step_inferior_state *
 get_displaced_stepping_state (inferior *inf)
 {
-  for (auto *state : displaced_step_inferior_states)
-    {
-      if (state->inf == inf)
-	return state;
-    }
-
-  return nullptr;
+  return &inf->displaced_step_state;
 }
 
 /* Returns true if any inferior has a thread doing a displaced
@@ -1531,9 +1490,9 @@ get_displaced_stepping_state (inferior *inf)
 static bool
 displaced_step_in_progress_any_inferior ()
 {
-  for (auto *state : displaced_step_inferior_states)
+  for (inferior *i : all_inferiors ())
     {
-      if (state->step_thread != nullptr)
+      if (i->displaced_step_state.step_thread != nullptr)
 	return true;
     }
 
@@ -1546,13 +1505,9 @@ displaced_step_in_progress_any_inferior ()
 static int
 displaced_step_in_progress_thread (thread_info *thread)
 {
-  struct displaced_step_inferior_state *displaced;
-
   gdb_assert (thread != NULL);
 
-  displaced = get_displaced_stepping_state (thread->inf);
-
-  return (displaced != NULL && displaced->step_thread == thread);
+  return get_displaced_stepping_state (thread->inf)->step_thread == thread;
 }
 
 /* Return true if process PID has a thread doing a displaced step.  */
@@ -1560,34 +1515,7 @@ displaced_step_in_progress_thread (thread_info *thread)
 static int
 displaced_step_in_progress (inferior *inf)
 {
-  struct displaced_step_inferior_state *displaced;
-
-  displaced = get_displaced_stepping_state (inf);
-  if (displaced != NULL && displaced->step_thread != nullptr)
-    return 1;
-
-  return 0;
-}
-
-/* Add a new displaced stepping state for process PID to the displaced
-   stepping state list, or return a pointer to an already existing
-   entry, if it already exists.  Never returns NULL.  */
-
-static displaced_step_inferior_state *
-add_displaced_stepping_state (inferior *inf)
-{
-  displaced_step_inferior_state *state
-    = get_displaced_stepping_state (inf);
-
-  if (state != nullptr)
-    return state;
-
-  state = XCNEW (struct displaced_step_inferior_state);
-  state->inf = inf;
-
-  displaced_step_inferior_states.push_front (state);
-
-  return state;
+  return get_displaced_stepping_state (inf)->step_thread != nullptr;
 }
 
 /* If inferior is in displaced stepping, and ADDR equals to starting address
@@ -1597,42 +1525,21 @@ add_displaced_stepping_state (inferior *inf)
 struct displaced_step_closure*
 get_displaced_step_closure_by_addr (CORE_ADDR addr)
 {
-  struct displaced_step_inferior_state *displaced
+  displaced_step_inferior_state *displaced
     = get_displaced_stepping_state (current_inferior ());
 
   /* If checking the mode of displaced instruction in copy area.  */
-  if (displaced != NULL
-      && displaced->step_thread != nullptr
+  if (displaced->step_thread != nullptr
       && displaced->step_copy == addr)
     return displaced->step_closure;
 
   return NULL;
 }
 
-/* Remove the displaced stepping state of process PID.  */
-
-static void
-remove_displaced_stepping_state (inferior *inf)
-{
-  gdb_assert (inf != nullptr);
-
-  displaced_step_inferior_states.remove_if
-    ([inf] (displaced_step_inferior_state *state)
-      {
-	if (state->inf == inf)
-	  {
-	    xfree (state);
-	    return true;
-	  }
-	else
-	  return false;
-      });
-}
-
 static void
 infrun_inferior_exit (struct inferior *inf)
 {
-  remove_displaced_stepping_state (inf);
+  inf->displaced_step_state.reset ();
 }
 
 /* If ON, and the architecture supports it, GDB will use displaced
@@ -1669,17 +1576,15 @@ use_displaced_stepping (struct thread_info *tp)
 {
   struct regcache *regcache = get_thread_regcache (tp);
   struct gdbarch *gdbarch = regcache->arch ();
-  struct displaced_step_inferior_state *displaced_state;
-
-  displaced_state = get_displaced_stepping_state (tp->inf);
+  displaced_step_inferior_state *displaced_state
+    = get_displaced_stepping_state (tp->inf);
 
   return (((can_use_displaced_stepping == AUTO_BOOLEAN_AUTO
 	    && target_is_non_stop_p ())
 	   || can_use_displaced_stepping == AUTO_BOOLEAN_TRUE)
 	  && gdbarch_displaced_step_copy_insn_p (gdbarch)
 	  && find_record_target () == NULL
-	  && (displaced_state == NULL
-	      || !displaced_state->failed_before));
+	  && !displaced_state->failed_before);
 }
 
 /* Clean out any stray displaced stepping state.  */
@@ -1734,14 +1639,12 @@ displaced_step_dump_bytes (struct ui_file *file,
 static int
 displaced_step_prepare_throw (thread_info *tp)
 {
-  struct cleanup *ignore_cleanups;
   regcache *regcache = get_thread_regcache (tp);
   struct gdbarch *gdbarch = regcache->arch ();
   const address_space *aspace = regcache->aspace ();
   CORE_ADDR original, copy;
   ULONGEST len;
   struct displaced_step_closure *closure;
-  struct displaced_step_inferior_state *displaced;
   int status;
 
   /* We should never reach this function if the architecture does not
@@ -1760,7 +1663,8 @@ displaced_step_prepare_throw (thread_info *tp)
   /* We have to displaced step one thread at a time, as we only have
      access to a single scratch space per inferior.  */
 
-  displaced = add_displaced_stepping_state (tp->inf);
+  displaced_step_inferior_state *displaced
+    = get_displaced_stepping_state (tp->inf);
 
   if (displaced->step_thread != nullptr)
     {
@@ -1816,10 +1720,8 @@ displaced_step_prepare_throw (thread_info *tp)
     }
 
   /* Save the original contents of the copy area.  */
-  displaced->step_saved_copy = (gdb_byte *) xmalloc (len);
-  ignore_cleanups = make_cleanup (free_current_contents,
-				  &displaced->step_saved_copy);
-  status = target_read_memory (copy, displaced->step_saved_copy, len);
+  displaced->step_saved_copy.resize (len);
+  status = target_read_memory (copy, displaced->step_saved_copy.data (), len);
   if (status != 0)
     throw_error (MEMORY_ERROR,
 		 _("Error accessing memory address %s (%s) for "
@@ -1830,7 +1732,7 @@ displaced_step_prepare_throw (thread_info *tp)
       fprintf_unfiltered (gdb_stdlog, "displaced: saved %s: ",
 			  paddress (gdbarch, copy));
       displaced_step_dump_bytes (gdb_stdlog,
-				 displaced->step_saved_copy,
+				 displaced->step_saved_copy.data (),
 				 len);
     };
 
@@ -1841,7 +1743,6 @@ displaced_step_prepare_throw (thread_info *tp)
       /* The architecture doesn't know how or want to displaced step
 	 this instruction or instruction sequence.  Fallback to
 	 stepping over the breakpoint in-line.  */
-      do_cleanups (ignore_cleanups);
       return -1;
     }
 
@@ -1853,7 +1754,8 @@ displaced_step_prepare_throw (thread_info *tp)
   displaced->step_original = original;
   displaced->step_copy = copy;
 
-  make_cleanup (displaced_step_clear_cleanup, displaced);
+  cleanup *ignore_cleanups
+    = make_cleanup (displaced_step_clear_cleanup, displaced);
 
   /* Resume execution at the copy.  */
   regcache_write_pc (regcache, copy);
@@ -1931,7 +1833,7 @@ displaced_step_restore (struct displaced_step_inferior_state *displaced,
   ULONGEST len = gdbarch_max_insn_length (displaced->step_gdbarch);
 
   write_memory_ptid (ptid, displaced->step_copy,
-		     displaced->step_saved_copy, len);
+		     displaced->step_saved_copy.data (), len);
   if (debug_displaced)
     fprintf_unfiltered (gdb_stdlog, "displaced: restored %s %s\n",
 			target_pid_to_str (ptid),
@@ -1952,10 +1854,6 @@ displaced_step_fixup (thread_info *event_thread, enum gdb_signal signal)
   struct displaced_step_inferior_state *displaced
     = get_displaced_stepping_state (event_thread->inf);
   int ret;
-
-  /* Was any thread of this process doing a displaced step?  */
-  if (displaced == NULL)
-    return 0;
 
   /* Was this event for the thread we displaced?  */
   if (displaced->step_thread != event_thread)
@@ -3577,7 +3475,7 @@ prepare_for_detach (void)
 
   /* Is any thread of this process displaced stepping?  If not,
      there's nothing else to do.  */
-  if (displaced == NULL || displaced->step_thread == nullptr)
+  if (displaced->step_thread == nullptr)
     return;
 
   if (debug_infrun)

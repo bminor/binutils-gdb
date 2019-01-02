@@ -1,3 +1,27 @@
+2019-01-02  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* inferior.h (class inferior) <displaced_step_state>: New field.
+	* infrun.h (struct displaced_step_state): Move here from
+	infrun.c.  Initialize fields, add constructor.
+	<inf>: Remove field.
+	<reset>: New method.
+	* infrun.c (struct displaced_step_inferior_state): Move to
+	infrun.h.
+	(displaced_step_inferior_states): Remove.
+	(get_displaced_stepping_state): Adust.
+	(displaced_step_in_progress_any_inferior): Adjust.
+	(displaced_step_in_progress_thread): Adjust.
+	(displaced_step_in_progress): Adjust.
+	(add_displaced_stepping_state): Remove.
+	(get_displaced_step_closure_by_addr): Adjust.
+	(remove_displaced_stepping_state): Remove.
+	(infrun_inferior_exit): Call displaced_step_state.reset.
+	(use_displaced_stepping): Don't check for NULL.
+	(displaced_step_prepare_throw): Call
+	get_displaced_stepping_state.
+	(displaced_step_fixup): Don't check for NULL.
+	(prepare_for_detach): Don't check for NULL.
+
 2019-01-02  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* infcall.c (call_function_by_hand_dummy): cleanup/destroy sm

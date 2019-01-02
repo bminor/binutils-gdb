@@ -258,4 +258,48 @@ struct buf_displaced_step_closure : displaced_step_closure
   gdb::byte_vector buf;
 };
 
+/* Per-inferior displaced stepping state.  */
+struct displaced_step_inferior_state
+{
+  displaced_step_inferior_state ()
+  {
+    reset ();
+  }
+
+  /* Put this object back in its original state.  */
+  void reset ()
+  {
+    failed_before = 0;
+    step_thread = nullptr;
+    step_gdbarch = nullptr;
+    step_closure = nullptr;
+    step_original = 0;
+    step_copy = 0;
+    step_saved_copy.clear ();
+  }
+
+  /* True if preparing a displaced step ever failed.  If so, we won't
+     try displaced stepping for this inferior again.  */
+  int failed_before;
+
+  /* If this is not nullptr, this is the thread carrying out a
+     displaced single-step in process PID.  This thread's state will
+     require fixing up once it has completed its step.  */
+  thread_info *step_thread;
+
+  /* The architecture the thread had when we stepped it.  */
+  gdbarch *step_gdbarch;
+
+  /* The closure provided gdbarch_displaced_step_copy_insn, to be used
+     for post-step cleanup.  */
+  displaced_step_closure *step_closure;
+
+  /* The address of the original instruction, and the copy we
+     made.  */
+  CORE_ADDR step_original, step_copy;
+
+  /* Saved contents of copy area.  */
+  gdb::byte_vector step_saved_copy;
+};
+
 #endif /* INFRUN_H */
