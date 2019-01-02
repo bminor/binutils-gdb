@@ -1,5 +1,79 @@
 2019-02-07  Tom Tromey  <tom@tromey.com>
 
+	* thread.c (thread_cancel_execution_command): Update.
+	* thread-fsm.h (struct thread_fsm): Add constructor, destructor,
+	methods.
+	(struct thread_fsm_ops): Remove.
+	(thread_fsm_ctor, thread_fsm_delete, thread_fsm_clean_up)
+	(thread_fsm_should_stop, thread_fsm_return_value)
+	(thread_fsm_set_finished, thread_fsm_finished_p)
+	(thread_fsm_async_reply_reason, thread_fsm_should_notify_stop):
+	Don't declare.
+	* mi/mi-interp.c (mi_on_normal_stop_1): Update.
+	* infrun.c (clear_proceed_status_thread)
+	(clean_up_just_stopped_threads_fsms, fetch_inferior_event)
+	(print_stop_event): Update.
+	* infcmd.c (struct step_command_fsm): Inherit from thread_fsm.
+	Add constructor.
+	(step_command_fsm_ops): Remove.
+	(new_step_command_fsm): Remove.
+	(step_1): Update.
+	(step_command_fsm::should_stop): Rename from
+	step_command_fsm_should_stop.
+	(step_command_fsm::clean_up): Rename from
+	step_command_fsm_clean_up.
+	(step_command_fsm::do_async_reply_reason): Rename from
+	step_command_fsm_async_reply_reason.
+	(struct until_next_fsm): Inherit from thread_fsm.  Add
+	constructor.
+	(until_next_fsm_ops): Remove.
+	(new_until_next_fsm): Remove.
+	(until_next_fsm::should_stop): Rename from
+	until_next_fsm_should_stop.
+	(until_next_fsm::clean_up): Rename from until_next_fsm_clean_up.
+	(until_next_fsm::do_async_reply_reason): Rename from
+	until_next_fsm_async_reply_reason.
+	(struct finish_command_fsm): Inherit from thread_fsm.  Add
+	constructor.  Change type of breakpoint.
+	(finish_command_fsm_ops): Remove.
+	(new_finish_command_fsm): Remove.
+	(finish_command_fsm::should_stop): Rename from
+	finish_command_fsm_should_stop.
+	(finish_command_fsm::clean_up): Rename from
+	finish_command_fsm_clean_up.
+	(finish_command_fsm::return_value): Rename from
+	finish_command_fsm_return_value.
+	(finish_command_fsm::do_async_reply_reason): Rename from
+	finish_command_fsm_async_reply_reason.
+	(finish_command): Update.
+	* infcall.c (struct call_thread_fsm): Inherit from thread_fsm.
+	Add constructor.
+	(call_thread_fsm_ops): Remove.
+	(call_thread_fsm::call_thread_fsm): Rename from
+	new_call_thread_fsm.
+	(call_thread_fsm::should_stop): Rename from
+	call_thread_fsm_should_stop.
+	(call_thread_fsm::should_notify_stop): Rename from
+	call_thread_fsm_should_notify_stop.
+	(run_inferior_call, call_function_by_hand_dummy): Update.
+	* cli/cli-interp.c (should_print_stop_to_console): Update.
+	* breakpoint.c (struct until_break_fsm): Inherit from thread_fsm.
+	Add constructor.  Change type of location_breakpoint,
+	caller_breakpoint.
+	(until_break_fsm_ops): Remove.
+	(new_until_break_fsm): Remove.
+	(until_break_fsm::should_stop): Rename from
+	until_break_fsm_should_stop.
+	(until_break_fsm::clean_up): Rename from
+	until_break_fsm_clean_up.
+	(until_break_fsm::do_async_reply_reason): Rename from
+	until_break_fsm_async_reply_reason.
+	(until_break_command): Update.
+	* thread-fsm.c: Remove.
+	* Makefile.in (COMMON_SFILES): Remove thread-fsm.c.
+
+2019-02-07  Tom Tromey  <tom@tromey.com>
+
 	* yy-remap.h: Add include guard.
 	* xtensa-tdep.h: Add include guard.
 	* xcoffread.h: Rename include guard.

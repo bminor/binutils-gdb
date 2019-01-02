@@ -170,8 +170,8 @@ thread_cancel_execution_command (struct thread_info *thr)
 {
   if (thr->thread_fsm != NULL)
     {
-      thread_fsm_clean_up (thr->thread_fsm, thr);
-      thread_fsm_delete (thr->thread_fsm);
+      thr->thread_fsm->clean_up (thr);
+      delete thr->thread_fsm;
       thr->thread_fsm = NULL;
     }
 }

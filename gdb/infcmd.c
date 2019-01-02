@@ -950,11 +950,8 @@ nexti_command (const char *count_string, int from_tty)
 /* Data for the FSM that manages the step/next/stepi/nexti
    commands.  */
 
-struct step_command_fsm
+struct step_command_fsm : public thread_fsm
 {
-  /* The base class.  */
-  struct thread_fsm thread_fsm;
-
   /* How many steps left in a "step N"-like command.  */
   int count;
 
@@ -963,38 +960,16 @@ struct step_command_fsm
 
   /* If true, this is a stepi/nexti, otherwise a step/step.  */
   int single_inst;
+
+  explicit step_command_fsm (struct interp *cmd_interp)
+    : thread_fsm (cmd_interp)
+  {
+  }
+
+  void clean_up (struct thread_info *thread) override;
+  bool should_stop (struct thread_info *thread) override;
+  enum async_reply_reason do_async_reply_reason () override;
 };
-
-static void step_command_fsm_clean_up (struct thread_fsm *self,
-				       struct thread_info *thread);
-static int step_command_fsm_should_stop (struct thread_fsm *self,
-					 struct thread_info *thread);
-static enum async_reply_reason
-  step_command_fsm_async_reply_reason (struct thread_fsm *self);
-
-/* step_command_fsm's vtable.  */
-
-static struct thread_fsm_ops step_command_fsm_ops =
-{
-  NULL,
-  step_command_fsm_clean_up,
-  step_command_fsm_should_stop,
-  NULL,	/* return_value */
-  step_command_fsm_async_reply_reason,
-};
-
-/* Allocate a new step_command_fsm.  */
-
-static struct step_command_fsm *
-new_step_command_fsm (struct interp *cmd_interp)
-{
-  struct step_command_fsm *sm;
-
-  sm = XCNEW (struct step_command_fsm);
-  thread_fsm_ctor (&sm->thread_fsm, &step_command_fsm_ops, cmd_interp);
-
-  return sm;
-}
 
 /* Prepare for a step/next/etc. command.  Any target resource
    allocated here is undone in the FSM's clean_up method.  */
@@ -1043,8 +1018,8 @@ step_1 (int skip_subroutines, int single_inst, const char *count_string)
   /* Setup the execution command state machine to handle all the COUNT
      steps.  */
   thr = inferior_thread ();
-  step_sm = new_step_command_fsm (command_interp ());
-  thr->thread_fsm = &step_sm->thread_fsm;
+  step_sm = new step_command_fsm (command_interp ());
+  thr->thread_fsm = step_sm;
 
   step_command_fsm_prepare (step_sm, skip_subroutines,
 			    single_inst, count, thr);
@@ -1061,7 +1036,7 @@ step_1 (int skip_subroutines, int single_inst, const char *count_string)
 
       /* Stepped into an inline frame.  Pretend that we've
 	 stopped.  */
-      thread_fsm_clean_up (thr->thread_fsm, thr);
+      thr->thread_fsm->clean_up (thr);
       proceeded = normal_stop ();
       if (!proceeded)
 	inferior_event_handler (INF_EXEC_COMPLETE, NULL);
@@ -1075,40 +1050,36 @@ step_1 (int skip_subroutines, int single_inst, const char *count_string)
    return control to the user.  If count is > 1, returns false, as we
    will need to keep going.  */
 
-static int
-step_command_fsm_should_stop (struct thread_fsm *self, struct thread_info *tp)
+bool
+step_command_fsm::should_stop (struct thread_info *tp)
 {
-  struct step_command_fsm *sm = (struct step_command_fsm *) self;
-
   if (tp->control.stop_step)
     {
       /* There are more steps to make, and we did stop due to
 	 ending a stepping range.  Do another step.  */
-      if (--sm->count > 0)
-	return prepare_one_step (sm);
+      if (--count > 0)
+	return prepare_one_step (this);
 
-      thread_fsm_set_finished (self);
+      set_finished ();
     }
 
-  return 1;
+  return true;
 }
 
 /* Implementation of the 'clean_up' FSM method for stepping commands.  */
 
-static void
-step_command_fsm_clean_up (struct thread_fsm *self, struct thread_info *thread)
+void
+step_command_fsm::clean_up (struct thread_info *thread)
 {
-  struct step_command_fsm *sm = (struct step_command_fsm *) self;
-
-  if (!sm->single_inst || sm->skip_subroutines)
+  if (!single_inst || skip_subroutines)
     delete_longjmp_breakpoint (thread->global_num);
 }
 
 /* Implementation of the 'async_reply_reason' FSM method for stepping
    commands.  */
 
-static enum async_reply_reason
-step_command_fsm_async_reply_reason (struct thread_fsm *self)
+enum async_reply_reason
+step_command_fsm::do_async_reply_reason ()
 {
   return EXEC_ASYNC_END_STEPPING_RANGE;
 }
@@ -1198,7 +1169,7 @@ prepare_one_step (struct step_command_fsm *sm)
     }
 
   /* Done.  */
-  thread_fsm_set_finished (&sm->thread_fsm);
+  sm->set_finished ();
   return 1;
 }
 
@@ -1420,66 +1391,39 @@ queue_signal_command (const char *signum_exp, int from_tty)
 /* Data for the FSM that manages the until (with no argument)
    command.  */
 
-struct until_next_fsm
+struct until_next_fsm : public thread_fsm
 {
-  /* The base class.  */
-  struct thread_fsm thread_fsm;
-
   /* The thread that as current when the command was executed.  */
   int thread;
+
+  until_next_fsm (struct interp *cmd_interp, int thread)
+    : thread_fsm (cmd_interp),
+      thread (thread)
+  {
+  }
+
+  bool should_stop (struct thread_info *thread) override;
+  void clean_up (struct thread_info *thread) override;
+  enum async_reply_reason do_async_reply_reason () override;
 };
-
-static int until_next_fsm_should_stop (struct thread_fsm *self,
-				       struct thread_info *thread);
-static void until_next_fsm_clean_up (struct thread_fsm *self,
-				     struct thread_info *thread);
-static enum async_reply_reason
-  until_next_fsm_async_reply_reason (struct thread_fsm *self);
-
-/* until_next_fsm's vtable.  */
-
-static struct thread_fsm_ops until_next_fsm_ops =
-{
-  NULL, /* dtor */
-  until_next_fsm_clean_up,
-  until_next_fsm_should_stop,
-  NULL, /* return_value */
-  until_next_fsm_async_reply_reason,
-};
-
-/* Allocate a new until_next_fsm.  */
-
-static struct until_next_fsm *
-new_until_next_fsm (struct interp *cmd_interp, int thread)
-{
-  struct until_next_fsm *sm;
-
-  sm = XCNEW (struct until_next_fsm);
-  thread_fsm_ctor (&sm->thread_fsm, &until_next_fsm_ops, cmd_interp);
-
-  sm->thread = thread;
-
-  return sm;
-}
 
 /* Implementation of the 'should_stop' FSM method for the until (with
    no arg) command.  */
 
-static int
-until_next_fsm_should_stop (struct thread_fsm *self,
-			    struct thread_info *tp)
+bool
+until_next_fsm::should_stop (struct thread_info *tp)
 {
   if (tp->control.stop_step)
-    thread_fsm_set_finished (self);
+    set_finished ();
 
-  return 1;
+  return true;
 }
 
 /* Implementation of the 'clean_up' FSM method for the until (with no
    arg) command.  */
 
-static void
-until_next_fsm_clean_up (struct thread_fsm *self, struct thread_info *thread)
+void
+until_next_fsm::clean_up (struct thread_info *thread)
 {
   delete_longjmp_breakpoint (thread->global_num);
 }
@@ -1487,8 +1431,8 @@ until_next_fsm_clean_up (struct thread_fsm *self, struct thread_info *thread)
 /* Implementation of the 'async_reply_reason' FSM method for the until
    (with no arg) command.  */
 
-static enum async_reply_reason
-until_next_fsm_async_reply_reason (struct thread_fsm *self)
+enum async_reply_reason
+until_next_fsm::do_async_reply_reason ()
 {
   return EXEC_ASYNC_END_STEPPING_RANGE;
 }
@@ -1550,8 +1494,8 @@ until_next_command (int from_tty)
   set_longjmp_breakpoint (tp, get_frame_id (frame));
   delete_longjmp_breakpoint_cleanup lj_deleter (thread);
 
-  sm = new_until_next_fsm (command_interp (), tp->global_num);
-  tp->thread_fsm = &sm->thread_fsm;
+  sm = new until_next_fsm (command_interp (), tp->global_num);
+  tp->thread_fsm = sm;
   lj_deleter.release ();
 
   proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
@@ -1718,77 +1662,48 @@ print_return_value (struct ui_out *uiout, struct return_value_info *rv)
 
 /* Data for the FSM that manages the finish command.  */
 
-struct finish_command_fsm
+struct finish_command_fsm : public thread_fsm
 {
-  /* The base class.  */
-  struct thread_fsm thread_fsm;
-
   /* The momentary breakpoint set at the function's return address in
      the caller.  */
-  struct breakpoint *breakpoint;
+  breakpoint_up breakpoint;
 
   /* The function that we're stepping out of.  */
-  struct symbol *function;
+  struct symbol *function = nullptr;
 
   /* If the FSM finishes successfully, this stores the function's
      return value.  */
-  struct return_value_info return_value;
+  struct return_value_info return_value_info {};
+
+  explicit finish_command_fsm (struct interp *cmd_interp)
+    : thread_fsm (cmd_interp)
+  {
+  }
+
+  bool should_stop (struct thread_info *thread) override;
+  void clean_up (struct thread_info *thread) override;
+  struct return_value_info *return_value () override;
+  enum async_reply_reason do_async_reply_reason () override;
 };
-
-static int finish_command_fsm_should_stop (struct thread_fsm *self,
-					   struct thread_info *thread);
-static void finish_command_fsm_clean_up (struct thread_fsm *self,
-					 struct thread_info *thread);
-static struct return_value_info *
-  finish_command_fsm_return_value (struct thread_fsm *self);
-static enum async_reply_reason
-  finish_command_fsm_async_reply_reason (struct thread_fsm *self);
-
-/* finish_command_fsm's vtable.  */
-
-static struct thread_fsm_ops finish_command_fsm_ops =
-{
-  NULL, /* dtor */
-  finish_command_fsm_clean_up,
-  finish_command_fsm_should_stop,
-  finish_command_fsm_return_value,
-  finish_command_fsm_async_reply_reason,
-  NULL, /* should_notify_stop */
-};
-
-/* Allocate a new finish_command_fsm.  */
-
-static struct finish_command_fsm *
-new_finish_command_fsm (struct interp *cmd_interp)
-{
-  struct finish_command_fsm *sm;
-
-  sm = XCNEW (struct finish_command_fsm);
-  thread_fsm_ctor (&sm->thread_fsm, &finish_command_fsm_ops, cmd_interp);
-
-  return sm;
-}
 
 /* Implementation of the 'should_stop' FSM method for the finish
    commands.  Detects whether the thread stepped out of the function
    successfully, and if so, captures the function's return value and
    marks the FSM finished.  */
 
-static int
-finish_command_fsm_should_stop (struct thread_fsm *self,
-				struct thread_info *tp)
+bool
+finish_command_fsm::should_stop (struct thread_info *tp)
 {
-  struct finish_command_fsm *f = (struct finish_command_fsm *) self;
-  struct return_value_info *rv = &f->return_value;
+  struct return_value_info *rv = &return_value_info;
 
-  if (f->function != NULL
+  if (function != NULL
       && bpstat_find_breakpoint (tp->control.stop_bpstat,
-				 f->breakpoint) != NULL)
+				 breakpoint.get ()) != NULL)
     {
       /* We're done.  */
-      thread_fsm_set_finished (self);
+      set_finished ();
 
-      rv->type = TYPE_TARGET_TYPE (SYMBOL_TYPE (f->function));
+      rv->type = TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
       if (rv->type == NULL)
 	internal_error (__FILE__, __LINE__,
 			_("finish_command: function has no target type"));
@@ -1797,7 +1712,7 @@ finish_command_fsm_should_stop (struct thread_fsm *self,
 	{
 	  struct value *func;
 
-	  func = read_var_value (f->function, NULL, get_current_frame ());
+	  func = read_var_value (function, NULL, get_current_frame ());
 	  rv->value = get_return_value (func, rv->type);
 	  if (rv->value != NULL)
 	    rv->value_history_index = record_latest_value (rv->value);
@@ -1807,45 +1722,36 @@ finish_command_fsm_should_stop (struct thread_fsm *self,
     {
       /* Finishing from an inline frame, or reverse finishing.  In
 	 either case, there's no way to retrieve the return value.  */
-      thread_fsm_set_finished (self);
+      set_finished ();
     }
 
-  return 1;
+  return true;
 }
 
 /* Implementation of the 'clean_up' FSM method for the finish
    commands.  */
 
-static void
-finish_command_fsm_clean_up (struct thread_fsm *self,
-			     struct thread_info *thread)
+void
+finish_command_fsm::clean_up (struct thread_info *thread)
 {
-  struct finish_command_fsm *f = (struct finish_command_fsm *) self;
-
-  if (f->breakpoint != NULL)
-    {
-      delete_breakpoint (f->breakpoint);
-      f->breakpoint = NULL;
-    }
+  breakpoint.reset ();
   delete_longjmp_breakpoint (thread->global_num);
 }
 
 /* Implementation of the 'return_value' FSM method for the finish
    commands.  */
 
-static struct return_value_info *
-finish_command_fsm_return_value (struct thread_fsm *self)
+struct return_value_info *
+finish_command_fsm::return_value ()
 {
-  struct finish_command_fsm *f = (struct finish_command_fsm *) self;
-
-  return &f->return_value;
+  return &return_value_info;
 }
 
 /* Implementation of the 'async_reply_reason' FSM method for the
    finish commands.  */
 
-static enum async_reply_reason
-finish_command_fsm_async_reply_reason (struct thread_fsm *self)
+enum async_reply_reason
+finish_command_fsm::do_async_reply_reason ()
 {
   if (execution_direction == EXEC_REVERSE)
     return EXEC_ASYNC_END_STEPPING_RANGE;
@@ -1920,7 +1826,7 @@ finish_forward (struct finish_command_fsm *sm, struct frame_info *frame)
 
   sm->breakpoint = set_momentary_breakpoint (gdbarch, sal,
 					     get_stack_frame_id (frame),
-					     bp_finish).release ();
+					     bp_finish);
 
   /* set_momentary_breakpoint invalidates FRAME.  */
   frame = NULL;
@@ -1990,9 +1896,9 @@ finish_command (const char *arg, int from_tty)
 
   tp = inferior_thread ();
 
-  sm = new_finish_command_fsm (command_interp ());
+  sm = new finish_command_fsm (command_interp ());
 
-  tp->thread_fsm = &sm->thread_fsm;
+  tp->thread_fsm = sm;
 
   /* Finishing from an inline frame is completely different.  We don't
      try to show the "return value" - no way to locate it.  */

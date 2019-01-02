@@ -10950,106 +10950,66 @@ awatch_command (const char *arg, int from_tty)
    in infcmd.c.  Here because it uses the mechanisms of
    breakpoints.  */
 
-struct until_break_fsm
+struct until_break_fsm : public thread_fsm
 {
-  /* The base class.  */
-  struct thread_fsm thread_fsm;
-
-  /* The thread that as current when the command was executed.  */
+  /* The thread that was current when the command was executed.  */
   int thread;
 
   /* The breakpoint set at the destination location.  */
-  struct breakpoint *location_breakpoint;
+  breakpoint_up location_breakpoint;
 
   /* Breakpoint set at the return address in the caller frame.  May be
      NULL.  */
-  struct breakpoint *caller_breakpoint;
+  breakpoint_up caller_breakpoint;
+
+  until_break_fsm (struct interp *cmd_interp, int thread,
+		   breakpoint_up &&location_breakpoint,
+		   breakpoint_up &&caller_breakpoint)
+    : thread_fsm (cmd_interp),
+      thread (thread),
+      location_breakpoint (std::move (location_breakpoint)),
+      caller_breakpoint (std::move (caller_breakpoint))
+  {
+  }
+
+  void clean_up (struct thread_info *thread) override;
+  bool should_stop (struct thread_info *thread) override;
+  enum async_reply_reason do_async_reply_reason () override;
 };
-
-static void until_break_fsm_clean_up (struct thread_fsm *self,
-				      struct thread_info *thread);
-static int until_break_fsm_should_stop (struct thread_fsm *self,
-					struct thread_info *thread);
-static enum async_reply_reason
-  until_break_fsm_async_reply_reason (struct thread_fsm *self);
-
-/* until_break_fsm's vtable.  */
-
-static struct thread_fsm_ops until_break_fsm_ops =
-{
-  NULL, /* dtor */
-  until_break_fsm_clean_up,
-  until_break_fsm_should_stop,
-  NULL, /* return_value */
-  until_break_fsm_async_reply_reason,
-};
-
-/* Allocate a new until_break_command_fsm.  */
-
-static struct until_break_fsm *
-new_until_break_fsm (struct interp *cmd_interp, int thread,
-		     breakpoint_up &&location_breakpoint,
-		     breakpoint_up &&caller_breakpoint)
-{
-  struct until_break_fsm *sm;
-
-  sm = XCNEW (struct until_break_fsm);
-  thread_fsm_ctor (&sm->thread_fsm, &until_break_fsm_ops, cmd_interp);
-
-  sm->thread = thread;
-  sm->location_breakpoint = location_breakpoint.release ();
-  sm->caller_breakpoint = caller_breakpoint.release ();
-
-  return sm;
-}
 
 /* Implementation of the 'should_stop' FSM method for the
    until(location)/advance commands.  */
 
-static int
-until_break_fsm_should_stop (struct thread_fsm *self,
-			     struct thread_info *tp)
+bool
+until_break_fsm::should_stop (struct thread_info *tp)
 {
-  struct until_break_fsm *sm = (struct until_break_fsm *) self;
-
   if (bpstat_find_breakpoint (tp->control.stop_bpstat,
-			      sm->location_breakpoint) != NULL
-      || (sm->caller_breakpoint != NULL
+			      location_breakpoint.get ()) != NULL
+      || (caller_breakpoint != NULL
 	  && bpstat_find_breakpoint (tp->control.stop_bpstat,
-				     sm->caller_breakpoint) != NULL))
-    thread_fsm_set_finished (self);
+				     caller_breakpoint.get ()) != NULL))
+    set_finished ();
 
-  return 1;
+  return true;
 }
 
 /* Implementation of the 'clean_up' FSM method for the
    until(location)/advance commands.  */
 
-static void
-until_break_fsm_clean_up (struct thread_fsm *self,
-			  struct thread_info *thread)
+void
+until_break_fsm::clean_up (struct thread_info *)
 {
-  struct until_break_fsm *sm = (struct until_break_fsm *) self;
-
   /* Clean up our temporary breakpoints.  */
-  if (sm->location_breakpoint != NULL)
-    {
-      delete_breakpoint (sm->location_breakpoint);
-      sm->location_breakpoint = NULL;
-    }
-  if (sm->caller_breakpoint != NULL)
-    {
-      delete_breakpoint (sm->caller_breakpoint);
-      sm->caller_breakpoint = NULL;
-    }
-  delete_longjmp_breakpoint (sm->thread);
+  location_breakpoint.reset ();
+  caller_breakpoint.reset ();
+  delete_longjmp_breakpoint (thread);
 }
 
 /* Implementation of the 'async_reply_reason' FSM method for the
    until(location)/advance commands.  */
 
-static enum async_reply_reason
-until_break_fsm_async_reply_reason (struct thread_fsm *self)
+enum async_reply_reason
+until_break_fsm::do_async_reply_reason ()
 {
   return EXEC_ASYNC_LOCATION_REACHED;
 }
@@ -11063,7 +11023,6 @@ until_break_command (const char *arg, int from_tty, int anywhere)
   struct frame_id caller_frame_id;
   int thread;
   struct thread_info *tp;
-  struct until_break_fsm *sm;
 
   clear_proceed_status (0);
 
@@ -11142,10 +11101,9 @@ until_break_command (const char *arg, int from_tty, int anywhere)
     location_breakpoint = set_momentary_breakpoint (frame_gdbarch, sal,
 						    stack_frame_id, bp_until);
 
-  sm = new_until_break_fsm (command_interp (), tp->global_num,
-			    std::move (location_breakpoint),
-			    std::move (caller_breakpoint));
-  tp->thread_fsm = &sm->thread_fsm;
+  tp->thread_fsm = new until_break_fsm (command_interp (), tp->global_num,
+					std::move (location_breakpoint),
+					std::move (caller_breakpoint));
 
   if (lj_deleter)
     lj_deleter->release ();

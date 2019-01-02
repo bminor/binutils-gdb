@@ -113,7 +113,7 @@ should_print_stop_to_console (struct interp *console_interp,
        == BPSTAT_WHAT_STOP_NOISY)
       || tp->thread_fsm == NULL
       || tp->thread_fsm->command_interp == console_interp
-      || !thread_fsm_finished_p (tp->thread_fsm))
+      || !tp->thread_fsm->finished_p ())
     return 1;
   return 0;
 }

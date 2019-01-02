@@ -470,106 +470,87 @@ get_call_return_value (struct call_return_meta_info *ri)
 /* Data for the FSM that manages an infcall.  It's main job is to
    record the called function's return value.  */
 
-struct call_thread_fsm
+struct call_thread_fsm : public thread_fsm
 {
-  /* The base class.  */
-  struct thread_fsm thread_fsm;
-
   /* All the info necessary to be able to extract the return
      value.  */
   struct call_return_meta_info return_meta_info;
 
   /* The called function's return value.  This is extracted from the
      target before the dummy frame is popped.  */
-  struct value *return_value;
+  struct value *return_value = nullptr;
 
   /* The top level that started the infcall (and is synchronously
      waiting for it to end).  */
   struct ui *waiting_ui;
-};
 
-static int call_thread_fsm_should_stop (struct thread_fsm *self,
-					struct thread_info *thread);
-static int call_thread_fsm_should_notify_stop (struct thread_fsm *self);
+  call_thread_fsm (struct ui *waiting_ui, struct interp *cmd_interp,
+		   struct gdbarch *gdbarch, struct value *function,
+		   struct type *value_type,
+		   int struct_return_p, CORE_ADDR struct_addr);
 
-/* call_thread_fsm's vtable.  */
+  bool should_stop (struct thread_info *thread) override;
 
-static struct thread_fsm_ops call_thread_fsm_ops =
-{
-  NULL, /*dtor */
-  NULL, /* clean_up */
-  call_thread_fsm_should_stop,
-  NULL, /* return_value */
-  NULL, /* async_reply_reason*/
-  call_thread_fsm_should_notify_stop,
+  bool should_notify_stop () override;
 };
 
 /* Allocate a new call_thread_fsm object.  */
 
-static struct call_thread_fsm *
-new_call_thread_fsm (struct ui *waiting_ui, struct interp *cmd_interp,
-		     struct gdbarch *gdbarch, struct value *function,
-		     struct type *value_type,
-		     int struct_return_p, CORE_ADDR struct_addr)
+call_thread_fsm::call_thread_fsm (struct ui *waiting_ui,
+				  struct interp *cmd_interp,
+				  struct gdbarch *gdbarch,
+				  struct value *function,
+				  struct type *value_type,
+				  int struct_return_p, CORE_ADDR struct_addr)
+  : thread_fsm (cmd_interp),
+    waiting_ui (waiting_ui)
 {
-  struct call_thread_fsm *sm;
-
-  sm = XCNEW (struct call_thread_fsm);
-  thread_fsm_ctor (&sm->thread_fsm, &call_thread_fsm_ops, cmd_interp);
-
-  sm->return_meta_info.gdbarch = gdbarch;
-  sm->return_meta_info.function = function;
-  sm->return_meta_info.value_type = value_type;
-  sm->return_meta_info.struct_return_p = struct_return_p;
-  sm->return_meta_info.struct_addr = struct_addr;
-
-  sm->waiting_ui = waiting_ui;
-
-  return sm;
+  return_meta_info.gdbarch = gdbarch;
+  return_meta_info.function = function;
+  return_meta_info.value_type = value_type;
+  return_meta_info.struct_return_p = struct_return_p;
+  return_meta_info.struct_addr = struct_addr;
 }
 
 /* Implementation of should_stop method for infcalls.  */
 
-static int
-call_thread_fsm_should_stop (struct thread_fsm *self,
-			     struct thread_info *thread)
+bool
+call_thread_fsm::should_stop (struct thread_info *thread)
 {
-  struct call_thread_fsm *f = (struct call_thread_fsm *) self;
-
   if (stop_stack_dummy == STOP_STACK_DUMMY)
     {
       /* Done.  */
-      thread_fsm_set_finished (self);
+      set_finished ();
 
       /* Stash the return value before the dummy frame is popped and
 	 registers are restored to what they were before the
 	 call..  */
-      f->return_value = get_call_return_value (&f->return_meta_info);
+      return_value = get_call_return_value (&return_meta_info);
 
       /* Break out of wait_sync_command_done.  */
-      scoped_restore save_ui = make_scoped_restore (&current_ui, f->waiting_ui);
+      scoped_restore save_ui = make_scoped_restore (&current_ui, waiting_ui);
       target_terminal::ours ();
-      f->waiting_ui->prompt_state = PROMPT_NEEDED;
+      waiting_ui->prompt_state = PROMPT_NEEDED;
     }
 
-  return 1;
+  return true;
 }
 
 /* Implementation of should_notify_stop method for infcalls.  */
 
-static int
-call_thread_fsm_should_notify_stop (struct thread_fsm *self)
+bool
+call_thread_fsm::should_notify_stop ()
 {
-  if (thread_fsm_finished_p (self))
+  if (finished_p ())
     {
       /* Infcall succeeded.  Be silent and proceed with evaluating the
 	 expression.  */
-      return 0;
+      return false;
     }
 
   /* Something wrong happened.  E.g., an unexpected breakpoint
      triggered, or a signal was intercepted.  Notify the stop.  */
-  return 1;
+  return true;
 }
 
 /* Subroutine of call_function_by_hand to simplify it.
@@ -606,7 +587,7 @@ run_inferior_call (struct call_thread_fsm *sm,
   /* Associate the FSM with the thread after clear_proceed_status
      (otherwise it'd clear this FSM), and before anything throws, so
      we don't leak it (and any resources it manages).  */
-  call_thread->thread_fsm = &sm->thread_fsm;
+  call_thread->thread_fsm = sm;
 
   disable_watchpoints_before_interactive_call_start ();
 
@@ -1139,7 +1120,7 @@ call_function_by_hand_dummy (struct value *function,
        not report the stop to the user, and captures the return value
        before the dummy frame is popped.  run_inferior_call registers
        it with the thread ASAP.  */
-    sm = new_call_thread_fsm (current_ui, command_interp (),
+    sm = new call_thread_fsm (current_ui, command_interp (),
 			      gdbarch, function,
 			      values_type,
 			      return_method != return_method_normal,
@@ -1152,9 +1133,9 @@ call_function_by_hand_dummy (struct value *function,
     if (call_thread->state != THREAD_EXITED)
       {
 	/* The FSM should still be the same.  */
-	gdb_assert (call_thread->thread_fsm == &sm->thread_fsm);
+	gdb_assert (call_thread->thread_fsm == sm);
 
-	if (thread_fsm_finished_p (call_thread->thread_fsm))
+	if (call_thread->thread_fsm->finished_p ())
 	  {
 	    struct value *retval;
 
@@ -1170,8 +1151,8 @@ call_function_by_hand_dummy (struct value *function,
 
 	    /* Clean up / destroy the call FSM, and restore the
 	       original one.  */
-	    thread_fsm_clean_up (call_thread->thread_fsm, call_thread.get ());
-	    thread_fsm_delete (call_thread->thread_fsm);
+	    call_thread->thread_fsm->clean_up (call_thread.get ());
+	    delete call_thread->thread_fsm;
 	    call_thread->thread_fsm = saved_sm;
 
 	    maybe_remove_breakpoints ();
@@ -1182,8 +1163,8 @@ call_function_by_hand_dummy (struct value *function,
 
 	/* Didn't complete.  Clean up / destroy the call FSM, and restore the
 	   previous state machine, and handle the error.  */
-	thread_fsm_clean_up (call_thread->thread_fsm, call_thread.get ());
-	thread_fsm_delete (call_thread->thread_fsm);
+	call_thread->thread_fsm->clean_up (call_thread.get ());
+	delete call_thread->thread_fsm;
 	call_thread->thread_fsm = saved_sm;
       }
   }
