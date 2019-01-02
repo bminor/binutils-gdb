@@ -521,7 +521,7 @@ PyObject *gdbarch_to_arch_object (struct gdbarch *gdbarch);
 
 thread_object *create_thread_object (struct thread_info *tp);
 gdbpy_ref<> thread_to_thread_object (thread_info *thr);;
-inferior_object *inferior_to_inferior_object (inferior *inf);
+gdbpy_ref<inferior_object> inferior_to_inferior_object (inferior *inf);
 
 const struct block *block_object_to_block (PyObject *obj);
 struct symbol *symbol_object_to_symbol (PyObject *obj);

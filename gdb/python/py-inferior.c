@@ -208,7 +208,7 @@ python_new_objfile (struct objfile *objfile)
    return it and increment the reference count,  otherwise, create it.
    Return NULL on failure.  */
 
-inferior_object *
+gdbpy_ref<inferior_object>
 inferior_to_inferior_object (struct inferior *inferior)
 {
   inferior_object *inf_obj;
@@ -218,7 +218,7 @@ inferior_to_inferior_object (struct inferior *inferior)
     {
       inf_obj = PyObject_New (inferior_object, &inferior_object_type);
       if (!inf_obj)
-	  return NULL;
+	return NULL;
 
       inf_obj->inferior = inferior;
       inf_obj->threads = NULL;
@@ -227,13 +227,11 @@ inferior_to_inferior_object (struct inferior *inferior)
       /* PyObject_New initializes the new object with a refcount of 1.  This
 	 counts for the reference we are keeping in the inferior data.  */
       set_inferior_data (inferior, infpy_inf_data_key, inf_obj);
-
     }
 
   /* We are returning a new reference.  */
-  Py_INCREF ((PyObject *)inf_obj);
-
-  return inf_obj;
+  gdb_assert (inf_obj != nullptr);
+  return gdbpy_ref<inferior_object>::new_reference (inf_obj);
 }
 
 /* Called when a new inferior is created.  Notifies any Python event
@@ -249,7 +247,7 @@ python_new_inferior (struct inferior *inf)
   if (evregpy_no_listeners_p (gdb_py_events.new_inferior))
     return;
 
-  gdbpy_ref<inferior_object> inf_obj (inferior_to_inferior_object (inf));
+  gdbpy_ref<inferior_object> inf_obj = inferior_to_inferior_object (inf);
   if (inf_obj == NULL)
     {
       gdbpy_print_stack ();
@@ -277,7 +275,7 @@ python_inferior_deleted (struct inferior *inf)
   if (evregpy_no_listeners_p (gdb_py_events.inferior_deleted))
     return;
 
-  gdbpy_ref<inferior_object> inf_obj (inferior_to_inferior_object (inf));
+  gdbpy_ref<inferior_object> inf_obj = inferior_to_inferior_object (inf);
   if (inf_obj == NULL)
     {
       gdbpy_print_stack ();
@@ -295,7 +293,7 @@ python_inferior_deleted (struct inferior *inf)
 gdbpy_ref<>
 thread_to_thread_object (thread_info *thr)
 {
-  gdbpy_ref<inferior_object> inf_obj (inferior_to_inferior_object (thr->inf));
+  gdbpy_ref<inferior_object> inf_obj = inferior_to_inferior_object (thr->inf);
   if (inf_obj == NULL)
     return NULL;
 
@@ -358,8 +356,7 @@ delete_thread_object (struct thread_info *tp, int ignore)
 
   gdbpy_enter enter_py (python_gdbarch, python_language);
 
-  gdbpy_ref<inferior_object> inf_obj
-    ((inferior_object *) inferior_to_inferior_object (tp->inf));
+  gdbpy_ref<inferior_object> inf_obj = inferior_to_inferior_object (tp->inf);
   if (inf_obj == NULL)
     return;
 
@@ -466,7 +463,7 @@ static int
 build_inferior_list (struct inferior *inf, void *arg)
 {
   PyObject *list = (PyObject *) arg;
-  gdbpy_ref<inferior_object> inferior (inferior_to_inferior_object (inf));
+  gdbpy_ref<inferior_object> inferior = inferior_to_inferior_object (inf);
 
   if (inferior == NULL)
     return 0;
@@ -925,7 +922,8 @@ py_free_inferior (struct inferior *inf, void *datum)
 PyObject *
 gdbpy_selected_inferior (PyObject *self, PyObject *args)
 {
-  return (PyObject *) inferior_to_inferior_object (current_inferior ());
+  return ((PyObject *)
+	  inferior_to_inferior_object (current_inferior ()).release ());
 }
 
 int

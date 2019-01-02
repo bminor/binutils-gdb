@@ -1,3 +1,16 @@
+2019-01-02  Tom Tromey  <tom@tromey.com>
+
+	* python/python-internal.h (inferior_to_inferior_object): Change
+	return type.
+	* python/py-exitedevent.c (create_exited_event_object): Update.
+	* python/py-inferior.c (inferior_to_inferior_object): Return
+	gdbpy_ref.
+	(python_new_inferior, python_inferior_deleted)
+	(thread_to_thread_object, delete_thread_object)
+	(build_inferior_list, gdbpy_selected_inferior): Update.
+	* python/py-infthread.c (create_thread_object): Update.  Also fail
+	if inferior_to_inferior_object fails.
+
 2019-01-02  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* inferior.h (class inferior) <displaced_step_state>: New field.
