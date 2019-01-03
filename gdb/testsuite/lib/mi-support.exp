@@ -833,11 +833,6 @@ proc mi_gdb_test { args } {
 	    perror "Window too small."
 	     fail "$message"
 	}
-	 -re "\\(y or n\\) " {
-	    send_gdb "n\n"
-	    perror "Got interactive prompt."
-	     fail "$message"
-	}
 	 eof {
 	     perror "Process no longer exists"
 	     if { $message != "" } {
