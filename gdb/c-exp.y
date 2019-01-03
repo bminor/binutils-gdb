@@ -74,6 +74,9 @@ struct c_parse_state
      allocated during the parse.  */
   std::vector<std::unique_ptr<std::vector<struct type *>>> type_lists;
   std::vector<std::unique_ptr<struct type_stack>> type_stacks;
+
+  /* Storage for some strings allocated during the parse.  */
+  std::vector<gdb::unique_xmalloc_ptr<char>> strings;
 };
 
 /* This is set and cleared in c_parse.  */
@@ -1743,7 +1746,7 @@ operator_stoken (const char *op)
   st.ptr = buf;
 
   /* The toplevel (c_parse) will free the memory allocated here.  */
-  make_cleanup (free, buf);
+  cpstate->strings.emplace_back (buf);
   return st;
 };
 

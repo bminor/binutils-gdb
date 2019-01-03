@@ -1,5 +1,10 @@
 2019-01-06  Tom Tromey  <tom@tromey.com>
 
+	* c-exp.y (struct c_parse_state) <strings>: New member.
+	(operator_stoken): Update.
+
+2019-01-06  Tom Tromey  <tom@tromey.com>
+
 	* parser-defs.h (type_ptr): Remove typedef.  Don't declare VEC.
 	(union type_stack_elt) <typelist_val>: Now a pointer to
 	std::vector.
