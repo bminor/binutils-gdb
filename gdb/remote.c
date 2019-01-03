@@ -8034,10 +8034,32 @@ remote_target::process_g_packet (struct regcache *regcache)
   buf_len = strlen (rs->buf);
 
   /* Further sanity checks, with knowledge of the architecture.  */
+  /* HACKFIX for changing architectures for qemu. It's ugly.
+   * Don't use, unless you have to.
+   * Just a tiny modification of the patch of Matias Vara
+   * (http://forum.osdev.org/viewtopic.php?f=13&p=177644)
+   */
   if (buf_len > 2 * rsa->sizeof_g_packet)
-    error (_("Remote 'g' packet reply is too long (expected %ld bytes, got %d "
-	     "bytes): %s"), rsa->sizeof_g_packet, buf_len / 2, rs->buf);
+    {
+      warning (_("Assuming long-mode change. [Remote 'g' packet reply is too long: %s]"), rs->buf);
+      rsa->sizeof_g_packet = buf_len;
 
+      for (i = 0; i < gdbarch_num_regs (gdbarch); i++)
+        {
+          if (rsa->regs[i].pnum == -1)
+            continue;
+
+          if (rsa->regs[i].offset >= rsa->sizeof_g_packet)
+            rsa->regs[i].in_g_packet = 0;
+          else
+            rsa->regs[i].in_g_packet = 1;
+        }
+
+      /* HACKFIX: Make sure at least the lower half of EIP is set correctly,
+       * so the proer breakpoint is recognized (and triggered).
+       */
+      rsa->regs[8].offset = (16 * 8);
+    }
   /* Save the size of the packet sent to us by the target.  It is used
      as a heuristic when determining the max size of packets that the
      target can safely receive.  */
