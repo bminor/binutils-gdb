@@ -1,3 +1,7 @@
+2019-01-03  Jim Wilson  <jimw@sifive.com>
+
+	* riscv-tdep.c (riscv_freg_feature): Drop s0 name from f8.
+
 2019-01-02  Tom Tromey  <tom@tromey.com>
 
 	* xml-tdesc.c (xml_cache): Hold a target_desc_up.

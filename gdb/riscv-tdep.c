@@ -185,7 +185,7 @@ static const struct riscv_register_feature riscv_freg_feature =
    { RISCV_FIRST_FP_REGNUM + 5, { "ft5", "f5" }, true },
    { RISCV_FIRST_FP_REGNUM + 6, { "ft6", "f6" }, true },
    { RISCV_FIRST_FP_REGNUM + 7, { "ft7", "f7" }, true },
-   { RISCV_FIRST_FP_REGNUM + 8, { "fs0", "f8", "s0" }, true },
+   { RISCV_FIRST_FP_REGNUM + 8, { "fs0", "f8" }, true },
    { RISCV_FIRST_FP_REGNUM + 9, { "fs1", "f9" }, true },
    { RISCV_FIRST_FP_REGNUM + 10, { "fa0", "f10" }, true },
    { RISCV_FIRST_FP_REGNUM + 11, { "fa1", "f11" }, true },
