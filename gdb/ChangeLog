@@ -1,5 +1,25 @@
 2019-01-06  Tom Tromey  <tom@tromey.com>
 
+	* parser-defs.h (type_ptr): Remove typedef.  Don't declare VEC.
+	(union type_stack_elt) <typelist_val>: Now a pointer to
+	std::vector.
+	(type_stack_cleanup): Don't declare.
+	(push_typelist): Update.
+	* parse.c (pop_typelist): Return a std::vector.
+	(push_typelist): Take a std::vector.
+	(follow_types): Update.  Do not free args.
+	(type_stack_cleanup): Remove.
+	* c-exp.y (struct c_parse_state): New.
+	(cpstate): New global.
+	(type_aggregate_p, exp, ptr_operator, parameter_typelist)
+	(nonempty_typelist): Update.
+	(func_mod): Create a new vector.
+	(c_parse): Create a c_parse_state.
+	(check_parameter_typelist): Do not delete params.
+	(function_method): Update.  Do not delete type_list.
+
+2019-01-06  Tom Tromey  <tom@tromey.com>
+
 	PR gdb/28155:
 	* python/py-finishbreakpoint.c (bpfinishpy_init): Use
 	check_typedef.

@@ -66,6 +66,20 @@
 
 static struct parser_state *pstate = NULL;
 
+/* Data that must be held for the duration of a parse.  */
+
+struct c_parse_state
+{
+  /* These are used to hold type lists and type stacks that are
+     allocated during the parse.  */
+  std::vector<std::unique_ptr<std::vector<struct type *>>> type_lists;
+  std::vector<std::unique_ptr<struct type_stack>> type_stacks;
+};
+
+/* This is set and cleared in c_parse.  */
+
+static struct c_parse_state *cpstate;
+
 int yyparse (void);
 
 static int yylex (void);
@@ -101,7 +115,7 @@ static int type_aggregate_p (struct type *);
     enum exp_opcode opcode;
 
     struct stoken_vector svec;
-    VEC (type_ptr) *tvec;
+    std::vector<struct type *> *tvec;
 
     struct type_stack *type_stack;
 
@@ -114,7 +128,7 @@ static int parse_number (struct parser_state *par_state,
 			 const char *, int, int, YYSTYPE *);
 static struct stoken operator_stoken (const char *);
 static struct stoken typename_stoken (const char *);
-static void check_parameter_typelist (VEC (type_ptr) *);
+static void check_parameter_typelist (std::vector<struct type *> *);
 static void write_destructor_name (struct parser_state *par_state,
 				   struct stoken);
 
@@ -552,10 +566,9 @@ arglist	:	arglist ',' exp   %prec ABOVE_COMMA
 	;
 
 function_method:       exp '(' parameter_typelist ')' const_or_volatile
-			{ int i;
-			  VEC (type_ptr) *type_list = $3;
-			  struct type *type_elt;
-			  LONGEST len = VEC_length (type_ptr, type_list);
+			{
+			  std::vector<struct type *> *type_list = $3;
+			  LONGEST len = type_list->size ();
 
 			  write_exp_elt_opcode (pstate, TYPE_INSTANCE);
 			  /* Save the const/volatile qualifiers as
@@ -564,13 +577,10 @@ function_method:       exp '(' parameter_typelist ')' const_or_volatile
 			  write_exp_elt_longcst (pstate,
 						 follow_type_instance_flags ());
 			  write_exp_elt_longcst (pstate, len);
-			  for (i = 0;
-			       VEC_iterate (type_ptr, type_list, i, type_elt);
-			       ++i)
+			  for (type *type_elt : *type_list)
 			    write_exp_elt_type (pstate, type_elt);
 			  write_exp_elt_longcst(pstate, len);
 			  write_exp_elt_opcode (pstate, TYPE_INSTANCE);
-			  VEC_free (type_ptr, type_list);
 			}
 	;
 
@@ -1157,9 +1167,7 @@ ptr_operator:
 ptr_operator_ts: ptr_operator
 			{
 			  $$ = get_type_stack ();
-			  /* This cleanup is eventually run by
-			     c_parse.  */
-			  make_cleanup (type_stack_cleanup, $$);
+			  cpstate->type_stacks.emplace_back ($$);
 			}
 	;
 
@@ -1209,7 +1217,10 @@ array_mod:	'[' ']'
 	;
 
 func_mod:	'(' ')'
-			{ $$ = NULL; }
+			{
+			  $$ = new std::vector<struct type *>;
+			  cpstate->type_lists.emplace_back ($$);
+			}
 	|	'(' parameter_typelist ')'
 			{ $$ = $2; }
 	;
@@ -1471,7 +1482,7 @@ parameter_typelist:
 			{ check_parameter_typelist ($1); }
 	|	nonempty_typelist ',' DOTDOTDOT
 			{
-			  VEC_safe_push (type_ptr, $1, NULL);
+			  $1->push_back (NULL);
 			  check_parameter_typelist ($1);
 			  $$ = $1;
 			}
@@ -1480,13 +1491,16 @@ parameter_typelist:
 nonempty_typelist
 	:	type
 		{
-		  VEC (type_ptr) *typelist = NULL;
-		  VEC_safe_push (type_ptr, typelist, $1);
+		  std::vector<struct type *> *typelist
+		    = new std::vector<struct type *>;
+		  cpstate->type_lists.emplace_back (typelist);
+
+		  typelist->push_back ($1);
 		  $$ = typelist;
 		}
 	|	nonempty_typelist ',' type
 		{
-		  VEC_safe_push (type_ptr, $1, $3);
+		  $1->push_back ($3);
 		  $$ = $1;
 		}
 	;
@@ -1758,30 +1772,27 @@ type_aggregate_p (struct type *type)
 /* Validate a parameter typelist.  */
 
 static void
-check_parameter_typelist (VEC (type_ptr) *params)
+check_parameter_typelist (std::vector<struct type *> *params)
 {
   struct type *type;
   int ix;
 
-  for (ix = 0; VEC_iterate (type_ptr, params, ix, type); ++ix)
+  for (ix = 0; ix < params->size (); ++ix)
     {
+      type = (*params)[ix];
       if (type != NULL && TYPE_CODE (check_typedef (type)) == TYPE_CODE_VOID)
 	{
 	  if (ix == 0)
 	    {
-	      if (VEC_length (type_ptr, params) == 1)
+	      if (params->size () == 1)
 		{
 		  /* Ok.  */
 		  break;
 		}
-	      VEC_free (type_ptr, params);
 	      error (_("parameter types following 'void'"));
 	    }
 	  else
-	    {
-	      VEC_free (type_ptr, params);
-	      error (_("'void' invalid as parameter type"));
-	    }
+	    error (_("'void' invalid as parameter type"));
 	}
     }
 }
@@ -3275,6 +3286,9 @@ c_parse (struct parser_state *par_state)
   scoped_restore pstate_restore = make_scoped_restore (&pstate);
   gdb_assert (par_state != NULL);
   pstate = par_state;
+
+  c_parse_state cstate;
+  scoped_restore cstate_restore = make_scoped_restore (&cpstate, &cstate);
 
   gdb::unique_xmalloc_ptr<struct macro_scope> macro_scope;
 

@@ -200,9 +200,6 @@ struct objc_class_str
     int theclass;
   };
 
-typedef struct type *type_ptr;
-DEF_VEC_P (type_ptr);
-
 /* For parsing of complicated types.
    An array should be preceded in the list by the size of the array.  */
 enum type_pieces
@@ -225,7 +222,7 @@ union type_stack_elt
     enum type_pieces piece;
     int int_val;
     struct type_stack *stack_val;
-    VEC (type_ptr) *typelist_val;
+    std::vector<struct type *> *typelist_val;
   };
 
 /* The type stack is an instance of this structure.  */
@@ -303,9 +300,7 @@ extern struct type_stack *append_type_stack (struct type_stack *to,
 
 extern void push_type_stack (struct type_stack *stack);
 
-extern void type_stack_cleanup (void *arg);
-
-extern void push_typelist (VEC (type_ptr) *typelist);
+extern void push_typelist (std::vector<struct type *> *typelist);
 
 extern int dump_subexp (struct expression *, struct ui_file *, int);
 

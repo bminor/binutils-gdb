@@ -1457,7 +1457,7 @@ pop_type_int (void)
 
 /* Pop a type list element from the global type stack.  */
 
-static VEC (type_ptr) *
+static std::vector<struct type *> *
 pop_typelist (void)
 {
   gdb_assert (!type_stack.elements.empty ());
@@ -1501,7 +1501,7 @@ push_type_stack (struct type_stack *stack)
 
 /* Copy the global type stack into a newly allocated type stack and
    return it.  The global stack is cleared.  The returned type stack
-   must be freed with type_stack_cleanup.  */
+   must be freed with delete.  */
 
 struct type_stack *
 get_type_stack (void)
@@ -1511,22 +1511,12 @@ get_type_stack (void)
   return result;
 }
 
-/* A cleanup function that destroys a single type stack.  */
-
-void
-type_stack_cleanup (void *arg)
-{
-  struct type_stack *stack = (struct type_stack *) arg;
-
-  delete stack;
-}
-
 /* Push a function type with arguments onto the global type stack.
    LIST holds the argument types.  If the final item in LIST is NULL,
    then the function will be varargs.  */
 
 void
-push_typelist (VEC (type_ptr) *list)
+push_typelist (std::vector<struct type *> *list)
 {
   type_stack_elt elt;
   elt.typelist_val = list;
@@ -1655,14 +1645,12 @@ follow_types (struct type *follow_type)
 
       case tp_function_with_arguments:
 	{
-	  VEC (type_ptr) *args = pop_typelist ();
+	  std::vector<struct type *> *args = pop_typelist ();
 
 	  follow_type
 	    = lookup_function_type_with_arguments (follow_type,
-						   VEC_length (type_ptr, args),
-						   VEC_address (type_ptr,
-								args));
-	  VEC_free (type_ptr, args);
+						   args->size (),
+						   args->data ());
 	}
 	break;
 
