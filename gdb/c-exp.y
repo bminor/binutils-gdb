@@ -77,6 +77,33 @@ struct c_parse_state
 
   /* Storage for some strings allocated during the parse.  */
   std::vector<gdb::unique_xmalloc_ptr<char>> strings;
+
+  /* When we find that lexptr (the global var defined in parse.c) is
+     pointing at a macro invocation, we expand the invocation, and call
+     scan_macro_expansion to save the old lexptr here and point lexptr
+     into the expanded text.  When we reach the end of that, we call
+     end_macro_expansion to pop back to the value we saved here.  The
+     macro expansion code promises to return only fully-expanded text,
+     so we don't need to "push" more than one level.
+
+     This is disgusting, of course.  It would be cleaner to do all macro
+     expansion beforehand, and then hand that to lexptr.  But we don't
+     really know where the expression ends.  Remember, in a command like
+
+     (gdb) break *ADDRESS if CONDITION
+
+     we evaluate ADDRESS in the scope of the current frame, but we
+     evaluate CONDITION in the scope of the breakpoint's location.  So
+     it's simply wrong to try to macro-expand the whole thing at once.  */
+  const char *macro_original_text = nullptr;
+
+  /* We save all intermediate macro expansions on this obstack for the
+     duration of a single parse.  The expansion text may sometimes have
+     to live past the end of the expansion, due to yacc lookahead.
+     Rather than try to be clever about saving the data for a single
+     token, we simply keep it all and delete it after parsing has
+     completed.  */
+  auto_obstack expansion_obstack;
 };
 
 /* This is set and cleared in c_parse.  */
@@ -2427,32 +2454,6 @@ static const struct token ident_tokens[] =
     {"typeid", TYPEID, OP_TYPEID, FLAG_CXX}
   };
 
-/* When we find that lexptr (the global var defined in parse.c) is
-   pointing at a macro invocation, we expand the invocation, and call
-   scan_macro_expansion to save the old lexptr here and point lexptr
-   into the expanded text.  When we reach the end of that, we call
-   end_macro_expansion to pop back to the value we saved here.  The
-   macro expansion code promises to return only fully-expanded text,
-   so we don't need to "push" more than one level.
-
-   This is disgusting, of course.  It would be cleaner to do all macro
-   expansion beforehand, and then hand that to lexptr.  But we don't
-   really know where the expression ends.  Remember, in a command like
-
-     (gdb) break *ADDRESS if CONDITION
-
-   we evaluate ADDRESS in the scope of the current frame, but we
-   evaluate CONDITION in the scope of the breakpoint's location.  So
-   it's simply wrong to try to macro-expand the whole thing at once.  */
-static const char *macro_original_text;
-
-/* We save all intermediate macro expansions on this obstack for the
-   duration of a single parse.  The expansion text may sometimes have
-   to live past the end of the expansion, due to yacc lookahead.
-   Rather than try to be clever about saving the data for a single
-   token, we simply keep it all and delete it after parsing has
-   completed.  */
-static struct obstack expansion_obstack;
 
 static void
 scan_macro_expansion (char *expansion)
@@ -2460,44 +2461,35 @@ scan_macro_expansion (char *expansion)
   char *copy;
 
   /* We'd better not be trying to push the stack twice.  */
-  gdb_assert (! macro_original_text);
+  gdb_assert (! cpstate->macro_original_text);
 
   /* Copy to the obstack, and then free the intermediate
      expansion.  */
-  copy = (char *) obstack_copy0 (&expansion_obstack, expansion,
+  copy = (char *) obstack_copy0 (&cpstate->expansion_obstack, expansion,
 				 strlen (expansion));
   xfree (expansion);
 
   /* Save the old lexptr value, so we can return to it when we're done
      parsing the expanded text.  */
-  macro_original_text = lexptr;
+  cpstate->macro_original_text = lexptr;
   lexptr = copy;
 }
 
 static int
 scanning_macro_expansion (void)
 {
-  return macro_original_text != 0;
+  return cpstate->macro_original_text != 0;
 }
 
 static void
 finished_macro_expansion (void)
 {
   /* There'd better be something to pop back to.  */
-  gdb_assert (macro_original_text);
+  gdb_assert (cpstate->macro_original_text);
 
   /* Pop back to the original text.  */
-  lexptr = macro_original_text;
-  macro_original_text = 0;
-}
-
-static void
-scan_macro_cleanup (void *dummy)
-{
-  if (macro_original_text)
-    finished_macro_expansion ();
-
-  obstack_free (&expansion_obstack, NULL);
+  lexptr = cpstate->macro_original_text;
+  cpstate->macro_original_text = 0;
 }
 
 /* Return true iff the token represents a C++ cast operator.  */
@@ -3262,7 +3254,7 @@ yylex (void)
   if (checkpoint > 0)
     {
       current.value.sval.ptr
-	= (const char *) obstack_copy0 (&expansion_obstack,
+	= (const char *) obstack_copy0 (&cpstate->expansion_obstack,
 					current.value.sval.ptr,
 					current.value.sval.length);
 
@@ -3282,9 +3274,6 @@ yylex (void)
 int
 c_parse (struct parser_state *par_state)
 {
-  int result;
-  struct cleanup *back_to;
-
   /* Setting up the parser state.  */
   scoped_restore pstate_restore = make_scoped_restore (&pstate);
   gdb_assert (par_state != NULL);
@@ -3305,13 +3294,6 @@ c_parse (struct parser_state *par_state)
   scoped_restore restore_macro_scope
     = make_scoped_restore (&expression_macro_scope, macro_scope.get ());
 
-  /* Initialize macro expansion code.  */
-  obstack_init (&expansion_obstack);
-  gdb_assert (! macro_original_text);
-  /* Note that parsing (within yyparse) freely installs cleanups
-     assuming they'll be run here (below).  */
-  back_to = make_cleanup (scan_macro_cleanup, 0);
-
   scoped_restore restore_yydebug = make_scoped_restore (&yydebug,
 							parser_debug);
 
@@ -3323,10 +3305,7 @@ c_parse (struct parser_state *par_state)
   popping = 0;
   name_obstack.clear ();
 
-  result = yyparse ();
-  do_cleanups (back_to);
-
-  return result;
+  return yyparse ();
 }
 
 #ifdef YYBISON

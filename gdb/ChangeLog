@@ -1,5 +1,15 @@
 2019-01-06  Tom Tromey  <tom@tromey.com>
 
+	* c-exp.y (struct c_parse_state) <macro_original_text,
+	expansion_obstack>: New member.
+	(macro_original_text, expansion_obstack): Remove globals.
+	(scan_macro_expansion, scanning_macro_expansion)
+	(finished_macro_expansion): Update.
+	(scan_macro_cleanup): Remove.
+	(yylex, c_parse): Update.
+
+2019-01-06  Tom Tromey  <tom@tromey.com>
+
 	* c-exp.y (struct c_parse_state) <strings>: New member.
 	(operator_stoken): Update.
 
