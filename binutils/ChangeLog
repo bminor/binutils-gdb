@@ -1,10 +1,17 @@
 2019-01-04  Nick Clifton  <nickc@redhat.com>
 
+	PR 24005
+	* objdump.c (load_specific_debug_section): Check for integer
+	overflow before attempting to allocate contents.
+
+2019-01-04  Nick Clifton  <nickc@redhat.com>
+
 	PR 24001
 	* objcopy.c (copy_object): Free dhandle after writing out the
 	debug information.
 	* objdump.c (dump_bfd): Free dhandle after printing out the debug
 	information.
+
 
 2019-01-01  Alan Modra  <amodra@gmail.com>
 
