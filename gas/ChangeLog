@@ -1,3 +1,9 @@
+2019-01-04  Wu Heng  <wu.heng@zte.com.cn>
+
+	PR 24009
+	* read.c (stringer): Fix handling of missing '>' character at end
+	of <...> sequence.
+
 2019-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

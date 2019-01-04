@@ -5390,8 +5390,11 @@ stringer (int bits_appendzero)
 	  c = get_single_number ();
 	  stringer_append_char (c, bitsize);
 	  if (*input_line_pointer != '>')
-	    as_bad (_("expected <nn>"));
-
+	    {
+	      as_bad (_("expected <nn>"));
+	      ignore_rest_of_line ();
+	      return;
+	    }
 	  input_line_pointer++;
 	  break;
 	case ',':
