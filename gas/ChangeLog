@@ -1,5 +1,11 @@
 2019-01-04  Wu Heng  <wu.heng@zte.com.cn>
 
+	PR 24010
+	* macro.c (get_any_string): Check for end of input whilst scanning
+	for separators.
+
+2019-01-04  Wu Heng  <wu.heng@zte.com.cn>
+
 	PR 24009
 	* read.c (stringer): Fix handling of missing '>' character at end
 	of <...> sequence.
