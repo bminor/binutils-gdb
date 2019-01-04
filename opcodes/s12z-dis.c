@@ -351,7 +351,7 @@ print_insn_s12z (bfd_vma memaddr, struct disassemble_info* info)
 		 (struct mem_read_abstraction_base *) &mra);
 
   (info->fprintf_func) (info->stream, "%s", mnemonics[(long)operator]);
-  
+
   /* Ship out size sufficies for those instructions which
      need them.  */
   if (osize == -1)
@@ -359,7 +359,7 @@ print_insn_s12z (bfd_vma memaddr, struct disassemble_info* info)
       bool suffix = false;
       for (o = 0; o < n_operands; ++o)
 	{
-	  if (operands[o]->osize != -1)
+	  if (operands[o] && operands[o]->osize != -1)
 	    {
 	      if (!suffix)
 		{
