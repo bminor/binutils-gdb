@@ -463,7 +463,7 @@ case "${targ}" in
     ;;
 
   csky-*-elf* | csky-*-linux* )
-    targ_defvec=csky_elf32_be_vec
+    targ_defvec=csky_elf32_le_vec
     targ_selvecs="csky_elf32_be_vec csky_elf32_le_vec"
     ;;
 
