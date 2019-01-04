@@ -1878,13 +1878,13 @@ _bfd_strntoll (const char * nptr, int base, unsigned int maxlen)
 }
 
 /* Macro to read an ASCII value stored in an archive header field.  */
-#define GET_VALUE_IN_FIELD(VAR, FIELD)		  \
-  do						  \
-    {						  \
-      (VAR) = sizeof (VAR) > sizeof (long)	  \
-	? _bfd_strntoll (FIELD, 10, sizeof FIELD) \
-	: _bfd_strntol (FIELD, 10, sizeof FIELD); \
-    }						  \
+#define GET_VALUE_IN_FIELD(VAR, FIELD, BASE)			\
+  do								\
+    {								\
+      (VAR) = (sizeof (VAR) > sizeof (long)			\
+	       ? _bfd_strntoll (FIELD, BASE, sizeof FIELD)	\
+	       : _bfd_strntol (FIELD, BASE, sizeof FIELD));	\
+    }								\
   while (0)
 
 /* Read in the armap of an XCOFF archive.  */
@@ -1927,7 +1927,7 @@ xcoff64_slurp_armap (bfd *abfd)
     return FALSE;
 
   /* Skip the name (normally empty).  */
-  GET_VALUE_IN_FIELD (namlen, hdr.namlen);
+  GET_VALUE_IN_FIELD (namlen, hdr.namlen, 10);
   pos = ((namlen + 1) & ~(size_t) 1) + SXCOFFARFMAG;
   if (bfd_seek (abfd, pos, SEEK_CUR) != 0)
     return FALSE;

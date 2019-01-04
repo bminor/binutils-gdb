@@ -1214,19 +1214,19 @@ _bfd_strntoll (const char * nptr, int base, unsigned int maxlen)
 }
 
 /* Macro to read an ASCII value stored in an archive header field.  */
-#define GET_VALUE_IN_FIELD(VAR, FIELD)		  \
-  do						  \
-    {						  \
-      (VAR) = sizeof (VAR) > sizeof (long)	  \
-	? _bfd_strntoll (FIELD, 10, sizeof FIELD) \
-	: _bfd_strntol (FIELD, 10, sizeof FIELD); \
-    }						  \
+#define GET_VALUE_IN_FIELD(VAR, FIELD, BASE)			\
+  do								\
+    {								\
+      (VAR) = (sizeof (VAR) > sizeof (long)			\
+	       ? _bfd_strntoll (FIELD, BASE, sizeof FIELD)	\
+	       : _bfd_strntol (FIELD, BASE, sizeof FIELD));	\
+    }								\
   while (0)
 
-#define EQ_VALUE_IN_FIELD(VAR, FIELD)			\
-  (sizeof (VAR) > sizeof (long)				\
-   ? (VAR) ==_bfd_strntoll (FIELD, 10, sizeof FIELD)	\
-   : (VAR) == _bfd_strntol (FIELD, 10, sizeof FIELD))
+#define EQ_VALUE_IN_FIELD(VAR, FIELD, BASE)			\
+  (sizeof (VAR) > sizeof (long)					\
+   ? (VAR) == _bfd_strntoll (FIELD, BASE, sizeof FIELD)		\
+   : (VAR) == _bfd_strntol (FIELD, BASE, sizeof FIELD))
 
 /* Read in the armap of an XCOFF archive.  */
 
@@ -1252,7 +1252,7 @@ _bfd_xcoff_slurp_armap (bfd *abfd)
       /* This is for the old format.  */
       struct xcoff_ar_hdr hdr;
 
-      GET_VALUE_IN_FIELD (off, xcoff_ardata (abfd)->symoff);
+      GET_VALUE_IN_FIELD (off, xcoff_ardata (abfd)->symoff, 10);
       if (off == 0)
 	{
 	  bfd_has_map (abfd) = FALSE;
@@ -1268,12 +1268,12 @@ _bfd_xcoff_slurp_armap (bfd *abfd)
 	return FALSE;
 
       /* Skip the name (normally empty).  */
-      GET_VALUE_IN_FIELD (namlen, hdr.namlen);
+      GET_VALUE_IN_FIELD (namlen, hdr.namlen, 10);
       off = ((namlen + 1) & ~ (size_t) 1) + SXCOFFARFMAG;
       if (bfd_seek (abfd, off, SEEK_CUR) != 0)
 	return FALSE;
 
-      GET_VALUE_IN_FIELD (sz, hdr.size);
+      GET_VALUE_IN_FIELD (sz, hdr.size, 10);
 
       /* Read in the entire symbol table.  */
       contents = (bfd_byte *) bfd_alloc (abfd, sz);
@@ -1307,7 +1307,7 @@ _bfd_xcoff_slurp_armap (bfd *abfd)
       /* This is for the new format.  */
       struct xcoff_ar_hdr_big hdr;
 
-      GET_VALUE_IN_FIELD (off, xcoff_ardata_big (abfd)->symoff);
+      GET_VALUE_IN_FIELD (off, xcoff_ardata_big (abfd)->symoff, 10);
       if (off == 0)
 	{
 	  bfd_has_map (abfd) = FALSE;
@@ -1323,12 +1323,12 @@ _bfd_xcoff_slurp_armap (bfd *abfd)
 	return FALSE;
 
       /* Skip the name (normally empty).  */
-      GET_VALUE_IN_FIELD (namlen, hdr.namlen);
+      GET_VALUE_IN_FIELD (namlen, hdr.namlen, 10);
       off = ((namlen + 1) & ~ (size_t) 1) + SXCOFFARFMAG;
       if (bfd_seek (abfd, off, SEEK_CUR) != 0)
 	return FALSE;
 
-      GET_VALUE_IN_FIELD (sz, hdr.size);
+      GET_VALUE_IN_FIELD (sz, hdr.size, 10);
 
       /* Read in the entire symbol table.  */
       contents = (bfd_byte *) bfd_alloc (abfd, sz);
@@ -1434,7 +1434,7 @@ _bfd_xcoff_archive_p (bfd *abfd)
 	}
 
       GET_VALUE_IN_FIELD (bfd_ardata (abfd)->first_file_filepos,
-			  hdr.firstmemoff);
+			  hdr.firstmemoff, 10);
 
       amt = SIZEOF_AR_FILE_HDR;
       bfd_ardata (abfd)->tdata = bfd_zalloc (abfd, amt);
@@ -1509,7 +1509,7 @@ _bfd_xcoff_read_ar_hdr (bfd *abfd)
 	  return NULL;
 	}
 
-      GET_VALUE_IN_FIELD (namlen, hdr.namlen);
+      GET_VALUE_IN_FIELD (namlen, hdr.namlen, 10);
       amt = SIZEOF_AR_HDR + namlen + 1;
       hdrp = (struct xcoff_ar_hdr *) bfd_alloc (abfd, amt);
       if (hdrp == NULL)
@@ -1526,7 +1526,7 @@ _bfd_xcoff_read_ar_hdr (bfd *abfd)
       ((char *) hdrp)[SIZEOF_AR_HDR + namlen] = '\0';
 
       ret->arch_header = (char *) hdrp;
-      GET_VALUE_IN_FIELD (ret->parsed_size, hdr.size);
+      GET_VALUE_IN_FIELD (ret->parsed_size, hdr.size, 10);
       ret->filename = (char *) hdrp + SIZEOF_AR_HDR;
     }
   else
@@ -1541,7 +1541,7 @@ _bfd_xcoff_read_ar_hdr (bfd *abfd)
 	  return NULL;
 	}
 
-      GET_VALUE_IN_FIELD (namlen, hdr.namlen);
+      GET_VALUE_IN_FIELD (namlen, hdr.namlen, 10);
       amt = SIZEOF_AR_HDR_BIG + namlen + 1;
       hdrp = (struct xcoff_ar_hdr_big *) bfd_alloc (abfd, amt);
       if (hdrp == NULL)
@@ -1558,7 +1558,7 @@ _bfd_xcoff_read_ar_hdr (bfd *abfd)
       ((char *) hdrp)[SIZEOF_AR_HDR_BIG + namlen] = '\0';
 
       ret->arch_header = (char *) hdrp;
-      GET_VALUE_IN_FIELD (ret->parsed_size, hdr.size);
+      GET_VALUE_IN_FIELD (ret->parsed_size, hdr.size, 10);
       ret->filename = (char *) hdrp + SIZEOF_AR_HDR_BIG;
     }
 
@@ -1587,11 +1587,11 @@ _bfd_xcoff_openr_next_archived_file (bfd *archive, bfd *last_file)
       if (last_file == NULL)
 	filestart = bfd_ardata (archive)->first_file_filepos;
       else
-	GET_VALUE_IN_FIELD (filestart, arch_xhdr (last_file)->nextoff);
+	GET_VALUE_IN_FIELD (filestart, arch_xhdr (last_file)->nextoff, 10);
 
       if (filestart == 0
-	  || EQ_VALUE_IN_FIELD (filestart, xcoff_ardata (archive)->memoff)
-	  || EQ_VALUE_IN_FIELD (filestart, xcoff_ardata (archive)->symoff))
+	  || EQ_VALUE_IN_FIELD (filestart, xcoff_ardata (archive)->memoff, 10)
+	  || EQ_VALUE_IN_FIELD (filestart, xcoff_ardata (archive)->symoff, 10))
 	{
 	  bfd_set_error (bfd_error_no_more_archived_files);
 	  return NULL;
@@ -1602,11 +1602,11 @@ _bfd_xcoff_openr_next_archived_file (bfd *archive, bfd *last_file)
       if (last_file == NULL)
 	filestart = bfd_ardata (archive)->first_file_filepos;
       else
-	GET_VALUE_IN_FIELD (filestart, arch_xhdr_big (last_file)->nextoff);
+	GET_VALUE_IN_FIELD (filestart, arch_xhdr_big (last_file)->nextoff, 10);
 
       if (filestart == 0
-	  || EQ_VALUE_IN_FIELD (filestart, xcoff_ardata_big (archive)->memoff)
-	  || EQ_VALUE_IN_FIELD (filestart, xcoff_ardata_big (archive)->symoff))
+	  || EQ_VALUE_IN_FIELD (filestart, xcoff_ardata_big (archive)->memoff, 10)
+	  || EQ_VALUE_IN_FIELD (filestart, xcoff_ardata_big (archive)->symoff, 10))
 	{
 	  bfd_set_error (bfd_error_no_more_archived_files);
 	  return NULL;
@@ -1631,20 +1631,20 @@ _bfd_xcoff_stat_arch_elt (bfd *abfd, struct stat *s)
     {
       struct xcoff_ar_hdr *hdrp = arch_xhdr (abfd);
 
-      GET_VALUE_IN_FIELD (s->st_mtime, hdrp->date);
-      GET_VALUE_IN_FIELD (s->st_uid, hdrp->uid);
-      GET_VALUE_IN_FIELD (s->st_gid, hdrp->gid);
-      GET_VALUE_IN_FIELD (s->st_mode, hdrp->mode);
+      GET_VALUE_IN_FIELD (s->st_mtime, hdrp->date, 10);
+      GET_VALUE_IN_FIELD (s->st_uid, hdrp->uid, 10);
+      GET_VALUE_IN_FIELD (s->st_gid, hdrp->gid, 10);
+      GET_VALUE_IN_FIELD (s->st_mode, hdrp->mode, 8);
       s->st_size = arch_eltdata (abfd)->parsed_size;
     }
   else
     {
       struct xcoff_ar_hdr_big *hdrp = arch_xhdr_big (abfd);
 
-      GET_VALUE_IN_FIELD (s->st_mtime, hdrp->date);
-      GET_VALUE_IN_FIELD (s->st_uid, hdrp->uid);
-      GET_VALUE_IN_FIELD (s->st_gid, hdrp->gid);
-      GET_VALUE_IN_FIELD (s->st_mode, hdrp->mode);
+      GET_VALUE_IN_FIELD (s->st_mtime, hdrp->date, 10);
+      GET_VALUE_IN_FIELD (s->st_uid, hdrp->uid, 10);
+      GET_VALUE_IN_FIELD (s->st_gid, hdrp->gid, 10);
+      GET_VALUE_IN_FIELD (s->st_mode, hdrp->mode, 8);
       s->st_size = arch_eltdata (abfd)->parsed_size;
     }
 

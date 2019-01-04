@@ -1,3 +1,12 @@
+2019-01-04  Alan Modra  <amodra@gmail.com>
+
+	PR 24061
+	PR 21786
+	* coff-rs6000.c (GET_VALUE_IN_FIELD): Add base parameter and
+	adjust all callers.
+	(EQ_VALUE_IN_FIELD): Likewise.
+	* coff64-rs6000.c (GET_VALUE_IN_FIELD): Likewise.
+
 2019-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
