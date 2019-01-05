@@ -442,15 +442,17 @@ thread_step_over_chain_remove (struct thread_info *tp)
   step_over_chain_remove (&step_over_queue_head, tp);
 }
 
-/* Delete thread TP.  If SILENT, don't notify the observer of this
-   exit.  */
+/* Delete the thread referenced by THR.  If SILENT, don't notifyi
+   the observer of this exit.
+   
+   THR must not be NULL or a failed assertion will be raised.  */
 
 static void
 delete_thread_1 (thread_info *thr, bool silent)
 {
-  struct thread_info *tp, *tpprev;
+  gdb_assert (thr != nullptr);
 
-  tpprev = NULL;
+  struct thread_info *tp, *tpprev = NULL;
 
   for (tp = thr->inf->thread_list; tp; tpprev = tp, tp = tp->next)
     if (tp == thr)

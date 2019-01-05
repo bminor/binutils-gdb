@@ -1,3 +1,16 @@
+2019-01-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* thread.c (delete_thread_1): Add gdb_assert that THR is not
+	NULL. Initialize tpprev to NULL instead of assigning it
+	to NULL on the next statement.
+	* windows-nat.c (windows_delete_thread): Remove check for
+	main_thread_id before printing thread exit notifications.
+	(get_windows_debug_event) <EXIT_THREAD_DEBUG_EVENT>:
+	Remove thread ID check against main_thread_id.
+	<CREATE_PROCESS_DEBUG_EVENT>: Remove call to
+	windows_delete_thread.
+	<EXIT_PROCESS_DEBUG_EVENT>: Add call to windows_delete_thread.
+
 2019-01-04  Tom Tromey  <tom@tromey.com>
 
 	* compile/compile.c (_initialize_compile): Use upper case for

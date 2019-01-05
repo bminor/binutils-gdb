@@ -496,7 +496,7 @@ windows_delete_thread (ptid_t ptid, DWORD exit_code)
 
   if (info_verbose)
     printf_unfiltered ("[Deleting %s]\n", target_pid_to_str (ptid));
-  else if (print_thread_events && id != main_thread_id)
+  else if (print_thread_events)
     printf_unfiltered (_("[%s exited with code %u]\n"),
 		       target_pid_to_str (ptid), (unsigned) exit_code);
   delete_thread (find_thread_ptid (ptid));
@@ -1560,14 +1560,10 @@ get_windows_debug_event (struct target_ops *ops,
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "EXIT_THREAD_DEBUG_EVENT"));
-
-      if (current_event.dwThreadId != main_thread_id)
-	{
-	  windows_delete_thread (ptid_t (current_event.dwProcessId, 0,
-					 current_event.dwThreadId),
-				 current_event.u.ExitThread.dwExitCode);
-	  th = &dummy_thread_info;
-	}
+      windows_delete_thread (ptid_t (current_event.dwProcessId, 0,
+				     current_event.dwThreadId),
+			     current_event.u.ExitThread.dwExitCode);
+      th = &dummy_thread_info;
       break;
 
     case CREATE_PROCESS_DEBUG_EVENT:
@@ -1580,10 +1576,6 @@ get_windows_debug_event (struct target_ops *ops,
 	break;
 
       current_process_handle = current_event.u.CreateProcessInfo.hProcess;
-      if (main_thread_id)
-	windows_delete_thread (ptid_t (current_event.dwProcessId, 0,
-				       main_thread_id),
-			       0);
       main_thread_id = current_event.dwThreadId;
       /* Add the main thread.  */
       th = windows_add_thread (ptid_t (current_event.dwProcessId, 0,
@@ -1607,6 +1599,9 @@ get_windows_debug_event (struct target_ops *ops,
 	}
       else if (saw_create == 1)
 	{
+	  windows_delete_thread (ptid_t (current_event.dwProcessId, 0,
+					 main_thread_id),
+				 0);
 	  ourstatus->kind = TARGET_WAITKIND_EXITED;
 	  ourstatus->value.integer = current_event.u.ExitProcess.dwExitCode;
 	  thread_id = main_thread_id;
