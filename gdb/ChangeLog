@@ -1,5 +1,17 @@
 2019-01-14  Tom Tromey  <tom@tromey.com>
 
+	* remote-notif.c (handle_notification, remote_notif_ack)
+	(remote_notif_parse): Make "buf" const.
+	* remote-notif.h (struct notif_client) <parse, ack>: Make "buf"
+	const.
+	(remote_notif_parse, remote_notif_ack, handle_notification):
+	Likewise.
+	* remote.c (remote_notif_stop_parse): Make "buf" const.
+	(remote_target::remote_parse_stop_reply): Make "buf" const.
+	(remote_notif_stop_ack): Make "buf" const.
+
+2019-01-14  Tom Tromey  <tom@tromey.com>
+
 	* remote.c (remote_console_output): Make parameter const.
 
 2019-01-14  Tom Tromey  <tom@tromey.com>

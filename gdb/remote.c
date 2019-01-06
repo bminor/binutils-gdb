@@ -768,7 +768,7 @@ public: /* Remote specific methods.  */
   struct stop_reply *remote_notif_remove_queued_reply (ptid_t ptid);
   struct stop_reply *queued_stop_reply (ptid_t ptid);
   int peek_stop_reply (ptid_t ptid);
-  void remote_parse_stop_reply (char *buf, stop_reply *event);
+  void remote_parse_stop_reply (const char *buf, stop_reply *event);
 
   void remote_stop_ns (ptid_t ptid);
   void remote_interrupt_as ();
@@ -6864,7 +6864,7 @@ remote_target::stop_reply_queue_length ()
 
 void
 remote_notif_stop_parse (remote_target *remote,
-			 struct notif_client *self, char *buf,
+			 struct notif_client *self, const char *buf,
 			 struct notif_event *event)
 {
   remote->remote_parse_stop_reply (buf, (struct stop_reply *) event);
@@ -6872,7 +6872,7 @@ remote_notif_stop_parse (remote_target *remote,
 
 static void
 remote_notif_stop_ack (remote_target *remote,
-		       struct notif_client *self, char *buf,
+		       struct notif_client *self, const char *buf,
 		       struct notif_event *event)
 {
   struct stop_reply *stop_reply = (struct stop_reply *) event;
@@ -7201,7 +7201,7 @@ strprefix (const char *p, const char *pend, const char *prefix)
    result is stored in EVENT, or throws an error.  */
 
 void
-remote_target::remote_parse_stop_reply (char *buf, stop_reply *event)
+remote_target::remote_parse_stop_reply (const char *buf, stop_reply *event)
 {
   remote_arch_state *rsa = NULL;
   ULONGEST addr;

@@ -59,7 +59,7 @@ static void do_notif_event_xfree (void *arg);
 
 void
 remote_notif_ack (remote_target *remote,
-		  struct notif_client *nc, char *buf)
+		  struct notif_client *nc, const char *buf)
 {
   struct notif_event *event = nc->alloc_event ();
   struct cleanup *old_chain
@@ -79,7 +79,7 @@ remote_notif_ack (remote_target *remote,
 
 struct notif_event *
 remote_notif_parse (remote_target *remote,
-		    struct notif_client *nc, char *buf)
+		    struct notif_client *nc, const char *buf)
 {
   struct notif_event *event = nc->alloc_event ();
   struct cleanup *old_chain
@@ -126,7 +126,7 @@ remote_async_get_pending_events_handler (gdb_client_data data)
    update STATE.  */
 
 void
-handle_notification (struct remote_notif_state *state, char *buf)
+handle_notification (struct remote_notif_state *state, const char *buf)
 {
   struct notif_client *nc;
   size_t i;

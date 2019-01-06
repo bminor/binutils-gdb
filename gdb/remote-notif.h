@@ -55,13 +55,13 @@ typedef struct notif_client
      function may throw exception if contents in BUF is not the
      expected event.  */
   void (*parse) (remote_target *remote,
-		 struct notif_client *self, char *buf,
+		 struct notif_client *self, const char *buf,
 		 struct notif_event *event);
 
   /* Send field <ack_command> to remote, and do some checking.  If
      something wrong, throw an exception.  */
   void (*ack) (remote_target *remote,
-	       struct notif_client *self, char *buf,
+	       struct notif_client *self, const char *buf,
 	       struct notif_event *event);
 
   /* Check this notification client can get pending events in
@@ -106,15 +106,16 @@ struct remote_notif_state
   struct notif_event *pending_event[REMOTE_NOTIF_LAST];
 };
 
-void remote_notif_ack (remote_target *remote, notif_client *nc, char *buf);
+void remote_notif_ack (remote_target *remote, notif_client *nc,
+		       const char *buf);
 struct notif_event *remote_notif_parse (remote_target *remote,
 					notif_client *nc,
-					char *buf);
+					const char *buf);
 
 void notif_event_xfree (struct notif_event *event);
 
 void handle_notification (struct remote_notif_state *notif_state,
-			  char *buf);
+			  const char *buf);
 
 void remote_notif_process (struct remote_notif_state *state,
 			   struct notif_client *except);
