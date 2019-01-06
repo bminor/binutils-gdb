@@ -1024,7 +1024,7 @@ static void remote_async_inferior_event_handler (gdb_client_data);
 
 static bool remote_read_description_p (struct target_ops *target);
 
-static void remote_console_output (char *msg);
+static void remote_console_output (const char *msg);
 
 static void remote_btrace_reset (remote_state *rs);
 
@@ -6799,9 +6799,9 @@ remote_target::terminal_ours ()
 }
 
 static void
-remote_console_output (char *msg)
+remote_console_output (const char *msg)
 {
-  char *p;
+  const char *p;
 
   for (p = msg; p[0] && p[1]; p += 2)
     {

@@ -1,5 +1,9 @@
 2019-01-14  Tom Tromey  <tom@tromey.com>
 
+	* remote.c (remote_console_output): Make parameter const.
+
+2019-01-14  Tom Tromey  <tom@tromey.com>
+
 	* target-debug.h (target_debug_print_signals): Constify.
 	* nto-procfs.c (nto_procfs_target::pass_signals): Update.
 	* procfs.c (procfs_target::pass_signals): Update.
