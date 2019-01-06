@@ -209,7 +209,7 @@ target_debug_print_options (int options)
 }
 
 static void
-target_debug_print_signals (unsigned char *sigs)
+target_debug_print_signals (const unsigned char *sigs)
 {
   fputs_unfiltered ("{", gdb_stdlog);
   if (sigs != NULL)

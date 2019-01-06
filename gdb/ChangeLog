@@ -1,5 +1,21 @@
 2019-01-14  Tom Tromey  <tom@tromey.com>
 
+	* target-debug.h (target_debug_print_signals): Constify.
+	* nto-procfs.c (nto_procfs_target::pass_signals): Update.
+	* procfs.c (procfs_target::pass_signals): Update.
+	* linux-nat.c (linux_nat_target::pass_signals): Update.
+	* linux-nat.h (class linux_nat_target) <pass_signals>: Update.
+	* target-delegates.c: Rebuild.
+	* remote.c (remote_target::program_signals): Update.
+	(remote_target::pass_signals): Update.
+	* target.c (target_pass_signals): Constify argument.
+	(target_program_signals): Likewise.
+	* target.h (struct target_ops) <pass_signals, program_signals>:
+	Constify argument.
+	(target_pass_signals, target_program_signals): Constify argument.
+
+2019-01-14  Tom Tromey  <tom@tromey.com>
+
 	PR tui/28819:
 	* tui/tui-io.c (gdb_wgetch): Print \r when needed.
 

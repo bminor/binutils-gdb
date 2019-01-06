@@ -109,7 +109,7 @@ struct nto_procfs_target : public inf_child_target
 
   void mourn_inferior () override;
 
-  void pass_signals (int, unsigned char *) override;
+  void pass_signals (int, const unsigned char *) override;
 
   bool thread_alive (ptid_t ptid) override;
 
@@ -1442,7 +1442,8 @@ nto_procfs_target::store_registers (struct regcache *regcache, int regno)
 /* Set list of signals to be handled in the target.  */
 
 void
-nto_procfs_target::pass_signals (int numsigs, unsigned char *pass_signals)
+nto_procfs_target::pass_signals (int numsigs,
+				 const unsigned char *pass_signals)
 {
   int signo;
 

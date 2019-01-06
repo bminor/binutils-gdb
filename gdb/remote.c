@@ -474,12 +474,12 @@ public:
 
   void mourn_inferior () override;
 
-  void pass_signals (int, unsigned char *) override;
+  void pass_signals (int, const unsigned char *) override;
 
   int set_syscall_catchpoint (int, bool, int,
 			      gdb::array_view<const int>) override;
 
-  void program_signals (int, unsigned char *) override;
+  void program_signals (int, const unsigned char *) override;
 
   bool thread_alive (ptid_t ptid) override;
 
@@ -2555,7 +2555,7 @@ record_currthread (struct remote_state *rs, ptid_t currthread)
    it can simply pass through to the inferior without reporting.  */
 
 void
-remote_target::pass_signals (int numsigs, unsigned char *pass_signals)
+remote_target::pass_signals (int numsigs, const unsigned char *pass_signals)
 {
   if (packet_support (PACKET_QPassSignals) != PACKET_DISABLE)
     {
@@ -2681,7 +2681,7 @@ remote_target::set_syscall_catchpoint (int pid, bool needed, int any_count,
    signals it should pass through to the inferior when detaching.  */
 
 void
-remote_target::program_signals (int numsigs, unsigned char *signals)
+remote_target::program_signals (int numsigs, const unsigned char *signals)
 {
   if (packet_support (PACKET_QProgramSignals) != PACKET_DISABLE)
     {

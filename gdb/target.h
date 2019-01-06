@@ -638,13 +638,13 @@ struct target_ops
     /* Documentation of this routine is provided with the corresponding
        target_* macro.  */
     virtual void pass_signals (int,
-			       unsigned char * TARGET_DEBUG_PRINTER (target_debug_print_signals))
+			       const unsigned char * TARGET_DEBUG_PRINTER (target_debug_print_signals))
       TARGET_DEFAULT_IGNORE ();
 
     /* Documentation of this routine is provided with the
        corresponding target_* function.  */
     virtual void program_signals (int,
-				  unsigned char * TARGET_DEBUG_PRINTER (target_debug_print_signals))
+				  const unsigned char * TARGET_DEBUG_PRINTER (target_debug_print_signals))
       TARGET_DEFAULT_IGNORE ();
 
     virtual bool thread_alive (ptid_t ptid)
@@ -1692,7 +1692,7 @@ extern int target_can_run ();
    about to receive a signal, it needs to be reported in any case, even
    if mentioned in a previous target_pass_signals call.   */
 
-extern void target_pass_signals (int nsig, unsigned char *pass_signals);
+extern void target_pass_signals (int nsig, const unsigned char *pass_signals);
 
 /* Set list of signals the target may pass to the inferior.  This
    directly maps to the "handle SIGNAL pass/nopass" setting.
@@ -1708,7 +1708,8 @@ extern void target_pass_signals (int nsig, unsigned char *pass_signals);
    example, when detaching (as threads may have been suspended with
    pending signals not reported to GDB).  */
 
-extern void target_program_signals (int nsig, unsigned char *program_signals);
+extern void target_program_signals (int nsig,
+				    const unsigned char *program_signals);
 
 /* Check to see if a thread is still alive.  */
 

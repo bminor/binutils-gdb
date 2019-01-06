@@ -788,7 +788,7 @@ static sigset_t pass_mask;
 
 /* Update signals to pass to the inferior.  */
 void
-linux_nat_target::pass_signals (int numsigs, unsigned char *pass_signals)
+linux_nat_target::pass_signals (int numsigs, const unsigned char *pass_signals)
 {
   int signo;
 
