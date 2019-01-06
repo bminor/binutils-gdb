@@ -1379,12 +1379,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	  else if (c == '\r')
 	    {
 	      /* Skip a \r character, but only before a \n.  */
-	      if (iter[1] == '\n')
-		{
-		  ++iter;
-		  c = '\n';
-		}
-	      else
+	      if (*iter != '\n')
 		printf_filtered ("^%c", c + 0100);
 	    }
 	  else
