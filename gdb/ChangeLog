@@ -1,3 +1,19 @@
+2019-01-15  Tom Tromey  <tom@tromey.com>
+
+	* remote.c (class remote_state) <buf>: Now a char_vector.
+	<buf_size>: Remove.
+	(remote_target::getpkt): Change type of buf.  Remove sizeof_buf
+	parameter.
+	(remote_target::getpkt_or_notif_sane_1)
+	(remote_target::getpkt_sane)
+	(remote_target::getpkt_or_notif_sane): Likewise.
+	(class remote_target) <putpkt>: New overload.
+	(remote_target::read_frame): Change type of "buf_p".  Remove
+	sizeof_p parameter.
+	(packet_ok): New overload.
+	(packet_check_result): New overload.
+	Update all uses.
+
 2019-01-14  Tom Tromey  <tom@tromey.com>
 
 	* remote-notif.c (handle_notification, remote_notif_ack)
