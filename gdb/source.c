@@ -1346,6 +1346,16 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 
   last_source_error = 0;
 
+  /* If the user requested a sequence of lines that seems to go backward
+     (from high to low line numbers) then we don't print anything.
+     The use of '- 1' here instead of '<=' is currently critical, we rely
+     on the undefined wrap around behaviour of 'int' for stopline.  When
+     the use has done: 'set listsize unlimited' then stopline can overflow
+     and appear as MIN_INT.  This is a long-standing bug that needs
+     fixing.  */
+  if (stopline - 1 < line)
+    return;
+
   std::string lines;
   if (!g_source_cache.get_source_lines (s, line, stopline - 1, &lines))
     error (_("Line number %d out of range; %s has %d lines."),
@@ -1392,7 +1402,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
       if (c == '\0')
 	break;
     }
-  if (lines.back () != '\n')
+  if (!lines.empty() && lines.back () != '\n')
     uiout->text ("\n");
 }
 

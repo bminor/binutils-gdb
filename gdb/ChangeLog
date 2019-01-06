@@ -1,5 +1,11 @@
 2019-01-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* source.c (print_source_lines_base): Handle requests to print
+	reverse line number sequences, and guard against empty lines
+	string.
+
+2019-01-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* source.c (print_source_lines_base): Fix skip of '\r' if next
 	character is '\n'.
 
