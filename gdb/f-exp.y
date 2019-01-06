@@ -161,7 +161,7 @@ static int parse_number (struct parser_state *, const char *, int,
 %token BOOL_AND BOOL_OR BOOL_NOT   
 %token <lval> CHARACTER 
 
-%token <voidval> VARIABLE
+%token <voidval> DOLLAR_VARIABLE
 
 %token <opcode> ASSIGN_MODIFY
 
@@ -426,7 +426,7 @@ exp	:	FLOAT
 exp	:	variable
 	;
 
-exp	:	VARIABLE
+exp	:	DOLLAR_VARIABLE
 	;
 
 exp	:	SIZEOF '(' type ')'	%prec UNARY
@@ -1135,7 +1135,7 @@ yylex (void)
   if (*tokstart == '$')
     {
       write_dollar_variable (pstate, yylval.sval);
-      return VARIABLE;
+      return DOLLAR_VARIABLE;
     }
   
   /* Use token-type TYPENAME for symbols that happen to be defined

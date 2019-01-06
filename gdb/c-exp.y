@@ -234,7 +234,7 @@ static void c_print_token (FILE *file, int type, YYSTYPE value);
    legal basetypes.  */
 %token SIGNED_KEYWORD LONG SHORT INT_KEYWORD CONST_KEYWORD VOLATILE_KEYWORD DOUBLE_KEYWORD
 
-%token <sval> VARIABLE
+%token <sval> DOLLAR_VARIABLE
 
 %token <opcode> ASSIGN_MODIFY
 
@@ -798,7 +798,7 @@ exp	:	FLOAT
 exp	:	variable
 	;
 
-exp	:	VARIABLE
+exp	:	DOLLAR_VARIABLE
 			{
 			  write_dollar_variable (pstate, $1);
 			}
@@ -2884,7 +2884,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
       }
 
   if (*tokstart == '$')
-    return VARIABLE;
+    return DOLLAR_VARIABLE;
 
   if (parse_completion && *lexptr == '\0')
     saw_name_at_eof = 1;
@@ -3337,7 +3337,7 @@ c_print_token (FILE *file, int type, YYSTYPE value)
       break;
 
     case NSSTRING:
-    case VARIABLE:
+    case DOLLAR_VARIABLE:
       parser_fprintf (file, "sval<%s>", copy_name (value.sval));
       break;
 

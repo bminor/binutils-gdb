@@ -1,3 +1,14 @@
+2019-01-08  Tom Tromey  <tom@tromey.com>
+	    Simon Marchi  <simon.marchi@ericsson.com>
+
+	PR gdb/24060
+	* ada-exp.y (DOLLAR_VARIABLE): Rename from SPECIAL_VARIABLE.
+	* ada-lex.l (DOLLAR_VARIABLE): Likewise.
+	* c-exp.y (DOLLAR_VARIABLE): Rename from VARIABLE.
+	* f-exp.y (DOLLAR_VARIABLE): Likewise.
+	* m2-exp.y (DOLLAR_VARIABLE): Rename from INTERNAL_VAR.
+	* p-exp.y (DOLLAR_VARIABLE): Rename from VARIABLE.
+
 2019-01-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* source.c (select_source_symtab): Move header comment to

@@ -151,7 +151,7 @@ static struct type *type_system_address (struct parser_state *);
 
 /* Special type cases, put in to allow the parser to distinguish different
    legal basetypes.  */
-%token <sval> SPECIAL_VARIABLE
+%token <sval> DOLLAR_VARIABLE
 
 %nonassoc ASSIGN
 %left _AND_ OR XOR THEN ELSE
@@ -275,7 +275,7 @@ primary :	var_or_type	%prec VAR
 			}
 	;
 
-primary :	SPECIAL_VARIABLE /* Various GDB extensions */
+primary :	DOLLAR_VARIABLE /* Various GDB extensions */
 			{ write_dollar_variable (pstate, $1); }
 	;
 

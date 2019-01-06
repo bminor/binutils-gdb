@@ -125,7 +125,7 @@ static int number_sign = 1;
 /* The GDB scope operator */
 %token COLONCOLON
 
-%token <voidval> INTERNAL_VAR
+%token <voidval> DOLLAR_VARIABLE
 
 /* M2 tokens */
 %left ','
@@ -535,7 +535,7 @@ variable:	fblock
 	;
 
 /* GDB internal ($foo) variable */
-variable:	INTERNAL_VAR
+variable:	DOLLAR_VARIABLE
 	;
 
 /* GDB scope operator */
@@ -949,7 +949,7 @@ yylex (void)
   if (*tokstart == '$')
     {
       write_dollar_variable (pstate, yylval.sval);
-      return INTERNAL_VAR;
+      return DOLLAR_VARIABLE;
     }
 
   /* Use token-type BLOCKNAME for symbols that happen to be defined as

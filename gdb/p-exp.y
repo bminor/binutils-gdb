@@ -158,7 +158,7 @@ static int search_field;
 /* Special type cases, put in to allow the parser to distinguish different
    legal basetypes.  */
 
-%token <voidval> VARIABLE
+%token <voidval> DOLLAR_VARIABLE
 
 
 /* Object pascal */
@@ -521,7 +521,7 @@ exp	:	FLOAT
 exp	:	variable
 	;
 
-exp	:	VARIABLE
+exp	:	DOLLAR_VARIABLE
 			/* Already written by write_dollar_variable.
 			   Handle current_type.  */
  			{  if (intvar) {
@@ -1492,7 +1492,7 @@ yylex (void)
       tmp[namelen] = '\0';
       intvar = lookup_only_internalvar (tmp + 1);
       free (uptokstart);
-      return VARIABLE;
+      return DOLLAR_VARIABLE;
     }
 
   /* Use token-type BLOCKNAME for symbols that happen to be defined as

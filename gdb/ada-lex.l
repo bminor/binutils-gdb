@@ -290,7 +290,7 @@ false		{ return FALSEKEYWORD; }
 "$"({LETTER}|{DIG}|"$")*  {
 		  yylval.sval.ptr = yytext;
 		  yylval.sval.length = yyleng;
-		  return SPECIAL_VARIABLE;
+		  return DOLLAR_VARIABLE;
 		}
 
 	/* CATCH-ALL ERROR CASE */
