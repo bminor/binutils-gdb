@@ -1,3 +1,7 @@
+2019-01-09  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* linespec.c (linespec_state_destructor): Free self->canonical_names.
+
 2019-01-08  Tom Tromey  <tom@tromey.com>
 	    Simon Marchi  <simon.marchi@ericsson.com>
 

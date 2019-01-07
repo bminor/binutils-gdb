@@ -2767,6 +2767,7 @@ static void
 linespec_state_destructor (struct linespec_state *self)
 {
   htab_delete (self->addr_set);
+  xfree (self->canonical_names);
 }
 
 /* Delete a linespec parser.  */
