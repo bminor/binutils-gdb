@@ -233,13 +233,7 @@ clear_current_source_symtab_and_line (void)
   current_source_line = 0;
 }
 
-/* Set the source file default for the "list" command to be S.
-
-   If S is NULL, and we don't have a default, find one.  This
-   should only be called when the user actually tries to use the
-   default, since we produce an error if we can't find a reasonable
-   default.  Also, since this can cause symbols to be read, doing it
-   before we need to would make things slower than necessary.  */
+/* See source.h.  */
 
 void
 select_source_symtab (struct symtab *s)
@@ -351,8 +345,7 @@ show_directories_command (struct ui_file *file, int from_tty,
   show_directories_1 (NULL, from_tty);
 }
 
-/* Forget line positions and file names for the symtabs in a
-   particular objfile.  */
+/* See source.h.  */
 
 void
 forget_cached_source_info_for_objfile (struct objfile *objfile)
@@ -378,9 +371,7 @@ forget_cached_source_info_for_objfile (struct objfile *objfile)
     objfile->sf->qf->forget_cached_source_info (objfile);
 }
 
-/* Forget what we learned about line positions in source files, and
-   which directories contain them; must check again now since files
-   may be found in a different directory now.  */
+/* See source.h.  */
 
 void
 forget_cached_source_info (void)
@@ -1226,14 +1217,7 @@ get_filename_and_charpos (struct symtab *s, char **fullname)
     find_source_lines (s, desc.get ());
 }
 
-/* Print text describing the full name of the source file S
-   and the line number LINE and its corresponding character position.
-   The text starts with two Ctrl-z so that the Emacs-GDB interface
-   can easily find it.
-
-   MID_STATEMENT is nonzero if the PC is not at the beginning of that line.
-
-   Return 1 if successful, 0 if could not find the file.  */
+/* See source.h.  */
 
 int
 identify_source_line (struct symtab *s, int line, int mid_statement,
@@ -1406,10 +1390,8 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
     uiout->text ("\n");
 }
 
-/* Show source lines from the file of symtab S, starting with line
-   number LINE and stopping before line number STOPLINE.  If this is
-   not the command line version, then the source is shown in the source
-   window otherwise it is simply printed.  */
+
+/* See source.h.  */
 
 void
 print_source_lines (struct symtab *s, int line, int stopline,

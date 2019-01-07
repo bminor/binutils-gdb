@@ -1,5 +1,27 @@
 2019-01-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* source.c (select_source_symtab): Move header comment to
+	declaration in source.h.
+	(forget_cached_source_info_for_objfile): Likewise.
+	(forget_cached_source_info): Likewise.
+	(identify_source_line): Likewise.
+	* source.h (identify_source_line): Move declaration from symtab.h
+	and add comment from source.c
+	(print_source_lines): Likewise.
+	(forget_cached_source_info_for_objfile): Likewise.
+	(forget_cached_source_info): Likewise.
+	(select_source_symtab): Likewise.
+	(enum print_source_lines_flag): Move definition from symtab.h.
+	* symtab.h (identify_source_line): Move declaration to source.h.
+	(print_source_lines): Likewise.
+	(forget_cached_source_info_for_objfile): Likewise.
+	(forget_cached_source_info): Likewise.
+	(select_source_symtab): Likewise.
+	(enum print_source_lines_flag): Move definition to source.h.
+	* tui/tui-hooks.c: Add 'source.h' include.
+
+2019-01-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* source.c (print_source_lines_base): Handle requests to print
 	reverse line number sequences, and guard against empty lines
 	string.

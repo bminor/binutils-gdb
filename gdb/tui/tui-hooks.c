@@ -33,6 +33,7 @@
 #include "ui-out.h"
 #include "top.h"
 #include "observable.h"
+#include "source.h"
 #include <unistd.h>
 #include <fcntl.h>
 
