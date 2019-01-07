@@ -1331,13 +1331,8 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
   last_source_error = 0;
 
   /* If the user requested a sequence of lines that seems to go backward
-     (from high to low line numbers) then we don't print anything.
-     The use of '- 1' here instead of '<=' is currently critical, we rely
-     on the undefined wrap around behaviour of 'int' for stopline.  When
-     the use has done: 'set listsize unlimited' then stopline can overflow
-     and appear as MIN_INT.  This is a long-standing bug that needs
-     fixing.  */
-  if (stopline - 1 < line)
+     (from high to low line numbers) then we don't print anything.  */
+  if (stopline <= line)
     return;
 
   std::string lines;
@@ -1399,6 +1394,18 @@ print_source_lines (struct symtab *s, int line, int stopline,
 {
   print_source_lines_base (s, line, stopline, flags);
 }
+
+/* See source.h.  */
+
+void
+print_source_lines (struct symtab *s, source_lines_range line_range,
+		    print_source_lines_flags flags)
+{
+  print_source_lines_base (s, line_range.startline (),
+			   line_range.stopline (), flags);
+}
+
+
 
 /* Print info on range of pc's in a specified line.  */
 
@@ -1820,6 +1827,33 @@ set_substitute_path_command (const char *args, int from_tty)
 
   add_substitute_path_rule (argv[0], argv[1]);
   forget_cached_source_info ();
+}
+
+/* See source.h.  */
+
+source_lines_range::source_lines_range (int startline,
+					source_lines_range::direction dir)
+{
+  if (dir == source_lines_range::FORWARD)
+    {
+      LONGEST end = static_cast <LONGEST> (startline) + get_lines_to_list ();
+
+      if (end > INT_MAX)
+	end = INT_MAX;
+
+      m_startline = startline;
+      m_stopline = static_cast <int> (end);
+    }
+  else
+    {
+      LONGEST start = static_cast <LONGEST> (startline) - get_lines_to_list ();
+
+      if (start < 1)
+	start = 1;
+
+      m_startline = static_cast <int> (start);
+      m_stopline = startline;
+    }
 }
 
 

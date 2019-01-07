@@ -1,3 +1,13 @@
+2019-01-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* cli/cli-cmds.c (list_command): Pass a source_lines_range to
+	print_source_lines.
+	* source.c (print_source_lines_base): Update line number check.
+	(print_source_lines): New function.
+	(source_lines_range::source_lines_range): New function.
+	* source.h (class source_lines_range): New class.
+	(print_source_lines): New declaration.
+
 2019-01-09  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* linespec.c (linespec_state_destructor): Free self->canonical_names.

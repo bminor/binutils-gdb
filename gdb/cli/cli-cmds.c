@@ -895,14 +895,13 @@ list_command (const char *arg, int from_tty)
 	      && get_lines_to_list () == 1 && first > 1)
 	    first -= 1;
 
-	  print_source_lines (cursal.symtab, first,
-			      first + get_lines_to_list (), 0);
+	  print_source_lines (cursal.symtab, source_lines_range (first), 0);
 	}
 
       /* "l" or "l +" lists next ten lines.  */
       else if (arg == NULL || arg[0] == '+')
-	print_source_lines (cursal.symtab, cursal.line,
-			    cursal.line + get_lines_to_list (), 0);
+	print_source_lines (cursal.symtab,
+			    source_lines_range (cursal.line), 0);
 
       /* "l -" lists previous ten lines, the ones before the ten just
 	 listed.  */
@@ -911,10 +910,9 @@ list_command (const char *arg, int from_tty)
 	  if (get_first_line_listed () == 1)
 	    error (_("Already at the start of %s."),
 		   symtab_to_filename_for_display (cursal.symtab));
-	  print_source_lines (cursal.symtab,
-			      std::max (get_first_line_listed ()
-					- get_lines_to_list (), 1),
-			      get_first_line_listed (), 0);
+	  source_lines_range range (get_first_line_listed (),
+				    source_lines_range::BACKWARD);
+	  print_source_lines (cursal.symtab, range, 0);
 	}
 
       return;
@@ -1059,9 +1057,11 @@ list_command (const char *arg, int from_tty)
   if (dummy_beg && sal_end.symtab == 0)
     error (_("No default source file yet.  Do \"help list\"."));
   if (dummy_beg)
-    print_source_lines (sal_end.symtab,
-			std::max (sal_end.line - (get_lines_to_list () - 1), 1),
-			sal_end.line + 1, 0);
+    {
+      source_lines_range range (sal_end.line + 1,
+				source_lines_range::BACKWARD);
+      print_source_lines (sal_end.symtab, range, 0);
+    }
   else if (sal.symtab == 0)
     error (_("No default source file yet.  Do \"help list\"."));
   else if (no_end)
@@ -1074,17 +1074,14 @@ list_command (const char *arg, int from_tty)
 	    first_line = 1;
 	  if (sals.size () > 1)
 	    print_sal_location (sal);
-	  print_source_lines (sal.symtab,
-			      first_line,
-			      first_line + get_lines_to_list (),
-			      0);
+	  print_source_lines (sal.symtab, source_lines_range (first_line), 0);
 	}
     }
+  else if (dummy_end)
+    print_source_lines (sal.symtab, source_lines_range (sal.line), 0);
   else
-    print_source_lines (sal.symtab, sal.line,
-			(dummy_end
-			 ? sal.line + get_lines_to_list ()
-			 : sal_end.line + 1),
+    print_source_lines (sal.symtab,
+			source_lines_range (sal.line, (sal_end.line + 1)),
 			0);
 }
 

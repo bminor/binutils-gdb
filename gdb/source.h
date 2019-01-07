@@ -157,6 +157,54 @@ DEF_ENUM_FLAGS_TYPE (enum print_source_lines_flag, print_source_lines_flags);
 extern void print_source_lines (struct symtab *s, int line, int stopline,
 				print_source_lines_flags flags);
 
+/* Wrap up the logic to build a line number range for passing to
+   print_source_lines when using get_lines_to_list.  An instance of this
+   class can be built from a single line number and a direction (forward or
+   backward) the range is then computed using get_lines_to_list.  */
+class source_lines_range
+{
+public:
+  /* When constructing the range from a single line number, does the line
+     range extend forward, or backward.  */
+  enum direction
+  {
+   FORWARD,
+   BACKWARD
+  };
+
+  /* Construct a SOURCE_LINES_RANGE starting at STARTLINE and extending in
+   direction DIR.  The number of lines is from GET_LINES_TO_LIST.  If the
+   direction is backward then the start is actually (STARTLINE -
+   GET_LINES_TO_LIST).  There is also logic in place to ensure the start
+   is always 1 or more, and the end will be at most INT_MAX.  */
+  explicit source_lines_range (int startline, direction dir = FORWARD);
+
+  /* Construct a SOURCE_LINES_RANGE from STARTLINE to STOPLINE.  */
+  explicit source_lines_range (int startline, int stopline)
+    : m_startline (startline),
+      m_stopline (stopline)
+  { /* Nothing.  */ }
+
+  /* Return the line to start listing from.  */
+  int startline () const
+  { return m_startline; }
+
+  /* Return the line after the last line that should be listed.  */
+  int stopline () const
+  { return m_stopline; }
+
+private:
+
+  /* The start and end of the range.  */
+  int m_startline;
+  int m_stopline;
+};
+
+/* Variation of previous print_source_lines that takes a range instead of a
+   start and end line number.  */
+extern void print_source_lines (struct symtab *s, source_lines_range r,
+				print_source_lines_flags flags);
+
 /* Forget line positions and file names for the symtabs in a
    particular objfile.  */
 extern void forget_cached_source_info_for_objfile (struct objfile *);
