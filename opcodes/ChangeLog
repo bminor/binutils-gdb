@@ -1,3 +1,8 @@
+2019-01-07  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2019-01-03  John Darrington <john@darrington.wattle.id.au>
 
 	* s12z-opc.c: New file.
@@ -6,9 +11,9 @@
 	of instructions.  Used the interface provided by the new files
 	instead.
 	* Makefile.am (TARGET_LIBOPCODES_CFILES) Add s12z-opc.c.
-	* Makefile.in: regenerate.
+	* Makefile.in: Regenerate.
 	* configure.ac (bfd_s12z_arch): Correct the dependencies.
-	* configure: regenerate.
+	* configure: Regenerate.
 
 2019-01-01  Alan Modra  <amodra@gmail.com>
 

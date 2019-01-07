@@ -179,6 +179,7 @@ rl78-dis.c
 rx-decode.c
 rx-dis.c
 s12z-dis.c
+s12z-opc.c
 s390-dis.c
 s390-mkopc.c
 s390-opc.c
