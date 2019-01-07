@@ -1,3 +1,8 @@
+2019-01-07  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* config/tc-arm.c (arm_cpus): Add ares.
+	* doc/c-arm.texi (-mcpu): Document ares value.
+
 2019-01-05  Yoshinori Sato  <ysato@users.sourceforge.jp>
 
 	* config/rx-defs.h (rx_cpu_types): Add type RXV3 and RXV3FPU.
