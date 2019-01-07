@@ -1,11 +1,3 @@
-2019-01-07  Nick Clifton  <nickc@redhat.com>
-
-	PR 24044
-	* stabs.c (parse_stab_argtypes): Remove call to
-	cplus_mangle_opcode.
-	* testsuite/binutils-all/cxxfilt.exp: Replace tests of v2 encoding
-	with v3 encoding.  Add escape for known failures.
-
 2018-12-25  Yoshinori Sato <ysato@users.sourceforge.jp>
 	* readelf.c (get_machine_flags): Add RXv3 output.
 
