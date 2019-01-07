@@ -3037,27 +3037,15 @@ parse_stab_argtypes (void *dhandle, struct stab_handle *info,
 	  && fieldname[1] == 'p'
 	  && (fieldname[2] == '$' || fieldname[2] == '.'))
 	{
-	  const char *opname;
+	  /* Opname selection is no longer supported by libiberty's demangler.  */
+	  return DEBUG_TYPE_NULL;
+	}
 
-	  opname = cplus_mangle_opname (fieldname + 3, 0);
-	  if (opname == NULL)
-	    {
-	      fprintf (stderr, _("No mangling for \"%s\"\n"), fieldname);
-	      return DEBUG_TYPE_NULL;
-	    }
-	  mangled_name_len += strlen (opname);
-	  physname = (char *) xmalloc (mangled_name_len);
-	  strncpy (physname, fieldname, 3);
-	  strcpy (physname + 3, opname);
-	}
+      physname = (char *) xmalloc (mangled_name_len);
+      if (is_constructor)
+	physname[0] = '\0';
       else
-	{
-	  physname = (char *) xmalloc (mangled_name_len);
-	  if (is_constructor)
-	    physname[0] = '\0';
-	  else
-	    strcpy (physname, fieldname);
-	}
+	strcpy (physname, fieldname);
 
       physname_len = strlen (physname);
       strcat (physname, buf);

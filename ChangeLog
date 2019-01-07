@@ -1,3 +1,7 @@
+2019-01-07  Nick Clifton  <nickc@redhat.com>
+
+	* libiberty: Merge from gcc.
+
 2019-01-03  Дилян Палаузов  <dilyan.palauzov@aegee.org>
 
 	* configure.ac: Don't configure readline if --with-system-readline is
