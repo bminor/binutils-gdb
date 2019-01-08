@@ -1,3 +1,8 @@
+2019-01-08  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* config/tc-aarch64.c (aarch64_cpus): Add ares.
+	* doc/c-aarch64.texi (-mcpu): Document ares value.
+
 2019-01-08  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/rx/rx.exp: Create generated test source in

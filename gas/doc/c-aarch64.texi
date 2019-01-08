@@ -63,6 +63,7 @@ on the target processor.  The following processor names are recognized:
 @code{cortex-a73},
 @code{cortex-a75},
 @code{cortex-a76},
+@code{ares},
 @code{exynos-m1},
 @code{falkor},
 @code{qdf24xx},
