@@ -1,3 +1,4 @@
+#source: ./rte.s
 #objdump: -dr
 
 .*:     file format .*

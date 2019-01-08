@@ -1,3 +1,4 @@
+#source: ./wait.s
 #objdump: -dr
 
 .*:     file format .*

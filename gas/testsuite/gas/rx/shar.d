@@ -1,3 +1,4 @@
+#source: ./shar.s
 #objdump: -dr
 
 .*:     file format .*

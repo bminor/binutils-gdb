@@ -1,3 +1,4 @@
+#source: ./mvfaclo.s
 #objdump: -dr
 
 .*:     file format .*

@@ -1,3 +1,9 @@
+2019-01-08  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/sec64k.exp: Use . rather than $objdir in
+	generated source file names.
+	* testsuite/ld-m68k/m68k-got.exp: Likewise.
+
 2019-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

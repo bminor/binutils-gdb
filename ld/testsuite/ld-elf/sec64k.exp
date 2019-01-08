@@ -61,7 +61,7 @@ set sfiles {}
 set max_sec 66000
 set secs_per_file 1000
 for { set i 0 } { $i < $max_sec / $secs_per_file } { incr i } {
-    set sfile "$objdir/tmpdir/sec64-$i.s"
+    set sfile "./tmpdir/sec64-$i.s"
     lappend sfiles $sfile
     if [catch { set ofd [open $sfile w] } x] {
 	perror "$x"

@@ -1,3 +1,4 @@
+#source: ./sstr.s
 #objdump: -dr
 
 .*:     file format .*

@@ -1,3 +1,4 @@
+#source: ./max.s
 #objdump: -dr
 
 .*:     file format .*

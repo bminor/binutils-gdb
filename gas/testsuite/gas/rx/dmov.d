@@ -1,3 +1,4 @@
+#source: ./dmov.s
 #objdump: -dr
 
 .*:     file format .*

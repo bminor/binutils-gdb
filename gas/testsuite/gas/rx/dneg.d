@@ -1,3 +1,4 @@
+#source: ./dneg.s
 #objdump: -dr
 
 .*:     file format .*

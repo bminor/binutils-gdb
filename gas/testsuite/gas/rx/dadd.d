@@ -1,3 +1,4 @@
+#source: ./dadd.s
 #objdump: -dr
 
 .*:     file format .*

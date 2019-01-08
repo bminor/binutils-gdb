@@ -1,3 +1,4 @@
+#source: ./satr.s
 #objdump: -dr
 
 .*:     file format .*

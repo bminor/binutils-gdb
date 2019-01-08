@@ -1,3 +1,4 @@
+#source: ./emulu.s
 #objdump: -dr
 
 .*:     file format .*

@@ -1,3 +1,4 @@
+#source: ./divu.s
 #objdump: -dr
 
 .*:     file format .*

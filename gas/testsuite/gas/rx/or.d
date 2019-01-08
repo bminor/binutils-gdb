@@ -1,3 +1,4 @@
+#source: ./or.s
 #objdump: -dr
 
 .*:     file format .*

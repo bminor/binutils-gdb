@@ -1,3 +1,4 @@
+#source: ./msblh.s
 #objdump: -dr
 
 .*:     file format .*

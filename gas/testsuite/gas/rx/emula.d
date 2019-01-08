@@ -1,3 +1,4 @@
+#source: ./emula.s
 #objdump: -dr
 
 .*:     file format .*

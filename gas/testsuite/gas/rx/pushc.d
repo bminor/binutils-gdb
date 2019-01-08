@@ -1,3 +1,4 @@
+#source: ./pushc.s
 #objdump: -dr
 
 .*:     file format .*

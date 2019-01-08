@@ -1,3 +1,4 @@
+#source: ./dcmp.s
 #objdump: -dr
 
 .*:     file format .*

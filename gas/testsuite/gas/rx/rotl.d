@@ -1,3 +1,4 @@
+#source: ./rotl.s
 #objdump: -dr
 
 .*:     file format .*

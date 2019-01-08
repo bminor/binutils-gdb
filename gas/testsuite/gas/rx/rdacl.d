@@ -1,3 +1,4 @@
+#source: ./rdacl.s
 #objdump: -dr
 
 .*:     file format .*

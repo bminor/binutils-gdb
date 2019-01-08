@@ -1,3 +1,4 @@
+#source: ./neg.s
 #objdump: -dr
 
 .*:     file format .*

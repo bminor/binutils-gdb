@@ -1,3 +1,4 @@
+#source: ./setpsw.s
 #objdump: -dr
 
 .*:     file format .*

@@ -1,3 +1,4 @@
+#source: ./mulhi.s
 #objdump: -dr
 
 .*:     file format .*

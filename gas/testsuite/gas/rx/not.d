@@ -1,3 +1,4 @@
+#source: ./not.s
 #objdump: -dr
 
 .*:     file format .*

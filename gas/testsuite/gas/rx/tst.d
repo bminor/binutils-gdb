@@ -1,3 +1,4 @@
+#source: ./tst.s
 #objdump: -dr
 
 .*:     file format .*

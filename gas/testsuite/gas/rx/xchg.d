@@ -1,3 +1,4 @@
+#source: ./xchg.s
 #objdump: -dr
 
 .*:     file format .*

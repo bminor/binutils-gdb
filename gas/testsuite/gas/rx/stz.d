@@ -1,3 +1,4 @@
+#source: ./stz.s
 #objdump: -dr
 
 .*:     file format .*

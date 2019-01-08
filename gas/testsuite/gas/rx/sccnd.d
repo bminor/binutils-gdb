@@ -1,3 +1,4 @@
+#source: ./sccnd.s
 #objdump: -dr
 
 .*:     file format .*

@@ -1,3 +1,4 @@
+#source: ./msblo.s
 #objdump: -dr
 
 .*:     file format .*

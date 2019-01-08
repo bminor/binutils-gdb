@@ -1,3 +1,4 @@
+#source: ./fmul.s
 #objdump: -dr
 
 .*:     file format .*

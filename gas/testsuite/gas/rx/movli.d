@@ -1,3 +1,4 @@
+#source: ./movli.s
 #objdump: -dr
 
 .*:     file format .*

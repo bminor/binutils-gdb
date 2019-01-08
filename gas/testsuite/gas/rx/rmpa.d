@@ -1,3 +1,4 @@
+#source: ./rmpa.s
 #objdump: -dr
 
 .*:     file format .*

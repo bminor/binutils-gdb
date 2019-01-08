@@ -1,3 +1,4 @@
+#source: ./r-bcc.s
 #objdump: -dr
 
 .*:     file format .*

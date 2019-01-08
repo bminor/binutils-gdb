@@ -1,3 +1,4 @@
+#source: ./gprel.s
 #objdump: -dr
 
 .*:     file format .*

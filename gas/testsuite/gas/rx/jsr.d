@@ -1,3 +1,4 @@
+#source: ./jsr.s
 #objdump: -dr
 
 .*:     file format .*

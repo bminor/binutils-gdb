@@ -1,3 +1,4 @@
+#source: ./bfmov.s
 #objdump: -dr
 
 .*:     file format .*

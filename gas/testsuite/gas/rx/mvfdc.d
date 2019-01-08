@@ -1,3 +1,4 @@
+#source: ./mvfdc.s
 #objdump: -dr
 
 .*:     file format .*

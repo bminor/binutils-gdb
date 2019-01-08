@@ -1,3 +1,4 @@
+#source: ./abs.s
 #objdump: -dr
 
 .*:     file format .*

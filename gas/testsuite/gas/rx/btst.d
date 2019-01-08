@@ -1,3 +1,4 @@
+#source: ./btst.s
 #objdump: -dr
 
 .*:     file format .*

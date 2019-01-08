@@ -1,3 +1,4 @@
+#source: ./fadd.s
 #objdump: -dr
 
 .*:     file format .*

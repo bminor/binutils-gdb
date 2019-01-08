@@ -1,3 +1,4 @@
+#source: ./emul.s
 #objdump: -dr
 
 .*:     file format .*

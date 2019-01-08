@@ -26,10 +26,10 @@ set ASFLAGS "--mcpu=rxv3-dfpu"
 
 foreach test [lsort [glob $srcdir/$subdir/*.sm]] {
     regexp ".*/(.*)\.sm" $test rxjunk rxbase
-    exec "$srcdir/$subdir/explode" "-I" "$srcdir/$subdir" "$test" "$srcdir/$subdir/$rxbase.s"
+    exec "$srcdir/$subdir/explode" "-I" "$srcdir/$subdir" "$test" "$rxbase.s"
     run_dump_test "$rxbase"
     # Commment out the next line if you want to retain the generated assembler source files.
-#    remote_file host delete "$srcdir/$subdir/$rxbase.s"
+    remote_file host delete "$rxbase.s"
 }
 
 run_dump_test "rx-asm-good"

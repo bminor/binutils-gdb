@@ -1,3 +1,4 @@
+#source: ./dpushm.s
 #objdump: -dr
 
 .*:     file format .*

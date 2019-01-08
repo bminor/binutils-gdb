@@ -1,3 +1,4 @@
+#source: ./bclr.s
 #objdump: -dr
 
 .*:     file format .*

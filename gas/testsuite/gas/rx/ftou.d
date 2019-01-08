@@ -1,3 +1,4 @@
+#source: ./ftou.s
 #objdump: -dr
 
 .*:     file format .*

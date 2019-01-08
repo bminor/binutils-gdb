@@ -1,3 +1,4 @@
+#source: ./movu.s
 #objdump: -dr
 
 .*:     file format .*

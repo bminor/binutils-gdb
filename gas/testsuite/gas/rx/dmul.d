@@ -1,3 +1,4 @@
+#source: ./dmul.s
 #objdump: -dr
 
 .*:     file format .*

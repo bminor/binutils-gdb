@@ -1,3 +1,4 @@
+#source: ./movco.s
 #objdump: -dr
 
 .*:     file format .*

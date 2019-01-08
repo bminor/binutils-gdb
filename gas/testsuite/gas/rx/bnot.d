@@ -1,3 +1,4 @@
+#source: ./bnot.s
 #objdump: -dr
 
 .*:     file format .*

@@ -1,3 +1,4 @@
+#source: ./xor.s
 #objdump: -dr
 
 .*:     file format .*

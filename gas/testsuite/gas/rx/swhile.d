@@ -1,3 +1,4 @@
+#source: ./swhile.s
 #objdump: -dr
 
 .*:     file format .*

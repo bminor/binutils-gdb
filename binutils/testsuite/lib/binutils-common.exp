@@ -928,7 +928,7 @@ proc run_dump_test { name {extra_options {}} } {
     } else {
 	set sourcefiles {}
 	foreach sf $opts(source) {
-	    if { [string match "/*" $sf] } {
+	    if { [string match "./*" $sf] } {
 		lappend sourcefiles "$sf"
 	    } else {
 		lappend sourcefiles "$srcdir/$subdir/$sf"

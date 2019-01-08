@@ -1,3 +1,4 @@
+#source: ./rtfi.s
 #objdump: -dr
 
 .*:     file format .*

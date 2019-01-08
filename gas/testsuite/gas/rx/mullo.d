@@ -1,3 +1,4 @@
+#source: ./mullo.s
 #objdump: -dr
 
 .*:     file format .*

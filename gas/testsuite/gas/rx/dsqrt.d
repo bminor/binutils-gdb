@@ -1,3 +1,4 @@
+#source: ./dsqrt.s
 #objdump: -dr
 
 .*:     file format .*

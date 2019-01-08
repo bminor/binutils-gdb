@@ -1,3 +1,4 @@
+#source: ./smovb.s
 #objdump: -dr
 
 .*:     file format .*

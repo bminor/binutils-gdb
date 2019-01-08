@@ -1,3 +1,4 @@
+#source: ./msbhi.s
 #objdump: -dr
 
 .*:     file format .*

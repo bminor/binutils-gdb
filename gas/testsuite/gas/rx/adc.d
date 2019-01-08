@@ -1,3 +1,4 @@
+#source: ./adc.s
 #objdump: -dr
 
 .*:     file format .*

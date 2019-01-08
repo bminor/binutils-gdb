@@ -1,3 +1,4 @@
+#source: ./mvfacgu.s
 #objdump: -dr
 
 .*:     file format .*

@@ -1,3 +1,4 @@
+#source: ./scmpu.s
 #objdump: -dr
 
 .*:     file format .*

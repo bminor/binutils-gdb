@@ -1,3 +1,4 @@
+#source: ./smovf.s
 #objdump: -dr
 
 .*:     file format .*

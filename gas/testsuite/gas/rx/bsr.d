@@ -1,3 +1,4 @@
+#source: ./bsr.s
 #objdump: -dr
 
 .*:     file format .*

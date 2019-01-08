@@ -1,3 +1,4 @@
+#source: ./emaca.s
 #objdump: -dr
 
 .*:     file format .*

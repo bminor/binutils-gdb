@@ -1,3 +1,4 @@
+#source: ./shlr.s
 #objdump: -dr
 
 .*:     file format .*

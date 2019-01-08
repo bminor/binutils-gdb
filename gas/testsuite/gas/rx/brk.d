@@ -1,3 +1,4 @@
+#source: ./brk.s
 #objdump: -dr
 
 .*:     file format .*

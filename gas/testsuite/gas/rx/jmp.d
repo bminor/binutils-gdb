@@ -1,3 +1,4 @@
+#source: ./jmp.s
 #objdump: -dr
 
 .*:     file format .*

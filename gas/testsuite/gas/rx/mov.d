@@ -1,3 +1,4 @@
+#source: ./mov.s
 #objdump: -dr
 
 .*:     file format .*

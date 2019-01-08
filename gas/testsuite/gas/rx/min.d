@@ -1,3 +1,4 @@
+#source: ./min.s
 #objdump: -dr
 
 .*:     file format .*

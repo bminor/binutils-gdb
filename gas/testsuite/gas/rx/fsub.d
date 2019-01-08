@@ -1,3 +1,4 @@
+#source: ./fsub.s
 #objdump: -dr
 
 .*:     file format .*

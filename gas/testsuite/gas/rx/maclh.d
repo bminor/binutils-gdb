@@ -1,3 +1,4 @@
+#source: ./maclh.s
 #objdump: -dr
 
 .*:     file format .*

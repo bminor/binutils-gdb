@@ -1,3 +1,4 @@
+#source: ./popm.s
 #objdump: -dr
 
 .*:     file format .*

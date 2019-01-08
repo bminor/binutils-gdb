@@ -1,3 +1,4 @@
+#source: ./fcmp.s
 #objdump: -dr
 
 .*:     file format .*

@@ -1,3 +1,4 @@
+#source: ./int.s
 #objdump: -dr
 
 .*:     file format .*

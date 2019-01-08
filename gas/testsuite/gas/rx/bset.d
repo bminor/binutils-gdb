@@ -1,3 +1,4 @@
+#source: ./bset.s
 #objdump: -dr
 
 .*:     file format .*

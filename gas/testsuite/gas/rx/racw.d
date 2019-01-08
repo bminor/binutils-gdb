@@ -1,3 +1,4 @@
+#source: ./racw.s
 #objdump: -dr
 
 .*:     file format .*

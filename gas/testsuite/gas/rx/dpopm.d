@@ -1,3 +1,4 @@
+#source: ./dpopm.s
 #objdump: -dr
 
 .*:     file format .*

@@ -1,3 +1,4 @@
+#source: ./and.s
 #objdump: -dr
 
 .*:     file format .*

@@ -1,3 +1,4 @@
+#source: ./sat.s
 #objdump: -dr
 
 .*:     file format .*

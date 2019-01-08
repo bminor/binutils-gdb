@@ -1,3 +1,4 @@
+#source: ./rorc.s
 #objdump: -dr
 
 .*:     file format .*

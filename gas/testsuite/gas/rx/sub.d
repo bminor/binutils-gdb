@@ -1,3 +1,4 @@
+#source: ./sub.s
 #objdump: -dr
 
 .*:     file format .*

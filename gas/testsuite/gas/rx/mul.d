@@ -1,3 +1,4 @@
+#source: ./mul.s
 #objdump: -dr
 
 .*:     file format .*

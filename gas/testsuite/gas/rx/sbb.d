@@ -1,3 +1,4 @@
+#source: ./sbb.s
 #objdump: -dr
 
 .*:     file format .*

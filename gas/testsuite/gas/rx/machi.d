@@ -1,3 +1,4 @@
+#source: ./machi.s
 #objdump: -dr
 
 .*:     file format .*

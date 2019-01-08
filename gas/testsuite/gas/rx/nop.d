@@ -1,3 +1,4 @@
+#source: ./nop.s
 #objdump: -dr
 
 .*:     file format .*

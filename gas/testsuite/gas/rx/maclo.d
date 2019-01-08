@@ -1,3 +1,4 @@
+#source: ./maclo.s
 #objdump: -dr
 
 .*:     file format .*

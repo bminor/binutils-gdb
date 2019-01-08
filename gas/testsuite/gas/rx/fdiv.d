@@ -1,3 +1,4 @@
+#source: ./fdiv.s
 #objdump: -dr
 
 .*:     file format .*

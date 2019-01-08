@@ -1,4 +1,10 @@
-2018-12-25  Yoshinori Sato <ysato@users.sourceforge.jp>
+2019-01-08  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/binutils-common.exp (run_dump_test): Don't prepend
+	$srcdir/$subdir to source file name if it starts with "./".
+
+2019-01-05  Yoshinori Sato <ysato@users.sourceforge.jp>
+
 	* readelf.c (get_machine_flags): Add RXv3 output.
 
 2019-01-04  Nick Clifton  <nickc@redhat.com>

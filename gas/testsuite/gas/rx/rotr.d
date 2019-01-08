@@ -1,3 +1,4 @@
+#source: ./rotr.s
 #objdump: -dr
 
 .*:     file format .*

@@ -1,3 +1,4 @@
+#source: ./suntil.s
 #objdump: -dr
 
 .*:     file format .*

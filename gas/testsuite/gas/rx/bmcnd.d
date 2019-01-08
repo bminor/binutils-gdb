@@ -1,3 +1,4 @@
+#source: ./bmcnd.s
 #objdump: -dr
 
 .*:     file format .*
