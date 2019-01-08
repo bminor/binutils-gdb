@@ -1,3 +1,15 @@
+2019-01-08  Nick Clifton  <nickc@redhat.com>
+
+	PR 24044
+	* cxxfilt.c (hp_symbol_characters): Delete.
+	(main): Remove depcreated demangling styles.
+	* stabs.c (parse_stab_argtypes): Remove support for old gnu v2
+	demangling opnames.
+	* testsuite/binutils-all/cxxfilt.exp: Use the
+	--no-strip-underscore option for targets that do prefix their
+	symbols with underscores.
+	Update tests to elimiate those that use gnu v2 encoding.
+
 2019-01-08  Tamar Christina  <tamar.christina@arm.com>
 
 	PR 24065
