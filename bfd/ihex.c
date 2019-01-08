@@ -775,25 +775,29 @@ ihex_write_object_contents (bfd *abfd)
       bfd_vma where;
       bfd_byte *p;
       bfd_size_type count;
-      const bfd_vma sign = (bfd_vma) 0xffffffff80000000ULL;
-      const bfd_vma top = (bfd_vma) 0xffffffff00000000ULL;
 
       where = l->where;
 
-      /* Check for unacceptable addresses sign extension.
-	 See PR 23699 for more details.  */
-      if ((where & sign) == top
-	  || ((where & top) != 0 && (where & top) != top))
-       {
-         _bfd_error_handler
-           /* xgettext:c-format */
-           (_("%pB 64-bit address %#" PRIx64 " out of range for Intel Hex file"),
-            abfd, (uint64_t) where);
-         bfd_set_error (bfd_error_bad_value);
-         return FALSE;
-       }
-
+#ifdef BFD64
+      /* IHex only supports 32-bit addresses, and we want to check
+	 that 64-bit addresses are in range.  This isn't quite as
+	 obvious as it may seem, since some targets have 32-bit
+	 addresses that are sign extended to 64 bits.  So complain
+	 only if addresses overflow both unsigned and signed 32-bit
+	 integers.  */
+      if (where > 0xffffffff
+	  && where + 0x80000000 > 0xffffffff)
+	{
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("%pB 64-bit address %#" PRIx64
+	       " out of range for Intel Hex file"),
+	     abfd, (uint64_t) where);
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
       where &= 0xffffffff;
+#endif
 
       p = l->data;
       count = l->size;
