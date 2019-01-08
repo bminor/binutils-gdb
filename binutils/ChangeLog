@@ -1,3 +1,9 @@
+2019-01-08  Tamar Christina  <tamar.christina@arm.com>
+
+	PR 24065
+	* testsuite/binutils-all/copy-6.d: New test.
+	* testsuite/binutils-all/objcopy.exp: Use it.
+
 2019-01-08  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/lib/binutils-common.exp (run_dump_test): Don't prepend
