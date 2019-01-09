@@ -19398,7 +19398,7 @@ process_archive (Filedata * filedata, bfd_boolean is_thin_archive)
       /* Read the next archive header.  */
       if (fseek (filedata->handle, arch.next_arhdr_offset, SEEK_SET) != 0)
         {
-          error (_("%s: failed to seek to next archive header\n"), filedata->file_name);
+          error (_("%s: failed to seek to next archive header\n"), arch.file_name);
           return FALSE;
         }
       got = fread (&arch.arhdr, 1, sizeof arch.arhdr, filedata->handle);
@@ -19406,7 +19406,10 @@ process_archive (Filedata * filedata, bfd_boolean is_thin_archive)
         {
           if (got == 0)
 	    break;
-          error (_("%s: failed to read archive header\n"), filedata->file_name);
+	  /* PR 24049 - we cannot use filedata->file_name as this will
+	     have already been freed.  */
+	  error (_("%s: failed to read archive header\n"), arch.file_name);
+	    
           ret = FALSE;
           break;
         }
@@ -19426,7 +19429,7 @@ process_archive (Filedata * filedata, bfd_boolean is_thin_archive)
       name = get_archive_member_name (&arch, &nested_arch);
       if (name == NULL)
 	{
-	  error (_("%s: bad archive file name\n"), filedata->file_name);
+	  error (_("%s: bad archive file name\n"), arch.file_name);
 	  ret = FALSE;
 	  break;
 	}
@@ -19435,7 +19438,7 @@ process_archive (Filedata * filedata, bfd_boolean is_thin_archive)
       qualified_name = make_qualified_name (&arch, &nested_arch, name);
       if (qualified_name == NULL)
 	{
-	  error (_("%s: bad archive file name\n"), filedata->file_name);
+	  error (_("%s: bad archive file name\n"), arch.file_name);
 	  ret = FALSE;
 	  break;
 	}
@@ -19481,7 +19484,7 @@ process_archive (Filedata * filedata, bfd_boolean is_thin_archive)
 	  if (nested_arch.file == NULL)
 	    {
 	      error (_("%s: contains corrupt thin archive: %s\n"),
-		     filedata->file_name, name);
+		     qualified_name, name);
 	      ret = FALSE;
 	      break;
 	    }
