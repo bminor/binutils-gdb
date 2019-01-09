@@ -30,14 +30,6 @@
 * GDB in batch mode now exits with status 1 if the last command to be
   executed failed.
 
-* Changes to the "frame", "select-frame", and "info frame" CLI
-  commands.  These commands all now take a frame specification which
-  is either a frame level, or one of the keywords 'level', 'address',
-  'function', or 'view' followed by a parameter.  Selecting a frame by
-  address, or viewing a frame outside the current backtrace now
-  requires the use of a keyword.  Selecting a frame by level is
-  unchanged.  The MI comment "-stack-select-frame" is unchanged.
-
 * The RISC-V target now supports target descriptions.
 
 * System call catchpoints now support system call aliases on FreeBSD.
@@ -105,6 +97,14 @@ info proc files
   Display a list of open files for a process.
 
 * Changed commands
+
+Changes to the "frame", "select-frame", and "info frame" CLI commands.
+  These commands all now take a frame specification which
+  is either a frame level, or one of the keywords 'level', 'address',
+  'function', or 'view' followed by a parameter.  Selecting a frame by
+  address, or viewing a frame outside the current backtrace now
+  requires the use of a keyword.  Selecting a frame by level is
+  unchanged.  The MI comment "-stack-select-frame" is unchanged.
 
 target remote FILENAME
 target extended-remote FILENAME

@@ -1,3 +1,8 @@
+2019-01-09  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* NEWS: Move the description of the changed "frame", "select-frame",
+	 and "info frame" commands to the Changed commands section.
+
 2019-01-09  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdbtypes.c (check_stub_method_group): Remove handling of old
