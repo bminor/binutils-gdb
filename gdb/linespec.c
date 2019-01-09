@@ -1251,17 +1251,6 @@ find_methods (struct type *t, enum language t_lang, const char *name,
 	   --method_counter)
 	{
 	  const char *method_name = TYPE_FN_FIELDLIST_NAME (t, method_counter);
-	  char dem_opname[64];
-
-	  if (startswith (method_name, "__") ||
-	      startswith (method_name, "op") ||
-	      startswith (method_name, "type"))
-	    {
-	      if (cplus_demangle_opname (method_name, dem_opname, DMGL_ANSI))
-		method_name = dem_opname;
-	      else if (cplus_demangle_opname (method_name, dem_opname, 0))
-		method_name = dem_opname;
-	    }
 
 	  if (symbol_name_compare (method_name, lookup_name, NULL))
 	    {

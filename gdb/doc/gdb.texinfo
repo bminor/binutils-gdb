@@ -10703,31 +10703,10 @@ or demangled form.
 @cindex symbol decoding style, C@t{++}
 @kindex set demangle-style
 @item set demangle-style @var{style}
-Choose among several encoding schemes used by different compilers to
-represent C@t{++} names.  The choices for @var{style} are currently:
-
-@table @code
-@item auto
-Allow @value{GDBN} to choose a decoding style by inspecting your program.
-This is the default.
-
-@item gnu
-Decode based on the @sc{gnu} C@t{++} compiler (@code{g++}) encoding algorithm.
-
-@item hp
-Decode based on the HP ANSI C@t{++} (@code{aCC}) encoding algorithm.
-
-@item lucid
-Decode based on the Lucid C@t{++} compiler (@code{lcc}) encoding algorithm.
-
-@item arm
-Decode using the algorithm in the @cite{C@t{++} Annotated Reference Manual}.
-@strong{Warning:} this setting alone is not sufficient to allow
-debugging @code{cfront}-generated executables.  @value{GDBN} would
-require further enhancement to permit that.
-
-@end table
-If you omit @var{style}, you will see a list of possible formats.
+Choose among several encoding schemes used by different compilers to represent
+C@t{++} names.  If you omit @var{style}, you will see a list of possible
+formats.  The default value is @var{auto}, which lets @value{GDBN} choose a
+decoding style by inspecting your program.
 
 @item show demangle-style
 Display the encoding style currently in use for decoding C@t{++} symbols.

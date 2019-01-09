@@ -1,3 +1,12 @@
+2019-01-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.cp/demangle.exp (test_gnu_style_demangling): Rename to...
+	(test_gnuv3_style_demangling): ... this.
+	(test_lucid_style_demangling): Remove.
+	(test_arm_style_demangling): Remove.
+	(test_hp_style_demangling): Remove.
+	(do_tests): Remove calls to the above.
+
 2019-01-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* lib/mi-support.exp (mi_gdb_test): Remove interactive prompt

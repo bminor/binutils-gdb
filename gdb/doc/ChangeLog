@@ -1,3 +1,8 @@
+2019-01-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Print Settings): Remove mention of specific
+	demangle-style values, just refer to the in-process help.
+
 2018-12-28  Tom Tromey  <tom@tromey.com>
 
 	* gdb.texinfo (Output Styling): New node.

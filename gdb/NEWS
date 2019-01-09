@@ -58,6 +58,9 @@
   source code snippets.  See the "set style" commands, below, for more
   information.
 
+* Removed support for old demangling styles arm, edg, gnu, hp and
+  lucid.
+
 * New targets
 
   NXP S12Z		s12z-*-elf

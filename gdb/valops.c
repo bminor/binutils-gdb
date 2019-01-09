@@ -1980,23 +1980,12 @@ search_struct_method (const char *name, struct value **arg1p,
   int i;
   struct value *v;
   int name_matched = 0;
-  char dem_opname[64];
 
   type = check_typedef (type);
   for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; i--)
     {
       const char *t_field_name = TYPE_FN_FIELDLIST_NAME (type, i);
 
-      /* FIXME!  May need to check for ARM demangling here.  */
-      if (startswith (t_field_name, "__") ||
-	  startswith (t_field_name, "op") ||
-	  startswith (t_field_name, "type"))
-	{
-	  if (cplus_demangle_opname (t_field_name, dem_opname, DMGL_ANSI))
-	    t_field_name = dem_opname;
-	  else if (cplus_demangle_opname (t_field_name, dem_opname, 0))
-	    t_field_name = dem_opname;
-	}
       if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
 	{
 	  int j = TYPE_FN_FIELDLIST_LENGTH (type, i) - 1;
@@ -3421,19 +3410,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
   for (i = TYPE_NFN_FIELDS (t) - 1; i >= 0; --i)
     {
       const char *t_field_name = TYPE_FN_FIELDLIST_NAME (t, i);
-      char dem_opname[64];
 
-      if (startswith (t_field_name, "__") 
-	  || startswith (t_field_name, "op") 
-	  || startswith (t_field_name, "type"))
-	{
-	  if (cplus_demangle_opname (t_field_name, 
-				     dem_opname, DMGL_ANSI))
-	    t_field_name = dem_opname;
-	  else if (cplus_demangle_opname (t_field_name, 
-					  dem_opname, 0))
-	    t_field_name = dem_opname;
-	}
       if (t_field_name && strcmp (t_field_name, name) == 0)
 	{
 	  int j;

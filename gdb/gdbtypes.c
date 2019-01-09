@@ -2736,37 +2736,11 @@ check_stub_method_group (struct type *type, int method_id)
 {
   int len = TYPE_FN_FIELDLIST_LENGTH (type, method_id);
   struct fn_field *f = TYPE_FN_FIELDLIST1 (type, method_id);
-  int j, found_stub = 0;
 
-  for (j = 0; j < len; j++)
-    if (TYPE_FN_FIELD_STUB (f, j))
-      {
-	found_stub = 1;
-	check_stub_method (type, method_id, j);
-      }
-
-  /* GNU v3 methods with incorrect names were corrected when we read
-     in type information, because it was cheaper to do it then.  The
-     only GNU v2 methods with incorrect method names are operators and
-     destructors; destructors were also corrected when we read in type
-     information.
-
-     Therefore the only thing we need to handle here are v2 operator
-     names.  */
-  if (found_stub && !startswith (TYPE_FN_FIELD_PHYSNAME (f, 0), "_Z"))
+  for (int j = 0; j < len; j++)
     {
-      int ret;
-      char dem_opname[256];
-
-      ret = cplus_demangle_opname (TYPE_FN_FIELDLIST_NAME (type, 
-							   method_id),
-				   dem_opname, DMGL_ANSI);
-      if (!ret)
-	ret = cplus_demangle_opname (TYPE_FN_FIELDLIST_NAME (type, 
-							     method_id),
-				     dem_opname, 0);
-      if (ret)
-	TYPE_FN_FIELDLIST_NAME (type, method_id) = xstrdup (dem_opname);
+      if (TYPE_FN_FIELD_STUB (f, j))
+	check_stub_method (type, method_id, j);
     }
 }
 

@@ -1,3 +1,13 @@
+2019-01-09  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdbtypes.c (check_stub_method_group): Remove handling of old
+	mangling schemes.
+	* linespec.c (find_methods): Likewise.
+	* stabsread.c (read_member_functions): Likewise.
+	* valops.c (search_struct_method): Likewise.
+	(value_struct_elt_for_reference): Likewise.
+	* NEWS: Mention this change.
+
 2019-01-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* cli/cli-cmds.c (list_command): Pass a source_lines_range to
