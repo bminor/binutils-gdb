@@ -18,33 +18,8 @@ proc test_cxxfilt {options mangled_string demangled_string} {
     global CXXFILT
     global CXXFILTFLAGS
     
-    if {   [istarget "arm*-*-pe"] \
-        || [istarget "cris*-*-*"] \
-	|| [istarget "cr16-*-*"] \
-	|| [istarget "crx*-*-*"] \
-	|| [istarget "epiphany-*-*"] \
-	|| [istarget "ip2k-*-*"] \
-	|| [istarget "metag-*-*"] \
-	|| [istarget "mn10200-*-*"] \
-	|| [istarget "mn10300-*-*"] \
-	|| [istarget "ns32k-*-*"] \
-	|| [istarget "pdp11-*-*"] \
-	|| [istarget "rl78-*-*"] \
-	|| [istarget "rx-*-*"] \
-	|| [istarget "sh-*-*"] \
-	|| [istarget "tic4*-*-*"] \
-	|| [istarget "tic54*-*-*"] \
-	|| [istarget "v850-*-*"] \
-	|| [istarget "z8k-*-*"] \
-	|| [istarget "*-*-cygwin"] \
-	|| [istarget "*-*-mingw32"] } then {
-	set cxxfilt_strip_opt "--no-strip-underscore"
-    } else {
-	set cxxfilt_strip_opt ""
-    }
-
     set testname "cxxfilt: demangling $mangled_string"
-    set got [binutils_run $CXXFILT "$cxxfilt_strip_opt $options $CXXFILTFLAGS $mangled_string"]
+    set got [binutils_run $CXXFILT "$options $CXXFILTFLAGS $mangled_string"]
 
     if ![regexp $demangled_string $got] then {
 	fail "$testname"
@@ -56,11 +31,11 @@ proc test_cxxfilt {options mangled_string demangled_string} {
 }
 
 # Mangled and demangled strings stolen from libiberty/testsuite/demangle-expected.
-test_cxxfilt {} \
+test_cxxfilt {--no-strip-underscores} \
     "_Z1fIvJiELb0EEvPDOT1_EFT_DpT0_E" \
     "void f.void, int, false.(void (.)(int) noexcept(false))*"
 
-test_cxxfilt {--format=gnu-v3} \
+test_cxxfilt {--format=gnu-v3 --no-strip-underscores} \
     "_Z14int_if_addableI1YERiP1AIXszpldecvPT_Li0EdecvS4_Li0EEE" \
     "int& int_if_addable.Y.(A.sizeof ((.((Y.)(0))).(.((Y.)(0))))..)*"
 

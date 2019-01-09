@@ -1,3 +1,9 @@
+2019-01-09  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/cxxfilt.exp: Pass --no-strip-underscores
+	unconditionally to tests needing the option rather than via a
+	list of targets.
+
 2019-01-08  Nick Clifton  <nickc@redhat.com>
 
 	PR 24044
@@ -8,7 +14,7 @@
 	* testsuite/binutils-all/cxxfilt.exp: Use the
 	--no-strip-underscore option for targets that do prefix their
 	symbols with underscores.
-	Update tests to elimiate those that use gnu v2 encoding.
+	Update tests to eliminate those that use gnu v2 encoding.
 
 2019-01-08  Tamar Christina  <tamar.christina@arm.com>
 
