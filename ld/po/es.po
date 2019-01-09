@@ -1,15 +1,15 @@
 # Mensajes en español para ld 2.30.0
-# Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2018 Free Software Foundation, Inc.
+# Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2018, 2019 Free Software Foundation, Inc.
 # This file is distributed under the same license as the binutils package.
 # Cristian Othón Martínez Vera <cfuga@cfuga.mx>, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012.
-# Antonio Ceballos Roa <aceballos@gmail.com>, 2018
+# Antonio Ceballos Roa <aceballos@gmail.com>, 2018, 2019
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: ld 2.30.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2018-06-24 19:43+0100\n"
-"PO-Revision-Date: 2018-11-16 01:19+0100\n"
+"PO-Revision-Date: 2019-01-06 23:11+0100\n"
 "Last-Translator: Antonio Ceballos Roa <aceballos@gmail.com>\n"
 "Language-Team: Spanish <es@tp.org.es>\n"
 "Language: es\n"
@@ -1448,6 +1448,8 @@ msgid ""
 "Do not allow multiple definitions with symbols included\n"
 "           in filename invoked by -R or --just-symbols"
 msgstr ""
+"No permite definiciones múltiples con símbolos incluidos\n"
+"           en el nombre de fichero invocado por -R o --just-symbols"
 
 # No me convence mucho la traducción de `embedded' por imbuído. cfuga
 #: lexsup.c:323
@@ -2229,6 +2231,8 @@ msgstr "  -z globalaudit              Indica que el ejecutable requiere auditor�
 #, c-format
 msgid "  --ld-generated-unwind-info  Generate exception handling info for PLT\n"
 msgstr ""
+"  --ld-generated-unwind-info  Genera información de manejo de excepciones\n"
+"                              para PLT\n"
 
 #: lexsup.c:1853
 #, c-format
@@ -2487,7 +2491,7 @@ msgstr "%P: aviso: "
 
 #: plugin.c:872
 msgid "%P: error: "
-msgstr ""
+msgstr "%P: error: "
 
 #: plugin.c:1024
 msgid "%F%P: %s: plugin error: %d\n"
@@ -3189,7 +3193,7 @@ msgstr "%P: %pB: falló bfd_stat: %E\n"
 #: eshlelf_fd.c:314 eshlelf_linux.c:314 eshlelf_nbsd.c:314 eshlelf_nto.c:314
 #: eshlelf_vxworks.c:343 ev850.c:360 ev850_rh850.c:360 exgateelf.c:314
 msgid "%P: warning: %s, needed by %pB, may conflict with %s\n"
-msgstr ""
+msgstr "%P: aviso: %s, necesario para %pB, podría entrar en conflicto con %s\n"
 
 #: eaarch64cloudabi.c:691 eaarch64cloudabib.c:691 eaarch64elf.c:691
 #: eaarch64elf32.c:691 eaarch64elf32b.c:691 eaarch64elfb.c:691
@@ -3415,7 +3419,7 @@ msgstr "%F%P: %pB: bfd_stat falló: %E\n"
 #: eshlelf_vxworks.c:460 ev850.c:477 ev850_rh850.c:477 exgateelf.c:431
 #, c-format
 msgid "found %s at %s\n"
-msgstr ""
+msgstr "se ha encontrado %s en %s\n"
 
 #. We only issue an "unrecognised" message in verbose mode
 #. as the $<foo> token might be a legitimate component of
@@ -3494,7 +3498,7 @@ msgstr ""
 #: eshlelf_vxworks.c:681 ev850.c:698 ev850_rh850.c:698 exgateelf.c:652
 #, c-format
 msgid "unrecognised or unsupported token '%s' in search path\n"
-msgstr ""
+msgstr "no se reconoce o no se admite el «token» '%s' en la ruta de búsqueda\n"
 
 #: eaarch64cloudabi.c:1081 eaarch64cloudabib.c:1081 eaarch64elf.c:1081
 #: eaarch64elf32.c:1081 eaarch64elf32b.c:1081 eaarch64elfb.c:1081
@@ -4041,7 +4045,7 @@ msgstr "%P: aviso: no se puede crear la sección .eh_frame_hdr, se hace caso omi
 #: exgateelf.c:1026
 #, c-format
 msgid "%s needed by %pB\n"
-msgstr ""
+msgstr "%s necesario para %pB\n"
 
 #: eaarch64cloudabi.c:1392 eaarch64cloudabib.c:1392 eaarch64elf.c:1392
 #: eaarch64elf32.c:1392 eaarch64elf32b.c:1392 eaarch64elfb.c:1392
@@ -4122,7 +4126,7 @@ msgstr ""
 #: eshlelf_nto.c:1077 eshlelf_vxworks.c:1106 ev850.c:1123 ev850_rh850.c:1123
 #: exgateelf.c:1077
 msgid "%P: warning: %s, needed by %pB, not found (try using -rpath or -rpath-link)\n"
-msgstr ""
+msgstr "%P: aviso: %s, necesario para %pB, no se ha encontrado (pruebe utilizando -rpath o -rpath-link)\n"
 
 #: eaarch64cloudabi.c:1399 eaarch64cloudabib.c:1399 eaarch64elf.c:1399
 #: eaarch64elf32.c:1399 eaarch64elf32b.c:1399 eaarch64elfb.c:1399
@@ -5004,6 +5008,8 @@ msgid ""
 "  --no-enum-size-warning      Don't warn about objects with incompatible\n"
 "                                enum sizes\n"
 msgstr ""
+"  --no-enum-size-warning      No advierte de objetos con tamaños de\n"
+"                                enumerados incompatibles\n"
 
 #: eaarch64cloudabi.c:2527 eaarch64cloudabib.c:2527 eaarch64elf.c:2527
 #: eaarch64elf32.c:2527 eaarch64elf32b.c:2527 eaarch64elfb.c:2527
@@ -5012,6 +5018,8 @@ msgstr ""
 #, c-format
 msgid "  --no-wchar-size-warning     Don't warn about objects with incompatible                                wchar_t sizes\n"
 msgstr ""
+"  --no-wchar-size-warning     No advierte de objetos con tamaños de\n"
+"                                wchar_t incompatibles\n"
 
 #: eaarch64cloudabi.c:2529 eaarch64cloudabib.c:2529 eaarch64elf.c:2529
 #: eaarch64elf32.c:2529 eaarch64elf32b.c:2529 eaarch64elfb.c:2529
@@ -5050,6 +5058,15 @@ msgid ""
 "                                Values of +/-1 indicate the linker should\n"
 "                                choose suitable defaults.\n"
 msgstr ""
+"  --stub-group-size=N         Tamaño máximo de un grupo de secciones de entrada\n"
+"                                que puede manejarse en una sección stub.  Un\n"
+"                                valor negativo coloca todos los stubs después\n"
+"                                de sus ramas (con tamaño de grupo -N), mientras\n"
+"                                que un valor positivo permite dos grupos de\n"
+"                                secciones de entrada, una delante y otra detrás\n"
+"                                de cada sección stub.  Los valores +/-1 indican\n"
+"                                que el enlazador es el que debería escoger los\n"
+"                                valores adecuados.\n"
 
 #: eaarch64cloudabi.c:2539 eaarch64cloudabib.c:2539 eaarch64elf.c:2539
 #: eaarch64elf32.c:2539 eaarch64elf32b.c:2539 eaarch64elfb.c:2539
@@ -5057,7 +5074,7 @@ msgstr ""
 #: eaarch64linux32.c:2546 eaarch64linux32b.c:2546 eaarch64linuxb.c:2546
 #, c-format
 msgid "  --fix-cortex-a53-835769      Fix erratum 835769\n"
-msgstr ""
+msgstr "  --fix-cortex-a53-835769      Corrige el error 835769\n"
 
 #: eaarch64cloudabi.c:2540 eaarch64cloudabib.c:2540 eaarch64elf.c:2540
 #: eaarch64elf32.c:2540 eaarch64elf32b.c:2540 eaarch64elfb.c:2540
@@ -5785,7 +5802,7 @@ msgstr "  --target1-abs               Interpreta R_ARM_TARGET1 como R_ARM_ABS32\
 #: earmelfb_nacl.c:2855 earmelfb_nbsd.c:2855 earmnto.c:2830 earmsymbian.c:2855
 #, c-format
 msgid "  --target2=<type>            Specify definition of R_ARM_TARGET2\n"
-msgstr ""
+msgstr "  --target2=<type>            Especifica la definición de R_ARM_TARGET2\n"
 
 #: earmelf.c:2856 earmelf_fbsd.c:2863 earmelf_fuchsia.c:2856
 #: earmelf_linux.c:2856 earmelf_linux_eabi.c:2856
@@ -5796,7 +5813,7 @@ msgstr ""
 #: earmelfb_nacl.c:2856 earmelfb_nbsd.c:2856 earmnto.c:2831 earmsymbian.c:2856
 #, c-format
 msgid "  --fix-v4bx                  Rewrite BX rn as MOV pc, rn for ARMv4\n"
-msgstr ""
+msgstr "  --fix-v4bx                  Reescribe BX rn como MOV pc, rn para ARMv4\n"
 
 #: earmelf.c:2857 earmelf_fbsd.c:2864 earmelf_fuchsia.c:2857
 #: earmelf_linux.c:2857 earmelf_linux_eabi.c:2857
@@ -5840,7 +5857,7 @@ msgstr "  --vfp11-denorm-fix          Especifica cómo corregir VFP11 denorm err
 #: earmelfb_nacl.c:2860 earmelfb_nbsd.c:2860 earmnto.c:2835 earmsymbian.c:2860
 #, c-format
 msgid "  --fix-stm32l4xx-629360      Specify how to fix STM32L4XX 629360 erratum\n"
-msgstr ""
+msgstr "  --fix-stm32l4xx-629360      Especifica cómo corregir el error STM32L4XX 629360\n"
 
 #: earmelf.c:2863 earmelf_fbsd.c:2870 earmelf_fuchsia.c:2863
 #: earmelf_linux.c:2863 earmelf_linux_eabi.c:2863
@@ -5854,6 +5871,8 @@ msgid ""
 "  --no-wchar-size-warning     Don't warn about objects with incompatible\n"
 "                                wchar_t sizes\n"
 msgstr ""
+"  --no-wchar-size-warning     No advierte de objetos con tamaños de\n"
+"                                wchar_t incompatibles\n"
 
 #: earmelf.c:2866 earmelf_fbsd.c:2873 earmelf_fuchsia.c:2866
 #: earmelf_linux.c:2866 earmelf_linux_eabi.c:2866
@@ -5867,6 +5886,8 @@ msgid ""
 "  --long-plt                  Generate long .plt entries\n"
 "                              to handle large .plt/.got displacements\n"
 msgstr ""
+"  --long-plt                  Genera entradas .plt largas para manejar\n"
+"                              desplazamientos .plt/.got grandes\n"
 
 #: earmelf.c:2868 earmelf_fbsd.c:2875 earmelf_fuchsia.c:2868
 #: earmelf_linux.c:2868 earmelf_linux_eabi.c:2868
@@ -5875,13 +5896,14 @@ msgstr ""
 #: earmelfb_fbsd.c:2875 earmelfb_fuchsia.c:2868 earmelfb_linux.c:2868
 #: earmelfb_linux_eabi.c:2868 earmelfb_linux_fdpiceabi.c:2868
 #: earmelfb_nacl.c:2868 earmelfb_nbsd.c:2868 earmnto.c:2843 earmsymbian.c:2868
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "  --cmse-implib               Make import library to be a secure gateway import\n"
 "                                library as per ARMv8-M Security Extensions\n"
 msgstr ""
-"  --compat-implib                    Crea bibliotecas de importación compatibles hacia atrás;\n"
-"                                       crea además __imp_<SÍMBOLO>.\n"
+"  --cmse-implib               Hace que la biblioteca de importación sea una\n"
+"                                biblioteca de importación de pasarela segura\n"
+"                                según las extensiones de seguridad de ARMv8-M\n"
 
 #: earmelf.c:2870 earmelf_fbsd.c:2877 earmelf_fuchsia.c:2870
 #: earmelf_linux.c:2870 earmelf_linux_eabi.c:2870
@@ -5918,7 +5940,7 @@ msgstr ""
 #: earmelfb_nacl.c:2882 earmelfb_nbsd.c:2882 earmnto.c:2857 earmsymbian.c:2882
 #, c-format
 msgid "  --no-merge-exidx-entries    Disable merging exidx entries\n"
-msgstr ""
+msgstr "  --no-merge-exidx-entries    Desactiva la fusión de entradas exidx\n"
 
 #: earmelf.c:2883 earmelf_fbsd.c:2890 earmelf_fuchsia.c:2883
 #: earmelf_linux.c:2883 earmelf_linux_eabi.c:2883
@@ -5974,6 +5996,10 @@ msgid ""
 "                                program counter wrap-around occures at address\n"
 "                                <val>.  Supported values: 8k, 16k, 32k and 64k.\n"
 msgstr ""
+"  --pmem-wrap-around=<val>    Induce a la máquina de relajación del enlazador a\n"
+"                                asumir que el contador de programa experimenta\n"
+"                                una vuelta a cero en la dirección <val>.\n"
+"                                Valores admitidos: 8k, 16k, 32k y 64k.\n"
 
 #: eavr1.c:2252 eavr2.c:2252 eavr25.c:2252 eavr3.c:2252 eavr31.c:2252
 #: eavr35.c:2252 eavr4.c:2252 eavr5.c:2252 eavr51.c:2252 eavr6.c:2252
@@ -5986,6 +6012,10 @@ msgid ""
 "                                instructions by a single jump instruction.\n"
 "                                This option disables this optimization.\n"
 msgstr ""
+"  --no-call-ret-replacement   La máquina de relajación normalmente sustituye\n"
+"                                dos instrucciones call/ret inmediatamente\n"
+"                                seguidas por una sola instrucción jump.\n"
+"                                Esta opción desactiva dicha optimización.\n"
 
 #: eavr1.c:2260 eavr2.c:2260 eavr25.c:2260 eavr3.c:2260 eavr31.c:2260
 #: eavr35.c:2260 eavr4.c:2260 eavr5.c:2260 eavr51.c:2260 eavr6.c:2260
@@ -6116,6 +6146,8 @@ msgstr ""
 #, c-format
 msgid "  --compact-stubs             Use smaller and possibly slower call stubs\n"
 msgstr ""
+"  --compact-stubs             Utiliza stubs de llamadas más pequeños y\n"
+"                                posiblemente más lentos\n"
 
 #: eelf32_spu.c:2749
 #, c-format
@@ -6130,7 +6162,7 @@ msgstr ""
 #: eelf32_spu.c:2753
 #, c-format
 msgid "  --local-store=lo:hi         Valid address range\n"
-msgstr ""
+msgstr "  --local-store=inf:sup       Rango de direcciones válido\n"
 
 #: eelf32_spu.c:2755
 #, c-format
@@ -6184,6 +6216,9 @@ msgid ""
 "  --reserved-space=bytes      Local store for stack and heap.  If not specified\n"
 "                                ld will estimate stack size and assume no heap\n"
 msgstr ""
+"  --reserved-space=bytes      Almacenamiento local para pila y montículo.  Si no\n"
+"                                se especifica, ld estima el tamaño de pila y\n"
+"                                asume que no hay montículo\n"
 
 #: eelf32_spu.c:2776
 #, c-format
@@ -6221,7 +6256,7 @@ msgstr ""
 #: eelf32_tic6x_le.c:140 eelf32_tic6x_linux_be.c:140
 #: eelf32_tic6x_linux_le.c:140
 msgid "%F%P: invalid --dsbt-index %d, outside DSBT size\n"
-msgstr ""
+msgstr "%F%P: --dsbt-index %d no válido, tamaño fuera de DSBT\n"
 
 #: eelf32_tic6x_be.c:2273 eelf32_tic6x_elf_be.c:2273
 #: eelf32_tic6x_elf_le.c:2273 eelf32_tic6x_le.c:2273
@@ -6305,7 +6340,7 @@ msgstr "%F%P: no se admite la opción: -z %s\n"
 #: eelf_x86_64_nacl.c:2238 eelf_x86_64_sol2.c:2369
 #, c-format
 msgid "  -z noextern-protected-data  Do not treat protected data symbol as external\n"
-msgstr ""
+msgstr "  -z noextern-protected-data  No trata los símbolos de datos protegidos como externos\n"
 
 #: eelf32_x86_64.c:7518 eelf32_x86_64_nacl.c:2238 eelf32lppc.c:2503
 #: eelf32lppclinux.c:2503 eelf32lppcnto.c:2503 eelf32lppcsim.c:2503
@@ -6324,6 +6359,8 @@ msgid ""
 "  -z dynamic-undefined-weak   Make undefined weak symbols dynamic\n"
 "  -z nodynamic-undefined-weak Do not make undefined weak symbols dynamic\n"
 msgstr ""
+"  -z dynamic-undefined-weak   Hace dinámicos los símbolos débiles indefinidos\n"
+"  -z nodynamic-undefined-weak No hace dinámicos los símbolos débiles indefinidos\n"
 
 #: eelf32_x86_64.c:7522 eelf32_x86_64_nacl.c:2242 eelf_x86_64.c:7525
 #: eelf_x86_64_cloudabi.c:2245 eelf_x86_64_fbsd.c:2252 eelf_x86_64_nacl.c:2245
@@ -6331,6 +6368,8 @@ msgstr ""
 #, c-format
 msgid "  -z noreloc-overflow         Disable relocation overflow check\n"
 msgstr ""
+"  -z noreloc-overflow         Desactiva la comprobación de desbordamiento\n"
+"                                por reubicación\n"
 
 #: eelf32_x86_64.c:7525 eelf32_x86_64_nacl.c:2245 eelf_i386.c:7137
 #: eelf_i386_be.c:2188 eelf_i386_chaos.c:2177 eelf_i386_fbsd.c:2246
@@ -6342,6 +6381,8 @@ msgstr ""
 #, c-format
 msgid "  -z call-nop=PADDING         Use PADDING as 1-byte NOP for branch\n"
 msgstr ""
+"  -z call-nop=RELLENO         Utiliza RELLENO como NOP de 1 byte para\n"
+"                                bifurcación\n"
 
 #: eelf32_x86_64.c:7528 eelf32_x86_64_nacl.c:2248 eelf_i386.c:7140
 #: eelf_i386_fbsd.c:2249 eelf_i386_nacl.c:2242 eelf_x86_64.c:7531
@@ -6471,16 +6512,15 @@ msgstr "%X%P: no se puede crear la sección .reloc: %E\n"
 #: eelf32ppclinux.c:148 eelf32ppcnto.c:148 eelf32ppcsim.c:148
 #: eelf32ppcwindiss.c:148 eppclynx.c:148
 msgid "%X%P: select_plt_layout problem %E\n"
-msgstr ""
+msgstr "%X%P: select_plt_layout problema %E\n"
 
 #: eelf32lppc.c:212 eelf32lppclinux.c:212 eelf32lppcnto.c:212
 #: eelf32lppcsim.c:212 eelf32ppc.c:212 eelf32ppc_fbsd.c:212
 #: eelf32ppclinux.c:212 eelf32ppcnto.c:212 eelf32ppcsim.c:212
 #: eelf32ppcvxworks.c:157 eelf32ppcwindiss.c:212 eelf64lppc.c:371
 #: eelf64ppc.c:371 eelf64ppc_fbsd.c:371 eppclynx.c:212
-#, fuzzy
 msgid "%X%P: inline PLT: %E\n"
-msgstr "%F%P: falló el enlace final: %E\n"
+msgstr "%X%P: PLT en línea: %E\n"
 
 #: eelf32lppc.c:220 eelf32lppclinux.c:220 eelf32lppcnto.c:220
 #: eelf32lppcsim.c:220 eelf32ppc.c:220 eelf32ppc_fbsd.c:220
@@ -6488,14 +6528,14 @@ msgstr "%F%P: falló el enlace final: %E\n"
 #: eelf32ppcvxworks.c:165 eelf32ppcwindiss.c:220 eelf64lppc.c:382
 #: eelf64ppc.c:382 eelf64ppc_fbsd.c:382 eppclynx.c:220
 msgid "%X%P: TLS problem %E\n"
-msgstr ""
+msgstr "%X%P: TLS problema %E\n"
 
 #: eelf32lppc.c:302 eelf32lppclinux.c:302 eelf32lppcnto.c:302
 #: eelf32lppcsim.c:302 eelf32ppc.c:302 eelf32ppc_fbsd.c:302
 #: eelf32ppclinux.c:302 eelf32ppcnto.c:302 eelf32ppcsim.c:302
 #: eelf32ppcvxworks.c:247 eelf32ppcwindiss.c:302 eppclynx.c:302
 msgid "%X%P: ppc_finish_symbols problem %E\n"
-msgstr ""
+msgstr "%X%P: ppc_finish_symbols problema %E\n"
 
 #: eelf32lppc.c:2444 eelf32lppclinux.c:2444 eelf32lppcnto.c:2444
 #: eelf32lppcsim.c:2444 eelf32ppc.c:2444 eelf32ppc_fbsd.c:2451
@@ -6519,7 +6559,7 @@ msgstr "%F%P: tamaño de página no válido `%s'\n"
 #: eelf64ppc.c:3038 eelf64ppc_fbsd.c:3045 eppclynx.c:2514
 #, c-format
 msgid "  --emit-stub-syms            Label linker stubs with a symbol\n"
-msgstr ""
+msgstr "  --emit-stub-syms            Etiqueta los stubs del enlazador con un símbolo\n"
 
 #: eelf32lppc.c:2510 eelf32lppclinux.c:2510 eelf32lppcnto.c:2510
 #: eelf32lppcsim.c:2510 eelf32ppc.c:2510 eelf32ppc_fbsd.c:2517
@@ -6529,6 +6569,8 @@ msgstr ""
 #, c-format
 msgid "  --no-emit-stub-syms         Don't label linker stubs with a symbol\n"
 msgstr ""
+"  --no-emit-stub-syms         No etiqueta los stubs del enlazador con un\n"
+"                                símbolo\n"
 
 #: eelf32lppc.c:2513 eelf32lppclinux.c:2513 eelf32lppcnto.c:2513
 #: eelf32lppcsim.c:2513 eelf32ppc.c:2513 eelf32ppc_fbsd.c:2520
@@ -6588,7 +6630,7 @@ msgstr ""
 #: eelf64ppc_fbsd.c:3080 eppclynx.c:2538
 #, c-format
 msgid "  --no-inline-optimize        Don't convert inline PLT to direct calls\n"
-msgstr ""
+msgstr "  --no-inline-optimize        No convierte PLT en línea en llamadas directas\n"
 
 #: eelf32lppc.c:2534 eelf32lppclinux.c:2534 eelf32lppcnto.c:2534
 #: eelf32lppcsim.c:2534 eelf32ppc.c:2534 eelf32ppc_fbsd.c:2541
@@ -6596,7 +6638,7 @@ msgstr ""
 #: eelf32ppcwindiss.c:2534 eppclynx.c:2541
 #, c-format
 msgid "  --sdata-got                 Force GOT location just before .sdata\n"
-msgstr ""
+msgstr "  --sdata-got                 Fuerza la ubicación de GOT justo antes de .sdata\n"
 
 #: eelf32lppc.c:2537 eelf32lppclinux.c:2537 eelf32lppcnto.c:2537
 #: eelf32lppcsim.c:2537 eelf32ppc.c:2537 eelf32ppc_fbsd.c:2544
@@ -6607,6 +6649,8 @@ msgid ""
 "  --ppc476-workaround [=pagesize]\n"
 "                              Avoid a cache bug on ppc476\n"
 msgstr ""
+"  --ppc476-workaround [=tamañopágina]\n"
+"                              Evita un error de caché en ppc476\n"
 
 #: eelf32lppc.c:2541 eelf32lppclinux.c:2541 eelf32lppcnto.c:2541
 #: eelf32lppcsim.c:2541 eelf32ppc.c:2541 eelf32ppc_fbsd.c:2548
@@ -6633,9 +6677,9 @@ msgid "  --vle-reloc-fixup           Correct old object file 16A/16D relocation\
 msgstr ""
 
 #: eelf32mcore.c:2014
-#, fuzzy, c-format
+#, c-format
 msgid "  --base_file <basefile>      Generate a base file for relocatable DLLs\n"
-msgstr "  --base_file <ficherobase>          Genera un fichero base para DLLs reubicables\n"
+msgstr "  --base_file <ficherobase>   Genera un fichero base para DLLs reubicables\n"
 
 #: eelf32metag.c:2443 eelf64lppc.c:3004 eelf64ppc.c:3004 eelf64ppc_fbsd.c:3011
 #: ehppaelf.c:2308 ehppalinux.c:2485 ehppanbsd.c:2485 ehppaobsd.c:2485
@@ -6650,6 +6694,15 @@ msgid ""
 "                                Values of +/-1 indicate the linker should\n"
 "                                choose suitable defaults.\n"
 msgstr ""
+"  --stub-group-size=N         Tamaño máximo de un grupo de secciones de entrada\n"
+"                                que puede manejarse en una sección stub.  Un\n"
+"                                valor negativo coloca todos los stubs después\n"
+"                                de sus ramas (con tamaño de grupo -N), mientras\n"
+"                                que un valor positivo permite dos grupos de\n"
+"                                secciones de entrada, una delante y otra detrás\n"
+"                                de cada sección stub.  Los valores +/-1 indican\n"
+"                                que el enlazador es el que debería escoger los\n"
+"                                valores adecuados.\n"
 
 #: eelf32rx.c:2046
 #, c-format
@@ -6657,6 +6710,8 @@ msgid ""
 "  --no-flag-mismatch-warnings Don't warn about objects with incompatible\n"
 "                                endian or dsp settings\n"
 msgstr ""
+"  --no-flag-mismatch-warnings No advierte de objetos con configuraciones de\n"
+"                                endian o dsp incompatibles\n"
 
 #: eelf32rx.c:2048
 #, c-format
@@ -6664,6 +6719,8 @@ msgid ""
 "  --flag-mismatch-warnings    Warn about objects with incompatible\n"
 "                                endian, dsp or ABI settings\n"
 msgstr ""
+"  --flag-mismatch-warnings    Advierte de objetos con configuraciones de\n"
+"                                endian, dsp o ABI incompatibles\n"
 
 #: eelf32rx.c:2050
 #, c-format
@@ -6671,6 +6728,9 @@ msgid ""
 "  --ignore-lma                Ignore segment LMAs [default]\n"
 "                                (for Renesas Tools compatibility)\n"
 msgstr ""
+"  --ignore-lma                Hace caso omiso de LMAs\n"
+"                                [comportamiento predefinido]\n"
+"                                (para compatibilidad con Renesas Tools)\n"
 
 #: eelf32rx.c:2052
 #, fuzzy, c-format
@@ -6679,62 +6739,55 @@ msgstr "  -z nocopyreloc              No crea reubicaciones copia\n"
 
 #: eelf32xtensa.c:189
 msgid "file already has property tables"
-msgstr ""
+msgstr "el fichero ya tiene tablas de propiedades"
 
 #: eelf32xtensa.c:199
-#, fuzzy
 msgid "failed to read section contents"
-msgstr "%X%P: no se pueden leer los contenidos de la sección .exports\n"
+msgstr "fallo al leer el contenido de la sección"
 
 #: eelf32xtensa.c:211
-#, fuzzy
 msgid "could not create new section"
-msgstr "%X%P: no se puede crear la sección .edata: %E\n"
+msgstr "no se ha podido crear la nueva sección"
 
 #: eelf32xtensa.c:227
-#, fuzzy
 msgid "could not allocate section contents"
-msgstr "%X%P: no se pueden leer los contenidos de la sección .exports\n"
+msgstr "no se ha podido asignar el contenido de la sección"
 
 #: eelf32xtensa.c:246
 msgid "out of memory"
-msgstr ""
+msgstr "sin memoria"
 
 #: eelf32xtensa.c:347
 msgid "%P: warning: failed to convert %s table in %pB (%s); subsequent disassembly may be incomplete\n"
-msgstr ""
+msgstr "%P: aviso: no se ha podido convertir la tabla de %s en %pB (%s); el desensamblaje subsiguiente puede estar incompleto\n"
 
 #: eelf32xtensa.c:464
-#, fuzzy
 msgid "%F%P: %pB: cannot read contents of section %pA\n"
-msgstr "%X%P: no se puede crear la sección .reloc: %E\n"
+msgstr "%F%P: %pB: no se puede leer el contenido de la sección %pA\n"
 
 #: eelf32xtensa.c:475
-#, fuzzy
 msgid "%P: %pB: warning: incompatible Xtensa configuration (%s)\n"
-msgstr "%P: se salta el %s incompatible mientras se busca %s\n"
+msgstr "%P: %pB: aviso: configuración Xtensa incompatible (%s)\n"
 
 #: eelf32xtensa.c:479
-#, fuzzy
 msgid "%P: %pB: warning: cannot parse .xtensa.info section\n"
-msgstr "%P: %pB: aviso: ignorando el símbolo duplicado `%s' de la sección `%s'\n"
+msgstr "%P: %pB: aviso: no se puede analizar la sección .xtensa.info\n"
 
 #: eelf32xtensa.c:505
 msgid "%F%P: little endian output does not match Xtensa configuration\n"
-msgstr ""
+msgstr "%F%P: la salida «little endian» no concuerda con la configuración Xtensa\n"
 
 #: eelf32xtensa.c:511
 msgid "%F%P: big endian output does not match Xtensa configuration\n"
-msgstr ""
+msgstr "%F%P: la salida «big endian» no concuerda con la configuración Xtensa\n"
 
 #: eelf32xtensa.c:530
 msgid "%F%P: cross-endian linking for %pB not supported\n"
-msgstr ""
+msgstr "%F%P: no se admite el enlazamiento con «endian» cruzado para %pB\n"
 
 #: eelf32xtensa.c:561
-#, fuzzy
 msgid "%F%P: failed to create .xtensa.info section\n"
-msgstr "%X%P: no se puede crear la sección .edata: %E\n"
+msgstr "%F%P: fallo al crear la sección .xtensa.info\n"
 
 #: eelf32xtensa.c:4073
 #, c-format
@@ -6744,52 +6797,50 @@ msgid ""
 msgstr ""
 
 #: eelf64_ia64.c:2198 eelf64_ia64_fbsd.c:2205
-#, fuzzy, c-format
+#, c-format
 msgid "  --itanium                   Generate code for Intel Itanium processor\n"
-msgstr "  --out-implib <fichero>             Genera una biblioteca de importación\n"
+msgstr "  --itanium                   Genera código para el procesador Intel Itanium\n"
 
 #: eelf64_s390.c:115 eelf64lppc.c:179 eelf64ppc.c:179 eelf64ppc_fbsd.c:179
-#, fuzzy
 msgid "%F%P: can not init BFD: %E\n"
-msgstr "%X%P: no se puede crear BFD: %E\n"
+msgstr "%F%P: no se puede inicializar BFD: %E\n"
 
 #: eelf64_s390.c:2189
 #, c-format
 msgid "  --s390-pgste                Tell the kernel to allocate 4k page tables\n"
-msgstr ""
+msgstr "  --s390-pgste                Pide al kernel que asigne tablas de páginas de 4k\n"
 
 #: eelf64alpha.c:2267 eelf64alpha_fbsd.c:2274 eelf64alpha_nbsd.c:2267
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "  --taso                      Load executable in the lower 31-bit addressable\n"
 "                                virtual address range\n"
 msgstr ""
-"  --large-address-aware              El ejecutable admite direcciones\n"
-"                                       virtuales mayores a 2 gigabytes\n"
+"  --taso                      Carga el ejecutable en el rango de 31 bits inferior\n"
+"                                de direcciones virtuales direccionables\n"
 
 #: eelf64alpha.c:2270 eelf64alpha_fbsd.c:2277 eelf64alpha_nbsd.c:2270
 #, c-format
 msgid "  --secureplt                 Force PLT in text segment\n"
-msgstr ""
+msgstr "  --secureplt                 Fuerza PLT en el segmento de texto\n"
 
 #: eelf64alpha.c:2272 eelf64alpha_fbsd.c:2279 eelf64alpha_nbsd.c:2272
 #, c-format
 msgid "  --no-secureplt              Force PLT in data segment\n"
-msgstr ""
+msgstr "  --no-secureplt              Fuerza PLT en el segmento de datos\n"
 
 #: eelf64lppc.c:363 eelf64lppc.c:391 eelf64ppc.c:363 eelf64ppc.c:391
 #: eelf64ppc_fbsd.c:363 eelf64ppc_fbsd.c:391
-#, fuzzy
 msgid "%X%P: can not edit %s: %E\n"
-msgstr "%F%P: no se puede abrir %s: %E\n"
+msgstr "%X%P: no se puede editar%s: %E\n"
 
 #: eelf64lppc.c:557 eelf64ppc.c:557 eelf64ppc_fbsd.c:557
 msgid "%X%P: linker script separates .got and .toc\n"
-msgstr ""
+msgstr "%X%P: el «script» de enlazamiento separa .got y .toc\n"
 
 #: eelf64lppc.c:618 eelf64ppc.c:618 eelf64ppc_fbsd.c:618
 msgid "%P: .init/.fini fragments use differing TOC pointers\n"
-msgstr ""
+msgstr "%P: los fragmentos .init/.fini utilizan punteros TOC que difieren\n"
 
 #: eelf64lppc.c:3014 eelf64ppc.c:3014
 #, c-format
@@ -6824,7 +6875,7 @@ msgstr ""
 #: eelf64lppc.c:3035 eelf64ppc.c:3035 eelf64ppc_fbsd.c:3042
 #, c-format
 msgid "  --no-plt-localentry         Don't optimize ELFv2 calls\n"
-msgstr ""
+msgstr "  --no-plt-localentry         No optimiza las llamadas ELFv2\n"
 
 #: eelf64lppc.c:3044 eelf64ppc.c:3044 eelf64ppc_fbsd.c:3051
 #, c-format
@@ -6834,11 +6885,16 @@ msgid ""
 "                                symbols are treated the same as function\n"
 "                                descriptor symbols.  Defaults to on.\n"
 msgstr ""
+"  --dotsyms                   Para cada patrón de versión \"foo\" en un «script»\n"
+"                                de versión, añade \".foo\" de modo que a los\n"
+"                                símbolos del código de función se los trate\n"
+"                                igual que a los símbolos de los descriptores de\n"
+"                                función. Activo por omisión.\n"
 
 #: eelf64lppc.c:3050 eelf64ppc.c:3050 eelf64ppc_fbsd.c:3057
 #, c-format
 msgid "  --no-dotsyms                Don't do anything special in version scripts\n"
-msgstr ""
+msgstr "  --no-dotsyms                No hace nada especial en los «scripts» de versión\n"
 
 #: eelf64lppc.c:3053 eelf64ppc.c:3053 eelf64ppc_fbsd.c:3060
 #, fuzzy, c-format
@@ -6854,32 +6910,33 @@ msgstr ""
 #: eelf64lppc.c:3058 eelf64ppc.c:3058 eelf64ppc_fbsd.c:3065
 #, c-format
 msgid "  --no-save-restore-funcs     Don't provide these routines\n"
-msgstr ""
+msgstr "  --no-save-restore-funcs     No proporciona estas rutinas\n"
 
 #: eelf64lppc.c:3064 eelf64ppc.c:3064 eelf64ppc_fbsd.c:3071
 #, c-format
 msgid "  --tls-get-addr-optimize     Force use of special __tls_get_addr call\n"
-msgstr ""
+msgstr "  --tls-get-addr-optimize     Fuerza el uso de la llamada especial __tls_get_addr\n"
 
 #: eelf64lppc.c:3070 eelf64ppc.c:3070 eelf64ppc_fbsd.c:3077
-#, fuzzy, c-format
+#, c-format
 msgid "  --no-opd-optimize           Don't optimize the OPD section\n"
-msgstr "  --no-eh-frame-hdr           No crea sección .eh_frame_hdr\n"
+msgstr "  --no-opd-optimize           No optimiza la sección OPD\n"
 
 #: eelf64lppc.c:3076 eelf64ppc.c:3076 eelf64ppc_fbsd.c:3083
-#, fuzzy, c-format
+#, c-format
 msgid "  --no-toc-optimize           Don't optimize the TOC section\n"
-msgstr "  --no-eh-frame-hdr           No crea sección .eh_frame_hdr\n"
+msgstr "  --no-toc-optimize           No optimiza la sección TOC\n"
 
 #: eelf64lppc.c:3079 eelf64ppc.c:3079 eelf64ppc_fbsd.c:3086
-#, fuzzy, c-format
+#, c-format
 msgid "  --no-multi-toc              Disallow automatic multiple toc sections\n"
-msgstr "  -z muldefs                  Permite definiciones múltiples\n"
+msgstr "  --no-multi-toc              Deniega secciones toc múltiples automáticas\n"
 
 #: eelf64lppc.c:3082 eelf64ppc.c:3082 eelf64ppc_fbsd.c:3089
-#, fuzzy, c-format
+#, c-format
 msgid "  --no-toc-sort               Don't sort TOC and GOT sections\n"
 msgstr ""
+"  --no-toc-sort               No ordena las secciones TOC y GOT\n"
 "  -z nocombreloc              No funde las reubicaciones dinámicas en una\n"
 "                              sola sección\n"
 
@@ -6891,18 +6948,17 @@ msgid ""
 msgstr ""
 
 #: eelf64mmix.c:133 emmo.c:128
-#, fuzzy
 msgid "%X%P: internal problems setting up section %s"
-msgstr "%P: error interno: se aborta en %s:%d en %s\n"
+msgstr "%X%P: problemas internos configurando la sección %s"
 
 #: eelf64mmix.c:177 emmo.c:172
 msgid "%X%P: too many global registers: %u, max 223\n"
-msgstr ""
+msgstr "%X%P: demasiados registros globales: %u, máx 223\n"
 
 #. This is a fatal error; make einfo call not return.
 #: eelf64mmix.c:195 emmo.c:190
 msgid "%F%P: can't finalize linker-allocated global registers\n"
-msgstr ""
+msgstr "%F%P: no se pueden finalizar los registros globales asignados por el enlazador\n"
 
 #: eelf64ppc_fbsd.c:3021
 #, c-format
@@ -6916,14 +6972,13 @@ msgstr ""
 
 #: eelf_x86_64.c:7538 eelf_x86_64_cloudabi.c:2258 eelf_x86_64_fbsd.c:2265
 #: eelf_x86_64_nacl.c:2258 eelf_x86_64_sol2.c:2389
-#, fuzzy, c-format
+#, c-format
 msgid "  -z bndplt                   Always generate BND prefix in PLT entries\n"
-msgstr "  -z muldefs                  Permite definiciones múltiples\n"
+msgstr "  -z bndplt                   Genera siempre prefijo BND en las entradas PLT\n"
 
 #: ehppaelf.c:376 ehppalinux.c:376 ehppanbsd.c:376 ehppaobsd.c:376
-#, fuzzy
 msgid "%X%P: can not set gp\n"
-msgstr "%X%P: no se puede crear BFD: %E\n"
+msgstr "%X%P: no se puede establecer gp\n"
 
 #: ehppaelf.c:2304 ehppalinux.c:2481 ehppanbsd.c:2481 ehppaobsd.c:2481
 #, c-format
@@ -6933,29 +6988,25 @@ msgid ""
 msgstr ""
 
 #: ei386beos.c:375
-#, fuzzy
 msgid "%F%P: PE operations on non PE file\n"
-msgstr "%F%P: no se pueden realizar operaciones PE en el fichero de salida '%B' que no es PE.\n"
+msgstr "%F%P: operaciones PE en un fichero que no es PE\n"
 
 #: ei386beos.c:428 ei386beos.c:435
-#, fuzzy
 msgid "%F%P: %pB: can't read contents of section .idata: %E\n"
-msgstr "%F%P: no se puede relajar la sección: %E\n"
+msgstr "%F%P: %pB: no se puede leer el contenido de la sección .idata: %E\n"
 
 #: ei386beos.c:683
-#, fuzzy
 msgid "%F%P: section %s has '$' as first character\n"
-msgstr "%X%P: la VMA de la sección %s da la vuelta alrededor del espacio de direcciones\n"
+msgstr "%F%P: la sección %s tiene un '$' como primer carácter\n"
 
 #: ei386beos.c:715
-#, fuzzy
 msgid "%F%P: *(%s$) missing from linker script\n"
-msgstr "%P: %s: falta el argumento\n"
+msgstr "%F%P: falta *(%s$) en el «script» del enlazador \n"
 
 #: ei386pep.c:374
-#, fuzzy, c-format
+#, c-format
 msgid "  --[no-]insert-timestamp            Use a real timestamp rather than zero (default)\n"
-msgstr "  --[no-]insert-timestamp            Utiliza marca de sello real en lugar de cero (funcionamiento predeterminado).\n"
+msgstr "  --[no-]insert-timestamp            Utiliza marca de tiempo real en lugar de cero (funcionamiento predeterminado)\n"
 
 #: ei386pep.c:385
 #, fuzzy, c-format
@@ -6963,23 +7014,22 @@ msgid "                                     export, place into import library in
 msgstr "                                     automática, los coloca en la biblioteca de importación.\n"
 
 #: ei386pep.c:390
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "  --compat-implib                    Create backward compatible import libs;\n"
 "                                       create __imp_<SYMBOL> as well\n"
 msgstr ""
 "  --compat-implib                    Crea bibliotecas de importación compatibles hacia atrás;\n"
-"                                       crea además __imp_<SÍMBOLO>.\n"
+"                                       crea además __imp_<SÍMBOLO>\n"
 
 #: ei386pep.c:391
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "  --enable-auto-image-base           Automatically choose image base for DLLs\n"
 "                                       unless user specifies one\n"
 msgstr ""
-"  --enable-auto-image-base[=<direc>]   Escoge automáticamente la base de la imagen para las DLLs\n"
-"                                       (opcionalmente empezando con direc salvo que\n"
-"                                       se establezca específicamente con --image-base\n"
+"  --enable-auto-image-base           Escoge automáticamente la base de la imagen para\n"
+"                                       las DLLs salvo que el usuario especifique una\n"
 
 #: ei386pep.c:392
 #, c-format
@@ -7044,12 +7094,11 @@ msgstr "aviso: se resuelve %s al enlazar con %s\n"
 
 #: em68hc11elf.c:193 em68hc11elfb.c:193 em68hc12elf.c:193 em68hc12elfb.c:193
 msgid "%P: warning: the size of the 'window' memory region is not a power of 2; its size %d is truncated to %d\n"
-msgstr ""
+msgstr "%P: aviso: el tamaño de la región de memoria de la 'ventana' no es potencia de 2; se trunca su tamaño %d a %d\n"
 
 #: em68hc11elf.c:208 em68hc11elfb.c:208 em68hc12elf.c:208 em68hc12elfb.c:208
-#, fuzzy
 msgid "%X%P: changing output format whilst linking is not supported\n"
-msgstr "%F%X%P: error: no se puede cambiar el formato de salida mientras se enlazan los binarios ARM\n"
+msgstr "%X%P: no se puede cambiar el formato de salida mientras se enlaza\n"
 
 #: em68hc11elf.c:2303 em68hc11elfb.c:2303 em68hc12elf.c:2303
 #: em68hc12elfb.c:2303
@@ -7066,24 +7115,25 @@ msgid ""
 "  --bank-window NAME          Specify the name of the memory region describing\n"
 "                                the layout of the memory bank window\n"
 msgstr ""
+"  --bank-window NOMBRE        Especifica el nombre de la región de memoria que\n"
+"                                describe la disposición de la ventana del banco de memoria\n"
 
 #: em68kelf.c:139 em68kelfnbsd.c:139
 msgid "%F%P: %pB: all input objects must be ELF for --embedded-relocs\n"
-msgstr ""
+msgstr "%F%P: %pB: todos los objetos de entrada deben ser ELF para --embedded-relocs\n"
 
 #: em68kelf.c:2320 em68kelfnbsd.c:2320
-#, fuzzy
 msgid "%P: unrecognized --got argument '%s'\n"
-msgstr "%P: no se reconoce la opción `%s'\n"
+msgstr "%P: no se reconoce el argumento --got '%s'\n"
 
 #: em68kelf.c:2333 em68kelfnbsd.c:2333
 #, c-format
 msgid "  --got=<type>                Specify GOT handling scheme\n"
-msgstr ""
+msgstr "  --got=<tipo>                Especifica el esquema de manejo GOT\n"
 
 #: emmo.c:379
 msgid "%X%P: internal problems scanning %pB after opening it"
-msgstr ""
+msgstr "%X%P: problemas internos explorando %pB después de abrirlo"
 
 #: emsp430X.c:199 emsp430elf.c:199
 #, fuzzy
@@ -7091,15 +7141,13 @@ msgid "%P: error: unhandled data_statement size\n"
 msgstr "%F%P: declaración de datos inválida\n"
 
 #: emsp430X.c:299 emsp430elf.c:299
-#, fuzzy
 msgid "%P: error: no section named %s or %s in linker script\n"
-msgstr "%P%X: error: no se pueden usar nombres de sección largos en esta arquitectura\n"
+msgstr "%P: error: no hay ninguna sección que se llame %s o %s en el «script» del enlazador\n"
 
 #: emsp430X.c:308 emsp430X.c:430 emsp430X.c:443 emsp430elf.c:308
 #: emsp430elf.c:430 emsp430elf.c:443
-#, fuzzy
 msgid "%P: error: no section named %s in linker script\n"
-msgstr "%P%X: error: no se pueden usar nombres de sección largos en esta arquitectura\n"
+msgstr "%P: error: no hay ninguna sección que se llame %s en el «script» del enlazador\n"
 
 #: emsp430X.c:509 emsp430elf.c:509
 #, c-format
@@ -7107,6 +7155,8 @@ msgid ""
 "  --code-region={either,lower,upper,none}\n"
 "        Transform .text* sections to {either,lower,upper,none}.text* sections\n"
 msgstr ""
+"  --code-region={either,lower,upper,none}\n"
+"        Transforma las secciones .text* en secciones {either,lower,upper,none}.text*\n"
 
 #: emsp430X.c:510 emsp430elf.c:510
 #, c-format
@@ -7115,6 +7165,9 @@ msgid ""
 "        Transform .data*, .rodata* and .bss* sections to\n"
 "        {either,lower,upper,none}.{bss,data,rodata}* sections\n"
 msgstr ""
+"  --data-region={either,lower,upper,none}\n"
+"        Transforma las secciones .data*, .rodata* y .bss* en\n"
+"        secciones {either,lower,upper,none}.{bss,data,rodata}*\n"
 
 #: emsp430X.c:511 emsp430elf.c:511
 #, c-format
@@ -7123,56 +7176,57 @@ msgid ""
 "        Disable transformation of .{text,data,bss,rodata}* sections to\n"
 "        add the {either,lower,upper,none} prefixes\n"
 msgstr ""
+"  --disable-sec-transformation\n"
+"        Desactiva la transformación de las secciones .{text,data,bss,rodata}*\n"
+"        para añadir los prefijos {either,lower,upper,none}\n"
 
 #: emsp430X.c:530 emsp430elf.c:530
 msgid "%P: --code-region requires an argument: {upper,lower,either,none}\n"
-msgstr ""
+msgstr "%P: --code-region requiere un argumento: {upper,lower,either,none}\n"
 
 #: emsp430X.c:536 emsp430elf.c:536
-#, fuzzy
 msgid "%P: error: unrecognized argument to --code-region= option: \"%s\"\n"
-msgstr "%P%F: no se reconoce la opción -assert `%s'\n"
+msgstr "%P: no se reconoce el argumento de la opción --code-region=: \"%s\"\n"
 
 #: emsp430X.c:553 emsp430elf.c:553
 msgid "%P: --data-region requires an argument: {upper,lower,either,none}\n"
-msgstr ""
+msgstr "%P: --data-region requiere un argumento: {upper,lower,either,none}\n"
 
 #: emsp430X.c:559 emsp430elf.c:559
-#, fuzzy
 msgid "%P: error: unrecognized argument to --data-region= option: \"%s\"\n"
-msgstr "%P%F: no se reconoce la opción -a `%s'\n"
+msgstr "%P: no se reconoce el argumento de la opción --data-region=: \"%s\"\n"
 
 #. Incompatible objects.
 #: ends32belf.c:203 ends32belf16m.c:203 ends32belf_linux.c:203 ends32elf.c:203
 #: ends32elf16m.c:203 ends32elf_linux.c:203
 msgid "%F%P: %pB: ABI version of object files mismatched\n"
-msgstr ""
+msgstr "%F%P: %pB: versión ABI de los ficheros objeto discordantes\n"
 
 #. For PIE or shared object, all input must be PIC.
 #: ends32belf.c:249 ends32belf16m.c:249 ends32belf_linux.c:249 ends32elf.c:249
 #: ends32elf16m.c:249 ends32elf_linux.c:249
 msgid "%P: %pB: must use -fpic to compile this file for shared object or PIE\n"
-msgstr ""
+msgstr "%P: %pB: debe utilizar -fpic para compilar este fichero para objeto compartido o PIE\n"
 
 #: ends32belf.c:2213 ends32belf16m.c:2213 ends32belf_linux.c:2342
 #: ends32elf.c:2213 ends32elf16m.c:2213 ends32elf_linux.c:2342
 msgid "%P: --mbaseline is not used anymore\n"
-msgstr ""
+msgstr "%P: --mbaseline ya no se utiliza\n"
 
 #: ends32belf.c:2224 ends32belf16m.c:2224 ends32belf_linux.c:2353
 #: ends32elf.c:2224 ends32elf16m.c:2224 ends32elf_linux.c:2353
 msgid "%P: --relax-[no-]reduce-fp-updat is not used anymore\n"
-msgstr ""
+msgstr "%P: --relax-[no-]reduce-fp-updat ya no se utiliza\n"
 
 #: ends32belf.c:2228 ends32belf16m.c:2228 ends32belf_linux.c:2357
 #: ends32elf.c:2228 ends32elf16m.c:2228 ends32elf_linux.c:2357
 msgid "%P: missing file for --mexport-symbols\n"
-msgstr ""
+msgstr "%P: falta el fichero para --mexport-symbols\n"
 
 #: ends32belf.c:2248 ends32belf16m.c:2248 ends32belf_linux.c:2377
 #: ends32elf.c:2248 ends32elf16m.c:2248 ends32elf_linux.c:2377
 msgid "%P: missing file for --mexport-ex9=<file>\n"
-msgstr ""
+msgstr "%P: falta el fichero para --mexport-ex9=<fichero>\n"
 
 #: ends32belf.c:2256 ends32belf16m.c:2256 ends32belf_linux.c:2385
 #: ends32elf.c:2256 ends32elf16m.c:2256 ends32elf_linux.c:2385
@@ -7183,7 +7237,7 @@ msgstr "%F%P: no se puede abrir el fichero base %s\n"
 #: ends32belf.c:2261 ends32belf16m.c:2261 ends32belf_linux.c:2390
 #: ends32elf.c:2261 ends32elf16m.c:2261 ends32elf_linux.c:2390
 msgid "%P: missing file for --mimport-ex9=<file>\n"
-msgstr ""
+msgstr "%P: falta el fichero para --mimport-ex9=<fichero>\n"
 
 #: ends32belf.c:2265 ends32belf16m.c:2265 ends32belf_linux.c:2394
 #: ends32elf.c:2265 ends32elf16m.c:2265 ends32elf_linux.c:2394
@@ -7194,77 +7248,76 @@ msgstr "%F%P: no se puede abrir el fichero base %s\n"
 #: ends32belf.c:2275 ends32belf16m.c:2275 ends32belf_linux.c:2404
 #: ends32elf.c:2275 ends32elf16m.c:2275 ends32elf_linux.c:2404
 msgid "%F%P: the range of ex9_limit must between 1 and 511\n"
-msgstr ""
+msgstr "%F%P: el rango de ex9_limit debe estar entre 1 y 511\n"
 
 #: ends32belf.c:2306 ends32belf16m.c:2306 ends32belf_linux.c:2435
 #: ends32elf.c:2306 ends32elf16m.c:2306 ends32elf_linux.c:2435
 #, c-format
 msgid "  --m[no-]fp-as-gp            Disable/enable fp-as-gp relaxation\n"
-msgstr ""
+msgstr "  --m[no-]fp-as-gp            Desactiva/activa la relajación fp-as-gp\n"
 
 #: ends32belf.c:2308 ends32belf16m.c:2308 ends32belf_linux.c:2437
 #: ends32elf.c:2308 ends32elf16m.c:2308 ends32elf_linux.c:2437
 #, c-format
 msgid "  --mexport-symbols=FILE      Exporting symbols in linker script\n"
-msgstr ""
+msgstr "  --mexport-symbols=FICHERO   Exportando los símbolos del «script» del enlazador\n"
 
 #: ends32belf.c:2312 ends32belf16m.c:2312 ends32belf_linux.c:2441
 #: ends32elf.c:2312 ends32elf16m.c:2312 ends32elf_linux.c:2441
 #, c-format
 msgid "  --m[no-]ex9                 Disable/enable link-time EX9 relaxation\n"
-msgstr ""
+msgstr "  --m[no-]ex9                 Desactiva/activa la relajación EX9 de tiempo de enlazamiento\n"
 
 #: ends32belf.c:2314 ends32belf16m.c:2314 ends32belf_linux.c:2443
 #: ends32elf.c:2314 ends32elf16m.c:2314 ends32elf_linux.c:2443
 #, c-format
 msgid "  --mexport-ex9=FILE          Export EX9 table after linking\n"
-msgstr ""
+msgstr "  --mexport-ex9=FICHERO       Exporta la tabla EX9 después de enlazar\n"
 
 #: ends32belf.c:2316 ends32belf16m.c:2316 ends32belf_linux.c:2445
 #: ends32elf.c:2316 ends32elf16m.c:2316 ends32elf_linux.c:2445
 #, c-format
 msgid "  --mimport-ex9=FILE          Import Ex9 table for EX9 relaxation\n"
-msgstr ""
+msgstr "  --mimport-ex9=FICHERO       Importa la tabla Ex9 para la relajación EX9\n"
 
 #: ends32belf.c:2318 ends32belf16m.c:2318 ends32belf_linux.c:2447
 #: ends32elf.c:2318 ends32elf16m.c:2318 ends32elf_linux.c:2447
 #, c-format
 msgid "  --mupdate-ex9               Update existing EX9 table\n"
-msgstr ""
+msgstr "  --mupdate-ex9               Actualiza la tabla EX9 existente\n"
 
 #: ends32belf.c:2320 ends32belf16m.c:2320 ends32belf_linux.c:2449
 #: ends32elf.c:2320 ends32elf16m.c:2320 ends32elf_linux.c:2449
 #, c-format
 msgid "  --mex9-limit=NUM            Maximum number of entries in ex9 table\n"
-msgstr ""
+msgstr "  --mex9-limit=NUM            Número máximo de entradas en la tabla ex9\n"
 
 #: ends32belf.c:2322 ends32belf16m.c:2322 ends32belf_linux.c:2451
 #: ends32elf.c:2322 ends32elf16m.c:2322 ends32elf_linux.c:2451
 #, c-format
 msgid "  --mex9-loop-aware           Avoid generate EX9 instruction inside loop\n"
-msgstr ""
+msgstr "  --mex9-loop-aware           Evita generar instrucción EX9 dentro de bucle\n"
 
 #: ends32belf.c:2327 ends32belf16m.c:2327 ends32belf_linux.c:2456
 #: ends32elf.c:2327 ends32elf16m.c:2327 ends32elf_linux.c:2456
 #, c-format
 msgid "  --m[no-]ifc                 Disable/enable link-time IFC optimization\n"
-msgstr ""
+msgstr "  --m[no-]ifc                 Desactiva/activa optimización IFC de tiempo de enlazamiento\n"
 
 #: ends32belf.c:2329 ends32belf16m.c:2329 ends32belf_linux.c:2458
 #: ends32elf.c:2329 ends32elf16m.c:2329 ends32elf_linux.c:2458
 #, c-format
 msgid "  --mifc-loop-aware           Avoid generate IFC instruction inside loop\n"
-msgstr ""
+msgstr "  --mifc-loop-aware           Evita generar instrucción IFC dentro de bucle\n"
 
 #: etic3xcoff.c:68 etic3xcoff_onchip.c:68 etic4xcoff.c:68 etic54xcoff.c:68
 #, c-format
 msgid "  --format 0|1|2              Specify which COFF version to use\n"
-msgstr ""
+msgstr "  --format 0|1|2              Especifica qué versión COFF utilizar\n"
 
 #: etic3xcoff.c:90 etic3xcoff_onchip.c:90 etic4xcoff.c:90 etic54xcoff.c:90
-#, fuzzy
 msgid "%F%P: invalid COFF format version %s\n"
-msgstr "%F%P: origen no válido para la región de memoria %s\n"
+msgstr "%F%P: versión no válida de formato COFF %s\n"
 
 #~ msgid "  --support-old-code          Support interworking with old code\n"
 #~ msgstr "  --support-old-code          Admite interoperar con código antiguo\n"
