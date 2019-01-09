@@ -446,7 +446,7 @@ class scoped_switch_fork_info
 public:
   /* Switch to the infrun state held on the fork_info identified by
      PPTID.  If PPTID is the current inferior then no switch is done.  */
-  scoped_switch_fork_info (ptid_t pptid)
+  explicit scoped_switch_fork_info (ptid_t pptid)
     : m_oldfp (nullptr)
   {
     if (pptid != inferior_ptid)
@@ -472,9 +472,18 @@ public:
     if (m_oldfp != nullptr)
       {
 	/* Switch back to inferior_ptid.  */
-	remove_breakpoints ();
-	fork_load_infrun_state (m_oldfp);
-	insert_breakpoints ();
+	TRY
+	  {
+	    remove_breakpoints ();
+	    fork_load_infrun_state (m_oldfp);
+	    insert_breakpoints ();
+	  }
+	CATCH (ex, RETURN_MASK_ALL)
+	  {
+	    warning (_("Couldn't restore checkpoint state in %s: %s"),
+		     target_pid_to_str (fp->ptid), ex.message);
+	  }
+	END_CATCH
       }
   }
 

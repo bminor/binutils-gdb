@@ -1,3 +1,9 @@
+2019-01-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* linux-fork.c (scoped_switch_fork_info)
+	<scoped_switch_fork_info>: Make explicit.
+	<~scoped_switch_fork_info>: Wrap core in TRY/CATCH.
+
 2019-01-10  Tom Tromey  <tom@tromey.com>
 
 	* objfiles.h (objfile::reset_psymtabs): Update.
