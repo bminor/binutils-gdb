@@ -1,6 +1,6 @@
 2019-01-09  Nick Clifton  <nickc@redhat.com>
 
-	PR 14049
+	PR 24049
 	* readelf.c (process_archive): Use arch.file_name in error
 	messages until the qualified name is available.
 
