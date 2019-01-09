@@ -1,3 +1,12 @@
+2019-01-09  Sandra Loosemore  <sandra@codesourcery.com>
+
+	Merge from GCC:
+	PR other/16615
+
+	* cp-demangle.c: Mechanically replace "can not" with "cannot".
+	* floatformat.c: Likewise.
+	* strerror.c: Likewise.
+
 2018-12-07  Nick Clifton  <nickc@redhat.com>
 
 	PR 87681

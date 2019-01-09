@@ -1,3 +1,11 @@
+2019-01-09  Sandra Loosemore  <sandra@codesourcery.com>
+
+	Merge from GCC:
+	PR other/16615
+
+	* libiberty.h: Mechanically replace "can not" with "cannot".
+	* plugin-api.h: Likewise.
+
 2018-12-25  Yoshinori Sato <ysato@users.sourceforge.jp>
 
 	* elf/rx.h (EF_RX_CPU_MASK): Update new bits.
