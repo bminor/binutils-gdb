@@ -1,5 +1,13 @@
 2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb/lm32-tdep.c (lm32_unwind_sp): Delete.
+	(lm32_unwind_pc): Delete.
+	(lm32_dummy_id): Delete.
+	(lm32_gdbarch_init): Don't register deleted functions with
+	gdbarch.
+
+2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb/iq2000-tdep.c (iq2000_unwind_sp): Delete.
 	(iq2000_unwind_pc): Delete.
 	(iq2000_dummy_id): Delete.
