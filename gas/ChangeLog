@@ -1,8 +1,9 @@
 2019-01-10  Nick Clifton  <nickc@redhat.com>
 
 	PR 23963
-	* gas/mips/mips16-branch-absolute-1.d: Adjust for the fact that
-	control characters are now displayed as escape sequences.
+	* testsuite/gas/mips/mips16-branch-absolute-1.d: Adjust for the
+	fact that control characters are now displayed as escape
+	sequences.
 	* testsuite/gas/mips/mips16-e.d: Likewise.
 	* testsuite/gas/mips/mips16-pcrel-0.d: Likewise.
 	* testsuite/gas/mips/mips16-pcrel-1.d: Likewise.
