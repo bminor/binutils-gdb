@@ -2,6 +2,19 @@
 
 	PR gdb/23712
 	PR symtab/23010
+	* dictionary.c (pending_to_vector): Remove.
+	(dict_create_hashed_1, dict_create_linear_1, dict_add_pending_1):
+	Remove _1 suffix, replacing functions of the same name.  Update
+	all callers.
+	(dict_create_hashed, dict_create_hashed_expandable)
+	(dict_create_linear, dict_create_linear_expandable, dict_free)
+	(dict_add_symbol, dict_add_pending, dict_size, dict_empty):
+	Make functions static.
+
+2019-01-10  Keith Seitz  <keiths@redhat.com>
+
+	PR gdb/23712
+	PR symtab/23010
 	* dictionary.h (struct dictionary): Replace declaration with
 	multidictionary.
 	(dict_create_hashed, dict_create_hashed_expandable)

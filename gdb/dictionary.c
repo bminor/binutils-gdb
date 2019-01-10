@@ -342,31 +342,14 @@ static void insert_symbol_hashed (struct dictionary *dict,
 
 static void expand_hashtable (struct dictionary *dict);
 
-/* A function to convert a linked list into a vector.  */
-
-static std::vector<symbol *>
-pending_to_vector (const struct pending *symbol_list)
-{
-  std::vector<symbol *> symlist;
-
-  for (const struct pending *list_counter = symbol_list;
-       list_counter != nullptr; list_counter = list_counter->next)
-    {
-      for (int i = list_counter->nsyms - 1; i >= 0; --i)
-	symlist.push_back (list_counter->symbol[i]);
-    }
-
-  return symlist;
-}
-
 /* The creation functions.  */
 
-/* A function to transition dict_create_hashed to new API.  */
+/* Create a hashed dictionary of a given language.  */
 
 static struct dictionary *
-dict_create_hashed_1 (struct obstack *obstack,
-		      enum language language,
-		      const std::vector<symbol *> &symbol_list)
+dict_create_hashed (struct obstack *obstack,
+		    enum language language,
+		    const std::vector<symbol *> &symbol_list)
 {
   /* Allocate the dictionary.  */
   struct dictionary *retval = XOBNEW (obstack, struct dictionary);
@@ -388,21 +371,9 @@ dict_create_hashed_1 (struct obstack *obstack,
   return retval;
 }
 
-/* See dictionary.h.  */
+/* Create an expandable hashed dictionary of a given language.  */
 
-struct dictionary *
-dict_create_hashed (struct obstack *obstack,
-		    enum language language,
-		    const struct pending *symbol_list)
-{
-  std::vector<symbol *> symlist = pending_to_vector (symbol_list);
-
-  return dict_create_hashed_1 (obstack, language, symlist);
-}
-
-/* See dictionary.h.  */
-
-extern struct dictionary *
+static struct dictionary *
 dict_create_hashed_expandable (enum language language)
 {
   struct dictionary *retval = XNEW (struct dictionary);
@@ -417,12 +388,12 @@ dict_create_hashed_expandable (enum language language)
   return retval;
 }
 
-/* A function to transition dict_create_linear to new API.  */
+/* Create a linear dictionary of a given language.  */
 
 static struct dictionary *
-dict_create_linear_1 (struct obstack *obstack,
-		      enum language language,
-		      const std::vector<symbol *> &symbol_list)
+dict_create_linear (struct obstack *obstack,
+		    enum language language,
+		    const std::vector<symbol *> &symbol_list)
 {
   struct dictionary *retval = XOBNEW (obstack, struct dictionary);
   DICT_VECTOR (retval) = &dict_linear_vector;
@@ -442,21 +413,9 @@ dict_create_linear_1 (struct obstack *obstack,
   return retval;
 }
 
-/* See dictionary.h.  */
+/* Create an expandable linear dictionary of a given language.  */
 
-struct dictionary *
-dict_create_linear (struct obstack *obstack,
-		    enum language language,
-		    const struct pending *symbol_list)
-{
-  std::vector<symbol *> symlist = pending_to_vector (symbol_list);
-
-  return dict_create_linear_1 (obstack, language, symlist);
-}
-
-/* See dictionary.h.  */
-
-struct dictionary *
+static struct dictionary *
 dict_create_linear_expandable (enum language language)
 {
   struct dictionary *retval = XNEW (struct dictionary);
@@ -476,7 +435,7 @@ dict_create_linear_expandable (enum language language)
 /* Free the memory used by a dictionary that's not on an obstack.  (If
    any.)  */
 
-void
+static void
 dict_free (struct dictionary *dict)
 {
   (DICT_VECTOR (dict))->free (dict);
@@ -484,32 +443,22 @@ dict_free (struct dictionary *dict)
 
 /* Add SYM to DICT.  DICT had better be expandable.  */
 
-void
+static void
 dict_add_symbol (struct dictionary *dict, struct symbol *sym)
 {
   (DICT_VECTOR (dict))->add_symbol (dict, sym);
 }
 
-/* A function to transition dict_add_pending to new API.  */
+/* Utility to add a list of symbols to a dictionary.
+   DICT must be an expandable dictionary.  */
 
 static void
-dict_add_pending_1 (struct dictionary *dict,
-		    const std::vector<symbol *> &symbol_list)
+dict_add_pending (struct dictionary *dict,
+		  const std::vector<symbol *> &symbol_list)
 {
   /* Preserve ordering by reversing the list.  */
   for (auto sym = symbol_list.rbegin (); sym != symbol_list.rend (); ++sym)
     dict_add_symbol (dict, *sym);
-}
-
-/* Utility to add a list of symbols to a dictionary.
-   DICT must be an expandable dictionary.  */
-
-void
-dict_add_pending (struct dictionary *dict, const struct pending *symbol_list)
-{
-  std::vector<symbol *> symlist = pending_to_vector (symbol_list);
-
-  dict_add_pending_1 (dict, symlist);
 }
 
 /* Initialize ITERATOR to point at the first symbol in DICT, and
@@ -548,7 +497,7 @@ dict_iter_match_next (const lookup_name_info &name,
     ->iter_match_next (name, iterator);
 }
 
-int
+static int
 dict_size (const struct dictionary *dict)
 {
   return (DICT_VECTOR (dict))->size (dict);
@@ -560,7 +509,7 @@ dict_size (const struct dictionary *dict)
 
 /* Test to see if DICT is empty.  */
 
-int
+static int
 dict_empty (struct dictionary *dict)
 {
   struct dict_iterator iter;
@@ -1019,7 +968,7 @@ mdict_create_hashed (struct obstack *obstack,
       std::vector<symbol *> symlist = pair.second;
 
       retval->dictionaries[idx++]
-	= dict_create_hashed_1 (obstack, language, symlist);
+	= dict_create_hashed (obstack, language, symlist);
     }
 
   return retval;
@@ -1064,7 +1013,7 @@ mdict_create_linear (struct obstack *obstack,
       std::vector<symbol *> symlist = pair.second;
 
       retval->dictionaries[idx++]
-	= dict_create_linear_1 (obstack, language, symlist);
+	= dict_create_linear (obstack, language, symlist);
     }
 
   return retval;
@@ -1210,7 +1159,7 @@ mdict_add_pending (struct multidictionary *mdict,
 	  dict = create_new_language_dictionary (mdict, language);
 	}
 
-      dict_add_pending_1 (dict, symlist);
+      dict_add_pending (dict, symlist);
     }
 }
 
