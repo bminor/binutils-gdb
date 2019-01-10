@@ -2765,6 +2765,9 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	      /* Handle stabs continuation.  */
 	      {
 		char *stabstring = debug_info->ss + fh->issBase + sh.iss;
+		/* If we need to heap-allocate STABSTRING, this owns
+		   it.  */
+		gdb::unique_xmalloc_ptr<char> stabstring_storage;
 		int len = strlen (stabstring);
 
 		while (stabstring[len - 1] == '\\')
@@ -2787,14 +2790,19 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		    stabstring2 = debug_info->ss + fh->issBase + sh2.iss;
 		    len2 = strlen (stabstring2);
 
-		    /* Concatinate stabstring2 with stabstring1.  */
-		    if (stabstring
-		     && stabstring != debug_info->ss + fh->issBase + sh.iss)
-		      stabstring
-			= (char *) xrealloc (stabstring, len + len2 + 1);
+		    /* Concatenate stabstring2 with stabstring1.  */
+		    if (stabstring_storage != nullptr)
+		      {
+			stabstring_storage.reset
+			  ((char *) xrealloc (stabstring_storage.release (),
+					      len + len2 + 1));
+			stabstring = stabstring_storage.get ();
+		      }
 		    else
 		      {
-			stabstring = (char *) xmalloc (len + len2 + 1);
+			stabstring_storage.reset
+			  ((char *) xmalloc (len + len2 + 1));
+			stabstring = stabstring_storage.get ();
 			strcpy (stabstring, stabstring1);
 		      }
 		    strcpy (stabstring + len, stabstring2);
@@ -3330,9 +3338,6 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 			       hex_string (type_code)); /* CUR_SYMBOL_TYPE */
 		    continue;
 		  }
-		if (stabstring
-		    && stabstring != debug_info->ss + fh->issBase + sh.iss)
-		  xfree (stabstring);
 	      }
 	      /* end - Handle continuation */
 	    }
