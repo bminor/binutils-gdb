@@ -1,5 +1,12 @@
 2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* nios2-tdep.c (nios2_dummy_id): Delete.
+	(nios2_unwind_sp): Delete.
+	(nios2_gdbarch_init): Don't register deleted functions with
+	gdbarch.
+
+2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* nds32-tdep.c (nds32_dummy_id): Delete.
 	(nds32_unwind_pc): Delete.
 	(nds32_unwind_sp): Delete.
