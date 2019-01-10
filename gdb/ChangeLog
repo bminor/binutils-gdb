@@ -1,3 +1,9 @@
+2019-02-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* ada-typeprint.c (print_func_type): Print function name
+	style to print function name.
+	* c-typeprint.c (c_print_type_1): Likewise.
+
 2019-02-11  Alan Hayward  <alan.hayward@arm.com>
 
 	* aarch64-linux-tdep.c (aarch64_linux_get_syscall_number): Check

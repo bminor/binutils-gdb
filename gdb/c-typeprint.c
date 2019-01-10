@@ -28,6 +28,7 @@
 #include "language.h"
 #include "demangle.h"
 #include "c-lang.h"
+#include "cli/cli-style.h"
 #include "typeprint.h"
 #include "cp-abi.h"
 #include "cp-support.h"
@@ -115,6 +116,7 @@ c_print_type_1 (struct type *type,
     type = check_typedef (type);
 
   local_name = typedef_hash_table::find_typedef (flags, type);
+  code = TYPE_CODE (type);
   if (local_name != NULL)
     {
       fputs_filtered (local_name, stream);
@@ -124,7 +126,6 @@ c_print_type_1 (struct type *type,
   else
     {
       c_type_print_base_1 (type, stream, show, level, language, flags, podata);
-      code = TYPE_CODE (type);
       if ((varstring != NULL && *varstring != '\0')
 	  /* Need a space if going to print stars or brackets;
 	     but not if we will print just a type name.  */
@@ -144,7 +145,10 @@ c_print_type_1 (struct type *type,
 
   if (varstring != NULL)
     {
-      fputs_filtered (varstring, stream);
+      if (code == TYPE_CODE_FUNC || code == TYPE_CODE_METHOD)
+	fputs_styled (varstring, function_name_style.style (), stream);
+      else
+	fputs_filtered (varstring, stream);
 
       /* For demangled function names, we have the arglist as part of
          the name, so don't print an additional pair of ()'s.  */

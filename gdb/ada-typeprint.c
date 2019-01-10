@@ -30,6 +30,7 @@
 #include "language.h"
 #include "demangle.h"
 #include "c-lang.h"
+#include "cli/cli-style.h"
 #include "typeprint.h"
 #include "target-float.h"
 #include "ada-lang.h"
@@ -779,7 +780,10 @@ print_func_type (struct type *type, struct ui_file *stream, const char *name,
     fprintf_filtered (stream, "function");
 
   if (name != NULL && name[0] != '\0')
-    fprintf_filtered (stream, " %s", name);
+    {
+      fputs_filtered (" ", stream);
+      fputs_styled (name, function_name_style.style (), stream);
+    }
 
   if (len > 0)
     {
