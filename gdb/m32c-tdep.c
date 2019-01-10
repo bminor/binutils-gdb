@@ -1951,22 +1951,6 @@ static const struct frame_unwind m32c_unwind = {
   default_frame_sniffer
 };
 
-
-static CORE_ADDR
-m32c_unwind_pc (struct gdbarch *arch, struct frame_info *next_frame)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (arch);
-  return frame_unwind_register_unsigned (next_frame, tdep->pc->num);
-}
-
-
-static CORE_ADDR
-m32c_unwind_sp (struct gdbarch *arch, struct frame_info *next_frame)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (arch);
-  return frame_unwind_register_unsigned (next_frame, tdep->sp->num);
-}
-
 
 /* Inferior calls.  */
 
@@ -2136,21 +2120,6 @@ m32c_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      Having a dummy frame and a real frame with the *same* CFA is
      tolerable.  */
   return cfa;
-}
-
-
-static struct frame_id
-m32c_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
-{
-  /* This needs to return a frame ID whose PC is the return address
-     passed to m32c_push_dummy_call, and whose stack_addr is the SP
-     m32c_push_dummy_call returned.
-
-     m32c_unwind_sp gives us the CFA, which is the value the SP had
-     before the return address was pushed.  */
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  CORE_ADDR sp = get_frame_register_unsigned (this_frame, tdep->sp->num);
-  return frame_id_build (sp, get_frame_pc (this_frame));
 }
 
 
@@ -2643,8 +2612,6 @@ m32c_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Prologue analysis and unwinding.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_skip_prologue (gdbarch, m32c_skip_prologue);
-  set_gdbarch_unwind_pc (gdbarch, m32c_unwind_pc);
-  set_gdbarch_unwind_sp (gdbarch, m32c_unwind_sp);
 #if 0
   /* I'm dropping the dwarf2 sniffer because it has a few problems.
      They may be in the dwarf2 cfi code in GDB, or they may be in
@@ -2658,7 +2625,6 @@ m32c_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Inferior calls.  */
   set_gdbarch_push_dummy_call (gdbarch, m32c_push_dummy_call);
   set_gdbarch_return_value (gdbarch, m32c_return_value);
-  set_gdbarch_dummy_id (gdbarch, m32c_dummy_id);
 
   /* Trampolines.  */
   set_gdbarch_skip_trampoline_code (gdbarch, m32c_skip_trampoline_code);
