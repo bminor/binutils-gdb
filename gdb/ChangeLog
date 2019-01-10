@@ -1,5 +1,12 @@
 2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* s12z-tdep.c (s12z_unwind_pc): Delete.
+	(s12z_unwind_sp): Delete.
+	(s12z_gdbarch_init): Don't register deleted functions with
+	gdbarch.
+
+2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* rl78-tdep.c (rl78_unwind_sp): Delete.
 	(rl78_gdbarch_init): Don't register deleted function with gdbarch.
 

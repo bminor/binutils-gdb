@@ -95,20 +95,6 @@ s12z_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   return pc;
 }
 
-/* Implement the unwind_pc gdbarch method.  */
-static CORE_ADDR
-s12z_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  return frame_unwind_register_unsigned (next_frame, REG_P);
-}
-
-/* Implement the unwind_sp gdbarch method.  */
-static CORE_ADDR
-s12z_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  return frame_unwind_register_unsigned (next_frame, REG_S);
-}
-
 static struct type *
 s12z_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
@@ -580,10 +566,6 @@ s12z_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, s12z_dwarf_reg_to_regnum);
 
   set_gdbarch_register_type (gdbarch, s12z_register_type);
-
-  /* Functions to access frame data.  */
-  set_gdbarch_unwind_pc (gdbarch, s12z_unwind_pc);
-  set_gdbarch_unwind_sp (gdbarch, s12z_unwind_sp);
 
   frame_unwind_append_unwinder (gdbarch, &s12z_frame_unwind);
   /* Currently, the only known producer for this archtecture, produces buggy
