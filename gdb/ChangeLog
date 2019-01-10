@@ -1,5 +1,13 @@
 2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* v850-tdep.c (v850_unwind_sp): Delete.
+	(v850_unwind_pc): Delete.
+	(v850_dummy_id): Delete.
+	(v850_gdbarch_init): Don't register deleted functions with
+	gdbarch.
+
+2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* tilegx-tdep.c (tilegx_unwind_sp): Delete.
 	(tilegx_unwind_pc): Delete.
 	(tilegx_unwind_dummy_id): Delete.
