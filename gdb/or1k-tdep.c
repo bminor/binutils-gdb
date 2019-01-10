@@ -789,14 +789,6 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   return sp;
 }
 
-/* Implement the dummy_id gdbarch method.  */
-
-static struct frame_id
-or1k_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
-{
-  return frame_id_build (get_frame_sp (this_frame),
-			 get_frame_pc (this_frame));
-}
 
 
 /* Support functions for frame handling.  */
@@ -1184,7 +1176,6 @@ or1k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
   set_gdbarch_push_dummy_code (gdbarch, or1k_push_dummy_code);
   set_gdbarch_push_dummy_call (gdbarch, or1k_push_dummy_call);
-  set_gdbarch_dummy_id (gdbarch, or1k_dummy_id);
 
   /* Frame unwinders.  Use DWARF debug info if available, otherwise use our
      own unwinder.  */
