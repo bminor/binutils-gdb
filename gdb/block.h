@@ -111,7 +111,7 @@ struct block
 
   /* This is used to store the symbols in the block.  */
 
-  struct dictionary *dict;
+  struct multidictionary *multidict;
 
   /* Contains information about namespace-related info relevant to this block:
      using directives and the current namespace scope.  */
@@ -143,7 +143,7 @@ struct global_block
 #define BLOCK_END(bl)		(bl)->endaddr
 #define BLOCK_FUNCTION(bl)	(bl)->function
 #define BLOCK_SUPERBLOCK(bl)	(bl)->superblock
-#define BLOCK_DICT(bl)		(bl)->dict
+#define BLOCK_MULTIDICT(bl)	(bl)->multidict
 #define BLOCK_NAMESPACE(bl)	(bl)->namespace_info
 
 /* Accessor for ranges field within block BL.  */
@@ -298,9 +298,9 @@ struct block_iterator
 
   enum block_enum which;
 
-  /* The underlying dictionary iterator.  */
+  /* The underlying multidictionary iterator.  */
 
-  struct dict_iterator dict_iter;
+  struct mdict_iterator mdict_iter;
 };
 
 /* Initialize ITERATOR to point at the first symbol in BLOCK, and

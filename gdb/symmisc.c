@@ -276,7 +276,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
   struct objfile *objfile = SYMTAB_OBJFILE (symtab);
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   int i;
-  struct dict_iterator iter;
+  struct mdict_iterator miter;
   int len;
   struct linetable *l;
   const struct blockvector *bv;
@@ -332,7 +332,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 	     even if we're using a hashtable, but nothing else but this message
 	     wants it.  */
 	  fprintf_filtered (outfile, ", %d syms/buckets in ",
-			    dict_size (BLOCK_DICT (b)));
+			    mdict_size (BLOCK_MULTIDICT (b)));
 	  fputs_filtered (paddress (gdbarch, BLOCK_START (b)), outfile);
 	  fprintf_filtered (outfile, "..");
 	  fputs_filtered (paddress (gdbarch, BLOCK_END (b)), outfile);
@@ -350,7 +350,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 	  /* Now print each symbol in this block (in no particular order, if
 	     we're using a hashtable).  Note that we only want this
 	     block, not any blocks from included symtabs.  */
-	  ALL_DICT_SYMBOLS (BLOCK_DICT (b), iter, sym)
+	  ALL_DICT_SYMBOLS (BLOCK_MULTIDICT (b), miter, sym)
 	    {
 	      TRY
 		{

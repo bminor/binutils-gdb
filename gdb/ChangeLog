@@ -2,6 +2,24 @@
 
 	PR gdb/23712
 	PR symtab/23010
+	* dictionary.h (struct dictionary): Replace declaration with
+	multidictionary.
+	(dict_create_hashed, dict_create_hashed_expandable)
+	(dict_create_linear, dict_create_linear_expandable)
+	(dict_free, dict_add_symbol, dict_add_pending, dict_empty)
+	(dict_iterator_first, dict_iterator_next, dict_iter_match_first)
+	(dict_iter_match_next, dict_size): Rename to "mdict_" versions
+	taking multidictionary argument.
+	[ALL_DICT_SYMBOLS]: Update for multidictionary.
+	* block.h (struct block) <dict>: Change to multidictionary
+	and rename `multidict'.
+	* block.c, buildsym.c, jit.c, mdebugread.c, objfiles.c,
+	symmisc.c: Update all dictionary references to multidictionary.
+
+2019-01-10  Keith Seitz  <keiths@redhat.com>
+
+	PR gdb/23712
+	PR symtab/23010
 	* dictionary.c: Include unordered_map.
 	(pending_to_vector): New function.
 	(dict_create_hashed_1, dict_create_linear_1, dict_add_pending_1):

@@ -4506,7 +4506,7 @@ static void
 add_symbol (struct symbol *s, struct symtab *symtab, struct block *b)
 {
   symbol_set_symtab (s, symtab);
-  dict_add_symbol (BLOCK_DICT (b), s);
+  mdict_add_symbol (BLOCK_MULTIDICT (b), s);
 }
 
 /* Add a new block B to a symtab S.  */
@@ -4734,7 +4734,7 @@ new_bvect (int nblocks)
 }
 
 /* Allocate and zero a new block of language LANGUAGE, and set its
-   BLOCK_DICT.  If function is non-zero, assume the block is
+   BLOCK_MULTIDICT.  If function is non-zero, assume the block is
    associated to a function, and make sure that the symbols are stored
    linearly; otherwise, store them hashed.  */
 
@@ -4747,9 +4747,9 @@ new_block (enum block_type type, enum language language)
   struct block *retval = XCNEW (struct block);
 
   if (type == FUNCTION_BLOCK)
-    BLOCK_DICT (retval) = dict_create_linear_expandable (language);
+    BLOCK_MULTIDICT (retval) = mdict_create_linear_expandable (language);
   else
-    BLOCK_DICT (retval) = dict_create_hashed_expandable (language);
+    BLOCK_MULTIDICT (retval) = mdict_create_hashed_expandable (language);
 
   return retval;
 }

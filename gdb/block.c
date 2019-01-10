@@ -387,9 +387,9 @@ block_global_block (const struct block *block)
    zero/NULL.  This is useful for creating "dummy" blocks that don't
    correspond to actual source files.
 
-   Warning: it sets the block's BLOCK_DICT to NULL, which isn't a
+   Warning: it sets the block's BLOCK_MULTIDICT to NULL, which isn't a
    valid value.  If you really don't want the block to have a
-   dictionary, then you should subsequently set its BLOCK_DICT to
+   dictionary, then you should subsequently set its BLOCK_MULTIDICT to
    dict_create_linear (obstack, NULL).  */
 
 struct block *
@@ -544,10 +544,11 @@ block_iterator_step (struct block_iterator *iterator, int first)
 
 	  block = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust),
 				     iterator->which);
-	  sym = dict_iterator_first (BLOCK_DICT (block), &iterator->dict_iter);
+	  sym = mdict_iterator_first (BLOCK_MULTIDICT (block),
+				      &iterator->mdict_iter);
 	}
       else
-	sym = dict_iterator_next (&iterator->dict_iter);
+	sym = mdict_iterator_next (&iterator->mdict_iter);
 
       if (sym != NULL)
 	return sym;
@@ -569,7 +570,7 @@ block_iterator_first (const struct block *block,
   initialize_block_iterator (block, iterator);
 
   if (iterator->which == FIRST_LOCAL_BLOCK)
-    return dict_iterator_first (block->dict, &iterator->dict_iter);
+    return mdict_iterator_first (block->multidict, &iterator->mdict_iter);
 
   return block_iterator_step (iterator, 1);
 }
@@ -580,7 +581,7 @@ struct symbol *
 block_iterator_next (struct block_iterator *iterator)
 {
   if (iterator->which == FIRST_LOCAL_BLOCK)
-    return dict_iterator_next (&iterator->dict_iter);
+    return mdict_iterator_next (&iterator->mdict_iter);
 
   return block_iterator_step (iterator, 0);
 }
@@ -612,11 +613,11 @@ block_iter_match_step (struct block_iterator *iterator,
 
 	  block = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust),
 				     iterator->which);
-	  sym = dict_iter_match_first (BLOCK_DICT (block), name,
-				       &iterator->dict_iter);
+	  sym = mdict_iter_match_first (BLOCK_MULTIDICT (block), name,
+					&iterator->mdict_iter);
 	}
       else
-	sym = dict_iter_match_next (name, &iterator->dict_iter);
+	sym = mdict_iter_match_next (name, &iterator->mdict_iter);
 
       if (sym != NULL)
 	return sym;
@@ -639,7 +640,8 @@ block_iter_match_first (const struct block *block,
   initialize_block_iterator (block, iterator);
 
   if (iterator->which == FIRST_LOCAL_BLOCK)
-    return dict_iter_match_first (block->dict, name, &iterator->dict_iter);
+    return mdict_iter_match_first (block->multidict, name,
+				   &iterator->mdict_iter);
 
   return block_iter_match_step (iterator, name, 1);
 }
@@ -651,7 +653,7 @@ block_iter_match_next (const lookup_name_info &name,
 		       struct block_iterator *iterator)
 {
   if (iterator->which == FIRST_LOCAL_BLOCK)
-    return dict_iter_match_next (name, &iterator->dict_iter);
+    return mdict_iter_match_next (name, &iterator->mdict_iter);
 
   return block_iter_match_step (iterator, name, 0);
 }
@@ -731,7 +733,7 @@ block_lookup_symbol_primary (const struct block *block, const char *name,
 			     const domain_enum domain)
 {
   struct symbol *sym, *other;
-  struct dict_iterator dict_iter;
+  struct mdict_iterator mdict_iter;
 
   lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
 
@@ -740,9 +742,10 @@ block_lookup_symbol_primary (const struct block *block, const char *name,
 	      || BLOCK_SUPERBLOCK (BLOCK_SUPERBLOCK (block)) == NULL);
 
   other = NULL;
-  for (sym = dict_iter_match_first (block->dict, lookup_name, &dict_iter);
+  for (sym
+	 = mdict_iter_match_first (block->multidict, lookup_name, &mdict_iter);
        sym != NULL;
-       sym = dict_iter_match_next (lookup_name, &dict_iter))
+       sym = mdict_iter_match_next (lookup_name, &mdict_iter))
     {
       if (SYMBOL_DOMAIN (sym) == domain)
 	return sym;

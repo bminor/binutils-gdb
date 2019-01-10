@@ -818,7 +818,7 @@ objfile_relocate1 (struct objfile *objfile,
 	  {
 	    struct block *b;
 	    struct symbol *sym;
-	    struct dict_iterator iter;
+	    struct mdict_iterator miter;
 
 	    b = BLOCKVECTOR_BLOCK (bv, i);
 	    BLOCK_START (b) += ANOFFSET (delta, block_line_section);
@@ -835,7 +835,7 @@ objfile_relocate1 (struct objfile *objfile,
 
 	    /* We only want to iterate over the local symbols, not any
 	       symbols in included symtabs.  */
-	    ALL_DICT_SYMBOLS (BLOCK_DICT (b), iter, sym)
+	    ALL_DICT_SYMBOLS (BLOCK_MULTIDICT (b), miter, sym)
 	      {
 		relocate_one_symbol (sym, objfile, delta);
 	      }
