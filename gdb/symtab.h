@@ -686,6 +686,14 @@ struct minimal_symbol
      the `next' pointer for the demangled hash table.  */
 
   struct minimal_symbol *demangled_hash_next;
+
+/* True if this symbol is of some data type.  */
+
+  bool data_p () const;
+
+  /* True if MSYMBOL is of some text type.  */
+
+  bool text_p () const;
 };
 
 #define MSYMBOL_TARGET_FLAG_1(msymbol)  (msymbol)->target_flag_1

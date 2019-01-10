@@ -1,5 +1,17 @@
 2019-02-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* symtab.h (struct minimal_symbol data_p): New const method.
+	(struct minimal_symbol text_p): Likewise.
+	* symtab.c (output_source_filename): Use file name style
+	to print file name.
+	(print_symbol_info): Likewise.
+	(print_msymbol_info): Use address style to print addresses.
+	Use function name style to print executable text symbols.
+	(expand_symtab_containing_pc): Use data_p.
+	(find_pc_sect_compunit_symtab): Likewise.
+
+2019-02-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* breakpoint.c (describe_other_breakpoints): Use address style
 	to print addresses.
 	(say_where): Likewise.

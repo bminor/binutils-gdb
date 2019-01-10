@@ -41,6 +41,7 @@
 #include "p-lang.h"
 #include "addrmap.h"
 #include "cli/cli-utils.h"
+#include "cli/cli-style.h"
 #include "fnmatch.h"
 #include "hashtab.h"
 #include "typeprint.h"
@@ -309,6 +310,31 @@ compunit_language (const struct compunit_symtab *cust)
 /* The language of the compunit symtab is the language of its primary
    source file.  */
   return SYMTAB_LANGUAGE (symtab);
+}
+
+/* See symtab.h.  */
+
+bool
+minimal_symbol::data_p () const
+{
+  return type == mst_data
+    || type == mst_bss
+    || type == mst_abs
+    || type == mst_file_data
+    || type == mst_file_bss;
+}
+
+/* See symtab.h.  */
+
+bool
+minimal_symbol::text_p () const
+{
+  return type == mst_text
+    || type == mst_text_gnu_ifunc
+    || type == mst_data_gnu_ifunc
+    || type == mst_slot_got_plt
+    || type == mst_solib_trampoline
+    || type == mst_file_text;
 }
 
 /* See whether FILENAME matches SEARCH_NAME using the rule that we
@@ -1039,12 +1065,7 @@ expand_symtab_containing_pc (CORE_ADDR pc, struct obj_section *section)
      necessary because we loop based on texthigh and textlow, which do
      not include the data ranges.  */
   msymbol = lookup_minimal_symbol_by_pc_section (pc, section);
-  if (msymbol.minsym
-      && (MSYMBOL_TYPE (msymbol.minsym) == mst_data
-	  || MSYMBOL_TYPE (msymbol.minsym) == mst_bss
-	  || MSYMBOL_TYPE (msymbol.minsym) == mst_abs
-	  || MSYMBOL_TYPE (msymbol.minsym) == mst_file_data
-	  || MSYMBOL_TYPE (msymbol.minsym) == mst_file_bss))
+  if (msymbol.minsym && msymbol.minsym->data_p ())
     return;
 
   for (objfile *objfile : current_program_space->objfiles ())
@@ -2879,12 +2900,7 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
      we call find_pc_sect_psymtab which has a similar restriction based
      on the partial_symtab's texthigh and textlow.  */
   msymbol = lookup_minimal_symbol_by_pc_section (pc, section);
-  if (msymbol.minsym
-      && (MSYMBOL_TYPE (msymbol.minsym) == mst_data
-	  || MSYMBOL_TYPE (msymbol.minsym) == mst_bss
-	  || MSYMBOL_TYPE (msymbol.minsym) == mst_abs
-	  || MSYMBOL_TYPE (msymbol.minsym) == mst_file_data
-	  || MSYMBOL_TYPE (msymbol.minsym) == mst_file_bss))
+  if (msymbol.minsym && msymbol.minsym->data_p ())
     return NULL;
 
   /* Search all symtabs for the one whose file contains our address, and which
@@ -4168,7 +4184,7 @@ output_source_filename (const char *name,
   data->first = 0;
 
   wrap_here ("");
-  fputs_filtered (name, gdb_stdout);
+  fputs_styled (name, file_name_style.style (), gdb_stdout);
 }
 
 /* A callback for map_partial_symbol_filenames.  */
@@ -4620,7 +4636,7 @@ print_symbol_info (enum search_domain kind,
       if (filename_cmp (last, s_filename) != 0)
 	{
 	  fputs_filtered ("\nFile ", gdb_stdout);
-	  fputs_filtered (s_filename, gdb_stdout);
+	  fputs_styled (s_filename, file_name_style.style (), gdb_stdout);
 	  fputs_filtered (":\n", gdb_stdout);
 	}
 
@@ -4667,8 +4683,15 @@ print_msymbol_info (struct bound_minimal_symbol msymbol)
   else
     tmp = hex_string_custom (BMSYMBOL_VALUE_ADDRESS (msymbol),
 			     16);
-  printf_filtered ("%s  %s\n",
-		   tmp, MSYMBOL_PRINT_NAME (msymbol.minsym));
+  fputs_styled (tmp, address_style.style (), gdb_stdout);
+  fputs_filtered ("  ", gdb_stdout);
+  if (msymbol.minsym->text_p ())
+    fputs_styled (MSYMBOL_PRINT_NAME (msymbol.minsym),
+		  function_name_style.style (),
+		  gdb_stdout);
+  else
+    fputs_filtered (MSYMBOL_PRINT_NAME (msymbol.minsym), gdb_stdout);
+  fputs_filtered ("\n", gdb_stdout);
 }
 
 /* This is the guts of the commands "info functions", "info types", and
