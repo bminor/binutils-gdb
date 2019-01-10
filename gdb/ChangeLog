@@ -1,5 +1,13 @@
 2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* moxie-tdep.c (moxie_unwind_sp): Delete.
+	(moxie_unwind_pc): Delete.
+	(moxie_dummy_id): Delete.
+	(moxie_gdbarch_init): Don't register deleted functions with
+	gdbarch.
+
+2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* mn10300-tdep.c (mn10300_dummy_id): Delete.
 	(mn10300_unwind_pc): Delete.
 	(mn10300_unwind_sp): Delete.
