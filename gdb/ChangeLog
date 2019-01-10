@@ -1,5 +1,13 @@
 2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* mep-tdep.c (mep_unwind_pc): Delete.
+	(mep_unwind_sp): Delete.
+	(mep_dummy_id): Delete.
+	(mep_gdbarch_init): Don't register deleted functions with
+	gdbarch.
+
+2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* m68hc11-tdep.c (m68hc11_unwind_pc): Delete.
 	(m68hc11_unwind_sp): Delete.
 	(m68hc11_gdbarch_init): Don't register deleted functions with
