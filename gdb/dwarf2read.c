@@ -9779,23 +9779,6 @@ compute_delayed_physnames (struct dwarf2_cu *cu)
   cu->method_list.clear ();
 }
 
-/* A wrapper for add_symbol_to_list to ensure that SYMBOL's language is
-   the same as all other symbols in LISTHEAD.  If a new symbol is added
-   with a different language, this function asserts.  */
-
-static inline void
-dw2_add_symbol_to_list (struct symbol *symbol, struct pending **listhead)
-{
-  /* Only assert if LISTHEAD already contains symbols of a different
-     language (dict_create_hashed/insert_symbol_hashed requires that all
-     symbols in this list are of the same language).  */
-  gdb_assert ((*listhead) == NULL
-	      || (SYMBOL_LANGUAGE ((*listhead)->symbol[0])
-		  == SYMBOL_LANGUAGE (symbol)));
-
-  add_symbol_to_list (symbol, listhead);
-}
-
 /* Go objects should be embedded in a DW_TAG_module DIE,
    and it's not clear if/how imported objects will appear.
    To keep Go support simple until that's worked out,
@@ -9869,7 +9852,7 @@ fixup_go_packaging (struct dwarf2_cu *cu)
       SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
       SYMBOL_TYPE (sym) = type;
 
-      dw2_add_symbol_to_list (sym, cu->builder->get_global_symbols ());
+      add_symbol_to_list (sym, cu->builder->get_global_symbols ());
 
       xfree (package_name);
     }
@@ -21428,7 +21411,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  SYMBOL_TYPE (sym) = objfile_type (objfile)->builtin_core_addr;
 	  SYMBOL_DOMAIN (sym) = LABEL_DOMAIN;
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_LABEL;
-	  dw2_add_symbol_to_list (sym, cu->list_in_scope);
+	  add_symbol_to_list (sym, cu->list_in_scope);
 	  break;
 	case DW_TAG_subprogram:
 	  /* SYMBOL_BLOCK_VALUE (sym) will be filled in later by
@@ -21697,7 +21680,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	case DW_TAG_common_block:
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_COMMON_BLOCK;
 	  SYMBOL_DOMAIN (sym) = COMMON_BLOCK_DOMAIN;
-	  dw2_add_symbol_to_list (sym, cu->list_in_scope);
+	  add_symbol_to_list (sym, cu->list_in_scope);
 	  break;
 	default:
 	  /* Not a tag we recognize.  Hopefully we aren't processing
@@ -21717,7 +21700,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	}
 
       if (list_to_add != NULL)
-	dw2_add_symbol_to_list (sym, list_to_add);
+	add_symbol_to_list (sym, list_to_add);
 
       /* For the benefit of old versions of GCC, check for anonymous
 	 namespaces based on the demangled name.  */

@@ -2,6 +2,13 @@
 
 	PR gdb/23712
 	PR symtab/23010
+	* dwarf2read.c (dw2_add_symbol_to_list): Remove.
+	(fixup_go_packaging, new_symbol): Use add_symbol_to_list.
+
+2019-01-10  Keith Seitz  <keiths@redhat.com>
+
+	PR gdb/23712
+	PR symtab/23010
 	* dictionary.c (pending_to_vector): Remove.
 	(dict_create_hashed_1, dict_create_linear_1, dict_add_pending_1):
 	Remove _1 suffix, replacing functions of the same name.  Update
