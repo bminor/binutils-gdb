@@ -1,3 +1,23 @@
+2019-01-10  Nick Clifton  <nickc@redhat.com>
+
+	PR 23963
+	* objdump.c (sanitize_string): New function.  Removes control
+	characters from symbol names.
+	(dump_section_header): Use new function.
+	(objdump_print_symname): Likewise.
+	(objdump_print_addr_with_sym): Likewise.
+	(show_line): Likewise.
+	(disassemble_bytes): Likewise.
+	(disassemble_section): Likewise.
+	(load_specific_debug_section): Likewise.
+	(read_section_stabs): Likewise.
+	(print_section_stabs): Likewise.
+	(dump_section): Likewise.
+	(dump_reloc_set): Likewise.
+	(dump_relocs_in_section): Likewise.
+	(dump_bfd): Likewise.
+	(display_any_bfd): Likewise.
+
 2019-01-09  Nick Clifton  <nickc@redhat.com>
 
 	PR 24049

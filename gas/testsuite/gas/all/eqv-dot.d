@@ -2,7 +2,7 @@
 #name: eqv involving dot
 # bfin doesn't support 'symbol = expression'
 # tic30 and tic4x have 4 octets per byte, tic54x has 2 octets per byte
-#notarget: bfin-*-* *c30-*-* *c4x-*-* *c54x-*-*
+#notarget: bfin-*-* *c30-*-* *c4x-*-* *c54x-*-* mn10300-*-*
 
 .*: .*
 

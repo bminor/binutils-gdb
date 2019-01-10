@@ -1,3 +1,39 @@
+2019-01-10  Nick Clifton  <nickc@redhat.com>
+
+	PR 23963
+	* gas/mips/mips16-branch-absolute-1.d: Adjust for the fact that
+	control characters are now displayed as escape sequences.
+	* testsuite/gas/mips/mips16-e.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-0.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-1.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-delay-0.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-delay-1.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-n32-0.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-n32-1.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-n64-sym32-0.d: Likewise.
+	* testsuite/gas/mips/mips16-pcrel-n64-sym32-1.d: Likewise.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-0.d: Likewise.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-1.d: Likewise.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-delay-0.d: Likewise.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-delay-1.d: Likewise.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-n32-0.d: Likewise.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-n32-1.d: Likewise.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-n64-sym32-0.d:
+	Likewise.
+	* testsuite/gas/mips/mips16e2@mips16-pcrel-n64-sym32-1.d:
+	Likewise.
+	* testsuite/gas/mips/mipsel16-e.d: Likewise.
+	* testsuite/gas/mips/mipsr6@msa.d: Likewise.
+	* testsuite/gas/mips/mipsr6@relax-swap3.d: Likewise.
+	* testsuite/gas/mips/r6-64-n32.d: Likewise.
+	* testsuite/gas/mips/r6-64-n64.d: Likewise.
+	* testsuite/gas/mips/r6-n32.d: Likewise.
+	* testsuite/gas/mips/r6-n64.d: Likewise.
+	* testsuite/gas/mips/r6.d: Likewise.
+	* testsuite/gas/mips/tmips16-e.d: Likewise.
+	* testsuite/gas/mips/tmipsel16-e.d: Likewise.
+	* testsuite/gas/mn10300/relax.d: Likewise.
+
 2019-01-09  John Darrington <john@darrington.wattle.id.au>
 
         * testsuite/gas/s12z/jsr.s: New case.

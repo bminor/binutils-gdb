@@ -374,6 +374,68 @@ nonfatal (const char *msg)
   bfd_nonfatal (msg);
   exit_status = 1;
 }
+
+/* Returns a version of IN with any control characters
+   replaced by escape sequences.  Uses a static buffer
+   if necessary.  */
+
+static const char *
+sanitize_string (const char * in)
+{
+  static char *        buffer = NULL;
+  static unsigned int  buffer_len = 0;
+  const char *         original = in;
+  char *               out;
+
+  /* Paranoia.  */
+  if (in == NULL)
+    return "";
+
+  /* See if any conversion is necessary.  In the majority
+     of cases it will not be needed.  */
+  do
+    {
+      char c = *in++;
+
+      if (c == 0)
+	return original;
+
+      if (ISCNTRL (c))
+	break;
+    }
+  while (1);
+
+  /* Copy the input, translating as needed.  */
+  in = original;
+  if (buffer_len < (strlen (in) * 2))
+    {
+      free ((void *) buffer);
+      buffer_len = strlen (in) * 2;
+      buffer = xmalloc (buffer_len + 1);
+    }
+
+  out = buffer;
+  do
+    {
+      char c = *in++;
+
+      if (c == 0)
+	break;
+
+      if (!ISCNTRL (c))
+	*out++ = c;
+      else
+	{
+	  *out++ = '^';
+	  *out++ = c + 0x40;
+	}
+    }
+  while (1);
+
+  *out = 0;
+  return buffer;
+}
+
 
 /* Returns TRUE if the specified section should be dumped.  */
 
@@ -471,7 +533,7 @@ dump_section_header (bfd *abfd, asection *section, void *data)
     return;
 
   printf ("%3d %-*s %08lx  ", section->index, longest_section_name,
-	  bfd_get_section_name (abfd, section),
+	  sanitize_string (bfd_get_section_name (abfd, section)),
 	  (unsigned long) bfd_section_size (abfd, section) / opb);
   bfd_printf_vma (abfd, bfd_get_section_vma (abfd, section));
   printf ("  ");
@@ -905,6 +967,8 @@ objdump_print_symname (bfd *abfd, struct disassemble_info *inf,
   if (bfd_is_und_section (bfd_get_section (sym)))
     hidden = TRUE;
 
+  name = sanitize_string (name);
+
   if (inf != NULL)
     {
       (*inf->fprintf_func) (inf->stream, "%s", name);
@@ -1152,7 +1216,7 @@ objdump_print_addr_with_sym (bfd *abfd, asection *sec, asymbol *sym,
       bfd_vma secaddr;
 
       (*inf->fprintf_func) (inf->stream, " <%s",
-			    bfd_get_section_name (abfd, sec));
+			    sanitize_string (bfd_get_section_name (abfd, sec)));
       secaddr = bfd_get_section_vma (abfd, sec);
       if (vma < secaddr)
 	{
@@ -1574,7 +1638,7 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
 	  && (prev_functionname == NULL
 	      || strcmp (functionname, prev_functionname) != 0))
 	{
-	  printf ("%s():\n", functionname);
+	  printf ("%s():\n", sanitize_string (functionname));
 	  prev_line = -1;
 	}
       if (linenumber > 0
@@ -1583,10 +1647,11 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
 	{
 	  if (discriminator > 0)
 	    printf ("%s:%u (discriminator %u)\n",
-		    filename == NULL ? "???" : filename,
+		    filename == NULL ? "???" : sanitize_string (filename),
 		    linenumber, discriminator);
 	  else
-	    printf ("%s:%u\n", filename == NULL ? "???" : filename,
+	    printf ("%s:%u\n", filename == NULL
+		    ? "???" : sanitize_string (filename),
 		    linenumber);
 	}
       if (unwind_inlines)
@@ -1597,8 +1662,11 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
 
 	  while (bfd_find_inliner_info (abfd, &filename2, &functionname2,
 					&line2))
-	    printf ("inlined by %s:%u (%s)\n", filename2, line2,
-		    functionname2);
+	    {
+	      printf ("inlined by %s:%u",
+		      sanitize_string (filename2), line2);
+	      printf (" (%s)\n", sanitize_string (functionname2));
+	    }
 	}
     }
 
@@ -2092,7 +2160,7 @@ disassemble_bytes (struct disassemble_info * inf,
 		      sym_name = bfd_get_section_name (aux->abfd, sym_sec);
 		      if (sym_name == NULL || *sym_name == '\0')
 			sym_name = "*unknown*";
-		      printf ("%s", sym_name);
+		      printf ("%s", sanitize_string (sym_name));
 		    }
 		}
 
@@ -2239,7 +2307,7 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 	 && (*rel_pp)->address < rel_offset + addr_offset)
     ++rel_pp;
 
-  printf (_("\nDisassembly of section %s:\n"), section->name);
+  printf (_("\nDisassembly of section %s:\n"), sanitize_string (section->name));
 
   /* Find the nearest symbol forwards from our current position.  */
   paux->require_sec = TRUE;
@@ -2547,7 +2615,8 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
       section->start = NULL;
       free_debug_section (debug);
       printf (_("\nSection '%s' has an invalid size: %#llx.\n"),
-	      section->name, (unsigned long long) section->size);
+	      sanitize_string (section->name),
+	      (unsigned long long) section->size);
       return FALSE;
     }
   section->start = contents = malloc (amt);
@@ -2556,7 +2625,7 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
     {
       free_debug_section (debug);
       printf (_("\nCan't get contents for section '%s'.\n"),
-	      section->name);
+	      sanitize_string (section->name));
       return FALSE;
     }
   /* Ensure any string section has a terminating NUL.  */
@@ -2578,7 +2647,7 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
         {
           free_debug_section (debug);
           printf (_("\nCan't get contents for section '%s'.\n"),
-	          section->name);
+	          sanitize_string (section->name));
           return FALSE;
         }
 
@@ -2834,7 +2903,8 @@ read_section_stabs (bfd *abfd, const char *sect_name, bfd_size_type *size_ptr)
   stabsect = bfd_get_section_by_name (abfd, sect_name);
   if (stabsect == NULL)
     {
-      printf (_("No %s section present\n\n"), sect_name);
+      printf (_("No %s section present\n\n"),
+	      sanitize_string (sect_name));
       return FALSE;
     }
 
@@ -2884,7 +2954,7 @@ print_section_stabs (bfd *abfd,
   stabp = stabs;
   stabs_end = stabp + stab_size;
 
-  printf (_("Contents of %s section:\n\n"), stabsect_name);
+  printf (_("Contents of %s section:\n\n"), sanitize_string (stabsect_name));
   printf ("Symnum n_type n_othr n_desc n_value  n_strx String\n");
 
   /* Loop through all symbols and print them.
@@ -2910,7 +2980,7 @@ print_section_stabs (bfd *abfd,
 	 again (makes consistent formatting for tools like awk).  */
       name = bfd_get_stab_name (type);
       if (name != NULL)
-	printf ("%-6s", name);
+	printf ("%-6s", sanitize_string (name));
       else if (type == N_UNDF)
 	printf ("HdrSym");
       else
@@ -2934,7 +3004,8 @@ print_section_stabs (bfd *abfd,
 	  /* Using the (possibly updated) string table offset, print the
 	     string (if any) associated with this symbol.  */
 	  if (amt < stabstr_size)
-	    /* PR 17512: file: 079-79389-0.001:0.1.  */
+	    /* PR 17512: file: 079-79389-0.001:0.1.
+	       FIXME: May need to sanitize this string before displaying.  */
 	    printf (" %.*s", (int)(stabstr_size - amt), strtab + amt);
 	  else
 	    printf (" *");
@@ -3147,7 +3218,7 @@ dump_section (bfd *abfd, asection *section, void *dummy ATTRIBUTE_UNUSED)
   if (start_offset >= stop_offset)
     return;
 
-  printf (_("Contents of section %s:"), section->name);
+  printf (_("Contents of section %s:"), sanitize_string (section->name));
   if (display_file_offsets)
     printf (_("  (Starting at file offset: 0x%lx)"),
 	    (unsigned long) (section->filepos + start_offset));
@@ -3361,7 +3432,7 @@ dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
 	      && (last_functionname == NULL
 		  || strcmp (functionname, last_functionname) != 0))
 	    {
-	      printf ("%s():\n", functionname);
+	      printf ("%s():\n", sanitize_string (functionname));
 	      if (last_functionname != NULL)
 		free (last_functionname);
 	      last_functionname = xstrdup (functionname);
@@ -3375,9 +3446,11 @@ dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
                   || (discriminator != last_discriminator)))
 	    {
               if (discriminator > 0)
-                printf ("%s:%u\n", filename == NULL ? "???" : filename, linenumber);
+                printf ("%s:%u\n", filename == NULL ? "???" :
+			sanitize_string (filename), linenumber);
               else
-                printf ("%s:%u (discriminator %u)\n", filename == NULL ? "???" : filename,
+                printf ("%s:%u (discriminator %u)\n",
+			filename == NULL ? "???" : sanitize_string (filename),
                         linenumber, discriminator);
 	      last_line = linenumber;
 	      last_discriminator = discriminator;
@@ -3447,7 +3520,7 @@ dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
 	{
 	  if (section_name == NULL)
 	    section_name = "*unknown*";
-	  printf ("[%s]", section_name);
+	  printf ("[%s]", sanitize_string (section_name));
 	}
 
       if (q->addend)
@@ -3497,7 +3570,7 @@ dump_relocs_in_section (bfd *abfd,
   if (relsize < 0)
     bfd_fatal (bfd_get_filename (abfd));
 
-  printf ("RELOCATION RECORDS FOR [%s]:", section->name);
+  printf ("RELOCATION RECORDS FOR [%s]:", sanitize_string (section->name));
 
   if (relsize == 0)
     {
@@ -3533,7 +3606,7 @@ dump_relocs_in_section (bfd *abfd,
   if (relcount < 0)
     {
       printf ("\n");
-      non_fatal (_("failed to read relocs in: %s"), bfd_get_filename (abfd));
+      non_fatal (_("failed to read relocs in: %s"), sanitize_string (bfd_get_filename (abfd)));
       bfd_fatal (_("error message was"));
     }
   else if (relcount == 0)
@@ -3633,7 +3706,8 @@ dump_bfd (bfd *abfd)
     }
 
   if (! dump_debugging_tags && ! suppress_bfd_header)
-    printf (_("\n%s:     file format %s\n"), bfd_get_filename (abfd),
+    printf (_("\n%s:     file format %s\n"),
+	    sanitize_string (bfd_get_filename (abfd)),
 	    abfd->xvec->name);
   if (dump_ar_hdrs)
     print_arelt_descr (stdout, abfd, TRUE, FALSE);
@@ -3788,7 +3862,7 @@ display_any_bfd (bfd *file, int level)
       bfd *last_arfile = NULL;
 
       if (level == 0)
-        printf (_("In archive %s:\n"), bfd_get_filename (file));
+        printf (_("In archive %s:\n"), sanitize_string (bfd_get_filename (file)));
       else if (level > 100)
 	{
 	  /* Prevent corrupted files from spinning us into an
@@ -3797,7 +3871,8 @@ display_any_bfd (bfd *file, int level)
 	  return;
 	}
       else
-        printf (_("In nested archive %s:\n"), bfd_get_filename (file));
+        printf (_("In nested archive %s:\n"),
+		sanitize_string (bfd_get_filename (file)));
 
       for (;;)
 	{

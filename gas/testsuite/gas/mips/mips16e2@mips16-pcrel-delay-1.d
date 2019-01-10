@@ -25,15 +25,15 @@ Disassembly of section \.text:
 [0-9a-f]+ <[^>]*> 1800 0000 	jal	00000000 <bar>
 [ 	]*[0-9a-f]+: R_MIPS16_26	bat
 [0-9a-f]+ <[^>]*> f000 6a20 	lui	v0,0x0
-[ 	]*[0-9a-f]+: R_MIPS16_HI16	L0\001
+[ 	]*[0-9a-f]+: R_MIPS16_HI16	L0.*
 [0-9a-f]+ <[^>]*> f7ef 4a1b 	addiu	v0,32763
-[ 	]*[0-9a-f]+: R_MIPS16_LO16	L0\001
+[ 	]*[0-9a-f]+: R_MIPS16_LO16	L0.*
 [0-9a-f]+ <[^>]*> 1c00 0000 	jalx	00000000 <bar>
 [ 	]*[0-9a-f]+: R_MIPS16_26	bax
 [0-9a-f]+ <[^>]*> f000 6a20 	lui	v0,0x0
-[ 	]*[0-9a-f]+: R_MIPS16_HI16	L0\001
+[ 	]*[0-9a-f]+: R_MIPS16_HI16	L0.*
 [0-9a-f]+ <[^>]*> f7ef 9a5b 	lw	v0,32763\(v0\)
-[ 	]*[0-9a-f]+: R_MIPS16_LO16	L0\001
+[ 	]*[0-9a-f]+: R_MIPS16_LO16	L0.*
 [0-9a-f]+ <[^>]*> 6500      	nop
 	\.\.\.
 	\.\.\.
