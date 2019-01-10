@@ -2392,6 +2392,25 @@ you should not put the definition of @code{__real_malloc} in the same
 file as @code{__wrap_malloc}; if you do, the assembler may resolve the
 call before the linker has a chance to wrap it to @code{malloc}.
 
+Only undefined references are replaced by the linker.  So, translation unit
+internal references to @var{symbol} are not resolved to
+@code{__wrap_@var{symbol}}.  In the next example, the call to @code{f} in
+@code{g} is not resolved to @code{__wrap_f}.
+
+@smallexample
+int
+f (void)
+@{
+  return 123;
+@}
+
+int
+g (void)
+@{
+  return f();
+@}
+@end smallexample
+
 @kindex --eh-frame-hdr
 @kindex --no-eh-frame-hdr
 @item --eh-frame-hdr

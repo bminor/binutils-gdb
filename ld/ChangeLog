@@ -1,3 +1,8 @@
+2019-01-14  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* ld.texi (--wrap): Add example to emphasise that only undefined
+	references are replaced by the linker.
+
 2019-01-09  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.
