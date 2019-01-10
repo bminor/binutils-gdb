@@ -1,5 +1,9 @@
 2019-01-10  Pedro Alves  <palves@redhat.com>
 
+	* solib-target.c (library_list_start_library): Don't xstrdup name.
+
+2019-01-10  Pedro Alves  <palves@redhat.com>
+
 	* mdebugread.c (parse_partial_symbols): Use
 	gdb::unique_xmalloc_ptr to manage heap-allocated 'stabsstring'.
 

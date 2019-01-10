@@ -124,10 +124,9 @@ library_list_start_library (struct gdb_xml_parser *parser,
 {
   VEC(lm_info_target_p) **list = (VEC(lm_info_target_p) **) user_data;
   lm_info_target *item = new lm_info_target;
-  const char *name
+  item->name
     = (const char *) xml_find_attribute (attributes, "name")->value.get ();
 
-  item->name = xstrdup (name);
   VEC_safe_push (lm_info_target_p, *list, item);
 }
 
