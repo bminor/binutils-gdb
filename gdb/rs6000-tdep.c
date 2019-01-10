@@ -3404,20 +3404,6 @@ find_variant_by_arch (enum bfd_architecture arch, unsigned long mach)
 }
 
 
-static CORE_ADDR
-rs6000_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  return frame_unwind_register_unsigned (next_frame,
-					 gdbarch_pc_regnum (gdbarch));
-}
-
-static struct frame_id
-rs6000_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
-{
-  return frame_id_build (get_frame_register_unsigned
-			  (this_frame, gdbarch_sp_regnum (gdbarch)),
-			 get_frame_pc (this_frame));
-}
 
 struct rs6000_frame_cache
 {
@@ -7101,19 +7087,15 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case GDB_OSABI_LINUX:
     case GDB_OSABI_NETBSD:
     case GDB_OSABI_UNKNOWN:
-      set_gdbarch_unwind_pc (gdbarch, rs6000_unwind_pc);
       frame_unwind_append_unwinder (gdbarch, &rs6000_epilogue_frame_unwind);
       frame_unwind_append_unwinder (gdbarch, &rs6000_frame_unwind);
-      set_gdbarch_dummy_id (gdbarch, rs6000_dummy_id);
       frame_base_append_sniffer (gdbarch, rs6000_frame_base_sniffer);
       break;
     default:
       set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
-      set_gdbarch_unwind_pc (gdbarch, rs6000_unwind_pc);
       frame_unwind_append_unwinder (gdbarch, &rs6000_epilogue_frame_unwind);
       frame_unwind_append_unwinder (gdbarch, &rs6000_frame_unwind);
-      set_gdbarch_dummy_id (gdbarch, rs6000_dummy_id);
       frame_base_append_sniffer (gdbarch, rs6000_frame_base_sniffer);
     }
 
