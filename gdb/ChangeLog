@@ -1,5 +1,13 @@
 2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* xstormy16-tdep.c (xstormy16_unwind_sp): Delete.
+	(xstormy16_unwind_pc): Delete.
+	(xstormy16_dummy_id): Delete.
+	(xstormy16_gdbarch_init): Don't register deleted functions with
+	gdbarch.
+
+2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* vax-tdep.c (vax_unwind_pc): Delete.
 	(vax_gdbarch_init): Don't register deleted function with gdbarch.
 
