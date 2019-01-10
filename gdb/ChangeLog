@@ -1,5 +1,13 @@
 2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* sh-tdep.c (sh_unwind_sp): Delete.
+	(sh_unwind_pc): Delete.
+	(sh_dummy_id): Delete.
+	(sh_gdbarch_init): Don't register deleted functions with
+	gdbarch.
+
+2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* score-tdep.c (score_unwind_sp): Delete.
 	(score_unwind_pc): Delete.
 	(score_dummy_id): Delete.
