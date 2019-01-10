@@ -1,5 +1,10 @@
 2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* rl78-tdep.c (rl78_unwind_sp): Delete.
+	(rl78_gdbarch_init): Don't register deleted function with gdbarch.
+
+2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* xstormy16-tdep.c (xstormy16_unwind_sp): Delete.
 	(xstormy16_unwind_pc): Delete.
 	(xstormy16_dummy_id): Delete.
