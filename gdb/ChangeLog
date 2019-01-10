@@ -1,5 +1,13 @@
 2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* rx-tdep.c (rx_unwind_pc): Delete.
+	(rx_unwind_sp): Delete.
+	(rx_dummy_id): Delete.
+	(rx_gdbarch_init): Don't register deleted functions with
+	gdbarch.  Update comment.
+
+2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* rs6000-tdep.c (rs6000_unwind_pc): Delete.
 	(rs6000_dummy_id): Delete.
 	(rs6000_gdbarch_init): Don't register deleted functions with
