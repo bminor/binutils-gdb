@@ -1,3 +1,10 @@
+2019-01-10  Tom Tromey  <tom@tromey.com>
+
+	* thread-iter.h (inf_threads_iterator): Use next_iterator.
+	(basic_inf_threads_range): Remove.
+	(inf_threads_range, inf_non_exited_threads_range)
+	(safe_inf_threads_range): Use next_adapter.
+
 2019-01-10  Keith Seitz  <keiths@redhat.com>
 
 	PR gdb/23712

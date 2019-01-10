@@ -20,68 +20,13 @@
 #define THREAD_ITER_H
 
 #include "common/filtered-iterator.h"
+#include "common/next-iterator.h"
 #include "common/safe-iterator.h"
 
 /* A forward iterator that iterates over a given inferior's
    threads.  */
 
-class inf_threads_iterator
-{
-public:
-  typedef inf_threads_iterator self_type;
-  typedef struct thread_info *value_type;
-  typedef struct thread_info *&reference;
-  typedef struct thread_info **pointer;
-  typedef std::forward_iterator_tag iterator_category;
-  typedef int difference_type;
-
-  /* Create an iterator pointing at HEAD.  This takes a thread pointer
-     instead of an inferior pointer to avoid circular dependencies
-     between the thread and inferior header files.  */
-  explicit inf_threads_iterator (struct thread_info *head)
-    : m_thr (head)
-  {}
-
-  /* Create a one-past-end iterator.  */
-  inf_threads_iterator ()
-    : m_thr (nullptr)
-  {}
-
-  inf_threads_iterator& operator++ ()
-  {
-    m_thr = m_thr->next;
-    return *this;
-  }
-
-  thread_info *operator* () const { return m_thr; }
-
-  bool operator!= (const inf_threads_iterator &other) const
-  { return m_thr != other.m_thr; }
-
-private:
-  /* The currently-iterated thread.  NULL if we reached the end of the
-     list.  */
-  thread_info *m_thr;
-};
-
-/* A range adapter that makes it possible to iterate over an
-   inferior's thread list with range-for.  */
-template<typename Iterator>
-struct basic_inf_threads_range
-{
-  friend struct inferior;
-private:
-  explicit basic_inf_threads_range (struct thread_info *head)
-    : m_head (head)
-  {}
-
-public:
-  Iterator begin () const { return Iterator (m_head); }
-  Iterator end () const { return Iterator (); }
-
-private:
-  thread_info *m_head;
-};
+using inf_threads_iterator = next_iterator<thread_info>;
 
 /* A forward iterator that iterates over all threads of all
    inferiors.  */
@@ -223,19 +168,19 @@ using safe_inf_threads_iterator
    of an inferior with range-for.  */
 
 using inf_threads_range
-  = basic_inf_threads_range<inf_threads_iterator>;
+  = next_adapter<thread_info, inf_threads_iterator>;
 
 /* A range adapter that makes it possible to iterate over all
    non-exited threads of an inferior with range-for.  */
 
 using inf_non_exited_threads_range
-  = basic_inf_threads_range<inf_non_exited_threads_iterator>;
+  = next_adapter<thread_info, inf_non_exited_threads_iterator>;
 
 /* A range adapter that makes it possible to iterate over all threads
    of an inferior with range-for, safely.  */
 
 using safe_inf_threads_range
-  = basic_inf_threads_range<safe_inf_threads_iterator>;
+  = next_adapter<thread_info, safe_inf_threads_iterator>;
 
 /* A range adapter that makes it possible to iterate over all threads
    of all inferiors with range-for.  */
