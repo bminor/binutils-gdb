@@ -1,5 +1,15 @@
 2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* mn10300-tdep.c (mn10300_dummy_id): Delete.
+	(mn10300_unwind_pc): Delete.
+	(mn10300_unwind_sp): Delete.
+	(mn10300_push_dummy_call): Use gdbarch_unwind_sp not
+	mn10300_unwind_sp.
+	(mn10300_frame_unwind_init): Don't register deleted functions with
+	gdbarch.
+
+2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* mep-tdep.c (mep_unwind_pc): Delete.
 	(mep_unwind_sp): Delete.
 	(mep_dummy_id): Delete.
