@@ -113,6 +113,21 @@ struct dict_iterator
   struct symbol *current;
 };
 
+/* The multi-language dictionary iterator.  Like dict_iterator above,
+   these contents should be considered private.  */
+
+struct mdict_iterator
+{
+  /* The multidictionary with whcih this iterator is associated.  */
+  const struct multidictionary *mdict;
+
+  /* The iterator used to iterate through individual dictionaries.  */
+  struct dict_iterator iterator;
+
+  /* The current index of the dictionary being iterated over.  */
+  unsigned short current_idx;
+};
+
 /* Initialize ITERATOR to point at the first symbol in DICT, and
    return that first symbol, or NULL if DICT is empty.  */
 

@@ -1,3 +1,25 @@
+2019-01-10  Keith Seitz  <keiths@redhat.com>
+
+	PR gdb/23712
+	PR symtab/23010
+	* dictionary.c: Include unordered_map.
+	(pending_to_vector): New function.
+	(dict_create_hashed_1, dict_create_linear_1, dict_add_pending_1):
+	Rewrite the non-"_1" functions to take vector instead
+	of linked list.
+	(dict_create_hashed, dict_create_linear, dict_add_pending): Use the
+	"new" _1 versions of the same name.
+	(multidictionary): Define.
+	(std::hash<enum language): New definition.
+	(collate_pending_symbols_by_language, mdict_create_hashed)
+	(mdict_create_hashed_expandable, mdict_create_linear)
+	(mdict_create_linear_expandable, mdict_free)
+	(find_language_dictionary, create_new_language_dictionary)
+	(mdict_add_symbol, mdict_add_pending, mdict_iterator_first)
+	(mdict_iterator_next, mdict_iter_match_first, mdict_iter_match_next)
+	(mdict_size, mdict_empty): New functions.
+	* dictionary.h (mdict_iterator): Define.
+
 2019-01-10  Pedro Alves  <palves@redhat.com>
 
 	* breakpoint.c (read_uploaded_action)

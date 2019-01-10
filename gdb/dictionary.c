@@ -27,6 +27,7 @@
 #include "buildsym.h"
 #include "dictionary.h"
 #include "safe-ctype.h"
+#include <unordered_map>
 
 /* This file implements dictionaries, which are tables that associate
    symbols to names.  They are represented by an opaque type 'struct
@@ -341,7 +342,51 @@ static void insert_symbol_hashed (struct dictionary *dict,
 
 static void expand_hashtable (struct dictionary *dict);
 
+/* A function to convert a linked list into a vector.  */
+
+static std::vector<symbol *>
+pending_to_vector (const struct pending *symbol_list)
+{
+  std::vector<symbol *> symlist;
+
+  for (const struct pending *list_counter = symbol_list;
+       list_counter != nullptr; list_counter = list_counter->next)
+    {
+      for (int i = list_counter->nsyms - 1; i >= 0; --i)
+	symlist.push_back (list_counter->symbol[i]);
+    }
+
+  return symlist;
+}
+
 /* The creation functions.  */
+
+/* A function to transition dict_create_hashed to new API.  */
+
+static struct dictionary *
+dict_create_hashed_1 (struct obstack *obstack,
+		      enum language language,
+		      const std::vector<symbol *> &symbol_list)
+{
+  /* Allocate the dictionary.  */
+  struct dictionary *retval = XOBNEW (obstack, struct dictionary);
+  DICT_VECTOR (retval) = &dict_hashed_vector;
+  DICT_LANGUAGE (retval) = language_def (language);
+
+  /* Allocate space for symbols.  */
+  int nsyms = symbol_list.size ();
+  int nbuckets = DICT_HASHTABLE_SIZE (nsyms);
+  DICT_HASHED_NBUCKETS (retval) = nbuckets;
+  struct symbol **buckets = XOBNEWVEC (obstack, struct symbol *, nbuckets);
+  memset (buckets, 0, nbuckets * sizeof (struct symbol *));
+  DICT_HASHED_BUCKETS (retval) = buckets;
+
+  /* Now fill the buckets.  */
+  for (const auto &sym : symbol_list)
+    insert_symbol_hashed (retval, sym);
+
+  return retval;
+}
 
 /* See dictionary.h.  */
 
@@ -350,40 +395,9 @@ dict_create_hashed (struct obstack *obstack,
 		    enum language language,
 		    const struct pending *symbol_list)
 {
-  struct dictionary *retval;
-  int nsyms = 0, nbuckets, i;
-  struct symbol **buckets;
-  const struct pending *list_counter;
+  std::vector<symbol *> symlist = pending_to_vector (symbol_list);
 
-  retval = XOBNEW (obstack, struct dictionary);
-  DICT_VECTOR (retval) = &dict_hashed_vector;
-  DICT_LANGUAGE (retval) = language_def (language);
-
-  /* Calculate the number of symbols, and allocate space for them.  */
-  for (list_counter = symbol_list;
-       list_counter != NULL;
-       list_counter = list_counter->next)
-    {
-      nsyms += list_counter->nsyms;
-    }
-  nbuckets = DICT_HASHTABLE_SIZE (nsyms);
-  DICT_HASHED_NBUCKETS (retval) = nbuckets;
-  buckets = XOBNEWVEC (obstack, struct symbol *, nbuckets);
-  memset (buckets, 0, nbuckets * sizeof (struct symbol *));
-  DICT_HASHED_BUCKETS (retval) = buckets;
-
-  /* Now fill the buckets.  */
-  for (list_counter = symbol_list;
-       list_counter != NULL;
-       list_counter = list_counter->next)
-    {
-      for (i = list_counter->nsyms - 1; i >= 0; --i)
-	{
-	  insert_symbol_hashed (retval, list_counter->symbol[i]);
-	}
-    }
-
-  return retval;
+  return dict_create_hashed_1 (obstack, language, symlist);
 }
 
 /* See dictionary.h.  */
@@ -403,6 +417,31 @@ dict_create_hashed_expandable (enum language language)
   return retval;
 }
 
+/* A function to transition dict_create_linear to new API.  */
+
+static struct dictionary *
+dict_create_linear_1 (struct obstack *obstack,
+		      enum language language,
+		      const std::vector<symbol *> &symbol_list)
+{
+  struct dictionary *retval = XOBNEW (obstack, struct dictionary);
+  DICT_VECTOR (retval) = &dict_linear_vector;
+  DICT_LANGUAGE (retval) = language_def (language);
+
+  /* Allocate space for symbols.  */
+  int nsyms = symbol_list.size ();
+  DICT_LINEAR_NSYMS (retval) = nsyms;
+  struct symbol **syms = XOBNEWVEC (obstack, struct symbol *, nsyms);
+  DICT_LINEAR_SYMS (retval) = syms;
+
+  /* Now fill in the symbols.  */
+  int idx = nsyms - 1;
+  for (const auto &sym : symbol_list)
+    syms[idx--] = sym;
+
+  return retval;
+}
+
 /* See dictionary.h.  */
 
 struct dictionary *
@@ -410,41 +449,9 @@ dict_create_linear (struct obstack *obstack,
 		    enum language language,
 		    const struct pending *symbol_list)
 {
-  struct dictionary *retval;
-  int nsyms = 0, i, j;
-  struct symbol **syms;
-  const struct pending *list_counter;
+  std::vector<symbol *> symlist = pending_to_vector (symbol_list);
 
-  retval = XOBNEW (obstack, struct dictionary);
-  DICT_VECTOR (retval) = &dict_linear_vector;
-  DICT_LANGUAGE (retval) = language_def (language);
-
-  /* Calculate the number of symbols, and allocate space for them.  */
-  for (list_counter = symbol_list;
-       list_counter != NULL;
-       list_counter = list_counter->next)
-    {
-      nsyms += list_counter->nsyms;
-    }
-  DICT_LINEAR_NSYMS (retval) = nsyms;
-  syms = XOBNEWVEC (obstack, struct symbol *, nsyms );
-  DICT_LINEAR_SYMS (retval) = syms;
-
-  /* Now fill in the symbols.  Start filling in from the back, so as
-     to preserve the original order of the symbols.  */
-  for (list_counter = symbol_list, j = nsyms - 1;
-       list_counter != NULL;
-       list_counter = list_counter->next)
-    {
-      for (i = list_counter->nsyms - 1;
-	   i >= 0;
-	   --i, --j)
-	{
-	  syms[j] = list_counter->symbol[i];
-	}
-    }
-
-  return retval;
+  return dict_create_linear_1 (obstack, language, symlist);
 }
 
 /* See dictionary.h.  */
@@ -483,20 +490,26 @@ dict_add_symbol (struct dictionary *dict, struct symbol *sym)
   (DICT_VECTOR (dict))->add_symbol (dict, sym);
 }
 
+/* A function to transition dict_add_pending to new API.  */
+
+static void
+dict_add_pending_1 (struct dictionary *dict,
+		    const std::vector<symbol *> &symbol_list)
+{
+  /* Preserve ordering by reversing the list.  */
+  for (auto sym = symbol_list.rbegin (); sym != symbol_list.rend (); ++sym)
+    dict_add_symbol (dict, *sym);
+}
+
 /* Utility to add a list of symbols to a dictionary.
    DICT must be an expandable dictionary.  */
 
 void
 dict_add_pending (struct dictionary *dict, const struct pending *symbol_list)
 {
-  const struct pending *list;
-  int i;
+  std::vector<symbol *> symlist = pending_to_vector (symbol_list);
 
-  for (list = symbol_list; list != NULL; list = list->next)
-    {
-      for (i = 0; i < list->nsyms; ++i)
-	dict_add_symbol (dict, list->symbol[i]);
-    }
+  dict_add_pending_1 (dict, symlist);
 }
 
 /* Initialize ITERATOR to point at the first symbol in DICT, and
@@ -928,4 +941,409 @@ add_symbol_linear_expandable (struct dictionary *dict,
     }
 
   DICT_LINEAR_SYM (dict, nsyms - 1) = sym;
+}
+
+/* Multi-language dictionary support.  */
+
+/* The structure describing a multi-language dictionary.  */
+
+struct multidictionary
+{
+  /* An array of dictionaries, one per language.  All dictionaries
+     must be of the same type.  This should be free'd for expandable
+     dictionary types.  */
+  struct dictionary **dictionaries;
+
+  /* The number of language dictionaries currently allocated.
+     Only used for expandable dictionaries.  */
+  unsigned short n_allocated_dictionaries;
+};
+
+/* A hasher for enum language.  Injecting this into std is a convenience
+   when using unordered_map with C++11.  */
+
+namespace std
+{
+  template<> struct hash<enum language>
+  {
+    typedef enum language argument_type;
+    typedef std::size_t result_type;
+
+    result_type operator() (const argument_type &l) const noexcept
+    {
+      return static_cast<result_type> (l);
+    }
+  };
+} /* namespace std */
+
+/* A helper function to collate symbols on the pending list by language.  */
+
+static std::unordered_map<enum language, std::vector<symbol *>>
+collate_pending_symbols_by_language (const struct pending *symbol_list)
+{
+  std::unordered_map<enum language, std::vector<symbol *>> nsyms;
+
+  for (const struct pending *list_counter = symbol_list;
+       list_counter != nullptr; list_counter = list_counter->next)
+    {
+      for (int i = list_counter->nsyms - 1; i >= 0; --i)
+	{
+	  enum language language = SYMBOL_LANGUAGE (list_counter->symbol[i]);
+	  nsyms[language].push_back (list_counter->symbol[i]);
+	}
+    }
+
+  return nsyms;
+}
+
+/* See dictionary.h.  */
+
+struct multidictionary *
+mdict_create_hashed (struct obstack *obstack,
+		     const struct pending *symbol_list)
+{
+  struct multidictionary *retval
+    = XOBNEW (obstack, struct multidictionary);
+  std::unordered_map<enum language, std::vector<symbol *>> nsyms
+    = collate_pending_symbols_by_language (symbol_list);
+
+  /* Loop over all languages and create/populate dictionaries.  */
+  retval->dictionaries
+    = XOBNEWVEC (obstack, struct dictionary *, nsyms.size ());
+  retval->n_allocated_dictionaries = nsyms.size ();
+
+  int idx = 0;
+  for (const auto &pair : nsyms)
+    {
+      enum language language = pair.first;
+      std::vector<symbol *> symlist = pair.second;
+
+      retval->dictionaries[idx++]
+	= dict_create_hashed_1 (obstack, language, symlist);
+    }
+
+  return retval;
+}
+
+/* See dictionary.h.  */
+
+struct multidictionary *
+mdict_create_hashed_expandable (enum language language)
+{
+  struct multidictionary *retval = XNEW (struct multidictionary);
+
+  /* We have no symbol list to populate, but we create an empty
+     dictionary of the requested language to populate later.  */
+  retval->n_allocated_dictionaries = 1;
+  retval->dictionaries = XNEW (struct dictionary *);
+  retval->dictionaries[0] = dict_create_hashed_expandable (language);
+
+  return retval;
+}
+
+/* See dictionary.h.  */
+
+struct multidictionary *
+mdict_create_linear (struct obstack *obstack,
+		     const struct pending *symbol_list)
+{
+  struct multidictionary *retval
+    = XOBNEW (obstack, struct multidictionary);
+  std::unordered_map<enum language, std::vector<symbol *>> nsyms
+    = collate_pending_symbols_by_language (symbol_list);
+
+  /* Loop over all languages and create/populate dictionaries.  */
+  retval->dictionaries
+    = XOBNEWVEC (obstack, struct dictionary *, nsyms.size ());
+  retval->n_allocated_dictionaries = nsyms.size ();
+
+  int idx = 0;
+  for (const auto &pair : nsyms)
+    {
+      enum language language = pair.first;
+      std::vector<symbol *> symlist = pair.second;
+
+      retval->dictionaries[idx++]
+	= dict_create_linear_1 (obstack, language, symlist);
+    }
+
+  return retval;
+}
+
+/* See dictionary.h.  */
+
+struct multidictionary *
+mdict_create_linear_expandable (enum language language)
+{
+  struct multidictionary *retval = XNEW (struct multidictionary);
+
+  /* We have no symbol list to populate, but we create an empty
+     dictionary to populate later.  */
+  retval->n_allocated_dictionaries = 1;
+  retval->dictionaries = XNEW (struct dictionary *);
+  retval->dictionaries[0] = dict_create_linear_expandable (language);
+
+  return retval;
+}
+
+/* See dictionary.h.  */
+
+void
+mdict_free (struct multidictionary *mdict)
+{
+  /* Grab the type of dictionary being used.  */
+  enum dict_type type = mdict->dictionaries[0]->vector->type;
+
+  /* Loop over all dictionaries and free them.  */
+  for (unsigned short idx = 0; idx < mdict->n_allocated_dictionaries; ++idx)
+    dict_free (mdict->dictionaries[idx]);
+
+  /* Free the dictionary list, if needed.  */
+  switch (type)
+    {
+    case DICT_HASHED:
+    case DICT_LINEAR:
+      /* Memory was allocated on an obstack when created.  */
+      break;
+
+    case DICT_HASHED_EXPANDABLE:
+    case DICT_LINEAR_EXPANDABLE:
+      xfree (mdict->dictionaries);
+      break;
+    }
+}
+
+/* Helper function to find the dictionary associated with LANGUAGE
+   or NULL if there is no dictionary of that language.  */
+
+static struct dictionary *
+find_language_dictionary (const struct multidictionary *mdict,
+			  enum language language)
+{
+  for (unsigned short idx = 0; idx < mdict->n_allocated_dictionaries; ++idx)
+    {
+      if (DICT_LANGUAGE (mdict->dictionaries[idx])->la_language == language)
+	return mdict->dictionaries[idx];
+    }
+
+  return nullptr;
+}
+
+/* Create a new language dictionary for LANGUAGE and add it to the
+   multidictionary MDICT's list of dictionaries.  If MDICT is not
+   based on expandable dictionaries, this function throws an
+   internal error.  */
+
+static struct dictionary *
+create_new_language_dictionary (struct multidictionary *mdict,
+				enum language language)
+{
+  struct dictionary *retval = nullptr;
+
+  /* We use the first dictionary entry to decide what create function
+     to call.  Not optimal but sufficient.  */
+  gdb_assert (mdict->dictionaries[0] != nullptr);
+  switch (mdict->dictionaries[0]->vector->type)
+    {
+    case DICT_HASHED:
+    case DICT_LINEAR:
+      internal_error (__FILE__, __LINE__,
+		      _("create_new_language_dictionary: attempted to expand "
+			"non-expandable multidictionary"));
+
+    case DICT_HASHED_EXPANDABLE:
+      retval = dict_create_hashed_expandable (language);
+      break;
+
+    case DICT_LINEAR_EXPANDABLE:
+      retval = dict_create_linear_expandable (language);
+      break;
+    }
+
+  /* Grow the dictionary vector and save the new dictionary.  */
+  mdict->dictionaries
+    = (struct dictionary **) xrealloc (mdict->dictionaries,
+				       (++mdict->n_allocated_dictionaries
+					* sizeof (struct dictionary *)));
+  mdict->dictionaries[mdict->n_allocated_dictionaries - 1] = retval;
+
+  return retval;
+}
+
+/* See dictionary.h.  */
+
+void
+mdict_add_symbol (struct multidictionary *mdict, struct symbol *sym)
+{
+  struct dictionary *dict
+    = find_language_dictionary (mdict, SYMBOL_LANGUAGE (sym));
+
+  if (dict == nullptr)
+    {
+      /* SYM is of a new language that we haven't previously seen.
+	 Create a new dictionary for it.  */
+      dict = create_new_language_dictionary (mdict, SYMBOL_LANGUAGE (sym));
+    }
+
+  dict_add_symbol (dict, sym);
+}
+
+/* See dictionary.h.  */
+
+void
+mdict_add_pending (struct multidictionary *mdict,
+		   const struct pending *symbol_list)
+{
+  std::unordered_map<enum language, std::vector<symbol *>> nsyms
+    = collate_pending_symbols_by_language (symbol_list);
+
+  for (const auto &pair : nsyms)
+    {
+      enum language language = pair.first;
+      std::vector<symbol *> symlist = pair.second;
+      struct dictionary *dict = find_language_dictionary (mdict, language);
+
+      if (dict == nullptr)
+	{
+	  /* The language was not previously seen.  Create a new dictionary
+	     for it.  */
+	  dict = create_new_language_dictionary (mdict, language);
+	}
+
+      dict_add_pending_1 (dict, symlist);
+    }
+}
+
+/* See dictionary.h.  */
+
+struct symbol *
+mdict_iterator_first (const multidictionary *mdict,
+		      struct mdict_iterator *miterator)
+{
+  miterator->mdict = mdict;
+  miterator->current_idx = 0;
+
+  for (unsigned short idx = miterator->current_idx;
+       idx < mdict->n_allocated_dictionaries; ++idx)
+    {
+      struct symbol *result
+	= dict_iterator_first (mdict->dictionaries[idx], &miterator->iterator);
+
+      if (result != nullptr)
+	{
+	  miterator->current_idx = idx;
+	  return result;
+	}
+    }
+
+  return nullptr;
+}
+
+/* See dictionary.h.  */
+
+struct symbol *
+mdict_iterator_next (struct mdict_iterator *miterator)
+{
+  struct symbol *result = dict_iterator_next (&miterator->iterator);
+
+  if (result != nullptr)
+    return result;
+
+  /* The current dictionary had no matches -- move to the next
+     dictionary, if any.  */
+  for (unsigned short idx = ++miterator->current_idx;
+       idx < miterator->mdict->n_allocated_dictionaries; ++idx)
+    {
+      result
+	= dict_iterator_first (miterator->mdict->dictionaries[idx],
+			       &miterator->iterator);
+      if (result != nullptr)
+	{
+	  miterator->current_idx = idx;
+	  return result;
+	}
+    }
+
+  return nullptr;
+}
+
+/* See dictionary.h.  */
+
+struct symbol *
+mdict_iter_match_first (const struct multidictionary *mdict,
+			const lookup_name_info &name,
+			struct mdict_iterator *miterator)
+{
+  miterator->mdict = mdict;
+  miterator->current_idx = 0;
+
+  for (unsigned short idx = miterator->current_idx;
+       idx < mdict->n_allocated_dictionaries; ++idx)
+    {
+      struct symbol *result
+	= dict_iter_match_first (mdict->dictionaries[idx], name,
+				 &miterator->iterator);
+
+      if (result != nullptr)
+	return result;
+    }
+
+  return nullptr;
+}
+
+/* See dictionary.h.  */
+
+struct symbol *
+mdict_iter_match_next (const lookup_name_info &name,
+		       struct mdict_iterator *miterator)
+{
+  /* Search the current dictionary.  */
+  struct symbol *result = dict_iter_match_next (name, &miterator->iterator);
+
+  if (result != nullptr)
+    return result;
+
+  /* The current dictionary had no matches -- move to the next
+     dictionary, if any.  */
+  for (unsigned short idx = ++miterator->current_idx;
+       idx < miterator->mdict->n_allocated_dictionaries; ++idx)
+    {
+      result
+	= dict_iter_match_first (miterator->mdict->dictionaries[idx],
+				 name, &miterator->iterator);
+      if (result != nullptr)
+	{
+	  miterator->current_idx = idx;
+	  return result;
+	}
+    }
+
+  return nullptr;
+}
+
+/* See dictionary.h.  */
+
+int
+mdict_size (const struct multidictionary *mdict)
+{
+  int size = 0;
+
+  for (unsigned short idx = 0; idx < mdict->n_allocated_dictionaries; ++idx)
+    size += dict_size (mdict->dictionaries[idx]);
+
+  return size;
+}
+
+/* See dictionary.h.  */
+
+bool
+mdict_empty (const struct multidictionary *mdict)
+{
+  for (unsigned short idx = 0; idx < mdict->n_allocated_dictionaries; ++idx)
+    {
+      if (!dict_empty (mdict->dictionaries[idx]))
+	return false;
+    }
+
+  return true;
 }
