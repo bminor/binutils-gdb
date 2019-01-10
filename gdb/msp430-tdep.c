@@ -447,22 +447,6 @@ msp430_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   return p.prologue_end;
 }
 
-/* Implement the "unwind_pc" gdbarch method.  */
-
-static CORE_ADDR
-msp430_unwind_pc (struct gdbarch *arch, struct frame_info *next_frame)
-{
-  return frame_unwind_register_unsigned (next_frame, MSP430_PC_REGNUM);
-}
-
-/* Implement the "unwind_sp" gdbarch method.  */
-
-static CORE_ADDR
-msp430_unwind_sp (struct gdbarch *arch, struct frame_info *next_frame)
-{
-  return frame_unwind_register_unsigned (next_frame, MSP430_SP_REGNUM);
-}
-
 /* Given a frame described by THIS_FRAME, decode the prologue of its
    associated function if there is not cache entry as specified by
    THIS_PROLOGUE_CACHE.  Save the decoded prologue in the cache and
@@ -649,19 +633,6 @@ msp430_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 {
   return align_down (sp, 2);
 }
-
-
-/* Implement the "dummy_id" gdbarch method.  */
-
-static struct frame_id
-msp430_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
-{
-  return
-    frame_id_build (get_frame_register_unsigned
-		    (this_frame, MSP430_SP_REGNUM),
-		    get_frame_pc (this_frame));
-}
-
 
 /* Implement the "push_dummy_call" gdbarch method.  */
 
@@ -995,14 +966,11 @@ msp430_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Frames, prologues, etc.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_skip_prologue (gdbarch, msp430_skip_prologue);
-  set_gdbarch_unwind_pc (gdbarch, msp430_unwind_pc);
-  set_gdbarch_unwind_sp (gdbarch, msp430_unwind_sp);
   set_gdbarch_frame_align (gdbarch, msp430_frame_align);
   dwarf2_append_unwinders (gdbarch);
   frame_unwind_append_unwinder (gdbarch, &msp430_unwind);
 
   /* Dummy frames, return values.  */
-  set_gdbarch_dummy_id (gdbarch, msp430_dummy_id);
   set_gdbarch_push_dummy_call (gdbarch, msp430_push_dummy_call);
   set_gdbarch_return_value (gdbarch, msp430_return_value);
 
