@@ -1,5 +1,20 @@
 2019-01-10  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (read_uploaded_action)
+	(create_tracepoint_from_upload): Adjust to use
+	gdb::unique_xmalloc_ptr.
+	* ctf.c (ctf_write_uploaded_tp):
+	(SET_ARRAY_FIELD): Use emplace_back.
+	(SET_STRING_FIELD): Adjust to use gdb::unique_xmalloc_ptr.
+	* tracefile-tfile.c (tfile_write_uploaded_tp):
+	* tracepoint.c (parse_tracepoint_definition): Adjust to use
+	gdb::unique_xmalloc_ptr.
+	* tracepoint.h (struct uploaded_tp) <cond, actions, step_actions,
+	at_string, cond_string, cmd_strings>: Replace char pointers
+	with gdb::unique_xmalloc_ptr.
+
+2019-01-10  Pedro Alves  <palves@redhat.com>
+
 	* solib-target.c (library_list_start_library): Don't xstrdup name.
 
 2019-01-10  Pedro Alves  <palves@redhat.com>

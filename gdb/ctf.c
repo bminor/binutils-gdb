@@ -596,38 +596,42 @@ ctf_write_uploaded_tp (struct trace_file_writer *self,
 
   /* condition  */
   if (tp->cond != NULL)
-    ctf_save_write (&writer->tcs, (gdb_byte *) tp->cond, strlen (tp->cond));
+    ctf_save_write (&writer->tcs, (gdb_byte *) tp->cond.get (),
+		    strlen (tp->cond.get ()));
   ctf_save_write (&writer->tcs, &zero, 1);
 
   /* actions */
   u32 = tp->actions.size ();
   ctf_save_align_write (&writer->tcs, (gdb_byte *) &u32, 4, 4);
-  for (char *act : tp->actions)
-    ctf_save_write (&writer->tcs, (gdb_byte *) act, strlen (act) + 1);
+  for (const auto &act : tp->actions)
+    ctf_save_write (&writer->tcs, (gdb_byte *) act.get (),
+		    strlen (act.get ()) + 1);
 
   /* step_actions */
   u32 = tp->step_actions.size ();
   ctf_save_align_write (&writer->tcs, (gdb_byte *) &u32, 4, 4);
-  for (char *act : tp->step_actions)
-    ctf_save_write (&writer->tcs, (gdb_byte *) act, strlen (act) + 1);
+  for (const auto &act : tp->step_actions)
+    ctf_save_write (&writer->tcs, (gdb_byte *) act.get (),
+		    strlen (act.get ()) + 1);
 
   /* at_string */
   if (tp->at_string != NULL)
-    ctf_save_write (&writer->tcs, (gdb_byte *) tp->at_string,
-		    strlen (tp->at_string));
+    ctf_save_write (&writer->tcs, (gdb_byte *) tp->at_string.get (),
+		    strlen (tp->at_string.get ()));
   ctf_save_write (&writer->tcs, &zero, 1);
 
   /* cond_string */
   if (tp->cond_string != NULL)
-    ctf_save_write (&writer->tcs, (gdb_byte *) tp->cond_string,
-		    strlen (tp->cond_string));
+    ctf_save_write (&writer->tcs, (gdb_byte *) tp->cond_string.get (),
+		    strlen (tp->cond_string.get ()));
   ctf_save_write (&writer->tcs, &zero, 1);
 
   /* cmd_strings */
   u32 = tp->cmd_strings.size ();
   ctf_save_align_write (&writer->tcs, (gdb_byte *) &u32, 4, 4);
-  for (char *act : tp->cmd_strings)
-    ctf_save_write (&writer->tcs, (gdb_byte *) act, strlen (act) + 1);
+  for (const auto &act : tp->cmd_strings)
+    ctf_save_write (&writer->tcs, (gdb_byte *) act.get (),
+		    strlen (act.get ()) + 1);
 
 }
 
@@ -1023,7 +1027,7 @@ ctf_read_tsv (struct uploaded_tsv **uploaded_tsvs)
 	  const struct bt_definition *element				\
 	    = bt_ctf_get_index ((EVENT), def, i);			\
 									\
-	  (VAR)->ARRAY.push_back					\
+	  (VAR)->ARRAY.emplace_back					\
 	    (xstrdup (bt_ctf_get_string (element)));			\
 	}								\
     }									\
@@ -1040,7 +1044,7 @@ ctf_read_tsv (struct uploaded_tsv **uploaded_tsvs)
 							   #FIELD));	\
 									\
       if (strlen (p) > 0)						\
-	(VAR)->FIELD = xstrdup (p);					\
+	(VAR)->FIELD.reset (xstrdup (p));				\
       else								\
 	(VAR)->FIELD = NULL;						\
     }									\

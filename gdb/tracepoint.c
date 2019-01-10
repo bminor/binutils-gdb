@@ -3083,7 +3083,8 @@ find_matching_tracepoint_location (struct uploaded_tp *utp)
       if (b->type == utp->type
 	  && t->step_count == utp->step
 	  && t->pass_count == utp->pass
-	  && cond_string_is_same (t->cond_string, utp->cond_string)
+	  && cond_string_is_same (t->cond_string,
+				  utp->cond_string.get ())
 	  /* FIXME also test actions.  */
 	  )
 	{
@@ -3462,7 +3463,7 @@ parse_tracepoint_definition (const char *line, struct uploaded_tp **utpp)
   int enabled, end;
   enum bptype type;
   const char *srctype;
-  char *cond, *buf;
+  char *buf;
   struct uploaded_tp *utp = NULL;
 
   p = line;
@@ -3475,13 +3476,14 @@ parse_tracepoint_definition (const char *line, struct uploaded_tp **utpp)
   p++;  /* skip a colon */
   if (piece == 'T')
     {
+      gdb::unique_xmalloc_ptr<char[]> cond;
+
       enabled = (*p++ == 'E');
       p++;  /* skip a colon */
       p = unpack_varlen_hex (p, &step);
       p++;  /* skip a colon */
       p = unpack_varlen_hex (p, &pass);
       type = bp_tracepoint;
-      cond = NULL;
       /* Thumb through optional fields.  */
       while (*p == ':')
 	{
@@ -3502,8 +3504,8 @@ parse_tracepoint_definition (const char *line, struct uploaded_tp **utpp)
 	      p++;
 	      p = unpack_varlen_hex (p, &xlen);
 	      p++;  /* skip a comma */
-	      cond = (char *) xmalloc (2 * xlen + 1);
-	      strncpy (cond, p, 2 * xlen);
+	      cond.reset ((char *) xmalloc (2 * xlen + 1));
+	      strncpy (&cond[0], p, 2 * xlen);
 	      cond[2 * xlen] = '\0';
 	      p += 2 * xlen;
 	    }
@@ -3516,17 +3518,17 @@ parse_tracepoint_definition (const char *line, struct uploaded_tp **utpp)
       utp->enabled = enabled;
       utp->step = step;
       utp->pass = pass;
-      utp->cond = cond;
+      utp->cond = std::move (cond);
     }
   else if (piece == 'A')
     {
       utp = get_uploaded_tp (num, addr, utpp);
-      utp->actions.push_back (xstrdup (p));
+      utp->actions.emplace_back (xstrdup (p));
     }
   else if (piece == 'S')
     {
       utp = get_uploaded_tp (num, addr, utpp);
-      utp->step_actions.push_back (xstrdup (p));
+      utp->step_actions.emplace_back (xstrdup (p));
     }
   else if (piece == 'Z')
     {
@@ -3546,11 +3548,11 @@ parse_tracepoint_definition (const char *line, struct uploaded_tp **utpp)
       buf[end] = '\0';
 
       if (startswith (srctype, "at:"))
-	utp->at_string = xstrdup (buf);
+	utp->at_string.reset (xstrdup (buf));
       else if (startswith (srctype, "cond:"))
-	utp->cond_string = xstrdup (buf);
+	utp->cond_string.reset (xstrdup (buf));
       else if (startswith (srctype, "cmd:"))
-	utp->cmd_strings.push_back (xstrdup (buf));
+	utp->cmd_strings.emplace_back (xstrdup (buf));
     }
   else if (piece == 'V')
     {

@@ -14686,7 +14686,7 @@ read_uploaded_action (void)
 
   if (next_cmd < this_utp->cmd_strings.size ())
     {
-      rslt = this_utp->cmd_strings[next_cmd];
+      rslt = this_utp->cmd_strings[next_cmd].get ();
       next_cmd++;
     }
 
@@ -14707,7 +14707,7 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
   struct tracepoint *tp;
 
   if (utp->at_string)
-    addr_str = utp->at_string;
+    addr_str = utp->at_string.get ();
   else
     {
       /* In the absence of a source location, fall back to raw
@@ -14731,7 +14731,7 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
 							 current_language);
   if (!create_breakpoint (get_current_arch (),
 			  location.get (),
-			  utp->cond_string, -1, addr_str,
+			  utp->cond_string.get (), -1, addr_str,
 			  0 /* parse cond/thread */,
 			  0 /* tempflag */,
 			  utp->type /* type_wanted */,

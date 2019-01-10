@@ -262,31 +262,32 @@ tfile_write_uploaded_tp (struct trace_file_writer *self,
     fprintf (writer->fp, ":F%x", utp->orig_size);
   if (utp->cond)
     fprintf (writer->fp,
-	     ":X%x,%s", (unsigned int) strlen (utp->cond) / 2,
-	     utp->cond);
+	     ":X%x,%s", (unsigned int) strlen (utp->cond.get ()) / 2,
+	     utp->cond.get ());
   fprintf (writer->fp, "\n");
-  for (char *act : utp->actions)
+  for (const auto &act : utp->actions)
     fprintf (writer->fp, "tp A%x:%s:%s\n",
-	     utp->number, phex_nz (utp->addr, sizeof (utp->addr)), act);
-  for (char *act : utp->step_actions)
+	     utp->number, phex_nz (utp->addr, sizeof (utp->addr)), act.get ());
+  for (const auto &act : utp->step_actions)
     fprintf (writer->fp, "tp S%x:%s:%s\n",
-	     utp->number, phex_nz (utp->addr, sizeof (utp->addr)), act);
+	     utp->number, phex_nz (utp->addr, sizeof (utp->addr)), act.get ());
   if (utp->at_string)
     {
       encode_source_string (utp->number, utp->addr,
-			    "at", utp->at_string, buf, MAX_TRACE_UPLOAD);
+			    "at", utp->at_string.get (),
+			    buf, MAX_TRACE_UPLOAD);
       fprintf (writer->fp, "tp Z%s\n", buf);
     }
   if (utp->cond_string)
     {
       encode_source_string (utp->number, utp->addr,
-			    "cond", utp->cond_string,
+			    "cond", utp->cond_string.get (),
 			    buf, MAX_TRACE_UPLOAD);
       fprintf (writer->fp, "tp Z%s\n", buf);
     }
-  for (char *act : utp->cmd_strings)
+  for (const auto &act : utp->cmd_strings)
     {
-      encode_source_string (utp->number, utp->addr, "cmd", act,
+      encode_source_string (utp->number, utp->addr, "cmd", act.get (),
 			    buf, MAX_TRACE_UPLOAD);
       fprintf (writer->fp, "tp Z%s\n", buf);
     }
