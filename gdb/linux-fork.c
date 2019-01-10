@@ -481,7 +481,7 @@ public:
 	CATCH (ex, RETURN_MASK_ALL)
 	  {
 	    warning (_("Couldn't restore checkpoint state in %s: %s"),
-		     target_pid_to_str (fp->ptid), ex.message);
+		     target_pid_to_str (m_oldfp->ptid), ex.message);
 	  }
 	END_CATCH
       }

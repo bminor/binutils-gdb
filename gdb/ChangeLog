@@ -1,6 +1,11 @@
 2019-01-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* linux-fork.c (scoped_switch_fork_info)
+	<~scoped_switch_fork_info>: Fix incorrect variable name.
+
+2019-01-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* linux-fork.c (scoped_switch_fork_info)
 	<scoped_switch_fork_info>: Make explicit.
 	<~scoped_switch_fork_info>: Wrap core in TRY/CATCH.
 
