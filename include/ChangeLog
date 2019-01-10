@@ -1,3 +1,11 @@
+2019-01-10  Nick Clifton  <nickc@redhat.com>
+
+	* Merge from GCC:
+	2018-12-22  Jason Merrill  <jason@redhat.com>
+
+	* demangle.h: Remove support for ancient GNU (pre-3.0), Lucid,
+	ARM, HP, and EDG demangling styles.
+
 2019-01-09  Sandra Loosemore  <sandra@codesourcery.com>
 
 	Merge from GCC:
@@ -13,7 +21,6 @@
 	* opcode/rx.h (RX_Size): Add double size.
 	(RX_Operand_Type): Add double FPU registers.
 	(RX_Opcode_ID): Add new instuctions.
-
 
 2019-01-01  Alan Modra  <amodra@gmail.com>
 
