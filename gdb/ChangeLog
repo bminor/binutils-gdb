@@ -1,5 +1,10 @@
 2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* vax-tdep.c (vax_unwind_pc): Delete.
+	(vax_gdbarch_init): Don't register deleted function with gdbarch.
+
+2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* v850-tdep.c (v850_unwind_sp): Delete.
 	(v850_unwind_pc): Delete.
 	(v850_dummy_id): Delete.

@@ -437,11 +437,6 @@ vax_frame_num_args (struct frame_info *frame)
   return get_frame_memory_unsigned (frame, args, 1);
 }
 
-static CORE_ADDR
-vax_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  return frame_unwind_register_unsigned (next_frame, VAX_PC_REGNUM);
-}
 
 
 /* Initialize the current architecture based on INFO.  If possible, re-use an
@@ -501,8 +496,6 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Misc info */
   set_gdbarch_deprecated_function_start_offset (gdbarch, 2);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
-
-  set_gdbarch_unwind_pc (gdbarch, vax_unwind_pc);
 
   frame_base_set_default (gdbarch, &vax_frame_base);
 
