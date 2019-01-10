@@ -64,18 +64,6 @@ score_register_type (struct gdbarch *gdbarch, int regnum)
   return builtin_type (gdbarch)->builtin_uint32;
 }
 
-static CORE_ADDR
-score_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  return frame_unwind_register_unsigned (next_frame, SCORE_SP_REGNUM);
-}
-
-static CORE_ADDR
-score_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  return frame_unwind_register_unsigned (next_frame, SCORE_PC_REGNUM);
-}
-
 static const char *
 score7_register_name (struct gdbarch *gdbarch, int regnum)
 {
@@ -476,14 +464,6 @@ score_return_value (struct gdbarch *gdbarch, struct value *function,
         }
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
-}
-
-static struct frame_id
-score_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
-{
-  return frame_id_build (get_frame_register_unsigned (this_frame,
-						      SCORE_SP_REGNUM),
-			 get_frame_pc (this_frame));
 }
 
 static int
@@ -1480,8 +1460,6 @@ score_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_type (gdbarch, score_register_type);
   set_gdbarch_frame_align (gdbarch, score_frame_align);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  set_gdbarch_unwind_sp (gdbarch, score_unwind_sp);
-  set_gdbarch_unwind_pc (gdbarch, score_unwind_pc);
 
   switch (target_mach)
     {
@@ -1519,7 +1497,6 @@ score_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Dummy frame hooks.  */
   set_gdbarch_return_value (gdbarch, score_return_value);
   set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
-  set_gdbarch_dummy_id (gdbarch, score_dummy_id);
   set_gdbarch_push_dummy_call (gdbarch, score_push_dummy_call);
 
   /* Normal frame hooks.  */
