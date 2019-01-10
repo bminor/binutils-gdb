@@ -1,5 +1,11 @@
 2019-02-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* breakpoint.c (describe_other_breakpoints): Use address style
+	to print addresses.
+	(say_where): Likewise.
+
+2019-02-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* ada-typeprint.c (print_func_type): Print function name
 	style to print function name.
 	* c-typeprint.c (c_print_type_1): Likewise.

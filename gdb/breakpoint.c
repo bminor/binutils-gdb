@@ -6701,7 +6701,7 @@ describe_other_breakpoints (struct gdbarch *gdbarch,
 			     : ((others == 1) ? " and" : ""));
 	  }
       printf_filtered (_("also set at pc "));
-      fputs_filtered (paddress (gdbarch, pc), gdb_stdout);
+      fputs_styled (paddress (gdbarch, pc), address_style.style (), gdb_stdout);
       printf_filtered (".\n");
     }
 }
@@ -12130,8 +12130,9 @@ say_where (struct breakpoint *b)
       if (opts.addressprint || b->loc->symtab == NULL)
 	{
 	  printf_filtered (" at ");
-	  fputs_filtered (paddress (b->loc->gdbarch, b->loc->address),
-			  gdb_stdout);
+	  fputs_styled (paddress (b->loc->gdbarch, b->loc->address),
+			address_style.style (),
+			gdb_stdout);
 	}
       if (b->loc->symtab != NULL)
 	{
