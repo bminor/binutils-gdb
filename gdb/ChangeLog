@@ -1,5 +1,13 @@
 2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* tilegx-tdep.c (tilegx_unwind_sp): Delete.
+	(tilegx_unwind_pc): Delete.
+	(tilegx_unwind_dummy_id): Delete.
+	(tilegx_gdbarch_init): Don't register deleted functions with
+	gdbarch.
+
+2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* tic6x-tdep.c (tic6x_unwind_sp): Delete.
 	(tic6x_dummy_id): Delete.
 	(tic6x_gdbarch_init): Don't register deleted functions with

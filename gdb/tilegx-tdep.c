@@ -930,29 +930,6 @@ static const struct frame_base tilegx_frame_base = {
   tilegx_frame_base_address
 };
 
-static CORE_ADDR
-tilegx_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  return frame_unwind_register_unsigned (next_frame, TILEGX_SP_REGNUM);
-}
-
-static CORE_ADDR
-tilegx_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  return frame_unwind_register_unsigned (next_frame, TILEGX_PC_REGNUM);
-}
-
-static struct frame_id
-tilegx_unwind_dummy_id (struct gdbarch *gdbarch,
-			struct frame_info *this_frame)
-{
-  CORE_ADDR sp;
-
-  sp = get_frame_register_unsigned (this_frame, TILEGX_SP_REGNUM);
-  return frame_id_build (sp, get_frame_pc (this_frame));
-}
-
-
 /* We cannot read/write the "special" registers.  */
 
 static int
@@ -1027,9 +1004,6 @@ tilegx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   /* Frame Info.  */
-  set_gdbarch_unwind_sp (gdbarch, tilegx_unwind_sp);
-  set_gdbarch_unwind_pc (gdbarch, tilegx_unwind_pc);
-  set_gdbarch_dummy_id (gdbarch, tilegx_unwind_dummy_id);
   set_gdbarch_frame_align (gdbarch, tilegx_frame_align);
   frame_base_set_default (gdbarch, &tilegx_frame_base);
 
