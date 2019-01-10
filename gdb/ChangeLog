@@ -1,5 +1,12 @@
 2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* m68hc11-tdep.c (m68hc11_unwind_pc): Delete.
+	(m68hc11_unwind_sp): Delete.
+	(m68hc11_gdbarch_init): Don't register deleted functions with
+	gdbarch.
+
+2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* m32r-tdep.c (m32r_unwind_sp): Delete.
 	(m32r_unwind_pc): Delete.
 	(m32r_dummy_id): Delete.
