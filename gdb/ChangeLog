@@ -1,5 +1,11 @@
 2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* sparc-tdep.c (sparc_unwind_pc): Delete.
+	(sparc32_gdbarch_init): Don't register deleted function with
+	gdbarch.
+
+2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* sh-tdep.c (sh_unwind_sp): Delete.
 	(sh_unwind_pc): Delete.
 	(sh_dummy_id): Delete.

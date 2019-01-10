@@ -1114,13 +1114,6 @@ sparc_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
   return pc;
 }
 
-static CORE_ADDR
-sparc_unwind_pc (struct gdbarch *gdbarch, struct frame_info *this_frame)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  return frame_unwind_register_unsigned (this_frame, tdep->pc_regnum);
-}
-
 /* Return PC of first real instruction of the function starting at
    START_PC.  */
 
@@ -1881,8 +1874,6 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_write_pc (gdbarch, sparc_write_pc);
 
   set_gdbarch_dummy_id (gdbarch, sparc_dummy_id);
-
-  set_gdbarch_unwind_pc (gdbarch, sparc_unwind_pc);
 
   frame_base_set_default (gdbarch, &sparc32_frame_base);
 
