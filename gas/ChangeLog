@@ -1,3 +1,9 @@
+2019-01-11  Alan Modra  <amodra@gmail.com>
+
+	PR 23963
+	* testsuite/gas/m68hc11/lbranch-dwarf2.d: Adjust for PR23963 change.
+	* testsuite/gas/m68hc11/opers12-dwarf2.d: Likewise.
+
 2019-01-10  Nick Clifton  <nickc@redhat.com>
 
 	PR 23963
