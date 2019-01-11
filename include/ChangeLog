@@ -1,3 +1,7 @@
+2019-01-14  Pavel I. Kryukov  <kryukov@frtk.ru>
+
+	* dis-asm.h: include <string.h>
+
 2019-01-10  Nick Clifton  <nickc@redhat.com>
 
 	* Merge from GCC:
