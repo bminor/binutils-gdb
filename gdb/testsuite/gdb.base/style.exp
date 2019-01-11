@@ -54,4 +54,5 @@ save_vars { env(TERM) } {
     set quoted [string_to_regexp $binfile]
     gdb_test "file $binfile" \
 	"Reading symbols from \033\\\[32m${quoted}\033\\\[m..." \
+	"filename is styled when loading symbol file"
 }

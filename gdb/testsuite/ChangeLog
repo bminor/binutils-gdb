@@ -1,3 +1,7 @@
+2019-01-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/style.exp: Don't include path in testname.
+
 2019-01-10  Keith Seitz  <keiths@redhat.com>
 
 	PR gdb/23712
