@@ -14508,7 +14508,14 @@ overloads selection menu is activated"),
 
   add_catch_command ("exception", _("\
 Catch Ada exceptions, when raised.\n\
-With an argument, catch only exceptions with the given name."),
+Usage: catch exception [ ARG ]\n\
+\n\
+Without any argument, stop when any Ada exception is raised.\n\
+If ARG is \"unhandled\" (without the quotes), only stop when the exception\n\
+being raised does not have a handler (and will therefore lead to the task's\n\
+termination).\n\
+Otherwise, the catchpoint only stops when the name of the exception being\n\
+raised is the same as ARG."),
 		     catch_ada_exception_command,
                      NULL,
 		     CATCH_PERMANENT,
