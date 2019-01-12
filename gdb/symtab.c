@@ -970,7 +970,6 @@ matching_obj_sections (struct obj_section *obj_first,
 {
   asection *first = obj_first? obj_first->the_bfd_section : NULL;
   asection *second = obj_second? obj_second->the_bfd_section : NULL;
-  struct objfile *obj;
 
   /* If they're the same section, then they match.  */
   if (first == second)
@@ -1010,6 +1009,7 @@ matching_obj_sections (struct obj_section *obj_first,
 
   /* Otherwise check that they are in corresponding objfiles.  */
 
+  struct objfile *obj = NULL;
   for (objfile *objfile : all_objfiles (current_program_space))
     if (objfile->obfd == first->owner)
       {

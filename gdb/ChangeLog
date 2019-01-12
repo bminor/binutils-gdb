@@ -1,3 +1,8 @@
+2019-01-12  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* symtab.c (matching_obj_sections): Initialize obj,
+	declare it closer to its usage.
+
 2019-01-10  Tom Tromey  <tom@tromey.com>
 
 	* thread-iter.h (inf_threads_iterator): Use next_iterator.
