@@ -609,6 +609,12 @@ gdb_wgetch (WINDOW *win)
   nonl ();
   int r = wgetch (win);
   nl ();
+  /* In nonl mode, if the user types Enter, it will not be echoed
+     properly.  This will result in gdb output appearing immediately
+     after the command.  So, if we read \r, emit a \r now, after nl
+     mode has been re-entered, so that the output looks correct.  */
+  if (r == '\r')
+    puts ("\r");
   return r;
 }
 

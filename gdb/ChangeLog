@@ -1,3 +1,8 @@
+2019-01-14  Tom Tromey  <tom@tromey.com>
+
+	PR tui/28819:
+	* tui/tui-io.c (gdb_wgetch): Print \r when needed.
+
 2019-01-14  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
 	* ppc-tdep.h (struct gdbarch_tdep) <ppc_v0_alias_regnum>: New
