@@ -21,6 +21,7 @@ Section Headers:
  +\[[ 0-9]+\] .tbss +NOBITS .* 0+20 00 WAT +0 +0 +1
  +\[[ 0-9]+\] .dynamic +DYNAMIC .*
  +\[[ 0-9]+\] .got +PROGBITS .*
+#...
  +\[[ 0-9]+\] .symtab .*
  +\[[ 0-9]+\] .strtab .*
  +\[[ 0-9]+\] .shstrtab .*
@@ -96,6 +97,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* SECTION +LOCAL +DEFAULT +9 
 .* SECTION +LOCAL +DEFAULT +10 
 .* SECTION +LOCAL +DEFAULT +11 
+#...
 .* FILE +LOCAL +DEFAULT +ABS .*
 .* TLS +LOCAL +DEFAULT +8 sl1
 .* TLS +LOCAL +DEFAULT +8 sl2
