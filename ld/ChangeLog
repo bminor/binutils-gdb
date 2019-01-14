@@ -1,6 +1,6 @@
 2019-01-14  Maamoun Tarsha  <maamountk@hotmail.com>
 
-	PR 20133
+	PR 20113
 	* emulparams/elf64_s390.sh (SEPARATE_GOTPLT): Define.
 	* emulparams/elf_s390.sh (SEPARATE_GOTPLT): Define.
 	* testsuite/ld-s390/gotreloc_31-1.dd: Update expected output.
@@ -16,7 +16,7 @@
 	* testsuite/ld-s390/tlspic_64.dd: Likewise.
 	* testsuite/ld-s390/tlspic_64.rd: Likewise.
 	* testsuite/ld-s390/tlspic_64.sd: Likewise.
-	* testsuite/ld-s390/s390.exp: Skip s390 tests for tpf targets.	
+	* testsuite/ld-s390/s390.exp: Skip s390 tests for tpf targets.
 
 2019-01-14  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 

@@ -1,6 +1,6 @@
 2019-01-14  Maamoun Tarsha  <maamountk@hotmail.com>
 
-	PR 20133
+	PR 20113
 	* elf32-s390.c (allocate_dynrelocs): Update comment.
 
 2019-01-09  Andrew Paprocki  <andrew@ishiboo.com>
