@@ -1,3 +1,10 @@
+2019-01-14  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	Merge from GCC:
+	PR target/88535
+	* config.guess: Import upstream version 2019-01-03.
+	* config.sub: Import upstream version 2019-01-01.
+
 2019-01-10  Nick Clifton  <nickc@redhat.com>
 
 	* libiberty: Sync with gcc.  Bring in:
