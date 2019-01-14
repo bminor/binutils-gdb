@@ -308,7 +308,7 @@ lex_reg_name (uint16_t which, int *reg)
       p++;
     }
 
-  int len = p - input_line_pointer;
+  size_t len = p - input_line_pointer;
 
   if (len <= 0)
     return 0;
@@ -318,7 +318,8 @@ lex_reg_name (uint16_t which, int *reg)
     {
       gas_assert (registers[i].name);
 
-      if (0 == strncasecmp (registers[i].name, input_line_pointer, len))
+      if (len == strlen (registers[i].name)
+	  && 0 == strncasecmp (registers[i].name, input_line_pointer, len))
 	{
 	  if ((0x1U << i) & which)
 	    {

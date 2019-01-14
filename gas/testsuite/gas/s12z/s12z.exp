@@ -119,6 +119,7 @@ run_dump_test bit-manip-invalid
 run_dump_test opr-symbol
 run_dump_test brclr-symbols
 run_dump_test dbCC
+run_dump_test labels
 
 # Expression related tests
 run_dump_test opr-expr

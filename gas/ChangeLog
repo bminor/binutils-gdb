@@ -1,8 +1,13 @@
 2019-01-16  John Darrington <john@darrington.wattle.id.au>
 
-        * config/tc-s12z.c (tfr): Change as_bad to as_warn.
+	* config/tc-s12z.c (lex_reg_name): Compare the length of the strings
+	before the contents.
+	* testsuite/gas/s12z/labels.d: New file.
+	* testsuite/gas/s12z/labels.s: New file.
+	* testsuite/gas/s12z/s12z.exp: Add them.
+	* config/tc-s12z.c (tfr): Change as_bad to as_warn.
 	Also fix message typo and semantics.
-        * config/tc-s12z.c (emit_opr): Emit BFD_RELOC_S12Z_OPR instead of
+	* config/tc-s12z.c (emit_opr): Emit BFD_RELOC_S12Z_OPR instead of
 	BFD_RELOC_24.
 	* testsuite/gas/s12z/opr-indirect-expr.d: Expect R_S12Z_OPR instead
 	of R_S12Z_EXT24.
