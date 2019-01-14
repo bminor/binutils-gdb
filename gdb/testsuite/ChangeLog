@@ -1,3 +1,8 @@
+2019-01-14  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* gdb.arch/altivec-regs.exp: Fix the list passed to
+	gdb_expect_list when testing "info vector".
+
 2019-01-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/style.exp: Don't include path in testname.

@@ -117,47 +117,14 @@ gdb_test "print \$vrsave" ".* = 1" "print vrsave"
 gdb_test "print \$vscr" ".* = 1" "print vscr"
 
 for {set i 0} {$i < 32} {incr i 1} {
-         set pattern$i ".*vr$i.*"
-         append pattern$i $vector_register
+    lappend pattern_list "vr$i\[ \t\]+$vector_register"
 }
 
+lappend pattern_list "vscr\[ \t\]+0x1"
+lappend pattern_list "vrsave\[ \t\]+0x1"
+
 send_gdb "info vector\n"
-gdb_expect_list "info vector" ".*$gdb_prompt $" {
-[$pattern0]
-[$pattern1]
-[$pattern2]
-[$pattern3]
-[$pattern4]
-[$pattern5]
-[$pattern6]
-[$pattern7]
-[$pattern8]
-[$pattern9]
-[$pattern10]
-[$pattern11]
-[$pattern12]
-[$pattern13]
-[$pattern14]
-[$pattern15]
-[$pattern16]
-[$pattern17]
-[$pattern18]
-[$pattern19]
-[$pattern20]
-[$pattern21]
-[$pattern22]
-[$pattern23]
-[$pattern24]
-[$pattern25]
-[$pattern26]
-[$pattern27]
-[$pattern28]
-[$pattern29]
-[$pattern30]
-[$pattern31]
-"\[ \t\n\r\]+vscr\[ \t\]+0x1"
-"\[ \t\n\r\]+vrsave\[ \t\]+0x1"
-}
+gdb_expect_list "info vector" ".*$gdb_prompt $" $pattern_list
 
 gdb_test "break vector_fun" \
  "Breakpoint 2 at.*altivec-regs.c, line \[0-9\]+\\." \
