@@ -2411,6 +2411,9 @@ g (void)
 @}
 @end smallexample
 
+Please keep in mind that with link-time optimization (LTO) enabled, your whole
+program may be a translation unit.
+
 @kindex --eh-frame-hdr
 @kindex --no-eh-frame-hdr
 @item --eh-frame-hdr
