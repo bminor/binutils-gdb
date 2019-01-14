@@ -1,3 +1,13 @@
+2019-01-14  Srinath Parvathaneni  <srinath.parvathaneni@arm.com>
+
+	* config/tc-arm.c (arm_ext_v6k_v6t2): Define.
+	(insns) [ARM_VARIANT]: Modified.
+	(insns) [THUMB_VARIANT]: To implement few ARMv6K instructions
+	in ARMv6T2 as well.
+	* testsuite/gas/arm/archv6t2-1.d: New test.
+	* testsuite/gas/arm/archv6t2-1.s: Likewise.
+	* testsuite/gas/arm/archv6t2-2.d: Likewise.
+
 2019-01-11  Alan Modra  <amodra@gmail.com>
 
 	PR 23963

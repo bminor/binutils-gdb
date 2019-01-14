@@ -204,6 +204,9 @@ static const arm_feature_set arm_ext_v5j = ARM_FEATURE_CORE_LOW (ARM_EXT_V5J);
 static const arm_feature_set arm_ext_v6 = ARM_FEATURE_CORE_LOW (ARM_EXT_V6);
 static const arm_feature_set arm_ext_v6k = ARM_FEATURE_CORE_LOW (ARM_EXT_V6K);
 static const arm_feature_set arm_ext_v6t2 = ARM_FEATURE_CORE_LOW (ARM_EXT_V6T2);
+/* Only for compatability of hint instructions.  */
+static const arm_feature_set arm_ext_v6k_v6t2 =
+  ARM_FEATURE_CORE_LOW (ARM_EXT_V6K | ARM_EXT_V6T2);
 static const arm_feature_set arm_ext_v6_notm =
   ARM_FEATURE_CORE_LOW (ARM_EXT_V6_NOTM);
 static const arm_feature_set arm_ext_v6_dsp =
@@ -19994,9 +19997,9 @@ static const struct asm_opcode insns[] =
  TCE("usat16",	6e00f30, f3a00000, 3, (RRnpc, I15, RRnpc),	   usat16, t_usat16),
 
 #undef  ARM_VARIANT
-#define ARM_VARIANT   & arm_ext_v6k
+#define ARM_VARIANT   & arm_ext_v6k_v6t2
 #undef  THUMB_VARIANT
-#define THUMB_VARIANT & arm_ext_v6k
+#define THUMB_VARIANT & arm_ext_v6k_v6t2
 
  tCE("yield",	320f001, _yield,    0, (), noargs, t_hint),
  tCE("wfe",	320f002, _wfe,      0, (), noargs, t_hint),
