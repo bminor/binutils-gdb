@@ -43322,8 +43322,10 @@ The @samp{org.gnu.gdb.power.fpu} feature is optional.  It should
 contain registers @samp{f0} through @samp{f31} and @samp{fpscr}.
 
 The @samp{org.gnu.gdb.power.altivec} feature is optional.  It should
-contain registers @samp{vr0} through @samp{vr31}, @samp{vscr},
-and @samp{vrsave}.
+contain registers @samp{vr0} through @samp{vr31}, @samp{vscr}, and
+@samp{vrsave}.  @value{GDBN} will define pseudo-registers @samp{v0}
+through @samp{v31} as aliases for the corresponding @samp{vrX}
+registers.
 
 The @samp{org.gnu.gdb.power.vsx} feature is optional.  It should
 contain registers @samp{vs0h} through @samp{vs31h}.  @value{GDBN} will

@@ -136,6 +136,7 @@ for {set i 32} {$i < 64} {incr i 1} {
 
 for {set i 0} {$i < 32} {incr i 1} {
     gdb_test "info reg vr$i" "vr$i.*$vector_register3_vr" "info reg vr$i"
+    gdb_test "info reg v$i" "v$i.*$vector_register3_vr" "info reg v$i"
 }
 
 # Create a core file.  We create the core file before the F32~F63/VR0~VR31 test
@@ -155,6 +156,7 @@ for {set i 32} {$i < 64} {incr i 1} {
 
 for {set i 0} {$i < 32} {incr i 1} {
     gdb_test "info reg vr$i" "vr$i.*$vector_register1_vr" "info reg vr$i (doubleword 0)"
+    gdb_test "info reg v$i" "v$i.*$vector_register1_vr" "info reg v$i (doubleword 0)"
 }
 
 # 2: Set VR0~VR31 registers and check if it reflects on F32~F63.
@@ -170,6 +172,7 @@ for {set i 32} {$i < 64} {incr i 1} {
 
 for {set i 0} {$i < 32} {incr i 1} {
     gdb_test "info reg vr$i" "vr$i.*$vector_register2_vr" "info reg vr$i (doubleword 1)"
+    gdb_test "info reg v$i" "v$i.*$vector_register2_vr" "info reg v$i (doubleword 1)"
 }
 
 # Test reading the core file.

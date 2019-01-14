@@ -1,5 +1,14 @@
 2019-01-14  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
+	* gdb.arch/vsx-regs.exp: Add tests that use the vector register
+	aliases.
+	* gdb.arch/altivec-regs.exp: Likewise.  Fix indentation of two
+	tests.
+	* gdb.arch/powerpc-vector-regs.c: New file.
+	* gdb.arch/powerpc-vector-regs.exp: New file.
+
+2019-01-14  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
 	* gdb.arch/altivec-regs.exp: Fix the list passed to
 	gdb_expect_list when testing "info vector".
 

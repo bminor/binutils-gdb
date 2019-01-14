@@ -1,3 +1,8 @@
+2019-01-14  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* gdb.texinfo (PowerPC Features): Document the alias
+	pseudo-registers for the org.gnu.gdb.power.altivec feature.
+
 2019-01-09  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.texinfo (Print Settings): Remove mention of specific

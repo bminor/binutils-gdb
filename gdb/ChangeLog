@@ -1,3 +1,25 @@
+2019-01-14  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* ppc-tdep.h (struct gdbarch_tdep) <ppc_v0_alias_regnum>: New
+	field.
+	* rs6000-tdep.c: Include reggroups.h.
+	(IS_V_ALIAS_PSEUDOREG): Define.
+	(rs6000_register_name): Return names for the "vX" aliases.
+	(rs6000_pseudo_register_type): Return type for the "vX" aliases.
+	(rs6000_pseudo_register_reggroup_p): Restore.  Handle "vX"
+	aliases.  Call default_register_reggroup_p for all other
+	pseudo-registers.
+	(v_alias_pseudo_register_read, v_alias_pseudo_register_write):
+	New functions.
+	(rs6000_pseudo_register_read, rs6000_pseudo_register_write):
+	Handle "vX" aliases.
+	(v_alias_pseudo_register_collect): New function.
+	(rs6000_ax_pseudo_register_collect): Handle "vX" aliases.
+	(rs6000_gdbarch_init): Initialize "vX" aliases as
+	pseudo-registers.  Restore registration of
+	rs6000_pseudo_register_reggroup_p with
+	set_tdesc_pseudo_register_reggroup_p.
+
 2019-01-13  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* xtensa-linux-tdep.c (xtensa_linux_init_abi): Update

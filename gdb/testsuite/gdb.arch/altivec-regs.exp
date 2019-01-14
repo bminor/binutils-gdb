@@ -91,7 +91,8 @@ set vector_register ".uint128 = 0x1000000010000000100000001, v4_float = .0x0, 0x
 }
 
 for {set i 0} {$i < 32} {incr i 1} {
-        gdb_test "info reg vr$i" "vr$i.*$vector_register" "info reg vr$i"
+    gdb_test "info reg vr$i" "vr$i.*$vector_register" "info reg vr$i"
+    gdb_test "info reg v$i" "v$i.*$vector_register" "info reg v$i"
 }
 
 gdb_test "info reg vrsave" "vrsave.*0x1\[ \t\]+1" "info reg vrsave"
@@ -110,7 +111,8 @@ if {$endianness == "big"} {
 }
 
 for {set i 0} {$i < 32} {incr i 1} {
-        gdb_test "print \$vr$i" ".* = $decimal_vector" "print vr$i"
+    gdb_test "print \$vr$i" ".* = $decimal_vector" "print vr$i"
+    gdb_test "print \$v$i" ".* = $decimal_vector" "print v$i"
 }
 
 gdb_test "print \$vrsave" ".* = 1" "print vrsave"

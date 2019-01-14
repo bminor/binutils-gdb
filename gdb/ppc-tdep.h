@@ -244,6 +244,10 @@ struct gdbarch_tdep
     int ppc_vr0_regnum;		/* First AltiVec register.  */
     int ppc_vrsave_regnum;	/* Last AltiVec register.  */
 
+    /* Altivec pseudo-register vX aliases for the raw vrX
+       registers.  */
+    int ppc_v0_alias_regnum;
+
     /* SPE registers.  */
     int ppc_ev0_upper_regnum;   /* First GPR upper half register.  */
     int ppc_ev0_regnum;         /* First ev register.  */
