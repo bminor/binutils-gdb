@@ -1,3 +1,7 @@
+2019-01-15  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* sim-arange.h (SIM_ARANGE_INLINE): Change EXTERN to extern.
+
 2018-12-18  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* sim-syscall.c (sim_syscall_multi): Don't update sc->errcode at

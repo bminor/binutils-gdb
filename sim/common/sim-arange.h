@@ -68,7 +68,7 @@ extern void sim_addr_range_delete (ADDR_RANGE * /*ar*/,
 #define SIM_ARANGE_INLINE EXTERN_INLINE
 #endif
 #else
-#define SIM_ARANGE_INLINE EXTERN
+#define SIM_ARANGE_INLINE extern
 #endif
 
 /* Return non-zero if ADDR is in range AR, traversing the entire tree.
