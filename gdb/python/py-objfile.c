@@ -501,7 +501,7 @@ objfpy_build_id_matches (const struct bfd_build_id *build_id,
 static struct objfile *
 objfpy_lookup_objfile_by_name (const char *name)
 {
-  for (objfile *objfile : all_objfiles (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles ())
     {
       const char *filename;
 
@@ -527,7 +527,7 @@ objfpy_lookup_objfile_by_name (const char *name)
 static struct objfile *
 objfpy_lookup_objfile_by_build_id (const char *build_id)
 {
-  for (objfile *objfile : all_objfiles (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles ())
     {
       const struct bfd_build_id *obfd_build_id;
 

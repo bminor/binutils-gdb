@@ -64,7 +64,7 @@ print_symbol_bcache_statistics (void)
   struct program_space *pspace;
 
   ALL_PSPACES (pspace)
-    for (objfile *objfile : all_objfiles (pspace))
+    for (objfile *objfile : pspace->objfiles ())
       {
 	QUIT;
 	printf_filtered (_("Byte cache statistics for '%s':\n"),
@@ -86,7 +86,7 @@ print_objfile_statistics (void)
   int i, linetables, blockvectors;
 
   ALL_PSPACES (pspace)
-  for (objfile *objfile : all_objfiles (pspace))
+  for (objfile *objfile : pspace->objfiles ())
     {
       QUIT;
       printf_filtered (_("Statistics for '%s':\n"), objfile_name (objfile));
@@ -475,7 +475,7 @@ maintenance_print_symbols (const char *args, int from_tty)
     {
       int found = 0;
 
-      for (objfile *objfile : all_objfiles (current_program_space))
+      for (objfile *objfile : current_program_space->objfiles ())
 	{
 	  int print_for_objfile = 1;
 
@@ -736,7 +736,7 @@ maintenance_print_msymbols (const char *args, int from_tty)
       outfile = &arg_outfile;
     }
 
-  for (objfile *objfile : all_objfiles (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles ())
     {
       QUIT;
       if (objfile_arg == NULL
@@ -756,7 +756,7 @@ maintenance_print_objfiles (const char *regexp, int from_tty)
     re_comp (regexp);
 
   ALL_PSPACES (pspace)
-    for (objfile *objfile : all_objfiles (pspace))
+    for (objfile *objfile : pspace->objfiles ())
       {
 	QUIT;
 	if (! regexp
@@ -778,7 +778,7 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
     re_comp (regexp);
 
   ALL_PSPACES (pspace)
-    for (objfile *objfile : all_objfiles (pspace))
+    for (objfile *objfile : pspace->objfiles ())
       {
 	/* We don't want to print anything for this objfile until we
 	   actually find a symtab whose name matches.  */
@@ -863,7 +863,7 @@ maintenance_check_symtabs (const char *ignore, int from_tty)
   struct program_space *pspace;
 
   ALL_PSPACES (pspace)
-    for (objfile *objfile : all_objfiles (pspace))
+    for (objfile *objfile : pspace->objfiles ())
       {
 	/* We don't want to print anything for this objfile until we
 	   actually find something worth printing.  */
@@ -929,7 +929,7 @@ maintenance_expand_symtabs (const char *args, int from_tty)
     re_comp (regexp);
 
   ALL_PSPACES (pspace)
-    for (objfile *objfile : all_objfiles (pspace))
+    for (objfile *objfile : pspace->objfiles ())
       {
 	if (objfile->sf)
 	  {
@@ -1030,7 +1030,7 @@ maintenance_info_line_tables (const char *regexp, int from_tty)
     re_comp (regexp);
 
   ALL_PSPACES (pspace)
-    for (objfile *objfile : all_objfiles (pspace))
+    for (objfile *objfile : pspace->objfiles ())
       {
 	for (compunit_symtab *cust : objfile_compunits (objfile))
 	  {

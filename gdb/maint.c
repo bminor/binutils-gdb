@@ -357,7 +357,7 @@ maintenance_info_sections (const char *arg, int from_tty)
 	  if (strcmp (arg, "ALLOBJ") == 0)
 	    arg = NULL;
 
-	  for (objfile *ofile : all_objfiles (current_program_space))
+	  for (objfile *ofile : current_program_space->objfiles ())
 	    {
 	      printf_filtered (_("  Object file: %s\n"), 
 			       bfd_get_filename (ofile->obfd));
@@ -447,7 +447,7 @@ maintenance_translate_address (const char *arg, int from_tty)
       int arg_len = p - arg;
       p = skip_spaces (p + 1);
 
-      for (objfile *objfile : all_objfiles (current_program_space))
+      for (objfile *objfile : current_program_space->objfiles ())
 	ALL_OBJFILE_OSECTIONS (objfile, sect)
 	  {
 	    if (strncmp (sect->the_bfd_section->name, arg, arg_len) == 0)
@@ -771,7 +771,7 @@ count_symtabs_and_blocks (int *nr_symtabs_ptr, int *nr_compunit_symtabs_ptr,
      current_program_space may be NULL.  */
   if (current_program_space != NULL)
     {
-      for (objfile *o : all_objfiles (current_program_space))
+      for (objfile *o : current_program_space->objfiles ())
 	{
 	  for (compunit_symtab *cu : objfile_compunits (o))
 	    {

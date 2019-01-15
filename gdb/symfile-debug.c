@@ -662,7 +662,7 @@ set_debug_symfile (const char *args, int from_tty, struct cmd_list_element *c)
   struct program_space *pspace;
 
   ALL_PSPACES (pspace)
-    for (objfile *objfile : all_objfiles (pspace))
+    for (objfile *objfile : pspace->objfiles ())
       {
 	if (debug_symfile)
 	  {

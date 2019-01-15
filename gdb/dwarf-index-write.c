@@ -1662,7 +1662,7 @@ save_gdb_index_command (const char *arg, int from_tty)
   if (!*arg)
     error (_("usage: save gdb-index [-dwarf-5] DIRECTORY"));
 
-  for (objfile *objfile : all_objfiles (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles ())
     {
       struct stat st;
 

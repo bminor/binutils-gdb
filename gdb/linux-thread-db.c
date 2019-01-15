@@ -1056,7 +1056,7 @@ try_thread_db_load_from_pdir (const char *subdir)
   if (!auto_load_thread_db)
     return 0;
 
-  for (objfile *obj : all_objfiles (current_program_space))
+  for (objfile *obj : current_program_space->objfiles ())
     if (libpthread_name_p (objfile_name (obj)))
       {
 	if (try_thread_db_load_from_pdir_1 (obj, subdir))
@@ -1165,7 +1165,7 @@ thread_db_load_search (void)
 static int
 has_libpthread (void)
 {
-  for (objfile *obj : all_objfiles (current_program_space))
+  for (objfile *obj : current_program_space->objfiles ())
     if (libpthread_name_p (objfile_name (obj)))
       return 1;
 

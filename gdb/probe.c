@@ -73,7 +73,7 @@ parse_probes_in_pspace (const static_probe_ops *spops,
 			const char *name,
 			std::vector<symtab_and_line> *result)
 {
-  for (objfile *objfile : all_objfiles (search_pspace))
+  for (objfile *objfile : search_pspace->objfiles ())
     {
       if (!objfile->sf || !objfile->sf->sym_probe_fns)
 	continue;
@@ -249,7 +249,7 @@ find_probe_by_pc (CORE_ADDR pc)
   result.objfile = NULL;
   result.prob = NULL;
 
-  for (objfile *objfile : all_objfiles (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles ())
     {
       if (!objfile->sf || !objfile->sf->sym_probe_fns
 	  || objfile->sect_index_text == -1)
@@ -294,7 +294,7 @@ collect_probes (const std::string &objname, const std::string &provider,
     obj_pat.emplace (objname.c_str (), REG_NOSUB,
 		     _("Invalid object file regexp"));
 
-  for (objfile *objfile : all_objfiles (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles ())
     {
       if (! objfile->sf || ! objfile->sf->sym_probe_fns)
 	continue;

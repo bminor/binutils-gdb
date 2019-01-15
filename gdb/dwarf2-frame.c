@@ -1702,7 +1702,7 @@ bsearch_fde_cmp (const void *key, const void *element)
 static struct dwarf2_fde *
 dwarf2_frame_find_fde (CORE_ADDR *pc, CORE_ADDR *out_offset)
 {
-  for (objfile *objfile : all_objfiles (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles ())
     {
       struct dwarf2_fde_table *fde_table;
       struct dwarf2_fde **p_fde;

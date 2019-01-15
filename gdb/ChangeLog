@@ -1,5 +1,91 @@
 2019-01-17  Tom Tromey  <tom@tromey.com>
 
+	* progspace.h (program_space) <objfiles_range>: New typedef.
+	<objfiles>: New method.
+	<objfiles_head>: Rename from objfiles.
+	(object_files): Update.
+	* guile/scm-progspace.c (gdbscm_progspace_objfiles): Update.
+	* guile/scm-pretty-print.c
+	(ppscm_find_pretty_printer_from_objfiles): Update.
+	* guile/scm-objfile.c (gdbscm_objfiles): Update.
+	* python/py-xmethods.c (gdbpy_get_matching_xmethod_workers):
+	Update.
+	* python/py-progspace.c (pspy_get_objfiles): Update.
+	* python/py-prettyprint.c (find_pretty_printer_from_objfiles):
+	Update.
+	* python/py-objfile.c (objfpy_lookup_objfile_by_name)
+	(objfpy_lookup_objfile_by_build_id): Update.
+	* mi/mi-cmd-file.c (mi_cmd_file_list_exec_source_files): Update.
+	* windows-tdep.c (windows_iterate_over_objfiles_in_search_order):
+	Update.
+	* symtab.c (iterate_over_symtabs, matching_obj_sections)
+	(expand_symtab_containing_pc, lookup_objfile_from_block)
+	(lookup_static_symbol, basic_lookup_transparent_type)
+	(find_pc_sect_compunit_symtab, find_symbol_at_address)
+	(find_line_symtab, info_sources_command)
+	(default_collect_symbol_completion_matches_break_on)
+	(make_source_files_completion_list, find_main_name): Update.
+	* symmisc.c (print_symbol_bcache_statistics)
+	(print_objfile_statistics, maintenance_print_symbols)
+	(maintenance_print_msymbols, maintenance_print_objfiles)
+	(maintenance_info_symtabs, maintenance_check_symtabs)
+	(maintenance_expand_symtabs, maintenance_info_line_tables):
+	Update.
+	* symfile.c (remove_symbol_file_command, overlay_invalidate_all)
+	(find_pc_overlay, find_pc_mapped_section, list_overlays_command)
+	(map_overlay_command, unmap_overlay_command)
+	(simple_overlay_update, expand_symtabs_matching)
+	(map_symbol_filenames): Update.
+	* symfile-debug.c (set_debug_symfile): Update.
+	* spu-tdep.c (spu_overlay_update, spu_objfile_from_frame):
+	Update.
+	* source.c (select_source_symtab, forget_cached_source_info):
+	Update.
+	* solib.c (solib_read_symbols): Update.
+	* solib-spu.c (append_ocl_sos): Update.
+	* psymtab.c (maintenance_print_psymbols)
+	(maintenance_info_psymtabs, maintenance_check_psymtabs): Update.
+	* probe.c (parse_probes_in_pspace, find_probe_by_pc): Update.
+	* printcmd.c (info_symbol_command): Update.
+	* ppc-linux-tdep.c (ppc_linux_spe_context_inferior_created):
+	Update.
+	* objfiles.h (class all_objfiles): Remove.
+	* objfiles.c (have_partial_symbols, have_full_symbols)
+	(have_minimal_symbols, qsort_cmp, update_section_map)
+	(shared_objfile_contains_address_p)
+	(default_iterate_over_objfiles_in_search_order): Update.
+	* objc-lang.c (info_selectors_command, info_classes_command)
+	(find_methods): Update.
+	* minsyms.c (find_solib_trampoline_target): Update.
+	* maint.c (maintenance_info_sections)
+	(maintenance_translate_address, count_symtabs_and_blocks):
+	Update.
+	* main.c (captured_main_1): Update.
+	* linux-thread-db.c (try_thread_db_load_from_pdir)
+	(has_libpthread): Update.
+	* linespec.c (iterate_over_all_matching_symtabs)
+	(search_minsyms_for_name): Update.
+	* jit.c (jit_find_objf_with_entry_addr): Update.
+	* hppa-tdep.c (find_unwind_entry)
+	(hppa_lookup_stub_minimal_symbol): Update.
+	* gcore.c (gcore_create_callback, objfile_find_memory_regions):
+	Update.
+	* elfread.c (elf_gnu_ifunc_resolve_by_cache)
+	(elf_gnu_ifunc_resolve_by_got): Update.
+	* dwarf2-frame.c (dwarf2_frame_find_fde): Update.
+	* dwarf-index-write.c (save_gdb_index_command): Update.
+	* cp-support.c (add_symbol_overload_list_qualified): Update.
+	* breakpoint.c (create_overlay_event_breakpoint)
+	(create_longjmp_master_breakpoint)
+	(create_std_terminate_master_breakpoint)
+	(create_exception_master_breakpoint): Update.
+	* blockframe.c (find_pc_partial_function): Update.
+	* ada-lang.c (ada_lookup_simple_minsym, add_nonlocal_symbols)
+	(ada_collect_symbol_completion_matches)
+	(ada_add_global_exceptions): Update.
+
+2019-01-17  Tom Tromey  <tom@tromey.com>
+
 	* solib-target.c (lm_info_target_p): Remove typedef.  Don't
 	declare VEC.
 	(solib_target_parse_libraries): Change return type.

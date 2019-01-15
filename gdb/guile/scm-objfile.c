@@ -370,7 +370,7 @@ gdbscm_objfiles (void)
 
   result = SCM_EOL;
 
-  for (objfile *objf : all_objfiles (current_program_space))
+  for (objfile *objf : current_program_space->objfiles ())
     {
       SCM item = ofscm_scm_from_objfile (objf);
 

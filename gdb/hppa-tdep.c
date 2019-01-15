@@ -497,7 +497,7 @@ find_unwind_entry (CORE_ADDR pc)
       return NULL;
     }
 
-  for (objfile *objfile : all_objfiles (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles ())
     {
       struct hppa_unwind_info *ui;
       ui = NULL;
@@ -2542,7 +2542,7 @@ hppa_lookup_stub_minimal_symbol (const char *name,
 {
   struct bound_minimal_symbol result = { NULL, NULL };
 
-  for (objfile *objfile : all_objfiles (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles ())
     {
       for (minimal_symbol *msym : objfile_msymbols (objfile))
 	{

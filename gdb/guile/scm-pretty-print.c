@@ -427,7 +427,7 @@ ppscm_search_pp_list (SCM list, SCM value)
 static SCM
 ppscm_find_pretty_printer_from_objfiles (SCM value)
 {
-  for (objfile *objfile : all_objfiles (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles ())
     {
       objfile_smob *o_smob = ofscm_objfile_smob_from_objfile (objfile);
       SCM pp

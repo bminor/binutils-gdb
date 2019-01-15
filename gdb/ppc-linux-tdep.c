@@ -1789,7 +1789,7 @@ static void
 ppc_linux_spe_context_inferior_created (struct target_ops *t, int from_tty)
 {
   ppc_linux_spe_context_lookup (NULL);
-  for (objfile *objfile : all_objfiles (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles ())
     ppc_linux_spe_context_lookup (objfile);
 }
 

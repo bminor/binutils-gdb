@@ -137,6 +137,17 @@ struct program_space
   program_space (address_space *aspace_);
   ~program_space ();
 
+  typedef next_adapter<struct objfile> objfiles_range;
+
+  /* Return an iterarable object that can be used to iterate over all
+     objfiles.  The basic use is in a foreach, like:
+
+     for (objfile *objf : pspace->objfiles ()) { ... }  */
+  objfiles_range objfiles ()
+  {
+    return objfiles_range (objfiles_head);
+  }
+
   /* Pointer to next in linked list.  */
   struct program_space *next = NULL;
 
@@ -189,7 +200,7 @@ struct program_space
 
   /* All known objfiles are kept in a linked list.  This points to
      the head of this list.  */
-  struct objfile *objfiles = NULL;
+  struct objfile *objfiles_head = NULL;
 
   /* The set of target sections matching the sections mapped into
      this program space.  Managed by both exec_ops and solib.c.  */
@@ -232,7 +243,7 @@ struct address_space
 
 /* All known objfiles are kept in a linked list.  This points to the
    root of this list.  */
-#define object_files current_program_space->objfiles
+#define object_files current_program_space->objfiles_head
 
 /* The set of target sections matching the sections mapped into the
    current program space.  */

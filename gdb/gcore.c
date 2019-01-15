@@ -426,7 +426,7 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size, int read,
 	 If so, we can avoid copying its contents by clearing SEC_LOAD.  */
       struct obj_section *objsec;
 
-      for (objfile *objfile : all_objfiles (current_program_space))
+      for (objfile *objfile : current_program_space->objfiles ())
 	ALL_OBJFILE_OSECTIONS (objfile, objsec)
 	  {
 	    bfd *abfd = objfile->obfd;
@@ -493,7 +493,7 @@ objfile_find_memory_regions (struct target_ops *self,
   bfd_vma temp_bottom, temp_top;
 
   /* Call callback function for each objfile section.  */
-  for (objfile *objfile : all_objfiles (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles ())
     ALL_OBJFILE_OSECTIONS (objfile, objsec)
       {
 	bfd *ibfd = objfile->obfd;

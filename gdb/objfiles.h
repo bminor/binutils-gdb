@@ -416,7 +416,7 @@ struct objfile
      Although this is a tree structure, GDB only support one level
      (ie a separate debug for a separate debug is not supported).  Note that
      separate debug object are in the main chain and therefore will be
-     visited by all_objfiles & co iterators.  Separate debug objfile always
+     visited by objfiles & co iterators.  Separate debug objfile always
      has a non-nul separate_debug_objfile_backlink.  */
 
   /* Link to the first separate debug object, if any.  */
@@ -556,21 +556,6 @@ extern void default_iterate_over_objfiles_in_search_order
 /* An iterarable object that can be used to iterate over all
    objfiles.  The basic use is in a foreach, like:
 
-   for (objfile *objf : all_objfiles (pspace)) { ... }  */
-
-class all_objfiles : public next_adapter<struct objfile>
-{
-public:
-
-  explicit all_objfiles (struct program_space *pspace)
-    : next_adapter<struct objfile> (pspace->objfiles)
-  {
-  }
-};
-
-/* An iterarable object that can be used to iterate over all
-   objfiles.  The basic use is in a foreach, like:
-
    for (objfile *objf : all_objfiles_safe (pspace)) { ... }
 
    This variant uses a basic_safe_iterator so that objfiles can be
@@ -585,7 +570,7 @@ public:
   explicit all_objfiles_safe (struct program_space *pspace)
     : next_adapter<struct objfile,
 		   basic_safe_iterator<next_iterator<objfile>>>
-        (pspace->objfiles)
+        (pspace->objfiles_head)
   {
   }
 };

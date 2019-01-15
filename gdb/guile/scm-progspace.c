@@ -289,7 +289,7 @@ gdbscm_progspace_objfiles (SCM self)
 
   result = SCM_EOL;
 
-  for (objfile *objfile : all_objfiles (p_smob->pspace))
+  for (objfile *objfile : p_smob->pspace->objfiles ())
     {
       if (objfile->separate_debug_objfile_backlink == NULL)
 	{

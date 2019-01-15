@@ -102,7 +102,7 @@ append_ocl_sos (struct so_list **link_ptr)
 {
   CORE_ADDR *ocl_program_addr_base;
 
-  for (objfile *objfile : all_objfiles (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles ())
     {
       ocl_program_addr_base
 	= (CORE_ADDR *) objfile_data (objfile, ocl_program_data_key);

@@ -2351,7 +2351,7 @@ remove_symbol_file_command (const char *args, int from_tty)
 
       addr = parse_and_eval_address (argv[1]);
 
-      for (objfile *objfile : all_objfiles (current_program_space))
+      for (objfile *objfile : current_program_space->objfiles ())
 	{
 	  if ((objfile->flags & OBJF_USERLOADED) != 0
 	      && (objfile->flags & OBJF_SHARED) != 0
@@ -2372,7 +2372,7 @@ remove_symbol_file_command (const char *args, int from_tty)
 
       gdb::unique_xmalloc_ptr<char> filename (tilde_expand (argv[0]));
 
-      for (objfile *objfile : all_objfiles (current_program_space))
+      for (objfile *objfile : current_program_space->objfiles ())
 	{
 	  if ((objfile->flags & OBJF_USERLOADED) != 0
 	      && (objfile->flags & OBJF_SHARED) != 0
@@ -2980,7 +2980,7 @@ overlay_invalidate_all (void)
 {
   struct obj_section *sect;
 
-  for (objfile *objfile : all_objfiles (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles ())
     ALL_OBJFILE_OSECTIONS (objfile, sect)
       if (section_is_overlay (sect))
 	sect->ovly_mapped = -1;
@@ -3158,7 +3158,7 @@ find_pc_overlay (CORE_ADDR pc)
 
   if (overlay_debugging)
     {
-      for (objfile *objfile : all_objfiles (current_program_space))
+      for (objfile *objfile : current_program_space->objfiles ())
 	ALL_OBJFILE_OSECTIONS (objfile, osect)
 	  if (section_is_overlay (osect))
 	    {
@@ -3187,7 +3187,7 @@ find_pc_mapped_section (CORE_ADDR pc)
 
   if (overlay_debugging)
     {
-      for (objfile *objfile : all_objfiles (current_program_space))
+      for (objfile *objfile : current_program_space->objfiles ())
 	ALL_OBJFILE_OSECTIONS (objfile, osect)
 	  if (pc_in_mapped_range (pc, osect) && section_is_mapped (osect))
 	    return osect;
@@ -3207,7 +3207,7 @@ list_overlays_command (const char *args, int from_tty)
 
   if (overlay_debugging)
     {
-      for (objfile *objfile : all_objfiles (current_program_space))
+      for (objfile *objfile : current_program_space->objfiles ())
 	ALL_OBJFILE_OSECTIONS (objfile, osect)
 	  if (section_is_mapped (osect))
 	    {
@@ -3255,7 +3255,7 @@ map_overlay_command (const char *args, int from_tty)
     error (_("Argument required: name of an overlay section"));
 
   /* First, find a section matching the user supplied argument.  */
-  for (objfile *obj_file : all_objfiles (current_program_space))
+  for (objfile *obj_file : current_program_space->objfiles ())
     ALL_OBJFILE_OSECTIONS (obj_file, sec)
       if (!strcmp (bfd_section_name (obj_file->obfd, sec->the_bfd_section),
 		   args))
@@ -3269,7 +3269,7 @@ map_overlay_command (const char *args, int from_tty)
 
 	  /* Next, make a pass and unmap any sections that are
 	     overlapped by this new section: */
-	  for (objfile *objfile2 : all_objfiles (current_program_space))
+	  for (objfile *objfile2 : current_program_space->objfiles ())
 	    ALL_OBJFILE_OSECTIONS (objfile2, sec2)
 	      if (sec2->ovly_mapped && sec != sec2 && sections_overlap (sec,
 									sec2))
@@ -3303,7 +3303,7 @@ unmap_overlay_command (const char *args, int from_tty)
     error (_("Argument required: name of an overlay section"));
 
   /* First, find a section matching the user supplied argument.  */
-  for (objfile *objfile : all_objfiles (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles ())
     ALL_OBJFILE_OSECTIONS (objfile, sec)
       if (!strcmp (bfd_section_name (objfile->obfd, sec->the_bfd_section), args))
 	{
@@ -3574,7 +3574,7 @@ simple_overlay_update (struct obj_section *osect)
     return;
 
   /* Now may as well update all sections, even if only one was requested.  */
-  for (objfile *objfile : all_objfiles (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles ())
     ALL_OBJFILE_OSECTIONS (objfile, osect)
       if (section_is_overlay (osect))
 	{
@@ -3790,7 +3790,7 @@ expand_symtabs_matching
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    enum search_domain kind)
 {
-  for (objfile *objfile : all_objfiles (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles ())
     {
       if (objfile->sf)
 	objfile->sf->qf->expand_symtabs_matching (objfile, file_matcher,
@@ -3808,7 +3808,7 @@ void
 map_symbol_filenames (symbol_filename_ftype *fun, void *data,
 		      int need_fullname)
 {
-  for (objfile *objfile : all_objfiles (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles ())
     {
       if (objfile->sf)
 	objfile->sf->qf->map_symbol_filenames (objfile, fun, data,

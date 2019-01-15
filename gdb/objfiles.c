@@ -1013,7 +1013,7 @@ objfile_has_symbols (struct objfile *objfile)
 int
 have_partial_symbols (void)
 {
-  for (objfile *ofp : all_objfiles (current_program_space))
+  for (objfile *ofp : current_program_space->objfiles ())
     {
       if (objfile_has_partial_symbols (ofp))
 	return 1;
@@ -1028,7 +1028,7 @@ have_partial_symbols (void)
 int
 have_full_symbols (void)
 {
-  for (objfile *ofp : all_objfiles (current_program_space))
+  for (objfile *ofp : current_program_space->objfiles ())
     {
       if (objfile_has_full_symbols (ofp))
 	return 1;
@@ -1062,7 +1062,7 @@ objfile_purge_solibs (void)
 int
 have_minimal_symbols (void)
 {
-  for (objfile *ofp : all_objfiles (current_program_space))
+  for (objfile *ofp : current_program_space->objfiles ())
     {
       if (ofp->per_bfd->minimal_symbol_count > 0)
 	{
@@ -1133,7 +1133,7 @@ qsort_cmp (const void *a, const void *b)
 	{
 	  /* Sort on sequence number of the objfile in the chain.  */
 
-	  for (objfile *objfile : all_objfiles (current_program_space))
+	  for (objfile *objfile : current_program_space->objfiles ())
 	    if (objfile == objfile1)
 	      return -1;
 	    else if (objfile == objfile2)
@@ -1317,7 +1317,7 @@ update_section_map (struct program_space *pspace,
   xfree (map);
 
   alloc_size = 0;
-  for (objfile *objfile : all_objfiles (pspace))
+  for (objfile *objfile : pspace->objfiles ())
     ALL_OBJFILE_OSECTIONS (objfile, s)
       if (insert_section_p (objfile->obfd, s->the_bfd_section))
 	alloc_size += 1;
@@ -1333,7 +1333,7 @@ update_section_map (struct program_space *pspace,
   map = XNEWVEC (struct obj_section *, alloc_size);
 
   i = 0;
-  for (objfile *objfile : all_objfiles (pspace))
+  for (objfile *objfile : pspace->objfiles ())
     ALL_OBJFILE_OSECTIONS (objfile, s)
       if (insert_section_p (objfile->obfd, s->the_bfd_section))
 	map[i++] = s;
@@ -1477,7 +1477,7 @@ int
 shared_objfile_contains_address_p (struct program_space *pspace,
 				   CORE_ADDR address)
 {
-  for (objfile *objfile : all_objfiles (pspace))
+  for (objfile *objfile : pspace->objfiles ())
     {
       if ((objfile->flags & OBJF_SHARED) != 0
 	  && is_addr_in_objfile (address, objfile))
@@ -1488,7 +1488,7 @@ shared_objfile_contains_address_p (struct program_space *pspace,
 }
 
 /* The default implementation for the "iterate_over_objfiles_in_search_order"
-   gdbarch method.  It is equivalent to use the all_objfiles iterable,
+   gdbarch method.  It is equivalent to use the objfiles iterable,
    searching the objfiles in the order they are stored internally,
    ignoring CURRENT_OBJFILE.
 
@@ -1503,7 +1503,7 @@ default_iterate_over_objfiles_in_search_order
 {
   int stop = 0;
 
-  for (objfile *objfile : all_objfiles (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles ())
     {
        stop = cb (objfile, cb_data);
        if (stop)

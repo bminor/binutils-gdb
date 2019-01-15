@@ -1942,7 +1942,7 @@ maintenance_print_psymbols (const char *args, int from_tty)
     }
 
   found = 0;
-  for (objfile *objfile : all_objfiles (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles ())
     {
       int printed_objfile_header = 0;
       int print_for_objfile = 1;
@@ -2035,7 +2035,7 @@ maintenance_info_psymtabs (const char *regexp, int from_tty)
     re_comp (regexp);
 
   ALL_PSPACES (pspace)
-    for (objfile *objfile : all_objfiles (pspace))
+    for (objfile *objfile : pspace->objfiles ())
       {
 	struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
@@ -2148,7 +2148,7 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
   struct block *b;
   int length;
 
-  for (objfile *objfile : all_objfiles (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles ())
     for (partial_symtab *ps : require_partial_symbols (objfile, 1))
       {
 	struct gdbarch *gdbarch = get_objfile_arch (objfile);

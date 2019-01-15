@@ -3205,7 +3205,7 @@ create_overlay_event_breakpoint (void)
 {
   const char *const func_name = "_ovly_debug_event";
 
-  for (objfile *objfile : all_objfiles (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles ())
     {
       struct breakpoint *b;
       struct breakpoint_objfile_data *bp_objfile_data;
@@ -3263,7 +3263,7 @@ create_longjmp_master_breakpoint (void)
   {
     set_current_program_space (pspace);
 
-    for (objfile *objfile : all_objfiles (current_program_space))
+    for (objfile *objfile : current_program_space->objfiles ())
       {
 	int i;
 	struct gdbarch *gdbarch;
@@ -3366,7 +3366,7 @@ create_std_terminate_master_breakpoint (void)
 
     set_current_program_space (pspace);
 
-    for (objfile *objfile : all_objfiles (current_program_space))
+    for (objfile *objfile : current_program_space->objfiles ())
       {
 	struct breakpoint *b;
 	struct breakpoint_objfile_data *bp_objfile_data;
@@ -3411,7 +3411,7 @@ create_exception_master_breakpoint (void)
 {
   const char *const func_name = "_Unwind_DebugHook";
 
-  for (objfile *objfile : all_objfiles (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles ())
     {
       struct breakpoint *b;
       struct gdbarch *gdbarch;

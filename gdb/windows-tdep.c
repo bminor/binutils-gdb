@@ -423,7 +423,7 @@ windows_iterate_over_objfiles_in_search_order
 	return;
     }
 
-  for (objfile *objfile : all_objfiles (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles ())
     {
       if (objfile != current_objfile)
 	{
