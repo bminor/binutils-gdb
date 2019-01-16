@@ -1,3 +1,12 @@
+2019-01-14  John Darrington <john@darrington.wattle.id.au>
+
+	* bfd-in2.h [BFD_RELOC_S12Z_OPR]: New reloc.
+	* libbfd.h: regen.
+	* elf32-s12z.c (eld_s12z_howto_table): R_S12Z_OPR takes non zero
+	source field.  (md_apply_fix): Apply final fix
+	to BFD_RELOC_S12Z_OPR.
+	* reloc.c[BFD_RELOC_S12Z_OPR]: New reloc.
+
 2019-01-14  Maamoun Tarsha  <maamountk@hotmail.com>
 
 	PR 20113

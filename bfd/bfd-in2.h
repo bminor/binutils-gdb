@@ -6696,6 +6696,9 @@ assembler and not (currently) written to any object files.  */
   BFD_RELOC_CKCORE_IRELATIVE,
   BFD_RELOC_CKCORE_PCREL_BLOOP_IMM4BY4,
   BFD_RELOC_CKCORE_PCREL_BLOOP_IMM12BY4,
+
+/* S12Z relocations.  */
+  BFD_RELOC_S12Z_OPR,
   BFD_RELOC_UNUSED };
 
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;

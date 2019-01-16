@@ -119,7 +119,7 @@ static reloc_howto_type elf_s12z_howto_table[] =
 	 shift_addend_reloc,
 	 "R_S12Z_OPR",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0x00000000,            /* src_mask */
+	 0x00ffffff,            /* src_mask */
 	 0x00ffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
@@ -232,11 +232,12 @@ struct s12z_reloc_map
 
 static const struct s12z_reloc_map s12z_reloc_map[] =
 {
-  /* bfd reloc val */ /* elf reloc val */
-  {BFD_RELOC_NONE, R_S12Z_NONE},
-  {BFD_RELOC_32, R_S12Z_EXT32},
-  {BFD_RELOC_24, R_S12Z_EXT24},
-  {BFD_RELOC_16_PCREL, R_S12Z_PCREL_7_15}
+  /* bfd reloc val */  /* elf reloc val */
+  {BFD_RELOC_NONE,     R_S12Z_NONE},
+  {BFD_RELOC_32,       R_S12Z_EXT32},
+  {BFD_RELOC_24,       R_S12Z_EXT24},
+  {BFD_RELOC_16_PCREL, R_S12Z_PCREL_7_15},
+  {BFD_RELOC_S12Z_OPR, R_S12Z_OPR}
 };
 
 static reloc_howto_type *

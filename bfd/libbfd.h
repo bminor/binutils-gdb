@@ -3320,6 +3320,7 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_CKCORE_IRELATIVE",
   "BFD_RELOC_CKCORE_PCREL_BLOOP_IMM4BY4",
   "BFD_RELOC_CKCORE_PCREL_BLOOP_IMM12BY4",
+  "BFD_RELOC_S12Z_OPR",
  "@@overflow: BFD_RELOC_UNUSED@@",
 };
 #endif

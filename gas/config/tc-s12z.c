@@ -732,12 +732,17 @@ emit_opr (char *f, const uint8_t *buffer, int n_bytes, expressionS *exp)
   number_to_chars_bigendian (f++, buffer[0], 1);
   if (exp->X_op != O_absent && exp->X_op != O_constant)
     {
-      fix_new_exp (frag_now,
-		   f - frag_now->fr_literal,
-		   3,
-		   exp,
-		   FALSE,
-		   BFD_RELOC_24);
+      fixS *fix = fix_new_exp (frag_now,
+			       f - frag_now->fr_literal,
+			       3,
+			       exp,
+			       FALSE,
+			       BFD_RELOC_S12Z_OPR);
+      /* Some third party tools seem to use the lower bits
+	of this addend for flags.   They don't get added
+	to the final location.   The purpose of these flags
+	is not known.  We simply set it to zero.  */
+      fix->fx_addnumber = 0x00;
     }
   for (i = 1; i < n_bytes; ++i)
     number_to_chars_bigendian (f++,  buffer[i], 1);
@@ -3821,6 +3826,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       bfd_putb16 ((bfd_vma) value, (unsigned char *) where);
       break;
     case BFD_RELOC_24:
+    case BFD_RELOC_S12Z_OPR:
       bfd_putb24 ((bfd_vma) value, (unsigned char *) where);
       break;
     case BFD_RELOC_32:
