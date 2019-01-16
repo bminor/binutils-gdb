@@ -1316,16 +1316,11 @@ tfr (const struct instruction *insn)
   if (!lex_reg_name (~0, &reg2))
     goto fail;
 
-  if ((0 == strcasecmp ("sex", insn->name))
-      || (0 == strcasecmp ("zex", insn->name)))
-    {
-      if (registers[reg1].bytes >= registers[reg2].bytes)
-	{
-	  as_bad (_("Source register for %s must be smaller that the destination register"),
-		  insn->name);
-	  goto fail;
-	}
-    }
+  if ( ((0 == strcasecmp ("sex", insn->name))
+        || (0 == strcasecmp ("zex", insn->name)))
+       && (registers[reg2].bytes <= registers[reg1].bytes))
+      as_warn (_("Source register for %s is no larger than the destination register"),
+               insn->name);
 
   char *f = s12z_new_insn (1 + insn->page);
   if (insn->page == 2)
