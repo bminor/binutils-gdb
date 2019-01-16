@@ -1,4 +1,9 @@
 2019-01-16  Kito Cheng  <kito@andestech.com>
+
+	* elf-attrs.c (vendor_obj_attr_size): Return 0 if size is 0 even
+	for OBJ_ATTR_PROC.
+
+2019-01-16  Kito Cheng  <kito@andestech.com>
 	    Nelson Chu  <nelson@andestech.com>
 
 	* elfnn-riscv.c (in_subsets): New.

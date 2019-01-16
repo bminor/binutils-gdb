@@ -1,4 +1,8 @@
 2019-01-16  Kito Cheng  <kito@andestech.com>
+
+	* testsuite/gas/riscv/attribute-empty.d: New.
+
+2019-01-16  Kito Cheng  <kito@andestech.com>
 	    Nelson Chu  <nelson@andestech.com>
 
 	* config/tc-riscv.c (DEFAULT_RISCV_ATTR): Define to 0 if not defined.

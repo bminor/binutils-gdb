@@ -106,7 +106,7 @@ vendor_obj_attr_size (bfd *abfd, int vendor)
     size += obj_attr_size (list->tag, &list->attr);
 
   /* <size> <vendor_name> NUL 0x1 <size> */
-  return ((size || vendor == OBJ_ATTR_PROC)
+  return (size
 	  ? size + 10 + strlen (vendor_name)
 	  : 0);
 }
