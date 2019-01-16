@@ -63,12 +63,8 @@ proc test_float_literal_types_accepted {} {
     gdb_test "pt .44" "type = real\\*\[0-9\]+"
     gdb_test "pt 44.0" "type = real\\*\[0-9\]+"
     gdb_test "pt 10D20" "type = real\\*\[0-9\]+"
-    gdb_test "pt 10D20" "type = real\\*\[0-9\]+"
-    gdb_test "pt 10d20" "type = real\\*\[0-9\]+"
     gdb_test "pt 10d20" "type = real\\*\[0-9\]+"
     gdb_test "pt 10E20" "type = real\\*\[0-9\]+"
-    gdb_test "pt 10E20" "type = real\\*\[0-9\]+"
-    gdb_test "pt 10e20" "type = real\\*\[0-9\]+"
     gdb_test "pt 10e20" "type = real\\*\[0-9\]+"
 }
 

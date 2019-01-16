@@ -1,3 +1,8 @@
+2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/types.exp (test_float_literal_types_accepted):
+	Remove duplicate tests.
+
 2019-03-06  Alan Hayward  <alan.hayward@arm.com>
 
 	* lib/gdb.exp (builtin_cd): rename of cd.
