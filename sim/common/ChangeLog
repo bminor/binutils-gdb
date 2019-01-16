@@ -1,3 +1,7 @@
+2019-01-16  Pavel I. Kryukov  <kryukov@frtk.ru>
+
+	* sim-arange.c: eliminate DEFINE_NON_INLINE_P
+
 2019-01-15  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* sim-arange.h (SIM_ARANGE_INLINE): Change EXTERN to extern.
