@@ -116,4 +116,20 @@ END_RELOC_NUMBERS (R_RISCV_max)
 /* The name of the global pointer symbol.  */
 #define RISCV_GP_SYMBOL "__global_pointer$"
 
+/* Additional section types.  */
+#define SHT_RISCV_ATTRIBUTES   0x70000003  /* Section holds attributes.  */
+
+/* Object attributes.  */
+
+enum
+{
+  /* 0-3 are generic.  */
+  Tag_RISCV_stack_align = 4,
+  Tag_RISCV_arch = 5,
+  Tag_RISCV_unaligned_access = 6,
+  Tag_RISCV_priv_spec = 8,
+  Tag_RISCV_priv_spec_minor = 10,
+  Tag_RISCV_priv_spec_revision = 12
+};
+
 #endif /* _ELF_RISCV_H */

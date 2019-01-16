@@ -3654,6 +3654,14 @@ riscv_elf_object_p (bfd *abfd)
   return TRUE;
 }
 
+/* Determine whether an object attribute tag takes an integer, a
+   string or both.  */
+
+static int
+riscv_elf_obj_attrs_arg_type (int tag)
+{
+  return (tag & 1) != 0 ? ATTR_TYPE_FLAG_STR_VAL : ATTR_TYPE_FLAG_INT_VAL;
+}
 
 #define TARGET_LITTLE_SYM		riscv_elfNN_vec
 #define TARGET_LITTLE_NAME		"elfNN-littleriscv"
@@ -3695,5 +3703,14 @@ riscv_elf_object_p (bfd *abfd)
 #define elf_backend_want_dynrelro	1
 #define elf_backend_rela_normal		1
 #define elf_backend_default_execstack	0
+
+#undef  elf_backend_obj_attrs_vendor
+#define elf_backend_obj_attrs_vendor            "riscv"
+#undef  elf_backend_obj_attrs_arg_type
+#define elf_backend_obj_attrs_arg_type          riscv_elf_obj_attrs_arg_type
+#undef  elf_backend_obj_attrs_section_type
+#define elf_backend_obj_attrs_section_type      SHT_RISCV_ATTRIBUTES
+#undef  elf_backend_obj_attrs_section
+#define elf_backend_obj_attrs_section           ".riscv.attributes"
 
 #include "elfNN-target.h"

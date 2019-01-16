@@ -1484,3 +1484,92 @@ riscv_release_subset_list (riscv_subset_list_t *subset_list)
 
   subset_list->tail = NULL;
 }
+
+/* Return the number of digits for the input.  */
+
+static size_t
+riscv_estimate_digit (unsigned num)
+{
+  size_t digit = 0;
+  if (num == 0)
+    return 1;
+
+  for (digit = 0; num ; num /= 10)
+    digit++;
+
+  return digit;
+}
+
+/* Auxiliary function to estimate string length of subset list.  */
+
+static size_t
+riscv_estimate_arch_strlen1 (const riscv_subset_t *subset)
+{
+  if (subset == NULL)
+    return 6; /* For rv32/rv64/rv128 and string terminator.  */
+
+  return riscv_estimate_arch_strlen1 (subset->next)
+	 + strlen (subset->name)
+	 + riscv_estimate_digit (subset->major_version)
+	 + 1 /* For version seperator: 'p'.  */
+	 + riscv_estimate_digit (subset->minor_version)
+	 + 1 /* For underscore.  */;
+}
+
+/* Estimate the string length of this subset list.  */
+
+static size_t
+riscv_estimate_arch_strlen (const riscv_subset_list_t *subset_list)
+{
+  return riscv_estimate_arch_strlen1 (subset_list->head);
+}
+
+/* Auxiliary function to convert subset info to string.  */
+
+static void
+riscv_arch_str1 (riscv_subset_t *subset,
+		 char *attr_str, char *buf, size_t bufsz)
+{
+  const char *underline = "_";
+
+  if (subset == NULL)
+    return;
+
+  /* No underline between rvXX and i/e.   */
+  if ((strcasecmp (subset->name, "i") == 0)
+      || (strcasecmp (subset->name, "e") == 0))
+    underline = "";
+
+  snprintf (buf, bufsz, "%s%s%dp%d",
+	    underline,
+            subset->name,
+            subset->major_version,
+            subset->minor_version);
+
+  strncat (attr_str, buf, bufsz);
+
+  /* Skip 'i' extension after 'e'.  */
+  if ((strcasecmp (subset->name, "e") == 0)
+      && subset->next
+      && (strcasecmp (subset->next->name, "i") == 0))
+    riscv_arch_str1 (subset->next->next, attr_str, buf, bufsz);
+  else
+    riscv_arch_str1 (subset->next, attr_str, buf, bufsz);
+}
+
+/* Convert subset info to string with explicit version info.  */
+
+char *
+riscv_arch_str (unsigned xlen, const riscv_subset_list_t *subset)
+{
+  size_t arch_str_len = riscv_estimate_arch_strlen (subset);
+  char *attr_str = xmalloc (arch_str_len);
+  char *buf = xmalloc (arch_str_len);
+
+  snprintf (attr_str, arch_str_len, "rv%u", xlen);
+
+  riscv_arch_str1 (subset->head, attr_str, buf, arch_str_len);
+  free (buf);
+
+  return attr_str;
+}

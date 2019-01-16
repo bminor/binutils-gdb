@@ -1,3 +1,50 @@
+2019-01-16  Kito Cheng  <kito@andestech.com>
+	    Nelson Chu  <nelson@andestech.com>
+
+	* config/tc-riscv.c (DEFAULT_RISCV_ATTR): Define to 0 if not defined.
+	(riscv_set_options): Add `arch_attr` field.
+	(riscv_opts): Set default value for arch_attr.
+	(riscv_write_out_arch_attr): New.
+	(riscv_set_public_attributes): Likewise.
+	(riscv_md_end): Likewise.
+	(riscv_convert_symbolic_attribute): Likewise.
+	(s_riscv_attribute): Likewise.
+	(explicit_arch_attr): Likewise.
+	(riscv_pseudo_table): Add .attribute to the table.
+	(options): Add OPTION_ARCH_ATTR and OPTION_NO_ARCH_ATTR
+	enumeration constants.
+	(md_longopts): Add `march-attr' and `mno-arch-attr' options.
+	(md_parse_option): Handle the new options.
+	(md_show_usage): Document the `march-attr' option.
+	* config/tc-riscv.h (md_end): Define as riscv_md_end
+	(riscv_md_end): Declare.
+	(CONVERT_SYMBOLIC_ATTRIBUTE): Define as
+	riscv_convert_symbolic_attribute.
+	(riscv_convert_symbolic_attribute): Declare.
+	(start_assemble): Declare.
+	* testsuite/gas/elf/elf.exp: Adjust test case for section2.e.
+	* testsuite/gas/elf/section2.e-riscv: New.
+	* testsuite/gas/riscv/attribute-01.d: New test
+	* testsuite/gas/riscv/attribute-02.d: Likewise.
+	* testsuite/gas/riscv/attribute-03.d: Likewise.
+	* testsuite/gas/riscv/attribute-04.d: Likewise.
+	* testsuite/gas/riscv/attribute-04.s: Likewise.
+	* testsuite/gas/riscv/attribute-05.d: Likewise.
+	* testsuite/gas/riscv/attribute-05.s: Likewise.
+	* testsuite/gas/riscv/attribute-06.d: Likewise.
+	* testsuite/gas/riscv/attribute-06.s: Likewise.
+	* testsuite/gas/riscv/attribute-07.d: Likewise.
+	* testsuite/gas/riscv/attribute-07.s: Likewise.
+	* testsuite/gas/riscv/attribute-08.d: Likewise.
+	* testsuite/gas/riscv/attribute-08.s: Likewise.
+	* testsuite/gas/riscv/attribute-unknown.d: Likewise.
+	* testsuite/gas/riscv/attribute-unknown.s: Likewise.
+	* testsuite/gas/riscv/empty.l: Likewise.
+	* doc/c-riscv.texi (.attribute): Add documentation.
+	* configure.ac (--enable-default-riscv-attribute): New options.
+	* configure: Re-generate.
+	* config.in: Re-generate.
+
 2019-01-16  John Darrington <john@darrington.wattle.id.au>
 
 	* config/tc-s12z.c (lex_reg_name): Compare the length of the strings

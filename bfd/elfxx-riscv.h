@@ -83,3 +83,6 @@ riscv_supported_std_ext (void);
 
 extern void
 riscv_release_subset_list (riscv_subset_list_t *);
+
+extern char *
+riscv_arch_str (unsigned, const riscv_subset_list_t *);

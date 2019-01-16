@@ -18,6 +18,7 @@
 * RISC-V-Options::        RISC-V Options
 * RISC-V-Directives::     RISC-V Directives
 * RISC-V-Formats::        RISC-V Instruction Formats
+* RISC-V-ATTRIBUTE::      RISC-V Object Attribute
 @end menu
 
 @node RISC-V-Options
@@ -167,6 +168,15 @@ and makes the assembler insert the operands according to one of the
 instruction formats for @samp{.insn} (@ref{RISC-V-Formats}).
 For example, the instruction @samp{add a0, a1, a2} could be written as
 @samp{.insn r 0x33, 0, 0, a0, a1, a2}.
+
+@cindex @code{.attribute} directive, RISC-V
+@item .attribute @var{tag}, @var{value}
+Set the object attribute @var{tag} to @var{value}.
+
+The @var{tag} is either an attribute number, or one of the following:
+@code{Tag_RISCV_arch}, @code{Tag_RISCV_stack_align},
+@code{Tag_RISCV_unaligned_access}, @code{Tag_RISCV_priv_spec},
+@code{Tag_RISCV_priv_spec_minor}, @code{Tag_RISCV_priv_spec_revision}.
 
 @end table
 
@@ -409,3 +419,46 @@ with the @samp{.insn} pseudo directive:
 
 For the complete list of all instruction format variants see
 The RISC-V Instruction Set Manual Volume I: User-Level ISA.
+
+@node RISC-V-ATTRIBUTE
+@section RISC-V Object Attribute
+@cindex Object Attribute, RISC-V
+
+RISC-V attributes have a string value if the tag number is odd and an integer
+value if the tag number is even.
+
+@table @r
+@item Tag_RISCV_stack_align (4)
+Tag_RISCV_strict_align records the N-byte stack alignment for this object.  The
+default value is 16 for RV32I or RV64I, and 4 for RV32E.
+
+The smallest value will be used if object files with different
+Tag_RISCV_stack_align values are merged.
+
+@item Tag_RISCV_arch (5)
+Tag_RISCV_arch contains a string for the target architecture taken from the
+option @option{-march}.  Different architectures will be integrated into a
+superset when object files are merged.
+
+Note that the version information of the target architecture must be presented
+explicitly in the attribute and abbreviations must be expanded.  The version
+information, if not given by @option{-march}, must be in accordance with the
+default specified by the tool.  For example, the architecture @code{RV32I} has
+to be recorded in the attribute as @code{RV32I2P0} in which @code{2P0} stands
+for the default version of its base ISA.  On the other hand, the architecture
+@code{RV32G} has to be presented as @code{RV32I2P0_M2P0_A2P0_F2P0_D2P0} in
+which the abbreviation @code{G} is expanded to the @code{IMAFD} combination
+with default versions of the standard extensions.
+
+@item Tag_RISCV_unaligned_access (6)
+Tag_RISCV_unaligned_access is 0 for files that do not allow any unaligned
+memory accesses, and 1 for files that do allow unaligned memory accesses.
+
+@item Tag_RISCV_priv_spec (8)
+@item Tag_RISCV_priv_spec_minor (10)
+@item Tag_RISCV_priv_spec_revision (12)
+Tag_RISCV_priv_spec contains the major/minor/revision version information of
+the privileged specification.  It will report errors if object files of
+different privileged specification versions are merged.
+
+@end table

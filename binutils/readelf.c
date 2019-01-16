@@ -4205,6 +4205,16 @@ get_v850_section_type_name (unsigned int sh_type)
 }
 
 static const char *
+get_riscv_section_type_name (unsigned int sh_type)
+{
+  switch (sh_type)
+    {
+    case SHT_RISCV_ATTRIBUTES:  return "RISCV_ATTRIBUTES";
+    default: return NULL;
+    }
+}
+
+static const char *
 get_section_type_name (Filedata * filedata, unsigned int sh_type)
 {
   static char buff[32];
@@ -4283,6 +4293,9 @@ get_section_type_name (Filedata * filedata, unsigned int sh_type)
 	    case EM_V850:
 	    case EM_CYGNUS_V850:
 	      result = get_v850_section_type_name (sh_type);
+	      break;
+	    case EM_RISCV:
+	      result = get_riscv_section_type_name (sh_type);
 	      break;
 	    default:
 	      result = NULL;
@@ -15362,6 +15375,88 @@ display_msp430x_attribute (unsigned char * p,
   return p;
 }
 
+struct riscv_attr_tag_t {
+  const char *name;
+  int tag;
+};
+
+static struct riscv_attr_tag_t riscv_attr_tag[] =
+{
+#define T(tag) {"Tag_RISCV_" #tag, Tag_RISCV_##tag}
+  T(arch),
+  T(priv_spec),
+  T(priv_spec_minor),
+  T(priv_spec_revision),
+  T(unaligned_access),
+  T(stack_align),
+#undef T
+};
+
+static unsigned char *
+display_riscv_attribute (unsigned char *p,
+			 const unsigned char * const end)
+{
+  unsigned int len;
+  int val;
+  int tag;
+  struct riscv_attr_tag_t *attr = NULL;
+  unsigned i;
+
+  tag = read_uleb128 (p, &len, end);
+  p += len;
+
+  /* Find the name of attribute. */
+  for (i = 0; i < ARRAY_SIZE (riscv_attr_tag); i++)
+    {
+      if (riscv_attr_tag[i].tag == tag)
+	{
+	  attr = &riscv_attr_tag[i];
+	  break;
+	}
+    }
+
+  if (attr)
+    printf ("  %s: ", attr->name);
+  else
+    return display_tag_value (tag, p, end);
+
+  switch (tag)
+    {
+    case Tag_RISCV_priv_spec:
+    case Tag_RISCV_priv_spec_minor:
+    case Tag_RISCV_priv_spec_revision:
+      val = read_uleb128 (p, &len, end);
+      p += len;
+      printf (_("%d\n"), val);
+      break;
+    case Tag_RISCV_unaligned_access:
+      val = read_uleb128 (p, &len, end);
+      p += len;
+      switch (val)
+	{
+	case 0:
+	  printf (_("No unaligned access\n"));
+	  break;
+	case 1:
+	  printf (_("Unaligned access\n"));
+	  break;
+	}
+      break;
+    case Tag_RISCV_stack_align:
+      val = read_uleb128 (p, &len, end);
+      p += len;
+      printf (_("%d-bytes\n"), val);
+      break;
+    case Tag_RISCV_arch:
+      p = display_tag_value (-1, p, end);
+      break;
+    default:
+      return display_tag_value (tag, p, end);
+    }
+
+  return p;
+}
+
 static bfd_boolean
 process_attributes (Filedata * filedata,
 		    const char * public_name,
@@ -18894,6 +18989,11 @@ process_arch_specific (Filedata * filedata)
     case EM_MSP430:
      return process_attributes (filedata, "mspabi", SHT_MSP430_ATTRIBUTES,
 				display_msp430x_attribute,
+				display_generic_attribute);
+
+    case EM_RISCV:
+     return process_attributes (filedata, "riscv", SHT_RISCV_ATTRIBUTES,
+				display_riscv_attribute,
 				display_generic_attribute);
 
     case EM_NDS32:

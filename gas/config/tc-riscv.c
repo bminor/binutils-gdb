@@ -59,6 +59,10 @@ struct riscv_cl_insn
 #define DEFAULT_ARCH "riscv64"
 #endif
 
+#ifndef DEFAULT_RISCV_ATTR
+#define DEFAULT_RISCV_ATTR 0
+#endif
+
 static const char default_arch[] = DEFAULT_ARCH;
 
 static unsigned xlen = 0; /* width of an x-register */
@@ -78,6 +82,7 @@ struct riscv_set_options
   int rvc; /* Generate RVC code.  */
   int rve; /* Generate RVE code.  */
   int relax; /* Emit relocs the linker is allowed to relax.  */
+  int arch_attr; /* Emit arch attribute.  */
 };
 
 static struct riscv_set_options riscv_opts =
@@ -86,6 +91,7 @@ static struct riscv_set_options riscv_opts =
   0,	/* rvc */
   0,	/* rve */
   1,	/* relax */
+  DEFAULT_RISCV_ATTR, /* arch_attr */
 };
 
 static void
@@ -169,6 +175,12 @@ const char EXP_CHARS[] = "eE";
 /* As in 0f12.456 */
 /* or    0d1.2345e12 */
 const char FLT_CHARS[] = "rRsSfFdDxXpP";
+
+/* Indicate we are already assemble any instructions or not.  */
+static bfd_boolean start_assemble = FALSE;
+
+/* Indicate arch attribute is explictly set.  */
+static bfd_boolean explicit_arch_attr = FALSE;
 
 /* Macros for encoding relaxation state for RVC branches and far jumps.  */
 #define RELAX_BRANCH_ENCODE(uncond, rvc, length)	\
@@ -2097,6 +2109,8 @@ md_assemble (char *str)
 
   const char *error = riscv_ip (str, &insn, &imm_expr, &imm_reloc, op_hash);
 
+  start_assemble = TRUE;
+
   if (error)
     {
       as_bad ("%s `%s'", error, str);
@@ -2131,6 +2145,8 @@ enum options
   OPTION_MABI,
   OPTION_RELAX,
   OPTION_NO_RELAX,
+  OPTION_ARCH_ATTR,
+  OPTION_NO_ARCH_ATTR,
   OPTION_END_OF_ENUM
 };
 
@@ -2143,6 +2159,8 @@ struct option md_longopts[] =
   {"mabi", required_argument, NULL, OPTION_MABI},
   {"mrelax", no_argument, NULL, OPTION_RELAX},
   {"mno-relax", no_argument, NULL, OPTION_NO_RELAX},
+  {"march-attr", no_argument, NULL, OPTION_ARCH_ATTR},
+  {"mno-arch-attr", no_argument, NULL, OPTION_NO_ARCH_ATTR},
 
   {NULL, no_argument, NULL, 0}
 };
@@ -2211,6 +2229,14 @@ md_parse_option (int c, const char *arg)
 
     case OPTION_NO_RELAX:
       riscv_opts.relax = FALSE;
+      break;
+
+    case OPTION_ARCH_ATTR:
+      riscv_opts.arch_attr = TRUE;
+      break;
+
+    case OPTION_NO_ARCH_ATTR:
+      riscv_opts.arch_attr = FALSE;
       break;
 
     default:
@@ -2948,6 +2974,8 @@ RISC-V options:\n\
   -mabi=ABI      set the RISC-V ABI\n\
   -mrelax        enable relax (default)\n\
   -mno-relax     disable relax\n\
+  -march-attr    generate RISC-V arch attribute\n\
+  -mno-arch-attr don't generate RISC-V arch attribute\n\
 "));
 }
 
@@ -3031,6 +3059,104 @@ s_riscv_insn (int x ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
+/* Update arch attributes.  */
+
+static void
+riscv_write_out_arch_attr (void)
+{
+  const char *arch_str = riscv_arch_str (xlen, &riscv_subsets);
+
+  bfd_elf_add_proc_attr_string (stdoutput, Tag_RISCV_arch, arch_str);
+
+  xfree ((void *)arch_str);
+}
+
+/* Add the default contents for the .riscv.attributes section.  */
+
+static void
+riscv_set_public_attributes (void)
+{
+  if (riscv_opts.arch_attr || explicit_arch_attr)
+    /* Re-write arch attribute to normalize the arch string.  */
+    riscv_write_out_arch_attr ();
+}
+
+/* Called after all assembly has been done.  */
+
+void
+riscv_md_end (void)
+{
+  riscv_set_public_attributes ();
+}
+
+/* Given a symbolic attribute NAME, return the proper integer value.
+   Returns -1 if the attribute is not known.  */
+
+int
+riscv_convert_symbolic_attribute (const char *name)
+{
+  static const struct
+  {
+    const char * name;
+    const int    tag;
+  }
+  attribute_table[] =
+    {
+      /* When you modify this table you should
+	 also modify the list in doc/c-riscv.texi.  */
+#define T(tag) {#tag, Tag_RISCV_##tag},  {"Tag_RISCV_" #tag, Tag_RISCV_##tag}
+      T(arch),
+      T(priv_spec),
+      T(priv_spec_minor),
+      T(priv_spec_revision),
+      T(unaligned_access),
+      T(stack_align),
+#undef T
+    };
+
+  unsigned int i;
+
+  if (name == NULL)
+    return -1;
+
+  for (i = 0; i < ARRAY_SIZE (attribute_table); i++)
+    if (strcmp (name, attribute_table[i].name) == 0)
+      return attribute_table[i].tag;
+
+  return -1;
+}
+
+/* Parse a .attribute directive.  */
+
+static void
+s_riscv_attribute (int ignored ATTRIBUTE_UNUSED)
+{
+  int tag = obj_elf_vendor_attribute (OBJ_ATTR_PROC);
+
+  if (tag == Tag_RISCV_arch)
+    {
+      unsigned old_xlen = xlen;
+
+      explicit_arch_attr = TRUE;
+      obj_attribute *attr;
+      attr = elf_known_obj_attributes_proc (stdoutput);
+      if (!start_assemble)
+	riscv_set_arch (attr[Tag_RISCV_arch].s);
+      else
+	as_fatal (_(".attribute arch must set before any instructions"));
+
+      if (old_xlen != xlen)
+	{
+	  /* We must re-init bfd again if xlen is changed.  */
+	  unsigned long mach = xlen == 64 ? bfd_mach_riscv64 : bfd_mach_riscv32;
+	  bfd_find_target (riscv_target_format (), stdoutput);
+
+	  if (! bfd_set_arch_mach (stdoutput, bfd_arch_riscv, mach))
+	    as_warn (_("Could not set architecture and machine"));
+	}
+    }
+}
+
 /* Pseudo-op table.  */
 
 static const pseudo_typeS riscv_pseudo_table[] =
@@ -3046,6 +3172,7 @@ static const pseudo_typeS riscv_pseudo_table[] =
   {"uleb128", s_riscv_leb128, 0},
   {"sleb128", s_riscv_leb128, 1},
   {"insn", s_riscv_insn, 0},
+  {"attribute", s_riscv_attribute, 0},
 
   { NULL, NULL, 0 },
 };

@@ -1,3 +1,19 @@
+2019-01-16  Kito Cheng  <kito@andestech.com>
+	    Nelson Chu  <nelson@andestech.com>
+
+	* elfnn-riscv.c (riscv_elf_obj_attrs_arg_type): New.
+	(elf_backend_obj_attrs_vendor): Define.
+	(elf_backend_obj_attrs_section_type): Likewise.
+	(elf_backend_obj_attrs_section): Likewise.
+	(elf_backend_obj_attrs_arg_type): Define as
+	riscv_elf_obj_attrs_arg_type.
+	* elfxx-riscv.c (riscv_estimate_digit): New.
+	(riscv_estimate_arch_strlen1): Likewise.
+	(riscv_estimate_arch_strlen): Likewise.
+	(riscv_arch_str1): Likewise.
+	(riscv_arch_str): Likewise.
+	* elfxx-riscv.h (riscv_arch_str): Declare.
+
 2019-01-14  John Darrington <john@darrington.wattle.id.au>
 
 	* bfd-in2.h [BFD_RELOC_S12Z_OPR]: New reloc.
