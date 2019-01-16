@@ -1,4 +1,20 @@
 2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Chris January  <chris.january@arm.com>
+
+	* expprint.c (dump_subexp_body_standard): Support UNOP_KIND.
+	* f-exp.y: Define 'KIND' token.
+	(exp): New pattern for KIND expressions.
+	(ptype): Handle types with a kind extension.
+	(direct_abs_decl): Extend to spot kind extensions.
+	(f77_keywords): Add 'kind' to the list.
+	(push_kind_type): New function.
+	(convert_to_kind_type): New function.
+	* f-lang.c (evaluate_subexp_f): Support UNOP_KIND.
+	* parse.c (operator_length_standard): Likewise.
+	* parser-defs.h (enum type_pieces): Add tp_kind.
+	* std-operator.def: Add UNOP_KIND.
+
+2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* f-exp.y (f_parse): Set yydebug.
 

@@ -78,6 +78,10 @@ static void growbuf_by_size (int);
 
 static int match_string_literal (void);
 
+static void push_kind_type (LONGEST val, struct type *type);
+
+static struct type *convert_to_kind_type (struct type *basetype, int kind);
+
 %}
 
 /* Although the yacc "value" of an expression is not used,
@@ -149,7 +153,7 @@ static int parse_number (struct parser_state *, const char *, int,
 
 %token <ssym> NAME_OR_INT 
 
-%token  SIZEOF 
+%token SIZEOF KIND
 %token ERROR
 
 /* Special type cases, put in to allow the parser to distinguish different
@@ -226,6 +230,10 @@ exp	:	'~' exp    %prec UNARY
 
 exp	:	SIZEOF exp       %prec UNARY
 			{ write_exp_elt_opcode (pstate, UNOP_SIZEOF); }
+	;
+
+exp	:	KIND '(' exp ')'       %prec UNARY
+			{ write_exp_elt_opcode (pstate, UNOP_KIND); }
 	;
 
 /* No more explicit array operators, we treat everything in F77 as 
@@ -530,6 +538,13 @@ ptype	:	typebase
 		      case tp_function:
 			follow_type = lookup_function_type (follow_type);
 			break;
+		      case tp_kind:
+			{
+			  int kind_val = pop_type_int ();
+			  follow_type
+			    = convert_to_kind_type (follow_type, kind_val);
+			}
+			break;
 		      }
 		  $$ = follow_type;
 		}
@@ -548,6 +563,8 @@ abs_decl:	'*'
 
 direct_abs_decl: '(' abs_decl ')'
 			{ $$ = $2; }
+	| 	'(' KIND '=' INT ')'
+			{ push_kind_type ($4.val, $4.type); }
 	| 	direct_abs_decl func_mod
 			{ push_type (tp_function); }
 	|	func_mod
@@ -773,6 +790,54 @@ parse_number (struct parser_state *par_state,
   return INT;
 }
 
+/* Called to setup the type stack when we encounter a '(kind=N)' type
+   modifier, performs some bounds checking on 'N' and then pushes this to
+   the type stack followed by the 'tp_kind' marker.  */
+static void
+push_kind_type (LONGEST val, struct type *type)
+{
+  int ival;
+
+  if (TYPE_UNSIGNED (type))
+    {
+      ULONGEST uval = static_cast <ULONGEST> (val);
+      if (uval > INT_MAX)
+	error (_("kind value out of range"));
+      ival = static_cast <int> (uval);
+    }
+  else
+    {
+      if (val > INT_MAX || val < 0)
+	error (_("kind value out of range"));
+      ival = static_cast <int> (val);
+    }
+
+  push_type_int (ival);
+  push_type (tp_kind);
+}
+
+/* Called when a type has a '(kind=N)' modifier after it, for example
+   'character(kind=1)'.  The BASETYPE is the type described by 'character'
+   in our example, and KIND is the integer '1'.  This function returns a
+   new type that represents the basetype of a specific kind.  */
+static struct type *
+convert_to_kind_type (struct type *basetype, int kind)
+{
+  if (basetype == parse_f_type (pstate)->builtin_character)
+    {
+      /* Character of kind 1 is a special case, this is the same as the
+	 base character type.  */
+      if (kind == 1)
+	return parse_f_type (pstate)->builtin_character;
+    }
+
+  error (_("unsupported kind %d for type %s"),
+	 kind, TYPE_SAFE_NAME (basetype));
+
+  /* Should never get here.  */
+  return nullptr;
+}
+
 struct token
 {
   /* The string to match against.  */
@@ -840,6 +905,9 @@ static const struct token f77_keywords[] =
   { "sizeof", SIZEOF, BINOP_END, true },
   { "real_8", REAL_S8_KEYWORD, BINOP_END, true },
   { "real", REAL_KEYWORD, BINOP_END, true },
+  /* The following correspond to actual functions in Fortran and are case
+     insensitive.  */
+  { "kind", KIND, BINOP_END, false }
 };
 
 /* Implementation of a dynamically expandable buffer for processing input

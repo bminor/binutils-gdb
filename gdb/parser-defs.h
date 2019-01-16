@@ -214,7 +214,8 @@ enum type_pieces
     tp_const, 
     tp_volatile, 
     tp_space_identifier,
-    tp_type_stack
+    tp_type_stack,
+    tp_kind
   };
 /* The stack can contain either an enum type_pieces or an int.  */
 union type_stack_elt

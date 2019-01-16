@@ -927,6 +927,7 @@ operator_length_standard (const struct expression *expr, int endpos,
     case UNOP_CHR:
     case UNOP_FLOAT:
     case UNOP_HIGH:
+    case UNOP_KIND:
     case UNOP_ODD:
     case UNOP_ORD:
     case UNOP_TRUNC:

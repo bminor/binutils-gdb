@@ -1,5 +1,11 @@
 2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.fortran/intrinsics.exp: New file.
+	* gdb.fortran/intrinsics.f90: New file.
+	* gdb.fortran/type-kinds.exp: New file.
+
+2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.fortran/dot-ops.exp: New file.
 
 2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>

@@ -244,8 +244,43 @@ struct value *
 evaluate_subexp_f (struct type *expect_type, struct expression *exp,
 		   int *pos, enum noside noside)
 {
-  /* Currently no special handling is required. */
-  return evaluate_subexp_standard (expect_type, exp, pos, noside);
+  struct value *arg1 = NULL;
+  enum exp_opcode op;
+  int pc;
+  struct type *type;
+
+  pc = *pos;
+  *pos += 1;
+  op = exp->elts[pc].opcode;
+
+  switch (op)
+    {
+    default:
+      *pos -= 1;
+      return evaluate_subexp_standard (expect_type, exp, pos, noside);
+
+    case UNOP_KIND:
+      arg1 = evaluate_subexp (NULL, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
+      type = value_type (arg1);
+
+      switch (TYPE_CODE (type))
+        {
+          case TYPE_CODE_STRUCT:
+          case TYPE_CODE_UNION:
+          case TYPE_CODE_MODULE:
+          case TYPE_CODE_FUNC:
+            error (_("argument to kind must be an intrinsic type"));
+        }
+
+      if (!TYPE_TARGET_TYPE (type))
+        return value_from_longest (builtin_type (exp->gdbarch)->builtin_int,
+				   TYPE_LENGTH (type));
+      return value_from_longest (builtin_type (exp->gdbarch)->builtin_int,
+				 TYPE_LENGTH (TYPE_TARGET_TYPE(type)));
+    }
+
+  /* Should be unreachable.  */
+  return nullptr;
 }
 
 static const char *f_extensions[] =
