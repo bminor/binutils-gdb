@@ -775,36 +775,33 @@ parse_number (struct parser_state *par_state,
 
 struct token
 {
+  /* The string to match against.  */
   const char *oper;
+
+  /* The lexer token to return.  */
   int token;
+
+  /* The expression opcode to embed within the token.  */
   enum exp_opcode opcode;
+
+  /* When this is true the string in OPER is matched exactly including
+     case, when this is false OPER is matched case insensitively.  */
+  bool case_sensitive;
 };
 
 static const struct token dot_ops[] =
 {
-  { ".and.", BOOL_AND, BINOP_END },
-  { ".AND.", BOOL_AND, BINOP_END },
-  { ".or.", BOOL_OR, BINOP_END },
-  { ".OR.", BOOL_OR, BINOP_END },
-  { ".not.", BOOL_NOT, BINOP_END },
-  { ".NOT.", BOOL_NOT, BINOP_END },
-  { ".eq.", EQUAL, BINOP_END },
-  { ".EQ.", EQUAL, BINOP_END },
-  { ".eqv.", EQUAL, BINOP_END },
-  { ".NEQV.", NOTEQUAL, BINOP_END },
-  { ".neqv.", NOTEQUAL, BINOP_END },
-  { ".EQV.", EQUAL, BINOP_END },
-  { ".ne.", NOTEQUAL, BINOP_END },
-  { ".NE.", NOTEQUAL, BINOP_END },
-  { ".le.", LEQ, BINOP_END },
-  { ".LE.", LEQ, BINOP_END },
-  { ".ge.", GEQ, BINOP_END },
-  { ".GE.", GEQ, BINOP_END },
-  { ".gt.", GREATERTHAN, BINOP_END },
-  { ".GT.", GREATERTHAN, BINOP_END },
-  { ".lt.", LESSTHAN, BINOP_END },
-  { ".LT.", LESSTHAN, BINOP_END },
-  { NULL, 0, BINOP_END }
+  { ".and.", BOOL_AND, BINOP_END, false },
+  { ".or.", BOOL_OR, BINOP_END, false },
+  { ".not.", BOOL_NOT, BINOP_END, false },
+  { ".eq.", EQUAL, BINOP_END, false },
+  { ".eqv.", EQUAL, BINOP_END, false },
+  { ".neqv.", NOTEQUAL, BINOP_END, false },
+  { ".ne.", NOTEQUAL, BINOP_END, false },
+  { ".le.", LEQ, BINOP_END, false },
+  { ".ge.", GEQ, BINOP_END, false },
+  { ".gt.", GREATERTHAN, BINOP_END, false },
+  { ".lt.", LESSTHAN, BINOP_END, false },
 };
 
 /* Holds the Fortran representation of a boolean, and the integer value we
@@ -825,25 +822,25 @@ static const struct f77_boolean_val boolean_values[]  =
   { ".false.", 0 }
 };
 
-static const struct token f77_keywords[] = 
+static const struct token f77_keywords[] =
 {
-  { "complex_16", COMPLEX_S16_KEYWORD, BINOP_END },
-  { "complex_32", COMPLEX_S32_KEYWORD, BINOP_END },
-  { "character", CHARACTER, BINOP_END },
-  { "integer_2", INT_S2_KEYWORD, BINOP_END },
-  { "logical_1", LOGICAL_S1_KEYWORD, BINOP_END },
-  { "logical_2", LOGICAL_S2_KEYWORD, BINOP_END },
-  { "logical_8", LOGICAL_S8_KEYWORD, BINOP_END },
-  { "complex_8", COMPLEX_S8_KEYWORD, BINOP_END },
-  { "integer", INT_KEYWORD, BINOP_END },
-  { "logical", LOGICAL_KEYWORD, BINOP_END },
-  { "real_16", REAL_S16_KEYWORD, BINOP_END },
-  { "complex", COMPLEX_S8_KEYWORD, BINOP_END },
-  { "sizeof", SIZEOF, BINOP_END },
-  { "real_8", REAL_S8_KEYWORD, BINOP_END },
-  { "real", REAL_KEYWORD, BINOP_END },
-  { NULL, 0, BINOP_END }
-}; 
+  /* Historically these have always been lowercase only in GDB.  */
+  { "complex_16", COMPLEX_S16_KEYWORD, BINOP_END, true },
+  { "complex_32", COMPLEX_S32_KEYWORD, BINOP_END, true },
+  { "character", CHARACTER, BINOP_END, true },
+  { "integer_2", INT_S2_KEYWORD, BINOP_END, true },
+  { "logical_1", LOGICAL_S1_KEYWORD, BINOP_END, true },
+  { "logical_2", LOGICAL_S2_KEYWORD, BINOP_END, true },
+  { "logical_8", LOGICAL_S8_KEYWORD, BINOP_END, true },
+  { "complex_8", COMPLEX_S8_KEYWORD, BINOP_END, true },
+  { "integer", INT_KEYWORD, BINOP_END, true },
+  { "logical", LOGICAL_KEYWORD, BINOP_END, true },
+  { "real_16", REAL_S16_KEYWORD, BINOP_END, true },
+  { "complex", COMPLEX_S8_KEYWORD, BINOP_END, true },
+  { "sizeof", SIZEOF, BINOP_END, true },
+  { "real_8", REAL_S8_KEYWORD, BINOP_END, true },
+  { "real", REAL_KEYWORD, BINOP_END, true },
+};
 
 /* Implementation of a dynamically expandable buffer for processing input
    characters acquired through lexptr and building a value to return in
@@ -951,18 +948,18 @@ yylex (void)
 	    }
 	}
     }
-  
+
   /* See if it is a special .foo. operator.  */
-  
-  for (int i = 0; dot_ops[i].oper != NULL; i++)
-    if (strncmp (tokstart, dot_ops[i].oper,
-		 strlen (dot_ops[i].oper)) == 0)
+  for (int i = 0; i < ARRAY_SIZE (dot_ops); i++)
+    if (strncasecmp (tokstart, dot_ops[i].oper,
+		     strlen (dot_ops[i].oper)) == 0)
       {
+	gdb_assert (!dot_ops[i].case_sensitive);
 	lexptr += strlen (dot_ops[i].oper);
 	yylval.opcode = dot_ops[i].opcode;
 	return dot_ops[i].token;
       }
-  
+
   /* See if it is an exponentiation operator.  */
 
   if (strncmp (tokstart, "**", 2) == 0)
@@ -1122,16 +1119,18 @@ yylex (void)
   lexptr += namelen;
   
   /* Catch specific keywords.  */
-  
-  for (int i = 0; f77_keywords[i].oper != NULL; i++)
+
+  for (int i = 0; i < ARRAY_SIZE (f77_keywords); i++)
     if (strlen (f77_keywords[i].oper) == namelen
-	&& strncmp (tokstart, f77_keywords[i].oper, namelen) == 0)
+	&& ((!f77_keywords[i].case_sensitive
+	     && strncasecmp (tokstart, f77_keywords[i].oper, namelen) == 0)
+	    || (f77_keywords[i].case_sensitive
+		&& strncmp (tokstart, f77_keywords[i].oper, namelen) == 0)))
       {
-	/* 	lexptr += strlen(f77_keywords[i].operator); */ 
 	yylval.opcode = f77_keywords[i].opcode;
 	return f77_keywords[i].token;
       }
-  
+
   yylval.sval.ptr = tokstart;
   yylval.sval.length = namelen;
   

@@ -1,5 +1,16 @@
 2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* f-exp.y (struct token): Add comments.
+	(dot_ops): Remove uppercase versions and the end marker.
+	(f77_keywords): Likewise.
+	(yylex): Use ARRAY_SIZE to iterate over dot_ops, assert all
+	entries in the dot_ops array are case insensitive, and use
+	strncasecmp to compare strings.  Also some whitespace cleanup in
+	this area.  Similar for the f77_keywords array, except entries in
+	this list might be case sensitive.
+
+2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* f-exp.y (struct f77_boolean_val): Add comments.
 	(boolean_values): Remove uppercase versions, and end marker.
 	(yylex): Use ARRAY_SIZE for iterating over boolean_values array,
