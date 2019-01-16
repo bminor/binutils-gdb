@@ -301,6 +301,15 @@ struct objfile
     partial_symtabs.reset (new psymtab_storage ());
   }
 
+  typedef next_adapter<struct compunit_symtab> compunits_range;
+
+  /* A range adapter that makes it possible to iterate over all
+     compunits in one objfile.  */
+
+  compunits_range compunits ()
+  {
+    return compunits_range (compunit_symtabs);
+  }
 
   /* All struct objfile's are chained together by their next pointers.
      The program space field "objfiles"  (frequently referenced via
@@ -552,19 +561,6 @@ extern void default_iterate_over_objfiles_in_search_order
    iterate_over_objfiles_in_search_order_cb_ftype *cb,
    void *cb_data, struct objfile *current_objfile);
 
-
-/* A range adapter that makes it possible to iterate over all
-   compunits in one objfile.  */
-
-class objfile_compunits : public next_adapter<struct compunit_symtab>
-{
-public:
-
-  explicit objfile_compunits (struct objfile *objfile)
-    : next_adapter<struct compunit_symtab> (objfile->compunit_symtabs)
-  {
-  }
-};
 
 /* A range adapter that makes it possible to iterate over all
    minimal symbols of an objfile.  */

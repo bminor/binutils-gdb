@@ -271,7 +271,7 @@ select_source_symtab (struct symtab *s)
 
   for (objfile *ofp : current_program_space->objfiles ())
     {
-      for (compunit_symtab *cu : objfile_compunits (ofp))
+      for (compunit_symtab *cu : ofp->compunits ())
 	{
 	  for (symtab *symtab : compunit_filetabs (cu))
 	    {
@@ -353,7 +353,7 @@ show_directories_command (struct ui_file *file, int from_tty,
 void
 forget_cached_source_info_for_objfile (struct objfile *objfile)
 {
-  for (compunit_symtab *cu : objfile_compunits (objfile))
+  for (compunit_symtab *cu : objfile->compunits ())
     {
       for (symtab *s : compunit_filetabs (cu))
 	{

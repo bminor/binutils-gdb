@@ -5629,7 +5629,7 @@ add_nonlocal_symbols (struct obstack *obstackp,
 					       symbol_name_match_type::FULL,
 					       compare_names);
 
-      for (compunit_symtab *cu : objfile_compunits (objfile))
+      for (compunit_symtab *cu : objfile->compunits ())
 	{
 	  const struct block *global_block
 	    = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cu), GLOBAL_BLOCK);
@@ -6467,7 +6467,7 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      for (compunit_symtab *s : objfile_compunits (objfile))
+      for (compunit_symtab *s : objfile->compunits ())
 	{
 	  QUIT;
 	  b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (s), GLOBAL_BLOCK);
@@ -6486,7 +6486,7 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      for (compunit_symtab *s : objfile_compunits (objfile))
+      for (compunit_symtab *s : objfile->compunits ())
 	{
 	  QUIT;
 	  b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (s), STATIC_BLOCK);
@@ -13568,7 +13568,7 @@ ada_add_global_exceptions (compiled_regex *preg,
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      for (compunit_symtab *s : objfile_compunits (objfile))
+      for (compunit_symtab *s : objfile->compunits ())
 	{
 	  const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (s);
 	  int i;

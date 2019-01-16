@@ -2171,7 +2171,7 @@ lookup_objfile_from_block (const struct block *block)
   /* Look through all blockvectors.  */
   for (objfile *obj : current_program_space->objfiles ())
     {
-      for (compunit_symtab *cust : objfile_compunits (obj))
+      for (compunit_symtab *cust : obj->compunits ())
 	if (block == BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust),
 					GLOBAL_BLOCK))
 	  {
@@ -2265,7 +2265,7 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile, int block_index,
 			  name, domain_name (domain));
     }
 
-  for (compunit_symtab *cust : objfile_compunits (objfile))
+  for (compunit_symtab *cust : objfile->compunits ())
     {
       const struct blockvector *bv;
       const struct block *block;
@@ -2763,7 +2763,7 @@ basic_lookup_transparent_type_1 (struct objfile *objfile, int block_index,
   const struct block *block;
   const struct symbol *sym;
 
-  for (compunit_symtab *cust : objfile_compunits (objfile))
+  for (compunit_symtab *cust : objfile->compunits ())
     {
       bv = COMPUNIT_BLOCKVECTOR (cust);
       block = BLOCKVECTOR_BLOCK (bv, block_index);
@@ -2904,7 +2904,7 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 
   for (objfile *obj_file : current_program_space->objfiles ())
     {
-      for (compunit_symtab *cust : objfile_compunits (obj_file))
+      for (compunit_symtab *cust : obj_file->compunits ())
 	{
 	  struct block *b;
 	  const struct blockvector *bv;
@@ -3360,7 +3360,7 @@ find_line_symtab (struct symtab *sym_tab, int line,
 
       for (objfile *objfile : current_program_space->objfiles ())
 	{
-	  for (compunit_symtab *cu : objfile_compunits (objfile))
+	  for (compunit_symtab *cu : objfile->compunits ())
 	    {
 	      for (symtab *s : compunit_filetabs (cu))
 		{
@@ -4200,7 +4200,7 @@ info_sources_command (const char *ignore, int from_tty)
   data.first = 1;
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      for (compunit_symtab *cu : objfile_compunits (objfile))
+      for (compunit_symtab *cu : objfile->compunits ())
 	{
 	  for (symtab *s : compunit_filetabs (cu))
 	    {
@@ -4492,7 +4492,7 @@ search_symbols (const char *regexp, enum search_domain kind,
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      for (compunit_symtab *cust : objfile_compunits (objfile))
+      for (compunit_symtab *cust : objfile->compunits ())
 	{
 	  bv = COMPUNIT_BLOCKVECTOR (cust);
 	  for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)
@@ -5293,7 +5293,7 @@ default_collect_symbol_completion_matches_break_on
   /* Add completions for all currently loaded symbol tables.  */
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      for (compunit_symtab *cust : objfile_compunits (objfile))
+      for (compunit_symtab *cust : objfile->compunits ())
 	add_symtab_completions (cust, tracker, mode, lookup_name,
 				sym_text, word, code);
     }
@@ -5602,7 +5602,7 @@ make_source_files_completion_list (const char *text, const char *word)
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      for (compunit_symtab *cu : objfile_compunits (objfile))
+      for (compunit_symtab *cu : objfile->compunits ())
 	{
 	  for (symtab *s : compunit_filetabs (cu))
 	    {

@@ -1397,7 +1397,7 @@ add_symbol_overload_list_qualified (const char *func_name,
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      for (compunit_symtab *cust : objfile_compunits (objfile))
+      for (compunit_symtab *cust : objfile->compunits ())
 	{
 	  QUIT;
 	  b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), GLOBAL_BLOCK);
@@ -1407,7 +1407,7 @@ add_symbol_overload_list_qualified (const char *func_name,
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      for (compunit_symtab *cust : objfile_compunits (objfile))
+      for (compunit_symtab *cust : objfile->compunits ())
 	{
 	  QUIT;
 	  b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), STATIC_BLOCK);

@@ -94,7 +94,7 @@ mi_cmd_file_list_exec_source_files (const char *command, char **argv, int argc)
   /* Look at all of the file symtabs.  */
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      for (compunit_symtab *cu : objfile_compunits (objfile))
+      for (compunit_symtab *cu : objfile->compunits ())
 	{
 	  for (symtab *s : compunit_filetabs (cu))
 	    {

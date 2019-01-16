@@ -1150,7 +1150,7 @@ iterate_over_all_matching_symtabs
 						    NULL, NULL,
 						    search_domain);
 
-	for (compunit_symtab *cu : objfile_compunits (objfile))
+	for (compunit_symtab *cu : objfile->compunits ())
 	  {
 	    struct symtab *symtab = COMPUNIT_FILETABS (cu);
 

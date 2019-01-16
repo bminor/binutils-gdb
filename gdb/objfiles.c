@@ -787,7 +787,7 @@ objfile_relocate1 (struct objfile *objfile,
 
   /* OK, get all the symtabs.  */
   {
-    for (compunit_symtab *cust : objfile_compunits (objfile))
+    for (compunit_symtab *cust : objfile->compunits ())
       {
 	for (symtab *s : compunit_filetabs (cust))
 	  {
@@ -805,7 +805,7 @@ objfile_relocate1 (struct objfile *objfile,
 	  }
       }
 
-    for (compunit_symtab *cust : objfile_compunits (objfile))
+    for (compunit_symtab *cust : objfile->compunits ())
       {
 	const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (cust);
 	int block_line_section = COMPUNIT_BLOCK_LINE_SECTION (cust);
