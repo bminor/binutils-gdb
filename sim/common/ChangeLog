@@ -1,6 +1,6 @@
 2019-01-16  Pavel I. Kryukov  <kryukov@frtk.ru>
 
-	* sim-arange.c: eliminate DEFINE_NON_INLINE_P
+	* sim-arange.c (DEFINE_INLINE_P, DEFINE_NON_INLINE_P): Remove.
 
 2019-01-15  Simon Marchi  <simon.marchi@ericsson.com>
 

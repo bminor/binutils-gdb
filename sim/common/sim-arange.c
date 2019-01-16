@@ -32,9 +32,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <string.h>
 #endif
 
-#define DEFINE_INLINE_P (! defined (SIM_ARANGE_C_INCLUDED))
-#define DEFINE_NON_INLINE_P defined (SIM_ARANGE_C_INCLUDED)
-
 #ifdef SIM_ARANGE_C_INCLUDED
 
 /* Insert a range.  */
