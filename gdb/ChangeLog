@@ -1,3 +1,23 @@
+2019-01-16  Keith Seitz  <keiths@redhat.com>
+
+	PR gdb/23773
+	* dwarf2read.c (dwarf2_cu) <ancestor>: New field.
+	<builder>: Rename to ..
+	<m_builder>: ... this and make private.
+	(dwarf2_cu::get_builder): New method.  Change all users of
+	`builder' to use this method.
+	(dwarf2_start_symtab): Move to ...
+	(dwarf2_cu::start_symtab): ... here.  Update all callers
+	(setup_type_unit_groups): Move to ...
+	(dwarf2_cu::setup_type_unit_groups): ... here.  Update all
+	callers.
+	(dwarf2_cu::reset_builder): New method.
+	(process_full_compunit, process_full_type_unit): Use
+	dwarf2_cu::reset_builder.
+	(follow_die_offset): Record the ancestor CU if it is different
+	from the followed DIE's CU.
+	(follow_die_sig_1): Likewise.
+
 2019-01-15  Tom Tromey  <tom@tromey.com>
 
 	* remote.c (class remote_state) <buf>: Now a char_vector.

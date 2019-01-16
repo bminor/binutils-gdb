@@ -421,6 +421,22 @@ struct dwarf2_cu
 
   DISABLE_COPY_AND_ASSIGN (dwarf2_cu);
 
+  /* TU version of handle_DW_AT_stmt_list for read_type_unit_scope.
+     Create the set of symtabs used by this TU, or if this TU is sharing
+     symtabs with another TU and the symtabs have already been created
+     then restore those symtabs in the line header.
+     We don't need the pc/line-number mapping for type units.  */
+  void setup_type_unit_groups (struct die_info *die);
+
+  /* Start a symtab for DWARF.  NAME, COMP_DIR, LOW_PC are passed to the
+     buildsym_compunit constructor.  */
+  struct compunit_symtab *start_symtab (const char *name,
+					const char *comp_dir,
+					CORE_ADDR low_pc);
+
+  /* Reset the builder.  */
+  void reset_builder () { m_builder.reset (); }
+
   /* The header of the compilation unit.  */
   struct comp_unit_head header {};
 
@@ -436,10 +452,12 @@ struct dwarf2_cu
 
   const char *producer = nullptr;
 
+private:
   /* The symtab builder for this CU.  This is only non-NULL when full
      symbols are being read.  */
-  std::unique_ptr<buildsym_compunit> builder;
+  std::unique_ptr<buildsym_compunit> m_builder;
 
+public:
   /* The generic symbol table building routines have separate lists for
      file scope symbols and all all other scopes (local scopes).  So
      we need to select the right one to pass to add_symbol_to_list().
@@ -562,6 +580,24 @@ struct dwarf2_cu
   bool processing_has_namespace_info : 1;
 
   struct partial_die_info *find_partial_die (sect_offset sect_off);
+
+  /* If this CU was inherited by another CU (via specification,
+     abstract_origin, etc), this is the ancestor CU.  */
+  dwarf2_cu *ancestor;
+
+  /* Get the buildsym_compunit for this CU.  */
+  buildsym_compunit *get_builder ()
+  {
+    /* If this CU has a builder associated with it, use that.  */
+    if (m_builder != nullptr)
+      return m_builder.get ();
+
+    /* Otherwise, search ancestors for a valid builder.  */
+    if (ancestor != nullptr)
+      return ancestor->get_builder ();
+
+    return nullptr;
+  }
 };
 
 /* A struct that can be used as a hash key for tables based on DW_AT_stmt_list.
@@ -1583,10 +1619,6 @@ static void dwarf_decode_lines (struct line_header *, const char *,
 
 static void dwarf2_start_subfile (struct dwarf2_cu *, const char *,
 				  const char *);
-
-static struct compunit_symtab *dwarf2_start_symtab (struct dwarf2_cu *,
-						    const char *, const char *,
-						    CORE_ADDR);
 
 static struct symbol *new_symbol (struct die_info *, struct type *,
 				  struct dwarf2_cu *, struct symbol * = NULL);
@@ -9797,7 +9829,7 @@ fixup_go_packaging (struct dwarf2_cu *cu)
   struct pending *list;
   int i;
 
-  for (list = *cu->builder->get_global_symbols ();
+  for (list = *cu->get_builder ()->get_global_symbols ();
        list != NULL;
        list = list->next)
     {
@@ -9852,7 +9884,7 @@ fixup_go_packaging (struct dwarf2_cu *cu)
       SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
       SYMBOL_TYPE (sym) = type;
 
-      add_symbol_to_list (sym, cu->builder->get_global_symbols ());
+      add_symbol_to_list (sym, cu->get_builder ()->get_global_symbols ());
 
       xfree (package_name);
     }
@@ -10347,7 +10379,7 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
   get_scope_pc_bounds (cu->dies, &lowpc, &highpc, cu);
 
   addr = gdbarch_adjust_dwarf2_addr (gdbarch, highpc + baseaddr);
-  static_block = cu->builder->end_symtab_get_static_block (addr, 0, 1);
+  static_block = cu->get_builder ()->end_symtab_get_static_block (addr, 0, 1);
 
   /* If the comp unit has DW_AT_ranges, it may have discontiguous ranges.
      Also, DW_AT_ranges may record ranges not belonging to any child DIEs
@@ -10356,7 +10388,7 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
      this comp unit.  */
   dwarf2_record_block_ranges (cu->dies, static_block, baseaddr, cu);
 
-  cust = cu->builder->end_symtab_from_static_block (static_block,
+  cust = cu->get_builder ()->end_symtab_from_static_block (static_block,
 						    SECT_OFF_TEXT (objfile),
 						    0);
 
@@ -10405,7 +10437,7 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
   dwarf2_per_objfile->just_read_cus.push_back (per_cu);
 
   /* Not needed any more.  */
-  cu->builder.reset ();
+  cu->reset_builder ();
 }
 
 /* Generate full symbol information for type unit PER_CU, whose DIEs have
@@ -10451,7 +10483,8 @@ process_full_type_unit (struct dwarf2_per_cu_data *per_cu,
      this TU's symbols to the existing symtab.  */
   if (sig_type->type_unit_group->compunit_symtab == NULL)
     {
-      cust = cu->builder->end_expandable_symtab (0, SECT_OFF_TEXT (objfile));
+      buildsym_compunit *builder = cu->get_builder ();
+      cust = builder->end_expandable_symtab (0, SECT_OFF_TEXT (objfile));
       sig_type->type_unit_group->compunit_symtab = cust;
 
       if (cust != NULL)
@@ -10467,7 +10500,7 @@ process_full_type_unit (struct dwarf2_per_cu_data *per_cu,
     }
   else
     {
-      cu->builder->augment_type_symtab ();
+      cu->get_builder ()->augment_type_symtab ();
       cust = sig_type->type_unit_group->compunit_symtab;
     }
 
@@ -10481,7 +10514,7 @@ process_full_type_unit (struct dwarf2_per_cu_data *per_cu,
     }
 
   /* Not needed any more.  */
-  cu->builder.reset ();
+  cu->reset_builder ();
 }
 
 /* Process an imported unit DIE.  */
@@ -11176,10 +11209,11 @@ read_namespace_alias (struct die_info *die, struct dwarf2_cu *cu)
 static struct using_direct **
 using_directives (struct dwarf2_cu *cu)
 {
-  if (cu->language == language_ada && cu->builder->outermost_context_p ())
-    return cu->builder->get_global_using_directives ();
+  if (cu->language == language_ada
+      && cu->get_builder ()->outermost_context_p ())
+    return cu->get_builder ()->get_global_using_directives ();
   else
-    return cu->builder->get_local_using_directives ();
+    return cu->get_builder ()->get_local_using_directives ();
 }
 
 /* Read the import statement specified by the given die and record it.  */
@@ -11540,7 +11574,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (cu->producer && strstr (cu->producer, "GNU Go ") != NULL)
     set_cu_language (DW_LANG_Go, cu);
 
-  dwarf2_start_symtab (cu, fnd.name, fnd.comp_dir, lowpc);
+  cu->start_symtab (fnd.name, fnd.comp_dir, lowpc);
 
   /* Decode line number information if present.  We do this before
      processing child DIEs, so that the line header table is available
@@ -11584,16 +11618,9 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
     }
 }
 
-/* TU version of handle_DW_AT_stmt_list for read_type_unit_scope.
-   Create the set of symtabs used by this TU, or if this TU is sharing
-   symtabs with another TU and the symtabs have already been created
-   then restore those symtabs in the line header.
-   We don't need the pc/line-number mapping for type units.  */
-
-static void
-setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
+void
+dwarf2_cu::setup_type_unit_groups (struct die_info *die)
 {
-  struct dwarf2_per_cu_data *per_cu = cu->per_cu;
   struct type_unit_group *tu_group;
   int first_time;
   struct attribute *attr;
@@ -11603,12 +11630,12 @@ setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
   gdb_assert (per_cu->is_debug_types);
   sig_type = (struct signatured_type *) per_cu;
 
-  attr = dwarf2_attr (die, DW_AT_stmt_list, cu);
+  attr = dwarf2_attr (die, DW_AT_stmt_list, this);
 
   /* If we're using .gdb_index (includes -readnow) then
      per_cu->type_unit_group may not have been set up yet.  */
   if (sig_type->type_unit_group == NULL)
-    sig_type->type_unit_group = get_type_unit_group (cu, attr);
+    sig_type->type_unit_group = get_type_unit_group (this, attr);
   tu_group = sig_type->type_unit_group;
 
   /* If we've already processed this stmt_list there's no real need to
@@ -11623,77 +11650,77 @@ setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
   if (attr != NULL)
     {
       sect_offset line_offset = (sect_offset) DW_UNSND (attr);
-      lh = dwarf_decode_line_header (line_offset, cu);
+      lh = dwarf_decode_line_header (line_offset, this);
     }
   if (lh == NULL)
     {
       if (first_time)
-	dwarf2_start_symtab (cu, "", NULL, 0);
+	start_symtab ("", NULL, 0);
       else
 	{
 	  gdb_assert (tu_group->symtabs == NULL);
-	  gdb_assert (cu->builder == nullptr);
+	  gdb_assert (m_builder == nullptr);
 	  struct compunit_symtab *cust = tu_group->compunit_symtab;
-	  cu->builder.reset (new struct buildsym_compunit
-			     (COMPUNIT_OBJFILE (cust), "",
-			      COMPUNIT_DIRNAME (cust),
-			      compunit_language (cust),
-			      0, cust));
+	  m_builder.reset (new struct buildsym_compunit
+			   (COMPUNIT_OBJFILE (cust), "",
+			    COMPUNIT_DIRNAME (cust),
+			    compunit_language (cust),
+			    0, cust));
 	}
       return;
     }
 
-  cu->line_header = lh.release ();
-  cu->line_header_die_owner = die;
+  line_header = lh.release ();
+  line_header_die_owner = die;
 
   if (first_time)
     {
-      struct compunit_symtab *cust = dwarf2_start_symtab (cu, "", NULL, 0);
+      struct compunit_symtab *cust = start_symtab ("", NULL, 0);
 
       /* Note: We don't assign tu_group->compunit_symtab yet because we're
 	 still initializing it, and our caller (a few levels up)
 	 process_full_type_unit still needs to know if this is the first
 	 time.  */
 
-      tu_group->num_symtabs = cu->line_header->file_names.size ();
+      tu_group->num_symtabs = line_header->file_names.size ();
       tu_group->symtabs = XNEWVEC (struct symtab *,
-				   cu->line_header->file_names.size ());
+				   line_header->file_names.size ());
 
-      for (i = 0; i < cu->line_header->file_names.size (); ++i)
+      for (i = 0; i < line_header->file_names.size (); ++i)
 	{
-	  file_entry &fe = cu->line_header->file_names[i];
+	  file_entry &fe = line_header->file_names[i];
 
-	  dwarf2_start_subfile (cu, fe.name, fe.include_dir (cu->line_header));
-
-	  if (cu->builder->get_current_subfile ()->symtab == NULL)
+	  dwarf2_start_subfile (this, fe.name,
+				fe.include_dir (line_header));
+	  buildsym_compunit *b = get_builder ();
+	  if (b->get_current_subfile ()->symtab == NULL)
 	    {
 	      /* NOTE: start_subfile will recognize when it's been
 		 passed a file it has already seen.  So we can't
 		 assume there's a simple mapping from
 		 cu->line_header->file_names to subfiles, plus
 		 cu->line_header->file_names may contain dups.  */
-	      cu->builder->get_current_subfile ()->symtab
-		= allocate_symtab (cust,
-				   cu->builder->get_current_subfile ()->name);
+	      b->get_current_subfile ()->symtab
+		= allocate_symtab (cust, b->get_current_subfile ()->name);
 	    }
 
-	  fe.symtab = cu->builder->get_current_subfile ()->symtab;
+	  fe.symtab = b->get_current_subfile ()->symtab;
 	  tu_group->symtabs[i] = fe.symtab;
 	}
     }
   else
     {
-      gdb_assert (cu->builder == nullptr);
+      gdb_assert (m_builder == nullptr);
       struct compunit_symtab *cust = tu_group->compunit_symtab;
-      cu->builder.reset (new struct buildsym_compunit
-			 (COMPUNIT_OBJFILE (cust), "",
-			  COMPUNIT_DIRNAME (cust),
-			  compunit_language (cust),
-			  0, cust));
+      m_builder.reset (new struct buildsym_compunit
+		       (COMPUNIT_OBJFILE (cust), "",
+			COMPUNIT_DIRNAME (cust),
+			compunit_language (cust),
+			0, cust));
 
-      for (i = 0; i < cu->line_header->file_names.size (); ++i)
+      for (i = 0; i < line_header->file_names.size (); ++i)
 	{
-	  file_entry &fe = cu->line_header->file_names[i];
+	  file_entry &fe = line_header->file_names[i];
 
 	  fe.symtab = tu_group->symtabs[i];
 	}
@@ -11721,7 +11748,7 @@ read_type_unit_scope (struct die_info *die, struct dwarf2_cu *cu)
   /* Initialize (or reinitialize) the machinery for building symtabs.
      We do this before processing child DIEs, so that the line header table
      is available for DW_AT_decl_file.  */
-  setup_type_unit_groups (die, cu);
+  cu->setup_type_unit_groups (die);
 
   if (die->child != NULL)
     {
@@ -13714,7 +13741,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	}
     }
 
-  newobj = cu->builder->push_context (0, lowpc);
+  newobj = cu->get_builder ()->push_context (0, lowpc);
   newobj->name = new_symbol (die, read_type_die (die, cu), cu,
 			     (struct symbol *) templ_func);
 
@@ -13734,7 +13761,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
       attr_to_dynamic_prop (attr, die, cu, newobj->static_link);
     }
 
-  cu->list_in_scope = cu->builder->get_local_symbols ();
+  cu->list_in_scope = cu->get_builder ()->get_local_symbols ();
 
   if (die->child != NULL)
     {
@@ -13782,9 +13809,9 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	}
     }
 
-  struct context_stack cstk = cu->builder->pop_context ();
+  struct context_stack cstk = cu->get_builder ()->pop_context ();
   /* Make a block for the local symbols within.  */
-  block = cu->builder->finish_block (cstk.name, cstk.old_blocks,
+  block = cu->get_builder ()->finish_block (cstk.name, cstk.old_blocks,
 				     cstk.static_link, lowpc, highpc);
 
   /* For C++, set the block's scope.  */
@@ -13826,13 +13853,13 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
      a function declares a class that has methods).  This means that
      when we finish processing a function scope, we may need to go
      back to building a containing block's symbol lists.  */
-  *cu->builder->get_local_symbols () = cstk.locals;
-  cu->builder->set_local_using_directives (cstk.local_using_directives);
+  *cu->get_builder ()->get_local_symbols () = cstk.locals;
+  cu->get_builder ()->set_local_using_directives (cstk.local_using_directives);
 
   /* If we've finished processing a top-level function, subsequent
      symbols go in the file symbol list.  */
-  if (cu->builder->outermost_context_p ())
-    cu->list_in_scope = cu->builder->get_file_symbols ();
+  if (cu->get_builder ()->outermost_context_p ())
+    cu->list_in_scope = cu->get_builder ()->get_file_symbols ();
 }
 
 /* Process all the DIES contained within a lexical block scope.  Start
@@ -13871,7 +13898,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
   lowpc = gdbarch_adjust_dwarf2_addr (gdbarch, lowpc + baseaddr);
   highpc = gdbarch_adjust_dwarf2_addr (gdbarch, highpc + baseaddr);
 
-  cu->builder->push_context (0, lowpc);
+  cu->get_builder ()->push_context (0, lowpc);
   if (die->child != NULL)
     {
       child_die = die->child;
@@ -13882,13 +13909,13 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
 	}
     }
   inherit_abstract_dies (die, cu);
-  struct context_stack cstk = cu->builder->pop_context ();
+  struct context_stack cstk = cu->get_builder ()->pop_context ();
 
-  if (*cu->builder->get_local_symbols () != NULL
-      || (*cu->builder->get_local_using_directives ()) != NULL)
+  if (*cu->get_builder ()->get_local_symbols () != NULL
+      || (*cu->get_builder ()->get_local_using_directives ()) != NULL)
     {
       struct block *block
-        = cu->builder->finish_block (0, cstk.old_blocks, NULL,
+        = cu->get_builder ()->finish_block (0, cstk.old_blocks, NULL,
 				     cstk.start_addr, highpc);
 
       /* Note that recording ranges after traversing children, as we
@@ -13903,8 +13930,8 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
          to do.  */
       dwarf2_record_block_ranges (die, block, baseaddr, cu);
     }
-  *cu->builder->get_local_symbols () = cstk.locals;
-  cu->builder->set_local_using_directives (cstk.local_using_directives);
+  *cu->get_builder ()->get_local_symbols () = cstk.locals;
+  cu->get_builder ()->set_local_using_directives (cstk.local_using_directives);
 }
 
 /* Read in DW_TAG_call_site and insert it to CU->call_site_htab.  */
@@ -14827,7 +14854,7 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
 
 	  low = gdbarch_adjust_dwarf2_addr (gdbarch, low + baseaddr);
 	  high = gdbarch_adjust_dwarf2_addr (gdbarch, high + baseaddr);
-	  cu->builder->record_block_range (block, low, high - 1);
+	  cu->get_builder ()->record_block_range (block, low, high - 1);
         }
     }
 
@@ -14852,7 +14879,7 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
 	  end += baseaddr;
 	  start = gdbarch_adjust_dwarf2_addr (gdbarch, start);
 	  end = gdbarch_adjust_dwarf2_addr (gdbarch, end);
-	  cu->builder->record_block_range (block, start, end - 1);
+	  cu->get_builder ()->record_block_range (block, start, end - 1);
 	  blockvec.emplace_back (start, end);
 	});
 
@@ -20672,7 +20699,7 @@ lnp_state_machine::handle_set_file (file_name_index file)
     {
       const char *dir = fe->include_dir (m_line_header);
 
-      m_last_subfile = m_cu->builder->get_current_subfile ();
+      m_last_subfile = m_cu->get_builder ()->get_current_subfile ();
       m_line_has_non_zero_discriminator = m_discriminator != 0;
       dwarf2_start_subfile (m_cu, fe->name, dir);
     }
@@ -20730,7 +20757,7 @@ dwarf_record_line_p (struct dwarf2_cu *cu,
 		     int line_has_non_zero_discriminator,
 		     struct subfile *last_subfile)
 {
-  if (cu->builder->get_current_subfile () != last_subfile)
+  if (cu->get_builder ()->get_current_subfile () != last_subfile)
     return 1;
   if (line != last_line)
     return 1;
@@ -20761,7 +20788,7 @@ dwarf_record_line_1 (struct gdbarch *gdbarch, struct subfile *subfile,
     }
 
   if (cu != nullptr)
-    cu->builder->record_line (subfile, line, addr);
+    cu->get_builder ()->record_line (subfile, line, addr);
 }
 
 /* Subroutine of dwarf_decode_lines_1 to simplify it.
@@ -20812,7 +20839,7 @@ lnp_state_machine::record_line (bool end_sequence)
       fe->included_p = 1;
       if (m_record_lines_p && (producer_is_codewarrior (m_cu) || m_is_stmt))
 	{
-	  if (m_last_subfile != m_cu->builder->get_current_subfile ()
+	  if (m_last_subfile != m_cu->get_builder ()->get_current_subfile ()
 	      || end_sequence)
 	    {
 	      dwarf_finish_line (m_gdbarch, m_last_subfile, m_address,
@@ -20825,12 +20852,13 @@ lnp_state_machine::record_line (bool end_sequence)
 				       m_line_has_non_zero_discriminator,
 				       m_last_subfile))
 		{
+		  buildsym_compunit *builder = m_cu->get_builder ();
 		  dwarf_record_line_1 (m_gdbarch,
-				       m_cu->builder->get_current_subfile (),
+				       builder->get_current_subfile (),
 				       m_line, m_address,
 				       m_currently_recording_lines ? m_cu : nullptr);
 		}
-	      m_last_subfile = m_cu->builder->get_current_subfile ();
+	      m_last_subfile = m_cu->get_builder ()->get_current_subfile ();
 	      m_last_line = m_line;
 	    }
 	}
@@ -21153,7 +21181,8 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir,
       /* Make sure a symtab is created for every file, even files
 	 which contain only variables (i.e. no code with associated
 	 line numbers).  */
-      struct compunit_symtab *cust = cu->builder->get_compunit_symtab ();
+      buildsym_compunit *builder = cu->get_builder ();
+      struct compunit_symtab *cust = builder->get_compunit_symtab ();
       int i;
 
       for (i = 0; i < lh->file_names.size (); i++)
@@ -21162,13 +21191,13 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir,
 
 	  dwarf2_start_subfile (cu, fe.name, fe.include_dir (lh));
 
-	  if (cu->builder->get_current_subfile ()->symtab == NULL)
+	  if (builder->get_current_subfile ()->symtab == NULL)
 	    {
-	      cu->builder->get_current_subfile ()->symtab
+	      builder->get_current_subfile ()->symtab
 		= allocate_symtab (cust,
-				   cu->builder->get_current_subfile ()->name);
+				   builder->get_current_subfile ()->name);
 	    }
-	  fe.symtab = cu->builder->get_current_subfile ()->symtab;
+	  fe.symtab = builder->get_current_subfile ()->symtab;
 	}
     }
 }
@@ -21215,7 +21244,7 @@ dwarf2_start_subfile (struct dwarf2_cu *cu, const char *filename,
       filename = copy;
     }
 
-  cu->builder->start_subfile (filename);
+  cu->get_builder ()->start_subfile (filename);
 
   if (copy != NULL)
     xfree (copy);
@@ -21224,24 +21253,24 @@ dwarf2_start_subfile (struct dwarf2_cu *cu, const char *filename,
 /* Start a symtab for DWARF.  NAME, COMP_DIR, LOW_PC are passed to the
    buildsym_compunit constructor.  */
 
-static struct compunit_symtab *
-dwarf2_start_symtab (struct dwarf2_cu *cu,
-		     const char *name, const char *comp_dir, CORE_ADDR low_pc)
+struct compunit_symtab *
+dwarf2_cu::start_symtab (const char *name, const char *comp_dir,
+			 CORE_ADDR low_pc)
 {
-  gdb_assert (cu->builder == nullptr);
+  gdb_assert (m_builder == nullptr);
 
-  cu->builder.reset (new struct buildsym_compunit
-		     (cu->per_cu->dwarf2_per_objfile->objfile,
-		      name, comp_dir, cu->language, low_pc));
+  m_builder.reset (new struct buildsym_compunit
+		   (per_cu->dwarf2_per_objfile->objfile,
+		    name, comp_dir, language, low_pc));
 
-  cu->list_in_scope = cu->builder->get_file_symbols ();
+  list_in_scope = get_builder ()->get_file_symbols ();
 
-  cu->builder->record_debugformat ("DWARF 2");
-  cu->builder->record_producer (cu->producer);
+  get_builder ()->record_debugformat ("DWARF 2");
+  get_builder ()->record_producer (producer);
 
-  cu->processing_has_namespace_info = false;
+  processing_has_namespace_info = false;
 
-  return cu->builder->get_compunit_symtab ();
+  return get_builder ()->get_compunit_symtab ();
 }
 
 static void
@@ -21427,7 +21456,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
                  access them globally.  For instance, we want to be able
                  to break on a nested subprogram without having to
                  specify the context.  */
-	      list_to_add = cu->builder->get_global_symbols ();
+	      list_to_add = cu->get_builder ()->get_global_symbols ();
 	    }
 	  else
 	    {
@@ -21470,7 +21499,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	      if (!suppress_add)
 		{
 		  if (attr2 && (DW_UNSND (attr2) != 0))
-		    list_to_add = cu->builder->get_global_symbols ();
+		    list_to_add = cu->get_builder ()->get_global_symbols ();
 		  else
 		    list_to_add = cu->list_in_scope;
 		}
@@ -21516,8 +21545,9 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		  /* A variable with DW_AT_external is never static,
 		     but it may be block-scoped.  */
 		  list_to_add
-		    = (cu->list_in_scope == cu->builder->get_file_symbols ()
-		       ? cu->builder->get_global_symbols ()
+		    = ((cu->list_in_scope
+			== cu->get_builder ()->get_file_symbols ())
+		       ? cu->get_builder ()->get_global_symbols ()
 		       : cu->list_in_scope);
 		}
 	      else
@@ -21549,8 +21579,9 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		  /* A variable with DW_AT_external is never static, but it
 		     may be block-scoped.  */
 		  list_to_add
-		    = (cu->list_in_scope == cu->builder->get_file_symbols ()
-		       ? cu->builder->get_global_symbols ()
+		    = ((cu->list_in_scope
+			== cu->get_builder ()->get_file_symbols ())
+		       ? cu->get_builder ()->get_global_symbols ()
 		       : cu->list_in_scope);
 
 		  SYMBOL_ACLASS_INDEX (sym) = LOC_UNRESOLVED;
@@ -21572,7 +21603,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	       pretend it's a local variable in that case so that the user can
 	       still see it.  */
 	    struct context_stack *curr
-	      = cu->builder->get_current_context_stack ();
+	      = cu->get_builder ()->get_current_context_stack ();
 	    if (curr != nullptr && curr->name != nullptr)
 	      SYMBOL_IS_ARGUMENT (sym) = 1;
 	    attr = dwarf2_attr (die, DW_AT_location, cu);
@@ -21617,10 +21648,11 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 
 	    if (!suppress_add)
 	      {
+		buildsym_compunit *builder = cu->get_builder ();
 		list_to_add
-		  = (cu->list_in_scope == cu->builder->get_file_symbols ()
+		  = (cu->list_in_scope == builder->get_file_symbols ()
 		     && cu->language == language_cplus
-		     ? cu->builder->get_global_symbols ()
+		     ? builder->get_global_symbols ()
 		     : cu->list_in_scope);
 
 		/* The semantics of C++ state that "struct foo {
@@ -21661,21 +21693,21 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	       DW_TAG_class_type, etc. block.  */
 
 	    list_to_add
-	      = (cu->list_in_scope == cu->builder->get_file_symbols ()
+	      = (cu->list_in_scope == cu->get_builder ()->get_file_symbols ()
 		 && cu->language == language_cplus
-		 ? cu->builder->get_global_symbols ()
+		 ? cu->get_builder ()->get_global_symbols ()
 		 : cu->list_in_scope);
 	  }
 	  break;
 	case DW_TAG_imported_declaration:
 	case DW_TAG_namespace:
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
-	  list_to_add = cu->builder->get_global_symbols ();
+	  list_to_add = cu->get_builder ()->get_global_symbols ();
 	  break;
 	case DW_TAG_module:
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
 	  SYMBOL_DOMAIN (sym) = MODULE_DOMAIN;
-	  list_to_add = cu->builder->get_global_symbols ();
+	  list_to_add = cu->get_builder ()->get_global_symbols ();
 	  break;
 	case DW_TAG_common_block:
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_COMMON_BLOCK;
@@ -21706,7 +21738,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	 namespaces based on the demangled name.  */
       if (!cu->processing_has_namespace_info
 	  && cu->language == language_cplus)
-	cp_scan_for_anonymous_namespaces (cu->builder.get (), sym, objfile);
+	cp_scan_for_anonymous_namespaces (cu->get_builder (), sym, objfile);
     }
   return (sym);
 }
@@ -23007,6 +23039,10 @@ follow_die_offset (sect_offset sect_off, int offset_in_dwz,
 
   *ref_cu = target_cu;
   temp_die.sect_off = sect_off;
+
+  if (target_cu != cu)
+    target_cu->ancestor = cu;
+
   return (struct die_info *) htab_find_with_hash (target_cu->die_hash,
 						  &temp_die,
 						  to_underlying (sect_off));
@@ -23341,7 +23377,7 @@ follow_die_sig_1 (struct die_info *src_die, struct signatured_type *sig_type,
 		  struct dwarf2_cu **ref_cu)
 {
   struct die_info temp_die;
-  struct dwarf2_cu *sig_cu;
+  struct dwarf2_cu *sig_cu, *cu = *ref_cu;
   struct die_info *die;
 
   /* While it might be nice to assert sig_type->type == NULL here,
@@ -23375,6 +23411,9 @@ follow_die_sig_1 (struct die_info *src_die, struct signatured_type *sig_type,
 	}
 
       *ref_cu = sig_cu;
+      if (sig_cu != cu)
+	sig_cu->ancestor = cu;
+
       return die;
     }
 
@@ -23951,7 +23990,7 @@ macro_start_file (struct dwarf2_cu *cu,
     {
       /* Note: We don't create a macro table for this compilation unit
 	 at all until we actually get a filename.  */
-      struct macro_table *macro_table = cu->builder->get_macro_table ();
+      struct macro_table *macro_table = cu->get_builder ()->get_macro_table ();
 
       /* If we have no current file, then this must be the start_file
 	 directive for the compilation unit's main source file.  */

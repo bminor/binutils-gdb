@@ -1,3 +1,8 @@
+2019-01-16  Keith Seitz  <keiths@redhat.com>
+
+	PR gdb/23773
+	* gdb.dwarf2/inlined_subroutine-inheritance.exp: New file.
+
 2019-01-14  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
 	* gdb.arch/vsx-regs.exp: Add tests that use the vector register
