@@ -239,11 +239,31 @@ f_collect_symbol_completion_matches (completion_tracker &tracker,
 						      text, word, ":", code);
 }
 
+/* Special expression evaluation cases for Fortran.  */
+struct value *
+evaluate_subexp_f (struct type *expect_type, struct expression *exp,
+		   int *pos, enum noside noside)
+{
+  /* Currently no special handling is required. */
+  return evaluate_subexp_standard (expect_type, exp, pos, noside);
+}
+
 static const char *f_extensions[] =
 {
   ".f", ".F", ".for", ".FOR", ".ftn", ".FTN", ".fpp", ".FPP",
   ".f90", ".F90", ".f95", ".F95", ".f03", ".F03", ".f08", ".F08",
   NULL
+};
+
+/* Expression processing for Fortran.  */
+static const struct exp_descriptor exp_descriptor_f =
+{
+  print_subexp_standard,
+  operator_length_standard,
+  operator_check_standard,
+  op_name_standard,
+  dump_subexp_body_standard,
+  evaluate_subexp_f
 };
 
 extern const struct language_defn f_language_defn =
@@ -256,7 +276,7 @@ extern const struct language_defn f_language_defn =
   array_column_major,
   macro_expansion_no,
   f_extensions,
-  &exp_descriptor_standard,
+  &exp_descriptor_f,
   f_parse,			/* parser */
   null_post_parser,
   f_printchar,			/* Print character constant */

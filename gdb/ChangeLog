@@ -1,5 +1,12 @@
 2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* f-lang.c (evaluate_subexp_f): New function.
+	(exp_descriptor_f): New global.
+	(f_language_defn): Use exp_descriptor_f instead of
+	exp_descriptor_standard.
+
+2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* f-exp.y (struct token): Add comments.
 	(dot_ops): Remove uppercase versions and the end marker.
 	(f77_keywords): Likewise.
