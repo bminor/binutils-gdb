@@ -293,6 +293,14 @@ struct objfile
 
   DISABLE_COPY_AND_ASSIGN (objfile);
 
+  /* A range adapter that makes it possible to iterate over all
+     psymtabs in one objfile.  */
+
+  psymtab_storage::partial_symtab_range psymtabs ()
+  {
+    return partial_symtabs->range ();
+  }
+
   /* Reset the storage for the partial symbol tables.  */
 
   void reset_psymtabs ()
@@ -640,19 +648,6 @@ public:
 private:
 
   struct objfile *m_objfile;
-};
-
-/* A range adapter that makes it possible to iterate over all
-   psymtabs in one objfile.  */
-
-class objfile_psymtabs : public next_adapter<struct partial_symtab>
-{
-public:
-
-  explicit objfile_psymtabs (struct objfile *objfile)
-    : next_adapter<struct partial_symtab> (objfile->partial_symtabs->psymtabs)
-  {
-  }
 };
 
 #define ALL_OBJFILE_OSECTIONS(objfile, osect)	\

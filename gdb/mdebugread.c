@@ -3684,7 +3684,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	  && save_pst->text_low_valid
 	  && !(objfile->flags & OBJF_REORDERED))
 	{
-	  for (partial_symtab *iter : objfile_psymtabs (objfile))
+	  for (partial_symtab *iter : objfile->psymtabs ())
 	    {
 	      if (save_pst != iter
 		  && save_pst->raw_text_low () >= iter->raw_text_low ()

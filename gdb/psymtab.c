@@ -104,7 +104,7 @@ psymtab_storage::allocate_psymtab ()
 
 /* See psymtab.h.  */
 
-objfile_psymtabs
+psymtab_storage::partial_symtab_range
 require_partial_symbols (struct objfile *objfile, int verbose)
 {
   if ((objfile->flags & OBJF_PSYMTABS_READ) == 0)
@@ -129,7 +129,7 @@ require_partial_symbols (struct objfile *objfile, int verbose)
 	}
     }
 
-  return objfile_psymtabs (objfile);
+  return objfile->psymtabs ();
 }
 
 /* Helper function for psym_map_symtabs_matching_filename that
@@ -1341,7 +1341,7 @@ psym_expand_symtabs_matching
   for (partial_symtab *ps : require_partial_symbols (objfile, 1))
     ps->searched_flag = PST_NOT_SEARCHED;
 
-  for (partial_symtab *ps : objfile_psymtabs (objfile))
+  for (partial_symtab *ps : objfile->psymtabs ())
     {
       QUIT;
 

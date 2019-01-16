@@ -2011,7 +2011,7 @@ dbx_end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
          address, set it to our starting address.  Take care to not set our
          own ending address to our starting address.  */
 
-      for (partial_symtab *p1 : objfile_psymtabs (objfile))
+      for (partial_symtab *p1 : objfile->psymtabs ())
 	if (!p1->text_high_valid && p1->text_low_valid && p1 != pst)
 	  p1->set_text_high (pst->raw_text_low ());
     }

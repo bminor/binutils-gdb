@@ -1,3 +1,16 @@
+2019-01-16  Tom Tromey  <tom@tromey.com>
+
+	* objfiles.h (struct objfile) <psymtabs>: New method.
+	(class objfile_psymtabs): Remove.
+	* psymtab.h (class psymtab_storage) <partial_symtab_range>: New
+	typedef.
+	<range>: New method.
+	(require_partial_symbols): Change return type.
+	* psymtab.c (require_partial_symbols)
+	(psym_expand_symtabs_matching): Update.
+	* mdebugread.c (parse_partial_symbols): Update.
+	* dbxread.c (dbx_end_psymtab): Update.
+
 2019-01-15  Tom Tromey  <tom@tromey.com>
 
 	* symtab.c (lookup_objfile_from_block)
