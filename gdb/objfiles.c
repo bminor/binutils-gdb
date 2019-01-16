@@ -514,7 +514,7 @@ objfile_separate_debug_iterate (const struct objfile *parent,
 
 /* Put one object file before a specified on in the global list.
    This can be used to make sure an object file is destroyed before
-   another when using all_objfiles_safe to free all objfiles.  */
+   another when using objfiles_safe to free all objfiles.  */
 void
 put_objfile_before (struct objfile *objfile, struct objfile *before_this)
 {
@@ -587,7 +587,7 @@ add_separate_debug_objfile (struct objfile *objfile, struct objfile *parent)
   parent->separate_debug_objfile = objfile;
 
   /* Put the separate debug object before the normal one, this is so that
-     usage of all_objfiles_safe will stay safe.  */
+     usage of objfiles_safe will stay safe.  */
   put_objfile_before (objfile, parent);
 }
 
@@ -735,7 +735,7 @@ free_all_objfiles (void)
   for (so = master_so_list (); so; so = so->next)
     gdb_assert (so->objfile == NULL);
 
-  for (objfile *objfile : all_objfiles_safe (current_program_space))
+  for (objfile *objfile : current_program_space->objfiles_safe ())
     delete objfile;
   clear_symtab_users (0);
 }
@@ -1044,7 +1044,7 @@ have_full_symbols (void)
 void
 objfile_purge_solibs (void)
 {
-  for (objfile *objf : all_objfiles_safe (current_program_space))
+  for (objfile *objf : current_program_space->objfiles_safe ())
     {
       /* We assume that the solib package has been purged already, or will
 	 be soon.  */

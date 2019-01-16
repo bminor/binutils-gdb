@@ -1,3 +1,12 @@
+2019-01-15  Tom Tromey  <tom@tromey.com>
+
+	* progspace.h (program_space) <objfiles_safe_range>: New
+	typedef.
+	<objfiles_safe>: New method.
+	* objfiles.h (class all_objfiles_safe): Remove.
+	* objfiles.c (free_all_objfiles, objfile_purge_solibs): Update.
+	* jit.c (jit_inferior_exit_hook): Update.
+
 2019-01-17  Tom Tromey  <tom@tromey.com>
 
 	* progspace.h (program_space) <objfiles_range>: New typedef.
@@ -1114,7 +1123,7 @@
 
 	Update copyright year range in all GDB files.
 
-2019-01-01  Joel Brobecker  <brobecker@adacore.com>
+2019-01-01, 19  Joel Brobecker  <brobecker@adacore.com>
 
 	* config/djgpp/fnchange.lst: Add entry for gdb/ChangeLog-2018.
 

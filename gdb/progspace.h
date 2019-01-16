@@ -26,6 +26,8 @@
 #include "gdb_bfd.h"
 #include "gdb_vecs.h"
 #include "registry.h"
+#include "common/next-iterator.h"
+#include "common/safe-iterator.h"
 
 struct target_ops;
 struct bfd;
@@ -146,6 +148,22 @@ struct program_space
   objfiles_range objfiles ()
   {
     return objfiles_range (objfiles_head);
+  }
+
+  typedef next_adapter<struct objfile,
+		       basic_safe_iterator<next_iterator<objfile>>>
+    objfiles_safe_range;
+
+  /* An iterable object that can be used to iterate over all objfiles.
+     The basic use is in a foreach, like:
+
+     for (objfile *objf : pspace->objfiles_safe ()) { ... }
+
+     This variant uses a basic_safe_iterator so that objfiles can be
+     deleted during iteration.  */
+  objfiles_safe_range objfiles_safe ()
+  {
+    return objfiles_safe_range (objfiles_head);
   }
 
   /* Pointer to next in linked list.  */
