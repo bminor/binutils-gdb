@@ -1,5 +1,13 @@
 2019-01-16  Tom Tromey  <tom@tromey.com>
 
+	* objfiles.h (class objfile_msymbols) <iterator>: Change argument
+	type.  Remove no-argument constructor.
+	<iterator::operator++>: Simplify.
+	<begin>: Update.
+	<end>: Use minimal_symbol_count.
+
+2019-01-16  Tom Tromey  <tom@tromey.com>
+
 	* objfiles.h (struct objfile) <psymtabs>: New method.
 	(class objfile_psymtabs): Remove.
 	* psymtab.h (class psymtab_storage) <partial_symtab_range>: New

@@ -591,20 +591,11 @@ public:
     typedef std::forward_iterator_tag iterator_category;
     typedef int difference_type;
 
-    explicit iterator (struct objfile *objfile)
-      : m_msym (objfile->per_bfd->msymbols)
+    explicit iterator (struct minimal_symbol *msym)
+      : m_msym (msym)
     {
-      /* Make sure to properly handle the case where there are no
-	 minsyms.  */
-      if (MSYMBOL_LINKAGE_NAME (m_msym) == nullptr)
-	m_msym = nullptr;
     }
 
-    iterator ()
-      : m_msym (nullptr)
-    {
-    }
-    
     value_type operator* () const
     {
       return m_msym;
@@ -622,12 +613,7 @@ public:
 
     self_type &operator++ ()
     {
-      if (m_msym != nullptr)
-	{
-	  ++m_msym;
-	  if (MSYMBOL_LINKAGE_NAME (m_msym) == nullptr)
-	    m_msym = nullptr;
-	}
+      ++m_msym;
       return *this;
     }
 
@@ -637,12 +623,13 @@ public:
 
   iterator begin () const
   {
-    return iterator (m_objfile);
+    return iterator (m_objfile->per_bfd->msymbols);
   }
 
   iterator end () const
   {
-    return iterator ();
+    return iterator (m_objfile->per_bfd->msymbols
+		     + m_objfile->per_bfd->minimal_symbol_count);
   }
 
 private:
