@@ -807,19 +807,22 @@ static const struct token dot_ops[] =
   { NULL, 0, BINOP_END }
 };
 
-struct f77_boolean_val 
+/* Holds the Fortran representation of a boolean, and the integer value we
+   substitute in when one of the matching strings is parsed.  */
+struct f77_boolean_val
 {
+  /* The string representing a Fortran boolean.  */
   const char *name;
-  int value;
-}; 
 
-static const struct f77_boolean_val boolean_values[]  = 
+  /* The integer value to replace it with.  */
+  int value;
+};
+
+/* The set of Fortran booleans.  These are matched case insensitively.  */
+static const struct f77_boolean_val boolean_values[]  =
 {
   { ".true.", 1 },
-  { ".TRUE.", 1 },
-  { ".false.", 0 },
-  { ".FALSE.", 0 },
-  { NULL, 0 }
+  { ".false.", 0 }
 };
 
 static const struct token f77_keywords[] = 
@@ -931,19 +934,19 @@ yylex (void)
   prev_lexptr = lexptr;
  
   tokstart = lexptr;
-  
-  /* First of all, let us make sure we are not dealing with the 
+
+  /* First of all, let us make sure we are not dealing with the
      special tokens .true. and .false. which evaluate to 1 and 0.  */
-  
+
   if (*lexptr == '.')
-    { 
-      for (int i = 0; boolean_values[i].name != NULL; i++)
+    {
+      for (int i = 0; i < ARRAY_SIZE (boolean_values); i++)
 	{
-	  if (strncmp (tokstart, boolean_values[i].name,
-		       strlen (boolean_values[i].name)) == 0)
+	  if (strncasecmp (tokstart, boolean_values[i].name,
+			   strlen (boolean_values[i].name)) == 0)
 	    {
-	      lexptr += strlen (boolean_values[i].name); 
-	      yylval.lval = boolean_values[i].value; 
+	      lexptr += strlen (boolean_values[i].name);
+	      yylval.lval = boolean_values[i].value;
 	      return BOOLEAN_LITERAL;
 	    }
 	}

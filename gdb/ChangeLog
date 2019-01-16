@@ -1,3 +1,11 @@
+2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* f-exp.y (struct f77_boolean_val): Add comments.
+	(boolean_values): Remove uppercase versions, and end marker.
+	(yylex): Use ARRAY_SIZE for iterating over boolean_values array,
+	and use strncasecmp to achieve case insensitivity.  Additionally,
+	perform whitespace cleanup around this code.
+
 2019-03-06  Tom Tromey  <tromey@adacore.com>
 
 	* remote-sim.c (gdbsim_target_open): Use result of

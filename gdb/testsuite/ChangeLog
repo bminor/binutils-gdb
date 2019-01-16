@@ -1,5 +1,10 @@
 2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.fortran/types.exp (test_logical_literal_types_accepted):
+	Check upper and lower case logical literals.
+
+2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.fortran/types.exp (test_float_literal_types_accepted):
 	Remove duplicate tests.
 
