@@ -27761,11 +27761,10 @@ recommended that front ends use the @code{-interpreter-exec} command
 The application which takes the MI output and presents the state of the
 program being debugged to the user is called a @dfn{front end}.
 
-Although @sc{gdb/mi} is still incomplete, it is currently being used
-by a variety of front ends to @value{GDBN}.  This makes it difficult
-to introduce new functionality without breaking existing usage.  This
-section tries to minimize the problems by describing how the protocol
-might change.
+Since @sc{gdb/mi} is used by a variety of front ends to @value{GDBN}, changes
+to the MI interface may break existing usage.  This section describes how the
+protocol changes and how to request previous version of the protocol when it
+does.
 
 Some changes in MI need not break a carefully designed front end, and
 for these the MI version will remain unchanged.  The following is a
@@ -27791,13 +27790,51 @@ The range of values for fields with specified values, e.g.,
 @end itemize
 
 If the changes are likely to break front ends, the MI version level
-will be increased by one.  This will allow the front end to parse the
-output according to the MI version.  Apart from mi0, new versions of
-@value{GDBN} will not support old versions of MI and it will be the
-responsibility of the front end to work with the new one.
+will be increased by one.  The new versions of the MI protocol are not compatible
+with the old versions.  Old versions of MI remain available, allowing front ends
+to keep using them until they are modified to use the latest MI version.
 
-@c Starting with mi3, add a new command -mi-version that prints the MI
-@c version?
+Since @code{--interpreter=mi} always points to the latest MI version, it is
+recommended that front ends request a specific version of MI when launching
+@value{GDBN} (e.g. @code{--interpreter=mi2}) to make sure they get an
+interpreter with the MI version they expect.
+
+The following table gives a summary of the the released versions of the MI
+interface: the version number, the version of GDB in which it first appeared
+and the breaking changes compared to the previous version.
+
+@multitable @columnfractions .05 .05 .9
+@headitem MI version @tab GDB version @tab Breaking changes
+
+@item
+@center 1
+@tab
+@center 5.1
+@tab
+None
+
+@item
+@center 2
+@tab
+@center 6.0
+@tab
+
+@itemize
+@item
+The @code{-environment-pwd}, @code{-environment-directory} and
+@code{-environment-path} commands now returns values using the MI output
+syntax, rather than CLI output syntax.
+
+@item
+@code{-var-list-children}'s @code{children} result field is now a list, rather
+than a tuple.
+
+@item
+@code{-var-update}'s @code{changelist} result field is now a list, rather than
+a tuple.
+@end itemize
+
+@end multitable
 
 The best way to avoid unexpected changes in MI that might break your front
 end is to make your project known to @value{GDBN} developers and

@@ -1,3 +1,8 @@
+2019-01-16  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (GDB/MI Development and Front Ends): Add table of
+	MI versions.  Update text around it.
+
 2019-01-14  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
 	* gdb.texinfo (PowerPC Features): Document the alias
