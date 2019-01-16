@@ -1,6 +1,21 @@
 2019-01-16  Kito Cheng  <kito@andestech.com>
 	    Nelson Chu  <nelson@andestech.com>
 
+	* elfnn-riscv.c (in_subsets): New.
+	(out_subsets): Likewise.
+	(merged_subsets): Likewise.
+	(riscv_std_ext_p): Likewise.
+	(riscv_non_std_ext_p): Likewise.
+	(riscv_std_sv_ext_p): Likewise.
+	(riscv_non_std_sv_ext_p): Likewise.
+	(riscv_version_mismatch): Likewise.
+	(riscv_i_or_e_p): Likewise.
+	(riscv_merge_std_ext): Likewise.
+	(riscv_merge_non_std_and_sv_ext): Likewise.
+	(riscv_merge_arch_attr_info): Likewise.
+	(riscv_merge_attributes): Likewise.
+	(_bfd_riscv_elf_merge_private_bfd_data): Merge attribute.
+
 	* elfnn-riscv.c (riscv_elf_obj_attrs_arg_type): New.
 	(elf_backend_obj_attrs_vendor): Define.
 	(elf_backend_obj_attrs_section_type): Likewise.

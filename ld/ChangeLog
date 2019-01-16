@@ -1,3 +1,45 @@
+2019-01-16  Kito Cheng  <kito@andestech.com>
+
+	* testsuite/ld-elf/orphan-region.d: XFAIL for RISC-V, because add new
+	section.
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Add new tests.
+	* testsuite/ld-riscv-elf/attr-merge-arch-01.d: New test.
+	* testsuite/ld-riscv-elf/attr-merge-arch-01a.s: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-arch-01b.s: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-arch-02.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-arch-02a.s: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-arch-02b.s: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-arch-03.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-arch-03a.s: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-arch-03b.s: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-arch-failed-01.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-arch-failed-01a.s: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-arch-failed-01b.s: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec-a.s: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec-b.s: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-stack-align-a.s: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-stack-align-b.s: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-stack-align-failed-a.s: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-stack-align-failed-b.s: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-stack-align-failed.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-stack-align.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-strict-align-01.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-strict-align-01a.s: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-strict-align-01b.s: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-strict-align-02.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-strict-align-02a.s: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-strict-align-02b.s: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-strict-align-03.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-strict-align-03a.s: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-strict-align-03b.s: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-strict-align-04.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-strict-align-04a.s: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-strict-align-04b.s: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-strict-align-05.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-strict-align-05a.s: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-strict-align-05b.s: Likewise.
+
 2019-01-14  Maamoun Tarsha  <maamountk@hotmail.com>
 
 	PR 20113
