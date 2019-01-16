@@ -197,7 +197,7 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
       return;
     }
   index = 0;
-  for (minimal_symbol *msymbol : objfile_msymbols (objfile))
+  for (minimal_symbol *msymbol : objfile->msymbols ())
     {
       struct obj_section *section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
 

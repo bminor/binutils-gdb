@@ -182,6 +182,47 @@ extern void print_symbol_bcache_statistics (void);
 /* Number of entries in the minimal symbol hash table.  */
 #define MINIMAL_SYMBOL_HASH_SIZE 2039
 
+/* An iterator for minimal symbols.  */
+
+struct minimal_symbol_iterator
+{
+  typedef minimal_symbol_iterator self_type;
+  typedef struct minimal_symbol *value_type;
+  typedef struct minimal_symbol *&reference;
+  typedef struct minimal_symbol **pointer;
+  typedef std::forward_iterator_tag iterator_category;
+  typedef int difference_type;
+
+  explicit minimal_symbol_iterator (struct minimal_symbol *msym)
+    : m_msym (msym)
+  {
+  }
+
+  value_type operator* () const
+  {
+    return m_msym;
+  }
+
+  bool operator== (const self_type &other) const
+  {
+    return m_msym == other.m_msym;
+  }
+
+  bool operator!= (const self_type &other) const
+  {
+    return m_msym != other.m_msym;
+  }
+
+  self_type &operator++ ()
+  {
+    ++m_msym;
+    return *this;
+  }
+
+private:
+  struct minimal_symbol *m_msym;
+};
+
 /* Some objfile data is hung off the BFD.  This enables sharing of the
    data across all objfiles using the BFD.  The data is stored in an
    instance of this structure, and associated with the BFD using the
@@ -318,6 +359,44 @@ struct objfile
   {
     return compunits_range (compunit_symtabs);
   }
+
+  /* A range adapter that makes it possible to iterate over all
+     minimal symbols of an objfile.  */
+
+  class msymbols_range
+  {
+  public:
+
+    explicit msymbols_range (struct objfile *objfile)
+      : m_objfile (objfile)
+    {
+    }
+
+    minimal_symbol_iterator begin () const
+    {
+      return minimal_symbol_iterator (m_objfile->per_bfd->msymbols);
+    }
+
+    minimal_symbol_iterator end () const
+    {
+      return minimal_symbol_iterator
+	(m_objfile->per_bfd->msymbols
+	 + m_objfile->per_bfd->minimal_symbol_count);
+    }
+
+  private:
+
+    struct objfile *m_objfile;
+  };
+
+  /* Return a range adapter for iterating over all minimal
+     symbols.  */
+
+  msymbols_range msymbols ()
+  {
+    return msymbols_range (this);
+  }
+
 
   /* All struct objfile's are chained together by their next pointers.
      The program space field "objfiles"  (frequently referenced via
@@ -569,73 +648,6 @@ extern void default_iterate_over_objfiles_in_search_order
    iterate_over_objfiles_in_search_order_cb_ftype *cb,
    void *cb_data, struct objfile *current_objfile);
 
-
-/* A range adapter that makes it possible to iterate over all
-   minimal symbols of an objfile.  */
-
-class objfile_msymbols
-{
-public:
-
-  explicit objfile_msymbols (struct objfile *objfile)
-    : m_objfile (objfile)
-  {
-  }
-
-  struct iterator
-  {
-    typedef iterator self_type;
-    typedef struct minimal_symbol *value_type;
-    typedef struct minimal_symbol *&reference;
-    typedef struct minimal_symbol **pointer;
-    typedef std::forward_iterator_tag iterator_category;
-    typedef int difference_type;
-
-    explicit iterator (struct minimal_symbol *msym)
-      : m_msym (msym)
-    {
-    }
-
-    value_type operator* () const
-    {
-      return m_msym;
-    }
-
-    bool operator== (const self_type &other) const
-    {
-      return m_msym == other.m_msym;
-    }
-
-    bool operator!= (const self_type &other) const
-    {
-      return m_msym != other.m_msym;
-    }
-
-    self_type &operator++ ()
-    {
-      ++m_msym;
-      return *this;
-    }
-
-  private:
-    struct minimal_symbol *m_msym;
-  };
-
-  iterator begin () const
-  {
-    return iterator (m_objfile->per_bfd->msymbols);
-  }
-
-  iterator end () const
-  {
-    return iterator (m_objfile->per_bfd->msymbols
-		     + m_objfile->per_bfd->minimal_symbol_count);
-  }
-
-private:
-
-  struct objfile *m_objfile;
-};
 
 #define ALL_OBJFILE_OSECTIONS(objfile, osect)	\
   for (osect = objfile->sections; osect < objfile->sections_end; osect++) \

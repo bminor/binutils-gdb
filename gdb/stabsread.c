@@ -4598,7 +4598,7 @@ scan_file_globals (struct objfile *objfile)
       if (hash >= HASHSIZE)
 	return;
 
-      for (minimal_symbol *msymbol : objfile_msymbols (resolve_objfile))
+      for (minimal_symbol *msymbol : resolve_objfile->msymbols ())
 	{
 	  QUIT;
 

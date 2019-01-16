@@ -4924,7 +4924,7 @@ ada_lookup_simple_minsym (const char *name)
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      for (minimal_symbol *msymbol : objfile_msymbols (objfile))
+      for (minimal_symbol *msymbol : objfile->msymbols ())
 	{
 	  if (match_name (MSYMBOL_LINKAGE_NAME (msymbol), lookup_name, NULL)
 	      && MSYMBOL_TYPE (msymbol) != mst_solib_trampoline)
@@ -6411,7 +6411,7 @@ ada_collect_symbol_completion_matches (completion_tracker &tracker,
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      for (minimal_symbol *msymbol : objfile_msymbols (objfile))
+      for (minimal_symbol *msymbol : objfile->msymbols ())
 	{
 	  QUIT;
 

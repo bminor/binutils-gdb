@@ -661,7 +661,7 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 
   if (pe_file)
     {
-      for (minimal_symbol *msym : objfile_msymbols (objfile))
+      for (minimal_symbol *msym : objfile->msymbols ())
 	{
 	  const char *name = MSYMBOL_LINKAGE_NAME (msym);
 

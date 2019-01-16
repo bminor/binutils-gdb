@@ -2544,7 +2544,7 @@ hppa_lookup_stub_minimal_symbol (const char *name,
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      for (minimal_symbol *msym : objfile_msymbols (objfile))
+      for (minimal_symbol *msym : objfile->msymbols ())
 	{
 	  if (strcmp (MSYMBOL_LINKAGE_NAME (msym), name) == 0)
 	    {

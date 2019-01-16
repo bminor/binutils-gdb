@@ -4455,7 +4455,7 @@ search_symbols (const char *regexp, enum search_domain kind,
     {
       for (objfile *objfile : current_program_space->objfiles ())
 	{
-	  for (minimal_symbol *msymbol : objfile_msymbols (objfile))
+	  for (minimal_symbol *msymbol : objfile->msymbols ())
 	    {
 	      QUIT;
 
@@ -4558,7 +4558,7 @@ search_symbols (const char *regexp, enum search_domain kind,
     {
       for (objfile *objfile : current_program_space->objfiles ())
 	{
-	  for (minimal_symbol *msymbol : objfile_msymbols (objfile))
+	  for (minimal_symbol *msymbol : objfile->msymbols ())
 	    {
 	      QUIT;
 
@@ -5274,7 +5274,7 @@ default_collect_symbol_completion_matches_break_on
     {
       for (objfile *objfile : current_program_space->objfiles ())
 	{
-	  for (minimal_symbol *msymbol : objfile_msymbols (objfile))
+	  for (minimal_symbol *msymbol : objfile->msymbols ())
 	    {
 	      QUIT;
 

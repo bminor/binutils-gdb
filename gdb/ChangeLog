@@ -1,5 +1,24 @@
 2019-01-16  Tom Tromey  <tom@tromey.com>
 
+	* objfiles.h (struct minimal_symbol_iterator): Rename.  Move
+	earlier.
+	(struct objfile) <msymbols_range>: Move from top level.
+	<msymbols>: New method.
+	(class objfile_msymbols): Remove.
+	* symtab.c (default_collect_symbol_completion_matches_break_on):
+	Update.
+	* symmisc.c (dump_msymbols): Update.
+	* stabsread.c (scan_file_globals): Update.
+	* objc-lang.c (info_selectors_command, info_classes_command)
+	(find_methods): Update.
+	* minsyms.c (find_solib_trampoline_target): Update.
+	* hppa-tdep.c (hppa_lookup_stub_minimal_symbol): Update.
+	* coffread.c (coff_symfile_read): Update.
+	* ada-lang.c (ada_lookup_simple_minsym)
+	(ada_collect_symbol_completion_matches): Update.
+
+2019-01-16  Tom Tromey  <tom@tromey.com>
+
 	* objfiles.h (class objfile_msymbols) <iterator>: Change argument
 	type.  Remove no-argument constructor.
 	<iterator::operator++>: Simplify.
