@@ -2,6 +2,7 @@
 #name: UDF
 #as: -march=armv8-a
 #warning_output: udf.l
+#skip: *-*-pe *-*-wince
 
 .*: +file format .*arm.*
 

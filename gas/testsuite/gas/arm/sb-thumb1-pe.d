@@ -1,8 +1,7 @@
-#objdump: -dr --prefix-addresses --show-raw-insn
+#objdump: -dr --prefix-addresses --show-raw-insn -M force-thumb
 #name: SB instruction (Thumb)
 #source: sb.s
 #as: -march=armv8.5-a -mthumb
-#skip: *-*-pe *-*-wince
 
 # Test SB Instruction
 

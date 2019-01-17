@@ -1,3 +1,14 @@
+2019-01-17  Tamar Christina  <tamar.christina@arm.com>
+
+	* testsuite/gas/arm/archv6t2-1-pe.d: New test.
+	* testsuite/gas/arm/archv6t2-1.d: Skip pe.
+	* testsuite/gas/arm/csdb.d: Skip pe.
+	* testsuite/gas/arm/sb-thumb1-pe.d: New test.
+	* testsuite/gas/arm/sb-thumb1.d: Skip pe.
+	* testsuite/gas/arm/sb-thumb2-pe.d: New test.
+	* testsuite/gas/arm/sb-thumb2.d: Skip pe.
+	* testsuite/gas/arm/udf.d: Skip pe.
+
 2019-01-16  Kito Cheng  <kito@andestech.com>
 
 	* testsuite/gas/riscv/attribute-empty.d: New.
