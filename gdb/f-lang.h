@@ -66,6 +66,7 @@ struct builtin_f_type
   struct type *builtin_character;
   struct type *builtin_integer;
   struct type *builtin_integer_s2;
+  struct type *builtin_integer_s8;
   struct type *builtin_logical;
   struct type *builtin_logical_s1;
   struct type *builtin_logical_s2;

@@ -54,6 +54,7 @@ proc test_basic_parsing_of_type_kinds {} {
 
     test_cast_1_to_type_kind "integer" "2" "1" "2"
     test_cast_1_to_type_kind "integer" "4" "1" "4"
+    test_cast_1_to_type_kind "integer" "8" "1" "8"
 }
 
 proc test_parsing_invalid_type_kinds {} {

@@ -865,6 +865,8 @@ convert_to_kind_type (struct type *basetype, int kind)
 	return parse_f_type (pstate)->builtin_integer_s2;
       else if (kind == 4)
 	return parse_f_type (pstate)->builtin_integer;
+      else if (kind == 8)
+	return parse_f_type (pstate)->builtin_integer_s8;
     }
 
   error (_("unsupported kind %d for type %s"),

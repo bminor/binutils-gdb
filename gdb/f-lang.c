@@ -375,6 +375,10 @@ build_fortran_types (struct gdbarch *gdbarch)
     = arch_integer_type (gdbarch, gdbarch_short_bit (gdbarch), 0,
 			 "integer*2");
 
+  builtin_f_type->builtin_integer_s8
+    = arch_integer_type (gdbarch, gdbarch_long_long_bit (gdbarch), 0,
+			 "integer*8");
+
   builtin_f_type->builtin_logical_s2
     = arch_boolean_type (gdbarch, gdbarch_short_bit (gdbarch), 1,
 			 "logical*2");

@@ -1,5 +1,9 @@
 2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.fortran/type-kinds.exp: Test new integer type kind.
+
+2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.fortran/type-kinds.exp (test_cast_1_to_type_kind): New
 	function.
 	(test_basic_parsing_of_type_kinds): Expand types tested.

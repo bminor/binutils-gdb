@@ -1,5 +1,11 @@
 2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* f-exp.y (convert_to_kind_type): Handle integer (kind=8).
+	* f-lang.c (build_fortran_types): Setup builtin_integer_s8.
+	* f-lang.h (struct builtin_f_type): Add builtin_integer_s8 field.
+
+2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* f-exp.y (convert_to_kind_type): Handle more type kinds.
 
 2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
