@@ -222,7 +222,7 @@ struct dwarf2_offset_baton
   LONGEST offset;
 
   /* The type of the object whose property is dynamic.  In the example
-     provided above, this would the the array's index type.  */
+     provided above, this would the array's index type.  */
   struct type *type;
 };
 

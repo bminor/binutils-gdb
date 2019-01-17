@@ -419,7 +419,7 @@ static const enum amd64_regnum amd64_windows_w2gdb_regnum[] =
   AMD64_R15_REGNUM
 };
 
-/* Return TRUE iff PC is the the range of the function corresponding to
+/* Return TRUE iff PC is the range of the function corresponding to
    CACHE.  */
 
 static int

@@ -650,7 +650,7 @@ dsbt_current_sos (void)
   /* Locate the address of the first link map struct.  */
   lm_addr = lm_base ();
 
-  /* We have at least one link map entry.  Fetch the the lot of them,
+  /* We have at least one link map entry.  Fetch the lot of them,
      building the solist chain.  */
   while (lm_addr)
     {

@@ -526,7 +526,7 @@ find_mi_interp (void)
 }
 
 /* Observers for several run control events that print why the
-   inferior has stopped to both the the MI event channel and to the MI
+   inferior has stopped to both the MI event channel and to the MI
    console.  If the MI interpreter is not active, print nothing.  */
 
 /* Observer for the signal_received notification.  */

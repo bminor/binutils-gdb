@@ -1445,7 +1445,7 @@ convert_results_to_lsals (struct linespec_state *self,
 
 /* A structure that contains two string representations of a struct
    linespec_canonical_name:
-     - one where the the symtab's fullname is used;
+     - one where the symtab's fullname is used;
      - one where the filename followed the "set filename-display"
        setting.  */
 

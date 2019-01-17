@@ -2513,7 +2513,7 @@ count_next_character (wchar_iterator *iter,
 
 /* Print the characters in CHARS to the OBSTACK.  QUOTE_CHAR is the quote
    character to use with string output.  WIDTH is the size of the output
-   character type.  BYTE_ORDER is the the target byte order.  OPTIONS
+   character type.  BYTE_ORDER is the target byte order.  OPTIONS
    is the user's print options.  */
 
 static void

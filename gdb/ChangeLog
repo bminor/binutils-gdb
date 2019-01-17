@@ -1,3 +1,14 @@
+2019-01-17  Tom Tromey  <tromey@bapiya>
+
+	* valprint.c: Replace "the the" with "the".
+	* symtab.c: Replace "the the" with "the".
+	* solib.c: Replace "the the" with "the".
+	* solib-dsbt.c: Replace "the the" with "the".
+	* linespec.c: Replace "the the" with "the".
+	* dwarf2loc.h: Replace "the the" with "the".
+	* amd64-windows-tdep.c: Replace "the the" with "the".
+	* aarch64-tdep.c: Replace "the the" with "the".
+
 2019-01-16  Keith Seitz  <keiths@redhat.com>
 
 	PR gdb/23773
