@@ -1,4 +1,8 @@
 2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* f-exp.y (convert_to_kind_type): Handle more type kinds.
+
+2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 	    Chris January  <chris.january@arm.com>
 
 	* expprint.c (dump_subexp_body_standard): Support UNOP_KIND.

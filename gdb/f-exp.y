@@ -830,6 +830,42 @@ convert_to_kind_type (struct type *basetype, int kind)
       if (kind == 1)
 	return parse_f_type (pstate)->builtin_character;
     }
+  else if (basetype == parse_f_type (pstate)->builtin_complex_s8)
+    {
+      if (kind == 4)
+	return parse_f_type (pstate)->builtin_complex_s8;
+      else if (kind == 8)
+	return parse_f_type (pstate)->builtin_complex_s16;
+      else if (kind == 16)
+	return parse_f_type (pstate)->builtin_complex_s32;
+    }
+  else if (basetype == parse_f_type (pstate)->builtin_real)
+    {
+      if (kind == 4)
+	return parse_f_type (pstate)->builtin_real;
+      else if (kind == 8)
+	return parse_f_type (pstate)->builtin_real_s8;
+      else if (kind == 16)
+	return parse_f_type (pstate)->builtin_real_s16;
+    }
+  else if (basetype == parse_f_type (pstate)->builtin_logical)
+    {
+      if (kind == 1)
+	return parse_f_type (pstate)->builtin_logical_s1;
+      else if (kind == 2)
+	return parse_f_type (pstate)->builtin_logical_s2;
+      else if (kind == 4)
+	return parse_f_type (pstate)->builtin_logical;
+      else if (kind == 8)
+	return parse_f_type (pstate)->builtin_logical_s8;
+    }
+  else if (basetype == parse_f_type (pstate)->builtin_integer)
+    {
+      if (kind == 2)
+	return parse_f_type (pstate)->builtin_integer_s2;
+      else if (kind == 4)
+	return parse_f_type (pstate)->builtin_integer;
+    }
 
   error (_("unsupported kind %d for type %s"),
 	 kind, TYPE_SAFE_NAME (basetype));

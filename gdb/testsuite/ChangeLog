@@ -1,5 +1,12 @@
 2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.fortran/type-kinds.exp (test_cast_1_to_type_kind): New
+	function.
+	(test_basic_parsing_of_type_kinds): Expand types tested.
+	(test_parsing_invalid_type_kinds): New function.
+
+2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.fortran/intrinsics.exp: New file.
 	* gdb.fortran/intrinsics.f90: New file.
 	* gdb.fortran/type-kinds.exp: New file.
