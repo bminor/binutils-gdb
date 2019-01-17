@@ -1,3 +1,15 @@
+2019-01-17  Tom Tromey  <tom@tromey.com>
+
+	* solib-target.c (lm_info_target_p): Remove typedef.  Don't
+	declare VEC.
+	(solib_target_parse_libraries): Change return type.
+	(library_list_start_segment, library_list_start_section)
+	(library_list_end_library, library_list_start_library); Update.
+	(solib_target_free_library_list): Remove.
+	(solib_target_parse_libraries): Remove cleanup.  Change return
+	type.
+	(solib_target_current_sos): Update.
+
 2019-01-17  Tom Tromey  <tromey@bapiya>
 
 	* valprint.c: Replace "the the" with "the".

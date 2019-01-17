@@ -50,12 +50,11 @@ struct lm_info_target : public lm_info_base
   section_offsets *offsets = NULL;
 };
 
-typedef lm_info_target *lm_info_target_p;
-DEF_VEC_P(lm_info_target_p);
+typedef std::vector<std::unique_ptr<lm_info_target>> lm_info_vector;
 
 #if !defined(HAVE_LIBEXPAT)
 
-static VEC(lm_info_target_p) *
+static lm_info_vector
 solib_target_parse_libraries (const char *library)
 {
   static int have_warned;
@@ -67,7 +66,7 @@ solib_target_parse_libraries (const char *library)
 		 "at compile time"));
     }
 
-  return NULL;
+  return lm_info_vector ();
 }
 
 #else /* HAVE_LIBEXPAT */
@@ -82,8 +81,8 @@ library_list_start_segment (struct gdb_xml_parser *parser,
 			    void *user_data,
 			    std::vector<gdb_xml_value> &attributes)
 {
-  VEC(lm_info_target_p) **list = (VEC(lm_info_target_p) **) user_data;
-  lm_info_target *last = VEC_last (lm_info_target_p, *list);
+  lm_info_vector *list = (lm_info_vector *) user_data;
+  lm_info_target *last = list->back ().get ();
   ULONGEST *address_p
     = (ULONGEST *) xml_find_attribute (attributes, "address")->value.get ();
   CORE_ADDR address = (CORE_ADDR) *address_p;
@@ -101,8 +100,8 @@ library_list_start_section (struct gdb_xml_parser *parser,
 			    void *user_data,
 			    std::vector<gdb_xml_value> &attributes)
 {
-  VEC(lm_info_target_p) **list = (VEC(lm_info_target_p) **) user_data;
-  lm_info_target *last = VEC_last (lm_info_target_p, *list);
+  lm_info_vector *list = (lm_info_vector *) user_data;
+  lm_info_target *last = list->back ().get ();
   ULONGEST *address_p
     = (ULONGEST *) xml_find_attribute (attributes, "address")->value.get ();
   CORE_ADDR address = (CORE_ADDR) *address_p;
@@ -122,12 +121,12 @@ library_list_start_library (struct gdb_xml_parser *parser,
 			    void *user_data,
 			    std::vector<gdb_xml_value> &attributes)
 {
-  VEC(lm_info_target_p) **list = (VEC(lm_info_target_p) **) user_data;
+  lm_info_vector *list = (lm_info_vector *) user_data;
   lm_info_target *item = new lm_info_target;
   item->name
     = (const char *) xml_find_attribute (attributes, "name")->value.get ();
 
-  VEC_safe_push (lm_info_target_p, *list, item);
+  list->emplace_back (item);
 }
 
 static void
@@ -135,8 +134,8 @@ library_list_end_library (struct gdb_xml_parser *parser,
 			  const struct gdb_xml_element *element,
 			  void *user_data, const char *body_text)
 {
-  VEC(lm_info_target_p) **list = (VEC(lm_info_target_p) **) user_data;
-  lm_info_target *lm_info = VEC_last (lm_info_target_p, *list);
+  lm_info_vector *list = (lm_info_vector *) user_data;
+  lm_info_target *lm_info = list->back ().get ();
 
   if (lm_info->segment_bases.empty () && lm_info->section_bases.empty ())
     gdb_xml_error (parser, _("No segment or section bases defined"));
@@ -163,22 +162,6 @@ library_list_start_list (struct gdb_xml_parser *parser,
 		       _("Library list has unsupported version \"%s\""),
 		       string);
     }
-}
-
-/* Discard the constructed library list.  */
-
-static void
-solib_target_free_library_list (void *p)
-{
-  VEC(lm_info_target_p) **result = (VEC(lm_info_target_p) **) p;
-  lm_info_target *info;
-  int ix;
-
-  for (ix = 0; VEC_iterate (lm_info_target_p, *result, ix, info); ix++)
-    delete info;
-
-  VEC_free (lm_info_target_p, *result);
-  *result = NULL;
 }
 
 /* The allowed elements and attributes for an XML library list.
@@ -227,23 +210,20 @@ static const struct gdb_xml_element library_list_elements[] = {
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
 };
 
-static VEC(lm_info_target_p) *
+static lm_info_vector
 solib_target_parse_libraries (const char *library)
 {
-  VEC(lm_info_target_p) *result = NULL;
-  struct cleanup *back_to = make_cleanup (solib_target_free_library_list,
-					  &result);
+  lm_info_vector result;
 
   if (gdb_xml_parse_quick (_("target library list"), "library-list.dtd",
 			   library_list_elements, library, &result) == 0)
     {
-      /* Parsed successfully, keep the result.  */
-      discard_cleanups (back_to);
+      /* Parsed successfully.  */
       return result;
     }
 
-  do_cleanups (back_to);
-  return NULL;
+  result.clear ();
+  return result;
 }
 #endif
 
@@ -251,9 +231,6 @@ static struct so_list *
 solib_target_current_sos (void)
 {
   struct so_list *new_solib, *start = NULL, *last = NULL;
-  VEC(lm_info_target_p) *library_list;
-  lm_info_target *info;
-  int ix;
 
   /* Fetch the list of shared libraries.  */
   gdb::optional<gdb::char_vector> library_document
@@ -263,13 +240,14 @@ solib_target_current_sos (void)
     return NULL;
 
   /* Parse the list.  */
-  library_list = solib_target_parse_libraries (library_document->data ());
+  lm_info_vector library_list
+    = solib_target_parse_libraries (library_document->data ());
 
-  if (library_list == NULL)
+  if (library_list.empty ())
     return NULL;
 
   /* Build a struct so_list for each entry on the list.  */
-  for (ix = 0; VEC_iterate (lm_info_target_p, library_list, ix, info); ix++)
+  for (auto &&info : library_list)
     {
       new_solib = XCNEW (struct so_list);
       strncpy (new_solib->so_name, info->name.c_str (),
@@ -278,10 +256,11 @@ solib_target_current_sos (void)
       strncpy (new_solib->so_original_name, info->name.c_str (),
 	       SO_NAME_MAX_PATH_SIZE - 1);
       new_solib->so_original_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
-      new_solib->lm_info = info;
 
       /* We no longer need this copy of the name.  */
       info->name.clear ();
+
+      new_solib->lm_info = info.release ();
 
       /* Add it to the list.  */
       if (!start)
@@ -292,9 +271,6 @@ solib_target_current_sos (void)
 	  last = new_solib;
 	}
     }
-
-  /* Free the library list, but not its members.  */
-  VEC_free (lm_info_target_p, library_list);
 
   return start;
 }
