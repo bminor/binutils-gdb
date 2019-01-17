@@ -1211,6 +1211,8 @@ f_parse (struct parser_state *par_state)
 {
   /* Setting up the parser state.  */
   scoped_restore pstate_restore = make_scoped_restore (&pstate);
+  scoped_restore restore_yydebug = make_scoped_restore (&yydebug,
+							parser_debug);
   gdb_assert (par_state != NULL);
   pstate = par_state;
 
