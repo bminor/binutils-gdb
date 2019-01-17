@@ -62,7 +62,7 @@ if [regexp $want $got] then {
 
 
 if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o]} then {
-    fail "objdump (assembling)"
+    fail "objdump (assembling bintest.s)"
     return
 }
 if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest2.o]} then {
@@ -280,8 +280,95 @@ proc test_objdump_d_sym { testfile dumpfile } {
 }
 
 test_objdump_d_sym $testfile $testfile
-if { [ remote_file host exists $testarchive ] } then {
-    test_objdump_d_sym $testarchive bintest2.o
+
+proc test_objdump_d_func_sym { testfile dumpfile } {
+    global OBJDUMP
+    global OBJDUMPFLAGS
+
+    set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS --disassemble=func --disassemble-zeroes $testfile"]
+
+    set want "$dumpfile:.*Disassembly of section"
+    if ![regexp $want $got] then {
+	fail "objdump --disassemble=func $testfile: No disassembly title"
+	return
+    }
+
+    set want "$dumpfile:.*00+0 <start_of_text>"
+    if [regexp $want $got] then {
+	fail "objdump --disassemble=func $testfile: First symbol displayed, when it should be absent"
+	return
+    }
+
+    set want "$dumpfile:.*00+. <func>"
+    if ![regexp $want $got] then {
+	fail "objdump --disassemble=func $testfile: Disassembly does not start at function symbol"
+	return
+    }
+
+    set want "$dumpfile:.*00+. <global_non_func_sym>"
+    if ![regexp $want $got] then {
+	fail "objdump --disassemble=func $testfile: Non function symbol not displayed"
+	return
+    }
+
+    set want "$dumpfile:.*00+. <next_func>"
+    if [regexp $want $got] then {
+	fail "objdump --disassemble=func $testfile: Disassembly did not stop at the next function"
+	return
+    }
+
+    pass "objdump --disassemble=func $testfile"
+}
+
+proc test_objdump_d_non_func_sym { testfile dumpfile } {
+    global OBJDUMP
+    global OBJDUMPFLAGS
+
+    set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS --disassemble=global_non_func_sym $testfile"]
+
+    set want "$dumpfile:.*Disassembly of section"
+    if ![regexp $want $got] then {
+	fail "objdump --disassemble=non_func $testfile: No disassembly title"
+	return
+    }
+
+    set want "$dumpfile:.*00+0 <start_of_text>"
+    if [regexp $want $got] then {
+	fail "objdump --disassemble=non_func $testfile: First symbol displayed, when it should be absent"
+	return
+    }
+
+    set want "$dumpfile:.*00+. <global_non_func_sym>"
+    if ![regexp $want $got] then {
+	fail "objdump --disassemble=non_func $testfile: Non function symbol not displayed"
+	return
+    }
+
+    set want "$dumpfile:.*00+. <local_non_func_sym>"
+    if [regexp $want $got] then {
+	fail "objdump --disassemble=non_func $testfile: Disassembly did not stop at the next symbol"
+	return
+    }
+
+    pass "objdump --disassemble=non_func $testfile"
+}
+
+# Extra test for ELF format - check that --disassemble=func disassembles
+# all of func, and does not stop at the next symbol.
+if { [is_elf_format] } then {
+
+    if {![binutils_assemble $srcdir/$subdir/disasm.s tmpdir/disasm.o]} then {
+	fail "objdump --disassemble=func (assembling disasm.s)"
+    } else {
+	if [is_remote host] {
+	    set elftestfile [remote_download host tmpdir/disasm.o]
+	} else {
+	    set elftestfile tmpdir/disasm.o
+	}
+    
+	test_objdump_d_func_sym $elftestfile $elftestfile
+	test_objdump_d_non_func_sym $elftestfile $elftestfile
+    }
 }
 
 

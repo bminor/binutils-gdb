@@ -1,3 +1,13 @@
+2019-01-17  Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c (disassemble_section): When disassembling from a
+	symbol only stop at the next symbol if the original symbol was not
+	a function symbol.  Otherwise continue disassembling until a new
+	function is reached.
+	* testsuite/binutils-all/objdump.exp: Add tests of extended
+	functionality.
+	* testsuite/binutils-all/disasm.s: New test source file.
+
 2019-01-16  Kito Cheng  <kito@andestech.com>
 	    Nelson Chu  <nelson@andestech.com>
 

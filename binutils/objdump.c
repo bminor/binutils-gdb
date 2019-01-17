@@ -2211,6 +2211,13 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
   long                         rel_count;
   bfd_vma                      rel_offset;
   unsigned long                addr_offset;
+  bfd_boolean                  do_print;
+  enum loop_control
+  {
+   stop_offset_reached,
+   function_sym,
+   next_sym
+  } loop_until;
 
   /* Sections that do not contain machine
      code are not normally disassembled.  */
@@ -2328,13 +2335,15 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
      the symbol we have just found.  Then print the symbol and find the
      next symbol on.  Repeat until we have disassembled the entire section
      or we have reached the end of the address range we are interested in.  */
+  do_print = paux->symbol == NULL;
+  loop_until = stop_offset_reached;
+
   while (addr_offset < stop_offset)
     {
       bfd_vma addr;
       asymbol *nextsym;
       bfd_vma nextstop_offset;
       bfd_boolean insns;
-      bfd_boolean do_print = TRUE;
 
       addr = section->vma + addr_offset;
       addr = ((addr & ((sign_adjust << 1) - 1)) ^ sign_adjust) - sign_adjust;
@@ -2360,20 +2369,80 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 	  pinfo->symtab_pos = -1;
 	}
 
+      /* If we are only disassembling from a specific symbol,
+	 check to see if we should start or stop displaying.  */
       if (sym && paux->symbol)
 	{
-	  const char *name = bfd_asymbol_name (sym);
-	  char *alloc = NULL;
-
-	  if (do_demangle && name[0] != '\0')
+	  if (do_print)
 	    {
-	      /* Demangle the name.  */
-	      alloc = bfd_demangle (abfd, name, demangle_flags);
-	      if (alloc != NULL)
-		name = alloc;
+	      /* See if we should stop printing.  */
+	      switch (loop_until)
+		{
+		case function_sym:
+		  if (sym->flags & BSF_FUNCTION)
+		    do_print = FALSE;
+		  break;
+
+		case stop_offset_reached:
+		  /* Handled by the while loop.  */
+		  break;
+
+		case next_sym:
+		  /* FIXME: There is an implicit assumption here
+		     that the name of sym is different from
+		     paux->symbol.  */
+		  if (! bfd_is_local_label (abfd, sym))
+		    do_print = FALSE;
+		  break;
+		}
 	    }
-	  do_print = streq (name, paux->symbol);
-	  free (alloc);
+	  else
+	    {
+	      const char * name = bfd_asymbol_name (sym);
+	      char * alloc = NULL;
+
+	      if (do_demangle && name[0] != '\0')
+		{
+		  /* Demangle the name.  */
+		  alloc = bfd_demangle (abfd, name, demangle_flags);
+		  if (alloc != NULL)
+		    name = alloc;
+		}
+
+	      /* We are not currently printing.  Check to see
+		 if the current symbol matches the requested symbol.  */
+	      if (streq (name, paux->symbol))
+		{
+		  do_print = TRUE;
+
+		  if (sym->flags & BSF_FUNCTION)
+		    {
+		      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
+			  && ((elf_symbol_type *) sym)->internal_elf_sym.st_size > 0)
+			{
+			  /* Sym is a function symbol with a size associated
+			     with it.  Turn on automatic disassembly for the
+			     next VALUE bytes.  */
+			  stop_offset = addr_offset
+			    + ((elf_symbol_type *) sym)->internal_elf_sym.st_size;
+			  loop_until = stop_offset_reached;
+			}
+		      else
+			{
+			  /* Otherwise we need to tell the loop heuristic to
+			     loop until the next function symbol is encountered.  */
+			  loop_until = function_sym;
+			}
+		    }
+		  else
+		    {
+		      /* Otherwise loop until the next symbol is encountered.  */
+		      loop_until = next_sym;
+		    }
+		}
+
+	      free (alloc);
+	    }
 	}
 
       if (! prefix_addresses && do_print)
@@ -2438,13 +2507,9 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 	insns = FALSE;
 
       if (do_print)
-	{
-	  disassemble_bytes (pinfo, paux->disassemble_fn, insns, data,
-			     addr_offset, nextstop_offset,
-			     rel_offset, &rel_pp, rel_ppend);
-	  if (paux->symbol)
-	    break;
-	}
+	disassemble_bytes (pinfo, paux->disassemble_fn, insns, data,
+			   addr_offset, nextstop_offset,
+			   rel_offset, &rel_pp, rel_ppend);
 
       addr_offset = nextstop_offset;
       sym = nextsym;
