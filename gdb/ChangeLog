@@ -1,3 +1,8 @@
+2019-01-23  Tom Tromey  <tom@tromey.com>
+
+	* language.h (class scoped_switch_to_sym_language_if_auto):
+	Initialize m_lang in both cases.
+
 2019-01-23  Alan Hayward  <alan.hayward@arm.com>
 
 	* nat/aarch64-linux.c (aarch64_linux_new_thread): Replace XNEW

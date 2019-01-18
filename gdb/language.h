@@ -726,7 +726,12 @@ public:
 	set_language (SYMBOL_LANGUAGE (sym));
       }
     else
-      m_switched = false;
+      {
+	m_switched = false;
+	/* Assign to m_lang to silence a GCC warning.  See
+	   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80635.  */
+	m_lang = language_unknown;
+      }
   }
 
   ~scoped_switch_to_sym_language_if_auto ()
