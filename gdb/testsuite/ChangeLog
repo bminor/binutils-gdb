@@ -1,5 +1,9 @@
 2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.fortran/type-kinds.exp: Update expected results.
+
+2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.fortran/type-kinds.exp: Test new integer type kind.
 
 2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
