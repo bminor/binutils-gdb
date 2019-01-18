@@ -34,7 +34,9 @@
 #include "cp-support.h"
 #include "charset.h"
 #include "c-lang.h"
+#include "target-float.h"
 
+#include <math.h>
 
 /* Local functions */
 
@@ -239,6 +241,20 @@ f_collect_symbol_completion_matches (completion_tracker &tracker,
 						      text, word, ":", code);
 }
 
+/* Create and return a value object of TYPE containing the value D.  The
+   TYPE must be of TYPE_CODE_FLT, and must be large enough to hold D once
+   it is converted to target format.  */
+
+static struct value *
+value_from_host_double (struct type *type, double d)
+{
+  struct value *value = allocate_value (type);
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
+  target_float_from_host_double (value_contents_raw (value),
+                                 value_type (value), d);
+  return value;
+}
+
 /* Special expression evaluation cases for Fortran.  */
 struct value *
 evaluate_subexp_f (struct type *expect_type, struct expression *exp,
@@ -258,6 +274,29 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
     default:
       *pos -= 1;
       return evaluate_subexp_standard (expect_type, exp, pos, noside);
+
+    case UNOP_ABS:
+      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      if (noside == EVAL_SKIP)
+	return eval_skip_value (exp);
+      type = value_type (arg1);
+      switch (TYPE_CODE (type))
+	{
+	case TYPE_CODE_FLT:
+	  {
+	    double d
+	      = fabs (target_float_to_host_double (value_contents (arg1),
+						   value_type (arg1)));
+	    return value_from_host_double (type, d);
+	  }
+	case TYPE_CODE_INT:
+	  {
+	    LONGEST l = value_as_long (arg1);
+	    l = llabs (l);
+	    return value_from_longest (type, l);
+	  }
+	}
+      error (_("ABS of type %s not supported"), TYPE_SAFE_NAME (type));
 
     case UNOP_KIND:
       arg1 = evaluate_subexp (NULL, exp, pos, EVAL_AVOID_SIDE_EFFECTS);

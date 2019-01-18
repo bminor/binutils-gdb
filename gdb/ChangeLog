@@ -1,4 +1,15 @@
 2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Chris January  <chris.january@arm.com>
+	    David Lecomber  <david.lecomber@arm.com>
+
+	* f-exp.y: New token, UNOP_INTRINSIC.
+	(exp): New pattern using UNOP_INTRINSIC token.
+	(f77_keywords): Add 'abs' keyword.
+	* f-lang.c: Add 'target-float.h' and 'math.h' includes.
+	(value_from_host_double): New function.
+	(evaluate_subexp_f): Support UNOP_ABS.
+
+2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* f-lang.c (build_fortran_types): Use TYPE_CODE_CHAR for character
 	types.

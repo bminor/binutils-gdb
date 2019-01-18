@@ -40,3 +40,12 @@ gdb_test "p kind (l2)" " = 2"
 gdb_test "p kind (l4)" " = 4"
 gdb_test "p kind (l8)" " = 8"
 gdb_test "p kind (s1)" "argument to kind must be an intrinsic type"
+
+# Test ABS
+
+gdb_test "p abs (-11)" " = 11"
+gdb_test "p abs (11)" " = 11"
+# Use `$decimal` to match here as we depend on host floating point
+# rounding, which can vary.
+gdb_test "p abs (-9.1)" " = 9.$decimal"
+gdb_test "p abs (9.1)" " = 9.$decimal"

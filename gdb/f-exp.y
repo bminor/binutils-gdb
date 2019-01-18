@@ -168,6 +168,7 @@ static int parse_number (struct parser_state *, const char *, int,
 %token <voidval> DOLLAR_VARIABLE
 
 %token <opcode> ASSIGN_MODIFY
+%token <opcode> UNOP_INTRINSIC
 
 %left ','
 %left ABOVE_COMMA
@@ -250,6 +251,10 @@ exp	:	exp '('
 						 (LONGEST) end_arglist ());
 			  write_exp_elt_opcode (pstate,
 					      OP_F77_UNDETERMINED_ARGLIST); }
+	;
+
+exp	:	UNOP_INTRINSIC '(' exp ')'
+			{ write_exp_elt_opcode (pstate, $1); }
 	;
 
 arglist	:
@@ -945,7 +950,8 @@ static const struct token f77_keywords[] =
   { "real", REAL_KEYWORD, BINOP_END, true },
   /* The following correspond to actual functions in Fortran and are case
      insensitive.  */
-  { "kind", KIND, BINOP_END, false }
+  { "kind", KIND, BINOP_END, false },
+  { "abs", UNOP_INTRINSIC, UNOP_ABS, false }
 };
 
 /* Implementation of a dynamically expandable buffer for processing input
