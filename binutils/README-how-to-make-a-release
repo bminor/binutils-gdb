@@ -38,15 +38,23 @@ How to perform a release.
 
   4. Create the release branch using:
 
-	git branch binutils-2_31-branch
-        git push origin binutils-2_31-branch
+	git branch binutils-2_33-branch
+        git push origin binutils-2_33-branch
+
+     If you get a message like:
+     
+       remote: fatal: Invalid revision range 0000000000000000000000000000000000000000..f974f26cb16cc6fe3946f163c787a05e713fb77b
+       
+     It appears that this can be ignored...
 
   5. Make sure that the branch is there.  IE check out the branch sources:
   
-        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_31-branch 2.31
+        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_33-branch 2.33
 
      If you get a message about being in a "detached head" state, something
      has gone wrong...
+
+     Keep the checked out sources - they are going to be needed in future steps.
 
   6. Update "BINUTILS_BRANCH" in gdbadmin's crontab:
 
@@ -62,7 +70,7 @@ How to perform a release.
      ask Joel Brobecker <brobecker AT adacore DOT com>.
 
   7. Rename the current HEAD version entry in Bugzilla, and create a
-     new one.  E.g. rename "2.30 (HEAD)" to 2.30, and create "2.31
+     new one.  E.g. rename "2.33 (HEAD)" to 2.33, and create "2.34
      (HEAD)":
      
         https://sourceware.org/bugzilla/editversions.cgi?product=binutils
@@ -70,19 +78,21 @@ How to perform a release.
   8. Update bfd/version.m4 on HEAD to indicate that is now a snapshot
      of the next release:
      
-       m4_define([BFD_VERSION], [2.31.51])
+       m4_define([BFD_VERSION], [2.33.51])
        
      Update the release number in bfd/version.m4 for the branch.
      The branch only needs the point value set to 90 as the release
      has not actually happened yet.
 
-       m4_define([BFD_VERSION], [2.30.90])
+       m4_define([BFD_VERSION], [2.32.90])
 
      Regenerate various files on both branch and HEAD by configuring
-     with --enable-maintainer-mode.  NB/ Remember to build gold and
-     gprof.  Add ChangeLog entries.  Commit the changes.  Make sure
-     that this includes the .pot files as well as the configure and
-     makefiles.
+     with "--enable-maintainer-mode --enable-gold" and then building
+     with "make all-binutils all-gas all-gold all-gprof all-ld"
+
+     Add ChangeLog entries for the updated files.  Commit the changes.
+     Make sure that this includes the .pot files as well as the
+     configure and makefiles.
 
   8. Create an initial prerelease:
 
