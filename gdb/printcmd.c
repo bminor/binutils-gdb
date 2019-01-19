@@ -50,7 +50,6 @@
 #include "format.h"
 #include "source.h"
 #include "common/byte-vector.h"
-#include "cli/cli-style.h"
 
 /* Last specified output format.  */
 

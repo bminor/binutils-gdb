@@ -25,7 +25,6 @@
 #include "tdesc.h"
 #include "dll.h"
 #include "rsp-low.h"
-#include "gdbthread.h"
 #include "netstuff.h"
 #include "filestuff.h"
 #include <ctype.h>

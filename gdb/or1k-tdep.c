@@ -33,7 +33,6 @@
 #include "block.h"
 #include "reggroups.h"
 #include "arch-utils.h"
-#include "frame.h"
 #include "frame-unwind.h"
 #include "frame-base.h"
 #include "dwarf2-frame.h"

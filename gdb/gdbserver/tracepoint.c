@@ -7330,7 +7330,6 @@ gdb_agent_init (void)
 }
 
 #include <sys/mman.h>
-#include <fcntl.h>
 
 IP_AGENT_EXPORT_VAR char *gdb_tp_heap_buffer;
 IP_AGENT_EXPORT_VAR char *gdb_jump_pad_buffer;

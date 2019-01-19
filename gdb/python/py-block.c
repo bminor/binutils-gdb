@@ -23,7 +23,6 @@
 #include "symtab.h"
 #include "python-internal.h"
 #include "objfiles.h"
-#include "symtab.h"
 
 typedef struct blpy_block_object {
   PyObject_HEAD

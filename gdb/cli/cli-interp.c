@@ -24,7 +24,6 @@
 #include "ui-out.h"
 #include "cli-out.h"
 #include "top.h"		/* for "execute_command" */
-#include "event-top.h"
 #include "infrun.h"
 #include "observable.h"
 #include "gdbthread.h"

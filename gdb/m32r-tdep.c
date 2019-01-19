@@ -35,7 +35,6 @@
 #include "regcache.h"
 #include "trad-frame.h"
 #include "dis-asm.h"
-#include "objfiles.h"
 #include "m32r-tdep.h"
 #include <algorithm>
 

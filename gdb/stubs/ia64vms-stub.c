@@ -56,7 +56,6 @@
 #include <builtins.h>
 #include <prtdef.h>
 #include <psldef.h>
-#include <ssdef.h>
 #include <chfdef.h>
 
 #include <lib_c/imcbdef.h>

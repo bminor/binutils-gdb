@@ -1419,7 +1419,6 @@ register_dump::dump (ui_file *file)
 #if GDB_SELF_TEST
 #include "selftest.h"
 #include "selftest-arch.h"
-#include "gdbthread.h"
 #include "target-float.h"
 
 namespace selftests {

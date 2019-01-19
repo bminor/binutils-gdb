@@ -28,7 +28,6 @@
 #include "source.h"
 #include "cp-support.h"
 #include "cp-abi.h"
-#include "symtab.h"
 #include "objfiles.h"
 #include "block.h"
 #include "gdbcmd.h"

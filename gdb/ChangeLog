@@ -1,3 +1,19 @@
+2019-01-21  Tom Tromey  <tom@tromey.com>
+
+	* ui-out.c: Fix includes.
+	* tui/tui-source.c: Fix includes.
+	* target.c: Fix includes.
+	* remote.c: Fix includes.
+	* regcache.c: Fix includes.
+	* python/py-block.c: Fix includes.
+	* printcmd.c: Fix includes.
+	* or1k-tdep.c: Fix includes.
+	* mi/mi-main.c: Fix includes.
+	* m32r-tdep.c: Fix includes.
+	* csky-tdep.c: Fix includes.
+	* compile/compile-cplus-types.c: Fix includes.
+	* cli/cli-interp.c: Fix includes.
+
 2019-01-21  Alan Hayward  <alan.hayward@arm.com>
 
 	* aarch64-tdep.c (aapcs_is_vfp_call_or_return_candidate_1): Check

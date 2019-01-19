@@ -25,7 +25,6 @@
 #include "frame.h"
 #include "breakpoint.h"
 #include "source.h"
-#include "symtab.h"
 #include "objfiles.h"
 #include "filenames.h"
 #include "source-cache.h"

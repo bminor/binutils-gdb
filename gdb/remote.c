@@ -28,7 +28,6 @@
 #include "symfile.h"
 #include "target.h"
 #include "process-stratum-target.h"
-/*#include "terminal.h" */
 #include "gdbcmd.h"
 #include "objfiles.h"
 #include "gdb-stabs.h"

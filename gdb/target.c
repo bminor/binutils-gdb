@@ -48,7 +48,6 @@
 #include <algorithm>
 #include "byte-vector.h"
 #include "terminal.h"
-#include <algorithm>
 #include <unordered_map>
 
 static void generic_tls_error (void) ATTRIBUTE_NORETURN;

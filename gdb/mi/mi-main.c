@@ -43,7 +43,6 @@
 #include "mi-common.h"
 #include "language.h"
 #include "valprint.h"
-#include "inferior.h"
 #include "osdata.h"
 #include "common/gdb_splay_tree.h"
 #include "tracepoint.h"
