@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.32:
+
 * The addr2line, c++filt, nm and objdump tools now have a limit on the
   maximum amount of recursion that is allowed whilst demangling strings.
   The value for this limit is defined by the DEMANGLE_RECRUSE_LIMIT

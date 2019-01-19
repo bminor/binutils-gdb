@@ -1,3 +1,7 @@
+2018-06-24  Nick Clifton  <nickc@redhat.com>
+
+	2.32 branch created.
+
 2018-11-09  Hafiz Abid Qadeer  <abidh@codesourcery.com>
 
 	* iconv.m4 (AM_ICONV_LINK): Don't overwrite CPPFLAGS.

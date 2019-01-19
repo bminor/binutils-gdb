@@ -27,14 +27,14 @@ How to perform a release.
      directories and the top level configure files.
 
   3. When branch day arrives add markers for the upcoming release to
-     gas, ld, gold and binutils NEWS files.
-       [If using the make-prerelease.sh script, check that
-        common.sh has the right values].
-       [make-prelease.sh command i]
-     Likewise for all of the ChangeLog files.
+     the NEWS files in gas, ld, gold and binutils.
+
+     Likewise for the ChangeLog files in: bfd, binutils, config, cpu,
+     elfcpp, gas, gold, gprof, include, ld, opcodes and toplevel.
+
      Add a note of the name of the new branch to binutils/BRANCHES.
+
      Commit these changes.
-       [make-prerelease.sh command C]
 
   4. Create the release branch using:
 

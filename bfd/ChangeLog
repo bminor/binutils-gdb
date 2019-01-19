@@ -1,3 +1,7 @@
+2018-06-24  Nick Clifton  <nickc@redhat.com>
+
+	2.32 branch created.
+
 2019-01-16  Kito Cheng  <kito@andestech.com>
 
 	* elf-attrs.c (vendor_obj_attr_size): Return 0 if size is 0 even

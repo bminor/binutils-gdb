@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.32:
+
 * Add -mvexwig=[0|1] option to x86 assembler to control encoding of
   VEX.W-ignored (WIG) VEX instructions.
 
