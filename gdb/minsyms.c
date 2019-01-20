@@ -308,7 +308,6 @@ struct bound_minimal_symbol
 lookup_minimal_symbol (const char *name, const char *sfile,
 		       struct objfile *objf)
 {
-  struct objfile *objfile;
   found_minimal_symbols found;
 
   unsigned int mangled_hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
@@ -323,10 +322,11 @@ lookup_minimal_symbol (const char *name, const char *sfile,
 
   lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
 
-  for (objfile = object_files;
-       objfile != NULL && found.external_symbol.minsym == NULL;
-       objfile = objfile->next)
+  for (objfile *objfile : current_program_space->objfiles ())
     {
+      if (found.external_symbol.minsym != NULL)
+	break;
+
       if (objf == NULL || objf == objfile
 	  || objf == objfile->separate_debug_objfile_backlink)
 	{
@@ -522,17 +522,17 @@ iterate_over_minimal_symbols
 struct bound_minimal_symbol
 lookup_minimal_symbol_text (const char *name, struct objfile *objf)
 {
-  struct objfile *objfile;
   struct minimal_symbol *msymbol;
   struct bound_minimal_symbol found_symbol = { NULL, NULL };
   struct bound_minimal_symbol found_file_symbol = { NULL, NULL };
 
   unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
 
-  for (objfile = object_files;
-       objfile != NULL && found_symbol.minsym == NULL;
-       objfile = objfile->next)
+  for (objfile *objfile : current_program_space->objfiles ())
     {
+      if (found_symbol.minsym != NULL)
+	break;
+
       if (objf == NULL || objf == objfile
 	  || objf == objfile->separate_debug_objfile_backlink)
 	{
@@ -574,14 +574,11 @@ struct minimal_symbol *
 lookup_minimal_symbol_by_pc_name (CORE_ADDR pc, const char *name,
 				  struct objfile *objf)
 {
-  struct objfile *objfile;
   struct minimal_symbol *msymbol;
 
   unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
 
-  for (objfile = object_files;
-       objfile != NULL;
-       objfile = objfile->next)
+  for (objfile *objfile : current_program_space->objfiles ())
     {
       if (objf == NULL || objf == objfile
 	  || objf == objfile->separate_debug_objfile_backlink)
@@ -606,15 +603,12 @@ struct bound_minimal_symbol
 lookup_minimal_symbol_solib_trampoline (const char *name,
 					struct objfile *objf)
 {
-  struct objfile *objfile;
   struct minimal_symbol *msymbol;
   struct bound_minimal_symbol found_symbol = { NULL, NULL };
 
   unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
 
-  for (objfile = object_files;
-       objfile != NULL;
-       objfile = objfile->next)
+  for (objfile *objfile : current_program_space->objfiles ())
     {
       if (objf == NULL || objf == objfile
 	  || objf == objfile->separate_debug_objfile_backlink)
