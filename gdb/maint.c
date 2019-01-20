@@ -589,7 +589,7 @@ maintenance_translate_address (const char *arg, int from_tty)
 	  gdb_assert (sect->objfile && objfile_name (sect->objfile));
 	  obj_name = objfile_name (sect->objfile);
 
-	  if (MULTI_OBJFILE_P ())
+	  if (current_program_space->multi_objfile_p ())
 	    printf_filtered (_("%s + %s in section %s of %s\n"),
 			     symbol_name, symbol_offset,
 			     section_name, obj_name);

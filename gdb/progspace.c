@@ -200,6 +200,14 @@ program_space::remove_objfile (struct objfile *objfile)
 		  _("remove_objfile: objfile already unlinked"));
 }
 
+/* See progspace.h.  */
+
+bool
+program_space::multi_objfile_p () const
+{
+  return objfiles_head != nullptr && objfiles_head->next != nullptr;
+}
+
 /* Copies program space SRC to DEST.  Copies the main executable file,
    and the main symbol file.  Returns DEST.  */
 

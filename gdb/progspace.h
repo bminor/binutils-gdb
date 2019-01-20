@@ -173,6 +173,11 @@ struct program_space
   /* Remove OBJFILE from the list of objfiles.  */
   void remove_objfile (struct objfile *objfile);
 
+  /* Return true if there is more than one object file loaded; false
+     otherwise.  */
+  bool multi_objfile_p () const;
+
+
   /* Pointer to next in linked list.  */
   struct program_space *next = NULL;
 

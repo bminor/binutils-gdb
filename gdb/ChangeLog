@@ -1,5 +1,14 @@
 2019-12-12  Tom Tromey  <tom@tromey.com>
 
+	* progspace.c (program_space::multi_objfile_p): New method.
+	* printcmd.c (info_symbol_command): Update.
+	* maint.c (maintenance_translate_address): Update.
+	* objfiles.h (MULTI_OBJFILE_P): Remove.
+	* progspace.h (struct program_space) <multi_objfile_p>: New
+	method.
+
+2019-12-12  Tom Tromey  <tom@tromey.com>
+
 	* progspace.h (struct program_space) <remove_objfile>: Declare.
 	* progspace.c (program_space::remove_objfile): New method.
 	* objfiles.c (unlink_objfile): Remove.

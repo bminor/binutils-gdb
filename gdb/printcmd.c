@@ -1367,7 +1367,7 @@ info_symbol_command (const char *arg, int from_tty)
 	    gdb_assert (osect->objfile && objfile_name (osect->objfile));
 	    obj_name = objfile_name (osect->objfile);
 
-	    if (MULTI_OBJFILE_P ())
+	    if (current_program_space->multi_objfile_p ())
 	      if (pc_in_unmapped_range (addr, osect))
 		if (section_is_overlay (osect))
 		  printf_filtered (_("%s in load address range of "

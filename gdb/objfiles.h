@@ -773,10 +773,6 @@ extern void default_iterate_over_objfiles_in_search_order
    uninitialized section index.  */
 #define SECT_OFF_BSS(objfile) (objfile)->sect_index_bss
 
-/* Answer whether there is more than one object file loaded.  */
-
-#define MULTI_OBJFILE_P() (object_files && object_files->next)
-
 /* Reset the per-BFD storage area on OBJ.  */
 
 void set_objfile_per_bfd (struct objfile *obj);
