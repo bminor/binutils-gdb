@@ -679,31 +679,29 @@ handle_line_of_input (struct buffer *cmd_line_buffer,
   /* Do history expansion if that is wished.  */
   if (history_expansion_p && from_tty && input_interactive_p (current_ui))
     {
-      char *history_value;
+      char *cmd_expansion;
       int expanded;
 
-      expanded = history_expand (cmd, &history_value);
+      expanded = history_expand (cmd, &cmd_expansion);
+      gdb::unique_xmalloc_ptr<char> history_value (cmd_expansion);
       if (expanded)
 	{
 	  size_t len;
 
 	  /* Print the changes.  */
-	  printf_unfiltered ("%s\n", history_value);
+	  printf_unfiltered ("%s\n", history_value.get ());
 
 	  /* If there was an error, call this function again.  */
 	  if (expanded < 0)
-	    {
-	      xfree (history_value);
-	      return cmd;
-	    }
+	    return cmd;
 
 	  /* history_expand returns an allocated string.  Just replace
 	     our buffer with it.  */
-	  len = strlen (history_value);
+	  len = strlen (history_value.get ());
 	  xfree (buffer_finish (cmd_line_buffer));
-	  cmd_line_buffer->buffer = history_value;
+	  cmd_line_buffer->buffer = history_value.get ();
 	  cmd_line_buffer->buffer_size = len + 1;
-	  cmd = history_value;
+	  cmd = history_value.release ();
 	}
     }
 

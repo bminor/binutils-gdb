@@ -1,3 +1,8 @@
+2019-01-22  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* event-top.c (handle_line_of_input): use unique_xmalloc_ptr for
+	history_value.
+
 2019-01-21  Tom Tromey  <tom@tromey.com>
 
 	* ui-out.c: Fix includes.
