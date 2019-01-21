@@ -21,9 +21,6 @@
 #include "arch-utils.h"
 #include <signal.h>
 #include <fcntl.h>
-#ifdef HAVE_SYS_FILE_H
-#include <sys/file.h>		/* needed for F_OK and friends */
-#endif
 #include "frame.h"		/* required by inferior.h */
 #include "inferior.h"
 #include "infrun.h"
