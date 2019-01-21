@@ -36,10 +36,10 @@ public:
   /* Get the source text for the source file in symtab S.  FIRST_LINE
      and LAST_LINE are the first and last lines to return; line
      numbers are 1-based.  If the file cannot be read, false is
-     returned.  Otherwise, LINES is set to the desired text.  The
+     returned.  Otherwise, LINES_OUT is set to the desired text.  The
      returned text may include ANSI terminal escapes.  */
   bool get_source_lines (struct symtab *s, int first_line,
-			 int last_line, std::string *lines);
+			 int last_line, std::string *lines_out);
 
   /* Remove all the items from the source cache.  */
   void clear ()
@@ -62,12 +62,12 @@ private:
      source lines are not highlighted.  The arguments and return value
      are as for get_source_lines.  */
   bool get_plain_source_lines (struct symtab *s, int first_line,
-			       int last_line, std::string *lines);
+			       int last_line, std::string *lines_out);
   /* A helper function for get_plain_source_lines that extracts the
-     desired source lines from TEXT, putting them into LINES.  The
+     desired source lines from TEXT, putting them into LINES_OUT.  The
      arguments and return value are as for get_source_lines.  */
   bool extract_lines (const struct source_text &text, int first_line,
-		      int last_line, std::string *lines);
+		      int last_line, std::string *lines_out);
 
   /* The contents of the cache.  */
   std::vector<source_text> m_source_map;

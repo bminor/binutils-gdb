@@ -1,5 +1,10 @@
 2019-01-22  Tom Tromey  <tom@tromey.com>
 
+	* source-cache.h (class source_cache) <get_source_lines,
+	get_plain_source_lines, extract_lines>: Rename "lines" parameter.
+
+2019-01-22  Tom Tromey  <tom@tromey.com>
+
 	* remote-fileio.h (struct remote_target): Declare.
 
 2019-01-22  Tom Tromey  <tom@tromey.com>
