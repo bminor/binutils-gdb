@@ -5636,7 +5636,7 @@ nds32_elf_relocate_section (bfd *		   output_bfd ATTRIBUTE_UNUSED,
 		      if (h->dynindx == -1)
 			{
 			  _bfd_error_handler
-			    (_("%pB: relocation %s against `%s' can not be used when"
+			    (_("%pB: relocation %s against `%s' can not be used when "
 			       "making a shared object; recompile with -fPIC"),
 			     input_bfd, nds32_elf_howto_table[r_type].name, h->root.root.string);
 			  bfd_set_error (bfd_error_bad_value);

@@ -1,3 +1,13 @@
+2019-01-21  Yuri Chornoivan  <yurchor@ukr.net>
+
+	PR 24108
+	* elf32-nds32.c (nds32_relocate_section): Add space between words
+	in error message.
+	* elfnn-riscv.c (riscv_version_mismatch): Fix spelling mistake in
+	error message.
+	(riscv_i_or_e_p): Likewise.
+	(riscv_merge_arch_attr_info): Likewise.
+
 2019-01-19  Nick Clifton  <nickc@redhat.com>
 
 	* version.m4: Reset to 2.32.51

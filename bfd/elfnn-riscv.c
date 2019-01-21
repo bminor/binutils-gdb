@@ -2708,7 +2708,7 @@ riscv_version_mismatch (bfd *ibfd,
 			struct riscv_subset_t *out)
 {
   _bfd_error_handler
-    (_("error: %pB: Mis-matched ISA version for '%s' exetension. "
+    (_("error: %pB: Mis-matched ISA version for '%s' extension. "
        "%d.%d vs %d.%d"),
        ibfd, in->name,
        in->major_version, in->minor_version,
@@ -2726,8 +2726,8 @@ riscv_i_or_e_p (bfd *ibfd,
       && (strcasecmp (subset->name, "i") != 0))
     {
       _bfd_error_handler
-	(_("error: %pB: corrupted ISA string '%s'."
-	   "first letter should be 'i' or 'e' but got '%s'."),
+	(_("error: %pB: corrupted ISA string '%s'. "
+	   "First letter should be 'i' or 'e' but got '%s'."),
 	   ibfd, arch, subset->name);
       return FALSE;
     }
@@ -2951,7 +2951,7 @@ riscv_merge_arch_attr_info (bfd *ibfd, char *in_arch, char *out_arch)
   if (xlen_in != ARCH_SIZE)
     {
       _bfd_error_handler
-	(_("error: %pB: Unspported XLEN (%u), you might"
+	(_("error: %pB: Unsupported XLEN (%u), you might be "
 	   "using wrong emulation."), ibfd, xlen_in);
       return NULL;
     }
