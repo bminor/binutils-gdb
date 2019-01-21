@@ -3276,12 +3276,12 @@ proc get_compiler_info {{arg ""}} {
 	# We have to use -E and -o together, despite the comments
 	# above, because of how DejaGnu handles remote host testing.
 	set ppout "$outdir/compiler.i"
-	gdb_compile "${ifile}" "$ppout" preprocess [list "$arg" quiet]
+	gdb_compile "${ifile}" "$ppout" preprocess [list "$arg" quiet getting_compiler_info]
 	set file [open $ppout r]
 	set cppout [read $file]
 	close $file
     } else {
-	set cppout [ gdb_compile "${ifile}" "" preprocess [list "$arg" quiet] ]
+	set cppout [ gdb_compile "${ifile}" "" preprocess [list "$arg" quiet getting_compiler_info] ]
     }
     eval log_file $saved_log
 
@@ -3519,6 +3519,7 @@ proc gdb_compile {source dest type options} {
     }
     set shlib_found 0
     set shlib_load 0
+    set getting_compiler_info 0
     foreach opt $options {
         if {[regexp {^shlib=(.*)} $opt dummy_var shlib_name]
 	    && $type == "executable"} {
@@ -3549,9 +3550,24 @@ proc gdb_compile {source dest type options} {
             }
 	} elseif { $opt == "shlib_load" && $type == "executable" } {
 	    set shlib_load 1
+	} elseif { $opt == "getting_compiler_info" } {
+	    # If this is set, calling test_compiler_info will cause recursion.
+	    set getting_compiler_info 1
         } else {
             lappend new_options $opt
         }
+    }
+
+    # Ensure stack protector is disabled for GCC, as this causes problems with
+    # DWARF line numbering.
+    # See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=88432
+    # This option defaults to on for Debian/Ubuntu.
+    if { $getting_compiler_info == 0
+	 && [test_compiler_info {gcc-*-*}]
+	 && !([test_compiler_info {gcc-[0-3]-*}]
+	      || [test_compiler_info {gcc-4-0-*}]) } {
+        # Put it at the front to not override any user-provided value.
+        lappend new_options "early_flags=-fno-stack-protector"
     }
 
     # Because we link with libraries using their basename, we may need

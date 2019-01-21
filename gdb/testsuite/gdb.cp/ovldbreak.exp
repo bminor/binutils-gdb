@@ -209,7 +209,7 @@ for {set idx 0} {$idx < [llength $overloads]} {incr idx} {
 
 # Verify the breakpoints.
 set bptable "Num\[\t \]+Type\[\t \]+Disp Enb Address\[\t \]+What.*\[\r\n]+"
-append bptable "\[0-9\]+\[\t \]+breakpoint\[\t \]+keep\[\t \]y\[\t \]+$hex\[\t \]+in main(\\((|void)\\))? at.*$srcfile:4\[89\]\[\r\n\]+"
+append bptable "\[0-9\]+\[\t \]+breakpoint\[\t \]+keep\[\t \]y\[\t \]+$hex\[\t \]+in main(\\((|void)\\))? at.*$srcfile:49\[\r\n\]+"
 append bptable "\[\t \]+breakpoint already hit 1 time\[\r\n\]+."
 foreach ovld $overloads {
     append bptable [format "\[0-9\]+\[\t \]+breakpoint\[\t \]+keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(%s\\) at.*$srcfile:%d\[\r\n\]+" $ovld \
