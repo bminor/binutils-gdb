@@ -1,5 +1,9 @@
 2019-01-22  Tom Tromey  <tom@tromey.com>
 
+	* compile/gcc-c-plugin.h: Include compile-internal.h.
+
+2019-01-22  Tom Tromey  <tom@tromey.com>
+
 	* stabsread.c (EXTERN): Do not define.
 	(symnum, next_symbol_text_func, processing_gcc_compilation)
 	(within_function, global_sym_chain, global_stabs)
