@@ -2,13 +2,13 @@
 # translation of gprof-2.28.90.tr.po to Turkish
 # Copyright (C) 2003, 2005 Free Software Foundation, Inc.
 # Deniz Akkus Kanca <deniz@arayan.com>, 2001,2003.
-# Mehmet Kececi <mkececi@mehmetkececi.com>, 2017.
+# Mehmet Kececi <mkececi@mehmetkececi.com>, 2017, 2019.
 msgid ""
 msgstr ""
-"Project-Id-Version: gprof 2.28.90\n"
+"Project-Id-Version: gprof 2.31.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2017-07-03 16:56+0200\n"
-"PO-Revision-Date: 2017-07-05 14:21+0300\n"
+"POT-Creation-Date: 2019-01-19 16:37+0000\n"
+"PO-Revision-Date: 2019-01-20 17:47+0300\n"
 "Last-Translator: Mehmet Kececi <mkececi@mehmetkececi.com>\n"
 "Language-Team: Turkish <gnu-tr-u12a@lists.sourceforge.net>\n"
 "Language: tr\n"
@@ -205,7 +205,7 @@ msgstr "astlar"
 #: cg_print.c:109
 #, c-format
 msgid "index %% time    self  children    called     name\n"
-msgstr "indeks %% zaman  kendi astlar      çağrıldı   isim\n"
+msgstr "indeks %% zaman    kendi  astlar    çağrıldı     isim\n"
 
 #: cg_print.c:132
 #, c-format
@@ -236,52 +236,52 @@ msgstr ""
 msgid "<cycle %d>"
 msgstr "<çevrim %d>"
 
-#: corefile.c:62
+#: corefile.c:61
 #, c-format
 msgid "%s: unable to parse mapping file %s.\n"
 msgstr "%s: eşlem dosyası %s ayrıştırılamadı.\n"
 
-#: corefile.c:90 corefile.c:527
+#: corefile.c:89 corefile.c:521
 #, c-format
 msgid "%s: could not open %s.\n"
 msgstr "%s: %s açılamadı.\n"
 
-#: corefile.c:192
+#: corefile.c:191
 #, c-format
 msgid "%s: %s: not in executable format\n"
 msgstr "%s: %s: çalıştırılabilir biçimde değil\n"
 
-#: corefile.c:203
+#: corefile.c:202
 #, c-format
 msgid "%s: can't find .text section in %s\n"
 msgstr "%s: %s içerisinde .text (metin) bölümü bulunamadı\n"
 
-#: corefile.c:278
+#: corefile.c:276
 #, c-format
 msgid "%s: ran out room for %lu bytes of text space\n"
 msgstr "%s: %lu bayt metin yeri için yer bulunamadı\n"
 
-#: corefile.c:292
+#: corefile.c:290
 #, c-format
 msgid "%s: can't do -c\n"
 msgstr "%s: -c yapılamıyor\n"
 
-#: corefile.c:335
+#: corefile.c:329
 #, c-format
 msgid "%s: -c not supported on architecture %s\n"
 msgstr "%s: -c %s platformu üzerinde desteklenmiyor\n"
 
-#: corefile.c:536 corefile.c:642
+#: corefile.c:530 corefile.c:635
 #, c-format
 msgid "%s: file `%s' has no symbols\n"
 msgstr "%s: `%s' dosyası sembol içermiyor\n"
 
-#: corefile.c:541
+#: corefile.c:535
 #, c-format
 msgid "%s: file `%s' has too many symbols\n"
 msgstr "%s: dosyası `%s' çok fazla sembol içeriyor\n"
 
-#: corefile.c:909
+#: corefile.c:902
 #, c-format
 msgid "%s: somebody miscounted: ltab.len=%d instead of %ld\n"
 msgstr "%1$s: hatalı sayım: %3$ld yerine ltab.len=%2$d\n"
@@ -431,12 +431,12 @@ msgstr "GNU gprof %s\n"
 #: gprof.c:425
 #, c-format
 msgid "Based on BSD gprof, copyright 1983 Regents of the University of California.\n"
-msgstr "BSD gprof baz alınmıştır. BSD gprof Telif Hakkı 1983 Regents of the University of California.\n"
+msgstr "BSD gprof baz alınmıştır, Telif Hakkı 1983 Regents of the University of California.\n"
 
 #: gprof.c:426
 #, c-format
 msgid "This program is free software.  This program has absolutely no warranty.\n"
-msgstr "Bu yazılım bir serbest yazılımdır. Bu yazılımın herhangi bir garantisi yoktur.\n"
+msgstr "Bu yazılım bir serbest yazılımdır.  Bu yazılımın herhangi bir garantisi yoktur.\n"
 
 #: gprof.c:467
 #, c-format
@@ -446,9 +446,7 @@ msgstr "%s: bilinmeyen düzeltme tarzı `%s'\n"
 #: gprof.c:490
 #, c-format
 msgid "%s: Only one of --function-ordering and --file-ordering may be specified.\n"
-msgstr ""
-"%s: --function-ordering (işleve göre sırala) ve\n"
-"    --file-ordering (dosyaya göre sırala) seçeneklerinin biri seçilebilir.\n"
+msgstr "%s: İşleve göre sırala --function-ordering ve --file-ordering dosyaya göre sırala seçeneklerinin biri seçilebilir.\n"
 
 #: gprof.c:542
 #, c-format
@@ -513,7 +511,7 @@ msgid ""
 " for %.2f%% of %.2f %s\n"
 "\n"
 msgstr ""
-" Toplam %2$.2f %3$s'nin %1$.2f%%'si okundu\n"
+" for %.2f%% of %.2f %s\n"
 "\n"
 
 #: hist.c:480
