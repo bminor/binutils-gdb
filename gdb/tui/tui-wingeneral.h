@@ -22,6 +22,8 @@
 #ifndef TUI_WINGENERAL_H
 #define TUI_WINGENERAL_H
 
+#include "gdb_curses.h"
+
 struct tui_win_info;
 struct tui_gen_win_info;
 
