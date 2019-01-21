@@ -32,8 +32,7 @@
 #include "block.h"
 #include "gdbcmd.h"
 #include "c-lang.h"
-#include "compile-c.h" 		/* Included for c_get_range_decl_name
-				   et al.  */
+#include "compile-c.h"
 #include <algorithm>
 
 /* Default compile flags for C++.  */

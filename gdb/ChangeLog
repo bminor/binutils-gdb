@@ -1,5 +1,9 @@
 2019-01-22  Tom Tromey  <tom@tromey.com>
 
+	* compile/compile-cplus-types.c: Remove a comment by #include.
+
+2019-01-22  Tom Tromey  <tom@tromey.com>
+
 	* compile/gcc-c-plugin.h: Include compile-internal.h.
 
 2019-01-22  Tom Tromey  <tom@tromey.com>
