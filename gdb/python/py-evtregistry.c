@@ -20,7 +20,6 @@
 #include "defs.h"
 #include "command.h"
 #include "py-events.h"
-#include "py-ref.h"
 
 events_object gdb_py_events;
 

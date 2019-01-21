@@ -26,7 +26,6 @@
 
 #include "python.h"
 #include "python-internal.h"
-#include "py-ref.h"
 
 static const char enabled_field_name[] = "enabled";
 static const char match_method_name[] = "match";

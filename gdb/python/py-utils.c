@@ -21,7 +21,6 @@
 #include "charset.h"
 #include "value.h"
 #include "python-internal.h"
-#include "py-ref.h"
 
 /* Converts a Python 8-bit string to a unicode string object.  Assumes the
    8-bit string is in the host charset.  If an error occurs during conversion,

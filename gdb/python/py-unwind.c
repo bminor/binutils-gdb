@@ -28,7 +28,6 @@
 #include "regcache.h"
 #include "valprint.h"
 #include "user-regs.h"
-#include "py-ref.h"
 
 #define TRACE_PY_UNWIND(level, args...) if (pyuw_debug >= level)  \
   { fprintf_unfiltered (gdb_stdlog, args); }

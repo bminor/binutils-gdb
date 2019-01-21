@@ -22,7 +22,6 @@
 #include "arch-utils.h"
 #include "disasm.h"
 #include "python-internal.h"
-#include "py-ref.h"
 
 typedef struct arch_object_type_object {
   PyObject_HEAD

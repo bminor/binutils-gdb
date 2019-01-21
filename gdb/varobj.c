@@ -35,7 +35,6 @@
 #if HAVE_PYTHON
 #include "python/python.h"
 #include "python/python-internal.h"
-#include "python/py-ref.h"
 #else
 typedef int PyObject;
 #endif

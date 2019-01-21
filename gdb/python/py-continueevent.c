@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "py-event.h"
-#include "py-ref.h"
 #include "gdbthread.h"
 
 /* Create a gdb.ContinueEvent event.  gdb.ContinueEvent is-a

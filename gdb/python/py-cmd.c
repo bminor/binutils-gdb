@@ -27,7 +27,6 @@
 #include "cli/cli-decode.h"
 #include "completer.h"
 #include "language.h"
-#include "py-ref.h"
 
 /* Struct representing built-in completion types.  */
 struct cmdpy_completer

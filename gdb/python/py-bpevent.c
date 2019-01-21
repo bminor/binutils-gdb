@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "py-stopevent.h"
-#include "py-ref.h"
 
 /* Create and initialize a BreakpointEvent object.  This acquires new
    references to BREAKPOINT_LIST and FIRST_BP.  */

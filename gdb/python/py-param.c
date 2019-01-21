@@ -27,7 +27,6 @@
 #include "completer.h"
 #include "language.h"
 #include "arch-utils.h"
-#include "py-ref.h"
 
 /* Parameter constants and their values.  */
 struct parm_constant

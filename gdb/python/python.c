@@ -98,7 +98,6 @@ const struct extension_language_defn extension_language_python =
 #include "gdbthread.h"
 #include "interps.h"
 #include "event-top.h"
-#include "py-ref.h"
 #include "py-event.h"
 
 /* True if Python has been successfully initialized, false

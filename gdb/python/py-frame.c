@@ -28,7 +28,6 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "user-regs.h"
-#include "py-ref.h"
 
 typedef struct {
   PyObject_HEAD

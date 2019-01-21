@@ -24,7 +24,6 @@
 #include "python-internal.h"
 #include "objfiles.h"
 #include "block.h"
-#include "py-ref.h"
 
 typedef struct stpy_symtab_object {
   PyObject_HEAD

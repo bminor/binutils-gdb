@@ -28,7 +28,6 @@
 #include "language.h"
 #include "vec.h"
 #include "typeprint.h"
-#include "py-ref.h"
 
 typedef struct pyty_type_object
 {

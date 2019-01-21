@@ -24,7 +24,6 @@
 #include "command.h"
 #include "python-internal.h"
 #include "inferior.h"
-#include "py-ref.h"
 
 /* Declare all event types.  */
 #define GDB_PY_DEFINE_EVENT_TYPE(name, py_name, doc, base) \

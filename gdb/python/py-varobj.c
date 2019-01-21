@@ -17,7 +17,6 @@
 #include "python-internal.h"
 #include "varobj.h"
 #include "varobj-iter.h"
-#include "py-ref.h"
 
 /* A dynamic varobj iterator "class" for python pretty-printed
    varobjs.  This inherits struct varobj_iter.  */

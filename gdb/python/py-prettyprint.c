@@ -25,7 +25,6 @@
 #include "extension-priv.h"
 #include "python.h"
 #include "python-internal.h"
-#include "py-ref.h"
 
 /* Return type of print_string_repr.  */
 

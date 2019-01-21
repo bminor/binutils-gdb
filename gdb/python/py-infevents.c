@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "py-event.h"
-#include "py-ref.h"
 
 /* Construct either a gdb.InferiorCallPreEvent or a
    gdb.InferiorCallPostEvent. */

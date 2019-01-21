@@ -27,7 +27,6 @@
 #include "completer.h"
 #include "expression.h"
 #include "language.h"
-#include "py-ref.h"
 
 extern PyTypeObject fnpy_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("PyObject");

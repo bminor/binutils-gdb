@@ -24,7 +24,6 @@
 #include "objfiles.h"
 #include "language.h"
 #include "arch-utils.h"
-#include "py-ref.h"
 #include "solib.h"
 #include "block.h"
 

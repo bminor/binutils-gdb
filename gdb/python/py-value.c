@@ -29,7 +29,6 @@
 #include "python.h"
 
 #include "python-internal.h"
-#include "py-ref.h"
 
 /* Even though Python scalar types directly map to host types, we use
    target types here to remain consistent with the values system in

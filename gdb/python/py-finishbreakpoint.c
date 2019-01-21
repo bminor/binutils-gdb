@@ -30,7 +30,6 @@
 #include "inferior.h"
 #include "block.h"
 #include "location.h"
-#include "py-ref.h"
 
 /* Function that is called when a Python finish bp is found out of scope.  */
 static const char outofscope_func[] = "out_of_scope";

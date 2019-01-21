@@ -24,7 +24,6 @@
 #include "language.h"
 #include "build-id.h"
 #include "symtab.h"
-#include "py-ref.h"
 
 typedef struct
 {
