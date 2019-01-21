@@ -1,5 +1,10 @@
 2019-01-22  Tom Tromey  <tom@tromey.com>
 
+	* objfiles.h (struct objfile_per_bfd_storage): Use "struct"
+	keyword for bcache.
+
+2019-01-22  Tom Tromey  <tom@tromey.com>
+
 	* compile/compile-cplus-types.c: Remove a comment by #include.
 
 2019-01-22  Tom Tromey  <tom@tromey.com>

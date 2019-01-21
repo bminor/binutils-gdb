@@ -240,11 +240,11 @@ struct objfile_per_bfd_storage
 
   /* Byte cache for file names.  */
 
-  bcache *filename_cache = NULL;
+  struct bcache *filename_cache = NULL;
 
   /* Byte cache for macros.  */
 
-  bcache *macro_cache = NULL;
+  struct bcache *macro_cache = NULL;
 
   /* The gdbarch associated with the BFD.  Note that this gdbarch is
      determined solely from BFD information, without looking at target
