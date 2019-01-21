@@ -1,5 +1,9 @@
 2019-01-22  Tom Tromey  <tom@tromey.com>
 
+	* remote-fileio.h (struct remote_target): Declare.
+
+2019-01-22  Tom Tromey  <tom@tromey.com>
+
 	* python/py-arch.c: Do not include py-ref.h.
 	* python/py-bpevent.c: Do not include py-ref.h.
 	* python/py-cmd.c: Do not include py-ref.h.
