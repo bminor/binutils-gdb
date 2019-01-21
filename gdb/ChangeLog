@@ -1,4 +1,8 @@
 2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* f-exp.y (direct_abs_decl): Handle TYPE*SIZE type names.
+
+2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 	    Chris January  <chris.january@arm.com>
 	    David Lecomber  <david.lecomber@arm.com>
 

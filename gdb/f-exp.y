@@ -570,6 +570,8 @@ direct_abs_decl: '(' abs_decl ')'
 			{ $$ = $2; }
 	| 	'(' KIND '=' INT ')'
 			{ push_kind_type ($4.val, $4.type); }
+	|	'*' INT
+			{ push_kind_type ($2.val, $2.type); }
 	| 	direct_abs_decl func_mod
 			{ push_type (tp_function); }
 	|	func_mod

@@ -65,11 +65,34 @@ proc test_parsing_invalid_type_kinds {} {
     }
 }
 
+# Perform some basic checks that GDB can parse the older style
+# TYPE*SIZE type names.
+proc test_old_star_type_sizes {} {
+    gdb_test "p ((character*1) 1)" " = 1 '\\\\001'"
+
+    gdb_test "p ((complex*4) 1)" " = \\(1,0\\)"
+    gdb_test "p ((complex*8) 1)" " = \\(1,0\\)"
+    gdb_test "p ((complex*16) 1)" " = \\(1,0\\)"
+
+    gdb_test "p ((real*4) 1)" " = 1"
+    gdb_test "p ((real*8) 1)" " = 1"
+    gdb_test "p ((real*16) 1)" " = 1"
+
+    gdb_test "p ((logical*1) 1)" " = \\.TRUE\\."
+    gdb_test "p ((logical*4) 1)" " = \\.TRUE\\."
+    gdb_test "p ((logical*8) 1)" " = \\.TRUE\\."
+
+    gdb_test "p ((integer*2) 1)" " = 1"
+    gdb_test "p ((integer*4) 1)" " = 1"
+    gdb_test "p ((integer*8) 1)" " = 1"
+}
+
 clean_restart
 
 if [set_lang_fortran] then {
     test_basic_parsing_of_type_kinds
     test_parsing_invalid_type_kinds
+    test_old_star_type_sizes
 } else {
     warning "$test_name tests suppressed." 0
 }

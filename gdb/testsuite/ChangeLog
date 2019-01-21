@@ -1,5 +1,9 @@
 2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.fortran/type-kinds.exp: Extend to cover TYPE*SIZE cases.
+
+2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.fortran/intrinsics.exp: Extend to cover ABS.
 
 2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
