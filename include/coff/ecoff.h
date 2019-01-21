@@ -22,6 +22,8 @@
 #ifndef ECOFF_H
 #define ECOFF_H
 
+#include "coff/sym.h"
+
 /* Mips magic numbers used in filehdr.  MIPS_MAGIC_LITTLE is used on
    little endian machines.  MIPS_MAGIC_BIG is used on big endian
    machines.  Where is MIPS_MAGIC_1 from?  */
