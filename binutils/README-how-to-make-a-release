@@ -98,16 +98,44 @@ How to perform a release.
 
      a. Create a source tarball of the BRANCH sources:
 
+           cd <branch-sources>
            ./src-release -x binutils
 
      b. Build a test target using this tarball.
 
-     c. Upload the prerelease snapshot to the FTP:
+           cp binutils-<version>.tar.xz /dev/shm
+	   cd /dev/shm
+	   tar xvf binutils-<version>.tar.xz
+	   mkdir build
+	   cd build
+	   ../<version>/configure --quiet --enable-gold
+	   make
 
-          scp ../binutils-$version.tar.xz sourceware.org:~ftp/pub/binutils/snapshots
-          ssh sourceware.org md5sum ~ftp/pub/binutils/snapshots/binutils-$version.tar.xz
+        If there are problems, fix them.
+
+     c. Upload the prerelease snapshot to the sourceware FTP site:
+
+          cd <branch-sources>
+          scp binutils-<version>.tar.xz sourceware.org:~ftp/pub/binutils/snapshots
+          ssh sourceware.org md5sum ~ftp/pub/binutils/snapshots/binutils-<version>.tar.xz
 
      d. Clean up the source directory.
+
+          rm binutils-<version> binutils-<version>.tar binutils-<version>.tar.xz
+	  rm gas/bfin-lex.c \
+	     gas/bfin-parse.c \
+	     gas/bfin-parse.h \
+	     gas/itbl-lex.c \
+	     gas/itbl-parse.c \
+	     gas/itbl-parse.h \
+	     gas/m68k-parse.c \
+	     gas/rl78-parse.c \
+	     gas/rl78-parse.h \
+	     gas/rx-parse.c \
+	     gas/rx-parse.h \
+	     gold/yyscript.c \
+	     gold/yyscript.h
+	rm -fr proto-toplev
 
    9. Tell the Translation Project where to find the new tarball. <coordinator@translationproject.org>
       qv: http://translationproject.org/html/maintainers.html

@@ -1,5 +1,9 @@
 2019-01-21  Nick Clifton  <nickc@redhat.com>
 
+	* po/uk.po: Updated Ukranian translation.
+
+2019-01-21  Nick Clifton  <nickc@redhat.com>
+
 	PR 24108
 	* testsuite/ld-riscv-elf/attr-merge-arch-failed-01.d: Update
 	expected error message.
