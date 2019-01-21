@@ -1,4 +1,7 @@
 2019-01-21  Alan Hayward  <alan.hayward@arm.com>
+	* gdb.base/infcall-nested-structs.exp: Test C++ in addition to C.
+
+2019-01-21  Alan Hayward  <alan.hayward@arm.com>
 	* gdb.base/stack-protector.c: New test.
 	* gdb.base/stack-protector.exp: New file.
 	* gdb.cp/ovldbreak.exp: Only allow a single break line.

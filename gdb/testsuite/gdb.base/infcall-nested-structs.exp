@@ -24,6 +24,20 @@ if [target_info exists gdb,cannot_call_functions] {
     continue
 }
 
+# Only test C++ if we are able.  Always use C.
+if { [skip_cplus_tests] || [get_compiler_info "c++"] } {
+    set lang {c}
+} else {
+    set lang {c c++}
+}
+
+foreach l $lang {
+    set dir "$l"
+    remote_exec host "rm -rf [standard_output_file ${dir}]"
+    remote_exec host "mkdir -p [standard_output_file ${dir}]"
+}
+
+
 set int_types { tc ts ti tl tll }
 set float_types { tf td tld }
 set complex_types { tfc tdc tldc }
@@ -31,6 +45,7 @@ set complex_types { tfc tdc tldc }
 set compile_flags {debug}
 if [support_complex_tests] {
     lappend compile_flags "additional_flags=-DTEST_COMPLEX"
+    lappend compile_flags "additional_flags=-Wno-psabi"
 }
 
 # Given N (0..25), return the corresponding alphabetic letter in upper
@@ -44,7 +59,7 @@ proc I2A { n } {
 # types of the struct fields within the source.  Run up to main.
 # Also updates the global "testfile" to reflect the most recent build.
 
-proc start_nested_structs_test { types } {
+proc start_nested_structs_test { lang types } {
     global testfile
     global srcfile
     global binfile
@@ -53,9 +68,11 @@ proc start_nested_structs_test { types } {
     global compile_flags
 
     standard_testfile .c
+    set dir "$lang"
 
     # Create the additional flags
     set flags $compile_flags
+    lappend flags $lang
 
     for {set n 0} {$n<[llength ${types}]} {incr n} {
 	set m [I2A ${n}]
@@ -64,7 +81,7 @@ proc start_nested_structs_test { types } {
 	append testfile "-" "$t"
     }
 
-    set binfile [standard_output_file ${testfile}]
+    set binfile [standard_output_file ${dir}/${testfile}]
     if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable "${flags}"] != "" } {
 	unresolved "failed to compile"
 	return 0
@@ -99,13 +116,21 @@ proc start_nested_structs_test { types } {
 # Assuming GDB is stopped at main within a test binary, run some tests
 # passing structures, and reading return value structures.
 
-proc run_tests {} {
+proc run_tests { lang types } {
     global gdb_prompt
 
     foreach {name} {struct_01_01 struct_01_02 struct_01_03 struct_01_04
                     struct_02_01 struct_02_02 struct_02_03 struct_02_04
                     struct_04_01 struct_04_02 struct_04_03 struct_04_04
                     struct_05_01 struct_05_02 struct_05_03 struct_05_04} {
+
+	if { ( $lang == "c++"
+	       && ( ( [regexp "struct_01_0(1|2|3)" $name match] && [regexp "^types-(td($|-)|tl(|l)(|-tf|-td|-tld)$)" $types match] )
+		    || ( $name == "struct_01_02" && $types == "types-tfc" )
+		    || ( $name == "struct_01_04" && [regexp "^types-(tf($|-)|ti(|-tf|-td|-tld)$)" $types match] )
+		    || ( $name == "struct_02_01" && [regexp "^types-tf-t(c|s|i)" $types match] ) ) ) } {
+	    setup_xfail gdb/24104 "x86_64-*-linux*"
+	}
 	gdb_test "p/d check_arg_${name} (ref_val_${name})" "= 1"
 
 	set refval [ get_valueof "" "ref_val_${name}" "" ]
@@ -113,8 +138,13 @@ proc run_tests {} {
 
 	set test "check return value ${name}"
 	if { ${refval} != "" } {
+
 	    set answer [ get_valueof "" "rtn_str_${name} ()" "XXXX"]
 	    verbose -log "Answer: ${answer}"
+
+	    if { ($lang == "c++" && $name == "struct_02_01" && [regexp "^types-(tf-t(c|s|i)|t(c|s|i)-tf)" $types match] ) } {
+		setup_xfail gdb/24104 "x86_64-*-linux*"
+	    }
 	    gdb_assert [string eq ${answer} ${refval}] ${test}
 	} else {
 	    unresolved $test
@@ -125,48 +155,50 @@ proc run_tests {} {
 # Set up a test prefix, compile the test binary, run to main, and then
 # run some tests.
 
-proc start_gdb_and_run_tests { types } {
+proc start_gdb_and_run_tests { lang types } {
     set prefix "types"
 
     foreach t $types {
 	append prefix "-" "${t}"
     }
 
-    with_test_prefix $prefix {
-	if { [start_nested_structs_test $types] } {
-	    run_tests
+    foreach_with_prefix l $lang {
+	with_test_prefix $prefix {
+	    if { [start_nested_structs_test $l $types] } {
+		run_tests $l $prefix
+	    }
 	}
     }
 }
 
 foreach ta $int_types {
-    start_gdb_and_run_tests $ta
+    start_gdb_and_run_tests $lang $ta
 }
 
 if [support_complex_tests] {
     foreach ta $complex_types {
-	start_gdb_and_run_tests $ta
+	start_gdb_and_run_tests $lang $ta
     }
 }
 
 if ![gdb_skip_float_test] {
     foreach ta $float_types {
-	start_gdb_and_run_tests $ta
+	start_gdb_and_run_tests $lang $ta
     }
 
     foreach ta $int_types {
 	foreach tb $float_types {
-	    start_gdb_and_run_tests [list $ta $tb]
+	    start_gdb_and_run_tests $lang [list $ta $tb]
 	}
     }
 
     foreach ta $float_types {
 	foreach tb $int_types {
-	    start_gdb_and_run_tests [list $ta $tb]
+	    start_gdb_and_run_tests $lang [list $ta $tb]
 	}
 
 	foreach tb $float_types {
-	    start_gdb_and_run_tests [list $ta $tb]
+	    start_gdb_and_run_tests $lang [list $ta $tb]
 	}
     }
 }

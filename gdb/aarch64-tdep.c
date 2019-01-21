@@ -1232,6 +1232,14 @@ aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
 	      return -1;
 	    count += sub_count;
 	  }
+
+	/* Ensure there is no padding between the fields (allowing for empty
+	   zero length structs)  */
+	int ftype_length = (*fundamental_type == nullptr)
+			   ? 0 : TYPE_LENGTH (*fundamental_type);
+	if (count * ftype_length != TYPE_LENGTH (type))
+	  return -1;
+
 	return count;
       }
 
