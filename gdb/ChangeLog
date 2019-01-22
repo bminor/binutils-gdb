@@ -1,5 +1,9 @@
 2019-01-25  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (GDB_CFLAGS): Don't add -I for common.
+
+2019-01-25  Tom Tromey  <tom@tromey.com>
+
 	* xtensa-linux-nat.c: Fix common/ includes.
 	* xml-support.h: Fix common/ includes.
 	* xml-support.c: Fix common/ includes.

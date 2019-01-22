@@ -1,5 +1,9 @@
 2019-01-25  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (INCLUDE_CFLAGS): Don't add -I for common.
+
+2019-01-25  Tom Tromey  <tom@tromey.com>
+
 	* win32-low.c: Fix common/ includes.
 	* win32-i386-low.c: Fix common/ includes.
 	* tracepoint.c: Fix common/ includes.
