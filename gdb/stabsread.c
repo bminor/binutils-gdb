@@ -47,11 +47,19 @@
 #include "bcache.h"
 #include <ctype.h>
 
-/* Ask stabsread.h to define the vars it normally declares `extern'.  */
-#define	EXTERN
-/**/
-#include "stabsread.h"		/* Our own declarations */
-#undef	EXTERN
+#include "stabsread.h"
+
+/* See stabsread.h for these globals.  */
+unsigned int symnum;
+const char *(*next_symbol_text_func) (struct objfile *);
+unsigned char processing_gcc_compilation;
+int within_function;
+struct symbol *global_sym_chain[HASHSIZE];
+struct pending_stabs *global_stabs;
+int previous_stab_code;
+int *this_object_header_files;
+int n_this_object_header_files;
+int n_allocated_this_object_header_files;
 
 struct nextfield
 {

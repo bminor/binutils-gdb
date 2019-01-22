@@ -20,16 +20,7 @@ struct objfile;
 enum language;
 
 /* Definitions, prototypes, etc for stabs debugging format support
-   functions.
-
-   Variables declared in this file can be defined by #define-ing
-   the name EXTERN to null.  It is used to declare variables that
-   are normally extern, but which get defined in a single module
-   using this technique.  */
-
-#ifndef EXTERN
-#define	EXTERN extern
-#endif
+   functions.  */
 
 #define HASHSIZE 127		/* Size of things hashed via
 				   hashname().  */
@@ -40,23 +31,23 @@ extern int hashname (const char *name);
 
 /* Count symbols as they are processed, for error messages.  */
 
-EXTERN unsigned int symnum;
+extern unsigned int symnum;
 
 #define next_symbol_text(objfile) (*next_symbol_text_func)(objfile)
 
 /* Function to invoke get the next symbol.  Return the symbol name.  */
 
-EXTERN const char *(*next_symbol_text_func) (struct objfile *);
+extern const char *(*next_symbol_text_func) (struct objfile *);
 
 /* Global variable which, when set, indicates that we are processing a
    .o file compiled with gcc */
 
-EXTERN unsigned char processing_gcc_compilation;
+extern unsigned char processing_gcc_compilation;
 
 /* Nonzero if within a function (so symbols should be local, if
    nothing says specifically).  */
 
-EXTERN int within_function;
+extern int within_function;
 
 /* Hash table of global symbols whose values are not known yet.
    They are chained thru the SYMBOL_VALUE_CHAIN, since we don't
@@ -66,7 +57,7 @@ EXTERN int within_function;
    it refers to a FORTRAN common block rather than the usual meaning, and
    the such LOC_BLOCK symbols use their fields in nonstandard ways.  */
 
-EXTERN struct symbol *global_sym_chain[HASHSIZE];
+extern struct symbol *global_sym_chain[HASHSIZE];
 
 extern void common_block_start (const char *, struct objfile *);
 extern void common_block_end (struct objfile *);
@@ -80,12 +71,12 @@ struct pending_stabs
     char *stab[1];
   };
 
-EXTERN struct pending_stabs *global_stabs;
+extern struct pending_stabs *global_stabs;
 
 /* The type code that process_one_symbol saw on its previous invocation.
    Used to detect pairs of N_SO symbols.  */
 
-EXTERN int previous_stab_code;
+extern int previous_stab_code;
 
 /* Support for Sun changes to dbx symbol format.  */
 
@@ -150,11 +141,11 @@ struct header_file
    and not to any header file.  FILENUM != 1 is interpreted by looking it up
    in the following table, which contains indices in header_files.  */
 
-EXTERN int *this_object_header_files;
+extern int *this_object_header_files;
 
-EXTERN int n_this_object_header_files;
+extern int n_this_object_header_files;
 
-EXTERN int n_allocated_this_object_header_files;
+extern int n_allocated_this_object_header_files;
 
 extern void cleanup_undefined_stabs_types (struct objfile *);
 
@@ -228,5 +219,3 @@ extern void init_header_files (void);
    to.  Get these symbols from the minimal symbol table.  */
 
 extern void scan_file_globals (struct objfile *objfile);
-
-#undef EXTERN

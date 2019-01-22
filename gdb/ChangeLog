@@ -1,3 +1,13 @@
+2019-01-22  Tom Tromey  <tom@tromey.com>
+
+	* stabsread.c (EXTERN): Do not define.
+	(symnum, next_symbol_text_func, processing_gcc_compilation)
+	(within_function, global_sym_chain, global_stabs)
+	(previous_stab_code, this_object_header_files)
+	(n_this_object_header_files)
+	(n_allocated_this_object_header_files): Define.
+	* stabsread.h (EXTERN): Never define.  Use "extern".
+
 2019-01-22  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* event-top.c (handle_line_of_input): use unique_xmalloc_ptr for
