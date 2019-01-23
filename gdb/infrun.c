@@ -3744,7 +3744,7 @@ fetch_inferior_event (void *client_data)
     ptid_t finish_ptid = !target_is_non_stop_p () ? minus_one_ptid : ecs->ptid;
     scoped_finish_thread_state finish_state (finish_ptid);
 
-    /* Get executed before make_cleanup_restore_current_thread above to apply
+    /* Get executed before scoped_restore_current_thread above to apply
        still for the thread which has thrown the exception.  */
     auto defer_bpstat_clear
       = make_scope_exit (bpstat_clear_actions);
