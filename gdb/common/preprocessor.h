@@ -30,6 +30,6 @@
 
 /* Escape parens out.  Useful if you need to pass an argument that
    includes commas to another macro.  */
-#define ESC(...) __VA_ARGS__
+#define ESC_PARENS(...) __VA_ARGS__
 
 #endif /* COMMON_PREPROC */

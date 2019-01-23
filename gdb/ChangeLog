@@ -1,3 +1,10 @@
+2019-01-23  Pedro Alves  <palves@redhat.com>
+
+	* common/preprocessor.h (ESC): Rename to ...
+	(ESC_PARENS): ... this.
+	* common/valid-expr.h (CHECK_VALID_EXPR_1, CHECK_VALID_EXPR_2)
+	(CHECK_VALID_EXPR_3, CHECK_VALID_EXPR_4): Adjust.
+
 2019-01-23  Tom Tromey  <tom@tromey.com>
 
 	* language.h (class scoped_switch_to_sym_language_if_auto):
