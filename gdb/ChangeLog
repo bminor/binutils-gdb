@@ -1,4 +1,8 @@
 2019-01-23  Pedro Alves  <palves@redhat.com>
+
+	* gdbarch-selftests.c (struct on_exit): Use SCOPE_EXIT.
+
+2019-01-23  Pedro Alves  <palves@redhat.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdbthread.h: Include "common/forward-scope-exit.h".

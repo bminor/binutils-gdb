@@ -104,13 +104,7 @@ register_to_value_test (struct gdbarch *gdbarch)
   push_target (&mock_target);
 
   /* Pop it again on exit (return/exception).  */
-  struct on_exit
-  {
-    ~on_exit ()
-    {
-      pop_all_targets_at_and_above (process_stratum);
-    }
-  } pop_targets;
+  SCOPE_EXIT { pop_all_targets_at_and_above (process_stratum); };
 
   /* Switch to the mock thread.  */
   scoped_restore restore_inferior_ptid
