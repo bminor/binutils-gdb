@@ -68,6 +68,7 @@
 #include "common/gdb_optional.h"
 #include "arch-utils.h"
 #include "common/scope-exit.h"
+#include "common/forward-scope-exit.h"
 
 /* Prototypes for local functions */
 
@@ -1596,14 +1597,9 @@ displaced_step_clear (struct displaced_step_inferior_state *displaced)
   displaced->step_closure = NULL;
 }
 
-static void
-displaced_step_clear_cleanup (void *arg)
-{
-  struct displaced_step_inferior_state *state
-    = (struct displaced_step_inferior_state *) arg;
-
-  displaced_step_clear (state);
-}
+/* A cleanup that wraps displaced_step_clear.  */
+using displaced_step_clear_cleanup
+  = FORWARD_SCOPE_EXIT (displaced_step_clear);
 
 /* Dump LEN bytes at BUF in hex to FILE, followed by a newline.  */
 void
@@ -1752,13 +1748,14 @@ displaced_step_prepare_throw (thread_info *tp)
   displaced->step_original = original;
   displaced->step_copy = copy;
 
-  cleanup *ignore_cleanups
-    = make_cleanup (displaced_step_clear_cleanup, displaced);
+  {
+    displaced_step_clear_cleanup cleanup (displaced);
 
-  /* Resume execution at the copy.  */
-  regcache_write_pc (regcache, copy);
+    /* Resume execution at the copy.  */
+    regcache_write_pc (regcache, copy);
 
-  discard_cleanups (ignore_cleanups);
+    cleanup.release ();
+  }
 
   if (debug_displaced)
     fprintf_unfiltered (gdb_stdlog, "displaced: displaced pc to %s\n",
@@ -1848,7 +1845,6 @@ displaced_step_restore (struct displaced_step_inferior_state *displaced,
 static int
 displaced_step_fixup (thread_info *event_thread, enum gdb_signal signal)
 {
-  struct cleanup *old_cleanups;
   struct displaced_step_inferior_state *displaced
     = get_displaced_stepping_state (event_thread->inf);
   int ret;
@@ -1857,7 +1853,7 @@ displaced_step_fixup (thread_info *event_thread, enum gdb_signal signal)
   if (displaced->step_thread != event_thread)
     return 0;
 
-  old_cleanups = make_cleanup (displaced_step_clear_cleanup, displaced);
+  displaced_step_clear_cleanup cleanup (displaced);
 
   displaced_step_restore (displaced, displaced->step_thread->ptid);
 
@@ -1891,10 +1887,6 @@ displaced_step_fixup (thread_info *event_thread, enum gdb_signal signal)
       regcache_write_pc (regcache, pc);
       ret = -1;
     }
-
-  do_cleanups (old_cleanups);
-
-  displaced->step_thread = nullptr;
 
   return ret;
 }

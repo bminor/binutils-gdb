@@ -1,5 +1,12 @@
 2019-03-06  Tom Tromey  <tom@tromey.com>
 
+	* infrun.c (displaced_step_clear_cleanup): Now a
+	forward_scope_exit type.
+	(displaced_step_prepare_throw): Update.
+	(displaced_step_fixup): Update.
+
+2019-03-06  Tom Tromey  <tom@tromey.com>
+
 	* inferior.h (class inferior): Update comment.
 	* gdbthread.h (class thread_info): Update comment.
 
