@@ -3745,8 +3745,8 @@ fetch_inferior_event (void *client_data)
 
   /* Get executed before make_cleanup_restore_current_thread above to apply
      still for the thread which has thrown the exception.  */
-  struct cleanup *ts_old_chain = make_bpstat_clear_actions_cleanup ();
-
+  auto defer_bpstat_clear
+    = make_scope_exit (bpstat_clear_actions);
   auto defer_delete_threads
     = make_scope_exit (delete_just_stopped_threads_infrun_breakpoints);
 
@@ -3802,7 +3802,7 @@ fetch_inferior_event (void *client_data)
     }
 
   defer_delete_threads.release ();
-  discard_cleanups (ts_old_chain);
+  defer_bpstat_clear.release ();
 
   /* No error, don't finish the thread states yet.  */
   finish_state.release ();

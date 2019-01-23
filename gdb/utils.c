@@ -3057,23 +3057,6 @@ parse_pid_to_attach (const char *args)
   return pid;
 }
 
-/* Helper for make_bpstat_clear_actions_cleanup.  */
-
-static void
-do_bpstat_clear_actions_cleanup (void *unused)
-{
-  bpstat_clear_actions ();
-}
-
-/* Call bpstat_clear_actions for the case an exception is throw.  You should
-   discard_cleanups if no exception is caught.  */
-
-struct cleanup *
-make_bpstat_clear_actions_cleanup (void)
-{
-  return make_cleanup (do_bpstat_clear_actions_cleanup, NULL);
-}
-
 /* Substitute all occurences of string FROM by string TO in *STRINGP.  *STRINGP
    must come from xrealloc-compatible allocator and it may be updated.  FROM
    needs to be delimited by IS_DIR_SEPARATOR or DIRNAME_SEPARATOR (or be

@@ -1,4 +1,15 @@
 2019-01-23  Tom Tromey  <tom@tromey.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (fetch_inferior_event): Use scope_exit.
+	* utils.h (make_bpstat_clear_actions_cleanup): Don't declare.
+	* top.c (execute_command): Use scope_exit.
+	* breakpoint.c (bpstat_do_actions): Use scope_exit.
+	* utils.c (do_bpstat_clear_actions_cleanup)
+	(make_bpstat_clear_actions_cleanup): Remove.
+
+2019-01-23  Tom Tromey  <tom@tromey.com>
 	    Pedro Alves  <palves@redhat.com>
 
 	* infrun.c: Include "common/scope-exit.h"

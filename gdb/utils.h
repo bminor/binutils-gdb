@@ -286,7 +286,6 @@ private:
   int m_save_batch_flag;
 };
 
-extern struct cleanup *make_bpstat_clear_actions_cleanup (void);
 
 /* Path utilities.  */
 
