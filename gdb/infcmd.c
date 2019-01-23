@@ -947,13 +947,6 @@ nexti_command (const char *count_string, int from_tty)
   step_1 (1, 1, count_string);
 }
 
-void
-delete_longjmp_breakpoint_cleanup (void *arg)
-{
-  int thread = * (int *) arg;
-  delete_longjmp_breakpoint (thread);
-}
-
 /* Data for the FSM that manages the step/next/stepi/nexti
    commands.  */
 
@@ -1517,7 +1510,6 @@ until_next_command (int from_tty)
   struct symtab_and_line sal;
   struct thread_info *tp = inferior_thread ();
   int thread = tp->global_num;
-  struct cleanup *old_chain;
   struct until_next_fsm *sm;
 
   clear_proceed_status (0);
@@ -1556,11 +1548,11 @@ until_next_command (int from_tty)
   tp->control.step_over_calls = STEP_OVER_ALL;
 
   set_longjmp_breakpoint (tp, get_frame_id (frame));
-  old_chain = make_cleanup (delete_longjmp_breakpoint_cleanup, &thread);
+  delete_longjmp_breakpoint_cleanup lj_deleter (thread);
 
   sm = new_until_next_fsm (command_interp (), tp->global_num);
   tp->thread_fsm = &sm->thread_fsm;
-  discard_cleanups (old_chain);
+  lj_deleter.release ();
 
   proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
 }

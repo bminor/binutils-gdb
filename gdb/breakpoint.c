@@ -11073,7 +11073,6 @@ until_break_command (const char *arg, int from_tty, int anywhere)
   struct gdbarch *frame_gdbarch;
   struct frame_id stack_frame_id;
   struct frame_id caller_frame_id;
-  struct cleanup *old_chain;
   int thread;
   struct thread_info *tp;
   struct until_break_fsm *sm;
@@ -11106,8 +11105,6 @@ until_break_command (const char *arg, int from_tty, int anywhere)
   tp = inferior_thread ();
   thread = tp->global_num;
 
-  old_chain = make_cleanup (null_cleanup, NULL);
-
   /* Note linespec handling above invalidates the frame chain.
      Installing a breakpoint also invalidates the frame chain (as it
      may need to switch threads), so do any frame handling before
@@ -11122,6 +11119,9 @@ until_break_command (const char *arg, int from_tty, int anywhere)
      one.  */
 
   breakpoint_up caller_breakpoint;
+
+  gdb::optional<delete_longjmp_breakpoint_cleanup> lj_deleter;
+
   if (frame_id_p (caller_frame_id))
     {
       struct symtab_and_line sal2;
@@ -11136,7 +11136,7 @@ until_break_command (const char *arg, int from_tty, int anywhere)
 						    bp_until);
 
       set_longjmp_breakpoint (tp, caller_frame_id);
-      make_cleanup (delete_longjmp_breakpoint_cleanup, &thread);
+      lj_deleter.emplace (thread);
     }
 
   /* set_momentary_breakpoint could invalidate FRAME.  */
@@ -11159,7 +11159,8 @@ until_break_command (const char *arg, int from_tty, int anywhere)
 			    std::move (caller_breakpoint));
   tp->thread_fsm = &sm->thread_fsm;
 
-  discard_cleanups (old_chain);
+  if (lj_deleter)
+    lj_deleter->release ();
 
   proceed (-1, GDB_SIGNAL_DEFAULT);
 }
