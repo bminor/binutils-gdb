@@ -335,7 +335,7 @@ extern void set_current_inferior (inferior *);
    the inferior object's refcount, to prevent something deleting the
    inferior object before reverting back (e.g., due to a
    "remove-inferiors" command (see
-   make_cleanup_restore_current_thread).  All other inferior
+   scoped_restore_current_inferior).  All other inferior
    references are considered weak references.  Inferiors are always
    listed exactly once in the inferior list, so placing an inferior in
    the inferior list is an implicit, not counted strong reference.  */

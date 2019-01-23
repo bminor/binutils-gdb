@@ -235,7 +235,7 @@ struct private_thread_info
    reverting back (e.g., due to a "kill" command).  If the thread
    meanwhile exits before being re-selected, then the thread object is
    left listed in the thread list, but marked with state
-   THREAD_EXITED.  (See make_cleanup_restore_current_thread and
+   THREAD_EXITED.  (See scoped_restore_current_thread and
    delete_thread).  All other thread references are considered weak
    references.  Placing a thread in the thread list is an implicit
    strong reference, and is thus not accounted for in the thread's

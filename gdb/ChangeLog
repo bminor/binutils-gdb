@@ -1,3 +1,8 @@
+2019-03-06  Tom Tromey  <tom@tromey.com>
+
+	* inferior.h (class inferior): Update comment.
+	* gdbthread.h (class thread_info): Update comment.
+
 2019-03-06  Joel Brobecker  <brobecker@adacore.com>
 	    Tom Tromey  <tom@tromey.com>
 
