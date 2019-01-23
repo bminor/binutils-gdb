@@ -1,6 +1,14 @@
 2019-01-23  Tom Tromey  <tom@tromey.com>
 	    Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (reinstall_readline_callback_handler_cleanup): Remove
+	parameter.
+	(fetch_inferior_event): Use SCOPE_EXIT.
+
+
+2019-01-23  Tom Tromey  <tom@tromey.com>
+	    Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (disable_thread_events): Delete.
 	(stop_all_threads): Use SCOPE_EXIT.
 
