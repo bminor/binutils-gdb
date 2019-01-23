@@ -1,6 +1,18 @@
 2019-01-23  Tom Tromey  <tom@tromey.com>
 	    Pedro Alves  <palves@redhat.com>
 
+	* symfile.c: Include forward-scope-exit.h.
+	(clear_symtab_users_cleanup): Replace forward declaration with
+	a FORWARD_SCOPE_EXIT.
+	(syms_from_objfile_1): Use the forward_scope_exit and
+	gdb::optional instead of cleanup_function.
+	(reread_symbols): Use the forward_scope_exit instead of
+	cleanup_function.
+	(clear_symtab_users_cleanup): Remove function.
+
+2019-01-23  Tom Tromey  <tom@tromey.com>
+	    Pedro Alves  <palves@redhat.com>
+
 	* linux-nat.c: Include scope-exit.h.
 	(cleanup_target_stop): Remove.
 	(linux_nat_target::static_tracepoint_markers_by_strid): Use

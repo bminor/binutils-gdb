@@ -59,6 +59,7 @@
 #include "common/byte-vector.h"
 #include "selftest.h"
 #include "cli/cli-style.h"
+#include "common/forward-scope-exit.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -79,7 +80,8 @@ void (*deprecated_show_load_progress) (const char *section,
 void (*deprecated_pre_add_symbol_hook) (const char *);
 void (*deprecated_post_add_symbol_hook) (void);
 
-static void clear_symtab_users_cleanup (void *ignore);
+using clear_symtab_users_cleanup
+  = FORWARD_SCOPE_EXIT (clear_symtab_users);
 
 /* Global variables owned by this file.  */
 int readnow_symbol_files;	/* Read full symbols immediately.  */
@@ -923,7 +925,6 @@ syms_from_objfile_1 (struct objfile *objfile,
 		     symfile_add_flags add_flags)
 {
   section_addr_info local_addr;
-  struct cleanup *old_chain;
   const int mainline = add_flags & SYMFILE_MAINLINE;
 
   objfile_set_sym_fns (objfile, find_sym_fns (objfile->obfd));
@@ -945,7 +946,8 @@ syms_from_objfile_1 (struct objfile *objfile,
 
   /* Make sure that partially constructed symbol tables will be cleaned up
      if an error occurs during symbol reading.  */
-  old_chain = make_cleanup (null_cleanup, NULL);
+  gdb::optional<clear_symtab_users_cleanup> defer_clear_users;
+
   std::unique_ptr<struct objfile> objfile_holder (objfile);
 
   /* If ADDRS is NULL, put together a dummy address list.
@@ -958,7 +960,7 @@ syms_from_objfile_1 (struct objfile *objfile,
     {
       /* We will modify the main symbol table, make sure that all its users
          will be cleaned up if an error occurs during symbol reading.  */
-      make_cleanup (clear_symtab_users_cleanup, 0 /*ignore*/);
+      defer_clear_users.emplace ((symfile_add_flag) 0);
 
       /* Since no error yet, throw away the old symbol table.  */
 
@@ -999,7 +1001,8 @@ syms_from_objfile_1 (struct objfile *objfile,
   /* Discard cleanups as symbol reading was successful.  */
 
   objfile_holder.release ();
-  discard_cleanups (old_chain);
+  if (defer_clear_users)
+    defer_clear_users->release ();
 }
 
 /* Same as syms_from_objfile_1, but also initializes the objfile
@@ -2441,7 +2444,6 @@ reread_symbols (void)
       new_modtime = new_statbuf.st_mtime;
       if (new_modtime != objfile->mtime)
 	{
-	  struct cleanup *old_cleanups;
 	  struct section_offsets *offsets;
 	  int num_offsets;
 
@@ -2461,7 +2463,7 @@ reread_symbols (void)
 	  std::unique_ptr<struct objfile> objfile_holder (objfile);
 
 	  /* We need to do this whenever any symbols go away.  */
-	  old_cleanups = make_cleanup (clear_symtab_users_cleanup, 0 /*ignore*/);
+	  clear_symtab_users_cleanup defer_clear_users (0);
 
 	  if (exec_bfd != NULL
 	      && filename_cmp (bfd_get_filename (objfile->obfd),
@@ -2615,7 +2617,7 @@ reread_symbols (void)
 
 	  /* Discard cleanups as symbol reading was successful.  */
 	  objfile_holder.release ();
-	  discard_cleanups (old_cleanups);
+	  defer_clear_users.release ();
 
 	  /* If the mtime has changed between the time we set new_modtime
 	     and now, we *want* this to be out of date, so don't call stat
@@ -2891,12 +2893,6 @@ clear_symtab_users (symfile_add_flags add_flags)
      our breakpoints without risking it using stale data.  */
   if ((add_flags & SYMFILE_DEFER_BP_RESET) == 0)
     breakpoint_re_set ();
-}
-
-static void
-clear_symtab_users_cleanup (void *ignore)
-{
-  clear_symtab_users (0);
 }
 
 /* OVERLAYS:
