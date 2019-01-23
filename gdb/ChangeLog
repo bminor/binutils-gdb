@@ -1,3 +1,8 @@
+2019-01-23  Alan Hayward  <alan.hayward@arm.com>
+
+	* nat/aarch64-linux.c (aarch64_linux_new_thread): Replace XNEW
+	with XCNEW.
+
 2019-01-22  Tom Tromey  <tom@tromey.com>
 
 	* corelow.c: Do not include sys/file.h.

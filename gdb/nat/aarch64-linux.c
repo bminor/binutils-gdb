@@ -76,7 +76,7 @@ aarch64_linux_new_thread (struct lwp_info *lwp)
   ptid_t ptid = ptid_of_lwp (lwp);
   struct aarch64_debug_reg_state *state
     = aarch64_get_debug_reg_state (ptid.pid ());
-  struct arch_lwp_info *info = XNEW (struct arch_lwp_info);
+  struct arch_lwp_info *info = XCNEW (struct arch_lwp_info);
 
   /* If there are hardware breakpoints/watchpoints in the process then mark that
      all the hardware breakpoint/watchpoint register pairs for this thread need
