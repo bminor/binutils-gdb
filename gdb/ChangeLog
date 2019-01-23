@@ -1,6 +1,14 @@
 2019-01-23  Tom Tromey  <tom@tromey.com>
 	    Pedro Alves  <palves@redhat.com>
 
+	* linux-nat.c: Include scope-exit.h.
+	(cleanup_target_stop): Remove.
+	(linux_nat_target::static_tracepoint_markers_by_strid): Use
+	SCOPE_EXIT.
+
+2019-01-23  Tom Tromey  <tom@tromey.com>
+	    Pedro Alves  <palves@redhat.com>
+
 	* infcall.c (cleanup_delete_std_terminate_breakpoint): Remove.
 	(call_function_by_hand_dummy): Use SCOPE_EXIT.
 

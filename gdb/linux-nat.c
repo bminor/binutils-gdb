@@ -66,6 +66,7 @@
 #include "objfiles.h"
 #include "nat/linux-namespaces.h"
 #include "fileio.h"
+#include "common/scope-exit.h"
 
 #ifndef SPUFS_MAGIC
 #define SPUFS_MAGIC 0x23c9b64e
@@ -4223,22 +4224,10 @@ linux_nat_xfer_osdata (enum target_object object,
     return TARGET_XFER_OK;
 }
 
-static void
-cleanup_target_stop (void *arg)
-{
-  ptid_t *ptid = (ptid_t *) arg;
-
-  gdb_assert (arg != NULL);
-
-  /* Unpause all */
-  target_continue_no_signal (*ptid);
-}
-
 std::vector<static_tracepoint_marker>
 linux_nat_target::static_tracepoint_markers_by_strid (const char *strid)
 {
   char s[IPA_CMD_BUF_SIZE];
-  struct cleanup *old_chain;
   int pid = inferior_ptid.pid ();
   std::vector<static_tracepoint_marker> markers;
   const char *p = s;
@@ -4253,7 +4242,8 @@ linux_nat_target::static_tracepoint_markers_by_strid (const char *strid)
 
   agent_run_command (pid, s, strlen (s) + 1);
 
-  old_chain = make_cleanup (cleanup_target_stop, &ptid);
+  /* Unpause all.  */
+  SCOPE_EXIT { target_continue_no_signal (ptid); };
 
   while (*p++ == 'm')
     {
@@ -4271,8 +4261,6 @@ linux_nat_target::static_tracepoint_markers_by_strid (const char *strid)
       agent_run_command (pid, s, strlen (s) + 1);
       p = s;
     }
-
-  do_cleanups (old_chain);
 
   return markers;
 }
