@@ -219,37 +219,6 @@ reg_buffer::arch () const
   return m_descr->gdbarch;
 }
 
-/* Cleanup class for invalidating a register.  */
-
-class regcache_invalidator
-{
-public:
-
-  regcache_invalidator (struct regcache *regcache, int regnum)
-    : m_regcache (regcache),
-      m_regnum (regnum)
-  {
-  }
-
-  ~regcache_invalidator ()
-  {
-    if (m_regcache != nullptr)
-      m_regcache->invalidate (m_regnum);
-  }
-
-  DISABLE_COPY_AND_ASSIGN (regcache_invalidator);
-
-  void release ()
-  {
-    m_regcache = nullptr;
-  }
-
-private:
-
-  struct regcache *m_regcache;
-  int m_regnum;
-};
-
 /* Return  a pointer to register REGNUM's buffer cache.  */
 
 gdb_byte *
@@ -769,7 +738,8 @@ regcache::raw_write (int regnum, const gdb_byte *buf)
 
   /* Invalidate the register after it is written, in case of a
      failure.  */
-  regcache_invalidator invalidator (this, regnum);
+  auto invalidator
+    = make_scope_exit ([&] { this->invalidate (regnum); });
 
   target_store_registers (this, regnum);
 

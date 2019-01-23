@@ -1,4 +1,10 @@
 2019-01-23  Tom Tromey  <tom@tromey.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* regcache.c (class regcache_invalidator): Remove.
+	(regcache::raw_write): Use make_scope_exit.
+
+2019-01-23  Tom Tromey  <tom@tromey.com>
 
 	* ui-out.h (class ui_out_emit_type): Update comment.
 
