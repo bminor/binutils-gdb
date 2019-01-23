@@ -3,6 +3,7 @@
 	* po/pt_BR.po: Updated Brazilian Portuguese translation.
 
 2019-01-22  Chenghua Xu  <paul.hua.gm@gmail.com>
+
 	* mips-dis.c (mips_arch_choices): Fix typo in
 	gs464, gs464e and gs264e descriptors.
 
