@@ -1,5 +1,10 @@
 2019-01-23  Pedro Alves  <palves@redhat.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* common/forward-scope-exit.h: New file.
+
+2019-01-23  Pedro Alves  <palves@redhat.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
 	    Tom Tromey  <tom@tromey.com>
 
 	* common/scope-exit.h: New file.
