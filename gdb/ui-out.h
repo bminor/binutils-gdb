@@ -195,11 +195,9 @@ class ui_out
   ui_out_level *current_level () const;
 };
 
-/* This is similar to make_cleanup_ui_out_tuple_begin_end and
-   make_cleanup_ui_out_list_begin_end, but written as an RAII template
-   class.  It takes the ui_out_type as a template parameter.  Normally
-   this is used via the typedefs ui_out_emit_tuple and
-   ui_out_emit_list.  */
+/* Start a new tuple or list on construction, and end it on
+   destruction.  Normally this is used via the typedefs
+   ui_out_emit_tuple and ui_out_emit_list.  */
 template<ui_out_type Type>
 class ui_out_emit_type
 {

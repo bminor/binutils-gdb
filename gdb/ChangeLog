@@ -1,5 +1,9 @@
 2019-01-23  Tom Tromey  <tom@tromey.com>
 
+	* ui-out.h (class ui_out_emit_type): Update comment.
+
+2019-01-23  Tom Tromey  <tom@tromey.com>
+
 	* infrun.c (fetch_inferior_event): Update comment.
 
 2019-01-23  Tom Tromey  <tom@tromey.com>
