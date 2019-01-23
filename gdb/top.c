@@ -35,11 +35,11 @@
 #include "value.h"
 #include "language.h"
 #include "terminal.h"		/* For job_control.  */
-#include "job-control.h"
+#include "common/job-control.h"
 #include "annotate.h"
 #include "completer.h"
 #include "top.h"
-#include "version.h"
+#include "common/version.h"
 #include "serial.h"
 #include "main.h"
 #include "event-loop.h"
@@ -50,7 +50,7 @@
 #include "maint.h"
 #include "filenames.h"
 #include "frame.h"
-#include "buffer.h"
+#include "common/buffer.h"
 #include "gdb_select.h"
 #include "common/scope-exit.h"
 

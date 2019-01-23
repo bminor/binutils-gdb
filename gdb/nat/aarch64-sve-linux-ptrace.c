@@ -19,12 +19,12 @@
 
 #include <sys/utsname.h>
 #include <sys/uio.h>
-#include "common-defs.h"
+#include "common/common-defs.h"
 #include "elf/external.h"
 #include "elf/common.h"
 #include "aarch64-sve-linux-ptrace.h"
 #include "arch/aarch64.h"
-#include "common-regcache.h"
+#include "common/common-regcache.h"
 #include "common/byte-vector.h"
 
 static bool vq_change_warned = false;

@@ -22,7 +22,7 @@
 #include "common/filestuff.h"
 #include "common/scoped_fd.h"
 #include "config.h"
-#include "selftest.h"
+#include "common/selftest.h"
 
 namespace selftests {
 namespace scoped_fd {

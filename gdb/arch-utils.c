@@ -32,7 +32,7 @@
 #include "language.h"
 #include "symtab.h"
 
-#include "version.h"
+#include "common/version.h"
 
 #include "floatformat.h"
 

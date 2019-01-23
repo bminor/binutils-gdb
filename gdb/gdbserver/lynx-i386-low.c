@@ -19,7 +19,7 @@
 #include "lynx-low.h"
 #include <limits.h>
 #include <sys/ptrace.h>
-#include "x86-xstate.h"
+#include "common/x86-xstate.h"
 #include "arch/i386.h"
 #include "x86-tdesc.h"
 

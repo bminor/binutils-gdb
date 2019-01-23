@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "common-defs.h"
-#include "version.h"
+#include "common/common-defs.h"
+#include "common/version.h"
 
 #if HAVE_SYS_FILE_H
 #include <sys/file.h>
@@ -49,7 +49,7 @@
 #include <wspiapi.h>
 #endif
 
-#include "netstuff.h"
+#include "common/netstuff.h"
 
 #ifndef HAVE_SOCKLEN_T
 typedef int socklen_t;

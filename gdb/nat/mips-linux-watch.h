@@ -19,7 +19,7 @@
 #define MIPS_LINUX_WATCH_H 1
 
 #include <asm/ptrace.h>
-#include "break-common.h"
+#include "common/break-common.h"
 
 #define MAX_DEBUG_REGISTER 8
 

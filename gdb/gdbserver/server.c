@@ -18,29 +18,29 @@
 
 #include "server.h"
 #include "gdbthread.h"
-#include "agent.h"
+#include "common/agent.h"
 #include "notif.h"
 #include "tdesc.h"
-#include "rsp-low.h"
-#include "signals-state-save-restore.h"
+#include "common/rsp-low.h"
+#include "common/signals-state-save-restore.h"
 #include <ctype.h>
 #include <unistd.h>
 #if HAVE_SIGNAL_H
 #include <signal.h>
 #endif
-#include "gdb_vecs.h"
-#include "gdb_wait.h"
-#include "btrace-common.h"
-#include "filestuff.h"
+#include "common/gdb_vecs.h"
+#include "common/gdb_wait.h"
+#include "common/btrace-common.h"
+#include "common/filestuff.h"
 #include "tracepoint.h"
 #include "dll.h"
 #include "hostio.h"
 #include <vector>
-#include "common-inferior.h"
-#include "job-control.h"
-#include "environ.h"
+#include "common/common-inferior.h"
+#include "common/job-control.h"
+#include "common/environ.h"
 #include "filenames.h"
-#include "pathstuff.h"
+#include "common/pathstuff.h"
 
 #include "common/selftest.h"
 

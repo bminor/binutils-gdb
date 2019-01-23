@@ -38,7 +38,7 @@
 #include "xml-syscall.h"
 
 #include "i387-tdep.h"
-#include "x86-xstate.h"
+#include "common/x86-xstate.h"
 
 /* The syscall's XML filename for i386.  */
 #define XML_SYSCALL_FILENAME_I386 "syscalls/i386-linux.xml"

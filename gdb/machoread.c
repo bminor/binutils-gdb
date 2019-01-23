@@ -28,7 +28,7 @@
 #include "gdbcore.h"
 #include "mach-o.h"
 #include "aout/stab_gnu.h"
-#include "vec.h"
+#include "common/vec.h"
 #include "psympriv.h"
 #include "complaints.h"
 #include "gdb_bfd.h"

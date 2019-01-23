@@ -20,7 +20,7 @@
 #ifndef TOP_H
 #define TOP_H
 
-#include "buffer.h"
+#include "common/buffer.h"
 #include "event-loop.h"
 #include "value.h"
 

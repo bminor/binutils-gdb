@@ -35,7 +35,7 @@
 #include <sys/proc.h>	/* for struct proc */
 #include <sys/user.h>	/* for struct user */
 #include <fcntl.h>	/* for O_RDWR etc.  */
-#include "gdb_wait.h"
+#include "common/gdb_wait.h"
 
 #include "proc-utils.h"
 

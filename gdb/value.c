@@ -41,7 +41,7 @@
 #include "user-regs.h"
 #include <algorithm>
 #include "completer.h"
-#include "selftest.h"
+#include "common/selftest.h"
 #include "common/array-view.h"
 
 /* Definition of a user function.  */

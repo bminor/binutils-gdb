@@ -23,7 +23,7 @@
 #include "regcache.h"
 
 #include <x86/context.h>
-#include "x86-xstate.h"
+#include "common/x86-xstate.h"
 #include "arch/i386.h"
 #include "x86-tdesc.h"
 

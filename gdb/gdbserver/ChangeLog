@@ -1,3 +1,36 @@
+2019-01-25  Tom Tromey  <tom@tromey.com>
+
+	* win32-low.c: Fix common/ includes.
+	* win32-i386-low.c: Fix common/ includes.
+	* tracepoint.c: Fix common/ includes.
+	* thread-db.c: Fix common/ includes.
+	* target.h: Fix common/ includes.
+	* symbol.c: Fix common/ includes.
+	* spu-low.c: Fix common/ includes.
+	* server.h: Fix common/ includes.
+	* server.c: Fix common/ includes.
+	* remote-utils.c: Fix common/ includes.
+	* regcache.h: Fix common/ includes.
+	* regcache.c: Fix common/ includes.
+	* nto-x86-low.c: Fix common/ includes.
+	* notif.h: Fix common/ includes.
+	* mem-break.h: Fix common/ includes.
+	* lynx-low.c: Fix common/ includes.
+	* lynx-i386-low.c: Fix common/ includes.
+	* linux-x86-tdesc-selftest.c: Fix common/ includes.
+	* linux-x86-low.c: Fix common/ includes.
+	* linux-low.c: Fix common/ includes.
+	* inferiors.h: Fix common/ includes.
+	* i387-fp.c: Fix common/ includes.
+	* hostio.c: Fix common/ includes.
+	* hostio-errno.c: Fix common/ includes.
+	* gdbthread.h: Fix common/ includes.
+	* gdbreplay.c: Fix common/ includes.
+	* fork-child.c: Fix common/ includes.
+	* event-loop.c: Fix common/ includes.
+	* ax.c: 
+	(enum gdb_agent_op): Fix common/ includes.
+
 2019-01-21  Tom Tromey  <tom@tromey.com>
 
 	* tracepoint.c: Fix includes.

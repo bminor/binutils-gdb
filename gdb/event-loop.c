@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "event-loop.h"
 #include "event-top.h"
-#include "queue.h"
+#include "common/queue.h"
 #include "ser-event.h"
 
 #ifdef HAVE_POLL
@@ -32,7 +32,7 @@
 #endif
 
 #include <sys/types.h>
-#include "gdb_sys_time.h"
+#include "common/gdb_sys_time.h"
 #include "gdb_select.h"
 #include "observable.h"
 #include "top.h"

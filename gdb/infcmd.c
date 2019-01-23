@@ -25,7 +25,7 @@
 #include "frame.h"
 #include "inferior.h"
 #include "infrun.h"
-#include "environ.h"
+#include "common/environ.h"
 #include "value.h"
 #include "gdbcmd.h"
 #include "symfile.h"

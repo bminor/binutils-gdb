@@ -20,7 +20,7 @@
 #ifndef WAITSTATUS_H
 #define WAITSTATUS_H
 
-#include "gdb_signals.h"
+#include "common/gdb_signals.h"
 
 /* Stuff for target_wait.  */
 

@@ -26,7 +26,7 @@
 #include "python-internal.h"
 #include "arch-utils.h"
 #include "language.h"
-#include "gdb_signals.h"
+#include "common/gdb_signals.h"
 #include "py-event.h"
 #include "py-stopevent.h"
 

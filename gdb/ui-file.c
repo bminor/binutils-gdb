@@ -23,7 +23,7 @@
 #include "ui-file.h"
 #include "gdb_obstack.h"
 #include "gdb_select.h"
-#include "filestuff.h"
+#include "common/filestuff.h"
 
 null_file null_stream;
 

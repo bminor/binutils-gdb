@@ -22,8 +22,8 @@
 #ifndef LINUX_BTRACE_H
 #define LINUX_BTRACE_H
 
-#include "btrace-common.h"
-#include "vec.h"
+#include "common/btrace-common.h"
+#include "common/vec.h"
 #if HAVE_LINUX_PERF_EVENT_H
 #  include <linux/perf_event.h>
 #endif

@@ -22,7 +22,7 @@
 #include "expression.h"
 #include "filenames.h"		/* For DOSish file names.  */
 #include "language.h"
-#include "gdb_signals.h"
+#include "common/gdb_signals.h"
 #include "target.h"
 #include "reggroups.h"
 #include "user-regs.h"

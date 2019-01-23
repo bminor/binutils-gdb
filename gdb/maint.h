@@ -19,7 +19,7 @@
 #ifndef MAINT_H
 #define MAINT_H
 
-#include "run-time-clock.h"
+#include "common/run-time-clock.h"
 #include <chrono>
 
 extern void set_per_command_time (int);

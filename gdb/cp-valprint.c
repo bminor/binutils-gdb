@@ -35,7 +35,7 @@
 #include "language.h"
 #include "extension.h"
 #include "typeprint.h"
-#include "byte-vector.h"
+#include "common/byte-vector.h"
 
 /* Controls printing of vtbl's.  */
 static void

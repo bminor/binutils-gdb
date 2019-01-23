@@ -36,7 +36,7 @@
 #include "completer.h"
 #include "fnmatch.h"
 #include "top.h"
-#include "filestuff.h"
+#include "common/filestuff.h"
 #include "extension.h"
 #include "gdb/section-scripts.h"
 #include <algorithm>

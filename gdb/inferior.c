@@ -29,7 +29,7 @@
 #include "observable.h"
 #include "gdbcore.h"
 #include "symfile.h"
-#include "environ.h"
+#include "common/environ.h"
 #include "cli/cli-utils.h"
 #include "continuations.h"
 #include "arch-utils.h"

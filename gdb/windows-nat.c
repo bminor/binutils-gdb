@@ -67,7 +67,7 @@
 #include "x86-nat.h"
 #include "complaints.h"
 #include "inf-child.h"
-#include "gdb_tilde_expand.h"
+#include "common/gdb_tilde_expand.h"
 #include "common/pathstuff.h"
 
 #define AdjustTokenPrivileges		dyn_AdjustTokenPrivileges

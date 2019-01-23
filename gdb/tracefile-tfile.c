@@ -20,8 +20,8 @@
 #include "defs.h"
 #include "tracefile.h"
 #include "readline/tilde.h"
-#include "filestuff.h"
-#include "rsp-low.h" /* bin2hex */
+#include "common/filestuff.h"
+#include "common/rsp-low.h" /* bin2hex */
 #include "regcache.h"
 #include "inferior.h"
 #include "gdbthread.h"
@@ -31,7 +31,7 @@
 #include "remote.h"
 #include "xml-tdesc.h"
 #include "target-descriptions.h"
-#include "buffer.h"
+#include "common/buffer.h"
 #include <algorithm>
 
 #ifndef O_LARGEFILE

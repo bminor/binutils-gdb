@@ -32,7 +32,7 @@
 #include "objfiles.h"
 #include "language.h"
 #include "dwarf2loc.h"
-#include "selftest.h"
+#include "common/selftest.h"
 
 /* Basic byte-swapping routines.  All 'extract' functions return a
    host-format integer from a target-format integer at ADDR which is

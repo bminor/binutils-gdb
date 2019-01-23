@@ -27,7 +27,7 @@
 #include "target/wait.h"
 #include "target/waitstatus.h"
 #include "mem-break.h"
-#include "btrace-common.h"
+#include "common/btrace-common.h"
 #include <vector>
 
 struct emit_ops;

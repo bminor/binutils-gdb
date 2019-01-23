@@ -15,10 +15,10 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "common-defs.h"
+#include "common/common-defs.h"
 #include "i386.h"
 #include "common/tdesc.h"
-#include "x86-xstate.h"
+#include "common/x86-xstate.h"
 #include <stdlib.h>
 
 #include "../features/i386/32bit-core.c"

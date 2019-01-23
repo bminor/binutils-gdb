@@ -21,7 +21,7 @@
 #include "disasm.h"
 
 #if GDB_SELF_TEST
-#include "selftest.h"
+#include "common/selftest.h"
 #include "selftest-arch.h"
 
 namespace selftests {

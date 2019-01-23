@@ -40,13 +40,13 @@
 #include "inline-frame.h"
 #include "tracepoint.h"
 #include "gdb/fileio.h"
-#include "agent.h"
+#include "common/agent.h"
 #include "auxv.h"
 #include "target-debug.h"
 #include "top.h"
 #include "event-top.h"
 #include <algorithm>
-#include "byte-vector.h"
+#include "common/byte-vector.h"
 #include "terminal.h"
 #include <unordered_map>
 

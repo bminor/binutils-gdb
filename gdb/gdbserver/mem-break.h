@@ -21,7 +21,7 @@
 #ifndef MEM_BREAK_H
 #define MEM_BREAK_H
 
-#include "break-common.h"
+#include "common/break-common.h"
 
 /* Breakpoints are opaque.  */
 struct breakpoint;

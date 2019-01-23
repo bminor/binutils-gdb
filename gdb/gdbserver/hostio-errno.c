@@ -22,7 +22,7 @@
    on top of errno.  */
 
 #include "server.h"
-#include "fileio.h"
+#include "common/fileio.h"
 
 void
 hostio_last_error_from_errno (char *buf)

@@ -30,7 +30,7 @@
 #include "top.h"
 #include "extension-priv.h"
 #include "utils.h"
-#include "version.h"
+#include "common/version.h"
 #ifdef HAVE_GUILE
 #include "guile.h"
 #include "guile-internal.h"

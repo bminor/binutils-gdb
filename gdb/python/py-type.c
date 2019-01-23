@@ -26,7 +26,7 @@
 #include "demangle.h"
 #include "objfiles.h"
 #include "language.h"
-#include "vec.h"
+#include "common/vec.h"
 #include "typeprint.h"
 
 typedef struct pyty_type_object

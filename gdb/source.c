@@ -26,7 +26,7 @@
 #include "gdbcmd.h"
 #include "frame.h"
 #include "value.h"
-#include "filestuff.h"
+#include "common/filestuff.h"
 
 #include <sys/types.h>
 #include <fcntl.h>

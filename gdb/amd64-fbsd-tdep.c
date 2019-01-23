@@ -25,7 +25,7 @@
 #include "osabi.h"
 #include "regset.h"
 #include "i386-fbsd-tdep.h"
-#include "x86-xstate.h"
+#include "common/x86-xstate.h"
 
 #include "amd64-tdep.h"
 #include "fbsd-tdep.h"

@@ -19,7 +19,7 @@
 
 #include "defs.h"
 #include "cli/cli-utils.h"
-#include "selftest.h"
+#include "common/selftest.h"
 
 namespace selftests {
 namespace cli_utils {

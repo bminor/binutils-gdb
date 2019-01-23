@@ -30,7 +30,7 @@
 #include "fbsd-nat.h"
 #include "i386-tdep.h"
 #include "x86-nat.h"
-#include "x86-xstate.h"
+#include "common/x86-xstate.h"
 #include "x86-bsd-nat.h"
 #include "i386-bsd-nat.h"
 

@@ -28,7 +28,7 @@
 #include "dwarf-index-write.h"
 #include "dwarf2read.h"
 #include "objfiles.h"
-#include "selftest.h"
+#include "common/selftest.h"
 #include <string>
 #include <stdlib.h>
 

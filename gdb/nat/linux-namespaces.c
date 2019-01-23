@@ -17,15 +17,15 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "common-defs.h"
+#include "common/common-defs.h"
 #include "nat/linux-namespaces.h"
-#include "filestuff.h"
+#include "common/filestuff.h"
 #include <fcntl.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
-#include "gdb_wait.h"
+#include "common/gdb_wait.h"
 #include <signal.h>
 #include <sched.h>
 

@@ -20,7 +20,7 @@
 #ifndef MI_PARSE_H
 #define MI_PARSE_H
 
-#include "run-time-clock.h"
+#include "common/run-time-clock.h"
 #include <chrono>
 #include "mi-cmds.h"  /* For enum print_values.  */
 

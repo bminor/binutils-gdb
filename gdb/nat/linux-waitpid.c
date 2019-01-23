@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "common-defs.h"
+#include "common/common-defs.h"
 
 #ifdef GDBSERVER
 /* FIXME: server.h is required for the definition of debug_threads
@@ -29,7 +29,7 @@
 
 #include "linux-nat.h"
 #include "linux-waitpid.h"
-#include "gdb_wait.h"
+#include "common/gdb_wait.h"
 
 /* Print debugging output based on the format string FORMAT and
    its parameters.  */

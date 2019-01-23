@@ -34,9 +34,9 @@
 #include "cp-abi.h"
 #include "namespace.h"
 #include <signal.h>
-#include "gdb_setjmp.h"
+#include "common/gdb_setjmp.h"
 #include "safe-ctype.h"
-#include "selftest.h"
+#include "common/selftest.h"
 
 #define d_left(dc) (dc)->u.s_binary.left
 #define d_right(dc) (dc)->u.s_binary.right

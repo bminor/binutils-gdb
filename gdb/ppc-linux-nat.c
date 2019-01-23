@@ -32,7 +32,7 @@
 #include <sys/user.h>
 #include <sys/ioctl.h>
 #include <sys/uio.h>
-#include "gdb_wait.h"
+#include "common/gdb_wait.h"
 #include <fcntl.h>
 #include <sys/procfs.h>
 #include "nat/gdb_ptrace.h"

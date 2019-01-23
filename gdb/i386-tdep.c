@@ -46,7 +46,7 @@
 #include "remote.h"
 #include "i386-tdep.h"
 #include "i387-tdep.h"
-#include "x86-xstate.h"
+#include "common/x86-xstate.h"
 #include "x86-tdep.h"
 
 #include "record.h"

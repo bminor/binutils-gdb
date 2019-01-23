@@ -26,7 +26,7 @@
 #include "reggroups.h"
 #include "target.h"
 #include "target-descriptions.h"
-#include "vec.h"
+#include "common/vec.h"
 #include "xml-support.h"
 #include "xml-tdesc.h"
 #include "osabi.h"

@@ -22,7 +22,7 @@
 
 #include "arch-utils.h"
 #include "dwarf2-frame.h"
-#include "errors.h"
+#include "common/errors.h"
 #include "frame-unwind.h"
 #include "gdbcore.h"
 #include "gdbcmd.h"

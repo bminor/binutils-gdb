@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "server.h"
-#include "symbol.h"
+#include "common/symbol.h"
 
 /* See common/symbol.h.  */
 

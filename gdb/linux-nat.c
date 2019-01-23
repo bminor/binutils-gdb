@@ -23,7 +23,7 @@
 #include "target.h"
 #include "nat/linux-nat.h"
 #include "nat/linux-waitpid.h"
-#include "gdb_wait.h"
+#include "common/gdb_wait.h"
 #include <unistd.h>
 #include <sys/syscall.h>
 #include "nat/gdb_ptrace.h"
@@ -58,14 +58,14 @@
 #include "nat/linux-osdata.h"
 #include "linux-tdep.h"
 #include "symfile.h"
-#include "agent.h"
+#include "common/agent.h"
 #include "tracepoint.h"
-#include "buffer.h"
+#include "common/buffer.h"
 #include "target-descriptions.h"
-#include "filestuff.h"
+#include "common/filestuff.h"
 #include "objfiles.h"
 #include "nat/linux-namespaces.h"
-#include "fileio.h"
+#include "common/fileio.h"
 #include "common/scope-exit.h"
 
 #ifndef SPUFS_MAGIC

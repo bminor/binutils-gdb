@@ -19,7 +19,7 @@
 #ifndef GDB_THREAD_H
 #define GDB_THREAD_H
 
-#include "common-gdbthread.h"
+#include "common/common-gdbthread.h"
 #include "inferiors.h"
 
 #include <list>

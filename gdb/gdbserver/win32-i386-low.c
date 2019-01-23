@@ -18,7 +18,7 @@
 #include "server.h"
 #include "win32-low.h"
 #include "x86-low.h"
-#include "x86-xstate.h"
+#include "common/x86-xstate.h"
 #ifdef __x86_64__
 #include "arch/amd64.h"
 #endif

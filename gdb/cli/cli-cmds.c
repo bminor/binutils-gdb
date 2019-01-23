@@ -23,7 +23,7 @@
 #include "readline/tilde.h"
 #include "completer.h"
 #include "target.h"	/* For baud_rate, remote_debug and remote_timeout.  */
-#include "gdb_wait.h"	/* For shell escape implementation.  */
+#include "common/gdb_wait.h"	/* For shell escape implementation.  */
 #include "gdb_regex.h"	/* Used by apropos_command.  */
 #include "gdb_vfork.h"
 #include "linespec.h"
@@ -36,7 +36,7 @@
 #include "source.h"
 #include "disasm.h"
 #include "tracepoint.h"
-#include "filestuff.h"
+#include "common/filestuff.h"
 #include "location.h"
 #include "block.h"
 

@@ -19,7 +19,7 @@
 
 #include "defs.h"
 #include "producer.h"
-#include "selftest.h"
+#include "common/selftest.h"
 
 /* See producer.h.  */
 

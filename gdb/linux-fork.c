@@ -31,7 +31,7 @@
 #include "source.h"
 
 #include "nat/gdb_ptrace.h"
-#include "gdb_wait.h"
+#include "common/gdb_wait.h"
 #include <dirent.h>
 #include <ctype.h>
 

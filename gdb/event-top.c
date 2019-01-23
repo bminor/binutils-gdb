@@ -37,7 +37,7 @@
 #include "gdbcmd.h"		/* for dont_repeat() */
 #include "annotate.h"
 #include "maint.h"
-#include "buffer.h"
+#include "common/buffer.h"
 #include "ser-event.h"
 #include "gdb_select.h"
 

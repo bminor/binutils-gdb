@@ -21,7 +21,7 @@
 #include "defs.h"
 #include "compile-internal.h"
 #include "compile-cplus.h"
-#include "gdb_assert.h"
+#include "common/gdb_assert.h"
 #include "symtab.h"
 #include "parser-defs.h"
 #include "block.h"

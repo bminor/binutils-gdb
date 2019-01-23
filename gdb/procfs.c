@@ -31,14 +31,14 @@
 #include "regcache.h"
 #include "inf-child.h"
 #include "nat/fork-inferior.h"
-#include "filestuff.h"
+#include "common/filestuff.h"
 
 #define _STRUCTURED_PROC 1	/* Should be done by configure script.  */
 
 #include <sys/procfs.h>
 #include <sys/fault.h>
 #include <sys/syscall.h>
-#include "gdb_wait.h"
+#include "common/gdb_wait.h"
 #include <signal.h>
 #include <ctype.h>
 #include "gdb_bfd.h"

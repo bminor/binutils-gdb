@@ -19,7 +19,7 @@
 
 #include "defs.h"
 #include <ctype.h>
-#include "gdb_wait.h"
+#include "common/gdb_wait.h"
 #include "event-top.h"
 #include "gdbthread.h"
 #include "fnmatch.h"
@@ -65,7 +65,7 @@
 #include "gdb_usleep.h"
 #include "interps.h"
 #include "gdb_regex.h"
-#include "job-control.h"
+#include "common/job-control.h"
 #include "common/selftest.h"
 #include "common/gdb_optional.h"
 #include "cp-support.h"

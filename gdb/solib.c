@@ -31,7 +31,7 @@
 #include "frame.h"
 #include "gdb_regex.h"
 #include "inferior.h"
-#include "environ.h"
+#include "common/environ.h"
 #include "language.h"
 #include "gdbcmd.h"
 #include "completer.h"
@@ -45,7 +45,7 @@
 #include "interps.h"
 #include "filesystem.h"
 #include "gdb_bfd.h"
-#include "filestuff.h"
+#include "common/filestuff.h"
 #include "source.h"
 
 /* Architecture-specific operations.  */

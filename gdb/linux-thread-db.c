@@ -21,7 +21,7 @@
 #include <dlfcn.h>
 #include "gdb_proc_service.h"
 #include "nat/gdb_thread_db.h"
-#include "gdb_vecs.h"
+#include "common/gdb_vecs.h"
 #include "bfd.h"
 #include "command.h"
 #include "gdbcmd.h"

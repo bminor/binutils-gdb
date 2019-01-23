@@ -37,7 +37,7 @@
 #include "solib.h"
 #include "solib-aix.h"
 #include "target-float.h"
-#include "xml-utils.h"
+#include "common/xml-utils.h"
 #include "trad-frame.h"
 #include "frame-unwind.h"
 

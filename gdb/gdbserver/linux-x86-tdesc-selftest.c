@@ -19,7 +19,7 @@
 #include "linux-x86-tdesc.h"
 #include "tdesc.h"
 #include "common/selftest.h"
-#include "x86-xstate.h"
+#include "common/x86-xstate.h"
 
 /* Defined in auto-generated file i386-linux.c.  */
 void init_registers_i386_linux (void);

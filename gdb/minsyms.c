@@ -50,7 +50,7 @@
 #include "cp-support.h"
 #include "language.h"
 #include "cli/cli-utils.h"
-#include "symbol.h"
+#include "common/symbol.h"
 #include <algorithm>
 #include "safe-ctype.h"
 

@@ -21,7 +21,7 @@
 #include "server.h"
 
 #include <sys/types.h>
-#include "gdb_sys_time.h"
+#include "common/gdb_sys_time.h"
 
 #ifdef USE_WIN32API
 #include <windows.h>

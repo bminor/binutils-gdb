@@ -26,7 +26,7 @@
 #include "gdbtypes.h"
 #include "objfiles.h"
 #include "language.h"
-#include "vec.h"
+#include "common/vec.h"
 #include "bcache.h"
 #include "dwarf2loc.h"
 #include "typeprint.h"

@@ -17,7 +17,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "server.h"
-#include "job-control.h"
+#include "common/job-control.h"
 #include "nat/fork-inferior.h"
 #ifdef HAVE_SIGNAL_H
 #include <signal.h>

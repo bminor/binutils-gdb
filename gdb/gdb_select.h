@@ -23,7 +23,7 @@
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #else
-#include "gdb_sys_time.h"
+#include "common/gdb_sys_time.h"
 #endif
 
 #ifdef USE_WIN32API

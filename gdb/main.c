@@ -40,11 +40,11 @@
 #include "maint.h"
 
 #include "filenames.h"
-#include "filestuff.h"
+#include "common/filestuff.h"
 #include <signal.h>
 #include "event-top.h"
 #include "infrun.h"
-#include "signals-state-save-restore.h"
+#include "common/signals-state-save-restore.h"
 #include <vector>
 #include "common/pathstuff.h"
 

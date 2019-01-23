@@ -59,7 +59,7 @@
 #include "psympriv.h"
 #include <sys/stat.h>
 #include "completer.h"
-#include "vec.h"
+#include "common/vec.h"
 #include "c-lang.h"
 #include "go-lang.h"
 #include "valprint.h"
@@ -69,7 +69,7 @@
 #include "gdb_bfd.h"
 #include "f-lang.h"
 #include "source.h"
-#include "filestuff.h"
+#include "common/filestuff.h"
 #include "build-id.h"
 #include "namespace.h"
 #include "common/gdb_unlinker.h"
@@ -85,7 +85,7 @@
 #include <algorithm>
 #include <unordered_set>
 #include <unordered_map>
-#include "selftest.h"
+#include "common/selftest.h"
 #include <cmath>
 #include <set>
 #include <forward_list>

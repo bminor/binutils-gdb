@@ -38,7 +38,7 @@
 #include "value.h"
 #include "top.h"
 #include "maint.h"
-#include "selftest.h"
+#include "common/selftest.h"
 
 #include "cli/cli-decode.h"
 #include "cli/cli-utils.h"

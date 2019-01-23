@@ -21,7 +21,7 @@
 #include "bfd.h"
 #include "gdb_bfd.h"
 #include "build-id.h"
-#include "gdb_vecs.h"
+#include "common/gdb_vecs.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "filenames.h"

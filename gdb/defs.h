@@ -25,7 +25,7 @@
 #  error gdbserver should not include gdb/defs.h
 #endif
 
-#include "common-defs.h"
+#include "common/common-defs.h"
 
 #include <sys/types.h>
 #include <limits.h>
@@ -52,7 +52,7 @@
 
 #include "ui-file.h"
 
-#include "host-defs.h"
+#include "common/host-defs.h"
 #include "common/enum-flags.h"
 
 /* Scope types enumerator.  List the types of scopes the compiler will

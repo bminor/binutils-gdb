@@ -33,7 +33,7 @@
 #include "amd64-tdep.h"
 #include "amd64-linux-tdep.h"
 #include "i386-linux-tdep.h"
-#include "x86-xstate.h"
+#include "common/x86-xstate.h"
 
 #include "x86-linux-nat.h"
 #include "nat/linux-ptrace.h"

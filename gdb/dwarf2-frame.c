@@ -40,7 +40,7 @@
 #include "dwarf2loc.h"
 #include "dwarf2-frame-tailcall.h"
 #if GDB_SELF_TEST
-#include "selftest.h"
+#include "common/selftest.h"
 #include "selftest-arch.h"
 #endif
 

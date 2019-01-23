@@ -89,7 +89,7 @@
 #include "inferior.h"
 #include "infrun.h"
 #include "gdbthread.h"
-#include "gdb_wait.h"
+#include "common/gdb_wait.h"
 #include "gdbcore.h"
 #include "command.h"
 #include "gdbcmd.h"

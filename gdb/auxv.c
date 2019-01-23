@@ -25,7 +25,7 @@
 #include "valprint.h"
 #include "gdbcore.h"
 #include "observable.h"
-#include "filestuff.h"
+#include "common/filestuff.h"
 #include "objfiles.h"
 
 #include "auxv.h"

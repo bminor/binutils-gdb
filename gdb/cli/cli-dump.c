@@ -30,7 +30,7 @@
 #include "gdbcore.h"
 #include "cli/cli-utils.h"
 #include "gdb_bfd.h"
-#include "filestuff.h"
+#include "common/filestuff.h"
 #include "common/byte-vector.h"
 
 static gdb::unique_xmalloc_ptr<char>

@@ -20,7 +20,7 @@
 #include "defs.h"
 
 #include "common/filestuff.h"
-#include "selftest.h"
+#include "common/selftest.h"
 #include "common/byte-vector.h"
 #include "common/pathstuff.h"
 

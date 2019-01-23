@@ -65,7 +65,7 @@
 #include "ax-gdb.h"
 #include "dummy-frame.h"
 #include "interps.h"
-#include "format.h"
+#include "common/format.h"
 #include "thread-fsm.h"
 #include "tid-parse.h"
 #include "cli/cli-style.h"

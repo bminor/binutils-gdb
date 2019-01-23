@@ -24,7 +24,7 @@
 #include "regcache.h"
 #include "regset.h"
 #include "i386-fbsd-tdep.h"
-#include "x86-xstate.h"
+#include "common/x86-xstate.h"
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"

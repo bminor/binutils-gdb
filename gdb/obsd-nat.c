@@ -24,7 +24,7 @@
 
 #include <sys/types.h>
 #include <sys/ptrace.h>
-#include "gdb_wait.h"
+#include "common/gdb_wait.h"
 
 #include "inf-child.h"
 #include "obsd-nat.h"

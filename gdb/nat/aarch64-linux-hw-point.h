@@ -19,7 +19,7 @@
 #ifndef AARCH64_LINUX_HW_POINT_H
 #define AARCH64_LINUX_HW_POINT_H 1
 
-#include "break-common.h" /* For enum target_hw_bp_type.  */
+#include "common/break-common.h" /* For enum target_hw_bp_type.  */
 
 /* Macro definitions, data structures, and code for the hardware
    breakpoint and hardware watchpoint support follow.  We use the

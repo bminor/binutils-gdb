@@ -20,7 +20,7 @@
 #ifndef REGCACHE_H
 #define REGCACHE_H
 
-#include "common-regcache.h"
+#include "common/common-regcache.h"
 #include <forward_list>
 
 struct regcache;

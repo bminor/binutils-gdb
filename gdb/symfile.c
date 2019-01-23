@@ -57,7 +57,7 @@
 #include "gdb_bfd.h"
 #include "cli/cli-utils.h"
 #include "common/byte-vector.h"
-#include "selftest.h"
+#include "common/selftest.h"
 #include "cli/cli-style.h"
 #include "common/forward-scope-exit.h"
 

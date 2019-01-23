@@ -25,8 +25,8 @@
 #include "terminal.h"
 #include "gdbthread.h"
 #include "top.h"
-#include "job-control.h"
-#include "filestuff.h"
+#include "common/job-control.h"
+#include "common/filestuff.h"
 #include "nat/fork-inferior.h"
 #include "common/common-inferior.h"
 

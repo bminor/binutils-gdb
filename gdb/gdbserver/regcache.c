@@ -20,7 +20,7 @@
 #include "regdef.h"
 #include "gdbthread.h"
 #include "tdesc.h"
-#include "rsp-low.h"
+#include "common/rsp-low.h"
 #ifndef IN_PROCESS_AGENT
 
 struct regcache *

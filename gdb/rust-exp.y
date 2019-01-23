@@ -38,9 +38,9 @@
 #include "gdb_regex.h"
 #include "rust-lang.h"
 #include "parser-defs.h"
-#include "selftest.h"
+#include "common/selftest.h"
 #include "value.h"
-#include "vec.h"
+#include "common/vec.h"
 
 #define GDB_YY_REMAP_PREFIX rust
 #include "yy-remap.h"

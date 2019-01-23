@@ -19,7 +19,7 @@
 #include "command.h"
 #include "gdbcmd.h"
 #include "target.h"
-#include "agent.h"
+#include "common/agent.h"
 
 /* Enum strings for "set|show agent".  */
 

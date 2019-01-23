@@ -17,7 +17,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "target.h"
-#include "queue.h"
+#include "common/queue.h"
 
 /* Structure holding information related to a single event.  We
    keep a queue of these to push to GDB.  It can be extended if

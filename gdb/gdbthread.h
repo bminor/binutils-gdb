@@ -31,7 +31,7 @@ struct symtab;
 #include "target/waitstatus.h"
 #include "cli/cli-utils.h"
 #include "common/refcounted-object.h"
-#include "common-gdbthread.h"
+#include "common/common-gdbthread.h"
 #include "common/forward-scope-exit.h"
 
 struct inferior;

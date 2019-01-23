@@ -25,7 +25,7 @@
 
 #if defined(HAVE_SYS_MMAN_H)
 
-#include "selftest.h"
+#include "common/selftest.h"
 #include "common/gdb_unlinker.h"
 
 #include <unistd.h>

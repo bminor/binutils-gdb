@@ -20,7 +20,7 @@
 #ifndef REMOTE_NOTIF_H
 #define REMOTE_NOTIF_H
 
-#include "queue.h"
+#include "common/queue.h"
 
 /* An event of a type of async remote notification.  */
 

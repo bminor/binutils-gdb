@@ -28,7 +28,7 @@
 
 #include <signal.h>
 #include "nat/gdb_ptrace.h"
-#include "gdb_wait.h"
+#include "common/gdb_wait.h"
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
 #endif

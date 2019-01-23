@@ -22,9 +22,9 @@
 #define PROGSPACE_H
 
 #include "target.h"
-#include "vec.h"
+#include "common/vec.h"
 #include "gdb_bfd.h"
-#include "gdb_vecs.h"
+#include "common/gdb_vecs.h"
 #include "registry.h"
 #include "common/next-iterator.h"
 #include "common/safe-iterator.h"

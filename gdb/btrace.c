@@ -31,7 +31,7 @@
 #include "filenames.h"
 #include "xml-support.h"
 #include "regcache.h"
-#include "rsp-low.h"
+#include "common/rsp-low.h"
 #include "gdbcmd.h"
 #include "cli/cli-utils.h"
 

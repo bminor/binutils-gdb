@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "gdbcmd.h"
 #include "xml-support.h"
-#include "filestuff.h"
+#include "common/filestuff.h"
 #include "safe-ctype.h"
 #include <vector>
 #include <string>

@@ -74,15 +74,15 @@ struct inferior;
 #include "bfd.h"
 #include "symtab.h"
 #include "memattr.h"
-#include "vec.h"
-#include "gdb_signals.h"
+#include "common/vec.h"
+#include "common/gdb_signals.h"
 #include "btrace.h"
 #include "record.h"
 #include "command.h"
 #include "disasm.h"
 #include "tracepoint.h"
 
-#include "break-common.h" /* For enum target_hw_bp_type.  */
+#include "common/break-common.h" /* For enum target_hw_bp_type.  */
 
 enum strata
   {

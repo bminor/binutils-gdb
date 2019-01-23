@@ -32,7 +32,7 @@
 #ifndef X86_DREGS_H
 #define X86_DREGS_H 1
 
-#include "break-common.h" /* target_hw_bp_type */
+#include "common/break-common.h" /* target_hw_bp_type */
 
 /* Low-level function vector.  */
 

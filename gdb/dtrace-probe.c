@@ -21,7 +21,7 @@
 
 #include "defs.h"
 #include "probe.h"
-#include "vec.h"
+#include "common/vec.h"
 #include "elf-bfd.h"
 #include "gdbtypes.h"
 #include "obstack.h"

@@ -21,10 +21,10 @@
 
 #include "frame.h"
 #include "value.h"
-#include "vec.h"
+#include "common/vec.h"
 #include "ax.h"
 #include "command.h"
-#include "break-common.h"
+#include "common/break-common.h"
 #include "probe.h"
 #include "location.h"
 #include <vector>

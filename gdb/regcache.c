@@ -1387,7 +1387,7 @@ register_dump::dump (ui_file *file)
 }
 
 #if GDB_SELF_TEST
-#include "selftest.h"
+#include "common/selftest.h"
 #include "selftest-arch.h"
 #include "target-float.h"
 

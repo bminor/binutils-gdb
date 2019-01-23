@@ -19,7 +19,7 @@
 
 #include "defs.h"
 #include "target.h"
-#include "vec.h"
+#include "common/vec.h"
 #include "xml-support.h"
 #include "osdata.h"
 #include "ui-out.h"

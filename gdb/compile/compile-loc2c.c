@@ -28,7 +28,7 @@
 #include "compile.h"
 #include "block.h"
 #include "dwarf2-frame.h"
-#include "gdb_vecs.h"
+#include "common/gdb_vecs.h"
 #include "value.h"
 
 

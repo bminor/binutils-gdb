@@ -37,7 +37,7 @@
 #include "cli-out.h"
 #include <fcntl.h>
 #include <signal.h>
-#include "filestuff.h"
+#include "common/filestuff.h"
 #include "completer.h"
 #include "gdb_curses.h"
 #include <map>

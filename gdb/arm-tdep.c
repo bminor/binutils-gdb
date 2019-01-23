@@ -55,7 +55,7 @@
 #include "coff/internal.h"
 #include "elf/arm.h"
 
-#include "vec.h"
+#include "common/vec.h"
 
 #include "record.h"
 #include "record-full.h"
@@ -70,7 +70,7 @@
 #include "features/arm/arm-with-neon.c"
 
 #if GDB_SELF_TEST
-#include "selftest.h"
+#include "common/selftest.h"
 #endif
 
 static int arm_debug;

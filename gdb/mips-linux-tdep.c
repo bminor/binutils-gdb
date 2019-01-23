@@ -38,7 +38,7 @@
 #include "glibc-tdep.h"
 #include "linux-tdep.h"
 #include "xml-syscall.h"
-#include "gdb_signals.h"
+#include "common/gdb_signals.h"
 
 #include "features/mips-linux.c"
 #include "features/mips-dsp-linux.c"

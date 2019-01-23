@@ -19,7 +19,7 @@
 
 #include "defs.h"
 #if GDB_SELF_TEST
-#include "selftest.h"
+#include "common/selftest.h"
 #include "selftest-arch.h"
 #include "inferior.h"
 #include "gdbthread.h"

@@ -25,10 +25,10 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
-#include "gdb_wait.h"
+#include "common/gdb_wait.h"
 #include <signal.h>
-#include "filestuff.h"
-#include "common-inferior.h"
+#include "common/filestuff.h"
+#include "common/common-inferior.h"
 #include "nat/fork-inferior.h"
 
 int using_threads = 1;

@@ -50,7 +50,7 @@
 #include "dwarf2-frame.h"
 #include "user-regs.h"
 #include "valprint.h"
-#include "common-defs.h"
+#include "common/common-defs.h"
 #include "opcode/riscv-opc.h"
 #include "cli/cli-decode.h"
 #include "observable.h"

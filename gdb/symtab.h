@@ -23,7 +23,7 @@
 #include <array>
 #include <vector>
 #include <string>
-#include "gdb_vecs.h"
+#include "common/gdb_vecs.h"
 #include "gdbtypes.h"
 #include "gdb_regex.h"
 #include "common/enum-flags.h"

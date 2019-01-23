@@ -28,7 +28,7 @@
 
 #include "sol2-tdep.h"
 #include "amd64-tdep.h"
-#include "x86-xstate.h"
+#include "common/x86-xstate.h"
 #include "solib-svr4.h"
 
 /* Mapping between the general-purpose registers in gregset_t format

@@ -42,7 +42,7 @@
 #include "objfiles.h"
 #include "gdb_bfd.h"
 #include "completer.h"
-#include "filestuff.h"
+#include "common/filestuff.h"
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0

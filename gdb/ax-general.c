@@ -353,7 +353,7 @@ struct aop_map aop_map[] =
   {0, 0, 0, 0, 0}
 #define DEFOP(NAME, SIZE, DATA_SIZE, CONSUMED, PRODUCED, VALUE) \
   , { # NAME, SIZE, DATA_SIZE, CONSUMED, PRODUCED }
-#include "ax.def"
+#include "common/ax.def"
 #undef DEFOP
 };
 

@@ -19,7 +19,7 @@
 
 #include "defs.h"
 #include "i386-tdep.h"
-#include "x86-xstate.h"
+#include "common/x86-xstate.h"
 #include "target-descriptions.h"
 #include "osabi.h"
 

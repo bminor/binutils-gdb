@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "osabi.h"
 #include "amd64-tdep.h"
-#include "x86-xstate.h"
+#include "common/x86-xstate.h"
 #include "dicos-tdep.h"
 
 static void

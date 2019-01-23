@@ -39,7 +39,7 @@
 #include "disasm.h"
 #include "amd64-tdep.h"
 #include "i387-tdep.h"
-#include "x86-xstate.h"
+#include "common/x86-xstate.h"
 #include <algorithm>
 #include "target-descriptions.h"
 #include "arch/amd64.h"

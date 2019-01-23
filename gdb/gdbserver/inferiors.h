@@ -19,7 +19,7 @@
 #ifndef INFERIORS_H
 #define INFERIORS_H
 
-#include "gdb_vecs.h"
+#include "common/gdb_vecs.h"
 #include <list>
 
 struct thread_info;

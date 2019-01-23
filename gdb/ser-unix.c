@@ -26,11 +26,11 @@
 #include <sys/types.h>
 #include "terminal.h"
 #include <sys/socket.h>
-#include "gdb_sys_time.h"
+#include "common/gdb_sys_time.h"
 
 #include "gdb_select.h"
 #include "gdbcmd.h"
-#include "filestuff.h"
+#include "common/filestuff.h"
 #include <termios.h>
 
 struct hardwire_ttystate

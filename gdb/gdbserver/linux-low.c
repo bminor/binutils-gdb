@@ -19,13 +19,13 @@
 #include "server.h"
 #include "linux-low.h"
 #include "nat/linux-osdata.h"
-#include "agent.h"
+#include "common/agent.h"
 #include "tdesc.h"
-#include "rsp-low.h"
-#include "signals-state-save-restore.h"
+#include "common/rsp-low.h"
+#include "common/signals-state-save-restore.h"
 #include "nat/linux-nat.h"
 #include "nat/linux-waitpid.h"
-#include "gdb_wait.h"
+#include "common/gdb_wait.h"
 #include "nat/gdb_ptrace.h"
 #include "nat/linux-ptrace.h"
 #include "nat/linux-procfs.h"
@@ -43,13 +43,13 @@
 #include <sys/stat.h>
 #include <sys/vfs.h>
 #include <sys/uio.h>
-#include "filestuff.h"
+#include "common/filestuff.h"
 #include "tracepoint.h"
 #include "hostio.h"
 #include <inttypes.h>
-#include "common-inferior.h"
+#include "common/common-inferior.h"
 #include "nat/fork-inferior.h"
-#include "environ.h"
+#include "common/environ.h"
 #include "common/scoped_restore.h"
 #ifndef ELFMAG0
 /* Don't include <linux/elf.h> here.  If it got included by gdb_proc_service.h
@@ -101,7 +101,7 @@
 
 #ifdef HAVE_LINUX_BTRACE
 # include "nat/linux-btrace.h"
-# include "btrace-common.h"
+# include "common/btrace-common.h"
 #endif
 
 #ifndef HAVE_ELF32_AUXV_T

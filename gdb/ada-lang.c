@@ -49,9 +49,9 @@
 #include "valprint.h"
 #include "source.h"
 #include "observable.h"
-#include "vec.h"
+#include "common/vec.h"
 #include "stack.h"
-#include "gdb_vecs.h"
+#include "common/gdb_vecs.h"
 #include "typeprint.h"
 #include "namespace.h"
 

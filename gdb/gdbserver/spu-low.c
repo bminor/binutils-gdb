@@ -20,12 +20,12 @@
 
 #include "server.h"
 
-#include "gdb_wait.h"
+#include "common/gdb_wait.h"
 #include <sys/ptrace.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/syscall.h>
-#include "filestuff.h"
+#include "common/filestuff.h"
 #include "hostio.h"
 #include "nat/fork-inferior.h"
 

@@ -18,7 +18,7 @@
 #if !defined (COMMAND_H)
 #define COMMAND_H 1
 
-#include "gdb_vecs.h"
+#include "common/gdb_vecs.h"
 #include "common/scoped_restore.h"
 
 struct completion_tracker;

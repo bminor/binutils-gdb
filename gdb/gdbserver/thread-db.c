@@ -26,7 +26,7 @@ extern int debug_threads;
 
 #include "gdb_proc_service.h"
 #include "nat/gdb_thread_db.h"
-#include "gdb_vecs.h"
+#include "common/gdb_vecs.h"
 #include "nat/linux-procfs.h"
 #include "common/scoped_restore.h"
 

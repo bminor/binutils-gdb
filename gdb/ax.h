@@ -19,7 +19,7 @@
 #ifndef AGENTEXPR_H
 #define AGENTEXPR_H
 
-#include "vec.h"
+#include "common/vec.h"
 
 /* It's sometimes useful to be able to debug programs that you can't
    really stop for more than a fraction of a second.  To this end, the
@@ -164,7 +164,7 @@ enum agent_op
   {
 #define DEFOP(NAME, SIZE, DATA_SIZE, CONSUMED, PRODUCED, VALUE)  \
     aop_ ## NAME = VALUE,
-#include "ax.def"
+#include "common/ax.def"
 #undef DEFOP
     aop_last
   };

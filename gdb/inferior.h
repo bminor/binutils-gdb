@@ -44,7 +44,7 @@ struct thread_info;
 #include "frame.h"
 
 /* For gdb_environ.  */
-#include "environ.h"
+#include "common/environ.h"
 
 #include "progspace.h"
 #include "registry.h"
@@ -53,7 +53,7 @@ struct thread_info;
 #include "common/refcounted-object.h"
 #include "common/forward-scope-exit.h"
 
-#include "common-inferior.h"
+#include "common/common-inferior.h"
 #include "gdbthread.h"
 
 struct infcall_suspend_state;

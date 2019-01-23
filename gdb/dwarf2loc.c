@@ -38,7 +38,7 @@
 #include "dwarf2loc.h"
 #include "dwarf2-frame.h"
 #include "compile/compile.h"
-#include "selftest.h"
+#include "common/selftest.h"
 #include <algorithm>
 #include <vector>
 #include <unordered_set>

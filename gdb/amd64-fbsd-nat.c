@@ -34,7 +34,7 @@
 #include "amd64-nat.h"
 #include "amd64-bsd-nat.h"
 #include "x86-nat.h"
-#include "x86-xstate.h"
+#include "common/x86-xstate.h"
 
 
 class amd64_fbsd_nat_target final

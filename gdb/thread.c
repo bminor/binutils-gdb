@@ -23,7 +23,7 @@
 #include "symtab.h"
 #include "frame.h"
 #include "inferior.h"
-#include "environ.h"
+#include "common/environ.h"
 #include "value.h"
 #include "target.h"
 #include "gdbthread.h"
