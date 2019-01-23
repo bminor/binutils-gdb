@@ -40,6 +40,7 @@
 #include "interps.h"
 #include "thread-fsm.h"
 #include <algorithm>
+#include "common/scope-exit.h"
 
 /* If we can't find a function's name from its address,
    we print this instead.  */
@@ -675,13 +676,6 @@ run_inferior_call (struct call_thread_fsm *sm,
   return caught_error;
 }
 
-/* A cleanup function that calls delete_std_terminate_breakpoint.  */
-static void
-cleanup_delete_std_terminate_breakpoint (void *ignore)
-{
-  delete_std_terminate_breakpoint ();
-}
-
 /* See infcall.h.  */
 
 struct value *
@@ -727,7 +721,6 @@ call_function_by_hand_dummy (struct value *function,
   struct frame_id dummy_id;
   struct frame_info *frame;
   struct gdbarch *gdbarch;
-  struct cleanup *terminate_bp_cleanup;
   ptid_t call_thread_ptid;
   struct gdb_exception e;
   char name_buf[RAW_FUNCTION_ADDRESS_SIZE];
@@ -1122,8 +1115,7 @@ call_function_by_hand_dummy (struct value *function,
 			       dummy_dtor, dummy_dtor_data);
 
   /* Register a clean-up for unwind_on_terminating_exception_breakpoint.  */
-  terminate_bp_cleanup = make_cleanup (cleanup_delete_std_terminate_breakpoint,
-				       NULL);
+  SCOPE_EXIT { delete_std_terminate_breakpoint (); };
 
   /* - SNIP - SNIP - SNIP - SNIP - SNIP - SNIP - SNIP - SNIP - SNIP -
      If you're looking to implement asynchronous dummy-frames, then
@@ -1184,7 +1176,6 @@ call_function_by_hand_dummy (struct value *function,
 
 	    maybe_remove_breakpoints ();
 
-	    do_cleanups (terminate_bp_cleanup);
 	    gdb_assert (retval != NULL);
 	    return retval;
 	  }

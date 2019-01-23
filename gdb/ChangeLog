@@ -1,4 +1,10 @@
 2019-01-23  Tom Tromey  <tom@tromey.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* infcall.c (cleanup_delete_std_terminate_breakpoint): Remove.
+	(call_function_by_hand_dummy): Use SCOPE_EXIT.
+
+2019-01-23  Tom Tromey  <tom@tromey.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 	    Pedro Alves  <palves@redhat.com>
 
