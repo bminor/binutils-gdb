@@ -1,6 +1,13 @@
 2019-01-23  Pedro Alves  <palves@redhat.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdbthread.h: Include "common/forward-scope-exit.h".
+	(scoped_finish_thread_state): Redefine custom class in terms of
+	forward_scope_exit.
+
+2019-01-23  Pedro Alves  <palves@redhat.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* common/forward-scope-exit.h: New file.
 
 2019-01-23  Pedro Alves  <palves@redhat.com>

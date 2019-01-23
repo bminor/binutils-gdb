@@ -32,6 +32,7 @@ struct symtab;
 #include "cli/cli-utils.h"
 #include "common/refcounted-object.h"
 #include "common-gdbthread.h"
+#include "common/forward-scope-exit.h"
 
 struct inferior;
 
@@ -612,31 +613,8 @@ extern void finish_thread_state (ptid_t ptid);
 
 /* Calls finish_thread_state on scope exit, unless release() is called
    to disengage.  */
-class scoped_finish_thread_state
-{
-public:
-  explicit scoped_finish_thread_state (ptid_t ptid)
-    : m_ptid (ptid)
-  {}
-
-  ~scoped_finish_thread_state ()
-  {
-    if (!m_released)
-      finish_thread_state (m_ptid);
-  }
-
-  /* Disengage.  */
-  void release ()
-  {
-    m_released = true;
-  }
-
-  DISABLE_COPY_AND_ASSIGN (scoped_finish_thread_state);
-
-private:
-  bool m_released = false;
-  ptid_t m_ptid;
-};
+using scoped_finish_thread_state
+  = FORWARD_SCOPE_EXIT (finish_thread_state);
 
 /* Commands with a prefix of `thread'.  */
 extern struct cmd_list_element *thread_cmd_list;
