@@ -1,6 +1,14 @@
 2019-01-23  Tom Tromey  <tom@tromey.com>
 	    Pedro Alves  <palves@redhat.com>
 
+	* infrun.c: Include "common/scope-exit.h"
+	(delete_just_stopped_threads_infrun_breakpoints_cleanup): Remove.
+	(wait_for_inferior): Use SCOPE_EXIT.
+	(fetch_inferior_event): Use scope_exit.
+
+2019-01-23  Tom Tromey  <tom@tromey.com>
+	    Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (create_breakpoint): Remove cleanup.
 
 2019-01-23  Tom Tromey  <tom@tromey.com>
