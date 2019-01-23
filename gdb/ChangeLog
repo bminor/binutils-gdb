@@ -1,6 +1,12 @@
 2019-01-23  Tom Tromey  <tom@tromey.com>
 	    Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (disable_thread_events): Delete.
+	(stop_all_threads): Use SCOPE_EXIT.
+
+2019-01-23  Tom Tromey  <tom@tromey.com>
+	    Pedro Alves  <palves@redhat.com>
+
 	* symfile.c: Include forward-scope-exit.h.
 	(clear_symtab_users_cleanup): Replace forward declaration with
 	a FORWARD_SCOPE_EXIT.
