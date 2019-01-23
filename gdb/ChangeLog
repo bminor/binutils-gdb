@@ -1,4 +1,9 @@
 2019-01-23  Tom Tromey  <tom@tromey.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (create_breakpoint): Remove cleanup.
+
+2019-01-23  Tom Tromey  <tom@tromey.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 	    Pedro Alves  <palves@redhat.com>
 
