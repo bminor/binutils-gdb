@@ -1826,7 +1826,7 @@ solist_update_incremental (struct svr4_info *info, CORE_ADDR lm)
    ones set up for the probes-based interface are adequate.  */
 
 static void
-disable_probes_interface_cleanup (void *arg)
+disable_probes_interface ()
 {
   struct svr4_info *info = get_svr4_info ();
 
@@ -1847,7 +1847,6 @@ svr4_handle_solib_event (void)
   struct svr4_info *info = get_svr4_info ();
   struct probe_and_action *pa;
   enum probe_action action;
-  struct cleanup *old_chain;
   struct value *val = NULL;
   CORE_ADDR pc, debug_base, lm = 0;
   struct frame_info *frame = get_current_frame ();
@@ -1858,26 +1857,20 @@ svr4_handle_solib_event (void)
 
   /* If anything goes wrong we revert to the original linker
      interface.  */
-  old_chain = make_cleanup (disable_probes_interface_cleanup, NULL);
+  auto cleanup = make_scope_exit (disable_probes_interface);
 
   pc = regcache_read_pc (get_current_regcache ());
   pa = solib_event_probe_at (info, pc);
   if (pa == NULL)
-    {
-      do_cleanups (old_chain);
-      return;
-    }
+    return;
 
   action = solib_event_probe_action (pa);
   if (action == PROBES_INTERFACE_FAILED)
-    {
-      do_cleanups (old_chain);
-      return;
-    }
+    return;
 
   if (action == DO_NOTHING)
     {
-      discard_cleanups (old_chain);
+      cleanup.release ();
       return;
     }
 
@@ -1907,25 +1900,16 @@ svr4_handle_solib_event (void)
     END_CATCH
 
     if (val == NULL)
-      {
-	do_cleanups (old_chain);
-	return;
-      }
+      return;
 
     debug_base = value_as_address (val);
     if (debug_base == 0)
-      {
-	do_cleanups (old_chain);
-	return;
-      }
+      return;
 
     /* Always locate the debug struct, in case it moved.  */
     info->debug_base = 0;
     if (locate_base (info) == 0)
-      {
-	do_cleanups (old_chain);
-	return;
-      }
+      return;
 
     /* GDB does not currently support libraries loaded via dlmopen
        into namespaces other than the initial one.  We must ignore
@@ -1943,7 +1927,6 @@ svr4_handle_solib_event (void)
 	CATCH (ex, RETURN_MASK_ERROR)
 	  {
 	    exception_print (gdb_stderr, ex);
-	    do_cleanups (old_chain);
 	    return;
 	  }
 	END_CATCH
@@ -1968,13 +1951,10 @@ svr4_handle_solib_event (void)
   if (action == FULL_RELOAD)
     {
       if (!solist_update_full (info))
-	{
-	  do_cleanups (old_chain);
-	  return;
-	}
+	return;
     }
 
-  discard_cleanups (old_chain);
+  cleanup.release ();
 }
 
 /* Helper function for svr4_update_solib_event_breakpoints.  */

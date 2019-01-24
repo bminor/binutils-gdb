@@ -1,5 +1,10 @@
 2019-03-06  Tom Tromey  <tom@tromey.com>
 
+	* solib-svr4.c (disable_probes_interface): Remove parameter.
+	(svr4_handle_solib_event): Use make_scope_exit.
+
+2019-03-06  Tom Tromey  <tom@tromey.com>
+
 	* remote.c (struct stop_reply_deleter): Remove.
 	(stop_reply_up): Update.
 	(struct stop_reply): Derive from notif_event.  Don't typedef.
