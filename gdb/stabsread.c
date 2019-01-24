@@ -85,14 +85,16 @@ struct next_fnfieldlist
    This is part of some reorganization of low level C++ support and is
    expected to eventually go away...  (FIXME) */
 
-struct field_info
+struct stab_field_info
   {
-    struct nextfield *list;
-    struct next_fnfieldlist *fnlist;
+    struct nextfield *list = nullptr;
+    struct next_fnfieldlist *fnlist = nullptr;
+
+    auto_obstack obstack;
   };
 
 static void
-read_one_struct_field (struct field_info *, const char **, const char *,
+read_one_struct_field (struct stab_field_info *, const char **, const char *,
 		       struct type *, struct objfile *);
 
 static struct type *dbx_alloc_type (int[2], struct objfile *);
@@ -125,24 +127,24 @@ static struct type *read_enum_type (const char **, struct type *, struct objfile
 static struct type *rs6000_builtin_type (int, struct objfile *);
 
 static int
-read_member_functions (struct field_info *, const char **, struct type *,
+read_member_functions (struct stab_field_info *, const char **, struct type *,
 		       struct objfile *);
 
 static int
-read_struct_fields (struct field_info *, const char **, struct type *,
+read_struct_fields (struct stab_field_info *, const char **, struct type *,
 		    struct objfile *);
 
 static int
-read_baseclasses (struct field_info *, const char **, struct type *,
+read_baseclasses (struct stab_field_info *, const char **, struct type *,
 		  struct objfile *);
 
 static int
-read_tilde_fields (struct field_info *, const char **, struct type *,
+read_tilde_fields (struct stab_field_info *, const char **, struct type *,
 		   struct objfile *);
 
-static int attach_fn_fields_to_type (struct field_info *, struct type *);
+static int attach_fn_fields_to_type (struct stab_field_info *, struct type *);
 
-static int attach_fields_to_type (struct field_info *, struct type *,
+static int attach_fields_to_type (struct stab_field_info *, struct type *,
 				  struct objfile *);
 
 static struct type *read_struct_type (const char **, struct type *,
@@ -158,7 +160,7 @@ static struct field *read_args (const char **, int, struct objfile *,
 static void add_undefined_type (struct type *, int[2]);
 
 static int
-read_cpp_abbrev (struct field_info *, const char **, struct type *,
+read_cpp_abbrev (struct stab_field_info *, const char **, struct type *,
 		 struct objfile *);
 
 static const char *find_name_end (const char *name);
@@ -2277,7 +2279,7 @@ stabs_method_name_from_physname (const char *physname)
    Returns 1 for success, 0 for failure.  */
 
 static int
-read_member_functions (struct field_info *fip, const char **pp,
+read_member_functions (struct stab_field_info *fip, const char **pp,
 		       struct type *type, struct objfile *objfile)
 {
   int nfn_fields = 0;
@@ -2317,8 +2319,7 @@ read_member_functions (struct field_info *fip, const char **pp,
       look_ahead_type = NULL;
       length = 0;
 
-      new_fnlist = XCNEW (struct next_fnfieldlist);
-      make_cleanup (xfree, new_fnlist);
+      new_fnlist = OBSTACK_ZALLOC (&fip->obstack, struct next_fnfieldlist);
 
       if ((*pp)[0] == 'o' && (*pp)[1] == 'p' && is_cplus_marker ((*pp)[2]))
 	{
@@ -2357,8 +2358,7 @@ read_member_functions (struct field_info *fip, const char **pp,
 
       do
 	{
-	  new_sublist = XCNEW (struct next_fnfield);
-	  make_cleanup (xfree, new_sublist);
+	  new_sublist = OBSTACK_ZALLOC (&fip->obstack, struct next_fnfield);
 
 	  /* Check for and handle cretinous dbx symbol name continuation!  */
 	  if (look_ahead_type == NULL)
@@ -2642,8 +2642,8 @@ read_member_functions (struct field_info *fip, const char **pp,
 
 	      /* Create a new fn_fieldlist for the destructors.  */
 
-	      destr_fnlist = XCNEW (struct next_fnfieldlist);
-	      make_cleanup (xfree, destr_fnlist);
+	      destr_fnlist = OBSTACK_ZALLOC (&fip->obstack,
+					     struct next_fnfieldlist);
 
 	      destr_fnlist->fn_fieldlist.name
 		= obconcat (&objfile->objfile_obstack, "~",
@@ -2743,8 +2743,8 @@ read_member_functions (struct field_info *fip, const char **pp,
    keep parsing and it's time for error_type().  */
 
 static int
-read_cpp_abbrev (struct field_info *fip, const char **pp, struct type *type,
-		 struct objfile *objfile)
+read_cpp_abbrev (struct stab_field_info *fip, const char **pp,
+		 struct type *type, struct objfile *objfile)
 {
   const char *p;
   const char *name;
@@ -2838,8 +2838,9 @@ read_cpp_abbrev (struct field_info *fip, const char **pp, struct type *type,
 }
 
 static void
-read_one_struct_field (struct field_info *fip, const char **pp, const char *p,
-		       struct type *type, struct objfile *objfile)
+read_one_struct_field (struct stab_field_info *fip, const char **pp,
+		       const char *p, struct type *type,
+		       struct objfile *objfile)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
@@ -2981,8 +2982,8 @@ read_one_struct_field (struct field_info *fip, const char **pp, const char *p,
    Returns 1 for success, 0 for failure.  */
 
 static int
-read_struct_fields (struct field_info *fip, const char **pp, struct type *type,
-		    struct objfile *objfile)
+read_struct_fields (struct stab_field_info *fip, const char **pp,
+		    struct type *type, struct objfile *objfile)
 {
   const char *p;
   struct nextfield *newobj;
@@ -3001,8 +3002,7 @@ read_struct_fields (struct field_info *fip, const char **pp, struct type *type,
     {
       STABS_CONTINUE (pp, objfile);
       /* Get space to record the next field's data.  */
-      newobj = XCNEW (struct nextfield);
-      make_cleanup (xfree, newobj);
+      newobj = OBSTACK_ZALLOC (&fip->obstack, struct nextfield);
 
       newobj->next = fip->list;
       fip->list = newobj;
@@ -3079,8 +3079,8 @@ read_struct_fields (struct field_info *fip, const char **pp, struct type *type,
 
 
 static int
-read_baseclasses (struct field_info *fip, const char **pp, struct type *type,
-		  struct objfile *objfile)
+read_baseclasses (struct stab_field_info *fip, const char **pp,
+		  struct type *type, struct objfile *objfile)
 {
   int i;
   struct nextfield *newobj;
@@ -3123,8 +3123,7 @@ read_baseclasses (struct field_info *fip, const char **pp, struct type *type,
 
   for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
     {
-      newobj = XCNEW (struct nextfield);
-      make_cleanup (xfree, newobj);
+      newobj = OBSTACK_ZALLOC (&fip->obstack, struct nextfield);
 
       newobj->next = fip->list;
       fip->list = newobj;
@@ -3203,8 +3202,8 @@ read_baseclasses (struct field_info *fip, const char **pp, struct type *type,
    so we can look for the vptr base class info.  */
 
 static int
-read_tilde_fields (struct field_info *fip, const char **pp, struct type *type,
-		   struct objfile *objfile)
+read_tilde_fields (struct stab_field_info *fip, const char **pp,
+		   struct type *type, struct objfile *objfile)
 {
   const char *p;
 
@@ -3286,7 +3285,7 @@ read_tilde_fields (struct field_info *fip, const char **pp, struct type *type,
 }
 
 static int
-attach_fn_fields_to_type (struct field_info *fip, struct type *type)
+attach_fn_fields_to_type (struct stab_field_info *fip, struct type *type)
 {
   int n;
 
@@ -3305,7 +3304,7 @@ attach_fn_fields_to_type (struct field_info *fip, struct type *type)
    for this class's virtual functions.  */
 
 static int
-attach_fields_to_type (struct field_info *fip, struct type *type,
+attach_fields_to_type (struct stab_field_info *fip, struct type *type,
 		       struct objfile *objfile)
 {
   int nfields = 0;
@@ -3474,11 +3473,7 @@ static struct type *
 read_struct_type (const char **pp, struct type *type, enum type_code type_code,
                   struct objfile *objfile)
 {
-  struct cleanup *back_to;
-  struct field_info fi;
-
-  fi.list = NULL;
-  fi.fnlist = NULL;
+  struct stab_field_info fi;
 
   /* When describing struct/union/class types in stabs, G++ always drops
      all qualifications from the name.  So if you've got:
@@ -3500,8 +3495,6 @@ read_struct_type (const char **pp, struct type *type, enum type_code type_code,
       return type;
     }
 
-  back_to = make_cleanup (null_cleanup, 0);
-
   INIT_CPLUS_SPECIFIC (type);
   TYPE_CODE (type) = type_code;
   TYPE_STUB (type) = 0;
@@ -3513,10 +3506,7 @@ read_struct_type (const char **pp, struct type *type, enum type_code type_code,
 
     TYPE_LENGTH (type) = read_huge_number (pp, 0, &nbits, 0);
     if (nbits != 0)
-      {
-	do_cleanups (back_to);
-	return error_type (pp, objfile);
-      }
+      return error_type (pp, objfile);
     set_length_in_type_chain (type);
   }
 
@@ -3535,7 +3525,6 @@ read_struct_type (const char **pp, struct type *type, enum type_code type_code,
       type = error_type (pp, objfile);
     }
 
-  do_cleanups (back_to);
   return (type);
 }
 

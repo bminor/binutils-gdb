@@ -1,5 +1,17 @@
 2019-03-06  Tom Tromey  <tom@tromey.com>
 
+	* stabsread.c (struct stabs_field_info): Rename from field_info.
+	<list, fnlist>: Add initializers.
+	<obstack>: New member.
+	(read_member_functions, read_struct_fields, read_baseclasses):
+	Allocate on obstack.  Don't use cleanups.
+	(read_one_struct_field, read_member_functions, read_struct_fields)
+	(read_baseclasses, read_tilde_fields, attach_fn_fields_to_type)
+	(attach_fields_to_type, read_cpp_abbrev, read_member_functions)
+	(read_struct_type): Update.
+
+2019-03-06  Tom Tromey  <tom@tromey.com>
+
 	* nat/linux-namespaces.c (linux_mntns_access_fs): Use SCOPE_EXIT.
 	* common/filestuff.h (make_cleanup_close): Don't declare.
 	* common/filestuff.c (do_close_cleanup, make_cleanup_close):
