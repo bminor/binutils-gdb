@@ -1,3 +1,8 @@
+2019-03-06  Tom Tromey  <tom@tromey.com>
+
+	* server.c (detach_or_kill_for_exit_cleanup): Remove parameter.
+	(captured_main): Use SCOPE_EXIT.
+
 2019-03-04  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* configure.srv: Use '$enable_unittest' instead of '$development'

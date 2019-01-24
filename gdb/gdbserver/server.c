@@ -43,6 +43,7 @@
 #include "common/pathstuff.h"
 
 #include "common/selftest.h"
+#include "common/scope-exit.h"
 
 #define require_running_or_return(BUF)		\
   if (!target_running ())			\
@@ -3545,17 +3546,16 @@ detach_or_kill_for_exit (void)
 /* Value that will be passed to exit(3) when gdbserver exits.  */
 static int exit_code;
 
-/* Cleanup version of detach_or_kill_for_exit.  */
+/* Wrapper for detach_or_kill_for_exit that catches and prints
+   errors.  */
 
 static void
-detach_or_kill_for_exit_cleanup (void *ignore)
+detach_or_kill_for_exit_cleanup ()
 {
-
   TRY
     {
       detach_or_kill_for_exit ();
     }
-
   CATCH (exception, RETURN_MASK_ALL)
     {
       fflush (stdout);
@@ -3832,7 +3832,8 @@ captured_main (int argc, char *argv[])
       cs.last_status.value.integer = 0;
       cs.last_ptid = minus_one_ptid;
     }
-  make_cleanup (detach_or_kill_for_exit_cleanup, NULL);
+
+  SCOPE_EXIT { detach_or_kill_for_exit_cleanup (); };
 
   /* Don't report shared library events on the initial connection,
      even if some libraries are preloaded.  Avoids the "stopped by
