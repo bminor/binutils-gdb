@@ -96,17 +96,7 @@ struct protocol_feature;
 struct packet_reg;
 
 struct stop_reply;
-static void stop_reply_xfree (struct stop_reply *);
-
-struct stop_reply_deleter
-{
-  void operator() (stop_reply *r) const
-  {
-    stop_reply_xfree (r);
-  }
-};
-
-typedef std::unique_ptr<stop_reply, stop_reply_deleter> stop_reply_up;
+typedef std::unique_ptr<stop_reply> stop_reply_up;
 
 /* Generic configuration support for packets the stub optionally
    supports.  Allows the user to specify the use of the packet as well
@@ -6813,11 +6803,9 @@ remote_console_output (const char *msg)
   gdb_flush (gdb_stdtarg);
 }
 
-DEF_VEC_O(cached_reg_t);
-
-typedef struct stop_reply
+struct stop_reply : public notif_event
 {
-  struct notif_event base;
+  ~stop_reply ();
 
   /* The identifier of the thread about this event  */
   ptid_t ptid;
@@ -6836,20 +6824,14 @@ typedef struct stop_reply
      efficient for those targets that provide critical registers as
      part of their normal status mechanism (as another roundtrip to
      fetch them is avoided).  */
-  VEC(cached_reg_t) *regcache;
+  std::vector<cached_reg_t> regcache;
 
   enum target_stop_reason stop_reason;
 
   CORE_ADDR watch_data_address;
 
   int core;
-} *stop_reply_p;
-
-static void
-stop_reply_xfree (struct stop_reply *r)
-{
-  notif_event_xfree ((struct notif_event *) r);
-}
+};
 
 /* Return the length of the stop reply queue.  */
 
@@ -6901,30 +6883,16 @@ remote_notif_stop_can_get_pending_events (remote_target *remote,
   return 0;
 }
 
-static void
-stop_reply_dtr (struct notif_event *event)
+stop_reply::~stop_reply ()
 {
-  struct stop_reply *r = (struct stop_reply *) event;
-  cached_reg_t *reg;
-  int ix;
-
-  for (ix = 0;
-       VEC_iterate (cached_reg_t, r->regcache, ix, reg);
-       ix++)
-    xfree (reg->data);
-
-  VEC_free (cached_reg_t, r->regcache);
+  for (cached_reg_t &reg : regcache)
+    xfree (reg.data);
 }
 
-static struct notif_event *
-remote_notif_stop_alloc_reply (void)
+static notif_event_up
+remote_notif_stop_alloc_reply ()
 {
-  /* We cast to a pointer to the "base class".  */
-  struct notif_event *r = (struct notif_event *) XNEW (struct stop_reply);
-
-  r->dtr = stop_reply_dtr;
-
-  return r;
+  return notif_event_up (new struct stop_reply ());
 }
 
 /* A client of notification Stop.  */
@@ -7067,7 +7035,7 @@ remote_target::discard_pending_stop_replies (struct inferior *inf)
   /* Discard the in-flight notification.  */
   if (reply != NULL && reply->ptid.pid () == inf->pid)
     {
-      stop_reply_xfree (reply);
+      delete reply;
       rns->pending_event[notif_client_stop.id] = NULL;
     }
 
@@ -7211,7 +7179,7 @@ remote_target::remote_parse_stop_reply (const char *buf, stop_reply *event)
   event->ws.kind = TARGET_WAITKIND_IGNORE;
   event->ws.value.integer = 0;
   event->stop_reason = TARGET_STOPPED_BY_NO_REASON;
-  event->regcache = NULL;
+  event->regcache.clear ();
   event->core = -1;
 
   switch (buf[0])
@@ -7447,7 +7415,7 @@ Packet: '%s'\n"),
 		  if (fieldsize < register_size (event->arch, reg->regnum))
 		    warning (_("Remote reply is too short: %s"), buf);
 
-		  VEC_safe_push (cached_reg_t, event->regcache, &cached_reg);
+		  event->regcache.push_back (cached_reg);
 		}
 	      else
 		{
@@ -7663,22 +7631,18 @@ remote_target::process_stop_reply (struct stop_reply *stop_reply,
       && status->kind != TARGET_WAITKIND_NO_RESUMED)
     {
       /* Expedited registers.  */
-      if (stop_reply->regcache)
+      if (!stop_reply->regcache.empty ())
 	{
 	  struct regcache *regcache
 	    = get_thread_arch_regcache (ptid, stop_reply->arch);
-	  cached_reg_t *reg;
-	  int ix;
 
-	  for (ix = 0;
-	       VEC_iterate (cached_reg_t, stop_reply->regcache, ix, reg);
-	       ix++)
-	  {
-	    regcache->raw_supply (reg->num, reg->data);
-	    xfree (reg->data);
-	  }
+	  for (cached_reg_t &reg : stop_reply->regcache)
+	    {
+	      regcache->raw_supply (reg.num, reg.data);
+	      xfree (reg.data);
+	    }
 
-	  VEC_free (cached_reg_t, stop_reply->regcache);
+	  stop_reply->regcache.clear ();
 	}
 
       remote_notice_new_inferior (ptid, 0);
@@ -7689,7 +7653,7 @@ remote_target::process_stop_reply (struct stop_reply *stop_reply,
       remote_thr->vcont_resumed = 0;
     }
 
-  stop_reply_xfree (stop_reply);
+  delete stop_reply;
   return ptid;
 }
 

@@ -1,5 +1,26 @@
 2019-03-06  Tom Tromey  <tom@tromey.com>
 
+	* remote.c (struct stop_reply_deleter): Remove.
+	(stop_reply_up): Update.
+	(struct stop_reply): Derive from notif_event.  Don't typedef.
+	<regcache>: Now a std::vector.
+	(stop_reply_xfree): Remove.
+	(stop_reply::~stop_reply): Rename from stop_reply_dtr.
+	(remote_notif_stop_alloc_reply): Return a unique_ptr.  Use new.
+	(remote_target::discard_pending_stop_replies): Use delete.
+	(remote_target::remote_parse_stop_reply): Update.
+	(remote_target::process_stop_reply): Update.
+	* remote-notif.h (struct notif_event): Add virtual destructor.
+	Remove "dtr" member.
+	(struct notif_client) <alloc_event>: Return a unique_ptr.
+	(notif_event_xfree): Don't declare.
+	(notif_event_up): New typedef.
+	* remote-notif.c (remote_notif_ack, remote_notif_parse): Update.
+	(notif_event_xfree, do_notif_event_xfree): Remove.
+	(remote_notif_state_xfree): Update.
+
+2019-03-06  Tom Tromey  <tom@tromey.com>
+
 	* infrun.c (displaced_step_clear_cleanup): Now a
 	forward_scope_exit type.
 	(displaced_step_prepare_throw): Update.

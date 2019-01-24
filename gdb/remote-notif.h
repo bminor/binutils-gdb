@@ -20,16 +20,21 @@
 #ifndef REMOTE_NOTIF_H
 #define REMOTE_NOTIF_H
 
+#include <memory>
 #include "common/queue.h"
 
 /* An event of a type of async remote notification.  */
 
 struct notif_event
 {
-  /* Destructor.  Release everything from SELF, but not SELF
-     itself.  */
-  void (*dtr) (struct notif_event *self);
+  virtual ~notif_event ()
+  {
+  }
 };
+
+/* A unique pointer holding a notif_event.  */
+
+typedef std::unique_ptr<notif_event> notif_event_up;
 
 /* ID of the notif_client.  */
 
@@ -70,7 +75,7 @@ typedef struct notif_client
 				 struct notif_client *self);
 
   /* Allocate an event.  */
-  struct notif_event *(*alloc_event) (void);
+  notif_event_up (*alloc_event) ();
 
   /* Id of this notif_client.  */
   const enum REMOTE_NOTIF_ID id;
@@ -111,8 +116,6 @@ void remote_notif_ack (remote_target *remote, notif_client *nc,
 struct notif_event *remote_notif_parse (remote_target *remote,
 					notif_client *nc,
 					const char *buf);
-
-void notif_event_xfree (struct notif_event *event);
 
 void handle_notification (struct remote_notif_state *notif_state,
 			  const char *buf);

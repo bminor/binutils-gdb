@@ -52,8 +52,6 @@ static struct notif_client *notifs[] =
 
 gdb_static_assert (ARRAY_SIZE (notifs) == REMOTE_NOTIF_LAST);
 
-static void do_notif_event_xfree (void *arg);
-
 /* Parse the BUF for the expected notification NC, and send packet to
    acknowledge.  */
 
@@ -61,18 +59,14 @@ void
 remote_notif_ack (remote_target *remote,
 		  struct notif_client *nc, const char *buf)
 {
-  struct notif_event *event = nc->alloc_event ();
-  struct cleanup *old_chain
-    = make_cleanup (do_notif_event_xfree, event);
+  notif_event_up event = nc->alloc_event ();
 
   if (notif_debug)
     fprintf_unfiltered (gdb_stdlog, "notif: ack '%s'\n",
 			nc->ack_command);
 
-  nc->parse (remote, nc, buf, event);
-  nc->ack (remote, nc, buf, event);
-
-  discard_cleanups (old_chain);
+  nc->parse (remote, nc, buf, event.get ());
+  nc->ack (remote, nc, buf, event.release ());
 }
 
 /* Parse the BUF for the expected notification NC.  */
@@ -81,17 +75,14 @@ struct notif_event *
 remote_notif_parse (remote_target *remote,
 		    struct notif_client *nc, const char *buf)
 {
-  struct notif_event *event = nc->alloc_event ();
-  struct cleanup *old_chain
-    = make_cleanup (do_notif_event_xfree, event);
+  notif_event_up event = nc->alloc_event ();
 
   if (notif_debug)
     fprintf_unfiltered (gdb_stdlog, "notif: parse '%s'\n", nc->name);
 
-  nc->parse (remote, nc, buf, event);
+  nc->parse (remote, nc, buf, event.get ());
 
-  discard_cleanups (old_chain);
-  return event;
+  return event.release ();
 }
 
 DEFINE_QUEUE_P (notif_client_p);
@@ -216,25 +207,6 @@ handle_notification (struct remote_notif_state *state, const char *buf)
     }
 }
 
-/* Invoke destructor of EVENT and xfree it.  */
-
-void
-notif_event_xfree (struct notif_event *event)
-{
-  if (event != NULL && event->dtr != NULL)
-    event->dtr (event);
-
-  xfree (event);
-}
-
-/* Cleanup wrapper.  */
-
-static void
-do_notif_event_xfree (void *arg)
-{
-  notif_event_xfree ((struct notif_event *) arg);
-}
-
 /* Return an allocated remote_notif_state.  */
 
 struct remote_notif_state *
@@ -269,7 +241,7 @@ remote_notif_state_xfree (struct remote_notif_state *state)
     delete_async_event_handler (&state->get_pending_events_token);
 
   for (i = 0; i < REMOTE_NOTIF_LAST; i++)
-    notif_event_xfree (state->pending_event[i]);
+    delete state->pending_event[i];
 
   xfree (state);
 }
