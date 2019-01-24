@@ -127,35 +127,6 @@ show_pagination_enabled (struct ui_file *file, int from_tty,
 }
 
 
-/* Cleanup utilities.
-
-   These are not defined in cleanups.c (nor declared in cleanups.h)
-   because while they use the "cleanup API" they are not part of the
-   "cleanup API".  */
-
-/* This function is useful for cleanups.
-   Do
-
-   foo = xmalloc (...);
-   old_chain = make_cleanup (free_current_contents, &foo);
-
-   to arrange to free the object thus allocated.  */
-
-void
-free_current_contents (void *ptr)
-{
-  void **location = (void **) ptr;
-
-  if (location == NULL)
-    internal_error (__FILE__, __LINE__,
-		    _("free_current_contents: NULL pointer"));
-  if (*location != NULL)
-    {
-      xfree (*location);
-      *location = NULL;
-    }
-}
-
 
 
 /* Print a warning message.  The first argument STRING is the warning

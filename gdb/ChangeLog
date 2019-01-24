@@ -1,5 +1,10 @@
 2019-03-06  Tom Tromey  <tom@tromey.com>
 
+	* utils.h (free_current_contents): Don't declare.
+	* utils.c (free_current_contents): Remove.
+
+2019-03-06  Tom Tromey  <tom@tromey.com>
+
 	* top.c (quit_force): Update.
 	* main.c (captured_command_loop): Update.
 	* common/new-op.c (operator new): Update.

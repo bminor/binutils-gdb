@@ -260,8 +260,6 @@ struct htab_deleter
 /* A unique_ptr wrapper for htab_t.  */
 typedef std::unique_ptr<htab, htab_deleter> htab_up;
 
-extern void free_current_contents (void *);
-
 extern void init_page_info (void);
 
 /* Temporarily set BATCH_FLAG and the associated unlimited terminal size.
