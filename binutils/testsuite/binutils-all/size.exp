@@ -79,4 +79,24 @@ if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o]} then {
 	    pass "size -A"
 	}
     }
+
+    # Test size -G
+
+    set got [binutils_run $SIZE "$SIZEFLAGS -G $testfile"]
+
+    set want "($dec)\[ 	\]+($dec)\[ 	\]+($dec)\[ 	\]+($dec)\[ 	\]+${testfile}"
+
+    if ![regexp $want $got all text data bss dtot hextot] then {
+	fail "size -G"
+    } else {
+	if {$text < 8 || $data < 4} then {
+	    # The z80-coff port defaults to a "binary" like output
+	    # file format which does not include a data section.
+	    setup_xfail "z80-*-coff"
+	    fail "size -G"
+	} else {
+	    pass "size -G"
+	}
+    }
+
 }

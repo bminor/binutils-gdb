@@ -1,5 +1,24 @@
 2019-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* size.c (berkeley_format): Delete.
+	(enum output_format): New enum.
+	(selected_output_format): New variable.
+	(usage): Update to mention GNU format.
+	(main): Update to extract options, and select format as needed.
+	Handle GNU format where needed.
+	(berkeley_sum): Renamed to...
+	(berkeley_or_gnu_sum): ...this, and updated to handle both formats.
+	(berkeley_format): Renamed to...
+	(berkeley_or_gnu_format): ...this, and updated to handle both
+	formats.
+	(print_sizes): Handle GNU format.
+	* doc/binutils.texi (size): Document new GNU format.
+	* testsuite/binutils-all/size.exp: Add test of extended
+	functionality.
+	* NEWS: Mention new functionality.
+
+2019-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* doc/binutils.texi (size): Update example output for Berkeley
 	format output.
 

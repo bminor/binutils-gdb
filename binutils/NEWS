@@ -33,6 +33,11 @@ Changes in 2.32:
   3A1000 processor, The -march=loongson3a is an alias of -march=gs464 for
   compatibility.
 
+* The size tool now has a new output format '--format=GNU' or '-G'.  The
+  results are displayed in a similar manor to the default berkeley layout,
+  except read-only data is counted in the data column, not the text column.
+  Additionally the total is only included once.
+
 Changes in 2.31:
 
 * Add support for disassembling netronome Flow Processor (NFP) firmware files.
