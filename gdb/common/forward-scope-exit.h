@@ -95,7 +95,7 @@ class forward_scope_exit<Function, function, Res (Args...)>
 
 public:
   explicit forward_scope_exit (Args ...args)
-    : m_bind_function (std::bind (function, args...))
+    : m_bind_function (function, args...)
   {
     /* Nothing.  */
   }

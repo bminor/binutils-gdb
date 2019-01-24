@@ -1,3 +1,10 @@
+2019-01-24  Pedro Alves  <palves@redhat.com>
+
+	* common/forward-scope-exit.h
+	(forward_scope_exit::forward_scope_exit): Pass arguments to
+	m_bind_function directly, instead of creating a std::bind and
+	copying that.
+
 2019-01-24  Alan Hayward  <alan.hayward@arm.com>
 
 	* aarch64-tdep.c (aapcs_is_vfp_call_or_return_candidate_1): Check
