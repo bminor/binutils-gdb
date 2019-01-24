@@ -1198,8 +1198,10 @@ static const struct gdb_xml_element svr4_library_list_elements[] =
 static int
 svr4_parse_libraries (const char *document, struct svr4_library_list *list)
 {
-  struct cleanup *back_to = make_cleanup (svr4_free_library_list,
-					  &list->head);
+  auto cleanup = make_scope_exit ([&] ()
+    {
+      svr4_free_library_list (&list->head);
+    });
 
   memset (list, 0, sizeof (*list));
   list->tailp = &list->head;
@@ -1207,11 +1209,10 @@ svr4_parse_libraries (const char *document, struct svr4_library_list *list)
 			   svr4_library_list_elements, document, list) == 0)
     {
       /* Parsed successfully, keep the result.  */
-      discard_cleanups (back_to);
+      cleanup.release ();
       return 1;
     }
 
-  do_cleanups (back_to);
   return 0;
 }
 
@@ -1374,7 +1375,6 @@ svr4_current_sos_direct (struct svr4_info *info)
   CORE_ADDR lm;
   struct so_list *head = NULL;
   struct so_list **link_ptr = &head;
-  struct cleanup *back_to;
   int ignore_first;
   struct svr4_library_list library_list;
 
@@ -1412,7 +1412,10 @@ svr4_current_sos_direct (struct svr4_info *info)
   else
     ignore_first = 1;
 
-  back_to = make_cleanup (svr4_free_library_list, &head);
+  auto cleanup = make_scope_exit ([&] ()
+    {
+      svr4_free_library_list (&head);
+    });
 
   /* Walk the inferior's link map list, and build our list of
      `struct so_list' nodes.  */
@@ -1428,7 +1431,7 @@ svr4_current_sos_direct (struct svr4_info *info)
   if (lm)
     svr4_read_so_list (lm, 0, &link_ptr, 0);
 
-  discard_cleanups (back_to);
+  cleanup.release ();
 
   if (head == NULL)
     return svr4_default_sos ();

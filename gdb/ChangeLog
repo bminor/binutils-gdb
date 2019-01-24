@@ -1,5 +1,10 @@
 2019-03-06  Tom Tromey  <tom@tromey.com>
 
+	* solib-svr4.c (svr4_parse_libraries, svr4_current_sos_direct):
+	Use make_scope_exit.
+
+2019-03-06  Tom Tromey  <tom@tromey.com>
+
 	* solib-svr4.c (disable_probes_interface): Remove parameter.
 	(svr4_handle_solib_event): Use make_scope_exit.
 
