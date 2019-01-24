@@ -1,5 +1,29 @@
 2019-03-06  Tom Tromey  <tom@tromey.com>
 
+	* top.c (quit_force): Update.
+	* main.c (captured_command_loop): Update.
+	* common/new-op.c (operator new): Update.
+	* common/common-exceptions.c (struct catcher)
+	<save_cleanup_chain>: Remove member.
+	(exceptions_state_mc_init): Update.
+	(exception_try_scope_entry): Return nullptr.
+	(exception_try_scope_exit, exception_rethrow)
+	(throw_exception_sjlj, throw_exception_cxx): Update.
+	* common/cleanups.h (make_cleanup, make_cleanup_dtor)
+	(all_cleanups, do_cleanups, discard_cleanups)
+	(discard_final_cleanups, save_cleanups, save_final_cleanups)
+	(restore_cleanups, restore_final_cleanups): Don't declare.
+	(do_final_cleanups): Remove parameter.
+	* common/cleanups.c (cleanup_chain, make_cleanup)
+	(make_cleanup_dtor, all_cleanups, do_cleanups)
+	(discard_my_cleanups, discard_cleanups)
+	(discard_final_cleanups, save_my_cleanups, save_cleanups)
+	(save_final_cleanups, restore_my_cleanups, restore_cleanups)
+	(null_cleanup): Remove.
+	(do_final_cleanups): Remove parameter.
+
+2019-03-06  Tom Tromey  <tom@tromey.com>
+
 	* remote.c (remote_target::remote_parse_stop_reply): Use
 	unique_xmalloc_ptr.
 

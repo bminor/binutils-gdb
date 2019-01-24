@@ -330,14 +330,6 @@ captured_command_loop ()
   /* Now it's time to start the event loop.  */
   start_event_loop ();
 
-  /* FIXME: cagney/1999-11-05: A correct command_loop() implementaton
-     would clean things up (restoring the cleanup chain) to the state
-     they were just prior to the call.  Technically, this means that
-     the do_cleanups() below is redundant.  Unfortunately, many FUNCs
-     are not that well behaved.  do_cleanups should either be replaced
-     with a do_cleanups call (to cover the problem) or an assertion
-     check to detect bad FUNCs code.  */
-  do_cleanups (all_cleanups ());
   /* If the command_loop returned, normally (rather than threw an
      error) we try to quit.  If the quit is aborted, our caller
      catches the signal and restarts the command loop.  */

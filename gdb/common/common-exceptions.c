@@ -47,7 +47,6 @@ struct catcher
   jmp_buf buf;
   /* Status buffer belonging to the exception handler.  */
   struct gdb_exception exception;
-  struct cleanup *saved_cleanup_chain;
   /* Back link.  */
   struct catcher *prev;
 };
@@ -83,10 +82,6 @@ exceptions_state_mc_init (void)
   /* Start with no exception.  */
   new_catcher->exception = exception_none;
 
-  /* Prevent error/quit during FUNC from calling cleanups established
-     prior to here.  */
-  new_catcher->saved_cleanup_chain = save_cleanups ();
-
   /* Push this new catcher on the top.  */
   new_catcher->prev = current_catcher;
   current_catcher = new_catcher;
@@ -101,11 +96,6 @@ catcher_pop (void)
   struct catcher *old_catcher = current_catcher;
 
   current_catcher = old_catcher->prev;
-
-  /* Restore the cleanup chain, the error/quit messages, and the uiout
-     builder, to their original states.  */
-
-  restore_cleanups (old_catcher->saved_cleanup_chain);
 
   xfree (old_catcher);
 }
@@ -228,7 +218,7 @@ void *
 exception_try_scope_entry (void)
 {
   ++try_scope_depth;
-  return (void *) save_cleanups ();
+  return nullptr;
 }
 
 /* Called on exit of a TRY scope, either normal exit or exception
@@ -237,7 +227,6 @@ exception_try_scope_entry (void)
 void
 exception_try_scope_exit (void *saved_state)
 {
-  restore_cleanups ((struct cleanup *) saved_state);
   --try_scope_depth;
 }
 
@@ -248,9 +237,6 @@ exception_try_scope_exit (void *saved_state)
 void
 exception_rethrow (void)
 {
-  /* Run this scope's cleanups before re-throwing to the next
-     outermost scope.  */
-  do_cleanups (all_cleanups ());
   throw;
 }
 
@@ -269,8 +255,6 @@ gdb_exception_sliced_copy (struct gdb_exception *to, const struct gdb_exception 
 void
 throw_exception_sjlj (struct gdb_exception exception)
 {
-  do_cleanups (all_cleanups ());
-
   /* Jump to the nearest CATCH_SJLJ block, communicating REASON to
      that call via setjmp's return value.  Note that REASON can't be
      zero, by definition in common-exceptions.h.  */
@@ -286,8 +270,6 @@ throw_exception_sjlj (struct gdb_exception exception)
 static ATTRIBUTE_NORETURN void
 throw_exception_cxx (struct gdb_exception exception)
 {
-  do_cleanups (all_cleanups ());
-
   if (exception.reason == RETURN_QUIT)
     {
       gdb_exception_RETURN_MASK_QUIT ex;

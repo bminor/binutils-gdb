@@ -66,8 +66,6 @@ operator new (std::size_t sz)
 	}
       CATCH (ex, RETURN_MASK_ALL)
 	{
-	  do_cleanups (all_cleanups ());
-
 	  throw gdb_quit_bad_alloc (ex);
 	}
       END_CATCH

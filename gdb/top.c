@@ -1675,7 +1675,7 @@ quit_force (int *exit_arg, int from_tty)
   /* Do any final cleanups before exiting.  */
   TRY
     {
-      do_final_cleanups (all_cleanups ());
+      do_final_cleanups ();
     }
   CATCH (ex, RETURN_MASK_ALL)
     {
