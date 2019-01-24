@@ -1188,6 +1188,8 @@ linux_attach (unsigned long pid)
   ptid_t ptid = ptid_t (pid, pid, 0);
   int err;
 
+  proc = linux_add_process (pid, 1);
+
   /* Attach to PID.  We will check for other threads
      soon.  */
   err = linux_attach_lwp (ptid);
@@ -1197,8 +1199,6 @@ linux_attach (unsigned long pid)
 
       error ("Cannot attach to process %ld: %s", pid, reason.c_str ());
     }
-
-  proc = linux_add_process (pid, 1);
 
   /* Don't ignore the initial SIGSTOP if we just attached to this
      process.  It will be collected by wait shortly.  */
