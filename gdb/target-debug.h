@@ -209,20 +209,16 @@ target_debug_print_options (int options)
 }
 
 static void
-target_debug_print_signals (const unsigned char *sigs)
+target_debug_print_signals (gdb::array_view<const unsigned char> sigs)
 {
   fputs_unfiltered ("{", gdb_stdlog);
-  if (sigs != NULL)
-    {
-      int i;
 
-      for (i = 0; i < GDB_SIGNAL_LAST; i++)
-	if (sigs[i])
-	  {
-	    fprintf_unfiltered (gdb_stdlog, " %s",
-				gdb_signal_to_name ((enum gdb_signal) i));
-	  }
-    }
+  for (size_t i = 0; i < sigs.size (); i++)
+    if (sigs[i] != 0)
+      {
+	fprintf_unfiltered (gdb_stdlog, " %s",
+			    gdb_signal_to_name ((enum gdb_signal) i));
+      }
   fputs_unfiltered (" }", gdb_stdlog);
 }
 

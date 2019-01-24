@@ -45,7 +45,7 @@ public:
 
   ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
 
-  void pass_signals (int, const unsigned char *) override;
+  void pass_signals (gdb::array_view<const unsigned char>) override;
 
   enum target_xfer_status xfer_partial (enum target_object object,
 					const char *annex,

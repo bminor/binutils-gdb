@@ -637,14 +637,12 @@ struct target_ops
 
     /* Documentation of this routine is provided with the corresponding
        target_* macro.  */
-    virtual void pass_signals (int,
-			       const unsigned char * TARGET_DEBUG_PRINTER (target_debug_print_signals))
+    virtual void pass_signals (gdb::array_view<const unsigned char> TARGET_DEBUG_PRINTER (target_debug_print_signals))
       TARGET_DEFAULT_IGNORE ();
 
     /* Documentation of this routine is provided with the
        corresponding target_* function.  */
-    virtual void program_signals (int,
-				  const unsigned char * TARGET_DEBUG_PRINTER (target_debug_print_signals))
+    virtual void program_signals (gdb::array_view<const unsigned char> TARGET_DEBUG_PRINTER (target_debug_print_signals))
       TARGET_DEFAULT_IGNORE ();
 
     virtual bool thread_alive (ptid_t ptid)
@@ -1682,7 +1680,7 @@ extern int target_can_run ();
 
 /* Set list of signals to be handled in the target.
 
-   PASS_SIGNALS is an array of size NSIG, indexed by target signal number
+   PASS_SIGNALS is an array indexed by target signal number
    (enum gdb_signal).  For every signal whose entry in this array is
    non-zero, the target is allowed -but not required- to skip reporting
    arrival of the signal to the GDB core by returning from target_wait,
@@ -1692,12 +1690,13 @@ extern int target_can_run ();
    about to receive a signal, it needs to be reported in any case, even
    if mentioned in a previous target_pass_signals call.   */
 
-extern void target_pass_signals (int nsig, const unsigned char *pass_signals);
+extern void target_pass_signals
+  (gdb::array_view<const unsigned char> pass_signals);
 
 /* Set list of signals the target may pass to the inferior.  This
    directly maps to the "handle SIGNAL pass/nopass" setting.
 
-   PROGRAM_SIGNALS is an array of size NSIG, indexed by target signal
+   PROGRAM_SIGNALS is an array indexed by target signal
    number (enum gdb_signal).  For every signal whose entry in this
    array is non-zero, the target is allowed to pass the signal to the
    inferior.  Signals not present in the array shall be silently
@@ -1708,8 +1707,8 @@ extern void target_pass_signals (int nsig, const unsigned char *pass_signals);
    example, when detaching (as threads may have been suspended with
    pending signals not reported to GDB).  */
 
-extern void target_program_signals (int nsig,
-				    const unsigned char *program_signals);
+extern void target_program_signals
+  (gdb::array_view<const unsigned char> program_signals);
 
 /* Check to see if a thread is still alive.  */
 

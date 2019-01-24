@@ -789,7 +789,8 @@ static sigset_t pass_mask;
 
 /* Update signals to pass to the inferior.  */
 void
-linux_nat_target::pass_signals (int numsigs, const unsigned char *pass_signals)
+linux_nat_target::pass_signals
+  (gdb::array_view<const unsigned char> pass_signals)
 {
   int signo;
 
@@ -798,7 +799,7 @@ linux_nat_target::pass_signals (int numsigs, const unsigned char *pass_signals)
   for (signo = 1; signo < NSIG; signo++)
     {
       int target_signo = gdb_signal_from_host (signo);
-      if (target_signo < numsigs && pass_signals[target_signo])
+      if (target_signo < pass_signals.size () && pass_signals[target_signo])
         sigaddset (&pass_mask, signo);
     }
 }
@@ -1096,7 +1097,7 @@ linux_nat_target::create_inferior (const char *exec_file,
      we have to mask the async mode.  */
 
   /* Make sure we report all signals during startup.  */
-  pass_signals (0, NULL);
+  pass_signals ({});
 
   inf_ptrace_target::create_inferior (exec_file, allargs, env, from_tty);
 }
@@ -1186,7 +1187,7 @@ linux_nat_target::attach (const char *args, int from_tty)
   ptid_t ptid;
 
   /* Make sure we report all signals during attach.  */
-  pass_signals (0, NULL);
+  pass_signals ({});
 
   TRY
     {

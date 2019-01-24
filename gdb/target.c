@@ -2111,15 +2111,15 @@ make_scoped_defer_target_commit_resume ()
 }
 
 void
-target_pass_signals (int numsigs, const unsigned char *pass_signals)
+target_pass_signals (gdb::array_view<const unsigned char> pass_signals)
 {
-  current_top_target ()->pass_signals (numsigs, pass_signals);
+  current_top_target ()->pass_signals (pass_signals);
 }
 
 void
-target_program_signals (int numsigs, const unsigned char *program_signals)
+target_program_signals (gdb::array_view<const unsigned char> program_signals)
 {
-  current_top_target ()->program_signals (numsigs, program_signals);
+  current_top_target ()->program_signals (program_signals);
 }
 
 static int

@@ -1,5 +1,27 @@
 2019-01-24  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (signal_stop, signal_print, signal_program)
+	(signal_catch, signal_pass): Now arrays instead of pointers.
+	(update_signals_program_target, do_target_resume)
+	(signal_catch_update, handle_command, _initialize_infrun): Adjust.
+	* linux-nat.c (linux_nat_target::pass_signals)
+	(linux_nat_target::create_inferior, linux_nat_target::attach):
+	Adjust.
+	* linux-nat.h (linux_nat_target::pass_signals): Adjust.
+	* nto-procfs.c (nto_procfs_target::pass_signals): Adjust.
+	* procfs.c (procfs_target::pass_signals): Adjust.
+	* record-full.c (record_full_target::resume): Adjust.
+	* remote.c (remote_target::pass_signals)
+	(remote_target::program_signals): Adjust.
+	* target-debug.h (target_debug_print_signals): Now takes a
+	gdb::array_view as parameter.  Adjust.
+	* target.h (target_ops) <pass_signals, program_signals>: Replace
+	pointer and length parameters with gdb::array_view.
+	(target_pass_signals, target_program_signals): Likewise.
+	* target-delegates.c: Regenerate.
+
+2019-01-24  Pedro Alves  <palves@redhat.com>
+
 	* common/forward-scope-exit.h
 	(forward_scope_exit::forward_scope_exit): Pass arguments to
 	m_bind_function directly, instead of creating a std::bind and

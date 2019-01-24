@@ -62,8 +62,8 @@ struct dummy_target : public target_ops
   void follow_exec (struct inferior *arg0, char *arg1) override;
   int set_syscall_catchpoint (int arg0, bool arg1, int arg2, gdb::array_view<const int> arg3) override;
   void mourn_inferior () override;
-  void pass_signals (int arg0, const unsigned char * arg1) override;
-  void program_signals (int arg0, const unsigned char * arg1) override;
+  void pass_signals (gdb::array_view<const unsigned char> arg0) override;
+  void program_signals (gdb::array_view<const unsigned char> arg0) override;
   bool thread_alive (ptid_t arg0) override;
   void update_thread_list () override;
   const char *pid_to_str (ptid_t arg0) override;
@@ -229,8 +229,8 @@ struct debug_target : public target_ops
   void follow_exec (struct inferior *arg0, char *arg1) override;
   int set_syscall_catchpoint (int arg0, bool arg1, int arg2, gdb::array_view<const int> arg3) override;
   void mourn_inferior () override;
-  void pass_signals (int arg0, const unsigned char * arg1) override;
-  void program_signals (int arg0, const unsigned char * arg1) override;
+  void pass_signals (gdb::array_view<const unsigned char> arg0) override;
+  void program_signals (gdb::array_view<const unsigned char> arg0) override;
   bool thread_alive (ptid_t arg0) override;
   void update_thread_list () override;
   const char *pid_to_str (ptid_t arg0) override;
@@ -1659,48 +1659,44 @@ debug_target::mourn_inferior ()
 }
 
 void
-target_ops::pass_signals (int arg0, const unsigned char * arg1)
+target_ops::pass_signals (gdb::array_view<const unsigned char> arg0)
 {
-  this->beneath ()->pass_signals (arg0, arg1);
+  this->beneath ()->pass_signals (arg0);
 }
 
 void
-dummy_target::pass_signals (int arg0, const unsigned char * arg1)
+dummy_target::pass_signals (gdb::array_view<const unsigned char> arg0)
 {
 }
 
 void
-debug_target::pass_signals (int arg0, const unsigned char * arg1)
+debug_target::pass_signals (gdb::array_view<const unsigned char> arg0)
 {
   fprintf_unfiltered (gdb_stdlog, "-> %s->pass_signals (...)\n", this->beneath ()->shortname ());
-  this->beneath ()->pass_signals (arg0, arg1);
+  this->beneath ()->pass_signals (arg0);
   fprintf_unfiltered (gdb_stdlog, "<- %s->pass_signals (", this->beneath ()->shortname ());
-  target_debug_print_int (arg0);
-  fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_signals (arg1);
+  target_debug_print_signals (arg0);
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 
 void
-target_ops::program_signals (int arg0, const unsigned char * arg1)
+target_ops::program_signals (gdb::array_view<const unsigned char> arg0)
 {
-  this->beneath ()->program_signals (arg0, arg1);
+  this->beneath ()->program_signals (arg0);
 }
 
 void
-dummy_target::program_signals (int arg0, const unsigned char * arg1)
+dummy_target::program_signals (gdb::array_view<const unsigned char> arg0)
 {
 }
 
 void
-debug_target::program_signals (int arg0, const unsigned char * arg1)
+debug_target::program_signals (gdb::array_view<const unsigned char> arg0)
 {
   fprintf_unfiltered (gdb_stdlog, "-> %s->program_signals (...)\n", this->beneath ()->shortname ());
-  this->beneath ()->program_signals (arg0, arg1);
+  this->beneath ()->program_signals (arg0);
   fprintf_unfiltered (gdb_stdlog, "<- %s->program_signals (", this->beneath ()->shortname ());
-  target_debug_print_int (arg0);
-  fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_signals (arg1);
+  target_debug_print_signals (arg0);
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 

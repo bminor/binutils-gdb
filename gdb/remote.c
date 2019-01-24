@@ -472,12 +472,12 @@ public:
 
   void mourn_inferior () override;
 
-  void pass_signals (int, const unsigned char *) override;
+  void pass_signals (gdb::array_view<const unsigned char>) override;
 
   int set_syscall_catchpoint (int, bool, int,
 			      gdb::array_view<const int>) override;
 
-  void program_signals (int, const unsigned char *) override;
+  void program_signals (gdb::array_view<const unsigned char>) override;
 
   bool thread_alive (ptid_t ptid) override;
 
@@ -2560,16 +2560,16 @@ record_currthread (struct remote_state *rs, ptid_t currthread)
    it can simply pass through to the inferior without reporting.  */
 
 void
-remote_target::pass_signals (int numsigs, const unsigned char *pass_signals)
+remote_target::pass_signals (gdb::array_view<const unsigned char> pass_signals)
 {
   if (packet_support (PACKET_QPassSignals) != PACKET_DISABLE)
     {
       char *pass_packet, *p;
-      int count = 0, i;
+      int count = 0;
       struct remote_state *rs = get_remote_state ();
 
-      gdb_assert (numsigs < 256);
-      for (i = 0; i < numsigs; i++)
+      gdb_assert (pass_signals.size () < 256);
+      for (size_t i = 0; i < pass_signals.size (); i++)
 	{
 	  if (pass_signals[i])
 	    count++;
@@ -2577,7 +2577,7 @@ remote_target::pass_signals (int numsigs, const unsigned char *pass_signals)
       pass_packet = (char *) xmalloc (count * 3 + strlen ("QPassSignals:") + 1);
       strcpy (pass_packet, "QPassSignals:");
       p = pass_packet + strlen (pass_packet);
-      for (i = 0; i < numsigs; i++)
+      for (size_t i = 0; i < pass_signals.size (); i++)
 	{
 	  if (pass_signals[i])
 	    {
@@ -2686,16 +2686,16 @@ remote_target::set_syscall_catchpoint (int pid, bool needed, int any_count,
    signals it should pass through to the inferior when detaching.  */
 
 void
-remote_target::program_signals (int numsigs, const unsigned char *signals)
+remote_target::program_signals (gdb::array_view<const unsigned char> signals)
 {
   if (packet_support (PACKET_QProgramSignals) != PACKET_DISABLE)
     {
       char *packet, *p;
-      int count = 0, i;
+      int count = 0;
       struct remote_state *rs = get_remote_state ();
 
-      gdb_assert (numsigs < 256);
-      for (i = 0; i < numsigs; i++)
+      gdb_assert (signals.size () < 256);
+      for (size_t i = 0; i < signals.size (); i++)
 	{
 	  if (signals[i])
 	    count++;
@@ -2703,7 +2703,7 @@ remote_target::program_signals (int numsigs, const unsigned char *signals)
       packet = (char *) xmalloc (count * 3 + strlen ("QProgramSignals:") + 1);
       strcpy (packet, "QProgramSignals:");
       p = packet + strlen (packet);
-      for (i = 0; i < numsigs; i++)
+      for (size_t i = 0; i < signals.size (); i++)
 	{
 	  if (signal_pass_state (i))
 	    {
@@ -4796,7 +4796,7 @@ remote_target::start_remote (int from_tty, int extended_p)
       gdb_assert (wait_status == NULL);
 
       /* Report all signals during attach/startup.  */
-      pass_signals (0, NULL);
+      pass_signals ({});
 
       /* If there are already stopped threads, mark them stopped and
 	 report their stops before giving the prompt to the user.  */

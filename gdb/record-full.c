@@ -1098,7 +1098,7 @@ record_full_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
         }
 
       /* Make sure the target beneath reports all signals.  */
-      target_pass_signals (0, NULL);
+      target_pass_signals ({});
 
       this->beneath ()->resume (ptid, step, signal);
     }

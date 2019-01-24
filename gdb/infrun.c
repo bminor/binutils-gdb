@@ -306,20 +306,19 @@ update_observer_mode (void)
 
 /* Tables of how to react to signals; the user sets them.  */
 
-static unsigned char *signal_stop;
-static unsigned char *signal_print;
-static unsigned char *signal_program;
+static unsigned char signal_stop[GDB_SIGNAL_LAST];
+static unsigned char signal_print[GDB_SIGNAL_LAST];
+static unsigned char signal_program[GDB_SIGNAL_LAST];
 
 /* Table of signals that are registered with "catch signal".  A
    non-zero entry indicates that the signal is caught by some "catch
-   signal" command.  This has size GDB_SIGNAL_LAST, to accommodate all
-   signals.  */
-static unsigned char *signal_catch;
+   signal" command.  */
+static unsigned char signal_catch[GDB_SIGNAL_LAST];
 
 /* Table of signals that the target may silently handle.
    This is automatically determined from the flags above,
    and simply cached here.  */
-static unsigned char *signal_pass;
+static unsigned char signal_pass[GDB_SIGNAL_LAST];
 
 #define SET_SIGS(nsigs,sigs,flags) \
   do { \
@@ -343,7 +342,7 @@ static unsigned char *signal_pass;
 void
 update_signals_program_target (void)
 {
-  target_program_signals ((int) GDB_SIGNAL_LAST, signal_program);
+  target_program_signals (signal_program);
 }
 
 /* Value to pass to target_resume() to cause all threads to resume.  */
@@ -2219,9 +2218,9 @@ do_target_resume (ptid_t resume_ptid, int step, enum gdb_signal sig)
        valid.  */
   if (step_over_info_valid_p ()
       || displaced_step_in_progress (tp->inf))
-    target_pass_signals (0, NULL);
+    target_pass_signals ({});
   else
-    target_pass_signals ((int) GDB_SIGNAL_LAST, signal_pass);
+    target_pass_signals (signal_pass);
 
   target_resume (resume_ptid, step, sig);
 
@@ -8251,7 +8250,7 @@ signal_catch_update (const unsigned int *info)
   for (i = 0; i < GDB_SIGNAL_LAST; ++i)
     signal_catch[i] = info[i] > 0;
   signal_cache_update (-1);
-  target_pass_signals ((int) GDB_SIGNAL_LAST, signal_pass);
+  target_pass_signals (signal_pass);
 }
 
 static void
@@ -8287,8 +8286,6 @@ handle_command (const char *args, int from_tty)
   int sigfirst, siglast;
   enum gdb_signal oursig;
   int allsigs;
-  int nsigs;
-  unsigned char *sigs;
 
   if (args == NULL)
     {
@@ -8297,9 +8294,8 @@ handle_command (const char *args, int from_tty)
 
   /* Allocate and zero an array of flags for which signals to handle.  */
 
-  nsigs = (int) GDB_SIGNAL_LAST;
-  sigs = (unsigned char *) alloca (nsigs);
-  memset (sigs, 0, nsigs);
+  const size_t nsigs = GDB_SIGNAL_LAST;
+  unsigned char sigs[nsigs] {};
 
   /* Break the command line up into args.  */
 
@@ -8436,8 +8432,8 @@ Are you sure you want to change it? "),
     if (sigs[signum])
       {
 	signal_cache_update (-1);
-	target_pass_signals ((int) GDB_SIGNAL_LAST, signal_pass);
-	target_program_signals ((int) GDB_SIGNAL_LAST, signal_program);
+	target_pass_signals (signal_pass);
+	target_program_signals (signal_program);
 
 	if (from_tty)
 	  {
@@ -8963,8 +8959,6 @@ infrun_async_inferior_event_handler (gdb_client_data data)
 void
 _initialize_infrun (void)
 {
-  int i;
-  int numsigs;
   struct cmd_list_element *c;
 
   /* Register extra event sources in the event loop.  */
@@ -9046,13 +9040,7 @@ leave it stopped or free to run as needed."),
 			   &setlist,
 			   &showlist);
 
-  numsigs = (int) GDB_SIGNAL_LAST;
-  signal_stop = XNEWVEC (unsigned char, numsigs);
-  signal_print = XNEWVEC (unsigned char, numsigs);
-  signal_program = XNEWVEC (unsigned char, numsigs);
-  signal_catch = XNEWVEC (unsigned char, numsigs);
-  signal_pass = XNEWVEC (unsigned char, numsigs);
-  for (i = 0; i < numsigs; i++)
+  for (size_t i = 0; i < GDB_SIGNAL_LAST; i++)
     {
       signal_stop[i] = 1;
       signal_print[i] = 1;

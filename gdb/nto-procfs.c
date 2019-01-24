@@ -109,7 +109,7 @@ struct nto_procfs_target : public inf_child_target
 
   void mourn_inferior () override;
 
-  void pass_signals (int, const unsigned char *) override;
+  void pass_signals (gdb::array_view<const unsigned char>) override;
 
   bool thread_alive (ptid_t ptid) override;
 
@@ -1442,8 +1442,8 @@ nto_procfs_target::store_registers (struct regcache *regcache, int regno)
 /* Set list of signals to be handled in the target.  */
 
 void
-nto_procfs_target::pass_signals (int numsigs,
-				 const unsigned char *pass_signals)
+nto_procfs_target::pass_signals
+  (gdb::array_view<const unsigned char> pass_signals)
 {
   int signo;
 
@@ -1452,7 +1452,7 @@ nto_procfs_target::pass_signals (int numsigs,
   for (signo = 1; signo < NSIG; signo++)
     {
       int target_signo = gdb_signal_from_host (signo);
-      if (target_signo < numsigs && pass_signals[target_signo])
+      if (target_signo < pass_signals.size () && pass_signals[target_signo])
         sigdelset (&run.trace, signo);
     }
 }
