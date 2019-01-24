@@ -1,5 +1,12 @@
 2019-03-06  Tom Tromey  <tom@tromey.com>
 
+	* nat/linux-namespaces.c (linux_mntns_access_fs): Use SCOPE_EXIT.
+	* common/filestuff.h (make_cleanup_close): Don't declare.
+	* common/filestuff.c (do_close_cleanup, make_cleanup_close):
+	Remove.
+
+2019-03-06  Tom Tromey  <tom@tromey.com>
+
 	* solib-aix.c: Use make_scope_exit.
 
 2019-03-06  Tom Tromey  <tom@tromey.com>
