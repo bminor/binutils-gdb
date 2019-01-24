@@ -1224,6 +1224,10 @@ aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
 
 	for (int i = 0; i < TYPE_NFIELDS (type); i++)
 	  {
+	    /* Ignore any static fields.  */
+	    if (field_is_static (&TYPE_FIELD (type, i)))
+	      continue;
+
 	    struct type *member = check_typedef (TYPE_FIELD_TYPE (type, i));
 
 	    int sub_count = aapcs_is_vfp_call_or_return_candidate_1
@@ -1502,6 +1506,10 @@ pass_in_v_vfp_candidate (struct gdbarch *gdbarch, struct regcache *regcache,
     case TYPE_CODE_UNION:
       for (int i = 0; i < TYPE_NFIELDS (arg_type); i++)
 	{
+	  /* Don't include static fields.  */
+	  if (field_is_static (&TYPE_FIELD (arg_type, i)))
+	    continue;
+
 	  struct value *field = value_primitive_field (arg, 0, i, arg_type);
 	  struct type *field_type = check_typedef (value_type (field));
 
