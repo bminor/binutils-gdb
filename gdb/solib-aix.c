@@ -26,6 +26,7 @@
 #include "xcoffread.h"
 #include "observable.h"
 #include "gdbcmd.h"
+#include "common/scope-exit.h"
 
 /* Variable controlling the output of the debugging traces for
    this module.  */
@@ -242,18 +243,19 @@ static VEC (lm_info_aix_p) *
 solib_aix_parse_libraries (const char *library)
 {
   VEC (lm_info_aix_p) *result = NULL;
-  struct cleanup *back_to = make_cleanup (solib_aix_free_library_list,
-                                          &result);
+  auto cleanup = make_scope_exit ([&] ()
+    {
+      solib_aix_free_library_list (&result);
+    });
 
   if (gdb_xml_parse_quick (_("aix library list"), "library-list-aix.dtd",
                            library_list_elements, library, &result) == 0)
     {
       /* Parsed successfully, keep the result.  */
-      discard_cleanups (back_to);
+      cleanup.release ();
       return result;
     }
 
-  do_cleanups (back_to);
   return NULL;
 }
 

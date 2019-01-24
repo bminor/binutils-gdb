@@ -1,5 +1,9 @@
 2019-03-06  Tom Tromey  <tom@tromey.com>
 
+	* solib-aix.c: Use make_scope_exit.
+
+2019-03-06  Tom Tromey  <tom@tromey.com>
+
 	* solib-svr4.c (svr4_parse_libraries, svr4_current_sos_direct):
 	Use make_scope_exit.
 
