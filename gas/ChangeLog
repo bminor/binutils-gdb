@@ -1,3 +1,9 @@
+2019-01-25  Alan Modra  <amodra@gmail.com>
+
+	PR 20902
+	PR 24125
+	* read.c (stringer): Delete assertion.
+
 2019-01-21  Nick Clifton  <nickc@redhat.com>
 
 	* po/uk.po: Updated Ukranian translation.

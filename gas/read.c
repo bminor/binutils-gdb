@@ -5364,8 +5364,6 @@ stringer (int bits_appendzero)
 	  if (append_zero)
 	    stringer_append_char (0, bitsize);
 
-	  know (input_line_pointer[-1] == '\"');
-
 #if !defined(NO_LISTING) && defined (OBJ_ELF)
 	  /* In ELF, when gcc is emitting DWARF 1 debugging output, it
 	     will emit .string with a filename in the .debug section
