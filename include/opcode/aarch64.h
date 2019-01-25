@@ -275,7 +275,6 @@ enum aarch64_opnd
   AARCH64_OPND_ADDR_PCREL26,	/* 26-bit PC-relative address for e.g. BL.  */
 
   AARCH64_OPND_ADDR_SIMPLE,	/* Address of ld/st exclusive.  */
-  AARCH64_OPND_ADDR_SIMPLE_2,	/* Address of ld/stgv.  */
   AARCH64_OPND_ADDR_REGOFF,	/* Address of register offset.  */
   AARCH64_OPND_ADDR_SIMM7,	/* Address of signed 7-bit immediate.  */
   AARCH64_OPND_ADDR_SIMM9,	/* Address of signed 9-bit immediate.  */
@@ -562,7 +561,6 @@ enum aarch64_insn_class
   ldstnapair_offs,
   ldstpair_off,
   ldstpair_indexed,
-  ldstgv_indexed,
   loadlit,
   log_imm,
   log_shift,

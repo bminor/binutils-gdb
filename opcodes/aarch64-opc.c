@@ -1602,7 +1602,6 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  break;
 	case ldst_imm9:
 	case ldstpair_indexed:
-	case ldstgv_indexed:
 	case asisdlsep:
 	case asisdlsop:
 	  if (opnd->addr.writeback == 0)
@@ -3555,11 +3554,6 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	}
       else
 	snprintf (buf, size, "[%s]", name);
-      break;
-
-    case AARCH64_OPND_ADDR_SIMPLE_2:
-      name = get_64bit_int_reg_name (opnd->addr.base_regno, 1);
-      snprintf (buf, size, "[%s]!", name);
       break;
 
     case AARCH64_OPND_ADDR_REGOFF:

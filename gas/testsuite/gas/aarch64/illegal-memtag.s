@@ -20,14 +20,6 @@ func:
 	stgp x1, x2, [x3, #33]
 	stgp x1, x2, [x3, #-1025]
 
-	# LDGV : Warn for Xt == Xn
-	# STGV : Sould not warn for above
-	ldgv x1, [x1]!
-	stgv x1, [x1]!
-	# Error for no writeback
-	ldgv x1, [x2]
-	stgv x1, [x2]
-
 	# Illegal SP/XZR registers
 	irg xzr, x2, x3
 	irg x1, xzr, x3
@@ -54,7 +46,3 @@ func:
 	stgp x0, x0, [xzr]
 	ldg sp, [x0, #16]
 	ldg x0, [xzr, #16]
-	ldgv sp, [x1]!
-	ldgv x0, [xzr]!
-	stgv sp, [x1]!
-	stgv x0, [xzr]!
