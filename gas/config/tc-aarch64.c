@@ -3381,7 +3381,6 @@ parse_shifter_operand_reloc (char **str, aarch64_opnd_info *operand,
      [base,Wm,(S|U)XTW {#imm}]
    Pre-indexed
      [base,#imm]!
-     [base]!			// in ld/stgv
    Post-indexed
      [base],#imm
      [base],Xm			 // in SIMD ld/st structure
@@ -3690,11 +3689,10 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
     }
 
   /* If at this point neither .preind nor .postind is set, we have a
-     bare [Rn]{!}; reject [Rn]! except for ld/stgv but accept [Rn]
-     as a shorthand for [Rn,#0].  */
+     bare [Rn]{!}; reject [Rn]! accept [Rn] as a shorthand for [Rn,#0].  */
   if (operand->addr.preind == 0 && operand->addr.postind == 0)
     {
-      if (operand->type != AARCH64_OPND_ADDR_SIMPLE_2 && operand->addr.writeback)
+      if (operand->addr.writeback)
 	{
 	  /* Reject [Rn]!   */
 	  set_syntax_error (_("missing offset in the pre-indexed address"));
@@ -6148,7 +6146,6 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_ADDR_SIMPLE:
-	case AARCH64_OPND_ADDR_SIMPLE_2:
 	case AARCH64_OPND_SIMD_ADDR_SIMPLE:
 	  {
 	    /* [<Xn|SP>{, #<simm>}]  */
@@ -6158,8 +6155,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    po_misc_or_fail (parse_address (&str, info));
 	    if (info->addr.pcrel || info->addr.offset.is_reg
 		|| !info->addr.preind || info->addr.postind
-		|| (info->addr.writeback
-		   && operands[i] != AARCH64_OPND_ADDR_SIMPLE_2))
+		|| info->addr.writeback)
 	      {
 		set_syntax_error (_("invalid addressing mode"));
 		goto failure;
@@ -6182,8 +6178,6 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 		  }
 	      }
 	    po_char_or_fail (']');
-	    if (operands[i] == AARCH64_OPND_ADDR_SIMPLE_2)
-	      po_char_or_fail ('!');
 	    break;
 	  }
 
@@ -6780,13 +6774,6 @@ warn_unpredictable_ldst (aarch64_instruction *instr, char *str)
 	  && opnds[1].addr.base_regno != REG_SP
 	  && opnds[1].addr.writeback)
 	as_warn (_("unpredictable transfer with writeback -- `%s'"), str);
-      break;
-
-    case ldstgv_indexed:
-      /* Load operations must load different registers.  */
-      if ((opcode->opcode & (1 << 22))
-	  && opnds[0].reg.regno == opnds[1].addr.base_regno)
-	    as_warn (_("unpredictable load of register -- `%s'"), str);
       break;
 
     case ldstpair_off:

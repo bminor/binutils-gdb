@@ -1,3 +1,19 @@
+2019-01-25  Sudakshina Das  <sudi.das@arm.com>
+	    Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+
+	* aarch64-asm.c (aarch64_ins_addr_simple_2): Remove.
+	* aarch64-asm.h (ins_addr_simple_2): Likeiwse.
+	* aarch64-dis.c (aarch64_ext_addr_simple_2): Likewise.
+	* aarch64-dis.h (ext_addr_simple_2): Likewise.
+	* aarch64-opc.c (operand_general_constraint_met_p): Remove
+	case for ldstgv_indexed.
+	(aarch64_print_operand): Remove case for AARCH64_OPND_ADDR_SIMPLE_2.
+	* aarch64-tbl.h (struct aarch64_opcode): Remove ldgv and stgv.
+	(AARCH64_OPERANDS): Remove ADDR_SIMPLE_2.
+	* aarch64-asm-2.c: Regenerated.
+	* aarch64-dis-2.c: Regenerated.
+	* aarch64-opc-2.c: Regenerated.
+
 2019-01-23  Nick Clifton  <nickc@redhat.com>
 
 	* po/pt_BR.po: Updated Brazilian Portuguese translation.

@@ -1,3 +1,16 @@
+2019-01-25  Sudakshina Das  <sudi.das@arm.com>
+	    Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+
+	* config/tc-aarch64.c (parse_address_main): Remove support for
+	[base]! address expression.
+	(parse_operands): Remove support for AARCH64_OPND_ADDR_SIMPLE_2.
+	(warn_unpredictable_ldst): Remove support for ldstgv_indexed.
+	* testsuite/gas/aarch64/armv8_5-a-memtag.d: Remove tests for ldgv
+	and stgv.
+	* testsuite/gas/aarch64/armv8_5-a-memtag.s: Likewise.
+	* testsuite/gas/aarch64/illegal-memtag.l: Likewise.
+	* testsuite/gas/aarch64/illegal-memtag.s: Likewise.
+
 2019-01-25  Wu Heng  <wu.heng@zte.com.cn>
 
 	PR gas/23940

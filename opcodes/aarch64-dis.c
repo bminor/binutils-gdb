@@ -985,23 +985,6 @@ aarch64_ext_addr_simple (const aarch64_operand *self ATTRIBUTE_UNUSED,
   return TRUE;
 }
 
-
-
-/* Decode the address operand for e.g. STGV <Xt>, [<Xn|SP>]!.  */
-bfd_boolean
-aarch64_ext_addr_simple_2 (const aarch64_operand *self ATTRIBUTE_UNUSED,
-			   aarch64_opnd_info *info,
-			   aarch64_insn code,
-			   const aarch64_inst *inst ATTRIBUTE_UNUSED,
-			   aarch64_operand_error *errors ATTRIBUTE_UNUSED)
-{
-  /* Rn */
-  info->addr.base_regno = extract_field (FLD_Rn, code, 0);
-  info->addr.writeback = 1;
-  info->addr.preind = 1;
-  return TRUE;
-}
-
 /* Decode the address operand for e.g.
      stlur <Xt>, [<Xn|SP>{, <amount>}].  */
 bfd_boolean

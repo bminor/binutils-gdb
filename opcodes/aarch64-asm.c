@@ -618,17 +618,6 @@ aarch64_ins_addr_simple (const aarch64_operand *self ATTRIBUTE_UNUSED,
   return TRUE;
 }
 
-/* Encode the address operand for e.g. STGV <Xt>, [<Xn|SP>]!.  */
-bfd_boolean
-aarch64_ins_addr_simple_2 (const aarch64_operand *self,
-			   const aarch64_opnd_info *info, aarch64_insn *code,
-			   const aarch64_inst *inst,
-			   aarch64_operand_error *errors)
-
-{
-  return aarch64_ins_addr_simple (self, info, code, inst, errors);
-}
-
 /* Encode the address operand for e.g.
      STR <Qt>, [<Xn|SP>, <R><m>{, <extend> {<amount>}}].  */
 bfd_boolean

@@ -30,14 +30,6 @@ func:
 	\op [sp], #-4096
 	.endm
 
-	.macro expand_ldg_bulk op
-	\op x27, [x0]!
-	\op x0, [x27]!
-	\op x25, [x27]!
-	\op x0, [sp]!
-	\op xzr, [x0]!
-	.endm
-
 	# IRG
 	expand_3_reg irg
 	irg sp, x0
@@ -106,8 +98,3 @@ func:
 	ldg xzr, [x0, #0]
 	ldg x0, [x0, #4080]
 	ldg x0, [x0, #-4096]
-
-	expand_ldg_bulk ldgv
-
-	stgv x0, [x0]!
-	expand_ldg_bulk stgv
