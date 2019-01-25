@@ -1,5 +1,13 @@
 2019-01-25  Nick Clifton  <nickc@redhat.com>
 
+	PR 24131
+	* readelf.c (process_notes_at): Prevent an illegal memory access
+	when the note's namesize is zero.
+	(decode_tic6x_unwind_bytecode): Add code to handle the case where
+	no registers are specified in a frame pop instruction.
+
+2019-01-25  Nick Clifton  <nickc@redhat.com>
+
 	* po/bg.po: Updated Bulgarian translation.
 
 2019-01-23  Nick Clifton  <nickc@redhat.com>

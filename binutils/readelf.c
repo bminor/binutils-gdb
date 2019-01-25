@@ -8852,21 +8852,28 @@ decode_tic6x_unwind_bytecode (Filedata *                 filedata,
 	    }
 
 	  printf (_("pop frame {"));
-	  reg = nregs - 1;
-	  for (i = i * 2; i > 0; i--)
+	  if (nregs == 0)
 	    {
-	      if (regpos[reg].offset == i - 1)
+	      printf (_("*corrupt* - no registers specified"));
+	    }
+	  else
+	    {
+	      reg = nregs - 1;
+	      for (i = i * 2; i > 0; i--)
 		{
-		  name = tic6x_unwind_regnames[regpos[reg].reg];
-		  if (reg > 0)
-		    reg--;
-		}
-	      else
-		name = _("[pad]");
+		  if (regpos[reg].offset == i - 1)
+		    {
+		      name = tic6x_unwind_regnames[regpos[reg].reg];
+		      if (reg > 0)
+			reg--;
+		    }
+		  else
+		    name = _("[pad]");
 
-	      fputs (name, stdout);
-	      if (i > 1)
-		printf (", ");
+		  fputs (name, stdout);
+		  if (i > 1)
+		    printf (", ");
+		}
 	    }
 
 	  printf ("}");
@@ -18741,7 +18748,7 @@ process_notes_at (Filedata *           filedata,
 	 one version of Linux (RedHat 6.0) generates corefiles that don't
 	 comply with the ELF spec by failing to include the null byte in
 	 namesz.  */
-      if (inote.namedata[inote.namesz - 1] != '\0')
+      if (inote.namesz > 0 && inote.namedata[inote.namesz - 1] != '\0')
 	{
 	  if ((size_t) (inote.descdata - inote.namedata) == inote.namesz)
 	    {
