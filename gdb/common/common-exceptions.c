@@ -54,26 +54,6 @@ struct catcher
 /* Where to go for throw_exception().  */
 static struct catcher *current_catcher;
 
-#if GDB_XCPT == GDB_XCPT_SJMP
-
-/* Return length of current_catcher list.  */
-
-static int
-catcher_list_size (void)
-{
-  int size;
-  struct catcher *catcher;
-
-  for (size = 0, catcher = current_catcher;
-       catcher != NULL;
-       catcher = catcher->prev)
-    ++size;
-
-  return size;
-}
-
-#endif
-
 jmp_buf *
 exceptions_state_mc_init (void)
 {
@@ -205,8 +185,6 @@ exceptions_state_mc_action_iter_1 (void)
   return exceptions_state_mc (CATCH_ITER_1);
 }
 
-#if GDB_XCPT != GDB_XCPT_SJMP
-
 /* How many nested TRY blocks we have.  See exception_messages and
    throw_it.  */
 
@@ -248,8 +226,6 @@ gdb_exception_sliced_copy (struct gdb_exception *to, const struct gdb_exception 
   *to = *from;
 }
 
-#endif /* !GDB_XCPT_SJMP */
-
 /* Return EXCEPTION to the nearest containing CATCH_SJLJ block.  */
 
 void
@@ -262,8 +238,6 @@ throw_exception_sjlj (struct gdb_exception exception)
   current_catcher->exception = exception;
   longjmp (current_catcher->buf, exception.reason);
 }
-
-#if GDB_XCPT != GDB_XCPT_SJMP
 
 /* Implementation of throw_exception that uses C++ try/catch.  */
 
@@ -288,16 +262,10 @@ throw_exception_cxx (struct gdb_exception exception)
     gdb_assert_not_reached ("invalid return reason");
 }
 
-#endif
-
 void
 throw_exception (struct gdb_exception exception)
 {
-#if GDB_XCPT == GDB_XCPT_SJMP
-  throw_exception_sjlj (exception);
-#else
   throw_exception_cxx (exception);
-#endif
 }
 
 /* A stack of exception messages.
@@ -321,11 +289,7 @@ throw_it (enum return_reason reason, enum errors error, const char *fmt,
 {
   struct gdb_exception e;
   char *new_message;
-#if GDB_XCPT == GDB_XCPT_SJMP
-  int depth = catcher_list_size ();
-#else
   int depth = try_scope_depth;
-#endif
 
   gdb_assert (depth > 0);
 
