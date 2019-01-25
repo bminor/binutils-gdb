@@ -20,6 +20,10 @@ func:
 	stgp x1, x2, [x3, #33]
 	stgp x1, x2, [x3, #-1025]
 
+	# STZGM
+	stzgm x2, [x3, #16]
+	stzgm x4, [x5, #16]!
+
 	# Illegal SP/XZR registers
 	irg xzr, x2, x3
 	irg x1, xzr, x3
@@ -46,3 +50,5 @@ func:
 	stgp x0, x0, [xzr]
 	ldg sp, [x0, #16]
 	ldg x0, [xzr, #16]
+	stzgm x0, [xzr]
+	stzgm sp, [x3]
