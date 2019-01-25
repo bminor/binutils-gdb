@@ -6772,6 +6772,8 @@ warn_unpredictable_ldst (aarch64_instruction *instr, char *str)
 	   == AARCH64_OPND_CLASS_INT_REG)
 	  && opnds[0].reg.regno == opnds[1].addr.base_regno
 	  && opnds[1].addr.base_regno != REG_SP
+	  /* Exempt STG/STZG/ST2G/STZ2G.  */
+	  && !(opnds[1].type == AARCH64_OPND_ADDR_SIMM13)
 	  && opnds[1].addr.writeback)
 	as_warn (_("unpredictable transfer with writeback -- `%s'"), str);
       break;
