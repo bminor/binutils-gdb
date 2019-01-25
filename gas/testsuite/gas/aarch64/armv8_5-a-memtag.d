@@ -55,50 +55,66 @@ Disassembly of section \.text:
 .*:	badb037f 	cmpp	x27, x27
 .*:	bac003ff 	cmpp	sp, x0
 .*:	badf001f 	cmpp	x0, sp
-.*:	d920081f 	stg	\[x0\]
-.*:	d9200b7f 	stg	\[x27\]
-.*:	d93fb81f 	stg	\[x0, #-80\]
-.*:	d9200c1f 	stg	\[x0, #0\]!
-.*:	d920ac1f 	stg	\[x0, #160\]!
-.*:	d920041f 	stg	\[x0\], #0
-.*:	d93a641f 	stg	\[x0\], #-1440
-.*:	d92ffbff 	stg	\[sp, #4080\]
-.*:	d9300bff 	stg	\[sp, #-4096\]
-.*:	d92fffff 	stg	\[sp, #4080\]!
-.*:	d93007ff 	stg	\[sp\], #-4096
-.*:	d960081f 	stzg	\[x0\]
-.*:	d9600b7f 	stzg	\[x27\]
-.*:	d97fb81f 	stzg	\[x0, #-80\]
-.*:	d9600c1f 	stzg	\[x0, #0\]!
-.*:	d960ac1f 	stzg	\[x0, #160\]!
-.*:	d960041f 	stzg	\[x0\], #0
-.*:	d97a641f 	stzg	\[x0\], #-1440
-.*:	d96ffbff 	stzg	\[sp, #4080\]
-.*:	d9700bff 	stzg	\[sp, #-4096\]
-.*:	d96fffff 	stzg	\[sp, #4080\]!
-.*:	d97007ff 	stzg	\[sp\], #-4096
-.*:	d9a0081f 	st2g	\[x0\]
-.*:	d9a00b7f 	st2g	\[x27\]
-.*:	d9bfb81f 	st2g	\[x0, #-80\]
-.*:	d9a00c1f 	st2g	\[x0, #0\]!
-.*:	d9a0ac1f 	st2g	\[x0, #160\]!
-.*:	d9a0041f 	st2g	\[x0\], #0
-.*:	d9ba641f 	st2g	\[x0\], #-1440
-.*:	d9affbff 	st2g	\[sp, #4080\]
-.*:	d9b00bff 	st2g	\[sp, #-4096\]
-.*:	d9afffff 	st2g	\[sp, #4080\]!
-.*:	d9b007ff 	st2g	\[sp\], #-4096
-.*:	d9e0081f 	stz2g	\[x0\]
-.*:	d9e00b7f 	stz2g	\[x27\]
-.*:	d9ffb81f 	stz2g	\[x0, #-80\]
-.*:	d9e00c1f 	stz2g	\[x0, #0\]!
-.*:	d9e0ac1f 	stz2g	\[x0, #160\]!
-.*:	d9e0041f 	stz2g	\[x0\], #0
-.*:	d9fa641f 	stz2g	\[x0\], #-1440
-.*:	d9effbff 	stz2g	\[sp, #4080\]
-.*:	d9f00bff 	stz2g	\[sp, #-4096\]
-.*:	d9efffff 	stz2g	\[sp, #4080\]!
-.*:	d9f007ff 	stz2g	\[sp\], #-4096
+.*:	d9200800 	stg	x0, \[x0\]
+.*:	d9200b60 	stg	x0, \[x27\]
+.*:	d920081f 	stg	xzr, \[x0\]
+.*:	d93fb81b 	stg	x27, \[x0, #-80\]
+.*:	d9200c00 	stg	x0, \[x0, #0\]!
+.*:	d9200c1f 	stg	xzr, \[x0, #0\]!
+.*:	d920ac1b 	stg	x27, \[x0, #160\]!
+.*:	d9200400 	stg	x0, \[x0\], #0
+.*:	d920041f 	stg	xzr, \[x0\], #0
+.*:	d93a641b 	stg	x27, \[x0\], #-1440
+.*:	d92ffbe0 	stg	x0, \[sp, #4080\]
+.*:	d92ffbff 	stg	xzr, \[sp, #4080\]
+.*:	d9300bfb 	stg	x27, \[sp, #-4096\]
+.*:	d92fffe0 	stg	x0, \[sp, #4080\]!
+.*:	d93007ff 	stg	xzr, \[sp\], #-4096
+.*:	d9600800 	stzg	x0, \[x0\]
+.*:	d9600b60 	stzg	x0, \[x27\]
+.*:	d960081f 	stzg	xzr, \[x0\]
+.*:	d97fb81b 	stzg	x27, \[x0, #-80\]
+.*:	d9600c00 	stzg	x0, \[x0, #0\]!
+.*:	d9600c1f 	stzg	xzr, \[x0, #0\]!
+.*:	d960ac1b 	stzg	x27, \[x0, #160\]!
+.*:	d9600400 	stzg	x0, \[x0\], #0
+.*:	d960041f 	stzg	xzr, \[x0\], #0
+.*:	d97a641b 	stzg	x27, \[x0\], #-1440
+.*:	d96ffbe0 	stzg	x0, \[sp, #4080\]
+.*:	d96ffbff 	stzg	xzr, \[sp, #4080\]
+.*:	d9700bfb 	stzg	x27, \[sp, #-4096\]
+.*:	d96fffe0 	stzg	x0, \[sp, #4080\]!
+.*:	d97007ff 	stzg	xzr, \[sp\], #-4096
+.*:	d9a00800 	st2g	x0, \[x0\]
+.*:	d9a00b60 	st2g	x0, \[x27\]
+.*:	d9a0081f 	st2g	xzr, \[x0\]
+.*:	d9bfb81b 	st2g	x27, \[x0, #-80\]
+.*:	d9a00c00 	st2g	x0, \[x0, #0\]!
+.*:	d9a00c1f 	st2g	xzr, \[x0, #0\]!
+.*:	d9a0ac1b 	st2g	x27, \[x0, #160\]!
+.*:	d9a00400 	st2g	x0, \[x0\], #0
+.*:	d9a0041f 	st2g	xzr, \[x0\], #0
+.*:	d9ba641b 	st2g	x27, \[x0\], #-1440
+.*:	d9affbe0 	st2g	x0, \[sp, #4080\]
+.*:	d9affbff 	st2g	xzr, \[sp, #4080\]
+.*:	d9b00bfb 	st2g	x27, \[sp, #-4096\]
+.*:	d9afffe0 	st2g	x0, \[sp, #4080\]!
+.*:	d9b007ff 	st2g	xzr, \[sp\], #-4096
+.*:	d9e00800 	stz2g	x0, \[x0\]
+.*:	d9e00b60 	stz2g	x0, \[x27\]
+.*:	d9e0081f 	stz2g	xzr, \[x0\]
+.*:	d9ffb81b 	stz2g	x27, \[x0, #-80\]
+.*:	d9e00c00 	stz2g	x0, \[x0, #0\]!
+.*:	d9e00c1f 	stz2g	xzr, \[x0, #0\]!
+.*:	d9e0ac1b 	stz2g	x27, \[x0, #160\]!
+.*:	d9e00400 	stz2g	x0, \[x0\], #0
+.*:	d9e0041f 	stz2g	xzr, \[x0\], #0
+.*:	d9fa641b 	stz2g	x27, \[x0\], #-1440
+.*:	d9effbe0 	stz2g	x0, \[sp, #4080\]
+.*:	d9effbff 	stz2g	xzr, \[sp, #4080\]
+.*:	d9f00bfb 	stz2g	x27, \[sp, #-4096\]
+.*:	d9efffe0 	stz2g	x0, \[sp, #4080\]!
+.*:	d9f007ff 	stz2g	xzr, \[sp\], #-4096
 .*:	69000000 	stgp	x0, x0, \[x0\]
 .*:	69006c00 	stgp	x0, x27, \[x0\]
 .*:	6900001b 	stgp	x27, x0, \[x0\]

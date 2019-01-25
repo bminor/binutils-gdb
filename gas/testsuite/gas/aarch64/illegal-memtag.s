@@ -9,9 +9,9 @@ func:
 	subg x1, x2, #0x3f0, -4
 
 	# STG/STZG/ST2G/LDG : Fail imm
-	stg [x1, #15]
-	stzg [x1, #-4097]!
-	st2g [x1], #4096
+	stg x2, [x1, #15]
+	stzg x2, [x1, #-4097]!
+	st2g x2, [x1], #4096
 	ldg x1, [x2, #33]
 	ldg x1, [x2, #4112]
 
@@ -41,10 +41,14 @@ func:
 	subps x1, x2, xzr
 	cmpp xzr, x2
 	cmpp x2, xzr
-	stg [xzr, #0]
-	st2g [xzr, #0]!
-	stzg [xzr], #0
-	stz2g [xzr, #0]
+	stg x2, [xzr, #0]
+	st2g x2, [xzr, #0]!
+	stzg x2, [xzr], #0
+	stz2g x2, [xzr, #0]
+	stg sp, [x2, #0]
+	st2g sp, [x2, #0]!
+	stzg sp, [x2], #0
+	stz2g sp, [x2, #0]
 	stgp sp, x2, [x3]
 	stgp x1, sp, [x3]
 	stgp x0, x0, [xzr]
@@ -52,3 +56,6 @@ func:
 	ldg x0, [xzr, #16]
 	stzgm x0, [xzr]
 	stzgm sp, [x3]
+	# Xt == Xn with writeback should not complain
+	st2g x2, [x2, #0]!
+	stzg x2, [x2], #0
