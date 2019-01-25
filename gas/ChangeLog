@@ -1,5 +1,15 @@
 2019-01-25  Sudakshina Das  <sudi.das@arm.com>
 
+	* config/tc-aarch64.c (warn_unpredictable_ldst): Exempt
+	stg, st2g, stzg and stz2g from Xt == Xn with writeback warning.
+	* testsuite/gas/aarch64/armv8_5-a-memtag.d: Change tests for
+	stg, stzg, st2g and stz2g.
+	* testsuite/gas/aarch64/armv8_5-a-memtag.s: Likewise.
+	* testsuite/gas/aarch64/illegal-memtag.l: Likewise.
+	* testsuite/gas/aarch64/illegal-memtag.s: Likewise.
+
+2019-01-25  Sudakshina Das  <sudi.das@arm.com>
+
 	* testsuite/gas/aarch64/armv8_5-a-memtag.d: New tests for stzgm.
 	* testsuite/gas/aarch64/armv8_5-a-memtag.s: Likewise.
 	* testsuite/gas/aarch64/illegal-memtag.l: Likewise.

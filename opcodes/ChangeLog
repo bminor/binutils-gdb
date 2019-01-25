@@ -1,5 +1,14 @@
 2019-01-25  Sudakshina Das  <sudi.das@arm.com>
 
+	* aarch64-tbl.h (QL_LDST_AT): Update macro.
+	(aarch64_opcode): Change encoding for stg, stzg
+	st2g and st2zg.
+	* aarch64-asm-2.c: Regenerated.
+	* aarch64-dis-2.c: Regenerated.
+	* aarch64-opc-2.c: Regenerated.
+
+2019-01-25  Sudakshina Das  <sudi.das@arm.com>
+
 	* aarch64-asm-2.c: Regenerated.
 	* aarch64-dis-2.c: Likewise.
 	* aarch64-opc-2.c: Likewise.
