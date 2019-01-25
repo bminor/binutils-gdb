@@ -285,8 +285,8 @@ getstring (size_t idx, sb *in, sb *acc)
 	{
 	  int nest = 0;
 	  idx++;
-	  while ((in->ptr[idx] != '>' || nest)
-		 && idx < in->len)
+	  while (idx < in->len
+		 && (in->ptr[idx] != '>' || nest))
 	    {
 	      if (in->ptr[idx] == '!')
 		{
