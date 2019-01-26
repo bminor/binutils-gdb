@@ -1,5 +1,13 @@
 2019-02-06  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* macrotab.c (macro_define_internal): New function that
+	factorizes macro_define_object_internal and macro_define_function
+	code.
+	(macro_define_object_internal): Use macro_define_internal.
+	(macro_define_function): Likewise.
+
+2019-02-06  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* macrocmd.c (extract_identifier): Return
 	a gdb::unique_xmalloc_ptr<char> instead of a char *, and update
 	callers.

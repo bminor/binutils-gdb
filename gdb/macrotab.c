@@ -743,21 +743,26 @@ check_for_redefinition (struct macro_source_file *source, int line,
     return 0;
 }
 
-/* A helper function to define a new object-like macro.  */
+/* A helper function to define a new object-like or function-like macro
+   according to KIND.  When KIND is macro_object_like,
+   the macro_special_kind must be provided as ARGC, and ARGV must be NULL.
+   When KIND is macro_function_like, ARGC and ARGV are giving the function
+   arguments.  */
 
 static void
-macro_define_object_internal (struct macro_source_file *source, int line,
-			      const char *name, const char *replacement,
-			      enum macro_special_kind kind)
+macro_define_internal (struct macro_source_file *source, int line,
+                       const char *name, enum macro_kind kind,
+		       int argc, const char **argv,
+                       const char *replacement)
 {
   struct macro_table *t = source->table;
   struct macro_key *k = NULL;
   struct macro_definition *d;
 
   if (! t->redef_ok)
-    k = check_for_redefinition (source, line, 
-				name, macro_object_like,
-				0, 0,
+    k = check_for_redefinition (source, line,
+				name, kind,
+				argc, argv,
 				replacement);
 
   /* If we're redefining a symbol, and the existing key would be
@@ -774,8 +779,21 @@ macro_define_object_internal (struct macro_source_file *source, int line,
     return;
 
   k = new_macro_key (t, name, source, line);
-  d = new_macro_definition (t, macro_object_like, kind, 0, replacement);
+  d = new_macro_definition (t, kind, argc, argv, replacement);
   splay_tree_insert (t->definitions, (splay_tree_key) k, (splay_tree_value) d);
+}
+
+/* A helper function to define a new object-like macro.  */
+
+static void
+macro_define_object_internal (struct macro_source_file *source, int line,
+			      const char *name, const char *replacement,
+			      enum macro_special_kind special_kind)
+{
+  macro_define_internal (source, line,
+			 name, macro_object_like,
+			 special_kind, NULL,
+			 replacement);
 }
 
 void
@@ -802,28 +820,11 @@ macro_define_function (struct macro_source_file *source, int line,
                        const char *name, int argc, const char **argv,
                        const char *replacement)
 {
-  struct macro_table *t = source->table;
-  struct macro_key *k = NULL;
-  struct macro_definition *d;
-
-  if (! t->redef_ok)
-    k = check_for_redefinition (source, line,
-				name, macro_function_like,
-				argc, argv,
-				replacement);
-
-  /* See comments about duplicate keys in macro_define_object.  */
-  if (k && ! key_compare (k, name, source, line))
-    return;
-
-  /* We should also check here that all the argument names in ARGV are
-     distinct.  */
-
-  k = new_macro_key (t, name, source, line);
-  d = new_macro_definition (t, macro_function_like, argc, argv, replacement);
-  splay_tree_insert (t->definitions, (splay_tree_key) k, (splay_tree_value) d);
+  macro_define_internal (source, line,
+			 name, macro_function_like,
+			 argc, argv,
+			 replacement);
 }
-
 
 void
 macro_undef (struct macro_source_file *source, int line,
