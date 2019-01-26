@@ -1,3 +1,8 @@
+2019-01-26  Tom Tromey  <tom@tromey.com>
+
+	* Make-common.in (version.c): Use sim's create-version.sh.
+	* create-version.sh: New file.
+
 2019-01-16  Pavel I. Kryukov  <kryukov@frtk.ru>
 
 	* sim-arange.c (DEFINE_INLINE_P, DEFINE_NON_INLINE_P): Remove.
