@@ -1,3 +1,9 @@
+2019-01-29  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (md_apply_fix): Mark fixups for constant
+	symbols as done in md_apply_fix.
+	* testsuite/gas/all/forward.d: Don't XFAIL for xtensa.
+
 2019-01-28  Alan Modra  <amodra@gmail.com>
 
 	* configure.ac (ac_checking): Set from bfd/development.sh

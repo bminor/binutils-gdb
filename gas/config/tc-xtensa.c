@@ -6019,6 +6019,12 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	  val = *valP;
 	  fixP->fx_done = 1;
 	}
+      else if (S_GET_SEGMENT (fixP->fx_addsy) == absolute_section)
+	{
+	  val = S_GET_VALUE (fixP->fx_addsy) + fixP->fx_offset;
+	  *valP = val;
+	  fixP->fx_done = 1;
+	}
       /* fall through */
 
     case BFD_RELOC_XTENSA_PLT:
