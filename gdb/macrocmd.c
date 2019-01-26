@@ -288,7 +288,7 @@ skip_ws (const char **expp)
    function will also allow "..." forms as used in varargs macro
    parameters.  */
 
-static char *
+static gdb::unique_xmalloc_ptr<char>
 extract_identifier (const char **expp, int is_parameter)
 {
   char *result;
@@ -317,7 +317,7 @@ extract_identifier (const char **expp, int is_parameter)
   memcpy (result, *expp, len);
   result[len] = '\0';
   *expp += len;
-  return result;
+  return gdb::unique_xmalloc_ptr<char> (result);
 }
 
 struct temporary_macro_definition : public macro_definition
@@ -346,14 +346,13 @@ static void
 macro_define_command (const char *exp, int from_tty)
 {
   temporary_macro_definition new_macro;
-  char *name = NULL;
 
   if (!exp)
     error (_("usage: macro define NAME[(ARGUMENT-LIST)] [REPLACEMENT-LIST]"));
 
   skip_ws (&exp);
-  name = extract_identifier (&exp, 0);
-  if (! name)
+  gdb::unique_xmalloc_ptr<char> name = extract_identifier (&exp, 0);
+  if (name == NULL)
     error (_("Invalid macro name."));
   if (*exp == '(')
     {
@@ -380,7 +379,7 @@ macro_define_command (const char *exp, int from_tty)
 	      /* Must update new_macro as well...  */
 	      new_macro.argv = (const char * const *) argv;
 	    }
-	  argv[new_macro.argc] = extract_identifier (&exp, 1);
+	  argv[new_macro.argc] = extract_identifier (&exp, 1).release ();
 	  if (! argv[new_macro.argc])
 	    error (_("Macro is missing an argument."));
 	  ++new_macro.argc;
@@ -404,14 +403,15 @@ macro_define_command (const char *exp, int from_tty)
       ++exp;
       skip_ws (&exp);
 
-      macro_define_function (macro_main (macro_user_macros), -1, name,
+      macro_define_function (macro_main (macro_user_macros), -1, name.get (),
 			     new_macro.argc, (const char **) new_macro.argv,
 			     exp);
     }
   else
     {
       skip_ws (&exp);
-      macro_define_object (macro_main (macro_user_macros), -1, name, exp);
+      macro_define_object (macro_main (macro_user_macros), -1, name.get (),
+			   exp);
     }
 }
 
@@ -419,17 +419,14 @@ macro_define_command (const char *exp, int from_tty)
 static void
 macro_undef_command (const char *exp, int from_tty)
 {
-  char *name;
-
   if (!exp)
     error (_("usage: macro undef NAME"));
 
   skip_ws (&exp);
-  name = extract_identifier (&exp, 0);
-  if (! name)
+  gdb::unique_xmalloc_ptr<char> name = extract_identifier (&exp, 0);
+  if (name == nullptr)
     error (_("Invalid macro name."));
-  macro_undef (macro_main (macro_user_macros), -1, name);
-  xfree (name);
+  macro_undef (macro_main (macro_user_macros), -1, name.get ());
 }
 
 

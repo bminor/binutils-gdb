@@ -1,3 +1,9 @@
+2019-02-06  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* macrocmd.c (extract_identifier): Return
+	a gdb::unique_xmalloc_ptr<char> instead of a char *, and update
+	callers.
+
 2019-02-06  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-nat.c (fbsd_fetch_cmdline): Join arguments with spaces.
