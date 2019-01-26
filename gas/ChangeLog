@@ -1,3 +1,9 @@
+2019-01-28  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (md_apply_fix): Mark fixups for constant
+	symbols as done in md_apply_fix.
+	* testsuite/gas/all/forward.d: Don't XFAIL for xtensa.
+
 2019-01-28  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.
