@@ -2315,6 +2315,7 @@ lang_map (void)
       obstack_begin (&map_obstack, 1000);
       bfd_link_hash_traverse (link_info.hash, sort_def_symbol, 0);
     }
+  expld.phase = lang_fixed_phase_enum;
   lang_statement_iteration++;
   print_statements ();
 
@@ -4244,9 +4245,7 @@ print_assignment (lang_assignment_statement_type *assignment,
       const char *dst = assignment->exp->assign.dst;
 
       is_dot = (dst[0] == '.' && dst[1] == 0);
-      if (!is_dot)
-	expld.assign_name = dst;
-      tree = assignment->exp->assign.src;
+      tree = assignment->exp;
     }
 
   osec = output_section->bfd_section;
@@ -4281,7 +4280,9 @@ print_assignment (lang_assignment_statement_type *assignment,
 
 	  h = bfd_link_hash_lookup (link_info.hash, assignment->exp->assign.dst,
 				    FALSE, FALSE, TRUE);
-	  if (h)
+	  if (h != NULL
+	      && (h->type == bfd_link_hash_defined
+		  || h->type == bfd_link_hash_defweak))
 	    {
 	      value = h->u.def.value;
 	      value += h->u.def.section->output_section->vma;
