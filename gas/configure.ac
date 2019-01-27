@@ -50,10 +50,9 @@ AC_ARG_ENABLE(targets,
   *)	    enable_targets=$enableval ;;
 esac])dnl
 
-ac_checking=yes
-if grep '^RELEASE=y' ${srcdir}/../bfd/Makefile.am >/dev/null 2>/dev/null ; then
-  ac_checking=
-fi
+ac_checking=
+. ${srcdir}/../bfd/development.sh
+test "$development" = true && ac_checking=yes
 AC_ARG_ENABLE(checking,
 [  --enable-checking       enable run-time checks],
 [case "${enableval}" in

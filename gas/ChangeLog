@@ -1,3 +1,9 @@
+2019-01-28  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac (ac_checking): Set from bfd/development.sh
+	development variable.
+	* configure: Regenerate.
+
 2019-01-25  Sudakshina Das  <sudi.das@arm.com>
 
 	* config/tc-aarch64.c (warn_unpredictable_ldst): Exempt

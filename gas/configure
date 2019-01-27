@@ -12050,10 +12050,9 @@ if test "${enable_targets+set}" = set; then :
 esac
 fi
 
-ac_checking=yes
-if grep '^RELEASE=y' ${srcdir}/../bfd/Makefile.am >/dev/null 2>/dev/null ; then
-  ac_checking=
-fi
+ac_checking=
+. ${srcdir}/../bfd/development.sh
+test "$development" = true && ac_checking=yes
 # Check whether --enable-checking was given.
 if test "${enable_checking+set}" = set; then :
   enableval=$enable_checking; case "${enableval}" in
