@@ -1,3 +1,9 @@
+2019-01-28  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac (ac_checking): Set from bfd/development.sh
+	development variable.
+	* configure: Regenerate.
+
 2019-01-28  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.
