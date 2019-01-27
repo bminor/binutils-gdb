@@ -53,9 +53,6 @@ if { $gdb_py_is_py24 == 1 } {
     return 0
 }
 
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
-
 #
 # Test FinishBreakpoint in normal conditions
 #

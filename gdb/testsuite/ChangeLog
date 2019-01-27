@@ -1,3 +1,8 @@
+2019-01-27  Tom Tromey  <tom@tromey.com>
+
+	* gdb.python/py-finish-breakpoint.exp: Remove duplicate call to
+	skip_python_tests.
+
 2019-01-24  Alan Hayward  <alan.hayward@arm.com>
 
 	* gdb.base/infcall-nested-structs.c (struct struct_static_02_01):
