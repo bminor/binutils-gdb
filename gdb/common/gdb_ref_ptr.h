@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDB_REF_PTR_H
-#define GDB_REF_PTR_H
+#ifndef COMMON_GDB_REF_PTR_H
+#define COMMON_GDB_REF_PTR_H
 
 #include <cstddef>
 
@@ -225,4 +225,4 @@ inline bool operator!= (const std::nullptr_t, const ref_ptr<T, Policy> &rhs)
 
 }
 
-#endif /* GDB_REF_PTR_H */
+#endif /* COMMON_GDB_REF_PTR_H */

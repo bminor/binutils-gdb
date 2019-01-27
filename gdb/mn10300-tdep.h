@@ -17,6 +17,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef MN10300_TDEP_H
+#define MN10300_TDEP_H
+
 enum {
   E_D0_REGNUM = 0,
   E_D1_REGNUM = 1,
@@ -77,3 +80,5 @@ struct gdbarch_tdep
 };
 
 #define AM33_MODE(gdbarch) (gdbarch_tdep (gdbarch)->am33_mode)
+
+#endif /* MN10300_TDEP_H */

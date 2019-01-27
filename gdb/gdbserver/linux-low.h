@@ -16,6 +16,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef GDBSERVER_LINUX_LOW_H
+#define GDBSERVER_LINUX_LOW_H
+
 #include "nat/linux-nat.h"
 #include "nat/gdb_thread_db.h"
 #include <signal.h>
@@ -430,3 +433,5 @@ void thread_db_notice_clone (struct thread_info *parent_thr, ptid_t child_ptid);
 bool thread_db_thread_handle (ptid_t ptid, gdb_byte **handle, int *handle_len);
 
 extern int have_ptrace_getregset;
+
+#endif /* GDBSERVER_LINUX_LOW_H */

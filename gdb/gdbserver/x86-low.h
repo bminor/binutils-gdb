@@ -17,8 +17,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef GDBSERVER_X86_LOW_H
+#define GDBSERVER_X86_LOW_H
 
 #include "nat/x86-dregs.h"
 
 /* Initialize STATE.  */
 extern void x86_low_init_dregs (struct x86_debug_reg_state *state);
+
+#endif /* GDBSERVER_X86_LOW_H */

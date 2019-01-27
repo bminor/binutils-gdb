@@ -14,8 +14,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDB_COMPILE_OBJECT_LOAD_H
-#define GDB_COMPILE_OBJECT_LOAD_H
+#ifndef COMPILE_COMPILE_OBJECT_LOAD_H
+#define COMPILE_COMPILE_OBJECT_LOAD_H
 
 #include "compile-internal.h"
 #include <list>
@@ -82,4 +82,4 @@ extern struct compile_module *compile_object_load
    enum compile_i_scope_types scope, void *scope_data);
 extern void munmap_list_free (struct munmap_list *head);
 
-#endif /* GDB_COMPILE_OBJECT_LOAD_H */
+#endif /* COMPILE_COMPILE_OBJECT_LOAD_H */

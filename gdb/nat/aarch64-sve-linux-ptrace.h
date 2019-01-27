@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef AARCH64_SVE_LINUX_PTRACE_H
-#define AARCH64_SVE_LINUX_PTRACE_H
+#ifndef NAT_AARCH64_SVE_LINUX_PTRACE_H
+#define NAT_AARCH64_SVE_LINUX_PTRACE_H
 
 #include <signal.h>
 #include <sys/utsname.h>
@@ -55,4 +55,4 @@ extern void
 aarch64_sve_regs_copy_from_reg_buf (const struct reg_buffer_common *reg_buf,
 				    void *buf);
 
-#endif /* aarch64-sve-linux-ptrace.h */
+#endif /* NAT_AARCH64_SVE_LINUX_PTRACE_H */

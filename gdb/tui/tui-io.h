@@ -19,8 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef TUI_IO_H
-#define TUI_IO_H
+#ifndef TUI_TUI_IO_H
+#define TUI_TUI_IO_H
 
 #include "gdb_curses.h"
 
@@ -51,4 +51,4 @@ extern char *tui_expand_tabs (const char *, int);
 extern struct ui_out *tui_out;
 extern cli_ui_out *tui_old_uiout;
 
-#endif
+#endif /* TUI_TUI_IO_H */

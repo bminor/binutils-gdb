@@ -19,6 +19,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef BFIN_TDEP_H
+#define BFIN_TDEP_H
+
 enum gdb_regnum {
   /* Core Registers */
   BFIN_R0_REGNUM = 0,
@@ -99,3 +102,5 @@ struct gdbarch_tdep
 
 /* Return the Blackfin ABI associated with GDBARCH.  */
 extern enum bfin_abi bfin_abi (struct gdbarch *gdbarch);
+
+#endif /* BFIN_TDEP_H */

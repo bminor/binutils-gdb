@@ -17,6 +17,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef LINUX_FORK_H
+#define LINUX_FORK_H
+
 struct fork_info;
 extern struct fork_info *add_fork (pid_t);
 extern struct fork_info *find_fork_pid (pid_t);
@@ -25,3 +28,5 @@ extern void linux_fork_mourn_inferior (void);
 extern void linux_fork_detach (int);
 extern int forks_exist_p (void);
 extern int linux_fork_checkpointing_p (int);
+
+#endif /* LINUX_FORK_H */

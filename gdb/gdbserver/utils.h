@@ -16,10 +16,10 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef GDBSERVER_UTILS_H
+#define GDBSERVER_UTILS_H
 
 char *paddress (CORE_ADDR addr);
 char *pfildes (gdb_fildes_t fd);
 
-#endif /* UTILS_H */
+#endif /* GDBSERVER_UTILS_H */

@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef REFCOUNTED_OBJECT_H
-#define REFCOUNTED_OBJECT_H
+#ifndef COMMON_REFCOUNTED_OBJECT_H
+#define COMMON_REFCOUNTED_OBJECT_H
 
 /* Base class of intrusively reference-countable objects.
    Incrementing and decrementing the reference count is an external
@@ -67,4 +67,4 @@ struct refcounted_object_ref_policy
   }
 };
 
-#endif /* REFCOUNTED_OBJECT_H */
+#endif /* COMMON_REFCOUNTED_OBJECT_H */

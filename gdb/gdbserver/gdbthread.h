@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDB_THREAD_H
-#define GDB_THREAD_H
+#ifndef GDBSERVER_GDBTHREAD_H
+#define GDBSERVER_GDBTHREAD_H
 
 #include "common/common-gdbthread.h"
 #include "inferiors.h"
@@ -224,4 +224,4 @@ lwpid_of (const thread_info *thread)
   return thread->id.lwp ();
 }
 
-#endif /* GDB_THREAD_H */
+#endif /* GDBSERVER_GDBTHREAD_H */

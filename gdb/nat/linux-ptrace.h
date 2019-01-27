@@ -15,8 +15,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef COMMON_LINUX_PTRACE_H
-#define COMMON_LINUX_PTRACE_H
+#ifndef NAT_LINUX_PTRACE_H
+#define NAT_LINUX_PTRACE_H
 
 struct buffer;
 
@@ -196,4 +196,4 @@ extern int linux_ptrace_get_extended_event (int wstat);
 extern int linux_is_extended_waitstatus (int wstat);
 extern int linux_wstatus_maybe_breakpoint (int wstat);
 
-#endif /* COMMON_LINUX_PTRACE_H */
+#endif /* NAT_LINUX_PTRACE_H */

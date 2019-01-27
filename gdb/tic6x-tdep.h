@@ -17,6 +17,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef TIC6X_TDEP_H
+#define TIC6X_TDEP_H
+
 enum
 {
   TIC6X_A4_REGNUM = 4,
@@ -51,3 +54,5 @@ struct gdbarch_tdep
 
   int has_gp; /* Has general purpose registers A16 - A31 and B16 - B31.  */
 };
+
+#endif /* TIC6X_TDEP_H */

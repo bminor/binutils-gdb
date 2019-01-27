@@ -18,6 +18,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef GDBSERVER_LINUX_X86_TDESC_H
+#define GDBSERVER_LINUX_X86_TDESC_H
+
 /* Note: since IPA obviously knows what ABI it's running on (i386 vs x86_64
    vs x32), it's sufficient to pass only the register set here.  This,
    together with the ABI known at IPA compile time, maps to a tdesc.  */
@@ -51,3 +54,5 @@ const struct target_desc *amd64_linux_read_description (uint64_t xcr0,
 const struct target_desc *i386_linux_read_description (uint64_t xcr0);
 
 void initialize_low_tdesc ();
+
+#endif /* GDBSERVER_LINUX_X86_TDESC_H */

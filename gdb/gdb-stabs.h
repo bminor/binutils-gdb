@@ -17,14 +17,15 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef GDB_STABS_H
+#define GDB_STABS_H
+
 /* This file exists to hold the common definitions required of most of
    the symbol-readers that end up using stabs.  The common use of
    these `symbol-type-specific' customizations of the generic data
    structures makes the stabs-oriented symbol readers able to call
    each others' functions as required.  */
 
-#if !defined (GDBSTABS_H)
-#define GDBSTABS_H
 
 /* The tag used to find the DBX info attached to an objfile.  This is
    global because it is referenced by several modules.  */
@@ -73,4 +74,4 @@ struct dbx_symfile_info
 #define DBX_BSS_SECTION(o)	(DBX_SYMFILE_INFO(o)->bss_section)
 #define DBX_STAB_SECTION(o)	(DBX_SYMFILE_INFO(o)->stab_section)
 
-#endif /* GDBSTABS_H */
+#endif /* GDB_STABS_H */

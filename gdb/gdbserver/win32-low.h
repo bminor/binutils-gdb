@@ -16,6 +16,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef GDBSERVER_WIN32_LOW_H
+#define GDBSERVER_WIN32_LOW_H
+
 #include <windows.h>
 
 struct target_desc;
@@ -115,3 +118,5 @@ extern char * strwinerror (DWORD error);
 /* in wincecompat.c */
 
 extern void to_back_slashes (char *);
+
+#endif /* GDBSERVER_WIN32_LOW_H */

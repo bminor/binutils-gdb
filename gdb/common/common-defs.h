@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef COMMON_DEFS_H
-#define COMMON_DEFS_H
+#ifndef COMMON_COMMON_DEFS_H
+#define COMMON_COMMON_DEFS_H
 
 #include "config.h"
 
@@ -127,4 +127,4 @@ extern char *current_directory;
 #define HAVE_USEFUL_SBRK 1
 #endif
 
-#endif /* COMMON_DEFS_H */
+#endif /* COMMON_COMMON_DEFS_H */

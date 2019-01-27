@@ -1,3 +1,36 @@
+2019-02-07  Tom Tromey  <tom@tromey.com>
+
+	* x86-tdesc.h: Rename include guard.
+	* x86-low.h: Add include guard.
+	* wincecompat.h: Rename include guard.
+	* win32-low.h: Add include guard.
+	* utils.h: Rename include guard.
+	* tracepoint.h: Rename include guard.
+	* tdesc.h: Rename include guard.
+	* target.h: Rename include guard.
+	* server.h: Rename include guard.
+	* remote-utils.h: Rename include guard.
+	* regcache.h: Rename include guard.
+	* nto-low.h: Rename include guard.
+	* notif.h: Add include guard.
+	* mem-break.h: Rename include guard.
+	* lynx-low.h: Add include guard.
+	* linux-x86-tdesc.h: Add include guard.
+	* linux-s390-tdesc.h: Add include guard.
+	* linux-ppc-tdesc-init.h: Add include guard.
+	* linux-low.h: Add include guard.
+	* linux-aarch64-tdesc.h: Add include guard.
+	* linux-aarch32-low.h: Add include guard.
+	* inferiors.h: Rename include guard.
+	* i387-fp.h: Rename include guard.
+	* hostio.h: Rename include guard.
+	* gdbthread.h: Rename include guard.
+	* gdb_proc_service.h: Rename include guard.
+	* event-loop.h: Rename include guard.
+	* dll.h: Rename include guard.
+	* debug.h: Rename include guard.
+	* ax.h: Rename include guard.
+
 2018-01-30  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	PR gdb/23985

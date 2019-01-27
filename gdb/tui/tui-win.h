@@ -19,8 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef TUI_WIN_H
-#define TUI_WIN_H
+#ifndef TUI_TUI_WIN_H
+#define TUI_TUI_WIN_H
 
 #include "tui/tui-data.h"
 
@@ -59,4 +59,4 @@ struct cmd_list_element **tui_get_cmd_list (void);
 /* Set a TUI variable.  */
 void tui_set_var_cmd (char *, int, struct cmd_list_element *);
 
-#endif
+#endif /* TUI_TUI_WIN_H */

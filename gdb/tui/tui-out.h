@@ -15,8 +15,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef TUI_OUT_H
-#define TUI_OUT_H
+#ifndef TUI_TUI_OUT_H
+#define TUI_TUI_OUT_H
 
 #include "cli-out.h"
 
@@ -45,4 +45,4 @@ private:
 
 extern tui_ui_out *tui_out_new (struct ui_file *stream);
 
-#endif
+#endif /* TUI_TUI_OUT_H */

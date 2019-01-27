@@ -14,8 +14,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (CLI_SCRIPT_H)
-#define CLI_SCRIPT_H 1
+#ifndef CLI_CLI_SCRIPT_H
+#define CLI_CLI_SCRIPT_H
 
 struct ui_file;
 struct cmd_list_element;
@@ -168,4 +168,4 @@ extern void print_command_trace (const char *cmd, ...)
 
 extern void reset_command_nest_depth (void);
 
-#endif /* !defined (CLI_SCRIPT_H) */
+#endif /* CLI_CLI_SCRIPT_H */

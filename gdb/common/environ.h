@@ -14,8 +14,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (ENVIRON_H)
-#define ENVIRON_H 1
+#ifndef COMMON_ENVIRON_H
+#define COMMON_ENVIRON_H
 
 #include <vector>
 #include <set>
@@ -100,4 +100,4 @@ private:
   std::set<std::string> m_user_unset_env;
 };
 
-#endif /* defined (ENVIRON_H) */
+#endif /* COMMON_ENVIRON_H */

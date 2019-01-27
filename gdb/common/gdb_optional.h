@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDB_OPTIONAL_H
-#define GDB_OPTIONAL_H
+#ifndef COMMON_GDB_OPTIONAL_H
+#define COMMON_GDB_OPTIONAL_H
 
 #include "common/traits.h"
 
@@ -216,4 +216,4 @@ private:
 
 }
 
-#endif /* GDB_OPTIONAL_H */
+#endif /* COMMON_GDB_OPTIONAL_H */

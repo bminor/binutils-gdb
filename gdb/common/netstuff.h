@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef NETSTUFF_H
-#define NETSTUFF_H
+#ifndef COMMON_NETSTUFF_H
+#define COMMON_NETSTUFF_H
 
 #include <string>
 
@@ -73,4 +73,4 @@ extern parsed_connection_spec
 extern parsed_connection_spec parse_connection_spec (const char *spec,
 						     struct addrinfo *hint);
 
-#endif /* ! NETSTUFF_H */
+#endif /* COMMON_NETSTUFF_H */

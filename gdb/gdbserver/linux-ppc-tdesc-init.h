@@ -17,6 +17,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef GDBSERVER_LINUX_PPC_TDESC_INIT_H
+#define GDBSERVER_LINUX_PPC_TDESC_INIT_H
+
 /* Note: since IPA obviously knows what ABI it's running on (32 vs 64),
    it's sufficient to pass only the register set here.  This, together with
    the ABI known at IPA compile time, maps to a tdesc.  */
@@ -105,3 +108,5 @@ void init_registers_powerpc_isa207_vsx64l (void);
 void init_registers_powerpc_isa207_htm_vsx64l (void);
 
 #endif
+
+#endif /* GDBSERVER_LINUX_PPC_TDESC_INIT_H */

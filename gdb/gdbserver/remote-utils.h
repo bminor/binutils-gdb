@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef REMOTE_UTILS_H
-#define REMOTE_UTILS_H
+#ifndef GDBSERVER_REMOTE_UTILS_H
+#define GDBSERVER_REMOTE_UTILS_H
 
 extern int remote_debug;
 
@@ -69,4 +69,4 @@ int relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc);
 
 void monitor_output (const char *msg);
 
-#endif /* REMOTE_UTILS_H */
+#endif /* GDBSERVER_REMOTE_UTILS_H */

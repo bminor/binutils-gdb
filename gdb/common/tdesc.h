@@ -15,8 +15,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef ARCH_TDESC_H
-#define ARCH_TDESC_H 1
+#ifndef COMMON_TDESC_H
+#define COMMON_TDESC_H
 
 struct tdesc_feature;
 struct tdesc_type;
@@ -404,4 +404,4 @@ private:
   std::string *m_buffer;
 };
 
-#endif /* ARCH_TDESC_H */
+#endif /* COMMON_TDESC_H */

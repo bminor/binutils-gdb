@@ -16,6 +16,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef STABSREAD_H
+#define STABSREAD_H
+
 struct objfile;
 enum language;
 
@@ -219,3 +222,5 @@ extern void init_header_files (void);
    to.  Get these symbols from the minimal symbol table.  */
 
 extern void scan_file_globals (struct objfile *objfile);
+
+#endif /* STABSREAD_H */

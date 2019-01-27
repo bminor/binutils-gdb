@@ -15,8 +15,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (CLI_DECODE_H)
-#define CLI_DECODE_H 1
+#ifndef CLI_CLI_DECODE_H
+#define CLI_CLI_DECODE_H
 
 /* This file defines the private interfaces for any code implementing
    command internals.  */
@@ -270,4 +270,4 @@ extern int cli_user_command_p (struct cmd_list_element *);
 
 extern int find_command_name_length (const char *);
 
-#endif /* !defined (CLI_DECODE_H) */
+#endif /* CLI_CLI_DECODE_H */

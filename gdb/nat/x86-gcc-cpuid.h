@@ -2,6 +2,10 @@
  * Helper cpuid.h file copied from gcc-6.0.0.  Code in gdb should not
  * include this directly, but pull in x86-cpuid.h and use that func.
  */
+
+#ifndef NAT_X86_GCC_CPUID_H
+#define NAT_X86_GCC_CPUID_H
+
 /*
  * Copyright (C) 2007-2019 Free Software Foundation, Inc.
  *
@@ -268,3 +272,5 @@ __get_cpuid_count (unsigned int __leaf, unsigned int __subleaf,
   __cpuid_count (__leaf, __subleaf, *__eax, *__ebx, *__ecx, *__edx);
   return 1;
 }
+
+#endif /* NAT_X86_GCC_CPUID_H */

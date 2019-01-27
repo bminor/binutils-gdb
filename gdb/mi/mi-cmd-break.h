@@ -18,8 +18,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef MI_CMD_BREAK_H
-#define MI_CMD_BREAK_H
+#ifndef MI_MI_CMD_BREAK_H
+#define MI_MI_CMD_BREAK_H
 
 #include "common/scoped_restore.h"
 
@@ -27,5 +27,4 @@
    catchpoint.  */
 scoped_restore_tmpl<int> setup_breakpoint_reporting (void);
 
-#endif
-
+#endif /* MI_MI_CMD_BREAK_H */

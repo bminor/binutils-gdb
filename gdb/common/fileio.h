@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef FILEIO_H
-#define FILEIO_H
+#ifndef COMMON_FILEIO_H
+#define COMMON_FILEIO_H
 
 #include "gdb/fileio.h"
 #include <sys/stat.h>
@@ -70,4 +70,4 @@ host_to_fileio_time (time_t num, fio_time_t fnum)
 
 extern void host_to_fileio_stat (struct stat *st, struct fio_stat *fst);
 
-#endif /* FILEIO_H */
+#endif /* COMMON_FILEIO_H */

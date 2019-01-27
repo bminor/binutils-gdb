@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef PTID_H
-#define PTID_H
+#ifndef COMMON_PTID_H
+#define COMMON_PTID_H
 
 /* The ptid struct is a collection of the various "ids" necessary for
    identifying the inferior process/thread being debugged.  This
@@ -152,4 +152,4 @@ extern ptid_t null_ptid;
 
 extern ptid_t minus_one_ptid;
 
-#endif
+#endif /* COMMON_PTID_H */

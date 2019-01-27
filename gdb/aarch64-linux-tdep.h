@@ -18,6 +18,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef AARCH64_LINUX_TDEP_H
+#define AARCH64_LINUX_TDEP_H
+
 #include "regset.h"
 
 /* The general-purpose regset consists of 31 X registers, plus SP, PC,
@@ -32,3 +35,5 @@
 
 extern const struct regset aarch64_linux_gregset;
 extern const struct regset aarch64_linux_fpregset;
+
+#endif /* AARCH64_LINUX_TDEP_H */

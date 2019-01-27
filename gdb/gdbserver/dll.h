@@ -15,8 +15,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef DLL_H
-#define DLL_H
+#ifndef GDBSERVER_DLL_H
+#define GDBSERVER_DLL_H
 
 #include <list>
 
@@ -37,4 +37,4 @@ extern void clear_dlls (void);
 extern void loaded_dll (const char *name, CORE_ADDR base_addr);
 extern void unloaded_dll (const char *name, CORE_ADDR base_addr);
 
-#endif /* DLL_H */
+#endif /* GDBSERVER_DLL_H */

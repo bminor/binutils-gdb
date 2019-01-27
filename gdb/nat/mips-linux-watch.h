@@ -15,8 +15,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef MIPS_LINUX_WATCH_H
-#define MIPS_LINUX_WATCH_H 1
+#ifndef NAT_MIPS_LINUX_WATCH_H
+#define NAT_MIPS_LINUX_WATCH_H
 
 #include <asm/ptrace.h>
 #include "common/break-common.h"
@@ -115,4 +115,5 @@ uint32_t mips_linux_watch_type_to_irw (enum target_hw_bp_type type);
 int mips_linux_read_watch_registers (long lwpid,
 				     struct pt_watch_regs *watch_readback,
 				     int *watch_readback_valid, int force);
-#endif
+
+#endif /* NAT_MIPS_LINUX_WATCH_H */

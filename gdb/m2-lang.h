@@ -17,6 +17,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef M2_LANG_H
+#define M2_LANG_H
+
 struct type_print_options;
 struct parser_state;
 
@@ -54,3 +57,4 @@ struct builtin_m2_type
 /* Return the Modula-2 type table for the specified architecture.  */
 extern const struct builtin_m2_type *builtin_m2_type (struct gdbarch *gdbarch);
 
+#endif /* M2_LANG_H */

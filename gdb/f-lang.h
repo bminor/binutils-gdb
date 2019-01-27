@@ -20,6 +20,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef F_LANG_H
+#define F_LANG_H
+
 struct type_print_options;
 struct parser_state;
 
@@ -79,3 +82,4 @@ struct builtin_f_type
 /* Return the Fortran type table for the specified architecture.  */
 extern const struct builtin_f_type *builtin_f_type (struct gdbarch *gdbarch);
 
+#endif /* F_LANG_H */

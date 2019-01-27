@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDBARCH_UTILS_H
-#define GDBARCH_UTILS_H
+#ifndef ARCH_UTILS_H
+#define ARCH_UTILS_H
 
 struct gdbarch;
 struct frame_info;
@@ -271,4 +271,4 @@ extern bool default_in_indirect_branch_thunk (gdbarch *gdbarch,
 extern ULONGEST default_type_align (struct gdbarch *gdbarch,
 				    struct type *type);
 
-#endif
+#endif /* ARCH_UTILS_H */

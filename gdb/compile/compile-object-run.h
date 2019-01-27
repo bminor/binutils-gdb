@@ -14,11 +14,11 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDB_COMPILE_OBJECT_RUN_H
-#define GDB_COMPILE_OBJECT_RUN_H
+#ifndef COMPILE_COMPILE_OBJECT_RUN_H
+#define COMPILE_COMPILE_OBJECT_RUN_H
 
 #include "compile-object-load.h"
 
 extern void compile_object_run (struct compile_module *module);
 
-#endif /* GDB_COMPILE_OBJECT_RUN_H */
+#endif /* COMPILE_COMPILE_OBJECT_RUN_H */

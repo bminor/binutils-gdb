@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDB_UNIQUE_PTR_H
-#define GDB_UNIQUE_PTR_H 1
+#ifndef COMMON_GDB_UNIQUE_PTR_H
+#define COMMON_GDB_UNIQUE_PTR_H
 
 #include <memory>
 
@@ -49,4 +49,4 @@ template<typename T> using unique_xmalloc_ptr
 
 } /* namespace gdb */
 
-#endif /* GDB_UNIQUE_PTR_H */
+#endif /* COMMON_GDB_UNIQUE_PTR_H */

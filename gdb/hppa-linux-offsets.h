@@ -17,6 +17,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef HPPA_LINUX_OFFSETS_H
+#define HPPA_LINUX_OFFSETS_H
+
 #define PT_PSW offsetof(struct pt_regs, gr[ 0])
 #define PT_GR1 offsetof(struct pt_regs, gr[ 1])
 #define PT_GR2 offsetof(struct pt_regs, gr[ 2])
@@ -101,3 +104,5 @@
 #define PT_IIR offsetof(struct pt_regs, iir)
 #define PT_ISR offsetof(struct pt_regs, isr)
 #define PT_IOR offsetof(struct pt_regs, ior)
+
+#endif /* HPPA_LINUX_OFFSETS_H */

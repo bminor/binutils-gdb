@@ -15,8 +15,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDB_COMPILE_H
-#define GDB_COMPILE_H
+#ifndef COMPILE_COMPILE_H
+#define COMPILE_COMPILE_H
 
 struct ui_file;
 struct gdbarch;
@@ -106,4 +106,4 @@ extern void compile_print_value (struct value *val, void *data_voidp);
 /* Command element for the 'compile' command.  */
 extern cmd_list_element *compile_cmd_element;
 
-#endif /* GDB_COMPILE_H */
+#endif /* COMPILE_COMPILE_H */

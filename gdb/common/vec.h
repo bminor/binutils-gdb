@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (GDB_VEC_H)
-#define GDB_VEC_H
+#ifndef COMMON_VEC_H
+#define COMMON_VEC_H
 
 #include "diagnostics.h"
 
@@ -1147,4 +1147,4 @@ static inline T *VEC_OP (T,safe_insert)					  \
   return VEC_OP (T,quick_insert) (*vec_, ix_, obj_ VEC_ASSERT_PASS);	  \
 }
 
-#endif /* GDB_VEC_H */
+#endif /* COMMON_VEC_H */

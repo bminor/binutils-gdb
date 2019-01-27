@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDB_PYTHON_INTERNAL_H
-#define GDB_PYTHON_INTERNAL_H
+#ifndef PYTHON_PYTHON_INTERNAL_H
+#define PYTHON_PYTHON_INTERNAL_H
 
 #include "extension.h"
 #include "extension-priv.h"
@@ -801,4 +801,4 @@ struct varobj;
 struct varobj_iter *py_varobj_get_iterator (struct varobj *var,
 					    PyObject *printer);
 
-#endif /* GDB_PYTHON_INTERNAL_H */
+#endif /* PYTHON_PYTHON_INTERNAL_H */

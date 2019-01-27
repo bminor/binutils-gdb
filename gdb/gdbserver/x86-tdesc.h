@@ -15,8 +15,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef X86_TDESC_H
-#define X86_TDESC_H
+#ifndef GDBSERVER_X86_TDESC_H
+#define GDBSERVER_X86_TDESC_H
 
 /* The "expedite" registers for x86 targets.  Since whether the
    variable is used depends on host/configuration, we mark it
@@ -29,4 +29,4 @@ static const char *i386_expedite_regs[] ATTRIBUTE_UNUSED
 static const char *amd64_expedite_regs[] = {"rbp", "rsp", "rip", NULL};
 #endif
 
-#endif /* X86_TDESC_H */
+#endif /* GDBSERVER_X86_TDESC_H */

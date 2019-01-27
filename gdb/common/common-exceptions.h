@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef COMMON_EXCEPTIONS_H
-#define COMMON_EXCEPTIONS_H
+#ifndef COMMON_COMMON_EXCEPTIONS_H
+#define COMMON_COMMON_EXCEPTIONS_H
 
 #include <setjmp.h>
 #include <new>
@@ -338,4 +338,4 @@ extern void throw_quit (const char *fmt, ...)
 /* A pre-defined non-exception.  */
 extern const struct gdb_exception exception_none;
 
-#endif /* COMMON_EXCEPTIONS_H */
+#endif /* COMMON_COMMON_EXCEPTIONS_H */

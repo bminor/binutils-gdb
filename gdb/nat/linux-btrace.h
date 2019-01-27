@@ -19,8 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef LINUX_BTRACE_H
-#define LINUX_BTRACE_H
+#ifndef NAT_LINUX_BTRACE_H
+#define NAT_LINUX_BTRACE_H
 
 #include "common/btrace-common.h"
 #include "common/vec.h"
@@ -119,4 +119,4 @@ extern enum btrace_error linux_read_btrace (struct btrace_data *btrace,
 extern const struct btrace_config *
   linux_btrace_conf (const struct btrace_target_info *);
 
-#endif /* LINUX_BTRACE_H */
+#endif /* NAT_LINUX_BTRACE_H */

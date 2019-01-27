@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef AGENTEXPR_H
-#define AGENTEXPR_H
+#ifndef AX_H
+#define AX_H
 
 #include "common/vec.h"
 
@@ -267,4 +267,4 @@ extern struct aop_map aop_map[];
 
 extern void ax_reqs (struct agent_expr *ax);
 
-#endif /* AGENTEXPR_H */
+#endif /* AX_H */

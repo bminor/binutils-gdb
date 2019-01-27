@@ -19,8 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef MI_CMDS_H
-#define MI_CMDS_H
+#ifndef MI_MI_CMDS_H
+#define MI_MI_CMDS_H
 
 enum print_values {
    PRINT_NO_VALUES,
@@ -162,4 +162,4 @@ extern int mi_debug_p;
 
 extern void mi_execute_command (const char *cmd, int from_tty);
 
-#endif
+#endif /* MI_MI_CMDS_H */

@@ -19,8 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef TUI_SOURCEWIN_H
-#define TUI_SOURCEWIN_H
+#ifndef TUI_TUI_WINSOURCE_H
+#define TUI_TUI_WINSOURCE_H
 
 #include "tui/tui-data.h"
 
@@ -76,4 +76,4 @@ extern int tui_addr_is_displayed (CORE_ADDR,
 /* Constant definitions. */
 #define SCROLL_THRESHOLD 2	/* Threshold for lazy scroll.  */
 
-#endif
+#endif /* TUI_TUI_WINSOURCE_H */

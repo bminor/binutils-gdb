@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef INFERIORS_H
-#define INFERIORS_H
+#ifndef GDBSERVER_INFERIORS_H
+#define GDBSERVER_INFERIORS_H
 
 #include "common/gdb_vecs.h"
 #include <list>
@@ -144,4 +144,4 @@ void *thread_target_data (struct thread_info *);
 struct regcache *thread_regcache_data (struct thread_info *);
 void set_thread_regcache_data (struct thread_info *, struct regcache *);
 
-#endif /* INFERIORS_H */
+#endif /* GDBSERVER_INFERIORS_H */

@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef LOCATIONS_H
-#define LOCATIONS_H 1
+#ifndef LOCATION_H
+#define LOCATION_H
 
 struct language_defn;
 struct event_location;
@@ -285,4 +285,5 @@ extern int event_location_empty_p (const struct event_location *location);
 extern void
   set_event_location_string (struct event_location *location,
 			     const char *string);
-#endif /* LOCATIONS_H */
+
+#endif /* LOCATION_H */

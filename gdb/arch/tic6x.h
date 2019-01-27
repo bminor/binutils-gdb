@@ -15,6 +15,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef ARCH_TIC6X_H
+#define ARCH_TIC6X_H
+
 enum c6x_feature
 {
   C6X_CORE,
@@ -24,3 +27,5 @@ enum c6x_feature
 };
 
 target_desc *tic6x_create_target_description (enum c6x_feature feature);
+
+#endif /* ARCH_TIC6X_H */

@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef SCOPED_MMAP_H
-#define SCOPED_MMAP_H
+#ifndef COMMON_SCOPED_MMAP_H
+#define COMMON_SCOPED_MMAP_H
 
 #include "config.h"
 
@@ -92,4 +92,5 @@ private:
 scoped_mmap mmap_file (const char *filename);
 
 #endif /* HAVE_SYS_MMAN_H */
-#endif /* SCOPED_MMAP_H */
+
+#endif /* COMMON_SCOPED_MMAP_H */

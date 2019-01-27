@@ -19,8 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef TUI_DATA_H
-#define TUI_DATA_H
+#ifndef TUI_TUI_DATA_H
+#define TUI_TUI_DATA_H
 
 #include "tui/tui.h"	/* For enum tui_win_type.  */
 #include "gdb_curses.h"	/* For WINDOW.  */
@@ -344,4 +344,4 @@ extern void tui_add_to_source_windows (struct tui_win_info *);
 
 extern unsigned int tui_tab_width;
 
-#endif /* TUI_DATA_H */
+#endif /* TUI_TUI_DATA_H */

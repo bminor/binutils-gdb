@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef WAITSTATUS_H
-#define WAITSTATUS_H
+#ifndef TARGET_WAITSTATUS_H
+#define TARGET_WAITSTATUS_H
 
 #include "common/gdb_signals.h"
 
@@ -148,4 +148,4 @@ enum target_stop_reason
 /* Return a pretty printed form of target_waitstatus.  */
 std::string target_waitstatus_to_string (const struct target_waitstatus *);
 
-#endif /* WAITSTATUS_H */
+#endif /* TARGET_WAITSTATUS_H */

@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef COMMON_UTILS_H
-#define COMMON_UTILS_H
+#ifndef COMMON_COMMON_UTILS_H
+#define COMMON_COMMON_UTILS_H
 
 #include <string>
 #include <vector>
@@ -178,4 +178,4 @@ in_inclusive_range (T value, T low, T high)
 extern ULONGEST align_up (ULONGEST v, int n);
 extern ULONGEST align_down (ULONGEST v, int n);
 
-#endif
+#endif /* COMMON_COMMON_UTILS_H */

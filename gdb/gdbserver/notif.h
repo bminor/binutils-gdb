@@ -16,6 +16,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef GDBSERVER_NOTIF_H
+#define GDBSERVER_NOTIF_H
+
 #include "target.h"
 #include "common/queue.h"
 
@@ -62,3 +65,5 @@ void notif_event_enque (struct notif_server *notif,
 			struct notif_event *event);
 
 void initialize_notif (void);
+
+#endif /* GDBSERVER_NOTIF_H */

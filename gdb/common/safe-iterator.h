@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef SAFE_ITERATOR_H
-#define SAFE_ITERATOR_H
+#ifndef COMMON_SAFE_ITERATOR_H
+#define COMMON_SAFE_ITERATOR_H
 
 /* A forward iterator that wraps Iterator, such that when iterating
    with iterator IT, it is possible to delete *IT without invalidating
@@ -90,4 +90,4 @@ private:
   Iterator m_end {};
 };
 
-#endif /* SAFE_ITERATOR_H */
+#endif /* COMMON_SAFE_ITERATOR_H */

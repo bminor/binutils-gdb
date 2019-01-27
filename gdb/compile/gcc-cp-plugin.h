@@ -17,6 +17,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef COMPILE_GCC_CP_PLUGIN_H
+#define COMPILE_GCC_CP_PLUGIN_H
+
 /* A class representing the GCC C++ plug-in.  */
 
 #include "gcc-cp-interface.h"
@@ -83,3 +86,5 @@ private:
   /* The GCC C++ context.  */
   struct gcc_cp_context *m_context;
 };
+
+#endif /* COMPILE_GCC_CP_PLUGIN_H */

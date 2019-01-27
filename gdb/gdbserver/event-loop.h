@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef EVENT_LOOP_H
-#define EVENT_LOOP_H
+#ifndef GDBSERVER_EVENT_LOOP_H
+#define GDBSERVER_EVENT_LOOP_H
 
 typedef void *gdb_client_data;
 typedef int (handler_func) (int, gdb_client_data);
@@ -33,4 +33,4 @@ extern void delete_callback_event (int id);
 extern void start_event_loop (void);
 extern void initialize_event_loop (void);
 
-#endif /* EVENT_LOOP_H */
+#endif /* GDBSERVER_EVENT_LOOP_H */

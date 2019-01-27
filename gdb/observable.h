@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (GDB_OBSERVER_H)
-#define GDB_OBSERVER_H
+#ifndef OBSERVABLE_H
+#define OBSERVABLE_H
 
 #include "common/observable.h"
 
@@ -232,4 +232,4 @@ extern observable<user_selected_what> user_selected_context_changed;
 
 } /* namespace gdb */
 
-#endif /* GDB_OBSERVER_H */
+#endif /* OBSERVABLE_H */

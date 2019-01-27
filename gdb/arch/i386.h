@@ -15,7 +15,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef ARCH_I386_H
+#define ARCH_I386_H
+
 #include "common/tdesc.h"
 #include <stdint.h>
 
 target_desc *i386_create_target_description (uint64_t xcr0, bool is_linux);
+
+#endif /* ARCH_I386_H */

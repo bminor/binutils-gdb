@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDB_PYTHON_H
-#define GDB_PYTHON_H
+#ifndef PYTHON_PYTHON_H
+#define PYTHON_PYTHON_H
 
 #include "extension.h"
 
@@ -28,4 +28,4 @@ extern const struct extension_language_defn extension_language_python;
 /* Command element for the 'python' command.  */
 extern cmd_list_element *python_cmd_element;
 
-#endif /* GDB_PYTHON_H */
+#endif /* PYTHON_PYTHON_H */

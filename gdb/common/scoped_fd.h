@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef SCOPED_FD_H
-#define SCOPED_FD_H
+#ifndef COMMON_SCOPED_FD_H
+#define COMMON_SCOPED_FD_H
 
 #include <unistd.h>
 #include "filestuff.h"
@@ -84,4 +84,4 @@ private:
   int m_fd;
 };
 
-#endif /* SCOPED_FD_H */
+#endif /* COMMON_SCOPED_FD_H */

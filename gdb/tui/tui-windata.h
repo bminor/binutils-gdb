@@ -19,8 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef TUI_WINDATA_H
-#define TUI_WINDATA_H
+#ifndef TUI_TUI_WINDATA_H
+#define TUI_TUI_WINDATA_H
 
 #include "tui/tui-data.h"
 
@@ -36,4 +36,4 @@ extern void tui_display_data_from (int, int);
 extern void tui_vertical_data_scroll (enum tui_scroll_direction, 
 				      int);
 
-#endif
+#endif /* TUI_TUI_WINDATA_H */

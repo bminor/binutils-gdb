@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (AX_H)
-#define AX_H 1
+#ifndef GDBSERVER_AX_H
+#define GDBSERVER_AX_H
 
 #include "regcache.h"
 
@@ -142,4 +142,4 @@ struct emit_ops
 extern CORE_ADDR current_insn_ptr;
 extern int emit_error;
 
-#endif /* AX_H */
+#endif /* GDBSERVER_AX_H */

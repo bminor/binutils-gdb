@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDB_PY_INSTRUCTION_H
-#define GDB_PY_INSTRUCTION_H
+#ifndef PYTHON_PY_INSTRUCTION_H
+#define PYTHON_PY_INSTRUCTION_H
 
 #include "python-internal.h"
 
@@ -27,4 +27,4 @@
    (str) and "size" (int) that must be overriden by sub classes.  */
 extern PyTypeObject py_insn_type;
 
-#endif /* GDB_PY_INSTRUCTION_H */
+#endif /* PYTHON_PY_INSTRUCTION_H */

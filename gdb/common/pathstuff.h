@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef PATHSTUFF_H
-#define PATHSTUFF_H
+#ifndef COMMON_PATHSTUFF_H
+#define COMMON_PATHSTUFF_H
 
 #include "common/byte-vector.h"
 
@@ -86,4 +86,4 @@ extern const char *get_shell ();
 
 extern gdb::char_vector make_temp_filename (const std::string &f);
 
-#endif /* PATHSTUFF_H */
+#endif /* COMMON_PATHSTUFF_H */

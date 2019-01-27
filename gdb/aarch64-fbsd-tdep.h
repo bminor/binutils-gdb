@@ -17,6 +17,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef AARCH64_FBSD_TDEP_H
+#define AARCH64_FBSD_TDEP_H
+
 #include "regset.h"
 
 /* The general-purpose regset consists of 30 X registers, plus LR, SP,
@@ -31,3 +34,5 @@
 
 extern const struct regset aarch64_fbsd_gregset;
 extern const struct regset aarch64_fbsd_fpregset;
+
+#endif /* AARCH64_FBSD_TDEP_H */

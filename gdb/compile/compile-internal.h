@@ -14,8 +14,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDB_COMPILE_INTERNAL_H
-#define GDB_COMPILE_INTERNAL_H
+#ifndef COMPILE_COMPILE_INTERNAL_H
+#define COMPILE_COMPILE_INTERNAL_H
 
 #include "gcc-c-interface.h"
 
@@ -207,4 +207,4 @@ private:
   std::string m_object_file;
 };
 
-#endif /* GDB_COMPILE_INTERNAL_H */
+#endif /* COMPILE_COMPILE_INTERNAL_H */

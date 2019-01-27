@@ -17,6 +17,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef ARM_FBSD_TDEP_H
+#define ARM_FBSD_TDEP_H
+
 #include "regset.h"
 
 /* The general-purpose regset consists of 13 R registers, plus SP, LR,
@@ -38,3 +41,5 @@ extern const struct regset arm_fbsd_vfpregset;
 
 extern const struct target_desc *
 arm_fbsd_read_description_auxv (struct target_ops *target);
+
+#endif /* ARM_FBSD_TDEP_H */

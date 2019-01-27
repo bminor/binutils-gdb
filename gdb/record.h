@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef _RECORD_H_
-#define _RECORD_H_
+#ifndef RECORD_H
+#define RECORD_H
 
 #include "target/waitstatus.h" /* For enum target_stop_reason.  */
 #include "common/enum-flags.h"
@@ -113,4 +113,4 @@ extern void record_start (const char *method, const char *format,
 /* Stop recording.  Throw on failure.  */
 extern void record_stop (int from_tty);
 
-#endif /* _RECORD_H_ */
+#endif /* RECORD_H */

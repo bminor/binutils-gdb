@@ -15,8 +15,13 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef ARCH_AMD64_H
+#define ARCH_AMD64_H
+
 #include "common/tdesc.h"
 #include <stdint.h>
 
 target_desc *amd64_create_target_description (uint64_t xcr0, bool is_x32,
 					      bool is_linux, bool segments);
+
+#endif /* ARCH_AMD64_H */

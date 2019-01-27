@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef REGDEF_H
-#define REGDEF_H
+#ifndef REGFORMATS_REGDEF_H
+#define REGFORMATS_REGDEF_H
 
 struct reg
 {
@@ -60,4 +60,4 @@ struct reg
   }
 };
 
-#endif /* REGDEF_H */
+#endif /* REGFORMATS_REGDEF_H */

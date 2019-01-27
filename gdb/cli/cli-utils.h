@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef CLI_UTILS_H
-#define CLI_UTILS_H
+#ifndef CLI_CLI_UTILS_H
+#define CLI_CLI_UTILS_H
 
 /* *PP is a string denoting a number.  Get the number.  Advance *PP
    after the string and any trailing whitespace.
@@ -238,4 +238,5 @@ struct qcs_flags
 
 extern bool parse_flags_qcs (const char *which_command, const char **str,
 			     qcs_flags *flags);
-#endif /* CLI_UTILS_H */
+
+#endif /* CLI_CLI_UTILS_H */

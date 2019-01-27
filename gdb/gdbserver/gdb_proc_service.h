@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDB_PROC_SERVICE_H
-#define GDB_PROC_SERVICE_H
+#ifndef GDBSERVER_GDB_PROC_SERVICE_H
+#define GDBSERVER_GDB_PROC_SERVICE_H
 
 #include "common/gdb_proc_service.h"
 
@@ -28,4 +28,4 @@ struct ps_prochandle
      current inferior.  */
 };
 
-#endif /* gdb_proc_service.h */
+#endif /* GDBSERVER_GDB_PROC_SERVICE_H */

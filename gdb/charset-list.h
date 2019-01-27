@@ -17,6 +17,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef CHARSET_LIST_H
+#define CHARSET_LIST_H
+
 /* Note that the first entry must always be "auto".
    The remaining entries were created by running this script:
    
@@ -1188,3 +1191,5 @@
 "WINSAMI2", \
 "WS2", \
 "YU",
+
+#endif /* CHARSET_LIST_H */

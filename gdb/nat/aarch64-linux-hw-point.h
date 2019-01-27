@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef AARCH64_LINUX_HW_POINT_H
-#define AARCH64_LINUX_HW_POINT_H 1
+#ifndef NAT_AARCH64_LINUX_HW_POINT_H
+#define NAT_AARCH64_LINUX_HW_POINT_H
 
 #include "common/break-common.h" /* For enum target_hw_bp_type.  */
 
@@ -197,4 +197,4 @@ struct aarch64_debug_reg_state *aarch64_get_debug_reg_state (pid_t pid);
 
 int aarch64_linux_region_ok_for_watchpoint (CORE_ADDR addr, int len);
 
-#endif /* AARCH64_LINUX_HW_POINT_H */
+#endif /* NAT_AARCH64_LINUX_HW_POINT_H */

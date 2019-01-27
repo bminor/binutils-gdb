@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDB_TILDE_EXPAND_H
-#define GDB_TILDE_EXPAND_H
+#ifndef COMMON_GDB_TILDE_EXPAND_H
+#define COMMON_GDB_TILDE_EXPAND_H
 
 /* Perform path expansion (i.e., tilde expansion) on DIR, and return
    the full path.  */
@@ -28,4 +28,4 @@ extern std::string gdb_tilde_expand (const char *dir);
    gdb::unique_xmalloc_ptr<char>.  */
 extern gdb::unique_xmalloc_ptr<char> gdb_tilde_expand_up (const char *dir);
 
-#endif /* ! GDB_TILDE_EXPAND_H */
+#endif /* COMMON_GDB_TILDE_EXPAND_H */

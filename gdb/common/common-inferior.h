@@ -18,8 +18,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef COMMON_INFERIOR_H
-#define COMMON_INFERIOR_H
+#ifndef COMMON_COMMON_INFERIOR_H
+#define COMMON_COMMON_INFERIOR_H
 
 /* Return the exec wrapper to be used when starting the inferior, or NULL
    otherwise.  */
@@ -38,4 +38,4 @@ extern const char *get_inferior_cwd ();
    the directory.  */
 extern void set_inferior_cwd (const char *cwd);
 
-#endif /* ! COMMON_INFERIOR_H */
+#endif /* COMMON_COMMON_INFERIOR_H */

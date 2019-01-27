@@ -18,8 +18,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef MEM_BREAK_H
-#define MEM_BREAK_H
+#ifndef GDBSERVER_MEM_BREAK_H
+#define GDBSERVER_MEM_BREAK_H
 
 #include "common/break-common.h"
 
@@ -276,4 +276,4 @@ int remove_memory_breakpoint (struct raw_breakpoint *bp);
 void clone_all_breakpoints (struct thread_info *child_thread,
 			    const struct thread_info *parent_thread);
 
-#endif /* MEM_BREAK_H */
+#endif /* GDBSERVER_MEM_BREAK_H */

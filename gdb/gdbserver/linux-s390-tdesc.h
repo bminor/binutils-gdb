@@ -17,6 +17,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef GDBSERVER_LINUX_S390_TDESC_H
+#define GDBSERVER_LINUX_S390_TDESC_H
+
 /* Note: since IPA obviously knows what ABI it's running on (s390 vs s390x),
    it's sufficient to pass only the register set here.  This, together with
    the ABI known at IPA compile time, maps to a tdesc.  */
@@ -109,3 +112,5 @@ void init_registers_s390_gs_linux64 (void);
 extern const struct target_desc *tdesc_s390_gs_linux64;
 
 #endif
+
+#endif /* GDBSERVER_LINUX_S390_TDESC_H */

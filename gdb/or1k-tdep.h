@@ -16,9 +16,8 @@
    You should have received a copy of the GNU General Public License along
    With this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
-#ifndef OR1K_TDEP__H
-#define OR1K_TDEP__H
+#ifndef OR1K_TDEP_H
+#define OR1K_TDEP_H
 
 #ifndef TARGET_OR1K
 #define TARGET_OR1K
@@ -53,4 +52,4 @@
 #define OR1K_NUM_TAP_RECORDS         8
 #define OR1K_FRAME_RED_ZONE_SIZE     2536
 
-#endif /* OR1K_TDEP__H */
+#endif /* OR1K_TDEP_H */

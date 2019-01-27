@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef SERVER_H
-#define SERVER_H
+#ifndef GDBSERVER_SERVER_H
+#define GDBSERVER_SERVER_H
 
 #include "common/common-defs.h"
 
@@ -205,4 +205,4 @@ client_state &get_client_state ();
 #include "gdbthread.h"
 #include "inferiors.h"
 
-#endif /* SERVER_H */
+#endif /* GDBSERVER_SERVER_H */

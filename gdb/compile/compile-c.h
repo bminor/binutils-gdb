@@ -14,8 +14,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDB_COMPILE_C_H
-#define GDB_COMPILE_C_H
+#ifndef COMPILE_COMPILE_C_H
+#define COMPILE_COMPILE_C_H
 
 #include "common/enum-flags.h"
 #include "gcc-c-plugin.h"
@@ -92,4 +92,4 @@ extern std::string c_get_range_decl_name (const struct dynamic_prop *prop);
 extern gdb::unique_xmalloc_ptr<char>
   c_symbol_substitution_name (struct symbol *sym);
 
-#endif /* GDB_COMPILE_C_H  */
+#endif /* COMPILE_COMPILE_C_H */

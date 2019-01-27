@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef COMMON_TYPES_H
-#define COMMON_TYPES_H
+#ifndef COMMON_COMMON_TYPES_H
+#define COMMON_COMMON_TYPES_H
 
 #ifdef GDBSERVER
 
@@ -63,4 +63,4 @@ typedef unsigned long long ULONGEST;
 
 enum tribool { TRIBOOL_UNKNOWN = -1, TRIBOOL_FALSE = 0, TRIBOOL_TRUE = 1 };
 
-#endif /* COMMON_TYPES_H */
+#endif /* COMMON_COMMON_TYPES_H */

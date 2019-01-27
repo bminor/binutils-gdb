@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef BUFFER_H
-#define BUFFER_H
+#ifndef COMMON_BUFFER_H
+#define COMMON_BUFFER_H
 
 struct buffer
 {
@@ -65,4 +65,4 @@ void buffer_xml_printf (struct buffer *buffer, const char *format, ...)
 #define buffer_grow_str0(BUFFER,STRING)			\
   buffer_grow (BUFFER, STRING, strlen (STRING) + 1)
 
-#endif
+#endif /* COMMON_BUFFER_H */

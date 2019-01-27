@@ -15,6 +15,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef GDBSERVER_LINUX_AARCH32_LOW_H
+#define GDBSERVER_LINUX_AARCH32_LOW_H
+
 extern struct regs_info regs_info_aarch32;
 
 void arm_fill_gregset (struct regcache *regcache, void *buf);
@@ -34,3 +37,5 @@ void init_registers_arm_with_neon (void);
 int arm_is_thumb_mode (void);
 
 extern const struct target_desc *tdesc_arm_with_neon;
+
+#endif /* GDBSERVER_LINUX_AARCH32_LOW_H */

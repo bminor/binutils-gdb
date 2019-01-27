@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef CLI_STYLE_H
-#define CLI_STYLE_H
+#ifndef CLI_CLI_STYLE_H
+#define CLI_CLI_STYLE_H
 
 #include "ui-file.h"
 
@@ -96,4 +96,4 @@ extern cli_style_option address_style;
 /* True if styling is enabled.  */
 extern int cli_styling;
 
-#endif /* CLI_STYLE_H */
+#endif /* CLI_CLI_STYLE_H */

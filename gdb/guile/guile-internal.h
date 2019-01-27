@@ -17,11 +17,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef GUILE_GUILE_INTERNAL_H
+#define GUILE_GUILE_INTERNAL_H
+
 /* See README file in this directory for implementation notes, coding
    conventions, et.al.  */
 
-#ifndef GDB_GUILE_INTERNAL_H
-#define GDB_GUILE_INTERNAL_H
 
 #include "hashtab.h"
 #include "extension-priv.h"
@@ -692,4 +693,4 @@ gdbscm_wrap (Function &&func, Args &&... args)
   return result;
 }
 
-#endif /* GDB_GUILE_INTERNAL_H */
+#endif /* GUILE_GUILE_INTERNAL_H */

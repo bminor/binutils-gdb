@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef FORK_INFERIOR_H
-#define FORK_INFERIOR_H
+#ifndef NAT_FORK_INFERIOR_H
+#define NAT_FORK_INFERIOR_H
 
 #include <string>
 
@@ -103,4 +103,4 @@ extern void trace_start_error (const char *fmt, ...)
 extern void trace_start_error_with_name (const char *string)
   ATTRIBUTE_NORETURN;
 
-#endif /* ! FORK_INFERIOR_H */
+#endif /* NAT_FORK_INFERIOR_H */

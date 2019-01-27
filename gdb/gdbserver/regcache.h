@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef REGCACHE_H
-#define REGCACHE_H
+#ifndef GDBSERVER_REGCACHE_H
+#define GDBSERVER_REGCACHE_H
 
 #include "common/common-regcache.h"
 
@@ -138,4 +138,4 @@ void collect_register_by_name (struct regcache *regcache,
 ULONGEST regcache_raw_get_unsigned_by_name (struct regcache *regcache,
 					    const char *name);
 
-#endif /* REGCACHE_H */
+#endif /* GDBSERVER_REGCACHE_H */

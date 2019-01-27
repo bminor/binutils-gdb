@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef X86_XSTATE_H
-#define X86_XSTATE_H 1
+#ifndef COMMON_X86_XSTATE_H
+#define COMMON_X86_XSTATE_H
 
 /* The extended state feature bits.  */
 #define X86_XSTATE_X87		(1ULL << 0)
@@ -85,4 +85,4 @@
 
 #define I387_MXCSR_INIT_VAL 0x1f80
 
-#endif /* X86_XSTATE_H */
+#endif /* COMMON_X86_XSTATE_H */

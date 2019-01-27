@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDB_WAIT_H
-#define GDB_WAIT_H
+#ifndef COMMON_GDB_WAIT_H
+#define COMMON_GDB_WAIT_H
 
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h> /* POSIX */
@@ -110,4 +110,4 @@
 #define __WCLONE	0x80000000 /* Wait for cloned process.  */
 #endif
 
-#endif
+#endif /* COMMON_GDB_WAIT_H */

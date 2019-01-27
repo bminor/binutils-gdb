@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDB_VECS_H
-#define GDB_VECS_H
+#ifndef COMMON_GDB_VECS_H
+#define COMMON_GDB_VECS_H
 
 #include "vec.h"
 
@@ -86,4 +86,4 @@ ordered_remove (std::vector<T> &vec, typename std::vector<T>::size_type ix)
   return removed;
 }
 
-#endif /* GDB_VECS_H */
+#endif /* COMMON_GDB_VECS_H */

@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef FILESTUFF_H
-#define FILESTUFF_H
+#ifndef COMMON_FILESTUFF_H
+#define COMMON_FILESTUFF_H
 
 #include <dirent.h>
 #include <fcntl.h>
@@ -143,4 +143,4 @@ extern bool is_regular_file (const char *name, int *errno_ptr);
 
 extern bool mkdir_recursive (const char *dir);
 
-#endif /* FILESTUFF_H */
+#endif /* COMMON_FILESTUFF_H */

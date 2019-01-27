@@ -14,8 +14,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (CLI_CMDS_H)
-#define CLI_CMDS_H 1
+#ifndef CLI_CLI_CMDS_H
+#define CLI_CLI_CMDS_H
 
 #include "common/filestuff.h"
 #include "common/gdb_optional.h"
@@ -142,4 +142,4 @@ extern gdb::optional<open_script>
 extern int source_verbose;
 extern int trace_commands;
 
-#endif /* !defined (CLI_CMDS_H) */
+#endif /* CLI_CLI_CMDS_H */

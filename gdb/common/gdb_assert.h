@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDB_ASSERT_H
-#define GDB_ASSERT_H
+#ifndef COMMON_GDB_ASSERT_H
+#define COMMON_GDB_ASSERT_H
 
 /* A static assertion.  This will cause a compile-time error if EXPR,
    which must be a compile-time constant, is false.  */
@@ -56,4 +56,4 @@
   internal_error (__FILE__, __LINE__, _(message))
 #endif
 
-#endif /* gdb_assert.h */
+#endif /* COMMON_GDB_ASSERT_H */

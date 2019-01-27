@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef MI_OUT_H
-#define MI_OUT_H 1
+#ifndef MI_MI_OUT_H
+#define MI_MI_OUT_H
 
 #include <vector>
 
@@ -95,4 +95,4 @@ int mi_version (ui_out *uiout);
 void mi_out_put (ui_out *uiout, struct ui_file *stream);
 void mi_out_rewind (ui_out *uiout);
 
-#endif /* MI_OUT_H */
+#endif /* MI_MI_OUT_H */

@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDB_PY_STOPEVENT_H
-#define GDB_PY_STOPEVENT_H
+#ifndef PYTHON_PY_STOPEVENT_H
+#define PYTHON_PY_STOPEVENT_H
 
 #include "py-event.h"
 
@@ -33,4 +33,4 @@ extern gdbpy_ref<> create_breakpoint_event_object (PyObject *breakpoint_list,
 
 extern gdbpy_ref<> create_signal_event_object (enum gdb_signal stop_signal);
 
-#endif /* GDB_PY_STOPEVENT_H */
+#endif /* PYTHON_PY_STOPEVENT_H */

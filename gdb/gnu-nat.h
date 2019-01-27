@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef __GNU_NAT_H__
-#define __GNU_NAT_H__
+#ifndef GNU_NAT_H
+#define GNU_NAT_H
 
 #include <unistd.h>
 #include <mach.h>
@@ -135,4 +135,4 @@ struct gnu_nat_target : public inf_child_target
   void stop (ptid_t) override;
 };
 
-#endif /* __GNU_NAT_H__ */
+#endif /* GNU_NAT_H */

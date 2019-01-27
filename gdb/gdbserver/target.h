@@ -18,8 +18,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef TARGET_H
-#define TARGET_H
+#ifndef GDBSERVER_TARGET_H
+#define GDBSERVER_TARGET_H
 
 #include <sys/types.h> /* for mode_t */
 #include "target/target.h"
@@ -737,4 +737,4 @@ int target_can_do_hardware_single_step (void);
 
 int default_breakpoint_kind_from_pc (CORE_ADDR *pcptr);
 
-#endif /* TARGET_H */
+#endif /* GDBSERVER_TARGET_H */

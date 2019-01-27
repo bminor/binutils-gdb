@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef AARCH64_LINUX_H
-#define AARCH64_LINUX_H 1
+#ifndef NAT_AARCH64_LINUX_H
+#define NAT_AARCH64_LINUX_H
 
 #include <signal.h>
 
@@ -129,4 +129,4 @@ ps_err_e aarch64_ps_get_thread_area (struct ps_prochandle *ph,
 				       lwpid_t lwpid, int idx, void **base,
 				       int is_64bit_p);
 
-#endif /* AARCH64_LINUX_H */
+#endif /* NAT_AARCH64_LINUX_H */

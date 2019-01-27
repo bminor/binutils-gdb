@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef XML_UTILS_H
-#define XML_UTILS_H
+#ifndef COMMON_XML_UTILS_H
+#define COMMON_XML_UTILS_H
 
 /* Return a string with special characters from TEXT replaced by entity
    references.  */
@@ -30,4 +30,4 @@ extern std::string xml_escape_text (const char *text);
 
 extern void xml_escape_text_append (std::string *result, const char *text);
 
-#endif
+#endif /* COMMON_XML_UTILS_H */

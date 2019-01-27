@@ -19,8 +19,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef TUI_LAYOUT_H
-#define TUI_LAYOUT_H
+#ifndef TUI_TUI_LAYOUT_H
+#define TUI_TUI_LAYOUT_H
 
 #include "tui/tui.h"
 #include "tui/tui-data.h"
@@ -32,4 +32,4 @@ extern int tui_default_win_viewport_height (enum tui_win_type,
 					    enum tui_layout_type);
 extern enum tui_status tui_set_layout (enum tui_layout_type);
 
-#endif /*TUI_LAYOUT_H */
+#endif /* TUI_TUI_LAYOUT_H */
