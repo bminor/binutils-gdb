@@ -164,10 +164,6 @@ extern int exceptions_state_mc_action_iter (void);
 extern int exceptions_state_mc_action_iter_1 (void);
 extern int exceptions_state_mc_catch (struct gdb_exception *, int);
 
-/* For the C++ try/catch-based TRY/CATCH mechanism.  */
-
-extern void exception_rethrow (void) ATTRIBUTE_NORETURN;
-
 /* Macro to wrap up standard try/catch behavior.
 
    The double loop lets us correctly handle code "break"ing out of the
@@ -179,24 +175,21 @@ extern void exception_rethrow (void) ATTRIBUTE_NORETURN;
 
    *INDENT-OFF*
 
-   TRY
+   TRY_SJLJ
      {
      }
-   CATCH (e, RETURN_MASK_ERROR)
+   CATCH_SJLJ (e, RETURN_MASK_ERROR)
      {
        switch (e.reason)
          {
            case RETURN_ERROR: ...
          }
      }
-   END_CATCH
+   END_CATCH_SJLJ
 
-  Note that the SJLJ version of the macros are actually named
-  TRY_SJLJ/CATCH_SJLJ in order to make it possible to call them even
-  when TRY/CATCH are mapped to C++ try/catch.  The SJLJ variants are
-  needed in some cases where gdb exceptions need to cross third-party
-  library code compiled without exceptions support (e.g.,
-  readline).  */
+   The SJLJ variants are needed in some cases where gdb exceptions
+   need to cross third-party library code compiled without exceptions
+   support (e.g., readline).  */
 
 #define TRY_SJLJ \
      { \
@@ -213,40 +206,6 @@ extern void exception_rethrow (void) ATTRIBUTE_NORETURN;
     if (exceptions_state_mc_catch (&(EXCEPTION), MASK))
 
 #define END_CATCH_SJLJ				\
-  }
-
-/* We still need to wrap TRY/CATCH in C++ so that cleanups and C++
-   exceptions can coexist.
-
-   The TRY blocked is wrapped in a do/while(0) so that break/continue
-   within the block works the same as in C.
-
-   END_CATCH makes sure that even if the CATCH block doesn't want to
-   catch the exception, we stop at every frame in the unwind chain to
-   run its cleanups, which may e.g., have pointers to stack variables
-   that are going to be destroyed.
-
-   There's an outer scope around the whole TRY/END_CATCH in order to
-   cause a compilation error if you forget to add the END_CATCH at the
-   end a TRY/CATCH construct.  */
-
-#define TRY								\
-  {									\
-    try									\
-      {									\
-	do								\
-	  {
-
-#define CATCH(EXCEPTION, MASK)						\
-	  } while (0);							\
-	}								\
-    catch (struct gdb_exception ## _ ## MASK &EXCEPTION)
-
-#define END_CATCH				\
-    catch (...)					\
-      {						\
-	exception_rethrow ();			\
-      }						\
   }
 
 /* The exception types client code may catch.  They're just shims

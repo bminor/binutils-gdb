@@ -165,16 +165,6 @@ exceptions_state_mc_action_iter_1 (void)
   return exceptions_state_mc (CATCH_ITER_1);
 }
 
-/* Called by the default catch block.  IOW, we'll get here before
-   jumping out to the next outermost scope an exception if a GDB
-   exception is not caught.  */
-
-void
-exception_rethrow (void)
-{
-  throw;
-}
-
 /* Return EXCEPTION to the nearest containing CATCH_SJLJ block.  */
 
 void

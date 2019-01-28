@@ -1,5 +1,12 @@
 2019-04-08  Tom Tromey  <tom@tromey.com>
 
+	* common/common-exceptions.h (exception_rethrow): Don't declare.
+	(TRY_SJLJ): Update comment.
+	(TRY, CATCH, END_CATCH): Remove.
+	* common/common-exceptions.c (exception_rethrow): Remove.
+
+2019-04-08  Tom Tromey  <tom@tromey.com>
+
 	* common/common-exceptions.h (gdb_exception_RETURN_MASK_ALL):
 	Remove.
 	(gdb_exception_error): Rename from
