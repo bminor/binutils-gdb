@@ -1,5 +1,10 @@
 2019-02-17  Tom Tromey  <tom@tromey.com>
 
+	PR tui/24197:
+	* tui/tui-source.c (tui_set_source_content_nil): Rewrite.
+
+2019-02-17  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (user_select_syms): Use filtered printing.
 	* utils.c (wrap_style): New global.
 	(desired_style): Remove.

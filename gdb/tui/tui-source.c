@@ -253,33 +253,22 @@ tui_set_source_content_nil (struct tui_win_info *win_info,
 
       if (curr_line == (n_lines / 2 + 1))
 	{
-	  int i;
 	  int xpos;
 	  int warning_length = strlen (warning_string);
 	  char *src_line;
-
-	  src_line = element->which_element.source.line;
 
 	  if (warning_length >= ((line_width - 1) / 2))
 	    xpos = 1;
 	  else
 	    xpos = (line_width - 1) / 2 - warning_length;
 
-	  for (i = 0; i < xpos; i++)
-	    src_line[i] = ' ';
-
-	  sprintf (src_line + i, "%s", warning_string);
-
-	  for (i = xpos + warning_length; i < line_width; i++)
-	    src_line[i] = ' ';
-
-	  src_line[i] = '\n';
-
-	}			/* end if */
+	  src_line = xstrprintf ("%s%s", n_spaces (xpos), warning_string);
+	  xfree (element->which_element.source.line);
+	  element->which_element.source.line = src_line;
+	}
 
       curr_line++;
-
-    }				/* end while */
+    }
 }
 
 
