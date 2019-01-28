@@ -1,3 +1,7 @@
+2019-01-28  Alan Hayward  <alan.hayward@arm.com>
+
+	* CONTRIBUTE: Replace contribution list with wiki link.
+
 2019-01-25  Tom Tromey  <tom@tromey.com>
 
 	* Makefile.in (GDB_CFLAGS): Don't add -I for common.
