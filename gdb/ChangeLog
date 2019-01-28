@@ -1,5 +1,15 @@
 2019-04-08  Tom Tromey  <tom@tromey.com>
 
+	* common/common-exceptions.c (throw_exception): Rename from
+	throw_exception_cxx.  Remove old copy.  Make argument const.
+	(throw_it): Create and throw exception objects directly.
+	* common/common-exceptions.h (throw_exception): Make argument
+	const.
+	(struct gdb_exception_error): Add constructor.
+	(struct gdb_exception_quit): Add constructor.
+
+2019-04-08  Tom Tromey  <tom@tromey.com>
+
 	* common/common-exceptions.h (exception_rethrow): Don't declare.
 	(TRY_SJLJ): Update comment.
 	(TRY, CATCH, END_CATCH): Remove.

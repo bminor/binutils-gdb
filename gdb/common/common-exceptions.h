@@ -214,6 +214,11 @@ extern int exceptions_state_mc_catch (struct gdb_exception *, int);
 
 struct gdb_exception_error : public gdb_exception
 {
+  gdb_exception_error (enum return_reason r, enum errors e)
+    : gdb_exception (r, e)
+  {
+  }
+
   explicit gdb_exception_error (const gdb_exception &ex) noexcept
     : gdb_exception (ex)
   {
@@ -222,6 +227,11 @@ struct gdb_exception_error : public gdb_exception
 
 struct gdb_exception_quit : public gdb_exception
 {
+  gdb_exception_quit (enum return_reason r, enum errors e)
+    : gdb_exception (r, e)
+  {
+  }
+
   explicit gdb_exception_quit (const gdb_exception &ex) noexcept
     : gdb_exception (ex)
   {
@@ -250,7 +260,7 @@ struct gdb_quit_bad_alloc
 /* Throw an exception (as described by "struct gdb_exception"),
    landing in the inner most containing exception handler established
    using TRY/CATCH.  */
-extern void throw_exception (struct gdb_exception exception)
+extern void throw_exception (const gdb_exception &exception)
      ATTRIBUTE_NORETURN;
 
 /* Throw an exception by executing a LONG JUMP to the inner most

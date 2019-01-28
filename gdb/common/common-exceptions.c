@@ -180,8 +180,8 @@ throw_exception_sjlj (struct gdb_exception exception)
 
 /* Implementation of throw_exception that uses C++ try/catch.  */
 
-static ATTRIBUTE_NORETURN void
-throw_exception_cxx (struct gdb_exception exception)
+void
+throw_exception (const gdb_exception &exception)
 {
   if (exception.reason == RETURN_QUIT)
     {
@@ -197,25 +197,24 @@ throw_exception_cxx (struct gdb_exception exception)
     gdb_assert_not_reached ("invalid return reason");
 }
 
-void
-throw_exception (struct gdb_exception exception)
-{
-  throw_exception_cxx (exception);
-}
-
 static void ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (3, 0)
 throw_it (enum return_reason reason, enum errors error, const char *fmt,
 	  va_list ap)
 {
-  struct gdb_exception e;
-
-  /* Create the exception.  */
-  e.reason = reason;
-  e.error = error;
-  e.message.reset (new std::string (string_vprintf (fmt, ap)));
-
-  /* Throw the exception.  */
-  throw_exception (e);
+  if (reason == RETURN_QUIT)
+    {
+      gdb_exception_quit ex (reason, error);
+      ex.message.reset (new std::string (string_vprintf (fmt, ap)));
+      throw ex;
+    }
+  else if (reason == RETURN_ERROR)
+    {
+      gdb_exception_error ex (reason, error);
+      ex.message.reset (new std::string (string_vprintf (fmt, ap)));
+      throw ex;
+    }
+  else
+    gdb_assert_not_reached ("invalid return reason");
 }
 
 void
