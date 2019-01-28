@@ -1,5 +1,9 @@
 2019-03-06  Tom Tromey  <tom@tromey.com>
 
+	* gcore.c (write_gcore_file): Use SCOPE_EXIT.
+
+2019-03-06  Tom Tromey  <tom@tromey.com>
+
 	* utils.h (free_current_contents): Don't declare.
 	* utils.c (free_current_contents): Remove.
 

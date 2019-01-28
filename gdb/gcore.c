@@ -37,6 +37,7 @@
 #include <algorithm>
 #include "common/gdb_unlinker.h"
 #include "common/byte-vector.h"
+#include "common/scope-exit.h"
 
 /* The largest amount of memory to read from the target at once.  We
    must throttle it to limit the amount of memory used by GDB during
@@ -114,24 +115,9 @@ write_gcore_file_1 (bfd *obfd)
 void
 write_gcore_file (bfd *obfd)
 {
-  struct gdb_exception except = exception_none;
-
   target_prepare_to_generate_core ();
-
-  TRY
-    {
-      write_gcore_file_1 (obfd);
-    }
-  CATCH (e, RETURN_MASK_ALL)
-    {
-      except = e;
-    }
-  END_CATCH
-
-  target_done_generating_core ();
-
-  if (except.reason < 0)
-    throw_exception (except);
+  SCOPE_EXIT { target_done_generating_core (); };
+  write_gcore_file_1 (obfd);
 }
 
 /* gcore_command -- implements the 'gcore' command.
