@@ -922,7 +922,7 @@ frame_unwind_pc (struct frame_info *this_frame)
 				    this_frame->level);
 	    }
 	  else
-	    throw_exception (ex);
+	    throw;
 	}
 
       if (pc_p)
@@ -1918,7 +1918,7 @@ get_prev_frame_if_no_cycle (struct frame_info *this_frame)
       prev_frame->next = NULL;
       this_frame->prev = NULL;
 
-      throw_exception (ex);
+      throw;
     }
 
   return prev_frame;
@@ -2116,7 +2116,7 @@ get_prev_frame_always (struct frame_info *this_frame)
 	  prev_frame = NULL;
 	}
       else
-	throw_exception (ex);
+	throw;
     }
 
   return prev_frame;
@@ -2385,7 +2385,7 @@ get_frame_pc_if_available (struct frame_info *frame, CORE_ADDR *pc)
       if (ex.error == NOT_AVAILABLE_ERROR)
 	return 0;
       else
-	throw_exception (ex);
+	throw;
     }
 
   return 1;
@@ -2466,7 +2466,7 @@ get_frame_address_in_block_if_available (struct frame_info *this_frame,
     {
       if (ex.error == NOT_AVAILABLE_ERROR)
 	return 0;
-      throw_exception (ex);
+      throw;
     }
 
   return 1;
@@ -2750,7 +2750,7 @@ get_frame_language (struct frame_info *frame)
   catch (const gdb_exception_error &ex)
     {
       if (ex.error != NOT_AVAILABLE_ERROR)
-	throw_exception (ex);
+	throw;
     }
 
   if (pc_p)

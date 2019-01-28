@@ -1693,7 +1693,7 @@ darwin_attach_pid (struct inferior *inf)
       exit_inferior (inf);
       inferior_ptid = null_ptid;
 
-      throw_exception (ex);
+      throw;
     }
 
   target_ops *darwin_ops = get_native_target ();

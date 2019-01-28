@@ -2588,7 +2588,7 @@ amd64_frame_cache (struct frame_info *this_frame, void **this_cache)
   catch (const gdb_exception_error &ex)
     {
       if (ex.error != NOT_AVAILABLE_ERROR)
-	throw_exception (ex);
+	throw;
     }
 
   return cache;
@@ -2715,7 +2715,7 @@ amd64_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
   catch (const gdb_exception_error &ex)
     {
       if (ex.error != NOT_AVAILABLE_ERROR)
-	throw_exception (ex);
+	throw;
     }
 
   *this_cache = cache;
@@ -2895,7 +2895,7 @@ amd64_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
   catch (const gdb_exception_error &ex)
     {
       if (ex.error != NOT_AVAILABLE_ERROR)
-	throw_exception (ex);
+	throw;
     }
 
   return cache;

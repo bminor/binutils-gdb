@@ -1408,7 +1408,7 @@ detach_one_lwp (struct lwp_info *lp, int *signo_p)
   catch (const gdb_exception_error &ex)
     {
       if (!check_ptrace_stopped_lwp_gone (lp))
-	throw_exception (ex);
+	throw;
     }
 
   if (ptrace (PTRACE_DETACH, lwpid, 0, signo) < 0)
@@ -1590,7 +1590,7 @@ linux_resume_one_lwp (struct lwp_info *lp, int step, enum gdb_signal signo)
   catch (const gdb_exception_error &ex)
     {
       if (!check_ptrace_stopped_lwp_gone (lp))
-	throw_exception (ex);
+	throw;
     }
 }
 
@@ -3552,7 +3552,7 @@ resume_stopped_resumed_lwps (struct lwp_info *lp, const ptid_t wait_ptid)
       catch (const gdb_exception_error &ex)
 	{
 	  if (!check_ptrace_stopped_lwp_gone (lp))
-	    throw_exception (ex);
+	    throw;
 	}
     }
 

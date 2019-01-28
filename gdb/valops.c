@@ -3634,7 +3634,7 @@ value_rtti_indirect_type (struct value *v, int *full,
 	         type.  */
 	      return NULL;
 	    }
-	  throw_exception (except);
+	  throw;
 	}
     }
   else

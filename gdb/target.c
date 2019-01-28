@@ -767,7 +767,7 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 		       objfile_name (objfile), ex.what ());
 	      break;
 	    default:
-	      throw_exception (ex);
+	      throw;
 	      break;
 	    }
 	}

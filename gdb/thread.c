@@ -1482,7 +1482,7 @@ thr_try_catch_cmd (thread_info *thr, const char *cmd, int from_tty,
 	  if (flags.cont)
 	    printf_filtered ("%s\n", ex.what ());
 	  else
-	    throw_exception (ex);
+	    throw;
 	}
     }
 }

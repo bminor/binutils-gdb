@@ -3152,7 +3152,7 @@ event_location_to_sals (linespec_parser *parser,
 	  }
 	catch (const gdb_exception_error &except)
 	  {
-	    throw_exception (except);
+	    throw;
 	  }
       }
       break;
@@ -3966,7 +3966,7 @@ find_linespec_symbols (struct linespec_state *state,
 	  catch (const gdb_exception_error &except)
 	    {
 	      if (except.error != NOT_FOUND_ERROR)
-		throw_exception (except);
+		throw;
 	    }
 	}
     }

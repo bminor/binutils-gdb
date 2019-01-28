@@ -79,7 +79,7 @@ inferior_event_handler (enum inferior_event_type event_type,
 		 the prompt and is typing some unrelated command, so
 		 just inform the user and swallow the exception.  */
 	      if (current_ui->prompt_state == PROMPT_BLOCKED)
-		throw_exception (e);
+		throw;
 	      else
 		exception_print (gdb_stderr, e);
 	    }

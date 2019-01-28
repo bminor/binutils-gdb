@@ -551,7 +551,7 @@ tfile_target_open (const char *arg, int from_tty)
     {
       /* Remove the partially set up target.  */
       unpush_target (&tfile_ops);
-      throw_exception (ex);
+      throw;
     }
 
   inferior_appeared (current_inferior (), TFILE_PID);

@@ -120,7 +120,7 @@ frame_unwind_try_unwinder (struct frame_info *this_frame, void **this_cache,
 	     should always accept the frame.  */
 	  return 0;
 	}
-      throw_exception (ex);
+      throw;
     }
 
   if (res)

@@ -9253,7 +9253,7 @@ create_breakpoint (struct gdbarch *gdbarch,
 	     error.  */
 
 	  if (pending_break_support == AUTO_BOOLEAN_FALSE)
-	    throw_exception (e);
+	    throw;
 
 	  exception_print (gdb_stderr, e);
 
@@ -9271,7 +9271,7 @@ create_breakpoint (struct gdbarch *gdbarch,
 	  pending = 1;
 	}
       else
-	throw_exception (e);
+	throw;
     }
 
   if (!pending && canonical.lsals.empty ())
@@ -13635,7 +13635,7 @@ location_to_sals (struct breakpoint *b, struct event_location *location,
 	     happens only when a binary has changed, I don't know
 	     which approach is better.  */
 	  b->enable_state = bp_disabled;
-	  throw_exception (e);
+	  throw;
 	}
     }
 
@@ -15034,7 +15034,7 @@ save_breakpoints (const char *filename, int from_tty,
 	catch (const gdb_exception &ex)
 	  {
 	  current_uiout->redirect (NULL);
-	    throw_exception (ex);
+	    throw;
 	  }
 
 	current_uiout->redirect (NULL);

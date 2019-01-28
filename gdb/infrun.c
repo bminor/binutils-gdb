@@ -1786,7 +1786,7 @@ displaced_step_prepare (thread_info *thread)
 
       if (ex.error != MEMORY_ERROR
 	  && ex.error != NOT_SUPPORTED_ERROR)
-	throw_exception (ex);
+	throw;
 
       if (debug_infrun)
 	{
@@ -2624,7 +2624,7 @@ resume (gdb_signal sig)
 	 we're running in non-stop mode.  */
       if (inferior_ptid != null_ptid)
 	delete_single_step_breakpoints (inferior_thread ());
-      throw_exception (ex);
+      throw;
     }
 }
 

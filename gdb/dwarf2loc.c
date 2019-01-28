@@ -1209,7 +1209,7 @@ call_site_find_chain (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
 	  return NULL;
 	}
       else
-	throw_exception (e);
+	throw;
     }
 
   return retval;
@@ -2185,7 +2185,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	  return allocate_optimized_out_value (subobj_type);
 	}
       else
-	throw_exception (ex);
+	throw;
     }
 
   if (ctx.pieces.size () > 0)
@@ -2397,7 +2397,7 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 	  return 0;
 	}
       else
-	throw_exception (ex);
+	throw;
     }
 
   switch (ctx.location)

@@ -1543,7 +1543,7 @@ linux_detach_one_lwp (struct lwp_info *lwp)
   catch (const gdb_exception_error &ex)
     {
       if (!check_ptrace_stopped_lwp_gone (lwp))
-	throw_exception (ex);
+	throw;
     }
 
   lwpid = lwpid_of (thread);
@@ -4514,7 +4514,7 @@ linux_resume_one_lwp (struct lwp_info *lwp,
   catch (const gdb_exception_error &ex)
     {
       if (!check_ptrace_stopped_lwp_gone (lwp))
-	throw_exception (ex);
+	throw;
     }
 }
 

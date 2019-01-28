@@ -2557,7 +2557,7 @@ s390_frame_unwind_cache (struct frame_info *this_frame,
   catch (const gdb_exception_error &ex)
     {
       if (ex.error != NOT_AVAILABLE_ERROR)
-	throw_exception (ex);
+	throw;
     }
 
   return info;

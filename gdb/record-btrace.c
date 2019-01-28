@@ -1485,7 +1485,7 @@ record_btrace_target::insert_breakpoint (struct gdbarch *gdbarch,
   catch (const gdb_exception &except)
     {
       replay_memory_access = old;
-      throw_exception (except);
+      throw;
     }
   replay_memory_access = old;
 
@@ -1515,7 +1515,7 @@ record_btrace_target::remove_breakpoint (struct gdbarch *gdbarch,
   catch (const gdb_exception &except)
     {
       replay_memory_access = old;
-      throw_exception (except);
+      throw;
     }
   replay_memory_access = old;
 
@@ -1994,7 +1994,7 @@ get_thread_current_frame_id (struct thread_info *tp)
       /* Restore the previous execution state.  */
       set_executing (inferior_ptid, executing);
 
-      throw_exception (except);
+      throw;
     }
 
   /* Restore the previous execution state.  */
@@ -2075,7 +2075,7 @@ record_btrace_start_replaying (struct thread_info *tp)
 
       registers_changed_thread (tp);
 
-      throw_exception (except);
+      throw;
     }
 
   return replay;
@@ -2896,7 +2896,7 @@ cmd_record_btrace_bts_start (const char *args, int from_tty)
   catch (const gdb_exception &exception)
     {
       record_btrace_conf.format = BTRACE_FORMAT_NONE;
-      throw_exception (exception);
+      throw;
     }
 }
 
@@ -2917,7 +2917,7 @@ cmd_record_btrace_pt_start (const char *args, int from_tty)
   catch (const gdb_exception &exception)
     {
       record_btrace_conf.format = BTRACE_FORMAT_NONE;
-      throw_exception (exception);
+      throw;
     }
 }
 
@@ -2946,7 +2946,7 @@ cmd_record_btrace_start (const char *args, int from_tty)
       catch (const gdb_exception &ex)
 	{
 	  record_btrace_conf.format = BTRACE_FORMAT_NONE;
-	  throw_exception (ex);
+	  throw;
 	}
     }
 }

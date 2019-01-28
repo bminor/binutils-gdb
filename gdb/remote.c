@@ -5611,7 +5611,7 @@ remote_target::open_1 (const char *name, int from_tty, int extended_p)
 	   already before throwing the exception.  */
 	if (ex.error != TARGET_CLOSE_ERROR)
 	  remote_unpush_target ();
-	throw_exception (ex);
+	throw;
       }
   }
 
@@ -9784,7 +9784,7 @@ remote_target::remote_kill_k ()
       /* Otherwise, something went wrong.  We didn't actually kill
 	 the target.  Just propagate the exception, and let the
 	 user or higher layers decide what to do.  */
-      throw_exception (ex);
+      throw;
     }
 }
 
@@ -13143,7 +13143,7 @@ remote_target::get_trace_status (struct trace_status *ts)
 	  exception_fprintf (gdb_stderr, ex, "qTStatus: ");
 	  return -1;
 	}
-      throw_exception (ex);
+      throw;
     }
 
   result = packet_ok (p, &remote_protocol_packets[PACKET_qTStatus]);

@@ -1076,7 +1076,7 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
 	  return cache;
 	}
 
-      throw_exception (ex);
+      throw;
     }
 
   /* Initialize the register state.  */

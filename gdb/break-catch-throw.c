@@ -214,7 +214,7 @@ re_set_exception_catchpoint (struct breakpoint *self)
 	  /* NOT_FOUND_ERROR just means the breakpoint will be
 	     pending, so let it through.  */
 	  if (ex.error != NOT_FOUND_ERROR)
-	    throw_exception (ex);
+	    throw;
 	}
     }
 

@@ -2715,7 +2715,7 @@ frame_apply_command_count (const char *which_command,
 	      if (flags.cont)
 		printf_filtered ("%s\n", ex.what ());
 	      else
-		throw_exception (ex);
+		throw;
 	    }
 	}
     }

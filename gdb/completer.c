@@ -1451,7 +1451,7 @@ complete_line_internal (completion_tracker &tracker,
   catch (const gdb_exception_error &except)
     {
       if (except.error != MAX_COMPLETIONS_REACHED_ERROR)
-	throw_exception (except);
+	throw;
     }
 }
 

@@ -764,7 +764,7 @@ record_full_message (struct regcache *regcache, enum gdb_signal signal)
   catch (const gdb_exception &ex)
     {
       record_full_list_release (record_full_arch_list_tail);
-      throw_exception (ex);
+      throw;
     }
 
   record_full_list->next = record_full_arch_list_head;
@@ -1444,7 +1444,7 @@ record_full_wait_1 (struct target_ops *ops,
 	  else
 	    record_full_list = record_full_list->prev;
 
-	  throw_exception (ex);
+	  throw;
 	}
     }
 
@@ -2476,7 +2476,7 @@ record_full_restore (void)
   catch (const gdb_exception &ex)
     {
       record_full_list_release (record_full_arch_list_tail);
-      throw_exception (ex);
+      throw;
     }
 
   /* Add record_full_arch_list_head to the end of record list.  */

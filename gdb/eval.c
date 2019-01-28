@@ -217,7 +217,7 @@ fetch_subexp_value (struct expression *exp, int *pc, struct value **valp,
 	    break;
 	  /* Fall through.  */
 	default:
-	  throw_exception (ex);
+	  throw;
 	  break;
 	}
     }
@@ -722,7 +722,7 @@ evaluate_var_value (enum noside noside, const block *blk, symbol *var)
   catch (const gdb_exception_error &except)
     {
       if (noside != EVAL_AVOID_SIDE_EFFECTS)
-	throw_exception (except);
+	throw;
 
       ret = value_zero (SYMBOL_TYPE (var), not_lval);
     }
@@ -964,7 +964,7 @@ evaluate_funcall (type *expect_type, expression *exp, int *pos,
 		  if (except.error == NOT_FOUND_ERROR)
 		    break;
 		  else
-		    throw_exception (except);
+		    throw;
 		}
 
 		arg2 = value;
@@ -2053,7 +2053,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	      if (except.error == NOT_FOUND_ERROR)
 		break;
 	      else
-		throw_exception (except);
+		throw;
 	    }
 
 	  arg1 = value;

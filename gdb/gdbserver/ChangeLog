@@ -1,5 +1,11 @@
 2019-04-08  Tom Tromey  <tom@tromey.com>
 
+	* linux-low.c (linux_detach_one_lwp): Replace throw_exception with
+	throw.
+	(linux_resume_one_lwp): Likewise.
+
+2019-04-08  Tom Tromey  <tom@tromey.com>
+
 	* gdbreplay.c: Update.
 	* linux-low.c: Update.
 	* server.c: Update.

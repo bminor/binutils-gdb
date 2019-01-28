@@ -1057,7 +1057,7 @@ process_next_line (const char *p, struct command_line **command,
       catch (const gdb_exception &ex)
 	{
 	  free_command_lines (command);
-	  throw_exception (ex);
+	  throw;
 	}
     }
 

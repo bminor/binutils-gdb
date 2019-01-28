@@ -1484,7 +1484,7 @@ btrace_compute_ftrace_pt (struct thread_info *tp,
 
       btrace_finalize_ftrace_pt (decoder, tp, level);
 
-      throw_exception (error);
+      throw;
     }
 
   btrace_finalize_ftrace_pt (decoder, tp, level);
@@ -1560,7 +1560,7 @@ btrace_compute_ftrace (struct thread_info *tp, struct btrace_data *btrace,
     {
       btrace_finalize_ftrace (tp, gaps);
 
-      throw_exception (error);
+      throw;
     }
 
   btrace_finalize_ftrace (tp, gaps);
@@ -1631,7 +1631,7 @@ btrace_enable (struct thread_info *tp, const struct btrace_config *conf)
     {
       btrace_disable (tp);
 
-      throw_exception (exception);
+      throw;
     }
 }
 
@@ -3065,7 +3065,7 @@ btrace_maint_update_pt_packets (struct btrace_thread_info *btinfo)
       pt_pkt_free_decoder (decoder);
 
       if (except.reason < 0)
-	throw_exception (except);
+	throw;
     }
 
   pt_pkt_free_decoder (decoder);

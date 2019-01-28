@@ -1,5 +1,79 @@
 2019-04-08  Tom Tromey  <tom@tromey.com>
 
+	* valops.c (value_rtti_indirect_type): Replace throw_exception
+	with throw.
+	* tracefile-tfile.c (tfile_target_open): Replace throw_exception
+	with throw.
+	* thread.c (thr_try_catch_cmd): Replace throw_exception with
+	throw.
+	* target.c (target_translate_tls_address): Replace throw_exception
+	with throw.
+	* stack.c (frame_apply_command_count): Replace throw_exception
+	with throw.
+	* solib-spu.c (append_ocl_sos): Replace throw_exception with
+	throw.
+	* s390-tdep.c (s390_frame_unwind_cache): Replace throw_exception
+	with throw.
+	* rs6000-tdep.c (rs6000_frame_cache)
+	(rs6000_epilogue_frame_cache): Replace throw_exception with throw.
+	* remote.c: Replace throw_exception with throw.
+	* record-full.c (record_full_message, record_full_wait_1)
+	(record_full_restore): Replace throw_exception with throw.
+	* record-btrace.c:
+	(get_thread_current_frame_id, record_btrace_start_replaying)
+	(cmd_record_btrace_bts_start, cmd_record_btrace_pt_start)
+	(cmd_record_btrace_start): Replace throw_exception with throw.
+	* parse.c (parse_exp_in_context_1): Replace throw_exception with
+	throw.
+	* linux-nat.c (detach_one_lwp, linux_resume_one_lwp)
+	(resume_stopped_resumed_lwps): Replace throw_exception with throw.
+	* linespec.c:
+	(find_linespec_symbols): Replace throw_exception with throw.
+	* infrun.c (displaced_step_prepare, resume): Replace
+	throw_exception with throw.
+	* infcmd.c (post_create_inferior): Replace throw_exception with
+	throw.
+	* inf-loop.c (inferior_event_handler): Replace throw_exception
+	with throw.
+	* i386-tdep.c (i386_frame_cache, i386_epilogue_frame_cache)
+	(i386_sigtramp_frame_cache): Replace throw_exception with throw.
+	* frame.c (frame_unwind_pc, get_prev_frame_if_no_cycle)
+	(get_prev_frame_always, get_frame_pc_if_available)
+	(get_frame_address_in_block_if_available, get_frame_language):
+	Replace throw_exception with throw.
+	* frame-unwind.c (frame_unwind_try_unwinder): Replace
+	throw_exception with throw.
+	* eval.c (fetch_subexp_value, evaluate_var_value)
+	(evaluate_funcall, evaluate_subexp_standard): Replace
+	throw_exception with throw.
+	* dwarf2loc.c (call_site_find_chain)
+	(dwarf2_evaluate_loc_desc_full, dwarf2_locexpr_baton_eval):
+	Replace throw_exception with throw.
+	* dwarf2-frame.c (dwarf2_frame_cache): Replace throw_exception
+	with throw.
+	* darwin-nat.c (darwin_attach_pid): Replace throw_exception with
+	throw.
+	* cp-abi.c (baseclass_offset): Replace throw_exception with throw.
+	* completer.c (complete_line_internal): Replace throw_exception
+	with throw.
+	* compile/compile-object-run.c (compile_object_run): Replace
+	throw_exception with throw.
+	* cli/cli-script.c (process_next_line): Replace throw_exception
+	with throw.
+	* btrace.c (btrace_compute_ftrace_pt, btrace_compute_ftrace)
+	(btrace_enable, btrace_maint_update_pt_packets): Replace
+	throw_exception with throw.
+	* breakpoint.c (create_breakpoint, save_breakpoints): Replace
+	throw_exception with throw.
+	* break-catch-throw.c (re_set_exception_catchpoint): Replace
+	throw_exception with throw.
+	* amd64-tdep.c (amd64_frame_cache, amd64_sigtramp_frame_cache)
+	(amd64_epilogue_frame_cache): Replace throw_exception with throw.
+	* aarch64-tdep.c (aarch64_make_prologue_cache)
+	(aarch64_make_stub_cache): Replace throw_exception with throw.
+
+2019-04-08  Tom Tromey  <tom@tromey.com>
+
 	* common/common-exceptions.c (throw_exception): Rename from
 	throw_exception_cxx.  Remove old copy.  Make argument const.
 	(throw_it): Create and throw exception objects directly.

@@ -1147,7 +1147,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
 	 expression elements have been written, then there's nothing
 	 to do, so fail.  */
       if (! ps.parse_completion || ps.expout_ptr == 0)
-	throw_exception (except);
+	throw;
     }
 
   /* We have to operate on an "expression *", due to la_post_parser,
