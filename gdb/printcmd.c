@@ -1892,7 +1892,7 @@ do_one_display (struct display *d)
 	  /* Can't re-parse the expression.  Disable this display item.  */
 	  d->enabled_p = 0;
 	  warning (_("Unable to display \"%s\": %s"),
-		   d->exp_string, ex.message);
+		   d->exp_string, ex.what ());
 	  return;
 	}
       END_CATCH
@@ -1955,7 +1955,8 @@ do_one_display (struct display *d)
 	}
       CATCH (ex, RETURN_MASK_ERROR)
 	{
-	  fprintf_filtered (gdb_stdout, _("<error: %s>\n"), ex.message);
+	  fprintf_filtered (gdb_stdout, _("<error: %s>\n"),
+			    ex.what ());
 	}
       END_CATCH
     }
@@ -1989,7 +1990,7 @@ do_one_display (struct display *d)
 	}
       CATCH (ex, RETURN_MASK_ERROR)
 	{
-	  fprintf_filtered (gdb_stdout, _("<error: %s>"), ex.message);
+	  fprintf_filtered (gdb_stdout, _("<error: %s>"), ex.what ());
 	}
       END_CATCH
 
@@ -2193,8 +2194,8 @@ print_variable_and_value (const char *name, struct symbol *var,
     }
   CATCH (except, RETURN_MASK_ERROR)
     {
-      fprintf_filtered(stream, "<error reading variable %s (%s)>", name,
-		       except.message);
+      fprintf_filtered (stream, "<error reading variable %s (%s)>", name,
+			except.what ());
     }
   END_CATCH
 

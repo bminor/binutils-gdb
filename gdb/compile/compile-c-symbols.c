@@ -369,7 +369,7 @@ gcc_convert_symbol (void *datum,
 
   CATCH (e, RETURN_MASK_ALL)
     {
-      context->plugin ().error (e.message);
+      context->plugin ().error (e.what ());
     }
   END_CATCH
 
@@ -432,7 +432,7 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 
   CATCH (e, RETURN_MASK_ERROR)
     {
-      context->plugin ().error (e.message);
+      context->plugin ().error (e.what ());
     }
   END_CATCH
 
@@ -602,7 +602,7 @@ generate_c_for_for_one_variable (compile_instance *compiler,
 
   CATCH (e, RETURN_MASK_ERROR)
     {
-      compiler->insert_symbol_error (sym, e.message);
+      compiler->insert_symbol_error (sym, e.what ());
     }
   END_CATCH
 }

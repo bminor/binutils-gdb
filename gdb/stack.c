@@ -229,7 +229,6 @@ static void
 print_frame_arg (const struct frame_arg *arg)
 {
   struct ui_out *uiout = current_uiout;
-  const char *error_message = NULL;
 
   string_file stb;
 
@@ -265,7 +264,7 @@ print_frame_arg (const struct frame_arg *arg)
   else
     {
       if (arg->error)
-	error_message = arg->error;
+	stb.printf (_("<error reading variable: %s>"), arg->error);
       else
 	{
 	  TRY
@@ -299,12 +298,11 @@ print_frame_arg (const struct frame_arg *arg)
 	    }
 	  CATCH (except, RETURN_MASK_ERROR)
 	    {
-	      error_message = except.message;
+	      stb.printf (_("<error reading variable: %s>"),
+			  except.what ());
 	    }
 	  END_CATCH
 	}
-      if (error_message != NULL)
-	stb.printf (_("<error reading variable: %s>"), error_message);
     }
 
   uiout->field_stream ("value", stb);
@@ -328,7 +326,7 @@ read_frame_local (struct symbol *sym, struct frame_info *frame,
     }
   CATCH (except, RETURN_MASK_ERROR)
     {
-      argp->error = xstrdup (except.message);
+      argp->error = xstrdup (except.what ());
     }
   END_CATCH
 }
@@ -354,8 +352,8 @@ read_frame_arg (struct symbol *sym, struct frame_info *frame,
 	}
       CATCH (except, RETURN_MASK_ERROR)
 	{
-	  val_error = (char *) alloca (strlen (except.message) + 1);
-	  strcpy (val_error, except.message);
+	  val_error = (char *) alloca (except.message->size () + 1);
+	  strcpy (val_error, except.what ());
 	}
       END_CATCH
     }
@@ -377,8 +375,8 @@ read_frame_arg (struct symbol *sym, struct frame_info *frame,
 	{
 	  if (except.error != NO_ENTRY_VALUE_ERROR)
 	    {
-	      entryval_error = (char *) alloca (strlen (except.message) + 1);
-	      strcpy (entryval_error, except.message);
+	      entryval_error = (char *) alloca (except.message->size () + 1);
+	      strcpy (entryval_error, except.what ());
 	    }
 	}
       END_CATCH
@@ -438,8 +436,9 @@ read_frame_arg (struct symbol *sym, struct frame_info *frame,
 			val_equal = 1;
 		      else if (except.message != NULL)
 			{
-			  entryval_error = (char *) alloca (strlen (except.message) + 1);
-			  strcpy (entryval_error, except.message);
+			  entryval_error
+			    = (char *) alloca (except.message->size () + 1);
+			  strcpy (entryval_error, except.what ());
 			}
 		    }
 		  END_CATCH
@@ -480,8 +479,8 @@ read_frame_arg (struct symbol *sym, struct frame_info *frame,
 	    }
 	  CATCH (except, RETURN_MASK_ERROR)
 	    {
-	      val_error = (char *) alloca (strlen (except.message) + 1);
-	      strcpy (val_error, except.message);
+	      val_error = (char *) alloca (except.message->size () + 1);
+	      strcpy (val_error, except.what ());
 	    }
 	  END_CATCH
 	}
@@ -1410,7 +1409,8 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
 	      val_print_not_saved (gdb_stdout);
 	      break;
 	    default:
-	      fprintf_filtered (gdb_stdout, _("<error: %s>"), ex.message);
+	      fprintf_filtered (gdb_stdout, _("<error: %s>"),
+				ex.what ());
 	      break;
 	    }
 	}
@@ -2723,7 +2723,7 @@ frame_apply_command_count (const char *which_command,
 	      if (!flags.quiet)
 		print_stack_frame (fi, 1, LOCATION, 0);
 	      if (flags.cont)
-		printf_filtered ("%s\n", ex.message);
+		printf_filtered ("%s\n", ex.what ());
 	      else
 		throw_exception (ex);
 	    }

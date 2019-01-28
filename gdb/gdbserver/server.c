@@ -474,7 +474,7 @@ handle_btrace_general_set (char *own_buf)
     }
   CATCH (exception, RETURN_MASK_ERROR)
     {
-      sprintf (own_buf, "E.%s", exception.message);
+      sprintf (own_buf, "E.%s", exception.what ());
     }
   END_CATCH
 
@@ -1884,7 +1884,7 @@ handle_qxfer_btrace (const char *annex,
 	}
       CATCH (exception, RETURN_MASK_ERROR)
 	{
-	  sprintf (cs.own_buf, "E.%s", exception.message);
+	  sprintf (cs.own_buf, "E.%s", exception.what ());
 	  result = -1;
 	}
       END_CATCH
@@ -1956,7 +1956,7 @@ handle_qxfer_btrace_conf (const char *annex,
 	}
       CATCH (exception, RETURN_MASK_ERROR)
 	{
-	  sprintf (cs.own_buf, "E.%s", exception.message);
+	  sprintf (cs.own_buf, "E.%s", exception.what ());
 	  result = -1;
 	}
       END_CATCH
@@ -3559,7 +3559,8 @@ detach_or_kill_for_exit_cleanup ()
   CATCH (exception, RETURN_MASK_ALL)
     {
       fflush (stdout);
-      fprintf (stderr, "Detach or kill failed: %s\n", exception.message);
+      fprintf (stderr, "Detach or kill failed: %s\n",
+	       exception.what ());
       exit_code = 1;
     }
   END_CATCH
@@ -3933,7 +3934,7 @@ captured_main (int argc, char *argv[])
       CATCH (exception, RETURN_MASK_ERROR)
 	{
 	  fflush (stdout);
-	  fprintf (stderr, "gdbserver: %s\n", exception.message);
+	  fprintf (stderr, "gdbserver: %s\n", exception.what ());
 
 	  if (response_needed)
 	    {
@@ -3963,7 +3964,7 @@ main (int argc, char *argv[])
       if (exception.reason == RETURN_ERROR)
 	{
 	  fflush (stdout);
-	  fprintf (stderr, "%s\n", exception.message);
+	  fprintf (stderr, "%s\n", exception.what ());
 	  fprintf (stderr, "Exiting\n");
 	  exit_code = 1;
 	}

@@ -2110,9 +2110,9 @@ get_prev_frame_always (struct frame_info *this_frame)
 	         Allocate using stack local STOP_STRING then assign the
 	         pointer to the frame, this allows the STOP_STRING on the
 	         frame to be of type 'const char *'.  */
-	      size = strlen (ex.message) + 1;
+	      size = ex.message->size () + 1;
 	      stop_string = (char *) frame_obstack_zalloc (size);
-	      memcpy (stop_string, ex.message, size);
+	      memcpy (stop_string, ex.what (), size);
 	      this_frame->stop_string = stop_string;
 	    }
 	  prev_frame = NULL;

@@ -81,7 +81,7 @@ print_exception (struct ui_file *file, struct gdb_exception e)
   const char *start;
   const char *end;
 
-  for (start = e.message; start != NULL; start = end)
+  for (start = e.what (); start != NULL; start = end)
     {
       end = strchr (start, '\n');
       if (end == NULL)
@@ -143,13 +143,8 @@ exception_fprintf (struct ui_file *file, struct gdb_exception e,
 int
 exception_print_same (struct gdb_exception e1, struct gdb_exception e2)
 {
-  const char *msg1 = e1.message;
-  const char *msg2 = e2.message;
-
-  if (msg1 == NULL)
-    msg1 = "";
-  if (msg2 == NULL)
-    msg2 = "";
+  const char *msg1 = e1.message == nullptr ? "" : e1.what ();
+  const char *msg2 = e2.message == nullptr ? "" : e2.what ();
 
   return (e1.reason == e2.reason
 	  && e1.error == e2.error

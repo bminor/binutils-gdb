@@ -22,6 +22,7 @@
 
 #include <setjmp.h>
 #include <new>
+#include <memory>
 
 /* Reasons for calling throw_exceptions().  NOTE: all reason values
    must be different from zero.  enum value 0 is reserved for internal
@@ -110,9 +111,47 @@ enum errors {
 
 struct gdb_exception
 {
+  gdb_exception ()
+    : reason ((enum return_reason) 0),
+      error (GDB_NO_ERROR)
+  {
+  }
+
+  gdb_exception (enum return_reason r, enum errors e)
+    : reason (r),
+      error (e)
+  {
+  }
+
+  /* The copy constructor exists so that we can mark it "noexcept",
+     which is a good practice for any sort of exception object.  */
+  gdb_exception (const gdb_exception &other) noexcept
+    : reason (other.reason),
+      error (other.error),
+      message (other.message)
+  {
+  }
+
+  /* The assignment operator exists so that we can mark it "noexcept",
+     which is a good practice for any sort of exception object.  */
+  gdb_exception &operator= (const gdb_exception &other) noexcept
+  {
+    reason = other.reason;
+    error = other.error;
+    message = other.message;
+    return *this;
+  }
+
+  /* Return the contents of the exception message, as a C string.  The
+     string remains owned by the exception object.  */
+  const char *what () const noexcept
+  {
+    return message->c_str ();
+  }
+
   enum return_reason reason;
   enum errors error;
-  const char *message;
+  std::shared_ptr<std::string> message;
 };
 
 /* Functions to drive the sjlj-based exceptions state machine.  Though
@@ -127,8 +166,6 @@ extern int exceptions_state_mc_catch (struct gdb_exception *, int);
 
 /* For the C++ try/catch-based TRY/CATCH mechanism.  */
 
-extern void *exception_try_scope_entry (void);
-extern void exception_try_scope_exit (void *saved_state);
 extern void exception_rethrow (void) ATTRIBUTE_NORETURN;
 
 /* Macro to wrap up standard try/catch behavior.
@@ -178,23 +215,6 @@ extern void exception_rethrow (void) ATTRIBUTE_NORETURN;
 #define END_CATCH_SJLJ				\
   }
 
-/* Prevent error/quit during TRY from calling cleanups established
-   prior to here.  This pops out the scope in either case of normal
-   exit or exception exit.  */
-struct exception_try_scope
-{
-  exception_try_scope ()
-  {
-    saved_state = exception_try_scope_entry ();
-  }
-  ~exception_try_scope ()
-  {
-    exception_try_scope_exit (saved_state);
-  }
-
-  void *saved_state;
-};
-
 /* We still need to wrap TRY/CATCH in C++ so that cleanups and C++
    exceptions can coexist.
 
@@ -214,7 +234,6 @@ struct exception_try_scope
   {									\
     try									\
       {									\
-	exception_try_scope exception_try_scope_instance;		\
 	do								\
 	  {
 
@@ -236,14 +255,26 @@ struct exception_try_scope
 
 struct gdb_exception_RETURN_MASK_ALL : public gdb_exception
 {
+  explicit gdb_exception_RETURN_MASK_ALL (const gdb_exception &ex) noexcept
+    : gdb_exception (ex)
+  {
+  }
 };
 
 struct gdb_exception_RETURN_MASK_ERROR : public gdb_exception_RETURN_MASK_ALL
 {
+  explicit gdb_exception_RETURN_MASK_ERROR (const gdb_exception &ex) noexcept
+    : gdb_exception_RETURN_MASK_ALL (ex)
+  {
+  }
 };
 
 struct gdb_exception_RETURN_MASK_QUIT : public gdb_exception_RETURN_MASK_ALL
 {
+  explicit gdb_exception_RETURN_MASK_QUIT (const gdb_exception &ex) noexcept
+    : gdb_exception_RETURN_MASK_ALL (ex)
+  {
+  }
 };
 
 /* An exception type that inherits from both std::bad_alloc and a gdb
@@ -256,12 +287,10 @@ struct gdb_quit_bad_alloc
   : public gdb_exception_RETURN_MASK_QUIT,
     public std::bad_alloc
 {
-  explicit gdb_quit_bad_alloc (gdb_exception ex)
-    : std::bad_alloc ()
+  explicit gdb_quit_bad_alloc (const gdb_exception &ex) noexcept
+    : gdb_exception_RETURN_MASK_QUIT (ex),
+      std::bad_alloc ()
   {
-    gdb_exception *self = this;
-
-    *self = ex;
   }
 };
 

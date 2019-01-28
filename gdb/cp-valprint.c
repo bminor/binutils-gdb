@@ -329,7 +329,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		    {
 		      fprintf_filtered (stream,
 					_("<error reading variable: %s>"),
-					ex.message);
+					ex.what ());
 		    }
 		  END_CATCH
 

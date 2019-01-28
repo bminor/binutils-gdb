@@ -240,7 +240,7 @@ gdbpy_convert_exception (struct gdb_exception exception)
   else
     exc_class = gdbpy_gdb_error;
 
-  PyErr_Format (exc_class, "%s", exception.message);
+  PyErr_Format (exc_class, "%s", exception.what ());
 }
 
 /* Converts OBJ to a CORE_ADDR value.

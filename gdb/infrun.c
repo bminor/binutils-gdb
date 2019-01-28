@@ -1792,7 +1792,7 @@ displaced_step_prepare (thread_info *thread)
 	{
 	  fprintf_unfiltered (gdb_stdlog,
 			      "infrun: disabling displaced stepping: %s\n",
-			      ex.message);
+			      ex.what ());
 	}
 
       /* Be verbose if "set displaced-stepping" is "on", silent if
@@ -1800,7 +1800,7 @@ displaced_step_prepare (thread_info *thread)
       if (can_use_displaced_stepping == AUTO_BOOLEAN_TRUE)
 	{
 	  warning (_("disabling displaced stepping: %s"),
-		   ex.message);
+		   ex.what ());
 	}
 
       /* Disable further displaced stepping attempts.  */

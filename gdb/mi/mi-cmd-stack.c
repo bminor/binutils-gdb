@@ -527,10 +527,8 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 
   if (arg->val || arg->error)
     {
-      const char *error_message = NULL;
-
       if (arg->error)
-	error_message = arg->error;
+	stb.printf (_("<error reading variable: %s>"), arg->error);
       else
 	{
 	  TRY
@@ -544,12 +542,11 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 	    }
 	  CATCH (except, RETURN_MASK_ERROR)
 	    {
-	      error_message = except.message;
+	      stb.printf (_("<error reading variable: %s>"),
+			  except.what ());
 	    }
 	  END_CATCH
 	}
-      if (error_message != NULL)
-	stb.printf (_("<error reading variable: %s>"), error_message);
       uiout->field_stream ("value", stb);
     }
 }

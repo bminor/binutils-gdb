@@ -133,7 +133,7 @@ index_cache::store (struct dwarf2_per_objfile *dwarf2_per_objfile)
     {
       if (debug_index_cache)
 	printf_unfiltered ("index cache: couldn't store index cache for objfile "
-			 "%s: %s", objfile_name (obj), except.message);
+			   "%s: %s", objfile_name (obj), except.what ());
     }
   END_CATCH
 }
@@ -193,7 +193,7 @@ index_cache::lookup_gdb_index (const bfd_build_id *build_id,
     {
       if (debug_index_cache)
 	printf_unfiltered ("index cache: couldn't read %s: %s\n",
-			 filename.c_str (), except.message);
+			   filename.c_str (), except.what ());
     }
   END_CATCH
 

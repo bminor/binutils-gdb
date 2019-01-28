@@ -1962,7 +1962,7 @@ caching a copy of your shell.  However, this failed:\n\
 If you correct the problem, gdb will automatically try again the next time\n\
 you \"run\".  To prevent these attempts, you can use:\n\
     set startup-with-shell off"),
-		   ex.message);
+		   ex.what ());
 	  return false;
 	}
       END_CATCH

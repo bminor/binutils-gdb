@@ -2544,7 +2544,7 @@ show_convenience (const char *ignore, int from_tty)
 	}
       CATCH (ex, RETURN_MASK_ERROR)
 	{
-	  fprintf_filtered (gdb_stdout, _("<error: %s>"), ex.message);
+	  fprintf_filtered (gdb_stdout, _("<error: %s>"), ex.what ());
 	}
       END_CATCH
 

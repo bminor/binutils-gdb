@@ -1480,7 +1480,7 @@ thr_try_catch_cmd (thread_info *thr, const char *cmd, int from_tty,
 			     print_thread_id (thr),
 			     target_pid_to_str (inferior_ptid).c_str ());
 	  if (flags.cont)
-	    printf_filtered ("%s\n", ex.message);
+	    printf_filtered ("%s\n", ex.what ());
 	  else
 	    throw_exception (ex);
 	}

@@ -595,7 +595,7 @@ gdb_xml_parser::parse (const char *buffer)
       && m_error.error == XML_PARSE_ERROR)
     {
       gdb_assert (m_error.message != NULL);
-      error_string = m_error.message;
+      error_string = m_error.what ();
     }
   else if (status == XML_STATUS_ERROR)
     {

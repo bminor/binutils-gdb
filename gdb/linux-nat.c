@@ -1198,9 +1198,10 @@ linux_nat_target::attach (const char *args, int from_tty)
       std::string reason = linux_ptrace_attach_fail_reason (pid);
 
       if (!reason.empty ())
-	throw_error (ex.error, "warning: %s\n%s", reason.c_str (), ex.message);
+	throw_error (ex.error, "warning: %s\n%s", reason.c_str (),
+		     ex.what ());
       else
-	throw_error (ex.error, "%s", ex.message);
+	throw_error (ex.error, "%s", ex.what ());
     }
   END_CATCH
 

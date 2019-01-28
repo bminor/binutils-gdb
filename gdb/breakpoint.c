@@ -2675,7 +2675,7 @@ insert_bp_location (struct bp_location *bl,
 				      bp_excpt.message ? ":" : ".\n");
                   if (bp_excpt.message != NULL)
                     fprintf_unfiltered (tmp_error_stream, "%s.\n",
-					bp_excpt.message);
+					bp_excpt.what ());
 		}
 	      else
 		{
@@ -2695,7 +2695,7 @@ insert_bp_location (struct bp_location *bl,
 		      fprintf_unfiltered (tmp_error_stream,
 					  "Cannot insert breakpoint %d: %s\n",
 					  bl->owner->number,
-					  bp_excpt.message);
+					  bp_excpt.what ());
 		    }
 		}
 	      return 1;
@@ -13539,7 +13539,7 @@ update_breakpoint_locations (struct breakpoint *b,
 	    {
 	      warning (_("failed to reevaluate condition "
 			 "for breakpoint %d: %s"), 
-		       b->number, e.message);
+		       b->number, e.what ());
 	      new_loc->enabled = 0;
 	    }
 	  END_CATCH

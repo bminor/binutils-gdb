@@ -1,3 +1,10 @@
+2019-04-08  Tom Tromey  <tom@tromey.com>
+
+	* server.c (handle_btrace_general_set, handle_qxfer_btrace)
+	(handle_qxfer_btrace_conf, detach_or_kill_for_exit_cleanup)
+	(captured_main, main): Update.
+	* gdbreplay.c (main): Update.
+
 2019-04-05  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
 	* linux-low.c (linux_get_auxv): Remove static.  Return auxv entry

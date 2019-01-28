@@ -1212,7 +1212,7 @@ ada_val_print (struct type *type,
   CATCH (except, RETURN_MASK_ERROR)
     {
       fprintf_filtered (stream, _("<error reading variable: %s>"),
-			except.message);
+			except.what ());
     }
   END_CATCH
 }

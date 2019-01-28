@@ -660,7 +660,7 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
     {
       /* Handle failure to read a register without interrupting the entire
          'info registers' flow.  */
-      fprintf_filtered (file, "%s\n", ex.message);
+      fprintf_filtered (file, "%s\n", ex.what ());
       return;
     }
   END_CATCH

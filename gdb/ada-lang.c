@@ -9067,7 +9067,7 @@ ada_to_fixed_type_1 (struct type *type, const gdb_byte *valaddr,
 		   optimized out).  */
 		throw_error (except.error,
 			     _("unable to read value of %s (%s)"),
-			     xvz_name, except.message);
+			     xvz_name, except.what ());
 	      }
 	    END_CATCH
 
@@ -12377,7 +12377,7 @@ ada_exception_name_addr (enum ada_exception_catchpoint_kind ex,
 
   CATCH (e, RETURN_MASK_ERROR)
     {
-      warning (_("failed to get exception name: %s"), e.message);
+      warning (_("failed to get exception name: %s"), e.what ());
       return 0;
     }
   END_CATCH
@@ -12471,7 +12471,7 @@ create_excep_cond_exprs (struct ada_catchpoint *c,
 	    {
 	      warning (_("failed to reevaluate internal exception condition "
 			 "for catchpoint %d: %s"),
-		       c->number, e.message);
+		       c->number, e.what ());
 	    }
 	  END_CATCH
 	}

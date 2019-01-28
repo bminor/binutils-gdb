@@ -38,6 +38,7 @@
 #include "cli-out.h"
 #include "thread-fsm.h"
 #include "cli/cli-interp.h"
+#include "common/scope-exit.h"
 
 /* These are the interpreter setup, etc. functions for the MI
    interpreter.  */
@@ -211,22 +212,18 @@ mi_cmd_interpreter_exec (const char *command, char **argv, int argc)
 
   /* Now run the code.  */
 
-  std::string mi_error_message;
+  SCOPE_EXIT
+    {
+      mi_remove_notify_hooks ();
+    };
+
   for (i = 1; i < argc; i++)
     {
       struct gdb_exception e = interp_exec (interp_to_use, argv[i]);
 
       if (e.reason < 0)
-	{
-	  mi_error_message = e.message;
-	  break;
-	}
+	error ("%s", e.what ());
     }
-
-  mi_remove_notify_hooks ();
-
-  if (!mi_error_message.empty ())
-    error ("%s", mi_error_message.c_str ());
 }
 
 /* This inserts a number of hooks that are meant to produce

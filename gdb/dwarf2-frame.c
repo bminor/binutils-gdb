@@ -2257,7 +2257,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	  CATCH (e, RETURN_MASK_ERROR)
 	    {
 	      warning (_("skipping .eh_frame info of %s: %s"),
-		       objfile_name (objfile), e.message);
+		       objfile_name (objfile), e.what ());
 
 	      if (fde_table.num_entries != 0)
 		{
@@ -2298,7 +2298,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
       CATCH (e, RETURN_MASK_ERROR)
 	{
 	  warning (_("skipping .debug_frame info of %s: %s"),
-		   objfile_name (objfile), e.message);
+		   objfile_name (objfile), e.what ());
 
 	  if (fde_table.num_entries != 0)
 	    {

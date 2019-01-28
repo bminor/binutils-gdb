@@ -759,12 +759,12 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 		error (_("Cannot find thread-local storage for %s, "
 		         "shared library %s:\n%s"),
 		       target_pid_to_str (ptid).c_str (),
-		       objfile_name (objfile), ex.message);
+		       objfile_name (objfile), ex.what ());
 	      else
 		error (_("Cannot find thread-local storage for %s, "
 		         "executable file %s:\n%s"),
 		       target_pid_to_str (ptid).c_str (),
-		       objfile_name (objfile), ex.message);
+		       objfile_name (objfile), ex.what ());
 	      break;
 	    default:
 	      throw_exception (ex);

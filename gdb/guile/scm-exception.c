@@ -446,7 +446,7 @@ gdbscm_scm_from_gdb_exception (struct gdb_exception exception)
 
   return gdbscm_make_error (key, NULL, "~A",
 			    scm_list_1 (gdbscm_scm_from_c_string
-					(exception.message)),
+					(exception.what ())),
 			    SCM_BOOL_F);
 }
 

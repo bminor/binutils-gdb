@@ -90,7 +90,7 @@ run_tests (const char *filter)
       CATCH (ex, RETURN_MASK_ERROR)
 	{
 	  ++failed;
-	  debug_printf ("Self test failed: %s\n", ex.message);
+	  debug_printf ("Self test failed: %s\n", ex.what ());
 	}
       END_CATCH
 

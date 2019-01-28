@@ -1,5 +1,81 @@
 2019-04-08  Tom Tromey  <tom@tromey.com>
 
+	* xml-support.c (gdb_xml_parser::parse): Update.
+	* x86-linux-nat.c (x86_linux_nat_target::enable_btrace): Update.
+	* value.c (show_convenience): Update.
+	* unittests/cli-utils-selftests.c (test_number_or_range_parser)
+	(test_parse_flags_qcs): Update.
+	* thread.c (thr_try_catch_cmd): Update.
+	* target.c (target_translate_tls_address): Update.
+	* stack.c (print_frame_arg, read_frame_local, read_frame_arg)
+	(info_frame_command_core, frame_apply_command_count): Update.
+	* rust-exp.y (rust_lex_exception_test): Update.
+	* riscv-tdep.c (riscv_print_one_register_info): Update.
+	* remote.c (remote_target::enable_btrace): Update.
+	* record-btrace.c (record_btrace_enable_warn): Update.
+	* python/py-utils.c (gdbpy_convert_exception): Update.
+	* printcmd.c (do_one_display, print_variable_and_value): Update.
+	* mi/mi-main.c (mi_print_exception): Update.
+	* mi/mi-interp.c (mi_cmd_interpreter_exec): Use SCOPE_EXIT.
+	* mi/mi-cmd-stack.c (list_arg_or_local): Update.
+	* linux-nat.c (linux_nat_target::attach): Update.
+	* linux-fork.c (class scoped_switch_fork_info): Update.
+	* infrun.c (displaced_step_prepare): Update.
+	* infcall.c (call_function_by_hand_dummy): Update.
+	* guile/scm-exception.c (gdbscm_scm_from_gdb_exception): Update.
+	* gnu-v3-abi.c (print_one_vtable): Update.
+	* frame.c (get_prev_frame_always): Update.
+	* f-valprint.c (info_common_command_for_block): Update.
+	* exec.c (try_open_exec_file): Update.
+	* exceptions.c (print_exception, exception_print)
+	(exception_fprintf, exception_print_same): Update.
+	* dwarf2-frame.c (dwarf2_build_frame_info): Update.
+	* dwarf-index-cache.c (index_cache::store)
+	(index_cache::lookup_gdb_index): Update.
+	* darwin-nat.c (maybe_cache_shell): Update.
+	* cp-valprint.c (cp_print_value_fields): Update.
+	* compile/compile-cplus-symbols.c (gcc_cplus_convert_symbol)
+	(gcc_cplus_symbol_address): Update.
+	* compile/compile-c-symbols.c (gcc_convert_symbol)
+	(gcc_symbol_address, generate_c_for_for_one_variable): Update.
+	* common/selftest.c: Update.
+	* common/common-exceptions.h (struct gdb_exception) <message>: Now
+	a std::string.
+	(exception_try_scope_entry, exception_try_scope_exit): Don't
+	declare.
+	(struct exception_try_scope): Remove.
+	(TRY): Don't use exception_try_scope.
+	(struct gdb_exception): Add constructor, operator=.
+	<what>: New method.
+	(struct gdb_exception_RETURN_MASK_ALL)
+	(struct gdb_exception_RETURN_MASK_ERROR)
+	(struct gdb_exception_RETURN_MASK_QUIT): Add constructor.
+	(struct gdb_quit_bad_alloc): Update.
+	* common/common-exceptions.c (exception_none): Change
+	initializer.
+	(struct catcher) <state, exception>: Initialize inline.
+	<prev>: Remove member.
+	(current_catcher): Remove.
+	(catchers): New global.
+	(exceptions_state_mc_init): Simplify.
+	(catcher_pop): Remove.
+	(exceptions_state_mc, exceptions_state_mc_catch): Update.
+	(try_scope_depth, exception_try_scope_entry)
+	(exception_try_scope_exit): Remove.
+	(throw_exception_sjlj): Update.
+	(exception_messages, exception_messages_size): Remove.
+	(throw_it): Simplify.
+	(gdb_exception_sliced_copy): Remove.
+	(throw_exception_cxx): Update.
+	* cli/cli-script.c (script_from_file): Update.
+	* breakpoint.c (insert_bp_location, update_breakpoint_locations):
+	Update.
+	* ada-valprint.c (ada_val_print): Update.
+	* ada-lang.c (ada_to_fixed_type_1, ada_exception_name_addr)
+	(create_excep_cond_exprs): Update.
+
+2019-04-08  Tom Tromey  <tom@tromey.com>
+
 	* common/common-exceptions.h (GDB_XCPT_SJMP, GDB_XCPT_TRY)
 	(GDB_XCPT_RAW_TRY, GDB_XCPT): Remove.
 	(TRY, CATCH, END_CATCH): Remove some definitions.

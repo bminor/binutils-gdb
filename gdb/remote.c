@@ -13797,7 +13797,7 @@ remote_target::enable_btrace (ptid_t ptid, const struct btrace_config *conf)
   CATCH (err, RETURN_MASK_ERROR)
     {
       if (err.message != NULL)
-	warning ("%s", err.message);
+	warning ("%s", err.what ());
     }
   END_CATCH
 

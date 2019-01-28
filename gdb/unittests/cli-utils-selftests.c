@@ -87,7 +87,7 @@ test_number_or_range_parser ()
       {
 	SELF_CHECK (ex.reason == RETURN_ERROR);
 	SELF_CHECK (ex.error == GENERIC_ERROR);
-	SELF_CHECK (strcmp (ex.message, "negative value") == 0);
+	SELF_CHECK (strcmp (ex.what (), "negative value") == 0);
 	SELF_CHECK (strcmp (minus_one.cur_tok (), "-1") == 0);
       }
     END_CATCH;
@@ -225,7 +225,7 @@ test_parse_flags_qcs ()
 	SELF_CHECK (ex.reason == RETURN_ERROR);
 	SELF_CHECK (ex.error == GENERIC_ERROR);
 	SELF_CHECK
-	  (strcmp (ex.message,
+	  (strcmp (ex.what (),
 		   "test_parse_flags_qcs.t4.cs: "
 		   "-c and -s are mutually exclusive") == 0);
       }

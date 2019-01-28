@@ -1550,7 +1550,8 @@ script_from_file (FILE *stream, const char *file)
 	 prepended.  */
       throw_error (e.error,
 		   _("%s:%d: Error in sourced command file:\n%s"),
-		   source_file_name.c_str (), source_line_number, e.message);
+		   source_file_name.c_str (), source_line_number,
+		   e.what ());
     }
   END_CATCH
 }

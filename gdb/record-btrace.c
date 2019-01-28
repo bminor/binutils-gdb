@@ -288,7 +288,7 @@ record_btrace_enable_warn (struct thread_info *tp)
     }
   CATCH (error, RETURN_MASK_ERROR)
     {
-      warning ("%s", error.message);
+      warning ("%s", error.what ());
     }
   END_CATCH
 }

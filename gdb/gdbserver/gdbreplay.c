@@ -537,7 +537,7 @@ main (int argc, char *argv[])
       if (exception.reason == RETURN_ERROR)
 	{
 	  fflush (stdout);
-	  fprintf (stderr, "%s\n", exception.message);
+	  fprintf (stderr, "%s\n", exception.what ());
 	}
 
       exit (1);

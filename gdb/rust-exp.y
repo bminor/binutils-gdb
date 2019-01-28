@@ -2623,7 +2623,7 @@ rust_lex_exception_test (rust_parser *parser, const char *input,
     }
   CATCH (except, RETURN_MASK_ERROR)
     {
-      SELF_CHECK (strcmp (except.message, err) == 0);
+      SELF_CHECK (strcmp (except.what (), err) == 0);
     }
   END_CATCH
 }

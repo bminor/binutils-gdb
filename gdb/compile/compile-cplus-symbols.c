@@ -392,7 +392,7 @@ gcc_cplus_convert_symbol (void *datum,
     {
       /* We can't allow exceptions to escape out of this callback.  Safest
 	 is to simply emit a gcc error.  */
-      instance->plugin ().error (e.message);
+      instance->plugin ().error (e.what ());
     }
   END_CATCH
 
@@ -469,7 +469,7 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
 
   CATCH (e, RETURN_MASK_ERROR)
     {
-      instance->plugin ().error (e.message);
+      instance->plugin ().error (e.what ());
     }
   END_CATCH
 

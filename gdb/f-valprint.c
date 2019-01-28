@@ -415,7 +415,8 @@ info_common_command_for_block (const struct block *block, const char *comname,
 
 	    CATCH (except, RETURN_MASK_ERROR)
 	      {
-		printf_filtered ("<error reading variable: %s>", except.message);
+		printf_filtered ("<error reading variable: %s>",
+				 except.what ());
 	      }
 	    END_CATCH
 

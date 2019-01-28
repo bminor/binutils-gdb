@@ -1193,7 +1193,7 @@ An error occurred while in a function called from GDB.\n\
 Evaluation of the expression containing the function\n\
 (%s) will be abandoned.\n\
 When the function is done executing, GDB will silently stop."),
-		       e.message, name);
+		       e.what (), name);
 	case RETURN_QUIT:
 	default:
 	  throw_exception (e);
