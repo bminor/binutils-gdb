@@ -30,6 +30,25 @@
 #include "trad-frame.h"
 #include "tramp-frame.h"
 
+/* Register maps.  */
+
+static const struct regcache_map_entry arm_fbsd_gregmap[] =
+  {
+    { 13, ARM_A1_REGNUM, 4 }, /* r0 ... r12 */
+    { 1, ARM_SP_REGNUM, 4 },
+    { 1, ARM_LR_REGNUM, 4 },
+    { 1, ARM_PC_REGNUM, 4 },
+    { 1, ARM_PS_REGNUM, 4 },
+    { 0 }
+  };
+
+static const struct regcache_map_entry arm_fbsd_vfpregmap[] =
+  {
+    { 32, ARM_D0_REGNUM, 8 }, /* d0 ... d31 */
+    { 1, ARM_FPSCR_REGNUM, 4 },
+    { 0 }
+  };
+
 /* In a signal frame, sp points to a 'struct sigframe' which is
    defined as:
 
@@ -67,8 +86,6 @@
    the sigframe, otherwise it is NULL.  There is no non-VFP floating
    point register state saved in the signal frame.  */
 
-#define ARM_MCONTEXT_REG_SIZE		4
-#define ARM_MCONTEXT_VFP_REG_SIZE	8
 #define ARM_SIGFRAME_UCONTEXT_OFFSET	64
 #define ARM_UCONTEXT_MCONTEXT_OFFSET	16
 #define ARM_MCONTEXT_VFP_PTR_OFFSET	72
@@ -89,31 +106,16 @@ arm_fbsd_sigframe_init (const struct tramp_frame *self,
 			     + ARM_UCONTEXT_MCONTEXT_OFFSET);
   ULONGEST mcontext_vfp_addr;
 
-  for (int i = 0; i < 16; i++)
-    {
-      trad_frame_set_reg_addr (this_cache,
-			       ARM_A1_REGNUM + i,
-			       mcontext_addr + i * ARM_MCONTEXT_REG_SIZE);
-    }
-  trad_frame_set_reg_addr (this_cache, ARM_PS_REGNUM,
-			   mcontext_addr + 16 * ARM_MCONTEXT_REG_SIZE);
+  trad_frame_set_reg_regmap (this_cache, arm_fbsd_gregmap, mcontext_addr,
+			     regcache_map_entry_size (arm_fbsd_gregmap));
 
   if (safe_read_memory_unsigned_integer (mcontext_addr
 					 + ARM_MCONTEXT_VFP_PTR_OFFSET, 4,
 					 byte_order,
 					 &mcontext_vfp_addr)
       && mcontext_vfp_addr != 0)
-    {
-      for (int i = 0; i < 32; i++)
-	{
-	  trad_frame_set_reg_addr (this_cache, ARM_D0_REGNUM + i,
-				   mcontext_vfp_addr
-				   + i * ARM_MCONTEXT_VFP_REG_SIZE);
-	}
-      trad_frame_set_reg_addr (this_cache, ARM_FPSCR_REGNUM,
-			       mcontext_vfp_addr
-			       + 32 * ARM_MCONTEXT_VFP_REG_SIZE);
-    }
+    trad_frame_set_reg_regmap (this_cache, arm_fbsd_vfpregmap, mcontext_vfp_addr,
+			       regcache_map_entry_size (arm_fbsd_vfpregmap));
 
   trad_frame_set_id (this_cache, frame_id_build (sp, func));
 }
@@ -131,25 +133,6 @@ static const struct tramp_frame arm_fbsd_sigframe =
   },
   arm_fbsd_sigframe_init
 };
-
-/* Register maps.  */
-
-static const struct regcache_map_entry arm_fbsd_gregmap[] =
-  {
-    { 13, ARM_A1_REGNUM, 4 }, /* r0 ... r12 */
-    { 1, ARM_SP_REGNUM, 4 },
-    { 1, ARM_LR_REGNUM, 4 },
-    { 1, ARM_PC_REGNUM, 4 },
-    { 1, ARM_PS_REGNUM, 4 },
-    { 0 }
-  };
-
-static const struct regcache_map_entry arm_fbsd_vfpregmap[] =
-  {
-    { 32, ARM_D0_REGNUM, 8 }, /* d0 ... d31 */
-    { 1, ARM_FPSCR_REGNUM, 4 },
-    { 0 }
-  };
 
 /* Register set definitions.  */
 

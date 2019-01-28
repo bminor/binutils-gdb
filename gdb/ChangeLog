@@ -1,3 +1,16 @@
+2019-01-28  John Baldwin  <jhb@FreeBSD.org>
+
+	* aarch64-fbsd-tdep.c (aarch64_fbsd_gregmap)
+	(aarch64_fbsd_fpregmap): Move earlier.
+	(AARCH64_MCONTEXT_REG_SIZE, AARCH64_MCONTEXT_FPREG_SIZE): Delete.
+	(aarch64_fbsd_sigframe_init): Use trad_frame_set_reg_regmap
+	instead of individual calls to trad_frame_set_reg_addr.
+	* arm-fbsd-tdep.c (arm_fbsd_gregmap, arm_fbsd_vfpregmap): Move
+	earlier.
+	(ARM_MCONTEXT_REG_SIZE, ARM_MCONTEXT_VFP_REG_SIZE): Delete.
+	(arm_fbsd_sigframe_init): Use trad_frame_set_reg_regmap
+	instead of individual calls to trad_frame_set_reg_addr.
+
 2019-01-28  Alan Hayward  <alan.hayward@arm.com>
 
 	* CONTRIBUTE: Replace contribution list with wiki link.

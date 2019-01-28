@@ -29,6 +29,26 @@
 #include "tramp-frame.h"
 #include "trad-frame.h"
 
+/* Register maps.  */
+
+static const struct regcache_map_entry aarch64_fbsd_gregmap[] =
+  {
+    { 30, AARCH64_X0_REGNUM, 8 }, /* x0 ... x29 */
+    { 1, AARCH64_LR_REGNUM, 8 },
+    { 1, AARCH64_SP_REGNUM, 8 },
+    { 1, AARCH64_PC_REGNUM, 8 },
+    { 1, AARCH64_CPSR_REGNUM, 4 },
+    { 0 }
+  };
+
+static const struct regcache_map_entry aarch64_fbsd_fpregmap[] =
+  {
+    { 32, AARCH64_V0_REGNUM, 16 }, /* v0 ... v31 */
+    { 1, AARCH64_FPSR_REGNUM, 4 },
+    { 1, AARCH64_FPCR_REGNUM, 4 },
+    { 0 }
+  };
+
 /* In a signal frame, sp points to a 'struct sigframe' which is
    defined as:
 
@@ -49,8 +69,6 @@
    by the floating point register set.  The floating point register
    set is only valid if the _MC_FP_VALID flag is set in mc_flags.  */
 
-#define AARCH64_MCONTEXT_REG_SIZE               8
-#define AARCH64_MCONTEXT_FPREG_SIZE             16
 #define AARCH64_SIGFRAME_UCONTEXT_OFFSET	80
 #define AARCH64_UCONTEXT_MCONTEXT_OFFSET	16
 #define	AARCH64_MCONTEXT_FPREGS_OFFSET		272
@@ -68,47 +86,22 @@ aarch64_fbsd_sigframe_init (const struct tramp_frame *self,
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR sp = get_frame_register_unsigned (this_frame, AARCH64_SP_REGNUM);
-  CORE_ADDR mcontext_addr =
-    sp
-    + AARCH64_SIGFRAME_UCONTEXT_OFFSET
-    + AARCH64_UCONTEXT_MCONTEXT_OFFSET;
+  CORE_ADDR mcontext_addr
+    = (sp
+       + AARCH64_SIGFRAME_UCONTEXT_OFFSET
+       + AARCH64_UCONTEXT_MCONTEXT_OFFSET);
   gdb_byte buf[4];
-  int i;
 
-  for (i = 0; i < 30; i++)
-    {
-      trad_frame_set_reg_addr (this_cache,
-			       AARCH64_X0_REGNUM + i,
-			       mcontext_addr + i * AARCH64_MCONTEXT_REG_SIZE);
-    }
-  trad_frame_set_reg_addr (this_cache, AARCH64_LR_REGNUM,
-			   mcontext_addr + 30 * AARCH64_MCONTEXT_REG_SIZE);
-  trad_frame_set_reg_addr (this_cache, AARCH64_SP_REGNUM,
-			   mcontext_addr + 31 * AARCH64_MCONTEXT_REG_SIZE);
-  trad_frame_set_reg_addr (this_cache, AARCH64_PC_REGNUM,
-			   mcontext_addr + 32 * AARCH64_MCONTEXT_REG_SIZE);
-  trad_frame_set_reg_addr (this_cache, AARCH64_CPSR_REGNUM,
-			   mcontext_addr + 33 * AARCH64_MCONTEXT_REG_SIZE);
+  trad_frame_set_reg_regmap (this_cache, aarch64_fbsd_gregmap, mcontext_addr,
+			     regcache_map_entry_size (aarch64_fbsd_gregmap));
 
   if (target_read_memory (mcontext_addr + AARCH64_MCONTEXT_FLAGS_OFFSET, buf,
 			  4) == 0
       && (extract_unsigned_integer (buf, 4, byte_order)
 	  & AARCH64_MCONTEXT_FLAG_FP_VALID))
-    {
-      for (i = 0; i < 32; i++)
-	{
-	  trad_frame_set_reg_addr (this_cache, AARCH64_V0_REGNUM + i,
-				   mcontext_addr
-				   + AARCH64_MCONTEXT_FPREGS_OFFSET
-				   + i * AARCH64_MCONTEXT_FPREG_SIZE);
-	}
-      trad_frame_set_reg_addr (this_cache, AARCH64_FPSR_REGNUM,
-			       mcontext_addr + AARCH64_MCONTEXT_FPREGS_OFFSET
-			       + 32 * AARCH64_MCONTEXT_FPREG_SIZE);
-      trad_frame_set_reg_addr (this_cache, AARCH64_FPCR_REGNUM,
-			       mcontext_addr + AARCH64_MCONTEXT_FPREGS_OFFSET
-			       + 32 * AARCH64_MCONTEXT_FPREG_SIZE + 4);
-    }
+    trad_frame_set_reg_regmap (this_cache, aarch64_fbsd_fpregmap,
+			       mcontext_addr + AARCH64_MCONTEXT_FPREGS_OFFSET,
+			       regcache_map_entry_size (aarch64_fbsd_fpregmap));
 
   trad_frame_set_id (this_cache, frame_id_build (sp, func));
 }
@@ -126,26 +119,6 @@ static const struct tramp_frame aarch64_fbsd_sigframe =
   },
   aarch64_fbsd_sigframe_init
 };
-
-/* Register maps.  */
-
-static const struct regcache_map_entry aarch64_fbsd_gregmap[] =
-  {
-    { 30, AARCH64_X0_REGNUM, 8 }, /* x0 ... x29 */
-    { 1, AARCH64_LR_REGNUM, 8 },
-    { 1, AARCH64_SP_REGNUM, 8 },
-    { 1, AARCH64_PC_REGNUM, 8 },
-    { 1, AARCH64_CPSR_REGNUM, 4 },
-    { 0 }
-  };
-
-static const struct regcache_map_entry aarch64_fbsd_fpregmap[] =
-  {
-    { 32, AARCH64_V0_REGNUM, 16 }, /* v0 ... v31 */
-    { 1, AARCH64_FPSR_REGNUM, 4 },
-    { 1, AARCH64_FPCR_REGNUM, 4 },
-    { 0 }
-  };
 
 /* Register set definitions.  */
 
