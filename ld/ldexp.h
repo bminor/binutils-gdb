@@ -106,7 +106,9 @@ typedef enum
   /* During assignment of symbol values when relaxation in progress.  */
   lang_assigning_phase_enum,
   /* Final assignment of symbol values.  */
-  lang_final_phase_enum
+  lang_final_phase_enum,
+  /* Run after symbol values have been fixed, for lang_map.  */
+  lang_fixed_phase_enum
 } lang_phase_type;
 
 union lang_statement_union;

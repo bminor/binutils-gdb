@@ -1,3 +1,18 @@
+2019-01-29  Nick Clifton  <nickc@redhat.com>
+
+	* Import from mainline:
+	2019-01-28  Alan Modra  <amodra@gmail.com>
+
+	PR 24008
+	* ldexp.h (lang_phase_type): Add lang_fixed_phase_enum.
+	* ldexp.c (fold_name): Move expld.assign_name check later to
+	avoid an extra lookup.
+	(exp_fold_tree_1): When lang_fixed_phase_enum, don't change symbol
+	values, and don't clear expld.assign_name.
+	* ldlang.c (lang_map): Set expld.phase to lang_fixed_phase_enum.
+	(print_assignment): Resolve entire assignment expression.
+	Don't access symbol u.def unless symbol is defined.
+
 2019-01-29  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* testsuite/ld-ifunc/ifunc.exp: Skip pr23169 on SPARC.
