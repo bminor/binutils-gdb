@@ -79,5 +79,6 @@ if ![is_aout_format] {
 if [is_elf_format] {
     run_dump_test "defined6"
 }
+run_dump_test "pr24008"
 set LDFLAGS "$saved_LDFLAGS"
 set ASFLAGS "$saved_ASFLAGS"
