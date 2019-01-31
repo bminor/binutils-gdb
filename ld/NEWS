@@ -6,6 +6,12 @@ Changes in 2.32:
 
 * Add support for the C-SKY processor series.
 
+* -t now doesn't report members within archives, unless -t is given twice.
+  A single -t is now more useful when generating a list of files that should be
+  packaged for a linker bug report.  For example:
+    gcc hello.c -save-temps -Wl,-t | xargs realpath | sort | uniq > files
+    tar cJf test.tar.xz `cat files`
+
 Changes in 2.31:
 
 * Speed up direct linking with DLLs for Cygwin and Mingw targets.
