@@ -1,3 +1,10 @@
+2019-01-31  Andreas Krebbel  <krebbel@linux.ibm.com>
+
+	* s390-mkopc.c (main): Accept arch13 as cpu string.
+	* s390-opc.c: Add new instruction formats and instruction opcode
+	masks.
+	* s390-opc.txt: Add new arch13 instructions.
+
 2019-01-25  Sudakshina Das  <sudi.das@arm.com>
 
 	* aarch64-tbl.h (QL_LDST_AT): Update macro.

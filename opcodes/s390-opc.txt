@@ -1887,3 +1887,107 @@ e70000000006 vl VRX_VRRDU "vector memory load" arch12 zarch optparm
 e70000000036 vlm VRS_VVRDU "vector load multiple" arch12 zarch optparm
 e7000000000e vst VRX_VRRDU "vector store" arch12 zarch optparm
 e7000000003e vstm VRS_VVRDU "vector store multiple" arch12 zarch optparm
+
+# arch13 instructions
+
+b9f5 ncrk RRF_R0RR2 " " arch13 zarch
+b9e5 ncgrk RRF_R0RR2 " " arch13 zarch
+e50a mvcrl SSE_RDRD " " arch13 zarch
+b974 nnrk RRF_R0RR2 " " arch13 zarch
+b964 nngrk RRF_R0RR2 " " arch13 zarch
+b976 nork RRF_R0RR2 " " arch13 zarch
+b966 nogrk RRF_R0RR2 " " arch13 zarch
+b977 nxrk RRF_R0RR2 " " arch13 zarch
+b967 nxgrk RRF_R0RR2 " " arch13 zarch
+b975 ocrk RRF_R0RR2 " " arch13 zarch
+b965 ocgrk RRF_R0RR2 " " arch13 zarch
+b9e1 popcnt RRF_U0RR " " arch13 zarch optparm
+b9f0 selr RRF_RURR " " arch13 zarch
+b9f00000 selr*20 RRF_R0RR3 " " arch13 zarch
+b9e3 selgr RRF_RURR " " arch13 zarch
+b9e30000 selgr*20 RRF_R0RR3 " " arch13 zarch
+b9c0 selhhhr RRF_RURR " " arch13 zarch
+b9c00000 selhhhr*20 RRF_R0RR3 " " arch13 zarch
+
+e60000000006 vlbr VRX_VRRDU " " arch13 zarch
+e60000001006 vlbrh VRX_VRRD " " arch13 zarch
+e60000002006 vlbrf VRX_VRRD " " arch13 zarch
+e60000003006 vlbrg VRX_VRRD " " arch13 zarch
+e60000004006 vlbrq VRX_VRRD " " arch13 zarch
+
+e60000000007 vler VRX_VRRDU " " arch13 zarch
+e60000001007 vlerh VRX_VRRD " " arch13 zarch
+e60000002007 vlerf VRX_VRRD " " arch13 zarch
+e60000003007 vlerg VRX_VRRD " " arch13 zarch
+
+e60000000004 vllebrz VRX_VRRDU " " arch13 zarch
+e60000001004 vllebrzh VRX_VRRD " " arch13 zarch
+e60000002004 vllebrzf VRX_VRRD " " arch13 zarch
+e60000003004 ldrv VRX_VRRD " " arch13 zarch
+e60000003004 vllebrzg VRX_VRRD " " arch13 zarch
+e60000006004 lerv VRX_VRRD " " arch13 zarch
+e60000006004 vllebrze VRX_VRRD " " arch13 zarch
+
+e60000000001 vlebrh VRX_VRRDU " " arch13 zarch
+e60000000003 vlebrf VRX_VRRDU " " arch13 zarch
+e60000000002 vlebrg VRX_VRRDU " " arch13 zarch
+
+e60000000005 vlbrrep VRX_VRRDU " " arch13 zarch
+e60000001005 vlbrreph VRX_VRRD " " arch13 zarch
+e60000002005 vlbrrepf VRX_VRRD " " arch13 zarch
+e60000003005 vlbrrepg VRX_VRRD " " arch13 zarch
+
+e6000000000e vstbr VRX_VRRDU " " arch13 zarch
+e6000000100e vstbrh VRX_VRRD " " arch13 zarch
+e6000000200e vstbrf VRX_VRRD " " arch13 zarch
+e6000000300e vstbrg VRX_VRRD " " arch13 zarch
+e6000000400e vstbrq VRX_VRRD " " arch13 zarch
+
+e6000000000f vster VRX_VRRDU " " arch13 zarch
+e6000000100f vsterh VRX_VRRD " " arch13 zarch
+e6000000200f vsterf VRX_VRRD " " arch13 zarch
+e6000000300f vsterg VRX_VRRD " " arch13 zarch
+
+e60000000009 vstebrh VRX_VRRDU " " arch13 zarch
+e6000000000b vstebrf VRX_VRRDU " " arch13 zarch
+e6000000000b sterv VRX_VRRD " " arch13 zarch
+e6000000000a vstebrg VRX_VRRDU " " arch13 zarch
+e6000000000a stdrv VRX_VRRD " " arch13 zarch
+
+e70000000086 vsld VRI_VVV0U " " arch13 zarch
+e70000000087 vsrd VRI_VVV0U " " arch13 zarch
+
+e7000000008b vstrs VRR_VVVUU0V " " arch13 zarch optparm
+
+e7000000008b vstrsb VRR_VVVU0VB " " arch13 zarch optparm
+e7000100008b vstrsh VRR_VVVU0VB " " arch13 zarch optparm
+e7000200008b vstrsf VRR_VVVU0VB " " arch13 zarch optparm
+
+e7000020008b vstrszb VRR_VVVU0VB2 " " arch13 zarch optparm
+e7000120008b vstrszh VRR_VVVU0VB2 " " arch13 zarch optparm
+e7000220008b vstrszf VRR_VVVU0VB2 " " arch13 zarch optparm
+
+e700000000c3 vcfps VRR_VV0UUU " " arch13 zarch
+e700000020c3 vcefb VRR_VV0UU " " arch13 zarch
+e700000820c3 wcefb VRR_VV0UU8 " " arch13 zarch
+
+e700000000c1 vcfpl VRR_VV0UUU " " arch13 zarch
+e700000020c1 vcelfb VRR_VV0UU " " arch13 zarch
+e700000820c1 wcelfb VRR_VV0UU8 " " arch13 zarch
+
+e700000000c2 vcsfp VRR_VV0UUU " " arch13 zarch
+e700000020c2 vcfeb VRR_VV0UU " " arch13 zarch
+e700000820c2 wcfeb VRR_VV0UU8 " " arch13 zarch
+
+e700000000c0 vclfp VRR_VV0UUU " " arch13 zarch
+e700000020c0 vclfeb VRR_VV0UU " " arch13 zarch
+e700000820c0 wclfeb VRR_VV0UU8 " " arch13 zarch
+
+b939 dfltcc RRF_R0RR2 " " arch13 zarch
+
+b938 sortl RRE_RR " " arch13 zarch
+
+e60000000050 vcvb VRR_RV0UU " " arch13 zarch optparm
+e60000000052 vcvbg VRR_RV0UU " " arch13 zarch optparm
+
+b93a kdsa RRE_RR " " arch13 zarch

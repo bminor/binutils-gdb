@@ -1,3 +1,8 @@
+2019-01-31  Andreas Krebbel  <krebbel@linux.ibm.com>
+
+	* opcode/s390.h (enum s390_opcode_cpu_val): Add
+	S390_OPCODE_ARCH13.
+
 2019-01-25  Sudakshina Das  <sudi.das@arm.com>
 	    Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
 
