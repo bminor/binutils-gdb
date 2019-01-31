@@ -961,7 +961,11 @@ Enabled by default.
 @cindex input files, displaying
 @item -t
 @itemx --trace
-Print the names of the input files as @command{ld} processes them.
+Print the names of the input files as @command{ld} processes them.  If
+@samp{-t} is given twice then members within archives are also printed.
+@samp{-t} output is useful to generate a list of all the object files
+and scripts involved in linking, for example, when packaging files for
+a linker bug report.
 
 @kindex -T @var{script}
 @kindex --script=@var{script}
