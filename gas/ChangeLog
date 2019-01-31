@@ -1,3 +1,10 @@
+2019-01-31  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-alpha.c (md_apply_fix): Correct range checks for
+	BFD_RELOC_ALPHA_NOP, BFD_RELOC_ALPHA_LDA, BFD_RELOC_ALPHA_BSR.
+	* config/tc-arm.c (md_apply_fix): Use llabs rather than abs.
+	* config/tc-csky.c (get_macro_reg_vals): Pass s to csky_show_error.
+
 2019-01-29  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* config/tc-xtensa.c (md_apply_fix): Mark fixups for constant

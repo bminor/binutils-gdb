@@ -5878,7 +5878,7 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 	  return;
 	}
 
-      if ((abs (value) >> 2) & ~0xfffff)
+      if (value + (1u << 22) >= (1u << 23))
 	goto done;
       else
 	{
@@ -5897,7 +5897,7 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 	  return;
 	}
 
-      if ((abs (value)) & ~0x7fff)
+      if (value + (1u << 15) >= (1u << 16))
 	goto done;
       else
 	{
@@ -5917,7 +5917,7 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 	  return;
 	}
 
-      if ((abs (value) >> 2) & ~0xfffff)
+      if (value + (1u << 22) >= (1u << 23))
 	{
 	  /* Out of range.  */
 	  if (fixP->fx_r_type == BFD_RELOC_ALPHA_BOH)
