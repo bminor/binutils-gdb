@@ -1,3 +1,8 @@
+2019-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* doc/binutils.texi (size): Update example output for Berkeley
+	format output.
+
 2019-02-07  Nick Clifton  <nickc@redhat.com>
 
 	* README-how-to-make-a-release: Add a note about updating the

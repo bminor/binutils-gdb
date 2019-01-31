@@ -2921,9 +2921,9 @@ Here is an example of the Berkeley (default) format of output from
 @command{size}:
 @smallexample
 $ size --format=Berkeley ranlib size
-text    data    bss     dec     hex     filename
-294880  81920   11592   388392  5ed28   ranlib
-294880  81920   11888   388688  5ee50   size
+   text    data     bss     dec     hex filename
+ 294880   81920   11592  388392   5ed28 ranlib
+ 294880   81920   11888  388688   5ee50 size
 @end smallexample
 
 @noindent
