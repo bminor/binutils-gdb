@@ -5494,7 +5494,7 @@ get_macro_reg_vals (int *reg1, int *reg2, int *reg3)
   s += nlen;
   if (*s != '\0')
     {
-      csky_show_error (ERROR_BAD_END, 0, NULL, NULL);
+      csky_show_error (ERROR_BAD_END, 0, s, NULL);
       return FALSE;
     }
   if (*reg1 == -1 || *reg2 == -1 || *reg3 == -1)
