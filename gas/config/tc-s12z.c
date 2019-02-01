@@ -348,7 +348,8 @@ lex_force_match (char x)
 }
 
 static int
-lex_opr (uint8_t *buffer, int *n_bytes, expressionS *exp)
+lex_opr (uint8_t *buffer, int *n_bytes, expressionS *exp,
+	 bool immediate_ok)
 {
   char *ilp = input_line_pointer;
   uint8_t *xb = buffer;
@@ -359,6 +360,11 @@ lex_opr (uint8_t *buffer, int *n_bytes, expressionS *exp)
   *xb = 0;
   if (lex_imm_e4 (&imm))
     {
+      if (!immediate_ok)
+	{
+	  as_bad (_("An immediate value in a source operand is inappropriate"));
+	  return 0;
+	}
       if (imm > 0)
 	*xb = imm;
       else
@@ -766,7 +772,7 @@ opr (const struct instruction *insn)
   uint8_t buffer[4];
   int n_bytes;
   expressionS exp;
-  if (lex_opr (buffer, &n_bytes, &exp))
+  if (lex_opr (buffer, &n_bytes, &exp, false))
     {
       /* Large constant direct values are more efficiently encoded as ext24 mode.
 	 Otherwise a decision has to be deferred to a relax. */
@@ -1094,7 +1100,7 @@ mul_reg_reg_opr (const struct instruction *insn)
   uint8_t buffer[4];
   int n_bytes;
   expressionS exp;
-  if (!lex_opr (buffer, &n_bytes, &exp))
+  if (!lex_opr (buffer, &n_bytes, &exp, true))
     goto fail;
 
   int size = size_from_suffix (insn, 0);
@@ -1149,7 +1155,7 @@ mul_reg_opr_opr (const struct instruction *insn)
   uint8_t buffer1[4];
   int n_bytes1;
   expressionS exp1;
-  if (!lex_opr (buffer1, &n_bytes1, &exp1))
+  if (!lex_opr (buffer1, &n_bytes1, &exp1, false))
     goto fail;
 
   if (!lex_match (','))
@@ -1158,7 +1164,7 @@ mul_reg_opr_opr (const struct instruction *insn)
   uint8_t buffer2[4];
   int n_bytes2;
   expressionS exp2;
-  if (!lex_opr (buffer2, &n_bytes2, &exp2))
+  if (!lex_opr (buffer2, &n_bytes2, &exp2, false))
     goto fail;
 
   int size1 = size_from_suffix (insn, 0);
@@ -1519,7 +1525,8 @@ regd6_regy_regx (const struct instruction *insn)
 }
 
 static int
-reg_opr (const struct instruction *insn, int allowed_regs)
+reg_opr (const struct instruction *insn, int allowed_regs,
+	 bool immediate_ok)
 {
   char *ilp = input_line_pointer;
   int reg;
@@ -1531,7 +1538,7 @@ reg_opr (const struct instruction *insn, int allowed_regs)
       uint8_t buffer[4];
       int n_bytes;
       expressionS exp;
-      if (lex_opr (buffer, &n_bytes, &exp))
+      if (lex_opr (buffer, &n_bytes, &exp, immediate_ok))
 	{
 	  /* Large constant direct values are more efficiently encoded as ext24 mode.
 	     Otherwise a decision has to be deferred to a relax. */
@@ -1572,22 +1579,37 @@ reg_opr (const struct instruction *insn, int allowed_regs)
 
 
 static int
-regdxy_opr (const struct instruction *insn)
+regdxy_opr_dest (const struct instruction *insn)
 {
-  return reg_opr (insn, REG_BIT_Dn | REG_BIT_XY);
+  return reg_opr (insn, REG_BIT_Dn | REG_BIT_XY, false);
 }
+
+static int
+regdxy_opr_src (const struct instruction *insn)
+{
+  return reg_opr (insn, REG_BIT_Dn | REG_BIT_XY, true);
+}
+
 
 static int
 regd_opr (const struct instruction *insn)
 {
-  return reg_opr (insn, REG_BIT_Dn);
+  return reg_opr (insn, REG_BIT_Dn, true);
 }
 
 
+/* OP0: S; OP1: destination OPR */
 static int
-regs_opr (const struct instruction *insn)
+regs_opr_dest (const struct instruction *insn)
 {
-  return reg_opr (insn, 0x1U << REG_S);
+  return reg_opr (insn, 0x1U << REG_S, false);
+}
+
+/* OP0: S; OP1: source OPR */
+static int
+regs_opr_src (const struct instruction *insn)
+{
+  return reg_opr (insn, 0x1U << REG_S, true);
 }
 
 static int
@@ -1604,7 +1626,7 @@ imm_opr  (const struct instruction *insn)
   uint8_t buffer[4];
   int n_bytes;
   expressionS exp;
-  if (!lex_opr (buffer, &n_bytes, &exp))
+  if (!lex_opr (buffer, &n_bytes, &exp, false))
     goto fail;
 
   int size = size_from_suffix (insn, 0);
@@ -1633,7 +1655,7 @@ opr_opr  (const struct instruction *insn)
   uint8_t buffer1[4];
   int n_bytes1;
   expressionS exp1;
-  if (!lex_opr (buffer1, &n_bytes1, &exp1))
+  if (!lex_opr (buffer1, &n_bytes1, &exp1, false))
     goto fail;
 
 
@@ -1643,7 +1665,7 @@ opr_opr  (const struct instruction *insn)
   uint8_t buffer2[4];
   int n_bytes2;
   expressionS exp2;
-  if (!lex_opr (buffer2, &n_bytes2, &exp2))
+  if (!lex_opr (buffer2, &n_bytes2, &exp2, false))
     goto fail;
 
   char *f = s12z_new_insn (1 + n_bytes1 + n_bytes2);
@@ -1673,7 +1695,7 @@ reg67sxy_opr  (const struct instruction *insn)
   uint8_t buffer[4];
   int n_bytes;
   expressionS exp;
-  if (!lex_opr (buffer, &n_bytes, &exp))
+  if (!lex_opr (buffer, &n_bytes, &exp, false))
     return 0;
 
   char *f = s12z_new_insn (1 + n_bytes);
@@ -1689,7 +1711,7 @@ rotate  (const struct instruction *insn, short dir)
   uint8_t buffer[4];
   int n_bytes;
   expressionS exp;
-  if (lex_opr (buffer, &n_bytes, &exp))
+  if (lex_opr (buffer, &n_bytes, &exp, false))
     {
       char *f = s12z_new_insn (n_bytes + 2);
       number_to_chars_bigendian (f++, insn->opc, 1);
@@ -1760,7 +1782,7 @@ lex_shift_reg_imm1  (const struct instruction *insn, short type, short dir)
   int n_bytes;
 
   expressionS exp;
-  if (!lex_opr (buffer, &n_bytes, &exp))
+  if (!lex_opr (buffer, &n_bytes, &exp, false))
     goto fail;
 
   gas_assert (n_bytes == 1);
@@ -1911,7 +1933,7 @@ shift_two_operand  (const struct instruction *insn)
   uint8_t buffer[4];
   int n_opr_bytes;
   expressionS exp;
-  if (!lex_opr (buffer, &n_opr_bytes, &exp))
+  if (!lex_opr (buffer, &n_opr_bytes, &exp, false))
     goto fail;
 
   if (!lex_match (','))
@@ -1963,7 +1985,7 @@ shift_opr_imm  (const struct instruction *insn)
   int n_opr_bytes1;
 
   expressionS exp1;
-  if (!lex_opr (buffer1, &n_opr_bytes1, &exp1))
+  if (!lex_opr (buffer1, &n_opr_bytes1, &exp1, false))
     goto fail;
 
   n_bytes += n_opr_bytes1;
@@ -1979,7 +2001,7 @@ shift_opr_imm  (const struct instruction *insn)
     {
       immediate = true;
     }
-  else if (!lex_opr (buffer2, &n_opr_bytes2, &exp2))
+  else if (!lex_opr (buffer2, &n_opr_bytes2, &exp2, false))
     goto fail;
 
   uint8_t sb = 0x20;
@@ -2091,7 +2113,7 @@ bm_opr_reg  (const struct instruction *insn)
   int n_opr_bytes;
 
   expressionS exp;
-  if (!lex_opr (buffer, &n_opr_bytes,  &exp))
+  if (!lex_opr (buffer, &n_opr_bytes,  &exp, false))
     goto fail;
 
   if (!lex_match (','))
@@ -2130,7 +2152,7 @@ bm_opr_imm  (const struct instruction *insn)
   int n_opr_bytes;
 
   expressionS exp;
-  if (!lex_opr (buffer, &n_opr_bytes, &exp))
+  if (!lex_opr (buffer, &n_opr_bytes, &exp, false))
     goto fail;
 
   if (!lex_match (','))
@@ -2224,7 +2246,7 @@ bf_reg_opr_imm  (const struct instruction *insn, short ie)
   int n_bytes;
 
   expressionS exp;
-  if (!lex_opr (buffer, &n_bytes, &exp))
+  if (!lex_opr (buffer, &n_bytes, &exp, false))
     goto fail;
 
   if (!lex_match (','))
@@ -2286,7 +2308,7 @@ bf_opr_reg_imm  (const struct instruction *insn, short ie)
   uint8_t buffer[4];
   int n_bytes;
   expressionS exp;
-  if (!lex_opr (buffer, &n_bytes, &exp))
+  if (!lex_opr (buffer, &n_bytes, &exp, false))
     goto fail;
 
   if (!lex_match (','))
@@ -2463,7 +2485,7 @@ bf_opr_reg_reg  (const struct instruction *insn, short ie)
   uint8_t buffer[4];
   int n_bytes;
   expressionS exp;
-  if (!lex_opr (buffer, &n_bytes, &exp))
+  if (!lex_opr (buffer, &n_bytes, &exp, false))
     goto fail;
 
   if (!lex_match (','))
@@ -2523,7 +2545,7 @@ bf_reg_opr_reg  (const struct instruction *insn, short ie)
   uint8_t buffer[4];
   int n_bytes;
   expressionS exp;
-  if (!lex_opr (buffer, &n_bytes, &exp))
+  if (!lex_opr (buffer, &n_bytes, &exp, false))
     goto fail;
 
   if (!lex_match (','))
@@ -2714,7 +2736,7 @@ tb_opr_rel  (const struct instruction *insn)
   uint8_t buffer[4];
   int n_bytes;
   expressionS exp;
-  if (!lex_opr (buffer, &n_bytes, &exp))
+  if (!lex_opr (buffer, &n_bytes, &exp, false))
     goto fail;
 
   if (!lex_match (','))
@@ -2829,7 +2851,7 @@ test_br_opr_reg_rel  (const struct instruction *insn)
   uint8_t buffer[4];
   int n_bytes;
   expressionS exp;
-  if (!lex_opr (buffer, &n_bytes,  &exp))
+  if (!lex_opr (buffer, &n_bytes,  &exp, false))
     goto fail;
 
   if (!lex_match (','))
@@ -2878,7 +2900,7 @@ test_br_opr_imm_rel  (const struct instruction *insn)
   uint8_t buffer[4];
   int n_bytes;
   expressionS exp;
-  if (!lex_opr (buffer, &n_bytes, &exp))
+  if (!lex_opr (buffer, &n_bytes, &exp, false))
     goto fail;
 
   if (!lex_match (','))
@@ -3238,7 +3260,7 @@ static const struct instruction opcodes[] = {
   {"tfr", 1,   0x9e,  tfr, 0},
   {"zex", 1,   0x9e,  tfr, 0},
 
-  {"ld",  1,   0xa0,  regdxy_opr, 0xb0},
+  {"ld",  1,   0xa0,  regdxy_opr_src, 0xb0},
 
   {"jmp", 1,   0xaa,  opr, 0xba},
   {"jsr", 1,   0xab,  opr, 0xbb},
@@ -3246,7 +3268,7 @@ static const struct instruction opcodes[] = {
   {"exg", 1,   0xae,  tfr, 0},
   {"sex", 1,   0xae,  tfr, 0},
 
-  {"st", 1,    0xc0,  regdxy_opr, 0xd0},
+  {"st", 1,    0xc0,  regdxy_opr_dest, 0xd0},
 
   {"andcc", 1, 0xce,  imm8, 0},
   {"orcc", 1,  0xde,  imm8, 0},
@@ -3305,7 +3327,7 @@ static const struct instruction opcodes[] = {
   {"btgl.l",  1, 0xee, bm_opr_reg, 0},
 
   {"cmp", 1,   0xe0,  regdxy_imm, 0},
-  {"cmp", 1,   0xf0,  regdxy_opr, 0},
+  {"cmp", 1,   0xf0,  regdxy_opr_src, 0},
 
   {"cmp", 1,   0xfc,  regx_regy, 0},
   {"sub", 1,   0xfd,  regd6_regx_regy, 0},
@@ -3316,13 +3338,13 @@ static const struct instruction opcodes[] = {
   /* Page 2 */
 
   /* The -10 below is a kludge.  The opcode is in fact 0x00 */
-  {"ld",    2,  -10,  regs_opr, 0},
+  {"ld",    2,  -10,  regs_opr_src, 0},
 
   /* The -9 below is a kludge.  The opcode is in fact 0x01 */
-  {"st",    2,  -9,  regs_opr, 0},
+  {"st",    2,  -9,  regs_opr_dest, 0},
 
   /* The -8 below is a kludge.  The opcode is in fact 0x02 */
-  {"cmp",    2,  -8,  regs_opr, 0},
+  {"cmp",    2,  -8,  regs_opr_src, 0},
 
   /* The -7 below is a kludge.  The opcode is in fact 0x03 */
   {"ld",    2,  -7,  regs_imm, 0},

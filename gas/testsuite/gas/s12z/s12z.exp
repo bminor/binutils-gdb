@@ -132,3 +132,5 @@ run_dump_test ld-large-direct
 run_dump_test ld-small-direct
 run_dump_test st-large-direct
 run_dump_test st-small-direct
+
+run_dump_test imm-dest

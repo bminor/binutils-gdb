@@ -1,3 +1,12 @@
+2019-01-31  John Darrington <john@darrington.wattle.id.au>
+
+	* config/tc-s12z.c (lex_opr): Add a parameter to indicate whether
+	immediate mode operands should be permitted.
+	* testsuite/s12z/imm-dest.d: New file.
+	* testsuite/s12z/imm-dest.l: New file.
+	* testsuite/s12z/imm-dest.s: New file.
+	* testsuite/s12z/s12z.exp: Add them.
+
 2019-01-31  Andreas Krebbel  <krebbel@linux.ibm.com>
 
 	* config/tc-s390.c (s390_parse_cpu): New entry for arch13.
