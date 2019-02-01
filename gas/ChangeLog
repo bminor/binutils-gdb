@@ -1,5 +1,15 @@
 2019-01-31  John Darrington <john@darrington.wattle.id.au>
 
+        * config/tc-s12z.c (lex_imm): Add new argument exp_o.
+	(emit_reloc): New function.
+	(md_apply_fix): [BFD_RELOC_S12Z_OPR] Recognise that it
+	can be either 2 bytes or 3 bytes long.
+	* testsuite/gas/s12z/mov-imm-reloc.d: New file.
+	* testsuite/gas/s12z/mov-imm-reloc.s: New file.
+	* testsuite/gas/s12z/s12z.exp: Add them.
+
+2019-01-31  John Darrington <john@darrington.wattle.id.au>
+
 	* config/tc-s12z.c (md_apply_fix): Fix incorrect limits.
 	* testsuite/gas/s12z/pc-rel-bad.d: New file.
 	* testsuite/gas/s12z/pc-rel-bad.l: New file.

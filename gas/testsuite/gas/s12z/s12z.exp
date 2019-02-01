@@ -75,6 +75,7 @@ run_dump_test mac
 run_dump_test min-max
 run_dump_test mod
 run_dump_test mov
+run_dump_test mov-imm-reloc
 run_dump_test p2-mul
 run_dump_test mul-imm
 run_dump_test mul-opr-opr
