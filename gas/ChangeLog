@@ -1,5 +1,11 @@
 2019-01-31  John Darrington <john@darrington.wattle.id.au>
 
+	* config/tc-s12z.c (tfr): Emit warning if operands are the same.
+	* testsuite/gas/s12z/exg.d: New test case.
+	* testsuite/gas/s12z/exg.l: New file.
+
+2019-01-31  John Darrington <john@darrington.wattle.id.au>
+
 	* config/tc-s12z.c (lex_opr): Add a parameter to indicate whether
 	immediate mode operands should be permitted.
 	* testsuite/s12z/imm-dest.d: New file.

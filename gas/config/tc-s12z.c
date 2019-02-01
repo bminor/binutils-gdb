@@ -1328,6 +1328,8 @@ tfr (const struct instruction *insn)
        && (registers[reg2].bytes <= registers[reg1].bytes))
       as_warn (_("Source register for %s is no larger than the destination register"),
                insn->name);
+  else if (reg1 == reg2)
+    as_warn (_("The destination and source registers are identical"));
 
   char *f = s12z_new_insn (1 + insn->page);
   if (insn->page == 2)
