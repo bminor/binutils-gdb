@@ -90,6 +90,8 @@ run_dump_test opr-idx3-reg
 run_dump_test opr-idx3-xysp-24
 run_dump_test or-imm
 run_dump_test or-opr
+run_dump_test pc-rel-bad
+run_dump_test pc-rel-good
 run_dump_test page2-inh
 run_dump_test psh-pul
 run_dump_test qmul

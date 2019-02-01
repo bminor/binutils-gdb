@@ -3853,7 +3853,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       bfd_putb32 ((bfd_vma) value, (unsigned char *) where);
       break;
     case BFD_RELOC_16_PCREL:
-      if (value < -0x8000 || value > 0x7FFF)
+      if (value < -0x4000 || value > 0x3FFF)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("Value out of 16-bit range."));
 

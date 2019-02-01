@@ -1,5 +1,15 @@
 2019-01-31  John Darrington <john@darrington.wattle.id.au>
 
+	* config/tc-s12z.c (md_apply_fix): Fix incorrect limits.
+	* testsuite/gas/s12z/pc-rel-bad.d: New file.
+	* testsuite/gas/s12z/pc-rel-bad.l: New file.
+	* testsuite/gas/s12z/pc-rel-bad.s: New file.
+	* testsuite/gas/s12z/pc-rel-good.d: New file.
+	* testsuite/gas/s12z/pc-rel-good.s: New file.
+	* testsuite/gas/s12z/s12z.exp: Add them.
+
+2019-01-31  John Darrington <john@darrington.wattle.id.au>
+
 	* config/tc-s12z.c (tfr): Emit warning if operands are the same.
 	* testsuite/gas/s12z/exg.d: New test case.
 	* testsuite/gas/s12z/exg.l: New file.
