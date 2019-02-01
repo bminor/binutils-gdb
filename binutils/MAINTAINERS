@@ -126,6 +126,7 @@ responsibility among the other maintainers.
   RISC-V	   Andrew Waterman <andrew@sifive.com>
   RISC-V	   Jim Wilson <jimw@sifive.com>
   RX               Nick Clifton <nickc@redhat.com>
+  S12Z		   John Darrington <john@darrington.wattle.id.au>
   s390, s390x	   Martin Schwidefsky <schwidefsky@de.ibm.com>
   s390, s390x	   Andreas Krebbel <krebbel@linux.vnet.ibm.com>
   SH		   Alexandre Oliva <aoliva@redhat.com>
