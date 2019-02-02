@@ -1,5 +1,13 @@
 2019-02-02  Nick Clifton  <nickc@redhat.com>
 
+	* version.m4 (BFD_VERSION): Set to 2.32.0.
+	* development.sh (development): Set to true.
+	(experimental) Set to true.
+	* configure: Regenerate.
+	* po/bfd.pot: Regenerate.
+
+2019-02-02  Nick Clifton  <nickc@redhat.com>
+
 	2.32 Release
 	* version.m4 (BFD_VERSION): Set to 2.32.
 	* development.sh (development): Set to false.

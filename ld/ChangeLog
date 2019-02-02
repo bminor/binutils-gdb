@@ -1,5 +1,10 @@
 2019-02-02  Nick Clifton  <nickc@redhat.com>
 
+	* configure: Regenerate.
+	* po/ld.pot: Regenerate.
+
+2019-02-02  Nick Clifton  <nickc@redhat.com>
+
 	2.32 Release
 	* configure: Regenerate.
 	* po/ld.pot: Regenerate.
