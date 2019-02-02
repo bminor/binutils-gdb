@@ -1,3 +1,8 @@
+2019-02-02  Nick Clifton  <nickc@redhat.com>
+
+	2.32 Release
+	* configure: Regenerate.
+
 2019-01-25  Nick Clifton  <nickc@redhat.com>
 
 	* po/bg.po: Updated Bulgarian translation.

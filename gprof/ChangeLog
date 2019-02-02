@@ -1,3 +1,8 @@
+2019-02-02  Nick Clifton  <nickc@redhat.com>
+
+	2.32 Release
+	* configure: Regenerate.
+
 2019-01-21  Nick Clifton  <nickc@redhat.com>
 
 	* po/tr.po: Updated Turkish translation.

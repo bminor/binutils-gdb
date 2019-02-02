@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2019-01-19 16:32+0000\n"
+"POT-Creation-Date: 2019-02-02 15:50+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,11 +17,11 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: aarch64-asm.c:819
+#: aarch64-asm.c:808
 msgid "specified register cannot be read from"
 msgstr ""
 
-#: aarch64-asm.c:828
+#: aarch64-asm.c:817
 msgid "specified register cannot be written to"
 msgstr ""
 
@@ -31,7 +31,7 @@ msgstr ""
 msgid "unrecognised disassembler option: %s"
 msgstr ""
 
-#: aarch64-dis.c:3448
+#: aarch64-dis.c:3431
 #, c-format
 msgid ""
 "\n"
@@ -39,42 +39,42 @@ msgid ""
 "with the -M switch (multiple options should be separated by commas):\n"
 msgstr ""
 
-#: aarch64-dis.c:3452
+#: aarch64-dis.c:3435
 #, c-format
 msgid ""
 "\n"
 "  no-aliases         Don't print instruction aliases.\n"
 msgstr ""
 
-#: aarch64-dis.c:3455
+#: aarch64-dis.c:3438
 #, c-format
 msgid ""
 "\n"
 "  aliases            Do print instruction aliases.\n"
 msgstr ""
 
-#: aarch64-dis.c:3458
+#: aarch64-dis.c:3441
 #, c-format
 msgid ""
 "\n"
 "  no-notes         Don't print instruction notes.\n"
 msgstr ""
 
-#: aarch64-dis.c:3461
+#: aarch64-dis.c:3444
 #, c-format
 msgid ""
 "\n"
 "  notes            Do print instruction notes.\n"
 msgstr ""
 
-#: aarch64-dis.c:3465
+#: aarch64-dis.c:3448
 #, c-format
 msgid ""
 "\n"
 "  debug_dump         Temp switch for debug trace.\n"
 msgstr ""
 
-#: aarch64-dis.c:3469 mips-dis.c:2773 mips-dis.c:2783 mips-dis.c:2786
+#: aarch64-dis.c:3452 mips-dis.c:2773 mips-dis.c:2783 mips-dis.c:2786
 #: nfp-dis.c:2981 riscv-dis.c:552
 #, c-format
 msgid "\n"
@@ -144,194 +144,194 @@ msgstr ""
 msgid "unexpected address writeback"
 msgstr ""
 
-#: aarch64-opc.c:1611
+#: aarch64-opc.c:1610
 msgid "address writeback expected"
 msgstr ""
 
-#: aarch64-opc.c:1658
+#: aarch64-opc.c:1657
 msgid "negative or unaligned offset expected"
 msgstr ""
 
-#: aarch64-opc.c:1715
+#: aarch64-opc.c:1714
 msgid "invalid register offset"
 msgstr ""
 
-#: aarch64-opc.c:1737
+#: aarch64-opc.c:1736
 msgid "invalid post-increment amount"
 msgstr ""
 
-#: aarch64-opc.c:1753 aarch64-opc.c:2247
+#: aarch64-opc.c:1752 aarch64-opc.c:2246
 msgid "invalid shift amount"
 msgstr ""
 
-#: aarch64-opc.c:1766
+#: aarch64-opc.c:1765
 msgid "invalid extend/shift operator"
 msgstr ""
 
-#: aarch64-opc.c:1812 aarch64-opc.c:2052 aarch64-opc.c:2087 aarch64-opc.c:2106
-#: aarch64-opc.c:2114 aarch64-opc.c:2201 aarch64-opc.c:2377 aarch64-opc.c:2477
-#: aarch64-opc.c:2490
+#: aarch64-opc.c:1811 aarch64-opc.c:2051 aarch64-opc.c:2086 aarch64-opc.c:2105
+#: aarch64-opc.c:2113 aarch64-opc.c:2200 aarch64-opc.c:2376 aarch64-opc.c:2476
+#: aarch64-opc.c:2489
 msgid "immediate out of range"
 msgstr ""
 
-#: aarch64-opc.c:1834 aarch64-opc.c:1876 aarch64-opc.c:1926 aarch64-opc.c:1960
+#: aarch64-opc.c:1833 aarch64-opc.c:1875 aarch64-opc.c:1925 aarch64-opc.c:1959
 msgid "invalid addressing mode"
 msgstr ""
 
-#: aarch64-opc.c:1918
+#: aarch64-opc.c:1917
 msgid "index register xzr is not allowed"
 msgstr ""
 
-#: aarch64-opc.c:2040 aarch64-opc.c:2062 aarch64-opc.c:2280 aarch64-opc.c:2288
-#: aarch64-opc.c:2354 aarch64-opc.c:2383
+#: aarch64-opc.c:2039 aarch64-opc.c:2061 aarch64-opc.c:2279 aarch64-opc.c:2287
+#: aarch64-opc.c:2353 aarch64-opc.c:2382
 msgid "invalid shift operator"
 msgstr ""
 
-#: aarch64-opc.c:2046
+#: aarch64-opc.c:2045
 msgid "shift amount must be 0 or 12"
 msgstr ""
 
-#: aarch64-opc.c:2069
+#: aarch64-opc.c:2068
 msgid "shift amount must be a multiple of 16"
 msgstr ""
 
-#: aarch64-opc.c:2081
+#: aarch64-opc.c:2080
 msgid "negative immediate value not allowed"
 msgstr ""
 
-#: aarch64-opc.c:2212
+#: aarch64-opc.c:2211
 msgid "immediate zero expected"
 msgstr ""
 
-#: aarch64-opc.c:2226
+#: aarch64-opc.c:2225
 msgid "rotate expected to be 0, 90, 180 or 270"
 msgstr ""
 
-#: aarch64-opc.c:2236
+#: aarch64-opc.c:2235
 msgid "rotate expected to be 90 or 270"
 msgstr ""
 
-#: aarch64-opc.c:2296
+#: aarch64-opc.c:2295
 msgid "shift is not permitted"
 msgstr ""
 
-#: aarch64-opc.c:2321
+#: aarch64-opc.c:2320
 msgid "invalid value for immediate"
 msgstr ""
 
-#: aarch64-opc.c:2346
+#: aarch64-opc.c:2345
 msgid "shift amount must be 0 or 16"
 msgstr ""
 
-#: aarch64-opc.c:2367
+#: aarch64-opc.c:2366
 msgid "floating-point immediate expected"
 msgstr ""
 
-#: aarch64-opc.c:2401
+#: aarch64-opc.c:2400
 msgid "no shift amount allowed for 8-bit constants"
 msgstr ""
 
-#: aarch64-opc.c:2411
+#: aarch64-opc.c:2410
 msgid "shift amount must be 0 or 8"
 msgstr ""
 
-#: aarch64-opc.c:2424
+#: aarch64-opc.c:2423
 msgid "immediate too big for element size"
 msgstr ""
 
-#: aarch64-opc.c:2431
+#: aarch64-opc.c:2430
 msgid "invalid arithmetic immediate"
 msgstr ""
 
-#: aarch64-opc.c:2445
+#: aarch64-opc.c:2444
 msgid "floating-point value must be 0.5 or 1.0"
 msgstr ""
 
-#: aarch64-opc.c:2455
+#: aarch64-opc.c:2454
 msgid "floating-point value must be 0.5 or 2.0"
 msgstr ""
 
-#: aarch64-opc.c:2465
+#: aarch64-opc.c:2464
 msgid "floating-point value must be 0.0 or 1.0"
 msgstr ""
 
-#: aarch64-opc.c:2496
+#: aarch64-opc.c:2495
 msgid "invalid replicated MOV immediate"
 msgstr ""
 
-#: aarch64-opc.c:2614
+#: aarch64-opc.c:2613
 msgid "extend operator expected"
 msgstr ""
 
-#: aarch64-opc.c:2627
+#: aarch64-opc.c:2626
 msgid "missing extend operator"
 msgstr ""
 
-#: aarch64-opc.c:2633
+#: aarch64-opc.c:2632
 msgid "'LSL' operator not allowed"
 msgstr ""
 
-#: aarch64-opc.c:2654
+#: aarch64-opc.c:2653
 msgid "W register expected"
 msgstr ""
 
-#: aarch64-opc.c:2665
+#: aarch64-opc.c:2664
 msgid "shift operator expected"
 msgstr ""
 
-#: aarch64-opc.c:2672
+#: aarch64-opc.c:2671
 msgid "'ROR' operator not allowed"
 msgstr ""
 
-#: aarch64-opc.c:3671
+#: aarch64-opc.c:3665
 msgid "reading from a write-only register"
 msgstr ""
 
-#: aarch64-opc.c:3673
+#: aarch64-opc.c:3667
 msgid "writing to a read-only register"
 msgstr ""
 
-#: aarch64-opc.c:4815
+#: aarch64-opc.c:4809
 msgid "instruction opens new dependency sequence without ending previous one"
 msgstr ""
 
-#: aarch64-opc.c:4835
+#: aarch64-opc.c:4829
 msgid "previous `movprfx' sequence not closed"
 msgstr ""
 
-#: aarch64-opc.c:4852
+#: aarch64-opc.c:4846
 msgid "SVE instruction expected after `movprfx'"
 msgstr ""
 
-#: aarch64-opc.c:4865
+#: aarch64-opc.c:4859
 msgid "SVE `movprfx' compatible instruction expected"
 msgstr ""
 
-#: aarch64-opc.c:4956
+#: aarch64-opc.c:4950
 msgid "predicated instruction expected after `movprfx'"
 msgstr ""
 
-#: aarch64-opc.c:4968
+#: aarch64-opc.c:4962
 msgid "merging predicate expected due to preceding `movprfx'"
 msgstr ""
 
-#: aarch64-opc.c:4980
+#: aarch64-opc.c:4974
 msgid "predicate register differs from that in preceding `movprfx'"
 msgstr ""
 
-#: aarch64-opc.c:4999
+#: aarch64-opc.c:4993
 msgid "output register of preceding `movprfx' not used in current instruction"
 msgstr ""
 
-#: aarch64-opc.c:5012
+#: aarch64-opc.c:5006
 msgid "output register of preceding `movprfx' expected as output"
 msgstr ""
 
-#: aarch64-opc.c:5024
+#: aarch64-opc.c:5018
 msgid "output register of preceding `movprfx' used as input"
 msgstr ""
 
-#: aarch64-opc.c:5040
+#: aarch64-opc.c:5034
 msgid "register size not compatible with previous `movprfx'"
 msgstr ""
 
