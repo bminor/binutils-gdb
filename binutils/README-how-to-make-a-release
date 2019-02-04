@@ -54,7 +54,8 @@ How to perform a release.
      If you get a message about being in a "detached head" state, something
      has gone wrong...
 
-     Keep the checked out sources - they are going to be needed in future steps.
+     Keep the checked out sources - they are going to be needed in future
+     steps.
 
   6. Update "BINUTILS_BRANCH" in gdbadmin's crontab:
 
@@ -137,7 +138,8 @@ How to perform a release.
 	     gold/yyscript.h
 	rm -fr proto-toplev
 
-   9. Tell the Translation Project where to find the new tarball. <coordinator@translationproject.org>
+   9. Tell the Translation Project where to find the new tarball.
+      <coordinator@translationproject.org>
       qv: http://translationproject.org/html/maintainers.html
 
 ------------------------------------------------------------------------
@@ -231,9 +233,9 @@ When the time comes to actually make the release....
       permissions. 
 
   25. Sanity check the release on x86_64-pc-linux-gnu by building and
-      running the testsuite.  Make the source directory read-only
-      before building.  Also test "make install".  If necessary fix
-      any problems.
+      running the testsuites (gas, gold, binutils and ld).  Make the
+      source directory read-only before building.  Also test
+      "make install".  If necessary fix any problems.
 
   26. Tag the branch with the new release number:
 
@@ -268,16 +270,52 @@ When the time comes to actually make the release....
 
       Create a new documentation folder on the sourceware.org web
       pages as /sourceware/www/sourceware/htdocs/binutils/docs-X.XX.
+
+       sftp sourceware.org
+         cd /sourceware/www/sourceware/htdocs/binutils
+	 mkdir docs-X.XX
+	 cd docs-X.XX
+	 mkdir as bfd binutils gprof ld
+	 cd ../docs-X.(XX-1)
+	 get index.html
+
+      Update the (local copy of the) index.html file to point to the
+      new documentation and mention the new version and then upload it.
+
+	 cd ../docs-X.XX
+	 put index.html
+
       Make the html documentation locally with the "make html" command
       and then upload and rename the directories as needed.  (sftp
       does not appear to support recursive uploads however, so the
-      directories will have to be made by hand).  Create an
-      index.html file and then edit the docs link to point to the new
-      docs-X.XX directory.
-      
-      Update the index.html file in the directory containing the
-      docs-X.XX entries to point to the new documentation and mention
-      the new version.
+      directories will have to be made by hand).
+
+         cd as
+	 lcd <build-dir>/gas/doc/as.html
+	 put *
+	 cd ../bfd
+	 lcd ../../../bfd/doc/bfd.html
+	 put *
+	 cd ../binutils
+	 lcd ../../../binutils/doc/binutils.html
+	 put *
+	 cd ../gprof
+	 lcd ../../../gprof/gprof.html
+	 put *
+	 cd ../ld
+	 lcd ../../ld/ld.html
+	 put *
+	 
+      Edit the top level binutils index.html file to change the links
+      to the new documentation.
+
+         cd ../../..
+	 get indexl.html
+	 [edit]
+	 put index.html
+	 quit
+
+      Check that the new web page is correct.
 
       For the www.gnu.org site you have to email webmasters@gnu.org
       and ask them to make the change(s).
@@ -287,7 +325,7 @@ When the time comes to actually make the release....
       Sign the email and include the checksum.
       (The email to Davis is so that he can update the GNU Toolchain
       social media).  Something like this:
-      ------------------------------------------------------------------------
+      -----------------------------------------------------------------------
         Hi Everyone,
 
         We are pleased to announce that version 2.XX of the GNU Binutils project
@@ -306,18 +344,34 @@ When the time comes to actually make the release....
        Our thanks go out to all of the binutils contributors, past and
        present, for helping to make this release possible.
 
-      --------------------------------------------------------------------------
+      -----------------------------------------------------------------------
 
   31. Clean up the source tree.  (Use "git status" to find new
       files, and remove them).
 
-  32. Edit bfd/development.sh on the branch and set
-      "development=true".  Also bump the version in bfd/version.m4 by
-      adding a trailing .0, so that the date suffix keeps the version
-      lower than the trunk version.  Regenerate files.  Commit these
-      changes.
+          rm binutils-<version> binutils-<version>.tar binutils-<version>.tar.xz
+	  rm gas/bfin-lex.c \
+	     gas/bfin-parse.c \
+	     gas/bfin-parse.h \
+	     gas/itbl-lex.c \
+	     gas/itbl-parse.c \
+	     gas/itbl-parse.h \
+	     gas/m68k-parse.c \
+	     gas/rl78-parse.c \
+	     gas/rl78-parse.h \
+	     gas/rx-parse.c \
+	     gas/rx-parse.h \
+	     gold/yyscript.c \
+	     gold/yyscript.h
+	rm -fr proto-toplev
 
-  33. Email the binutils list telling everyone that the 2.31 branch
+  32. Edit bfd/development.sh on the branch and set the development flag
+      to "true".  (Leave the experimental flag set to "false").  Also bump
+      the version in bfd/version.m4 by adding a trailing .0, so that the
+      date suffix keeps the version lower than the trunk version.
+      Regenerate files.  Commit these changes.
+
+  33. Email the binutils list telling everyone that the 2.XX branch
       is now open for business as usual and that patched no longer
       need special approval.
  
