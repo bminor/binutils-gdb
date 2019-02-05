@@ -1,3 +1,9 @@
+2019-02-08  Jim Wilson  <jimw@sifive.com>
+
+	* riscv-linux-tdep.c (riscv_linux_fregmap): New.
+	(riscv_linux_fregset): New.
+	(riscv_linux_iterate_over_regset_sections): Call cb for .reg2 section.
+
 2019-02-07  Tom Tromey  <tom@tromey.com>
 
 	* thread.c (thread_cancel_execution_command): Update.
