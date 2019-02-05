@@ -1087,6 +1087,10 @@ follow_exec (ptid_t ptid, char *exec_file_target)
   int pid = ptid.pid ();
   ptid_t process_ptid;
 
+  /* Switch terminal for any messages produced e.g. by
+     breakpoint_re_set.  */
+  target_terminal::ours_for_output ();
+
   /* This is an exec event that we actually wish to pay attention to.
      Refresh our symbol table to the newly exec'd program, remove any
      momentary bp's, etc.
