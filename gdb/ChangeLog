@@ -1,5 +1,14 @@
 2019-02-15  Tom Tromey  <tromey@adacore.com>
 
+	* ravenscar-thread.c (is_ravenscar_task)
+	(ravenscar_task_is_currently_active): Return bool.
+	(ravenscar_update_inferior_ptid, get_running_thread_msymbol)
+	(_initialize_ravenscar): Remove "(void)".
+	(has_ravenscar_runtime, ravenscar_runtime_initialized): Likewise.
+	Return bool.
+
+2019-02-15  Tom Tromey  <tromey@adacore.com>
+
 	* ravenscar-thread.c (ravenscar_runtime_initializer)
 	(has_ravenscar_runtime, get_running_thread_id)
 	(ravenscar_thread_target::resume): Fix indentation.

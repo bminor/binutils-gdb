@@ -121,15 +121,11 @@ struct ravenscar_thread_target final : public target_ops
 static ravenscar_thread_target ravenscar_ops;
 
 static ptid_t ravenscar_active_task (int cpu);
-static void ravenscar_update_inferior_ptid (void);
-static int has_ravenscar_runtime (void);
-static int ravenscar_runtime_initialized (void);
-static void ravenscar_inferior_created (struct target_ops *target,
-					int from_tty);
+static bool ravenscar_runtime_initialized ();
 
-/* Return nonzero iff PTID corresponds to a ravenscar task.  */
+/* Return true iff PTID corresponds to a ravenscar task.  */
 
-static int
+static bool
 is_ravenscar_task (ptid_t ptid)
 {
   /* By construction, ravenscar tasks have their LWP set to zero.
@@ -169,7 +165,7 @@ ravenscar_get_thread_base_cpu (ptid_t ptid)
   return base_cpu;
 }
 
-/* Given a ravenscar task (identified by its ptid_t PTID), return nonzero
+/* Given a ravenscar task (identified by its ptid_t PTID), return true
    if this task is the currently active task on the cpu that task is
    running on.
 
@@ -179,7 +175,7 @@ ravenscar_get_thread_base_cpu (ptid_t ptid)
    that task's registers are in the CPU bank.  Otherwise, the task
    is currently suspended, and its registers have been saved in memory.  */
 
-static int
+static bool
 ravenscar_task_is_currently_active (ptid_t ptid)
 {
   ptid_t active_task_ptid
@@ -210,7 +206,7 @@ get_base_thread_from_ravenscar_task (ptid_t ptid)
    update inferior_ptid accordingly.  */
 
 static void
-ravenscar_update_inferior_ptid (void)
+ravenscar_update_inferior_ptid ()
 {
   int base_cpu;
 
@@ -242,7 +238,7 @@ ravenscar_update_inferior_ptid (void)
    Return NULL if not found.  */
 
 static struct bound_minimal_symbol
-get_running_thread_msymbol (void)
+get_running_thread_msymbol ()
 {
   struct bound_minimal_symbol msym;
 
@@ -260,8 +256,8 @@ get_running_thread_msymbol (void)
 /* Return True if the Ada Ravenscar run-time can be found in the
    application.  */
 
-static int
-has_ravenscar_runtime (void)
+static bool
+has_ravenscar_runtime ()
 {
   struct bound_minimal_symbol msym_ravenscar_runtime_initializer
     = lookup_minimal_symbol (ravenscar_runtime_initializer, NULL, NULL);
@@ -280,10 +276,10 @@ has_ravenscar_runtime (void)
 /* Return True if the Ada Ravenscar run-time can be found in the
    application, and if it has been initialized on target.  */
 
-static int
-ravenscar_runtime_initialized (void)
+static bool
+ravenscar_runtime_initialized ()
 {
-  return (!(ravenscar_active_task (1) == null_ptid));
+  return ravenscar_active_task (1) != null_ptid;
 }
 
 /* Return the ID of the thread that is currently running.
@@ -584,7 +580,7 @@ Support for Ravenscar task/thread switching is disabled\n"));
    init.c.  */
 
 void
-_initialize_ravenscar (void)
+_initialize_ravenscar ()
 {
   base_ptid = null_ptid;
 
