@@ -598,13 +598,13 @@ unpush_target (struct target_ops *t)
 bool
 target_stack::unpush (target_ops *t)
 {
+  gdb_assert (t != NULL);
+
   strata stratum = t->stratum ();
 
   if (stratum == dummy_stratum)
     internal_error (__FILE__, __LINE__,
 		    _("Attempt to unpush the dummy target"));
-
-  gdb_assert (t != NULL);
 
   /* Look for the specified target.  Note that a target can only occur
      once in the target stack.  */

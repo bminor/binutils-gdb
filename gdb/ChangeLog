@@ -1,3 +1,7 @@
+2019-02-05  Tom Tromey  <tom@tromey.com>
+
+	* target.c (target_stack::unpush): Move assertion earlier.
+
 2019-01-30  Tom Tromey  <tom@tromey.com>
 
 	PR python/23615:
