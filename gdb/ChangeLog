@@ -1,5 +1,13 @@
 2019-02-15  Tom Tromey  <tromey@adacore.com>
 
+	* ravenscar-thread.c (ravenscar_thread_target::stopped_by_sw_breakpoint)
+	(ravenscar_thread_target::stopped_by_hw_breakpoint)
+	(ravenscar_thread_target::stopped_by_watchpoint)
+	(ravenscar_thread_target::stopped_data_address)
+	(ravenscar_thread_target::core_of_thread): Use scoped_restore.
+
+2019-02-15  Tom Tromey  <tromey@adacore.com>
+
 	* ravenscar-thread.c: Fix some typos.
 
 2019-02-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>

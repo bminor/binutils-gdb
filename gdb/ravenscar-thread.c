@@ -464,13 +464,9 @@ ravenscar_thread_target::prepare_to_store (struct regcache *regcache)
 bool
 ravenscar_thread_target::stopped_by_sw_breakpoint ()
 {
-  ptid_t saved_ptid = inferior_ptid;
-  bool result;
-
-  inferior_ptid = get_base_thread_from_ravenscar_task (saved_ptid);
-  result = beneath ()->stopped_by_sw_breakpoint ();
-  inferior_ptid = saved_ptid;
-  return result;
+  scoped_restore save_ptid = make_scoped_restore (&inferior_ptid);
+  inferior_ptid = get_base_thread_from_ravenscar_task (inferior_ptid);
+  return beneath ()->stopped_by_sw_breakpoint ();
 }
 
 /* Implement the to_stopped_by_hw_breakpoint target_ops "method".  */
@@ -478,13 +474,9 @@ ravenscar_thread_target::stopped_by_sw_breakpoint ()
 bool
 ravenscar_thread_target::stopped_by_hw_breakpoint ()
 {
-  ptid_t saved_ptid = inferior_ptid;
-  bool result;
-
-  inferior_ptid = get_base_thread_from_ravenscar_task (saved_ptid);
-  result = beneath ()->stopped_by_hw_breakpoint ();
-  inferior_ptid = saved_ptid;
-  return result;
+  scoped_restore save_ptid = make_scoped_restore (&inferior_ptid);
+  inferior_ptid = get_base_thread_from_ravenscar_task (inferior_ptid);
+  return beneath ()->stopped_by_hw_breakpoint ();
 }
 
 /* Implement the to_stopped_by_watchpoint target_ops "method".  */
@@ -492,13 +484,9 @@ ravenscar_thread_target::stopped_by_hw_breakpoint ()
 bool
 ravenscar_thread_target::stopped_by_watchpoint ()
 {
-  ptid_t saved_ptid = inferior_ptid;
-  bool result;
-
-  inferior_ptid = get_base_thread_from_ravenscar_task (saved_ptid);
-  result = beneath ()->stopped_by_watchpoint ();
-  inferior_ptid = saved_ptid;
-  return result;
+  scoped_restore save_ptid = make_scoped_restore (&inferior_ptid);
+  inferior_ptid = get_base_thread_from_ravenscar_task (inferior_ptid);
+  return beneath ()->stopped_by_watchpoint ();
 }
 
 /* Implement the to_stopped_data_address target_ops "method".  */
@@ -506,13 +494,9 @@ ravenscar_thread_target::stopped_by_watchpoint ()
 bool
 ravenscar_thread_target::stopped_data_address (CORE_ADDR *addr_p)
 {
-  ptid_t saved_ptid = inferior_ptid;
-  bool result;
-
-  inferior_ptid = get_base_thread_from_ravenscar_task (saved_ptid);
-  result = beneath ()->stopped_data_address (addr_p);
-  inferior_ptid = saved_ptid;
-  return result;
+  scoped_restore save_ptid = make_scoped_restore (&inferior_ptid);
+  inferior_ptid = get_base_thread_from_ravenscar_task (inferior_ptid);
+  return beneath ()->stopped_data_address (addr_p);
 }
 
 void
@@ -528,13 +512,9 @@ ravenscar_thread_target::mourn_inferior ()
 int
 ravenscar_thread_target::core_of_thread (ptid_t ptid)
 {
-  ptid_t saved_ptid = inferior_ptid;
-  int result;
-
-  inferior_ptid = get_base_thread_from_ravenscar_task (saved_ptid);
-  result = beneath ()->core_of_thread (inferior_ptid);
-  inferior_ptid = saved_ptid;
-  return result;
+  scoped_restore save_ptid = make_scoped_restore (&inferior_ptid);
+  inferior_ptid = get_base_thread_from_ravenscar_task (inferior_ptid);
+  return beneath ()->core_of_thread (inferior_ptid);
 }
 
 /* Observer on inferior_created: push ravenscar thread stratum if needed.  */
