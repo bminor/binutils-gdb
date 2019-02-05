@@ -25,11 +25,11 @@
 #include "ravenscar-thread.h"
 #include "sparc-ravenscar-thread.h"
 
-static void sparc_ravenscar_fetch_registers (struct regcache *regcache,
-                                             int regnum);
-static void sparc_ravenscar_store_registers (struct regcache *regcache,
-                                             int regnum);
-static void sparc_ravenscar_prepare_to_store (struct regcache *regcache);
+struct sparc_ravenscar_ops : public ravenscar_arch_ops
+{
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+};
 
 /* Register offsets from a referenced address (exempli gratia the
    Thread_Descriptor).  The referenced address depends on the register
@@ -100,8 +100,8 @@ register_in_thread_descriptor_p (int regnum)
 /* to_fetch_registers when inferior_ptid is different from the running
    thread.  */
 
-static void
-sparc_ravenscar_fetch_registers (struct regcache *regcache, int regnum)
+void
+sparc_ravenscar_ops::fetch_registers (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   const int sp_regnum = gdbarch_sp_regnum (gdbarch);
@@ -140,20 +140,11 @@ sparc_ravenscar_fetch_registers (struct regcache *regcache, int regnum)
     }
 }
 
-/* to_prepare_to_store when inferior_ptid is different from the running
-   thread.  */
-
-static void
-sparc_ravenscar_prepare_to_store (struct regcache *regcache)
-{
-  /* Nothing to do.  */
-}
-
 /* to_store_registers when inferior_ptid is different from the running
    thread.  */
 
-static void
-sparc_ravenscar_store_registers (struct regcache *regcache, int regnum)
+void
+sparc_ravenscar_ops::store_registers (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   int buf_size = register_size (gdbarch, regnum);
@@ -178,12 +169,7 @@ sparc_ravenscar_store_registers (struct regcache *regcache, int regnum)
                 buf_size);
 }
 
-static struct ravenscar_arch_ops sparc_ravenscar_ops =
-{
-  sparc_ravenscar_fetch_registers,
-  sparc_ravenscar_store_registers,
-  sparc_ravenscar_prepare_to_store
-};
+static struct sparc_ravenscar_ops sparc_ravenscar_ops;
 
 /* Register ravenscar_arch_ops in GDBARCH.  */
 

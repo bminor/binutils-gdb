@@ -169,15 +169,6 @@ ppc_ravenscar_generic_fetch_registers
     }
 }
 
-/* to_prepare_to_store when inferior_ptid is different from the running
-   thread.  */
-
-static void
-ppc_ravenscar_generic_prepare_to_store (struct regcache *regcache)
-{
-  /* Nothing to do.  */
-}
-
 /* to_store_registers when inferior_ptid is different from the running
    thread.  */
 
@@ -211,32 +202,27 @@ static const struct ravenscar_reg_info ppc_reg_info =
   ARRAY_SIZE (powerpc_context_offsets),
 };
 
-/* Implement the to_fetch_registers ravenscar_arch_ops method
-   for most PowerPC targets.  */
+struct ppc_ravenscar_powerpc_ops : public ravenscar_arch_ops
+{
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+};
 
-static void
-ppc_ravenscar_powerpc_fetch_registers (struct regcache *regcache, int regnum)
+void
+ppc_ravenscar_powerpc_ops::fetch_registers (struct regcache *regcache, int regnum)
 {
   ppc_ravenscar_generic_fetch_registers (&ppc_reg_info, regcache, regnum);
 }
 
-/* Implement the to_store_registers ravenscar_arch_ops method
-   for most PowerPC targets.  */
-
-static void
-ppc_ravenscar_powerpc_store_registers (struct regcache *regcache, int regnum)
+void
+ppc_ravenscar_powerpc_ops::store_registers (struct regcache *regcache, int regnum)
 {
   ppc_ravenscar_generic_store_registers (&ppc_reg_info, regcache, regnum);
 }
 
 /* The ravenscar_arch_ops vector for most PowerPC targets.  */
 
-static struct ravenscar_arch_ops ppc_ravenscar_powerpc_ops =
-{
-  ppc_ravenscar_powerpc_fetch_registers,
-  ppc_ravenscar_powerpc_store_registers,
-  ppc_ravenscar_generic_prepare_to_store
-};
+static struct ppc_ravenscar_powerpc_ops ppc_ravenscar_powerpc_ops;
 
 /* Register ppc_ravenscar_powerpc_ops in GDBARCH.  */
 
@@ -254,11 +240,14 @@ static const struct ravenscar_reg_info e500_reg_info =
   ARRAY_SIZE (e500_context_offsets),
 };
 
-/* Implement the to_fetch_registers ravenscar_arch_ops method
-   for E500 targets.  */
+struct ppc_ravenscar_e500_ops : public ravenscar_arch_ops
+{
+  void fetch_registers (struct regcache *, int) override;
+  void store_registers (struct regcache *, int) override;
+};
 
-static void
-ppc_ravenscar_e500_fetch_registers (struct regcache *regcache, int regnum)
+void
+ppc_ravenscar_e500_ops::fetch_registers (struct regcache *regcache, int regnum)
 {
   ppc_ravenscar_generic_fetch_registers (&e500_reg_info, regcache, regnum);
 }
@@ -266,20 +255,15 @@ ppc_ravenscar_e500_fetch_registers (struct regcache *regcache, int regnum)
 /* Implement the to_store_registers ravenscar_arch_ops method
    for E500 targets.  */
 
-static void
-ppc_ravenscar_e500_store_registers (struct regcache *regcache, int regnum)
+void
+ppc_ravenscar_e500_ops::store_registers (struct regcache *regcache, int regnum)
 {
   ppc_ravenscar_generic_store_registers (&e500_reg_info, regcache, regnum);
 }
 
 /* The ravenscar_arch_ops vector for E500 targets.  */
 
-static struct ravenscar_arch_ops ppc_ravenscar_e500_ops =
-{
-  ppc_ravenscar_e500_fetch_registers,
-  ppc_ravenscar_e500_store_registers,
-  ppc_ravenscar_generic_prepare_to_store
-};
+static struct ppc_ravenscar_e500_ops ppc_ravenscar_e500_ops;
 
 /* Register ppc_ravenscar_e500_ops in GDBARCH.  */
 

@@ -133,15 +133,6 @@ aarch64_ravenscar_generic_fetch_registers
     }
 }
 
-/* to_prepare_to_store when inferior_ptid is different from the running
-   thread.  */
-
-static void
-aarch64_ravenscar_generic_prepare_to_store (struct regcache *regcache)
-{
-  /* Nothing to do.  */
-}
-
 /* to_store_registers when inferior_ptid is different from the running
    thread.  */
 
@@ -175,34 +166,24 @@ static const struct ravenscar_reg_info aarch64_reg_info =
   ARRAY_SIZE (aarch64_context_offsets),
 };
 
-/* Implement the to_fetch_registers ravenscar_arch_ops method
-   for most Aarch64 targets.  */
-
-static void
-aarch64_ravenscar_fetch_registers (struct regcache *regcache, int regnum)
+struct aarch64_ravenscar_ops : public ravenscar_arch_ops
 {
-  aarch64_ravenscar_generic_fetch_registers
-    (&aarch64_reg_info, regcache, regnum);
-}
+  void fetch_registers (struct regcache *regcache, int regnum) override
+  {
+    aarch64_ravenscar_generic_fetch_registers
+      (&aarch64_reg_info, regcache, regnum);
+  }
 
-/* Implement the to_store_registers ravenscar_arch_ops method
-   for most Aarch64 targets.  */
-
-static void
-aarch64_ravenscar_store_registers (struct regcache *regcache, int regnum)
-{
-  aarch64_ravenscar_generic_store_registers
-    (&aarch64_reg_info, regcache, regnum);
-}
+  void store_registers (struct regcache *regcache, int regnum) override
+  {
+    aarch64_ravenscar_generic_store_registers
+      (&aarch64_reg_info, regcache, regnum);
+  }
+};
 
 /* The ravenscar_arch_ops vector for most Aarch64 targets.  */
 
-static struct ravenscar_arch_ops aarch64_ravenscar_ops =
-{
-  aarch64_ravenscar_fetch_registers,
-  aarch64_ravenscar_store_registers,
-  aarch64_ravenscar_generic_prepare_to_store
-};
+static struct aarch64_ravenscar_ops aarch64_ravenscar_ops;
 
 /* Register aarch64_ravenscar_ops in GDBARCH.  */
 

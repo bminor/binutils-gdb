@@ -414,7 +414,7 @@ ravenscar_thread_target::fetch_registers (struct regcache *regcache, int regnum)
       struct ravenscar_arch_ops *arch_ops
 	= gdbarch_ravenscar_ops (gdbarch);
 
-      arch_ops->to_fetch_registers (regcache, regnum);
+      arch_ops->fetch_registers (regcache, regnum);
     }
   else
     beneath ()->fetch_registers (regcache, regnum);
@@ -434,7 +434,7 @@ ravenscar_thread_target::store_registers (struct regcache *regcache,
       struct ravenscar_arch_ops *arch_ops
 	= gdbarch_ravenscar_ops (gdbarch);
 
-      arch_ops->to_store_registers (regcache, regnum);
+      arch_ops->store_registers (regcache, regnum);
     }
   else
     beneath ()->store_registers (regcache, regnum);
@@ -449,11 +449,7 @@ ravenscar_thread_target::prepare_to_store (struct regcache *regcache)
       && is_ravenscar_task (ptid)
       && !ravenscar_task_is_currently_active (ptid))
     {
-      struct gdbarch *gdbarch = regcache->arch ();
-      struct ravenscar_arch_ops *arch_ops
-	= gdbarch_ravenscar_ops (gdbarch);
-
-      arch_ops->to_prepare_to_store (regcache);
+      /* Nothing.  */
     }
   else
     beneath ()->prepare_to_store (regcache);

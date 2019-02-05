@@ -1,5 +1,36 @@
 2019-02-15  Tom Tromey  <tromey@adacore.com>
 
+	* sparc-ravenscar-thread.c (struct sparc_ravenscar_ops): Derive
+	from ravenscar_arch_ops.
+	(sparc_ravenscar_ops::fetch_registers)
+	(sparc_ravenscar_ops::store_registers): Now methods.
+	(sparc_ravenscar_prepare_to_store): Remove.
+	(sparc_ravenscar_ops): Redefine.
+	* ravenscar-thread.h (struct ravenscar_arch_ops): Add virtual
+	methods and destructor.  Remove members.
+	* ravenscar-thread.c (ravenscar_thread_target::fetch_registers)
+	(ravenscar_thread_target::store_registers)
+	(ravenscar_thread_target::prepare_to_store): Update.
+	* ppc-ravenscar-thread.c (ppc_ravenscar_generic_prepare_to_store):
+	Remove.
+	(struct ppc_ravenscar_powerpc_ops): Derive from
+	ravenscar_arch_ops.
+	(ppc_ravenscar_powerpc_ops::fetch_registers)
+	(ppc_ravenscar_powerpc_ops::store_registers): Now methods.
+	(ppc_ravenscar_powerpc_ops): Redefine.
+	(struct ppc_ravenscar_e500_ops): Derive from ravenscar_arch_ops.
+	(ppc_ravenscar_e500_ops::fetch_registers)
+	(ppc_ravenscar_e500_ops::store_registers): Now methods.
+	(ppc_ravenscar_e500_ops): Redefine.
+	* aarch64-ravenscar-thread.c
+	(aarch64_ravenscar_generic_prepare_to_store): Remove.
+	(struct aarch64_ravenscar_ops): Derive from ravenscar_arch_ops.
+	(aarch64_ravenscar_fetch_registers)
+	(aarch64_ravenscar_store_registers): Now methods.
+	(aarch64_ravenscar_ops): Redefine.
+
+2019-02-15  Tom Tromey  <tromey@adacore.com>
+
 	* ravenscar-thread.c (ravenscar_thread_target::stopped_by_sw_breakpoint)
 	(ravenscar_thread_target::stopped_by_hw_breakpoint)
 	(ravenscar_thread_target::stopped_by_watchpoint)
