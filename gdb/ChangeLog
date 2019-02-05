@@ -1,3 +1,7 @@
+2019-02-15  Tom Tromey  <tromey@adacore.com>
+
+	* ravenscar-thread.c: Fix some typos.
+
 2019-02-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 	    Tom Tromey  <tromey@adacore.com>
 

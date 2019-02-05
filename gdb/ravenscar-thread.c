@@ -36,7 +36,7 @@
 
    The typical situation is when debugging a bare-metal target over
    the remote protocol. In that situation, the system does not know
-   about high-level comcepts such as threads, only about some code
+   about high-level concepts such as threads, only about some code
    running on one or more CPUs. And since the remote protocol does not
    provide any handling for CPUs, the de facto standard for handling
    them is to have one thread per CPU, where the thread's ptid has
@@ -44,14 +44,14 @@
    2 for the second one, etc).  This module will make that assumption.
 
    This module then creates and maintains the list of threads based
-   on the list of Ada tasks, with one thread per Ada tasks. The convention
+   on the list of Ada tasks, with one thread per Ada task. The convention
    is that threads corresponding to the CPUs (see assumption above)
-   have a ptid_t of the form (PID, LWP, 0), which threads corresponding
+   have a ptid_t of the form (PID, LWP, 0), while threads corresponding
    to our Ada tasks have a ptid_t of the form (PID, 0, TID) where TID
    is the Ada task's ID as extracted from Ada runtime information.
 
-   Switching to a given Ada tasks (or its underlying thread) is performed
-   by fetching the registers of that tasks from the memory area where
+   Switching to a given Ada task (or its underlying thread) is performed
+   by fetching the registers of that task from the memory area where
    the registers were saved.  For any of the other operations, the
    operation is performed by first finding the CPU on which the task
    is running, switching to its corresponding ptid, and then performing
