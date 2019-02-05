@@ -1,5 +1,11 @@
 2019-02-15  Tom Tromey  <tromey@adacore.com>
 
+	* ravenscar-thread.c (ravenscar_runtime_initializer)
+	(has_ravenscar_runtime, get_running_thread_id)
+	(ravenscar_thread_target::resume): Fix indentation.
+
+2019-02-15  Tom Tromey  <tromey@adacore.com>
+
 	* sparc-ravenscar-thread.c (struct sparc_ravenscar_ops): Derive
 	from ravenscar_arch_ops.
 	(sparc_ravenscar_ops::fetch_registers)

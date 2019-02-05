@@ -70,8 +70,8 @@ static const char running_thread_name[] = "__gnat_running_thread_table";
 static const char known_tasks_name[] = "system__tasking__debug__known_tasks";
 static const char first_task_name[] = "system__tasking__debug__first_task";
 
-static const char ravenscar_runtime_initializer[] =
-  "system__bb__threads__initialize";
+static const char ravenscar_runtime_initializer[]
+  = "system__bb__threads__initialize";
 
 static const target_info ravenscar_target_info = {
   "ravenscar",
@@ -263,12 +263,12 @@ get_running_thread_msymbol (void)
 static int
 has_ravenscar_runtime (void)
 {
-  struct bound_minimal_symbol msym_ravenscar_runtime_initializer =
-    lookup_minimal_symbol (ravenscar_runtime_initializer, NULL, NULL);
-  struct bound_minimal_symbol msym_known_tasks =
-    lookup_minimal_symbol (known_tasks_name, NULL, NULL);
-  struct bound_minimal_symbol msym_first_task =
-    lookup_minimal_symbol (first_task_name, NULL, NULL);
+  struct bound_minimal_symbol msym_ravenscar_runtime_initializer
+    = lookup_minimal_symbol (ravenscar_runtime_initializer, NULL, NULL);
+  struct bound_minimal_symbol msym_known_tasks
+    = lookup_minimal_symbol (known_tasks_name, NULL, NULL);
+  struct bound_minimal_symbol msym_first_task
+    = lookup_minimal_symbol (first_task_name, NULL, NULL);
   struct bound_minimal_symbol msym_running_thread
     = get_running_thread_msymbol ();
 
@@ -297,8 +297,8 @@ get_running_thread_id (int cpu)
   int buf_size;
   gdb_byte *buf;
   CORE_ADDR object_addr;
-  struct type *builtin_type_void_data_ptr =
-    builtin_type (target_gdbarch ())->builtin_data_ptr;
+  struct type *builtin_type_void_data_ptr
+    = builtin_type (target_gdbarch ())->builtin_data_ptr;
 
   if (!object_msym.minsym)
     return 0;
@@ -313,7 +313,8 @@ get_running_thread_id (int cpu)
 }
 
 void
-ravenscar_thread_target::resume (ptid_t ptid, int step, enum gdb_signal siggnal)
+ravenscar_thread_target::resume (ptid_t ptid, int step,
+				 enum gdb_signal siggnal)
 {
   inferior_ptid = base_ptid;
   beneath ()->resume (base_ptid, step, siggnal);
