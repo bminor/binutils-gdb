@@ -585,6 +585,15 @@ push_target (struct target_ops *t)
   g_target_stack.push (t);
 }
 
+/* See target.h  */
+
+void
+push_target (target_ops_up &&t)
+{
+  g_target_stack.push (t.get ());
+  t.release ();
+}
+
 /* See target.h.  */
 
 int

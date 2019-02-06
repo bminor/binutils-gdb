@@ -1,5 +1,12 @@
 2019-02-15  Tom Tromey  <tromey@adacore.com>
 
+	* target.h (push_target): Declare new overload.
+	* target.c (push_target): New overload, taking an rvalue reference.
+	* remote.c (remote_target::open_1): Use push_target overload.
+	* corelow.c (core_target_open): Use push_target overload.
+
+2019-02-15  Tom Tromey  <tromey@adacore.com>
+
 	* ravenscar-thread.c (is_ravenscar_task)
 	(ravenscar_task_is_currently_active): Return bool.
 	(ravenscar_update_inferior_ptid, get_running_thread_msymbol)

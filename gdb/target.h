@@ -2333,6 +2333,9 @@ extern void add_deprecated_target_alias (const target_info &info,
 
 extern void push_target (struct target_ops *);
 
+/* An overload that deletes the target on failure.  */
+extern void push_target (target_ops_up &&);
+
 extern int unpush_target (struct target_ops *);
 
 extern void target_pre_inferior (int);

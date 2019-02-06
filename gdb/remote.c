@@ -5547,9 +5547,7 @@ remote_target::open_1 (const char *name, int from_tty, int extended_p)
     }
 
   /* Switch to using the remote target now.  */
-  push_target (remote);
-  /* The target stack owns the target now.  */
-  target_holder.release ();
+  push_target (std::move (target_holder));
 
   /* Register extra event sources in the event loop.  */
   rs->remote_async_inferior_event_token

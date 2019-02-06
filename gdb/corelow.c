@@ -417,8 +417,7 @@ core_target_open (const char *arg, int from_tty)
   if (!exec_bfd)
     set_gdbarch_from_file (core_bfd);
 
-  push_target (target);
-  target_holder.release ();
+  push_target (std::move (target_holder));
 
   inferior_ptid = null_ptid;
 
