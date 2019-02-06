@@ -1426,7 +1426,7 @@ elf_x86_64_need_pic (struct bfd_link_info *info,
 	  break;
 	}
 
-      if (!h->def_regular && !h->def_dynamic)
+      if (!SYMBOL_DEFINED_NON_SHARED_P (h) && !h->def_dynamic)
 	und = _("undefined ");
     }
   else
@@ -1855,6 +1855,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
       const char *name;
       bfd_boolean size_reloc;
       bfd_boolean converted_reloc;
+      bfd_boolean do_check_pic;
 
       r_symndx = htab->r_sym (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
@@ -2130,6 +2131,13 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  size_reloc = TRUE;
 	  goto do_size;
 
+	case R_X86_64_PC8:
+	case R_X86_64_PC16:
+	case R_X86_64_PC32:
+	case R_X86_64_PC32_BND:
+	  do_check_pic = TRUE;
+	  goto check_pic;
+
 	case R_X86_64_32:
 	  if (!ABI_64_P (abfd))
 	    goto pointer;
@@ -2153,13 +2161,11 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 					&x86_64_elf_howto_table[r_type]);
 	  /* Fall through.  */
 
-	case R_X86_64_PC8:
-	case R_X86_64_PC16:
-	case R_X86_64_PC32:
-	case R_X86_64_PC32_BND:
 	case R_X86_64_PC64:
 	case R_X86_64_64:
 pointer:
+	  do_check_pic = FALSE;
+check_pic:
 	  if (eh != NULL && (sec->flags & SEC_CODE) != 0)
 	    eh->zero_undefweak |= 0x2;
 	  /* We are called after all symbols have been resolved.  Only
@@ -2220,6 +2226,67 @@ pointer:
 		  if (!h->def_regular
 		      || (sec->flags & (SEC_CODE | SEC_READONLY)) != 0)
 		    h->plt.refcount = 1;
+		}
+	    }
+
+	  if (do_check_pic)
+	    {
+	      /* Don't complain about -fPIC if the symbol is undefined
+	         when building executable unless it is unresolved weak
+		 symbol, references a dynamic definition in PIE or
+		 -z nocopyreloc is used.  */
+	      bfd_boolean no_copyreloc_p
+		= (info->nocopyreloc
+		   || (h != NULL
+		       && eh->def_protected
+		       && elf_has_no_copy_on_protected (h->root.u.def.section->owner)));
+	      if ((sec->flags & SEC_ALLOC) != 0
+		  && (sec->flags & SEC_READONLY) != 0
+		  && h != NULL
+		  && ((bfd_link_executable (info)
+		       && ((h->root.type == bfd_link_hash_undefweak
+			    && (eh == NULL
+				|| !UNDEFINED_WEAK_RESOLVED_TO_ZERO (info,
+								     eh)))
+			   || (bfd_link_pie (info)
+			       && !SYMBOL_DEFINED_NON_SHARED_P (h)
+			       && h->def_dynamic)
+			   || (no_copyreloc_p
+			       && h->def_dynamic
+			       && !(h->root.u.def.section->flags & SEC_CODE))))
+		      || bfd_link_dll (info)))
+		{
+		  bfd_boolean fail = FALSE;
+		  if (SYMBOL_REFERENCES_LOCAL_P (info, h))
+		    {
+		      /* Symbol is referenced locally.  Make sure it is
+			 defined locally.  */
+		      fail = !SYMBOL_DEFINED_NON_SHARED_P (h);
+		    }
+		  else if (bfd_link_pie (info))
+		    {
+		      /* We can only use PC-relative relocations in PIE
+			 from non-code sections.  */
+		      if (h->type == STT_FUNC
+			  && (sec->flags & SEC_CODE) != 0)
+			fail = TRUE;
+		    }
+		  else if (no_copyreloc_p || bfd_link_dll (info))
+		    {
+		      /* Symbol doesn't need copy reloc and isn't
+			 referenced locally.  Don't allow PC-relative
+			 relocations against default and protected
+			 symbols since address of protected function
+			 and location of protected data may not be in
+			 the shared object.   */
+		      fail = (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+			      || ELF_ST_VISIBILITY (h->other) == STV_PROTECTED);
+		    }
+
+		  if (fail)
+		    return elf_x86_64_need_pic (info, abfd, sec, h,
+						symtab_hdr, isym,
+						&x86_64_elf_howto_table[r_type]);
 		}
 	    }
 
@@ -3066,56 +3133,14 @@ use_plt:
 	case R_X86_64_PC16:
 	case R_X86_64_PC32:
 	case R_X86_64_PC32_BND:
-	  /* Don't complain about -fPIC if the symbol is undefined when
-	     building executable unless it is unresolved weak symbol,
-	     references a dynamic definition in PIE or -z nocopyreloc
-	     is used.  */
-	  if ((input_section->flags & SEC_ALLOC) != 0
-	      && (input_section->flags & SEC_READONLY) != 0
-	      && h != NULL
-	      && ((bfd_link_executable (info)
-		   && ((h->root.type == bfd_link_hash_undefweak
-			&& !resolved_to_zero)
-		       || (bfd_link_pie (info)
-			   && !h->def_regular
-			   && h->def_dynamic)
-		       || ((info->nocopyreloc
-			    || (eh->def_protected
-				&& elf_has_no_copy_on_protected (h->root.u.def.section->owner)))
-			   && h->def_dynamic
-			   && !(h->root.u.def.section->flags & SEC_CODE))))
-		  || bfd_link_dll (info)))
-	    {
-	      bfd_boolean fail = FALSE;
-	      if (SYMBOL_REFERENCES_LOCAL_P (info, h))
-		{
-		  /* Symbol is referenced locally.  Make sure it is
-		     defined locally.  */
-		  fail = !(h->def_regular || ELF_COMMON_DEF_P (h));
-		}
-	      else if (!(bfd_link_pie (info)
-			 && (h->needs_copy || eh->needs_copy)))
-		{
-		  /* Symbol doesn't need copy reloc and isn't referenced
-		     locally.  Address of protected function may not be
-		     reachable at run-time.  */
-		  fail = (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-			  || (ELF_ST_VISIBILITY (h->other) == STV_PROTECTED
-			      && h->type == STT_FUNC));
-		}
-
-	      if (fail)
-		return elf_x86_64_need_pic (info, input_bfd, input_section,
-					    h, NULL, NULL, howto);
-	    }
 	  /* Since x86-64 has PC-relative PLT, we can use PLT in PIE
 	     as function address.  */
-	  else if (h != NULL
-		   && (input_section->flags & SEC_CODE) == 0
-		   && bfd_link_pie (info)
-		   && h->type == STT_FUNC
-		   && !h->def_regular
-		   && h->def_dynamic)
+	  if (h != NULL
+	      && (input_section->flags & SEC_CODE) == 0
+	      && bfd_link_pie (info)
+	      && h->type == STT_FUNC
+	      && !h->def_regular
+	      && h->def_dynamic)
 	    goto use_plt;
 	  /* Fall through.  */
 
@@ -4272,7 +4297,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
       else if (bfd_link_pic (info)
 	       && SYMBOL_REFERENCES_LOCAL_P (info, h))
 	{
-	  if (!(h->def_regular || ELF_COMMON_DEF_P (h)))
+	  if (!SYMBOL_DEFINED_NON_SHARED_P (h))
 	    return FALSE;
 	  BFD_ASSERT((h->got.offset & 1) != 0);
 	  rela.r_info = htab->r_info (0, R_X86_64_RELATIVE);
