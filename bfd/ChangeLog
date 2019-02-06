@@ -1,3 +1,15 @@
+2019-02-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/24151
+	* elf64-x86-64.c (elf_x86_64_need_pic): Check
+	SYMBOL_DEFINED_NON_SHARED_P instead of def_regular.
+	(elf_x86_64_relocate_section): Move PIC check for PC-relative
+	relocations to ...
+	(elf_x86_64_check_relocs): Here.
+	(elf_x86_64_finish_dynamic_symbol): Use SYMBOL_DEFINED_NON_SHARED_P
+	to check if a symbol is defined in a non-shared object.
+	* elfxx-x86.h (SYMBOL_DEFINED_NON_SHARED_P): New.
+
 2019-02-08  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Add %X to "unsupported
