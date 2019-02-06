@@ -323,8 +323,12 @@ void
 ravenscar_thread_target::resume (ptid_t ptid, int step,
 				 enum gdb_signal siggnal)
 {
+  /* If we see a wildcard resume, we simply pass that on.  Otherwise,
+     arrange to resume the base ptid.  */
   inferior_ptid = m_base_ptid;
-  beneath ()->resume (m_base_ptid, step, siggnal);
+  if (ptid != minus_one_ptid)
+    ptid = m_base_ptid;
+  beneath ()->resume (ptid, step, siggnal);
 }
 
 ptid_t
@@ -335,7 +339,9 @@ ravenscar_thread_target::wait (ptid_t ptid,
   ptid_t event_ptid;
 
   inferior_ptid = m_base_ptid;
-  event_ptid = beneath ()->wait (m_base_ptid, status, 0);
+  if (ptid != minus_one_ptid)
+    ptid = m_base_ptid;
+  event_ptid = beneath ()->wait (ptid, status, 0);
   /* Find any new threads that might have been created, and update
      inferior_ptid to the active thread.
 
@@ -350,6 +356,8 @@ ravenscar_thread_target::wait (ptid_t ptid,
       this->update_thread_list ();
       this->update_inferior_ptid ();
     }
+  else
+    inferior_ptid = m_base_ptid;
   return inferior_ptid;
 }
 

@@ -1,5 +1,10 @@
 2019-02-15  Tom Tromey  <tromey@adacore.com>
 
+	* ravenscar-thread.c (ravenscar_thread_target::resume)
+	(ravenscar_thread_target::wait): Special case wildcard requests.
+
+2019-02-15  Tom Tromey  <tromey@adacore.com>
+
 	* ravenscar-thread.c (base_ptid): Remove.
 	(struct ravenscar_thread_target) <close>: New method.
 	<m_base_ptid>: New member.
