@@ -1,3 +1,9 @@
+2019-02-06  Alan Modra  <amodra@gmail.com>
+
+	PR ld/24008
+	* testsuite/ld-scripts/pr24008.d: Pass with extra target
+	defined symbols.
+
 2019-02-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/24151
