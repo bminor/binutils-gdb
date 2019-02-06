@@ -1,3 +1,11 @@
+2019-02-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/24151
+	* testsuite/ld-x86-64/pr24151a-x32.d: New file.
+	* testsuite/ld-x86-64/pr24151a.d: Likewise.
+	* testsuite/ld-x86-64/pr24151a.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run pr24151a and pr24151a-x32.
+
 2019-01-31  Alan Modra  <amodra@gmail.com>
 
 	* NEWS: Mention -t change.

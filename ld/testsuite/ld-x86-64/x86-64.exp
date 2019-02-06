@@ -424,6 +424,8 @@ run_dump_test "pr23486d-x32"
 run_dump_test "pr23854"
 run_dump_test "pr23930"
 run_dump_test "pr23930-x32"
+run_dump_test "pr24151a"
+run_dump_test "pr24151a-x32"
 
 if { ![istarget "x86_64-*-linux*"] && ![istarget "x86_64-*-nacl*"]} {
     return
