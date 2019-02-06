@@ -1,5 +1,28 @@
 2019-02-15  Tom Tromey  <tromey@adacore.com>
 
+	* ravenscar-thread.c (base_ptid): Remove.
+	(struct ravenscar_thread_target) <close>: New method.
+	<m_base_ptid>: New member.
+	<update_inferior_ptid, active_task, task_is_currently_active,
+	runtime_initialized>: Declare methods.
+	<ravenscar_thread_target>: Add constructor.
+	(ravenscar_thread_target::task_is_currently_active)
+	(ravenscar_thread_target::update_inferior_ptid)
+	(ravenscar_runtime_initialized): Rename.  Now methods.
+	(ravenscar_thread_target::resume, ravenscar_thread_target::wait)
+	(ravenscar_thread_target::update_thread_list): Update.
+	(ravenscar_thread_target::active_task): Now method.
+	(ravenscar_thread_target::store_registers)
+	(ravenscar_thread_target::prepare_to_store)
+	(ravenscar_thread_target::prepare_to_store)
+	(ravenscar_thread_target::mourn_inferior): Update.
+	(ravenscar_inferior_created): Use "new" to create target.
+	(ravenscar_thread_target::get_ada_task_ptid): Update.
+	(_initialize_ravenscar): Don't initialize base_ptid.
+	(ravenscar_ops): Remove global.
+
+2019-02-15  Tom Tromey  <tromey@adacore.com>
+
 	* target.h (push_target): Declare new overload.
 	* target.c (push_target): New overload, taking an rvalue reference.
 	* remote.c (remote_target::open_1): Use push_target overload.
