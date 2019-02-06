@@ -231,6 +231,13 @@ fbsd_fetch_cmdline (pid_t pid)
   if (sysctl (mib, 4, cmdline.get (), &len, NULL, 0) == -1)
     return nullptr;
 
+  /* Join the arguments with spaces to form a single string.  */
+  char *cp = cmdline.get ();
+  for (size_t i = 0; i < len - 1; i++)
+    if (cp[i] == '\0')
+      cp[i] = ' ';
+  cp[len - 1] = '\0';
+
   return cmdline;
 }
 

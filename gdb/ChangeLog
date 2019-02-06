@@ -1,3 +1,7 @@
+2019-02-06  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (fbsd_fetch_cmdline): Join arguments with spaces.
+
 2019-02-05  Tom Tromey  <tom@tromey.com>
 
 	* target.c (target_stack::unpush): Move assertion earlier.
