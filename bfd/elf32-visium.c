@@ -312,7 +312,6 @@ visium_elf_howto_parity_reloc (bfd * input_bfd, arelent *reloc_entry,
   bfd_vma relocation;
   bfd_byte *inplace_address;
   bfd_vma insn;
-  const bfd_vma signmask = 0xffff8000;
 
   /* This part is from bfd_elf_generic_reloc.
      If we're relocating, and this an external symbol, we don't want
@@ -351,19 +350,19 @@ visium_elf_howto_parity_reloc (bfd * input_bfd, arelent *reloc_entry,
 
   if (reloc_entry->howto->pc_relative)
     {
-      relocation -= input_section->output_section->vma
-	+ input_section->output_offset;
+      relocation -= input_section->output_section->vma;
+      relocation -= input_section->output_offset;
       relocation -= reloc_entry->address;
     }
 
   switch (reloc_entry->howto->type)
     {
     case R_VISIUM_PC16:
-      relocation >>= 2;
-      if (ret == bfd_reloc_ok && (relocation & signmask) != 0
-	  && (relocation & signmask) != signmask)
+      if (ret == bfd_reloc_ok
+	  && ((bfd_signed_vma) relocation < -0x20000
+	      || (bfd_signed_vma) relocation > 0x1ffff))
 	ret = bfd_reloc_overflow;
-      relocation &= 0xffff;
+      relocation = (relocation >> 2) & 0xffff;
       break;
     case R_VISIUM_HI16:
     case R_VISIUM_HI16_PCREL:
