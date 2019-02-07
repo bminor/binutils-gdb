@@ -1,5 +1,12 @@
 2019-02-07  Eric Botcazou  <ebotcazou@adacore.com>
 
+	PR ld/18841
+	* elf32-sparc.c (elf32_sparc_reloc_type_class): Return
+	reloc_class_ifunc for ifunc symbols.
+	* elf64-sparc.c (elf64_sparc_reloc_type_class): Likewise.
+
+2019-02-07  Eric Botcazou  <ebotcazou@adacore.com>
+
 	* elf32-visium.c (visium_elf_howto_parity_reloc): Minor tweak.
 	<R_VISIUM_PC16>: Use explicit range test to detect an overflow.
 

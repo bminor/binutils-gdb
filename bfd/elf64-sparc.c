@@ -769,13 +769,44 @@ elf64_sparc_print_symbol_all (bfd *abfd ATTRIBUTE_UNUSED, void * filep,
     return symbol->name;
 }
 
+/* Used to decide how to sort relocs in an optimal manner for the
+   dynamic linker, before writing them out.  */
+
 static enum elf_reloc_type_class
-elf64_sparc_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
+elf64_sparc_reloc_type_class (const struct bfd_link_info *info,
 			      const asection *rel_sec ATTRIBUTE_UNUSED,
 			      const Elf_Internal_Rela *rela)
 {
+  bfd *abfd = info->output_bfd;
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  struct _bfd_sparc_elf_link_hash_table *htab
+    = _bfd_sparc_elf_hash_table (info);
+  BFD_ASSERT (htab != NULL);
+
+  if (htab->elf.dynsym != NULL
+      && htab->elf.dynsym->contents != NULL)
+    {
+      /* Check relocation against STT_GNU_IFUNC symbol if there are
+	 dynamic symbols.  */
+      unsigned long r_symndx = htab->r_symndx (rela->r_info);
+      if (r_symndx != STN_UNDEF)
+	{
+	  Elf_Internal_Sym sym;
+	  if (!bed->s->swap_symbol_in (abfd,
+				       (htab->elf.dynsym->contents
+					+ r_symndx * bed->s->sizeof_sym),
+				       0, &sym))
+	    abort ();
+
+	  if (ELF_ST_TYPE (sym.st_info) == STT_GNU_IFUNC)
+	    return reloc_class_ifunc;
+	}
+    }
+
   switch ((int) ELF64_R_TYPE (rela->r_info))
     {
+    case R_SPARC_IRELATIVE:
+      return reloc_class_ifunc;
     case R_SPARC_RELATIVE:
       return reloc_class_relative;
     case R_SPARC_JMP_SLOT:
