@@ -1,3 +1,7 @@
+2019-02-07  Alan Hayward  <alan.hayward@arm.com>
+
+	* gdb.base/attach.exp: Add double attach test.
+
 2019-02-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* lib/gdb.exp (default_gdb_start): Don't match pagination

@@ -45,7 +45,10 @@ if [get_compiler_info] {
     return -1
 }
 
-proc do_attach_tests {} {
+# This is a test of the error cases for gdb's ability to attach to a
+# running process.
+
+proc_with_prefix do_attach_failure_tests {} {
     global gdb_prompt
     global binfile
     global escapedbinfile
@@ -54,7 +57,9 @@ proc do_attach_tests {} {
     global subdir
     global timeout
     global decimal
-    
+
+    clean_restart $binfile
+
     # Figure out a regular expression that will match the sysroot,
     # noting that the default sysroot is "target:", and also noting
     # that GDB will strip "target:" from the start of filenames when
@@ -154,6 +159,75 @@ proc do_attach_tests {} {
 	}
     }
     
+    # Verify that we can't double attach to the process.
+
+    set test "first attach"
+    gdb_test_multiple "attach $testpid" "$test" {
+	-re "Attaching to program.*`?$escapedbinfile'?, process $testpid.*main.*at .*$srcfile:.*$gdb_prompt $" {
+	    pass "$test"
+	}
+	-re "Attaching to program.*`?$escapedbinfile\.exe'?, process $testpid.*\[Switching to thread $testpid\..*\].*$gdb_prompt $" {
+	    # Response expected on Cygwin.
+	    pass "$test"
+	}
+    }
+
+    gdb_test "add-inferior" "Added inferior 2.*" "add empty inferior 2"
+    gdb_test "inferior 2" "Switching to inferior 2.*" "switch to inferior 2"
+
+    set test "fail to attach again"
+    gdb_test_multiple "attach $testpid" "$test" {
+	-re "Attaching to process $testpid.*warning: process .* is already traced by process .*$gdb_prompt $" {
+	    pass "$test"
+	}
+	-re "Attaching to process .* failed.*$gdb_prompt $" {
+	    # Response expected when using gdbserver.
+	    pass "$test"
+	}
+    }
+
+    gdb_test "inferior 1" "Switching to inferior 1.*" "switch to inferior 1"
+    set test "exit after attach failures"
+    gdb_test "kill" \
+	"" \
+	"$test" \
+	"Kill the program being debugged.*y or n. $" \
+	"y"
+
+    # Another "don't leave a process around"
+    kill_wait_spawned_process $test_spawn_id
+}
+
+# This is a test of gdb's ability to attach to a running process.
+
+proc_with_prefix do_attach_tests {} {
+    global gdb_prompt
+    global binfile
+    global escapedbinfile
+    global srcfile
+    global testfile
+    global subdir
+    global timeout
+    global decimal
+
+    clean_restart $binfile
+
+    # Figure out a regular expression that will match the sysroot,
+    # noting that the default sysroot is "target:", and also noting
+    # that GDB will strip "target:" from the start of filenames when
+    # operating on the local filesystem.  However the default sysroot
+    # can be set via configure option --with-sysroot, which can be "/".
+    # If $binfile is a absolute path, so pattern
+    # "$sysroot$escapedbinfile" below is wrong.  Use [^\r\n]* to make
+    # $sysroot simple.
+    set sysroot "\[^\r\n\]*"
+
+    # Start the program running and then wait for a bit, to be sure
+    # that it can be attached to.
+
+    set test_spawn_id [spawn_wait_for_attach $binfile]
+    set testpid [spawn_id_get_pid $test_spawn_id]
+
     # Verify that we can attach to the process by first giving its
     # executable name via the file command, and using attach with the
     # process ID.
@@ -313,10 +387,14 @@ proc do_attach_tests {} {
     kill_wait_spawned_process $test_spawn_id
 }
 
-proc do_call_attach_tests {} {
+# Test attaching when the target is inside a system call.
+
+proc_with_prefix do_call_attach_tests {} {
     global gdb_prompt
     global binfile2
-    
+
+    clean_restart
+
     set test_spawn_id [spawn_wait_for_attach $binfile2]
     set testpid [spawn_id_get_pid $test_spawn_id]
 
@@ -358,7 +436,7 @@ proc do_call_attach_tests {} {
     kill_wait_spawned_process $test_spawn_id
 }
 
-proc do_command_attach_tests {} {
+proc_with_prefix do_command_attach_tests {} {
     global gdb_prompt
     global binfile
     global verbose
@@ -435,23 +513,8 @@ proc test_command_line_attach_run {} {
     }
 }
 
-# Start with a fresh gdb
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
-
-# This is a test of gdb's ability to attach to a running process.
-
 do_attach_tests
-
-# Test attaching when the target is inside a system call
-
-gdb_exit
-gdb_start
-
-gdb_reinitialize_dir $srcdir/$subdir
+do_attach_failure_tests
 do_call_attach_tests
 
 # Test "gdb --pid"

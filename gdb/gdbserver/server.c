@@ -295,6 +295,9 @@ attach_inferior (int pid)
   /* myattach should return -1 if attaching is unsupported,
      0 if it succeeded, and call error() otherwise.  */
 
+  if (find_process_pid (pid) != nullptr)
+    error ("Already attached to process %d\n", pid);
+
   if (myattach (pid) != 0)
     return -1;
 
