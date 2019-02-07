@@ -1249,7 +1249,6 @@ static void
 print_source_lines_base (struct symtab *s, int line, int stopline,
 			 print_source_lines_flags flags)
 {
-  int c;
   scoped_fd desc;
   int noprint = 0;
   int nlines = stopline - line;
@@ -1343,13 +1342,10 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	   line, symtab_to_filename_for_display (s), s->nlines);
 
   const char *iter = lines.c_str ();
-  while (nlines-- > 0)
+  while (nlines-- > 0 && *iter != '\0')
     {
       char buf[20];
 
-      c = *iter++;
-      if (c == '\0')
-	break;
       last_line_listed = current_source_line;
       if (flags & PRINT_SOURCE_LINES_FILENAME)
         {
@@ -1358,33 +1354,55 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
         }
       xsnprintf (buf, sizeof (buf), "%d\t", current_source_line++);
       uiout->text (buf);
-      do
+
+      while (*iter != '\0')
 	{
-	  if (c < 040 && c != '\t' && c != '\n' && c != '\r' && c != '\033')
+	  /* Find a run of characters that can be emitted at once.
+	     This is done so that escape sequences are kept
+	     together.  */
+	  const char *start = iter;
+	  while (true)
 	    {
-	      xsnprintf (buf, sizeof (buf), "^%c", c + 0100);
+	      int skip_bytes;
+
+	      char c = *iter;
+	      if (c == '\033' && skip_ansi_escape (iter, &skip_bytes))
+		iter += skip_bytes;
+	      else if (c < 040 && c != '\t')
+		break;
+	      else if (c == 0177)
+		break;
+	      else
+		++iter;
+	    }
+	  if (iter > start)
+	    {
+	      std::string text (start, iter);
+	      uiout->text (text.c_str ());
+	    }
+	  if (*iter == '\r')
+	    {
+	      /* Treat either \r or \r\n as a single newline.  */
+	      ++iter;
+	      if (*iter == '\n')
+		++iter;
+	      break;
+	    }
+	  else if (*iter == '\n')
+	    {
+	      ++iter;
+	      break;
+	    }
+	  else if (*iter > 0 && *iter < 040)
+	    {
+	      xsnprintf (buf, sizeof (buf), "^%c", *iter + 0100);
 	      uiout->text (buf);
 	    }
-	  else if (c == 0177)
+	  else if (*iter == 0177)
 	    uiout->text ("^?");
-	  else if (c == '\r')
-	    {
-	      /* Skip a \r character, but only before a \n.  */
-	      if (*iter != '\n')
-		printf_filtered ("^%c", c + 0100);
-	    }
-	  else
-	    {
-	      xsnprintf (buf, sizeof (buf), "%c", c);
-	      uiout->text (buf);
-	    }
 	}
-      while (c != '\n' && (c = *iter++) != '\0');
-      if (c == '\0')
-	break;
+      uiout->text ("\n");
     }
-  if (!lines.empty() && lines.back () != '\n')
-    uiout->text ("\n");
 }
 
 

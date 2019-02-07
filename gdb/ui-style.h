@@ -163,6 +163,16 @@ struct ui_file_style
   /* Return the ANSI escape sequence for this style.  */
   std::string to_ansi () const;
 
+  /* Return true if this style is the default style; false
+     otherwise.  */
+  bool is_default () const
+  {
+    return (m_foreground == NONE
+	    && m_background == NONE
+	    && m_intensity == NORMAL
+	    && !m_reverse);
+  }
+
   /* Return true if this style specified reverse display; false
      otherwise.  */
   bool is_reverse () const

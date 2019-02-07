@@ -1,3 +1,8 @@
+2019-02-17  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/style.exp: Add line-wrapping tests.
+	* gdb.base/page.exp: Add test for quitting during pagination.
+
 2019-02-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/big_packed_array: New testcase.

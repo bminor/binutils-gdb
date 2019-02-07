@@ -45,6 +45,24 @@ save_vars { env(TERM) } {
 
     gdb_test "print &main" " = .* \033\\\[34m$hex\033\\\[m <$main_expr>"
 
+    # Regression test for a bug where line-wrapping would occur at the
+    # wrong spot with styling.  There were different bugs at different
+    # widths, so try two.
+    foreach width {20 30} {
+	gdb_test_no_output "set width $width"
+	# There was also a bug where the styling could be wrong in the
+	# line listing; this is why the words from the source code are
+	# spelled out in the final result line of the test.
+	gdb_test "frame" \
+	    [multi_line \
+		 "#0 *$main_expr.*$arg_expr.*" \
+		 ".*$arg_expr.*" \
+		 ".* at .*$file_expr.*" \
+		 "\[0-9\]+.*return.* break here .*"
+	    ] \
+	    "frame when width=$width"
+    }
+
     gdb_exit
     gdb_spawn
 

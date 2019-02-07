@@ -1,3 +1,22 @@
+2019-02-17  Tom Tromey  <tom@tromey.com>
+
+	* ada-lang.c (user_select_syms): Use filtered printing.
+	* utils.c (wrap_style): New global.
+	(desired_style): Remove.
+	(emit_style_escape): Add stream parameter.
+	(set_output_style, reset_terminal_style, prompt_for_continue):
+	Update.
+	(flush_wrap_buffer): Only flush gdb_stdout.
+	(wrap_here): Set wrap_style.
+	(fputs_maybe_filtered): Clear the wrap buffer on exception.  Don't
+	treat escape sequences as a character.  Change when wrap buffer is
+	flushed.
+	(fputs_styled): Do not set the output style when the default is
+	requested.
+	* ui-style.h (struct ui_file_style) <is_default>: New method.
+	* source.c (print_source_lines_base): Emit escape sequences in one
+	piece.
+
 2019-02-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbtypes.c (type_align): Handle TYPE_CODE_RANGE the same as

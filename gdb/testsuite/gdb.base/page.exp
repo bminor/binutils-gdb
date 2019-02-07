@@ -80,6 +80,20 @@ gdb_expect_list "paged count remainder" "${gdb_prompt} " {
     11
 }
 
+set fours [string repeat 4 40]
+set str "1\\n2\\n3\\n$fours\\n5\\n"
+
+# Avoid some confusing output from readline.
+gdb_test_no_output "set editing off"
+
+gdb_test_no_output "set width 30"
+send_gdb "printf \"$str\"\n"
+gdb_expect_list "paged count for interrupt" \
+    ".*$pagination_prompt" \
+    [list 1\r\n 2\r\n 3\r\n 444444444444444444444444444444]
+
+gdb_test "q" "Quit" "quit while paging"
+
 gdb_exit
 return 0
 

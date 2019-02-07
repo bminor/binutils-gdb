@@ -72,6 +72,7 @@
 #include <algorithm>
 #include "common/pathstuff.h"
 #include "cli/cli-style.h"
+#include "common/scope-exit.h"
 
 void (*deprecated_error_begin_hook) (void);
 
@@ -1282,6 +1283,9 @@ static const char *wrap_indent;
 /* Column number on the screen where wrap_buffer begins, or 0 if wrapping
    is not in effect.  */
 static int wrap_column;
+
+/* The style applied at the time that wrap_here was called.  */
+static ui_file_style wrap_style;
 
 
 /* Initialize the number of lines per page and chars per line.  */
@@ -1427,21 +1431,19 @@ set_screen_width_and_height (int width, int height)
 
 static ui_file_style applied_style;
 
-/* The currently desired style.  This can differ from the applied
-   style when showing the pagination prompt.  */
-
-static ui_file_style desired_style;
-
-/* Emit an ANSI style escape for STYLE to the wrap buffer.  */
+/* Emit an ANSI style escape for STYLE.  If STREAM is nullptr, emit to
+   the wrap buffer; otherwise emit to STREAM.  */
 
 static void
-emit_style_escape (const ui_file_style &style)
+emit_style_escape (const ui_file_style &style,
+		   struct ui_file *stream = nullptr)
 {
-  if (applied_style == style)
-    return;
   applied_style = style;
 
-  wrap_buffer.append (style.to_ansi ());
+  if (stream == nullptr)
+    wrap_buffer.append (style.to_ansi ());
+  else
+    fputs_unfiltered (style.to_ansi ().c_str (), stream);
 }
 
 /* See utils.h.  */
@@ -1465,11 +1467,11 @@ can_emit_style_escape (struct ui_file *stream)
 static void
 set_output_style (struct ui_file *stream, const ui_file_style &style)
 {
-  if (!can_emit_style_escape (stream)
-      || style == desired_style)
+  if (!can_emit_style_escape (stream))
     return;
 
-  desired_style = style;
+  /* Note that we don't pass STREAM here, because we want to emit to
+     the wrap buffer, not directly to STREAM.  */
   emit_style_escape (style);
 }
 
@@ -1482,9 +1484,8 @@ reset_terminal_style (struct ui_file *stream)
     {
       /* Force the setting, regardless of what we think the setting
 	 might already be.  */
-      desired_style = ui_file_style ();
-      applied_style = desired_style;
-      wrap_buffer.append (desired_style.to_ansi ());
+      applied_style = ui_file_style ();
+      wrap_buffer.append (applied_style.to_ansi ());
     }
 }
 
@@ -1504,7 +1505,8 @@ prompt_for_continue (void)
   bool disable_pagination = pagination_disabled_for_command;
 
   /* Clear the current styling.  */
-  emit_style_escape (ui_file_style ());
+  if (can_emit_style_escape (gdb_stdout))
+    emit_style_escape (ui_file_style (), gdb_stdout);
 
   if (annotation_level > 1)
     printf_unfiltered (("\n\032\032pre-prompt-for-continue\n"));
@@ -1551,7 +1553,8 @@ prompt_for_continue (void)
   pagination_disabled_for_command = disable_pagination;
 
   /* Restore the current styling.  */
-  emit_style_escape (desired_style);
+  if (can_emit_style_escape (gdb_stdout))
+    emit_style_escape (applied_style);
 
   dont_repeat ();		/* Forget prev cmd -- CR won't repeat it.  */
 }
@@ -1589,7 +1592,7 @@ reinitialize_more_filter (void)
 static void
 flush_wrap_buffer (struct ui_file *stream)
 {
-  if (!wrap_buffer.empty ())
+  if (stream == gdb_stdout && !wrap_buffer.empty ())
     {
       fputs_unfiltered (wrap_buffer.c_str (), stream);
       wrap_buffer.clear ();
@@ -1644,6 +1647,7 @@ wrap_here (const char *indent)
 	wrap_indent = "";
       else
 	wrap_indent = indent;
+      wrap_style = applied_style;
     }
 }
 
@@ -1743,6 +1747,14 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
       return;
     }
 
+  auto buffer_clearer
+    = make_scope_exit ([&] ()
+		       {
+			 wrap_buffer.clear ();
+			 wrap_column = 0;
+			 wrap_indent = "";
+		       });
+
   /* Go through and output each character.  Show line extension
      when this is necessary; prompt user for new page when this is
      necessary.  */
@@ -1759,6 +1771,8 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 
       while (*lineptr && *lineptr != '\n')
 	{
+	  int skip_bytes;
+
 	  /* Print a single line.  */
 	  if (*lineptr == '\t')
 	    {
@@ -1768,6 +1782,14 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 	         shifting left 3 advances to the next tab stop.  */
 	      chars_printed = ((chars_printed >> 3) + 1) << 3;
 	      lineptr++;
+	    }
+	  else if (*lineptr == '\033'
+		   && skip_ansi_escape (lineptr, &skip_bytes))
+	    {
+	      wrap_buffer.append (lineptr, skip_bytes);
+	      /* Note that we don't consider this a character, so we
+		 don't increment chars_printed here.  */
+	      lineptr += skip_bytes;
 	    }
 	  else
 	    {
@@ -1782,15 +1804,18 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 
 	      chars_printed = 0;
 	      lines_printed++;
-	      /* If we aren't actually wrapping, don't output newline --
-	         if chars_per_line is right, we probably just overflowed
-	         anyway; if it's wrong, let us keep going.  */
 	      if (wrap_column)
 		{
-		  emit_style_escape (ui_file_style ());
-		  flush_wrap_buffer (stream);
+		  if (can_emit_style_escape (stream))
+		    emit_style_escape (ui_file_style (), stream);
+		  /* If we aren't actually wrapping, don't output
+		     newline -- if chars_per_line is right, we
+		     probably just overflowed anyway; if it's wrong,
+		     let us keep going.  */
 		  fputc_unfiltered ('\n', stream);
 		}
+	      else
+		flush_wrap_buffer (stream);
 
 	      /* Possible new page.  Note that
 		 PAGINATION_DISABLED_FOR_COMMAND might be set during
@@ -1803,8 +1828,8 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 	      if (wrap_column)
 		{
 		  fputs_unfiltered (wrap_indent, stream);
-		  emit_style_escape (desired_style);
-		  flush_wrap_buffer (stream);
+		  if (can_emit_style_escape (stream))
+		    emit_style_escape (wrap_style, stream);
 		  /* FIXME, this strlen is what prevents wrap_indent from
 		     containing tabs.  However, if we recurse to print it
 		     and count its chars, we risk trouble if wrap_indent is
@@ -1828,6 +1853,8 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 	  lineptr++;
 	}
     }
+
+  buffer_clearer.release ();
 }
 
 void
@@ -1842,9 +1869,16 @@ void
 fputs_styled (const char *linebuffer, const ui_file_style &style,
 	      struct ui_file *stream)
 {
-  set_output_style (stream, style);
-  fputs_maybe_filtered (linebuffer, stream, 1);
-  set_output_style (stream, ui_file_style ());
+  /* This just makes it so we emit somewhat fewer escape
+     sequences.  */
+  if (style.is_default ())
+    fputs_maybe_filtered (linebuffer, stream, 1);
+  else
+    {
+      set_output_style (stream, style);
+      fputs_maybe_filtered (linebuffer, stream, 1);
+      set_output_style (stream, ui_file_style ());
+    }
 }
 
 int
