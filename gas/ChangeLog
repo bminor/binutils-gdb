@@ -1,5 +1,13 @@
 2019-02-07  Tamar Christina  <tamar.christina@arm.com>
 
+	* config/tc-arm.c (insns): Redefine THUMB_VARIANT and ARM_VARIANT for
+	hlt to armv1.
+	* testsuite/gas/arm/armv8a-automatic-hlt.d: Update TAGs
+	* testsuite/gas/arm/hlt.d: New test.
+	* testsuite/gas/arm/hlt.s: New test.
+
+2019-02-07  Tamar Christina  <tamar.christina@arm.com>
+
 	* testsuite/gas/aarch64/undefined_advsimd_armv8_3.d: New test.
 	* testsuite/gas/aarch64/undefined_advsimd_armv8_3.s: New test.
 
