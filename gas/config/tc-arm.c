@@ -20187,11 +20187,22 @@ static const struct asm_opcode insns[] =
 #define THUMB_VARIANT & arm_ext_v8
 
  tCE("sevl",	320f005, _sevl,    0, (),		noargs,	t_hint),
- TUE("hlt",	1000070, ba80,     1, (oIffffb),	bkpt,	t_hlt),
  TCE("ldaexd",	1b00e9f, e8d000ff, 3, (RRnpc, oRRnpc, RRnpcb),
 							ldrexd, t_ldrexd),
  TCE("stlexd",	1a00e90, e8c000f0, 4, (RRnpc, RRnpc, oRRnpc, RRnpcb),
 							strexd, t_strexd),
+
+/* Defined in V8 but is in undefined encoding space for earlier
+   architectures.  However earlier architectures are required to treat
+   this instuction as a semihosting trap as well.  Hence while not explicitly
+   defined as such, it is in fact correct to define the instruction for all
+   architectures.  */
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT  & arm_ext_v1
+#undef  ARM_VARIANT
+#define ARM_VARIANT  & arm_ext_v1
+ TUE("hlt",	1000070, ba80,     1, (oIffffb),	bkpt,	t_hlt),
+
  /* ARMv8 T32 only.  */
 #undef  ARM_VARIANT
 #define ARM_VARIANT  NULL

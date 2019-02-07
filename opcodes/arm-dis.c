@@ -1788,7 +1788,8 @@ static const struct opcode32 arm_opcodes[] =
   /* V8 instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V8),
     0x0320f005, 0x0fffffff, "sevl"},
-  {ARM_FEATURE_CORE_LOW (ARM_EXT_V8),
+  /* Defined in V8 but is in NOP space so available to all arch.  */
+  {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
     0xe1000070, 0xfff000f0, "hlt\t0x%16-19X%12-15X%8-11X%0-3X"},
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_ATOMICS),
     0x01800e90, 0x0ff00ff0, "stlex%c\t%12-15r, %0-3r, [%16-19R]"},

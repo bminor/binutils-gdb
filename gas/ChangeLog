@@ -1,3 +1,11 @@
+2019-02-07  Tamar Christina  <tamar.christina@arm.com>
+
+	* config/tc-arm.c (insns): Redefine THUMB_VARIANT and ARM_VARIANT for
+	hlt to armv1.
+	* testsuite/gas/arm/armv8a-automatic-hlt.d: Update TAGs
+	* testsuite/gas/arm/hlt.d: New test.
+	* testsuite/gas/arm/hlt.s: New test.
+
 2019-02-07  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* config/tc-visium.c (md_assemble) <mode_cad>: Align instruction on
