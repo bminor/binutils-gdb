@@ -1638,7 +1638,7 @@ proc default_gdb_spawn { } {
 # Default gdb_start procedure.
 
 proc default_gdb_start { } {
-    global gdb_prompt pagination_prompt
+    global gdb_prompt
     global gdb_spawn_id
     global inferior_spawn_id
 
@@ -1659,29 +1659,20 @@ proc default_gdb_start { } {
     # When running over NFS, particularly if running many simultaneous
     # tests on different hosts all using the same server, things can
     # get really slow.  Give gdb at least 3 minutes to start up.
-    set loop_again 1
-    while { $loop_again } {
-	set loop_again 0
-	gdb_expect 360 {
-	    -re "$pagination_prompt" {
-		verbose "Hit pagination during startup. Pressing enter to continue."
-		send_gdb "\n"
-		set loop_again 1
-	    }
-	    -re "\[\r\n\]$gdb_prompt $" {
-		verbose "GDB initialized."
-	    }
-	    -re "$gdb_prompt $"	{
-		perror "GDB never initialized."
-		unset gdb_spawn_id
-		return -1
-	    }
-	    timeout	{
-		perror "(timeout) GDB never initialized after 10 seconds."
-		remote_close host
-		unset gdb_spawn_id
-		return -1
-	    }
+    gdb_expect 360 {
+	-re "\[\r\n\]$gdb_prompt $" {
+	    verbose "GDB initialized."
+	}
+	-re "$gdb_prompt $"	{
+	    perror "GDB never initialized."
+	    unset gdb_spawn_id
+	    return -1
+	}
+	timeout	{
+	    perror "(timeout) GDB never initialized after 10 seconds."
+	    remote_close host
+	    unset gdb_spawn_id
+	    return -1
 	}
     }
 
@@ -4751,6 +4742,11 @@ proc gdb_init { test_file_name } {
     # This disables style output, which would interfere with many
     # tests.
     setenv TERM "dumb"
+
+    # Initialize GDB's pty with a fixed size, to make sure we avoid pagination
+    # during startup.  See "man expect" for details about stty_init.
+    global stty_init
+    set stty_init "rows 25 cols 80"
 
     # Some tests (for example gdb.base/maint.exp) shell out from gdb to use
     # grep.  Clear GREP_OPTIONS to make the behavior predictable,
