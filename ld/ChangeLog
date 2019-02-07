@@ -1,3 +1,9 @@
+2019-02-07  Nick Clifton  <nickc@redhat.com>
+
+	PR 24175
+	* ld.texi (Options): Add missing word to the description of the
+	--start-group option.
+
 2019-02-06  Alan Modra  <amodra@gmail.com>
 
 	PR ld/24008

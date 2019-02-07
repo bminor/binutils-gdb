@@ -1317,7 +1317,7 @@ the order that it is specified on the command line.  If a symbol in that
 archive is needed to resolve an undefined symbol referred to by an
 object in an archive that appears later on the command line, the linker
 would not be able to resolve that reference.  By grouping the archives,
-they all be searched repeatedly until all possible references are
+they will all be searched repeatedly until all possible references are
 resolved.
 
 Using this option has a significant performance cost.  It is best to use
