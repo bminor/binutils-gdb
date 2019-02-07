@@ -104,6 +104,11 @@ CORE_ADDR read_memory_typed_address (CORE_ADDR addr, struct type *type);
 extern void write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr,
 			  ssize_t len);
 
+/* Same as above, but with length_t.  */
+
+extern void write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr,
+			  length_t &len);
+
 /* Same as write_memory, but notify 'memory_changed' observers.  */
 
 extern void write_memory_with_notification (CORE_ADDR memaddr,

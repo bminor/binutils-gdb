@@ -377,6 +377,15 @@ write_memory (CORE_ADDR memaddr,
     memory_error (TARGET_XFER_E_IO, memaddr);
 }
 
+/* See gdbcore.h.  */
+
+void
+write_memory (CORE_ADDR memaddr,
+	      const bfd_byte *myaddr, length_t &len)
+{
+  write_memory (memaddr, myaddr, static_cast<ssize_t> len);
+}
+
 /* Same as write_memory, but notify 'memory_changed' observers.  */
 
 void

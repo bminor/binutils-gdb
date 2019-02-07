@@ -50,6 +50,7 @@
 #include "common/enum-flags.h"
 #include "common/underlying.h"
 #include "common/print-utils.h"
+#include "common/length-type.h"
 #include "gdbarch.h"
 
 /* Forward declarations for prototypes.  */
@@ -859,7 +860,7 @@ struct type
      type_length_units function should be used in order to get the length
      expressed in target addressable memory units.  */
 
-  unsigned int length;
+  length_t length;
 
   /* * Core type, shared by a group of qualified types.  */
 

@@ -1081,19 +1081,19 @@ typedef struct
   const gdb_byte *data;
 
   /* Size in bytes of value to pass on stack.  */
-  int len;
+  length_t len;
 } stack_item_t;
 
 DEF_VEC_O (stack_item_t);
 
 /* Return the alignment (in bytes) of the given type.  */
 
-static int
+static length_t
 aarch64_type_align (struct type *t)
 {
   int n;
-  int align;
-  int falign;
+  length_t align;
+  length_t falign;
 
   t = check_typedef (t);
   switch (TYPE_CODE (t))
@@ -1206,14 +1206,13 @@ aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
 	else
 	  {
 	    struct type *target_type = TYPE_TARGET_TYPE (type);
-	    int count = aapcs_is_vfp_call_or_return_candidate_1
-			  (target_type, fundamental_type);
+	    slength_t count = aapcs_is_vfp_call_or_return_candidate_1
+	      (target_type, fundamental_type);
 
-	    if (count == -1)
-	      return count;
+	    if (count != -1)
+	      count *= (TYPE_LENGTH (type) / TYPE_LENGTH (target_type));
 
-	    count *= (TYPE_LENGTH (type) / TYPE_LENGTH (target_type));
-	      return count;
+	    return (int) count;
 	  }
       }
 
@@ -1239,8 +1238,8 @@ aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
 
 	/* Ensure there is no padding between the fields (allowing for empty
 	   zero length structs)  */
-	int ftype_length = (*fundamental_type == nullptr)
-			   ? 0 : TYPE_LENGTH (*fundamental_type);
+	length_t ftype_length = (*fundamental_type == nullptr)
+	  ? 0 : TYPE_LENGTH (*fundamental_type);
 	if (count * ftype_length != TYPE_LENGTH (type))
 	  return -1;
 
@@ -1309,7 +1308,7 @@ struct aarch64_call_info
 
   /* The next stacked argument address, equivalent to NSAA as
      described in the AArch64 Procedure Call Standard.  */
-  unsigned nsaa;
+  length_t nsaa;
 
   /* Stack item vector.  */
   VEC(stack_item_t) *si;
@@ -1324,7 +1323,7 @@ pass_in_x (struct gdbarch *gdbarch, struct regcache *regcache,
 	   struct value *arg)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int len = TYPE_LENGTH (type);
+  length_t len = TYPE_LENGTH (type);
   enum type_code typecode = TYPE_CODE (type);
   int regnum = AARCH64_X0_REGNUM + info->ngrn;
   const bfd_byte *buf = value_contents (arg);
@@ -1333,8 +1332,8 @@ pass_in_x (struct gdbarch *gdbarch, struct regcache *regcache,
 
   while (len > 0)
     {
-      int partial_len = len < X_REGISTER_SIZE ? len : X_REGISTER_SIZE;
-      CORE_ADDR regval = extract_unsigned_integer (buf, partial_len,
+      length_t partial_len = len < X_REGISTER_SIZE ? len : X_REGISTER_SIZE;
+      CORE_ADDR regval = extract_unsigned_integer (buf, (int) partial_len,
 						   byte_order);
 
 
@@ -1342,7 +1341,7 @@ pass_in_x (struct gdbarch *gdbarch, struct regcache *regcache,
       if (byte_order == BFD_ENDIAN_BIG
 	  && partial_len < X_REGISTER_SIZE
 	  && (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION))
-	regval <<= ((X_REGISTER_SIZE - partial_len) * TARGET_CHAR_BIT);
+	regval <<= ((X_REGISTER_SIZE - (int) partial_len) * TARGET_CHAR_BIT);
 
       if (aarch64_debug)
 	{
@@ -1352,7 +1351,7 @@ pass_in_x (struct gdbarch *gdbarch, struct regcache *regcache,
 	}
       regcache_cooked_write_unsigned (regcache, regnum, regval);
       len -= partial_len;
-      buf += partial_len;
+      buf += (int) partial_len;
       regnum++;
     }
 }
@@ -1366,7 +1365,7 @@ static int
 pass_in_v (struct gdbarch *gdbarch,
 	   struct regcache *regcache,
 	   struct aarch64_call_info *info,
-	   int len, const bfd_byte *buf)
+	   length_t &len, const bfd_byte *buf)
 {
   if (info->nsrn < 8)
     {
@@ -1381,7 +1380,7 @@ pass_in_v (struct gdbarch *gdbarch,
       memset (reg, 0, sizeof (reg));
       /* PCS C.1, the argument is allocated to the least significant
 	 bits of V register.  */
-      memcpy (reg, buf, len);
+      memcpy (reg, buf, static_cast<size_t> (len));
       regcache->cooked_write (regnum, reg);
 
       if (aarch64_debug)
@@ -1402,8 +1401,8 @@ pass_on_stack (struct aarch64_call_info *info, struct type *type,
 	       struct value *arg)
 {
   const bfd_byte *buf = value_contents (arg);
-  int len = TYPE_LENGTH (type);
-  int align;
+  length_t len = TYPE_LENGTH (type);
+  length_t align;
   stack_item_t item;
 
   info->argnum++;
@@ -1412,7 +1411,7 @@ pass_on_stack (struct aarch64_call_info *info, struct type *type,
 
   /* PCS C.17 Stack should be aligned to the larger of 8 bytes or the
      Natural alignment of the argument's type.  */
-  align = align_up (align, 8);
+  align = align_up (static_cast<ULONGEST> (align), 8);
 
   /* The AArch64 PCS requires at most doubleword alignment.  */
   if (align > 16)
@@ -1420,8 +1419,8 @@ pass_on_stack (struct aarch64_call_info *info, struct type *type,
 
   if (aarch64_debug)
     {
-      debug_printf ("arg %d len=%d @ sp + %d\n", info->argnum, len,
-		    info->nsaa);
+      debug_printf ("arg %d len=%s @ sp + %s\n", info->argnum, len.c_str (),
+		    info->nsaa.c_str ());
     }
 
   item.len = len;
@@ -1429,10 +1428,10 @@ pass_on_stack (struct aarch64_call_info *info, struct type *type,
   VEC_safe_push (stack_item_t, info->si, &item);
 
   info->nsaa += len;
-  if (info->nsaa & (align - 1))
+  if ((info->nsaa & (align - 1)) != 0)
     {
       /* Push stack alignment padding.  */
-      int pad = align - (info->nsaa & (align - 1));
+      length_t pad = align - (info->nsaa & (align - 1));
 
       item.len = pad;
       item.data = NULL;
@@ -1451,8 +1450,8 @@ pass_in_x_or_stack (struct gdbarch *gdbarch, struct regcache *regcache,
 		    struct aarch64_call_info *info, struct type *type,
 		    struct value *arg)
 {
-  int len = TYPE_LENGTH (type);
-  int nregs = (len + X_REGISTER_SIZE - 1) / X_REGISTER_SIZE;
+  length_t len = TYPE_LENGTH (type);
+  int nregs = static_cast<int> ((len + X_REGISTER_SIZE - 1) / X_REGISTER_SIZE);
 
   /* PCS C.13 - Pass in registers if we have enough spare */
   if (info->ngrn + nregs <= 8)
@@ -1493,7 +1492,8 @@ pass_in_v_vfp_candidate (struct gdbarch *gdbarch, struct regcache *regcache,
 	  return false;
 
 	return pass_in_v (gdbarch, regcache, info, TYPE_LENGTH (target_type),
-			  buf + TYPE_LENGTH (target_type));
+			  buf
+			  + static_cast<ULONGEST> (TYPE_LENGTH (target_type)));
       }
 
     case TYPE_CODE_ARRAY:
@@ -1588,7 +1588,8 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       struct value *arg = args[argnum];
       struct type *arg_type, *fundamental_type;
-      int len, elements;
+      length_t len;
+      int elements;
 
       arg_type = check_typedef (value_type (arg));
       len = TYPE_LENGTH (arg_type);
@@ -1642,7 +1643,7 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		 invisible reference.  */
 
 	      /* Allocate aligned storage.  */
-	      sp = align_down (sp - len, 16);
+	      sp = align_down (sp - static_cast<CORE_ADDR> (len), 16);
 
 	      /* Write the real data into the stack.  */
 	      write_memory (sp, value_contents (arg), len);
@@ -1664,14 +1665,14 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     }
 
   /* Make sure stack retains 16 byte alignment.  */
-  if (info.nsaa & 15)
-    sp -= 16 - (info.nsaa & 15);
+  if ((info.nsaa & length_t (15)) != 0)
+    sp -= 16 - (static_cast<CORE_ADDR> (info.nsaa) & 15);
 
   while (!VEC_empty (stack_item_t, info.si))
     {
       stack_item_t *si = VEC_last (stack_item_t, info.si);
 
-      sp -= si->len;
+      sp -= static_cast<CORE_ADDR> (si->len);
       if (si->data != NULL)
 	write_memory (sp, si->data, si->len);
       VEC_pop (stack_item_t, info.si);
@@ -1920,7 +1921,7 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
   if (aapcs_is_vfp_call_or_return_candidate (type, &elements,
 					     &fundamental_type))
     {
-      int len = TYPE_LENGTH (fundamental_type);
+      length_t len = TYPE_LENGTH (fundamental_type);
 
       for (int i = 0; i < elements; i++)
 	{
