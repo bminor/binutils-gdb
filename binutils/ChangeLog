@@ -1,3 +1,8 @@
+2019-02-07  Nick Clifton  <nickc@redhat.com>
+
+	* README-how-to-make-a-release: Add a note about updating the
+	obsolete targets in the bfd/config.bfd file.
+
 2019-02-04  Nick Clifton  <nickc@redhat.com>
 
 	* README-how-to-make-a-release: Add more notes on making a release.

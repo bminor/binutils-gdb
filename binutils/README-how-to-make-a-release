@@ -374,7 +374,11 @@ When the time comes to actually make the release....
   33. Email the binutils list telling everyone that the 2.XX branch
       is now open for business as usual and that patched no longer
       need special approval.
- 
+
+  34. Examine the bfd/config.bfd file and move any pending obsolete
+      targets into the definitely obsolete section.  Create a
+      changelog entry and commit.
+      
 -------------------------------------------------
 How to perform a point release.
 -------------------------------------------------

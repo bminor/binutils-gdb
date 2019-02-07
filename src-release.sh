@@ -38,15 +38,13 @@ MAKEINFOFLAGS=--split-size=5000000
 # Support for building net releases
 
 # Files in root used in any net release.
-DEVO_SUPPORT="README Makefile.in configure configure.ac \
-	config.guess config.sub config move-if-change \
-	COPYING COPYING.LIB install-sh config-ml.in symlink-tree \
-	mkinstalldirs ltmain.sh missing ylwrap \
-	libtool.m4 ltsugar.m4 ltversion.m4 ltoptions.m4 \
-	Makefile.def Makefile.tpl src-release.sh config.rpath \
-	ChangeLog MAINTAINERS README-maintainer-mode \
-	lt~obsolete.m4 ltgcc.m4 depcomp mkdep compile \
-	COPYING3 COPYING3.LIB test-driver ar-lib"
+DEVO_SUPPORT="ar-lib ChangeLog compile config config-ml.in config.guess \
+	config.rpath config.sub configure configure.ac COPYING COPYING.LIB \
+	COPYING3 COPYING3.LIB depcomp install-sh libtool.m4 ltgcc.m4 \
+	ltmain.sh ltoptions.m4 ltsugar.m4 ltversion.m4 lt~obsolete.m4 \
+	MAINTAINERS Makefile.def Makefile.in Makefile.tpl missing mkdep \
+	mkinstalldirs move-if-change README README-maintainer-mode \
+	src-release.sh symlink-tree test-driver ylwrap"
 
 # Files in devo/etc used in any net release.
 ETC_SUPPORT="Makefile.in configure configure.in standards.texi \
