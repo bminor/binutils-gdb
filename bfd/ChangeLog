@@ -1,3 +1,8 @@
+2019-02-07  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* elf32-visium.c (visium_elf_howto_parity_reloc): Minor tweak.
+	<R_VISIUM_PC16>: Use explicit range test to detect an overflow.
+
 2019-02-07  Nick Clifton  <nickc@redhat.com>
 
 	* config.bfd: Move the powerpc-lynxos and powerpc-windiss targets
