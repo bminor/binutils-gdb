@@ -1,3 +1,7 @@
+2019-02-07  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
 2019-01-31  Andreas Krebbel  <krebbel@linux.ibm.com>
 
 	* s390-mkopc.c (main): Accept arch13 as cpu string.
