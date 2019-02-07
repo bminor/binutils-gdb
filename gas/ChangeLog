@@ -1,5 +1,10 @@
 2019-02-07  Tamar Christina  <tamar.christina@arm.com>
 
+	* testsuite/gas/aarch64/undefined_advsimd_armv8_3.d: New test.
+	* testsuite/gas/aarch64/undefined_advsimd_armv8_3.s: New test.
+
+2019-02-07  Tamar Christina  <tamar.christina@arm.com>
+
 	PR binutils/23212
 	* testsuite/gas/aarch64/undefined_by_elem_sz_l.s: New test.
 	* testsuite/gas/aarch64/undefined_by_elem_sz_l.d: New test.
