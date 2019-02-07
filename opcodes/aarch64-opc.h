@@ -146,7 +146,8 @@ enum aarch64_field_kind
   FLD_rotate1,
   FLD_rotate2,
   FLD_rotate3,
-  FLD_SM3_imm2
+  FLD_SM3_imm2,
+  FLD_sz
 };
 
 /* Field description.  */

@@ -2239,6 +2239,8 @@ static const aarch64_feature_set aarch64_feature_memtag =
   { NAME, OPCODE, MASK, CLASS, OP, FP, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define SIMD_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, SIMD, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define _SIMD_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,VERIFIER) \
+  { NAME, OPCODE, MASK, CLASS, OP, SIMD, OPS, QUALS, FLAGS, 0, 0, VERIFIER }
 #define CRYP_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, CRYPTO, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define _CRC_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
@@ -2420,11 +2422,11 @@ struct aarch64_opcode aarch64_opcode_table[] =
   SIMD_INSN ("sqdmull2",0x4f00b000, 0xff00f400, asimdelem, 0, OP3 (Vd, Vn, Em16), QL_ELEMENT_L2,   F_SIZEQ),
   SIMD_INSN ("sqdmulh", 0x0f00c000, 0xbf00f400, asimdelem, 0, OP3 (Vd, Vn, Em16), QL_ELEMENT,      F_SIZEQ),
   SIMD_INSN ("sqrdmulh",0x0f00d000, 0xbf00f400, asimdelem, 0, OP3 (Vd, Vn, Em16), QL_ELEMENT,      F_SIZEQ),
-  SIMD_INSN ("fmla",    0x0f801000, 0xbf80f400, asimdelem, 0, OP3 (Vd, Vn, Em), QL_ELEMENT_FP,   F_SIZEQ),
+  _SIMD_INSN ("fmla",    0x0f801000, 0xbf80f400, asimdelem, 0, OP3 (Vd, Vn, Em), QL_ELEMENT_FP,  F_SIZEQ, VERIFIER (elem_sd)),
   SF16_INSN ("fmla",    0x0f001000, 0xbfc0f400, asimdelem, OP3 (Vd, Vn, Em16), QL_ELEMENT_FP_H, F_SIZEQ),
-  SIMD_INSN ("fmls",    0x0f805000, 0xbf80f400, asimdelem, 0, OP3 (Vd, Vn, Em), QL_ELEMENT_FP,   F_SIZEQ),
+  _SIMD_INSN ("fmls",    0x0f805000, 0xbf80f400, asimdelem, 0, OP3 (Vd, Vn, Em), QL_ELEMENT_FP,   F_SIZEQ, VERIFIER (elem_sd)),
   SF16_INSN ("fmls",    0x0f005000, 0xbfc0f400, asimdelem, OP3 (Vd, Vn, Em16), QL_ELEMENT_FP_H, F_SIZEQ),
-  SIMD_INSN ("fmul",    0x0f809000, 0xbf80f400, asimdelem, 0, OP3 (Vd, Vn, Em), QL_ELEMENT_FP,   F_SIZEQ),
+  _SIMD_INSN ("fmul",    0x0f809000, 0xbf80f400, asimdelem, 0, OP3 (Vd, Vn, Em), QL_ELEMENT_FP,   F_SIZEQ, VERIFIER (elem_sd)),
   SF16_INSN ("fmul",    0x0f009000, 0xbfc0f400, asimdelem, OP3 (Vd, Vn, Em16), QL_ELEMENT_FP_H, F_SIZEQ),
   SIMD_INSN ("mla",     0x2f000000, 0xbf00f400, asimdelem, 0, OP3 (Vd, Vn, Em16), QL_ELEMENT,      F_SIZEQ),
   SIMD_INSN ("umlal",   0x2f002000, 0xff00f400, asimdelem, 0, OP3 (Vd, Vn, Em16), QL_ELEMENT_L,    F_SIZEQ),
@@ -2434,7 +2436,7 @@ struct aarch64_opcode aarch64_opcode_table[] =
   SIMD_INSN ("umlsl2",  0x6f006000, 0xff00f400, asimdelem, 0, OP3 (Vd, Vn, Em16), QL_ELEMENT_L2,   F_SIZEQ),
   SIMD_INSN ("umull",   0x2f00a000, 0xff00f400, asimdelem, 0, OP3 (Vd, Vn, Em16), QL_ELEMENT_L,    F_SIZEQ),
   SIMD_INSN ("umull2",  0x6f00a000, 0xff00f400, asimdelem, 0, OP3 (Vd, Vn, Em16), QL_ELEMENT_L2,   F_SIZEQ),
-  SIMD_INSN ("fmulx",   0x2f809000, 0xbf80f400, asimdelem, 0, OP3 (Vd, Vn, Em), QL_ELEMENT_FP,   F_SIZEQ),
+  _SIMD_INSN ("fmulx",   0x2f809000, 0xbf80f400, asimdelem, 0, OP3 (Vd, Vn, Em), QL_ELEMENT_FP,   F_SIZEQ, VERIFIER (elem_sd)),
   SF16_INSN ("fmulx",   0x2f009000, 0xbfc0f400, asimdelem, OP3 (Vd, Vn, Em16), QL_ELEMENT_FP_H, F_SIZEQ),
   RDMA_INSN ("sqrdmlah",0x2f00d000, 0xbf00f400, asimdelem, OP3 (Vd, Vn, Em16), QL_ELEMENT,      F_SIZEQ),
   RDMA_INSN ("sqrdmlsh",0x2f00f000, 0xbf00f400, asimdelem, OP3 (Vd, Vn, Em16), QL_ELEMENT,      F_SIZEQ),
@@ -2748,13 +2750,13 @@ struct aarch64_opcode aarch64_opcode_table[] =
   SIMD_INSN ("sqdmull", 0x5f00b000, 0xff00f400, asisdelem, 0, OP3 (Sd, Sn, Em16), QL_SISDL_HS, F_SSIZE),
   SIMD_INSN ("sqdmulh", 0x5f00c000, 0xff00f400, asisdelem, 0, OP3 (Sd, Sn, Em16), QL_SISD_HS, F_SSIZE),
   SIMD_INSN ("sqrdmulh", 0x5f00d000, 0xff00f400, asisdelem, 0, OP3 (Sd, Sn, Em16), QL_SISD_HS, F_SSIZE),
-  SIMD_INSN ("fmla", 0x5f801000, 0xff80f400, asisdelem, 0, OP3 (Sd, Sn, Em), QL_FP3, F_SSIZE),
+  _SIMD_INSN ("fmla", 0x5f801000, 0xff80f400, asisdelem, 0, OP3 (Sd, Sn, Em), QL_FP3, F_SSIZE, VERIFIER (elem_sd)),
   SF16_INSN ("fmla", 0x5f001000, 0xffc0f400, asisdelem, OP3 (Sd, Sn, Em16), QL_FP3_H, F_SSIZE),
-  SIMD_INSN ("fmls", 0x5f805000, 0xff80f400, asisdelem, 0, OP3 (Sd, Sn, Em), QL_FP3, F_SSIZE),
+  _SIMD_INSN ("fmls", 0x5f805000, 0xff80f400, asisdelem, 0, OP3 (Sd, Sn, Em), QL_FP3, F_SSIZE, VERIFIER (elem_sd)),
   SF16_INSN ("fmls", 0x5f005000, 0xffc0f400, asisdelem, OP3 (Sd, Sn, Em16), QL_FP3_H, F_SSIZE),
-  SIMD_INSN ("fmul", 0x5f809000, 0xff80f400, asisdelem, 0, OP3 (Sd, Sn, Em), QL_FP3, F_SSIZE),
+  _SIMD_INSN ("fmul", 0x5f809000, 0xff80f400, asisdelem, 0, OP3 (Sd, Sn, Em), QL_FP3, F_SSIZE, VERIFIER (elem_sd)),
   SF16_INSN ("fmul", 0x5f009000, 0xffc0f400, asisdelem, OP3 (Sd, Sn, Em16), QL_FP3_H, F_SSIZE),
-  SIMD_INSN ("fmulx", 0x7f809000, 0xff80f400, asisdelem, 0, OP3 (Sd, Sn, Em), QL_FP3, F_SSIZE),
+  _SIMD_INSN ("fmulx", 0x7f809000, 0xff80f400, asisdelem, 0, OP3 (Sd, Sn, Em), QL_FP3, F_SSIZE, VERIFIER (elem_sd)),
   SF16_INSN ("fmulx", 0x7f009000, 0xffc0f400, asisdelem, OP3 (Sd, Sn, Em16), QL_FP3_H, F_SSIZE),
   RDMA_INSN ("sqrdmlah", 0x7f00d000, 0xff00f400, asisdelem, OP3 (Sd, Sn, Em16), QL_SISD_HS, F_SSIZE),
   RDMA_INSN ("sqrdmlsh", 0x7f00f000, 0xff00f400, asisdelem, OP3 (Sd, Sn, Em16), QL_SISD_HS, F_SSIZE),

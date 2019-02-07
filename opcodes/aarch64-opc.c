@@ -320,6 +320,7 @@ const aarch64_field fields[] =
     { 13,  2 }, /* rotate2: Indexed element FCMLA immediate rotate.  */
     { 12,  1 }, /* rotate3: FCADD immediate rotate.  */
     { 12,  2 }, /* SM3: Indexed element SM3 2 bits index immediate.  */
+    { 22,  1 }, /* sz: 1-bit element size select.  */
 };
 
 enum aarch64_operand_class
@@ -4724,6 +4725,29 @@ verify_ldpsw (const struct aarch64_inst *inst ATTRIBUTE_UNUSED,
       if (t == t2)
 	return ERR_UND;
     }
+
+  return ERR_OK;
+}
+
+/* Verifier for vector by element 3 operands functions where the
+   conditions `if sz:L == 11 then UNDEFINED` holds.  */
+
+static enum err_type
+verify_elem_sd (const struct aarch64_inst *inst, const aarch64_insn insn,
+		bfd_vma pc ATTRIBUTE_UNUSED, bfd_boolean encoding,
+		aarch64_operand_error *mismatch_detail ATTRIBUTE_UNUSED,
+		aarch64_instr_sequence *insn_sequence ATTRIBUTE_UNUSED)
+{
+  const aarch64_insn undef_pattern = 0x3;
+  aarch64_insn value;
+
+  assert (inst->opcode);
+  assert (inst->opcode->operands[2] == AARCH64_OPND_Em);
+  value = encoding ? inst->value : insn;
+  assert (value);
+
+  if (undef_pattern == extract_fields (value, 0, 2, FLD_sz, FLD_L))
+    return ERR_UND;
 
   return ERR_OK;
 }
