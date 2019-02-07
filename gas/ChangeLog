@@ -1,3 +1,13 @@
+2019-02-07  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* config/tc-visium.c (md_assemble) <mode_cad>: Align instruction on
+	64-bit boundaries for the GR6.
+	* testsuite/gas/visium/allinsn_gr6.s: Tweak.
+	* testsuite/gas/visium/allinsn_gr6.d: Likewise.
+	* testsuite/gas/visium/bra-1.d: New test.
+	* testsuite/gas/visium/bra-1.s: Likewise.
+	* testsuite/gas/visium/visium.exp: Run bra-1 test.
+
 2019-02-02  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.
