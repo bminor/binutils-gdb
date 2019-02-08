@@ -1,5 +1,14 @@
 2019-02-17  Tom Tromey  <tom@tromey.com>
 
+	* macrotab.h (macro_source_fullname): Return a std::string.
+	* macrotab.c (macro_include, check_for_redefinition)
+	(macro_undef, macro_lookup_definition, foreach_macro)
+	(foreach_macro_in_scope): Update.
+	(macro_source_fullname): Return a std::string.
+	* macrocmd.c (show_pp_source_pos): Update.
+
+2019-02-17  Tom Tromey  <tom@tromey.com>
+
 	* macrocmd.c (show_pp_source_pos): Style the file names.
 
 2019-02-17  Tom Tromey  <tom@tromey.com>

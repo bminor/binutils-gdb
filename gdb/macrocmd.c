@@ -119,20 +119,16 @@ show_pp_source_pos (struct ui_file *stream,
                     struct macro_source_file *file,
                     int line)
 {
-  char *fullname;
-
-  fullname = macro_source_fullname (file);
-  fputs_styled (fullname, file_name_style.style (), stream);
+  std::string fullname = macro_source_fullname (file);
+  fputs_styled (fullname.c_str (), file_name_style.style (), stream);
   fprintf_filtered (stream, ":%d\n", line);
-  xfree (fullname);
 
   while (file->included_by)
     {
       fullname = macro_source_fullname (file->included_by);
       fputs_filtered (_("  included at "), stream);
-      fputs_styled (fullname, file_name_style.style (), stream);
+      fputs_styled (fullname.c_str (), file_name_style.style (), stream);
       fprintf_filtered (stream, ":%d\n", file->included_at_line);
-      xfree (fullname);
       file = file->included_by;
     }
 }
