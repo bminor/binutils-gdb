@@ -1,3 +1,8 @@
+2019-02-08  Jim Wilson  <jimw@sifive.com>
+
+	* riscv-opc.c (riscv_opcodes) <beq>: Use Cz to compress 3 operand form.
+	<bne>: Likewise.
+
 2019-02-07  Tamar Christina  <tamar.christina@arm.com>
 
 	* arm-dis.c (arm_opcodes): Redefine hlt to armv1.

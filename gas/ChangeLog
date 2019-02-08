@@ -1,3 +1,8 @@
+2019-02-08  Jim Wilson  <jimw@sifive.com>
+
+	* config/tc-riscv.c (validate_riscv_insn) <'C'>: Add 'z' support.
+	(riscv_ip) <'C'>: Add 'z' support.
+
 2019-02-07  Tamar Christina  <tamar.christina@arm.com>
 
 	* config/tc-arm.c (insns): Redefine THUMB_VARIANT and ARM_VARIANT for
