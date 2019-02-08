@@ -8852,7 +8852,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	    }
 	  else if (htab->plt_type != PLT_NEW)
 	    info->callbacks->einfo
-	      (_("%P: %H: %s relocation unsupported for bss-plt\n"),
+	      (_("%X%P: %H: %s relocation unsupported for bss-plt\n"),
 	       input_bfd, input_section, rel->r_offset,
 	       howto->name);
 	  break;
@@ -8870,7 +8870,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	    }
 	  else if (htab->plt_type != PLT_NEW)
 	    info->callbacks->einfo
-	      (_("%P: %H: %s relocation unsupported for bss-plt\n"),
+	      (_("%X%P: %H: %s relocation unsupported for bss-plt\n"),
 	       input_bfd, input_section, rel->r_offset,
 	       howto->name);
 	  break;
