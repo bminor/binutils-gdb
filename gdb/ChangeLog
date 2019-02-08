@@ -1,5 +1,9 @@
 2019-02-17  Tom Tromey  <tom@tromey.com>
 
+	* macrocmd.c (show_pp_source_pos): Style the file names.
+
+2019-02-17  Tom Tromey  <tom@tromey.com>
+
 	PR tui/24197:
 	* tui/tui-source.c (tui_set_source_content_nil): Rewrite.
 

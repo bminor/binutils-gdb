@@ -22,6 +22,7 @@
 #include "macrotab.h"
 #include "macroexp.h"
 #include "macroscope.h"
+#include "cli/cli-style.h"
 #include "cli/cli-utils.h"
 #include "command.h"
 #include "gdbcmd.h"
@@ -121,14 +122,16 @@ show_pp_source_pos (struct ui_file *stream,
   char *fullname;
 
   fullname = macro_source_fullname (file);
-  fprintf_filtered (stream, "%s:%d\n", fullname, line);
+  fputs_styled (fullname, file_name_style.style (), stream);
+  fprintf_filtered (stream, ":%d\n", line);
   xfree (fullname);
 
   while (file->included_by)
     {
       fullname = macro_source_fullname (file->included_by);
-      fprintf_filtered (gdb_stdout, "  included at %s:%d\n", fullname,
-                        file->included_at_line);
+      fputs_filtered (_("  included at "), stream);
+      fputs_styled (fullname, file_name_style.style (), stream);
+      fprintf_filtered (stream, ":%d\n", file->included_at_line);
       xfree (fullname);
       file = file->included_by;
     }

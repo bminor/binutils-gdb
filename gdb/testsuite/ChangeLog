@@ -1,5 +1,11 @@
 2019-02-17  Tom Tromey  <tom@tromey.com>
 
+	* gdb.base/style.exp: Use -g3 to compile when possible.  Add test
+	for macro styling.
+	* gdb.base/style.c (SOME_MACRO): New macro.
+
+2019-02-17  Tom Tromey  <tom@tromey.com>
+
 	* gdb.base/style.exp: Add line-wrapping tests.
 	* gdb.base/page.exp: Add test for quitting during pagination.
 

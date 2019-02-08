@@ -21,7 +21,16 @@ save_vars { env(TERM) } {
     # We need an ANSI-capable terminal to get the output.
     setenv TERM ansi
 
-    if {[prepare_for_testing "failed to prepare" $testfile $srcfile]} {
+    set test_macros 0
+    set options debug
+    get_compiler_info
+    if { [test_compiler_info "gcc-*"] || [test_compiler_info "clang-*"] } {
+	lappend options additional_flags=-g3
+	set test_macros 1
+    }
+
+    if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
+	     $options]} {
 	return -1
     }
 
@@ -61,6 +70,11 @@ save_vars { env(TERM) } {
 		 "\[0-9\]+.*return.* break here .*"
 	    ] \
 	    "frame when width=$width"
+    }
+
+    if {$test_macros} {
+	gdb_test "info macro SOME_MACRO" \
+	    "Defined at $base_file_expr:16\r\n#define SOME_MACRO 23"
     }
 
     gdb_exit
