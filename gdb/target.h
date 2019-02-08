@@ -659,6 +659,9 @@ struct target_ops
 						       int,
 						       inferior *inf)
       TARGET_DEFAULT_RETURN (NULL);
+    /* See target_thread_info_to_thread_handle.  */
+    virtual gdb::byte_vector thread_info_to_thread_handle (struct thread_info *)
+      TARGET_DEFAULT_RETURN (gdb::byte_vector ());
     virtual void stop (ptid_t)
       TARGET_DEFAULT_IGNORE ();
     virtual void interrupt ()
@@ -1850,6 +1853,12 @@ extern const char *target_thread_name (struct thread_info *);
 
 extern struct thread_info *target_thread_handle_to_thread_info
   (const gdb_byte *thread_handle, int handle_len, struct inferior *inf);
+
+/* Given a thread, return the thread handle, a target-specific sequence of
+   bytes which serves as a thread identifier within the program being
+   debugged.  */
+extern gdb::byte_vector target_thread_info_to_thread_handle
+  (struct thread_info *);
 
 /* Attempts to find the pathname of the executable file
    that was run to create a specified process.

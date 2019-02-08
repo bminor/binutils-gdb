@@ -1,3 +1,22 @@
+2019-04-08  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdbthread.h (thread_to_thread_handle): Declare.
+	* thread.c (gdbtypes.h): Include.
+	(thread_to_thread_handle): New function.
+
+	* target.h (struct target_ops): Add thread_info_to_thread_handle.
+	(target_thread_info_to_thread_handle): Declare.
+	* target.c (target_thread_info_to_thread_handle): New function.
+	* target-debug.h (target_debug_print_gdb_byte_vector): Define.
+	* target-delegates.c: Regenerate.
+
+	* linux-thread-db.c (class thread_db_target): Add method
+	thread_info_to_thread_handle.
+	(thread_db_target::thread_info_to_thread_handle): Define.
+	* remote.c (class remote_target): Add new method
+	thread_info_to_thread_handle.
+	(remote_target::thread_info_to_thread_handle): Define.
+
 2019-04-08  Pedro Alves  <palves@redhat.com>
 
 	* common/common-exceptions.c (throw_exception): Don't create

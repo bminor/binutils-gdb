@@ -2097,6 +2097,14 @@ target_thread_handle_to_thread_info (const gdb_byte *thread_handle,
 						     handle_len, inf);
 }
 
+/* See target.h.  */
+
+gdb::byte_vector
+target_thread_info_to_thread_handle (struct thread_info *tip)
+{
+  return current_top_target ()->thread_info_to_thread_handle (tip);
+}
+
 void
 target_resume (ptid_t ptid, int step, enum gdb_signal signal)
 {

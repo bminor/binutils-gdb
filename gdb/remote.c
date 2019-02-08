@@ -485,6 +485,9 @@ public:
 					     int handle_len,
 					     inferior *inf) override;
 
+  gdb::byte_vector thread_info_to_thread_handle (struct thread_info *tp)
+						 override;
+
   void stop (ptid_t) override;
 
   void interrupt () override;
@@ -13996,6 +13999,13 @@ remote_target::thread_handle_to_thread_info (const gdb_byte *thread_handle,
     }
 
   return NULL;
+}
+
+gdb::byte_vector
+remote_target::thread_info_to_thread_handle (struct thread_info *tp)
+{
+  remote_thread_info *priv = get_remote_thread_info (tp);
+  return priv->thread_handle;
 }
 
 bool

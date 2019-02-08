@@ -186,6 +186,8 @@
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_std_string(X) \
   target_debug_do_print ((X).c_str ())
+#define target_debug_print_gdb_byte_vector(X)	\
+  target_debug_do_print (host_address_to_string (X.data ()))
 
 static void
 target_debug_print_struct_target_waitstatus_p (struct target_waitstatus *status)
