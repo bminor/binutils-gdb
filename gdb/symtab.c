@@ -4722,7 +4722,7 @@ symtab_symbol_info (bool quiet,
 	  if (t_regexp != NULL)
 	    printf_filtered
 	      (_("All %ss matching regular expression \"%s\""
-		 " with type matching regulation expression \"%s\":\n"),
+		 " with type matching regular expression \"%s\":\n"),
 	       classnames[kind], regexp, t_regexp);
 	  else
 	    printf_filtered (_("All %ss matching regular expression \"%s\":\n"),
@@ -4733,7 +4733,7 @@ symtab_symbol_info (bool quiet,
 	  if (t_regexp != NULL)
 	    printf_filtered
 	      (_("All defined %ss"
-		 " with type matching regulation expression \"%s\" :\n"),
+		 " with type matching regular expression \"%s\" :\n"),
 	       classnames[kind], t_regexp);
 	  else
 	    printf_filtered (_("All defined %ss:\n"), classnames[kind]);

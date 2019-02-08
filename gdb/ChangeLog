@@ -1,3 +1,7 @@
+2019-02-20  Tom Tromey  <tom@tromey.com>
+
+	* symtab.c (symtab_symbol_info): Fix typos.
+
 2019-02-20  Tom Tromey  <tromey@adacore.com>
 
 	* findcmd.c (_initialize_mem_search): Use upper case for

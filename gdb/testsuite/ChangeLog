@@ -1,3 +1,7 @@
+2019-02-20  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/info_qt.exp: Update.
+
 2019-02-19  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.base/source.exp: Move "error in sourced script" code to

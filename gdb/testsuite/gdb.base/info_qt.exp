@@ -234,10 +234,10 @@ with_test_prefix "rest of args as single regexp" {
 	"single regexp"
 
     gdb_test "info functions -t uvw abc def" \
-	"All functions matching regular expression \\\"abc def\\\" with type matching regulation expression \\\"uvw\\\":" \
+	"All functions matching regular expression \\\"abc def\\\" with type matching regular expression \\\"uvw\\\":" \
 	"-t noquote single regexp"
 
     gdb_test "info functions -t 'uvw xyz' abc def" \
-	"All functions matching regular expression \\\"abc def\\\" with type matching regulation expression \\\"uvw xyz\\\":" \
+	"All functions matching regular expression \\\"abc def\\\" with type matching regular expression \\\"uvw xyz\\\":" \
 	"-t quote single regexp"
 }
