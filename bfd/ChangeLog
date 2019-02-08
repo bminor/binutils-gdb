@@ -1,3 +1,8 @@
+2019-02-08  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Add %X to "unsupported
+	for bss-plt" warning to make it an error.
+
 2019-02-07  Eric Botcazou  <ebotcazou@adacore.com>
 
 	PR ld/18841
