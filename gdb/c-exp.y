@@ -1215,12 +1215,14 @@ direct_abs_decl: '(' abs_decl ')'
 			  push_type_int ($2);
 			  push_type (tp_array);
 			  $$ = get_type_stack ();
+			  cpstate->type_stacks.emplace_back ($$);
 			}
 	|	array_mod
 			{
 			  push_type_int ($1);
 			  push_type (tp_array);
 			  $$ = get_type_stack ();
+			  cpstate->type_stacks.emplace_back ($$);
 			}
 
 	| 	direct_abs_decl func_mod
@@ -1228,11 +1230,13 @@ direct_abs_decl: '(' abs_decl ')'
 			  push_type_stack ($1);
 			  push_typelist ($2);
 			  $$ = get_type_stack ();
+			  cpstate->type_stacks.emplace_back ($$);
 			}
 	|	func_mod
 			{
 			  push_typelist ($1);
 			  $$ = get_type_stack ();
+			  cpstate->type_stacks.emplace_back ($$);
 			}
 	;
 

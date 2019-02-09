@@ -1,3 +1,8 @@
+2019-02-10  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* c-exp.y (direct_abs_decl): Use emplace_back to record the
+	type_stack.
+
 2019-02-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-varobj.c (ada_value_is_changeable_p): Add handling of
