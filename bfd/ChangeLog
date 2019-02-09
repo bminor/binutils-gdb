@@ -1,3 +1,10 @@
+2019-02-09  Vineet Gupta  <vgupta@synopsys.com>
+
+	* elf32-arc (INIT_SYM_STRING): Delete.
+	(FINI_SYM_STRING): Likewise.
+	(init_str): Likewise.
+	(fini_str): Likewise.
+
 2019-02-08  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Add %X to "unsupported
