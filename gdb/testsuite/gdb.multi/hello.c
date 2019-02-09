@@ -48,7 +48,7 @@ main()
 {
   int tmpx;
 
-  alarm (30);
+  alarm (240);
 
   bar();
   tmpx = hello(glob);

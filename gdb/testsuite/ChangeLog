@@ -1,3 +1,7 @@
+2019-03-28  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.multi/hello.c (main): Increase alarm timer.
+
 2019-03-28  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.threads/watchpoint-fork.exp (test): Use large timeout
