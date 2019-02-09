@@ -1,5 +1,9 @@
 2019-03-28  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* gdb.multi/multi-term-settings.c (main): Increase alarm timer.
+
+2019-03-28  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* gdb.multi/hello.c (main): Increase alarm timer.
 
 2019-03-28  Sandra Loosemore  <sandra@codesourcery.com>

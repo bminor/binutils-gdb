@@ -31,7 +31,7 @@ main ()
   /* In case we inherit SIG_IGN.  */
   signal (SIGTTOU, SIG_DFL);
 
-  alarm (30);
+  alarm (240);
 
   int count = 0;
   while (1)
