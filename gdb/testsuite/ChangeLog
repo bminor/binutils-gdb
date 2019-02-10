@@ -1,3 +1,7 @@
+2019-02-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/mi_ref_changeable: New testcase.
+
 2019-02-07  Alan Hayward  <alan.hayward@arm.com>
 
 	* gdb.base/attach.exp: Add double attach test.

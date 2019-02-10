@@ -1,3 +1,8 @@
+2019-02-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-varobj.c (ada_value_is_changeable_p): Add handling of
+	TYPE_CODE_REF types.
+
 2019-02-08  Jim Wilson  <jimw@sifive.com>
 
 	* riscv-linux-tdep.c (riscv_linux_fregmap): New.

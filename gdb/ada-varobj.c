@@ -935,6 +935,9 @@ ada_value_is_changeable_p (const struct varobj *var)
   struct type *type = (var->value != nullptr
 		       ? value_type (var->value.get ()) : var->type);
 
+  if (TYPE_CODE (type) == TYPE_CODE_REF)
+    type = TYPE_TARGET_TYPE (type);
+
   if (ada_is_access_to_unconstrained_array (type))
     {
       /* This is in reality a pointer to an unconstrained array.
