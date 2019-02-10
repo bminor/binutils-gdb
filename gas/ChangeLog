@@ -1,3 +1,13 @@
+2019-02-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/24165
+	* config/tc-i386.h (MAX_MEM_FOR_RS_ALIGN_CODE): Set to
+	(alignment ? ((1 << alignment) - 1) : 1)
+	(i386_tc_frag_data): Add max_bytes.
+	(TC_FRAG_INIT): Track max_chars in max_bytes.
+	(HANDLE_ALIGN): Replace MAX_MEM_FOR_RS_ALIGN_CODE with
+	fragP->tc_frag_data.max_bytes.
+
 2019-02-07  Tamar Christina  <tamar.christina@arm.com>
 
 	* config/tc-arm.c (insns): Redefine THUMB_VARIANT and ARM_VARIANT for
