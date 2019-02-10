@@ -166,7 +166,7 @@ void ia64_vms_note (void);
 
 /* Record if an alignment frag should end with a stop bit.  */
 #define TC_FRAG_TYPE			int
-#define TC_FRAG_INIT(FRAGP)		do {(FRAGP)->tc_frag_data = 0;}while (0)
+#define TC_FRAG_INIT(FRAGP, MAX_BYTES)	do {(FRAGP)->tc_frag_data = 0;}while (0)
 
 /* Give an error if a frag containing code is not aligned to a 16 byte
    boundary.  */

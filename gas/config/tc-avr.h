@@ -243,5 +243,5 @@ struct avr_frag_data
   unsigned int prev_opcode;
 };
 #define TC_FRAG_TYPE			struct avr_frag_data
-#define TC_FRAG_INIT(frag)		avr_frag_init (frag)
+#define TC_FRAG_INIT(frag, max_bytes)	avr_frag_init (frag)
 extern void avr_frag_init (fragS *);

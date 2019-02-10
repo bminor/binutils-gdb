@@ -53,7 +53,7 @@ extern void rl78_md_end (void);
 extern int rl78_relax_frag (segT, fragS *, long);
 
 #define TC_FRAG_TYPE struct rl78_bytesT *
-#define TC_FRAG_INIT rl78_frag_init
+#define TC_FRAG_INIT(fragp, max_bytes) rl78_frag_init (fragp)
 extern void rl78_frag_init (fragS *);
 
 /* Call md_pcrel_from_section(), not md_pcrel_from().  */

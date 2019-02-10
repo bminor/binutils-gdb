@@ -229,8 +229,7 @@ arm_min (int am_p1, int am_p2)
 }
 
 #define TC_FRAG_TYPE		struct arm_frag_type
-/* NOTE: max_chars is a local variable from frag_var / frag_variant.  */
-#define TC_FRAG_INIT(fragp)	arm_init_frag (fragp, max_chars)
+#define TC_FRAG_INIT(fragp, max_bytes) arm_init_frag (fragp, max_bytes)
 #define TC_ALIGN_ZERO_IS_DEFAULT 1
 #define HANDLE_ALIGN(fragp)	arm_handle_align (fragp)
 /* PR gas/19276: COFF/PE segment alignment is already handled in coff_frob_section().  */

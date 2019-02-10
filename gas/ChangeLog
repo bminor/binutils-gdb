@@ -1,3 +1,31 @@
+2019-02-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/24165
+	* frags.c (frag_var_init): Pass max_chars to TC_FRAG_INIT as
+	max_bytes.
+	* config/tc-aarch64.h (TC_FRAG_INIT): Add and pass max_bytes to
+	aarch64_init_frag.
+	* /config/tc-arm.h (TC_FRAG_INIT): And and pass max_bytes to
+	arm_init_frag.
+	* config/tc-avr.h (TC_FRAG_INIT): And and ignore max_bytes.
+	* config/tc-ia64.h (TC_FRAG_INIT): Likewise.
+	* config/tc-mmix.h (TC_FRAG_INIT): Likewise.
+	* config/tc-nds32.h (TC_FRAG_INIT): Likewise.
+	* config/tc-ns32k.h (TC_FRAG_INIT): Likewise.
+	* config/tc-rl78.h (TC_FRAG_INIT): Likewise.
+	* config/tc-rx.h (TC_FRAG_INIT): Likewise.
+	* config/tc-score.h (TC_FRAG_INIT): Likewise.
+	* config/tc-tic54x.h (TC_FRAG_INIT): Likewise.
+	* config/tc-tic6x.h (TC_FRAG_INIT): Likewise.
+	* config/tc-xtensa.h (TC_FRAG_INIT): Likewise.
+	* config/tc-i386.h (MAX_MEM_FOR_RS_ALIGN_CODE): Set to
+	(alignment ? ((1 << alignment) - 1) : 1)
+	(i386_tc_frag_data): Add max_bytes.
+	(TC_FRAG_INIT): Add and track max_bytes.
+	(HANDLE_ALIGN): Replace MAX_MEM_FOR_RS_ALIGN_CODE with
+	fragP->tc_frag_data.max_bytes.
+	* doc/internals.texi: Update TC_FRAG_TYPE with max_bytes.
+
 2019-02-08  Jim Wilson  <jimw@sifive.com>
 
 	* config/tc-riscv.c (validate_riscv_insn) <'C'>: Add 'z' support.

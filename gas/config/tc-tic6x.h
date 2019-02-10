@@ -130,7 +130,7 @@ typedef struct
   bfd_boolean can_cross_fp_boundary;
 } tic6x_frag_info;
 #define TC_FRAG_TYPE tic6x_frag_info
-#define TC_FRAG_INIT(fragP) tic6x_frag_init (fragP)
+#define TC_FRAG_INIT(fragP, max_bytes) tic6x_frag_init (fragP)
 extern void tic6x_frag_init (fragS *fragp);
 
 typedef struct

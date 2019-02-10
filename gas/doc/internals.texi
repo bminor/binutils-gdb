@@ -1118,10 +1118,11 @@ These fields are defined with the @code{TC_FIX_TYPE} macro.
 A C statement to output target specific debugging information for
 fixup @var{fixp} to @var{stream}.  This macro is called by @code{print_fixup}.
 
-@item TC_FRAG_INIT (@var{fragp})
+@item TC_FRAG_INIT (@var{fragp}, @var{max_bytes})
 @cindex TC_FRAG_INIT
-A C statement to initialize the target specific fields of frag @var{fragp}.
-These fields are defined with the @code{TC_FRAG_TYPE} macro.
+A C statement to initialize the target specific fields of frag @var{fragp}
+with maximum number of bytes @var{max_bytes}.  These fields are defined
+with the @code{TC_FRAG_TYPE} macro.
 
 @item md_number_to_chars
 @cindex md_number_to_chars

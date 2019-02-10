@@ -238,7 +238,7 @@ frag_var_init (relax_stateT type, size_t max_chars, size_t var,
   frag_now->fr_cgen.opinfo = 0;
 #endif
 #ifdef TC_FRAG_INIT
-  TC_FRAG_INIT (frag_now);
+  TC_FRAG_INIT (frag_now, max_chars);
 #endif
   frag_now->fr_file = as_where (&frag_now->fr_line);
 

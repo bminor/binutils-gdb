@@ -356,7 +356,7 @@ extern void xtensa_init (int, char **);
 #define TC_FIX_TYPE			xtensa_fix_data
 #define TC_INIT_FIX_DATA(x)		xtensa_init_fix_data (x)
 #define TC_FRAG_TYPE			struct xtensa_frag_type
-#define TC_FRAG_INIT(frag)		xtensa_frag_init (frag)
+#define TC_FRAG_INIT(frag, max_bytes)	xtensa_frag_init (frag)
 #define TC_FORCE_RELOCATION(fix)	xtensa_force_relocation (fix)
 #define TC_FORCE_RELOCATION_SUB_SAME(fix, seg) \
   (GENERIC_FORCE_RELOCATION_SUB_SAME (fix, seg)	\

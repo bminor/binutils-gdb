@@ -73,7 +73,7 @@ extern const struct relax_type md_relax_table[];
       char         fr_bsr;			\
     }
 
-#define TC_FRAG_INIT(X)				\
+#define TC_FRAG_INIT(X, MAX_BYTES)		\
   do						\
      {						\
        frag_opcode_frag (X) = NULL;		\

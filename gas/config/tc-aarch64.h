@@ -173,8 +173,7 @@ struct aarch64_frag_type
 };
 
 #define TC_FRAG_TYPE		struct aarch64_frag_type
-/* NOTE: max_chars is a local variable from frag_var / frag_variant.  */
-#define TC_FRAG_INIT(fragp)	aarch64_init_frag (fragp, max_chars)
+#define TC_FRAG_INIT(fragp, max_bytes) aarch64_init_frag (fragp, max_bytes)
 #define HANDLE_ALIGN(fragp)	aarch64_handle_align (fragp)
 
 #define md_do_align(N, FILL, LEN, MAX, LABEL)					\

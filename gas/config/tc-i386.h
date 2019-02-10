@@ -206,7 +206,7 @@ if ((n)									\
     goto around;							\
   }
 
-#define MAX_MEM_FOR_RS_ALIGN_CODE 4095
+#define MAX_MEM_FOR_RS_ALIGN_CODE  (alignment ? ((1 << alignment) - 1) : 1)
 
 void i386_print_statistics (FILE *);
 #define tc_print_statistics i386_print_statistics
@@ -251,6 +251,7 @@ struct i386_tc_frag_data
   enum processor_type isa;
   i386_cpu_flags isa_flags;
   enum processor_type tune;
+  unsigned int max_bytes;
 };
 
 /* We need to emit the right NOP pattern in .align frags.  This is
@@ -258,12 +259,13 @@ struct i386_tc_frag_data
    the isa/tune settings at the time the .align was assembled.  */
 #define TC_FRAG_TYPE struct i386_tc_frag_data
 
-#define TC_FRAG_INIT(FRAGP)					\
+#define TC_FRAG_INIT(FRAGP, MAX_BYTES)				\
  do								\
    {								\
      (FRAGP)->tc_frag_data.isa = cpu_arch_isa;			\
      (FRAGP)->tc_frag_data.isa_flags = cpu_arch_isa_flags;	\
      (FRAGP)->tc_frag_data.tune = cpu_arch_tune;		\
+     (FRAGP)->tc_frag_data.max_bytes = (MAX_BYTES);		\
    }								\
  while (0)
 
@@ -280,7 +282,8 @@ if (fragP->fr_type == rs_align_code) 					\
     offsetT __count = (fragP->fr_next->fr_address			\
 		       - fragP->fr_address				\
 		       - fragP->fr_fix);				\
-    if (__count > 0 && __count <= MAX_MEM_FOR_RS_ALIGN_CODE)		\
+    if (__count > 0							\
+	&& (unsigned int) __count <= fragP->tc_frag_data.max_bytes)	\
       md_generate_nops (fragP, fragP->fr_literal + fragP->fr_fix,	\
 			__count, 0);					\
   }

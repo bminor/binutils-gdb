@@ -191,7 +191,7 @@ struct nds32_frag_type
 extern void nds32_frag_init (fragS *);
 
 #define TC_FRAG_TYPE				struct nds32_frag_type
-#define TC_FRAG_INIT(fragP)			nds32_frag_init (fragP)
+#define TC_FRAG_INIT(fragP, max_bytes)		nds32_frag_init (fragP)
 
 /* CFI directive.  */
 extern void nds32_elf_frame_initial_instructions (void);
