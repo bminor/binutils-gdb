@@ -1,3 +1,8 @@
+2019-02-11  Alan Hayward  <alan.hayward@arm.com>
+
+	* aarch64-linux-tdep.c (aarch64_linux_get_syscall_number): Check
+	for execve.
+
 2019-02-10  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* c-exp.y (direct_abs_decl): Use emplace_back to record the

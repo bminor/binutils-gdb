@@ -757,28 +757,6 @@ aarch64_stap_parse_special_token (struct gdbarch *gdbarch,
   return 1;
 }
 
-/* Implement the "get_syscall_number" gdbarch method.  */
-
-static LONGEST
-aarch64_linux_get_syscall_number (struct gdbarch *gdbarch,
-				  thread_info *thread)
-{
-  struct regcache *regs = get_thread_regcache (thread);
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-
-  /* The content of register x8.  */
-  gdb_byte buf[X_REGISTER_SIZE];
-  /* The result.  */
-  LONGEST ret;
-
-  /* Getting the system call number from the register x8.  */
-  regs->cooked_read (AARCH64_DWARF_X0 + 8, buf);
-
-  ret = extract_signed_integer (buf, X_REGISTER_SIZE, byte_order);
-
-  return ret;
-}
-
 /* AArch64 process record-replay constructs: syscall, signal etc.  */
 
 struct linux_record_tdep aarch64_linux_record_tdep;
@@ -1332,6 +1310,40 @@ aarch64_canonicalize_syscall (enum aarch64_syscall syscall_number)
   default:
     return gdb_sys_no_syscall;
   }
+}
+
+/* Retrieve the syscall number at a ptrace syscall-stop, either on syscall entry
+   or exit.  Return -1 upon error.  */
+
+static LONGEST
+aarch64_linux_get_syscall_number (struct gdbarch *gdbarch, thread_info *thread)
+{
+  struct regcache *regs = get_thread_regcache (thread);
+  LONGEST ret;
+
+  /* Get the system call number from register x8.  */
+  regs->cooked_read (AARCH64_X0_REGNUM + 8, &ret);
+
+  /* On exit from a successful execve, we will be in a new process and all the
+     registers will be cleared - x0 to x30 will be 0, except for a 1 in x7.
+     This function will only ever get called when stopped at the entry or exit
+     of a syscall, so by checking for 0 in x0 (arg0/retval), x1 (arg1), x8
+     (syscall), x29 (FP) and x30 (LR) we can infer:
+     1) Either inferior is at exit from sucessful execve.
+     2) Or inferior is at entry to a call to io_setup with invalid arguments and
+	a corrupted FP and LR.
+     It should be safe enough to assume case 1.  */
+  if (ret == 0)
+    {
+      LONGEST x1 = -1, fp = -1, lr = -1;
+      regs->cooked_read (AARCH64_X0_REGNUM + 1, &x1);
+      regs->cooked_read (AARCH64_FP_REGNUM, &fp);
+      regs->cooked_read (AARCH64_LR_REGNUM, &lr);
+      if (x1 == 0 && fp ==0 && lr == 0)
+	return aarch64_sys_execve;
+    }
+
+  return ret;
 }
 
 /* Record all registers but PC register for process-record.  */
