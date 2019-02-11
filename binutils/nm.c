@@ -976,6 +976,7 @@ print_symbol (bfd *        abfd,
 	    }
 
 	  symname = bfd_asymbol_name (sym);
+
 	  for (i = 0; i < seccount; i++)
 	    {
 	      long j;
@@ -985,7 +986,9 @@ print_symbol (bfd *        abfd,
 		  arelent *r;
 
 		  r = relocs[i][j];
+
 		  if (r->sym_ptr_ptr != NULL
+		      && * r->sym_ptr_ptr != NULL
 		      && (*r->sym_ptr_ptr)->section == sym->section
 		      && (*r->sym_ptr_ptr)->value == sym->value
 		      && strcmp (symname,
