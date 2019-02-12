@@ -1,3 +1,9 @@
+2019-02-12  Nick Clifton  <nickc@redhat.com>
+
+	PR 23440
+	* README-how-to-make-a-release: Use git clean to delete spurious
+	files from the local source repository.
+
 2019-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* size.c (berkeley_format): Delete.
