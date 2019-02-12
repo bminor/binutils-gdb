@@ -6958,13 +6958,10 @@ adjust_breakpoint_address (struct gdbarch *gdbarch,
     }
 }
 
-bp_location::bp_location (const bp_location_ops *ops, breakpoint *owner)
+bp_location::bp_location (breakpoint *owner)
 {
   bp_location *loc = this;
 
-  gdb_assert (ops != NULL);
-
-  loc->ops = ops;
   loc->owner = owner;
   loc->cond_bytecode = NULL;
   loc->shlib_disabled = 0;
@@ -7033,7 +7030,6 @@ allocate_bp_location (struct breakpoint *bpt)
 static void
 free_bp_location (struct bp_location *loc)
 {
-  loc->ops->dtor (loc);
   delete loc;
 }
 
@@ -12166,18 +12162,10 @@ say_where (struct breakpoint *b)
     }
 }
 
-/* Default bp_location_ops methods.  */
-
-static void
-bp_location_dtor (struct bp_location *self)
+bp_location::~bp_location ()
 {
-  xfree (self->function_name);
+  xfree (function_name);
 }
-
-static const struct bp_location_ops bp_location_ops =
-{
-  bp_location_dtor
-};
 
 /* Destructor for the breakpoint base class.  */
 
@@ -12191,7 +12179,7 @@ breakpoint::~breakpoint ()
 static struct bp_location *
 base_breakpoint_allocate_location (struct breakpoint *self)
 {
-  return new bp_location (&bp_location_ops, self);
+  return new bp_location (self);
 }
 
 static void

@@ -12396,32 +12396,14 @@ static std::string ada_exception_catchpoint_cond_string
 class ada_catchpoint_location : public bp_location
 {
 public:
-  ada_catchpoint_location (const bp_location_ops *ops, breakpoint *owner)
-    : bp_location (ops, owner)
+  ada_catchpoint_location (breakpoint *owner)
+    : bp_location (owner)
   {}
 
   /* The condition that checks whether the exception that was raised
      is the specific exception the user specified on catchpoint
      creation.  */
   expression_up excep_cond_expr;
-};
-
-/* Implement the DTOR method in the bp_location_ops structure for all
-   Ada exception catchpoint kinds.  */
-
-static void
-ada_catchpoint_location_dtor (struct bp_location *bl)
-{
-  struct ada_catchpoint_location *al = (struct ada_catchpoint_location *) bl;
-
-  al->excep_cond_expr.reset ();
-}
-
-/* The vtable to be used in Ada catchpoint locations.  */
-
-static const struct bp_location_ops ada_catchpoint_location_ops =
-{
-  ada_catchpoint_location_dtor
 };
 
 /* An instance of this type is used to represent an Ada catchpoint.  */
@@ -12493,7 +12475,7 @@ static struct bp_location *
 allocate_location_exception (enum ada_exception_catchpoint_kind ex,
 			     struct breakpoint *self)
 {
-  return new ada_catchpoint_location (&ada_catchpoint_location_ops, self);
+  return new ada_catchpoint_location (self);
 }
 
 /* Implement the RE_SET method in the breakpoint_ops structure for all

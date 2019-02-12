@@ -301,30 +301,18 @@ enum bp_loc_type
   bp_loc_other			/* Miscellaneous...  */
 };
 
-/* This structure is a collection of function pointers that, if
-   available, will be called instead of performing the default action
-   for this bp_loc_type.  */
-
-struct bp_location_ops
-{
-  /* Destructor.  Releases everything from SELF (but not SELF
-     itself).  */
-  void (*dtor) (struct bp_location *self);
-};
-
 class bp_location
 {
 public:
   bp_location () = default;
 
-  bp_location (const bp_location_ops *ops, breakpoint *owner);
+  bp_location (breakpoint *owner);
+
+  virtual ~bp_location ();
 
   /* Chain pointer to the next breakpoint location for
      the same parent breakpoint.  */
   bp_location *next = NULL;
-
-  /* Methods associated with this location.  */
-  const bp_location_ops *ops = NULL;
 
   /* The reference count.  */
   int refc = 0;

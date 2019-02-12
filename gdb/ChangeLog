@@ -1,3 +1,21 @@
+2019-02-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+	    Tom Tromey  <tromey@adacore.com>
+
+	* breakpoint.c (~bp_location): Rename from bp_location_dtor.
+	(bp_location_ops): Remove.
+	(base_breakpoint_allocate_location): Update.
+	(free_bp_location): Update.
+	* ada-lang.c (class ada_catchpoint_location)
+	<ada_catchpoint_location>: Remove ops parameter.
+	(ada_catchpoint_location_dtor): Remove.
+	(ada_catchpoint_location_ops): Remove.
+	(allocate_location_exception): Update.
+	* breakpoint.h (struct bp_location_ops): Remove.
+	(class bp_location) <bp_location>: Remove bp_location_ops
+	parameter.
+	<~bp_location>: Add destructor.
+	<ops>: Remove.
+
 2019-02-14  Thomas Schwinge  <thomas@codesourcery.com>
 	    Pedro Alves  <palves@redhat.com>
 
