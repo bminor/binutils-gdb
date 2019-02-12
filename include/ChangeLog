@@ -1,3 +1,8 @@
+2019-02-11  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* splay-tree.h (splay_tree_delete_key_fn): Update comment.
+	(splay_tree_delete_value_fn): Likewise.
+
 2019-01-31  Andreas Krebbel  <krebbel@linux.ibm.com>
 
 	* opcode/s390.h (enum s390_opcode_cpu_val): Add
