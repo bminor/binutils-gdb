@@ -1,5 +1,10 @@
 2019-02-12  John Baldwin  <jhb@FreeBSD.org>
 
+	* symfile.c (find_separate_debug_file): Use canonical path of
+	sysroot with child_path instead of gdb_sysroot if it is valid.
+
+2019-02-12  John Baldwin  <jhb@FreeBSD.org>
+
 	* symfile.c (find_separate_debug_file): Use child_path to
 	determine if an object file is under a sysroot.
 

@@ -1441,6 +1441,7 @@ find_separate_debug_file (const char *dir,
   const char *dir_notarget = target_prefix ? dir + strlen ("target:") : dir;
   std::vector<gdb::unique_xmalloc_ptr<char>> debugdir_vec
     = dirnames_to_char_ptr_vec (debug_file_directory);
+  gdb::unique_xmalloc_ptr<char> canon_sysroot = gdb_realpath (gdb_sysroot);
 
   for (const gdb::unique_xmalloc_ptr<char> &debugdir : debugdir_vec)
     {
@@ -1453,9 +1454,15 @@ find_separate_debug_file (const char *dir,
       if (separate_debug_file_exists (debugfile, crc32, objfile))
 	return debugfile;
 
-      const char *base_path;
-      if (canon_dir != NULL
-	  && (base_path = child_path (gdb_sysroot, canon_dir)) != NULL)
+      const char *base_path = NULL;
+      if (canon_dir != NULL)
+	{
+	  if (canon_sysroot.get () != NULL)
+	    base_path = child_path (canon_sysroot.get (), canon_dir);
+	  else
+	    base_path = child_path (gdb_sysroot, canon_dir);
+	}
+      if (base_path != NULL)
 	{
 	  /* If the file is in the sysroot, try using its base path in
 	     the global debugfile directory.  */
