@@ -48,6 +48,12 @@ extern gdb::unique_xmalloc_ptr<char>
 
 extern gdb::unique_xmalloc_ptr<char> gdb_abspath (const char *path);
 
+/* If the path in CHILD is a child of the path in PARENT, return a
+   pointer to the first component in the CHILD's pathname below the
+   PARENT.  Otherwise, return NULL.  */
+
+extern const char *child_path (const char *parent, const char *child);
+
 /* Return whether PATH contains a directory separator character.  */
 
 extern bool contains_dir_separator (const char *path);

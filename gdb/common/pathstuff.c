@@ -147,6 +147,56 @@ gdb_abspath (const char *path)
 
 /* See common/pathstuff.h.  */
 
+const char *
+child_path (const char *parent, const char *child)
+{
+  /* The child path must start with the parent path.  */
+  size_t parent_len = strlen (parent);
+  if (filename_ncmp (parent, child, parent_len) != 0)
+    return NULL;
+
+  /* The parent path must be a directory and the child must contain at
+     least one component underneath the parent.  */
+  const char *child_component;
+  if (IS_DIR_SEPARATOR (parent[parent_len - 1]))
+    {
+      /* The parent path ends in a directory separator, so it is a
+	 directory.  The first child component starts after the common
+	 prefix.  */
+      child_component = child + parent_len;
+    }
+  else
+    {
+      /* The parent path does not end in a directory separator.  The
+	 first character in the child after the common prefix must be
+	 a directory separator.
+
+	 Note that CHILD must hold at least parent_len characters for
+	 filename_ncmp to return zero.  If the character at parent_len
+	 is nul due to CHILD containing the same path as PARENT, the
+	 IS_DIR_SEPARATOR check will fail here.  */
+      if (!IS_DIR_SEPARATOR (child[parent_len]))
+	return NULL;
+
+      /* The first child component starts after the separator after the
+	 common prefix.  */
+      child_component = child + parent_len + 1;
+    }
+
+  /* The child must contain at least one non-separator character after
+     the parent.  */
+  while (*child_component != '\0')
+    {
+      if (!IS_DIR_SEPARATOR (*child_component))
+	return child_component;
+
+      child_component++;
+    }
+  return NULL;
+}
+
+/* See common/pathstuff.h.  */
+
 bool
 contains_dir_separator (const char *path)
 {

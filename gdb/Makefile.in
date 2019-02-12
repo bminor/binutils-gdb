@@ -411,6 +411,7 @@ SUBDIR_PYTHON_CFLAGS =
 
 SUBDIR_UNITTESTS_SRCS = \
 	unittests/array-view-selftests.c \
+	unittests/child-path-selftests.c \
 	unittests/cli-utils-selftests.c \
 	unittests/common-utils-selftests.c \
 	unittests/copy_bitwise-selftests.c \

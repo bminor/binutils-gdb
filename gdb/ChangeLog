@@ -1,5 +1,13 @@
 2019-02-12  John Baldwin  <jhb@FreeBSD.org>
 
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/child-path-selftests.c.
+	* common/pathstuff.c (child_path): New function.
+	* common/pathstuff.h (child_path): New prototype.
+	* unittests/child-path-selftests.c: New file.
+
+2019-02-12  John Baldwin  <jhb@FreeBSD.org>
+
 	* symfile.c (find_separate_debug_file): Look for separate debug
 	files in debug directories under the sysroot.
 
