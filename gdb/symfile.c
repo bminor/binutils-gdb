@@ -1452,13 +1452,13 @@ find_separate_debug_file (const char *dir,
       if (separate_debug_file_exists (debugfile, crc32, objfile))
 	return debugfile;
 
-      /* If the file is in the sysroot, try using its base path in the
-	 global debugfile directory.  */
       if (canon_dir != NULL
 	  && filename_ncmp (canon_dir, gdb_sysroot,
 			    strlen (gdb_sysroot)) == 0
 	  && IS_DIR_SEPARATOR (canon_dir[strlen (gdb_sysroot)]))
 	{
+	  /* If the file is in the sysroot, try using its base path in
+	     the global debugfile directory.  */
 	  debugfile = target_prefix ? "target:" : "";
 	  debugfile += debugdir.get ();
 	  debugfile += (canon_dir + strlen (gdb_sysroot));
@@ -1467,7 +1467,20 @@ find_separate_debug_file (const char *dir,
 
 	  if (separate_debug_file_exists (debugfile, crc32, objfile))
 	    return debugfile;
+
+	  /* If the file is in the sysroot, try using its base path in
+	     the sysroot's global debugfile directory.  */
+	  debugfile = target_prefix ? "target:" : "";
+	  debugfile += gdb_sysroot;
+	  debugfile += debugdir.get ();
+	  debugfile += (canon_dir + strlen (gdb_sysroot));
+	  debugfile += "/";
+	  debugfile += debuglink;
+
+	  if (separate_debug_file_exists (debugfile, crc32, objfile))
+	    return debugfile;
 	}
+
     }
 
   return std::string ();
