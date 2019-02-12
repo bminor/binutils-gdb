@@ -57,6 +57,7 @@
 #include "gdb_bfd.h"
 #include "cli/cli-utils.h"
 #include "common/byte-vector.h"
+#include "common/pathstuff.h"
 #include "common/selftest.h"
 #include "cli/cli-style.h"
 #include "common/forward-scope-exit.h"
@@ -1452,16 +1453,16 @@ find_separate_debug_file (const char *dir,
       if (separate_debug_file_exists (debugfile, crc32, objfile))
 	return debugfile;
 
+      const char *base_path;
       if (canon_dir != NULL
-	  && filename_ncmp (canon_dir, gdb_sysroot,
-			    strlen (gdb_sysroot)) == 0
-	  && IS_DIR_SEPARATOR (canon_dir[strlen (gdb_sysroot)]))
+	  && (base_path = child_path (gdb_sysroot, canon_dir)) != NULL)
 	{
 	  /* If the file is in the sysroot, try using its base path in
 	     the global debugfile directory.  */
 	  debugfile = target_prefix ? "target:" : "";
 	  debugfile += debugdir.get ();
-	  debugfile += (canon_dir + strlen (gdb_sysroot));
+	  debugfile += "/";
+	  debugfile += base_path;
 	  debugfile += "/";
 	  debugfile += debuglink;
 
@@ -1473,7 +1474,8 @@ find_separate_debug_file (const char *dir,
 	  debugfile = target_prefix ? "target:" : "";
 	  debugfile += gdb_sysroot;
 	  debugfile += debugdir.get ();
-	  debugfile += (canon_dir + strlen (gdb_sysroot));
+	  debugfile += "/";
+	  debugfile += base_path;
 	  debugfile += "/";
 	  debugfile += debuglink;
 

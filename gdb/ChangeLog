@@ -1,5 +1,10 @@
 2019-02-12  John Baldwin  <jhb@FreeBSD.org>
 
+	* symfile.c (find_separate_debug_file): Use child_path to
+	determine if an object file is under a sysroot.
+
+2019-02-12  John Baldwin  <jhb@FreeBSD.org>
+
 	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
 	unittests/child-path-selftests.c.
 	* common/pathstuff.c (child_path): New function.
