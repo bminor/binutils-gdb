@@ -17,6 +17,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* Include this first, to pick up the <mach.h> 'thread_info' diversion.  */
+#include "gnu-nat.h"
+
 /* Mach/Hurd headers are not yet ready for C++ compilation.  */
 extern "C"
 {
@@ -34,7 +37,6 @@ extern "C"
 
 #include "i386-tdep.h"
 
-#include "gnu-nat.h"
 #include "inf-child.h"
 #include "i387-tdep.h"
 

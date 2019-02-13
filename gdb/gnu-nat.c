@@ -20,6 +20,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* Include this first, to pick up the <mach.h> 'thread_info' diversion.  */
+#include "gnu-nat.h"
+
 /* Mach/Hurd headers are not yet ready for C++ compilation.  */
 extern "C"
 {
@@ -67,7 +70,6 @@ extern "C"
 #include "gdb_obstack.h"
 #include "tid-parse.h"
 
-#include "gnu-nat.h"
 #include "inf-child.h"
 
 /* MIG stubs are not yet ready for C++ compilation.  */
@@ -3429,8 +3431,9 @@ thread_takeover_sc_cmd (const char *args, int from_tty)
   thread_basic_info_data_t _info;
   thread_basic_info_t info = &_info;
   mach_msg_type_number_t info_len = THREAD_BASIC_INFO_COUNT;
-  kern_return_t err =
-  thread_info (thread->port, THREAD_BASIC_INFO, (int *) &info, &info_len);
+  kern_return_t err
+    = mach_thread_info (thread->port, THREAD_BASIC_INFO,
+			(int *) &info, &info_len);
   if (err)
     error (("%s."), safe_strerror (err));
   thread->sc = info->suspend_count;

@@ -1,5 +1,9 @@
 2019-02-14  Thomas Schwinge  <thomas@codesourcery.com>
 
+	* config/i386/nm-i386gnu.h: Don't "#include" any files.
+	* gnu-nat.h (mach_thread_info): New function.
+	* gnu-nat.c (thread_takeover_sc_cmd): Use it.
+
 	* config/i386/nm-i386gnu.h (gnu_target_pid_to_str): Remove.
 
 2019-02-14  Frederic Konrad  <konrad@adacore.com>

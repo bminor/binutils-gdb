@@ -19,11 +19,6 @@
 #ifndef CONFIG_I386_NM_I386GNU_H
 #define CONFIG_I386_NM_I386GNU_H
 
-#include <unistd.h>
-#include <mach.h>
-#include <mach/exception.h>
-#include "regcache.h"
-
 /* Thread flavors used in re-setting the T bit.  */
 #define THREAD_STATE_FLAVOR		i386_REGS_SEGS_STATE
 #define THREAD_STATE_SIZE		i386_THREAD_STATE_COUNT

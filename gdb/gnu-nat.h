@@ -19,8 +19,21 @@
 #ifndef GNU_NAT_H
 #define GNU_NAT_H
 
-#include <unistd.h>
+#include "defs.h"
+
+/* Work around conflict between Mach's 'thread_info' function, and GDB's
+   'thread_info' class.  Make the former available as 'mach_thread_info'.  */
+#define thread_info mach_thread_info
+/* Mach headers are not yet ready for C++ compilation.  */
+extern "C"
+{
 #include <mach.h>
+}
+#undef thread_info
+/* Divert 'mach_thread_info' to the original Mach 'thread_info' function.  */
+extern __typeof__ (mach_thread_info) mach_thread_info asm ("thread_info");
+
+#include <unistd.h>
 
 struct inf;
 
