@@ -19,4 +19,9 @@
 
 /* Single operand builtins.  */
 OP (UNOP_FORTRAN_KIND)
+OP (UNOP_FORTRAN_FLOOR)
+OP (UNOP_FORTRAN_CEILING)
 
+/* Two operand builtins.  */
+OP (BINOP_FORTRAN_CMPLX)
+OP (BINOP_FORTRAN_MODULO)

@@ -1,3 +1,8 @@
+2019-04-30  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/intrinsics.exp: Extend to cover MOD, CEILING, FLOOR,
+	MODULO, CMPLX.
+
 2019-04-29  Andrew Burgess  <andrew.burgess@embecosm.com>
 	    Richard Bunt  <richard.bunt@arm.com>
 

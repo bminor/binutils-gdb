@@ -1,4 +1,24 @@
 2019-04-30  Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Chris January  <chris.january@arm.com>
+	    David Lecomber  <david.lecomber@arm.com>
+
+	* f-exp.y (BINOP_INTRINSIC): New token.
+	(exp): New parser rule handling BINOP_INTRINSIC.
+	(f77_keywords): Add new builtin procedures.
+	* f-lang.c (evaluate_subexp_f): Handle BINOP_MOD, UNOP_FORTRAN_CEILING,
+	UNOP_FORTRAN_FLOOR, BINOP_FORTRAN_MODULO, BINOP_FORTRAN_CMPLX.
+	(operator_length_f): Handle UNOP_FORTRAN_CEILING,
+	UNOP_FORTRAN_FLOOR, BINOP_FORTRAN_MODULO, BINOP_FORTRAN_CMPLX.
+	(print_unop_subexp_f): New function.
+	(print_binop_subexp_f): New function.
+	(print_subexp_f): Handle UNOP_FORTRAN_CEILING, UNOP_FORTRAN_FLOOR,
+	BINOP_FORTRAN_MODULO, BINOP_FORTRAN_CMPLX.
+	(dump_subexp_body_f): Likewise.
+	(operator_check_f): Likewise.
+	* fortran-operator.def: Add UNOP_FORTRAN_CEILING, UNOP_FORTRAN_FLOOR,
+	BINOP_FORTRAN_MODULO, BINOP_FORTRAN_CMPLX
+
+2019-04-30  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb/expprint.c (dump_subexp_body_standard): Remove use of
 	UNOP_KIND.

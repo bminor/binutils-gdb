@@ -49,3 +49,38 @@ gdb_test "p abs (11)" " = 11"
 # rounding, which can vary.
 gdb_test "p abs (-9.1)" " = 9.$decimal"
 gdb_test "p abs (9.1)" " = 9.$decimal"
+
+# Test MOD
+
+gdb_test "p mod (3.0, 2.0)" " = 1"
+gdb_test "ptype mod (3.0, 2.0)" "type = real\\*8"
+gdb_test "p mod (2.0, 3.0)" " = 2"
+gdb_test "p mod (8, 5)" " = 3"
+gdb_test "ptype mod (8, 5)" "type = int"
+gdb_test "p mod (-8, 5)" " = -3"
+gdb_test "p mod (8, -5)" " = 3"
+gdb_test "p mod (-8, -5)" " = -3"
+
+# Test CEILING
+
+gdb_test "p ceiling (3.7)" " = 4"
+gdb_test "p ceiling (-3.7)" " = -3"
+
+# Test FLOOR
+
+gdb_test "p floor (3.7)" " = 3"
+gdb_test "p floor (-3.7)" " = -4"
+
+# Test MODULO
+
+gdb_test "p MODULO (8,5)" " = 3"
+gdb_test "ptype MODULO (8,5)" "type = int"
+gdb_test "p MODULO (-8,5)" " = 2"
+gdb_test "p MODULO (8,-5)" " = -2"
+gdb_test "p MODULO (-8,-5)" " = -3"
+gdb_test "p MODULO (3.0,2.0)" " = 1"
+gdb_test "ptype MODULO (3.0,2.0)" "type = real\\*8"
+
+# Test CMPLX
+
+gdb_test "p CMPLX (4.1, 2.0)" " = \\(4.$decimal,2\\)"
