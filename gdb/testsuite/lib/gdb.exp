@@ -3461,6 +3461,7 @@ set gdb_saved_set_unbuffered_mode_obj ""
 #     dynamically load libraries at runtime.  For example, on Linux, this adds
 #     -ldl so that the test can use dlopen.
 #   - nowarnings:  Inhibit all compiler warnings.
+#   - pie: Force creation of PIE executables.
 #   - nopie: Prevent creation of PIE executables.
 #
 # And here are some of the not too obscure options understood by DejaGnu that
@@ -3599,8 +3600,33 @@ proc gdb_compile {source dest type options} {
 	set options [lreplace $options $nowarnings $nowarnings $flag]
     }
 
-    # Replace the "nopie" option with the appropriate additional_flags
-    # to disable PIE executables.
+    # Replace the "pie" option with the appropriate compiler and linker flags
+    # to enable PIE executables.
+    set pie [lsearch -exact $options pie]
+    if {$pie != -1} {
+	if [target_info exists gdb,pie_flag] {
+	    set flag "additional_flags=[target_info gdb,pie_flag]"
+	} else {
+	    # For safety, use fPIE rather than fpie. On AArch64, m68k, PowerPC
+	    # and SPARC, fpie can cause compile errors due to the GOT exceeding
+	    # a maximum size.  On other architectures the two flags are
+	    # identical (see the GCC manual). Note Debian9 and Ubuntu16.10
+	    # onwards default GCC to using fPIE.  If you do require fpie, then
+	    # it can be set using the pie_flag.
+	    set flag "additional_flags=-fPIE"
+	}
+	set options [lreplace $options $pie $pie $flag]
+
+	if [target_info exists gdb,pie_ldflag] {
+	    set flag "ldflags=[target_info gdb,pie_ldflag]"
+	} else {
+	    set flag "ldflags=-pie"
+	}
+	lappend options "$flag"
+    }
+
+    # Replace the "nopie" option with the appropriate linker flag to disable
+    # PIE executables.  There are no compiler flags for this option.
     set nopie [lsearch -exact $options nopie]
     if {$nopie != -1} {
 	if [target_info exists gdb,nopie_flag] {

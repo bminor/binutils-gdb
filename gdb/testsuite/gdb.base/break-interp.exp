@@ -625,8 +625,10 @@ foreach ldprelink {NO YES} {
 				lappend opts {debug}
 			    }
 			    if {$binpie != "NO"} {
-				lappend opts {additional_flags=-fPIE}
-				lappend opts {ldflags=-pie}
+				lappend opts {pie}
+			    } else {
+				# Debian9/Ubuntu16.10 onwards default to PIE enabled. Ensure it is disabled.
+				lappend opts {nopie}
 			    }
 
 			    set dir ${exec}.d
