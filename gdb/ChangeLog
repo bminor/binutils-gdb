@@ -1,3 +1,7 @@
+2019-02-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* MAINTAINERS: Add Andrew Burgess as global maintainer.
+
 2019-02-12  John Baldwin  <jhb@FreeBSD.org>
 
 	* symfile.c (find_separate_debug_file): Use canonical path of
