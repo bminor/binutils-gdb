@@ -1,6 +1,13 @@
 2019-02-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 	    Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (ada_exception_sal): Change addr_string to a
+	std::string.
+	(create_ada_exception_catchpoint): Update.
+
+2019-02-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+	    Tom Tromey  <tromey@adacore.com>
+
 	* breakpoint.c (~bp_location): Rename from bp_location_dtor.
 	(bp_location_ops): Remove.
 	(base_breakpoint_allocate_location): Update.
