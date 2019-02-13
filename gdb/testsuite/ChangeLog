@@ -1,3 +1,9 @@
+2019-02-12  Weimin Pan  <weimin.pan@oracle.com>
+
+	PR breakpoints/21870
+	* gdb.arch/aarch64-dbreg-contents.exp: New file.
+	* gdb.arch/aarch64-dbreg-contents.c: New file.
+
 2019-02-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/mi_ref_changeable: New testcase.
