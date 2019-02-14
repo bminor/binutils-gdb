@@ -1,3 +1,8 @@
+2019-02-20  Tom Tromey  <tromey@adacore.com>
+
+	* findcmd.c (_initialize_mem_search): Use upper case for
+	metasyntactic variables.
+
 2019-02-20  Alan Hayward  <alan.hayward@arm.com>
 
 	* aarch64-tdep.c (aarch64_add_reggroups): New function.

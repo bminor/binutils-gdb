@@ -286,9 +286,9 @@ _initialize_mem_search (void)
   add_cmd ("find", class_vars, find_command, _("\
 Search memory for a sequence of bytes.\n\
 Usage:\nfind \
-[/size-char] [/max-count] start-address, end-address, expr1 [, expr2 ...]\n\
-find [/size-char] [/max-count] start-address, +length, expr1 [, expr2 ...]\n\
-size-char is one of b,h,w,g for 8,16,32,64 bit values respectively,\n\
+[/SIZE-CHAR] [/MAX-COUNT] START-ADDRESS, END-ADDRESS, EXPR1 [, EXPR2 ...]\n\
+find [/SIZE-CHAR] [/MAX-COUNT] START-ADDRESS, +LENGTH, EXPR1 [, EXPR2 ...]\n\
+SIZE-CHAR is one of b,h,w,g for 8,16,32,64 bit values respectively,\n\
 and if not specified the size is taken from the type of the expression\n\
 in the current language.\n\
 Note that this means for example that in the case of C-like languages\n\
