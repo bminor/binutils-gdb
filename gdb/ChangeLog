@@ -1,3 +1,15 @@
+2019-02-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* windows-nat.c (windows_add_thread): Add new parameter
+	"main_thread_p" with default value set to false.  Update
+	function documentation as well as all callers.
+	(windows_delete_thread): Likewise.
+	(fake_create_process): Update call to windows_add_thread.
+	(get_windows_debug_event) <CREATE_THREAD_DEBUG_EVENT>
+	<CREATE_PROCESS_DEBUG_EVENT>: Likewise.
+	<EXIT_THREAD_DEBUG_EVENT, EXIT_PROCESS_DEBUG_EVENT>: Update
+	call to windows_delete_thread.
+
 2019-02-13  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* MAINTAINERS: Add Andrew Burgess as global maintainer.

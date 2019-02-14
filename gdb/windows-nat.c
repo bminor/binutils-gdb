@@ -426,9 +426,16 @@ thread_rec (DWORD id, int get_context)
   return NULL;
 }
 
-/* Add a thread to the thread list.  */
+/* Add a thread to the thread list.
+
+   PTID is the ptid of the thread to be added.
+   H is its Windows handle.
+   TLB is its thread local base.
+   MAIN_THREAD_P should be true if the thread to be added is
+   the main thread, false otherwise.  */
+
 static windows_thread_info *
-windows_add_thread (ptid_t ptid, HANDLE h, void *tlb)
+windows_add_thread (ptid_t ptid, HANDLE h, void *tlb, bool main_thread_p)
 {
   windows_thread_info *th;
   DWORD id;
@@ -446,7 +453,17 @@ windows_add_thread (ptid_t ptid, HANDLE h, void *tlb)
   th->thread_local_base = (CORE_ADDR) (uintptr_t) tlb;
   th->next = thread_head.next;
   thread_head.next = th;
-  add_thread (ptid);
+
+  /* Add this new thread to the list of threads.
+
+     To be consistent with what's done on other platforms, we add
+     the main thread silently (in reality, this thread is really
+     more of a process to the user than a thread).  */
+  if (main_thread_p)
+    add_thread_silent (ptid);
+  else
+    add_thread (ptid);
+
   /* Set the debug registers for the new thread if they are used.  */
   if (debug_registers_used)
     {
@@ -483,9 +500,15 @@ windows_init_thread_list (void)
   thread_head.next = NULL;
 }
 
-/* Delete a thread from the list of threads.  */
+/* Delete a thread from the list of threads.
+
+   PTID is the ptid of the thread to be deleted.
+   EXIT_CODE is the thread's exit code.
+   MAIN_THREAD_P should be true if the thread to be deleted is
+   the main thread, false otherwise.  */
+
 static void
-windows_delete_thread (ptid_t ptid, DWORD exit_code)
+windows_delete_thread (ptid_t ptid, DWORD exit_code, bool main_thread_p)
 {
   windows_thread_info *th;
   DWORD id;
@@ -494,11 +517,19 @@ windows_delete_thread (ptid_t ptid, DWORD exit_code)
 
   id = ptid.tid ();
 
+  /* Emit a notification about the thread being deleted.
+
+     Note that no notification was printed when the main thread
+     was created, and thus, unless in verbose mode, we should be
+     symetrical, and avoid that notification for the main thread
+     here as well.  */
+
   if (info_verbose)
     printf_unfiltered ("[Deleting %s]\n", target_pid_to_str (ptid));
-  else if (print_thread_events)
+  else if (print_thread_events && !main_thread_p)
     printf_unfiltered (_("[%s exited with code %u]\n"),
 		       target_pid_to_str (ptid), (unsigned) exit_code);
+
   delete_thread (find_thread_ptid (ptid));
 
   for (th = &thread_head;
@@ -1375,11 +1406,12 @@ fake_create_process (void)
       /*  We can not debug anything in that case.  */
     }
   main_thread_id = current_event.dwThreadId;
-  current_thread = windows_add_thread (
-		     ptid_t (current_event.dwProcessId, 0,
-			     current_event.dwThreadId),
-		     current_event.u.CreateThread.hThread,
-		     current_event.u.CreateThread.lpThreadLocalBase);
+  current_thread
+    = windows_add_thread (ptid_t (current_event.dwProcessId, 0,
+				  current_event.dwThreadId),
+			  current_event.u.CreateThread.hThread,
+			  current_event.u.CreateThread.lpThreadLocalBase,
+			  true /* main_thread_p */);
   return main_thread_id;
 }
 
@@ -1548,10 +1580,11 @@ get_windows_debug_event (struct target_ops *ops,
 	}
       /* Record the existence of this thread.  */
       thread_id = current_event.dwThreadId;
-      th = windows_add_thread (ptid_t (current_event.dwProcessId, 0,
-				       current_event.dwThreadId),
-			     current_event.u.CreateThread.hThread,
-			     current_event.u.CreateThread.lpThreadLocalBase);
+      th = windows_add_thread
+        (ptid_t (current_event.dwProcessId, 0, current_event.dwThreadId),
+	 current_event.u.CreateThread.hThread,
+	 current_event.u.CreateThread.lpThreadLocalBase,
+	 false /* main_thread_p */);
 
       break;
 
@@ -1562,7 +1595,8 @@ get_windows_debug_event (struct target_ops *ops,
 		     "EXIT_THREAD_DEBUG_EVENT"));
       windows_delete_thread (ptid_t (current_event.dwProcessId, 0,
 				     current_event.dwThreadId),
-			     current_event.u.ExitThread.dwExitCode);
+			     current_event.u.ExitThread.dwExitCode,
+			     false /* main_thread_p */);
       th = &dummy_thread_info;
       break;
 
@@ -1578,10 +1612,12 @@ get_windows_debug_event (struct target_ops *ops,
       current_process_handle = current_event.u.CreateProcessInfo.hProcess;
       main_thread_id = current_event.dwThreadId;
       /* Add the main thread.  */
-      th = windows_add_thread (ptid_t (current_event.dwProcessId, 0,
-				       current_event.dwThreadId),
-	     current_event.u.CreateProcessInfo.hThread,
-	     current_event.u.CreateProcessInfo.lpThreadLocalBase);
+      th = windows_add_thread
+        (ptid_t (current_event.dwProcessId, 0,
+		 current_event.dwThreadId),
+	 current_event.u.CreateProcessInfo.hThread,
+	 current_event.u.CreateProcessInfo.lpThreadLocalBase,
+	 true /* main_thread_p */);
       thread_id = current_event.dwThreadId;
       break;
 
@@ -1601,7 +1637,7 @@ get_windows_debug_event (struct target_ops *ops,
 	{
 	  windows_delete_thread (ptid_t (current_event.dwProcessId, 0,
 					 main_thread_id),
-				 0);
+				 0, true /* main_thread_p */);
 	  ourstatus->kind = TARGET_WAITKIND_EXITED;
 	  ourstatus->value.integer = current_event.u.ExitProcess.dwExitCode;
 	  thread_id = main_thread_id;
