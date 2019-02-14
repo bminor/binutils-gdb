@@ -7312,14 +7312,13 @@ Packet: '%s'\n"),
 
 	      /* Save the pathname for event reporting and for
 		 the next run command.  */
-	      char *pathname = (char *) xmalloc (pathlen + 1);
-	      struct cleanup *old_chain = make_cleanup (xfree, pathname);
-	      hex2bin (p1, (gdb_byte *) pathname, pathlen);
+	      gdb::unique_xmalloc_ptr<char[]> pathname
+		((char *) xmalloc (pathlen + 1));
+	      hex2bin (p1, (gdb_byte *) pathname.get (), pathlen);
 	      pathname[pathlen] = '\0';
-	      discard_cleanups (old_chain);
 
 	      /* This is freed during event handling.  */
-	      event->ws.value.execd_pathname = pathname;
+	      event->ws.value.execd_pathname = pathname.release ();
 	      event->ws.kind = TARGET_WAITKIND_EXECD;
 
 	      /* Skip the registers included in this packet, since

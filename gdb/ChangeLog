@@ -1,5 +1,10 @@
 2019-03-06  Tom Tromey  <tom@tromey.com>
 
+	* remote.c (remote_target::remote_parse_stop_reply): Use
+	unique_xmalloc_ptr.
+
+2019-03-06  Tom Tromey  <tom@tromey.com>
+
 	* stabsread.c (struct stabs_field_info): Rename from field_info.
 	<list, fnlist>: Add initializers.
 	<obstack>: New member.
