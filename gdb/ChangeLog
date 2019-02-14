@@ -1,3 +1,7 @@
+2019-02-14  Frederic Konrad  <konrad@adacore.com>
+
+	* riscv-rdep.c (riscv_type_alignment): Handle TYPE_CODE_RANGE.
+
 2019-02-14  Joel Brobecker  <brobecker@adacore.com>
 
 	* windows-nat.c (windows_add_thread): Add new parameter

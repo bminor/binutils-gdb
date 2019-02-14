@@ -1632,6 +1632,7 @@ riscv_type_alignment (struct type *t)
     default:
       error (_("Could not compute alignment of type"));
 
+    case TYPE_CODE_RANGE:
     case TYPE_CODE_RVALUE_REF:
     case TYPE_CODE_PTR:
     case TYPE_CODE_ENUM:
