@@ -17,7 +17,7 @@
 #
 # This test checks that GDB does not alter watchpoints set by an inferior.
 # It sets a watchpoint on memory then writes to the watched memory.
-# It will exit with 1 if the watchpoint is not reached.
+# It will exit with 2 if the watchpoint is not reached.
 #
 # See PR breakpoints/21870.
 
@@ -28,16 +28,15 @@ if {![is_aarch64_target]} {
 
 standard_testfile .c
 
-if { [gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile} executable {debug}] != "" } {
-     untested "failed to compile"
-     return -1
+if { [prepare_for_testing "failed to prepare" ${testfile}] } {
+    return
 }
 
-clean_restart $testfile
-
-set test "run to exit"
-gdb_test_multiple "run" "$test" {
+runto_main
+set test "continue to exit"
+gdb_test_multiple "continue" "$test" {
     -re "exited with code 01.*$gdb_prompt $" {
+        # For case that the PTRACE_SETREGSET call fails.
         pass "$test"
     }
     -re "exited normally.*$gdb_prompt $" {

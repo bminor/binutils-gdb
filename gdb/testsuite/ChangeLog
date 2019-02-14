@@ -1,3 +1,11 @@
+2019-02-13  Weimin Pan  <weimin.pan@oracle.com>
+
+	PR breakpoints/21870
+	* gdb.arch/aarch64-dbreg-contents.exp: Use runto_main + continue
+	and prepare_for_testing.  Add comment.
+	* gdb.arch/aarch64-dbreg-contents.c: Remove SET_WATCHPOINT and
+	redundant cleanup call.  Clean up comment.
+
 2019-02-12  Weimin Pan  <weimin.pan@oracle.com>
 
 	PR breakpoints/21870
