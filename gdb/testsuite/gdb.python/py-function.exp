@@ -51,7 +51,13 @@ gdb_py_test_multiple "input value-returning convenience function" \
   "Double ()" "" \
   "end" ""
 
-gdb_test "print \$double (1)" "= 2" "call value-returning function"
+# Different languages can have different parsers, so lets check that
+# internal functions are understood by every language.  Place auto
+# last in the list so we end up back in 'auto' language mode.
+foreach lang [concat [gdb_supported_languages] auto] {
+    gdb_test_no_output "set language $lang"
+    gdb_test "print \$double (1)" "= 2" "call value-returning function, language = $lang"
+}
 
 gdb_py_test_multiple "input int-returning function" \
   "python" "" \

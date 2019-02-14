@@ -6353,5 +6353,13 @@ proc cd { dir } {
     builtin_cd $dir
 }
 
+# Return a list of all languages supported by GDB, suitable for use in
+# 'set language NAME'.  This doesn't include either the 'local' or
+# 'auto' keywords.
+proc gdb_supported_languages {} {
+    return [list c objective-c c++ d go fortran modula-2 asm pascal \
+		opencl rust minimal ada]
+}
+
 # Always load compatibility stuff.
 load_lib future.exp

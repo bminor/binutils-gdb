@@ -1979,6 +1979,7 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	case TYPE_CODE_PTR:
 	case TYPE_CODE_FUNC:
+	case TYPE_CODE_INTERNAL_FUNCTION:
 	  /* It's a function call.  */
 	  /* Allocate arg vector, including space for the function to be
 	     called in argvec[0] and a terminating NULL.  */
@@ -1996,10 +1997,13 @@ evaluate_subexp_standard (struct type *expect_type,
 		 results in malloc being called with a pointer to an integer
 		 followed by an attempt to malloc the arguments to malloc in
 		 target memory.  Infinite recursion ensues.  */
-	      bool is_artificial =
-		TYPE_FIELD_ARTIFICIAL (value_type (arg1), tem - 1);
-	      argvec[tem] = fortran_argument_convert (argvec[tem],
-						      is_artificial);
+	      if (code == TYPE_CODE_PTR || code == TYPE_CODE_FUNC)
+		{
+		  bool is_artificial
+		    = TYPE_FIELD_ARTIFICIAL (value_type (arg1), tem - 1);
+		  argvec[tem] = fortran_argument_convert (argvec[tem],
+							  is_artificial);
+		}
 	    }
 	  argvec[tem] = 0;	/* signal end of arglist */
 	  if (noside == EVAL_SKIP)

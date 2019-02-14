@@ -1,5 +1,11 @@
 2019-04-01  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.python/py-function.exp: Check calling helper function from
+	all languages.
+	* lib/gdb.exp (gdb_supported_languages): New proc.
+
+2019-04-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.base/complex-parts.c: New file.
 	* gdb.base/complex-parts.exp: New file.
 
