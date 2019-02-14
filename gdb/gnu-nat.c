@@ -2361,7 +2361,7 @@ gnu_write_inferior (task_t task, CORE_ADDR addr,
   mach_msg_type_number_t copy_count;
   int deallocate = 0;
 
-  char *errstr = "Bug in gnu_write_inferior";
+  const char *errstr = "Bug in gnu_write_inferior";
 
   struct vm_region_list *region_element;
   struct vm_region_list *region_head = NULL;
@@ -2778,7 +2778,7 @@ show_thread_default_cmd (const char *args, int from_tty)
 }
 
 static int
-parse_int_arg (const char *args, char *cmd_prefix)
+parse_int_arg (const char *args, const char *cmd_prefix)
 {
   if (args)
     {
@@ -2793,7 +2793,8 @@ parse_int_arg (const char *args, char *cmd_prefix)
 }
 
 static int
-_parse_bool_arg (const char *args, char *t_val, char *f_val, char *cmd_prefix)
+_parse_bool_arg (const char *args, const char *t_val, const char *f_val,
+		 const char *cmd_prefix)
 {
   if (!args || strcmp (args, t_val) == 0)
     return 1;
@@ -2809,7 +2810,7 @@ _parse_bool_arg (const char *args, char *t_val, char *f_val, char *cmd_prefix)
   _parse_bool_arg (args, "on", "off", cmd_prefix)
 
 static void
-check_empty (const char *args, char *cmd_prefix)
+check_empty (const char *args, const char *cmd_prefix)
 {
   if (args)
     error (_("Garbage after \"%s\" command: `%s'"), cmd_prefix, args);

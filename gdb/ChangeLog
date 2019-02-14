@@ -1,5 +1,8 @@
 2019-02-14  Thomas Schwinge  <thomas@codesourcery.com>
 
+	* gnu-nat.c (gnu_write_inferior, parse_int_arg, _parse_bool_arg)
+	(check_empty): Use "const char *".
+
 	* gnu-nat.c (gnu_nat_target::detach): Instead of
 	'detach_inferior (pid)' call
 	'detach_inferior (find_inferior_pid (pid))'.
