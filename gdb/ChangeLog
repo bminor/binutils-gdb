@@ -1,3 +1,18 @@
+2019-02-19  Tom Tromey  <tromey@adacore.com>
+
+	* ravenscar-thread.c
+	(ravenscar_thread_target::update_thread_list): Don't call
+	ada_build_task_list.
+	* ada-lang.h (ada_build_task_list): Don't declare.
+	* ada-tasks.c (struct ada_tasks_inferior_data)
+	<task_list_valid_p>: Now bool.
+	(read_known_tasks, ada_task_list_changed)
+	(ada_tasks_invalidate_inferior_data): Update.
+	(read_known_tasks_array): Return bool.
+	(read_known_tasks_list): Likewise.
+	(read_known_tasks): Return void.
+	(ada_build_task_list): Now static.
+
 2019-02-18  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdbtypes.c (type_align): Allow alignment of TYPE_CODE_METHODPTR

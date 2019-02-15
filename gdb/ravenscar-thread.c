@@ -374,8 +374,6 @@ ravenscar_add_thread (struct ada_task_info *task)
 void
 ravenscar_thread_target::update_thread_list ()
 {
-  ada_build_task_list ();
-
   /* Do not clear the thread list before adding the Ada task, to keep
      the thread that the process stratum has included into it
      (m_base_ptid) and the running thread, that may not have been included
