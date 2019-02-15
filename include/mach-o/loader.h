@@ -174,8 +174,8 @@ typedef enum bfd_mach_o_load_command_type
   BFD_MACH_O_LC_ENCRYPTION_INFO = 0x21,		/* Encrypted segment info.  */
   BFD_MACH_O_LC_DYLD_INFO = 0x22,		/* Compressed dyld information.  */
   BFD_MACH_O_LC_LOAD_UPWARD_DYLIB = 0x23,	/* Load upward dylib.  */
-  BFD_MACH_O_LC_VERSION_MIN_MACOSX = 0x24,	/* Minimal MacOSX version.  */
-  BFD_MACH_O_LC_VERSION_MIN_IPHONEOS = 0x25,	/* Minimal IOS version.  */
+  BFD_MACH_O_LC_VERSION_MIN_MACOSX = 0x24,	/* Minimal macOS version.  */
+  BFD_MACH_O_LC_VERSION_MIN_IPHONEOS = 0x25,	/* Minimal iOS version.  */
   BFD_MACH_O_LC_FUNCTION_STARTS = 0x26,  	/* Compressed table of func start.  */
   BFD_MACH_O_LC_DYLD_ENVIRONMENT = 0x27, 	/* Env variable string for dyld.  */
   BFD_MACH_O_LC_MAIN = 0x28,             	/* Entry point.  */
@@ -186,7 +186,7 @@ typedef enum bfd_mach_o_load_command_type
   BFD_MACH_O_LC_LINKER_OPTIONS = 0x2d,		/* Linker options.  */
   BFD_MACH_O_LC_LINKER_OPTIMIZATION_HINT = 0x2e,/* Optimization hints.  */
   BFD_MACH_O_LC_VERSION_MIN_TVOS = 0x2f,	/* Minimal tvOS version.  */
-  BFD_MACH_O_LC_VERSION_MIN_WATCHOS = 0x30,	/* Minimal WatchOS version.  */
+  BFD_MACH_O_LC_VERSION_MIN_WATCHOS = 0x30,	/* Minimal watchOS version.  */
   BFD_MACH_O_LC_NOTE = 0x31,			/* Region of arbitrary data.  */
   BFD_MACH_O_LC_BUILD_VERSION = 0x32,		/* Generic build version.  */
 }
