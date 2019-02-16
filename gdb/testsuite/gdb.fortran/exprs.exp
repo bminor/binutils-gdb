@@ -141,7 +141,7 @@ proc test_convenience_variables {} {
     gdb_test "print (\$foo = 32) + 4"	" = 36" \
 	"Use convenience variable assignment in arithmetic expression"
 
-    gdb_test "print \$bar"		" = VOID" \
+    gdb_test "print \$bar"		" = void" \
 	"Print contents of uninitialized convenience variable"
 }
 

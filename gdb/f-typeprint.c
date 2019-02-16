@@ -328,7 +328,11 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
       break;
 
     case TYPE_CODE_VOID:
-      fprintfi_filtered (level, stream, "VOID");
+      {
+	gdbarch *gdbarch = get_type_arch (type);
+	struct type *void_type = builtin_f_type (gdbarch)->builtin_void;
+	fprintfi_filtered (level, stream, "%s", TYPE_NAME (void_type));
+      }
       break;
 
     case TYPE_CODE_UNDEF:

@@ -1,4 +1,12 @@
 2019-04-30  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* f-lang.c (build_fortran_types): Change name of void type to
+	lower case.
+	* f-typeprint.c (f_type_print_base): Print the name of the void
+	type, rather than a fixed string.
+	* f-valprint.c (f_decorations): Use lower case void string.
+
+2019-04-30  Andrew Burgess  <andrew.burgess@embecosm.com>
 	    Chris January  <chris.january@arm.com>
 
 	* dwarf2read.c (dwarf2_init_complex_target_type): Use different

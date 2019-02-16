@@ -1,5 +1,10 @@
 2019-04-30  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.fortran/exprs.exp (test_convenience_variables): Expect lower
+	case void string.
+
+2019-04-30  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.fortran/complex.exp: Expand.
 	* gdb.fortran/complex.f: Renamed to...
 	* gdb.fortran/complex.f90: ...this, and extended to add more
