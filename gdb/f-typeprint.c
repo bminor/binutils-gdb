@@ -226,12 +226,29 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
       break;
 
     case TYPE_CODE_FUNC:
-      f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
-				   passed_a_ptr, 0, arrayprint_recurse_level);
-      if (passed_a_ptr)
-	fprintf_filtered (stream, ")");
+      {
+	int i, nfields = TYPE_NFIELDS (type);
 
-      fprintf_filtered (stream, "()");
+	f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
+				     passed_a_ptr, 0, arrayprint_recurse_level);
+	if (passed_a_ptr)
+	  fprintf_filtered (stream, ")");
+	fprintf_filtered (stream, "(");
+	if (nfields == 0 && TYPE_PROTOTYPED (type))
+	  f_print_type (builtin_f_type (get_type_arch (type))->builtin_void,
+			"", stream, -1, 0, 0);
+	else
+	  for (i = 0; i < nfields; i++)
+	    {
+	      if (i > 0)
+		{
+		  fputs_filtered (", ", stream);
+		  wrap_here ("    ");
+		}
+	      f_print_type (TYPE_FIELD_TYPE (type, i), "", stream, -1, 0, 0);
+	    }
+	fprintf_filtered (stream, ")");
+      }
       break;
 
     case TYPE_CODE_UNDEF:
