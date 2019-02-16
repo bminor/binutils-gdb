@@ -17545,17 +17545,37 @@ dwarf2_init_complex_target_type (struct dwarf2_cu *cu,
   /* Try to find a suitable floating point builtin type of size BITS.
      We're going to use the name of this type as the name for the complex
      target type that we are about to create.  */
-  switch (bits)
+  switch (cu->language)
     {
-    case 32:
-      tt = builtin_type (gdbarch)->builtin_float;
+    case language_fortran:
+      switch (bits)
+	{
+	case 32:
+	  tt = builtin_f_type (gdbarch)->builtin_real;
+	  break;
+	case 64:
+	  tt = builtin_f_type (gdbarch)->builtin_real_s8;
+	  break;
+	case 96:	/* The x86-32 ABI specifies 96-bit long double.  */
+	case 128:
+	  tt = builtin_f_type (gdbarch)->builtin_real_s16;
+	  break;
+	}
       break;
-    case 64:
-      tt = builtin_type (gdbarch)->builtin_double;
-      break;
-    case 96:	/* The x86-32 ABI specifies 96-bit long double.  */
-    case 128:
-      tt = builtin_type (gdbarch)->builtin_long_double;
+    default:
+      switch (bits)
+	{
+	case 32:
+	  tt = builtin_type (gdbarch)->builtin_float;
+	  break;
+	case 64:
+	  tt = builtin_type (gdbarch)->builtin_double;
+	  break;
+	case 96:	/* The x86-32 ABI specifies 96-bit long double.  */
+	case 128:
+	  tt = builtin_type (gdbarch)->builtin_long_double;
+	  break;
+	}
       break;
     }
 

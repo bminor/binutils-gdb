@@ -1,5 +1,11 @@
 2019-04-30  Andrew Burgess  <andrew.burgess@embecosm.com>
 	    Chris January  <chris.january@arm.com>
+
+	* dwarf2read.c (dwarf2_init_complex_target_type): Use different
+	types for Fortran.
+
+2019-04-30  Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Chris January  <chris.january@arm.com>
 	    David Lecomber  <david.lecomber@arm.com>
 
 	* f-exp.y (BINOP_INTRINSIC): New token.

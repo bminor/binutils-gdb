@@ -1,5 +1,12 @@
 2019-04-30  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.fortran/complex.exp: Expand.
+	* gdb.fortran/complex.f: Renamed to...
+	* gdb.fortran/complex.f90: ...this, and extended to add more
+	complex values.
+
+2019-04-30  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.fortran/intrinsics.exp: Extend to cover MOD, CEILING, FLOOR,
 	MODULO, CMPLX.
 
