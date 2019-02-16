@@ -7195,6 +7195,11 @@ is_resolvable_asm_expansion (bfd *abfd,
 			     bfd_boolean *is_reachable_p)
 {
   asection *target_sec;
+  asection *s;
+  bfd_vma first_vma;
+  bfd_vma last_vma;
+  unsigned int first_align;
+  unsigned int adjust;
   bfd_vma target_offset;
   r_reloc r_rel;
   xtensa_opcode opcode, direct_call_opcode;
@@ -7281,6 +7286,56 @@ is_resolvable_asm_expansion (bfd *abfd,
 		      + sec->output_offset + irel->r_offset + 3);
       dest_address = (target_sec->output_section->vma
 		      + target_sec->output_offset + target_offset);
+    }
+
+  /* Adjust addresses with alignments for the worst case to see if call insn
+     can fit.  Don't relax l32r + callx to call if the target can be out of
+     range due to alignment.
+     Caller and target addresses are highest and lowest address.
+     Search all sections between caller and target, looking for max alignment.
+     The adjustment is max alignment bytes.  If the alignment at the lowest
+     address is less than the adjustment, apply the adjustment to highest
+     address.  */
+
+  /* Start from lowest address.
+     Lowest address aligmnet is from input section.
+     Initial alignment (adjust) is from input section.  */
+  if (dest_address > self_address)
+    {
+      s = sec->output_section;
+      last_vma = dest_address;
+      first_align = sec->alignment_power;
+      adjust = target_sec->alignment_power;
+    }
+  else
+    {
+      s = target_sec->output_section;
+      last_vma = self_address;
+      first_align = target_sec->alignment_power;
+      adjust = sec->alignment_power;
+    }
+
+  first_vma = s->vma;
+
+  /* Find the largest alignment in output section list.  */
+  for (; s && s->vma >= first_vma && s->vma <= last_vma ; s = s->next)
+    {
+      if (s->alignment_power > adjust)
+	adjust = s->alignment_power;
+    }
+
+  if (adjust > first_align)
+    {
+      /* Alignment may enlarge the range, adjust highest address.  */
+      adjust = 1 << adjust;
+      if (dest_address > self_address)
+	{
+	  dest_address += adjust;
+	}
+      else
+	{
+	  self_address += adjust;
+	}
     }
 
   *is_reachable_p = pcrel_reloc_fits (direct_call_opcode, 0,

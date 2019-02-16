@@ -1,3 +1,11 @@
+2019-02-20  Eric Tsai  <erictsai@cadence.com>
+
+	* testsuite/ld-xtensa/call_overflow.d: New test definition.
+	* testsuite/ld-xtensa/call_overflow1.s: New test source.
+	* testsuite/ld-xtensa/call_overflow2.s: New test source.
+	* testsuite/ld-xtensa/call_overflow3.s: New test source.
+	* testsuite/ld-xtensa/xtensa.exp: Add call_overflow test.
+
 2019-02-14  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* testsuite/ld-elf/elf.exp: Remove Hurd XFAILs.

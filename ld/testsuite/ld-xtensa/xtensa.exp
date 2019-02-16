@@ -23,6 +23,7 @@ if { !([istarget "xtensa*-*-*"]) } {
     return
 }
 
+run_dump_test "call_overflow"
 run_dump_test "coalesce"
 run_dump_test "diff_overflow"
 run_dump_test "lcall"
