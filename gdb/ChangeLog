@@ -1,3 +1,8 @@
+2019-02-27  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* target.c (target_detach): Clear the regcache and the
+	frame cache.
+
 2019-02-27  Pedro Alves  <palves@redhat.com>
 
 	* utils.c (set_screen_size): When we cap the height/width sizes,
@@ -35,7 +40,7 @@
 	Python 2.4 workaround.
 
 2019-02-27  Kevin Buettner  <kevinb@redhat.com>
-    
+
 	* NEWS: Note minimum Python version.
 
 2019-02-27  Kevin Buettner  <kevinb@redhat.com>
