@@ -107,22 +107,68 @@ note_value (value_object *value_obj)
   values_in_python = value_obj;
 }
 
+/* Convert a python object OBJ with type TYPE to a gdb value.  The
+   python object in question must conform to the python buffer
+   protocol.  On success, return the converted value, otherwise
+   nullptr.  */
+
+static struct value *
+convert_buffer_and_type_to_value (PyObject *obj, struct type *type)
+{
+  Py_buffer_up buffer_up;
+  Py_buffer py_buf;
+
+  if (PyObject_CheckBuffer (obj) 
+      && PyObject_GetBuffer (obj, &py_buf, PyBUF_SIMPLE) == 0)
+    {
+      /* Got a buffer, py_buf, out of obj.  Cause it to be released
+         when it goes out of scope.  */
+      buffer_up.reset (&py_buf);
+    }
+  else
+    {
+      PyErr_SetString (PyExc_TypeError,
+		       _("Object must support the python buffer protocol."));
+      return nullptr;
+    }
+
+  if (TYPE_LENGTH (type) > py_buf.len)
+    {
+      PyErr_SetString (PyExc_ValueError,
+		       _("Size of type is larger than that of buffer object."));
+      return nullptr;
+    }
+
+  return value_from_contents (type, (const gdb_byte *) py_buf.buf);
+}
+
 /* Called when a new gdb.Value object needs to be allocated.  Returns NULL on
    error, with a python exception set.  */
 static PyObject *
-valpy_new (PyTypeObject *subtype, PyObject *args, PyObject *keywords)
+valpy_new (PyTypeObject *subtype, PyObject *args, PyObject *kwargs)
 {
-  struct value *value = NULL;   /* Initialize to appease gcc warning.  */
-  value_object *value_obj;
+  static const char *keywords[] = { "val", "type", NULL };
+  PyObject *val_obj = nullptr;
+  PyObject *type_obj = nullptr;
 
-  if (PyTuple_Size (args) != 1)
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kwargs, "O|O", keywords,
+					&val_obj, &type_obj))
+    return nullptr;
+
+  struct type *type = nullptr;
+
+  if (type_obj != nullptr)
     {
-      PyErr_SetString (PyExc_TypeError, _("Value object creation takes only "
-					  "1 argument"));
-      return NULL;
+      type = type_object_to_type (type_obj);
+      if (type == nullptr)
+        {
+	  PyErr_SetString (PyExc_TypeError,
+			   _("type argument must be a gdb.Type."));
+	  return nullptr;
+	}
     }
 
-  value_obj = (value_object *) subtype->tp_alloc (subtype, 1);
+  value_object *value_obj = (value_object *) subtype->tp_alloc (subtype, 1);
   if (value_obj == NULL)
     {
       PyErr_SetString (PyExc_MemoryError, _("Could not allocate memory to "
@@ -130,8 +176,14 @@ valpy_new (PyTypeObject *subtype, PyObject *args, PyObject *keywords)
       return NULL;
     }
 
-  value = convert_value_from_python (PyTuple_GetItem (args, 0));
-  if (value == NULL)
+  struct value *value;
+
+  if (type == nullptr)
+    value = convert_value_from_python (val_obj);
+  else
+    value = convert_buffer_and_type_to_value (val_obj, type);
+
+  if (value == nullptr)
     {
       subtype->tp_free (value_obj);
       return NULL;

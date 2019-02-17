@@ -1,5 +1,10 @@
 2019-02-26  Kevin Buettner  <kevinb@redhat.com>
 
+	* python/py-value.c (convert_buffer_and_type_to_value): New
+	function.
+	(valpy_new): Parse arguments via gdb_PyArg_ParseTupleAndKeywords.
+	Add support for handling an optional second argument.  Call
+	convert_buffer_and_type_to_value as appropriate.
 	* python/python-internal.h (Py_buffer_deleter): New struct.
 	(Py_buffer_up): New typedef.
 
