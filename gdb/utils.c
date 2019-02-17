@@ -62,7 +62,6 @@
 
 #include <chrono>
 
-#include "gdb_usleep.h"
 #include "interps.h"
 #include "gdb_regex.h"
 #include "gdbsupport/job-control.h"

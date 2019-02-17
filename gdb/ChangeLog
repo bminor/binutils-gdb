@@ -1,3 +1,11 @@
+2019-09-26  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (COMMON_SFILES): Remove gdb_usleep.c.
+	(HFILES_NO_SRCDIR): Remove gdb_usleep.h.
+	* gdb_usleep.h: Remove.
+	* gdb_usleep.c: Remove.
+	* utils.c: Don't include gdb_usleep.h.
+
 2019-09-26  Tom Tromey  <tromey@adacore.com>
 
 	* python/py-type.c (type_to_type_object): Call check_typedef
