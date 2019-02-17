@@ -1,3 +1,8 @@
+2019-02-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* python/python-internal.h (Py_buffer_deleter): New struct.
+	(Py_buffer_up): New typedef.
+
 2019-02-25  John Baldwin  <jhb@FreeBSD.org>
 
 	* dwarf2read.c (dwarf2_get_dwz_file): Reset dwz_bfd to nullptr

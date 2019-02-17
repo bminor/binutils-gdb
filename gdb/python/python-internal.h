@@ -801,4 +801,17 @@ struct varobj;
 struct varobj_iter *py_varobj_get_iterator (struct varobj *var,
 					    PyObject *printer);
 
+/* Deleter for Py_buffer unique_ptr specialization.  */
+
+struct Py_buffer_deleter
+{
+  void operator() (Py_buffer *b) const
+  {
+    PyBuffer_Release (b);
+  }
+};
+
+/* A unique_ptr specialization for Py_buffer.  */
+typedef std::unique_ptr<Py_buffer, Py_buffer_deleter> Py_buffer_up;
+
 #endif /* PYTHON_PYTHON_INTERNAL_H */
