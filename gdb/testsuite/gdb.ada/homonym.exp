@@ -36,7 +36,7 @@ gdb_test "break homonym.adb:Get_Value" \
     "set breakpoint at homonym.adb:Get_Value"
 
 gdb_test "break <homonym__get_value>" \
-    "Breakpoint \[0-9\]+ at $hex: <homonym__get_value>. .2 locations." \
+    "Breakpoint \[0-9\]+ at $hex: file .*homonym\\.adb, line $decimal\\." \
     "set breakpoint at <homonym__get_value>"
 
 delete_breakpoints

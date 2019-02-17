@@ -4760,7 +4760,7 @@ standard_lookup (const char *name, const struct block *block,
 
   if (lookup_cached_symbol (name, domain, &sym.symbol, NULL))
     return sym.symbol;
-  sym = lookup_symbol_in_language (name, block, domain, language_c, 0);
+  ada_lookup_encoded_symbol (name, block, domain, &sym);
   cache_symbol (name, domain, sym.symbol, sym.block);
   return sym.symbol;
 }
@@ -14175,6 +14175,16 @@ do_full_match (const char *symbol_search_name,
   return full_match (symbol_search_name, ada_lookup_name (lookup_name));
 }
 
+/* symbol_name_matcher_ftype for exact (verbatim) matches.  */
+
+static bool
+do_exact_match (const char *symbol_search_name,
+		const lookup_name_info &lookup_name,
+		completion_match_result *comp_match_res)
+{
+  return strcmp (symbol_search_name, ada_lookup_name (lookup_name)) == 0;
+}
+
 /* Build the Ada lookup name for LOOKUP_NAME.  */
 
 ada_lookup_name_info::ada_lookup_name_info (const lookup_name_info &lookup_name)
@@ -14285,6 +14295,8 @@ ada_get_symbol_name_matcher (const lookup_name_info &lookup_name)
     {
       if (lookup_name.ada ().wild_match_p ())
 	return do_wild_match;
+      else if (lookup_name.ada ().verbatim_p ())
+	return do_exact_match;
       else
 	return do_full_match;
     }

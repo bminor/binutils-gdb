@@ -1,3 +1,11 @@
+2019-02-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (standard_lookup): Use ada_lookup_encoded_symbol
+	instead of lookup_symbol_in_language
+	(do_exact_match): New function.
+	(ada_get_symbol_name_matcher): Return do_exact_match when
+	doing a verbatim match.
+
 2019-02-15  Tom Tromey  <tromey@adacore.com>
 
 	* ravenscar-thread.c (ravenscar_thread_target::resume)

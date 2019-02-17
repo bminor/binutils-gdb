@@ -1,3 +1,9 @@
+2019-02-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/big_packed_array: New testcase.
+	* gdb.ada/homonym.exp: Fix incorrect expected output for
+	"break <homonym__get_value>" test.
+
 2019-02-13  Weimin Pan  <weimin.pan@oracle.com>
 
 	PR breakpoints/21870
