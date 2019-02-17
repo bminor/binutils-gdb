@@ -1,3 +1,8 @@
+2019-02-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* python.texi (Values From Inferior): Document second form
+	of Value.__init__.
+
 2019-02-23  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo: Update copyright year ranges.

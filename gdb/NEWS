@@ -202,6 +202,9 @@ FreeBSD/riscv			riscv*-*-freebsd*
      gdb.SYMBOL_TYPES_DOMAIN are now deprecated.  These were never
      correct and did not work properly.
 
+  ** The gdb.Value type has a new constructor, which is used to construct a
+     gdb.Value from a Python buffer object and a gdb.Type.
+
 * Configure changes
 
 --enable-ubsan

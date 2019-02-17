@@ -735,6 +735,14 @@ its result is used.
 @end table
 @end defun
 
+@defun Value.__init__ (@var{val}, @r{[}, type @r{]})
+This second form of the @code{gdb.Value} constructor returns a
+@code{gdb.Value} of type @var{type} where the value contents are taken
+from the Python buffer object specified by @var{val}.  The number of
+bytes in the Python buffer object must be greater than or equal to the
+size of @var{type}.
+@end defun
+
 @defun Value.cast (type)
 Return a new instance of @code{gdb.Value} that is the result of
 casting this instance to the type described by @var{type}, which must
