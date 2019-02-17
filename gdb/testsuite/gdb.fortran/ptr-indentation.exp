@@ -37,5 +37,5 @@ gdb_continue_to_breakpoint "BP1"
 gdb_test "ptype tinsta" \
   [multi_line "type = Type tuserdef" \
               "    $int :: i" \
-              "    PTR TO -> \\( $real :: ptr\\)" \
+              "    PTR TO -> \\( $real :: ptr \\)" \
               "End Type tuserdef"]

@@ -42,4 +42,4 @@ gdb_test "ptype say_numbers" \
     "type = void \\(integer\\(kind=4\\), integer\\(kind=4\\), integer\\(kind=4\\)\\)"
 
 gdb_test "ptype fun_ptr" \
-    "type = PTR TO -> \\( integer\\(kind=4\\) \\(\\)\\(REF TO -> \\( integer\\(kind=4\\) \\)\\)\\)"
+    "type = PTR TO -> \\( integer\\(kind=4\\) \\(\\) \\(REF TO -> \\( integer\\(kind=4\\) \\)\\) \\)"

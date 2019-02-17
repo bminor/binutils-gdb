@@ -1,5 +1,12 @@
 2019-04-30  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.fortran/ptr-indentation.exp: Update expected results.
+	* gdb.fortran/ptype-on-functions.exp: Likewise.
+	* gdb.fortran/vla-ptr-info.exp: Likewise.
+	* gdb.fortran/vla-value.exp: Likewise.
+
+2019-04-30  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.fortran/ptype-on-functions.exp: New file.
 	* gdb.fortran/ptype-on-functions.f90: New file.
 
