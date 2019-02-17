@@ -3003,6 +3003,7 @@ type_align (struct type *type)
     case TYPE_CODE_FUNC:
     case TYPE_CODE_FLAGS:
     case TYPE_CODE_INT:
+    case TYPE_CODE_RANGE:
     case TYPE_CODE_FLT:
     case TYPE_CODE_ENUM:
     case TYPE_CODE_REF:
@@ -3047,7 +3048,6 @@ type_align (struct type *type)
       break;
 
     case TYPE_CODE_SET:
-    case TYPE_CODE_RANGE:
     case TYPE_CODE_STRING:
       /* Not sure what to do here, and these can't appear in C or C++
 	 anyway.  */
