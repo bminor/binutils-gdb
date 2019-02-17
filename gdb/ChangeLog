@@ -1,3 +1,11 @@
+2019-02-18  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* ada-task.c (_initialize_tasks): Use 'with_cleanup' register
+	variant for ada_tasks_pspace_data_handle and
+	ada_tasks_inferior_data_handle.
+	(ada_tasks_pspace_data_cleanup): New function.
+	(ada_tasks_inferior_data_cleanup): New function.
+
 2019-02-17  Tom Tromey  <tom@tromey.com>
 
 	* macrotab.h (macro_source_fullname): Return a std::string.

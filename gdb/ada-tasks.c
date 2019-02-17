@@ -161,6 +161,15 @@ struct ada_tasks_pspace_data
 /* Key to our per-program-space data.  */
 static const struct program_space_data *ada_tasks_pspace_data_handle;
 
+/* A cleanup routine for our per-program-space data.  */
+static void
+ada_tasks_pspace_data_cleanup (struct program_space *pspace, void *arg)
+{
+  struct ada_tasks_pspace_data *data
+    = (struct ada_tasks_pspace_data *) arg;
+  xfree (data);
+}
+
 /* The kind of data structure used by the runtime to store the list
    of Ada tasks.  */
 
@@ -283,6 +292,15 @@ get_ada_tasks_inferior_data (struct inferior *inf)
     }
 
   return data;
+}
+
+/* A cleanup routine for our per-inferior data.  */
+static void
+ada_tasks_inferior_data_cleanup (struct inferior *inf, void *arg)
+{
+  struct ada_tasks_inferior_data *data
+    = (struct ada_tasks_inferior_data *) arg;
+  delete data;
 }
 
 /* Return the task number of the task whose thread is THREAD, or zero
@@ -1414,8 +1432,12 @@ ada_tasks_new_objfile_observer (struct objfile *objfile)
 void
 _initialize_tasks (void)
 {
-  ada_tasks_pspace_data_handle = register_program_space_data ();
-  ada_tasks_inferior_data_handle = register_inferior_data ();
+  ada_tasks_pspace_data_handle
+    = register_program_space_data_with_cleanup (NULL,
+						ada_tasks_pspace_data_cleanup);
+  ada_tasks_inferior_data_handle
+    = register_inferior_data_with_cleanup (NULL,
+					   ada_tasks_inferior_data_cleanup);
 
   /* Attach various observers.  */
   gdb::observers::normal_stop.attach (ada_tasks_normal_stop_observer);
