@@ -13345,12 +13345,6 @@ dump_section_as_strings (Elf_Internal_Shdr * section, Filedata * filedata)
 		    printable_section_name (filedata, section), chdr.ch_type);
 	      return FALSE;
 	    }
-	  else if (chdr.ch_addralign != section->sh_addralign)
-	    {
-	      warn (_("compressed section '%s' is corrupted\n"),
-		    printable_section_name (filedata, section));
-	      return FALSE;
-	    }
 	  uncompressed_size = chdr.ch_size;
 	  start += compression_header_size;
 	  new_size -= compression_header_size;
@@ -13490,12 +13484,6 @@ dump_section_as_bytes (Elf_Internal_Shdr *  section,
 	    {
 	      warn (_("section '%s' has unsupported compress type: %d\n"),
 		    printable_section_name (filedata, section), chdr.ch_type);
-	      return FALSE;
-	    }
-	  else if (chdr.ch_addralign != section->sh_addralign)
-	    {
-	      warn (_("compressed section '%s' is corrupted\n"),
-		    printable_section_name (filedata, section));
 	      return FALSE;
 	    }
 	  uncompressed_size = chdr.ch_size;
@@ -13665,12 +13653,6 @@ load_specific_debug_section (enum dwarf_section_display_enum  debug,
 	    {
 	      warn (_("section '%s' has unsupported compress type: %d\n"),
 		    section->name, chdr.ch_type);
-	      return FALSE;
-	    }
-	  else if (chdr.ch_addralign != sec->sh_addralign)
-	    {
-	      warn (_("compressed section '%s' is corrupted\n"),
-		    section->name);
 	      return FALSE;
 	    }
 	  uncompressed_size = chdr.ch_size;

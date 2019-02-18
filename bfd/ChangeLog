@@ -1,3 +1,31 @@
+2019-02-18  Nick Clifton  <nickc@redhat.com>
+
+	Import from the mainline:
+	2018-11-27  Mark Wielaard  <mark@klomp.org>
+
+	PR binutils/23919
+	* bfd.c (bfd_update_compression_header): Explicitly set alignment.
+	(bfd_check_compression_header): Add uncompressed_alignment_power
+	argument. Check ch_addralign is a power of 2.
+	* bfd-in2.h: Regenerated.
+	* compress.c (bfd_compress_section_contents): Get and set
+	orig_uncompressed_alignment_pow if section is decompressed.
+	(bfd_is_section_compressed_with_header): Add and get
+	uncompressed_align_pow_p argument.
+	(bfd_is_section_compressed): Add uncompressed_align_power argument
+	to bfd_is_section_compressed_with_header call.
+	(bfd_init_section_decompress_status): Get and set
+	uncompressed_alignment_power.
+	* elf.c (_bfd_elf_make_section_from_shdr): Add
+	uncompressed_align_power argument to
+	bfd_is_section_compressed_with_header call.
+
+	2018-11-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/23919
+	* compress.c (bfd_is_section_compressed_with_header): Initialize
+	* uncompressed_align_pow_p to 0.
+
 2019-02-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/24151
