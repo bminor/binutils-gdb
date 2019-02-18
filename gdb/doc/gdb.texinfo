@@ -7784,6 +7784,9 @@ Moxie, PowerPC, PowerPC64, S/390, and x86 (i386/amd64) running
 GNU/Linux.  Process record and replay can be used both when native
 debugging, and when remote debugging via @code{gdbserver}.
 
+When recording an inferior, @value{GDBN} may print auxiliary information
+during stepping commands and commands displaying the execution history.
+
 For architecture environments that support process record and replay,
 @value{GDBN} provides the following commands:
 

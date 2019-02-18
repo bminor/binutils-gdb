@@ -52,7 +52,10 @@ enum btrace_insn_class
   BTRACE_INSN_RETURN,
 
   /* The instruction is an unconditional jump.  */
-  BTRACE_INSN_JUMP
+  BTRACE_INSN_JUMP,
+
+  /* The instruction is a pseudo instruction containing auxiliary data.  */
+  BTRACE_INSN_AUX
 };
 
 /* Instruction flags.  */
@@ -68,8 +71,19 @@ DEF_ENUM_FLAGS_TYPE (enum btrace_insn_flag, btrace_insn_flags);
    This represents a single instruction in a branch trace.  */
 struct btrace_insn
 {
-  /* The address of this instruction.  */
-  CORE_ADDR pc;
+  union
+  {
+    /* The address of this instruction.  Applies to btrace_insn with
+       iclass == BTRACE_INSN_OTHER or
+       iclass == BTRACE_INSN_CALL or
+       iclass == BTRACE_INSN_RETURN or
+       iclass == BTRACE_INSN_JUMP.  */
+    CORE_ADDR pc;
+
+    /* Index into btrace_info::aux_data.  Applies to btrace_insn with
+       iclass == BTRACE_INSN_AUX.  */
+    uint64_t aux_data_index;
+  };
 
   /* The size of this instruction in bytes.  */
   gdb_byte size;
@@ -329,6 +343,10 @@ struct btrace_thread_info
      Note that the numbering for btrace function segments starts with 1, so
      function segment i will be at index (i - 1).  */
   std::vector<btrace_function> functions;
+
+  /* Optional auxiliary information that is printed in all commands
+     displaying or stepping through the execution history.  */
+  std::vector<std::string> aux_data;
 
   /* The function level offset.  When added to each function's LEVEL,
      this normalizes the function levels such that the smallest level
