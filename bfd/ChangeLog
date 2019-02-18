@@ -1,3 +1,9 @@
+2019-02-18  Alan Modra  <amodra@gmail.com>
+
+	PR 24225
+	* elf32-nios2.c (nios2_elf32_relocate_section): Use asprintf and
+	PRIx64 to generate warning messages.  Print local sym names too.
+
 2019-02-09  Vineet Gupta  <vgupta@synopsys.com>
 
 	* elf32-arc (INIT_SYM_STRING): Delete.

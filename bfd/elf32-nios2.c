@@ -3720,8 +3720,8 @@ nios2_elf32_relocate_section (bfd *output_bfd,
       const char *name = NULL;
       int r_type;
       const char *format;
-      char msgbuf[256];
-      const char* msg = (const char*) NULL;
+      char *msgbuf = NULL;
+      char *msg = NULL;
       bfd_boolean unresolved_reloc;
       bfd_vma off;
       int use_plt;
@@ -3820,8 +3820,8 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 		    reloc_address = 0;
 
 		  format = _("global pointer relative relocation at address "
-			     "0x%08x when _gp not defined\n");
-		  sprintf (msgbuf, format, reloc_address);
+			     "%#" PRIx64 " when _gp not defined\n");
+		  asprintf (&msgbuf, format, (uint64_t) reloc_address);
 		  msg = msgbuf;
 		  r = bfd_reloc_dangerous;
 		}
@@ -3838,13 +3838,22 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 		    {
 		      if (h)
 			name = h->root.root.string;
+		      else
+			{
+			  name = (bfd_elf_string_from_elf_section
+				  (input_bfd, symtab_hdr->sh_link,
+				   sym->st_name));
+			  if (name == NULL || *name == '\0')
+			    name = bfd_section_name (input_bfd, sec);
+			}
 		      /* xgettext:c-format */
-		      format = _("unable to reach %s (at 0x%08x) from the "
-				 "global pointer (at 0x%08x) because the "
-				 "offset (%d) is out of the allowed range, "
-				 "-32678 to 32767\n" );
-		      sprintf (msgbuf, format, name, symbol_address, gp,
-			       (signed)relocation);
+		      format = _("unable to reach %s (at %#" PRIx64 ") from "
+				 "the global pointer (at %#" PRIx64 ") "
+				 "because the offset (%" PRId64 ") is out of "
+				 "the allowed range, -32678 to 32767\n" );
+		      asprintf (&msgbuf, format, name,
+				(uint64_t) symbol_address, (uint64_t) gp,
+				(int64_t) relocation);
 		      msg = msgbuf;
 		      r = bfd_reloc_outofrange;
 		    }
@@ -4515,6 +4524,8 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 	    {
 	      (*info->callbacks->warning) (info, msg, name, input_bfd,
 					   input_section, rel->r_offset);
+	      if (msgbuf)
+		free (msgbuf);
 	      return FALSE;
 	    }
 	}
