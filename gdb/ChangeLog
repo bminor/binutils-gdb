@@ -1,3 +1,8 @@
+2019-02-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdbtypes.c (type_align): Allow alignment of TYPE_CODE_METHODPTR
+	and TYPE_CODE_MEMBERPTR to be overridden by the gdbarch.
+
 2019-02-18  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* ada-task.c (_initialize_tasks): Use 'with_cleanup' register
