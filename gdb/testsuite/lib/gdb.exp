@@ -4299,6 +4299,79 @@ gdb_caching_proc allow_btrace_pt_tests {} {
     return $allow_btrace_pt_tests
 }
 
+# Run a test on the target to see if it supports ptwrite instructions and
+# if GDB can decode ptwrite events.  Return 1 if so, 0 if it does not.
+
+gdb_caching_proc allow_btrace_ptw_tests {} {
+    global srcdir subdir gdb_prompt inferior_exited_re decimal
+
+    require allow_btrace_pt_tests
+    set me "allow_btrace_ptw_tests"
+
+    set src {
+	#include <immintrin.h>
+
+	int
+	main ()
+	{
+	  _ptwrite32 (0x42);
+	  return 0;
+	}
+    }
+
+    set compile_flags "additional_flags=-mptwrite"
+    if {![gdb_simple_compile $me $src executable $compile_flags]} {
+	return 0
+    }
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load "$obj"
+    if ![runto_main] {
+	return 1
+    }
+
+    gdb_test_no_output "record btrace pt" "$me: record btrace pt"
+
+    set allow_btrace_ptw_tests 0
+    gdb_test_multiple "next" "$me: next" {
+	-re -wrap ".*Illegal instruction.*" {
+	    verbose -log "$me:  ptwrite instruction support not detected."
+	}
+	-re -wrap ".*$inferior_exited_re normally.*" {
+	    verbose -log "$me:  ptwrite support not detected."
+	}
+	-re -wrap "$decimal.*(at|in|return 0).*" {
+	    set allow_btrace_ptw_tests 1
+	}
+    }
+
+    if { $allow_btrace_ptw_tests == 1 } {
+	# Show the func-call-history to get the packet trace.
+	gdb_test "record function-call-history" ".*"
+
+	gdb_test_multiple "maintenance btrace packet-history 0,1000" \
+	    "$me: check decoding support" {
+	    -re  "ptw" {
+		verbose -log "$me:  ptwrite decoding support detected."
+		set allow_btrace_ptw_tests 1
+	    }
+	    -re -wrap "" {
+		verbose -log "$me:  ptwrite decoding support not detected."
+		set allow_btrace_ptw_tests 0
+	    }
+	}
+    }
+
+    gdb_exit
+    remote_file build delete $obj
+
+    verbose "$me:  returning $allow_btrace_ptw_tests" 2
+    return $allow_btrace_ptw_tests
+}
+
+
 # Run a test on the target to see if it supports Aarch64 SVE hardware.
 # Return 1 if so, 0 if it does not.  Note this causes a restart of GDB.
 

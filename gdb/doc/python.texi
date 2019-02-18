@@ -8224,6 +8224,7 @@ registering objfile-specific pretty-printers and frame-filters.
 * gdb.printing::       Building and registering pretty-printers.
 * gdb.types::          Utilities for working with types.
 * gdb.prompt::         Utilities for prompt value substitution.
+* gdb.ptwrite::        Utilities for PTWRITE filter registration.
 @end menu
 
 @node gdb.printing
@@ -8414,3 +8415,153 @@ substitute_prompt ("frame: \f, args: \p@{print frame-arguments@}")
 "frame: main, args: scalars"
 @end smallexample
 @end table
+
+@node gdb.ptwrite
+@subsubsection gdb.ptwrite
+@cindex gdb.ptwrite
+
+This module provides additional functionality for recording programs that
+make use of the @code{PTWRITE} instruction.  @code{PTWRITE} is a x86
+instruction that allows to write values into the Intel Processor Trace
+(@pxref{Process Record and Replay}).
+The @value{NGCC} intrinsics for it are:
+@smallexample
+void _ptwrite32 (unsigned int a)
+void _ptwrite64 (unsigned __int64 a)
+@end smallexample
+
+If an inferior uses the instruction, @value{GDBN} by default inserts the
+raw payload value as auxiliary information into the execution history.
+Auxiliary information is by default printed during
+@code{record instruction-history}, @code{record function-call-history},
+and all stepping commands, and is accessible in Python as a
+@code{RecordAuxiliary} object (@pxref{Recordings In Python}).
+
+@exdent Sample program:
+@smallexample
+@group
+#include <immintrin.h>
+
+void
+ptwrite64 (unsigned long long value)
+@{
+  _ptwrite64 (value);
+@}
+@end group
+
+@group
+int
+main (void)
+@{
+  ptwrite64 (0x42);
+  return 0; /* break here.  */
+@}
+@end group
+@end smallexample
+
+
+@exdent @value{GDBN} output after recording the sample program in pt format:
+@smallexample
+@group
+(gdb) record instruction-history 12,14
+12         0x0040074c <ptwrite64+16>:   ptwrite %rbx
+13           [0x42]
+14         0x00400751 <ptwrite64+21>:   mov -0x8(%rbp),%rbx
+(gdb) record function-call-history
+1       main
+2       ptwrite64
+          [0x42]
+3       main
+@end group
+@end smallexample
+
+The @code{gdb.ptwrite} module allows customizing the default output of
+@code{PTWRITE} auxiliary information.  A custom Python function can be
+registered as the @code{PTWRITE} filter function.  This function will be
+called with the @code{PTWRITE} payload and PC as arguments during trace
+decoding.  The function can return a string, which will be printed by
+@value{GDBN} during the aforementioned commands, or @code{None}, resulting
+in no output.  To register such a filter function, the user needs to
+provide a filter factory function, which returns a new filter function
+object to be called by @value{GDBN}.
+
+@findex gdb.ptwrite.register_filter_factory
+@defun register_filter_factory (filter_factory)
+Used to register the @code{PTWRITE} filter factory.  This filter factory can
+be any callable object that accepts one argument, the current thread as
+a @code{gdb.InferiorThread}.
+It can return None or a callable.  This callable is the @code{PTWRITE} filter
+function for the specified thread.  If @code{None} is returned by the factory
+function, the default auxiliary information will be printed.
+@end defun
+
+@findex gdb.ptwrite.get_filter
+@defun get_filter ()
+Return the currently active @code{PTWRITE} filter function.
+@end defun
+
+An example:
+
+@smallexample
+@group
+(gdb) python-interactive
+>>> class my_filter():
+...    def __init__(self):
+...        self.var = 0
+...    def __call__(self, payload, ip):
+...        self.var += 1
+...        return f"counter: @{self.var@}, ip: @{ip:#x@}"
+...
+>>> def my_filter_factory(thread):
+...    if thread.global_num == 1:
+...        return my_filter()
+...    else:
+...        return None
+...
+>>> import gdb.ptwrite
+>>> gdb.ptwrite.register_filter_factory(my_filter_factory)
+>>>
+@end group
+
+@group
+(gdb) record function-call-history 59,64
+59      pthread_create@@GLIBC_2.2.5
+60      job()
+61      task(void*)
+62      ptwrite64(unsigned long)
+          [counter: 1, ip: 0x401156]
+63      task(void*)
+64      ptwrite32(unsigned int)
+          [counter: 2, ip: 0x40116c]
+@end group
+
+@group
+(gdb) info threads
+* 1    Thread 0x7ffff7fd8740 (LWP 25796) "ptw_threads" task ()
+    at bin/ptwrite/ptw_threads.c:45
+  2    Thread 0x7ffff6eb8700 (LWP 25797) "ptw_threads" task ()
+    at bin/ptwrite/ptw_threads.c:45
+@end group
+
+@group
+(gdb) thread 2
+[Switching to thread 2 (Thread 0x7ffff6eb8700 (LWP 25797))]
+#0  task (arg=0x0) at ptwrite_threads.c:45
+45        return NULL;
+@end group
+
+@group
+(gdb) record function-call-history 10,14
+10    start_thread
+11    task(void*)
+12    ptwrite64(unsigned long)
+        [0x42]
+13    task(void*)
+14    ptwrite32(unsigned int)
+        [0x43]
+@end group
+@end smallexample
+
+This @value{GDBN} feature is dependent on hardware and operating system
+support and requires the Intel Processor Trace decoder library in version
+2.0.0 or newer.

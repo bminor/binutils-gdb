@@ -3,6 +3,13 @@
 
 *** Changes since GDB 15
 
+* GDB now supports printing of ptwrite payloads from the Intel Processor
+  Trace during 'record instruction-history', 'record function-call-history'
+  and all stepping commands.  The payload is also accessible in Python as a
+  RecordAuxiliary object.  Printing is customizable via a ptwrite filter
+  function in Python.  By default, the raw ptwrite payload is printed for
+  each ptwrite that is encountered.
+
 * Python API
 
   ** Added gdb.record.clear.  Clears the trace data of the current recording.
