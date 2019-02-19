@@ -1186,10 +1186,7 @@ read_command_lines (const char *prompt_arg, int from_tty, int parse_commands,
 					     END_MESSAGE);
 	}
       else
-	{
-	  printf_unfiltered ("%s\n%s\n", prompt_arg, END_MESSAGE);
-	  gdb_flush (gdb_stdout);
-	}
+	printf_unfiltered ("%s\n%s\n", prompt_arg, END_MESSAGE);
     }
 
 

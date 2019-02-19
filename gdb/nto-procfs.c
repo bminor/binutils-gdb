@@ -712,8 +712,6 @@ nto_procfs_target::attach (const char *args, int from_tty)
       else
 	printf_unfiltered ("Attaching to %s\n",
 			   target_pid_to_str (ptid_t (pid)));
-
-      gdb_flush (gdb_stdout);
     }
   inferior_ptid = do_attach (ptid_t (pid));
   inf = current_inferior ();

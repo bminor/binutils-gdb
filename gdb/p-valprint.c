@@ -349,7 +349,6 @@ pascal_val_print (struct type *type,
       if (TYPE_STUB (elttype))
 	{
 	  fprintf_filtered (stream, "<incomplete type>");
-	  gdb_flush (stream);
 	  break;
 	}
       else
@@ -418,7 +417,6 @@ pascal_val_print (struct type *type,
       error (_("Invalid pascal type code %d in symbol table."),
 	     TYPE_CODE (type));
     }
-  gdb_flush (stream);
 }
 
 void

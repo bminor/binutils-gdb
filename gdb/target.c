@@ -3168,7 +3168,6 @@ target_announce_detach (int from_tty)
   pid = inferior_ptid.pid ();
   printf_unfiltered (_("Detaching from program: %s, %s\n"), exec_file,
 		     target_pid_to_str (ptid_t (pid)));
-  gdb_flush (gdb_stdout);
 }
 
 /* The inferior process has died.  Long live the inferior!  */

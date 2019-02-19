@@ -406,7 +406,6 @@ adi_print_versions (CORE_ADDR vaddr, size_t cnt, gdb_byte *tags)
           ++v_idx;
         }
       printf_filtered ("\n");
-      gdb_flush (gdb_stdout);
       vaddr += maxelts;
     }
 }

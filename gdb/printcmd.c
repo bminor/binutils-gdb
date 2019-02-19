@@ -1098,7 +1098,6 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
 	    count += branch_delay_insns;
 	}
       printf_filtered ("\n");
-      gdb_flush (gdb_stdout);
     }
 
   if (need_to_update_next_address)
@@ -2068,7 +2067,6 @@ Num Enb Expression\n"));
       if (d->block && !contained_in (get_selected_block (0), d->block))
 	printf_filtered (_(" (cannot be evaluated in the current context)"));
       printf_filtered ("\n");
-      gdb_flush (gdb_stdout);
     }
 }
 

@@ -2056,8 +2056,6 @@ darwin_nat_target::attach (const char *args, int from_tty)
       else
 	printf_unfiltered (_("Attaching to %s\n"),
 			   target_pid_to_str (ptid_t (pid)));
-
-      gdb_flush (gdb_stdout);
     }
 
   if (pid == 0 || ::kill (pid, 0) < 0)

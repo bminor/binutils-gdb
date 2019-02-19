@@ -2015,8 +2015,6 @@ windows_nat_target::attach (const char *args, int from_tty)
       else
 	printf_unfiltered ("Attaching to %s\n",
 			   target_pid_to_str (ptid_t (pid)));
-
-      gdb_flush (gdb_stdout);
     }
 
   do_initial_windows_stuff (this, pid, 1);
@@ -2046,7 +2044,6 @@ windows_nat_target::detach (inferior *inf, int from_tty)
 	exec_file = "";
       printf_unfiltered ("Detaching from program: %s, Pid %u\n", exec_file,
 			 (unsigned) current_event.dwProcessId);
-      gdb_flush (gdb_stdout);
     }
 
   x86_cleanup_dregs ();

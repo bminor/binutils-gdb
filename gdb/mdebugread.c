@@ -377,7 +377,6 @@ mdebug_build_psymtabs (minimal_symbol_reader &reader,
 			   objfile->name);
       printf_unfiltered (_("You should compile with -g2 or "
 			   "-g3 for best debugging support.\n"));
-      gdb_flush (gdb_stdout);
     }
 #endif
 }

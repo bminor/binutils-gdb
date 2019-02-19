@@ -709,16 +709,10 @@ shell_escape (const char *arg, int from_tty)
     arg = "inferior shell";
 
   if (rc == -1)
-    {
-      fprintf_unfiltered (gdb_stderr, "Cannot execute %s: %s\n", arg,
-			  safe_strerror (errno));
-      gdb_flush (gdb_stderr);
-    }
+    fprintf_unfiltered (gdb_stderr, "Cannot execute %s: %s\n", arg,
+			safe_strerror (errno));
   else if (rc)
-    {
-      fprintf_unfiltered (gdb_stderr, "%s exited with status %d\n", arg, rc);
-      gdb_flush (gdb_stderr);
-    }
+    fprintf_unfiltered (gdb_stderr, "%s exited with status %d\n", arg, rc);
 #ifdef GLOBAL_CURDIR
   /* Make sure to return to the directory GDB thinks it is, in case
      the shell command we just ran changed it.  */
@@ -743,7 +737,6 @@ shell_escape (const char *arg, int from_tty)
 
       fprintf_unfiltered (gdb_stderr, "Cannot execute %s: %s\n", user_shell,
 			  safe_strerror (errno));
-      gdb_flush (gdb_stderr);
       _exit (0177);
     }
 
@@ -1130,7 +1123,6 @@ print_disassembly (struct gdbarch *gdbarch, const char *name,
 	    }
 	}
       printf_filtered ("End of assembler dump.\n");
-      gdb_flush (gdb_stdout);
     }
 #if defined(TUI)
   else

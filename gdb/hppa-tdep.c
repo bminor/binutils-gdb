@@ -2580,10 +2580,8 @@ unwind_command (const char *exp, int from_tty)
   printf_unfiltered ("unwind_table_entry (%s):\n", host_address_to_string (u));
 
   printf_unfiltered ("\tregion_start = %s\n", hex_string (u->region_start));
-  gdb_flush (gdb_stdout);
 
   printf_unfiltered ("\tregion_end = %s\n", hex_string (u->region_end));
-  gdb_flush (gdb_stdout);
 
 #define pif(FLD) if (u->FLD) printf_unfiltered (" "#FLD);
 

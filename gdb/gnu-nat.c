@@ -2217,8 +2217,6 @@ gnu_nat_target::attach (const char *args, int from_tty)
 			   exec_file, pid);
       else
 	printf_unfiltered ("Attaching to pid %d\n", pid);
-
-      gdb_flush (gdb_stdout);
     }
 
   inf_debug (inf, "attaching to pid: %d", pid);
@@ -2273,7 +2271,6 @@ gnu_nat_target::detach (inferior *inf, int from_tty)
 			   exec_file, gnu_current_inf->pid);
       else
 	printf_unfiltered ("Detaching from pid %d\n", gnu_current_inf->pid);
-      gdb_flush (gdb_stdout);
     }
 
   pid = gnu_current_inf->pid;

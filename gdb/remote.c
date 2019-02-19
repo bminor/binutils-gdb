@@ -5826,8 +5826,6 @@ extended_remote_target::attach (const char *args, int from_tty)
       else
 	printf_unfiltered (_("Attaching to %s\n"),
 			   target_pid_to_str (ptid_t (pid)));
-
-      gdb_flush (gdb_stdout);
     }
 
   xsnprintf (rs->buf.data (), get_remote_packet_size (), "vAttach;%x", pid);

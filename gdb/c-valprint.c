@@ -564,7 +564,6 @@ c_val_print (struct type *type,
 			 &c_decorations);
       break;
     }
-  gdb_flush (stream);
 }
 
 void

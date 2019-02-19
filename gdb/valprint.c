@@ -986,7 +986,6 @@ generic_val_print (struct type *type,
       error (_("Unhandled type code %d in symbol table."),
 	     TYPE_CODE (type));
     }
-  gdb_flush (stream);
 }
 
 /* Print using the given LANGUAGE the data of type TYPE located at
@@ -1032,7 +1031,6 @@ val_print (struct type *type, LONGEST embedded_offset,
   if (TYPE_STUB (real_type))
     {
       fprintf_filtered (stream, _("<incomplete type>"));
-      gdb_flush (stream);
       return;
     }
 
@@ -2859,8 +2857,6 @@ val_print_string (struct type *elttype, const char *encoding,
       fputs_filtered (str.c_str (), stream);
       fprintf_filtered (stream, ">");
     }
-
-  gdb_flush (stream);
 
   return (bytes_read / width);
 }

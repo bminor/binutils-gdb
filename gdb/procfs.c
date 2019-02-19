@@ -1911,7 +1911,6 @@ procfs_target::detach (inferior *inf, int from_tty)
 
       printf_filtered (_("Detaching from program: %s, %s\n"), exec_file,
 		       target_pid_to_str (ptid_t (pid)));
-      gdb_flush (gdb_stdout);
     }
 
   do_detach ();

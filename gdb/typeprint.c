@@ -691,7 +691,6 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
     default:
       error (_("Invalid type code in symbol table."));
     }
-  gdb_flush (stream);
 }
 
 /* Dump details of a type specified either directly or indirectly.

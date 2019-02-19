@@ -366,7 +366,6 @@ f_val_print (struct type *type, int embedded_offset,
 			 &f_decorations);
       break;
     }
-  gdb_flush (stream);
 }
 
 static void

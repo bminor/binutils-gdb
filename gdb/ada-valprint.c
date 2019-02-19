@@ -465,7 +465,6 @@ ada_print_scalar (struct type *type, LONGEST val, struct ui_file *stream)
     default:
       error (_("Invalid type code in symbol table."));
     }
-  gdb_flush (stream);
 }
 
 /* Print the character string STRING, printing at most LENGTH characters.

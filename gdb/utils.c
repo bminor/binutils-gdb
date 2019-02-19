@@ -890,7 +890,6 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
       printf_filtered (_("(%s or %s) [answered %c; "
 			 "input not from terminal]\n"),
 		       y_string, n_string, def_answer);
-      gdb_flush (gdb_stdout);
 
       return def_value;
     }

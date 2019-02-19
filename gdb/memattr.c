@@ -459,8 +459,6 @@ info_mem_command (const char *args, int from_tty)
 #endif
 
       printf_filtered ("\n");
-
-      gdb_flush (gdb_stdout);
     }
 }
 

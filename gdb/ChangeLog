@@ -1,5 +1,38 @@
 2019-03-05  Tom Tromey  <tromey@adacore.com>
 
+	* windows-nat.c (windows_nat_target::attach)
+	(windows_nat_target::detach): Don't call gdb_flush.
+	* valprint.c (generic_val_print, val_print, val_print_string):
+	Don't call gdb_flush.
+	* utils.c (defaulted_query): Don't call gdb_flush.
+	* typeprint.c (print_type_scalar): Don't call gdb_flush.
+	* target.c (target_announce_detach): Don't call gdb_flush.
+	* sparc64-tdep.c (adi_print_versions): Don't call gdb_flush.
+	* remote.c (extended_remote_target::attach): Don't call
+	gdb_flush.
+	* procfs.c (procfs_target::detach): Don't call gdb_flush.
+	* printcmd.c (do_examine): Don't call gdb_flush.
+	(info_display_command): Don't call gdb_flush.
+	* p-valprint.c (pascal_val_print): Don't call gdb_flush.
+	* nto-procfs.c (nto_procfs_target::attach): Don't call gdb_flush.
+	* memattr.c (info_mem_command): Don't call gdb_flush.
+	* mdebugread.c (mdebug_build_psymtabs): Don't call gdb_flush.
+	* m2-valprint.c (m2_val_print): Don't call gdb_flush.
+	* infrun.c (follow_exec, handle_command): Don't call gdb_flush.
+	* inf-ptrace.c (inf_ptrace_target::attach): Don't call gdb_flush.
+	* hppa-tdep.c (unwind_command): Don't call gdb_flush.
+	* gnu-nat.c (gnu_nat_target::attach): Don't call gdb_flush.
+	(gnu_nat_target::detach): Don't call gdb_flush.
+	* f-valprint.c (f_val_print): Don't call gdb_flush.
+	* darwin-nat.c (darwin_nat_target::attach): Don't call gdb_flush.
+	* cli/cli-script.c (read_command_lines): Don't call gdb_flush.
+	* cli/cli-cmds.c (shell_escape, print_disassembly): Don't call
+	gdb_flush.
+	* c-valprint.c (c_val_print): Don't call gdb_flush.
+	* ada-valprint.c (ada_print_scalar): Don't call gdb_flush.
+
+2019-03-05  Tom Tromey  <tromey@adacore.com>
+
 	* varobj.c (update_dynamic_varobj_children): Update.
 	(install_default_visualizer): Use reset, not release.
 	* value.c (set_internalvar): Update.

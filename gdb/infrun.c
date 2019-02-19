@@ -1159,8 +1159,6 @@ follow_exec (ptid_t ptid, char *exec_file_target)
   /* We've followed the inferior through an exec.  Therefore, the
      inferior has essentially been killed & reborn.  */
 
-  gdb_flush (gdb_stdout);
-
   breakpoint_init_inferior (inf_execd);
 
   gdb::unique_xmalloc_ptr<char> exec_file_host
@@ -8406,10 +8404,7 @@ Are you sure you want to change it? "),
 		      sigs[signum] = 1;
 		    }
 		  else
-		    {
-		      printf_unfiltered (_("Not confirmed, unchanged.\n"));
-		      gdb_flush (gdb_stdout);
-		    }
+		    printf_unfiltered (_("Not confirmed, unchanged.\n"));
 		}
 	      break;
 	    case GDB_SIGNAL_0:
