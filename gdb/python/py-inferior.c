@@ -554,31 +554,23 @@ infpy_write_memory (PyObject *self, PyObject *args, PyObject *kw)
   CORE_ADDR addr, length;
   PyObject *addr_obj, *length_obj = NULL;
   static const char *keywords[] = { "address", "buffer", "length", NULL };
-#ifdef IS_PY3K
   Py_buffer pybuf;
 
   if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "Os*|O", keywords,
 					&addr_obj, &pybuf, &length_obj))
     return NULL;
 
+  Py_buffer_up buffer_up (&pybuf);
   buffer = (const gdb_byte *) pybuf.buf;
   buf_len = pybuf.len;
-#else
-  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "Os#|O", keywords,
-					&addr_obj, &buffer, &buf_len,
-					&length_obj))
-    return NULL;
-
-  buffer = (const gdb_byte *) buffer;
-#endif
 
   if (get_addr_from_python (addr_obj, &addr) < 0)
-    goto fail;
+    return nullptr;
 
   if (!length_obj)
     length = buf_len;
   else if (get_addr_from_python (length_obj, &length) < 0)
-    goto fail;
+    return nullptr;
 
   TRY
     {
@@ -590,18 +582,9 @@ infpy_write_memory (PyObject *self, PyObject *args, PyObject *kw)
     }
   END_CATCH
 
-#ifdef IS_PY3K
-  PyBuffer_Release (&pybuf);
-#endif
   GDB_PY_HANDLE_EXCEPTION (except);
 
   Py_RETURN_NONE;
-
- fail:
-#ifdef IS_PY3K
-  PyBuffer_Release (&pybuf);
-#endif
-  return NULL;
 }
 
 /* Destructor of Membuf objects.  */
@@ -710,7 +693,6 @@ infpy_search_memory (PyObject *self, PyObject *args, PyObject *kw)
   const gdb_byte *buffer;
   CORE_ADDR found_addr;
   int found = 0;
-#ifdef IS_PY3K
   Py_buffer pybuf;
 
   if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "OOs*", keywords,
@@ -718,42 +700,21 @@ infpy_search_memory (PyObject *self, PyObject *args, PyObject *kw)
 					&pybuf))
     return NULL;
 
+  Py_buffer_up buffer_up (&pybuf);
   buffer = (const gdb_byte *) pybuf.buf;
   pattern_size = pybuf.len;
-#else
-  PyObject *pattern;
-  const void *vbuffer;
-
-  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "OOO", keywords,
-					&start_addr_obj, &length_obj,
-					&pattern))
-     return NULL;
-
-  if (!PyObject_CheckReadBuffer (pattern))
-    {
-      PyErr_SetString (PyExc_RuntimeError,
-		       _("The pattern is not a Python buffer."));
-
-      return NULL;
-    }
-
-  if (PyObject_AsReadBuffer (pattern, &vbuffer, &pattern_size) == -1)
-    return NULL;
-
-  buffer = (const gdb_byte *) vbuffer;
-#endif
 
   if (get_addr_from_python (start_addr_obj, &start_addr) < 0)
-    goto fail;
+    return nullptr;
 
   if (get_addr_from_python (length_obj, &length) < 0)
-    goto fail;
+    return nullptr;
 
   if (!length)
     {
       PyErr_SetString (PyExc_ValueError,
 		       _("Search range is empty."));
-      goto fail;
+      return nullptr;
     }
   /* Watch for overflows.  */
   else if (length > CORE_ADDR_MAX
@@ -761,7 +722,7 @@ infpy_search_memory (PyObject *self, PyObject *args, PyObject *kw)
     {
       PyErr_SetString (PyExc_ValueError,
 		       _("The search range is too large."));
-      goto fail;
+      return nullptr;
     }
 
   TRY
@@ -776,21 +737,12 @@ infpy_search_memory (PyObject *self, PyObject *args, PyObject *kw)
     }
   END_CATCH
 
-#ifdef IS_PY3K
-  PyBuffer_Release (&pybuf);
-#endif
   GDB_PY_HANDLE_EXCEPTION (except);
 
   if (found)
     return PyLong_FromLong (found_addr);
   else
     Py_RETURN_NONE;
-
- fail:
-#ifdef IS_PY3K
-  PyBuffer_Release (&pybuf);
-#endif
-  return NULL;
 }
 
 /* Implementation of gdb.Inferior.is_valid (self) -> Boolean.

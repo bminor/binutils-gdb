@@ -1,3 +1,11 @@
+2019-02-27  Kevin Buettner  <kevinb@redhat.com>
+
+	* python/py-inferior.c (infpy_write_memory): Remove non-IS_PY3K
+	code from these functions.  Remove corresponding ifdefs.  Use
+	Py_buffer_up instead of explicit calls to PyBuffer_Release.
+	Remove gotos and target of gotos.
+	(infpy_search_memory): Likewise.
+
 2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb/hppa-tdep.c (hppa_dummy_id): Delete.
