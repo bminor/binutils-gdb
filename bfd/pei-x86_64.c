@@ -541,7 +541,7 @@ pex64_bfd_print_pdata_section (bfd *abfd, void *vfile, asection *pdata_section)
   /* virt_size might be zero for objects.  */
   if (stop == 0 && strcmp (abfd->xvec->name, "pe-x86-64") == 0)
     {
-      stop = (datasize / onaline) * onaline;
+      stop = datasize;
       virt_size_is_zero = TRUE;
     }
   else if (datasize < stop)
@@ -551,8 +551,8 @@ pex64_bfd_print_pdata_section (bfd *abfd, void *vfile, asection *pdata_section)
 		 _("Warning: %s section size (%ld) is smaller than virtual size (%ld)\n"),
 		 pdata_section->name, (unsigned long) datasize,
 		 (unsigned long) stop);
-	/* Be sure not to read passed datasize.  */
-	stop = datasize / onaline;
+	/* Be sure not to read past datasize.  */
+	stop = datasize;
       }
 
   /* Display functions table.  */
@@ -724,8 +724,7 @@ pex64_bfd_print_pdata_section (bfd *abfd, void *vfile, asection *pdata_section)
 	      altent += imagebase;
 
 	      if (altent >= pdata_vma
-		  && (altent + PDATA_ROW_SIZE <= pdata_vma
-		      + pei_section_data (abfd, pdata_section)->virt_size))
+		  && altent - pdata_vma + PDATA_ROW_SIZE <= stop)
 		{
 		  pex64_get_runtime_function
 		    (abfd, &arf, &pdata[altent - pdata_vma]);
