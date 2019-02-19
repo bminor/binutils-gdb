@@ -1,3 +1,13 @@
+2019-02-20  Alan Modra  <amodra@gmail.com>
+
+	PR 24236
+	* archive64.c (_bfd_archive_64_bit_slurp_armap): Move code adding
+	sentinel NUL to string buffer nearer to loop where it is used.
+	Don't go past sentinel when scanning strings, and don't write
+	NUL again.
+	* archive.c (do_slurp_coff_armap): Simplify string handling to
+	archive64.c style.
+
 2019-02-19  Alan Modra  <amodra@gmail.com>
 
 	PR 24235

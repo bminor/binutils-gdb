@@ -100,8 +100,6 @@ _bfd_archive_64_bit_slurp_armap (bfd *abfd)
     return FALSE;
   carsyms = ardata->symdefs;
   stringbase = ((char *) ardata->symdefs) + carsym_size;
-  stringbase[stringsize] = 0;
-  stringend = stringbase + stringsize;
 
   raw_armap = (bfd_byte *) bfd_alloc (abfd, ptrsize);
   if (raw_armap == NULL)
@@ -115,15 +113,17 @@ _bfd_archive_64_bit_slurp_armap (bfd *abfd)
       goto release_raw_armap;
     }
 
+  stringend = stringbase + stringsize;
+  *stringend = 0;
   for (i = 0; i < nsymz; i++)
     {
       carsyms->file_offset = bfd_getb64 (raw_armap + i * 8);
       carsyms->name = stringbase;
-      if (stringbase < stringend)
-	stringbase += strlen (stringbase) + 1;
+      stringbase += strlen (stringbase);
+      if (stringbase != stringend)
+	++stringbase;
       ++carsyms;
     }
-  *stringbase = '\0';
 
   ardata->symdef_count = nsymz;
   ardata->first_file_filepos = bfd_tell (abfd);
