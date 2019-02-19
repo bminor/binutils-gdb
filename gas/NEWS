@@ -1,5 +1,10 @@
 -*- text -*-
 
+* For MIPS, Add -m[no-]fix-loongson3-llsc option to fix (or not) Loongson3 LLSC
+  Errata.  Add a --enable-mips-fix-loongson3-llsc=[yes|no] configure time option
+  to set the default behavior. Set the default if the configure option is not used
+  to "no".
+
 Changes in 2.32:
 
 * Add -mvexwig=[0|1] option to x86 assembler to control encoding of

@@ -808,6 +808,7 @@ enable_compressed_debug_sections
 enable_x86_relax_relocations
 enable_elf_stt_common
 enable_generate_build_notes
+enable_mips_fix_loongson3_llsc
 enable_x86_used_note
 enable_default_riscv_attribute
 enable_werror
@@ -1471,6 +1472,8 @@ Optional Features:
   --enable-generate-build-notes
                           generate GNU Build notes if none are provided by the
                           input
+  --enable-mips-fix-loongson3-llsc
+                          enable MIPS fix Loongson3 LLSC errata
   --enable-x86-used-note  generate GNU x86 used ISA and feature properties
   --enable-default-riscv-attribute
                           generate RISC-V arch attribute by default
@@ -11340,7 +11343,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11343 "configure"
+#line 11346 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11446,7 +11449,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11449 "configure"
+#line 11452 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12114,6 +12117,17 @@ if test "${enable_generate_build_notes+set}" = set; then :
 esac
 fi
 
+# Decide if the MIPS assembler should default to enable MIPS fix Loongson3
+# LLSC errata.
+ac_default_mips_fix_loongson3_llsc=unset
+# Provide a configuration option to override the default.
+# Check whether --enable-mips-fix-loongson3-llsc was given.
+if test "${enable_mips_fix_loongson3_llsc+set}" = set; then :
+  enableval=$enable_mips_fix_loongson3_llsc; case "${enableval}" in
+  yes)  ac_default_mips_fix_loongson3_llsc=1 ;;
+  no)   ac_default_mips_fix_loongson3_llsc=0 ;;
+esac
+fi
 
 # Decide if the x86 ELF assembler should default to generating GNU x86
 # used ISA and feature properties.
@@ -13128,6 +13142,15 @@ fi
 
 cat >>confdefs.h <<_ACEOF
 #define DEFAULT_RISCV_ATTR $ac_default_generate_riscv_attr
+_ACEOF
+
+
+if test ${ac_default_mips_fix_loongson3_llsc} = unset; then
+  ac_default_mips_fix_loongson3_llsc=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_MIPS_FIX_LOONGSON3_LLSC $ac_default_mips_fix_loongson3_llsc
 _ACEOF
 
 

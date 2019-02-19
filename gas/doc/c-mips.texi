@@ -308,6 +308,13 @@ Replace nops by @code{or at,at,zero} to work around the Loongson2F
 deadlock.  The issue has been solved in later Loongson2F batches, but
 this fix has no side effect to them.
 
+@item -mfix-loongson3-llsc
+@itemx -mno-fix-loongson3-llsc
+Insert @samp{sync} before @samp{ll} and @samp{lld} to work around
+Loongson3 LLSC errata.  Without it, under extrame cases, the CPU might
+deadlock. The default can be controlled by the
+@option{--enable-mips-fix-loongson3-llsc=[yes|no]} configure option.
+
 @item -mfix-vr4120
 @itemx -mno-fix-vr4120
 Insert nops to work around certain VR4120 errata.  This option is

@@ -1,3 +1,24 @@
+2019-02-19  Paul Hua  <paul.hua.gm@gmail.com>
+
+	* NEWS: Mention -m[no-]fix-loongson3-llsc.
+	* configure.ac: Add --enable-mips-fix-loongson3-llsc.
+	Define DEFAULT_MIPS_FIX_LOONGSON3_LLSC.
+	* config.in: Regenerated.
+	* configure: Likewise.
+	* config/tc-mips.c (sync_insn, mips_fix_loongson3_llsc):
+	New variables.
+	(options): New OPTION_FIX_LOONGSON3_LLSC,
+	OPTION_NO_FIX_LOONGSON3_LLSC.
+	(md_longopts): Add -m[no-]fix-loongson3-llsc.
+	(md_begin): Initialize sync insn.
+	(fix_loongson3_llsc): New.
+	(append_insn): Call fix_loongson3_llsc.
+	(md_parse_option): Handle OPTION_FIX_LOONGSON3_LLSC,
+	OPTION_NO_FIX_LOONGSON3_LLSC.
+	(md_show_usage): Display -m[no-]fix-loongson3-llsc.
+	* doc/c-mips.texi: Document -m[no-]fix-loongson3-llsc,
+	--enable-mips-fix-loongson3-llsc=[yes|no].
+
 2019-02-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/24165
