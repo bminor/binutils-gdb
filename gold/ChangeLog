@@ -1,3 +1,14 @@
+2019-02-19  Egeyar Bagcioglu  <egeyar.bagcioglu@oracle.com>
+
+     PR gold/23870
+     * aarch64.cc (Target_aarch64::Scan::global): Check if a symbol with
+     R_AARCH64_MOVW_.ABS_* relocations requires a PLT entry.
+     * testsuite/Makefile.am: Add aarch64_pr23870 test case.
+     * testsuite/Makefile.in: Regenerate.
+     * testsuite/aarch64_pr23870_bar.c: New file.
+     * testsuite/aarch64_pr23870_foo.c: New file.
+     * testsuite/aarch64_pr23870_main.S: New file.
+
 2019-02-12  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.

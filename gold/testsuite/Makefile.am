@@ -3285,6 +3285,26 @@ pr22266: pr22266_main.o pr22266_ar.o gcctestdir/ld
 pr22266_ar.o: pr22266_a.o gcctestdir/ld
 	gcctestdir/ld -r -T $(srcdir)/pr22266_script.t -o $@ pr22266_a.o
 
+if DEFAULT_TARGET_AARCH64
+
+check_PROGRAMS += aarch64_pr23870
+aarch64_pr23870_SOURCES = aarch64_pr23870_foo.c
+aarch64_pr23870_DEPENDENCIES = \
+	gcctestdir/ld gcctestdir/as aarch64_pr23870_main.o \
+	aarch64_pr23870_foo.o aarch64_pr23870_bar.so
+aarch64_pr23870_LDFLAGS = -Wl,-R,. -L. -Wl,-l:aarch64_pr23870_bar.so
+aarch64_pr23870_LDADD = aarch64_pr23870_main.o
+aarch64_pr23870_main.o: aarch64_pr23870_main.S
+	$(COMPILE) -c -o $@ $<
+aarch64_pr23870_foo.o: aarch64_pr23870_foo.c
+	$(COMPILE) -c -o $@ $<
+aarch64_pr23870_bar.o: aarch64_pr23870_bar.c
+	$(COMPILE) -c -fPIC -o $@ $<
+aarch64_pr23870_bar.so: aarch64_pr23870_bar.o
+	$(COMPILE) -shared -o $@ $<
+
+endif DEFAULT_TARGET_AARCH64
+
 endif GCC
 endif NATIVE_LINKER
 
