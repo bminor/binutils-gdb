@@ -14528,15 +14528,15 @@ if test "$enable_shared" = "yes"; then
     SHARED_LIBADD="-L`pwd`/../libiberty/pic -liberty"
   fi
 
-# More hacks to build DLLs on Windows.
   case "${host}" in
+  # More hacks to build DLLs on Windows.
   *-*-cygwin*)
     SHARED_LDFLAGS="-no-undefined"
     SHARED_LIBADD="-L`pwd`/../libiberty -liberty -L`pwd`/../intl -lintl -lcygwin -lkernel32"
   ;;
 
-  # Hack to build or1k-src on OSX
-  or1k*-*-darwin*)
+  # Use built-in libintl on macOS, since it is not provided by libc.
+  *-*-darwin*)
     SHARED_LIBADD="-L`pwd`/../libiberty/pic -L`pwd`/../intl -liberty -lintl"
   ;;
   esac
