@@ -17940,42 +17940,77 @@ get_ia64_vms_note_type (unsigned e_type)
 static bfd_boolean
 print_ia64_vms_note (Elf_Internal_Note * pnote)
 {
+  int maxlen = pnote->descsz;
+
+  if (maxlen < 2 || (unsigned long) maxlen != pnote->descsz)
+    goto desc_size_fail;
+
   switch (pnote->type)
     {
     case NT_VMS_MHD:
-      if (pnote->descsz > 36)
-        {
-          size_t l = strlen (pnote->descdata + 34);
-          printf (_("    Creation date  : %.17s\n"), pnote->descdata);
-          printf (_("    Last patch date: %.17s\n"), pnote->descdata + 17);
-          printf (_("    Module name    : %s\n"), pnote->descdata + 34);
-          printf (_("    Module version : %s\n"), pnote->descdata + 34 + l + 1);
-        }
+      if (maxlen <= 36)
+	goto desc_size_fail;
+
+      int l = (int) strnlen (pnote->descdata + 34, maxlen - 34);
+
+      printf (_("    Creation date  : %.17s\n"), pnote->descdata);
+      printf (_("    Last patch date: %.17s\n"), pnote->descdata + 17);
+      if (l + 34 < maxlen)
+	{
+	  printf (_("    Module name    : %s\n"), pnote->descdata + 34);
+	  if (l + 35 < maxlen)
+	    printf (_("    Module version : %s\n"), pnote->descdata + 34 + l + 1);
+	  else
+	    printf (_("    Module version : <missing>\n"));
+	}
       else
-        printf (_("    Invalid size\n"));
+	{
+	  printf (_("    Module name    : <missing>\n"));
+	  printf (_("    Module version : <missing>\n"));
+	}
       break;
+
     case NT_VMS_LNM:
-      printf (_("   Language: %s\n"), pnote->descdata);
+      printf (_("   Language: %.*s\n"), maxlen, pnote->descdata);
       break;
+
 #ifdef BFD64
     case NT_VMS_FPMODE:
       printf (_("   Floating Point mode: "));
+      if (maxlen < 8)
+	goto desc_size_fail;
+      /* FIXME: Generate an error if descsz > 8 ?  */
+
       printf ("0x%016" BFD_VMA_FMT "x\n",
-              (bfd_vma) byte_get ((unsigned char *)pnote->descdata, 8));
+	      (bfd_vma) byte_get ((unsigned char *)pnote->descdata, 8));
       break;
+
     case NT_VMS_LINKTIME:
       printf (_("   Link time: "));
+      if (maxlen < 8)
+	goto desc_size_fail;
+      /* FIXME: Generate an error if descsz > 8 ?  */
+
       print_vms_time
-        ((bfd_int64_t) byte_get ((unsigned char *)pnote->descdata, 8));
+	((bfd_int64_t) byte_get ((unsigned char *)pnote->descdata, 8));
       printf ("\n");
       break;
+
     case NT_VMS_PATCHTIME:
       printf (_("   Patch time: "));
+      if (maxlen < 8)
+	goto desc_size_fail;
+      /* FIXME: Generate an error if descsz > 8 ?  */
+
       print_vms_time
-        ((bfd_int64_t) byte_get ((unsigned char *)pnote->descdata, 8));
+	((bfd_int64_t) byte_get ((unsigned char *)pnote->descdata, 8));
       printf ("\n");
       break;
+
     case NT_VMS_ORIG_DYN:
+      if (maxlen < 34)
+	goto desc_size_fail;
+
       printf (_("   Major id: %u,  minor id: %u\n"),
               (unsigned) byte_get ((unsigned char *)pnote->descdata, 4),
               (unsigned) byte_get ((unsigned char *)pnote->descdata + 4, 4));
@@ -17987,25 +18022,36 @@ print_ia64_vms_note (Elf_Internal_Note * pnote)
               (bfd_vma) byte_get ((unsigned char *)pnote->descdata + 16, 8));
       printf (_("   Header flags: 0x%08x\n"),
               (unsigned) byte_get ((unsigned char *)pnote->descdata + 24, 4));
-      printf (_("   Image id    : %s\n"), pnote->descdata + 32);
+      printf (_("   Image id    : %.*s\n"), maxlen - 32, pnote->descdata + 32);
       break;
 #endif
+
     case NT_VMS_IMGNAM:
-      printf (_("    Image name: %s\n"), pnote->descdata);
+      printf (_("    Image name: %.*s\n"), maxlen, pnote->descdata);
       break;
+
     case NT_VMS_GSTNAM:
-      printf (_("    Global symbol table name: %s\n"), pnote->descdata);
+      printf (_("    Global symbol table name: %.*s\n"), maxlen, pnote->descdata);
       break;
+
     case NT_VMS_IMGID:
-      printf (_("    Image id: %s\n"), pnote->descdata);
+      printf (_("    Image id: %.*s\n"), maxlen, pnote->descdata);
       break;
+
     case NT_VMS_LINKID:
-      printf (_("    Linker id: %s\n"), pnote->descdata);
+      printf (_("    Linker id: %.*s\n"), maxlen, pnote->descdata);
       break;
+
     default:
       return FALSE;
     }
+
   return TRUE;
+
+ desc_size_fail:
+  printf (_("  <corrupt - data size is too small>\n"));
+  error (_("corrupt IA64 note: data size is too small\n"));
+  return FALSE;
 }
 
 /* Find the symbol associated with a build attribute that is attached

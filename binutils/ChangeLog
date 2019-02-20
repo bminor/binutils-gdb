@@ -1,3 +1,8 @@
+2019-02-20  Nick Clifton  <nickc@redhat.com>
+
+	PR 24242
+	* readelf.c (print_ia64_vms_note): Harden against corrupt notes.
+
 2019-02-20  Alan Modra  <amodra@gmail.com>
 
 	PR 24132
