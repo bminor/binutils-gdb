@@ -400,7 +400,7 @@ quit_cover (void)
 /* NOTE 1999-04-29: This variable will be static again, once we modify
    gdb to use the event loop as the default command loop and we merge
    event-top.c into this file, top.c.  */
-/* static */ const char *source_file_name;
+/* static */ std::string source_file_name;
 
 /* Read commands from STREAM.  */
 void
@@ -1221,7 +1221,7 @@ command_line_input (const char *prompt_arg, const char *annotation_suffix)
       gdb_flush (gdb_stdout);
       gdb_flush (gdb_stderr);
 
-      if (source_file_name != NULL)
+      if (!source_file_name.empty ())
 	++source_line_number;
 
       if (from_tty && annotation_level > 1)

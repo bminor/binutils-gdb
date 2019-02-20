@@ -281,7 +281,7 @@ extern void gdb_init (char *);
 /* For use by event-top.c.  */
 /* Variables from top.c.  */
 extern int source_line_number;
-extern const char *source_file_name;
+extern std::string source_file_name;
 extern int history_expansion_p;
 extern int server_command;
 extern char *lim_at_start;

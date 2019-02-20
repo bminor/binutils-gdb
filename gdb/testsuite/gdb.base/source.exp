@@ -23,10 +23,6 @@ standard_testfile structs.c
 
 gdb_start
 
-gdb_test "source ${srcdir}/${subdir}/source-error.gdb" \
-    "source-error.gdb:21: Error in sourced command file:\[\r\n\]*Cannot access memory at address 0x0.*" \
-    "script contains error"
-
 gdb_test "source -v ${srcdir}/${subdir}/source-test.gdb" \
     "echo test source options.*" \
     "source -v"
@@ -66,4 +62,14 @@ gdb_test "source for-sure-nonexistant-file" \
 gdb_test "source source-nofile.gdb" \
          "warning: for-sure-nonexistant-file: No such file or directory\.\[\r\n\]*source error not fatal"
 
-gdb_exit
+
+# Test commands that error out in sourced files, including in nested sourced
+# files.
+#
+# This needs to come after the "dir" command tested above for source-error.gdb
+# to find source-error-1.gdb.
+gdb_test "source ${srcdir}/${subdir}/source-error.gdb" \
+    [multi_line ".*source-error.gdb:20: Error in sourced command file:" \
+		"source-error-1.gdb:21: Error in sourced command file:" \
+		"Cannot access memory at address 0x0" ] \
+    "script contains error"

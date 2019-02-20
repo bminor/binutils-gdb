@@ -1,3 +1,10 @@
+2019-02-19  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* top.h (source_file_name): Change to std::string.
+	* top.c (source_file_name): Likewise.
+	(command_line_input): Adjust.
+	* cli/cli-script.c (script_from_file): Adjust.
+
 2019-02-19  Tom Tromey  <tromey@adacore.com>
 
 	* ravenscar-thread.c

@@ -1537,8 +1537,9 @@ script_from_file (FILE *stream, const char *file)
 
   scoped_restore restore_line_number
     = make_scoped_restore (&source_line_number, 0);
-  scoped_restore resotre_file
-    = make_scoped_restore (&source_file_name, file);
+  scoped_restore restore_file
+    = make_scoped_restore<std::string, const std::string &> (&source_file_name,
+							     file);
 
   scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
@@ -1552,7 +1553,7 @@ script_from_file (FILE *stream, const char *file)
 	 prepended.  */
       throw_error (e.error,
 		   _("%s:%d: Error in sourced command file:\n%s"),
-		   source_file_name, source_line_number, e.message);
+		   source_file_name.c_str (), source_line_number, e.message);
     }
   END_CATCH
 }

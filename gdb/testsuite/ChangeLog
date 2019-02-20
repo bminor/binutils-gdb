@@ -1,3 +1,12 @@
+2019-02-19  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.base/source.exp: Move "error in sourced script" code to
+	the end.
+	* gdb.base/source-error.gdb: Move contents to
+	source-error-1.gdb.  Add new code to source source-error-1.gdb.
+	* gdb.base/source-error-1.gdb: New file, from previous
+	source-error.gdb.
+
 2019-02-17  Tom Tromey  <tom@tromey.com>
 
 	* gdb.base/style.exp: Use -g3 to compile when possible.  Add test
