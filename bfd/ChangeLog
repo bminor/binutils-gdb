@@ -1,3 +1,11 @@
+2019-02-20  Alan Hayward  <alan.hayward@arm.com>
+
+	* elf-bfd.h (elfcore_write_aarch_pauth): Add declaration.
+	* elf.c (elfcore_grok_aarch_pauth): New function.
+	(elfcore_grok_note): Check for NT_ARM_PAC_MASK.
+	(elfcore_write_aarch_pauth): New function.
+	(elfcore_write_register_note): Check for AArch64 pauth section.
+
 2019-02-20  Alan Modra  <amodra@gmail.com>
 
 	PR 24225

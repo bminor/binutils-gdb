@@ -1,3 +1,7 @@
+2019-02-20  Alan Hayward  <alan.hayward@arm.com>
+
+	* elf/common.h (NT_ARM_PAC_MASK): Add define.
+
 2019-02-15  Saagar Jha  <saagar@saagarjha.com>
 
 	* mach-o/loader.h: Use new OS names in comments.
