@@ -1,3 +1,9 @@
+2019-02-20  Alan Modra  <amodra@gmail.com>
+
+	PR 24233
+	* objdump.c (dump_bfd_private_header): Print warning if
+	bfd_print_private_bfd_data returns false.
+
 2019-02-12  Nick Clifton  <nickc@redhat.com>
 
 	PR 23440
