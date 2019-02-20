@@ -3821,7 +3821,9 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 
 		  format = _("global pointer relative relocation at address "
 			     "%#" PRIx64 " when _gp not defined\n");
-		  asprintf (&msgbuf, format, (uint64_t) reloc_address);
+		  if (asprintf (&msgbuf, format,
+				(uint64_t) reloc_address) == -1)
+		    msgbuf = NULL;
 		  msg = msgbuf;
 		  r = bfd_reloc_dangerous;
 		}
@@ -3851,9 +3853,10 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 				 "the global pointer (at %#" PRIx64 ") "
 				 "because the offset (%" PRId64 ") is out of "
 				 "the allowed range, -32678 to 32767\n" );
-		      asprintf (&msgbuf, format, name,
-				(uint64_t) symbol_address, (uint64_t) gp,
-				(int64_t) relocation);
+		      if (asprintf (&msgbuf, format, name,
+				    (uint64_t) symbol_address, (uint64_t) gp,
+				    (int64_t) relocation) == -1)
+			msgbuf = NULL;
 		      msg = msgbuf;
 		      r = bfd_reloc_outofrange;
 		    }
