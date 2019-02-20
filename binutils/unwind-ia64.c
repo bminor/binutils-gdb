@@ -542,13 +542,13 @@ typedef bfd_vma unw_word;
  */
 
 static unw_word
-unw_decode_uleb128 (const unsigned char **dpp)
+unw_decode_uleb128 (const unsigned char **dpp, const unsigned char * end)
 {
   unsigned shift = 0;
   unw_word byte, result = 0;
   const unsigned char *bp = *dpp;
 
-  while (1)
+  while (bp < end)
     {
       byte = *bp++;
       result |= (byte & 0x7f) << shift;
@@ -566,14 +566,14 @@ unw_decode_uleb128 (const unsigned char **dpp)
 
 static const unsigned char *
 unw_decode_x1 (const unsigned char *dp, unsigned int code ATTRIBUTE_UNUSED,
-	       void *arg ATTRIBUTE_UNUSED)
+	       void *arg ATTRIBUTE_UNUSED, const unsigned char * end)
 {
   unsigned char byte1, abreg;
   unw_word t, off;
 
   byte1 = *dp++;
-  t = unw_decode_uleb128 (&dp);
-  off = unw_decode_uleb128 (&dp);
+  t = unw_decode_uleb128 (&dp, end);
+  off = unw_decode_uleb128 (&dp, end);
   abreg = (byte1 & 0x7f);
   if (byte1 & 0x80)
     UNW_DEC_SPILL_SPREL ("X1", t, abreg, off, arg);
@@ -584,14 +584,14 @@ unw_decode_x1 (const unsigned char *dp, unsigned int code ATTRIBUTE_UNUSED,
 
 static const unsigned char *
 unw_decode_x2 (const unsigned char *dp, unsigned int code ATTRIBUTE_UNUSED,
-	       void *arg ATTRIBUTE_UNUSED)
+	       void *arg ATTRIBUTE_UNUSED, const unsigned char * end)
 {
   unsigned char byte1, byte2, abreg, x, ytreg;
   unw_word t;
 
   byte1 = *dp++;
   byte2 = *dp++;
-  t = unw_decode_uleb128 (&dp);
+  t = unw_decode_uleb128 (&dp, end);
   abreg = (byte1 & 0x7f);
   ytreg = byte2;
   x = (byte1 >> 7) & 1;
@@ -604,15 +604,15 @@ unw_decode_x2 (const unsigned char *dp, unsigned int code ATTRIBUTE_UNUSED,
 
 static const unsigned char *
 unw_decode_x3 (const unsigned char *dp, unsigned int code ATTRIBUTE_UNUSED,
-	       void *arg ATTRIBUTE_UNUSED)
+	       void *arg ATTRIBUTE_UNUSED, const unsigned char * end)
 {
   unsigned char byte1, byte2, abreg, qp;
   unw_word t, off;
 
   byte1 = *dp++;
   byte2 = *dp++;
-  t = unw_decode_uleb128 (&dp);
-  off = unw_decode_uleb128 (&dp);
+  t = unw_decode_uleb128 (&dp, end);
+  off = unw_decode_uleb128 (&dp, end);
 
   qp = (byte1 & 0x3f);
   abreg = (byte2 & 0x7f);
@@ -626,7 +626,7 @@ unw_decode_x3 (const unsigned char *dp, unsigned int code ATTRIBUTE_UNUSED,
 
 static const unsigned char *
 unw_decode_x4 (const unsigned char *dp, unsigned int code ATTRIBUTE_UNUSED,
-	       void *arg ATTRIBUTE_UNUSED)
+	       void *arg ATTRIBUTE_UNUSED, const unsigned char * end)
 {
   unsigned char byte1, byte2, byte3, qp, abreg, x, ytreg;
   unw_word t;
@@ -634,7 +634,7 @@ unw_decode_x4 (const unsigned char *dp, unsigned int code ATTRIBUTE_UNUSED,
   byte1 = *dp++;
   byte2 = *dp++;
   byte3 = *dp++;
-  t = unw_decode_uleb128 (&dp);
+  t = unw_decode_uleb128 (&dp, end);
 
   qp = (byte1 & 0x3f);
   abreg = (byte2 & 0x7f);
@@ -662,7 +662,7 @@ unw_decode_r1 (const unsigned char *dp, unsigned int code, void *arg,
 
 static const unsigned char *
 unw_decode_r2 (const unsigned char *dp, unsigned int code, void *arg,
-	       const unsigned char * end ATTRIBUTE_UNUSED)
+	       const unsigned char * end)
 {
   unsigned char byte1, mask, grsave;
   unw_word rlen;
@@ -671,18 +671,18 @@ unw_decode_r2 (const unsigned char *dp, unsigned int code, void *arg,
 
   mask = ((code & 0x7) << 1) | ((byte1 >> 7) & 1);
   grsave = (byte1 & 0x7f);
-  rlen = unw_decode_uleb128 (& dp);
+  rlen = unw_decode_uleb128 (& dp, end);
   UNW_DEC_PROLOGUE_GR ("R2", rlen, mask, grsave, arg);
   return dp;
 }
 
 static const unsigned char *
 unw_decode_r3 (const unsigned char *dp, unsigned int code, void *arg,
-	       const unsigned char * end ATTRIBUTE_UNUSED)
+	       const unsigned char * end)
 {
   unw_word rlen;
 
-  rlen = unw_decode_uleb128 (& dp);
+  rlen = unw_decode_uleb128 (& dp, end);
   UNW_DEC_PROLOGUE ("R3", ((code & 0x3) == 1), rlen, arg);
   return dp;
 }
@@ -795,7 +795,7 @@ unw_decode_p6 (const unsigned char *dp, unsigned int code,
 
 static const unsigned char *
 unw_decode_p7_p10 (const unsigned char *dp, unsigned int code, void *arg,
-		   const unsigned char * end ATTRIBUTE_UNUSED)
+		   const unsigned char * end)
 {
   unsigned char r, byte1, byte2;
   unw_word t, size;
@@ -803,11 +803,11 @@ unw_decode_p7_p10 (const unsigned char *dp, unsigned int code, void *arg,
   if ((code & 0x10) == 0)
     {
       r = (code & 0xf);
-      t = unw_decode_uleb128 (&dp);
+      t = unw_decode_uleb128 (&dp, end);
       switch (r)
 	{
 	case 0:
-	  size = unw_decode_uleb128 (&dp);
+	  size = unw_decode_uleb128 (&dp, end);
 	  UNW_DEC_MEM_STACK_F ("P7", t, size, arg);
 	  break;
 
@@ -868,7 +868,7 @@ unw_decode_p7_p10 (const unsigned char *dp, unsigned int code, void *arg,
 	case 0x0:		/* p8 */
 	  {
 	    r = *dp++;
-	    t = unw_decode_uleb128 (&dp);
+	    t = unw_decode_uleb128 (&dp, end);
 	    switch (r)
 	      {
 	      case 1:
@@ -948,16 +948,16 @@ unw_decode_p7_p10 (const unsigned char *dp, unsigned int code, void *arg,
 	  break;
 
 	case 0x9:
-	  return unw_decode_x1 (dp, code, arg);
+	  return unw_decode_x1 (dp, code, arg, end);
 
 	case 0xa:
-	  return unw_decode_x2 (dp, code, arg);
+	  return unw_decode_x2 (dp, code, arg, end);
 
 	case 0xb:
-	  return unw_decode_x3 (dp, code, arg);
+	  return unw_decode_x3 (dp, code, arg, end);
 
 	case 0xc:
-	  return unw_decode_x4 (dp, code, arg);
+	  return unw_decode_x4 (dp, code, arg, end);
 
 	default:
 	  UNW_DEC_BAD_CODE (code);
@@ -984,30 +984,30 @@ unw_decode_b1 (const unsigned char *dp, unsigned int code,
 static const unsigned char *
 unw_decode_b2 (const unsigned char *dp, unsigned int code,
 	       void *arg ATTRIBUTE_UNUSED,
-	       const unsigned char * end ATTRIBUTE_UNUSED)
+	       const unsigned char * end)
 {
   unw_word t;
 
-  t = unw_decode_uleb128 (& dp);
+  t = unw_decode_uleb128 (& dp, end);
   UNW_DEC_EPILOGUE ("B2", t, (code & 0x1f), arg);
   return dp;
 }
 
 static const unsigned char *
 unw_decode_b3_x4 (const unsigned char *dp, unsigned int code, void *arg,
-		  const unsigned char * end ATTRIBUTE_UNUSED)
+		  const unsigned char * end)
 {
   unw_word t, ecount, label;
 
   if ((code & 0x10) == 0)
     {
-      t = unw_decode_uleb128 (&dp);
-      ecount = unw_decode_uleb128 (&dp);
+      t = unw_decode_uleb128 (&dp, end);
+      ecount = unw_decode_uleb128 (&dp, end);
       UNW_DEC_EPILOGUE ("B3", t, ecount, arg);
     }
   else if ((code & 0x07) == 0)
     {
-      label = unw_decode_uleb128 (&dp);
+      label = unw_decode_uleb128 (&dp, end);
       if ((code & 0x08) != 0)
 	UNW_DEC_COPY_STATE ("B4", label, arg);
       else
@@ -1017,13 +1017,13 @@ unw_decode_b3_x4 (const unsigned char *dp, unsigned int code, void *arg,
     switch (code & 0x7)
       {
       case 1:
-	return unw_decode_x1 (dp, code, arg);
+	return unw_decode_x1 (dp, code, arg, end);
       case 2:
-	return unw_decode_x2 (dp, code, arg);
+	return unw_decode_x2 (dp, code, arg, end);
       case 3:
-	return unw_decode_x3 (dp, code, arg);
+	return unw_decode_x3 (dp, code, arg, end);
       case 4:
-	return unw_decode_x4 (dp, code, arg);
+	return unw_decode_x4 (dp, code, arg, end);
       default:
 	UNW_DEC_BAD_CODE (code);
 	break;
