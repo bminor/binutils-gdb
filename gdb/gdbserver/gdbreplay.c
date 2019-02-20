@@ -316,10 +316,26 @@ logchar (FILE *fp)
   int ch2;
 
   ch = fgetc (fp);
-  fputc (ch, stdout);
-  fflush (stdout);
+  if (ch != '\r')
+    {
+      fputc (ch, stdout);
+      fflush (stdout);
+    }
   switch (ch)
     {
+      /* Treat \r\n as a newline.  */
+    case '\r':
+      ch = fgetc (fp);
+      if (ch == '\n')
+	ch = EOL;
+      else
+	{
+	  ungetc (ch, fp);
+	  ch = '\r';
+	}
+      fputc (ch == EOL ? '\n' : '\r', stdout);
+      fflush (stdout);
+      break;
     case '\n':
       ch = EOL;
       break;

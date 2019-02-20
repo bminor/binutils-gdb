@@ -1,3 +1,7 @@
+2019-02-27  Tom Tromey  <tromey@adacore.com>
+
+	* gdbreplay.c (logchar): Handle \r\n.
+
 2019-02-07  Alan Hayward  <alan.hayward@arm.com>
 
 	* linux-low.c (linux_attach): Add process before lwp.
