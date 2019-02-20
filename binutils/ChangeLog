@@ -1,5 +1,13 @@
 2019-02-20  Alan Modra  <amodra@gmail.com>
 
+	PR 24132
+	PR 24138
+	* readelf.c (get_data): Avoid possibility of overflow when
+	checking for a read that may extend past end of file.
+	(process_program_headers): Likewise.
+
+2019-02-20  Alan Modra  <amodra@gmail.com>
+
 	PR 24233
 	* objdump.c (dump_bfd_private_header): Print warning if
 	bfd_print_private_bfd_data returns false.

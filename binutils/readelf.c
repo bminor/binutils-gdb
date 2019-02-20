@@ -398,10 +398,11 @@ get_data (void *         var,
       return NULL;
     }
 
-  /* Be kind to memory chekers (eg valgrind, address sanitizer) by not
+  /* Be kind to memory checkers (eg valgrind, address sanitizer) by not
      attempting to allocate memory when the read is bound to fail.  */
-  if (amt > filedata->file_size
-      || offset + archive_file_offset + amt > filedata->file_size)
+  if (archive_file_offset > filedata->file_size
+      || offset > filedata->file_size - archive_file_offset
+      || amt > filedata->file_size - archive_file_offset - offset)
     {
       if (reason)
 	error (_("Reading %s bytes extends past end of file for %s\n"),
@@ -5235,7 +5236,8 @@ process_program_headers (Filedata * filedata)
 	     segment.  Check this after matching against the section headers
 	     so we don't warn on debuginfo file (which have NOBITS .dynamic
 	     sections).  */
-	  if (dynamic_addr + dynamic_size >= filedata->file_size)
+	  if (dynamic_addr > filedata->file_size
+	      || dynamic_size > filedata->file_size - dynamic_addr)
 	    {
 	      error (_("the dynamic segment offset + size exceeds the size of the file\n"));
 	      dynamic_addr = dynamic_size = 0;
