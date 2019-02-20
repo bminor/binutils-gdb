@@ -16187,6 +16187,12 @@ process_mips_specific (Filedata * filedata)
 	  error (_("No MIPS_OPTIONS header found\n"));
 	  return FALSE;
 	}
+      /* PR 24243  */
+      if (sect->sh_size < sizeof (* eopt))
+	{
+	  error (_("The MIPS options section is too small.\n"));
+	  return FALSE;
+	}
 
       eopt = (Elf_External_Options *) get_data (NULL, filedata, options_offset, 1,
                                                 sect->sh_size, _("options"));

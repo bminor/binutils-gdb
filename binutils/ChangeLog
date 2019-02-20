@@ -2,6 +2,9 @@
 
 	PR 24242
 	* readelf.c (print_ia64_vms_note): Harden against corrupt notes.
+	PR 24243
+	* readelf.c (process_mips_specific): Check for an options section
+	that is too small to even contain a single option.
 
 2019-02-20  Alan Modra  <amodra@gmail.com>
 
