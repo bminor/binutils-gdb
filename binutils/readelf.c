@@ -17868,25 +17868,60 @@ get_stapsdt_note_type (unsigned e_type)
 static bfd_boolean
 print_stapsdt_note (Elf_Internal_Note *pnote)
 {
-  int addr_size = is_32bit_elf ? 4 : 8;
+  size_t len, maxlen;
+  unsigned long addr_size = is_32bit_elf ? 4 : 8;
   char *data = pnote->descdata;
   char *data_end = pnote->descdata + pnote->descsz;
   bfd_vma pc, base_addr, semaphore;
   char *provider, *probe, *arg_fmt;
 
+  if (pnote->descsz < (addr_size * 3))
+    goto stapdt_note_too_small;
+
   pc = byte_get ((unsigned char *) data, addr_size);
   data += addr_size;
+
   base_addr = byte_get ((unsigned char *) data, addr_size);
   data += addr_size;
+
   semaphore = byte_get ((unsigned char *) data, addr_size);
   data += addr_size;
 
-  provider = data;
-  data += strlen (data) + 1;
-  probe = data;
-  data += strlen (data) + 1;
-  arg_fmt = data;
-  data += strlen (data) + 1;
+  if (data >= data_end)
+    goto stapdt_note_too_small;
+  maxlen = data_end - data;
+  len = strnlen (data, maxlen);
+  if (len < maxlen)
+    {
+      provider = data;
+      data += len + 1;
+    }
+  else
+    goto stapdt_note_too_small;
+
+  if (data >= data_end)
+    goto stapdt_note_too_small;
+  maxlen = data_end - data;
+  len = strnlen (data, maxlen);
+  if (len < maxlen)
+    {
+      probe = data;
+      data += len + 1;
+    }
+  else
+    goto stapdt_note_too_small;
+  
+  if (data >= data_end)
+    goto stapdt_note_too_small;
+  maxlen = data_end - data;
+  len = strnlen (data, maxlen);
+  if (len < maxlen)
+    {
+      arg_fmt = data;
+      data += len + 1;
+    }
+  else
+    goto stapdt_note_too_small;
 
   printf (_("    Provider: %s\n"), provider);
   printf (_("    Name: %s\n"), probe);
@@ -17900,6 +17935,11 @@ print_stapsdt_note (Elf_Internal_Note *pnote)
   printf (_("    Arguments: %s\n"), arg_fmt);
 
   return data == data_end;
+
+ stapdt_note_too_small:
+  printf (_("  <corrupt - note is too small>\n"));
+  error (_("corrupt stapdt note - the data size is too small\n"));
+  return FALSE;
 }
 
 static const char *
