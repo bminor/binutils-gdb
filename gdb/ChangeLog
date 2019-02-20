@@ -1,3 +1,8 @@
+2019-02-20  Alan Hayward  <alan.hayward@arm.com>
+
+	* aarch64-tdep.c (aarch64_add_reggroups): New function.
+	(aarch64_gdbarch_init): Call aarch64_add_reggroups.
+
 2019-02-19  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* top.h (source_file_name): Change to std::string.
