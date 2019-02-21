@@ -2999,6 +2999,43 @@ fixup_size (bfd_reloc_code_real_type reloc, bfd_boolean *pc_relative)
   return size;
 }
 
+/* If we have parsed a call to __tls_get_addr, parse an argument like
+   (gd0@tlsgd).  *STR is the leading parenthesis on entry.  If an arg
+   is successfully parsed, *STR is updated past the trailing
+   parenthesis and trailing white space, and *TLS_FIX contains the
+   reloc and arg expression.  */
+
+static int
+parse_tls_arg (char **str, const expressionS *exp, struct ppc_fixup *tls_fix)
+{
+  const char *sym_name = S_GET_NAME (exp->X_add_symbol);
+  if (sym_name[0] == '.')
+    ++sym_name;
+
+  tls_fix->reloc = BFD_RELOC_NONE;
+  if (strcasecmp (sym_name, "__tls_get_addr") == 0)
+    {
+      char *hold = input_line_pointer;
+      input_line_pointer = *str + 1;
+      expression (&tls_fix->exp);
+      if (tls_fix->exp.X_op == O_symbol)
+	{
+	  if (strncasecmp (input_line_pointer, "@tlsgd)", 7) == 0)
+	    tls_fix->reloc = BFD_RELOC_PPC_TLSGD;
+	  else if (strncasecmp (input_line_pointer, "@tlsld)", 7) == 0)
+	    tls_fix->reloc = BFD_RELOC_PPC_TLSLD;
+	  if (tls_fix->reloc != BFD_RELOC_NONE)
+	    {
+	      input_line_pointer += 7;
+	      SKIP_WHITESPACE ();
+	      *str = input_line_pointer;
+	    }
+	}
+      input_line_pointer = hold;
+    }
+  return tls_fix->reloc != BFD_RELOC_NONE;
+}
+
 /* This routine is called for each instruction to be assembled.  */
 
 void
@@ -3388,47 +3425,12 @@ md_assemble (char *str)
 	{
 	  bfd_reloc_code_real_type reloc = BFD_RELOC_NONE;
 #ifdef OBJ_ELF
-	  if (ex.X_op == O_symbol && str[0] == '(')
+	  /* Look for a __tls_get_addr arg using the insane old syntax.  */
+	  if (ex.X_op == O_symbol && *str == '(' && fc < MAX_INSN_FIXUPS
+	      && parse_tls_arg (&str, &ex, &fixups[fc]))
 	    {
-	      const char *sym_name = S_GET_NAME (ex.X_add_symbol);
-	      if (sym_name[0] == '.')
-		++sym_name;
-
-	      if (strcasecmp (sym_name, "__tls_get_addr") == 0)
-		{
-		  expressionS tls_exp;
-
-		  hold = input_line_pointer;
-		  input_line_pointer = str + 1;
-		  expression (&tls_exp);
-		  if (tls_exp.X_op == O_symbol)
-		    {
-		      reloc = BFD_RELOC_NONE;
-		      if (strncasecmp (input_line_pointer, "@tlsgd)", 7) == 0)
-			{
-			  reloc = BFD_RELOC_PPC_TLSGD;
-			  input_line_pointer += 7;
-			}
-		      else if (strncasecmp (input_line_pointer, "@tlsld)", 7) == 0)
-			{
-			  reloc = BFD_RELOC_PPC_TLSLD;
-			  input_line_pointer += 7;
-			}
-		      if (reloc != BFD_RELOC_NONE)
-			{
-			  SKIP_WHITESPACE ();
-			  str = input_line_pointer;
-
-			  if (fc >= MAX_INSN_FIXUPS)
-			    as_fatal (_("too many fixups"));
-			  fixups[fc].exp = tls_exp;
-			  fixups[fc].opindex = *opindex_ptr;
-			  fixups[fc].reloc = reloc;
-			  ++fc;
-			}
-		    }
-		  input_line_pointer = hold;
-		}
+	      fixups[fc].opindex = *opindex_ptr;
+	      ++fc;
 	    }
 
 	  if ((reloc = ppc_elf_suffix (&str, &ex)) != BFD_RELOC_NONE)
@@ -3702,6 +3704,16 @@ md_assemble (char *str)
 		  as_bad (_("unsupported relocation for DS offset field"));
 		  break;
 		}
+	    }
+
+	  /* Look for a __tls_get_addr arg after any __tls_get_addr
+	     modifiers like @plt.  This fixup must be emitted before
+	     the usual call fixup.  */
+	  if (ex.X_op == O_symbol && *str == '(' && fc < MAX_INSN_FIXUPS
+	      && parse_tls_arg (&str, &ex, &fixups[fc]))
+	    {
+	      fixups[fc].opindex = *opindex_ptr;
+	      ++fc;
 	    }
 #endif
 
