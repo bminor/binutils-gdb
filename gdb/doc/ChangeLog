@@ -1,3 +1,7 @@
+2019-02-21  Alan Hayward  <alan.hayward@arm.com>
+
+	* gdb.texinfo: Update style defaults.
+
 2019-02-21  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.texinfo (Remote Configuration): Remove trailing "." from

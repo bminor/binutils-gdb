@@ -141,7 +141,7 @@ show tui tab-width NCHARS
 set style enabled [on|off]
 show style enabled
   Enable or disable terminal styling.  Styling is enabled by default
-  on most hosts.
+  on most hosts, but disabled by default when in batch mode.
 
 set style filename foreground COLOR
 set style filename background COLOR

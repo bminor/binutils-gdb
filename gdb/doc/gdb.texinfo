@@ -24514,8 +24514,9 @@ Show the current pagination mode.
 @kindex set style
 @kindex show style
 @value{GDBN} can style its output on a capable terminal.  This is
-enabled by default on most systems.  Various style settings are
-available; and styles can also be disabled entirely.
+enabled by default on most systems, but disabled by default when in
+batch mode (@pxref{Mode Options}).  Various style settings are available;
+and styles can also be disabled entirely.
 
 @table @code
 @item set style enabled @samp{on|off}

@@ -1,5 +1,9 @@
 2019-02-21  Alan Hayward  <alan.hayward@arm.com>
 
+	* NEWS: Update style defaults.
+
+2019-02-21  Alan Hayward  <alan.hayward@arm.com>
+
 	* main.c (captured_main_1): Disable styling in batch mode.
 
 2019-02-20  Tom Tromey  <tom@tromey.com>
