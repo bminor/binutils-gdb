@@ -21608,7 +21608,7 @@ protocol.
 Record remote serial communications on the named @var{file}.  The
 default is not to record at all.
 
-@item show remotelogfile.
+@item show remotelogfile
 Show the current setting  of the file name on which to record the
 serial communications.
 
