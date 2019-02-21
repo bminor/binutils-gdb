@@ -452,10 +452,7 @@ darwin_get_dyld_bfd ()
       gdb_bfd_ref_ptr sub
 	(gdb_bfd_mach_o_fat_extract (dyld_bfd.get (), bfd_object,
 				     gdbarch_bfd_arch_info (target_gdbarch ())));
-      if (sub != NULL)
-	dyld_bfd = sub;
-      else
-	dyld_bfd.release ();
+      dyld_bfd = sub;
     }
   return dyld_bfd;
 }

@@ -1,3 +1,7 @@
+2019-02-25  Tom Tromey  <tromey@adacore.com>
+
+	* solib-darwin.c (darwin_get_dyld_bfd): Don't release dyld_bfd.
+
 2019-02-23  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gcore.in: Add '--readnever' option when invoking GDB.
