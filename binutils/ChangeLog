@@ -1,3 +1,17 @@
+2019-02-21  Nick Clifton  <nickc@redhat.com>
+
+	PR 24247
+	* unwind-ia64.c: Include sysdep.h.
+	(unw_decode_x1): Check current pointer against end pointer before
+	accessing memory.
+	(unw_decode_x2): Likewise.
+	(unw_decode_x3): Likewise.
+	(unw_decode_x4): Likewise.
+	(unw_decode_r2): Likewise.
+	(unw_decode_p2_p5): Likewise.
+	(unw_decode_p7_p10): Likewise.
+	(unw_decode): Likewise.
+
 2019-02-20  Nick Clifton  <nickc@redhat.com>
 
 	PR 24246

@@ -21,9 +21,8 @@
    MA 02110-1301, USA.  */
 
 #include "config.h"
+#include "sysdep.h"
 #include "unwind-ia64.h"
-#include <stdio.h>
-#include <string.h>
 
 #if __GNUC__ >= 2
 /* Define BFD64 here, even if our default architecture is 32 bit ELF
@@ -174,7 +173,7 @@ unw_print_xyreg (char *cp, unsigned int x, unsigned int ytreg)
 typedef bfd_vma unw_word;
 
 #define UNW_DEC_BAD_CODE(code)			\
-    printf ("Unknown code 0x%02x\n", code)
+  printf (_("Unknown code 0x%02x\n"), code)
 
 #define UNW_DEC_PROLOGUE(fmt, body, rlen, arg)					\
   do										\
@@ -360,7 +359,7 @@ typedef bfd_vma unw_word;
       /* PR 18420.  */							\
       if ((dp + (unw_rlen / 4)) > end)					\
 	{								\
-	  printf ("\nERROR: unwind length too long (0x%lx > 0x%lx)\n\n",\
+	  printf (_("\nERROR: unwind length too long (0x%lx > 0x%lx)\n\n"), \
 		  (long) (unw_rlen / 4), (long)(end - dp));		\
 	  /* FIXME: Should we reset unw_rlen ?  */			\
 	  break;							\
@@ -571,6 +570,12 @@ unw_decode_x1 (const unsigned char *dp, unsigned int code ATTRIBUTE_UNUSED,
   unsigned char byte1, abreg;
   unw_word t, off;
 
+  if ((end - dp) < 3)
+    {
+      printf (_("\t<corrupt X1>\n"));
+      return end;
+    }
+
   byte1 = *dp++;
   t = unw_decode_uleb128 (&dp, end);
   off = unw_decode_uleb128 (&dp, end);
@@ -588,6 +593,12 @@ unw_decode_x2 (const unsigned char *dp, unsigned int code ATTRIBUTE_UNUSED,
 {
   unsigned char byte1, byte2, abreg, x, ytreg;
   unw_word t;
+
+  if ((end - dp) < 3)
+    {
+      printf (_("\t<corrupt X2>\n"));
+      return end;
+    }
 
   byte1 = *dp++;
   byte2 = *dp++;
@@ -608,6 +619,12 @@ unw_decode_x3 (const unsigned char *dp, unsigned int code ATTRIBUTE_UNUSED,
 {
   unsigned char byte1, byte2, abreg, qp;
   unw_word t, off;
+
+  if ((end - dp) < 4)
+    {
+      printf (_("\t<corrupt X3>\n"));
+      return end;
+    }
 
   byte1 = *dp++;
   byte2 = *dp++;
@@ -630,6 +647,12 @@ unw_decode_x4 (const unsigned char *dp, unsigned int code ATTRIBUTE_UNUSED,
 {
   unsigned char byte1, byte2, byte3, qp, abreg, x, ytreg;
   unw_word t;
+
+  if ((end - dp) < 4)
+    {
+      printf (_("\t<corrupt X4>\n"));
+      return end;
+    }
 
   byte1 = *dp++;
   byte2 = *dp++;
@@ -666,6 +689,12 @@ unw_decode_r2 (const unsigned char *dp, unsigned int code, void *arg,
 {
   unsigned char byte1, mask, grsave;
   unw_word rlen;
+
+  if ((end - dp) < 2)
+    {
+      printf (_("\t<corrupt R2>\n"));
+      return end;
+    }
 
   byte1 = *dp++;
 
@@ -705,14 +734,30 @@ unw_decode_p2_p5 (const unsigned char *dp, unsigned int code,
 {
   if ((code & 0x10) == 0)
     {
-      unsigned char byte1 = *dp++;
+      unsigned char byte1;
+
+      if ((end - dp) < 1)
+	{
+	  printf (_("\t<corrupt P2>\n"));
+	  return end;
+	}
+
+      byte1 = *dp++;
 
       UNW_DEC_BR_GR ("P2", ((code & 0xf) << 1) | ((byte1 >> 7) & 1),
 		     (byte1 & 0x7f), arg);
     }
   else if ((code & 0x08) == 0)
     {
-      unsigned char byte1 = *dp++, r, dst;
+      unsigned char byte1, r, dst;
+
+      if ((end - dp) < 1)
+	{
+	  printf (_("\t<corrupt P3>\n"));
+	  return end;
+	}
+
+      byte1 = *dp++;
 
       r = ((code & 0x7) << 1) | ((byte1 >> 7) & 1);
       dst = (byte1 & 0x7f);
@@ -765,6 +810,11 @@ unw_decode_p2_p5 (const unsigned char *dp, unsigned int code,
     {
       unw_word grmask, frmask, byte1, byte2, byte3;
 
+      if ((end - dp) < 3)
+	{
+	  printf (_("\t<corrupt P5>\n"));
+	  return end;
+	}
       byte1 = *dp++;
       byte2 = *dp++;
       byte3 = *dp++;
@@ -867,6 +917,12 @@ unw_decode_p7_p10 (const unsigned char *dp, unsigned int code, void *arg,
 	{
 	case 0x0:		/* p8 */
 	  {
+	    if ((end - dp) < 2)
+	      {
+		printf (_("\t<corrupt P8>\n"));
+		return end;
+	      }
+
 	    r = *dp++;
 	    t = unw_decode_uleb128 (&dp, end);
 	    switch (r)
@@ -936,12 +992,24 @@ unw_decode_p7_p10 (const unsigned char *dp, unsigned int code, void *arg,
 	  break;
 
 	case 0x1:
+	  if ((end - dp) < 2)
+	    {
+	      printf (_("\t<corrupt P9>\n"));
+	      return end;
+	    }
+
 	  byte1 = *dp++;
 	  byte2 = *dp++;
 	  UNW_DEC_GR_GR ("P9", (byte1 & 0xf), (byte2 & 0x7f), arg);
 	  break;
 
 	case 0xf:		/* p10 */
+	  if ((end - dp) < 2)
+	    {
+	      printf (_("\t<corrupt P10>\n"));
+	      return end;
+	    }
+
 	  byte1 = *dp++;
 	  byte2 = *dp++;
 	  UNW_DEC_ABI ("P10", byte1, byte2, arg);
@@ -1066,6 +1134,12 @@ unw_decode (const unsigned char *dp, int inside_body,
 {
   unw_decoder decoder;
   unsigned char code;
+
+  if ((end - dp) < 1)
+    {
+      printf (_("\t<corrupt IA64 descriptor>\n"));
+      return end;
+    }
 
   code = *dp++;
   decoder = unw_decode_table[inside_body][code >> 5];
