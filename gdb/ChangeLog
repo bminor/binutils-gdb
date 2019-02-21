@@ -1,3 +1,7 @@
+2019-02-21  Alan Hayward  <alan.hayward@arm.com>
+
+	* main.c (captured_main_1): Disable styling in batch mode.
+
 2019-02-20  Tom Tromey  <tom@tromey.com>
 
 	* symtab.c (symtab_symbol_info): Fix typos.

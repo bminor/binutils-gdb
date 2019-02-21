@@ -47,6 +47,7 @@
 #include "common/signals-state-save-restore.h"
 #include <vector>
 #include "common/pathstuff.h"
+#include "cli/cli-style.h"
 
 /* The selected interpreter.  This will be used as a set command
    variable, so it should always be malloc'ed - since
@@ -850,7 +851,12 @@ captured_main_1 (struct captured_main_args *context)
       }
 
     if (batch_flag)
-      quiet = 1;
+      {
+	quiet = 1;
+
+	/* Disable all output styling when running in batch mode.  */
+	cli_styling = 0;
+      }
   }
 
   save_original_signals_state (quiet);
