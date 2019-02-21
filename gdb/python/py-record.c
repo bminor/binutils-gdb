@@ -48,6 +48,12 @@ static PyTypeObject recpy_gap_type = {
   PyVarObject_HEAD_INIT (NULL, 0)
 };
 
+/* Python RecordAuxiliary type.  */
+
+PyTypeObject recpy_aux_type = {
+  PyVarObject_HEAD_INIT (nullptr, 0)
+};
+
 /* Python RecordGap object.  */
 struct recpy_gap_object
 {
@@ -389,8 +395,8 @@ recpy_element_hash (PyObject *self)
   return obj->number;
 }
 
-/* Implementation of operator == and != of RecordInstruction and
-   RecordFunctionSegment.  */
+/* Implementation of operator == and != of RecordInstruction,
+   RecordFunctionSegment and RecordAuxiliary.  */
 
 static PyObject *
 recpy_element_richcompare (PyObject *self, PyObject *other, int op)
@@ -478,6 +484,38 @@ recpy_gap_reason_string (PyObject *self, void *closure)
   return PyUnicode_FromString (obj->reason_string);
 }
 
+/* Create a new gdb.Auxiliary object.  */
+
+PyObject *
+recpy_aux_new (thread_info *thread, enum record_method method,
+	       Py_ssize_t number)
+{
+  recpy_element_object * const obj = PyObject_New (recpy_element_object,
+						   &recpy_aux_type);
+
+  if (obj == NULL)
+   return NULL;
+
+  obj->thread = thread;
+  obj->method = method;
+  obj->number = number;
+
+  return (PyObject *) obj;
+}
+
+/* Implementation of Auxiliary.data [buffer].  */
+
+static PyObject *
+recpy_aux_data (PyObject *self, void *closure)
+{
+  const recpy_element_object * const obj = (recpy_element_object *) self;
+
+  if (obj->method == RECORD_METHOD_BTRACE)
+    return recpy_bt_aux_data (self, closure);
+
+  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+}
+
 /* Record method list.  */
 
 static PyMethodDef recpy_record_methods[] = {
@@ -543,6 +581,14 @@ static gdb_PyGetSetDef recpy_gap_getset[] = {
   { NULL }
 };
 
+/* RecordAuxiliary member list.  */
+
+static gdb_PyGetSetDef recpy_aux_getset[] = {
+  { "number", recpy_element_number, nullptr, "element number", nullptr},
+  { "data", recpy_aux_data, nullptr, "data", nullptr},
+  { nullptr }
+};
+
 /* Sets up the record API in the gdb module.  */
 
 static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
@@ -582,10 +628,20 @@ gdbpy_initialize_record (void)
   recpy_gap_type.tp_doc = "GDB recorded gap object";
   recpy_gap_type.tp_getset = recpy_gap_getset;
 
+  recpy_aux_type.tp_new = PyType_GenericNew;
+  recpy_aux_type.tp_flags = Py_TPFLAGS_DEFAULT;
+  recpy_aux_type.tp_basicsize = sizeof (recpy_element_object);
+  recpy_aux_type.tp_name = "gdb.RecordAuxiliary";
+  recpy_aux_type.tp_doc = "GDB recorded auxiliary object";
+  recpy_aux_type.tp_getset = recpy_aux_getset;
+  recpy_aux_type.tp_richcompare = recpy_element_richcompare;
+  recpy_aux_type.tp_hash = recpy_element_hash;
+
   if (PyType_Ready (&recpy_record_type) < 0
       || PyType_Ready (&recpy_insn_type) < 0
       || PyType_Ready (&recpy_func_type) < 0
-      || PyType_Ready (&recpy_gap_type) < 0)
+      || PyType_Ready (&recpy_gap_type) < 0
+      || PyType_Ready (&recpy_aux_type) < 0)
     return -1;
   else
     return 0;

@@ -4369,6 +4369,19 @@ the current recording method.
 A human readable string with the reason for the gap.
 @end defvar
 
+Some @value{GDBN} features write auxiliary information into the execution
+history.  This information is represented by a @code{gdb.RecordAuxiliary} object
+in the instruction list.  It has the following attributes:
+
+@defvar RecordAuxiliary.@var{number}
+An integer identifying this auxiliary.  @var{number} corresponds to the numbers
+seen in @code{record instruction-history} (@pxref{Process Record and Replay}).
+@end defvar
+
+@defvar RecordAuxiliary.data
+A string representation of the auxiliary data.
+@end defvar
+
 A @code{gdb.RecordFunctionSegment} object has the following attributes:
 
 @defvar RecordFunctionSegment.number

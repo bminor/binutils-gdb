@@ -44,7 +44,8 @@ struct btpy_list_object {
   /* Stride size.  */
   Py_ssize_t step;
 
-  /* Either &BTPY_CALL_TYPE or &RECPY_INSN_TYPE.  */
+  /* Either &recpy_func_type, &recpy_insn_type, &recpy_aux_type or
+     &recpy_gap_type.  */
   PyTypeObject* element_type;
 };
 
@@ -140,15 +141,21 @@ btrace_func_from_recpy_func (const PyObject * const pyobject)
 }
 
 /* Looks at the recorded item with the number NUMBER and create a
-   gdb.RecordInstruction or gdb.RecordGap object for it accordingly.  */
+   gdb.RecordInstruction, gdb.RecordGap or gdb.RecordAuxiliary object
+   for it accordingly.  */
 
 static PyObject *
-btpy_insn_or_gap_new (thread_info *tinfo, Py_ssize_t number)
+btpy_item_new (thread_info *tinfo, Py_ssize_t number)
 {
   btrace_insn_iterator iter;
   int err_code;
 
-  btrace_find_insn_by_number (&iter, &tinfo->btrace, number);
+  if (btrace_find_insn_by_number (&iter, &tinfo->btrace, number) == 0)
+    {
+      PyErr_Format (gdbpy_gdb_error, _("No such instruction."));
+      return nullptr;
+    }
+
   err_code = btrace_insn_get_error (&iter);
 
   if (err_code != 0)
@@ -161,6 +168,12 @@ btpy_insn_or_gap_new (thread_info *tinfo, Py_ssize_t number)
 
       return recpy_gap_new (err_code, err_string, number);
     }
+
+  const struct btrace_insn *insn = btrace_insn_get (&iter);
+  gdb_assert (insn != nullptr);
+
+  if (insn->iclass == BTRACE_INSN_AUX)
+    return recpy_aux_new (tinfo, RECORD_METHOD_BTRACE, number);
 
   return recpy_insn_new (tinfo, RECORD_METHOD_BTRACE, number);
 }
@@ -423,6 +436,48 @@ recpy_bt_func_next (PyObject *self, void *closure)
 			 RECORD_METHOD_BTRACE, func->next);
 }
 
+/* Implementation of Auxiliary.data [str] for btrace.  */
+
+PyObject *
+recpy_bt_aux_data (PyObject *self, void *closure)
+{
+  const btrace_insn *insn;
+  const recpy_element_object *obj;
+  thread_info *tinfo;
+  btrace_insn_iterator iter;
+
+  if (Py_TYPE (self) != &recpy_aux_type)
+    {
+      PyErr_Format (gdbpy_gdb_error, _("Must be a gdb.Auxiliary."));
+      return nullptr;
+    }
+
+  obj = (const recpy_element_object *) self;
+  tinfo = obj->thread;
+
+  if (tinfo == nullptr || btrace_is_empty (tinfo))
+    {
+      PyErr_Format (gdbpy_gdb_error, _("No such auxiliary object."));
+      return nullptr;
+    }
+
+  if (btrace_find_insn_by_number (&iter, &tinfo->btrace, obj->number) == 0)
+    {
+      PyErr_Format (gdbpy_gdb_error, _("No such auxiliary object."));
+      return nullptr;
+    }
+
+  insn = btrace_insn_get (&iter);
+  if (insn == nullptr || insn->iclass != BTRACE_INSN_AUX)
+    {
+      PyErr_Format (gdbpy_gdb_error, _("Not a valid auxiliary object."));
+      return nullptr;
+    }
+
+  return PyUnicode_FromString
+    (iter.btinfo->aux_data.at (insn->aux_data_index).c_str ());
+}
+
 /* Implementation of BtraceList.__len__ (self) -> int.  */
 
 static Py_ssize_t
@@ -439,8 +494,9 @@ btpy_list_length (PyObject *self)
 }
 
 /* Implementation of
-   BtraceList.__getitem__ (self, key) -> BtraceInstruction and
-   BtraceList.__getitem__ (self, key) -> BtraceFunctionCall.  */
+   BtraceList.__getitem__ (self, key) -> BtraceInstruction,
+   BtraceList.__getitem__ (self, key) -> BtraceFunctionCall,
+   BtraceList.__getitem__ (self, key) -> BtraceAuxiliary.  */
 
 static PyObject *
 btpy_list_item (PyObject *self, Py_ssize_t index)
@@ -454,10 +510,13 @@ btpy_list_item (PyObject *self, Py_ssize_t index)
 
   number = obj->first + (obj->step * index);
 
-  if (obj->element_type == &recpy_insn_type)
-    return recpy_insn_new (obj->thread, RECORD_METHOD_BTRACE, number);
-  else
+  if (obj->element_type == &recpy_func_type)
     return recpy_func_new (obj->thread, RECORD_METHOD_BTRACE, number);
+  else if (obj->element_type == &recpy_insn_type
+	   || obj->element_type == &recpy_aux_type)
+    return btpy_item_new (obj->thread, number);
+  else
+    return PyErr_Format (gdbpy_gdb_error, _("Not a valid BtraceList object."));
 }
 
 /* Implementation of BtraceList.__getitem__ (self, slice) -> BtraceList.  */
@@ -644,8 +703,7 @@ recpy_bt_replay_position (PyObject *self, void *closure)
   if (tinfo->btrace.replay == NULL)
     Py_RETURN_NONE;
 
-  return btpy_insn_or_gap_new (tinfo,
-			       btrace_insn_number (tinfo->btrace.replay));
+  return btpy_item_new (tinfo, btrace_insn_number (tinfo->btrace.replay));
 }
 
 /* Implementation of
@@ -667,7 +725,7 @@ recpy_bt_begin (PyObject *self, void *closure)
     Py_RETURN_NONE;
 
   btrace_insn_begin (&iterator, &tinfo->btrace);
-  return btpy_insn_or_gap_new (tinfo, btrace_insn_number (&iterator));
+  return btpy_item_new (tinfo, btrace_insn_number (&iterator));
 }
 
 /* Implementation of
@@ -689,7 +747,7 @@ recpy_bt_end (PyObject *self, void *closure)
     Py_RETURN_NONE;
 
   btrace_insn_end (&iterator, &tinfo->btrace);
-  return btpy_insn_or_gap_new (tinfo, btrace_insn_number (&iterator));
+  return btpy_item_new (tinfo, btrace_insn_number (&iterator));
 }
 
 /* Implementation of

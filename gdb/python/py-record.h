@@ -59,6 +59,9 @@ extern PyTypeObject recpy_insn_type;
 /* Python RecordFunctionSegment type.  */
 extern PyTypeObject recpy_func_type;
 
+/* Python RecordAuxiliary type.  */
+extern PyTypeObject recpy_aux_type;
+
 /* Create a new gdb.RecordInstruction object.  */
 extern PyObject *recpy_insn_new (thread_info *thread, enum record_method method,
 				 Py_ssize_t number);
@@ -69,6 +72,10 @@ extern PyObject *recpy_func_new (thread_info *thread, enum record_method method,
 
 /* Create a new gdb.RecordGap object.  */
 extern PyObject *recpy_gap_new (int reason_code, const char *reason_string,
+				Py_ssize_t number);
+
+/* Create a new gdb.RecordGap object.  */
+extern PyObject *recpy_aux_new (thread_info *thread, enum record_method method,
 				Py_ssize_t number);
 
 #endif /* PYTHON_PY_RECORD_H */

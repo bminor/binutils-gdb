@@ -88,4 +88,7 @@ extern PyObject *recpy_bt_func_prev (PyObject *self, void *closure);
 /* Implementation of RecordFunctionSegment.next [RecordFunctionSegment].  */
 extern PyObject *recpy_bt_func_next (PyObject *self, void *closure);
 
+/* Implementation of RecordAuxiliary.decoded [str].  */
+extern PyObject *recpy_bt_aux_data (PyObject *self, void *closure);
+
 #endif /* PYTHON_PY_RECORD_BTRACE_H */
