@@ -26264,7 +26264,9 @@ static const struct arm_cpu_option_table arm_cpus[] =
   ARM_CPU_OPT ("exynos-m1",	  "Samsung Exynos M1", ARM_ARCH_V8A,
 	       ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
 	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8),
-
+  ARM_CPU_OPT ("neoverse-n1",    "Neoverse N1",	       ARM_ARCH_V8_2A,
+	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
+	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_DOTPROD),
   /* ??? XSCALE is really an architecture.  */
   ARM_CPU_OPT ("xscale",	  NULL,		       ARM_ARCH_XSCALE,
 	       ARM_ARCH_NONE,
