@@ -1,3 +1,8 @@
+2019-02-27  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.texinfo (Configure Options): Document minimum python
+	version.
+
 2019-02-26  Kevin Buettner  <kevinb@redhat.com>
 
 	* python.texi (Values From Inferior): Document second form

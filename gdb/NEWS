@@ -190,6 +190,8 @@ FreeBSD/riscv			riscv*-*-freebsd*
 
 * Python API
 
+  ** GDB no longer supports Python versions less than 2.6.
+
   ** The gdb.Inferior type has a new 'progspace' property, which is the program
      space associated to that inferior.
 

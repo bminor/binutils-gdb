@@ -1,4 +1,8 @@
 2019-02-27  Kevin Buettner  <kevinb@redhat.com>
+    
+	* NEWS: Note minimum Python version.
+
+2019-02-27  Kevin Buettner  <kevinb@redhat.com>
 
 	* python/py-inferior.c (infpy_write_memory): Remove non-IS_PY3K
 	code from these functions.  Remove corresponding ifdefs.  Use
