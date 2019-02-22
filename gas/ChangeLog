@@ -1,3 +1,8 @@
+2019-02-22  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* config/tc-aarch64.c (aarch64_cpus): Add neoverse-n1.
+	* doc/c-aarch64.texi (-mcpu): Document neoverse-n1 value.
+
 2019-02-19  Paul Hua  <paul.hua.gm@gmail.com>
 
 	* NEWS: Mention -m[no-]fix-loongson3-llsc.

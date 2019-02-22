@@ -66,6 +66,7 @@ on the target processor.  The following processor names are recognized:
 @code{ares},
 @code{exynos-m1},
 @code{falkor},
+@code{neoverse-n1},
 @code{qdf24xx},
 @code{saphira},
 @code{thunderx},

@@ -8746,6 +8746,11 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
 			      AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO
 			      | AARCH64_FEATURE_RDMA),
    "Qualcomm Falkor"},
+  {"neoverse-n1", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
+				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16
+				  | AARCH64_FEATURE_DOTPROD
+				  | AARCH64_FEATURE_PROFILE),
+				  "Neoverse N1"},
   {"qdf24xx", AARCH64_FEATURE (AARCH64_ARCH_V8,
 			       AARCH64_FEATURE_CRC | AARCH64_FEATURE_CRYPTO
 			       | AARCH64_FEATURE_RDMA),
