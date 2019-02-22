@@ -1589,7 +1589,10 @@ extern void set_gdbarch_disassembler_options (struct gdbarch *gdbarch, char ** d
 extern const disasm_options_and_args_t * gdbarch_valid_disassembler_options (struct gdbarch *gdbarch);
 extern void set_gdbarch_valid_disassembler_options (struct gdbarch *gdbarch, const disasm_options_and_args_t * valid_disassembler_options);
 
-/* Type alignment. */
+/* Type alignment override method.  Return the architecture specific
+   alignment required for TYPE.  If there is no special handling
+   required for TYPE then return the value 0, GDB will then apply the
+   default rules as laid out in gdbtypes.c:type_align. */
 
 typedef ULONGEST (gdbarch_type_align_ftype) (struct gdbarch *gdbarch, struct type *type);
 extern ULONGEST gdbarch_type_align (struct gdbarch *gdbarch, struct type *type);

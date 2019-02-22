@@ -8348,7 +8348,7 @@ i386_type_align (struct gdbarch *gdbarch, struct type *type)
 	return 4;
     }
 
-  return TYPE_LENGTH (type);
+  return 0;
 }
 
 

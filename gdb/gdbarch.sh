@@ -1171,7 +1171,10 @@ v;const char *;disassembler_options_implicit;;;0;0;;0;pstring (gdbarch->disassem
 v;char **;disassembler_options;;;0;0;;0;pstring_ptr (gdbarch->disassembler_options)
 v;const disasm_options_and_args_t *;valid_disassembler_options;;;0;0;;0;host_address_to_string (gdbarch->valid_disassembler_options)
 
-# Type alignment.
+# Type alignment override method.  Return the architecture specific
+# alignment required for TYPE.  If there is no special handling
+# required for TYPE then return the value 0, GDB will then apply the
+# default rules as laid out in gdbtypes.c:type_align.
 m;ULONGEST;type_align;struct type *type;type;;default_type_align;;0
 
 EOF

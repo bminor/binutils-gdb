@@ -1963,8 +1963,27 @@ arc_tdesc_init (struct gdbarch_info info, const struct target_desc **tdesc,
 static ULONGEST
 arc_type_align (struct gdbarch *gdbarch, struct type *type)
 {
-  type = check_typedef (type);
-  return std::min<ULONGEST> (4, TYPE_LENGTH (type));
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_PTR:
+    case TYPE_CODE_FUNC:
+    case TYPE_CODE_FLAGS:
+    case TYPE_CODE_INT:
+    case TYPE_CODE_RANGE:
+    case TYPE_CODE_FLT:
+    case TYPE_CODE_ENUM:
+    case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
+    case TYPE_CODE_CHAR:
+    case TYPE_CODE_BOOL:
+    case TYPE_CODE_DECFLOAT:
+    case TYPE_CODE_METHODPTR:
+    case TYPE_CODE_MEMBERPTR:
+      type = check_typedef (type);
+      return std::min<ULONGEST> (4, TYPE_LENGTH (type));
+    default:
+      return 0;
+    }
 }
 
 /* Implement the "init" gdbarch method.  */

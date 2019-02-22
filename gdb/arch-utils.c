@@ -993,7 +993,7 @@ default_in_indirect_branch_thunk (gdbarch *gdbarch, CORE_ADDR pc)
 ULONGEST
 default_type_align (struct gdbarch *gdbarch, struct type *type)
 {
-  return type_length_units (check_typedef (type));
+  return 0;
 }
 
 void

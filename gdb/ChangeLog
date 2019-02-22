@@ -1,3 +1,17 @@
+2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arc-tdep.c (arc_type_align): Provide alignment for basic types,
+	return 0 for other types.
+	* arch-utils.c (default_type_align): Always return 0.
+	* gdbarch.h: Regenerate.
+	* gdbarch.sh (type_align): Extend comment.
+	* gdbtypes.c (type_align): Add additional comments, always call
+	gdbarch_type_align before applying the default rules.
+	* i386-tdep.c (i386_type_align): Return 0 as the default rule,
+	generic code will then apply a suitable default.
+	* nios2-tdep.c (nios2_type_align): Provide alignment for basic
+	types, return 0 for other types.
+
 2019-02-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Create a new section for the next release branch.
