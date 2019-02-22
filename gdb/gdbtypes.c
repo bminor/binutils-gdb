@@ -3039,15 +3039,18 @@ type_align (struct type *type)
 	  }
 	for (unsigned i = 0; i < TYPE_NFIELDS (type); ++i)
 	  {
-	    ULONGEST f_align = type_align (TYPE_FIELD_TYPE (type, i));
-	    if (f_align == 0)
+	    if (!field_is_static (&TYPE_FIELD (type, i)))
 	      {
-		/* Don't pretend we know something we don't.  */
-		align = 0;
-		break;
+		ULONGEST f_align = type_align (TYPE_FIELD_TYPE (type, i));
+		if (f_align == 0)
+		  {
+		    /* Don't pretend we know something we don't.  */
+		    align = 0;
+		    break;
+		  }
+		if (f_align > align)
+		  align = f_align;
 	      }
-	    if (f_align > align)
-	      align = f_align;
 	  }
       }
       break;

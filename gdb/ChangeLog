@@ -1,5 +1,10 @@
 2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdbtypes.c (type_align): Don't consider static members when
+	computing structure alignment.
+
+2019-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* arc-tdep.c (arc_type_align): Provide alignment for basic types,
 	return 0 for other types.
 	* arch-utils.c (default_type_align): Always return 0.
