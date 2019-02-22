@@ -1,5 +1,11 @@
 -*- text -*-
 
+* The separate debug info file options of readelf (--debug-dump=links
+  and --debug-dump=follow) and objdump (--dwarf=links and
+  --dwarf=follow-links) will now display and/or follow multiple links if
+  more than one are present in a file.  (This usually happens when gcc's
+  -gsplit-dwarf option is used).
+
 Changes in 2.32:
 
 * The addr2line, c++filt, nm and objdump tools now have a limit on the

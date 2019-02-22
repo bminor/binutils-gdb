@@ -1,3 +1,41 @@
+2019-02-22  Nick Clifton  <nickc@redhat.com>
+
+	PR 23843
+	* dwarf.h (struct separate_info): New structure for containing
+	information on separate debug info files.
+	* dwarf.c (struct dwo_info): New structure for containing dwo
+	links.
+	(first_dwo_info): Chain of dwo_info structures.
+	(first_separate_file): Chain of separate_info structures.
+	(separate_debug_file, separate_debug_filename): Delete.
+	(fetch_alt_indirect_string): Scan all separate debug info files
+	for the requested string.
+	(add_dwo_info): New function.
+	(add_dwo_name): New function.
+	(add_dwo_dir): New function.
+	(add_dwo_id: New function.
+	(free_dwo_info): New function.
+	(read_and_display_attr_value): Store DWO data using the new
+	functions.
+	(load_debug_section_with_follow): If necessary, scan the list of
+	separate debug info files for the requested section.
+	(add_separate_debug_file): New function.
+	(load_separate_debug_info): Call add_separate_debug_file to store
+	the information on the newly loaded file.
+	(load_dwo_file): Likewise.
+	(load_separate_debif_file): Rename to load_separate_debug_files.
+	Change return type to boolean.  If following links then attempt to
+	load all separate debug info files, not just the first one.
+	(free_debug_memory): Release memory in dwo_info and separate_info
+	chains.
+	* objdump.c (dump_dwarf): Iterate over all loaded debg info files.
+	* readelf.c (process_object): Likewise.
+	* doc/debug.options.texi: Update descriptions of links and
+	follow-links options.
+	* testsuite/binutils-all/objdump.WK2: Update expected output.
+	* testsuite/binutils-all/readelf.k2: Likewise.
+	* NEWS: Announce the new feature.
+
 2019-02-21  Nick Clifton  <nickc@redhat.com>
 
 	PR 24247

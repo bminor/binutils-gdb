@@ -48,11 +48,26 @@ static debug_info *debug_information = NULL;
    that the .debug_info section could not be loaded/parsed.  */
 #define DEBUG_INFO_UNAVAILABLE  (unsigned int) -1
 
-static const char *           dwo_name;
-static const char *           dwo_dir;
-static const unsigned char *  dwo_id;
-static bfd_size_type          dwo_id_len;
-static bfd_boolean            need_dwo_info;
+/* A .debug_info section can contain multiple links to separate
+   DWO object files.  We use these structures to record these links.  */
+typedef enum dwo_type
+{
+ DWO_NAME,
+ DWO_DIR,
+ DWO_ID
+} dwo_type;
+
+typedef struct dwo_info
+{
+  dwo_type          type;
+  const char *      value;
+  struct dwo_info * next;
+} dwo_info;
+
+static dwo_info *   first_dwo_info = NULL;
+static bfd_boolean  need_dwo_info;
+
+separate_info * first_separate_info = NULL;
 
 unsigned int eh_addr_size;
 
@@ -95,10 +110,6 @@ static const dwarf_vma vm1 = -1;
 static unsigned int *shndx_pool = NULL;
 static unsigned int shndx_pool_size = 0;
 static unsigned int shndx_pool_used = 0;
-
-/* Pointer to a separate file containing extra debug information.  */
-static void * separate_debug_file = NULL;
-static const char * separate_debug_filename = NULL;
 
 /* For version 2 package files, each set contains an array of section offsets
    and an array of section sizes, giving the offset and size of the
@@ -1711,37 +1722,44 @@ add64 (dwarf_vma * high_bits, dwarf_vma * low_bits, dwarf_vma inc)
 static const char *
 fetch_alt_indirect_string (dwarf_vma offset)
 {
-  struct dwarf_section * section;
-  const char *           ret;
+  separate_info * i;
 
   if (! do_follow_links)
     return "";
 
-  if (separate_debug_file == NULL)
-    return _("<following link not possible>");
+  if (first_separate_info == NULL)
+    return _("<no links available>");
 
-  if (! load_debug_section (separate_debug_str, separate_debug_file))
-    return _("<could not load separate string section>");
-
-  section = &debug_displays [separate_debug_str].section;
-  if (section->start == NULL)
-    return  _("<no .debug_str section>");
-
-  if (offset >= section->size)
+  for (i = first_separate_info; i != NULL; i = i->next)
     {
-      warn (_("DW_FORM_GNU_strp_alt offset too big: %s\n"), dwarf_vmatoa ("x", offset));
-      return _("<offset is too big>");
+      struct dwarf_section * section;
+      const char *           ret;
+
+      if (! load_debug_section (separate_debug_str, i->handle))
+	continue;
+
+      section = &debug_displays [separate_debug_str].section;
+
+      if (section->start == NULL)
+	continue;
+
+      if (offset >= section->size)
+	continue;
+
+      ret = (const char *) (section->start + offset);
+      /* Unfortunately we cannot rely upon the .debug_str section ending with a
+	 NUL byte.  Since our caller is expecting to receive a well formed C
+	 string we test for the lack of a terminating byte here.  */
+      if (strnlen ((const char *) ret, section->size - offset)
+	  == section->size - offset)
+	return _("<no NUL byte at end of alt .debug_str section>");
+
+      return ret;
     }
-
-  ret = (const char *) (section->start + offset);
-  /* Unfortunately we cannot rely upon the .debug_str section ending with a
-     NUL byte.  Since our caller is expecting to receive a well formed C
-     string we test for the lack of a terminating byte here.  */
-  if (strnlen ((const char *) ret, section->size - offset)
-      == section->size - offset)
-    return _("<no NUL byte at end of .debug_str section>");
-
-  return ret;
+  
+  warn (_("DW_FORM_GNU_strp_alt offset (%s) too big or no string sections available\n"),
+	dwarf_vmatoa ("x", offset));
+  return _("<offset is too big>");
 }
 	
 static const char *
@@ -1768,6 +1786,49 @@ get_AT_name (unsigned long attribute)
     }
 
   return name;
+}
+
+static void
+add_dwo_info (const char * field, dwo_type type)
+{
+  dwo_info * dwinfo = xmalloc (sizeof * dwinfo);
+
+  dwinfo->type = type;
+  dwinfo->value = field;
+  dwinfo->next = first_dwo_info;
+  first_dwo_info = dwinfo;
+}
+
+static void
+add_dwo_name (const char * name)
+{
+  add_dwo_info (name, DWO_NAME);
+}
+
+static void
+add_dwo_dir (const char * dir)
+{
+  add_dwo_info (dir, DWO_DIR);
+}
+
+static void
+add_dwo_id (const char * id)
+{
+  add_dwo_info (id, DWO_ID);
+}
+
+static void
+free_dwo_info (void)
+{
+  dwo_info * dwinfo;
+  dwo_info * next;
+
+  for (dwinfo = first_dwo_info; dwinfo != NULL; dwinfo = next)
+    {
+      next = dwinfo->next;
+      free (dwinfo);
+    }
+  first_dwo_info = NULL;
 }
 
 static unsigned char *
@@ -2260,18 +2321,17 @@ read_and_display_attr_value (unsigned long           attribute,
 	    switch (form)
 	      {
 	      case DW_FORM_strp:
-		dwo_name = (const char *) fetch_indirect_string (uvalue);
+		add_dwo_name ((const char *) fetch_indirect_string (uvalue));
 		break;
 	      case DW_FORM_GNU_str_index:
-		dwo_name = fetch_indexed_string (uvalue, this_set, offset_size, FALSE);
+		add_dwo_name (fetch_indexed_string (uvalue, this_set, offset_size, FALSE));
 		break;
 	      case DW_FORM_string:
-		dwo_name = (const char *) orig_data;
+		add_dwo_name ((const char *) orig_data);
 		break;
 	      default:
 		warn (_("Unsupported form (%s) for attribute %s\n"),
 		      get_FORM_name (form), get_AT_name (attribute));
-		dwo_name = _("<unknown>");
 		break;
 	      }
 	  break;
@@ -2282,21 +2342,20 @@ read_and_display_attr_value (unsigned long           attribute,
 	    switch (form)
 	      {
 	      case DW_FORM_strp:
-		dwo_dir = (const char *) fetch_indirect_string (uvalue);
+		add_dwo_dir ((const char *) fetch_indirect_string (uvalue));
 		break;
 	      case DW_FORM_line_strp:
-		dwo_dir = (const char *) fetch_indirect_line_string (uvalue);
+		add_dwo_dir ((const char *) fetch_indirect_line_string (uvalue));
 		break;
 	      case DW_FORM_GNU_str_index:
-		dwo_dir = fetch_indexed_string (uvalue, this_set, offset_size, FALSE);
+		add_dwo_dir (fetch_indexed_string (uvalue, this_set, offset_size, FALSE));
 		break;
 	      case DW_FORM_string:
-		dwo_dir = (const char *) orig_data;
+		add_dwo_dir ((const char *) orig_data);
 		break;
 	      default:
 		warn (_("Unsupported form (%s) for attribute %s\n"),
 		      get_FORM_name (form), get_AT_name (attribute));
-		dwo_dir = _("<unknown>");
 		break;
 	      }
 	  break;
@@ -2306,13 +2365,12 @@ read_and_display_attr_value (unsigned long           attribute,
 	    switch (form)
 	      {
 	      case DW_FORM_data8:
-		dwo_id = data - 8;
-		dwo_id_len = 8;
+		/* FIXME: Record the length of the ID as well ?  */
+		add_dwo_id ((const char *) (data - 8));
 		break;
 	      default:
 		warn (_("Unsupported form (%s) for attribute %s\n"),
 		      get_FORM_name (form), get_AT_name (attribute));
-		dwo_id = NULL;
 		break;
 	      }
 	  break;
@@ -2722,30 +2780,47 @@ read_and_display_attr (unsigned long           attribute,
 }
 
 /* Like load_debug_section, but if the ordinary call fails, and we are
-   following debug links, and we have been able to load a separate debug
-   info file, then attempt to load the requested section from the separate
-   file.  */
+   following debug links, then attempt to load the requested section
+   from one of the separate debug info files.  */
 
 static bfd_boolean
 load_debug_section_with_follow (enum dwarf_section_display_enum sec_enum,
-				void * data)
+				void * handle)
 {
-  if (load_debug_section (sec_enum, data))
+  if (load_debug_section (sec_enum, handle))
     {
-      if (data == separate_debug_file)
-	debug_displays[sec_enum].section.filename = separate_debug_filename;
-	
-      /* FIXME: We should check to see if there is a separate debug info file
-	 that also contains this section, and if so, issue a warning.  */
+      if (debug_displays[sec_enum].section.filename == NULL)
+	{
+	  /* See if we can associate a filename with this section.  */
+	  separate_info * i;
+
+	  for (i = first_separate_info; i != NULL; i = i->next)
+	    if (i->handle == handle)
+	      {
+		debug_displays[sec_enum].section.filename = i->filename;
+		break;
+	      }
+	}
+
       return TRUE;
     }
 
-  if (do_follow_links && separate_debug_file != NULL)
-    if (load_debug_section (sec_enum, separate_debug_file))
-      {
-	debug_displays[sec_enum].section.filename = separate_debug_filename;
-	return TRUE;
-      }
+  if (do_follow_links)
+    {
+      separate_info * i;
+
+      for (i = first_separate_info; i != NULL; i = i->next)
+	{
+	  if (load_debug_section (sec_enum, i->handle))
+	    {
+	      debug_displays[sec_enum].section.filename = i->filename;
+
+	      /* FIXME: We should check to see if any of the remaining debug info
+		 files also contain this section, and, umm, do something about it.  */
+	      return TRUE;
+	    }
+	}
+    }
 
   return FALSE;
 }
@@ -6003,12 +6078,12 @@ display_debug_loc (struct dwarf_section *section, void *file)
   unsigned char *next = start, *vnext = vstart;
   unsigned int *array = NULL;
   const char *suffix = strrchr (section->name, '.');
-  int is_dwo = 0;
+  bfd_boolean is_dwo = FALSE;
   int is_loclists = strstr (section->name, "debug_loclists") != NULL;
   dwarf_vma expected_start = 0;
 
   if (suffix && strcmp (suffix, ".dwo") == 0)
-    is_dwo = 1;
+    is_dwo = TRUE;
 
   bytes = section->size;
 
@@ -6554,6 +6629,7 @@ display_debug_addr (struct dwarf_section *section,
 }
 
 /* Display the .debug_str_offsets and .debug_str_offsets.dwo sections.  */
+
 static int
 display_debug_str_offsets (struct dwarf_section *section,
 			   void *file ATTRIBUTE_UNUSED)
@@ -9811,6 +9887,17 @@ parse_gnu_debugaltlink (struct dwarf_section * section, void * data)
   return name;
 }
 
+static void
+add_separate_debug_file (const char * filename, void * handle)
+{
+  separate_info * i = xmalloc (sizeof * i);
+
+  i->filename = filename;
+  i->handle   = handle;
+  i->next     = first_separate_info;
+  first_separate_info = i;
+}
+
 static void *
 load_separate_debug_info (const char *            main_filename,
 			  struct dwarf_section *  xlink,
@@ -9819,7 +9906,7 @@ load_separate_debug_info (const char *            main_filename,
 			  void *                  func_data)
 {
   const char *   separate_filename;
-  char *         debugfile;
+  char *         debug_filename;
   char *         canon_dir;
   size_t         canon_dirlen;
   size_t         dirlen;
@@ -9851,18 +9938,18 @@ load_separate_debug_info (const char *            main_filename,
 #define EXTRA_DEBUG_ROOT2 "/usr/lib/debug/usr"
 #endif
 
-  debugfile = (char *) malloc (strlen (DEBUGDIR) + 1
-			       + canon_dirlen
-			       + strlen (".debug/")
+  debug_filename = (char *) malloc (strlen (DEBUGDIR) + 1
+				    + canon_dirlen
+				    + strlen (".debug/")
 #ifdef EXTRA_DEBUG_ROOT1
-			       + strlen (EXTRA_DEBUG_ROOT1)
+				    + strlen (EXTRA_DEBUG_ROOT1)
 #endif
 #ifdef EXTRA_DEBUG_ROOT2
-			       + strlen (EXTRA_DEBUG_ROOT2)
+				    + strlen (EXTRA_DEBUG_ROOT2)
 #endif
-			       + strlen (separate_filename)
-			       + 1);
-  if (debugfile == NULL)
+				    + strlen (separate_filename)
+				    + 1);
+  if (debug_filename == NULL)
     {
       warn (_("Out of memory"));
       free (canon_dir);
@@ -9870,171 +9957,199 @@ load_separate_debug_info (const char *            main_filename,
     }
 
   /* First try in the current directory.  */
-  sprintf (debugfile, "%s", separate_filename);
-  if (check_func (debugfile, func_data))
+  sprintf (debug_filename, "%s", separate_filename);
+  if (check_func (debug_filename, func_data))
     goto found;
 
   /* Then try in a subdirectory called .debug.  */
-  sprintf (debugfile, ".debug/%s", separate_filename);
-  if (check_func (debugfile, func_data))
+  sprintf (debug_filename, ".debug/%s", separate_filename);
+  if (check_func (debug_filename, func_data))
     goto found;
 
   /* Then try in the same directory as the original file.  */
-  sprintf (debugfile, "%s%s", canon_dir, separate_filename);
-  if (check_func (debugfile, func_data))
+  sprintf (debug_filename, "%s%s", canon_dir, separate_filename);
+  if (check_func (debug_filename, func_data))
     goto found;
 
   /* And the .debug subdirectory of that directory.  */
-  sprintf (debugfile, "%s.debug/%s", canon_dir, separate_filename);
-  if (check_func (debugfile, func_data))
+  sprintf (debug_filename, "%s.debug/%s", canon_dir, separate_filename);
+  if (check_func (debug_filename, func_data))
     goto found;
 
 #ifdef EXTRA_DEBUG_ROOT1
   /* Try the first extra debug file root.  */
-  sprintf (debugfile, "%s/%s", EXTRA_DEBUG_ROOT1, separate_filename);
-  if (check_func (debugfile, func_data))
+  sprintf (debug_filename, "%s/%s", EXTRA_DEBUG_ROOT1, separate_filename);
+  if (check_func (debug_filename, func_data))
     goto found;
 #endif
 
 #ifdef EXTRA_DEBUG_ROOT2
   /* Try the second extra debug file root.  */
-  sprintf (debugfile, "%s/%s", EXTRA_DEBUG_ROOT2, separate_filename);
-  if (check_func (debugfile, func_data))
+  sprintf (debug_filename, "%s/%s", EXTRA_DEBUG_ROOT2, separate_filename);
+  if (check_func (debug_filename, func_data))
     goto found;
 #endif
 
-  /* Then try in the global debugfile directory.  */
-  strcpy (debugfile, DEBUGDIR);
+  /* Then try in the global debug_filename directory.  */
+  strcpy (debug_filename, DEBUGDIR);
   dirlen = strlen (DEBUGDIR) - 1;
   if (dirlen > 0 && DEBUGDIR[dirlen] != '/')
-    strcat (debugfile, "/");
-  strcat (debugfile, (const char *) separate_filename);
+    strcat (debug_filename, "/");
+  strcat (debug_filename, (const char *) separate_filename);
 
-  if (check_func (debugfile, func_data))
+  if (check_func (debug_filename, func_data))
     goto found;
 
   /* Failed to find the file.  */
   warn (_("could not find separate debug file '%s'\n"), separate_filename);
-  warn (_("tried: %s\n"), debugfile);
+  warn (_("tried: %s\n"), debug_filename);
 
 #ifdef EXTRA_DEBUG_ROOT2
-  sprintf (debugfile, "%s/%s", EXTRA_DEBUG_ROOT2, separate_filename);
-  warn (_("tried: %s\n"), debugfile);
+  sprintf (debug_filename, "%s/%s", EXTRA_DEBUG_ROOT2, separate_filename);
+  warn (_("tried: %s\n"), debug_filename);
 #endif
 
 #ifdef EXTRA_DEBUG_ROOT1
-  sprintf (debugfile, "%s/%s", EXTRA_DEBUG_ROOT1, separate_filename);
-  warn (_("tried: %s\n"), debugfile);
+  sprintf (debug_filename, "%s/%s", EXTRA_DEBUG_ROOT1, separate_filename);
+  warn (_("tried: %s\n"), debug_filename);
 #endif
 
-  sprintf (debugfile, "%s.debug/%s", canon_dir, separate_filename);
-  warn (_("tried: %s\n"), debugfile);
+  sprintf (debug_filename, "%s.debug/%s", canon_dir, separate_filename);
+  warn (_("tried: %s\n"), debug_filename);
 
-  sprintf (debugfile, "%s%s", canon_dir, separate_filename);
-  warn (_("tried: %s\n"), debugfile);
+  sprintf (debug_filename, "%s%s", canon_dir, separate_filename);
+  warn (_("tried: %s\n"), debug_filename);
 
-  sprintf (debugfile, ".debug/%s", separate_filename);
-  warn (_("tried: %s\n"), debugfile);
+  sprintf (debug_filename, ".debug/%s", separate_filename);
+  warn (_("tried: %s\n"), debug_filename);
 
-  sprintf (debugfile, "%s", separate_filename);
-  warn (_("tried: %s\n"), debugfile);
+  sprintf (debug_filename, "%s", separate_filename);
+  warn (_("tried: %s\n"), debug_filename);
 
   free (canon_dir);
-  free (debugfile);
+  free (debug_filename);
   return NULL;
 
  found:
   free (canon_dir);
 
+  void * debug_handle;
+
   /* Now open the file.... */
-  if ((separate_debug_file = open_debug_file (debugfile)) == NULL)
+  if ((debug_handle = open_debug_file (debug_filename)) == NULL)
     {
-      warn (_("failed to open separate debug file: %s\n"), debugfile);
-      free (debugfile);
+      warn (_("failed to open separate debug file: %s\n"), debug_filename);
+      free (debug_filename);
       return FALSE;
     }
 
   /* FIXME: We do not check to see if there are any other separate debug info
      files that would also match.  */
 
-  printf (_("%s: Found separate debug info file: %s\n\n"), main_filename, debugfile);
-  separate_debug_filename = debugfile;
+  printf (_("%s: Found separate debug info file: %s\n\n"), main_filename, debug_filename);
+  add_separate_debug_file (debug_filename, debug_handle);
 
-  /* Do not free debugfile - it might be referenced inside
+  /* Do not free debug_filename - it might be referenced inside
      the structure returned by open_debug_file().  */
-  return separate_debug_file;
+  return debug_handle;
 }
 
 /* Attempt to load a separate dwarf object file.  */
 
 static void *
-load_dwo_file (const char * main_filename)
+load_dwo_file (const char * main_filename, const char * name, const char * dir, const char * id ATTRIBUTE_UNUSED)
 {
-  char * filename;
+  char * separate_filename;
+  void * separate_handle;
 
   /* FIXME: Skip adding / if dwo_dir ends in /.  */
-  filename = concat (dwo_dir, "/", dwo_name, NULL);
-  if (filename == NULL)
+  separate_filename = concat (dir, "/", name, NULL);
+  if (separate_filename == NULL)
     {
       warn (_("Out of memory allocating dwo filename\n"));
       return NULL;
     }
 
-  if ((separate_debug_file = open_debug_file (filename)) == NULL)
+  if ((separate_handle = open_debug_file (separate_filename)) == NULL)
     {
-      warn (_("Unable to load dwo file: %s\n"), filename);
-      free (filename);
+      warn (_("Unable to load dwo file: %s\n"), separate_filename);
+      free (separate_filename);
       return NULL;
     }
 
   /* FIXME: We should check the dwo_id.  */
 
-  printf (_("%s: Found separate debug object file: %s\n\n"), main_filename, filename);
-  separate_debug_filename = filename;
-  return separate_debug_file;
+  printf (_("%s: Found separate debug object file: %s\n\n"), main_filename, separate_filename);
+  add_separate_debug_file (separate_filename, separate_handle);
+  /* Note - separate_filename will be freed in free_debug_memory().  */
+  return separate_handle;
 }
 
-/* Load a separate debug info file, if it exists.
-   Returns the data pointer that is the result of calling open_debug_file
-   on the separate debug info file, or NULL if there were problems or there
-   is no such file.  */
+/* Load the separate debug info file(s) attached to FILE, if any exist.
+   Returns TRUE if any were found, FALSE otherwise.
+   If TRUE is returned then the linked list starting at first_separate_info
+   will be populated with open file handles.  */
 
-void *
-load_separate_debug_file (void * file, const char * filename)
+bfd_boolean
+load_separate_debug_files (void * file, const char * filename)
 {
   /* Skip this operation if we are not interested in debug links.  */
   if (! do_follow_links && ! do_debug_links)
-    return NULL;
+    return FALSE;
 
-  /* See if there is a dwo link.  */
+  /* See if there are any dwo links.  */
   if (load_debug_section (str, file)
       && load_debug_section (abbrev, file)
       && load_debug_section (info, file))
     {
-      dwo_name = dwo_dir = NULL;
-      dwo_id = NULL;
-      dwo_id_len = 0;
+      free_dwo_info ();
 
       if (process_debug_info (& debug_displays[info].section, file, abbrev, TRUE, FALSE))
 	{
-	  if (dwo_name != NULL)
-	    {
-	      if (do_debug_links)
-		{
-		  printf (_("The %s section contains a link to a dwo file:\n"),
-			  debug_displays [info].section.uncompressed_name);
-		  printf (_("  Name:      %s\n"), dwo_name);
-		  printf (_("  Directory: %s\n"), dwo_dir ? dwo_dir : _("<not-found>"));
-		  if (dwo_id != NULL)
-		    display_data (printf (_("  ID:       ")), dwo_id, dwo_id_len);
-		  else
-		    printf (_("  ID: <unknown>\n"));
-		  printf ("\n\n");
-		}
+	  bfd_boolean introduced = FALSE;
+	  dwo_info *   dwinfo;
+	  const char * dir = NULL;
+	  const char * id = NULL;
 
-	      /* FIXME: We do not check to see if there are any more dwo links in the file...  */
-	      if (do_follow_links)
-		return load_dwo_file (filename);
+	  for (dwinfo = first_dwo_info; dwinfo != NULL; dwinfo = dwinfo->next)
+	    {
+	      switch (dwinfo->type)
+		{
+		case DWO_NAME:
+		  if (do_debug_links)
+		    {
+		      if (! introduced)
+			{
+			  printf (_("The %s section contains link(s) to dwo file(s):\n\n"),
+				  debug_displays [info].section.uncompressed_name);
+			  introduced = TRUE;
+			}
+
+		      printf (_("  Name:      %s\n"), dwinfo->value);
+		      printf (_("  Directory: %s\n"), dir ? dir : _("<not-found>"));
+		      if (id != NULL)
+			display_data (printf (_("  ID:       ")), (unsigned char *) id, 8);
+		      else
+			printf (_("  ID: <unknown>\n"));
+		      printf ("\n\n");
+		    }
+
+		  if (do_follow_links)
+		    load_dwo_file (filename, dwinfo->value, dir, id);
+		  break;
+
+		case DWO_DIR:
+		  dir = dwinfo->value;
+		  break;
+
+		case DWO_ID:
+		  id = dwinfo->value;
+		  break;
+
+		default:
+		  error (_("Unexpected DWO INFO type"));
+		  break;
+		}
 	    }
 	}
     }
@@ -10042,7 +10157,7 @@ load_separate_debug_file (void * file, const char * filename)
   if (! do_follow_links)
     /* The other debug links will be displayed by display_debug_links()
        so we do not need to do any further processing here.  */
-    return NULL;
+    return FALSE;
 
   /* FIXME: We do not check for the presence of both link sections in the same file.  */
   /* FIXME: We do not check the separate debug info file to see if it too contains debuglinks.  */
@@ -10053,26 +10168,29 @@ load_separate_debug_file (void * file, const char * filename)
     {
       Build_id_data * build_id_data;
 
-      return load_separate_debug_info (filename,
-				       & debug_displays[gnu_debugaltlink].section,
-				       parse_gnu_debugaltlink,
-				       check_gnu_debugaltlink,
-				       & build_id_data);
+      load_separate_debug_info (filename,
+				& debug_displays[gnu_debugaltlink].section,
+				parse_gnu_debugaltlink,
+				check_gnu_debugaltlink,
+				& build_id_data);
     }
 
   if (load_debug_section (gnu_debuglink, file))
     {
       unsigned long crc32;
 
-      return load_separate_debug_info (filename,
-				       & debug_displays[gnu_debuglink].section,
-				       parse_gnu_debuglink,
-				       check_gnu_debuglink,
-				       & crc32);
+      load_separate_debug_info (filename,
+				& debug_displays[gnu_debuglink].section,
+				parse_gnu_debuglink,
+				check_gnu_debuglink,
+				& crc32);
     }
 
+  if (first_separate_info != NULL)
+    return TRUE;
+
   do_follow_links = 0;
-  return NULL;
+  return FALSE;
 }  
 
 void
@@ -10105,14 +10223,19 @@ free_debug_memory (void)
       alloc_num_debug_info_entries = num_debug_info_entries = 0;
     }
 
-  if (separate_debug_file != NULL)
-    {
-      close_debug_file (separate_debug_file);
-      separate_debug_file = NULL;
+  separate_info * d;
+  separate_info * next;
 
-      free ((void *) separate_debug_filename);
-      separate_debug_filename = NULL;
+  for (d = first_separate_info; d != NULL; d = next)
+    {
+      close_debug_file (d->handle);
+      free ((void *) d->filename);
+      next = d->next;
+      free ((void *) d);
     }
+  first_separate_info = NULL;
+  
+  free_dwo_info ();
 }
 
 void

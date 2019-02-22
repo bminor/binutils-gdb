@@ -19302,7 +19302,7 @@ open_debug_file (const char * pathname)
 static bfd_boolean
 process_object (Filedata * filedata)
 {
-  Filedata * separates;
+  bfd_boolean  have_separate_files;
   unsigned int i;
   bfd_boolean res = TRUE;
 
@@ -19379,19 +19379,26 @@ process_object (Filedata * filedata)
     res = FALSE;
 
   if (filedata->file_header.e_shstrndx != SHN_UNDEF)
-    separates = load_separate_debug_file (filedata, filedata->file_name);
+    have_separate_files = load_separate_debug_files (filedata, filedata->file_name);
   else
-    separates = NULL;
+    have_separate_files = FALSE;
 
   if (! process_section_contents (filedata))
     res = FALSE;
 
-  if (separates)
+  if (have_separate_files)
     {
-      if (! process_section_headers (separates))
-	res = FALSE;
-      else if (! process_section_contents (separates))
-	res = FALSE;
+      separate_info * d;
+
+      for (d = first_separate_info; d != NULL; d = d->next)
+	{
+	  if (! process_section_headers (d->handle))
+	    res = FALSE;
+	  else if (! process_section_contents (d->handle))
+	    res = FALSE;
+	}
+
+      /* The file handles are closed by the call to free_debug_memory() below.  */
     }
 
   if (! process_notes (filedata))
