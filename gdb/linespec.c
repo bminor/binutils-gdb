@@ -2102,16 +2102,14 @@ create_sals_line_offset (struct linespec_state *self,
   if (ls->file_symtabs->size () == 1
       && ls->file_symtabs->front () == nullptr)
     {
-      const char *fullname;
-
       set_current_program_space (self->program_space);
 
       /* Make sure we have at least a default source line.  */
       set_default_source_symtab_and_line ();
       initialize_defaults (&self->default_symtab, &self->default_line);
-      fullname = symtab_to_fullname (self->default_symtab);
       *ls->file_symtabs
-	= collect_symtabs_from_filename (fullname, self->search_pspace);
+	= collect_symtabs_from_filename (self->default_symtab->filename,
+					 self->search_pspace);
       use_default = 1;
     }
 
