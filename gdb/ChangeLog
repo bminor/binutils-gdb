@@ -1,3 +1,8 @@
+2019-02-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdbarch.sh: Update the copyright year range that is placed into
+	generated files.
+
 2019-02-22  Keith Seitz  <keiths@redhat.com>
 
 	PR symtab/23853
