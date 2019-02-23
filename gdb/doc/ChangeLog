@@ -1,3 +1,8 @@
+2019-02-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo: Update copyright year ranges.
+	* refcard.tex: Likewise.
+
 2019-02-21  Alan Hayward  <alan.hayward@arm.com>
 
 	* gdb.texinfo: Update style defaults.
