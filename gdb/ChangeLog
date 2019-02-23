@@ -1,3 +1,7 @@
+2019-02-23  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gcore.in: Add '--readnever' option when invoking GDB.
+
 2019-02-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* MAINTAINERS: Update my email address.
