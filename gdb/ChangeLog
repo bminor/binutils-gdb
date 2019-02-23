@@ -1,3 +1,12 @@
+2019-02-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* features/riscv/32bit-cpu.xml: Add register numbers.
+	* features/riscv/32bit-fpu.c: Regenerate.
+	* features/riscv/32bit-fpu.xml: Add register numbers.
+	* features/riscv/64bit-cpu.xml: Add register numbers.
+	* features/riscv/64bit-fpu.c: Regenerate.
+	* features/riscv/64bit-fpu.xml: Add register numbers.
+
 2019-02-26  Kevin Buettner  <kevinb@redhat.com>
 
 	* NEWS: Mention two argument form of gdb.Value constructor.

@@ -9,6 +9,7 @@ create_feature_riscv_32bit_fpu (struct target_desc *result, long regnum)
   struct tdesc_feature *feature;
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.riscv.fpu");
+  regnum = 33;
   tdesc_create_reg (feature, "ft0", regnum++, 1, NULL, 32, "ieee_single");
   tdesc_create_reg (feature, "ft1", regnum++, 1, NULL, 32, "ieee_single");
   tdesc_create_reg (feature, "ft2", regnum++, 1, NULL, 32, "ieee_single");
@@ -41,6 +42,7 @@ create_feature_riscv_32bit_fpu (struct target_desc *result, long regnum)
   tdesc_create_reg (feature, "ft9", regnum++, 1, NULL, 32, "ieee_single");
   tdesc_create_reg (feature, "ft10", regnum++, 1, NULL, 32, "ieee_single");
   tdesc_create_reg (feature, "ft11", regnum++, 1, NULL, 32, "ieee_single");
+  regnum = 66;
   tdesc_create_reg (feature, "fflags", regnum++, 1, NULL, 32, "int");
   tdesc_create_reg (feature, "frm", regnum++, 1, NULL, 32, "int");
   tdesc_create_reg (feature, "fcsr", regnum++, 1, NULL, 32, "int");
