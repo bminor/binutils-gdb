@@ -1,3 +1,11 @@
+2019-02-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/mi_ref_changeable.exp: Update copyright year range.
+	* gdb.ada/mi_ref_changeable/foo_rb20_056.adb: Likewise.
+	* gdb.ada/mi_ref_changeable/pck.adb: Likewise.
+	* gdb.ada/mi_ref_changeable/pck.ads: Likewise.
+	* gdb.dwarf2/inlined_subroutine-inheritance.exp: Likewise.
+
 2019-02-22  Keith Seitz  <keiths@redhat.com>
 
 	PR symtab/23853
