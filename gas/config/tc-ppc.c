@@ -2999,6 +2999,7 @@ fixup_size (bfd_reloc_code_real_type reloc, bfd_boolean *pc_relative)
   return size;
 }
 
+#ifdef OBJ_ELF
 /* If we have parsed a call to __tls_get_addr, parse an argument like
    (gd0@tlsgd).  *STR is the leading parenthesis on entry.  If an arg
    is successfully parsed, *STR is updated past the trailing
@@ -3035,6 +3036,7 @@ parse_tls_arg (char **str, const expressionS *exp, struct ppc_fixup *tls_fix)
     }
   return tls_fix->reloc != BFD_RELOC_NONE;
 }
+#endif
 
 /* This routine is called for each instruction to be assembled.  */
 
