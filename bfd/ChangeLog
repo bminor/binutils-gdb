@@ -1,3 +1,8 @@
+2019-02-24  Alan Modra  <amodra@gmail.com>
+
+	PR 24144
+	* pdp11.c (set_section_contents): Revert 2015-02-24 change.
+
 2019-02-20  Eric Tsai  <erictsai@cadence.com>
 
 	* elf32-xtensa.c (is_resolvable_asm_expansion): Scan output

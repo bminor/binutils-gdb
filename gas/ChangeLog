@@ -1,3 +1,9 @@
+2019-02-24  Alan Modra  <amodra@gmail.com>
+
+	PR 24144
+	* config/obj-aout.c (obj_aout_frob_file_before_fix): Write to end
+	of section to ensure file contents cover aligned section size.
+
 2019-02-22  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* config/tc-arm.c (arm_cpus): Add neoverse-n1.
