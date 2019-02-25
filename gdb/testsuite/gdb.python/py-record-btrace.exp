@@ -144,6 +144,10 @@ with_test_prefix "instruction " {
     gdb_test "python print(i.decoded)" ".*"
     gdb_test "python print(i.size)" "$decimal"
     gdb_test "python print(i.is_speculative)" "False"
+    gdb_test_no_output "python r.clear()"
+    gdb_test "python insn = r.instruction_history"
+    gdb_test_no_output "python i = insn\[0\]"
+    gdb_test "python print(i.size)" "$decimal" "size after clear"
 }
 
 with_test_prefix "function call" {

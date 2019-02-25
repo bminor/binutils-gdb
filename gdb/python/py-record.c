@@ -114,6 +114,19 @@ recpy_goto (PyObject *self, PyObject *value)
   return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
 }
 
+/* Implementation of record.clear () -> None.  */
+
+static PyObject *
+recpy_clear (PyObject *self, PyObject *value)
+{
+  const recpy_record_object * const obj = (recpy_record_object *) self;
+
+  if (obj->method == RECORD_METHOD_BTRACE)
+    return recpy_bt_clear (self, value);
+
+  return PyErr_Format (PyExc_NotImplementedError, _("Not implemented."));
+}
+
 /* Implementation of record.replay_position [instruction]  */
 
 static PyObject *
@@ -522,6 +535,9 @@ static PyMethodDef recpy_record_methods[] = {
   { "goto", recpy_goto, METH_VARARGS,
     "goto (instruction|function_call) -> None.\n\
 Rewind to given location."},
+  { "clear", recpy_clear, METH_VARARGS,
+    "clear () -> None.\n\
+Clears the trace."},
   { NULL }
 };
 

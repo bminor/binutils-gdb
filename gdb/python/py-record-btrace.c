@@ -847,6 +847,19 @@ recpy_bt_goto (PyObject *self, PyObject *args)
   Py_RETURN_NONE;
 }
 
+/* Implementation of BtraceRecord.clear (self) -> None.  */
+
+PyObject *
+recpy_bt_clear (PyObject *self, PyObject *args)
+{
+  const recpy_record_object * const record = (recpy_record_object *) self;
+  thread_info *const tinfo = record->thread;
+
+  btrace_clear (tinfo);
+
+  Py_RETURN_NONE;
+}
+
 /* BtraceList methods.  */
 
 static PyMethodDef btpy_list_methods[] =

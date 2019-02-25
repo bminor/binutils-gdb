@@ -4314,6 +4314,11 @@ A @code{gdb.Record} object has the following methods:
 Move the replay position to the given @var{instruction}.
 @end defun
 
+@defun Record.clear ()
+Clear the trace data of the current recording.  This forces re-decoding of the
+trace for successive commands.
+@end defun
+
 The common @code{gdb.Instruction} class that recording method specific
 instruction objects inherit from, has the following attributes:
 

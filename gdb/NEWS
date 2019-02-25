@@ -3,6 +3,11 @@
 
 *** Changes since GDB 15
 
+* Python API
+
+  ** Added gdb.record.clear.  Clears the trace data of the current recording.
+     This forces re-decoding of the trace for successive commands.
+
 * Debugger Adapter Protocol changes
 
   ** The "scopes" request will now return a scope holding global
