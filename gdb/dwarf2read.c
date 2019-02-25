@@ -2722,7 +2722,7 @@ dwarf2_get_dwz_file (struct dwarf2_per_objfile *dwarf2_per_objfile)
   if (dwz_bfd != NULL)
     {
       if (!build_id_verify (dwz_bfd.get (), buildid_len, buildid))
-	dwz_bfd.release ();
+	dwz_bfd.reset (nullptr);
     }
 
   if (dwz_bfd == NULL)

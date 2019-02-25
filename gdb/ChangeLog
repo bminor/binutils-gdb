@@ -1,3 +1,8 @@
+2019-02-25  John Baldwin  <jhb@FreeBSD.org>
+
+	* dwarf2read.c (dwarf2_get_dwz_file): Reset dwz_bfd to nullptr
+	instead of releasing ownership.
+
 2019-02-25  Jordan Rupprecht  <rupprecht@google.com>
 
 	* dwarf2read.c (open_and_init_dwp_file): Call
