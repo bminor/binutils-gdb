@@ -2236,6 +2236,10 @@ will stop at the end of the function, otherwise it will stop when the
 next symbol is encountered.  If there are no matches for @var{symbol}
 then nothing will be displayed.
 
+Note if the @option{--dwarf=follow-links} option has also been enabled
+then any symbol tables in linked debug info files will be read in and
+used when disassembling.
+
 @item -D
 @itemx --disassemble-all
 Like @option{-d}, but disassemble the contents of all sections, not just
@@ -2253,6 +2257,10 @@ is stored in code sections.
 If the target is an ARM architecture this switch also has the effect
 of forcing the disassembler to decode pieces of data found in code
 sections as if they were instructions.
+
+Note if the @option{--dwarf=follow-links} option has also been enabled
+then any symbol tables in linked debug info files will be read in and
+used when disassembling.
 
 @item --prefix-addresses
 When disassembling, print the complete address on each line.  This is

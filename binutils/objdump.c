@@ -987,6 +987,30 @@ objdump_print_symname (bfd *abfd, struct disassemble_info *inf,
     free (alloc);
 }
 
+static inline bfd_boolean
+sym_ok (bfd_boolean               want_section,
+	bfd *                     abfd ATTRIBUTE_UNUSED,
+	long                      place,
+	asection *                sec,
+	struct disassemble_info * inf)
+{
+  if (want_section)
+    {
+      /* Note - we cannot just compare section pointers because they could
+	 be different, but the same...  Ie the symbol that we are trying to
+	 find could have come from a separate debug info file.  Under such
+	 circumstances the symbol will be associated with a section in the
+	 debug info file, whilst the section we want is in a normal file.
+	 So the section pointers will be different, but the section names
+	 will be the same.  */
+      if (strcmp (bfd_section_name (abfd, sorted_syms[place]->section),
+		  bfd_section_name (abfd, sec)) != 0)
+	return FALSE;
+    }
+
+  return inf->symbol_is_valid (sorted_syms[place], inf);
+}
+
 /* Locate a symbol given a bfd and a section (from INFO->application_data),
    and a VMA.  If INFO->application_data->require_sec is TRUE, then always
    require the symbol to be in the section.  Returns NULL if there is no
@@ -1062,8 +1086,7 @@ find_symbol_for_address (bfd_vma vma,
 	 && (bfd_asymbol_value (sorted_syms[min])
 	     == bfd_asymbol_value (sorted_syms[thisplace])))
     {
-      if (sorted_syms[min]->section == sec
-	  && inf->symbol_is_valid (sorted_syms[min], inf))
+      if (sym_ok (TRUE, abfd, min, sec, inf))
 	{
 	  thisplace = min;
 
@@ -1090,16 +1113,15 @@ find_symbol_for_address (bfd_vma vma,
 		      && vma >= bfd_get_section_vma (abfd, sec)
 		      && vma < (bfd_get_section_vma (abfd, sec)
 				+ bfd_section_size (abfd, sec) / opb)));
-  if ((sorted_syms[thisplace]->section != sec && want_section)
-      || ! inf->symbol_is_valid (sorted_syms[thisplace], inf))
+  
+  if (! sym_ok (want_section, abfd, thisplace, sec, inf))
     {
       long i;
       long newplace = sorted_symcount;
 
       for (i = min - 1; i >= 0; i--)
 	{
-	  if ((sorted_syms[i]->section == sec || !want_section)
-	      && inf->symbol_is_valid (sorted_syms[i], inf))
+	  if (sym_ok (want_section, abfd, i, sec, inf))
 	    {
 	      if (newplace == sorted_symcount)
 		newplace = i;
@@ -1122,8 +1144,7 @@ find_symbol_for_address (bfd_vma vma,
 	     Look for one with a larger value.  */
 	  for (i = thisplace + 1; i < sorted_symcount; i++)
 	    {
-	      if ((sorted_syms[i]->section == sec || !want_section)
-		  && inf->symbol_is_valid (sorted_syms[i], inf))
+	      if (sym_ok (want_section, abfd, i, sec, inf))
 		{
 		  thisplace = i;
 		  break;
@@ -1131,8 +1152,7 @@ find_symbol_for_address (bfd_vma vma,
 	    }
 	}
 
-      if ((sorted_syms[thisplace]->section != sec && want_section)
-	  || ! inf->symbol_is_valid (sorted_syms[thisplace], inf))
+      if (! sym_ok (want_section, abfd, thisplace, sec, inf))
 	/* There is no suitable symbol.  */
 	return NULL;
     }
@@ -2460,7 +2480,7 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
       else
 	{
 #define is_valid_next_sym(SYM) \
-  ((SYM)->section == section \
+  (strcmp (bfd_section_name (abfd, (SYM)->section), bfd_section_name (abfd, section)) == 0 \
    && (bfd_asymbol_value (SYM) > bfd_asymbol_value (sym)) \
    && pinfo->symbol_is_valid (SYM, pinfo))
 
@@ -2882,23 +2902,17 @@ dump_dwarf_section (bfd *abfd, asection *section,
 static void
 dump_dwarf (bfd *abfd)
 {
-  bfd_boolean have_separates;
-
-  is_relocatable = (abfd->flags & (EXEC_P | DYNAMIC)) == 0;
-
-  eh_addr_size = bfd_arch_bits_per_address (abfd) / 8;
-
-  if (bfd_big_endian (abfd))
-    byte_get = byte_get_big_endian;
-  else if (bfd_little_endian (abfd))
-    byte_get = byte_get_little_endian;
-  else
-    /* PR 17512: file: objdump-s-endless-loop.tekhex.  */
+  /* The byte_get pointer should have been set at the start of dump_bfd().  */
+  if (byte_get == NULL)
     {
       warn (_("File %s does not contain any dwarf debug information\n"),
 	    bfd_get_filename (abfd));
       return;
     }
+
+  is_relocatable = (abfd->flags & (EXEC_P | DYNAMIC)) == 0;
+
+  eh_addr_size = bfd_arch_bits_per_address (abfd) / 8;
 
   switch (bfd_get_arch (abfd))
     {
@@ -2946,21 +2960,7 @@ dump_dwarf (bfd *abfd)
       break;
     }
 
-  have_separates = load_separate_debug_files (abfd, bfd_get_filename (abfd));
-
   bfd_map_over_sections (abfd, dump_dwarf_section, NULL);
-
-  if (have_separates)
-    {
-      separate_info * i;
-
-      for (i = first_separate_info; i != NULL; i = i->next)
-	bfd_map_over_sections (i->handle, dump_dwarf_section, NULL);
-
-      /* The file handles are closed by the call to free_debug_memory() below.  */
-    }
-
-  free_debug_memory ();
 }
 
 /* Read ABFD's stabs section STABSECT_NAME, and return a pointer to
@@ -3768,8 +3768,38 @@ adjust_addresses (bfd *abfd ATTRIBUTE_UNUSED,
 /* Dump selected contents of ABFD.  */
 
 static void
-dump_bfd (bfd *abfd)
+dump_bfd (bfd *abfd, bfd_boolean is_mainfile)
 {
+  if (bfd_big_endian (abfd))
+    byte_get = byte_get_big_endian;
+  else if (bfd_little_endian (abfd))
+    byte_get = byte_get_little_endian;
+  else
+    byte_get = NULL;
+
+  /* Load any separate debug information files.
+     We do this now and without checking do_follow_links because separate
+     debug info files may contain symbol tables that we will need when
+     displaying information about the main file.  Any memory allocated by
+     load_separate_debug_files will be released when we call
+     free_debug_memory below.
+     
+     The test on is_mainfile is there because the chain of separate debug
+     info files is a global variable shared by all invocations of dump_bfd.  */
+  if (is_mainfile)
+    {
+      load_separate_debug_files (abfd, bfd_get_filename (abfd));
+
+      /* If asked to do so, recursively dump the separate files.  */
+      if (do_follow_links)
+	{
+	  separate_info * i;
+
+	  for (i = first_separate_info; i != NULL; i = i->next)
+	    dump_bfd (i->handle, FALSE);
+	}
+    }
+
   /* If we are adjusting section VMA's, change them all now.  Changing
      the BFD information is a hack.  However, we must do it, or
      bfd_find_nearest_line will not do the right thing.  */
@@ -3799,7 +3829,40 @@ dump_bfd (bfd *abfd)
       || disassemble
       || dump_debugging
       || dump_dwarf_section_info)
-    syms = slurp_symtab (abfd);
+    {
+      syms = slurp_symtab (abfd);
+
+      /* If following links, load any symbol tables from the linked files as well.  */
+      if (do_follow_links && is_mainfile)
+	{
+	  separate_info * i;
+
+	  for (i = first_separate_info; i != NULL; i = i->next)
+	    {
+	      asymbol **  extra_syms;
+	      long        old_symcount = symcount;
+	      
+	      extra_syms = slurp_symtab (i->handle);
+
+	      if (extra_syms)
+		{
+		  if (old_symcount == 0)
+		    {
+		      syms = extra_syms;
+		    }
+		  else
+		    {
+		      syms = xrealloc (syms, (symcount + old_symcount) * sizeof (asymbol *));
+		      memcpy (syms + old_symcount,
+			      extra_syms,
+			      symcount * sizeof (asymbol *));
+		    }
+		}
+
+	      symcount += old_symcount;
+	    }
+	}
+    }
 
   if (dump_section_headers)
     dump_headers (abfd);
@@ -3807,6 +3870,7 @@ dump_bfd (bfd *abfd)
   if (dump_dynamic_symtab || dump_dynamic_reloc_info
       || (disassemble && bfd_get_dynamic_symtab_upper_bound (abfd) > 0))
     dynsyms = slurp_dynamic_symtab (abfd);
+
   if (disassemble)
     {
       synthcount = bfd_get_synthetic_symtab (abfd, symcount, syms,
@@ -3880,6 +3944,9 @@ dump_bfd (bfd *abfd)
   symcount = 0;
   dynsymcount = 0;
   synthcount = 0;
+
+  if (is_mainfile)
+    free_debug_memory ();
 }
 
 static void
@@ -3889,7 +3956,7 @@ display_object_bfd (bfd *abfd)
 
   if (bfd_check_format_matches (abfd, bfd_object, &matching))
     {
-      dump_bfd (abfd);
+      dump_bfd (abfd, TRUE);
       return;
     }
 
@@ -3909,7 +3976,7 @@ display_object_bfd (bfd *abfd)
 
   if (bfd_check_format_matches (abfd, bfd_core, &matching))
     {
-      dump_bfd (abfd);
+      dump_bfd (abfd, TRUE);
       return;
     }
 

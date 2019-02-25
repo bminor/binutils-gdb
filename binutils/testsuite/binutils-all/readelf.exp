@@ -489,7 +489,7 @@ if {![binutils_assemble $srcdir/$subdir/debuglink.s tmpdir/debuglink.o]} then {
 	    set tempfile2 [remote_download host tmpdir/linkdebug.debug]
 	}
 
-	readelf_test {-wKis} $tempfile objdump.WK2  {}
+	readelf_test {-wKis} $tempfile readelf.wKis  {}
     }
 }
 

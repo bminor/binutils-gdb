@@ -1,3 +1,26 @@
+2019-02-25  Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c (sym_ok): New function.
+	(find_symbol_for_address): Use new function.
+	(disassemble_section): Compare sections by name, not pointer.
+	(dump_dwarf): Move code to initialise byte_get pointer and iterate
+	over separate debug files from here to ...
+	(dump_bfd): ... here.  Add parameter indicating that a separate
+	debug info file is being dumped.  For main file, pull in the
+	symbol tables from all separate debug info files.
+	(display_object): Update call to dump_bfd.
+	* doc/binutils.texi: Document extened behaviour of the
+	--dwarf=follow-links option.
+	* NEWS: Mention this new feature.
+	* testsuite/binutils-all/objdump.WK2: Update expected output.
+	* testsuite/binutils-all/objdump.exp (test_follow_debuglink): Add
+	options and dump file parameters.
+	Add extra test.
+	* testsuite/binutils-all/objdump.WK3: New file.
+	* testsuite/binutils-all/readelf.exp: Change expected output for
+	readelf -wKis test.
+	* testsuite/binutils-all/readelf.wKis: New file.
+
 2019-02-22  Nick Clifton  <nickc@redhat.com>
 
 	PR 23843

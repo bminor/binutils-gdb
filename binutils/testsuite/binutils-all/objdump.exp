@@ -623,12 +623,12 @@ if { [is_elf_format] } then {
 # Very similar to proc test_build_id_debuglink except this time we
 # display some of the contents of the separate debug info file.
 
-proc test_follow_debuglink {} {
+proc test_follow_debuglink { options dumpfile } {
     global srcdir
     global subdir
     global OBJDUMP
     
-    set test "follow-debuglink"
+    set test "follow-debuglink ($options)"
 
     if {![binutils_assemble $srcdir/$subdir/debuglink.s tmpdir/debuglink.o]} then {
 	fail "$test (reason: assemble first source file)"
@@ -647,13 +647,13 @@ proc test_follow_debuglink {} {
 	set tempfile [remote_download host tmpdir/debuglink.o]
     }
     
-    set got [remote_exec host "$OBJDUMP --dwarf=follow-links --dwarf=info --dwarf=str $tempfile" "" "/dev/null" "tmpdir/objdump.out"]
+    set got [remote_exec host "$OBJDUMP $options $tempfile" "" "/dev/null" "tmpdir/objdump.out"]
     if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
 	fail "$test (reason: unexpected error output from objdump)"
 	return
     }
 
-    if { [regexp_diff tmpdir/objdump.out $srcdir/$subdir/objdump.WK2] } then {
+    if { [regexp_diff tmpdir/objdump.out $srcdir/$subdir/$dumpfile] } then {
 	fail $test
 	verbose "output is \n[file_contents objdump.out]" 2
 	return
@@ -668,7 +668,8 @@ proc test_follow_debuglink {} {
 }
 
 if {[is_elf_format]} then {
-    test_follow_debuglink
+    test_follow_debuglink "--dwarf=follow-links --dwarf=info --dwarf=str" objdump.WK2
+    test_follow_debuglink "--dwarf=follow-links --headers --wide" objdump.WK3
 }
 
 # Options which are not tested: -a -D -R -T -x -l --stabs

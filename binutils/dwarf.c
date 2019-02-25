@@ -9826,6 +9826,7 @@ parse_gnu_debuglink (struct dwarf_section * section, void * data)
      The CRC value is stored after the filename, aligned up to 4 bytes.  */
   name = (const char *) section->start;
 
+  
   crc_offset = strnlen (name, section->size) + 1;
   crc_offset = (crc_offset + 3) & ~3;
   if (crc_offset + 4 > section->size)
@@ -9981,6 +9982,11 @@ load_separate_debug_info (const char *            main_filename,
   sprintf (debug_filename, "%s/%s", EXTRA_DEBUG_ROOT1, separate_filename);
   if (check_func (debug_filename, func_data))
     goto found;
+
+  /* Try the first extra debug file root.  */
+  sprintf (debug_filename, "%s/%s/%s", EXTRA_DEBUG_ROOT1, canon_dir, separate_filename);
+  if (check_func (debug_filename, func_data))
+    goto found;
 #endif
 
 #ifdef EXTRA_DEBUG_ROOT2
@@ -10010,6 +10016,9 @@ load_separate_debug_info (const char *            main_filename,
 #endif
 
 #ifdef EXTRA_DEBUG_ROOT1
+  sprintf (debug_filename, "%s/%s/%s", EXTRA_DEBUG_ROOT1, canon_dir, separate_filename);
+  warn (_("tried: %s\n"), debug_filename);
+
   sprintf (debug_filename, "%s/%s", EXTRA_DEBUG_ROOT1, separate_filename);
   warn (_("tried: %s\n"), debug_filename);
 #endif

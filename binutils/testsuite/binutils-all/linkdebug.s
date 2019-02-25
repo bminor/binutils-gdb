@@ -51,4 +51,3 @@ string3:
 	.asciz  "string-4"
 	.balign	2
 string_end:
-	
