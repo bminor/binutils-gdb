@@ -13230,8 +13230,7 @@ open_and_init_dwp_file (struct dwarf2_per_objfile *dwarf2_per_objfile)
   std::unique_ptr<struct dwp_file> dwp_file
     (new struct dwp_file (name, std::move (dbfd)));
 
-  /* +1: section 0 is unused */
-  dwp_file->num_sections = bfd_count_sections (dwp_file->dbfd) + 1;
+  dwp_file->num_sections = elf_numsections (dwp_file->dbfd);
   dwp_file->elf_sections =
     OBSTACK_CALLOC (&objfile->objfile_obstack,
 		    dwp_file->num_sections, asection *);
