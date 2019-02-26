@@ -1,5 +1,10 @@
 2019-03-05  Tom Tromey  <tromey@adacore.com>
 
+	* remote.c (class scoped_remote_fd) <release>: Add
+	ATTRIBUTE_UNUSED_RESULT.
+
+2019-03-05  Tom Tromey  <tromey@adacore.com>
+
 	* macroexp.c (struct macro_buffer) <release>: Add
 	ATTRIBUTE_UNUSED_RESULT.
 

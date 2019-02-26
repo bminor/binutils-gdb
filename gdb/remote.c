@@ -12410,7 +12410,7 @@ public:
   DISABLE_COPY_AND_ASSIGN (scoped_remote_fd);
 
   /* Release ownership of the file descriptor, and return it.  */
-  int release () noexcept
+  ATTRIBUTE_UNUSED_RESULT int release () noexcept
   {
     int fd = m_fd;
     m_fd = -1;
