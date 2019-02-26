@@ -1,5 +1,10 @@
 2019-03-05  Tom Tromey  <tromey@adacore.com>
 
+	* macroexp.c (struct macro_buffer) <release>: Add
+	ATTRIBUTE_UNUSED_RESULT.
+
+2019-03-05  Tom Tromey  <tromey@adacore.com>
+
 	* nat/linux-btrace.c (linux_enable_bts, linux_enable_pt): Update.
 	* common/scoped_mmap.h (class scoped_mmap) <release>: Add
 	ATTRIBUTE_UNUSED_RESULT.
