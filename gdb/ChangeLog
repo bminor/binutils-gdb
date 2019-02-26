@@ -1,5 +1,10 @@
 2019-03-05  Tom Tromey  <tromey@adacore.com>
 
+	* common/scoped_fd.h (class scoped_fd) <release>: Add
+	ATTRIBUTE_UNUSED_RESULT.
+
+2019-03-05  Tom Tromey  <tromey@adacore.com>
+
 	* parser-defs.h (struct parser_state) <release>: Add
 	ATTRIBUTE_UNUSED_RESULT.
 

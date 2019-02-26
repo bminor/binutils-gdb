@@ -56,7 +56,7 @@ public:
 
   DISABLE_COPY_AND_ASSIGN (scoped_fd);
 
-  int release () noexcept
+  ATTRIBUTE_UNUSED_RESULT int release () noexcept
   {
     int fd = m_fd;
     m_fd = -1;
