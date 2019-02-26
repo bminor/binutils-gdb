@@ -1,5 +1,10 @@
 2019-03-05  Tom Tromey  <tromey@adacore.com>
 
+	* parser-defs.h (struct parser_state) <release>: Add
+	ATTRIBUTE_UNUSED_RESULT.
+
+2019-03-05  Tom Tromey  <tromey@adacore.com>
+
 	* utils.h (class gdb_argv) <release>: Add
 	ATTRIBUTE_UNUSED_RESULT.
 	* common/common-defs.h (ATTRIBUTE_UNUSED_RESULT): Define.

@@ -48,7 +48,7 @@ struct parser_state
 
   /* Resize the allocated expression to the correct size, and return
      it as an expression_up -- passing ownership to the caller.  */
-  expression_up release ();
+  ATTRIBUTE_UNUSED_RESULT expression_up release ();
 
   /* The size of the expression above.  */
 
