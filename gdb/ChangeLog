@@ -1,5 +1,14 @@
 2019-03-05  Tom Tromey  <tromey@adacore.com>
 
+	* varobj.c (update_dynamic_varobj_children): Update.
+	(install_default_visualizer): Use reset, not release.
+	* value.c (set_internalvar): Update.
+	* dwarf2loc.c (value_of_dwarf_reg_entry): Update.
+	* common/gdb_ref_ptr.h (class ref_ptr) <release>: Add
+	ATTRIBUTE_UNUSED_RESULT.
+
+2019-03-05  Tom Tromey  <tromey@adacore.com>
+
 	* remote.c (class scoped_remote_fd) <release>: Add
 	ATTRIBUTE_UNUSED_RESULT.
 

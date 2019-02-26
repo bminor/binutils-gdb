@@ -135,7 +135,7 @@ class ref_ptr
   /* Return this instance's referent, and stop managing this
      reference.  The caller is now responsible for the ownership of
      the reference.  */
-  T *release ()
+  ATTRIBUTE_UNUSED_RESULT T *release ()
   {
     T *result = m_obj;
 

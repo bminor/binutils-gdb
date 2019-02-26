@@ -1472,9 +1472,8 @@ value_of_dwarf_reg_entry (struct type *type, struct frame_info *frame,
 					       target_type, caller_frame,
 					       caller_per_cu);
 
-  release_value (target_val).release ();
   val = allocate_computed_value (type, &entry_data_value_funcs,
-				 target_val /* closure */);
+				 release_value (target_val).release ());
 
   /* Copy the referencing pointer to the new computed value.  */
   memcpy (value_contents_raw (val), value_contents_raw (outer_val),

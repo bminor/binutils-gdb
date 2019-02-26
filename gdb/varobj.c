@@ -760,7 +760,7 @@ update_dynamic_varobj_children (struct varobj *var,
 	  /* Release vitem->value so its lifetime is not bound to the
 	     execution of a command.  */
 	  if (item != NULL && item->value != NULL)
-	    release_value (item->value).release ();
+	    item->value = release_value (item->value).release ();
 	}
 
       if (item == NULL)
@@ -1127,7 +1127,7 @@ install_default_visualizer (struct varobj *var)
 	}
 
       if (pretty_printer == Py_None)
-	pretty_printer.release ();
+	pretty_printer.reset (nullptr);
   
       install_visualizer (var->dynamic, NULL, pretty_printer.release ());
     }
