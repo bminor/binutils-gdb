@@ -544,12 +544,10 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
 
   bts->bts.size = size;
   bts->bts.data_head = &header->data_head;
-  bts->bts.mem = (const uint8_t *) data.get () + data_offset;
+  bts->bts.mem = (const uint8_t *) data.release () + data_offset;
   bts->bts.last_head = 0ull;
   bts->header = header;
   bts->file = fd.release ();
-
-  data.release ();
 
   tinfo->conf.bts.size = (unsigned int) size;
   return tinfo.release ();
@@ -667,10 +665,9 @@ linux_enable_pt (ptid_t ptid, const struct btrace_config_pt *conf)
   pt->pt.size = aux.size ();
   pt->pt.mem = (const uint8_t *) aux.release ();
   pt->pt.data_head = &header->aux_head;
-  pt->header = header;
+  pt->header = (struct perf_event_mmap_page *) data.release ();
+  gdb_assert (pt->header == header);
   pt->file = fd.release ();
-
-  data.release ();
 
   tinfo->conf.pt.size = (unsigned int) pt->pt.size;
   return tinfo.release ();

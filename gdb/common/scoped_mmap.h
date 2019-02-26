@@ -57,7 +57,7 @@ public:
 
   DISABLE_COPY_AND_ASSIGN (scoped_mmap);
 
-  void *release () noexcept
+  ATTRIBUTE_UNUSED_RESULT void *release () noexcept
   {
     void *mem = m_mem;
     m_mem = MAP_FAILED;
