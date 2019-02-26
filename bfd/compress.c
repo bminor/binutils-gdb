@@ -84,11 +84,13 @@ bfd_compress_section_contents (bfd *abfd, sec_ptr sec,
   int zlib_size = 0;
   int orig_compression_header_size;
   bfd_size_type orig_uncompressed_size;
+  unsigned int orig_uncompressed_alignment_pow;
   int header_size = bfd_get_compression_header_size (abfd, NULL);
   bfd_boolean compressed
     = bfd_is_section_compressed_with_header (abfd, sec,
 					     &orig_compression_header_size,
-					     &orig_uncompressed_size);
+					     &orig_uncompressed_size,
+					     &orig_uncompressed_alignment_pow);
 
   /* Either ELF compression header or the 12-byte, "ZLIB" + 8-byte size,
      overhead in .zdebug* section.  */
@@ -153,6 +155,8 @@ bfd_compress_section_contents (bfd *abfd, sec_ptr sec,
 	      return 0;
 	    }
 	  free (uncompressed_buffer);
+	  bfd_set_section_alignment (abfd, sec,
+				     orig_uncompressed_alignment_pow);
 	  sec->contents = buffer;
 	  sec->compress_status = COMPRESS_SECTION_DONE;
 	  return orig_uncompressed_size;
@@ -364,26 +368,33 @@ SYNOPSIS
 	bfd_boolean bfd_is_section_compressed_with_header
 	  (bfd *abfd, asection *section,
 	  int *compression_header_size_p,
-	  bfd_size_type *uncompressed_size_p);
+	  bfd_size_type *uncompressed_size_p,
+	  unsigned int *uncompressed_alignment_power_p);
+
 
 DESCRIPTION
 	Return @code{TRUE} if @var{section} is compressed.  Compression
-	header size is returned in @var{compression_header_size_p} and
-	uncompressed size is returned in @var{uncompressed_size_p}.  If
-	compression is unsupported, compression header size is returned
-	with -1 and uncompressed size is returned with 0.
+	header size is returned in @var{compression_header_size_p},
+        uncompressed size is returned in @var{uncompressed_size_p}
+        and the uncompressed data alignement power is returned in
+        @var{uncompressed_align_pow_p}.  If compression is
+        unsupported, compression header size is returned with -1
+        and uncompressed size is returned with 0.
 */
 
 bfd_boolean
 bfd_is_section_compressed_with_header (bfd *abfd, sec_ptr sec,
 				       int *compression_header_size_p,
-				       bfd_size_type *uncompressed_size_p)
+				       bfd_size_type *uncompressed_size_p,
+				       unsigned int *uncompressed_align_pow_p)
 {
   bfd_byte header[MAX_COMPRESSION_HEADER_SIZE];
   int compression_header_size;
   int header_size;
   unsigned int saved = sec->compress_status;
   bfd_boolean compressed;
+
+  *uncompressed_align_pow_p = 0;
 
   compression_header_size = bfd_get_compression_header_size (abfd, sec);
   if (compression_header_size > MAX_COMPRESSION_HEADER_SIZE)
@@ -412,7 +423,8 @@ bfd_is_section_compressed_with_header (bfd *abfd, sec_ptr sec,
       if (compression_header_size != 0)
 	{
 	  if (!bfd_check_compression_header (abfd, header, sec,
-					     uncompressed_size_p))
+					     uncompressed_size_p,
+					     uncompressed_align_pow_p))
 	    compression_header_size = -1;
 	}
       /* Check for the pathalogical case of a debug string section that
@@ -449,9 +461,11 @@ bfd_is_section_compressed (bfd *abfd, sec_ptr sec)
 {
   int compression_header_size;
   bfd_size_type uncompressed_size;
+  unsigned int uncompressed_align_power;
   return (bfd_is_section_compressed_with_header (abfd, sec,
 						 &compression_header_size,
-						 &uncompressed_size)
+						 &uncompressed_size,
+						 &uncompressed_align_power)
 	  && compression_header_size >= 0
 	  && uncompressed_size > 0);
 }
@@ -480,6 +494,7 @@ bfd_init_section_decompress_status (bfd *abfd, sec_ptr sec)
   int compression_header_size;
   int header_size;
   bfd_size_type uncompressed_size;
+  unsigned int uncompressed_alignment_power = 0;
 
   compression_header_size = bfd_get_compression_header_size (abfd, sec);
   if (compression_header_size > MAX_COMPRESSION_HEADER_SIZE)
@@ -508,7 +523,8 @@ bfd_init_section_decompress_status (bfd *abfd, sec_ptr sec)
       uncompressed_size = bfd_getb64 (header + 4);
     }
   else if (!bfd_check_compression_header (abfd, header, sec,
-					 &uncompressed_size))
+					  &uncompressed_size,
+					  &uncompressed_alignment_power))
     {
       bfd_set_error (bfd_error_wrong_format);
       return FALSE;
@@ -516,6 +532,7 @@ bfd_init_section_decompress_status (bfd *abfd, sec_ptr sec)
 
   sec->compressed_size = sec->size;
   sec->size = uncompressed_size;
+  bfd_set_section_alignment (abfd, sec, uncompressed_alignment_power);
   sec->compress_status = DECOMPRESS_SECTION_SIZED;
 
   return TRUE;

@@ -2448,7 +2448,14 @@ Output_section::add_input_section(Layout* layout,
 				  unsigned int reloc_shndx,
 				  bool have_sections_script)
 {
+  section_size_type input_section_size = shdr.get_sh_size();
+  section_size_type uncompressed_size;
   elfcpp::Elf_Xword addralign = shdr.get_sh_addralign();
+
+  if (object->section_is_compressed(shndx, &uncompressed_size,
+                                   &addralign))
+    input_section_size = uncompressed_size;
+
   if ((addralign & (addralign - 1)) != 0)
     {
       object->error(_("invalid alignment %lu for section \"%s\""),
@@ -2497,11 +2504,6 @@ Output_section::add_input_section(Layout* layout,
 	  return -1;
 	}
     }
-
-  section_size_type input_section_size = shdr.get_sh_size();
-  section_size_type uncompressed_size;
-  if (object->section_is_compressed(shndx, &uncompressed_size))
-    input_section_size = uncompressed_size;
 
   off_t offset_in_section;
 
