@@ -530,7 +530,7 @@ proc test_value_from_buffer {} {
   gdb_test "python v=gdb.Value(b\[2*size_a0:\],tp); print(v)" "3" \
            "convert 3rd elem of buffer to value"
   gdb_test "python v=gdb.Value(b\[2*size_a0+1:\],tp); print(v)" \
-           "TypeError: Size of type is larger than that of buffer object\..*" \
+           "ValueError: Size of type is larger than that of buffer object\..*" \
 	   "attempt to convert smaller buffer than size of type"
   gdb_py_test_silent_cmd "python atp=tp.array(2) ; print(atp)" \
                          "make array type" 0
