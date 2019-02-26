@@ -93,6 +93,12 @@
 #undef ATTRIBUTE_PRINTF
 #define ATTRIBUTE_PRINTF _GL_ATTRIBUTE_FORMAT_PRINTF
 
+#if GCC_VERSION >= 3004
+#define ATTRIBUTE_UNUSED_RESULT __attribute__ ((__warn_unused_result__))
+#else
+#define ATTRIBUTE_UNUSED_RESULT
+#endif
+
 #include "libiberty.h"
 #include "pathmax.h"
 #include "gdb/signals.h"

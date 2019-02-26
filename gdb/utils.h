@@ -188,7 +188,7 @@ public:
   /* Return the underlying array, transferring ownership to the
      caller.  */
 
-  char **release ()
+  ATTRIBUTE_UNUSED_RESULT char **release ()
   {
     char **result = m_argv;
     m_argv = NULL;

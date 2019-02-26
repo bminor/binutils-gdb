@@ -1,3 +1,9 @@
+2019-03-05  Tom Tromey  <tromey@adacore.com>
+
+	* utils.h (class gdb_argv) <release>: Add
+	ATTRIBUTE_UNUSED_RESULT.
+	* common/common-defs.h (ATTRIBUTE_UNUSED_RESULT): Define.
+
 2019-03-02  Eli Zaretskii  <eliz@gnu.org>
 
 	* xml-syscall.c (xml_list_syscalls_by_group): Drop 'struct' from
