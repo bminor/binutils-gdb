@@ -46,13 +46,6 @@ clean_restart ${testfile}
 
 if { [skip_python_tests] } { continue }
 
-if { $gdb_py_is_py24 == 1 } {
-    # Python 2.4, 2.5 do not support the "ValueError as e" syntax used in
-    # the py-finish-breakpoint.py script.
-	untested "missing support on Python 2.4 and 2.5"
-    return 0
-}
-
 #
 # Test FinishBreakpoint in normal conditions
 #

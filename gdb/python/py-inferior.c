@@ -1002,20 +1002,11 @@ static PyBufferProcs buffer_procs =
 
 #else
 
-/* Python doesn't provide a decent way to get compatibility here.  */
-#if HAVE_LIBPYTHON2_4
-#define CHARBUFFERPROC_NAME getcharbufferproc
-#else
-#define CHARBUFFERPROC_NAME charbufferproc
-#endif
-
 static PyBufferProcs buffer_procs = {
   get_read_buffer,
   get_write_buffer,
   get_seg_count,
-  /* The cast here works around a difference between Python 2.4 and
-     Python 2.5.  */
-  (CHARBUFFERPROC_NAME) get_char_buffer
+  get_char_buffer
 };
 #endif	/* IS_PY3K */
 

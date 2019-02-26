@@ -249,12 +249,6 @@
 /* Define if you have the mpfr library. */
 #undef HAVE_LIBMPFR
 
-/* Define if Python 2.4 is being used. */
-#undef HAVE_LIBPYTHON2_4
-
-/* Define if Python 2.5 is being used. */
-#undef HAVE_LIBPYTHON2_5
-
 /* Define if Python 2.6 is being used. */
 #undef HAVE_LIBPYTHON2_6
 

@@ -1138,9 +1138,7 @@ gdbpy_initialize_breakpoints (void)
   /* Add breakpoint types constants.  */
   for (i = 0; pybp_codes[i].name; ++i)
     {
-      if (PyModule_AddIntConstant (gdb_module,
-				   /* Cast needed for Python 2.4.  */
-				   (char *) pybp_codes[i].name,
+      if (PyModule_AddIntConstant (gdb_module, pybp_codes[i].name,
 				   pybp_codes[i].code) < 0)
 	return -1;
     }
@@ -1148,9 +1146,7 @@ gdbpy_initialize_breakpoints (void)
   /* Add watchpoint types constants.  */
   for (i = 0; pybp_watch_types[i].name; ++i)
     {
-      if (PyModule_AddIntConstant (gdb_module,
-				   /* Cast needed for Python 2.4.  */
-				   (char *) pybp_watch_types[i].name,
+      if (PyModule_AddIntConstant (gdb_module, pybp_watch_types[i].name,
 				   pybp_watch_types[i].code) < 0)
 	return -1;
     }

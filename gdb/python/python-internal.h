@@ -51,8 +51,6 @@
 #define CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 #endif
 
-/* Python 2.4 doesn't include stdint.h soon enough to get {u,}intptr_t
-   needed by pyport.h.  */
 /* /usr/include/features.h on linux systems will define _POSIX_C_SOURCE
    if it sees _GNU_SOURCE (which config.h will define).
    pyconfig.h defines _POSIX_C_SOURCE to a different value than
@@ -109,26 +107,6 @@
 #define PyString_Check PyUnicode_Check
 #endif
 
-#if HAVE_LIBPYTHON2_4
-/* Py_ssize_t is not defined until 2.5.
-   Logical type for Py_ssize_t is Py_intptr_t, but that fails in 64-bit
-   compilation due to several apparent mistakes in python2.4 API, so we
-   use 'int' instead.  */
-typedef int Py_ssize_t;
-#endif
-
-#ifndef PyVarObject_HEAD_INIT
-/* Python 2.4 does not define PyVarObject_HEAD_INIT.  */
-#define PyVarObject_HEAD_INIT(type, size)       \
-    PyObject_HEAD_INIT(type) size,
-
-#endif
-
-#ifndef Py_TYPE
-/* Python 2.4 does not define Py_TYPE.  */
-#define Py_TYPE(ob)             (((PyObject*)(ob))->ob_type)
-#endif
-
 /* If Python.h does not define WITH_THREAD, then the various
    GIL-related functions will not be defined.  However,
    PyGILState_STATE will be.  */
@@ -183,40 +161,11 @@ typedef long Py_hash_t;
 static inline void
 gdb_Py_DECREF (void *op) /* ARI: editCase function */
 {
-  /* ... and Python 2.4 didn't cast OP to PyObject pointer on the
-     '(op)->ob_refcnt' references within the macro.  Cast it ourselves
-     too.  */
-  Py_DECREF ((PyObject *) op);
+  Py_DECREF (op);
 }
 
 #undef Py_DECREF
 #define Py_DECREF(op) gdb_Py_DECREF (op)
-
-/* The second argument to PyObject_GetAttrString was missing the 'const'
-   qualifier in Python-2.4.  Hence, we wrap it in a function to avoid errors
-   when compiled with -Werror.  */
-
-static inline PyObject *
-gdb_PyObject_GetAttrString (PyObject *obj,
-			    const char *attr) /* ARI: editCase function */
-{
-  return PyObject_GetAttrString (obj, (char *) attr);
-}
-
-#define PyObject_GetAttrString(obj, attr) gdb_PyObject_GetAttrString (obj, attr)
-
-/* The second argument to PyObject_HasAttrString was also missing the 'const'
-   qualifier in Python-2.4.  Hence, we wrap it also in a function to avoid
-   errors when compiled with -Werror.  */
-
-static inline int
-gdb_PyObject_HasAttrString (PyObject *obj,
-			    const char *attr)  /* ARI: editCase function */
-{
-  return PyObject_HasAttrString (obj, (char *) attr);
-}
-
-#define PyObject_HasAttrString(obj, attr) gdb_PyObject_HasAttrString (obj, attr)
 
 /* PyObject_CallMethod's 'method' and 'format' parameters were missing
    the 'const' qualifier before Python 3.4.  Hence, we wrap the

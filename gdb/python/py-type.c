@@ -198,9 +198,7 @@ convert_field (struct type *type, int field)
       if (arg == NULL)
 	return NULL;
 
-      /* At least python-2.4 had the second parameter non-const.  */
-      if (PyObject_SetAttrString (result.get (), (char *) attrstring,
-				  arg.get ()) < 0)
+      if (PyObject_SetAttrString (result.get (), attrstring, arg.get ()) < 0)
 	return NULL;
     }
 
@@ -1408,9 +1406,7 @@ gdbpy_initialize_types (void)
 
   for (i = 0; pyty_codes[i].name; ++i)
     {
-      if (PyModule_AddIntConstant (gdb_module,
-				   /* Cast needed for Python 2.4.  */
-				   (char *) pyty_codes[i].name,
+      if (PyModule_AddIntConstant (gdb_module, pyty_codes[i].name,
 				   pyty_codes[i].code) < 0)
 	return -1;
     }

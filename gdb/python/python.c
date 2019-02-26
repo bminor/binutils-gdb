@@ -1646,12 +1646,10 @@ do_start_initialization ()
   if (gdb_module == NULL)
     return false;
 
-  /* The casts to (char*) are for python 2.4.  */
-  if (PyModule_AddStringConstant (gdb_module, "VERSION", (char*) version) < 0
-      || PyModule_AddStringConstant (gdb_module, "HOST_CONFIG",
-				     (char*) host_name) < 0
+  if (PyModule_AddStringConstant (gdb_module, "VERSION", version) < 0
+      || PyModule_AddStringConstant (gdb_module, "HOST_CONFIG", host_name) < 0
       || PyModule_AddStringConstant (gdb_module, "TARGET_CONFIG",
-				     (char*) target_name) < 0)
+				     target_name) < 0)
     return false;
 
   /* Add stream constants.  */

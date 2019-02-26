@@ -10657,82 +10657,6 @@ rm -f core conftest.err conftest.$ac_objext \
 $as_echo "${found_usable_python}" >&6; }
 
     fi
-    if test ${have_libpython} = no; then
-
-  version=python2.5
-
-  new_CPPFLAGS=${python_includes}
-  new_LIBS="-lpython2.5 ${python_libs}"
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${version}" >&5
-$as_echo_n "checking for ${version}... " >&6; }
-  save_CPPFLAGS=$CPPFLAGS
-  save_LIBS=$LIBS
-  CPPFLAGS="$CPPFLAGS $new_CPPFLAGS"
-  LIBS="$new_LIBS $LIBS"
-  found_usable_python=no
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include "Python.h"
-int
-main ()
-{
-Py_Initialize ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  have_libpython=${version}
-                  found_usable_python=yes
-                  PYTHON_CPPFLAGS=$new_CPPFLAGS
-                  PYTHON_LIBS=$new_LIBS
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-  CPPFLAGS=$save_CPPFLAGS
-  LIBS=$save_LIBS
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${found_usable_python}" >&5
-$as_echo "${found_usable_python}" >&6; }
-
-    fi
-    if test ${have_libpython} = no; then
-
-  version=python2.4
-
-  new_CPPFLAGS=${python_includes}
-  new_LIBS="-lpython2.4 ${python_libs}"
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ${version}" >&5
-$as_echo_n "checking for ${version}... " >&6; }
-  save_CPPFLAGS=$CPPFLAGS
-  save_LIBS=$LIBS
-  CPPFLAGS="$CPPFLAGS $new_CPPFLAGS"
-  LIBS="$new_LIBS $LIBS"
-  found_usable_python=no
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include "Python.h"
-int
-main ()
-{
-Py_Initialize ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  have_libpython=${version}
-                  found_usable_python=yes
-                  PYTHON_CPPFLAGS=$new_CPPFLAGS
-                  PYTHON_LIBS=$new_LIBS
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-  CPPFLAGS=$save_CPPFLAGS
-  LIBS=$save_LIBS
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${found_usable_python}" >&5
-$as_echo "${found_usable_python}" >&6; }
-
-    fi
   fi
   if test "${have_libpython}" = python2.7 -o "${have_libpython}" = python27; then
 
@@ -10741,14 +10665,6 @@ $as_echo "#define HAVE_LIBPYTHON2_7 1" >>confdefs.h
   elif test "${have_libpython}" = python2.6 -o "${have_libpython}" = python26; then
 
 $as_echo "#define HAVE_LIBPYTHON2_6 1" >>confdefs.h
-
-  elif test "${have_libpython}" = python2.5 -o "${have_libpython}" = python25; then
-
-$as_echo "#define HAVE_LIBPYTHON2_5 1" >>confdefs.h
-
-  elif test "${have_libpython}" = python2.4 -o "${have_libpython}" = python24; then
-
-$as_echo "#define HAVE_LIBPYTHON2_4 1" >>confdefs.h
 
   fi
 
@@ -11477,8 +11393,8 @@ fi
 
 SRCHIGH_LIBS=
 SRCHIGH_CFLAGS=
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for source highlight" >&5
-$as_echo_n "checking for source highlight... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for the source-highlight library" >&5
+$as_echo_n "checking for the source-highlight library... " >&6; }
 if test "${pkg_config_prog_path}" = "missing"; then
    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no - pkg-config not found" >&5
 $as_echo "no - pkg-config not found" >&6; }

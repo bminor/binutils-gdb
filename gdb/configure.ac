@@ -734,7 +734,7 @@ dnl no -   Don't include python support.
 dnl yes -  Include python support, error if it's missing.
 dnl        If we find python in $PATH, use it to fetch configure options,
 dnl        otherwise assume the compiler can find it with no help from us.
-dnl        Python 2.7, 2.6, 2.5, and then 2.4 are tried in turn.
+dnl        Python 2.7 and 2.6 are tried in turn.
 dnl auto - Same as "yes", but if python is missing from the system,
 dnl        fall back to "no".
 dnl /path/to/python/exec-prefix -
@@ -743,7 +743,7 @@ dnl        If /path/to/python/exec-prefix/bin/python exists, use it to find
 dnl        the compilation parameters.  Otherwise use
 dnl        -I/path/to/python/exec-prefix/include,
 dnl        -L/path/to/python/exec-prefix/lib.
-dnl        Python 2.7, 2.6, 2.5, and then 2.4 are tried in turn.
+dnl        Python 2.7 and 2.6 are tried in turn.
 dnl        NOTE: This case is historical.  It is what was done for 7.0/7.1
 dnl        but is deprecated.
 dnl /path/to/python/executable -
@@ -911,23 +911,11 @@ else
       AC_TRY_LIBPYTHON(python2.6, have_libpython,
                        ${python_includes}, "-lpython2.6 ${python_libs}")
     fi
-    if test ${have_libpython} = no; then
-      AC_TRY_LIBPYTHON(python2.5, have_libpython,
-                       ${python_includes}, "-lpython2.5 ${python_libs}")
-    fi
-    if test ${have_libpython} = no; then
-      AC_TRY_LIBPYTHON(python2.4, have_libpython,
-                       ${python_includes}, "-lpython2.4 ${python_libs}")
-    fi
   fi
   if test "${have_libpython}" = python2.7 -o "${have_libpython}" = python27; then
     AC_DEFINE(HAVE_LIBPYTHON2_7, 1, [Define if Python 2.7 is being used.])
   elif test "${have_libpython}" = python2.6 -o "${have_libpython}" = python26; then
     AC_DEFINE(HAVE_LIBPYTHON2_6, 1, [Define if Python 2.6 is being used.])
-  elif test "${have_libpython}" = python2.5 -o "${have_libpython}" = python25; then
-    AC_DEFINE(HAVE_LIBPYTHON2_5, 1, [Define if Python 2.5 is being used.])
-  elif test "${have_libpython}" = python2.4 -o "${have_libpython}" = python24; then
-    AC_DEFINE(HAVE_LIBPYTHON2_4, 1, [Define if Python 2.4 is being used.])
   fi
 
   if test "${have_libpython}" = no; then

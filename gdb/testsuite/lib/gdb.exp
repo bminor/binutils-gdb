@@ -1803,7 +1803,6 @@ proc skip_rust_tests {} {
 
 proc skip_python_tests_prompt { prompt_regexp } {
     global gdb_py_is_py3k
-    global gdb_py_is_py24
 
     gdb_test_multiple "python print ('test')" "verify python support" {
 	-re "not supported.*$prompt_regexp" {
@@ -1813,23 +1812,12 @@ proc skip_python_tests_prompt { prompt_regexp } {
 	-re "$prompt_regexp" {}
     }
 
-    set gdb_py_is_py24 0
     gdb_test_multiple "python print (sys.version_info\[0\])" "check if python 3" {
 	-re "3.*$prompt_regexp" {
             set gdb_py_is_py3k 1
         }
 	-re ".*$prompt_regexp" {
             set gdb_py_is_py3k 0
-        }
-    }
-    if { $gdb_py_is_py3k == 0 } {
-        gdb_test_multiple "python print (sys.version_info\[1\])" "check if python 2.4" {
-	    -re "\[45\].*$prompt_regexp" {
-                set gdb_py_is_py24 1
-            }
-	    -re ".*$prompt_regexp" {
-                set gdb_py_is_py24 0
-            }
         }
     }
 

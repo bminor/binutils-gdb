@@ -350,88 +350,6 @@ print_string_repr (PyObject *printer, const char *hint,
   return result;
 }
 
-#ifndef IS_PY3K
-
-/* Create a dummy PyFrameObject, needed to work around
-   a Python-2.4 bug with generators.  */
-class dummy_python_frame
-{
- public:
-
-  dummy_python_frame ();
-
-  ~dummy_python_frame ()
-  {
-    if (m_valid)
-      m_tstate->frame = m_saved_frame;
-  }
-
-  bool failed () const
-  {
-    return !m_valid;
-  }
-
- private:
-
-  bool m_valid;
-  PyFrameObject *m_saved_frame;
-  gdbpy_ref<> m_frame;
-  PyThreadState *m_tstate;
-};
-
-dummy_python_frame::dummy_python_frame ()
-: m_valid (false),
-  m_saved_frame (NULL),
-  m_tstate (NULL)
-{
-  PyCodeObject *code;
-  PyFrameObject *frame;
-
-  gdbpy_ref<> empty_string (PyString_FromString (""));
-  if (empty_string == NULL)
-    return;
-
-  gdbpy_ref<> null_tuple (PyTuple_New (0));
-  if (null_tuple == NULL)
-    return;
-
-  code = PyCode_New (0,			  /* argcount */
-		     0,			  /* locals */
-		     0,			  /* stacksize */
-		     0,			  /* flags */
-		     empty_string.get (), /* code */
-		     null_tuple.get (),	  /* consts */
-		     null_tuple.get (),	  /* names */
-		     null_tuple.get (),	  /* varnames */
-#if PYTHON_API_VERSION >= 1010
-		     null_tuple.get (),	  /* freevars */
-		     null_tuple.get (),	  /* cellvars */
-#endif
-		     empty_string.get (), /* filename */
-		     empty_string.get (), /* name */
-		     1,			  /* firstlineno */
-		     empty_string.get ()  /* lnotab */
-		     );
-  if (code == NULL)
-    return;
-  gdbpy_ref<> code_holder ((PyObject *) code);
-
-  gdbpy_ref<> globals (PyDict_New ());
-  if (globals == NULL)
-    return;
-
-  m_tstate = PyThreadState_GET ();
-  frame = PyFrame_New (m_tstate, code, globals.get (), NULL);
-  if (frame == NULL)
-    return;
-
-  m_frame.reset ((PyObject *) frame);
-  m_tstate->frame = frame;
-  m_saved_frame = frame->f_back;
-  m_valid = true;
-}
-#endif
-
 /* Helper for gdbpy_apply_val_pretty_printer that formats children of the
    printer, if any exist.  If is_py_none is true, then nothing has
    been printed by to_string, and format output accordingly. */
@@ -479,18 +397,6 @@ print_children (PyObject *printer, const char *hint,
       else
 	pretty = options->prettyformat_structs;
     }
-
-  /* Manufacture a dummy Python frame to work around Python 2.4 bug,
-     where it insists on having a non-NULL tstate->frame when
-     a generator is called.  */
-#ifndef IS_PY3K
-  dummy_python_frame frame;
-  if (frame.failed ())
-    {
-      gdbpy_print_stack ();
-      return;
-    }
-#endif
 
   done_flag = 0;
   for (i = 0; i < options->print_max; ++i)

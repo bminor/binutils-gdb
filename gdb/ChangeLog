@@ -1,3 +1,28 @@
+2019-02-27  Tom Tromey  <tromey@adacore.com>
+
+	* configure.ac (HAVE_LIBPYTHON2_4, HAVE_LIBPYTHON2_5): Never
+	define.
+	* python/py-value.c: Remove Python 2.4 workaround.
+	* python/py-utils.c (gdb_pymodule_addobject): Remove Python 2.4
+	workaround.
+	* python/py-type.c (convert_field, gdbpy_initialize_types): Remove
+	Python 2.4 workaround.
+	* python/python-internal.h: Remove Python 2.4 comment.
+	(Py_ssize_t): Don't define.
+	(PyVarObject_HEAD_INIT, Py_TYPE): Don't define.
+	(gdb_Py_DECREF): Remove Python 2.4 workaround.
+	(gdb_PyObject_GetAttrString, PyObject_GetAttrString): Remove.
+	(gdb_PyObject_HasAttrString, PyObject_HasAttrString): Remove.
+	* python/python.c (do_start_initialization): Remove Python 2.4
+	workaround.
+	* python/py-prettyprint.c (class dummy_python_frame): Remove.
+	(print_children): Remove Python 2.4 workaround.
+	* python/py-inferior.c (buffer_procs): Remove Python 2.4
+	workaround.
+	(CHARBUFFERPROC_NAME): Remove.
+	* python/py-breakpoint.c (gdbpy_initialize_breakpoints): Remove
+	Python 2.4 workaround.
+
 2019-02-27  Kevin Buettner  <kevinb@redhat.com>
     
 	* NEWS: Note minimum Python version.
