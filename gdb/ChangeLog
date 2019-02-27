@@ -1,5 +1,10 @@
 2019-04-08  Kevin Buettner  <kevinb@redhat.com>
 
+	* python/py-infthread.c (thpy_thread_handle): New function.
+	(thread_object_methods): Register thpy_thread_handle.
+
+2019-04-08  Kevin Buettner  <kevinb@redhat.com>
+
 	* gdbthread.h (thread_to_thread_handle): Declare.
 	* thread.c (gdbtypes.h): Include.
 	(thread_to_thread_handle): New function.

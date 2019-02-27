@@ -256,6 +256,36 @@ thpy_is_valid (PyObject *self, PyObject *args)
   Py_RETURN_TRUE;
 }
 
+/* Implementation of gdb.InferiorThread.handle (self) -> handle. */
+
+static PyObject *
+thpy_thread_handle (PyObject *self, PyObject *args)
+{
+  thread_object *thread_obj = (thread_object *) self;
+  THPY_REQUIRE_VALID (thread_obj);
+
+  gdb::byte_vector hv;
+  
+  try
+    {
+      hv = target_thread_info_to_thread_handle (thread_obj->thread);
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+
+  if (hv.size () == 0)
+    {
+      PyErr_SetString (PyExc_RuntimeError, _("Thread handle not found."));
+      return NULL;
+    }
+
+  PyObject *object = PyBytes_FromStringAndSize ((const char *) hv.data (),
+				                hv.size());
+  return object;
+}
+
 /* Return a reference to a new Python object representing a ptid_t.
    The object is a tuple containing (pid, lwp, tid). */
 PyObject *
@@ -335,6 +365,9 @@ Return whether the thread is running." },
   { "is_exited", thpy_is_exited, METH_NOARGS,
     "is_exited () -> Boolean\n\
 Return whether the thread is exited." },
+  { "handle", thpy_thread_handle, METH_NOARGS,
+    "handle  () -> handle\n\
+Return thread library specific handle for thread." },
 
   { NULL }
 };
