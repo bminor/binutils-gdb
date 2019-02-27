@@ -1,3 +1,9 @@
+2019-02-27  Saagar Jha  <saagar@saagarjha.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* utils.c (set_screen_size): Reduce "infinite" rows and columns
+	before calling rl_set_screen_size.
+
 2019-02-27  Tom Tromey  <tromey@adacore.com>
 
 	* configure.ac (HAVE_LIBPYTHON2_4, HAVE_LIBPYTHON2_5): Never

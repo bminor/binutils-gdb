@@ -1380,11 +1380,24 @@ set_screen_size (void)
   int rows = lines_per_page;
   int cols = chars_per_line;
 
-  if (rows <= 0)
-    rows = INT_MAX;
+  /* If we get 0 or negative ROWS or COLS, treat as "infinite" size.
+     A negative number can be seen here with the "set width/height"
+     commands and either:
 
-  if (cols <= 0)
-    cols = INT_MAX;
+     - the user specified "unlimited", which maps to UINT_MAX, or
+     - the user spedified some number between INT_MAX and UINT_MAX.
+
+     Cap "infinity" to approximately sqrt(INT_MAX) so that we don't
+     overflow in rl_set_screen_size, which multiplies rows and columns
+     to compute the number of characters on the screen.  */
+
+  const int sqrt_int_max = INT_MAX >> (sizeof (int) * 8 / 2);
+
+  if (rows <= 0 || rows > sqrt_int_max)
+    rows = sqrt_int_max;
+
+  if (cols <= 0 || cols > sqrt_int_max)
+    cols = sqrt_int_max;
 
   /* Update Readline's idea of the terminal size.  */
   rl_set_screen_size (rows, cols);
