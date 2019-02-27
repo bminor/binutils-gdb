@@ -1394,10 +1394,16 @@ set_screen_size (void)
   const int sqrt_int_max = INT_MAX >> (sizeof (int) * 8 / 2);
 
   if (rows <= 0 || rows > sqrt_int_max)
-    rows = sqrt_int_max;
+    {
+      rows = sqrt_int_max;
+      lines_per_page = UINT_MAX;
+    }
 
   if (cols <= 0 || cols > sqrt_int_max)
-    cols = sqrt_int_max;
+    {
+      cols = sqrt_int_max;
+      chars_per_line = UINT_MAX;
+    }
 
   /* Update Readline's idea of the terminal size.  */
   rl_set_screen_size (rows, cols);
