@@ -1,5 +1,13 @@
 2019-04-08  Kevin Buettner  <kevinb@redhat.com>
 
+	* gdbthread.h (find_thread_by_handle): Revise declaration.
+	* thread.c (find_thread_by_handle): Likewise.  Adjust
+	implementation too.
+	* python/py-inferior.c (infpy_thread_from_thread_handle): Add
+	support for buffer objects as handles.
+
+2019-04-08  Kevin Buettner  <kevinb@redhat.com>
+
 	* python/py-infthread.c (thpy_thread_handle): New function.
 	(thread_object_methods): Register thpy_thread_handle.
 

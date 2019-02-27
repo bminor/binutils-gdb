@@ -770,7 +770,25 @@ infpy_thread_from_thread_handle (PyObject *self, PyObject *args, PyObject *kw)
   if (! gdb_PyArg_ParseTupleAndKeywords (args, kw, "O", keywords, &handle_obj))
     return NULL;
 
-  if (!gdbpy_is_value_object (handle_obj))
+  const gdb_byte *bytes;
+  size_t bytes_len;
+  Py_buffer_up buffer_up;
+  Py_buffer py_buf;
+
+  if (PyObject_CheckBuffer (handle_obj)
+      && PyObject_GetBuffer (handle_obj, &py_buf, PyBUF_SIMPLE) == 0)
+    {
+      buffer_up.reset (&py_buf);
+      bytes = (const gdb_byte *) py_buf.buf;
+      bytes_len = py_buf.len;
+    }
+  else if (gdbpy_is_value_object (handle_obj))
+    {
+      struct value *val = value_object_to_value (handle_obj);
+      bytes = value_contents_all (val);
+      bytes_len = TYPE_LENGTH (value_type (val));
+    }
+  else
     {
       PyErr_SetString (PyExc_TypeError,
 		       _("Argument 'handle_obj' must be a thread handle object."));
@@ -781,9 +799,10 @@ infpy_thread_from_thread_handle (PyObject *self, PyObject *args, PyObject *kw)
   try
     {
       struct thread_info *thread_info;
-      struct value *val = value_object_to_value (handle_obj);
 
-      thread_info = find_thread_by_handle (val, inf_obj->inferior);
+      thread_info = find_thread_by_handle
+        (gdb::array_view<const gdb_byte> (bytes, bytes_len),
+	 inf_obj->inferior);
       if (thread_info != NULL)
 	return thread_to_thread_object (thread_info).release ();
     }

@@ -540,12 +540,12 @@ find_thread_ptid (inferior *inf, ptid_t ptid)
 /* See gdbthread.h.  */
 
 struct thread_info *
-find_thread_by_handle (struct value *thread_handle, struct inferior *inf)
+find_thread_by_handle (gdb::array_view<const gdb_byte> handle,
+		       struct inferior *inf)
 {
-  return target_thread_handle_to_thread_info
-	   (value_contents_all (thread_handle),
-	    TYPE_LENGTH (value_type (thread_handle)),
-	    inf);
+  return target_thread_handle_to_thread_info (handle.data (),
+					      handle.size (),
+					      inf);
 }
 
 /*

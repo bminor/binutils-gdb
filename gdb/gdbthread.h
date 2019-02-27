@@ -486,8 +486,8 @@ extern struct thread_info *find_thread_ptid (inferior *inf, ptid_t ptid);
 struct thread_info *find_thread_global_id (int global_id);
 
 /* Find thread by thread library specific handle in inferior INF.  */
-struct thread_info *find_thread_by_handle (struct value *thread_handle,
-					   struct inferior *inf);
+struct thread_info *find_thread_by_handle
+  (gdb::array_view<const gdb_byte> handle, struct inferior *inf);
 
 /* Finds the first thread of the specified inferior.  */
 extern struct thread_info *first_thread_of_inferior (inferior *inf);
