@@ -118,6 +118,9 @@ foreach_with_prefix size {"0" "0x80000000" "unlimited"} {
 	"Number of lines gdb thinks are in a page is unlimited\\."
 }
 
+gdb_test "set width -1" "integer -1 out of range"
+gdb_test "set height -1" "integer -1 out of range"
+
 gdb_exit
 return 0
 
