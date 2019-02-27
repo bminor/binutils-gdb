@@ -9018,11 +9018,15 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 			   0, cu->language, objfile);
       break;
     case DW_TAG_module:
-      add_psymbol_to_list (actual_name, strlen (actual_name),
-			   built_actual_name != NULL,
-			   MODULE_DOMAIN, LOC_TYPEDEF, -1,
-			   psymbol_placement::GLOBAL,
-			   0, cu->language, objfile);
+      /* With Fortran 77 there might be a "BLOCK DATA" module
+         available without any name.  If so, we skip the module as it
+         doesn't bring any value.  */
+      if (actual_name != nullptr)
+	add_psymbol_to_list (actual_name, strlen (actual_name),
+			     built_actual_name != NULL,
+			     MODULE_DOMAIN, LOC_TYPEDEF, -1,
+			     psymbol_placement::GLOBAL,
+			     0, cu->language, objfile);
       break;
     case DW_TAG_class_type:
     case DW_TAG_interface_type:
@@ -16955,9 +16959,6 @@ read_module_type (struct die_info *die, struct dwarf2_cu *cu)
   struct type *type;
 
   module_name = dwarf2_name (die, cu);
-  if (!module_name)
-    complaint (_("DW_TAG_module has no name, offset %s"),
-               sect_offset_str (die->sect_off));
   type = init_type (objfile, TYPE_CODE_MODULE, 0, module_name);
 
   return set_die_type (die, type, cu);
