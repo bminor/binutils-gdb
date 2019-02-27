@@ -1,7 +1,9 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 8.2
+*** Changes since GDB 8.3
+
+*** Changes in GDB 8.3
 
 * GDB and GDBserver now support access to additional registers on
   PowerPC GNU/Linux targets: PPR, DSCR, TAR, EBB/PMU registers, and
