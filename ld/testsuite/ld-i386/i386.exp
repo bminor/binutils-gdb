@@ -805,6 +805,15 @@ if { [isnative]
 	    "pr19319" \
 	] \
 	[list \
+	    "Build pr24276.so" \
+	    "-shared -nostdlib -nostartfiles \
+	     -Ltmpdir $srcdir/$subdir/pr24276.dso" \
+	    "-Wa,-mx86-used-note=yes" \
+	    { pr19319b.S } \
+	    {{warning_output pr24276.warn}} \
+	    "pr24276.so" \
+	] \
+	[list \
 	    "Build property 1" \
 	    "" \
 	    "-Wa,-mx86-used-note=no" \

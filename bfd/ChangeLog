@@ -1,3 +1,9 @@
+2019-02-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/24276
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Skip symbol defined
+	by linker when checking copy reloc on protected symbol.
+
 2019-02-24  Alan Modra  <amodra@gmail.com>
 
 	PR 24144

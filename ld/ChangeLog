@@ -1,3 +1,13 @@
+2019-02-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/24276
+	* testsuite/ld-i386/i386.exp: Run PR ld/24276 test.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr24276.dso: New file.
+	* testsuite/ld-i386/pr24276.warn: Likewise.
+	* testsuite/ld-x86-64/pr24276.dso: Likewise.
+	* testsuite/ld-x86-64/pr24276.warn: Likewise.
+
 2019-02-20  Eric Tsai  <erictsai@cadence.com>
 
 	* testsuite/ld-xtensa/call_overflow.d: New test definition.

@@ -2238,6 +2238,8 @@ check_pic:
 	      bfd_boolean no_copyreloc_p
 		= (info->nocopyreloc
 		   || (h != NULL
+		       && !h->root.linker_def
+		       && !h->root.ldscript_def
 		       && eh->def_protected
 		       && elf_has_no_copy_on_protected (h->root.u.def.section->owner)));
 	      if ((sec->flags & SEC_ALLOC) != 0
