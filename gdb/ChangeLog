@@ -1,3 +1,11 @@
+2019-02-26  Simon Marchi  <simon.marchi@efficios.com>
+
+	* aix-thread.c (ptid_cmp): Remove unused variable.
+	(get_signaled_thread): Likewise.
+	(store_regs_user_thread): Likewise.
+	(store_regs_kernel_thread): Likewise.
+	(fetch_regs_kernel_thread): Remove shadowed variable.
+
 2019-02-26  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* features/riscv/32bit-cpu.xml: Add register numbers.
