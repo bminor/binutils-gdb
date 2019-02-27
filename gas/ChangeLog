@@ -1,3 +1,13 @@
+2019-02-27  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* testsuite/gas/aarch64/dotproduct.d: Use multiple "as" lines.
+	* testsuite/gas/aarch64/dotproduct_armv8_4.d: Remove.
+	* testsuite/gas/aarch64/dotproduct_armv8_4.s: Remove.
+	* testsuite/gas/aarch64/illegal-dotproduct.d: Use multiple "as"
+	lines.
+	* testsuite/gas/aarch64/ldst-rcpc-armv8_2.d: Remove.
+	* testsuite/gas/aarch64/ldst-rcpc.d: Use multiple "as" lines.
+
 2019-02-24  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (parse_tls_arg): Wrap in #ifdef OBJ_ELF.

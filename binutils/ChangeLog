@@ -1,3 +1,7 @@
+2019-02-27  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* testsuite/lib/binutils-common.exp: Allow multiple "as" lines.
+
 2019-02-25  Nick Clifton  <nickc@redhat.com>
 
 	* objdump.c (sym_ok): New function.
