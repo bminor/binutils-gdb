@@ -1,3 +1,10 @@
+2019-02-28  Brian Vandenberg  <phantall@gmail.com>
+	    Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR gdb/8527
+	* procfs.c (proc_wait_for_stop): Wrap write of PCWSTOP in
+	set_sigint_trap, clear_sigint_trap.
+
 2019-02-27  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* target.c (target_detach): Clear the regcache and the
