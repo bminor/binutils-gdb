@@ -522,15 +522,15 @@ _bfd_XXi_swap_aouthdr_in (bfd * abfd,
   a->NumberOfRvaAndSizes = H_GET_32 (abfd, src->NumberOfRvaAndSizes);
 
   {
-    int idx;
+    unsigned idx;
 
     /* PR 17512: Corrupt PE binaries can cause seg-faults.  */
     if (a->NumberOfRvaAndSizes > IMAGE_NUMBEROF_DIRECTORY_ENTRIES)
       {
 	/* xgettext:c-format */
 	_bfd_error_handler
-	  (_("%pB: aout header specifies an invalid number of data-directory entries: %ld"),
-	   abfd, a->NumberOfRvaAndSizes);
+	  (_("%pB: aout header specifies an invalid number of"
+	     " data-directory entries: %u"), abfd, a->NumberOfRvaAndSizes);
 	bfd_set_error (bfd_error_bad_value);
 
 	/* Paranoia: If the number is corrupt, then assume that the
@@ -2806,12 +2806,13 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
     fprintf (file, "\t(%s)",name);
   fprintf (file, "\nMajorLinkerVersion\t%d\n", i->MajorLinkerVersion);
   fprintf (file, "MinorLinkerVersion\t%d\n", i->MinorLinkerVersion);
-  fprintf (file, "SizeOfCode\t\t%08lx\n", (unsigned long) i->SizeOfCode);
-  fprintf (file, "SizeOfInitializedData\t%08lx\n",
-	   (unsigned long) i->SizeOfInitializedData);
-  fprintf (file, "SizeOfUninitializedData\t%08lx\n",
-	   (unsigned long) i->SizeOfUninitializedData);
-  fprintf (file, "AddressOfEntryPoint\t");
+  fprintf (file, "SizeOfCode\t\t");
+  bfd_fprintf_vma (abfd, file, i->SizeOfCode);
+  fprintf (file, "\nSizeOfInitializedData\t");
+  bfd_fprintf_vma (abfd, file, i->SizeOfInitializedData);
+  fprintf (file, "\nSizeOfUninitializedData\t");
+  bfd_fprintf_vma (abfd, file, i->SizeOfUninitializedData);
+  fprintf (file, "\nAddressOfEntryPoint\t");
   bfd_fprintf_vma (abfd, file, i->AddressOfEntryPoint);
   fprintf (file, "\nBaseOfCode\t\t");
   bfd_fprintf_vma (abfd, file, i->BaseOfCode);
@@ -2823,20 +2824,18 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
 
   fprintf (file, "\nImageBase\t\t");
   bfd_fprintf_vma (abfd, file, i->ImageBase);
-  fprintf (file, "\nSectionAlignment\t");
-  bfd_fprintf_vma (abfd, file, i->SectionAlignment);
-  fprintf (file, "\nFileAlignment\t\t");
-  bfd_fprintf_vma (abfd, file, i->FileAlignment);
-  fprintf (file, "\nMajorOSystemVersion\t%d\n", i->MajorOperatingSystemVersion);
+  fprintf (file, "\nSectionAlignment\t%08x\n", i->SectionAlignment);
+  fprintf (file, "FileAlignment\t\t%08x\n", i->FileAlignment);
+  fprintf (file, "MajorOSystemVersion\t%d\n", i->MajorOperatingSystemVersion);
   fprintf (file, "MinorOSystemVersion\t%d\n", i->MinorOperatingSystemVersion);
   fprintf (file, "MajorImageVersion\t%d\n", i->MajorImageVersion);
   fprintf (file, "MinorImageVersion\t%d\n", i->MinorImageVersion);
   fprintf (file, "MajorSubsystemVersion\t%d\n", i->MajorSubsystemVersion);
   fprintf (file, "MinorSubsystemVersion\t%d\n", i->MinorSubsystemVersion);
-  fprintf (file, "Win32Version\t\t%08lx\n", (unsigned long) i->Reserved1);
-  fprintf (file, "SizeOfImage\t\t%08lx\n", (unsigned long) i->SizeOfImage);
-  fprintf (file, "SizeOfHeaders\t\t%08lx\n", (unsigned long) i->SizeOfHeaders);
-  fprintf (file, "CheckSum\t\t%08lx\n", (unsigned long) i->CheckSum);
+  fprintf (file, "Win32Version\t\t%08x\n", i->Reserved1);
+  fprintf (file, "SizeOfImage\t\t%08x\n", i->SizeOfImage);
+  fprintf (file, "SizeOfHeaders\t\t%08x\n", i->SizeOfHeaders);
+  fprintf (file, "CheckSum\t\t%08x\n", i->CheckSum);
 
   switch (i->Subsystem)
     {
