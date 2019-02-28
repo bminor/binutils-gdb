@@ -1,3 +1,8 @@
+2019-06-06  Руслан Ижбулатов <lrn1986@gmail.com>
+
+	* source.c (find_and_open_source): Also rewrite relative file
+	names.
+
 2019-04-26  Amos Bird  <amosbird@gmail.com>
 
 	* annotate.c (annotate_thread_exited): Add "thread-exited"

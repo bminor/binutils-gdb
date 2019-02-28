@@ -1025,16 +1025,11 @@ find_and_open_source (const char *filename,
 	}
     }
 
-  gdb::unique_xmalloc_ptr<char> rewritten_filename;
-  if (IS_ABSOLUTE_PATH (filename))
-    {
-      /* If filename is absolute path, try the source path
-	 substitution on it.  */
-      rewritten_filename = rewrite_source_path (filename);
+  gdb::unique_xmalloc_ptr<char> rewritten_filename
+    = rewrite_source_path (filename);
 
-      if (rewritten_filename != NULL)
-	filename = rewritten_filename.get ();
-    }
+  if (rewritten_filename != NULL)
+    filename = rewritten_filename.get ();
 
   result = openp (path, OPF_SEARCH_IN_PATH | OPF_RETURN_REALPATH, filename,
 		  OPEN_MODE, fullname);
