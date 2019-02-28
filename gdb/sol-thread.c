@@ -87,7 +87,7 @@ public:
   ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
   void resume (ptid_t, int, enum gdb_signal) override;
   void mourn_inferior () override;
-  const char *pid_to_str (ptid_t) override;
+  std::string pid_to_str (ptid_t) override;
   ptid_t get_ada_task_ptid (long lwp, long thread) override;
 
   void fetch_registers (struct regcache *, int) override;
@@ -997,11 +997,9 @@ ps_lgetLDT (struct ps_prochandle *ph, lwpid_t lwpid, struct ssd *pldt)	/* ARI: e
 
 /* Convert PTID to printable form.  */
 
-const char *
+std::string
 sol_thread_target::pid_to_str (ptid_t ptid)
 {
-  static char buf[100];
-
   if (ptid.tid_p ())
     {
       ptid_t lwp;
@@ -1009,21 +1007,19 @@ sol_thread_target::pid_to_str (ptid_t ptid)
       lwp = thread_to_lwp (ptid, -2);
 
       if (lwp.pid () == -1)
-	xsnprintf (buf, sizeof (buf), "Thread %ld (defunct)",
-		   ptid.tid ());
+	return string_printf ("Thread %ld (defunct)",
+			      ptid.tid ());
       else if (lwp.pid () != -2)
-	xsnprintf (buf, sizeof (buf), "Thread %ld (LWP %ld)",
-		 ptid.tid (), lwp.lwp ());
+	return string_printf ("Thread %ld (LWP %ld)",
+			      ptid.tid (), lwp.lwp ());
       else
-	xsnprintf (buf, sizeof (buf), "Thread %ld        ",
-		   ptid.tid ());
+	return string_printf ("Thread %ld        ",
+			      ptid.tid ());
     }
   else if (ptid.lwp () != 0)
-    xsnprintf (buf, sizeof (buf), "LWP    %ld        ", ptid.lwp ());
+    return string_printf ("LWP    %ld        ", ptid.lwp ());
   else
-    xsnprintf (buf, sizeof (buf), "process %d    ", ptid.pid ());
-
-  return buf;
+    return string_printf ("process %d    ", ptid.pid ());
 }
 
 

@@ -615,7 +615,7 @@ dcache_info_1 (DCACHE *dcache, const char *exp)
     }
 
   printf_filtered (_("Contains data for %s\n"),
-		   target_pid_to_str (dcache->ptid));
+		   target_pid_to_str (dcache->ptid).c_str ());
 
   refcount = 0;
 

@@ -327,7 +327,7 @@ display_one_tib (ptid_t ptid)
   if (target_get_tib_address (ptid, &thread_local_base) == 0)
     {
       printf_filtered (_("Unable to get thread local base for %s\n"),
-	target_pid_to_str (ptid));
+		       target_pid_to_str (ptid).c_str ());
       return -1;
     }
 
@@ -336,13 +336,13 @@ display_one_tib (ptid_t ptid)
     {
       printf_filtered (_("Unable to read thread information "
 			 "block for %s at address %s\n"),
-	target_pid_to_str (ptid), 
-	paddress (target_gdbarch (), thread_local_base));
+		       target_pid_to_str (ptid).c_str (), 
+		       paddress (target_gdbarch (), thread_local_base));
       return -1;
     }
 
   printf_filtered (_("Thread Information Block %s at %s\n"),
-		   target_pid_to_str (ptid),
+		   target_pid_to_str (ptid).c_str (),
 		   paddress (target_gdbarch (), thread_local_base));
 
   index = (gdb_byte *) tib;

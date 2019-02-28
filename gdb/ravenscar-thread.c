@@ -110,7 +110,7 @@ struct ravenscar_thread_target final : public target_ops
 
   const char *extra_thread_info (struct thread_info *) override;
 
-  const char *pid_to_str (ptid_t) override;
+  std::string pid_to_str (ptid_t) override;
 
   ptid_t get_ada_task_ptid (long lwp, long thread) override;
 
@@ -406,13 +406,10 @@ ravenscar_thread_target::thread_alive (ptid_t ptid)
   return true;
 }
 
-const char *
+std::string
 ravenscar_thread_target::pid_to_str (ptid_t ptid)
 {
-  static char buf[30];
-
-  snprintf (buf, sizeof (buf), "Thread %#x", (int) ptid.tid ());
-  return buf;
+  return string_printf ("Thread %#x", (int) ptid.tid ());
 }
 
 void

@@ -319,7 +319,7 @@ add_thread_with_info (ptid_t ptid, private_thread_info *priv)
   result->priv.reset (priv);
 
   if (print_thread_events)
-    printf_unfiltered (_("[New %s]\n"), target_pid_to_str (ptid));
+    printf_unfiltered (_("[New %s]\n"), target_pid_to_str (ptid).c_str ());
 
   annotate_new_thread ();
   return result;
@@ -992,16 +992,17 @@ should_print_thread (const char *requested_threads, int default_inf_num,
 static std::string
 thread_target_id_str (thread_info *tp)
 {
-  const char *target_id = target_pid_to_str (tp->ptid);
+  std::string target_id = target_pid_to_str (tp->ptid);
   const char *extra_info = target_extra_thread_info (tp);
   const char *name = tp->name != nullptr ? tp->name : target_thread_name (tp);
 
   if (extra_info != nullptr && name != nullptr)
-    return string_printf ("%s \"%s\" (%s)", target_id, name, extra_info);
+    return string_printf ("%s \"%s\" (%s)", target_id.c_str (), name,
+			  extra_info);
   else if (extra_info != nullptr)
-    return string_printf ("%s (%s)", target_id, extra_info);
+    return string_printf ("%s (%s)", target_id.c_str (), extra_info);
   else if (name != nullptr)
-    return string_printf ("%s \"%s\"", target_id, name);
+    return string_printf ("%s \"%s\"", target_id.c_str (), name);
   else
     return target_id;
 }
@@ -1466,7 +1467,7 @@ thr_try_catch_cmd (thread_info *thr, const char *cmd, int from_tty,
 	  if (!flags.quiet)
 	    printf_filtered (_("\nThread %s (%s):\n"),
 			     print_thread_id (thr),
-			     target_pid_to_str (inferior_ptid));
+			     target_pid_to_str (inferior_ptid).c_str ());
 	  printf_filtered ("%s", cmd_result.c_str ());
 	}
     }
@@ -1477,7 +1478,7 @@ thr_try_catch_cmd (thread_info *thr, const char *cmd, int from_tty,
 	  if (!flags.quiet)
 	    printf_filtered (_("\nThread %s (%s):\n"),
 			     print_thread_id (thr),
-			     target_pid_to_str (inferior_ptid));
+			     target_pid_to_str (inferior_ptid).c_str ());
 	  if (flags.cont)
 	    printf_filtered ("%s\n", ex.message);
 	  else
@@ -1675,11 +1676,11 @@ thread_command (const char *tidstr, int from_tty)
 	  if (tp->state == THREAD_EXITED)
 	    printf_filtered (_("[Current thread is %s (%s) (exited)]\n"),
 			     print_thread_id (tp),
-			     target_pid_to_str (inferior_ptid));
+			     target_pid_to_str (inferior_ptid).c_str ());
 	  else
 	    printf_filtered (_("[Current thread is %s (%s)]\n"),
 			     print_thread_id (tp),
-			     target_pid_to_str (inferior_ptid));
+			     target_pid_to_str (inferior_ptid).c_str ());
 	}
       else
 	error (_("No stack."));
@@ -1756,11 +1757,11 @@ thread_find_command (const char *arg, int from_tty)
 	  match++;
 	}
 
-      tmp = target_pid_to_str (tp->ptid);
-      if (tmp != NULL && re_exec (tmp))
+      std::string name = target_pid_to_str (tp->ptid);
+      if (!name.empty () && re_exec (name.c_str ()))
 	{
 	  printf_filtered (_("Thread %s has target id '%s'\n"),
-			   print_thread_id (tp), tmp);
+			   print_thread_id (tp), name.c_str ());
 	  match++;
 	}
 
@@ -1824,7 +1825,7 @@ print_selected_thread_frame (struct ui_out *uiout,
 	  uiout->text ("[Switching to thread ");
 	  uiout->field_string ("new-thread-id", print_thread_id (tp));
 	  uiout->text (" (");
-	  uiout->text (target_pid_to_str (inferior_ptid));
+	  uiout->text (target_pid_to_str (inferior_ptid).c_str ());
 	  uiout->text (")]");
 	}
     }

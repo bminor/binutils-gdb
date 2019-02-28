@@ -66,7 +66,7 @@ struct dummy_target : public target_ops
   void program_signals (gdb::array_view<const unsigned char> arg0) override;
   bool thread_alive (ptid_t arg0) override;
   void update_thread_list () override;
-  const char *pid_to_str (ptid_t arg0) override;
+  std::string pid_to_str (ptid_t arg0) override;
   const char *extra_thread_info (thread_info *arg0) override;
   const char *thread_name (thread_info *arg0) override;
   thread_info *thread_handle_to_thread_info (const gdb_byte *arg0, int arg1, inferior *arg2) override;
@@ -233,7 +233,7 @@ struct debug_target : public target_ops
   void program_signals (gdb::array_view<const unsigned char> arg0) override;
   bool thread_alive (ptid_t arg0) override;
   void update_thread_list () override;
-  const char *pid_to_str (ptid_t arg0) override;
+  std::string pid_to_str (ptid_t arg0) override;
   const char *extra_thread_info (thread_info *arg0) override;
   const char *thread_name (thread_info *arg0) override;
   thread_info *thread_handle_to_thread_info (const gdb_byte *arg0, int arg1, inferior *arg2) override;
@@ -1746,28 +1746,28 @@ debug_target::update_thread_list ()
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 
-const char *
+std::string
 target_ops::pid_to_str (ptid_t arg0)
 {
   return this->beneath ()->pid_to_str (arg0);
 }
 
-const char *
+std::string
 dummy_target::pid_to_str (ptid_t arg0)
 {
   return default_pid_to_str (this, arg0);
 }
 
-const char *
+std::string
 debug_target::pid_to_str (ptid_t arg0)
 {
-  const char * result;
+  std::string result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->pid_to_str (...)\n", this->beneath ()->shortname ());
   result = this->beneath ()->pid_to_str (arg0);
   fprintf_unfiltered (gdb_stdlog, "<- %s->pid_to_str (", this->beneath ()->shortname ());
   target_debug_print_ptid_t (arg0);
   fputs_unfiltered (") = ", gdb_stdlog);
-  target_debug_print_const_char_p (result);
+  target_debug_print_std_string (result);
   fputs_unfiltered ("\n", gdb_stdlog);
   return result;
 }

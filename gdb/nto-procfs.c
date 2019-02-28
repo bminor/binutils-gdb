@@ -115,7 +115,7 @@ struct nto_procfs_target : public inf_child_target
 
   void update_thread_list () override;
 
-  const char *pid_to_str (ptid_t) override;
+  std::string pid_to_str (ptid_t) override;
 
   void interrupt () override;
 
@@ -658,7 +658,7 @@ nto_procfs_target::files_info ()
 
   printf_unfiltered ("\tUsing the running image of %s %s via %s.\n",
 		     inf->attach_flag ? "attached" : "child",
-		     target_pid_to_str (inferior_ptid),
+		     target_pid_to_str (inferior_ptid).c_str (),
 		     (nodestr != NULL) ? nodestr : "local node");
 }
 
@@ -708,10 +708,10 @@ nto_procfs_target::attach (const char *args, int from_tty)
 
       if (exec_file)
 	printf_unfiltered ("Attaching to program `%s', %s\n", exec_file,
-			   target_pid_to_str (ptid_t (pid)));
+			   target_pid_to_str (ptid_t (pid)).c_str ());
       else
 	printf_unfiltered ("Attaching to %s\n",
-			   target_pid_to_str (ptid_t (pid)));
+			   target_pid_to_str (ptid_t (pid)).c_str ());
     }
   inferior_ptid = do_attach (ptid_t (pid));
   inf = current_inferior ();
@@ -1455,17 +1455,14 @@ nto_procfs_target::pass_signals
     }
 }
 
-char *
+std::string
 nto_procfs_target::pid_to_str (ptid_t ptid)
 {
-  static char buf[1024];
-  int pid, tid, n;
+  int pid, tid;
   struct tidinfo *tip;
 
   pid = ptid.pid ();
   tid = ptid.tid ();
-
-  n = snprintf (buf, 1023, "process %d", pid);
 
 #if 0				/* NYI */
   tip = procfs_thread_info (pid, tid);
@@ -1473,7 +1470,7 @@ nto_procfs_target::pid_to_str (ptid_t ptid)
     snprintf (&buf[n], 1023, " (state = 0x%02x)", tip->state);
 #endif
 
-  return buf;
+  return string_printf ("process %d", pid);
 }
 
 /* to_can_run implementation for "target procfs".  Note this really

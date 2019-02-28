@@ -1,3 +1,166 @@
+2019-03-13  Tom Tromey  <tromey@adacore.com>
+
+	* i386-gnu-nat.c (i386_gnu_nat_target::fetch_registers)
+	(i386_gnu_nat_target::store_registers): Update.
+	* target-debug.h (target_debug_print_std_string): New macro.
+	* x86-linux-nat.c (x86_linux_nat_target::enable_btrace): Update.
+	* windows-tdep.c (display_one_tib): Update.
+	* tui/tui-stack.c (tui_make_status_line): Update.
+	* top.c (print_inferior_quit_action): Update.
+	* thread.c (thr_try_catch_cmd): Update.
+	(add_thread_with_info): Update.
+	(thread_target_id_str): Update.
+	(thr_try_catch_cmd): Update.
+	(thread_command): Update.
+	(thread_find_command): Update.
+	* record-btrace.c (record_btrace_target::info_record)
+	(record_btrace_resume_thread, record_btrace_target::resume)
+	(record_btrace_cancel_resume, record_btrace_step_thread)
+	(record_btrace_target::wait, record_btrace_target::wait)
+	(record_btrace_target::wait, record_btrace_target::stop): Update.
+	* progspace.c (print_program_space): Update.
+	* process-stratum-target.c
+	(process_stratum_target::thread_address_space): Update.
+	* linux-fork.c (linux_fork_mourn_inferior)
+	(detach_checkpoint_command, info_checkpoints_command)
+	(linux_fork_context): Update.
+	(linux_fork_detach): Update.
+	(class scoped_switch_fork_info): Update.
+	(delete_checkpoint_command): Update.
+	* infrun.c (follow_fork_inferior): Update.
+	(follow_fork_inferior): Update.
+	(proceed_after_vfork_done): Update.
+	(handle_vfork_child_exec_or_exit): Update.
+	(follow_exec): Update.
+	(displaced_step_prepare_throw): Update.
+	(displaced_step_restore): Update.
+	(start_step_over): Update.
+	(resume_1): Update.
+	(clear_proceed_status_thread): Update.
+	(proceed): Update.
+	(print_target_wait_results): Update.
+	(do_target_wait): Update.
+	(context_switch): Update.
+	(stop_all_threads): Update.
+	(restart_threads): Update.
+	(finish_step_over): Update.
+	(handle_signal_stop): Update.
+	(switch_back_to_stepped_thread): Update.
+	(keep_going_pass_signal): Update.
+	(print_exited_reason): Update.
+	(normal_stop): Update.
+	* inferior.c (inferior_pid_to_str): Change return type.
+	(print_selected_inferior): Update.
+	(add_inferior): Update.
+	(detach_inferior): Update.
+	* dummy-frame.c (fprint_dummy_frames): Update.
+	* dcache.c (dcache_info_1): Update.
+	* btrace.c (btrace_enable, btrace_disable, btrace_teardown)
+	(btrace_fetch, btrace_clear): Update.
+	* linux-tdep.c (linux_core_pid_to_str): Change return type.
+	* i386-cygwin-tdep.c (i386_windows_core_pid_to_str): Change return
+	type.
+	* fbsd-tdep.c (fbsd_core_pid_to_str): Change return type.
+	* sol2-tdep.h (sol2_core_pid_to_str): Change return type.
+	* sol2-tdep.c (sol2_core_pid_to_str): Change return type.
+	* gdbarch.c, gdbarch.h: Rebuild.
+	* gdbarch.sh (core_pid_to_str): Change return type.
+	* windows-nat.c (struct windows_nat_target) <pid_to_str>: Change
+	return type.
+	(windows_nat_target::pid_to_str): Change return type.
+	(windows_delete_thread): Update.
+	(windows_nat_target::attach): Update.
+	(windows_nat_target::files_info): Update.
+	* target-delegates.c: Rebuild.
+	* sol-thread.c (class sol_thread_target) <pid_to_str>: Change
+	return type.
+	(sol_thread_target::pid_to_str): Change return type.
+	* remote.c (class remote_target) <pid_to_str>: Change return
+	type.
+	(remote_target::pid_to_str): Change return type.
+	(extended_remote_target::attach, remote_target::remote_stop_ns)
+	(remote_target::remote_notif_remove_queued_reply)
+	(remote_target::push_stop_reply, remote_target::disable_btrace):
+	Update.
+	(extended_remote_target::attach): Update.
+	* remote-sim.c (struct gdbsim_target) <pid_to_str>: Change return
+	type.
+	(gdbsim_target::pid_to_str): Change return type.
+	* ravenscar-thread.c (struct ravenscar_thread_target)
+	<pid_to_str>: Change return type.
+	(ravenscar_thread_target::pid_to_str): Change return type.
+	* procfs.c (class procfs_target) <pid_to_str>: Change return
+	type.
+	(procfs_target::pid_to_str): Change return type.
+	(procfs_target::attach): Update.
+	(procfs_target::detach): Update.
+	(procfs_target::fetch_registers): Update.
+	(procfs_target::store_registers): Update.
+	(procfs_target::wait): Update.
+	(procfs_target::files_info): Update.
+	* obsd-nat.c (obsd_nat_target::pid_to_str): Change return type.
+	* nto-procfs.c (struct nto_procfs_target) <pid_to_str>: Change
+	return type.
+	(nto_procfs_target::pid_to_str): Change return type.
+	(nto_procfs_target::files_info, nto_procfs_target::attach): Update.
+	* linux-thread-db.c (class thread_db_target) <pid_to_str>: Change
+	return type.
+	* linux-nat.c (linux_nat_target::pid_to_str): Change return type.
+	(exit_lwp): Update.
+	(attach_proc_task_lwp_callback, get_detach_signal)
+	(detach_one_lwp, resume_lwp, linux_nat_target::resume)
+	(linux_nat_target::resume, wait_lwp, stop_callback)
+	(maybe_clear_ignore_sigint, stop_wait_callback, status_callback)
+	(save_stop_reason, select_event_lwp, linux_nat_filter_event)
+	(linux_nat_wait_1, resume_stopped_resumed_lwps)
+	(linux_nat_target::wait, linux_nat_stop_lwp): Update.
+	* inf-ptrace.c (inf_ptrace_target::pid_to_str): Change return
+	type.
+	(inf_ptrace_target::attach): Update.
+	(inf_ptrace_target::files_info): Update.
+	* go32-nat.c (struct go32_nat_target) <pid_to_str>: Change return
+	type.
+	(go32_nat_target::pid_to_str): Change return type.
+	* gnu-nat.c (gnu_nat_target::pid_to_str): Change return type.
+	(gnu_nat_target::wait): Update.
+	(gnu_nat_target::wait): Update.
+	(gnu_nat_target::resume): Update.
+	* fbsd-nat.c (fbsd_nat_target::pid_to_str): Change return type.
+	(fbsd_nat_target::wait): Update.
+	* darwin-nat.c (darwin_nat_target::pid_to_str): Change return
+	type.
+	(darwin_nat_target::attach): Update.
+	* corelow.c (class core_target) <pid_to_str>: Change return type.
+	(core_target::pid_to_str): Change return type.
+	* target.c (normal_pid_to_str): Change return type.
+	(default_pid_to_str): Likewise.
+	(target_pid_to_str): Change return type.
+	(target_translate_tls_address): Update.
+	(target_announce_detach): Update.
+	* bsd-uthread.c (struct bsd_uthread_target) <pid_to_str>: Change
+	return type.
+	(bsd_uthread_target::pid_to_str): Change return type.
+	* bsd-kvm.c (class bsd_kvm_target) <pid_to_str>: Change return
+	type.
+	(bsd_kvm_target::pid_to_str): Change return type.
+	* aix-thread.c (class aix_thread_target) <pid_to_str>: Change
+	return type.
+	(aix_thread_target::pid_to_str): Change return type.
+	* target.h (struct target_ops) <pid_to_str>: Change return type.
+	(target_pid_to_str, normal_pid_to_str): Likewise.
+	* obsd-nat.h (class obsd_nat_target) <pid_to_str>: Change return
+	type.
+	* linux-nat.h (class linux_nat_target) <pid_to_str>: Change return
+	type.
+	* inf-ptrace.h (struct inf_ptrace_target) <pid_to_str>: Change
+	return type.
+	* gnu-nat.h (struct gnu_nat_target) <pid_to_str>: Change return
+	type.
+	* fbsd-nat.h (class fbsd_nat_target) <pid_to_str>: Change return
+	type.
+	* darwin-nat.h (class darwin_nat_target) <pid_to_str>: Change
+	return type.
+
 2019-03-13  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* NEWS: Mention that the new default MI version is 3.  Mention

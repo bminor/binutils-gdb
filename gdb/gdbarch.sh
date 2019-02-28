@@ -767,7 +767,7 @@ M;ULONGEST;core_xfer_shared_libraries;gdb_byte *readbuf, ULONGEST offset, ULONGE
 M;ULONGEST;core_xfer_shared_libraries_aix;gdb_byte *readbuf, ULONGEST offset, ULONGEST len;readbuf, offset, len
 
 # How the core target converts a PTID from a core file to a string.
-M;const char *;core_pid_to_str;ptid_t ptid;ptid
+M;std::string;core_pid_to_str;ptid_t ptid;ptid
 
 # How the core target extracts the name of a thread from a core file.
 M;const char *;core_thread_name;struct thread_info *thr;thr

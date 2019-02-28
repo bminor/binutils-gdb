@@ -2052,10 +2052,10 @@ darwin_nat_target::attach (const char *args, int from_tty)
 
       if (exec_file)
 	printf_unfiltered (_("Attaching to program: %s, %s\n"), exec_file,
-			   target_pid_to_str (ptid_t (pid)));
+			   target_pid_to_str (ptid_t (pid)).c_str ());
       else
 	printf_unfiltered (_("Attaching to %s\n"),
-			   target_pid_to_str (ptid_t (pid)));
+			   target_pid_to_str (ptid_t (pid)).c_str ());
     }
 
   if (pid == 0 || ::kill (pid, 0) < 0)
@@ -2126,18 +2126,14 @@ darwin_nat_target::detach (inferior *inf, int from_tty)
   mourn_inferior ();
 }
 
-const char *
+std::string
 darwin_nat_target::pid_to_str (ptid_t ptid)
 {
-  static char buf[80];
   long tid = ptid.tid ();
 
   if (tid != 0)
-    {
-      snprintf (buf, sizeof (buf), _("Thread 0x%lx of process %u"),
-		tid, ptid.pid ());
-      return buf;
-    }
+    return string_printf (_("Thread 0x%lx of process %u"),
+			  tid, ptid.pid ());
 
   return normal_pid_to_str (ptid);
 }

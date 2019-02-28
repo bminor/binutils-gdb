@@ -596,7 +596,8 @@ record_btrace_target::info_record ()
 
   printf_unfiltered (_("Recorded %u instructions in %u functions (%u gaps) "
 		       "for thread %s (%s).\n"), insns, calls, gaps,
-		     print_thread_id (tp), target_pid_to_str (tp->ptid));
+		     print_thread_id (tp),
+		     target_pid_to_str (tp->ptid).c_str ());
 
   if (btrace_is_replaying (tp))
     printf_unfiltered (_("Replay in progress.  At instruction %u.\n"),
@@ -1949,7 +1950,8 @@ record_btrace_resume_thread (struct thread_info *tp,
   struct btrace_thread_info *btinfo;
 
   DEBUG ("resuming thread %s (%s): %x (%s)", print_thread_id (tp),
-	 target_pid_to_str (tp->ptid), flag, btrace_thread_flag_to_str (flag));
+	 target_pid_to_str (tp->ptid).c_str (), flag,
+	 btrace_thread_flag_to_str (flag));
 
   btinfo = &tp->btrace;
 
@@ -2127,7 +2129,7 @@ record_btrace_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
 {
   enum btrace_thread_flag flag, cflag;
 
-  DEBUG ("resume %s: %s%s", target_pid_to_str (ptid),
+  DEBUG ("resume %s: %s%s", target_pid_to_str (ptid).c_str (),
 	 ::execution_direction == EXEC_REVERSE ? "reverse-" : "",
 	 step ? "step" : "cont");
 
@@ -2214,7 +2216,7 @@ record_btrace_cancel_resume (struct thread_info *tp)
 
   DEBUG ("cancel resume thread %s (%s): %x (%s)",
 	 print_thread_id (tp),
-	 target_pid_to_str (tp->ptid), flags,
+	 target_pid_to_str (tp->ptid).c_str (), flags,
 	 btrace_thread_flag_to_str (flags));
 
   tp->btrace.flags &= ~(BTHR_MOVE | BTHR_STOP);
@@ -2442,7 +2444,7 @@ record_btrace_step_thread (struct thread_info *tp)
   btinfo->flags &= ~(BTHR_MOVE | BTHR_STOP);
 
   DEBUG ("stepping thread %s (%s): %x (%s)", print_thread_id (tp),
-	 target_pid_to_str (tp->ptid), flags,
+	 target_pid_to_str (tp->ptid).c_str (), flags,
 	 btrace_thread_flag_to_str (flags));
 
   /* We can't step without an execution history.  */
@@ -2527,7 +2529,7 @@ record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
   std::vector<thread_info *> moving;
   std::vector<thread_info *> no_history;
 
-  DEBUG ("wait %s (0x%x)", target_pid_to_str (ptid), options);
+  DEBUG ("wait %s (0x%x)", target_pid_to_str (ptid).c_str (), options);
 
   /* As long as we're not replaying, just forward the request.  */
   if ((::execution_direction != EXEC_REVERSE)
@@ -2545,7 +2547,7 @@ record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
     {
       *status = btrace_step_no_resumed ();
 
-      DEBUG ("wait ended by %s: %s", target_pid_to_str (null_ptid),
+      DEBUG ("wait ended by %s: %s", target_pid_to_str (null_ptid).c_str (),
 	     target_waitstatus_to_string (status).c_str ());
 
       return null_ptid;
@@ -2636,7 +2638,7 @@ record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
 
   DEBUG ("wait ended by thread %s (%s): %s",
 	 print_thread_id (eventing),
-	 target_pid_to_str (eventing->ptid),
+	 target_pid_to_str (eventing->ptid).c_str (),
 	 target_waitstatus_to_string (status).c_str ());
 
   return eventing->ptid;
@@ -2647,7 +2649,7 @@ record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
 void
 record_btrace_target::stop (ptid_t ptid)
 {
-  DEBUG ("stop %s", target_pid_to_str (ptid));
+  DEBUG ("stop %s", target_pid_to_str (ptid).c_str ());
 
   /* As long as we're not replaying, just forward the request.  */
   if ((::execution_direction != EXEC_REVERSE)

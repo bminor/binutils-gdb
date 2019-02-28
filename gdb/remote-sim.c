@@ -124,7 +124,7 @@ struct gdbsim_target final
 
   bool thread_alive (ptid_t ptid) override;
 
-  const char *pid_to_str (ptid_t) override;
+  std::string pid_to_str (ptid_t) override;
 
   bool has_all_memory ()  override;
   bool has_memory ()  override;
@@ -1280,10 +1280,9 @@ gdbsim_target::thread_alive (ptid_t ptid)
   return false;
 }
 
-/* Convert a thread ID to a string.  Returns the string in a static
-   buffer.  */
+/* Convert a thread ID to a string.  */
 
-const char *
+std::string
 gdbsim_target::pid_to_str (ptid_t ptid)
 {
   return normal_pid_to_str (ptid);

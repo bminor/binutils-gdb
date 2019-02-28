@@ -64,7 +64,7 @@ public:
 
   void update_thread_list () override;
 
-  const char *pid_to_str (ptid_t) override;
+  std::string pid_to_str (ptid_t) override;
 
   const char *thread_name (struct thread_info *) override;
 

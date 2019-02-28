@@ -146,7 +146,7 @@ struct gnu_nat_target : public inf_child_target
 			char **, int) override;
   void mourn_inferior () override;
   bool thread_alive (ptid_t ptid) override;
-  const char *pid_to_str (ptid_t) override;
+  std::string pid_to_str (ptid_t) override;
   void stop (ptid_t) override;
 };
 

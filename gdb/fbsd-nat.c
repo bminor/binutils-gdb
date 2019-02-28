@@ -897,10 +897,9 @@ fbsd_nat_target::thread_alive (ptid_t ptid)
   return true;
 }
 
-/* Convert PTID to a string.  Returns the string in a static
-   buffer.  */
+/* Convert PTID to a string.  */
 
-const char *
+std::string
 fbsd_nat_target::pid_to_str (ptid_t ptid)
 {
   lwpid_t lwp;
@@ -908,11 +907,9 @@ fbsd_nat_target::pid_to_str (ptid_t ptid)
   lwp = ptid.lwp ();
   if (lwp != 0)
     {
-      static char buf[64];
       int pid = ptid.pid ();
 
-      xsnprintf (buf, sizeof buf, "LWP %d of process %d", lwp, pid);
-      return buf;
+      return string_printf ("LWP %d of process %d", lwp, pid);
     }
 
   return normal_pid_to_str (ptid);
@@ -1350,8 +1347,8 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 					"FLWP: deleting thread for LWP %u\n",
 					pl.pl_lwpid);
 		  if (print_thread_events)
-		    printf_unfiltered (_("[%s exited]\n"), target_pid_to_str
-				       (wptid));
+		    printf_unfiltered (_("[%s exited]\n"),
+				       target_pid_to_str (wptid).c_str ());
 		  delete_thread (thr);
 		}
 	      if (ptrace (PT_CONTINUE, pid, (caddr_t) 1, 0) == -1)

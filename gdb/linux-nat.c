@@ -1013,7 +1013,8 @@ exit_lwp (struct lwp_info *lp)
   if (th)
     {
       if (print_thread_events)
-	printf_unfiltered (_("[%s exited]\n"), target_pid_to_str (lp->ptid));
+	printf_unfiltered (_("[%s exited]\n"),
+			   target_pid_to_str (lp->ptid).c_str ());
 
       delete_thread (th);
     }
@@ -1149,7 +1150,7 @@ attach_proc_task_lwp_callback (ptid_t ptid)
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
 				"PTRACE_ATTACH %s, 0, 0 (OK)\n",
-				target_pid_to_str (ptid));
+				target_pid_to_str (ptid).c_str ());
 
 	  lp = add_lwp (ptid);
 
@@ -1335,7 +1336,7 @@ get_detach_signal (struct lwp_info *lp)
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "GPT: lwp %s has no pending signal\n",
-			    target_pid_to_str (lp->ptid));
+			    target_pid_to_str (lp->ptid).c_str ());
     }
   else if (!signal_pass_state (signo))
     {
@@ -1343,7 +1344,7 @@ get_detach_signal (struct lwp_info *lp)
 	fprintf_unfiltered (gdb_stdlog,
 			    "GPT: lwp %s had signal %s, "
 			    "but it is in no pass state\n",
-			    target_pid_to_str (lp->ptid),
+			    target_pid_to_str (lp->ptid).c_str (),
 			    gdb_signal_to_string (signo));
     }
   else
@@ -1351,7 +1352,7 @@ get_detach_signal (struct lwp_info *lp)
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "GPT: lwp %s has pending signal %s\n",
-			    target_pid_to_str (lp->ptid),
+			    target_pid_to_str (lp->ptid).c_str (),
 			    gdb_signal_to_string (signo));
 
       return gdb_signal_to_host (signo);
@@ -1375,7 +1376,7 @@ detach_one_lwp (struct lwp_info *lp, int *signo_p)
   if (debug_linux_nat && lp->status)
     fprintf_unfiltered (gdb_stdlog, "DC:  Pending %s for %s on detach.\n",
 			strsignal (WSTOPSIG (lp->status)),
-			target_pid_to_str (lp->ptid));
+			target_pid_to_str (lp->ptid).c_str ());
 
   /* If there is a pending SIGSTOP, get rid of it.  */
   if (lp->signalled)
@@ -1383,7 +1384,7 @@ detach_one_lwp (struct lwp_info *lp, int *signo_p)
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "DC: Sending SIGCONT to %s\n",
-			    target_pid_to_str (lp->ptid));
+			    target_pid_to_str (lp->ptid).c_str ());
 
       kill_lwp (lwpid, SIGCONT);
       lp->signalled = 0;
@@ -1438,7 +1439,8 @@ detach_one_lwp (struct lwp_info *lp, int *signo_p)
 	}
       else
 	{
-	  error (_("Can't detach %s: %s"), target_pid_to_str (lp->ptid),
+	  error (_("Can't detach %s: %s"),
+		 target_pid_to_str (lp->ptid).c_str (),
 		 safe_strerror (save_errno));
 	}
     }
@@ -1446,7 +1448,7 @@ detach_one_lwp (struct lwp_info *lp, int *signo_p)
     {
       fprintf_unfiltered (gdb_stdlog,
 			  "PTRACE_DETACH (%s, %s, 0) (OK)\n",
-			  target_pid_to_str (lp->ptid),
+			  target_pid_to_str (lp->ptid).c_str (),
 			  strsignal (signo));
     }
 
@@ -1608,14 +1610,14 @@ resume_lwp (struct lwp_info *lp, int step, enum gdb_signal signo)
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
 				"RC: Not resuming %s (vfork parent)\n",
-				target_pid_to_str (lp->ptid));
+				target_pid_to_str (lp->ptid).c_str ());
 	}
       else if (!lwp_status_pending_p (lp))
 	{
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
 				"RC: Resuming sibling %s, %s, %s\n",
-				target_pid_to_str (lp->ptid),
+				target_pid_to_str (lp->ptid).c_str (),
 				(signo != GDB_SIGNAL_0
 				 ? strsignal (gdb_signal_to_host (signo))
 				 : "0"),
@@ -1628,7 +1630,7 @@ resume_lwp (struct lwp_info *lp, int step, enum gdb_signal signo)
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
 				"RC: Not resuming sibling %s (has pending)\n",
-				target_pid_to_str (lp->ptid));
+				target_pid_to_str (lp->ptid).c_str ());
 	}
     }
   else
@@ -1636,7 +1638,7 @@ resume_lwp (struct lwp_info *lp, int step, enum gdb_signal signo)
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "RC: Not resuming sibling %s (not stopped)\n",
-			    target_pid_to_str (lp->ptid));
+			    target_pid_to_str (lp->ptid).c_str ());
     }
 }
 
@@ -1693,10 +1695,10 @@ linux_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
     fprintf_unfiltered (gdb_stdlog,
 			"LLR: Preparing to %s %s, %s, inferior_ptid %s\n",
 			step ? "step" : "resume",
-			target_pid_to_str (ptid),
+			target_pid_to_str (ptid).c_str (),
 			(signo != GDB_SIGNAL_0
 			 ? strsignal (gdb_signal_to_host (signo)) : "0"),
-			target_pid_to_str (inferior_ptid));
+			target_pid_to_str (inferior_ptid).c_str ());
 
   /* A specific PTID means `step only this process id'.  */
   resume_many = (minus_one_ptid == ptid
@@ -1773,7 +1775,7 @@ linux_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
     fprintf_unfiltered (gdb_stdlog,
 			"LLR: %s %s, %s (resume event thread)\n",
 			step ? "PTRACE_SINGLESTEP" : "PTRACE_CONT",
-			target_pid_to_str (lp->ptid),
+			target_pid_to_str (lp->ptid).c_str (),
 			(signo != GDB_SIGNAL_0
 			 ? strsignal (gdb_signal_to_host (signo)) : "0"));
 
@@ -2174,7 +2176,7 @@ wait_lwp (struct lwp_info *lp)
 	  thread_dead = 1;
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog, "WL: %s vanished.\n",
-				target_pid_to_str (lp->ptid));
+				target_pid_to_str (lp->ptid).c_str ());
 	}
       if (pid != 0)
 	break;
@@ -2200,7 +2202,7 @@ wait_lwp (struct lwp_info *lp)
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
 				"WL: Thread group leader %s vanished.\n",
-				target_pid_to_str (lp->ptid));
+				target_pid_to_str (lp->ptid).c_str ());
 	  break;
 	}
 
@@ -2223,7 +2225,7 @@ wait_lwp (struct lwp_info *lp)
 	{
 	  fprintf_unfiltered (gdb_stdlog,
 			      "WL: waitpid %s received %s\n",
-			      target_pid_to_str (lp->ptid),
+			      target_pid_to_str (lp->ptid).c_str (),
 			      status_to_str (status));
 	}
 
@@ -2248,7 +2250,7 @@ wait_lwp (struct lwp_info *lp)
 	  thread_dead = 1;
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog, "WL: %s exited.\n",
-				target_pid_to_str (lp->ptid));
+				target_pid_to_str (lp->ptid).c_str ());
 	}
     }
 
@@ -2316,7 +2318,7 @@ stop_callback (struct lwp_info *lp)
 	{
 	  fprintf_unfiltered (gdb_stdlog,
 			      "SC:  kill %s **<SIGSTOP>**\n",
-			      target_pid_to_str (lp->ptid));
+			      target_pid_to_str (lp->ptid).c_str ());
 	}
       errno = 0;
       ret = kill_lwp (lp->ptid.lwp (), SIGSTOP);
@@ -2417,7 +2419,7 @@ maybe_clear_ignore_sigint (struct lwp_info *lp)
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "MCIS: Clearing bogus flag for %s\n",
-			    target_pid_to_str (lp->ptid));
+			    target_pid_to_str (lp->ptid).c_str ());
       lp->ignore_sigint = 0;
     }
 }
@@ -2517,7 +2519,7 @@ stop_wait_callback (struct lwp_info *lp)
 	    fprintf_unfiltered (gdb_stdlog,
 				"PTRACE_CONT %s, 0, 0 (%s) "
 				"(discarding SIGINT)\n",
-				target_pid_to_str (lp->ptid),
+				target_pid_to_str (lp->ptid).c_str (),
 				errno ? safe_strerror (errno) : "OK");
 
 	  return stop_wait_callback (lp);
@@ -2533,7 +2535,7 @@ stop_wait_callback (struct lwp_info *lp)
 	    fprintf_unfiltered (gdb_stdlog,
 				"SWC: Pending event %s in %s\n",
 				status_to_str ((int) status),
-				target_pid_to_str (lp->ptid));
+				target_pid_to_str (lp->ptid).c_str ());
 
 	  /* Save the sigtrap event.  */
 	  lp->status = status;
@@ -2547,7 +2549,7 @@ stop_wait_callback (struct lwp_info *lp)
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
 				"SWC: Expected SIGSTOP caught for %s.\n",
-				target_pid_to_str (lp->ptid));
+				target_pid_to_str (lp->ptid).c_str ());
 
 	  lp->signalled = 0;
 
@@ -2594,7 +2596,7 @@ status_callback (struct lwp_info *lp)
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
 				"SC: PC of %s changed.  was=%s, now=%s\n",
-				target_pid_to_str (lp->ptid),
+				target_pid_to_str (lp->ptid).c_str (),
 				paddress (target_gdbarch (), lp->stop_pc),
 				paddress (target_gdbarch (), pc));
 	  discard = 1;
@@ -2606,7 +2608,7 @@ status_callback (struct lwp_info *lp)
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
 				"SC: previous breakpoint of %s, at %s gone\n",
-				target_pid_to_str (lp->ptid),
+				target_pid_to_str (lp->ptid).c_str (),
 				paddress (target_gdbarch (), lp->stop_pc));
 
 	  discard = 1;
@@ -2618,7 +2620,7 @@ status_callback (struct lwp_info *lp)
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
 				"SC: pending event of %s cancelled.\n",
-				target_pid_to_str (lp->ptid));
+				target_pid_to_str (lp->ptid).c_str ());
 
 	  lp->status = 0;
 	  linux_resume_one_lwp (lp, lp->step, GDB_SIGNAL_0);
@@ -2744,7 +2746,7 @@ save_stop_reason (struct lwp_info *lp)
 	      if (debug_linux_nat)
 		fprintf_unfiltered (gdb_stdlog,
 				    "CSBB: %s stopped by trace\n",
-				    target_pid_to_str (lp->ptid));
+				    target_pid_to_str (lp->ptid).c_str ());
 
 	      /* We may have single stepped an instruction that
 		 triggered a watchpoint.  In that case, on some
@@ -2777,7 +2779,7 @@ save_stop_reason (struct lwp_info *lp)
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "CSBB: %s stopped by software breakpoint\n",
-			    target_pid_to_str (lp->ptid));
+			    target_pid_to_str (lp->ptid).c_str ());
 
       /* Back up the PC if necessary.  */
       if (pc != sw_bp_pc)
@@ -2791,14 +2793,14 @@ save_stop_reason (struct lwp_info *lp)
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "CSBB: %s stopped by hardware breakpoint\n",
-			    target_pid_to_str (lp->ptid));
+			    target_pid_to_str (lp->ptid).c_str ());
     }
   else if (lp->stop_reason == TARGET_STOPPED_BY_WATCHPOINT)
     {
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "CSBB: %s stopped by hardware watchpoint\n",
-			    target_pid_to_str (lp->ptid));
+			    target_pid_to_str (lp->ptid).c_str ());
     }
 
   lp->stop_pc = pc;
@@ -2875,7 +2877,7 @@ select_event_lwp (ptid_t filter, struct lwp_info **orig_lp, int *status)
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
 				"SEL: Select single-step %s\n",
-				target_pid_to_str (event_lp->ptid));
+				target_pid_to_str (event_lp->ptid).c_str ());
 	}
     }
 
@@ -3038,7 +3040,7 @@ linux_nat_filter_event (int lwpid, int status)
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
 				"LLW: %s exited.\n",
-				target_pid_to_str (lp->ptid));
+				target_pid_to_str (lp->ptid).c_str ());
 
 	  /* If there is at least one more LWP, then the exit signal
 	     was not the end of the debugged application and should be
@@ -3077,7 +3079,7 @@ linux_nat_filter_event (int lwpid, int status)
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
 				"LLW: resume_stop SIGSTOP caught for %s.\n",
-				target_pid_to_str (lp->ptid));
+				target_pid_to_str (lp->ptid).c_str ());
 	}
       else
 	{
@@ -3088,7 +3090,7 @@ linux_nat_filter_event (int lwpid, int status)
 				"LLW: %s %s, 0, 0 (discard delayed SIGSTOP)\n",
 				lp->step ?
 				"PTRACE_SINGLESTEP" : "PTRACE_CONT",
-				target_pid_to_str (lp->ptid));
+				target_pid_to_str (lp->ptid).c_str ());
 
 	  linux_resume_one_lwp (lp, lp->step, GDB_SIGNAL_0);
 	  gdb_assert (lp->resumed);
@@ -3104,7 +3106,7 @@ linux_nat_filter_event (int lwpid, int status)
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "LLW: Delayed SIGINT caught for %s.\n",
-			    target_pid_to_str (lp->ptid));
+			    target_pid_to_str (lp->ptid).c_str ());
 
       /* This is a delayed SIGINT.  */
       lp->ignore_sigint = 0;
@@ -3115,7 +3117,7 @@ linux_nat_filter_event (int lwpid, int status)
 			    "LLW: %s %s, 0, 0 (discard SIGINT)\n",
 			    lp->step ?
 			    "PTRACE_SINGLESTEP" : "PTRACE_CONT",
-			    target_pid_to_str (lp->ptid));
+			    target_pid_to_str (lp->ptid).c_str ());
       gdb_assert (lp->resumed);
 
       /* Discard the event.  */
@@ -3164,7 +3166,7 @@ linux_nat_filter_event (int lwpid, int status)
 				"LLW: %s %s, %s (preempt 'handle')\n",
 				lp->step ?
 				"PTRACE_SINGLESTEP" : "PTRACE_CONT",
-				target_pid_to_str (lp->ptid),
+				target_pid_to_str (lp->ptid).c_str (),
 				(signo != GDB_SIGNAL_0
 				 ? strsignal (gdb_signal_to_host (signo))
 				 : "0"));
@@ -3293,7 +3295,7 @@ linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
 	fprintf_unfiltered (gdb_stdlog,
 			    "LLW: Using pending wait status %s for %s.\n",
 			    status_to_str (lp->status),
-			    target_pid_to_str (lp->ptid));
+			    target_pid_to_str (lp->ptid).c_str ());
     }
 
   /* But if we don't find a pending event, we'll have to wait.  Always
@@ -3453,7 +3455,7 @@ linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "LLW: trap ptid is %s.\n",
-			    target_pid_to_str (lp->ptid));
+			    target_pid_to_str (lp->ptid).c_str ());
     }
 
   if (lp->waitstatus.kind != TARGET_WAITKIND_IGNORE)
@@ -3502,21 +3504,21 @@ resume_stopped_resumed_lwps (struct lwp_info *lp, const ptid_t wait_ptid)
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "RSRL: NOT resuming LWP %s, not stopped\n",
-			    target_pid_to_str (lp->ptid));
+			    target_pid_to_str (lp->ptid).c_str ());
     }
   else if (!lp->resumed)
     {
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "RSRL: NOT resuming LWP %s, not resumed\n",
-			    target_pid_to_str (lp->ptid));
+			    target_pid_to_str (lp->ptid).c_str ());
     }
   else if (lwp_status_pending_p (lp))
     {
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "RSRL: NOT resuming LWP %s, has pending status\n",
-			    target_pid_to_str (lp->ptid));
+			    target_pid_to_str (lp->ptid).c_str ());
     }
   else
     {
@@ -3542,7 +3544,7 @@ resume_stopped_resumed_lwps (struct lwp_info *lp, const ptid_t wait_ptid)
 		fprintf_unfiltered (gdb_stdlog,
 				    "RSRL: resuming stopped-resumed LWP %s at "
 				    "%s: step=%d\n",
-				    target_pid_to_str (lp->ptid),
+				    target_pid_to_str (lp->ptid).c_str (),
 				    paddress (gdbarch, pc),
 				    lp->step);
 
@@ -3571,7 +3573,7 @@ linux_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
       std::string options_string = target_options_to_string (target_options);
       fprintf_unfiltered (gdb_stdlog,
 			  "linux_nat_wait: [%s], [%s]\n",
-			  target_pid_to_str (ptid),
+			  target_pid_to_str (ptid).c_str (),
 			  options_string.c_str ());
     }
 
@@ -3943,18 +3945,13 @@ linux_nat_target::update_thread_list ()
     }
 }
 
-const char *
+std::string
 linux_nat_target::pid_to_str (ptid_t ptid)
 {
-  static char buf[64];
-
   if (ptid.lwp_p ()
       && (ptid.pid () != ptid.lwp ()
 	  || num_lwps (ptid.pid ()) > 1))
-    {
-      snprintf (buf, sizeof (buf), "LWP %ld", ptid.lwp ());
-      return buf;
-    }
+    return string_printf ("LWP %ld", ptid.lwp ());
 
   return normal_pid_to_str (ptid);
 }
@@ -4434,7 +4431,7 @@ linux_nat_stop_lwp (struct lwp_info *lwp)
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "LNSL: running -> suspending %s\n",
-			    target_pid_to_str (lwp->ptid));
+			    target_pid_to_str (lwp->ptid).c_str ());
 
 
       if (lwp->last_resume_kind == resume_stop)
@@ -4459,12 +4456,12 @@ linux_nat_stop_lwp (struct lwp_info *lwp)
 	  if (find_thread_ptid (lwp->ptid)->stop_requested)
 	    fprintf_unfiltered (gdb_stdlog,
 				"LNSL: already stopped/stop_requested %s\n",
-				target_pid_to_str (lwp->ptid));
+				target_pid_to_str (lwp->ptid).c_str ());
 	  else
 	    fprintf_unfiltered (gdb_stdlog,
 				"LNSL: already stopped/no "
 				"stop_requested yet %s\n",
-				target_pid_to_str (lwp->ptid));
+				target_pid_to_str (lwp->ptid).c_str ());
 	}
     }
   return 0;

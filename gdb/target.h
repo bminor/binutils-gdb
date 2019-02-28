@@ -649,7 +649,7 @@ struct target_ops
       TARGET_DEFAULT_RETURN (false);
     virtual void update_thread_list ()
       TARGET_DEFAULT_IGNORE ();
-    virtual const char *pid_to_str (ptid_t)
+    virtual std::string pid_to_str (ptid_t)
       TARGET_DEFAULT_FUNC (default_pid_to_str);
     virtual const char *extra_thread_info (thread_info *)
       TARGET_DEFAULT_RETURN (NULL);
@@ -1829,9 +1829,9 @@ extern int target_is_non_stop_p (void);
    `process xyz', but on some systems it may contain
    `process xyz thread abc'.  */
 
-extern const char *target_pid_to_str (ptid_t ptid);
+extern std::string target_pid_to_str (ptid_t ptid);
 
-extern const char *normal_pid_to_str (ptid_t ptid);
+extern std::string normal_pid_to_str (ptid_t ptid);
 
 /* Return a short string describing extra information about PID,
    e.g. "sleeping", "runnable", "running on LWP 3".  Null return value

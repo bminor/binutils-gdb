@@ -409,7 +409,7 @@ fprint_dummy_frames (struct ui_file *file)
       fprintf_unfiltered (file, " id=");
       fprint_frame_id (file, s->id.id);
       fprintf_unfiltered (file, ", ptid=%s",
-			  target_pid_to_str (s->id.thread->ptid));
+			  target_pid_to_str (s->id.thread->ptid).c_str ());
       fprintf_unfiltered (file, "\n");
     }
 }

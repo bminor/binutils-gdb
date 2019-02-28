@@ -1608,7 +1608,7 @@ btrace_enable (struct thread_info *tp, const struct btrace_config *conf)
 #endif /* !defined (HAVE_LIBIPT) */
 
   DEBUG ("enable thread %s (%s)", print_thread_id (tp),
-	 target_pid_to_str (tp->ptid));
+	 target_pid_to_str (tp->ptid).c_str ());
 
   tp->btrace.target = target_enable_btrace (tp->ptid, conf);
 
@@ -1663,7 +1663,7 @@ btrace_disable (struct thread_info *tp)
     return;
 
   DEBUG ("disable thread %s (%s)", print_thread_id (tp),
-	 target_pid_to_str (tp->ptid));
+	 target_pid_to_str (tp->ptid).c_str ());
 
   target_disable_btrace (btp->target);
   btp->target = NULL;
@@ -1682,7 +1682,7 @@ btrace_teardown (struct thread_info *tp)
     return;
 
   DEBUG ("teardown thread %s (%s)", print_thread_id (tp),
-	 target_pid_to_str (tp->ptid));
+	 target_pid_to_str (tp->ptid).c_str ());
 
   target_teardown_btrace (btp->target);
   btp->target = NULL;
@@ -1905,7 +1905,7 @@ btrace_fetch (struct thread_info *tp, const struct btrace_cpu *cpu)
   int errcode;
 
   DEBUG ("fetch thread %s (%s)", print_thread_id (tp),
-	 target_pid_to_str (tp->ptid));
+	 target_pid_to_str (tp->ptid).c_str ());
 
   btinfo = &tp->btrace;
   tinfo = btinfo->target;
@@ -1981,7 +1981,7 @@ btrace_clear (struct thread_info *tp)
   struct btrace_thread_info *btinfo;
 
   DEBUG ("clear thread %s (%s)", print_thread_id (tp),
-	 target_pid_to_str (tp->ptid));
+	 target_pid_to_str (tp->ptid).c_str ());
 
   /* Make sure btrace frames that may hold a pointer into the branch
      trace data are destroyed.  */

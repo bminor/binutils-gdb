@@ -51,7 +51,7 @@ public:
 
 #ifdef PT_LWPINFO
   bool thread_alive (ptid_t ptid) override;
-  const char *pid_to_str (ptid_t) override;
+  std::string pid_to_str (ptid_t) override;
 
 #ifdef HAVE_STRUCT_PTRACE_LWPINFO_PL_TDNAME
   const char *thread_name (struct thread_info *) override;

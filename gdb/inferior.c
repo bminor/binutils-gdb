@@ -126,7 +126,7 @@ add_inferior (int pid)
       if (pid != 0)
 	printf_unfiltered (_("[New inferior %d (%s)]\n"),
 			   inf->num,
-			   target_pid_to_str (ptid_t (pid)));
+			   target_pid_to_str (ptid_t (pid)).c_str ());
       else
 	printf_unfiltered (_("[New inferior %d]\n"), inf->num);
     }
@@ -243,7 +243,7 @@ detach_inferior (inferior *inf)
   if (print_inferior_events)
     printf_unfiltered (_("[Inferior %d (%s) detached]\n"),
 		       inf->num,
-		       target_pid_to_str (ptid_t (pid)));
+		       target_pid_to_str (ptid_t (pid)).c_str ());
 }
 
 void
@@ -407,7 +407,7 @@ number_of_inferiors (void)
 /* Converts an inferior process id to a string.  Like
    target_pid_to_str, but special cases the null process.  */
 
-static const char *
+static std::string
 inferior_pid_to_str (int pid)
 {
   if (pid != 0)
@@ -428,7 +428,7 @@ print_selected_inferior (struct ui_out *uiout)
     filename = _("<noexec>");
 
   uiout->message (_("[Switching to inferior %d [%s] (%s)]\n"),
-		  inf->num, inferior_pid_to_str (inf->pid), filename);
+		  inf->num, inferior_pid_to_str (inf->pid).c_str (), filename);
 }
 
 /* Prints the list of inferiors and their details on UIOUT.  This is a

@@ -92,7 +92,7 @@ public:
 
   void files_info () override;
   bool thread_alive (ptid_t ptid) override;
-  const char *pid_to_str (ptid_t) override;
+  std::string pid_to_str (ptid_t) override;
 
   bool has_memory () override { return true; }
   bool has_stack () override { return true; }
@@ -368,12 +368,10 @@ bsd_kvm_target::thread_alive (ptid_t ptid)
   return true;
 }
 
-const char *
+std::string
 bsd_kvm_target::pid_to_str (ptid_t ptid)
 {
-  static char buf[64];
-  xsnprintf (buf, sizeof buf, "<kvm>");
-  return buf;
+  return "<kvm>";
 }
 
 /* Add the libkvm interface to the list of all possible targets and

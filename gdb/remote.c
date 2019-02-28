@@ -475,7 +475,7 @@ public:
 
   void update_thread_list () override;
 
-  const char *pid_to_str (ptid_t) override;
+  std::string pid_to_str (ptid_t) override;
 
   const char *extra_thread_info (struct thread_info *) override;
 
@@ -5814,10 +5814,10 @@ extended_remote_target::attach (const char *args, int from_tty)
 
       if (exec_file)
 	printf_unfiltered (_("Attaching to program: %s, %s\n"), exec_file,
-			   target_pid_to_str (ptid_t (pid)));
+			   target_pid_to_str (ptid_t (pid)).c_str ());
       else
 	printf_unfiltered (_("Attaching to %s\n"),
-			   target_pid_to_str (ptid_t (pid)));
+			   target_pid_to_str (ptid_t (pid)).c_str ());
     }
 
   xsnprintf (rs->buf.data (), get_remote_packet_size (), "vAttach;%x", pid);
@@ -5836,14 +5836,14 @@ extended_remote_target::attach (const char *args, int from_tty)
 	}
       else if (strcmp (rs->buf.data (), "OK") != 0)
 	error (_("Attaching to %s failed with: %s"),
-	       target_pid_to_str (ptid_t (pid)),
+	       target_pid_to_str (ptid_t (pid)).c_str (),
 	       rs->buf.data ());
       break;
     case PACKET_UNKNOWN:
       error (_("This target does not support attaching to a process"));
     default:
       error (_("Attaching to %s failed"),
-	     target_pid_to_str (ptid_t (pid)));
+	     target_pid_to_str (ptid_t (pid)).c_str ());
     }
 
   set_current_inferior (remote_add_inferior (0, pid, 1, 0));
@@ -6638,7 +6638,7 @@ remote_target::remote_stop_ns (ptid_t ptid)
   putpkt (rs->buf);
   getpkt (&rs->buf, 0);
   if (strcmp (rs->buf.data (), "OK") != 0)
-    error (_("Stopping %s failed: %s"), target_pid_to_str (ptid),
+    error (_("Stopping %s failed: %s"), target_pid_to_str (ptid).c_str (),
 	   rs->buf.data ());
 }
 
@@ -7096,7 +7096,7 @@ remote_target::remote_notif_remove_queued_reply (ptid_t ptid)
   if (notif_debug)
     fprintf_unfiltered (gdb_stdlog,
 			"notif: discard queued event: 'Stop' in %s\n",
-			target_pid_to_str (ptid));
+			target_pid_to_str (ptid).c_str ());
 
   return result;
 }
@@ -7134,7 +7134,7 @@ remote_target::push_stop_reply (struct stop_reply *new_event)
   if (notif_debug)
     fprintf_unfiltered (gdb_stdlog,
 			"notif: push 'Stop' %s to queue %d\n",
-			target_pid_to_str (new_event->ptid),
+			target_pid_to_str (new_event->ptid).c_str (),
 			int (rs->stop_reply_queue.size ()));
 
   mark_async_event_handler (rs->remote_async_inferior_event_token);
@@ -11397,13 +11397,11 @@ init_remote_threadtests (void)
 
 #endif /* 0 */
 
-/* Convert a thread ID to a string.  Returns the string in a static
-   buffer.  */
+/* Convert a thread ID to a string.  */
 
-const char *
+std::string
 remote_target::pid_to_str (ptid_t ptid)
 {
-  static char buf[64];
   struct remote_state *rs = get_remote_state ();
 
   if (ptid == null_ptid)
@@ -11422,27 +11420,22 @@ remote_target::pid_to_str (ptid_t ptid)
 	 attached to a process, and reporting yes to qAttached, hence
 	 no smart special casing here.  */
       if (!remote_multi_process_p (rs))
-	{
-	  xsnprintf (buf, sizeof buf, "Remote target");
-	  return buf;
-	}
+	return "Remote target";
 
       return normal_pid_to_str (ptid);
     }
   else
     {
       if (magic_null_ptid == ptid)
-	xsnprintf (buf, sizeof buf, "Thread <main>");
+	return "Thread <main>";
       else if (remote_multi_process_p (rs))
 	if (ptid.lwp () == 0)
 	  return normal_pid_to_str (ptid);
 	else
-	  xsnprintf (buf, sizeof buf, "Thread %d.%ld",
-		     ptid.pid (), ptid.lwp ());
+	  return string_printf ("Thread %d.%ld",
+				ptid.pid (), ptid.lwp ());
       else
-	xsnprintf (buf, sizeof buf, "Thread %ld",
-		   ptid.lwp ());
-      return buf;
+	return string_printf ("Thread %ld", ptid.lwp ());
     }
 }
 
@@ -13786,10 +13779,10 @@ remote_target::enable_btrace (ptid_t ptid, const struct btrace_config *conf)
     {
       if (rs->buf[0] == 'E' && rs->buf[1] == '.')
 	error (_("Could not enable branch tracing for %s: %s"),
-	       target_pid_to_str (ptid), &rs->buf[2]);
+	       target_pid_to_str (ptid).c_str (), &rs->buf[2]);
       else
 	error (_("Could not enable branch tracing for %s."),
-	       target_pid_to_str (ptid));
+	       target_pid_to_str (ptid).c_str ());
     }
 
   tinfo = XCNEW (struct btrace_target_info);
@@ -13834,10 +13827,10 @@ remote_target::disable_btrace (struct btrace_target_info *tinfo)
     {
       if (rs->buf[0] == 'E' && rs->buf[1] == '.')
 	error (_("Could not disable branch tracing for %s: %s"),
-	       target_pid_to_str (tinfo->ptid), &rs->buf[2]);
+	       target_pid_to_str (tinfo->ptid).c_str (), &rs->buf[2]);
       else
 	error (_("Could not disable branch tracing for %s."),
-	       target_pid_to_str (tinfo->ptid));
+	       target_pid_to_str (tinfo->ptid).c_str ());
     }
 
   xfree (tinfo);

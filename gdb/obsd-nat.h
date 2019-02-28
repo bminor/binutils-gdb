@@ -25,7 +25,7 @@
 class obsd_nat_target : public inf_ptrace_target
 {
   /* Override some methods to support threads.  */
-  const char *pid_to_str (ptid_t) override;
+  std::string pid_to_str (ptid_t) override;
   void update_thread_list () override;
   ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
 };

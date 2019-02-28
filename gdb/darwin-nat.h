@@ -45,7 +45,7 @@ class darwin_nat_target : public inf_child_target
 
   bool thread_alive (ptid_t ptid) override;
 
-  const char *pid_to_str (ptid_t) override;
+  std::string pid_to_str (ptid_t) override;
 
   char *pid_to_exec_file (int pid) override;
 

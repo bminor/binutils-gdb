@@ -35,16 +35,11 @@
 
 #ifdef PT_GET_THREAD_FIRST
 
-const char *
+std::sring
 obsd_nat_target::pid_to_str (ptid_t ptid)
 {
   if (ptid.lwp () != 0)
-    {
-      static char buf[64];
-
-      xsnprintf (buf, sizeof buf, "thread %ld", ptid.lwp ());
-      return buf;
-    }
+    return string_printf ("thread %ld", ptid.lwp ());
 
   return normal_pid_to_str (ptid);
 }

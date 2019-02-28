@@ -117,7 +117,7 @@ i386_gnu_nat_target::fetch_registers (struct regcache *regcache, int regno)
   thread = inf_tid_to_thread (gnu_current_inf, ptid.lwp ());
   if (!thread)
     error (_("Can't fetch registers from thread %s: No such thread"),
-	   target_pid_to_str (ptid));
+	   target_pid_to_str (ptid).c_str ());
 
   if (regno < I386_NUM_GREGS || regno == -1)
     {
@@ -208,7 +208,7 @@ i386_gnu_nat_target::store_registers (struct regcache *regcache, int regno)
   thread = inf_tid_to_thread (gnu_current_inf, ptid.lwp ());
   if (!thread)
     error (_("Couldn't store registers into thread %s: No such thread"),
-	   target_pid_to_str (ptid));
+	   target_pid_to_str (ptid).c_str ());
 
   if (regno < I386_NUM_GREGS || regno == -1)
     {

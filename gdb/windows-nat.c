@@ -341,7 +341,7 @@ struct windows_nat_target final : public x86_nat_target<inf_child_target>
 
   bool thread_alive (ptid_t ptid) override;
 
-  const char *pid_to_str (ptid_t) override;
+  std::string pid_to_str (ptid_t) override;
 
   void interrupt () override;
 
@@ -525,10 +525,11 @@ windows_delete_thread (ptid_t ptid, DWORD exit_code, bool main_thread_p)
      here as well.  */
 
   if (info_verbose)
-    printf_unfiltered ("[Deleting %s]\n", target_pid_to_str (ptid));
+    printf_unfiltered ("[Deleting %s]\n", target_pid_to_str (ptid).c_str ());
   else if (print_thread_events && !main_thread_p)
     printf_unfiltered (_("[%s exited with code %u]\n"),
-		       target_pid_to_str (ptid), (unsigned) exit_code);
+		       target_pid_to_str (ptid).c_str (),
+		       (unsigned) exit_code);
 
   delete_thread (find_thread_ptid (ptid));
 
@@ -2011,10 +2012,10 @@ windows_nat_target::attach (const char *args, int from_tty)
 
       if (exec_file)
 	printf_unfiltered ("Attaching to program `%s', %s\n", exec_file,
-			   target_pid_to_str (ptid_t (pid)));
+			   target_pid_to_str (ptid_t (pid)).c_str ());
       else
 	printf_unfiltered ("Attaching to %s\n",
-			   target_pid_to_str (ptid_t (pid)));
+			   target_pid_to_str (ptid_t (pid)).c_str ());
     }
 
   do_initial_windows_stuff (this, pid, 1);
@@ -2142,7 +2143,7 @@ windows_nat_target::files_info ()
 
   printf_unfiltered ("\tUsing the running image of %s %s.\n",
 		     inf->attach_flag ? "attached" : "child",
-		     target_pid_to_str (inferior_ptid));
+		     target_pid_to_str (inferior_ptid).c_str ());
 }
 
 /* Modify CreateProcess parameters for use of a new separate console.
@@ -2934,17 +2935,11 @@ windows_nat_target::close ()
 }
 
 /* Convert pid to printable format.  */
-const char *
+std::string
 windows_nat_target::pid_to_str (ptid_t ptid)
 {
-  static char buf[80];
-
   if (ptid.tid () != 0)
-    {
-      snprintf (buf, sizeof (buf), "Thread %d.0x%lx",
-		ptid.pid (), ptid.tid ());
-      return buf;
-    }
+    return string_printf ("Thread %d.0x%lx", ptid.pid (), ptid.tid ());
 
   return normal_pid_to_str (ptid);
 }

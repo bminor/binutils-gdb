@@ -352,7 +352,7 @@ linux_fork_mourn_inferior (void)
   last = find_last_fork ();
   fork_load_infrun_state (last);
   printf_filtered (_("[Switching to %s]\n"),
-		   target_pid_to_str (inferior_ptid));
+		   target_pid_to_str (inferior_ptid).c_str ());
 
   /* If there's only one fork, switch back to non-fork mode.  */
   if (one_fork_p ())
@@ -371,7 +371,8 @@ linux_fork_detach (int from_tty)
      fork.  */
 
   if (ptrace (PTRACE_DETACH, inferior_ptid.pid (), 0, 0))
-    error (_("Unable to detach %s"), target_pid_to_str (inferior_ptid));
+    error (_("Unable to detach %s"),
+	   target_pid_to_str (inferior_ptid).c_str ());
 
   delete_fork (inferior_ptid);
 
@@ -384,7 +385,7 @@ linux_fork_detach (int from_tty)
 
   if (from_tty)
     printf_filtered (_("[Switching to %s]\n"),
-		     target_pid_to_str (inferior_ptid));
+		     target_pid_to_str (inferior_ptid).c_str ());
 
   /* If there's only one fork, switch back to non-fork mode.  */
   if (one_fork_p ())
@@ -435,7 +436,7 @@ public:
 	CATCH (ex, RETURN_MASK_ALL)
 	  {
 	    warning (_("Couldn't restore checkpoint state in %s: %s"),
-		     target_pid_to_str (m_oldfp->ptid), ex.message);
+		     target_pid_to_str (m_oldfp->ptid).c_str (), ex.message);
 	  }
 	END_CATCH
       }
@@ -504,14 +505,14 @@ delete_checkpoint_command (const char *args, int from_tty)
 Please switch to another checkpoint before deleting the current one"));
 
   if (ptrace (PTRACE_KILL, ptid.pid (), 0, 0))
-    error (_("Unable to kill pid %s"), target_pid_to_str (ptid));
+    error (_("Unable to kill pid %s"), target_pid_to_str (ptid).c_str ());
 
   fi = find_fork_ptid (ptid);
   gdb_assert (fi);
   pptid = fi->parent_ptid;
 
   if (from_tty)
-    printf_filtered (_("Killed %s\n"), target_pid_to_str (ptid));
+    printf_filtered (_("Killed %s\n"), target_pid_to_str (ptid).c_str ());
 
   delete_fork (ptid);
 
@@ -524,7 +525,8 @@ Please switch to another checkpoint before deleting the current one"));
       || (parent != NULL && parent->state == THREAD_STOPPED))
     {
       if (inferior_call_waitpid (pptid, ptid.pid ()))
-        warning (_("Unable to wait pid %s"), target_pid_to_str (ptid));
+        warning (_("Unable to wait pid %s"),
+		 target_pid_to_str (ptid).c_str ());
     }
 }
 
@@ -545,10 +547,10 @@ detach_checkpoint_command (const char *args, int from_tty)
 Please switch to another checkpoint before detaching the current one"));
 
   if (ptrace (PTRACE_DETACH, ptid.pid (), 0, 0))
-    error (_("Unable to detach %s"), target_pid_to_str (ptid));
+    error (_("Unable to detach %s"), target_pid_to_str (ptid).c_str ());
 
   if (from_tty)
-    printf_filtered (_("Detached %s\n"), target_pid_to_str (ptid));
+    printf_filtered (_("Detached %s\n"), target_pid_to_str (ptid).c_str ());
 
   delete_fork (ptid);
 }
@@ -577,7 +579,7 @@ info_checkpoints_command (const char *arg, int from_tty)
 	printf_filtered ("  ");
 
       ULONGEST pc = fi.pc;
-      printf_filtered ("%d %s", fi.num, target_pid_to_str (fi.ptid));
+      printf_filtered ("%d %s", fi.num, target_pid_to_str (fi.ptid).c_str ());
       if (fi.num == 0)
 	printf_filtered (_(" (main process)"));
       printf_filtered (_(" at "));
@@ -730,7 +732,7 @@ linux_fork_context (struct fork_info *newfp, int from_tty)
   insert_breakpoints ();
 
   printf_filtered (_("Switching to %s\n"),
-		   target_pid_to_str (inferior_ptid));
+		   target_pid_to_str (inferior_ptid).c_str ());
 
   print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
 }

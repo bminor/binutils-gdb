@@ -40,10 +40,9 @@ sol2_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 /* This is how we want PTIDs from Solaris core files to be
    printed.  */
 
-const char *
+std::string
 sol2_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
 {
-  static char buf[80];
   struct inferior *inf;
   int pid;
 
@@ -53,8 +52,7 @@ sol2_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
   if (pid != 0)
     {
       /* A thread.  */
-      xsnprintf (buf, sizeof buf, "LWP %ld", ptid.lwp ());
-      return buf;
+      return string_printf ("LWP %ld", ptid.lwp ());
     }
 
   /* GDB didn't use to put a NT_PSTATUS note in Solaris cores.  If
@@ -62,10 +60,7 @@ sol2_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
      up.  */
   inf = find_inferior_ptid (ptid);
   if (inf == NULL || inf->fake_pid_p)
-    {
-      xsnprintf (buf, sizeof buf, "<core>");
-      return buf;
-    }
+    return "<core>";
 
   /* Not fake; print as usual.  */
   return normal_pid_to_str (ptid);

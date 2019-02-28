@@ -83,7 +83,7 @@ public:
   bool thread_alive (ptid_t ptid) override;
   const struct target_desc *read_description () override;
 
-  const char *pid_to_str (ptid_t) override;
+  std::string pid_to_str (ptid_t) override;
 
   const char *thread_name (struct thread_info *) override;
 
@@ -985,10 +985,9 @@ core_target::read_description ()
   return this->beneath ()->read_description ();
 }
 
-const char *
+std::string
 core_target::pid_to_str (ptid_t ptid)
 {
-  static char buf[64];
   struct inferior *inf;
   int pid;
 
@@ -1013,8 +1012,7 @@ core_target::pid_to_str (ptid_t ptid)
     return normal_pid_to_str (ptid);
 
   /* No luck.  We simply don't have a valid PID to print.  */
-  xsnprintf (buf, sizeof buf, "<main task>");
-  return buf;
+  return "<main task>";
 }
 
 const char *

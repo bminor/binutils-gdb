@@ -127,7 +127,7 @@ public:
 
   bool thread_alive (ptid_t ptid) override;
 
-  const char *pid_to_str (ptid_t) override;
+  std::string pid_to_str (ptid_t) override;
 
   char *pid_to_exec_file (int pid) override;
 
@@ -1884,10 +1884,10 @@ procfs_target::attach (const char *args, int from_tty)
 
       if (exec_file)
 	printf_filtered (_("Attaching to program `%s', %s\n"),
-			 exec_file, target_pid_to_str (ptid_t (pid)));
+			 exec_file, target_pid_to_str (ptid_t (pid)).c_str ());
       else
 	printf_filtered (_("Attaching to %s\n"),
-			 target_pid_to_str (ptid_t (pid)));
+			 target_pid_to_str (ptid_t (pid)).c_str ());
 
       fflush (stdout);
     }
@@ -1910,7 +1910,7 @@ procfs_target::detach (inferior *inf, int from_tty)
 	exec_file = "";
 
       printf_filtered (_("Detaching from program: %s, %s\n"), exec_file,
-		       target_pid_to_str (ptid_t (pid)));
+		       target_pid_to_str (ptid_t (pid)).c_str ());
     }
 
   do_detach ();
@@ -2063,7 +2063,7 @@ procfs_target::fetch_registers (struct regcache *regcache, int regnum)
 
   if (pi == NULL)
     error (_("procfs: fetch_registers failed to find procinfo for %s"),
-	   target_pid_to_str (ptid));
+	   target_pid_to_str (ptid).c_str ());
 
   gregs = proc_get_gregs (pi);
   if (gregs == NULL)
@@ -2112,7 +2112,7 @@ procfs_target::store_registers (struct regcache *regcache, int regnum)
 
   if (pi == NULL)
     error (_("procfs: store_registers: failed to find procinfo for %s"),
-	   target_pid_to_str (ptid));
+	   target_pid_to_str (ptid).c_str ());
 
   gregs = proc_get_gregs (pi);
   if (gregs == NULL)
@@ -2285,7 +2285,7 @@ wait_again:
 		  {
 		    if (print_thread_events)
 		      printf_unfiltered (_("[%s exited]\n"),
-					 target_pid_to_str (retval));
+					 target_pid_to_str (retval).c_str ());
 		    delete_thread (find_thread_ptid (retval));
 		    status->kind = TARGET_WAITKIND_SPURIOUS;
 		    return retval;
@@ -2406,7 +2406,7 @@ wait_again:
 		  {
 		    if (print_thread_events)
 		      printf_unfiltered (_("[%s exited]\n"),
-					 target_pid_to_str (retval));
+					 target_pid_to_str (retval).c_str ());
 		    delete_thread (find_thread_ptid (retval));
 		    status->kind = TARGET_WAITKIND_SPURIOUS;
 		    return retval;
@@ -2804,7 +2804,7 @@ procfs_target::files_info ()
 
   printf_filtered (_("\tUsing the running image of %s %s via /proc.\n"),
 		   inf->attach_flag? "attached": "child",
-		   target_pid_to_str (inferior_ptid));
+		   target_pid_to_str (inferior_ptid).c_str ());
 }
 
 /* Make it die.  Wait for it to die.  Clean up after it.  Note: this
@@ -3189,20 +3189,15 @@ procfs_target::thread_alive (ptid_t ptid)
   return true;
 }
 
-/* Convert PTID to a string.  Returns the string in a static
-   buffer.  */
+/* Convert PTID to a string.  */
 
-const char *
+std::string
 procfs_target::pid_to_str (ptid_t ptid)
 {
-  static char buf[80];
-
   if (ptid.lwp () == 0)
-    xsnprintf (buf, sizeof (buf), "process %d", ptid.pid ());
+    return string_printf ("process %d", ptid.pid ());
   else
-    xsnprintf (buf, sizeof (buf), "LWP %ld", ptid.lwp ());
-
-  return buf;
+    return string_printf ("LWP %ld", ptid.lwp ());
 }
 
 /* Accepts an integer PID; Returns a string representing a file that

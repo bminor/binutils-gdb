@@ -72,10 +72,14 @@ tui_make_status_line (struct tui_locator_element *loc)
   int pid_width;
   int line_width;
 
+  std::string pid_name_holder;
   if (inferior_ptid == null_ptid)
     pid_name = "No process";
   else
-    pid_name = target_pid_to_str (inferior_ptid);
+    {
+      pid_name_holder = target_pid_to_str (inferior_ptid);
+      pid_name = pid_name_holder.c_str ();
+    }
 
   target_width = strlen (target_shortname);
   if (target_width > MAX_TARGET_WIDTH)

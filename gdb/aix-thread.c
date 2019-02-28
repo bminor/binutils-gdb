@@ -140,7 +140,7 @@ public:
 
   bool thread_alive (ptid_t ptid) override;
 
-  const char *pid_to_str (ptid_t) override;
+  std::string pid_to_str (ptid_t) override;
 
   const char *extra_thread_info (struct thread_info *) override;
 
@@ -1746,20 +1746,13 @@ aix_thread_target::thread_alive (ptid_t ptid)
 /* Return a printable representation of composite PID for use in
    "info threads" output.  */
 
-const char *
+std::string
 aix_thread_target::pid_to_str (ptid_t ptid)
 {
-  static char *ret = NULL;
-
   if (!PD_TID (ptid))
     return beneath ()->pid_to_str (ptid);
 
-  /* Free previous return value; a new one will be allocated by
-     xstrprintf().  */
-  xfree (ret);
-
-  ret = xstrprintf (_("Thread %ld"), ptid.tid ());
-  return ret;
+  return string_printf (_("Thread %ld"), ptid.tid ());
 }
 
 /* Return a printable representation of extra information about

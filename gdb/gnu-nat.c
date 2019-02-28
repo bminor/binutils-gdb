@@ -1493,7 +1493,7 @@ gnu_nat_target::wait (ptid_t ptid, struct target_waitstatus *status,
 
   waiting_inf = inf;
 
-  inf_debug (inf, "waiting for: %s", target_pid_to_str (ptid));
+  inf_debug (inf, "waiting for: %s", target_pid_to_str (ptid).c_str ());
 
 rewait:
   if (proc_wait_pid != inf->pid && !inf->no_wait)
@@ -1648,7 +1648,7 @@ rewait:
     }
 
   inf_debug (inf, "returning ptid = %s, status = %s (%d)",
-	     target_pid_to_str (ptid),
+	     target_pid_to_str (ptid).c_str (),
 	     status->kind == TARGET_WAITKIND_EXITED ? "EXITED"
 	     : status->kind == TARGET_WAITKIND_STOPPED ? "STOPPED"
 	     : status->kind == TARGET_WAITKIND_SIGNALLED ? "SIGNALLED"
@@ -2012,7 +2012,7 @@ gnu_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
   struct inf *inf = gnu_current_inf;
 
   inf_debug (inf, "ptid = %s, step = %d, sig = %d",
-	     target_pid_to_str (ptid), step, sig);
+	     target_pid_to_str (ptid).c_str (), step, sig);
 
   inf_validate_procinfo (inf);
 
@@ -2058,8 +2058,9 @@ gnu_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
 
       if (!thread)
 	error (_("Can't run single thread id %s: no such thread!"),
-	       target_pid_to_str (ptid));
-      inf_debug (inf, "running one thread: %s", target_pid_to_str (ptid));
+	       target_pid_to_str (ptid).c_str ());
+      inf_debug (inf, "running one thread: %s",
+		 target_pid_to_str (ptid).c_str ());
       inf_set_threads_resume_sc (inf, thread, 0);
     }
 
@@ -2068,9 +2069,10 @@ gnu_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
       step_thread = inf_tid_to_thread (inf, ptid.lwp ());
       if (!step_thread)
 	warning (_("Can't step thread id %s: no such thread."),
-		 target_pid_to_str (ptid));
+		 target_pid_to_str (ptid).c_str ());
       else
-	inf_debug (inf, "stepping thread: %s", target_pid_to_str (ptid));
+	inf_debug (inf, "stepping thread: %s",
+		   target_pid_to_str (ptid).c_str ());
     }
   if (step_thread != inf->step_thread)
     inf_set_step_thread (inf, step_thread);
@@ -2714,7 +2716,7 @@ proc_string (struct proc *proc)
   return tid_str;
 }
 
-const char *
+std::string
 gnu_nat_target::pid_to_str (ptid_t ptid)
 {
   struct inf *inf = gnu_current_inf;
@@ -2724,12 +2726,7 @@ gnu_nat_target::pid_to_str (ptid_t ptid)
   if (thread)
     return proc_string (thread);
   else
-    {
-      static char tid_str[80];
-
-      xsnprintf (tid_str, sizeof (tid_str), "bogus thread id %d", tid);
-      return tid_str;
-    }
+    return string_printf ("bogus thread id %d", tid);
 }
 
 

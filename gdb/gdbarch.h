@@ -959,8 +959,8 @@ extern void set_gdbarch_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch,
 
 extern int gdbarch_core_pid_to_str_p (struct gdbarch *gdbarch);
 
-typedef const char * (gdbarch_core_pid_to_str_ftype) (struct gdbarch *gdbarch, ptid_t ptid);
-extern const char * gdbarch_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid);
+typedef std::string (gdbarch_core_pid_to_str_ftype) (struct gdbarch *gdbarch, ptid_t ptid);
+extern std::string gdbarch_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid);
 extern void set_gdbarch_core_pid_to_str (struct gdbarch *gdbarch, gdbarch_core_pid_to_str_ftype *core_pid_to_str);
 
 /* How the core target extracts the name of a thread from a core file. */

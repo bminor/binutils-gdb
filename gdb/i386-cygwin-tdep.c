@@ -178,16 +178,11 @@ windows_core_xfer_shared_libraries (struct gdbarch *gdbarch,
 
 /* This is how we want PTIDs from core files to be printed.  */
 
-static const char *
+static std::string
 i386_windows_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
 {
-  static char buf[80];
-
   if (ptid.lwp () != 0)
-    {
-      snprintf (buf, sizeof (buf), "Thread 0x%lx", ptid.lwp ());
-      return buf;
-    }
+    return string_printf ("Thread 0x%lx", ptid.lwp ());
 
   return normal_pid_to_str (ptid);
 }
