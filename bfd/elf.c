@@ -351,6 +351,16 @@ bfd_elf_string_from_elf_section (bfd *abfd,
       if (bfd_elf_get_str_section (abfd, shindex) == NULL)
 	return NULL;
     }
+  else
+    {
+      /* PR 24273: The string section's contents may have already
+	 been loaded elsewhere, eg because a corrupt file has the
+	 string section index in the ELF header pointing at a group
+	 section.  So be paranoid, and test that the last byte of
+	 the section is zero.  */
+      if (hdr->sh_size == 0 || hdr->contents[hdr->sh_size - 1] != 0)
+	return NULL;
+    }
 
   if (strindex >= hdr->sh_size)
     {
@@ -655,7 +665,7 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		  BFD_ASSERT (sizeof (*dest) >= 4);
 		  amt = shdr->sh_size * sizeof (*dest) / 4;
 		  shdr->contents = (unsigned char *)
-		      bfd_alloc2 (abfd, shdr->sh_size, sizeof (*dest) / 4);
+		    bfd_alloc2 (abfd, shdr->sh_size, sizeof (*dest) / 4);
 		  /* PR binutils/4110: Handle corrupt group headers.  */
 		  if (shdr->contents == NULL)
 		    {

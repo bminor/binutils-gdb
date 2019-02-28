@@ -1,3 +1,9 @@
+2019-02-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 24273
+	* elf.c (bfd_elf_string_from_elf_section): Check for a string
+	section that is not NUL terminated.
+
 2019-02-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/24276
