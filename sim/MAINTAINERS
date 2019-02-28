@@ -10,7 +10,6 @@ gdb-patches@sources.redhat.com
         Global Maintainers
 
 Andrew Burgess			andrew.burgess@embecosm.com
-Mike Frysinger			vapier@gentoo.org
 
 	Maintainers for particular sims:
 
@@ -50,3 +49,4 @@ ppc		Andrew Cagney <cagney@gnu.org>
 rl78		DJ Delorie <dj@redhat.com>
 rx		DJ Delorie <dj@redhat.com>
 v850		DJ Delorie <dj@redhat.com>
+*		Mike Frysinger <vapier@gentoo.org>

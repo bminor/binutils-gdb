@@ -1,3 +1,7 @@
+2019-02-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* MAINTAINERS: Move Mike Frysinger to past maintainers' section.
+
 2019-02-13  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* MAINTAINERS: Add Andrew Burgess as global maintainer.
