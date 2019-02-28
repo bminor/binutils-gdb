@@ -317,7 +317,7 @@ proc gdbserver_start { options arguments } {
 	    -timeout 120
 	    -notransfer
 	    -re "Listening on" { }
-	    -re "Can't bind address: Address already in use\\.\r\n" {
+	    -re "Can't (bind address|listen on socket): Address already in use\\.\r\n" {
 		verbose -log "Port $portnum is already in use."
 		if ![target_info exists gdb,socketport] {
 		    # Bump the port number to avoid the conflict.
