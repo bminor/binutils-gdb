@@ -1,3 +1,7 @@
+2019-03-01  Gary Benson <gbenson@redhat.com>
+
+	* coffread.c (coff_start_symtab): Remove unnecessary xstrdup.
+
 2019-02-28  Brian Vandenberg  <phantall@gmail.com>
 	    Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
