@@ -1993,7 +1993,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	      || ent->u.cie.per_encoding_relative)
 	    {
 	      char *aug;
-	      unsigned int action, extra_string, extra_data;
+	      unsigned int version, action, extra_string, extra_data;
 	      unsigned int per_width, per_encoding;
 
 	      /* Need to find 'R' or 'L' augmentation's argument and modify
@@ -2004,13 +2004,17 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	      extra_string = extra_augmentation_string_bytes (ent);
 	      extra_data = extra_augmentation_data_bytes (ent);
 
-	      /* Skip length, id and version.  */
-	      buf += 9;
+	      /* Skip length, id.  */
+	      buf += 8;
+	      version = *buf++;
 	      aug = (char *) buf;
 	      buf += strlen (aug) + 1;
 	      skip_leb128 (&buf, end);
 	      skip_leb128 (&buf, end);
-	      skip_leb128 (&buf, end);
+	      if (version == 1)
+		skip_bytes (&buf, end, 1);
+	      else
+		skip_leb128 (&buf, end);
 	      if (*aug == 'z')
 		{
 		  /* The uleb128 will always be a single byte for the kind

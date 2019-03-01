@@ -1,3 +1,7 @@
+2019-02-28  Tamar Christina  <tamar.christina@arm.com>
+
+	* elf-eh-frame.c (_bfd_elf_write_section_eh_frame): Correct CIE parse.
+
 2019-02-28  Nick Clifton  <nickc@redhat.com>
 
 	PR 24273
