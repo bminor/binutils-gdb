@@ -59,3 +59,13 @@ gdb_test "print sizeof(pvla)" " = 4000" "print sizeof associated pvla"
 gdb_test "print sizeof(pvla(3,2,1))" "4" \
     "print sizeof element from associated pvla"
 gdb_test "print sizeof(pvla(3:4,2,1))" "800" "print sizeof sliced pvla"
+
+gdb_breakpoint [gdb_get_line_number "vla1-neg-bounds-v1"]
+gdb_continue_to_breakpoint "vla1-neg-bounds-v1"
+gdb_test "print sizeof(vla1)" " = 96" \
+    "print sizeof vla1 negative bounds"
+
+gdb_breakpoint [gdb_get_line_number "vla1-neg-bounds-v2"]
+gdb_continue_to_breakpoint "vla1-neg-bounds-v2"
+gdb_test "print sizeof(vla1)" " = 640" \
+    "print sizeof vla1 negative lower bounds, positive upper bounds"

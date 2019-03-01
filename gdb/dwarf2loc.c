@@ -2454,6 +2454,29 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 		struct value *val = value_at (baton->property_type, *value);
 		*value = value_as_address (val);
 	      }
+	    else
+	      {
+		gdb_assert (baton->property_type != NULL);
+
+		struct type *type = check_typedef (baton->property_type);
+		if (TYPE_LENGTH (type) < sizeof (CORE_ADDR)
+		    && !TYPE_UNSIGNED (type))
+		  {
+		    /* If we have a valid return candidate and it's value
+		       is signed, we have to sign-extend the value because
+		       CORE_ADDR on 64bit machine has 8 bytes but address
+		       size of an 32bit application is bytes.  */
+		    const int addr_size
+		      = (dwarf2_per_cu_addr_size (baton->locexpr.per_cu)
+			 * TARGET_CHAR_BIT);
+		    const CORE_ADDR neg_mask
+		      = (~((CORE_ADDR) 0) <<  (addr_size - 1));
+
+		    /* Check if signed bit is set and sign-extend values.  */
+		    if (*value & neg_mask)
+		      *value |= neg_mask;
+		  }
+	      }
 	    return true;
 	  }
       }

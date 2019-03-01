@@ -1,3 +1,14 @@
+2019-07-12  Bernhard Heckel  <bernhard.heckel@intel.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/vla-ptype.exp: Print array with negative bounds.
+	* gdb.fortran/vla-sizeof.exp: Print the size of an array with
+	negative bounds.
+	* gdb.fortran/vla-value.exp: Print elements of an array with
+	negative bounds.
+	* gdb.fortran/vla.f90: Setup an array with negative bounds for
+	testing.
+
 2019-07-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/options.exp (expect_string): Dequote strings in

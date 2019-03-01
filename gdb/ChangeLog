@@ -1,5 +1,10 @@
 2019-07-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* dwarf2loc.c (dwarf2_evaluate_property): Sign extend property
+	value if its desired type is smaller than a CORE_ADDR and signed.
+
+2019-07-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* dwarf2loc.c (dwarf2_evaluate_property): Update to take account
 	of changes to field names, and use new is_reference field to
 	decide if a property is a reference or not.
