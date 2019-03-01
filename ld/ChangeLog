@@ -1,3 +1,27 @@
+2019-03-01  Andreas Krebbel  <krebbel@linux.ibm.com>
+
+	Backport from mainline
+	This reverts commit 5a12586d44fa8d5dfc74cbca4f2f36a273a16335.
+	2019-01-14  Maamoun Tarsha  <maamountk@hotmail.com>
+
+	PR 20113
+	* emulparams/elf64_s390.sh (SEPARATE_GOTPLT): Define.
+	* emulparams/elf_s390.sh (SEPARATE_GOTPLT): Define.
+	* testsuite/ld-s390/gotreloc_31-1.dd: Update expected output.
+	* testsuite/ld-s390/tlsbin.dd: Likewise.
+	* testsuite/ld-s390/tlsbin.rd: Likewise.
+	* testsuite/ld-s390/tlsbin.sd: Likewise.
+	* testsuite/ld-s390/tlsbin_64.dd: Likewise.
+	* testsuite/ld-s390/tlsbin_64.rd: Likewise.
+	* testsuite/ld-s390/tlsbin_64.sd: Likewise.
+	* testsuite/ld-s390/tlspic.dd: Likewise.
+	* testsuite/ld-s390/tlspic.rd: Likewise.
+	* testsuite/ld-s390/tlspic.sd: Likewise.
+	* testsuite/ld-s390/tlspic_64.dd: Likewise.
+	* testsuite/ld-s390/tlspic_64.rd: Likewise.
+	* testsuite/ld-s390/tlspic_64.sd: Likewise.
+	* testsuite/ld-s390/s390.exp: Skip s390 tests for tpf targets.
+
 2019-02-12  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.

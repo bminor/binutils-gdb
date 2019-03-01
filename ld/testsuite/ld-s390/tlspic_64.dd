@@ -15,40 +15,40 @@ Disassembly of section .text:
  +[0-9a-f]+:	a7 d5 00 56       	bras	%r13,[0-9a-f]+ <fn1\+0xb2>
 # sg1@tlsgd
  +[0-9a-f]+:	00 00 00 00       	.long	0x00000000
- +[0-9a-f]+:	00 00 00 .0       	.long	0x000000.0
+ +[0-9a-f]+:	00 00 00 70       	.long	0x00000070
 # sg2@tlsgd
  +[0-9a-f]+:	00 00 00 00       	.long	0x00000000
- +[0-9a-f]+:	00 00 00 .0       	.long	0x000000.0
+ +[0-9a-f]+:	00 00 00 90       	.long	0x00000090
 # sl1@tlsgd
  +[0-9a-f]+:	00 00 00 00       	.long	0x00000000
- +[0-9a-f]+:	00 00 00 .0       	.long	0x000000.0
+ +[0-9a-f]+:	00 00 00 20       	.long	0x00000020
 # sl2@tlsgd
  +[0-9a-f]+:	00 00 00 00       	.long	0x00000000
- +[0-9a-f]+:	00 00 00 .0       	.long	0x000000.0
+ +[0-9a-f]+:	00 00 00 30       	.long	0x00000030
 # sh1@tlsgd
  +[0-9a-f]+:	00 00 00 00       	.long	0x00000000
- +[0-9a-f]+:	00 00 00 .8       	.long	0x000000.8
+ +[0-9a-f]+:	00 00 00 98       	.long	0x00000098
 # sh2@tlsgd
  +[0-9a-f]+:	00 00 00 00       	.long	0x00000000
- +[0-9a-f]+:	00 00 00 .8       	.long	0x000000.8
+ +[0-9a-f]+:	00 00 00 a8       	.long	0x000000a8
 # sH1@tlsgd
  +[0-9a-f]+:	00 00 00 00       	.long	0x00000000
- +[0-9a-f]+:	00 00 00 .0       	.long	0x000000.0
+ +[0-9a-f]+:	00 00 00 50       	.long	0x00000050
 # sH2@tlsgd
  +[0-9a-f]+:	00 00 00 00       	.long	0x00000000
- +[0-9a-f]+:	00 00 00 .0       	.long	0x000000.0
+ +[0-9a-f]+:	00 00 00 60       	.long	0x00000060
 # sl1@tlsldm
  +[0-9a-f]+:	00 00 00 00       	.long	0x00000000
- +[0-9a-f]+:	00 00 00 .0       	.long	0x000000.0
+ +[0-9a-f]+:	00 00 00 40       	.long	0x00000040
 # sl1@dtpoff
  +[0-9a-f]+:	00 00 00 00       	.long	0x00000000
- +[0-9a-f]+:	00 00 00 .0       	.long	0x000000.0
+ +[0-9a-f]+:	00 00 00 20       	.long	0x00000020
 # sl2@dtpoff
  +[0-9a-f]+:	00 00 00 00       	.long	0x00000000
  +[0-9a-f]+:	00 00 00 24       	.long	0x00000024
 # sh1@tlsldm
  +[0-9a-f]+:	00 00 00 00       	.long	0x00000000
- +[0-9a-f]+:	00 00 00 .0       	.long	0x000000.0
+ +[0-9a-f]+:	00 00 00 40       	.long	0x00000040
 # sh1@dtpoff
  +[0-9a-f]+:	00 00 00 00       	.long	0x00000000
  +[0-9a-f]+:	00 00 00 40       	.long	0x00000040
@@ -57,7 +57,7 @@ Disassembly of section .text:
  +[0-9a-f]+:	00 00 00 44       	.long	0x00000044
 # sH1@tlsldm
  +[0-9a-f]+:	00 00 00 00       	.long	0x00000000
- +[0-9a-f]+:	00 00 00 .0       	.long	0x000000.0
+ +[0-9a-f]+:	00 00 00 40       	.long	0x00000040
 # sH1@dtpoff
  +[0-9a-f]+:	00 00 00 00       	.long	0x00000000
  +[0-9a-f]+:	00 00 00 60       	.long	0x00000060
@@ -66,19 +66,19 @@ Disassembly of section .text:
  +[0-9a-f]+:	00 00 00 64       	.long	0x00000064
 # sg2@gotntpoff
  +[0-9a-f]+:	00 00 00 00       	.long	0x00000000
- +[0-9a-f]+:	00 00 00 .0       	.long	0x000000.0
+ +[0-9a-f]+:	00 00 00 90       	.long	0x00000090
 # sl2@gotntpoff
  +[0-9a-f]+:	00 00 00 00       	.long	0x00000000
- +[0-9a-f]+:	00 00 00 .0       	.long	0x000000.0
+ +[0-9a-f]+:	00 00 00 30       	.long	0x00000030
 # sh2@gotntpoff
  +[0-9a-f]+:	00 00 00 00       	.long	0x00000000
- +[0-9a-f]+:	00 00 00 .8       	.long	0x000000.8
+ +[0-9a-f]+:	00 00 00 a8       	.long	0x000000a8
 # sH2@gotntpoff
  +[0-9a-f]+:	00 00 00 00       	.long	0x00000000
- +[0-9a-f]+:	00 00 00 .0       	.long	0x000000.0
+ +[0-9a-f]+:	00 00 00 60       	.long	0x00000060
 # function prolog
  +[0-9a-f]+:	b9 04 00 ef       	lgr	%r14,%r15
- +[0-9a-f]+:	c0 c0 [0-9a-f ]+ 	larl	%r12,[0-9a-f]+ <.*>
+ +[0-9a-f]+:	c0 c0 [0-9a-f ]+ 	larl	%r12,[0-9a-f]+ <_GLOBAL_OFFSET_TABLE_>
  +[0-9a-f]+:	a7 fb ff 60       	aghi	%r15,-160
  +[0-9a-f]+:	e3 e0 e0 00 00 24 	stg	%r14,0\(%r14\)
 # extract TCB
@@ -164,30 +164,30 @@ Disassembly of section .text:
  +[0-9a-f]+:	e3 33 c0 00 00 04 	lg	%r3,0\(%r3,%r12\)
  +[0-9a-f]+:	41 33 90 00       	la	%r3,0\(%r3,%r9\)
 # IE against local var with larl got access
- +[0-9a-f]+:	c0 30 [0-9a-f ]+ 	larl	%r3,[0-9a-f]+ <.*>
+ +[0-9a-f]+:	c0 30 [0-9a-f ]+ 	larl	%r3,[0-9a-f]+ <\_GLOBAL\_OFFSET\_TABLE\_\+0x38>
  +[0-9a-f]+:	e3 43 c0 00 00 04 	lg	%r4,0\(%r3,%r12\)
  +[0-9a-f]+:	41 54 90 00       	la	%r5,0\(%r4,%r9\)
 # IE against hidden and local var with larl got access
- +[0-9a-f]+:	c0 30 [0-9a-f ]+ 	larl	%r3,[0-9a-f]+ <.*>
+ +[0-9a-f]+:	c0 30 [0-9a-f ]+ 	larl	%r3,[0-9a-f]+ <\_GLOBAL\_OFFSET\_TABLE\_\+0x80>
  +[0-9a-f]+:	e3 43 c0 00 00 04 	lg	%r4,0\(%r3,%r12\)
  +[0-9a-f]+:	41 54 90 00       	la	%r5,0\(%r4,%r9\)
 # IE against hidden but not local var with larl got access
- +[0-9a-f]+:	c0 30 [0-9a-f ]+ 	larl	%r3,[0-9a-f]+ <.*>
+ +[0-9a-f]+:	c0 30 [0-9a-f ]+ 	larl	%r3,[0-9a-f]+ <\_GLOBAL\_OFFSET\_TABLE\_\+0x88>
  +[0-9a-f]+:	e3 43 c0 00 00 04 	lg	%r4,0\(%r3,%r12\)
  +[0-9a-f]+:	41 54 90 00       	la	%r5,0\(%r4,%r9\)
 # IE against global var with small got access (no optimization)
- +[0-9a-f]+:	e3 30 c0 .8 00 04 	lg	%r3,.*\(%r12\)
+ +[0-9a-f]+:	e3 30 c0 68 00 04 	lg	%r3,104\(%r12\)
  +[0-9a-f]+:	41 33 90 00       	la	%r3,0\(%r3,%r9\)
 # IE against local var with small got access (no optimization)
- +[0-9a-f]+:	e3 30 c0 .8 00 04 	lg	%r3,..\(%r12\)
+ +[0-9a-f]+:	e3 30 c0 38 00 04 	lg	%r3,56\(%r12\)
  +[0-9a-f]+:	41 33 90 00       	la	%r3,0\(%r3,%r9\)
 # IE against hidden and local var with small got access
 # (no optimization)
- +[0-9a-f]+:	e3 30 c0 .0 00 04 	lg	%r3,.*\(%r12\)
+ +[0-9a-f]+:	e3 30 c0 80 00 04 	lg	%r3,128\(%r12\)
  +[0-9a-f]+:	41 33 90 00       	la	%r3,0\(%r3,%r9\)
 # IE against hidden but not local var with small got access
 # (no optimization)
- +[0-9a-f]+:	e3 30 c0 .8 00 04 	lg	%r3,1..\(%r12\)
+ +[0-9a-f]+:	e3 30 c0 88 00 04 	lg	%r3,136\(%r12\)
  +[0-9a-f]+:	41 33 90 00       	la	%r3,0\(%r3,%r9\)
 # function epilog
  +[0-9a-f]+:	eb 6e f0 d0 00 04 	lmg	%r6,%r14,208\(%r15\)
