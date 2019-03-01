@@ -92,8 +92,6 @@ if [istarget "s390-*-*"] {
 }
 
 if [istarget "s390x-*-*"] {
-    if {! [istarget "*-*-tpf"] } {
-	run_ld_link_tests $s390tests
-    }
+    run_ld_link_tests $s390tests
     run_ld_link_tests $s390xtests
 }
