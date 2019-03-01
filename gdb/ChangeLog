@@ -1,3 +1,12 @@
+2019-06-16  Bernhard Heckel  <bernhard.heckel@intel.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* f-typeprint.c (f_print_type): Don't return early for not
+	associated or not allocated types.
+	(f_type_print_varspec_suffix): Add print_rank parameter and print
+	ranks of array types in case they dangling.
+	(f_type_print_base): Add print_rank parameter.
+
 2019-06-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* NEWS: Mention new MI commands.

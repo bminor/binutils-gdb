@@ -1,3 +1,13 @@
+2019-06-16  Bernhard Heckel  <bernhard.heckel@intel.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/pointers.f90: New file.
+	* gdb.fortran/print_type.exp: New file.
+	* gdb.fortran/vla-ptype.exp: Adapt expected results.
+	* gdb.fortran/vla-type.exp: Likewise.
+	* gdb.fortran/vla-value.exp: Likewise.
+	* gdb.mi/mi-vla-fortran.exp: Likewise.
+
 2019-06-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.mi/mi-catch-cpp-exceptions.cc: New file.

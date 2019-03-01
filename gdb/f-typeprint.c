@@ -37,7 +37,7 @@ static void f_type_print_args (struct type *, struct ui_file *);
 #endif
 
 static void f_type_print_varspec_suffix (struct type *, struct ui_file *, int,
-					 int, int, int);
+					 int, int, int, bool);
 
 void f_type_print_varspec_prefix (struct type *, struct ui_file *,
 				  int, int);
@@ -52,18 +52,6 @@ f_print_type (struct type *type, const char *varstring, struct ui_file *stream,
 	      int show, int level, const struct type_print_options *flags)
 {
   enum type_code code;
-
-  if (type_not_associated (type))
-    {
-      val_print_not_associated (stream);
-      return;
-    }
-
-  if (type_not_allocated (type))
-    {
-      val_print_not_allocated (stream);
-      return;
-    }
 
   f_type_print_base (type, stream, show, level);
   code = TYPE_CODE (type);
@@ -96,7 +84,7 @@ f_print_type (struct type *type, const char *varstring, struct ui_file *stream,
 
       demangled_args = (*varstring != '\0'
 			&& varstring[strlen (varstring) - 1] == ')');
-      f_type_print_varspec_suffix (type, stream, show, 0, demangled_args, 0);
+      f_type_print_varspec_suffix (type, stream, show, 0, demangled_args, 0, false);
    }
 }
 
@@ -161,12 +149,17 @@ f_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
 
 /* Print any array sizes, function arguments or close parentheses
    needed after the variable name (to describe its type).
-   Args work like c_type_print_varspec_prefix.  */
+   Args work like c_type_print_varspec_prefix.
+
+   PRINT_RANK_ONLY is true when TYPE is an array which should be printed
+   without the upper and lower bounds being specified, this will occur
+   when the array is not allocated or not associated and so there are no
+   known upper or lower bounds.  */
 
 static void
 f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 			     int show, int passed_a_ptr, int demangled_args,
-			     int arrayprint_recurse_level)
+			     int arrayprint_recurse_level, bool print_rank_only)
 {
   /* No static variables are permitted as an error call may occur during
      execution of this function.  */
@@ -188,36 +181,52 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 	fprintf_filtered (stream, "(");
 
       if (type_not_associated (type))
-        val_print_not_associated (stream);
+	print_rank_only = true;
       else if (type_not_allocated (type))
-        val_print_not_allocated (stream);
+	print_rank_only = true;
+      else if ((TYPE_ASSOCIATED_PROP (type)
+		&& PROP_CONST != TYPE_DYN_PROP_KIND (TYPE_ASSOCIATED_PROP (type)))
+	       || (TYPE_ALLOCATED_PROP (type)
+		   && PROP_CONST != TYPE_DYN_PROP_KIND (TYPE_ALLOCATED_PROP (type)))
+	       || (TYPE_DATA_LOCATION (type)
+		   && PROP_CONST != TYPE_DYN_PROP_KIND (TYPE_DATA_LOCATION (type))))
+	{
+	  /* This case exist when we ptype a typename which has the dynamic
+	     properties but cannot be resolved as there is no object.  */
+	  print_rank_only = true;
+	}
+
+      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_ARRAY)
+	f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
+				     0, 0, arrayprint_recurse_level,
+				     print_rank_only);
+
+      if (print_rank_only)
+	fprintf_filtered (stream, ":");
       else
-        {
-          if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_ARRAY)
-            f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
-                                        0, 0, arrayprint_recurse_level);
-
-          LONGEST lower_bound = f77_get_lowerbound (type);
-
-          if (lower_bound != 1)	/* Not the default.  */
+	{
+	  LONGEST lower_bound = f77_get_lowerbound (type);
+	  if (lower_bound != 1)	/* Not the default.  */
             fprintf_filtered (stream, "%s:", plongest (lower_bound));
 
-          /* Make sure that, if we have an assumed size array, we
-             print out a warning and print the upperbound as '*'.  */
+	  /* Make sure that, if we have an assumed size array, we
+	       print out a warning and print the upperbound as '*'.  */
 
-          if (TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (type))
-            fprintf_filtered (stream, "*");
-          else
-            {
-              LONGEST upper_bound = f77_get_upperbound (type);
+	  if (TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (type))
+	    fprintf_filtered (stream, "*");
+	  else
+	    {
+	      LONGEST upper_bound = f77_get_upperbound (type);
 
               fputs_filtered (plongest (upper_bound), stream);
-            }
+	    }
+	}
 
-          if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_ARRAY)
-            f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
-                                        0, 0, arrayprint_recurse_level);
-        }
+      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_ARRAY)
+	f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
+				     0, 0, arrayprint_recurse_level,
+				     print_rank_only);
+
       if (arrayprint_recurse_level == 1)
 	fprintf_filtered (stream, ")");
       else
@@ -228,7 +237,7 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
       f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 1, 0,
-				   arrayprint_recurse_level);
+				   arrayprint_recurse_level, false);
       fprintf_filtered (stream, " )");
       break;
 
@@ -237,7 +246,8 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 	int i, nfields = TYPE_NFIELDS (type);
 
 	f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
-				     passed_a_ptr, 0, arrayprint_recurse_level);
+				     passed_a_ptr, 0,
+				     arrayprint_recurse_level, false);
 	if (passed_a_ptr)
 	  fprintf_filtered (stream, ") ");
 	fprintf_filtered (stream, "(");
@@ -416,7 +426,7 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
 	      fputs_filtered (" :: ", stream);
 	      fputs_filtered (TYPE_FIELD_NAME (type, index), stream);
 	      f_type_print_varspec_suffix (TYPE_FIELD_TYPE (type, index),
-					   stream, show - 1, 0, 0, 0);
+					   stream, show - 1, 0, 0, 0, false);
 	      fputs_filtered ("\n", stream);
 	    }
 	  fprintfi_filtered (level, stream, "End Type ");
