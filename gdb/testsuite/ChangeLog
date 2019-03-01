@@ -1,3 +1,8 @@
+2019-05-15  Bernhard Heckel  <bernhard.heckel@intel.com>
+
+	* gdb.fortran/vla-sizeof.exp: Add tests of sizeof applied to
+	indexed and sliced arrays, and pointers to arrays.
+
 2019-05-14  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.base/info-shared.exp (check_info_shared): Add "info shared"
