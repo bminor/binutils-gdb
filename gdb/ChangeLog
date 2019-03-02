@@ -1,3 +1,17 @@
+2019-03-02  Eli Zaretskii  <eliz@gnu.org>
+
+	PR gdb/24292
+	* common/netstuff.c:
+	* gdbserver/gdbreplay.c
+	* gdbserver/remote-utils.c:
+	* ser-tcp.c:
+	* unittests/parse-connection-spec-selftests.c [USE_WIN32API]:
+	Include ws2tcpip.h instead of wsiapi.h and winsock2.h.  Redefine
+	_WIN32_WINNT to 0x0501 if defined to a smaller value, as
+	'getaddrinfo' and 'freeaddrinfo' were not available before
+	Windows XP, and mingw.org's MinGW headers by default define
+	_WIN32_WINNT to 0x500.
+
 2019-02-27  Kevin Buettner  <kevinb@redhat.com>
     
 	* NEWS: Note minimum Python version.

@@ -63,8 +63,11 @@
 #include <sys/stat.h>
 
 #if USE_WIN32API
-#include <winsock2.h>
-#include <wspiapi.h>
+#if _WIN32_WINNT < 0x0501
+# undef _WIN32_WINNT
+# define _WIN32_WINNT 0x0501
+#endif
+#include <ws2tcpip.h>
 #endif
 
 #if __QNX__
