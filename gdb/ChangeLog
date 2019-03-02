@@ -1,5 +1,16 @@
 2019-03-15  Tom Tromey  <tom@tromey.com>
 
+	* objfiles.h (struct objfile_per_bfd_storage): Declare
+	destructor.
+	* objfiles.c (objfile_per_bfd_storage::~objfile_per_bfd_storage):
+	New.
+	(get_objfile_bfd_data): Use new.  Don't initialize
+	language_of_main.
+	(free_objfile_per_bfd_storage): Remove.
+	(objfile_bfd_data_free, objfile::~objfile): Use delete.
+
+2019-03-15  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (reread_symbols): Update.
 	* objfiles.c (objfile::objfile): Update.
 	* minsyms.h (terminate_minimal_symbol_table): Don't declare.

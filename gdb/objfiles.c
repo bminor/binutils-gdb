@@ -117,13 +117,17 @@ get_objfile_pspace_data (struct program_space *pspace)
 
 static const struct bfd_data *objfiles_bfd_data;
 
+objfile_per_bfd_storage::~objfile_per_bfd_storage ()
+{
+  if (demangled_names_hash)
+    htab_delete (demangled_names_hash);
+}
+
 /* Create the per-BFD storage object for OBJFILE.  If ABFD is not
    NULL, and it already has a per-BFD storage object, use that.
-   Otherwise, allocate a new per-BFD storage object.  If ABFD is not
-   NULL, the object is allocated on the BFD; otherwise it is allocated
-   on OBJFILE's obstack.  Note that it is not safe to call this
-   multiple times for a given OBJFILE -- it can only be called when
-   allocating or re-initializing OBJFILE.  */
+   Otherwise, allocate a new per-BFD storage object.  Note that it is
+   not safe to call this multiple times for a given OBJFILE -- it can
+   only be called when allocating or re-initializing OBJFILE.  */
 
 static struct objfile_per_bfd_storage *
 get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
@@ -136,50 +140,28 @@ get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
 
   if (storage == NULL)
     {
+      storage = new objfile_per_bfd_storage;
       /* If the object requires gdb to do relocations, we simply fall
 	 back to not sharing data across users.  These cases are rare
 	 enough that this seems reasonable.  */
       if (abfd != NULL && !gdb_bfd_requires_relocations (abfd))
-	{
-	  storage
-	    = ((struct objfile_per_bfd_storage *)
-	       bfd_alloc (abfd, sizeof (struct objfile_per_bfd_storage)));
-	  /* objfile_per_bfd_storage is not trivially constructible, must
-	     call the ctor manually.  */
-	  storage = new (storage) objfile_per_bfd_storage ();
-	  set_bfd_data (abfd, objfiles_bfd_data, storage);
-	}
-      else
-	storage
-	  = obstack_new<objfile_per_bfd_storage> (&objfile->objfile_obstack);
+	set_bfd_data (abfd, objfiles_bfd_data, storage);
 
       /* Look up the gdbarch associated with the BFD.  */
       if (abfd != NULL)
 	storage->gdbarch = gdbarch_from_bfd (abfd);
-
-      storage->language_of_main = language_unknown;
     }
 
   return storage;
 }
 
-/* Free STORAGE.  */
-
-static void
-free_objfile_per_bfd_storage (struct objfile_per_bfd_storage *storage)
-{
-  if (storage->demangled_names_hash)
-    htab_delete (storage->demangled_names_hash);
-  storage->~objfile_per_bfd_storage ();
-}
-
-/* A wrapper for free_objfile_per_bfd_storage that can be passed as a
+/* A deleter for objfile_per_bfd_storage that can be passed as a
    cleanup function to the BFD registry.  */
 
 static void
 objfile_bfd_data_free (struct bfd *unused, void *d)
 {
-  free_objfile_per_bfd_storage ((struct objfile_per_bfd_storage *) d);
+  delete (struct objfile_per_bfd_storage *) d;
 }
 
 /* See objfiles.h.  */
@@ -670,7 +652,7 @@ objfile::~objfile ()
   if (obfd)
     gdb_bfd_unref (obfd);
   else
-    free_objfile_per_bfd_storage (per_bfd);
+    delete per_bfd;
 
   /* Remove it from the chain of all objfiles.  */
 

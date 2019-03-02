@@ -235,6 +235,8 @@ struct objfile_per_bfd_storage
     : minsyms_read (false)
   {}
 
+  ~objfile_per_bfd_storage ();
+
   /* The storage has an obstack of its own.  */
 
   auto_obstack storage_obstack;
