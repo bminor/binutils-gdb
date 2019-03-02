@@ -1,5 +1,10 @@
 2019-03-15  Tom Tromey  <tom@tromey.com>
 
+	* minsyms.c (minimal_symbol_reader::record_full): Remove some
+	initializations.
+
+2019-03-15  Tom Tromey  <tom@tromey.com>
+
 	* objfiles.h (struct objfile_per_bfd_storage)
 	<demangled_hash_languages>: Now a bitset.
 	* minsyms.c (add_minsym_to_demangled_hash_table): Update.
