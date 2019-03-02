@@ -698,6 +698,10 @@ struct minimal_symbol : public general_symbol_info
 
   unsigned maybe_copied : 1;
 
+  /* Non-zero if this symbol ever had its demangled name set (even if
+     it was set to NULL).  */
+  unsigned int name_set : 1;
+
   /* Minimal symbols with the same hash key are kept on a linked
      list.  This is the link.  */
 
