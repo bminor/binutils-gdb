@@ -1337,7 +1337,6 @@ build_minimal_symbol_hash_tables (struct objfile *objfile)
 void
 minimal_symbol_reader::install ()
 {
-  int bindex;
   int mcount;
   struct msym_bunch *bunch;
   struct minimal_symbol *msymbols;
@@ -1384,8 +1383,9 @@ minimal_symbol_reader::install ()
 
       for (bunch = m_msym_bunch; bunch != NULL; bunch = bunch->next)
 	{
-	  for (bindex = 0; bindex < m_msym_bunch_index; bindex++, mcount++)
-	    msymbols[mcount] = bunch->contents[bindex];
+	  memcpy (&msymbols[mcount], &bunch->contents[0],
+		  m_msym_bunch_index * sizeof (struct minimal_symbol));
+	  mcount += m_msym_bunch_index;
 	  m_msym_bunch_index = BUNCH_SIZE;
 	}
 

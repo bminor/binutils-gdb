@@ -1,5 +1,9 @@
 2019-03-15  Tom Tromey  <tom@tromey.com>
 
+	* minsyms.c (minimal_symbol_reader::install): Use memcpy.
+
+2019-03-15  Tom Tromey  <tom@tromey.com>
+
 	* objfiles.h (struct objfile_per_bfd_storage) <msymbols>: Now a
 	unique_xmalloc_ptr.
 	(objfile::msymbols_range::begin, objfile::msymbols_range::end):
