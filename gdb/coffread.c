@@ -463,7 +463,8 @@ record_minimal_symbol (minimal_symbol_reader &reader,
       return NULL;
     }
 
-  return reader.record_with_info (cs->c_name, address, type, section);
+  return reader.record_full (cs->c_name, strlen (cs->c_name), true, address,
+			     type, section);
 }
 
 /* coff_symfile_init ()

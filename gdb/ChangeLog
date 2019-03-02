@@ -1,3 +1,9 @@
+2019-03-15  Tom Tromey  <tom@tromey.com>
+
+	* minsyms.h (class minimal_symbol_reader) <record_with_info>:
+	Don't return the symbol.
+	* coffread.c (record_minimal_symbol): Use record_full.
+
 2019-03-14  Eli Zaretskii  <eliz@gnu.org>
 
 	The MS-Windows port of ncurses fails to switch to a color pair if
