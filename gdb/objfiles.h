@@ -28,6 +28,7 @@
 #include "registry.h"
 #include "gdb_bfd.h"
 #include "psymtab.h"
+#include <bitset>
 #include <vector>
 #include "common/next-iterator.h"
 #include "common/safe-iterator.h"
@@ -313,10 +314,8 @@ struct objfile_per_bfd_storage
   minimal_symbol *msymbol_demangled_hash[MINIMAL_SYMBOL_HASH_SIZE] {};
 
   /* All the different languages of symbols found in the demangled
-     hash table.  A flat/vector-based map is more efficient than a map
-     or hash table here, since this will only usually contain zero or
-     one entries.  */
-  std::vector<enum language> demangled_hash_languages;
+     hash table.  */
+  std::bitset<nr_languages> demangled_hash_languages;
 };
 
 /* Master structure for keeping track of each file from which

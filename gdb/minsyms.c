@@ -160,11 +160,7 @@ add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
       unsigned int hash = search_name_hash (MSYMBOL_LANGUAGE (sym),
 					    MSYMBOL_SEARCH_NAME (sym));
 
-      auto &vec = objfile->per_bfd->demangled_hash_languages;
-      auto it = std::lower_bound (vec.begin (), vec.end (),
-				  MSYMBOL_LANGUAGE (sym));
-      if (it == vec.end () || *it != MSYMBOL_LANGUAGE (sym))
-	vec.insert (it, MSYMBOL_LANGUAGE (sym));
+      objfile->per_bfd->demangled_hash_languages.set (MSYMBOL_LANGUAGE (sym));
 
       struct minimal_symbol **table
 	= objfile->per_bfd->msymbol_demangled_hash;
@@ -354,8 +350,12 @@ lookup_minimal_symbol (const char *name, const char *sfile,
 	    {
 	      /* Once for each language in the demangled hash names
 		 table (usually just zero or one languages).  */
-	      for (auto lang : objfile->per_bfd->demangled_hash_languages)
+	      for (unsigned iter = 0; iter < nr_languages; ++iter)
 		{
+		  if (!objfile->per_bfd->demangled_hash_languages.test (iter))
+		    continue;
+		  enum language lang = (enum language) iter;
+
 		  unsigned int hash
 		    = (lookup_name.search_name_hash (lang)
 		       % MINIMAL_SYMBOL_HASH_SIZE);
@@ -497,8 +497,12 @@ iterate_over_minimal_symbols
   /* The second pass is over the demangled table.  Once for each
      language in the demangled hash names table (usually just zero or
      one).  */
-  for (auto lang : objf->per_bfd->demangled_hash_languages)
+  for (unsigned liter = 0; liter < nr_languages; ++liter)
     {
+      if (!objf->per_bfd->demangled_hash_languages.test (liter))
+	continue;
+
+      enum language lang = (enum language) liter;
       const language_defn *lang_def = language_def (lang);
       symbol_name_matcher_ftype *name_match
 	= get_symbol_name_matcher (lang_def, lookup_name);

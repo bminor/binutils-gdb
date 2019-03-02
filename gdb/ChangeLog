@@ -1,5 +1,12 @@
 2019-03-15  Tom Tromey  <tom@tromey.com>
 
+	* objfiles.h (struct objfile_per_bfd_storage)
+	<demangled_hash_languages>: Now a bitset.
+	* minsyms.c (add_minsym_to_demangled_hash_table): Update.
+	(lookup_minimal_symbol): Update.
+
+2019-03-15  Tom Tromey  <tom@tromey.com>
+
 	* minsyms.h (class minimal_symbol_reader) <record_with_info>:
 	Don't return the symbol.
 	* coffread.c (record_minimal_symbol): Use record_full.
