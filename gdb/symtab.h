@@ -669,6 +669,10 @@ struct minimal_symbol : public general_symbol_info
      the object file format may not carry that piece of information.  */
   unsigned int has_size : 1;
 
+  /* Non-zero if this symbol ever had its demangled name set (even if
+     it was set to NULL).  */
+  unsigned int name_set : 1;
+
   /* Minimal symbols with the same hash key are kept on a linked
      list.  This is the link.  */
 
