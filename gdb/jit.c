@@ -805,8 +805,6 @@ jit_object_close_impl (struct gdb_symbol_callbacks *cb,
 				OBJF_NOT_FILENAME);
   objfile->per_bfd->gdbarch = target_gdbarch ();
 
-  terminate_minimal_symbol_table (objfile);
-
   j = NULL;
   for (i = obj->symtabs; i; i = j)
     {

@@ -1,5 +1,16 @@
 2019-03-15  Tom Tromey  <tom@tromey.com>
 
+	* symfile.c (reread_symbols): Update.
+	* objfiles.c (objfile::objfile): Update.
+	* minsyms.h (terminate_minimal_symbol_table): Don't declare.
+	* minsyms.c (lookup_minimal_symbol_by_pc_section): Update
+	comment.
+	(minimal_symbol_reader::install): Update.
+	(terminate_minimal_symbol_table): Remove.
+	* jit.c (jit_object_close_impl): Update.
+
+2019-03-15  Tom Tromey  <tom@tromey.com>
+
 	* minsyms.c (minimal_symbol_reader::record_full): Remove some
 	initializations.
 

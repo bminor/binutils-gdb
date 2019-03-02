@@ -411,8 +411,6 @@ objfile::objfile (bfd *abfd, const char *name, objfile_flags flags_)
 
   per_bfd = get_objfile_bfd_data (this, abfd);
 
-  terminate_minimal_symbol_table (this);
-
   /* Add this file onto the tail of the linked list of other such files.  */
 
   if (object_files == NULL)

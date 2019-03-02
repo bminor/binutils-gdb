@@ -735,11 +735,8 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
     {
       CORE_ADDR pc = pc_in;
 
-      /* If this objfile has a minimal symbol table, go search it using
-         a binary search.  Note that a minimal symbol table always consists
-         of at least two symbols, a "real" symbol and the terminating
-         "null symbol".  If there are no real symbols, then there is no
-         minimal symbol table at all.  */
+      /* If this objfile has a minimal symbol table, go search it
+         using a binary search.  */
 
       if (objfile->per_bfd->minimal_symbol_count > 0)
 	{
@@ -1363,7 +1360,7 @@ minimal_symbol_reader::install ()
          compact out the duplicate entries.  Once we have a final table,
          we will give back the excess space.  */
 
-      alloc_count = m_msym_count + m_objfile->per_bfd->minimal_symbol_count + 1;
+      alloc_count = m_msym_count + m_objfile->per_bfd->minimal_symbol_count;
       obstack_blank (&m_objfile->per_bfd->storage_obstack,
 		     alloc_count * sizeof (struct minimal_symbol));
       msymbols = (struct minimal_symbol *)
@@ -1406,16 +1403,6 @@ minimal_symbol_reader::install ()
       msymbols = (struct minimal_symbol *)
 	obstack_finish (&m_objfile->per_bfd->storage_obstack);
 
-      /* We also terminate the minimal symbol table with a "null symbol",
-         which is *not* included in the size of the table.  This makes it
-         easier to find the end of the table when we are handed a pointer
-         to some symbol in the middle of it.  Zero out the fields in the
-         "null symbol" allocated at the end of the array.  Note that the
-         symbol count does *not* include this null symbol, which is why it
-         is indexed by mcount and not mcount-1.  */
-
-      memset (&msymbols[mcount], 0, sizeof (struct minimal_symbol));
-
       /* Attach the minimal symbol table to the specified objfile.
          The strings themselves are also located in the storage_obstack
          of this objfile.  */
@@ -1429,27 +1416,6 @@ minimal_symbol_reader::install ()
 	 pointers to other msymbols need to be adjusted.)  */
       build_minimal_symbol_hash_tables (m_objfile);
     }
-}
-
-/* See minsyms.h.  */
-
-void
-terminate_minimal_symbol_table (struct objfile *objfile)
-{
-  if (! objfile->per_bfd->msymbols)
-    objfile->per_bfd->msymbols = XOBNEW (&objfile->per_bfd->storage_obstack,
-					 minimal_symbol);
-
-  {
-    struct minimal_symbol *m
-      = &objfile->per_bfd->msymbols[objfile->per_bfd->minimal_symbol_count];
-
-    memset (m, 0, sizeof (*m));
-    /* Don't rely on these enumeration values being 0's.  */
-    MSYMBOL_TYPE (m) = mst_unknown;
-    MSYMBOL_SET_LANGUAGE (m, language_unknown,
-			  &objfile->per_bfd->storage_obstack);
-  }
 }
 
 /* Check if PC is in a shared library trampoline code stub.

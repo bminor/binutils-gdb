@@ -148,13 +148,6 @@ class minimal_symbol_reader
   int m_msym_count;
 };
 
-/* Create the terminating entry of OBJFILE's minimal symbol table.
-   If OBJFILE->msymbols is zero, allocate a single entry from
-   OBJFILE->objfile_obstack; otherwise, just initialize
-   OBJFILE->msymbols[OBJFILE->minimal_symbol_count].  */
-
-void terminate_minimal_symbol_table (struct objfile *objfile);
-
 
 
 /* Return whether MSYMBOL is a function/method.  If FUNC_ADDRESS_P is
