@@ -1,5 +1,10 @@
 2019-03-02  Eli Zaretskii  <eliz@gnu.org>
 
+	* NEWS: Mention end of support for native debugging on MS-Windows
+	before XP.
+
+2019-03-02  Eli Zaretskii  <eliz@gnu.org>
+
 	PR gdb/24292
 	* common/netstuff.c:
 	* gdbserver/gdbreplay.c
