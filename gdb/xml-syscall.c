@@ -472,7 +472,7 @@ xml_list_syscalls_by_group (struct gdbarch *gdbarch, const char *group,
   if (groupdesc == NULL)
     return false;
 
-  for (const struct syscall_desc *sysdesc : groupdesc->syscalls)
+  for (const syscall_desc *sysdesc : groupdesc->syscalls)
     syscalls->push_back (sysdesc->number);
 
   return true;

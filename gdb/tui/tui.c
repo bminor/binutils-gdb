@@ -410,7 +410,9 @@ tui_enable (void)
     {
       WINDOW *w;
       SCREEN *s;
-      const char *cap;
+#ifndef __MINGW32__
+       const char *cap;
+#endif
       const char *interp;
 
       /* If the top level interpreter is not the console/tui (e.g.,
