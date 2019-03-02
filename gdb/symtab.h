@@ -641,16 +641,8 @@ gdb_static_assert (nr_minsym_types <= (1 << MINSYM_TYPE_BITS));
    between names and addresses, and vice versa.  They are also sometimes
    used to figure out what full symbol table entries need to be read in.  */
 
-struct minimal_symbol
+struct minimal_symbol : public general_symbol_info
 {
-
-  /* The general symbol info required for all types of symbols.
-
-     The SYMBOL_VALUE_ADDRESS contains the address that this symbol
-     corresponds to.  */
-
-  struct general_symbol_info mginfo;
-
   /* Size of this symbol.  dbx_end_psymtab in dbxread.c uses this
      information to calculate the end of the partial symtab based on the
      address of the last symbol plus the size of the last symbol.  */
@@ -687,7 +679,7 @@ struct minimal_symbol
 
   struct minimal_symbol *demangled_hash_next;
 
-/* True if this symbol is of some data type.  */
+  /* True if this symbol is of some data type.  */
 
   bool data_p () const;
 
@@ -708,43 +700,38 @@ struct minimal_symbol
 #define MSYMBOL_HAS_SIZE(msymbol)	((msymbol)->has_size + 0)
 #define MSYMBOL_TYPE(msymbol)		(msymbol)->type
 
-#define MSYMBOL_VALUE(symbol)		(symbol)->mginfo.value.ivalue
+#define MSYMBOL_VALUE(symbol)		(symbol)->value.ivalue
 /* The unrelocated address of the minimal symbol.  */
-#define MSYMBOL_VALUE_RAW_ADDRESS(symbol) ((symbol)->mginfo.value.address + 0)
+#define MSYMBOL_VALUE_RAW_ADDRESS(symbol) ((symbol)->value.address + 0)
 /* The relocated address of the minimal symbol, using the section
    offsets from OBJFILE.  */
 #define MSYMBOL_VALUE_ADDRESS(objfile, symbol)				\
-  ((symbol)->mginfo.value.address					\
-   + ANOFFSET ((objfile)->section_offsets, ((symbol)->mginfo.section)))
+  ((symbol)->value.address					\
+   + ANOFFSET ((objfile)->section_offsets, ((symbol)->section)))
 /* For a bound minsym, we can easily compute the address directly.  */
 #define BMSYMBOL_VALUE_ADDRESS(symbol) \
   MSYMBOL_VALUE_ADDRESS ((symbol).objfile, (symbol).minsym)
 #define SET_MSYMBOL_VALUE_ADDRESS(symbol, new_value)	\
-  ((symbol)->mginfo.value.address = (new_value))
-#define MSYMBOL_VALUE_BYTES(symbol)	(symbol)->mginfo.value.bytes
-#define MSYMBOL_BLOCK_VALUE(symbol)	(symbol)->mginfo.value.block
-#define MSYMBOL_VALUE_CHAIN(symbol)	(symbol)->mginfo.value.chain
-#define MSYMBOL_LANGUAGE(symbol)	(symbol)->mginfo.language
-#define MSYMBOL_SECTION(symbol)		(symbol)->mginfo.section
+  ((symbol)->value.address = (new_value))
+#define MSYMBOL_VALUE_BYTES(symbol)	(symbol)->value.bytes
+#define MSYMBOL_BLOCK_VALUE(symbol)	(symbol)->value.block
+#define MSYMBOL_VALUE_CHAIN(symbol)	(symbol)->value.chain
+#define MSYMBOL_LANGUAGE(symbol)	(symbol)->language
+#define MSYMBOL_SECTION(symbol)		(symbol)->section
 #define MSYMBOL_OBJ_SECTION(objfile, symbol)			\
-  (((symbol)->mginfo.section >= 0)				\
-   ? (&(((objfile)->sections)[(symbol)->mginfo.section]))	\
+  (((symbol)->section >= 0)				\
+   ? (&(((objfile)->sections)[(symbol)->section]))	\
    : NULL)
 
 #define MSYMBOL_NATURAL_NAME(symbol) \
-  (symbol_natural_name (&(symbol)->mginfo))
-#define MSYMBOL_LINKAGE_NAME(symbol)	(symbol)->mginfo.name
+  (symbol_natural_name (symbol))
+#define MSYMBOL_LINKAGE_NAME(symbol)	(symbol)->name
 #define MSYMBOL_PRINT_NAME(symbol)					\
   (demangle ? MSYMBOL_NATURAL_NAME (symbol) : MSYMBOL_LINKAGE_NAME (symbol))
 #define MSYMBOL_DEMANGLED_NAME(symbol) \
-  (symbol_demangled_name (&(symbol)->mginfo))
-#define MSYMBOL_SET_LANGUAGE(symbol,language,obstack)	\
-  (symbol_set_language (&(symbol)->mginfo, (language), (obstack)))
+  (symbol_demangled_name (symbol))
 #define MSYMBOL_SEARCH_NAME(symbol)					 \
-   (symbol_search_name (&(symbol)->mginfo))
-#define MSYMBOL_SET_NAMES(symbol,linkage_name,len,copy_name,objfile)	\
-  symbol_set_names (&(symbol)->mginfo, linkage_name, len, copy_name, \
-		    (objfile)->per_bfd)
+   (symbol_search_name (symbol))
 
 #include "minsyms.h"
 

@@ -1,5 +1,19 @@
 2019-03-15  Tom Tromey  <tom@tromey.com>
 
+	* symtab.h (struct minimal_symbol): Derive from
+	general_symbol_info.
+	(MSYMBOL_VALUE, MSYMBOL_VALUE_RAW_ADDRESS)
+	(MSYMBOL_VALUE_ADDRESS, MSYMBOL_VALUE_BYTES)
+	(MSYMBOL_BLOCK_VALUE, MSYMBOL_VALUE_CHAIN, MSYMBOL_LANGUAGE)
+	(MSYMBOL_SECTION, MSYMBOL_OBJ_SECTION, MSYMBOL_NATURAL_NAME)
+	(MSYMBOL_LINKAGE_NAME, MSYMBOL_DEMANGLED_NAME)
+	(MSYMBOL_SEARCH_NAME): Update.
+	(MSYMBOL_SET_LANGUAGE, MSYMBOL_SET_NAMES): Remove.
+	* solib.c (gdb_bfd_lookup_symbol_from_symtab): Don't use memset.
+	* minsyms.c (minimal_symbol_reader::record_full): Update.
+
+2019-03-15  Tom Tromey  <tom@tromey.com>
+
 	* minsyms.c (minimal_symbol_reader::install): Use memcpy.
 
 2019-03-15  Tom Tromey  <tom@tromey.com>

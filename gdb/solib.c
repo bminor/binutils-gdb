@@ -1501,9 +1501,8 @@ gdb_bfd_lookup_symbol_from_symtab (bfd *abfd,
 	      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
 		  && gdbarch_elf_make_msymbol_special_p (gdbarch))
 		{
-		  struct minimal_symbol msym;
+		  struct minimal_symbol msym {};
 
-		  memset (&msym, 0, sizeof (msym));
 		  SET_MSYMBOL_VALUE_ADDRESS (&msym, symaddr);
 		  gdbarch_elf_make_msymbol_special (gdbarch, sym, &msym);
 		  symaddr = MSYMBOL_VALUE_RAW_ADDRESS (&msym);

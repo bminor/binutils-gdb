@@ -1152,9 +1152,9 @@ minimal_symbol_reader::record_full (const char *name, int name_len,
       m_msym_bunch = newobj;
     }
   msymbol = &m_msym_bunch->contents[m_msym_bunch_index];
-  MSYMBOL_SET_LANGUAGE (msymbol, language_auto,
-			&m_objfile->per_bfd->storage_obstack);
-  MSYMBOL_SET_NAMES (msymbol, name, name_len, copy_name, m_objfile);
+  symbol_set_language (msymbol, language_auto,
+		       &m_objfile->per_bfd->storage_obstack);
+  symbol_set_names (msymbol, name, name_len, copy_name, m_objfile->per_bfd);
 
   SET_MSYMBOL_VALUE_ADDRESS (msymbol, address);
   MSYMBOL_SECTION (msymbol) = section;
