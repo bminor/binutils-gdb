@@ -742,7 +742,7 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 	{
 	  int best_zero_sized = -1;
 
-          msymbol = objfile->per_bfd->msymbols;
+          msymbol = objfile->per_bfd->msymbols.get ();
 	  lo = 0;
 	  hi = objfile->per_bfd->minimal_symbol_count - 1;
 
@@ -1298,7 +1298,7 @@ build_minimal_symbol_hash_tables (struct objfile *objfile)
 
   /* Now, (re)insert the actual entries.  */
   for ((i = objfile->per_bfd->minimal_symbol_count,
-	msym = objfile->per_bfd->msymbols);
+	msym = objfile->per_bfd->msymbols.get ());
        i > 0;
        i--, msym++)
     {
@@ -1363,14 +1363,16 @@ minimal_symbol_reader::install ()
       alloc_count = m_msym_count + m_objfile->per_bfd->minimal_symbol_count;
       obstack_blank (&m_objfile->per_bfd->storage_obstack,
 		     alloc_count * sizeof (struct minimal_symbol));
-      msymbols = (struct minimal_symbol *)
-	obstack_base (&m_objfile->per_bfd->storage_obstack);
+      gdb::unique_xmalloc_ptr<minimal_symbol>
+	msym_holder (XNEWVEC (minimal_symbol, alloc_count));
+      msymbols = msym_holder.get ();
 
       /* Copy in the existing minimal symbols, if there are any.  */
 
       if (m_objfile->per_bfd->minimal_symbol_count)
-	memcpy ((char *) msymbols, (char *) m_objfile->per_bfd->msymbols,
-	    m_objfile->per_bfd->minimal_symbol_count * sizeof (struct minimal_symbol));
+	memcpy (msymbols, m_objfile->per_bfd->msymbols.get (),
+		m_objfile->per_bfd->minimal_symbol_count
+		* sizeof (struct minimal_symbol));
 
       /* Walk through the list of minimal symbol bunches, adding each symbol
          to the new contiguous array of symbols.  Note that we start with the
@@ -1396,19 +1398,16 @@ minimal_symbol_reader::install ()
          no longer using.  */
 
       mcount = compact_minimal_symbols (msymbols, mcount, m_objfile);
-
-      ssize_t shrink_bytes
-	= (mcount + 1 - alloc_count) * sizeof (struct minimal_symbol);
-      obstack_blank_fast (&m_objfile->per_bfd->storage_obstack, shrink_bytes);
-      msymbols = (struct minimal_symbol *)
-	obstack_finish (&m_objfile->per_bfd->storage_obstack);
+      msym_holder.reset (XRESIZEVEC (struct minimal_symbol,
+				     msym_holder.release (),
+				     mcount));
 
       /* Attach the minimal symbol table to the specified objfile.
          The strings themselves are also located in the storage_obstack
          of this objfile.  */
 
       m_objfile->per_bfd->minimal_symbol_count = mcount;
-      m_objfile->per_bfd->msymbols = msymbols;
+      m_objfile->per_bfd->msymbols = std::move (msym_holder);
 
       /* Now build the hash tables; we can't do this incrementally
          at an earlier point since we weren't finished with the obstack

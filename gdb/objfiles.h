@@ -282,11 +282,9 @@ struct objfile_per_bfd_storage
      name and a zero value for the address.  This makes it easy to walk
      through the array when passed a pointer to somewhere in the middle
      of it.  There is also a count of the number of symbols, which does
-     not include the terminating null symbol.  The array itself, as well
-     as all the data that it points to, should be allocated on the
-     objfile_obstack for this file.  */
+     not include the terminating null symbol.  */
 
-  minimal_symbol *msymbols = NULL;
+  gdb::unique_xmalloc_ptr<minimal_symbol> msymbols;
   int minimal_symbol_count = 0;
 
   /* The number of minimal symbols read, before any minimal symbol
@@ -375,13 +373,13 @@ struct objfile
 
     minimal_symbol_iterator begin () const
     {
-      return minimal_symbol_iterator (m_objfile->per_bfd->msymbols);
+      return minimal_symbol_iterator (m_objfile->per_bfd->msymbols.get ());
     }
 
     minimal_symbol_iterator end () const
     {
       return minimal_symbol_iterator
-	(m_objfile->per_bfd->msymbols
+	(m_objfile->per_bfd->msymbols.get ()
 	 + m_objfile->per_bfd->minimal_symbol_count);
     }
 

@@ -1,5 +1,15 @@
 2019-03-15  Tom Tromey  <tom@tromey.com>
 
+	* objfiles.h (struct objfile_per_bfd_storage) <msymbols>: Now a
+	unique_xmalloc_ptr.
+	(objfile::msymbols_range::begin, objfile::msymbols_range::end):
+	Update.
+	* minsyms.c (lookup_minimal_symbol_by_pc_section)
+	(build_minimal_symbol_hash_tables)
+	(minimal_symbol_reader::install): Update.
+
+2019-03-15  Tom Tromey  <tom@tromey.com>
+
 	* symtab.c (create_demangled_names_hash): Update.
 	(symbol_set_names): Update.
 	* objfiles.h (struct objfile_per_bfd_storage)
