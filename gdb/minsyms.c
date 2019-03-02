@@ -1127,7 +1127,12 @@ minimal_symbol_reader::record_full (gdb::string_view name,
   msymbol = &m_msym_bunch->contents[m_msym_bunch_index];
   symbol_set_language (msymbol, language_auto,
 		       &m_objfile->per_bfd->storage_obstack);
-  symbol_set_names (msymbol, name, copy_name, m_objfile->per_bfd);
+
+  if (copy_name)
+    msymbol->name = obstack_strndup (&m_objfile->per_bfd->storage_obstack,
+				     name.data (), name.size ());
+  else
+    msymbol->name = name.data ();
 
   SET_MSYMBOL_VALUE_ADDRESS (msymbol, address);
   MSYMBOL_SECTION (msymbol) = section;
@@ -1353,6 +1358,17 @@ minimal_symbol_reader::install ()
 
       m_objfile->per_bfd->minimal_symbol_count = mcount;
       m_objfile->per_bfd->msymbols = std::move (msym_holder);
+
+      msymbols = m_objfile->per_bfd->msymbols.get ();
+      for (int i = 0; i < mcount; ++i)
+	{
+	  if (!msymbols[i].name_set)
+	    {
+	      symbol_set_names (&msymbols[i], msymbols[i].name,
+				false, m_objfile->per_bfd);
+	      msymbols[i].name_set = 1;
+	    }
+	}
 
       build_minimal_symbol_hash_tables (m_objfile);
     }
