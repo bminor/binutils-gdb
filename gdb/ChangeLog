@@ -1,5 +1,11 @@
 2019-03-02  Eli Zaretskii  <eliz@gnu.org>
 
+	* xml-syscall.c (xml_list_syscalls_by_group): Drop 'struct' from
+	for-loop range, to avoid compiler warnings.
+
+	* tui/tui.c (tui_enable) [__MINGW32__]: Don't declare 'cap', to
+	avoid compiler warnings about unused variables.
+
 	* NEWS: Mention end of support for native debugging on MS-Windows
 	before XP.
 
