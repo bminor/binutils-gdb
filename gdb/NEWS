@@ -188,6 +188,11 @@ CSKY ELF			csky*-*-elf
 CSKY GNU/LINUX			csky*-*-linux
 FreeBSD/riscv			riscv*-*-freebsd*
 
+* Removed targets
+
+GDB no longer supports native debugging on versions of MS-Windows
+before Windows XP.
+
 * Python API
 
   ** GDB no longer supports Python versions less than 2.6.
