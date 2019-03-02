@@ -24539,13 +24539,13 @@ For example, the style of file names can be controlled using the
 @item set style filename background @var{color}
 Set the background to @var{color}.  Valid colors are @samp{none}
 (meaning the terminal's default color), @samp{black}, @samp{red},
-@samp{green}, @samp{yellow}, @samp{vlue}, @samp{magenta}, @samp{cyan},
+@samp{green}, @samp{yellow}, @samp{blue}, @samp{magenta}, @samp{cyan},
 and@samp{white}.
 
 @item set style filename foreground @var{color}
 Set the foreground to @var{color}.  Valid colors are @samp{none}
 (meaning the terminal's default color), @samp{black}, @samp{red},
-@samp{green}, @samp{yellow}, @samp{vlue}, @samp{magenta}, @samp{cyan},
+@samp{green}, @samp{yellow}, @samp{blue}, @samp{magenta}, @samp{cyan},
 and@samp{white}.
 
 @item set style filename intensity @var{value}
@@ -24556,19 +24556,23 @@ Set the intensity to @var{value}.  Valid intensities are @samp{normal}
 The style-able objects are:
 @table @code
 @item filename
-Control the styling of file names.
+Control the styling of file names.  By default, this style's
+foreground color is green.
 
 @item function
 Control the styling of function names.  These are managed with the
-@code{set style function} family of commands.
+@code{set style function} family of commands.  By default, this
+style's foreground color is yellow.
 
 @item variable
 Control the styling of variable names.  These are managed with the
-@code{set style variable} family of commands.
+@code{set style variable} family of commands.  By default, this style's
+foreground color is cyan.
 
 @item address
 Control the styling of addresses.  These are managed with the
-@code{set style address} family of commands.
+@code{set style address} family of commands.  By default, this style's
+foreground color is blue.
 @end table
 
 @node Numbers
