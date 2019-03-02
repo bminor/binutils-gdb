@@ -1,5 +1,13 @@
 2019-03-15  Tom Tromey  <tom@tromey.com>
 
+	* symtab.c (create_demangled_names_hash): Update.
+	(symbol_set_names): Update.
+	* objfiles.h (struct objfile_per_bfd_storage)
+	<demangled_names_hash>: Now an htab_up.
+	* objfiles.c (objfile_per_bfd_storage): Simplify.
+
+2019-03-15  Tom Tromey  <tom@tromey.com>
+
 	* objfiles.h (struct objfile_per_bfd_storage): Declare
 	destructor.
 	* objfiles.c (objfile_per_bfd_storage::~objfile_per_bfd_storage):

@@ -262,7 +262,7 @@ struct objfile_per_bfd_storage
      name, and the second is the demangled name or just a zero byte
      if the name doesn't demangle.  */
 
-  htab *demangled_names_hash = NULL;
+  htab_up demangled_names_hash;
 
   /* The per-objfile information about the entry point, the scope (file/func)
      containing the entry point, and the scope of the user's main() func.  */

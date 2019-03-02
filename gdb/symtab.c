@@ -740,9 +740,9 @@ create_demangled_names_hash (struct objfile_per_bfd_storage *per_bfd)
      Choosing a much larger table size wastes memory, and saves only about
      1% in symbol reading.  */
 
-  per_bfd->demangled_names_hash = htab_create_alloc
+  per_bfd->demangled_names_hash.reset (htab_create_alloc
     (256, hash_demangled_name_entry, eq_demangled_name_entry,
-     NULL, xcalloc, xfree);
+     NULL, xcalloc, xfree));
 }
 
 /* Try to determine the demangled name for a symbol, based on the
@@ -848,7 +848,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 
   entry.mangled = linkage_name_copy;
   slot = ((struct demangled_name_entry **)
-	  htab_find_slot (per_bfd->demangled_names_hash,
+	  htab_find_slot (per_bfd->demangled_names_hash.get (),
 			  &entry, INSERT));
 
   /* If this name is not in the hash table, add it.  */

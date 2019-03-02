@@ -119,8 +119,6 @@ static const struct bfd_data *objfiles_bfd_data;
 
 objfile_per_bfd_storage::~objfile_per_bfd_storage ()
 {
-  if (demangled_names_hash)
-    htab_delete (demangled_names_hash);
 }
 
 /* Create the per-BFD storage object for OBJFILE.  If ABFD is not
