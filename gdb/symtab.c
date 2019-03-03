@@ -69,6 +69,9 @@
 #include "arch-utils.h"
 #include <algorithm>
 #include "gdbsupport/pathstuff.h"
+#if CXX_STD_THREAD
+#include <mutex>
+#endif
 
 /* Forward declarations for local functions.  */
 
@@ -710,6 +713,16 @@ symbol_set_language (struct general_symbol_info *gsymbol,
 
 /* Functions to initialize a symbol's mangled name.  */
 
+#if CXX_STD_THREAD
+/* Mutex that is used when modifying or accessing the demangled hash
+   table.  This is a global mutex simply because the only current
+   multi-threaded user of the hash table does not process multiple
+   objfiles in parallel.  The mutex could easily live on the per-BFD
+   object, but this approach avoids using extra memory when it is not
+   needed.  */
+static std::mutex demangled_mutex;
+#endif
+
 /* Objects of this type are stored in the demangled name hash table.  */
 struct demangled_name_entry
 {
@@ -839,9 +852,6 @@ symbol_set_names (struct general_symbol_info *gsymbol,
       return;
     }
 
-  if (per_bfd->demangled_names_hash == NULL)
-    create_demangled_names_hash (per_bfd);
-
   if (linkage_name[len] != '\0')
     {
       char *alloc_name;
@@ -855,71 +865,84 @@ symbol_set_names (struct general_symbol_info *gsymbol,
   else
     linkage_name_copy = linkage_name;
 
-  entry.mangled = linkage_name_copy;
-  slot = ((struct demangled_name_entry **)
-	  htab_find_slot (per_bfd->demangled_names_hash.get (),
-			  &entry, INSERT));
+  struct demangled_name_entry *found_entry;
 
-  /* If this name is not in the hash table, add it.  */
-  if (*slot == NULL
-      /* A C version of the symbol may have already snuck into the table.
-	 This happens to, e.g., main.init (__go_init_main).  Cope.  */
-      || (gsymbol->language == language_go
-	  && (*slot)->demangled[0] == '\0'))
-    {
-      char *demangled_name_ptr
-	= symbol_find_demangled_name (gsymbol, linkage_name_copy);
-      gdb::unique_xmalloc_ptr<char> demangled_name (demangled_name_ptr);
-      int demangled_len = demangled_name ? strlen (demangled_name.get ()) : 0;
+  {
+#if CXX_STD_THREAD
+    std::lock_guard<std::mutex> guard (demangled_mutex);
+#endif
 
-      /* Suppose we have demangled_name==NULL, copy_name==0, and
-	 linkage_name_copy==linkage_name.  In this case, we already have the
-	 mangled name saved, and we don't have a demangled name.  So,
-	 you might think we could save a little space by not recording
-	 this in the hash table at all.
+    if (per_bfd->demangled_names_hash == NULL)
+      create_demangled_names_hash (per_bfd);
+
+    entry.mangled = linkage_name_copy;
+    slot = ((struct demangled_name_entry **)
+	    htab_find_slot (per_bfd->demangled_names_hash.get (),
+			    &entry, INSERT));
+
+    /* If this name is not in the hash table, add it.  */
+    if (*slot == NULL
+	/* A C version of the symbol may have already snuck into the table.
+	   This happens to, e.g., main.init (__go_init_main).  Cope.  */
+	|| (gsymbol->language == language_go
+	    && (*slot)->demangled[0] == '\0'))
+      {
+	char *demangled_name_ptr
+	  = symbol_find_demangled_name (gsymbol, linkage_name_copy);
+	gdb::unique_xmalloc_ptr<char> demangled_name (demangled_name_ptr);
+	int demangled_len = demangled_name ? strlen (demangled_name.get ()) : 0;
+
+	/* Suppose we have demangled_name==NULL, copy_name==0, and
+	   linkage_name_copy==linkage_name.  In this case, we already have the
+	   mangled name saved, and we don't have a demangled name.  So,
+	   you might think we could save a little space by not recording
+	   this in the hash table at all.
 	 
-	 It turns out that it is actually important to still save such
-	 an entry in the hash table, because storing this name gives
-	 us better bcache hit rates for partial symbols.  */
-      if (!copy_name && linkage_name_copy == linkage_name)
-	{
-	  *slot
-	    = ((struct demangled_name_entry *)
-	       obstack_alloc (&per_bfd->storage_obstack,
-			      offsetof (struct demangled_name_entry, demangled)
-			      + demangled_len + 1));
-	  (*slot)->mangled = linkage_name;
-	}
-      else
-	{
-	  char *mangled_ptr;
+	   It turns out that it is actually important to still save such
+	   an entry in the hash table, because storing this name gives
+	   us better bcache hit rates for partial symbols.  */
+	if (!copy_name && linkage_name_copy == linkage_name)
+	  {
+	    *slot
+	      = ((struct demangled_name_entry *)
+		 obstack_alloc (&per_bfd->storage_obstack,
+				offsetof (struct demangled_name_entry, demangled)
+				+ demangled_len + 1));
+	    (*slot)->mangled = linkage_name;
+	  }
+	else
+	  {
+	    char *mangled_ptr;
 
-	  /* If we must copy the mangled name, put it directly after
-	     the demangled name so we can have a single
-	     allocation.  */
-	  *slot
-	    = ((struct demangled_name_entry *)
-	       obstack_alloc (&per_bfd->storage_obstack,
-			      offsetof (struct demangled_name_entry, demangled)
-			      + len + demangled_len + 2));
-	  mangled_ptr = &((*slot)->demangled[demangled_len + 1]);
-	  strcpy (mangled_ptr, linkage_name_copy);
-	  (*slot)->mangled = mangled_ptr;
-	}
-      (*slot)->language = gsymbol->language;
+	    /* If we must copy the mangled name, put it directly after
+	       the demangled name so we can have a single
+	       allocation.  */
+	    *slot
+	      = ((struct demangled_name_entry *)
+		 obstack_alloc (&per_bfd->storage_obstack,
+				offsetof (struct demangled_name_entry, demangled)
+				+ len + demangled_len + 2));
+	    mangled_ptr = &((*slot)->demangled[demangled_len + 1]);
+	    strcpy (mangled_ptr, linkage_name_copy);
+	    (*slot)->mangled = mangled_ptr;
+	  }
+	(*slot)->language = gsymbol->language;
 
-      if (demangled_name != NULL)
-	strcpy ((*slot)->demangled, demangled_name.get ());
-      else
-	(*slot)->demangled[0] = '\0';
-    }
-  else if (gsymbol->language == language_unknown
-	   || gsymbol->language == language_auto)
-    gsymbol->language = (*slot)->language;
+	if (demangled_name != NULL)
+	  strcpy ((*slot)->demangled, demangled_name.get ());
+	else
+	  (*slot)->demangled[0] = '\0';
+      }
+    else if (gsymbol->language == language_unknown
+	     || gsymbol->language == language_auto)
+      gsymbol->language = (*slot)->language;
 
-  gsymbol->name = (*slot)->mangled;
-  if ((*slot)->demangled[0] != '\0')
-    symbol_set_demangled_name (gsymbol, (*slot)->demangled,
+    found_entry = *slot;
+  }
+
+  gsymbol->name = found_entry->mangled;
+  if (found_entry->demangled[0] != '\0')
+    symbol_set_demangled_name (gsymbol, found_entry->demangled,
 			       &per_bfd->storage_obstack);
   else
     symbol_set_demangled_name (gsymbol, NULL, &per_bfd->storage_obstack);
