@@ -53,6 +53,11 @@
 #include "gdbsupport/symbol.h"
 #include <algorithm>
 #include "safe-ctype.h"
+#include "gdbsupport/parallel-for.h"
+
+#if CXX_STD_THREAD
+#include <mutex>
+#endif
 
 /* See minsyms.h.  */
 
@@ -1359,16 +1364,43 @@ minimal_symbol_reader::install ()
       m_objfile->per_bfd->minimal_symbol_count = mcount;
       m_objfile->per_bfd->msymbols = std::move (msym_holder);
 
+#if CXX_STD_THREAD
+      /* Mutex that is used when modifying or accessing the demangled
+	 hash table.  */
+      std::mutex demangled_mutex;
+#endif
+
       msymbols = m_objfile->per_bfd->msymbols.get ();
-      for (int i = 0; i < mcount; ++i)
-	{
-	  if (!msymbols[i].name_set)
-	    {
-	      symbol_set_names (&msymbols[i], msymbols[i].name,
-				false, m_objfile->per_bfd);
-	      msymbols[i].name_set = 1;
-	    }
-	}
+      gdb::parallel_for_each
+	(&msymbols[0], &msymbols[mcount],
+	 [&] (minimal_symbol *start, minimal_symbol *end)
+	 {
+	   for (minimal_symbol *msym = start; msym < end; ++msym)
+	     {
+	       if (!msym->name_set)
+		 {
+		   /* This will be freed later, by symbol_set_names.  */
+		   char *demangled_name
+		     = symbol_find_demangled_name (msym, msym->name);
+		   symbol_set_demangled_name
+		     (msym, demangled_name,
+		      &m_objfile->per_bfd->storage_obstack);
+		   msym->name_set = 1;
+		 }
+	     }
+	   {
+	     /* To limit how long we hold the lock, we only acquire it here
+	        and not while we demangle the names above.  */
+#if CXX_STD_THREAD
+	     std::lock_guard<std::mutex> guard (demangled_mutex);
+#endif
+	     for (minimal_symbol *msym = start; msym < end; ++msym)
+	       {
+		 symbol_set_names (msym, msym->name, false,
+				   m_objfile->per_bfd);
+	       }
+	   }
+	 });
 
       build_minimal_symbol_hash_tables (m_objfile);
     }

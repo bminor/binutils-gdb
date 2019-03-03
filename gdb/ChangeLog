@@ -1,6 +1,14 @@
 2019-10-19  Christian Biesinger  <cbiesinger@google.com>
 	    Tom Tromey  <tom@tromey.com>
 
+	* minsyms.c (minimal_symbol_reader::install): Use
+	parallel_for_each.
+	* gdbsupport/parallel-for.h: New file.
+	* Makefile.in (HFILES_NO_SRCDIR): Add gdbsupport/parallel-for.h.
+
+2019-10-19  Christian Biesinger  <cbiesinger@google.com>
+	    Tom Tromey  <tom@tromey.com>
+
 	* gdbsupport/thread-pool.h: New file.
 	* gdbsupport/thread-pool.c: New file.
 	* Makefile.in (COMMON_SFILES): Add thread-pool.c.
