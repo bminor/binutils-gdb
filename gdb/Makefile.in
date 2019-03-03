@@ -1491,6 +1491,7 @@ HFILES_NO_SRCDIR = \
 	gdbsupport/common-inferior.h \
 	gdbsupport/netstuff.h \
 	gdbsupport/host-defs.h \
+	gdbsupport/parallel-for.h \
 	gdbsupport/pathstuff.h \
 	gdbsupport/print-utils.h \
 	gdbsupport/ptid.h \

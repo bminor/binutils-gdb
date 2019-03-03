@@ -787,13 +787,9 @@ create_demangled_names_hash (struct objfile_per_bfd_storage *per_bfd)
      free_demangled_name_entry, xcalloc, xfree));
 }
 
-/* Try to determine the demangled name for a symbol, based on the
-   language of that symbol.  If the language is set to language_auto,
-   it will attempt to find any demangling algorithm that works and
-   then set the language appropriately.  The returned name is allocated
-   by the demangler and should be xfree'd.  */
+/* See symtab.h  */
 
-static char *
+char *
 symbol_find_demangled_name (struct general_symbol_info *gsymbol,
 			    const char *mangled)
 {
@@ -894,8 +890,15 @@ symbol_set_names (struct general_symbol_info *gsymbol,
       else
 	linkage_name_copy = linkage_name;
 
-      gdb::unique_xmalloc_ptr<char> demangled_name_ptr
-	(symbol_find_demangled_name (gsymbol, linkage_name_copy.data ()));
+      /* The const_cast is safe because the only reason it is already
+         initialized is if we purposefully set it from a background
+         thread to avoid doing the work here.  However, it is still
+         allocated from the heap and needs to be freed by us, just
+         like if we called symbol_find_demangled_name here.  */
+      gdb::unique_xmalloc_ptr<char> demangled_name
+	(gsymbol->language_specific.demangled_name
+	 ? const_cast<char *> (gsymbol->language_specific.demangled_name)
+	 : symbol_find_demangled_name (gsymbol, linkage_name_copy.data ()));
 
       /* Suppose we have demangled_name==NULL, copy_name==0, and
 	 linkage_name_copy==linkage_name.  In this case, we already have the
@@ -929,7 +932,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	  new (*slot) demangled_name_entry
 	    (gdb::string_view (mangled_ptr, linkage_name.length ()));
 	}
-      (*slot)->demangled = std::move (demangled_name_ptr);
+      (*slot)->demangled = std::move (demangled_name);
       (*slot)->language = gsymbol->language;
     }
   else if (gsymbol->language == language_unknown
