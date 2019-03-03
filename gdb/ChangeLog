@@ -1,5 +1,14 @@
 2019-09-30  Tom Tromey  <tom@tromey.com>
 
+	* minsyms.c (minimal_symbol_reader::install): Use
+	parallel_for_each.
+	* gdbsupport/parallel-for.h: New file.
+	* gdbsupport/parallel-for.c: New file.
+	* Makefile.in (HFILES_NO_SRCDIR): Add gdbsupport/parallel-for.h.
+	(COMMON_SFILES): Add gdbsupport/parallel-for.c.
+
+2019-09-30  Tom Tromey  <tom@tromey.com>
+
 	* event-top.h (thread_local_segv_handler): Declare.
 	* event-top.c (thread_local_segv_handler): New global.
 	(install_handle_sigsegv, handle_sigsegv): New functions.

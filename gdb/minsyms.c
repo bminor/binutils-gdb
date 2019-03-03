@@ -53,6 +53,8 @@
 #include "gdbsupport/symbol.h"
 #include <algorithm>
 #include "safe-ctype.h"
+#include "gdbsupport/alt-stack.h"
+#include "gdbsupport/parallel-for.h"
 
 /* See minsyms.h.  */
 
@@ -1332,16 +1334,25 @@ minimal_symbol_reader::install ()
       m_objfile->per_bfd->msymbols = std::move (msym_holder);
 
       msymbols = m_objfile->per_bfd->msymbols.get ();
-      for (int i = 0; i < mcount; ++i)
-	{
-	  if (!msymbols[i].name_set)
-	    {
-	      symbol_set_names (&msymbols[i], msymbols[i].name,
-				strlen (msymbols[i].name), 0,
-				m_objfile->per_bfd);
-	      msymbols[i].name_set = 1;
-	    }
-	}
+      gdb::parallel_for_each
+	(&msymbols[0], &msymbols[mcount],
+	 [&] (minimal_symbol *start, minimal_symbol *end)
+	 {
+	   /* Ensure that SIGSEGV is delivered to an alternate signal
+	      stack.  */
+	   gdb::alternate_signal_stack signal_stack;
+
+	   for (minimal_symbol *msym = start; msym < end; ++msym)
+	     {
+	       if (!msym->name_set)
+		 {
+		   symbol_set_names (msym, msym->name,
+				     strlen (msym->name), 0,
+				     m_objfile->per_bfd);
+		   msym->name_set = 1;
+		 }
+	     }
+	 });
 
       build_minimal_symbol_hash_tables (m_objfile);
     }
