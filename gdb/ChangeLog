@@ -1,5 +1,10 @@
 2019-03-12  Tom Tromey  <tromey@adacore.com>
 
+	* common/ptid.c (null_ptid, minus_one_ptid): Now const.
+	* common/ptid.h (null_ptid, minus_one_ptid): Now const.
+
+2019-03-12  Tom Tromey  <tromey@adacore.com>
+
 	* linux-nat.c (iterate_over_lwps): Update.
 	(stop_callback): Remove parameter.
 	(stop_wait_callback, detach_callback, resume_set_callback)

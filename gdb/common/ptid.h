@@ -145,11 +145,11 @@ private:
 
 /* The null or zero ptid, often used to indicate no process. */
 
-extern ptid_t null_ptid;
+extern const ptid_t null_ptid;
 
 /* The (-1,0,0) ptid, often used to indicate either an error condition
    or a "don't care" condition, i.e, "run all threads."  */
 
-extern ptid_t minus_one_ptid;
+extern const ptid_t minus_one_ptid;
 
 #endif /* COMMON_PTID_H */

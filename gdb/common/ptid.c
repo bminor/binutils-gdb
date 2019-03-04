@@ -22,5 +22,5 @@
 
 /* See ptid.h for these.  */
 
-ptid_t null_ptid = ptid_t::make_null ();
-ptid_t minus_one_ptid = ptid_t::make_minus_one ();
+ptid_t const null_ptid = ptid_t::make_null ();
+ptid_t const minus_one_ptid = ptid_t::make_minus_one ();
