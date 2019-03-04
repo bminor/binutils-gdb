@@ -38,6 +38,9 @@
 #include "safe-ctype.h"
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/gdb-sigmask.h"
+#include <atomic>
+#include "event-top.h"
+#include "run-on-main-thread.h"
 
 #define d_left(dc) (dc)->u.s_binary.left
 #define d_right(dc) (dc)->u.s_binary.right
@@ -1476,11 +1479,11 @@ static bool catch_demangler_crashes = true;
 
 /* Stack context and environment for demangler crash recovery.  */
 
-static SIGJMP_BUF gdb_demangle_jmp_buf;
+static thread_local SIGJMP_BUF *gdb_demangle_jmp_buf;
 
-/* If nonzero, attempt to dump core from the signal handler.  */
+/* If true, attempt to dump core from the signal handler.  */
 
-static int gdb_demangle_attempt_core_dump = 1;
+static std::atomic<bool> gdb_demangle_attempt_core_dump;
 
 /* Signal handler for gdb_demangle.  */
 
@@ -1492,10 +1495,46 @@ gdb_demangle_signal_handler (int signo)
       if (fork () == 0)
 	dump_core ();
 
-      gdb_demangle_attempt_core_dump = 0;
+      gdb_demangle_attempt_core_dump = false;
     }
 
-  SIGLONGJMP (gdb_demangle_jmp_buf, signo);
+  SIGLONGJMP (*gdb_demangle_jmp_buf, signo);
+}
+
+/* A helper for gdb_demangle that reports a demangling failure.  */
+
+static void
+report_failed_demangle (const char *name, bool core_dump_allowed,
+			int crash_signal)
+{
+  static bool error_reported = false;
+
+  if (!error_reported)
+    {
+      std::string short_msg
+	= string_printf (_("unable to demangle '%s' "
+			   "(demangler failed with signal %d)"),
+			 name, crash_signal);
+
+      std::string long_msg
+	= string_printf ("%s:%d: %s: %s", __FILE__, __LINE__,
+			 "demangler-warning", short_msg.c_str ());
+
+      target_terminal::scoped_restore_terminal_state term_state;
+      target_terminal::ours_for_output ();
+
+      begin_line ();
+      if (core_dump_allowed)
+	fprintf_unfiltered (gdb_stderr,
+			    _("%s\nAttempting to dump core.\n"),
+			    long_msg.c_str ());
+      else
+	warn_cant_dump_core (long_msg.c_str ());
+
+      demangler_warning (__FILE__, __LINE__, "%s", short_msg.c_str ());
+
+      error_reported = true;
+    }
 }
 
 #endif
@@ -1509,45 +1548,27 @@ gdb_demangle (const char *name, int options)
   int crash_signal = 0;
 
 #ifdef HAVE_WORKING_FORK
-#if defined (HAVE_SIGACTION) && defined (SA_RESTART)
-  struct sigaction sa, old_sa;
-#else
-  sighandler_t ofunc;
-#endif
-  static int core_dump_allowed = -1;
+  scoped_restore restore_segv
+    = make_scoped_restore (&thread_local_segv_handler,
+			   catch_demangler_crashes
+			   ? gdb_demangle_signal_handler
+			   : nullptr);
 
-  if (core_dump_allowed == -1)
-    {
-      core_dump_allowed = can_dump_core (LIMIT_CUR);
-
-      if (!core_dump_allowed)
-	gdb_demangle_attempt_core_dump = 0;
-    }
-
+  bool core_dump_allowed = gdb_demangle_attempt_core_dump;
+  SIGJMP_BUF jmp_buf;
+  scoped_restore restore_jmp_buf
+    = make_scoped_restore (&gdb_demangle_jmp_buf, &jmp_buf);
   if (catch_demangler_crashes)
     {
-#if defined (HAVE_SIGACTION) && defined (SA_RESTART)
-      sa.sa_handler = gdb_demangle_signal_handler;
-      sigemptyset (&sa.sa_mask);
-#ifdef HAVE_SIGALTSTACK
-      sa.sa_flags = SA_ONSTACK;
-#else
-      sa.sa_flags = 0;
-#endif
-      sigaction (SIGSEGV, &sa, &old_sa);
-#else
-      ofunc = signal (SIGSEGV, gdb_demangle_signal_handler);
-#endif
-
       /* The signal handler may keep the signal blocked when we longjmp out
          of it.  If we have sigprocmask, we can use it to unblock the signal
 	 afterwards and we can avoid the performance overhead of saving the
 	 signal mask just in case the signal gets triggered.  Otherwise, just
 	 tell sigsetjmp to save the mask.  */
 #ifdef HAVE_SIGPROCMASK
-      crash_signal = SIGSETJMP (gdb_demangle_jmp_buf, 0);
+      crash_signal = SIGSETJMP (*gdb_demangle_jmp_buf, 0);
 #else
-      crash_signal = SIGSETJMP (gdb_demangle_jmp_buf, 1);
+      crash_signal = SIGSETJMP (*gdb_demangle_jmp_buf, 1);
 #endif
     }
 #endif
@@ -1558,16 +1579,8 @@ gdb_demangle (const char *name, int options)
 #ifdef HAVE_WORKING_FORK
   if (catch_demangler_crashes)
     {
-#if defined (HAVE_SIGACTION) && defined (SA_RESTART)
-      sigaction (SIGSEGV, &old_sa, NULL);
-#else
-      signal (SIGSEGV, ofunc);
-#endif
-
       if (crash_signal != 0)
-	{
-	  static int error_reported = 0;
-
+        {
 #ifdef HAVE_SIGPROCMASK
 	  /* If we got the signal, SIGSEGV may still be blocked; restore it.  */
 	  sigset_t segv_sig_set;
@@ -1576,35 +1589,18 @@ gdb_demangle (const char *name, int options)
 	  gdb_sigmask (SIG_UNBLOCK, &segv_sig_set, NULL);
 #endif
 
-	  if (!error_reported)
-	    {
-	      std::string short_msg
-		= string_printf (_("unable to demangle '%s' "
-				   "(demangler failed with signal %d)"),
-				 name, crash_signal);
+	  /* If there was a failure, we can't report it here, because
+	     we might be in a background thread.  Instead, arrange for
+	     the reporting to happen on the main thread.  */
+          std::string copy = name;
+          run_on_main_thread ([=] ()
+            {
+              report_failed_demangle (copy.c_str (), core_dump_allowed,
+                                      crash_signal);
+            });
 
-	      std::string long_msg
-		= string_printf ("%s:%d: %s: %s", __FILE__, __LINE__,
-				 "demangler-warning", short_msg.c_str ());
-
-	      target_terminal::scoped_restore_terminal_state term_state;
-	      target_terminal::ours_for_output ();
-
-	      begin_line ();
-	      if (core_dump_allowed)
-		fprintf_unfiltered (gdb_stderr,
-				    _("%s\nAttempting to dump core.\n"),
-				    long_msg.c_str ());
-	      else
-		warn_cant_dump_core (long_msg.c_str ());
-
-	      demangler_warning (__FILE__, __LINE__, "%s", short_msg.c_str ());
-
-	      error_reported = 1;
-	    }
-
-	  result = NULL;
-	}
+          result = NULL;
+        }
     }
 #endif
 
@@ -2211,4 +2207,6 @@ display the offending symbol."),
   selftests::register_test ("cp_remove_params",
 			    selftests::test_cp_remove_params);
 #endif
+
+  gdb_demangle_attempt_core_dump = can_dump_core (LIMIT_CUR);
 }
