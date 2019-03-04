@@ -1,5 +1,18 @@
 2019-10-19  Tom Tromey  <tom@tromey.com>
 
+	* event-top.h (thread_local_segv_handler): Declare.
+	* event-top.c (thread_local_segv_handler): New global.
+	(install_handle_sigsegv, handle_sigsegv): New functions.
+	(async_init_signals): Install SIGSEGV handler.
+	* cp-support.c (gdb_demangle_jmp_buf): Change type.  Now
+	thread-local.
+	(report_failed_demangle): New function.
+	(gdb_demangle): Make core_dump_allowed atomic.  Remove signal
+	handler-setting code, instead use segv_handler.  Run warning code
+	on main thread.
+
+2019-10-19  Tom Tromey  <tom@tromey.com>
+
 	* unittests/main-thread-selftests.c: New file.
 	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
 	main-thread-selftests.c.
