@@ -833,7 +833,7 @@ s390_linux_nat_target::low_delete_thread (struct arch_lwp_info *arch_lwp)
 /* Iterator callback for s390_refresh_per_info.  */
 
 static int
-s390_refresh_per_info_cb (struct lwp_info *lp, void *arg)
+s390_refresh_per_info_cb (struct lwp_info *lp)
 {
   s390_mark_per_info_changed (lp);
 
@@ -849,7 +849,7 @@ s390_refresh_per_info (void)
 {
   ptid_t pid_ptid = ptid_t (current_lwp_ptid ().pid ());
 
-  iterate_over_lwps (pid_ptid, s390_refresh_per_info_cb, NULL);
+  iterate_over_lwps (pid_ptid, s390_refresh_per_info_cb);
   return 0;
 }
 

@@ -1843,14 +1843,13 @@ num_lwps (int pid)
 
 struct lwp_info *
 iterate_over_lwps (ptid_t filter,
-		   iterate_over_lwps_ftype callback,
-		   void *data)
+		   gdb::function_view<iterate_over_lwps_ftype> callback)
 {
   thread_info *thread = find_thread (filter, [&] (thread_info *thr_arg)
     {
       lwp_info *lwp = get_thread_lwp (thr_arg);
 
-      return callback (lwp, data);
+      return callback (lwp);
     });
 
   if (thread == NULL)

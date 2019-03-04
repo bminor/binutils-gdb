@@ -1,3 +1,7 @@
+2019-03-12  Tom Tromey  <tromey@adacore.com>
+
+	* linux-low.c (iterate_over_lwps): Update.
+
 2019-03-06  Tom Tromey  <tom@tromey.com>
 
 	* server.c (detach_or_kill_for_exit_cleanup): Remove parameter.

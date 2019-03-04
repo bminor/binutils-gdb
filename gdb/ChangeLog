@@ -1,3 +1,36 @@
+2019-03-12  Tom Tromey  <tromey@adacore.com>
+
+	* linux-nat.c (iterate_over_lwps): Update.
+	(stop_callback): Remove parameter.
+	(stop_wait_callback, detach_callback, resume_set_callback)
+	(select_singlestep_lwp_callback, set_ignore_sigint)
+	(status_callback, resumed_callback, resume_clear_callback)
+	(kill_callback, kill_wait_callback, linux_nat_stop_lwp): Remove
+	data parameter.
+	(linux_nat_target::detach, linux_nat_target::resume)
+	(linux_stop_and_wait_all_lwps, select_event_lwp)
+	(linux_nat_filter_event, linux_nat_wait_1)
+	(linux_nat_target::kill, linux_nat_target::stop)
+	(linux_nat_target::stop): Update.
+	(linux_nat_resume_callback): Change type.
+	(resume_stopped_resumed_lwps, count_events_callback)
+	(select_event_lwp_callback): Likewise.
+	(linux_stop_lwp, linux_nat_stop_lwp): Update.
+	* arm-linux-nat.c (struct update_registers_data): Remove.
+	(update_registers_callback): Change type.
+	(arm_linux_insert_hw_breakpoint1): Update.
+	* nat/x86-linux-dregs.c (update_debug_registers_callback): Remove
+	parameter.
+	(x86_linux_dr_set_addr): Update.
+	(x86_linux_dr_set_control): Update.
+	* nat/linux-nat.h (iterate_over_lwps_ftype): Remove parameter.
+	(iterate_over_lwps): Use gdb::function_view.
+	* nat/aarch64-linux-hw-point.c (struct
+	aarch64_dr_update_callback_param): Remove.
+	(debug_reg_change_callback): Change type.
+	(aarch64_notify_debug_reg_change): Update.
+	* s390-linux-nat.c (s390_refresh_per_info): Update.
+
 2019-03-11  Tom Tromey  <tromey@adacore.com>
 
 	* dwarf2read.c (dwarf2_find_containing_comp_unit): Remove

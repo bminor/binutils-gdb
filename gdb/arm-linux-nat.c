@@ -952,26 +952,18 @@ arm_linux_hw_breakpoint_equal (const struct arm_linux_hw_breakpoint *p1,
 /* Callback to mark a watch-/breakpoint to be updated in all threads of
    the current process.  */
 
-struct update_registers_data
-{
-  int watch;
-  int index;
-};
-
 static int
-update_registers_callback (struct lwp_info *lwp, void *arg)
+update_registers_callback (struct lwp_info *lwp, int watch, int index)
 {
-  struct update_registers_data *data = (struct update_registers_data *) arg;
-
   if (lwp->arch_private == NULL)
     lwp->arch_private = XCNEW (struct arch_lwp_info);
 
   /* The actual update is done later just before resuming the lwp,
      we just mark that the registers need updating.  */
-  if (data->watch)
-    lwp->arch_private->wpts_changed[data->index] = 1;
+  if (watch)
+    lwp->arch_private->wpts_changed[index] = 1;
   else
-    lwp->arch_private->bpts_changed[data->index] = 1;
+    lwp->arch_private->bpts_changed[index] = 1;
 
   /* If the lwp isn't stopped, force it to momentarily pause, so
      we can update its breakpoint registers.  */
@@ -991,7 +983,6 @@ arm_linux_insert_hw_breakpoint1 (const struct arm_linux_hw_breakpoint* bpt,
   ptid_t pid_ptid;
   gdb_byte count, i;
   struct arm_linux_hw_breakpoint* bpts;
-  struct update_registers_data data;
 
   pid = inferior_ptid.pid ();
   pid_ptid = ptid_t (pid);
@@ -1010,10 +1001,13 @@ arm_linux_insert_hw_breakpoint1 (const struct arm_linux_hw_breakpoint* bpt,
   for (i = 0; i < count; ++i)
     if (!arm_hwbp_control_is_enabled (bpts[i].control))
       {
-        data.watch = watchpoint;
-        data.index = i;
         bpts[i] = *bpt;
-        iterate_over_lwps (pid_ptid, update_registers_callback, &data);
+        iterate_over_lwps (pid_ptid,
+			   [=] (struct lwp_info *info)
+			   {
+			     return update_registers_callback (info, watch,
+							       index);
+			   });
         break;
       }
 
