@@ -1,5 +1,11 @@
 2019-03-05  Tom Tromey  <tromey@adacore.com>
 
+	* target.c (the_dummy_target): Move later.  Change type to
+	"dummy_target".
+	(initialize_targets): Don't initialize the_dummy_target.
+
+2019-03-05  Tom Tromey  <tromey@adacore.com>
+
 	* gdb_bfd.c (gdb_bfd_fdopenr): Remove.
 	* gdb_bfd.h (gdb_bfd_fdopenr): Don't declare.
 
