@@ -3276,6 +3276,27 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
   char *dir;
   const char *filename;
 
+  /* PR 24281: It is not clear what should happen when copying a thin archive.
+     One part is straight forward - if the output archive is in a different
+     directory from the input archive then any relative paths in the library
+     should be adjusted to the new location.  But if any transformation
+     options are active (eg strip, rename, add, etc) then the implication is
+     that these should be applied to the files pointed to by the archive.
+     But since objcopy is not destructive, this means that new files must be
+     created, and there is no guidance for the names of the new files.  (Plus
+     this conflicts with one of the goals of thin libraries - only taking up
+     a  minimal amount of space in the file system).
+
+     So for now we fail if an attempt is made to copy such libraries.  */
+  if (ibfd->is_thin_archive)
+    {
+      status = 1;
+      bfd_set_error (bfd_error_invalid_operation);
+      bfd_nonfatal_message (NULL, ibfd, NULL,
+			    _("sorry: copying thin archives is not currently supported"));
+      return;
+    }
+
   /* Make a temp directory to hold the contents.  */
   dir = make_tempdir (bfd_get_filename (obfd));
   if (dir == NULL)
