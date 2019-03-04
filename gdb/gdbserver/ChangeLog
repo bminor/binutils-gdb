@@ -1,3 +1,9 @@
+2019-03-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* configure.srv: Use '$enable_unittest' instead of '$development'
+	when checking whether to fill 'srv_regobj' on 'aarch64*-*-linux*'
+	case.
+
 2019-02-27  Tom Tromey  <tromey@adacore.com>
 
 	* gdbreplay.c (logchar): Handle \r\n.
