@@ -1,5 +1,10 @@
 2019-03-05  Tom Tromey  <tromey@adacore.com>
 
+	* gdb_bfd.c (gdb_bfd_fdopenr): Remove.
+	* gdb_bfd.h (gdb_bfd_fdopenr): Don't declare.
+
+2019-03-05  Tom Tromey  <tromey@adacore.com>
+
 	* windows-nat.c (windows_nat_target::attach)
 	(windows_nat_target::detach): Don't call gdb_flush.
 	* valprint.c (generic_val_print, val_print, val_print_string):

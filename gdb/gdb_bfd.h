@@ -161,11 +161,6 @@ gdb_bfd_ref_ptr gdb_bfd_openr_iovec (const char *filename, const char *target,
 
 gdb_bfd_ref_ptr gdb_bfd_openr_next_archived_file (bfd *archive, bfd *previous);
 
-/* A wrapper for bfd_fdopenr that initializes the gdb-specific
-   reference count.  */
-
-gdb_bfd_ref_ptr gdb_bfd_fdopenr (const char *filename, const char *target,
-				 int fd);
 
 
 

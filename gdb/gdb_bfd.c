@@ -874,16 +874,6 @@ gdb_bfd_record_inclusion (bfd *includer, bfd *includee)
   gdata->included_bfds.push_back (gdb_bfd_ref_ptr::new_reference (includee));
 }
 
-/* See gdb_bfd.h.  */
-
-gdb_bfd_ref_ptr
-gdb_bfd_fdopenr (const char *filename, const char *target, int fd)
-{
-  bfd *result = bfd_fdopenr (filename, target, fd);
-
-  return gdb_bfd_ref_ptr::new_reference (result);
-}
-
 
 
 gdb_static_assert (ARRAY_SIZE (_bfd_std_section) == 4);
