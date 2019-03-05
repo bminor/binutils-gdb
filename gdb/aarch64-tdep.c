@@ -1921,7 +1921,7 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
   if (aapcs_is_vfp_call_or_return_candidate (type, &elements,
 					     &fundamental_type))
     {
-      length_t len = TYPE_LENGTH (fundamental_type);
+      size_t len = static_cast<size_t> (TYPE_LENGTH (fundamental_type));
 
       for (int i = 0; i < elements; i++)
 	{
@@ -1952,7 +1952,7 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
       /* If the type is a plain integer, then the access is
 	 straight-forward.  Otherwise we have to play around a bit
 	 more.  */
-      int len = TYPE_LENGTH (type);
+      length_t len = TYPE_LENGTH (type);
       int regno = AARCH64_X0_REGNUM;
       ULONGEST tmp;
 
@@ -1963,7 +1963,8 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
 	  regcache_cooked_read_unsigned (regs, regno++, &tmp);
 	  store_unsigned_integer (valbuf,
 				  (len > X_REGISTER_SIZE
-				   ? X_REGISTER_SIZE : len), byte_order, tmp);
+				   ? X_REGISTER_SIZE
+				   : static_cast<int> (len)), byte_order, tmp);
 	  len -= X_REGISTER_SIZE;
 	  valbuf += X_REGISTER_SIZE;
 	}
@@ -1973,14 +1974,15 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
       /* For a structure or union the behaviour is as if the value had
          been stored to word-aligned memory and then loaded into
          registers with 64-bit load instruction(s).  */
-      int len = TYPE_LENGTH (type);
+      length_t len = TYPE_LENGTH (type);
       int regno = AARCH64_X0_REGNUM;
       bfd_byte buf[X_REGISTER_SIZE];
 
       while (len > 0)
 	{
 	  regs->cooked_read (regno++, buf);
-	  memcpy (valbuf, buf, len > X_REGISTER_SIZE ? X_REGISTER_SIZE : len);
+	  memcpy (valbuf, buf, len > X_REGISTER_SIZE ? X_REGISTER_SIZE
+		  : static_cast<size_t> (len));
 	  len -= X_REGISTER_SIZE;
 	  valbuf += X_REGISTER_SIZE;
 	}
@@ -2033,7 +2035,7 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
   if (aapcs_is_vfp_call_or_return_candidate (type, &elements,
 					     &fundamental_type))
     {
-      int len = TYPE_LENGTH (fundamental_type);
+      size_t len = static_cast<size_t> (TYPE_LENGTH (fundamental_type));
 
       for (int i = 0; i < elements; i++)
 	{
@@ -2077,7 +2079,7 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 	  /* Integral values greater than one word are stored in
 	     consecutive registers starting with r0.  This will always
 	     be a multiple of the regiser size.  */
-	  int len = TYPE_LENGTH (type);
+	  length_t len = TYPE_LENGTH (type);
 	  int regno = AARCH64_X0_REGNUM;
 
 	  while (len > 0)
@@ -2093,14 +2095,15 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
       /* For a structure or union the behaviour is as if the value had
 	 been stored to word-aligned memory and then loaded into
 	 registers with 64-bit load instruction(s).  */
-      int len = TYPE_LENGTH (type);
+      length_t len = TYPE_LENGTH (type);
       int regno = AARCH64_X0_REGNUM;
       bfd_byte tmpbuf[X_REGISTER_SIZE];
 
       while (len > 0)
 	{
 	  memcpy (tmpbuf, valbuf,
-		  len > X_REGISTER_SIZE ? X_REGISTER_SIZE : len);
+		  len > X_REGISTER_SIZE ? X_REGISTER_SIZE
+		  : static_cast<size_t> (len));
 	  regs->cooked_write (regno++, tmpbuf);
 	  len -= X_REGISTER_SIZE;
 	  valbuf += X_REGISTER_SIZE;
@@ -2358,8 +2361,12 @@ aarch64_pseudo_read_value_1 (struct gdbarch *gdbarch,
   gdb_static_assert (AARCH64_V0_REGNUM == AARCH64_SVE_Z0_REGNUM);
 
   if (regcache->raw_read (v_regnum, reg_buf) != REG_VALID)
-    mark_value_bytes_unavailable (result_value, 0,
-				  TYPE_LENGTH (value_type (result_value)));
+    {
+      LONGEST len
+	= static_cast<LONGEST> (TYPE_LENGTH (value_type (result_value)));
+
+      mark_value_bytes_unavailable (result_value, 0, len);
+    }
   else
     memcpy (value_contents_raw (result_value), reg_buf, regsize);
 
