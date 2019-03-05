@@ -465,7 +465,7 @@ option.
 @item P
 Use the full path name when matching names in the archive.  @sc{gnu}
 @command{ar} can not create an archive with a full path name (such archives
-are not POSIX complaint), but other archive creators can.  This option
+are not POSIX compliant), but other archive creators can.  This option
 will cause @sc{gnu} @command{ar} to match file names using a complete path
 name, which can be convenient when extracting a single file from an
 archive created by another tool.
