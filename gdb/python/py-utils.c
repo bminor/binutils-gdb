@@ -66,20 +66,13 @@ python_string_to_unicode (PyObject *obj)
 static gdb::unique_xmalloc_ptr<char>
 unicode_to_encoded_string (PyObject *unicode_str, const char *charset)
 {
-  gdb::unique_xmalloc_ptr<char> result;
-
   /* Translate string to named charset.  */
   gdbpy_ref<> string (PyUnicode_AsEncodedString (unicode_str, charset, NULL));
   if (string == NULL)
     return NULL;
 
-#ifdef IS_PY3K
-  result.reset (xstrdup (PyBytes_AsString (string.get ())));
-#else
-  result.reset (xstrdup (PyString_AsString (string.get ())));
-#endif
-
-  return result;
+  return gdb::unique_xmalloc_ptr<char>
+    (xstrdup (PyBytes_AsString (string.get ())));
 }
 
 /* Returns a PyObject with the contents of the given unicode string

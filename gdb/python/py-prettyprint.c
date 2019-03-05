@@ -312,13 +312,8 @@ print_string_repr (PyObject *printer, const char *hint,
 	      long length;
 	      struct type *type;
 
-#ifdef IS_PY3K
 	      output = PyBytes_AS_STRING (string.get ());
 	      length = PyBytes_GET_SIZE (string.get ());
-#else
-	      output = PyString_AsString (string.get ());
-	      length = PyString_Size (string.get ());
-#endif
 	      type = builtin_type (gdbarch)->builtin_char;
 
 	      if (hint && !strcmp (hint, "string"))

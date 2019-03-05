@@ -1,5 +1,10 @@
 2019-03-05  Tom Tromey  <tromey@adacore.com>
 
+	* python/py-prettyprint.c (print_string_repr): Remove #if.
+	* python/py-utils.c (unicode_to_encoded_string): Remove #if.
+
+2019-03-05  Tom Tromey  <tromey@adacore.com>
+
 	* target.c (the_dummy_target): Move later.  Change type to
 	"dummy_target".
 	(initialize_targets): Don't initialize the_dummy_target.
