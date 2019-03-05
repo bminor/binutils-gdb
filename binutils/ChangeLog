@@ -1,3 +1,9 @@
+2019-03-05  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	PR 24287
+	* testsuite/lib/binutils-common.exp (run_dump_test): Replace a use
+	of "lmap" with a "foreach" loop.
+
 2019-03-04  Nick Clifton  <nickc@redhat.com>
 
 	PR 24281

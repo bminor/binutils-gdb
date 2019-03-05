@@ -829,19 +829,19 @@ proc run_dump_test { name {extra_options {}} } {
 	}
     }
 
-    # Ensure there is something in $opts(as) for the lmap below.
+    # Ensure there is something in $opts(as) for the foreach loop below.
     if { [llength $opts(as)] == 0 } {
         set opts(as) [list " "]
     }
-    set as_final_flags [lmap x $opts(as) {
+    foreach x $opts(as) {
         if { [string length $x] && [string length $as_additional_flags] } {
             append x " "
         }
         append x $as_additional_flags
         regsub {\[big_or_little_endian\]} $x \
             [big_or_little_endian] x
-        expr {$x}
-    }]
+        lappend as_final_flags $x
+    }
 
     regsub {\[big_or_little_endian\]} $opts(ld) \
         [big_or_little_endian] opts(ld)
