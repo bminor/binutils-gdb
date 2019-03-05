@@ -1,3 +1,8 @@
+2019-03-05  Simon Marchi  <simon.marchi@efficios.com>
+
+	* python.texi (Values From Inferior): Change synopsys of the
+	second form of Value.__init__.
+
 2019-03-02  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Output Styling): Fix typos.  Document the default

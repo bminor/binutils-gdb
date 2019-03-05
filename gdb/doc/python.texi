@@ -735,7 +735,7 @@ its result is used.
 @end table
 @end defun
 
-@defun Value.__init__ (@var{val}, @r{[}, type @r{]})
+@defun Value.__init__ (@var{val}, @var{type})
 This second form of the @code{gdb.Value} constructor returns a
 @code{gdb.Value} of type @var{type} where the value contents are taken
 from the Python buffer object specified by @var{val}.  The number of
