@@ -1,3 +1,11 @@
+2019-03-06  Pedro Alves  <palves@redhat.com>
+
+	* linux-fork.c (new_fork): New, split out of ...
+	(add_fork): ... this.  Return void.  Move "first fork" special
+	case from here, to ...
+	(checkpoint_command): ... here.
+	* linux-linux.h (add_fork): Return void.
+
 2019-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* f-exp.y (direct_abs_decl): Handle TYPE*SIZE type names.
