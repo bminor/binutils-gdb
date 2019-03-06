@@ -1,5 +1,15 @@
 2019-03-06  Pedro Alves  <palves@redhat.com>
 
+	* linux-fork.c (fork_info::clobber_regs): Delete.
+	(fork_load_infrun_state): Remove reference to 'clobber_regs'.
+	(fork_save_infrun_state): Remove 'clobber_regs' parameter.  Update
+	comment.  Adjust.
+	(scoped_switch_fork_info::scoped_switch_fork_info)
+	(checkpoint_command, linux_fork_context): Adjust
+	fork_save_infrun_state calls.
+
+2019-03-06  Pedro Alves  <palves@redhat.com>
+
 	* linux-fork.c (inf_has_multiple_thread_cb): Delete.
 	(inf_has_multiple_threads): Return 'bool' and rewrite using
 	inferior_info::threads().

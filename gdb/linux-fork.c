@@ -77,9 +77,6 @@ struct fork_info
 
   CORE_ADDR pc = 0;
 
-  /* True if we should restore saved regs.  */
-  int clobber_regs = 0;
-
   /* Set of open file descriptors' offsets.  */
   off_t *filepos = nullptr;
 
@@ -223,7 +220,7 @@ fork_load_infrun_state (struct fork_info *fp)
 
   linux_nat_switch_fork (fp->ptid);
 
-  if (fp->savedregs && fp->clobber_regs)
+  if (fp->savedregs)
     get_current_regcache ()->restore (fp->savedregs);
 
   registers_changed ();
@@ -245,11 +242,10 @@ fork_load_infrun_state (struct fork_info *fp)
     }
 }
 
-/* Save infrun state for the fork PTID.
-   Exported for use by linux child_follow_fork.  */
+/* Save infrun state for the fork FP.  */
 
 static void
-fork_save_infrun_state (struct fork_info *fp, int clobber_regs)
+fork_save_infrun_state (struct fork_info *fp)
 {
   char path[PATH_MAX];
   struct dirent *de;
@@ -260,44 +256,39 @@ fork_save_infrun_state (struct fork_info *fp, int clobber_regs)
 
   fp->savedregs = new readonly_detached_regcache (*get_current_regcache ());
   fp->pc = regcache_read_pc (get_current_regcache ());
-  fp->clobber_regs = clobber_regs;
 
-  if (clobber_regs)
+  /* Now save the 'state' (file position) of all open file descriptors.
+     Unfortunately fork does not take care of that for us...  */
+  snprintf (path, PATH_MAX, "/proc/%ld/fd", (long) fp->ptid.pid ());
+  if ((d = opendir (path)) != NULL)
     {
-      /* Now save the 'state' (file position) of all open file descriptors.
-	 Unfortunately fork does not take care of that for us...  */
-      snprintf (path, PATH_MAX, "/proc/%ld/fd",
-		(long) fp->ptid.pid ());
-      if ((d = opendir (path)) != NULL)
+      long tmp;
+
+      fp->maxfd = 0;
+      while ((de = readdir (d)) != NULL)
 	{
-	  long tmp;
-
-	  fp->maxfd = 0;
-	  while ((de = readdir (d)) != NULL)
-	    {
-	      /* Count open file descriptors (actually find highest
-		 numbered).  */
-	      tmp = strtol (&de->d_name[0], NULL, 10);
-	      if (fp->maxfd < tmp)
-		fp->maxfd = tmp;
-	    }
-	  /* Allocate array of file positions.  */
-	  fp->filepos = XRESIZEVEC (off_t, fp->filepos, fp->maxfd + 1);
-
-	  /* Initialize to -1 (invalid).  */
-	  for (tmp = 0; tmp <= fp->maxfd; tmp++)
-	    fp->filepos[tmp] = -1;
-
-	  /* Now find actual file positions.  */
-	  rewinddir (d);
-	  while ((de = readdir (d)) != NULL)
-	    if (isdigit (de->d_name[0]))
-	      {
-		tmp = strtol (&de->d_name[0], NULL, 10);
-		fp->filepos[tmp] = call_lseek (tmp, 0, SEEK_CUR);
-	      }
-	  closedir (d);
+	  /* Count open file descriptors (actually find highest
+	     numbered).  */
+	  tmp = strtol (&de->d_name[0], NULL, 10);
+	  if (fp->maxfd < tmp)
+	    fp->maxfd = tmp;
 	}
+      /* Allocate array of file positions.  */
+      fp->filepos = XRESIZEVEC (off_t, fp->filepos, fp->maxfd + 1);
+
+      /* Initialize to -1 (invalid).  */
+      for (tmp = 0; tmp <= fp->maxfd; tmp++)
+	fp->filepos[tmp] = -1;
+
+      /* Now find actual file positions.  */
+      rewinddir (d);
+      while ((de = readdir (d)) != NULL)
+	if (isdigit (de->d_name[0]))
+	  {
+	    tmp = strtol (&de->d_name[0], NULL, 10);
+	    fp->filepos[tmp] = call_lseek (tmp, 0, SEEK_CUR);
+	  }
+      closedir (d);
     }
 }
 
@@ -421,7 +412,7 @@ public:
 	gdb_assert (m_oldfp != nullptr);
 	newfp = find_fork_ptid (pptid);
 	gdb_assert (newfp != nullptr);
-	fork_save_infrun_state (m_oldfp, 1);
+	fork_save_infrun_state (m_oldfp);
 	remove_breakpoints ();
 	fork_load_infrun_state (newfp);
 	insert_breakpoints ();
@@ -718,7 +709,7 @@ checkpoint_command (const char *args, int from_tty)
       fork_list.emplace_front (inferior_ptid.pid ());
     }
 
-  fork_save_infrun_state (fp, 1);
+  fork_save_infrun_state (fp);
   fp->parent_ptid = last_target_ptid;
 }
 
@@ -733,7 +724,7 @@ linux_fork_context (struct fork_info *newfp, int from_tty)
   oldfp = find_fork_ptid (inferior_ptid);
   gdb_assert (oldfp != NULL);
 
-  fork_save_infrun_state (oldfp, 1);
+  fork_save_infrun_state (oldfp);
   remove_breakpoints ();
   fork_load_infrun_state (newfp);
   insert_breakpoints ();
