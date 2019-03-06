@@ -627,31 +627,20 @@ linux_fork_checkpointing_p (int pid)
   return (checkpointing_pid == pid);
 }
 
-/* Callback for iterate over threads.  Used to check whether
-   the current inferior is multi-threaded.  Returns true as soon
-   as it sees the second thread of the current inferior.  */
-
-static int
-inf_has_multiple_thread_cb (struct thread_info *tp, void *data)
-{
-  int *count_p = (int *) data;
-  
-  if (current_inferior ()->pid == tp->ptid.pid ())
-    (*count_p)++;
-  
-  /* Stop the iteration if multiple threads have been detected.  */
-  return *count_p > 1;
-}
-
 /* Return true if the current inferior is multi-threaded.  */
 
-static int
-inf_has_multiple_threads (void)
+static bool
+inf_has_multiple_threads ()
 {
   int count = 0;
 
-  iterate_over_threads (inf_has_multiple_thread_cb, &count);
-  return (count > 1);
+  /* Return true as soon as we see the second thread of the current
+     inferior.  */
+  for (thread_info *tp ATTRIBUTE_UNUSED : current_inferior ()->threads ())
+    if (++count > 1)
+      return true;
+
+  return false;
 }
 
 static void

@@ -1,5 +1,11 @@
 2019-03-06  Pedro Alves  <palves@redhat.com>
 
+	* linux-fork.c (inf_has_multiple_thread_cb): Delete.
+	(inf_has_multiple_threads): Return 'bool' and rewrite using
+	inferior_info::threads().
+
+2019-03-06  Pedro Alves  <palves@redhat.com>
+
 	* linux-fork.c: Include <list>.
 	(fork_list): Now a std::list instance.
 	(fork_info): Add ctor, dtor, and in-class initialize all fields.
