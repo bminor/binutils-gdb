@@ -1,5 +1,22 @@
 2019-03-06  Pedro Alves  <palves@redhat.com>
 
+	* linux-fork.c: Include <list>.
+	(fork_list): Now a std::list instance.
+	(fork_info): Add ctor, dtor, and in-class initialize all fields.
+	(forks_exist_p, find_last_fork): Adjust.
+	(new_fork): Delete.
+	(one_fork_p): New.
+	(add_fork): Adjust.
+	(free_fork): Delete, folded into fork_info::~fork_info().
+	(delete_fork, find_fork_ptid, find_fork_id, find_fork_pid):
+	Adjust.
+	(init_fork_list): Delete.
+	(linux_fork_killall, linux_fork_mourn_inferior)
+	(linux_fork_detach, info_checkpoints_command): Adjust.
+	(_initialize_linux_fork): No longer call init_fork_list.
+
+2019-03-06  Pedro Alves  <palves@redhat.com>
+
 	* linux-fork.c (new_fork): New, split out of ...
 	(add_fork): ... this.  Return void.  Move "first fork" special
 	case from here, to ...

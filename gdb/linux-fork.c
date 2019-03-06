@@ -35,30 +35,66 @@
 #include <dirent.h>
 #include <ctype.h>
 
-struct fork_info *fork_list;
-static int highest_fork_num;
+#include <list>
 
 /* Fork list data structure:  */
 struct fork_info
 {
-  struct fork_info *next;
-  ptid_t ptid;
-  ptid_t parent_ptid;
-  int num;			/* Convenient handle (GDB fork id).  */
-  readonly_detached_regcache *savedregs;	/* Convenient for info fork, saves
-				   having to actually switch contexts.  */
-  CORE_ADDR pc;
-  int clobber_regs;		/* True if we should restore saved regs.  */
-  off_t *filepos;		/* Set of open file descriptors' offsets.  */
-  int maxfd;
+  explicit fork_info (pid_t pid)
+    : ptid (pid, pid, 0)
+  {
+  }
+
+  ~fork_info ()
+  {
+    /* Notes on step-resume breakpoints: since this is a concern for
+       threads, let's convince ourselves that it's not a concern for
+       forks.  There are two ways for a fork_info to be created.
+       First, by the checkpoint command, in which case we're at a gdb
+       prompt and there can't be any step-resume breakpoint.  Second,
+       by a fork in the user program, in which case we *may* have
+       stepped into the fork call, but regardless of whether we follow
+       the parent or the child, we will return to the same place and
+       the step-resume breakpoint, if any, will take care of itself as
+       usual.  And unlike threads, we do not save a private copy of
+       the step-resume breakpoint -- so we're OK.  */
+
+    if (savedregs)
+      delete savedregs;
+    if (filepos)
+      xfree (filepos);
+  }
+
+  ptid_t ptid = null_ptid;
+  ptid_t parent_ptid = null_ptid;
+
+  /* Convenient handle (GDB fork id).  */
+  int num = 0;
+
+  /* Convenient for info fork, saves having to actually switch
+     contexts.  */
+  readonly_detached_regcache *savedregs = nullptr;
+
+  CORE_ADDR pc = 0;
+
+  /* True if we should restore saved regs.  */
+  int clobber_regs = 0;
+
+  /* Set of open file descriptors' offsets.  */
+  off_t *filepos = nullptr;
+
+  int maxfd = 0;
 };
+
+static std::list<fork_info> fork_list;
+static int highest_fork_num;
 
 /* Fork list methods:  */
 
 int
 forks_exist_p (void)
 {
-  return (fork_list != NULL);
+  return !fork_list.empty ();
 }
 
 /* Return the last fork in the list.  */
@@ -66,26 +102,19 @@ forks_exist_p (void)
 static struct fork_info *
 find_last_fork (void)
 {
-  struct fork_info *last;
-
-  if (fork_list == NULL)
+  if (fork_list.empty ())
     return NULL;
 
-  for (last = fork_list; last->next != NULL; last = last->next)
-    ;
-  return last;
+  return &fork_list.back ();
 }
 
-/* Allocate a new fork.  */
+/* Return true iff there's one fork in the list.  */
 
-static struct fork_info *
-new_fork (pid_t pid)
+static bool
+one_fork_p ()
 {
-  struct fork_info *fp;
-
-  fp = XCNEW (struct fork_info);
-  fp->ptid = ptid_t (pid, pid, 0);
-  return fp;
+  return (!fork_list.empty ()
+	  && &fork_list.front () == &fork_list.back ());
 }
 
 /* Add a new fork to the internal fork list.  */
@@ -93,93 +122,46 @@ new_fork (pid_t pid)
 void
 add_fork (pid_t pid)
 {
-  struct fork_info *fp = new_fork (pid);
+  fork_list.emplace_back (pid);
 
-  if (fork_list == NULL)
-    {
-      fork_list = fp;
-      highest_fork_num = 0;
-    }
-  else
-    {
-      struct fork_info *last = find_last_fork ();
+  if (one_fork_p ())
+    highest_fork_num = 0;
 
-      last->next = fp;
-    }
-
+  fork_info *fp = &fork_list.back ();
   fp->num = ++highest_fork_num;
-}
-
-static void
-free_fork (struct fork_info *fp)
-{
-  /* Notes on step-resume breakpoints: since this is a concern for
-     threads, let's convince ourselves that it's not a concern for
-     forks.  There are two ways for a fork_info to be created.  First,
-     by the checkpoint command, in which case we're at a gdb prompt
-     and there can't be any step-resume breakpoint.  Second, by a fork
-     in the user program, in which case we *may* have stepped into the
-     fork call, but regardless of whether we follow the parent or the
-     child, we will return to the same place and the step-resume
-     breakpoint, if any, will take care of itself as usual.  And
-     unlike threads, we do not save a private copy of the step-resume
-     breakpoint -- so we're OK.  */
-
-  if (fp)
-    {
-      if (fp->savedregs)
-	delete fp->savedregs;
-      if (fp->filepos)
-	xfree (fp->filepos);
-      xfree (fp);
-    }
 }
 
 static void
 delete_fork (ptid_t ptid)
 {
-  struct fork_info *fp, *fpprev;
-
-  fpprev = NULL;
-
   linux_target->low_forget_process (ptid.pid ());
 
-  for (fp = fork_list; fp; fpprev = fp, fp = fp->next)
-    if (fp->ptid == ptid)
-      break;
+  for (auto it = fork_list.begin (); it != fork_list.end (); ++it)
+    if (it->ptid == ptid)
+      {
+	fork_list.erase (it);
 
-  if (!fp)
-    return;
-
-  if (fpprev)
-    fpprev->next = fp->next;
-  else
-    fork_list = fp->next;
-
-  free_fork (fp);
-
-  /* Special case: if there is now only one process in the list,
-     and if it is (hopefully!) the current inferior_ptid, then
-     remove it, leaving the list empty -- we're now down to the
-     default case of debugging a single process.  */
-  if (fork_list != NULL && fork_list->next == NULL &&
-      fork_list->ptid == inferior_ptid)
-    {
-      /* Last fork -- delete from list and handle as solo process
-	 (should be a safe recursion).  */
-      delete_fork (inferior_ptid);
-    }
+	/* Special case: if there is now only one process in the list,
+	   and if it is (hopefully!) the current inferior_ptid, then
+	   remove it, leaving the list empty -- we're now down to the
+	   default case of debugging a single process.  */
+	if (one_fork_p () && fork_list.front ().ptid == inferior_ptid)
+	  {
+	    /* Last fork -- delete from list and handle as solo
+	       process (should be a safe recursion).  */
+	    delete_fork (inferior_ptid);
+	  }
+	return;
+      }
 }
 
 /* Find a fork_info by matching PTID.  */
 static struct fork_info *
 find_fork_ptid (ptid_t ptid)
 {
-  struct fork_info *fp;
-
-  for (fp = fork_list; fp; fp = fp->next)
-    if (fp->ptid == ptid)
-      return fp;
+  for (fork_info &fi : fork_list)
+    if (fi.ptid == ptid)
+      return &fi;
 
   return NULL;
 }
@@ -188,11 +170,9 @@ find_fork_ptid (ptid_t ptid)
 static struct fork_info *
 find_fork_id (int num)
 {
-  struct fork_info *fp;
-
-  for (fp = fork_list; fp; fp = fp->next)
-    if (fp->num == num)
-      return fp;
+  for (fork_info &fi : fork_list)
+    if (fi.num == num)
+      return &fi;
 
   return NULL;
 }
@@ -201,11 +181,9 @@ find_fork_id (int num)
 extern struct fork_info *
 find_fork_pid (pid_t pid)
 {
-  struct fork_info *fp;
-
-  for (fp = fork_list; fp; fp = fp->next)
-    if (pid == fp->ptid.pid ())
-      return fp;
+  for (fork_info &fi : fork_list)
+    if (pid == fi.ptid.pid ())
+      return &fi;
 
   return NULL;
 }
@@ -218,23 +196,6 @@ fork_id_to_ptid (int num)
     return fork->ptid;
   else
     return ptid_t (-1);
-}
-
-static void
-init_fork_list (void)
-{
-  struct fork_info *fp, *fpnext;
-
-  if (!fork_list)
-    return;
-
-  for (fp = fork_list; fp; fp = fpnext)
-    {
-      fpnext = fp->next;
-      free_fork (fp);
-    }
-
-  fork_list = NULL;
 }
 
 /* Fork list <-> gdb interface.  */
@@ -350,13 +311,12 @@ linux_fork_killall (void)
      status for it) -- however any process may be a child
      or a parent, so may get a SIGCHLD from a previously
      killed child.  Wait them all out.  */
-  struct fork_info *fp;
-  pid_t pid, ret;
-  int status;
 
-  for (fp = fork_list; fp; fp = fp->next)
+  for (fork_info &fi : fork_list)
     {
-      pid = fp->ptid.pid ();
+      pid_t pid = fi.ptid.pid ();
+      int status;
+      pid_t ret;
       do {
 	/* Use SIGKILL instead of PTRACE_KILL because the former works even
 	   if the thread is running, while the later doesn't.  */
@@ -367,7 +327,9 @@ linux_fork_killall (void)
 	 died.  MVS comment cut-and-pasted from linux-nat.  */
       } while (ret == pid && WIFSTOPPED (status));
     }
-  init_fork_list ();	/* Clear list, prepare to start fresh.  */
+
+  /* Clear list, prepare to start fresh.  */
+  fork_list.clear ();
 }
 
 /* The current inferior_ptid has exited, but there are other viable
@@ -394,7 +356,7 @@ linux_fork_mourn_inferior (void)
   /* There should still be a fork - if there's only one left,
      delete_fork won't remove it, because we haven't updated
      inferior_ptid yet.  */
-  gdb_assert (fork_list);
+  gdb_assert (!fork_list.empty ());
 
   last = find_last_fork ();
   fork_load_infrun_state (last);
@@ -402,7 +364,7 @@ linux_fork_mourn_inferior (void)
 		   target_pid_to_str (inferior_ptid));
 
   /* If there's only one fork, switch back to non-fork mode.  */
-  if (fork_list->next == NULL)
+  if (one_fork_p ())
     delete_fork (inferior_ptid);
 }
 
@@ -425,16 +387,16 @@ linux_fork_detach (int from_tty)
   /* There should still be a fork - if there's only one left,
      delete_fork won't remove it, because we haven't updated
      inferior_ptid yet.  */
-  gdb_assert (fork_list);
+  gdb_assert (!fork_list.empty ());
 
-  fork_load_infrun_state (fork_list);
+  fork_load_infrun_state (&fork_list.front ());
 
   if (from_tty)
     printf_filtered (_("[Switching to %s]\n"),
 		     target_pid_to_str (inferior_ptid));
 
   /* If there's only one fork, switch back to non-fork mode.  */
-  if (fork_list->next == NULL)
+  if (one_fork_p ())
     delete_fork (inferior_ptid);
 }
 
@@ -606,34 +568,31 @@ static void
 info_checkpoints_command (const char *arg, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
-  struct symtab_and_line sal;
-  struct fork_info *fp;
-  ULONGEST pc;
   int requested = -1;
-  struct fork_info *printed = NULL;
+  const fork_info *printed = NULL;
 
   if (arg && *arg)
     requested = (int) parse_and_eval_long (arg);
 
-  for (fp = fork_list; fp; fp = fp->next)
+  for (const fork_info &fi : fork_list)
     {
-      if (requested > 0 && fp->num != requested)
+      if (requested > 0 && fi.num != requested)
 	continue;
 
-      printed = fp;
-      if (fp->ptid == inferior_ptid)
+      printed = &fi;
+      if (fi.ptid == inferior_ptid)
 	printf_filtered ("* ");
       else
 	printf_filtered ("  ");
 
-      pc = fp->pc;
-      printf_filtered ("%d %s", fp->num, target_pid_to_str (fp->ptid));
-      if (fp->num == 0)
+      ULONGEST pc = fi.pc;
+      printf_filtered ("%d %s", fi.num, target_pid_to_str (fi.ptid));
+      if (fi.num == 0)
 	printf_filtered (_(" (main process)"));
       printf_filtered (_(" at "));
       fputs_filtered (paddress (gdbarch, pc), gdb_stdout);
 
-      sal = find_pc_line (pc, 0);
+      symtab_and_line sal = find_pc_line (pc, 0);
       if (sal.symtab)
 	printf_filtered (_(", file %s"),
 			 symtab_to_filename_for_display (sal.symtab));
@@ -762,14 +721,12 @@ checkpoint_command (const char *args, int from_tty)
   if (!fp)
     error (_("Failed to find new fork"));
 
-  if (fork_list->next == NULL)
+  if (one_fork_p ())
     {
       /* Special case -- if this is the first fork in the list (the
 	 list was hitherto empty), then add inferior_ptid first, as a
 	 special zeroeth fork id.  */
-      fork_info *first = new_fork (inferior_ptid.pid ());
-      first->next = fork_list;
-      fork_list = first;
+      fork_list.emplace_front (inferior_ptid.pid ());
     }
 
   fork_save_infrun_state (fp, 1);
@@ -816,8 +773,6 @@ restart_command (const char *args, int from_tty)
 void
 _initialize_linux_fork (void)
 {
-  init_fork_list ();
-
   /* Checkpoint command: create a fork of the inferior process
      and set it aside for later debugging.  */
 
