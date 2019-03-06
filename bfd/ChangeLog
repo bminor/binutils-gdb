@@ -1,3 +1,10 @@
+2019-03-06  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf2.c (_bfd_dwarf2_find_symbol_bias): Check for a NULL symbol
+	table pointer.
+	* coffgen.c (coff_find_nearest_line_with_names): Do not call
+	_bfd_dwarf2_find_symbol_bias if there is no symbol table available.
+
 2019-03-01  Andreas Krebbel  <krebbel@linux.ibm.com>
 
 	This reverts commit 5a12586d44fa8d5dfc74cbca4f2f36a273a16335.

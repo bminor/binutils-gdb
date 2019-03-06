@@ -2294,7 +2294,7 @@ coff_find_nearest_line_with_names (bfd *abfd,
      information.  So try again, using a bias against the address sought.  */
   if (coff_data (abfd)->dwarf2_find_line_info != NULL)
     {
-      bfd_signed_vma bias;
+      bfd_signed_vma bias = 0;
 
       /* Create a cache of the result for the next call.  */
       if (sec_data == NULL && section->owner == abfd)
@@ -2306,10 +2306,11 @@ coff_find_nearest_line_with_names (bfd *abfd,
 
       if (sec_data != NULL && sec_data->saved_bias)
 	bias = sec_data->saved_bias;
-      else
+      else if (symbols)
 	{
 	  bias = _bfd_dwarf2_find_symbol_bias (symbols,
 					       & coff_data (abfd)->dwarf2_find_line_info);
+
 	  if (sec_data)
 	    {
 	      sec_data->saved_bias = TRUE;

@@ -4472,7 +4472,7 @@ _bfd_dwarf2_find_symbol_bias (asymbol ** symbols, void ** pinfo)
 
   stash = (struct dwarf2_debug *) *pinfo;
 
-  if (stash == NULL)
+  if (stash == NULL || symbols == NULL)
     return 0;
 
   for (unit = stash->all_comp_units; unit; unit = unit->next_unit)
