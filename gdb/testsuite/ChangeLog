@@ -1,3 +1,8 @@
+2019-03-06  Alan Hayward  <alan.hayward@arm.com>
+
+	* lib/gdb.exp (builtin_cd): rename of cd.
+	(cd): Override builtin.
+
 2019-03-06  Richard Bunt  <richard.bunt@arm.com>
 
 	* gdb.fortran/function-calls.exp: New file.
@@ -12,8 +17,8 @@
 
 2019-02-28  Alan Hayward  <alan.hayward@arm.com>
 
-        * lib/gdbserver-support.exp (gdbserver_start): Check for listen
-        failure.
+	* lib/gdbserver-support.exp (gdbserver_start): Check for listen
+	failure.
 
 2019-02-28  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 

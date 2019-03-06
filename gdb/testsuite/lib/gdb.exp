@@ -6272,5 +6272,41 @@ proc gdb_define_cmd {command command_list} {
     }
 }
 
+# Override the 'cd' builtin with a version that ensures that the
+# log file keeps pointing at the same file.  We need this because
+# unfortunately the path to the log file is recorded using an
+# relative path name, and, we sometimes need to close/reopen the log
+# after changing the current directory.  See get_compiler_info.
+
+rename cd builtin_cd
+
+proc cd { dir } {
+
+    # Get the existing log file flags.
+    set log_file_info [log_file -info]
+
+    # Split the flags into args and file name.
+    set log_file_flags ""
+    set log_file_file ""
+    foreach arg [ split "$log_file_info" " "] {
+	if [string match "-*" $arg] {
+	    lappend log_file_flags $arg
+	} else {
+	    lappend log_file_file $arg
+	}
+    }
+
+    # If there was an existing file, ensure it is an absolute path, and then
+    # reset logging.
+    if { $log_file_file != "" } {
+	set log_file_file [file normalize $log_file_file]
+	log_file
+	log_file $log_file_flags "$log_file_file"
+    }
+
+    # Call the builtin version of cd.
+    builtin_cd $dir
+}
+
 # Always load compatibility stuff.
 load_lib future.exp
