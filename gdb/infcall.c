@@ -33,6 +33,7 @@
 #include "command.h"
 #include "dummy-frame.h"
 #include "ada-lang.h"
+#include "f-lang.h"
 #include "gdbthread.h"
 #include "event-top.h"
 #include "observable.h"
@@ -130,7 +131,7 @@ show_unwind_on_terminating_exception_p (struct ui_file *file, int from_tty,
 }
 
 /* Perform the standard coercions that are specified
-   for arguments to be passed to C or Ada functions.
+   for arguments to be passed to C, Ada or Fortran functions.
 
    If PARAM_TYPE is non-NULL, it is the expected parameter type.
    IS_PROTOTYPED is non-zero if the function declaration is prototyped.
@@ -146,9 +147,11 @@ value_arg_coerce (struct gdbarch *gdbarch, struct value *arg,
   struct type *type
     = param_type ? check_typedef (param_type) : arg_type;
 
-  /* Perform any Ada-specific coercion first.  */
+  /* Perform any Ada- and Fortran-specific coercion first.  */
   if (current_language->la_language == language_ada)
     arg = ada_convert_actual (arg, type);
+  else if (current_language->la_language == language_fortran)
+    type = fortran_preserve_arg_pointer (arg, type);
 
   /* Force the value to the target if we will need its address.  At
      this point, we could allocate arguments on the stack instead of

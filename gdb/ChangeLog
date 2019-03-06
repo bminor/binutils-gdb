@@ -1,3 +1,20 @@
+2019-03-06  Richard Bunt  <richard.bunt@arm.com>
+	Dirk Schubert  <dirk.schubert@arm.com>
+	Chris January  <chris.january@arm.com>
+
+	* eval.c (evaluate_subexp_standard): Call Fortran argument
+	wrapping logic.
+	* f-lang.c (struct value): A value which can be passed into a
+	Fortran function call.
+	(fortran_argument_convert): Wrap Fortran arguments in a pointer
+	where appropriate.
+	(struct type): Value ready for a Fortran function call.
+	(fortran_preserve_arg_pointer): Undo check_typedef, the pointer
+	is needed.
+	* f-lang.h (fortran_argument_convert): Declaration.
+	(fortran_preserve_arg_pointer): Declaration.
+	* infcall.c (value_arg_coerce): Call Fortran argument logic.
+
 2019-03-05  Tom Tromey  <tromey@adacore.com>
 
 	* python/py-prettyprint.c (print_string_repr): Remove #if.

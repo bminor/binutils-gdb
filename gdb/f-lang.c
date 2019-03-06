@@ -27,6 +27,7 @@
 #include "parser-defs.h"
 #include "language.h"
 #include "varobj.h"
+#include "gdbcore.h"
 #include "f-lang.h"
 #include "valprint.h"
 #include "value.h"
@@ -370,4 +371,41 @@ void
 _initialize_f_language (void)
 {
   f_type_data = gdbarch_data_register_post_init (build_fortran_types);
+}
+
+/* See f-lang.h.  */
+
+struct value *
+fortran_argument_convert (struct value *value, bool is_artificial)
+{
+  if (!is_artificial)
+    {
+      /* If the value is not in the inferior e.g. registers values,
+	 convenience variables and user input.  */
+      if (VALUE_LVAL (value) != lval_memory)
+	{
+	  struct type *type = value_type (value);
+	  const int length = TYPE_LENGTH (type);
+	  const CORE_ADDR addr
+	    = value_as_long (value_allocate_space_in_inferior (length));
+	  write_memory (addr, value_contents (value), length);
+	  struct value *val
+	    = value_from_contents_and_address (type, value_contents (value),
+					       addr);
+	  return value_addr (val);
+	}
+      else
+	return value_addr (value); /* Program variables, e.g. arrays.  */
+    }
+    return value;
+}
+
+/* See f-lang.h.  */
+
+struct type *
+fortran_preserve_arg_pointer (struct value *arg, struct type *type)
+{
+  if (TYPE_CODE (value_type (arg)) == TYPE_CODE_PTR)
+    return value_type (arg);
+  return type;
 }

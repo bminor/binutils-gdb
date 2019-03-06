@@ -82,4 +82,37 @@ struct builtin_f_type
 /* Return the Fortran type table for the specified architecture.  */
 extern const struct builtin_f_type *builtin_f_type (struct gdbarch *gdbarch);
 
+/* Ensures that function argument VALUE is in the appropriate form to
+   pass to a Fortran function.  Returns a possibly new value that should
+   be used instead of VALUE.
+
+   When IS_ARTIFICIAL is true this indicates an artificial argument,
+   e.g. hidden string lengths which the GNU Fortran argument passing
+   convention specifies as being passed by value.
+
+   When IS_ARTIFICIAL is false, the argument is passed by pointer.  If the
+   value is already in target memory then return a value that is a pointer
+   to VALUE.  If VALUE is not in memory (e.g. an integer literal), allocate
+   space in the target, copy VALUE in, and return a pointer to the in
+   memory copy.  */
+
+extern struct value *fortran_argument_convert (struct value *value,
+					       bool is_artificial);
+
+/* Ensures that function argument TYPE is appropriate to inform the debugger
+   that ARG should be passed as a pointer.  Returns the potentially updated
+   argument type.
+
+   If ARG is of type pointer then the type of ARG is returned, otherwise
+   TYPE is returned untouched.
+
+   This function exists to augment the types of Fortran function call
+   parameters to be pointers to the reported value, when the corresponding ARG
+   has also been wrapped in a pointer (by fortran_argument_convert).  This
+   informs the debugger that these arguments should be passed as a pointer
+   rather than as the pointed to type.  */
+
+extern struct type *fortran_preserve_arg_pointer (struct value *arg,
+						  struct type *type);
+
 #endif /* F_LANG_H */

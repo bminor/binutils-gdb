@@ -1987,7 +1987,20 @@ evaluate_subexp_standard (struct type *expect_type,
 	  argvec[0] = arg1;
 	  tem = 1;
 	  for (; tem <= nargs; tem++)
-	    argvec[tem] = evaluate_subexp_with_coercion (exp, pos, noside);
+	    {
+	      argvec[tem] = evaluate_subexp_with_coercion (exp, pos, noside);
+	      /* Arguments in Fortran are passed by address.  Coerce the
+		 arguments here rather than in value_arg_coerce as otherwise
+		 the call to malloc to place the non-lvalue parameters in
+		 target memory is hit by this Fortran specific logic.  This
+		 results in malloc being called with a pointer to an integer
+		 followed by an attempt to malloc the arguments to malloc in
+		 target memory.  Infinite recursion ensues.  */
+	      bool is_artificial =
+		TYPE_FIELD_ARTIFICIAL (value_type (arg1), tem - 1);
+	      argvec[tem] = fortran_argument_convert (argvec[tem],
+						      is_artificial);
+	    }
 	  argvec[tem] = 0;	/* signal end of arglist */
 	  if (noside == EVAL_SKIP)
 	    return eval_skip_value (exp);
