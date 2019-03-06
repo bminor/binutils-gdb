@@ -1,3 +1,8 @@
+2019-03-06  Tom Tromey  <tromey@adacore.com>
+
+	* remote-sim.c (gdbsim_target_open): Use result of
+	gdb_argv::release.
+
 2019-03-06  Richard Bunt  <richard.bunt@arm.com>
 	Dirk Schubert  <dirk.schubert@arm.com>
 	Chris January  <chris.january@arm.com>

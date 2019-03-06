@@ -751,18 +751,17 @@ gdbsim_target_open (const char *args, int from_tty)
     }
 
   gdb_argv argv (arg_buf);
-  sim_argv = argv.get ();
+  sim_argv = argv.release ();
 
   init_callbacks ();
   gdbsim_desc = sim_open (SIM_OPEN_DEBUG, &gdb_callback, exec_bfd, sim_argv);
 
   if (gdbsim_desc == 0)
     {
+      freeargv (sim_argv);
       sim_argv = NULL;
       error (_("unable to create simulator instance"));
     }
-
-  argv.release ();
 
   /* Reset the pid numberings for this batch of sim instances.  */
   next_pid = INITIAL_PID;
