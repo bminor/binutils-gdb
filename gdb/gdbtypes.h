@@ -350,6 +350,10 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 #define TYPE_IS_REFERENCE(t) \
   (TYPE_CODE (t) == TYPE_CODE_REF || TYPE_CODE (t) == TYPE_CODE_RVALUE_REF)
 
+/* * True if this type is allocatable.  */
+#define TYPE_IS_ALLOCATABLE(t) \
+  (get_dyn_prop (DYN_PROP_ALLOCATED, t) != NULL)
+
 /* * Instruction-space delimited type.  This is for Harvard architectures
    which have separate instruction and data address spaces (and perhaps
    others).

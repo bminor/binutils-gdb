@@ -440,4 +440,7 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
 	error (_("Invalid type code (%d) in symbol table."), TYPE_CODE (type));
       break;
     }
+
+  if (TYPE_IS_ALLOCATABLE (type))
+    fprintf_filtered (stream, ", allocatable");
 }

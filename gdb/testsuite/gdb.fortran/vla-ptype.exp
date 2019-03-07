@@ -43,24 +43,24 @@ gdb_test "ptype vla2(5, 45, 20)" \
 
 gdb_breakpoint [gdb_get_line_number "vla1-allocated"]
 gdb_continue_to_breakpoint "vla1-allocated"
-gdb_test "ptype vla1" "type = $real \\\(10,10,10\\\)" \
+gdb_test "ptype vla1" "type = $real, allocatable \\\(10,10,10\\\)" \
   "ptype vla1 allocated"
 
 gdb_breakpoint [gdb_get_line_number "vla2-allocated"]
 gdb_continue_to_breakpoint "vla2-allocated"
-gdb_test "ptype vla2" "type = $real \\\(7,42:50,13:35\\\)" \
+gdb_test "ptype vla2" "type = $real, allocatable \\\(7,42:50,13:35\\\)" \
   "ptype vla2 allocated"
 
 gdb_breakpoint [gdb_get_line_number "vla1-filled"]
 gdb_continue_to_breakpoint "vla1-filled"
-gdb_test "ptype vla1" "type = $real \\\(10,10,10\\\)" \
+gdb_test "ptype vla1" "type = $real, allocatable \\\(10,10,10\\\)" \
   "ptype vla1 filled"
 gdb_test "ptype vla1(3, 6, 9)" "type = $real" \
   "ptype vla1(3, 6, 9)"
 
 gdb_breakpoint [gdb_get_line_number "vla2-filled"]
 gdb_continue_to_breakpoint "vla2-filled"
-gdb_test "ptype vla2" "type = $real \\\(7,42:50,13:35\\\)" \
+gdb_test "ptype vla2" "type = $real, allocatable \\\(7,42:50,13:35\\\)" \
   "ptype vla2 filled"
 gdb_test "ptype vla2(5, 45, 20)" "type = $real" \
   "ptype vla2(5, 45, 20) filled"

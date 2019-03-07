@@ -77,10 +77,10 @@ mi_expect_stop "breakpoint-hit" "vla" "" ".*vla.f90" "$bp_lineno" \
 mi_gdb_test "510-data-evaluate-expression vla1" \
   "510\\^done,value=\"\\(.*\\)\"" "evaluate allocated vla"
 
-mi_create_varobj_checked vla1_allocated vla1 "$real \\\(5\\\)" \
+mi_create_varobj_checked vla1_allocated vla1 "$real, allocatable \\\(5\\\)" \
   "create local variable vla1_allocated"
 mi_gdb_test "511-var-info-type vla1_allocated" \
-  "511\\^done,type=\"$real \\\(5\\\)\"" \
+  "511\\^done,type=\"$real, allocatable \\\(5\\\)\"" \
   "info type variable vla1_allocated"
 mi_gdb_test "512-var-show-format vla1_allocated" \
   "512\\^done,format=\"natural\"" \

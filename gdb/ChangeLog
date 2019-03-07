@@ -1,4 +1,11 @@
 2019-04-30  Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Chris January  <chris.january@arm.com>
+
+	* f-typeprint.c (f_type_print_base): Print 'allocatable' type
+	qualifier.
+	* gdbtypes.h (TYPE_IS_ALLOCATABLE): Define.
+
+2019-04-30  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* f-typeprint.c (f_print_type): Update rules for printing
 	whitespace.
