@@ -25,8 +25,6 @@ set timeout 60
 # test default actions of gdb commands
 #
 
-#load_lib gdb.exp
-
 gdb_test "add-symbol-file" "add-symbol-file takes a file name and an address" "add-symbol-file"
 
 # test append
