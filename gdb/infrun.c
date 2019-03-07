@@ -8146,7 +8146,8 @@ normal_stop (void)
   if (target_has_execution)
     {
       if (last.kind != TARGET_WAITKIND_SIGNALLED
-	  && last.kind != TARGET_WAITKIND_EXITED)
+	  && last.kind != TARGET_WAITKIND_EXITED
+	  && last.kind != TARGET_WAITKIND_NO_RESUMED)
 	/* Delete the breakpoint we stopped at, if it wants to be deleted.
 	   Delete any breakpoint that is to be deleted at the next stop.  */
 	breakpoint_auto_delete (inferior_thread ()->control.stop_bpstat);
