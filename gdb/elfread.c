@@ -334,8 +334,8 @@ elf_symtab_read (minimal_symbol_reader &reader,
       if (sym->flags & BSF_FILE)
 	{
 	  filesymname
-	    = (const char *) bcache (sym->name, strlen (sym->name) + 1,
-				     objfile->per_bfd->filename_cache);
+	    = ((const char *) objfile->per_bfd->filename_cache.insert
+	       (sym->name, strlen (sym->name) + 1));
 	}
       else if (sym->flags & BSF_SECTION_SYM)
 	continue;

@@ -26,7 +26,6 @@
 #include "source.h"
 #include "addrmap.h"
 #include "gdbtypes.h"
-#include "bcache.h"
 #include "ui-out.h"
 #include "command.h"
 #include "readline/readline.h"
@@ -37,11 +36,6 @@
 #include "gdbcmd.h"
 #include <algorithm>
 #include <set>
-
-struct psymbol_bcache
-{
-  struct bcache *bcache;
-};
 
 static struct partial_symbol *match_partial_symbol (struct objfile *,
 						    struct partial_symtab *,
@@ -67,14 +61,16 @@ static struct compunit_symtab *psymtab_to_symtab (struct objfile *objfile,
 
 
 
+static unsigned long psymbol_hash (const void *addr, int length);
+static int psymbol_compare (const void *addr1, const void *addr2, int length);
+
 psymtab_storage::psymtab_storage ()
-  : psymbol_cache (psymbol_bcache_init ())
+  : psymbol_cache (psymbol_hash, psymbol_compare)
 {
 }
 
 psymtab_storage::~psymtab_storage ()
 {
-  psymbol_bcache_free (psymbol_cache);
 }
 
 /* See psymtab.h.  */
@@ -1589,52 +1585,6 @@ psymbol_compare (const void *addr1, const void *addr2, int length)
           && sym1->name == sym2->name);
 }
 
-/* Initialize a partial symbol bcache.  */
-
-struct psymbol_bcache *
-psymbol_bcache_init (void)
-{
-  struct psymbol_bcache *bcache = XCNEW (struct psymbol_bcache);
-
-  bcache->bcache = bcache_xmalloc (psymbol_hash, psymbol_compare);
-  return bcache;
-}
-
-/* Free a partial symbol bcache.  */
-
-void
-psymbol_bcache_free (struct psymbol_bcache *bcache)
-{
-  if (bcache == NULL)
-    return;
-
-  bcache_xfree (bcache->bcache);
-  xfree (bcache);
-}
-
-/* Return the internal bcache of the psymbol_bcache BCACHE.  */
-
-struct bcache *
-psymbol_bcache_get_bcache (struct psymbol_bcache *bcache)
-{
-  return bcache->bcache;
-}
-
-/* Find a copy of the SYM in BCACHE.  If BCACHE has never seen this
-   symbol before, add a copy to BCACHE.  In either case, return a pointer
-   to BCACHE's copy of the symbol.  If optional ADDED is not NULL, return
-   1 in case of new entry or 0 if returning an old entry.  */
-
-static struct partial_symbol *
-psymbol_bcache_full (struct partial_symbol *sym,
-                     struct psymbol_bcache *bcache,
-                     int *added)
-{
-  return ((struct partial_symbol *)
-	  bcache_full (sym, sizeof (struct partial_symbol), bcache->bcache,
-		       added));
-}
-
 /* Helper function, initialises partial symbol structure and stashes
    it into objfile's bcache.  Note that our caching mechanism will
    use all fields of struct partial_symbol to determine hash value of the
@@ -1664,9 +1614,9 @@ add_psymbol_to_bcache (const char *name, int namelength, int copy_name,
   symbol_set_names (&psymbol, name, namelength, copy_name, objfile->per_bfd);
 
   /* Stash the partial symbol away in the cache.  */
-  return psymbol_bcache_full (&psymbol,
-			      objfile->partial_symtabs->psymbol_cache,
-			      added);
+  return ((struct partial_symbol *)
+	  objfile->partial_symtabs->psymbol_cache.insert
+	  (&psymbol, sizeof (struct partial_symbol), added));
 }
 
 /* Helper function, adds partial symbol to the given partial symbol list.  */
@@ -1741,8 +1691,8 @@ allocate_psymtab (const char *filename, struct objfile *objfile)
     = objfile->partial_symtabs->allocate_psymtab ();
 
   psymtab->filename
-    = (const char *) bcache (filename, strlen (filename) + 1,
-			     objfile->per_bfd->filename_cache);
+    = ((const char *) objfile->per_bfd->filename_cache.insert
+       (filename, strlen (filename) + 1));
   psymtab->compunit_symtab = NULL;
 
   if (symtab_create_debug)

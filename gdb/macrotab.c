@@ -113,7 +113,7 @@ static const void *
 macro_bcache (struct macro_table *t, const void *addr, int len)
 {
   if (t->bcache)
-    return bcache (addr, len, t->bcache);
+    return t->bcache->insert (addr, len);
   else
     {
       void *copy = xmalloc (len);

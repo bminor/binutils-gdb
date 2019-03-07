@@ -23,12 +23,9 @@
 #include "gdb_obstack.h"
 #include "symfile.h"
 #include "common/next-iterator.h"
+#include "bcache.h"
 
 struct partial_symbol;
-
-/* A bcache for partial symbols.  */
-
-struct psymbol_bcache;
 
 /* An instance of this class manages the partial symbol tables and
    partial symbols for a given objfile.
@@ -119,7 +116,7 @@ public:
   /* A byte cache where we can stash arbitrary "chunks" of bytes that
      will not change.  */
 
-  struct psymbol_bcache *psymbol_cache;
+  struct bcache psymbol_cache;
 
   /* Vectors of all partial symbols read in from file.  The actual data
      is stored in the objfile_obstack.  */
@@ -139,10 +136,6 @@ private:
   gdb::optional<auto_obstack> m_obstack;
 };
 
-
-extern struct psymbol_bcache *psymbol_bcache_init (void);
-extern void psymbol_bcache_free (struct psymbol_bcache *);
-extern struct bcache *psymbol_bcache_get_bcache (struct psymbol_bcache *);
 
 extern const struct quick_symbol_functions psym_functions;
 

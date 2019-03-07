@@ -157,8 +157,6 @@ get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
       if (abfd != NULL)
 	storage->gdbarch = gdbarch_from_bfd (abfd);
 
-      storage->filename_cache = bcache_xmalloc (NULL, NULL);
-      storage->macro_cache = bcache_xmalloc (NULL, NULL);
       storage->language_of_main = language_unknown;
     }
 
@@ -170,8 +168,6 @@ get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
 static void
 free_objfile_per_bfd_storage (struct objfile_per_bfd_storage *storage)
 {
-  bcache_xfree (storage->filename_cache);
-  bcache_xfree (storage->macro_cache);
   if (storage->demangled_names_hash)
     htab_delete (storage->demangled_names_hash);
   storage->~objfile_per_bfd_storage ();

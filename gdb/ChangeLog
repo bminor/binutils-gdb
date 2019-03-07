@@ -1,3 +1,45 @@
+2019-03-07  Tom Tromey  <tom@tromey.com>
+
+	* symmisc.c (print_symbol_bcache_statistics): Update.
+	(print_objfile_statistics): Update.
+	* symfile.c (allocate_symtab): Update.
+	* stabsread.c: Don't include bcache.h.
+	* psymtab.h (struct psymbol_bcache): Don't declare.
+	(class psymtab_storage) <psymbol_cache>: Now a bcache.
+	(psymbol_bcache_init, psymbol_bcache_free)
+	(psymbol_bcache_get_bcache): Don't declare.
+	* psymtab.c (struct psymbol_bcache): Remove.
+	(psymtab_storage::psymtab_storage): Update.
+	(psymtab_storage::~psymtab_storage): Update.
+	(psymbol_bcache_init, psymbol_bcache_free)
+	(psymbol_bcache_get_bcache, psymbol_bcache_full): Remove.
+	(add_psymbol_to_bcache): Update.
+	(allocate_psymtab): Update.
+	* objfiles.h (struct objfile_per_bfd_storage) <filename_cache,
+	macro_cache>: No longer pointers.
+	* objfiles.c (get_objfile_bfd_data): Don't call bcache_xmalloc.
+	(free_objfile_per_bfd_storage): Don't call bcache_xfree.
+	* macrotab.c (macro_bcache): Update.
+	* macroexp.c: Don't include bcache.h.
+	* gdbtypes.c (check_types_worklist): Update.
+	(types_deeply_equal): Remove TRY/CATCH.  Update.
+	* elfread.c (elf_symtab_read): Update.
+	* dwarf2read.c: Don't include bcache.h.
+	* buildsym.c (buildsym_compunit::get_macro_table): Update.
+	* bcache.h (bcache, bcache_full, bcache_xffree, bcache_xmalloc)
+	(print_bcache_statistics, bcache_memory_used): Don't declare.
+	(struct bcache): Move from bcache.c.  Add constructor, destructor,
+	methods.  Rename all data members.
+	* bcache.c (struct bcache): Move to bcache.h.
+	(bcache::expand_hash_table): Rename from expand_hash_table.
+	(bcache): Remove.
+	(bcache::insert): Rename from bcache_full.
+	(bcache::compare): Rename from bcache_compare.
+	(bcache_xmalloc): Remove.
+	(bcache::~bcache): Rename from bcache_xfree.
+	(bcache::print_statistics): Rename from print_bcache_statistics.
+	(bcache::memory_used): Rename from bcache_memory_used.
+
 2019-03-07  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (normal_stop): Also check for

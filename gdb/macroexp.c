@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "gdb_obstack.h"
-#include "bcache.h"
 #include "macrotab.h"
 #include "macroexp.h"
 #include "c-lang.h"

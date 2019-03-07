@@ -46,7 +46,6 @@
 #include "macrotab.h"
 #include "language.h"
 #include "complaints.h"
-#include "bcache.h"
 #include "dwarf2expr.h"
 #include "dwarf2loc.h"
 #include "cp-support.h"

@@ -3732,7 +3732,7 @@ check_types_worklist (std::vector<type_equality_entry> *worklist,
 
       /* If the type pair has already been visited, we know it is
 	 ok.  */
-      bcache_full (&entry, sizeof (entry), cache, &added);
+      cache->insert (&entry, sizeof (entry), &added);
       if (!added)
 	continue;
 
@@ -3749,9 +3749,6 @@ check_types_worklist (std::vector<type_equality_entry> *worklist,
 bool
 types_deeply_equal (struct type *type1, struct type *type2)
 {
-  struct gdb_exception except = exception_none;
-  bool result = false;
-  struct bcache *cache;
   std::vector<type_equality_entry> worklist;
 
   gdb_assert (type1 != NULL && type2 != NULL);
@@ -3760,31 +3757,9 @@ types_deeply_equal (struct type *type1, struct type *type2)
   if (type1 == type2)
     return true;
 
-  cache = bcache_xmalloc (NULL, NULL);
-
+  struct bcache cache (nullptr, nullptr);
   worklist.emplace_back (type1, type2);
-
-  /* check_types_worklist calls several nested helper functions, some
-     of which can raise a GDB exception, so we just check and rethrow
-     here.  If there is a GDB exception, a comparison is not capable
-     (or trusted), so exit.  */
-  TRY
-    {
-      result = check_types_worklist (&worklist, cache);
-    }
-  CATCH (ex, RETURN_MASK_ALL)
-    {
-      except = ex;
-    }
-  END_CATCH
-
-  bcache_xfree (cache);
-
-  /* Rethrow if there was a problem.  */
-  if (except.reason < 0)
-    throw_exception (except);
-
-  return result;
+  return check_types_worklist (&worklist, &cache);
 }
 
 /* Allocated status of type TYPE.  Return zero if type TYPE is allocated.
