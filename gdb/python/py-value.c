@@ -1739,11 +1739,7 @@ convert_value_from_python (PyObject *obj)
 	  double d = PyFloat_AsDouble (obj);
 
 	  if (! PyErr_Occurred ())
-	    {
-	      value = allocate_value (builtin_type_pyfloat);
-	      target_float_from_host_double (value_contents_raw (value),
-					     value_type (value), d);
-	    }
+	    value = value_from_host_double (builtin_type_pyfloat, d);
 	}
       else if (gdbpy_is_string (obj))
 	{

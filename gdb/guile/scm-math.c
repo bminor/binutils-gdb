@@ -559,13 +559,7 @@ vlscm_convert_typed_number (const char *func_name, int obj_arg_pos, SCM obj,
 	}
     }
   else if (TYPE_CODE (type) == TYPE_CODE_FLT)
-    {
-      struct value *value = allocate_value (type);
-      target_float_from_host_double (value_contents_raw (value),
-				     value_type (value),
-				     scm_to_double (obj));
-      return value;
-    }
+    return value_from_host_double (type, scm_to_double (obj));
   else
     {
       *except_scmp = gdbscm_make_type_error (func_name, obj_arg_pos, obj,
@@ -645,13 +639,7 @@ vlscm_convert_number (const char *func_name, int obj_arg_pos, SCM obj,
 				   gdbscm_scm_to_ulongest (obj));
     }
   else if (scm_is_real (obj))
-    {
-      struct value *value = allocate_value (bt->builtin_double);
-      target_float_from_host_double (value_contents_raw (value),
-				     value_type (value),
-				     scm_to_double (obj));
-      return value;
-    }
+    return value_from_host_double (bt->builtin_double, scm_to_double (obj));
 
   *except_scmp = gdbscm_make_out_of_range_error (func_name, obj_arg_pos, obj,
 			_("value not a number representable on the target"));

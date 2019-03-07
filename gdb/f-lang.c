@@ -241,20 +241,6 @@ f_collect_symbol_completion_matches (completion_tracker &tracker,
 						      text, word, ":", code);
 }
 
-/* Create and return a value object of TYPE containing the value D.  The
-   TYPE must be of TYPE_CODE_FLT, and must be large enough to hold D once
-   it is converted to target format.  */
-
-static struct value *
-value_from_host_double (struct type *type, double d)
-{
-  struct value *value = allocate_value (type);
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
-  target_float_from_host_double (value_contents_raw (value),
-                                 value_type (value), d);
-  return value;
-}
-
 /* Special expression evaluation cases for Fortran.  */
 struct value *
 evaluate_subexp_f (struct type *expect_type, struct expression *exp,

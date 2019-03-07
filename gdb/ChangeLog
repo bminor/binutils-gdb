@@ -1,3 +1,14 @@
+2019-03-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* f-lang.c (value_from_host_double): Moved to...
+	* value.c (value_from_host_double): ...here.
+	* value.h (value_from_host_double): Declare.
+	* guile/scm-math.c (vlscm_convert_typed_number): Use
+	value_from_host_double.
+	(vlscm_convert_number): Likewise.
+	* guile/scm-value.c (gdbscm_value_to_real): Likewise.
+	* python/py-value.c (convert_value_from_python): Likewise.
+
 2019-03-06  Tom Tromey  <tom@tromey.com>
 
 	* gcore.c (write_gcore_file): Use SCOPE_EXIT.

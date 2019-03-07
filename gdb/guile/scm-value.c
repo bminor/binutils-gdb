@@ -903,8 +903,7 @@ gdbscm_value_to_real (SCM self)
       if (is_floating_value (value))
 	{
 	  d = target_float_to_host_double (value_contents (value), type);
-	  check = allocate_value (type);
-	  target_float_from_host_double (value_contents_raw (check), type, d);
+	  check = value_from_host_double (type, d);
 	}
       else if (TYPE_UNSIGNED (type))
 	{
