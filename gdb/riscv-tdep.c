@@ -2770,6 +2770,7 @@ riscv_arg_location (struct gdbarch *gdbarch,
     case TYPE_CODE_RANGE:
     case TYPE_CODE_ENUM:
     case TYPE_CODE_PTR:
+    case TYPE_CODE_FIXED_POINT:
       if (ainfo->length <= cinfo->xlen)
 	{
 	  ainfo->type = builtin_type (gdbarch)->builtin_long;
@@ -3144,8 +3145,30 @@ riscv_return_value (struct gdbarch  *gdbarch,
 	   buffers of sufficient size.  */
 	if (writebuf != nullptr)
 	  {
-	    struct value *arg_val = value_from_contents (arg_type, writebuf);
-	    abi_val = value_cast (info.type, arg_val);
+	    struct value *arg_val;
+
+	    if (is_fixed_point_type (arg_type))
+	      {
+		/* Convert the argument to the type used to pass
+		   the return value, but being careful to preserve
+		   the fact that the value needs to be returned
+		   unscaled.  */
+		gdb_mpz unscaled;
+
+		unscaled.read (gdb::make_array_view (writebuf,
+						     TYPE_LENGTH (arg_type)),
+			       type_byte_order (arg_type),
+			       arg_type->is_unsigned ());
+		abi_val = allocate_value (info.type);
+		unscaled.write (value_contents_raw (abi_val),
+				type_byte_order (info.type),
+				info.type->is_unsigned ());
+	      }
+	    else
+	      {
+		arg_val = value_from_contents (arg_type, writebuf);
+		abi_val = value_cast (info.type, arg_val);
+	      }
 	    writebuf = value_contents_raw (abi_val).data ();
 	  }
 	else
@@ -3249,7 +3272,25 @@ riscv_return_value (struct gdbarch  *gdbarch,
 	   comment at the head of this block for more details.  */
 	if (readbuf != nullptr)
 	  {
-	    struct value *arg_val = value_cast (arg_type, abi_val);
+	    struct value *arg_val;
+
+	    if (is_fixed_point_type (arg_type))
+	      {
+		/* Convert abi_val to the actual return type, but
+		   being careful to preserve the fact that abi_val
+		   is unscaled.  */
+		gdb_mpz unscaled;
+
+		unscaled.read (value_contents (abi_val),
+			       type_byte_order (info.type),
+			       info.type->is_unsigned ());
+		arg_val = allocate_value (arg_type);
+		unscaled.write (value_contents_raw (arg_val),
+				type_byte_order (arg_type),
+				arg_type->is_unsigned ());
+	      }
+	    else
+	      arg_val = value_cast (arg_type, abi_val);
 	    memcpy (old_readbuf, value_contents_raw (arg_val).data (),
 		    TYPE_LENGTH (arg_type));
 	  }
