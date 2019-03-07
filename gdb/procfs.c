@@ -909,7 +909,12 @@ proc_wait_for_stop (procinfo *pi)
 
   procfs_ctl_t cmd = PCWSTOP;
 
+  set_sigint_trap ();
+
   win = (write (pi->ctl_fd, (char *) &cmd, sizeof (cmd)) == sizeof (cmd));
+
+  clear_sigint_trap ();
+
   /* We been runnin' and we stopped -- need to update status.  */
   pi->status_valid = 0;
 

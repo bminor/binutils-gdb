@@ -1,3 +1,10 @@
+2019-03-07  Brian Vandenberg  <phantall@gmail.com>
+	    Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR gdb/8527
+	* procfs.c (proc_wait_for_stop): Wrap write of PCWSTOP in
+	set_sigint_trap, clear_sigint_trap.
+
 2019-03-02  Eli Zaretskii  <eliz@gnu.org>
 
 	* xml-syscall.c (xml_list_syscalls_by_group): Drop 'struct' from

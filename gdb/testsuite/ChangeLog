@@ -1,3 +1,9 @@
+2019-03-07  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR gdb/8527
+	* gdb.base/interrupt-daemon-attach.c,
+	gdb.base/interrupt-daemon-attach.exp: New test.
+
 2019-03-06  Alan Hayward  <alan.hayward@arm.com>
 
 	* lib/gdb.exp (builtin_cd): rename of cd.
