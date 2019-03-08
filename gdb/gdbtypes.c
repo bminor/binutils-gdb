@@ -3998,6 +3998,53 @@ rank_one_type_parm_enum (struct type *parm, struct type *arg, struct value *valu
     }
 }
 
+/* rank_one_type helper for when PARM's type code is TYPE_CODE_CHAR.  */
+
+static struct rank
+rank_one_type_parm_char (struct type *parm, struct type *arg, struct value *value)
+{
+  switch (TYPE_CODE (arg))
+    {
+    case TYPE_CODE_RANGE:
+    case TYPE_CODE_BOOL:
+    case TYPE_CODE_ENUM:
+      if (TYPE_DECLARED_CLASS (arg))
+	return INCOMPATIBLE_TYPE_BADNESS;
+      return INTEGER_CONVERSION_BADNESS;
+    case TYPE_CODE_FLT:
+      return INT_FLOAT_CONVERSION_BADNESS;
+    case TYPE_CODE_INT:
+      if (TYPE_LENGTH (arg) > TYPE_LENGTH (parm))
+	return INTEGER_CONVERSION_BADNESS;
+      else if (TYPE_LENGTH (arg) < TYPE_LENGTH (parm))
+	return INTEGER_PROMOTION_BADNESS;
+      /* fall through */
+    case TYPE_CODE_CHAR:
+      /* Deal with signed, unsigned, and plain chars for C++ and
+	 with int cases falling through from previous case.  */
+      if (TYPE_NOSIGN (parm))
+	{
+	  if (TYPE_NOSIGN (arg))
+	    return EXACT_MATCH_BADNESS;
+	  else
+	    return INTEGER_CONVERSION_BADNESS;
+	}
+      else if (TYPE_UNSIGNED (parm))
+	{
+	  if (TYPE_UNSIGNED (arg))
+	    return EXACT_MATCH_BADNESS;
+	  else
+	    return INTEGER_PROMOTION_BADNESS;
+	}
+      else if (!TYPE_NOSIGN (arg) && !TYPE_UNSIGNED (arg))
+	return EXACT_MATCH_BADNESS;
+      else
+	return INTEGER_CONVERSION_BADNESS;
+    default:
+      return INCOMPATIBLE_TYPE_BADNESS;
+    }
+}
+
 /* Compare one type (PARM) for compatibility with another (ARG).
  * PARM is intended to be the parameter type of a function; and
  * ARG is the supplied argument's type.  This function tests if
@@ -4098,47 +4145,7 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
     case TYPE_CODE_ENUM:
       return rank_one_type_parm_enum (parm, arg, value);
     case TYPE_CODE_CHAR:
-      switch (TYPE_CODE (arg))
-	{
-	case TYPE_CODE_RANGE:
-	case TYPE_CODE_BOOL:
-	case TYPE_CODE_ENUM:
-	  if (TYPE_DECLARED_CLASS (arg))
-	    return INCOMPATIBLE_TYPE_BADNESS;
-	  return INTEGER_CONVERSION_BADNESS;
-	case TYPE_CODE_FLT:
-	  return INT_FLOAT_CONVERSION_BADNESS;
-	case TYPE_CODE_INT:
-	  if (TYPE_LENGTH (arg) > TYPE_LENGTH (parm))
-	    return INTEGER_CONVERSION_BADNESS;
-	  else if (TYPE_LENGTH (arg) < TYPE_LENGTH (parm))
-	    return INTEGER_PROMOTION_BADNESS;
-	  /* fall through */
-	case TYPE_CODE_CHAR:
-	  /* Deal with signed, unsigned, and plain chars for C++ and
-	     with int cases falling through from previous case.  */
-	  if (TYPE_NOSIGN (parm))
-	    {
-	      if (TYPE_NOSIGN (arg))
-		return EXACT_MATCH_BADNESS;
-	      else
-		return INTEGER_CONVERSION_BADNESS;
-	    }
-	  else if (TYPE_UNSIGNED (parm))
-	    {
-	      if (TYPE_UNSIGNED (arg))
-		return EXACT_MATCH_BADNESS;
-	      else
-		return INTEGER_PROMOTION_BADNESS;
-	    }
-	  else if (!TYPE_NOSIGN (arg) && !TYPE_UNSIGNED (arg))
-	    return EXACT_MATCH_BADNESS;
-	  else
-	    return INTEGER_CONVERSION_BADNESS;
-	default:
-	  return INCOMPATIBLE_TYPE_BADNESS;
-	}
-      break;
+      return rank_one_type_parm_char (parm, arg, value);
     case TYPE_CODE_RANGE:
       switch (TYPE_CODE (arg))
 	{
