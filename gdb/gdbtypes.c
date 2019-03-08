@@ -3887,6 +3887,95 @@ rank_one_type_parm_func (struct type *parm, struct type *arg, struct value *valu
     }
 }
 
+/* rank_one_type helper for when PARM's type code is TYPE_CODE_INT.  */
+
+static struct rank
+rank_one_type_parm_int (struct type *parm, struct type *arg, struct value *value)
+{
+  switch (TYPE_CODE (arg))
+    {
+    case TYPE_CODE_INT:
+      if (TYPE_LENGTH (arg) == TYPE_LENGTH (parm))
+	{
+	  /* Deal with signed, unsigned, and plain chars and
+	     signed and unsigned ints.  */
+	  if (TYPE_NOSIGN (parm))
+	    {
+	      /* This case only for character types.  */
+	      if (TYPE_NOSIGN (arg))
+		return EXACT_MATCH_BADNESS;	/* plain char -> plain char */
+	      else		/* signed/unsigned char -> plain char */
+		return INTEGER_CONVERSION_BADNESS;
+	    }
+	  else if (TYPE_UNSIGNED (parm))
+	    {
+	      if (TYPE_UNSIGNED (arg))
+		{
+		  /* unsigned int -> unsigned int, or
+		     unsigned long -> unsigned long */
+		  if (integer_types_same_name_p (TYPE_NAME (parm),
+						 TYPE_NAME (arg)))
+		    return EXACT_MATCH_BADNESS;
+		  else if (integer_types_same_name_p (TYPE_NAME (arg),
+						      "int")
+			   && integer_types_same_name_p (TYPE_NAME (parm),
+							 "long"))
+		    /* unsigned int -> unsigned long */
+		    return INTEGER_PROMOTION_BADNESS;
+		  else
+		    /* unsigned long -> unsigned int */
+		    return INTEGER_CONVERSION_BADNESS;
+		}
+	      else
+		{
+		  if (integer_types_same_name_p (TYPE_NAME (arg),
+						 "long")
+		      && integer_types_same_name_p (TYPE_NAME (parm),
+						    "int"))
+		    /* signed long -> unsigned int */
+		    return INTEGER_CONVERSION_BADNESS;
+		  else
+		    /* signed int/long -> unsigned int/long */
+		    return INTEGER_CONVERSION_BADNESS;
+		}
+	    }
+	  else if (!TYPE_NOSIGN (arg) && !TYPE_UNSIGNED (arg))
+	    {
+	      if (integer_types_same_name_p (TYPE_NAME (parm),
+					     TYPE_NAME (arg)))
+		return EXACT_MATCH_BADNESS;
+	      else if (integer_types_same_name_p (TYPE_NAME (arg),
+						  "int")
+		       && integer_types_same_name_p (TYPE_NAME (parm),
+						     "long"))
+		return INTEGER_PROMOTION_BADNESS;
+	      else
+		return INTEGER_CONVERSION_BADNESS;
+	    }
+	  else
+	    return INTEGER_CONVERSION_BADNESS;
+	}
+      else if (TYPE_LENGTH (arg) < TYPE_LENGTH (parm))
+	return INTEGER_PROMOTION_BADNESS;
+      else
+	return INTEGER_CONVERSION_BADNESS;
+    case TYPE_CODE_ENUM:
+    case TYPE_CODE_FLAGS:
+    case TYPE_CODE_CHAR:
+    case TYPE_CODE_RANGE:
+    case TYPE_CODE_BOOL:
+      if (TYPE_DECLARED_CLASS (arg))
+	return INCOMPATIBLE_TYPE_BADNESS;
+      return INTEGER_PROMOTION_BADNESS;
+    case TYPE_CODE_FLT:
+      return INT_FLOAT_CONVERSION_BADNESS;
+    case TYPE_CODE_PTR:
+      return NS_POINTER_CONVERSION_BADNESS;
+    default:
+      return INCOMPATIBLE_TYPE_BADNESS;
+    }
+}
+
 /* Compare one type (PARM) for compatibility with another (ARG).
  * PARM is intended to be the parameter type of a function; and
  * ARG is the supplied argument's type.  This function tests if
@@ -3983,89 +4072,7 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
     case TYPE_CODE_FUNC:
       return rank_one_type_parm_func (parm, arg, value);
     case TYPE_CODE_INT:
-      switch (TYPE_CODE (arg))
-	{
-	case TYPE_CODE_INT:
-	  if (TYPE_LENGTH (arg) == TYPE_LENGTH (parm))
-	    {
-	      /* Deal with signed, unsigned, and plain chars and
-	         signed and unsigned ints.  */
-	      if (TYPE_NOSIGN (parm))
-		{
-		  /* This case only for character types.  */
-		  if (TYPE_NOSIGN (arg))
-		    return EXACT_MATCH_BADNESS;	/* plain char -> plain char */
-		  else		/* signed/unsigned char -> plain char */
-		    return INTEGER_CONVERSION_BADNESS;
-		}
-	      else if (TYPE_UNSIGNED (parm))
-		{
-		  if (TYPE_UNSIGNED (arg))
-		    {
-		      /* unsigned int -> unsigned int, or 
-			 unsigned long -> unsigned long */
-		      if (integer_types_same_name_p (TYPE_NAME (parm), 
-						     TYPE_NAME (arg)))
-			return EXACT_MATCH_BADNESS;
-		      else if (integer_types_same_name_p (TYPE_NAME (arg), 
-							  "int")
-			       && integer_types_same_name_p (TYPE_NAME (parm),
-							     "long"))
-			/* unsigned int -> unsigned long */
-			return INTEGER_PROMOTION_BADNESS;
-		      else
-			/* unsigned long -> unsigned int */
-			return INTEGER_CONVERSION_BADNESS;
-		    }
-		  else
-		    {
-		      if (integer_types_same_name_p (TYPE_NAME (arg), 
-						     "long")
-			  && integer_types_same_name_p (TYPE_NAME (parm), 
-							"int"))
-			/* signed long -> unsigned int */
-			return INTEGER_CONVERSION_BADNESS;
-		      else
-			/* signed int/long -> unsigned int/long */
-			return INTEGER_CONVERSION_BADNESS;
-		    }
-		}
-	      else if (!TYPE_NOSIGN (arg) && !TYPE_UNSIGNED (arg))
-		{
-		  if (integer_types_same_name_p (TYPE_NAME (parm), 
-						 TYPE_NAME (arg)))
-		    return EXACT_MATCH_BADNESS;
-		  else if (integer_types_same_name_p (TYPE_NAME (arg), 
-						      "int")
-			   && integer_types_same_name_p (TYPE_NAME (parm), 
-							 "long"))
-		    return INTEGER_PROMOTION_BADNESS;
-		  else
-		    return INTEGER_CONVERSION_BADNESS;
-		}
-	      else
-		return INTEGER_CONVERSION_BADNESS;
-	    }
-	  else if (TYPE_LENGTH (arg) < TYPE_LENGTH (parm))
-	    return INTEGER_PROMOTION_BADNESS;
-	  else
-	    return INTEGER_CONVERSION_BADNESS;
-	case TYPE_CODE_ENUM:
-	case TYPE_CODE_FLAGS:
-	case TYPE_CODE_CHAR:
-	case TYPE_CODE_RANGE:
-	case TYPE_CODE_BOOL:
-	  if (TYPE_DECLARED_CLASS (arg))
-	    return INCOMPATIBLE_TYPE_BADNESS;
-	  return INTEGER_PROMOTION_BADNESS;
-	case TYPE_CODE_FLT:
-	  return INT_FLOAT_CONVERSION_BADNESS;
-	case TYPE_CODE_PTR:
-	  return NS_POINTER_CONVERSION_BADNESS;
-	default:
-	  return INCOMPATIBLE_TYPE_BADNESS;
-	}
-      break;
+      return rank_one_type_parm_int (parm, arg, value);
     case TYPE_CODE_ENUM:
       switch (TYPE_CODE (arg))
 	{
