@@ -1,5 +1,15 @@
 2019-11-26  Tom Tromey  <tom@tromey.com>
 
+	* run-on-main-thread.c: New file.
+	* run-on-main-thread.h: New file.
+	* unittests/main-thread-selftests.c: New file.
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	main-thread-selftests.c.
+	(HFILES_NO_SRCDIR): Add run-on-main-thread.h.
+	(COMMON_SFILES): Add run-on-main-thread.c.
+
+2019-11-26  Tom Tromey  <tom@tromey.com>
+
 	* main.c (setup_alternate_signal_stack): Remove.
 	(captured_main_1): Use gdb::alternate_signal_stack.
 	* gdbsupport/alt-stack.h: New file.

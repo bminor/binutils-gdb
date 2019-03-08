@@ -433,6 +433,7 @@ SUBDIR_UNITTESTS_SRCS = \
 	unittests/optional-selftests.c \
 	unittests/parse-connection-spec-selftests.c \
 	unittests/ptid-selftests.c \
+	unittests/main-thread-selftests.c \
 	unittests/mkdir-recursive-selftests.c \
 	unittests/rsp-low-selftests.c \
 	unittests/scoped_fd-selftests.c \
@@ -1116,6 +1117,7 @@ COMMON_SFILES = \
 	remote-fileio.c \
 	remote-notif.c \
 	reverse.c \
+	run-on-main-thread.c \
 	rust-lang.c \
 	sentinel-frame.c \
 	ser-event.c \
@@ -1378,6 +1380,7 @@ HFILES_NO_SRCDIR = \
 	riscv-tdep.h \
 	rs6000-aix-tdep.h \
 	rs6000-tdep.h \
+	run-on-main-thread.h \
 	s390-linux-tdep.h \
 	s390-tdep.h \
 	score-tdep.h \
