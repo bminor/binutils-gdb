@@ -1,5 +1,11 @@
 2019-03-08  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.c (rank_one_type_parm_struct): New function extracted
+	from...
+	(rank_one_type): ... this.
+
+2019-03-08  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.c (rank_one_type_parm_complex): New function extracted
 	from...
 	(rank_one_type): ... this.
