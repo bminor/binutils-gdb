@@ -65,9 +65,10 @@ private:
 			       int last_line, std::string *lines_out);
   /* A helper function for get_plain_source_lines that extracts the
      desired source lines from TEXT, putting them into LINES_OUT.  The
-     arguments and return value are as for get_source_lines.  */
-  bool extract_lines (const struct source_text &text, int first_line,
-		      int last_line, std::string *lines_out);
+     arguments are as for get_source_lines.  The return value is the
+     desired lines.  */
+  std::string extract_lines (const struct source_text &text, int first_line,
+			     int last_line);
 
   /* The contents of the cache.  */
   std::vector<source_text> m_source_map;
