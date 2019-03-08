@@ -1,5 +1,16 @@
 2019-10-19  Tom Tromey  <tom@tromey.com>
 
+	* unittests/main-thread-selftests.c: New file.
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	main-thread-selftests.c.
+	* ser-event.h (run_on_main_thread): Declare.
+	* ser-event.c (runnable_event, runnables, runnable_mutex): New
+	globals.
+	(run_events, run_on_main_thread, _initialize_ser_event): New
+	functions.
+
+2019-10-19  Tom Tromey  <tom@tromey.com>
+
 	* main.c (setup_alternate_signal_stack): Remove.
 	(captured_main_1): Use gdb::alternate_signal_stack.
 	* gdbsupport/alt-stack.h: New file.
