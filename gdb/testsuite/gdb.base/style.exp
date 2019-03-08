@@ -50,6 +50,12 @@ save_vars { env(TERM) } {
 	"$main_expr.*$arg_expr.*$arg_expr.*$file_expr.*"
     gdb_test "info breakpoints" "$main_expr at $file_expr.*"
 
+    gdb_test_no_output "set style sources off"
+    gdb_test "frame" \
+	"\r\n\[^\033\]*break here.*" \
+	"frame without styling"
+    gdb_test_no_output "set style sources on"
+
     gdb_test "break main" "file $base_file_expr.*"
 
     gdb_test "print &main" " = .* \033\\\[34m$hex\033\\\[m <$main_expr>"

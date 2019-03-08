@@ -93,6 +93,9 @@ extern cli_style_option variable_name_style;
 /* The address style.  */
 extern cli_style_option address_style;
 
+/* True if source styling is enabled.  */
+extern int source_styling;
+
 /* True if styling is enabled.  */
 extern int cli_styling;
 

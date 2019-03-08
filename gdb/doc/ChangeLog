@@ -1,3 +1,8 @@
+2019-03-14  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.texinfo (Output Styling): Document "set style source" and
+	"show style source".
+
 2019-03-02  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Output Styling): Fix typos.  Document the default
