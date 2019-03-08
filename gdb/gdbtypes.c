@@ -3873,6 +3873,20 @@ rank_one_type_parm_array (struct type *parm, struct type *arg, struct value *val
     }
 }
 
+/* rank_one_type helper for when PARM's type code is TYPE_CODE_FUNC.  */
+
+static struct rank
+rank_one_type_parm_func (struct type *parm, struct type *arg, struct value *value)
+{
+  switch (TYPE_CODE (arg))
+    {
+    case TYPE_CODE_PTR:	/* funcptr -> func */
+      return rank_one_type (parm, TYPE_TARGET_TYPE (arg), NULL);
+    default:
+      return INCOMPATIBLE_TYPE_BADNESS;
+    }
+}
+
 /* Compare one type (PARM) for compatibility with another (ARG).
  * PARM is intended to be the parameter type of a function; and
  * ARG is the supplied argument's type.  This function tests if
@@ -3967,13 +3981,7 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
     case TYPE_CODE_ARRAY:
       return rank_one_type_parm_array (parm, arg, value);
     case TYPE_CODE_FUNC:
-      switch (TYPE_CODE (arg))
-	{
-	case TYPE_CODE_PTR:	/* funcptr -> func */
-	  return rank_one_type (parm, TYPE_TARGET_TYPE (arg), NULL);
-	default:
-	  return INCOMPATIBLE_TYPE_BADNESS;
-	}
+      return rank_one_type_parm_func (parm, arg, value);
     case TYPE_CODE_INT:
       switch (TYPE_CODE (arg))
 	{
