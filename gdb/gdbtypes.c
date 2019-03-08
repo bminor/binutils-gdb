@@ -3976,6 +3976,28 @@ rank_one_type_parm_int (struct type *parm, struct type *arg, struct value *value
     }
 }
 
+/* rank_one_type helper for when PARM's type code is TYPE_CODE_ENUM.  */
+
+static struct rank
+rank_one_type_parm_enum (struct type *parm, struct type *arg, struct value *value)
+{
+  switch (TYPE_CODE (arg))
+    {
+    case TYPE_CODE_INT:
+    case TYPE_CODE_CHAR:
+    case TYPE_CODE_RANGE:
+    case TYPE_CODE_BOOL:
+    case TYPE_CODE_ENUM:
+      if (TYPE_DECLARED_CLASS (parm) || TYPE_DECLARED_CLASS (arg))
+	return INCOMPATIBLE_TYPE_BADNESS;
+      return INTEGER_CONVERSION_BADNESS;
+    case TYPE_CODE_FLT:
+      return INT_FLOAT_CONVERSION_BADNESS;
+    default:
+      return INCOMPATIBLE_TYPE_BADNESS;
+    }
+}
+
 /* Compare one type (PARM) for compatibility with another (ARG).
  * PARM is intended to be the parameter type of a function; and
  * ARG is the supplied argument's type.  This function tests if
@@ -4074,22 +4096,7 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
     case TYPE_CODE_INT:
       return rank_one_type_parm_int (parm, arg, value);
     case TYPE_CODE_ENUM:
-      switch (TYPE_CODE (arg))
-	{
-	case TYPE_CODE_INT:
-	case TYPE_CODE_CHAR:
-	case TYPE_CODE_RANGE:
-	case TYPE_CODE_BOOL:
-	case TYPE_CODE_ENUM:
-	  if (TYPE_DECLARED_CLASS (parm) || TYPE_DECLARED_CLASS (arg))
-	    return INCOMPATIBLE_TYPE_BADNESS;
-	  return INTEGER_CONVERSION_BADNESS;
-	case TYPE_CODE_FLT:
-	  return INT_FLOAT_CONVERSION_BADNESS;
-	default:
-	  return INCOMPATIBLE_TYPE_BADNESS;
-	}
-      break;
+      return rank_one_type_parm_enum (parm, arg, value);
     case TYPE_CODE_CHAR:
       switch (TYPE_CODE (arg))
 	{
