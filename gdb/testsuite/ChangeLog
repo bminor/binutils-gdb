@@ -1,3 +1,7 @@
+2019-03-14  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.base/style.exp: Add "set style sources" test.
+
 2019-03-13  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* mi-breakpoint-location-ena-dis.exp: Rename to ...

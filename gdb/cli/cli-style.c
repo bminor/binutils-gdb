@@ -31,6 +31,11 @@ int cli_styling = 0;
 int cli_styling = 1;
 #endif
 
+/* True if source styling is enabled.  Note that this is only
+   consulted when cli_styling is true.  */
+
+int source_styling = 1;
+
 /* Name of colors; must correspond to ui_file_style::basic_color.  */
 static const char * const cli_colors[] = {
   "none",
@@ -230,6 +235,16 @@ show_style_enabled (struct ui_file *file, int from_tty,
     fprintf_filtered (file, _("CLI output styling is disabled.\n"));
 }
 
+static void
+show_style_sources (struct ui_file *file, int from_tty,
+		    struct cmd_list_element *c, const char *value)
+{
+  if (source_styling)
+    fprintf_filtered (file, _("Source code styling is enabled.\n"));
+  else
+    fprintf_filtered (file, _("Source code styling is disabled.\n"));
+}
+
 void
 _initialize_cli_style ()
 {
@@ -247,6 +262,20 @@ Set whether CLI styling is enabled."), _("\
 Show whether CLI is enabled."), _("\
 If enabled, output to the terminal is styled."),
 			   set_style_enabled, show_style_enabled,
+			   &style_set_list, &style_show_list);
+
+  add_setshow_boolean_cmd ("sources", no_class, &source_styling, _("\
+Set whether source code styling is enabled."), _("\
+Show whether source code styling is enabled."), _("\
+If enabled, source code is styled.\n"
+#ifdef HAVE_SOURCE_HIGHLIGHT
+"Note that source styling only works if styling in general is enabled,\n\
+see \"show style enabled\"."
+#else
+"Source highlighting is disabled in this installation of gdb, because\n\
+it was not linked against GNU Source Highlight."
+#endif
+			   ), set_style_enabled, show_style_sources,
 			   &style_set_list, &style_show_list);
 
 #define STYLE_ADD_SETSHOW_COMMANDS(STYLE, NAME, PREFIX_DOC)	  \

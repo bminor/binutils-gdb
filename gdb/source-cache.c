@@ -180,7 +180,7 @@ source_cache::get_source_lines (struct symtab *s, int first_line,
     return false;
 
 #ifdef HAVE_SOURCE_HIGHLIGHT
-  if (can_emit_style_escape (gdb_stdout))
+  if (source_styling && can_emit_style_escape (gdb_stdout))
     {
       const char *fullname = symtab_to_fullname (s);
 

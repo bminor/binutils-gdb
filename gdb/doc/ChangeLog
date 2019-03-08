@@ -1,3 +1,8 @@
+2019-03-14  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.texinfo (Output Styling): Document "set style source" and
+	"show style source".
+
 2019-03-13  Simon Marchi  <simon.marchi@ericsson.com>
 
 	* gdb.texinfo (Mode Options): Mention mi3.

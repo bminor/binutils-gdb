@@ -1,3 +1,13 @@
+2019-03-14  Tom Tromey  <tromey@adacore.com>
+
+	* NEWS: Add item for "style sources" commands.
+	* source-cache.c (source_cache::get_source_lines): Check
+	source_styling.
+	* cli/cli-style.c (source_styling): New global.
+	(_initialize_cli_style): Add "style sources" commands.
+	(show_style_sources): New function.
+	* cli/cli-style.h (source_styling): Declare.
+
 2019-03-14  Pedro Alves  <palves@redhat.com>
 	    Tom Tromey  <tromey@adacore.com>
 

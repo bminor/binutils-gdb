@@ -24525,6 +24525,16 @@ most hosts defaulting to @samp{on}.
 
 @item show style enabled
 Show the current state of styling.
+
+@item set style sources @samp{on|off}
+Enable or disable source code styling.  This affects whether source
+code, such as the output of the @code{list} command, is styled.  Note
+that source styling only works if styling in general is enabled, and
+if @value{GDBN} was linked with the GNU Source Highlight library.  The
+default is @samp{on}.
+
+@item show style sources
+Show the current state of source code styling.
 @end table
 
 Subcommands of @code{set style} control specific forms of styling.
