@@ -20,6 +20,10 @@
 #include "ser-event.h"
 #include "serial.h"
 #include "gdbsupport/filestuff.h"
+#if CXX_STD_THREAD
+#include <mutex>
+#endif
+#include "event-loop.h"
 
 /* On POSIX hosts, a serial_event is basically an abstraction for the
    classical self-pipe trick.
@@ -216,4 +220,78 @@ serial_event_clear (struct serial_event *event)
   struct serial_event_state *state = (struct serial_event_state *) ser->state;
   ResetEvent (state->event);
 #endif
+}
+
+
+
+/* The serial event used when posting runnables.  */
+
+static struct serial_event *runnable_event;
+
+/* Runnables that have been posted.  */
+
+static std::vector<std::function<void ()>> runnables;
+
+#if CXX_STD_THREAD
+
+/* Mutex to hold when handling runnable_event or runnables.  */
+
+static std::mutex runnable_mutex;
+
+#endif
+
+/* Run all the queued runnables.  */
+
+static void
+run_events (int error, gdb_client_data client_data)
+{
+  std::vector<std::function<void ()>> local;
+
+  /* Hold the lock while changing the globals, but not while running
+     the runnables.  */
+  {
+#if CXX_STD_THREAD
+    std::lock_guard<std::mutex> lock (runnable_mutex);
+#endif
+
+    /* Clear the event fd.  Do this before flushing the events list,
+       so that any new event post afterwards is sure to re-awaken the
+       event loop.  */
+    serial_event_clear (runnable_event);
+
+    /* Move the vector in case running a runnable pushes a new
+       runnable.  */
+    local = std::move (runnables);
+  }
+
+  for (auto &item : local)
+    {
+      try
+	{
+	  item ();
+	}
+      catch (...)
+	{
+	  /* Ignore exceptions in the callback.  */
+	}
+    }
+}
+
+/* See ser-event.h.  */
+
+void
+run_on_main_thread (std::function<void ()> &&func)
+{
+#if CXX_STD_THREAD
+  std::lock_guard<std::mutex> lock (runnable_mutex);
+#endif
+  runnables.emplace_back (std::move (func));
+  serial_event_set (runnable_event);
+}
+
+void
+_initialize_ser_event ()
+{
+  runnable_event = make_serial_event ();
+  add_file_handler (serial_event_fd (runnable_event), run_events, nullptr);
 }

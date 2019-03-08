@@ -1,5 +1,16 @@
 2019-09-30  Tom Tromey  <tom@tromey.com>
 
+	* unittests/main-thread-selftests.c: New file.
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	main-thread-selftests.c.
+	* ser-event.h (run_on_main_thread): Declare.
+	* ser-event.c (runnable_event, runnables, runnable_mutex): New
+	globals.
+	(run_events, run_on_main_thread, _initialize_ser_event): New
+	functions.
+
+2019-09-30  Tom Tromey  <tom@tromey.com>
+
 	* symtab.c (demangled_mutex): New global.
 	(symbol_set_names): Use a lock_guard.
 
