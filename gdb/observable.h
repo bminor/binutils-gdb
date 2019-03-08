@@ -228,6 +228,10 @@ extern observable<struct frame_info *, int> register_changed;
    frame has changed.  */
 extern observable<user_selected_what> user_selected_context_changed;
 
+/* This is notified when the source styling setting has changed and
+   should be reconsulted.  */
+extern observable<> source_styling_changed;
+
 } /* namespace observers */
 
 } /* namespace gdb */

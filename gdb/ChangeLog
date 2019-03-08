@@ -1,3 +1,17 @@
+2019-03-14  Pedro Alves  <palves@redhat.com>
+	    Tom Tromey  <tromey@adacore.com>
+
+	* tui/tui-winsource.h (tui_refill_source_window): Declare.
+	* tui/tui-winsource.c (tui_refill_source_window): New function,
+	from...
+	(tui_horizontal_source_scroll): ... here.  Move some logic.
+	* cli/cli-style.c (set_style_enabled): Notify new observable.
+	* tui/tui-hooks.c (tui_redisplay_source): New function.
+	(tui_attach_detach_observers): Attach or detach
+	tui_redisplay_source.
+	* observable.h (source_styling_changed): New observable.
+	* observable.c: Define source_styling_changed observable.
+
 2019-03-13  Tom Tromey  <tromey@adacore.com>
 
 	* i386-gnu-nat.c (i386_gnu_nat_target::fetch_registers)

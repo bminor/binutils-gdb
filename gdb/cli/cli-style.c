@@ -21,6 +21,7 @@
 #include "cli/cli-cmds.h"
 #include "cli/cli-style.h"
 #include "source-cache.h"
+#include "observable.h"
 
 /* True if styling is enabled.  */
 
@@ -216,6 +217,7 @@ static void
 set_style_enabled  (const char *args, int from_tty, struct cmd_list_element *c)
 {
   g_source_cache.clear ();
+  gdb::observers::source_styling_changed.notify ();
 }
 
 static void
