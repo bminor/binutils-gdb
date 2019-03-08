@@ -4096,6 +4096,31 @@ rank_one_type_parm_bool (struct type *parm, struct type *arg, struct value *valu
     }
 }
 
+/* rank_one_type helper for when PARM's type code is TYPE_CODE_FLOAT.  */
+
+static struct rank
+rank_one_type_parm_float (struct type *parm, struct type *arg, struct value *value)
+{
+  switch (TYPE_CODE (arg))
+    {
+    case TYPE_CODE_FLT:
+      if (TYPE_LENGTH (arg) < TYPE_LENGTH (parm))
+	return FLOAT_PROMOTION_BADNESS;
+      else if (TYPE_LENGTH (arg) == TYPE_LENGTH (parm))
+	return EXACT_MATCH_BADNESS;
+      else
+	return FLOAT_CONVERSION_BADNESS;
+    case TYPE_CODE_INT:
+    case TYPE_CODE_BOOL:
+    case TYPE_CODE_ENUM:
+    case TYPE_CODE_RANGE:
+    case TYPE_CODE_CHAR:
+      return INT_FLOAT_CONVERSION_BADNESS;
+    default:
+      return INCOMPATIBLE_TYPE_BADNESS;
+    }
+}
+
 /* Compare one type (PARM) for compatibility with another (ARG).
  * PARM is intended to be the parameter type of a function; and
  * ARG is the supplied argument's type.  This function tests if
@@ -4202,25 +4227,7 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
     case TYPE_CODE_BOOL:
       return rank_one_type_parm_bool (parm, arg, value);
     case TYPE_CODE_FLT:
-      switch (TYPE_CODE (arg))
-	{
-	case TYPE_CODE_FLT:
-	  if (TYPE_LENGTH (arg) < TYPE_LENGTH (parm))
-	    return FLOAT_PROMOTION_BADNESS;
-	  else if (TYPE_LENGTH (arg) == TYPE_LENGTH (parm))
-	    return EXACT_MATCH_BADNESS;
-	  else
-	    return FLOAT_CONVERSION_BADNESS;
-	case TYPE_CODE_INT:
-	case TYPE_CODE_BOOL:
-	case TYPE_CODE_ENUM:
-	case TYPE_CODE_RANGE:
-	case TYPE_CODE_CHAR:
-	  return INT_FLOAT_CONVERSION_BADNESS;
-	default:
-	  return INCOMPATIBLE_TYPE_BADNESS;
-	}
-      break;
+      return rank_one_type_parm_float (parm, arg, value);
     case TYPE_CODE_COMPLEX:
       switch (TYPE_CODE (arg))
 	{		/* Strictly not needed for C++, but...  */
