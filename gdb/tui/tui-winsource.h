@@ -56,6 +56,7 @@ extern void tui_show_source_content (struct tui_win_info *);
 extern void tui_horizontal_source_scroll (struct tui_win_info *,
 					  enum tui_scroll_direction, 
 					  int);
+extern void tui_refill_source_window (struct tui_win_info *);
 extern enum tui_status tui_set_exec_info_content (struct tui_win_info *);
 extern void tui_show_exec_info_content (struct tui_win_info *);
 extern void tui_erase_exec_info_content (struct tui_win_info *);

@@ -74,6 +74,7 @@ DEFINE_OBSERVABLE (inferior_call_pre);
 DEFINE_OBSERVABLE (inferior_call_post);
 DEFINE_OBSERVABLE (register_changed);
 DEFINE_OBSERVABLE (user_selected_context_changed);
+DEFINE_OBSERVABLE (source_styling_changed);
 
 } /* namespace observers */
 } /* namespace gdb */

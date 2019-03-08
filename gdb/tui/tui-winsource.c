@@ -306,8 +306,32 @@ tui_show_source_content (struct tui_win_info *win_info)
   win_info->generic.content_in_use = TRUE;
 }
 
+/* Refill the source window's source cache and update it.  If WIN_INFO
+   is a disassembly window, then just update it.  */
+
+void
+tui_refill_source_window (struct tui_win_info *win_info)
+{
+  symtab *s = nullptr;
+
+  if (win_info->generic.type == SRC_WIN)
+    {
+      symtab_and_line cursal = get_current_source_symtab_and_line ();
+      s = (cursal.symtab == NULL
+	   ? find_pc_line_symtab (get_frame_pc (get_selected_frame (NULL)))
+	   : cursal.symtab);
+    }
+
+  tui_update_source_window_as_is (win_info,
+				  win_info->detail.source_info.gdbarch,
+				  s,
+				  win_info->generic.content[0]
+				    ->which_element.source.line_or_addr,
+				  FALSE);
+}
 
 /* Scroll the source forward or backward horizontally.  */
+
 void
 tui_horizontal_source_scroll (struct tui_win_info *win_info,
 			      enum tui_scroll_direction direction,
@@ -315,20 +339,7 @@ tui_horizontal_source_scroll (struct tui_win_info *win_info,
 {
   if (win_info->generic.content != NULL)
     {
-      struct gdbarch *gdbarch = win_info->detail.source_info.gdbarch;
       int offset;
-      struct symtab *s = NULL;
-
-      if (win_info->generic.type == SRC_WIN)
-	{
-	  struct symtab_and_line cursal
-	    = get_current_source_symtab_and_line ();
-
-	  if (cursal.symtab == NULL)
-	    s = find_pc_line_symtab (get_frame_pc (get_selected_frame (NULL)));
-	  else
-	    s = cursal.symtab;
-	}
 
       if (direction == LEFT_SCROLL)
 	offset = win_info->detail.source_info.horizontal_offset
@@ -341,13 +352,8 @@ tui_horizontal_source_scroll (struct tui_win_info *win_info,
 	    offset = 0;
 	}
       win_info->detail.source_info.horizontal_offset = offset;
-      tui_update_source_window_as_is (win_info, gdbarch, s,
-				      win_info->generic.content[0]
-					->which_element.source.line_or_addr,
-				      FALSE);
+      tui_refill_source_window (win_info);
     }
-
-  return;
 }
 
 
