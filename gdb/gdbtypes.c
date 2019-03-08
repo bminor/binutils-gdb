@@ -4157,6 +4157,22 @@ rank_one_type_parm_struct (struct type *parm, struct type *arg, struct value *va
     }
 }
 
+/* rank_one_type helper for when PARM's type code is TYPE_CODE_SET.  */
+
+static struct rank
+rank_one_type_parm_set (struct type *parm, struct type *arg, struct value *value)
+{
+  switch (TYPE_CODE (arg))
+    {
+      /* Not in C++ */
+    case TYPE_CODE_SET:
+      return rank_one_type (TYPE_FIELD_TYPE (parm, 0),
+			    TYPE_FIELD_TYPE (arg, 0), NULL);
+    default:
+      return INCOMPATIBLE_TYPE_BADNESS;
+    }
+}
+
 /* Compare one type (PARM) for compatibility with another (ARG).
  * PARM is intended to be the parameter type of a function; and
  * ARG is the supplied argument's type.  This function tests if
@@ -4301,16 +4317,7 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
 
       break;
     case TYPE_CODE_SET:
-      switch (TYPE_CODE (arg))
-	{
-	  /* Not in C++ */
-	case TYPE_CODE_SET:
-	  return rank_one_type (TYPE_FIELD_TYPE (parm, 0), 
-				TYPE_FIELD_TYPE (arg, 0), NULL);
-	default:
-	  return INCOMPATIBLE_TYPE_BADNESS;
-	}
-      break;
+      return rank_one_type_parm_set (parm, arg, value);
     case TYPE_CODE_VOID:
     default:
       return INCOMPATIBLE_TYPE_BADNESS;
