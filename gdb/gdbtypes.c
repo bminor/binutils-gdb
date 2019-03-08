@@ -4065,6 +4065,37 @@ rank_one_type_parm_range (struct type *parm, struct type *arg, struct value *val
     }
 }
 
+/* rank_one_type helper for when PARM's type code is TYPE_CODE_BOOL.  */
+
+static struct rank
+rank_one_type_parm_bool (struct type *parm, struct type *arg, struct value *value)
+{
+  switch (TYPE_CODE (arg))
+    {
+      /* n3290 draft, section 4.12.1 (conv.bool):
+
+	 "A prvalue of arithmetic, unscoped enumeration, pointer, or
+	 pointer to member type can be converted to a prvalue of type
+	 bool.  A zero value, null pointer value, or null member pointer
+	 value is converted to false; any other value is converted to
+	 true.  A prvalue of type std::nullptr_t can be converted to a
+	 prvalue of type bool; the resulting value is false."  */
+    case TYPE_CODE_INT:
+    case TYPE_CODE_CHAR:
+    case TYPE_CODE_ENUM:
+    case TYPE_CODE_FLT:
+    case TYPE_CODE_MEMBERPTR:
+    case TYPE_CODE_PTR:
+      return BOOL_CONVERSION_BADNESS;
+    case TYPE_CODE_RANGE:
+      return INCOMPATIBLE_TYPE_BADNESS;
+    case TYPE_CODE_BOOL:
+      return EXACT_MATCH_BADNESS;
+    default:
+      return INCOMPATIBLE_TYPE_BADNESS;
+    }
+}
+
 /* Compare one type (PARM) for compatibility with another (ARG).
  * PARM is intended to be the parameter type of a function; and
  * ARG is the supplied argument's type.  This function tests if
@@ -4169,31 +4200,7 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
     case TYPE_CODE_RANGE:
       return rank_one_type_parm_range (parm, arg, value);
     case TYPE_CODE_BOOL:
-      switch (TYPE_CODE (arg))
-	{
-	  /* n3290 draft, section 4.12.1 (conv.bool):
-
-	     "A prvalue of arithmetic, unscoped enumeration, pointer, or
-	     pointer to member type can be converted to a prvalue of type
-	     bool.  A zero value, null pointer value, or null member pointer
-	     value is converted to false; any other value is converted to
-	     true.  A prvalue of type std::nullptr_t can be converted to a
-	     prvalue of type bool; the resulting value is false."  */
-	case TYPE_CODE_INT:
-	case TYPE_CODE_CHAR:
-	case TYPE_CODE_ENUM:
-	case TYPE_CODE_FLT:
-	case TYPE_CODE_MEMBERPTR:
-	case TYPE_CODE_PTR:
-	  return BOOL_CONVERSION_BADNESS;
-	case TYPE_CODE_RANGE:
-	  return INCOMPATIBLE_TYPE_BADNESS;
-	case TYPE_CODE_BOOL:
-	  return EXACT_MATCH_BADNESS;
-	default:
-	  return INCOMPATIBLE_TYPE_BADNESS;
-	}
-      break;
+      return rank_one_type_parm_bool (parm, arg, value);
     case TYPE_CODE_FLT:
       switch (TYPE_CODE (arg))
 	{
