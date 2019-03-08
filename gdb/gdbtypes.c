@@ -3785,7 +3785,78 @@ type_not_associated (const struct type *type)
   return (prop && TYPE_DYN_PROP_KIND (prop) == PROP_CONST
          && !TYPE_DYN_PROP_ADDR (prop));
 }
-
+
+/* rank_one_type helper for when PARM's type code is TYPE_CODE_PTR.  */
+
+static struct rank
+rank_one_type_parm_ptr (struct type *parm, struct type *arg, struct value *value)
+{
+  struct rank rank = {0,0};
+
+  switch (TYPE_CODE (arg))
+    {
+    case TYPE_CODE_PTR:
+
+      /* Allowed pointer conversions are:
+	 (a) pointer to void-pointer conversion.  */
+      if (TYPE_CODE (TYPE_TARGET_TYPE (parm)) == TYPE_CODE_VOID)
+	return VOID_PTR_CONVERSION_BADNESS;
+
+      /* (b) pointer to ancestor-pointer conversion.  */
+      rank.subrank = distance_to_ancestor (TYPE_TARGET_TYPE (parm),
+					   TYPE_TARGET_TYPE (arg),
+					   0);
+      if (rank.subrank >= 0)
+	return sum_ranks (BASE_PTR_CONVERSION_BADNESS, rank);
+
+      return INCOMPATIBLE_TYPE_BADNESS;
+    case TYPE_CODE_ARRAY:
+      {
+	struct type *t1 = TYPE_TARGET_TYPE (parm);
+	struct type *t2 = TYPE_TARGET_TYPE (arg);
+
+	if (types_equal (t1, t2))
+	  {
+	    /* Make sure they are CV equal.  */
+	    if (TYPE_CONST (t1) != TYPE_CONST (t2))
+	      rank.subrank |= CV_CONVERSION_CONST;
+	    if (TYPE_VOLATILE (t1) != TYPE_VOLATILE (t2))
+	      rank.subrank |= CV_CONVERSION_VOLATILE;
+	    if (rank.subrank != 0)
+	      return sum_ranks (CV_CONVERSION_BADNESS, rank);
+	    return EXACT_MATCH_BADNESS;
+	  }
+	return INCOMPATIBLE_TYPE_BADNESS;
+      }
+    case TYPE_CODE_FUNC:
+      return rank_one_type (TYPE_TARGET_TYPE (parm), arg, NULL);
+    case TYPE_CODE_INT:
+      if (value != NULL && TYPE_CODE (value_type (value)) == TYPE_CODE_INT)
+	{
+	  if (value_as_long (value) == 0)
+	    {
+	      /* Null pointer conversion: allow it to be cast to a pointer.
+		 [4.10.1 of C++ standard draft n3290]  */
+	      return NULL_POINTER_CONVERSION_BADNESS;
+	    }
+	  else
+	    {
+	      /* If type checking is disabled, allow the conversion.  */
+	      if (!strict_type_checking)
+		return NS_INTEGER_POINTER_CONVERSION_BADNESS;
+	    }
+	}
+      /* fall through  */
+    case TYPE_CODE_ENUM:
+    case TYPE_CODE_FLAGS:
+    case TYPE_CODE_CHAR:
+    case TYPE_CODE_RANGE:
+    case TYPE_CODE_BOOL:
+    default:
+      return INCOMPATIBLE_TYPE_BADNESS;
+    }
+}
+
 /* Compare one type (PARM) for compatibility with another (ARG).
  * PARM is intended to be the parameter type of a function; and
  * ARG is the supplied argument's type.  This function tests if
@@ -3876,68 +3947,7 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
   switch (TYPE_CODE (parm))
     {
     case TYPE_CODE_PTR:
-      switch (TYPE_CODE (arg))
-	{
-	case TYPE_CODE_PTR:
-
-	  /* Allowed pointer conversions are:
-	     (a) pointer to void-pointer conversion.  */
-	  if (TYPE_CODE (TYPE_TARGET_TYPE (parm)) == TYPE_CODE_VOID)
-	    return VOID_PTR_CONVERSION_BADNESS;
-
-	  /* (b) pointer to ancestor-pointer conversion.  */
-	  rank.subrank = distance_to_ancestor (TYPE_TARGET_TYPE (parm),
-	                                       TYPE_TARGET_TYPE (arg),
-	                                       0);
-	  if (rank.subrank >= 0)
-	    return sum_ranks (BASE_PTR_CONVERSION_BADNESS, rank);
-
-	  return INCOMPATIBLE_TYPE_BADNESS;
-	case TYPE_CODE_ARRAY:
-	  {
-	    struct type *t1 = TYPE_TARGET_TYPE (parm);
-	    struct type *t2 = TYPE_TARGET_TYPE (arg);
-
-	    if (types_equal (t1, t2))
-	      {
-		/* Make sure they are CV equal.  */
-		if (TYPE_CONST (t1) != TYPE_CONST (t2))
-		  rank.subrank |= CV_CONVERSION_CONST;
-		if (TYPE_VOLATILE (t1) != TYPE_VOLATILE (t2))
-		  rank.subrank |= CV_CONVERSION_VOLATILE;
-		if (rank.subrank != 0)
-		  return sum_ranks (CV_CONVERSION_BADNESS, rank);
-		return EXACT_MATCH_BADNESS;
-	      }
-	    return INCOMPATIBLE_TYPE_BADNESS;
-	  }
-	case TYPE_CODE_FUNC:
-	  return rank_one_type (TYPE_TARGET_TYPE (parm), arg, NULL);
-	case TYPE_CODE_INT:
-	  if (value != NULL && TYPE_CODE (value_type (value)) == TYPE_CODE_INT)
-	    {
-	      if (value_as_long (value) == 0)
-		{
-		  /* Null pointer conversion: allow it to be cast to a pointer.
-		     [4.10.1 of C++ standard draft n3290]  */
-		  return NULL_POINTER_CONVERSION_BADNESS;
-		}
-	      else
-		{
-		  /* If type checking is disabled, allow the conversion.  */
-		  if (!strict_type_checking)
-		    return NS_INTEGER_POINTER_CONVERSION_BADNESS;
-		}
-	    }
-	  /* fall through  */
-	case TYPE_CODE_ENUM:
-	case TYPE_CODE_FLAGS:
-	case TYPE_CODE_CHAR:
-	case TYPE_CODE_RANGE:
-	case TYPE_CODE_BOOL:
-	default:
-	  return INCOMPATIBLE_TYPE_BADNESS;
-	}
+      return rank_one_type_parm_ptr (parm, arg, value);
     case TYPE_CODE_ARRAY:
       switch (TYPE_CODE (arg))
 	{

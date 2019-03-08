@@ -1,3 +1,9 @@
+2019-03-08  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.c (rank_one_type_parm_ptr): New function extracted
+	from...
+	(rank_one_type): ... this.
+
 2019-02-27  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* inferior.c (initialize_inferiors): Ensure 'help set/show print
