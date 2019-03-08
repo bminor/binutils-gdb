@@ -84,9 +84,9 @@ source_cache::get_plain_source_lines (struct symtab *s, int first_line,
 
 /* See source-cache.h.  */
 
-bool
+std::string
 source_cache::extract_lines (const struct source_text &text, int first_line,
-			     int last_line, std::string *lines)
+			     int last_line)
 {
   int lineno = 1;
   std::string::size_type pos = 0;
@@ -102,16 +102,17 @@ source_cache::extract_lines (const struct source_text &text, int first_line,
       pos = new_pos;
       if (lineno == last_line || pos == std::string::npos)
 	{
+	  if (first_pos == std::string::npos)
+	    return {};
 	  if (pos == std::string::npos)
 	    pos = text.contents.size ();
-	  *lines = text.contents.substr (first_pos, pos - first_pos);
-	  return true;
+	  return text.contents.substr (first_pos, pos - first_pos);
 	}
       ++lineno;
       ++pos;
     }
 
-  return false;
+  return {};
 }
 
 #ifdef HAVE_SOURCE_HIGHLIGHT
@@ -187,7 +188,10 @@ source_cache::get_source_lines (struct symtab *s, int first_line,
       for (const auto &item : m_source_map)
 	{
 	  if (item.fullname == fullname)
-	    return extract_lines (item, first_line, last_line, lines);
+	    {
+	      *lines = extract_lines (item, first_line, last_line);
+	      return true;
+	    }
 	}
 
       const char *lang_name = get_language_name (SYMTAB_LANGUAGE (s));
@@ -208,8 +212,9 @@ source_cache::get_source_lines (struct symtab *s, int first_line,
 	      if (m_source_map.size () > MAX_ENTRIES)
 		m_source_map.erase (m_source_map.begin ());
 
-	      return extract_lines (m_source_map.back (), first_line,
-				    last_line, lines);
+	      *lines = extract_lines (m_source_map.back (), first_line,
+				      last_line);
+	      return true;
 	    }
 	}
     }

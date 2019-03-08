@@ -1,5 +1,13 @@
 2019-03-14  Tom Tromey  <tromey@adacore.com>
 
+	* source-cache.h (class source_cache) <get_source_lines>: Return
+	std::string.
+	* source-cache.c (source_cache::extract_lines): Handle case where
+	first_pos==npos.  Return std::string.
+	(source_cache::get_source_lines): Update.
+
+2019-03-14  Tom Tromey  <tromey@adacore.com>
+
 	* NEWS: Add item for "style sources" commands.
 	* source-cache.c (source_cache::get_source_lines): Check
 	source_styling.
