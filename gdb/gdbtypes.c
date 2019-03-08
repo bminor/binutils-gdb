@@ -4121,6 +4121,22 @@ rank_one_type_parm_float (struct type *parm, struct type *arg, struct value *val
     }
 }
 
+/* rank_one_type helper for when PARM's type code is TYPE_CODE_COMPLEX.  */
+
+static struct rank
+rank_one_type_parm_complex (struct type *parm, struct type *arg, struct value *value)
+{
+  switch (TYPE_CODE (arg))
+    {		/* Strictly not needed for C++, but...  */
+    case TYPE_CODE_FLT:
+      return FLOAT_PROMOTION_BADNESS;
+    case TYPE_CODE_COMPLEX:
+      return EXACT_MATCH_BADNESS;
+    default:
+      return INCOMPATIBLE_TYPE_BADNESS;
+    }
+}
+
 /* Compare one type (PARM) for compatibility with another (ARG).
  * PARM is intended to be the parameter type of a function; and
  * ARG is the supplied argument's type.  This function tests if
@@ -4229,16 +4245,7 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
     case TYPE_CODE_FLT:
       return rank_one_type_parm_float (parm, arg, value);
     case TYPE_CODE_COMPLEX:
-      switch (TYPE_CODE (arg))
-	{		/* Strictly not needed for C++, but...  */
-	case TYPE_CODE_FLT:
-	  return FLOAT_PROMOTION_BADNESS;
-	case TYPE_CODE_COMPLEX:
-	  return EXACT_MATCH_BADNESS;
-	default:
-	  return INCOMPATIBLE_TYPE_BADNESS;
-	}
-      break;
+      return rank_one_type_parm_complex (parm, arg, value);
     case TYPE_CODE_STRUCT:
       switch (TYPE_CODE (arg))
 	{
