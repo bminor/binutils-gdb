@@ -1,3 +1,12 @@
+2019-03-08  Alan Modra  <amodra@gmail.com>
+
+	PR 24311
+	* merge.c (merge_strings): Return secinfo.  Don't pad section
+	to alignment here.
+	(_bfd_merge_sections): Pad section to alignment here, if input
+	sections contributing to merged output all pad to alignment.
+	Formatting.
+
 2019-03-06  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf2.c (_bfd_dwarf2_find_symbol_bias): Check for a NULL symbol
