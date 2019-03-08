@@ -1,5 +1,9 @@
 2019-03-08  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.c (rank_one_type): Remove unnecessary cases from switch.
+
+2019-03-08  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.c (rank_one_type_parm_set): New function extracted
 	from...
 	(rank_one_type): ... this.

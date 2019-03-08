@@ -4284,41 +4284,8 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
       return rank_one_type_parm_complex (parm, arg, value);
     case TYPE_CODE_STRUCT:
       return rank_one_type_parm_struct (parm, arg, value);
-    case TYPE_CODE_UNION:
-      switch (TYPE_CODE (arg))
-	{
-	case TYPE_CODE_UNION:
-	default:
-	  return INCOMPATIBLE_TYPE_BADNESS;
-	}
-      break;
-    case TYPE_CODE_MEMBERPTR:
-      switch (TYPE_CODE (arg))
-	{
-	default:
-	  return INCOMPATIBLE_TYPE_BADNESS;
-	}
-      break;
-    case TYPE_CODE_METHOD:
-      switch (TYPE_CODE (arg))
-	{
-
-	default:
-	  return INCOMPATIBLE_TYPE_BADNESS;
-	}
-      break;
-    case TYPE_CODE_REF:
-      switch (TYPE_CODE (arg))
-	{
-
-	default:
-	  return INCOMPATIBLE_TYPE_BADNESS;
-	}
-
-      break;
     case TYPE_CODE_SET:
       return rank_one_type_parm_set (parm, arg, value);
-    case TYPE_CODE_VOID:
     default:
       return INCOMPATIBLE_TYPE_BADNESS;
     }				/* switch (TYPE_CODE (arg)) */
