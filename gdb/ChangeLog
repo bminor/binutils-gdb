@@ -1,3 +1,8 @@
+2019-02-27  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* inferior.c (initialize_inferiors): Ensure 'help set/show print
+	inferior-events' shows the example events.
+
 2019-03-08  Eli Zaretskii  <eliz@gnu.org>
 
 	Support styling on native MS-Windows console

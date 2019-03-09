@@ -930,8 +930,8 @@ The new inferior ID must be currently known."),
 
   add_setshow_boolean_cmd ("inferior-events", no_class,
          &print_inferior_events, _("\
-Set printing of inferior events (e.g., inferior start and exit)."), _("\
-Show printing of inferior events (e.g., inferior start and exit)."), NULL,
+Set printing of inferior events (such as inferior start and exit)."), _("\
+Show printing of inferior events (such as inferior start and exit)."), NULL,
          NULL,
          show_print_inferior_events,
          &setprintlist, &showprintlist);
