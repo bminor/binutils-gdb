@@ -24,7 +24,7 @@
 
 /* True if styling is enabled.  */
 
-#if defined(_WIN32) || defined (__CYGWIN__)
+#if defined (__MSDOS__) || defined (__CYGWIN__)
 int cli_styling = 0;
 #else
 int cli_styling = 1;

@@ -1,3 +1,21 @@
+2019-03-08  Eli Zaretskii  <eliz@gnu.org>
+
+	Support styling on native MS-Windows console
+
+	PR/24315
+	* utils.c (can_emit_style_escape) [_WIN32]: Don't disable styling
+	on MS-Windows if $TERM is not defined.
+
+	* cli/cli-style.c: Set cli_styling to 1 in the MinGW build.
+
+	* posix-hdep.c (gdb_console_fputs):
+	* mingw-hdep.c (rgb_to_16colors, gdb_console_fputs): New
+	functions.
+	* ui-file.h (gdb_console_fputs): Add prototype.
+
+	* ui-file.c (stdio_file::puts): Call gdb_console_fputs, and fall
+	back to fputs only if the former returns zero.
+
 2019-03-07  Brian Vandenberg  <phantall@gmail.com>
 	    Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 

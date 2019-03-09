@@ -236,6 +236,12 @@ stdio_file::write_async_safe (const char *buf, long length_buf)
 void
 stdio_file::puts (const char *linebuffer)
 {
+  /* This host-dependent function (with implementations in
+     posix-hdep.c and mingw-hdep.c) is given the opportunity to
+     process the output first in host-dependent way.  If it does, it
+     should return non-zero, to avoid calling fputs below.  */
+  if (gdb_console_fputs (linebuffer, m_file))
+    return;
   /* Calling error crashes when we are called from the exception framework.  */
   if (fputs (linebuffer, m_file))
     {
