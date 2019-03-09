@@ -70,6 +70,17 @@ public:
   virtual bool isatty ()
   { return false; }
 
+  /* true indicates terminal output behaviour such as cli_styling.
+     This default implementation indicates to do terminal output
+     behaviour if the UI_FILE is a tty.  A derived class can override
+     TERM_OUT to have cli_styling behaviour without being a tty.  */
+  virtual bool term_out ()
+  { return isatty (); }
+
+  /* true if ANSI escapes can be used on STREAM.  */
+  virtual bool can_emit_style_escape ()
+  { return false; }
+
   virtual void flush ()
   {}
 };
@@ -109,7 +120,13 @@ extern int gdb_console_fputs (const char *, FILE *);
 class string_file : public ui_file
 {
 public:
-  string_file () {}
+  /* Construct a string_file to collect 'raw' output, i.e. without
+     'terminal' behaviour such as cli_styling.  */
+  string_file () : m_term_out (false) {};
+  /* If TERM_OUT, construct a string_file with terminal output behaviour
+     such as cli_styling)
+     else collect 'raw' output like the previous constructor.  */
+  explicit string_file (bool term_out) : m_term_out (term_out) {};
   ~string_file () override;
 
   /* Override ui_file methods.  */
@@ -118,6 +135,9 @@ public:
 
   long read (char *buf, long length_buf) override
   { gdb_assert_not_reached ("a string_file is not readable"); }
+
+  bool term_out () override;
+  bool can_emit_style_escape () override;
 
   /* string_file-specific public API.  */
 
@@ -145,6 +165,8 @@ public:
 private:
   /* The internal buffer.  */
   std::string m_string;
+
+  bool m_term_out;
 };
 
 /* A ui_file implementation that maps directly onto <stdio.h>'s FILE.
@@ -182,6 +204,8 @@ public:
   long read (char *buf, long length_buf) override;
 
   bool isatty () override;
+
+  bool can_emit_style_escape () override;
 
 private:
   /* Sets the internal stream to FILE, and saves the FILE's file
@@ -255,6 +279,8 @@ public:
   void puts (const char *) override;
 
   bool isatty () override;
+  bool term_out () override;
+  bool can_emit_style_escape () override;
   void flush () override;
 
 private:

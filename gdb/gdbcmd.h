@@ -133,7 +133,12 @@ extern struct cmd_list_element *showchecklist;
 extern struct cmd_list_element *save_cmdlist;
 
 extern void execute_command (const char *, int);
-extern std::string execute_command_to_string (const char *p, int from_tty);
+
+/* Execute command P and returns its output.  If TERM_OUT,
+   the output is built using terminal output behaviour such
+   as cli_styling.  */
+extern std::string execute_command_to_string (const char *p, int from_tty,
+					      bool term_out);
 
 extern void print_command_line (struct command_line *, unsigned int,
 				struct ui_file *);

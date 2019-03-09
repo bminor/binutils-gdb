@@ -440,10 +440,6 @@ extern void fputs_styled (const char *linebuffer,
 
 extern void reset_terminal_style (struct ui_file *stream);
 
-/* Return true if ANSI escapes can be used on STREAM.  */
-
-extern bool can_emit_style_escape (struct ui_file *stream);
-
 /* Display the host ADDR on STREAM formatted as ``0x%x''.  */
 extern void gdb_print_host_address_1 (const void *addr, struct ui_file *stream);
 

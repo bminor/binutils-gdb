@@ -1461,7 +1461,8 @@ thr_try_catch_cmd (thread_info *thr, const char *cmd, int from_tty,
   switch_to_thread (thr);
   try
     {
-      std::string cmd_result = execute_command_to_string (cmd, from_tty);
+      std::string cmd_result = execute_command_to_string
+	(cmd, from_tty, gdb_stdout->term_out ());
       if (!flags.silent || cmd_result.length () > 0)
 	{
 	  if (!flags.quiet)

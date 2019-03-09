@@ -1435,38 +1435,13 @@ emit_style_escape (const ui_file_style &style,
     fputs_unfiltered (style.to_ansi ().c_str (), stream);
 }
 
-/* See utils.h.  */
-
-bool
-can_emit_style_escape (struct ui_file *stream)
-{
-  if (stream != gdb_stdout
-      || !cli_styling
-      || !ui_file_isatty (stream))
-    return false;
-  const char *term = getenv ("TERM");
-  /* Windows doesn't by default define $TERM, but can support styles
-     regardless.  */
-#ifndef _WIN32
-  if (term == nullptr || !strcmp (term, "dumb"))
-    return false;
-#else
-  /* But if they do define $TERM, let us behave the same as on Posix
-     platforms, for the benefit of programs which invoke GDB as their
-     back-end.  */
-  if (term && !strcmp (term, "dumb"))
-    return false;
-#endif
-  return true;
-}
-
 /* Set the current output style.  This will affect future uses of the
    _filtered output functions.  */
 
 static void
 set_output_style (struct ui_file *stream, const ui_file_style &style)
 {
-  if (!can_emit_style_escape (stream))
+  if (!stream->can_emit_style_escape ())
     return;
 
   /* Note that we don't pass STREAM here, because we want to emit to
@@ -1479,7 +1454,7 @@ set_output_style (struct ui_file *stream, const ui_file_style &style)
 void
 reset_terminal_style (struct ui_file *stream)
 {
-  if (can_emit_style_escape (stream))
+  if (stream->can_emit_style_escape ())
     {
       /* Force the setting, regardless of what we think the setting
 	 might already be.  */
@@ -1504,7 +1479,7 @@ prompt_for_continue (void)
   bool disable_pagination = pagination_disabled_for_command;
 
   /* Clear the current styling.  */
-  if (can_emit_style_escape (gdb_stdout))
+  if (gdb_stdout->can_emit_style_escape ())
     emit_style_escape (ui_file_style (), gdb_stdout);
 
   if (annotation_level > 1)
@@ -1801,7 +1776,7 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 	      lines_printed++;
 	      if (wrap_column)
 		{
-		  if (can_emit_style_escape (stream))
+		  if (stream->can_emit_style_escape ())
 		    emit_style_escape (ui_file_style (), stream);
 		  /* If we aren't actually wrapping, don't output
 		     newline -- if chars_per_line is right, we
@@ -1823,7 +1798,7 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 	      if (wrap_column)
 		{
 		  fputs_unfiltered (wrap_indent, stream);
-		  if (can_emit_style_escape (stream))
+		  if (stream->can_emit_style_escape ())
 		    emit_style_escape (wrap_style, stream);
 		  /* FIXME, this strlen is what prevents wrap_indent from
 		     containing tabs.  However, if we recurse to print it

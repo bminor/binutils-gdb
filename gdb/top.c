@@ -657,7 +657,8 @@ execute_command (const char *p, int from_tty)
    temporarily set to true.  */
 
 std::string
-execute_command_to_string (const char *p, int from_tty)
+execute_command_to_string (const char *p, int from_tty,
+			   bool term_out)
 {
   /* GDB_STDOUT should be better already restored during these
      restoration callbacks.  */
@@ -665,7 +666,7 @@ execute_command_to_string (const char *p, int from_tty)
 
   scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
-  string_file str_file;
+  string_file str_file (term_out);
 
   {
     current_uiout->redirect (&str_file);

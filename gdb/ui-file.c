@@ -101,6 +101,33 @@ ui_file_isatty (struct ui_file *file)
   return file->isatty ();
 }
 
+/* true if the gdb terminal supports styling, and styling is enabled.  */
+
+static bool
+term_cli_styling ()
+{
+  extern int cli_styling;
+
+  if (!cli_styling)
+    return false;
+
+  const char *term = getenv ("TERM");
+  /* Windows doesn't by default define $TERM, but can support styles
+     regardless.  */
+#ifndef _WIN32
+  if (term == nullptr || !strcmp (term, "dumb"))
+    return false;
+#else
+  /* But if they do define $TERM, let us behave the same as on Posix
+     platforms, for the benefit of programs which invoke GDB as their
+     back-end.  */
+  if (term && !strcmp (term, "dumb"))
+    return false;
+#endif
+  return true;
+}
+
+
 void
 ui_file_write (struct ui_file *file,
 		const char *buf,
@@ -138,6 +165,22 @@ void
 string_file::write (const char *buf, long length_buf)
 {
   m_string.append (buf, length_buf);
+}
+
+/* See ui-file.h.  */
+
+bool
+string_file::term_out ()
+{
+  return m_term_out;
+}
+
+/* See ui-file.h.  */
+
+bool
+string_file::can_emit_style_escape ()
+{
+  return m_term_out && term_cli_styling ();
 }
 
 
@@ -255,6 +298,16 @@ stdio_file::isatty ()
   return ::isatty (m_fd);
 }
 
+/* See ui-file.h.  */
+
+bool
+stdio_file::can_emit_style_escape ()
+{
+  return (this == gdb_stdout
+	  && this->isatty ()
+	  && term_cli_styling ());
+}
+
 
 
 /* This is the implementation of ui_file method 'write' for stderr.
@@ -331,4 +384,22 @@ bool
 tee_file::isatty ()
 {
   return m_one->isatty ();
+}
+
+/* See ui-file.h.  */
+
+bool
+tee_file::term_out ()
+{
+  return m_one->term_out ();
+}
+
+/* See ui-file.h.  */
+
+bool
+tee_file::can_emit_style_escape ()
+{
+  return (this == gdb_stdout
+	  && m_one->term_out ()
+	  && term_cli_styling ());
 }
