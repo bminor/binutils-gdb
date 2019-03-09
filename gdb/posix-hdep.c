@@ -30,3 +30,11 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 {
   return select (n, readfds, writefds, exceptfds, timeout);
 }
+
+/* Host-dependent console fputs method.  POSIX platforms always return
+   zero, to use the default C 'fputs'.  */
+int
+gdb_console_fputs (const char *buf, FILE *f)
+{
+  return 0;
+}

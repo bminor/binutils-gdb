@@ -1445,8 +1445,18 @@ can_emit_style_escape (struct ui_file *stream)
       || !ui_file_isatty (stream))
     return false;
   const char *term = getenv ("TERM");
+  /* Windows doesn't by default define $TERM, but can support styles
+     regardless.  */
+#ifndef _WIN32
   if (term == nullptr || !strcmp (term, "dumb"))
     return false;
+#else
+  /* But if they do define $TERM, let us behave the same as on Posix
+     platforms, for the benefit of programs which invoke GDB as their
+     back-end.  */
+  if (term && !strcmp (term, "dumb"))
+    return false;
+#endif
   return true;
 }
 
