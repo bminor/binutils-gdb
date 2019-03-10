@@ -1,5 +1,9 @@
 2019-03-13  Christian Eggers  <ceggers@gmx.de>
 
+	* dwarf2dbg.c (out_debug_line): Use octets for .debug_line prologue.
+
+2019-03-13  Christian Eggers  <ceggers@gmx.de>
+
 	* dwarf2dbg.c (out_debug_line): Use octets for dwarf2 headers.
 	(out_debug_aranges, out_debug_info): Likewise.
 

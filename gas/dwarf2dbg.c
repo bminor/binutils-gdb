@@ -1803,7 +1803,7 @@ out_debug_line (segT line_seg)
   exp.X_op_symbol = prologue_start;
   exp.X_add_number = 0;
   emit_expr (&exp, sizeof_offset);
-  symbol_set_value_now (prologue_start);
+  symbol_set_value_now_octets (prologue_start);
 
   /* Parameters of the state machine.  */
   out_byte (DWARF2_LINE_MIN_INSN_LENGTH);
@@ -1828,7 +1828,7 @@ out_debug_line (segT line_seg)
 
   out_file_list ();
 
-  symbol_set_value_now (prologue_end);
+  symbol_set_value_now_octets (prologue_end);
 
   /* For each section, emit a statement program.  */
   for (s = all_segs; s; s = s->next)
