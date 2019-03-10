@@ -1,5 +1,23 @@
 2019-12-12  Tom Tromey  <tom@tromey.com>
 
+	* progspace.c (program_space::add_objfile)
+	(program_space::remove_objfile): Update.
+	(program_space::multi_objfile_p): Remove.
+	* objfiles.h (struct objfile) <next>: Remove.
+	* objfiles.c (objfile::objfile): Update.
+	(put_objfile_before): Update.
+	(unlink_objfile): Update.
+	* progspace.h (object_files): Remove.
+	(struct program_space) <objfiles_head>: Remove.
+	<objfiles_list>: New member.
+	<objfiles_range, objfiles_safe_range>: Change type.
+	(objfiles): Change return type.
+	(objfiles_safe): Update.
+	(multi_objfile_p): Rewrite and inline.
+	(object_files): Remove macro.
+
+2019-12-12  Tom Tromey  <tom@tromey.com>
+
 	* gdbsupport/safe-iterator.h (basic_safe_iterator): Simplify.  Add
 	second constructor.
 	(basic_safe_range): New class.

@@ -486,12 +486,6 @@ public:
   }
 
 
-  /* All struct objfile's are chained together by their next pointers.
-     The program space field "objfiles"  (frequently referenced via
-     the macro "object_files") points to the first link in this chain.  */
-
-  struct objfile *next = nullptr;
-
   /* The object file's original name as specified by the user,
      made absolute, and tilde-expanded.  However, it is not canonicalized
      (i.e., it has not been passed through gdb_realpath).

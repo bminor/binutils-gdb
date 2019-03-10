@@ -54,6 +54,7 @@
 #include "btrace.h"
 #include "gdbsupport/pathstuff.h"
 
+#include <algorithm>
 #include <vector>
 
 /* Keep a registry of per-objfile data-pointers required by other GDB

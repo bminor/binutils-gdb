@@ -27,6 +27,7 @@
 #include "registry.h"
 #include "gdbsupport/next-iterator.h"
 #include "gdbsupport/safe-iterator.h"
+#include <list>
 
 struct target_ops;
 struct bfd;
@@ -138,20 +139,18 @@ struct program_space
   program_space (address_space *aspace_);
   ~program_space ();
 
-  typedef next_adapter<struct objfile> objfiles_range;
+  typedef std::list<struct objfile *> objfiles_range;
 
   /* Return an iterable object that can be used to iterate over all
      objfiles.  The basic use is in a foreach, like:
 
      for (objfile *objf : pspace->objfiles ()) { ... }  */
-  objfiles_range objfiles ()
+  objfiles_range &objfiles ()
   {
-    return objfiles_range (objfiles_head);
+    return objfiles_list;
   }
 
-  typedef next_adapter<struct objfile,
-		       basic_safe_iterator<next_iterator<objfile>>>
-    objfiles_safe_range;
+  typedef basic_safe_range<objfiles_range> objfiles_safe_range;
 
   /* An iterable object that can be used to iterate over all objfiles.
      The basic use is in a foreach, like:
@@ -162,7 +161,7 @@ struct program_space
      deleted during iteration.  */
   objfiles_safe_range objfiles_safe ()
   {
-    return objfiles_safe_range (objfiles_head);
+    return objfiles_safe_range (objfiles_list);
   }
 
   /* Add OBJFILE to the list of objfiles, putting it just before
@@ -175,7 +174,10 @@ struct program_space
 
   /* Return true if there is more than one object file loaded; false
      otherwise.  */
-  bool multi_objfile_p () const;
+  bool multi_objfile_p () const
+  {
+    return objfiles_list.size () > 1;
+  }
 
 
   /* Pointer to next in linked list.  */
@@ -228,9 +230,8 @@ struct program_space
      (e.g. the argument to the "symbol-file" or "file" command).  */
   struct objfile *symfile_object_file = NULL;
 
-  /* All known objfiles are kept in a linked list.  This points to
-     the head of this list.  */
-  struct objfile *objfiles_head = NULL;
+  /* All known objfiles are kept in a linked list.  */
+  std::list<struct objfile *> objfiles_list;
 
   /* The set of target sections matching the sections mapped into
      this program space.  Managed by both exec_ops and solib.c.  */
@@ -270,10 +271,6 @@ struct address_space
    argument to the "symbol-file" or "file" command).  */
 
 #define symfile_objfile current_program_space->symfile_object_file
-
-/* All known objfiles are kept in a linked list.  This points to the
-   root of this list.  */
-#define object_files current_program_space->objfiles_head
 
 /* The set of target sections matching the sections mapped into the
    current program space.  */

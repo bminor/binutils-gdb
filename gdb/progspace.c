@@ -25,6 +25,7 @@
 #include "solib.h"
 #include "gdbthread.h"
 #include "inferior.h"
+#include <algorithm>
 
 /* The last program space number assigned.  */
 int last_program_space_num = 0;
@@ -158,21 +159,15 @@ program_space::~program_space ()
 void
 program_space::add_objfile (struct objfile *objfile, struct objfile *before)
 {
-  for (struct objfile **objp = &objfiles_head;
-       *objp != NULL;
-       objp = &((*objp)->next))
+  if (before == nullptr)
+    objfiles_list.push_back (objfile);
+  else
     {
-      if (*objp == before)
-	{
-	  objfile->next = *objp;
-	  *objp = objfile;
-	  return;
-	}
+      auto iter = std::find (objfiles_list.begin (), objfiles_list.end (),
+			     before);
+      gdb_assert (iter != objfiles_list.end ());
+      objfiles_list.insert (iter, objfile);
     }
-
-  internal_error (__FILE__, __LINE__,
-		  _("put_objfile_before: before objfile not in list"));
-
 }
 
 /* See progspace.h.  */
@@ -180,32 +175,13 @@ program_space::add_objfile (struct objfile *objfile, struct objfile *before)
 void
 program_space::remove_objfile (struct objfile *objfile)
 {
-  struct objfile **objpp;
+  auto iter = std::find (objfiles_list.begin (), objfiles_list.end (),
+			 objfile);
+  gdb_assert (iter != objfiles_list.end ());
+  objfiles_list.erase (iter);
 
-  for (objpp = &object_files; *objpp != NULL; objpp = &((*objpp)->next))
-    {
-      if (*objpp == objfile)
-	{
-	  *objpp = (*objpp)->next;
-	  objfile->next = NULL;
-
-	  if (objfile == symfile_object_file)
-	    symfile_object_file = NULL;
-
-	  return;
-	}
-    }
-
-  internal_error (__FILE__, __LINE__,
-		  _("remove_objfile: objfile already unlinked"));
-}
-
-/* See progspace.h.  */
-
-bool
-program_space::multi_objfile_p () const
-{
-  return objfiles_head != nullptr && objfiles_head->next != nullptr;
+  if (objfile == symfile_object_file)
+    symfile_object_file = NULL;
 }
 
 /* Copies program space SRC to DEST.  Copies the main executable file,
