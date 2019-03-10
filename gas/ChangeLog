@@ -1,3 +1,7 @@
+2019-03-13  Christian Eggers  <ceggers@gmx.de>
+
+	* dwarf2dbg.c (dwarf2_emit_insn): Fix calculation of line info offset.
+
 2019-03-12  Andreas Krebbel  <krebbel@linux.ibm.com>
 
 	* testsuite/gas/s390/zarch-arch13.s: Adjust testcase to optable changes.

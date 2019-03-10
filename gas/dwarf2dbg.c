@@ -579,7 +579,7 @@ dwarf2_emit_insn (int size)
 
   dwarf2_where (&loc);
 
-  dwarf2_gen_line_info (frag_now_fix () - size, &loc);
+  dwarf2_gen_line_info ((frag_now_fix_octets () - size) / OCTETS_PER_BYTE, &loc);
   dwarf2_consume_line_info ();
 }
 
