@@ -1,5 +1,20 @@
 2019-04-10  Tom Tromey  <tom@tromey.com>
 
+	* symtab.c (lookup_global_symbol_from_objfile)
+	(lookup_symbol_in_objfile_from_linkage_name): Use the iterator.
+	* objfiles.h (class separate_debug_iterator): New.
+	(class separate_debug_range): New.
+	(struct objfile) <separate_debug_objfiles>: New method.
+	(objfile_separate_debug_iterate): Don't declare.
+	* objfiles.c (separate_debug_iterator::operator++): Rename from
+	objfile_separate_debug_iterate.
+	(objfile_relocate, objfile_rebase, objfile_has_symbols): Use the
+	iterator.
+	* minsyms.c (lookup_minimal_symbol_by_pc_section): Use the
+	iterator.
+
+2019-04-10  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (reread_symbols): Remove old comment.
 	* objfiles.c (free_all_objfiles): Fix a typo.
 

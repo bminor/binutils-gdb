@@ -2246,11 +2246,7 @@ lookup_global_symbol_from_objfile (struct objfile *main_objfile,
 				   const char *name,
 				   const domain_enum domain)
 {
-  struct objfile *objfile;
-
-  for (objfile = main_objfile;
-       objfile;
-       objfile = objfile_separate_debug_iterate (main_objfile, objfile))
+  for (struct objfile *objfile : main_objfile->separate_debug_objfiles ())
     {
       struct block_symbol result
         = lookup_symbol_in_objfile (objfile, GLOBAL_BLOCK, name, domain);
@@ -2327,7 +2323,7 @@ lookup_symbol_in_objfile_from_linkage_name (struct objfile *objfile,
 					    domain_enum domain)
 {
   enum language lang = current_language->la_language;
-  struct objfile *main_objfile, *cur_objfile;
+  struct objfile *main_objfile;
 
   demangle_result_storage storage;
   const char *modified_name = demangle_for_lookup (linkage_name, lang, storage);
@@ -2337,9 +2333,7 @@ lookup_symbol_in_objfile_from_linkage_name (struct objfile *objfile,
   else
     main_objfile = objfile;
 
-  for (cur_objfile = main_objfile;
-       cur_objfile;
-       cur_objfile = objfile_separate_debug_iterate (main_objfile, cur_objfile))
+  for (struct objfile *cur_objfile : main_objfile->separate_debug_objfiles ())
     {
       struct block_symbol result;
 

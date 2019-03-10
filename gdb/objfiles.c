@@ -446,44 +446,50 @@ entry_point_address (void)
   return retval;
 }
 
-/* Iterator on PARENT and every separate debug objfile of PARENT.
-   The usage pattern is:
-     for (objfile = parent;
-          objfile;
-          objfile = objfile_separate_debug_iterate (parent, objfile))
-       ...
-*/
-
-struct objfile *
-objfile_separate_debug_iterate (const struct objfile *parent,
-                                const struct objfile *objfile)
+separate_debug_iterator &
+separate_debug_iterator::operator++ ()
 {
+  gdb_assert (m_objfile != nullptr);
+
   struct objfile *res;
 
   /* If any, return the first child.  */
-  res = objfile->separate_debug_objfile;
-  if (res)
-    return res;
+  res = m_objfile->separate_debug_objfile;
+  if (res != nullptr)
+    {
+      m_objfile = res;
+      return *this;
+    }
 
   /* Common case where there is no separate debug objfile.  */
-  if (objfile == parent)
-    return NULL;
+  if (m_objfile == m_parent)
+    {
+      m_objfile = nullptr;
+      return *this;
+    }
 
   /* Return the brother if any.  Note that we don't iterate on brothers of
      the parents.  */
-  res = objfile->separate_debug_objfile_link;
-  if (res)
-    return res;
+  res = m_objfile->separate_debug_objfile_link;
+  if (res != nullptr)
+    {
+      m_objfile = res;
+      return *this;
+    }
 
-  for (res = objfile->separate_debug_objfile_backlink;
-       res != parent;
+  for (res = m_objfile->separate_debug_objfile_backlink;
+       res != m_parent;
        res = res->separate_debug_objfile_backlink)
     {
-      gdb_assert (res != NULL);
-      if (res->separate_debug_objfile_link)
-        return res->separate_debug_objfile_link;
+      gdb_assert (res != nullptr);
+      if (res->separate_debug_objfile_link != nullptr)
+	{
+	  m_objfile = res->separate_debug_objfile_link;
+	  return *this;
+	}
     }
-  return NULL;
+  m_objfile = nullptr;
+  return *this;
 }
 
 /* Put one object file before a specified on in the global list.
@@ -860,15 +866,15 @@ void
 objfile_relocate (struct objfile *objfile,
 		  const struct section_offsets *new_offsets)
 {
-  struct objfile *debug_objfile;
   int changed = 0;
 
   changed |= objfile_relocate1 (objfile, new_offsets);
 
-  for (debug_objfile = objfile->separate_debug_objfile;
-       debug_objfile;
-       debug_objfile = objfile_separate_debug_iterate (objfile, debug_objfile))
+  for (struct objfile *debug_objfile : objfile->separate_debug_objfiles ())
     {
+      if (debug_objfile == objfile)
+	continue;
+
       section_addr_info objfile_addrs
 	= build_section_addr_info_from_objfile (objfile);
 
@@ -917,14 +923,9 @@ objfile_rebase1 (struct objfile *objfile, CORE_ADDR slide)
 void
 objfile_rebase (struct objfile *objfile, CORE_ADDR slide)
 {
-  struct objfile *debug_objfile;
   int changed = 0;
 
-  changed |= objfile_rebase1 (objfile, slide);
-
-  for (debug_objfile = objfile->separate_debug_objfile;
-       debug_objfile;
-       debug_objfile = objfile_separate_debug_iterate (objfile, debug_objfile))
+  for (struct objfile *debug_objfile : objfile->separate_debug_objfiles ())
     changed |= objfile_rebase1 (debug_objfile, slide);
 
   /* Relocate breakpoints as necessary, after things are relocated.  */
@@ -965,9 +966,7 @@ objfile_has_full_symbols (struct objfile *objfile)
 int
 objfile_has_symbols (struct objfile *objfile)
 {
-  struct objfile *o;
-
-  for (o = objfile; o; o = objfile_separate_debug_iterate (objfile, o))
+  for (struct objfile *o : objfile->separate_debug_objfiles ())
     if (objfile_has_partial_symbols (o) || objfile_has_full_symbols (o))
       return 1;
   return 0;

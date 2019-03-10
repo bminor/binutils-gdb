@@ -318,6 +318,63 @@ struct objfile_per_bfd_storage
   std::bitset<nr_languages> demangled_hash_languages;
 };
 
+/* An iterator that first returns a parent objfile, and then each
+   separate debug objfile.  */
+
+class separate_debug_iterator
+{
+public:
+
+  explicit separate_debug_iterator (struct objfile *objfile)
+    : m_objfile (objfile),
+      m_parent (objfile)
+  {
+  }
+
+  bool operator!= (const separate_debug_iterator &other)
+  {
+    return m_objfile != other.m_objfile;
+  }
+
+  separate_debug_iterator &operator++ ();
+
+  struct objfile *operator* ()
+  {
+    return m_objfile;
+  }
+
+private:
+
+  struct objfile *m_objfile;
+  struct objfile *m_parent;
+};
+
+/* A range adapter wrapping separate_debug_iterator.  */
+
+class separate_debug_range
+{
+public:
+
+  explicit separate_debug_range (struct objfile *objfile)
+    : m_objfile (objfile)
+  {
+  }
+
+  separate_debug_iterator begin ()
+  {
+    return separate_debug_iterator (m_objfile);
+  }
+
+  separate_debug_iterator end ()
+  {
+    return separate_debug_iterator (nullptr);
+  }
+
+private:
+
+  struct objfile *m_objfile;
+};
+
 /* Master structure for keeping track of each file from which
    gdb reads symbols.  There are several ways these get allocated: 1.
    The main symbol file, symfile_objfile, set by the symbol-file command,
@@ -394,6 +451,14 @@ struct objfile
   msymbols_range msymbols ()
   {
     return msymbols_range (this);
+  }
+
+  /* Return a range adapter for iterating over all the separate debug
+     objfiles of this objfile.  */
+
+  separate_debug_range separate_debug_objfiles ()
+  {
+    return separate_debug_range (this);
   }
 
 
@@ -562,9 +627,6 @@ extern int entry_point_address_query (CORE_ADDR *entry_p);
 extern CORE_ADDR entry_point_address (void);
 
 extern void build_objfile_section_table (struct objfile *);
-
-extern struct objfile *objfile_separate_debug_iterate (const struct objfile *,
-                                                       const struct objfile *);
 
 extern void put_objfile_before (struct objfile *, struct objfile *);
 
