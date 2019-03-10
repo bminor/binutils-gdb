@@ -1,5 +1,9 @@
 2019-03-13  Christian Eggers  <ceggers@gmx.de>
 
+	* dwarf2dbg.c (out_set_addr): Align relocation within .debug_line.
+
+2019-03-13  Christian Eggers  <ceggers@gmx.de>
+
 	* dwarf2dbg.c (out_debug_line): Pad size of .debug_line section.
 
 2019-03-13  Christian Eggers  <ceggers@gmx.de>

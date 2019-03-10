@@ -1109,15 +1109,27 @@ get_frag_fix (fragS *frag, segT seg)
 /* Set an absolute address (may result in a relocation entry).  */
 
 static void
+out_inc_line_addr (int line_delta, addressT addr_delta);
+
+static void
 out_set_addr (symbolS *sym)
 {
   expressionS exp;
+  addressT expr_addr, expr_addr_aligned;
 
   memset (&exp, 0, sizeof exp);
-  out_opcode (DW_LNS_extended_op);
-  out_uleb128 (sizeof_address + 1);
 
-  out_opcode (DW_LNE_set_address);
+  /* The expression at the bottom must be aligned to OCTETS_PER_BYTE.  The
+     statements after the for loop will contribute 3 more octets.  */
+  expr_addr = frag_now_fix_octets () + 3;
+  expr_addr_aligned = (expr_addr + OCTETS_PER_BYTE - 1) & -OCTETS_PER_BYTE;
+  for ( ; expr_addr != expr_addr_aligned; expr_addr++)
+    out_inc_line_addr (0, 0);  /* NOP */
+
+  out_opcode (DW_LNS_extended_op);   /* 1 octet */
+  out_uleb128 (sizeof_address + 1);  /* 1 octet */
+
+  out_opcode (DW_LNE_set_address);   /* 1 octet */
   exp.X_op = O_symbol;
   exp.X_add_symbol = sym;
   exp.X_add_number = 0;
