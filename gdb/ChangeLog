@@ -1,5 +1,10 @@
 2019-04-10  Tom Tromey  <tom@tromey.com>
 
+	* symfile.c (reread_symbols): Remove old comment.
+	* objfiles.c (free_all_objfiles): Fix a typo.
+
+2019-04-10  Tom Tromey  <tom@tromey.com>
+
 	* ia64-tdep.c (ia64_get_dyn_info_list): Use foreach.
 	* minsyms.c (lookup_minimal_symbol): Use foreach.
 	(lookup_minimal_symbol_text, lookup_minimal_symbol_by_pc_name)

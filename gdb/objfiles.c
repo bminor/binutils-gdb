@@ -699,7 +699,7 @@ free_all_objfiles (void)
 {
   struct so_list *so;
 
-  /* Any objfile referencewould become stale.  */
+  /* Any objfile reference would become stale.  */
   for (so = master_so_list (); so; so = so->next)
     gdb_assert (so->objfile == NULL);
 
