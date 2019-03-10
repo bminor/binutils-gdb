@@ -2103,7 +2103,7 @@ out_debug_str (segT str_seg, symbolS **name_sym, symbolS **comp_dir_sym,
      on the command line, so assume files[1] is the main input file.
      We're not supposed to get called unless at least one line number
      entry was emitted, so this should always be defined.  */
-  *name_sym = symbol_temp_new_now ();
+  *name_sym = symbol_temp_new_now_octets ();
   if (files_in_use == 0)
     abort ();
   if (files[1].dir)
@@ -2125,14 +2125,14 @@ out_debug_str (segT str_seg, symbolS **name_sym, symbolS **comp_dir_sym,
   memcpy (p, files[1].filename, len);
 
   /* DW_AT_comp_dir */
-  *comp_dir_sym = symbol_temp_new_now ();
+  *comp_dir_sym = symbol_temp_new_now_octets ();
   comp_dir = remap_debug_filename (getpwd ());
   len = strlen (comp_dir) + 1;
   p = frag_more (len);
   memcpy (p, comp_dir, len);
 
   /* DW_AT_producer */
-  *producer_sym = symbol_temp_new_now ();
+  *producer_sym = symbol_temp_new_now_octets ();
   sprintf (producer, "GNU AS %s", VERSION);
   len = strlen (producer) + 1;
   p = frag_more (len);
