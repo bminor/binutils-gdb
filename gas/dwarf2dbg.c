@@ -1745,7 +1745,7 @@ out_header (asection *sec, expressionS *exp)
     }
   else
     {
-      start_sym = symbol_temp_new_now ();
+      start_sym = symbol_temp_new_now_octets ();
       end_sym = symbol_temp_make ();
     }
 
@@ -1848,7 +1848,7 @@ out_debug_line (segT line_seg)
        in the DWARF Line Number header.  */
     subseg_set (subseg_get (".debug_line_end", FALSE), 0);
 
-  symbol_set_value_now (line_end);
+  symbol_set_value_now_octets (line_end);
 }
 
 static void
@@ -1967,7 +1967,7 @@ out_debug_aranges (segT aranges_seg, segT info_seg)
   md_number_to_chars (p, 0, addr_size);
   md_number_to_chars (p + addr_size, 0, addr_size);
 
-  symbol_set_value_now (aranges_end);
+  symbol_set_value_now_octets (aranges_end);
 }
 
 /* Emit data for .debug_abbrev.  Note that this must be kept in
@@ -2082,7 +2082,7 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT ranges_seg,
      dwarf2 draft has no standard code for assembler.  */
   out_two (DW_LANG_Mips_Assembler);
 
-  symbol_set_value_now (info_end);
+  symbol_set_value_now_octets (info_end);
 }
 
 /* Emit the three debug strings needed in .debug_str and setup symbols
