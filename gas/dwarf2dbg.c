@@ -1787,6 +1787,7 @@ out_debug_line (segT line_seg)
   symbolS *line_end;
   struct line_seg *s;
   int sizeof_offset;
+  addressT section_end, section_end_aligned;
 
   memset (&exp, 0, sizeof exp);
   sizeof_offset = out_header (line_seg, &exp);
@@ -1847,6 +1848,16 @@ out_debug_line (segT line_seg)
        compute the size of the linked .debug_line section, as seen
        in the DWARF Line Number header.  */
     subseg_set (subseg_get (".debug_line_end", FALSE), 0);
+
+  /* Pad size of .debug_line section to a multiple of OCTETS_PER_BYTE.
+     Simply sizing the section in md_section_align() is not sufficient,
+     also the size field in the .debug_line header must be a multiple
+     of OCTETS_PER_BYTE.  Not doing so will introduce gaps within the
+     .debug_line sections after linking.  */
+  section_end = frag_now_fix_octets ();
+  section_end_aligned = (section_end + OCTETS_PER_BYTE - 1) & -OCTETS_PER_BYTE;
+  for ( ; section_end != section_end_aligned; section_end++)
+    out_inc_line_addr (0, 0);  /* NOP */
 
   symbol_set_value_now_octets (line_end);
 }
