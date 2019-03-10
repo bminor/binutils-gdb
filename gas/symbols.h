@@ -57,6 +57,7 @@ symbolS *symbol_clone_if_forward_ref (symbolS *, int);
 #define symbol_clone_if_forward_ref(s) symbol_clone_if_forward_ref (s, 0)
 symbolS *symbol_temp_new (segT, valueT, fragS *);
 symbolS *symbol_temp_new_now (void);
+symbolS *symbol_temp_new_now_octets (void);
 symbolS *symbol_temp_make (void);
 
 symbolS *colon (const char *sym_name);
@@ -181,6 +182,7 @@ extern expressionS *symbol_get_value_expression (symbolS *);
 extern void symbol_set_value_expression (symbolS *, const expressionS *);
 extern offsetT *symbol_X_add_number (symbolS *);
 extern void symbol_set_value_now (symbolS *);
+extern void symbol_set_value_now_octets (symbolS *);
 extern void symbol_set_frag (symbolS *, fragS *);
 extern fragS *symbol_get_frag (symbolS *);
 extern void symbol_mark_used (symbolS *);
@@ -206,6 +208,7 @@ extern symbolS *symbol_symbolS (symbolS *);
 extern asymbol *symbol_get_bfdsym (symbolS *);
 extern void symbol_set_bfdsym (symbolS *, asymbol *);
 extern int symbol_same_p (symbolS *, symbolS *);
+extern int symbol_octets_p (symbolS *);
 
 #ifdef OBJ_SYMFIELD_TYPE
 OBJ_SYMFIELD_TYPE *symbol_get_obj (symbolS *);
