@@ -1,3 +1,8 @@
+2019-03-11  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2read.c (dwarf2_find_containing_comp_unit): Remove
+	redundant assignment to "this_cu".
+
 2019-03-08  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdbtypes.c (rank_one_type): Remove unnecessary cases from switch.

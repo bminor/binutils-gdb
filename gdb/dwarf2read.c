@@ -25157,7 +25157,6 @@ dwarf2_find_containing_comp_unit (sect_offset sect_off,
     }
   else
     {
-      this_cu = dwarf2_per_objfile->all_comp_units[low];
       if (low == dwarf2_per_objfile->all_comp_units.size () - 1
 	  && sect_off >= this_cu->sect_off + this_cu->length)
 	error (_("invalid dwarf2 offset %s"), sect_offset_str (sect_off));
