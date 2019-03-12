@@ -1644,19 +1644,10 @@ lookup_template_type (char *name, struct type *type,
   return (SYMBOL_TYPE (sym));
 }
 
-/* Given a type TYPE, lookup the type of the component named NAME.
+/* See gdbtypes.h.  */
 
-   TYPE can be either a struct or union, or a pointer or reference to
-   a struct or union.  If it is a pointer or reference, its target
-   type is automatically used.  Thus '.' and '->' are interchangable,
-   as specified for the definitions of the expression element types
-   STRUCTOP_STRUCT and STRUCTOP_PTR.
-
-   If NOERR is nonzero, return NULL if there is no component named
-   NAME.  */
-
-struct type *
-lookup_struct_elt_type (struct type *type, const char *name, int noerr)
+struct_elt
+lookup_struct_elt (struct type *type, const char *name, int noerr)
 {
   int i;
 
@@ -1683,37 +1674,45 @@ lookup_struct_elt_type (struct type *type, const char *name, int noerr)
 
       if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
 	{
-	  return TYPE_FIELD_TYPE (type, i);
+	  return {&TYPE_FIELD (type, i), TYPE_FIELD_BITPOS (type, i)};
 	}
      else if (!t_field_name || *t_field_name == '\0')
 	{
-	  struct type *subtype 
-	    = lookup_struct_elt_type (TYPE_FIELD_TYPE (type, i), name, 1);
-
-	  if (subtype != NULL)
-	    return subtype;
+	  struct_elt elt
+	    = lookup_struct_elt (TYPE_FIELD_TYPE (type, i), name, 1);
+	  if (elt.field != NULL)
+	    {
+	      elt.offset += TYPE_FIELD_BITPOS (type, i);
+	      return elt;
+	    }
 	}
     }
 
   /* OK, it's not in this class.  Recursively check the baseclasses.  */
   for (i = TYPE_N_BASECLASSES (type) - 1; i >= 0; i--)
     {
-      struct type *t;
-
-      t = lookup_struct_elt_type (TYPE_BASECLASS (type, i), name, 1);
-      if (t != NULL)
-	{
-	  return t;
-	}
+      struct_elt elt = lookup_struct_elt (TYPE_BASECLASS (type, i), name, 1);
+      if (elt.field != NULL)
+	return elt;
     }
 
   if (noerr)
-    {
-      return NULL;
-    }
+    return {nullptr, 0};
 
   std::string type_name = type_to_string (type);
   error (_("Type %s has no component named %s."), type_name.c_str (), name);
+}
+
+/* See gdbtypes.h.  */
+
+struct type *
+lookup_struct_elt_type (struct type *type, const char *name, int noerr)
+{
+  struct_elt elt = lookup_struct_elt (type, name, noerr);
+  if (elt.field != NULL)
+    return FIELD_TYPE (*elt.field);
+  else
+    return NULL;
 }
 
 /* Store in *MAX the largest number representable by unsigned integer type

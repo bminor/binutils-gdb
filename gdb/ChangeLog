@@ -1,5 +1,12 @@
 2019-03-12  John Baldwin  <jhb@FreeBSD.org>
 
+	* gdbtypes.c (lookup_struct_elt): New function.
+	(lookup_struct_elt_type): Reimplement via lookup_struct_elt.
+	* gdbtypes.h (struct struct_elt): New type.
+	(lookup_struct_elt): New prototype.
+
+2019-03-12  John Baldwin  <jhb@FreeBSD.org>
+
 	* gdbtypes.c (lookup_struct_elt_type): Update comment and
 	remove disabled code block.
 

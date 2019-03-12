@@ -1873,6 +1873,44 @@ extern struct type *allocate_stub_method (struct type *);
 
 extern const char *type_name_or_error (struct type *type);
 
+struct struct_elt
+{
+  /* The field of the element, or NULL if no element was found.  */
+  struct field *field;
+
+  /* The bit offset of the element in the parent structure.  */
+  LONGEST offset;
+};
+
+/* Given a type TYPE, lookup the field and offset of the component named
+   NAME.
+
+   TYPE can be either a struct or union, or a pointer or reference to
+   a struct or union.  If it is a pointer or reference, its target
+   type is automatically used.  Thus '.' and '->' are interchangable,
+   as specified for the definitions of the expression element types
+   STRUCTOP_STRUCT and STRUCTOP_PTR.
+
+   If NOERR is nonzero, the returned structure will have field set to
+   NULL if there is no component named NAME.
+
+   If the component NAME is a field in an anonymous substructure of
+   TYPE, the returned offset is a "global" offset relative to TYPE
+   rather than an offset within the substructure.  */
+
+extern struct_elt lookup_struct_elt (struct type *, const char *, int);
+
+/* Given a type TYPE, lookup the type of the component named NAME.
+
+   TYPE can be either a struct or union, or a pointer or reference to
+   a struct or union.  If it is a pointer or reference, its target
+   type is automatically used.  Thus '.' and '->' are interchangable,
+   as specified for the definitions of the expression element types
+   STRUCTOP_STRUCT and STRUCTOP_PTR.
+
+   If NOERR is nonzero, return NULL if there is no component named
+   NAME.  */
+
 extern struct type *lookup_struct_elt_type (struct type *, const char *, int);
 
 extern struct type *make_pointer_type (struct type *, struct type **);
