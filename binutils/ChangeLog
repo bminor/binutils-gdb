@@ -1,3 +1,10 @@
+2019-03-12  Alan Modra  <amodra@gmail.com>
+
+	* objdump.c (load_specific_debug_section): Don't compare section
+	size against file size.
+	(dump_relocs_in_section): Don't compare reloc size against file size.
+	Print "failed to read relocs" on bfd_get_reloc_upper_bound error.
+
 2019-03-05  Nick Clifton  <nickc@redhat.com>
 
 	PR 24295

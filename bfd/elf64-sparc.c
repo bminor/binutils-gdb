@@ -19,6 +19,7 @@
    MA 02110-1301, USA.  */
 
 #include "sysdep.h"
+#include <limits.h>
 #include "bfd.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
@@ -33,16 +34,36 @@
    section can represent up to two relocs, we must tell the user to allocate
    more space.  */
 
+#if GCC_VERSION >= 4003
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wtype-limits"
+#endif
 static long
 elf64_sparc_get_reloc_upper_bound (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 {
+  if (sec->reloc_count >= LONG_MAX / 2 / sizeof (arelent *))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      return -1;
+    }
   return (sec->reloc_count * 2 + 1) * sizeof (arelent *);
 }
+#if GCC_VERSION >= 4003
+# pragma GCC diagnostic pop
+#endif
 
 static long
 elf64_sparc_get_dynamic_reloc_upper_bound (bfd *abfd)
 {
-  return _bfd_elf_get_dynamic_reloc_upper_bound (abfd) * 2;
+  long ret = _bfd_elf_get_dynamic_reloc_upper_bound (abfd);
+  if (ret > LONG_MAX / 2)
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      ret = -1;
+    }
+  else if (ret > 0)
+    ret *= 2;
+  return ret;
 }
 
 /* Read  relocations for ASECT from REL_HDR.  There are RELOC_COUNT of

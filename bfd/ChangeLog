@@ -1,3 +1,31 @@
+2019-03-12  Alan Modra  <amodra@gmail.com>
+
+	* coffcode.h (buy_and_read): Delete unnecessary forward decl.  Add
+	nmemb parameter.  Use bfd_alloc2.
+	(coff_slurp_line_table): Use bfd_alloc2.  Update buy_and_read calls.
+	Delete assertion.
+	(coff_slurp_symbol_table): Use bfd_alloc2 and bfd_zalloc2.
+	(coff_slurp_reloc_table): Use bfd_alloc2.  Update buy_and_read calls.
+	* coffgen.c (coff_get_reloc_upper_bound): Ensure size calculation
+	doesn't overflow.
+	* elf.c (bfd_section_from_shdr): Use bfd_zalloc2.  Style fix.
+	(assign_section_numbers): Style fix.
+	(swap_out_syms): Use bfd_malloc2.
+	(_bfd_elf_get_reloc_upper_bound): Ensure size calculation doesn't
+	overflow.
+	(_bfd_elf_make_empty_symbol): Style fix.
+	(elfobj_grok_stapsdt_note_1): Formatting.
+	* elfcode.h (elf_object_p): Use bfd_alloc2.
+	(elf_write_relocs, elf_write_shdrs_and_ehdr): Likewise.
+	(elf_slurp_symbol_table): Use bfd_zalloc2.
+	(elf_slurp_reloc_table): Use bfd_alloc2.
+	(_bfd_elf_bfd_from_remote_memory): Use bfd_malloc2.
+	* elf64-sparc (elf64_sparc_get_reloc_upper_bound): Ensure
+	size calculation doesn't overflow.
+	(elf64_sparc_get_dynamic_reloc_upper_bound): Likewise.
+	* mach-o.c (bfd_mach_o_get_reloc_upper_bound): Likewise.
+	* pdp11.c (get_reloc_upper_bound): Copy aoutx.h version.
+
 2019-03-08  Alan Modra  <amodra@gmail.com>
 
 	PR 24311

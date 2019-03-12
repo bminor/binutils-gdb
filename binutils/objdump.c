@@ -2695,7 +2695,7 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
   section->user_data = sec;
   section->size = bfd_get_section_size (sec);
   amt = section->size + 1;
-  if (amt == 0 || amt > bfd_get_file_size (abfd))
+  if (amt == 0)
     {
       section->start = NULL;
       free_debug_section (debug);
@@ -3640,47 +3640,28 @@ dump_relocs_in_section (bfd *abfd,
       || ((section->flags & SEC_RELOC) == 0))
     return;
 
-  relsize = bfd_get_reloc_upper_bound (abfd, section);
-  if (relsize < 0)
-    bfd_fatal (bfd_get_filename (abfd));
-
   printf ("RELOCATION RECORDS FOR [%s]:", sanitize_string (section->name));
 
+  relsize = bfd_get_reloc_upper_bound (abfd, section);
   if (relsize == 0)
     {
       printf (" (none)\n\n");
       return;
     }
 
-  if ((bfd_get_file_flags (abfd) & (BFD_IN_MEMORY | BFD_LINKER_CREATED)) == 0
-      && (/* Check that the size of the relocs is reasonable.  Note that some
-	     file formats, eg aout, can have relocs whose internal size is
-	     larger than their external size, thus we check the size divided
-	     by four against the file size.  See PR 23931 for an example of
-	     this.  */
-	  ((ufile_ptr) (relsize / 4) > bfd_get_file_size (abfd))
-	  /* Also check the section's reloc count since if this is negative
-	     (or very large) the computation in bfd_get_reloc_upper_bound
-	     may have resulted in returning a small, positive integer.
-	     See PR 22508 for a reproducer.
-
-	     Note - we check against file size rather than section size as
-	     it is possible for there to be more relocs that apply to a
-	     section than there are bytes in that section.  */
-	  || (section->reloc_count > bfd_get_file_size (abfd))))
+  if (relsize < 0)
+    relcount = relsize;
+  else
     {
-      printf (" (too many: %#x relocs)\n", section->reloc_count);
-      bfd_set_error (bfd_error_file_truncated);
-      bfd_fatal (bfd_get_filename (abfd));
+      relpp = (arelent **) xmalloc (relsize);
+      relcount = bfd_canonicalize_reloc (abfd, section, relpp, syms);
     }
-
-  relpp = (arelent **) xmalloc (relsize);
-  relcount = bfd_canonicalize_reloc (abfd, section, relpp, syms);
 
   if (relcount < 0)
     {
       printf ("\n");
-      non_fatal (_("failed to read relocs in: %s"), sanitize_string (bfd_get_filename (abfd)));
+      non_fatal (_("failed to read relocs in: %s"),
+		 sanitize_string (bfd_get_filename (abfd)));
       bfd_fatal (_("error message was"));
     }
   else if (relcount == 0)

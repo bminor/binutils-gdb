@@ -423,8 +423,6 @@ static bfd_boolean coff_write_object_contents
   (bfd *) ATTRIBUTE_UNUSED;
 static bfd_boolean coff_set_section_contents
   (bfd *, asection *, const void *, file_ptr, bfd_size_type);
-static void * buy_and_read
-  (bfd *, file_ptr, bfd_size_type);
 static bfd_boolean coff_slurp_line_table
   (bfd *, asection *);
 static bfd_boolean coff_slurp_symbol_table
@@ -4197,12 +4195,14 @@ coff_set_section_contents (bfd * abfd,
 }
 
 static void *
-buy_and_read (bfd *abfd, file_ptr where, bfd_size_type size)
+buy_and_read (bfd *abfd, file_ptr where,
+	      bfd_size_type nmemb, bfd_size_type size)
 {
-  void * area = bfd_alloc (abfd, size);
+  void *area = bfd_alloc2 (abfd, nmemb, size);
 
   if (!area)
     return NULL;
+  size *= nmemb;
   if (bfd_seek (abfd, where, SEEK_SET) != 0
       || bfd_bread (area, size, abfd) != size)
     return NULL;
@@ -4255,7 +4255,6 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 {
   LINENO *native_lineno;
   alent *lineno_cache;
-  bfd_size_type amt;
   unsigned int counter;
   alent *cache_ptr;
   bfd_vma prev_offset = 0;
@@ -4278,13 +4277,15 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
       return FALSE;
     }
 
-  amt = ((bfd_size_type) asect->lineno_count + 1) * sizeof (alent);
-  lineno_cache = (alent *) bfd_alloc (abfd, amt);
+  lineno_cache = (alent *) bfd_alloc2 (abfd,
+				       (bfd_size_type) asect->lineno_count + 1,
+				       sizeof (alent));
   if (lineno_cache == NULL)
     return FALSE;
 
-  amt = (bfd_size_type) bfd_coff_linesz (abfd) * asect->lineno_count;
-  native_lineno = (LINENO *) buy_and_read (abfd, asect->line_filepos, amt);
+  native_lineno = (LINENO *) buy_and_read (abfd, asect->line_filepos,
+					   asect->lineno_count,
+					   bfd_coff_linesz (abfd));
   if (native_lineno == NULL)
     {
       _bfd_error_handler
@@ -4393,7 +4394,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
       alent *n_lineno_cache;
 
       /* Create a table of functions.  */
-      func_table = (alent **) bfd_alloc (abfd, nbr_func * sizeof (alent *));
+      func_table = (alent **) bfd_alloc2 (abfd, nbr_func, sizeof (alent *));
       if (func_table != NULL)
 	{
 	  alent **p = func_table;
@@ -4409,8 +4410,8 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	  qsort (func_table, nbr_func, sizeof (alent *), coff_sort_func_alent);
 
 	  /* Create the new sorted table.  */
-	  amt = (bfd_size_type) asect->lineno_count * sizeof (alent);
-	  n_lineno_cache = (alent *) bfd_alloc (abfd, amt);
+	  n_lineno_cache = (alent *) bfd_alloc2 (abfd, asect->lineno_count,
+						 sizeof (alent));
 	  if (n_lineno_cache != NULL)
 	    {
 	      alent *n_cache_ptr = n_lineno_cache;
@@ -4430,9 +4431,9 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 		    *n_cache_ptr++ = *old_ptr++;
 		  while (old_ptr->line_number != 0);
 		}
-	      BFD_ASSERT ((bfd_size_type) (n_cache_ptr - n_lineno_cache) == (amt / sizeof (alent)));
 
-	      memcpy (lineno_cache, n_lineno_cache, amt);
+	      memcpy (lineno_cache, n_lineno_cache,
+		      asect->lineno_count * sizeof (alent));
 	    }
 	  else
 	    ret = FALSE;
@@ -4455,7 +4456,6 @@ coff_slurp_symbol_table (bfd * abfd)
   combined_entry_type *native_symbols;
   coff_symbol_type *cached_area;
   unsigned int *table_ptr;
-  bfd_size_type amt;
   unsigned int number_of_symbols = 0;
   bfd_boolean ret = TRUE;
 
@@ -4467,15 +4467,14 @@ coff_slurp_symbol_table (bfd * abfd)
     return FALSE;
 
   /* Allocate enough room for all the symbols in cached form.  */
-  amt = obj_raw_syment_count (abfd);
-  amt *= sizeof (coff_symbol_type);
-  cached_area = (coff_symbol_type *) bfd_alloc (abfd, amt);
+  cached_area = (coff_symbol_type *) bfd_alloc2 (abfd,
+						 obj_raw_syment_count (abfd),
+						 sizeof (coff_symbol_type));
   if (cached_area == NULL)
     return FALSE;
 
-  amt = obj_raw_syment_count (abfd);
-  amt *= sizeof (unsigned int);
-  table_ptr = (unsigned int *) bfd_zalloc (abfd, amt);
+  table_ptr = (unsigned int *) bfd_zalloc2 (abfd, obj_raw_syment_count (abfd),
+					    sizeof (unsigned int));
 
   if (table_ptr == NULL)
     return FALSE;
@@ -4963,7 +4962,6 @@ coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
   arelent *reloc_cache;
   arelent *cache_ptr;
   unsigned int idx;
-  bfd_size_type amt;
 
   if (asect->relocation)
     return TRUE;
@@ -4974,10 +4972,11 @@ coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
   if (!coff_slurp_symbol_table (abfd))
     return FALSE;
 
-  amt = (bfd_size_type) bfd_coff_relsz (abfd) * asect->reloc_count;
-  native_relocs = (RELOC *) buy_and_read (abfd, asect->rel_filepos, amt);
-  amt = (bfd_size_type) asect->reloc_count * sizeof (arelent);
-  reloc_cache = (arelent *) bfd_alloc (abfd, amt);
+  native_relocs = (RELOC *) buy_and_read (abfd, asect->rel_filepos,
+					  asect->reloc_count,
+					  bfd_coff_relsz (abfd));
+  reloc_cache = (arelent *) bfd_alloc2 (abfd, asect->reloc_count,
+					sizeof (arelent));
 
   if (reloc_cache == NULL || native_relocs == NULL)
     return FALSE;

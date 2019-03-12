@@ -2036,9 +2036,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	sections_being_created = NULL;
       if (sections_being_created == NULL)
 	{
-	  /* FIXME: It would be more efficient to attach this array to the bfd somehow.  */
 	  sections_being_created = (bfd_boolean *)
-	    bfd_zalloc (abfd, elf_numsections (abfd) * sizeof (bfd_boolean));
+	    bfd_zalloc2 (abfd, elf_numsections (abfd), sizeof (bfd_boolean));
 	  sections_being_created_abfd = abfd;
 	}
       if (sections_being_created [shindex])
@@ -2259,7 +2258,7 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	  if (entry->ndx == shindex)
 	    goto success;
 
-	entry = bfd_alloc (abfd, sizeof * entry);
+	entry = bfd_alloc (abfd, sizeof (*entry));
 	if (entry == NULL)
 	  goto fail;
 	entry->ndx = shindex;
@@ -3737,11 +3736,11 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
       _bfd_elf_strtab_addref (elf_shstrtab (abfd), t->symtab_hdr.sh_name);
       if (section_number > ((SHN_LORESERVE - 2) & 0xFFFF))
 	{
-	  elf_section_list * entry;
+	  elf_section_list *entry;
 
 	  BFD_ASSERT (elf_symtab_shndx_list (abfd) == NULL);
 
-	  entry = bfd_zalloc (abfd, sizeof * entry);
+	  entry = bfd_zalloc (abfd, sizeof (*entry));
 	  entry->ndx = section_number++;
 	  elf_symtab_shndx_list (abfd) = entry;
 	  entry->hdr.sh_name
@@ -7901,8 +7900,8 @@ swap_out_syms (bfd *abfd,
   symstrtab_hdr->sh_type = SHT_STRTAB;
 
   /* Allocate buffer to swap out the .strtab section.  */
-  symstrtab = (struct elf_sym_strtab *) bfd_malloc ((symcount + 1)
-						    * sizeof (*symstrtab));
+  symstrtab = (struct elf_sym_strtab *) bfd_malloc2 (symcount + 1,
+						     sizeof (*symstrtab));
   if (symstrtab == NULL)
     {
       _bfd_elf_strtab_free (stt);
@@ -8269,12 +8268,25 @@ _bfd_elf_get_dynamic_symtab_upper_bound (bfd *abfd)
   return symtab_size;
 }
 
+#if GCC_VERSION >= 4003
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wtype-limits"
+#endif
 long
 _bfd_elf_get_reloc_upper_bound (bfd *abfd ATTRIBUTE_UNUSED,
 				sec_ptr asect)
 {
+
+  if (asect->reloc_count >= LONG_MAX / sizeof (arelent *))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      return -1;
+    }
   return (asect->reloc_count + 1) * sizeof (arelent *);
 }
+#if GCC_VERSION >= 4003
+# pragma GCC diagnostic pop
+#endif
 
 /* Canonicalize the relocs.  */
 
@@ -8753,7 +8765,7 @@ _bfd_elf_make_empty_symbol (bfd *abfd)
 {
   elf_symbol_type *newsym;
 
-  newsym = (elf_symbol_type *) bfd_zalloc (abfd, sizeof * newsym);
+  newsym = (elf_symbol_type *) bfd_zalloc (abfd, sizeof (*newsym));
   if (!newsym)
     return NULL;
   newsym->symbol.the_bfd = abfd;
@@ -10233,8 +10245,8 @@ static bfd_boolean
 elfobj_grok_stapsdt_note_1 (bfd *abfd, Elf_Internal_Note *note)
 {
   struct sdt_note *cur =
-    (struct sdt_note *) bfd_alloc (abfd, sizeof (struct sdt_note)
-				   + note->descsz);
+    (struct sdt_note *) bfd_alloc (abfd,
+				   sizeof (struct sdt_note) + note->descsz);
 
   cur->next = (struct sdt_note *) (elf_tdata (abfd))->sdt_note_head;
   cur->size = (bfd_size_type) note->descsz;
