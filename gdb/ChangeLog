@@ -1,5 +1,9 @@
 2019-03-12  Pedro Alves  <palves@redhat.com>
 
+	* yy-remap.h [TEST_CPNAMES] (YYFPRINTF): Don't define.
+
+2019-03-12  Pedro Alves  <palves@redhat.com>
+
 	* cp-name-parser.y (main): Remove unused 'len' variable.
 
 2019-03-12  Tom Tromey  <tromey@adacore.com>
