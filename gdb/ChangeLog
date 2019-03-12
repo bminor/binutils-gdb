@@ -1,3 +1,7 @@
+2019-03-12  John Baldwin  <jhb@FreeBSD.org>
+
+	* NEWS: Combine separate "New targets" sections for 8.3.
+
 2019-03-14  Eli Zaretskii  <eliz@gnu.org>
 
 	The MS-Windows port of ncurses fails to switch to a color pair if
