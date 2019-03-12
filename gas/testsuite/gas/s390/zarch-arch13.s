@@ -55,27 +55,27 @@ foo:
 	selgrnh	%r6,%r9,%r11
 	selgrnp	%r6,%r9,%r11
 	selgrno	%r6,%r9,%r11
-	selhhhr	%r6,%r9,%r11,13
-	selhhhro	%r6,%r9,%r11
-	selhhhrh	%r6,%r9,%r11
-	selhhhrp	%r6,%r9,%r11
-	selhhhrnle	%r6,%r9,%r11
-	selhhhrl	%r6,%r9,%r11
-	selhhhrm	%r6,%r9,%r11
-	selhhhrnhe	%r6,%r9,%r11
-	selhhhrlh	%r6,%r9,%r11
-	selhhhrne	%r6,%r9,%r11
-	selhhhrnz	%r6,%r9,%r11
-	selhhhre	%r6,%r9,%r11
-	selhhhrz	%r6,%r9,%r11
-	selhhhrnlh	%r6,%r9,%r11
-	selhhhrhe	%r6,%r9,%r11
-	selhhhrnl	%r6,%r9,%r11
-	selhhhrnm	%r6,%r9,%r11
-	selhhhrle	%r6,%r9,%r11
-	selhhhrnh	%r6,%r9,%r11
-	selhhhrnp	%r6,%r9,%r11
-	selhhhrno	%r6,%r9,%r11
+	selfhr	%r6,%r9,%r11,13
+	selfhro	%r6,%r9,%r11
+	selfhrh	%r6,%r9,%r11
+	selfhrp	%r6,%r9,%r11
+	selfhrnle	%r6,%r9,%r11
+	selfhrl	%r6,%r9,%r11
+	selfhrm	%r6,%r9,%r11
+	selfhrnhe	%r6,%r9,%r11
+	selfhrlh	%r6,%r9,%r11
+	selfhrne	%r6,%r9,%r11
+	selfhrnz	%r6,%r9,%r11
+	selfhre	%r6,%r9,%r11
+	selfhrz	%r6,%r9,%r11
+	selfhrnlh	%r6,%r9,%r11
+	selfhrhe	%r6,%r9,%r11
+	selfhrnl	%r6,%r9,%r11
+	selfhrnm	%r6,%r9,%r11
+	selfhrle	%r6,%r9,%r11
+	selfhrnh	%r6,%r9,%r11
+	selfhrnp	%r6,%r9,%r11
+	selfhrno	%r6,%r9,%r11
 	vlbr	%v15,4000(%r6,%r9),13
 	vlbrh	%v15,4000(%r6,%r9)
 	vlbrf	%v15,4000(%r6,%r9)
@@ -124,11 +124,8 @@ foo:
 	vstrsf	%v15,%v17,%v20,%v24
 	vstrsf	%v15,%v17,%v20,%v24,13
 	vstrszb	%v15,%v17,%v20,%v24
-	vstrszb	%v15,%v17,%v20,%v24,13
 	vstrszh	%v15,%v17,%v20,%v24
-	vstrszh	%v15,%v17,%v20,%v24,13
 	vstrszf	%v15,%v17,%v20,%v24
-	vstrszf	%v15,%v17,%v20,%v24,13
 	vcfps	%v15,%v17,13,12,11
 	vcefb	%v15,%v17,13,12
 	wcefb	%v15,%v17,13,12

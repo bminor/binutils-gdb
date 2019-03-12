@@ -1,3 +1,11 @@
+2019-03-12  Andreas Krebbel  <krebbel@linux.ibm.com>
+
+	Backport from mainline
+	2019-03-12  Andreas Krebbel  <krebbel@linux.ibm.com>
+
+	* testsuite/gas/s390/zarch-arch13.s: Adjust testcase to optable changes.
+	* testsuite/gas/s390/zarch-arch13.d: Likewise.
+
 2019-02-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/24165

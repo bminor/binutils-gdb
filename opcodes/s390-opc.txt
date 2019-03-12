@@ -1910,8 +1910,8 @@ b9f0 selr RRF_RURR "select 32 bit" arch13 zarch
 b9f00000 selr*20 RRF_R0RR3 "select 32 bit" arch13 zarch
 b9e3 selgr RRF_RURR "select 64 bit" arch13 zarch
 b9e30000 selgr*20 RRF_R0RR3 "select 64 bit" arch13 zarch
-b9c0 selhhhr RRF_RURR "select high" arch13 zarch
-b9c00000 selhhhr*20 RRF_R0RR3 "select high" arch13 zarch
+b9c0 selfhr RRF_RURR "select high" arch13 zarch
+b9c00000 selfhr*20 RRF_R0RR3 "select high" arch13 zarch
 
 # Vector Enhancements Facility 2
 
@@ -1969,9 +1969,9 @@ e7000000008b vstrsb VRR_VVVU0VB "vector string search byte" arch13 zarch optparm
 e7000100008b vstrsh VRR_VVVU0VB "vector string search halfword" arch13 zarch optparm
 e7000200008b vstrsf VRR_VVVU0VB "vector string search word" arch13 zarch optparm
 
-e7000020008b vstrszb VRR_VVVU0VB2 "vector string search byte zero" arch13 zarch optparm
-e7000120008b vstrszh VRR_VVVU0VB2 "vector string search halfword zero" arch13 zarch optparm
-e7000220008b vstrszf VRR_VVVU0VB2 "vector string search word zero" arch13 zarch optparm
+e7000020008b vstrszb VRR_VVV0V "vector string search byte zero" arch13 zarch
+e7000120008b vstrszh VRR_VVV0V "vector string search halfword zero" arch13 zarch
+e7000220008b vstrszf VRR_VVV0V "vector string search word zero" arch13 zarch
 
 e700000000c3 vcfps VRR_VV0UUU "vector fp convert from fixed" arch13 zarch
 e700000020c3 vcefb VRR_VV0UU "vector fp convert from fixed 32 bit" arch13 zarch
