@@ -694,7 +694,7 @@ i386_linux_read_description (uint64_t xcr0)
     [(xcr0 & X86_XSTATE_PKRU) ? 1 : 0];
 
   if (*tdesc == NULL)
-    *tdesc = i386_create_target_description (xcr0, true);
+    *tdesc = i386_create_target_description (xcr0, true, false);
 
   return *tdesc;
 }

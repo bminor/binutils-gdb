@@ -160,7 +160,7 @@ i386_fbsd_nat_target::read_description ()
   if (x86bsd_xsave_len == 0)
     xcr0 = X86_XSTATE_SSE_MASK;
 
-  return i386_target_description (xcr0);
+  return i386_target_description (xcr0, false);
 }
 #endif
 

@@ -21,6 +21,7 @@
 #include "common/tdesc.h"
 #include <stdint.h>
 
-target_desc *i386_create_target_description (uint64_t xcr0, bool is_linux);
+target_desc *i386_create_target_description (uint64_t xcr0, bool is_linux,
+					     bool segments);
 
 #endif /* ARCH_I386_H */

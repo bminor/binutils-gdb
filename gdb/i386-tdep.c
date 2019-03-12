@@ -8175,7 +8175,7 @@ i386_validate_tdesc_p (struct gdbarch_tdep *tdep,
   const struct tdesc_feature *feature_core;
 
   const struct tdesc_feature *feature_sse, *feature_avx, *feature_mpx,
-			     *feature_avx512, *feature_pkeys;
+			     *feature_avx512, *feature_pkeys, *feature_segments;
   int i, num_regs, valid_p;
 
   if (! tdesc_has_registers (tdesc))
@@ -8197,6 +8197,9 @@ i386_validate_tdesc_p (struct gdbarch_tdep *tdep,
 
   /* Try AVX512 registers.  */
   feature_avx512 = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.avx512");
+
+  /* Try segment base registers.  */
+  feature_segments = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.segments");
 
   /* Try PKEYS  */
   feature_pkeys = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.pkeys");
@@ -8305,6 +8308,16 @@ i386_validate_tdesc_p (struct gdbarch_tdep *tdep,
 	valid_p &= tdesc_numbered_register (feature_mpx, tdesc_data,
 	    I387_BND0R_REGNUM (tdep) + i,
 	    tdep->mpx_register_names[i]);
+    }
+
+  if (feature_segments)
+    {
+      if (tdep->fsbase_regnum < 0)
+	tdep->fsbase_regnum = I386_FSBASE_REGNUM;
+      valid_p &= tdesc_numbered_register (feature_segments, tdesc_data,
+					  tdep->fsbase_regnum, "fs_base");
+      valid_p &= tdesc_numbered_register (feature_segments, tdesc_data,
+					  tdep->fsbase_regnum + 1, "gs_base");
     }
 
   if (feature_pkeys)
@@ -8543,14 +8556,14 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Even though the default ABI only includes general-purpose registers,
      floating-point registers and the SSE registers, we have to leave a
      gap for the upper AVX, MPX and AVX512 registers.  */
-  set_gdbarch_num_regs (gdbarch, I386_PKEYS_NUM_REGS);
+  set_gdbarch_num_regs (gdbarch, I386_NUM_REGS);
 
   set_gdbarch_gnu_triplet_regexp (gdbarch, i386_gnu_triplet_regexp);
 
   /* Get the x86 target description from INFO.  */
   tdesc = info.target_desc;
   if (! tdesc_has_registers (tdesc))
-    tdesc = i386_target_description (X86_XSTATE_SSE_MASK);
+    tdesc = i386_target_description (X86_XSTATE_SSE_MASK, false);
   tdep->tdesc = tdesc;
 
   tdep->num_core_regs = I386_NUM_GREGS + I387_NUM_REGS;
@@ -8591,6 +8604,9 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* No PKEYS registers  */
   tdep->pkru_regnum = -1;
   tdep->num_pkeys_regs = 0;
+
+  /* No segment base registers.  */
+  tdep->fsbase_regnum = -1;
 
   tdesc_data = tdesc_data_alloc ();
 
@@ -8717,20 +8733,21 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 /* Return the target description for a specified XSAVE feature mask.  */
 
 const struct target_desc *
-i386_target_description (uint64_t xcr0)
+i386_target_description (uint64_t xcr0, bool segments)
 {
   static target_desc *i386_tdescs \
-    [2/*SSE*/][2/*AVX*/][2/*MPX*/][2/*AVX512*/][2/*PKRU*/] = {};
+    [2/*SSE*/][2/*AVX*/][2/*MPX*/][2/*AVX512*/][2/*PKRU*/][2/*segments*/] = {};
   target_desc **tdesc;
 
   tdesc = &i386_tdescs[(xcr0 & X86_XSTATE_SSE) ? 1 : 0]
     [(xcr0 & X86_XSTATE_AVX) ? 1 : 0]
     [(xcr0 & X86_XSTATE_MPX) ? 1 : 0]
     [(xcr0 & X86_XSTATE_AVX512) ? 1 : 0]
-    [(xcr0 & X86_XSTATE_PKRU) ? 1 : 0];
+    [(xcr0 & X86_XSTATE_PKRU) ? 1 : 0]
+    [segments ? 1 : 0];
 
   if (*tdesc == NULL)
-    *tdesc = i386_create_target_description (xcr0, false);
+    *tdesc = i386_create_target_description (xcr0, false, segments);
 
   return *tdesc;
 }
@@ -9072,7 +9089,7 @@ Show Intel Memory Protection Extensions specific variables."),
 
   for (auto &a : xml_masks)
     {
-      auto tdesc = i386_target_description (a.mask);
+      auto tdesc = i386_target_description (a.mask, false);
 
       selftests::record_xml_tdesc (a.xml, tdesc);
     }
