@@ -320,6 +320,30 @@ i386fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 	"XSAVE extended state", cb_data);
 }
 
+/* Implement the get_thread_local_address gdbarch method.  */
+
+static CORE_ADDR
+i386fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
+				   CORE_ADDR lm_addr, CORE_ADDR offset)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  struct regcache *regcache;
+
+  if (tdep->fsbase_regnum == -1)
+    error (_("Unable to fetch %%gsbase"));
+
+  regcache = get_thread_arch_regcache (ptid, gdbarch);
+
+  target_fetch_registers (regcache, tdep->fsbase_regnum + 1);
+
+  ULONGEST gsbase;
+  if (regcache->cooked_read (tdep->fsbase_regnum + 1, &gsbase) != REG_VALID)
+    error (_("Unable to fetch %%gsbase"));
+
+  CORE_ADDR dtv_addr = gsbase + gdbarch_ptr_bit (gdbarch) / 8;
+  return fbsd_get_thread_local_address (gdbarch, dtv_addr, lm_addr, offset);
+}
+
 static void
 i386fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -418,6 +442,11 @@ i386fbsd4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_core_read_description (gdbarch,
 				     i386fbsd_core_read_description);
+
+  set_gdbarch_fetch_tls_load_module_address (gdbarch,
+					     svr4_fetch_objfile_link_map);
+  set_gdbarch_get_thread_local_address (gdbarch,
+					i386fbsd_get_thread_local_address);
 }
 
 void
