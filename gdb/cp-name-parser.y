@@ -2129,7 +2129,6 @@ main (int argc, char **argv)
   if (argv[arg] == NULL)
     while (fgets (buf, 65536, stdin) != NULL)
       {
-	int len;
 	buf[strlen (buf) - 1] = 0;
 	/* Use DMGL_VERBOSE to get expanded standard substitutions.  */
 	c = trim_chars (buf, &extra_chars);

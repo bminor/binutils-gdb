@@ -1,3 +1,7 @@
+2019-03-12  Pedro Alves  <palves@redhat.com>
+
+	* cp-name-parser.y (main): Remove unused 'len' variable.
+
 2019-03-12  Tom Tromey  <tromey@adacore.com>
 
 	* common/ptid.c (null_ptid, minus_one_ptid): Now const.
