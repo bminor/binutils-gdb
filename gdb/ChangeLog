@@ -1,5 +1,10 @@
 2019-03-12  John Baldwin  <jhb@FreeBSD.org>
 
+	* gdbtypes.c (lookup_struct_elt_type): Update comment and
+	remove disabled code block.
+
+2019-03-12  John Baldwin  <jhb@FreeBSD.org>
+
 	* gdbarch.sh (get_thread_local_address): New method.
 	* gdbarch.h, gdbarch.c: Regenerate.
 	* target.c (target_translate_tls_address): Use

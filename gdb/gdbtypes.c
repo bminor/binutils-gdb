@@ -1644,8 +1644,7 @@ lookup_template_type (char *name, struct type *type,
   return (SYMBOL_TYPE (sym));
 }
 
-/* Given a type TYPE, lookup the type of the component of type named
-   NAME.
+/* Given a type TYPE, lookup the type of the component named NAME.
 
    TYPE can be either a struct or union, or a pointer or reference to
    a struct or union.  If it is a pointer or reference, its target
@@ -1653,8 +1652,8 @@ lookup_template_type (char *name, struct type *type,
    as specified for the definitions of the expression element types
    STRUCTOP_STRUCT and STRUCTOP_PTR.
 
-   If NOERR is nonzero, return zero if NAME is not suitably defined.
-   If NAME is the name of a baseclass type, return that type.  */
+   If NOERR is nonzero, return NULL if there is no component named
+   NAME.  */
 
 struct type *
 lookup_struct_elt_type (struct type *type, const char *name, int noerr)
@@ -1677,20 +1676,6 @@ lookup_struct_elt_type (struct type *type, const char *name, int noerr)
       error (_("Type %s is not a structure or union type."),
 	     type_name.c_str ());
     }
-
-#if 0
-  /* FIXME: This change put in by Michael seems incorrect for the case
-     where the structure tag name is the same as the member name.
-     I.e. when doing "ptype bell->bar" for "struct foo { int bar; int
-     foo; } bell;" Disabled by fnf.  */
-  {
-    char *type_name;
-
-    type_name = TYPE_NAME (type);
-    if (type_name != NULL && strcmp (type_name, name) == 0)
-      return type;
-  }
-#endif
 
   for (i = TYPE_NFIELDS (type) - 1; i >= TYPE_N_BASECLASSES (type); i--)
     {
