@@ -144,6 +144,33 @@ i386bsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
 	return;
     }
 
+#ifdef PT_GETFSBASE
+  if (regnum == -1 || regnum == I386_FSBASE_REGNUM)
+    {
+      register_t base;
+
+      if (ptrace (PT_GETFSBASE, pid, (PTRACE_TYPE_ARG3) &base, 0) == -1)
+	perror_with_name (_("Couldn't get segment register fs_base"));
+
+      regcache->raw_supply (I386_FSBASE_REGNUM, &base);
+      if (regnum != -1)
+	return;
+    }
+#endif
+#ifdef PT_GETGSBASE
+  if (regnum == -1 || regnum == I386_GSBASE_REGNUM)
+    {
+      register_t base;
+
+      if (ptrace (PT_GETGSBASE, pid, (PTRACE_TYPE_ARG3) &base, 0) == -1)
+	perror_with_name (_("Couldn't get segment register gs_base"));
+
+      regcache->raw_supply (I386_GSBASE_REGNUM, &base);
+      if (regnum != -1)
+	return;
+    }
+#endif
+
   if (regnum == -1 || regnum >= I386_ST0_REGNUM)
     {
       struct fpreg fpregs;
@@ -210,6 +237,33 @@ i386bsd_store_inferior_registers (struct regcache *regcache, int regnum)
       if (regnum != -1)
 	return;
     }
+
+#ifdef PT_SETFSBASE
+  if (regnum == -1 || regnum == I386_FSBASE_REGNUM)
+    {
+      register_t base;
+
+      regcache->raw_collect (I386_FSBASE_REGNUM, &base);
+
+      if (ptrace (PT_SETFSBASE, pid, (PTRACE_TYPE_ARG3) &base, 0) == -1)
+	perror_with_name (_("Couldn't write segment register fs_base"));
+      if (regnum != -1)
+	return;
+    }
+#endif
+#ifdef PT_SETGSBASE
+  if (regnum == -1 || regnum == I386_GSBASE_REGNUM)
+    {
+      register_t base;
+
+      regcache->raw_collect (I386_GSBASE_REGNUM, &base);
+
+      if (ptrace (PT_SETGSBASE, pid, (PTRACE_TYPE_ARG3) &base, 0) == -1)
+	perror_with_name (_("Couldn't write segment register gs_base"));
+      if (regnum != -1)
+	return;
+    }
+#endif
 
   if (regnum == -1 || regnum >= I386_ST0_REGNUM)
     {

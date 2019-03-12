@@ -190,13 +190,13 @@ amd64_fbsd_nat_target::read_description ()
       if (is64)
 	return amd64_target_description (xcr0, true);
       else
-	return i386_target_description (xcr0, false);
+	return i386_target_description (xcr0, true);
     }
 #endif
   if (is64)
     return amd64_target_description (X86_XSTATE_SSE_MASK, true);
   else
-    return i386_target_description (X86_XSTATE_SSE_MASK, false);
+    return i386_target_description (X86_XSTATE_SSE_MASK, true);
 }
 
 #if defined(HAVE_PT_GETDBREGS) && defined(USE_SIGTRAP_SIGINFO)

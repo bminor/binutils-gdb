@@ -1,5 +1,20 @@
 2019-03-12  John Baldwin  <jhb@FreeBSD.org>
 
+	* amd64-bsd-nat.c (amd64bsd_fetch_inferior_registers): Use
+	tdep->fsbase_regnum instead of constants for fs_base and gs_base.
+	(amd64bsd_store_inferior_registers): Likewise.
+	* amd64-fbsd-nat.c (amd64_fbsd_nat_target::read_description):
+	Enable segment base registers.
+	* i386-bsd-nat.c (i386bsd_fetch_inferior_registers): Use
+	PT_GETFSBASE and PT_GETGSBASE.
+	(i386bsd_store_inferior_registers): Use PT_SETFSBASE and
+	PT_SETGSBASE.
+	* i386-fbsd-nat.c (i386_fbsd_nat_target::read_description): Enable
+	segment base registers.
+	* i386-fbsd-tdep.c (i386fbsd_core_read_description): Likewise.
+
+2019-03-12  John Baldwin  <jhb@FreeBSD.org>
+
 	* amd64-fbsd-nat.c (amd64_fbsd_nat_target::read_description):
 	Update calls to i386_target_description to add 'segments'
 	parameter.

@@ -267,7 +267,7 @@ i386fbsd_core_read_description (struct gdbarch *gdbarch,
 				struct target_ops *target,
 				bfd *abfd)
 {
-  return i386_target_description (i386fbsd_core_read_xcr0 (abfd), false);
+  return i386_target_description (i386fbsd_core_read_xcr0 (abfd), true);
 }
 
 /* Similar to i386_supply_fpregset, but use XSAVE extended state.  */
