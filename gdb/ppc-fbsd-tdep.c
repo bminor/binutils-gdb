@@ -279,6 +279,39 @@ ppcfbsd_return_value (struct gdbarch *gdbarch, struct value *function,
 					   regcache, readbuf, writebuf);
 }
 
+/* Implement the "get_thread_local_address" gdbarch method.  */
+
+static CORE_ADDR
+ppcfbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
+				  CORE_ADDR lm_addr, CORE_ADDR offset)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  struct regcache *regcache;
+  int tp_offset, tp_regnum;
+
+  regcache = get_thread_arch_regcache (ptid, gdbarch);
+
+  if (tdep->wordsize == 4)
+    {
+      tp_offset = 0x7008;
+      tp_regnum = PPC_R0_REGNUM + 2;
+    }
+  else
+    {
+      tp_offset = 0x7010;
+      tp_regnum = PPC_R0_REGNUM + 13;
+    }
+  target_fetch_registers (regcache, tp_regnum);
+
+  ULONGEST tp;
+  if (regcache->cooked_read (tp_regnum, &tp) != REG_VALID)
+    error (_("Unable to fetch tcb pointer"));
+
+  /* tp points to the end of the TCB block.  The first member of the
+     TCB is the pointer to the DTV array.  */
+  CORE_ADDR dtv_addr = tp - tp_offset;
+  return fbsd_get_thread_local_address (gdbarch, dtv_addr, lm_addr, offset);
+}
 
 static void
 ppcfbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -322,6 +355,8 @@ ppcfbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
 					     svr4_fetch_objfile_link_map);
+  set_gdbarch_get_thread_local_address (gdbarch,
+					ppcfbsd_get_thread_local_address);
 }
 
 void

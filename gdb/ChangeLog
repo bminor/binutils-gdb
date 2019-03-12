@@ -1,5 +1,12 @@
 2019-03-12  John Baldwin  <jhb@FreeBSD.org>
 
+	* ppc-fbsd-tdep.c (ppcfbsd_get_thread_local_address): New.
+	(ppcfbsd_init_abi): Install gdbarch
+	"fetch_tls_load_module_address" and "get_thread_local_address"
+	methods.
+
+2019-03-12  John Baldwin  <jhb@FreeBSD.org>
+
 	* riscv-fbsd-tdep.c (riscv_fbsd_get_thread_local_address): New.
 	(riscv_fbsd_init_abi): Install gdbarch
 	"fetch_tls_load_module_address" and "get_thread_local_address"
