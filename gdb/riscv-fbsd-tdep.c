@@ -174,6 +174,28 @@ static const struct tramp_frame riscv_fbsd_sigframe =
   riscv_fbsd_sigframe_init
 };
 
+/* Implement the "get_thread_local_address" gdbarch method.  */
+
+static CORE_ADDR
+riscv_fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
+				     CORE_ADDR lm_addr, CORE_ADDR offset)
+{
+  struct regcache *regcache;
+
+  regcache = get_thread_arch_regcache (ptid, gdbarch);
+
+  target_fetch_registers (regcache, RISCV_TP_REGNUM);
+
+  ULONGEST tp;
+  if (regcache->cooked_read (RISCV_TP_REGNUM, &tp) != REG_VALID)
+    error (_("Unable to fetch %%tp"));
+
+  /* %tp points to the end of the TCB which contains two pointers.
+      The first pointer in the TCB points to the DTV array.  */
+  CORE_ADDR dtv_addr = tp - (gdbarch_ptr_bit (gdbarch) / 8) * 2;
+  return fbsd_get_thread_local_address (gdbarch, dtv_addr, lm_addr, offset);
+}
+
 /* Implement the 'init_osabi' method of struct gdb_osabi_handler.  */
 
 static void
@@ -193,6 +215,11 @@ riscv_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_iterate_over_regset_sections
     (gdbarch, riscv_fbsd_iterate_over_regset_sections);
+
+  set_gdbarch_fetch_tls_load_module_address (gdbarch,
+					     svr4_fetch_objfile_link_map);
+  set_gdbarch_get_thread_local_address (gdbarch,
+					riscv_fbsd_get_thread_local_address);
 }
 
 void
