@@ -1,3 +1,8 @@
+2019-03-12  Andreas Krebbel  <krebbel@linux.ibm.com>
+
+	* testsuite/gas/s390/zarch-arch13.s: Adjust testcase to optable changes.
+	* testsuite/gas/s390/zarch-arch13.d: Likewise.
+
 2019-02-27  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* testsuite/gas/aarch64/dotproduct.d: Use multiple "as" lines.
