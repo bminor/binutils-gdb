@@ -1,5 +1,12 @@
 2019-03-12  John Baldwin  <jhb@FreeBSD.org>
 
+	* amd64-fbsd-tdep.c (amd64fbsd_get_thread_local_address): New.
+	(amd64fbsd_init_abi): Install gdbarch
+	"fetch_tls_load_module_address" and "get_thread_local_address"
+	methods.
+
+2019-03-12  John Baldwin  <jhb@FreeBSD.org>
+
 	* fbsd-tdep.c (fbsd_pspace_data_handle): New variable.
 	(struct fbsd_pspace_data): New type.
 	(get_fbsd_pspace_data, fbsd_pspace_data_cleanup)

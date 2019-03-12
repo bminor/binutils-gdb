@@ -204,6 +204,26 @@ amd64fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
       &amd64fbsd_xstateregset, "XSAVE extended state", cb_data);
 }
 
+/* Implement the get_thread_local_address gdbarch method.  */
+
+static CORE_ADDR
+amd64fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
+				    CORE_ADDR lm_addr, CORE_ADDR offset)
+{
+  struct regcache *regcache;
+
+  regcache = get_thread_arch_regcache (ptid, gdbarch);
+
+  target_fetch_registers (regcache, AMD64_FSBASE_REGNUM);
+
+  ULONGEST fsbase;
+  if (regcache->cooked_read (AMD64_FSBASE_REGNUM, &fsbase) != REG_VALID)
+    error (_("Unable to fetch %%fsbase"));
+
+  CORE_ADDR dtv_addr = fsbase + gdbarch_ptr_bit (gdbarch) / 8;
+  return fbsd_get_thread_local_address (gdbarch, dtv_addr, lm_addr, offset);
+}
+
 static void
 amd64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -241,6 +261,11 @@ amd64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* FreeBSD uses SVR4-style shared libraries.  */
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_lp64_fetch_link_map_offsets);
+
+  set_gdbarch_fetch_tls_load_module_address (gdbarch,
+					     svr4_fetch_objfile_link_map);
+  set_gdbarch_get_thread_local_address (gdbarch,
+					amd64fbsd_get_thread_local_address);
 }
 
 void
