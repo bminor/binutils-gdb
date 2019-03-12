@@ -1,5 +1,15 @@
 2019-03-12  John Baldwin  <jhb@FreeBSD.org>
 
+	* fbsd-tdep.c (fbsd_pspace_data_handle): New variable.
+	(struct fbsd_pspace_data): New type.
+	(get_fbsd_pspace_data, fbsd_pspace_data_cleanup)
+	(fbsd_read_integer_by_name, fbsd_fetch_rtld_offsets)
+	(fbsd_get_tls_index, fbsd_get_thread_local_address): New function.
+	(_initialize_fbsd_tdep): Initialize 'fbsd_pspace_data_handle'.
+	* fbsd-tdep.c (fbsd_get_thread_local_address): New prototype.
+
+2019-03-12  John Baldwin  <jhb@FreeBSD.org>
+
 	* gdbtypes.c (lookup_struct_elt): New function.
 	(lookup_struct_elt_type): Reimplement via lookup_struct_elt.
 	* gdbtypes.h (struct struct_elt): New type.

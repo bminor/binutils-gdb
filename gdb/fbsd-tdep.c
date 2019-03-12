@@ -24,6 +24,7 @@
 #include "regcache.h"
 #include "regset.h"
 #include "gdbthread.h"
+#include "objfiles.h"
 #include "xml-syscall.h"
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -442,6 +443,41 @@ get_fbsd_gdbarch_data (struct gdbarch *gdbarch)
 {
   return ((struct fbsd_gdbarch_data *)
 	  gdbarch_data (gdbarch, fbsd_gdbarch_data_handle));
+}
+
+/* Per-program-space data for FreeBSD architectures.  */
+static const struct program_space_data *fbsd_pspace_data_handle;
+
+struct fbsd_pspace_data
+{
+  /* Offsets in the runtime linker's 'Obj_Entry' structure.  */
+  LONGEST off_linkmap;
+  LONGEST off_tlsindex;
+  bool rtld_offsets_valid;
+};
+
+static struct fbsd_pspace_data *
+get_fbsd_pspace_data (struct program_space *pspace)
+{
+  struct fbsd_pspace_data *data;
+
+  data = ((struct fbsd_pspace_data *)
+	  program_space_data (pspace, fbsd_pspace_data_handle));
+  if (data == NULL)
+    {
+      data = XCNEW (struct fbsd_pspace_data);
+      set_program_space_data (pspace, fbsd_pspace_data_handle, data);
+    }
+
+  return data;
+}
+
+/* The cleanup callback for FreeBSD architecture per-program-space data.  */
+
+static void
+fbsd_pspace_data_cleanup (struct program_space *pspace, void *data)
+{
+  xfree (data);
 }
 
 /* This is how we want PTIDs from core files to be printed.  */
@@ -1932,6 +1968,121 @@ fbsd_get_syscall_number (struct gdbarch *gdbarch, thread_info *thread)
   internal_error (__FILE__, __LINE__, _("fbsd_get_sycall_number called"));
 }
 
+/* Read an integer symbol value from the current target.  */
+
+static LONGEST
+fbsd_read_integer_by_name (struct gdbarch *gdbarch, const char *name)
+{
+  bound_minimal_symbol ms = lookup_minimal_symbol (name, NULL, NULL);
+  if (ms.minsym == NULL)
+    error (_("Unable to resolve symbol '%s'"), name);
+
+  gdb_byte buf[4];
+  if (target_read_memory (BMSYMBOL_VALUE_ADDRESS (ms), buf, sizeof buf) != 0)
+    error (_("Unable to read value of '%s'"), name);
+
+  return extract_signed_integer (buf, sizeof buf, gdbarch_byte_order (gdbarch));
+}
+
+/* Lookup offsets of fields in the runtime linker's 'Obj_Entry'
+   structure needed to determine the TLS index of an object file.  */
+
+static void
+fbsd_fetch_rtld_offsets (struct gdbarch *gdbarch, struct fbsd_pspace_data *data)
+{
+  TRY
+    {
+      /* Fetch offsets from debug symbols in rtld.  */
+      struct symbol *obj_entry_sym
+	= lookup_symbol_in_language ("Struct_Obj_Entry", NULL, STRUCT_DOMAIN,
+				     language_c, NULL).symbol;
+      if (obj_entry_sym == NULL)
+	error (_("Unable to find Struct_Obj_Entry symbol"));
+      data->off_linkmap = lookup_struct_elt (SYMBOL_TYPE(obj_entry_sym),
+					     "linkmap", 0).offset / 8;
+      data->off_tlsindex = lookup_struct_elt (SYMBOL_TYPE(obj_entry_sym),
+					      "tlsindex", 0).offset / 8;
+      data->rtld_offsets_valid = true;
+      return;
+    }
+  CATCH (e, RETURN_MASK_ERROR)
+    {
+      data->off_linkmap = -1;
+    }
+  END_CATCH
+
+  TRY
+    {
+      /* Fetch offsets from global variables in libthr.  Note that
+	 this does not work for single-threaded processes that are not
+	 linked against libthr.  */
+      data->off_linkmap = fbsd_read_integer_by_name (gdbarch,
+						     "_thread_off_linkmap");
+      data->off_tlsindex = fbsd_read_integer_by_name (gdbarch,
+						      "_thread_off_tlsindex");
+      data->rtld_offsets_valid = true;
+      return;
+    }
+  CATCH (e, RETURN_MASK_ERROR)
+    {
+      data->off_linkmap = -1;
+    }
+  END_CATCH
+}
+
+/* Helper function to read the TLS index of an object file associated
+   with a link map entry at LM_ADDR.  */
+
+static LONGEST
+fbsd_get_tls_index (struct gdbarch *gdbarch, CORE_ADDR lm_addr)
+{
+  struct fbsd_pspace_data *data = get_fbsd_pspace_data (current_program_space);
+
+  if (!data->rtld_offsets_valid)
+    fbsd_fetch_rtld_offsets (gdbarch, data);
+
+  if (data->off_linkmap == -1)
+    throw_error (TLS_GENERIC_ERROR,
+		 _("Cannot fetch runtime linker structure offsets"));
+
+  /* Simulate container_of to convert from LM_ADDR to the Obj_Entry
+     pointer and then compute the offset of the tlsindex member.  */
+  CORE_ADDR tlsindex_addr = lm_addr - data->off_linkmap + data->off_tlsindex;
+
+  gdb_byte buf[4];
+  if (target_read_memory (tlsindex_addr, buf, sizeof buf) != 0)
+    throw_error (TLS_GENERIC_ERROR,
+		 _("Cannot find thread-local variables on this target"));
+
+  return extract_signed_integer (buf, sizeof buf, gdbarch_byte_order (gdbarch));
+}
+
+/* See fbsd-tdep.h.  */
+
+CORE_ADDR
+fbsd_get_thread_local_address (struct gdbarch *gdbarch, CORE_ADDR dtv_addr,
+			       CORE_ADDR lm_addr, CORE_ADDR offset)
+{
+  LONGEST tls_index = fbsd_get_tls_index (gdbarch, lm_addr);
+
+  gdb_byte buf[gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT];
+  if (target_read_memory (dtv_addr, buf, sizeof buf) != 0)
+    throw_error (TLS_GENERIC_ERROR,
+		 _("Cannot find thread-local variables on this target"));
+
+  const struct builtin_type *builtin = builtin_type (gdbarch);
+  CORE_ADDR addr = gdbarch_pointer_to_address (gdbarch,
+					       builtin->builtin_data_ptr, buf);
+
+  addr += (tls_index + 1) * TYPE_LENGTH (builtin->builtin_data_ptr);
+  if (target_read_memory (addr, buf, sizeof buf) != 0)
+    throw_error (TLS_GENERIC_ERROR,
+		 _("Cannot find thread-local variables on this target"));
+
+  addr = gdbarch_pointer_to_address (gdbarch, builtin->builtin_data_ptr, buf);
+  return addr + offset;
+}
+
 /* To be called from GDB_OSABI_FREEBSD handlers. */
 
 void
@@ -1957,4 +2108,6 @@ _initialize_fbsd_tdep (void)
 {
   fbsd_gdbarch_data_handle =
     gdbarch_data_register_post_init (init_fbsd_gdbarch_data);
+  fbsd_pspace_data_handle
+    = register_program_space_data_with_cleanup (NULL, fbsd_pspace_data_cleanup);
 }
