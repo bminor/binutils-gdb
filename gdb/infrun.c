@@ -7856,7 +7856,7 @@ print_stop_location (struct target_waitstatus *ws)
 /* See infrun.h.  */
 
 void
-print_stop_event (struct ui_out *uiout)
+print_stop_event (struct ui_out *uiout, bool displays)
 {
   struct target_waitstatus last;
   ptid_t last_ptid;
@@ -7870,7 +7870,8 @@ print_stop_event (struct ui_out *uiout)
     print_stop_location (&last);
 
     /* Display the auto-display expressions.  */
-    do_displays ();
+    if (displays)
+      do_displays ();
   }
 
   tp = inferior_thread ();

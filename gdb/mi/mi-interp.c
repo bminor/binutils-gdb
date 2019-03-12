@@ -625,10 +625,15 @@ mi_on_normal_stop_1 (struct bpstats *bs, int print_frame)
 	  reason = tp->thread_fsm->async_reply_reason ();
 	  mi_uiout->field_string ("reason", async_reason_lookup (reason));
 	}
-      print_stop_event (mi_uiout);
 
       console_interp = interp_lookup (current_ui, INTERP_CONSOLE);
-      if (should_print_stop_to_console (console_interp, tp))
+      /* We only want to print the displays once, and we want it to
+	 look just how it would on the console, so we use this to
+	 decide whether the MI stop should include them.  */
+      bool console_print = should_print_stop_to_console (console_interp, tp);
+      print_stop_event (mi_uiout, !console_print);
+
+      if (console_print)
 	print_stop_event (mi->cli_uiout);
 
       mi_uiout->field_int ("thread-id", tp->global_num);

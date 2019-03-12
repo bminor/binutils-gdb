@@ -1,3 +1,8 @@
+2019-03-19  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.mi/mi2-cli-display.c: New file.
+	* gdb.mi/mi2-cli-display.exp: New file.
+
 2019-03-18  Joel Brobecker  <brobecker@adacore.com>
 	    Tom Tromey  <tromey@adacore.com>
 

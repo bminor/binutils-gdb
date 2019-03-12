@@ -167,9 +167,10 @@ extern void print_return_value (struct ui_out *uiout,
 
 /* Print current location without a level number, if we have changed
    functions or hit a breakpoint.  Print source line if we have one.
-   If the execution command captured a return value, print it.  */
+   If the execution command captured a return value, print it.  If
+   DISPLAYS is false, do not call 'do_displays'.  */
 
-extern void print_stop_event (struct ui_out *uiout);
+extern void print_stop_event (struct ui_out *uiout, bool displays = true);
 
 /* Pretty print the results of target_wait, for debugging purposes.  */
 

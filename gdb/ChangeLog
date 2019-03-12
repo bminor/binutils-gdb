@@ -1,3 +1,9 @@
+2019-03-19  Tom Tromey  <tromey@adacore.com>
+
+	* mi/mi-interp.c (mi_on_normal_stop_1): Only show displays once.
+	* infrun.h (print_stop_event): Add "displays" parameter.
+	* infrun.c (print_stop_event): Add "displays" parameter.
+
 2019-03-19  Pedro Alves  <palves@redhat.com>
 
 	* tui/tui-out.c (tui_ui_out::do_field_string): Simplify.
