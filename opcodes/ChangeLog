@@ -1,3 +1,10 @@
+2019-03-12  Andreas Krebbel  <krebbel@linux.ibm.com>
+
+	Backport from mainline
+	2019-03-12  Andreas Krebbel  <krebbel@linux.ibm.com>
+
+	* s390-opc.txt: Add instruction descriptions.
+
 2019-02-07  Tamar Christina  <tamar.christina@arm.com>
 
 	* arm-dis.c (arm_opcodes): Redefine hlt to armv1.
