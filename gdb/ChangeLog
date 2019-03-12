@@ -1,5 +1,13 @@
 2019-03-12  John Baldwin  <jhb@FreeBSD.org>
 
+	* gdbarch.sh (get_thread_local_address): New method.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* target.c (target_translate_tls_address): Use
+	gdbarch_get_thread_local_address if present instead of
+	target::get_thread_local_address.
+
+2019-03-12  John Baldwin  <jhb@FreeBSD.org>
+
 	* target.h (target::get_thread_local_address): Update comment.
 
 2019-03-12  John Baldwin  <jhb@FreeBSD.org>
