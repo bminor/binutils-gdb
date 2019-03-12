@@ -1,3 +1,9 @@
+2019-03-12  Eli Zaretskii  <eliz@gnu.org>
+
+	PR/24325
+	* source-cache.c: #undef open and close, to avoid unresolved
+	externals during linking.
+
 2019-03-08  Eli Zaretskii  <eliz@gnu.org>
 
 	Support styling on native MS-Windows console

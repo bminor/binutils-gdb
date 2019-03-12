@@ -23,6 +23,12 @@
 #include "cli/cli-style.h"
 
 #ifdef HAVE_SOURCE_HIGHLIGHT
+/* If Gnulib redirects 'open' and 'close' to its replacements
+   'rpl_open' and 'rpl_close' via cpp macros, including <fstream>
+   below with those macros in effect will cause unresolved externals
+   when GDB is linked.  Happens, e.g., in the MinGW build.  */
+#undef open
+#undef close
 #include <fstream>
 #include <sstream>
 #include <srchilite/sourcehighlight.h>
