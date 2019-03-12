@@ -1551,6 +1551,11 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
   if (objfile == symfile_objfile)
     return info->main_lm_addr;
 
+  /* If OBJFILE is a separate debug object file, look for the
+     original object file.  */
+  if (objfile->separate_debug_objfile_backlink != NULL)
+    objfile = objfile->separate_debug_objfile_backlink;
+
   /* The other link map addresses may be found by examining the list
      of shared libraries.  */
   for (so = master_so_list (); so; so = so->next)

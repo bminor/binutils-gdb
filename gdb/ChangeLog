@@ -1,5 +1,10 @@
 2019-03-12  John Baldwin  <jhb@FreeBSD.org>
 
+	* solib-svr4.c (svr4_fetch_objfile_link_map): Look for
+	objfile->separate_debug_objfile_backlink if not NULL.
+
+2019-03-12  John Baldwin  <jhb@FreeBSD.org>
+
 	* amd64-bsd-nat.c (amd64bsd_fetch_inferior_registers): Use
 	tdep->fsbase_regnum instead of constants for fs_base and gs_base.
 	(amd64bsd_store_inferior_registers): Likewise.
