@@ -2297,9 +2297,11 @@ remote_target::remove_exec_catchpoint (int pid)
 
 
 
-static ptid_t magic_null_ptid;
-static ptid_t not_sent_ptid;
-static ptid_t any_thread_ptid;
+/* Take advantage of the fact that the TID field is not used, to tag
+   special ptids with it set to != 0.  */
+static const ptid_t magic_null_ptid (42000, -1, 1);
+static const ptid_t not_sent_ptid (42000, -2, 1);
+static const ptid_t any_thread_ptid (42000, 0, 1);
 
 /* Find out if the stub attached to PID (and hence GDB should offer to
    detach instead of killing it when bailing out).  */
@@ -14754,10 +14756,4 @@ stepping is supported by the target.  The default is on."),
 
   /* Eventually initialize fileio.  See fileio.c */
   initialize_remote_fileio (remote_set_cmdlist, remote_show_cmdlist);
-
-  /* Take advantage of the fact that the TID field is not used, to tag
-     special ptids with it set to != 0.  */
-  magic_null_ptid = ptid_t (42000, -1, 1);
-  not_sent_ptid = ptid_t (42000, -2, 1);
-  any_thread_ptid = ptid_t (42000, 0, 1);
 }

@@ -1,3 +1,9 @@
+2019-03-12  Tom Tromey  <tromey@adacore.com>
+
+	* remote.c (magic_null_ptid, not_sent_ptid, any_thread_ptid): Now
+	const.  Add initializers.
+	(_initialize_remote): Don't initialize ptid globals.
+
 2019-03-12  Pedro Alves  <palves@redhat.com>
 
 	* yy-remap.h [TEST_CPNAMES] (YYFPRINTF): Don't define.
