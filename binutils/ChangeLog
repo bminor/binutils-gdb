@@ -1,4 +1,10 @@
 2019-03-13  Sudakshina Das  <sudi.das@arm.com>
+
+	* readelf.c (get_aarch64_dynamic_type): Add case for
+	DT_AARCH64_PAC_PLT.
+	(dynamic_section_aarch64_val): Likewise.
+
+2019-03-13  Sudakshina Das  <sudi.das@arm.com>
 	    Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* readelf.c (get_aarch64_dynamic_type): New.

@@ -1,4 +1,17 @@
 2019-03-13  Sudakshina Das  <sudi.das@arm.com>
+
+	* NEWS: Document --pac-plt.
+	* emultempl/aarch64elf.em (OPTION_PAC_PLT): New.
+	(PARSE_AND_LIST_LONGOPTS, PARSE_AND_LIST_OPTIONS): Add pac-plt.
+	(PARSE_AND_LIST_ARGS_CASES): Handle OPTION_PAC_PLT.
+	* testsuite/ld-aarch64/aarch64-elf.exp: Add the following tests.
+	* testsuite/ld-aarch64/bti-pac-plt-1.d: New test.
+	* testsuite/ld-aarch64/bti-pac-plt-2.d: New test.
+	* testsuite/ld-aarch64/pac-plt-1.d: New test.
+	* testsuite/ld-aarch64/pac-plt-2.d: New test.
+	* testsuite/ld-aarch64/bti-plt-1.s: Add .ifndef directive.
+
+2019-03-13  Sudakshina Das  <sudi.das@arm.com>
 	    Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* NEWS: Document --force-bti.

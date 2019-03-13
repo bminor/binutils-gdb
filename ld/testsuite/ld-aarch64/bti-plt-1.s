@@ -4,6 +4,7 @@
 _start:
 	bl foo
 	bl bar
+.ifndef __guard_property_bti__
 	.section ".note.gnu.property", "a"
 	.p2align 3
 	.long 1f - 0f		/* name length */
@@ -19,3 +20,4 @@ _start:
 4:
 	.p2align 3
 5:
+.endif

@@ -1803,6 +1803,7 @@ get_aarch64_dynamic_type (unsigned long type)
   switch (type)
     {
     case DT_AARCH64_BTI_PLT:  return "AARCH64_BTI_PLT";
+    case DT_AARCH64_PAC_PLT:  return "AARCH64_PAC_PLT";
     default:
       return NULL;
     }
@@ -9364,6 +9365,7 @@ dynamic_section_aarch64_val (Elf_Internal_Dyn * entry)
   switch (entry->d_tag)
     {
     case DT_AARCH64_BTI_PLT:
+    case DT_AARCH64_PAC_PLT:
       break;
     default:
       print_vma (entry->d_un.d_ptr, PREFIX_HEX);

@@ -271,6 +271,12 @@
 #define PLT_BTI_ENTRY_SIZE		(36)
 #define PLT_BTI_SMALL_ENTRY_SIZE	(20)
 #define PLT_BTI_TLSDESC_ENTRY_SIZE	(36)
+/* PLT sizes with PAC insn.  */
+#define PLT_PAC_ENTRY_SIZE		(36)
+#define PLT_PAC_SMALL_ENTRY_SIZE	(20)
+/* PLT sizes with BTI and PAC insn.  */
+#define PLT_BTI_PAC_ENTRY_SIZE		(40)
+#define PLT_BTI_PAC_SMALL_ENTRY_SIZE	(24)
 
 /* Encoding of the nop instruction.  */
 #define INSN_NOP 0xd503201f
@@ -319,6 +325,44 @@ static const bfd_byte elfNN_aarch64_small_plt0_bti_entry[PLT_BTI_ENTRY_SIZE] =
   0x1f, 0x20, 0x03, 0xd5,	/* nop */
 };
 
+static const bfd_byte elfNN_aarch64_small_plt0_pac_entry[PLT_PAC_ENTRY_SIZE] =
+{
+  0xf0, 0x7b, 0xbf, 0xa9,	/* stp x16, x30, [sp, #-16]!  */
+  0x10, 0x00, 0x00, 0x90,	/* adrp x16, (GOT+16)  */
+#if ARCH_SIZE == 64
+  0x11, 0x0A, 0x40, 0xf9,	/* ldr x17, [x16, #PLT_GOT+0x10]  */
+  0x10, 0x42, 0x00, 0x91,	/* add x16, x16,#PLT_GOT+0x10   */
+#else
+  0x11, 0x0A, 0x40, 0xb9,	/* ldr w17, [x16, #PLT_GOT+0x8]  */
+  0x10, 0x22, 0x00, 0x11,	/* add w16, w16,#PLT_GOT+0x8   */
+#endif
+  0x9f, 0x21, 0x03, 0xd5,	/* autia1716 */
+  0x20, 0x02, 0x1f, 0xd6,	/* br x17  */
+  0x1f, 0x20, 0x03, 0xd5,	/* nop */
+  0x1f, 0x20, 0x03, 0xd5,	/* nop */
+  0x1f, 0x20, 0x03, 0xd5,	/* nop */
+};
+
+static const bfd_byte
+elfNN_aarch64_small_plt0_bti_pac_entry[PLT_BTI_PAC_ENTRY_SIZE] =
+{
+  0x5f, 0x24, 0x03, 0xd5,	/* bti c.  */
+  0xf0, 0x7b, 0xbf, 0xa9,	/* stp x16, x30, [sp, #-16]!  */
+  0x10, 0x00, 0x00, 0x90,	/* adrp x16, (GOT+16)  */
+#if ARCH_SIZE == 64
+  0x11, 0x0A, 0x40, 0xf9,	/* ldr x17, [x16, #PLT_GOT+0x10]  */
+  0x10, 0x42, 0x00, 0x91,	/* add x16, x16,#PLT_GOT+0x10   */
+#else
+  0x11, 0x0A, 0x40, 0xb9,	/* ldr w17, [x16, #PLT_GOT+0x8]  */
+  0x10, 0x22, 0x00, 0x11,	/* add w16, w16,#PLT_GOT+0x8   */
+#endif
+  0x9f, 0x21, 0x03, 0xd5,	/* autia1716 */
+  0x20, 0x02, 0x1f, 0xd6,	/* br x17  */
+  0x1f, 0x20, 0x03, 0xd5,	/* nop */
+  0x1f, 0x20, 0x03, 0xd5,	/* nop */
+  0x1f, 0x20, 0x03, 0xd5,	/* nop */
+};
+
 /* Per function entry in a procedure linkage table looks like this
    if the distance between the PLTGOT and the PLT is < 4GB use
    these PLT entries.  Use BTI versions of the PLTs when enabled.  */
@@ -347,6 +391,37 @@ elfNN_aarch64_small_plt_bti_entry[PLT_BTI_SMALL_ENTRY_SIZE] =
   0x11, 0x02, 0x40, 0xb9,	/* ldr w17, [x16, PLTGOT + n * 4] */
   0x10, 0x02, 0x00, 0x11,	/* add w16, w16, :lo12:PLTGOT + n * 4  */
 #endif
+  0x20, 0x02, 0x1f, 0xd6,	/* br x17.  */
+};
+
+static const bfd_byte
+elfNN_aarch64_small_plt_pac_entry[PLT_PAC_SMALL_ENTRY_SIZE] =
+{
+  0x10, 0x00, 0x00, 0x90,	/* adrp x16, PLTGOT + n * 8  */
+#if ARCH_SIZE == 64
+  0x11, 0x02, 0x40, 0xf9,	/* ldr x17, [x16, PLTGOT + n * 8] */
+  0x10, 0x02, 0x00, 0x91,	/* add x16, x16, :lo12:PLTGOT + n * 8  */
+#else
+  0x11, 0x02, 0x40, 0xb9,	/* ldr w17, [x16, PLTGOT + n * 4] */
+  0x10, 0x02, 0x00, 0x11,	/* add w16, w16, :lo12:PLTGOT + n * 4  */
+#endif
+  0x9f, 0x21, 0x03, 0xd5,	/* autia1716 */
+  0x20, 0x02, 0x1f, 0xd6,	/* br x17.  */
+};
+
+static const bfd_byte
+elfNN_aarch64_small_plt_bti_pac_entry[PLT_BTI_PAC_SMALL_ENTRY_SIZE] =
+{
+  0x5f, 0x24, 0x03, 0xd5,	/* bti c.  */
+  0x10, 0x00, 0x00, 0x90,	/* adrp x16, PLTGOT + n * 8  */
+#if ARCH_SIZE == 64
+  0x11, 0x02, 0x40, 0xf9,	/* ldr x17, [x16, PLTGOT + n * 8] */
+  0x10, 0x02, 0x00, 0x91,	/* add x16, x16, :lo12:PLTGOT + n * 8  */
+#else
+  0x11, 0x02, 0x40, 0xb9,	/* ldr w17, [x16, PLTGOT + n * 4] */
+  0x10, 0x02, 0x00, 0x11,	/* add w16, w16, :lo12:PLTGOT + n * 4  */
+#endif
+  0x9f, 0x21, 0x03, 0xd5,	/* autia1716 */
   0x20, 0x02, 0x1f, 0xd6,	/* br x17.  */
 };
 
@@ -4681,7 +4756,25 @@ setup_plt_values (struct bfd_link_info *link_info,
   struct elf_aarch64_link_hash_table *globals;
   globals = elf_aarch64_hash_table (link_info);
 
-  if (plt_type == PLT_BTI)
+  if (plt_type == PLT_BTI_PAC)
+    {
+      globals->plt_header_size = PLT_BTI_PAC_ENTRY_SIZE;
+      globals->plt0_entry = elfNN_aarch64_small_plt0_bti_pac_entry;
+      globals->tlsdesc_plt_entry_size = PLT_BTI_TLSDESC_ENTRY_SIZE;
+
+      /* Only in ET_EXEC we need PLTn with BTI.  */
+      if (bfd_link_pde (link_info))
+	{
+	  globals->plt_entry_size = PLT_BTI_PAC_SMALL_ENTRY_SIZE;
+	  globals->plt_entry = elfNN_aarch64_small_plt_bti_pac_entry;
+	}
+      else
+	{
+	  globals->plt_entry_size = PLT_PAC_SMALL_ENTRY_SIZE;
+	  globals->plt_entry = elfNN_aarch64_small_plt_pac_entry;
+	}
+    }
+  else if (plt_type == PLT_BTI)
     {
       globals->plt_header_size = PLT_BTI_ENTRY_SIZE;
       globals->plt0_entry = elfNN_aarch64_small_plt0_bti_entry;
@@ -4693,6 +4786,14 @@ setup_plt_values (struct bfd_link_info *link_info,
 	  globals->plt_entry_size = PLT_BTI_SMALL_ENTRY_SIZE;
 	  globals->plt_entry = elfNN_aarch64_small_plt_bti_entry;
 	}
+    }
+  else if (plt_type == PLT_PAC)
+    {
+      globals->plt_header_size = PLT_PAC_ENTRY_SIZE;
+      globals->plt0_entry = elfNN_aarch64_small_plt0_pac_entry;
+      globals->tlsdesc_plt_entry_size = PLT_TLSDESC_ENTRY_SIZE;
+      globals->plt_entry_size = PLT_PAC_SMALL_ENTRY_SIZE;
+      globals->plt_entry = elfNN_aarch64_small_plt_pac_entry;
     }
 }
 
@@ -9077,8 +9178,17 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 		  || !add_dynamic_entry (DT_TLSDESC_GOT, 0)))
 	    return FALSE;
 
-	  if ((elf_aarch64_tdata (output_bfd)->plt_type == PLT_BTI)
-	      && !add_dynamic_entry (DT_AARCH64_BTI_PLT, 0))
+	  if ((elf_aarch64_tdata (output_bfd)->plt_type == PLT_BTI_PAC)
+	      && (!add_dynamic_entry (DT_AARCH64_BTI_PLT, 0)
+		  || !add_dynamic_entry (DT_AARCH64_PAC_PLT, 0)))
+	    return FALSE;
+
+	  else if ((elf_aarch64_tdata (output_bfd)->plt_type == PLT_BTI)
+		   && !add_dynamic_entry (DT_AARCH64_BTI_PLT, 0))
+	    return FALSE;
+
+	  else if ((elf_aarch64_tdata (output_bfd)->plt_type == PLT_PAC)
+		   && !add_dynamic_entry (DT_AARCH64_PAC_PLT, 0))
 	    return FALSE;
 	}
 
@@ -9604,7 +9714,7 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
 	  htab->tlsdesc_plt_entry_size = PLT_TLSDESC_ENTRY_SIZE;
 
 	  aarch64_plt_type type = elf_aarch64_tdata (output_bfd)->plt_type;
-	  if (type == PLT_BTI)
+	  if (type == PLT_BTI || type == PLT_BTI_PAC)
 	    {
 	      entry = elfNN_aarch64_tlsdesc_small_plt_bti_entry;
 	      htab->tlsdesc_plt_entry_size = PLT_BTI_TLSDESC_ENTRY_SIZE;
@@ -9744,7 +9854,11 @@ get_plt_type (bfd *abfd)
       switch (tag)
 	{
 	case DT_AARCH64_BTI_PLT:
-	  ret = PLT_BTI;
+	  ret |= PLT_BTI;
+	  break;
+
+	case DT_AARCH64_PAC_PLT:
+	  ret |= PLT_PAC;
 	  break;
 
 	default: break;
@@ -9777,12 +9891,26 @@ elfNN_aarch64_plt_sym_val (bfd_vma i, const asection *plt,
   size_t plt0_size = PLT_ENTRY_SIZE;
   size_t pltn_size = PLT_SMALL_ENTRY_SIZE;
 
-  if (elf_aarch64_tdata (plt->owner)->plt_type == PLT_BTI)
+  if (elf_aarch64_tdata (plt->owner)->plt_type == PLT_BTI_PAC)
+    {
+      plt0_size = PLT_BTI_PAC_ENTRY_SIZE;
+      if (elf_elfheader (plt->owner)->e_type == ET_EXEC)
+	pltn_size = PLT_BTI_PAC_SMALL_ENTRY_SIZE;
+      else
+	pltn_size = PLT_PAC_SMALL_ENTRY_SIZE;
+    }
+  else if (elf_aarch64_tdata (plt->owner)->plt_type == PLT_BTI)
     {
       plt0_size = PLT_BTI_ENTRY_SIZE;
       if (elf_elfheader (plt->owner)->e_type == ET_EXEC)
 	pltn_size = PLT_BTI_SMALL_ENTRY_SIZE;
     }
+  else if (elf_aarch64_tdata (plt->owner)->plt_type == PLT_PAC)
+    {
+      plt0_size = PLT_PAC_ENTRY_SIZE;
+      pltn_size = PLT_PAC_SMALL_ENTRY_SIZE;
+    }
+
   return plt->vma + plt0_size + i * pltn_size;
 }
 

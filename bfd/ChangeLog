@@ -1,4 +1,15 @@
 2019-03-13  Sudakshina Das  <sudi.das@arm.com>
+
+	* elfnn-aarch64.c (PLT_PAC_ENTRY_SIZE, PLT_PAC_SMALL_ENTRY_SIZE): New.
+	(PLT_BTI_PAC_ENTRY_SIZE, PLT_BTI_PAC_SMALL_ENTRY_SIZE): New.
+	(setup_plt_values): Account for PAC or PAC and BTI enabled PLTs.
+	(elfNN_aarch64_size_dynamic_sections): Add checks for PLT_BTI_PAC
+	and PLT_PAC_PLT.
+	(elfNN_aarch64_finish_dynamic_sections): Account for PLT_BTI_PAC.
+	(get_plt_type): Add case for DT_AARCH64_PAC_PLT.
+	(elfNN_aarch64_plt_sym_val): Add cases for PLT_BTI_PAC and PLT_PAC.
+
+2019-03-13  Sudakshina Das  <sudi.das@arm.com>
 	    Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	* bfd-in.h (aarch64_plt_type, aarch64_enable_bti_type): New.

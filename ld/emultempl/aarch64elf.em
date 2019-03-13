@@ -373,6 +373,7 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_FIX_ERRATUM_843419	314
 #define OPTION_NO_APPLY_DYNAMIC_RELOCS	315
 #define OPTION_FORCE_BTI		316
+#define OPTION_PAC_PLT			317
 '
 
 PARSE_AND_LIST_SHORTOPTS=p
@@ -387,6 +388,7 @@ PARSE_AND_LIST_LONGOPTS='
   { "fix-cortex-a53-843419", no_argument, NULL, OPTION_FIX_ERRATUM_843419},
   { "no-apply-dynamic-relocs", no_argument, NULL, OPTION_NO_APPLY_DYNAMIC_RELOCS},
   { "force-bti", no_argument, NULL, OPTION_FORCE_BTI},
+  { "pac-plt", no_argument, NULL, OPTION_PAC_PLT},
 '
 
 PARSE_AND_LIST_OPTIONS='
@@ -408,6 +410,7 @@ PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("  --fix-cortex-a53-843419      Fix erratum 843419\n"));
   fprintf (file, _("  --no-apply-dynamic-relocs    Do not apply link-time values for dynamic relocations\n"));
   fprintf (file, _("  --force-bti                  Turn on Branch Target Identification mechanism and generate PLTs with BTI. Generate warnings for missing BTI on inputs\n"));
+  fprintf (file, _("  --pac-plt                    Protect PLTs with Pointer Authentication.\n"));
 '
 
 PARSE_AND_LIST_ARGS_CASES='
@@ -442,6 +445,10 @@ PARSE_AND_LIST_ARGS_CASES='
     case OPTION_FORCE_BTI:
       plt_type |= PLT_BTI;
       bti_type = BTI_WARN;
+      break;
+
+    case OPTION_PAC_PLT:
+      plt_type |= PLT_PAC;
       break;
 
     case OPTION_STUBGROUP_SIZE:
