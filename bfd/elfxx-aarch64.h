@@ -55,3 +55,19 @@ _bfd_aarch64_elf_write_core_note (bfd *, char *, int *, int, ...);
 #define elf_backend_grok_prstatus	_bfd_aarch64_elf_grok_prstatus
 #define elf_backend_grok_psinfo		_bfd_aarch64_elf_grok_psinfo
 #define elf_backend_write_core_note	_bfd_aarch64_elf_write_core_note
+
+extern bfd *
+_bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *,
+					    uint32_t *);
+
+extern enum elf_property_kind
+_bfd_aarch64_elf_parse_gnu_properties (bfd *, unsigned int,
+				       bfd_byte *, unsigned int);
+
+extern bfd_boolean
+_bfd_aarch64_elf_merge_gnu_properties (struct bfd_link_info *, bfd *,
+				       elf_property *, elf_property *,
+				       uint32_t);
+
+#define elf_backend_parse_gnu_properties	\
+  _bfd_aarch64_elf_parse_gnu_properties

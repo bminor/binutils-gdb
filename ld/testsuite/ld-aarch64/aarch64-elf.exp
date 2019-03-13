@@ -371,6 +371,10 @@ run_dump_test_lp64 "rela-abs-relative-opt"
 
 run_dump_test_lp64 "pie-bind-locally"
 
+run_dump_test "property-bti-pac1"
+run_dump_test "property-bti-pac2"
+run_dump_test "property-bti-pac3"
+
 set aarch64elflinktests {
   {"ld-aarch64/so with global symbol" "-shared" "" "" {copy-reloc-so.s}
     {} "copy-reloc-so.so"}

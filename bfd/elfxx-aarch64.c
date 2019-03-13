@@ -683,3 +683,183 @@ _bfd_aarch64_elf_write_core_note (bfd *abfd, char *buf, int *bufsiz, int note_ty
       }
     }
 }
+
+/* Find the first input bfd with GNU property and merge it with GPROP.  If no
+   such input is found, add it to a new section at the last input.  Update
+   GPROP accordingly.  */
+bfd *
+_bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info,
+					    uint32_t *gprop)
+{
+  asection *sec;
+  bfd *pbfd;
+  bfd *ebfd = NULL;
+  elf_property *prop;
+
+  uint32_t gnu_prop = *gprop;
+
+  /* Find a normal input file with GNU property note.  */
+  for (pbfd = info->input_bfds;
+       pbfd != NULL;
+       pbfd = pbfd->link.next)
+    if (bfd_get_flavour (pbfd) == bfd_target_elf_flavour
+	&& bfd_count_sections (pbfd) != 0)
+      {
+	ebfd = pbfd;
+
+	if (elf_properties (pbfd) != NULL)
+	  break;
+      }
+
+  /* If ebfd != NULL it is either an input with property note or the last
+     input.  Either way if we have gnu_prop, we should add it (by creating
+     a section if needed).  */
+  if (ebfd != NULL && gnu_prop)
+    {
+      prop = _bfd_elf_get_property (ebfd,
+				    GNU_PROPERTY_AARCH64_FEATURE_1_AND,
+				    4);
+      prop->u.number |= gnu_prop;
+      prop->pr_kind = property_number;
+
+      /* pbfd being NULL implies ebfd is the last input.  Create the GNU
+	 property note section.  */
+      if (pbfd == NULL)
+	{
+	  sec = bfd_make_section_with_flags (ebfd,
+					     NOTE_GNU_PROPERTY_SECTION_NAME,
+					     (SEC_ALLOC
+					      | SEC_LOAD
+					      | SEC_IN_MEMORY
+					      | SEC_READONLY
+					      | SEC_HAS_CONTENTS
+					      | SEC_DATA));
+	  if (sec == NULL)
+	    info->callbacks->einfo (
+	      _("%F%P: failed to create GNU property section\n"));
+
+	  elf_section_type (sec) = SHT_NOTE;
+	}
+    }
+
+  pbfd = _bfd_elf_link_setup_gnu_properties (info);
+
+  if (bfd_link_relocatable (info))
+    return pbfd;
+
+  /* If pbfd has any GNU_PROPERTY_AARCH64_FEATURE_1_AND properties, update
+     gnu_prop accordingly.  */
+  if (pbfd != NULL)
+    {
+      elf_property_list *p;
+
+      /* The property list is sorted in order of type.  */
+      for (p = elf_properties (pbfd); p; p = p->next)
+	{
+	  /* Check for all GNU_PROPERTY_AARCH64_FEATURE_1_AND.  */
+	  if (GNU_PROPERTY_AARCH64_FEATURE_1_AND == p->property.pr_type)
+	    {
+	      gnu_prop = (p->property.u.number
+			  & (GNU_PROPERTY_AARCH64_FEATURE_1_PAC
+			      | GNU_PROPERTY_AARCH64_FEATURE_1_BTI));
+	      break;
+	    }
+	  else if (GNU_PROPERTY_AARCH64_FEATURE_1_AND < p->property.pr_type)
+	    break;
+	}
+    }
+  *gprop = gnu_prop;
+  return pbfd;
+}
+
+/* Define elf_backend_parse_gnu_properties for AArch64.  */
+enum elf_property_kind
+_bfd_aarch64_elf_parse_gnu_properties (bfd *abfd, unsigned int type,
+				       bfd_byte *ptr, unsigned int datasz)
+{
+  elf_property *prop;
+
+  switch (type)
+    {
+    case GNU_PROPERTY_AARCH64_FEATURE_1_AND:
+      if (datasz != 4)
+	{
+	  _bfd_error_handler
+	    ( _("error: %pB: <corrupt AArch64 used size: 0x%x>"),
+	     abfd, datasz);
+	  return property_corrupt;
+	}
+      prop = _bfd_elf_get_property (abfd, type, datasz);
+      /* Combine properties of the same type.  */
+      prop->u.number |= bfd_h_get_32 (abfd, ptr);
+      prop->pr_kind = property_number;
+      break;
+
+    default:
+      return property_ignored;
+    }
+
+  return property_number;
+}
+
+/* Merge AArch64 GNU property BPROP with APROP also accounting for PROP.
+   If APROP isn't NULL, merge it with BPROP and/or PROP.  Vice-versa if BROP
+   isn't NULL.  Return TRUE if there is any update to APROP or if BPROP should
+   be merge with ABFD.  */
+bfd_boolean
+_bfd_aarch64_elf_merge_gnu_properties (struct bfd_link_info *info
+				       ATTRIBUTE_UNUSED,
+				       bfd *abfd ATTRIBUTE_UNUSED,
+				       elf_property *aprop,
+				       elf_property *bprop,
+				       uint32_t prop)
+{
+  unsigned int orig_number;
+  bfd_boolean updated = FALSE;
+  unsigned int pr_type = aprop != NULL ? aprop->pr_type : bprop->pr_type;
+
+  switch (pr_type)
+    {
+    case GNU_PROPERTY_AARCH64_FEATURE_1_AND:
+      {
+	if (aprop != NULL && bprop != NULL)
+	  {
+	    orig_number = aprop->u.number;
+	    aprop->u.number = (orig_number & bprop->u.number) | prop;
+	    updated = orig_number != aprop->u.number;
+	    /* Remove the property if all feature bits are cleared.  */
+	    if (aprop->u.number == 0)
+	      aprop->pr_kind = property_remove;
+	    break;
+	  }
+	/* If either is NULL, the AND would be 0 so, if there is
+	   any PROP, asign it to the input that is not NULL.  */
+	if (prop)
+	  {
+	    if (aprop != NULL)
+	      {
+		orig_number = aprop->u.number;
+		aprop->u.number = prop;
+		updated = orig_number != aprop->u.number;
+	      }
+	    else
+	      {
+		bprop->u.number = prop;
+		updated = TRUE;
+	      }
+	  }
+	/* No PROP and BPROP is NULL, so remove APROP.  */
+	else if (aprop != NULL)
+	  {
+	    aprop->pr_kind = property_remove;
+	    updated = TRUE;
+	  }
+      }
+      break;
+
+    default:
+      abort ();
+    }
+
+  return updated;
+}

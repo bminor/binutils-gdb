@@ -17342,6 +17342,33 @@ decode_x86_feature_2 (unsigned int bitmask)
 }
 
 static void
+decode_aarch64_feature_1_and (unsigned int bitmask)
+{
+  while (bitmask)
+    {
+      unsigned int bit = bitmask & (- bitmask);
+
+      bitmask &= ~ bit;
+      switch (bit)
+	{
+	case GNU_PROPERTY_AARCH64_FEATURE_1_BTI:
+	  printf ("BTI");
+	  break;
+
+	case GNU_PROPERTY_AARCH64_FEATURE_1_PAC:
+	  printf ("PAC");
+	  break;
+
+	default:
+	  printf (_("<unknown: %x>"), bit);
+	  break;
+	}
+      if (bitmask)
+	printf (", ");
+    }
+}
+
+static void
 print_gnu_property_note (Filedata * filedata, Elf_Internal_Note * pnote)
 {
   unsigned char * ptr = (unsigned char *) pnote->descdata;
@@ -17473,6 +17500,18 @@ print_gnu_property_note (Filedata * filedata, Elf_Internal_Note * pnote)
 
 		default:
 		  break;
+		}
+	    }
+	  else if (filedata->file_header.e_machine == EM_AARCH64)
+	    {
+	      if (type == GNU_PROPERTY_AARCH64_FEATURE_1_AND)
+		{
+		  printf ("AArch64 feature: ");
+		  if (datasz != 4)
+		    printf (_("<corrupt length: %#x> "), datasz);
+		  else
+		    decode_aarch64_feature_1_and (byte_get (ptr, 4));
+		  goto next;
 		}
 	    }
 	}

@@ -2435,6 +2435,9 @@ struct elf_aarch64_obj_tdata
 
   /* Zero to warn when linking objects with incompatible wchar_t sizes.  */
   int no_wchar_size_warning;
+
+  /* All GNU_PROPERTY_AARCH64_FEATURE_1_AND properties.  */
+  uint32_t gnu_and_prop;
 };
 
 #define elf_aarch64_tdata(bfd)				\
@@ -9615,6 +9618,32 @@ elfNN_aarch64_backend_symbol_processing (bfd *abfd, asymbol *sym)
     sym->flags |= BSF_KEEP;
 }
 
+/* Implement elf_backend_setup_gnu_properties for AArch64.  It serves as a
+   wrapper function for _bfd_aarch64_elf_link_setup_gnu_properties to account
+   for the effect of GNU properties of the output_bfd.  */
+static bfd *
+elfNN_aarch64_link_setup_gnu_properties (struct bfd_link_info *info)
+{
+  uint32_t prop = elf_aarch64_tdata (info->output_bfd)->gnu_and_prop;
+  bfd *pbfd = _bfd_aarch64_elf_link_setup_gnu_properties (info, &prop);
+  elf_aarch64_tdata (info->output_bfd)->gnu_and_prop = prop;
+  return pbfd;
+}
+
+/* Implement elf_backend_merge_gnu_properties for AArch64.  It serves as a
+   wrapper function for _bfd_aarch64_elf_merge_gnu_properties to account
+   for the effect of GNU properties of the output_bfd.  */
+static bfd_boolean
+elfNN_aarch64_merge_gnu_properties (struct bfd_link_info *info,
+				       bfd *abfd,
+				       elf_property *aprop,
+				       elf_property *bprop)
+{
+  uint32_t prop
+    = elf_aarch64_tdata (info->output_bfd)->gnu_and_prop;
+  return  _bfd_aarch64_elf_merge_gnu_properties (info, abfd, aprop,
+						 bprop, prop);
+}
 
 /* We use this so we can override certain functions
    (though currently we don't).  */
@@ -9753,6 +9782,12 @@ const struct elf_size_info elfNN_aarch64_size_info =
 
 #define elf_backend_symbol_processing		\
   elfNN_aarch64_backend_symbol_processing
+
+#define elf_backend_setup_gnu_properties	\
+  elfNN_aarch64_link_setup_gnu_properties
+
+#define elf_backend_merge_gnu_properties	\
+  elfNN_aarch64_merge_gnu_properties
 
 #define elf_backend_can_refcount       1
 #define elf_backend_can_gc_sections    1

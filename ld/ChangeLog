@@ -1,3 +1,14 @@
+2019-03-13  Sudakshina Das  <sudi.das@arm.com>
+
+	* NEWS: Document GNU_PROPERTY_AARCH64_FEATURE_1_BTI and
+	GNU_PROPERTY_AARCH64_FEATURE_1_PAC.
+	* testsuite/ld-aarch64/aarch64-elf.exp: Add run commands for new tests.
+	* testsuite/ld-aarch64/property-bti-pac1.d: New test.
+	* testsuite/ld-aarch64/property-bti-pac1.s: New test.
+	* testsuite/ld-aarch64/property-bti-pac2.d: New test.
+	* testsuite/ld-aarch64/property-bti-pac2.s: New test.
+	* testsuite/ld-aarch64/property-bti-pac3.d: New test.
+
 2019-03-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/24322

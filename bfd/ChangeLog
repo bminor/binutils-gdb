@@ -1,3 +1,21 @@
+2019-03-13  Sudakshina Das  <sudi.das@arm.com>
+
+	* elf-properties.c (_bfd_elf_link_setup_gnu_properties): Exclude
+	linker created inputs from merge.
+	* elfnn-aarch64.c (struct elf_aarch64_obj_tdata): Add field for
+	GNU_PROPERTY_AARCH64_FEATURE_1_AND properties.
+	(elfNN_aarch64_link_setup_gnu_properties): New.
+	(elfNN_aarch64_merge_gnu_properties): New.
+	(elf_backend_setup_gnu_properties): Define for AArch64.
+	(elf_backend_merge_gnu_properties): Likewise.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_link_setup_gnu_properties): Define.
+	(_bfd_aarch64_elf_parse_gnu_properties): Define.
+	(_bfd_aarch64_elf_merge_gnu_properties): Define.
+	* elfxx-aarch64.h (_bfd_aarch64_elf_link_setup_gnu_properties): Declare.
+	(_bfd_aarch64_elf_parse_gnu_properties): Declare.
+	(_bfd_aarch64_elf_merge_gnu_properties): Declare.
+	(elf_backend_parse_gnu_properties): Define for AArch64.
+
 2019-03-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/24322

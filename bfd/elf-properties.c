@@ -555,7 +555,7 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 
   for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link.next)
     if (abfd != first_pbfd
-	&& (abfd->flags & (DYNAMIC | BFD_PLUGIN)) == 0)
+	&& (abfd->flags & (DYNAMIC | BFD_PLUGIN | BFD_LINKER_CREATED)) == 0)
       {
 	elf_property_list *null_ptr = NULL;
 	elf_property_list **listp = &null_ptr;
