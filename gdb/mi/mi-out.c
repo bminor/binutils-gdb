@@ -297,10 +297,10 @@ mi_ui_out::~mi_ui_out ()
 mi_ui_out *
 mi_out_new (const char *mi_version)
 {
-  if (streq (mi_version, INTERP_MI3))
+  if (streq (mi_version, INTERP_MI3) ||  streq (mi_version, INTERP_MI))
     return new mi_ui_out (3);
 
-  if (streq (mi_version, INTERP_MI2) || streq (mi_version, INTERP_MI))
+  if (streq (mi_version, INTERP_MI2))
     return new mi_ui_out (2);
 
   if (streq (mi_version, INTERP_MI1))

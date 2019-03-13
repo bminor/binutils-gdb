@@ -1268,12 +1268,12 @@ program or device.  This option is meant to be set by programs which
 communicate with @value{GDBN} using it as a back end.
 @xref{Interpreters, , Command Interpreters}.
 
-@samp{--interpreter=mi} (or @samp{--interpreter=mi2}) causes
-@value{GDBN} to use the @dfn{@sc{gdb/mi} interface} (@pxref{GDB/MI, ,
-The @sc{gdb/mi} Interface}) included since @value{GDBN} version 6.0.  The
-previous @sc{gdb/mi} interface, included in @value{GDBN} version 5.3 and
-selected with @samp{--interpreter=mi1}, is deprecated.  Earlier
-@sc{gdb/mi} interfaces are no longer supported.
+@samp{--interpreter=mi} (or @samp{--interpreter=mi3}) causes
+@value{GDBN} to use the @dfn{@sc{gdb/mi} interface} version 3 (@pxref{GDB/MI, ,
+The @sc{gdb/mi} Interface}) included since @value{GDBN} version 9.1.  @sc{gdb/mi}
+version 2 (@code{mi2}), included in @value{GDBN} 6.0 and version 1 (@code{mi1}),
+included in @value{GDBN} 5.3, are also available.  Earlier @sc{gdb/mi}
+interfaces are no longer supported.
 
 @item -write
 @cindex @code{--write}
@@ -26506,18 +26506,22 @@ used interpreter with @value{GDBN}. With no interpreter specified at runtime,
 
 @item mi
 @cindex mi interpreter
-The newest @sc{gdb/mi} interface (currently @code{mi2}).  Used primarily
+The newest @sc{gdb/mi} interface (currently @code{mi3}).  Used primarily
 by programs wishing to use @value{GDBN} as a backend for a debugger GUI
 or an IDE.  For more information, see @ref{GDB/MI, ,The @sc{gdb/mi}
 Interface}.
 
+@item mi3
+@cindex mi3 interpreter
+The @sc{gdb/mi} interface introduced in @value{GDBN} 9.1.
+
 @item mi2
 @cindex mi2 interpreter
-The current @sc{gdb/mi} interface.
+The @sc{gdb/mi} interface introduced in @value{GDBN} 6.0.
 
 @item mi1
 @cindex mi1 interpreter
-The @sc{gdb/mi} interface included in @value{GDBN} 5.1, 5.2, and 5.3.
+The @sc{gdb/mi} interface introduced in @value{GDBN} 5.1.
 
 @end table
 
@@ -27839,7 +27843,35 @@ than a tuple.
 a tuple.
 @end itemize
 
+@item
+@center 3
+@tab
+@center 9.1
+@tab
+
+@itemize
+@item
+The output of information about multi-location breakpoints has changed in the
+responses to the @code{-break-insert} and @code{-break-info} commands, as well
+as in the @code{=breakpoint-created} and @code{=breakpoint-modified} events.
+The multiple locations are now placed in a @code{locations} field, whose value
+is a list.
+@end itemize
+
 @end multitable
+
+If your front end cannot yet migrate to a more recent version of the
+MI protocol, you can nevertheless selectively enable specific features
+available in those recent MI versions, using the following commands:
+
+@table @code
+
+@item -fix-multi-location-breakpoint-output
+Use the output for multi-location breakpoints which was introduced by
+MI 3, even when using MI versions 2 or 1.  This command has no
+effect when using MI version 3 or later.
+
+@end @table
 
 The best way to avoid unexpected changes in MI that might break your front
 end is to make your project known to @value{GDBN} developers and
@@ -28169,9 +28201,7 @@ following fields:
 
 @table @code
 @item number
-The breakpoint number.  For a breakpoint that represents one location
-of a multi-location breakpoint, this will be a dotted pair, like
-@samp{1.2}.
+The breakpoint number.
 
 @item type
 The type of the breakpoint.  For ordinary breakpoints this will be
@@ -28270,6 +28300,52 @@ is not.
 
 @item what
 Some extra data, the exact contents of which are type-dependent.
+
+@item locations
+This field is present if the breakpoint has multiple locations.  It is also
+exceptionally present if the breakpoint is enabled and has a single, disabled
+location.
+
+The value is a list of locations.  The format of a location is decribed below.
+
+@end table
+
+A location in a multi-location breakpoint is represented as a tuple with the
+following fields:
+
+@table @code
+
+@item number
+The location number as a dotted pair, like @samp{1.2}.  The first digit is the
+number of the parent breakpoint.  The second digit is the number of the
+location within that breakpoint.
+
+@item enabled
+This indicates whether the location is enabled, in which case the
+value is @samp{y}, or disabled, in which case the value is @samp{n}.
+Note that this is not the same as the field @code{enable}.
+
+@item addr
+The address of this location as an hexidecimal number.
+
+@item func
+If known, the function in which the location appears.
+If not known, this field is not present.
+
+@item file
+The name of the source file which contains this location, if known.
+If not known, this field is not present.
+
+@item fullname
+The full file name of the source file which contains this location, if
+known.  If not known, this field is not present.
+
+@item line
+The line number at which this location appears, if known.
+If not known, this field is not present.
+
+@item thread-groups
+The thread groups this location is in.
 
 @end table
 

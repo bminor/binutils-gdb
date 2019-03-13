@@ -69,6 +69,7 @@
 #include "thread-fsm.h"
 #include "tid-parse.h"
 #include "cli/cli-style.h"
+#include "mi/mi-main.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -6361,12 +6362,15 @@ print_one_breakpoint (struct breakpoint *b,
 		      int allflag)
 {
   struct ui_out *uiout = current_uiout;
+  bool use_fixed_output = mi_multi_location_breakpoint_output_fixed (uiout);
 
-  {
-    ui_out_emit_tuple tuple_emitter (uiout, "bkpt");
+  gdb::optional<ui_out_emit_tuple> bkpt_tuple_emitter (gdb::in_place, uiout, "bkpt");
+  print_one_breakpoint_location (b, NULL, 0, last_loc, allflag);
 
-    print_one_breakpoint_location (b, NULL, 0, last_loc, allflag);
-  }
+  /* The mi2 broken format: the main breakpoint tuple ends here, the locations
+     are outside.  */
+  if (!use_fixed_output)
+    bkpt_tuple_emitter.reset ();
 
   /* If this breakpoint has custom print function,
      it's already printed.  Otherwise, print individual
@@ -6384,12 +6388,18 @@ print_one_breakpoint (struct breakpoint *b,
 	  && !is_hardware_watchpoint (b)
 	  && (b->loc->next || !b->loc->enabled))
 	{
-	  struct bp_location *loc;
-	  int n = 1;
+	  gdb::optional<ui_out_emit_list> locations_list;
 
-	  for (loc = b->loc; loc; loc = loc->next, ++n)
+	  /* For MI version <= 2, keep the behavior where GDB outputs an invalid
+	     MI record.  For later versions, place breakpoint locations in a
+	     list.  */
+	  if (uiout->is_mi_like_p () && use_fixed_output)
+	    locations_list.emplace (uiout, "locations");
+
+	  int n = 1;
+	  for (bp_location *loc = b->loc; loc != NULL; loc = loc->next, ++n)
 	    {
-	      ui_out_emit_tuple tuple_emitter (uiout, NULL);
+	      ui_out_emit_tuple loc_tuple_emitter (uiout, NULL);
 	      print_one_breakpoint_location (b, loc, n, last_loc, allflag);
 	    }
 	}

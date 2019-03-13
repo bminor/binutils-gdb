@@ -1,3 +1,12 @@
+2019-03-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* gdb.texinfo (Mode Options): Mention mi3.
+	(Interpreters): Likewise.
+	(GDB/MI Development and Front Ends): Add entry for MI 3 in
+	version table.  Document -fix-multi-location-breakpoint-output.
+	(GDB/MI Breakpoint Information): Document format of breakpoint
+	location output.
+
 2019-03-05  Simon Marchi  <simon.marchi@efficios.com>
 
 	* python.texi (Values From Inferior): Change synopsys of the

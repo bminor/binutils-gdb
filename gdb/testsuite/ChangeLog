@@ -1,3 +1,11 @@
+2019-03-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* mi-breakpoint-location-ena-dis.exp: Rename to ...
+	* mi-breakpoint-multiple-locations.exp: ... this.
+	(make_breakpoints_pattern): New proc.
+	(do_test): Add mi_version parameter, test -break-insert,
+	-break-info and	=breakpoint-created.
+
 2019-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* config/default.exp: Remove 'load_lib gdb.exp'.

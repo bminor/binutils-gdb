@@ -1,3 +1,22 @@
+2019-03-13  Simon Marchi  <simon.marchi@ericsson.com>
+
+	* NEWS: Mention that the new default MI version is 3.  Mention
+	changes to the output of commands and events that deal with
+	multi-location breakpoints.
+	* breakpoint.c: Include "mi/mi-out.h".
+	(print_one_breakpoint): Change output syntax if using MI version
+	>= 3.
+	* mi/mi-main.h (mi_cmd_fix_multi_location_breakpoint_output):
+	New.
+	(mi_multi_location_breakpoint_output_fixed): New.
+	* mi/mi-main.c (fix_multi_location_breakpoint_output): New.
+	(mi_cmd_fix_multi_location_breakpoint_output): New.
+	(mi_multi_location_breakpoint_output_fixed): New.
+	* mi/mi-cmds.c (mi_cmds): Register command
+	-fix-multi-location-breakpoint-output.
+	* mi/mi-out.c (mi_out_new): Instantiate version 3 when using
+	interpreter "mi".
+
 2019-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* mi/mi-out.h (mi_out_new): Change parameter to const char *.
