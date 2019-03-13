@@ -1,4 +1,23 @@
 2019-03-13  Sudakshina Das  <sudi.das@arm.com>
+	    Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* NEWS: Document --force-bti.
+	* emultempl/aarch64elf.em (plt_type, bti_type, OPTION_FORCE_BTI): New.
+	(PARSE_AND_LIST_SHORTOPTS, PARSE_AND_LIST_OPTIONS): Add force-bti.
+	(PARSE_AND_LIST_ARGS_CASES): Handle OPTION_FORCE_BTI.
+	* testsuite/ld-aarch64/aarch64-elf.exp: Add all the tests below.
+	* testsuite/ld-aarch64/bti-plt-1.d: New test.
+	* testsuite/ld-aarch64/bti-plt-1.s: New test.
+	* testsuite/ld-aarch64/bti-plt-2.d: New test.
+	* testsuite/ld-aarch64/bti-plt-3.d: New test.
+	* testsuite/ld-aarch64/bti-plt-4.d: New test.
+	* testsuite/ld-aarch64/bti-plt-5.d: New test.
+	* testsuite/ld-aarch64/bti-plt-6.d: New test.
+	* testsuite/ld-aarch64/bti-plt-7.d: New test.
+	* testsuite/ld-aarch64/bti-plt-so.s: New test.
+	* testsuite/ld-aarch64/bti-plt.ld: New test.
+
+2019-03-13  Sudakshina Das  <sudi.das@arm.com>
 
 	* NEWS: Document GNU_PROPERTY_AARCH64_FEATURE_1_BTI and
 	GNU_PROPERTY_AARCH64_FEATURE_1_PAC.

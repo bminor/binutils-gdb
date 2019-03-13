@@ -35,6 +35,8 @@
 						entry point.  */
 #define SHF_COMDEF		0x80000000   /* Section may be multiply defined
 						in the input to a link step.  */
+/* Processor specific dynamic array tags.  */
+#define DT_AARCH64_BTI_PLT	(DT_LOPROC + 1)
 
 /* Relocation types.  */
 

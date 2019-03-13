@@ -33,6 +33,8 @@ static int pic_veneer = 0;
 static int fix_erratum_835769 = 0;
 static int fix_erratum_843419 = 0;
 static int no_apply_dynamic_relocs = 0;
+static aarch64_plt_type plt_type = PLT_NORMAL;
+static aarch64_enable_bti_type bti_type = BTI_NONE;
 
 static void
 gld${EMULATION_NAME}_before_parse (void)
@@ -308,12 +310,17 @@ aarch64_elf_create_output_section_statements (void)
       return;
     }
 
+  aarch64_bti_pac_info bp_info;
+  bp_info.plt_type = plt_type;
+  bp_info.bti_type = bti_type;
+
   bfd_elf${ELFSIZE}_aarch64_set_options (link_info.output_bfd, &link_info,
 				 no_enum_size_warning,
 				 no_wchar_size_warning,
 				 pic_veneer,
 				 fix_erratum_835769, fix_erratum_843419,
-				 no_apply_dynamic_relocs);
+				 no_apply_dynamic_relocs,
+				 bp_info);
 
   stub_file = lang_add_input_file ("linker stubs",
 				   lang_input_file_is_fake_enum,
@@ -365,6 +372,7 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_FIX_ERRATUM_835769	313
 #define OPTION_FIX_ERRATUM_843419	314
 #define OPTION_NO_APPLY_DYNAMIC_RELOCS	315
+#define OPTION_FORCE_BTI		316
 '
 
 PARSE_AND_LIST_SHORTOPTS=p
@@ -378,6 +386,7 @@ PARSE_AND_LIST_LONGOPTS='
   { "fix-cortex-a53-835769", no_argument, NULL, OPTION_FIX_ERRATUM_835769},
   { "fix-cortex-a53-843419", no_argument, NULL, OPTION_FIX_ERRATUM_843419},
   { "no-apply-dynamic-relocs", no_argument, NULL, OPTION_NO_APPLY_DYNAMIC_RELOCS},
+  { "force-bti", no_argument, NULL, OPTION_FORCE_BTI},
 '
 
 PARSE_AND_LIST_OPTIONS='
@@ -398,6 +407,7 @@ PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("  --fix-cortex-a53-835769      Fix erratum 835769\n"));
   fprintf (file, _("  --fix-cortex-a53-843419      Fix erratum 843419\n"));
   fprintf (file, _("  --no-apply-dynamic-relocs    Do not apply link-time values for dynamic relocations\n"));
+  fprintf (file, _("  --force-bti                  Turn on Branch Target Identification mechanism and generate PLTs with BTI. Generate warnings for missing BTI on inputs\n"));
 '
 
 PARSE_AND_LIST_ARGS_CASES='
@@ -427,6 +437,11 @@ PARSE_AND_LIST_ARGS_CASES='
 
     case OPTION_NO_APPLY_DYNAMIC_RELOCS:
       no_apply_dynamic_relocs = 1;
+      break;
+
+    case OPTION_FORCE_BTI:
+      plt_type |= PLT_BTI;
+      bti_type = BTI_WARN;
       break;
 
     case OPTION_STUBGROUP_SIZE:

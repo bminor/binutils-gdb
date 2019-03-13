@@ -1798,6 +1798,17 @@ dump_relocations (Filedata *          filedata,
 }
 
 static const char *
+get_aarch64_dynamic_type (unsigned long type)
+{
+  switch (type)
+    {
+    case DT_AARCH64_BTI_PLT:  return "AARCH64_BTI_PLT";
+    default:
+      return NULL;
+    }
+}
+
+static const char *
 get_mips_dynamic_type (unsigned long type)
 {
   switch (type)
@@ -2170,6 +2181,9 @@ get_dynamic_type (Filedata * filedata, unsigned long type)
 
 	  switch (filedata->file_header.e_machine)
 	    {
+	    case EM_AARCH64:
+	      result = get_aarch64_dynamic_type (type);
+	      break;
 	    case EM_MIPS:
 	    case EM_MIPS_RS3_LE:
 	      result = get_mips_dynamic_type (type);
@@ -9345,6 +9359,20 @@ process_unwind (Filedata * filedata)
 }
 
 static void
+dynamic_section_aarch64_val (Elf_Internal_Dyn * entry)
+{
+  switch (entry->d_tag)
+    {
+    case DT_AARCH64_BTI_PLT:
+      break;
+    default:
+      print_vma (entry->d_un.d_ptr, PREFIX_HEX);
+      break;
+    }
+  putchar ('\n');
+}
+
+static void
 dynamic_section_mips_val (Elf_Internal_Dyn * entry)
 {
   switch (entry->d_tag)
@@ -10358,6 +10386,9 @@ process_dynamic_section (Filedata * filedata)
 	    {
 	      switch (filedata->file_header.e_machine)
 		{
+		case EM_AARCH64:
+		  dynamic_section_aarch64_val (entry);
+		  break;
 		case EM_MIPS:
 		case EM_MIPS_RS3_LE:
 		  dynamic_section_mips_val (entry);

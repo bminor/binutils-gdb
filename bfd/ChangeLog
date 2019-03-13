@@ -1,4 +1,41 @@
 2019-03-13  Sudakshina Das  <sudi.das@arm.com>
+	    Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* bfd-in.h (aarch64_plt_type, aarch64_enable_bti_type): New.
+	(aarch64_bti_pac_info): New.
+	(bfd_elf64_aarch64_set_options): Add aarch64_bti_pac_info argument.
+	(bfd_elf32_aarch64_set_options): Likewise.
+	* bfd-in2.h: Regenerate
+	* elfnn-aarch64.c (PLT_BTI_ENTRY_SIZE): New.
+	(PLT_BTI_SMALL_ENTRY_SIZE, PLT_BTI_TLSDESC_ENTRY_SIZE): New.
+	(elfNN_aarch64_small_plt0_bti_entry): New.
+	(elfNN_aarch64_small_plt_bti_entry): New.
+	(elfNN_aarch64_tlsdesc_small_plt_bti_entry): New.
+	(elf_aarch64_obj_tdata): Add no_bti_warn and plt_type fields.
+	(elf_aarch64_link_hash_table): Add plt0_entry, plt_entry and
+	tlsdesc_plt_entry_size fields.
+	(elfNN_aarch64_link_hash_table_create): Initialise the new fields.
+	(setup_plt_values): New helper function.
+	(bfd_elfNN_aarch64_set_options): Use new bp_info to set plt sizes and
+	bti enable type.
+	(elfNN_aarch64_allocate_dynrelocs): Use new size members instead of
+	fixed macros.
+	(elfNN_aarch64_size_dynamic_sections): Likewise and add checks.
+	(elfNN_aarch64_create_small_pltn_entry): Use new generic pointers
+	to plt stubs instead of fixed ones and update filling them according
+	to the need for bti.
+	(elfNN_aarch64_init_small_plt0_entry): Likewise.
+	(elfNN_aarch64_finish_dynamic_sections): Likewise.
+	(get_plt_type, elfNN_aarch64_get_synthetic_symtab): New.
+	(elfNN_aarch64_plt_sym_val): Update size accordingly.
+	(elfNN_aarch64_link_setup_gnu_properties): Set up plts if BTI GNU NOTE
+	is set.
+	(bfd_elfNN_get_synthetic_symtab): Define.
+	(elfNN_aarch64_merge_gnu_properties): Give out warning with --force-bti
+	and mising BTI NOTE SECTION.
+
+
+2019-03-13  Sudakshina Das  <sudi.das@arm.com>
 
 	* elf-properties.c (_bfd_elf_link_setup_gnu_properties): Exclude
 	linker created inputs from merge.

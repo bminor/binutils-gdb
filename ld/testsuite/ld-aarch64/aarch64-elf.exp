@@ -374,6 +374,8 @@ run_dump_test_lp64 "pie-bind-locally"
 run_dump_test "property-bti-pac1"
 run_dump_test "property-bti-pac2"
 run_dump_test "property-bti-pac3"
+run_dump_test "bti-plt-1"
+run_dump_test "bti-plt-2"
 
 set aarch64elflinktests {
   {"ld-aarch64/so with global symbol" "-shared" "" "" {copy-reloc-so.s}
@@ -389,6 +391,14 @@ set aarch64elflinktests {
   {"ld-aarch64/func sym hash opt for exe"
    "-e0 --hash-style=gnu tmpdir/func-in-so.so" "" ""
     {func-sym-hash-opt.s} {{readelf --dyn-sym func-sym-hash-opt.d}} "hash-opt"}
+  {"Build bti-plt-so for PLT tests" "-shared" "" "" {bti-plt-so.s}
+    {} "libbti-plt-so.so"}
 }
 
 run_ld_link_tests $aarch64elflinktests
+
+run_dump_test "bti-plt-3"
+run_dump_test "bti-plt-4"
+run_dump_test "bti-plt-5"
+run_dump_test "bti-plt-6"
+run_dump_test "bti-plt-7"

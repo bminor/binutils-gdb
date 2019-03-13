@@ -1,4 +1,12 @@
 2019-03-13  Sudakshina Das  <sudi.das@arm.com>
+	    Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* readelf.c (get_aarch64_dynamic_type): New.
+	(get_dynamic_type): Use above for EM_AARCH64.
+	(dynamic_section_aarch64_val): New.
+	(process_dynamic_section): Use above for EM_AARCH64.
+
+2019-03-13  Sudakshina Das  <sudi.das@arm.com>
 
 	* readelf.c (decode_aarch64_feature_1_and): New.
 	(print_gnu_property_note): Add case for AArch64 gnu notes.

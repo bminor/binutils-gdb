@@ -1002,11 +1002,45 @@ extern void bfd_elf64_aarch64_init_maps
 extern void bfd_elf32_aarch64_init_maps
   (bfd *);
 
+/* Types of PLTs based on the level of security.  This would be a
+   bit-mask to denote which of the combinations of security features
+   are enabled:
+   - No security feature PLTs
+   - PLTs with BTI instruction
+   - PLTs with PAC instruction
+*/
+typedef enum
+{
+  PLT_NORMAL	= 0x0,  /* Normal plts.  */
+  PLT_BTI	= 0x1,  /* plts with bti.  */
+  PLT_PAC	= 0x2,  /* plts with pointer authentication.  */
+  PLT_BTI_PAC	= PLT_BTI | PLT_PAC
+} aarch64_plt_type;
+
+/* To indicate if BTI is enabled with/without warning.  */
+typedef enum
+{
+  BTI_NONE	= 0,  /* BTI is not enabled.  */
+  BTI_WARN	= 1,  /* BTI is enabled with --force-bti.  */
+} aarch64_enable_bti_type;
+
+/* A structure to encompass all information coming from BTI or PAC
+   related command line options.  This involves the "PLT_TYPE" to determine
+   which version of PLTs to pick and "BTI_TYPE" to determine if
+   BTI should be turned on with any warnings.   */
+typedef struct
+{
+  aarch64_plt_type plt_type;
+  aarch64_enable_bti_type bti_type;
+} aarch64_bti_pac_info;
+
 extern void bfd_elf64_aarch64_set_options
-  (bfd *, struct bfd_link_info *, int, int, int, int, int, int);
+  (bfd *, struct bfd_link_info *, int, int, int, int, int, int,
+   aarch64_bti_pac_info);
 
 extern void bfd_elf32_aarch64_set_options
-  (bfd *, struct bfd_link_info *, int, int, int, int, int, int);
+  (bfd *, struct bfd_link_info *, int, int, int, int, int, int,
+   aarch64_bti_pac_info);
 
 /* ELF AArch64 mapping symbol support.  */
 #define BFD_AARCH64_SPECIAL_SYM_TYPE_MAP	(1 << 0)

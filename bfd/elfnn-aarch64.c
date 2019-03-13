@@ -267,6 +267,10 @@
 #define PLT_ENTRY_SIZE			(32)
 #define PLT_SMALL_ENTRY_SIZE		(16)
 #define PLT_TLSDESC_ENTRY_SIZE		(32)
+/* PLT sizes with BTI insn.  */
+#define PLT_BTI_ENTRY_SIZE		(36)
+#define PLT_BTI_SMALL_ENTRY_SIZE	(20)
+#define PLT_BTI_TLSDESC_ENTRY_SIZE	(36)
 
 /* Encoding of the nop instruction.  */
 #define INSN_NOP 0xd503201f
@@ -297,9 +301,27 @@ static const bfd_byte elfNN_aarch64_small_plt0_entry[PLT_ENTRY_SIZE] =
   0x1f, 0x20, 0x03, 0xd5,	/* nop */
 };
 
+static const bfd_byte elfNN_aarch64_small_plt0_bti_entry[PLT_BTI_ENTRY_SIZE] =
+{
+  0x5f, 0x24, 0x03, 0xd5,	/* bti c.  */
+  0xf0, 0x7b, 0xbf, 0xa9,	/* stp x16, x30, [sp, #-16]!  */
+  0x10, 0x00, 0x00, 0x90,	/* adrp x16, (GOT+16)  */
+#if ARCH_SIZE == 64
+  0x11, 0x0A, 0x40, 0xf9,	/* ldr x17, [x16, #PLT_GOT+0x10]  */
+  0x10, 0x42, 0x00, 0x91,	/* add x16, x16,#PLT_GOT+0x10   */
+#else
+  0x11, 0x0A, 0x40, 0xb9,	/* ldr w17, [x16, #PLT_GOT+0x8]  */
+  0x10, 0x22, 0x00, 0x11,	/* add w16, w16,#PLT_GOT+0x8   */
+#endif
+  0x20, 0x02, 0x1f, 0xd6,	/* br x17  */
+  0x1f, 0x20, 0x03, 0xd5,	/* nop */
+  0x1f, 0x20, 0x03, 0xd5,	/* nop */
+  0x1f, 0x20, 0x03, 0xd5,	/* nop */
+};
+
 /* Per function entry in a procedure linkage table looks like this
    if the distance between the PLTGOT and the PLT is < 4GB use
-   these PLT entries.  */
+   these PLT entries.  Use BTI versions of the PLTs when enabled.  */
 static const bfd_byte elfNN_aarch64_small_plt_entry[PLT_SMALL_ENTRY_SIZE] =
 {
   0x10, 0x00, 0x00, 0x90,	/* adrp x16, PLTGOT + n * 8  */
@@ -314,8 +336,42 @@ static const bfd_byte elfNN_aarch64_small_plt_entry[PLT_SMALL_ENTRY_SIZE] =
 };
 
 static const bfd_byte
+elfNN_aarch64_small_plt_bti_entry[PLT_BTI_SMALL_ENTRY_SIZE] =
+{
+  0x5f, 0x24, 0x03, 0xd5,	/* bti c.  */
+  0x10, 0x00, 0x00, 0x90,	/* adrp x16, PLTGOT + n * 8  */
+#if ARCH_SIZE == 64
+  0x11, 0x02, 0x40, 0xf9,	/* ldr x17, [x16, PLTGOT + n * 8] */
+  0x10, 0x02, 0x00, 0x91,	/* add x16, x16, :lo12:PLTGOT + n * 8  */
+#else
+  0x11, 0x02, 0x40, 0xb9,	/* ldr w17, [x16, PLTGOT + n * 4] */
+  0x10, 0x02, 0x00, 0x11,	/* add w16, w16, :lo12:PLTGOT + n * 4  */
+#endif
+  0x20, 0x02, 0x1f, 0xd6,	/* br x17.  */
+};
+
+static const bfd_byte
 elfNN_aarch64_tlsdesc_small_plt_entry[PLT_TLSDESC_ENTRY_SIZE] =
 {
+  0xe2, 0x0f, 0xbf, 0xa9,	/* stp x2, x3, [sp, #-16]! */
+  0x02, 0x00, 0x00, 0x90,	/* adrp x2, 0 */
+  0x03, 0x00, 0x00, 0x90,	/* adrp x3, 0 */
+#if ARCH_SIZE == 64
+  0x42, 0x00, 0x40, 0xf9,	/* ldr x2, [x2, #0] */
+  0x63, 0x00, 0x00, 0x91,	/* add x3, x3, 0 */
+#else
+  0x42, 0x00, 0x40, 0xb9,	/* ldr w2, [x2, #0] */
+  0x63, 0x00, 0x00, 0x11,	/* add w3, w3, 0 */
+#endif
+  0x40, 0x00, 0x1f, 0xd6,	/* br x2 */
+  0x1f, 0x20, 0x03, 0xd5,	/* nop */
+  0x1f, 0x20, 0x03, 0xd5,	/* nop */
+};
+
+static const bfd_byte
+elfNN_aarch64_tlsdesc_small_plt_bti_entry[PLT_BTI_TLSDESC_ENTRY_SIZE] =
+{
+  0x5f, 0x24, 0x03, 0xd5,	/* bti c.  */
   0xe2, 0x0f, 0xbf, 0xa9,	/* stp x2, x3, [sp, #-16]! */
   0x02, 0x00, 0x00, 0x90,	/* adrp x2, 0 */
   0x03, 0x00, 0x00, 0x90,	/* adrp x3, 0 */
@@ -2438,6 +2494,13 @@ struct elf_aarch64_obj_tdata
 
   /* All GNU_PROPERTY_AARCH64_FEATURE_1_AND properties.  */
   uint32_t gnu_and_prop;
+
+  /* Zero to warn when linking objects with incompatible
+     GNU_PROPERTY_AARCH64_FEATURE_1_BTI.  */
+  int no_bti_warn;
+
+  /* PLT type based on security.  */
+  aarch64_plt_type plt_type;
 };
 
 #define elf_aarch64_tdata(bfd)				\
@@ -2543,8 +2606,14 @@ struct elf_aarch64_link_hash_table
   /* The number of bytes in the initial entry in the PLT.  */
   bfd_size_type plt_header_size;
 
-  /* The number of bytes in the subsequent PLT etries.  */
+  /* The bytes of the initial PLT entry.  */
+  const bfd_byte *plt0_entry;
+
+  /* The number of bytes in the subsequent PLT entries.  */
   bfd_size_type plt_entry_size;
+
+  /* The bytes of the subsequent PLT entry.  */
+  const bfd_byte *plt_entry;
 
   /* Small local sym cache.  */
   struct sym_cache sym_cache;
@@ -2587,6 +2656,9 @@ struct elf_aarch64_link_hash_table
      to be necessary yet), and -1 if needed but not determined
      yet.  */
   bfd_vma tlsdesc_plt;
+
+  /* The number of bytes in the PLT enty for the TLS descriptor.  */
+  bfd_size_type tlsdesc_plt_entry_size;
 
   /* The GOT offset for the lazy trampoline.  Communicated to the
      loader via DT_TLSDESC_GOT.  The magic value (bfd_vma) -1
@@ -2831,7 +2903,10 @@ elfNN_aarch64_link_hash_table_create (bfd *abfd)
     }
 
   ret->plt_header_size = PLT_ENTRY_SIZE;
+  ret->plt0_entry = elfNN_aarch64_small_plt0_entry;
   ret->plt_entry_size = PLT_SMALL_ENTRY_SIZE;
+  ret->plt_entry = elfNN_aarch64_small_plt_entry;
+  ret->tlsdesc_plt_entry_size = PLT_TLSDESC_ENTRY_SIZE;
   ret->obfd = abfd;
   ret->dt_tlsdesc_got = (bfd_vma) - 1;
 
@@ -4599,6 +4674,28 @@ bfd_elfNN_aarch64_init_maps (bfd *abfd)
     }
 }
 
+static void
+setup_plt_values (struct bfd_link_info *link_info,
+		  aarch64_plt_type plt_type)
+{
+  struct elf_aarch64_link_hash_table *globals;
+  globals = elf_aarch64_hash_table (link_info);
+
+  if (plt_type == PLT_BTI)
+    {
+      globals->plt_header_size = PLT_BTI_ENTRY_SIZE;
+      globals->plt0_entry = elfNN_aarch64_small_plt0_bti_entry;
+      globals->tlsdesc_plt_entry_size = PLT_BTI_TLSDESC_ENTRY_SIZE;
+
+      /* Only in ET_EXEC we need PLTn with BTI.  */
+      if (bfd_link_pde (link_info))
+	{
+	  globals->plt_entry_size = PLT_BTI_SMALL_ENTRY_SIZE;
+	  globals->plt_entry = elfNN_aarch64_small_plt_bti_entry;
+	}
+    }
+}
+
 /* Set option values needed during linking.  */
 void
 bfd_elfNN_aarch64_set_options (struct bfd *output_bfd,
@@ -4607,7 +4704,8 @@ bfd_elfNN_aarch64_set_options (struct bfd *output_bfd,
 			       int no_wchar_warn, int pic_veneer,
 			       int fix_erratum_835769,
 			       int fix_erratum_843419,
-			       int no_apply_dynamic_relocs)
+			       int no_apply_dynamic_relocs,
+			       aarch64_bti_pac_info bp_info)
 {
   struct elf_aarch64_link_hash_table *globals;
 
@@ -4621,6 +4719,20 @@ bfd_elfNN_aarch64_set_options (struct bfd *output_bfd,
   BFD_ASSERT (is_aarch64_elf (output_bfd));
   elf_aarch64_tdata (output_bfd)->no_enum_size_warning = no_enum_warn;
   elf_aarch64_tdata (output_bfd)->no_wchar_size_warning = no_wchar_warn;
+
+  switch (bp_info.bti_type)
+    {
+    case BTI_WARN:
+      elf_aarch64_tdata (output_bfd)->no_bti_warn = 0;
+      elf_aarch64_tdata (output_bfd)->gnu_and_prop
+	|= GNU_PROPERTY_AARCH64_FEATURE_1_BTI;
+      break;
+
+    default:
+      break;
+    }
+  elf_aarch64_tdata (output_bfd)->plt_type = bp_info.plt_type;
+  setup_plt_values (link_info, bp_info.plt_type);
 }
 
 static bfd_vma
@@ -8349,7 +8461,7 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  /* Make room for this entry. For now we only create the
 	     small model PLT entries. We later need to find a way
 	     of relaxing into these from the large model PLT entries.  */
-	  s->size += PLT_SMALL_ENTRY_SIZE;
+	  s->size += htab->plt_entry_size;
 
 	  /* We also need to make an entry in the .got.plt section, which
 	     will be placed in the .got section by the linker script.  */
@@ -8849,10 +8961,10 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   if (htab->tlsdesc_plt)
     {
       if (htab->root.splt->size == 0)
-	htab->root.splt->size += PLT_ENTRY_SIZE;
+	htab->root.splt->size += htab->plt_header_size;
 
       htab->tlsdesc_plt = htab->root.splt->size;
-      htab->root.splt->size += PLT_TLSDESC_ENTRY_SIZE;
+      htab->root.splt->size += htab->tlsdesc_plt_entry_size;
 
       /* If we're not using lazy TLS relocations, don't generate the
 	 GOT entry required.  */
@@ -8964,6 +9076,10 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      && (!add_dynamic_entry (DT_TLSDESC_PLT, 0)
 		  || !add_dynamic_entry (DT_TLSDESC_GOT, 0)))
 	    return FALSE;
+
+	  if ((elf_aarch64_tdata (output_bfd)->plt_type == PLT_BTI)
+	      && !add_dynamic_entry (DT_AARCH64_BTI_PLT, 0))
+	    return FALSE;
 	}
 
       if (relocs)
@@ -9060,7 +9176,13 @@ elfNN_aarch64_create_small_pltn_entry (struct elf_link_hash_entry *h,
     gotplt->output_offset + got_offset;
 
   /* Copy in the boiler-plate for the PLTn entry.  */
-  memcpy (plt_entry, elfNN_aarch64_small_plt_entry, PLT_SMALL_ENTRY_SIZE);
+  memcpy (plt_entry, htab->plt_entry, htab->plt_entry_size);
+
+  /* First instruction in BTI enabled PLT stub is a BTI
+     instruction so skip it.  */
+  if (elf_aarch64_tdata (output_bfd)->plt_type & PLT_BTI
+      && elf_elfheader (output_bfd)->e_type == ET_EXEC)
+    plt_entry = plt_entry + 4;
 
   /* Fill in the top 21 bits for this: ADRP x16, PLT_GOT + n * 8.
      ADRP:   ((PG(S+A)-PG(P)) >> 12) & 0x1fffff */
@@ -9365,10 +9487,10 @@ elfNN_aarch64_init_small_plt0_entry (bfd *output_bfd ATTRIBUTE_UNUSED,
   bfd_vma plt_base;
 
 
-  memcpy (htab->root.splt->contents, elfNN_aarch64_small_plt0_entry,
-	  PLT_ENTRY_SIZE);
+  memcpy (htab->root.splt->contents, htab->plt0_entry,
+	  htab->plt_header_size);
   elf_section_data (htab->root.splt->output_section)->this_hdr.sh_entsize =
-    PLT_ENTRY_SIZE;
+    htab->plt_header_size;
 
   plt_got_2nd_ent = (htab->root.sgotplt->output_section->vma
 		  + htab->root.sgotplt->output_offset
@@ -9377,18 +9499,24 @@ elfNN_aarch64_init_small_plt0_entry (bfd *output_bfd ATTRIBUTE_UNUSED,
   plt_base = htab->root.splt->output_section->vma +
     htab->root.splt->output_offset;
 
+  /* First instruction in BTI enabled PLT stub is a BTI
+     instruction so skip it.  */
+  bfd_byte *plt0_entry = htab->root.splt->contents;
+  if (elf_aarch64_tdata (output_bfd)->plt_type & PLT_BTI)
+    plt0_entry = plt0_entry + 4;
+
   /* Fill in the top 21 bits for this: ADRP x16, PLT_GOT + n * 8.
      ADRP:   ((PG(S+A)-PG(P)) >> 12) & 0x1fffff */
   elf_aarch64_update_plt_entry (output_bfd, BFD_RELOC_AARCH64_ADR_HI21_PCREL,
-				htab->root.splt->contents + 4,
+				plt0_entry + 4,
 				PG (plt_got_2nd_ent) - PG (plt_base + 4));
 
   elf_aarch64_update_plt_entry (output_bfd, BFD_RELOC_AARCH64_LDSTNN_LO12,
-				htab->root.splt->contents + 8,
+				plt0_entry + 8,
 				PG_OFFSET (plt_got_2nd_ent));
 
   elf_aarch64_update_plt_entry (output_bfd, BFD_RELOC_AARCH64_ADD_LO12,
-				htab->root.splt->contents + 12,
+				plt0_entry + 12,
 				PG_OFFSET (plt_got_2nd_ent));
 }
 
@@ -9472,9 +9600,18 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
 	  bfd_put_NN (output_bfd, (bfd_vma) 0,
 		      htab->root.sgot->contents + htab->dt_tlsdesc_got);
 
+	  const bfd_byte *entry = elfNN_aarch64_tlsdesc_small_plt_entry;
+	  htab->tlsdesc_plt_entry_size = PLT_TLSDESC_ENTRY_SIZE;
+
+	  aarch64_plt_type type = elf_aarch64_tdata (output_bfd)->plt_type;
+	  if (type == PLT_BTI)
+	    {
+	      entry = elfNN_aarch64_tlsdesc_small_plt_bti_entry;
+	      htab->tlsdesc_plt_entry_size = PLT_BTI_TLSDESC_ENTRY_SIZE;
+	    }
+
 	  memcpy (htab->root.splt->contents + htab->tlsdesc_plt,
-		  elfNN_aarch64_tlsdesc_small_plt_entry,
-		  sizeof (elfNN_aarch64_tlsdesc_small_plt_entry));
+		  entry, htab->tlsdesc_plt_entry_size);
 
 	  {
 	    bfd_vma adrp1_addr =
@@ -9495,6 +9632,15 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
 
 	    bfd_byte *plt_entry =
 	      htab->root.splt->contents + htab->tlsdesc_plt;
+
+	   /* First instruction in BTI enabled PLT stub is a BTI
+	      instruction so skip it.  */
+	    if (type & PLT_BTI)
+	      {
+		plt_entry = plt_entry + 4;
+		adrp1_addr = adrp1_addr + 4;
+		adrp2_addr = adrp2_addr + 4;
+	      }
 
 	    /* adrp x2, DT_TLSDESC_GOT */
 	    elf_aarch64_update_plt_entry (output_bfd,
@@ -9574,6 +9720,53 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
   return TRUE;
 }
 
+/* Check if BTI enabled PLTs are needed.  Returns the type needed.  */
+static aarch64_plt_type
+get_plt_type (bfd *abfd)
+{
+  aarch64_plt_type ret = PLT_NORMAL;
+  bfd_byte *contents, *extdyn, *extdynend;
+  asection *sec = bfd_get_section_by_name (abfd, ".dynamic");
+  if (!sec || !bfd_malloc_and_get_section (abfd, sec, &contents))
+    return ret;
+  extdyn = contents;
+  extdynend = contents + sec->size;
+  for (; extdyn < extdynend; extdyn += sizeof (ElfNN_External_Dyn))
+    {
+      Elf_Internal_Dyn dyn;
+      bfd_elfNN_swap_dyn_in (abfd, extdyn, &dyn);
+
+      /* Let's check the processor specific dynamic array tags.  */
+      bfd_vma tag = dyn.d_tag;
+      if (tag < DT_LOPROC || tag > DT_HIPROC)
+	continue;
+
+      switch (tag)
+	{
+	case DT_AARCH64_BTI_PLT:
+	  ret = PLT_BTI;
+	  break;
+
+	default: break;
+	}
+    }
+  free (contents);
+  return ret;
+}
+
+static long
+elfNN_aarch64_get_synthetic_symtab (bfd *abfd,
+				    long symcount,
+				    asymbol **syms,
+				    long dynsymcount,
+				    asymbol **dynsyms,
+				    asymbol **ret)
+{
+  elf_aarch64_tdata (abfd)->plt_type = get_plt_type (abfd);
+  return _bfd_elf_get_synthetic_symtab (abfd, symcount, syms,
+					dynsymcount, dynsyms, ret);
+}
+
 /* Return address for Ith PLT stub in section PLT, for relocation REL
    or (bfd_vma) -1 if it should not be included.  */
 
@@ -9581,7 +9774,16 @@ static bfd_vma
 elfNN_aarch64_plt_sym_val (bfd_vma i, const asection *plt,
 			   const arelent *rel ATTRIBUTE_UNUSED)
 {
-  return plt->vma + PLT_ENTRY_SIZE + i * PLT_SMALL_ENTRY_SIZE;
+  size_t plt0_size = PLT_ENTRY_SIZE;
+  size_t pltn_size = PLT_SMALL_ENTRY_SIZE;
+
+  if (elf_aarch64_tdata (plt->owner)->plt_type == PLT_BTI)
+    {
+      plt0_size = PLT_BTI_ENTRY_SIZE;
+      if (elf_elfheader (plt->owner)->e_type == ET_EXEC)
+	pltn_size = PLT_BTI_SMALL_ENTRY_SIZE;
+    }
+  return plt->vma + plt0_size + i * pltn_size;
 }
 
 /* Returns TRUE if NAME is an AArch64 mapping symbol.
@@ -9627,6 +9829,9 @@ elfNN_aarch64_link_setup_gnu_properties (struct bfd_link_info *info)
   uint32_t prop = elf_aarch64_tdata (info->output_bfd)->gnu_and_prop;
   bfd *pbfd = _bfd_aarch64_elf_link_setup_gnu_properties (info, &prop);
   elf_aarch64_tdata (info->output_bfd)->gnu_and_prop = prop;
+  elf_aarch64_tdata (info->output_bfd)->plt_type
+    |= (prop & GNU_PROPERTY_AARCH64_FEATURE_1_BTI) ? PLT_BTI : 0;
+  setup_plt_values (info, elf_aarch64_tdata (info->output_bfd)->plt_type);
   return pbfd;
 }
 
@@ -9641,6 +9846,23 @@ elfNN_aarch64_merge_gnu_properties (struct bfd_link_info *info,
 {
   uint32_t prop
     = elf_aarch64_tdata (info->output_bfd)->gnu_and_prop;
+
+  /* If output has been marked with BTI using command line argument, give out
+     warning if necessary.  */
+  if ((prop & GNU_PROPERTY_AARCH64_FEATURE_1_BTI)
+      && (!elf_aarch64_tdata (info->output_bfd)->no_bti_warn))
+    {
+      if ((aprop && !(aprop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_BTI))
+	  || (bprop && !(bprop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_BTI))
+	  /* If either property is NULL, it means its bfd did not have any
+	     property.  */
+	  || !aprop || !bprop)
+	{
+	  _bfd_error_handler (_("warning: BTI turned on by --force-bti when "
+				"all inputs do not have BTI in NOTE section."));
+	}
+    }
+
   return  _bfd_aarch64_elf_merge_gnu_properties (info, abfd, aprop,
 						 bprop, prop);
 }
@@ -9717,6 +9939,9 @@ const struct elf_size_info elfNN_aarch64_size_info =
 
 #define bfd_elfNN_find_nearest_line		\
   elfNN_aarch64_find_nearest_line
+
+#define bfd_elfNN_get_synthetic_symtab		\
+  elfNN_aarch64_get_synthetic_symtab
 
 #define bfd_elfNN_mkobject			\
   elfNN_aarch64_mkobject
