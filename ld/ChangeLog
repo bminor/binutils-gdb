@@ -1,3 +1,18 @@
+2019-03-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/24322
+	* testsuite/ld-i386/i386.exp: Run PR ld/24322 tests.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr24322a.d: New file.
+	* testsuite/ld-i386/pr24322b.d: Likewise.
+	* testsuite/ld-x86-64/pr24322a-x32.d: Likewise.
+	* testsuite/ld-x86-64/pr24322a.d: Likewise.
+	* testsuite/ld-x86-64/pr24322b-x32.d: Likewise.
+	* testsuite/ld-x86-64/pr24322b.d: Likewise.
+	* testsuite/ld-x86-64/pr24322a.s: Likewise.
+	* testsuite/ld-x86-64/pr24322b.s: Likewise.
+	* testsuite/ld-x86-64/pr24322c.s: Likewise.
+
 2019-03-06  Nick Bowler  <nbowler@draconx.ca>
 
 	PR 24289

@@ -2496,6 +2496,9 @@ _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
 	}
       else
 	{
+	  /* There should be no AND properties since some input doesn't
+	     have them.  Set IBT and SHSTK properties for -z ibt and -z
+	     shstk if needed.  */
 	  features = 0;
 	  if (info->ibt)
 	    features = GNU_PROPERTY_X86_FEATURE_1_IBT;
@@ -2503,18 +2506,15 @@ _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
 	    features |= GNU_PROPERTY_X86_FEATURE_1_SHSTK;
 	  if (features)
 	    {
-	      /* Add GNU_PROPERTY_X86_FEATURE_1_IBT and
-		 GNU_PROPERTY_X86_FEATURE_1_SHSTK.  */
 	      if (aprop != NULL)
 		{
-		  number = aprop->u.number;
-		  aprop->u.number = number | features;
-		  updated = number != (unsigned int) aprop->u.number;
+		  updated = features != (unsigned int) aprop->u.number;
+		  aprop->u.number = features;
 		}
 	      else
 		{
-		  bprop->u.number |= features;
 		  updated = TRUE;
+		  bprop->u.number = features;
 		}
 	    }
 	  else if (aprop != NULL)
