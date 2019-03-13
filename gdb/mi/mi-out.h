@@ -90,7 +90,12 @@ private:
   std::vector<ui_file *> m_streams;
 };
 
-mi_ui_out *mi_out_new (int mi_version);
+/* Create an MI ui-out object with MI version MI_VERSION, which should be equal
+   to one of the INTERP_MI* constants (see interps.h).
+
+   Return nullptr if an invalid version is provided.  */
+mi_ui_out *mi_out_new (const char *mi_version);
+
 int mi_version (ui_out *uiout);
 void mi_out_put (ui_out *uiout, struct ui_file *stream);
 void mi_out_rewind (ui_out *uiout);

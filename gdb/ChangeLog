@@ -1,3 +1,11 @@
+2019-03-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* mi/mi-out.h (mi_out_new): Change parameter to const char *.
+	* mi/mi-out.c (mi_out_new): Change parameter to const char *,
+	instantiate mi_ui_out based on interpreter name.
+	* mi/mi-interp.c (mi_interp::init): Use the new mi_out_new.
+	* mi/mi-main.c (mi_load_progress): Likewise.
+
 2019-03-12  John Baldwin  <jhb@FreeBSD.org>
 
 	* NEWS: Combine separate "New targets" sections for 8.3.

@@ -114,7 +114,6 @@ void
 mi_interp::init (bool top_level)
 {
   mi_interp *mi = this;
-  int mi_version;
 
   /* Store the current output channel, so that we can create a console
      channel that encapsulates and prefixes all gdb_output-type bits
@@ -128,21 +127,8 @@ mi_interp::init (bool top_level)
   mi->log = mi->err;
   mi->targ = new mi_console_file (mi->raw_stdout, "@", '"');
   mi->event_channel = new mi_console_file (mi->raw_stdout, "=", 0);
-
-  /* INTERP_MI selects the most recent released version.  "mi2" was
-     released as part of GDB 6.0.  */
-  if (strcmp (name (), INTERP_MI) == 0)
-    mi_version = 2;
-  else if (strcmp (name (), INTERP_MI1) == 0)
-    mi_version = 1;
-  else if (strcmp (name (), INTERP_MI2) == 0)
-    mi_version = 2;
-  else if (strcmp (name (), INTERP_MI3) == 0)
-    mi_version = 3;
-  else
-    gdb_assert_not_reached ("unhandled MI version");
-
-  mi->mi_uiout = mi_out_new (mi_version);
+  mi->mi_uiout = mi_out_new (name ());
+  gdb_assert (mi->mi_uiout != nullptr);
   mi->cli_uiout = cli_out_new (mi->out);
 
   if (top_level)

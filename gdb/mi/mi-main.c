@@ -2173,16 +2173,8 @@ mi_load_progress (const char *section_name,
      which means uiout may not be correct.  Fix it for the duration
      of this function.  */
 
-  std::unique_ptr<ui_out> uiout;
-
-  if (current_interp_named_p (INTERP_MI)
-      || current_interp_named_p (INTERP_MI2))
-    uiout.reset (mi_out_new (2));
-  else if (current_interp_named_p (INTERP_MI1))
-    uiout.reset (mi_out_new (1));
-  else if (current_interp_named_p (INTERP_MI3))
-    uiout.reset (mi_out_new (3));
-  else
+  std::unique_ptr<ui_out> uiout (mi_out_new (current_interpreter ()->name ()));
+  if (uiout == nullptr)
     return;
 
   scoped_restore save_uiout

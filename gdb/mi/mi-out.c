@@ -20,9 +20,13 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "ui-out.h"
 #include "mi-out.h"
+
 #include <vector>
+
+#include "interps.h"
+#include "ui-out.h"
+#include "utils.h"
 
 /* Mark beginning of a table.  */
 
@@ -288,12 +292,21 @@ mi_ui_out::~mi_ui_out ()
 {
 }
 
-/* Initialize private members at startup.  */
+/* See mi/mi-out.h.  */
 
 mi_ui_out *
-mi_out_new (int mi_version)
+mi_out_new (const char *mi_version)
 {
-  return new mi_ui_out (mi_version);
+  if (streq (mi_version, INTERP_MI3))
+    return new mi_ui_out (3);
+
+  if (streq (mi_version, INTERP_MI2) || streq (mi_version, INTERP_MI))
+    return new mi_ui_out (2);
+
+  if (streq (mi_version, INTERP_MI1))
+    return new mi_ui_out (1);
+
+  return nullptr;
 }
 
 /* Helper function to return the given UIOUT as an mi_ui_out.  It is an error
