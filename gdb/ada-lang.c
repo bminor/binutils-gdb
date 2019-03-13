@@ -3173,16 +3173,18 @@ ada_array_length (struct value *arr, int n)
   return high - low + 1;
 }
 
-/* An empty array whose type is that of ARR_TYPE (an array type),
-   with bounds LOW to LOW-1.  */
+/* An array whose type is that of ARR_TYPE (an array type), with
+   bounds LOW to HIGH, but whose contents are unimportant.  If HIGH is
+   less than LOW, then LOW-1 is used.  */
 
 static struct value *
-empty_array (struct type *arr_type, int low)
+empty_array (struct type *arr_type, int low, int high)
 {
   struct type *arr_type0 = ada_check_typedef (arr_type);
   struct type *index_type
     = create_static_range_type
-        (NULL, TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (arr_type0)),  low, low - 1);
+        (NULL, TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (arr_type0)), low,
+	 high < low ? low - 1 : high);
   struct type *elt_type = ada_array_element_type (arr_type0, 1);
 
   return allocate_value (create_array_type (NULL, elt_type, index_type));
@@ -11033,7 +11035,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         if (noside == EVAL_AVOID_SIDE_EFFECTS
             && ada_is_array_descriptor_type (ada_check_typedef
                                              (value_type (array))))
-          return empty_array (ada_type_of_array (array, 0), low_bound);
+          return empty_array (ada_type_of_array (array, 0), low_bound,
+			      high_bound);
 
         array = ada_coerce_to_simple_array_ptr (array);
 
@@ -11057,7 +11060,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
             struct type *type0 = ada_check_typedef (value_type (array));
 
             if (high_bound < low_bound || noside == EVAL_AVOID_SIDE_EFFECTS)
-              return empty_array (TYPE_TARGET_TYPE (type0), low_bound);
+              return empty_array (TYPE_TARGET_TYPE (type0), low_bound, high_bound);
             else
               {
                 struct type *arr_type0 =
@@ -11071,7 +11074,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         else if (noside == EVAL_AVOID_SIDE_EFFECTS)
           return array;
         else if (high_bound < low_bound)
-          return empty_array (value_type (array), low_bound);
+          return empty_array (value_type (array), low_bound, high_bound);
         else
           return ada_value_slice (array, longest_to_int (low_bound),
 				  longest_to_int (high_bound));
