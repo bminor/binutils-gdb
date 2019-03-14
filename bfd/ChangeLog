@@ -1,3 +1,11 @@
+2019-03-14  Nick Clifton  <nickc@redhat.com>
+
+	PR 24332
+	* elflink.c (elf_link_add_object_symbols): Add new local variable
+	extversym_end.  Initialise it to point to the end of the version
+	symbol table, if present.  Check it when initialising and updating
+	the ever pointer.
+
 2019-03-13  Sudakshina Das  <sudi.das@arm.com>
 
 	* elfnn-aarch64.c (PLT_PAC_ENTRY_SIZE, PLT_PAC_SMALL_ENTRY_SIZE): New.
