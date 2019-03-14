@@ -11401,6 +11401,17 @@ an enumerated type:
 Visiting node of type NODE_INTEGER
 @end smallexample
 
+@item $_cimag(@var{value})
+@itemx $_creal(@var{value})
+@findex $_cimag@r{, convenience function}
+@findex $_creal@r{, convenience function}
+Return the imaginary (@code{$_cimag}) or real (@code{$_creal}) part of
+the complex number @var{value}.
+
+The type of the imaginary or real part depends on the type of the
+complex number, e.g., using @code{$_cimag} on a @code{float complex}
+will return an imaginary part of type @code{float}.
+
 @end table
 
 @value{GDBN} provides the ability to list and get help on

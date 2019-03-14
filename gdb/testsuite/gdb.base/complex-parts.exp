@@ -1,0 +1,62 @@
+# Copyright 2019 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+standard_testfile
+
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
+    return -1
+}
+
+if { ![runto_main] } then {
+    fail "can't run to main"
+    return 0
+}
+
+gdb_breakpoint [gdb_get_line_number "Break Here"]
+gdb_continue_to_breakpoint "breakpt" ".* Break Here\\. .*"
+
+gdb_test "p z1" " = 1.5 \\+ 4.5 \\* I"
+gdb_test "p z2" " = 2.5 \\+ -5.5 \\* I"
+gdb_test "p z3" " = 3.5 \\+ 6.5 \\* I"
+
+gdb_test "ptype z1" " = complex double"
+gdb_test "ptype z2" " = complex float"
+gdb_test "ptype z3" " = complex long double"
+
+gdb_test "p \$_cimag (z1)" " = 4.5"
+gdb_test "ptype \$" " = double"
+
+gdb_test "p \$_cimag (z2)" " = -5.5"
+gdb_test "ptype \$" " = float"
+
+gdb_test "p \$_cimag (z3)" " = 6.5"
+gdb_test "ptype \$" " = long double"
+
+gdb_test "p \$_creal (z1)" " = 1.5"
+gdb_test "ptype \$" " = double"
+
+gdb_test "p \$_creal (z2)" " = 2.5"
+gdb_test "ptype \$" " = float"
+
+gdb_test "p \$_creal (z3)" " = 3.5"
+gdb_test "ptype \$" " = long double"
+
+gdb_test "p \$_cimag (d1)" "expected a complex number"
+gdb_test "p \$_cimag (f1)" "expected a complex number"
+gdb_test "p \$_cimag (i1)" "expected a complex number"
+
+gdb_test "p \$_creal (d1)" "expected a complex number"
+gdb_test "p \$_creal (f1)" "expected a complex number"
+gdb_test "p \$_creal (i1)" "expected a complex number"

@@ -16,6 +16,9 @@
 
 * Support for Pointer Authentication on AArch64 Linux.
 
+* Two new convernience functions $_cimag and $_creal that extract the
+  imaginary and real parts respectively from complex numbers.
+
 * Python API
 
   ** The gdb.Value type has a new method 'format_string' which returns a
@@ -23,7 +26,6 @@
      optional keyword arguments: 'raw', 'pretty_arrays', 'pretty_structs',
      'array_indexes', 'symbols', 'unions', 'deref_refs', 'actual_objects',
      'static_members', 'max_elements', 'repeat_threshold', and 'format'.
-
 
 *** Changes in GDB 8.3
 

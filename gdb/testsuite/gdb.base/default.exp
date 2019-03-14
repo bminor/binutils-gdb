@@ -601,6 +601,8 @@ set show_conv_list \
 	{$_probe_arg9 = <error: No frame selected>} \
 	{$_probe_arg10 = <error: No frame selected>} \
 	{$_probe_arg11 = <error: No frame selected>} \
+	{$_cimag = <internal function _cimag>} \
+	{$_creal = <internal function _creal>} \
 	{$_isvoid = <internal function _isvoid>} \
 	{$_gdb_major = 8} \
 	{$_gdb_minor = 4} \

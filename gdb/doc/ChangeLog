@@ -1,3 +1,8 @@
+2019-04-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Convenience Funs): Document '$_creal' and
+	'$_cimag'.
+
 2019-03-30  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Convenience Vars): Document $_gdb_major and

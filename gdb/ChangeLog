@@ -1,3 +1,12 @@
+2019-04-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* NEWS: Mention new internal functions.
+	* dwarf2read.c (dwarf2_init_complex_target_type): New function.
+	(read_base_type): Use dwarf2_init_complex_target_type.
+	* value.c (creal_internal_fn): New function.
+	(cimag_internal_fn): New function.
+	(_initialize_values): Register new internal functions.
+
 2019-04-01  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* infrun.c (stop_all_threads): If debug_infrun, always

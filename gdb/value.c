@@ -3933,6 +3933,44 @@ isvoid_internal_fn (struct gdbarch *gdbarch,
   return value_from_longest (builtin_type (gdbarch)->builtin_int, ret);
 }
 
+/* Implementation of the convenience function $_cimag.  Extracts the
+   real part from a complex number.  */
+
+static struct value *
+creal_internal_fn (struct gdbarch *gdbarch,
+		   const struct language_defn *language,
+		   void *cookie, int argc, struct value **argv)
+{
+  if (argc != 1)
+    error (_("You must provide one argument for $_creal."));
+
+  value *cval = argv[0];
+  type *ctype = check_typedef (value_type (cval));
+  if (TYPE_CODE (ctype) != TYPE_CODE_COMPLEX)
+    error (_("expected a complex number"));
+  return value_from_component (cval, TYPE_TARGET_TYPE (ctype), 0);
+}
+
+/* Implementation of the convenience function $_cimag.  Extracts the
+   imaginary part from a complex number.  */
+
+static struct value *
+cimag_internal_fn (struct gdbarch *gdbarch,
+		   const struct language_defn *language,
+		   void *cookie, int argc,
+		   struct value **argv)
+{
+  if (argc != 1)
+    error (_("You must provide one argument for $_cimag."));
+
+  value *cval = argv[0];
+  type *ctype = check_typedef (value_type (cval));
+  if (TYPE_CODE (ctype) != TYPE_CODE_COMPLEX)
+    error (_("expected a complex number"));
+  return value_from_component (cval, TYPE_TARGET_TYPE (ctype),
+			       TYPE_LENGTH (TYPE_TARGET_TYPE (ctype)));
+}
+
 #if GDB_SELF_TEST
 namespace selftests
 {
@@ -4113,6 +4151,20 @@ Check whether an expression is void.\n\
 Usage: $_isvoid (expression)\n\
 Return 1 if the expression is void, zero otherwise."),
 			 isvoid_internal_fn, NULL);
+
+  add_internal_function ("_creal", _("\
+Extract the real part of a complex number.\n\
+Usage: $_creal (expression)\n\
+Return the real part of a complex number, the type depends on the\n\
+type of a complex number."),
+			 creal_internal_fn, NULL);
+
+  add_internal_function ("_cimag", _("\
+Extract the imaginary part of a complex number.\n\
+Usage: $_cimag (expression)\n\
+Return the imaginary part of a complex number, the type depends on the\n\
+type of a complex number."),
+			 cimag_internal_fn, NULL);
 
   add_setshow_zuinteger_unlimited_cmd ("max-value-size",
 				       class_support, &max_value_size, _("\
