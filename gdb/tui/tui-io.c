@@ -37,6 +37,9 @@
 #include "cli-out.h"
 #include <fcntl.h>
 #include <signal.h>
+#ifdef __MINGW32__
+#include <windows.h>
+#endif
 #include "common/filestuff.h"
 #include "completer.h"
 #include "gdb_curses.h"
@@ -46,6 +49,10 @@
    after terminal state releated include files like <term.h> and
    "gdb_curses.h".  */
 #include "readline/readline.h"
+
+#ifdef __MINGW32__
+static SHORT ncurses_norm_attr;
+#endif
 
 static int tui_getc (FILE *fp);
 
@@ -322,6 +329,16 @@ apply_ansi_escape (WINDOW *w, const char *buf)
       int fgi, bgi;
       if (get_color (fg, &fgi) && get_color (bg, &bgi))
 	{
+#ifdef __MINGW32__
+	  /* MS-Windows port of ncurses doesn't support implicit
+	     default foreground and background colors, so we must
+	     specify them explicitly when needed, using the colors we
+	     saw at startup.  */
+	  if (fgi == -1)
+	    fgi = ncurses_norm_attr & 15;
+	  if (bgi == -1)
+	    bgi = (ncurses_norm_attr >> 4) & 15;
+#endif
 	  int pair = get_color_pair (fgi, bgi);
 	  if (last_color_pair != -1)
 	    wattroff (w, COLOR_PAIR (last_color_pair));
@@ -806,6 +823,19 @@ tui_initialize_io (void)
   add_file_handler (tui_readline_pipe[0], tui_readline_output, 0);
 #else
   tui_rl_outstream = stdout;
+#endif
+
+#ifdef __MINGW32__
+  /* MS-Windows port of ncurses doesn't support default foreground and
+     background colors, so we must record the default colors at startup.  */
+  HANDLE hstdout = (HANDLE)_get_osfhandle (fileno (stdout));
+  DWORD cmode;
+  CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+  if (hstdout != INVALID_HANDLE_VALUE
+      && GetConsoleMode (hstdout, &cmode) != 0
+      && GetConsoleScreenBufferInfo (hstdout, &csbi))
+    ncurses_norm_attr = csbi.wAttributes;
 #endif
 }
 
