@@ -1,3 +1,19 @@
+2019-03-14  Eli Zaretskii  <eliz@gnu.org>
+
+	The MS-Windows port of ncurses fails to switch to a color pair if
+	one or both of the colors are the implicit default colors.  This
+	change records the default colors when TUI is initialized, and
+	then specifies them explicitly when a color pair uses the default
+	colors.  This allows color styling in TUI mode on MS-Windows.
+
+	* tui/tui-io.c [__MINGW32__]: Include windows.h.  Declare
+	ncurses_norm_attr.
+	(tui_initialize_io) [__MINGW32__]: Record the default terminal
+	colors in ncurses_norm_attr.
+	(apply_ansi_escape) [__MINGW32__]: If a color in a color pair is
+	"none", replace it with the default color recorded in
+	ncurses_norm_attr.
+
 2019-03-14  Tom Tromey  <tromey@adacore.com>
 
 	* source-cache.h (class source_cache) <get_source_lines>: Return
