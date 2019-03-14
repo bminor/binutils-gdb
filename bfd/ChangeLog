@@ -1,5 +1,14 @@
 2019-03-14  Nick Clifton  <nickc@redhat.com>
 
+	PR 24334
+	* dwarf2.c (struct dwarf2_debug): Add sec_vma_count field.
+	(save_section_vma): Initialise field to the number of entries in
+	the sec_vma table.
+	(section_vma_same): Check that the number of entries in the
+	sec_vma table matches the number of sections in the bfd.
+
+2019-03-14  Nick Clifton  <nickc@redhat.com>
+
 	PR 24333
 	* elflink.c (_bfd_elf_add_default_symbol): Add a check for a NULL
 	section owner pointer when adding the default symbol.

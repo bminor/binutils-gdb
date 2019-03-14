@@ -169,6 +169,8 @@ struct dwarf2_debug
 
   /* Section VMAs at the time the stash was built.  */
   bfd_vma *sec_vma;
+  /* Number of sections in the SEC_VMA table.  */
+  unsigned int sec_vma_count;
 
   /* Number of sections whose VMA we must adjust.  */
   int adjusted_section_count;
@@ -4269,6 +4271,7 @@ save_section_vma (const bfd *abfd, struct dwarf2_debug *stash)
   stash->sec_vma = bfd_malloc (sizeof (*stash->sec_vma) * abfd->section_count);
   if (stash->sec_vma == NULL)
     return FALSE;
+  stash->sec_vma_count = abfd->section_count;
   for (i = 0, s = abfd->sections; i < abfd->section_count; i++, s = s->next)
     {
       if (s->output_section != NULL)
@@ -4292,6 +4295,12 @@ section_vma_same (const bfd *abfd, const struct dwarf2_debug *stash)
   asection *s;
   unsigned int i;
 
+  /* PR 24334: If the number of sections in ABFD has changed between
+     when the stash was created and now, then we cannot trust the
+     stashed vma information.  */
+  if (abfd->section_count != stash->sec_vma_count)
+    return FALSE;
+     
   for (i = 0, s = abfd->sections; i < abfd->section_count; i++, s = s->next)
     {
       bfd_vma vma;
