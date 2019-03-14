@@ -27881,7 +27881,7 @@ Use the output for multi-location breakpoints which was introduced by
 MI 3, even when using MI versions 2 or 1.  This command has no
 effect when using MI version 3 or later.
 
-@end @table
+@end table
 
 The best way to avoid unexpected changes in MI that might break your front
 end is to make your project known to @value{GDBN} developers and
