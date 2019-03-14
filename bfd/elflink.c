@@ -1941,6 +1941,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
 	{
 	  bh = &hi->root;
 	  if (bh->type == bfd_link_hash_defined
+	      && bh->u.def.section->owner != NULL
 	      && (bh->u.def.section->owner->flags & BFD_PLUGIN) != 0)
 	    {
 	      /* Mark the previous definition from IR object as

@@ -1,5 +1,11 @@
 2019-03-14  Nick Clifton  <nickc@redhat.com>
 
+	PR 24333
+	* elflink.c (_bfd_elf_add_default_symbol): Add a check for a NULL
+	section owner pointer when adding the default symbol.
+
+2019-03-14  Nick Clifton  <nickc@redhat.com>
+
 	PR 24332
 	* elflink.c (elf_link_add_object_symbols): Add new local variable
 	extversym_end.  Initialise it to point to the end of the version
