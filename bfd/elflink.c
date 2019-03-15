@@ -4446,7 +4446,7 @@ error_free_dyn:
 	    continue;
 
 	  /* If we aren't prepared to handle locals within the globals
-	      then we'll likely segfault on a NULL section.  */
+	     then we'll likely segfault on a NULL section.  */
 	  bfd_set_error (bfd_error_bad_value);
 	  goto error_free_vers;
 
@@ -10421,8 +10421,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	    {
 	      /* Don't attempt to output symbols with st_shnx in the
 		 reserved range other than SHN_ABS and SHN_COMMON.  */
-	      *ppsection = NULL;
-	      continue;
+	      isec = bfd_und_section_ptr;
 	    }
 	  else if (isec->sec_info_type == SEC_INFO_TYPE_MERGE
 		   && ELF_ST_TYPE (isym->st_info) != STT_SECTION)

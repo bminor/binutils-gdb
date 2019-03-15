@@ -1,3 +1,11 @@
+2019-03-16  Alan Modra  <amodra@gmail.com>
+
+	PR 24337
+	* elf.c (_bfd_elf_rela_local_sym): Revert last change.
+	(_bfd_elf_rel_local_sym): Likewise.
+	* elflink.c (elf_link_input_bfd): Use bfd_und_section for
+	section of symbols with unrecognized shndx.
+
 2019-03-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/24267

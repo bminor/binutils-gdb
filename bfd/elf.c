@@ -11822,10 +11822,9 @@ _bfd_elf_rela_local_sym (bfd *abfd,
   asection *sec = *psec;
   bfd_vma relocation;
 
-  relocation = sym->st_value;
-  if (sec == NULL)
-    return relocation;
-  relocation += sec->output_section->vma + sec->output_offset;
+  relocation = (sec->output_section->vma
+		+ sec->output_offset
+		+ sym->st_value);
   if ((sec->flags & SEC_MERGE)
       && ELF_ST_TYPE (sym->st_info) == STT_SECTION
       && sec->sec_info_type == SEC_INFO_TYPE_MERGE)
@@ -11859,7 +11858,7 @@ _bfd_elf_rel_local_sym (bfd *abfd,
 {
   asection *sec = *psec;
 
-  if (sec == NULL || sec->sec_info_type != SEC_INFO_TYPE_MERGE)
+  if (sec->sec_info_type != SEC_INFO_TYPE_MERGE)
     return sym->st_value + addend;
 
   return _bfd_merged_section_offset (abfd, psec,
