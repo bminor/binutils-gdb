@@ -1,3 +1,11 @@
+2019-10-19  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (PTHREAD_CFLAGS, PTHREAD_LIBS): New variables.
+	(INTERNAL_CFLAGS_BASE): Use PTHREAD_CFLAGS.
+	(GDBSERVER_LIBS): Use PTHREAD_LIBS.
+	* acinclude.m4: Include ax_pthread.m4.
+	* config.in, configure: Rebuild.
+
 2019-11-06  Christian Biesinger  <cbiesinger@google.com>
 
 	* linux-tdep.c (linux_info_proc): Use strtok_r instead of strtok.

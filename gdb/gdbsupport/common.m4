@@ -37,6 +37,32 @@ AC_DEFUN([GDB_AC_COMMON], [
 
   AC_CHECK_DECLS([strerror, strstr])
 
+  # Check for std::thread.  This does not work on some platforms, like
+  # mingw and DJGPP.
+  AC_LANG_PUSH([C++])
+  AX_PTHREAD([threads=yes], [threads=no])
+  if test "$threads" = "yes"; then
+    save_LIBS="$LIBS"
+    LIBS="$PTHREAD_LIBS $LIBS"
+    save_CXXFLAGS="$CXXFLAGS"
+    CXXFLAGS="$PTHREAD_CFLAGS $save_CFLAGS"
+    AC_CACHE_CHECK([for std::thread],
+		   gdb_cv_cxx_std_thread,
+		   [AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+    [[#include <thread>
+      void callback() { }]],
+    [[std::thread t(callback);]])],
+				  gdb_cv_cxx_std_thread=yes,
+				  gdb_cv_cxx_std_thread=no)])
+    LIBS="$save_LIBS"
+    CXXFLAGS="$save_CXXFLAGS"
+  fi
+  if test $gdb_cv_cxx_std_thread = yes; then
+    AC_DEFINE(CXX_STD_THREAD, 1,
+	      [Define to 1 if std::thread works.])
+  fi
+  AC_LANG_POP
+
   dnl Check if sigsetjmp is available.  Using AC_CHECK_FUNCS won't
   dnl do since sigsetjmp might only be defined as a macro.
 AC_CACHE_CHECK([for sigsetjmp], gdb_cv_func_sigsetjmp,

@@ -17,6 +17,9 @@
    */
 #undef CRAY_STACKSEG_END
 
+/* Define to 1 if std::thread works. */
+#undef CXX_STD_THREAD
+
 /* Define to 1 if using `alloca.c'. */
 #undef C_ALLOCA
 
@@ -336,6 +339,9 @@
 /* Define if <sys/procfs.h> has psaddr_t. */
 #undef HAVE_PSADDR_T
 
+/* Have PTHREAD_PRIO_INHERIT. */
+#undef HAVE_PTHREAD_PRIO_INHERIT
+
 /* Define to 1 if you have the `ptrace64' function. */
 #undef HAVE_PTRACE64
 
@@ -624,6 +630,10 @@
 
 /* Define to 1 if the "%ll" format works to print long longs. */
 #undef PRINTF_HAS_LONG_LONG
+
+/* Define to necessary symbol if this constant uses a non-standard name on
+   your system. */
+#undef PTHREAD_CREATE_JOINABLE
 
 /* Define to the type of arg 1 for ptrace. */
 #undef PTRACE_TYPE_ARG1
