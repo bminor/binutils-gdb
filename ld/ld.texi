@@ -846,7 +846,7 @@ Note that the location of the compiler originated plugins is different
 from the place where the @command{ar}, @command{nm} and
 @command{ranlib} programs search for their plugins.  In order for
 those commands to make use of a compiler based plugin it must first be
-copied into the @file{$@{libdir@}/bfd-plugins} directory.  All gcc
+copied into the @file{$@{bindir@}/../lib/bfd-plugins} directory.  All gcc
 based linker plugins are backward compatible, so it is sufficient to
 just copy in the newest one.
 

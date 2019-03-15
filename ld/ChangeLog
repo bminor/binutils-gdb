@@ -1,3 +1,9 @@
+2019-03-15  Nick Clifton  <nickc@redhat.com>
+
+	PR 24262
+	* ld.texi (-plugin): Correct the path used to locate linker
+	plugins.
+
 2019-03-13  Sudakshina Das  <sudi.das@arm.com>
 
 	* NEWS: Document --pac-plt.
