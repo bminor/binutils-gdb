@@ -3361,20 +3361,39 @@ direct:
 		    {
 		      if (contents[roff + 5] == 0xb8)
 			{
+			  if (roff < 3
+			      || (roff - 3 + 22) > input_section->size)
+			    {
+corrupt_input:
+			      info->callbacks->einfo
+				(_("%F%P: corrupt input: %pB\n"),
+				 input_bfd);
+			      return FALSE;
+			    }
 			  memcpy (contents + roff - 3,
 				  "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x8d\x80"
 				  "\0\0\0\0\x66\x0f\x1f\x44\0", 22);
 			  largepic = 1;
 			}
 		      else
-			memcpy (contents + roff - 4,
-				"\x64\x48\x8b\x04\x25\0\0\0\0\x48\x8d\x80\0\0\0",
-				16);
+			{
+			  if (roff < 4
+			      || (roff - 4 + 16) > input_section->size)
+			    goto corrupt_input;
+			  memcpy (contents + roff - 4,
+				  "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x8d\x80\0\0\0",
+				  16);
+			}
 		    }
 		  else
-		    memcpy (contents + roff - 3,
-			    "\x64\x8b\x04\x25\0\0\0\0\x48\x8d\x80\0\0\0",
-			    15);
+		    {
+		      if (roff < 3
+			  || (roff - 3 + 15) > input_section->size)
+			goto corrupt_input;
+		      memcpy (contents + roff - 3,
+			      "\x64\x8b\x04\x25\0\0\0\0\x48\x8d\x80\0\0\0",
+			      15);
+		    }
 		  bfd_put_32 (output_bfd,
 			      elf_x86_64_tpoff (info, relocation),
 			      contents + roff + 8 + largepic);
@@ -3395,6 +3414,8 @@ direct:
 
 		  unsigned int val, type;
 
+		  if (roff < 3)
+		    goto corrupt_input;
 		  type = bfd_get_8 (input_bfd, contents + roff - 3);
 		  val = bfd_get_8 (input_bfd, contents + roff - 1);
 		  bfd_put_8 (output_bfd, 0x48 | ((type >> 2) & 1),
@@ -3441,7 +3462,11 @@ direct:
 		  if (roff >= 3)
 		    val = bfd_get_8 (input_bfd, contents + roff - 3);
 		  else
-		    val = 0;
+		    {
+		      if (roff < 2)
+			goto corrupt_input;
+		      val = 0;
+		    }
 		  type = bfd_get_8 (input_bfd, contents + roff - 2);
 		  reg = bfd_get_8 (input_bfd, contents + roff - 1);
 		  reg >>= 3;
@@ -3449,11 +3474,19 @@ direct:
 		    {
 		      /* movq */
 		      if (val == 0x4c)
-			bfd_put_8 (output_bfd, 0x49,
-				   contents + roff - 3);
+			{
+			  if (roff < 3)
+			    goto corrupt_input;
+			  bfd_put_8 (output_bfd, 0x49,
+				     contents + roff - 3);
+			}
 		      else if (!ABI_64_P (output_bfd) && val == 0x44)
-			bfd_put_8 (output_bfd, 0x41,
-				   contents + roff - 3);
+			{
+			  if (roff < 3)
+			    goto corrupt_input;
+			  bfd_put_8 (output_bfd, 0x41,
+				     contents + roff - 3);
+			}
 		      bfd_put_8 (output_bfd, 0xc7,
 				 contents + roff - 2);
 		      bfd_put_8 (output_bfd, 0xc0 | reg,
@@ -3464,11 +3497,19 @@ direct:
 		      /* addq/addl -> addq/addl - addressing with %rsp/%r12
 			 is special  */
 		      if (val == 0x4c)
-			bfd_put_8 (output_bfd, 0x49,
-				   contents + roff - 3);
+			{
+			  if (roff < 3)
+			    goto corrupt_input;
+			  bfd_put_8 (output_bfd, 0x49,
+				     contents + roff - 3);
+			}
 		      else if (!ABI_64_P (output_bfd) && val == 0x44)
-			bfd_put_8 (output_bfd, 0x41,
-				   contents + roff - 3);
+			{
+			  if (roff < 3)
+			    goto corrupt_input;
+			  bfd_put_8 (output_bfd, 0x41,
+				     contents + roff - 3);
+			}
 		      bfd_put_8 (output_bfd, 0x81,
 				 contents + roff - 2);
 		      bfd_put_8 (output_bfd, 0xc0 | reg,
@@ -3478,11 +3519,19 @@ direct:
 		    {
 		      /* addq/addl -> leaq/leal */
 		      if (val == 0x4c)
-			bfd_put_8 (output_bfd, 0x4d,
-				   contents + roff - 3);
+			{
+			  if (roff < 3)
+			    goto corrupt_input;
+			  bfd_put_8 (output_bfd, 0x4d,
+				     contents + roff - 3);
+			}
 		      else if (!ABI_64_P (output_bfd) && val == 0x44)
-			bfd_put_8 (output_bfd, 0x45,
-				   contents + roff - 3);
+			{
+			  if (roff < 3)
+			    goto corrupt_input;
+			  bfd_put_8 (output_bfd, 0x45,
+				     contents + roff - 3);
+			}
 		      bfd_put_8 (output_bfd, 0x8d,
 				 contents + roff - 2);
 		      bfd_put_8 (output_bfd, 0x80 | reg | (reg << 3),
@@ -3652,20 +3701,33 @@ direct:
 		    {
 		      if (contents[roff + 5] == 0xb8)
 			{
+			  if (roff < 3
+			      || (roff - 3 + 22) > input_section->size)
+			    goto corrupt_input;
 			  memcpy (contents + roff - 3,
 				  "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x03\x05"
 				  "\0\0\0\0\x66\x0f\x1f\x44\0", 22);
 			  largepic = 1;
 			}
 		      else
-			memcpy (contents + roff - 4,
-				"\x64\x48\x8b\x04\x25\0\0\0\0\x48\x03\x05\0\0\0",
-				16);
+			{
+			  if (roff < 4
+			      || (roff - 4 + 16) > input_section->size)
+			    goto corrupt_input;
+			  memcpy (contents + roff - 4,
+				  "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x03\x05\0\0\0",
+				  16);
+			}
 		    }
 		  else
-		    memcpy (contents + roff - 3,
-			    "\x64\x8b\x04\x25\0\0\0\0\x48\x03\x05\0\0\0",
-			    15);
+		    {
+		      if (roff < 3
+			  || (roff - 3 + 15) > input_section->size)
+			goto corrupt_input;
+		      memcpy (contents + roff - 3,
+			      "\x64\x8b\x04\x25\0\0\0\0\x48\x03\x05\0\0\0",
+			      15);
+		    }
 
 		  relocation = (htab->elf.sgot->output_section->vma
 				+ htab->elf.sgot->output_offset + off
@@ -3694,6 +3756,8 @@ direct:
 		     turn a leaq into a movq in the form we use it, it
 		     suffices to change the second byte from 0x8d to
 		     0x8b.  */
+		  if (roff < 2)
+		    goto corrupt_input;
 		  bfd_put_8 (output_bfd, 0x8b, contents + roff - 2);
 
 		  bfd_put_32 (output_bfd,
@@ -3762,28 +3826,58 @@ direct:
 	      BFD_ASSERT (r_type == R_X86_64_TPOFF32);
 	      if (ABI_64_P (output_bfd))
 		{
+		  if ((rel->r_offset + 5) >= input_section->size)
+		    goto corrupt_input;
 		  if (contents[rel->r_offset + 5] == 0xb8)
-		    memcpy (contents + rel->r_offset - 3,
-			    "\x66\x66\x66\x66\x2e\x0f\x1f\x84\0\0\0\0\0"
-			    "\x64\x48\x8b\x04\x25\0\0\0", 22);
+		    {
+		      if (rel->r_offset < 3
+			  || (rel->r_offset - 3 + 22) > input_section->size)
+			goto corrupt_input;
+		      memcpy (contents + rel->r_offset - 3,
+			      "\x66\x66\x66\x66\x2e\x0f\x1f\x84\0\0\0\0\0"
+			      "\x64\x48\x8b\x04\x25\0\0\0", 22);
+		    }
 		  else if (contents[rel->r_offset + 4] == 0xff
 			   || contents[rel->r_offset + 4] == 0x67)
-		    memcpy (contents + rel->r_offset - 3,
-			    "\x66\x66\x66\x66\x64\x48\x8b\x04\x25\0\0\0",
-			    13);
+		    {
+		      if (rel->r_offset < 3
+			  || (rel->r_offset - 3 + 13) > input_section->size)
+			goto corrupt_input;
+		      memcpy (contents + rel->r_offset - 3,
+			      "\x66\x66\x66\x66\x64\x48\x8b\x04\x25\0\0\0",
+			      13);
+
+		    }
 		  else
-		    memcpy (contents + rel->r_offset - 3,
-			    "\x66\x66\x66\x64\x48\x8b\x04\x25\0\0\0", 12);
+		    {
+		      if (rel->r_offset < 3
+			  || (rel->r_offset - 3 + 12) > input_section->size)
+			goto corrupt_input;
+		      memcpy (contents + rel->r_offset - 3,
+			      "\x66\x66\x66\x64\x48\x8b\x04\x25\0\0\0", 12);
+		    }
 		}
 	      else
 		{
+		  if ((rel->r_offset + 4) >= input_section->size)
+		    goto corrupt_input;
 		  if (contents[rel->r_offset + 4] == 0xff)
-		    memcpy (contents + rel->r_offset - 3,
-			    "\x66\x0f\x1f\x40\x00\x64\x8b\x04\x25\0\0\0",
-			    13);
+		    {
+		      if (rel->r_offset < 3
+			  || (rel->r_offset - 3 + 13) > input_section->size)
+			goto corrupt_input;
+		      memcpy (contents + rel->r_offset - 3,
+			      "\x66\x0f\x1f\x40\x00\x64\x8b\x04\x25\0\0\0",
+			      13);
+		    }
 		  else
-		    memcpy (contents + rel->r_offset - 3,
-			    "\x0f\x1f\x40\x00\x64\x8b\x04\x25\0\0\0", 12);
+		    {
+		      if (rel->r_offset < 3
+			  || (rel->r_offset - 3 + 12) > input_section->size)
+			goto corrupt_input;
+		      memcpy (contents + rel->r_offset - 3,
+			      "\x0f\x1f\x40\x00\x64\x8b\x04\x25\0\0\0", 12);
+		    }
 		}
 	      /* Skip R_X86_64_PC32, R_X86_64_PLT32, R_X86_64_GOTPCRELX
 		 and R_X86_64_PLTOFF64.  */

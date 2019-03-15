@@ -1,5 +1,11 @@
 2019-03-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/24338
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Check for corrupt
+	input with bad relocation.
+
+22019-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf64-x86-64.c (elf_x86_64_relocate_section): Re-indent.
 
 2019-03-14  Nick Clifton  <nickc@redhat.com>
