@@ -1,3 +1,7 @@
+2019-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Re-indent.
+
 2019-03-14  Nick Clifton  <nickc@redhat.com>
 
 	PR 24334

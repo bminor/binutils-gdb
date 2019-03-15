@@ -3013,14 +3013,14 @@ skip_ifunc:
 		       && ELF_ST_VISIBILITY (h->other) == STV_PROTECTED)
 		{
 		  _bfd_error_handler
-	      /* xgettext:c-format */
+		    /* xgettext:c-format */
 		    (_("%pB: relocation R_X86_64_GOTOFF64 against protected %s"
 		       " `%s' can not be used when making a shared object"),
 		     input_bfd,
 		     h->type == STT_FUNC ? "function" : "data",
 		     h->root.root.string);
 		  bfd_set_error (bfd_error_bad_value);
-	      return FALSE;
+		  return FALSE;
 		}
 	    }
 
