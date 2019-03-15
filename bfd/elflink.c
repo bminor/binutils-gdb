@@ -2523,9 +2523,11 @@ elf_link_read_relocs_from_section (bfd *abfd,
     }
 
   erela = (const bfd_byte *) external_relocs;
-  erelaend = erela + shdr->sh_size;
+  /* Setting erelaend like this and comparing with <= handles case of
+     a fuzzed object with sh_size not a multiple of sh_entsize.  */
+  erelaend = erela + shdr->sh_size - shdr->sh_entsize;
   irela = internal_relocs;
-  while (erela < erelaend)
+  while (erela <= erelaend)
     {
       bfd_vma r_symndx;
 
