@@ -1,5 +1,11 @@
 2019-03-15  Alan Modra  <amodra@gmail.com>
 
+	PR 24339
+	* elflink.c (elf_link_add_object_symbols): Bail out on a local
+	symbol after globals if elf_bad_symtab is not set.
+
+2019-03-15  Alan Modra  <amodra@gmail.com>
+
 	PR 24337
 	* elf.c (_bfd_elf_rela_local_sym): Don't segfault on NULL sec.
 	(_bfd_elf_rel_local_sym): Likewise.
