@@ -1,3 +1,9 @@
+2019-03-15  Li Hao  <li.hao296@zte.com.cn>
+
+	PR 24308
+	* config/tc-i386.c (parse_insn): Check mnemp before using it to
+	determine if a suffix can be trimmed.
+
 2019-03-13  Christian Eggers  <ceggers@gmx.de>
 
 	* dwarf2dbg.c (out_set_addr): Align relocation within .debug_line.
