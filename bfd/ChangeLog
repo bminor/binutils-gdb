@@ -1,3 +1,11 @@
+2019-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/24267
+	* coffgen.c (_bfd_coff_section_already_linked): Skip discarded
+	section.
+	* cofflink.c (coff_link_add_symbols): Check for symbols defined
+	in discarded section.
+
 2019-03-15  Alan Modra  <amodra@gmail.com>
 
 	PR 24339

@@ -2652,6 +2652,9 @@ _bfd_coff_section_already_linked (bfd *abfd,
   struct bfd_section_already_linked_hash_entry *already_linked_list;
   struct coff_comdat_info *s_comdat;
 
+  if (sec->output_section == bfd_abs_section_ptr)
+    return FALSE;
+
   flags = sec->flags;
   if ((flags & SEC_LINK_ONCE) == 0)
     return FALSE;

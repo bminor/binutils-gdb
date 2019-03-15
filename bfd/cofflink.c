@@ -310,7 +310,9 @@ coff_link_add_symbols (bfd *abfd,
 	    case COFF_SYMBOL_GLOBAL:
 	      flags = BSF_EXPORT | BSF_GLOBAL;
 	      section = coff_section_from_bfd_index (abfd, sym.n_scnum);
-	      if (! obj_pe (abfd))
+	      if (discarded_section (section))
+		section = bfd_und_section_ptr;
+	      else if (! obj_pe (abfd))
 		value -= section->vma;
 	      break;
 
@@ -327,6 +329,8 @@ coff_link_add_symbols (bfd *abfd,
 	    case COFF_SYMBOL_PE_SECTION:
 	      flags = BSF_SECTION_SYM | BSF_GLOBAL;
 	      section = coff_section_from_bfd_index (abfd, sym.n_scnum);
+	      if (discarded_section (section))
+		section = bfd_und_section_ptr;
 	      break;
 	    }
 
