@@ -1,5 +1,15 @@
 2019-09-30  Tom Tromey  <tom@tromey.com>
 
+	* acinclude.m4: Include ax_pthread.m4.
+	* Makefile.in (PTHREAD_CFLAGS, PTHREAD_LIBS): New variables.
+	(INTERNAL_CFLAGS_BASE): Use PTHREAD_CFLAGS.
+	(CLIBS): Use PTHREAD_LIBS.
+	(aclocal_m4_deps): Add ax_pthread.m4.
+	* config.in, configure: Rebuild.
+	* gdbsupport/common.m4 (GDB_AC_COMMON): Check for std::thread.
+
+2019-09-30  Tom Tromey  <tom@tromey.com>
+
 	* symtab.h (struct minimal_symbol) <name_set>: New member.
 	* minsyms.c (minimal_symbol_reader::record_full): Copy name.
 	Don't call symbol_set_names.

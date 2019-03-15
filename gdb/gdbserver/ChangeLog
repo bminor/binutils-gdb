@@ -1,5 +1,10 @@
 2019-09-30  Tom Tromey  <tom@tromey.com>
 
+	* acinclude.m4: Include ax_pthread.m4.
+	* config.in, configure: Rebuild.
+
+2019-09-30  Tom Tromey  <tom@tromey.com>
+
 	* configure: Rebuild.
 	* acinclude.m4: Use m4_include, not sinclude.
 

@@ -5,6 +5,9 @@
    */
 #undef CRAY_STACKSEG_END
 
+/* Define to 1 if std::thread works. */
+#undef CXX_STD_THREAD
+
 /* Define to 1 if using `alloca.c'. */
 #undef C_ALLOCA
 

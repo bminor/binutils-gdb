@@ -73,6 +73,8 @@ m4_include(ptrace.m4)
 
 m4_include(ax_cxx_compile_stdcxx.m4)
 
+m4_include([../config/ax_pthread.m4])
+
 ## ----------------------------------------- ##
 ## ANSIfy the C compiler whenever possible.  ##
 ## From Franc,ois Pinard                     ##
