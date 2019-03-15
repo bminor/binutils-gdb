@@ -1,3 +1,11 @@
+2019-11-26  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (PTHREAD_CFLAGS, PTHREAD_LIBS): New variables.
+	(INTERNAL_CFLAGS_BASE): Use PTHREAD_CFLAGS.
+	(GDBSERVER_LIBS): Use PTHREAD_LIBS.
+	* acinclude.m4: Include ax_pthread.m4.
+	* config.in, configure: Rebuild.
+
 2019-11-26  Christian Biesinger  <cbiesinger@google.com>
 
 	* debug.c (debug_set_output): Call safe_strerror instead of
