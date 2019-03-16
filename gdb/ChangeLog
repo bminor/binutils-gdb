@@ -1,3 +1,12 @@
+2019-10-19  Tom Tromey  <tom@tromey.com>
+
+	* NEWS: Add entry.
+	* maint.c (_initialize_maint_cmds): Add "worker-threads" maint
+	commands.  Call update_thread_pool_size.
+	(update_thread_pool_size, maintenance_set_worker_threads): New
+	functions.
+	(n_worker_threads): New global.
+
 2019-10-19  Christian Biesinger  <cbiesinger@google.com>
 	    Tom Tromey  <tom@tromey.com>
 
