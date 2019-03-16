@@ -1,3 +1,9 @@
+2019-03-16  Eli Zaretskii  <eliz@gnu.org>
+
+	* tui/tui-winsource.c (tui_show_source_line): Revert "Use
+	wclrtoeol in tui_show_source_line".  This reverts changes made in
+	commit 4a3045920bbe4e50a0f4920b0fdc4e88ef23015c.
+
 2019-03-15  Tom Tromey  <tom@tromey.com>
 
 	* symtab.h (struct minimal_symbol): Derive from
