@@ -472,6 +472,9 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_dump_test "optimize-3"
     run_dump_test "optimize-4"
     run_dump_test "optimize-5"
+    run_dump_test "optimize-6a"
+    run_dump_test "optimize-6b"
+    run_dump_test "optimize-6c"
 
     # These tests require support for 8 and 16 bit relocs,
     # so we only run them for ELF and COFF targets.
@@ -982,6 +985,9 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-optimize-4"
     run_dump_test "x86-64-optimize-5"
     run_dump_test "x86-64-optimize-6"
+    run_dump_test "x86-64-optimize-7a"
+    run_dump_test "x86-64-optimize-7b"
+    run_dump_test "x86-64-optimize-7c"
 
     if { ![istarget "*-*-aix*"]
       && ![istarget "*-*-beos*"]
