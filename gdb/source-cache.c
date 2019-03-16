@@ -200,6 +200,13 @@ source_cache::get_source_lines (struct symtab *s, int first_line,
 	  std::ifstream input (fullname);
 	  if (input.is_open ())
 	    {
+	      if (s->line_charpos == 0)
+		{
+		  scoped_fd desc = open_source_file (s);
+		  if (desc.get () < 0)
+		    return false;
+		  find_source_lines (s, desc.get ());
+		}
 	      srchilite::SourceHighlight highlighter ("esc.outlang");
 	      highlighter.setStyleFile("esc.style");
 

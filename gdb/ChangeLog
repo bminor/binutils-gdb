@@ -1,5 +1,11 @@
 2019-03-16  Eli Zaretskii  <eliz@gnu.org>
 
+	* source-cache.c (source_cache::get_source_lines): Call
+	find_source_lines to initialize s->nlines.  This fixes vertical
+	scrolling of TUI source window when the DOWN arrow is pressed.
+
+2019-03-16  Eli Zaretskii  <eliz@gnu.org>
+
 	* tui/tui-winsource.c (tui_show_source_line): Revert "Use
 	wclrtoeol in tui_show_source_line".  This reverts changes made in
 	commit 4a3045920bbe4e50a0f4920b0fdc4e88ef23015c.
