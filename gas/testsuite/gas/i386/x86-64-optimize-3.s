@@ -19,3 +19,5 @@ _start:
 	test	$0x7f, %r9d
 	test	$0x7f, %r9w
 	test	$0x7f, %r9b
+
+	vandnpd	%zmm1, %zmm1, %zmm5

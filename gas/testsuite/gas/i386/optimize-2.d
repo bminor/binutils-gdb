@@ -16,4 +16,5 @@ Disassembly of section .text:
  +[a-f0-9]+:	f6 c3 7f             	test   \$0x7f,%bl
  +[a-f0-9]+:	f7 c7 7f 00 00 00    	test   \$0x7f,%edi
  +[a-f0-9]+:	66 f7 c7 7f 00       	test   \$0x7f,%di
+ +[a-f0-9]+:	c5 f1 55 e9          	vandnpd %xmm1,%xmm1,%xmm5
 #pass

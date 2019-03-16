@@ -11,3 +11,5 @@ _start:
 	test	$0x7f, %bl
 	test	$0x7f, %edi
 	test	$0x7f, %di
+
+	vandnpd	%zmm1, %zmm1, %zmm5

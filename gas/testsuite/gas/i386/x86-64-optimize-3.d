@@ -24,4 +24,5 @@ Disassembly of section .text:
  +[a-f0-9]+:	41 f6 c1 7f          	test   \$0x7f,%r9b
  +[a-f0-9]+:	41 f6 c1 7f          	test   \$0x7f,%r9b
  +[a-f0-9]+:	41 f6 c1 7f          	test   \$0x7f,%r9b
+ +[a-f0-9]+:	c5 f1 55 e9          	vandnpd %xmm1,%xmm1,%xmm5
 #pass

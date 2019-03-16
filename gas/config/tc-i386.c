@@ -33,6 +33,17 @@
 #include "elf/x86-64.h"
 #include "opcodes/i386-init.h"
 
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#else
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifndef INT_MAX
+#define INT_MAX (int) (((unsigned) (-1)) >> 1)
+#endif
+#endif
+
 #ifndef REGISTER_WARNINGS
 #define REGISTER_WARNINGS 1
 #endif
@@ -11350,7 +11361,7 @@ md_parse_option (int c, const char *arg)
 	{
 	  optimize_for_space = 1;
 	  /* Turn on all encoding optimizations.  */
-	  optimize = -1;
+	  optimize = INT_MAX;
 	}
       else
 	{
