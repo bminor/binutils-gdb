@@ -1,3 +1,11 @@
+2019-04-10  Kevin Buettner  <kevinb@redhat.com>
+
+	* amd64-linux-nat.c (amd64_linux_collect_native_gregset): New
+	function.
+	(fill_gregset): Call amd64_linux_collect_native_gregset instead
+	of amd64_collect_native_gregset.
+	(amd64_linux_nat_target::store_registers): Likewise.
+
 2019-04-10  Tom Tromey  <tom@tromey.com>
 
 	* symtab.c (lookup_global_symbol_from_objfile)

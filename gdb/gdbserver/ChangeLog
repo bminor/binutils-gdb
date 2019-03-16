@@ -1,3 +1,8 @@
+2019-04-10  Kevin Buettner  <kevinb@redhat.com>
+
+	* linux-x86-low.c (x86_fill_gregset): Sign extend EAX value
+	when using a 64-bit gdbserver.
+
 2019-04-09  Tom Tromey  <tromey@adacore.com>
 
 	* linux-low.c (select_event_lwp): Use find_thread_in_random.
