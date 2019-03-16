@@ -37876,6 +37876,21 @@ with the DWARF frame unwinders enabled.
 
 If DWARF frame unwinders are not supported for a particular target
 architecture, then enabling this flag does not cause them to be used.
+
+@kindex maint set worker-threads
+@kindex maint show worker-threads
+@item maint set worker-threads
+@item maint show worker-threads
+Control the number of worker threads that may be used by @value{GDBN}.
+On capable hosts, @value{GDBN} may use multiple threads to speed up
+certain CPU-intensive operations, such as demangling symbol names.
+While the number of threads used by @value{GDBN} may vary, this
+command can be used to set an upper bound on this number.  The default
+is @code{unlimited}, which lets @value{GDBN} choose a reasonable
+number.  Note that this only controls worker threads started by
+@value{GDBN} itself; libraries used by @value{GDBN} may start threads
+of their own.
+
 @kindex maint set profile
 @kindex maint show profile
 @cindex profiling GDB

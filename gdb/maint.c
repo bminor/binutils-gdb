@@ -46,6 +46,10 @@
 #include "cli/cli-setshow.h"
 #include "cli/cli-cmds.h"
 
+#if CXX_STD_THREAD
+#include "gdbsupport/thread-pool.h"
+#endif
+
 static void maintenance_do_deprecate (const char *, int);
 
 /* Access the maintenance subcommands.  */
@@ -840,6 +844,30 @@ maintenance_set_profile_cmd (const char *args, int from_tty,
   error (_("Profiling support is not available on this system."));
 }
 #endif
+
+static int n_worker_threads = -1;
+
+/* Update the thread pool for the desired number of threads.  */
+static void
+update_thread_pool_size ()
+{
+#if CXX_STD_THREAD
+  int n_threads = n_worker_threads;
+
+  if (n_threads < 0)
+    n_threads = std::thread::hardware_concurrency ();
+
+  gdb::thread_pool::g_thread_pool->set_thread_count (n_threads);
+#endif
+}
+
+static void
+maintenance_set_worker_threads (const char *args, int from_tty,
+				struct cmd_list_element *c)
+{
+  update_thread_pool_size ();
+}
+
 
 /* If true, display time usage both at startup and for each command.  */
 
@@ -1313,4 +1341,17 @@ When enabled GDB is profiled."),
 			   show_maintenance_profile_p,
 			   &maintenance_set_cmdlist,
 			   &maintenance_show_cmdlist);
+
+  add_setshow_zuinteger_unlimited_cmd ("worker-threads",
+				       class_maintenance,
+				       &n_worker_threads, _("\
+Set the number of worker threads GDB can use."), _("\
+Show the number of worker threads GDB can use."), _("\
+GDB may use multiple threads to speed up certain CPU-intensive operations,\n\
+such as demangling symbol names."),
+				       maintenance_set_worker_threads, NULL,
+				       &maintenance_set_cmdlist,
+				       &maintenance_show_cmdlist);
+
+  update_thread_pool_size ();
 }

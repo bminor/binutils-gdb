@@ -1,3 +1,8 @@
+2019-11-26  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (Maintenance Commands): Document new maint
+	commands.
+
 2019-11-25  Luis Machado  <luis.machado@linaro.org>
 
 	* gdb.texinfo (Debugging Output): Document set debug
