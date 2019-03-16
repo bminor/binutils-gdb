@@ -1551,7 +1551,7 @@ Show whether auto-loading of canned sequences of commands scripts is enabled."),
 			   _("\
 If enabled, canned sequences of commands are loaded when the debugger reads\n\
 an executable or shared library.\n\
-This options has security implications for untrusted inferiors."),
+This option has security implications for untrusted inferiors."),
 			   NULL, show_auto_load_gdb_scripts,
 			   auto_load_set_cmdlist_get (),
 			   auto_load_show_cmdlist_get ());
@@ -1569,7 +1569,7 @@ Show whether auto-loading .gdbinit script in current directory is enabled."),
 If enabled, canned sequences of commands are loaded when debugger starts\n\
 from .gdbinit file in current directory.  Such files are deprecated,\n\
 use a script associated with inferior executable file instead.\n\
-This options has security implications for untrusted inferiors."),
+This option has security implications for untrusted inferiors."),
 			   NULL, show_auto_load_local_gdbinit,
 			   auto_load_set_cmdlist_get (),
 			   auto_load_show_cmdlist_get ());
@@ -1647,7 +1647,7 @@ Setting this parameter to '/' (without the quotes) allows any file\n\
 for the 'set auto-load ...' options.  Each path entry can be also shell\n\
 wildcard pattern; '*' does not match directory separator.\n\
 This option is ignored for the kinds of files having 'set auto-load ... off'.\n\
-This options has security implications for untrusted inferiors."),
+This option has security implications for untrusted inferiors."),
 				     set_auto_load_safe_path,
 				     show_auto_load_safe_path,
 				     auto_load_set_cmdlist_get (),

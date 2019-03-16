@@ -1,3 +1,8 @@
+2019-03-16  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* auto-load.c (_initialize_auto_load): Fix 'This options has'.
+	linux-thread-db.c (_initialize_thread_db): Likewise.
+
 2019-03-16  Eli Zaretskii  <eliz@gnu.org>
 
 	* tui/tui-winsource.c (tui_show_source_line): Revert "Use

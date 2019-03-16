@@ -1976,7 +1976,7 @@ Show whether auto-loading inferior specific libthread_db is enabled."), _("\
 If enabled, libthread_db will be searched in 'set libthread-db-search-path'\n\
 locations to load libthread_db compatible with the inferior.\n\
 Standard system libthread_db still gets loaded even with this option off.\n\
-This options has security implications for untrusted inferiors."),
+This option has security implications for untrusted inferiors."),
 			   NULL, show_auto_load_thread_db,
 			   auto_load_set_cmdlist_get (),
 			   auto_load_show_cmdlist_get ());
