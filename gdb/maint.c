@@ -40,6 +40,7 @@
 #include "top.h"
 #include "maint.h"
 #include "gdbsupport/selftest.h"
+#include "gdbsupport/parallel-for.h"
 
 #include "cli/cli-decode.h"
 #include "cli/cli-utils.h"
@@ -1312,4 +1313,15 @@ When enabled GDB is profiled."),
 			   show_maintenance_profile_p,
 			   &maintenance_set_cmdlist,
 			   &maintenance_show_cmdlist);
+
+  add_setshow_zuinteger_unlimited_cmd ("max-worker-threads",
+				       class_maintenance,
+				       &gdb::max_threads, _("\
+Set the maximum number of worker threads GDB can use."), _("\
+Set the maximum number of worker threads GDB can use."), _("\
+GDB may use multiple threads to speed up certain CPU-intensive operations,\n\
+such as demangling symbol names."),
+				       NULL, NULL,
+				       &maintenance_set_cmdlist,
+				       &maintenance_show_cmdlist);
 }

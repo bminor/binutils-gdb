@@ -122,6 +122,12 @@ set style highlight background COLOR
 set style highlight intensity VALUE
   Control the styling of highlightings.
 
+maint set max-worker-threads
+maint show max-worker-threads
+  Control the maximum number of worker threads that can be used by GDB.
+  The default is "unlimited".  Currently worker threads are only used when
+  demangling the names of linker symbols.
+
 maint set test-settings KIND
 maint show test-settings KIND
   A set of commands used by the testsuite for exercising the settings

@@ -1,5 +1,11 @@
 2019-09-30  Tom Tromey  <tom@tromey.com>
 
+	* NEWS: Add entry.
+	* maint.c (_initialize_maint_cmds): Add "max-worker-threads" maint
+	commands.
+
+2019-09-30  Tom Tromey  <tom@tromey.com>
+
 	* minsyms.c (minimal_symbol_reader::install): Use
 	parallel_for_each.
 	* gdbsupport/parallel-for.h: New file.
