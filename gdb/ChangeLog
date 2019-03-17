@@ -1,3 +1,10 @@
+2019-04-19  Sergei Trofimovich <siarheit@google.com>
+
+	* configure.ac: add --enable-source-highlight switch.
+	* configure: Regenerate.
+	* top.c (print_gdb_version): plumb --enable-source-highlight
+	status to "show configuration".
+
 2019-04-19  Tom Tromey  <tromey@adacore.com>
 
 	* ada-lang.c (ada_is_variant_part, ada_to_fixed_type_1):

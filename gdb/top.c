@@ -1450,6 +1450,15 @@ This GDB was configured as follows:\n\
              --without-guile\n\
 "));
 #endif
+#if HAVE_SOURCE_HIGHLIGHT
+  fprintf_filtered (stream, _("\
+             --enable-source-highlight\n\
+"));
+#else
+  fprintf_filtered (stream, _("\
+             --disable-source-highlight\n\
+"));
+#endif
 #ifdef RELOC_SRCDIR
   fprintf_filtered (stream, _("\
              --with-relocated-sources=%s\n\

@@ -879,6 +879,7 @@ with_mpfr
 with_libmpfr_prefix
 with_python
 with_guile
+enable_source_highlight
 enable_libmcheck
 with_intel_pt
 with_libipt_prefix
@@ -1554,6 +1555,8 @@ Optional Features:
   --enable-profiling      enable profiling of GDB
   --enable-codesign=CERT  sign gdb with 'codesign -s CERT'
   --disable-rpath         do not hardcode runtime library paths
+  --enable-source-highlight
+                          enable source-highlight for source listings
   --enable-libmcheck      Try linking with -lmcheck if available
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings if gcc is used
@@ -11393,13 +11396,30 @@ fi
 
 SRCHIGH_LIBS=
 SRCHIGH_CFLAGS=
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for the source-highlight library" >&5
-$as_echo_n "checking for the source-highlight library... " >&6; }
-if test "${pkg_config_prog_path}" = "missing"; then
-   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no - pkg-config not found" >&5
-$as_echo "no - pkg-config not found" >&6; }
+
+# Check whether --enable-source-highlight was given.
+if test "${enable_source_highlight+set}" = set; then :
+  enableval=$enable_source_highlight; case "${enableval}" in
+  yes)  enable_source_highlight=yes ;;
+  no)   enable_source_highlight=no  ;;
+  *)    as_fn_error $? "bad value ${enableval} for source-highlight option" "$LINENO" 5 ;;
+esac
 else
-   if ${pkg_config_prog_path} --exists source-highlight; then
+  enable_source_highlight=auto
+fi
+
+
+if test "${enable_source_highlight}" != "no"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for the source-highlight library" >&5
+$as_echo_n "checking for the source-highlight library... " >&6; }
+  if test "${pkg_config_prog_path}" = "missing"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no - pkg-config not found" >&5
+$as_echo "no - pkg-config not found" >&6; }
+    if test "${enable_source_highlight}" = "yes"; then
+      as_fn_error $? "pkg-config was not found in your system" "$LINENO" 5
+    fi
+  else
+    if ${pkg_config_prog_path} --exists source-highlight; then
       SRCHIGH_CFLAGS=`${pkg_config_prog_path} --cflags source-highlight`
       SRCHIGH_LIBS=`${pkg_config_prog_path} --libs source-highlight`
 
@@ -11407,10 +11427,14 @@ $as_echo "#define HAVE_SOURCE_HIGHLIGHT 1" >>confdefs.h
 
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-   else
+    else
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-   fi
+      if test "${enable_source_highlight}" = "yes"; then
+        as_fn_error $? "source-highlight was not found in your system" "$LINENO" 5
+      fi
+    fi
+  fi
 fi
 
 

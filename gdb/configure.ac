@@ -1220,19 +1220,38 @@ AM_CONDITIONAL(HAVE_GUILE, test "${have_libguile}" != no)
 
 SRCHIGH_LIBS=
 SRCHIGH_CFLAGS=
-AC_MSG_CHECKING([for the source-highlight library])
-if test "${pkg_config_prog_path}" = "missing"; then
-   AC_MSG_RESULT([no - pkg-config not found])
-else
-   if ${pkg_config_prog_path} --exists source-highlight; then
+
+AC_ARG_ENABLE(source-highlight,
+  AS_HELP_STRING([--enable-source-highlight],
+    [enable source-highlight for source listings]),
+  [case "${enableval}" in
+  yes)  enable_source_highlight=yes ;;
+  no)   enable_source_highlight=no  ;;
+  *)    AC_MSG_ERROR(bad value ${enableval} for source-highlight option) ;;
+esac],
+[enable_source_highlight=auto])
+
+if test "${enable_source_highlight}" != "no"; then
+  AC_MSG_CHECKING([for the source-highlight library])
+  if test "${pkg_config_prog_path}" = "missing"; then
+    AC_MSG_RESULT([no - pkg-config not found])
+    if test "${enable_source_highlight}" = "yes"; then
+      AC_MSG_ERROR([pkg-config was not found in your system])
+    fi
+  else
+    if ${pkg_config_prog_path} --exists source-highlight; then
       SRCHIGH_CFLAGS=`${pkg_config_prog_path} --cflags source-highlight`
       SRCHIGH_LIBS=`${pkg_config_prog_path} --libs source-highlight`
       AC_DEFINE([HAVE_SOURCE_HIGHLIGHT], 1,
                 [Define to 1 if the source-highlight library is available])
       AC_MSG_RESULT([yes])
-   else
+    else
       AC_MSG_RESULT([no])
-   fi
+      if test "${enable_source_highlight}" = "yes"; then
+        AC_MSG_ERROR([source-highlight was not found in your system])
+      fi
+    fi
+  fi
 fi
 AC_SUBST(SRCHIGH_LIBS)
 AC_SUBST(SRCHIGH_CFLAGS)
