@@ -778,7 +778,6 @@ windows_make_so (const char *name, LPVOID load_addr)
   if (p >= so->so_name && strcasecmp (p, "/cygwin1.dll") == 0)
     {
       asection *text = NULL;
-      CORE_ADDR text_vma;
 
       gdb_bfd_ref_ptr abfd (gdb_bfd_open (so->so_name, "pei-i386", -1));
 

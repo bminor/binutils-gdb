@@ -1,5 +1,10 @@
 2019-03-17  Vladimir Martyanov  <vilgeforce@gmail.com>
 
+	PR gdb/24350
+	* windows-nat.c (windows_make_so): Remove unused text_vma variable.
+
+2019-03-17  Vladimir Martyanov  <vilgeforce@gmail.com>
+
 	PR gdb/24351
 	* windows-nat.c (display_selector): Fix format specifiers.
 
