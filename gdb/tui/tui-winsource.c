@@ -399,7 +399,7 @@ tui_set_is_exec_point_at (struct tui_line_or_address l,
       i++;
     }
   if (changed)
-    tui_refresh_win (&win_info->generic);
+    tui_refill_source_window (win_info);
 }
 
 /* Update the execution windows to show the active breakpoints.

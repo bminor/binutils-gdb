@@ -1,3 +1,10 @@
+2019-03-17  Eli Zaretskii  <eliz@gnu.org>
+
+	* tui/tui-winsource.c (tui_set_is_exec_point_at): Call
+	tui_refill_source_window instead of tui_refresh_win, to update the
+	current execution line.  This fixes redisplay of the current line
+	when stepping through the code with "next" or "step".
+
 2019-03-16  Eli Zaretskii  <eliz@gnu.org>
 
 	* source-cache.c (source_cache::get_source_lines): Call
