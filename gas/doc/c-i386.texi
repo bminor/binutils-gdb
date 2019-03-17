@@ -453,10 +453,12 @@ Intel64 ISA in 64-bit mode.  The default is to accept both.
 Optimize instruction encoding with smaller instruction size.  @samp{-O}
 and @samp{-O1} encode 64-bit register load instructions with 64-bit
 immediate as 32-bit register load instructions with 31-bit or 32-bits
-immediates and encode 64-bit register clearing instructions with 32-bit
-register clearing instructions.  @samp{-O2} includes @samp{-O1}
-optimization plus encodes 256-bit and 512-bit vector register clearing
-instructions with 128-bit vector register clearing instructions.
+immediates, encode 64-bit register clearing instructions with 32-bit
+register clearing instructions and encode 256-bit/512-bit VEX/EVEX
+vector register clearing instructions with 128-bit VEX vector register
+clearing instructions.  @samp{-O2} includes @samp{-O1} optimization plus
+encodes 256-bit/512-bit EVEX vector register clearing instructions with
+128-bit EVEX vector register clearing instructions.
 @samp{-Os} includes @samp{-O2} optimization plus encodes 16-bit, 32-bit
 and 64-bit register tests with immediate as 8-bit register test with
 immediate.  @samp{-O0} turns off this optimization.

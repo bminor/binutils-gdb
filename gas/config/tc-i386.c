@@ -3977,8 +3977,7 @@ optimize_encoding (void)
 	    }
 	}
     }
-  else if (optimize > 1
-	   && i.reg_operands == 3
+  else if (i.reg_operands == 3
 	   && i.op[0].regs == i.op[1].regs
 	   && !i.types[2].bitfield.xmmword
 	   && (i.tm.opcode_modifier.vex
@@ -4009,15 +4008,15 @@ optimize_encoding (void)
 		|| i.tm.base_opcode == 0x6647)
 	       && i.tm.extension_opcode == None))
     {
-      /* Optimize: -O2:
+      /* Optimize: -O1:
 	   VOP, one of vandnps, vandnpd, vxorps, vxorpd, vpsubb, vpsubd,
 	   vpsubq and vpsubw:
 	     EVEX VOP %zmmM, %zmmM, %zmmN
 	       -> VEX VOP %xmmM, %xmmM, %xmmN (M and N < 16)
-	       -> EVEX VOP %xmmM, %xmmM, %xmmN (M || N >= 16)
+	       -> EVEX VOP %xmmM, %xmmM, %xmmN (M || N >= 16) (-O2)
 	     EVEX VOP %ymmM, %ymmM, %ymmN
 	       -> VEX VOP %xmmM, %xmmM, %xmmN (M and N < 16)
-	       -> EVEX VOP %xmmM, %xmmM, %xmmN (M || N >= 16)
+	       -> EVEX VOP %xmmM, %xmmM, %xmmN (M || N >= 16) (-O2)
 	     VEX VOP %ymmM, %ymmM, %ymmN
 	       -> VEX VOP %xmmM, %xmmM, %xmmN
 	   VOP, one of vpandn and vpxor:
@@ -4026,17 +4025,17 @@ optimize_encoding (void)
 	   VOP, one of vpandnd and vpandnq:
 	     EVEX VOP %zmmM, %zmmM, %zmmN
 	       -> VEX vpandn %xmmM, %xmmM, %xmmN (M and N < 16)
-	       -> EVEX VOP %xmmM, %xmmM, %xmmN (M || N >= 16)
+	       -> EVEX VOP %xmmM, %xmmM, %xmmN (M || N >= 16) (-O2)
 	     EVEX VOP %ymmM, %ymmM, %ymmN
 	       -> VEX vpandn %xmmM, %xmmM, %xmmN (M and N < 16)
-	       -> EVEX VOP %xmmM, %xmmM, %xmmN (M || N >= 16)
+	       -> EVEX VOP %xmmM, %xmmM, %xmmN (M || N >= 16) (-O2)
 	   VOP, one of vpxord and vpxorq:
 	     EVEX VOP %zmmM, %zmmM, %zmmN
 	       -> VEX vpxor %xmmM, %xmmM, %xmmN (M and N < 16)
-	       -> EVEX VOP %xmmM, %xmmM, %xmmN (M || N >= 16)
+	       -> EVEX VOP %xmmM, %xmmM, %xmmN (M || N >= 16) (-O2)
 	     EVEX VOP %ymmM, %ymmM, %ymmN
 	       -> VEX vpxor %xmmM, %xmmM, %xmmN (M and N < 16)
-	       -> EVEX VOP %xmmM, %xmmM, %xmmN (M || N >= 16)
+	       -> EVEX VOP %xmmM, %xmmM, %xmmN (M || N >= 16) (-O2)
 	   VOP, one of kxord and kxorq:
 	     VEX VOP %kM, %kM, %kN
 	       -> VEX kxorw %kM, %kM, %kN
@@ -4054,8 +4053,9 @@ optimize_encoding (void)
 	      i.tm.opcode_modifier.vexw = VEXW0;
 	      i.tm.opcode_modifier.evex = 0;
 	    }
-	  else if (cpu_arch_flags.bitfield.cpuavx512vl
-		   || cpu_arch_isa_flags.bitfield.cpuavx512vl)
+	  else if (optimize > 1
+		   && (cpu_arch_flags.bitfield.cpuavx512vl
+		       || cpu_arch_isa_flags.bitfield.cpuavx512vl))
 	    i.tm.opcode_modifier.evex = EVEX128;
 	  else
 	    return;
