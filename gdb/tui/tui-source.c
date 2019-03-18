@@ -71,10 +71,27 @@ copy_source_line (const char **ptr, int line_no, int first_col,
 
       ++lineptr;
       ++column;
+
+      auto process_tab = [&] ()
+	{
+	  int max_tab_len = tui_tab_width;
+
+	  --column;
+	  for (int j = column % max_tab_len;
+	       j < max_tab_len && column < first_col + line_width;
+	       column++, j++)
+	    if (column >= first_col)
+	      result.push_back (' ');
+	};
+
       /* We have to process all the text in order to pick up all the
 	 escapes.  */
-      if (column < first_col || column > first_col + line_width)
-	continue;
+      if (column <= first_col || column > first_col + line_width)
+	{
+	  if (c == '\t')
+	    process_tab ();
+	  continue;
+	}
 
       if (c == '\n' || c == '\r' || c == '\0')
 	{
@@ -91,14 +108,7 @@ copy_source_line (const char **ptr, int line_no, int first_col,
 	  result.push_back ('?');
 	}
       else if (c == '\t')
-	{
-	  int j, max_tab_len = tui_tab_width;
-
-	  for (j = column - ((column / max_tab_len) * max_tab_len);
-	       j < max_tab_len && column < first_col + line_width;
-	       column++, j++)
-	    result.push_back (' ');
-	}
+	process_tab ();
       else
 	result.push_back (c);
     }
