@@ -274,6 +274,15 @@ static int last_color_pair = -1;
 
 static ui_file_style last_style;
 
+/* If true, we're highlighting the current source line in reverse
+   video mode.  */
+static bool reverse_mode_p = false;
+
+/* The background/foreground colors before we entered reverse
+   mode.  */
+static ui_file_style::color reverse_save_bg (ui_file_style::NONE);
+static ui_file_style::color reverse_save_fg (ui_file_style::NONE);
+
 /* Given two colors, return their color pair index; making a new one
    if necessary.  */
 
@@ -298,21 +307,11 @@ get_color_pair (int fg, int bg)
   return it->second;
 }
 
-/* Apply an ANSI escape sequence from BUF to W.  BUF must start with
-   the ESC character.  If BUF does not start with an ANSI escape,
-   return 0.  Otherwise, apply the sequence if it is recognized, or
-   simply ignore it if not.  In this case, the number of bytes read
-   from BUF is returned.  */
+/* Apply STYLE to W.  */
 
-static size_t
-apply_ansi_escape (WINDOW *w, const char *buf)
+static void
+apply_style (WINDOW *w, ui_file_style style)
 {
-  ui_file_style style = last_style;
-  size_t n_read;
-
-  if (!style.parse (buf, &n_read))
-    return n_read;
-
   /* Reset.  */
   wattron (w, A_NORMAL);
   wattroff (w, A_BOLD);
@@ -368,7 +367,81 @@ apply_ansi_escape (WINDOW *w, const char *buf)
     wattron (w, A_REVERSE);
 
   last_style = style;
+}
+
+/* Apply an ANSI escape sequence from BUF to W.  BUF must start with
+   the ESC character.  If BUF does not start with an ANSI escape,
+   return 0.  Otherwise, apply the sequence if it is recognized, or
+   simply ignore it if not.  In this case, the number of bytes read
+   from BUF is returned.  */
+
+static size_t
+apply_ansi_escape (WINDOW *w, const char *buf)
+{
+  ui_file_style style = last_style;
+  size_t n_read;
+
+  if (!style.parse (buf, &n_read))
+    return n_read;
+
+  if (reverse_mode_p)
+    {
+      /* We want to reverse _only_ the default foreground/background
+	 colors.  If the foreground color is not the default (because
+	 the text was styled), we want to leave it as is.  If e.g.,
+	 the terminal is fg=BLACK, and bg=WHITE, and the style wants
+	 to print text in RED, we want to reverse the background color
+	 (print in BLACK), but still print the text in RED.  To do
+	 that, we enable the A_REVERSE attribute, and re-reverse the
+	 parsed-style's fb/bg colors.
+
+	 Notes on the approach:
+
+	  - there's no portable way to know which colors the default
+	    fb/bg colors map to.
+
+	  - this approach does the right thing even if you change the
+	    terminal colors while GDB is running -- the reversed
+	    colors automatically adapt.
+      */
+      if (!style.is_default ())
+	{
+	  ui_file_style::color bg = style.get_background ();
+	  ui_file_style::color fg = style.get_foreground ();
+	  style.set_fg (bg);
+	  style.set_bg (fg);
+	}
+
+      /* Enable A_REVERSE.  */
+      style.set_reverse (true);
+    }
+
+  apply_style (w, style);
   return n_read;
+}
+
+/* See tui.io.h.  */
+
+void
+tui_set_reverse_mode (WINDOW *w, bool reverse)
+{
+  ui_file_style style = last_style;
+
+  reverse_mode_p = reverse;
+  style.set_reverse (reverse);
+
+  if (reverse)
+    {
+      reverse_save_bg = style.get_background ();
+      reverse_save_fg = style.get_foreground ();
+    }
+  else
+    {
+      style.set_bg (reverse_save_bg);
+      style.set_fg (reverse_save_fg);
+    }
+
+  apply_style (w, style);
 }
 
 /* Print LENGTH characters from the buffer pointed to by BUF to the

@@ -1,3 +1,16 @@
+2019-03-18  Pedro Alves  <palves@redhat.com>
+
+	* tui/tui-io.c (reverse_mode_p, reverse_save_bg, reverse_save_fg):
+	New globals.
+	(apply_style): New, factored out from ...
+	(apply_ansi_escape): ... this.  Handle reverse video mode.
+	(tui_set_reverse_mode): New function.
+	* tui/tui-io.h (tui_set_reverse_mode): New declaration.
+	* tui/tui-winsource.c (tui_show_source_line): Use
+	tui_set_reverse_mode instead of setting A_STANDOUT.
+	* ui-style.h (struct ui_file_style) <set_reverse, set_fg, set_bg>:
+	New setter methods.
+
 2019-03-18  Hannes Domani  <ssbssa@yahoo.de>
 
 	* tui/tui-source.c (copy_source_line): Fix handling of 'column'.

@@ -180,16 +180,34 @@ struct ui_file_style
     return m_reverse;
   }
 
+  /* Set/clear the reverse display flag.  */
+  void set_reverse (bool reverse)
+  {
+    m_reverse = reverse;
+  }
+
   /* Return the foreground color of this style.  */
   const color &get_foreground () const
   {
     return m_foreground;
   }
 
+  /* Set the foreground color of this style.  */
+  void set_fg (color c)
+  {
+    m_foreground = c;
+  }
+
   /* Return the background color of this style.  */
   const color &get_background () const
   {
     return m_background;
+  }
+
+  /* Set the background color of this style.  */
+  void set_bg (color c)
+  {
+    m_background = c;
   }
 
   /* Return the intensity of this style.  */

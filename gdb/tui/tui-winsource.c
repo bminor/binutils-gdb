@@ -277,13 +277,13 @@ tui_show_source_line (struct tui_win_info *win_info, int lineno)
 
   line = win_info->generic.content[lineno - 1];
   if (line->which_element.source.is_exec_point)
-    wattron (win_info->generic.handle, A_STANDOUT);
+    tui_set_reverse_mode (win_info->generic.handle, true);
 
   wmove (win_info->generic.handle, lineno, 1);
   tui_puts (line->which_element.source.line,
 	    win_info->generic.handle);
   if (line->which_element.source.is_exec_point)
-    wattroff (win_info->generic.handle, A_STANDOUT);
+    tui_set_reverse_mode (win_info->generic.handle, false);
 
   /* Clear to end of line but stop before the border.  */
   x = getcurx (win_info->generic.handle);

@@ -48,6 +48,9 @@ extern void tui_redisplay_readline (void);
 /* Expand TABs into spaces.  */
 extern char *tui_expand_tabs (const char *, int);
 
+/* Enter/leave reverse video mode.  */
+extern void tui_set_reverse_mode (WINDOW *w, bool reverse);
+
 extern struct ui_out *tui_out;
 extern cli_ui_out *tui_old_uiout;
 
