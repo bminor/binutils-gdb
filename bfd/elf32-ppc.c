@@ -8259,6 +8259,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		{
 		  Elf_Internal_Rela rela;
 		  bfd_byte *loc;
+		  unsigned char *p;
 
 		  rela.r_offset = (htab->elf.iplt->output_section->vma
 				   + htab->elf.iplt->output_offset
@@ -8272,14 +8273,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  htab->local_ifunc_resolver = 1;
 
 		  ent->plt.offset |= 1;
-		}
-	      if (h == NULL && (ent->glink_offset & 1) == 0)
-		{
-		  unsigned char *p = ((unsigned char *) htab->glink->contents
-				      + ent->glink_offset);
 
+		  p = ((unsigned char *) htab->glink->contents
+		       + ent->glink_offset);
 		  write_glink_stub (NULL, ent, htab->elf.iplt, p, info);
-		  ent->glink_offset |= 1;
 		}
 
 	      unresolved_reloc = FALSE;
@@ -8289,11 +8286,11 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  || h->dynindx == -1)
 		relocation = (htab->glink->output_section->vma
 			      + htab->glink->output_offset
-			      + (ent->glink_offset & ~1));
+			      + ent->glink_offset);
 	      else
 		relocation = (htab->elf.splt->output_section->vma
 			      + htab->elf.splt->output_offset
-			      + ent->plt.offset);
+			      + (ent->plt.offset & ~1));
 	    }
 	}
 

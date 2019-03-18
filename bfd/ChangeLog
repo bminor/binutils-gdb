@@ -1,3 +1,10 @@
+2019-03-18  Alan Modra  <amodra@gmail.com>
+
+	PR 24355
+	* elf32-ppc.c (ppc_elf_relocate_section): Don't call write_glink_stub
+	for local iplt syms with ent->plt.offset == -1.  Remove ineffective
+	attempt at writing glink stubs only once.  Correct plt.offset mask.
+
 2018-07-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/23324
