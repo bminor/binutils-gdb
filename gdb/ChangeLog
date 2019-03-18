@@ -1,3 +1,9 @@
+2019-03-18  Alan Hayward  <alan.hayward@arm.com>
+
+	* arm-linux-nat.c (arm_linux_insert_hw_breakpoint1): Fix
+	variable names.
+	(arm_linux_remove_hw_breakpoint1): Use a gdb::function_view.
+
 2019-03-18  Pedro Alves  <palves@redhat.com>
 	    Eli Zaretskii <eliz@gnu.org>
 

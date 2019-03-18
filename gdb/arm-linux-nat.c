@@ -1005,8 +1005,8 @@ arm_linux_insert_hw_breakpoint1 (const struct arm_linux_hw_breakpoint* bpt,
         iterate_over_lwps (pid_ptid,
 			   [=] (struct lwp_info *info)
 			   {
-			     return update_registers_callback (info, watch,
-							       index);
+			     return update_registers_callback (info, watchpoint,
+							       i);
 			   });
         break;
       }
@@ -1024,7 +1024,6 @@ arm_linux_remove_hw_breakpoint1 (const struct arm_linux_hw_breakpoint *bpt,
   gdb_byte count, i;
   ptid_t pid_ptid;
   struct arm_linux_hw_breakpoint* bpts;
-  struct update_registers_data data;
 
   pid = inferior_ptid.pid ();
   pid_ptid = ptid_t (pid);
@@ -1043,10 +1042,13 @@ arm_linux_remove_hw_breakpoint1 (const struct arm_linux_hw_breakpoint *bpt,
   for (i = 0; i < count; ++i)
     if (arm_linux_hw_breakpoint_equal (bpt, bpts + i))
       {
-        data.watch = watchpoint;
-        data.index = i;
         bpts[i].control = arm_hwbp_control_disable (bpts[i].control);
-        iterate_over_lwps (pid_ptid, update_registers_callback, &data);
+	iterate_over_lwps (pid_ptid,
+			   [=] (struct lwp_info *info)
+			   {
+			     return update_registers_callback (info, watchpoint,
+							       i);
+			   });
         break;
       }
 
