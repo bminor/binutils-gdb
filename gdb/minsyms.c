@@ -1360,8 +1360,6 @@ minimal_symbol_reader::install ()
          we will give back the excess space.  */
 
       alloc_count = m_msym_count + m_objfile->per_bfd->minimal_symbol_count;
-      obstack_blank (&m_objfile->per_bfd->storage_obstack,
-		     alloc_count * sizeof (struct minimal_symbol));
       gdb::unique_xmalloc_ptr<minimal_symbol>
 	msym_holder (XNEWVEC (minimal_symbol, alloc_count));
       msymbols = msym_holder.get ();

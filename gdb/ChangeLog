@@ -1,3 +1,8 @@
+2019-03-18  Tom Tromey  <tromey@adacore.com>
+
+	* minsyms.c (minimal_symbol_reader::install): Remove call to
+	obstack_blank.
+
 2019-03-18  Pedro Alves  <palves@redhat.com>
 
 	* tui/tui-io.c (reverse_mode_p, reverse_save_bg, reverse_save_fg):
