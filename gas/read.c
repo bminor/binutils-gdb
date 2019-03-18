@@ -6213,10 +6213,7 @@ static char *saved_limit;
    overruns should not occur.  Saves the current input line pointer so that
    it can be restored by calling restore_ilp().
 
-   Does not support recursion.
-
-   FIXME: This function is currently only used by stabs.c but that
-   should be extended to other files in the gas source directory.  */
+   Does not support recursion.  */
 
 void
 temp_ilp (char *buf)

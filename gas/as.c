@@ -1102,16 +1102,14 @@ close_output_file (void)
 static size_t
 macro_expr (const char *emsg, size_t idx, sb *in, offsetT *val)
 {
-  char *hold;
   expressionS ex;
 
   sb_terminate (in);
 
-  hold = input_line_pointer;
-  input_line_pointer = in->ptr + idx;
+  temp_ilp (in->ptr + idx);
   expression_and_evaluate (&ex);
   idx = input_line_pointer - in->ptr;
-  input_line_pointer = hold;
+  restore_ilp ();
 
   if (ex.X_op != O_constant)
     as_bad ("%s", emsg);
