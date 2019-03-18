@@ -1,3 +1,10 @@
+2019-03-18  Eli Zaretskii  <eliz@gnu.org>
+
+	* tui/tui-io.c (gdb_wgetch): Don't echo CR.
+	(tui_getc): When gdb_wgetch returns a CR, behave the same as when
+	it returns a newline.  This fixes a regression in TU mode, whereby
+	the next line is output on the same screen line as the user input.
+
 2019-03-18  Tom Tromey  <tromey@adacore.com>
 
 	* minsyms.c (minimal_symbol_reader::install): Remove call to
