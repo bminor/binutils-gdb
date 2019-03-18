@@ -1,3 +1,4 @@
+#as: -O0
 #objdump: -drw
 #name: x86-64 pseudo prefixes
 

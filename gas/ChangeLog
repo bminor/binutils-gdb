@@ -1,5 +1,18 @@
 2019-03-18  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/gas/i386/att-regs.d: Pass -O0 to assembler.
+	* testsuite/gas/i386/avx512bw-intel.d: Likewise.
+	* testsuite/gas/i386/avx512bw.d: Likewise.
+	* testsuite/gas/i386/avx512f-intel.d: Likewise.
+	* testsuite/gas/i386/avx512f.d: Likewise.
+	* testsuite/gas/i386/disp32.d: Likewise.
+	* testsuite/gas/i386/intel-regs.d: Likewise.
+	* testsuite/gas/i386/pseudos.d: Likewise.
+	* testsuite/gas/i386/x86-64-disp32.d: Likewise.
+	* testsuite/gas/i386/x86-64-pseudos.d: Likewise.
+
+2019-03-18  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/24348
 	* config/tc-i386.c (optimize_encoding): Encode 128-bit and
 	256-bit EVEX vector register load/store instructions as VEX
