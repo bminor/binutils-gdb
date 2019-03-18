@@ -109,8 +109,8 @@ tui_ui_out::do_text (const char *string)
 
 tui_ui_out::tui_ui_out (ui_file *stream)
 : cli_ui_out (stream, 0),
-  m_line (0),
-  m_start_of_line (-1)
+  m_line (-1),
+  m_start_of_line (0)
 {
 }
 
