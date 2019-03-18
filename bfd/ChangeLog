@@ -1,3 +1,10 @@
+2019-03-18  Alan Modra  <amodra@gmail.com>
+
+	PR 24355
+	* elf32-ppc.c (ppc_finish_symbols): Don't call write_glink_stub
+	for local iplt syms with ent->plt.offset == -1.  Remove ineffective
+	attempt at writing glink stubs only once.
+
 2019-03-16  Alan Modra  <amodra@gmail.com>
 
 	PR 24337

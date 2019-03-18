@@ -9704,6 +9704,7 @@ ppc_finish_symbols (struct bfd_link_info *info)
 		bfd_byte *loc;
 		bfd_vma val;
 		Elf_Internal_Rela rela;
+		unsigned char *p;
 
 		if (!get_sym_h (NULL, &sym, &sym_sec, NULL, &local_syms,
 				lplt - local_plt, ibfd))
@@ -9748,14 +9749,9 @@ ppc_finish_symbols (struct bfd_link_info *info)
 		loc = relplt->contents + (relplt->reloc_count++
 					  * sizeof (Elf32_External_Rela));
 		bfd_elf32_swap_reloca_out (info->output_bfd, &rela, loc);
-	      }
-	    if ((ent->glink_offset & 1) == 0)
-	      {
-		unsigned char *p = ((unsigned char *) htab->glink->contents
-				    + ent->glink_offset);
 
+		p = (unsigned char *) htab->glink->contents + ent->glink_offset;
 		write_glink_stub (NULL, ent, htab->elf.iplt, p, info);
-		ent->glink_offset |= 1;
 	      }
 	  }
 
