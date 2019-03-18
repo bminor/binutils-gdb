@@ -62,4 +62,40 @@ Disassembly of section .text:
  +[a-f0-9]+:	c5 f4 47 e9          	kxorw  %k1,%k1,%k5
  +[a-f0-9]+:	c5 f4 42 e9          	kandnw %k1,%k1,%k5
  +[a-f0-9]+:	c5 f4 42 e9          	kandnw %k1,%k1,%k5
+ +[a-f0-9]+:	c5 f9 6f d1          	vmovdqa %xmm1,%xmm2
+ +[a-f0-9]+:	c5 f9 6f d1          	vmovdqa %xmm1,%xmm2
+ +[a-f0-9]+:	c5 fa 6f d1          	vmovdqu %xmm1,%xmm2
+ +[a-f0-9]+:	c5 fa 6f d1          	vmovdqu %xmm1,%xmm2
+ +[a-f0-9]+:	c5 fa 6f d1          	vmovdqu %xmm1,%xmm2
+ +[a-f0-9]+:	c5 fa 6f d1          	vmovdqu %xmm1,%xmm2
+ +[a-f0-9]+:	c5 f9 6f 50 7f       	vmovdqa 0x7f\(%eax\),%xmm2
+ +[a-f0-9]+:	c5 f9 6f 50 7f       	vmovdqa 0x7f\(%eax\),%xmm2
+ +[a-f0-9]+:	c5 fa 6f 50 7f       	vmovdqu 0x7f\(%eax\),%xmm2
+ +[a-f0-9]+:	c5 fa 6f 50 7f       	vmovdqu 0x7f\(%eax\),%xmm2
+ +[a-f0-9]+:	c5 fa 6f 50 7f       	vmovdqu 0x7f\(%eax\),%xmm2
+ +[a-f0-9]+:	c5 fa 6f 50 7f       	vmovdqu 0x7f\(%eax\),%xmm2
+ +[a-f0-9]+:	c5 f9 7f 88 80 00 00 00 	vmovdqa %xmm1,0x80\(%eax\)
+ +[a-f0-9]+:	c5 f9 7f 88 80 00 00 00 	vmovdqa %xmm1,0x80\(%eax\)
+ +[a-f0-9]+:	c5 fa 7f 88 80 00 00 00 	vmovdqu %xmm1,0x80\(%eax\)
+ +[a-f0-9]+:	c5 fa 7f 88 80 00 00 00 	vmovdqu %xmm1,0x80\(%eax\)
+ +[a-f0-9]+:	c5 fa 7f 88 80 00 00 00 	vmovdqu %xmm1,0x80\(%eax\)
+ +[a-f0-9]+:	c5 fa 7f 88 80 00 00 00 	vmovdqu %xmm1,0x80\(%eax\)
+ +[a-f0-9]+:	c5 fd 6f d1          	vmovdqa %ymm1,%ymm2
+ +[a-f0-9]+:	c5 fd 6f d1          	vmovdqa %ymm1,%ymm2
+ +[a-f0-9]+:	c5 fe 6f d1          	vmovdqu %ymm1,%ymm2
+ +[a-f0-9]+:	c5 fe 6f d1          	vmovdqu %ymm1,%ymm2
+ +[a-f0-9]+:	c5 fe 6f d1          	vmovdqu %ymm1,%ymm2
+ +[a-f0-9]+:	c5 fe 6f d1          	vmovdqu %ymm1,%ymm2
+ +[a-f0-9]+:	c5 fd 6f 50 7f       	vmovdqa 0x7f\(%eax\),%ymm2
+ +[a-f0-9]+:	c5 fd 6f 50 7f       	vmovdqa 0x7f\(%eax\),%ymm2
+ +[a-f0-9]+:	c5 fe 6f 50 7f       	vmovdqu 0x7f\(%eax\),%ymm2
+ +[a-f0-9]+:	c5 fe 6f 50 7f       	vmovdqu 0x7f\(%eax\),%ymm2
+ +[a-f0-9]+:	c5 fe 6f 50 7f       	vmovdqu 0x7f\(%eax\),%ymm2
+ +[a-f0-9]+:	c5 fe 6f 50 7f       	vmovdqu 0x7f\(%eax\),%ymm2
+ +[a-f0-9]+:	c5 fd 7f 88 80 00 00 00 	vmovdqa %ymm1,0x80\(%eax\)
+ +[a-f0-9]+:	c5 fd 7f 88 80 00 00 00 	vmovdqa %ymm1,0x80\(%eax\)
+ +[a-f0-9]+:	c5 fe 7f 88 80 00 00 00 	vmovdqu %ymm1,0x80\(%eax\)
+ +[a-f0-9]+:	c5 fe 7f 88 80 00 00 00 	vmovdqu %ymm1,0x80\(%eax\)
+ +[a-f0-9]+:	c5 fe 7f 88 80 00 00 00 	vmovdqu %ymm1,0x80\(%eax\)
+ +[a-f0-9]+:	c5 fe 7f 88 80 00 00 00 	vmovdqu %ymm1,0x80\(%eax\)
 #pass

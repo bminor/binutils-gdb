@@ -72,3 +72,45 @@ _start:
 
 	kandnd %k1, %k1, %k5
 	kandnq %k1, %k1, %k5
+
+	vmovdqa32	%xmm1, %xmm2
+	vmovdqa64	%xmm1, %xmm2
+	vmovdqu8	%xmm1, %xmm2
+	vmovdqu16	%xmm1, %xmm2
+	vmovdqu32	%xmm1, %xmm2
+	vmovdqu64	%xmm1, %xmm2
+
+	vmovdqa32	127(%eax), %xmm2
+	vmovdqa64	127(%eax), %xmm2
+	vmovdqu8	127(%eax), %xmm2
+	vmovdqu16	127(%eax), %xmm2
+	vmovdqu32	127(%eax), %xmm2
+	vmovdqu64	127(%eax), %xmm2
+
+	vmovdqa32	%xmm1, 128(%eax)
+	vmovdqa64	%xmm1, 128(%eax)
+	vmovdqu8	%xmm1, 128(%eax)
+	vmovdqu16	%xmm1, 128(%eax)
+	vmovdqu32	%xmm1, 128(%eax)
+	vmovdqu64	%xmm1, 128(%eax)
+
+	vmovdqa32	%ymm1, %ymm2
+	vmovdqa64	%ymm1, %ymm2
+	vmovdqu8	%ymm1, %ymm2
+	vmovdqu16	%ymm1, %ymm2
+	vmovdqu32	%ymm1, %ymm2
+	vmovdqu64	%ymm1, %ymm2
+
+	vmovdqa32	127(%eax), %ymm2
+	vmovdqa64	127(%eax), %ymm2
+	vmovdqu8	127(%eax), %ymm2
+	vmovdqu16	127(%eax), %ymm2
+	vmovdqu32	127(%eax), %ymm2
+	vmovdqu64	127(%eax), %ymm2
+
+	vmovdqa32	%ymm1, 128(%eax)
+	vmovdqa64	%ymm1, 128(%eax)
+	vmovdqu8	%ymm1, 128(%eax)
+	vmovdqu16	%ymm1, 128(%eax)
+	vmovdqu32	%ymm1, 128(%eax)
+	vmovdqu64	%ymm1, 128(%eax)

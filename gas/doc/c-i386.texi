@@ -456,7 +456,9 @@ immediate as 32-bit register load instructions with 31-bit or 32-bits
 immediates, encode 64-bit register clearing instructions with 32-bit
 register clearing instructions and encode 256-bit/512-bit VEX/EVEX
 vector register clearing instructions with 128-bit VEX vector register
-clearing instructions.  @samp{-O2} includes @samp{-O1} optimization plus
+clearing instructions as well as encode 128-bit/256-bit EVEX vector
+register load/store instructions with VEX vector register load/store
+instructions.  @samp{-O2} includes @samp{-O1} optimization plus
 encodes 256-bit/512-bit EVEX vector register clearing instructions with
 128-bit EVEX vector register clearing instructions.
 @samp{-Os} includes @samp{-O2} optimization plus encodes 16-bit, 32-bit

@@ -114,3 +114,59 @@ _start:
 	vpsubq %ymm1, %ymm1, %ymm16
 	vpsubq %zmm17, %zmm17, %zmm1
 	vpsubq %ymm17, %ymm17, %ymm1
+
+	vmovdqa32	%xmm1, %xmm2
+	vmovdqa64	%xmm1, %xmm2
+	vmovdqu8	%xmm1, %xmm2
+	vmovdqu16	%xmm1, %xmm2
+	vmovdqu32	%xmm1, %xmm2
+	vmovdqu64	%xmm1, %xmm2
+
+	vmovdqa32	%xmm11, %xmm12
+	vmovdqa64	%xmm11, %xmm12
+	vmovdqu8	%xmm11, %xmm12
+	vmovdqu16	%xmm11, %xmm12
+	vmovdqu32	%xmm11, %xmm12
+	vmovdqu64	%xmm11, %xmm12
+
+	vmovdqa32	127(%rax), %xmm2
+	vmovdqa64	127(%rax), %xmm2
+	vmovdqu8	127(%rax), %xmm2
+	vmovdqu16	127(%rax), %xmm2
+	vmovdqu32	127(%rax), %xmm2
+	vmovdqu64	127(%rax), %xmm2
+
+	vmovdqa32	%xmm1, 128(%rax)
+	vmovdqa64	%xmm1, 128(%rax)
+	vmovdqu8	%xmm1, 128(%rax)
+	vmovdqu16	%xmm1, 128(%rax)
+	vmovdqu32	%xmm1, 128(%rax)
+	vmovdqu64	%xmm1, 128(%rax)
+
+	vmovdqa32	%ymm1, %ymm2
+	vmovdqa64	%ymm1, %ymm2
+	vmovdqu8	%ymm1, %ymm2
+	vmovdqu16	%ymm1, %ymm2
+	vmovdqu32	%ymm1, %ymm2
+	vmovdqu64	%ymm1, %ymm2
+
+	vmovdqa32	%ymm11, %ymm12
+	vmovdqa64	%ymm11, %ymm12
+	vmovdqu8	%ymm11, %ymm12
+	vmovdqu16	%ymm11, %ymm12
+	vmovdqu32	%ymm11, %ymm12
+	vmovdqu64	%ymm11, %ymm12
+
+	vmovdqa32	127(%rax), %ymm2
+	vmovdqa64	127(%rax), %ymm2
+	vmovdqu8	127(%rax), %ymm2
+	vmovdqu16	127(%rax), %ymm2
+	vmovdqu32	127(%rax), %ymm2
+	vmovdqu64	127(%rax), %ymm2
+
+	vmovdqa32	%ymm1, 128(%rax)
+	vmovdqa64	%ymm1, 128(%rax)
+	vmovdqu8	%ymm1, 128(%rax)
+	vmovdqu16	%ymm1, 128(%rax)
+	vmovdqu32	%ymm1, 128(%rax)
+	vmovdqu64	%ymm1, 128(%rax)

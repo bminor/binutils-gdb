@@ -107,4 +107,52 @@ Disassembly of section .text:
  +[a-f0-9]+:	62 e1 f5 28 fb c1    	vpsubq %ymm1,%ymm1,%ymm16
  +[a-f0-9]+:	62 b1 f5 40 fb c9    	vpsubq %zmm17,%zmm17,%zmm1
  +[a-f0-9]+:	62 b1 f5 20 fb c9    	vpsubq %ymm17,%ymm17,%ymm1
+ +[a-f0-9]+:	c5 f9 6f d1          	vmovdqa %xmm1,%xmm2
+ +[a-f0-9]+:	c5 f9 6f d1          	vmovdqa %xmm1,%xmm2
+ +[a-f0-9]+:	c5 fa 6f d1          	vmovdqu %xmm1,%xmm2
+ +[a-f0-9]+:	c5 fa 6f d1          	vmovdqu %xmm1,%xmm2
+ +[a-f0-9]+:	c5 fa 6f d1          	vmovdqu %xmm1,%xmm2
+ +[a-f0-9]+:	c5 fa 6f d1          	vmovdqu %xmm1,%xmm2
+ +[a-f0-9]+:	c4 41 79 6f e3       	vmovdqa %xmm11,%xmm12
+ +[a-f0-9]+:	c4 41 79 6f e3       	vmovdqa %xmm11,%xmm12
+ +[a-f0-9]+:	c4 41 7a 6f e3       	vmovdqu %xmm11,%xmm12
+ +[a-f0-9]+:	c4 41 7a 6f e3       	vmovdqu %xmm11,%xmm12
+ +[a-f0-9]+:	c4 41 7a 6f e3       	vmovdqu %xmm11,%xmm12
+ +[a-f0-9]+:	c4 41 7a 6f e3       	vmovdqu %xmm11,%xmm12
+ +[a-f0-9]+:	c5 f9 6f 50 7f       	vmovdqa 0x7f\(%rax\),%xmm2
+ +[a-f0-9]+:	c5 f9 6f 50 7f       	vmovdqa 0x7f\(%rax\),%xmm2
+ +[a-f0-9]+:	c5 fa 6f 50 7f       	vmovdqu 0x7f\(%rax\),%xmm2
+ +[a-f0-9]+:	c5 fa 6f 50 7f       	vmovdqu 0x7f\(%rax\),%xmm2
+ +[a-f0-9]+:	c5 fa 6f 50 7f       	vmovdqu 0x7f\(%rax\),%xmm2
+ +[a-f0-9]+:	c5 fa 6f 50 7f       	vmovdqu 0x7f\(%rax\),%xmm2
+ +[a-f0-9]+:	c5 f9 7f 88 80 00 00 00 	vmovdqa %xmm1,0x80\(%rax\)
+ +[a-f0-9]+:	c5 f9 7f 88 80 00 00 00 	vmovdqa %xmm1,0x80\(%rax\)
+ +[a-f0-9]+:	c5 fa 7f 88 80 00 00 00 	vmovdqu %xmm1,0x80\(%rax\)
+ +[a-f0-9]+:	c5 fa 7f 88 80 00 00 00 	vmovdqu %xmm1,0x80\(%rax\)
+ +[a-f0-9]+:	c5 fa 7f 88 80 00 00 00 	vmovdqu %xmm1,0x80\(%rax\)
+ +[a-f0-9]+:	c5 fa 7f 88 80 00 00 00 	vmovdqu %xmm1,0x80\(%rax\)
+ +[a-f0-9]+:	c5 fd 6f d1          	vmovdqa %ymm1,%ymm2
+ +[a-f0-9]+:	c5 fd 6f d1          	vmovdqa %ymm1,%ymm2
+ +[a-f0-9]+:	c5 fe 6f d1          	vmovdqu %ymm1,%ymm2
+ +[a-f0-9]+:	c5 fe 6f d1          	vmovdqu %ymm1,%ymm2
+ +[a-f0-9]+:	c5 fe 6f d1          	vmovdqu %ymm1,%ymm2
+ +[a-f0-9]+:	c5 fe 6f d1          	vmovdqu %ymm1,%ymm2
+ +[a-f0-9]+:	c4 41 7d 6f e3       	vmovdqa %ymm11,%ymm12
+ +[a-f0-9]+:	c4 41 7d 6f e3       	vmovdqa %ymm11,%ymm12
+ +[a-f0-9]+:	c4 41 7e 6f e3       	vmovdqu %ymm11,%ymm12
+ +[a-f0-9]+:	c4 41 7e 6f e3       	vmovdqu %ymm11,%ymm12
+ +[a-f0-9]+:	c4 41 7e 6f e3       	vmovdqu %ymm11,%ymm12
+ +[a-f0-9]+:	c4 41 7e 6f e3       	vmovdqu %ymm11,%ymm12
+ +[a-f0-9]+:	c5 fd 6f 50 7f       	vmovdqa 0x7f\(%rax\),%ymm2
+ +[a-f0-9]+:	c5 fd 6f 50 7f       	vmovdqa 0x7f\(%rax\),%ymm2
+ +[a-f0-9]+:	c5 fe 6f 50 7f       	vmovdqu 0x7f\(%rax\),%ymm2
+ +[a-f0-9]+:	c5 fe 6f 50 7f       	vmovdqu 0x7f\(%rax\),%ymm2
+ +[a-f0-9]+:	c5 fe 6f 50 7f       	vmovdqu 0x7f\(%rax\),%ymm2
+ +[a-f0-9]+:	c5 fe 6f 50 7f       	vmovdqu 0x7f\(%rax\),%ymm2
+ +[a-f0-9]+:	c5 fd 7f 88 80 00 00 00 	vmovdqa %ymm1,0x80\(%rax\)
+ +[a-f0-9]+:	c5 fd 7f 88 80 00 00 00 	vmovdqa %ymm1,0x80\(%rax\)
+ +[a-f0-9]+:	c5 fe 7f 88 80 00 00 00 	vmovdqu %ymm1,0x80\(%rax\)
+ +[a-f0-9]+:	c5 fe 7f 88 80 00 00 00 	vmovdqu %ymm1,0x80\(%rax\)
+ +[a-f0-9]+:	c5 fe 7f 88 80 00 00 00 	vmovdqu %ymm1,0x80\(%rax\)
+ +[a-f0-9]+:	c5 fe 7f 88 80 00 00 00 	vmovdqu %ymm1,0x80\(%rax\)
 #pass

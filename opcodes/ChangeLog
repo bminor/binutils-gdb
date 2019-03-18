@@ -1,3 +1,10 @@
+2019-03-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/24348
+	* i386-opc.tbl: Add Optimize to vmovdqa32, vmovdqa64, vmovdqu8,
+	vmovdqu16, vmovdqu32 and vmovdqu64.
+	* i386-tbl.h: Regenerated.
+
 2019-03-12  Andreas Krebbel  <krebbel@linux.ibm.com>
 
 	* s390-opc.txt: Rename selhhhr to selfhr.  Remove optional operand

@@ -1,5 +1,38 @@
 2019-03-18  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gas/24348
+	* config/tc-i386.c (optimize_encoding): Encode 128-bit and
+	256-bit EVEX vector register load/store instructions as VEX
+	vector register load/store instructions for -O1.
+	* doc/c-i386.texi: Update -O1 documentation.
+	* testsuite/gas/i386/i386.exp: Run PR gas/24348 tests.
+	* testsuite/gas/i386/optimize-1.s: Add tests for EVEX vector
+	load/store instructions.
+	* testsuite/gas/i386/optimize-2.s: Likewise.
+	* testsuite/gas/i386/optimize-3.s: Likewise.
+	* testsuite/gas/i386/optimize-5.s: Likewise.
+	* testsuite/gas/i386/x86-64-optimize-2.s: Likewise.
+	* testsuite/gas/i386/x86-64-optimize-3.s: Likewise.
+	* testsuite/gas/i386/x86-64-optimize-4.s: Likewise.
+	* testsuite/gas/i386/x86-64-optimize-5.s: Likewise.
+	* testsuite/gas/i386/x86-64-optimize-6.s: Likewise.
+	* testsuite/gas/i386/optimize-1.d: Updated.
+	* testsuite/gas/i386/optimize-2.d: Likewise.
+	* testsuite/gas/i386/optimize-3.d: Likewise.
+	* testsuite/gas/i386/optimize-4.d: Likewise.
+	* testsuite/gas/i386/optimize-5.d: Likewise.
+	* testsuite/gas/i386/x86-64-optimize-2.d: Likewise.
+	* testsuite/gas/i386/x86-64-optimize-3.d: Likewise.
+	* testsuite/gas/i386/x86-64-optimize-4.d: Likewise.
+	* testsuite/gas/i386/x86-64-optimize-5.d: Likewise.
+	* testsuite/gas/i386/x86-64-optimize-6.d: Likewise.
+	* testsuite/gas/i386/optimize-7.d: New file.
+	* testsuite/gas/i386/optimize-7.s: Likewise.
+	* testsuite/gas/i386/x86-64-optimize-8.d: Likewise.
+	* testsuite/gas/i386/x86-64-optimize-8.s: Likewise.
+
+2019-03-18  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (optimize_encoding): Encode 256-bit/512-bit
 	VEX/EVEX vector register clearing instructions with 128-bit VEX
 	vector register clearing instructions at -O1.

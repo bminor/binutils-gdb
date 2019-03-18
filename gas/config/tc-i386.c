@@ -4075,6 +4075,56 @@ optimize_encoding (void)
 	    i.types[j].bitfield.ymmword = 0;
 	  }
     }
+  else if ((cpu_arch_flags.bitfield.cpuavx
+	    || cpu_arch_isa_flags.bitfield.cpuavx)
+	   && i.vec_encoding != vex_encoding_evex
+	   && !i.types[0].bitfield.zmmword
+	   && !i.mask
+	   && is_evex_encoding (&i.tm)
+	   && (i.tm.base_opcode == 0x666f
+	       || (i.tm.base_opcode ^ Opcode_SIMD_IntD) == 0x666f
+	       || i.tm.base_opcode == 0xf36f
+	       || (i.tm.base_opcode ^ Opcode_SIMD_IntD) == 0xf36f
+	       || i.tm.base_opcode == 0xf26f
+	       || (i.tm.base_opcode ^ Opcode_SIMD_IntD) == 0xf26f)
+	   && i.tm.extension_opcode == None)
+    {
+      /* Optimize: -O1:
+	   VOP, one of vmovdqa32, vmovdqa64, vmovdqu8, vmovdqu16,
+	   vmovdqu32 and vmovdqu64:
+	     EVEX VOP %xmmM, %xmmN
+	       -> VEX vmovdqa|vmovdqu %xmmM, %xmmN (M and N < 16)
+	     EVEX VOP %ymmM, %ymmN
+	       -> VEX vmovdqa|vmovdqu %ymmM, %ymmN (M and N < 16)
+	     EVEX VOP %xmmM, mem
+	       -> VEX vmovdqa|vmovdqu %xmmM, mem (M < 16)
+	     EVEX VOP %ymmM, mem
+	       -> VEX vmovdqa|vmovdqu %ymmM, mem (M < 16)
+	     EVEX VOP mem, %xmmN
+	       -> VEX mvmovdqa|vmovdquem, %xmmN (N < 16)
+	     EVEX VOP mem, %ymmN
+	       -> VEX vmovdqa|vmovdqu mem, %ymmN (N < 16)
+       */
+      if (i.tm.base_opcode == 0xf26f)
+	i.tm.base_opcode = 0xf36f;
+      else if ((i.tm.base_opcode ^ Opcode_SIMD_IntD) == 0xf26f)
+	i.tm.base_opcode = 0xf36f ^ Opcode_SIMD_IntD;
+      i.tm.opcode_modifier.vex
+	= i.types[0].bitfield.ymmword ? VEX256 : VEX128;
+      i.tm.opcode_modifier.vexw = VEXW0;
+      i.tm.opcode_modifier.evex = 0;
+      i.tm.opcode_modifier.masking = 0;
+      i.tm.opcode_modifier.disp8memshift = 0;
+      i.memshift = 0;
+      for (j = 0; j < 2; j++)
+	if (operand_type_check (i.types[j], disp)
+	    && i.op[j].disps->X_op == O_constant)
+	  {
+	    i.types[j].bitfield.disp8
+	      = fits_in_disp8 (i.op[j].disps->X_add_number);
+	    break;
+	  }
+    }
 }
 
 /* This is the guts of the machine-dependent assembler.  LINE points to a
