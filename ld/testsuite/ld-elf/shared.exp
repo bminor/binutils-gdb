@@ -459,6 +459,7 @@ run_ld_link_tests [list \
 	"-shared" "" "$AFLAGS_PIC" "pr22374b.s" {} "pr22374.so" ] \
 ]
 if { ![istarget "alpha-*-*"]
+     && ![istarget "csky-*-*"]
      && ![istarget "frv-*-*"]
      && ![istarget "hppa*-*-*"]
      && ![istarget "i?86-*-*"]

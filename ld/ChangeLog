@@ -1,3 +1,10 @@
+2019-03-18  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/merge.d: Remove csky from xfails, add moxie.
+	* testsuite/ld-elf/pr21884.d: Remove csky from xfails.
+	* testsuite/ld-elf/shared.exp: Add csky to list not xfailing pr22374.
+	* testsuite/ld-unique/pr21529.d: Remove csky from xfails
+
 2019-03-15  Nick Clifton  <nickc@redhat.com>
 
 	PR 24262
