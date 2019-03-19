@@ -1,3 +1,10 @@
+2019-03-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/24359
+	* i386-gen.c (cpu_flag_init): Add CPU_ANY_AVX512F_FLAGS to
+	CPU_ANY_AVX2_FLAGS.
+	* i386-init.h: Regenerated.
+
 2019-03-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/24348
