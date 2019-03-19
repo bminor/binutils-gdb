@@ -3985,9 +3985,6 @@ optimize_encoding (void)
 		   && !i.rounding
 		   && is_evex_encoding (&i.tm)
 		   && (i.vec_encoding != vex_encoding_evex
-		       || cpu_arch_flags.bitfield.cpuavx
-		       || cpu_arch_isa_flags.bitfield.cpuavx
-		       || cpu_arch_flags.bitfield.cpuavx512vl
 		       || cpu_arch_isa_flags.bitfield.cpuavx512vl
 		       || i.tm.cpu_flags.bitfield.cpuavx512vl
 		       || (i.tm.operand_types[2].bitfield.zmmword
@@ -4045,17 +4042,13 @@ optimize_encoding (void)
        */
       if (is_evex_encoding (&i.tm))
 	{
-	  if (i.vec_encoding != vex_encoding_evex
-	      && (cpu_arch_flags.bitfield.cpuavx
-		  || cpu_arch_isa_flags.bitfield.cpuavx))
+	  if (i.vec_encoding != vex_encoding_evex)
 	    {
 	      i.tm.opcode_modifier.vex = VEX128;
 	      i.tm.opcode_modifier.vexw = VEXW0;
 	      i.tm.opcode_modifier.evex = 0;
 	    }
-	  else if (optimize > 1
-		   && (cpu_arch_flags.bitfield.cpuavx512vl
-		       || cpu_arch_isa_flags.bitfield.cpuavx512vl))
+	  else if (optimize > 1)
 	    i.tm.opcode_modifier.evex = EVEX128;
 	  else
 	    return;
