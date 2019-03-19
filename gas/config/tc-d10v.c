@@ -1580,6 +1580,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_16:
       bfd_putb16 ((bfd_vma) value, (unsigned char *) where);
       break;
+    case BFD_RELOC_8:
+      *where = value;
+      break;
 
     case BFD_RELOC_VTABLE_INHERIT:
     case BFD_RELOC_VTABLE_ENTRY:

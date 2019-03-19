@@ -248,6 +248,10 @@ md_apply_fix (fixS *fixP,
 
   switch (fixP->fx_r_type)
     {
+    case BFD_RELOC_8:
+      mask = 0xff;
+      shift = 0;
+      break;
     case BFD_RELOC_16:
     case BFD_RELOC_16_PCREL:
       mask = 0xffff;

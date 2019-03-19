@@ -1,3 +1,14 @@
+2019-03-21  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-d10v.c (md_apply_fix): Apply BFD_RELOC_8.
+	* config/tc-pdp11.c (md_apply_fix): Likewise.
+	* config/tc-d30v.c (md_apply_fix): Don't emit errors for BFD_RELOC_8,
+	BFD_RELOC_16, and BFD_RELOC_64.
+	* testsuite/gas/all/gas.exp: Move target exclusions for forward
+	test, but not cr16, to..
+	* testsuite/gas/all/forward.d: ..here, with explanation.  Remove
+	d10v, d30v, and pdp11 xfails.
+
 2019-03-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (optimize_encoding): Don't check AVX for

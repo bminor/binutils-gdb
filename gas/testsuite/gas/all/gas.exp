@@ -99,23 +99,7 @@ if { ![istarget "bfin-*-*"] } then {
 gas_test_error "assign-bad.s" "" "== assignment for symbol already set"
 
 run_dump_test simple-forward
-
-# .equ works differently on some targets.
-# linkrelax-ing prevents most forward references from working.
-case $target_triplet in {
-    { am3*-*-* } { }
-    { *c54x*-*-* } { }
-    { cr16*-*-* } { }
-    { crx*-*-* } { }
-    { h8300*-*-* } { }
-    { hppa*-*-* } { }
-    { mep-*-* } { }
-    { microblaze-*-* } { }
-    { mn10\[23\]00*-*-* } { }
-    default {
-	run_dump_test forward
-    }
-}
+run_dump_test forward
 
 # aout relocs are often weird, so is mep. don't bother testing
 # som doesn't use a .text section
