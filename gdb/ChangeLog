@@ -1,3 +1,13 @@
+2019-03-19  Pedro Alves  <palves@redhat.com>
+
+	* tui/tui-out.c (tui_ui_out::do_field_string): Simplify.
+	(tui_ui_out::do_text): Add comments.  Reset M_LINE to 0 instead of
+	to -1.  Fix TABs vs spaces.
+	(tui_ui_out::tui_ui_out): Don't initialize fields here.
+	* tui/tui-out.h (tui_ui_out) Add intro comments.
+	<m_line, m_start_of_line>: In-class initialize, and add describing
+	comment.
+
 2019-03-18  Alan Hayward  <alan.hayward@arm.com>
 
 	* arm-linux-nat.c (arm_linux_insert_hw_breakpoint1): Fix

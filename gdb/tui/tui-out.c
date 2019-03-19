@@ -57,17 +57,13 @@ tui_ui_out::do_field_string (int fldno, int width, ui_align align,
   if (suppress_output ())
     return;
 
+  m_start_of_line++;
+
   if (fldname && m_line > 0 && strcmp (fldname, "fullname") == 0)
     {
-      m_start_of_line++;
-      if (m_line > 0)
-        {
-          tui_show_source (string, m_line);
-        }
+      tui_show_source (string, m_line);
       return;
     }
-  
-  m_start_of_line++;
 
   cli_ui_out::do_field_string (fldno, width, align, fldname, string, style);
 }
@@ -94,11 +90,16 @@ tui_ui_out::do_text (const char *string)
   m_start_of_line++;
   if (m_line > 0)
     {
+      /* Printing a source line, so suppress regular output -- the
+	 line was shown on the TUI's source window by tui_show_source
+	 above instead.  */
       if (strchr (string, '\n') != 0)
-        {
-          m_line = -1;
-          m_start_of_line = 0;
-        }
+	{
+	  /* We've reached the end of the line, so go back to letting
+	     text output go to the console.  */
+	  m_line = 0;
+	  m_start_of_line = 0;
+	}
       return;
     }
   if (strchr (string, '\n'))
@@ -108,9 +109,7 @@ tui_ui_out::do_text (const char *string)
 }
 
 tui_ui_out::tui_ui_out (ui_file *stream)
-: cli_ui_out (stream, 0),
-  m_line (-1),
-  m_start_of_line (0)
+  : cli_ui_out (stream, 0)
 {
 }
 

@@ -20,6 +20,10 @@
 
 #include "cli-out.h"
 
+/* A ui_out class for the TUI.  This is just like the CLI's ui_out,
+   except that it overrides output methods to detect when a source
+   line is being printed and show the source in the TUI's source
+   window instead of printing the line in the console window.  */
 class tui_ui_out : public cli_ui_out
 {
 public:
@@ -39,8 +43,21 @@ protected:
 
 private:
 
-  int m_line;
-  int m_start_of_line;
+  /* These fields are used to make print_source_lines show the source
+     in the TUI's source window instead of in the console.
+     M_START_OF_LINE is incremented whenever something is output to
+     the ui_out.  If an integer field named "line" is printed on the
+     ui_out, and nothing else has been printed yet (both
+     M_START_OF_LINE and M_LINE are still 0), we assume
+     print_source_lines is starting to print a source line, and thus
+     record the line number in M_LINE.  Afterwards, when we see a
+     string field named "fullname" being output, we take the fullname
+     and the recorded line and show the source line in the TUI's
+     source window.  tui_ui_out::do_text() suppresses text output
+     until it sees an endline being printed, at which point these
+     variables are reset back to 0.  */
+  int m_line = 0;
+  int m_start_of_line = 0;
 };
 
 extern tui_ui_out *tui_out_new (struct ui_file *stream);
