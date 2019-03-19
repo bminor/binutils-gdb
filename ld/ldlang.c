@@ -5619,8 +5619,9 @@ lang_size_sections_1
 	  break;
 
 	case lang_object_symbols_statement_enum:
-	  link_info.create_object_symbols_section =
-	    output_section_statement->bfd_section;
+	  link_info.create_object_symbols_section
+	    = output_section_statement->bfd_section;
+	  output_section_statement->bfd_section->flags |= SEC_KEEP;
 	  break;
 
 	case lang_output_statement_enum:

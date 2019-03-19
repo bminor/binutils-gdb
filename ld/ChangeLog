@@ -1,3 +1,9 @@
+2019-03-21  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (lang_size_sections_1): Set SEC_KEEP on
+	create_object_symbols_section.
+	* testsuite/ld-elf/pr22319.d: Don't xfail dlx.
+
 2019-03-18  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/merge.d: Remove csky from xfails, add moxie.
