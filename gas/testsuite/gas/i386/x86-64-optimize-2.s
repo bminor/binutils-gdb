@@ -170,3 +170,5 @@ _start:
 	vmovdqu16	%ymm1, 128(%rax)
 	vmovdqu32	%ymm1, 128(%rax)
 	vmovdqu64	%ymm1, 128(%rax)
+
+	vmovdqa32	(%rax), %zmm2

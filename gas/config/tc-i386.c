@@ -4068,18 +4068,14 @@ optimize_encoding (void)
 	    i.types[j].bitfield.ymmword = 0;
 	  }
     }
-  else if ((cpu_arch_flags.bitfield.cpuavx
-	    || cpu_arch_isa_flags.bitfield.cpuavx)
-	   && i.vec_encoding != vex_encoding_evex
+  else if (i.vec_encoding != vex_encoding_evex
 	   && !i.types[0].bitfield.zmmword
+	   && !i.types[1].bitfield.zmmword
 	   && !i.mask
 	   && is_evex_encoding (&i.tm)
-	   && (i.tm.base_opcode == 0x666f
-	       || (i.tm.base_opcode ^ Opcode_SIMD_IntD) == 0x666f
-	       || i.tm.base_opcode == 0xf36f
-	       || (i.tm.base_opcode ^ Opcode_SIMD_IntD) == 0xf36f
-	       || i.tm.base_opcode == 0xf26f
-	       || (i.tm.base_opcode ^ Opcode_SIMD_IntD) == 0xf26f)
+	   && ((i.tm.base_opcode & ~Opcode_SIMD_IntD) == 0x666f
+	       || (i.tm.base_opcode & ~Opcode_SIMD_IntD) == 0xf36f
+	       || (i.tm.base_opcode & ~Opcode_SIMD_IntD) == 0xf26f)
 	   && i.tm.extension_opcode == None)
     {
       /* Optimize: -O1:
@@ -4098,10 +4094,31 @@ optimize_encoding (void)
 	     EVEX VOP mem, %ymmN
 	       -> VEX vmovdqa|vmovdqu mem, %ymmN (N < 16)
        */
-      if (i.tm.base_opcode == 0xf26f)
-	i.tm.base_opcode = 0xf36f;
-      else if ((i.tm.base_opcode ^ Opcode_SIMD_IntD) == 0xf26f)
-	i.tm.base_opcode = 0xf36f ^ Opcode_SIMD_IntD;
+      for (j = 0; j < 2; j++)
+	if (operand_type_check (i.types[j], disp)
+	    && i.op[j].disps->X_op == O_constant)
+	  {
+	    /* Since the VEX prefix has 2 or 3 bytes, the EVEX prefix
+	       has 4 bytes, EVEX Disp8 has 1 byte and VEX Disp32 has 4
+	       bytes, we choose EVEX Disp8 over VEX Disp32.  */
+	    int evex_disp8, vex_disp8;
+	    unsigned int memshift = i.memshift;
+	    offsetT n = i.op[j].disps->X_add_number;
+
+	    evex_disp8 = fits_in_disp8 (n);
+	    i.memshift = 0;
+	    vex_disp8 = fits_in_disp8 (n);
+	    if (evex_disp8 != vex_disp8)
+	      {
+		i.memshift = memshift;
+		return;
+	      }
+
+	    i.types[j].bitfield.disp8 = vex_disp8;
+	    break;
+	  }
+      if ((i.tm.base_opcode & ~Opcode_SIMD_IntD) == 0xf26f)
+	i.tm.base_opcode ^= 0xf36f ^ 0xf26f;
       i.tm.opcode_modifier.vex
 	= i.types[0].bitfield.ymmword ? VEX256 : VEX128;
       i.tm.opcode_modifier.vexw = VEXW0;

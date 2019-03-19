@@ -29,12 +29,12 @@ Disassembly of section .text:
  +[a-f0-9]+:	c5 fa 6f 50 7f       	vmovdqu 0x7f\(%eax\),%xmm2
  +[a-f0-9]+:	c5 fa 6f 50 7f       	vmovdqu 0x7f\(%eax\),%xmm2
  +[a-f0-9]+:	c5 fa 6f 50 7f       	vmovdqu 0x7f\(%eax\),%xmm2
- +[a-f0-9]+:	c5 f9 7f 88 80 00 00 00 	vmovdqa %xmm1,0x80\(%eax\)
- +[a-f0-9]+:	c5 f9 7f 88 80 00 00 00 	vmovdqa %xmm1,0x80\(%eax\)
- +[a-f0-9]+:	c5 fa 7f 88 80 00 00 00 	vmovdqu %xmm1,0x80\(%eax\)
- +[a-f0-9]+:	c5 fa 7f 88 80 00 00 00 	vmovdqu %xmm1,0x80\(%eax\)
- +[a-f0-9]+:	c5 fa 7f 88 80 00 00 00 	vmovdqu %xmm1,0x80\(%eax\)
- +[a-f0-9]+:	c5 fa 7f 88 80 00 00 00 	vmovdqu %xmm1,0x80\(%eax\)
+ +[a-f0-9]+:	62 f1 7d 08 7f 48 08 	vmovdqa32 %xmm1,0x80\(%eax\)
+ +[a-f0-9]+:	62 f1 fd 08 7f 48 08 	vmovdqa64 %xmm1,0x80\(%eax\)
+ +[a-f0-9]+:	62 f1 7f 08 7f 48 08 	vmovdqu8 %xmm1,0x80\(%eax\)
+ +[a-f0-9]+:	62 f1 ff 08 7f 48 08 	vmovdqu16 %xmm1,0x80\(%eax\)
+ +[a-f0-9]+:	62 f1 7e 08 7f 48 08 	vmovdqu32 %xmm1,0x80\(%eax\)
+ +[a-f0-9]+:	62 f1 fe 08 7f 48 08 	vmovdqu64 %xmm1,0x80\(%eax\)
  +[a-f0-9]+:	c5 fd 6f d1          	vmovdqa %ymm1,%ymm2
  +[a-f0-9]+:	c5 fd 6f d1          	vmovdqa %ymm1,%ymm2
  +[a-f0-9]+:	c5 fe 6f d1          	vmovdqu %ymm1,%ymm2
@@ -47,12 +47,12 @@ Disassembly of section .text:
  +[a-f0-9]+:	c5 fe 6f 50 7f       	vmovdqu 0x7f\(%eax\),%ymm2
  +[a-f0-9]+:	c5 fe 6f 50 7f       	vmovdqu 0x7f\(%eax\),%ymm2
  +[a-f0-9]+:	c5 fe 6f 50 7f       	vmovdqu 0x7f\(%eax\),%ymm2
- +[a-f0-9]+:	c5 fd 7f 88 80 00 00 00 	vmovdqa %ymm1,0x80\(%eax\)
- +[a-f0-9]+:	c5 fd 7f 88 80 00 00 00 	vmovdqa %ymm1,0x80\(%eax\)
- +[a-f0-9]+:	c5 fe 7f 88 80 00 00 00 	vmovdqu %ymm1,0x80\(%eax\)
- +[a-f0-9]+:	c5 fe 7f 88 80 00 00 00 	vmovdqu %ymm1,0x80\(%eax\)
- +[a-f0-9]+:	c5 fe 7f 88 80 00 00 00 	vmovdqu %ymm1,0x80\(%eax\)
- +[a-f0-9]+:	c5 fe 7f 88 80 00 00 00 	vmovdqu %ymm1,0x80\(%eax\)
+ +[a-f0-9]+:	62 f1 7d 28 7f 48 04 	vmovdqa32 %ymm1,0x80\(%eax\)
+ +[a-f0-9]+:	62 f1 fd 28 7f 48 04 	vmovdqa64 %ymm1,0x80\(%eax\)
+ +[a-f0-9]+:	62 f1 7f 28 7f 48 04 	vmovdqu8 %ymm1,0x80\(%eax\)
+ +[a-f0-9]+:	62 f1 ff 28 7f 48 04 	vmovdqu16 %ymm1,0x80\(%eax\)
+ +[a-f0-9]+:	62 f1 7e 28 7f 48 04 	vmovdqu32 %ymm1,0x80\(%eax\)
+ +[a-f0-9]+:	62 f1 fe 28 7f 48 04 	vmovdqu64 %ymm1,0x80\(%eax\)
  +[a-f0-9]+:	62 f1 7d 48 6f d1    	vmovdqa32 %zmm1,%zmm2
  +[a-f0-9]+:	62 f1 fd 48 6f d1    	vmovdqa64 %zmm1,%zmm2
  +[a-f0-9]+:	62 f1 7f 48 6f d1    	vmovdqu8 %zmm1,%zmm2

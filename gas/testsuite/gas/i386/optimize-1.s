@@ -114,3 +114,5 @@ _start:
 	vmovdqu16	%ymm1, 128(%eax)
 	vmovdqu32	%ymm1, 128(%eax)
 	vmovdqu64	%ymm1, 128(%eax)
+
+	vmovdqa32	(%eax), %zmm2
