@@ -1,3 +1,9 @@
+2019-03-20  Tom Tromey  <tromey@adacore.com>
+
+	* infrun.c (handle_inferior_event): Rename from
+	handle_inferior_event_1.  Create a scoped_value_mark.
+	(handle_inferior_event): Remove.
+
 2019-03-19  Tom Tromey  <tromey@adacore.com>
 
 	* mi/mi-interp.c (mi_on_normal_stop_1): Only show displays once.
