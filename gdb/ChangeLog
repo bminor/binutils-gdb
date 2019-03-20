@@ -1,3 +1,10 @@
+2019-03-20  Tom Tromey  <tromey@adacore.com>
+
+	PR gdb/24391
+	* infrun.c (handle_inferior_event): Rename from
+	handle_inferior_event_1.  Create a scoped_value_mark.
+	(handle_inferior_event): Remove.
+
 2019-03-25  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* source-cache.c (source_cache::get_source_lines): Re-read

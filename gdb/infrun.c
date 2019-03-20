@@ -4598,8 +4598,13 @@ handle_no_resumed (struct execution_control_state *ecs)
    once).  */
 
 static void
-handle_inferior_event_1 (struct execution_control_state *ecs)
+handle_inferior_event (struct execution_control_state *ecs)
 {
+  /* Make sure that all temporary struct value objects that were
+     created during the handling of the event get deleted at the
+     end.  */
+  scoped_value_mark free_values;
+
   enum stop_kind stop_soon;
 
   if (ecs->ws.kind == TARGET_WAITKIND_IGNORE)
@@ -5194,22 +5199,6 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       stop_waiting (ecs);
       return;
     }
-}
-
-/* A wrapper around handle_inferior_event_1, which also makes sure
-   that all temporary struct value objects that were created during
-   the handling of the event get deleted at the end.  */
-
-static void
-handle_inferior_event (struct execution_control_state *ecs)
-{
-  struct value *mark = value_mark ();
-
-  handle_inferior_event_1 (ecs);
-  /* Purge all temporary values created during the event handling,
-     as it could be a long time before we return to the command level
-     where such values would otherwise be purged.  */
-  value_free_to_mark (mark);
 }
 
 /* Restart threads back to what they were trying to do back when we
