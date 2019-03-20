@@ -30,7 +30,6 @@ struct emulation
     unsigned                  local_labels_fb : 1;
     unsigned                  local_labels_dollar : 1;
     unsigned                  leading_underscore : 2;
-    unsigned                  strip_underscore : 1;
     unsigned                  default_endian : 2;
     const char *              fake_label_name;
     const struct format_ops * format;

@@ -1,5 +1,11 @@
 2019-03-21  Alan Modra  <amodra@gmail.com>
 
+	* emul.h (struct emulation): Delete strip_underscore.
+	* emul-target.h (emul_strip_underscore): Don't define.
+	(emul_struct_name): Update initialization.
+
+2019-03-21  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-d10v.c (md_apply_fix): Apply BFD_RELOC_8.
 	* config/tc-pdp11.c (md_apply_fix): Likewise.
 	* config/tc-d30v.c (md_apply_fix): Don't emit errors for BFD_RELOC_8,
