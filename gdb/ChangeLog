@@ -1,3 +1,8 @@
+2019-03-29  Tom Tromey  <tromey@adacore.com>
+
+	* printcmd.c (_initialize_printcmd): Add usage lines.  Update some
+	help text.  Remove dead code.
+
 2019-03-29  Keith Seitz  <keiths@redhat.com>
 
 	From Siddhesh Poyarekar:

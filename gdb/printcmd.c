@@ -2652,10 +2652,12 @@ _initialize_printcmd (void)
   gdb::observers::free_objfile.attach (clear_dangling_display_expressions);
 
   add_info ("address", info_address_command,
-	    _("Describe where symbol SYM is stored."));
+	    _("Describe where symbol SYM is stored.\n\
+Usage: info address SYM"));
 
   add_info ("symbol", info_symbol_command, _("\
 Describe what symbol is at location ADDR.\n\
+Usage: info symbol ADDR\n\
 Only for symbols with fixed locations (global or static scope)."));
 
   add_com ("x", class_vars, x_command, _("\
@@ -2673,16 +2675,13 @@ Defaults for format and size letters are those previously used.\n\
 Default count is 1.  Default address is following last thing printed\n\
 with this command or \"print\"."));
 
-#if 0
-  add_com ("whereis", class_vars, whereis_command,
-	   _("Print line number and file of definition of variable."));
-#endif
-
   add_info ("display", info_display_command, _("\
-Expressions to display when program stops, with code numbers."));
+Expressions to display when program stops, with code numbers.\n\
+Usage: info display"));
 
   add_cmd ("undisplay", class_vars, undisplay_command, _("\
 Cancel some expressions to be displayed when program stops.\n\
+Usage: undisplay [NUM]...\n\
 Arguments are the code numbers of the expressions to stop displaying.\n\
 No argument means cancel all automatic-display expressions.\n\
 \"delete display\" has the same effect as this command.\n\
@@ -2691,6 +2690,7 @@ Do \"info display\" to see current list of code numbers."),
 
   add_com ("display", class_vars, display_command, _("\
 Print value of expression EXP each time the program stops.\n\
+Usage: display[/FMT] EXP\n\
 /FMT may be used before EXP as in the \"print\" command.\n\
 /FMT \"i\" or \"s\" or including a size-letter is allowed,\n\
 as in the \"x\" command, and then EXP is used to get the address to examine\n\
@@ -2700,35 +2700,41 @@ Use \"undisplay\" to cancel display requests previously made."));
 
   add_cmd ("display", class_vars, enable_display_command, _("\
 Enable some expressions to be displayed when program stops.\n\
+Usage: enable display [NUM]...\n\
 Arguments are the code numbers of the expressions to resume displaying.\n\
 No argument means enable all automatic-display expressions.\n\
 Do \"info display\" to see current list of code numbers."), &enablelist);
 
   add_cmd ("display", class_vars, disable_display_command, _("\
 Disable some expressions to be displayed when program stops.\n\
+Usage: disable display [NUM]...\n\
 Arguments are the code numbers of the expressions to stop displaying.\n\
 No argument means disable all automatic-display expressions.\n\
 Do \"info display\" to see current list of code numbers."), &disablelist);
 
   add_cmd ("display", class_vars, undisplay_command, _("\
 Cancel some expressions to be displayed when program stops.\n\
+Usage: delete display [NUM]...\n\
 Arguments are the code numbers of the expressions to stop displaying.\n\
 No argument means cancel all automatic-display expressions.\n\
 Do \"info display\" to see current list of code numbers."), &deletelist);
 
   add_com ("printf", class_vars, printf_command, _("\
 Formatted printing, like the C \"printf\" function.\n\
-Usage: printf \"format string\", arg1, arg2, arg3, ..., argn\n\
+Usage: printf \"format string\", ARG1, ARG2, ARG3, ..., ARGN\n\
 This supports most C printf format specifications, like %s, %d, etc."));
 
   add_com ("output", class_vars, output_command, _("\
 Like \"print\" but don't put in value history and don't print newline.\n\
+Usage: output EXP\n\
 This is useful in user-defined commands."));
 
   add_prefix_cmd ("set", class_vars, set_command, _("\
-Evaluate expression EXP and assign result to variable VAR, using assignment\n\
-syntax appropriate for the current language (VAR = EXP or VAR := EXP for\n\
-example).  VAR may be a debugger \"convenience\" variable (names starting\n\
+Evaluate expression EXP and assign result to variable VAR\n\
+Usage: set VAR = EXP\n\
+This uses assignment syntax appropriate for the current language\n\
+(VAR = EXP or VAR := EXP for example).\n\
+VAR may be a debugger \"convenience\" variable (names starting\n\
 with $), a register (a few standard names starting with $), or an actual\n\
 variable in the program being debugged.  EXP is any valid expression.\n\
 Use \"set variable\" for variables with names identical to set subcommands.\n\
@@ -2738,9 +2744,11 @@ You can see these environment settings with the \"show\" command."),
 		  &setlist, "set ", 1, &cmdlist);
   if (dbx_commands)
     add_com ("assign", class_vars, set_command, _("\
-Evaluate expression EXP and assign result to variable VAR, using assignment\n\
-syntax appropriate for the current language (VAR = EXP or VAR := EXP for\n\
-example).  VAR may be a debugger \"convenience\" variable (names starting\n\
+Evaluate expression EXP and assign result to variable VAR\n\
+Usage: assign VAR = EXP\n\
+This uses assignment syntax appropriate for the current language\n\
+(VAR = EXP or VAR := EXP for example).\n\
+VAR may be a debugger \"convenience\" variable (names starting\n\
 with $), a register (a few standard names starting with $), or an actual\n\
 variable in the program being debugged.  EXP is any valid expression.\n\
 Use \"set variable\" for variables with names identical to set subcommands.\n\
@@ -2750,15 +2758,18 @@ You can see these environment settings with the \"show\" command."));
   /* "call" is the same as "set", but handy for dbx users to call fns.  */
   c = add_com ("call", class_vars, call_command, _("\
 Call a function in the program.\n\
+Usage: call EXP\n\
 The argument is the function name and arguments, in the notation of the\n\
 current working language.  The result is printed and saved in the value\n\
 history, if it is not void."));
   set_cmd_completer (c, expression_completer);
 
   add_cmd ("variable", class_vars, set_command, _("\
-Evaluate expression EXP and assign result to variable VAR, using assignment\n\
-syntax appropriate for the current language (VAR = EXP or VAR := EXP for\n\
-example).  VAR may be a debugger \"convenience\" variable (names starting\n\
+Evaluate expression EXP and assign result to variable VAR\n\
+Usage: set variable VAR = EXP\n\
+This uses assignment syntax appropriate for the current language\n\
+(VAR = EXP or VAR := EXP for example).\n\
+VAR may be a debugger \"convenience\" variable (names starting\n\
 with $), a register (a few standard names starting with $), or an actual\n\
 variable in the program being debugged.  EXP is any valid expression.\n\
 This may usually be abbreviated to simply \"set\"."),
@@ -2767,6 +2778,7 @@ This may usually be abbreviated to simply \"set\"."),
 
   c = add_com ("print", class_vars, print_command, _("\
 Print value of expression EXP.\n\
+Usage: print[/FMT] EXP\n\
 Variables accessible are those of the lexical environment of the selected\n\
 stack frame, plus all those whose scope is global or an entire file.\n\
 \n\
@@ -2793,8 +2805,8 @@ but no count or size letter (see \"x\" command)."));
 
   add_setshow_uinteger_cmd ("max-symbolic-offset", no_class,
 			    &max_symbolic_offset, _("\
-Set the largest offset that will be printed in <symbol+1234> form."), _("\
-Show the largest offset that will be printed in <symbol+1234> form."), _("\
+Set the largest offset that will be printed in <SYMBOL+1234> form."), _("\
+Show the largest offset that will be printed in <SYMBOL+1234> form."), _("\
 Tell GDB to only display the symbolic form of an address if the\n\
 offset between the closest earlier symbol and the address is less than\n\
 the specified maximum offset.  The default is \"unlimited\", which tells GDB\n\
@@ -2805,13 +2817,15 @@ it.  Zero is equivalent to \"unlimited\"."),
 			    &setprintlist, &showprintlist);
   add_setshow_boolean_cmd ("symbol-filename", no_class,
 			   &print_symbol_filename, _("\
-Set printing of source filename and line number with <symbol>."), _("\
-Show printing of source filename and line number with <symbol>."), NULL,
+Set printing of source filename and line number with <SYMBOL>."), _("\
+Show printing of source filename and line number with <SYMBOL>."), NULL,
 			   NULL,
 			   show_print_symbol_filename,
 			   &setprintlist, &showprintlist);
 
   add_com ("eval", no_class, eval_command, _("\
-Convert \"printf format string\", arg1, arg2, arg3, ..., argn to\n\
-a command line, and call it."));
+Construct a GDB command and then evaluate it.\n\
+Usage: eval \"format string\", ARG1, ARG2, ARG3, ..., ARGN\n\
+Convert the arguments to a string as \"printf\" would, but then\n\
+treat this string as a command line, and evaluate it."));
 }
