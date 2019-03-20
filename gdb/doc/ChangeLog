@@ -1,3 +1,8 @@
+2019-03-20  Tom Tromey  <tromey@adacore.com>
+
+	* python.texi (Selecting Pretty-Printers): Use @defvar for
+	gdb.pretty_printers.
+
 2019-03-14  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdb.texinfo (GDB/MI Development and Front Ends): Fix closing

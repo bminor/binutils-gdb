@@ -1363,10 +1363,21 @@ printer exists, then this returns @code{None}.
 @subsubsection Selecting Pretty-Printers
 @cindex selecting python pretty-printers
 
+@value{GDBN} provides several ways to register a pretty-printer:
+globally, per program space, and per objfile.  When choosing how to
+register your pretty-printer, a good rule is to register it with the
+smallest scope possible: that is prefer a specific objfile first, then
+a program space, and only register a printer globally as a last
+resort.
+
+@findex gdb.pretty_printers
+@defvar gdb.pretty_printers
 The Python list @code{gdb.pretty_printers} contains an array of
 functions or callable objects that have been registered via addition
 as a pretty-printer.  Printers in this list are called @code{global}
 printers, they're available when debugging all inferiors.
+@end defvar
+
 Each @code{gdb.Progspace} contains a @code{pretty_printers} attribute.
 Each @code{gdb.Objfile} also contains a @code{pretty_printers}
 attribute.
