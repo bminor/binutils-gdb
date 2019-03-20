@@ -863,3 +863,38 @@ _bfd_aarch64_elf_merge_gnu_properties (struct bfd_link_info *info
 
   return updated;
 }
+
+/* Fix up AArch64 GNU properties.  */
+void
+_bfd_aarch64_elf_link_fixup_gnu_properties
+  (struct bfd_link_info *info ATTRIBUTE_UNUSED,
+   elf_property_list **listp)
+{
+  elf_property_list *p, *prev;
+
+  for (p = *listp, prev = *listp; p; p = p->next)
+    {
+      unsigned int type = p->property.pr_type;
+      if (type == GNU_PROPERTY_AARCH64_FEATURE_1_AND)
+	{
+	  if (p->property.pr_kind == property_remove)
+	    {
+	      /* Remove empty property.  */
+	      if (prev == p)
+		{
+		  *listp = p->next;
+		  prev = *listp;
+		}
+	      else
+		  prev->next = p->next;
+	      continue;
+	    }
+	  prev = p;
+	}
+      else if (type > GNU_PROPERTY_HIPROC)
+	{
+	  /* The property list is sorted in order of type.  */
+	  break;
+	}
+    }
+}

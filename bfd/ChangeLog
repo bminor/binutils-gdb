@@ -1,3 +1,9 @@
+2019-03-20  Sudakshina Das  <sudi.das@arm.com>
+
+	* elfxx-aarch64.c (_bfd_aarch64_elf_link_fixup_gnu_properties): Define.
+	* elfxx-aarch64.h (_bfd_aarch64_elf_link_fixup_gnu_properties): Declare.
+	(elf_backend_fixup_gnu_properties): Define for AArch64.
+
 2019-03-18  Alan Modra  <amodra@gmail.com>
 
 	PR 24355

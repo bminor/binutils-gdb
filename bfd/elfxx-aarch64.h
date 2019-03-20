@@ -69,5 +69,12 @@ _bfd_aarch64_elf_merge_gnu_properties (struct bfd_link_info *, bfd *,
 				       elf_property *, elf_property *,
 				       uint32_t);
 
+extern void
+_bfd_aarch64_elf_link_fixup_gnu_properties (struct bfd_link_info *,
+					    elf_property_list **);
+
 #define elf_backend_parse_gnu_properties	\
   _bfd_aarch64_elf_parse_gnu_properties
+
+#define elf_backend_fixup_gnu_properties	\
+  _bfd_aarch64_elf_link_fixup_gnu_properties
