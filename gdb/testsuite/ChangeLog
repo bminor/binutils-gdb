@@ -1,5 +1,10 @@
 2019-04-08  Kevin Buettner  <kevinb@redhat.com>
 
+	* gdb.python/py-thrhandle.exp: Adjust tests to call
+	thread_from_handle instead of thread_from_thread_handle.
+
+2019-04-08  Kevin Buettner  <kevinb@redhat.com>
+
 	* gdb.python/py-thrhandle.exp: Add tests for
 	gdb.InferiorThread.handle.
 

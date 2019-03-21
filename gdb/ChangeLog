@@ -1,5 +1,13 @@
 2019-04-08  Kevin Buettner  <kevinb@redhat.com>
 
+	* python/py-inferior.c (infpy_thread_from_thread_handle):
+	Adjust comments to reflect renaming of thread_from_thread_handle
+	to thread_from_handle.  Adjust keywords.  Fix type error message.
+	(inferior_object_methods): Add thread_from_handle.  Retain
+	thread_from_thread_handle, but mark it as deprecated.
+
+2019-04-08  Kevin Buettner  <kevinb@redhat.com>
+
 	* gdbthread.h (find_thread_by_handle): Revise declaration.
 	* thread.c (find_thread_by_handle): Likewise.  Adjust
 	implementation too.

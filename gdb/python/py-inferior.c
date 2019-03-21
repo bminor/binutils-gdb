@@ -755,7 +755,7 @@ infpy_is_valid (PyObject *self, PyObject *args)
   Py_RETURN_TRUE;
 }
 
-/* Implementation of gdb.Inferior.thread_from_thread_handle (self, handle)
+/* Implementation of gdb.Inferior.thread_from_handle (self, handle)
                         ->  gdb.InferiorThread.  */
 
 static PyObject *
@@ -763,7 +763,7 @@ infpy_thread_from_thread_handle (PyObject *self, PyObject *args, PyObject *kw)
 {
   PyObject *handle_obj;
   inferior_object *inf_obj = (inferior_object *) self;
-  static const char *keywords[] = { "thread_handle", NULL };
+  static const char *keywords[] = { "handle", NULL };
 
   INFPY_REQUIRE_VALID (inf_obj);
 
@@ -791,7 +791,7 @@ infpy_thread_from_thread_handle (PyObject *self, PyObject *args, PyObject *kw)
   else
     {
       PyErr_SetString (PyExc_TypeError,
-		       _("Argument 'handle_obj' must be a thread handle object."));
+		       _("Argument 'handle' must be a thread handle object."));
 
       return NULL;
     }
@@ -956,9 +956,15 @@ Write the given buffer object to the inferior's memory." },
     METH_VARARGS | METH_KEYWORDS,
     "search_memory (address, length, pattern) -> long\n\
 Return a long with the address of a match, or None." },
+  /* thread_from_thread_handle is deprecated.  */
   { "thread_from_thread_handle", (PyCFunction) infpy_thread_from_thread_handle,
     METH_VARARGS | METH_KEYWORDS,
     "thread_from_thread_handle (handle) -> gdb.InferiorThread.\n\
+Return thread object corresponding to thread handle.\n\
+This method is deprecated - use thread_from_handle instead." },
+  { "thread_from_handle", (PyCFunction) infpy_thread_from_thread_handle,
+    METH_VARARGS | METH_KEYWORDS,
+    "thread_from_handle (handle) -> gdb.InferiorThread.\n\
 Return thread object corresponding to thread handle." },
   { "architecture", (PyCFunction) infpy_architecture, METH_NOARGS,
     "architecture () -> gdb.Architecture\n\

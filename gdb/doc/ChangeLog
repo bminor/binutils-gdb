@@ -1,5 +1,11 @@
 2019-04-08  Kevin Buettner  <kevinb@redhat.com>
 
+	* python.texi (Inferiors In Python): Rename
+	Inferior.thread_from_thread_handle to Inferior.thread_from_handle.
+	Add note about the former being deprecated.
+
+2019-04-08  Kevin Buettner  <kevinb@redhat.com>
+
 	* python.texi (Threads In Python): Add description for method
 	InferiorThread.handle.
 
