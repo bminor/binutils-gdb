@@ -292,7 +292,7 @@ SECTIONS
 
   .init	${RELOCATING-0} :
   {
-    *(.init)
+    KEEP (*(SORT_NONE(.init)))
   } ${RELOCATING+=${NOP-0}}
 
   ${RELOCATING-${INSTALL_RELOC}}
@@ -303,7 +303,6 @@ SECTIONS
     /* Put startup code at beginning so that _start keeps same address.  */
     ${RELOCATING+${STARTUP_CODE}}
 
-    ${RELOCATING+*(.init)}
     *(.text)
     ${RELOCATING+*(.text.*)}
     /* .gnu.warning sections are handled specially by elf32.em.  */
@@ -312,6 +311,7 @@ SECTIONS
     ${RELOCATING+*(.tramp)}
     ${RELOCATING+*(.tramp.*)}
 
+    ${RELOCATING+KEEP (*(SORT_NONE(.fini)))}
     ${RELOCATING+${FINISH_CODE}}
 
     ${RELOCATING+_etext = .;}

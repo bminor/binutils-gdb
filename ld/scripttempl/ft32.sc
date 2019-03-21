@@ -35,8 +35,8 @@ SECTIONS
     *(.text${RELOCATING+*})
     ${RELOCATING+*(.strings)
     *(._pm*)
-    *(.init)
-    *(.fini)
+    KEEP (*(SORT_NONE(.init)))
+    KEEP (*(SORT_NONE(.fini)))
     _etext = .;
     . = ALIGN(4);}
   } ${RELOCATING+ > flash}

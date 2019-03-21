@@ -40,8 +40,8 @@ ${RELOCATING+ENTRY (${ENTRY})}
 SECTIONS
 {
   .text ${RELOCATING+ $TEXT_START_ADDR} : {
-    *(.init)
-    *(.fini)
+    ${RELOCATING+KEEP (*(SORT_NONE(.init)))
+    KEEP (*(SORT_NONE(.fini)))}
     *(.text)
   }
   .const ALIGN(4) : {

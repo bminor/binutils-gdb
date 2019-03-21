@@ -189,13 +189,13 @@ SECTIONS
   .init        ${RELOCATING-0} :
   {
     ${RELOCATING+${INIT_START}}
-    KEEP (*(.init))
+    KEEP (*(SORT_NONE(.init)))
     ${RELOCATING+${INIT_END}}
   }${RELOCATING+ > ROM =${NOP-0}}
   .fini    ${RELOCATING-0} :
   {
     ${RELOCATING+${FINI_START}}
-    KEEP (*(.fini))
+    KEEP (*(SORT_NONE(.fini)))
     ${RELOCATING+${FINI_END}}
   }${RELOCATING+ > ROM =${NOP-0}}
   ${RELOCATING+PROVIDE (__etext = .);}

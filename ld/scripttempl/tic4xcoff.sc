@@ -109,7 +109,7 @@ SECTIONS
   /* Program code.  */
   .text : {
     ${RELOCATING+  __text =  .;}
-    ${RELOCATING+ *(.init)}
+    ${RELOCATING+ KEEP (*(SORT_NONE(.init)))}
     *(.text)
     ${CONSTRUCTING+ ___CTOR_LIST__ = .;}
     ${CONSTRUCTING+ LONG(___CTOR_END__ - ___CTOR_LIST__ - 2)}
@@ -121,7 +121,7 @@ SECTIONS
     ${CONSTRUCTING+ *(.dtors)}
     ${CONSTRUCTING+ LONG(0)}
     ${CONSTRUCTING+ ___DTOR_END__  = .;}
-    ${RELOCATING+ *(.fini)}
+    ${RELOCATING+ KEEP (*(SORT_NONE(.fini)))}
     ${RELOCATING+  __etext =  .;}
   } ${RELOCATING+ > ${TEXT_MEMORY}}
   /* Global initialised variables.  */

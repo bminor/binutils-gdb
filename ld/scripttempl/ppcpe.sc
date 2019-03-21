@@ -8,11 +8,6 @@
 # are permitted in any medium without royalty provided the copyright
 # notice and this notice are preserved.
 #
-# These are substituted in as variables in order to get '}' in a shell
-# conditional expansion.
-
-INIT='.init : { *(.init) }'
-FINI='.fini : { *(.fini) }'
 
 cat <<EOF
 /* Copyright (C) 2014-2019 Free Software Foundation, Inc.
@@ -44,7 +39,7 @@ SECTIONS
   /* text - the usual meaning */
   .text ${RELOCATING+ __image_base__ + __section_alignment__ } :
 	{
-	    ${RELOCATING+ *(.init);}
+	    ${RELOCATING+ KEEP (*(SORT_NONE(.init)))}
 	    *(.text)
 	    ${RELOCATING+ *(.text.*)}
 	    *(.gcc_except_table)
@@ -52,7 +47,7 @@ SECTIONS
 			LONG (-1); *(.ctors); *(.ctor); LONG (0); }
 	    ${CONSTRUCTING+ ___DTOR_LIST__ = .; __DTOR_LIST__ = . ;
 			LONG (-1); *(.dtors); *(.dtor); LONG (0); }
-	    ${RELOCATING+ *(.fini);}
+	    ${RELOCATING+ KEEP (*(SORT_NONE(.fini)))}
 	    ${RELOCATING+ etext = .};
 	}
 

@@ -196,7 +196,7 @@ SECTIONS
   .init         ${RELOCATING-0} :
   {
     ${RELOCATING+${INIT_START}}
-    KEEP (*(.init))
+    KEEP (*(SORT_NONE(.init)))
     ${RELOCATING+${INIT_END}}
   } ${RELOCATING+ > ${TEXT_MEMORY}}  =${NOP-0}
 
@@ -215,7 +215,7 @@ SECTIONS
   .fini         ${RELOCATING-0} :
   {
     ${RELOCATING+${FINI_START}}
-    KEEP (*(.fini))
+    KEEP (*(SORT_NONE(.fini)))
     ${RELOCATING+${FINI_END}}
 
     ${RELOCATING+PROVIDE (__etext = .);}

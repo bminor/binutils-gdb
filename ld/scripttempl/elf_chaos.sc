@@ -251,10 +251,16 @@ cat <<EOF
     *(.gnu.warning)
     ${RELOCATING+${OTHER_TEXT_SECTIONS}}
   } =${NOP-0}
+  .init         ${RELOCATING-0} :
+  {
+    ${RELOCATING+${INIT_START}}
+    KEEP (*(SORT_NONE(.init)))
+    ${RELOCATING+${INIT_END}}
+  } =${NOP-0}
   .fini         ${RELOCATING-0} :
   {
     ${RELOCATING+${FINI_START}}
-    KEEP (*(.fini))
+    KEEP (*(SORT_NONE(.fini)))
     ${RELOCATING+${FINI_END}}
   } =${NOP-0}
   ${RELOCATING+PROVIDE (__etext = .);}

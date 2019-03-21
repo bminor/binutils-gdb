@@ -116,7 +116,7 @@ SECTIONS
   .rel.plt		${RELOCATING-0} : { *(.rel.plt) }
   .rela.plt		${RELOCATING-0} : { *(.rela.plt) }
 
-  .init			${RELOCATING-0} : { *(.init) } =${NOP-0}
+  .init			${RELOCATING-0} : { KEEP (*(SORT_NONE(.init))) } =${NOP-0}
   ${DATA_PLT-${PLT}}
 
   /* Internal text space */
@@ -127,8 +127,7 @@ SECTIONS
   {
     *(.text)
     ${RELOCATING+*(.gnu.linkonce.t*)
-    *(SORT_NONE(.init))
-    *(SORT_NONE(.fini))
+    KEEP (*(SORT_NONE(.fini)))
     _etext = . ;}
   } ${RELOCATING+ > ${TEXT_MEMORY}}
 

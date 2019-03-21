@@ -75,7 +75,7 @@ SECTIONS
   .rela.bss	: { *(.rela.bss) }
   .rel.plt	: { *(.rel.plt) }
   .rela.plt	: { *(.rela.plt) }
-  .init		: { KEEP (*(.init)) } =0
+  .init		: { KEEP (*(SORT_NONE(.init))) } =0
   .plt		: { *(.plt) }
 
   .text		:
@@ -106,7 +106,7 @@ SECTIONS
     *(.call_table_text)
   }
 
-  .fini		: { KEEP (*(.fini)) } =0
+  .fini		: { KEEP (*(SORT_NONE(.fini))) } =0
   .rodata	:
   {
 	*(.rodata)

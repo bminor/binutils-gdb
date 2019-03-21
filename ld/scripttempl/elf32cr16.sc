@@ -62,14 +62,14 @@ SECTIONS
   .init :
   {
     __INIT_START = .;
-    KEEP (*(.init))
+    KEEP (*(SORT_NONE(.init)))
     __INIT_END = .;
   }${RELOCATING+ > rom}
 
   .fini :
   {
     __FINI_START = .;
-    KEEP (*(.fini))
+    KEEP (*(SORT_NONE(.fini)))
     __FINI_END = .;
   }${RELOCATING+ > rom}
 

@@ -40,13 +40,13 @@ SECTIONS
 {
   ${RELOCATING+. = ${TEXT_START_ADDR};}
   .text : {
-    ${RELOCATING+ _ftext = . };
-    *(.init)
-    ${RELOCATING+ eprol  =  .};
+    ${RELOCATING+_ftext = .;
+    KEEP (*(SORT_NONE(.init)))
+    eprol  =  .;}
     *(.text)
-    *(.fini)
-    ${RELOCATING+ etext  =  .};
-    ${RELOCATING+ _etext  =  .};
+    ${RELOCATING+KEEP (*(SORT_NONE(.fini)))
+    etext  =  .;
+    _etext  =  .;}
   }
   ${RELOCATING+. = ${DATA_ADDR};}
   .rdata : {

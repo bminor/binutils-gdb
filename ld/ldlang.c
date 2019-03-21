@@ -3744,7 +3744,9 @@ update_wild_statements (lang_statement_union_type *s)
 	    case lang_wild_statement_enum:
 	      for (sec = s->wild_statement.section_list; sec != NULL;
 		   sec = sec->next)
-		{
+		/* Don't sort .init/.fini sections.  */
+		if (strcmp (sec->spec.name, ".init") != 0
+		    && strcmp (sec->spec.name, ".fini") != 0)
 		  switch (sec->spec.sorted)
 		    {
 		    case none:
@@ -3761,7 +3763,6 @@ update_wild_statements (lang_statement_union_type *s)
 		    default:
 		      break;
 		    }
-		}
 	      break;
 
 	    case lang_constructors_statement_enum:
@@ -3769,11 +3770,8 @@ update_wild_statements (lang_statement_union_type *s)
 	      break;
 
 	    case lang_output_section_statement_enum:
-	      /* Don't sort .init/.fini sections.  */
-	      if (strcmp (s->output_section_statement.name, ".init") != 0
-		  && strcmp (s->output_section_statement.name, ".fini") != 0)
-		update_wild_statements
-		  (s->output_section_statement.children.head);
+	      update_wild_statements
+		(s->output_section_statement.children.head);
 	      break;
 
 	    case lang_group_statement_enum:

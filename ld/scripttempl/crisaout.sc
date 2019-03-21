@@ -42,7 +42,7 @@ SECTIONS
     ${CONSTRUCTING+ PROVIDE (___do_global_ctors = .);}
     ${CONSTRUCTING+ SHORT (0xe1fc); /* push srp */}
     ${CONSTRUCTING+ SHORT (0xbe7e);}
-    ${CONSTRUCTING+ *(.init)}
+    ${CONSTRUCTING+ KEEP (*(SORT_NONE(.init)))}
     ${CONSTRUCTING+ SHORT (0x0d3e); /* jump [sp+] */}
     ${CONSTRUCTING+ PROVIDE (__init__end = .);}
     ${CONSTRUCTING+ PROVIDE (___init__end = .);}
@@ -52,7 +52,7 @@ SECTIONS
     ${CONSTRUCTING+ PROVIDE (___do_global_dtors = .);}
     ${CONSTRUCTING+ SHORT (0xe1fc); /* push srp */}
     ${CONSTRUCTING+ SHORT (0xbe7e);}
-    ${CONSTRUCTING+ *(.fini)}
+    ${CONSTRUCTING+ KEEP (*(SORT_NONE(.fini)))}
     ${CONSTRUCTING+ SHORT (0x0d3e); /* jump [sp+] */}
     ${CONSTRUCTING+ PROVIDE (__fini__end = .);}
     ${CONSTRUCTING+  ___fini__end = .;}

@@ -60,8 +60,8 @@ cat <<EOF
 SECTIONS
 {
   .init ${RELOCATING-0} : {
-    KEEP (*(.init))
-    ${RELOCATING+KEEP (*(.fini))}
+    KEEP (*(SORT_NONE(.init)))
+    ${RELOCATING+KEEP (*(SORT_NONE(.fini)))}
     ${RELOCATING+ _einit  =  .;}
   } ${RELOCATING+ > init}
 

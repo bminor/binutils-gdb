@@ -472,7 +472,7 @@ cat <<EOF
   .init  ${RELOCATING-0}${RELOCATING+__init_start}  :
   {
     ${RELOCATING+${INIT_START}}
-    KEEP (*(.init))
+    KEEP (*(SORT_NONE(.init)))
     ${RELOCATING+${INIT_END}}
   } /* ${RELOCATING+ > INTERNAL_RAM} */ =${NOP-0}
 
@@ -482,7 +482,7 @@ cat <<EOF
   .fini ${RELOCATING-0}${RELOCATING+ADDR(.init)+SIZEOF(.init)} :
   {
     ${RELOCATING+${FINI_START}}
-    KEEP (*(.fini))
+    KEEP (*(SORT_NONE(.fini)))
     ${RELOCATING+${FINI_END}}
   } /* ${RELOCATING+ > INTERNAL_RAM} */ =${NOP-0}
 

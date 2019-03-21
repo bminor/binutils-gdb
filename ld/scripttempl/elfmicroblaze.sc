@@ -85,8 +85,8 @@ SECTIONS
   }
   ${RELOCATING+ _etext  =  .;}
 
-  .init : { KEEP (*(.init))	} =0
-  .fini : { KEEP (*(.fini))	} =0
+  .init : { KEEP (*(SORT_NONE(.init)))	} =0
+  .fini : { KEEP (*(SORT_NONE(.fini)))	} =0
 
   ${RELOCATING+PROVIDE (__CTOR_LIST__ = .);}
   ${RELOCATING+PROVIDE (___CTOR_LIST__ = .);}

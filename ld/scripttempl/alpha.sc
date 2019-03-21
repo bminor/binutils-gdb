@@ -34,12 +34,12 @@ SECTIONS
   .text : {
     ${RELOCATING+ _ftext = .;}
     ${RELOCATING+ __istart = .;}
-    ${RELOCATING+ *(.init)}
+    ${RELOCATING+ KEEP (*(SORT_NONE(.init)))}
     ${RELOCATING+ LONG (0x6bfa8001)}
     ${RELOCATING+ eprol = .;}
     *(.text)
     ${RELOCATING+ __fstart = .;}
-    ${RELOCATING+ *(.fini)}
+    ${RELOCATING+ KEEP (*(SORT_NONE(.fini)))}
     ${RELOCATING+ LONG (0x6bfa8001)}
     ${RELOCATING+ _etext = .;}
   }

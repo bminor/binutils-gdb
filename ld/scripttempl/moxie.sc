@@ -29,10 +29,10 @@ SECTIONS
   .text :
   {
     *(.text)
-      .init : { KEEP (*(.init)) } =0
-      .fini : { KEEP (*(.fini)) } =0
+    ${RELOCATING+KEEP (*(SORT_NONE(.init)))
+    KEEP (*(SORT_NONE(.fini)))
     *(.strings)
-    ${RELOCATING+ _etext = . ; }
+    _etext = . ; }
   } ${RELOCATING+ > ram}
   ${CONSTRUCTING+${TORS}}
   .data :

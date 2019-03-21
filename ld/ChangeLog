@@ -1,5 +1,37 @@
 2019-03-21  Alan Modra  <amodra@gmail.com>
 
+	* scripttempl/alpha.sc, * scripttempl/armbpabi.sc,
+	* scripttempl/crisaout.sc, * scripttempl/elf32cr16.sc,
+	* scripttempl/elf32crx.sc, * scripttempl/elf32xc16x.sc,
+	* scripttempl/elf32xc16xl.sc, * scripttempl/elf32xc16xs.sc,
+	* scripttempl/elf64hppa.sc, * scripttempl/elf_chaos.sc,
+	* scripttempl/elfarc.sc, * scripttempl/elfarcv2.sc,
+	* scripttempl/elfd30v.sc, * scripttempl/elfm68hc11.sc,
+	* scripttempl/elfm68hc12.sc, * scripttempl/elfm9s12z.sc,
+	* scripttempl/elfmicroblaze.sc, * scripttempl/elfxgate.sc,
+	* scripttempl/elfxtensa.sc, * scripttempl/epiphany_4x4.sc,
+	* scripttempl/ft32.sc, * scripttempl/i386beos.sc,
+	* scripttempl/iq2000.sc, * scripttempl/mcorepe.sc,
+	* scripttempl/mep.sc, * scripttempl/mips.sc, * scripttempl/moxie.sc,
+	* scripttempl/pe.sc, * scripttempl/pep.sc, * scripttempl/ppcpe.sc,
+	* scripttempl/tic4xcoff.sc, * scripttempl/tic80coff.sc,
+	* scripttempl/v850.sc, * scripttempl/v850_rh850.sc,
+	* scripttempl/visium.sc, * scripttempl/xstormy16.sc: Add KEEP and
+	SORT_NONE to .init and .fini wildcards.
+	* scripttempl/elf32xc16x.sc,
+	* scripttempl/elf32xc16xl.sc,
+	* scripttempl/elf32xc16xs.sc: Add .fini wildcard.
+	* scripttempl/elf_chaos.sc: Add .init output section.
+	* scripttempl/elfd30v.sc: Remove duplicate .init.
+	* scripttempl/elfm68hc11.sc, * scripttempl/elfm68hc12.sc,
+	* scripttempl/elfm9s12z.sc, * scripttempl/elfxgate.sc: Remove
+	duplicate .init, and add .fini wildcard.
+	* scripttempl/ppcpe.sc (INIT, FINI): Delete.
+	* ldlang.c (update_wild_statements): Special case .init and
+	.fini in the wildcard, not the output section.
+
+2019-03-21  Alan Modra  <amodra@gmail.com>
+
 	* emulparams/elf32lm32fd.sh (DYNAMIC_LINK): Undef.
 
 2019-03-21  Alan Modra  <amodra@gmail.com>

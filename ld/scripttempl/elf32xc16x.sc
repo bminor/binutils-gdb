@@ -38,7 +38,8 @@ SECTIONS
 {
 .init :
 	{
-	  *(.init)
+	  KEEP (*(SORT_NONE(.init)))
+	  ${RELOCATING+KEEP (*(SORT_NONE(.fini)))}
 	} ${RELOCATING+ >introm}
 
 .text :

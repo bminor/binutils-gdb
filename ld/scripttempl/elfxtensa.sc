@@ -147,9 +147,9 @@ RODATA=".rodata       ${RELOCATING-0} : { *(.rodata${RELOCATING+ .rodata.* .gnu.
 DATARELRO=".data.rel.ro : { *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*) *(.data.rel.ro .data.rel.ro.* .gnu.linkonce.d.rel.ro.*) }"
 DISCARDED="/DISCARD/ : { *(.note.GNU-stack) *(.gnu_debuglink)  *(.gnu.lto_*) }"
 INIT_LIT=".init.literal 0 : { *(.init.literal)	}"
-INIT=".init         0 : { *(.init)		}"
+INIT=".init         0 : { KEEP (*(SORT_NONE(.init))) }"
 FINI_LIT=".fini.literal 0 : { *(.fini.literal)	}"
-FINI=".fini         0 : { *(.fini)		}"
+FINI=".fini         0 : { KEEP (*(SORT_NONE(.fini))) }"
 if test -z "${NO_SMALL_DATA}"; then
   SBSS=".sbss         ${RELOCATING-0} :
   {

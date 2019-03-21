@@ -90,7 +90,7 @@ SECTIONS
   ${RELOCATING+. = ALIGN(__section_alignment__);}
   .text ${RELOCATING+ __image_base__ + ( __section_alignment__ < ${TARGET_PAGE_SIZE} ? . : __section_alignment__ )} :
   {
-    ${RELOCATING+ KEEP(*(.init))}
+    ${RELOCATING+KEEP (*(SORT_NONE(.init)))}
     *(.text)
     ${R_TEXT}
     ${RELOCATING+ *(.text.*)}
@@ -133,7 +133,7 @@ SECTIONS
        KEEP(*(SORT_BY_NAME(.dtors.*)));
        LONG (0);
      }
-    ${RELOCATING+ KEEP (*(.fini))}
+    ${RELOCATING+KEEP (*(SORT_NONE(.fini)))}
     /* ??? Why is .gcc_exc here?  */
     ${RELOCATING+ *(.gcc_exc)}
     ${RELOCATING+PROVIDE (etext = .);}

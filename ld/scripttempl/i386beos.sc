@@ -59,7 +59,7 @@ SECTIONS
   .text ${RELOCATING+ __image_base__ + __section_alignment__ } :
   {
     ${RELOCATING+ __text_start__ = . ;}
-    ${RELOCATING+ *(.init)}
+    ${RELOCATING+ KEEP (*(SORT_NONE(.init)))}
     *(.text)
     ${R_TEXT}
     *(.glue_7t)
@@ -68,7 +68,7 @@ SECTIONS
 			LONG (-1); *(.ctors); *(.ctor); LONG (0); }
     ${CONSTRUCTING+ ___DTOR_LIST__ = .; __DTOR_LIST__ = . ;
 			LONG (-1); *(.dtors); *(.dtor);  LONG (0); }
-    ${RELOCATING+ *(.fini)}
+    ${RELOCATING+ KEEP (*(SORT_NONE(.fini)))}
     /* ??? Why is .gcc_exc here?  */
     ${RELOCATING+ *(.gcc_exc)}
     ${RELOCATING+ etext = .;}
