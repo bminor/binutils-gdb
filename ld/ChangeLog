@@ -1,5 +1,16 @@
 2019-03-21  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-elf/fini2.s: Reduce alignment.
+	* testsuite/ld-elf/fini3.s: Likewise.
+	* testsuite/ld-elf/finin.s: Likewise.
+	* testsuite/ld-elf/init2.s: Likewise.
+	* testsuite/ld-elf/init3.s: Likewise.
+	* testsuite/ld-elf/initn.s: Likewise.
+	* testsuite/ld-elf/pr14156a.d: Don't xfail m68hc1*-* or xgate-*.
+	* testsuite/ld-elf/pr14156b.d: Don't xfail xgate-*.
+
+2019-03-21  Alan Modra  <amodra@gmail.com>
+
 	* scripttempl/alpha.sc, * scripttempl/armbpabi.sc,
 	* scripttempl/crisaout.sc, * scripttempl/elf32cr16.sc,
 	* scripttempl/elf32crx.sc, * scripttempl/elf32xc16x.sc,
