@@ -1,3 +1,11 @@
+2019-04-29  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Print Settings): Document 'print max-depth'.
+	* guile.texi (Guile Pretty Printing API): Document that 'print
+	max-depth' can effect the display of a values children.
+	* python.texi (Pretty Printing API): Likewise.
+	(Values From Inferior): Document max_depth keyword.
+
 2019-04-27  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.texinfo (Calling): Document the new

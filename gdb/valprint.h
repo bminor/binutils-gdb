@@ -92,6 +92,9 @@ struct value_print_options
   /* If nonzero, when printing a pointer, print the symbol to which it
      points, if any.  */
   int symbol_print;
+
+  /* Maximum print depth when printing nested aggregates.  */
+  int max_depth;
 };
 
 /* The global print options set by the user.  In general this should
@@ -245,5 +248,14 @@ extern int build_address_symbolic (struct gdbarch *,
 				   std::string *filename,
 				   int *line,
 				   int *unmapped);
+
+/* Check to see if RECURSE is greater than or equal to the allowed
+   printing max-depth (see 'set print max-depth').  If it is then print an
+   ellipsis expression to STREAM and return true, otherwise return false.
+   LANGUAGE determines what type of ellipsis expression is printed.  */
+
+extern bool val_print_check_max_depth (struct ui_file *stream, int recurse,
+				       const struct value_print_options *opts,
+				       const struct language_defn *language);
 
 #endif

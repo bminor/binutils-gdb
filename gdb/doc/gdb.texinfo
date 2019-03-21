@@ -10572,6 +10572,64 @@ is 10.
 Display the current threshold for printing repeated identical
 elements.
 
+@item set print max-depth @var{depth}
+@item set print max-depth unlimited
+@cindex printing nested structures
+Set the threshold after which nested structures are replaced with
+ellipsis, this can make visualising deeply nested structures easier.
+
+For example, given this C code
+
+@smallexample
+typedef struct s1 @{ int a; @} s1;
+typedef struct s2 @{ s1 b; @} s2;
+typedef struct s3 @{ s2 c; @} s3;
+typedef struct s4 @{ s3 d; @} s4;
+
+s4 var = @{ @{ @{ @{ 3 @} @} @} @};
+@end smallexample
+
+The following table shows how different values of @var{depth} will
+effect how @code{var} is printed by @value{GDBN}:
+
+@multitable @columnfractions .3 .7
+@headitem @var{depth} setting @tab Result of @samp{p var}
+@item unlimited
+@tab @code{$1 = @{d = @{c = @{b = @{a = 3@}@}@}@}}
+@item @code{0}
+@tab @code{$1 = @{...@}}
+@item @code{1}
+@tab @code{$1 = @{d = @{...@}@}}
+@item @code{2}
+@tab @code{$1 = @{d = @{c = @{...@}@}@}}
+@item @code{3}
+@tab @code{$1 = @{d = @{c = @{b = @{...@}@}@}@}}
+@item @code{4}
+@tab @code{$1 = @{d = @{c = @{b = @{a = 3@}@}@}@}}
+@end multitable
+
+To see the contents of structures that have been hidden the user can
+either increase the print max-depth, or they can print the elements of
+the structure that are visible, for example
+
+@smallexample
+(gdb) set print max-depth 2
+(gdb) p var
+$1 = @{d = @{c = @{...@}@}@}
+(gdb) p var.d
+$2 = @{c = @{b = @{...@}@}@}
+(gdb) p var.d.c
+$3 = @{b = @{a = 3@}@}
+@end smallexample
+
+The pattern used to replace nested structures varies based on
+language, for most languages @code{@{...@}} is used, but Fortran uses
+@code{(...)}.
+
+@item show print max-depth
+Display the current threshold after which nested structures are
+replaces with ellipsis.
+
 @item set print null-stop
 @cindex @sc{null} elements in arrays
 Cause @value{GDBN} to stop printing the characters of an array when the first

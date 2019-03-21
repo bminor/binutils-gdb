@@ -272,10 +272,23 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 				   current_language->la_language,
 				   DMGL_PARAMS | DMGL_ANSI);
 	  annotate_field_name_end ();
+
+	  /* We tweak various options in a few cases below.  */
+	  value_print_options options_copy = *options;
+	  value_print_options *opts = &options_copy;
+
 	  /* Do not print leading '=' in case of anonymous
 	     unions.  */
 	  if (strcmp (TYPE_FIELD_NAME (type, i), ""))
 	    fputs_filtered (" = ", stream);
+	  else
+	    {
+	      /* If this is an anonymous field then we want to consider it
+		 as though it is at its parent's depth when it comes to the
+		 max print depth.  */
+	      if (opts->max_depth != -1 && opts->max_depth < INT_MAX)
+		++opts->max_depth;
+	    }
 	  annotate_field_value ();
 
 	  if (!field_is_static (&TYPE_FIELD (type, i))
@@ -299,14 +312,12 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		}
 	      else
 		{
-		  struct value_print_options opts = *options;
-
-		  opts.deref_ref = 0;
+		  opts->deref_ref = 0;
 
 		  v = value_field_bitfield (type, i, valaddr, offset, val);
 
-		  common_val_print (v, stream, recurse + 1, &opts,
-				    current_language);
+		  common_val_print (v, stream, recurse + 1,
+				    opts, current_language);
 		}
 	    }
 	  else
@@ -333,8 +344,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		    }
 
 		  cp_print_static_field (TYPE_FIELD_TYPE (type, i),
-					 v, stream, recurse + 1,
-					 options);
+					 v, stream, recurse + 1, opts);
 		}
 	      else if (i == vptr_fieldno && type == vptr_basetype)
 		{
@@ -346,20 +356,18 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		      CORE_ADDR addr;
 		      
 		      addr = extract_typed_address (valaddr + i_offset, i_type);
-		      print_function_pointer_address (options,
+		      print_function_pointer_address (opts,
 						      get_type_arch (type),
 						      addr, stream);
 		    }
 		}
 	      else
 		{
-		  struct value_print_options opts = *options;
-
-		  opts.deref_ref = 0;
+		  opts->deref_ref = 0;
 		  val_print (TYPE_FIELD_TYPE (type, i),
 			     offset + TYPE_FIELD_BITPOS (type, i) / 8,
 			     address,
-			     stream, recurse + 1, val, &opts,
+			     stream, recurse + 1, val, opts,
 			     current_language);
 		}
 	    }
@@ -575,25 +583,35 @@ cp_print_value (struct type *type, struct type *real_type,
 	{
 	  int result = 0;
 
-	  /* Attempt to run an extension language pretty-printer on the
-	     baseclass if possible.  */
-	  if (!options->raw)
-	    result
-	      = apply_ext_lang_val_pretty_printer (baseclass,
-						   thisoffset + boffset,
-						   value_address (base_val),
-						   stream, recurse,
-						   base_val, options,
-						   current_language);
+	  if (options->max_depth > -1
+	      && recurse >= options->max_depth)
+	    {
+	      const struct language_defn *language = current_language;
+	      gdb_assert (language->la_struct_too_deep_ellipsis != NULL);
+	      fputs_filtered (language->la_struct_too_deep_ellipsis, stream);
+	    }
+	  else
+	    {
+	      /* Attempt to run an extension language pretty-printer on the
+		 baseclass if possible.  */
+	      if (!options->raw)
+		result
+		  = apply_ext_lang_val_pretty_printer (baseclass,
+						       thisoffset + boffset,
+						       value_address (base_val),
+						       stream, recurse,
+						       base_val, options,
+						       current_language);
 
-	  if (!result)
-	    cp_print_value_fields (baseclass, thistype,
-				   thisoffset + boffset,
-				   value_address (base_val),
-				   stream, recurse, base_val, options,
-				   ((struct type **)
-				    obstack_base (&dont_print_vb_obstack)),
-				   0);
+	      if (!result)
+		cp_print_value_fields (baseclass, thistype,
+				       thisoffset + boffset,
+				       value_address (base_val),
+				       stream, recurse, base_val, options,
+				       ((struct type **)
+					obstack_base (&dont_print_vb_obstack)),
+				       0);
+	    }
 	}
       fputs_filtered (", ", stream);
 

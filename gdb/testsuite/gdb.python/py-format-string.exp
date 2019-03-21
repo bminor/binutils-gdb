@@ -672,6 +672,26 @@ proc test_max_elements {} {
   }
 }
 
+# Test the max_depth option for gdb.Value.format_string.
+proc test_max_depth {} {
+    set opts "max_depth=-1"
+    with_test_prefix $opts {
+	check_format_string "a_struct_with_union" $opts
+    }
+    set opts "max_depth=0"
+    with_test_prefix $opts {
+	check_format_string "a_struct_with_union" $opts "\\{\.\.\.\\}"
+    }
+    set opts "max_depth=1"
+    with_test_prefix $opts {
+	check_format_string "a_struct_with_union" $opts "\\{the_union = \\{\.\.\.\\}\\}"
+    }
+    set opts "max_depth=2"
+    with_test_prefix $opts {
+	check_format_string "a_struct_with_union" $opts
+    }
+}
+
 # Test the repeat_threshold option for gdb.Value.format_string.
 proc test_repeat_threshold {} {
   global current_lang
@@ -925,6 +945,7 @@ proc test_all_common {} {
   test_actual_objects
   test_static_members
   test_max_elements
+  test_max_depth
   test_repeat_threshold
   test_format
   # Multiple options mixed together.

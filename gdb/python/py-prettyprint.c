@@ -517,7 +517,17 @@ print_children (PyObject *printer, const char *hint,
 	      error (_("Error while executing Python code."));
 	    }
 	  else
-	    common_val_print (value, stream, recurse + 1, options, language);
+	    {
+	      /* When printing the key of a map we allow one additional
+		 level of depth.  This means the key will print before the
+		 value does.  */
+	      struct value_print_options opt = *options;
+	      if (is_map && i % 2 == 0
+		  && opt.max_depth != -1
+		  && opt.max_depth < INT_MAX)
+		++opt.max_depth;
+	      common_val_print (value, stream, recurse + 1, &opt, language);
+	    }
 	}
 
       if (is_map && i % 2 == 0)
@@ -589,6 +599,9 @@ gdbpy_apply_val_pretty_printer (const struct extension_language_defn *extlang,
 
   if (printer == Py_None)
     return EXT_LANG_RC_NOP;
+
+  if (val_print_check_max_depth (stream, recurse, options, language))
+    return EXT_LANG_RC_OK;
 
   /* If we are printing a map, we want some special formatting.  */
   gdb::unique_xmalloc_ptr<char> hint (gdbpy_get_display_hint (printer.get ()));

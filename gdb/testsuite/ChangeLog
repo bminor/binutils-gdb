@@ -1,3 +1,21 @@
+2019-04-29  Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Richard Bunt  <richard.bunt@arm.com>
+
+	* gdb.base/max-depth.c: New file.
+	* gdb.base/max-depth.exp: New file.
+	* gdb.python/py-nested-maps.c: New file.
+	* gdb.python/py-nested-maps.exp: New file.
+	* gdb.python/py-nested-maps.py: New file.
+	* gdb.python/py-format-string.exp (test_max_depth): New proc.
+	(test_all_common): Call test_max_depth.
+	* gdb.fortran/max-depth.exp: New file.
+	* gdb.fortran/max-depth.f90: New file.
+	* gdb.go/max-depth.exp: New file.
+	* gdb.go/max-depth.go: New file.
+	* gdb.modula2/max-depth.exp: New file.
+	* gdb.modula2/max-depth.c: New file.
+	* lib/gdb.exp (get_print_expr_at_depths): New proc.
+
 2019-04-29  Tom de Vries  <tdevries@suse.de>
 
 	* lib/opencl.exp (skip_opencl_tests): Add missing "with" in regexp.

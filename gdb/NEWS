@@ -19,6 +19,15 @@
 * Two new convernience functions $_cimag and $_creal that extract the
   imaginary and real parts respectively from complex numbers.
 
+* New commands
+
+set print max-depth
+show print max-depth
+  Allows deeply nested structures to be simplified when printing by
+  replacing deeply nested parts (beyond the max-depth) with ellipses.
+  The default max-depth is 20, but this can be set to unlimited to get
+  the old behavior back.
+
 * Python API
 
   ** The gdb.Value type has a new method 'format_string' which returns a

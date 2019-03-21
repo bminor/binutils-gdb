@@ -88,6 +88,7 @@ static void val_print_type_code_flags (struct type *type,
 				       struct ui_file *stream);
 
 #define PRINT_MAX_DEFAULT 200	/* Start print_max off at this value.  */
+#define PRINT_MAX_DEPTH_DEFAULT 20	/* Start print_max_depth off at this value. */
 
 struct value_print_options user_print_options =
 {
@@ -109,7 +110,8 @@ struct value_print_options user_print_options =
   1,				/* pascal_static_field_print */
   0,				/* raw */
   0,				/* summary */
-  1				/* symbol_print */
+  1,				/* symbol_print */
+  PRINT_MAX_DEPTH_DEFAULT	/* max_depth */
 };
 
 /* Initialize *OPTS to be a copy of the user print options.  */
@@ -279,6 +281,18 @@ val_print_scalar_type_p (struct type *type)
     default:
       return 1;
     }
+}
+
+/* A helper function for val_print.  When printing with limited depth we
+   want to print string and scalar arguments, but not aggregate arguments.
+   This function distinguishes between the two.  */
+
+static bool
+val_print_scalar_or_string_type_p (struct type *type,
+				   const struct language_defn *language)
+{
+  return (val_print_scalar_type_p (type)
+	  || language->la_is_string_type_p (type));
 }
 
 /* See its definition in value.h.  */
@@ -1054,6 +1068,11 @@ val_print (struct type *type, LONGEST embedded_offset,
       return;
     }
 
+  /* If this value is too deep then don't print it.  */
+  if (!val_print_scalar_or_string_type_p (type, language)
+      && val_print_check_max_depth (stream, recurse, options, language))
+    return;
+
   try
     {
       language->la_val_print (type, embedded_offset, address,
@@ -1064,6 +1083,23 @@ val_print (struct type *type, LONGEST embedded_offset,
     {
       fprintf_filtered (stream, _("<error reading variable>"));
     }
+}
+
+/* See valprint.h.  */
+
+bool
+val_print_check_max_depth (struct ui_file *stream, int recurse,
+			   const struct value_print_options *options,
+			   const struct language_defn *language)
+{
+  if (options->max_depth > -1 && recurse >= options->max_depth)
+    {
+      gdb_assert (language->la_struct_too_deep_ellipsis != NULL);
+      fputs_filtered (language->la_struct_too_deep_ellipsis, stream);
+      return true;
+    }
+
+  return false;
 }
 
 /* Check whether the value VAL is printable.  Return 1 if it is;
@@ -2859,6 +2895,15 @@ val_print_string (struct type *elttype, const char *encoding,
 
   return (bytes_read / width);
 }
+
+/* Handle 'show print max-depth'.  */
+
+static void
+show_print_max_depth (struct ui_file *file, int from_tty,
+		      struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Maximum print depth is %s.\n"), value);
+}
 
 
 /* The 'set input-radix' command writes to this auxiliary variable.
@@ -3152,4 +3197,14 @@ Use 'show input-radix' or 'show output-radix' to independently show each."),
 Set printing of array indexes."), _("\
 Show printing of array indexes"), NULL, NULL, show_print_array_indexes,
                            &setprintlist, &showprintlist);
+
+  add_setshow_zuinteger_unlimited_cmd ("max-depth", class_support,
+                            &user_print_options.max_depth, _("\
+Set maximum print depth for nested structures, unions and arrays."), _("\
+Show maximum print depth for nested structures, unions, and arrays."), _("\
+When structures, unions, or arrays are nested beyond this depth then they\n\
+will be replaced with either '{...}' or '(...)' depending on the language.\n\
+Use 'set print max-depth unlimited' to print the complete structure."),
+				       NULL, show_print_max_depth,
+				       &setprintlist, &showprintlist);
 }

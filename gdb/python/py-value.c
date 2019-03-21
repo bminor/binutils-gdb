@@ -623,6 +623,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
       "static_members",		/* See set print static-members on|off.  */
       /* C non-bool options.  */
       "max_elements", 		/* See set print elements N.  */
+      "max_depth",		/* See set print max-depth N.  */
       "repeat_threshold",	/* See set print repeats.  */
       "format",			/* The format passed to the print command.  */
       NULL
@@ -665,7 +666,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
   char *format = NULL;
   if (!gdb_PyArg_ParseTupleAndKeywords (args,
 					kw,
-					"|O!O!O!O!O!O!O!O!O!IIs",
+					"|O!O!O!O!O!O!O!O!O!IIIs",
 					keywords,
 					&PyBool_Type, &raw_obj,
 					&PyBool_Type, &pretty_arrays_obj,
@@ -677,6 +678,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
 					&PyBool_Type, &actual_objects_obj,
 					&PyBool_Type, &static_members_obj,
 					&opts.print_max,
+					&opts.max_depth,
 					&opts.repeat_count_threshold,
 					&format))
     return NULL;
@@ -702,7 +704,8 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
     return NULL;
 
   /* Numeric arguments for which 0 means unlimited (which we represent as
-     UINT_MAX).  */
+     UINT_MAX).  Note that the max-depth numeric argument uses -1 as
+     unlimited, and 0 is a valid choice.  */
   if (opts.print_max == 0)
     opts.print_max = UINT_MAX;
   if (opts.repeat_count_threshold == 0)

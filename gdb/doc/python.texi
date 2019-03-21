@@ -931,6 +931,11 @@ Number of array elements to print, or @code{0} to print an unlimited
 number of elements (see @code{set print elements} in @ref{Print
 Settings}).
 
+@item max_depth
+The maximum depth to print for nested structs and unions, or @code{-1}
+to print an unlimited number of elements (see @code{set print
+max-depth} in @ref{Print Settings}).
+
 @item repeat_threshold
 Set the threshold for suppressing display of repeated array elements, or
 @code{0} to represent all elements, even if repeated.  (See @code{set
@@ -1365,6 +1370,9 @@ object which is convertible to a @value{GDBN} value.
 
 This method is optional.  If it does not exist, @value{GDBN} will act
 as though the value has no children.
+
+Children may be hidden from display based on the value of @samp{set
+print max-depth} (@pxref{Print Settings}).
 @end defun
 
 @defun pretty_printer.display_hint (self)

@@ -1,4 +1,34 @@
 2019-04-29  Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Chris January  <chris.january@arm.com>
+	    Daniel Everett  <daniel.everett@arm.com>
+	    Nick Forrington  <nick.forrington@arm.com>
+	    Richard Bunt  <richard.bunt@arm.com>
+
+	* cp-valprint.c (cp_print_value_fields): Allow an additional level
+	of depth when printing anonymous structs or unions.
+	* guile/scm-pretty-print.c (gdbscm_apply_val_pretty_printer):
+	Don't print either the top-level value, or the children if the
+	max-depth is exceeded.
+	(ppscm_print_children): When printing the key of a map, allow one
+	extra level of depth.
+	* python/py-prettyprint.c (gdbpy_apply_val_pretty_printer): Don't
+	print either the top-level value, or the children if the max-depth
+	is exceeded.
+	(print_children): When printing the key of a map, allow one extra
+	level of depth.
+	* python/py-value.c (valpy_format_string): Add max_depth keyword.
+	* valprint.c: (PRINT_MAX_DEPTH_DEFAULT): Define.
+	(user_print_options): Initialise max_depth field.
+	(val_print_scalar_or_string_type_p): New function.
+	(val_print): Check to see if the max depth has been reached.
+	(val_print_check_max_depth): Define new function.
+	(show_print_max_depth): New function.
+	(_initialize_valprint): Add 'print max-depth' option.
+	* valprint.h (struct value_print_options) <max_depth>: New field.
+	(val_print_check_max_depth): Declare new function.
+	* NEWS: Document new feature.
+
+2019-04-29  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ada-lang.c (ada_language_defn): Initialise new field.
 	* c-lang.c (c_is_string_type_p): New function.

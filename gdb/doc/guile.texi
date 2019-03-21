@@ -1469,6 +1469,9 @@ object which is convertible to a @value{GDBN} value.
 
 If @var{children} is @code{#f}, @value{GDBN} will act
 as though the value has no children.
+
+Children may be hidden from display based on the value of @samp{set
+print max-depth} (@pxref{Print Settings}).
 @end table
 @end deffn
 

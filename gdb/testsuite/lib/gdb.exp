@@ -1390,6 +1390,36 @@ proc gdb_test_stdio {command inferior_pattern {gdb_pattern ""} {message ""}} {
     return $res
 }
 
+# get_print_expr_at_depths EXP OUTPUTS
+#
+# Used for testing 'set print max-depth'.  Prints the expression EXP
+# with 'set print max-depth' set to various depths.  OUTPUTS is a list
+# of `n` different patterns to match at each of the depths from 0 to
+# (`n` - 1).
+#
+# This proc does one final check with the max-depth set to 'unlimited'
+# which is tested against the last pattern in the OUTPUTS list.  The
+# OUTPUTS list is therefore required to match every depth from 0 to a
+# depth where the whole of EXP is printed with no ellipsis.
+#
+# This proc leaves the 'set print max-depth' set to 'unlimited'.
+proc gdb_print_expr_at_depths {exp outputs} {
+    for { set depth 0 } { $depth <= [llength $outputs] } { incr depth } {
+	if { $depth == [llength $outputs] } {
+	    set expected_result [lindex $outputs [expr [llength $outputs] - 1]]
+	    set depth_string "unlimited"
+	} else {
+	    set expected_result [lindex $outputs $depth]
+	    set depth_string $depth
+	}
+
+	with_test_prefix "exp='$exp': depth=${depth_string}" {
+	    gdb_test_no_output "set print max-depth ${depth_string}"
+	    gdb_test "p $exp" "$expected_result"
+	}
+    }
+}
+
 
 
 # Issue a PASS and return true if evaluating CONDITION in the caller's

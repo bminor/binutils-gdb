@@ -897,7 +897,18 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 	      ppscm_print_exception_unless_memory_error (except_scm, stream);
 	      break;
 	    }
-	  common_val_print (value, stream, recurse + 1, options, language);
+	  else
+	    {
+	      /* When printing the key of a map we allow one additional
+		 level of depth.  This means the key will print before the
+		 value does.  */
+	      struct value_print_options opt = *options;
+	      if (is_map && i % 2 == 0
+		  && opt.max_depth != -1
+		  && opt.max_depth < INT_MAX)
+		++opt.max_depth;
+	      common_val_print (value, stream, recurse + 1, &opt, language);
+	    }
 	}
 
       if (is_map && i % 2 == 0)
@@ -983,6 +994,12 @@ gdbscm_apply_val_pretty_printer (const struct extension_language_defn *extlang,
       goto done;
     }
   gdb_assert (ppscm_is_pretty_printer_worker (printer));
+
+  if (val_print_check_max_depth (stream, recurse, options, language))
+    {
+      result = EXT_LANG_RC_OK;
+      goto done;
+    }
 
   /* If we are printing a map, we want some special formatting.  */
   hint = ppscm_get_display_hint_enum (printer);
