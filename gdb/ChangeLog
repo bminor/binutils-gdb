@@ -1,3 +1,8 @@
+2019-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* cp-valprint.c (cp_print_value_fields): Don't print trailing
+	whitespace when pretty printing is on.
+
 2019-03-26  Alan Hayward  <alan.hayward@arm.com>
 
         * ppc-linux-nat.c: Add include.

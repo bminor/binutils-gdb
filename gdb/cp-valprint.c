@@ -235,7 +235,11 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 	    continue;
 
 	  if (fields_seen)
-	    fprintf_filtered (stream, ", ");
+	    {
+	      fputs_filtered (",", stream);
+	      if (!options->prettyformat)
+		fputs_filtered (" ", stream);
+	    }
 	  else if (n_baseclasses > 0)
 	    {
 	      if (options->prettyformat)
@@ -244,7 +248,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		  print_spaces_filtered (2 + 2 * recurse, stream);
 		  fputs_filtered ("members of ", stream);
 		  fputs_filtered (TYPE_NAME (type), stream);
-		  fputs_filtered (": ", stream);
+		  fputs_filtered (":", stream);
 		}
 	    }
 	  fields_seen = 1;
