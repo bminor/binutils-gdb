@@ -1,5 +1,14 @@
 2019-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.python/py-prettyprint.c (struct container) <is_map_p>: New
+	field.
+	(make_container): Initialise new field.
+	* gdb.python/py-prettyprint.exp: Add new tests.
+	* gdb.python/py-prettyprint.py (class ContainerPrinter)
+	<display_hint>: New method.
+
+2019-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.python/py-prettyprint.exp: Use gdb_breakpoint and
 	gdb_continue_to_breakpoint more throughout this test.
 	(run_lang_tests) Supply unique test names, and use

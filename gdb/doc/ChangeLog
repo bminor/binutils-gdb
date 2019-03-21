@@ -1,3 +1,8 @@
+2019-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python.texi (Pretty Printing API): Document use of None for the
+	display_hint.
+
 2019-03-22  Alan Hayward  <alan.hayward@arm.com>
 	    Jiong Wang  <jiong.wang@arm.com>
 

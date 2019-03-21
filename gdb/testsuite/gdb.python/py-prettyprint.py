@@ -56,6 +56,12 @@ class ContainerPrinter (object):
     def children(self):
         return _iterator(self.val['elements'], self.val['len'])
 
+    def display_hint (self):
+        if (self.val['is_map_p']):
+            return 'map'
+        else:
+            return None
+
 # Treats a container as array.
 class ArrayPrinter (object):
     def __init__(self, val):

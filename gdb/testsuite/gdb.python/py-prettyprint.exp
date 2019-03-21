@@ -109,13 +109,26 @@ proc run_lang_tests {exefile lang} {
     gdb_test_no_output "set python print-stack full"
     gdb_test "print hint_error" "Exception: hint failed\r\nhint_error_val"
 
-    gdb_test "print c" " = container \"container\" with 2 elements = {$nl *.0. = 23,$nl *.1. = 72$nl}"
+    gdb_test "print c" " = container \"container\" with 2 elements = {$nl *.0. = 23,$nl *.1. = 72$nl}" \
+	"print c, pretty printing on, default display hint"
+
+    gdb_test_no_output "set variable c.is_map_p=1"
+    gdb_test "print c" " = container \"container\" with 2 elements = \{$nl  \\\[23\\\] = 72$nl\}" \
+	"print c, pretty printing on, display hint is now map"
 
     gdb_test "print nstype" " = {$nl *.0. = 7,$nl *.1. = 42$nl}"
 
     gdb_test_no_output "set print pretty off"
     gdb_test "print nstype" " = {.0. = 7, .1. = 42}" \
 	"print nstype on one line"
+
+    # Now we have pretty printing turned off, try printing 'c' again.
+    gdb_test "print c" " = container \"container\" with 2 elements = \{\\\[23\\\] = 72\}" \
+	"print c, pretty printing off, display hint is now map"
+
+    gdb_test_no_output "set variable c.is_map_p=0"
+    gdb_test "print c" " = container \"container\" with 2 elements = \{\\\[0\\\] = 23, \\\[1\\\] = 72\}" \
+	"print c, pretty printing off, default display hint"
 
     # Check that GDB doesn't lose typedefs when looking for a printer.
     gdb_test "print an_int" " = -1"

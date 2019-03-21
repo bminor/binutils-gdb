@@ -1294,7 +1294,7 @@ consumer as a @samp{displayhint} attribute of the variable being
 printed.
 
 This method is optional.  If it does exist, this method must return a
-string.
+string or the special value @code{None}.
 
 Some display hints are predefined by @value{GDBN}:
 
@@ -1317,6 +1317,9 @@ string-printing function to format the string.  For the CLI this means
 adding quotation marks, possibly escaping some characters, respecting
 @code{set print elements}, and the like.
 @end table
+
+The special value @code{None} causes @value{GDBN} to apply the default
+display rules.
 @end defun
 
 @defun pretty_printer.to_string (self)
