@@ -2059,7 +2059,9 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	     all relocs to update these addends.  This is also ambiguous, as
 	     we do allow offsets to be added to the target address, which are
 	     not to be used to find the auipc address.  */
-	  if ((ELF_ST_TYPE (sym->st_info) == STT_SECTION) && rel->r_addend)
+	  if (((sym != NULL && (ELF_ST_TYPE (sym->st_info) == STT_SECTION))
+	       || (h != NULL && h->type == STT_SECTION))
+	      && rel->r_addend)
 	    {
 	      r = bfd_reloc_dangerous;
 	      break;
