@@ -1,3 +1,11 @@
+2019-03-21  Sudakshina Das  <sudi.das@arm.com>
+
+	* testsuite/ld-aarch64/aarch64-elf.exp: Add new test.
+	* testsuite/ld-aarch64/bti-plt-1.s: Add .ifdef for PAC note section.
+	* testsuite/ld-aarch64/bti-plt-6.d: Update warning.
+	* testsuite/ld-aarch64/bti-plt-7.d: Likewise.
+	* testsuite/ld-aarch64/bti-warn.d: New test.
+
 2019-03-21  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/fini2.s: Reduce alignment.

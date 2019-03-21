@@ -9968,7 +9968,7 @@ elfNN_aarch64_link_setup_gnu_properties (struct bfd_link_info *info)
    for the effect of GNU properties of the output_bfd.  */
 static bfd_boolean
 elfNN_aarch64_merge_gnu_properties (struct bfd_link_info *info,
-				       bfd *abfd,
+				       bfd *abfd, bfd *bbfd,
 				       elf_property *aprop,
 				       elf_property *bprop)
 {
@@ -9977,17 +9977,26 @@ elfNN_aarch64_merge_gnu_properties (struct bfd_link_info *info,
 
   /* If output has been marked with BTI using command line argument, give out
      warning if necessary.  */
-  if ((prop & GNU_PROPERTY_AARCH64_FEATURE_1_BTI)
+  /* Properties are merged per type, hence only check for warnings when merging
+     GNU_PROPERTY_AARCH64_FEATURE_1_AND.  */
+  if (((aprop && aprop->pr_type == GNU_PROPERTY_AARCH64_FEATURE_1_AND)
+	|| (bprop && bprop->pr_type == GNU_PROPERTY_AARCH64_FEATURE_1_AND))
+      && (prop & GNU_PROPERTY_AARCH64_FEATURE_1_BTI)
       && (!elf_aarch64_tdata (info->output_bfd)->no_bti_warn))
     {
       if ((aprop && !(aprop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_BTI))
-	  || (bprop && !(bprop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_BTI))
-	  /* If either property is NULL, it means its bfd did not have any
-	     property.  */
-	  || !aprop || !bprop)
+	   || !aprop)
 	{
-	  _bfd_error_handler (_("warning: BTI turned on by --force-bti when "
-				"all inputs do not have BTI in NOTE section."));
+	  _bfd_error_handler (_("%pB: warning: BTI turned on by --force-bti when "
+				"all inputs do not have BTI in NOTE section."),
+			      abfd);
+	}
+      if ((bprop && !(bprop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_BTI))
+	   || !bprop)
+	{
+	  _bfd_error_handler (_("%pB: warning: BTI turned on by --force-bti when "
+				"all inputs do not have BTI in NOTE section."),
+			      bbfd);
 	}
     }
 

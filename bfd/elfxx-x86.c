@@ -2401,6 +2401,7 @@ _bfd_x86_elf_parse_gnu_properties (bfd *abfd, unsigned int type,
 bfd_boolean
 _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
 				   bfd *abfd ATTRIBUTE_UNUSED,
+				   bfd *bbfd ATTRIBUTE_UNUSED,
 				   elf_property *aprop,
 				   elf_property *bprop)
 {

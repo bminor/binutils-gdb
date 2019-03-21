@@ -691,7 +691,7 @@ extern enum elf_property_kind _bfd_x86_elf_parse_gnu_properties
   (bfd *, unsigned int, bfd_byte *, unsigned int);
 
 extern bfd_boolean _bfd_x86_elf_merge_gnu_properties
-  (struct bfd_link_info *, bfd *, elf_property *, elf_property *);
+  (struct bfd_link_info *, bfd *, bfd *, elf_property *, elf_property *);
 
 extern void _bfd_x86_elf_link_fixup_gnu_properties
   (struct bfd_link_info *, elf_property_list **);

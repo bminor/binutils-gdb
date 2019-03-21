@@ -198,7 +198,7 @@ next:
    with ABFD.  */
 
 static bfd_boolean
-elf_merge_gnu_properties (struct bfd_link_info *info, bfd *abfd,
+elf_merge_gnu_properties (struct bfd_link_info *info, bfd *abfd, bfd *bbfd,
 			  elf_property *aprop, elf_property *bprop)
 {
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
@@ -207,7 +207,7 @@ elf_merge_gnu_properties (struct bfd_link_info *info, bfd *abfd,
   if (bed->merge_gnu_properties != NULL
       && pr_type >= GNU_PROPERTY_LOPROC
       && pr_type < GNU_PROPERTY_LOUSER)
-    return bed->merge_gnu_properties (info, abfd, aprop, bprop);
+    return bed->merge_gnu_properties (info, abfd, bbfd, aprop, bprop);
 
   switch (pr_type)
     {
@@ -289,7 +289,7 @@ elf_merge_gnu_property_list (struct bfd_link_info *info, bfd *first_pbfd,
 					   TRUE);
 	/* Pass NULL to elf_merge_gnu_properties for the property which
 	   isn't on *LISTP.  */
-	elf_merge_gnu_properties (info, first_pbfd, &p->property, pr);
+	elf_merge_gnu_properties (info, first_pbfd, abfd, &p->property, pr);
 	if (p->property.pr_kind == property_remove)
 	  {
 	    if (info->has_map_file)
@@ -365,7 +365,7 @@ elf_merge_gnu_property_list (struct bfd_link_info *info, bfd *first_pbfd,
       else
 	number_p = FALSE;
 
-      if (elf_merge_gnu_properties (info, first_pbfd, NULL, &p->property))
+      if (elf_merge_gnu_properties (info, first_pbfd, abfd, NULL, &p->property))
 	{
 	  if (p->property.pr_type == GNU_PROPERTY_NO_COPY_ON_PROTECTED)
 	    elf_has_no_copy_on_protected (first_pbfd) = TRUE;

@@ -1,3 +1,19 @@
+2019-03-21  Sudakshina Das  <sudi.das@arm.com>
+
+	* elf-bfd.h (struct elf_backend_data): Add argument to
+	merge_gnu_properties.
+	* elf-properties.c (elf_merge_gnu_properties): Add argument to
+	itself and while calling bed->merge_gnu_properties.
+	(elf_merge_gnu_property_list): Update the calls for
+	elf_merge_gnu_properties.
+	* elfnn-aarch64.c (elfNN_aarch64_merge_gnu_properties): Update handling
+	of --force-bti warning and add argument.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_link_setup_gnu_properties): Add
+	warning.
+	* elfxx-x86.c (_bfd_x86_elf_merge_gnu_properties): Add argument.
+	* elfxx-x86.h (_bfd_x86_elf_merge_gnu_properties): Likewise in
+	declaration.
+
 2019-03-20  Sudakshina Das  <sudi.das@arm.com>
 
 	* elfxx-aarch64.c (_bfd_aarch64_elf_link_fixup_gnu_properties): Define.
