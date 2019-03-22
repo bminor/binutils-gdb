@@ -118,7 +118,7 @@ extern void add_symbol_overload_list_adl
    std::vector<symbol *> *overload_list);
 
 extern struct type *cp_lookup_rtti_type (const char *name,
-					 struct block *block);
+					 const struct block *block);
 
 /* Produce an unsigned hash value from SEARCH_NAME that is compatible
    with cp_symbol_name_matches.  Only the last component in

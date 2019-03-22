@@ -240,7 +240,7 @@ static void
 debug_qf_map_matching_symbols (struct objfile *objfile,
 			       const char *name, domain_enum domain,
 			       int global,
-			       int (*callback) (struct block *,
+			       int (*callback) (const struct block *,
 						struct symbol *, void *),
 			       void *data,
 			       symbol_name_match_type match,

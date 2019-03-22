@@ -1,3 +1,52 @@
+2019-03-24  Tom Tromey  <tom@tromey.com>
+
+	* c-exp.y (typebase): Remove casts.
+	* gdbtypes.c (lookup_unsigned_typename, )
+	(lookup_signed_typename): Remove cast.
+	* eval.c (parse_to_comma_and_eval): Remove cast.
+	* parse.c (write_dollar_variable): Remove cast.
+	* block.h (struct block) <superblock>: Now const.
+	* symfile-debug.c (debug_qf_map_matching_symbols): Update.
+	* psymtab.c (psym_map_matching_symbols): Make "block" const.
+	(map_block): Make "block" const.
+	* symfile.h (struct quick_symbol_functions)
+	<map_matching_symbols>: Constify block argument to "callback".
+	* symtab.c (basic_lookup_transparent_type_quick): Make "block"
+	const.
+	(find_pc_sect_compunit_symtab): Make "b" const.
+	(find_symbol_at_address): Likewise.
+	(search_symbols): Likewise.
+	* dwarf2read.c (dw2_lookup_symbol): Make "block" const.
+	(dw2_debug_names_lookup_symbol): Likewise.
+	(dw2_map_matching_symbols): Update.
+	* p-valprint.c (pascal_val_print): Remove "block".
+	* ada-lang.c (ada_add_global_exceptions): Make "b" const.
+	(aux_add_nonlocal_symbols): Make "block" const.
+	(resolve_subexp): Remove cast.
+	* linespec.c (iterate_over_all_matching_symtabs): Make "block"
+	const.
+	(iterate_over_file_blocks): Likewise.
+	* f-exp.y (%union) <bval>: Remove.
+	* coffread.c (patch_opaque_types): Make "b" const.
+	* spu-tdep.c (spu_catch_start): Make "block" const.
+	* c-valprint.c (print_unpacked_pointer): Remove "block".
+	* symmisc.c (dump_symtab_1): Make "b" const.
+	(block_depth): Make "block" const.
+	* d-exp.y (%union) <bval>: Remove.
+	* cp-support.h (cp_lookup_rtti_type): Update.
+	* cp-support.c (cp_lookup_rtti_type): Make "block" const.
+	* psymtab.c (psym_lookup_symbol): Make "block" const.
+	(maintenance_check_psymtabs): Make "b" const.
+	* python/py-framefilter.c (extract_sym): Make "sym_block" const.
+	(enumerate_locals, enumerate_args): Update.
+	* python/py-symtab.c (stpy_global_block): Make "block" const.
+	(stpy_static_block): Likewise.
+	* inline-frame.c (block_starting_point_at): Make "new_block"
+	const.
+	* block.c (find_block_in_blockvector): Make return type const.
+	(blockvector_for_pc_sect): Make "b" const.
+	(find_block_in_blockvector): Make "b" const.
+
 2019-03-23  Tom Tromey  <tom@tromey.com>
 
 	* varobj.c (varobj_create): Update.

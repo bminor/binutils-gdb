@@ -1496,7 +1496,7 @@ patch_type (struct type *type, struct type *real_type)
 static void
 patch_opaque_types (struct symtab *s)
 {
-  struct block *b;
+  const struct block *b;
   struct block_iterator iter;
   struct symbol *real_sym;
 

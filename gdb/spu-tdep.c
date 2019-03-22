@@ -1963,7 +1963,7 @@ spu_catch_start (struct objfile *objfile)
   if (cust != NULL)
     {
       const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (cust);
-      struct block *block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+      const struct block *block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
       struct symbol *sym;
       struct symtab_and_line sal;
 

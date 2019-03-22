@@ -1528,7 +1528,7 @@ lookup_unsigned_typename (const struct language_defn *language,
 
   strcpy (uns, "unsigned ");
   strcpy (uns + 9, name);
-  return lookup_typename (language, gdbarch, uns, (struct block *) NULL, 0);
+  return lookup_typename (language, gdbarch, uns, NULL, 0);
 }
 
 struct type *
@@ -1540,11 +1540,11 @@ lookup_signed_typename (const struct language_defn *language,
 
   strcpy (uns, "signed ");
   strcpy (uns + 7, name);
-  t = lookup_typename (language, gdbarch, uns, (struct block *) NULL, 1);
+  t = lookup_typename (language, gdbarch, uns, NULL, 1);
   /* If we don't find "signed FOO" just try again with plain "FOO".  */
   if (t != NULL)
     return t;
-  return lookup_typename (language, gdbarch, name, (struct block *) NULL, 0);
+  return lookup_typename (language, gdbarch, name, NULL, 0);
 }
 
 /* Lookup a structure type named "struct NAME",

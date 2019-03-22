@@ -131,16 +131,16 @@ block_inlined_p (const struct block *bl)
 /* A helper function that checks whether PC is in the blockvector BL.
    It returns the containing block if there is one, or else NULL.  */
 
-static struct block *
+static const struct block *
 find_block_in_blockvector (const struct blockvector *bl, CORE_ADDR pc)
 {
-  struct block *b;
+  const struct block *b;
   int bot, top, half;
 
   /* If we have an addrmap mapping code addresses to blocks, then use
      that.  */
   if (BLOCKVECTOR_MAP (bl))
-    return (struct block *) addrmap_find (BLOCKVECTOR_MAP (bl), pc);
+    return (const struct block *) addrmap_find (BLOCKVECTOR_MAP (bl), pc);
 
   /* Otherwise, use binary search to find the last block that starts
      before PC.
@@ -186,7 +186,7 @@ blockvector_for_pc_sect (CORE_ADDR pc, struct obj_section *section,
 			 struct compunit_symtab *cust)
 {
   const struct blockvector *bl;
-  struct block *b;
+  const struct block *b;
 
   if (cust == NULL)
     {

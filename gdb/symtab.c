@@ -2752,7 +2752,7 @@ basic_lookup_transparent_type_quick (struct objfile *objfile, int block_index,
 {
   struct compunit_symtab *cust;
   const struct blockvector *bv;
-  struct block *block;
+  const struct block *block;
   struct symbol *sym;
 
   if (!objfile->sf)
@@ -2922,7 +2922,7 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
     {
       for (compunit_symtab *cust : obj_file->compunits ())
 	{
-	  struct block *b;
+	  const struct block *b;
 	  const struct blockvector *bv;
 
 	  bv = COMPUNIT_BLOCKVECTOR (cust);
@@ -3026,7 +3026,7 @@ find_symbol_at_address (CORE_ADDR address)
 
 	  for (int i = GLOBAL_BLOCK; i <= STATIC_BLOCK; ++i)
 	    {
-	      struct block *b = BLOCKVECTOR_BLOCK (bv, i);
+	      const struct block *b = BLOCKVECTOR_BLOCK (bv, i);
 	      struct block_iterator iter;
 	      struct symbol *sym;
 
@@ -4357,7 +4357,7 @@ search_symbols (const char *regexp, enum search_domain kind,
 		int nfiles, const char *files[])
 {
   const struct blockvector *bv;
-  struct block *b;
+  const struct block *b;
   int i = 0;
   struct block_iterator iter;
   struct symbol *sym;

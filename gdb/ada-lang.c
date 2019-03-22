@@ -3562,7 +3562,7 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
 
           n_candidates =
             ada_lookup_symbol_list (ada_decoded_op_name (op),
-                                    (struct block *) NULL, VAR_DOMAIN,
+				    NULL, VAR_DOMAIN,
                                     &candidates);
 
           i = ada_resolve_function (candidates.data (), n_candidates, argvec,
@@ -5416,7 +5416,8 @@ struct match_data
    other has been found.  */
 
 static int
-aux_add_nonlocal_symbols (struct block *block, struct symbol *sym, void *data0)
+aux_add_nonlocal_symbols (const struct block *block, struct symbol *sym,
+			  void *data0)
 {
   struct match_data *data = (struct match_data *) data0;
   
@@ -13560,7 +13561,7 @@ ada_add_global_exceptions (compiled_regex *preg,
 
 	  for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)
 	    {
-	      struct block *b = BLOCKVECTOR_BLOCK (bv, i);
+	      const struct block *b = BLOCKVECTOR_BLOCK (bv, i);
 	      struct block_iterator iter;
 	      struct symbol *sym;
 

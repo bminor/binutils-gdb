@@ -107,7 +107,7 @@ struct block
      case of C) is the STATIC_BLOCK.  The superblock of the
      STATIC_BLOCK is the GLOBAL_BLOCK.  */
 
-  struct block *superblock;
+  const struct block *superblock;
 
   /* This is used to store the symbols in the block.  */
 

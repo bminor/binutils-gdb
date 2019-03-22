@@ -105,7 +105,6 @@ static struct type *convert_to_kind_type (struct type *basetype, int kind);
     struct ttype tsym;
     struct symtoken ssym;
     int voidval;
-    struct block *bval;
     enum exp_opcode opcode;
     struct internalvar *ivar;
 

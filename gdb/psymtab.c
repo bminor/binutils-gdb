@@ -498,7 +498,7 @@ psym_lookup_symbol (struct objfile *objfile,
 	     partial symtab is empty, we can assume it won't here
 	     because lookup_partial_symbol succeeded.  */
 	  const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (stab);
-	  struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
+	  const struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
 
 	  sym = block_find_symbol (block, name, domain,
 				   block_find_non_opaque_type_preferred,
@@ -1165,8 +1165,8 @@ psymtab_to_fullname (struct partial_symtab *ps)
 
 static int
 map_block (const char *name, domain_enum domain, struct objfile *objfile,
-	   struct block *block,
-	   int (*callback) (struct block *, struct symbol *, void *),
+	   const struct block *block,
+	   int (*callback) (const struct block *, struct symbol *, void *),
 	   void *data, symbol_name_match_type match)
 {
   struct block_iterator iter;
@@ -1196,7 +1196,7 @@ static void
 psym_map_matching_symbols (struct objfile *objfile,
 			   const char *name, domain_enum domain,
 			   int global,
-			   int (*callback) (struct block *,
+			   int (*callback) (const struct block *,
 					    struct symbol *, void *),
 			   void *data,
 			   symbol_name_match_type match,
@@ -1212,7 +1212,7 @@ psym_map_matching_symbols (struct objfile *objfile,
 				   ordered_compare))
 	{
 	  struct compunit_symtab *cust = psymtab_to_symtab (objfile, ps);
-	  struct block *block;
+	  const struct block *block;
 
 	  if (cust == NULL)
 	    continue;
@@ -2095,7 +2095,7 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
   struct symbol *sym;
   struct compunit_symtab *cust = NULL;
   const struct blockvector *bv;
-  struct block *b;
+  const struct block *b;
   int length;
 
   for (objfile *objfile : current_program_space->objfiles ())

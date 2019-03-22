@@ -248,7 +248,6 @@ pascal_val_print (struct type *type,
 	      struct value *vt_val;
 	      struct symbol *wsym = NULL;
 	      struct type *wtype;
-	      struct block *block = NULL;
 
 	      if (want_space)
 		fputs_filtered (" ", stream);
@@ -257,7 +256,7 @@ pascal_val_print (struct type *type,
 		{
 		  const char *search_name
 		    = MSYMBOL_SEARCH_NAME (msymbol.minsym);
-		  wsym = lookup_symbol_search_name (search_name, block,
+		  wsym = lookup_symbol_search_name (search_name, NULL,
 						    VAR_DOMAIN).symbol;
 		}
 

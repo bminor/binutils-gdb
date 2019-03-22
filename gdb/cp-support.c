@@ -1422,7 +1422,7 @@ add_symbol_overload_list_qualified (const char *func_name,
 /* Lookup the rtti type for a class name.  */
 
 struct type *
-cp_lookup_rtti_type (const char *name, struct block *block)
+cp_lookup_rtti_type (const char *name, const struct block *block)
 {
   struct symbol * rtti_sym;
   struct type * rtti_type;

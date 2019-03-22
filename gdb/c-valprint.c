@@ -197,7 +197,6 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
 	  struct value *vt_val;
 	  struct symbol *wsym = NULL;
 	  struct type *wtype;
-	  struct block *block = NULL;
 
 	  if (want_space)
 	    fputs_filtered (" ", stream);
@@ -206,7 +205,7 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
 	    {
 	      const char *search_name
 		= MSYMBOL_SEARCH_NAME (msymbol.minsym);
-	      wsym = lookup_symbol_search_name (search_name, block,
+	      wsym = lookup_symbol_search_name (search_name, NULL,
 						VAR_DOMAIN).symbol;
 	    }
 

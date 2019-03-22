@@ -4082,7 +4082,7 @@ dw2_lookup_symbol (struct objfile *objfile, int block_index,
       struct symbol *sym, *with_opaque = NULL;
       struct compunit_symtab *stab = dw2_instantiate_symtab (per_cu, false);
       const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (stab);
-      struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
+      const struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
 
       sym = block_find_symbol (block, name, domain,
 			       block_find_non_opaque_type_preferred,
@@ -4227,7 +4227,7 @@ static void
 dw2_map_matching_symbols (struct objfile *objfile,
 			  const char * name, domain_enum domain,
 			  int global,
-			  int (*callback) (struct block *,
+			  int (*callback) (const struct block *,
 					   struct symbol *, void *),
 			  void *data, symbol_name_match_type match,
 			  symbol_compare_ftype *ordered_compare)
@@ -6083,7 +6083,7 @@ dw2_debug_names_lookup_symbol (struct objfile *objfile, int block_index_int,
       struct symbol *sym, *with_opaque = NULL;
       struct compunit_symtab *stab = dw2_instantiate_symtab (per_cu, false);
       const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (stab);
-      struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
+      const struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
 
       sym = block_find_symbol (block, name, domain,
 			       block_find_non_opaque_type_preferred,

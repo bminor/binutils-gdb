@@ -648,8 +648,7 @@ write_dollar_variable (struct parser_state *ps, struct stoken str)
   /* On some systems, such as HP-UX and hppa-linux, certain system routines 
      have names beginning with $ or $$.  Check for those, first.  */
 
-  sym = lookup_symbol (copy_name (str), (struct block *) NULL,
-		       VAR_DOMAIN, NULL);
+  sym = lookup_symbol (copy_name (str), NULL, VAR_DOMAIN, NULL);
   if (sym.symbol)
     {
       write_exp_elt_opcode (ps, OP_VAR_VALUE);

@@ -1391,13 +1391,13 @@ typebase
 			{ $$ = lookup_typename (parse_language (pstate),
 						parse_gdbarch (pstate),
 						"double",
-						(struct block *) NULL,
+						NULL,
 						0); }
 	|	LONG DOUBLE_KEYWORD
 			{ $$ = lookup_typename (parse_language (pstate),
 						parse_gdbarch (pstate),
 						"long double",
-						(struct block *) NULL,
+						NULL,
 						0); }
 	|	STRUCT name
 			{ $$ = lookup_struct (copy_name ($2),

@@ -54,7 +54,7 @@ enum mi_print_types
 
 static enum ext_lang_bt_status
 extract_sym (PyObject *obj, gdb::unique_xmalloc_ptr<char> *name,
-	     struct symbol **sym, struct block **sym_block,
+	     struct symbol **sym, const struct block **sym_block,
 	     const struct language_defn **language)
 {
   gdbpy_ref<> result (PyObject_CallMethod (obj, "symbol", NULL));
@@ -449,7 +449,7 @@ enumerate_args (PyObject *iter,
       const struct language_defn *language;
       gdb::unique_xmalloc_ptr<char> sym_name;
       struct symbol *sym;
-      struct block *sym_block;
+      const struct block *sym_block;
       struct value *val;
       enum ext_lang_bt_status success = EXT_LANG_BT_ERROR;
 
@@ -567,7 +567,7 @@ enumerate_locals (PyObject *iter,
       struct value *val;
       enum ext_lang_bt_status success = EXT_LANG_BT_ERROR;
       struct symbol *sym;
-      struct block *sym_block;
+      const struct block *sym_block;
       int local_indent = 8 + (8 * indent);
       gdb::optional<ui_out_emit_tuple> tuple;
 

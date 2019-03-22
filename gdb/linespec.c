@@ -1159,7 +1159,7 @@ iterate_over_all_matching_symtabs
 
 	    if (include_inline)
 	      {
-		struct block *block;
+		const struct block *block;
 		int i;
 
 		for (i = FIRST_LOCAL_BLOCK;
@@ -1203,7 +1203,7 @@ iterate_over_file_blocks
   (struct symtab *symtab, const lookup_name_info &name,
    domain_enum domain, gdb::function_view<symbol_found_callback_ftype> callback)
 {
-  struct block *block;
+  const struct block *block;
 
   for (block = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab), STATIC_BLOCK);
        block != NULL;

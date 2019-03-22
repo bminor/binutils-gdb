@@ -52,7 +52,7 @@ FILE *std_err;
 
 /* Prototypes for local functions */
 
-static int block_depth (struct block *);
+static int block_depth (const struct block *);
 
 static void print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 			  int depth, ui_file *outfile);
@@ -278,7 +278,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
   struct linetable *l;
   const struct blockvector *bv;
   struct symbol *sym;
-  struct block *b;
+  const struct block *b;
   int depth;
 
   fprintf_filtered (outfile, "\nSymtab for file %s\n",
@@ -950,7 +950,7 @@ maintenance_expand_symtabs (const char *args, int from_tty)
 /* Return the nexting depth of a block within other blocks in its symtab.  */
 
 static int
-block_depth (struct block *block)
+block_depth (const struct block *block)
 {
   int i = 0;
 
