@@ -20,9 +20,6 @@
 #if !defined (EXPRESSION_H)
 #define EXPRESSION_H 1
 
-
-#include "symtab.h"		/* Needed for "struct block" type.  */
-
 /* While parsing expressions we need to track the innermost lexical block
    that we encounter.  In some situations we need to track the innermost
    block just for symbols, and in other situations we want to track the

@@ -1,5 +1,10 @@
 2019-03-24  Tom Tromey  <tom@tromey.com>
 
+	* expression.h: Don't include symtab.h.
+	(struct block): Forward declare.
+
+2019-03-24  Tom Tromey  <tom@tromey.com>
+
 	* c-exp.y (typebase): Remove casts.
 	* gdbtypes.c (lookup_unsigned_typename, )
 	(lookup_signed_typename): Remove cast.
