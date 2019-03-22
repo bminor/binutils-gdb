@@ -1,6 +1,13 @@
 2019-03-22  Alan Hayward  <alan.hayward@arm.com>
 	    Jiong Wang  <jiong.wang@arm.com>
 
+	* linux-aarch64-low.c (AARCH64_HWCAP_PACA): New define.
+	(aarch64_get_hwcap): New function.
+	(aarch64_arch_setup): Read APIA hwcap.
+
+2019-03-22  Alan Hayward  <alan.hayward@arm.com>
+	    Jiong Wang  <jiong.wang@arm.com>
+
 	* linux-aarch64-ipa.c (get_ipa_tdesc): Add pauth param.
 	(initialize_low_tracepoint): Likewise.
 	* linux-aarch64-low.c (aarch64_arch_setup): Likewise.

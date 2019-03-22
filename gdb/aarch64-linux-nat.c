@@ -606,8 +606,11 @@ aarch64_linux_nat_target::read_description ()
   if (ret == 0)
     return tdesc_arm_with_neon;
 
-  /* pauth not yet supported.  */
-  return aarch64_read_description (aarch64_sve_get_vq (tid), false);
+  CORE_ADDR hwcap = 0;
+  bool pauth_p = aarch64_linux_get_hwcap (this, &hwcap)
+		 && (hwcap & AARCH64_HWCAP_PACA);
+
+  return aarch64_read_description (aarch64_sve_get_vq (tid), pauth_p);
 }
 
 /* Convert a native/host siginfo object, into/from the siginfo in the

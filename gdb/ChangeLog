@@ -2,6 +2,17 @@
 	    Jiong Wang  <jiong.wang@arm.com>
 
 	* aarch64-linux-nat.c
+	(aarch64_linux_nat_target::read_description): Read PACA hwcap.
+	* aarch64-linux-tdep.c
+	(aarch64_linux_core_read_description): Likewise.
+	(aarch64_linux_get_hwcap): New function.
+	* aarch64-linux-tdep.h (AARCH64_HWCAP_PACA): New define.
+	(aarch64_linux_get_hwcap): New declaration.
+
+2019-03-22  Alan Hayward  <alan.hayward@arm.com>
+	    Jiong Wang  <jiong.wang@arm.com>
+
+	* aarch64-linux-nat.c
 	(aarch64_linux_nat_target::read_description): Add pauth param.
 	* aarch64-linux-tdep.c
 	(aarch64_linux_core_read_description): Likewise.
