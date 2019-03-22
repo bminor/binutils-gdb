@@ -4758,7 +4758,7 @@ standard_lookup (const char *name, const struct block *block,
                  domain_enum domain)
 {
   /* Initialize it just to avoid a GCC false warning.  */
-  struct block_symbol sym = {NULL, NULL};
+  struct block_symbol sym = {};
 
   if (lookup_cached_symbol (name, domain, &sym.symbol, NULL))
     return sym.symbol;
@@ -5918,7 +5918,7 @@ ada_lookup_symbol_nonlocal (const struct language_defn *langdef,
 	return sym;
     }
 
-  return (struct block_symbol) {NULL, NULL};
+  return {};
 }
 
 

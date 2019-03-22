@@ -217,7 +217,7 @@ cp_lookup_bare_symbol (const struct language_defn *langdef,
 	lang_this = lookup_language_this (langdef, block);
 
       if (lang_this.symbol == NULL)
-	return null_block_symbol;
+	return {};
 
 
       type = check_typedef (TYPE_TARGET_TYPE (SYMBOL_TYPE (lang_this.symbol)));
@@ -225,7 +225,7 @@ cp_lookup_bare_symbol (const struct language_defn *langdef,
 	 This can happen for lambda functions compiled with clang++,
 	 which outputs no name for the container class.  */
       if (TYPE_NAME (type) == NULL)
-	return null_block_symbol;
+	return {};
 
       /* Look for symbol NAME in this class.  */
       sym = cp_lookup_nested_symbol (type, name, block, domain);
@@ -252,7 +252,7 @@ cp_search_static_and_baseclasses (const char *name,
 {
   /* Check for malformed input.  */
   if (prefix_len + 2 > strlen (name) || name[prefix_len + 1] != ':')
-    return null_block_symbol;
+    return {};
 
   /* The class, namespace or function name is everything up to and
      including PREFIX_LEN.  */
@@ -272,7 +272,7 @@ cp_search_static_and_baseclasses (const char *name,
   if (scope_sym.symbol == NULL)
     scope_sym = lookup_global_symbol (scope.c_str (), block, VAR_DOMAIN);
   if (scope_sym.symbol == NULL)
-    return null_block_symbol;
+    return {};
 
   struct type *scope_type = SYMBOL_TYPE (scope_sym.symbol);
 
@@ -379,12 +379,9 @@ cp_lookup_symbol_via_imports (const char *scope,
 			      const int search_parents)
 {
   struct using_direct *current;
-  struct block_symbol sym;
+  struct block_symbol sym = {};
   int len;
   int directive_match;
-
-  sym.symbol = NULL;
-  sym.block = NULL;
 
   /* First, try to find the symbol in the given namespace if requested.  */
   if (search_scope_first)
@@ -476,7 +473,7 @@ cp_lookup_symbol_via_imports (const char *scope,
 	}
     }
 
-  return null_block_symbol;
+  return {};
 }
 
 /* Helper function that searches an array of symbols for one named NAME.  */
@@ -621,7 +618,7 @@ cp_lookup_symbol_via_all_imports (const char *scope, const char *name,
       block = BLOCK_SUPERBLOCK (block);
     }
 
-  return null_block_symbol;
+  return {};
 }
 
 /* Searches for NAME in the current namespace, and by applying
@@ -808,10 +805,7 @@ find_symbol_in_baseclass (struct type *parent_type, const char *name,
 			  int is_in_anonymous)
 {
   int i;
-  struct block_symbol sym;
-
-  sym.symbol = NULL;
-  sym.block = NULL;
+  struct block_symbol sym = {};
 
   for (i = 0; i < TYPE_N_BASECLASSES (parent_type); ++i)
     {
@@ -902,7 +896,7 @@ cp_lookup_nested_symbol_1 (struct type *container_type,
 	return sym;
     }
 
-  return null_block_symbol;
+  return {};
 }
 
 /* Look up a symbol named NESTED_NAME that is nested inside the C++
@@ -979,7 +973,7 @@ cp_lookup_nested_symbol (struct type *parent_type,
 			      "cp_lookup_nested_symbol (...) = NULL"
 			      " (func/method)\n");
 	}
-      return null_block_symbol;
+      return {};
 
     default:
       internal_error (__FILE__, __LINE__,

@@ -127,7 +127,7 @@ d_lookup_symbol (const struct language_defn *langdef,
 
 	  lang_this = lookup_language_this (language_def (language_d), block);
 	  if (lang_this.symbol == NULL)
-	    return null_block_symbol;
+	    return {};
 
 	  type = check_typedef (TYPE_TARGET_TYPE (SYMBOL_TYPE (lang_this.symbol)));
 	  classname = TYPE_NAME (type);
@@ -147,7 +147,7 @@ d_lookup_symbol (const struct language_defn *langdef,
 	 more that can be done.  */
       class_sym = lookup_global_symbol (classname.c_str (), block, domain);
       if (class_sym.symbol == NULL)
-	return null_block_symbol;
+	return {};
 
       /* Look for a symbol named NESTED in this class.  */
       sym = d_lookup_nested_symbol (SYMBOL_TYPE (class_sym.symbol),
@@ -246,11 +246,8 @@ static struct block_symbol
 find_symbol_in_baseclass (struct type *parent_type, const char *name,
 			  const struct block *block)
 {
-  struct block_symbol sym;
+  struct block_symbol sym = {};
   int i;
-
-  sym.symbol = NULL;
-  sym.block = NULL;
 
   for (i = 0; i < TYPE_N_BASECLASSES (parent_type); ++i)
     {
@@ -349,7 +346,7 @@ d_lookup_nested_symbol (struct type *parent_type,
 
     case TYPE_CODE_FUNC:
     case TYPE_CODE_METHOD:
-      return null_block_symbol;
+      return {};
 
     default:
       gdb_assert_not_reached ("called with non-aggregate type.");
@@ -464,7 +461,7 @@ d_lookup_symbol_imports (const char *scope, const char *name,
 	}
     }
 
-  return null_block_symbol;
+  return {};
 }
 
 /* Searches for NAME in the current module, and by applying relevant
@@ -496,7 +493,7 @@ d_lookup_symbol_module (const char *scope, const char *name,
       block = BLOCK_SUPERBLOCK (block);
     }
 
-  return null_block_symbol;
+  return {};
 }
 
 /* The D-specific version of name lookup for static and global names

@@ -397,7 +397,7 @@ spu_lookup_lib_symbol (struct objfile *objfile,
 
   if (svr4_so_ops.lookup_lib_global_symbol != NULL)
     return svr4_so_ops.lookup_lib_global_symbol (objfile, name, domain);
-  return (struct block_symbol) {NULL, NULL};
+  return {};
 }
 
 /* Enable shared library breakpoint.  */

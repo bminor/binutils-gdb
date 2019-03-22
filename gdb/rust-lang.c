@@ -2020,7 +2020,7 @@ rust_lookup_symbol_nonlocal (const struct language_defn *langdef,
 			     const struct block *block,
 			     const domain_enum domain)
 {
-  struct block_symbol result = {NULL, NULL};
+  struct block_symbol result = {};
 
   if (symbol_lookup_debug)
     {

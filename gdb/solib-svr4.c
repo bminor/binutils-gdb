@@ -3204,7 +3204,7 @@ elf_lookup_lib_symbol (struct objfile *objfile,
     }
 
   if (abfd == NULL || scan_dyntag (DT_SYMBOLIC, abfd, NULL, NULL) != 1)
-    return (struct block_symbol) {NULL, NULL};
+    return {};
 
   return lookup_global_symbol_from_objfile (objfile, name, domain);
 }

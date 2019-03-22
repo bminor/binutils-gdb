@@ -1,5 +1,37 @@
 2019-03-24  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (standard_lookup): Simplify initialization.
+	(ada_lookup_symbol_nonlocal): Simplify return.
+	* solib-spu.c (spu_lookup_lib_symbol): Simplify return.
+	* solib-darwin.c (darwin_lookup_lib_symbol): Simplify return.
+	* solib-svr4.c (elf_lookup_lib_symbol): Simplify return.
+	* rust-lang.c (rust_lookup_symbol_nonlocal): Simplify
+	initialization.
+	* solib.c (solib_global_lookup): Simplify.
+	* symtab.c (null_block_symbol): Remove.
+	(symbol_cache_lookup): Simplify returns.
+	(lookup_language_this): Simplify returns.
+	(lookup_symbol_aux): Simplify return.
+	(lookup_local_symbol): Simplify returns.
+	(lookup_global_symbol_from_objfile): Simplify return.
+	(lookup_symbol_in_objfile_symtabs)
+	(lookup_symbol_in_objfile_from_linkage_name): Simplify return.
+	(lookup_symbol_via_quick_fns, lookup_symbol_in_static_block)
+	(lookup_static_symbol, lookup_global_symbol): Simplify return.
+	* cp-namespace.c (cp_lookup_bare_symbol)
+	(cp_search_static_and_baseclasses, cp_lookup_symbol_via_imports)
+	(cp_lookup_symbol_via_all_imports, cp_lookup_nested_symbol_1)
+	(cp_lookup_nested_symbol): Don't use null_block_symbol.
+	(cp_lookup_symbol_via_imports): Simplify initialization.
+	(find_symbol_in_baseclass): Likewise.
+	* symtab.h (null_block_symbol): Remove.
+	* d-namespace.c (d_lookup_symbol): Don't use null_block_symbol.
+	(d_lookup_nested_symbol, d_lookup_symbol_imports)
+	(d_lookup_symbol_module): Likewise.
+	(find_symbol_in_baseclass): Simplify initialization.
+
+2019-03-24  Tom Tromey  <tom@tromey.com>
+
 	* expression.h: Don't include symtab.h.
 	(struct block): Forward declare.
 

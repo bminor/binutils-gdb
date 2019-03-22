@@ -653,7 +653,7 @@ darwin_lookup_lib_symbol (struct objfile *objfile,
 			  const char *name,
 			  const domain_enum domain)
 {
-  return (struct block_symbol) {NULL, NULL};
+  return {};
 }
 
 static gdb_bfd_ref_ptr

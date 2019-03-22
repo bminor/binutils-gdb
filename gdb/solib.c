@@ -1457,7 +1457,7 @@ solib_global_lookup (struct objfile *objfile,
 
   if (ops->lookup_lib_global_symbol != NULL)
     return ops->lookup_lib_global_symbol (objfile, name, domain);
-  return (struct block_symbol) {NULL, NULL};
+  return {};
 }
 
 /* Lookup the value for a specific symbol from dynamic symbol table.  Look
