@@ -1,6 +1,14 @@
 2019-03-22  Alan Hayward  <alan.hayward@arm.com>
 	    Jiong Wang  <jiong.wang@arm.com>
 
+	* aarch64-linux-tdep.c
+	(aarch64_linux_iterate_over_regset_sections): Check for pauth
+	section.
+	* aarch64-linux-tdep.h (AARCH64_LINUX_SIZEOF_PAUTH): New define.
+
+2019-03-22  Alan Hayward  <alan.hayward@arm.com>
+	    Jiong Wang  <jiong.wang@arm.com>
+
 	* aarch64-tdep.c (aarch64_analyze_prologue): Check for pauth
 	instructions.
 	(aarch64_analyze_prologue_test): Add PACIASP test.
