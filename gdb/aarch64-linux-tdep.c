@@ -640,7 +640,9 @@ aarch64_linux_core_read_description (struct gdbarch *gdbarch,
   if (target_auxv_search (target, AT_HWCAP, &aarch64_hwcap) != 1)
     return NULL;
 
-  return aarch64_read_description (aarch64_linux_core_read_vq (gdbarch, abfd));
+  /* pauth not yet supported.  */
+  return aarch64_read_description (aarch64_linux_core_read_vq (gdbarch, abfd),
+				   false);
 }
 
 /* Implementation of `gdbarch_stap_is_single_operand', as defined in

@@ -43162,6 +43162,9 @@ The @samp{org.gnu.gdb.aarch64.sve} feature is optional.  If present,
 it should contain registers @samp{z0} through @samp{z31}, @samp{p0}
 through @samp{p15}, @samp{ffr} and @samp{vg}.
 
+The @samp{org.gnu.gdb.aarch64.pauth} feature is optional.  If present,
+it should contain registers @samp{pauth_dmask} and @samp{pauth_cmask}.
+
 @node ARC Features
 @subsection ARC Features
 @cindex target descriptions, ARC Features

@@ -89,7 +89,7 @@ struct gdbarch_tdep
   }
 };
 
-const target_desc *aarch64_read_description (uint64_t vq);
+const target_desc *aarch64_read_description (uint64_t vq, bool pauth_p);
 
 extern int aarch64_process_record (struct gdbarch *gdbarch,
                                struct regcache *regcache, CORE_ADDR addr);

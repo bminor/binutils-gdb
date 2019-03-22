@@ -605,8 +605,9 @@ aarch64_linux_nat_target::read_description ()
   ret = ptrace (PTRACE_GETREGSET, tid, NT_ARM_VFP, &iovec);
   if (ret == 0)
     return tdesc_arm_with_neon;
-  else
-    return aarch64_read_description (aarch64_sve_get_vq (tid));
+
+  /* pauth not yet supported.  */
+  return aarch64_read_description (aarch64_sve_get_vq (tid), false);
 }
 
 /* Convert a native/host siginfo object, into/from the siginfo in the

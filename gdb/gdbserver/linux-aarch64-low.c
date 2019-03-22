@@ -501,7 +501,8 @@ aarch64_arch_setup (void)
   if (is_elf64)
     {
       uint64_t vq = aarch64_sve_get_vq (tid);
-      current_process ()->tdesc = aarch64_linux_read_description (vq);
+      /* pauth not yet supported.  */
+      current_process ()->tdesc = aarch64_linux_read_description (vq, false);
     }
   else
     current_process ()->tdesc = tdesc_arm_with_neon;

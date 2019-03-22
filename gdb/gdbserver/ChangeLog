@@ -1,3 +1,14 @@
+2019-03-22  Alan Hayward  <alan.hayward@arm.com>
+	    Jiong Wang  <jiong.wang@arm.com>
+
+	* linux-aarch64-ipa.c (get_ipa_tdesc): Add pauth param.
+	(initialize_low_tracepoint): Likewise.
+	* linux-aarch64-low.c (aarch64_arch_setup): Likewise.
+	* linux-aarch64-tdesc-selftest.c (aarch64_tdesc_test): Likewise.
+	* linux-aarch64-tdesc.c (struct target_desc): Likewise.
+	(aarch64_linux_read_description): Likewise.
+	* linux-aarch64-tdesc.h (aarch64_linux_read_description): Likewise.
+
 2019-03-12  John Baldwin  <jhb@FreeBSD.org>
 
 	* linux-x86-tdesc.c (i386_linux_read_description): Update call to

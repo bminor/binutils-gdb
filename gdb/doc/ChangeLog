@@ -1,3 +1,8 @@
+2019-03-22  Alan Hayward  <alan.hayward@arm.com>
+	    Jiong Wang  <jiong.wang@arm.com>
+
+	* gdb.texinfo (AArch64 Features): Describe pauth feature.
+
 2019-03-20  Tom Tromey  <tromey@adacore.com>
 
 	* python.texi (Selecting Pretty-Printers): Use @defvar for

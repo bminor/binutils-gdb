@@ -227,6 +227,7 @@ $(outdir)/%.dat: %.xml number-regs.xsl sort-regs.xsl gdbserver-regs.xsl
 
 FEATURE_XMLFILES = aarch64-core.xml \
 	aarch64-fpu.xml \
+	aarch64-pauth.xml \
 	i386/32bit-core.xml \
 	i386/32bit-sse.xml \
 	i386/32bit-linux.xml \

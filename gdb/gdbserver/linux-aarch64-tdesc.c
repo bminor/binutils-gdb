@@ -24,22 +24,22 @@
 #include <inttypes.h>
 
 /* All possible aarch64 target descriptors.  */
-struct target_desc *tdesc_aarch64_list[AARCH64_MAX_SVE_VQ + 1];
+struct target_desc *tdesc_aarch64_list[AARCH64_MAX_SVE_VQ + 1][2/*pauth*/];
 
 /* Create the aarch64 target description.  */
 
 const target_desc *
-aarch64_linux_read_description (uint64_t vq)
+aarch64_linux_read_description (uint64_t vq, bool pauth_p)
 {
   if (vq > AARCH64_MAX_SVE_VQ)
     error (_("VQ is %" PRIu64 ", maximum supported value is %d"), vq,
 	   AARCH64_MAX_SVE_VQ);
 
-  struct target_desc *tdesc = tdesc_aarch64_list[vq];
+  struct target_desc *tdesc = tdesc_aarch64_list[vq][pauth_p];
 
   if (tdesc == NULL)
     {
-      tdesc = aarch64_create_target_description (vq);
+      tdesc = aarch64_create_target_description (vq, pauth_p);
 
       static const char *expedite_regs_aarch64[] = { "x29", "sp", "pc", NULL };
       static const char *expedite_regs_aarch64_sve[] = { "x29", "sp", "pc",
@@ -50,7 +50,7 @@ aarch64_linux_read_description (uint64_t vq)
       else
 	init_target_desc (tdesc, expedite_regs_aarch64_sve);
 
-      tdesc_aarch64_list[vq] = tdesc;
+      tdesc_aarch64_list[vq][pauth_p] = tdesc;
     }
 
   return tdesc;

@@ -1,3 +1,20 @@
+2019-03-22  Alan Hayward  <alan.hayward@arm.com>
+	    Jiong Wang  <jiong.wang@arm.com>
+
+	* aarch64-linux-nat.c
+	(aarch64_linux_nat_target::read_description): Add pauth param.
+	* aarch64-linux-tdep.c
+	(aarch64_linux_core_read_description): Likewise.
+	* aarch64-tdep.c (struct target_desc): Add in pauth.
+	(aarch64_read_description): Add pauth param.
+	(aarch64_gdbarch_init): Likewise.
+	* aarch64-tdep.h (aarch64_read_description): Likewise.
+	* arch/aarch64.c (aarch64_create_target_description): Likewise.
+	* arch/aarch64.h (aarch64_create_target_description): Likewise.
+	* features/Makefile: Add new files.
+	* features/aarch64-pauth.c: New file.
+	* features/aarch64-pauth.xml: New file.
+
 2019-03-20  Tom Tromey  <tromey@adacore.com>
 
 	* infrun.c (handle_inferior_event): Rename from
