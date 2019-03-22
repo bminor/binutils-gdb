@@ -476,6 +476,37 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  /* Stop analysis on branch.  */
 	  break;
 	}
+      else if (inst.opcode->iclass == ic_system)
+	{
+	  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+	  int ra_state_val = 0;
+
+	  if (insn == 0xd503233f /* paciasp.  */
+	      || insn == 0xd503237f  /* pacibsp.  */)
+	    {
+	      /* Return addresses are mangled.  */
+	      ra_state_val = 1;
+	    }
+	  else if (insn == 0xd50323bf /* autiasp.  */
+		   || insn == 0xd50323ff /* autibsp.  */)
+	    {
+	      /* Return addresses are not mangled.  */
+	      ra_state_val = 0;
+	    }
+	  else
+	    {
+	      if (aarch64_debug)
+		debug_printf ("aarch64: prologue analysis gave up addr=%s"
+			      " opcode=0x%x (iclass)\n",
+			      core_addr_to_string_nz (start), insn);
+	      break;
+	    }
+
+	  if (tdep->has_pauth () && cache != nullptr)
+	    trad_frame_set_value (cache->saved_regs,
+				  tdep->pauth_ra_state_regnum,
+				  ra_state_val);
+	}
       else
 	{
 	  if (aarch64_debug)
@@ -582,11 +613,13 @@ aarch64_analyze_prologue_test (void)
   struct gdbarch *gdbarch = gdbarch_find_by_info (info);
   SELF_CHECK (gdbarch != NULL);
 
+  struct aarch64_prologue_cache cache;
+  cache.saved_regs = trad_frame_alloc_saved_regs (gdbarch);
+
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
   /* Test the simple prologue in which frame pointer is used.  */
   {
-    struct aarch64_prologue_cache cache;
-    cache.saved_regs = trad_frame_alloc_saved_regs (gdbarch);
-
     static const uint32_t insns[] = {
       0xa9af7bfd, /* stp     x29, x30, [sp,#-272]! */
       0x910003fd, /* mov     x29, sp */
@@ -622,9 +655,6 @@ aarch64_analyze_prologue_test (void)
   /* Test a prologue in which STR is used and frame pointer is not
      used.  */
   {
-    struct aarch64_prologue_cache cache;
-    cache.saved_regs = trad_frame_alloc_saved_regs (gdbarch);
-
     static const uint32_t insns[] = {
       0xf81d0ff3, /* str	x19, [sp, #-48]! */
       0xb9002fe0, /* str	w0, [sp, #44] */
@@ -664,6 +694,45 @@ aarch64_analyze_prologue_test (void)
 		      == -1);
       }
   }
+
+  /* Test a prologue in which there is a return address signing instruction.  */
+  if (tdep->has_pauth ())
+    {
+      static const uint32_t insns[] = {
+	0xd503233f, /* paciasp */
+	0xa9bd7bfd, /* stp	x29, x30, [sp, #-48]! */
+	0x910003fd, /* mov	x29, sp */
+	0xf801c3f3, /* str	x19, [sp, #28] */
+	0xb9401fa0, /* ldr	x19, [x29, #28] */
+      };
+      instruction_reader_test reader (insns);
+
+      CORE_ADDR end = aarch64_analyze_prologue (gdbarch, 0, 128, &cache,
+						reader);
+
+      SELF_CHECK (end == 4 * 4);
+      SELF_CHECK (cache.framereg == AARCH64_FP_REGNUM);
+      SELF_CHECK (cache.framesize == 48);
+
+      for (int i = 0; i < AARCH64_X_REGISTER_COUNT; i++)
+	{
+	  if (i == 19)
+	    SELF_CHECK (cache.saved_regs[i].addr == -20);
+	  else if (i == AARCH64_FP_REGNUM)
+	    SELF_CHECK (cache.saved_regs[i].addr == -48);
+	  else if (i == AARCH64_LR_REGNUM)
+	    SELF_CHECK (cache.saved_regs[i].addr == -40);
+	  else
+	    SELF_CHECK (cache.saved_regs[i].addr == -1);
+	}
+
+      if (tdep->has_pauth ())
+	{
+	  SELF_CHECK (trad_frame_value_p (cache.saved_regs,
+					  tdep->pauth_ra_state_regnum));
+	  SELF_CHECK (cache.saved_regs[tdep->pauth_ra_state_regnum].addr == 1);
+	}
+    }
 }
 } // namespace selftests
 #endif /* GDB_SELF_TEST */
@@ -873,8 +942,16 @@ aarch64_prologue_prev_register (struct frame_info *this_frame,
   if (prev_regnum == AARCH64_PC_REGNUM)
     {
       CORE_ADDR lr;
+      struct gdbarch *gdbarch = get_frame_arch (this_frame);
+      struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
       lr = frame_unwind_register_unsigned (this_frame, AARCH64_LR_REGNUM);
+
+      if (tdep->has_pauth ()
+	  && trad_frame_value_p (cache->saved_regs,
+				 tdep->pauth_ra_state_regnum))
+	lr = aarch64_frame_unmask_address (tdep, this_frame, lr);
+
       return frame_unwind_got_constant (this_frame, prev_regnum, lr);
     }
 

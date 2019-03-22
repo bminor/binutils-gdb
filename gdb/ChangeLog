@@ -1,6 +1,14 @@
 2019-03-22  Alan Hayward  <alan.hayward@arm.com>
 	    Jiong Wang  <jiong.wang@arm.com>
 
+	* aarch64-tdep.c (aarch64_analyze_prologue): Check for pauth
+	instructions.
+	(aarch64_analyze_prologue_test): Add PACIASP test.
+	(aarch64_prologue_prev_register): Unmask PC value.
+
+2019-03-22  Alan Hayward  <alan.hayward@arm.com>
+	    Jiong Wang  <jiong.wang@arm.com>
+
 	* aarch64-tdep.c (aarch64_frame_unmask_address): New function.
 	(aarch64_dwarf2_prev_register): Unmask PC value.
 	(aarch64_dwarf2_frame_init_reg): Init pauth registers.
