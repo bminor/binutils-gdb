@@ -87,6 +87,14 @@ struct gdbarch_tdep
   {
     return vq != 0;
   }
+
+  int pauth_reg_base;
+
+  /* Returns true if the target supports pauth.  */
+  bool has_pauth () const
+  {
+    return pauth_reg_base != -1;
+  }
 };
 
 const target_desc *aarch64_read_description (uint64_t vq, bool pauth_p);

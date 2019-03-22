@@ -423,6 +423,31 @@ store_sveregs_to_thread (struct regcache *regcache)
     perror_with_name (_("Unable to store sve registers"));
 }
 
+/* Fill GDB's register array with the pointer authentication mask values from
+   the current thread.  */
+
+static void
+fetch_pauth_masks_from_thread (struct regcache *regcache)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
+  int ret;
+  struct iovec iovec;
+  uint64_t pauth_regset[2] = {0, 0};
+  int tid = regcache->ptid ().lwp ();
+
+  iovec.iov_base = &pauth_regset;
+  iovec.iov_len = sizeof (pauth_regset);
+
+  ret = ptrace (PTRACE_GETREGSET, tid, NT_ARM_PAC_MASK, &iovec);
+  if (ret != 0)
+    perror_with_name (_("unable to fetch pauth registers."));
+
+  regcache->raw_supply (AARCH64_PAUTH_DMASK_REGNUM (tdep->pauth_reg_base),
+			&pauth_regset[0]);
+  regcache->raw_supply (AARCH64_PAUTH_CMASK_REGNUM (tdep->pauth_reg_base),
+			&pauth_regset[1]);
+}
+
 /* Implement the "fetch_registers" target_ops method.  */
 
 void
@@ -438,6 +463,9 @@ aarch64_linux_nat_target::fetch_registers (struct regcache *regcache,
 	fetch_sveregs_from_thread (regcache);
       else
 	fetch_fpregs_from_thread (regcache);
+
+      if (tdep->has_pauth ())
+	fetch_pauth_masks_from_thread (regcache);
     }
   else if (regno < AARCH64_V0_REGNUM)
     fetch_gregs_from_thread (regcache);
@@ -445,6 +473,13 @@ aarch64_linux_nat_target::fetch_registers (struct regcache *regcache,
     fetch_sveregs_from_thread (regcache);
   else
     fetch_fpregs_from_thread (regcache);
+
+  if (tdep->has_pauth ())
+    {
+      if (regno == AARCH64_PAUTH_DMASK_REGNUM (tdep->pauth_reg_base)
+	  || regno == AARCH64_PAUTH_CMASK_REGNUM (tdep->pauth_reg_base))
+	fetch_pauth_masks_from_thread (regcache);
+    }
 }
 
 /* Implement the "store_registers" target_ops method.  */

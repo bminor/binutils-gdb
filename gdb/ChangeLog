@@ -1,6 +1,18 @@
 2019-03-22  Alan Hayward  <alan.hayward@arm.com>
 	    Jiong Wang  <jiong.wang@arm.com>
 
+	* aarch64-linux-nat.c (fetch_pauth_masks_from_thread): New
+	function.
+	(aarch64_linux_nat_target::fetch_registers): Read pauth registers.
+	* aarch64-tdep.c (aarch64_cannot_store_register): New function.
+	(aarch64_gdbarch_init): Add puth registers.
+	* aarch64-tdep.h (struct gdbarch_tdep): Add pauth features.
+	* arch/aarch64.h (AARCH64_PAUTH_DMASK_REGNUM): New define.
+	(AARCH64_PAUTH_CMASK_REGNUM): Likewise.
+
+2019-03-22  Alan Hayward  <alan.hayward@arm.com>
+	    Jiong Wang  <jiong.wang@arm.com>
+
 	* aarch64-linux-nat.c
 	(aarch64_linux_nat_target::read_description): Read PACA hwcap.
 	* aarch64-linux-tdep.c

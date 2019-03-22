@@ -66,6 +66,9 @@ enum aarch64_regnum
 #define AARCH64_B0_REGNUM (AARCH64_H0_REGNUM + 32)
 #define AARCH64_SVE_V0_REGNUM (AARCH64_B0_REGNUM + 32)
 
+#define AARCH64_PAUTH_DMASK_REGNUM(pauth_reg_base) (pauth_reg_base)
+#define AARCH64_PAUTH_CMASK_REGNUM(pauth_reg_base) (pauth_reg_base + 1)
+
 #define AARCH64_X_REGS_NUM 31
 #define AARCH64_V_REGS_NUM 32
 #define AARCH64_SVE_Z_REGS_NUM AARCH64_V_REGS_NUM

@@ -175,6 +175,14 @@ static const char *const aarch64_sve_register_names[] =
   "ffr", "vg"
 };
 
+static const char *const aarch64_pauth_register_names[] =
+{
+  /* Authentication mask for data pointer.  */
+  "pauth_dmask",
+  /* Authentication mask for code pointer.  */
+  "pauth_cmask"
+};
+
 /* AArch64 prologue cache structure.  */
 struct aarch64_prologue_cache
 {
@@ -2936,6 +2944,21 @@ aarch64_add_reggroups (struct gdbarch *gdbarch)
   reggroup_add (gdbarch, restore_reggroup);
 }
 
+/* Implement the "cannot_store_register" gdbarch method.  */
+
+static int
+aarch64_cannot_store_register (struct gdbarch *gdbarch, int regnum)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (!tdep->has_pauth ())
+    return 0;
+
+  /* Pointer authentication registers are read-only.  */
+  return (regnum == AARCH64_PAUTH_DMASK_REGNUM (tdep->pauth_reg_base)
+	  || regnum == AARCH64_PAUTH_CMASK_REGNUM (tdep->pauth_reg_base));
+}
+
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
@@ -2956,8 +2979,10 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   const struct tdesc_feature *feature_core;
   const struct tdesc_feature *feature_fpu;
   const struct tdesc_feature *feature_sve;
+  const struct tdesc_feature *feature_pauth;
   int num_regs = 0;
   int num_pseudo_regs = 0;
+  int first_pauth_regnum = -1;
 
   /* Ensure we always have a target description.  */
   if (!tdesc_has_registers (tdesc))
@@ -2967,6 +2992,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   feature_core = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.core");
   feature_fpu = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.fpu");
   feature_sve = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.sve");
+  feature_pauth = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.pauth");
 
   if (feature_core == NULL)
     return NULL;
@@ -3021,6 +3047,21 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       num_pseudo_regs += 32;	/* add the Bn scalar register pseudos */
     }
 
+  /* Add the pauth registers.  */
+  if (feature_pauth != NULL)
+    {
+      first_pauth_regnum = num_regs;
+
+      /* Validate the descriptor provides the mandatory PAUTH registers and
+	 allocate their numbers.  */
+      for (i = 0; i < ARRAY_SIZE (aarch64_pauth_register_names); i++)
+	valid_p &= tdesc_numbered_register (feature_pauth, tdesc_data,
+					    first_pauth_regnum + i,
+					    aarch64_pauth_register_names[i]);
+
+      num_regs += i;
+    }
+
   if (!valid_p)
     {
       tdesc_data_cleanup (tdesc_data);
@@ -3054,6 +3095,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->jb_pc = -1;		/* Longjump support not enabled by default.  */
   tdep->jb_elt_size = 8;
   tdep->vq = aarch64_get_tdesc_vq (tdesc);
+  tdep->pauth_reg_base = first_pauth_regnum;
 
   set_gdbarch_push_dummy_call (gdbarch, aarch64_push_dummy_call);
   set_gdbarch_frame_align (gdbarch, aarch64_frame_align);
@@ -3084,6 +3126,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_tdesc_pseudo_register_type (gdbarch, aarch64_pseudo_register_type);
   set_tdesc_pseudo_register_reggroup_p (gdbarch,
 					aarch64_pseudo_register_reggroup_p);
+  set_gdbarch_cannot_store_register (gdbarch, aarch64_cannot_store_register);
 
   /* ABI */
   set_gdbarch_short_bit (gdbarch, 16);
