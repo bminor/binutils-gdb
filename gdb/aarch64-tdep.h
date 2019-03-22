@@ -31,6 +31,9 @@ struct regset;
 /* AArch64 Dwarf register numbering.  */
 #define AARCH64_DWARF_X0   0
 #define AARCH64_DWARF_SP  31
+#define AARCH64_DWARF_PAUTH_RA_STATE  34
+#define AARCH64_DWARF_PAUTH_DMASK  35
+#define AARCH64_DWARF_PAUTH_CMASK  36
 #define AARCH64_DWARF_V0  64
 #define AARCH64_DWARF_SVE_VG   46
 #define AARCH64_DWARF_SVE_FFR  47
@@ -89,6 +92,7 @@ struct gdbarch_tdep
   }
 
   int pauth_reg_base;
+  int pauth_ra_state_regnum;
 
   /* Returns true if the target supports pauth.  */
   bool has_pauth () const

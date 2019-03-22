@@ -1839,6 +1839,8 @@ aarch64_vnv_type (struct gdbarch *gdbarch)
 static int
 aarch64_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
   if (reg >= AARCH64_DWARF_X0 && reg <= AARCH64_DWARF_X0 + 30)
     return AARCH64_X0_REGNUM + reg - AARCH64_DWARF_X0;
 
@@ -1859,6 +1861,15 @@ aarch64_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 
   if (reg >= AARCH64_DWARF_SVE_Z0 && reg <= AARCH64_DWARF_SVE_Z0 + 15)
     return AARCH64_SVE_Z0_REGNUM + reg - AARCH64_DWARF_SVE_Z0;
+
+  if (tdep->has_pauth ())
+    {
+      if (reg >= AARCH64_DWARF_PAUTH_DMASK && reg <= AARCH64_DWARF_PAUTH_CMASK)
+	return tdep->pauth_reg_base + reg - AARCH64_DWARF_PAUTH_DMASK;
+
+      if (reg == AARCH64_DWARF_PAUTH_RA_STATE)
+	return tdep->pauth_ra_state_regnum;
+    }
 
   return -1;
 }
@@ -2215,22 +2226,22 @@ aarch64_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
       "b28", "b29", "b30", "b31",
     };
 
-  regnum -= gdbarch_num_regs (gdbarch);
+  int p_regnum = regnum - gdbarch_num_regs (gdbarch);
 
-  if (regnum >= AARCH64_Q0_REGNUM && regnum < AARCH64_Q0_REGNUM + 32)
-    return q_name[regnum - AARCH64_Q0_REGNUM];
+  if (p_regnum >= AARCH64_Q0_REGNUM && p_regnum < AARCH64_Q0_REGNUM + 32)
+    return q_name[p_regnum - AARCH64_Q0_REGNUM];
 
-  if (regnum >= AARCH64_D0_REGNUM && regnum < AARCH64_D0_REGNUM + 32)
-    return d_name[regnum - AARCH64_D0_REGNUM];
+  if (p_regnum >= AARCH64_D0_REGNUM && p_regnum < AARCH64_D0_REGNUM + 32)
+    return d_name[p_regnum - AARCH64_D0_REGNUM];
 
-  if (regnum >= AARCH64_S0_REGNUM && regnum < AARCH64_S0_REGNUM + 32)
-    return s_name[regnum - AARCH64_S0_REGNUM];
+  if (p_regnum >= AARCH64_S0_REGNUM && p_regnum < AARCH64_S0_REGNUM + 32)
+    return s_name[p_regnum - AARCH64_S0_REGNUM];
 
-  if (regnum >= AARCH64_H0_REGNUM && regnum < AARCH64_H0_REGNUM + 32)
-    return h_name[regnum - AARCH64_H0_REGNUM];
+  if (p_regnum >= AARCH64_H0_REGNUM && p_regnum < AARCH64_H0_REGNUM + 32)
+    return h_name[p_regnum - AARCH64_H0_REGNUM];
 
-  if (regnum >= AARCH64_B0_REGNUM && regnum < AARCH64_B0_REGNUM + 32)
-    return b_name[regnum - AARCH64_B0_REGNUM];
+  if (p_regnum >= AARCH64_B0_REGNUM && p_regnum < AARCH64_B0_REGNUM + 32)
+    return b_name[p_regnum - AARCH64_B0_REGNUM];
 
   if (tdep->has_sve ())
     {
@@ -2246,14 +2257,20 @@ aarch64_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
 	  "v28", "v29", "v30", "v31",
 	};
 
-      if (regnum >= AARCH64_SVE_V0_REGNUM
-	  && regnum < AARCH64_SVE_V0_REGNUM + AARCH64_V_REGS_NUM)
-	return sve_v_name[regnum - AARCH64_SVE_V0_REGNUM];
+      if (p_regnum >= AARCH64_SVE_V0_REGNUM
+	  && p_regnum < AARCH64_SVE_V0_REGNUM + AARCH64_V_REGS_NUM)
+	return sve_v_name[p_regnum - AARCH64_SVE_V0_REGNUM];
     }
+
+  /* RA_STATE is used for unwinding only.  Do not assign it a name - this
+     prevents it from being read by methods such as
+     mi_cmd_trace_frame_collected.  */
+  if (tdep->has_pauth () && regnum == tdep->pauth_ra_state_regnum)
+    return "";
 
   internal_error (__FILE__, __LINE__,
 		  _("aarch64_pseudo_register_name: bad register number %d"),
-		  regnum);
+		  p_regnum);
 }
 
 /* Implement the "pseudo_register_type" tdesc_arch_data method.  */
@@ -2263,30 +2280,33 @@ aarch64_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  regnum -= gdbarch_num_regs (gdbarch);
+  int p_regnum = regnum - gdbarch_num_regs (gdbarch);
 
-  if (regnum >= AARCH64_Q0_REGNUM && regnum < AARCH64_Q0_REGNUM + 32)
+  if (p_regnum >= AARCH64_Q0_REGNUM && p_regnum < AARCH64_Q0_REGNUM + 32)
     return aarch64_vnq_type (gdbarch);
 
-  if (regnum >= AARCH64_D0_REGNUM && regnum < AARCH64_D0_REGNUM + 32)
+  if (p_regnum >= AARCH64_D0_REGNUM && p_regnum < AARCH64_D0_REGNUM + 32)
     return aarch64_vnd_type (gdbarch);
 
-  if (regnum >= AARCH64_S0_REGNUM && regnum < AARCH64_S0_REGNUM + 32)
+  if (p_regnum >= AARCH64_S0_REGNUM && p_regnum < AARCH64_S0_REGNUM + 32)
     return aarch64_vns_type (gdbarch);
 
-  if (regnum >= AARCH64_H0_REGNUM && regnum < AARCH64_H0_REGNUM + 32)
+  if (p_regnum >= AARCH64_H0_REGNUM && p_regnum < AARCH64_H0_REGNUM + 32)
     return aarch64_vnh_type (gdbarch);
 
-  if (regnum >= AARCH64_B0_REGNUM && regnum < AARCH64_B0_REGNUM + 32)
+  if (p_regnum >= AARCH64_B0_REGNUM && p_regnum < AARCH64_B0_REGNUM + 32)
     return aarch64_vnb_type (gdbarch);
 
-  if (tdep->has_sve () && regnum >= AARCH64_SVE_V0_REGNUM
-      && regnum < AARCH64_SVE_V0_REGNUM + AARCH64_V_REGS_NUM)
+  if (tdep->has_sve () && p_regnum >= AARCH64_SVE_V0_REGNUM
+      && p_regnum < AARCH64_SVE_V0_REGNUM + AARCH64_V_REGS_NUM)
     return aarch64_vnv_type (gdbarch);
+
+  if (tdep->has_pauth () && regnum == tdep->pauth_ra_state_regnum)
+    return builtin_type (gdbarch)->builtin_uint64;
 
   internal_error (__FILE__, __LINE__,
 		  _("aarch64_pseudo_register_type: bad register number %d"),
-		  regnum);
+		  p_regnum);
 }
 
 /* Implement the "pseudo_register_reggroup_p" tdesc_arch_data method.  */
@@ -2297,23 +2317,26 @@ aarch64_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  regnum -= gdbarch_num_regs (gdbarch);
+  int p_regnum = regnum - gdbarch_num_regs (gdbarch);
 
-  if (regnum >= AARCH64_Q0_REGNUM && regnum < AARCH64_Q0_REGNUM + 32)
+  if (p_regnum >= AARCH64_Q0_REGNUM && p_regnum < AARCH64_Q0_REGNUM + 32)
     return group == all_reggroup || group == vector_reggroup;
-  else if (regnum >= AARCH64_D0_REGNUM && regnum < AARCH64_D0_REGNUM + 32)
+  else if (p_regnum >= AARCH64_D0_REGNUM && p_regnum < AARCH64_D0_REGNUM + 32)
     return (group == all_reggroup || group == vector_reggroup
 	    || group == float_reggroup);
-  else if (regnum >= AARCH64_S0_REGNUM && regnum < AARCH64_S0_REGNUM + 32)
+  else if (p_regnum >= AARCH64_S0_REGNUM && p_regnum < AARCH64_S0_REGNUM + 32)
     return (group == all_reggroup || group == vector_reggroup
 	    || group == float_reggroup);
-  else if (regnum >= AARCH64_H0_REGNUM && regnum < AARCH64_H0_REGNUM + 32)
+  else if (p_regnum >= AARCH64_H0_REGNUM && p_regnum < AARCH64_H0_REGNUM + 32)
     return group == all_reggroup || group == vector_reggroup;
-  else if (regnum >= AARCH64_B0_REGNUM && regnum < AARCH64_B0_REGNUM + 32)
+  else if (p_regnum >= AARCH64_B0_REGNUM && p_regnum < AARCH64_B0_REGNUM + 32)
     return group == all_reggroup || group == vector_reggroup;
-  else if (tdep->has_sve () && regnum >= AARCH64_SVE_V0_REGNUM
-	   && regnum < AARCH64_SVE_V0_REGNUM + AARCH64_V_REGS_NUM)
+  else if (tdep->has_sve () && p_regnum >= AARCH64_SVE_V0_REGNUM
+	   && p_regnum < AARCH64_SVE_V0_REGNUM + AARCH64_V_REGS_NUM)
     return group == all_reggroup || group == vector_reggroup;
+  /* RA_STATE is used for unwinding only.  Do not assign it to any groups.  */
+  if (tdep->has_pauth () && regnum == tdep->pauth_ra_state_regnum)
+    return 0;
 
   return group == all_reggroup;
 }
@@ -2983,6 +3006,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   int num_regs = 0;
   int num_pseudo_regs = 0;
   int first_pauth_regnum = -1;
+  int pauth_ra_state_offset = -1;
 
   /* Ensure we always have a target description.  */
   if (!tdesc_has_registers (tdesc))
@@ -3051,7 +3075,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (feature_pauth != NULL)
     {
       first_pauth_regnum = num_regs;
-
+      pauth_ra_state_offset = num_pseudo_regs;
       /* Validate the descriptor provides the mandatory PAUTH registers and
 	 allocate their numbers.  */
       for (i = 0; i < ARRAY_SIZE (aarch64_pauth_register_names); i++)
@@ -3060,6 +3084,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					    aarch64_pauth_register_names[i]);
 
       num_regs += i;
+      num_pseudo_regs += 1;	/* Count RA_STATE pseudo register.  */
     }
 
   if (!valid_p)
@@ -3096,6 +3121,9 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->jb_elt_size = 8;
   tdep->vq = aarch64_get_tdesc_vq (tdesc);
   tdep->pauth_reg_base = first_pauth_regnum;
+  tdep->pauth_ra_state_regnum = (feature_pauth == NULL) ? -1
+				: pauth_ra_state_offset + num_regs;
+
 
   set_gdbarch_push_dummy_call (gdbarch, aarch64_push_dummy_call);
   set_gdbarch_frame_align (gdbarch, aarch64_frame_align);
