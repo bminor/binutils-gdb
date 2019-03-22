@@ -1,6 +1,11 @@
 2019-03-22  Alan Hayward  <alan.hayward@arm.com>
 	    Jiong Wang  <jiong.wang@arm.com>
 
+	* arch/aarch64.h (AARCH64_PAUTH_REGS_SIZE): New define.
+
+2019-03-22  Alan Hayward  <alan.hayward@arm.com>
+	    Jiong Wang  <jiong.wang@arm.com>
+
 	* aarch64-linux-nat.c (fetch_pauth_masks_from_thread): New
 	function.
 	(aarch64_linux_nat_target::fetch_registers): Read pauth registers.

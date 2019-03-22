@@ -40,6 +40,7 @@ enum regset_type {
   GENERAL_REGS,
   FP_REGS,
   EXTENDED_REGS,
+  OPTIONAL_REGS, /* Do not error if the regset cannot be accessed.  */
 };
 
 /* The arch's regsets array initializer must be terminated with a NULL
