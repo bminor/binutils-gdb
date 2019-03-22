@@ -34,6 +34,7 @@
 #include "frame-base.h"
 #include "trad-frame.h"
 #include "objfiles.h"
+#include "dwarf2.h"
 #include "dwarf2-frame.h"
 #include "gdbtypes.h"
 #include "prologue-value.h"
@@ -247,6 +248,26 @@ class instruction_reader : public abstract_instruction_reader
 };
 
 } // namespace
+
+/* If address signing is enabled, mask off the signature bits from ADDR, using
+   the register values in THIS_FRAME.  */
+
+static CORE_ADDR
+aarch64_frame_unmask_address (struct gdbarch_tdep *tdep,
+			      struct frame_info *this_frame,
+			      CORE_ADDR addr)
+{
+  if (tdep->has_pauth ()
+      && frame_unwind_register_unsigned (this_frame,
+					 tdep->pauth_ra_state_regnum))
+    {
+      int cmask_num = AARCH64_PAUTH_CMASK_REGNUM (tdep->pauth_reg_base);
+      CORE_ADDR cmask = frame_unwind_register_unsigned (this_frame, cmask_num);
+      addr = addr & ~cmask;
+    }
+
+  return addr;
+}
 
 /* Analyze a prologue, looking for a recognizable stack frame
    and frame pointer.  Scan until we encounter a store that could
@@ -1013,12 +1034,14 @@ static struct value *
 aarch64_dwarf2_prev_register (struct frame_info *this_frame,
 			      void **this_cache, int regnum)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (this_frame));
   CORE_ADDR lr;
 
   switch (regnum)
     {
     case AARCH64_PC_REGNUM:
       lr = frame_unwind_register_unsigned (this_frame, AARCH64_LR_REGNUM);
+      lr = aarch64_frame_unmask_address (tdep, this_frame, lr);
       return frame_unwind_got_constant (this_frame, regnum, lr);
 
     default:
@@ -1027,6 +1050,9 @@ aarch64_dwarf2_prev_register (struct frame_info *this_frame,
     }
 }
 
+static const unsigned char op_lit0 = DW_OP_lit0;
+static const unsigned char op_lit1 = DW_OP_lit1;
+
 /* Implement the "init_reg" dwarf2_frame_ops method.  */
 
 static void
@@ -1034,16 +1060,70 @@ aarch64_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 			       struct dwarf2_frame_state_reg *reg,
 			       struct frame_info *this_frame)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
   switch (regnum)
     {
     case AARCH64_PC_REGNUM:
       reg->how = DWARF2_FRAME_REG_FN;
       reg->loc.fn = aarch64_dwarf2_prev_register;
-      break;
+      return;
+
     case AARCH64_SP_REGNUM:
       reg->how = DWARF2_FRAME_REG_CFA;
-      break;
+      return;
     }
+
+  /* Init pauth registers.  */
+  if (tdep->has_pauth ())
+    {
+      if (regnum == tdep->pauth_ra_state_regnum)
+	{
+	  /* Initialize RA_STATE to zero.  */
+	  reg->how = DWARF2_FRAME_REG_SAVED_VAL_EXP;
+	  reg->loc.exp.start = &op_lit0;
+	  reg->loc.exp.len = 1;
+	  return;
+	}
+      else if (regnum == AARCH64_PAUTH_DMASK_REGNUM (tdep->pauth_reg_base)
+	       || regnum == AARCH64_PAUTH_CMASK_REGNUM (tdep->pauth_reg_base))
+	{
+	  reg->how = DWARF2_FRAME_REG_SAME_VALUE;
+	  return;
+	}
+    }
+}
+
+/* Implement the execute_dwarf_cfa_vendor_op method.  */
+
+static bool
+aarch64_execute_dwarf_cfa_vendor_op (struct gdbarch *gdbarch, gdb_byte op,
+				     struct dwarf2_frame_state *fs)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  struct dwarf2_frame_state_reg *ra_state;
+
+  if (tdep->has_pauth () && op == DW_CFA_AARCH64_negate_ra_state)
+    {
+      /* Allocate RA_STATE column if it's not allocated yet.  */
+      fs->regs.alloc_regs (AARCH64_DWARF_PAUTH_RA_STATE + 1);
+
+      /* Toggle the status of RA_STATE between 0 and 1.  */
+      ra_state = &(fs->regs.reg[AARCH64_DWARF_PAUTH_RA_STATE]);
+      ra_state->how = DWARF2_FRAME_REG_SAVED_VAL_EXP;
+
+      if (ra_state->loc.exp.start == nullptr
+	  || ra_state->loc.exp.start == &op_lit0)
+	ra_state->loc.exp.start = &op_lit1;
+      else
+	ra_state->loc.exp.start = &op_lit0;
+
+      ra_state->loc.exp.len = 1;
+
+      return true;
+    }
+
+  return false;
 }
 
 /* When arguments must be pushed onto the stack, they go on in reverse
@@ -3192,6 +3272,9 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch_init_osabi (info, gdbarch);
 
   dwarf2_frame_set_init_reg (gdbarch, aarch64_dwarf2_frame_init_reg);
+  /* Register DWARF CFA vendor handler.  */
+  set_gdbarch_execute_dwarf_cfa_vendor_op (gdbarch,
+					   aarch64_execute_dwarf_cfa_vendor_op);
 
   /* Add some default predicates.  */
   frame_unwind_append_unwinder (gdbarch, &aarch64_stub_unwind);

@@ -1,6 +1,16 @@
 2019-03-22  Alan Hayward  <alan.hayward@arm.com>
 	    Jiong Wang  <jiong.wang@arm.com>
 
+	* aarch64-tdep.c (aarch64_frame_unmask_address): New function.
+	(aarch64_dwarf2_prev_register): Unmask PC value.
+	(aarch64_dwarf2_frame_init_reg): Init pauth registers.
+	(aarch64_execute_dwarf_cfa_vendor_op): Check for
+	DW_CFA_AARCH64_negate_ra_state.
+	(aarch64_gdbarch_init): Add aarch64_execute_dwarf_cfa_vendor_op.
+
+2019-03-22  Alan Hayward  <alan.hayward@arm.com>
+	    Jiong Wang  <jiong.wang@arm.com>
+
 	* aarch64-tdep.c (aarch64_dwarf_reg_to_regnum): Check for pauth
 	registers.
 	(aarch64_pseudo_register_name): Likewise.
