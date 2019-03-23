@@ -1715,7 +1715,6 @@ display_command (const char *arg, int from_tty)
       fmt.raw = 0;
     }
 
-  innermost_block.reset ();
   expression_up expr = parse_expression (exp);
 
   newobj = new display ();
@@ -1883,7 +1882,6 @@ do_one_display (struct display *d)
 
       TRY
 	{
-	  innermost_block.reset ();
 	  d->exp = parse_expression (d->exp_string);
 	  d->block = innermost_block.block ();
 	}

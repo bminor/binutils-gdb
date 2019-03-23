@@ -2901,12 +2901,6 @@ clear_symtab_users (symfile_add_flags add_flags)
   clear_pc_function_cache ();
   gdb::observers::new_objfile.notify (NULL);
 
-  /* Clear globals which might have pointed into a removed objfile.
-     FIXME: It's not clear which of these are supposed to persist
-     between expressions and which ought to be reset each time.  */
-  expression_context_block = NULL;
-  innermost_block.reset ();
-
   /* Varobj may refer to old symbols, perform a cleanup.  */
   varobj_invalidate ();
 

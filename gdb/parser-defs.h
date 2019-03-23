@@ -75,24 +75,6 @@ extern const struct block *expression_context_block;
    then look up the macro definitions active at that point.  */
 extern CORE_ADDR expression_context_pc;
 
-/* While parsing expressions we need to track the innermost lexical block
-   that we encounter.  In some situations we need to track the innermost
-   block just for symbols, and in other situations we want to track the
-   innermost block for symbols and registers.  These flags are used by the
-   innermost block tracker to control which blocks we consider for the
-   innermost block.  These flags can be combined together as needed.  */
-
-enum innermost_block_tracker_type
-{
-  /* Track the innermost block for symbols within an expression.  */
-  INNERMOST_BLOCK_FOR_SYMBOLS = (1 << 0),
-
-  /* Track the innermost block for registers within an expression.  */
-  INNERMOST_BLOCK_FOR_REGISTERS = (1 << 1)
-};
-DEF_ENUM_FLAGS_TYPE (enum innermost_block_tracker_type,
-		     innermost_block_tracker_types);
-
 /* When parsing expressions we track the innermost block that was
    referenced.  */
 
@@ -146,8 +128,9 @@ private:
 };
 
 /* The innermost context required by the stack and register variables
-   we've encountered so far.  This should be cleared before parsing an
-   expression, and queried once the parse is complete.  */
+   we've encountered so far.  This is cleared by the expression
+   parsing functions before parsing an expression, and can queried
+   once the parse is complete.  */
 extern innermost_block_tracker innermost_block;
 
 /* Number of arguments seen so far in innermost function call.  */

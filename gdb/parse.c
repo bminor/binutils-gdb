@@ -116,10 +116,8 @@ static int prefixify_subexp (struct expression *, struct expression *, int,
 
 static expression_up parse_exp_in_context (const char **, CORE_ADDR,
 					   const struct block *, int,
-					   int, int *);
-static expression_up parse_exp_in_context_1 (const char **, CORE_ADDR,
-					     const struct block *, int,
-					     int, int *);
+					   int, int *,
+					   innermost_block_tracker_types);
 
 /* Documented at it's declaration.  */
 
@@ -1095,18 +1093,10 @@ prefixify_subexp (struct expression *inexpr,
 
 expression_up
 parse_exp_1 (const char **stringptr, CORE_ADDR pc, const struct block *block,
-	     int comma)
+	     int comma, innermost_block_tracker_types tracker_types)
 {
-  return parse_exp_in_context (stringptr, pc, block, comma, 0, NULL);
-}
-
-static expression_up
-parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
-		      const struct block *block,
-		      int comma, int void_context_p, int *out_subexp)
-{
-  return parse_exp_in_context_1 (stringptr, pc, block, comma,
-				 void_context_p, out_subexp);
+  return parse_exp_in_context (stringptr, pc, block, comma, 0, NULL,
+			       tracker_types);
 }
 
 /* As for parse_exp_1, except that if VOID_CONTEXT_P, then
@@ -1117,9 +1107,10 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
    is left untouched.  */
 
 static expression_up
-parse_exp_in_context_1 (const char **stringptr, CORE_ADDR pc,
-			const struct block *block,
-			int comma, int void_context_p, int *out_subexp)
+parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
+		      const struct block *block,
+		      int comma, int void_context_p, int *out_subexp,
+		      innermost_block_tracker_types tracker_types)
 {
   const struct language_defn *lang = NULL;
   int subexp;
@@ -1132,6 +1123,7 @@ parse_exp_in_context_1 (const char **stringptr, CORE_ADDR pc,
   expout_last_struct = -1;
   expout_tag_completion_type = TYPE_CODE_UNDEF;
   expout_completion_name.reset ();
+  innermost_block.reset (tracker_types);
 
   comma_terminates = comma;
 
@@ -1286,7 +1278,8 @@ parse_expression_for_completion (const char *string,
   TRY
     {
       parse_completion = 1;
-      exp = parse_exp_in_context (&string, 0, 0, 0, 0, &subexp);
+      exp = parse_exp_in_context (&string, 0, 0, 0, 0, &subexp,
+				  INNERMOST_BLOCK_FOR_SYMBOLS);
     }
   CATCH (except, RETURN_MASK_ERROR)
     {

@@ -1,5 +1,27 @@
 2019-03-23  Tom Tromey  <tom@tromey.com>
 
+	* varobj.c (varobj_create): Update.
+	* symfile.c (clear_symtab_users): Don't reset innermost_block.
+	* printcmd.c (display_command, do_one_display): Don't reset
+	innermost_block.
+	* parser-defs.h (enum innermost_block_tracker_type): Move to
+	expression.h.
+	(innermost_block): Update comment.
+	* parse.c (parse_exp_1): Add tracker_types parameter.
+	(parse_exp_in_context): Rename from parse_exp_in_context_1.  Add
+	tracker_types parameter.  Reset innermost_block.
+	(parse_exp_in_context): Remove.
+	(parse_expression_for_completion): Update.
+	* objfiles.c (~objfile): Don't reset expression_context_block or
+	innermost_block.
+	* expression.h (enum innermost_block_tracker_type): Move from
+	parser-defs.h.
+	(parse_exp_1): Add tracker_types parameter.
+	* breakpoint.c (set_breakpoint_condition, watch_command_1): Don't
+	reset innermost_block.
+
+2019-03-23  Tom Tromey  <tom@tromey.com>
+
 	* objfiles.h: Include bcache.h.
 
 2019-03-23  Tom Tromey  <tom@tromey.com>

@@ -23,6 +23,23 @@
 
 #include "symtab.h"		/* Needed for "struct block" type.  */
 
+/* While parsing expressions we need to track the innermost lexical block
+   that we encounter.  In some situations we need to track the innermost
+   block just for symbols, and in other situations we want to track the
+   innermost block for symbols and registers.  These flags are used by the
+   innermost block tracker to control which blocks we consider for the
+   innermost block.  These flags can be combined together as needed.  */
+
+enum innermost_block_tracker_type
+{
+  /* Track the innermost block for symbols within an expression.  */
+  INNERMOST_BLOCK_FOR_SYMBOLS = (1 << 0),
+
+  /* Track the innermost block for registers within an expression.  */
+  INNERMOST_BLOCK_FOR_REGISTERS = (1 << 1)
+};
+DEF_ENUM_FLAGS_TYPE (enum innermost_block_tracker_type,
+		     innermost_block_tracker_types);
 
 /* Definitions for saved C expressions.  */
 
@@ -105,7 +122,9 @@ extern struct type *parse_expression_for_completion
     (const char *, gdb::unique_xmalloc_ptr<char> *, enum type_code *);
 
 extern expression_up parse_exp_1 (const char **, CORE_ADDR pc,
-				  const struct block *, int);
+				  const struct block *, int,
+				  innermost_block_tracker_types
+				    = INNERMOST_BLOCK_FOR_SYMBOLS);
 
 /* For use by parsers; set if we want to parse an expression and
    attempt completion.  */

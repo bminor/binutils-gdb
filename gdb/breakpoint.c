@@ -880,7 +880,6 @@ set_breakpoint_condition (struct breakpoint *b, const char *exp,
 	{
 	  struct watchpoint *w = (struct watchpoint *) b;
 
-	  innermost_block.reset ();
 	  arg = exp;
 	  w->cond_exp = parse_exp_1 (&arg, 0, 0, 0);
 	  if (*arg)
@@ -10602,7 +10601,6 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   /* Parse the rest of the arguments.  From here on out, everything
      is in terms of a newly allocated string instead of the original
      ARG.  */
-  innermost_block.reset ();
   std::string expression (arg, exp_end - arg);
   exp_start = arg = expression.c_str ();
   expression_up exp = parse_exp_1 (&arg, 0, 0, 0);
@@ -10664,7 +10662,6 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   toklen = end_tok - tok;
   if (toklen >= 1 && strncmp (tok, "if", toklen) == 0)
     {
-      innermost_block.reset ();
       tok = cond_start = end_tok + 1;
       parse_exp_1 (&tok, 0, 0, 0);
 
