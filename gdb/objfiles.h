@@ -32,8 +32,8 @@
 #include <vector>
 #include "common/next-iterator.h"
 #include "common/safe-iterator.h"
+#include "bcache.h"
 
-struct bcache;
 struct htab;
 struct objfile_data;
 struct partial_symbol;

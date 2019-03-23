@@ -1,5 +1,9 @@
 2019-03-23  Tom Tromey  <tom@tromey.com>
 
+	* objfiles.h: Include bcache.h.
+
+2019-03-23  Tom Tromey  <tom@tromey.com>
+
 	* linespec.c (get_current_search_block): Use
 	scoped_restore_current_language.
 	* symmisc.c (dump_symtab): Use scoped_restore_current_language.
