@@ -1190,16 +1190,10 @@ iterate_over_all_matching_symtabs
 static const struct block *
 get_current_search_block (void)
 {
-  const struct block *block;
-  enum language save_language;
-
   /* get_selected_block can change the current language when there is
      no selected frame yet.  */
-  save_language = current_language->la_language;
-  block = get_selected_block (0);
-  set_language (save_language);
-
-  return block;
+  scoped_restore_current_language save_language;
+  return get_selected_block (0);
 }
 
 /* Iterate over static and global blocks.  */

@@ -384,13 +384,9 @@ dump_symtab (struct symtab *symtab, struct ui_file *outfile)
   if (symtab->language != language_unknown
       && symtab->language != language_auto)
     {
-      enum language saved_lang;
-
-      saved_lang = set_language (symtab->language);
-
+      scoped_restore_current_language save_lang;
+      set_language (symtab->language);
       dump_symtab_1 (symtab, outfile);
-
-      set_language (saved_lang);
     }
   else
     dump_symtab_1 (symtab, outfile);

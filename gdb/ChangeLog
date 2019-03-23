@@ -1,3 +1,9 @@
+2019-03-23  Tom Tromey  <tom@tromey.com>
+
+	* linespec.c (get_current_search_block): Use
+	scoped_restore_current_language.
+	* symmisc.c (dump_symtab): Use scoped_restore_current_language.
+
 2019-03-22  Alan Hayward  <alan.hayward@arm.com>
 	    Jiong Wang  <jiong.wang@arm.com>
 
