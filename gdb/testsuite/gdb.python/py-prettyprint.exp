@@ -49,9 +49,9 @@ proc run_lang_tests {exefile lang} {
 
     gdb_test_no_output "set print pretty on"
 
-    gdb_test "b [gdb_get_line_number {break to inspect} ${testfile}.c ]" \
-	".*Breakpoint.*"
-    gdb_test "continue" ".*Breakpoint.*"
+    gdb_breakpoint [gdb_get_line_number "break to inspect" ${testfile}.c]
+    gdb_continue_to_breakpoint "break to inspect" ".*break to inspect.*"
+
 
     set remote_python_file [gdb_remote_download host \
 				${srcdir}/${subdir}/${testfile}.py]
@@ -78,12 +78,15 @@ proc run_lang_tests {exefile lang} {
 	gdb_test "print ref" "= a=<15> b=< a=<8> b=<$hex>>"
 	gdb_test "print derived" \
 	    " = \{.*<Vbase1> = pp class name: Vbase1.*<Vbase2> = \{.*<VirtualTest> = pp value variable is: 1,.*members of Vbase2:.*_vptr.Vbase2 = $hex.*<Vbase3> = \{.*members of Vbase3.*members of Derived:.*value = 2.*"
-	gdb_test "print ns " "\"embedded\\\\000null\\\\000string\""
-	gdb_py_test_silent_cmd "set print elements 3" "" 1
-	gdb_test "print ns" "emb\.\.\.."
-	gdb_py_test_silent_cmd "set print elements 10" "" 1
-	gdb_test "print ns" "embedded\\\\000n\.\.\.."
-	gdb_py_test_silent_cmd "set print elements 200" "" 1
+	gdb_test "print ns " "\"embedded\\\\000null\\\\000string\"" \
+	    "print ns with default element limit"
+	gdb_test_no_output "set print elements 3"
+	gdb_test "print ns" "emb\.\.\.." \
+	    "print ns with element limit of 3"
+	gdb_test_no_output "set print elements 10"
+	gdb_test "print ns" "embedded\\\\000n\.\.\.." \
+	    "print ns with element limit of 10"
+	gdb_test_no_output "set print elements 200"
     }
 
     if { ![is_address_zero_readable] } {
@@ -168,9 +171,8 @@ gdb_continue_to_breakpoint "eval-break" ".* eval-break .*"
 
 gdb_test "info locals" "eval9 = eval=<123456789>"
 
-gdb_test "b [gdb_get_line_number {break to inspect} ${testfile}.c ]" \
-    ".*Breakpoint.*"
-gdb_test "continue" ".*Breakpoint.*"
+gdb_breakpoint [gdb_get_line_number "break to inspect" ${testfile}.c ]
+gdb_continue_to_breakpoint "break to inspect" ".*break to inspect.*"
 
 gdb_test "print ss" " = a=< a=<1> b=<$hex>> b=< a=<2> b=<$hex>>" \
     "print ss enabled #1"

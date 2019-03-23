@@ -1,5 +1,12 @@
 2019-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.python/py-prettyprint.exp: Use gdb_breakpoint and
+	gdb_continue_to_breakpoint more throughout this test.
+	(run_lang_tests) Supply unique test names, and use
+	gdb_test_no_output.
+
+2019-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.base/finish-pretty.exp: Update expected results.
 	* gdb.base/pretty-print.c: New file.
 	* gdb.base/pretty-print.exp: New file.
