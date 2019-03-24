@@ -68,6 +68,9 @@
 
 static struct parser_state *pstate = NULL;
 
+/* Depth of parentheses.  */
+static int paren_depth;
+
 int yyparse (void);
 
 static int yylex (void);
@@ -1328,6 +1331,7 @@ f_parse (struct parser_state *par_state)
 							parser_debug);
   gdb_assert (par_state != NULL);
   pstate = par_state;
+  paren_depth = 0;
 
   return yyparse ();
 }

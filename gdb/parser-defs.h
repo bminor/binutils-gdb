@@ -356,10 +356,6 @@ extern const char *lexptr;
    Currently used only for error reporting.  */
 extern const char *prev_lexptr;
 
-/* Current depth in parentheses within the expression.  */
-
-extern int paren_depth;
-
 /* Nonzero means stop parsing on first comma (if not within parentheses).  */
 
 extern int comma_terminates;

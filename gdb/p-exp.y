@@ -68,6 +68,9 @@
 
 static struct parser_state *pstate = NULL;
 
+/* Depth of parentheses.  */
+static int paren_depth;
+
 int yyparse (void);
 
 static int yylex (void);
@@ -1723,6 +1726,7 @@ pascal_parse (struct parser_state *par_state)
   scoped_restore pstate_restore = make_scoped_restore (&pstate);
   gdb_assert (par_state != NULL);
   pstate = par_state;
+  paren_depth = 0;
 
   return yyparse ();
 }

@@ -71,7 +71,6 @@ int arglist_len;
 static struct type_stack type_stack;
 const char *lexptr;
 const char *prev_lexptr;
-int paren_depth;
 int comma_terminates;
 
 /* True if parsing an expression to attempt completion.  */
@@ -1117,7 +1116,6 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
   lexptr = *stringptr;
   prev_lexptr = NULL;
 
-  paren_depth = 0;
   type_stack.elements.clear ();
   expout_last_struct = -1;
   expout_tag_completion_type = TYPE_CODE_UNDEF;

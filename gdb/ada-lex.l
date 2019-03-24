@@ -84,6 +84,9 @@ static void rewind_to_char (int);
 
 static int find_dot_all (const char *);
 
+/* Depth of parentheses.  */
+static int paren_depth;
+
 %}
 
 %option case-insensitive interactive nodefault
@@ -305,6 +308,7 @@ static void
 lexer_init (FILE *inp)
 {
   BEGIN INITIAL;
+  paren_depth = 0;
   yyrestart (inp);
 }
 

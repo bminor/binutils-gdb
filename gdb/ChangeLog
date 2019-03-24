@@ -1,5 +1,28 @@
 2019-04-04  Tom Tromey  <tom@tromey.com>
 
+	* rust-exp.y (struct rust_parser) <paren_depth>: New member.
+	(rustyylex, rust_lex_test_init, rust_lex_test_one)
+	(rust_lex_test_sequence, rust_lex_test_push_back): Update.
+	* parser-defs.h (paren_depth): Don't declare.
+	* parse.c (paren_depth): Remove global.
+	(parse_exp_in_context): Update.
+	* p-exp.y (paren_depth): New global.
+	(pascal_parse): Initialize it.
+	* m2-exp.y (paren_depth): New global.
+	(m2_parse): Initialize it.
+	* go-exp.y (paren_depth): New global.
+	(go_parse): Initialize it.
+	* f-exp.y (paren_depth): New global.
+	(f_parse): Initialize it.
+	* d-exp.y (paren_depth): New global.
+	(d_parse): Initialize it.
+	* c-exp.y (paren_depth): New global.
+	(c_parse): Initialize it.
+	* ada-lex.l (paren_depth): New global.
+	(lexer_init): Initialize it.
+
+2019-04-04  Tom Tromey  <tom@tromey.com>
+
 	* rust-exp.y (rust_parser::crate_name, rust_parser::super_name)
 	(rust_parser::convert_ast_to_type)
 	(rust_parser::convert_ast_to_expression, rust_lex_tests): Update.

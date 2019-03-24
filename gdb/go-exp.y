@@ -1001,6 +1001,9 @@ static int saw_name_at_eof;
    do field name completion.  */
 static int last_was_structop;
 
+/* Depth of parentheses.  */
+static int paren_depth;
+
 /* Read one token, getting characters through lexptr.  */
 
 static int
@@ -1566,6 +1569,7 @@ go_parse (struct parser_state *par_state)
   /* Initialize some state used by the lexer.  */
   last_was_structop = 0;
   saw_name_at_eof = 0;
+  paren_depth = 0;
 
   token_fifo.clear ();
   popping = 0;

@@ -300,6 +300,9 @@ struct rust_parser
 
   /* The parser state gdb gave us.  */
   struct parser_state *pstate;
+
+  /* Depth of parentheses.  */
+  int paren_depth = 0;
 };
 
 /* Rust AST operations.  We build a tree of these; then lower them to
@@ -1664,14 +1667,14 @@ rustyylex (YYSTYPE *lvalp, rust_parser *parser)
   else if (lexptr[0] == '}' || lexptr[0] == ']')
     {
       /* Falls through to lex_operator.  */
-      --paren_depth;
+      --parser->paren_depth;
     }
   else if (lexptr[0] == '(' || lexptr[0] == '{')
     {
       /* Falls through to lex_operator.  */
-      ++paren_depth;
+      ++parser->paren_depth;
     }
-  else if (lexptr[0] == ',' && comma_terminates && paren_depth == 0)
+  else if (lexptr[0] == ',' && comma_terminates && parser->paren_depth == 0)
     return 0;
 
   return lex_operator (lvalp);
@@ -2552,11 +2555,11 @@ rustyyerror (rust_parser *parser, const char *msg)
 /* Initialize the lexer for testing.  */
 
 static void
-rust_lex_test_init (const char *input)
+rust_lex_test_init (rust_parser *parser, const char *input)
 {
   prev_lexptr = NULL;
   lexptr = input;
-  paren_depth = 0;
+  parser->paren_depth = 0;
 }
 
 /* A test helper that lexes a string, expecting a single token.  It
@@ -2568,7 +2571,7 @@ rust_lex_test_one (rust_parser *parser, const char *input, int expected)
   int token;
   RUSTSTYPE result;
 
-  rust_lex_test_init (input);
+  rust_lex_test_init (parser, input);
 
   token = rustyylex (&result, parser);
   SELF_CHECK (token == expected);
@@ -2632,7 +2635,7 @@ rust_lex_test_sequence (rust_parser *parser, const char *input, int len,
   int i;
 
   lexptr = input;
-  paren_depth = 0;
+  parser->paren_depth = 0;
 
   for (i = 0; i < len; ++i)
     {
@@ -2686,7 +2689,7 @@ rust_lex_test_push_back (rust_parser *parser)
   int token;
   RUSTSTYPE lval;
 
-  rust_lex_test_init (">>=");
+  rust_lex_test_init (parser, ">>=");
 
   token = rustyylex (&lval, parser);
   SELF_CHECK (token == COMPOUND_ASSIGN);

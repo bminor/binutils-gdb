@@ -763,6 +763,9 @@ static struct keyword keytab[] =
 };
 
 
+/* Depth of parentheses.  */
+static int paren_depth;
+
 /* Read one token, getting characters through lexptr.  */
 
 /* This is where we will check to make sure that the language and the
@@ -1039,6 +1042,7 @@ m2_parse (struct parser_state *par_state)
   scoped_restore pstate_restore = make_scoped_restore (&pstate);
   gdb_assert (par_state != NULL);
   pstate = par_state;
+  paren_depth = 0;
 
   return yyparse ();
 }
