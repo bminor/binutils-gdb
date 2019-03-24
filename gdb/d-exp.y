@@ -1288,7 +1288,7 @@ lex_one_token (struct parser_state *par_state)
     return DOLLAR_VARIABLE;
 
   yylval.tsym.type
-    = language_lookup_primitive_type (parse_language (par_state),
+    = language_lookup_primitive_type (par_state->language (),
 				      par_state->gdbarch (), copy);
   if (yylval.tsym.type != NULL)
     return TYPENAME;

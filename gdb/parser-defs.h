@@ -32,8 +32,6 @@ struct internalvar;
 
 extern int parser_debug;
 
-#define parse_language(ps) ((ps)->expout->language_defn)
-
 struct parser_state
 {
   /* Constructor.  LANG is the language used to parse the expression.
@@ -53,6 +51,13 @@ struct parser_state
   struct gdbarch *gdbarch ()
   {
     return expout->gdbarch;
+  }
+
+  /* Return the language that was passed to the constructor.  */
+
+  const struct language_defn *language ()
+  {
+    return expout->language_defn;
   }
 
   /* The size of the expression above.  */

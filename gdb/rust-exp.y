@@ -205,7 +205,7 @@ struct rust_parser
   /* Return the parser's language.  */
   const struct language_defn *language () const
   {
-    return parse_language (pstate);
+    return pstate->language ();
   }
 
   /* Return the parser's gdbarch.  */
@@ -2280,7 +2280,7 @@ rust_parser::convert_ast_to_expression (const struct rust_op *operation,
 	{
 	  struct type *type;
 
-	  type = language_lookup_primitive_type (parse_language (pstate),
+	  type = language_lookup_primitive_type (pstate->language (),
 						 pstate->gdbarch (),
 						 "()");
 

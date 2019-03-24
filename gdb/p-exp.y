@@ -591,7 +591,7 @@ exp	:	THIS
 			  write_exp_elt_opcode (pstate, OP_THIS);
 			  /* We need type of this.  */
 			  this_val
-			    = value_of_this_silent (parse_language (pstate));
+			    = value_of_this_silent (pstate->language ());
 			  if (this_val)
 			    this_type = value_type (this_val);
 			  else
@@ -731,7 +731,7 @@ variable:	name_not_typename
 			      write_exp_elt_opcode (pstate, STRUCTOP_PTR);
 			      /* We need type of this.  */
 			      this_val
-				= value_of_this_silent (parse_language (pstate));
+				= value_of_this_silent (pstate->language ());
 			      if (this_val)
 				this_type = value_type (this_val);
 			      else
@@ -1675,7 +1675,7 @@ yylex (void)
 	  return TYPENAME;
         }
     yylval.tsym.type
-      = language_lookup_primitive_type (parse_language (pstate),
+      = language_lookup_primitive_type (pstate->language (),
 					pstate->gdbarch (), tmp);
     if (yylval.tsym.type != NULL)
       {

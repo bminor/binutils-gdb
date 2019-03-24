@@ -1276,7 +1276,7 @@ yylex (void)
 
 	result = lookup_symbol (tmp, expression_context_block,
 				lookup_domains[i],
-				parse_language (pstate)->la_language
+				pstate->language ()->la_language
 				== language_cplus
 				  ? &is_a_field_of_this : NULL);
 	if (result.symbol && SYMBOL_CLASS (result.symbol) == LOC_TYPEDEF)
@@ -1290,7 +1290,7 @@ yylex (void)
       }
 
     yylval.tsym.type
-      = language_lookup_primitive_type (parse_language (pstate),
+      = language_lookup_primitive_type (pstate->language (),
 					pstate->gdbarch (), tmp);
     if (yylval.tsym.type != NULL)
       return TYPENAME;

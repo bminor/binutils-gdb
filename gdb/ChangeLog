@@ -1,5 +1,23 @@
 2019-04-04  Tom Tromey  <tom@tromey.com>
 
+	* rust-exp.y: Replace "parse_language" with method call.
+	* p-exp.y: 
+	(yylex): Replace "parse_language" with method call.
+	* m2-exp.y: 
+	(yylex): Replace "parse_language" with method call.
+	* go-exp.y (classify_name): Replace "parse_language" with method
+	call.
+	* f-exp.y (yylex): Replace "parse_language" with method call.
+	* d-exp.y (lex_one_token): Replace "parse_language" with method
+	call.
+	* c-exp.y: 
+	(lex_one_token, classify_name, yylex): Replace "parse_language"
+	with method call.
+	* ada-exp.y (find_primitive_type, type_char)
+	(type_system_address): Replace "parse_language" with method call.
+
+2019-04-04  Tom Tromey  <tom@tromey.com>
+
 	* rust-exp.y: Replace "parse_gdbarch" with method call.
 	* parse.c (write_dollar_variable, insert_type_address_space):
 	Replace "parse_gdbarch" with method call.
