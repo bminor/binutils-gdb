@@ -2013,6 +2013,11 @@ target_preopen (int from_tty)
 void
 target_detach (inferior *inf, int from_tty)
 {
+  /* After we have detached, we will clear the register cache for this inferior
+     by calling registers_changed_ptid.  We must save the pid_ptid before
+     detaching, as the target detach method will clear inf->pid.  */
+  ptid_t save_pid_ptid = ptid_t (inf->pid);
+
   /* As long as some to_detach implementations rely on the current_inferior
      (either directly, or indirectly, like through target_gdbarch or by
      reading memory), INF needs to be the current inferior.  When that
@@ -2033,14 +2038,11 @@ target_detach (inferior *inf, int from_tty)
 
   current_top_target ()->detach (inf, from_tty);
 
-  /* After we have detached, clear the register cache for this inferior.  */
-  ptid_t pid_ptid = ptid_t (inf->pid);
-
-  registers_changed_ptid (pid_ptid);
+  registers_changed_ptid (save_pid_ptid);
 
   /* We have to ensure we have no frame cache left.  Normally,
-     registers_changed_ptid (pid_ptid) calls reinit_frame_cache when
-     inferior_ptid matches pid_ptid, but in our case, it does not
+     registers_changed_ptid (save_pid_ptid) calls reinit_frame_cache when
+     inferior_ptid matches save_pid_ptid, but in our case, it does not
      call it, as inferior_ptid has been reset.  */
   reinit_frame_cache ();
 }
