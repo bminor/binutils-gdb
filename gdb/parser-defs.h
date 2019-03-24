@@ -32,7 +32,6 @@ struct internalvar;
 
 extern int parser_debug;
 
-#define parse_gdbarch(ps) ((ps)->expout->gdbarch)
 #define parse_language(ps) ((ps)->expout->language_defn)
 
 struct parser_state
@@ -48,6 +47,13 @@ struct parser_state
   /* Resize the allocated expression to the correct size, and return
      it as an expression_up -- passing ownership to the caller.  */
   ATTRIBUTE_UNUSED_RESULT expression_up release ();
+
+  /* Return the gdbarch that was passed to the constructor.  */
+
+  struct gdbarch *gdbarch ()
+  {
+    return expout->gdbarch;
+  }
 
   /* The size of the expression above.  */
 

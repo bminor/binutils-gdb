@@ -65,7 +65,7 @@
 #include "charset.h"
 #include "block.h"
 
-#define parse_type(ps) builtin_type (parse_gdbarch (ps))
+#define parse_type(ps) builtin_type (ps->gdbarch ())
 
 /* Remap normal yacc parser interface names (yyparse, yylex, yyerror,
    etc).  */
@@ -603,7 +603,7 @@ type  /* Implements (approximately): [*] type-specifier */
 					      expression_context_block); }
 */
 	|	BYTE_KEYWORD
-			{ $$ = builtin_go_type (parse_gdbarch (pstate))
+			{ $$ = builtin_go_type (pstate->gdbarch ())
 			    ->builtin_uint8; }
 	;
 
@@ -664,7 +664,7 @@ parse_number (struct parser_state *par_state,
   if (parsed_float)
     {
       const struct builtin_go_type *builtin_go_types
-	= builtin_go_type (parse_gdbarch (par_state));
+	= builtin_go_type (par_state->gdbarch ());
 
       /* Handle suffixes: 'f' for float32, 'l' for long double.
 	 FIXME: This appears to be an extension -- do we want this?  */
@@ -803,10 +803,10 @@ parse_number (struct parser_state *par_state,
 
   un = (ULONGEST)n >> 2;
   if (long_p == 0
-      && (un >> (gdbarch_int_bit (parse_gdbarch (par_state)) - 2)) == 0)
+      && (un >> (gdbarch_int_bit (par_state->gdbarch ()) - 2)) == 0)
     {
       high_bit
-        = ((ULONGEST)1) << (gdbarch_int_bit (parse_gdbarch (par_state)) - 1);
+        = ((ULONGEST)1) << (gdbarch_int_bit (par_state->gdbarch ()) - 1);
 
       /* A large decimal (not hex or octal) constant (between INT_MAX
 	 and UINT_MAX) is a long or unsigned long, according to ANSI,
@@ -818,10 +818,10 @@ parse_number (struct parser_state *par_state,
       signed_type = parse_type (par_state)->builtin_int;
     }
   else if (long_p <= 1
-	   && (un >> (gdbarch_long_bit (parse_gdbarch (par_state)) - 2)) == 0)
+	   && (un >> (gdbarch_long_bit (par_state->gdbarch ()) - 2)) == 0)
     {
       high_bit
-	= ((ULONGEST)1) << (gdbarch_long_bit (parse_gdbarch (par_state)) - 1);
+	= ((ULONGEST)1) << (gdbarch_long_bit (par_state->gdbarch ()) - 1);
       unsigned_type = parse_type (par_state)->builtin_unsigned_long;
       signed_type = parse_type (par_state)->builtin_long;
     }
@@ -829,11 +829,11 @@ parse_number (struct parser_state *par_state,
     {
       int shift;
       if (sizeof (ULONGEST) * HOST_CHAR_BIT
-	  < gdbarch_long_long_bit (parse_gdbarch (par_state)))
+	  < gdbarch_long_long_bit (par_state->gdbarch ()))
 	/* A long long does not fit in a LONGEST.  */
 	shift = (sizeof (ULONGEST) * HOST_CHAR_BIT - 1);
       else
-	shift = (gdbarch_long_long_bit (parse_gdbarch (par_state)) - 1);
+	shift = (gdbarch_long_long_bit (par_state->gdbarch ()) - 1);
       high_bit = (ULONGEST) 1 << shift;
       unsigned_type = parse_type (par_state)->builtin_unsigned_long_long;
       signed_type = parse_type (par_state)->builtin_long_long;
@@ -1401,7 +1401,7 @@ classify_name (struct parser_state *par_state, const struct block *block)
 
   /* Try primitive types first so they win over bad/weird debug info.  */
   type = language_lookup_primitive_type (parse_language (par_state),
-					 parse_gdbarch (par_state),
+					 par_state->gdbarch (),
 					 copy);
   if (type != NULL)
     {

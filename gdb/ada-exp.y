@@ -48,7 +48,7 @@
 #include "frame.h"
 #include "block.h"
 
-#define parse_type(ps) builtin_type (parse_gdbarch (ps))
+#define parse_type(ps) builtin_type (ps->gdbarch ())
 
 /* Remap normal yacc parser interface names (yyparse, yylex, yyerror,
    etc).  */
@@ -1028,7 +1028,7 @@ find_primitive_type (struct parser_state *par_state, char *name)
 {
   struct type *type;
   type = language_lookup_primitive_type (parse_language (par_state),
-					 parse_gdbarch (par_state),
+					 par_state->gdbarch (),
 					 name);
   if (type == NULL && strcmp ("system__address", name) == 0)
     type = type_system_address (par_state);
@@ -1443,7 +1443,7 @@ static struct type *
 type_char (struct parser_state *par_state)
 {
   return language_string_char_type (parse_language (par_state),
-				    parse_gdbarch (par_state));
+				    par_state->gdbarch ());
 }
 
 static struct type *
@@ -1457,7 +1457,7 @@ type_system_address (struct parser_state *par_state)
 {
   struct type *type 
     = language_lookup_primitive_type (parse_language (par_state),
-				      parse_gdbarch (par_state),
+				      par_state->gdbarch (),
 				      "system__address");
   return  type != NULL ? type : parse_type (par_state)->builtin_data_ptr;
 }

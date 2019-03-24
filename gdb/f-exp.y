@@ -55,8 +55,8 @@
 #include <ctype.h>
 #include <algorithm>
 
-#define parse_type(ps) builtin_type (parse_gdbarch (ps))
-#define parse_f_type(ps) builtin_f_type (parse_gdbarch (ps))
+#define parse_type(ps) builtin_type (ps->gdbarch ())
+#define parse_f_type(ps) builtin_f_type (ps->gdbarch ())
 
 /* Remap normal yacc parser interface names (yyparse, yylex, yyerror,
    etc).  */
@@ -763,22 +763,22 @@ parse_number (struct parser_state *par_state,
      are the same size.  So we shift it twice, with fewer bits
      each time, for the same result.  */
   
-  if ((gdbarch_int_bit (parse_gdbarch (par_state))
-       != gdbarch_long_bit (parse_gdbarch (par_state))
+  if ((gdbarch_int_bit (par_state->gdbarch ())
+       != gdbarch_long_bit (par_state->gdbarch ())
        && ((n >> 2)
-	   >> (gdbarch_int_bit (parse_gdbarch (par_state))-2))) /* Avoid
+	   >> (gdbarch_int_bit (par_state->gdbarch ())-2))) /* Avoid
 							    shift warning */
       || long_p)
     {
       high_bit = ((ULONGEST)1)
-      << (gdbarch_long_bit (parse_gdbarch (par_state))-1);
+      << (gdbarch_long_bit (par_state->gdbarch ())-1);
       unsigned_type = parse_type (par_state)->builtin_unsigned_long;
       signed_type = parse_type (par_state)->builtin_long;
     }
   else 
     {
       high_bit =
-	((ULONGEST)1) << (gdbarch_int_bit (parse_gdbarch (par_state)) - 1);
+	((ULONGEST)1) << (gdbarch_int_bit (par_state->gdbarch ()) - 1);
       unsigned_type = parse_type (par_state)->builtin_unsigned_int;
       signed_type = parse_type (par_state)->builtin_int;
     }    
@@ -1291,7 +1291,7 @@ yylex (void)
 
     yylval.tsym.type
       = language_lookup_primitive_type (parse_language (pstate),
-					parse_gdbarch (pstate), tmp);
+					pstate->gdbarch (), tmp);
     if (yylval.tsym.type != NULL)
       return TYPENAME;
     

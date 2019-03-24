@@ -370,11 +370,11 @@ processInt (struct parser_state *par_state, const char *base0,
       exp -= 1;
     }
 
-  if ((result >> (gdbarch_int_bit (parse_gdbarch (par_state))-1)) == 0)
+  if ((result >> (gdbarch_int_bit (par_state->gdbarch ())-1)) == 0)
     yylval.typed_val.type = type_int (par_state);
-  else if ((result >> (gdbarch_long_bit (parse_gdbarch (par_state))-1)) == 0)
+  else if ((result >> (gdbarch_long_bit (par_state->gdbarch ())-1)) == 0)
     yylval.typed_val.type = type_long (par_state);
-  else if (((result >> (gdbarch_long_bit (parse_gdbarch (par_state))-1)) >> 1) == 0)
+  else if (((result >> (gdbarch_long_bit (par_state->gdbarch ())-1)) >> 1) == 0)
     {
       /* We have a number representable as an unsigned integer quantity.
          For consistency with the C treatment, we will treat it as an
@@ -384,7 +384,7 @@ processInt (struct parser_state *par_state, const char *base0,
          assignment does the trick (no, it doesn't; read the reference manual).
        */
       yylval.typed_val.type
-	= builtin_type (parse_gdbarch (par_state))->builtin_unsigned_long;
+	= builtin_type (par_state->gdbarch ())->builtin_unsigned_long;
       if (result & LONGEST_SIGN)
 	yylval.typed_val.val =
 	  (LONGEST) (result & ~LONGEST_SIGN)

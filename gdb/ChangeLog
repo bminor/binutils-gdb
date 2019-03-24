@@ -1,5 +1,28 @@
 2019-04-04  Tom Tromey  <tom@tromey.com>
 
+	* rust-exp.y: Replace "parse_gdbarch" with method call.
+	* parse.c (write_dollar_variable, insert_type_address_space):
+	Replace "parse_gdbarch" with method call.
+	* p-exp.y (parse_type, yylex): Replace "parse_gdbarch" with method
+	call.
+	* objc-lang.c (end_msglist): Replace "parse_gdbarch" with method
+	call.
+	* m2-exp.y (parse_type, parse_m2_type, yylex): Replace
+	"parse_gdbarch" with method call.
+	* go-exp.y (parse_type, classify_name): Replace "parse_gdbarch"
+	with method call.
+	* f-exp.y (parse_type, parse_f_type, yylex): Replace
+	"parse_gdbarch" with method call.
+	* d-exp.y (parse_type, parse_d_type, lex_one_token): Replace
+	"parse_gdbarch" with method call.
+	* c-exp.y (parse_type, parse_number, classify_name): Replace
+	"parse_gdbarch" with method call.
+	* ada-lex.l: Replace "parse_gdbarch" with method call.
+	* ada-exp.y (parse_type, find_primitive_type, type_char)
+	(type_system_address): Replace "parse_gdbarch" with method call.
+
+2019-04-04  Tom Tromey  <tom@tromey.com>
+
 	* dtrace-probe.c (dtrace_probe::build_arg_exprs): Update.
 	* stap-probe.c (stap_parse_argument): Update.
 	* stap-probe.h (struct stap_parse_info) <stap_parse_info>: Remove

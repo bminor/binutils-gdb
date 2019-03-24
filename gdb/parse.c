@@ -631,7 +631,7 @@ write_dollar_variable (struct parser_state *ps, struct stoken str)
 
   /* Handle tokens that refer to machine registers:
      $ followed by a register name.  */
-  i = user_reg_map_name_to_regnum (parse_gdbarch (ps),
+  i = user_reg_map_name_to_regnum (ps->gdbarch (),
 				   str.ptr + 1, str.length - 1);
   if (i >= 0)
     goto handle_register;
@@ -1420,7 +1420,7 @@ insert_type_address_space (struct parser_state *pstate, char *string)
 
   element.piece = tp_space_identifier;
   insert_into_type_stack (slot, element);
-  element.int_val = address_space_name_to_int (parse_gdbarch (pstate),
+  element.int_val = address_space_name_to_int (pstate->gdbarch (),
 					       string);
   insert_into_type_stack (slot, element);
 }

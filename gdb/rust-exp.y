@@ -211,7 +211,7 @@ struct rust_parser
   /* Return the parser's gdbarch.  */
   struct gdbarch *arch () const
   {
-    return parse_gdbarch (pstate);
+    return pstate->gdbarch ();
   }
 
   /* A helper to look up a Rust type, or fail.  This only works for
@@ -2281,7 +2281,7 @@ rust_parser::convert_ast_to_expression (const struct rust_op *operation,
 	  struct type *type;
 
 	  type = language_lookup_primitive_type (parse_language (pstate),
-						 parse_gdbarch (pstate),
+						 pstate->gdbarch (),
 						 "()");
 
 	  write_exp_elt_opcode (pstate, OP_LONG);

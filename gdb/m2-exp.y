@@ -48,8 +48,8 @@
 #include "objfiles.h" /* For have_full_symbols and have_partial_symbols */
 #include "block.h"
 
-#define parse_type(ps) builtin_type (parse_gdbarch (ps))
-#define parse_m2_type(ps) builtin_m2_type (parse_gdbarch (ps))
+#define parse_type(ps) builtin_type (ps->gdbarch ())
+#define parse_m2_type(ps) builtin_m2_type (ps->gdbarch ())
 
 /* Remap normal yacc parser interface names (yyparse, yylex, yyerror,
    etc).  */
@@ -597,7 +597,7 @@ variable:	NAME
 type
 	:	TYPENAME
 			{ $$ = lookup_typename (parse_language (pstate),
-						parse_gdbarch (pstate),
+						pstate->gdbarch (),
 						copy_name ($1),
 						expression_context_block, 0); }
 
@@ -968,7 +968,7 @@ yylex (void)
     sym = lookup_symbol (tmp, expression_context_block, VAR_DOMAIN, 0).symbol;
     if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
       return BLOCKNAME;
-    if (lookup_typename (parse_language (pstate), parse_gdbarch (pstate),
+    if (lookup_typename (parse_language (pstate), pstate->gdbarch (),
 			 copy_name (yylval.sval),
 			 expression_context_block, 1))
       return TYPENAME;

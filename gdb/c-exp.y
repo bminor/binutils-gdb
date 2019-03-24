@@ -54,7 +54,7 @@
 #include "typeprint.h"
 #include "cp-abi.h"
 
-#define parse_type(ps) builtin_type (parse_gdbarch (ps))
+#define parse_type(ps) builtin_type (ps->gdbarch ())
 
 /* Remap normal yacc parser interface names (yyparse, yylex, yyerror,
    etc).  */
@@ -470,7 +470,7 @@ exp	: 	OBJC_LBRAC TYPENAME
 			{
 			  CORE_ADDR theclass;
 
-			  theclass = lookup_objc_class (parse_gdbarch (pstate),
+			  theclass = lookup_objc_class (pstate->gdbarch (),
 						     copy_name ($2.stoken));
 			  if (theclass == 0)
 			    error (_("%s is not an ObjC Class"),
@@ -816,7 +816,7 @@ exp	:	SIZEOF '(' type ')'	%prec UNARY
 			  write_exp_elt_opcode (pstate, OP_LONG);
 			  write_exp_elt_type (pstate, lookup_signed_typename
 					      (parse_language (pstate),
-					       parse_gdbarch (pstate),
+					       pstate->gdbarch (),
 					       "int"));
 			  type = check_typedef (type);
 
@@ -1285,117 +1285,117 @@ typebase
 			{ $$ = $1.type; }
 	|	INT_KEYWORD
 			{ $$ = lookup_signed_typename (parse_language (pstate),
-						       parse_gdbarch (pstate),
+						       pstate->gdbarch (),
 						       "int"); }
 	|	LONG
 			{ $$ = lookup_signed_typename (parse_language (pstate),
-						       parse_gdbarch (pstate),
+						       pstate->gdbarch (),
 						       "long"); }
 	|	SHORT
 			{ $$ = lookup_signed_typename (parse_language (pstate),
-						       parse_gdbarch (pstate),
+						       pstate->gdbarch (),
 						       "short"); }
 	|	LONG INT_KEYWORD
 			{ $$ = lookup_signed_typename (parse_language (pstate),
-						       parse_gdbarch (pstate),
+						       pstate->gdbarch (),
 						       "long"); }
 	|	LONG SIGNED_KEYWORD INT_KEYWORD
 			{ $$ = lookup_signed_typename (parse_language (pstate),
-						       parse_gdbarch (pstate),
+						       pstate->gdbarch (),
 						       "long"); }
 	|	LONG SIGNED_KEYWORD
 			{ $$ = lookup_signed_typename (parse_language (pstate),
-						       parse_gdbarch (pstate),
+						       pstate->gdbarch (),
 						       "long"); }
 	|	SIGNED_KEYWORD LONG INT_KEYWORD
 			{ $$ = lookup_signed_typename (parse_language (pstate),
-						       parse_gdbarch (pstate),
+						       pstate->gdbarch (),
 						       "long"); }
 	|	UNSIGNED LONG INT_KEYWORD
 			{ $$ = lookup_unsigned_typename (parse_language (pstate),
-							 parse_gdbarch (pstate),
+							 pstate->gdbarch (),
 							 "long"); }
 	|	LONG UNSIGNED INT_KEYWORD
 			{ $$ = lookup_unsigned_typename (parse_language (pstate),
-							 parse_gdbarch (pstate),
+							 pstate->gdbarch (),
 							 "long"); }
 	|	LONG UNSIGNED
 			{ $$ = lookup_unsigned_typename (parse_language (pstate),
-							 parse_gdbarch (pstate),
+							 pstate->gdbarch (),
 							 "long"); }
 	|	LONG LONG
 			{ $$ = lookup_signed_typename (parse_language (pstate),
-						       parse_gdbarch (pstate),
+						       pstate->gdbarch (),
 						       "long long"); }
 	|	LONG LONG INT_KEYWORD
 			{ $$ = lookup_signed_typename (parse_language (pstate),
-						       parse_gdbarch (pstate),
+						       pstate->gdbarch (),
 						       "long long"); }
 	|	LONG LONG SIGNED_KEYWORD INT_KEYWORD
 			{ $$ = lookup_signed_typename (parse_language (pstate),
-						       parse_gdbarch (pstate),
+						       pstate->gdbarch (),
 						       "long long"); }
 	|	LONG LONG SIGNED_KEYWORD
 			{ $$ = lookup_signed_typename (parse_language (pstate),
-						       parse_gdbarch (pstate),
+						       pstate->gdbarch (),
 						       "long long"); }
 	|	SIGNED_KEYWORD LONG LONG
 			{ $$ = lookup_signed_typename (parse_language (pstate),
-						       parse_gdbarch (pstate),
+						       pstate->gdbarch (),
 						       "long long"); }
 	|	SIGNED_KEYWORD LONG LONG INT_KEYWORD
 			{ $$ = lookup_signed_typename (parse_language (pstate),
-						       parse_gdbarch (pstate),
+						       pstate->gdbarch (),
 						       "long long"); }
 	|	UNSIGNED LONG LONG
 			{ $$ = lookup_unsigned_typename (parse_language (pstate),
-							 parse_gdbarch (pstate),
+							 pstate->gdbarch (),
 							 "long long"); }
 	|	UNSIGNED LONG LONG INT_KEYWORD
 			{ $$ = lookup_unsigned_typename (parse_language (pstate),
-							 parse_gdbarch (pstate),
+							 pstate->gdbarch (),
 							 "long long"); }
 	|	LONG LONG UNSIGNED
 			{ $$ = lookup_unsigned_typename (parse_language (pstate),
-							 parse_gdbarch (pstate),
+							 pstate->gdbarch (),
 							 "long long"); }
 	|	LONG LONG UNSIGNED INT_KEYWORD
 			{ $$ = lookup_unsigned_typename (parse_language (pstate),
-							 parse_gdbarch (pstate),
+							 pstate->gdbarch (),
 							 "long long"); }
 	|	SHORT INT_KEYWORD
 			{ $$ = lookup_signed_typename (parse_language (pstate),
-						       parse_gdbarch (pstate),
+						       pstate->gdbarch (),
 						       "short"); }
 	|	SHORT SIGNED_KEYWORD INT_KEYWORD
 			{ $$ = lookup_signed_typename (parse_language (pstate),
-						       parse_gdbarch (pstate),
+						       pstate->gdbarch (),
 						       "short"); }
 	|	SHORT SIGNED_KEYWORD
 			{ $$ = lookup_signed_typename (parse_language (pstate),
-						       parse_gdbarch (pstate),
+						       pstate->gdbarch (),
 						       "short"); }
 	|	UNSIGNED SHORT INT_KEYWORD
 			{ $$ = lookup_unsigned_typename (parse_language (pstate),
-							 parse_gdbarch (pstate),
+							 pstate->gdbarch (),
 							 "short"); }
 	|	SHORT UNSIGNED
 			{ $$ = lookup_unsigned_typename (parse_language (pstate),
-							 parse_gdbarch (pstate),
+							 pstate->gdbarch (),
 							 "short"); }
 	|	SHORT UNSIGNED INT_KEYWORD
 			{ $$ = lookup_unsigned_typename (parse_language (pstate),
-							 parse_gdbarch (pstate),
+							 pstate->gdbarch (),
 							 "short"); }
 	|	DOUBLE_KEYWORD
 			{ $$ = lookup_typename (parse_language (pstate),
-						parse_gdbarch (pstate),
+						pstate->gdbarch (),
 						"double",
 						NULL,
 						0); }
 	|	LONG DOUBLE_KEYWORD
 			{ $$ = lookup_typename (parse_language (pstate),
-						parse_gdbarch (pstate),
+						pstate->gdbarch (),
 						"long double",
 						NULL,
 						0); }
@@ -1457,19 +1457,19 @@ typebase
 			}
 	|	UNSIGNED type_name
 			{ $$ = lookup_unsigned_typename (parse_language (pstate),
-							 parse_gdbarch (pstate),
+							 pstate->gdbarch (),
 							 TYPE_NAME($2.type)); }
 	|	UNSIGNED
 			{ $$ = lookup_unsigned_typename (parse_language (pstate),
-							 parse_gdbarch (pstate),
+							 pstate->gdbarch (),
 							 "int"); }
 	|	SIGNED_KEYWORD type_name
 			{ $$ = lookup_signed_typename (parse_language (pstate),
-						       parse_gdbarch (pstate),
+						       pstate->gdbarch (),
 						       TYPE_NAME($2.type)); }
 	|	SIGNED_KEYWORD
 			{ $$ = lookup_signed_typename (parse_language (pstate),
-						       parse_gdbarch (pstate),
+						       pstate->gdbarch (),
 						       "int"); }
                 /* It appears that this rule for templates is never
                    reduced; template recognition happens by lookahead
@@ -1490,7 +1490,7 @@ type_name:	TYPENAME
 		  $$.stoken.ptr = "int";
 		  $$.stoken.length = 3;
 		  $$.type = lookup_signed_typename (parse_language (pstate),
-						    parse_gdbarch (pstate),
+						    pstate->gdbarch (),
 						    "int");
 		}
 	|	LONG
@@ -1498,7 +1498,7 @@ type_name:	TYPENAME
 		  $$.stoken.ptr = "long";
 		  $$.stoken.length = 4;
 		  $$.type = lookup_signed_typename (parse_language (pstate),
-						    parse_gdbarch (pstate),
+						    pstate->gdbarch (),
 						    "long");
 		}
 	|	SHORT
@@ -1506,7 +1506,7 @@ type_name:	TYPENAME
 		  $$.stoken.ptr = "short";
 		  $$.stoken.length = 5;
 		  $$.type = lookup_signed_typename (parse_language (pstate),
-						    parse_gdbarch (pstate),
+						    pstate->gdbarch (),
 						    "short");
 		}
 	;
@@ -2021,10 +2021,10 @@ parse_number (struct parser_state *par_state,
 
   un = n >> 2;
   if (long_p == 0
-      && (un >> (gdbarch_int_bit (parse_gdbarch (par_state)) - 2)) == 0)
+      && (un >> (gdbarch_int_bit (par_state->gdbarch ()) - 2)) == 0)
     {
       high_bit
-	= ((ULONGEST)1) << (gdbarch_int_bit (parse_gdbarch (par_state)) - 1);
+	= ((ULONGEST)1) << (gdbarch_int_bit (par_state->gdbarch ()) - 1);
 
       /* A large decimal (not hex or octal) constant (between INT_MAX
 	 and UINT_MAX) is a long or unsigned long, according to ANSI,
@@ -2036,10 +2036,10 @@ parse_number (struct parser_state *par_state,
       signed_type = parse_type (par_state)->builtin_int;
     }
   else if (long_p <= 1
-	   && (un >> (gdbarch_long_bit (parse_gdbarch (par_state)) - 2)) == 0)
+	   && (un >> (gdbarch_long_bit (par_state->gdbarch ()) - 2)) == 0)
     {
       high_bit
-	= ((ULONGEST)1) << (gdbarch_long_bit (parse_gdbarch (par_state)) - 1);
+	= ((ULONGEST)1) << (gdbarch_long_bit (par_state->gdbarch ()) - 1);
       unsigned_type = parse_type (par_state)->builtin_unsigned_long;
       signed_type = parse_type (par_state)->builtin_long;
     }
@@ -2047,11 +2047,11 @@ parse_number (struct parser_state *par_state,
     {
       int shift;
       if (sizeof (ULONGEST) * HOST_CHAR_BIT
-	  < gdbarch_long_long_bit (parse_gdbarch (par_state)))
+	  < gdbarch_long_long_bit (par_state->gdbarch ()))
 	/* A long long does not fit in a LONGEST.  */
 	shift = (sizeof (ULONGEST) * HOST_CHAR_BIT - 1);
       else
-	shift = (gdbarch_long_long_bit (parse_gdbarch (par_state)) - 1);
+	shift = (gdbarch_long_long_bit (par_state->gdbarch ()) - 1);
       high_bit = (ULONGEST) 1 << shift;
       unsigned_type = parse_type (par_state)->builtin_unsigned_long_long;
       signed_type = parse_type (par_state)->builtin_long_long;
@@ -3001,7 +3001,7 @@ classify_name (struct parser_state *par_state, const struct block *block,
   /* See if it's an ObjC classname.  */
   if (parse_language (par_state)->la_language == language_objc && !bsym.symbol)
     {
-      CORE_ADDR Class = lookup_objc_class (parse_gdbarch (par_state), copy);
+      CORE_ADDR Class = lookup_objc_class (par_state->gdbarch (), copy);
       if (Class)
 	{
 	  struct symbol *sym;

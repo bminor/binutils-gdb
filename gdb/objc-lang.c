@@ -491,7 +491,7 @@ end_msglist (struct parser_state *ps)
   selname_chain = sel->next;
   msglist_len = sel->msglist_len;
   msglist_sel = sel->msglist_sel;
-  selid = lookup_child_selector (parse_gdbarch (ps), p);
+  selid = lookup_child_selector (ps->gdbarch (), p);
   if (!selid)
     error (_("Can't find selector \"%s\""), p);
   write_exp_elt_longcst (ps, selid);

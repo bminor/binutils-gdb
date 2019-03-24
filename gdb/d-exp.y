@@ -52,8 +52,8 @@
 #include "charset.h"
 #include "block.h"
 
-#define parse_type(ps) builtin_type (parse_gdbarch (ps))
-#define parse_d_type(ps) builtin_d_type (parse_gdbarch (ps))
+#define parse_type(ps) builtin_type (ps->gdbarch ())
+#define parse_d_type(ps) builtin_d_type (ps->gdbarch ())
 
 /* Remap normal yacc parser interface names (yyparse, yylex, yyerror,
    etc).  */
@@ -1289,7 +1289,7 @@ lex_one_token (struct parser_state *par_state)
 
   yylval.tsym.type
     = language_lookup_primitive_type (parse_language (par_state),
-				      parse_gdbarch (par_state), copy);
+				      par_state->gdbarch (), copy);
   if (yylval.tsym.type != NULL)
     return TYPENAME;
 
