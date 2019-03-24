@@ -426,11 +426,5 @@ extern int exp_uses_objfile (struct expression *exp, struct objfile *objfile);
 extern void mark_completion_tag (enum type_code, const char *ptr,
 				 int length);
 
-/* Reallocate the `expout' pointer inside PS so that it can accommodate
-   at least LENELT expression elements.  This function does nothing if
-   there is enough room for the elements.  */
-
-extern void increase_expout_size (struct parser_state *ps, size_t lenelt);
-
 #endif /* PARSER_DEFS_H */
 

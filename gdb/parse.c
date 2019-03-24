@@ -119,6 +119,9 @@ static expression_up parse_exp_in_context (const char **, CORE_ADDR,
 					   int, int *,
 					   innermost_block_tracker_types);
 
+static void increase_expout_size (struct parser_state *ps, size_t lenelt);
+
+
 /* Documented at it's declaration.  */
 
 void
@@ -1822,9 +1825,11 @@ exp_uses_objfile (struct expression *exp, struct objfile *objfile)
   return exp_iterate (exp, exp_uses_objfile_iter, objfile);
 }
 
-/* See definition in parser-defs.h.  */
+/* Reallocate the `expout' pointer inside PS so that it can accommodate
+   at least LENELT expression elements.  This function does nothing if
+   there is enough room for the elements.  */
 
-void
+static void
 increase_expout_size (struct parser_state *ps, size_t lenelt)
 {
   if ((ps->expout_ptr + lenelt) >= ps->expout_size)

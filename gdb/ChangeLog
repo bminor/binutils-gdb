@@ -1,3 +1,8 @@
+2019-04-04  Tom Tromey  <tom@tromey.com>
+
+	* parser-defs.h (increase_expout_size): Don't declare.
+	* parse.c (increase_expout_size): Now static.
+
 2019-04-04  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* gnu-nat.c (gnu_nat_target::wait): Fix
