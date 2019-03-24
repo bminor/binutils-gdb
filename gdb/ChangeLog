@@ -1,5 +1,17 @@
 2019-04-04  Tom Tromey  <tom@tromey.com>
 
+	* dtrace-probe.c (dtrace_probe::build_arg_exprs): Update.
+	* stap-probe.c (stap_parse_argument): Update.
+	* stap-probe.h (struct stap_parse_info) <stap_parse_info>: Remove
+	initial_size parameter.
+	* rust-exp.y (rust_lex_tests): Update.
+	* parse.c (parser_state): Update.
+	(parse_exp_in_context): Update.
+	* parser-defs.h (struct parser_state) <parser_state>: Remove
+	"initial_size" parameter.
+
+2019-04-04  Tom Tromey  <tom@tromey.com>
+
 	* parser-defs.h (increase_expout_size): Don't declare.
 	* parse.c (increase_expout_size): Now static.
 

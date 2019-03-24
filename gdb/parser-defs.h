@@ -37,11 +37,10 @@ extern int parser_debug;
 
 struct parser_state
 {
-  /* Constructor.  INITIAL_SIZE is the initial size of the expout
-     array.  LANG is the language used to parse the expression.  And
-     GDBARCH is the gdbarch to use during parsing.  */
+  /* Constructor.  LANG is the language used to parse the expression.
+     And GDBARCH is the gdbarch to use during parsing.  */
 
-  parser_state (size_t initial_size, const struct language_defn *lang,
+  parser_state (const struct language_defn *lang,
 		struct gdbarch *gdbarch);
 
   DISABLE_COPY_AND_ASSIGN (parser_state);

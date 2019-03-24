@@ -29,10 +29,10 @@
 struct stap_parse_info
 {
   stap_parse_info (const char *arg_, struct type *arg_type_,
-		   size_t initial_size, const struct language_defn *lang,
+		   const struct language_defn *lang,
 		   struct gdbarch *gdbarch)
     : arg (arg_),
-      pstate (initial_size, lang, gdbarch),
+      pstate (lang, gdbarch),
       saved_arg (arg_),
       arg_type (arg_type_),
       gdbarch (gdbarch),

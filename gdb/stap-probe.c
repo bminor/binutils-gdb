@@ -1149,7 +1149,7 @@ stap_parse_argument (const char **arg, struct type *atype,
   /* We need to initialize the expression buffer, in order to begin
      our parsing efforts.  We use language_c here because we may need
      to do pointer arithmetics.  */
-  struct stap_parse_info p (*arg, atype, 10, language_def (language_c),
+  struct stap_parse_info p (*arg, atype, language_def (language_c),
 			    gdbarch);
 
   stap_parse_argument_1 (&p, 0, STAP_OPERAND_PREC_NONE);

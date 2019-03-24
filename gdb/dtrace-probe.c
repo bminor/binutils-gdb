@@ -627,7 +627,7 @@ dtrace_probe::build_arg_exprs (struct gdbarch *gdbarch)
       /* Initialize the expression buffer in the parser state.  The
 	 language does not matter, since we are using our own
 	 parser.  */
-      parser_state pstate (10, current_language, gdbarch);
+      parser_state pstate (current_language, gdbarch);
 
       /* The argument value, which is ABI dependent and casted to
 	 `long int'.  */

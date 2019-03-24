@@ -165,10 +165,9 @@ end_arglist (void)
 
 /* See definition in parser-defs.h.  */
 
-parser_state::parser_state (size_t initial_size,
-			    const struct language_defn *lang,
+parser_state::parser_state (const struct language_defn *lang,
 			    struct gdbarch *gdbarch)
-  : expout_size (initial_size),
+  : expout_size (10),
     expout (XNEWVAR (expression,
 		     (sizeof (expression)
 		      + EXP_ELEM_TO_BYTES (expout_size)))),
@@ -1190,7 +1189,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
      and others called from *.y) ensure CURRENT_LANGUAGE gets restored
      to the value matching SELECTED_FRAME as set by get_current_arch.  */
 
-  parser_state ps (10, lang, get_current_arch ());
+  parser_state ps (lang, get_current_arch ());
 
   scoped_restore_current_language lang_saver;
   set_language (lang->la_language);
