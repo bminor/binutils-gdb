@@ -784,11 +784,15 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 	|	TYPENAME
 			{ $$ = $1.type; }
 	|	STRUCT name
-			{ $$ = lookup_struct (copy_name ($2),
-					      expression_context_block); }
+			{ $$
+			    = lookup_struct (copy_name ($2),
+					     pstate->expression_context_block);
+			}
 	|	CLASS name
-			{ $$ = lookup_struct (copy_name ($2),
-					      expression_context_block); }
+			{ $$
+			    = lookup_struct (copy_name ($2),
+					     pstate->expression_context_block);
+			}
 	/* "const" and "volatile" are curently ignored.  A type qualifier
 	   after the type is handled in the ptype rule.  I think these could
 	   be too.  */
@@ -1463,7 +1467,7 @@ yylex (void)
              inserted in FPC stabs debug info.  */
 	  static const char this_name[] = "this";
 
-	  if (lookup_symbol (this_name, expression_context_block,
+	  if (lookup_symbol (this_name, pstate->expression_context_block,
 			     VAR_DOMAIN, NULL).symbol)
 	    {
 	      free (uptokstart);
@@ -1513,7 +1517,7 @@ yylex (void)
     if (is_a_field)
       sym = NULL;
     else
-      sym = lookup_symbol (tmp, expression_context_block,
+      sym = lookup_symbol (tmp, pstate->expression_context_block,
 			   VAR_DOMAIN, &is_a_field_of_this).symbol;
     /* second chance uppercased (as Free Pascal does).  */
     if (!sym && is_a_field_of_this.type == NULL && !is_a_field)
@@ -1528,7 +1532,7 @@ yylex (void)
        if (is_a_field)
 	 sym = NULL;
        else
-	 sym = lookup_symbol (tmp, expression_context_block,
+	 sym = lookup_symbol (tmp, pstate->expression_context_block,
 			      VAR_DOMAIN, &is_a_field_of_this).symbol;
       }
     /* Third chance Capitalized (as GPC does).  */
@@ -1550,7 +1554,7 @@ yylex (void)
        if (is_a_field)
 	 sym = NULL;
        else
-	 sym = lookup_symbol (tmp, expression_context_block,
+	 sym = lookup_symbol (tmp, pstate->expression_context_block,
 			      VAR_DOMAIN, &is_a_field_of_this).symbol;
       }
 
@@ -1645,8 +1649,10 @@ yylex (void)
 		      tmp1 += 2;
 		      memcpy (tmp1, namestart, p - namestart);
 		      tmp1[p - namestart] = '\0';
-		      cur_sym = lookup_symbol (ncopy, expression_context_block,
-					       VAR_DOMAIN, NULL).symbol;
+		      cur_sym
+			= lookup_symbol (ncopy,
+					 pstate->expression_context_block,
+					 VAR_DOMAIN, NULL).symbol;
 		      if (cur_sym)
 			{
 			  if (SYMBOL_CLASS (cur_sym) == LOC_TYPEDEF)

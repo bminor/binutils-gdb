@@ -1528,14 +1528,14 @@ yylex (void)
 	      return classify_unsafe_function (name2.value.sval);
 	    }
 
-	  if (package_name_p (copy, expression_context_block))
+	  if (package_name_p (copy, pstate->expression_context_block))
 	    {
 	      popping = 1;
 	      yylval.sval = build_packaged_name (current.value.sval.ptr,
 						 current.value.sval.length,
 						 name2.value.sval.ptr,
 						 name2.value.sval.length);
-	      return classify_packaged_name (expression_context_block);
+	      return classify_packaged_name (pstate->expression_context_block);
 	    }
 	}
 
@@ -1549,7 +1549,7 @@ yylex (void)
 
   popping = 1;
   yylval = current.value;
-  return classify_name (pstate, expression_context_block);
+  return classify_name (pstate, pstate->expression_context_block);
 }
 
 int

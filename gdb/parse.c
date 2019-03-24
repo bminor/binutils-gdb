@@ -66,8 +66,6 @@ const struct exp_descriptor exp_descriptor_standard =
   };
 
 /* Global variables declared in parser-defs.h (and commented there).  */
-const struct block *expression_context_block;
-CORE_ADDR expression_context_pc;
 innermost_block_tracker innermost_block;
 int arglist_len;
 static struct type_stack type_stack;
@@ -593,7 +591,7 @@ mark_completion_tag (enum type_code tag, const char *ptr, int length)
    value in the value history, I.e. $$1  */
 
 void
-write_dollar_variable (struct expr_builder *ps, struct stoken str)
+write_dollar_variable (struct parser_state *ps, struct stoken str)
 {
   struct block_symbol sym;
   struct bound_minimal_symbol msym;
@@ -683,7 +681,7 @@ handle_register:
   str.ptr++;
   write_exp_string (ps, str);
   write_exp_elt_opcode (ps, OP_REGISTER);
-  innermost_block.update (expression_context_block,
+  innermost_block.update (ps->expression_context_block,
 			  INNERMOST_BLOCK_FOR_REGISTERS);
   return;
 }
@@ -1135,7 +1133,8 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
   scoped_restore save_funcall_chain = make_scoped_restore (&funcall_chain,
 							   &funcalls);
 
-  expression_context_block = block;
+  const struct block *expression_context_block = block;
+  CORE_ADDR expression_context_pc = 0;
 
   /* If no context specified, try using the current frame, if any.  */
   if (!expression_context_block)
@@ -1189,7 +1188,8 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
      and others called from *.y) ensure CURRENT_LANGUAGE gets restored
      to the value matching SELECTED_FRAME as set by get_current_arch.  */
 
-  parser_state ps (lang, get_current_arch ());
+  parser_state ps (lang, get_current_arch (), expression_context_block,
+		   expression_context_pc);
 
   scoped_restore_current_language lang_saver;
   set_language (lang->la_language);

@@ -1,5 +1,28 @@
 2019-04-04  Tom Tromey  <tom@tromey.com>
 
+	* rust-exp.y (rust_parser::crate_name, rust_parser::super_name)
+	(rust_parser::convert_ast_to_type)
+	(rust_parser::convert_ast_to_expression, rust_lex_tests): Update.
+	* parser-defs.h (struct parser_state) <parser_state>: Add
+	parameters.  Initialize new members.
+	<expression_context_block, expression_context_pc>: New members.
+	* parse.c (expression_context_block, expression_context_pc):
+	Remove globals.
+	(parse_exp_in_context): Update.
+	* p-exp.y: Update all rules.
+	(yylex): Update.
+	* m2-exp.y: Update all rules.
+	(yylex): Update.
+	* go-exp.y (yylex): Update.
+	* f-exp.y (yylex): Update.
+	* d-exp.y: Update all rules.
+	(yylex): Update.
+	* c-exp.y: Update all rules.
+	(lex_one_token, classify_name, yylex, c_parse): Update.
+	* ada-exp.y (write_var_or_type, write_name_assoc): Update.
+
+2019-04-04  Tom Tromey  <tom@tromey.com>
+
 	* gdbarch.h, gdbarch.c: Rebuild.
 	* gdbarch.sh (dtrace_parse_probe_argument): Change type.
 	* stap-probe.h: 

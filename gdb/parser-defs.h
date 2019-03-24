@@ -86,24 +86,29 @@ struct parser_state : public expr_builder
      And GDBARCH is the gdbarch to use during parsing.  */
 
   parser_state (const struct language_defn *lang,
-		struct gdbarch *gdbarch)
-    : expr_builder (lang, gdbarch)
+		struct gdbarch *gdbarch,
+		const struct block *context_block,
+		CORE_ADDR context_pc)
+    : expr_builder (lang, gdbarch),
+      expression_context_block (context_block),
+      expression_context_pc (context_pc)
   {
   }
 
   DISABLE_COPY_AND_ASSIGN (parser_state);
+
+  /* If this is nonzero, this block is used as the lexical context for
+     symbol names.  */
+
+  const struct block * const expression_context_block;
+
+  /* If expression_context_block is non-zero, then this is the PC
+     within the block that we want to evaluate expressions at.  When
+     debugging C or C++ code, we use this to find the exact line we're
+     at, and then look up the macro definitions active at that
+     point.  */
+  const CORE_ADDR expression_context_pc;
 };
-
-/* If this is nonzero, this block is used as the lexical context
-   for symbol names.  */
-
-extern const struct block *expression_context_block;
-
-/* If expression_context_block is non-zero, then this is the PC within
-   the block that we want to evaluate expressions at.  When debugging
-   C or C++ code, we use this to find the exact line we're at, and
-   then look up the macro definitions active at that point.  */
-extern CORE_ADDR expression_context_pc;
 
 /* When parsing expressions we track the innermost block that was
    referenced.  */
@@ -283,7 +288,7 @@ extern void write_exp_elt_objfile (struct expr_builder *,
 extern void write_exp_msymbol (struct expr_builder *,
 			       struct bound_minimal_symbol);
 
-extern void write_dollar_variable (struct expr_builder *, struct stoken str);
+extern void write_dollar_variable (struct parser_state *, struct stoken str);
 
 extern void mark_struct_expression (struct expr_builder *);
 

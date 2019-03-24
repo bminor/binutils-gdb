@@ -1203,7 +1203,7 @@ write_var_or_type (struct parser_state *par_state,
   int name_len;
 
   if (block == NULL)
-    block = expression_context_block;
+    block = par_state->expression_context_block;
 
   encoded_name = ada_encode (name0.ptr);
   name_len = strlen (encoded_name);
@@ -1343,7 +1343,7 @@ write_var_or_type (struct parser_state *par_state,
 
       if (!have_full_symbols () && !have_partial_symbols () && block == NULL)
 	error (_("No symbol table is loaded.  Use the \"file\" command."));
-      if (block == expression_context_block)
+      if (block == par_state->expression_context_block)
 	error (_("No definition of \"%s\" in current context."), name0.ptr);
       else
 	error (_("No definition of \"%s\" in specified context."), name0.ptr);
@@ -1376,7 +1376,8 @@ write_name_assoc (struct parser_state *par_state, struct stoken name)
   if (strchr (name.ptr, '.') == NULL)
     {
       std::vector<struct block_symbol> syms;
-      int nsyms = ada_lookup_symbol_list (name.ptr, expression_context_block,
+      int nsyms = ada_lookup_symbol_list (name.ptr,
+					  par_state->expression_context_block,
 					  VAR_DOMAIN, &syms);
 
       if (nsyms != 1 || SYMBOL_CLASS (syms[0].symbol) == LOC_TYPEDEF)

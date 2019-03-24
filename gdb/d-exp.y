@@ -416,8 +416,8 @@ PrimaryExpression:
 		  struct block_symbol sym;
 
 		  /* Handle VAR, which could be local or global.  */
-		  sym = lookup_symbol (copy, expression_context_block, VAR_DOMAIN,
-				       &is_a_field_of_this);
+		  sym = lookup_symbol (copy, pstate->expression_context_block,
+				       VAR_DOMAIN, &is_a_field_of_this);
 		  if (sym.symbol && SYMBOL_CLASS (sym.symbol) != LOC_TYPEDEF)
 		    {
 		      if (symbol_read_needs_frame (sym.symbol))
@@ -1458,7 +1458,7 @@ yylex (void)
   if (current.token == IDENTIFIER)
     {
       yylval = current.value;
-      current.token = classify_name (pstate, expression_context_block);
+      current.token = classify_name (pstate, pstate->expression_context_block);
       current.value = yylval;
     }
 
@@ -1489,7 +1489,8 @@ yylex (void)
 	      yylval.sval.ptr = (char *) obstack_base (&name_obstack);
 	      yylval.sval.length = obstack_object_size (&name_obstack);
 
-	      current.token = classify_name (pstate, expression_context_block);
+	      current.token = classify_name (pstate,
+					     pstate->expression_context_block);
 	      current.value = yylval;
 
 	      /* We keep going until we find a TYPENAME.  */
@@ -1526,7 +1527,7 @@ yylex (void)
   else
     {
       gdb_assert (current.token == TYPENAME);
-      search_block = expression_context_block;
+      search_block = pstate->expression_context_block;
       obstack_grow (&name_obstack, current.value.sval.ptr,
 		    current.value.sval.length);
       context_type = current.value.tsym.type;

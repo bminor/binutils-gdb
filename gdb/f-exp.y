@@ -1274,7 +1274,7 @@ yylex (void)
 	   way we can refer to it unconditionally below.  */
 	memset (&is_a_field_of_this, 0, sizeof (is_a_field_of_this));
 
-	result = lookup_symbol (tmp, expression_context_block,
+	result = lookup_symbol (tmp, pstate->expression_context_block,
 				lookup_domains[i],
 				pstate->language ()->la_language
 				== language_cplus
