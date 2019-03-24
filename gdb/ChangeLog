@@ -1,3 +1,15 @@
+2019-04-01  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* infrun.c (stop_all_threads): If debug_infrun, always
+	trace the wait status after wait_one, using
+	target_waitstatus_to_string and target_pid_to_str.
+	(handle_inferior_event): Replace various trace of
+	wait status kind by a single trace.
+	* gdb/gnu-nat.c (gnu_nat_target::wait): Replace local
+	wait status kind image by target_waitstatus_to_string.
+	* target/waitstatus.c (target_waitstatus_to_string): Fix
+	obsolete comment.
+
 2019-04-01  Tom Tromey  <tromey@adacore.com>
 
 	PR symtab/23331:

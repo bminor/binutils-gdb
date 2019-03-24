@@ -20,8 +20,7 @@
 #include "common/common-defs.h"
 #include "waitstatus.h"
 
-/* Return a pretty printed form of target_waitstatus.
-   Space for the result is malloc'd, caller must free.  */
+/* Return a pretty printed form of target_waitstatus.  */
 
 std::string
 target_waitstatus_to_string (const struct target_waitstatus *ws)

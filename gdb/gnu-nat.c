@@ -1647,15 +1647,9 @@ rewait:
       inf_update_suspends (inf);
     }
 
-  inf_debug (inf, "returning ptid = %s, status = %s (%d)",
+  inf_debug (inf, "returning ptid = %s, %s",
 	     target_pid_to_str (ptid).c_str (),
-	     status->kind == TARGET_WAITKIND_EXITED ? "EXITED"
-	     : status->kind == TARGET_WAITKIND_STOPPED ? "STOPPED"
-	     : status->kind == TARGET_WAITKIND_SIGNALLED ? "SIGNALLED"
-	     : status->kind == TARGET_WAITKIND_LOADED ? "LOADED"
-	     : status->kind == TARGET_WAITKIND_SPURIOUS ? "SPURIOUS"
-	     : "?",
-	     status->value.integer);
+	     target_waitstatus_to_string (&status).c_str ());
 
   return ptid;
 }
