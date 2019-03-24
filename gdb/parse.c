@@ -119,7 +119,7 @@ static expression_up parse_exp_in_context (const char **, CORE_ADDR,
 					   int, int *,
 					   innermost_block_tracker_types);
 
-static void increase_expout_size (struct parser_state *ps, size_t lenelt);
+static void increase_expout_size (struct expr_builder *ps, size_t lenelt);
 
 
 /* Documented at it's declaration.  */
@@ -165,7 +165,7 @@ end_arglist (void)
 
 /* See definition in parser-defs.h.  */
 
-parser_state::parser_state (const struct language_defn *lang,
+expr_builder::expr_builder (const struct language_defn *lang,
 			    struct gdbarch *gdbarch)
   : expout_size (10),
     expout (XNEWVAR (expression,
@@ -178,7 +178,7 @@ parser_state::parser_state (const struct language_defn *lang,
 }
 
 expression_up
-parser_state::release ()
+expr_builder::release ()
 {
   /* Record the actual number of expression elements, and then
      reallocate the expression memory so that we free up any
@@ -201,7 +201,7 @@ parser_state::release ()
    a register through here.  */
 
 static void
-write_exp_elt (struct parser_state *ps, const union exp_element *expelt)
+write_exp_elt (struct expr_builder *ps, const union exp_element *expelt)
 {
   if (ps->expout_ptr >= ps->expout_size)
     {
@@ -214,7 +214,7 @@ write_exp_elt (struct parser_state *ps, const union exp_element *expelt)
 }
 
 void
-write_exp_elt_opcode (struct parser_state *ps, enum exp_opcode expelt)
+write_exp_elt_opcode (struct expr_builder *ps, enum exp_opcode expelt)
 {
   union exp_element tmp;
 
@@ -224,7 +224,7 @@ write_exp_elt_opcode (struct parser_state *ps, enum exp_opcode expelt)
 }
 
 void
-write_exp_elt_sym (struct parser_state *ps, struct symbol *expelt)
+write_exp_elt_sym (struct expr_builder *ps, struct symbol *expelt)
 {
   union exp_element tmp;
 
@@ -234,7 +234,7 @@ write_exp_elt_sym (struct parser_state *ps, struct symbol *expelt)
 }
 
 void
-write_exp_elt_msym (struct parser_state *ps, minimal_symbol *expelt)
+write_exp_elt_msym (struct expr_builder *ps, minimal_symbol *expelt)
 {
   union exp_element tmp;
 
@@ -244,7 +244,7 @@ write_exp_elt_msym (struct parser_state *ps, minimal_symbol *expelt)
 }
 
 void
-write_exp_elt_block (struct parser_state *ps, const struct block *b)
+write_exp_elt_block (struct expr_builder *ps, const struct block *b)
 {
   union exp_element tmp;
 
@@ -254,7 +254,7 @@ write_exp_elt_block (struct parser_state *ps, const struct block *b)
 }
 
 void
-write_exp_elt_objfile (struct parser_state *ps, struct objfile *objfile)
+write_exp_elt_objfile (struct expr_builder *ps, struct objfile *objfile)
 {
   union exp_element tmp;
 
@@ -264,7 +264,7 @@ write_exp_elt_objfile (struct parser_state *ps, struct objfile *objfile)
 }
 
 void
-write_exp_elt_longcst (struct parser_state *ps, LONGEST expelt)
+write_exp_elt_longcst (struct expr_builder *ps, LONGEST expelt)
 {
   union exp_element tmp;
 
@@ -274,7 +274,7 @@ write_exp_elt_longcst (struct parser_state *ps, LONGEST expelt)
 }
 
 void
-write_exp_elt_floatcst (struct parser_state *ps, const gdb_byte expelt[16])
+write_exp_elt_floatcst (struct expr_builder *ps, const gdb_byte expelt[16])
 {
   union exp_element tmp;
   int index;
@@ -286,7 +286,7 @@ write_exp_elt_floatcst (struct parser_state *ps, const gdb_byte expelt[16])
 }
 
 void
-write_exp_elt_type (struct parser_state *ps, struct type *expelt)
+write_exp_elt_type (struct expr_builder *ps, struct type *expelt)
 {
   union exp_element tmp;
 
@@ -296,7 +296,7 @@ write_exp_elt_type (struct parser_state *ps, struct type *expelt)
 }
 
 void
-write_exp_elt_intern (struct parser_state *ps, struct internalvar *expelt)
+write_exp_elt_intern (struct expr_builder *ps, struct internalvar *expelt)
 {
   union exp_element tmp;
 
@@ -327,7 +327,7 @@ write_exp_elt_intern (struct parser_state *ps, struct internalvar *expelt)
 
 
 void
-write_exp_string (struct parser_state *ps, struct stoken str)
+write_exp_string (struct expr_builder *ps, struct stoken str)
 {
   int len = str.length;
   size_t lenelt;
@@ -369,7 +369,7 @@ write_exp_string (struct parser_state *ps, struct stoken str)
    long constant, followed by the contents of the string.  */
 
 void
-write_exp_string_vector (struct parser_state *ps, int type,
+write_exp_string_vector (struct expr_builder *ps, int type,
 			 struct stoken_vector *vec)
 {
   int i, len;
@@ -422,7 +422,7 @@ write_exp_string_vector (struct parser_state *ps, int type,
    either end of the bitstring.  */
 
 void
-write_exp_bitstring (struct parser_state *ps, struct stoken str)
+write_exp_bitstring (struct expr_builder *ps, struct stoken str)
 {
   int bits = str.length;	/* length in bits */
   int len = (bits + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
@@ -532,7 +532,7 @@ find_minsym_type_and_address (minimal_symbol *msymbol,
    the expression.  */
 
 void
-write_exp_msymbol (struct parser_state *ps,
+write_exp_msymbol (struct expr_builder *ps,
 		   struct bound_minimal_symbol bound_msym)
 {
   write_exp_elt_opcode (ps, OP_VAR_MSYM_VALUE);
@@ -545,7 +545,7 @@ write_exp_msymbol (struct parser_state *ps,
    expression.  This is used when completing on field names.  */
 
 void
-mark_struct_expression (struct parser_state *ps)
+mark_struct_expression (struct expr_builder *ps)
 {
   gdb_assert (parse_completion
 	      && expout_tag_completion_type == TYPE_CODE_UNDEF);
@@ -593,7 +593,7 @@ mark_completion_tag (enum type_code tag, const char *ptr, int length)
    value in the value history, I.e. $$1  */
 
 void
-write_dollar_variable (struct parser_state *ps, struct stoken str)
+write_dollar_variable (struct expr_builder *ps, struct stoken str)
 {
   struct block_symbol sym;
   struct bound_minimal_symbol msym;
@@ -1405,7 +1405,7 @@ push_type_int (int n)
    item.  */
 
 void
-insert_type_address_space (struct parser_state *pstate, char *string)
+insert_type_address_space (struct expr_builder *pstate, char *string)
 {
   union type_stack_elt element;
   int slot;
@@ -1829,7 +1829,7 @@ exp_uses_objfile (struct expression *exp, struct objfile *objfile)
    there is enough room for the elements.  */
 
 static void
-increase_expout_size (struct parser_state *ps, size_t lenelt)
+increase_expout_size (struct expr_builder *ps, size_t lenelt)
 {
   if ((ps->expout_ptr + lenelt) >= ps->expout_size)
     {

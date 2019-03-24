@@ -4523,13 +4523,13 @@ gdbarch_dtrace_parse_probe_argument_p (struct gdbarch *gdbarch)
 }
 
 void
-gdbarch_dtrace_parse_probe_argument (struct gdbarch *gdbarch, struct parser_state *pstate, int narg)
+gdbarch_dtrace_parse_probe_argument (struct gdbarch *gdbarch, struct expr_builder *builder, int narg)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->dtrace_parse_probe_argument != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_dtrace_parse_probe_argument called\n");
-  gdbarch->dtrace_parse_probe_argument (gdbarch, pstate, narg);
+  gdbarch->dtrace_parse_probe_argument (gdbarch, builder, narg);
 }
 
 void

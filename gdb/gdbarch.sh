@@ -1034,7 +1034,7 @@ M;int;stap_parse_special_token;struct stap_parse_info *p;p
 
 # The expression to compute the NARTGth+1 argument to a DTrace USDT probe.
 # NARG must be >= 0.
-M;void;dtrace_parse_probe_argument;struct parser_state *pstate, int narg;pstate, narg
+M;void;dtrace_parse_probe_argument;struct expr_builder *builder, int narg;builder, narg
 
 # True if the given ADDR does not contain the instruction sequence
 # corresponding to a disabled DTrace is-enabled probe.
@@ -1305,7 +1305,7 @@ struct syscall;
 struct agent_expr;
 struct axs_value;
 struct stap_parse_info;
-struct parser_state;
+struct expr_builder;
 struct ravenscar_arch_ops;
 struct mem_range;
 struct syscalls_info;

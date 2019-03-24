@@ -32,15 +32,17 @@ struct internalvar;
 
 extern int parser_debug;
 
-struct parser_state
+/* A class that can be used to build a "struct expression".  */
+
+struct expr_builder
 {
   /* Constructor.  LANG is the language used to parse the expression.
      And GDBARCH is the gdbarch to use during parsing.  */
 
-  parser_state (const struct language_defn *lang,
+  expr_builder (const struct language_defn *lang,
 		struct gdbarch *gdbarch);
 
-  DISABLE_COPY_AND_ASSIGN (parser_state);
+  DISABLE_COPY_AND_ASSIGN (expr_builder);
 
   /* Resize the allocated expression to the correct size, and return
      it as an expression_up -- passing ownership to the caller.  */
@@ -72,6 +74,24 @@ struct parser_state
      to know where to put new elements.  */
 
   size_t expout_ptr;
+};
+
+/* An instance of this type is instantiated during expression parsing,
+   and passed to the appropriate parser.  It holds both inputs to the
+   parser, and result.  */
+
+struct parser_state : public expr_builder
+{
+  /* Constructor.  LANG is the language used to parse the expression.
+     And GDBARCH is the gdbarch to use during parsing.  */
+
+  parser_state (const struct language_defn *lang,
+		struct gdbarch *gdbarch)
+    : expr_builder (lang, gdbarch)
+  {
+  }
+
+  DISABLE_COPY_AND_ASSIGN (parser_state);
 };
 
 /* If this is nonzero, this block is used as the lexical context
@@ -236,36 +256,36 @@ struct type_stack
 
 extern int prefixify_expression (struct expression *expr);
 
-extern void write_exp_elt_opcode (struct parser_state *, enum exp_opcode);
+extern void write_exp_elt_opcode (struct expr_builder *, enum exp_opcode);
 
-extern void write_exp_elt_sym (struct parser_state *, struct symbol *);
+extern void write_exp_elt_sym (struct expr_builder *, struct symbol *);
 
-extern void write_exp_elt_longcst (struct parser_state *, LONGEST);
+extern void write_exp_elt_longcst (struct expr_builder *, LONGEST);
 
-extern void write_exp_elt_floatcst (struct parser_state *, const gdb_byte *);
+extern void write_exp_elt_floatcst (struct expr_builder *, const gdb_byte *);
 
-extern void write_exp_elt_type (struct parser_state *, struct type *);
+extern void write_exp_elt_type (struct expr_builder *, struct type *);
 
-extern void write_exp_elt_intern (struct parser_state *, struct internalvar *);
+extern void write_exp_elt_intern (struct expr_builder *, struct internalvar *);
 
-extern void write_exp_string (struct parser_state *, struct stoken);
+extern void write_exp_string (struct expr_builder *, struct stoken);
 
-void write_exp_string_vector (struct parser_state *, int type,
+void write_exp_string_vector (struct expr_builder *, int type,
 			      struct stoken_vector *vec);
 
-extern void write_exp_bitstring (struct parser_state *, struct stoken);
+extern void write_exp_bitstring (struct expr_builder *, struct stoken);
 
-extern void write_exp_elt_block (struct parser_state *, const struct block *);
+extern void write_exp_elt_block (struct expr_builder *, const struct block *);
 
-extern void write_exp_elt_objfile (struct parser_state *,
+extern void write_exp_elt_objfile (struct expr_builder *,
 				   struct objfile *objfile);
 
-extern void write_exp_msymbol (struct parser_state *,
+extern void write_exp_msymbol (struct expr_builder *,
 			       struct bound_minimal_symbol);
 
-extern void write_dollar_variable (struct parser_state *, struct stoken str);
+extern void write_dollar_variable (struct expr_builder *, struct stoken str);
 
-extern void mark_struct_expression (struct parser_state *);
+extern void mark_struct_expression (struct expr_builder *);
 
 extern const char *find_template_name_end (const char *);
 
@@ -281,7 +301,7 @@ extern void push_type (enum type_pieces);
 
 extern void push_type_int (int);
 
-extern void insert_type_address_space (struct parser_state *, char *);
+extern void insert_type_address_space (struct expr_builder *, char *);
 
 extern enum type_pieces pop_type (void);
 

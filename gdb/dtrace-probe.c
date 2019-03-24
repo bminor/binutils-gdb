@@ -624,26 +624,25 @@ dtrace_probe::build_arg_exprs (struct gdbarch *gdbarch)
      value of the argument when executed at the PC of the probe.  */
   for (dtrace_probe_arg &arg : m_args)
     {
-      /* Initialize the expression buffer in the parser state.  The
-	 language does not matter, since we are using our own
-	 parser.  */
-      parser_state pstate (current_language, gdbarch);
+      /* Initialize the expression builder.  The language does not
+	 matter, since we are using our own parser.  */
+      expr_builder builder (current_language, gdbarch);
 
       /* The argument value, which is ABI dependent and casted to
 	 `long int'.  */
-      gdbarch_dtrace_parse_probe_argument (gdbarch, &pstate, argc);
+      gdbarch_dtrace_parse_probe_argument (gdbarch, &builder, argc);
 
       /* Casting to the expected type, but only if the type was
 	 recognized at probe load time.  Otherwise the argument will
 	 be evaluated as the long integer passed to the probe.  */
       if (arg.type != NULL)
 	{
-	  write_exp_elt_opcode (&pstate, UNOP_CAST);
-	  write_exp_elt_type (&pstate, arg.type);
-	  write_exp_elt_opcode (&pstate, UNOP_CAST);
+	  write_exp_elt_opcode (&builder, UNOP_CAST);
+	  write_exp_elt_type (&builder, arg.type);
+	  write_exp_elt_opcode (&builder, UNOP_CAST);
 	}
 
-      arg.expr = pstate.release ();
+      arg.expr = builder.release ();
       prefixify_expression (arg.expr.get ());
       ++argc;
     }

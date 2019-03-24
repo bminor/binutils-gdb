@@ -1,5 +1,29 @@
 2019-04-04  Tom Tromey  <tom@tromey.com>
 
+	* gdbarch.h, gdbarch.c: Rebuild.
+	* gdbarch.sh (dtrace_parse_probe_argument): Change type.
+	* stap-probe.h: 
+	(struct stap_parse_info): Replace "parser_state" with
+	"expr_builder".
+	* parser-defs.h (struct expr_builder): Rename from "parser_state".
+	(parser_state): New class.
+	* parse.c (expr_builder): Rename.
+	(expr_builder::release): Rename.
+	(write_exp_elt, write_exp_elt_opcode, write_exp_elt_sym)
+	(write_exp_elt_msym, write_exp_elt_block, write_exp_elt_objfile)
+	(write_exp_elt_longcst, write_exp_elt_floatcst)
+	(write_exp_elt_type, write_exp_elt_intern, write_exp_string)
+	(write_exp_string_vector, write_exp_bitstring)
+	(write_exp_msymbol, mark_struct_expression)
+	(write_dollar_variable)
+	(insert_type_address_space, increase_expout_size): Replace
+	"parser_state" with "expr_builder".
+	* dtrace-probe.c: Replace "parser_state" with "expr_builder".
+	* amd64-linux-tdep.c (amd64_dtrace_parse_probe_argument): Replace
+	"parser_state" with "expr_builder".
+
+2019-04-04  Tom Tromey  <tom@tromey.com>
+
 	* rust-exp.y: Replace "parse_language" with method call.
 	* p-exp.y: 
 	(yylex): Replace "parse_language" with method call.

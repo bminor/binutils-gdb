@@ -20,7 +20,6 @@
 #if !defined (STAP_PROBE_H)
 #define STAP_PROBE_H 1
 
-/* For `struct parser_state'.  */
 #include "parser-defs.h"
 
 /* Structure which holds information about the parsing process of one probe's
@@ -46,7 +45,7 @@ struct stap_parse_info
   const char *arg;
 
   /* The parser state to be used when generating the expression.  */
-  struct parser_state pstate;
+  struct expr_builder pstate;
 
   /* A pointer to the full chain of arguments.  This is useful for printing
      error messages.  The parser functions should not modify this argument
