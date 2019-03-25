@@ -1,3 +1,7 @@
+2019-03-26  Alan Modra  <amodra@gmail.com>
+
+	* objdump.c (dump_relocs_in_section): Warning fix.
+
 2019-03-25  Tamar Christina  <tamar.christina@arm.com>
 
 	* testsuite/binutils-all/arm/in-order-all.d: New test.
