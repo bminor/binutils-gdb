@@ -1,3 +1,11 @@
+2019-03-25  Tom Tromey  <tromey@adacore.com>
+
+	* minsyms.c (BUNCH_SIZE): Update comment.
+	(~minimal_symbol_reader): Remove old comment.
+	(compact_minimal_symbols): Update comment.
+	(minimal_symbol_reader::install): Remove old comment.  Update
+	other comments.
+
 2019-03-25  Alan Hayward  <alan.hayward@arm.com>
 
 	* s390-linux-nat.c: Add include.
