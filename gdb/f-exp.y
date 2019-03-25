@@ -245,12 +245,12 @@ exp	:	KIND '(' exp ')'       %prec UNARY
    later in eval.c.  */
 
 exp	:	exp '(' 
-			{ start_arglist (); }
+			{ pstate->start_arglist (); }
 		arglist ')'	
 			{ write_exp_elt_opcode (pstate,
 						OP_F77_UNDETERMINED_ARGLIST);
 			  write_exp_elt_longcst (pstate,
-						 (LONGEST) end_arglist ());
+						 pstate->end_arglist ());
 			  write_exp_elt_opcode (pstate,
 					      OP_F77_UNDETERMINED_ARGLIST); }
 	;
@@ -263,15 +263,15 @@ arglist	:
 	;
 
 arglist	:	exp
-			{ arglist_len = 1; }
+			{ pstate->arglist_len = 1; }
 	;
 
 arglist :	subrange
-			{ arglist_len = 1; }
+			{ pstate->arglist_len = 1; }
 	;
    
 arglist	:	arglist ',' exp   %prec ABOVE_COMMA
-			{ arglist_len++; }
+			{ pstate->arglist_len++; }
 	;
 
 /* There are four sorts of subrange types in F90.  */

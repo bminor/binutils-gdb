@@ -298,11 +298,11 @@ exp     :       exp '['
                         /* This function just saves the number of arguments
 			   that follow in the list.  It is *not* specific to
 			   function types */
-                        { start_arglist(); }
+                        { pstate->start_arglist(); }
                 non_empty_arglist ']'  %prec DOT
                         { write_exp_elt_opcode (pstate, MULTI_SUBSCRIPT);
 			  write_exp_elt_longcst (pstate,
-						 (LONGEST) end_arglist());
+						 pstate->end_arglist());
 			  write_exp_elt_opcode (pstate, MULTI_SUBSCRIPT); }
         ;
 
@@ -313,11 +313,11 @@ exp	:	exp '[' exp ']'
 exp	:	exp '('
 			/* This is to save the value of arglist_len
 			   being accumulated by an outer function call.  */
-			{ start_arglist (); }
+			{ pstate->start_arglist (); }
 		arglist ')'	%prec DOT
 			{ write_exp_elt_opcode (pstate, OP_FUNCALL);
 			  write_exp_elt_longcst (pstate,
-						 (LONGEST) end_arglist ());
+						 pstate->end_arglist ());
 			  write_exp_elt_opcode (pstate, OP_FUNCALL); }
 	;
 
@@ -325,21 +325,21 @@ arglist	:
 	;
 
 arglist	:	exp
-			{ arglist_len = 1; }
+			{ pstate->arglist_len = 1; }
 	;
 
 arglist	:	arglist ',' exp   %prec ABOVE_COMMA
-			{ arglist_len++; }
+			{ pstate->arglist_len++; }
 	;
 
 non_empty_arglist
         :       exp
-                        { arglist_len = 1; }
+                        { pstate->arglist_len = 1; }
 	;
 
 non_empty_arglist
         :       non_empty_arglist ',' exp %prec ABOVE_COMMA
-     	       	    	{ arglist_len++; }
+     	       	    	{ pstate->arglist_len++; }
      	;
 
 /* GDB construct */

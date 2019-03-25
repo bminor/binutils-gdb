@@ -334,11 +334,11 @@ exp	:	exp '('
 			/* This is to save the value of arglist_len
 			   being accumulated by an outer function call.  */
 			{ push_current_type ();
-			  start_arglist (); }
+			  pstate->start_arglist (); }
 		arglist ')'	%prec ARROW
 			{ write_exp_elt_opcode (pstate, OP_FUNCALL);
 			  write_exp_elt_longcst (pstate,
-						 (LONGEST) end_arglist ());
+						 pstate->end_arglist ());
 			  write_exp_elt_opcode (pstate, OP_FUNCALL);
 			  pop_current_type ();
 			  if (current_type)
@@ -348,9 +348,9 @@ exp	:	exp '('
 
 arglist	:
          | exp
-			{ arglist_len = 1; }
+			{ pstate->arglist_len = 1; }
 	 | arglist ',' exp   %prec ABOVE_COMMA
-			{ arglist_len++; }
+			{ pstate->arglist_len++; }
 	;
 
 exp	:	type '(' exp ')' %prec UNARY

@@ -101,6 +101,27 @@ struct parser_state : public expr_builder
 
   DISABLE_COPY_AND_ASSIGN (parser_state);
 
+  /* Begin counting arguments for a function call,
+     saving the data about any containing call.  */
+
+  void start_arglist ()
+  {
+    m_funcall_chain.push_back (arglist_len);
+    arglist_len = 0;
+  }
+
+  /* Return the number of arguments in a function call just terminated,
+     and restore the data for the containing function call.  */
+
+  int end_arglist ()
+  {
+    int val = arglist_len;
+    arglist_len = m_funcall_chain.back ();
+    m_funcall_chain.pop_back ();
+    return val;
+  }
+
+
   /* If this is nonzero, this block is used as the lexical context for
      symbol names.  */
 
@@ -125,6 +146,17 @@ struct parser_state : public expr_builder
   /* After a token has been recognized, this variable points to it.
      Currently used only for error reporting.  */
   const char *prev_lexptr = nullptr;
+
+  /* Number of arguments seen so far in innermost function call.  */
+
+  int arglist_len = 0;
+
+private:
+
+  /* Data structure for saving values of arglist_len for function calls whose
+     arguments contain other function calls.  */
+
+  std::vector<int> m_funcall_chain;
 };
 
 /* When parsing expressions we track the innermost block that was
@@ -184,9 +216,6 @@ private:
    parsing functions before parsing an expression, and can queried
    once the parse is complete.  */
 extern innermost_block_tracker innermost_block;
-
-/* Number of arguments seen so far in innermost function call.  */
-extern int arglist_len;
 
 /* A string token, either a char-string or bit-string.  Char-strings are
    used, for example, for the names of symbols.  */
@@ -310,10 +339,6 @@ extern void write_dollar_variable (struct parser_state *, struct stoken str);
 extern void mark_struct_expression (struct expr_builder *);
 
 extern const char *find_template_name_end (const char *);
-
-extern void start_arglist (void);
-
-extern int end_arglist (void);
 
 extern char *copy_name (struct stoken);
 

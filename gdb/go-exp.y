@@ -269,31 +269,31 @@ exp	:	exp '[' exp1 ']'
 exp	:	exp '('
 			/* This is to save the value of arglist_len
 			   being accumulated by an outer function call.  */
-			{ start_arglist (); }
+			{ pstate->start_arglist (); }
 		arglist ')'	%prec LEFT_ARROW
 			{ write_exp_elt_opcode (pstate, OP_FUNCALL);
 			  write_exp_elt_longcst (pstate,
-						 (LONGEST) end_arglist ());
+						 pstate->end_arglist ());
 			  write_exp_elt_opcode (pstate, OP_FUNCALL); }
 	;
 
 lcurly	:	'{'
-			{ start_arglist (); }
+			{ pstate->start_arglist (); }
 	;
 
 arglist	:
 	;
 
 arglist	:	exp
-			{ arglist_len = 1; }
+			{ pstate->arglist_len = 1; }
 	;
 
 arglist	:	arglist ',' exp   %prec ABOVE_COMMA
-			{ arglist_len++; }
+			{ pstate->arglist_len++; }
 	;
 
 rcurly	:	'}'
-			{ $$ = end_arglist () - 1; }
+			{ $$ = pstate->end_arglist () - 1; }
 	;
 
 exp	:	lcurly type rcurly exp  %prec UNARY

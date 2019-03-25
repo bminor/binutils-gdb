@@ -534,11 +534,11 @@ msgarg	:	name ':' exp
 exp	:	exp '('
 			/* This is to save the value of arglist_len
 			   being accumulated by an outer function call.  */
-			{ start_arglist (); }
+			{ pstate->start_arglist (); }
 		arglist ')'	%prec ARROW
 			{ write_exp_elt_opcode (pstate, OP_FUNCALL);
 			  write_exp_elt_longcst (pstate,
-						 (LONGEST) end_arglist ());
+						 pstate->end_arglist ());
 			  write_exp_elt_opcode (pstate, OP_FUNCALL); }
 	;
 
@@ -546,10 +546,10 @@ exp	:	exp '('
    "func()::static_var" further below, which uses
    function_method_void.  */
 exp	:	exp '(' ')' %prec ARROW
-			{ start_arglist ();
+			{ pstate->start_arglist ();
 			  write_exp_elt_opcode (pstate, OP_FUNCALL);
 			  write_exp_elt_longcst (pstate,
-						 (LONGEST) end_arglist ());
+						 pstate->end_arglist ());
 			  write_exp_elt_opcode (pstate, OP_FUNCALL); }
 	;
 
@@ -569,30 +569,30 @@ exp	:	UNKNOWN_CPP_NAME '('
 			/* This is to save the value of arglist_len
 			   being accumulated by an outer function call.  */
 
-			  start_arglist ();
+			  pstate->start_arglist ();
 			}
 		arglist ')'	%prec ARROW
 			{
 			  write_exp_elt_opcode (pstate, OP_FUNCALL);
 			  write_exp_elt_longcst (pstate,
-						 (LONGEST) end_arglist ());
+						 pstate->end_arglist ());
 			  write_exp_elt_opcode (pstate, OP_FUNCALL);
 			}
 	;
 
 lcurly	:	'{'
-			{ start_arglist (); }
+			{ pstate->start_arglist (); }
 	;
 
 arglist	:
 	;
 
 arglist	:	exp
-			{ arglist_len = 1; }
+			{ pstate->arglist_len = 1; }
 	;
 
 arglist	:	arglist ',' exp   %prec ABOVE_COMMA
-			{ arglist_len++; }
+			{ pstate->arglist_len++; }
 	;
 
 function_method:       exp '(' parameter_typelist ')' const_or_volatile
@@ -645,7 +645,7 @@ exp     :       function_method_void_or_typelist COLONCOLON name
 	;
 
 rcurly	:	'}'
-			{ $$ = end_arglist () - 1; }
+			{ $$ = pstate->end_arglist () - 1; }
 	;
 exp	:	lcurly arglist rcurly	%prec ARROW
 			{ write_exp_elt_opcode (pstate, OP_ARRAY);

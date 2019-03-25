@@ -1,5 +1,21 @@
 2019-04-04  Tom Tromey  <tom@tromey.com>
 
+	* parser-defs.h (struct parser_state) <start_arglist,
+	end_arglist>: New methods.
+	<arglist_len, m_funcall_chain>: New members.
+	(arglist_len, start_arglist, end_arglist): Don't declare.
+	* parse.c (arglist_len, funcall_chain): Remove global.
+	(start_arglist, end_arglist): Remove functions.
+	(parse_exp_in_context): Update.
+	* p-exp.y: Update rules.
+	* m2-exp.y: Update rules.
+	* go-exp.y: Update rules.
+	* f-exp.y: Update rules.
+	* d-exp.y: Update rules.
+	* c-exp.y: Update rules.
+
+2019-04-04  Tom Tromey  <tom@tromey.com>
+
 	* rust-exp.y (struct rust_parser) <lex_hex, lex_escape,
 	lex_operator, push_back>: New methods.
 	Update all rules.

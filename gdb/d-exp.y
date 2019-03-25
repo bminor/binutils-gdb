@@ -366,32 +366,32 @@ PostfixExpression:
 
 ArgumentList:
 	AssignExpression
-		{ arglist_len = 1; }
+		{ pstate->arglist_len = 1; }
 |	ArgumentList ',' AssignExpression
-		{ arglist_len++; }
+		{ pstate->arglist_len++; }
 ;
 
 ArgumentList_opt:
 	/* EMPTY */
-		{ arglist_len = 0; }
+		{ pstate->arglist_len = 0; }
 |	ArgumentList
 ;
 
 CallExpression:
 	PostfixExpression '('
-		{ start_arglist (); }
+		{ pstate->start_arglist (); }
 	ArgumentList_opt ')'
 		{ write_exp_elt_opcode (pstate, OP_FUNCALL);
-		  write_exp_elt_longcst (pstate, (LONGEST) end_arglist ());
+		  write_exp_elt_longcst (pstate, pstate->end_arglist ());
 		  write_exp_elt_opcode (pstate, OP_FUNCALL); }
 ;
 
 IndexExpression:
 	PostfixExpression '[' ArgumentList ']'
-		{ if (arglist_len > 0)
+		{ if (pstate->arglist_len > 0)
 		    {
 		      write_exp_elt_opcode (pstate, MULTI_SUBSCRIPT);
-		      write_exp_elt_longcst (pstate, (LONGEST) arglist_len);
+		      write_exp_elt_longcst (pstate, pstate->arglist_len);
 		      write_exp_elt_opcode (pstate, MULTI_SUBSCRIPT);
 		    }
 		  else
@@ -558,7 +558,7 @@ PrimaryExpression:
 
 ArrayLiteral:
 	'[' ArgumentList_opt ']'
-		{ $$ = arglist_len; }
+		{ $$ = pstate->arglist_len; }
 ;
 
 IdentifierExp:

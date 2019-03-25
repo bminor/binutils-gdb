@@ -67,7 +67,6 @@ const struct exp_descriptor exp_descriptor_standard =
 
 /* Global variables declared in parser-defs.h (and commented there).  */
 innermost_block_tracker innermost_block;
-int arglist_len;
 static struct type_stack type_stack;
 
 /* True if parsing an expression to attempt completion.  */
@@ -126,33 +125,6 @@ innermost_block_tracker::update (const struct block *b,
       && (m_innermost_block == NULL
 	  || contained_in (b, m_innermost_block)))
     m_innermost_block = b;
-}
-
-/* Data structure for saving values of arglist_len for function calls whose
-   arguments contain other function calls.  */
-
-static std::vector<int> *funcall_chain;
-
-/* Begin counting arguments for a function call,
-   saving the data about any containing call.  */
-
-void
-start_arglist (void)
-{
-  funcall_chain->push_back (arglist_len);
-  arglist_len = 0;
-}
-
-/* Return the number of arguments in a function call just terminated,
-   and restore the data for the containing function call.  */
-
-int
-end_arglist (void)
-{
-  int val = arglist_len;
-  arglist_len = funcall_chain->back ();
-  funcall_chain->pop_back ();
-  return val;
 }
 
 
@@ -1118,10 +1090,6 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
 
   if (*stringptr == 0 || **stringptr == 0)
     error_no_arg (_("expression to compute"));
-
-  std::vector<int> funcalls;
-  scoped_restore save_funcall_chain = make_scoped_restore (&funcall_chain,
-							   &funcalls);
 
   const struct block *expression_context_block = block;
   CORE_ADDR expression_context_pc = 0;
