@@ -1,5 +1,11 @@
 2019-03-25  Tamar Christina  <tamar.christina@arm.com>
 
+	* testsuite/binutils-all/aarch64/in-order.d: New test.
+	* testsuite/binutils-all/aarch64/out-of-order.d: Disassemble data as
+	well.
+
+2019-03-25  Tamar Christina  <tamar.christina@arm.com>
+
 	* objdump.c (disassemble_bytes): Pass stop_offset.
 	* testsuite/binutils-all/aarch64/out-of-order.T: New test.
 	* testsuite/binutils-all/aarch64/out-of-order.d: New test.
