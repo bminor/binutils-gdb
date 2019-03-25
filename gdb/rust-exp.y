@@ -1438,10 +1438,10 @@ rust_parser::lex_identifier (YYSTYPE *lvalp)
       return 0;
     }
 
-  if (token == NULL || (parse_completion && pstate->lexptr[0] == '\0'))
+  if (token == NULL || (pstate->parse_completion && pstate->lexptr[0] == '\0'))
     lvalp->sval = make_stoken (copy_name (start, length));
 
-  if (parse_completion && pstate->lexptr[0] == '\0')
+  if (pstate->parse_completion && pstate->lexptr[0] == '\0')
     {
       /* Prevent rustyylex from returning two COMPLETE tokens.  */
       pstate->prev_lexptr = pstate->lexptr;
@@ -1650,7 +1650,7 @@ rustyylex (YYSTYPE *lvalp, rust_parser *parser)
   pstate->prev_lexptr = pstate->lexptr;
   if (pstate->lexptr[0] == '\0')
     {
-      if (parse_completion)
+      if (pstate->parse_completion)
 	{
 	  lvalp->sval = make_stoken ("");
 	  return COMPLETE;
@@ -2225,7 +2225,7 @@ rust_parser::convert_ast_to_expression (const struct rust_op *operation,
 	convert_ast_to_expression (operation->left.op, top);
 
 	if (operation->completing)
-	  mark_struct_expression (pstate);
+	  pstate->mark_struct_expression ();
 	write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
 	write_exp_string (pstate, operation->right.sval);
 	write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
@@ -2544,7 +2544,7 @@ rust_parse (struct parser_state *state)
 
   result = rustyyparse (&parser);
 
-  if (!result || (parse_completion && parser.rust_ast != NULL))
+  if (!result || (state->parse_completion && parser.rust_ast != NULL))
     parser.convert_ast_to_expression (parser.rust_ast, parser.rust_ast);
 
   return result;
@@ -2684,14 +2684,14 @@ rust_lex_test_completion (rust_parser *parser)
 {
   const int expected[] = { IDENT, '.', COMPLETE, 0 };
 
-  parse_completion = 1;
+  parser->pstate->parse_completion = 1;
 
   rust_lex_test_sequence (parser, "something.wha", ARRAY_SIZE (expected),
 			  expected);
   rust_lex_test_sequence (parser, "something.", ARRAY_SIZE (expected),
 			  expected);
 
-  parse_completion = 0;
+  parser->pstate->parse_completion = 0;
 }
 
 /* Test pushback.  */
@@ -2726,7 +2726,7 @@ rust_lex_tests (void)
 
   // Set up dummy "parser", so that rust_type works.
   struct parser_state ps (&rust_language_defn, target_gdbarch (),
-			  nullptr, 0, 0, nullptr);
+			  nullptr, 0, 0, nullptr, 0);
   rust_parser parser (&ps);
 
   rust_lex_test_one (&parser, "", 0);

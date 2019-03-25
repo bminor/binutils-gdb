@@ -246,7 +246,7 @@ exp	:	exp '.' name_not_typename
 	;
 
 exp	:	exp '.' name_not_typename COMPLETE
-			{ mark_struct_expression (pstate);
+			{ pstate->mark_struct_expression ();
 			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
 			  write_exp_string (pstate, $3.stoken);
 			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT); }
@@ -254,7 +254,7 @@ exp	:	exp '.' name_not_typename COMPLETE
 
 exp	:	exp '.' COMPLETE
 			{ struct stoken s;
-			  mark_struct_expression (pstate);
+			  pstate->mark_struct_expression ();
 			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
 			  s.ptr = "";
 			  s.length = 0;
@@ -1087,7 +1087,7 @@ lex_one_token (struct parser_state *par_state)
       /* Might be a floating point number.  */
       if (par_state->lexptr[1] < '0' || par_state->lexptr[1] > '9')
 	{
-	  if (parse_completion)
+	  if (pstate->parse_completion)
 	    last_was_structop = 1;
 	  goto symbol;		/* Nope, must be a symbol. */
 	}
@@ -1276,7 +1276,7 @@ lex_one_token (struct parser_state *par_state)
   if (*tokstart == '$')
     return DOLLAR_VARIABLE;
 
-  if (parse_completion && *par_state->lexptr == '\0')
+  if (pstate->parse_completion && *par_state->lexptr == '\0')
     saw_name_at_eof = 1;
   return NAME;
 }

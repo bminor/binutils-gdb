@@ -285,14 +285,14 @@ exp	:	field_exp name
 			}
 	;
 exp	:	field_exp  name COMPLETE
-			{ mark_struct_expression (pstate);
+			{ pstate->mark_struct_expression ();
 			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
 			  write_exp_string (pstate, $2);
 			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT); }
 	;
 exp	:	field_exp COMPLETE
 			{ struct stoken s;
-			  mark_struct_expression (pstate);
+			  pstate->mark_struct_expression ();
 			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
 			  s.ptr = "";
 			  s.length = 0;
@@ -1162,7 +1162,7 @@ yylex (void)
   switch (c = *tokstart)
     {
     case 0:
-      if (search_field && parse_completion)
+      if (search_field && pstate->parse_completion)
 	return COMPLETE;
       else
        return 0;

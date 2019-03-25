@@ -338,7 +338,7 @@ PostfixExpression:
 	PrimaryExpression
 |	PostfixExpression '.' COMPLETE
 		{ struct stoken s;
-		  mark_struct_expression (pstate);
+		  pstate->mark_struct_expression ();
 		  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
 		  s.ptr = "";
 		  s.length = 0;
@@ -349,7 +349,7 @@ PostfixExpression:
 		  write_exp_string (pstate, $3);
 		  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT); }
 |	PostfixExpression '.' IDENTIFIER COMPLETE
-		{ mark_struct_expression (pstate);
+		{ pstate->mark_struct_expression ();
 		  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
 		  write_exp_string (pstate, $3);
 		  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT); }
@@ -1107,7 +1107,7 @@ lex_one_token (struct parser_state *par_state)
       /* Might be a floating point number.  */
       if (pstate->lexptr[1] < '0' || pstate->lexptr[1] > '9')
 	{
-	  if (parse_completion)
+	  if (pstate->parse_completion)
 	    last_was_structop = 1;
 	  goto symbol;		/* Nope, must be a symbol.  */
 	}
@@ -1308,7 +1308,7 @@ lex_one_token (struct parser_state *par_state)
 	return NAME_OR_INT;
     }
 
-  if (parse_completion && *pstate->lexptr == '\0')
+  if (pstate->parse_completion && *pstate->lexptr == '\0')
     saw_name_at_eof = 1;
 
   return IDENTIFIER;

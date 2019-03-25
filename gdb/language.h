@@ -176,9 +176,12 @@ struct language_defn
        la_parser, perform any remaining processing necessary to complete
        its translation.  *EXPP may change; la_post_parser is responsible 
        for releasing its previous contents, if necessary.  If 
-       VOID_CONTEXT_P, then no value is expected from the expression.  */
+       VOID_CONTEXT_P, then no value is expected from the expression.
+       If COMPLETING is non-zero, then the expression has been parsed
+       for completion, not evaluation.  */
 
-    void (*la_post_parser) (expression_up *expp, int void_context_p);
+    void (*la_post_parser) (expression_up *expp, int void_context_p,
+			    int completing);
 
     void (*la_printchar) (int ch, struct type *chtype,
 			  struct ui_file * stream);

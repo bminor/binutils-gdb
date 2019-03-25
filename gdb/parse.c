@@ -69,20 +69,6 @@ const struct exp_descriptor exp_descriptor_standard =
 innermost_block_tracker innermost_block;
 static struct type_stack type_stack;
 
-/* True if parsing an expression to attempt completion.  */
-int parse_completion;
-
-/* The index of the last struct expression directly before a '.' or
-   '->'.  This is set when parsing and is only used when completing a
-   field name.  It is -1 if no dereference operation was found.  */
-static int expout_last_struct = -1;
-
-/* If we are completing a tagged type name, this will be nonzero.  */
-static enum type_code expout_tag_completion_type = TYPE_CODE_UNDEF;
-
-/* The token for tagged type name completion.  */
-static gdb::unique_xmalloc_ptr<char> expout_completion_name;
-
 
 static unsigned int expressiondebug = 0;
 static void
@@ -105,12 +91,13 @@ show_parserdebug (struct ui_file *file, int from_tty,
 
 
 static int prefixify_subexp (struct expression *, struct expression *, int,
-			     int);
+			     int, int);
 
 static expression_up parse_exp_in_context (const char **, CORE_ADDR,
 					   const struct block *, int,
 					   int, int *,
-					   innermost_block_tracker_types);
+					   innermost_block_tracker_types,
+					   expr_completion_state *);
 
 static void increase_expout_size (struct expr_builder *ps, size_t lenelt);
 
@@ -507,15 +494,15 @@ write_exp_msymbol (struct expr_builder *ps,
   write_exp_elt_opcode (ps, OP_VAR_MSYM_VALUE);
 }
 
-/* Mark the current index as the starting location of a structure
-   expression.  This is used when completing on field names.  */
+/* See parser-defs.h.  */
 
 void
-mark_struct_expression (struct expr_builder *ps)
+parser_state::mark_struct_expression ()
 {
   gdb_assert (parse_completion
-	      && expout_tag_completion_type == TYPE_CODE_UNDEF);
-  expout_last_struct = ps->expout_ptr;
+	      && (m_completion_state.expout_tag_completion_type
+		  == TYPE_CODE_UNDEF));
+  m_completion_state.expout_last_struct = expout_ptr;
 }
 
 /* Indicate that the current parser invocation is completing a tag.
@@ -523,17 +510,19 @@ mark_struct_expression (struct expr_builder *ps)
    start of the tag name.  */
 
 void
-mark_completion_tag (enum type_code tag, const char *ptr, int length)
+parser_state::mark_completion_tag (enum type_code tag, const char *ptr,
+				   int length)
 {
   gdb_assert (parse_completion
-	      && expout_tag_completion_type == TYPE_CODE_UNDEF
-	      && expout_completion_name == NULL
-	      && expout_last_struct == -1);
+	      && (m_completion_state.expout_tag_completion_type
+		  == TYPE_CODE_UNDEF)
+	      && m_completion_state.expout_completion_name == NULL
+	      && m_completion_state.expout_last_struct == -1);
   gdb_assert (tag == TYPE_CODE_UNION
 	      || tag == TYPE_CODE_STRUCT
 	      || tag == TYPE_CODE_ENUM);
-  expout_tag_completion_type = tag;
-  expout_completion_name.reset (xstrndup (ptr, length));
+  m_completion_state.expout_tag_completion_type = tag;
+  m_completion_state.expout_completion_name.reset (xstrndup (ptr, length));
 }
 
 
@@ -755,7 +744,7 @@ copy_name (struct stoken token)
 /* See comments on parser-defs.h.  */
 
 int
-prefixify_expression (struct expression *expr)
+prefixify_expression (struct expression *expr, int last_struct)
 {
   gdb_assert (expr->nelts > 0);
   int len = sizeof (struct expression) + EXP_ELEM_TO_BYTES (expr->nelts);
@@ -767,7 +756,7 @@ prefixify_expression (struct expression *expr)
   /* Copy the original expression into temp.  */
   memcpy (temp, expr, len);
 
-  return prefixify_subexp (temp, expr, inpos, outpos);
+  return prefixify_subexp (temp, expr, inpos, outpos, last_struct);
 }
 
 /* Return the number of exp_elements in the postfix subexpression 
@@ -987,13 +976,14 @@ operator_length_standard (const struct expression *expr, int endpos,
 /* Copy the subexpression ending just before index INEND in INEXPR
    into OUTEXPR, starting at index OUTBEG.
    In the process, convert it from suffix to prefix form.
-   If EXPOUT_LAST_STRUCT is -1, then this function always returns -1.
+   If LAST_STRUCT is -1, then this function always returns -1.
    Otherwise, it returns the index of the subexpression which is the
-   left-hand-side of the expression at EXPOUT_LAST_STRUCT.  */
+   left-hand-side of the expression at LAST_STRUCT.  */
 
 static int
 prefixify_subexp (struct expression *inexpr,
-		  struct expression *outexpr, int inend, int outbeg)
+		  struct expression *outexpr, int inend, int outbeg,
+		  int last_struct)
 {
   int oplen;
   int args;
@@ -1010,7 +1000,7 @@ prefixify_subexp (struct expression *inexpr,
 	  EXP_ELEM_TO_BYTES (oplen));
   outbeg += oplen;
 
-  if (expout_last_struct == inend)
+  if (last_struct == inend)
     result = outbeg - oplen;
 
   /* Find the lengths of the arg subexpressions.  */
@@ -1034,7 +1024,7 @@ prefixify_subexp (struct expression *inexpr,
 
       oplen = arglens[i];
       inend += oplen;
-      r = prefixify_subexp (inexpr, outexpr, inend, outbeg);
+      r = prefixify_subexp (inexpr, outexpr, inend, outbeg, last_struct);
       if (r != -1)
 	{
 	  /* Return immediately.  We probably have only parsed a
@@ -1063,7 +1053,7 @@ parse_exp_1 (const char **stringptr, CORE_ADDR pc, const struct block *block,
 	     int comma, innermost_block_tracker_types tracker_types)
 {
   return parse_exp_in_context (stringptr, pc, block, comma, 0, NULL,
-			       tracker_types);
+			       tracker_types, nullptr);
 }
 
 /* As for parse_exp_1, except that if VOID_CONTEXT_P, then
@@ -1077,15 +1067,13 @@ static expression_up
 parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
 		      const struct block *block,
 		      int comma, int void_context_p, int *out_subexp,
-		      innermost_block_tracker_types tracker_types)
+		      innermost_block_tracker_types tracker_types,
+		      expr_completion_state *cstate)
 {
   const struct language_defn *lang = NULL;
   int subexp;
 
   type_stack.elements.clear ();
-  expout_last_struct = -1;
-  expout_tag_completion_type = TYPE_CODE_UNDEF;
-  expout_completion_name.reset ();
   innermost_block.reset (tracker_types);
 
   if (*stringptr == 0 || **stringptr == 0)
@@ -1147,7 +1135,8 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
      to the value matching SELECTED_FRAME as set by get_current_arch.  */
 
   parser_state ps (lang, get_current_arch (), expression_context_block,
-		   expression_context_pc, comma, *stringptr);
+		   expression_context_pc, comma, *stringptr,
+		   cstate != nullptr);
 
   scoped_restore_current_language lang_saver;
   set_language (lang->la_language);
@@ -1161,7 +1150,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
       /* If parsing for completion, allow this to succeed; but if no
 	 expression elements have been written, then there's nothing
 	 to do, so fail.  */
-      if (! parse_completion || ps.expout_ptr == 0)
+      if (! ps.parse_completion || ps.expout_ptr == 0)
 	throw_exception (except);
     }
   END_CATCH
@@ -1177,15 +1166,18 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
     dump_raw_expression (result.get (), gdb_stdlog,
 			 "before conversion to prefix form");
 
-  subexp = prefixify_expression (result.get ());
+  subexp = prefixify_expression (result.get (),
+				 ps.m_completion_state.expout_last_struct);
   if (out_subexp)
     *out_subexp = subexp;
 
-  lang->la_post_parser (&result, void_context_p);
+  lang->la_post_parser (&result, void_context_p, ps.parse_completion);
 
   if (expressiondebug)
     dump_prefix_expression (result.get (), gdb_stdlog);
 
+  if (cstate != nullptr)
+    *cstate = std::move (ps.m_completion_state);
   *stringptr = ps.lexptr;
   return result;
 }
@@ -1233,12 +1225,12 @@ parse_expression_for_completion (const char *string,
   expression_up exp;
   struct value *val;
   int subexp;
+  expr_completion_state cstate;
 
   TRY
     {
-      parse_completion = 1;
       exp = parse_exp_in_context (&string, 0, 0, 0, 0, &subexp,
-				  INNERMOST_BLOCK_FOR_SYMBOLS);
+				  INNERMOST_BLOCK_FOR_SYMBOLS, &cstate);
     }
   CATCH (except, RETURN_MASK_ERROR)
     {
@@ -1246,18 +1238,17 @@ parse_expression_for_completion (const char *string,
     }
   END_CATCH
 
-  parse_completion = 0;
   if (exp == NULL)
     return NULL;
 
-  if (expout_tag_completion_type != TYPE_CODE_UNDEF)
+  if (cstate.expout_tag_completion_type != TYPE_CODE_UNDEF)
     {
-      *code = expout_tag_completion_type;
-      *name = std::move (expout_completion_name);
+      *code = cstate.expout_tag_completion_type;
+      *name = std::move (cstate.expout_completion_name);
       return NULL;
     }
 
-  if (expout_last_struct == -1)
+  if (cstate.expout_last_struct == -1)
     return NULL;
 
   const char *fieldname = extract_field_op (exp.get (), &subexp);
@@ -1278,7 +1269,7 @@ parse_expression_for_completion (const char *string,
 /* A post-parser that does nothing.  */
 
 void
-null_post_parser (expression_up *exp, int void_context_p)
+null_post_parser (expression_up *exp, int void_context_p, int completin)
 {
 }
 

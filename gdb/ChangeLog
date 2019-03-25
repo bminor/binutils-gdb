@@ -1,5 +1,43 @@
 2019-04-04  Tom Tromey  <tom@tromey.com>
 
+	* rust-exp.y (rust_parser::lex_identifier, rustyylex)
+	(rust_parser::convert_ast_to_expression, rust_parse)
+	(rust_lex_test_completion, rust_lex_tests): Update.
+	* parser-defs.h (struct expr_completion_state): New.
+	(struct parser_state) <parser_state>: Add completion parameter.
+	<mark_struct_expression, mark_completion_tag>: New methods.
+	<parse_completion, m_completion_state>: New members.
+	(prefixify_expression, null_post_parser): Update.
+	(mark_struct_expression, mark_completion_tag): Don't declare.
+	* parse.c (parse_completion, expout_last_struct)
+	(expout_tag_completion_type, expout_completion_name): Remove
+	globals.
+	(parser_state::mark_struct_expression)
+	(parser_state::mark_completion_tag): Now methods.
+	(prefixify_expression): Add last_struct parameter.
+	(prefixify_subexp): Likewise.
+	(parse_exp_1): Update.
+	(parse_exp_in_context): Add cstate parameter.  Update.
+	(parse_expression_for_completion): Create an
+	expr_completion_state.
+	(null_post_parser): Add "completion" parameter.
+	* p-exp.y: Update rules.
+	(yylex): Update.
+	* language.h (struct language_defn) <la_post_parser>: Add
+	"completing" parameter.
+	* go-exp.y: Update rules.
+	(lex_one_token): Update.
+	* expression.h (parse_completion): Don't declare.
+	* d-exp.y: Update rules.
+	(lex_one_token): Update rules.
+	* c-exp.y: Update rules.
+	(lex_one_token): Update.
+	* ada-lang.c (resolve): Add "parse_completion" parameter.
+	(resolve_subexp): Likewise.
+	(ada_resolve_function): Likewise.
+
+2019-04-04  Tom Tromey  <tom@tromey.com>
+
 	* parser-defs.h (struct parser_state) <start_arglist,
 	end_arglist>: New methods.
 	<arglist_len, m_funcall_chain>: New members.

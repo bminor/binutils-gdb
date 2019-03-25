@@ -123,10 +123,6 @@ extern expression_up parse_exp_1 (const char **, CORE_ADDR pc,
 				  innermost_block_tracker_types
 				    = INNERMOST_BLOCK_FOR_SYMBOLS);
 
-/* For use by parsers; set if we want to parse an expression and
-   attempt completion.  */
-extern int parse_completion;
-
 /* From eval.c */
 
 /* Values of NOSIDE argument to eval_subexp.  */

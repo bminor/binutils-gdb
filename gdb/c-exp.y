@@ -364,7 +364,7 @@ exp	:	exp ARROW field_name
 	;
 
 exp	:	exp ARROW field_name COMPLETE
-			{ mark_struct_expression (pstate);
+			{ pstate->mark_struct_expression ();
 			  write_exp_elt_opcode (pstate, STRUCTOP_PTR);
 			  write_exp_string (pstate, $3);
 			  write_exp_elt_opcode (pstate, STRUCTOP_PTR); }
@@ -372,7 +372,7 @@ exp	:	exp ARROW field_name COMPLETE
 
 exp	:	exp ARROW COMPLETE
 			{ struct stoken s;
-			  mark_struct_expression (pstate);
+			  pstate->mark_struct_expression ();
 			  write_exp_elt_opcode (pstate, STRUCTOP_PTR);
 			  s.ptr = "";
 			  s.length = 0;
@@ -387,7 +387,7 @@ exp	:	exp ARROW '~' name
 	;
 
 exp	:	exp ARROW '~' name COMPLETE
-			{ mark_struct_expression (pstate);
+			{ pstate->mark_struct_expression ();
 			  write_exp_elt_opcode (pstate, STRUCTOP_PTR);
 			  write_destructor_name (pstate, $4);
 			  write_exp_elt_opcode (pstate, STRUCTOP_PTR); }
@@ -412,7 +412,7 @@ exp	:	exp '.' field_name
 	;
 
 exp	:	exp '.' field_name COMPLETE
-			{ mark_struct_expression (pstate);
+			{ pstate->mark_struct_expression ();
 			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
 			  write_exp_string (pstate, $3);
 			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT); }
@@ -420,7 +420,7 @@ exp	:	exp '.' field_name COMPLETE
 
 exp	:	exp '.' COMPLETE
 			{ struct stoken s;
-			  mark_struct_expression (pstate);
+			  pstate->mark_struct_expression ();
 			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
 			  s.ptr = "";
 			  s.length = 0;
@@ -435,7 +435,7 @@ exp	:	exp '.' '~' name
 	;
 
 exp	:	exp '.' '~' name COMPLETE
-			{ mark_struct_expression (pstate);
+			{ pstate->mark_struct_expression ();
 			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
 			  write_destructor_name (pstate, $4);
 			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT); }
@@ -1406,13 +1406,14 @@ typebase
 			}
 	|	STRUCT COMPLETE
 			{
-			  mark_completion_tag (TYPE_CODE_STRUCT, "", 0);
+			  pstate->mark_completion_tag (TYPE_CODE_STRUCT,
+						       "", 0);
 			  $$ = NULL;
 			}
 	|	STRUCT name COMPLETE
 			{
-			  mark_completion_tag (TYPE_CODE_STRUCT, $2.ptr,
-					       $2.length);
+			  pstate->mark_completion_tag (TYPE_CODE_STRUCT,
+						       $2.ptr, $2.length);
 			  $$ = NULL;
 			}
 	|	CLASS name
@@ -1421,13 +1422,14 @@ typebase
 			}
 	|	CLASS COMPLETE
 			{
-			  mark_completion_tag (TYPE_CODE_STRUCT, "", 0);
+			  pstate->mark_completion_tag (TYPE_CODE_STRUCT,
+						       "", 0);
 			  $$ = NULL;
 			}
 	|	CLASS name COMPLETE
 			{
-			  mark_completion_tag (TYPE_CODE_STRUCT, $2.ptr,
-					       $2.length);
+			  pstate->mark_completion_tag (TYPE_CODE_STRUCT,
+						       $2.ptr, $2.length);
 			  $$ = NULL;
 			}
 	|	UNION name
@@ -1437,13 +1439,14 @@ typebase
 			}
 	|	UNION COMPLETE
 			{
-			  mark_completion_tag (TYPE_CODE_UNION, "", 0);
+			  pstate->mark_completion_tag (TYPE_CODE_UNION,
+						       "", 0);
 			  $$ = NULL;
 			}
 	|	UNION name COMPLETE
 			{
-			  mark_completion_tag (TYPE_CODE_UNION, $2.ptr,
-					       $2.length);
+			  pstate->mark_completion_tag (TYPE_CODE_UNION,
+						       $2.ptr, $2.length);
 			  $$ = NULL;
 			}
 	|	ENUM name
@@ -1452,13 +1455,13 @@ typebase
 			}
 	|	ENUM COMPLETE
 			{
-			  mark_completion_tag (TYPE_CODE_ENUM, "", 0);
+			  pstate->mark_completion_tag (TYPE_CODE_ENUM, "", 0);
 			  $$ = NULL;
 			}
 	|	ENUM name COMPLETE
 			{
-			  mark_completion_tag (TYPE_CODE_ENUM, $2.ptr,
-					       $2.length);
+			  pstate->mark_completion_tag (TYPE_CODE_ENUM, $2.ptr,
+						       $2.length);
 			  $$ = NULL;
 			}
 	|	UNSIGNED type_name
@@ -2608,7 +2611,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 	  saw_name_at_eof = 0;
 	  return COMPLETE;
 	}
-      else if (parse_completion && saw_structop)
+      else if (par_state->parse_completion && saw_structop)
 	return COMPLETE;
       else
         return 0;
@@ -2902,7 +2905,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
   if (*tokstart == '$')
     return DOLLAR_VARIABLE;
 
-  if (parse_completion && *pstate->lexptr == '\0')
+  if (pstate->parse_completion && *pstate->lexptr == '\0')
     saw_name_at_eof = 1;
 
   yylval.ssym.stoken = yylval.sval;

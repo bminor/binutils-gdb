@@ -76,6 +76,22 @@ struct expr_builder
   size_t expout_ptr;
 };
 
+/* This is used for expression completion.  */
+
+struct expr_completion_state
+{
+  /* The index of the last struct expression directly before a '.' or
+     '->'.  This is set when parsing and is only used when completing a
+     field name.  It is -1 if no dereference operation was found.  */
+  int expout_last_struct = -1;
+
+  /* If we are completing a tagged type name, this will be nonzero.  */
+  enum type_code expout_tag_completion_type = TYPE_CODE_UNDEF;
+
+  /* The token for tagged type name completion.  */
+  gdb::unique_xmalloc_ptr<char> expout_completion_name;
+};
+
 /* An instance of this type is instantiated during expression parsing,
    and passed to the appropriate parser.  It holds both inputs to the
    parser, and result.  */
@@ -90,12 +106,14 @@ struct parser_state : public expr_builder
 		const struct block *context_block,
 		CORE_ADDR context_pc,
 		int comma,
-		const char *input)
+		const char *input,
+		int completion)
     : expr_builder (lang, gdbarch),
       expression_context_block (context_block),
       expression_context_pc (context_pc),
       comma_terminates (comma),
-      lexptr (input)
+      lexptr (input),
+      parse_completion (completion)
   {
   }
 
@@ -120,6 +138,17 @@ struct parser_state : public expr_builder
     m_funcall_chain.pop_back ();
     return val;
   }
+
+  /* Mark the current index as the starting location of a structure
+     expression.  This is used when completing on field names.  */
+
+  void mark_struct_expression ();
+
+  /* Indicate that the current parser invocation is completing a tag.
+     TAG is the type code of the tag, and PTR and LENGTH represent the
+     start of the tag name.  */
+
+  void mark_completion_tag (enum type_code tag, const char *ptr, int length);
 
 
   /* If this is nonzero, this block is used as the lexical context for
@@ -150,6 +179,12 @@ struct parser_state : public expr_builder
   /* Number of arguments seen so far in innermost function call.  */
 
   int arglist_len = 0;
+
+  /* True if parsing an expression to attempt completion.  */
+  int parse_completion;
+
+  /* Completion state is updated here.  */
+  expr_completion_state m_completion_state;
 
 private:
 
@@ -300,12 +335,13 @@ struct type_stack
 
 /* Reverse an expression from suffix form (in which it is constructed)
    to prefix form (in which we can conveniently print or execute it).
-   Ordinarily this always returns -1.  However, if EXPOUT_LAST_STRUCT
+   Ordinarily this always returns -1.  However, if LAST_STRUCT
    is not -1 (i.e., we are trying to complete a field name), it will
    return the index of the subexpression which is the left-hand-side
-   of the struct operation at EXPOUT_LAST_STRUCT.  */
+   of the struct operation at LAST_STRUCT.  */
 
-extern int prefixify_expression (struct expression *expr);
+extern int prefixify_expression (struct expression *expr,
+				 int last_struct = -1);
 
 extern void write_exp_elt_opcode (struct expr_builder *, enum exp_opcode);
 
@@ -335,8 +371,6 @@ extern void write_exp_msymbol (struct expr_builder *,
 			       struct bound_minimal_symbol);
 
 extern void write_dollar_variable (struct parser_state *, struct stoken str);
-
-extern void mark_struct_expression (struct expr_builder *);
 
 extern const char *find_template_name_end (const char *);
 
@@ -384,7 +418,7 @@ extern struct type *follow_types (struct type *);
 
 extern type_instance_flags follow_type_instance_flags ();
 
-extern void null_post_parser (expression_up *, int);
+extern void null_post_parser (expression_up *, int, int);
 
 extern bool parse_float (const char *p, int len,
 			 const struct type *type, gdb_byte *data);
@@ -482,9 +516,6 @@ extern void print_subexp_standard (struct expression *, int *,
 extern void parser_fprintf (FILE *, const char *, ...) ATTRIBUTE_PRINTF (2, 3);
 
 extern int exp_uses_objfile (struct expression *exp, struct objfile *objfile);
-
-extern void mark_completion_tag (enum type_code, const char *ptr,
-				 int length);
 
 #endif /* PARSER_DEFS_H */
 
