@@ -117,7 +117,6 @@ struct rust_parser;
 static int rustyylex (YYSTYPE *, rust_parser *);
 static void rustyyerror (rust_parser *parser, const char *msg);
 
-static void rust_push_back (char c);
 static struct stoken make_stoken (const char *);
 static struct block_symbol rust_lookup_symbol (const char *name,
 					       const struct block *block,
@@ -237,6 +236,10 @@ struct rust_parser
   int lex_number (YYSTYPE *lvalp);
   int lex_string (YYSTYPE *lvalp);
   int lex_identifier (YYSTYPE *lvalp);
+  uint32_t lex_hex (int min, int max);
+  uint32_t lex_escape (int is_byte);
+  int lex_operator (YYSTYPE *lvalp);
+  void push_back (char c);
 
   struct type *rust_lookup_type (const char *name, const struct block *block);
   std::vector<struct type *> convert_params_to_types (rust_op_vector *params);
@@ -855,7 +858,7 @@ identifier_path_for_expr:
 |	identifier_path_for_expr COLONCOLON '<' type_list RSH
 		{
 		  $$ = parser->ast_path ($1->left.sval, $4);
-		  rust_push_back ('>');
+		  parser->push_back ('>');
 		}
 ;
 
@@ -898,7 +901,7 @@ identifier_path_for_type:
 |	just_identifiers_for_type '<' type_list RSH
 		{
 		  $$ = parser->ast_path ($1->left.sval, $3);
-		  rust_push_back ('>');
+		  parser->push_back ('>');
 		}
 ;
 
@@ -1111,8 +1114,8 @@ update_innermost_block (struct block_symbol sym)
 /* Lex a hex number with at least MIN digits and at most MAX
    digits.  */
 
-static uint32_t
-lex_hex (int min, int max)
+uint32_t
+rust_parser::lex_hex (int min, int max)
 {
   uint32_t result = 0;
   int len = 0;
@@ -1120,18 +1123,18 @@ lex_hex (int min, int max)
   int check_max = min == max;
 
   while ((check_max ? len <= max : 1)
-	 && ((lexptr[0] >= 'a' && lexptr[0] <= 'f')
-	     || (lexptr[0] >= 'A' && lexptr[0] <= 'F')
-	     || (lexptr[0] >= '0' && lexptr[0] <= '9')))
+	 && ((pstate->lexptr[0] >= 'a' && pstate->lexptr[0] <= 'f')
+	     || (pstate->lexptr[0] >= 'A' && pstate->lexptr[0] <= 'F')
+	     || (pstate->lexptr[0] >= '0' && pstate->lexptr[0] <= '9')))
     {
       result *= 16;
-      if (lexptr[0] >= 'a' && lexptr[0] <= 'f')
-	result = result + 10 + lexptr[0] - 'a';
-      else if (lexptr[0] >= 'A' && lexptr[0] <= 'F')
-	result = result + 10 + lexptr[0] - 'A';
+      if (pstate->lexptr[0] >= 'a' && pstate->lexptr[0] <= 'f')
+	result = result + 10 + pstate->lexptr[0] - 'a';
+      else if (pstate->lexptr[0] >= 'A' && pstate->lexptr[0] <= 'F')
+	result = result + 10 + pstate->lexptr[0] - 'A';
       else
-	result = result + lexptr[0] - '0';
-      ++lexptr;
+	result = result + pstate->lexptr[0] - '0';
+      ++pstate->lexptr;
       ++len;
     }
 
@@ -1149,65 +1152,65 @@ lex_hex (int min, int max)
 /* Lex an escape.  IS_BYTE is true if we're lexing a byte escape;
    otherwise we're lexing a character escape.  */
 
-static uint32_t
-lex_escape (int is_byte)
+uint32_t
+rust_parser::lex_escape (int is_byte)
 {
   uint32_t result;
 
-  gdb_assert (lexptr[0] == '\\');
-  ++lexptr;
-  switch (lexptr[0])
+  gdb_assert (pstate->lexptr[0] == '\\');
+  ++pstate->lexptr;
+  switch (pstate->lexptr[0])
     {
     case 'x':
-      ++lexptr;
+      ++pstate->lexptr;
       result = lex_hex (2, 2);
       break;
 
     case 'u':
       if (is_byte)
 	error (_("Unicode escape in byte literal"));
-      ++lexptr;
-      if (lexptr[0] != '{')
+      ++pstate->lexptr;
+      if (pstate->lexptr[0] != '{')
 	error (_("Missing '{' in Unicode escape"));
-      ++lexptr;
+      ++pstate->lexptr;
       result = lex_hex (1, 6);
       /* Could do range checks here.  */
-      if (lexptr[0] != '}')
+      if (pstate->lexptr[0] != '}')
 	error (_("Missing '}' in Unicode escape"));
-      ++lexptr;
+      ++pstate->lexptr;
       break;
 
     case 'n':
       result = '\n';
-      ++lexptr;
+      ++pstate->lexptr;
       break;
     case 'r':
       result = '\r';
-      ++lexptr;
+      ++pstate->lexptr;
       break;
     case 't':
       result = '\t';
-      ++lexptr;
+      ++pstate->lexptr;
       break;
     case '\\':
       result = '\\';
-      ++lexptr;
+      ++pstate->lexptr;
       break;
     case '0':
       result = '\0';
-      ++lexptr;
+      ++pstate->lexptr;
       break;
     case '\'':
       result = '\'';
-      ++lexptr;
+      ++pstate->lexptr;
       break;
     case '"':
       result = '"';
-      ++lexptr;
+      ++pstate->lexptr;
       break;
 
     default:
-      error (_("Invalid escape \\%c in literal"), lexptr[0]);
+      error (_("Invalid escape \\%c in literal"), pstate->lexptr[0]);
     }
 
   return result;
@@ -1221,25 +1224,25 @@ rust_parser::lex_character (YYSTYPE *lvalp)
   int is_byte = 0;
   uint32_t value;
 
-  if (lexptr[0] == 'b')
+  if (pstate->lexptr[0] == 'b')
     {
       is_byte = 1;
-      ++lexptr;
+      ++pstate->lexptr;
     }
-  gdb_assert (lexptr[0] == '\'');
-  ++lexptr;
+  gdb_assert (pstate->lexptr[0] == '\'');
+  ++pstate->lexptr;
   /* This should handle UTF-8 here.  */
-  if (lexptr[0] == '\\')
+  if (pstate->lexptr[0] == '\\')
     value = lex_escape (is_byte);
   else
     {
-      value = lexptr[0] & 0xff;
-      ++lexptr;
+      value = pstate->lexptr[0] & 0xff;
+      ++pstate->lexptr;
     }
 
-  if (lexptr[0] != '\'')
+  if (pstate->lexptr[0] != '\'')
     error (_("Unterminated character literal"));
-  ++lexptr;
+  ++pstate->lexptr;
 
   lvalp->typed_val_int.val = value;
   lvalp->typed_val_int.type = get_type (is_byte ? "u8" : "char");
@@ -1285,15 +1288,15 @@ ends_raw_string (const char *str, int n)
 int
 rust_parser::lex_string (YYSTYPE *lvalp)
 {
-  int is_byte = lexptr[0] == 'b';
+  int is_byte = pstate->lexptr[0] == 'b';
   int raw_length;
 
   if (is_byte)
-    ++lexptr;
-  raw_length = starts_raw_string (lexptr);
-  lexptr += raw_length;
-  gdb_assert (lexptr[0] == '"');
-  ++lexptr;
+    ++pstate->lexptr;
+  raw_length = starts_raw_string (pstate->lexptr);
+  pstate->lexptr += raw_length;
+  gdb_assert (pstate->lexptr[0] == '"');
+  ++pstate->lexptr;
 
   while (1)
     {
@@ -1301,29 +1304,30 @@ rust_parser::lex_string (YYSTYPE *lvalp)
 
       if (raw_length > 0)
 	{
-	  if (lexptr[0] == '"' && ends_raw_string (lexptr, raw_length - 1))
+	  if (pstate->lexptr[0] == '"' && ends_raw_string (pstate->lexptr,
+							   raw_length - 1))
 	    {
 	      /* Exit with lexptr pointing after the final "#".  */
-	      lexptr += raw_length;
+	      pstate->lexptr += raw_length;
 	      break;
 	    }
-	  else if (lexptr[0] == '\0')
+	  else if (pstate->lexptr[0] == '\0')
 	    error (_("Unexpected EOF in string"));
 
-	  value = lexptr[0] & 0xff;
+	  value = pstate->lexptr[0] & 0xff;
 	  if (is_byte && value > 127)
 	    error (_("Non-ASCII value in raw byte string"));
 	  obstack_1grow (&obstack, value);
 
-	  ++lexptr;
+	  ++pstate->lexptr;
 	}
-      else if (lexptr[0] == '"')
+      else if (pstate->lexptr[0] == '"')
 	{
 	  /* Make sure to skip the quote.  */
-	  ++lexptr;
+	  ++pstate->lexptr;
 	  break;
 	}
-      else if (lexptr[0] == '\\')
+      else if (pstate->lexptr[0] == '\\')
 	{
 	  value = lex_escape (is_byte);
 
@@ -1334,15 +1338,15 @@ rust_parser::lex_string (YYSTYPE *lvalp)
 				       sizeof (value), sizeof (value),
 				       &obstack, translit_none);
 	}
-      else if (lexptr[0] == '\0')
+      else if (pstate->lexptr[0] == '\0')
 	error (_("Unexpected EOF in string"));
       else
 	{
-	  value = lexptr[0] & 0xff;
+	  value = pstate->lexptr[0] & 0xff;
 	  if (is_byte && value > 127)
 	    error (_("Non-ASCII value in byte string"));
 	  obstack_1grow (&obstack, value);
-	  ++lexptr;
+	  ++pstate->lexptr;
 	}
     }
 
@@ -1382,27 +1386,27 @@ rust_identifier_start_p (char c)
 int
 rust_parser::lex_identifier (YYSTYPE *lvalp)
 {
-  const char *start = lexptr;
+  const char *start = pstate->lexptr;
   unsigned int length;
   const struct token_info *token;
   int i;
-  int is_gdb_var = lexptr[0] == '$';
+  int is_gdb_var = pstate->lexptr[0] == '$';
 
-  gdb_assert (rust_identifier_start_p (lexptr[0]));
+  gdb_assert (rust_identifier_start_p (pstate->lexptr[0]));
 
-  ++lexptr;
+  ++pstate->lexptr;
 
   /* For the time being this doesn't handle Unicode rules.  Non-ASCII
      identifiers are gated anyway.  */
-  while ((lexptr[0] >= 'a' && lexptr[0] <= 'z')
-	 || (lexptr[0] >= 'A' && lexptr[0] <= 'Z')
-	 || lexptr[0] == '_'
-	 || (is_gdb_var && lexptr[0] == '$')
-	 || (lexptr[0] >= '0' && lexptr[0] <= '9'))
-    ++lexptr;
+  while ((pstate->lexptr[0] >= 'a' && pstate->lexptr[0] <= 'z')
+	 || (pstate->lexptr[0] >= 'A' && pstate->lexptr[0] <= 'Z')
+	 || pstate->lexptr[0] == '_'
+	 || (is_gdb_var && pstate->lexptr[0] == '$')
+	 || (pstate->lexptr[0] >= '0' && pstate->lexptr[0] <= '9'))
+    ++pstate->lexptr;
 
 
-  length = lexptr - start;
+  length = pstate->lexptr - start;
   token = NULL;
   for (i = 0; i < ARRAY_SIZE (identifier_tokens); ++i)
     {
@@ -1419,28 +1423,28 @@ rust_parser::lex_identifier (YYSTYPE *lvalp)
       if (token->value == 0)
 	{
 	  /* Leave the terminating token alone.  */
-	  lexptr = start;
+	  pstate->lexptr = start;
 	  return 0;
 	}
     }
   else if (token == NULL
 	   && (strncmp (start, "thread", length) == 0
 	       || strncmp (start, "task", length) == 0)
-	   && space_then_number (lexptr))
+	   && space_then_number (pstate->lexptr))
     {
       /* "task" or "thread" followed by a number terminates the
 	 parse, per gdb rules.  */
-      lexptr = start;
+      pstate->lexptr = start;
       return 0;
     }
 
-  if (token == NULL || (parse_completion && lexptr[0] == '\0'))
+  if (token == NULL || (parse_completion && pstate->lexptr[0] == '\0'))
     lvalp->sval = make_stoken (copy_name (start, length));
 
-  if (parse_completion && lexptr[0] == '\0')
+  if (parse_completion && pstate->lexptr[0] == '\0')
     {
       /* Prevent rustyylex from returning two COMPLETE tokens.  */
-      prev_lexptr = lexptr;
+      pstate->prev_lexptr = pstate->lexptr;
       return COMPLETE;
     }
 
@@ -1453,18 +1457,18 @@ rust_parser::lex_identifier (YYSTYPE *lvalp)
 
 /* Lex an operator.  */
 
-static int
-lex_operator (YYSTYPE *lvalp)
+int
+rust_parser::lex_operator (YYSTYPE *lvalp)
 {
   const struct token_info *token = NULL;
   int i;
 
   for (i = 0; i < ARRAY_SIZE (operator_tokens); ++i)
     {
-      if (strncmp (operator_tokens[i].name, lexptr,
+      if (strncmp (operator_tokens[i].name, pstate->lexptr,
 		   strlen (operator_tokens[i].name)) == 0)
 	{
-	  lexptr += strlen (operator_tokens[i].name);
+	  pstate->lexptr += strlen (operator_tokens[i].name);
 	  token = &operator_tokens[i];
 	  break;
 	}
@@ -1476,7 +1480,7 @@ lex_operator (YYSTYPE *lvalp)
       return token->value;
     }
 
-  return *lexptr++;
+  return *pstate->lexptr++;
 }
 
 /* Lex a number.  */
@@ -1495,7 +1499,8 @@ rust_parser::lex_number (YYSTYPE *lvalp)
   int type_index = -1;
   int i;
 
-  match = regexec (&number_regex, lexptr, ARRAY_SIZE (subexps), subexps, 0);
+  match = regexec (&number_regex, pstate->lexptr, ARRAY_SIZE (subexps),
+		   subexps, 0);
   /* Failure means the regexp is broken.  */
   gdb_assert (match == 0);
 
@@ -1539,9 +1544,9 @@ rust_parser::lex_number (YYSTYPE *lvalp)
      a request for a trait method call, not a syntax error involving
      the floating point number "23.".  */
   gdb_assert (subexps[0].rm_eo > 0);
-  if (lexptr[subexps[0].rm_eo - 1] == '.')
+  if (pstate->lexptr[subexps[0].rm_eo - 1] == '.')
     {
-      const char *next = skip_spaces (&lexptr[subexps[0].rm_eo]);
+      const char *next = skip_spaces (&pstate->lexptr[subexps[0].rm_eo]);
 
       if (rust_identifier_start_p (*next) || *next == '.')
 	{
@@ -1559,7 +1564,8 @@ rust_parser::lex_number (YYSTYPE *lvalp)
   if (type_name == NULL)
     {
       gdb_assert (type_index != -1);
-      type_name_holder = std::string (lexptr + subexps[type_index].rm_so,
+      type_name_holder = std::string ((pstate->lexptr
+				       + subexps[type_index].rm_so),
 				      (subexps[type_index].rm_eo
 				       - subexps[type_index].rm_so));
       type_name = type_name_holder.c_str ();
@@ -1570,16 +1576,16 @@ rust_parser::lex_number (YYSTYPE *lvalp)
 
   /* Copy the text of the number and remove the "_"s.  */
   std::string number;
-  for (i = 0; i < end_index && lexptr[i]; ++i)
+  for (i = 0; i < end_index && pstate->lexptr[i]; ++i)
     {
-      if (lexptr[i] == '_')
+      if (pstate->lexptr[i] == '_')
 	could_be_decimal = 0;
       else
-	number.push_back (lexptr[i]);
+	number.push_back (pstate->lexptr[i]);
     }
 
   /* Advance past the match.  */
-  lexptr += subexps[0].rm_eo;
+  pstate->lexptr += subexps[0].rm_eo;
 
   /* Parse the number.  */
   if (is_integer)
@@ -1627,18 +1633,22 @@ rust_parser::lex_number (YYSTYPE *lvalp)
 static int
 rustyylex (YYSTYPE *lvalp, rust_parser *parser)
 {
+  struct parser_state *pstate = parser->pstate;
+
   /* Skip all leading whitespace.  */
-  while (lexptr[0] == ' ' || lexptr[0] == '\t' || lexptr[0] == '\r'
-	 || lexptr[0] == '\n')
-    ++lexptr;
+  while (pstate->lexptr[0] == ' '
+	 || pstate->lexptr[0] == '\t'
+	 || pstate->lexptr[0] == '\r'
+	 || pstate->lexptr[0] == '\n')
+    ++pstate->lexptr;
 
   /* If we hit EOF and we're completing, then return COMPLETE -- maybe
      we're completing an empty string at the end of a field_expr.
      But, we don't want to return two COMPLETE tokens in a row.  */
-  if (lexptr[0] == '\0' && lexptr == prev_lexptr)
+  if (pstate->lexptr[0] == '\0' && pstate->lexptr == pstate->prev_lexptr)
     return 0;
-  prev_lexptr = lexptr;
-  if (lexptr[0] == '\0')
+  pstate->prev_lexptr = pstate->lexptr;
+  if (pstate->lexptr[0] == '\0')
     {
       if (parse_completion)
 	{
@@ -1648,49 +1658,49 @@ rustyylex (YYSTYPE *lvalp, rust_parser *parser)
       return 0;
     }
 
-  if (lexptr[0] >= '0' && lexptr[0] <= '9')
+  if (pstate->lexptr[0] >= '0' && pstate->lexptr[0] <= '9')
     return parser->lex_number (lvalp);
-  else if (lexptr[0] == 'b' && lexptr[1] == '\'')
+  else if (pstate->lexptr[0] == 'b' && pstate->lexptr[1] == '\'')
     return parser->lex_character (lvalp);
-  else if (lexptr[0] == 'b' && lexptr[1] == '"')
+  else if (pstate->lexptr[0] == 'b' && pstate->lexptr[1] == '"')
     return parser->lex_string (lvalp);
-  else if (lexptr[0] == 'b' && starts_raw_string (lexptr + 1))
+  else if (pstate->lexptr[0] == 'b' && starts_raw_string (pstate->lexptr + 1))
     return parser->lex_string (lvalp);
-  else if (starts_raw_string (lexptr))
+  else if (starts_raw_string (pstate->lexptr))
     return parser->lex_string (lvalp);
-  else if (rust_identifier_start_p (lexptr[0]))
+  else if (rust_identifier_start_p (pstate->lexptr[0]))
     return parser->lex_identifier (lvalp);
-  else if (lexptr[0] == '"')
+  else if (pstate->lexptr[0] == '"')
     return parser->lex_string (lvalp);
-  else if (lexptr[0] == '\'')
+  else if (pstate->lexptr[0] == '\'')
     return parser->lex_character (lvalp);
-  else if (lexptr[0] == '}' || lexptr[0] == ']')
+  else if (pstate->lexptr[0] == '}' || pstate->lexptr[0] == ']')
     {
       /* Falls through to lex_operator.  */
       --parser->paren_depth;
     }
-  else if (lexptr[0] == '(' || lexptr[0] == '{')
+  else if (pstate->lexptr[0] == '(' || pstate->lexptr[0] == '{')
     {
       /* Falls through to lex_operator.  */
       ++parser->paren_depth;
     }
-  else if (lexptr[0] == ',' && parser->pstate->comma_terminates
+  else if (pstate->lexptr[0] == ',' && pstate->comma_terminates
 	   && parser->paren_depth == 0)
     return 0;
 
-  return lex_operator (lvalp);
+  return parser->lex_operator (lvalp);
 }
 
 /* Push back a single character to be re-lexed.  */
 
-static void
-rust_push_back (char c)
+void
+rust_parser::push_back (char c)
 {
   /* Can't be called before any lexing.  */
-  gdb_assert (prev_lexptr != NULL);
+  gdb_assert (pstate->prev_lexptr != NULL);
 
-  --lexptr;
-  gdb_assert (*lexptr == c);
+  --pstate->lexptr;
+  gdb_assert (*pstate->lexptr == c);
 }
 
 
@@ -2545,7 +2555,9 @@ rust_parse (struct parser_state *state)
 static void
 rustyyerror (rust_parser *parser, const char *msg)
 {
-  const char *where = prev_lexptr ? prev_lexptr : lexptr;
+  const char *where = (parser->pstate->prev_lexptr
+		       ? parser->pstate->prev_lexptr
+		       : parser->pstate->lexptr);
   error (_("%s in expression, near `%s'."), msg, where);
 }
 
@@ -2558,8 +2570,8 @@ rustyyerror (rust_parser *parser, const char *msg)
 static void
 rust_lex_test_init (rust_parser *parser, const char *input)
 {
-  prev_lexptr = NULL;
-  lexptr = input;
+  parser->pstate->prev_lexptr = NULL;
+  parser->pstate->lexptr = input;
   parser->paren_depth = 0;
 }
 
@@ -2635,7 +2647,7 @@ rust_lex_test_sequence (rust_parser *parser, const char *input, int len,
 {
   int i;
 
-  lexptr = input;
+  parser->pstate->lexptr = input;
   parser->paren_depth = 0;
 
   for (i = 0; i < len; ++i)
@@ -2696,7 +2708,7 @@ rust_lex_test_push_back (rust_parser *parser)
   SELF_CHECK (token == COMPOUND_ASSIGN);
   SELF_CHECK (lval.opcode == BINOP_RSH);
 
-  rust_push_back ('=');
+  parser->push_back ('=');
 
   token = rustyylex (&lval, parser);
   SELF_CHECK (token == '=');
@@ -2714,7 +2726,7 @@ rust_lex_tests (void)
 
   // Set up dummy "parser", so that rust_type works.
   struct parser_state ps (&rust_language_defn, target_gdbarch (),
-			  nullptr, 0, 0);
+			  nullptr, 0, 0, nullptr);
   rust_parser parser (&ps);
 
   rust_lex_test_one (&parser, "", 0);

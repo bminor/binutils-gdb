@@ -2483,8 +2483,8 @@ scan_macro_expansion (char *expansion)
 
   /* Save the old lexptr value, so we can return to it when we're done
      parsing the expanded text.  */
-  cpstate->macro_original_text = lexptr;
-  lexptr = copy;
+  cpstate->macro_original_text = pstate->lexptr;
+  pstate->lexptr = copy;
 }
 
 static int
@@ -2500,7 +2500,7 @@ finished_macro_expansion (void)
   gdb_assert (cpstate->macro_original_text);
 
   /* Pop back to the original text.  */
-  lexptr = cpstate->macro_original_text;
+  pstate->lexptr = cpstate->macro_original_text;
   cpstate->macro_original_text = 0;
 }
 
@@ -2550,7 +2550,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
   /* Check if this is a macro invocation that we need to expand.  */
   if (! scanning_macro_expansion ())
     {
-      char *expanded = macro_expand_next (&lexptr,
+      char *expanded = macro_expand_next (&pstate->lexptr,
                                           standard_macro_lookup,
                                           expression_macro_scope);
 
@@ -2558,9 +2558,9 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
         scan_macro_expansion (expanded);
     }
 
-  prev_lexptr = lexptr;
+  pstate->prev_lexptr = pstate->lexptr;
 
-  tokstart = lexptr;
+  tokstart = pstate->lexptr;
   /* See if it is a special token of length 3.  */
   for (i = 0; i < sizeof tokentab3 / sizeof tokentab3[0]; i++)
     if (strncmp (tokstart, tokentab3[i].oper, 3) == 0)
@@ -2569,7 +2569,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 	    && par_state->language ()->la_language != language_cplus)
 	  break;
 
-	lexptr += 3;
+	pstate->lexptr += 3;
 	yylval.opcode = tokentab3[i].opcode;
 	return tokentab3[i].token;
       }
@@ -2582,7 +2582,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 	    && par_state->language ()->la_language != language_cplus)
 	  break;
 
-	lexptr += 2;
+	pstate->lexptr += 2;
 	yylval.opcode = tokentab2[i].opcode;
 	if (tokentab2[i].token == ARROW)
 	  last_was_structop = 1;
@@ -2616,13 +2616,13 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
     case ' ':
     case '\t':
     case '\n':
-      lexptr++;
+      pstate->lexptr++;
       goto retry;
 
     case '[':
     case '(':
       paren_depth++;
-      lexptr++;
+      pstate->lexptr++;
       if (par_state->language ()->la_language == language_objc
 	  && c == '[')
 	return OBJC_LBRAC;
@@ -2633,7 +2633,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
       if (paren_depth == 0)
 	return 0;
       paren_depth--;
-      lexptr++;
+      pstate->lexptr++;
       return c;
 
     case ',':
@@ -2641,12 +2641,12 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
           && paren_depth == 0
           && ! scanning_macro_expansion ())
 	return 0;
-      lexptr++;
+      pstate->lexptr++;
       return c;
 
     case '.':
       /* Might be a floating point number.  */
-      if (lexptr[1] < '0' || lexptr[1] > '9')
+      if (pstate->lexptr[1] < '0' || pstate->lexptr[1] > '9')
 	{
 	  last_was_structop = true;
 	  goto symbol;		/* Nope, must be a symbol. */
@@ -2713,7 +2713,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 	    err_copy[p - tokstart] = 0;
 	    error (_("Invalid number \"%s\"."), err_copy);
 	  }
-	lexptr = p;
+	pstate->lexptr = p;
 	return toktype;
       }
 
@@ -2728,7 +2728,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 	    if (strncmp (p, "selector", len) == 0
 		&& (p[len] == '\0' || ISSPACE (p[len])))
 	      {
-		lexptr = p + len;
+		pstate->lexptr = p + len;
 		return SELECTOR;
 	      }
 	    else if (*p == '"')
@@ -2741,7 +2741,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 	if (strncmp (p, "entry", len) == 0 && !c_ident_is_alnum (p[len])
 	    && p[len] != '_')
 	  {
-	    lexptr = &p[len];
+	    pstate->lexptr = &p[len];
 	    return ENTRY;
 	  }
       }
@@ -2764,7 +2764,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
     case '{':
     case '}':
     symbol:
-      lexptr++;
+      pstate->lexptr++;
       return c;
 
     case 'L':
@@ -2779,8 +2779,8 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
     parse_string:
       {
 	int host_len;
-	int result = parse_string_or_char (tokstart, &lexptr, &yylval.tsval,
-					   &host_len);
+	int result = parse_string_or_char (tokstart, &pstate->lexptr,
+					   &yylval.tsval, &host_len);
 	if (result == CHAR)
 	  {
 	    if (host_len == 0)
@@ -2788,7 +2788,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 	    else if (host_len > 2 && c == '\'')
 	      {
 		++tokstart;
-		namelen = lexptr - tokstart - 1;
+		namelen = pstate->lexptr - tokstart - 1;
 		*is_quoted_name = true;
 
 		goto tryname;
@@ -2860,7 +2860,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 	return 0;
     }
 
-  lexptr += namelen;
+  pstate->lexptr += namelen;
 
   tryname:
 
@@ -2902,7 +2902,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
   if (*tokstart == '$')
     return DOLLAR_VARIABLE;
 
-  if (parse_completion && *lexptr == '\0')
+  if (parse_completion && *pstate->lexptr == '\0')
     saw_name_at_eof = 1;
 
   yylval.ssym.stoken = yylval.sval;
@@ -3388,8 +3388,8 @@ c_print_token (FILE *file, int type, YYSTYPE value)
 static void
 yyerror (const char *msg)
 {
-  if (prev_lexptr)
-    lexptr = prev_lexptr;
+  if (pstate->prev_lexptr)
+    pstate->lexptr = pstate->prev_lexptr;
 
-  error (_("A %s in expression, near `%s'."), msg, lexptr);
+  error (_("A %s in expression, near `%s'."), msg, pstate->lexptr);
 }

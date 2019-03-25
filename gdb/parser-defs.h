@@ -89,11 +89,13 @@ struct parser_state : public expr_builder
 		struct gdbarch *gdbarch,
 		const struct block *context_block,
 		CORE_ADDR context_pc,
-		int comma)
+		int comma,
+		const char *input)
     : expr_builder (lang, gdbarch),
       expression_context_block (context_block),
       expression_context_pc (context_pc),
-      comma_terminates (comma)
+      comma_terminates (comma),
+      lexptr (input)
   {
   }
 
@@ -114,6 +116,15 @@ struct parser_state : public expr_builder
   /* Nonzero means stop parsing on first comma (if not within parentheses).  */
 
   int comma_terminates;
+
+  /* During parsing of a C expression, the pointer to the next character
+     is in this variable.  */
+
+  const char *lexptr;
+
+  /* After a token has been recognized, this variable points to it.
+     Currently used only for error reporting.  */
+  const char *prev_lexptr = nullptr;
 };
 
 /* When parsing expressions we track the innermost block that was
@@ -352,15 +363,6 @@ extern void null_post_parser (expression_up *, int);
 
 extern bool parse_float (const char *p, int len,
 			 const struct type *type, gdb_byte *data);
-
-/* During parsing of a C expression, the pointer to the next character
-   is in this variable.  */
-
-extern const char *lexptr;
-
-/* After a token has been recognized, this variable points to it.
-   Currently used only for error reporting.  */
-extern const char *prev_lexptr;
 
 /* These codes indicate operator precedences for expression printing,
    least tightly binding first.  */

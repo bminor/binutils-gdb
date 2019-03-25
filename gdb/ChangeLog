@@ -1,5 +1,33 @@
 2019-04-04  Tom Tromey  <tom@tromey.com>
 
+	* rust-exp.y (struct rust_parser) <lex_hex, lex_escape,
+	lex_operator, push_back>: New methods.
+	Update all rules.
+	(rust_parser::lex_hex, lex_escape): Rename and update.
+	(rust_parser::lex_string, rust_parser::lex_identifier): Update.
+	(rust_parser::lex_operator): Rename and update.
+	(rust_parser::lex_number, rustyylex, rustyyerror)
+	(rust_lex_test_init, rust_lex_test_sequence)
+	(rust_lex_test_push_back, rust_lex_tests): Update.
+	* parser-defs.h (struct parser_state) <parser_state>: Add "input"
+	parameter.
+	<lexptr, prev_lexptr>: New members.
+	(lexptr, prev_lexptr): Don't declare.
+	* parse.c (lexptr, prev_lexptr): Remove globals.
+	(parse_exp_in_context): Update.
+	* p-exp.y (yylex, yyerror): Update.
+	* m2-exp.y (parse_number, yylex, yyerror): Update.
+	* go-exp.y (lex_one_token, yyerror): Update.
+	* f-exp.y (match_string_literal, yylex, yyerror): Update.
+	* d-exp.y (lex_one_token, yyerror): Update.
+	* c-exp.y (scan_macro_expansion, finished_macro_expansion)
+	(lex_one_token, yyerror): Update.
+	* ada-lex.l (YY_INPUT): Update.
+	(rewind_to_char): Update.
+	* ada-exp.y (yyerror): Update.
+
+2019-04-04  Tom Tromey  <tom@tromey.com>
+
 	* rust-exp.y (rustyylex, rust_lex_tests): Update.
 	* parser-defs.h (struct parser_state) <parser_state>: Add new
 	parameter.

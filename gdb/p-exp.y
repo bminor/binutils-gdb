@@ -1128,10 +1128,10 @@ yylex (void)
 
  retry:
 
-  prev_lexptr = lexptr;
+  pstate->prev_lexptr = pstate->lexptr;
 
-  tokstart = lexptr;
-  explen = strlen (lexptr);
+  tokstart = pstate->lexptr;
+  explen = strlen (pstate->lexptr);
 
   /* See if it is a special token of length 3.  */
   if (explen > 2)
@@ -1141,7 +1141,7 @@ yylex (void)
               || (!isalpha (tokstart[3])
 		  && !isdigit (tokstart[3]) && tokstart[3] != '_')))
         {
-          lexptr += 3;
+          pstate->lexptr += 3;
           yylval.opcode = tokentab3[i].opcode;
           return tokentab3[i].token;
         }
@@ -1154,7 +1154,7 @@ yylex (void)
               || (!isalpha (tokstart[2])
 		  && !isdigit (tokstart[2]) && tokstart[2] != '_')))
         {
-          lexptr += 2;
+          pstate->lexptr += 2;
           yylval.opcode = tokentab2[i].opcode;
           return tokentab2[i].token;
         }
@@ -1170,31 +1170,31 @@ yylex (void)
     case ' ':
     case '\t':
     case '\n':
-      lexptr++;
+      pstate->lexptr++;
       goto retry;
 
     case '\'':
       /* We either have a character constant ('0' or '\177' for example)
 	 or we have a quoted symbol reference ('foo(int,int)' in object pascal
 	 for example).  */
-      lexptr++;
-      c = *lexptr++;
+      pstate->lexptr++;
+      c = *pstate->lexptr++;
       if (c == '\\')
-	c = parse_escape (pstate->gdbarch (), &lexptr);
+	c = parse_escape (pstate->gdbarch (), &pstate->lexptr);
       else if (c == '\'')
 	error (_("Empty character constant."));
 
       yylval.typed_val_int.val = c;
       yylval.typed_val_int.type = parse_type (pstate)->builtin_char;
 
-      c = *lexptr++;
+      c = *pstate->lexptr++;
       if (c != '\'')
 	{
 	  namelen = skip_quoted (tokstart) - tokstart;
 	  if (namelen > 2)
 	    {
-	      lexptr = tokstart + namelen;
-	      if (lexptr[-1] != '\'')
+	      pstate->lexptr = tokstart + namelen;
+	      if (pstate->lexptr[-1] != '\'')
 		error (_("Unmatched single quote."));
 	      namelen -= 2;
               tokstart++;
@@ -1207,25 +1207,25 @@ yylex (void)
 
     case '(':
       paren_depth++;
-      lexptr++;
+      pstate->lexptr++;
       return c;
 
     case ')':
       if (paren_depth == 0)
 	return 0;
       paren_depth--;
-      lexptr++;
+      pstate->lexptr++;
       return c;
 
     case ',':
       if (pstate->comma_terminates && paren_depth == 0)
 	return 0;
-      lexptr++;
+      pstate->lexptr++;
       return c;
 
     case '.':
       /* Might be a floating point number.  */
-      if (lexptr[1] < '0' || lexptr[1] > '9')
+      if (pstate->lexptr[1] < '0' || pstate->lexptr[1] > '9')
 	{
 	  goto symbol;		/* Nope, must be a symbol.  */
 	}
@@ -1293,7 +1293,7 @@ yylex (void)
 	    err_copy[p - tokstart] = 0;
 	    error (_("Invalid number \"%s\"."), err_copy);
 	  }
-	lexptr = p;
+	pstate->lexptr = p;
 	return toktype;
       }
 
@@ -1317,7 +1317,7 @@ yylex (void)
     case '{':
     case '}':
     symbol:
-      lexptr++;
+      pstate->lexptr++;
       return c;
 
     case '"':
@@ -1369,7 +1369,7 @@ yylex (void)
       tempbuf[tempbufindex] = '\0';	/* See note above.  */
       yylval.sval.ptr = tempbuf;
       yylval.sval.length = tempbufindex;
-      lexptr = tokptr;
+      pstate->lexptr = tokptr;
       return (STRING);
     }
 
@@ -1420,7 +1420,7 @@ yylex (void)
       return 0;
     }
 
-  lexptr += namelen;
+  pstate->lexptr += namelen;
 
   tryname:
 
@@ -1616,7 +1616,7 @@ yylex (void)
 	     us whether a type is nested), we just ignore the
 	     containing type.  */
 
-	  p = lexptr;
+	  p = pstate->lexptr;
 	  best_sym = sym;
 	  while (1)
 	    {
@@ -1661,7 +1661,7 @@ yylex (void)
 			  if (SYMBOL_CLASS (cur_sym) == LOC_TYPEDEF)
 			    {
 			      best_sym = cur_sym;
-			      lexptr = p;
+			      pstate->lexptr = p;
 			    }
 			  else
 			    break;
@@ -1734,8 +1734,8 @@ pascal_parse (struct parser_state *par_state)
 static void
 yyerror (const char *msg)
 {
-  if (prev_lexptr)
-    lexptr = prev_lexptr;
+  if (pstate->prev_lexptr)
+    pstate->lexptr = pstate->prev_lexptr;
 
-  error (_("A %s in expression, near `%s'."), msg, lexptr);
+  error (_("A %s in expression, near `%s'."), msg, pstate->lexptr);
 }

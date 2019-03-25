@@ -69,8 +69,6 @@ const struct exp_descriptor exp_descriptor_standard =
 innermost_block_tracker innermost_block;
 int arglist_len;
 static struct type_stack type_stack;
-const char *lexptr;
-const char *prev_lexptr;
 
 /* True if parsing an expression to attempt completion.  */
 int parse_completion;
@@ -1112,16 +1110,13 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
   const struct language_defn *lang = NULL;
   int subexp;
 
-  lexptr = *stringptr;
-  prev_lexptr = NULL;
-
   type_stack.elements.clear ();
   expout_last_struct = -1;
   expout_tag_completion_type = TYPE_CODE_UNDEF;
   expout_completion_name.reset ();
   innermost_block.reset (tracker_types);
 
-  if (lexptr == 0 || *lexptr == 0)
+  if (*stringptr == 0 || **stringptr == 0)
     error_no_arg (_("expression to compute"));
 
   std::vector<int> funcalls;
@@ -1184,7 +1179,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
      to the value matching SELECTED_FRAME as set by get_current_arch.  */
 
   parser_state ps (lang, get_current_arch (), expression_context_block,
-		   expression_context_pc, comma);
+		   expression_context_pc, comma, *stringptr);
 
   scoped_restore_current_language lang_saver;
   set_language (lang->la_language);
@@ -1223,7 +1218,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
   if (expressiondebug)
     dump_prefix_expression (result.get (), gdb_stdlog);
 
-  *stringptr = lexptr;
+  *stringptr = ps.lexptr;
   return result;
 }
 

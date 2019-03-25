@@ -1020,14 +1020,14 @@ lex_one_token (struct parser_state *par_state)
 
  retry:
 
-  prev_lexptr = lexptr;
+  par_state->prev_lexptr = par_state->lexptr;
 
-  tokstart = lexptr;
+  tokstart = par_state->lexptr;
   /* See if it is a special token of length 3.  */
   for (i = 0; i < sizeof (tokentab3) / sizeof (tokentab3[0]); i++)
     if (strncmp (tokstart, tokentab3[i].oper, 3) == 0)
       {
-	lexptr += 3;
+	par_state->lexptr += 3;
 	yylval.opcode = tokentab3[i].opcode;
 	return tokentab3[i].token;
       }
@@ -1036,7 +1036,7 @@ lex_one_token (struct parser_state *par_state)
   for (i = 0; i < sizeof (tokentab2) / sizeof (tokentab2[0]); i++)
     if (strncmp (tokstart, tokentab2[i].oper, 2) == 0)
       {
-	lexptr += 2;
+	par_state->lexptr += 2;
 	yylval.opcode = tokentab2[i].opcode;
 	/* NOTE: -> doesn't exist in Go, so we don't need to watch for
 	   setting last_was_structop here.  */
@@ -1059,13 +1059,13 @@ lex_one_token (struct parser_state *par_state)
     case ' ':
     case '\t':
     case '\n':
-      lexptr++;
+      par_state->lexptr++;
       goto retry;
 
     case '[':
     case '(':
       paren_depth++;
-      lexptr++;
+      par_state->lexptr++;
       return c;
 
     case ']':
@@ -1073,19 +1073,19 @@ lex_one_token (struct parser_state *par_state)
       if (paren_depth == 0)
 	return 0;
       paren_depth--;
-      lexptr++;
+      par_state->lexptr++;
       return c;
 
     case ',':
       if (pstate->comma_terminates
           && paren_depth == 0)
 	return 0;
-      lexptr++;
+      par_state->lexptr++;
       return c;
 
     case '.':
       /* Might be a floating point number.  */
-      if (lexptr[1] < '0' || lexptr[1] > '9')
+      if (par_state->lexptr[1] < '0' || par_state->lexptr[1] > '9')
 	{
 	  if (parse_completion)
 	    last_was_structop = 1;
@@ -1148,7 +1148,7 @@ lex_one_token (struct parser_state *par_state)
 	    err_copy[p - tokstart] = 0;
 	    error (_("Invalid number \"%s\"."), err_copy);
 	  }
-	lexptr = p;
+	par_state->lexptr = p;
 	return toktype;
       }
 
@@ -1162,7 +1162,7 @@ lex_one_token (struct parser_state *par_state)
 	if (strncmp (p, "entry", len) == 0 && !isalnum (p[len])
 	    && p[len] != '_')
 	  {
-	    lexptr = &p[len];
+	    par_state->lexptr = &p[len];
 	    return ENTRY;
 	  }
       }
@@ -1185,7 +1185,7 @@ lex_one_token (struct parser_state *par_state)
     case '{':
     case '}':
     symbol:
-      lexptr++;
+      par_state->lexptr++;
       return c;
 
     case '\'':
@@ -1193,8 +1193,8 @@ lex_one_token (struct parser_state *par_state)
     case '`':
       {
 	int host_len;
-	int result = parse_string_or_char (tokstart, &lexptr, &yylval.tsval,
-					   &host_len);
+	int result = parse_string_or_char (tokstart, &par_state->lexptr,
+					   &yylval.tsval, &host_len);
 	if (result == CHAR)
 	  {
 	    if (host_len == 0)
@@ -1202,7 +1202,7 @@ lex_one_token (struct parser_state *par_state)
 	    else if (host_len > 2 && c == '\'')
 	      {
 		++tokstart;
-		namelen = lexptr - tokstart - 1;
+		namelen = par_state->lexptr - tokstart - 1;
 		goto tryname;
 	      }
 	    else if (host_len > 1)
@@ -1255,7 +1255,7 @@ lex_one_token (struct parser_state *par_state)
 	return 0;
     }
 
-  lexptr += namelen;
+  par_state->lexptr += namelen;
 
   tryname:
 
@@ -1276,7 +1276,7 @@ lex_one_token (struct parser_state *par_state)
   if (*tokstart == '$')
     return DOLLAR_VARIABLE;
 
-  if (parse_completion && *lexptr == '\0')
+  if (parse_completion && *par_state->lexptr == '\0')
     saw_name_at_eof = 1;
   return NAME;
 }
@@ -1581,8 +1581,8 @@ go_parse (struct parser_state *par_state)
 static void
 yyerror (const char *msg)
 {
-  if (prev_lexptr)
-    lexptr = prev_lexptr;
+  if (pstate->prev_lexptr)
+    pstate->lexptr = pstate->prev_lexptr;
 
-  error (_("A %s in expression, near `%s'."), msg, lexptr);
+  error (_("A %s in expression, near `%s'."), msg, pstate->lexptr);
 }

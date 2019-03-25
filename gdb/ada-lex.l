@@ -73,13 +73,13 @@ static void rewind_to_char (int);
 
 #undef YY_INPUT
 #define YY_INPUT(BUF, RESULT, MAX_SIZE) \
-    if ( *lexptr == '\000' ) \
+    if ( *pstate->lexptr == '\000' ) \
       (RESULT) = YY_NULL; \
     else \
       { \
-        *(BUF) = *lexptr; \
+        *(BUF) = *pstate->lexptr; \
         (RESULT) = 1; \
-	lexptr += 1; \
+	pstate->lexptr += 1; \
       }
 
 static int find_dot_all (const char *);
@@ -628,9 +628,9 @@ processAttribute (const char *str)
 static void
 rewind_to_char (int ch)
 {
-  lexptr -= yyleng;
-  while (toupper (*lexptr) != toupper (ch))
-    lexptr -= 1;
+  pstate->lexptr -= yyleng;
+  while (toupper (*pstate->lexptr) != toupper (ch))
+    pstate->lexptr -= 1;
   yyrestart (NULL);
 }
 

@@ -1005,14 +1005,14 @@ growbuf_by_size (int count)
 static int
 match_string_literal (void)
 {
-  const char *tokptr = lexptr;
+  const char *tokptr = pstate->lexptr;
 
   for (tempbufindex = 0, tokptr++; *tokptr != '\0'; tokptr++)
     {
       CHECKBUF (1);
-      if (*tokptr == *lexptr)
+      if (*tokptr == *pstate->lexptr)
 	{
-	  if (*(tokptr + 1) == *lexptr)
+	  if (*(tokptr + 1) == *pstate->lexptr)
 	    tokptr++;
 	  else
 	    break;
@@ -1027,7 +1027,7 @@ match_string_literal (void)
       tempbuf[tempbufindex] = '\0';
       yylval.sval.ptr = tempbuf;
       yylval.sval.length = tempbufindex;
-      lexptr = ++tokptr;
+      pstate->lexptr = ++tokptr;
       return STRING_LITERAL;
     }
 }
@@ -1044,21 +1044,21 @@ yylex (void)
   
  retry:
  
-  prev_lexptr = lexptr;
+  pstate->prev_lexptr = pstate->lexptr;
  
-  tokstart = lexptr;
+  tokstart = pstate->lexptr;
 
   /* First of all, let us make sure we are not dealing with the
      special tokens .true. and .false. which evaluate to 1 and 0.  */
 
-  if (*lexptr == '.')
+  if (*pstate->lexptr == '.')
     {
       for (int i = 0; i < ARRAY_SIZE (boolean_values); i++)
 	{
 	  if (strncasecmp (tokstart, boolean_values[i].name,
 			   strlen (boolean_values[i].name)) == 0)
 	    {
-	      lexptr += strlen (boolean_values[i].name);
+	      pstate->lexptr += strlen (boolean_values[i].name);
 	      yylval.lval = boolean_values[i].value;
 	      return BOOLEAN_LITERAL;
 	    }
@@ -1071,7 +1071,7 @@ yylex (void)
 		     strlen (dot_ops[i].oper)) == 0)
       {
 	gdb_assert (!dot_ops[i].case_sensitive);
-	lexptr += strlen (dot_ops[i].oper);
+	pstate->lexptr += strlen (dot_ops[i].oper);
 	yylval.opcode = dot_ops[i].opcode;
 	return dot_ops[i].token;
       }
@@ -1080,7 +1080,7 @@ yylex (void)
 
   if (strncmp (tokstart, "**", 2) == 0)
     {
-      lexptr += 2;
+      pstate->lexptr += 2;
       yylval.opcode = BINOP_EXP;
       return STARSTAR;
     }
@@ -1093,7 +1093,7 @@ yylex (void)
     case ' ':
     case '\t':
     case '\n':
-      lexptr++;
+      pstate->lexptr++;
       goto retry;
       
     case '\'':
@@ -1104,25 +1104,25 @@ yylex (void)
       
     case '(':
       paren_depth++;
-      lexptr++;
+      pstate->lexptr++;
       return c;
       
     case ')':
       if (paren_depth == 0)
 	return 0;
       paren_depth--;
-      lexptr++;
+      pstate->lexptr++;
       return c;
       
     case ',':
       if (pstate->comma_terminates && paren_depth == 0)
 	return 0;
-      lexptr++;
+      pstate->lexptr++;
       return c;
       
     case '.':
       /* Might be a floating point number.  */
-      if (lexptr[1] < '0' || lexptr[1] > '9')
+      if (pstate->lexptr[1] < '0' || pstate->lexptr[1] > '9')
 	goto symbol;		/* Nope, must be a symbol.  */
       /* FALL THRU.  */
       
@@ -1186,7 +1186,7 @@ yylex (void)
 	    err_copy[p - tokstart] = 0;
 	    error (_("Invalid number \"%s\"."), err_copy);
 	  }
-	lexptr = p;
+	pstate->lexptr = p;
 	return toktype;
       }
       
@@ -1211,7 +1211,7 @@ yylex (void)
     case '{':
     case '}':
     symbol:
-      lexptr++;
+      pstate->lexptr++;
       return c;
     }
   
@@ -1232,7 +1232,7 @@ yylex (void)
   if (namelen == 2 && tokstart[0] == 'i' && tokstart[1] == 'f')
     return 0;
   
-  lexptr += namelen;
+  pstate->lexptr += namelen;
   
   /* Catch specific keywords.  */
 
@@ -1339,8 +1339,8 @@ f_parse (struct parser_state *par_state)
 static void
 yyerror (const char *msg)
 {
-  if (prev_lexptr)
-    lexptr = prev_lexptr;
+  if (pstate->prev_lexptr)
+    pstate->lexptr = pstate->prev_lexptr;
 
-  error (_("A %s in expression, near `%s'."), msg, lexptr);
+  error (_("A %s in expression, near `%s'."), msg, pstate->lexptr);
 }

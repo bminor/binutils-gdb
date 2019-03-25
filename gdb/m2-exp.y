@@ -618,7 +618,7 @@ type
 static int
 parse_number (int olen)
 {
-  const char *p = lexptr;
+  const char *p = pstate->lexptr;
   LONGEST n = 0;
   LONGEST prevn = 0;
   int c,i,ischar=0;
@@ -649,7 +649,7 @@ parse_number (int olen)
 			  yylval.val))
 	  return ERROR;
 
-	lexptr += len;
+	pstate->lexptr += len;
 	return FLOAT;
       }
     if (p[c] == '.' && base != 10)
@@ -689,9 +689,9 @@ parse_number (int olen)
 	 prevn=n;
     }
 
-  lexptr = p;
+  pstate->lexptr = p;
   if(*p == 'B' || *p == 'C' || *p == 'H')
-     lexptr++;			/* Advance past B,C or H */
+     pstate->lexptr++;			/* Advance past B,C or H */
 
   if (ischar)
   {
@@ -782,16 +782,16 @@ yylex (void)
 
  retry:
 
-  prev_lexptr = lexptr;
+  pstate->prev_lexptr = pstate->lexptr;
 
-  tokstart = lexptr;
+  tokstart = pstate->lexptr;
 
 
   /* See if it is a special token of length 2 */
   for( i = 0 ; i < (int) (sizeof tokentab2 / sizeof tokentab2[0]) ; i++)
      if (strncmp (tokentab2[i].name, tokstart, 2) == 0)
      {
-	lexptr += 2;
+	pstate->lexptr += 2;
 	return tokentab2[i].token;
      }
 
@@ -803,34 +803,34 @@ yylex (void)
     case ' ':
     case '\t':
     case '\n':
-      lexptr++;
+      pstate->lexptr++;
       goto retry;
 
     case '(':
       paren_depth++;
-      lexptr++;
+      pstate->lexptr++;
       return c;
 
     case ')':
       if (paren_depth == 0)
 	return 0;
       paren_depth--;
-      lexptr++;
+      pstate->lexptr++;
       return c;
 
     case ',':
       if (pstate->comma_terminates && paren_depth == 0)
 	return 0;
-      lexptr++;
+      pstate->lexptr++;
       return c;
 
     case '.':
       /* Might be a floating point number.  */
-      if (lexptr[1] >= '0' && lexptr[1] <= '9')
+      if (pstate->lexptr[1] >= '0' && pstate->lexptr[1] <= '9')
 	break;			/* Falls into number code.  */
       else
       {
-	 lexptr++;
+	 pstate->lexptr++;
 	 return DOT;
       }
 
@@ -851,7 +851,7 @@ yylex (void)
     case '@':
     case '~':
     case '&':
-      lexptr++;
+      pstate->lexptr++;
       return c;
 
     case '\'' :
@@ -872,7 +872,7 @@ yylex (void)
 	 error (_("Unterminated string or character constant."));
       yylval.sval.ptr = tokstart + 1;
       yylval.sval.length = namelen - 1;
-      lexptr += namelen + 1;
+      pstate->lexptr += namelen + 1;
 
       if(namelen == 2)  	/* Single character */
       {
@@ -918,7 +918,7 @@ yylex (void)
 	    err_copy[p - tokstart] = 0;
 	    error (_("Invalid number \"%s\"."), err_copy);
 	  }
-	lexptr = p;
+	pstate->lexptr = p;
 	return toktype;
     }
 
@@ -942,7 +942,7 @@ yylex (void)
       return 0;
     }
 
-  lexptr += namelen;
+  pstate->lexptr += namelen;
 
   /*  Lookup special keywords */
   for(i = 0 ; i < (int) (sizeof(keytab) / sizeof(keytab[0])) ; i++)
@@ -1050,8 +1050,8 @@ m2_parse (struct parser_state *par_state)
 static void
 yyerror (const char *msg)
 {
-  if (prev_lexptr)
-    lexptr = prev_lexptr;
+  if (pstate->prev_lexptr)
+    pstate->lexptr = pstate->prev_lexptr;
 
-  error (_("A %s in expression, near `%s'."), msg, lexptr);
+  error (_("A %s in expression, near `%s'."), msg, pstate->lexptr);
 }
