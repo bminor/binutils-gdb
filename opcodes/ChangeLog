@@ -1,5 +1,10 @@
 2019-03-25  Tamar Christina  <tamar.christina@arm.com>
 
+	* aarch64-dis.c (print_insn_aarch64):
+	Implement override.
+
+2019-03-25  Tamar Christina  <tamar.christina@arm.com>
+
 	* aarch64-dis.c (print_insn_aarch64): Update the mapping symbol search
 	order.
 

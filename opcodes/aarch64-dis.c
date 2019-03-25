@@ -3433,7 +3433,8 @@ print_insn_aarch64 (bfd_vma pc,
   else
     last_type = type;
 
-  if (last_type == MAP_DATA)
+  /* PR 10263: Disassemble data if requested to do so by the user.  */
+  if (last_type == MAP_DATA && ((info->flags & DISASSEMBLE_DATA) == 0))
     {
       /* size was set above.  */
       info->bytes_per_chunk = size;
