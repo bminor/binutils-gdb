@@ -1,3 +1,30 @@
+2019-03-25  Alan Hayward  <alan.hayward@arm.com>
+
+	* aarch64-linux-nat.c (aarch64_linux_nat_target::read_description):
+	Call linux_get_hwcap.
+	* aarch64-linux-tdep.c (aarch64_linux_core_read_description):
+	Likewise.
+	(aarch64_linux_get_hwcap): Remove function.
+	* aarch64-linux-tdep.h (aarch64_linux_get_hwcap): Remove
+	declaration.
+	* arm-linux-nat.c (arm_linux_nat_target::read_description):Call
+	linux_get_hwcap.
+	* arm-linux-tdep.c (arm_linux_core_read_description): Likewise.
+	* linux-tdep.c (linux_get_hwcap): Add function.
+	(linux_get_hwcap2): Likewise.
+	* linux-tdep.h (linux_get_hwcap): Add declaration.
+	(linux_get_hwcap2): Likewise.
+	* ppc-linux-nat.c (ppc_linux_get_hwcap): Remove function.
+	(ppc_linux_get_hwcap2): Likewise.
+	(ppc_linux_nat_target::region_ok_for_hw_watchpoint): Call
+	linux_get_hwcap.
+	(ppc_linux_nat_target::insert_watchpoint): Likewise.
+	(ppc_linux_nat_target::watchpoint_addr_within_range): Likewise.
+	(ppc_linux_nat_target::read_description): Likewise.
+	* ppc-linux-tdep.c (ppc_linux_core_read_description): Likewise.
+	* s390-linux-nat.c: Likewise.
+	* s390-linux-tdep.c (s390_core_read_description): Likewise.
+
 2019-03-24  Tom Tromey  <tom@tromey.com>
 
 	* ada-lang.c (standard_lookup): Simplify initialization.

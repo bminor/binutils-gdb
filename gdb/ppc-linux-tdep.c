@@ -1601,10 +1601,7 @@ ppc_linux_core_read_description (struct gdbarch *gdbarch,
   if (vsx)
     features.vsx = true;
 
-  CORE_ADDR hwcap;
-
-  if (target_auxv_search (target, AT_HWCAP, &hwcap) != 1)
-    hwcap = 0;
+  CORE_ADDR hwcap = linux_get_hwcap (target);
 
   features.isa205 = ppc_linux_has_isa205 (hwcap);
 

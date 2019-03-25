@@ -730,10 +730,7 @@ arm_linux_core_read_description (struct gdbarch *gdbarch,
                                  struct target_ops *target,
                                  bfd *abfd)
 {
-  CORE_ADDR arm_hwcap = 0;
-
-  if (target_auxv_search (target, AT_HWCAP, &arm_hwcap) != 1)
-    return NULL;
+  CORE_ADDR arm_hwcap = linux_get_hwcap (target);
 
   if (arm_hwcap & HWCAP_VFP)
     {

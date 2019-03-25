@@ -1554,31 +1554,6 @@ store_ppc_registers (const struct regcache *regcache, int tid)
      function to fail most of the time, so we ignore them.  */
 }
 
-/* Fetch the AT_HWCAP entry from the aux vector.  */
-static CORE_ADDR
-ppc_linux_get_hwcap (void)
-{
-  CORE_ADDR field;
-
-  if (target_auxv_search (current_top_target (), AT_HWCAP, &field) != 1)
-    return 0;
-
-  return field;
-}
-
-/* Fetch the AT_HWCAP2 entry from the aux vector.  */
-
-static CORE_ADDR
-ppc_linux_get_hwcap2 (void)
-{
-  CORE_ADDR field;
-
-  if (target_auxv_search (current_top_target (), AT_HWCAP2, &field) != 1)
-    return 0;
-
-  return field;
-}
-
 /* The cached DABR value, to install in new threads.
    This variable is used when the PowerPC HWDEBUG ptrace
    interface is not available.  */
@@ -1735,7 +1710,7 @@ ppc_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
          takes two hardware watchpoints though.  */
       if (len > 1
 	  && hwdebug_info.features & PPC_DEBUG_FEATURE_DATA_BP_RANGE
-	  && ppc_linux_get_hwcap () & PPC_FEATURE_BOOKE)
+	  && linux_get_hwcap (current_top_target ()) & PPC_FEATURE_BOOKE)
 	return 2;
       /* Check if the processor provides DAWR interface.  */
       if (hwdebug_info.features & PPC_DEBUG_FEATURE_DATA_BP_DAWR)
@@ -1755,7 +1730,7 @@ ppc_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
      ptrace interface, DAC-based processors (i.e., embedded processors) will
      use addresses aligned to 4-bytes due to the way the read/write flags are
      passed in the old ptrace interface.  */
-  else if (((ppc_linux_get_hwcap () & PPC_FEATURE_BOOKE)
+  else if (((linux_get_hwcap (current_top_target ()) & PPC_FEATURE_BOOKE)
 	   && (addr + len) > (addr & ~3) + 4)
 	   || (addr + len) > (addr & ~7) + 8)
     return 0;
@@ -2294,7 +2269,7 @@ ppc_linux_nat_target::insert_watchpoint (CORE_ADDR addr, int len,
       long dabr_value;
       long read_mode, write_mode;
 
-      if (ppc_linux_get_hwcap () & PPC_FEATURE_BOOKE)
+      if (linux_get_hwcap (current_top_target ()) & PPC_FEATURE_BOOKE)
 	{
 	  /* PowerPC 440 requires only the read/write flags to be passed
 	     to the kernel.  */
@@ -2497,9 +2472,9 @@ ppc_linux_nat_target::watchpoint_addr_within_range (CORE_ADDR addr,
   int mask;
 
   if (have_ptrace_hwdebug_interface ()
-      && ppc_linux_get_hwcap () & PPC_FEATURE_BOOKE)
+      && linux_get_hwcap (current_top_target ()) & PPC_FEATURE_BOOKE)
     return start <= addr && start + length >= addr;
-  else if (ppc_linux_get_hwcap () & PPC_FEATURE_BOOKE)
+  else if (linux_get_hwcap (current_top_target ()) & PPC_FEATURE_BOOKE)
     mask = 3;
   else
     mask = 7;
@@ -2637,8 +2612,8 @@ ppc_linux_nat_target::read_description ()
 
   features.wordsize = ppc_linux_target_wordsize (tid);
 
-  CORE_ADDR hwcap = ppc_linux_get_hwcap ();
-  CORE_ADDR hwcap2 = ppc_linux_get_hwcap2 ();
+  CORE_ADDR hwcap = linux_get_hwcap (current_top_target ());
+  CORE_ADDR hwcap2 = linux_get_hwcap2 (current_top_target ());
 
   if (have_ptrace_getsetvsxregs
       && (hwcap & PPC_FEATURE_HAS_VSX))

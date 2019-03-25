@@ -2462,6 +2462,28 @@ linux_displaced_step_location (struct gdbarch *gdbarch)
   return addr;
 }
 
+/* See linux-tdep.h.  */
+
+CORE_ADDR
+linux_get_hwcap (struct target_ops *target)
+{
+  CORE_ADDR field;
+  if (target_auxv_search (target, AT_HWCAP, &field) != 1)
+    return 0;
+  return field;
+}
+
+/* See linux-tdep.h.  */
+
+CORE_ADDR
+linux_get_hwcap2 (struct target_ops *target)
+{
+  CORE_ADDR field;
+  if (target_auxv_search (target, AT_HWCAP2, &field) != 1)
+    return 0;
+  return field;
+}
+
 /* Display whether the gcore command is using the
    /proc/PID/coredump_filter file.  */
 

@@ -42,7 +42,4 @@ extern const struct regset aarch64_linux_fpregset;
 /* Matches HWCAP_PACA in kernel header arch/arm64/include/uapi/asm/hwcap.h.  */
 #define AARCH64_HWCAP_PACA (1 << 30)
 
-/* Fetch the AT_HWCAP entry from the auxv vector for the given TARGET.  */
-bool aarch64_linux_get_hwcap (struct target_ops *target, CORE_ADDR *hwcap);
-
 #endif /* AARCH64_LINUX_TDEP_H */

@@ -655,13 +655,10 @@ static const struct target_desc *
 aarch64_linux_core_read_description (struct gdbarch *gdbarch,
 				     struct target_ops *target, bfd *abfd)
 {
-  CORE_ADDR aarch64_hwcap = 0;
-
-  if (!aarch64_linux_get_hwcap (target, &aarch64_hwcap))
-    return nullptr;
+  CORE_ADDR hwcap = linux_get_hwcap (target);
 
   return aarch64_read_description (aarch64_linux_core_read_vq (gdbarch, abfd),
-				   aarch64_hwcap & AARCH64_HWCAP_PACA);
+				   hwcap & AARCH64_HWCAP_PACA);
 }
 
 /* Implementation of `gdbarch_stap_is_single_operand', as defined in
@@ -1437,15 +1434,6 @@ aarch64_linux_gcc_target_options (struct gdbarch *gdbarch)
 {
   /* GCC doesn't know "-m64".  */
   return NULL;
-}
-
-/* See aarch64-linux-tdep.h.  */
-
-bool
-aarch64_linux_get_hwcap (struct target_ops *target, CORE_ADDR *hwcap)
-{
-  *hwcap = 0;
-  return target_auxv_search (target, AT_HWCAP, hwcap) == 1;
 }
 
 static void

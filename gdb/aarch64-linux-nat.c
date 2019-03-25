@@ -42,6 +42,7 @@
 #include <asm/ptrace.h>
 
 #include "gregset.h"
+#include "linux-tdep.h"
 
 /* Defines ps_err_e, struct ps_prochandle.  */
 #include "gdb_proc_service.h"
@@ -641,11 +642,10 @@ aarch64_linux_nat_target::read_description ()
   if (ret == 0)
     return tdesc_arm_with_neon;
 
-  CORE_ADDR hwcap = 0;
-  bool pauth_p = aarch64_linux_get_hwcap (this, &hwcap)
-		 && (hwcap & AARCH64_HWCAP_PACA);
+  CORE_ADDR hwcap = linux_get_hwcap (this);
 
-  return aarch64_read_description (aarch64_sve_get_vq (tid), pauth_p);
+  return aarch64_read_description (aarch64_sve_get_vq (tid),
+				   hwcap & AARCH64_HWCAP_PACA);
 }
 
 /* Convert a native/host siginfo object, into/from the siginfo in the
