@@ -435,4 +435,14 @@ bool thread_db_thread_handle (ptid_t ptid, gdb_byte **handle, int *handle_len);
 
 extern int have_ptrace_getregset;
 
+/* Fetch the AT_HWCAP entry from the auxv vector, where entries are length
+   WORDSIZE.  If no entry was found, return zero.  */
+
+CORE_ADDR linux_get_hwcap (int wordsize);
+
+/* Fetch the AT_HWCAP2 entry from the auxv vector, where entries are length
+   WORDSIZE.  If no entry was found, return zero.  */
+
+CORE_ADDR linux_get_hwcap2 (int wordsize);
+
 #endif /* GDBSERVER_LINUX_LOW_H */

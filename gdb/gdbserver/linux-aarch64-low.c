@@ -505,30 +505,6 @@ aarch64_linux_new_fork (struct process_info *parent,
 /* Matches HWCAP_PACA in kernel header arch/arm64/include/uapi/asm/hwcap.h.  */
 #define AARCH64_HWCAP_PACA (1 << 30)
 
-/* Fetch the AT_HWCAP entry from the auxv vector.  */
-
-static bool
-aarch64_get_hwcap (unsigned long *valp)
-{
-  unsigned char *data = (unsigned char *) alloca (16);
-  int offset = 0;
-
-  while ((*the_target->read_auxv) (offset, data, 16) == 16)
-    {
-      unsigned long *data_p = (unsigned long *)data;
-      if (data_p[0] == AT_HWCAP)
-	{
-	  *valp = data_p[1];
-	  return true;
-	}
-
-      offset += 16;
-    }
-
-  *valp = 0;
-  return false;
-}
-
 /* Implementation of linux_target_ops method "arch_setup".  */
 
 static void
@@ -545,8 +521,8 @@ aarch64_arch_setup (void)
   if (is_elf64)
     {
       uint64_t vq = aarch64_sve_get_vq (tid);
-      unsigned long hwcap = 0;
-      bool pauth_p = aarch64_get_hwcap (&hwcap) && (hwcap & AARCH64_HWCAP_PACA);
+      unsigned long hwcap = linux_get_hwcap (8);
+      bool pauth_p = hwcap & AARCH64_HWCAP_PACA;
 
       current_process ()->tdesc = aarch64_linux_read_description (vq, pauth_p);
     }

@@ -323,43 +323,6 @@ ppc_set_pc (struct regcache *regcache, CORE_ADDR pc)
     }
 }
 
-
-static int
-ppc_get_auxv (unsigned long type, unsigned long *valp)
-{
-  const struct target_desc *tdesc = current_process ()->tdesc;
-  int wordsize = register_size (tdesc, 0);
-  unsigned char *data = (unsigned char *) alloca (2 * wordsize);
-  int offset = 0;
-
-  while ((*the_target->read_auxv) (offset, data, 2 * wordsize) == 2 * wordsize)
-    {
-      if (wordsize == 4)
-	{
-	  unsigned int *data_p = (unsigned int *)data;
-	  if (data_p[0] == type)
-	    {
-	      *valp = data_p[1];
-	      return 1;
-	    }
-	}
-      else
-	{
-	  unsigned long *data_p = (unsigned long *)data;
-	  if (data_p[0] == type)
-	    {
-	      *valp = data_p[1];
-	      return 1;
-	    }
-	}
-
-      offset += 2 * wordsize;
-    }
-
-  *valp = 0;
-  return 0;
-}
-
 #ifndef __powerpc64__
 static int ppc_regmap_adjusted;
 #endif
@@ -944,8 +907,8 @@ ppc_arch_setup (void)
 
   /* The value of current_process ()->tdesc needs to be set for this
      call.  */
-  ppc_get_auxv (AT_HWCAP, &ppc_hwcap);
-  ppc_get_auxv (AT_HWCAP2, &ppc_hwcap2);
+  ppc_hwcap = linux_get_hwcap (features.wordsize);
+  ppc_hwcap2 = linux_get_hwcap2 (features.wordsize);
 
   features.isa205 = ppc_linux_has_isa205 (ppc_hwcap);
 

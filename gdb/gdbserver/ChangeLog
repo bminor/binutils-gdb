@@ -1,3 +1,19 @@
+2019-03-26  Alan Hayward  <alan.hayward@arm.com>
+
+	* linux-aarch64-low.c (aarch64_get_hwcap): Remove function.
+	(aarch64_arch_setup): Call linux_get_hwcap.
+	* linux-arm-low.c (arm_get_hwcap): Remove function.
+	(arm_read_description): Call linux_get_hwcap.
+	* linux-low.c (linux_get_auxv): New function.
+	(linux_get_hwcap): Likewise.
+	(linux_get_hwcap2): Likewise.
+	* linux-low.h (linux_get_hwcap): New declaration.
+	(linux_get_hwcap2): Likewise.
+	* linux-ppc-low.c (ppc_get_auxv): Remove function.
+	(ppc_arch_setup): Call linux_get_hwcap.
+	* linux-s390-low.c (s390_get_hwcap): Remove function.
+	(s390_arch_setup): Call linux_get_hwcap.
+
 2019-03-22  Alan Hayward  <alan.hayward@arm.com>
 	    Jiong Wang  <jiong.wang@arm.com>
 

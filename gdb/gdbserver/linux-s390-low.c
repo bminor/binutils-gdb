@@ -467,36 +467,6 @@ s390_set_pc (struct regcache *regcache, CORE_ADDR newpc)
     }
 }
 
-/* Get HWCAP from AUXV, using the given WORDSIZE.  Return the HWCAP, or
-   zero if not found.  */
-
-static unsigned long
-s390_get_hwcap (int wordsize)
-{
-  gdb_byte *data = (gdb_byte *) alloca (2 * wordsize);
-  int offset = 0;
-
-  while ((*the_target->read_auxv) (offset, data, 2 * wordsize) == 2 * wordsize)
-    {
-      if (wordsize == 4)
-        {
-          unsigned int *data_p = (unsigned int *)data;
-          if (data_p[0] == AT_HWCAP)
-	    return data_p[1];
-        }
-      else
-        {
-          unsigned long *data_p = (unsigned long *)data;
-          if (data_p[0] == AT_HWCAP)
-	    return data_p[1];
-        }
-
-      offset += 2 * wordsize;
-    }
-
-  return 0;
-}
-
 /* Determine the word size for the given PID, in bytes.  */
 
 #ifdef __s390x__
@@ -548,7 +518,7 @@ s390_arch_setup (void)
   /* Determine word size and HWCAP.  */
   int pid = pid_of (current_thread);
   int wordsize = s390_get_wordsize (pid);
-  unsigned long hwcap = s390_get_hwcap (wordsize);
+  unsigned long hwcap = linux_get_hwcap (wordsize);
 
   /* Check whether the kernel supports extra register sets.  */
   int have_regset_last_break

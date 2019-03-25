@@ -7423,6 +7423,53 @@ linux_get_pc_64bit (struct regcache *regcache)
   return pc;
 }
 
+/* Fetch the entry MATCH from the auxv vector, where entries are length
+   WORDSIZE.  If no entry was found, return zero.  */
+
+static CORE_ADDR
+linux_get_auxv (int wordsize, CORE_ADDR match)
+{
+  gdb_byte *data = (gdb_byte *) alloca (2 * wordsize);
+  int offset = 0;
+
+  gdb_assert (wordsize == 4 || wordsize == 8);
+
+  while ((*the_target->read_auxv) (offset, data, 2 * wordsize) == 2 * wordsize)
+    {
+      if (wordsize == 4)
+	{
+	  uint32_t *data_p = (uint32_t *)data;
+	  if (data_p[0] == match)
+	    return data_p[1];
+	}
+      else
+	{
+	  uint64_t *data_p = (uint64_t *)data;
+	  if (data_p[0] == match)
+	    return data_p[1];
+	}
+
+      offset += 2 * wordsize;
+    }
+
+  return 0;
+}
+
+/* See linux-low.h.  */
+
+CORE_ADDR
+linux_get_hwcap (int wordsize)
+{
+  return linux_get_auxv (wordsize, AT_HWCAP);
+}
+
+/* See linux-low.h.  */
+
+CORE_ADDR
+linux_get_hwcap2 (int wordsize)
+{
+  return linux_get_auxv (wordsize, AT_HWCAP2);
+}
 
 static struct target_ops linux_target_ops = {
   linux_create_inferior,

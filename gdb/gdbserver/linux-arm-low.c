@@ -847,39 +847,14 @@ get_next_pcs_syscall_next_pc (struct arm_get_next_pcs *self)
   return next_pc;
 }
 
-static int
-arm_get_hwcap (unsigned long *valp)
-{
-  unsigned char *data = (unsigned char *) alloca (8);
-  int offset = 0;
-
-  while ((*the_target->read_auxv) (offset, data, 8) == 8)
-    {
-      unsigned int *data_p = (unsigned int *)data;
-      if (data_p[0] == AT_HWCAP)
-	{
-	  *valp = data_p[1];
-	  return 1;
-	}
-
-      offset += 8;
-    }
-
-  *valp = 0;
-  return 0;
-}
-
 static const struct target_desc *
 arm_read_description (void)
 {
   int pid = lwpid_of (current_thread);
-  unsigned long arm_hwcap = 0;
+  unsigned long arm_hwcap = linux_get_hwcap (4);
 
   /* Query hardware watchpoint/breakpoint capabilities.  */
   arm_linux_init_hwbp_cap (pid);
-
-  if (arm_get_hwcap (&arm_hwcap) == 0)
-    return tdesc_arm;
 
   if (arm_hwcap & HWCAP_IWMMXT)
     return tdesc_arm_with_iwmmxt;
