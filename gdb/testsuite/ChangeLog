@@ -1,3 +1,8 @@
+2019-03-25  Pedro Alves  <palves@redhat.com>
+
+	* lib/gdb.exp (gdb_test_multiple): Split appends to $code and
+	move comments outside list.  Append '-i "" eof' section.
+
 2019-03-22  Alan Hayward  <alan.hayward@arm.com>
 
 	* README: Add pie options.

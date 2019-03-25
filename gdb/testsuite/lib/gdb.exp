@@ -906,10 +906,13 @@ proc gdb_test_multiple { command message user_code } {
 	}
     }
     append code $processed_code
-    append code {
-	# Reset the spawn id, in case the processed code used -i.
-	-i "$gdb_spawn_id"
 
+    # Reset the spawn id, in case the processed code used -i.
+    append code {
+	-i "$gdb_spawn_id"
+    }
+
+    append code {
 	-re "Ending remote debugging.*$gdb_prompt $" {
 	    if ![isnative] then {
 		warning "Can`t communicate to remote target."
@@ -990,8 +993,10 @@ proc gdb_test_multiple { command message user_code } {
 	    }
 	    return -1
 	}
+    }
 
-	# Patterns below apply to any spawn id specified.
+    # Now patterns that apply to any spawn id specified.
+    append code {
 	-i $any_spawn_id
 	eof {
 	    perror "Process no longer exists"
@@ -1010,6 +1015,20 @@ proc gdb_test_multiple { command message user_code } {
 		fail "$message (timeout)"
 	    }
 	    set result 1
+	}
+    }
+
+    # remote_expect calls the eof section if there is an error on the
+    # expect call.  We already have eof sections above, and we don't
+    # want them to get called in that situation.  Since the last eof
+    # section becomes the error section, here we define another eof
+    # section, but with an empty spawn_id list, so that it won't ever
+    # match.
+    append code {
+	-i "" eof {
+	    # This comment is here because the eof section must not be
+	    # the empty string, otherwise remote_expect won't realize
+	    # it exists.
 	}
     }
 
