@@ -1,5 +1,22 @@
 2019-04-04  Tom Tromey  <tom@tromey.com>
 
+	* rust-exp.y (rustyylex, rust_lex_tests): Update.
+	* parser-defs.h (struct parser_state) <parser_state>: Add new
+	parameter.
+	<comma_terminates>: New member.
+	(comma_terminates): Don't declare global.
+	* parse.c (comma_terminates): Remove global.
+	(parse_exp_in_context): Update.
+	* p-exp.y (yylex): Update.
+	* m2-exp.y (yylex): Update.
+	* go-exp.y (lex_one_token): Update.
+	* f-exp.y (yylex): Update.
+	* d-exp.y (lex_one_token): Update.
+	* c-exp.y (lex_one_token): Update.
+	* ada-lex.l: Update.
+
+2019-04-04  Tom Tromey  <tom@tromey.com>
+
 	* rust-exp.y (struct rust_parser) <paren_depth>: New member.
 	(rustyylex, rust_lex_test_init, rust_lex_test_one)
 	(rust_lex_test_sequence, rust_lex_test_push_back): Update.

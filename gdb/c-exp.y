@@ -2637,7 +2637,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
       return c;
 
     case ',':
-      if (comma_terminates
+      if (pstate->comma_terminates
           && paren_depth == 0
           && ! scanning_macro_expansion ())
 	return 0;

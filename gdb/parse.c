@@ -71,7 +71,6 @@ int arglist_len;
 static struct type_stack type_stack;
 const char *lexptr;
 const char *prev_lexptr;
-int comma_terminates;
 
 /* True if parsing an expression to attempt completion.  */
 int parse_completion;
@@ -1122,8 +1121,6 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
   expout_completion_name.reset ();
   innermost_block.reset (tracker_types);
 
-  comma_terminates = comma;
-
   if (lexptr == 0 || *lexptr == 0)
     error_no_arg (_("expression to compute"));
 
@@ -1187,7 +1184,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
      to the value matching SELECTED_FRAME as set by get_current_arch.  */
 
   parser_state ps (lang, get_current_arch (), expression_context_block,
-		   expression_context_pc);
+		   expression_context_pc, comma);
 
   scoped_restore_current_language lang_saver;
   set_language (lang->la_language);

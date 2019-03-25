@@ -88,10 +88,12 @@ struct parser_state : public expr_builder
   parser_state (const struct language_defn *lang,
 		struct gdbarch *gdbarch,
 		const struct block *context_block,
-		CORE_ADDR context_pc)
+		CORE_ADDR context_pc,
+		int comma)
     : expr_builder (lang, gdbarch),
       expression_context_block (context_block),
-      expression_context_pc (context_pc)
+      expression_context_pc (context_pc),
+      comma_terminates (comma)
   {
   }
 
@@ -108,6 +110,10 @@ struct parser_state : public expr_builder
      at, and then look up the macro definitions active at that
      point.  */
   const CORE_ADDR expression_context_pc;
+
+  /* Nonzero means stop parsing on first comma (if not within parentheses).  */
+
+  int comma_terminates;
 };
 
 /* When parsing expressions we track the innermost block that was
@@ -355,10 +361,6 @@ extern const char *lexptr;
 /* After a token has been recognized, this variable points to it.
    Currently used only for error reporting.  */
 extern const char *prev_lexptr;
-
-/* Nonzero means stop parsing on first comma (if not within parentheses).  */
-
-extern int comma_terminates;
 
 /* These codes indicate operator precedences for expression printing,
    least tightly binding first.  */

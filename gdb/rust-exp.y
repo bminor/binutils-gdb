@@ -1674,7 +1674,8 @@ rustyylex (YYSTYPE *lvalp, rust_parser *parser)
       /* Falls through to lex_operator.  */
       ++parser->paren_depth;
     }
-  else if (lexptr[0] == ',' && comma_terminates && parser->paren_depth == 0)
+  else if (lexptr[0] == ',' && parser->pstate->comma_terminates
+	   && parser->paren_depth == 0)
     return 0;
 
   return lex_operator (lvalp);
@@ -2713,7 +2714,7 @@ rust_lex_tests (void)
 
   // Set up dummy "parser", so that rust_type works.
   struct parser_state ps (&rust_language_defn, target_gdbarch (),
-			  nullptr, 0);
+			  nullptr, 0, 0);
   rust_parser parser (&ps);
 
   rust_lex_test_one (&parser, "", 0);

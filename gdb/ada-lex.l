@@ -232,7 +232,7 @@ false		{ return FALSEKEYWORD; }
 
 [-&*+./:<>=|;\[\]] { return yytext[0]; }
 
-","		{ if (paren_depth == 0 && comma_terminates)
+","		{ if (paren_depth == 0 && pstate->comma_terminates)
 		    {
 		      rewind_to_char (',');
 		      return 0;

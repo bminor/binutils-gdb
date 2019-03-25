@@ -1218,7 +1218,7 @@ yylex (void)
       return c;
 
     case ',':
-      if (comma_terminates && paren_depth == 0)
+      if (pstate->comma_terminates && paren_depth == 0)
 	return 0;
       lexptr++;
       return c;
