@@ -1,5 +1,16 @@
 2019-03-25  Tamar Christina  <tamar.christina@arm.com>
 
+	* testsuite/binutils-all/arm/in-order-all.d: New test.
+	* testsuite/binutils-all/arm/in-order.d: New test.
+	* testsuite/binutils-all/arm/objdump.exp: Support .d tests.
+	* testsuite/binutils-all/arm/out-of-order-all.d: New test.
+	* testsuite/binutils-all/arm/out-of-order.T: New test.
+	* testsuite/binutils-all/arm/out-of-order.d: New test.
+	* testsuite/binutils-all/arm/out-of-order.s: New test.
+
+
+2019-03-25  Tamar Christina  <tamar.christina@arm.com>
+
 	* testsuite/binutils-all/aarch64/in-order-all.d: New test.
 	* testsuite/binutils-all/aarch64/out-of-order-all.d: New test.
 	* testsuite/binutils-all/aarch64/out-of-order.d:

@@ -1,5 +1,11 @@
 2019-03-25  Tamar Christina  <tamar.christina@arm.com>
 
+	* arm-dis.c (struct arm_private_data): Remove has_mapping_symbols.
+	(mapping_symbol_for_insn): Implement new algorithm.
+	(print_insn): Remove duplicate code.
+
+2019-03-25  Tamar Christina  <tamar.christina@arm.com>
+
 	* aarch64-dis.c (print_insn_aarch64):
 	Implement override.
 

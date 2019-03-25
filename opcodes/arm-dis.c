@@ -56,15 +56,14 @@ struct arm_private_data
   /* The features to use when disassembling optional instructions.  */
   arm_feature_set features;
 
-  /* Whether any mapping symbols are present in the provided symbol
-     table.  -1 if we do not know yet, otherwise 0 or 1.  */
-  int has_mapping_symbols;
-
   /* Track the last type (although this doesn't seem to be useful) */
   enum map_type last_type;
 
   /* Tracking symbol table information */
   int last_mapping_sym;
+
+  /* The end range of the current range being disassembled.  */
+  bfd_vma last_stop_offset;
   bfd_vma last_mapping_addr;
 };
 
@@ -6351,52 +6350,114 @@ static bfd_boolean
 mapping_symbol_for_insn (bfd_vma pc, struct disassemble_info *info,
 			 enum map_type *map_symbol)
 {
-  bfd_vma addr;
-  int n, start = 0;
+  bfd_vma addr, section_vma = 0;
+  int n, last_sym = -1;
   bfd_boolean found = FALSE;
-  enum map_type type = MAP_ARM;
+  bfd_boolean can_use_search_opt_p = FALSE;
+
+  /* Default to DATA.  A text section is required by the ABI to contain an
+     INSN mapping symbol at the start.  A data section has no such
+     requirement, hence if no mapping symbol is found the section must
+     contain only data.  This however isn't very useful if the user has
+     fully stripped the binaries.  If this is the case use the section
+     attributes to determine the default.  If we have no section default to
+     INSN as well, as we may be disassembling some raw bytes on a baremetal
+     HEX file or similar.  */
+  enum map_type type = MAP_DATA;
+  if ((info->section && info->section->flags & SEC_CODE) || !info->section)
+    type = MAP_ARM;
   struct arm_private_data *private_data;
 
-  if (info->private_data == NULL || info->symtab_size == 0
+  if (info->private_data == NULL
       || bfd_asymbol_flavour (*info->symtab) != bfd_target_elf_flavour)
     return FALSE;
 
   private_data = info->private_data;
-  if (pc == 0)
-    start = 0;
-  else
-    start = private_data->last_mapping_sym;
 
-  start = (start == -1)? 0 : start;
-  addr = bfd_asymbol_value (info->symtab[start]);
+  /* First, look for mapping symbols.  */
+  if (info->symtab_size != 0)
+  {
+    if (pc <= private_data->last_mapping_addr)
+      private_data->last_mapping_sym = -1;
 
-  if (pc >= addr)
-    {
-      if (get_map_sym_type (info, start, &type))
-      found = TRUE;
-    }
-  else
-    {
-      for (n = start - 1; n >= 0; n--)
-	{
-	  if (get_map_sym_type (info, n, &type))
-	    {
-	      found = TRUE;
+    /* Start scanning at the start of the function, or wherever
+       we finished last time.  */
+    n = info->symtab_pos + 1;
+
+    /* If the last stop offset is different from the current one it means we
+       are disassembling a different glob of bytes.  As such the optimization
+       would not be safe and we should start over.  */
+    can_use_search_opt_p
+      = private_data->last_mapping_sym >= 0
+	&& info->stop_offset == private_data->last_stop_offset;
+
+    if (n >= private_data->last_mapping_sym && can_use_search_opt_p)
+      n = private_data->last_mapping_sym;
+
+    /* Look down while we haven't passed the location being disassembled.
+       The reason for this is that there's no defined order between a symbol
+       and an mapping symbol that may be at the same address.  We may have to
+       look at least one position ahead.  */
+    for (; n < info->symtab_size; n++)
+      {
+	addr = bfd_asymbol_value (info->symtab[n]);
+	if (addr > pc)
+	  break;
+	if (get_map_sym_type (info, n, &type))
+	  {
+	    last_sym = n;
+	    found = TRUE;
+	  }
+      }
+
+    if (!found)
+      {
+	n = info->symtab_pos;
+	if (n >= private_data->last_mapping_sym && can_use_search_opt_p)
+	  n = private_data->last_mapping_sym;
+
+	/* No mapping symbol found at this address.  Look backwards
+	   for a preceeding one, but don't go pass the section start
+	   otherwise a data section with no mapping symbol can pick up
+	   a text mapping symbol of a preceeding section.  The documentation
+	   says section can be NULL, in which case we will seek up all the
+	   way to the top.  */
+	if (info->section)
+	  section_vma = info->section->vma;
+
+	for (; n >= 0; n--)
+	  {
+	    addr = bfd_asymbol_value (info->symtab[n]);
+	    if (addr < section_vma)
 	      break;
-	    }
+
+	    if (get_map_sym_type (info, n, &type))
+	      {
+		last_sym = n;
+		found = TRUE;
+		break;
+	      }
+	  }
+      }
+  }
+
+  /* If no mapping symbol was found, try looking up without a mapping
+     symbol.  This is done by walking up from the current PC to the nearest
+     symbol.  We don't actually have to loop here since symtab_pos will
+     contain the nearest symbol already.  */
+  if (!found)
+    {
+      n = info->symtab_pos;
+      if (n >= 0 && get_sym_code_type (info, n, &type))
+	{
+	  last_sym = n;
+	  found = TRUE;
 	}
     }
 
-  /* No mapping symbols were found.  A leading $d may be
-     omitted for sections which start with data; but for
-     compatibility with legacy and stripped binaries, only
-     assume the leading $d if there is at least one mapping
-     symbol in the file.  */
-  if (!found && private_data->has_mapping_symbols == 1)
-    {
-      type = MAP_DATA;
-      found = TRUE;
-    }
+  private_data->last_mapping_sym = last_sym;
+  private_data->last_type = type;
+  private_data->last_stop_offset = info->stop_offset;
 
   *map_symbol = type;
   return found;
@@ -6535,9 +6596,9 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
 	 during disassembly....  */
       select_arm_features (info->mach, & private.features);
 
-      private.has_mapping_symbols = -1;
       private.last_mapping_sym = -1;
       private.last_mapping_addr = 0;
+      private.last_stop_offset = 0;
 
       info->private_data = & private;
     }
@@ -6554,121 +6615,13 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
       && bfd_asymbol_flavour (*info->symtab) == bfd_target_elf_flavour)
     {
       bfd_vma addr;
-      int n, start;
+      int n;
       int last_sym = -1;
       enum map_type type = MAP_ARM;
 
-      /* Start scanning at the start of the function, or wherever
-	 we finished last time.  */
-      /* PR 14006.  When the address is 0 we are either at the start of the
-	 very first function, or else the first function in a new, unlinked
-	 executable section (eg because of -ffunction-sections).  Either way
-	 start scanning from the beginning of the symbol table, not where we
-	 left off last time.  */
-      if (pc == 0)
-	start = 0;
-      else
-	{
-	  start = info->symtab_pos + 1;
-	  if (start < private_data->last_mapping_sym)
-	    start = private_data->last_mapping_sym;
-	}
-      found = FALSE;
+      found = mapping_symbol_for_insn (pc, info, &type);
+      last_sym = private_data->last_mapping_sym;
 
-      /* First, look for mapping symbols.  */
-      if (private_data->has_mapping_symbols != 0)
-	{
-	  /* Scan up to the location being disassembled.  */
-	  for (n = start; n < info->symtab_size; n++)
-	    {
-	      addr = bfd_asymbol_value (info->symtab[n]);
-	      if (addr > pc)
-		break;
-	      if (get_map_sym_type (info, n, &type))
-		{
-		  last_sym = n;
-		  found = TRUE;
-		}
-	    }
-
-	  if (!found)
-	    {
-	      /* No mapping symbol found at this address.  Look backwards
-		 for a preceding one.  */
-	      for (n = start - 1; n >= 0; n--)
-		{
-		  if (get_map_sym_type (info, n, &type))
-		    {
-		      last_sym = n;
-		      found = TRUE;
-		      break;
-		    }
-		}
-	    }
-
-	  if (found)
-	    private_data->has_mapping_symbols = 1;
-
-	  /* No mapping symbols were found.  A leading $d may be
-	     omitted for sections which start with data; but for
-	     compatibility with legacy and stripped binaries, only
-	     assume the leading $d if there is at least one mapping
-	     symbol in the file.  */
-	  if (!found && private_data->has_mapping_symbols == -1)
-	    {
-	      /* Look for mapping symbols, in any section.  */
-	      for (n = 0; n < info->symtab_size; n++)
-		if (is_mapping_symbol (info, n, &type))
-		  {
-		    private_data->has_mapping_symbols = 1;
-		    break;
-		  }
-	      if (private_data->has_mapping_symbols == -1)
-		private_data->has_mapping_symbols = 0;
-	    }
-
-	  if (!found && private_data->has_mapping_symbols == 1)
-	    {
-	      type = MAP_DATA;
-	      found = TRUE;
-	    }
-	}
-
-      /* Next search for function symbols to separate ARM from Thumb
-	 in binaries without mapping symbols.  */
-      if (!found)
-	{
-	  /* Scan up to the location being disassembled.  */
-	  for (n = start; n < info->symtab_size; n++)
-	    {
-	      addr = bfd_asymbol_value (info->symtab[n]);
-	      if (addr > pc)
-		break;
-	      if (get_sym_code_type (info, n, &type))
-		{
-		  last_sym = n;
-		  found = TRUE;
-		}
-	    }
-
-	  if (!found)
-	    {
-	      /* No mapping symbol found at this address.  Look backwards
-		 for a preceding one.  */
-	      for (n = start - 1; n >= 0; n--)
-		{
-		  if (get_sym_code_type (info, n, &type))
-		    {
-		      last_sym = n;
-		      found = TRUE;
-		      break;
-		    }
-		}
-	    }
-	}
-
-      private_data->last_mapping_sym = last_sym;
-      private_data->last_type = type;
       is_thumb = (private_data->last_type == MAP_THUMB);
       is_data = (private_data->last_type == MAP_DATA);
 

@@ -10,8 +10,9 @@ Disassembly of section destsect:
 Disassembly of section .text:
 
 000080.. <[^>]*>:
-    80..:	(b802f000|f000b802) 	.word	0x(b802f000|f000b802)
-    80..:	00000000 	andeq	r0, r0, r0
+    80..:	f000 b802 	b.w	8008 <__dest_veneer>
+    80..:	0000      	movs	r0, r0
+	...
 
 000080.. <[^>]*>:
     80..:	4778      	bx	pc
