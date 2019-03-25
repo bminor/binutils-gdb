@@ -1,3 +1,7 @@
+2019-03-25  John Baldwin  <jhb@FreeBSD.org>
+
+	* NEWS: Mention TLS support for FreeBSD.
+
 2019-03-25  Tom Tromey  <tromey@adacore.com>
 
 	* minsyms.c (BUNCH_SIZE): Update comment.

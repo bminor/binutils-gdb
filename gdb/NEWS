@@ -3,6 +3,11 @@
 
 *** Changes since GDB 8.3
 
+* GDB now supports Thread Local Storage (TLS) variables on several
+  FreeBSD architectures (amd64, i386, powerpc, riscv).  Other
+  architectures require kernel changes.  TLS is not yet supported for
+  amd64 and i386 process core dumps.
+
 *** Changes in GDB 8.3
 
 * GDB and GDBserver now support access to additional registers on
