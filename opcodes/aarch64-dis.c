@@ -37,6 +37,7 @@ enum map_type
 
 static enum map_type last_type;
 static int last_mapping_sym = -1;
+static bfd_vma last_stop_offset = 0;
 static bfd_vma last_mapping_addr = 0;
 
 /* Other options */
@@ -3317,14 +3318,26 @@ print_insn_aarch64 (bfd_vma pc,
   /* Aarch64 instructions are always little-endian */
   info->endian_code = BFD_ENDIAN_LITTLE;
 
+  /* Default to DATA.  A text section is required by the ABI to contain an
+     INSN mapping symbol at the start.  A data section has no such
+     requirement, hence if no mapping symbol is found the section must
+     contain only data.  This however isn't very useful if the user has
+     fully stripped the binaries.  If this is the case use the section
+     attributes to determine the default.  If we have no section default to
+     INSN as well, as we may be disassembling some raw bytes on a baremetal
+     HEX file or similar.  */
+  enum map_type type = MAP_DATA;
+  if ((info->section && info->section->flags & SEC_CODE) || !info->section)
+    type = MAP_INSN;
+
   /* First check the full symtab for a mapping symbol, even if there
      are no usable non-mapping symbols for this address.  */
   if (info->symtab_size != 0
       && bfd_asymbol_flavour (*info->symtab) == bfd_target_elf_flavour)
     {
-      enum map_type type = MAP_INSN;
       int last_sym = -1;
-      bfd_vma addr;
+      bfd_vma addr, section_vma = 0;
+      bfd_boolean can_use_search_opt_p;
       int n;
 
       if (pc <= last_mapping_addr)
@@ -3333,10 +3346,20 @@ print_insn_aarch64 (bfd_vma pc,
       /* Start scanning at the start of the function, or wherever
 	 we finished last time.  */
       n = info->symtab_pos + 1;
-      if (n < last_mapping_sym)
+
+      /* If the last stop offset is different from the current one it means we
+	 are disassembling a different glob of bytes.  As such the optimization
+	 would not be safe and we should start over.  */
+      can_use_search_opt_p = last_mapping_sym >= 0
+			     && info->stop_offset == last_stop_offset;
+
+      if (n >= last_mapping_sym && can_use_search_opt_p)
 	n = last_mapping_sym;
 
-      /* Scan up to the location being disassembled.  */
+      /* Look down while we haven't passed the location being disassembled.
+	 The reason for this is that there's no defined order between a symbol
+	 and an mapping symbol that may be at the same address.  We may have to
+	 look at least one position ahead.  */
       for (; n < info->symtab_size; n++)
 	{
 	  addr = bfd_asymbol_value (info->symtab[n]);
@@ -3352,13 +3375,24 @@ print_insn_aarch64 (bfd_vma pc,
       if (!found)
 	{
 	  n = info->symtab_pos;
-	  if (n < last_mapping_sym)
+	  if (n >= last_mapping_sym && can_use_search_opt_p)
 	    n = last_mapping_sym;
 
 	  /* No mapping symbol found at this address.  Look backwards
-	     for a preceeding one.  */
+	     for a preceeding one, but don't go pass the section start
+	     otherwise a data section with no mapping symbol can pick up
+	     a text mapping symbol of a preceeding section.  The documentation
+	     says section can be NULL, in which case we will seek up all the
+	     way to the top.  */
+	  if (info->section)
+	    section_vma = info->section->vma;
+
 	  for (; n >= 0; n--)
 	    {
+	      addr = bfd_asymbol_value (info->symtab[n]);
+	      if (addr < section_vma)
+		break;
+
 	      if (get_sym_code_type (info, n, &type))
 		{
 		  last_sym = n;
@@ -3370,6 +3404,7 @@ print_insn_aarch64 (bfd_vma pc,
 
       last_mapping_sym = last_sym;
       last_type = type;
+      last_stop_offset = info->stop_offset;
 
       /* Look a little bit ahead to see if we should print out
 	 less than four bytes of data.  If there's a symbol,
@@ -3395,8 +3430,11 @@ print_insn_aarch64 (bfd_vma pc,
 	    size = (pc & 1) ? 1 : 2;
 	}
     }
+  else
+    last_type = type;
 
-  if (last_type == MAP_DATA)
+  /* PR 10263: Disassemble data if requested to do so by the user.  */
+  if (last_type == MAP_DATA && ((info->flags & DISASSEMBLE_DATA) == 0))
     {
       /* size was set above.  */
       info->bytes_per_chunk = size;

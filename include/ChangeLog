@@ -1,3 +1,10 @@
+2019-04-01  Tamar Christina  <tamar.christina@arm.com>
+
+	Backport from mainline.
+	2019-03-25  Tamar Christina  <tamar.christina@arm.com>
+
+	* dis-asm.h (struct disassemble_info): Add stop_offset.
+
 2019-02-02  Nick Clifton  <nickc@redhat.com>
 
 	2.32 Release.

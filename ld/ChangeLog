@@ -1,3 +1,8 @@
+2019-04-01  Tamar Christina  <tamar.christina@arm.com>
+
+	* testsuite/ld-arm/jump-reloc-veneers-cond-long.d: Update disassembly.
+	* testsuite/ld-arm/jump-reloc-veneers-long.d: Update disassembly.
+
 2019-02-09  Vineet Gupta  <vgupta@synopsys.com>
 
 	* emultempl/arclinux.em: Delete special INIT/FINI handling.

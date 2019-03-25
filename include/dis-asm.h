@@ -221,6 +221,12 @@ typedef struct disassemble_info
      file being disassembled.  */
   bfd_vma stop_vma;
 
+  /* The end range of the current range being disassembled.  This is required
+     in order to notify the disassembler when it's currently handling a
+     different range than it was before.  This prevent unsafe optimizations when
+     disassembling such as the way mapping symbols are found on AArch64.  */
+  bfd_vma stop_offset;
+
 } disassemble_info;
 
 /* This struct is used to pass information about valid disassembler
