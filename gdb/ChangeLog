@@ -1,5 +1,9 @@
 2019-03-25  Alan Hayward  <alan.hayward@arm.com>
 
+	* s390-linux-nat.c: Add include.
+
+2019-03-25  Alan Hayward  <alan.hayward@arm.com>
+
 	* aarch64-linux-nat.c (aarch64_linux_nat_target::read_description):
 	Call linux_get_hwcap.
 	* aarch64-linux-tdep.c (aarch64_linux_core_read_description):

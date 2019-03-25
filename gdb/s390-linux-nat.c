@@ -42,6 +42,7 @@
 #include <elf.h>
 #include <algorithm>
 #include "inf-ptrace.h"
+#include "linux-tdep.h"
 
 /* Per-thread arch-specific data.  */
 
