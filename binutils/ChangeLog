@@ -1,3 +1,10 @@
+2019-03-25  Tamar Christina  <tamar.christina@arm.com>
+
+	* objdump.c (disassemble_bytes): Pass stop_offset.
+	* testsuite/binutils-all/aarch64/out-of-order.T: New test.
+	* testsuite/binutils-all/aarch64/out-of-order.d: New test.
+	* testsuite/binutils-all/aarch64/out-of-order.s: New test.
+
 2019-03-19  Nick Clifton  <nickc@redhat.com>
 
 	PR 24360

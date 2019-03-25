@@ -1,3 +1,8 @@
+2019-03-25  Tamar Christina  <tamar.christina@arm.com>
+
+	* aarch64-dis.c (last_stop_offset): New.
+	(print_insn_aarch64): Use stop_offset.
+
 2019-03-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/24359

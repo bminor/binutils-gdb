@@ -37,6 +37,7 @@ enum map_type
 
 static enum map_type last_type;
 static int last_mapping_sym = -1;
+static bfd_vma last_stop_offset = 0;
 static bfd_vma last_mapping_addr = 0;
 
 /* Other options */
@@ -3333,7 +3334,10 @@ print_insn_aarch64 (bfd_vma pc,
       /* Start scanning at the start of the function, or wherever
 	 we finished last time.  */
       n = info->symtab_pos + 1;
-      if (n < last_mapping_sym)
+      /* If the last stop offset is different from the current one it means we
+	 are disassembling a different glob of bytes.  As such the optimization
+	 would not be safe and we should start over.  */
+      if (n < last_mapping_sym && info->stop_offset == last_stop_offset)
 	n = last_mapping_sym;
 
       /* Scan up to the location being disassembled.  */
@@ -3370,6 +3374,7 @@ print_insn_aarch64 (bfd_vma pc,
 
       last_mapping_sym = last_sym;
       last_type = type;
+      last_stop_offset = info->stop_offset;
 
       /* Look a little bit ahead to see if we should print out
 	 less than four bytes of data.  If there's a symbol,
