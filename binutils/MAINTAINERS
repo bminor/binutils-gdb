@@ -80,8 +80,8 @@ responsibility among the other maintainers.
   DWARF2	   Jakub Jelinek <jakub@redhat.com>
   dwarf-mode.el    Tom Tromey <tom@tromey.com>
   EPIPHANY	   Joern Rennecke <joern.rennecke@embecosm.com>
-  FR30		   Dave Brolley <brolley@redhat.com>
-  FRV		   Dave Brolley <brolley@redhat.com>
+  FR30		   Nick Clifton <nickc@redhat.com>
+  FRV		   Nick Clifton <nickc@redhat.com>
   FRV		   Alexandre Oliva <aoliva@redhat.com>
   GOLD		   Ian Lance Taylor <iant@google.com>
   GOLD		   Cary Coutant <ccoutant@gmail.com>
@@ -102,7 +102,7 @@ responsibility among the other maintainers.
   M68HC11 M68HC12  Sean Keys <skeys@ipdatasys.com>
   MACH-O           Tristan Gingold <tgingold@free.fr>
   MAXQ		   Inderpreet Singh <inderpreetb@noida.hcltech.com>
-  MEP		   Dave Brolley <brolley@redhat.com>
+  MEP		   Nick Clifton <nickc@redhat.com>
   METAG            Markos Chandras <markos.chandras@imgtec.com>
   MICROBLAZE	   Michael Eager <eager@eagercon.com>
   MIPS		   Chenghua Xu <paul.hua.gm@gmail.com>
