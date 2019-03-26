@@ -8,6 +8,8 @@
   architectures require kernel changes.  TLS is not yet supported for
   amd64 and i386 process core dumps.
 
+* Support for Pointer Authentication on AArch64 Linux.
+
 *** Changes in GDB 8.3
 
 * GDB and GDBserver now support access to additional registers on
