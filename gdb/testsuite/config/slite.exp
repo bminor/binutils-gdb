@@ -27,7 +27,7 @@
 # rather than being displayed by gdb.
 
 load_lib remote.exp
-load_lib gdb.exp
+
 set gdb_prompt "\\(gdb\\)"
 
 #

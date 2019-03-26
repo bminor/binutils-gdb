@@ -1,3 +1,13 @@
+2019-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* config/default.exp: Remove 'load_lib gdb.exp'.
+	* config/monitor.exp: Likewise.
+	* config/sid.exp: Likewise.
+	* config/sim.exp: Likewise.
+	* config/slite.exp: Likewise.
+	* config/unix.exp: Likewise.
+	* gdb.base/default.exp: Remove unhelpful comment.
+
 2019-03-14  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.base/style.exp: Add "set style sources" test.
