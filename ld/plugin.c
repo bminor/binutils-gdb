@@ -659,6 +659,73 @@ is_visible_from_outside (struct ld_plugin_symbol *lsym,
   return FALSE;
 }
 
+/* Return LTO kind string name that corresponds to INDEX enum value.  */
+static const char *
+get_lto_kind (unsigned int index)
+{
+  static char buffer[64];
+  const char *lto_kind_str[5] =
+  {
+    "DEF",
+    "WEAKDEF",
+    "UNDEF",
+    "WEAKUNDEF",
+    "COMMON"
+  };
+
+  if (index < ARRAY_SIZE (lto_kind_str))
+    return lto_kind_str [index];
+
+  sprintf (buffer, _("unknown LTO kind value %x"), index);
+  return buffer;
+}
+
+/* Return LTO resolution string name that corresponds to INDEX enum value.  */
+static const char *
+get_lto_resolution (unsigned int index)
+{
+  static char buffer[64];
+  static const char *lto_resolution_str[10] =
+  {
+    "UNKNOWN",
+    "UNDEF",
+    "PREVAILING_DEF",
+    "PREVAILING_DEF_IRONLY",
+    "PREEMPTED_REG",
+    "PREEMPTED_IR",
+    "RESOLVED_IR",
+    "RESOLVED_EXEC",
+    "RESOLVED_DYN",
+    "PREVAILING_DEF_IRONLY_EXP",
+  };
+
+  if (index < ARRAY_SIZE (lto_resolution_str))
+    return lto_resolution_str [index];
+
+  sprintf (buffer, _("unknown LTO resolution value %x"), index);
+  return buffer;
+}
+
+/* Return LTO visibility string name that corresponds to INDEX enum value.  */
+static const char *
+get_lto_visibility (unsigned int index)
+{
+  static char buffer[64];
+  const char *lto_visibility_str[4] =
+  {
+    "DEFAULT",
+    "PROTECTED",
+    "INTERNAL",
+    "HIDDEN"
+  };
+
+  if (index < ARRAY_SIZE (lto_visibility_str))
+    return lto_visibility_str [index];
+
+  sprintf (buffer, _("unknown LTO visibility value %x"), index);
+  return buffer;
+}
+
 /* Get the symbol resolution info for a plugin-claimed input file.  */
 static enum ld_plugin_status
 get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms,
@@ -777,9 +844,11 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms,
       syms[n].resolution = res;
       if (report_plugin_symbols)
 	einfo (_("%P: %pB: symbol `%s' "
-		 "definition: %d, visibility: %d, resolution: %d\n"),
+		 "definition: %s, visibility: %s, resolution: %s\n"),
 	       abfd, syms[n].name,
-	       syms[n].def, syms[n].visibility, res);
+	       get_lto_kind (syms[n].def),
+	       get_lto_visibility (syms[n].visibility),
+	       get_lto_resolution (res));
     }
   return LDPS_OK;
 }

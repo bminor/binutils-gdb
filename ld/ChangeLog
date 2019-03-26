@@ -1,3 +1,9 @@
+2019-03-26  Martin Liska  <mliska@suse.cz>
+
+	* plugin.c (get_symbols): Add lto_kind_str, lto_resolution_str,
+	lto_visibility_str and use then to inform about plugin-symbols.
+	* testsuite/ld-plugin/plugin-12.d: Adjust expected pattern.
+
 2019-03-25  Tamar Christina  <tamar.christina@arm.com>
 
 	* testsuite/ld-arm/jump-reloc-veneers-cond-long.d: Update disassembly.
