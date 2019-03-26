@@ -38,6 +38,7 @@
 #include <sys/procfs.h>
 
 #include "nat/linux-ptrace.h"
+#include "linux-tdep.h"
 
 /* Prototypes for supply_gregset etc.  */
 #include "gregset.h"

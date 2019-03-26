@@ -1,3 +1,7 @@
+2019-03-26  Alan Hayward  <alan.hayward@arm.com>
+
+        * arm-linux-nat.c: Add include.
+
 2019-03-25  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* source-cache.c (source_cache::get_source_lines): Re-read
