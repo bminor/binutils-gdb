@@ -1,3 +1,10 @@
+2019-03-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb-gdb.py.in (StructMainTypePrettyPrinter.bound_img): New method.
+	(StructMainTypePrettyPrinter.bounds_img): Use new "bound_img"
+	method to compute the bounds of range types. Also print "[evaluated]"
+	if the bounds' values come from a dynamic evaluation.
+
 2019-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* cp-valprint.c (cp_print_value_fields): Don't print trailing
