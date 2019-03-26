@@ -206,6 +206,12 @@ source_cache::get_source_lines (struct symtab *s, int first_line,
 		  if (desc.get () < 0)
 		    return false;
 		  find_source_lines (s, desc.get ());
+
+		  /* FULLNAME points to a value owned by the symtab
+		     (symtab::fullname).  Calling open_source_file reallocates
+		     that value, so we must refresh FULLNAME to avoid a
+		     use-after-free.  */
+		  fullname = symtab_to_fullname (s);
 		}
 	      srchilite::SourceHighlight highlighter ("esc.outlang");
 	      highlighter.setStyleFile("esc.style");
