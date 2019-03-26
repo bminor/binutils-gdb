@@ -20,9 +20,9 @@ v1:
 
 	.data
 	.section .global,"aw",@progbits
-	.xword 1
-	.xword 1
-	.xword 1
+	.xword 0
+	.xword 0
+	.xword 0
 
 	.section .rodata
-	.word 4
+	.word 0

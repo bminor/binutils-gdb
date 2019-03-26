@@ -21,9 +21,9 @@ v1:
 
 	.data
 	.section .global,"aw",%progbits
-	.word 1
-	.word 1
-	.word 1
+	.word 0
+	.word 0
+	.word 0
 
 	.section .rodata
-	.word 4
+	.word 0

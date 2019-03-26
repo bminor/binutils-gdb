@@ -1,3 +1,16 @@
+2019-03-26  Tamar Christina  <tamar.christina@arm.com>
+
+	* testsuite/binutils-all/aarch64/in-order-all.d: Update.
+	* testsuite/binutils-all/aarch64/in-order.d: Likewise.
+	* testsuite/binutils-all/aarch64/out-of-order-all.d: Likewise.
+	* testsuite/binutils-all/aarch64/out-of-order.d: Likewise.
+	* testsuite/binutils-all/aarch64/out-of-order.s: Likewise.
+	* testsuite/binutils-all/arm/in-order-all.d: Likewise.
+	* testsuite/binutils-all/arm/in-order.d: Likewise.
+	* testsuite/binutils-all/arm/out-of-order-all.d: Likewise.
+	* testsuite/binutils-all/arm/out-of-order.d: Likewise.
+	* testsuite/binutils-all/arm/out-of-order.s: Likewise.
+
 2019-03-26  Nick Clifton  <nickc@redhat.com>
 
 	* MAINTAINERS: Take over Dave Brolley's maintainerships for FR30,
