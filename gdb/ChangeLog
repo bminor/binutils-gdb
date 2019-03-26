@@ -1,5 +1,9 @@
 2019-03-26  Joel Brobecker  <brobecker@adacore.com>
 
+	GDB 8.2.91 released.
+
+2019-03-26  Joel Brobecker  <brobecker@adacore.com>
+
 	* version.in: Set GDB version number to 8.2.91.
 
 2019-03-20  Tom Tromey  <tromey@adacore.com>
