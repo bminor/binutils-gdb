@@ -1,5 +1,9 @@
 2019-03-26  Alan Hayward  <alan.hayward@arm.com>
 
+        * ppc-linux-nat.c: Add include.
+
+2019-03-26  Alan Hayward  <alan.hayward@arm.com>
+
         * NEWS: Mention AArch64 Pointer Authentication.
 
 2019-03-26  Alan Hayward  <alan.hayward@arm.com>

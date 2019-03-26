@@ -51,6 +51,7 @@
 #include "arch/ppc-linux-common.h"
 #include "arch/ppc-linux-tdesc.h"
 #include "nat/ppc-linux.h"
+#include "linux-tdep.h"
 
 /* Similarly for the hardware watchpoint support.  These requests are used
    when the PowerPC HWDEBUG ptrace interface is not available.  */
