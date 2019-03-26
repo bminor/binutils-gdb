@@ -449,6 +449,12 @@ struct language_defn
 				       struct gdbarch *gdbarch,
 				       const struct block *expr_block,
 				       CORE_ADDR expr_pc);
+
+    /* This string is used by the 'set print max-depth' setting.  When GDB
+       replaces a struct or union (during value printing) that is "too
+       deep" this string is displayed instead.  */
+    const char *la_struct_too_deep_ellipsis;
+
   };
 
 /* Pointer to the language_defn for our current language.  This pointer

@@ -873,7 +873,8 @@ extern const struct language_defn c_language_defn =
   default_search_name_hash,
   &c_varobj_ops,
   c_get_compile_context,
-  c_compute_program
+  c_compute_program,
+  "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
 enum cplus_primitive_types {
@@ -1017,7 +1018,8 @@ extern const struct language_defn cplus_language_defn =
   cp_search_name_hash,
   &cplus_varobj_ops,
   cplus_get_compile_context,
-  cplus_compute_program
+  cplus_compute_program,
+  "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
 static const char *asm_extensions[] =
@@ -1070,7 +1072,8 @@ extern const struct language_defn asm_language_defn =
   default_search_name_hash,
   &default_varobj_ops,
   NULL,
-  NULL
+  NULL,
+  "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
 /* The following language_defn does not represent a real language.
@@ -1123,5 +1126,6 @@ extern const struct language_defn minimal_language_defn =
   default_search_name_hash,
   &default_varobj_ops,
   NULL,
-  NULL
+  NULL,
+  "{...}"			/* la_struct_too_deep_ellipsis */
 };
