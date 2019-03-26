@@ -1,3 +1,8 @@
+2019-03-25  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* source-cache.c (source_cache::get_source_lines): Re-read
+	fullname after calling open_source_file.
+
 2019-03-18  Pedro Alves  <palves@redhat.com>
 	    Eli Zaretskii <eliz@gnu.org>
 
