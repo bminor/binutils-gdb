@@ -1,3 +1,8 @@
+2019-03-27  Alan Hayward  <alan.hayward@arm.com>
+
+	* gdb.base/interrupt-daemon-attach.c (main): Add alarm and sleep
+	in child.
+
 2019-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.python/py-prettyprint.c (struct container) <is_map_p>: New
