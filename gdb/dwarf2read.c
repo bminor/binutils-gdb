@@ -18751,6 +18751,25 @@ partial_die_info::read (const struct die_reader_specs *reader,
 	  main_subprogram = DW_UNSND (&attr);
 	  break;
 
+	case DW_AT_ranges:
+	  {
+	    /* It would be nice to reuse dwarf2_get_pc_bounds here,
+	       but that requires a full DIE, so instead we just
+	       reimplement it.  */
+	    int need_ranges_base = tag != DW_TAG_compile_unit;
+	    unsigned int ranges_offset = (DW_UNSND (&attr)
+					  + (need_ranges_base
+					     ? cu->ranges_base
+					     : 0));
+
+	    /* Value of the DW_AT_ranges attribute is the offset in the
+	       .debug_ranges section.  */
+	    if (dwarf2_ranges_read (ranges_offset, &lowpc, &highpc, cu,
+				    nullptr))
+	      has_pc_info = 1;
+	  }
+	  break;
+
 	default:
 	  break;
 	}

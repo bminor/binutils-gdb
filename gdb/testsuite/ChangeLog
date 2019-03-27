@@ -1,3 +1,10 @@
+2019-04-01  Tom Tromey  <tromey@adacore.com>
+
+	PR symtab/23331:
+	* gdb.dwarf2/dw2-ranges-main.c: New file.
+	* gdb.dwarf2/dw2-ranges-psym.c: New file.
+	* gdb.dwarf2/dw2-ranges-psym.exp: New file.
+
 2019-03-30  Simon Marchi <simark@simark.ca>
 
 	* gdb.base/default.exp: Add values for $_gdb_major and
