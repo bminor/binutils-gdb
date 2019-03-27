@@ -23,6 +23,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "sim-events.h"
 
+#if HAVE_STRING_H
+#include <string.h>
+#endif
 
 /* The hw-events object is implemented using sim-events */
 

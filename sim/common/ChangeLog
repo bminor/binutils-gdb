@@ -1,5 +1,16 @@
 2019-03-28  Stafford Horne  <shorne@gmail.com>
 
+	* sim-options.c: Include "config.h".
+	Include <stdio.h>.
+	* sim-watch.c: Include "config.h".
+	Include <stdio.h>.
+	* hw-device.c: Include <string.h>.
+	* hw-events.c: Include <string.h>.
+	* hw-handles.c: Include <stdlib.h>.
+	* sim-fpu.c: Include <stdlib.h>.
+
+2019-03-28  Stafford Horne  <shorne@gmail.com>
+
 	* Make-common.in (sim-arange_h): Remove sim-arange.c
 	* sim-arange.c: Remove SIM_ARANGE_C.
 	Add ifdef for _SIM_ARANGE_C_.

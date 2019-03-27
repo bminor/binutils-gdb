@@ -23,6 +23,9 @@
 #include "hw-main.h"
 #include "hw-base.h"
 
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 
 struct hw_handle_mapping
 {
