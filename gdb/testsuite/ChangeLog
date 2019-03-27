@@ -1,5 +1,14 @@
 2019-04-30  Tom Tromey  <tromey@adacore.com>
 
+	* lib/ada.exp (find_ada_tool): New proc.
+	* lib/gdb.exp (gdb_compile_shlib): Allow .o files as inputs.
+	* gdb.ada/catch_ex_std.exp: New file.
+	* gdb.ada/catch_ex_std/foo.adb: New file.
+	* gdb.ada/catch_ex_std/some_package.adb: New file.
+	* gdb.ada/catch_ex_std/some_package.ads: New file.
+
+2019-04-30  Tom Tromey  <tromey@adacore.com>
+
 	PR c++/24470:
 	* gdb.cp/temargs.cc: Add test code from PR.
 

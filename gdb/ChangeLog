@@ -1,5 +1,12 @@
 2019-04-30  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (ada_lookup_simple_minsyms): New function.
+	(create_excep_cond_exprs): Iterate over program spaces.
+	(ada_exception_catchpoint_cond_string): Examine all minimal
+	symbols for exception types.
+
+2019-04-30  Tom Tromey  <tromey@adacore.com>
+
 	PR c++/24470:
 	* dwarf2read.c (process_structure_scope): Handle case where type
 	has template parameters but no symbol was created.

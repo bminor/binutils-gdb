@@ -3832,11 +3832,16 @@ proc gdb_compile_shlib {sources dest options} {
     set outdir [file dirname $dest]
     set objects ""
     foreach source $sources {
-       set sourcebase [file tail $source]
-       if {[gdb_compile $source "${outdir}/${sourcebase}.o" object $obj_options] != ""} {
-           return -1
-       }
-       lappend objects ${outdir}/${sourcebase}.o
+	set sourcebase [file tail $source]
+	if {[file extension $source] == ".o"} {
+	    # Already a .o file.
+	    lappend objects $source
+	} elseif {[gdb_compile $source "${outdir}/${sourcebase}.o" object \
+		       $obj_options] != ""} {
+	    return -1
+	} else {
+	    lappend objects ${outdir}/${sourcebase}.o
+	}
     }
 
     set link_options $options

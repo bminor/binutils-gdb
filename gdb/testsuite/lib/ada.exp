@@ -78,3 +78,30 @@ proc standard_ada_testfile {base_file {dir ""}} {
     set srcfile $srcdir/$subdir/$testdir/$testfile.adb
     set binfile [standard_output_file $testfile]
 }
+
+# A helper function to find the appropriate version of a tool.
+# TOOL is the tool's name, e.g., "gnatbind" or "gnatlink".
+
+proc find_ada_tool {tool} {
+    set upper [string toupper $tool]
+
+    set targname ${upper}_FOR_TARGET
+    global $targname
+    if {[info exists $targname]} {
+	return $targname
+    }
+
+    global tool_root_dir
+    set root "$tool_root_dir/gcc"
+    set result ""
+
+    if {![is_remote host]} {
+        set result [lookfor_file $root $tool]
+    }
+
+    if {$result == ""} {
+        set result [transform $tool]
+    }
+
+    return $result
+}

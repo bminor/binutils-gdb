@@ -63,6 +63,7 @@
 #include "common/function-view.h"
 #include "common/byte-vector.h"
 #include <algorithm>
+#include <map>
 
 /* Define whether or not the C operator '/' truncates towards zero for
    differently signed operands (truncation direction is undefined in C).
@@ -4943,6 +4944,36 @@ ada_lookup_simple_minsym (const char *name)
 	      result.objfile = objfile;
 	      break;
 	    }
+	}
+    }
+
+  return result;
+}
+
+/* Return all the bound minimal symbols matching NAME according to Ada
+   decoding rules.  Returns an empty vector if there is no such
+   minimal symbol.  Names prefixed with "standard__" are handled
+   specially: "standard__" is first stripped off, and only static and
+   global symbols are searched.  */
+
+static std::vector<struct bound_minimal_symbol>
+ada_lookup_simple_minsyms (const char *name)
+{
+  std::vector<struct bound_minimal_symbol> result;
+
+  symbol_name_match_type match_type = name_match_type_from_name (name);
+  lookup_name_info lookup_name (name, match_type);
+
+  symbol_name_matcher_ftype *match_name
+    = ada_get_symbol_name_matcher (lookup_name);
+
+  for (objfile *objfile : current_program_space->objfiles ())
+    {
+      for (minimal_symbol *msymbol : objfile->msymbols ())
+	{
+	  if (match_name (MSYMBOL_LINKAGE_NAME (msymbol), lookup_name, NULL)
+	      && MSYMBOL_TYPE (msymbol) != mst_solib_trampoline)
+	    result.push_back ({msymbol, objfile});
 	}
     }
 
@@ -12437,8 +12468,6 @@ static void
 create_excep_cond_exprs (struct ada_catchpoint *c,
                          enum ada_exception_catchpoint_kind ex)
 {
-  struct bp_location *bl;
-
   /* Nothing to do if there's no specific exception to catch.  */
   if (c->excep_string.empty ())
     return;
@@ -12447,28 +12476,45 @@ create_excep_cond_exprs (struct ada_catchpoint *c,
   if (c->loc == NULL)
     return;
 
-  /* Compute the condition expression in text form, from the specific
-     expection we want to catch.  */
-  std::string cond_string
-    = ada_exception_catchpoint_cond_string (c->excep_string.c_str (), ex);
+  /* We have to compute the expression once for each program space,
+     because the expression may hold the addresses of multiple symbols
+     in some cases.  */
+  std::multimap<program_space *, struct bp_location *> loc_map;
+  for (struct bp_location *bl = c->loc; bl != NULL; bl = bl->next)
+    loc_map.emplace (bl->pspace, bl);
 
-  /* Iterate over all the catchpoint's locations, and parse an
-     expression for each.  */
-  for (bl = c->loc; bl != NULL; bl = bl->next)
+  scoped_restore_current_program_space save_pspace;
+
+  std::string cond_string;
+  program_space *last_ps = nullptr;
+  for (auto iter : loc_map)
     {
       struct ada_catchpoint_location *ada_loc
-	= (struct ada_catchpoint_location *) bl;
+	= (struct ada_catchpoint_location *) iter.second;
+
+      if (ada_loc->pspace != last_ps)
+	{
+	  last_ps = ada_loc->pspace;
+	  set_current_program_space (last_ps);
+
+	  /* Compute the condition expression in text form, from the
+	     specific expection we want to catch.  */
+	  cond_string
+	    = ada_exception_catchpoint_cond_string (c->excep_string.c_str (),
+						    ex);
+	}
+
       expression_up exp;
 
-      if (!bl->shlib_disabled)
+      if (!ada_loc->shlib_disabled)
 	{
 	  const char *s;
 
 	  s = cond_string.c_str ();
 	  try
 	    {
-	      exp = parse_exp_1 (&s, bl->address,
-				 block_for_pc (bl->address),
+	      exp = parse_exp_1 (&s, ada_loc->address,
+				 block_for_pc (ada_loc->address),
 				 0);
 	    }
 	  catch (const gdb_exception_error &e)
@@ -13130,18 +13176,18 @@ ada_exception_catchpoint_cond_string (const char *excep_string,
                                       enum ada_exception_catchpoint_kind ex)
 {
   int i;
-  bool is_standard_exc = false;
   std::string result;
+  const char *name;
 
   if (ex == ada_catch_handlers)
     {
       /* For exception handlers catchpoints, the condition string does
          not use the same parameter as for the other exceptions.  */
-      result = ("long_integer (GNAT_GCC_exception_Access"
-		"(gcc_exception).all.occurrence.id)");
+      name = ("long_integer (GNAT_GCC_exception_Access"
+	      "(gcc_exception).all.occurrence.id)");
     }
   else
-    result = "long_integer (e)";
+    name = "long_integer (e)";
 
   /* The standard exceptions are a special case.  They are defined in
      runtime units that have been compiled without debugging info; if
@@ -13160,23 +13206,35 @@ ada_exception_catchpoint_cond_string (const char *excep_string,
      If an exception named contraint_error is defined in another package of
      the inferior program, then the only way to specify this exception as a
      breakpoint condition is to use its fully-qualified named:
-     e.g. my_package.constraint_error.  */
+     e.g. my_package.constraint_error.
 
+     Furthermore, in some situations a standard exception's symbol may
+     be present in more than one objfile, because the compiler may
+     choose to emit copy relocations for them.  So, we have to compare
+     against all the possible addresses.  */
+
+  /* Storage for a rewritten symbol name.  */
+  std::string std_name;
   for (i = 0; i < sizeof (standard_exc) / sizeof (char *); i++)
     {
       if (strcmp (standard_exc [i], excep_string) == 0)
 	{
-	  is_standard_exc = true;
+	  std_name = std::string ("standard.") + excep_string;
+	  excep_string = std_name.c_str ();
 	  break;
 	}
     }
 
-  result += " = ";
-
-  if (is_standard_exc)
-    string_appendf (result, "long_integer (&standard.%s)", excep_string);
-  else
-    string_appendf (result, "long_integer (&%s)", excep_string);
+  excep_string = ada_encode (excep_string);
+  std::vector<struct bound_minimal_symbol> symbols
+    = ada_lookup_simple_minsyms (excep_string);
+  for (const struct bound_minimal_symbol &msym : symbols)
+    {
+      if (!result.empty ())
+	result += " or ";
+      string_appendf (result, "%s = %s", name,
+		      pulongest (BMSYMBOL_VALUE_ADDRESS (msym)));
+    }
 
   return result;
 }
