@@ -1,3 +1,8 @@
+2019-03-24  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+	    Tom Tromey  <tromey@adacore.com>
+
+	* minsyms.c (minimal_symbol_upper_bound): Fix buffer overflow.
+
 2019-03-26  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb-gdb.py.in (StructMainTypePrettyPrinter.bound_img): New method.
