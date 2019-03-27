@@ -82,6 +82,7 @@ typedef struct _sim_cpu sim_cpu;
 
 #include "sim-module.h"
 
+#include "sim-arange.h"
 #include "sim-trace.h"
 #include "sim-core.h"
 #include "sim-events.h"

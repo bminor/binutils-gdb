@@ -29,6 +29,10 @@
 #include "sim-inline.h"
 #include "sim-main.h"
 
+#if C_REVEALS_MODULE_P (SIM_ARANGE_INLINE)
+#include "sim-arange.c"
+#endif
+
 
 #if C_REVEALS_MODULE_P (SIM_BITS_INLINE)
 #include "sim-bits.c"
@@ -63,7 +67,6 @@
 #if C_REVEALS_MODULE_P (SIM_MAIN_INLINE)
 #include "sim-main.c"
 #endif
-
 
 #if C_REVEALS_MODULE_P (ENGINE_INLINE)
 /* #include "engine.c" - handled by generator */

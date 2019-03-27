@@ -1,3 +1,29 @@
+2019-03-28  Stafford Horne  <shorne@gmail.com>
+
+	* Make-common.in (sim-arange_h): Remove sim-arange.c
+	* sim-arange.c: Remove SIM_ARANGE_C.
+	Add ifdef for _SIM_ARANGE_C_.
+	Include "sim-arange.h".
+	Remove include for unused "sim-assert.h".
+	Remove DEFINE_INLINE_P.  Remove DEFINE_NON_INLINE_P.
+	(sim_addr_range_add): Declare as INLINE_SIM_ARANGE.
+	(sim_addr_range_delete): Declare as INLINE_SIM_ARANGE.
+	(sim_addr_range_hit_p): Change from SIM_ARANGE_INLINE to
+	INLINE_SIM_ARANGE.
+	* sim-arange.h (sim_addr_range_add): Declare as
+	INLINE_SIM_ARANGE.
+	(sim_addr_range_delete): Declare as INLINE_SIM_ARANGE.
+	(sim_addr_range_hit_p) Declare as INLINE_SIM_ARANGE.
+	Remove definition of SIM_ARANGE_INLINE.
+	Remove [HAVE_INLINE].
+	Wrap include "sim-arange.c" in H_REVEALS_MODULE_P.
+	* sim-base.h: Include "sim-arange.h"
+	* sim-basics.h: Remove include of "sim-arange.h"
+	* sim-inline.c: Include "sim-arange.c"
+	* sim-inline.h: Define INLINE_SIM_ARANGE.
+	Define SIM_ARANGE_INLINE.  Define EXTERN_SIM_ARANGE_P.
+	Define STATIC_INLINE_SIM_ARANGE.  Define STATIC_SIM_ARANGE.
+
 2019-01-26  Tom Tromey  <tom@tromey.com>
 
 	* Make-common.in (version.c): Use sim's create-version.sh.

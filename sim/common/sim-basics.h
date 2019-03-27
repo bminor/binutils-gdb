@@ -144,7 +144,6 @@ typedef enum {
 #include "sim-bits.h"
 #include "sim-endian.h"
 #include "sim-signal.h"
-#include "sim-arange.h"
 
 #include "sim-utils.h"
 

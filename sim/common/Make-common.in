@@ -319,8 +319,7 @@ SIM_MAIN_DEPS = \
 	$(sim_main_headers)
 
 sim-alu_h = $(srccom)/sim-alu.h
-sim-arange_h = $(srccom)/sim-arange.h \
-		$(srccom)/sim-arange.c
+sim-arange_h = $(srccom)/sim-arange.h
 sim-assert_h = $(srccom)/sim-assert.h
 sim-base_h = $(srccom)/sim-base.h \
 		$(sim-module_h) \
