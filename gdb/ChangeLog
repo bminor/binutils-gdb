@@ -1,3 +1,8 @@
+2019-03-28  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* windows-nat.c (display_selector): Fixed format specifications
+	for 64-bit Cygwin.
+
 2019-03-28  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* infrun.c (follow_exec): Call target_terminal::ours_for_output.

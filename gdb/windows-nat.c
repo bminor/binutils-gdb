@@ -1096,14 +1096,16 @@ display_selector (HANDLE thread, DWORD sel)
 	  puts_filtered ("Code (Exec/Read, Conf");
 	  break;
 	default:
-	  printf_filtered ("Unknown type 0x%lx",info.HighWord.Bits.Type);
+	  printf_filtered ("Unknown type 0x%lx",
+			   (unsigned long) info.HighWord.Bits.Type);
 	}
       if ((info.HighWord.Bits.Type & 0x1) == 0)
 	puts_filtered(", N.Acc");
       puts_filtered (")\n");
       if ((info.HighWord.Bits.Type & 0x10) == 0)
 	puts_filtered("System selector ");
-      printf_filtered ("Priviledge level = %ld. ", info.HighWord.Bits.Dpl);
+      printf_filtered ("Priviledge level = %ld. ",
+		       (unsigned long) info.HighWord.Bits.Dpl);
       if (info.HighWord.Bits.Granularity)
 	puts_filtered ("Page granular.\n");
       else
