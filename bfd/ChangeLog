@@ -1,3 +1,14 @@
+2019-03-28  Alan Modra  <amodra@gmail.com>
+
+	PR 24392
+	* configure.ac: Invoke AC_CHECK_SIZEOF(int).
+	* configure: Regenerate.
+	* coffgen.c (coff_get_reloc_upper_bound): Replace gcc diagnostic
+	workaround with SIZEOF_LONG vs. SIZEOF_INT check.
+	* elf.c (_bfd_elf_get_reloc_upper_bound): Likewise.
+	* elf64-sparc.c (elf64_sparc_get_reloc_upper_bound): Likewise.
+	* mach-o.c (bfd_mach_o_get_reloc_upper_bound): Likewise.
+
 2019-03-21  Jim Wilson  <jimw@sifive.com>
 
 	PR 24365

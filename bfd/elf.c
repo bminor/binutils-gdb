@@ -8268,25 +8268,19 @@ _bfd_elf_get_dynamic_symtab_upper_bound (bfd *abfd)
   return symtab_size;
 }
 
-#if GCC_VERSION >= 4003
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wtype-limits"
-#endif
 long
 _bfd_elf_get_reloc_upper_bound (bfd *abfd ATTRIBUTE_UNUSED,
 				sec_ptr asect)
 {
-
+#if SIZEOF_LONG == SIZEOF_INT
   if (asect->reloc_count >= LONG_MAX / sizeof (arelent *))
     {
       bfd_set_error (bfd_error_file_too_big);
       return -1;
     }
+#endif
   return (asect->reloc_count + 1) * sizeof (arelent *);
 }
-#if GCC_VERSION >= 4003
-# pragma GCC diagnostic pop
-#endif
 
 /* Canonicalize the relocs.  */
 

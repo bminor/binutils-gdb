@@ -1417,24 +1417,19 @@ bfd_mach_o_write_dyld_info (bfd *abfd, bfd_mach_o_load_command *command)
   return TRUE;
 }
 
-#if GCC_VERSION >= 4003
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wtype-limits"
-#endif
 long
 bfd_mach_o_get_reloc_upper_bound (bfd *abfd ATTRIBUTE_UNUSED,
 				  asection *asect)
 {
+#if SIZEOF_LONG == SIZEOF_INT
    if (asect->reloc_count >= LONG_MAX / sizeof (arelent *))
     {
       bfd_set_error (bfd_error_file_too_big);
       return -1;
     }
+#endif
  return (asect->reloc_count + 1) * sizeof (arelent *);
 }
-#if GCC_VERSION >= 4003
-# pragma GCC diagnostic pop
-#endif
 
 /* In addition to the need to byte-swap the symbol number, the bit positions
    of the fields in the relocation information vary per target endian-ness.  */

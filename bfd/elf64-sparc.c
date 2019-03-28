@@ -34,23 +34,18 @@
    section can represent up to two relocs, we must tell the user to allocate
    more space.  */
 
-#if GCC_VERSION >= 4003
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wtype-limits"
-#endif
 static long
 elf64_sparc_get_reloc_upper_bound (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 {
+#if SIZEOF_LONG == SIZEOF_INT
   if (sec->reloc_count >= LONG_MAX / 2 / sizeof (arelent *))
     {
       bfd_set_error (bfd_error_file_too_big);
       return -1;
     }
+#endif
   return (sec->reloc_count * 2 + 1) * sizeof (arelent *);
 }
-#if GCC_VERSION >= 4003
-# pragma GCC diagnostic pop
-#endif
 
 static long
 elf64_sparc_get_dynamic_reloc_upper_bound (bfd *abfd)

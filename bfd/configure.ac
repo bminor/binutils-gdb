@@ -189,6 +189,7 @@ AC_TYPE_LONG_DOUBLE
 AC_CHECK_TYPES([long long], [AC_CHECK_SIZEOF(long long)])
 AC_CHECK_SIZEOF(void *)
 AC_CHECK_SIZEOF(long)
+AC_CHECK_SIZEOF(int)
 
 if test "x${ac_cv_sizeof_void_p}" = "x8"; then
   host64=true

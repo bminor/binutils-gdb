@@ -2007,10 +2007,6 @@ coff_get_normalized_symtab (bfd *abfd)
   return internal;
 }
 
-#if GCC_VERSION >= 4003
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wtype-limits"
-#endif
 long
 coff_get_reloc_upper_bound (bfd *abfd, sec_ptr asect)
 {
@@ -2019,16 +2015,15 @@ coff_get_reloc_upper_bound (bfd *abfd, sec_ptr asect)
       bfd_set_error (bfd_error_invalid_operation);
       return -1;
     }
+#if SIZEOF_LONG == SIZEOF_INT
   if (asect->reloc_count >= LONG_MAX / sizeof (arelent *))
     {
       bfd_set_error (bfd_error_file_too_big);
       return -1;
     }
+#endif
   return (asect->reloc_count + 1) * sizeof (arelent *);
 }
-#if GCC_VERSION >= 4003
-# pragma GCC diagnostic pop
-#endif
 
 asymbol *
 coff_make_empty_symbol (bfd *abfd)
