@@ -74,6 +74,9 @@ struct gdbarch_tdep
   CORE_ADDR (*syscall_next_pc) (struct frame_info *frame,
 				const struct nios2_opcode *op);
 
+  /* Returns true if PC points to a kernel helper function.  */
+  bool (*is_kernel_helper) (CORE_ADDR pc);
+
   /* Offset to PC value in jump buffer.
      If this is negative, longjmp support will be disabled.  */
   int jb_pc;

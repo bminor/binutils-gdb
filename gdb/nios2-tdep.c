@@ -2169,13 +2169,32 @@ nios2_get_next_pc (struct regcache *regcache, CORE_ADDR pc)
 	}
     }
 
-  else if (nios2_match_jmpi (insn, op, mach, &uimm)
-	   || nios2_match_calli (insn, op, mach, &uimm))
+  else if (nios2_match_jmpi (insn, op, mach, &uimm))
     pc = (pc & 0xf0000000) | uimm;
+  else if (nios2_match_calli (insn, op, mach, &uimm))
+    {
+      CORE_ADDR callto = (pc & 0xf0000000) | uimm;
+      if (tdep->is_kernel_helper != NULL
+	  && tdep->is_kernel_helper (callto))
+	/* Step over call to kernel helper, which we cannot debug
+	   from user space.  */
+	pc += op->size;
+      else
+	pc = callto;
+    }
 
-  else if (nios2_match_jmpr (insn, op, mach, &ra)
-	   || nios2_match_callr (insn, op, mach, &ra))
+  else if (nios2_match_jmpr (insn, op, mach, &ra))
     pc = regcache_raw_get_unsigned (regcache, ra);
+  else if (nios2_match_callr (insn, op, mach, &ra))
+    {
+      CORE_ADDR callto = regcache_raw_get_unsigned (regcache, ra);
+      if (tdep->is_kernel_helper != NULL
+	  && tdep->is_kernel_helper (callto))
+	/* Step over call to kernel helper.  */
+	pc += op->size;
+      else
+	pc = callto;
+    }
 
   else if (nios2_match_ldwm (insn, op, mach, &uimm, &ra, &imm, &wb, &id, &ret)
 	   && ret)

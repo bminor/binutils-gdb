@@ -1,3 +1,10 @@
+2019-03-28  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-tdep.h (struct gdbarch_tdep): Add is_kernel_helper.
+	* nios2-tdep.c (nios2_get_next_pc): Skip over kernel helpers.
+	* nios2-linux-tdep.c (nios2_linux_is_kernel_helper): New.
+	(nios2_linux_init_abi): Install it.
+
 2019-03-28  Alan Hayward  <alan.hayward@arm.com>
 
 	* aarch64-tdep.c (aarch64_vnv_type): Use vector types.
