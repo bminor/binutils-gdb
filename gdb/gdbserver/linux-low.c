@@ -75,6 +75,10 @@
 #define O_LARGEFILE 0
 #endif
 
+#ifndef AT_HWCAP2
+#define AT_HWCAP2 26
+#endif
+
 /* Some targets did not define these ptrace constants from the start,
    so gdbserver defines them locally here.  In the future, these may
    be removed after they are added to asm/ptrace.h.  */

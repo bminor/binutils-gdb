@@ -1,3 +1,7 @@
+2019-03-28  Alan Hayward  <alan.hayward@arm.com>
+
+	* linux-low.c (AT_HWCAP2): Add define if not already included.
+
 2019-03-26  Alan Hayward  <alan.hayward@arm.com>
 
 	* linux-aarch64-low.c (aarch64_get_hwcap): Remove function.
