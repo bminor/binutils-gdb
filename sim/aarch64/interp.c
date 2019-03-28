@@ -38,6 +38,7 @@
 #include "sim-options.h"
 #include "memory.h"
 #include "simulator.h"
+#include "sim-assert.h"
 
 /* Filter out (in place) symbols that are useless for disassembly.
    COUNT is the number of elements in SYMBOLS.

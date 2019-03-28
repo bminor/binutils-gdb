@@ -25,6 +25,7 @@
 #include "sim-main.h"
 #include "cpustate.h"
 #include "simulator.h"
+#include "libiberty.h"
 
 /* Some operands are allowed to access the stack pointer (reg 31).
    For others a read from r31 always returns 0, and a write to r31 is ignored.  */
