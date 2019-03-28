@@ -147,6 +147,8 @@ typedef enum {
 
 #include "sim-utils.h"
 
+#include "libiberty.h"
+
 /* Note: Only the simpler interfaces are defined here.  More heavy
    weight objects, such as core and events, are defined in the more
    serious sim-base.h header. */

@@ -93,6 +93,7 @@ typedef struct _sim_cpu sim_cpu;
 #include "sim-watch.h"
 #include "sim-memopt.h"
 #include "sim-cpu.h"
+#include "sim-assert.h"
 
 
 /* We require all sims to dynamically allocate cpus.  See comment up top about
