@@ -22,3 +22,6 @@ global board_info
 # Remove any target variant specifications from the name.
 set baseboard [lindex [split $board "/"] 0]
 set board_info($baseboard,isremote) 0
+
+# Set sysroot to avoid sending files via the remote protocol.
+set GDBFLAGS "${GDBFLAGS} -ex \"set sysroot /\""

@@ -1,3 +1,8 @@
+2019-03-28  Alan Hayward  <alan.hayward@arm.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* boards/local-board.exp: set sysroot to /.
+
 2019-03-27  Alan Hayward  <alan.hayward@arm.com>
 
 	* gdb.base/interrupt-daemon-attach.c (main): Add alarm and sleep
