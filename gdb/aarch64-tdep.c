@@ -1976,14 +1976,57 @@ aarch64_vnv_type (struct gdbarch *gdbarch)
 
   if (tdep->vnv_type == NULL)
     {
+      /* The other AArch64 psuedo registers (Q,D,H,S,B) refer to a single value
+	 slice from the non-pseudo vector registers.  However NEON V registers
+	 are always vector registers, and need constructing as such.  */
+      const struct builtin_type *bt = builtin_type (gdbarch);
+
       struct type *t = arch_composite_type (gdbarch, "__gdb_builtin_type_vnv",
 					    TYPE_CODE_UNION);
 
-      append_composite_type_field (t, "d", aarch64_vnd_type (gdbarch));
-      append_composite_type_field (t, "s", aarch64_vns_type (gdbarch));
-      append_composite_type_field (t, "h", aarch64_vnh_type (gdbarch));
-      append_composite_type_field (t, "b", aarch64_vnb_type (gdbarch));
-      append_composite_type_field (t, "q", aarch64_vnq_type (gdbarch));
+      struct type *sub = arch_composite_type (gdbarch, "__gdb_builtin_type_vnd",
+				 TYPE_CODE_UNION);
+      append_composite_type_field (sub, "f",
+				   init_vector_type (bt->builtin_double, 2));
+      append_composite_type_field (sub, "u",
+				   init_vector_type (bt->builtin_uint64, 2));
+      append_composite_type_field (sub, "s",
+				   init_vector_type (bt->builtin_int64, 2));
+      append_composite_type_field (t, "d", sub);
+
+      sub = arch_composite_type (gdbarch, "__gdb_builtin_type_vns",
+				 TYPE_CODE_UNION);
+      append_composite_type_field (sub, "f",
+				   init_vector_type (bt->builtin_float, 4));
+      append_composite_type_field (sub, "u",
+				   init_vector_type (bt->builtin_uint32, 4));
+      append_composite_type_field (sub, "s",
+				   init_vector_type (bt->builtin_int32, 4));
+      append_composite_type_field (t, "s", sub);
+
+      sub = arch_composite_type (gdbarch, "__gdb_builtin_type_vnh",
+				 TYPE_CODE_UNION);
+      append_composite_type_field (sub, "u",
+				   init_vector_type (bt->builtin_uint16, 8));
+      append_composite_type_field (sub, "s",
+				   init_vector_type (bt->builtin_int16, 8));
+      append_composite_type_field (t, "h", sub);
+
+      sub = arch_composite_type (gdbarch, "__gdb_builtin_type_vnb",
+				 TYPE_CODE_UNION);
+      append_composite_type_field (sub, "u",
+				   init_vector_type (bt->builtin_uint8, 16));
+      append_composite_type_field (sub, "s",
+				   init_vector_type (bt->builtin_int8, 16));
+      append_composite_type_field (t, "b", sub);
+
+      sub = arch_composite_type (gdbarch, "__gdb_builtin_type_vnq",
+				 TYPE_CODE_UNION);
+      append_composite_type_field (sub, "u",
+				   init_vector_type (bt->builtin_uint128, 1));
+      append_composite_type_field (sub, "s",
+				   init_vector_type (bt->builtin_int128, 1));
+      append_composite_type_field (t, "q", sub);
 
       tdep->vnv_type = t;
     }
