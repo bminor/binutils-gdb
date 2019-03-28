@@ -354,7 +354,10 @@ extern const unsigned int num_powerpc_operands;
 #define PPC_OPERAND_CR_BIT (0x20)
 
 /* This is a CR FIELD that does not use symbolic names (unless
-   -mregnames is in effect).  */
+   -mregnames is in effect).  If both PPC_OPERAND_CR_BIT and
+   PPC_OPERAND_CR_REG are set then treat the field as per
+   PPC_OPERAND_CR_BIT for assembly, but as if neither of these
+   bits are set for disassembly.  */
 #define PPC_OPERAND_CR_REG (0x40)
 
 /* This operand names a special purpose register.  */

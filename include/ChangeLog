@@ -1,3 +1,8 @@
+2019-03-28  Alan Modra  <amodra@gmail.com>
+
+	PR 24390
+	* opcode/ppc.h (PPC_OPERAND_CR_REG): Comment.
+
 2019-03-25  Tamar Christina  <tamar.christina@arm.com>
 
 	* dis-asm.h (struct disassemble_info): Add stop_offset.

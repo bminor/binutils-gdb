@@ -1,3 +1,9 @@
+2019-03-28  Alan Modra  <amodra@gmail.com>
+
+	PR 24390
+	* testsuite/gas/ppc/476.d: Update mtfsb*.
+	* testsuite/gas/ppc/a2.d: Likewise.
+
 2019-03-21  Alan Modra  <amodra@gmail.com>
 
 	* emul.h (struct emulation): Delete strip_underscore.

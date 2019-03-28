@@ -315,10 +315,10 @@ Disassembly of section \.text:
  4c4:	(7d 10 6b 86|86 6b 10 7d) 	mtdcr   432,r8
  4c8:	(7c 83 03 46|46 03 83 7c) 	mtdcrux r3,r4
  4cc:	(7c e6 03 06|06 03 e6 7c) 	mtdcrx  r6,r7
- 4d0:	(fc 60 00 8c|8c 00 60 fc) 	mtfsb0  so
- 4d4:	(fc 60 00 8d|8d 00 60 fc) 	mtfsb0\. so
- 4d8:	(fc 60 00 4c|4c 00 60 fc) 	mtfsb1  so
- 4dc:	(fc 60 00 4d|4d 00 60 fc) 	mtfsb1\. so
+ 4d0:	(fc 60 00 8c|8c 00 60 fc) 	mtfsb0  3
+ 4d4:	(fc 60 00 8d|8d 00 60 fc) 	mtfsb0\. 3
+ 4d8:	(fc 60 00 4c|4c 00 60 fc) 	mtfsb1  3
+ 4dc:	(fc 60 00 4d|4d 00 60 fc) 	mtfsb1\. 3
  4e0:	(fc 0c 55 8e|8e 55 0c fc) 	mtfsf   6,f10
  4e4:	(fc 0c 55 8e|8e 55 0c fc) 	mtfsf   6,f10
  4e8:	(fc 0d 55 8e|8e 55 0d fc) 	mtfsf   6,f10,0,1

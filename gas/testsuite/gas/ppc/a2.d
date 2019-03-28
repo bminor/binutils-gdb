@@ -372,10 +372,10 @@ Disassembly of section \.text:
  560:	(7d 4a 3b 86|86 3b 4a 7d) 	mtdcr   234,r10
  564:	(7d 6a 03 07|07 03 6a 7d) 	mtdcrx\. r10,r11
  568:	(7d 6a 03 06|06 03 6a 7d) 	mtdcrx  r10,r11
- 56c:	(fc 60 00 8d|8d 00 60 fc) 	mtfsb0\. so
- 570:	(fc 60 00 8c|8c 00 60 fc) 	mtfsb0  so
- 574:	(fc 60 00 4d|4d 00 60 fc) 	mtfsb1\. so
- 578:	(fc 60 00 4c|4c 00 60 fc) 	mtfsb1  so
+ 56c:	(fc 60 00 8d|8d 00 60 fc) 	mtfsb0\. 3
+ 570:	(fc 60 00 8c|8c 00 60 fc) 	mtfsb0  3
+ 574:	(fc 60 00 4d|4d 00 60 fc) 	mtfsb1\. 3
+ 578:	(fc 60 00 4c|4c 00 60 fc) 	mtfsb1  3
  57c:	(fc 0c a5 8f|8f a5 0c fc) 	mtfsf\.  6,f20
  580:	(fc 0c a5 8e|8e a5 0c fc) 	mtfsf   6,f20
  584:	(fc 0c a5 8f|8f a5 0c fc) 	mtfsf\.  6,f20

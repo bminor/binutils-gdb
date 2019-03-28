@@ -1,3 +1,11 @@
+2019-03-28  Alan Modra  <amodra@gmail.com>
+
+	PR 24390
+	* ppc-opc.c (BTF): Define.
+	(powerpc_opcodes): Use for mtfsb*.
+	* ppc-dis.c (print_insn_powerpc): Print fields with both
+	PPC_OPERAND_CR_REG and PPC_OPERAND_CR_BIT as a plain number.
+
 2019-03-25  Tamar Christina  <tamar.christina@arm.com>
 
 	* arm-dis.c (struct arm_private_data): Remove has_mapping_symbols.

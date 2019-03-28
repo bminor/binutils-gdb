@@ -779,10 +779,12 @@ print_insn_powerpc (bfd_vma memaddr,
 	  else if ((operand->flags & PPC_OPERAND_UDI) != 0)
 	    (*info->fprintf_func) (info->stream, "%" PRId64, value);
 	  else if ((operand->flags & PPC_OPERAND_CR_REG) != 0
+		   && (operand->flags & PPC_OPERAND_CR_BIT) == 0
 		   && (((dialect & PPC_OPCODE_PPC) != 0)
 		       || ((dialect & PPC_OPCODE_VLE) != 0)))
 	    (*info->fprintf_func) (info->stream, "cr%" PRId64, value);
-	  else if (((operand->flags & PPC_OPERAND_CR_BIT) != 0)
+	  else if ((operand->flags & PPC_OPERAND_CR_BIT) != 0
+		   && (operand->flags & PPC_OPERAND_CR_REG) == 0
 		   && (((dialect & PPC_OPCODE_PPC) != 0)
 		       || ((dialect & PPC_OPCODE_VLE) != 0)))
 	    {

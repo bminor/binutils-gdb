@@ -1837,8 +1837,12 @@ const struct powerpc_operand powerpc_operands[] =
 #define BT BH + 1
   { 0x1f, 21, NULL, NULL, PPC_OPERAND_CR_BIT },
 
+  /* The BT field in a mtfsb0 or mtfsb1 instruction.  */
+#define BTF BT + 1
+  { 0x1f, 21, NULL, NULL, PPC_OPERAND_CR_BIT | PPC_OPERAND_CR_REG },
+
   /* The BI16 field in a BD8 form instruction.  */
-#define BI16 BT + 1
+#define BI16 BTF + 1
   { 0x3, 8, NULL, NULL, PPC_OPERAND_CR_BIT },
 
   /* The BI32 field in a BD15 form instruction.  */
@@ -7381,8 +7385,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"xsrqpxp",	Z(63,37),	Z2_MASK,     PPCVSX3,	PPCVLE,		{R, VD, VB, RMC}},
 
-{"mtfsb1",	XRC(63,38,0),	XRARB_MASK,  COM,	PPCVLE,		{BT}},
-{"mtfsb1.",	XRC(63,38,1),	XRARB_MASK,  COM,	PPCVLE,		{BT}},
+{"mtfsb1",	XRC(63,38,0),	XRARB_MASK,  COM,	PPCVLE,		{BTF}},
+{"mtfsb1.",	XRC(63,38,1),	XRARB_MASK,  COM,	PPCVLE,		{BTF}},
 
 {"fneg",	XRC(63,40,0),	XRA_MASK,    COM,	PPCEFS|PPCVLE,	{FRT, FRB}},
 {"fneg.",	XRC(63,40,1),	XRA_MASK,    COM,	PPCEFS|PPCVLE,	{FRT, FRB}},
@@ -7395,8 +7399,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"dquaiq",	ZRC(63,67,0), Z2_MASK|Q_MASK, POWER6,	PPCVLE,		{TE, FRTp, FRBp, RMC}},
 {"dquaiq.",	ZRC(63,67,1), Z2_MASK|Q_MASK, POWER6,	PPCVLE,		{TE, FRTp, FRBp, RMC}},
 
-{"mtfsb0",	XRC(63,70,0),	XRARB_MASK,  COM,	PPCVLE,		{BT}},
-{"mtfsb0.",	XRC(63,70,1),	XRARB_MASK,  COM,	PPCVLE,		{BT}},
+{"mtfsb0",	XRC(63,70,0),	XRARB_MASK,  COM,	PPCVLE,		{BTF}},
+{"mtfsb0.",	XRC(63,70,1),	XRARB_MASK,  COM,	PPCVLE,		{BTF}},
 
 {"fmr",		XRC(63,72,0),	XRA_MASK,    COM,	PPCEFS|PPCVLE,	{FRT, FRB}},
 {"fmr.",	XRC(63,72,1),	XRA_MASK,    COM,	PPCEFS|PPCVLE,	{FRT, FRB}},
