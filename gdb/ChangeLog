@@ -1,3 +1,7 @@
+2019-03-28  Alan Hayward  <alan.hayward@arm.com>
+
+	* features/aarch64-sve.c (create_feature_aarch64_sve): Add q view.
+
 2019-03-24  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 	    Tom Tromey  <tromey@adacore.com>
 
