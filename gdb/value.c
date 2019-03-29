@@ -4132,3 +4132,11 @@ prevents future values, larger than this size, from being allocated."),
 			    selftests::test_insert_into_bit_range_vector);
 #endif
 }
+
+/* See value.h.  */
+
+void
+finalize_values ()
+{
+  all_values.clear ();
+}

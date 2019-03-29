@@ -1189,4 +1189,8 @@ extern struct value *call_xmethod (struct value *method,
 extern int value_union_variant (struct type *union_type,
 				const gdb_byte *contents);
 
+/* Destroy the values currently allocated.  This is called when GDB is
+   exiting (e.g., on quit_force).  */
+extern void finalize_values ();
+
 #endif /* !defined (VALUE_H) */

@@ -1,3 +1,10 @@
+2019-04-01  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* top.c (quit_force): Call 'finalize_values'.
+	* value.c (finalize_values): New function.
+	* value.h (finalize_values): Declare.
+
 2019-03-30  Eli Zaretskii  <eliz@gnu.org>
 
 	* NEWS: Announce $_gdb_major and $_gdb_minor.
