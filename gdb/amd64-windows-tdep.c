@@ -144,7 +144,7 @@ amd64_windows_store_arg_in_reg (struct regcache *regcache,
 
   gdb_assert (TYPE_LENGTH (type) <= 8);
   memset (buf, 0, sizeof buf);
-  memcpy (buf, valbuf, std::min (TYPE_LENGTH (type), (unsigned int) 8));
+  memcpy (buf, valbuf, std::min (TYPE_LENGTH (type), (ULONGEST) 8));
   regcache->cooked_write (regno, buf);
 }
 

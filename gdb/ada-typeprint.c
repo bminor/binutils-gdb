@@ -895,8 +895,8 @@ ada_print_type (struct type *type0, const char *varstring,
 	    const char *name = ada_type_name (type);
 
 	    if (!ada_is_range_type_name (name))
-	      fprintf_filtered (stream, _("<%d-byte integer>"),
-				TYPE_LENGTH (type));
+	      fprintf_filtered (stream, _("<%s-byte integer>"),
+				pulongest (TYPE_LENGTH (type)));
 	    else
 	      {
 		fprintf_filtered (stream, "range ");
@@ -917,7 +917,8 @@ ada_print_type (struct type *type0, const char *varstring,
 	  }
 	break;
       case TYPE_CODE_FLT:
-	fprintf_filtered (stream, _("<%d-byte float>"), TYPE_LENGTH (type));
+	fprintf_filtered (stream, _("<%s-byte float>"),
+			  pulongest (TYPE_LENGTH (type)));
 	break;
       case TYPE_CODE_ENUM:
 	if (show < 0)

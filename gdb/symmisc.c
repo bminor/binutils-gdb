@@ -583,8 +583,8 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 	    unsigned i;
 	    struct type *type = check_typedef (SYMBOL_TYPE (symbol));
 
-	    fprintf_filtered (outfile, "const %u hex bytes:",
-			      TYPE_LENGTH (type));
+	    fprintf_filtered (outfile, "const %s hex bytes:",
+			      pulongest (TYPE_LENGTH (type)));
 	    for (i = 0; i < TYPE_LENGTH (type); i++)
 	      fprintf_filtered (outfile, " %02x",
 				(unsigned) SYMBOL_VALUE_BYTES (symbol)[i]);

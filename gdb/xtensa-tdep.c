@@ -1615,8 +1615,8 @@ xtensa_store_return_value (struct type *type,
 
       if (len > (callsize > 8 ? 8 : 16))
 	internal_error (__FILE__, __LINE__,
-			_("unimplemented for this length: %d"),
-			TYPE_LENGTH (type));
+			_("unimplemented for this length: %s"),
+			pulongest (TYPE_LENGTH (type)));
       areg = arreg_number (gdbarch,
 			   gdbarch_tdep (gdbarch)->a0_base + 2 + callsize, wb);
 
@@ -1723,9 +1723,9 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
         {
 	  struct value *arg = args[i];
 	  struct type *arg_type = check_typedef (value_type (arg));
-	  fprintf_unfiltered (gdb_stdlog, "%2d: %s %3d ", i,
+	  fprintf_unfiltered (gdb_stdlog, "%2d: %s %3s ", i,
 			      host_address_to_string (arg),
-			      TYPE_LENGTH (arg_type));
+			      pulongest (TYPE_LENGTH (arg_type)));
 	  switch (TYPE_CODE (arg_type))
 	    {
 	    case TYPE_CODE_INT:

@@ -1645,7 +1645,7 @@ riscv_type_alignment (struct type *t)
 
     case TYPE_CODE_ARRAY:
       if (TYPE_VECTOR (t))
-	return std::min (TYPE_LENGTH (t), (unsigned) BIGGEST_ALIGNMENT);
+	return std::min (TYPE_LENGTH (t), (ULONGEST) BIGGEST_ALIGNMENT);
       /* FALLTHROUGH */
 
     case TYPE_CODE_COMPLEX:

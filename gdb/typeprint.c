@@ -120,7 +120,8 @@ print_offset_data::update (struct type *type, unsigned int field_idx,
     {
       /* Since union fields don't have the concept of offsets, we just
 	 print their sizes.  */
-      fprintf_filtered (stream, "/*              %4u */", TYPE_LENGTH (ftype));
+      fprintf_filtered (stream, "/*              %4s */",
+			pulongest (TYPE_LENGTH (ftype)));
       return;
     }
 
@@ -183,8 +184,8 @@ print_offset_data::finish (struct type *type, int level,
 
   fputs_filtered ("\n", stream);
   print_spaces_filtered (level + 4 + print_offset_data::indentation, stream);
-  fprintf_filtered (stream, "/* total size (bytes): %4u */\n",
-		    TYPE_LENGTH (type));
+  fprintf_filtered (stream, "/* total size (bytes): %4s */\n",
+		    pulongest (TYPE_LENGTH (type)));
 }
 
 

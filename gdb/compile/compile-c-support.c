@@ -270,11 +270,11 @@ generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
 
 	      default:
 		fprintf_unfiltered (stream,
-				    "  unsigned char %s[%d]"
+				    "  unsigned char %s[%s]"
 				    " __attribute__((__aligned__("
 				    "__BIGGEST_ALIGNMENT__)))",
 				    regname.c_str (),
-				    TYPE_LENGTH (regtype));
+				    pulongest (TYPE_LENGTH (regtype)));
 	      }
 	    fputs_unfiltered (";\n", stream);
 	  }

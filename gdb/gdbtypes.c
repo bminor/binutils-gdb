@@ -4591,7 +4591,7 @@ recursive_dump_type (struct type *type, int spaces)
       break;
     }
   puts_filtered ("\n");
-  printfi_filtered (spaces, "length %d\n", TYPE_LENGTH (type));
+  printfi_filtered (spaces, "length %s\n", pulongest (TYPE_LENGTH (type)));
   if (TYPE_OBJFILE_OWNED (type))
     {
       printfi_filtered (spaces, "objfile ");

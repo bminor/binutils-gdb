@@ -859,7 +859,7 @@ struct type
      type_length_units function should be used in order to get the length
      expressed in target addressable memory units.  */
 
-  unsigned int length;
+  ULONGEST length;
 
   /* * Core type, shared by a group of qualified types.  */
 

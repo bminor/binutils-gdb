@@ -1,3 +1,25 @@
+2019-03-29  Keith Seitz  <keiths@redhat.com>
+
+	* ada-lang.c (ada_template_to_fixed_record_type_1): Use
+	%s/pulongest for TYPE_LENGTH instead of %d in format
+	strings.
+	* ada-typerint.c (ada_print_type): Likewise.
+	* amd64-windows-tdep.c (amd64_windows_store_arg_in_reg): Likewise.
+	* compile/compile-c-support.c (generate_register_struct): Likewise.
+	* gdbtypes.c (recursive_dump_type): Likewise.
+	* gdbtypes.h (struct type) <length>: Change type to ULONGEST.
+	* m2-typeprint.c (m2_array):  Use %s/pulongest for TYPE_LENGTH
+	instead of %d in format strings.
+	* riscv-tdep.c (riscv_type_alignment): Cast second argument
+	to std::min to ULONGEST.
+	* symmisc.c (print_symbol): Use %s/pulongest for TYPE_LENGTH
+	instead of %d in format strings.
+	* tracepoint.c (info_scope_command): Likewise.
+	* typeprint.c (print_offset_data::update)
+	(print_offset_data::finish): Likewise.
+	* xtensa-tdep.c (xtensa_store_return_value)
+	(xtensa_push_dummy_call): Likewise.
+
 2019-03-28  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* windows-nat.c (display_selector): Fixed format specifications

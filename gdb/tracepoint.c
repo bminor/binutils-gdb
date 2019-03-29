@@ -2636,8 +2636,11 @@ info_scope_command (const char *args_in, int from_tty)
 		}
 	    }
 	  if (SYMBOL_TYPE (sym))
-	    printf_filtered (", length %d.\n",
-			     TYPE_LENGTH (check_typedef (SYMBOL_TYPE (sym))));
+	    {
+	      struct type *t = check_typedef (SYMBOL_TYPE (sym));
+
+	      printf_filtered (", length %s.\n", pulongest (TYPE_LENGTH (t)));
+	    }
 	}
       if (BLOCK_FUNCTION (block))
 	break;

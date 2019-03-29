@@ -8500,11 +8500,11 @@ ada_template_to_fixed_record_type_1 (struct type *type,
   if (TYPE_LENGTH (type) <= 0)
     {
       if (TYPE_NAME (rtype))
-	warning (_("Invalid type size for `%s' detected: %d."),
-		 TYPE_NAME (rtype), TYPE_LENGTH (type));
+	warning (_("Invalid type size for `%s' detected: %s."),
+		 TYPE_NAME (rtype), pulongest (TYPE_LENGTH (type)));
       else
-	warning (_("Invalid type size for <unnamed> detected: %d."),
-		 TYPE_LENGTH (type));
+	warning (_("Invalid type size for <unnamed> detected: %s."),
+		 pulongest (TYPE_LENGTH (type)));
     }
   else
     {
