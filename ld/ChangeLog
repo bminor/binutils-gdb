@@ -1,3 +1,10 @@
+2019-03-29  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* testsuite/ld-xtensa/relax-undef-weak-pie-export-dynamic.d: New
+	test definition.
+	* testsuite/ld-xtensa/xtensa.exp
+	(relax-undef-weak-pie-export-dynamic): Add new test.
+
 2019-03-26  Martin Liska  <mliska@suse.cz>
 
 	* plugin.c (get_symbols): Add lto_kind_str, lto_resolution_str,

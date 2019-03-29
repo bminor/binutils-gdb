@@ -1,3 +1,8 @@
+2019-03-29  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* elf32-xtensa.c (shrink_dynamic_reloc_sections): Add
+	info->export_dynamic to the conditional.
+
 2019-03-28  Alan Modra  <amodra@gmail.com>
 
 	PR 24392

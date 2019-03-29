@@ -34,6 +34,7 @@ run_dump_test "relax-static-shared"
 run_dump_test "relax-static-local-shared"
 
 run_dump_test "relax-undef-weak-pie"
+run_dump_test "relax-undef-weak-pie-export-dynamic"
 run_dump_test "relax-undef-weak-local-pie"
 run_dump_test "relax-undef-weak-shared"
 run_dump_test "relax-undef-weak-local-shared"

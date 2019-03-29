@@ -10083,7 +10083,8 @@ shrink_dynamic_reloc_sections (struct bfd_link_info *info,
       && (input_section->flags & SEC_ALLOC) != 0
       && (dynamic_symbol || bfd_link_pic (info))
       && (!h || h->root.type != bfd_link_hash_undefweak
-	  || (dynamic_symbol && bfd_link_dll (info))))
+	  || (dynamic_symbol
+	      && (bfd_link_dll (info) || info->export_dynamic))))
     {
       asection *srel;
       bfd_boolean is_plt = FALSE;
