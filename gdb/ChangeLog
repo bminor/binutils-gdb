@@ -1,5 +1,21 @@
 2019-03-29  Keith Seitz  <keiths@redhat.com>
 
+	From Siddhesh Poyarekar:
+	* f-lang.h (f77_get_upperbound): Return LONGEST.
+	(f77_get_lowerbound): Likewise.
+	* f-typeprint.c (f_type_print_varspec_suffix): Expand
+	UPPER_BOUND and LOWER_BOUND to LONGEST.  Use plongest to format
+	print them.
+	(f_type_print_base): Expand UPPER_BOUND to LONGEST.  Use
+	plongest to format print it.
+	* f-valprint.c (f77_get_lowerbound): Return LONGEST.
+	(f77_get_upperbound): Likewise.
+	(f77_get_dynamic_length_of_aggregate): Expand UPPER_BOUND,
+	LOWER_BOUND to LONGEST.
+	(f77_create_arrayprint_offset_tbl): Likewise.
+
+2019-03-29  Keith Seitz  <keiths@redhat.com>
+
 	* ada-lang.c (ada_template_to_fixed_record_type_1): Use
 	%s/pulongest for TYPE_LENGTH instead of %d in format
 	strings.

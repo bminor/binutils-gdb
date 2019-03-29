@@ -50,9 +50,9 @@ struct common_block
   struct symbol *contents[1];
 };
 
-extern int f77_get_upperbound (struct type *);
+extern LONGEST f77_get_upperbound (struct type *);
 
-extern int f77_get_lowerbound (struct type *);
+extern LONGEST f77_get_lowerbound (struct type *);
 
 extern void f77_get_dynamic_array_length (struct type *);
 
