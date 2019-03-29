@@ -110,6 +110,8 @@ x86_linux_tdesc_for_tid (int tid, uint64_t *xstate_bv_storage,
 	    = x86_fetch_xsave_layout (xcr0, x86_xsave_length ());
 
 	  *xstate_bv_storage = xcr0;
+	  if (x86_check_ssp_support (tid))
+	    *xstate_bv_storage |= X86_XSTATE_CET_U;
 	}
     }
 

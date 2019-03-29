@@ -3,6 +3,9 @@
 
 *** Changes since GDB 16
 
+* Support for the shadow stack pointer register on x86-64 or x86-64 with
+  32-bit pointer size (X32) GNU/Linux.
+
 * Debugger Adapter Protocol changes
 
   ** GDB now supports the "completions" request.

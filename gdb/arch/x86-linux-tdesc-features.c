@@ -65,6 +65,7 @@ struct x86_xstate_feature {
 
 static constexpr x86_xstate_feature x86_linux_all_xstate_features[] = {
   /* Feature,           i386,	amd64,	x32.  */
+  { X86_XSTATE_CET_U,	false,	true, 	true },
   { X86_XSTATE_PKRU,	true,	true, 	true },
   { X86_XSTATE_AVX512,	true,	true, 	true },
   { X86_XSTATE_AVX,	true,	true, 	true },
