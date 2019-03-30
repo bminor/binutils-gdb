@@ -1,3 +1,8 @@
+2019-03-30  Andrew Waterman  <andrew@sifive.com>
+
+	* elfnn-riscv.c (_bfd_riscv_relax_call): Only check ARCH_SIZE for
+	rd == X_RA case.
+
 2019-03-29  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* elf32-xtensa.c (shrink_dynamic_reloc_sections): Add
