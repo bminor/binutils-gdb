@@ -3,6 +3,12 @@
 
 *** Changes since GDB 8.3
 
+* New built-in convenience variables $_gdb_major and $_gdb_minor
+  provide the GDB version.  They are handy for conditionally using
+  features available only in or since specific GDB versions, in
+  scripts that should work error-free with many different versions,
+  such as in system-wide init files.
+
 * GDB now supports Thread Local Storage (TLS) variables on several
   FreeBSD architectures (amd64, i386, powerpc, riscv).  Other
   architectures require kernel changes.  TLS is not yet supported for

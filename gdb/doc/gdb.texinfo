@@ -11197,7 +11197,7 @@ For example, it will be empty before you execute the @code{run} command.
 @vindex $_tlb@r{, convenience variable}
 The variable @code{$_tlb} is automatically set when debugging
 applications running on MS-Windows in native mode or connected to
-gdbserver that supports the @code{qGetTIBAddr} request. 
+gdbserver that supports the @code{qGetTIBAddr} request.
 @xref{General Query Packets}.
 This variable contains the address of the thread information block.
 
@@ -11211,6 +11211,17 @@ The thread number of the current thread.  @xref{thread numbers}.
 @item $_gthread
 The global number of the current thread.  @xref{global thread numbers}.
 
+@item $_gdb_major
+@itemx $_gdb_minor
+@vindex $_gdb_major@r{, convenience variable}
+@vindex $_gdb_minor@r{, convenience variable}
+The major and minor version numbers of the running @value{GDBN}.
+Development snapshots and pretest versions have their minor version
+incremented by one; thus, @value{GDBN} pretest 9.11.90 will produce
+the value 12 for @code{$_gdb_minor}.  These variables allow you to
+write scripts that work with different versions of @value{GDBN}
+without errors caused by features unavailable in some of those
+versions.
 @end table
 
 @node Convenience Funs

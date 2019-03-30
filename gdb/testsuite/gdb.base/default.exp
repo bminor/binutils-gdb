@@ -602,6 +602,8 @@ set show_conv_list \
 	{$_probe_arg10 = <error: No frame selected>} \
 	{$_probe_arg11 = <error: No frame selected>} \
 	{$_isvoid = <internal function _isvoid>} \
+	{$_gdb_major = 8} \
+	{$_gdb_minor = 4} \
     }
 if ![skip_python_tests] {
     append show_conv_list \

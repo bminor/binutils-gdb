@@ -147,22 +147,22 @@ int server_command;
 
 /* Timeout limit for response from target.  */
 
-/* The default value has been changed many times over the years.  It 
-   was originally 5 seconds.  But that was thought to be a long time 
+/* The default value has been changed many times over the years.  It
+   was originally 5 seconds.  But that was thought to be a long time
    to sit and wait, so it was changed to 2 seconds.  That was thought
-   to be plenty unless the connection was going through some terminal 
+   to be plenty unless the connection was going through some terminal
    server or multiplexer or other form of hairy serial connection.
 
-   In mid-1996, remote_timeout was moved from remote.c to top.c and 
+   In mid-1996, remote_timeout was moved from remote.c to top.c and
    it began being used in other remote-* targets.  It appears that the
    default was changed to 20 seconds at that time, perhaps because the
    Renesas E7000 ICE didn't always respond in a timely manner.
 
    But if 5 seconds is a long time to sit and wait for retransmissions,
-   20 seconds is far worse.  This demonstrates the difficulty of using 
+   20 seconds is far worse.  This demonstrates the difficulty of using
    a single variable for all protocol timeouts.
 
-   As remote.c is used much more than remote-e7000.c, it was changed 
+   As remote.c is used much more than remote-e7000.c, it was changed
    back to 2 seconds in 1999.  */
 
 int remote_timeout = 2;
@@ -188,9 +188,9 @@ int (*deprecated_ui_loop_hook) (int);
 
 /* Called from print_frame_info to list the line we stopped in.  */
 
-void (*deprecated_print_frame_info_listing_hook) (struct symtab * s, 
+void (*deprecated_print_frame_info_listing_hook) (struct symtab * s,
 						  int line,
-						  int stopline, 
+						  int stopline,
 						  int noerror);
 /* Replaces most of query.  */
 
@@ -237,7 +237,7 @@ ptid_t (*deprecated_target_wait_hook) (ptid_t ptid,
 /* Used by UI as a wrapper around command execution.  May do various
    things like enabling/disabling buttons, etc...  */
 
-void (*deprecated_call_command_hook) (struct cmd_list_element * c, 
+void (*deprecated_call_command_hook) (struct cmd_list_element * c,
 				      const char *cmd, int from_tty);
 
 /* Called when the current thread changes.  Argument is thread id.  */
@@ -1339,8 +1339,9 @@ There is NO WARRANTY, to the extent permitted by law.");
 resources online at:\n    <http://www.gnu.org/software/gdb/documentation/>."));
   fprintf_filtered (stream, "\n\n");
   fprintf_filtered (stream, _("For help, type \"help\".\n"));
-  fprintf_filtered (stream, _("Type \"apropos word\" to search for \
-commands related to \"word\"."));
+  fprintf_filtered (stream,
+		    _("Type \"apropos word\" to search for commands \
+related to \"word\"."));
 }
 
 /* Print the details of GDB build-time configuration.  */
@@ -1608,7 +1609,7 @@ quit_force (int *exit_arg, int from_tty)
 
   undo_terminal_modifications_before_exit ();
 
-  /* An optional expression may be used to cause gdb to terminate with the 
+  /* An optional expression may be used to cause gdb to terminate with the
      value of that expression.  */
   if (exit_arg)
     exit_code = *exit_arg;
@@ -2003,6 +2004,17 @@ set_history_filename (const char *args,
 }
 
 static void
+init_gdb_version_vars (void)
+{
+  struct internalvar *major_version_var = create_internalvar ("_gdb_major");
+  struct internalvar *minor_version_var = create_internalvar ("_gdb_minor");
+  int vmajor = 0, vminor = 0, vrevision = 0;
+  sscanf (version, "%d.%d.%d", &vmajor, &vminor, &vrevision);
+  set_internalvar_integer (major_version_var, vmajor);
+  set_internalvar_integer (minor_version_var, vminor + (vrevision > 0));
+}
+
+static void
 init_main (void)
 {
   struct cmd_list_element *c;
@@ -2206,4 +2218,7 @@ gdb_init (char *argv0)
      prefix to be installed.  Keep things simple and just do final
      script initialization here.  */
   finish_ext_lang_initialization ();
+
+  /* Create $_gdb_major and $_gdb_minor convenience variables.  */
+  init_gdb_version_vars ();
 }

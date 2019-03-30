@@ -1,3 +1,8 @@
+2019-03-30  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Convenience Vars): Document $_gdb_major and
+	$_gdb_minor.
+
 2019-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* python.texi (Pretty Printing API): Document use of None for the

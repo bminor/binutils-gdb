@@ -1,3 +1,10 @@
+2019-03-30  Eli Zaretskii  <eliz@gnu.org>
+
+	* NEWS: Announce $_gdb_major and $_gdb_minor.
+
+	* top.c (init_gdb_version_vars): New function.
+	(gdb_init): Call init_gdb_version_vars.
+
 2019-03-29  Tom Tromey  <tromey@adacore.com>
 
 	* printcmd.c (_initialize_printcmd): Add usage lines.  Update some
