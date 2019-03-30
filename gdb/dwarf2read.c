@@ -9361,6 +9361,7 @@ skip_one_die (const struct die_reader_specs *reader, const gdb_byte *info_ptr,
 	  info_ptr += 4 + read_4_bytes (abfd, info_ptr);
 	  break;
 	case DW_FORM_addrx:
+	case DW_FORM_strx:
 	case DW_FORM_sdata:
 	case DW_FORM_udata:
 	case DW_FORM_ref_udata:
@@ -19287,6 +19288,7 @@ read_attribute_value (const struct die_reader_specs *reader,
       DW_ADDR (attr) = read_addr_index_from_leb128 (cu, info_ptr, &bytes_read);
       info_ptr += bytes_read;
       break;
+    case DW_FORM_strx:
     case DW_FORM_GNU_str_index:
       if (reader->dwo_file == NULL)
 	{
@@ -19882,7 +19884,7 @@ dwarf2_read_addr_index (struct dwarf2_per_cu_data *per_cu,
 			    addr_size);
 }
 
-/* Given a DW_FORM_GNU_str_index, fetch the string.
+/* Given a DW_FORM_GNU_str_index or DW_FORM_strx, fetch the string.
    This is only used by the Fission support.  */
 
 static const char *
@@ -19899,7 +19901,7 @@ read_str_index (const struct die_reader_specs *reader, ULONGEST str_index)
     &reader->dwo_file->sections.str_offsets;
   const gdb_byte *info_ptr;
   ULONGEST str_offset;
-  static const char form_name[] = "DW_FORM_GNU_str_index";
+  static const char form_name[] = "DW_FORM_GNU_str_index or DW_FORM_strx";
 
   dwarf2_read_section (objfile, str_section);
   dwarf2_read_section (objfile, str_offsets_section);
@@ -20065,6 +20067,7 @@ dwarf2_string_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *c
     {
       if (attr->form == DW_FORM_strp || attr->form == DW_FORM_line_strp
 	  || attr->form == DW_FORM_string
+	  || attr->form == DW_FORM_strx
 	  || attr->form == DW_FORM_GNU_str_index
 	  || attr->form == DW_FORM_GNU_strp_alt)
 	str = DW_STRING (attr);
@@ -21888,6 +21891,7 @@ dwarf2_const_value_attr (const struct attribute *attr, struct type *type,
       break;
     case DW_FORM_string:
     case DW_FORM_strp:
+    case DW_FORM_strx:
     case DW_FORM_GNU_str_index:
     case DW_FORM_GNU_strp_alt:
       /* DW_STRING is already allocated on the objfile obstack, point
@@ -22892,6 +22896,7 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	case DW_FORM_string:
 	case DW_FORM_strp:
 	case DW_FORM_line_strp:
+	case DW_FORM_strx:
 	case DW_FORM_GNU_str_index:
 	case DW_FORM_GNU_strp_alt:
 	  fprintf_unfiltered (f, "string: \"%s\" (%s canonicalized)",
@@ -23320,6 +23325,7 @@ dwarf2_fetch_constant_bytes (sect_offset sect_off,
       break;
     case DW_FORM_string:
     case DW_FORM_strp:
+    case DW_FORM_strx:
     case DW_FORM_GNU_str_index:
     case DW_FORM_GNU_strp_alt:
       /* DW_STRING is already allocated on the objfile obstack, point
@@ -24285,6 +24291,7 @@ skip_form_bytes (bfd *abfd, const gdb_byte *bytes, const gdb_byte *buffer_end,
 
     case DW_FORM_addrx:
     case DW_FORM_sdata:
+    case DW_FORM_strx:
     case DW_FORM_udata:
     case DW_FORM_GNU_addr_index:
     case DW_FORM_GNU_str_index:

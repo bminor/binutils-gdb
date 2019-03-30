@@ -527,6 +527,8 @@ namespace eval Dwarf {
 	    DW_FORM_indirect -
 	    DW_FORM_exprloc -
 
+	    DW_FORM_strx -
+
 	    DW_FORM_GNU_addr_index -
 	    DW_FORM_GNU_str_index -
 	    DW_FORM_GNU_ref_alt -

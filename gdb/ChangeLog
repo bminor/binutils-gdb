@@ -1,3 +1,16 @@
+2019-04-25  Ali Tamur  <tamur@google.com>
+
+	* dwarf2read.c (skip_one_die): Add DW_FORM_strx.
+	(read_attribute_value): Likewise.
+	(dwarf2_read_addr_index): Update comment.
+	(read_str_index): Add DW_FORM_strx.
+	(dwarf2_string_attr): Likewise.
+	(dwarf2_const_value_attr): Likewise.
+	(dump_die_shallow): Likewise.
+	(dwarf2_fetch_constant_bytes): Likewise.
+	(skip_form_bytes): Likewise.
+	* testsuite/lib/dwarf.exp (_handle_DW_FORM): Add DW_FORM_strx.
+
 2019-04-25  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR corefiles/11608
