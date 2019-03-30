@@ -1,3 +1,8 @@
+2019-04-30  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* std-operator.def: Remove unbalanced, stray double quote
+	character.
+
 2019-04-29  Andrew Burgess  <andrew.burgess@embecosm.com>
 	    Chris January  <chris.january@arm.com>
 	    Daniel Everett  <daniel.everett@arm.com>

@@ -300,7 +300,7 @@ OP (OP_SCOPE)
      p 'S:method() const'::var
 
    then the C-specific handling directly in the parser takes over (see
-   "block/variable productions).
+   block/variable productions).
 
    Also, if the whole function+var is quoted like this:
 
