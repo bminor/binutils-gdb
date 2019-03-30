@@ -1,3 +1,24 @@
+
+2019-03-27  Ali Tamur  <tamur@google.com>
+
+	* dwarf2-frame.c(dwarf_expr_executor::get_addr_index): Update comment
+	* dwarf2expr.c(dwarf_expr_context::execute_stack_op): Add DW_OP_addrx
+	* dwarf2expr.h(dwarf_expr_context::offset): Update comment
+	(dwarf_expr_context::get_addr_index): Likewise
+	* dwarf2loc.c(dwarf_evaluate_loc_desc::get_addr_index): Likewise
+	(symbol_needs_eval_context::get_addr_index): Likewise
+	(disassemble_dwarf_expression): Add DW_OP_addrx
+	* dwarf2read.c(attr_value_as_address): Add DW_FORM_addrx
+	(read_cutu_die_from_dwo): Update comment
+	(skip_one_die): Add DW_FORM_addrx
+	(read_attribute_value): Likewise
+	(var_decode_location): Add DW_OP_addrx
+	(dwarf2_const_value_attr): Add DW_FORM_addrx
+	(dump_die_shallow): Likewise
+	(dwarf2_fetch_constant_bytes): Likewise
+	(decode_locdesc): Add DW_OP_addrx
+	(skip_form_bytes): Add DW_FORM_addrx
+
 2019-04-22  Ali Tamur  <tamur@google.com>
 
 	* MAINTAINERS (Write After Approval): Add self.

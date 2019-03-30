@@ -634,6 +634,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	  result_val = value_from_ulongest (address_type, result);
 	  break;
 
+	case DW_OP_addrx:
 	case DW_OP_GNU_addr_index:
 	  op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
 	  result = this->get_addr_index (uoffset);

@@ -636,7 +636,7 @@ class dwarf_evaluate_loc_desc : public dwarf_expr_context
   }
 
   /* Callback function for dwarf2_evaluate_loc_desc.
-     Fetch the address indexed by DW_OP_GNU_addr_index.  */
+     Fetch the address indexed by DW_OP_addrx or DW_OP_GNU_addr_index.  */
 
   CORE_ADDR get_addr_index (unsigned int index) override
   {
@@ -2642,7 +2642,7 @@ class symbol_needs_eval_context : public dwarf_expr_context
     push_address (0, 0);
   }
 
-  /* DW_OP_GNU_addr_index doesn't require a frame.  */
+  /* DW_OP_addrx and DW_OP_GNU_addr_index doesn't require a frame.  */
 
    CORE_ADDR get_addr_index (unsigned int index) override
    {
@@ -4086,6 +4086,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	  fprintf_filtered (stream, " offset %s", phex_nz (ul, 4));
 	  break;
 
+	case DW_OP_addrx:
 	case DW_OP_GNU_addr_index:
 	  data = safe_read_uleb128 (data, end, &ul);
 	  ul = dwarf2_read_addr_index (per_cu, ul);

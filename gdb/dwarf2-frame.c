@@ -290,7 +290,7 @@ class dwarf_expr_executor : public dwarf_expr_context
 
   CORE_ADDR get_addr_index (unsigned int index) override
   {
-    invalid ("DW_OP_GNU_addr_index");
+    invalid ("DW_OP_addrx or DW_OP_GNU_addr_index");
   }
 
  private:
