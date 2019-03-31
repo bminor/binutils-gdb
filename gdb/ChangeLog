@@ -1,3 +1,16 @@
+2019-08-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* symtab.c (filename_partial_match_opts): New struct type.
+	(struct output_source_filename_data): New members
+	regexp, c_regexp, partial_match.
+	(output_source_filename): Use new members to decide to print file.
+	(info_sources_option_defs): New variable.
+	(make_info_sources_options_def_group, print_info_sources_header,
+	info_sources_command_completer):
+	New functions.
+	(info_sources_command): Read new optional arguments.
+	(_initialize_symtab): Update info sources help.
+
 2019-08-02  Alexandre Oliva <oliva@adacore.com>
 
 	* ada-lang.c (exception_support_info_v0): Renamed from...

@@ -4126,10 +4126,28 @@ operator_chars (const char *p, const char **end)
 }
 
 
+/* What part to match in a file name.  */
+
+struct filename_partial_match_opts
+{
+  /* Only match the directory name part.   */
+  int dirname = false;
+
+  /* Only match the basename part.  */
+  int basename = false;
+};
+
 /* Data structure to maintain printing state for output_source_filename.  */
 
 struct output_source_filename_data
 {
+  /* Output only filenames matching REGEXP.  */
+  std::string regexp;
+  gdb::optional<compiled_regex> c_regexp;
+  /* Possibly only match a part of the filename.  */
+  filename_partial_match_opts partial_match;
+
+
   /* Cache of what we've seen so far.  */
   struct filename_seen_cache *filename_seen_cache;
 
@@ -4161,7 +4179,27 @@ output_source_filename (const char *name,
       return;
     }
 
-  /* No; print it and reset *FIRST.  */
+  /* Does it match data->regexp?  */
+  if (data->c_regexp.has_value ())
+    {
+      const char *to_match;
+      std::string dirname;
+
+      if (data->partial_match.dirname)
+	{
+	  dirname = ldirname (name);
+	  to_match = dirname.c_str ();
+	}
+      else if (data->partial_match.basename)
+	to_match = lbasename (name);
+      else
+	to_match = name;
+
+      if (data->c_regexp->exec (to_match, 0, NULL, 0) != 0)
+	return;
+    }
+
+  /* Print it and reset *FIRST.  */
   if (! data->first)
     printf_filtered (", ");
   data->first = 0;
@@ -4180,8 +4218,74 @@ output_partial_symbol_filename (const char *filename, const char *fullname,
 			  (struct output_source_filename_data *) data);
 }
 
+using isrc_flag_option_def
+  = gdb::option::flag_option_def<filename_partial_match_opts>;
+
+static const gdb::option::option_def info_sources_option_defs[] = {
+
+  isrc_flag_option_def {
+    "dirname",
+    [] (filename_partial_match_opts *opts) { return &opts->dirname; },
+    N_("Show only the files having a dirname matching REGEXP."),
+  },
+
+  isrc_flag_option_def {
+    "basename",
+    [] (filename_partial_match_opts *opts) { return &opts->basename; },
+    N_("Show only the files having a basename matching REGEXP."),
+  },
+
+};
+
+/* Create an option_def_group for the "info sources" options, with
+   ISRC_OPTS as context.  */
+
+static inline gdb::option::option_def_group
+make_info_sources_options_def_group (filename_partial_match_opts *isrc_opts)
+{
+  return {{info_sources_option_defs}, isrc_opts};
+}
+
+/* Prints the header message for the source files that will be printed
+   with the matching info present in DATA.  SYMBOL_MSG is a message
+   that tells what will or has been done with the symbols of the
+   matching source files.  */
+
 static void
-info_sources_command (const char *ignore, int from_tty)
+print_info_sources_header (const char *symbol_msg,
+			   const struct output_source_filename_data *data)
+{
+  puts_filtered (symbol_msg);
+  if (!data->regexp.empty ())
+    {
+      if (data->partial_match.dirname)
+	printf_filtered (_("(dirname matching regular expression \"%s\")"),
+			 data->regexp.c_str ());
+      else if (data->partial_match.basename)
+	printf_filtered (_("(basename matching regular expression \"%s\")"),
+			 data->regexp.c_str ());
+      else
+	printf_filtered (_("(filename matching regular expression \"%s\")"),
+			 data->regexp.c_str ());
+    }
+  puts_filtered ("\n");
+}
+
+/* Completer for "info sources".  */
+
+static void
+info_sources_command_completer (cmd_list_element *ignore,
+				completion_tracker &tracker,
+				const char *text, const char *word)
+{
+  const auto group = make_info_sources_options_def_group (nullptr);
+  if (gdb::option::complete_options
+      (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, group))
+    return;
+}
+
+static void
+info_sources_command (const char *args, int from_tty)
 {
   struct output_source_filename_data data;
 
@@ -4192,11 +4296,38 @@ info_sources_command (const char *ignore, int from_tty)
 
   filename_seen_cache filenames_seen;
 
+  auto group = make_info_sources_options_def_group (&data.partial_match);
+
+  gdb::option::process_options
+    (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, group);
+
+  if (args != NULL && *args != '\000')
+    data.regexp = args;
+
   data.filename_seen_cache = &filenames_seen;
-
-  printf_filtered ("Source files for which symbols have been read in:\n\n");
-
   data.first = 1;
+
+  if (data.partial_match.dirname && data.partial_match.basename)
+    error (_("You cannot give both -basename and -dirname to 'info sources'."));
+  if ((data.partial_match.dirname || data.partial_match.basename)
+      && data.regexp.empty ())
+     error (_("Missing REGEXP for 'info sources'."));
+
+  if (data.regexp.empty ())
+    data.c_regexp.reset ();
+  else
+    {
+      int cflags = REG_NOSUB;
+#ifdef HAVE_CASE_INSENSITIVE_FILE_SYSTEM
+      cflags |= REG_ICASE;
+#endif
+      data.c_regexp.emplace (data.regexp.c_str (), cflags,
+			     _("Invalid regexp"));
+    }
+
+  print_info_sources_header
+    (_("Source files for which symbols have been read in:\n"), &data);
+
   for (objfile *objfile : current_program_space->objfiles ())
     {
       for (compunit_symtab *cu : objfile->compunits ())
@@ -4211,8 +4342,8 @@ info_sources_command (const char *ignore, int from_tty)
     }
   printf_filtered ("\n\n");
 
-  printf_filtered ("Source files for which symbols "
-		   "will be read in on demand:\n\n");
+  print_info_sources_header
+    (_("Source files for which symbols will be read in on demand:\n"), &data);
 
   filenames_seen.clear ();
   data.first = 1;
@@ -6110,8 +6241,20 @@ Print information about all types matching REGEXP, or all types if no\n\
 REGEXP is given.  The optional flag -q disables printing of headers."));
   set_cmd_completer_handle_brkchars (c, info_types_command_completer);
 
-  add_info ("sources", info_sources_command,
-	    _("Source files in the program."));
+  const auto info_sources_opts = make_info_sources_options_def_group (nullptr);
+
+  static std::string info_sources_help
+    = gdb::option::build_help (_("\
+All source files in the program or those matching REGEXP.\n\
+Usage: info sources [OPTION]... [REGEXP]\n\
+By default, REGEXP is used to match anywhere in the filename.\n\
+\n\
+Options:\n\
+%OPTIONS%"),
+			       info_sources_opts);
+
+  c = add_info ("sources", info_sources_command, info_sources_help.c_str ());
+  set_cmd_completer_handle_brkchars (c, info_sources_command_completer);
 
   add_com ("rbreak", class_breakpoint, rbreak_command,
 	   _("Set a breakpoint for all functions matching REGEXP."));
