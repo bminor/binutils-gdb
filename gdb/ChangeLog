@@ -1,5 +1,47 @@
 2019-04-04  Tom Tromey  <tom@tromey.com>
 
+	* varobj.c (varobj_create): Update.
+	* rust-exp.y (struct rust_parser) <update_innermost_block,
+	lookup_symbol>: New methods.
+	(rust_parser::update_innermost_block, rust_parser::lookup_symbol):
+	Rename.
+	(rust_parser::rust_lookup_type)
+	(rust_parser::convert_ast_to_expression, rust_lex_tests): Update.
+	* printcmd.c (display_command, do_one_display): Update.
+	* parser-defs.h (struct parser_state) <parser_state>: Add
+	"tracker" parameter.
+	(block_tracker): New member.
+	(class innermost_block_tracker) <innermost_block_tracker>: Add
+	"types" parameter.
+	<reset>: Remove method.
+	(innermost_block): Don't declare.
+	(null_post_parser): Update.
+	* parse.c (innermost_block): Remove global.
+	(write_dollar_variable): Update.
+	(parse_exp_1, parse_exp_in_context): Add "tracker" parameter.
+	Remove "tracker_types" parameter.
+	(parse_expression): Add "tracker" parameter.
+	(parse_expression_for_completion): Update.
+	(null_post_parser): Add "tracker" parameter.
+	* p-exp.y: Update rules.
+	* m2-exp.y: Update rules.
+	* language.h (struct language_defn) <la_post_parser>: Add
+	"tracker" parameter.
+	* go-exp.y: Update rules.
+	* f-exp.y: Update rules.
+	* expression.h (parse_expression, parse_exp_1): Add "tracker"
+	parameter.
+	* d-exp.y: Update rules.
+	* c-exp.y: Update rules.
+	* breakpoint.c (set_breakpoint_condition): Create an
+	innermost_block_tracker.
+	(watch_command_1): Likewise.
+	* ada-lang.c (resolve): Add "tracker" parameter.
+	(resolve_subexp): Likewise.
+	* ada-exp.y (write_var_from_sym): Update.
+
+2019-04-04  Tom Tromey  <tom@tromey.com>
+
 	* type-stack.h: New file.
 	* type-stack.c: New file.
 	* parser-defs.h (enum type_pieces, union type_stack_elt): Move to

@@ -1715,13 +1715,14 @@ display_command (const char *arg, int from_tty)
       fmt.raw = 0;
     }
 
-  expression_up expr = parse_expression (exp);
+  innermost_block_tracker tracker;
+  expression_up expr = parse_expression (exp, &tracker);
 
   newobj = new display ();
 
   newobj->exp_string = xstrdup (exp);
   newobj->exp = std::move (expr);
-  newobj->block = innermost_block.block ();
+  newobj->block = tracker.block ();
   newobj->pspace = current_program_space;
   newobj->number = ++display_number;
   newobj->format = fmt;
@@ -1882,8 +1883,9 @@ do_one_display (struct display *d)
 
       TRY
 	{
-	  d->exp = parse_expression (d->exp_string);
-	  d->block = innermost_block.block ();
+	  innermost_block_tracker tracker;
+	  d->exp = parse_expression (d->exp_string, &tracker);
+	  d->block = tracker.block ();
 	}
       CATCH (ex, RETURN_MASK_ALL)
 	{

@@ -125,7 +125,8 @@ static int num_defns_collected (struct obstack *);
 static struct block_symbol *defns_collected (struct obstack *, int);
 
 static struct value *resolve_subexp (expression_up *, int *, int,
-                                     struct type *, int);
+                                     struct type *, int,
+				     innermost_block_tracker *);
 
 static void replace_operator_with_call (expression_up *, int, int, int,
                                         struct symbol *, const struct block *);
@@ -3220,7 +3221,8 @@ ada_decoded_op_name (enum exp_opcode op)
    return type is preferred.  May change (expand) *EXP.  */
 
 static void
-resolve (expression_up *expp, int void_context_p, int parse_completion)
+resolve (expression_up *expp, int void_context_p, int parse_completion,
+	 innermost_block_tracker *tracker)
 {
   struct type *context_type = NULL;
   int pc = 0;
@@ -3228,7 +3230,7 @@ resolve (expression_up *expp, int void_context_p, int parse_completion)
   if (void_context_p)
     context_type = builtin_type ((*expp)->gdbarch)->builtin_void;
 
-  resolve_subexp (expp, &pc, 1, context_type, parse_completion);
+  resolve_subexp (expp, &pc, 1, context_type, parse_completion, tracker);
 }
 
 /* Resolve the operator of the subexpression beginning at
@@ -3242,7 +3244,8 @@ resolve (expression_up *expp, int void_context_p, int parse_completion)
 
 static struct value *
 resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
-                struct type *context_type, int parse_completion)
+                struct type *context_type, int parse_completion,
+		innermost_block_tracker *tracker)
 {
   int pc = *pos;
   int i;
@@ -3267,20 +3270,20 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
       else
         {
           *pos += 3;
-          resolve_subexp (expp, pos, 0, NULL, parse_completion);
+          resolve_subexp (expp, pos, 0, NULL, parse_completion, tracker);
         }
       nargs = longest_to_int (exp->elts[pc + 1].longconst);
       break;
 
     case UNOP_ADDR:
       *pos += 1;
-      resolve_subexp (expp, pos, 0, NULL, parse_completion);
+      resolve_subexp (expp, pos, 0, NULL, parse_completion, tracker);
       break;
 
     case UNOP_QUAL:
       *pos += 3;
       resolve_subexp (expp, pos, 1, check_typedef (exp->elts[pc + 1].type),
-		      parse_completion);
+		      parse_completion, tracker);
       break;
 
     case OP_ATR_MODULUS:
@@ -3311,11 +3314,12 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
         struct value *arg1;
 
         *pos += 1;
-        arg1 = resolve_subexp (expp, pos, 0, NULL, parse_completion);
+        arg1 = resolve_subexp (expp, pos, 0, NULL, parse_completion, tracker);
         if (arg1 == NULL)
-          resolve_subexp (expp, pos, 1, NULL, parse_completion);
+          resolve_subexp (expp, pos, 1, NULL, parse_completion, tracker);
         else
-          resolve_subexp (expp, pos, 1, value_type (arg1), parse_completion);
+          resolve_subexp (expp, pos, 1, value_type (arg1), parse_completion,
+			  tracker);
         break;
       }
 
@@ -3403,7 +3407,8 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
 
   argvec = XALLOCAVEC (struct value *, nargs + 1);
   for (i = 0; i < nargs; i += 1)
-    argvec[i] = resolve_subexp (expp, pos, 1, NULL, parse_completion);
+    argvec[i] = resolve_subexp (expp, pos, 1, NULL, parse_completion,
+				tracker);
   argvec[i] = NULL;
   exp = expp->get ();
 
@@ -3487,7 +3492,7 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
 
           exp->elts[pc + 1].block = candidates[i].block;
           exp->elts[pc + 2].symbol = candidates[i].symbol;
-	  innermost_block.update (candidates[i]);
+	  tracker->update (candidates[i]);
         }
 
       if (deprocedure_p
@@ -3531,7 +3536,7 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
 
             exp->elts[pc + 4].block = candidates[i].block;
             exp->elts[pc + 5].symbol = candidates[i].symbol;
-	    innermost_block.update (candidates[i]);
+	    tracker->update (candidates[i]);
           }
       }
       break;

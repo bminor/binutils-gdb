@@ -118,9 +118,6 @@ static int rustyylex (YYSTYPE *, rust_parser *);
 static void rustyyerror (rust_parser *parser, const char *msg);
 
 static struct stoken make_stoken (const char *);
-static struct block_symbol rust_lookup_symbol (const char *name,
-					       const struct block *block,
-					       const domain_enum domain);
 
 /* A regular expression for matching Rust numbers.  This is split up
    since it is very long and this gives us a way to comment the
@@ -241,6 +238,10 @@ struct rust_parser
   int lex_operator (YYSTYPE *lvalp);
   void push_back (char c);
 
+  void update_innermost_block (struct block_symbol sym);
+  struct block_symbol lookup_symbol (const char *name,
+				     const struct block *block,
+				     const domain_enum domain);
   struct type *rust_lookup_type (const char *name, const struct block *block);
   std::vector<struct type *> convert_params_to_types (rust_op_vector *params);
   struct type *convert_ast_to_type (const struct rust_op *operation);
@@ -1104,11 +1105,11 @@ rust_parser::super_name (const struct rust_op *ident, unsigned int n_supers)
 
 /* A helper that updates the innermost block as appropriate.  */
 
-static void
-update_innermost_block (struct block_symbol sym)
+void
+rust_parser::update_innermost_block (struct block_symbol sym)
 {
   if (symbol_read_needs_frame (sym.symbol))
-    innermost_block.update (sym);
+    pstate->block_tracker->update (sym);
 }
 
 /* Lex a hex number with at least MIN digits and at most MAX
@@ -1992,15 +1993,15 @@ munge_name_and_block (const char **name, const struct block **block)
 /* Like lookup_symbol, but handles Rust namespace conventions, and
    doesn't require field_of_this_result.  */
 
-static struct block_symbol
-rust_lookup_symbol (const char *name, const struct block *block,
-		    const domain_enum domain)
+struct block_symbol
+rust_parser::lookup_symbol (const char *name, const struct block *block,
+			    const domain_enum domain)
 {
   struct block_symbol result;
 
   munge_name_and_block (&name, &block);
 
-  result = lookup_symbol (name, block, domain, NULL);
+  result = ::lookup_symbol (name, block, domain, NULL);
   if (result.symbol != NULL)
     update_innermost_block (result);
   return result;
@@ -2016,7 +2017,7 @@ rust_parser::rust_lookup_type (const char *name, const struct block *block)
 
   munge_name_and_block (&name, &block);
 
-  result = lookup_symbol (name, block, STRUCT_DOMAIN, NULL);
+  result = ::lookup_symbol (name, block, STRUCT_DOMAIN, NULL);
   if (result.symbol != NULL)
     {
       update_innermost_block (result);
@@ -2387,8 +2388,8 @@ rust_parser::convert_ast_to_expression (const struct rust_op *operation,
 	  }
 
 	varname = convert_name (operation);
-	sym = rust_lookup_symbol (varname, pstate->expression_context_block,
-				  VAR_DOMAIN);
+	sym = lookup_symbol (varname, pstate->expression_context_block,
+			     VAR_DOMAIN);
 	if (sym.symbol != NULL && SYMBOL_CLASS (sym.symbol) != LOC_TYPEDEF)
 	  {
 	    write_exp_elt_opcode (pstate, OP_VAR_VALUE);
@@ -2726,7 +2727,7 @@ rust_lex_tests (void)
 
   // Set up dummy "parser", so that rust_type works.
   struct parser_state ps (&rust_language_defn, target_gdbarch (),
-			  nullptr, 0, 0, nullptr, 0);
+			  nullptr, 0, 0, nullptr, 0, nullptr);
   rust_parser parser (&ps);
 
   rust_lex_test_one (&parser, "", 0);

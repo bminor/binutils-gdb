@@ -29,6 +29,7 @@
 struct block;
 struct language_defn;
 struct internalvar;
+class innermost_block_tracker;
 
 extern int parser_debug;
 
@@ -107,13 +108,15 @@ struct parser_state : public expr_builder
 		CORE_ADDR context_pc,
 		int comma,
 		const char *input,
-		int completion)
+		int completion,
+		innermost_block_tracker *tracker)
     : expr_builder (lang, gdbarch),
       expression_context_block (context_block),
       expression_context_pc (context_pc),
       comma_terminates (comma),
       lexptr (input),
-      parse_completion (completion)
+      parse_completion (completion),
+      block_tracker (tracker)
   {
   }
 
@@ -186,6 +189,9 @@ struct parser_state : public expr_builder
   /* Completion state is updated here.  */
   expr_completion_state m_completion_state;
 
+  /* The innermost block tracker.  */
+  innermost_block_tracker *block_tracker;
+
 private:
 
   /* Data structure for saving values of arglist_len for function calls whose
@@ -200,20 +206,11 @@ private:
 class innermost_block_tracker
 {
 public:
-  innermost_block_tracker ()
-    : m_types (INNERMOST_BLOCK_FOR_SYMBOLS),
+  innermost_block_tracker (innermost_block_tracker_types types
+			   = INNERMOST_BLOCK_FOR_SYMBOLS)
+    : m_types (types),
       m_innermost_block (NULL)
   { /* Nothing.  */ }
-
-  /* Reset the currently stored innermost block.  Usually called before
-     parsing a new expression.  As the most common case is that we only
-     want to gather the innermost block for symbols in an expression, this
-     becomes the default block tracker type.  */
-  void reset (innermost_block_tracker_types t = INNERMOST_BLOCK_FOR_SYMBOLS)
-  {
-    m_types = t;
-    m_innermost_block = NULL;
-  }
 
   /* Update the stored innermost block if the new block B is more inner
      than the currently stored block, or if no block is stored yet.  The
@@ -245,12 +242,6 @@ private:
      expression.  */
   const struct block *m_innermost_block;
 };
-
-/* The innermost context required by the stack and register variables
-   we've encountered so far.  This is cleared by the expression
-   parsing functions before parsing an expression, and can queried
-   once the parse is complete.  */
-extern innermost_block_tracker innermost_block;
 
 /* A string token, either a char-string or bit-string.  Char-strings are
    used, for example, for the names of symbols.  */
@@ -359,7 +350,8 @@ extern int operator_check_standard (struct expression *exp, int pos,
 
 extern const char *op_name_standard (enum exp_opcode);
 
-extern void null_post_parser (expression_up *, int, int);
+extern void null_post_parser (expression_up *, int, int,
+			      innermost_block_tracker *);
 
 extern bool parse_float (const char *p, int len,
 			 const struct type *type, gdb_byte *data);

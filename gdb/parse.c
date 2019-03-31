@@ -65,10 +65,6 @@ const struct exp_descriptor exp_descriptor_standard =
     evaluate_subexp_standard
   };
 
-/* Global variables declared in parser-defs.h (and commented there).  */
-innermost_block_tracker innermost_block;
-
-
 static unsigned int expressiondebug = 0;
 static void
 show_expressiondebug (struct ui_file *file, int from_tty,
@@ -95,7 +91,7 @@ static int prefixify_subexp (struct expression *, struct expression *, int,
 static expression_up parse_exp_in_context (const char **, CORE_ADDR,
 					   const struct block *, int,
 					   int, int *,
-					   innermost_block_tracker_types,
+					   innermost_block_tracker *,
 					   expr_completion_state *);
 
 static void increase_expout_size (struct expr_builder *ps, size_t lenelt);
@@ -637,8 +633,8 @@ handle_register:
   str.ptr++;
   write_exp_string (ps, str);
   write_exp_elt_opcode (ps, OP_REGISTER);
-  innermost_block.update (ps->expression_context_block,
-			  INNERMOST_BLOCK_FOR_REGISTERS);
+  ps->block_tracker->update (ps->expression_context_block,
+			     INNERMOST_BLOCK_FOR_REGISTERS);
   return;
 }
 
@@ -1049,10 +1045,10 @@ prefixify_subexp (struct expression *inexpr,
 
 expression_up
 parse_exp_1 (const char **stringptr, CORE_ADDR pc, const struct block *block,
-	     int comma, innermost_block_tracker_types tracker_types)
+	     int comma, innermost_block_tracker *tracker)
 {
   return parse_exp_in_context (stringptr, pc, block, comma, 0, NULL,
-			       tracker_types, nullptr);
+			       tracker, nullptr);
 }
 
 /* As for parse_exp_1, except that if VOID_CONTEXT_P, then
@@ -1066,19 +1062,21 @@ static expression_up
 parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
 		      const struct block *block,
 		      int comma, int void_context_p, int *out_subexp,
-		      innermost_block_tracker_types tracker_types,
+		      innermost_block_tracker *tracker,
 		      expr_completion_state *cstate)
 {
   const struct language_defn *lang = NULL;
   int subexp;
-
-  innermost_block.reset (tracker_types);
 
   if (*stringptr == 0 || **stringptr == 0)
     error_no_arg (_("expression to compute"));
 
   const struct block *expression_context_block = block;
   CORE_ADDR expression_context_pc = 0;
+
+  innermost_block_tracker local_tracker;
+  if (tracker == nullptr)
+    tracker = &local_tracker;
 
   /* If no context specified, try using the current frame, if any.  */
   if (!expression_context_block)
@@ -1134,7 +1132,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
 
   parser_state ps (lang, get_current_arch (), expression_context_block,
 		   expression_context_pc, comma, *stringptr,
-		   cstate != nullptr);
+		   cstate != nullptr, tracker);
 
   scoped_restore_current_language lang_saver;
   set_language (lang->la_language);
@@ -1169,7 +1167,8 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
   if (out_subexp)
     *out_subexp = subexp;
 
-  lang->la_post_parser (&result, void_context_p, ps.parse_completion);
+  lang->la_post_parser (&result, void_context_p, ps.parse_completion,
+			tracker);
 
   if (expressiondebug)
     dump_prefix_expression (result.get (), gdb_stdlog);
@@ -1184,9 +1183,9 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
    to use up all of the contents of STRING.  */
 
 expression_up
-parse_expression (const char *string)
+parse_expression (const char *string, innermost_block_tracker *tracker)
 {
-  expression_up exp = parse_exp_1 (&string, 0, 0, 0);
+  expression_up exp = parse_exp_1 (&string, 0, 0, 0, tracker);
   if (*string)
     error (_("Junk after end of expression."));
   return exp;
@@ -1228,7 +1227,7 @@ parse_expression_for_completion (const char *string,
   TRY
     {
       exp = parse_exp_in_context (&string, 0, 0, 0, 0, &subexp,
-				  INNERMOST_BLOCK_FOR_SYMBOLS, &cstate);
+				  nullptr, &cstate);
     }
   CATCH (except, RETURN_MASK_ERROR)
     {
@@ -1267,7 +1266,8 @@ parse_expression_for_completion (const char *string,
 /* A post-parser that does nothing.  */
 
 void
-null_post_parser (expression_up *exp, int void_context_p, int completin)
+null_post_parser (expression_up *exp, int void_context_p, int completin,
+		  innermost_block_tracker *tracker)
 {
 }
 

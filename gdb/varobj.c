@@ -309,13 +309,14 @@ varobj_create (const char *objname,
 	}
 
       p = expression;
+
+      innermost_block_tracker tracker (INNERMOST_BLOCK_FOR_SYMBOLS
+				       | INNERMOST_BLOCK_FOR_REGISTERS);
       /* Wrap the call to parse expression, so we can 
          return a sensible error.  */
       TRY
 	{
-	  var->root->exp = parse_exp_1 (&p, pc, block, 0,
-					INNERMOST_BLOCK_FOR_SYMBOLS
-					| INNERMOST_BLOCK_FOR_REGISTERS);
+	  var->root->exp = parse_exp_1 (&p, pc, block, 0, &tracker);
 	}
 
       CATCH (except, RETURN_MASK_ERROR)
@@ -336,7 +337,7 @@ varobj_create (const char *objname,
 
       var->format = variable_default_display (var.get ());
       var->root->valid_block =
-	var->root->floating ? NULL : innermost_block.block ();
+	var->root->floating ? NULL : tracker.block ();
       var->name = expression;
       /* For a root var, the name and the expr are the same.  */
       var->path_expr = expression;

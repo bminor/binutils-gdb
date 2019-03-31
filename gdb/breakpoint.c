@@ -880,11 +880,12 @@ set_breakpoint_condition (struct breakpoint *b, const char *exp,
 	{
 	  struct watchpoint *w = (struct watchpoint *) b;
 
+	  innermost_block_tracker tracker;
 	  arg = exp;
-	  w->cond_exp = parse_exp_1 (&arg, 0, 0, 0);
+	  w->cond_exp = parse_exp_1 (&arg, 0, 0, 0, &tracker);
 	  if (*arg)
 	    error (_("Junk at end of expression"));
-	  w->cond_exp_valid_block = innermost_block.block ();
+	  w->cond_exp_valid_block = tracker.block ();
 	}
       else
 	{
@@ -10603,7 +10604,8 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
      ARG.  */
   std::string expression (arg, exp_end - arg);
   exp_start = arg = expression.c_str ();
-  expression_up exp = parse_exp_1 (&arg, 0, 0, 0);
+  innermost_block_tracker tracker;
+  expression_up exp = parse_exp_1 (&arg, 0, 0, 0, &tracker);
   exp_end = arg;
   /* Remove trailing whitespace from the expression before saving it.
      This makes the eventual display of the expression string a bit
@@ -10622,7 +10624,7 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
       error (_("Cannot watch constant value `%.*s'."), len, exp_start);
     }
 
-  exp_valid_block = innermost_block.block ();
+  exp_valid_block = tracker.block ();
   struct value *mark = value_mark ();
   struct value *val_as_value = nullptr;
   fetch_subexp_value (exp.get (), &pc, &val_as_value, &result, NULL,
@@ -10663,11 +10665,12 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   if (toklen >= 1 && strncmp (tok, "if", toklen) == 0)
     {
       tok = cond_start = end_tok + 1;
-      parse_exp_1 (&tok, 0, 0, 0);
+      innermost_block_tracker if_tracker;
+      parse_exp_1 (&tok, 0, 0, 0, &if_tracker);
 
       /* The watchpoint expression may not be local, but the condition
 	 may still be.  E.g.: `watch global if local > 0'.  */
-      cond_exp_valid_block = innermost_block.block ();
+      cond_exp_valid_block = if_tracker.block ();
 
       cond_end = tok;
     }

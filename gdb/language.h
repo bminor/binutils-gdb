@@ -38,6 +38,7 @@ struct lang_varobj_ops;
 struct parser_state;
 class compile_instance;
 struct completion_match_for_lcd;
+class innermost_block_tracker;
 
 #define MAX_FORTRAN_DIMS  7	/* Maximum number of F77 array dims.  */
 
@@ -181,7 +182,7 @@ struct language_defn
        for completion, not evaluation.  */
 
     void (*la_post_parser) (expression_up *expp, int void_context_p,
-			    int completing);
+			    int completing, innermost_block_tracker *tracker);
 
     void (*la_printchar) (int ch, struct type *chtype,
 			  struct ui_file * stream);

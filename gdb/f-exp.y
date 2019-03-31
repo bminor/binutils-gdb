@@ -480,7 +480,7 @@ variable:	name_not_typename
 			  if (sym.symbol)
 			    {
 			      if (symbol_read_needs_frame (sym.symbol))
-				innermost_block.update (sym);
+				pstate->block_tracker->update (sym);
 			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
 			      write_exp_elt_block (pstate, sym.block);
 			      write_exp_elt_sym (pstate, sym.symbol);

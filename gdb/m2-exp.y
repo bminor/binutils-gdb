@@ -548,7 +548,7 @@ variable:	block COLONCOLON NAME
 			    error (_("No symbol \"%s\" in specified context."),
 				   copy_name ($3));
 			  if (symbol_read_needs_frame (sym.symbol))
-			    innermost_block.update (sym);
+			    pstate->block_tracker->update (sym);
 
 			  write_exp_elt_opcode (pstate, OP_VAR_VALUE);
 			  write_exp_elt_block (pstate, sym.block);
@@ -570,7 +570,7 @@ variable:	NAME
 			  if (sym.symbol)
 			    {
 			      if (symbol_read_needs_frame (sym.symbol))
-				innermost_block.update (sym);
+				pstate->block_tracker->update (sym);
 
 			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
 			      write_exp_elt_block (pstate, sym.block);
