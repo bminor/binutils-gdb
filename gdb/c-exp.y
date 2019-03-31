@@ -53,6 +53,7 @@
 #include "objc-lang.h"
 #include "typeprint.h"
 #include "cp-abi.h"
+#include "type-stack.h"
 
 #define parse_type(ps) builtin_type (ps->gdbarch ())
 
@@ -104,6 +105,9 @@ struct c_parse_state
      token, we simply keep it all and delete it after parsing has
      completed.  */
   auto_obstack expansion_obstack;
+
+  /* The type stack.  */
+  struct type_stack type_stack;
 };
 
 /* This is set and cleared in c_parse.  */
@@ -604,8 +608,10 @@ function_method:       exp '(' parameter_typelist ')' const_or_volatile
 			  /* Save the const/volatile qualifiers as
 			     recorded by the const_or_volatile
 			     production's actions.  */
-			  write_exp_elt_longcst (pstate,
-						 follow_type_instance_flags ());
+			  write_exp_elt_longcst
+			    (pstate,
+			     (cpstate->type_stack
+			      .follow_type_instance_flags ()));
 			  write_exp_elt_longcst (pstate, len);
 			  for (type *type_elt : *type_list)
 			    write_exp_elt_type (pstate, type_elt);
@@ -617,8 +623,9 @@ function_method:       exp '(' parameter_typelist ')' const_or_volatile
 function_method_void:	    exp '(' ')' const_or_volatile
 		       { write_exp_elt_opcode (pstate, TYPE_INSTANCE);
 			 /* See above.  */
-			 write_exp_elt_longcst (pstate,
-						follow_type_instance_flags ());
+			 write_exp_elt_longcst
+			   (pstate,
+			    cpstate->type_stack.follow_type_instance_flags ());
 			 write_exp_elt_longcst (pstate, 0);
 			 write_exp_elt_longcst (pstate, 0);
 			 write_exp_elt_opcode (pstate, TYPE_INSTANCE);
@@ -1158,7 +1165,9 @@ variable:	name_not_typename
 	;
 
 space_identifier : '@' NAME
-		{ insert_type_address_space (pstate, copy_name ($2.stoken)); }
+		{
+		  cpstate->type_stack.insert (pstate, copy_name ($2.stoken));
+		}
 	;
 
 const_or_volatile: const_or_volatile_noopt
@@ -1179,30 +1188,30 @@ const_or_volatile_or_space_identifier:
 
 ptr_operator:
 		ptr_operator '*'
-			{ insert_type (tp_pointer); }
+			{ cpstate->type_stack.insert (tp_pointer); }
 		const_or_volatile_or_space_identifier
 	|	'*'
-			{ insert_type (tp_pointer); }
+			{ cpstate->type_stack.insert (tp_pointer); }
 		const_or_volatile_or_space_identifier
 	|	'&'
-			{ insert_type (tp_reference); }
+			{ cpstate->type_stack.insert (tp_reference); }
 	|	'&' ptr_operator
-			{ insert_type (tp_reference); }
+			{ cpstate->type_stack.insert (tp_reference); }
 	|       ANDAND
-			{ insert_type (tp_rvalue_reference); }
+			{ cpstate->type_stack.insert (tp_rvalue_reference); }
 	|       ANDAND ptr_operator
-			{ insert_type (tp_rvalue_reference); }
+			{ cpstate->type_stack.insert (tp_rvalue_reference); }
 	;
 
 ptr_operator_ts: ptr_operator
 			{
-			  $$ = get_type_stack ();
+			  $$ = cpstate->type_stack.create ();
 			  cpstate->type_stacks.emplace_back ($$);
 			}
 	;
 
 abs_decl:	ptr_operator_ts direct_abs_decl
-			{ $$ = append_type_stack ($2, $1); }
+			{ $$ = $2->append ($1); }
 	|	ptr_operator_ts
 	|	direct_abs_decl
 	;
@@ -1211,31 +1220,31 @@ direct_abs_decl: '(' abs_decl ')'
 			{ $$ = $2; }
 	|	direct_abs_decl array_mod
 			{
-			  push_type_stack ($1);
-			  push_type_int ($2);
-			  push_type (tp_array);
-			  $$ = get_type_stack ();
+			  cpstate->type_stack.push ($1);
+			  cpstate->type_stack.push ($2);
+			  cpstate->type_stack.push (tp_array);
+			  $$ = cpstate->type_stack.create ();
 			  cpstate->type_stacks.emplace_back ($$);
 			}
 	|	array_mod
 			{
-			  push_type_int ($1);
-			  push_type (tp_array);
-			  $$ = get_type_stack ();
+			  cpstate->type_stack.push ($1);
+			  cpstate->type_stack.push (tp_array);
+			  $$ = cpstate->type_stack.create ();
 			  cpstate->type_stacks.emplace_back ($$);
 			}
 
 	| 	direct_abs_decl func_mod
 			{
-			  push_type_stack ($1);
-			  push_typelist ($2);
-			  $$ = get_type_stack ();
+			  cpstate->type_stack.push ($1);
+			  cpstate->type_stack.push ($2);
+			  $$ = cpstate->type_stack.create ();
 			  cpstate->type_stacks.emplace_back ($$);
 			}
 	|	func_mod
 			{
-			  push_typelist ($1);
-			  $$ = get_type_stack ();
+			  cpstate->type_stack.push ($1);
+			  $$ = cpstate->type_stack.create ();
 			  cpstate->type_stacks.emplace_back ($$);
 			}
 	;
@@ -1489,9 +1498,9 @@ typebase
 			     pstate->expression_context_block);
 			}
 	| const_or_volatile_or_space_identifier_noopt typebase
-			{ $$ = follow_types ($2); }
+			{ $$ = cpstate->type_stack.follow_types ($2); }
 	| typebase const_or_volatile_or_space_identifier_noopt
-			{ $$ = follow_types ($1); }
+			{ $$ = cpstate->type_stack.follow_types ($1); }
 	;
 
 type_name:	TYPENAME
@@ -1552,13 +1561,13 @@ nonempty_typelist
 ptype	:	typebase
 	|	ptype abs_decl
 		{
-		  push_type_stack ($2);
-		  $$ = follow_types ($1);
+		  cpstate->type_stack.push ($2);
+		  $$ = cpstate->type_stack.follow_types ($1);
 		}
 	;
 
 conversion_type_id: typebase conversion_declarator
-		{ $$ = follow_types ($1); }
+		{ $$ = cpstate->type_stack.follow_types ($1); }
 	;
 
 conversion_declarator:  /* Nothing.  */
@@ -1570,13 +1579,13 @@ const_and_volatile: 	CONST_KEYWORD VOLATILE_KEYWORD
 	;
 
 const_or_volatile_noopt:  	const_and_volatile
-			{ insert_type (tp_const);
-			  insert_type (tp_volatile);
+			{ cpstate->type_stack.insert (tp_const);
+			  cpstate->type_stack.insert (tp_volatile);
 			}
 	| 		CONST_KEYWORD
-			{ insert_type (tp_const); }
+			{ cpstate->type_stack.insert (tp_const); }
 	| 		VOLATILE_KEYWORD
-			{ insert_type (tp_volatile); }
+			{ cpstate->type_stack.insert (tp_volatile); }
 	;
 
 oper:	OPERATOR NEW

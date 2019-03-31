@@ -299,40 +299,6 @@ struct objc_class_str
     int theclass;
   };
 
-/* For parsing of complicated types.
-   An array should be preceded in the list by the size of the array.  */
-enum type_pieces
-  {
-    tp_end = -1, 
-    tp_pointer, 
-    tp_reference, 
-    tp_rvalue_reference,
-    tp_array, 
-    tp_function,
-    tp_function_with_arguments,
-    tp_const, 
-    tp_volatile, 
-    tp_space_identifier,
-    tp_type_stack,
-    tp_kind
-  };
-/* The stack can contain either an enum type_pieces or an int.  */
-union type_stack_elt
-  {
-    enum type_pieces piece;
-    int int_val;
-    struct type_stack *stack_val;
-    std::vector<struct type *> *typelist_val;
-  };
-
-/* The type stack is an instance of this structure.  */
-
-struct type_stack
-{
-  /* Elements on the stack.  */
-  std::vector<union type_stack_elt> elements;
-};
-
 /* Reverse an expression from suffix form (in which it is constructed)
    to prefix form (in which we can conveniently print or execute it).
    Ordinarily this always returns -1.  However, if LAST_STRUCT
@@ -376,27 +342,6 @@ extern const char *find_template_name_end (const char *);
 
 extern char *copy_name (struct stoken);
 
-extern void insert_type (enum type_pieces);
-
-extern void push_type (enum type_pieces);
-
-extern void push_type_int (int);
-
-extern void insert_type_address_space (struct expr_builder *, char *);
-
-extern enum type_pieces pop_type (void);
-
-extern int pop_type_int (void);
-
-extern struct type_stack *get_type_stack (void);
-
-extern struct type_stack *append_type_stack (struct type_stack *to,
-					     struct type_stack *from);
-
-extern void push_type_stack (struct type_stack *stack);
-
-extern void push_typelist (std::vector<struct type *> *typelist);
-
 extern int dump_subexp (struct expression *, struct ui_file *, int);
 
 extern int dump_subexp_body_standard (struct expression *, 
@@ -413,10 +358,6 @@ extern int operator_check_standard (struct expression *exp, int pos,
 				    void *data);
 
 extern const char *op_name_standard (enum exp_opcode);
-
-extern struct type *follow_types (struct type *);
-
-extern type_instance_flags follow_type_instance_flags ();
 
 extern void null_post_parser (expression_up *, int, int);
 

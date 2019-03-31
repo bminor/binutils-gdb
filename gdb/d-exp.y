@@ -51,6 +51,7 @@
 #include "objfiles.h" /* For have_full_symbols and have_partial_symbols */
 #include "charset.h"
 #include "block.h"
+#include "type-stack.h"
 
 #define parse_type(ps) builtin_type (ps->gdbarch ())
 #define parse_d_type(ps) builtin_d_type (ps->gdbarch ())
@@ -64,6 +65,9 @@
    expression.  */
 
 static struct parser_state *pstate = NULL;
+
+/* The current type stack.  */
+static struct type_stack *type_stack;
 
 int yyparse (void);
 
@@ -606,7 +610,7 @@ TypeExp:
 		  write_exp_elt_type (pstate, $1);
 		  write_exp_elt_opcode (pstate, OP_TYPE); }
 |	BasicType BasicType2
-		{ $$ = follow_types ($1);
+		{ $$ = type_stack->follow_types ($1);
 		  write_exp_elt_opcode (pstate, OP_TYPE);
 		  write_exp_elt_type (pstate, $$);
 		  write_exp_elt_opcode (pstate, OP_TYPE);
@@ -615,15 +619,15 @@ TypeExp:
 
 BasicType2:
 	'*'
-		{ push_type (tp_pointer); }
+		{ type_stack->push (tp_pointer); }
 |	'*' BasicType2
-		{ push_type (tp_pointer); }
+		{ type_stack->push (tp_pointer); }
 |	'[' INTEGER_LITERAL ']'
-		{ push_type_int ($2.val);
-		  push_type (tp_array); }
+		{ type_stack->push ($2.val);
+		  type_stack->push (tp_array); }
 |	'[' INTEGER_LITERAL ']' BasicType2
-		{ push_type_int ($2.val);
-		  push_type (tp_array); }
+		{ type_stack->push ($2.val);
+		  type_stack->push (tp_array); }
 ;
 
 BasicType:
@@ -1618,6 +1622,10 @@ d_parse (struct parser_state *par_state)
 
   scoped_restore restore_yydebug = make_scoped_restore (&yydebug,
 							parser_debug);
+
+  struct type_stack stack;
+  scoped_restore restore_type_stack = make_scoped_restore (&type_stack,
+							   &stack);
 
   /* Initialize some state used by the lexer.  */
   last_was_structop = 0;

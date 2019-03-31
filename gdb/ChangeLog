@@ -1,5 +1,35 @@
 2019-04-04  Tom Tromey  <tom@tromey.com>
 
+	* type-stack.h: New file.
+	* type-stack.c: New file.
+	* parser-defs.h (enum type_pieces, union type_stack_elt): Move to
+	type-stack.h.
+	(insert_into_type_stack, insert_type, push_type, push_type_int)
+	(insert_type_address_space, pop_type, pop_type_int)
+	(pop_typelist, pop_type_stack, append_type_stack)
+	(push_type_stack, get_type_stack, push_typelist)
+	(follow_type_instance_flags, follow_types): Don't declare.
+	* parse.c (type_stack): Remove global.
+	(parse_exp_in_context): Update.
+	(insert_into_type_stack, insert_type, push_type, push_type_int)
+	(insert_type_address_space, pop_type, pop_type_int)
+	(pop_typelist, pop_type_stack, append_type_stack)
+	(push_type_stack, get_type_stack, push_typelist)
+	(follow_type_instance_flags, follow_types): Remove (moved to
+	type-stack.c).
+	* f-exp.y (type_stack): New global.
+	Update rules.
+	(push_kind_type, f_parse): Update.
+	* d-exp.y (type_stack): New global.
+	Update rules.
+	(d_parse): Update.
+	* c-exp.y (struct c_parse_state) <type_stack>: New member.
+	Update rules.
+	* Makefile.in (COMMON_SFILES): Add type-stack.c.
+	(HFILES_NO_SRCDIR): Add type-stack.h.
+
+2019-04-04  Tom Tromey  <tom@tromey.com>
+
 	* rust-exp.y (rust_parser::lex_identifier, rustyylex)
 	(rust_parser::convert_ast_to_expression, rust_parse)
 	(rust_lex_test_completion, rust_lex_tests): Update.

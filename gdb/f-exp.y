@@ -54,6 +54,7 @@
 #include "block.h"
 #include <ctype.h>
 #include <algorithm>
+#include "type-stack.h"
 
 #define parse_type(ps) builtin_type (ps->gdbarch ())
 #define parse_f_type(ps) builtin_f_type (ps->gdbarch ())
@@ -70,6 +71,9 @@ static struct parser_state *pstate = NULL;
 
 /* Depth of parentheses.  */
 static int paren_depth;
+
+/* The current type stack.  */
+static struct type_stack *type_stack;
 
 int yyparse (void);
 
@@ -515,7 +519,7 @@ ptype	:	typebase
 		  struct type *range_type;
 		  
 		  while (!done)
-		    switch (pop_type ())
+		    switch (type_stack->pop ())
 		      {
 		      case tp_end:
 			done = 1;
@@ -527,7 +531,7 @@ ptype	:	typebase
 			follow_type = lookup_lvalue_reference_type (follow_type);
 			break;
 		      case tp_array:
-			array_size = pop_type_int ();
+			array_size = type_stack->pop_int ();
 			if (array_size != -1)
 			  {
 			    range_type =
@@ -547,7 +551,7 @@ ptype	:	typebase
 			break;
 		      case tp_kind:
 			{
-			  int kind_val = pop_type_int ();
+			  int kind_val = type_stack->pop_int ();
 			  follow_type
 			    = convert_to_kind_type (follow_type, kind_val);
 			}
@@ -558,13 +562,13 @@ ptype	:	typebase
 	;
 
 abs_decl:	'*'
-			{ push_type (tp_pointer); $$ = 0; }
+			{ type_stack->push (tp_pointer); $$ = 0; }
 	|	'*' abs_decl
-			{ push_type (tp_pointer); $$ = $2; }
+			{ type_stack->push (tp_pointer); $$ = $2; }
 	|	'&'
-			{ push_type (tp_reference); $$ = 0; }
+			{ type_stack->push (tp_reference); $$ = 0; }
 	|	'&' abs_decl
-			{ push_type (tp_reference); $$ = $2; }
+			{ type_stack->push (tp_reference); $$ = $2; }
 	|	direct_abs_decl
 	;
 
@@ -575,9 +579,9 @@ direct_abs_decl: '(' abs_decl ')'
 	|	'*' INT
 			{ push_kind_type ($2.val, $2.type); }
 	| 	direct_abs_decl func_mod
-			{ push_type (tp_function); }
+			{ type_stack->push (tp_function); }
 	|	func_mod
-			{ push_type (tp_function); }
+			{ type_stack->push (tp_function); }
 	;
 
 func_mod:	'(' ')'
@@ -821,8 +825,8 @@ push_kind_type (LONGEST val, struct type *type)
       ival = static_cast <int> (val);
     }
 
-  push_type_int (ival);
-  push_type (tp_kind);
+  type_stack->push (ival);
+  type_stack->push (tp_kind);
 }
 
 /* Called when a type has a '(kind=N)' modifier after it, for example
@@ -1332,6 +1336,10 @@ f_parse (struct parser_state *par_state)
   gdb_assert (par_state != NULL);
   pstate = par_state;
   paren_depth = 0;
+
+  struct type_stack stack;
+  scoped_restore restore_type_stack = make_scoped_restore (&type_stack,
+							   &stack);
 
   return yyparse ();
 }
