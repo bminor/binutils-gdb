@@ -89,7 +89,7 @@ symtab_finalize (Sym_Table *tab)
 
   /* Remove duplicate entries to speed-up later processing and
      set end_addr if its not set yet.  */
-  prev_addr = tab->base[0].addr + 1;
+  prev_addr = tab->base[0].addr - 1;
 
   for (src = dst = tab->base; src < tab->limit; ++src)
     {
@@ -107,7 +107,7 @@ symtab_finalize (Sym_Table *tab)
 		  && ((src->is_func && !dst[-1].is_func)
 		      || ((src->is_func == dst[-1].is_func)
 			  && ((src->name[0] != '_' && dst[-1].name[0] == '_')
-			      || (src->name[0]
+			      || (src->name[0] == '_' && dst[-1].name[0] == '_'
 				  && src->name[1] != '_'
 				  && dst[-1].name[1] == '_'))))))
 	    {
