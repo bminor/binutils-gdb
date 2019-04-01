@@ -1,5 +1,23 @@
 2019-04-30  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb/expprint.c (dump_subexp_body_standard): Remove use of
+	UNOP_KIND.
+	* gdb/expression.h (exp_opcode): Include 'fortran-operator.def'.
+	* gdb/f-exp.y (exp): Rename UNOP_KIND to UNOP_FORTRAN_KIND.
+	* gdb/f-lang.c (evaluate_subexp_f): Likewise.
+	(operator_length_f): New fuction.
+	(print_subexp_f): New function.
+	(op_name_f): New function.
+	(dump_subexp_body_f): New function.
+	(operator_check_f): New function.
+	(exp_descriptor_f): Replace standard expression handling functions
+	with new functions.
+	* gdb/fortran-operator.def: New file.
+	* gdb/parse.c (operator_length_standard): Remove use of UNOP_KIND.
+	* gdb/std-operator.def: Remove UNOP_KIND.
+
+2019-04-30  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* std-operator.def: Remove unbalanced, stray double quote
 	character.
 

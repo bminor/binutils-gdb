@@ -869,7 +869,6 @@ dump_subexp_body_standard (struct expression *exp,
     case UNOP_MIN:
     case UNOP_ODD:
     case UNOP_TRUNC:
-    case UNOP_KIND:
       elt = dump_subexp (exp, stream, elt);
       break;
     case OP_LONG:

@@ -240,7 +240,7 @@ exp	:	SIZEOF exp       %prec UNARY
 	;
 
 exp	:	KIND '(' exp ')'       %prec UNARY
-			{ write_exp_elt_opcode (pstate, UNOP_KIND); }
+			{ write_exp_elt_opcode (pstate, UNOP_FORTRAN_KIND); }
 	;
 
 /* No more explicit array operators, we treat everything in F77 as 

@@ -284,7 +284,7 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
 	}
       error (_("ABS of type %s not supported"), TYPE_SAFE_NAME (type));
 
-    case UNOP_KIND:
+    case UNOP_FORTRAN_KIND:
       arg1 = evaluate_subexp (NULL, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
       type = value_type (arg1);
 
@@ -319,6 +319,125 @@ f_is_string_type_p (struct type *type)
 	      && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CHAR));
 }
 
+/* Special expression lengths for Fortran.  */
+
+static void
+operator_length_f (const struct expression *exp, int pc, int *oplenp,
+		   int *argsp)
+{
+  int oplen = 1;
+  int args = 0;
+
+  switch (exp->elts[pc - 1].opcode)
+    {
+    default:
+      operator_length_standard (exp, pc, oplenp, argsp);
+      return;
+
+    case UNOP_FORTRAN_KIND:
+      oplen = 1;
+      args = 1;
+      break;
+    }
+
+  *oplenp = oplen;
+  *argsp = args;
+}
+
+/* Special expression printing for Fortran.  */
+
+static void
+print_subexp_f (struct expression *exp, int *pos,
+		struct ui_file *stream, enum precedence prec)
+{
+  int pc = *pos;
+  enum exp_opcode op = exp->elts[pc].opcode;
+
+  switch (op)
+    {
+    default:
+      print_subexp_standard (exp, pos, stream, prec);
+      return;
+
+    case UNOP_FORTRAN_KIND:
+      (*pos)++;
+      fputs_filtered ("KIND(", stream);
+      print_subexp (exp, pos, stream, PREC_SUFFIX);
+      fputs_filtered (")", stream);
+      return;
+    }
+}
+
+/* Special expression names for Fortran.  */
+
+static const char *
+op_name_f (enum exp_opcode opcode)
+{
+  switch (opcode)
+    {
+    default:
+      return op_name_standard (opcode);
+
+#define OP(name)	\
+    case name:		\
+      return #name ;
+#include "fortran-operator.def"
+#undef OP
+    }
+}
+
+/* Special expression dumping for Fortran.  */
+
+static int
+dump_subexp_body_f (struct expression *exp,
+		    struct ui_file *stream, int elt)
+{
+  int opcode = exp->elts[elt].opcode;
+  int oplen, nargs, i;
+
+  switch (opcode)
+    {
+    default:
+      return dump_subexp_body_standard (exp, stream, elt);
+
+    case UNOP_FORTRAN_KIND:
+      operator_length_f (exp, (elt + 1), &oplen, &nargs);
+      break;
+    }
+
+  elt += oplen;
+  for (i = 0; i < nargs; i += 1)
+    elt = dump_subexp (exp, stream, elt);
+
+  return elt;
+}
+
+/* Special expression checking for Fortran.  */
+
+static int
+operator_check_f (struct expression *exp, int pos,
+		  int (*objfile_func) (struct objfile *objfile,
+				       void *data),
+		  void *data)
+{
+  const union exp_element *const elts = exp->elts;
+
+  switch (elts[pos].opcode)
+    {
+    case UNOP_FORTRAN_KIND:
+      /* Any references to objfiles are held in the arguments to this
+	 expression, not within the expression itself, so no additional
+	 checking is required here, the outer expression iteration code
+	 will take care of checking each argument.  */
+      break;
+
+    default:
+      return operator_check_standard (exp, pos, objfile_func, data);
+    }
+
+  return 0;
+}
+
 static const char *f_extensions[] =
 {
   ".f", ".F", ".for", ".FOR", ".ftn", ".FTN", ".fpp", ".FPP",
@@ -329,11 +448,11 @@ static const char *f_extensions[] =
 /* Expression processing for Fortran.  */
 static const struct exp_descriptor exp_descriptor_f =
 {
-  print_subexp_standard,
-  operator_length_standard,
-  operator_check_standard,
-  op_name_standard,
-  dump_subexp_body_standard,
+  print_subexp_f,
+  operator_length_f,
+  operator_check_f,
+  op_name_f,
+  dump_subexp_body_f,
   evaluate_subexp_f
 };
 

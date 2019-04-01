@@ -66,6 +66,7 @@ enum exp_opcode : uint8_t
 
 /* Language specific operators.  */
 #include "ada-operator.def"
+#include "fortran-operator.def"
 
 #undef OP
 
