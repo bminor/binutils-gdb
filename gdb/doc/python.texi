@@ -864,6 +864,86 @@ Like @code{Value.cast}, but works as if the C@t{++} @code{reinterpret_cast}
 operator were used.  Consult a C@t{++} reference for details.
 @end defun
 
+@defun Value.format_string (...)
+Convert a @code{gdb.Value} to a string, similarly to what the @code{print}
+command does.  Invoked with no arguments, this is equivalent to calling
+the @code{str} function on the @code{gdb.Value}.  The representation of
+the same value may change across different versions of @value{GDBN}, so
+you shouldn't, for instance, parse the strings returned by this method.
+
+All the arguments are keyword only.  If an argument is not specified, the
+current global default setting is used.
+
+@table @code
+@item raw
+@code{True} if pretty-printers (@pxref{Pretty Printing}) should not be
+used to format the value.  @code{False} if enabled pretty-printers
+matching the type represented by the @code{gdb.Value} should be used to
+format it.
+
+@item pretty_arrays
+@code{True} if arrays should be pretty printed to be more convenient to
+read, @code{False} if they shouldn't (see @code{set print array} in
+@ref{Print Settings}).
+
+@item pretty_structs
+@code{True} if structs should be pretty printed to be more convenient to
+read, @code{False} if they shouldn't (see @code{set print pretty} in
+@ref{Print Settings}).
+
+@item array_indexes
+@code{True} if array indexes should be included in the string
+representation of arrays, @code{False} if they shouldn't (see @code{set
+print array-indexes} in @ref{Print Settings}).
+
+@item symbols
+@code{True} if the string representation of a pointer should include the
+corresponding symbol name (if one exists), @code{False} if it shouldn't
+(see @code{set print symbol} in @ref{Print Settings}).
+
+@item unions
+@code{True} if unions which are contained in other structures or unions
+should be expanded, @code{False} if they shouldn't (see @code{set print
+union} in @ref{Print Settings}).
+
+@item deref_refs
+@code{True} if C@t{++} references should be resolved to the value they
+refer to, @code{False} (the default) if they shouldn't.  Note that, unlike
+for the @code{print} command, references are not automatically expanded
+when using the @code{format_string} method or the @code{str}
+function.  There is no global @code{print} setting to change the default
+behaviour.
+
+@item actual_objects
+@code{True} if the representation of a pointer to an object should
+identify the @emph{actual} (derived) type of the object rather than the
+@emph{declared} type, using the virtual function table.  @code{False} if
+the @emph{declared} type should be used.  (See @code{set print object} in
+@ref{Print Settings}).
+
+@item static_fields
+@code{True} if static members should be included in the string
+representation of a C@t{++} object, @code{False} if they shouldn't (see
+@code{set print static-members} in @ref{Print Settings}).
+
+@item max_elements
+Number of array elements to print, or @code{0} to print an unlimited
+number of elements (see @code{set print elements} in @ref{Print
+Settings}).
+
+@item repeat_threshold
+Set the threshold for suppressing display of repeated array elements, or
+@code{0} to represent all elements, even if repeated.  (See @code{set
+print repeats} in @ref{Print Settings}).
+
+@item format
+A string containing a single character representing the format to use for
+the returned string.  For instance, @code{'x'} is equivalent to using the
+@value{GDBN} command @code{print} with the @code{/x} option and formats
+the value as a hexadecimal number.
+@end table
+@end defun
+
 @defun Value.string (@r{[}encoding@r{[}, errors@r{[}, length@r{]]]})
 If this @code{gdb.Value} represents a string, then this method
 converts the contents to a Python string.  Otherwise, this method will

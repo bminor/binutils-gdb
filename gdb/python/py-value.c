@@ -588,6 +588,165 @@ valpy_string (PyObject *self, PyObject *args, PyObject *kw)
 			   encoding, errors);
 }
 
+/* Given a Python object, copy its truth value to a C int (the value
+   pointed by dest).
+   If src_obj is NULL, then *dest is not modified.
+
+   Return true in case of success (including src_obj being NULL), false
+   in case of error.  */
+
+static bool
+copy_py_bool_obj (int *dest, PyObject *src_obj)
+{
+  if (src_obj)
+    {
+      int cmp = PyObject_IsTrue (src_obj);
+      if (cmp < 0)
+	return false;
+      *dest = cmp;
+    }
+
+  return true;
+}
+
+/* Implementation of gdb.Value.format_string (...) -> string.
+   Return Unicode string with value contents formatted using the
+   keyword-only arguments.  */
+
+static PyObject *
+valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
+{
+  static const char *keywords[] =
+    {
+      /* Basic C/C++ options.  */
+      "raw",			/* See the /r option to print.  */
+      "pretty_arrays",		/* See set print array on|off.  */
+      "pretty_structs",		/* See set print pretty on|off.  */
+      "array_indexes",		/* See set print array-indexes on|off.  */
+      "symbols",		/* See set print symbol on|off.  */
+      "unions",			/* See set print union on|off.  */
+      /* C++ options.  */
+      "deref_refs",		/* No corresponding setting.  */
+      "actual_objects",		/* See set print object on|off.  */
+      "static_members",		/* See set print static-members on|off.  */
+      /* C non-bool options.  */
+      "max_elements", 		/* See set print elements N.  */
+      "repeat_threshold",	/* See set print repeats.  */
+      "format",			/* The format passed to the print command.  */
+      NULL
+    };
+
+  /* This function has too many arguments to be useful as positionals, so
+     the user should specify them all as keyword arguments.
+     Python 3.3 and later have a way to specify it (both in C and Python
+     itself), but we could be compiled with older versions, so we just
+     check that the args tuple is empty.  */
+  Py_ssize_t positional_count = PyObject_Length (args);
+  if (positional_count < 0)
+    return NULL;
+  else if (positional_count > 0)
+    {
+      /* This matches the error message that Python 3.3 raises when
+	 passing positionals to functions expecting keyword-only
+	 arguments.  */
+      PyErr_Format (PyExc_TypeError,
+		    "format_string() takes 0 positional arguments but %zu were given",
+		    positional_count);
+      return NULL;
+    }
+
+  struct value_print_options opts;
+  get_user_print_options (&opts);
+  opts.deref_ref = 0;
+
+  /* We need objects for booleans as the "p" flag for bools is new in
+     Python 3.3.  */
+  PyObject *raw_obj = NULL;
+  PyObject *pretty_arrays_obj = NULL;
+  PyObject *pretty_structs_obj = NULL;
+  PyObject *array_indexes_obj = NULL;
+  PyObject *symbols_obj = NULL;
+  PyObject *unions_obj = NULL;
+  PyObject *deref_refs_obj = NULL;
+  PyObject *actual_objects_obj = NULL;
+  PyObject *static_members_obj = NULL;
+  char *format = NULL;
+  if (!gdb_PyArg_ParseTupleAndKeywords (args,
+					kw,
+					"|O!O!O!O!O!O!O!O!O!IIs",
+					keywords,
+					&PyBool_Type, &raw_obj,
+					&PyBool_Type, &pretty_arrays_obj,
+					&PyBool_Type, &pretty_structs_obj,
+					&PyBool_Type, &array_indexes_obj,
+					&PyBool_Type, &symbols_obj,
+					&PyBool_Type, &unions_obj,
+					&PyBool_Type, &deref_refs_obj,
+					&PyBool_Type, &actual_objects_obj,
+					&PyBool_Type, &static_members_obj,
+					&opts.print_max,
+					&opts.repeat_count_threshold,
+					&format))
+    return NULL;
+
+  /* Set boolean arguments.  */
+  if (!copy_py_bool_obj (&opts.raw, raw_obj))
+    return NULL;
+  if (!copy_py_bool_obj (&opts.prettyformat_arrays, pretty_arrays_obj))
+    return NULL;
+  if (!copy_py_bool_obj (&opts.prettyformat_structs, pretty_structs_obj))
+    return NULL;
+  if (!copy_py_bool_obj (&opts.print_array_indexes, array_indexes_obj))
+    return NULL;
+  if (!copy_py_bool_obj (&opts.symbol_print, symbols_obj))
+    return NULL;
+  if (!copy_py_bool_obj (&opts.unionprint, unions_obj))
+    return NULL;
+  if (!copy_py_bool_obj (&opts.deref_ref, deref_refs_obj))
+    return NULL;
+  if (!copy_py_bool_obj (&opts.objectprint, actual_objects_obj))
+    return NULL;
+  if (!copy_py_bool_obj (&opts.static_field_print, static_members_obj))
+    return NULL;
+
+  /* Numeric arguments for which 0 means unlimited (which we represent as
+     UINT_MAX).  */
+  if (opts.print_max == 0)
+    opts.print_max = UINT_MAX;
+  if (opts.repeat_count_threshold == 0)
+    opts.repeat_count_threshold = UINT_MAX;
+
+  /* Other arguments.  */
+  if (format != NULL)
+    {
+      if (strlen (format) == 1)
+	opts.format = format[0];
+      else
+	{
+	  /* Mimic the message on standard Python ones for similar
+	     errors.  */
+	  PyErr_SetString (PyExc_ValueError,
+			   "a single character is required");
+	  return NULL;
+	}
+    }
+
+  string_file stb;
+
+  TRY
+    {
+      common_val_print (((value_object *) self)->value, &stb, 0,
+			&opts, python_language);
+    }
+  CATCH (except, RETURN_MASK_ALL)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+  END_CATCH
+
+  return PyUnicode_Decode (stb.c_str (), stb.size (), host_charset (), NULL);
+}
+
 /* A helper function that implements the various cast operators.  */
 
 static PyObject *
@@ -1944,6 +2103,11 @@ Return a lazy string representation of the value." },
 Return Unicode string representation of the value." },
   { "fetch_lazy", valpy_fetch_lazy, METH_NOARGS,
     "Fetches the value from the inferior, if it was lazy." },
+  { "format_string", (PyCFunction) valpy_format_string,
+    METH_VARARGS | METH_KEYWORDS,
+    "format_string (...) -> string\n\
+Return a string representation of the value using the specified\n\
+formatting options" },
   {NULL}  /* Sentinel */
 };
 

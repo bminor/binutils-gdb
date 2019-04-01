@@ -16,6 +16,15 @@
 
 * Support for Pointer Authentication on AArch64 Linux.
 
+* Python API
+
+  ** The gdb.Value type has a new method 'format_string' which returns a
+     string representing the value.  The formatting is controlled by the
+     optional keyword arguments: 'raw', 'pretty_arrays', 'pretty_structs',
+     'array_indexes', 'symbols', 'unions', 'deref_refs', 'actual_objects',
+     'static_members', 'max_elements', 'repeat_threshold', and 'format'.
+
+
 *** Changes in GDB 8.3
 
 * GDB and GDBserver now support access to additional registers on
