@@ -26308,17 +26308,217 @@ static const struct arm_cpu_option_table arm_cpus[] =
 };
 #undef ARM_CPU_OPT
 
+struct arm_ext_table
+{
+  const char *		  name;
+  size_t		  name_len;
+  const arm_feature_set	  merge;
+  const arm_feature_set	  clear;
+};
+
 struct arm_arch_option_table
 {
-  const char *           name;
-  size_t                 name_len;
-  const arm_feature_set	 value;
-  const arm_feature_set	 default_fpu;
+  const char *			name;
+  size_t			name_len;
+  const arm_feature_set		value;
+  const arm_feature_set		default_fpu;
+  const struct arm_ext_table *	ext_table;
+};
+
+/* Used to add support for +E and +noE extension.  */
+#define ARM_EXT(E, M, C) { E, sizeof (E) - 1, M, C }
+/* Used to add support for a +E extension.  */
+#define ARM_ADD(E, M) { E, sizeof(E) - 1, M, ARM_ARCH_NONE }
+/* Used to add support for a +noE extension.  */
+#define ARM_REMOVE(E, C) { E, sizeof(E) -1, ARM_ARCH_NONE, C }
+
+#define ALL_FP ARM_FEATURE (0, ARM_EXT2_FP16_INST | ARM_EXT2_FP16_FML, \
+			    ~0 & ~FPU_ENDIAN_PURE)
+
+static const struct arm_ext_table armv5te_ext_table[] =
+{
+  ARM_EXT ("fp", FPU_ARCH_VFP_V2, ALL_FP),
+  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
+};
+
+static const struct arm_ext_table armv7_ext_table[] =
+{
+  ARM_EXT ("fp", FPU_ARCH_VFP_V3D16, ALL_FP),
+  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
+};
+
+static const struct arm_ext_table armv7ve_ext_table[] =
+{
+  ARM_EXT ("fp", FPU_ARCH_VFP_V4D16, ALL_FP),
+  ARM_ADD ("vfpv3-d16", FPU_ARCH_VFP_V3D16),
+  ARM_ADD ("vfpv3", FPU_ARCH_VFP_V3),
+  ARM_ADD ("vfpv3-d16-fp16", FPU_ARCH_VFP_V3D16_FP16),
+  ARM_ADD ("vfpv3-fp16", FPU_ARCH_VFP_V3_FP16),
+  ARM_ADD ("vfpv4-d16", FPU_ARCH_VFP_V4D16),  /* Alias for +fp.  */
+  ARM_ADD ("vfpv4", FPU_ARCH_VFP_V4),
+
+  ARM_EXT ("simd", FPU_ARCH_NEON_VFP_V4,
+	   ARM_FEATURE_COPROC (FPU_NEON_EXT_V1 | FPU_NEON_EXT_FMA)),
+
+  /* Aliases for +simd.  */
+  ARM_ADD ("neon-vfpv4", FPU_ARCH_NEON_VFP_V4),
+
+  ARM_ADD ("neon", FPU_ARCH_VFP_V3_PLUS_NEON_V1),
+  ARM_ADD ("neon-vfpv3", FPU_ARCH_VFP_V3_PLUS_NEON_V1),
+  ARM_ADD ("neon-fp16", FPU_ARCH_NEON_FP16),
+
+  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
+};
+
+static const struct arm_ext_table armv7a_ext_table[] =
+{
+  ARM_EXT ("fp", FPU_ARCH_VFP_V3D16, ALL_FP),
+  ARM_ADD ("vfpv3-d16", FPU_ARCH_VFP_V3D16), /* Alias for +fp.  */
+  ARM_ADD ("vfpv3", FPU_ARCH_VFP_V3),
+  ARM_ADD ("vfpv3-d16-fp16", FPU_ARCH_VFP_V3D16_FP16),
+  ARM_ADD ("vfpv3-fp16", FPU_ARCH_VFP_V3_FP16),
+  ARM_ADD ("vfpv4-d16", FPU_ARCH_VFP_V4D16),
+  ARM_ADD ("vfpv4", FPU_ARCH_VFP_V4),
+
+  ARM_EXT ("simd", FPU_ARCH_VFP_V3_PLUS_NEON_V1,
+	   ARM_FEATURE_COPROC (FPU_NEON_EXT_V1 | FPU_NEON_EXT_FMA)),
+
+  /* Aliases for +simd.  */
+  ARM_ADD ("neon", FPU_ARCH_VFP_V3_PLUS_NEON_V1),
+  ARM_ADD ("neon-vfpv3", FPU_ARCH_VFP_V3_PLUS_NEON_V1),
+
+  ARM_ADD ("neon-fp16", FPU_ARCH_NEON_FP16),
+  ARM_ADD ("neon-vfpv4", FPU_ARCH_NEON_VFP_V4),
+
+  ARM_ADD ("mp", ARM_FEATURE_CORE_LOW (ARM_EXT_MP)),
+  ARM_ADD ("sec", ARM_FEATURE_CORE_LOW (ARM_EXT_SEC)),
+  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
+};
+
+static const struct arm_ext_table armv7r_ext_table[] =
+{
+  ARM_ADD ("fp.sp", FPU_ARCH_VFP_V3xD),
+  ARM_ADD ("vfpv3xd", FPU_ARCH_VFP_V3xD), /* Alias for +fp.sp.  */
+  ARM_EXT ("fp", FPU_ARCH_VFP_V3D16, ALL_FP),
+  ARM_ADD ("vfpv3-d16", FPU_ARCH_VFP_V3D16), /* Alias for +fp.  */
+  ARM_ADD ("vfpv3xd-fp16", FPU_ARCH_VFP_V3xD_FP16),
+  ARM_ADD ("vfpv3-d16-fp16", FPU_ARCH_VFP_V3D16_FP16),
+  ARM_EXT ("idiv", ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV | ARM_EXT_DIV),
+	   ARM_FEATURE_CORE_LOW (ARM_EXT_ADIV | ARM_EXT_DIV)),
+  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
+};
+
+static const struct arm_ext_table armv7em_ext_table[] =
+{
+  ARM_EXT ("fp", FPU_ARCH_VFP_V4_SP_D16, ALL_FP),
+  /* Alias for +fp, used to be known as fpv4-sp-d16.  */
+  ARM_ADD ("vfpv4-sp-d16", FPU_ARCH_VFP_V4_SP_D16),
+  ARM_ADD ("fpv5", FPU_ARCH_VFP_V5_SP_D16),
+  ARM_ADD ("fp.dp", FPU_ARCH_VFP_V5D16),
+  ARM_ADD ("fpv5-d16", FPU_ARCH_VFP_V5D16),
+  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
+};
+
+static const struct arm_ext_table armv8a_ext_table[] =
+{
+  ARM_ADD ("crc", ARCH_CRC_ARMV8),
+  ARM_ADD ("simd", FPU_ARCH_NEON_VFP_ARMV8),
+  ARM_EXT ("crypto", FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+	   ARM_FEATURE_COPROC (FPU_CRYPTO_ARMV8)),
+
+  /* Armv8-a does not allow an FP implementation without SIMD, so the user
+     should use the +simd option to turn on FP.  */
+  ARM_REMOVE ("fp", ALL_FP),
+  ARM_ADD ("sb", ARM_FEATURE_CORE_HIGH (ARM_EXT2_SB)),
+  ARM_ADD ("predres", ARM_FEATURE_CORE_HIGH (ARM_EXT2_PREDRES)),
+  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
+};
+
+
+static const struct arm_ext_table armv81a_ext_table[] =
+{
+  ARM_ADD ("simd", FPU_ARCH_NEON_VFP_ARMV8_1),
+  ARM_EXT ("crypto", FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_1,
+	   ARM_FEATURE_COPROC (FPU_CRYPTO_ARMV8)),
+
+  /* Armv8-a does not allow an FP implementation without SIMD, so the user
+     should use the +simd option to turn on FP.  */
+  ARM_REMOVE ("fp", ALL_FP),
+  ARM_ADD ("sb", ARM_FEATURE_CORE_HIGH (ARM_EXT2_SB)),
+  ARM_ADD ("predres", ARM_FEATURE_CORE_HIGH (ARM_EXT2_PREDRES)),
+  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
+};
+
+static const struct arm_ext_table armv82a_ext_table[] =
+{
+  ARM_ADD ("simd", FPU_ARCH_NEON_VFP_ARMV8_1),
+  ARM_ADD ("fp16", FPU_ARCH_NEON_VFP_ARMV8_2_FP16),
+  ARM_ADD ("fp16fml", FPU_ARCH_NEON_VFP_ARMV8_2_FP16FML),
+  ARM_EXT ("crypto", FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_1,
+	   ARM_FEATURE_COPROC (FPU_CRYPTO_ARMV8)),
+  ARM_ADD ("dotprod", FPU_ARCH_DOTPROD_NEON_VFP_ARMV8),
+
+  /* Armv8-a does not allow an FP implementation without SIMD, so the user
+     should use the +simd option to turn on FP.  */
+  ARM_REMOVE ("fp", ALL_FP),
+  ARM_ADD ("sb", ARM_FEATURE_CORE_HIGH (ARM_EXT2_SB)),
+  ARM_ADD ("predres", ARM_FEATURE_CORE_HIGH (ARM_EXT2_PREDRES)),
+  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
+};
+
+static const struct arm_ext_table armv84a_ext_table[] =
+{
+  ARM_ADD ("simd", FPU_ARCH_DOTPROD_NEON_VFP_ARMV8),
+  ARM_ADD ("fp16", FPU_ARCH_NEON_VFP_ARMV8_4_FP16FML),
+  ARM_EXT ("crypto", FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_4,
+	   ARM_FEATURE_COPROC (FPU_CRYPTO_ARMV8)),
+
+  /* Armv8-a does not allow an FP implementation without SIMD, so the user
+     should use the +simd option to turn on FP.  */
+  ARM_REMOVE ("fp", ALL_FP),
+  ARM_ADD ("sb", ARM_FEATURE_CORE_HIGH (ARM_EXT2_SB)),
+  ARM_ADD ("predres", ARM_FEATURE_CORE_HIGH (ARM_EXT2_PREDRES)),
+  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
+};
+
+static const struct arm_ext_table armv85a_ext_table[] =
+{
+  ARM_ADD ("simd", FPU_ARCH_DOTPROD_NEON_VFP_ARMV8),
+  ARM_ADD ("fp16", FPU_ARCH_NEON_VFP_ARMV8_4_FP16FML),
+  ARM_EXT ("crypto", FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_4,
+	   ARM_FEATURE_COPROC (FPU_CRYPTO_ARMV8)),
+
+  /* Armv8-a does not allow an FP implementation without SIMD, so the user
+     should use the +simd option to turn on FP.  */
+  ARM_REMOVE ("fp", ALL_FP),
+  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
+};
+
+static const struct arm_ext_table armv8m_main_ext_table[] =
+{
+  ARM_EXT ("dsp", ARM_FEATURE_CORE_LOW (ARM_EXT_V5ExP | ARM_EXT_V6_DSP),
+		  ARM_FEATURE_CORE_LOW (ARM_EXT_V5ExP | ARM_EXT_V6_DSP)),
+  ARM_EXT ("fp", FPU_ARCH_VFP_V5_SP_D16, ALL_FP),
+  ARM_ADD ("fp.dp", FPU_ARCH_VFP_V5D16),
+  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
+};
+
+static const struct arm_ext_table armv8r_ext_table[] =
+{
+  ARM_ADD ("crc", ARCH_CRC_ARMV8),
+  ARM_ADD ("simd", FPU_ARCH_NEON_VFP_ARMV8),
+  ARM_EXT ("crypto", FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+	   ARM_FEATURE_COPROC (FPU_CRYPTO_ARMV8)),
+  ARM_REMOVE ("fp", ALL_FP),
+  ARM_ADD ("fp.sp", FPU_ARCH_VFP_V5_SP_D16),
+  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
 };
 
 /* This list should, at a minimum, contain all the architecture names
    recognized by GCC.  */
-#define ARM_ARCH_OPT(N, V, DF) { N, sizeof (N) - 1, V, DF }
+#define ARM_ARCH_OPT(N, V, DF) { N, sizeof (N) - 1, V, DF, NULL }
+#define ARM_ARCH_OPT2(N, V, DF, ext) \
+  { N, sizeof (N) - 1, V, DF, ext##_ext_table }
 
 static const struct arm_arch_option_table arm_archs[] =
 {
@@ -26336,50 +26536,51 @@ static const struct arm_arch_option_table arm_archs[] =
   ARM_ARCH_OPT ("armv5",	  ARM_ARCH_V5,		FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv5t",	  ARM_ARCH_V5T,		FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv5txm",	  ARM_ARCH_V5TxM,	FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv5te",	  ARM_ARCH_V5TE,	FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv5texp",	  ARM_ARCH_V5TExP,	FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv5tej",	  ARM_ARCH_V5TEJ,	FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv6",	  ARM_ARCH_V6,		FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv6j",	  ARM_ARCH_V6,		FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv6k",	  ARM_ARCH_V6K,		FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv6z",	  ARM_ARCH_V6Z,		FPU_ARCH_VFP),
+  ARM_ARCH_OPT2 ("armv5te",	  ARM_ARCH_V5TE,	FPU_ARCH_VFP,	armv5te),
+  ARM_ARCH_OPT2 ("armv5texp",	  ARM_ARCH_V5TExP,	FPU_ARCH_VFP, armv5te),
+  ARM_ARCH_OPT2 ("armv5tej",	  ARM_ARCH_V5TEJ,	FPU_ARCH_VFP,	armv5te),
+  ARM_ARCH_OPT2 ("armv6",	  ARM_ARCH_V6,		FPU_ARCH_VFP,	armv5te),
+  ARM_ARCH_OPT2 ("armv6j",	  ARM_ARCH_V6,		FPU_ARCH_VFP,	armv5te),
+  ARM_ARCH_OPT2 ("armv6k",	  ARM_ARCH_V6K,		FPU_ARCH_VFP,	armv5te),
+  ARM_ARCH_OPT2 ("armv6z",	  ARM_ARCH_V6Z,		FPU_ARCH_VFP,	armv5te),
   /* The official spelling of this variant is ARMv6KZ, the name "armv6zk" is
      kept to preserve existing behaviour.  */
-  ARM_ARCH_OPT ("armv6kz",	  ARM_ARCH_V6KZ,	FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv6zk",	  ARM_ARCH_V6KZ,	FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv6t2",	  ARM_ARCH_V6T2,	FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv6kt2",	  ARM_ARCH_V6KT2,	FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv6zt2",	  ARM_ARCH_V6ZT2,	FPU_ARCH_VFP),
+  ARM_ARCH_OPT2 ("armv6kz",	  ARM_ARCH_V6KZ,	FPU_ARCH_VFP,	armv5te),
+  ARM_ARCH_OPT2 ("armv6zk",	  ARM_ARCH_V6KZ,	FPU_ARCH_VFP,	armv5te),
+  ARM_ARCH_OPT2 ("armv6t2",	  ARM_ARCH_V6T2,	FPU_ARCH_VFP,	armv5te),
+  ARM_ARCH_OPT2 ("armv6kt2",	  ARM_ARCH_V6KT2,	FPU_ARCH_VFP,	armv5te),
+  ARM_ARCH_OPT2 ("armv6zt2",	  ARM_ARCH_V6ZT2,	FPU_ARCH_VFP,	armv5te),
   /* The official spelling of this variant is ARMv6KZ, the name "armv6zkt2" is
      kept to preserve existing behaviour.  */
-  ARM_ARCH_OPT ("armv6kzt2",	  ARM_ARCH_V6KZT2,	FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv6zkt2",	  ARM_ARCH_V6KZT2,	FPU_ARCH_VFP),
+  ARM_ARCH_OPT2 ("armv6kzt2",	  ARM_ARCH_V6KZT2,	FPU_ARCH_VFP,	armv5te),
+  ARM_ARCH_OPT2 ("armv6zkt2",	  ARM_ARCH_V6KZT2,	FPU_ARCH_VFP,	armv5te),
   ARM_ARCH_OPT ("armv6-m",	  ARM_ARCH_V6M,		FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv6s-m",	  ARM_ARCH_V6SM,	FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv7",	  ARM_ARCH_V7,		FPU_ARCH_VFP),
+  ARM_ARCH_OPT2 ("armv7",	  ARM_ARCH_V7,		FPU_ARCH_VFP, armv7),
   /* The official spelling of the ARMv7 profile variants is the dashed form.
      Accept the non-dashed form for compatibility with old toolchains.  */
-  ARM_ARCH_OPT ("armv7a",	  ARM_ARCH_V7A,		FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv7ve",	  ARM_ARCH_V7VE,	FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv7r",	  ARM_ARCH_V7R,		FPU_ARCH_VFP),
+  ARM_ARCH_OPT2 ("armv7a",	  ARM_ARCH_V7A,		FPU_ARCH_VFP, armv7a),
+  ARM_ARCH_OPT2 ("armv7ve",	  ARM_ARCH_V7VE,	FPU_ARCH_VFP, armv7ve),
+  ARM_ARCH_OPT2 ("armv7r",	  ARM_ARCH_V7R,		FPU_ARCH_VFP, armv7r),
   ARM_ARCH_OPT ("armv7m",	  ARM_ARCH_V7M,		FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv7-a",	  ARM_ARCH_V7A,		FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv7-r",	  ARM_ARCH_V7R,		FPU_ARCH_VFP),
+  ARM_ARCH_OPT2 ("armv7-a",	  ARM_ARCH_V7A,		FPU_ARCH_VFP, armv7a),
+  ARM_ARCH_OPT2 ("armv7-r",	  ARM_ARCH_V7R,		FPU_ARCH_VFP, armv7r),
   ARM_ARCH_OPT ("armv7-m",	  ARM_ARCH_V7M,		FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv7e-m",	  ARM_ARCH_V7EM,	FPU_ARCH_VFP),
+  ARM_ARCH_OPT2 ("armv7e-m",	  ARM_ARCH_V7EM,	FPU_ARCH_VFP, armv7em),
   ARM_ARCH_OPT ("armv8-m.base",	  ARM_ARCH_V8M_BASE,	FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv8-m.main",	  ARM_ARCH_V8M_MAIN,	FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv8-a",	  ARM_ARCH_V8A,		FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv8.1-a",	  ARM_ARCH_V8_1A,	FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv8.2-a",	  ARM_ARCH_V8_2A,	FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv8.3-a",	  ARM_ARCH_V8_3A,	FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv8-r",	  ARM_ARCH_V8R,		FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv8.4-a",	  ARM_ARCH_V8_4A,	FPU_ARCH_VFP),
-  ARM_ARCH_OPT ("armv8.5-a",	  ARM_ARCH_V8_5A,	FPU_ARCH_VFP),
+  ARM_ARCH_OPT2 ("armv8-m.main",  ARM_ARCH_V8M_MAIN,	FPU_ARCH_VFP,
+		 armv8m_main),
+  ARM_ARCH_OPT2 ("armv8-a",	  ARM_ARCH_V8A,		FPU_ARCH_VFP, armv8a),
+  ARM_ARCH_OPT2 ("armv8.1-a",	  ARM_ARCH_V8_1A,	FPU_ARCH_VFP, armv81a),
+  ARM_ARCH_OPT2 ("armv8.2-a",	  ARM_ARCH_V8_2A,	FPU_ARCH_VFP, armv82a),
+  ARM_ARCH_OPT2 ("armv8.3-a",	  ARM_ARCH_V8_3A,	FPU_ARCH_VFP, armv82a),
+  ARM_ARCH_OPT2 ("armv8-r",	  ARM_ARCH_V8R,		FPU_ARCH_VFP, armv8r),
+  ARM_ARCH_OPT2 ("armv8.4-a",	  ARM_ARCH_V8_4A,	FPU_ARCH_VFP, armv84a),
+  ARM_ARCH_OPT2 ("armv8.5-a",	  ARM_ARCH_V8_5A,	FPU_ARCH_VFP, armv85a),
   ARM_ARCH_OPT ("xscale",	  ARM_ARCH_XSCALE,	FPU_ARCH_VFP),
   ARM_ARCH_OPT ("iwmmxt",	  ARM_ARCH_IWMMXT,	FPU_ARCH_VFP),
   ARM_ARCH_OPT ("iwmmxt2",	  ARM_ARCH_IWMMXT2,	FPU_ARCH_VFP),
-  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
+  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE, NULL }
 };
 #undef ARM_ARCH_OPT
 
@@ -26402,6 +26603,8 @@ struct arm_option_extension_value_table
 #define ARM_EXT_OPT(N, M, C, AA) { N, sizeof (N) - 1, M, C, { AA, ARM_ANY } }
 #define ARM_EXT_OPT2(N, M, C, AA1, AA2) { N, sizeof (N) - 1, M, C, {AA1, AA2} }
 
+/* DEPRECATED: Refrain from using this table to add any new extensions, instead
+   use the context sensitive approach using arm_ext_table's.  */
 static const struct arm_option_extension_value_table arm_extensions[] =
 {
   ARM_EXT_OPT ("crc",  ARCH_CRC_ARMV8, ARM_FEATURE_COPROC (CRC_EXT_ARMV8),
@@ -26574,7 +26777,8 @@ struct arm_long_option_table
 
 static bfd_boolean
 arm_parse_extension (const char *str, const arm_feature_set *opt_set,
-		     arm_feature_set *ext_set)
+		     arm_feature_set *ext_set,
+		     const struct arm_ext_table *ext_table)
 {
   /* We insist on extensions being specified in alphabetical order, and with
      extensions being added before being removed.  We achieve this by having
@@ -26639,6 +26843,41 @@ arm_parse_extension (const char *str, const arm_feature_set *opt_set,
 
       gas_assert (adding_value != -1);
       gas_assert (opt != NULL);
+
+      if (ext_table != NULL)
+	{
+	  const struct arm_ext_table * ext_opt = ext_table;
+	  bfd_boolean found = FALSE;
+	  for (; ext_opt->name != NULL; ext_opt++)
+	    if (ext_opt->name_len == len
+		&& strncmp (ext_opt->name, str, len) == 0)
+	      {
+		if (adding_value)
+		  {
+		    if (ARM_FEATURE_ZERO (ext_opt->merge))
+			/* TODO: Option not supported.  When we remove the
+			   legacy table this case should error out.  */
+			continue;
+
+		    ARM_MERGE_FEATURE_SETS (*ext_set, *ext_set, ext_opt->merge);
+		  }
+		else
+		  {
+		    if (ARM_FEATURE_ZERO (ext_opt->clear))
+			/* TODO: Option not supported.  When we remove the
+			   legacy table this case should error out.  */
+			continue;
+		    ARM_CLEAR_FEATURE (*ext_set, *ext_set, ext_opt->clear);
+		  }
+		found = TRUE;
+		break;
+	      }
+	  if (found)
+	    {
+	      str = ext;
+	      continue;
+	    }
+	}
 
       /* Scan over the options table trying to find an exact match. */
       for (; opt->name != NULL; opt++)
@@ -26748,7 +26987,7 @@ arm_parse_cpu (const char *str)
 	  }
 
 	if (ext != NULL)
-	  return arm_parse_extension (ext, mcpu_cpu_opt, mcpu_ext_opt);
+	  return arm_parse_extension (ext, mcpu_cpu_opt, mcpu_ext_opt, NULL);
 
 	return TRUE;
       }
@@ -26786,7 +27025,8 @@ arm_parse_arch (const char *str)
 	strcpy (selected_cpu_name, opt->name);
 
 	if (ext != NULL)
-	  return arm_parse_extension (ext, march_cpu_opt, march_ext_opt);
+	  return arm_parse_extension (ext, march_cpu_opt, march_ext_opt,
+				      opt->ext_table);
 
 	return TRUE;
       }

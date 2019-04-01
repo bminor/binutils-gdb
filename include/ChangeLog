@@ -1,3 +1,14 @@
+2019-04-01  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* opcode/arm.h (FPU_NEON_ARMV8_1): New.
+	(FPU_ARCH_NEON_VFP_ARMV8_1): Use FPU_NEON_ARMV8_1.
+	(FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_1): Likewise.
+	(FPU_ARCH_DOTPROD_NEON_VFP_ARMV8): Likewise.
+	(FPU_ARCH_NEON_VFP_ARMV8_2_FP16): New.
+	(FPU_ARCH_NEON_VFP_ARMV8_2_FP16FML): New.
+	(FPU_ARCH_NEON_VFP_ARMV8_4_FP16FML): New.
+	(FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_4): New.
+
 2019-03-28  Alan Modra  <amodra@gmail.com>
 
 	PR 24390

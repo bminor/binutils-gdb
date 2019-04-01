@@ -1,3 +1,64 @@
+2019-04-01  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* config/tc-arm.c (arm_ext_table): New struct type.
+	(arm_arch_option_table): Add new 'arm_ext_table' field.
+	(ARM_EXT,ARM_ADD,ARM_REMOVE, ALL_FP): New macros.
+	(armv5te_ext_table, armv7ve_ext_table, armv7a_ext_table,
+	armv7r_ext_table, armv7em_ext_table, armv8a_ext_table,
+	armv81a_ext_table, armv82a_ext_table, armv84a_ext_table,
+	armv85a_ext_table, armv8m_main_ext_table,
+	armv8r_ext_table): New architecture extension tables.
+	(ARM_ARCH_OPT): Add new default field.
+	(ARM_ARCH_OPT2): New macro.
+	(arm_archs): Extend some architectures with the new architecture
+	extension tables mentioned above.
+	(arm_extensions): Add DEPRECATED comment with instructions to
+	use new table.
+	(arm_parse_extension): Change to use new extension tables.
+	(arm_parse_cpu): Don't change existing behavior.
+	(arm_parse_arch): Change to use new extension tables.
+	* doc/c-arm.texi: Document new architecture extensions.
+	* testsuite/gas/arm/attr-mfpu-neon-fp16.d: Change test to use new
+	extension option rather than -mfpu and change expected behaviour to
+	sane outputs.
+	* testsuite/gas/arm/armv8-2-fp16-scalar-bad-ext.d: New.
+	* testsuite/gas/arm/armv8-2-fp16-scalar-ext.d: New.
+	* testsuite/gas/arm/armv8-2-fp16-scalar-thumb-ext.d: New.
+	* testsuite/gas/arm/armv8-2-fp16-simd-ext.d: New.
+	* testsuite/gas/arm/armv8-2-fp16-simd-thumb-ext.d: New.
+	* testsuite/gas/arm/armv8-2-fp16-simd-warning-ext.d: New.
+	* testsuite/gas/arm/armv8-2-fp16-simd-warning-thumb-ext.d: New.
+	* testsuite/gas/arm/armv8_2+rdma-ext.d: New.
+	* testsuite/gas/arm/armv8_2-a-fp16-thumb2-ext.d: New.
+	* testsuite/gas/arm/armv8_2-a-fp16_ext.d: New.
+	* testsuite/gas/arm/armv8_3-a-fp-bad-ext.d: New.
+	* testsuite/gas/arm/armv8_3-a-fp-ext.d: New.
+	* testsuite/gas/arm/armv8_3-a-fp16-ext.d: New.
+	* testsuite/gas/arm/armv8_3-a-simd-bad-ext.d: New.
+	* testsuite/gas/arm/armv8_4-a-fp16-ext.d: New.
+	* testsuite/gas/arm/armv8m.main+fp.d: New.
+	* testsuite/gas/arm/armv8m.main+fp.dp.d: New.
+	* testsuite/gas/arm/attr-ext-fpv5-d16.d: New.
+	* testsuite/gas/arm/attr-ext-fpv5.d: New.
+	* testsuite/gas/arm/attr-ext-idiv.d: New.
+	* testsuite/gas/arm/attr-ext-mp.d: New.
+	* testsuite/gas/arm/attr-ext-neon-fp16.d: New.
+	* testsuite/gas/arm/attr-ext-neon-vfpv3.d: New.
+	* testsuite/gas/arm/attr-ext-neon-vfpv4.d: New.
+	* testsuite/gas/arm/attr-ext-sec.d: New.
+	* testsuite/gas/arm/attr-ext-vfpv3-d16-fp16.d: New.
+	* testsuite/gas/arm/attr-ext-vfpv3-d16.d: New.
+	* testsuite/gas/arm/attr-ext-vfpv3-fp16.d: New.
+	* testsuite/gas/arm/attr-ext-vfpv3.d: New.
+	* testsuite/gas/arm/attr-ext-vfpv3xd-fp.d: New.
+	* testsuite/gas/arm/attr-ext-vfpv3xd.d: New.
+	* testsuite/gas/arm/attr-ext-vfpv4-d16.d: New.
+	* testsuite/gas/arm/attr-ext-vfpv4-sp-d16.d: New.
+	* testsuite/gas/arm/attr-ext-vfpv4.d: New.
+	* testsuite/gas/arm/dotprod-mandatory-ext.d: New.
+	* testsuite/gas/arm/fpv5-d16.s: New.
+	* testsuite/gas/arm/fpv5-sp-d16.s: New.
+
 2019-03-28  Alan Modra  <amodra@gmail.com>
 
 	PR 24390

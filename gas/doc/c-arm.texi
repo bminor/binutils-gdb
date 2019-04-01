@@ -248,7 +248,9 @@ names are recognized:
 @code{armv8-r},
 @code{armv8.4-a},
 @code{armv8.5-a},
-@code{iwmmxt}
+@code{armv8-m.base},
+@code{armv8-m.main},
+@code{iwmmxt},
 @code{iwmmxt2}
 and
 @code{xscale}.
@@ -256,8 +258,167 @@ If both @code{-mcpu} and
 @code{-march} are specified, the assembler will use
 the setting for @code{-mcpu}.
 
-The architecture option can be extended with the same instruction set
-extension options as the @code{-mcpu} option.
+The architecture option can be extended with a set extension options.  These
+extensions are context sensitive, i.e. the same extension may mean different
+things when used with different architectures.  When used together with a
+@code{-mfpu} option, the union of both feature enablement is taken.
+See their availability and meaning below:
+
+For @code{armv5te}, @code{armv5texp}, @code{armv5tej}, @code{armv6}, @code{armv6j}, @code{armv6k}, @code{armv6z}, @code{armv6kz}, @code{armv6zk}, @code{armv6t2}, @code{armv6kt2} and @code{armv6zt2}:
+
+@code{+fp}: Enables VFPv2 instructions.
+@code{+nofp}: Disables all FPU instrunctions.
+
+For @code{armv7}:
+
+@code{+fp}: Enables VFPv3 instructions with 16 double-word registers.
+@code{+nofp}: Disables all FPU instructions.
+
+For @code{armv7-a}:
+
+@code{+fp}: Enables VFPv3 instructions with 16 double-word registers.
+@code{+vfpv3-d16}: Alias for @code{+fp}.
+@code{+vfpv3}: Enables VFPv3 instructions with 32 double-word registers.
+@code{+vfpv3-d16-fp16}: Enables VFPv3 with half precision floating-point
+conversion instructions and 16 double-word registers.
+@code{+vfpv3-fp16}: Enables VFPv3 with half precision floating-point conversion
+instructions and 32 double-word registers.
+@code{+vfpv4-d16}: Enables VFPv4 instructions with 16 double-word registers.
+@code{+vfpv4}: Enables VFPv4 instructions with 32 double-word registers.
+@code{+simd}: Enables VFPv3 and NEONv1 instructions with 32 double-word
+registers.
+@code{+neon}: Alias for @code{+simd}.
+@code{+neon-vfpv3}: Alias for @code{+simd}.
+@code{+neon-fp16}: Enables VFPv3, half precision floating-point conversion and
+NEONv1 instructions with 32 double-word registers.
+@code{+neon-vfpv4}: Enables VFPv4 and NEONv1 with Fused-MAC instructions and 32
+double-word registers.
+@code{+mp}: Enables Multiprocessing Extensions.
+@code{+sec}: Enables Security Extensions.
+@code{+nofp}: Disables all FPU and NEON instructions.
+@code{+nosimd}: Disables all NEON instructions.
+
+For @code{armv7ve}:
+
+@code{+fp}: Enables VFPv4 instructions with 16 double-word registers.
+@code{+vfpv4-d16}: Alias for @code{+fp}.
+@code{+vfpv3-d16}: Enables VFPv3 instructions with 16 double-word registers.
+@code{+vfpv3}: Enables VFPv3 instructions with 32 double-word registers.
+@code{+vfpv3-d16-fp16}: Enables VFPv3 with half precision floating-point
+conversion instructions and 16 double-word registers.
+@code{+vfpv3-fp16}: Enables VFPv3 with half precision floating-point conversion
+instructions and 32 double-word registers.
+@code{+vfpv4}: Enables VFPv4 instructions with 32 double-word registers.
+@code{+simd}: Enables VFPv4 and NEONv1 with Fused-MAC instructions and 32
+double-word registers.
+@code{+neon-vfpv4}: Alias for @code{+simd}.
+@code{+neon}: Enables VFPv3 and NEONv1 instructions with 32 double-word
+registers.
+@code{+neon-vfpv3}: Alias for @code{+neon}.
+@code{+neon-fp16}: Enables VFPv3, half precision floating-point conversion and
+NEONv1 instructions with 32 double-word registers.
+double-word registers.
+@code{+nofp}: Disables all FPU and NEON instructions.
+@code{+nosimd}: Disables all NEON instructions.
+
+For @code{armv7-r}:
+
+@code{+fp.sp}: Enables single-precision only VFPv3 instructions with 16
+double-word registers.
+@code{+vfpv3xd}: Alias for @code{+fp.sp}.
+@code{+fp}: Enables VFPv3 instructions with 16 double-word registers.
+@code{+vfpv3-d16}: Alias for @code{+fp}.
+@code{+vfpv3xd-fp16}: Enables single-precision only VFPv3 and half
+floating-point conversion instructions with 16 double-word registers.
+@code{+vfpv3-d16-fp16}: Enables VFPv3 and half precision floating-point
+conversion instructions with 16 double-word registers.
+@code{+idiv}: Enables integer division instructions in ARM mode.
+@code{+nofp}: Disables all FPU instructions.
+
+For @code{armv7e-m}:
+
+@code{+fp}: Enables single-precision only VFPv4 instructions with 16
+double-word registers.
+@code{+vfpvf4-sp-d16}: Alias for @code{+fp}.
+@code{+fpv5}: Enables single-precision only VFPv5 instructions with 16
+double-word registers.
+@code{+fp.dp}: Enables VFPv5 instructions with 16 double-word registers.
+@code{+fpv5-d16"}: Alias for @code{+fp.dp}.
+@code{+nofp}: Disables all FPU instructions.
+
+For @code{armv8-m.main}:
+
+@code{+dsp}: Enables DSP Extension.
+@code{+fp}: Enables single-precision only VFPv5 instructions with 16
+double-word registers.
+@code{+fp.dp}: Enables VFPv5 instructions with 16 double-word registers.
+@code{+nofp}: Disables all FPU instructions.
+@code{+nodsp}: Disables DSP Extension.
+
+For @code{armv8-a}:
+
+@code{+crc}: Enables CRC32 Extension.
+@code{+simd}: Enables VFP and NEON for Armv8-A.
+@code{+crypto}: Enables Cryptography Extensions for Armv8-A, implies
+@code{+simd}.
+@code{+sb}: Enables Speculation Barrier Instruction for Armv8-A.
+@code{+predres}: Enables Execution and Data Prediction Restriction Instruction
+for Armv8-A.
+@code{+nofp}: Disables all FPU, NEON and Cryptography Extensions.
+@code{+nocrypto}: Disables Cryptography Extensions.
+
+For @code{armv8.1-a}:
+
+@code{+simd}: Enables VFP and NEON for Armv8.1-A.
+@code{+crypto}: Enables Cryptography Extensions for Armv8-A, implies
+@code{+simd}.
+@code{+sb}: Enables Speculation Barrier Instruction for Armv8-A.
+@code{+predres}: Enables Execution and Data Prediction Restriction Instruction
+for Armv8-A.
+@code{+nofp}: Disables all FPU, NEON and Cryptography Extensions.
+@code{+nocrypto}: Disables Cryptography Extensions.
+
+For @code{armv8.2-a} and @code{armv8.3-a}:
+
+@code{+simd}: Enables VFP and NEON for Armv8.1-A.
+@code{+fp16}: Enables FP16 Extension for Armv8.2-A, implies @code{+simd}.
+@code{+fp16fml}: Enables FP16 Floating Point Multiplication Variant Extensions
+for Armv8.2-A, implies @code{+fp16}.
+@code{+crypto}: Enables Cryptography Extensions for Armv8-A, implies
+@code{+simd}.
+@code{+dotprod}: Enables Dot Product Extensions for Armv8.2-A, implies
+@code{+simd}.
+@code{+sb}: Enables Speculation Barrier Instruction for Armv8-A.
+@code{+predres}: Enables Execution and Data Prediction Restriction Instruction
+for Armv8-A.
+@code{+nofp}: Disables all FPU, NEON, Cryptography and Dot Product Extensions.
+@code{+nocrypto}: Disables Cryptography Extensions.
+
+For @code{armv8.4-a}:
+
+@code{+simd}: Enables VFP and NEON for Armv8.1-A and Dot Product Extensions for
+Armv8.2-A.
+@code{+fp16}: Enables FP16 Floating Point and Floating Point Multiplication
+Variant Extensions for Armv8.2-A, implies @code{+simd}.
+@code{+crypto}: Enables Cryptography Extensions for Armv8-A, implies
+@code{+simd}.
+@code{+sb}: Enables Speculation Barrier Instruction for Armv8-A.
+@code{+predres}: Enables Execution and Data Prediction Restriction Instruction
+for Armv8-A.
+@code{+nofp}: Disables all FPU, NEON, Cryptography and Dot Product Extensions.
+@code{+nocryptp}: Disables Cryptography Extensions.
+
+For @code{armv8.5-a}:
+
+@code{+simd}: Enables VFP and NEON for Armv8.1-A and Dot Product Extensions for
+Armv8.2-A.
+@code{+fp16}: Enables FP16 Floating Point and Floating Point Multiplication
+Variant Extensions for Armv8.2-A, implies @code{+simd}.
+@code{+crypto}: Enables Cryptography Extensions for Armv8-A, implies
+@code{+simd}.
+@code{+nofp}: Disables all FPU, NEON, Cryptography and Dot Product Extensions.
+@code{+nocryptp}: Disables Cryptography Extensions.
+
 
 @cindex @code{-mfpu=} command-line option, ARM
 @item -mfpu=@var{floating-point-format}
