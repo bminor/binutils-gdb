@@ -3098,9 +3098,9 @@ group_sections (struct csky_elf_link_hash_table *htab,
 	continue;
 
       /* Reverse the list: we must avoid placing stubs at the
-         beginning of the section because the beginning of the text
-         section may be required for an interrupt vector in bare metal
-         code.  */
+	 beginning of the section because the beginning of the text
+	 section may be required for an interrupt vector in bare metal
+	 code.  */
 #define NEXT_SEC PREV_SEC
       head = NULL;
       while (tail != NULL)
@@ -4509,7 +4509,7 @@ csky_elf_relocate_section (bfd *                  output_bfd,
 			{
 			  h->got.offset |= 1;
 			  if (GENERATE_RELATIVE_RELOC_P (info, h))
-                            relative_reloc = TRUE;
+			    relative_reloc = TRUE;
 			}
 		    }
 		  bfd_put_32 (output_bfd, relocation,

@@ -1542,9 +1542,9 @@ riscv_arch_str1 (riscv_subset_t *subset,
 
   snprintf (buf, bufsz, "%s%s%dp%d",
 	    underline,
-            subset->name,
-            subset->major_version,
-            subset->minor_version);
+	    subset->name,
+	    subset->major_version,
+	    subset->minor_version);
 
   strncat (attr_str, buf, bufsz);
 

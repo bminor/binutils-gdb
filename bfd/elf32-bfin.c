@@ -142,12 +142,12 @@ bfin_pcrel24_reloc (bfd *abfd,
 
 static bfd_reloc_status_type
 bfin_imm16_reloc (bfd *abfd,
-     		  arelent *reloc_entry,
-     		  asymbol *symbol,
-     		  void * data,
-     		  asection *input_section,
-     		  bfd *output_bfd,
-     		  char **error_message ATTRIBUTE_UNUSED)
+		  arelent *reloc_entry,
+		  asymbol *symbol,
+		  void * data,
+		  asection *input_section,
+		  bfd *output_bfd,
+		  char **error_message ATTRIBUTE_UNUSED)
 {
   bfd_vma relocation, x;
   bfd_size_type reloc_addr = reloc_entry->address;
@@ -281,11 +281,11 @@ bfin_byte4_reloc (bfd *abfd,
 static bfd_reloc_status_type
 bfin_bfd_reloc (bfd *abfd,
 		arelent *reloc_entry,
-     		asymbol *symbol,
-     		void * data,
-     		asection *input_section,
-     		bfd *output_bfd,
-     		char **error_message ATTRIBUTE_UNUSED)
+		asymbol *symbol,
+		void * data,
+		asection *input_section,
+		bfd *output_bfd,
+		char **error_message ATTRIBUTE_UNUSED)
 {
   bfd_vma relocation;
   bfd_size_type addr = reloc_entry->address;

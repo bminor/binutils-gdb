@@ -836,7 +836,7 @@ coff_mangle_symbols (bfd *bfd_ptr)
 	  for (i = 0; i < s->u.syment.n_numaux; i++)
 	    {
 	      combined_entry_type *a = s + i + 1;
-	      
+
 	      BFD_ASSERT (! a->is_sym);
 	      if (a->fix_tag)
 		{

@@ -385,7 +385,7 @@ bfd_elf32_bfd_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   for (i = 0; i < ARRAY_SIZE (xgate_reloc_map); i++)
     if (xgate_reloc_map[i].bfd_reloc_val == code)
       return &elf_xgate_howto_table[xgate_reloc_map[i].elf_reloc_val];
-  
+
   return NULL;
 }
 

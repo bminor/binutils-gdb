@@ -1,3 +1,12 @@
+2019-04-03  Alan Modra  <amodra@gmail.com>
+
+	* coff-i386.c, * coff-x86_64.c, * coffgen.c, * dwarf2.c,
+	* elf-m10200.c, * elf.c, * elf32-arm.c, * elf32-bfin.c,
+	* elf32-csky.c, * elf32-m32r.c, * elf32-microblaze.c, * elf32-pru.c,
+	* elf32-rx.c, * elf32-xgate.c, * elf64-sparc.c, * elfnn-ia64.c,
+	* elfxx-riscv.c, * elfxx-sparc.c, * linker.c, * mach-o.c,
+	* pe-x86_64.c, * pei-x86_64.c, * plugin.c: Whitespace fixes.
+
 2019-04-02  Jim Wilson  <jimw@sifive.com>
 
 	PR 24389

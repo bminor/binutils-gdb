@@ -959,7 +959,7 @@ _bfd_generic_link_add_archive_symbols
 
 	  if (arsym->name == NULL)
 	    goto error_return;
-				  
+
 	  h = bfd_link_hash_lookup (info->hash, arsym->name,
 				    FALSE, FALSE, TRUE);
 

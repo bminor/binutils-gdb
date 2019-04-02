@@ -3872,7 +3872,7 @@ elfNN_ia64_relocate_section (bfd *output_bfd,
 	  ret_val = FALSE;
 	  continue;
 	}
-      
+
       r_symndx = ELFNN_R_SYM (rel->r_info);
       h = NULL;
       sym = NULL;

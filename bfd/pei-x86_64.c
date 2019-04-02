@@ -126,7 +126,7 @@ pex64_get_unwind_info (bfd *abfd, struct pex64_unwind_info *ui,
   ex_dta += ui->SizeOfBlock;
   if (ex_dta >= ex_dta_end)
     return FALSE;
-  
+
   switch (ui->Flags)
     {
     case UNW_FLAG_CHAININFO:
@@ -191,7 +191,7 @@ pex64_xdata_print_uwd_codes (FILE *file, bfd *abfd,
 	  fprintf (file, _("warning: corrupt unwind data\n"));
 	  return;
 	}
-	  
+
       fprintf (file, "\tv2 epilog (length: %02x) at pc+:",
 	       ui->rawUnwindCodes[0]);
 
@@ -220,7 +220,7 @@ pex64_xdata_print_uwd_codes (FILE *file, bfd *abfd,
       fprintf (file, _("warning: corrupt unwind data\n"));
       return;
     }
-	  
+
   for (; i < ui->CountOfCodes; i++)
     {
       const bfd_byte *dta = ui->rawUnwindCodes + 2 * i;

@@ -661,7 +661,7 @@ const bfd_target
      bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* hdrs */
 
 /* Note that we allow an object file to be treated as a core file as well.  */
-    
+
 #ifdef COFF_CHECK_FORMAT
   {				/* bfd_check_format */
     _bfd_dummy_target,

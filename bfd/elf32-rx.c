@@ -3318,8 +3318,7 @@ rx_elf_object_p (bfd * abfd)
 static bfd_boolean
 rx_linux_object_p (bfd * abfd)
 {
-  bfd_default_set_arch_mach (abfd, bfd_arch_rx,
-           elf32_rx_machine (abfd));
+  bfd_default_set_arch_mach (abfd, bfd_arch_rx, elf32_rx_machine (abfd));
   return TRUE;
 }
  
@@ -4083,6 +4082,6 @@ rx_additional_link_map_text (bfd *obfd, struct bfd_link_info *info, FILE *mapfil
 #define elf_backend_object_p			rx_linux_object_p
 #undef  elf_symbol_leading_char
 #undef	elf32_bed
-#define	elf32_bed 				elf32_rx_le_linux_bed
+#define	elf32_bed				elf32_rx_le_linux_bed
 
 #include "elf32-target.h"

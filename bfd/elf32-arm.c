@@ -9534,7 +9534,7 @@ elf32_arm_allocate_plt_entry (struct bfd_link_info *info,
 	arm_plt->got_offset = sgotplt->size - 8 * htab->num_tls_desc;
       if (htab->fdpic_p)
 	/* Function descriptor takes 64 bits in GOT.  */
-        sgotplt->size += 8;
+	sgotplt->size += 8;
       else
 	sgotplt->size += 4;
     }
@@ -9646,10 +9646,10 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
 	 After the reserved .got.plt entries, all symbols appear in
 	 the same order as in .plt.  */
       if (htab->fdpic_p)
-        /* Function descriptor takes 8 bytes.  */
-        plt_index = (got_offset - got_header_size) / 8;
+	/* Function descriptor takes 8 bytes.  */
+	plt_index = (got_offset - got_header_size) / 8;
       else
-        plt_index = (got_offset - got_header_size) / 4;
+	plt_index = (got_offset - got_header_size) / 4;
 
       /* Calculate the address of the GOT entry.  */
       got_address = (sgot->output_section->vma
@@ -12620,7 +12620,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 
     case R_ARM_GOTOFFFUNCDESC:
       {
-        if (h == NULL)
+	if (h == NULL)
 	  {
 	    struct fdpic_local *local_fdpic_cnts = elf32_arm_local_fdpic_cnts(input_bfd);
 	    int dynindx = elf_section_data (sym_sec->output_section)->dynindx;
@@ -12681,7 +12681,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 
     case R_ARM_GOTFUNCDESC:
       {
-        if (h != NULL)
+	if (h != NULL)
 	  {
 	    Elf_Internal_Rela outrel;
 
@@ -12741,9 +12741,10 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 		outrel.r_addend = 0;
 		if (h->dynindx == -1 && !bfd_link_pic(info))
 		  if (h->root.type == bfd_link_hash_undefweak)
-                    arm_elf_add_rofixup(output_bfd, globals->srofixup, -1);
+		    arm_elf_add_rofixup(output_bfd, globals->srofixup, -1);
 		  else
-                    arm_elf_add_rofixup(output_bfd, globals->srofixup, outrel.r_offset);
+		    arm_elf_add_rofixup(output_bfd, globals->srofixup,
+					outrel.r_offset);
 		else
 		  elf32_arm_add_dynreloc (output_bfd, info, srelgot, &outrel);
 		eh->fdpic_cnts.gotfuncdesc_offset |= 1;
@@ -12761,7 +12762,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 
     case R_ARM_FUNCDESC:
       {
-        if (h == NULL)
+	if (h == NULL)
 	  {
 	    struct fdpic_local *local_fdpic_cnts = elf32_arm_local_fdpic_cnts(input_bfd);
 	    Elf_Internal_Rela outrel;
@@ -16334,9 +16335,9 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
       eh->fdpic_cnts.gotfuncdesc_offset = s->size;
       s->size += 4;
       if (h->dynindx == -1 && !bfd_link_pic(info))
-        htab->srofixup->size += 4;
+	htab->srofixup->size += 4;
       else
-        elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
+	elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
     }
 
   if (eh->fdpic_cnts.funcdesc_cnt > 0)
@@ -17843,15 +17844,15 @@ elf32_arm_output_plt_map_1 (output_arch_syminfo *osi,
 	: ARM_MAP_ARM;
 
       if (elf32_arm_plt_needs_thumb_stub_p (osi->info, arm_plt))
-        if (!elf32_arm_output_map_sym (osi, ARM_MAP_THUMB, addr - 4))
-          return FALSE;
+	if (!elf32_arm_output_map_sym (osi, ARM_MAP_THUMB, addr - 4))
+	  return FALSE;
       if (!elf32_arm_output_map_sym (osi, type, addr))
-        return FALSE;
+	return FALSE;
       if (!elf32_arm_output_map_sym (osi, ARM_MAP_DATA, addr + 16))
-        return FALSE;
+	return FALSE;
       if (htab->plt_entry_size == 4 * ARRAY_SIZE(elf32_arm_fdpic_plt_entry))
-        if (!elf32_arm_output_map_sym (osi, type, addr + 24))
-          return FALSE;
+	if (!elf32_arm_output_map_sym (osi, type, addr + 24))
+	  return FALSE;
     }
   else if (using_thumb_only (htab))
     {
@@ -20454,7 +20455,7 @@ elf32_arm_fdpic_omit_section_dynsym (bfd *output_bfd ATTRIBUTE_UNUSED,
 #define elf32_bed				elf32_arm_fdpic_bed
 
 #undef  bfd_elf32_bfd_link_hash_table_create
-#define bfd_elf32_bfd_link_hash_table_create 	elf32_arm_fdpic_link_hash_table_create
+#define bfd_elf32_bfd_link_hash_table_create	elf32_arm_fdpic_link_hash_table_create
 
 #undef elf_backend_omit_section_dynsym
 #define elf_backend_omit_section_dynsym		elf32_arm_fdpic_omit_section_dynsym

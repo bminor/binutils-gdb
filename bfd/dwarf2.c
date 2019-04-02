@@ -4300,7 +4300,7 @@ section_vma_same (const bfd *abfd, const struct dwarf2_debug *stash)
      stashed vma information.  */
   if (abfd->section_count != stash->sec_vma_count)
     return FALSE;
-     
+
   for (i = 0, s = abfd->sections; i < abfd->section_count; i++, s = s->next)
     {
       bfd_vma vma;

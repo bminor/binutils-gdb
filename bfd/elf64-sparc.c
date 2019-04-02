@@ -116,17 +116,17 @@ elf64_sparc_slurp_one_reloc_table (bfd *abfd, asection *asect,
       if (ELF64_R_SYM (rela.r_info) == STN_UNDEF)
 	relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
       else if (/* PR 17512: file: 996185f8.  */
-               (!dynamic && ELF64_R_SYM(rela.r_info) > bfd_get_symcount(abfd))
-               || (dynamic
-                   && ELF64_R_SYM(rela.r_info) > bfd_get_dynamic_symcount(abfd)))
-        {
-          _bfd_error_handler
+	       ELF64_R_SYM (rela.r_info) > (dynamic
+					    ? bfd_get_dynamic_symcount (abfd)
+					    : bfd_get_symcount (abfd)))
+	{
+	  _bfd_error_handler
 	    /* xgettext:c-format */
 	    (_("%pB(%pA): relocation %d has invalid symbol index %ld"),
 	     abfd, asect, i, (long) ELF64_R_SYM (rela.r_info));
 	  bfd_set_error (bfd_error_bad_value);
 	  relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
-        }
+	}
       else
 	{
 	  asymbol **ps, *s;

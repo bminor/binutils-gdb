@@ -228,7 +228,7 @@ mn10200_info_to_howto (bfd *abfd,
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
-  
+
   cache_ptr->howto = &elf_mn10200_howto_table[r_type];
   return cache_ptr->howto != NULL;
 }

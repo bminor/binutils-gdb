@@ -647,7 +647,7 @@ cpusubtype (unsigned long cputype, unsigned long cpusubtype)
 	  break;
 	}
       break;
-	
+
     case BFD_MACH_O_CPU_TYPE_ARM:
       switch (cpusubtype)
 	{
@@ -667,7 +667,7 @@ cpusubtype (unsigned long cputype, unsigned long cpusubtype)
 	  break;
 	}
       break;
-      
+
     case BFD_MACH_O_CPU_TYPE_ARM64:
       switch (cpusubtype)
 	{
@@ -707,7 +707,7 @@ bfd_mach_o_bfd_print_private_bfd_data (bfd *abfd, void *ptr)
   fprintf (file, _("   sizeocmds:  %#lx\n"), (long) mdata->header.sizeofcmds);
   fprintf (file, _("   flags:      %#lx\n"), (long) mdata->header.flags);
   fprintf (file, _("   version:    %x\n"), mdata->header.version);
-  
+
   return TRUE;
 }
 
@@ -748,7 +748,7 @@ bfd_mach_o_bfd_copy_private_header_data (bfd *ibfd, bfd *obfd)
 
   /* Copy the cpusubtype.  */
   omdata->header.cpusubtype = imdata->header.cpusubtype;
-    
+
   /* Copy commands.  */
   for (icmd = imdata->first_command; icmd != NULL; icmd = icmd->next)
     {
@@ -4928,11 +4928,11 @@ bfd_mach_o_read_command (bfd *abfd, bfd_mach_o_load_command *command)
       break;
     case BFD_MACH_O_LC_NOTE:
       if (!bfd_mach_o_read_note (abfd, command))
-        return FALSE;
+	return FALSE;
       break;
     case BFD_MACH_O_LC_BUILD_VERSION:
       if (!bfd_mach_o_read_build_version (abfd, command))
-        return FALSE;
+	return FALSE;
       break;
     default:
       command->len = 0;

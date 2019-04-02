@@ -1310,7 +1310,7 @@ m32r_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
   /* xgettext:c-format */
   _bfd_error_handler (_("%pB: unsupported relocation type %#x"), abfd, r_type);
   bfd_set_error (bfd_error_bad_value);
-  return FALSE;  
+  return FALSE;
 }
 
 

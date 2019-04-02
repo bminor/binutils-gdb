@@ -4792,7 +4792,7 @@ _bfd_sparc_elf_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *i
   htab = _bfd_sparc_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
   dynobj = htab->elf.dynobj;
-  
+
   /* We arranged in size_dynamic_sections to put the STT_REGISTER
      entries at the end of the dynlocal list, so they came at the end
      of the local symbols in the symtab.  Except that they aren't
@@ -4802,7 +4802,7 @@ _bfd_sparc_elf_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *i
     {
       asection *dynsymsec = bfd_get_linker_section (dynobj, ".dynsym");
       struct elf_link_local_dynamic_entry *e;
-      
+
       for (e = elf_hash_table (info)->dynlocal; e ; e = e->next)
 	if (e->input_indx == -1)
 	  break;
@@ -4810,7 +4810,7 @@ _bfd_sparc_elf_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *i
 	elf_section_data (dynsymsec->output_section)->this_hdr.sh_info
 	  = e->dynindx;
     }
-  
+
   sdyn = bfd_get_linker_section (dynobj, ".dynamic");
 
   if (elf_hash_table (info)->dynamic_sections_created)

@@ -421,7 +421,7 @@ pru_elf32_info_to_howto (bfd *abfd, arelent *cache_ptr,
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
-    
+
   cache_ptr->howto = lookup_howto (r_type);
   return cache_ptr->howto != NULL;
 }

@@ -252,14 +252,14 @@ try_load_plugin (const char *pname, bfd *abfd, int *has_plugin_p)
        plugin_list_iter = plugin_list_iter->next)
     {
       if (plugin_handle == plugin_list_iter->handle)
-        {
-          dlclose (plugin_handle);
-          if (!plugin_list_iter->claim_file)
-            return 0;
+	{
+	  dlclose (plugin_handle);
+	  if (!plugin_list_iter->claim_file)
+	    return 0;
 
-          register_claim_file (plugin_list_iter->claim_file);
-          goto have_claim_file;
-        }
+	  register_claim_file (plugin_list_iter->claim_file);
+	  goto have_claim_file;
+	}
     }
 
   plugin_list_iter = (struct plugin_list_entry *) xmalloc (sizeof *plugin_list_iter);
