@@ -2251,19 +2251,20 @@ lang_map (void)
 	  || file->flags.just_syms)
 	continue;
 
-      for (s = file->the_bfd->sections; s != NULL; s = s->next)
-	if ((s->output_section == NULL
-	     || s->output_section->owner != link_info.output_bfd)
-	    && (s->flags & (SEC_LINKER_CREATED | SEC_KEEP)) == 0)
-	  {
-	    if (!dis_header_printed)
-	      {
-		fprintf (config.map_file, _("\nDiscarded input sections\n\n"));
-		dis_header_printed = TRUE;
-	      }
+      if (config.print_map_discarded)
+	for (s = file->the_bfd->sections; s != NULL; s = s->next)
+	  if ((s->output_section == NULL
+	       || s->output_section->owner != link_info.output_bfd)
+	      && (s->flags & (SEC_LINKER_CREATED | SEC_KEEP)) == 0)
+	    {
+	      if (! dis_header_printed)
+		{
+		  fprintf (config.map_file, _("\nDiscarded input sections\n\n"));
+		  dis_header_printed = TRUE;
+		}
 
-	    print_input_section (s, TRUE);
-	  }
+	      print_input_section (s, TRUE);
+	    }
     }
 
   minfo (_("\nMemory Configuration\n\n"));

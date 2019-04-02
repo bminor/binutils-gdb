@@ -264,6 +264,7 @@ main (int argc, char **argv)
   config.make_executable = TRUE;
   config.magic_demand_paged = TRUE;
   config.text_read_only = TRUE;
+  config.print_map_discarded = TRUE;
   link_info.disable_target_specific_optimizations = -1;
 
   command_line.warn_mismatch = TRUE;

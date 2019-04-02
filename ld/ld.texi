@@ -783,6 +783,14 @@ when merging properties in  @file{foo.o}, whose 0xc0010001 property value
 is 0x1, and @file{bar.o}, whose 0xc0010001 property value is 0x1.
 @end itemize
 
+@cindex link map discarded
+@kindex --print-map-discarded
+@kindex --no-print-map-discarded
+@item --print-map-discarded
+@itemx --no-print-map-discarded
+Print (or do not print) the list of discarded and garbage collected sections
+in the link map.  Enabled by default.
+
 @kindex -n
 @cindex read-only text
 @cindex NMAGIC

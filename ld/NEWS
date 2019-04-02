@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add command-line option --no-print-map-discarded.
+
 Changes in 2.33:
 
 * Add target handlers for AArch64 for ELF GNU program properties.

@@ -318,6 +318,9 @@ typedef struct
 
   /* The common page size for ELF.  */
   bfd_vma commonpagesize;
+
+  /* If set, print discarded sections in map file output.  */
+  bfd_boolean print_map_discarded;
 } ld_config_type;
 
 extern ld_config_type config;

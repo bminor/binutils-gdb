@@ -1,3 +1,21 @@
+2019-04-11  Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+	* NEWS: Mention new option --no-print-map-discarded.
+	* ld.h (ld_config_type) <print_map_discarded>: New field.
+	* ldlang.c (lang_map): Conditionally output discarded sections
+	in map files based on configuration option.
+	* ldlex.h (option_values) <OPTION_PRINT_MAP_DISCARDED,
+	OPTION_NO_PRINT_MAP_DISCARDED>: New.
+	* ldmain.c (main): Enabled print_map_discarded by default.
+	* lexsup.c (ld_options): Add new command-line options.
+	(parse_args) <OPTION_NO_PRINT_MAP_DISCARDED,
+	OPTION_PRINT_MAP_DISCARDED>: New cases.
+	* ld.texi: Document new options.
+	* testsuite/ld-gc/gc.exp: Add new test.
+	* testsuite/ld-gc/skip-map-discarded.s: New file.
+	* testsuite/ld-gc/skip-map-discarded.d: New file.
+	* testsuite/ld-gc/skip-map-discarded.map: New file.
+
 2019-04-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld.texi: Document -z cet-report=[none|warning|error].
