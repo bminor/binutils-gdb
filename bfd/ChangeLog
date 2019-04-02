@@ -1,3 +1,10 @@
+2019-04-02  Jim Wilson  <jimw@sifive.com>
+
+	PR 24389
+	* elfnn-riscv.c (_bfd_riscv_elf_merge_private_bfd_data): Move read of
+	ELF header flags to after check for ELF object file.  Loop through
+	sections looking for code sections, if none, then skip ABI checks.
+
 2019-03-30  Andrew Waterman  <andrew@sifive.com>
 
 	* elfnn-riscv.c (_bfd_riscv_relax_call): Only check ARCH_SIZE for
