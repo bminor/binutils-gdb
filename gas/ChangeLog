@@ -1,3 +1,13 @@
+2019-04-03  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (convert_frag_immed): Drop
+	convert_frag_immed_finish_loop invocation.
+	(convert_frag_immed_finish_loop): Drop declaration and
+	definition.
+	* config/xtensa-relax.c (widen_spec_list): Replace loop
+	widening that uses addi/addmi with widening that uses l32r
+	and const16.
+
 2019-04-01  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	* config/tc-arm.c (arm_ext_table): New struct type.

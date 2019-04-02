@@ -10668,7 +10668,6 @@ convert_frag_fill_nop (fragS *fragP)
 static fixS *fix_new_exp_in_seg
   (segT, subsegT, fragS *, int, int, expressionS *, int,
    bfd_reloc_code_real_type);
-static void convert_frag_immed_finish_loop (segT, fragS *, TInsn *);
 
 static void
 convert_frag_immed (segT segP,
@@ -10910,9 +10909,6 @@ convert_frag_immed (segT segP,
 	}
     }
 
-  if (expanded && xtensa_opcode_is_loop (isa, orig_tinsn.opcode) == 1)
-    convert_frag_immed_finish_loop (segP, fragP, &orig_tinsn);
-
   if (expanded && is_direct_call_opcode (orig_tinsn.opcode))
     {
       /* Add an expansion note on the expanded instruction.  */
@@ -10948,122 +10944,6 @@ fix_new_exp_in_seg (segT new_seg,
   return new_fix;
 }
 
-
-/* Relax a loop instruction so that it can span loop >256 bytes.
-
-                  loop    as, .L1
-          .L0:
-                  rsr     as, LEND
-                  wsr     as, LBEG
-                  addi    as, as, lo8 (label-.L1)
-                  addmi   as, as, mid8 (label-.L1)
-                  wsr     as, LEND
-                  isync
-                  rsr     as, LCOUNT
-                  addi    as, as, 1
-          .L1:
-                  <<body>>
-          label:
-*/
-
-static void
-convert_frag_immed_finish_loop (segT segP, fragS *fragP, TInsn *tinsn)
-{
-  TInsn loop_insn;
-  TInsn addi_insn;
-  TInsn addmi_insn;
-  unsigned long target;
-  static xtensa_insnbuf insnbuf = NULL;
-  unsigned int loop_length, loop_length_hi, loop_length_lo;
-  xtensa_isa isa = xtensa_default_isa;
-  addressT loop_offset;
-  addressT addi_offset = 9;
-  addressT addmi_offset = 12;
-  fragS *next_fragP;
-  int target_count;
-
-  if (!insnbuf)
-    insnbuf = xtensa_insnbuf_alloc (isa);
-
-  /* Get the loop offset.  */
-  loop_offset = get_expanded_loop_offset (tinsn->opcode);
-
-  /* Validate that there really is a LOOP at the loop_offset.  Because
-     loops are not bundleable, we can assume that the instruction will be
-     in slot 0.  */
-  tinsn_from_chars (&loop_insn, fragP->fr_opcode + loop_offset, 0);
-  tinsn_immed_from_frag (&loop_insn, fragP, 0);
-
-  gas_assert (xtensa_opcode_is_loop (isa, loop_insn.opcode) == 1);
-  addi_offset += loop_offset;
-  addmi_offset += loop_offset;
-
-  gas_assert (tinsn->ntok == 2);
-  if (tinsn->tok[1].X_op == O_constant)
-    target = tinsn->tok[1].X_add_number;
-  else if (tinsn->tok[1].X_op == O_symbol)
-    {
-      /* Find the fragment.  */
-      symbolS *sym = tinsn->tok[1].X_add_symbol;
-      gas_assert (S_GET_SEGMENT (sym) == segP
-	      || S_GET_SEGMENT (sym) == absolute_section);
-      target = (S_GET_VALUE (sym) + tinsn->tok[1].X_add_number);
-    }
-  else
-    {
-      as_bad (_("invalid expression evaluation type %d"), tinsn->tok[1].X_op);
-      target = 0;
-    }
-
-  loop_length = target - (fragP->fr_address + fragP->fr_fix);
-  loop_length_hi = loop_length & ~0x0ff;
-  loop_length_lo = loop_length & 0x0ff;
-  if (loop_length_lo >= 128)
-    {
-      loop_length_lo -= 256;
-      loop_length_hi += 256;
-    }
-
-  /* Because addmi sign-extends the immediate, 'loop_length_hi' can be at most
-     32512.  If the loop is larger than that, then we just fail.  */
-  if (loop_length_hi > 32512)
-    as_bad_where (fragP->fr_file, fragP->fr_line,
-		  _("loop too long for LOOP instruction"));
-
-  tinsn_from_chars (&addi_insn, fragP->fr_opcode + addi_offset, 0);
-  gas_assert (addi_insn.opcode == xtensa_addi_opcode);
-
-  tinsn_from_chars (&addmi_insn, fragP->fr_opcode + addmi_offset, 0);
-  gas_assert (addmi_insn.opcode == xtensa_addmi_opcode);
-
-  set_expr_const (&addi_insn.tok[2], loop_length_lo);
-  tinsn_to_insnbuf (&addi_insn, insnbuf);
-
-  fragP->tc_frag_data.is_insn = TRUE;
-  xtensa_insnbuf_to_chars
-    (isa, insnbuf, (unsigned char *) fragP->fr_opcode + addi_offset, 0);
-
-  set_expr_const (&addmi_insn.tok[2], loop_length_hi);
-  tinsn_to_insnbuf (&addmi_insn, insnbuf);
-  xtensa_insnbuf_to_chars
-    (isa, insnbuf, (unsigned char *) fragP->fr_opcode + addmi_offset, 0);
-
-  /* Walk through all of the frags from here to the loop end
-     and mark them as no_transform to keep them from being modified
-     by the linker.  If we ever have a relocation for the
-     addi/addmi of the difference of two symbols we can remove this.  */
-
-  target_count = 0;
-  for (next_fragP = fragP; next_fragP != NULL;
-       next_fragP = next_fragP->fr_next)
-    {
-      next_fragP->tc_frag_data.is_no_transform = TRUE;
-      if (next_fragP->tc_frag_data.is_loop_target)
-	target_count++;
-      if (target_count == 2)
-	break;
-    }
-}
 
 
 /* A map that keeps information on a per-subsegment basis.  This is
