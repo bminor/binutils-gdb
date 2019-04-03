@@ -1,3 +1,12 @@
+2019-04-03  Alan Modra  <amodra@gmail.com>
+
+	* ldlex.l: Formatting.
+	(CMDFILENAMECHAR, CMDFILENAMECHAR1): Delete.
+	(FILENAMECHAR1, SYMBOLNAMECHAR1, FILENAMECHAR, WILDCHAR),
+	(NOCFILENAMECHAR): Remove duplicate chars.  Reorder.
+	(SYMBOLCHARN): Likewise.  Rename to SYMBOLNAMECHAR.
+	(<INPUTLIST>"$SYSROOT"..): Delete rule.
+
 2019-03-29  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* testsuite/ld-xtensa/relax-undef-weak-pie-export-dynamic.d: New
