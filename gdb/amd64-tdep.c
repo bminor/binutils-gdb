@@ -20,34 +20,38 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "opcode/i386.h"
-#include "dis-asm.h"
+
+/* Standard C++ includes.  */
+#include <algorithm>
+
+/* Local non-gdb includes.  */
+#include "amd64-tdep.h"
 #include "arch-utils.h"
+#include "arch/amd64.h"
+#include "ax-gdb.h"
+#include "ax.h"
 #include "block.h"
+#include "common/byte-vector.h"
+#include "common/x86-xstate.h"
+#include "dis-asm.h"
+#include "disasm.h"
 #include "dummy-frame.h"
-#include "frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
-#include "inferior.h"
-#include "infrun.h"
+#include "frame.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
+#include "i387-tdep.h"
+#include "inferior.h"
+#include "infrun.h"
 #include "objfiles.h"
+#include "opcode/i386.h"
+#include "osabi.h"
+#include "producer.h"
 #include "regcache.h"
 #include "regset.h"
 #include "symfile.h"
-#include "disasm.h"
-#include "amd64-tdep.h"
-#include "i387-tdep.h"
-#include "common/x86-xstate.h"
-#include <algorithm>
 #include "target-descriptions.h"
-#include "arch/amd64.h"
-#include "producer.h"
-#include "ax.h"
-#include "ax-gdb.h"
-#include "common/byte-vector.h"
-#include "osabi.h"
 #include "x86-tdep.h"
 
 /* Note that the AMD64 architecture was previously known as x86-64.

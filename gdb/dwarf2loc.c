@@ -20,30 +20,34 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "ui-out.h"
-#include "value.h"
-#include "frame.h"
-#include "gdbcore.h"
-#include "target.h"
-#include "inferior.h"
-#include "ax.h"
+
+/* Standard C++ includes.  */
+#include <algorithm>
+#include <unordered_set>
+#include <vector>
+
+/* Local non-gdb includes.  */
 #include "ax-gdb.h"
-#include "regcache.h"
-#include "objfiles.h"
+#include "ax.h"
 #include "block.h"
-#include "gdbcmd.h"
+#include "common/byte-vector.h"
+#include "common/selftest.h"
+#include "common/underlying.h"
+#include "compile/compile.h"
 #include "complaints.h"
+#include "dwarf2-frame.h"
 #include "dwarf2.h"
 #include "dwarf2expr.h"
 #include "dwarf2loc.h"
-#include "dwarf2-frame.h"
-#include "compile/compile.h"
-#include "common/selftest.h"
-#include <algorithm>
-#include <vector>
-#include <unordered_set>
-#include "common/underlying.h"
-#include "common/byte-vector.h"
+#include "frame.h"
+#include "gdbcmd.h"
+#include "gdbcore.h"
+#include "inferior.h"
+#include "objfiles.h"
+#include "regcache.h"
+#include "target.h"
+#include "ui-out.h"
+#include "value.h"
 
 extern int dwarf_always_disassemble;
 

@@ -18,11 +18,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "value.h"
-#include "cp-abi.h"
+
+/* Local non-gdb includes.  */
 #include "command.h"
+#include "cp-abi.h"
 #include "gdbcmd.h"
 #include "ui-out.h"
+#include "value.h"
+
 static struct cp_abi_ops *find_cp_abi (const char *short_name);
 
 static struct cp_abi_ops current_cp_abi = { "", NULL };

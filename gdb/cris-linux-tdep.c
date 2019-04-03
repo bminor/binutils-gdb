@@ -22,12 +22,13 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "osabi.h"
+
+/* Local non-gdb includes.  */
+#include "cris-tdep.h"
 #include "linux-tdep.h"
+#include "osabi.h"
 #include "solib-svr4.h"
 #include "symtab.h"
-
-#include "cris-tdep.h"
 
 static void
 cris_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)

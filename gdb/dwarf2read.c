@@ -29,67 +29,73 @@
    E.g., load_partial_dies, read_partial_die.  */
 
 #include "defs.h"
-#include "dwarf2read.h"
-#include "dwarf-index-cache.h"
-#include "dwarf-index-common.h"
-#include "bfd.h"
-#include "elf-bfd.h"
-#include "symtab.h"
-#include "gdbtypes.h"
-#include "objfiles.h"
-#include "dwarf2.h"
-#include "buildsym.h"
-#include "demangle.h"
-#include "gdb-demangle.h"
-#include "expression.h"
-#include "filenames.h"	/* for DOSish file names */
-#include "macrotab.h"
-#include "language.h"
-#include "complaints.h"
-#include "dwarf2expr.h"
-#include "dwarf2loc.h"
-#include "cp-support.h"
-#include "hashtab.h"
-#include "command.h"
-#include "gdbcmd.h"
-#include "block.h"
-#include "addrmap.h"
-#include "typeprint.h"
-#include "psympriv.h"
-#include <sys/stat.h>
-#include "completer.h"
-#include "common/vec.h"
-#include "c-lang.h"
-#include "go-lang.h"
-#include "valprint.h"
-#include "gdbcore.h" /* for gnutarget */
-#include "gdb/gdb-index.h"
+
+/* Standard C includes.  */
 #include <ctype.h>
-#include "gdb_bfd.h"
-#include "f-lang.h"
-#include "source.h"
-#include "common/filestuff.h"
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+/* Standard C++ includes.  */
+#include <algorithm>
+#include <cmath>
+#include <forward_list>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+
+/* Local non-gdb includes.  */
+#include "addrmap.h"
+#include "bfd.h"
+#include "block.h"
 #include "build-id.h"
-#include "namespace.h"
-#include "common/gdb_unlinker.h"
+#include "buildsym.h"
+#include "c-lang.h"
+#include "command.h"
+#include "common/byte-vector.h"
+#include "common/filestuff.h"
 #include "common/function-view.h"
 #include "common/gdb_optional.h"
-#include "common/underlying.h"
-#include "common/byte-vector.h"
+#include "common/gdb_unlinker.h"
 #include "common/hash_enum.h"
-#include "filename-seen-cache.h"
-#include "producer.h"
-#include <fcntl.h>
-#include <sys/types.h>
-#include <algorithm>
-#include <unordered_set>
-#include <unordered_map>
-#include "common/selftest.h"
-#include <cmath>
-#include <set>
-#include <forward_list>
-#include "rust-lang.h"
 #include "common/pathstuff.h"
+#include "common/selftest.h"
+#include "common/underlying.h"
+#include "common/vec.h"
+#include "complaints.h"
+#include "completer.h"
+#include "cp-support.h"
+#include "demangle.h"
+#include "dwarf-index-cache.h"
+#include "dwarf-index-common.h"
+#include "dwarf2.h"
+#include "dwarf2expr.h"
+#include "dwarf2loc.h"
+#include "dwarf2read.h"
+#include "elf-bfd.h"
+#include "expression.h"
+#include "f-lang.h"
+#include "filename-seen-cache.h"
+#include "filenames.h"
+#include "gdb-demangle.h"
+#include "gdb/gdb-index.h"
+#include "gdb_bfd.h"
+#include "gdbcmd.h"
+#include "gdbcore.h"
+#include "gdbtypes.h"
+#include "go-lang.h"
+#include "hashtab.h"
+#include "language.h"
+#include "macrotab.h"
+#include "namespace.h"
+#include "objfiles.h"
+#include "producer.h"
+#include "psympriv.h"
+#include "rust-lang.h"
+#include "source.h"
+#include "symtab.h"
+#include "typeprint.h"
+#include "valprint.h"
 
 /* When == 1, print basic high level tracing messages.
    When > 1, be more verbose.

@@ -18,16 +18,20 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+
+/* Standard C includes.  */
 #include <ctype.h>
+
+/* Local non-gdb includes.  */
+#include "annotate.h"
+#include "arch-utils.h"
 #include "breakpoint.h"
+#include "cli/cli-utils.h"
 #include "gdbcmd.h"
 #include "inferior.h"
-#include "cli/cli-utils.h"
-#include "annotate.h"
 #include "mi/mi-common.h"
-#include "valprint.h"
-#include "arch-utils.h"
 #include "observable.h"
+#include "valprint.h"
 #include "xml-syscall.h"
 
 /* An instance of this type is used to represent a syscall catchpoint.

@@ -21,16 +21,18 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "gdb_obstack.h"
+
+/* Local non-gdb includes.  */
 #include "bfd.h"
-#include "symtab.h"
-#include "gdbtypes.h"
 #include "expression.h"
-#include "value.h"
-#include "gdbcore.h"
-#include "target.h"
 #include "f-lang.h"
+#include "gdb_obstack.h"
+#include "gdbcore.h"
+#include "gdbtypes.h"
+#include "symtab.h"
+#include "target.h"
 #include "typeprint.h"
+#include "value.h"
 
 #if 0				/* Currently unused.  */
 static void f_type_print_args (struct type *, struct ui_file *);

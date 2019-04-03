@@ -18,16 +18,19 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "symtab.h"
-#include "gdbtypes.h"
-#include "expression.h"
-#include "value.h"
-#include "valprint.h"
-#include "language.h"
+
+/* Local non-gdb includes.  */
 #include "c-lang.h"
 #include "cp-abi.h"
-#include "target.h"
+#include "expression.h"
+#include "gdbtypes.h"
+#include "language.h"
 #include "objfiles.h"
+#include "symtab.h"
+#include "target.h"
+#include "valprint.h"
+#include "value.h"
+
 
 
 /* A helper for c_textual_element_type.  This checks the name of the

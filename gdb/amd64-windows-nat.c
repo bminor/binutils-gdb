@@ -16,11 +16,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+
+/* Standard C includes.  */
+#include <windows.h>
+
+/* Local non-gdb includes.  */
+#include "amd64-tdep.h"
 #include "windows-nat.h"
 #include "x86-nat.h"
-#include "amd64-tdep.h"
-
-#include <windows.h>
 
 #define context_offset(x) (offsetof (CONTEXT, x))
 static const int mappings[] =

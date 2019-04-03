@@ -40,21 +40,24 @@
      */
 
 #include "defs.h"
-#include "gdbthread.h"
-#include "target.h"
-#include "inferior.h"
-#include "regcache.h"
-#include "gdbcmd.h"
-#include "ppc-tdep.h"
-#include "observable.h"
-#include "objfiles.h"
 
+/* Standard C includes.  */
 #include <procinfo.h>
-#include <sys/types.h>
-#include <sys/ptrace.h>
-#include <sys/reg.h>
 #include <sched.h>
 #include <sys/pthdebug.h>
+#include <sys/ptrace.h>
+#include <sys/reg.h>
+#include <sys/types.h>
+
+/* Local non-gdb includes.  */
+#include "gdbcmd.h"
+#include "gdbthread.h"
+#include "inferior.h"
+#include "objfiles.h"
+#include "observable.h"
+#include "ppc-tdep.h"
+#include "regcache.h"
+#include "target.h"
 
 #if !HAVE_DECL_GETTHRDS
 extern int getthrds (pid_t, struct thrdsinfo64 *, int, tid_t *, int);

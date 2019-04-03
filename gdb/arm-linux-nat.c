@@ -17,28 +17,29 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "inferior.h"
-#include "gdbcore.h"
-#include "regcache.h"
-#include "target.h"
-#include "linux-nat.h"
-#include "target-descriptions.h"
-#include "auxv.h"
-#include "observable.h"
-#include "gdbthread.h"
 
-#include "arm-tdep.h"
-#include "arm-linux-tdep.h"
-#include "aarch32-linux-nat.h"
-
+/* Standard C includes.  */
 #include <elf/common.h>
-#include <sys/user.h>
-#include "nat/gdb_ptrace.h"
-#include <sys/utsname.h>
 #include <sys/procfs.h>
+#include <sys/user.h>
+#include <sys/utsname.h>
 
-#include "nat/linux-ptrace.h"
+/* Local non-gdb includes.  */
+#include "aarch32-linux-nat.h"
+#include "arm-linux-tdep.h"
+#include "arm-tdep.h"
+#include "auxv.h"
+#include "gdbcore.h"
+#include "gdbthread.h"
+#include "inferior.h"
+#include "linux-nat.h"
 #include "linux-tdep.h"
+#include "nat/gdb_ptrace.h"
+#include "nat/linux-ptrace.h"
+#include "observable.h"
+#include "regcache.h"
+#include "target-descriptions.h"
+#include "target.h"
 
 /* Prototypes for supply_gregset etc.  */
 #include "gregset.h"

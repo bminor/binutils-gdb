@@ -18,13 +18,15 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "symtab.h"
-#include "language.h"
-#include "varobj.h"
-#include "d-lang.h"
+
+/* Local non-gdb includes.  */
 #include "c-lang.h"
-#include "demangle.h"
 #include "cp-support.h"
+#include "d-lang.h"
+#include "demangle.h"
+#include "language.h"
+#include "symtab.h"
+#include "varobj.h"
 
 /* The name of the symbol to use to get the name of the main subprogram.  */
 static const char D_MAIN[] = "D main";

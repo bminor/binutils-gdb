@@ -18,12 +18,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "gdbcore.h"
-#include "regcache.h"
+
+/* Local non-gdb includes.  */
+#include "aarch64-ravenscar-thread.h"
 #include "aarch64-tdep.h"
+#include "gdbcore.h"
 #include "inferior.h"
 #include "ravenscar-thread.h"
-#include "aarch64-ravenscar-thread.h"
+#include "regcache.h"
 
 #define NO_OFFSET -1
 

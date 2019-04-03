@@ -18,14 +18,20 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "arch-utils.h"
+
+/* Standard C includes.  */
 #include <ctype.h>
-#include "gdbcmd.h"
-#include "value.h"
-#include "target.h"
-#include "cli/cli-utils.h"
+
+/* Standard C++ includes.  */
 #include <algorithm>
+
+/* Local non-gdb includes.  */
+#include "arch-utils.h"
+#include "cli/cli-utils.h"
 #include "common/byte-vector.h"
+#include "gdbcmd.h"
+#include "target.h"
+#include "value.h"
 
 /* Copied from bfd_put_bits.  */
 

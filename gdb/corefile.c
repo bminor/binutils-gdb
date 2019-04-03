@@ -18,20 +18,24 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include <signal.h>
+
+/* Standard C includes.  */
 #include <fcntl.h>
-#include "inferior.h"
-#include "symtab.h"
-#include "command.h"
-#include "gdbcmd.h"
-#include "bfd.h"
-#include "target.h"
-#include "gdbcore.h"
-#include "dis-asm.h"
+#include <signal.h>
 #include <sys/stat.h>
-#include "completer.h"
-#include "observable.h"
+
+/* Local non-gdb includes.  */
+#include "bfd.h"
 #include "cli/cli-utils.h"
+#include "command.h"
+#include "completer.h"
+#include "dis-asm.h"
+#include "gdbcmd.h"
+#include "gdbcore.h"
+#include "inferior.h"
+#include "observable.h"
+#include "symtab.h"
+#include "target.h"
 
 /* You can have any number of hooks for `exec_file_command' command to
    call.  If there's only one hook, it is set in exec_file_display

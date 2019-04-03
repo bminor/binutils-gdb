@@ -20,8 +20,8 @@
 #ifndef FILENAME_SEEN_CACHE_H
 #define FILENAME_SEEN_CACHE_H
 
-#include "defs.h"
 #include "common/function-view.h"
+#include "defs.h"
 
 /* Cache to watch for file names already seen.  */
 

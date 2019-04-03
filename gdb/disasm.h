@@ -19,8 +19,8 @@
 #ifndef DISASM_H
 #define DISASM_H
 
-#include "dis-asm.h"
 #include "common/enum-flags.h"
+#include "dis-asm.h"
 
 enum gdb_disassembly_flag
   {

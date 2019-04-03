@@ -18,19 +18,24 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "dwarf-index-cache.h"
 
+/* Standard C includes.  */
+#include <stdlib.h>
+
+/* Standard C++ includes.  */
+#include <string>
+
+/* Local non-gdb includes.  */
 #include "build-id.h"
 #include "cli/cli-cmds.h"
 #include "command.h"
-#include "common/scoped_mmap.h"
 #include "common/pathstuff.h"
+#include "common/scoped_mmap.h"
+#include "common/selftest.h"
+#include "dwarf-index-cache.h"
 #include "dwarf-index-write.h"
 #include "dwarf2read.h"
 #include "objfiles.h"
-#include "common/selftest.h"
-#include <string>
-#include <stdlib.h>
 
 /* When set to 1, show debug messages about the index cache.  */
 static int debug_index_cache = 0;

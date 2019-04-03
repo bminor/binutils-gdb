@@ -18,30 +18,30 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "symtab.h"
-#include "gdbtypes.h"
-#include "demangle.h"
-#include "breakpoint.h"
 
-#include "bfd.h"
-#include "gdb_obstack.h"
+/* Standard C includes.  */
 #include <ctype.h>
 
-#include "coff/internal.h"	/* Internal format of COFF symbols in BFD */
-#include "libcoff.h"		/* FIXME secret internal data from BFD */
-#include "objfiles.h"
-#include "buildsym-legacy.h"
-#include "gdb-stabs.h"
-#include "stabsread.h"
-#include "complaints.h"
-#include "target.h"
+/* Local non-gdb includes.  */
+#include "bfd.h"
 #include "block.h"
-#include "dictionary.h"
-
-#include "coff-pe-read.h"
-
-#include "psymtab.h"
+#include "breakpoint.h"
 #include "build-id.h"
+#include "buildsym-legacy.h"
+#include "coff-pe-read.h"
+#include "coff/internal.h"
+#include "complaints.h"
+#include "demangle.h"
+#include "dictionary.h"
+#include "gdb-stabs.h"
+#include "gdb_obstack.h"
+#include "gdbtypes.h"
+#include "libcoff.h"
+#include "objfiles.h"
+#include "psymtab.h"
+#include "stabsread.h"
+#include "symtab.h"
+#include "target.h"
 
 /* Key for COFF-associated data.  */
 

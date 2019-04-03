@@ -18,16 +18,18 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "target.h"
 
-#include <sys/types.h>
-#include <sys/ptrace.h>
+/* Standard C includes.  */
 #include <machine/reg.h>
+#include <sys/ptrace.h>
+#include <sys/types.h>
 
-#include "fbsd-nat.h"
-#include "aarch64-tdep.h"
+/* Local non-gdb includes.  */
 #include "aarch64-fbsd-tdep.h"
+#include "aarch64-tdep.h"
+#include "fbsd-nat.h"
 #include "inf-ptrace.h"
+#include "target.h"
 
 struct aarch64_fbsd_nat_target final : public fbsd_nat_target
 {

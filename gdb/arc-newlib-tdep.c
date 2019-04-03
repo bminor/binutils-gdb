@@ -20,8 +20,9 @@
 
 #include "defs.h"
 
-#include "gdbarch.h"
+/* Local non-gdb includes.  */
 #include "arc-tdep.h"
+#include "gdbarch.h"
 #include "osabi.h"
 
 /* Implement the 'init_osabi' method of struct gdb_osabi_handler.  */

@@ -16,8 +16,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "objfiles.h"
+
+/* Local non-gdb includes.  */
 #include "arm-tdep.h"
+#include "objfiles.h"
 #include "osabi.h"
 
 /* The gdbarch_register_osabi handler for ARM PikeOS; it performs

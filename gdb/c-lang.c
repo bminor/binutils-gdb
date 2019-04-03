@@ -18,23 +18,27 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "symtab.h"
-#include "gdbtypes.h"
-#include "expression.h"
-#include "parser-defs.h"
-#include "language.h"
-#include "varobj.h"
+
+/* Standard C includes.  */
+#include <ctype.h>
+
+/* Local non-gdb includes.  */
 #include "c-lang.h"
 #include "c-support.h"
-#include "valprint.h"
-#include "macroscope.h"
 #include "charset.h"
-#include "demangle.h"
 #include "cp-abi.h"
 #include "cp-support.h"
+#include "demangle.h"
+#include "expression.h"
 #include "gdb_obstack.h"
-#include <ctype.h>
 #include "gdbcore.h"
+#include "gdbtypes.h"
+#include "language.h"
+#include "macroscope.h"
+#include "parser-defs.h"
+#include "symtab.h"
+#include "valprint.h"
+#include "varobj.h"
 
 /* Given a C string type, STR_TYPE, return the corresponding target
    character set name.  */

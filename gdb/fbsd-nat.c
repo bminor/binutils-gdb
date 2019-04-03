@@ -18,33 +18,37 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "common/byte-vector.h"
-#include "gdbcore.h"
-#include "inferior.h"
-#include "regcache.h"
-#include "regset.h"
-#include "gdbcmd.h"
-#include "gdbthread.h"
-#include "common/gdb_wait.h"
-#include "inf-ptrace.h"
-#include <sys/types.h>
+
+/* Standard C includes.  */
+#if defined(HAVE_KINFO_GETFILE) || defined(HAVE_KINFO_GETVMMAP)
+#include <libutil.h>
+#endif
 #include <sys/procfs.h>
 #include <sys/ptrace.h>
 #include <sys/signal.h>
 #include <sys/sysctl.h>
+#include <sys/types.h>
 #include <sys/user.h>
-#if defined(HAVE_KINFO_GETFILE) || defined(HAVE_KINFO_GETVMMAP)
-#include <libutil.h>
-#endif
+
+/* Standard C++ includes.  */
+#include <list>
+
+/* Local non-gdb includes.  */
+#include "common/byte-vector.h"
 #if !defined(HAVE_KINFO_GETVMMAP)
 #include "common/filestuff.h"
 #endif
-
+#include "common/gdb_wait.h"
 #include "elf-bfd.h"
 #include "fbsd-nat.h"
 #include "fbsd-tdep.h"
-
-#include <list>
+#include "gdbcmd.h"
+#include "gdbcore.h"
+#include "gdbthread.h"
+#include "inf-ptrace.h"
+#include "inferior.h"
+#include "regcache.h"
+#include "regset.h"
 
 /* Return the name of a file that can be opened to get the symbols for
    the child process identified by PID.  */

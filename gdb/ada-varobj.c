@@ -18,10 +18,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+
+/* Local non-gdb includes.  */
 #include "ada-lang.h"
-#include "varobj.h"
 #include "language.h"
 #include "valprint.h"
+#include "varobj.h"
 
 /* Implementation principle used in this unit:
 

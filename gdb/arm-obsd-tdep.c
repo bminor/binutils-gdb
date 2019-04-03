@@ -18,13 +18,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+
+/* Local non-gdb includes.  */
+#include "arm-tdep.h"
+#include "obsd-tdep.h"
 #include "osabi.h"
+#include "solib-svr4.h"
 #include "trad-frame.h"
 #include "tramp-frame.h"
-
-#include "obsd-tdep.h"
-#include "arm-tdep.h"
-#include "solib-svr4.h"
 
 /* Signal trampolines.  */
 

@@ -20,33 +20,33 @@
 
 #include "defs.h"
 
-#include "gdbarch.h"
-#include "arch-utils.h"
-#include "glibc-tdep.h"
-#include "linux-tdep.h"
-#include "aarch64-tdep.h"
-#include "aarch64-linux-tdep.h"
-#include "osabi.h"
-#include "solib-svr4.h"
-#include "symtab.h"
-#include "tramp-frame.h"
-#include "trad-frame.h"
-
-#include "inferior.h"
-#include "regcache.h"
-#include "regset.h"
-
-#include "cli/cli-utils.h"
-#include "stap-probe.h"
-#include "parser-defs.h"
-#include "user-regs.h"
-#include "xml-syscall.h"
+/* Standard C includes.  */
 #include <ctype.h>
 
-#include "record-full.h"
-#include "linux-record.h"
+/* Local non-gdb includes.  */
+#include "aarch64-linux-tdep.h"
+#include "aarch64-tdep.h"
+#include "arch-utils.h"
 #include "auxv.h"
+#include "cli/cli-utils.h"
 #include "elf/common.h"
+#include "gdbarch.h"
+#include "glibc-tdep.h"
+#include "inferior.h"
+#include "linux-record.h"
+#include "linux-tdep.h"
+#include "osabi.h"
+#include "parser-defs.h"
+#include "record-full.h"
+#include "regcache.h"
+#include "regset.h"
+#include "solib-svr4.h"
+#include "stap-probe.h"
+#include "symtab.h"
+#include "trad-frame.h"
+#include "tramp-frame.h"
+#include "user-regs.h"
+#include "xml-syscall.h"
 
 /* Signal frame handling.
 

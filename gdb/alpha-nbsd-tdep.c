@@ -20,18 +20,19 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+
+/* Local non-gdb includes.  */
+#include "alpha-bsd-tdep.h"
+#include "alpha-tdep.h"
 #include "frame.h"
 #include "gdbcore.h"
+#include "nbsd-tdep.h"
 #include "osabi.h"
 #include "regcache.h"
 #include "regset.h"
-#include "value.h"
-
-#include "alpha-tdep.h"
-#include "alpha-bsd-tdep.h"
-#include "nbsd-tdep.h"
 #include "solib-svr4.h"
 #include "target.h"
+#include "value.h"
 
 /* Core file support.  */
 

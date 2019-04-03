@@ -17,12 +17,12 @@
 
 #include "defs.h"
 
-#include "regcache.h"
-#include "arm-tdep.h"
-#include "arm-linux-tdep.h"
-#include "arch/arm-linux.h"
-
+/* Local non-gdb includes.  */
 #include "aarch32-linux-nat.h"
+#include "arch/arm-linux.h"
+#include "arm-linux-tdep.h"
+#include "arm-tdep.h"
+#include "regcache.h"
 
 /* Supply GP registers contents, stored in REGS, to REGCACHE.  ARM_APCS_32
    is true if the 32-bit mode is in use, otherwise, it is false.  */

@@ -19,6 +19,14 @@
 
 #include "defs.h"
 
+/* Standard C++ includes.  */
+#include <algorithm>
+#include <cmath>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+
+/* Local non-gdb includes.  */
 #include "addrmap.h"
 #include "cli/cli-decode.h"
 #include "common/byte-vector.h"
@@ -34,12 +42,6 @@
 #include "gdbcmd.h"
 #include "objfiles.h"
 #include "psympriv.h"
-
-#include <algorithm>
-#include <cmath>
-#include <set>
-#include <unordered_map>
-#include <unordered_set>
 
 /* Ensure only legit values are used.  */
 #define DW2_GDB_INDEX_SYMBOL_STATIC_SET_VALUE(cu_index, value) \

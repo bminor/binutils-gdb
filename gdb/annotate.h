@@ -19,8 +19,8 @@
 #ifndef ANNOTATE_H
 #define ANNOTATE_H
 
-#include "symtab.h"
 #include "gdbtypes.h"
+#include "symtab.h"
 
 extern void annotate_breakpoint (int);
 extern void annotate_catchpoint (int);

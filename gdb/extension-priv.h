@@ -21,9 +21,11 @@
 #ifndef EXTENSION_PRIV_H
 #define EXTENSION_PRIV_H
 
-#include "extension.h"
 #include <signal.h>
+
+/* Local non-gdb includes.  */
 #include "cli/cli-script.h"
+#include "extension.h"
 
 /* High level description of an extension/scripting language.
    An entry for each is compiled into GDB regardless of whether the support

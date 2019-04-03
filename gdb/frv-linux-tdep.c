@@ -19,18 +19,20 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "gdbcore.h"
-#include "target.h"
-#include "frame.h"
-#include "osabi.h"
-#include "regcache.h"
+
+/* Local non-gdb includes.  */
 #include "elf-bfd.h"
 #include "elf/frv.h"
-#include "frv-tdep.h"
-#include "trad-frame.h"
 #include "frame-unwind.h"
-#include "regset.h"
+#include "frame.h"
+#include "frv-tdep.h"
+#include "gdbcore.h"
 #include "linux-tdep.h"
+#include "osabi.h"
+#include "regcache.h"
+#include "regset.h"
+#include "target.h"
+#include "trad-frame.h"
 
 /* Define the size (in bytes) of an FR-V instruction.  */
 static const int frv_instr_size = 4;

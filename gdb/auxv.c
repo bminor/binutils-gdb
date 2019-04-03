@@ -18,21 +18,23 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "target.h"
-#include "gdbtypes.h"
-#include "command.h"
-#include "inferior.h"
-#include "valprint.h"
-#include "gdbcore.h"
-#include "observable.h"
-#include "common/filestuff.h"
-#include "objfiles.h"
 
-#include "auxv.h"
-#include "elf/common.h"
-
-#include <unistd.h>
+/* Standard C includes.  */
 #include <fcntl.h>
+#include <unistd.h>
+
+/* Local non-gdb includes.  */
+#include "auxv.h"
+#include "command.h"
+#include "common/filestuff.h"
+#include "elf/common.h"
+#include "gdbcore.h"
+#include "gdbtypes.h"
+#include "inferior.h"
+#include "objfiles.h"
+#include "observable.h"
+#include "target.h"
+#include "valprint.h"
 
 
 /* Implement the to_xfer_partial target_ops method.  This function

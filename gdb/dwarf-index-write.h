@@ -20,8 +20,8 @@
 #ifndef DWARF_INDEX_WRITE_H
 #define DWARF_INDEX_WRITE_H
 
-#include "symfile.h"
 #include "dwarf2read.h"
+#include "symfile.h"
 
 /* Create an index file for OBJFILE in the directory DIR.  BASENAME is the
    desired filename, minus the extension, which gets added by this function

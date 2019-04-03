@@ -18,11 +18,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+
+/* Local non-gdb includes.  */
+#include "arm-tdep.h"
 #include "osabi.h"
 #include "regcache.h"
 #include "regset.h"
-
-#include "arm-tdep.h"
 
 /* Core file support.  */
 

@@ -18,12 +18,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+
+/* Local non-gdb includes.  */
 #include "dcache.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
-#include "target-dcache.h"
 #include "inferior.h"
 #include "splay-tree.h"
+#include "target-dcache.h"
 
 /* Commands with a prefix of `{set,show} dcache'.  */
 static struct cmd_list_element *dcache_set_list = NULL;

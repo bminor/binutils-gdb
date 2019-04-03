@@ -18,17 +18,18 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+
+/* Local non-gdb includes.  */
+#include "amd64-tdep.h"
 #include "arch-utils.h"
+#include "common/x86-xstate.h"
+#include "fbsd-tdep.h"
 #include "frame.h"
 #include "gdbcore.h"
-#include "regcache.h"
-#include "osabi.h"
-#include "regset.h"
 #include "i386-fbsd-tdep.h"
-#include "common/x86-xstate.h"
-
-#include "amd64-tdep.h"
-#include "fbsd-tdep.h"
+#include "osabi.h"
+#include "regcache.h"
+#include "regset.h"
 #include "solib-svr4.h"
 
 /* Support for signal handlers.  */

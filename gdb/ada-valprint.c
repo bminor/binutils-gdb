@@ -18,20 +18,24 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+
+/* Standard C includes.  */
 #include <ctype.h>
-#include "symtab.h"
-#include "gdbtypes.h"
-#include "expression.h"
-#include "value.h"
-#include "demangle.h"
-#include "valprint.h"
-#include "language.h"
-#include "annotate.h"
+
+/* Local non-gdb includes.  */
 #include "ada-lang.h"
+#include "annotate.h"
 #include "c-lang.h"
+#include "demangle.h"
+#include "expression.h"
+#include "gdbtypes.h"
 #include "infcall.h"
+#include "language.h"
 #include "objfiles.h"
+#include "symtab.h"
 #include "target-float.h"
+#include "valprint.h"
+#include "value.h"
 
 static int print_field_values (struct type *, const gdb_byte *,
 			       int,

@@ -19,10 +19,11 @@
 
 #include "defs.h"
 
-#include "elf/common.h"
-#include "arm-tdep.h"
+/* Local non-gdb includes.  */
 #include "arm-fbsd-tdep.h"
+#include "arm-tdep.h"
 #include "auxv.h"
+#include "elf/common.h"
 #include "fbsd-tdep.h"
 #include "gdbcore.h"
 #include "osabi.h"

@@ -20,10 +20,10 @@
 #ifndef EXEC_H
 #define EXEC_H
 
-#include "target.h"
-#include "progspace.h"
 #include "memrange.h"
+#include "progspace.h"
 #include "symfile-add-flags.h"
+#include "target.h"
 
 struct target_section;
 struct target_ops;

@@ -18,23 +18,26 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+
+/* Standard C includes.  */
+#include <machine/reg.h>
+#include <signal.h>
+#include <sys/ptrace.h>
+#include <sys/sysctl.h>
+#include <sys/types.h>
+#include <sys/user.h>
+
+/* Local non-gdb includes.  */
+#include "amd64-bsd-nat.h"
+#include "amd64-nat.h"
+#include "amd64-tdep.h"
+#include "common/x86-xstate.h"
+#include "fbsd-nat.h"
 #include "inferior.h"
 #include "regcache.h"
 #include "target.h"
-
-#include <signal.h>
-#include <sys/types.h>
-#include <sys/ptrace.h>
-#include <sys/sysctl.h>
-#include <sys/user.h>
-#include <machine/reg.h>
-
-#include "fbsd-nat.h"
-#include "amd64-tdep.h"
-#include "amd64-nat.h"
-#include "amd64-bsd-nat.h"
 #include "x86-nat.h"
-#include "common/x86-xstate.h"
+
 
 
 class amd64_fbsd_nat_target final

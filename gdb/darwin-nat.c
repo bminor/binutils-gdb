@@ -19,55 +19,56 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "top.h"
-#include "inferior.h"
-#include "target.h"
-#include "symfile.h"
-#include "symtab.h"
-#include "objfiles.h"
-#include "gdbcmd.h"
-#include "gdbcore.h"
-#include "gdbthread.h"
-#include "regcache.h"
-#include "event-top.h"
-#include "inf-loop.h"
+
+/* Standard C includes.  */
+#include <copyfile.h>
+#include <ctype.h>
+#include <libproc.h>
+#include <mach/mach_error.h>
+#include <mach/mach_init.h>
+#include <mach/mach_port.h>
+#include <mach/mach_vm.h>
+#include <mach/port.h>
+#include <mach/task.h>
+#include <mach/thread_act.h>
+#include <mach/vm_map.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <spawn.h>
+#include <sys/proc.h>
+#include <sys/ptrace.h>
+#include <sys/signal.h>
 #include <sys/stat.h>
-#include "inf-child.h"
-#include "value.h"
+#include <sys/syscall.h>
+#include <sys/sysctl.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+/* Local non-gdb includes.  */
 #include "arch-utils.h"
 #include "bfd.h"
 #include "bfd/mach-o.h"
-
-#include <copyfile.h>
-#include <sys/ptrace.h>
-#include <sys/signal.h>
-#include <setjmp.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <signal.h>
-#include <ctype.h>
-#include <sys/sysctl.h>
-#include <sys/proc.h>
-#include <libproc.h>
-#include <sys/syscall.h>
-#include <spawn.h>
-
-#include <mach/mach_error.h>
-#include <mach/mach_vm.h>
-#include <mach/mach_init.h>
-#include <mach/vm_map.h>
-#include <mach/task.h>
-#include <mach/mach_port.h>
-#include <mach/thread_act.h>
-#include <mach/port.h>
-
-#include "darwin-nat.h"
-#include "filenames.h"
 #include "common/filestuff.h"
 #include "common/gdb_unlinker.h"
 #include "common/pathstuff.h"
 #include "common/scoped_fd.h"
+#include "darwin-nat.h"
+#include "event-top.h"
+#include "filenames.h"
+#include "gdbcmd.h"
+#include "gdbcore.h"
+#include "gdbthread.h"
+#include "inf-child.h"
+#include "inf-loop.h"
+#include "inferior.h"
 #include "nat/fork-inferior.h"
+#include "objfiles.h"
+#include "regcache.h"
+#include "symfile.h"
+#include "symtab.h"
+#include "target.h"
+#include "top.h"
+#include "value.h"
 
 /* Quick overview.
    Darwin kernel is Mach + BSD derived kernel.  Note that they share the

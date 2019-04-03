@@ -18,14 +18,16 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "frame.h"
-#include "frame-unwind.h"
+
+/* Local non-gdb includes.  */
 #include "dummy-frame.h"
-#include "inline-frame.h"
-#include "value.h"
-#include "regcache.h"
+#include "frame-unwind.h"
+#include "frame.h"
 #include "gdb_obstack.h"
+#include "inline-frame.h"
+#include "regcache.h"
 #include "target.h"
+#include "value.h"
 
 static struct gdbarch_data *frame_unwind_data;
 

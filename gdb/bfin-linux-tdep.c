@@ -20,14 +20,16 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+
+/* Local non-gdb includes.  */
 #include "arch-utils.h"
-#include "regcache.h"
-#include "tramp-frame.h"
-#include "trad-frame.h"
-#include "osabi.h"
-#include "xml-syscall.h"
-#include "linux-tdep.h"
 #include "bfin-tdep.h"
+#include "linux-tdep.h"
+#include "osabi.h"
+#include "regcache.h"
+#include "trad-frame.h"
+#include "tramp-frame.h"
+#include "xml-syscall.h"
 
 /* From <asm/sigcontext.h>.  */
 

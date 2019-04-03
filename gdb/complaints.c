@@ -18,10 +18,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "complaints.h"
-#include "command.h"
-#include "gdbcmd.h"
+
+/* Standard C++ includes.  */
 #include <unordered_map>
+
+/* Local non-gdb includes.  */
+#include "command.h"
+#include "complaints.h"
+#include "gdbcmd.h"
 
 /* Map format strings to counters.  */
 

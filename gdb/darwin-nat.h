@@ -17,9 +17,11 @@
 #ifndef DARWIN_NAT_H
 #define DARWIN_NAT_H
 
-#include "inf-child.h"
 #include <mach/mach.h>
+
+/* Local non-gdb includes.  */
 #include "gdbthread.h"
+#include "inf-child.h"
 
 /* This needs to be overridden by the platform specific nat code.  */
 

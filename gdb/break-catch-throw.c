@@ -18,24 +18,28 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "arch-utils.h"
+
+/* Standard C includes.  */
 #include <ctype.h>
-#include "breakpoint.h"
-#include "gdbcmd.h"
-#include "inferior.h"
+
+/* Local non-gdb includes.  */
 #include "annotate.h"
-#include "valprint.h"
+#include "arch-utils.h"
+#include "breakpoint.h"
 #include "cli/cli-utils.h"
 #include "completer.h"
-#include "gdb_obstack.h"
-#include "mi/mi-common.h"
-#include "linespec.h"
-#include "probe.h"
-#include "objfiles.h"
 #include "cp-abi.h"
-#include "gdb_regex.h"
 #include "cp-support.h"
+#include "gdb_obstack.h"
+#include "gdb_regex.h"
+#include "gdbcmd.h"
+#include "inferior.h"
+#include "linespec.h"
 #include "location.h"
+#include "mi/mi-common.h"
+#include "objfiles.h"
+#include "probe.h"
+#include "valprint.h"
 
 /* Enums for exception-handling support.  */
 enum exception_event_kind

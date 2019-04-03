@@ -20,15 +20,17 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "inferior.h"
-#include "gdbcmd.h"
-#include "terminal.h"
-#include "gdbthread.h"
-#include "top.h"
-#include "common/job-control.h"
-#include "common/filestuff.h"
-#include "nat/fork-inferior.h"
+
+/* Local non-gdb includes.  */
 #include "common/common-inferior.h"
+#include "common/filestuff.h"
+#include "common/job-control.h"
+#include "gdbcmd.h"
+#include "gdbthread.h"
+#include "inferior.h"
+#include "nat/fork-inferior.h"
+#include "terminal.h"
+#include "top.h"
 
 /* The exec-wrapper, if any, that will be used when starting the
    inferior.  */

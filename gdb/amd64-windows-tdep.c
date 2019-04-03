@@ -16,22 +16,26 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "osabi.h"
-#include "amd64-tdep.h"
-#include "common/x86-xstate.h"
-#include "gdbtypes.h"
-#include "gdbcore.h"
-#include "regcache.h"
-#include "windows-tdep.h"
-#include "frame.h"
-#include "objfiles.h"
-#include "frame-unwind.h"
-#include "coff/internal.h"
-#include "coff/i386.h"
-#include "coff/pe.h"
-#include "libcoff.h"
-#include "value.h"
+
+/* Standard C++ includes.  */
 #include <algorithm>
+
+/* Local non-gdb includes.  */
+#include "amd64-tdep.h"
+#include "coff/i386.h"
+#include "coff/internal.h"
+#include "coff/pe.h"
+#include "common/x86-xstate.h"
+#include "frame-unwind.h"
+#include "frame.h"
+#include "gdbcore.h"
+#include "gdbtypes.h"
+#include "libcoff.h"
+#include "objfiles.h"
+#include "osabi.h"
+#include "regcache.h"
+#include "value.h"
+#include "windows-tdep.h"
 
 /* The registers used to pass integer arguments during a function call.  */
 static int amd64_windows_dummy_call_integer_regs[] =

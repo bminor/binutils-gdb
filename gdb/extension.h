@@ -20,9 +20,9 @@
 #ifndef EXTENSION_H
 #define EXTENSION_H
 
-#include "mi/mi-cmds.h" /* For PRINT_NO_VALUES, etc.  */
-#include "common/vec.h"
 #include "common/array-view.h"
+#include "common/vec.h"
+#include "mi/mi-cmds.h"
 
 struct breakpoint;
 struct command_line;

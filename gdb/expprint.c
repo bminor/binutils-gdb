@@ -18,19 +18,22 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "symtab.h"
-#include "gdbtypes.h"
-#include "expression.h"
-#include "value.h"
-#include "language.h"
-#include "parser-defs.h"
-#include "user-regs.h"		/* For user_reg_map_regnum_to_name.  */
-#include "target.h"
-#include "block.h"
-#include "objfiles.h"
-#include "valprint.h"
 
+/* Standard C includes.  */
 #include <ctype.h>
+
+/* Local non-gdb includes.  */
+#include "block.h"
+#include "expression.h"
+#include "gdbtypes.h"
+#include "language.h"
+#include "objfiles.h"
+#include "parser-defs.h"
+#include "symtab.h"
+#include "target.h"
+#include "user-regs.h"
+#include "valprint.h"
+#include "value.h"
 
 void
 print_expression (struct expression *exp, struct ui_file *stream)

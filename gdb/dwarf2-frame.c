@@ -20,25 +20,27 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "dwarf2expr.h"
+
+/* Local non-gdb includes.  */
+#include "ax.h"
+#include "complaints.h"
+#include "dwarf2-frame-tailcall.h"
+#include "dwarf2-frame.h"
 #include "dwarf2.h"
-#include "frame.h"
+#include "dwarf2expr.h"
+#include "dwarf2loc.h"
+#include "dwarf2read.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
+#include "frame.h"
 #include "gdbcore.h"
 #include "gdbtypes.h"
-#include "symtab.h"
 #include "objfiles.h"
-#include "regcache.h"
-#include "value.h"
 #include "record.h"
+#include "regcache.h"
+#include "symtab.h"
+#include "value.h"
 
-#include "complaints.h"
-#include "dwarf2-frame.h"
-#include "dwarf2read.h"
-#include "ax.h"
-#include "dwarf2loc.h"
-#include "dwarf2-frame-tailcall.h"
 #if GDB_SELF_TEST
 #include "common/selftest.h"
 #include "selftest-arch.h"

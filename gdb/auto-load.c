@@ -18,29 +18,35 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+
+/* Standard C includes.  */
 #include <ctype.h>
+
+/* Standard C++ includes.  */
+#include <algorithm>
+
+/* Local non-gdb includes.  */
 #include "auto-load.h"
-#include "progspace.h"
-#include "gdb_regex.h"
-#include "ui-out.h"
-#include "filenames.h"
-#include "command.h"
-#include "observable.h"
-#include "objfiles.h"
-#include "cli/cli-script.h"
-#include "gdbcmd.h"
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
+#include "cli/cli-script.h"
 #include "cli/cli-setshow.h"
-#include "readline/tilde.h"
-#include "completer.h"
-#include "fnmatch.h"
-#include "top.h"
+#include "command.h"
 #include "common/filestuff.h"
-#include "extension.h"
-#include "gdb/section-scripts.h"
-#include <algorithm>
 #include "common/pathstuff.h"
+#include "completer.h"
+#include "extension.h"
+#include "filenames.h"
+#include "fnmatch.h"
+#include "gdb/section-scripts.h"
+#include "gdb_regex.h"
+#include "gdbcmd.h"
+#include "objfiles.h"
+#include "observable.h"
+#include "progspace.h"
+#include "readline/tilde.h"
+#include "top.h"
+#include "ui-out.h"
 
 /* The section to look in for auto-loaded scripts (in file formats that
    support sections).

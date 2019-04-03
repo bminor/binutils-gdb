@@ -18,14 +18,15 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "gdbcore.h"
-#include "regcache.h"
-#include "target.h"
 
-#include "amd64-tdep.h"
+/* Local non-gdb includes.  */
 #include "amd64-bsd-nat.h"
 #include "amd64-nat.h"
+#include "amd64-tdep.h"
+#include "gdbcore.h"
 #include "obsd-nat.h"
+#include "regcache.h"
+#include "target.h"
 
 /* Mapping between the general-purpose registers in OpenBSD/amd64
    `struct reg' format and GDB's register cache layout for

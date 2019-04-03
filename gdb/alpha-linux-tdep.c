@@ -17,14 +17,16 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+
+/* Local non-gdb includes.  */
+#include "alpha-tdep.h"
 #include "frame.h"
+#include "linux-tdep.h"
 #include "osabi.h"
+#include "regcache.h"
+#include "regset.h"
 #include "solib-svr4.h"
 #include "symtab.h"
-#include "regset.h"
-#include "regcache.h"
-#include "linux-tdep.h"
-#include "alpha-tdep.h"
 
 /* This enum represents the signals' numbers on the Alpha
    architecture.  It just contains the signal definitions which are

@@ -18,11 +18,13 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "osabi.h"
-#include "solib.h"
-#include "solib-target.h"
-#include "inferior.h"
+
+/* Local non-gdb includes.  */
 #include "dicos-tdep.h"
+#include "inferior.h"
+#include "osabi.h"
+#include "solib-target.h"
+#include "solib.h"
 
 void
 dicos_init_abi (struct gdbarch *gdbarch)
