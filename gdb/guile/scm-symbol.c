@@ -490,7 +490,7 @@ gdbscm_symbol_needs_frame_p (SCM self)
     {
       result = symbol_read_needs_frame (symbol);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
@@ -556,7 +556,7 @@ gdbscm_symbol_value (SCM self, SCM rest)
 	 can happen with nested functions).  */
       value = read_var_value (symbol, NULL, frame_info);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
@@ -607,7 +607,7 @@ gdbscm_lookup_symbol (SCM name_scm, SCM rest)
 	  selected_frame = get_selected_frame (_("no frame selected"));
 	  block = get_frame_block (selected_frame, NULL);
 	}
-      catch (const gdb_exception_RETURN_MASK_ALL &ex)
+      catch (const gdb_exception &ex)
 	{
 	  xfree (name);
 	  GDBSCM_HANDLE_GDB_EXCEPTION (ex);
@@ -620,7 +620,7 @@ gdbscm_lookup_symbol (SCM name_scm, SCM rest)
       symbol = lookup_symbol (name, block, (domain_enum) domain,
 			      &is_a_field_of_this).symbol;
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
       except = ex;
     }
@@ -656,7 +656,7 @@ gdbscm_lookup_global_symbol (SCM name_scm, SCM rest)
     {
       symbol = lookup_global_symbol (name, NULL, (domain_enum) domain).symbol;
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
       except = ex;
     }

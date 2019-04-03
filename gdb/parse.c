@@ -1141,7 +1141,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
     {
       lang->la_parser (&ps);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       /* If parsing for completion, allow this to succeed; but if no
 	 expression elements have been written, then there's nothing
@@ -1228,7 +1228,7 @@ parse_expression_for_completion (const char *string,
       exp = parse_exp_in_context (&string, 0, 0, 0, 0, &subexp,
 				  nullptr, &cstate);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+  catch (const gdb_exception_error &except)
     {
       /* Nothing, EXP remains NULL.  */
     }

@@ -2621,7 +2621,7 @@ rust_lex_exception_test (rust_parser *parser, const char *input,
       rust_lex_test_one (parser, input, DECIMAL_INTEGER);
       SELF_CHECK (0);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+  catch (const gdb_exception_error &except)
     {
       SELF_CHECK (strcmp (except.what (), err) == 0);
     }

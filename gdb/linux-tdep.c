@@ -1930,7 +1930,7 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
     {
       update_thread_list ();
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &e)
+  catch (const gdb_exception_error &e)
     {
       exception_print (gdb_stderr, e);
     }

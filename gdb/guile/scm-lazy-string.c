@@ -336,7 +336,7 @@ lsscm_safe_lazy_string_to_value (SCM string, int arg_pos,
 	  break;
 	}
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       *except_scmp = gdbscm_scm_from_gdb_exception (except);
       return NULL;

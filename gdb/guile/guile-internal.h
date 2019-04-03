@@ -681,7 +681,7 @@ gdbscm_wrap (Function &&func, Args &&... args)
     {
       result = func (std::forward<Args> (args)...);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }

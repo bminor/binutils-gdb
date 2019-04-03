@@ -279,7 +279,7 @@ ioscm_write (SCM port, const void *data, size_t size)
       else
 	fputsn_filtered ((const char *) data, size, gdb_stdout);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }

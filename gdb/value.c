@@ -1409,7 +1409,7 @@ value_optimized_out (struct value *value)
 	{
 	  value_fetch_lazy (value);
 	}
-      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+      catch (const gdb_exception_error &ex)
 	{
 	  /* Fall back to checking value->optimized_out.  */
 	}
@@ -2541,7 +2541,7 @@ show_convenience (const char *ignore, int from_tty)
 	  val = value_of_internalvar (gdbarch, var);
 	  value_print (val, gdb_stdout, &opts);
 	}
-      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+      catch (const gdb_exception_error &ex)
 	{
 	  fprintf_filtered (gdb_stdout, _("<error: %s>"), ex.what ());
 	}

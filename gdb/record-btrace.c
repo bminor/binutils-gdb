@@ -286,7 +286,7 @@ record_btrace_enable_warn (struct thread_info *tp)
     {
       btrace_enable (tp, &record_btrace_conf);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &error)
+  catch (const gdb_exception_error &error)
     {
       warning ("%s", error.what ());
     }
@@ -1482,7 +1482,7 @@ record_btrace_target::insert_breakpoint (struct gdbarch *gdbarch,
     {
       ret = this->beneath ()->insert_breakpoint (gdbarch, bp_tgt);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       replay_memory_access = old;
       throw_exception (except);
@@ -1512,7 +1512,7 @@ record_btrace_target::remove_breakpoint (struct gdbarch *gdbarch,
     {
       ret = this->beneath ()->remove_breakpoint (gdbarch, bp_tgt, reason);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       replay_memory_access = old;
       throw_exception (except);
@@ -1989,7 +1989,7 @@ get_thread_current_frame_id (struct thread_info *tp)
     {
       id = get_frame_id (get_current_frame ());
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       /* Restore the previous execution state.  */
       set_executing (inferior_ptid, executing);
@@ -2068,7 +2068,7 @@ record_btrace_start_replaying (struct thread_info *tp)
       if (upd_step_stack_frame_id)
 	tp->control.step_stack_frame_id = frame_id;
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       xfree (btinfo->replay);
       btinfo->replay = NULL;
@@ -2893,7 +2893,7 @@ cmd_record_btrace_bts_start (const char *args, int from_tty)
     {
       execute_command ("target record-btrace", from_tty);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &exception)
+  catch (const gdb_exception &exception)
     {
       record_btrace_conf.format = BTRACE_FORMAT_NONE;
       throw_exception (exception);
@@ -2914,7 +2914,7 @@ cmd_record_btrace_pt_start (const char *args, int from_tty)
     {
       execute_command ("target record-btrace", from_tty);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &exception)
+  catch (const gdb_exception &exception)
     {
       record_btrace_conf.format = BTRACE_FORMAT_NONE;
       throw_exception (exception);
@@ -2935,7 +2935,7 @@ cmd_record_btrace_start (const char *args, int from_tty)
     {
       execute_command ("target record-btrace", from_tty);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &exception)
+  catch (const gdb_exception &exception)
     {
       record_btrace_conf.format = BTRACE_FORMAT_BTS;
 
@@ -2943,7 +2943,7 @@ cmd_record_btrace_start (const char *args, int from_tty)
 	{
 	  execute_command ("target record-btrace", from_tty);
 	}
-      catch (const gdb_exception_RETURN_MASK_ALL &ex)
+      catch (const gdb_exception &ex)
 	{
 	  record_btrace_conf.format = BTRACE_FORMAT_NONE;
 	  throw_exception (ex);

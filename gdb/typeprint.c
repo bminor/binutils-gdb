@@ -420,7 +420,7 @@ type_to_string (struct type *type)
       type_print (type, "", &stb, -1);
       return std::move (stb.string ());
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
     }
 

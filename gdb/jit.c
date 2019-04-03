@@ -855,7 +855,7 @@ jit_reader_try_read_symtab (struct jit_code_entry *code_entry,
 			      code_entry->symfile_size))
 	status = 0;
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &e)
+  catch (const gdb_exception &e)
     {
       status = 0;
     }

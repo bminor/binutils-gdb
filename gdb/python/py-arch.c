@@ -203,7 +203,7 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
         {
           insn_len = gdb_print_insn (gdbarch, pc, &stb, NULL);
         }
-      catch (const gdb_exception_RETURN_MASK_ALL &except)
+      catch (const gdb_exception &except)
         {
 	  gdbpy_convert_exception (except);
 	  return NULL;

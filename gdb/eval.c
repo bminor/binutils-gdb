@@ -205,7 +205,7 @@ fetch_subexp_value (struct expression *exp, int *pc, struct value **valp,
     {
       result = evaluate_subexp (NULL_TYPE, exp, pc, EVAL_NORMAL);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
       /* Ignore memory errors if we want watchpoints pointing at
 	 inaccessible memory to still be created; otherwise, throw the
@@ -242,7 +242,7 @@ fetch_subexp_value (struct expression *exp, int *pc, struct value **valp,
 	      value_fetch_lazy (result);
 	      *valp = result;
 	    }
-	  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+	  catch (const gdb_exception_error &except)
 	    {
 	    }
 	}
@@ -719,7 +719,7 @@ evaluate_var_value (enum noside noside, const block *blk, symbol *var)
       ret = value_of_variable (var, blk);
     }
 
-  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+  catch (const gdb_exception_error &except)
     {
       if (noside != EVAL_AVOID_SIDE_EFFECTS)
 	throw_exception (except);
@@ -959,7 +959,7 @@ evaluate_funcall (type *expect_type, expression *exp, int *pos,
 		  value = value_x_unop (arg2, op, noside);
 		}
 
-	      catch (const gdb_exception_RETURN_MASK_ERROR &except)
+	      catch (const gdb_exception_error &except)
 		{
 		  if (except.error == NOT_FOUND_ERROR)
 		    break;
@@ -2048,7 +2048,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	      value = value_x_unop (arg1, op, noside);
 	    }
 
-	  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+	  catch (const gdb_exception_error &except)
 	    {
 	      if (except.error == NOT_FOUND_ERROR)
 		break;

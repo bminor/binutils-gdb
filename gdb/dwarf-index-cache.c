@@ -129,7 +129,7 @@ index_cache::store (struct dwarf2_per_objfile *dwarf2_per_objfile)
       write_psymtabs_to_index (dwarf2_per_objfile, m_dir.c_str (),
 			       build_id_str.c_str (), dw_index_kind::GDB_INDEX);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+  catch (const gdb_exception_error &except)
     {
       if (debug_index_cache)
 	printf_unfiltered ("index cache: couldn't store index cache for objfile "
@@ -188,7 +188,7 @@ index_cache::lookup_gdb_index (const bfd_build_id *build_id,
 	  ((const gdb_byte *) mmap_resource->mapping.get (),
 	   mmap_resource->mapping.size ());
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+  catch (const gdb_exception_error &except)
     {
       if (debug_index_cache)
 	printf_unfiltered ("index cache: couldn't read %s: %s\n",

@@ -824,7 +824,7 @@ vlscm_convert_typed_value_from_scheme (const char *func_name,
 	  value = NULL;
 	}
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       except_scm = gdbscm_scm_from_gdb_exception (except);
     }

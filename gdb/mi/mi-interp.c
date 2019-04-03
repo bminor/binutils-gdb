@@ -830,7 +830,7 @@ mi_print_breakpoint_for_event (struct mi_interp *mi, breakpoint *bp)
 
       print_breakpoint (bp);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
       exception_print (gdb_stderr, ex);
     }

@@ -687,7 +687,7 @@ ftrace_classify_insn (struct gdbarch *gdbarch, CORE_ADDR pc)
       else if (gdbarch_insn_is_jump (gdbarch, pc))
 	iclass = BTRACE_INSN_JUMP;
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &error)
+  catch (const gdb_exception_error &error)
     {
     }
 
@@ -1106,7 +1106,7 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 	    {
 	      size = gdb_insn_length (gdbarch, pc);
 	    }
-	  catch (const gdb_exception_RETURN_MASK_ERROR &error)
+	  catch (const gdb_exception_error &error)
 	    {
 	    }
 
@@ -1374,7 +1374,7 @@ btrace_pt_readmem_callback (gdb_byte *buffer, size_t size,
       if (errcode != 0)
 	result = -pte_nomap;
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &error)
+  catch (const gdb_exception_error &error)
     {
       result = -pte_nomap;
     }
@@ -1476,7 +1476,7 @@ btrace_compute_ftrace_pt (struct thread_info *tp,
 
       ftrace_add_pt (btinfo, decoder, &level, gaps);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &error)
+  catch (const gdb_exception &error)
     {
       /* Indicate a gap in the trace if we quit trace processing.  */
       if (error.reason == RETURN_QUIT && !btinfo->functions.empty ())
@@ -1556,7 +1556,7 @@ btrace_compute_ftrace (struct thread_info *tp, struct btrace_data *btrace,
     {
       btrace_compute_ftrace_1 (tp, btrace, cpu, gaps);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &error)
+  catch (const gdb_exception &error)
     {
       btrace_finalize_ftrace (tp, gaps);
 
@@ -1627,7 +1627,7 @@ btrace_enable (struct thread_info *tp, const struct btrace_config *conf)
 	  && can_access_registers_thread (tp))
 	btrace_add_pc (tp);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &exception)
+  catch (const gdb_exception &exception)
     {
       btrace_disable (tp);
 
@@ -3060,7 +3060,7 @@ btrace_maint_update_pt_packets (struct btrace_thread_info *btinfo)
     {
       btrace_maint_decode_pt (&btinfo->maint, decoder);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       pt_pkt_free_decoder (decoder);
 

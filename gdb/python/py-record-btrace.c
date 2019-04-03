@@ -212,7 +212,7 @@ recpy_bt_insn_sal (PyObject *self, void *closure)
     {
       result = symtab_and_line_to_sal_object (find_pc_line (insn->pc, 0));
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -283,7 +283,7 @@ recpy_bt_insn_data (PyObject *self, void *closure)
       buffer.resize (insn->size);
       read_memory (insn->pc, buffer.data (), insn->size);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -318,7 +318,7 @@ recpy_bt_insn_decoded (PyObject *self, void *closure)
     {
       gdb_print_insn (target_gdbarch (), insn->pc, &strfile, NULL);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       gdbpy_convert_exception (except);
       return NULL;
@@ -795,7 +795,7 @@ recpy_bt_goto (PyObject *self, PyObject *args)
       else
 	target_goto_record (obj->number);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }

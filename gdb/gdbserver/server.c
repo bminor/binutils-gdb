@@ -472,7 +472,7 @@ handle_btrace_general_set (char *own_buf)
 
       write_ok (own_buf);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &exception)
+  catch (const gdb_exception_error &exception)
     {
       sprintf (own_buf, "E.%s", exception.what ());
     }
@@ -1881,7 +1881,7 @@ handle_qxfer_btrace (const char *annex,
 	  if (result != 0)
 	    memcpy (cs.own_buf, cache.buffer, cache.used_size);
 	}
-      catch (const gdb_exception_RETURN_MASK_ERROR &exception)
+      catch (const gdb_exception_error &exception)
 	{
 	  sprintf (cs.own_buf, "E.%s", exception.what ());
 	  result = -1;
@@ -1952,7 +1952,7 @@ handle_qxfer_btrace_conf (const char *annex,
 	  if (result != 0)
 	    memcpy (cs.own_buf, cache.buffer, cache.used_size);
 	}
-      catch (const gdb_exception_RETURN_MASK_ERROR &exception)
+      catch (const gdb_exception_error &exception)
 	{
 	  sprintf (cs.own_buf, "E.%s", exception.what ());
 	  result = -1;
@@ -3553,7 +3553,7 @@ detach_or_kill_for_exit_cleanup ()
     {
       detach_or_kill_for_exit ();
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &exception)
+  catch (const gdb_exception &exception)
     {
       fflush (stdout);
       fprintf (stderr, "Detach or kill failed: %s\n",
@@ -3927,7 +3927,7 @@ captured_main (int argc, char *argv[])
 		}
 	    }
 	}
-      catch (const gdb_exception_RETURN_MASK_ERROR &exception)
+      catch (const gdb_exception_error &exception)
 	{
 	  fflush (stdout);
 	  fprintf (stderr, "gdbserver: %s\n", exception.what ());
@@ -3954,7 +3954,7 @@ main (int argc, char *argv[])
     {
       captured_main (argc, argv);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &exception)
+  catch (const gdb_exception &exception)
     {
       if (exception.reason == RETURN_ERROR)
 	{

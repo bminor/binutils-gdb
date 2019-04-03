@@ -58,7 +58,7 @@ breakpoint_notify (struct breakpoint *b)
 	{
 	  print_breakpoint (b);
 	}
-      catch (const gdb_exception_RETURN_MASK_ALL &ex)
+      catch (const gdb_exception &ex)
 	{
 	  exception_print (gdb_stderr, ex);
 	}

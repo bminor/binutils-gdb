@@ -1209,7 +1209,7 @@ ada_val_print (struct type *type,
 		       stream, recurse, val, options,
 		       current_language);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+  catch (const gdb_exception_error &except)
     {
       fprintf_filtered (stream, _("<error reading variable: %s>"),
 			except.what ());

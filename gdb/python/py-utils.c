@@ -258,7 +258,7 @@ get_addr_from_python (PyObject *obj, CORE_ADDR *addr)
 	{
 	  *addr = value_as_address (value_object_to_value (obj));
 	}
-      catch (const gdb_exception_RETURN_MASK_ALL &except)
+      catch (const gdb_exception &except)
 	{
 	  GDB_PY_SET_HANDLE_EXCEPTION (except);
 	}

@@ -87,7 +87,7 @@ run_tests (const char *filter)
 	  ++ran;
 	  (*test) ();
 	}
-      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+      catch (const gdb_exception_error &ex)
 	{
 	  ++failed;
 	  debug_printf ("Self test failed: %s\n", ex.what ());

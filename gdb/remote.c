@@ -1151,7 +1151,7 @@ remote_target::remote_get_noisy_reply ()
 	      gdbarch_relocate_instruction (target_gdbarch (), &to, from);
 	      relocated = 1;
 	    }
-	  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+	  catch (const gdb_exception &ex)
 	    {
 	      if (ex.error == MEMORY_ERROR)
 		{
@@ -5605,7 +5605,7 @@ remote_target::open_1 (const char *name, int from_tty, int extended_p)
       {
 	remote->start_remote (from_tty, extended_p);
       }
-    catch (const gdb_exception_RETURN_MASK_ALL &ex)
+    catch (const gdb_exception &ex)
       {
 	/* Pop the partially set up target - unless something else did
 	   already before throwing the exception.  */
@@ -9768,7 +9768,7 @@ remote_target::remote_kill_k ()
     {
       putpkt ("k");
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+  catch (const gdb_exception_error &ex)
     {
       if (ex.error == TARGET_CLOSE_ERROR)
 	{
@@ -13136,7 +13136,7 @@ remote_target::get_trace_status (struct trace_status *ts)
     {
       p = remote_get_noisy_reply ();
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+  catch (const gdb_exception_error &ex)
     {
       if (ex.error != TARGET_CLOSE_ERROR)
 	{
@@ -13790,7 +13790,7 @@ remote_target::enable_btrace (ptid_t ptid, const struct btrace_config *conf)
     {
       btrace_read_config (&tinfo->conf);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &err)
+  catch (const gdb_exception_error &err)
     {
       if (err.message != NULL)
 	warning ("%s", err.what ());

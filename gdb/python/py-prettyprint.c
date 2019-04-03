@@ -212,7 +212,7 @@ pretty_print_one_value (PyObject *printer, struct value **out_value)
 	    }
 	}
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
     }
 
@@ -640,7 +640,7 @@ gdbpy_get_varobj_pretty_printer (struct value *value)
     {
       value = value_copy (value);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }

@@ -540,7 +540,7 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 	      common_val_print (arg->val, &stb, 0, &opts,
 				language_def (SYMBOL_LANGUAGE (arg->sym)));
 	    }
-	  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+	  catch (const gdb_exception_error &except)
 	    {
 	      stb.printf (_("<error reading variable: %s>"),
 			  except.what ());

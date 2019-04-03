@@ -607,7 +607,7 @@ gdbpy_start_recording (PyObject *self, PyObject *args)
       record_start (method, format, 0);
       ret = gdbpy_current_recording (self, args);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       gdbpy_convert_exception (except);
     }
@@ -641,7 +641,7 @@ gdbpy_stop_recording (PyObject *self, PyObject *args)
     {
       record_stop (0);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }

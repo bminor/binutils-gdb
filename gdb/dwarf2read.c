@@ -6344,7 +6344,7 @@ dwarf2_build_psymtabs (struct objfile *objfile)
       /* (maybe) store an index in the cache.  */
       global_index_cache.store (dwarf2_per_objfile);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+  catch (const gdb_exception_error &except)
     {
       exception_print (gdb_stderr, except);
     }

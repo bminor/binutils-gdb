@@ -1780,7 +1780,7 @@ displaced_step_prepare (thread_info *thread)
     {
       prepared = displaced_step_prepare_throw (thread);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+  catch (const gdb_exception_error &ex)
     {
       struct displaced_step_inferior_state *displaced_state;
 
@@ -2615,7 +2615,7 @@ resume (gdb_signal sig)
     {
       resume_1 (sig);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
       /* If resuming is being aborted for any reason, delete any
 	 single-step breakpoint resume_1 may have created, to avoid
@@ -7299,7 +7299,7 @@ insert_exception_resume_breakpoint (struct thread_info *tp,
 	  inferior_thread ()->control.exception_resume_breakpoint = bp;
 	}
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &e)
+  catch (const gdb_exception_error &e)
     {
       /* We want to ignore errors here.  */
     }
@@ -7398,7 +7398,7 @@ check_exception_resume (struct execution_control_state *ecs,
 	    }
 	}
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &e)
+  catch (const gdb_exception_error &e)
     {
     }
 }
@@ -7531,7 +7531,7 @@ keep_going_pass_signal (struct execution_control_state *ecs)
 	{
 	  insert_breakpoints ();
 	}
-      catch (const gdb_exception_RETURN_MASK_ERROR &e)
+      catch (const gdb_exception_error &e)
 	{
 	  exception_print (gdb_stderr, e);
 	  stop_waiting (ecs);
@@ -8063,7 +8063,7 @@ normal_stop (void)
 	{
 	  execute_cmd_pre_hook (stop_command);
 	}
-      catch (const gdb_exception_RETURN_MASK_ALL &ex)
+      catch (const gdb_exception &ex)
 	{
 	  exception_fprintf (gdb_stderr, ex,
 			     "Error while running hook_stop:\n");
@@ -8768,7 +8768,7 @@ restore_infcall_control_state (struct infcall_control_state *inf_status)
 	{
 	  restore_selected_frame (inf_status->selected_frame_id);
 	}
-      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+      catch (const gdb_exception_error &ex)
 	{
 	  exception_fprintf (gdb_stderr, ex,
 			     "Unable to restore previously selected frame:\n");

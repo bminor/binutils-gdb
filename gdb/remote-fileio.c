@@ -1189,7 +1189,7 @@ remote_fileio_request (remote_target *remote, char *buf, int ctrlc_pending_p)
 	{
 	  do_remote_fileio_request (remote, buf);
 	}
-      catch (const gdb_exception_RETURN_MASK_ALL &ex)
+      catch (const gdb_exception &ex)
 	{
 	  if (ex.reason == RETURN_QUIT)
 	    remote_fileio_reply (remote, -1, FILEIO_EINTR);

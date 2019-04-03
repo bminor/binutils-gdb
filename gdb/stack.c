@@ -182,7 +182,7 @@ print_stack_frame (struct frame_info *frame, int print_level,
       if (set_current_sal)
 	set_current_sal_from_frame (frame);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &e)
+  catch (const gdb_exception_error &e)
     {
     }
 }
@@ -295,7 +295,7 @@ print_frame_arg (const struct frame_arg *arg)
 
 	      common_val_print (arg->val, &stb, 2, &opts, language);
 	    }
-	  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+	  catch (const gdb_exception_error &except)
 	    {
 	      stb.printf (_("<error reading variable: %s>"),
 			  except.what ());
@@ -322,7 +322,7 @@ read_frame_local (struct symbol *sym, struct frame_info *frame,
     {
       argp->val = read_var_value (sym, NULL, frame);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+  catch (const gdb_exception_error &except)
     {
       argp->error = xstrdup (except.what ());
     }
@@ -347,7 +347,7 @@ read_frame_arg (struct symbol *sym, struct frame_info *frame,
 	{
 	  val = read_var_value (sym, NULL, frame);
 	}
-      catch (const gdb_exception_RETURN_MASK_ERROR &except)
+      catch (const gdb_exception_error &except)
 	{
 	  val_error = (char *) alloca (except.message->size () + 1);
 	  strcpy (val_error, except.what ());
@@ -367,7 +367,7 @@ read_frame_arg (struct symbol *sym, struct frame_info *frame,
 	  ops = SYMBOL_COMPUTED_OPS (sym);
 	  entryval = ops->read_variable_at_entry (sym, frame);
 	}
-      catch (const gdb_exception_RETURN_MASK_ERROR &except)
+      catch (const gdb_exception_error &except)
 	{
 	  if (except.error != NO_ENTRY_VALUE_ERROR)
 	    {
@@ -423,7 +423,7 @@ read_frame_arg (struct symbol *sym, struct frame_info *frame,
 						TYPE_LENGTH (type_deref)))
 			val_equal = 1;
 		    }
-		  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+		  catch (const gdb_exception_error &except)
 		    {
 		      /* If the dereferenced content could not be
 			 fetched do not display anything.  */
@@ -471,7 +471,7 @@ read_frame_arg (struct symbol *sym, struct frame_info *frame,
 	    {
 	      val = read_var_value (sym, NULL, frame);
 	    }
-	  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+	  catch (const gdb_exception_error &except)
 	    {
 	      val_error = (char *) alloca (except.message->size () + 1);
 	      strcpy (val_error, except.what ());
@@ -758,7 +758,7 @@ do_gdb_disassembly (struct gdbarch *gdbarch,
 		       DISASSEMBLY_RAW_INSN, how_many,
 		       low, high);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &exception)
+  catch (const gdb_exception_error &exception)
     {
       /* If an exception was thrown while doing the disassembly, print
 	 the error message, to give the user a clue of what happened.  */
@@ -1200,7 +1200,7 @@ print_frame (struct frame_info *frame, int print_level,
 	    {
 	      print_frame_args (func, frame, numargs, gdb_stdout);
 	    }
-	  catch (const gdb_exception_RETURN_MASK_ERROR &e)
+	  catch (const gdb_exception_error &e)
 	    {
 	    }
 
@@ -1389,7 +1389,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
 	  caller_pc = frame_unwind_caller_pc (fi);
 	  caller_pc_p = 1;
 	}
-      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+      catch (const gdb_exception_error &ex)
 	{
 	  switch (ex.error)
 	    {
@@ -2704,7 +2704,7 @@ frame_apply_command_count (const char *which_command,
 	      printf_filtered ("%s", cmd_result.c_str ());
 	    }
 	}
-      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+      catch (const gdb_exception_error &ex)
 	{
 	  fi = get_selected_frame (_("frame apply "
 				     "unable to get selected frame."));

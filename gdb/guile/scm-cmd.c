@@ -776,7 +776,7 @@ gdbscm_register_command_x (SCM self)
 			 c_smob->doc, cmd_list);
 	}
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }

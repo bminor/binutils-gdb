@@ -1199,7 +1199,7 @@ call_site_find_chain (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
     {
       retval = call_site_find_chain_1 (gdbarch, caller_pc, callee_pc);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &e)
+  catch (const gdb_exception_error &e)
     {
       if (e.error == NO_ENTRY_VALUE_ERROR)
 	{
@@ -2167,7 +2167,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
     {
       ctx.eval (data, size);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+  catch (const gdb_exception_error &ex)
     {
       if (ex.error == NOT_AVAILABLE_ERROR)
 	{
@@ -2384,7 +2384,7 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
     {
       ctx.eval (dlbaton->data, dlbaton->size);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+  catch (const gdb_exception_error &ex)
     {
       if (ex.error == NOT_AVAILABLE_ERROR)
 	{

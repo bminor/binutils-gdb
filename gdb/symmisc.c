@@ -353,7 +353,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 		{
 		  print_symbol (gdbarch, sym, depth + 1, outfile);
 		}
-	      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+	      catch (const gdb_exception_error &ex)
 		{
 		  exception_fprintf (gdb_stderr, ex,
 				     "Error printing symbol:\n");

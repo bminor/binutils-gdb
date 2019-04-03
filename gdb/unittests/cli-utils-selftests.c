@@ -83,7 +83,7 @@ test_number_or_range_parser ()
 	minus_one.get_number ();
 	SELF_CHECK (false);
       }
-    catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+    catch (const gdb_exception_error &ex)
       {
 	SELF_CHECK (ex.reason == RETURN_ERROR);
 	SELF_CHECK (ex.error == GENERIC_ERROR);
@@ -219,7 +219,7 @@ test_parse_flags_qcs ()
 				&flags);
 	SELF_CHECK (false);
       }
-    catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+    catch (const gdb_exception_error &ex)
       {
 	SELF_CHECK (ex.reason == RETURN_ERROR);
 	SELF_CHECK (ex.error == GENERIC_ERROR);

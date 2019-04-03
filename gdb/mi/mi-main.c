@@ -1942,7 +1942,7 @@ mi_execute_command (const char *cmd, int from_tty)
     {
       command = mi_parse (cmd, &token);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &exception)
+  catch (const gdb_exception &exception)
     {
       mi_print_exception (token, exception);
       xfree (token);
@@ -1969,7 +1969,7 @@ mi_execute_command (const char *cmd, int from_tty)
 	{
 	  captured_mi_execute_command (current_uiout, command.get ());
 	}
-      catch (const gdb_exception_RETURN_MASK_ALL &result)
+      catch (const gdb_exception &result)
 	{
 	  /* Like in start_event_loop, enable input and force display
 	     of the prompt.  Otherwise, any command that calls

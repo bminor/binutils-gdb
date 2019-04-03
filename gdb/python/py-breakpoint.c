@@ -145,7 +145,7 @@ bppy_set_enabled (PyObject *self, PyObject *newvalue, void *closure)
       else
 	disable_breakpoint (self_bp->bp);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_SET_HANDLE_EXCEPTION (except);
     }
@@ -250,7 +250,7 @@ bppy_set_task (PyObject *self, PyObject *newvalue, void *closure)
 	{
 	  valid_id = valid_task_id (id);
 	}
-      catch (const gdb_exception_RETURN_MASK_ALL &except)
+      catch (const gdb_exception &except)
 	{
 	  GDB_PY_SET_HANDLE_EXCEPTION (except);
 	}
@@ -292,7 +292,7 @@ bppy_delete_breakpoint (PyObject *self, PyObject *args)
     {
       delete_breakpoint (self_bp->bp);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -333,7 +333,7 @@ bppy_set_ignore_count (PyObject *self, PyObject *newvalue, void *closure)
     {
       set_ignore_count (self_bp->number, (int) value, 0);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_SET_HANDLE_EXCEPTION (except);
     }
@@ -469,7 +469,7 @@ bppy_set_condition (PyObject *self, PyObject *newvalue, void *closure)
     {
       set_breakpoint_condition (self_bp->bp, exp, 0);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
       except = ex;
     }
@@ -498,7 +498,7 @@ bppy_get_commands (PyObject *self, void *closure)
     {
       print_command_lines (current_uiout, breakpoint_commands (bp), 0);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       current_uiout->redirect (NULL);
       gdbpy_convert_exception (except);
@@ -540,7 +540,7 @@ bppy_set_commands (PyObject *self, PyObject *newvalue, void *closure)
       counted_command_line lines = read_command_lines_1 (reader, 1, nullptr);
       breakpoint_set_commands (self_bp->bp, std::move (lines));
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
       except = ex;
     }
@@ -864,7 +864,7 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 	  error(_("Do not understand breakpoint type to set."));
 	}
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       bppy_pending_object = NULL;
       gdbpy_convert_exception (except);

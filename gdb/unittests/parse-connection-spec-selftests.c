@@ -216,7 +216,7 @@ test_conn (const parse_conn_test &c)
     {
       ret = parse_connection_spec (c.connspec, &hint);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+  catch (const gdb_exception_error &ex)
     {
       /* If we caught an error, we should check if this connection
 	 spec was supposed to fail.  */

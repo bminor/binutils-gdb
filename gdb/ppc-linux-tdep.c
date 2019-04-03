@@ -1842,7 +1842,7 @@ ppc_linux_spe_context (int wordsize, enum bfd_endian byte_order,
 	  spe_context_cache_ptid = inferior_ptid;
 	}
 
-      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+      catch (const gdb_exception_error &ex)
 	{
 	  return 0;
 	}

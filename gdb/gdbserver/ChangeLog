@@ -1,5 +1,11 @@
 2019-04-08  Tom Tromey  <tom@tromey.com>
 
+	* gdbreplay.c: Update.
+	* linux-low.c: Update.
+	* server.c: Update.
+
+2019-04-08  Tom Tromey  <tom@tromey.com>
+
 	* server.c: Use C++ exception handling.
 	* linux-low.c: Use C++ exception handling.
 	* gdbreplay.c: Use C++ exception handling.

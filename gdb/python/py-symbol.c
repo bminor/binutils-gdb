@@ -200,7 +200,7 @@ sympy_needs_frame (PyObject *self, void *closure)
     {
       result = symbol_read_needs_frame (symbol);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -283,7 +283,7 @@ sympy_value (PyObject *self, PyObject *args)
 	 can happen with nested functions).  */
       value = read_var_value (symbol, NULL, frame_info);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -391,7 +391,7 @@ gdbpy_lookup_symbol (PyObject *self, PyObject *args, PyObject *kw)
 	  selected_frame = get_selected_frame (_("No frame selected."));
 	  block = get_frame_block (selected_frame, NULL);
 	}
-      catch (const gdb_exception_RETURN_MASK_ALL &except)
+      catch (const gdb_exception &except)
 	{
 	  GDB_PY_HANDLE_EXCEPTION (except);
 	}
@@ -402,7 +402,7 @@ gdbpy_lookup_symbol (PyObject *self, PyObject *args, PyObject *kw)
       symbol = lookup_symbol (name, block, (domain_enum) domain,
 			      &is_a_field_of_this).symbol;
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -451,7 +451,7 @@ gdbpy_lookup_global_symbol (PyObject *self, PyObject *args, PyObject *kw)
     {
       symbol = lookup_global_symbol (name, NULL, (domain_enum) domain).symbol;
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }

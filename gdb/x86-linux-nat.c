@@ -221,7 +221,7 @@ x86_linux_nat_target::enable_btrace (ptid_t ptid,
     {
       tinfo = linux_enable_btrace (ptid, conf);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &exception)
+  catch (const gdb_exception_error &exception)
     {
       error (_("Could not enable branch tracing for %s: %s"),
 	     target_pid_to_str (ptid).c_str (), exception.what ());

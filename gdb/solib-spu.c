@@ -133,7 +133,7 @@ append_ocl_sos (struct so_list **link_ptr)
 		  link_ptr = &newobj->next;
 		}
 	    }
-	  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+	  catch (const gdb_exception &ex)
 	    {
 	      /* Ignore memory errors.  */
 	      switch (ex.error)

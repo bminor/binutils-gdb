@@ -656,7 +656,7 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
       val = value_of_register (regnum, frame);
       regtype = value_type (val);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+  catch (const gdb_exception_error &ex)
     {
       /* Handle failure to read a register without interrupting the entire
          'info registers' flow.  */
@@ -2806,7 +2806,7 @@ riscv_frame_this_id (struct frame_info *this_frame,
       cache = riscv_frame_cache (this_frame, prologue_cache);
       *this_id = cache->this_id;
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+  catch (const gdb_exception_error &ex)
     {
       /* Ignore errors, this leaves the frame id as the predefined outer
          frame id which terminates the backtrace at this point.  */

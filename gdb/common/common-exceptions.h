@@ -253,26 +253,18 @@ extern void exception_rethrow (void) ATTRIBUTE_NORETURN;
    around gdb_exception that add nothing but type info.  Which is used
    is selected depending on the MASK argument passed to CATCH.  */
 
-struct gdb_exception_RETURN_MASK_ALL : public gdb_exception
+struct gdb_exception_error : public gdb_exception
 {
-  explicit gdb_exception_RETURN_MASK_ALL (const gdb_exception &ex) noexcept
+  explicit gdb_exception_error (const gdb_exception &ex) noexcept
     : gdb_exception (ex)
   {
   }
 };
 
-struct gdb_exception_RETURN_MASK_ERROR : public gdb_exception_RETURN_MASK_ALL
+struct gdb_exception_quit : public gdb_exception
 {
-  explicit gdb_exception_RETURN_MASK_ERROR (const gdb_exception &ex) noexcept
-    : gdb_exception_RETURN_MASK_ALL (ex)
-  {
-  }
-};
-
-struct gdb_exception_RETURN_MASK_QUIT : public gdb_exception_RETURN_MASK_ALL
-{
-  explicit gdb_exception_RETURN_MASK_QUIT (const gdb_exception &ex) noexcept
-    : gdb_exception_RETURN_MASK_ALL (ex)
+  explicit gdb_exception_quit (const gdb_exception &ex) noexcept
+    : gdb_exception (ex)
   {
   }
 };
@@ -284,11 +276,11 @@ struct gdb_exception_RETURN_MASK_QUIT : public gdb_exception_RETURN_MASK_ALL
    spread around the codebase.  */
 
 struct gdb_quit_bad_alloc
-  : public gdb_exception_RETURN_MASK_QUIT,
+  : public gdb_exception_quit,
     public std::bad_alloc
 {
   explicit gdb_quit_bad_alloc (const gdb_exception &ex) noexcept
-    : gdb_exception_RETURN_MASK_QUIT (ex),
+    : gdb_exception_quit (ex),
       std::bad_alloc ()
   {
   }

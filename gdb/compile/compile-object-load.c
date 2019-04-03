@@ -54,7 +54,7 @@ munmap_list::~munmap_list ()
 	{
 	  gdbarch_infcall_munmap (target_gdbarch (), item.addr, item.size);
 	}
-      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+      catch (const gdb_exception_error &ex)
 	{
 	  /* There's not much the user can do, so just ignore
 	     this.  */

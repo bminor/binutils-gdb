@@ -319,7 +319,7 @@ varobj_create (const char *objname,
 	  var->root->exp = parse_exp_1 (&p, pc, block, 0, &tracker);
 	}
 
-      catch (const gdb_exception_RETURN_MASK_ERROR &except)
+      catch (const gdb_exception_error &except)
 	{
 	  return NULL;
 	}
@@ -367,7 +367,7 @@ varobj_create (const char *objname,
 	{
 	  value = evaluate_expression (var->root->exp.get ());
 	}
-      catch (const gdb_exception_RETURN_MASK_ERROR &except)
+      catch (const gdb_exception_error &except)
 	{
 	  /* Error getting the value.  Try to at least get the
 	     right type.  */
@@ -1037,7 +1037,7 @@ varobj_set_value (struct varobj *var, const char *expression)
       value = evaluate_expression (exp.get ());
     }
 
-  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+  catch (const gdb_exception_error &except)
     {
       /* We cannot proceed without a valid expression.  */
       return false;
@@ -1065,7 +1065,7 @@ varobj_set_value (struct varobj *var, const char *expression)
       val = value_assign (var->value.get (), value);
     }
 
-  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+  catch (const gdb_exception_error &except)
     {
       return false;
     }
@@ -1312,7 +1312,7 @@ install_new_value (struct varobj *var, struct value *value, bool initial)
 	      value_fetch_lazy (value);
 	    }
 
-	  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+	  catch (const gdb_exception_error &except)
 	    {
 	      /* Set the value to NULL, so that for the next -var-update,
 		 we don't try to compare the new value with this value,
@@ -2138,7 +2138,7 @@ value_of_root_1 (struct varobj **var_handle)
 	{
 	  new_val = evaluate_expression (var->root->exp.get ());
 	}
-      catch (const gdb_exception_RETURN_MASK_ERROR &except)
+      catch (const gdb_exception_error &except)
 	{
 	}
     }

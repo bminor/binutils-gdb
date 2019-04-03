@@ -224,7 +224,7 @@ valpy_dereference (PyObject *self, PyObject *args)
       res_val = value_ind (((value_object *) self)->value);
       result = value_to_value_object (res_val);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -267,7 +267,7 @@ valpy_referenced_value (PyObject *self, PyObject *args)
 
       result = value_to_value_object (res_val);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -290,7 +290,7 @@ valpy_reference_value (PyObject *self, PyObject *args, enum type_code refcode)
       self_val = ((value_object *) self)->value;
       result = value_to_value_object (value_ref (self_val, refcode));
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -326,7 +326,7 @@ valpy_const_value (PyObject *self, PyObject *args)
       res_val = make_cv_value (1, 0, self_val);
       result = value_to_value_object (res_val);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -350,7 +350,7 @@ valpy_get_address (PyObject *self, void *closure)
 	  res_val = value_addr (val_obj->value);
 	  val_obj->address = value_to_value_object (res_val);
 	}
-      catch (const gdb_exception_RETURN_MASK_ALL &except)
+      catch (const gdb_exception &except)
 	{
 	  val_obj->address = Py_None;
 	  Py_INCREF (Py_None);
@@ -428,7 +428,7 @@ valpy_get_dynamic_type (PyObject *self, void *closure)
 	  type = NULL;
 	}
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -534,7 +534,7 @@ valpy_lazy_string (PyObject *self, PyObject *args, PyObject *kw)
       str_obj = gdbpy_create_lazy_string_object (addr, length, user_encoding,
 						 type);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -569,7 +569,7 @@ valpy_string (PyObject *self, PyObject *args, PyObject *kw)
     {
       LA_GET_STRING (value, &buffer, &length, &char_type, &la_encoding);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -730,7 +730,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
       common_val_print (((value_object *) self)->value, &stb, 0,
 			&opts, python_language);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -775,7 +775,7 @@ valpy_do_cast (PyObject *self, PyObject *args, enum exp_opcode op)
 
       result = value_to_value_object (res_val);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -853,7 +853,7 @@ value_has_field (struct value *v, PyObject *field)
       else
 	has_field = 0;
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_SET_HANDLE_EXCEPTION (except);
     }
@@ -1031,7 +1031,7 @@ valpy_getitem (PyObject *self, PyObject *key)
       if (res_val)
 	result = value_to_value_object (res_val);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
       except = ex;
     }
@@ -1064,7 +1064,7 @@ valpy_call (PyObject *self, PyObject *args, PyObject *keywords)
     {
       ftype = check_typedef (value_type (function));
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -1111,7 +1111,7 @@ valpy_call (PyObject *self, PyObject *args, PyObject *keywords)
 				 gdb::make_array_view (vargs, args_count));
       result = value_to_value_object (return_value);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -1136,7 +1136,7 @@ valpy_str (PyObject *self)
       common_val_print (((value_object *) self)->value, &stb, 0,
 			&opts, python_language);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -1155,7 +1155,7 @@ valpy_get_is_optimized_out (PyObject *self, void *closure)
     {
       opt = value_optimized_out (value);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -1177,7 +1177,7 @@ valpy_get_is_lazy (PyObject *self, void *closure)
     {
       opt = value_lazy (value);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -1199,7 +1199,7 @@ valpy_fetch_lazy (PyObject *self, PyObject *args)
       if (value_lazy (value))
 	value_fetch_lazy (value);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -1370,7 +1370,7 @@ valpy_binop (enum valpy_opcode opcode, PyObject *self, PyObject *other)
     {
       result = valpy_binop_throw (opcode, self, other);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -1438,7 +1438,7 @@ valpy_negative (PyObject *self)
       val = value_neg (((value_object *) self)->value);
       result = value_to_value_object (val);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -1465,7 +1465,7 @@ valpy_absolute (PyObject *self)
       if (value_less (value, value_zero (value_type (value), not_lval)))
 	isabs = 0;
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -1498,7 +1498,7 @@ valpy_nonzero (PyObject *self)
 	/* All other values are True.  */
 	nonzero = 1;
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
       except = ex;
     }
@@ -1521,7 +1521,7 @@ valpy_invert (PyObject *self)
     {
       val = value_complement (((value_object *) self)->value);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -1648,7 +1648,7 @@ valpy_richcompare (PyObject *self, PyObject *other, int op)
     {
       result = valpy_richcompare_throw (self, other, op);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -1686,7 +1686,7 @@ valpy_int (PyObject *self)
 
       l = value_as_long (value);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -1722,7 +1722,7 @@ valpy_long (PyObject *self)
 
       l = value_as_long (value);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -1757,7 +1757,7 @@ valpy_float (PyObject *self)
       else
 	error (_("Cannot convert value to float."));
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -1900,7 +1900,7 @@ convert_value_from_python (PyObject *obj)
 		      PyString_AsString (PyObject_Str (obj)));
 #endif
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       gdbpy_convert_exception (except);
       return NULL;
@@ -1923,7 +1923,7 @@ gdbpy_history (PyObject *self, PyObject *args)
     {
       res_val = access_value_history (i);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -1952,7 +1952,7 @@ gdbpy_convenience_variable (PyObject *self, PyObject *args)
 	    res_val = NULL;
 	}
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -1998,7 +1998,7 @@ gdbpy_set_convenience_variable (PyObject *self, PyObject *args)
 	  set_internalvar (var, value);
 	}
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }

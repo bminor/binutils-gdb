@@ -761,7 +761,7 @@ record_full_message (struct regcache *regcache, enum gdb_signal signal)
       if (ret < 0)
 	error (_("Process record: failed to record execution log."));
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
       record_full_list_release (record_full_arch_list_tail);
       throw_exception (ex);
@@ -785,7 +785,7 @@ record_full_message_wrapper_safe (struct regcache *regcache,
     {
       record_full_message (regcache, signal);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
       exception_print (gdb_stderr, ex);
       return false;
@@ -1434,7 +1434,7 @@ record_full_wait_1 (struct target_ops *ops,
 	  else
 	    status->value.sig = GDB_SIGNAL_TRAP;
 	}
-      catch (const gdb_exception_RETURN_MASK_ALL &ex)
+      catch (const gdb_exception &ex)
 	{
 	  if (execution_direction == EXEC_REVERSE)
 	    {
@@ -2473,7 +2473,7 @@ record_full_restore (void)
 	  record_full_arch_list_add (rec);
 	}
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
       record_full_list_release (record_full_arch_list_tail);
       throw_exception (ex);

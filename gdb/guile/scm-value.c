@@ -163,7 +163,7 @@ vlscm_print_value_smob (SCM self, SCM port, scm_print_state *pstate)
       common_val_print (v_smob->value, &stb, 0, &opts, current_language);
       scm_puts (stb.c_str (), port);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
@@ -190,7 +190,7 @@ vlscm_equal_p_value_smob (SCM v1, SCM v2)
     {
       result = value_equal (v1_smob->value, v2_smob->value);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
@@ -394,7 +394,7 @@ gdbscm_value_address (SCM self)
 	    {
 	      address = vlscm_scm_from_value (value_addr (value));
 	    }
-	  catch (const gdb_exception_RETURN_MASK_ALL &except)
+	  catch (const gdb_exception &except)
 	    {
 	    }
 
@@ -529,7 +529,7 @@ gdbscm_value_dynamic_type (SCM self)
 	  type = NULL;
 	}
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
@@ -684,7 +684,7 @@ gdbscm_value_call (SCM self, SCM args)
     {
       ftype = check_typedef (value_type (function));
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
@@ -752,7 +752,7 @@ gdbscm_value_to_bytevector (SCM self)
       length = TYPE_LENGTH (type);
       contents = value_contents (value);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
@@ -793,7 +793,7 @@ gdbscm_value_to_bool (SCM self)
     {
       type = check_typedef (type);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
@@ -808,7 +808,7 @@ gdbscm_value_to_bool (SCM self)
       else
 	l = value_as_long (value);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
@@ -834,7 +834,7 @@ gdbscm_value_to_integer (SCM self)
     {
       type = check_typedef (type);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
@@ -849,7 +849,7 @@ gdbscm_value_to_integer (SCM self)
       else
 	l = value_as_long (value);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
@@ -879,7 +879,7 @@ gdbscm_value_to_real (SCM self)
     {
       type = check_typedef (type);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
@@ -905,7 +905,7 @@ gdbscm_value_to_real (SCM self)
 	  check = value_from_longest (type, (LONGEST) d);
 	}
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
@@ -998,7 +998,7 @@ gdbscm_value_to_string (SCM self, SCM rest)
       LA_GET_STRING (value, &buffer, &length, &char_type, &la_encoding);
       buffer_contents = buffer.release ();
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       xfree (encoding);
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
@@ -1119,7 +1119,7 @@ gdbscm_value_to_lazy_string (SCM self, SCM rest)
 
       result = lsscm_make_lazy_string (addr, length, encoding, type);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
       except = ex;
     }
@@ -1181,7 +1181,7 @@ gdbscm_value_print (SCM self)
     {
       common_val_print (value, &stb, 0, &opts, current_language);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }

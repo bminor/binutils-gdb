@@ -212,7 +212,7 @@ gdb_rl_callback_handler (char *rl) noexcept
     {
       ui->input_handler (gdb::unique_xmalloc_ptr<char> (rl));
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
       gdb_rl_expt = ex;
     }
@@ -1086,7 +1086,7 @@ async_disconnect (gdb_client_data arg)
       quit_cover ();
     }
 
-  catch (const gdb_exception_RETURN_MASK_ALL &exception)
+  catch (const gdb_exception &exception)
     {
       fputs_filtered ("Could not kill the program being debugged",
 		      gdb_stderr);
@@ -1097,7 +1097,7 @@ async_disconnect (gdb_client_data arg)
     {
       pop_all_targets ();
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &exception)
+  catch (const gdb_exception &exception)
     {
     }
 

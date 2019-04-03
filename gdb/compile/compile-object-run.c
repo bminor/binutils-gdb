@@ -173,7 +173,7 @@ compile_object_run (struct compile_module *module)
       call_function_by_hand_dummy (func_val, NULL, args,
 				   do_module_cleanup, data);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+  catch (const gdb_exception_error &ex)
     {
       /* In the case of DTOR_FOUND or in the case of EXECUTED nothing
 	 needs to be done.  */

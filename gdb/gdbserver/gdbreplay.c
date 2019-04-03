@@ -532,7 +532,7 @@ main (int argc, char *argv[])
     {
       captured_main (argc, argv);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &exception)
+  catch (const gdb_exception &exception)
     {
       if (exception.reason == RETURN_ERROR)
 	{

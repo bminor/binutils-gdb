@@ -720,7 +720,7 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 	}
       /* If an error occurred, print TLS related messages here.  Otherwise,
          throw the error to some higher catcher.  */
-      catch (const gdb_exception_RETURN_MASK_ALL &ex)
+      catch (const gdb_exception &ex)
 	{
 	  int objfile_is_library = (objfile->flags & OBJF_SHARED);
 

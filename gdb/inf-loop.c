@@ -71,7 +71,7 @@ inferior_event_handler (enum inferior_event_type event_type,
 	    {
 	      bpstat_do_actions ();
 	    }
-	  catch (const gdb_exception_RETURN_MASK_ALL &e)
+	  catch (const gdb_exception &e)
 	    {
 	      /* If the user was running a foreground execution
 		 command, then propagate the error so that the prompt

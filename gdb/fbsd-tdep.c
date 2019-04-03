@@ -750,7 +750,7 @@ fbsd_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
     {
       update_thread_list ();
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &e)
+  catch (const gdb_exception_error &e)
     {
       exception_print (gdb_stderr, e);
     }
@@ -1999,7 +1999,7 @@ fbsd_fetch_rtld_offsets (struct gdbarch *gdbarch, struct fbsd_pspace_data *data)
       data->rtld_offsets_valid = true;
       return;
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &e)
+  catch (const gdb_exception_error &e)
     {
       data->off_linkmap = -1;
     }
@@ -2016,7 +2016,7 @@ fbsd_fetch_rtld_offsets (struct gdbarch *gdbarch, struct fbsd_pspace_data *data)
       data->rtld_offsets_valid = true;
       return;
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &e)
+  catch (const gdb_exception_error &e)
     {
       data->off_linkmap = -1;
     }

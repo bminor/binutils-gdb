@@ -72,7 +72,7 @@ struct gdbarch_selftest : public selftest
 
 	    function (gdbarch);
 	  }
-	catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+	catch (const gdb_exception_error &ex)
 	  {
 	    pass = false;
 	    exception_fprintf (gdb_stderr, ex,

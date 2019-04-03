@@ -1688,7 +1688,7 @@ darwin_attach_pid (struct inferior *inf)
 
       darwin_setup_exceptions (inf);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
       exit_inferior (inf);
       inferior_ptid = null_ptid;
@@ -1952,7 +1952,7 @@ The error was: %s"),
 	{
 	  copy_shell_to_cache (shell, new_name);
 	}
-      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+      catch (const gdb_exception_error &ex)
 	{
 	  warning (_("This version of macOS has System Integrity Protection.\n\
 Because `startup-with-shell' is enabled, gdb tried to work around SIP by\n\

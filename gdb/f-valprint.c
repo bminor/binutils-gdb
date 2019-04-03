@@ -413,7 +413,7 @@ info_common_command_for_block (const struct block *block, const char *comname,
 		value_print (val, gdb_stdout, &opts);
 	      }
 
-	    catch (const gdb_exception_RETURN_MASK_ERROR &except)
+	    catch (const gdb_exception_error &except)
 	      {
 		printf_filtered ("<error reading variable: %s>",
 				 except.what ());

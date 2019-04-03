@@ -1748,7 +1748,7 @@ tuple structs, and tuple-like enum variants"));
 		result = value_struct_elt (&lhs, NULL, field_name,
 					   NULL, "structure");
 	      }
-	    catch (const gdb_exception_RETURN_MASK_ERROR &except)
+	    catch (const gdb_exception_error &except)
 	      {
 		error (_("Could not find field %s of struct variant %s::%s"),
 		       field_name, TYPE_NAME (outer_type),

@@ -489,7 +489,7 @@ dtrace_process_dof_probe (struct objfile *objfile,
 	      expr = parse_expression_with_language (type_str.c_str (),
 						     language_c);
 	    }
-	  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+	  catch (const gdb_exception_error &ex)
 	    {
 	    }
 

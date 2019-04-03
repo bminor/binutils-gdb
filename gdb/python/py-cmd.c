@@ -572,7 +572,7 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 	set_cmd_completer_handle_brkchars (cmd,
 					   cmdpy_completer_handle_brkchars);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       xfree (cmd_name);
       xfree (docstring);

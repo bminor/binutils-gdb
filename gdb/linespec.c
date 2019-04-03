@@ -2388,7 +2388,7 @@ convert_explicit_location_to_linespec (struct linespec_state *self,
 	  *result->file_symtabs
 	    = symtabs_from_filename (source_filename, self->search_pspace);
 	}
-      catch (const gdb_exception_RETURN_MASK_ERROR &except)
+      catch (const gdb_exception_error &except)
 	{
 	  source_file_not_found_error (source_filename);
 	}
@@ -2613,7 +2613,7 @@ parse_linespec (linespec_parser *parser, const char *arg,
 	    = symtabs_from_filename (user_filename.get (),
 				     PARSER_STATE (parser)->search_pspace);
 	}
-      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+      catch (const gdb_exception_error &ex)
 	{
 	  file_exception = ex;
 	}
@@ -2930,7 +2930,7 @@ linespec_complete_label (completion_tracker &tracker,
 					     func_name_match_type,
 					     NULL, unknown_offset);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+  catch (const gdb_exception_error &ex)
     {
       return;
     }
@@ -2960,7 +2960,7 @@ linespec_complete (completion_tracker &tracker, const char *text,
     {
       parse_linespec (&parser, text, match_type);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+  catch (const gdb_exception_error &except)
     {
     }
 
@@ -3150,7 +3150,7 @@ event_location_to_sals (linespec_parser *parser,
 	    result = parse_linespec (parser,
 				     ls->spec_string, ls->match_type);
 	  }
-	catch (const gdb_exception_RETURN_MASK_ERROR &except)
+	catch (const gdb_exception_error &except)
 	  {
 	    throw_exception (except);
 	  }
@@ -3963,7 +3963,7 @@ find_linespec_symbols (struct linespec_state *state,
 
 	  /* If successful, we're done.  If NOT_FOUND_ERROR
 	     was not thrown, rethrow the exception that we did get.  */
-	  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+	  catch (const gdb_exception_error &except)
 	    {
 	      if (except.error != NOT_FOUND_ERROR)
 		throw_exception (except);

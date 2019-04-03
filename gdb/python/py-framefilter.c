@@ -1085,7 +1085,7 @@ gdbpy_apply_frame_filter (const struct extension_language_defn *extlang,
     {
       gdbarch = get_frame_arch (frame);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+  catch (const gdb_exception_error &except)
     {
       /* Let gdb try to print the stack trace.  */
       return EXT_LANG_BT_NO_FILTERS;
@@ -1170,7 +1170,7 @@ gdbpy_apply_frame_filter (const struct extension_language_defn *extlang,
 	  success = py_print_frame (item.get (), flags, args_type, out, 0,
 				    levels_printed.get ());
 	}
-      catch (const gdb_exception_RETURN_MASK_ERROR &except)
+      catch (const gdb_exception_error &except)
 	{
 	  gdbpy_convert_exception (except);
 	  success = EXT_LANG_BT_ERROR;

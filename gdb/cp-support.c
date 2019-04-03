@@ -155,7 +155,7 @@ inspect_type (struct demangle_parse_info *info,
     {
       sym = lookup_symbol (name, 0, VAR_DOMAIN, 0).symbol;
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       return 0;
     }
@@ -228,7 +228,7 @@ inspect_type (struct demangle_parse_info *info,
 	    }
 	  /* If type_print threw an exception, there is little point
 	     in continuing, so just bow out gracefully.  */
-	  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+	  catch (const gdb_exception_error &except)
 	    {
 	      return 0;
 	    }
@@ -427,7 +427,7 @@ replace_typedefs (struct demangle_parse_info *info,
 		  sym = lookup_symbol (local_name.get (), 0,
 				       VAR_DOMAIN, 0).symbol;
 		}
-	      catch (const gdb_exception_RETURN_MASK_ALL &except)
+	      catch (const gdb_exception &except)
 		{
 		}
 

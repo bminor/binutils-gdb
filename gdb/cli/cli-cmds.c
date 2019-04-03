@@ -267,7 +267,7 @@ complete_command (const char *arg, int from_tty)
 	  tracker = &tracker_handle_completions;
 	}
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
       return;
     }

@@ -687,7 +687,7 @@ gdbscm_lookup_block (SCM pc_scm)
       if (cust != NULL && COMPUNIT_OBJFILE (cust) != NULL)
 	block = block_for_pc (pc);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }

@@ -973,7 +973,7 @@ gdbarch_skip_prologue_noexcept (gdbarch *gdbarch, CORE_ADDR pc) noexcept
     {
       new_pc = gdbarch_skip_prologue (gdbarch, pc);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {}
 
   return new_pc;

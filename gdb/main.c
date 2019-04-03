@@ -373,7 +373,7 @@ catch_command_errors (catch_command_errors_const_ftype command,
 
       maybe_wait_sync_command_done (was_sync);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &e)
+  catch (const gdb_exception &e)
     {
       return handle_command_errors (e);
     }
@@ -1172,7 +1172,7 @@ captured_main (void *data)
 	{
 	  captured_command_loop ();
 	}
-      catch (const gdb_exception_RETURN_MASK_ALL &ex)
+      catch (const gdb_exception &ex)
 	{
 	  exception_print (gdb_stderr, ex);
 	}
@@ -1187,7 +1187,7 @@ gdb_main (struct captured_main_args *args)
     {
       captured_main (args);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
       exception_print (gdb_stderr, ex);
     }

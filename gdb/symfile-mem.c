@@ -198,7 +198,7 @@ add_vsyscall_page (struct target_ops *target, int from_tty)
 				       name,
 				       0 /* from_tty */);
 	}
-      catch (const gdb_exception_RETURN_MASK_ALL &ex)
+      catch (const gdb_exception &ex)
 	{
 	  exception_print (gdb_stderr, ex);
 	}

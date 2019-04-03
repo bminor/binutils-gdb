@@ -2102,7 +2102,7 @@ parse_cond_to_aexpr (CORE_ADDR scope, struct expression *cond)
       aexpr = gen_eval_for_expr (scope, cond);
     }
 
-  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+  catch (const gdb_exception_error &ex)
     {
       /* If we got here, it means the condition could not be parsed to a valid
 	 bytecode expression and thus can't be evaluated on the target's side.
@@ -2277,7 +2277,7 @@ parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
 			  format_start, format_end - format_start,
 			  argvec.size (), argvec.data ());
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+  catch (const gdb_exception_error &ex)
     {
       /* If we got here, it means the command could not be parsed to a valid
 	 bytecode expression and thus can't be evaluated on the target's side.
@@ -2545,7 +2545,7 @@ insert_bp_location (struct bp_location *bl,
 	      if (val)
 		bp_excpt = gdb_exception {RETURN_ERROR, GENERIC_ERROR};
 	    }
-	  catch (const gdb_exception_RETURN_MASK_ALL &e)
+	  catch (const gdb_exception &e)
 	    {
 	      bp_excpt = e;
 	    }
@@ -2584,7 +2584,7 @@ insert_bp_location (struct bp_location *bl,
 			bp_excpt
 			  = gdb_exception {RETURN_ERROR, GENERIC_ERROR};
 		    }
-		  catch (const gdb_exception_RETURN_MASK_ALL &e)
+		  catch (const gdb_exception &e)
 		    {
 		      bp_excpt = e;
 		    }
@@ -2608,7 +2608,7 @@ insert_bp_location (struct bp_location *bl,
 		  if (val)
 		    bp_excpt = gdb_exception {RETURN_ERROR, GENERIC_ERROR};
 	        }
-	      catch (const gdb_exception_RETURN_MASK_ALL &e)
+	      catch (const gdb_exception &e)
 	        {
 		  bp_excpt = e;
 	        }
@@ -5016,7 +5016,7 @@ bpstat_check_watchpoint (bpstat bs)
 	    {
 	      e = watchpoint_check (bs);
 	    }
-	  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+	  catch (const gdb_exception &ex)
 	    {
 	      exception_fprintf (gdb_stderr, ex,
 				 "Error evaluating expression "
@@ -5253,7 +5253,7 @@ bpstat_check_breakpoint_conditions (bpstat bs, thread_info *thread)
 	    {
 	      condition_result = breakpoint_cond_eval (cond);
 	    }
-	  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+	  catch (const gdb_exception &ex)
 	    {
 	      exception_fprintf (gdb_stderr, ex,
 				 "Error in testing breakpoint condition:\n");
@@ -9243,7 +9243,7 @@ create_breakpoint (struct gdbarch *gdbarch,
     {
       ops->create_sals_from_location (location, &canonical, type_wanted);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &e)
+  catch (const gdb_exception_error &e)
     {
       /* If caller is interested in rc value from parse, set
 	 value.  */
@@ -12056,7 +12056,7 @@ update_global_location_list_nothrow (enum ugll_insert_mode insert_mode)
     {
       update_global_location_list (insert_mode);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &e)
+  catch (const gdb_exception_error &e)
     {
     }
 }
@@ -13526,7 +13526,7 @@ update_breakpoint_locations (struct breakpoint *b,
 					   block_for_pc (sal.pc),
 					   0);
 	    }
-	  catch (const gdb_exception_RETURN_MASK_ERROR &e)
+	  catch (const gdb_exception_error &e)
 	    {
 	      warning (_("failed to reevaluate condition "
 			 "for breakpoint %d: %s"), 
@@ -13603,7 +13603,7 @@ location_to_sals (struct breakpoint *b, struct event_location *location,
     {
       sals = b->ops->decode_location (b, location, search_pspace);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &e)
+  catch (const gdb_exception_error &e)
     {
       int not_found_and_ok = 0;
 
@@ -13813,7 +13813,7 @@ breakpoint_re_set (void)
 	  {
 	    breakpoint_re_set_one (b);
 	  }
-	catch (const gdb_exception_RETURN_MASK_ALL &ex)
+	catch (const gdb_exception &ex)
 	  {
 	    exception_fprintf (gdb_stderr, ex,
 			       "Error in re-setting breakpoint %d: ",
@@ -14293,7 +14293,7 @@ enable_breakpoint_disp (struct breakpoint *bpt, enum bpdisp disposition,
 	  bpt->enable_state = bp_enabled;
 	  update_watchpoint (w, 1 /* reparse */);
 	}
-      catch (const gdb_exception_RETURN_MASK_ALL &e)
+      catch (const gdb_exception &e)
 	{
 	  bpt->enable_state = orig_enable_state;
 	  exception_fprintf (gdb_stderr, e, _("Cannot enable watchpoint %d: "),
@@ -15031,7 +15031,7 @@ save_breakpoints (const char *filename, int from_tty,
 	  {
 	    print_command_lines (current_uiout, tp->commands.get (), 2);
 	  }
-	catch (const gdb_exception_RETURN_MASK_ALL &ex)
+	catch (const gdb_exception &ex)
 	  {
 	  current_uiout->redirect (NULL);
 	    throw_exception (ex);

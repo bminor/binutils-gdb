@@ -388,7 +388,7 @@ gcc_cplus_convert_symbol (void *datum,
 	    }
 	}
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &e)
+  catch (const gdb_exception &e)
     {
       /* We can't allow exceptions to escape out of this callback.  Safest
 	 is to simply emit a gcc error.  */
@@ -466,7 +466,7 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
 	}
     }
 
-  catch (const gdb_exception_RETURN_MASK_ERROR &e)
+  catch (const gdb_exception_error &e)
     {
       instance->plugin ().error (e.what ());
     }

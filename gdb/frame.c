@@ -899,7 +899,7 @@ frame_unwind_pc (struct frame_info *this_frame)
 	  pc = gdbarch_unwind_pc (prev_gdbarch, this_frame);
 	  pc_p = 1;
 	}
-      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+      catch (const gdb_exception_error &ex)
 	{
 	  if (ex.error == NOT_AVAILABLE_ERROR)
 	    {
@@ -1913,7 +1913,7 @@ get_prev_frame_if_no_cycle (struct frame_info *this_frame)
 	  prev_frame = NULL;
 	}
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
       prev_frame->next = NULL;
       this_frame->prev = NULL;
@@ -2094,7 +2094,7 @@ get_prev_frame_always (struct frame_info *this_frame)
     {
       prev_frame = get_prev_frame_always_1 (this_frame);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+  catch (const gdb_exception_error &ex)
     {
       if (ex.error == MEMORY_ERROR)
 	{
@@ -2380,7 +2380,7 @@ get_frame_pc_if_available (struct frame_info *frame, CORE_ADDR *pc)
     {
       *pc = frame_unwind_pc (frame->next);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+  catch (const gdb_exception_error &ex)
     {
       if (ex.error == NOT_AVAILABLE_ERROR)
 	return 0;
@@ -2462,7 +2462,7 @@ get_frame_address_in_block_if_available (struct frame_info *this_frame,
     {
       *pc = get_frame_address_in_block (this_frame);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+  catch (const gdb_exception_error &ex)
     {
       if (ex.error == NOT_AVAILABLE_ERROR)
 	return 0;
@@ -2747,7 +2747,7 @@ get_frame_language (struct frame_info *frame)
       pc = get_frame_address_in_block (frame);
       pc_p = 1;
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+  catch (const gdb_exception_error &ex)
     {
       if (ex.error != NOT_AVAILABLE_ERROR)
 	throw_exception (ex);

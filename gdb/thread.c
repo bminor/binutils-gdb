@@ -1471,7 +1471,7 @@ thr_try_catch_cmd (thread_info *thr, const char *cmd, int from_tty,
 	  printf_filtered ("%s", cmd_result.c_str ());
 	}
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+  catch (const gdb_exception_error &ex)
     {
       if (!flags.silent)
 	{

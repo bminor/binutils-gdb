@@ -1025,7 +1025,7 @@ complete_expression (completion_tracker &tracker,
     {
       type = parse_expression_for_completion (text, &fieldname, &code);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+  catch (const gdb_exception_error &except)
     {
       return;
     }
@@ -1448,7 +1448,7 @@ complete_line_internal (completion_tracker &tracker,
     {
       complete_line_internal_1 (tracker, text, line_buffer, point, reason);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+  catch (const gdb_exception_error &except)
     {
       if (except.error != MAX_COMPLETIONS_REACHED_ERROR)
 	throw_exception (except);
@@ -1861,7 +1861,7 @@ gdb_completion_word_break_characters ()
     {
       return gdb_completion_word_break_characters_throw ();
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
       /* Set this to that gdb_rl_attempted_completion_function knows
 	 to abort early.  */
@@ -2208,7 +2208,7 @@ gdb_rl_attempted_completion_function (const char *text, int start, int end)
     {
       return gdb_rl_attempted_completion_function_throw (text, start, end);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
     }
 

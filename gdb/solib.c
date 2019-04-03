@@ -700,7 +700,7 @@ solib_read_symbols (struct so_list *so, symfile_add_flags flags)
 
 	  so->symbols_loaded = 1;
 	}
-      catch (const gdb_exception_RETURN_MASK_ERROR &e)
+      catch (const gdb_exception_error &e)
 	{
 	  exception_fprintf (gdb_stderr, e, _("Error while reading shared"
 					      " library symbols for %s:\n"),
@@ -751,7 +751,7 @@ update_solib_list (int from_tty)
 	    {
 	      ops->open_symbol_file_object (from_tty);
 	    }
-	  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+	  catch (const gdb_exception &ex)
 	    {
 	      exception_fprintf (gdb_stderr, ex,
 				 "Error reading attached "
@@ -877,7 +877,7 @@ update_solib_list (int from_tty)
 		}
 	    }
 
-	  catch (const gdb_exception_RETURN_MASK_ERROR &e)
+	  catch (const gdb_exception_error &e)
 	    {
 	      exception_fprintf (gdb_stderr, e,
 				 _("Error while mapping shared "
@@ -1335,7 +1335,7 @@ reload_shared_libraries_1 (int from_tty)
 	      solib_map_sections (so);
 	    }
 
-	  catch (const gdb_exception_RETURN_MASK_ERROR &e)
+	  catch (const gdb_exception_error &e)
 	    {
 	      exception_fprintf (gdb_stderr, e,
 				 _("Error while mapping "

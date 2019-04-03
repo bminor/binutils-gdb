@@ -257,7 +257,7 @@ gdbscm_arch_disassemble (SCM self, SCM start_scm, SCM rest)
 	  else
 	    insn_len = gdb_print_insn (gdbarch, pc, &buf, NULL);
 	}
-      catch (const gdb_exception_RETURN_MASK_ALL &except)
+      catch (const gdb_exception &except)
 	{
 	  GDBSCM_HANDLE_GDB_EXCEPTION (except);
 	}

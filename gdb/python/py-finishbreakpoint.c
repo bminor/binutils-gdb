@@ -121,7 +121,7 @@ bpfinishpy_pre_stop_hook (struct gdbpy_breakpoint_object *bp_obj)
           self_finishbp->return_value = Py_None;
         }
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       gdbpy_convert_exception (except);
       gdbpy_print_stack ();
@@ -141,7 +141,7 @@ bpfinishpy_post_stop_hook (struct gdbpy_breakpoint_object *bp_obj)
       disable_breakpoint (bp_obj->bp);
       gdb_assert (bp_obj->bp->disposition == disp_del);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       gdbpy_convert_exception (except);
       gdbpy_print_stack ();
@@ -208,7 +208,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 	    }
 	}
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       gdbpy_convert_exception (except);
       return -1;
@@ -267,7 +267,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
             }
         }
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       /* Just swallow.  Either the return type or the function value
 	 remain NULL.  */
@@ -302,7 +302,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
                          &bkpt_breakpoint_ops,
                          0, 1, internal_bp, 0);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_SET_HANDLE_EXCEPTION (except);
     }
@@ -364,7 +364,7 @@ bpfinishpy_detect_out_scope_cb (struct breakpoint *b, void *args)
                       || frame_find_by_id (b->frame_id) == NULL))
                 bpfinishpy_out_of_scope (finish_bp);
             }
-          catch (const gdb_exception_RETURN_MASK_ALL &except)
+          catch (const gdb_exception &except)
             {
               gdbpy_convert_exception (except);
               gdbpy_print_stack ();

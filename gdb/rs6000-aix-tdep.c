@@ -674,7 +674,7 @@ rs6000_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
         {
           pc = read_memory_unsigned_integer (addr, tdep->wordsize, byte_order);
         }
-      catch (const gdb_exception_RETURN_MASK_ERROR &e)
+      catch (const gdb_exception_error &e)
         {
           /* An error occured during reading.  Probably a memory error
              due to the section not being loaded yet.  This address

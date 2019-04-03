@@ -433,7 +433,7 @@ public:
 	    fork_load_infrun_state (m_oldfp);
 	    insert_breakpoints ();
 	  }
-	catch (const gdb_exception_RETURN_MASK_ALL &ex)
+	catch (const gdb_exception &ex)
 	  {
 	    warning (_("Couldn't restore checkpoint state in %s: %s"),
 		     target_pid_to_str (m_oldfp->ptid).c_str (),

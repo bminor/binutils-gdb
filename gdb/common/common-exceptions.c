@@ -195,12 +195,12 @@ throw_exception_cxx (struct gdb_exception exception)
 {
   if (exception.reason == RETURN_QUIT)
     {
-      gdb_exception_RETURN_MASK_QUIT ex (exception);
+      gdb_exception_quit ex (exception);
       throw ex;
     }
   else if (exception.reason == RETURN_ERROR)
     {
-      gdb_exception_RETURN_MASK_ERROR ex (exception);
+      gdb_exception_error ex (exception);
       throw ex;
     }
   else

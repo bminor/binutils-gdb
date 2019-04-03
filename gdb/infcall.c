@@ -605,7 +605,7 @@ run_inferior_call (struct call_thread_fsm *sm,
 	 target supports asynchronous execution.  */
       wait_sync_command_done ();
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &e)
+  catch (const gdb_exception &e)
     {
       caught_error = e;
     }

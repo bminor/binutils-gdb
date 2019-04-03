@@ -1054,7 +1054,7 @@ process_next_line (const char *p, struct command_line **command,
 	{
 	  validator ((*command)->line);
 	}
-      catch (const gdb_exception_RETURN_MASK_ALL &ex)
+      catch (const gdb_exception &ex)
 	{
 	  free_command_lines (command);
 	  throw_exception (ex);
@@ -1543,7 +1543,7 @@ script_from_file (FILE *stream, const char *file)
     {
       read_command_file (stream);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &e)
+  catch (const gdb_exception_error &e)
     {
       /* Re-throw the error, but with the file name information
 	 prepended.  */

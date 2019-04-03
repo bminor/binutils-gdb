@@ -414,7 +414,7 @@ i386_linux_handle_segmentation_fault (struct gdbarch *gdbarch,
       access
         = parse_and_eval_long ("$_siginfo._sifields._sigfault.si_addr");
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &exception)
+  catch (const gdb_exception &exception)
     {
       return;
     }

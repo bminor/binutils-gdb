@@ -3625,7 +3625,7 @@ value_rtti_indirect_type (struct value *v, int *full,
         {
 	  target = value_ind (v);
         }
-      catch (const gdb_exception_RETURN_MASK_ERROR &except)
+      catch (const gdb_exception_error &except)
 	{
 	  if (except.error == MEMORY_ERROR)
 	    {
@@ -3777,7 +3777,7 @@ value_of_this_silent (const struct language_defn *lang)
     {
       ret = value_of_this (lang);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+  catch (const gdb_exception_error &except)
     {
     }
 

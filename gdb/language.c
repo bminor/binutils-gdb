@@ -179,7 +179,7 @@ set_language_command (const char *ignore,
 		  frame = get_selected_frame (NULL);
 		  flang = get_frame_language (frame);
 		}
-	      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+	      catch (const gdb_exception_error &ex)
 		{
 		  flang = language_unknown;
 		}

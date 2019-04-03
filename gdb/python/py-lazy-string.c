@@ -142,7 +142,7 @@ stpy_convert_to_value (PyObject *self, PyObject *args)
 	  break;
 	}
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }

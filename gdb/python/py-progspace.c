@@ -391,7 +391,7 @@ pspy_block_for_pc (PyObject *o, PyObject *args)
       if (cust != NULL && COMPUNIT_OBJFILE (cust) != NULL)
 	block = block_for_pc (pc);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -436,7 +436,7 @@ pspy_find_pc_line (PyObject *o, PyObject *args)
       sal = find_pc_line (pc, 0);
       result = symtab_and_line_to_sal_object (sal);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }

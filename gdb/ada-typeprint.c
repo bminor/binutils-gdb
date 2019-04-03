@@ -168,7 +168,7 @@ print_range (struct type *type, struct ui_file *stream,
 	    lo = ada_discrete_type_low_bound (type);
 	    hi = ada_discrete_type_high_bound (type);
 	  }
-	catch (const gdb_exception_RETURN_MASK_ERROR &e)
+	catch (const gdb_exception_error &e)
 	  {
 	    /* This can happen when the range is dynamic.  Sometimes,
 	       resolving dynamic property values requires us to have

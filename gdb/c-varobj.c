@@ -97,7 +97,7 @@ adjust_value_for_child_access (struct value **value,
 		  *value = value_ind (*value);
 		}
 
-	      catch (const gdb_exception_RETURN_MASK_ERROR &except)
+	      catch (const gdb_exception_error &except)
 		{
 		  *value = NULL;
 		}
@@ -259,7 +259,7 @@ value_struct_element_index (struct value *value, int type_index)
       else
 	result = value_primitive_field (value, 0, type_index, type);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &e)
+  catch (const gdb_exception_error &e)
     {
       return NULL;
     }
@@ -318,7 +318,7 @@ c_describe_child (const struct varobj *parent, int index,
 	    {
 	      *cvalue = value_subscript (value, real_index);
 	    }
-	  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+	  catch (const gdb_exception_error &except)
 	    {
 	    }
 	}
@@ -395,7 +395,7 @@ c_describe_child (const struct varobj *parent, int index,
 	      *cvalue = value_ind (value);
 	    }
 
-	  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+	  catch (const gdb_exception_error &except)
 	    {
 	      *cvalue = NULL;
 	    }

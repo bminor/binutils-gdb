@@ -1192,7 +1192,7 @@ linux_nat_target::attach (const char *args, int from_tty)
     {
       inf_ptrace_target::attach (args, from_tty);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+  catch (const gdb_exception_error &ex)
     {
       pid_t pid = parse_pid_to_attach (args);
       std::string reason = linux_ptrace_attach_fail_reason (pid);
@@ -1405,7 +1405,7 @@ detach_one_lwp (struct lwp_info *lp, int *signo_p)
     {
       linux_target->low_prepare_to_resume (lp);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+  catch (const gdb_exception_error &ex)
     {
       if (!check_ptrace_stopped_lwp_gone (lp))
 	throw_exception (ex);
@@ -1587,7 +1587,7 @@ linux_resume_one_lwp (struct lwp_info *lp, int step, enum gdb_signal signo)
     {
       linux_resume_one_lwp_throw (lp, step, signo);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+  catch (const gdb_exception_error &ex)
     {
       if (!check_ptrace_stopped_lwp_gone (lp))
 	throw_exception (ex);
@@ -3549,7 +3549,7 @@ resume_stopped_resumed_lwps (struct lwp_info *lp, const ptid_t wait_ptid)
 	      linux_resume_one_lwp_throw (lp, lp->step, GDB_SIGNAL_0);
 	    }
 	}
-      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+      catch (const gdb_exception_error &ex)
 	{
 	  if (!check_ptrace_stopped_lwp_gone (lp))
 	    throw_exception (ex);

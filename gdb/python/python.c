@@ -501,7 +501,7 @@ gdbpy_parameter (PyObject *self, PyObject *args)
     {
       found = lookup_cmd_composition (newarg.c_str (), &alias, &prefix, &cmd);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
       GDB_PY_HANDLE_EXCEPTION (ex);
     }
@@ -614,7 +614,7 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
       /* Do any commands attached to breakpoint we stopped at.  */
       bpstat_do_actions ();
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -842,7 +842,7 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
 	  sals = def_sal;
 	}
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
       /* We know this will always throw.  */
       gdbpy_convert_exception (ex);
@@ -900,7 +900,7 @@ gdbpy_parse_and_eval (PyObject *self, PyObject *args)
       gdbpy_allow_threads allow_threads;
       result = parse_and_eval (expr_str);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -1150,7 +1150,7 @@ gdbpy_write (PyObject *self, PyObject *args, PyObject *kw)
           fprintf_filtered (gdb_stdout, "%s", arg);
         }
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
@@ -1223,7 +1223,7 @@ gdbpy_print_stack (void)
 	{
 	  begin_line ();
 	}
-      catch (const gdb_exception_RETURN_MASK_ALL &except)
+      catch (const gdb_exception &except)
 	{
 	}
     }
@@ -1254,7 +1254,7 @@ gdbpy_print_stack (void)
 	    fprintf_filtered (gdb_stderr, "Python Exception %s %s: \n",
 			      type.get (), msg.get ());
 	}
-      catch (const gdb_exception_RETURN_MASK_ALL &except)
+      catch (const gdb_exception &except)
 	{
 	}
     }

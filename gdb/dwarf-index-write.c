@@ -1681,7 +1681,7 @@ save_gdb_index_command (const char *arg, int from_tty)
 	      write_psymtabs_to_index (dwarf2_per_objfile, arg, basename,
 				       index_kind);
 	    }
-	  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+	  catch (const gdb_exception_error &except)
 	    {
 	      exception_fprintf (gdb_stderr, except,
 				 _("Error while writing index for `%s': "),

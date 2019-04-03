@@ -387,7 +387,7 @@ gdb_xml_start_element_wrapper (void *data, const XML_Char *name,
     {
       parser->start_element (name, attrs);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
       parser->set_error (ex);
     }
@@ -459,7 +459,7 @@ gdb_xml_end_element_wrapper (void *data, const XML_Char *name)
     {
       parser->end_element (name);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
       parser->set_error (ex);
     }

@@ -2575,7 +2575,7 @@ safe_parse_type (struct gdbarch *gdbarch, char *p, int length)
     {
       type = parse_and_eval_type (p, length);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+  catch (const gdb_exception_error &except)
     {
       type = builtin_type (gdbarch)->builtin_void;
     }

@@ -367,7 +367,7 @@ gcc_convert_symbol (void *datum,
 	}
     }
 
-  catch (const gdb_exception_RETURN_MASK_ALL &e)
+  catch (const gdb_exception &e)
     {
       context->plugin ().error (e.what ());
     }
@@ -429,7 +429,7 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 	}
     }
 
-  catch (const gdb_exception_RETURN_MASK_ERROR &e)
+  catch (const gdb_exception_error &e)
     {
       context->plugin ().error (e.what ());
     }
@@ -598,7 +598,7 @@ generate_c_for_for_one_variable (compile_instance *compiler,
 	}
     }
 
-  catch (const gdb_exception_RETURN_MASK_ERROR &e)
+  catch (const gdb_exception_error &e)
     {
       compiler->insert_symbol_error (sym, e.what ());
     }

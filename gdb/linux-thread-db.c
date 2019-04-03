@@ -502,7 +502,7 @@ thread_db_find_new_threads_silently (thread_info *stopped)
       thread_db_find_new_threads_2 (stopped, true);
     }
 
-  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+  catch (const gdb_exception_error &except)
     {
       if (libthread_db_debug)
 	exception_fprintf (gdb_stdlog, except,
@@ -772,7 +772,7 @@ check_thread_db (struct thread_db_info *info, bool log_progress)
       if (!tdb_testinfo->threads_seen)
 	error (_("no threads seen"));
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+  catch (const gdb_exception_error &except)
     {
       if (warning_pre_print)
 	fputs_unfiltered (warning_pre_print, gdb_stderr);
@@ -1518,7 +1518,7 @@ find_new_threads_once (struct thread_db_info *info, int iteration,
 				    TD_SIGNO_MASK,
 				    TD_THR_ANY_USER_FLAGS);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &except)
+  catch (const gdb_exception_error &except)
     {
       if (libthread_db_debug)
 	{

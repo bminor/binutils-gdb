@@ -874,7 +874,7 @@ solib_svr4_r_map (struct svr4_info *info)
       addr = read_memory_typed_address (info->debug_base + lmo->r_map_offset,
                                         ptr_type);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+  catch (const gdb_exception_error &ex)
     {
       exception_print (gdb_stderr, ex);
     }
@@ -913,7 +913,7 @@ solib_svr4_r_ldsomap (struct svr4_info *info)
 	= read_memory_unsigned_integer (info->debug_base + lmo->r_version_offset,
 					lmo->r_version_size, byte_order);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+  catch (const gdb_exception_error &ex)
     {
       exception_print (gdb_stderr, ex);
     }
@@ -1734,7 +1734,7 @@ solib_event_probe_action (struct probe_and_action *pa)
     {
       probe_argc = pa->prob->get_argument_count (frame);
     }
-  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+  catch (const gdb_exception_error &ex)
     {
       exception_print (gdb_stderr, ex);
       probe_argc = 0;
@@ -1897,7 +1897,7 @@ svr4_handle_solib_event (void)
       {
 	val = pa->prob->evaluate_argument (1, frame);
       }
-    catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+    catch (const gdb_exception_error &ex)
       {
 	exception_print (gdb_stderr, ex);
 	val = NULL;
@@ -1928,7 +1928,7 @@ svr4_handle_solib_event (void)
 	  {
 	    val = pa->prob->evaluate_argument (2, frame);
 	  }
-	catch (const gdb_exception_RETURN_MASK_ERROR &ex)
+	catch (const gdb_exception_error &ex)
 	  {
 	    exception_print (gdb_stderr, ex);
 	    return;
@@ -2278,7 +2278,7 @@ enable_break (struct svr4_info *info, int from_tty)
         {
 	  tmp_bfd = solib_bfd_open (interp_name);
 	}
-      catch (const gdb_exception_RETURN_MASK_ALL &ex)
+      catch (const gdb_exception &ex)
 	{
 	}
 

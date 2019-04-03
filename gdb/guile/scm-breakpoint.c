@@ -465,7 +465,7 @@ gdbscm_register_breakpoint_x (SCM self)
 	  gdb_assert_not_reached ("invalid breakpoint type");
 	}
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &ex)
+  catch (const gdb_exception &ex)
     {
       except = ex;
     }
@@ -493,7 +493,7 @@ gdbscm_delete_breakpoint_x (SCM self)
     {
       delete_breakpoint (bp_smob->bp);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
@@ -593,7 +593,7 @@ gdbscm_set_breakpoint_enabled_x (SCM self, SCM newvalue)
       else
 	disable_breakpoint (bp_smob->bp);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
@@ -627,7 +627,7 @@ gdbscm_set_breakpoint_silent_x (SCM self, SCM newvalue)
     {
       breakpoint_set_silent (bp_smob->bp, gdbscm_is_true (newvalue));
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
@@ -667,7 +667,7 @@ gdbscm_set_breakpoint_ignore_count_x (SCM self, SCM newvalue)
     {
       set_ignore_count (bp_smob->number, (int) value, 0);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
@@ -787,7 +787,7 @@ gdbscm_set_breakpoint_task_x (SCM self, SCM newvalue)
 	{
 	  valid_id = valid_task_id (id);
 	}
-      catch (const gdb_exception_RETURN_MASK_ALL &except)
+      catch (const gdb_exception &except)
 	{
 	  GDBSCM_HANDLE_GDB_EXCEPTION (except);
 	}
@@ -807,7 +807,7 @@ gdbscm_set_breakpoint_task_x (SCM self, SCM newvalue)
     {
       breakpoint_set_task (bp_smob->bp, id);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
@@ -972,7 +972,7 @@ gdbscm_breakpoint_commands (SCM self)
     {
       print_command_lines (current_uiout, breakpoint_commands (bp), 0);
     }
-  catch (const gdb_exception_RETURN_MASK_ALL &except)
+  catch (const gdb_exception &except)
     {
       current_uiout->redirect (NULL);
       gdbscm_throw_gdb_exception (except);
