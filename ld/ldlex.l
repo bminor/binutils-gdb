@@ -96,7 +96,7 @@ FILENAMECHAR	[_a-zA-Z0-9\/\.\\\$\~\-\+\:\[\]\,\=]
 NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\\\$\~\-\+\:\[\]]
 SYMBOLNAMECHAR  [_a-zA-Z0-9\/\.\\\$\~]
 FILENAMECHAR1	[_a-zA-Z\/\.\\\$\~]
-SYMBOLNAMECHAR1	[_a-zA-Z\/\.\\\$]
+SYMBOLNAMECHAR1	[_a-zA-Z\.\\\$]
 WHITE		[ \t\n\r]+
 
 V_TAG [.$_a-zA-Z][._a-zA-Z0-9]*
@@ -385,6 +385,10 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 				  return LNAME;
 				}
 <EXPRESSION>{SYMBOLNAMECHAR1}{NOCFILENAMECHAR}* {
+				  yylval.name = xstrdup (yytext);
+				  return NAME;
+				}
+<EXPRESSION>"/DISCARD/"		{
 				  yylval.name = xstrdup (yytext);
 				  return NAME;
 				}

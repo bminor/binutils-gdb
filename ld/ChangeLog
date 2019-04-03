@@ -1,5 +1,11 @@
 2019-04-03  Alan Modra  <amodra@gmail.com>
 
+	PR 24411
+	ldlex.l (SYMBOLNAMECHAR1): Don't match '/'.
+	(<EXPRESSION>"/DISCARD/"): New.
+
+2019-04-03  Alan Modra  <amodra@gmail.com>
+
 	* ldlex.l: Formatting.
 	(CMDFILENAMECHAR, CMDFILENAMECHAR1): Delete.
 	(FILENAMECHAR1, SYMBOLNAMECHAR1, FILENAMECHAR, WILDCHAR),
