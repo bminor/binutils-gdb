@@ -138,18 +138,17 @@ bppy_set_enabled (PyObject *self, PyObject *newvalue, void *closure)
   if (cmp < 0)
     return -1;
 
-  TRY
+  try
     {
       if (cmp == 1)
 	enable_breakpoint (self_bp->bp);
       else
 	disable_breakpoint (self_bp->bp);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_SET_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   return 0;
 }
@@ -247,15 +246,14 @@ bppy_set_task (PyObject *self, PyObject *newvalue, void *closure)
       if (! gdb_py_int_as_long (newvalue, &id))
 	return -1;
 
-      TRY
+      try
 	{
 	  valid_id = valid_task_id (id);
 	}
-      CATCH (except, RETURN_MASK_ALL)
+      catch (const gdb_exception_RETURN_MASK_ALL &except)
 	{
 	  GDB_PY_SET_HANDLE_EXCEPTION (except);
 	}
-      END_CATCH
 
       if (! valid_id)
 	{
@@ -290,15 +288,14 @@ bppy_delete_breakpoint (PyObject *self, PyObject *args)
 
   BPPY_REQUIRE_VALID (self_bp);
 
-  TRY
+  try
     {
       delete_breakpoint (self_bp->bp);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   Py_RETURN_NONE;
 }
@@ -332,15 +329,14 @@ bppy_set_ignore_count (PyObject *self, PyObject *newvalue, void *closure)
   if (value < 0)
     value = 0;
 
-  TRY
+  try
     {
       set_ignore_count (self_bp->number, (int) value, 0);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_SET_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   return 0;
 }
@@ -469,15 +465,14 @@ bppy_set_condition (PyObject *self, PyObject *newvalue, void *closure)
       exp = exp_holder.get ();
     }
 
-  TRY
+  try
     {
       set_breakpoint_condition (self_bp->bp, exp, 0);
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       except = ex;
     }
-  END_CATCH
 
   GDB_PY_SET_HANDLE_EXCEPTION (except);
 
@@ -499,17 +494,16 @@ bppy_get_commands (PyObject *self, void *closure)
   string_file stb;
 
   current_uiout->redirect (&stb);
-  TRY
+  try
     {
       print_command_lines (current_uiout, breakpoint_commands (bp), 0);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       current_uiout->redirect (NULL);
       gdbpy_convert_exception (except);
       return NULL;
     }
-  END_CATCH
 
   current_uiout->redirect (NULL);
   return host_string_to_python_string (stb.c_str ()).release ();
@@ -530,7 +524,7 @@ bppy_set_commands (PyObject *self, PyObject *newvalue, void *closure)
   if (commands == nullptr)
     return -1;
 
-  TRY
+  try
     {
       bool first = true;
       char *save_ptr = nullptr;
@@ -546,11 +540,10 @@ bppy_set_commands (PyObject *self, PyObject *newvalue, void *closure)
       counted_command_line lines = read_command_lines_1 (reader, 1, nullptr);
       breakpoint_set_commands (self_bp->bp, std::move (lines));
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       except = ex;
     }
-  END_CATCH
 
   GDB_PY_SET_HANDLE_EXCEPTION (except);
 
@@ -801,7 +794,7 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
   bppy_pending_object->number = -1;
   bppy_pending_object->bp = NULL;
 
-  TRY
+  try
     {
       switch (type)
 	{
@@ -871,13 +864,12 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 	  error(_("Do not understand breakpoint type to set."));
 	}
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       bppy_pending_object = NULL;
       gdbpy_convert_exception (except);
       return -1;
     }
-  END_CATCH
 
   BPPY_SET_REQUIRE_VALID ((gdbpy_breakpoint_object *) self);
   return 0;

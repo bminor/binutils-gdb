@@ -869,16 +869,15 @@ solib_svr4_r_map (struct svr4_info *info)
   struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
   CORE_ADDR addr = 0;
 
-  TRY
+  try
     {
       addr = read_memory_typed_address (info->debug_base + lmo->r_map_offset,
                                         ptr_type);
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       exception_print (gdb_stderr, ex);
     }
-  END_CATCH
 
   return addr;
 }
@@ -906,7 +905,7 @@ solib_svr4_r_ldsomap (struct svr4_info *info)
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   ULONGEST version = 0;
 
-  TRY
+  try
     {
       /* Check version, and return zero if `struct r_debug' doesn't have
 	 the r_ldsomap member.  */
@@ -914,11 +913,10 @@ solib_svr4_r_ldsomap (struct svr4_info *info)
 	= read_memory_unsigned_integer (info->debug_base + lmo->r_version_offset,
 					lmo->r_version_size, byte_order);
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       exception_print (gdb_stderr, ex);
     }
-  END_CATCH
 
   if (version < 2 || lmo->r_ldsomap_offset == -1)
     return 0;
@@ -1732,16 +1730,15 @@ solib_event_probe_action (struct probe_and_action *pa)
        arg0: Lmid_t lmid (mandatory)
        arg1: struct r_debug *debug_base (mandatory)
        arg2: struct link_map *new (optional, for incremental updates)  */
-  TRY
+  try
     {
       probe_argc = pa->prob->get_argument_count (frame);
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       exception_print (gdb_stderr, ex);
       probe_argc = 0;
     }
-  END_CATCH
 
   /* If get_argument_count throws an exception, probe_argc will be set
      to zero.  However, if pa->prob does not have arguments, then
@@ -1896,16 +1893,15 @@ svr4_handle_solib_event (void)
     scoped_restore inhibit_updates
       = inhibit_section_map_updates (current_program_space);
 
-    TRY
+    try
       {
 	val = pa->prob->evaluate_argument (1, frame);
       }
-    CATCH (ex, RETURN_MASK_ERROR)
+    catch (const gdb_exception_RETURN_MASK_ERROR &ex)
       {
 	exception_print (gdb_stderr, ex);
 	val = NULL;
       }
-    END_CATCH
 
     if (val == NULL)
       return;
@@ -1928,16 +1924,15 @@ svr4_handle_solib_event (void)
 
     if (action == UPDATE_OR_RELOAD)
       {
-	TRY
+	try
 	  {
 	    val = pa->prob->evaluate_argument (2, frame);
 	  }
-	CATCH (ex, RETURN_MASK_ERROR)
+	catch (const gdb_exception_RETURN_MASK_ERROR &ex)
 	  {
 	    exception_print (gdb_stderr, ex);
 	    return;
 	  }
-	END_CATCH
 
 	if (val != NULL)
 	  lm = value_as_address (val);
@@ -2279,14 +2274,13 @@ enable_break (struct svr4_info *info, int from_tty)
          mechanism to find the dynamic linker's base address.  */
 
       gdb_bfd_ref_ptr tmp_bfd;
-      TRY
+      try
         {
 	  tmp_bfd = solib_bfd_open (interp_name);
 	}
-      CATCH (ex, RETURN_MASK_ALL)
+      catch (const gdb_exception_RETURN_MASK_ALL &ex)
 	{
 	}
-      END_CATCH
 
       if (tmp_bfd == NULL)
 	goto bkpt_at_symbol;

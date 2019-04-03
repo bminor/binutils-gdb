@@ -282,15 +282,14 @@ require_btrace (void)
 static void
 record_btrace_enable_warn (struct thread_info *tp)
 {
-  TRY
+  try
     {
       btrace_enable (tp, &record_btrace_conf);
     }
-  CATCH (error, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &error)
     {
       warning ("%s", error.what ());
     }
-  END_CATCH
 }
 
 /* Enable automatic tracing of new threads.  */
@@ -1479,16 +1478,15 @@ record_btrace_target::insert_breakpoint (struct gdbarch *gdbarch,
   replay_memory_access = replay_memory_access_read_write;
 
   ret = 0;
-  TRY
+  try
     {
       ret = this->beneath ()->insert_breakpoint (gdbarch, bp_tgt);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       replay_memory_access = old;
       throw_exception (except);
     }
-  END_CATCH
   replay_memory_access = old;
 
   return ret;
@@ -1510,16 +1508,15 @@ record_btrace_target::remove_breakpoint (struct gdbarch *gdbarch,
   replay_memory_access = replay_memory_access_read_write;
 
   ret = 0;
-  TRY
+  try
     {
       ret = this->beneath ()->remove_breakpoint (gdbarch, bp_tgt, reason);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       replay_memory_access = old;
       throw_exception (except);
     }
-  END_CATCH
   replay_memory_access = old;
 
   return ret;
@@ -1988,18 +1985,17 @@ get_thread_current_frame_id (struct thread_info *tp)
   set_executing (inferior_ptid, false);
 
   id = null_frame_id;
-  TRY
+  try
     {
       id = get_frame_id (get_current_frame ());
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       /* Restore the previous execution state.  */
       set_executing (inferior_ptid, executing);
 
       throw_exception (except);
     }
-  END_CATCH
 
   /* Restore the previous execution state.  */
   set_executing (inferior_ptid, executing);
@@ -2027,7 +2023,7 @@ record_btrace_start_replaying (struct thread_info *tp)
      Since frames are computed differently when we're replaying, we need to
      recompute those stored frames and fix them up so we can still detect
      subroutines after we started replaying.  */
-  TRY
+  try
     {
       struct frame_id frame_id;
       int upd_step_frame_id, upd_step_stack_frame_id;
@@ -2072,7 +2068,7 @@ record_btrace_start_replaying (struct thread_info *tp)
       if (upd_step_stack_frame_id)
 	tp->control.step_stack_frame_id = frame_id;
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       xfree (btinfo->replay);
       btinfo->replay = NULL;
@@ -2081,7 +2077,6 @@ record_btrace_start_replaying (struct thread_info *tp)
 
       throw_exception (except);
     }
-  END_CATCH
 
   return replay;
 }
@@ -2894,16 +2889,15 @@ cmd_record_btrace_bts_start (const char *args, int from_tty)
 
   record_btrace_conf.format = BTRACE_FORMAT_BTS;
 
-  TRY
+  try
     {
       execute_command ("target record-btrace", from_tty);
     }
-  CATCH (exception, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &exception)
     {
       record_btrace_conf.format = BTRACE_FORMAT_NONE;
       throw_exception (exception);
     }
-  END_CATCH
 }
 
 /* Start recording in Intel Processor Trace format.  */
@@ -2916,16 +2910,15 @@ cmd_record_btrace_pt_start (const char *args, int from_tty)
 
   record_btrace_conf.format = BTRACE_FORMAT_PT;
 
-  TRY
+  try
     {
       execute_command ("target record-btrace", from_tty);
     }
-  CATCH (exception, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &exception)
     {
       record_btrace_conf.format = BTRACE_FORMAT_NONE;
       throw_exception (exception);
     }
-  END_CATCH
 }
 
 /* Alias for "target record".  */
@@ -2938,26 +2931,24 @@ cmd_record_btrace_start (const char *args, int from_tty)
 
   record_btrace_conf.format = BTRACE_FORMAT_PT;
 
-  TRY
+  try
     {
       execute_command ("target record-btrace", from_tty);
     }
-  CATCH (exception, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &exception)
     {
       record_btrace_conf.format = BTRACE_FORMAT_BTS;
 
-      TRY
+      try
 	{
 	  execute_command ("target record-btrace", from_tty);
 	}
-      CATCH (ex, RETURN_MASK_ALL)
+      catch (const gdb_exception_RETURN_MASK_ALL &ex)
 	{
 	  record_btrace_conf.format = BTRACE_FORMAT_NONE;
 	  throw_exception (ex);
 	}
-      END_CATCH
     }
-  END_CATCH
 }
 
 /* The "set record btrace" command.  */

@@ -377,7 +377,7 @@ dwarf2_tailcall_sniffer_first (struct frame_info *this_frame,
   this_pc = get_frame_address_in_block (this_frame);
 
   /* Catch any unwinding errors.  */
-  TRY
+  try
     {
       int sp_regnum;
 
@@ -399,13 +399,12 @@ dwarf2_tailcall_sniffer_first (struct frame_info *this_frame,
 	    }
 	}
     }
-  CATCH (except, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &except)
     {
       if (entry_values_debug)
 	exception_print (gdb_stdout, except);
       return;
     }
-  END_CATCH
 
   /* Ambiguous unwind or unambiguous unwind verified as matching.  */
   if (chain == NULL || chain->length == 0)

@@ -677,15 +677,14 @@ gdbscm_wrap (Function &&func, Args &&... args)
 {
   SCM result = SCM_BOOL_F;
 
-  TRY
+  try
     {
       result = func (std::forward<Args> (args)...);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   if (gdbscm_is_exception (result))
     gdbscm_throw (result);

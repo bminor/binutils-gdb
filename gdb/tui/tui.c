@@ -96,7 +96,7 @@ tui_rl_switch_mode (int notused1, int notused2)
 
   /* Don't let exceptions escape.  We're in the middle of a readline
      callback that isn't prepared for that.  */
-  TRY
+  try
     {
       if (tui_active)
 	{
@@ -110,14 +110,13 @@ tui_rl_switch_mode (int notused1, int notused2)
 	  tui_enable ();
 	}
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       exception_print (gdb_stderr, ex);
 
       if (!tui_active)
 	rl_prep_terminal (0);
     }
-  END_CATCH
 
   /* Clear the readline in case switching occurred in middle of
      something.  */

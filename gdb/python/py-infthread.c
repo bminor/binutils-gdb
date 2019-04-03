@@ -181,15 +181,14 @@ thpy_switch (PyObject *self, PyObject *args)
 
   THPY_REQUIRE_VALID (thread_obj);
 
-  TRY
+  try
     {
       switch_to_thread (thread_obj->thread);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   Py_RETURN_NONE;
 }

@@ -402,7 +402,7 @@ i386_linux_handle_segmentation_fault (struct gdbarch *gdbarch,
   if (!i386_mpx_enabled ())
     return;
 
-  TRY
+  try
     {
       /* Sigcode evaluates if the actual segfault is a boundary violation.  */
       sig_code = parse_and_eval_long ("$_siginfo.si_code\n");
@@ -414,11 +414,10 @@ i386_linux_handle_segmentation_fault (struct gdbarch *gdbarch,
       access
         = parse_and_eval_long ("$_siginfo._sifields._sigfault.si_addr");
     }
-  CATCH (exception, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &exception)
     {
       return;
     }
-  END_CATCH
 
   /* If this is not a boundary violation just return.  */
   if (sig_code != SIG_CODE_BONDARY_FAULT)

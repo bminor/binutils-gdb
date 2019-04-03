@@ -349,16 +349,15 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 	     block, not any blocks from included symtabs.  */
 	  ALL_DICT_SYMBOLS (BLOCK_MULTIDICT (b), miter, sym)
 	    {
-	      TRY
+	      try
 		{
 		  print_symbol (gdbarch, sym, depth + 1, outfile);
 		}
-	      CATCH (ex, RETURN_MASK_ERROR)
+	      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
 		{
 		  exception_fprintf (gdb_stderr, ex,
 				     "Error printing symbol:\n");
 		}
-	      END_CATCH
 	    }
 	}
       fprintf_filtered (outfile, "\n");

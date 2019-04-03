@@ -680,18 +680,17 @@ gdbscm_lookup_block (SCM pc_scm)
 
   gdbscm_parse_function_args (FUNC_NAME, SCM_ARG1, NULL, "U", pc_scm, &pc);
 
-  TRY
+  try
     {
       cust = find_pc_compunit_symtab (pc);
 
       if (cust != NULL && COMPUNIT_OBJFILE (cust) != NULL)
 	block = block_for_pc (pc);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   if (cust == NULL || COMPUNIT_OBJFILE (cust) == NULL)
     {

@@ -151,15 +151,14 @@ inspect_type (struct demangle_parse_info *info,
 
   sym = NULL;
 
-  TRY
+  try
     {
       sym = lookup_symbol (name, 0, VAR_DOMAIN, 0).symbol;
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       return 0;
     }
-  END_CATCH
 
   if (sym != NULL)
     {
@@ -223,17 +222,16 @@ inspect_type (struct demangle_parse_info *info,
 	    }
 
 	  string_file buf;
-	  TRY
+	  try
 	    {
 	      type_print (type, "", &buf, -1);
 	    }
 	  /* If type_print threw an exception, there is little point
 	     in continuing, so just bow out gracefully.  */
-	  CATCH (except, RETURN_MASK_ERROR)
+	  catch (const gdb_exception_RETURN_MASK_ERROR &except)
 	    {
 	      return 0;
 	    }
-	  END_CATCH
 
 	  len = buf.size ();
 	  name = (char *) obstack_copy0 (&info->obstack, buf.c_str (), len);
@@ -424,15 +422,14 @@ replace_typedefs (struct demangle_parse_info *info,
 	      struct symbol *sym = NULL;
 
 	      sym = NULL;
-	      TRY
+	      try
 		{
 		  sym = lookup_symbol (local_name.get (), 0,
 				       VAR_DOMAIN, 0).symbol;
 		}
-	      CATCH (except, RETURN_MASK_ALL)
+	      catch (const gdb_exception_RETURN_MASK_ALL &except)
 		{
 		}
-	      END_CATCH
 
 	      if (sym != NULL)
 		{

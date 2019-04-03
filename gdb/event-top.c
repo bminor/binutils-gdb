@@ -208,15 +208,14 @@ gdb_rl_callback_handler (char *rl) noexcept
   struct gdb_exception gdb_rl_expt = exception_none;
   struct ui *ui = current_ui;
 
-  TRY
+  try
     {
       ui->input_handler (gdb::unique_xmalloc_ptr<char> (rl));
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       gdb_rl_expt = ex;
     }
-  END_CATCH
 
   /* If we caught a GDB exception, longjmp out of the readline
      callback.  There's no other way for the callback to signal to
@@ -1082,27 +1081,25 @@ static void
 async_disconnect (gdb_client_data arg)
 {
 
-  TRY
+  try
     {
       quit_cover ();
     }
 
-  CATCH (exception, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &exception)
     {
       fputs_filtered ("Could not kill the program being debugged",
 		      gdb_stderr);
       exception_print (gdb_stderr, exception);
     }
-  END_CATCH
 
-  TRY
+  try
     {
       pop_all_targets ();
     }
-  CATCH (exception, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &exception)
     {
     }
-  END_CATCH
 
   signal (SIGHUP, SIG_DFL);	/*FIXME: ???????????  */
   raise (SIGHUP);

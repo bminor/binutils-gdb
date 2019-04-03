@@ -1,5 +1,11 @@
 2019-04-08  Tom Tromey  <tom@tromey.com>
 
+	* server.c: Use C++ exception handling.
+	* linux-low.c: Use C++ exception handling.
+	* gdbreplay.c: Use C++ exception handling.
+
+2019-04-08  Tom Tromey  <tom@tromey.com>
+
 	* server.c (handle_btrace_general_set, handle_qxfer_btrace)
 	(handle_qxfer_btrace_conf, detach_or_kill_for_exit_cleanup)
 	(captured_main, main): Update.

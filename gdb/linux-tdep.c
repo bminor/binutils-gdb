@@ -1926,15 +1926,14 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
     }
 
   /* Thread register information.  */
-  TRY
+  try
     {
       update_thread_list ();
     }
-  CATCH (e, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &e)
     {
       exception_print (gdb_stderr, e);
     }
-  END_CATCH
 
   /* Like the kernel, prefer dumping the signalled thread first.
      "First thread" is what tools use to infer the signalled thread.

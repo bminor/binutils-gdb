@@ -208,15 +208,14 @@ recpy_bt_insn_sal (PyObject *self, void *closure)
   if (insn == NULL)
     return NULL;
 
-  TRY
+  try
     {
       result = symtab_and_line_to_sal_object (find_pc_line (insn->pc, 0));
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   return result;
 }
@@ -279,16 +278,15 @@ recpy_bt_insn_data (PyObject *self, void *closure)
   if (insn == NULL)
     return NULL;
 
-  TRY
+  try
     {
       buffer.resize (insn->size);
       read_memory (insn->pc, buffer.data (), insn->size);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   object = PyBytes_FromStringAndSize ((const char *) buffer.data (),
 				      insn->size);
@@ -316,16 +314,15 @@ recpy_bt_insn_decoded (PyObject *self, void *closure)
   if (insn == NULL)
     return NULL;
 
-  TRY
+  try
     {
       gdb_print_insn (target_gdbarch (), insn->pc, &strfile, NULL);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       gdbpy_convert_exception (except);
       return NULL;
     }
-  END_CATCH
 
 
   return PyBytes_FromString (strfile.string ().c_str ());
@@ -787,7 +784,7 @@ recpy_bt_goto (PyObject *self, PyObject *args)
     return PyErr_Format (PyExc_TypeError, _("Argument must be instruction."));
   obj = (const recpy_element_object *) parse_obj;
 
-  TRY
+  try
     {
       struct btrace_insn_iterator iter;
 
@@ -798,11 +795,10 @@ recpy_bt_goto (PyObject *self, PyObject *args)
       else
 	target_goto_record (obj->number);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   Py_RETURN_NONE;
 }

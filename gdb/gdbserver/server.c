@@ -459,7 +459,7 @@ handle_btrace_general_set (char *own_buf)
       return -1;
     }
 
-  TRY
+  try
     {
       if (strcmp (op, "bts") == 0)
 	handle_btrace_enable_bts (thread);
@@ -472,11 +472,10 @@ handle_btrace_general_set (char *own_buf)
 
       write_ok (own_buf);
     }
-  CATCH (exception, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &exception)
     {
       sprintf (own_buf, "E.%s", exception.what ());
     }
-  END_CATCH
 
   return 1;
 }
@@ -1876,18 +1875,17 @@ handle_qxfer_btrace (const char *annex,
     {
       buffer_free (&cache);
 
-      TRY
+      try
 	{
 	  result = target_read_btrace (thread->btrace, &cache, type);
 	  if (result != 0)
 	    memcpy (cs.own_buf, cache.buffer, cache.used_size);
 	}
-      CATCH (exception, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &exception)
 	{
 	  sprintf (cs.own_buf, "E.%s", exception.what ());
 	  result = -1;
 	}
-      END_CATCH
 
       if (result != 0)
 	return -3;
@@ -1948,18 +1946,17 @@ handle_qxfer_btrace_conf (const char *annex,
     {
       buffer_free (&cache);
 
-      TRY
+      try
 	{
 	  result = target_read_btrace_conf (thread->btrace, &cache);
 	  if (result != 0)
 	    memcpy (cs.own_buf, cache.buffer, cache.used_size);
 	}
-      CATCH (exception, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &exception)
 	{
 	  sprintf (cs.own_buf, "E.%s", exception.what ());
 	  result = -1;
 	}
-      END_CATCH
 
       if (result != 0)
 	return -3;
@@ -3552,18 +3549,17 @@ static int exit_code;
 static void
 detach_or_kill_for_exit_cleanup ()
 {
-  TRY
+  try
     {
       detach_or_kill_for_exit ();
     }
-  CATCH (exception, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &exception)
     {
       fflush (stdout);
       fprintf (stderr, "Detach or kill failed: %s\n",
 	       exception.what ());
       exit_code = 1;
     }
-  END_CATCH
 }
 
 /* Main function.  This is called by the real "main" function,
@@ -3866,7 +3862,7 @@ captured_main (int argc, char *argv[])
 
       remote_open (port);
 
-      TRY
+      try
 	{
 	  /* Wait for events.  This will return when all event sources
 	     are removed from the event loop.  */
@@ -3931,7 +3927,7 @@ captured_main (int argc, char *argv[])
 		}
 	    }
 	}
-      CATCH (exception, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &exception)
 	{
 	  fflush (stdout);
 	  fprintf (stderr, "gdbserver: %s\n", exception.what ());
@@ -3945,7 +3941,6 @@ captured_main (int argc, char *argv[])
 	  if (run_once)
 	    throw_quit ("Quit");
 	}
-      END_CATCH
     }
 }
 
@@ -3955,11 +3950,11 @@ int
 main (int argc, char *argv[])
 {
 
-  TRY
+  try
     {
       captured_main (argc, argv);
     }
-  CATCH (exception, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &exception)
     {
       if (exception.reason == RETURN_ERROR)
 	{
@@ -3971,7 +3966,6 @@ main (int argc, char *argv[])
 
       exit (exit_code);
     }
-  END_CATCH
 
   gdb_assert_not_reached ("captured_main should never return");
 }

@@ -1675,19 +1675,18 @@ save_gdb_index_command (const char *arg, int from_tty)
 
       if (dwarf2_per_objfile != NULL)
 	{
-	  TRY
+	  try
 	    {
 	      const char *basename = lbasename (objfile_name (objfile));
 	      write_psymtabs_to_index (dwarf2_per_objfile, arg, basename,
 				       index_kind);
 	    }
-	  CATCH (except, RETURN_MASK_ERROR)
+	  catch (const gdb_exception_RETURN_MASK_ERROR &except)
 	    {
 	      exception_fprintf (gdb_stderr, except,
 				 _("Error while writing index for `%s': "),
 				 objfile_name (objfile));
 	    }
-	  END_CATCH
 	    }
 
     }

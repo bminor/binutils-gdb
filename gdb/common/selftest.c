@@ -81,18 +81,17 @@ run_tests (const char *filter)
 	  && name.find (filter) == std::string::npos)
 	continue;
 
-      TRY
+      try
 	{
 	  debug_printf (_("Running selftest %s.\n"), name.c_str ());
 	  ++ran;
 	  (*test) ();
 	}
-      CATCH (ex, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
 	{
 	  ++failed;
 	  debug_printf ("Self test failed: %s\n", ex.what ());
 	}
-      END_CATCH
 
       reset ();
     }

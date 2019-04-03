@@ -2383,16 +2383,15 @@ convert_explicit_location_to_linespec (struct linespec_state *self,
 
   if (source_filename != NULL)
     {
-      TRY
+      try
 	{
 	  *result->file_symtabs
 	    = symtabs_from_filename (source_filename, self->search_pspace);
 	}
-      CATCH (except, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &except)
 	{
 	  source_file_not_found_error (source_filename);
 	}
-      END_CATCH
       result->explicit_loc.source_filename = xstrdup (source_filename);
     }
   else
@@ -2608,17 +2607,16 @@ parse_linespec (linespec_parser *parser, const char *arg,
       gdb::unique_xmalloc_ptr<char> user_filename = copy_token_string (token);
 
       /* Check if the input is a filename.  */
-      TRY
+      try
 	{
 	  *PARSER_RESULT (parser)->file_symtabs
 	    = symtabs_from_filename (user_filename.get (),
 				     PARSER_STATE (parser)->search_pspace);
 	}
-      CATCH (ex, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
 	{
 	  file_exception = ex;
 	}
-      END_CATCH
 
       if (file_exception.reason >= 0)
 	{
@@ -2923,7 +2921,7 @@ linespec_complete_label (completion_tracker &tracker,
 
   line_offset unknown_offset = { 0, LINE_OFFSET_UNKNOWN };
 
-  TRY
+  try
     {
       convert_explicit_location_to_linespec (PARSER_STATE (&parser),
 					     PARSER_RESULT (&parser),
@@ -2932,11 +2930,10 @@ linespec_complete_label (completion_tracker &tracker,
 					     func_name_match_type,
 					     NULL, unknown_offset);
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       return;
     }
-  END_CATCH
 
   complete_label (tracker, &parser, label_name);
 }
@@ -2959,14 +2956,13 @@ linespec_complete (completion_tracker &tracker, const char *text,
 
   /* Parse as much as possible.  parser.completion_word will hold
      furthest completion point we managed to parse to.  */
-  TRY
+  try
     {
       parse_linespec (&parser, text, match_type);
     }
-  CATCH (except, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &except)
     {
     }
-  END_CATCH
 
   if (parser.completion_quote_char != '\0'
       && parser.completion_quote_end != NULL
@@ -3148,17 +3144,16 @@ event_location_to_sals (linespec_parser *parser,
     case LINESPEC_LOCATION:
       {
 	PARSER_STATE (parser)->is_linespec = 1;
-	TRY
+	try
 	  {
 	    const linespec_location *ls = get_linespec_location (location);
 	    result = parse_linespec (parser,
 				     ls->spec_string, ls->match_type);
 	  }
-	CATCH (except, RETURN_MASK_ERROR)
+	catch (const gdb_exception_RETURN_MASK_ERROR &except)
 	  {
 	    throw_exception (except);
 	  }
-	END_CATCH
       }
       break;
 
@@ -3959,7 +3954,7 @@ find_linespec_symbols (struct linespec_state *state,
       if (!classes.empty ())
 	{
 	  /* Now locate a list of suitable methods named METHOD.  */
-	  TRY
+	  try
 	    {
 	      find_method (state, file_symtabs,
 			   klass.c_str (), method.c_str (),
@@ -3968,12 +3963,11 @@ find_linespec_symbols (struct linespec_state *state,
 
 	  /* If successful, we're done.  If NOT_FOUND_ERROR
 	     was not thrown, rethrow the exception that we did get.  */
-	  CATCH (except, RETURN_MASK_ERROR)
+	  catch (const gdb_exception_RETURN_MASK_ERROR &except)
 	    {
 	      if (except.error != NOT_FOUND_ERROR)
 		throw_exception (except);
 	    }
-	  END_CATCH
 	}
     }
 }

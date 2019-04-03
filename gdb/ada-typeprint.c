@@ -163,12 +163,12 @@ print_range (struct type *type, struct ui_file *stream,
 	LONGEST lo = 0, hi = 0; /* init for gcc -Wall */
 	int got_error = 0;
 
-	TRY
+	try
 	  {
 	    lo = ada_discrete_type_low_bound (type);
 	    hi = ada_discrete_type_high_bound (type);
 	  }
-	CATCH (e, RETURN_MASK_ERROR)
+	catch (const gdb_exception_RETURN_MASK_ERROR &e)
 	  {
 	    /* This can happen when the range is dynamic.  Sometimes,
 	       resolving dynamic property values requires us to have
@@ -178,7 +178,6 @@ print_range (struct type *type, struct ui_file *stream,
 	    fprintf_filtered (stream, "<>");
 	    got_error = 1;
 	  }
-	END_CATCH
 
 	if (!got_error)
 	  {

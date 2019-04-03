@@ -314,16 +314,15 @@ varobj_create (const char *objname,
 				       | INNERMOST_BLOCK_FOR_REGISTERS);
       /* Wrap the call to parse expression, so we can 
          return a sensible error.  */
-      TRY
+      try
 	{
 	  var->root->exp = parse_exp_1 (&p, pc, block, 0, &tracker);
 	}
 
-      CATCH (except, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &except)
 	{
 	  return NULL;
 	}
-      END_CATCH
 
       /* Don't allow variables to be created for types.  */
       if (var->root->exp->elts[0].opcode == OP_TYPE
@@ -364,11 +363,11 @@ varobj_create (const char *objname,
       /* We definitely need to catch errors here.
          If evaluate_expression succeeds we got the value we wanted.
          But if it fails, we still go on with a call to evaluate_type().  */
-      TRY
+      try
 	{
 	  value = evaluate_expression (var->root->exp.get ());
 	}
-      CATCH (except, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &except)
 	{
 	  /* Error getting the value.  Try to at least get the
 	     right type.  */
@@ -376,7 +375,6 @@ varobj_create (const char *objname,
 
 	  var->type = value_type (type_only_value);
 	}
-      END_CATCH
 
       if (value != NULL)
 	{
@@ -1034,17 +1032,16 @@ varobj_set_value (struct varobj *var, const char *expression)
 
   input_radix = 10;		/* ALWAYS reset to decimal temporarily.  */
   expression_up exp = parse_exp_1 (&s, 0, 0, 0);
-  TRY
+  try
     {
       value = evaluate_expression (exp.get ());
     }
 
-  CATCH (except, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &except)
     {
       /* We cannot proceed without a valid expression.  */
       return false;
     }
-  END_CATCH
 
   /* All types that are editable must also be changeable.  */
   gdb_assert (varobj_value_is_changeable_p (var));
@@ -1063,16 +1060,15 @@ varobj_set_value (struct varobj *var, const char *expression)
 
   /* The new value may be lazy.  value_assign, or
      rather value_contents, will take care of this.  */
-  TRY
+  try
     {
       val = value_assign (var->value.get (), value);
     }
 
-  CATCH (except, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &except)
     {
       return false;
     }
-  END_CATCH
 
   /* If the value has changed, record it, so that next -var-update can
      report this change.  If a variable had a value of '1', we've set it
@@ -1311,19 +1307,18 @@ install_new_value (struct varobj *var, struct value *value, bool initial)
       else
 	{
 
-	  TRY
+	  try
 	    {
 	      value_fetch_lazy (value);
 	    }
 
-	  CATCH (except, RETURN_MASK_ERROR)
+	  catch (const gdb_exception_RETURN_MASK_ERROR &except)
 	    {
 	      /* Set the value to NULL, so that for the next -var-update,
 		 we don't try to compare the new value with this value,
 		 that we couldn't even read.  */
 	      value = NULL;
 	    }
-	  END_CATCH
 	}
     }
 
@@ -2139,14 +2134,13 @@ value_of_root_1 (struct varobj **var_handle)
 
       /* We need to catch errors here, because if evaluate
          expression fails we want to just return NULL.  */
-      TRY
+      try
 	{
 	  new_val = evaluate_expression (var->root->exp.get ());
 	}
-      CATCH (except, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &except)
 	{
 	}
-      END_CATCH
     }
 
   return new_val;

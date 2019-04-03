@@ -110,7 +110,7 @@ index_cache::store (struct dwarf2_per_objfile *dwarf2_per_objfile)
 
   std::string build_id_str = build_id_to_string (build_id);
 
-  TRY
+  try
     {
       /* Try to create the containing directory.  */
       if (!mkdir_recursive (m_dir.c_str ()))
@@ -129,13 +129,12 @@ index_cache::store (struct dwarf2_per_objfile *dwarf2_per_objfile)
       write_psymtabs_to_index (dwarf2_per_objfile, m_dir.c_str (),
 			       build_id_str.c_str (), dw_index_kind::GDB_INDEX);
     }
-  CATCH (except, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &except)
     {
       if (debug_index_cache)
 	printf_unfiltered ("index cache: couldn't store index cache for objfile "
 			   "%s: %s", objfile_name (obj), except.what ());
     }
-  END_CATCH
 }
 
 #if HAVE_SYS_MMAN_H
@@ -172,7 +171,7 @@ index_cache::lookup_gdb_index (const bfd_build_id *build_id,
   /* Compute where we would expect a gdb index file for this build id to be.  */
   std::string filename = make_index_filename (build_id, INDEX4_SUFFIX);
 
-  TRY
+  try
     {
       if (debug_index_cache)
         printf_unfiltered ("index cache: trying to read %s\n",
@@ -189,13 +188,12 @@ index_cache::lookup_gdb_index (const bfd_build_id *build_id,
 	  ((const gdb_byte *) mmap_resource->mapping.get (),
 	   mmap_resource->mapping.size ());
     }
-  CATCH (except, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &except)
     {
       if (debug_index_cache)
 	printf_unfiltered ("index cache: couldn't read %s: %s\n",
 			   filename.c_str (), except.what ());
     }
-  END_CATCH
 
   return {};
 }

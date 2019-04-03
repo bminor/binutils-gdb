@@ -413,17 +413,16 @@ type_print (struct type *type, const char *varstring, struct ui_file *stream,
 std::string
 type_to_string (struct type *type)
 {
-  TRY
+  try
     {
       string_file stb;
 
       type_print (type, "", &stb, -1);
       return std::move (stb.string ());
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
     }
-  END_CATCH
 
   return {};
 }

@@ -389,15 +389,14 @@ infpy_threads (PyObject *self, PyObject *args)
 
   INFPY_REQUIRE_VALID (inf_obj);
 
-  TRY
+  try
     {
       update_thread_list ();
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   tuple = PyTuple_New (inf_obj->nthreads);
   if (!tuple)
@@ -508,17 +507,16 @@ infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
       || get_addr_from_python (length_obj, &length) < 0)
     return NULL;
 
-  TRY
+  try
     {
       buffer.reset ((gdb_byte *) xmalloc (length));
 
       read_memory (addr, buffer.get (), length);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   gdbpy_ref<membuf_object> membuf_obj (PyObject_New (membuf_object,
 						     &membuf_object_type));
@@ -572,15 +570,14 @@ infpy_write_memory (PyObject *self, PyObject *args, PyObject *kw)
   else if (get_addr_from_python (length_obj, &length) < 0)
     return nullptr;
 
-  TRY
+  try
     {
       write_memory_with_notification (addr, buffer, length);
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       except = ex;
     }
-  END_CATCH
 
   GDB_PY_HANDLE_EXCEPTION (except);
 
@@ -725,17 +722,16 @@ infpy_search_memory (PyObject *self, PyObject *args, PyObject *kw)
       return nullptr;
     }
 
-  TRY
+  try
     {
       found = target_search_memory (start_addr, length,
 				    buffer, pattern_size,
 				    &found_addr);
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       except = ex;
     }
-  END_CATCH
 
   GDB_PY_HANDLE_EXCEPTION (except);
 
@@ -782,7 +778,7 @@ infpy_thread_from_thread_handle (PyObject *self, PyObject *args, PyObject *kw)
       return NULL;
     }
 
-  TRY
+  try
     {
       struct thread_info *thread_info;
       struct value *val = value_object_to_value (handle_obj);
@@ -791,11 +787,10 @@ infpy_thread_from_thread_handle (PyObject *self, PyObject *args, PyObject *kw)
       if (thread_info != NULL)
 	return thread_to_thread_object (thread_info).release ();
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   Py_RETURN_NONE;
 }

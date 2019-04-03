@@ -1776,11 +1776,11 @@ displaced_step_prepare (thread_info *thread)
 {
   int prepared = -1;
 
-  TRY
+  try
     {
       prepared = displaced_step_prepare_throw (thread);
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       struct displaced_step_inferior_state *displaced_state;
 
@@ -1808,7 +1808,6 @@ displaced_step_prepare (thread_info *thread)
 	= get_displaced_stepping_state (thread->inf);
       displaced_state->failed_before = 1;
     }
-  END_CATCH
 
   return prepared;
 }
@@ -2612,11 +2611,11 @@ resume_1 (enum gdb_signal sig)
 static void
 resume (gdb_signal sig)
 {
-  TRY
+  try
     {
       resume_1 (sig);
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       /* If resuming is being aborted for any reason, delete any
 	 single-step breakpoint resume_1 may have created, to avoid
@@ -2627,7 +2626,6 @@ resume (gdb_signal sig)
 	delete_single_step_breakpoints (inferior_thread ());
       throw_exception (ex);
     }
-  END_CATCH
 }
 
 
@@ -7270,7 +7268,7 @@ insert_exception_resume_breakpoint (struct thread_info *tp,
 				    struct frame_info *frame,
 				    struct symbol *sym)
 {
-  TRY
+  try
     {
       struct block_symbol vsym;
       struct value *value;
@@ -7301,11 +7299,10 @@ insert_exception_resume_breakpoint (struct thread_info *tp,
 	  inferior_thread ()->control.exception_resume_breakpoint = bp;
 	}
     }
-  CATCH (e, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &e)
     {
       /* We want to ignore errors here.  */
     }
-  END_CATCH
 }
 
 /* A helper for check_exception_resume that sets an
@@ -7364,7 +7361,7 @@ check_exception_resume (struct execution_control_state *ecs,
   if (!func)
     return;
 
-  TRY
+  try
     {
       const struct block *b;
       struct block_iterator iter;
@@ -7401,10 +7398,9 @@ check_exception_resume (struct execution_control_state *ecs,
 	    }
 	}
     }
-  CATCH (e, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &e)
     {
     }
-  END_CATCH
 }
 
 static void
@@ -7531,18 +7527,17 @@ keep_going_pass_signal (struct execution_control_state *ecs)
 	stop_all_threads ();
 
       /* Stop stepping if inserting breakpoints fails.  */
-      TRY
+      try
 	{
 	  insert_breakpoints ();
 	}
-      CATCH (e, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &e)
 	{
 	  exception_print (gdb_stderr, e);
 	  stop_waiting (ecs);
 	  clear_step_over_info ();
 	  return;
 	}
-      END_CATCH
 
       ecs->event_thread->control.trap_expected = (remove_bp || remove_wps);
 
@@ -8064,16 +8059,15 @@ normal_stop (void)
     {
       stop_context saved_context;
 
-      TRY
+      try
 	{
 	  execute_cmd_pre_hook (stop_command);
 	}
-      CATCH (ex, RETURN_MASK_ALL)
+      catch (const gdb_exception_RETURN_MASK_ALL &ex)
 	{
 	  exception_fprintf (gdb_stderr, ex,
 			     "Error while running hook_stop:\n");
 	}
-      END_CATCH
 
       /* If the stop hook resumes the target, then there's no point in
 	 trying to notify about the previous stop; its context is
@@ -8770,11 +8764,11 @@ restore_infcall_control_state (struct infcall_control_state *inf_status)
       /* The point of the try/catch is that if the stack is clobbered,
          walking the stack might encounter a garbage pointer and
          error() trying to dereference it.  */
-      TRY
+      try
 	{
 	  restore_selected_frame (inf_status->selected_frame_id);
 	}
-      CATCH (ex, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
 	{
 	  exception_fprintf (gdb_stderr, ex,
 			     "Unable to restore previously selected frame:\n");
@@ -8782,7 +8776,6 @@ restore_infcall_control_state (struct infcall_control_state *inf_status)
 	     innermost frame.  */
 	  select_frame (get_current_frame ());
 	}
-      END_CATCH
     }
 
   delete inf_status;

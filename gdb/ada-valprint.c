@@ -1203,18 +1203,17 @@ ada_val_print (struct type *type,
 	       struct value *val,
 	       const struct value_print_options *options)
 {
-  TRY
+  try
     {
       ada_val_print_1 (type, embedded_offset, address,
 		       stream, recurse, val, options,
 		       current_language);
     }
-  CATCH (except, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &except)
     {
       fprintf_filtered (stream, _("<error reading variable: %s>"),
 			except.what ());
     }
-  END_CATCH
 }
 
 void

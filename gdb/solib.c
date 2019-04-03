@@ -674,7 +674,7 @@ solib_read_symbols (struct so_list *so, symfile_add_flags flags)
 
       flags |= current_inferior ()->symfile_flags;
 
-      TRY
+      try
 	{
 	  /* Have we already loaded this shared object?  */
 	  so->objfile = nullptr;
@@ -700,13 +700,12 @@ solib_read_symbols (struct so_list *so, symfile_add_flags flags)
 
 	  so->symbols_loaded = 1;
 	}
-      CATCH (e, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &e)
 	{
 	  exception_fprintf (gdb_stderr, e, _("Error while reading shared"
 					      " library symbols for %s:\n"),
 			     so->so_name);
 	}
-      END_CATCH
 
       return 1;
     }
@@ -748,17 +747,16 @@ update_solib_list (int from_tty)
 	 symbols now!  */
       if (inf->attach_flag && symfile_objfile == NULL)
 	{
-	  TRY
+	  try
 	    {
 	      ops->open_symbol_file_object (from_tty);
 	    }
-	  CATCH (ex, RETURN_MASK_ALL)
+	  catch (const gdb_exception_RETURN_MASK_ALL &ex)
 	    {
 	      exception_fprintf (gdb_stderr, ex,
 				 "Error reading attached "
 				 "process's symbol file.\n");
 	    }
-	  END_CATCH
 	}
     }
 
@@ -868,7 +866,7 @@ update_solib_list (int from_tty)
 	  i->pspace = current_program_space;
 	  current_program_space->added_solibs.push_back (i);
 
-	  TRY
+	  try
 	    {
 	      /* Fill in the rest of the `struct so_list' node.  */
 	      if (!solib_map_sections (i))
@@ -879,13 +877,12 @@ update_solib_list (int from_tty)
 		}
 	    }
 
-	  CATCH (e, RETURN_MASK_ERROR)
+	  catch (const gdb_exception_RETURN_MASK_ERROR &e)
 	    {
 	      exception_fprintf (gdb_stderr, e,
 				 _("Error while mapping shared "
 				   "library sections:\n"));
 	    }
-	  END_CATCH
 
 	  /* Notify any observer that the shared object has been
 	     loaded now that we've added it to GDB's tables.  */
@@ -1333,19 +1330,18 @@ reload_shared_libraries_1 (int from_tty)
 	{
 	  int got_error = 0;
 
-	  TRY
+	  try
 	    {
 	      solib_map_sections (so);
 	    }
 
-	  CATCH (e, RETURN_MASK_ERROR)
+	  catch (const gdb_exception_RETURN_MASK_ERROR &e)
 	    {
 	      exception_fprintf (gdb_stderr, e,
 				 _("Error while mapping "
 				   "shared library sections:\n"));
 	      got_error = 1;
 	    }
-	  END_CATCH
 
 	    if (!got_error
 		&& (auto_solib_add || was_loaded || libpthread_solib_p (so)))

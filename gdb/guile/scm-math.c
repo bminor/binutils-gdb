@@ -723,7 +723,7 @@ vlscm_convert_typed_value_from_scheme (const char *func_name,
 
   *except_scmp = SCM_BOOL_F;
 
-  TRY
+  try
     {
       if (vlscm_is_value (obj))
 	{
@@ -824,11 +824,10 @@ vlscm_convert_typed_value_from_scheme (const char *func_name,
 	  value = NULL;
 	}
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       except_scm = gdbscm_scm_from_gdb_exception (except);
     }
-  END_CATCH
 
   if (gdbscm_is_true (except_scm))
     {

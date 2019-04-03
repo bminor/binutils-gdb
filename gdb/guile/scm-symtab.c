@@ -591,17 +591,16 @@ gdbscm_find_pc_line (SCM pc_scm)
 
   gdbscm_parse_function_args (FUNC_NAME, SCM_ARG1, NULL, "U", pc_scm, &pc_ull);
 
-  TRY
+  try
     {
       CORE_ADDR pc = (CORE_ADDR) pc_ull;
 
       sal = find_pc_line (pc, 0);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   return stscm_scm_from_sal (sal);
 }

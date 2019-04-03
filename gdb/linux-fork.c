@@ -427,19 +427,18 @@ public:
     if (m_oldfp != nullptr)
       {
 	/* Switch back to inferior_ptid.  */
-	TRY
+	try
 	  {
 	    remove_breakpoints ();
 	    fork_load_infrun_state (m_oldfp);
 	    insert_breakpoints ();
 	  }
-	CATCH (ex, RETURN_MASK_ALL)
+	catch (const gdb_exception_RETURN_MASK_ALL &ex)
 	  {
 	    warning (_("Couldn't restore checkpoint state in %s: %s"),
 		     target_pid_to_str (m_oldfp->ptid).c_str (),
 		     ex.what ());
 	  }
-	END_CATCH
       }
   }
 

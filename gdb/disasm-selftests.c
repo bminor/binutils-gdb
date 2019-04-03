@@ -192,16 +192,15 @@ memory_error_test (struct gdbarch *gdbarch)
   gdb_disassembler_test di (gdbarch);
   bool saw_memory_error = false;
 
-  TRY
+  try
     {
       di.print_insn (0);
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       if (ex.error == MEMORY_ERROR)
 	saw_memory_error = true;
     }
-  END_CATCH
 
   /* Expect MEMORY_ERROR.  */
   SELF_CHECK (saw_memory_error);

@@ -524,7 +524,7 @@ ppscm_pretty_print_one_value (SCM printer, struct value **out_value,
   SCM result = SCM_BOOL_F;
 
   *out_value = NULL;
-  TRY
+  try
     {
       pretty_printer_worker_smob *w_smob
 	= (pretty_printer_worker_smob *) SCM_SMOB_DATA (printer);
@@ -558,10 +558,9 @@ ppscm_pretty_print_one_value (SCM printer, struct value **out_value,
 	    (_("invalid result from pretty-printer to-string"), result);
 	}
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
     }
-  END_CATCH
 
   return result;
 }

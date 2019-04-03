@@ -130,7 +130,7 @@ sparc64_linux_handle_segmentation_fault (struct gdbarch *gdbarch,
   CORE_ADDR addr = 0;
   long si_code = 0;
 
-  TRY
+  try
     {
       /* Evaluate si_code to see if the segfault is ADI related.  */
       si_code = parse_and_eval_long ("$_siginfo.si_code\n");
@@ -138,11 +138,10 @@ sparc64_linux_handle_segmentation_fault (struct gdbarch *gdbarch,
       if (si_code >= SEGV_ACCADI && si_code <= SEGV_ADIPERR)
         addr = parse_and_eval_long ("$_siginfo._sifields._sigfault.si_addr");
     }
-  CATCH (exception, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &exception)
     {
       return;
     }
-  END_CATCH
 
   /* Print out ADI event based on sig_code value */
   switch (si_code)

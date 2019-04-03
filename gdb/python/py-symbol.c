@@ -196,15 +196,14 @@ sympy_needs_frame (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  TRY
+  try
     {
       result = symbol_read_needs_frame (symbol);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   if (result)
     Py_RETURN_TRUE;
@@ -266,7 +265,7 @@ sympy_value (PyObject *self, PyObject *args)
       return NULL;
     }
 
-  TRY
+  try
     {
       if (frame_obj != NULL)
 	{
@@ -284,11 +283,10 @@ sympy_value (PyObject *self, PyObject *args)
 	 can happen with nested functions).  */
       value = read_var_value (symbol, NULL, frame_info);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   return value_to_value_object (value);
 }
@@ -388,28 +386,26 @@ gdbpy_lookup_symbol (PyObject *self, PyObject *args, PyObject *kw)
     {
       struct frame_info *selected_frame;
 
-      TRY
+      try
 	{
 	  selected_frame = get_selected_frame (_("No frame selected."));
 	  block = get_frame_block (selected_frame, NULL);
 	}
-      CATCH (except, RETURN_MASK_ALL)
+      catch (const gdb_exception_RETURN_MASK_ALL &except)
 	{
 	  GDB_PY_HANDLE_EXCEPTION (except);
 	}
-      END_CATCH
     }
 
-  TRY
+  try
     {
       symbol = lookup_symbol (name, block, (domain_enum) domain,
 			      &is_a_field_of_this).symbol;
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   gdbpy_ref<> ret_tuple (PyTuple_New (2));
   if (ret_tuple == NULL)
@@ -451,15 +447,14 @@ gdbpy_lookup_global_symbol (PyObject *self, PyObject *args, PyObject *kw)
 					&domain))
     return NULL;
 
-  TRY
+  try
     {
       symbol = lookup_global_symbol (name, NULL, (domain_enum) domain).symbol;
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   if (symbol)
     {

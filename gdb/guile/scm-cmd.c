@@ -758,7 +758,7 @@ gdbscm_register_command_x (SCM self)
   c_smob->cmd_name = gdbscm_gc_xstrdup (cmd_name);
   xfree (cmd_name);
 
-  TRY
+  try
     {
       if (c_smob->is_prefix)
 	{
@@ -776,11 +776,10 @@ gdbscm_register_command_x (SCM self)
 			 c_smob->doc, cmd_list);
 	}
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   /* Note: At this point the command exists in gdb.
      So no more errors after this point.  */

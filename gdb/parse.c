@@ -1137,11 +1137,11 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
   scoped_restore_current_language lang_saver;
   set_language (lang->la_language);
 
-  TRY
+  try
     {
       lang->la_parser (&ps);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       /* If parsing for completion, allow this to succeed; but if no
 	 expression elements have been written, then there's nothing
@@ -1149,7 +1149,6 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
       if (! ps.parse_completion || ps.expout_ptr == 0)
 	throw_exception (except);
     }
-  END_CATCH
 
   /* We have to operate on an "expression *", due to la_post_parser,
      which explains this funny-looking double release.  */
@@ -1224,16 +1223,15 @@ parse_expression_for_completion (const char *string,
   int subexp;
   expr_completion_state cstate;
 
-  TRY
+  try
     {
       exp = parse_exp_in_context (&string, 0, 0, 0, 0, &subexp,
 				  nullptr, &cstate);
     }
-  CATCH (except, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &except)
     {
       /* Nothing, EXP remains NULL.  */
     }
-  END_CATCH
 
   if (exp == NULL)
     return NULL;

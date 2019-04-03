@@ -50,16 +50,15 @@ munmap_list::~munmap_list ()
 {
   for (auto &item : items)
     {
-      TRY
+      try
 	{
 	  gdbarch_infcall_munmap (target_gdbarch (), item.addr, item.size);
 	}
-      CATCH (ex, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
 	{
 	  /* There's not much the user can do, so just ignore
 	     this.  */
 	}
-      END_CATCH
     }
 }
 

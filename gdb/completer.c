@@ -1021,15 +1021,14 @@ complete_expression (completion_tracker &tracker,
 
   /* Perform a tentative parse of the expression, to see whether a
      field completion is required.  */
-  TRY
+  try
     {
       type = parse_expression_for_completion (text, &fieldname, &code);
     }
-  CATCH (except, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &except)
     {
       return;
     }
-  END_CATCH
 
   if (fieldname != nullptr && type)
     {
@@ -1445,16 +1444,15 @@ complete_line_internal (completion_tracker &tracker,
 			const char *line_buffer, int point,
 			complete_line_internal_reason reason)
 {
-  TRY
+  try
     {
       complete_line_internal_1 (tracker, text, line_buffer, point, reason);
     }
-  CATCH (except, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &except)
     {
       if (except.error != MAX_COMPLETIONS_REACHED_ERROR)
 	throw_exception (except);
     }
-  END_CATCH
 }
 
 /* See completer.h.  */
@@ -1859,17 +1857,16 @@ gdb_completion_word_break_characters ()
   /* New completion starting.  */
   current_completion.aborted = false;
 
-  TRY
+  try
     {
       return gdb_completion_word_break_characters_throw ();
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       /* Set this to that gdb_rl_attempted_completion_function knows
 	 to abort early.  */
       current_completion.aborted = true;
     }
-  END_CATCH
 
   return NULL;
 }
@@ -2207,14 +2204,13 @@ gdb_rl_attempted_completion_function (const char *text, int start, int end)
   if (current_completion.aborted)
     return NULL;
 
-  TRY
+  try
     {
       return gdb_rl_attempted_completion_function_throw (text, start, end);
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
     }
-  END_CATCH
 
   return NULL;
 }

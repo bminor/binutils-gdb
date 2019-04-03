@@ -2581,16 +2581,15 @@ amd64_frame_cache (struct frame_info *this_frame, void **this_cache)
   cache = amd64_alloc_frame_cache ();
   *this_cache = cache;
 
-  TRY
+  try
     {
       amd64_frame_cache_1 (this_frame, cache);
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       if (ex.error != NOT_AVAILABLE_ERROR)
 	throw_exception (ex);
     }
-  END_CATCH
 
   return cache;
 }
@@ -2699,7 +2698,7 @@ amd64_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   cache = amd64_alloc_frame_cache ();
 
-  TRY
+  try
     {
       get_frame_register (this_frame, AMD64_RSP_REGNUM, buf);
       cache->base = extract_unsigned_integer (buf, 8, byte_order) - 8;
@@ -2713,12 +2712,11 @@ amd64_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
 
       cache->base_p = 1;
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       if (ex.error != NOT_AVAILABLE_ERROR)
 	throw_exception (ex);
     }
-  END_CATCH
 
   *this_cache = cache;
   return cache;
@@ -2876,7 +2874,7 @@ amd64_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
   cache = amd64_alloc_frame_cache ();
   *this_cache = cache;
 
-  TRY
+  try
     {
       /* Cache base will be %esp plus cache->sp_offset (-8).  */
       get_frame_register (this_frame, AMD64_RSP_REGNUM, buf);
@@ -2894,12 +2892,11 @@ amd64_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
 
       cache->base_p = 1;
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       if (ex.error != NOT_AVAILABLE_ERROR)
 	throw_exception (ex);
     }
-  END_CATCH
 
   return cache;
 }

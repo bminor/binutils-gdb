@@ -3451,7 +3451,7 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
   cache->pc = 0;
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
-  TRY
+  try
     {
       func = get_frame_func (this_frame);
       cache->pc = func;
@@ -3468,13 +3468,12 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
       cache->base = get_frame_register_unsigned
 	(this_frame, gdbarch_sp_regnum (gdbarch));
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       if (ex.error != NOT_AVAILABLE_ERROR)
 	throw_exception (ex);
       return (struct rs6000_frame_cache *) (*this_cache);
     }
-  END_CATCH
 
   /* If the function appears to be frameless, check a couple of likely
      indicators that we have simply failed to find the frame setup.
@@ -3683,7 +3682,7 @@ rs6000_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
   (*this_cache) = cache;
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
-  TRY
+  try
     {
       /* At this point the stack looks as if we just entered the
 	 function, and the return address is stored in LR.  */
@@ -3698,12 +3697,11 @@ rs6000_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
       trad_frame_set_value (cache->saved_regs,
 			    gdbarch_pc_regnum (gdbarch), lr);
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       if (ex.error != NOT_AVAILABLE_ERROR)
 	throw_exception (ex);
     }
-  END_CATCH
 
   return cache;
 }

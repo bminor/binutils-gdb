@@ -2615,17 +2615,16 @@ static void
 rust_lex_exception_test (rust_parser *parser, const char *input,
 			 const char *err)
 {
-  TRY
+  try
     {
       /* The "kind" doesn't matter.  */
       rust_lex_test_one (parser, input, DECIMAL_INTEGER);
       SELF_CHECK (0);
     }
-  CATCH (except, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &except)
     {
       SELF_CHECK (strcmp (except.what (), err) == 0);
     }
-  END_CATCH
 }
 
 /* Test that INPUT lexes as the identifier, string, or byte-string

@@ -531,7 +531,7 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 	stb.printf (_("<error reading variable: %s>"), arg->error);
       else
 	{
-	  TRY
+	  try
 	    {
 	      struct value_print_options opts;
 
@@ -540,12 +540,11 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 	      common_val_print (arg->val, &stb, 0, &opts,
 				language_def (SYMBOL_LANGUAGE (arg->sym)));
 	    }
-	  CATCH (except, RETURN_MASK_ERROR)
+	  catch (const gdb_exception_RETURN_MASK_ERROR &except)
 	    {
 	      stb.printf (_("<error reading variable: %s>"),
 			  except.what ());
 	    }
-	  END_CATCH
 	}
       uiout->field_stream ("value", stb);
     }

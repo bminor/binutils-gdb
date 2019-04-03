@@ -190,7 +190,7 @@ pretty_print_one_value (PyObject *printer, struct value **out_value)
   gdbpy_ref<> result;
 
   *out_value = NULL;
-  TRY
+  try
     {
       if (!PyObject_HasAttr (printer, gdbpy_to_string_cst))
 	result = gdbpy_ref<>::new_reference (Py_None);
@@ -212,10 +212,9 @@ pretty_print_one_value (PyObject *printer, struct value **out_value)
 	    }
 	}
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
     }
-  END_CATCH
 
   return result;
 }
@@ -637,15 +636,14 @@ apply_varobj_pretty_printer (PyObject *printer_obj,
 gdbpy_ref<>
 gdbpy_get_varobj_pretty_printer (struct value *value)
 {
-  TRY
+  try
     {
       value = value_copy (value);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   gdbpy_ref<> val_obj (value_to_value_object (value));
   if (val_obj == NULL)

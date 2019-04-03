@@ -39,12 +39,12 @@ gdbpy_readline_wrapper (FILE *sys_stdin, FILE *sys_stdout,
   int n;
   char *p = NULL, *q;
 
-  TRY
+  try
     {
       p = command_line_input (prompt, "python");
     }
   /* Handle errors by raising Python exceptions.  */
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       /* Detect user interrupt (Ctrl-C).  */
       if (except.reason == RETURN_QUIT)
@@ -59,7 +59,6 @@ gdbpy_readline_wrapper (FILE *sys_stdin, FILE *sys_stdout,
       PyEval_SaveThread ();
       return NULL;
     }
-  END_CATCH
 
   /* Detect EOF (Ctrl-D).  */
   if (p == NULL)

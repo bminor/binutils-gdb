@@ -429,7 +429,7 @@ gdbscm_register_breakpoint_x (SCM self)
 				      current_language,
 				      symbol_name_match_type::WILD);
 
-  TRY
+  try
     {
       int internal = bp_smob->spec.is_internal;
 
@@ -465,11 +465,10 @@ gdbscm_register_breakpoint_x (SCM self)
 	  gdb_assert_not_reached ("invalid breakpoint type");
 	}
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       except = ex;
     }
-  END_CATCH
 
   /* Ensure this gets reset, even if there's an error.  */
   pending_breakpoint_scm = SCM_BOOL_F;
@@ -490,15 +489,14 @@ gdbscm_delete_breakpoint_x (SCM self)
   breakpoint_smob *bp_smob
     = bpscm_get_valid_breakpoint_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
-  TRY
+  try
     {
       delete_breakpoint (bp_smob->bp);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   return SCM_UNSPECIFIED;
 }
@@ -588,18 +586,17 @@ gdbscm_set_breakpoint_enabled_x (SCM self, SCM newvalue)
   SCM_ASSERT_TYPE (gdbscm_is_bool (newvalue), newvalue, SCM_ARG2, FUNC_NAME,
 		   _("boolean"));
 
-  TRY
+  try
     {
       if (gdbscm_is_true (newvalue))
 	enable_breakpoint (bp_smob->bp);
       else
 	disable_breakpoint (bp_smob->bp);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   return SCM_UNSPECIFIED;
 }
@@ -626,15 +623,14 @@ gdbscm_set_breakpoint_silent_x (SCM self, SCM newvalue)
   SCM_ASSERT_TYPE (gdbscm_is_bool (newvalue), newvalue, SCM_ARG2, FUNC_NAME,
 		   _("boolean"));
 
-  TRY
+  try
     {
       breakpoint_set_silent (bp_smob->bp, gdbscm_is_true (newvalue));
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   return SCM_UNSPECIFIED;
 }
@@ -667,15 +663,14 @@ gdbscm_set_breakpoint_ignore_count_x (SCM self, SCM newvalue)
   if (value < 0)
     value = 0;
 
-  TRY
+  try
     {
       set_ignore_count (bp_smob->number, (int) value, 0);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   return SCM_UNSPECIFIED;
 }
@@ -788,15 +783,14 @@ gdbscm_set_breakpoint_task_x (SCM self, SCM newvalue)
     {
       id = scm_to_long (newvalue);
 
-      TRY
+      try
 	{
 	  valid_id = valid_task_id (id);
 	}
-      CATCH (except, RETURN_MASK_ALL)
+      catch (const gdb_exception_RETURN_MASK_ALL &except)
 	{
 	  GDBSCM_HANDLE_GDB_EXCEPTION (except);
 	}
-      END_CATCH
 
       if (! valid_id)
 	{
@@ -809,15 +803,14 @@ gdbscm_set_breakpoint_task_x (SCM self, SCM newvalue)
   else
     SCM_ASSERT_TYPE (0, newvalue, SCM_ARG2, FUNC_NAME, _("integer or #f"));
 
-  TRY
+  try
     {
       breakpoint_set_task (bp_smob->bp, id);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   return SCM_UNSPECIFIED;
 }
@@ -975,16 +968,15 @@ gdbscm_breakpoint_commands (SCM self)
   string_file buf;
 
   current_uiout->redirect (&buf);
-  TRY
+  try
     {
       print_command_lines (current_uiout, breakpoint_commands (bp), 0);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       current_uiout->redirect (NULL);
       gdbscm_throw_gdb_exception (except);
     }
-  END_CATCH
 
   current_uiout->redirect (NULL);
   result = gdbscm_scm_from_c_string (buf.c_str ());

@@ -1405,15 +1405,14 @@ value_optimized_out (struct value *value)
      fetch it.  */
   if (value->optimized_out.empty () && value->lazy)
     {
-      TRY
+      try
 	{
 	  value_fetch_lazy (value);
 	}
-      CATCH (ex, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
 	{
 	  /* Fall back to checking value->optimized_out.  */
 	}
-      END_CATCH
     }
 
   return !value->optimized_out.empty ();
@@ -2535,18 +2534,17 @@ show_convenience (const char *ignore, int from_tty)
 	}
       printf_filtered (("$%s = "), var->name);
 
-      TRY
+      try
 	{
 	  struct value *val;
 
 	  val = value_of_internalvar (gdbarch, var);
 	  value_print (val, gdb_stdout, &opts);
 	}
-      CATCH (ex, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
 	{
 	  fprintf_filtered (gdb_stdout, _("<error: %s>"), ex.what ());
 	}
-      END_CATCH
 
       printf_filtered (("\n"));
     }

@@ -383,15 +383,14 @@ gdb_xml_start_element_wrapper (void *data, const XML_Char *name,
 {
   struct gdb_xml_parser *parser = (struct gdb_xml_parser *) data;
 
-  TRY
+  try
     {
       parser->start_element (name, attrs);
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       parser->set_error (ex);
     }
-  END_CATCH
 }
 
 /* Handle the end of an element.  NAME is the current element.  */
@@ -456,15 +455,14 @@ gdb_xml_end_element_wrapper (void *data, const XML_Char *name)
 {
   struct gdb_xml_parser *parser = (struct gdb_xml_parser *) data;
 
-  TRY
+  try
     {
       parser->end_element (name);
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       parser->set_error (ex);
     }
-  END_CATCH
 }
 
 /* Free a parser and all its associated state.  */

@@ -1054,17 +1054,16 @@ val_print (struct type *type, LONGEST embedded_offset,
       return;
     }
 
-  TRY
+  try
     {
       language->la_val_print (type, embedded_offset, address,
 			      stream, recurse, val,
 			      &local_opts);
     }
-  CATCH (except, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &except)
     {
       fprintf_filtered (stream, _("<error reading variable>"));
     }
-  END_CATCH
 }
 
 /* Check whether the value VAL is printable.  Return 1 if it is;

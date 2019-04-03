@@ -2547,19 +2547,18 @@ s390_frame_unwind_cache (struct frame_info *this_frame,
   info->frame_base = -1;
   info->local_base = -1;
 
-  TRY
+  try
     {
       /* Try to use prologue analysis to fill the unwind cache.
 	 If this fails, fall back to reading the stack backchain.  */
       if (!s390_prologue_frame_unwind_cache (this_frame, info))
 	s390_backchain_frame_unwind_cache (this_frame, info);
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       if (ex.error != NOT_AVAILABLE_ERROR)
 	throw_exception (ex);
     }
-  END_CATCH
 
   return info;
 }

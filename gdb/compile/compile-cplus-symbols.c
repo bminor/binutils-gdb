@@ -343,7 +343,7 @@ gcc_cplus_convert_symbol (void *datum,
   bool found = false;
   compile_cplus_instance *instance = (compile_cplus_instance *) datum;
 
-  TRY
+  try
     {
       /* Symbol searching is a three part process unfortunately.  */
 
@@ -388,13 +388,12 @@ gcc_cplus_convert_symbol (void *datum,
 	    }
 	}
     }
-  CATCH (e, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &e)
     {
       /* We can't allow exceptions to escape out of this callback.  Safest
 	 is to simply emit a gcc error.  */
       instance->plugin ().error (e.what ());
     }
-  END_CATCH
 
   if (compile_debug && !found)
     fprintf_unfiltered (gdb_stdlog,
@@ -431,7 +430,7 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
 
   /* We can't allow exceptions to escape out of this callback.  Safest
      is to simply emit a gcc error.  */
-  TRY
+  try
     {
       struct symbol *sym
 	= lookup_symbol (identifier, nullptr, VAR_DOMAIN, nullptr).symbol;
@@ -467,11 +466,10 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
 	}
     }
 
-  CATCH (e, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &e)
     {
       instance->plugin ().error (e.what ());
     }
-  END_CATCH
 
   if (compile_debug && !found)
     fprintf_unfiltered (gdb_stdlog,

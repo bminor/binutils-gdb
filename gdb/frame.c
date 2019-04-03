@@ -894,12 +894,12 @@ frame_unwind_pc (struct frame_info *this_frame)
 	 different ways that a PC could be unwound.  */
       prev_gdbarch = frame_unwind_arch (this_frame);
 
-      TRY
+      try
 	{
 	  pc = gdbarch_unwind_pc (prev_gdbarch, this_frame);
 	  pc_p = 1;
 	}
-      CATCH (ex, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
 	{
 	  if (ex.error == NOT_AVAILABLE_ERROR)
 	    {
@@ -924,7 +924,6 @@ frame_unwind_pc (struct frame_info *this_frame)
 	  else
 	    throw_exception (ex);
 	}
-      END_CATCH
 
       if (pc_p)
 	{
@@ -1894,7 +1893,7 @@ get_prev_frame_if_no_cycle (struct frame_info *this_frame)
   if (prev_frame->level == 0)
     return prev_frame;
 
-  TRY
+  try
     {
       compute_frame_id (prev_frame);
       if (!frame_stash_add (prev_frame))
@@ -1914,14 +1913,13 @@ get_prev_frame_if_no_cycle (struct frame_info *this_frame)
 	  prev_frame = NULL;
 	}
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       prev_frame->next = NULL;
       this_frame->prev = NULL;
 
       throw_exception (ex);
     }
-  END_CATCH
 
   return prev_frame;
 }
@@ -2092,11 +2090,11 @@ get_prev_frame_always (struct frame_info *this_frame)
 {
   struct frame_info *prev_frame = NULL;
 
-  TRY
+  try
     {
       prev_frame = get_prev_frame_always_1 (this_frame);
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       if (ex.error == MEMORY_ERROR)
 	{
@@ -2120,7 +2118,6 @@ get_prev_frame_always (struct frame_info *this_frame)
       else
 	throw_exception (ex);
     }
-  END_CATCH
 
   return prev_frame;
 }
@@ -2379,18 +2376,17 @@ get_frame_pc_if_available (struct frame_info *frame, CORE_ADDR *pc)
 
   gdb_assert (frame->next != NULL);
 
-  TRY
+  try
     {
       *pc = frame_unwind_pc (frame->next);
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       if (ex.error == NOT_AVAILABLE_ERROR)
 	return 0;
       else
 	throw_exception (ex);
     }
-  END_CATCH
 
   return 1;
 }
@@ -2462,17 +2458,16 @@ get_frame_address_in_block_if_available (struct frame_info *this_frame,
 					 CORE_ADDR *pc)
 {
 
-  TRY
+  try
     {
       *pc = get_frame_address_in_block (this_frame);
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       if (ex.error == NOT_AVAILABLE_ERROR)
 	return 0;
       throw_exception (ex);
     }
-  END_CATCH
 
   return 1;
 }
@@ -2747,17 +2742,16 @@ get_frame_language (struct frame_info *frame)
        a PC that is guaranteed to be inside the frame's code
        block.  */
 
-  TRY
+  try
     {
       pc = get_frame_address_in_block (frame);
       pc_p = 1;
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       if (ex.error != NOT_AVAILABLE_ERROR)
 	throw_exception (ex);
     }
-  END_CATCH
 
   if (pc_p)
     {

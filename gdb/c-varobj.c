@@ -92,16 +92,15 @@ adjust_value_for_child_access (struct value **value,
 	  if (value && *value)
 	    {
 
-	      TRY
+	      try
 		{
 		  *value = value_ind (*value);
 		}
 
-	      CATCH (except, RETURN_MASK_ERROR)
+	      catch (const gdb_exception_RETURN_MASK_ERROR &except)
 		{
 		  *value = NULL;
 		}
-	      END_CATCH
 	    }
 	  *type = target_type;
 	  if (was_ptr)
@@ -253,18 +252,17 @@ value_struct_element_index (struct value *value, int type_index)
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
 	      || TYPE_CODE (type) == TYPE_CODE_UNION);
 
-  TRY
+  try
     {
       if (field_is_static (&TYPE_FIELD (type, type_index)))
 	result = value_static_field (type, type_index);
       else
 	result = value_primitive_field (value, 0, type_index, type);
     }
-  CATCH (e, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &e)
     {
       return NULL;
     }
-  END_CATCH
 
   return result;
 }
@@ -316,14 +314,13 @@ c_describe_child (const struct varobj *parent, int index,
 	{
 	  int real_index = index + TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type));
 
-	  TRY
+	  try
 	    {
 	      *cvalue = value_subscript (value, real_index);
 	    }
-	  CATCH (except, RETURN_MASK_ERROR)
+	  catch (const gdb_exception_RETURN_MASK_ERROR &except)
 	    {
 	    }
-	  END_CATCH
 	}
 
       if (ctype)
@@ -393,16 +390,15 @@ c_describe_child (const struct varobj *parent, int index,
 
       if (cvalue && value)
 	{
-	  TRY
+	  try
 	    {
 	      *cvalue = value_ind (value);
 	    }
 
-	  CATCH (except, RETURN_MASK_ERROR)
+	  catch (const gdb_exception_RETURN_MASK_ERROR &except)
 	    {
 	      *cvalue = NULL;
 	    }
-	  END_CATCH
 	}
 
       /* Don't use get_target_type because it calls

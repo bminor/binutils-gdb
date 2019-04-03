@@ -486,15 +486,14 @@ gdbscm_symbol_needs_frame_p (SCM self)
   struct symbol *symbol = s_smob->symbol;
   int result = 0;
 
-  TRY
+  try
     {
       result = symbol_read_needs_frame (symbol);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   return scm_from_bool (result);
 }
@@ -539,7 +538,7 @@ gdbscm_symbol_value (SCM self, SCM rest)
 				 _("cannot get the value of a typedef"));
     }
 
-  TRY
+  try
     {
       if (f_smob != NULL)
 	{
@@ -557,11 +556,10 @@ gdbscm_symbol_value (SCM self, SCM rest)
 	 can happen with nested functions).  */
       value = read_var_value (symbol, NULL, frame_info);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   return vlscm_scm_from_value (value);
 }
@@ -604,30 +602,28 @@ gdbscm_lookup_symbol (SCM name_scm, SCM rest)
     {
       struct frame_info *selected_frame;
 
-      TRY
+      try
 	{
 	  selected_frame = get_selected_frame (_("no frame selected"));
 	  block = get_frame_block (selected_frame, NULL);
 	}
-      CATCH (ex, RETURN_MASK_ALL)
+      catch (const gdb_exception_RETURN_MASK_ALL &ex)
 	{
 	  xfree (name);
 	  GDBSCM_HANDLE_GDB_EXCEPTION (ex);
 	}
-      END_CATCH
     }
 
   struct gdb_exception except = exception_none;
-  TRY
+  try
     {
       symbol = lookup_symbol (name, block, (domain_enum) domain,
 			      &is_a_field_of_this).symbol;
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       except = ex;
     }
-  END_CATCH
 
   xfree (name);
   GDBSCM_HANDLE_GDB_EXCEPTION (except);
@@ -656,15 +652,14 @@ gdbscm_lookup_global_symbol (SCM name_scm, SCM rest)
 			      name_scm, &name, rest,
 			      &domain_arg_pos, &domain);
 
-  TRY
+  try
     {
       symbol = lookup_global_symbol (name, NULL, (domain_enum) domain).symbol;
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       except = ex;
     }
-  END_CATCH
 
   xfree (name);
   GDBSCM_HANDLE_GDB_EXCEPTION (except);

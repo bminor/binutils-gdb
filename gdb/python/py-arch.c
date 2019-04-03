@@ -199,16 +199,15 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
 
       string_file stb;
 
-      TRY
+      try
         {
           insn_len = gdb_print_insn (gdbarch, pc, &stb, NULL);
         }
-      CATCH (except, RETURN_MASK_ALL)
+      catch (const gdb_exception_RETURN_MASK_ALL &except)
         {
 	  gdbpy_convert_exception (except);
 	  return NULL;
         }
-      END_CATCH
 
       if (PyDict_SetItemString (insn_dict.get (), "addr",
                                 gdb_py_long_from_ulongest (pc))

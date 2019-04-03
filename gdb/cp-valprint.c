@@ -320,18 +320,17 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		{
 		  struct value *v = NULL;
 
-		  TRY
+		  try
 		    {
 		      v = value_static_field (type, i);
 		    }
 
-		  CATCH (ex, RETURN_MASK_ERROR)
+		  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
 		    {
 		      fprintf_filtered (stream,
 					_("<error reading variable: %s>"),
 					ex.what ());
 		    }
-		  END_CATCH
 
 		  cp_print_static_field (TYPE_FIELD_TYPE (type, i),
 					 v, stream, recurse + 1,
@@ -509,18 +508,17 @@ cp_print_value (struct type *type, struct type *real_type,
       thisoffset = offset;
       thistype = real_type;
 
-      TRY
+      try
 	{
 	  boffset = baseclass_offset (type, i, valaddr, offset, address, val);
 	}
-      CATCH (ex, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
 	{
 	  if (ex.error == NOT_AVAILABLE_ERROR)
 	    skip = -1;
 	  else
 	    skip = 1;
 	}
-      END_CATCH
 
       if (skip == 0)
 	{

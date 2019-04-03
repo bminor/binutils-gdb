@@ -164,15 +164,14 @@ ltpy_get_pcs_for_line (PyObject *self, PyObject *args)
   if (! PyArg_ParseTuple (args, GDB_PY_LL_ARG, &py_line))
     return NULL;
 
-  TRY
+  try
     {
       pcs = find_pcs_for_symtab_line (symtab, py_line, &best_entry);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   return build_line_table_tuple_from_pcs (py_line, pcs);
 }

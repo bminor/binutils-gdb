@@ -2082,16 +2082,15 @@ i386_frame_cache (struct frame_info *this_frame, void **this_cache)
   cache = i386_alloc_frame_cache ();
   *this_cache = cache;
 
-  TRY
+  try
     {
       i386_frame_cache_1 (this_frame, cache);
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       if (ex.error != NOT_AVAILABLE_ERROR)
 	throw_exception (ex);
     }
-  END_CATCH
 
   return cache;
 }
@@ -2252,7 +2251,7 @@ i386_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
   cache = i386_alloc_frame_cache ();
   *this_cache = cache;
 
-  TRY
+  try
     {
       cache->pc = get_frame_func (this_frame);
 
@@ -2266,12 +2265,11 @@ i386_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
 
       cache->base_p = 1;
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       if (ex.error != NOT_AVAILABLE_ERROR)
 	throw_exception (ex);
     }
-  END_CATCH
 
   return cache;
 }
@@ -2438,7 +2436,7 @@ i386_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   cache = i386_alloc_frame_cache ();
 
-  TRY
+  try
     {
       get_frame_register (this_frame, I386_ESP_REGNUM, buf);
       cache->base = extract_unsigned_integer (buf, 4, byte_order) - 4;
@@ -2462,12 +2460,11 @@ i386_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
 
       cache->base_p = 1;
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       if (ex.error != NOT_AVAILABLE_ERROR)
 	throw_exception (ex);
     }
-  END_CATCH
 
   *this_cache = cache;
   return cache;

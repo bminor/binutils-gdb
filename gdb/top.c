@@ -1621,31 +1621,29 @@ quit_force (int *exit_arg, int from_tty)
   /* We want to handle any quit errors and exit regardless.  */
 
   /* Get out of tfind mode, and kill or detach all inferiors.  */
-  TRY
+  try
     {
       disconnect_tracing ();
       iterate_over_inferiors (kill_or_detach, &qt);
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       exception_print (gdb_stderr, ex);
     }
-  END_CATCH
 
   /* Give all pushed targets a chance to do minimal cleanup, and pop
      them all out.  */
-  TRY
+  try
     {
       pop_all_targets ();
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       exception_print (gdb_stderr, ex);
     }
-  END_CATCH
 
   /* Save the history information if it is appropriate to do so.  */
-  TRY
+  try
     {
       if (write_history_p && history_filename)
 	{
@@ -1667,11 +1665,10 @@ quit_force (int *exit_arg, int from_tty)
 	    gdb_safe_append_history ();
 	}
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       exception_print (gdb_stderr, ex);
     }
-  END_CATCH
 
   /* Destroy any values currently allocated now instead of leaving it
      to global destructors, because that may be too late.  For
@@ -1680,15 +1677,14 @@ quit_force (int *exit_arg, int from_tty)
   finalize_values ();
 
   /* Do any final cleanups before exiting.  */
-  TRY
+  try
     {
       do_final_cleanups ();
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       exception_print (gdb_stderr, ex);
     }
-  END_CATCH
 
   exit (exit_code);
 }

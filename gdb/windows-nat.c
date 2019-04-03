@@ -943,15 +943,14 @@ handle_unload_dll ()
 static void
 catch_errors (void (*func) ())
 {
-  TRY
+  try
     {
       func ();
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       exception_print (gdb_stderr, ex);
     }
-  END_CATCH
 }
 
 /* Clear list of loaded DLLs.  */

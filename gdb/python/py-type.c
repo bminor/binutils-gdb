@@ -312,15 +312,14 @@ typy_fields_items (PyObject *self, enum gdbpy_iter_kind kind)
   struct type *type = ((type_object *) py_type)->type;
   struct type *checked_type = type;
 
-  TRY
+  try
     {
       checked_type = check_typedef (checked_type);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   gdbpy_ref<> type_holder;
   if (checked_type != type)
@@ -420,15 +419,14 @@ typy_strip_typedefs (PyObject *self, PyObject *args)
 {
   struct type *type = ((type_object *) self)->type;
 
-  TRY
+  try
     {
       type = check_typedef (type);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   return type_to_type_object (type);
 }
@@ -442,15 +440,14 @@ typy_get_composite (struct type *type)
 
   for (;;)
     {
-      TRY
+      try
 	{
 	  type = check_typedef (type);
 	}
-      CATCH (except, RETURN_MASK_ALL)
+      catch (const gdb_exception_RETURN_MASK_ALL &except)
 	{
 	  GDB_PY_HANDLE_EXCEPTION (except);
 	}
-      END_CATCH
 
       if (TYPE_CODE (type) != TYPE_CODE_PTR && !TYPE_IS_REFERENCE (type))
 	break;
@@ -510,17 +507,16 @@ typy_array_1 (PyObject *self, PyObject *args, int is_vector)
       return NULL;
     }
 
-  TRY
+  try
     {
       array = lookup_array_range_type (type, n1, n2);
       if (is_vector)
 	make_vector_type (array);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   return type_to_type_object (array);
 }
@@ -547,15 +543,14 @@ typy_pointer (PyObject *self, PyObject *args)
 {
   struct type *type = ((type_object *) self)->type;
 
-  TRY
+  try
     {
       type = lookup_pointer_type (type);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   return type_to_type_object (type);
 }
@@ -616,15 +611,14 @@ typy_reference (PyObject *self, PyObject *args)
 {
   struct type *type = ((type_object *) self)->type;
 
-  TRY
+  try
     {
       type = lookup_lvalue_reference_type (type);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   return type_to_type_object (type);
 }
@@ -651,15 +645,14 @@ typy_const (PyObject *self, PyObject *args)
 {
   struct type *type = ((type_object *) self)->type;
 
-  TRY
+  try
     {
       type = make_cv_type (1, 0, type, NULL);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   return type_to_type_object (type);
 }
@@ -670,15 +663,14 @@ typy_volatile (PyObject *self, PyObject *args)
 {
   struct type *type = ((type_object *) self)->type;
 
-  TRY
+  try
     {
       type = make_cv_type (0, 1, type, NULL);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   return type_to_type_object (type);
 }
@@ -689,15 +681,14 @@ typy_unqualified (PyObject *self, PyObject *args)
 {
   struct type *type = ((type_object *) self)->type;
 
-  TRY
+  try
     {
       type = make_cv_type (0, 0, type, NULL);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   return type_to_type_object (type);
 }
@@ -708,14 +699,13 @@ typy_get_sizeof (PyObject *self, void *closure)
 {
   struct type *type = ((type_object *) self)->type;
 
-  TRY
+  try
     {
       check_typedef (type);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
     }
-  END_CATCH
 
   /* Ignore exceptions.  */
 
@@ -729,15 +719,14 @@ typy_get_alignof (PyObject *self, void *closure)
   struct type *type = ((type_object *) self)->type;
 
   ULONGEST align = 0;
-  TRY
+  try
     {
       align = type_align (type);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       align = 0;
     }
-  END_CATCH
 
   /* Ignore exceptions.  */
 
@@ -749,7 +738,7 @@ typy_lookup_typename (const char *type_name, const struct block *block)
 {
   struct type *type = NULL;
 
-  TRY
+  try
     {
       if (startswith (type_name, "struct "))
 	type = lookup_struct (type_name + 7, NULL);
@@ -761,11 +750,10 @@ typy_lookup_typename (const char *type_name, const struct block *block)
 	type = lookup_typename (python_language, python_gdbarch,
 				type_name, block, 0);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   return type;
 }
@@ -791,7 +779,7 @@ typy_lookup_type (struct demangle_component *demangled,
       if (! type)
 	return NULL;
 
-      TRY
+      try
 	{
 	  /* If the demangled_type matches with one of the types
 	     below, run the corresponding function and save the type
@@ -816,11 +804,10 @@ typy_lookup_type (struct demangle_component *demangled,
 	      break;
 	    }
 	}
-      CATCH (except, RETURN_MASK_ALL)
+      catch (const gdb_exception_RETURN_MASK_ALL &except)
 	{
 	  GDB_PY_HANDLE_EXCEPTION (except);
 	}
-      END_CATCH
     }
 
   /* If we have a type from the switch statement above, just return
@@ -854,16 +841,15 @@ typy_legacy_template_argument (struct type *type, const struct block *block,
       return NULL;
     }
 
-  TRY
+  try
     {
       /* Note -- this is not thread-safe.  */
       info = cp_demangled_name_to_comp (TYPE_NAME (type), &err);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   if (! info)
     {
@@ -934,17 +920,16 @@ typy_template_argument (PyObject *self, PyObject *args)
 	}
     }
 
-  TRY
+  try
     {
       type = check_typedef (type);
       if (TYPE_IS_REFERENCE (type))
 	type = check_typedef (TYPE_TARGET_TYPE (type));
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   /* We might not have DW_TAG_template_*, so try to parse the type's
      name.  This is inefficient if we do not have a template type --
@@ -969,15 +954,14 @@ typy_template_argument (PyObject *self, PyObject *args)
       return NULL;
     }
 
-  TRY
+  try
     {
       val = value_of_variable (sym, block);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   return value_to_value_object (val);
 }
@@ -987,16 +971,15 @@ typy_str (PyObject *self)
 {
   string_file thetype;
 
-  TRY
+  try
     {
       LA_PRINT_TYPE (type_object_to_type (self), "", &thetype, -1, 0,
 		     &type_print_raw_options);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   return PyUnicode_Decode (thetype.c_str (), thetype.size (),
 			   host_charset (), NULL);
@@ -1023,17 +1006,16 @@ typy_richcompare (PyObject *self, PyObject *other, int op)
     result = true;
   else
     {
-      TRY
+      try
 	{
 	  result = types_deeply_equal (type1, type2);
 	}
-      CATCH (except, RETURN_MASK_ALL)
+      catch (const gdb_exception_RETURN_MASK_ALL &except)
 	{
 	  /* If there is a GDB exception, a comparison is not capable
 	     (or trusted), so exit.  */
 	  GDB_PY_HANDLE_EXCEPTION (except);
 	}
-      END_CATCH
     }
 
   if (op == (result ? Py_EQ : Py_NE))

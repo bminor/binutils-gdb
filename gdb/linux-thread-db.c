@@ -497,12 +497,12 @@ static int
 thread_db_find_new_threads_silently (thread_info *stopped)
 {
 
-  TRY
+  try
     {
       thread_db_find_new_threads_2 (stopped, true);
     }
 
-  CATCH (except, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &except)
     {
       if (libthread_db_debug)
 	exception_fprintf (gdb_stdlog, except,
@@ -532,7 +532,6 @@ thread_db_find_new_threads_silently (thread_info *stopped)
 	  return 1;
 	}
     }
-  END_CATCH
 
   return 0;
 }
@@ -757,7 +756,7 @@ check_thread_db (struct thread_db_info *info, bool log_progress)
      fail.  */
   linux_stop_and_wait_all_lwps ();
 
-  TRY
+  try
     {
       td_err_e err = td_ta_thr_iter_p (info->thread_agent,
 				       check_thread_db_callback,
@@ -773,7 +772,7 @@ check_thread_db (struct thread_db_info *info, bool log_progress)
       if (!tdb_testinfo->threads_seen)
 	error (_("no threads seen"));
     }
-  CATCH (except, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &except)
     {
       if (warning_pre_print)
 	fputs_unfiltered (warning_pre_print, gdb_stderr);
@@ -783,7 +782,6 @@ check_thread_db (struct thread_db_info *info, bool log_progress)
 
       test_passed = false;
     }
-  END_CATCH
 
   if (test_passed && log_progress)
     debug_printf (_("libthread_db integrity checks passed.\n"));
@@ -1509,7 +1507,7 @@ find_new_threads_once (struct thread_db_info *info, int iteration,
   /* See comment in thread_db_update_thread_list.  */
   gdb_assert (info->td_ta_thr_iter_p != NULL);
 
-  TRY
+  try
     {
       /* Iterate over all user-space threads to discover new threads.  */
       err = info->td_ta_thr_iter_p (info->thread_agent,
@@ -1520,7 +1518,7 @@ find_new_threads_once (struct thread_db_info *info, int iteration,
 				    TD_SIGNO_MASK,
 				    TD_THR_ANY_USER_FLAGS);
     }
-  CATCH (except, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &except)
     {
       if (libthread_db_debug)
 	{
@@ -1528,7 +1526,6 @@ find_new_threads_once (struct thread_db_info *info, int iteration,
 			     "Warning: find_new_threads_once: ");
 	}
     }
-  END_CATCH
 
   if (libthread_db_debug)
     {

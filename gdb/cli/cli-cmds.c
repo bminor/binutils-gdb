@@ -250,7 +250,7 @@ complete_command (const char *arg, int from_tty)
   int quote_char = '\0';
   const char *word;
 
-  TRY
+  try
     {
       word = completion_find_completion_word (tracker_handle_brkchars,
 					      arg, &quote_char);
@@ -267,11 +267,10 @@ complete_command (const char *arg, int from_tty)
 	  tracker = &tracker_handle_completions;
 	}
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       return;
     }
-  END_CATCH
 
   std::string arg_prefix (arg, word - arg);
 

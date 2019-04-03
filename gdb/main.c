@@ -365,7 +365,7 @@ static int
 catch_command_errors (catch_command_errors_const_ftype command,
 		      const char *arg, int from_tty)
 {
-  TRY
+  try
     {
       int was_sync = current_ui->prompt_state == PROMPT_BLOCKED;
 
@@ -373,11 +373,10 @@ catch_command_errors (catch_command_errors_const_ftype command,
 
       maybe_wait_sync_command_done (was_sync);
     }
-  CATCH (e, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &e)
     {
       return handle_command_errors (e);
     }
-  END_CATCH
 
   return 1;
 }
@@ -1169,15 +1168,14 @@ captured_main (void *data)
      change - SET_TOP_LEVEL() - has been eliminated.  */
   while (1)
     {
-      TRY
+      try
 	{
 	  captured_command_loop ();
 	}
-      CATCH (ex, RETURN_MASK_ALL)
+      catch (const gdb_exception_RETURN_MASK_ALL &ex)
 	{
 	  exception_print (gdb_stderr, ex);
 	}
-      END_CATCH
     }
   /* No exit -- exit is through quit_command.  */
 }
@@ -1185,15 +1183,14 @@ captured_main (void *data)
 int
 gdb_main (struct captured_main_args *args)
 {
-  TRY
+  try
     {
       captured_main (args);
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       exception_print (gdb_stderr, ex);
     }
-  END_CATCH
 
   /* The only way to end up here is by an error (normal exit is
      handled by quit_force()), hence always return an error status.  */

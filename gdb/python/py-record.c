@@ -602,16 +602,15 @@ gdbpy_start_recording (PyObject *self, PyObject *args)
   if (!PyArg_ParseTuple (args, "|ss", &method, &format))
     return NULL;
 
-  TRY
+  try
     {
       record_start (method, format, 0);
       ret = gdbpy_current_recording (self, args);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       gdbpy_convert_exception (except);
     }
-  END_CATCH
 
   return ret;
 }
@@ -638,15 +637,14 @@ gdbpy_current_recording (PyObject *self, PyObject *args)
 PyObject *
 gdbpy_stop_recording (PyObject *self, PyObject *args)
 {
-  TRY
+  try
     {
       record_stop (0);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   Py_RETURN_NONE;
 }

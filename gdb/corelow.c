@@ -461,16 +461,15 @@ core_target_open (const char *arg, int from_tty)
      may be a thread_stratum target loaded on top of target core by
      now.  The layer above should claim threads found in the BFD
      sections.  */
-  TRY
+  try
     {
       target_update_thread_list ();
     }
 
-  CATCH (except, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &except)
     {
       exception_print (gdb_stderr, except);
     }
-  END_CATCH
 
   p = bfd_core_file_failing_command (core_bfd);
   if (p)
@@ -517,15 +516,14 @@ core_target_open (const char *arg, int from_tty)
      anything about threads.  That is why the test is >= 2.  */
   if (thread_count () >= 2)
     {
-      TRY
+      try
 	{
 	  thread_command (NULL, from_tty);
 	}
-      CATCH (except, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &except)
 	{
 	  exception_print (gdb_stderr, except);
 	}
-      END_CATCH
     }
 }
 

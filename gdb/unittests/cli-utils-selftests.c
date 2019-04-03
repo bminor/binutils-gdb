@@ -78,19 +78,18 @@ test_number_or_range_parser ()
     number_or_range_parser minus_one ("-1");
 
     SELF_CHECK (!minus_one.finished ());
-    TRY
+    try
       {
 	minus_one.get_number ();
 	SELF_CHECK (false);
       }
-    CATCH (ex, RETURN_MASK_ERROR)
+    catch (const gdb_exception_RETURN_MASK_ERROR &ex)
       {
 	SELF_CHECK (ex.reason == RETURN_ERROR);
 	SELF_CHECK (ex.error == GENERIC_ERROR);
 	SELF_CHECK (strcmp (ex.what (), "negative value") == 0);
 	SELF_CHECK (strcmp (minus_one.cur_tok (), "-1") == 0);
       }
-    END_CATCH;
   }
 
   /* Test that a - followed by not a number does not give an error.  */
@@ -209,7 +208,7 @@ test_parse_flags_qcs ()
     const char *t4 = "-c -s non flags args";
     qcs_flags flags;
 
-    TRY
+    try
       {
 	SELF_CHECK (parse_flags_qcs ("test_parse_flags_qcs.t4.cs",
 				     &t4,
@@ -220,7 +219,7 @@ test_parse_flags_qcs ()
 				&flags);
 	SELF_CHECK (false);
       }
-    CATCH (ex, RETURN_MASK_ERROR)
+    catch (const gdb_exception_RETURN_MASK_ERROR &ex)
       {
 	SELF_CHECK (ex.reason == RETURN_ERROR);
 	SELF_CHECK (ex.error == GENERIC_ERROR);
@@ -229,7 +228,6 @@ test_parse_flags_qcs ()
 		   "test_parse_flags_qcs.t4.cs: "
 		   "-c and -s are mutually exclusive") == 0);
       }
-    END_CATCH;
   }
 
 }

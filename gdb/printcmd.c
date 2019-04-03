@@ -1881,13 +1881,13 @@ do_one_display (struct display *d)
   if (d->exp == NULL)
     {
 
-      TRY
+      try
 	{
 	  innermost_block_tracker tracker;
 	  d->exp = parse_expression (d->exp_string, &tracker);
 	  d->block = tracker.block ();
 	}
-      CATCH (ex, RETURN_MASK_ALL)
+      catch (const gdb_exception_RETURN_MASK_ALL &ex)
 	{
 	  /* Can't re-parse the expression.  Disable this display item.  */
 	  d->enabled_p = 0;
@@ -1895,7 +1895,6 @@ do_one_display (struct display *d)
 		   d->exp_string, ex.what ());
 	  return;
 	}
-      END_CATCH
     }
 
   if (d->block)
@@ -1942,7 +1941,7 @@ do_one_display (struct display *d)
 
       annotate_display_value ();
 
-      TRY
+      try
         {
 	  struct value *val;
 	  CORE_ADDR addr;
@@ -1953,12 +1952,11 @@ do_one_display (struct display *d)
 	    addr = gdbarch_addr_bits_remove (d->exp->gdbarch, addr);
 	  do_examine (d->format, d->exp->gdbarch, addr);
 	}
-      CATCH (ex, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
 	{
 	  fprintf_filtered (gdb_stdout, _("<error: %s>\n"),
 			    ex.what ());
 	}
-      END_CATCH
     }
   else
     {
@@ -1981,18 +1979,17 @@ do_one_display (struct display *d)
       get_formatted_print_options (&opts, d->format.format);
       opts.raw = d->format.raw;
 
-      TRY
+      try
         {
 	  struct value *val;
 
 	  val = evaluate_expression (d->exp.get ());
 	  print_formatted (val, d->format.size, &opts, gdb_stdout);
 	}
-      CATCH (ex, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
 	{
 	  fprintf_filtered (gdb_stdout, _("<error: %s>"), ex.what ());
 	}
-      END_CATCH
 
       printf_filtered ("\n");
     }
@@ -2174,7 +2171,7 @@ print_variable_and_value (const char *name, struct symbol *var,
   fputs_styled (name, variable_name_style.style (), stream);
   fputs_filtered (" = ", stream);
 
-  TRY
+  try
     {
       struct value *val;
       struct value_print_options opts;
@@ -2192,12 +2189,11 @@ print_variable_and_value (const char *name, struct symbol *var,
 	 function.  */
       frame = NULL;
     }
-  CATCH (except, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &except)
     {
       fprintf_filtered (stream, "<error reading variable %s (%s)>", name,
 			except.what ());
     }
-  END_CATCH
 
   fprintf_filtered (stream, "\n");
 }

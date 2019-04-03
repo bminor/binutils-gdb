@@ -344,7 +344,7 @@ gcc_convert_symbol (void *datum,
 
   /* We can't allow exceptions to escape out of this callback.  Safest
      is to simply emit a gcc error.  */
-  TRY
+  try
     {
       struct block_symbol sym;
 
@@ -367,11 +367,10 @@ gcc_convert_symbol (void *datum,
 	}
     }
 
-  CATCH (e, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &e)
     {
       context->plugin ().error (e.what ());
     }
-  END_CATCH
 
   if (compile_debug && !found)
     fprintf_unfiltered (gdb_stdlog,
@@ -393,7 +392,7 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 
   /* We can't allow exceptions to escape out of this callback.  Safest
      is to simply emit a gcc error.  */
-  TRY
+  try
     {
       struct symbol *sym;
 
@@ -430,11 +429,10 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 	}
     }
 
-  CATCH (e, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &e)
     {
       context->plugin ().error (e.what ());
     }
-  END_CATCH
 
   if (compile_debug && !found)
     fprintf_unfiltered (gdb_stdlog,
@@ -548,7 +546,7 @@ generate_c_for_for_one_variable (compile_instance *compiler,
 				 struct symbol *sym)
 {
 
-  TRY
+  try
     {
       if (is_dynamic_type (SYMBOL_TYPE (sym)))
 	{
@@ -600,11 +598,10 @@ generate_c_for_for_one_variable (compile_instance *compiler,
 	}
     }
 
-  CATCH (e, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &e)
     {
       compiler->insert_symbol_error (sym, e.what ());
     }
-  END_CATCH
 }
 
 /* See compile-c.h.  */

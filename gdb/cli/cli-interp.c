@@ -363,15 +363,14 @@ safe_execute_command (struct ui_out *command_uiout, const char *command,
   scoped_restore saved_uiout = make_scoped_restore (&current_uiout,
 						    command_uiout);
 
-  TRY
+  try
     {
       execute_command (command, from_tty);
     }
-  CATCH (exception, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &exception)
     {
       e = exception;
     }
-  END_CATCH
 
   /* FIXME: cagney/2005-01-13: This shouldn't be needed.  Instead the
      caller should print the exception.  */

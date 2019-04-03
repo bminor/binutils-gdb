@@ -874,16 +874,15 @@ aarch64_make_prologue_cache (struct frame_info *this_frame, void **this_cache)
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
   *this_cache = cache;
 
-  TRY
+  try
     {
       aarch64_make_prologue_cache_1 (this_frame, cache);
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       if (ex.error != NOT_AVAILABLE_ERROR)
 	throw_exception (ex);
     }
-  END_CATCH
 
   return cache;
 }
@@ -1006,19 +1005,18 @@ aarch64_make_stub_cache (struct frame_info *this_frame, void **this_cache)
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
   *this_cache = cache;
 
-  TRY
+  try
     {
       cache->prev_sp = get_frame_register_unsigned (this_frame,
 						    AARCH64_SP_REGNUM);
       cache->prev_pc = get_frame_pc (this_frame);
       cache->available_p = 1;
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       if (ex.error != NOT_AVAILABLE_ERROR)
 	throw_exception (ex);
     }
-  END_CATCH
 
   return cache;
 }

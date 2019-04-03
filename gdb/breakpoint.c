@@ -2097,18 +2097,17 @@ parse_cond_to_aexpr (CORE_ADDR scope, struct expression *cond)
 
   /* We don't want to stop processing, so catch any errors
      that may show up.  */
-  TRY
+  try
     {
       aexpr = gen_eval_for_expr (scope, cond);
     }
 
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       /* If we got here, it means the condition could not be parsed to a valid
 	 bytecode expression and thus can't be evaluated on the target's side.
 	 It's no use iterating through the conditions.  */
     }
-  END_CATCH
 
   /* We have a valid agent expression.  */
   return aexpr;
@@ -2272,19 +2271,18 @@ parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
 
   /* We don't want to stop processing, so catch any errors
      that may show up.  */
-  TRY
+  try
     {
       aexpr = gen_printf (scope, gdbarch, 0, 0,
 			  format_start, format_end - format_start,
 			  argvec.size (), argvec.data ());
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       /* If we got here, it means the command could not be parsed to a valid
 	 bytecode expression and thus can't be evaluated on the target's side.
 	 It's no use iterating through the other commands.  */
     }
-  END_CATCH
 
   /* We have a valid agent expression, return it.  */
   return aexpr;
@@ -2539,7 +2537,7 @@ insert_bp_location (struct bp_location *bl,
 	  || !(section_is_overlay (bl->section)))
 	{
 	  /* No overlay handling: just set the breakpoint.  */
-	  TRY
+	  try
 	    {
 	      int val;
 
@@ -2547,11 +2545,10 @@ insert_bp_location (struct bp_location *bl,
 	      if (val)
 		bp_excpt = gdb_exception {RETURN_ERROR, GENERIC_ERROR};
 	    }
-	  CATCH (e, RETURN_MASK_ALL)
+	  catch (const gdb_exception_RETURN_MASK_ALL &e)
 	    {
 	      bp_excpt = e;
 	    }
-	  END_CATCH
 	}
       else
 	{
@@ -2574,7 +2571,7 @@ insert_bp_location (struct bp_location *bl,
 		  bl->overlay_target_info.reqstd_address = addr;
 
 		  /* No overlay handling: just set the breakpoint.  */
-		  TRY
+		  try
 		    {
 		      int val;
 
@@ -2587,11 +2584,10 @@ insert_bp_location (struct bp_location *bl,
 			bp_excpt
 			  = gdb_exception {RETURN_ERROR, GENERIC_ERROR};
 		    }
-		  CATCH (e, RETURN_MASK_ALL)
+		  catch (const gdb_exception_RETURN_MASK_ALL &e)
 		    {
 		      bp_excpt = e;
 		    }
-		  END_CATCH
 
 		  if (bp_excpt.reason != 0)
 		    fprintf_unfiltered (tmp_error_stream,
@@ -2604,7 +2600,7 @@ insert_bp_location (struct bp_location *bl,
 	  if (section_is_mapped (bl->section))
 	    {
 	      /* Yes.  This overlay section is mapped into memory.  */
-	      TRY
+	      try
 	        {
 		  int val;
 
@@ -2612,11 +2608,10 @@ insert_bp_location (struct bp_location *bl,
 		  if (val)
 		    bp_excpt = gdb_exception {RETURN_ERROR, GENERIC_ERROR};
 	        }
-	      CATCH (e, RETURN_MASK_ALL)
+	      catch (const gdb_exception_RETURN_MASK_ALL &e)
 	        {
 		  bp_excpt = e;
 	        }
-	      END_CATCH
 	    }
 	  else
 	    {
@@ -5017,11 +5012,11 @@ bpstat_check_watchpoint (bpstat bs)
 	{
 	  wp_check_result e;
 
-	  TRY
+	  try
 	    {
 	      e = watchpoint_check (bs);
 	    }
-	  CATCH (ex, RETURN_MASK_ALL)
+	  catch (const gdb_exception_RETURN_MASK_ALL &ex)
 	    {
 	      exception_fprintf (gdb_stderr, ex,
 				 "Error evaluating expression "
@@ -5036,7 +5031,6 @@ bpstat_check_watchpoint (bpstat bs)
 	      watchpoint_del_at_next_stop (b);
 	      e = WP_DELETED;
 	    }
-	  END_CATCH
 
 	  switch (e)
 	    {
@@ -5255,16 +5249,15 @@ bpstat_check_breakpoint_conditions (bpstat bs, thread_info *thread)
 	}
       if (within_current_scope)
 	{
-	  TRY
+	  try
 	    {
 	      condition_result = breakpoint_cond_eval (cond);
 	    }
-	  CATCH (ex, RETURN_MASK_ALL)
+	  catch (const gdb_exception_RETURN_MASK_ALL &ex)
 	    {
 	      exception_fprintf (gdb_stderr, ex,
 				 "Error in testing breakpoint condition:\n");
 	    }
-	  END_CATCH
 	}
       else
 	{
@@ -9246,11 +9239,11 @@ create_breakpoint (struct gdbarch *gdbarch,
   if (extra_string != NULL && *extra_string == '\0')
     extra_string = NULL;
 
-  TRY
+  try
     {
       ops->create_sals_from_location (location, &canonical, type_wanted);
     }
-  CATCH (e, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &e)
     {
       /* If caller is interested in rc value from parse, set
 	 value.  */
@@ -9280,7 +9273,6 @@ create_breakpoint (struct gdbarch *gdbarch,
       else
 	throw_exception (e);
     }
-  END_CATCH
 
   if (!pending && canonical.lsals.empty ())
     return 0;
@@ -12060,14 +12052,13 @@ static void
 update_global_location_list_nothrow (enum ugll_insert_mode insert_mode)
 {
 
-  TRY
+  try
     {
       update_global_location_list (insert_mode);
     }
-  CATCH (e, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &e)
     {
     }
-  END_CATCH
 }
 
 /* Clear BKP from a BPS.  */
@@ -13529,20 +13520,19 @@ update_breakpoint_locations (struct breakpoint *b,
 	  const char *s;
 
 	  s = b->cond_string;
-	  TRY
+	  try
 	    {
 	      new_loc->cond = parse_exp_1 (&s, sal.pc,
 					   block_for_pc (sal.pc),
 					   0);
 	    }
-	  CATCH (e, RETURN_MASK_ERROR)
+	  catch (const gdb_exception_RETURN_MASK_ERROR &e)
 	    {
 	      warning (_("failed to reevaluate condition "
 			 "for breakpoint %d: %s"), 
 		       b->number, e.what ());
 	      new_loc->enabled = 0;
 	    }
-	  END_CATCH
 	}
 
       if (!sals_end.empty ())
@@ -13609,11 +13599,11 @@ location_to_sals (struct breakpoint *b, struct event_location *location,
 
   std::vector<symtab_and_line> sals;
 
-  TRY
+  try
     {
       sals = b->ops->decode_location (b, location, search_pspace);
     }
-  CATCH (e, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &e)
     {
       int not_found_and_ok = 0;
 
@@ -13648,7 +13638,6 @@ location_to_sals (struct breakpoint *b, struct event_location *location,
 	  throw_exception (e);
 	}
     }
-  END_CATCH
 
   if (exception.reason == 0 || exception.error != NOT_FOUND_ERROR)
     {
@@ -13820,17 +13809,16 @@ breakpoint_re_set (void)
 
     ALL_BREAKPOINTS_SAFE (b, b_tmp)
       {
-	TRY
+	try
 	  {
 	    breakpoint_re_set_one (b);
 	  }
-	CATCH (ex, RETURN_MASK_ALL)
+	catch (const gdb_exception_RETURN_MASK_ALL &ex)
 	  {
 	    exception_fprintf (gdb_stderr, ex,
 			       "Error in re-setting breakpoint %d: ",
 			       b->number);
 	  }
-	END_CATCH
       }
 
     jit_breakpoint_re_set ();
@@ -14297,7 +14285,7 @@ enable_breakpoint_disp (struct breakpoint *bpt, enum bpdisp disposition,
       /* Initialize it just to avoid a GCC false warning.  */
       enum enable_state orig_enable_state = bp_disabled;
 
-      TRY
+      try
 	{
 	  struct watchpoint *w = (struct watchpoint *) bpt;
 
@@ -14305,14 +14293,13 @@ enable_breakpoint_disp (struct breakpoint *bpt, enum bpdisp disposition,
 	  bpt->enable_state = bp_enabled;
 	  update_watchpoint (w, 1 /* reparse */);
 	}
-      CATCH (e, RETURN_MASK_ALL)
+      catch (const gdb_exception_RETURN_MASK_ALL &e)
 	{
 	  bpt->enable_state = orig_enable_state;
 	  exception_fprintf (gdb_stderr, e, _("Cannot enable watchpoint %d: "),
 			     bpt->number);
 	  return;
 	}
-      END_CATCH
     }
 
   bpt->enable_state = bp_enabled;
@@ -15040,16 +15027,15 @@ save_breakpoints (const char *filename, int from_tty,
 	fp.puts ("  commands\n");
 	
 	current_uiout->redirect (&fp);
-	TRY
+	try
 	  {
 	    print_command_lines (current_uiout, tp->commands.get (), 2);
 	  }
-	CATCH (ex, RETURN_MASK_ALL)
+	catch (const gdb_exception_RETURN_MASK_ALL &ex)
 	  {
 	  current_uiout->redirect (NULL);
 	    throw_exception (ex);
 	  }
-	END_CATCH
 
 	current_uiout->redirect (NULL);
 	fp.puts ("  end\n");

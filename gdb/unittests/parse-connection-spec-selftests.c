@@ -212,18 +212,17 @@ test_conn (const parse_conn_test &c)
 
   memset (&hint, 0, sizeof (hint));
 
-  TRY
+  try
     {
       ret = parse_connection_spec (c.connspec, &hint);
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       /* If we caught an error, we should check if this connection
 	 spec was supposed to fail.  */
       SELF_CHECK (c.should_fail);
       return;
     }
-  END_CATCH
 
   SELF_CHECK (!c.should_fail);
   SELF_CHECK (ret.host_str == c.expected_result.host_str);

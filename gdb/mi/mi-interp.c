@@ -823,18 +823,17 @@ mi_print_breakpoint_for_event (struct mi_interp *mi, breakpoint *bp)
      ui_out_redirect.  */
   mi_uiout->redirect (mi->event_channel);
 
-  TRY
+  try
     {
       scoped_restore restore_uiout
 	= make_scoped_restore (&current_uiout, mi_uiout);
 
       print_breakpoint (bp);
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       exception_print (gdb_stderr, ex);
     }
-  END_CATCH
 
   mi_uiout->redirect (NULL);
 }

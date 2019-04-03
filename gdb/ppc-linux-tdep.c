@@ -1827,7 +1827,7 @@ ppc_linux_spe_context (int wordsize, enum bfd_endian byte_order,
     {
       struct target_ops *target = current_top_target ();
 
-      TRY
+      try
 	{
 	  /* We do not call target_translate_tls_address here, because
 	     svr4_fetch_objfile_link_map may invalidate the frame chain,
@@ -1842,11 +1842,10 @@ ppc_linux_spe_context (int wordsize, enum bfd_endian byte_order,
 	  spe_context_cache_ptid = inferior_ptid;
 	}
 
-      CATCH (ex, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
 	{
 	  return 0;
 	}
-      END_CATCH
     }
 
   /* Read variable value.  */

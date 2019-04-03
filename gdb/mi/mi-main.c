@@ -1938,16 +1938,15 @@ mi_execute_command (const char *cmd, int from_tty)
 
   target_log_command (cmd);
 
-  TRY
+  try
     {
       command = mi_parse (cmd, &token);
     }
-  CATCH (exception, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &exception)
     {
       mi_print_exception (token, exception);
       xfree (token);
     }
-  END_CATCH
 
   if (command != NULL)
     {
@@ -1966,11 +1965,11 @@ mi_execute_command (const char *cmd, int from_tty)
 	  timestamp (command->cmd_start);
 	}
 
-      TRY
+      try
 	{
 	  captured_mi_execute_command (current_uiout, command.get ());
 	}
-      CATCH (result, RETURN_MASK_ALL)
+      catch (const gdb_exception_RETURN_MASK_ALL &result)
 	{
 	  /* Like in start_event_loop, enable input and force display
 	     of the prompt.  Otherwise, any command that calls
@@ -1984,7 +1983,6 @@ mi_execute_command (const char *cmd, int from_tty)
 	  mi_print_exception (command->token, result);
 	  mi_out_rewind (current_uiout);
 	}
-      END_CATCH
 
       bpstat_do_actions ();
 

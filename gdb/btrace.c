@@ -678,7 +678,7 @@ ftrace_classify_insn (struct gdbarch *gdbarch, CORE_ADDR pc)
   enum btrace_insn_class iclass;
 
   iclass = BTRACE_INSN_OTHER;
-  TRY
+  try
     {
       if (gdbarch_insn_is_call (gdbarch, pc))
 	iclass = BTRACE_INSN_CALL;
@@ -687,10 +687,9 @@ ftrace_classify_insn (struct gdbarch *gdbarch, CORE_ADDR pc)
       else if (gdbarch_insn_is_jump (gdbarch, pc))
 	iclass = BTRACE_INSN_JUMP;
     }
-  CATCH (error, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &error)
     {
     }
-  END_CATCH
 
   return iclass;
 }
@@ -1103,14 +1102,13 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 	    level = std::min (level, bfun->level);
 
 	  size = 0;
-	  TRY
+	  try
 	    {
 	      size = gdb_insn_length (gdbarch, pc);
 	    }
-	  CATCH (error, RETURN_MASK_ERROR)
+	  catch (const gdb_exception_RETURN_MASK_ERROR &error)
 	    {
 	    }
-	  END_CATCH
 
 	  insn.pc = pc;
 	  insn.size = size;
@@ -1370,17 +1368,16 @@ btrace_pt_readmem_callback (gdb_byte *buffer, size_t size,
   int result, errcode;
 
   result = (int) size;
-  TRY
+  try
     {
       errcode = target_read_code ((CORE_ADDR) pc, buffer, size);
       if (errcode != 0)
 	result = -pte_nomap;
     }
-  CATCH (error, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &error)
     {
       result = -pte_nomap;
     }
-  END_CATCH
 
   return result;
 }
@@ -1464,7 +1461,7 @@ btrace_compute_ftrace_pt (struct thread_info *tp,
   if (decoder == NULL)
     error (_("Failed to allocate the Intel Processor Trace decoder."));
 
-  TRY
+  try
     {
       struct pt_image *image;
 
@@ -1479,7 +1476,7 @@ btrace_compute_ftrace_pt (struct thread_info *tp,
 
       ftrace_add_pt (btinfo, decoder, &level, gaps);
     }
-  CATCH (error, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &error)
     {
       /* Indicate a gap in the trace if we quit trace processing.  */
       if (error.reason == RETURN_QUIT && !btinfo->functions.empty ())
@@ -1489,7 +1486,6 @@ btrace_compute_ftrace_pt (struct thread_info *tp,
 
       throw_exception (error);
     }
-  END_CATCH
 
   btrace_finalize_ftrace_pt (decoder, tp, level);
 }
@@ -1556,17 +1552,16 @@ btrace_compute_ftrace (struct thread_info *tp, struct btrace_data *btrace,
 {
   std::vector<unsigned int> gaps;
 
-  TRY
+  try
     {
       btrace_compute_ftrace_1 (tp, btrace, cpu, gaps);
     }
-  CATCH (error, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &error)
     {
       btrace_finalize_ftrace (tp, gaps);
 
       throw_exception (error);
     }
-  END_CATCH
 
   btrace_finalize_ftrace (tp, gaps);
 }
@@ -1617,7 +1612,7 @@ btrace_enable (struct thread_info *tp, const struct btrace_config *conf)
     return;
 
   /* We need to undo the enable in case of errors.  */
-  TRY
+  try
     {
       /* Add an entry for the current PC so we start tracing from where we
 	 enabled it.
@@ -1632,13 +1627,12 @@ btrace_enable (struct thread_info *tp, const struct btrace_config *conf)
 	  && can_access_registers_thread (tp))
 	btrace_add_pc (tp);
     }
-  CATCH (exception, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &exception)
     {
       btrace_disable (tp);
 
       throw_exception (exception);
     }
-  END_CATCH
 }
 
 /* See btrace.h.  */
@@ -3062,18 +3056,17 @@ btrace_maint_update_pt_packets (struct btrace_thread_info *btinfo)
   if (decoder == NULL)
     error (_("Failed to allocate the Intel Processor Trace decoder."));
 
-  TRY
+  try
     {
       btrace_maint_decode_pt (&btinfo->maint, decoder);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       pt_pkt_free_decoder (decoder);
 
       if (except.reason < 0)
 	throw_exception (except);
     }
-  END_CATCH
 
   pt_pkt_free_decoder (decoder);
 }

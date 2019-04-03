@@ -6332,7 +6332,7 @@ dwarf2_build_psymtabs (struct objfile *objfile)
 
   init_psymbol_list (objfile, 1024);
 
-  TRY
+  try
     {
       /* This isn't really ideal: all the data we allocate on the
 	 objfile's obstack is still uselessly kept around.  However,
@@ -6344,11 +6344,10 @@ dwarf2_build_psymtabs (struct objfile *objfile)
       /* (maybe) store an index in the cache.  */
       global_index_cache.store (dwarf2_per_objfile);
     }
-  CATCH (except, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &except)
     {
       exception_print (gdb_stderr, except);
     }
-  END_CATCH
 }
 
 /* Return the total length of the CU described by HEADER.  */

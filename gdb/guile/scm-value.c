@@ -156,18 +156,17 @@ vlscm_print_value_smob (SCM self, SCM port, scm_print_state *pstate)
      instead of writingp.  */
   opts.raw = !!pstate->writingp;
 
-  TRY
+  try
     {
       string_file stb;
 
       common_val_print (v_smob->value, &stb, 0, &opts, current_language);
       scm_puts (stb.c_str (), port);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   if (pstate->writingp)
     scm_puts (">", port);
@@ -187,15 +186,14 @@ vlscm_equal_p_value_smob (SCM v1, SCM v2)
   const value_smob *v2_smob = (value_smob *) SCM_SMOB_DATA (v2);
   int result = 0;
 
-  TRY
+  try
     {
       result = value_equal (v1_smob->value, v2_smob->value);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   return scm_from_bool (result);
 }
@@ -392,14 +390,13 @@ gdbscm_value_address (SCM self)
 
 	  SCM address = SCM_BOOL_F;
 
-	  TRY
+	  try
 	    {
 	      address = vlscm_scm_from_value (value_addr (value));
 	    }
-	  CATCH (except, RETURN_MASK_ALL)
+	  catch (const gdb_exception_RETURN_MASK_ALL &except)
 	    {
 	    }
-	  END_CATCH
 
 	  if (gdbscm_is_exception (address))
 	    return address;
@@ -496,7 +493,7 @@ gdbscm_value_dynamic_type (SCM self)
   if (! SCM_UNBNDP (v_smob->dynamic_type))
     return v_smob->dynamic_type;
 
-  TRY
+  try
     {
       scoped_value_mark free_values;
 
@@ -532,11 +529,10 @@ gdbscm_value_dynamic_type (SCM self)
 	  type = NULL;
 	}
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   if (type == NULL)
     v_smob->dynamic_type = gdbscm_value_type (self);
@@ -684,15 +680,14 @@ gdbscm_value_call (SCM self, SCM args)
   long args_count;
   struct value **vargs = NULL;
 
-  TRY
+  try
     {
       ftype = check_typedef (value_type (function));
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   SCM_ASSERT_TYPE (TYPE_CODE (ftype) == TYPE_CODE_FUNC, self,
 		   SCM_ARG1, FUNC_NAME,
@@ -751,17 +746,16 @@ gdbscm_value_to_bytevector (SCM self)
 
   type = value_type (value);
 
-  TRY
+  try
     {
       type = check_typedef (type);
       length = TYPE_LENGTH (type);
       contents = value_contents (value);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   bv = scm_c_make_bytevector (length);
   memcpy (SCM_BYTEVECTOR_CONTENTS (bv), contents, length);
@@ -795,31 +789,29 @@ gdbscm_value_to_bool (SCM self)
 
   type = value_type (value);
 
-  TRY
+  try
     {
       type = check_typedef (type);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   SCM_ASSERT_TYPE (is_intlike (type, 1), self, SCM_ARG1, FUNC_NAME,
 		   _("integer-like gdb value"));
 
-  TRY
+  try
     {
       if (TYPE_CODE (type) == TYPE_CODE_PTR)
 	l = value_as_address (value);
       else
 	l = value_as_long (value);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   return scm_from_bool (l != 0);
 }
@@ -838,31 +830,29 @@ gdbscm_value_to_integer (SCM self)
 
   type = value_type (value);
 
-  TRY
+  try
     {
       type = check_typedef (type);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   SCM_ASSERT_TYPE (is_intlike (type, 1), self, SCM_ARG1, FUNC_NAME,
 		   _("integer-like gdb value"));
 
-  TRY
+  try
     {
       if (TYPE_CODE (type) == TYPE_CODE_PTR)
 	l = value_as_address (value);
       else
 	l = value_as_long (value);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   if (TYPE_UNSIGNED (type))
     return gdbscm_scm_from_ulongest (l);
@@ -885,20 +875,19 @@ gdbscm_value_to_real (SCM self)
 
   type = value_type (value);
 
-  TRY
+  try
     {
       type = check_typedef (type);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   SCM_ASSERT_TYPE (is_intlike (type, 0) || TYPE_CODE (type) == TYPE_CODE_FLT,
 		   self, SCM_ARG1, FUNC_NAME, _("number"));
 
-  TRY
+  try
     {
       if (is_floating_value (value))
 	{
@@ -916,11 +905,10 @@ gdbscm_value_to_real (SCM self)
 	  check = value_from_longest (type, (LONGEST) d);
 	}
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   /* TODO: Is there a better way to check if the value fits?  */
   if (!value_equal (value, check))
@@ -1004,18 +992,17 @@ gdbscm_value_to_string (SCM self, SCM rest)
   /* We don't assume anything about the result of scm_port_conversion_strategy.
      From this point on, if errors is not 'errors, use 'substitute.  */
 
-  TRY
+  try
     {
       gdb::unique_xmalloc_ptr<gdb_byte> buffer;
       LA_GET_STRING (value, &buffer, &length, &char_type, &la_encoding);
       buffer_contents = buffer.release ();
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       xfree (encoding);
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   /* If errors is "error", scm_from_stringn may throw a Scheme exception.
      Make sure we don't leak.  This is done via scm_dynwind_begin, et.al.  */
@@ -1077,7 +1064,7 @@ gdbscm_value_to_lazy_string (SCM self, SCM rest)
 				 _("invalid length"));
     }
 
-  TRY
+  try
     {
       scoped_value_mark free_values;
 
@@ -1132,11 +1119,10 @@ gdbscm_value_to_lazy_string (SCM self, SCM rest)
 
       result = lsscm_make_lazy_string (addr, length, encoding, type);
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       except = ex;
     }
-  END_CATCH
 
   xfree (encoding);
   GDBSCM_HANDLE_GDB_EXCEPTION (except);
@@ -1191,15 +1177,14 @@ gdbscm_value_print (SCM self)
 
   string_file stb;
 
-  TRY
+  try
     {
       common_val_print (value, &stb, 0, &opts, current_language);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   /* Use SCM_FAILED_CONVERSION_QUESTION_MARK to ensure this doesn't
      throw an error if the encoding fails.

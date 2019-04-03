@@ -366,11 +366,11 @@ start_event_loop (void)
     {
       int result = 0;
 
-      TRY
+      try
 	{
 	  result = gdb_do_one_event ();
 	}
-      CATCH (ex, RETURN_MASK_ALL)
+      catch (const gdb_exception_RETURN_MASK_ALL &ex)
 	{
 	  exception_print (gdb_stderr, ex);
 
@@ -394,7 +394,6 @@ start_event_loop (void)
 	  /* Maybe better to set a flag to be checked somewhere as to
 	     whether display the prompt or not.  */
 	}
-      END_CATCH
 
       if (result < 0)
 	break;

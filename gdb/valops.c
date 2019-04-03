@@ -3621,11 +3621,11 @@ value_rtti_indirect_type (struct value *v, int *full,
   else if (TYPE_CODE (type) == TYPE_CODE_PTR)
     {
 
-      TRY
+      try
         {
 	  target = value_ind (v);
         }
-      CATCH (except, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &except)
 	{
 	  if (except.error == MEMORY_ERROR)
 	    {
@@ -3636,7 +3636,6 @@ value_rtti_indirect_type (struct value *v, int *full,
 	    }
 	  throw_exception (except);
 	}
-      END_CATCH
     }
   else
     return NULL;
@@ -3774,14 +3773,13 @@ value_of_this_silent (const struct language_defn *lang)
 {
   struct value *ret = NULL;
 
-  TRY
+  try
     {
       ret = value_of_this (lang);
     }
-  CATCH (except, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &except)
     {
     }
-  END_CATCH
 
   return ret;
 }

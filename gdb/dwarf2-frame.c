@@ -1044,7 +1044,7 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
   execute_cfa_program (fde, instr, fde->end, gdbarch,
 		       get_frame_address_in_block (this_frame), &fs);
 
-  TRY
+  try
     {
       /* Calculate the CFA.  */
       switch (fs.regs.cfa_how)
@@ -1068,7 +1068,7 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
 	  internal_error (__FILE__, __LINE__, _("Unknown CFA rule."));
 	}
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       if (ex.error == NOT_AVAILABLE_ERROR)
 	{
@@ -1078,7 +1078,6 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
 
       throw_exception (ex);
     }
-  END_CATCH
 
   /* Initialize the register state.  */
   {
@@ -2245,7 +2244,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
           if (txt)
             unit->tbase = txt->vma;
 
-	  TRY
+	  try
 	    {
 	      frame_ptr = unit->dwarf_frame_buffer;
 	      while (frame_ptr < unit->dwarf_frame_buffer + unit->dwarf_frame_size)
@@ -2254,7 +2253,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
 						EH_CIE_OR_FDE_TYPE_ID);
 	    }
 
-	  CATCH (e, RETURN_MASK_ERROR)
+	  catch (const gdb_exception_RETURN_MASK_ERROR &e)
 	    {
 	      warning (_("skipping .eh_frame info of %s: %s"),
 		       objfile_name (objfile), e.what ());
@@ -2267,7 +2266,6 @@ dwarf2_build_frame_info (struct objfile *objfile)
 		}
 	      /* The cie_table is discarded by the next if.  */
 	    }
-	  END_CATCH
 
           if (cie_table.num_entries != 0)
             {
@@ -2287,7 +2285,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
     {
       int num_old_fde_entries = fde_table.num_entries;
 
-      TRY
+      try
 	{
 	  frame_ptr = unit->dwarf_frame_buffer;
 	  while (frame_ptr < unit->dwarf_frame_buffer + unit->dwarf_frame_size)
@@ -2295,7 +2293,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
 					    &cie_table, &fde_table,
 					    EH_CIE_OR_FDE_TYPE_ID);
 	}
-      CATCH (e, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &e)
 	{
 	  warning (_("skipping .debug_frame info of %s: %s"),
 		   objfile_name (objfile), e.what ());
@@ -2318,7 +2316,6 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	  fde_table.num_entries = num_old_fde_entries;
 	  /* The cie_table is discarded by the next if.  */
 	}
-      END_CATCH
     }
 
   /* Discard the cie_table, it is no longer needed.  */

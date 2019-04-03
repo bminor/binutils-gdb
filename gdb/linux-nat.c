@@ -1188,11 +1188,11 @@ linux_nat_target::attach (const char *args, int from_tty)
   /* Make sure we report all signals during attach.  */
   pass_signals ({});
 
-  TRY
+  try
     {
       inf_ptrace_target::attach (args, from_tty);
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       pid_t pid = parse_pid_to_attach (args);
       std::string reason = linux_ptrace_attach_fail_reason (pid);
@@ -1203,7 +1203,6 @@ linux_nat_target::attach (const char *args, int from_tty)
       else
 	throw_error (ex.error, "%s", ex.what ());
     }
-  END_CATCH
 
   /* The ptrace base target adds the main thread with (pid,0,0)
      format.  Decorate it with lwp info.  */
@@ -1402,16 +1401,15 @@ detach_one_lwp (struct lwp_info *lp, int *signo_p)
   /* Preparing to resume may try to write registers, and fail if the
      lwp is zombie.  If that happens, ignore the error.  We'll handle
      it below, when detach fails with ESRCH.  */
-  TRY
+  try
     {
       linux_target->low_prepare_to_resume (lp);
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       if (!check_ptrace_stopped_lwp_gone (lp))
 	throw_exception (ex);
     }
-  END_CATCH
 
   if (ptrace (PTRACE_DETACH, lwpid, 0, signo) < 0)
     {
@@ -1585,16 +1583,15 @@ check_ptrace_stopped_lwp_gone (struct lwp_info *lp)
 static void
 linux_resume_one_lwp (struct lwp_info *lp, int step, enum gdb_signal signo)
 {
-  TRY
+  try
     {
       linux_resume_one_lwp_throw (lp, step, signo);
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       if (!check_ptrace_stopped_lwp_gone (lp))
 	throw_exception (ex);
     }
-  END_CATCH
 }
 
 /* Resume LP.  */
@@ -3526,7 +3523,7 @@ resume_stopped_resumed_lwps (struct lwp_info *lp, const ptid_t wait_ptid)
       struct regcache *regcache = get_thread_regcache (lp->ptid);
       struct gdbarch *gdbarch = regcache->arch ();
 
-      TRY
+      try
 	{
 	  CORE_ADDR pc = regcache_read_pc (regcache);
 	  int leave_stopped = 0;
@@ -3552,12 +3549,11 @@ resume_stopped_resumed_lwps (struct lwp_info *lp, const ptid_t wait_ptid)
 	      linux_resume_one_lwp_throw (lp, lp->step, GDB_SIGNAL_0);
 	    }
 	}
-      CATCH (ex, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
 	{
 	  if (!check_ptrace_stopped_lwp_gone (lp))
 	    throw_exception (ex);
 	}
-      END_CATCH
     }
 
   return 0;

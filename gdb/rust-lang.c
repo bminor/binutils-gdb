@@ -1743,18 +1743,17 @@ tuple structs, and tuple-like enum variants"));
 		       field_name, TYPE_NAME (outer_type),
 		       rust_last_path_segment (TYPE_NAME (type)));
 
-	    TRY
+	    try
 	      {
 		result = value_struct_elt (&lhs, NULL, field_name,
 					   NULL, "structure");
 	      }
-	    CATCH (except, RETURN_MASK_ERROR)
+	    catch (const gdb_exception_RETURN_MASK_ERROR &except)
 	      {
 		error (_("Could not find field %s of struct variant %s::%s"),
 		       field_name, TYPE_NAME (outer_type),
 		       rust_last_path_segment (TYPE_NAME (type)));
 	      }
-	    END_CATCH
 	  }
 	else
 	  result = value_struct_elt (&lhs, NULL, field_name, NULL, "structure");

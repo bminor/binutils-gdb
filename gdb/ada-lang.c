@@ -6723,16 +6723,15 @@ ada_tag_value_at_base_address (struct value *obj)
      see ada_tag_name for more details.  We do not print the error
      message for the same reason.  */
 
-  TRY
+  try
     {
       offset_to_top = value_as_long (value_ind (value_ptradd (val, -2)));
     }
 
-  CATCH (e, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &e)
     {
       return obj;
     }
-  END_CATCH
 
   /* If offset is null, nothing to do.  */
 
@@ -6869,17 +6868,16 @@ ada_tag_name (struct value *tag)
      We also do not print the error message either (which often is very
      low-level (Eg: "Cannot read memory at 0x[...]"), but instead let
      the caller print a more meaningful message if necessary.  */
-  TRY
+  try
     {
       struct value *tsd = ada_get_tsd_from_tag (tag);
 
       if (tsd != NULL)
 	name = ada_tag_name_from_tsd (tsd);
     }
-  CATCH (e, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &e)
     {
     }
-  END_CATCH
 
   return name;
 }
@@ -9054,11 +9052,11 @@ ada_to_fixed_type_1 (struct type *type, const gdb_byte *valaddr,
             LONGEST size;
 
             xsnprintf (xvz_name, strlen (name) + 7, "%s___XVZ", name);
-	    TRY
+	    try
 	      {
 		xvz_found = get_int_var_value (xvz_name, size);
 	      }
-	    CATCH (except, RETURN_MASK_ERROR)
+	    catch (const gdb_exception_RETURN_MASK_ERROR &except)
 	      {
 		/* We found the variable, but somehow failed to read
 		   its value.  Rethrow the same error, but with a little
@@ -9069,7 +9067,6 @@ ada_to_fixed_type_1 (struct type *type, const gdb_byte *valaddr,
 			     _("unable to read value of %s (%s)"),
 			     xvz_name, except.what ());
 	      }
-	    END_CATCH
 
             if (xvz_found && TYPE_LENGTH (fixed_record_type) != size)
               {
@@ -12346,15 +12343,14 @@ ada_exception_message (void)
 {
   gdb::unique_xmalloc_ptr<char> e_msg;
 
-  TRY
+  try
     {
       e_msg = ada_exception_message_1 ();
     }
-  CATCH (e, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &e)
     {
       e_msg.reset (nullptr);
     }
-  END_CATCH
 
   return e_msg;
 }
@@ -12370,17 +12366,16 @@ ada_exception_name_addr (enum ada_exception_catchpoint_kind ex,
 {
   CORE_ADDR result = 0;
 
-  TRY
+  try
     {
       result = ada_exception_name_addr_1 (ex, b);
     }
 
-  CATCH (e, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &e)
     {
       warning (_("failed to get exception name: %s"), e.what ());
       return 0;
     }
-  END_CATCH
 
   return result;
 }
@@ -12461,19 +12456,18 @@ create_excep_cond_exprs (struct ada_catchpoint *c,
 	  const char *s;
 
 	  s = cond_string.c_str ();
-	  TRY
+	  try
 	    {
 	      exp = parse_exp_1 (&s, bl->address,
 				 block_for_pc (bl->address),
 				 0);
 	    }
-	  CATCH (e, RETURN_MASK_ERROR)
+	  catch (const gdb_exception_RETURN_MASK_ERROR &e)
 	    {
 	      warning (_("failed to reevaluate internal exception condition "
 			 "for catchpoint %d: %s"),
 		       c->number, e.what ());
 	    }
-	  END_CATCH
 	}
 
       ada_loc->excep_cond_expr = std::move (exp);
@@ -12531,7 +12525,7 @@ should_stop_exception (const struct bp_location *bl)
     }
 
   stop = 1;
-  TRY
+  try
     {
       struct value *mark;
 
@@ -12539,12 +12533,11 @@ should_stop_exception (const struct bp_location *bl)
       stop = value_true (evaluate_expression (ada_loc->excep_cond_expr.get ()));
       value_free_to_mark (mark);
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       exception_fprintf (gdb_stderr, ex,
 			 _("Error in testing exception condition:\n"));
     }
-  END_CATCH
 
   return stop;
 }

@@ -704,7 +704,7 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
     {
       ptid_t ptid = inferior_ptid;
 
-      TRY
+      try
 	{
 	  CORE_ADDR lm_addr;
 	  
@@ -720,7 +720,7 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 	}
       /* If an error occurred, print TLS related messages here.  Otherwise,
          throw the error to some higher catcher.  */
-      CATCH (ex, RETURN_MASK_ALL)
+      catch (const gdb_exception_RETURN_MASK_ALL &ex)
 	{
 	  int objfile_is_library = (objfile->flags & OBJF_SHARED);
 
@@ -771,7 +771,6 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 	      break;
 	    }
 	}
-      END_CATCH
     }
   else
     error (_("Cannot find thread-local variables on this target"));

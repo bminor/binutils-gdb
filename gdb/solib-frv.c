@@ -561,14 +561,13 @@ enable_break2 (void)
          mechanism to find the dynamic linker's base address.  */
 
       gdb_bfd_ref_ptr tmp_bfd;
-      TRY
+      try
         {
           tmp_bfd = solib_bfd_open (buf);
         }
-      CATCH (ex, RETURN_MASK_ALL)
+      catch (const gdb_exception_RETURN_MASK_ALL &ex)
 	{
 	}
-      END_CATCH
 
       if (tmp_bfd == NULL)
 	{

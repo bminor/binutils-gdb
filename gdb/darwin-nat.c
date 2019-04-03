@@ -1611,7 +1611,7 @@ darwin_attach_pid (struct inferior *inf)
   darwin_inferior *priv = new darwin_inferior;
   inf->priv.reset (priv);
 
-  TRY
+  try
     {
       kret = task_for_pid (gdb_task, inf->pid, &priv->task);
       if (kret != KERN_SUCCESS)
@@ -1688,14 +1688,13 @@ darwin_attach_pid (struct inferior *inf)
 
       darwin_setup_exceptions (inf);
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       exit_inferior (inf);
       inferior_ptid = null_ptid;
 
       throw_exception (ex);
     }
-  END_CATCH
 
   target_ops *darwin_ops = get_native_target ();
   if (!target_is_pushed (darwin_ops))
@@ -1949,11 +1948,11 @@ The error was: %s"),
   /* Maybe it was cached by some earlier gdb.  */
   if (stat (new_name.c_str (), &sb) != 0 || !S_ISREG (sb.st_mode))
     {
-      TRY
+      try
 	{
 	  copy_shell_to_cache (shell, new_name);
 	}
-      CATCH (ex, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
 	{
 	  warning (_("This version of macOS has System Integrity Protection.\n\
 Because `startup-with-shell' is enabled, gdb tried to work around SIP by\n\
@@ -1965,7 +1964,6 @@ you \"run\".  To prevent these attempts, you can use:\n\
 		   ex.what ());
 	  return false;
 	}
-      END_CATCH
 
       printf_filtered (_("Note: this version of macOS has System Integrity Protection.\n\
 Because `startup-with-shell' is enabled, gdb has worked around this by\n\

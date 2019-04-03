@@ -906,16 +906,15 @@ print_one_vtable (struct gdbarch *gdbarch, struct value *value,
       if (gdbarch_vtable_function_descriptors (gdbarch))
 	vfn = value_addr (vfn);
 
-      TRY
+      try
 	{
 	  addr = value_as_address (vfn);
 	}
-      CATCH (ex, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
 	{
 	  printf_filtered (_("<error: %s>"), ex.what ());
 	  got_error = 1;
 	}
-      END_CATCH
 
       if (!got_error)
 	print_function_pointer_address (opts, gdbarch, addr, gdb_stdout);

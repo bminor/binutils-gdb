@@ -172,18 +172,17 @@ set_language_command (const char *ignore,
 	      /* Enter auto mode.  Set to the current frame's language, if
                  known, or fallback to the initial language.  */
 	      language_mode = language_mode_auto;
-	      TRY
+	      try
 		{
 		  struct frame_info *frame;
 
 		  frame = get_selected_frame (NULL);
 		  flang = get_frame_language (frame);
 		}
-	      CATCH (ex, RETURN_MASK_ERROR)
+	      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
 		{
 		  flang = language_unknown;
 		}
-	      END_CATCH
 
 	      if (flang != language_unknown)
 		set_language (flang);

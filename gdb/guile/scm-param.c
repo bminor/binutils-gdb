@@ -1006,7 +1006,7 @@ gdbscm_register_parameter_x (SCM self)
 		_("parameter exists, \"show\" command is already defined"));
     }
 
-  TRY
+  try
     {
       add_setshow_generic (p_smob->type, p_smob->cmd_class,
 			   p_smob->cmd_name, p_smob,
@@ -1018,11 +1018,10 @@ gdbscm_register_parameter_x (SCM self)
 			   set_list, show_list,
 			   &p_smob->set_command, &p_smob->show_command);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDBSCM_HANDLE_GDB_EXCEPTION (except);
     }
-  END_CATCH
 
   /* Note: At this point the parameter exists in gdb.
      So no more errors after this point.  */
@@ -1064,15 +1063,14 @@ gdbscm_parameter_value (SCM self)
       if (name == NULL)
 	gdbscm_throw (except_scm);
       newarg = concat ("show ", name.get (), (char *) NULL);
-      TRY
+      try
 	{
 	  found = lookup_cmd_composition (newarg, &alias, &prefix, &cmd);
 	}
-      CATCH (ex, RETURN_MASK_ALL)
+      catch (const gdb_exception_RETURN_MASK_ALL &ex)
 	{
 	  except = ex;
 	}
-      END_CATCH
 
       xfree (newarg);
       GDBSCM_HANDLE_GDB_EXCEPTION (except);

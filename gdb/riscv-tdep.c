@@ -651,19 +651,18 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
   fputs_filtered (name, file);
   print_spaces_filtered (value_column_1 - strlen (name), file);
 
-  TRY
+  try
     {
       val = value_of_register (regnum, frame);
       regtype = value_type (val);
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       /* Handle failure to read a register without interrupting the entire
          'info registers' flow.  */
       fprintf_filtered (file, "%s\n", ex.what ());
       return;
     }
-  END_CATCH
 
   print_raw_format = (value_entirely_available (val)
 		      && !value_optimized_out (val));
@@ -2802,17 +2801,16 @@ riscv_frame_this_id (struct frame_info *this_frame,
 {
   struct riscv_unwind_cache *cache;
 
-  TRY
+  try
     {
       cache = riscv_frame_cache (this_frame, prologue_cache);
       *this_id = cache->this_id;
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       /* Ignore errors, this leaves the frame id as the predefined outer
          frame id which terminates the backtrace at this point.  */
     }
-  END_CATCH
 }
 
 /* Implement the prev_register callback for RiscV frame unwinder.  */

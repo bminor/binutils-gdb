@@ -746,15 +746,14 @@ fbsd_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
     }
 
   /* Thread register information.  */
-  TRY
+  try
     {
       update_thread_list ();
     }
-  CATCH (e, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &e)
     {
       exception_print (gdb_stderr, e);
     }
-  END_CATCH
 
   /* Like the kernel, prefer dumping the signalled thread first.
      "First thread" is what tools use to infer the signalled thread.
@@ -1985,7 +1984,7 @@ fbsd_read_integer_by_name (struct gdbarch *gdbarch, const char *name)
 static void
 fbsd_fetch_rtld_offsets (struct gdbarch *gdbarch, struct fbsd_pspace_data *data)
 {
-  TRY
+  try
     {
       /* Fetch offsets from debug symbols in rtld.  */
       struct symbol *obj_entry_sym
@@ -2000,13 +1999,12 @@ fbsd_fetch_rtld_offsets (struct gdbarch *gdbarch, struct fbsd_pspace_data *data)
       data->rtld_offsets_valid = true;
       return;
     }
-  CATCH (e, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &e)
     {
       data->off_linkmap = -1;
     }
-  END_CATCH
 
-  TRY
+  try
     {
       /* Fetch offsets from global variables in libthr.  Note that
 	 this does not work for single-threaded processes that are not
@@ -2018,11 +2016,10 @@ fbsd_fetch_rtld_offsets (struct gdbarch *gdbarch, struct fbsd_pspace_data *data)
       data->rtld_offsets_valid = true;
       return;
     }
-  CATCH (e, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &e)
     {
       data->off_linkmap = -1;
     }
-  END_CATCH
 }
 
 /* Helper function to read the TLS index of an object file associated

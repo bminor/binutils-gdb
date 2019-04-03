@@ -708,7 +708,7 @@ record_full_message (struct regcache *regcache, enum gdb_signal signal)
   int ret;
   struct gdbarch *gdbarch = regcache->arch ();
 
-  TRY
+  try
     {
       record_full_arch_list_head = NULL;
       record_full_arch_list_tail = NULL;
@@ -761,12 +761,11 @@ record_full_message (struct regcache *regcache, enum gdb_signal signal)
       if (ret < 0)
 	error (_("Process record: failed to record execution log."));
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       record_full_list_release (record_full_arch_list_tail);
       throw_exception (ex);
     }
-  END_CATCH
 
   record_full_list->next = record_full_arch_list_head;
   record_full_arch_list_head->prev = record_full_list;
@@ -782,16 +781,15 @@ static bool
 record_full_message_wrapper_safe (struct regcache *regcache,
 				  enum gdb_signal signal)
 {
-  TRY
+  try
     {
       record_full_message (regcache, signal);
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       exception_print (gdb_stderr, ex);
       return false;
     }
-  END_CATCH
 
   return true;
 }
@@ -1293,7 +1291,7 @@ record_full_wait_1 (struct target_ops *ops,
       int continue_flag = 1;
       int first_record_full_end = 1;
 
-      TRY
+      try
 	{
 	  CORE_ADDR tmp_pc;
 
@@ -1436,7 +1434,7 @@ record_full_wait_1 (struct target_ops *ops,
 	  else
 	    status->value.sig = GDB_SIGNAL_TRAP;
 	}
-      CATCH (ex, RETURN_MASK_ALL)
+      catch (const gdb_exception_RETURN_MASK_ALL &ex)
 	{
 	  if (execution_direction == EXEC_REVERSE)
 	    {
@@ -1448,7 +1446,6 @@ record_full_wait_1 (struct target_ops *ops,
 
 	  throw_exception (ex);
 	}
-      END_CATCH
     }
 
   signal (SIGINT, handle_sigint);
@@ -2374,7 +2371,7 @@ record_full_restore (void)
   record_full_arch_list_tail = NULL;
   record_full_insn_num = 0;
 
-  TRY
+  try
     {
       regcache = get_current_regcache ();
 
@@ -2476,12 +2473,11 @@ record_full_restore (void)
 	  record_full_arch_list_add (rec);
 	}
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       record_full_list_release (record_full_arch_list_tail);
       throw_exception (ex);
     }
-  END_CATCH
 
   /* Add record_full_arch_list_head to the end of record list.  */
   record_full_first.next = record_full_arch_list_head;

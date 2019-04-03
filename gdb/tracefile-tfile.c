@@ -511,7 +511,7 @@ tfile_target_open (const char *arg, int from_tty)
   ts->disconnected_tracing = 0;
   ts->circular_buffer = 0;
 
-  TRY
+  try
     {
       /* Read through a section of newline-terminated lines that
 	 define things like tracepoints.  */
@@ -547,13 +547,12 @@ tfile_target_open (const char *arg, int from_tty)
       if (trace_regblock_size == 0)
 	error (_("No register block size recorded in trace file"));
     }
-  CATCH (ex, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &ex)
     {
       /* Remove the partially set up target.  */
       unpush_target (&tfile_ops);
       throw_exception (ex);
     }
-  END_CATCH
 
   inferior_appeared (current_inferior (), TFILE_PID);
   inferior_ptid = ptid_t (TFILE_PID);

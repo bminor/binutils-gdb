@@ -751,18 +751,17 @@ pascal_object_print_value (struct type *type, const gdb_byte *valaddr,
 
       thisoffset = offset;
 
-      TRY
+      try
 	{
 	  boffset = baseclass_offset (type, i, valaddr, offset, address, val);
 	}
-      CATCH (ex, RETURN_MASK_ERROR)
+      catch (const gdb_exception_RETURN_MASK_ERROR &ex)
 	{
 	  if (ex.error == NOT_AVAILABLE_ERROR)
 	    skip = -1;
 	  else
 	    skip = 1;
 	}
-      END_CATCH
 
       if (skip == 0)
 	{

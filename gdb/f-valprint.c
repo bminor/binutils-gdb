@@ -407,18 +407,17 @@ info_common_command_for_block (const struct block *block, const char *comname,
 	    printf_filtered ("%s = ",
 			     SYMBOL_PRINT_NAME (common->contents[index]));
 
-	    TRY
+	    try
 	      {
 		val = value_of_variable (common->contents[index], block);
 		value_print (val, gdb_stdout, &opts);
 	      }
 
-	    CATCH (except, RETURN_MASK_ERROR)
+	    catch (const gdb_exception_RETURN_MASK_ERROR &except)
 	      {
 		printf_filtered ("<error reading variable: %s>",
 				 except.what ());
 	      }
-	    END_CATCH
 
 	    putchar_filtered ('\n');
 	  }

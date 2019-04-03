@@ -2571,15 +2571,14 @@ safe_parse_type (struct gdbarch *gdbarch, char *p, int length)
   gdb_stderr = &null_stream;
 
   /* Call parse_and_eval_type() without fear of longjmp()s.  */
-  TRY
+  try
     {
       type = parse_and_eval_type (p, length);
     }
-  CATCH (except, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &except)
     {
       type = builtin_type (gdbarch)->builtin_void;
     }
-  END_CATCH
 
   /* Stop suppressing error messages.  */
   gdb_stderr = saved_gdb_stderr;

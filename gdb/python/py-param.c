@@ -726,21 +726,20 @@ parmpy_init (PyObject *self, PyObject *args, PyObject *kwds)
 
   Py_INCREF (self);
 
-  TRY
+  try
     {
       add_setshow_generic (parmclass, (enum command_class) cmdtype,
 			   cmd_name, obj,
 			   set_doc.get (), show_doc.get (),
 			   doc.get (), set_list, show_list);
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       xfree (cmd_name);
       Py_DECREF (self);
       gdbpy_convert_exception (except);
       return -1;
     }
-  END_CATCH
 
   return 0;
 }

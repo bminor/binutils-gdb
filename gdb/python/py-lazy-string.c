@@ -113,7 +113,7 @@ stpy_convert_to_value (PyObject *self, PyObject *args)
       return NULL;
     }
 
-  TRY
+  try
     {
       struct type *type = type_object_to_type (self_string->type);
       struct type *realtype;
@@ -142,11 +142,10 @@ stpy_convert_to_value (PyObject *self, PyObject *args)
 	  break;
 	}
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  END_CATCH
 
   return value_to_value_object (val);
 }

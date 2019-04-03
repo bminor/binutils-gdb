@@ -60,15 +60,14 @@ operator new (std::size_t sz)
 	 QUIT gdb_exception.  This is necessary because operator new
 	 can only ever throw std::bad_alloc, or something that extends
 	 it.  */
-      TRY
+      try
 	{
 	  malloc_failure (sz);
 	}
-      CATCH (ex, RETURN_MASK_ALL)
+      catch (const gdb_exception_RETURN_MASK_ALL &ex)
 	{
 	  throw gdb_quit_bad_alloc (ex);
 	}
-      END_CATCH
     }
   return p;
 }

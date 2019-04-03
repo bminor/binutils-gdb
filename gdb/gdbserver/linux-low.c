@@ -1531,7 +1531,7 @@ linux_detach_one_lwp (struct lwp_info *lwp)
   /* Preparing to resume may try to write registers, and fail if the
      lwp is zombie.  If that happens, ignore the error.  We'll handle
      it below, when detach fails with ESRCH.  */
-  TRY
+  try
     {
       /* Flush any pending changes to the process's registers.  */
       regcache_invalidate_thread (thread);
@@ -1540,12 +1540,11 @@ linux_detach_one_lwp (struct lwp_info *lwp)
       if (the_low_target.prepare_to_resume != NULL)
 	the_low_target.prepare_to_resume (lwp);
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       if (!check_ptrace_stopped_lwp_gone (lwp))
 	throw_exception (ex);
     }
-  END_CATCH
 
   lwpid = lwpid_of (thread);
   if (ptrace (PTRACE_DETACH, lwpid, (PTRACE_TYPE_ARG3) 0,
@@ -4508,16 +4507,15 @@ static void
 linux_resume_one_lwp (struct lwp_info *lwp,
 		      int step, int signal, siginfo_t *info)
 {
-  TRY
+  try
     {
       linux_resume_one_lwp_throw (lwp, step, signal, info);
     }
-  CATCH (ex, RETURN_MASK_ERROR)
+  catch (const gdb_exception_RETURN_MASK_ERROR &ex)
     {
       if (!check_ptrace_stopped_lwp_gone (lwp))
 	throw_exception (ex);
     }
-  END_CATCH
 }
 
 /* This function is called once per thread via for_each_thread.

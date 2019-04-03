@@ -849,17 +849,16 @@ jit_reader_try_read_symtab (struct jit_code_entry *code_entry,
   gdb_mem = (gdb_byte *) xmalloc (code_entry->symfile_size);
 
   status = 1;
-  TRY
+  try
     {
       if (target_read_memory (code_entry->symfile_addr, gdb_mem,
 			      code_entry->symfile_size))
 	status = 0;
     }
-  CATCH (e, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &e)
     {
       status = 0;
     }
-  END_CATCH
 
   if (status)
     {

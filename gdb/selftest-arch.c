@@ -60,7 +60,7 @@ struct gdbarch_selftest : public selftest
 
 	QUIT;
 
-	TRY
+	try
 	  {
 	    struct gdbarch_info info;
 
@@ -72,13 +72,12 @@ struct gdbarch_selftest : public selftest
 
 	    function (gdbarch);
 	  }
-	CATCH (ex, RETURN_MASK_ERROR)
+	catch (const gdb_exception_RETURN_MASK_ERROR &ex)
 	  {
 	    pass = false;
 	    exception_fprintf (gdb_stderr, ex,
 			       _("Self test failed: arch %s: "), arches[i]);
 	  }
-	END_CATCH
 
 	reset ();
       }

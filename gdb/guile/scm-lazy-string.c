@@ -309,7 +309,7 @@ lsscm_safe_lazy_string_to_value (SCM string, int arg_pos,
       return NULL;
     }
 
-  TRY
+  try
     {
       struct type *type = tyscm_scm_to_type (ls_smob->type);
       struct type *realtype = check_typedef (type);
@@ -336,12 +336,11 @@ lsscm_safe_lazy_string_to_value (SCM string, int arg_pos,
 	  break;
 	}
     }
-  CATCH (except, RETURN_MASK_ALL)
+  catch (const gdb_exception_RETURN_MASK_ALL &except)
     {
       *except_scmp = gdbscm_scm_from_gdb_exception (except);
       return NULL;
     }
-  END_CATCH
 
   return value;
 }
