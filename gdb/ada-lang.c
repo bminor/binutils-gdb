@@ -54,6 +54,7 @@
 #include "gdbsupport/gdb_vecs.h"
 #include "typeprint.h"
 #include "namespace.h"
+#include "cli/cli-style.h"
 
 #include "psymtab.h"
 #include "value.h"
@@ -3877,8 +3878,8 @@ See set/show multiple-symbol."));
 	  ada_print_symbol_signature (gdb_stdout, syms[i].symbol,
 				      &type_print_raw_options);
 	  if (sal.symtab == NULL)
-	    printf_filtered (_(" at <no source file available>:%d\n"),
-			     sal.line);
+	    printf_filtered (_(" at %p[<no source file available>%p]:%d\n"),
+			     metadata_style.style ().ptr (), nullptr, sal.line);
 	  else
 	    printf_filtered (_(" at %s:%d\n"),
 			     symtab_to_filename_for_display (sal.symtab),

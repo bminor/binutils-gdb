@@ -141,8 +141,8 @@ mi_ui_out::do_field_string (int fldno, int width, ui_align align,
 
 void
 mi_ui_out::do_field_fmt (int fldno, int width, ui_align align,
-			 const char *fldname, const char *format,
-			 va_list args)
+			 const char *fldname, const ui_file_style &style,
+			 const char *format, va_list args)
 {
   ui_file *stream = m_streams.back ();
   field_separator ();

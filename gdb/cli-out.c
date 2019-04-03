@@ -188,16 +188,15 @@ cli_ui_out::do_field_string (int fldno, int width, ui_align align,
 
 void
 cli_ui_out::do_field_fmt (int fldno, int width, ui_align align,
-			  const char *fldname, const char *format,
-			  va_list args)
+			  const char *fldname, const ui_file_style &style,
+			  const char *format, va_list args)
 {
   if (m_suppress_output)
     return;
 
   std::string str = string_vprintf (format, args);
 
-  do_field_string (fldno, width, align, fldname, str.c_str (),
-		   ui_file_style ());
+  do_field_string (fldno, width, align, fldname, str.c_str (), style);
 }
 
 void

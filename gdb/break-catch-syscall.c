@@ -29,6 +29,7 @@
 #include "arch-utils.h"
 #include "observable.h"
 #include "xml-syscall.h"
+#include "cli/cli-style.h"
 
 /* An instance of this type is used to represent a syscall catchpoint.
    A breakpoint is really of this type iff its ops pointer points to
@@ -273,7 +274,7 @@ print_one_catch_syscall (struct breakpoint *b,
       xfree (text);
     }
   else
-    uiout->field_string ("what", "<any syscall>");
+    uiout->field_string ("what", "<any syscall>", metadata_style.style ());
   uiout->text ("\" ");
 
   if (uiout->is_mi_like_p ())

@@ -1,5 +1,10 @@
 2019-10-01  Tom Tromey  <tom@tromey.com>
 
+	* lib/gdb-utils.exp (style): Handle "metadata" argument.
+	* gdb.base/style.exp: Add metadata style test.
+
+2019-10-01  Tom Tromey  <tom@tromey.com>
+
 	* gdb.base/style.exp: Test "pwd".
 
 2019-10-01  Tom Tromey  <tom@tromey.com>

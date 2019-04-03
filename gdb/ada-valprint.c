@@ -32,6 +32,7 @@
 #include "infcall.h"
 #include "objfiles.h"
 #include "target-float.h"
+#include "cli/cli-style.h"
 
 static int print_field_values (struct type *, const gdb_byte *,
 			       int,
@@ -237,7 +238,8 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 		     value_embedded_offset (v0), 0, stream,
 		     recurse + 1, v0, &opts, current_language);
 	  annotate_elt_rep (i - i0);
-	  fprintf_filtered (stream, _(" <repeats %u times>"), i - i0);
+	  fprintf_filtered (stream, _(" %p[<repeats %u times>%p]"),
+			    metadata_style.style ().ptr (), i - i0, nullptr);
 	  annotate_elt_rep_end ();
 
 	}
@@ -527,7 +529,8 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
 	  ada_emit_char (char_at (string, i, type_len, byte_order),
 			 elttype, stream, '\'', type_len);
 	  fputs_filtered ("'", stream);
-	  fprintf_filtered (stream, _(" <repeats %u times>"), reps);
+	  fprintf_filtered (stream, _(" %p[<repeats %u times>%p]"),
+			    metadata_style.style ().ptr (), reps, nullptr);
 	  i = rep1 - 1;
 	  things_printed += options->repeat_count_threshold;
 	  need_comma = 1;
@@ -671,7 +674,8 @@ print_field_values (struct type *type, const gdb_byte *valaddr,
 	     order problems.  */
 	  if (HAVE_CPLUS_STRUCT (type) && TYPE_FIELD_IGNORE (type, i))
 	    {
-	      fputs_filtered (_("<optimized out or zero length>"), stream);
+	      fputs_styled (_("<optimized out or zero length>"),
+			    metadata_style.style (), stream);
 	    }
 	  else
 	    {
@@ -1069,7 +1073,8 @@ ada_val_print_ref (struct type *type, const gdb_byte *valaddr,
 
   if (TYPE_CODE (elttype) == TYPE_CODE_UNDEF)
     {
-      fputs_filtered ("<ref to undefined type>", stream);
+      fputs_styled ("<ref to undefined type>", metadata_style.style (),
+		    stream);
       return;
     }
 
@@ -1212,8 +1217,9 @@ ada_val_print (struct type *type,
     }
   catch (const gdb_exception_error &except)
     {
-      fprintf_filtered (stream, _("<error reading variable: %s>"),
-			except.what ());
+      fprintf_styled (stream, metadata_style.style (),
+		      _("<error reading variable: %s>"),
+		      except.what ());
     }
 }
 

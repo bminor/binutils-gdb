@@ -34,6 +34,9 @@ public:
   /* Construct a CLI style option with an intensity.  */
   cli_style_option (const char *name, ui_file_style::intensity i);
 
+  /* Construct a CLI style option with an intensity.  */
+  cli_style_option (ui_file_style::intensity val);
+
   /* Return a ui_file_style corresponding to the settings in this CLI
      style.  */
   ui_file_style style () const;
@@ -108,6 +111,8 @@ extern cli_style_option highlight_style;
 /* The title style.  */
 extern cli_style_option title_style;
 
+/* The metadata style.  */
+extern cli_style_option metadata_style;
 
 /* True if source styling is enabled.  */
 extern bool source_styling;

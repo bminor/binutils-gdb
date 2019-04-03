@@ -25,6 +25,7 @@
 #include "gdbthread.h"
 #include "progspace.h"
 #include "objfiles.h"
+#include "cli/cli-style.h"
 
 static int ada_build_task_list ();
 
@@ -1163,9 +1164,14 @@ print_ada_task_info (struct ui_out *uiout,
       /* Finally, print the task name, without quotes around it, as mi like
 	 is not expecting quotes, and in non mi-like no need for quotes
          as there is a specific column for the name.  */
-      uiout->field_string ("name",
-                          task_info->name[0] != '\0' ? task_info->name
-                          : _("<no name>"));
+      uiout->field_fmt ("name",
+			(task_info->name[0] != '\0'
+			 ? ui_file_style ()
+			 : metadata_style.style ()),
+			"%s",
+			(task_info->name[0] != '\0'
+			 ? task_info->name
+			 : _("<no name>")));
 
       uiout->text ("\n");
     }
@@ -1201,7 +1207,7 @@ info_task (struct ui_out *uiout, const char *taskno_str, struct inferior *inf)
   if (task_info->name[0] != '\0')
     printf_filtered (_("Name: %s\n"), task_info->name);
   else
-    printf_filtered (_("<no name>\n"));
+    fprintf_styled (gdb_stdout, metadata_style.style (), _("<no name>\n"));
 
   /* Print the TID and LWP.  */
   printf_filtered (_("Thread: %#lx\n"), task_info->ptid.tid ());

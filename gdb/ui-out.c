@@ -545,7 +545,25 @@ ui_out::field_fmt (const char *fldname, const char *format, ...)
 
   va_start (args, format);
 
-  do_field_fmt (fldno, width, align, fldname, format, args);
+  do_field_fmt (fldno, width, align, fldname, ui_file_style (), format, args);
+
+  va_end (args);
+}
+
+void
+ui_out::field_fmt (const char *fldname, const ui_file_style &style,
+		   const char *format, ...)
+{
+  va_list args;
+  int fldno;
+  int width;
+  ui_align align;
+
+  verify_field (&fldno, &width, &align);
+
+  va_start (args, format);
+
+  do_field_fmt (fldno, width, align, fldname, style, format, args);
 
   va_end (args);
 }

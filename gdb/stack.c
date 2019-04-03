@@ -386,12 +386,16 @@ print_frame_arg (const frame_print_options &fp_opts,
   annotate_arg_name_end ();
   uiout->text ("=");
 
+  ui_file_style style;
   if (!arg->val && !arg->error)
     uiout->text ("...");
   else
     {
       if (arg->error)
-	stb.printf (_("<error reading variable: %s>"), arg->error.get ());
+	{
+	  stb.printf (_("<error reading variable: %s>"), arg->error.get ());
+	  style = metadata_style.style ();
+	}
       else
 	{
 	  try
@@ -428,11 +432,12 @@ print_frame_arg (const frame_print_options &fp_opts,
 	    {
 	      stb.printf (_("<error reading variable: %s>"),
 			  except.what ());
+	      style = metadata_style.style ();
 	    }
 	}
     }
 
-  uiout->field_stream ("value", stb);
+  uiout->field_stream ("value", stb, style);
 }
 
 /* Read in inferior function local SYM at FRAME into ARGP.  Caller is
@@ -1006,18 +1011,18 @@ print_frame_info (const frame_print_options &fp_opts,
         {
           annotate_function_call ();
           uiout->field_string ("func", "<function called from gdb>",
-			       function_name_style.style ());
+			       metadata_style.style ());
 	}
       else if (get_frame_type (frame) == SIGTRAMP_FRAME)
         {
 	  annotate_signal_handler_caller ();
           uiout->field_string ("func", "<signal handler called>",
-			       function_name_style.style ());
+			       metadata_style.style ());
         }
       else if (get_frame_type (frame) == ARCH_FRAME)
         {
           uiout->field_string ("func", "<cross-architecture call>",
-			       function_name_style.style ());
+			       metadata_style.style ());
 	}
       uiout->text ("\n");
       annotate_frame_end ();
@@ -1311,7 +1316,7 @@ print_frame (const frame_print_options &fp_opts,
 	    print_pc (uiout, gdbarch, frame, pc);
 	  else
 	    uiout->field_string ("addr", "<unavailable>",
-				 address_style.style ());
+				 metadata_style.style ());
 	  annotate_frame_address_end ();
 	  uiout->text (" in ");
 	}
@@ -1508,7 +1513,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
   if (frame_pc_p)
     fputs_filtered (paddress (gdbarch, get_frame_pc (fi)), gdb_stdout);
   else
-    fputs_filtered ("<unavailable>", gdb_stdout);
+    fputs_styled ("<unavailable>", metadata_style.style (), gdb_stdout);
 
   wrap_here ("   ");
   if (funname)
@@ -1545,8 +1550,9 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
 	      val_print_not_saved (gdb_stdout);
 	      break;
 	    default:
-	      fprintf_filtered (gdb_stdout, _("<error: %s>"),
-				ex.what ());
+	      fprintf_styled (gdb_stdout, metadata_style.style (),
+			      _("<error: %s>"),
+			      ex.what ());
 	      break;
 	    }
 	}

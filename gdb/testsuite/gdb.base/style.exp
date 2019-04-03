@@ -133,4 +133,8 @@ save_vars { env(TERM) } {
 	"filename is styled when loading symbol file"
 
     gdb_test "pwd" "Working directory [style .*? file].*"
+
+    gdb_test_no_output "set print repeat 3"
+    gdb_test "print {0,0,0,0,0,0,0,0}" \
+	" = \\{0 [style {<repeats.*8.*times>} metadata]\\}"
 }

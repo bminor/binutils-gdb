@@ -60,6 +60,7 @@
 #include "interps.h"
 #include "gdbsupport/gdb_optional.h"
 #include "source.h"
+#include "cli/cli-style.h"
 
 /* Local functions: */
 
@@ -1628,7 +1629,8 @@ print_return_value_1 (struct ui_out *uiout, struct return_value_info *rv)
 	  uiout->field_stream ("return-value", stb);
 	}
       else
-	uiout->field_string ("return-value", _("<not displayed>"));
+	uiout->field_string ("return-value", _("<not displayed>"),
+			     metadata_style.style ());
       uiout->text ("\n");
     }
   else

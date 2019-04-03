@@ -1116,10 +1116,12 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	{
 	  if (TYPE_STUB (type))
 	    fprintfi_filtered (level + 4, stream,
-			       _("<incomplete type>\n"));
+			       _("%p[<incomplete type>%p]\n"),
+			       metadata_style.style ().ptr (), nullptr);
 	  else
 	    fprintfi_filtered (level + 4, stream,
-			       _("<no data fields>\n"));
+			       _("%p[<no data fields>%p]\n"),
+			       metadata_style.style ().ptr (), nullptr);
 	}
 
       /* Start off with no specific section type, so we can print
@@ -1277,7 +1279,8 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 		{
 		  /* Keep GDB from crashing here.  */
 		  fprintf_filtered (stream,
-				    _("<undefined type> %s;\n"),
+				    _("%p[<undefined type>%p] %s;\n"),
+				    metadata_style.style ().ptr (), nullptr,
 				    TYPE_FN_FIELD_PHYSNAME (f, j));
 		  break;
 		}
@@ -1325,9 +1328,9 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 						 &local_flags);
 		    }
 		  else
-		    fprintf_filtered (stream,
-				      _("<badly mangled name '%s'>"),
-				      mangled_name);
+		    fprintf_styled (stream, metadata_style.style (),
+				    _("<badly mangled name '%s'>"),
+				    mangled_name);
 		}
 	      else
 		{
@@ -1465,7 +1468,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 
   if (type == NULL)
     {
-      fputs_filtered (_("<type unknown>"), stream);
+      fputs_styled (_("<type unknown>"), metadata_style.style (), stream);
       return;
     }
 
@@ -1511,7 +1514,8 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 	 couldn't resolve TYPE_TARGET_TYPE.  Not much we can do.  */
       gdb_assert (TYPE_NAME (type) == NULL);
       gdb_assert (TYPE_TARGET_TYPE (type) == NULL);
-      fprintf_filtered (stream, _("<unnamed typedef>"));
+      fprintf_styled (stream, metadata_style.style (),
+		      _("<unnamed typedef>"));
       break;
 
     case TYPE_CODE_FUNC:
@@ -1622,10 +1626,12 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 	      {
 		if (TYPE_STUB (type))
 		  fprintfi_filtered (level + 4, stream,
-				     _("<incomplete type>\n"));
+				     _("%p[<incomplete type>%p]\n"),
+				     metadata_style.style ().ptr (), nullptr);
 		else
 		  fprintfi_filtered (level + 4, stream,
-				     _("<no data fields>\n"));
+				     _("%p[<no data fields>%p]\n"),
+				     metadata_style.style ().ptr (), nullptr);
 	      }
 	    len = TYPE_NFIELDS (type);
 	    for (i = 0; i < len; i++)
@@ -1668,7 +1674,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 
     case TYPE_CODE_RANGE:
       /* This should not occur.  */
-      fprintf_filtered (stream, _("<range type>"));
+      fprintf_styled (stream, metadata_style.style (), _("<range type>"));
       break;
 
     case TYPE_CODE_NAMESPACE:
@@ -1690,8 +1696,8 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 	{
 	  /* At least for dump_symtab, it is important that this not
 	     be an error ().  */
-	  fprintf_filtered (stream, _("<invalid type code %d>"),
-			    TYPE_CODE (type));
+	  fprintf_styled (stream, metadata_style.style (),
+			  _("<invalid type code %d>"), TYPE_CODE (type));
 	}
       break;
     }

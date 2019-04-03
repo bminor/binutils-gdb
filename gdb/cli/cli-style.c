@@ -85,6 +85,10 @@ cli_style_option title_style ("title", ui_file_style::BOLD);
 
 /* See cli-style.h.  */
 
+cli_style_option metadata_style ("metadata", ui_file_style::DIM);
+
+/* See cli-style.h.  */
+
 cli_style_option::cli_style_option (const char *name,
 				    ui_file_style::basic_color fg)
   : m_name (name),
@@ -372,4 +376,11 @@ Highlight display styling.\n\
 Configure highlight colors and display intensity\n\
 Some commands use the highlight style to draw the attention to a part\n\
 of their output."));
+
+  STYLE_ADD_SETSHOW_COMMANDS (metadata_style,
+			      _("\
+Metadata display styling\n\
+Configure metadata colors and display intensity\n\
+The \"metadata\" style is used when GDB displays information about\n\
+your data, for example \"<unavailable>\""));
 }

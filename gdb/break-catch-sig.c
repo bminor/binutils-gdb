@@ -28,6 +28,7 @@
 #include "valprint.h"
 #include "cli/cli-utils.h"
 #include "completer.h"
+#include "cli/cli-style.h"
 
 #include <string>
 
@@ -241,7 +242,8 @@ signal_catchpoint_print_one (struct breakpoint *b,
     }
   else
     uiout->field_string ("what",
-			 c->catch_all ? "<any signal>" : "<standard signals>");
+			 c->catch_all ? "<any signal>" : "<standard signals>",
+			 metadata_style.style ());
   uiout->text ("\" ");
 
   if (uiout->is_mi_like_p ())

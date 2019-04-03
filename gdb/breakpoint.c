@@ -4457,7 +4457,7 @@ static void
 watchpoint_value_print (struct value *val, struct ui_file *stream)
 {
   if (val == NULL)
-    fprintf_unfiltered (stream, _("<unreadable>"));
+    fprintf_styled (stream, metadata_style.style (), _("<unreadable>"));
   else
     {
       struct value_print_options opts;
@@ -6055,9 +6055,11 @@ print_one_breakpoint_location (struct breakpoint *b,
 	    {
 	      annotate_field (4);
 	      if (header_of_multiple)
-		uiout->field_string ("addr", "<MULTIPLE>");
+		uiout->field_string ("addr", "<MULTIPLE>",
+				     metadata_style.style ());
 	      else if (b->loc == NULL || loc->shlib_disabled)
-		uiout->field_string ("addr", "<PENDING>");
+		uiout->field_string ("addr", "<PENDING>",
+				     metadata_style.style ());
 	      else
 		uiout->field_core_addr ("addr",
 					loc->gdbarch, loc->address);

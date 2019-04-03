@@ -29,6 +29,7 @@
 #include "block.h"
 #include "objfiles.h"
 #include "valprint.h"
+#include "cli/cli-style.h"
 
 #include <ctype.h>
 
@@ -510,8 +511,9 @@ print_subexp_standard (struct expression *exp, int *pos,
       if (exp->language_defn->la_name_of_this)
 	fputs_filtered (exp->language_defn->la_name_of_this, stream);
       else
-	fprintf_filtered (stream, _("<language %s has no 'this'>"),
-			  exp->language_defn->la_name);
+	fprintf_styled (stream, metadata_style.style (),
+			_("<language %s has no 'this'>"),
+			exp->language_defn->la_name);
       return;
 
       /* Modula-2 ops */

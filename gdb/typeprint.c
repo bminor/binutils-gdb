@@ -36,6 +36,7 @@
 #include "cli/cli-utils.h"
 #include "extension.h"
 #include "completer.h"
+#include "cli/cli-style.h"
 
 const struct type_print_options type_print_raw_options =
 {
@@ -415,7 +416,8 @@ type_to_string (struct type *type)
 void
 type_print_unknown_return_type (struct ui_file *stream)
 {
-  fprintf_filtered (stream, _("<unknown return type>"));
+  fprintf_styled (stream, metadata_style.style (),
+		  _("<unknown return type>"));
 }
 
 /* See typeprint.h.  */
@@ -862,7 +864,7 @@ Show the number of recursive nested type definitions to print."), NULL,
 void
 val_print_not_allocated (struct ui_file *stream)
 {
-  fprintf_filtered (stream, _("<not allocated>"));
+  fprintf_styled (stream, metadata_style.style (), _("<not allocated>"));
 }
 
 /* Print <not associated> status to stream STREAM.  */
@@ -870,5 +872,5 @@ val_print_not_allocated (struct ui_file *stream)
 void
 val_print_not_associated (struct ui_file *stream)
 {
-  fprintf_filtered (stream, _("<not associated>"));
+  fprintf_styled (stream, metadata_style.style (), _("<not associated>"));
 }

@@ -43,6 +43,7 @@
 #include "completer.h"
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/array-view.h"
+#include "cli/cli-style.h"
 
 /* Definition of a user function.  */
 struct internal_function
@@ -2539,7 +2540,8 @@ show_convenience (const char *ignore, int from_tty)
 	}
       catch (const gdb_exception_error &ex)
 	{
-	  fprintf_filtered (gdb_stdout, _("<error: %s>"), ex.what ());
+	  fprintf_styled (gdb_stdout, metadata_style.style (),
+			  _("<error: %s>"), ex.what ());
 	}
 
       printf_filtered (("\n"));

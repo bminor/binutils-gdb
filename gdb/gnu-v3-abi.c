@@ -28,6 +28,7 @@
 #include "c-lang.h"
 #include "typeprint.h"
 #include <algorithm>
+#include "cli/cli-style.h"
 
 static struct cp_abi_ops gnu_v3_abi_ops;
 
@@ -912,7 +913,8 @@ print_one_vtable (struct gdbarch *gdbarch, struct value *value,
 	}
       catch (const gdb_exception_error &ex)
 	{
-	  printf_filtered (_("<error: %s>"), ex.what ());
+	  fprintf_styled (gdb_stdout, metadata_style.style (),
+			  _("<error: %s>"), ex.what ());
 	  got_error = 1;
 	}
 

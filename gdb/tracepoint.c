@@ -436,6 +436,7 @@ tvariables_info_1 (void)
 	uiout->field_string ("name", std::string ("$") + tsv.name);
 	uiout->field_string ("initial", plongest (tsv.initial_value));
 
+	ui_file_style style;
 	if (tsv.value_known)
 	  c = plongest (tsv.value);
 	else if (uiout->is_mi_like_p ())
@@ -444,13 +445,19 @@ tvariables_info_1 (void)
 	     undefined does not seem important enough to represent.  */
 	  c = NULL;
 	else if (current_trace_status ()->running || traceframe_number >= 0)
-	  /* The value is/was defined, but we don't have it.  */
-	  c = "<unknown>";
+	  {
+	    /* The value is/was defined, but we don't have it.  */
+	    c = "<unknown>";
+	    style = metadata_style.style ();
+	  }
 	else
-	  /* It is not meaningful to ask about the value.  */
-	  c = "<undefined>";
+	  {
+	    /* It is not meaningful to ask about the value.  */
+	    c = "<undefined>";
+	    style = metadata_style.style ();
+	  }
 	if (c)
-	  uiout->field_string ("current", c);
+	  uiout->field_string ("current", c, style);
 	uiout->text ("\n");
       }
   }

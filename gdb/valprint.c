@@ -38,6 +38,7 @@
 #include "gdbsupport/byte-vector.h"
 #include "cli/cli-option.h"
 #include "gdbarch.h"
+#include "cli/cli-style.h"
 
 /* Maximum number of wchars returned from wchar_iterate.  */
 #define MAX_WCHARS 4
@@ -347,7 +348,8 @@ valprint_check_validity (struct ui_file *stream,
 	    }
 
 	  if (!is_ref || !ref_is_addressable)
-	    fputs_filtered (_("<synthetic pointer>"), stream);
+	    fputs_styled (_("<synthetic pointer>"), metadata_style.style (),
+			  stream);
 
 	  /* C++ references should be valid even if they're synthetic.  */
 	  return is_ref;
@@ -369,25 +371,25 @@ val_print_optimized_out (const struct value *val, struct ui_file *stream)
   if (val != NULL && value_lval_const (val) == lval_register)
     val_print_not_saved (stream);
   else
-    fprintf_filtered (stream, _("<optimized out>"));
+    fprintf_styled (stream, metadata_style.style (), _("<optimized out>"));
 }
 
 void
 val_print_not_saved (struct ui_file *stream)
 {
-  fprintf_filtered (stream, _("<not saved>"));
+  fprintf_styled (stream, metadata_style.style (), _("<not saved>"));
 }
 
 void
 val_print_unavailable (struct ui_file *stream)
 {
-  fprintf_filtered (stream, _("<unavailable>"));
+  fprintf_styled (stream, metadata_style.style (), _("<unavailable>"));
 }
 
 void
 val_print_invalid_address (struct ui_file *stream)
 {
-  fprintf_filtered (stream, _("<invalid address>"));
+  fprintf_styled (stream, metadata_style.style (), _("<invalid address>"));
 }
 
 /* Print a pointer based on the type of its target.
@@ -988,7 +990,7 @@ generic_val_print (struct type *type,
       /* This happens (without TYPE_STUB set) on systems which don't use
          dbx xrefs (NO_DBX_XREFS in gcc) if a file has a "struct foo *bar"
          and no complete type for struct foo in that file.  */
-      fprintf_filtered (stream, _("<incomplete type>"));
+      fprintf_styled (stream, metadata_style.style (), _("<incomplete type>"));
       break;
 
     case TYPE_CODE_COMPLEX:
@@ -1047,7 +1049,7 @@ val_print (struct type *type, LONGEST embedded_offset,
 
   if (TYPE_STUB (real_type))
     {
-      fprintf_filtered (stream, _("<incomplete type>"));
+      fprintf_styled (stream, metadata_style.style (), _("<incomplete type>"));
       return;
     }
 
@@ -1084,7 +1086,8 @@ val_print (struct type *type, LONGEST embedded_offset,
     }
   catch (const gdb_exception_error &except)
     {
-      fprintf_filtered (stream, _("<error reading variable>"));
+      fprintf_styled (stream, metadata_style.style (),
+		      _("<error reading variable>"));
     }
 }
 
@@ -1115,7 +1118,8 @@ value_check_printable (struct value *val, struct ui_file *stream,
 {
   if (val == 0)
     {
-      fprintf_filtered (stream, _("<address of value unknown>"));
+      fprintf_styled (stream, metadata_style.style (),
+		      _("<address of value unknown>"));
       return 0;
     }
 
@@ -1139,8 +1143,9 @@ value_check_printable (struct value *val, struct ui_file *stream,
 
   if (TYPE_CODE (value_type (val)) == TYPE_CODE_INTERNAL_FUNCTION)
     {
-      fprintf_filtered (stream, _("<internal function %s>"),
-			value_internal_function_name (val));
+      fprintf_styled (stream, metadata_style.style (),
+		      _("<internal function %s>"),
+		      value_internal_function_name (val));
       return 0;
     }
 
@@ -2069,7 +2074,8 @@ val_print_array_elements (struct type *type,
 		     address, stream, recurse + 1, val, options,
 		     current_language);
 	  annotate_elt_rep (reps);
-	  fprintf_filtered (stream, " <repeats %u times>", reps);
+	  fprintf_filtered (stream, " %p[<repeats %u times>%p]",
+			    metadata_style.style ().ptr (), reps, nullptr);
 	  annotate_elt_rep_end ();
 
 	  i = rep1 - 1;

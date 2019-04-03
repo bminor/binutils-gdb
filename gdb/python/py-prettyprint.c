@@ -25,6 +25,7 @@
 #include "extension-priv.h"
 #include "python.h"
 #include "python-internal.h"
+#include "cli/cli-style.h"
 
 /* Return type of print_string_repr.  */
 
@@ -259,10 +260,11 @@ print_stack_unless_memory_error (struct ui_file *stream)
       gdb::unique_xmalloc_ptr<char> msg = fetched_error.to_string ();
 
       if (msg == NULL || *msg == '\0')
-	fprintf_filtered (stream, _("<error reading variable>"));
+	fprintf_styled (stream, metadata_style.style (),
+			_("<error reading variable>"));
       else
-	fprintf_filtered (stream, _("<error reading variable: %s>"),
-			  msg.get ());
+	fprintf_styled (stream, metadata_style.style (),
+			_("<error reading variable: %s>"), msg.get ());
     }
   else
     gdbpy_print_stack ();

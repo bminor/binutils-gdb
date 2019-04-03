@@ -28,6 +28,7 @@
 #include "c-lang.h"
 #include "m2-lang.h"
 #include "target.h"
+#include "cli/cli-style.h"
 
 static int print_unpacked_pointer (struct type *type,
 				   CORE_ADDR address, CORE_ADDR addr,
@@ -92,7 +93,8 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
     }
   else
     {
-      fprintf_filtered (stream, " %s }", _("<unknown bounds of set>"));
+      fprintf_styled (stream, metadata_style.style (),
+		      " %s }", _("<unknown bounds of set>"));
       return;
     }
 
@@ -407,7 +409,8 @@ m2_val_print (struct type *type, int embedded_offset,
       elttype = check_typedef (elttype);
       if (TYPE_STUB (elttype))
 	{
-	  fprintf_filtered (stream, _("<incomplete type>"));
+	  fprintf_styled (stream, metadata_style.style (),
+			  _("<incomplete type>"));
 	  break;
 	}
       else
@@ -423,7 +426,8 @@ m2_val_print (struct type *type, int embedded_offset,
 	maybe_bad_bstring:
 	  if (i < 0)
 	    {
-	      fputs_filtered (_("<error value>"), stream);
+	      fputs_styled (_("<error value>"), metadata_style.style (),
+			    stream);
 	      goto done;
 	    }
 

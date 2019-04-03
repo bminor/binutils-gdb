@@ -54,6 +54,7 @@ proc style {str style} {
 	highlight { set style 31 }
 	variable { set style 36 }
 	address { set style 34 }
+	metadata { set style 2 }
     }
     return "\033\\\[${style}m${str}\033\\\[m"
 }

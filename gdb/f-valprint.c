@@ -33,6 +33,7 @@
 #include "command.h"
 #include "block.h"
 #include "dictionary.h"
+#include "cli/cli-style.h"
 
 static void f77_get_dynamic_length_of_aggregate (struct type *);
 
@@ -415,8 +416,9 @@ info_common_command_for_block (const struct block *block, const char *comname,
 
 	    catch (const gdb_exception_error &except)
 	      {
-		printf_filtered ("<error reading variable: %s>",
-				 except.what ());
+		fprintf_styled (gdb_stdout, metadata_style.style (),
+				"<error reading variable: %s>",
+				except.what ());
 	      }
 
 	    putchar_filtered ('\n');

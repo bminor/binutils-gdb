@@ -39,6 +39,7 @@
 #include "cp-support.h"
 #include "objfiles.h"
 #include "gdbsupport/byte-vector.h"
+#include "cli/cli-style.h"
 
 
 /* Decorations for Pascal.  */
@@ -347,7 +348,7 @@ pascal_val_print (struct type *type,
       elttype = check_typedef (elttype);
       if (TYPE_STUB (elttype))
 	{
-	  fprintf_filtered (stream, "<incomplete type>");
+	  fprintf_styled (stream, metadata_style.style (), "<incomplete type>");
 	  break;
 	}
       else
@@ -370,7 +371,7 @@ pascal_val_print (struct type *type,
 	maybe_bad_bstring:
 	  if (bound_info < 0)
 	    {
-	      fputs_filtered ("<error value>", stream);
+	      fputs_styled ("<error value>", metadata_style.style (), stream);
 	      goto done;
 	    }
 
@@ -557,7 +558,7 @@ pascal_object_print_value_fields (struct type *type, const gdb_byte *valaddr,
 			       options, dont_print_vb);
 
   if (!len && n_baseclasses == 1)
-    fprintf_filtered (stream, "<No data fields>");
+    fprintf_styled (stream, metadata_style.style (), "<No data fields>");
   else
     {
       struct obstack tmp_obstack = dont_print_statmem_obstack;
@@ -622,7 +623,8 @@ pascal_object_print_value_fields (struct type *type, const gdb_byte *valaddr,
 	         order problems.  */
 	      if (TYPE_FIELD_IGNORE (type, i))
 		{
-		  fputs_filtered ("<optimized out or zero length>", stream);
+		  fputs_styled ("<optimized out or zero length>",
+				metadata_style.style (), stream);
 		}
 	      else if (value_bits_synthetic_pointer (val,
 						     TYPE_FIELD_BITPOS (type,
@@ -630,7 +632,8 @@ pascal_object_print_value_fields (struct type *type, const gdb_byte *valaddr,
 						     TYPE_FIELD_BITSIZE (type,
 									 i)))
 		{
-		  fputs_filtered (_("<synthetic pointer>"), stream);
+		  fputs_styled (_("<synthetic pointer>"),
+				metadata_style.style (), stream);
 		}
 	      else
 		{
@@ -647,7 +650,8 @@ pascal_object_print_value_fields (struct type *type, const gdb_byte *valaddr,
 	    {
 	      if (TYPE_FIELD_IGNORE (type, i))
 		{
-		  fputs_filtered ("<optimized out or zero length>", stream);
+		  fputs_styled ("<optimized out or zero length>",
+				metadata_style.style (), stream);
 		}
 	      else if (field_is_static (&TYPE_FIELD (type, i)))
 		{

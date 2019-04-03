@@ -1,5 +1,73 @@
 2019-10-01  Tom Tromey  <tom@tromey.com>
 
+	* p-lang.c (pascal_printstr): Use metadata style.
+	* value.c (show_convenience): Use metadata style.
+	* valprint.c (valprint_check_validity, val_print_optimized_out)
+	(val_print_not_saved, val_print_unavailable)
+	(val_print_invalid_address, generic_val_print, val_print)
+	(value_check_printable, val_print_array_elements): Use metadata
+	style.
+	* ui-out.h (class ui_out) <field_fmt>: New overload.
+	<do_field_fmt>: Add style parameter.
+	* ui-out.c (ui_out::field_fmt): New overload.
+	* typeprint.c (type_print_unknown_return_type)
+	(val_print_not_allocated, val_print_not_associated): Use metadata
+	style.
+	* tui/tui-out.h (class tui_ui_out) <do_field_fmt>: Add style
+	parameter.
+	* tui/tui-out.c (tui_ui_out::do_field_fmt): Update.
+	* tracepoint.c (tvariables_info_1): Use metadata style.
+	* stack.c (print_frame_arg, print_frame_info, print_frame)
+	(info_frame_command_core): Use metadata style.
+	* skip.c (info_skip_command): Use metadata style.
+	* rust-lang.c (rust_print_enum): Use metadata style.
+	* python/py-prettyprint.c (print_stack_unless_memory_error): Use
+	metadata style.
+	* python/py-framefilter.c (py_print_single_arg): Use metadata
+	style.
+	* printcmd.c (do_one_display, print_variable_and_value): Use
+	metadata style.
+	* p-valprint.c (pascal_val_print)
+	(pascal_object_print_value_fields): Use metadata style.
+	* p-typeprint.c (pascal_type_print_base): Use metadata style.
+	* mi/mi-out.h (class mi_ui_out) <do_field_fmt>: Add style
+	parameter.
+	* mi/mi-out.c (mi_ui_out::do_field_fmt): Update.
+	* m2-valprint.c (m2_print_long_set): Use metadata style.
+	* m2-typeprint.c (m2_print_type): Use metadata style.
+	* infcmd.c (print_return_value_1): Use metadata style.
+	* gnu-v3-abi.c (print_one_vtable): Use metadata style.
+	* f-valprint.c (info_common_command_for_block): Use metadata
+	style.
+	* f-typeprint.c (f_type_print_base): Use metadata style.
+	* expprint.c (print_subexp_standard): Use metadata style.
+	* cp-valprint.c (cp_print_value_fields): Use metadata style.
+	* cli/cli-style.h (class cli_style_option): Add constructor.
+	(metadata_style): Declare.
+	* cli/cli-style.c (metadata_style): New global.
+	(_initialize_cli_style): Register metadata style.
+	* cli-out.h (class cli_ui_out) <do_field_fmt>: Add style
+	parameter.
+	* cli-out.c (cli_ui_out::do_field_fmt): Update.
+	* c-typeprint.c (c_type_print_base_struct_union)
+	(c_type_print_base_1): Use metadata style.
+	* breakpoint.c (watchpoint_value_print)
+	(print_one_breakpoint_location): Use metadata style.
+	* break-catch-syscall.c (print_one_catch_syscall): Use metadata
+	style.
+	* break-catch-sig.c (signal_catchpoint_print_one): Use metadata
+	style.
+	* ada-valprint.c (val_print_packed_array_elements, printstr)
+	(print_field_values, ada_val_print_ref, ada_val_print): Use
+	metadata style.
+	* ada-typeprint.c (print_array_type, ada_print_type): Use metadata
+	style.
+	* ada-tasks.c (print_ada_task_info, info_task): Use metadata
+	style.
+	* ada-lang.c (user_select_syms): Use metadata style.
+
+2019-10-01  Tom Tromey  <tom@tromey.com>
+
 	* cli/cli-cmds.c (pwd_command): Style output.
 
 2019-10-01  Pedro Alves  <palves@redhat.com>

@@ -37,6 +37,7 @@
 #include "typeprint.h"
 #include "gdbsupport/byte-vector.h"
 #include "gdbarch.h"
+#include "cli/cli-style.h"
 
 static struct obstack dont_print_vb_obstack;
 static struct obstack dont_print_statmem_obstack;
@@ -170,7 +171,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 
   /* If there are no data fields, skip this part */
   if (len == n_baseclasses || !len)
-    fprintf_filtered (stream, "<No data fields>");
+    fprintf_styled (stream, metadata_style.style (), "<No data fields>");
   else
     {
       size_t statmem_obstack_initial_size = 0;
@@ -268,7 +269,8 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 	         byte order problems.  */
 	      if (TYPE_FIELD_IGNORE (type, i))
 		{
-		  fputs_filtered ("<optimized out or zero length>", stream);
+		  fputs_styled ("<optimized out or zero length>",
+				metadata_style.style (), stream);
 		}
 	      else if (value_bits_synthetic_pointer (val,
 						     TYPE_FIELD_BITPOS (type,
@@ -276,7 +278,8 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 						     TYPE_FIELD_BITSIZE (type,
 									 i)))
 		{
-		  fputs_filtered (_("<synthetic pointer>"), stream);
+		  fputs_styled (_("<synthetic pointer>"),
+				metadata_style.style (), stream);
 		}
 	      else
 		{
@@ -292,8 +295,8 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 	    {
 	      if (TYPE_FIELD_IGNORE (type, i))
 		{
-		  fputs_filtered ("<optimized out or zero length>",
-				  stream);
+		  fputs_styled ("<optimized out or zero length>",
+				metadata_style.style (), stream);
 		}
 	      else if (field_is_static (&TYPE_FIELD (type, i)))
 		{
@@ -307,9 +310,9 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		    }
 		  catch (const gdb_exception_error &ex)
 		    {
-		      fprintf_filtered (stream,
-					_("<error reading variable: %s>"),
-					ex.what ());
+		      fprintf_styled (stream, metadata_style.style (),
+				      _("<error reading variable: %s>"),
+				      ex.what ());
 		    }
 		}
 	      else if (i == vptr_fieldno && type == vptr_basetype)

@@ -194,6 +194,9 @@ class ui_out
   void field_skip (const char *fldname);
   void field_fmt (const char *fldname, const char *format, ...)
     ATTRIBUTE_PRINTF (3, 4);
+  void field_fmt (const char *fldname, const ui_file_style &style,
+		  const char *format, ...)
+    ATTRIBUTE_PRINTF (4, 5);
 
   void spaces (int numspaces);
   void text (const char *string);
@@ -291,9 +294,9 @@ class ui_out
 				const char *fldname, const char *string,
 				const ui_file_style &style) = 0;
   virtual void do_field_fmt (int fldno, int width, ui_align align,
-			     const char *fldname, const char *format,
-			     va_list args)
-    ATTRIBUTE_PRINTF (6,0) = 0;
+			     const char *fldname, const ui_file_style &style,
+			     const char *format, va_list args)
+    ATTRIBUTE_PRINTF (7, 0) = 0;
   virtual void do_spaces (int numspaces) = 0;
   virtual void do_text (const char *string) = 0;
   virtual void do_message (const ui_file_style &style,

@@ -2001,8 +2001,9 @@ do_one_display (struct display *d)
 	}
       catch (const gdb_exception_error &ex)
 	{
-	  fprintf_filtered (gdb_stdout, _("<error: %s>\n"),
-			    ex.what ());
+	  fprintf_filtered (gdb_stdout, _("%p[<error: %s>%p]\n"),
+			    metadata_style.style ().ptr (), ex.what (),
+			    nullptr);
 	}
     }
   else
@@ -2035,7 +2036,8 @@ do_one_display (struct display *d)
 	}
       catch (const gdb_exception_error &ex)
 	{
-	  fprintf_filtered (gdb_stdout, _("<error: %s>"), ex.what ());
+	  fprintf_styled (gdb_stdout, metadata_style.style (),
+			  _("<error: %s>"), ex.what ());
 	}
 
       printf_filtered ("\n");
@@ -2237,8 +2239,9 @@ print_variable_and_value (const char *name, struct symbol *var,
     }
   catch (const gdb_exception_error &except)
     {
-      fprintf_filtered (stream, "<error reading variable %s (%s)>", name,
-			except.what ());
+      fprintf_styled (stream, metadata_style.style (),
+		      "<error reading variable %s (%s)>", name,
+		      except.what ());
     }
 
   fprintf_filtered (stream, "\n");

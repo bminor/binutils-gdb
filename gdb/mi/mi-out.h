@@ -68,8 +68,9 @@ protected:
 				const char *fldname, const char *string,
 				const ui_file_style &style) override;
   virtual void do_field_fmt (int fldno, int width, ui_align align,
-			  const char *fldname, const char *format, va_list args)
-    override ATTRIBUTE_PRINTF (6,0);
+			     const char *fldname, const ui_file_style &style,
+			     const char *format, va_list args)
+    override ATTRIBUTE_PRINTF (7,0);
   virtual void do_spaces (int numspaces) override;
   virtual void do_text (const char *string) override;
   virtual void do_message (const ui_file_style &style,
