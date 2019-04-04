@@ -1,3 +1,8 @@
+2019-04-05  Alan Modra  <amodra@gmail.com>
+
+	* ppc-dis.c (print_insn_powerpc): Delay printing spaces after
+	opcode until first operand is output.
+
 2019-04-04  Peter Bergner  <bergner@linux.ibm.com>
 
 	PR gas/24349

@@ -723,11 +723,13 @@ print_insn_powerpc (bfd_vma memaddr,
       int need_comma;
       int need_paren;
       int skip_optional;
+      int spaces;
 
-      if (opcode->operands[0] != 0)
-	(*info->fprintf_func) (info->stream, "%-7s ", opcode->name);
-      else
-	(*info->fprintf_func) (info->stream, "%s", opcode->name);
+      (*info->fprintf_func) (info->stream, "%s", opcode->name);
+      /* gdb fprintf_func doesn't return count printed.  */
+      spaces = 8 - strlen (opcode->name);
+      if (spaces <= 0)
+	spaces = 1;
 
       /* Now extract and print the operands.  */
       need_comma = 0;
@@ -752,6 +754,11 @@ print_insn_powerpc (bfd_vma memaddr,
 
 	  value = operand_value_powerpc (operand, insn, dialect);
 
+	  if (spaces)
+	    {
+	      (*info->fprintf_func) (info->stream, "%*s", spaces, " ");
+	      spaces = 0;
+	    }
 	  if (need_comma)
 	    {
 	      (*info->fprintf_func) (info->stream, ",");

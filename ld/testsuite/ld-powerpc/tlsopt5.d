@@ -21,7 +21,7 @@ Disassembly of section \.text:
 .*:	(78 1b 60 7c|7c 60 1b 78) 	mr      r0,r3
 .*:	(00 00 2b 2c|2c 2b 00 00) 	cmpdi   r11,0
 .*:	(14 6a 6c 7c|7c 6c 6a 14) 	add     r3,r12,r13
-.*:	(20 00 82 4d|4d 82 00 20) 	beqlr   
+.*:	(20 00 82 4d|4d 82 00 20) 	beqlr
 .*:	(78 03 03 7c|7c 03 03 78) 	mr      r3,r0
 .*:	(a6 02 68 7d|7d 68 02 a6) 	mflr    r11
 .*:	(08 00 61 f9|f9 61 00 08) 	std     r11,8\(r1\)

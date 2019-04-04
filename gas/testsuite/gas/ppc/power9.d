@@ -361,8 +361,8 @@ Disassembly of section \.text:
 .*:	(7d 40 7a 6a|6a 7a 40 7d) 	ldmx    r10,0,r15
 .*:	(7d 43 7a 6a|6a 7a 43 7d) 	ldmx    r10,r3,r15
 .*:	(4c 00 02 e4|e4 02 00 4c) 	stop
-.*:	(7c 00 00 3c|3c 00 00 7c) 	wait    
-.*:	(7c 00 00 3c|3c 00 00 7c) 	wait    
+.*:	(7c 00 00 3c|3c 00 00 7c) 	wait
+.*:	(7c 00 00 3c|3c 00 00 7c) 	wait
 .*:	(7c 60 05 e6|e6 05 60 7c) 	darn    r3,0
 .*:	(7c 61 05 e6|e6 05 61 7c) 	darn    r3,1
 .*:	(7c 62 05 e6|e6 05 62 7c) 	darn    r3,2
