@@ -1,3 +1,8 @@
+2019-04-04  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* gnu-nat.c (gnu_nat_target::wait): Fix
+	target_waitstatus_to_string call.
+
 2019-04-01  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* eval.c (evaluate_subexp_standard): Handle internal functions
