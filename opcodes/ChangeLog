@@ -1,5 +1,12 @@
 2019-04-05  Alan Modra  <amodra@gmail.com>
 
+	* ppc-opc.c (XLBH_MASK): Subtract off BH field from BB_MASK.
+	(powerpc_opcodes): Reorder bcctr and bclr extended mnemonics
+	to favour printing of "-" branch hint when using the "y" bit.
+	Allow BH field on bc{ctr,lr,tar}{,l}{-,+}.
+
+2019-04-05  Alan Modra  <amodra@gmail.com>
+
 	* ppc-dis.c (print_insn_powerpc): Delay printing spaces after
 	opcode until first operand is output.
 
