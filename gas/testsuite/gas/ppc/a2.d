@@ -46,11 +46,11 @@ Disassembly of section \.text:
   88:	(00 00 02 00|00 02 00 00) 	attn
   8c:	(48 00 00 02|02 00 00 48) 	ba      0 <start>
 			8c: R_PPC(|64)_ADDR24	label_abs
-  90:	(40 01 00 00|00 00 01 40) 	bdnzf   gt,90 <start\+0x90>
+  90:	(40 8a 00 00|00 00 8a 40) 	bne     cr2,90 <start\+0x90>
 			90: R_PPC(|64)_REL14	foo
-  94:	(40 01 00 00|00 00 01 40) 	bdnzf   gt,94 <start\+0x94>
+  94:	(40 ca 00 00|00 00 ca 40) 	bne-    cr2,94 <start\+0x94>
 			94: R_PPC(|64)_REL14	foo
-  98:	(40 01 00 00|00 00 01 40) 	bdnzf   gt,98 <start\+0x98>
+  98:	(40 ea 00 00|00 00 ea 40) 	bne\+    cr2,98 <start\+0x98>
 			98: R_PPC(|64)_REL14	foo
   9c:	(40 85 00 02|02 00 85 40) 	blea    cr1,0 <start>
 			9c: R_PPC(|64)_ADDR14	foo_abs
@@ -59,16 +59,16 @@ Disassembly of section \.text:
   a4:	(40 e5 00 02|02 00 e5 40) 	blea\+   cr1,0 <start>
 			a4: R_PPC(|64)_ADDR14	foo_abs
   a8:	(4c 86 0c 20|20 0c 86 4c) 	bcctr   4,4\*cr1\+eq,1
-  ac:	(4c 86 04 20|20 04 86 4c) 	bnectr  cr1
-  b0:	(4c a6 04 20|20 04 a6 4c) 	bcctr\+  4,4\*cr1\+eq
+  ac:	(4c c6 04 20|20 04 c6 4c) 	bnectr- cr1
+  b0:	(4c e6 04 20|20 04 e6 4c) 	bnectr\+ cr1
   b4:	(4c 86 0c 21|21 0c 86 4c) 	bcctrl  4,4\*cr1\+eq,1
-  b8:	(4c 86 04 21|21 04 86 4c) 	bnectrl cr1
-  bc:	(4c a6 04 21|21 04 a6 4c) 	bcctrl\+ 4,4\*cr1\+eq
-  c0:	(40 01 00 01|01 00 01 40) 	bdnzfl  gt,c0 <start\+0xc0>
+  b8:	(4c c6 04 21|21 04 c6 4c) 	bnectrl- cr1
+  bc:	(4c e6 04 21|21 04 e6 4c) 	bnectrl\+ cr1
+  c0:	(40 8a 00 01|01 00 8a 40) 	bnel    cr2,c0 <start\+0xc0>
 			c0: R_PPC(|64)_REL14	foo
-  c4:	(40 01 00 01|01 00 01 40) 	bdnzfl  gt,c4 <start\+0xc4>
+  c4:	(40 ca 00 01|01 00 ca 40) 	bnel-   cr2,c4 <start\+0xc4>
 			c4: R_PPC(|64)_REL14	foo
-  c8:	(40 01 00 01|01 00 01 40) 	bdnzfl  gt,c8 <start\+0xc8>
+  c8:	(40 ea 00 01|01 00 ea 40) 	bnel\+   cr2,c8 <start\+0xc8>
 			c8: R_PPC(|64)_REL14	foo
   cc:	(40 85 00 03|03 00 85 40) 	blela   cr1,0 <start>
 			cc: R_PPC(|64)_ADDR14	foo_abs
@@ -77,11 +77,11 @@ Disassembly of section \.text:
   d4:	(40 e5 00 03|03 00 e5 40) 	blela\+  cr1,0 <start>
 			d4: R_PPC(|64)_ADDR14	foo_abs
   d8:	(4c 86 08 20|20 08 86 4c) 	bclr    4,4\*cr1\+eq,1
-  dc:	(4c 86 00 20|20 00 86 4c) 	bnelr   cr1
-  e0:	(4c a6 00 20|20 00 a6 4c) 	bclr\+   4,4\*cr1\+eq
+  dc:	(4c c6 00 20|20 00 c6 4c) 	bnelr-  cr1
+  e0:	(4c e6 00 20|20 00 e6 4c) 	bnelr\+  cr1
   e4:	(4c 86 08 21|21 08 86 4c) 	bclrl   4,4\*cr1\+eq,1
-  e8:	(4c 86 00 21|21 00 86 4c) 	bnelrl  cr1
-  ec:	(4c a6 00 21|21 00 a6 4c) 	bclrl\+  4,4\*cr1\+eq
+  e8:	(4c c6 00 21|21 00 c6 4c) 	bnelrl- cr1
+  ec:	(4c e6 00 21|21 00 e6 4c) 	bnelrl\+ cr1
   f0:	(48 00 00 00|00 00 00 48) 	b       f0 <start\+0xf0>
 			f0: R_PPC(|64)_REL24	label
   f4:	(48 00 00 03|03 00 00 48) 	bla     0 <start>
@@ -582,3 +582,4 @@ Disassembly of section \.text:
  8a8:	(7d 6a 62 78|78 62 6a 7d) 	xor     r10,r11,r12
  8ac:	(69 6a 10 00|00 10 6a 69) 	xori    r10,r11,4096
  8b0:	(6d 6a 10 00|00 10 6a 6d) 	xoris   r10,r11,4096
+#pass

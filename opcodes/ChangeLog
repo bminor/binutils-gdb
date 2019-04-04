@@ -1,3 +1,39 @@
+2019-04-04  Peter Bergner  <bergner@linux.ibm.com>
+
+	PR gas/24349
+	* ppc-opc.c (valid_bo_pre_v2): Add comments.
+	(valid_bo_post_v2): Add support for 'at' branch hints.
+	(insert_bo): Only error on branch on ctr.
+	(get_bo_hint_mask): New function.
+	(insert_boe): Add new 'branch_taken' formal argument.  Add support
+	for inserting 'at' branch hints.
+	(extract_boe): Add new 'branch_taken' formal argument.  Add support
+	for extracting 'at' branch hints.
+	(insert_bom, extract_bom, insert_bop, extract_bop): New functions.
+	(BOE): Delete operand.
+	(BOM, BOP): New operands.
+	(RM): Update value.
+	(XLYLK, XLYLK_MASK, XLYBB_MASK): Delete.
+	(powerpc_opcodes) <bc-, bcl-, bca-, bcla-, bclr-, bclrl-, bcctr-,
+	bcctrl-, bctar-, bctarl->: Replace BOE with BOM.
+	(powerpc_opcodes) <bc+, bcl+, bca+, bcla+, bclr+, bclrl+, bcctr+,
+	bcctrl+, bctar+, bctarl+>: Replace BOE with BOP.
+	<bdnztar, bdnztarl, bdztar, bdztarl, btar, btarl, bdnztar-, bdnztarl-,
+	bdnztar+, bdnztarl+, bdztar-, bdztarl-, bdztar+, bdztarl+, bgetar,
+	bnltar, bgetarl, bnltarl, bletar, bngtar, bletarl, bngtarl, bnetar,
+	bnetarl, bnstar, bnutar, bnstarl, bnutarl, bgetar-, bnltar-, bgetarl-,
+	bnltarl-, bletar-, bngtar-, bletarl-, bngtarl-, bnetar-, bnetarl-,
+	bnstar-, bnutar-, bnstarl-, bnutarl-, bgetar+, bnltar+, bgetarl+,
+	bnltarl+, bletar+, bngtar+, bletarl+, bngtarl+, bnetar+, bnetarl+,
+	bnstar+, bnutar+, bnstarl+, bnutarl+, blttar, blttarl, bgttar, bgttarl,
+	beqtar, beqtarl, bsotar, buntar, bsotarl, buntarl, blttar-, blttarl-,
+	bgttar-, bgttarl-, beqtar-, beqtarl-, bsotar-, buntar-, bsotarl-,
+	buntarl-, blttar+, blttarl+, bgttar+, bgttarl+, beqtar+, beqtarl+,
+	bsotar+, buntar+, bsotarl+, buntarl+, bdnzftar, bdnzftarl, bdzftar,
+	bdzftarl, bftar, bftarl, bftar-, bftarl-, bftar+, bftarl+, bdnzttar,
+	bdnzttarl, bdzttar, bdzttarl, bttar, bttarl, bttar-, bttarl-, bttar+,
+	bttarl+>: New extended mnemonics.
+
 2019-03-28  Alan Modra  <amodra@gmail.com>
 
 	PR 24390

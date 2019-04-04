@@ -30,10 +30,10 @@ Disassembly of section \.text:
   50:	(4c 00 01 24|24 01 00 4c) 	rfebb   0
   54:	(4c 00 09 24|24 09 00 4c) 	rfebb   
   58:	(4c 00 09 24|24 09 00 4c) 	rfebb   
-  5c:	(4d 95 04 60|60 04 95 4d) 	bctar-  12,4\*cr5\+gt
-  60:	(4c 87 04 61|61 04 87 4c) 	bctarl- 4,4\*cr1\+so
-  64:	(4d ac 04 60|60 04 ac 4d) 	bctar\+  12,4\*cr3\+lt
-  68:	(4c a2 04 61|61 04 a2 4c) 	bctarl\+ 4,eq
+  5c:	(4d d5 04 60|60 04 d5 4d) 	bgttar- cr5
+  60:	(4c c7 04 61|61 04 c7 4c) 	bnstarl- cr1
+  64:	(4d ec 04 60|60 04 ec 4d) 	blttar\+ cr3
+  68:	(4c e2 04 61|61 04 e2 4c) 	bnetarl\+ 
   6c:	(4c 88 0c 60|60 0c 88 4c) 	bctar   4,4\*cr2\+lt,1
   70:	(4c 87 14 61|61 14 87 4c) 	bctarl  4,4\*cr1\+so,2
   74:	(7c 00 00 3c|3c 00 00 7c) 	waitasec
@@ -192,4 +192,122 @@ Disassembly of section \.text:
 .*:	(7d 81 49 2d|2d 49 81 7d) 	stwcx\.  r12,r1,r9
 .*:	(7d a0 51 ad|ad 51 a0 7d) 	stdcx\.  r13,0,r10
 .*:	(7d a1 51 ad|ad 51 a1 7d) 	stdcx\.  r13,r1,r10
+.*:	(4e 80 04 60|60 04 80 4e) 	btar
+.*:	(4e 80 04 60|60 04 80 4e) 	btar
+.*:	(4e 00 04 60|60 04 00 4e) 	bdnztar
+.*:	(4e 00 04 61|61 04 00 4e) 	bdnztarl
+.*:	(4e 40 04 60|60 04 40 4e) 	bdztar
+.*:	(4e 40 04 61|61 04 40 4e) 	bdztarl
+.*:	(4e 80 04 60|60 04 80 4e) 	btar
+.*:	(4e 80 04 61|61 04 80 4e) 	btarl
+.*:	(4f 00 04 60|60 04 00 4f) 	bdnztar-
+.*:	(4f 00 04 61|61 04 00 4f) 	bdnztarl-
+.*:	(4f 20 04 60|60 04 20 4f) 	bdnztar\+
+.*:	(4f 20 04 61|61 04 20 4f) 	bdnztarl\+
+.*:	(4f 40 04 60|60 04 40 4f) 	bdztar-
+.*:	(4f 40 04 61|61 04 40 4f) 	bdztarl-
+.*:	(4f 60 04 60|60 04 60 4f) 	bdztar\+
+.*:	(4f 60 04 61|61 04 60 4f) 	bdztarl\+
+.*:	(4c 90 04 60|60 04 90 4c) 	bgetar  cr4
+.*:	(4c 90 04 60|60 04 90 4c) 	bgetar  cr4
+.*:	(4c 90 04 61|61 04 90 4c) 	bgetarl cr4
+.*:	(4c 90 04 61|61 04 90 4c) 	bgetarl cr4
+.*:	(4c 91 04 60|60 04 91 4c) 	bletar  cr4
+.*:	(4c 91 04 60|60 04 91 4c) 	bletar  cr4
+.*:	(4c 91 04 61|61 04 91 4c) 	bletarl cr4
+.*:	(4c 91 04 61|61 04 91 4c) 	bletarl cr4
+.*:	(4c 92 04 60|60 04 92 4c) 	bnetar  cr4
+.*:	(4c 92 04 61|61 04 92 4c) 	bnetarl cr4
+.*:	(4c 93 04 60|60 04 93 4c) 	bnstar  cr4
+.*:	(4c 93 04 60|60 04 93 4c) 	bnstar  cr4
+.*:	(4c 93 04 61|61 04 93 4c) 	bnstarl cr4
+.*:	(4c 93 04 61|61 04 93 4c) 	bnstarl cr4
+.*:	(4c d0 04 60|60 04 d0 4c) 	bgetar- cr4
+.*:	(4c d0 04 60|60 04 d0 4c) 	bgetar- cr4
+.*:	(4c d0 04 61|61 04 d0 4c) 	bgetarl- cr4
+.*:	(4c d0 04 61|61 04 d0 4c) 	bgetarl- cr4
+.*:	(4c d1 04 60|60 04 d1 4c) 	bletar- cr4
+.*:	(4c d1 04 60|60 04 d1 4c) 	bletar- cr4
+.*:	(4c d1 04 61|61 04 d1 4c) 	bletarl- cr4
+.*:	(4c d1 04 61|61 04 d1 4c) 	bletarl- cr4
+.*:	(4c d2 04 60|60 04 d2 4c) 	bnetar- cr4
+.*:	(4c d2 04 61|61 04 d2 4c) 	bnetarl- cr4
+.*:	(4c d3 04 60|60 04 d3 4c) 	bnstar- cr4
+.*:	(4c d3 04 60|60 04 d3 4c) 	bnstar- cr4
+.*:	(4c d3 04 61|61 04 d3 4c) 	bnstarl- cr4
+.*:	(4c d3 04 61|61 04 d3 4c) 	bnstarl- cr4
+.*:	(4c f0 04 60|60 04 f0 4c) 	bgetar\+ cr4
+.*:	(4c f0 04 60|60 04 f0 4c) 	bgetar\+ cr4
+.*:	(4c f0 04 61|61 04 f0 4c) 	bgetarl\+ cr4
+.*:	(4c f0 04 61|61 04 f0 4c) 	bgetarl\+ cr4
+.*:	(4c f1 04 60|60 04 f1 4c) 	bletar\+ cr4
+.*:	(4c f1 04 60|60 04 f1 4c) 	bletar\+ cr4
+.*:	(4c f1 04 61|61 04 f1 4c) 	bletarl\+ cr4
+.*:	(4c f1 04 61|61 04 f1 4c) 	bletarl\+ cr4
+.*:	(4c f2 04 60|60 04 f2 4c) 	bnetar\+ cr4
+.*:	(4c f2 04 61|61 04 f2 4c) 	bnetarl\+ cr4
+.*:	(4c f3 04 60|60 04 f3 4c) 	bnstar\+ cr4
+.*:	(4c f3 04 60|60 04 f3 4c) 	bnstar\+ cr4
+.*:	(4c f3 04 61|61 04 f3 4c) 	bnstarl\+ cr4
+.*:	(4c f3 04 61|61 04 f3 4c) 	bnstarl\+ cr4
+.*:	(4d 90 04 60|60 04 90 4d) 	blttar  cr4
+.*:	(4d 90 04 61|61 04 90 4d) 	blttarl cr4
+.*:	(4d 91 04 60|60 04 91 4d) 	bgttar  cr4
+.*:	(4d 91 04 61|61 04 91 4d) 	bgttarl cr4
+.*:	(4d 92 04 60|60 04 92 4d) 	beqtar  cr4
+.*:	(4d 92 04 61|61 04 92 4d) 	beqtarl cr4
+.*:	(4d 93 04 60|60 04 93 4d) 	bsotar  cr4
+.*:	(4d 93 04 60|60 04 93 4d) 	bsotar  cr4
+.*:	(4d 93 04 61|61 04 93 4d) 	bsotarl cr4
+.*:	(4d 93 04 61|61 04 93 4d) 	bsotarl cr4
+.*:	(4d d0 04 60|60 04 d0 4d) 	blttar- cr4
+.*:	(4d d0 04 61|61 04 d0 4d) 	blttarl- cr4
+.*:	(4d d1 04 60|60 04 d1 4d) 	bgttar- cr4
+.*:	(4d d1 04 61|61 04 d1 4d) 	bgttarl- cr4
+.*:	(4d d2 04 60|60 04 d2 4d) 	beqtar- cr4
+.*:	(4d d2 04 61|61 04 d2 4d) 	beqtarl- cr4
+.*:	(4d d3 04 60|60 04 d3 4d) 	bsotar- cr4
+.*:	(4d d3 04 60|60 04 d3 4d) 	bsotar- cr4
+.*:	(4d d3 04 61|61 04 d3 4d) 	bsotarl- cr4
+.*:	(4d d3 04 61|61 04 d3 4d) 	bsotarl- cr4
+.*:	(4d f0 04 60|60 04 f0 4d) 	blttar\+ cr4
+.*:	(4d f0 04 61|61 04 f0 4d) 	blttarl\+ cr4
+.*:	(4d f1 04 60|60 04 f1 4d) 	bgttar\+ cr4
+.*:	(4d f1 04 61|61 04 f1 4d) 	bgttarl\+ cr4
+.*:	(4d f2 04 60|60 04 f2 4d) 	beqtar\+ cr4
+.*:	(4d f2 04 61|61 04 f2 4d) 	beqtarl\+ cr4
+.*:	(4d f3 04 60|60 04 f3 4d) 	bsotar\+ cr4
+.*:	(4d f3 04 60|60 04 f3 4d) 	bsotar\+ cr4
+.*:	(4d f3 04 61|61 04 f3 4d) 	bsotarl\+ cr4
+.*:	(4d f3 04 61|61 04 f3 4d) 	bsotarl\+ cr4
+.*:	(4c 08 04 60|60 04 08 4c) 	bdnzftar 4\*cr2\+lt
+.*:	(4c 08 04 61|61 04 08 4c) 	bdnzftarl 4\*cr2\+lt
+.*:	(4c 48 04 60|60 04 48 4c) 	bdzftar 4\*cr2\+lt
+.*:	(4c 48 04 61|61 04 48 4c) 	bdzftarl 4\*cr2\+lt
+.*:	(4c 88 04 60|60 04 88 4c) 	bgetar  cr2
+.*:	(4c 88 04 61|61 04 88 4c) 	bgetarl cr2
+.*:	(4c c8 04 60|60 04 c8 4c) 	bgetar- cr2
+.*:	(4c c8 04 61|61 04 c8 4c) 	bgetarl- cr2
+.*:	(4c e8 04 60|60 04 e8 4c) 	bgetar\+ cr2
+.*:	(4c e8 04 61|61 04 e8 4c) 	bgetarl\+ cr2
+.*:	(4d 08 04 60|60 04 08 4d) 	bdnzttar 4\*cr2\+lt
+.*:	(4d 08 04 61|61 04 08 4d) 	bdnzttarl 4\*cr2\+lt
+.*:	(4d 48 04 60|60 04 48 4d) 	bdzttar 4\*cr2\+lt
+.*:	(4d 48 04 61|61 04 48 4d) 	bdzttarl 4\*cr2\+lt
+.*:	(4d 88 04 60|60 04 88 4d) 	blttar  cr2
+.*:	(4d 88 04 61|61 04 88 4d) 	blttarl cr2
+.*:	(4d c8 04 60|60 04 c8 4d) 	blttar- cr2
+.*:	(4d c8 04 61|61 04 c8 4d) 	blttarl- cr2
+.*:	(4d e8 04 60|60 04 e8 4d) 	blttar\+ cr2
+.*:	(4d e8 04 61|61 04 e8 4d) 	blttarl\+ cr2
+.*:	(4d ca 04 60|60 04 ca 4d) 	beqtar- cr2
+.*:	(4d ca 04 61|61 04 ca 4d) 	beqtarl- cr2
+.*:	(4d ea 04 60|60 04 ea 4d) 	beqtar\+ cr2
+.*:	(4d ea 04 61|61 04 ea 4d) 	beqtarl\+ cr2
+.*:	(4d 89 04 60|60 04 89 4d) 	bgttar  cr2
+.*:	(4d 89 04 60|60 04 89 4d) 	bgttar  cr2
+.*:	(4d 89 1c 60|60 1c 89 4d) 	bctar   12,4\*cr2\+gt,3
+.*:	(4d 89 04 61|61 04 89 4d) 	bgttarl cr2
+.*:	(4d 89 04 61|61 04 89 4d) 	bgttarl cr2
+.*:	(4d 89 1c 61|61 1c 89 4d) 	bctarl  12,4\*cr2\+gt,3
 #pass

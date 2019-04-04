@@ -36,9 +36,9 @@ start:
 	andis.	4,5,6
 	attn
 	ba      label_abs
-	bc      0,1,foo
-	bc-     0,1,foo
-	bc+     0,1,foo
+	bc      4,10,foo
+	bc-     4,10,foo
+	bc+     4,10,foo
 	bca     4,5,foo_abs
 	bca-    4,5,foo_abs
 	bca+    4,5,foo_abs
@@ -48,9 +48,9 @@ start:
 	bcctrl  4,6,1
 	bcctrl- 4,6
 	bcctrl+ 4,6
-	bcl     0,1,foo
-	bcl-    0,1,foo
-	bcl+    0,1,foo
+	bcl     4,10,foo
+	bcl-    4,10,foo
+	bcl+    4,10,foo
 	bcla    4,5,foo_abs
 	bcla-   4,5,foo_abs
 	bcla+   4,5,foo_abs

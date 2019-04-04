@@ -321,12 +321,16 @@ valid_bo_pre_v2 (int64_t value)
 	 1z1zz
   */
   if ((value & 0x14) == 0)
+    /* BO: 0000y, 0001y, 0100y, 0101y.  */
     return 1;
   else if ((value & 0x14) == 0x4)
+    /* BO: 001zy, 011zy.  */
     return (value & 0x2) == 0;
   else if ((value & 0x14) == 0x10)
+    /* BO: 1z00y, 1z01y.  */
     return (value & 0x8) == 0;
   else
+    /* BO: 1z1zz.  */
     return value == 0x14;
 }
 
@@ -346,9 +350,17 @@ valid_bo_post_v2 (int64_t value)
 	 1z1zz
   */
   if ((value & 0x14) == 0)
+    /* BO: 0000z, 0001z, 0100z, 0101z.  */
     return (value & 0x1) == 0;
   else if ((value & 0x14) == 0x14)
+    /* BO: 1z1zz.  */
     return value == 0x14;
+  else if ((value & 0x14) == 0x4)
+    /* BO: 001at, 011at, with "at" == 0b01 being reserved.  */
+    return (value & 0x3) != 1;
+  else if ((value & 0x14) == 0x10)
+    /* BO: 1a00t, 1a01t, with "at" == 0b01 being reserved.  */
+    return (value & 0x9) != 1;
   else
     return 1;
 }
@@ -382,7 +394,8 @@ insert_bo (uint64_t insn,
 {
   if (!valid_bo (value, dialect, 0))
     *errmsg = _("invalid conditional option");
-  else if (PPC_OP (insn) == 19 && (insn & 0x400) && ! (value & 4))
+  else if (PPC_OP (insn) == 19
+	   && (((insn >> 1) & 0x3ff) == 528) && ! (value & 4))
     *errmsg = _("invalid counter access");
   return insn | ((value & 0x1f) << 21);
 }
@@ -398,35 +411,128 @@ extract_bo (uint64_t insn,
   return value;
 }
 
-/* The BO field in a B form instruction when the + or - modifier is
-   used.  This is like the BO field, but it must be even.  When
-   extracting it, we force it to be even.  */
+/* For the given BO value, return a bit mask detailing which bits
+   define the branch hints.  */
+
+static int64_t
+get_bo_hint_mask (int64_t bo, ppc_cpu_t dialect)
+{
+  if ((dialect & ISA_V2) == 0)
+    {
+      if ((bo & 0x14) != 0x14)
+	/* BO: 0000y, 0001y, 001zy, 0100y, 0101y, 011zy, 1z00y, 1z01y .  */
+	return 1;
+      else
+	/* BO: 1z1zz.  */
+	return 0;
+    }
+  else
+    {
+      if ((bo & 0x14) == 0x4)
+	/* BO: 001at, 011at.  */
+	return 0x3;
+      else if ((bo & 0x14) == 0x10)
+	/* BO: 1a00t, 1a01t.  */
+	return 0x9;
+      else
+	/* BO: 0000z, 0001z, 0100z, 0101z, 1z1zz.  */
+	return 0;
+    }
+}
+
+/* The BO field in a B form instruction when the + or - modifier is used.  */
 
 static uint64_t
 insert_boe (uint64_t insn,
 	    int64_t value,
 	    ppc_cpu_t dialect,
-	    const char **errmsg)
+	    const char **errmsg,
+	    int branch_taken)
 {
-  if (!valid_bo (value, dialect, 0))
-    *errmsg = _("invalid conditional option");
-  else if (PPC_OP (insn) == 19 && (insn & 0x400) && ! (value & 4))
-    *errmsg = _("invalid counter access");
-  else if ((value & 1) != 0)
-    *errmsg = _("attempt to set y bit when using + or - modifier");
+  int64_t implied_hint;
+  int64_t hint_mask = get_bo_hint_mask (value, dialect);
 
-  return insn | ((value & 0x1f) << 21);
+  if (branch_taken)
+    implied_hint = hint_mask;
+  else
+    implied_hint = hint_mask & ~1;
+
+  /* The branch hint bit(s) in the BO field must either be zero or exactly
+     match the branch hint bits implied by the '+' or '-' modifier.  */
+  if (implied_hint == 0)
+    *errmsg = _("BO value implies no branch hint, when using + or - modifier");
+  else if ((value & hint_mask) != 0
+	   && (value & hint_mask) != implied_hint)
+    {
+      if ((dialect & ISA_V2) == 0)
+	*errmsg = _("attempt to set y bit when using + or - modifier");
+      else
+	*errmsg = _("attempt to set 'at' bits when using + or - modifier");
+    }
+
+  value |= implied_hint;
+
+  return insert_bo (insn, value, dialect, errmsg);
 }
 
 static int64_t
 extract_boe (uint64_t insn,
 	     ppc_cpu_t dialect,
-	     int *invalid)
+	     int *invalid,
+	     int branch_taken)
 {
   int64_t value = (insn >> 21) & 0x1f;
-  if (!valid_bo (value, dialect, 1))
+  int64_t implied_hint;
+  int64_t hint_mask = get_bo_hint_mask (value, dialect);
+
+  if (branch_taken)
+    implied_hint = hint_mask;
+  else
+    implied_hint = hint_mask & ~1;
+
+  if (!valid_bo (value, dialect, 1)
+      || implied_hint == 0
+      || (value & hint_mask) != implied_hint)
     *invalid = 1;
-  return value & 0x1e;
+  return value;
+}
+
+/* The BO field in a B form instruction when the - modifier is used.  */
+
+static uint64_t
+insert_bom (uint64_t insn,
+	    int64_t value,
+	    ppc_cpu_t dialect,
+	    const char **errmsg)
+{
+  return insert_boe (insn, value, dialect, errmsg, 0);
+}
+
+static int64_t
+extract_bom (uint64_t insn,
+	     ppc_cpu_t dialect,
+	     int *invalid)
+{
+  return extract_boe (insn, dialect, invalid, 0);
+}
+
+/* The BO field in a B form instruction when the + modifier is used.  */
+
+static uint64_t
+insert_bop (uint64_t insn,
+	    int64_t value,
+	    ppc_cpu_t dialect,
+	    const char **errmsg)
+{
+  return insert_boe (insn, value, dialect, errmsg, 1);
+}
+
+static int64_t
+extract_bop (uint64_t insn,
+	     ppc_cpu_t dialect,
+	     int *invalid)
+{
+  return extract_boe (insn, dialect, invalid, 1);
 }
 
 /* The DCMX field in a X form instruction when the field is split
@@ -1820,13 +1926,16 @@ const struct powerpc_operand powerpc_operands[] =
 #define BO_MASK (0x1f << 21)
   { 0x1f, 21, insert_bo, extract_bo, 0 },
 
-  /* The BO field in a B form instruction when the + or - modifier is
-     used.  This is like the BO field, but it must be even.  */
-#define BOE BO + 1
-  { 0x1e, 21, insert_boe, extract_boe, 0 },
+  /* The BO field in a B form instruction when the - modifier is used.  */
+#define BOM BO + 1
+  { 0x1f, 21, insert_bom, extract_bom, 0 },
+
+  /* The BO field in a B form instruction when the + modifier is used.  */
+#define BOP BOM + 1
+  { 0x1f, 21, insert_bop, extract_bop, 0 },
 
   /* The RM field in an X form instruction.  */
-#define RM BOE + 1
+#define RM BOP + 1
 #define DD RM
   { 0x3, 11, NULL, NULL, 0 },
 
@@ -3259,22 +3368,14 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
   (XLLK ((op), (xop), (lk)) | ((((uint64_t)(bo)) & 0x1f) << 21))
 #define XLO_MASK (XL_MASK | BO_MASK)
 
-/* An XL form instruction which explicitly sets the y bit of the BO
-   field.  */
-#define XLYLK(op, xop, y, lk)			\
-  (XLLK ((op), (xop), (lk))			\
-   | ((((uint64_t)(y)) & 1) << 21))
-#define XLYLK_MASK (XL_MASK | Y_MASK)
-
 /* An XL form instruction which sets the BO field and the condition
    bits of the BI field.  */
 #define XLOCB(op, bo, cb, xop, lk) \
   (XLO ((op), (bo), (xop), (lk)) | ((((uint64_t)(cb)) & 3) << 16))
 #define XLOCB_MASK XLOCB (0x3f, 0x1f, 0x3, 0x3ff, 1)
 
-/* An XL_MASK or XLYLK_MASK or XLOCB_MASK with the BB field fixed.  */
+/* An XL_MASK or XLOCB_MASK with the BB field fixed.  */
 #define XLBB_MASK (XL_MASK | BB_MASK)
-#define XLYBB_MASK (XLYLK_MASK | BB_MASK)
 #define XLBOCBBB_MASK (XLOCB_MASK | BB_MASK)
 
 /* A mask for branch instructions using the BH field.  */
@@ -4689,17 +4790,17 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"btla",     BBO(16,BOT,1,1),		BBOAT_MASK,    PPCCOM,	 PPCVLE,	{BI, BDA}},
 {"bbtla",    BBO(16,BOT,1,1),		BBOAT_MASK,    PWRCOM,	 PPCVLE,	{BI, BDA}},
 
-{"bc-",		B(16,0,0),	B_MASK,	     PPCCOM,	PPCVLE,		{BOE, BI, BDM}},
-{"bc+",		B(16,0,0),	B_MASK,	     PPCCOM,	PPCVLE,		{BOE, BI, BDP}},
+{"bc-",		B(16,0,0),	B_MASK,	     PPCCOM,	PPCVLE,		{BOM, BI, BDM}},
+{"bc+",		B(16,0,0),	B_MASK,	     PPCCOM,	PPCVLE,		{BOP, BI, BDP}},
 {"bc",		B(16,0,0),	B_MASK,	     COM,	PPCVLE,		{BO, BI, BD}},
-{"bcl-",	B(16,0,1),	B_MASK,	     PPCCOM,	PPCVLE,		{BOE, BI, BDM}},
-{"bcl+",	B(16,0,1),	B_MASK,	     PPCCOM,	PPCVLE,		{BOE, BI, BDP}},
+{"bcl-",	B(16,0,1),	B_MASK,	     PPCCOM,	PPCVLE,		{BOM, BI, BDM}},
+{"bcl+",	B(16,0,1),	B_MASK,	     PPCCOM,	PPCVLE,		{BOP, BI, BDP}},
 {"bcl",		B(16,0,1),	B_MASK,	     COM,	PPCVLE,		{BO, BI, BD}},
-{"bca-",	B(16,1,0),	B_MASK,	     PPCCOM,	PPCVLE,		{BOE, BI, BDMA}},
-{"bca+",	B(16,1,0),	B_MASK,	     PPCCOM,	PPCVLE,		{BOE, BI, BDPA}},
+{"bca-",	B(16,1,0),	B_MASK,	     PPCCOM,	PPCVLE,		{BOM, BI, BDMA}},
+{"bca+",	B(16,1,0),	B_MASK,	     PPCCOM,	PPCVLE,		{BOP, BI, BDPA}},
 {"bca",		B(16,1,0),	B_MASK,	     COM,	PPCVLE,		{BO, BI, BDA}},
-{"bcla-",	B(16,1,1),	B_MASK,	     PPCCOM,	PPCVLE,		{BOE, BI, BDMA}},
-{"bcla+",	B(16,1,1),	B_MASK,	     PPCCOM,	PPCVLE,		{BOE, BI, BDPA}},
+{"bcla-",	B(16,1,1),	B_MASK,	     PPCCOM,	PPCVLE,		{BOM, BI, BDMA}},
+{"bcla+",	B(16,1,1),	B_MASK,	     PPCCOM,	PPCVLE,		{BOP, BI, BDPA}},
 {"bcla",	B(16,1,1),	B_MASK,	     COM,	PPCVLE,		{BO, BI, BDA}},
 
 {"svc",		SC(17,0,0),	SC_MASK,     POWER,	PPCVLE,		{SVC_LEV, FL1, FL2}},
@@ -4935,10 +5036,10 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"btlr+",    XLO(19,BOTP4,16,0),	XLBOBB_MASK,   ISA_V2,	 PPCVLE,	{BI}},
 {"btlrl+",   XLO(19,BOTP4,16,1),	XLBOBB_MASK,   ISA_V2,	 PPCVLE,	{BI}},
 
-{"bclr-",    XLYLK(19,16,0,0),		XLYBB_MASK,    PPCCOM,	 PPCVLE,	{BOE, BI}},
-{"bclrl-",   XLYLK(19,16,0,1),		XLYBB_MASK,    PPCCOM,	 PPCVLE,	{BOE, BI}},
-{"bclr+",    XLYLK(19,16,1,0),		XLYBB_MASK,    PPCCOM,	 PPCVLE,	{BOE, BI}},
-{"bclrl+",   XLYLK(19,16,1,1),		XLYBB_MASK,    PPCCOM,	 PPCVLE,	{BOE, BI}},
+{"bclr-",    XLLK(19,16,0),		XLBB_MASK,     PPCCOM,	 PPCVLE,	{BOM, BI}},
+{"bclrl-",   XLLK(19,16,1),		XLBB_MASK,     PPCCOM,	 PPCVLE,	{BOM, BI}},
+{"bclr+",    XLLK(19,16,0),		XLBB_MASK,     PPCCOM,	 PPCVLE,	{BOP, BI}},
+{"bclrl+",   XLLK(19,16,1),		XLBB_MASK,     PPCCOM,	 PPCVLE,	{BOP, BI}},
 {"bclr",     XLLK(19,16,0),		XLBH_MASK,     PPCCOM,	 PPCVLE,	{BO, BI, BH}},
 {"bcr",	     XLLK(19,16,0),		XLBB_MASK,     PWRCOM,	 PPCVLE,	{BO, BI}},
 {"bclrl",    XLLK(19,16,1),		XLBH_MASK,     PPCCOM,	 PPCVLE,	{BO, BI, BH}},
@@ -5140,19 +5241,131 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"btctr+",  XLO(19,BOTP4,528,0),	XLBOBB_MASK,   ISA_V2,	 PPCVLE,	{BI}},
 {"btctrl+", XLO(19,BOTP4,528,1),	XLBOBB_MASK,   ISA_V2,	 PPCVLE,	{BI}},
 
-{"bcctr-",  XLYLK(19,528,0,0),		XLYBB_MASK,    PPCCOM,	 PPCVLE,	{BOE, BI}},
-{"bcctrl-", XLYLK(19,528,0,1),		XLYBB_MASK,    PPCCOM,	 PPCVLE,	{BOE, BI}},
-{"bcctr+",  XLYLK(19,528,1,0),		XLYBB_MASK,    PPCCOM,	 PPCVLE,	{BOE, BI}},
-{"bcctrl+", XLYLK(19,528,1,1),		XLYBB_MASK,    PPCCOM,	 PPCVLE,	{BOE, BI}},
+{"bcctr-",  XLLK(19,528,0),		XLBB_MASK,     PPCCOM,	 PPCVLE,	{BOM, BI}},
+{"bcctrl-", XLLK(19,528,1),		XLBB_MASK,     PPCCOM,	 PPCVLE,	{BOM, BI}},
+{"bcctr+",  XLLK(19,528,0),		XLBB_MASK,     PPCCOM,	 PPCVLE,	{BOP, BI}},
+{"bcctrl+", XLLK(19,528,1),		XLBB_MASK,     PPCCOM,	 PPCVLE,	{BOP, BI}},
 {"bcctr",   XLLK(19,528,0),		XLBH_MASK,     PPCCOM,	 PPCVLE,	{BO, BI, BH}},
 {"bcc",	    XLLK(19,528,0),		XLBB_MASK,     PWRCOM,	 PPCVLE,	{BO, BI}},
 {"bcctrl",  XLLK(19,528,1),		XLBH_MASK,     PPCCOM,	 PPCVLE,	{BO, BI, BH}},
 {"bccl",    XLLK(19,528,1),		XLBB_MASK,     PWRCOM,	 PPCVLE,	{BO, BI}},
 
-{"bctar-",  XLYLK(19,560,0,0),		XLYBB_MASK,    POWER8,	 PPCVLE,	{BOE, BI}},
-{"bctarl-", XLYLK(19,560,0,1),		XLYBB_MASK,    POWER8,	 PPCVLE,	{BOE, BI}},
-{"bctar+",  XLYLK(19,560,1,0),		XLYBB_MASK,    POWER8,	 PPCVLE,	{BOE, BI}},
-{"bctarl+", XLYLK(19,560,1,1),		XLYBB_MASK,    POWER8,	 PPCVLE,	{BOE, BI}},
+{"bdnztar",   XLO(19,BODNZ,560,0),	XLBOBIBB_MASK, POWER8,   PPCVLE,	{0}},
+{"bdnztarl",  XLO(19,BODNZ,560,1),	XLBOBIBB_MASK, POWER8,   PPCVLE,	{0}},
+{"bdztar",    XLO(19,BODZ,560,0),	XLBOBIBB_MASK, POWER8,   PPCVLE,	{0}},
+{"bdztarl",   XLO(19,BODZ,560,1),	XLBOBIBB_MASK, POWER8,   PPCVLE,	{0}},
+{"btar",      XLO(19,BOU,560,0),	XLBOBIBB_MASK, POWER8,   PPCVLE,	{0}},
+{"btarl",     XLO(19,BOU,560,1),	XLBOBIBB_MASK, POWER8,   PPCVLE,	{0}},
+{"bdnztar-",  XLO(19,BODNZM4,560,0),    XLBOBIBB_MASK, POWER8,   PPCVLE,	{0}},
+{"bdnztarl-", XLO(19,BODNZM4,560,1),    XLBOBIBB_MASK, POWER8,   PPCVLE,	{0}},
+{"bdnztar+",  XLO(19,BODNZP4,560,0),    XLBOBIBB_MASK, POWER8,   PPCVLE,	{0}},
+{"bdnztarl+", XLO(19,BODNZP4,560,1),    XLBOBIBB_MASK, POWER8,   PPCVLE,	{0}},
+{"bdztar-",   XLO(19,BODZM4,560,0),     XLBOBIBB_MASK, POWER8,   PPCVLE,	{0}},
+{"bdztarl-",  XLO(19,BODZM4,560,1),     XLBOBIBB_MASK, POWER8,   PPCVLE,	{0}},
+{"bdztar+",   XLO(19,BODZP4,560,0),     XLBOBIBB_MASK, POWER8,   PPCVLE,	{0}},
+{"bdztarl+",  XLO(19,BODZP4,560,1),     XLBOBIBB_MASK, POWER8,   PPCVLE,	{0}},
+
+{"bgetar",  XLOCB(19,BOF,CBLT,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bnltar",  XLOCB(19,BOF,CBLT,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bgetarl", XLOCB(19,BOF,CBLT,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bnltarl", XLOCB(19,BOF,CBLT,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bletar",  XLOCB(19,BOF,CBGT,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bngtar",  XLOCB(19,BOF,CBGT,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bletarl", XLOCB(19,BOF,CBGT,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bngtarl", XLOCB(19,BOF,CBGT,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bnetar",  XLOCB(19,BOF,CBEQ,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bnetarl", XLOCB(19,BOF,CBEQ,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bnstar",  XLOCB(19,BOF,CBSO,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bnutar",  XLOCB(19,BOF,CBSO,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bnstarl", XLOCB(19,BOF,CBSO,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bnutarl", XLOCB(19,BOF,CBSO,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bgetar-", XLOCB(19,BOFM4,CBLT,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bnltar-", XLOCB(19,BOFM4,CBLT,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bgetarl-",XLOCB(19,BOFM4,CBLT,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bnltarl-",XLOCB(19,BOFM4,CBLT,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bletar-", XLOCB(19,BOFM4,CBGT,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bngtar-", XLOCB(19,BOFM4,CBGT,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bletarl-",XLOCB(19,BOFM4,CBGT,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bngtarl-",XLOCB(19,BOFM4,CBGT,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bnetar-", XLOCB(19,BOFM4,CBEQ,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bnetarl-",XLOCB(19,BOFM4,CBEQ,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bnstar-", XLOCB(19,BOFM4,CBSO,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bnutar-", XLOCB(19,BOFM4,CBSO,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bnstarl-",XLOCB(19,BOFM4,CBSO,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bnutarl-",XLOCB(19,BOFM4,CBSO,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bgetar+", XLOCB(19,BOFP4,CBLT,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bnltar+", XLOCB(19,BOFP4,CBLT,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bgetarl+",XLOCB(19,BOFP4,CBLT,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bnltarl+",XLOCB(19,BOFP4,CBLT,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bletar+", XLOCB(19,BOFP4,CBGT,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bngtar+", XLOCB(19,BOFP4,CBGT,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bletarl+",XLOCB(19,BOFP4,CBGT,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bngtarl+",XLOCB(19,BOFP4,CBGT,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bnetar+", XLOCB(19,BOFP4,CBEQ,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bnetarl+",XLOCB(19,BOFP4,CBEQ,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bnstar+", XLOCB(19,BOFP4,CBSO,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bnutar+", XLOCB(19,BOFP4,CBSO,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bnstarl+",XLOCB(19,BOFP4,CBSO,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bnutarl+",XLOCB(19,BOFP4,CBSO,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"blttar",  XLOCB(19,BOT,CBLT,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"blttarl", XLOCB(19,BOT,CBLT,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bgttar",  XLOCB(19,BOT,CBGT,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bgttarl", XLOCB(19,BOT,CBGT,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"beqtar",  XLOCB(19,BOT,CBEQ,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"beqtarl", XLOCB(19,BOT,CBEQ,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bsotar",  XLOCB(19,BOT,CBSO,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"buntar",  XLOCB(19,BOT,CBSO,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bsotarl", XLOCB(19,BOT,CBSO,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"buntarl", XLOCB(19,BOT,CBSO,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"blttar-", XLOCB(19,BOTM4,CBLT,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"blttarl-",XLOCB(19,BOTM4,CBLT,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bgttar-", XLOCB(19,BOTM4,CBGT,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bgttarl-",XLOCB(19,BOTM4,CBGT,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"beqtar-", XLOCB(19,BOTM4,CBEQ,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"beqtarl-",XLOCB(19,BOTM4,CBEQ,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bsotar-", XLOCB(19,BOTM4,CBSO,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"buntar-", XLOCB(19,BOTM4,CBSO,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bsotarl-",XLOCB(19,BOTM4,CBSO,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"buntarl-",XLOCB(19,BOTM4,CBSO,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"blttar+", XLOCB(19,BOTP4,CBLT,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"blttarl+",XLOCB(19,BOTP4,CBLT,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bgttar+", XLOCB(19,BOTP4,CBGT,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bgttarl+",XLOCB(19,BOTP4,CBGT,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"beqtar+", XLOCB(19,BOTP4,CBEQ,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"beqtarl+",XLOCB(19,BOTP4,CBEQ,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bsotar+", XLOCB(19,BOTP4,CBSO,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"buntar+", XLOCB(19,BOTP4,CBSO,560,0),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"bsotarl+",XLOCB(19,BOTP4,CBSO,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+{"buntarl+",XLOCB(19,BOTP4,CBSO,560,1),	XLBOCBBB_MASK, POWER8,	 PPCVLE,	{CR}},
+
+{"bdnzftar",  XLO(19,BODNZF,560,0),     XLBOBB_MASK,   POWER8,   PPCVLE,	{BI}},
+{"bdnzftarl", XLO(19,BODNZF,560,1),     XLBOBB_MASK,   POWER8,   PPCVLE,	{BI}},
+{"bdzftar",   XLO(19,BODZF,560,0),	XLBOBB_MASK,   POWER8,   PPCVLE,	{BI}},
+{"bdzftarl",  XLO(19,BODZF,560,1),	XLBOBB_MASK,   POWER8,   PPCVLE,	{BI}},
+
+{"bftar",     XLO(19,BOF,560,0),	XLBOBB_MASK,   POWER8,	 PPCVLE,	{BI}},
+{"bftarl",    XLO(19,BOF,560,1),	XLBOBB_MASK,   POWER8,	 PPCVLE,	{BI}},
+{"bftar-",    XLO(19,BOFM4,560,0),	XLBOBB_MASK,   POWER8,	 PPCVLE,	{BI}},
+{"bftarl-",   XLO(19,BOFM4,560,1),	XLBOBB_MASK,   POWER8,	 PPCVLE,	{BI}},
+{"bftar+",    XLO(19,BOFP4,560,0),	XLBOBB_MASK,   POWER8,	 PPCVLE,	{BI}},
+{"bftarl+",   XLO(19,BOFP4,560,1),	XLBOBB_MASK,   POWER8,	 PPCVLE,	{BI}},
+
+{"bdnzttar",  XLO(19,BODNZT,560,0),     XLBOBB_MASK,   POWER8,   PPCVLE,	{BI}},
+{"bdnzttarl", XLO(19,BODNZT,560,1),     XLBOBB_MASK,   POWER8,   PPCVLE,	{BI}},
+{"bdzttar",   XLO(19,BODZT,560,0),	XLBOBB_MASK,   POWER8,   PPCVLE,	{BI}},
+{"bdzttarl",  XLO(19,BODZT,560,1),	XLBOBB_MASK,   POWER8,   PPCVLE,	{BI}},
+
+{"bttar",     XLO(19,BOT,560,0),	XLBOBB_MASK,   POWER8,	 PPCVLE,	{BI}},
+{"bttarl",    XLO(19,BOT,560,1),	XLBOBB_MASK,   POWER8,	 PPCVLE,	{BI}},
+{"bttar-",    XLO(19,BOTM4,560,0),	XLBOBB_MASK,   POWER8,	 PPCVLE,	{BI}},
+{"bttarl-",   XLO(19,BOTM4,560,1),	XLBOBB_MASK,   POWER8,	 PPCVLE,	{BI}},
+{"bttar+",    XLO(19,BOTP4,560,0),	XLBOBB_MASK,   POWER8,	 PPCVLE,	{BI}},
+{"bttarl+",   XLO(19,BOTP4,560,1),	XLBOBB_MASK,   POWER8,	 PPCVLE,	{BI}},
+
+{"bctar-",  XLLK(19,560,0),		XLBB_MASK,     POWER8,	 PPCVLE,	{BOM, BI}},
+{"bctarl-", XLLK(19,560,1),		XLBB_MASK,     POWER8,	 PPCVLE,	{BOM, BI}},
+{"bctar+",  XLLK(19,560,0),		XLBB_MASK,     POWER8,	 PPCVLE,	{BOP, BI}},
+{"bctarl+", XLLK(19,560,1),		XLBB_MASK,     POWER8,	 PPCVLE,	{BOP, BI}},
 {"bctar",   XLLK(19,560,0),		XLBH_MASK,     POWER8,	 PPCVLE,	{BO, BI, BH}},
 {"bctarl",  XLLK(19,560,1),		XLBH_MASK,     POWER8,	 PPCVLE,	{BO, BI, BH}},
 

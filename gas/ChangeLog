@@ -1,3 +1,28 @@
+2019-04-04  Peter Bergner  <bergner@linux.ibm.com>
+
+	PR gas/24349
+	* testsuite/gas/ppc/power8.s: (bdnztar, bdnztarl, bdztar, bdztarl,
+	btar, btarl, bdnztar-, bdnztarl-, bdnztar+, bdnztarl+, bdztar-,
+	bdztarl-, bdztar+, bdztarl+, bgetar, bnltar, bgetarl, bnltarl,
+	bletar, bngtar, bletarl, bngtarl, bnetar, bnetarl, bnstar, bnutar,
+	bnstarl, bnutarl, bgetar-, bnltar-, bgetarl-, bnltarl-, bletar-,
+	bngtar-, bletarl-, bngtarl-, bnetar-, bnetarl-, bnstar-, bnutar-,
+	bnstarl-, bnutarl-, bgetar+, bnltar+, bgetarl+, bnltarl+, bletar+,
+	bngtar+, bletarl+, bngtarl+, bnetar+, bnetarl+, bnstar+, bnutar+,
+	bnstarl+, bnutarl+, blttar, blttarl, bgttar, bgttarl, beqtar,
+	beqtarl, bsotar, buntar, bsotarl, buntarl, blttar-, blttarl-,
+	bgttar-, bgttarl-, beqtar-, beqtarl-, bsotar-, buntar-, bsotarl-,
+	buntarl-, blttar+, blttarl+, bgttar+, bgttarl+, beqtar+, beqtarl+,
+	bsotar+, buntar+, bsotarl+, buntarl+, bdnzftar, bdnzftarl, bdzftar,
+	bdzftarl, bftar, bftarl, bftar-, bftarl-, bftar+, bftarl+, bdnzttar,
+	bdnzttarl, bdzttar, bdzttarl, bttar, bttarl, bttar-, bttarl-, bttar+,
+	bttarl+): Add tests of extended mnemonics.
+	* testsuite/gas/ppc/power8.d: Likewise.  Update previous bctar tests
+	to expect new extended mnemonics.
+	* testsuite/gas/ppc/a2.s: <bc, bc-, bc+, bcl, bcl-, bcl+>: Update test
+	to not use illegal BO value.  Use a more convenient BI value.
+	* testsuite/gas/ppc/a2.d: Update tests for new expect output.
+
 2019-04-03  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* config/tc-xtensa.c (convert_frag_immed): Drop
