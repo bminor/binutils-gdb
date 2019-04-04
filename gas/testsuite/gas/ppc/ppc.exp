@@ -22,6 +22,10 @@ if { ![istarget "powerpc*-*-*"] && ![istarget "rs6000-*-*"] } then {
     return
 }
 
+run_dump_test "bcyerr"
+run_dump_test "bcy"
+run_dump_test "bcaterr"
+run_dump_test "bcat"
 run_dump_test "regnames"
 run_dump_test "misalign"
 run_dump_test "misalign2"

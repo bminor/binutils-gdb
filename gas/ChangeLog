@@ -1,5 +1,16 @@
 2019-04-05  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/gas/ppc/bc.s,
+	* testsuite/gas/ppc/bcat.d,
+	* testsuite/gas/ppc/bcaterr.d,
+	* testsuite/gas/ppc/bcaterr.l,
+	* testsuite/gas/ppc/bcy.d,
+	* testsuite/gas/ppc/bcyerr.d,
+	* testsuite/gas/ppc/bcyerr.l: New tests.
+	* testsuite/gas/ppc/ppc.exp: Run them.
+
+2019-04-05  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/gas/ppc/476.d: Remove trailing spaces.
 	* testsuite/gas/ppc/a2.d: Likewise.
 	* testsuite/gas/ppc/booke.d: Likewise.
