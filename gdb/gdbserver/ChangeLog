@@ -1,3 +1,8 @@
+2019-04-05  Tom Tromey  <tromey@adacore.com>
+
+	* server.c (gdbserver_usage): Use upper-case for metasyntactic
+	variables.
+
 2019-03-28  Alan Hayward  <alan.hayward@arm.com>
 
 	* linux-low.c (AT_HWCAP2): Add define if not already included.
