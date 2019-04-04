@@ -767,7 +767,7 @@ public: /* Remote specific methods.  */
 
   char *remote_get_noisy_reply ();
   int remote_query_attached (int pid);
-  inferior *remote_add_inferior (int fake_pid_p, int pid, int attached,
+  inferior *remote_add_inferior (bool fake_pid_p, int pid, int attached,
 				 int try_open_exec);
 
   ptid_t remote_current_thread (ptid_t oldpid);
@@ -2354,7 +2354,7 @@ remote_target::remote_query_attached (int pid)
    if no main executable is open already.  */
 
 inferior *
-remote_target::remote_add_inferior (int fake_pid_p, int pid, int attached,
+remote_target::remote_add_inferior (bool fake_pid_p, int pid, int attached,
 				    int try_open_exec)
 {
   struct inferior *inf;
@@ -2495,7 +2495,7 @@ remote_target::remote_notice_new_inferior (ptid_t currthread, int executing)
       if (find_inferior_pid (currthread.pid ()) == NULL)
 	{
 	  struct remote_state *rs = get_remote_state ();
-	  int fake_pid_p = !remote_multi_process_p (rs);
+	  bool fake_pid_p = !remote_multi_process_p (rs);
 
 	  inf = remote_add_inferior (fake_pid_p,
 				     currthread.pid (), -1, 1);
@@ -4311,7 +4311,7 @@ void
 remote_target::add_current_inferior_and_thread (char *wait_status)
 {
   struct remote_state *rs = get_remote_state ();
-  int fake_pid_p = 0;
+  bool fake_pid_p = false;
 
   inferior_ptid = null_ptid;
 
@@ -4321,7 +4321,7 @@ remote_target::add_current_inferior_and_thread (char *wait_status)
   if (curr_ptid != null_ptid)
     {
       if (!remote_multi_process_p (rs))
-	fake_pid_p = 1;
+	fake_pid_p = true;
     }
   else
     {
@@ -4330,7 +4330,7 @@ remote_target::add_current_inferior_and_thread (char *wait_status)
 	 double duty as both the pid of the target process (if it has
 	 such), and as a flag indicating that a target is active.  */
       curr_ptid = magic_null_ptid;
-      fake_pid_p = 1;
+      fake_pid_p = true;
     }
 
   remote_add_inferior (fake_pid_p, curr_ptid.pid (), -1, 1);
@@ -5847,7 +5847,7 @@ extended_remote_target::attach (const char *args, int from_tty)
 	     target_pid_to_str (ptid_t (pid)).c_str ());
     }
 
-  set_current_inferior (remote_add_inferior (0, pid, 1, 0));
+  set_current_inferior (remote_add_inferior (false, pid, 1, 0));
 
   inferior_ptid = ptid_t (pid);
 

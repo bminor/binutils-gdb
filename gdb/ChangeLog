@@ -1,3 +1,13 @@
+2019-04-09  Tom Tromey  <tromey@adacore.com>
+
+	* remote.c (remote_target::remote_add_inferior): Change fake_pid_p
+	to bool.
+	(extended_remote_target::attach): Update.
+	(remote_target::remote_notice_new_inferior): Update.
+	(remote_target::add_current_inferior_and_thread): Update.
+	* inferior.c (exit_inferior_1): Use "false".
+	* corelow.c (add_to_thread_list): Make fake_pid_p bool.
+
 2019-04-09  Simon Marchi  <simon.marchi@efficios.com>
 
 	* infcmd.c (run_command_1): Pass -qualified to tbreak when using

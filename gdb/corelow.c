@@ -285,7 +285,7 @@ add_to_thread_list (bfd *abfd, asection *asect, void *reg_sect_arg)
   int core_tid;
   int pid, lwpid;
   asection *reg_sect = (asection *) reg_sect_arg;
-  int fake_pid_p = 0;
+  bool fake_pid_p = false;
   struct inferior *inf;
 
   if (!startswith (bfd_section_name (abfd, asect), ".reg/"))
@@ -296,7 +296,7 @@ add_to_thread_list (bfd *abfd, asection *asect, void *reg_sect_arg)
   pid = bfd_core_file_pid (core_bfd);
   if (pid == 0)
     {
-      fake_pid_p = 1;
+      fake_pid_p = true;
       pid = CORELOW_PID;
     }
 

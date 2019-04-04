@@ -191,7 +191,7 @@ exit_inferior_1 (struct inferior *inftoex, int silent)
   gdb::observers::inferior_exit.notify (inf);
 
   inf->pid = 0;
-  inf->fake_pid_p = 0;
+  inf->fake_pid_p = false;
   inf->priv = NULL;
 
   if (inf->vfork_parent != NULL)
