@@ -1,3 +1,7 @@
+2019-04-09  Tom Tromey  <tromey@adacore.com>
+
+	* linux-low.c (select_event_lwp): Use find_thread_in_random.
+
 2019-04-08  Tom Tromey  <tom@tromey.com>
 
 	* linux-low.c (linux_detach_one_lwp): Replace throw_exception with
