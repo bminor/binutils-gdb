@@ -1993,7 +1993,7 @@ riscv_call_arg_complex_float (struct riscv_arg_info *ainfo,
       int len = ainfo->length / 2;
 
       result = riscv_assign_reg_location (&ainfo->argloc[0],
-					  &cinfo->float_regs, len, len);
+					  &cinfo->float_regs, len, 0);
       gdb_assert (result);
 
       result = riscv_assign_reg_location (&ainfo->argloc[1],
@@ -2014,14 +2014,18 @@ class riscv_struct_info
 public:
   riscv_struct_info ()
     : m_number_of_fields (0),
-      m_types { nullptr, nullptr }
+      m_types { nullptr, nullptr },
+      m_offsets { 0, 0 }
   {
     /* Nothing.  */
   }
 
   /* Analyse TYPE descending into nested structures, count the number of
      scalar fields and record the types of the first two fields found.  */
-  void analyse (struct type *type);
+  void analyse (struct type *type)
+  {
+    analyse_inner (type, 0);
+  }
 
   /* The number of scalar fields found in the analysed type.  This is
      currently only accurate if the value returned is 0, 1, or 2 as the
@@ -2041,6 +2045,16 @@ public:
     return m_types[index];
   }
 
+  /* Return the offset of scalar field INDEX within the analysed type. Will
+     return 0 if there is no field at that index.  Only INDEX values 0 and
+     1 can be requested as the RiscV ABI only has special cases for
+     structures with 1 or 2 fields.  */
+  int field_offset (int index) const
+  {
+    gdb_assert (index < (sizeof (m_offsets) / sizeof (m_offsets[0])));
+    return m_offsets[index];
+  }
+
 private:
   /* The number of scalar fields found within the structure after recursing
      into nested structures.  */
@@ -2049,13 +2063,20 @@ private:
   /* The types of the first two scalar fields found within the structure
      after recursing into nested structures.  */
   struct type *m_types[2];
+
+  /* The offsets of the first two scalar fields found within the structure
+     after recursing into nested structures.  */
+  int m_offsets[2];
+
+  /* Recursive core for ANALYSE, the OFFSET parameter tracks the byte
+     offset from the start of the top level structure being analysed.  */
+  void analyse_inner (struct type *type, int offset);
 };
 
-/* Analyse TYPE descending into nested structures, count the number of
-   scalar fields and record the types of the first two fields found.  */
+/* See description in class declaration.  */
 
 void
-riscv_struct_info::analyse (struct type *type)
+riscv_struct_info::analyse_inner (struct type *type, int offset)
 {
   unsigned int count = TYPE_NFIELDS (type);
   unsigned int i;
@@ -2067,11 +2088,13 @@ riscv_struct_info::analyse (struct type *type)
 
       struct type *field_type = TYPE_FIELD_TYPE (type, i);
       field_type = check_typedef (field_type);
+      int field_offset
+	= offset + TYPE_FIELD_BITPOS (type, i) / TARGET_CHAR_BIT;
 
       switch (TYPE_CODE (field_type))
 	{
 	case TYPE_CODE_STRUCT:
-	  analyse (field_type);
+	  analyse_inner (field_type, field_offset);
 	  break;
 
 	default:
@@ -2081,7 +2104,10 @@ riscv_struct_info::analyse (struct type *type)
 	     structure we can special case, and pass the structure in
 	     memory.  */
 	  if (m_number_of_fields < 2)
-	    m_types[m_number_of_fields] = field_type;
+	    {
+	      m_types[m_number_of_fields] = field_type;
+	      m_offsets[m_number_of_fields] = field_offset;
+	    }
 	  m_number_of_fields++;
 	  break;
 	}
@@ -2114,17 +2140,54 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
       if (sinfo.number_of_fields () == 1
 	  && TYPE_CODE (sinfo.field_type (0)) == TYPE_CODE_COMPLEX)
 	{
-	  gdb_assert (TYPE_LENGTH (ainfo->type)
-		      == TYPE_LENGTH (sinfo.field_type (0)));
-	  return riscv_call_arg_complex_float (ainfo, cinfo);
+	  /* The following is similar to RISCV_CALL_ARG_COMPLEX_FLOAT,
+	     except we use the type of the complex field instead of the
+	     type from AINFO, and the first location might be at a non-zero
+	     offset.  */
+	  if (TYPE_LENGTH (sinfo.field_type (0)) <= (2 * cinfo->flen)
+	      && riscv_arg_regs_available (&cinfo->float_regs) >= 2
+	      && !ainfo->is_unnamed)
+	    {
+	      bool result;
+	      int len = TYPE_LENGTH (sinfo.field_type (0)) / 2;
+	      int offset = sinfo.field_offset (0);
+
+	      result = riscv_assign_reg_location (&ainfo->argloc[0],
+						  &cinfo->float_regs, len,
+						  offset);
+	      gdb_assert (result);
+
+	      result = riscv_assign_reg_location (&ainfo->argloc[1],
+						  &cinfo->float_regs, len,
+						  (offset + len));
+	      gdb_assert (result);
+	    }
+	  else
+	    riscv_call_arg_scalar_int (ainfo, cinfo);
+	  return;
 	}
 
       if (sinfo.number_of_fields () == 1
 	  && TYPE_CODE (sinfo.field_type (0)) == TYPE_CODE_FLT)
 	{
-	  gdb_assert (TYPE_LENGTH (ainfo->type)
-		      == TYPE_LENGTH (sinfo.field_type (0)));
-	  return riscv_call_arg_scalar_float (ainfo, cinfo);
+	  /* The following is similar to RISCV_CALL_ARG_SCALAR_FLOAT,
+	     except we use the type of the first scalar field instead of
+	     the type from AINFO.  Also the location might be at a non-zero
+	     offset.  */
+	  if (TYPE_LENGTH (sinfo.field_type (0)) > cinfo->flen
+	      || ainfo->is_unnamed)
+	    riscv_call_arg_scalar_int (ainfo, cinfo);
+	  else
+	    {
+	      int offset = sinfo.field_offset (0);
+	      int len = TYPE_LENGTH (sinfo.field_type (0));
+
+	      if (!riscv_assign_reg_location (&ainfo->argloc[0],
+					      &cinfo->float_regs,
+					      len, offset))
+		riscv_call_arg_scalar_int (ainfo, cinfo);
+	    }
+	  return;
 	}
 
       if (sinfo.number_of_fields () == 2
@@ -2134,17 +2197,14 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
 	  && TYPE_LENGTH (sinfo.field_type (1)) <= cinfo->flen
 	  && riscv_arg_regs_available (&cinfo->float_regs) >= 2)
 	{
-	  int len0, len1, offset;
-
-	  gdb_assert (TYPE_LENGTH (ainfo->type) <= (2 * cinfo->flen));
-
-	  len0 = TYPE_LENGTH (sinfo.field_type (0));
+	  int len0 = TYPE_LENGTH (sinfo.field_type (0));
+	  int offset = sinfo.field_offset (0);
 	  if (!riscv_assign_reg_location (&ainfo->argloc[0],
-					  &cinfo->float_regs, len0, 0))
+					  &cinfo->float_regs, len0, offset))
 	    error (_("failed during argument setup"));
 
-	  len1 = TYPE_LENGTH (sinfo.field_type (1));
-	  offset = align_up (len0, riscv_type_alignment (sinfo.field_type (1)));
+	  int len1 = TYPE_LENGTH (sinfo.field_type (1));
+	  offset = sinfo.field_offset (1);
 	  gdb_assert (len1 <= (TYPE_LENGTH (ainfo->type)
 			       - TYPE_LENGTH (sinfo.field_type (0))));
 
@@ -2162,15 +2222,14 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
 	      && is_integral_type (sinfo.field_type (1))
 	      && TYPE_LENGTH (sinfo.field_type (1)) <= cinfo->xlen))
 	{
-	  int len0, len1, offset;
-
-	  len0 = TYPE_LENGTH (sinfo.field_type (0));
+	  int  len0 = TYPE_LENGTH (sinfo.field_type (0));
+	  int offset = sinfo.field_offset (0);
 	  if (!riscv_assign_reg_location (&ainfo->argloc[0],
-					  &cinfo->float_regs, len0, 0))
+					  &cinfo->float_regs, len0, offset))
 	    error (_("failed during argument setup"));
 
-	  len1 = TYPE_LENGTH (sinfo.field_type (1));
-	  offset = align_up (len0, riscv_type_alignment (sinfo.field_type (1)));
+	  int len1 = TYPE_LENGTH (sinfo.field_type (1));
+	  offset = sinfo.field_offset (1);
 	  gdb_assert (len1 <= cinfo->xlen);
 	  if (!riscv_assign_reg_location (&ainfo->argloc[1],
 					  &cinfo->int_regs, len1, offset))
@@ -2185,19 +2244,18 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
 	      && TYPE_CODE (sinfo.field_type (1)) == TYPE_CODE_FLT
 	      && TYPE_LENGTH (sinfo.field_type (1)) <= cinfo->flen))
 	{
-	  int len0, len1, offset;
-
-	  len0 = TYPE_LENGTH (sinfo.field_type (0));
-	  len1 = TYPE_LENGTH (sinfo.field_type (1));
-	  offset = align_up (len0, riscv_type_alignment (sinfo.field_type (1)));
+	  int len0 = TYPE_LENGTH (sinfo.field_type (0));
+	  int len1 = TYPE_LENGTH (sinfo.field_type (1));
 
 	  gdb_assert (len0 <= cinfo->xlen);
 	  gdb_assert (len1 <= cinfo->flen);
 
+	  int offset = sinfo.field_offset (0);
 	  if (!riscv_assign_reg_location (&ainfo->argloc[0],
-					  &cinfo->int_regs, len0, 0))
+					  &cinfo->int_regs, len0, offset))
 	    error (_("failed during argument setup"));
 
+	  offset = sinfo.field_offset (1);
 	  if (!riscv_assign_reg_location (&ainfo->argloc[1],
 					  &cinfo->float_regs,
 					  len1, offset))
@@ -2233,6 +2291,8 @@ riscv_arg_location (struct gdbarch *gdbarch,
   ainfo->align = riscv_type_alignment (ainfo->type);
   ainfo->is_unnamed = is_unnamed;
   ainfo->contents = nullptr;
+  ainfo->argloc[0].c_length = 0;
+  ainfo->argloc[1].c_length = 0;
 
   switch (TYPE_CODE (ainfo->type))
     {
@@ -2474,10 +2534,11 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 	      memset (tmp, -1, sizeof (tmp));
 	    else
 	      memset (tmp, 0, sizeof (tmp));
-	    memcpy (tmp, info->contents, info->argloc[0].c_length);
+	    memcpy (tmp, (info->contents + info->argloc[0].c_offset),
+		    info->argloc[0].c_length);
 	    regcache->cooked_write (info->argloc[0].loc_data.regno, tmp);
 	    second_arg_length =
-	      ((info->argloc[0].c_length < info->length)
+	      (((info->argloc[0].c_length + info->argloc[0].c_offset) < info->length)
 	       ? info->argloc[1].c_length : 0);
 	    second_arg_data = info->contents + info->argloc[1].c_offset;
 	  }
@@ -2629,18 +2690,24 @@ riscv_return_value (struct gdbarch  *gdbarch,
 			  <= register_size (gdbarch, regnum));
 
 	      if (readbuf)
-		regcache->cooked_read_part (regnum, 0,
-					    info.argloc[0].c_length,
-					    readbuf);
+		{
+		  gdb_byte *ptr = readbuf + info.argloc[0].c_offset;
+		  regcache->cooked_read_part (regnum, 0,
+					      info.argloc[0].c_length,
+					      ptr);
+		}
 
 	      if (writebuf)
-		regcache->cooked_write_part (regnum, 0,
-					     info.argloc[0].c_length,
-					     writebuf);
+		{
+		  const gdb_byte *ptr = writebuf + info.argloc[0].c_offset;
+		  regcache->cooked_write_part (regnum, 0,
+					       info.argloc[0].c_length,
+					       ptr);
+		}
 
 	      /* A return value in register can have a second part in a
 		 second register.  */
-	      if (info.argloc[0].c_length < info.length)
+	      if (info.argloc[1].c_length > 0)
 		{
 		  switch (info.argloc[1].loc_type)
 		    {

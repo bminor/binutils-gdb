@@ -1,3 +1,25 @@
+2019-04-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-tdep.c (riscv_call_arg_complex_float): Fix offset of first
+	component to 0.
+	(riscv_struct_info::riscv_struct_info): Initialise m_offsets
+	member.
+	(riscv_struct_info::analyse): New implementation using new
+	analyse_inner member function.
+	(riscv_struct_info::field_offset): New member function.
+	(riscv_struct_info::m_offsets): New member variable.
+	(riscv_struct_info::analyse_inner): New private member function,
+	takes the old implementation of riscv_struct_info::analyse but
+	extended to track field offsets.
+	(riscv_call_arg_struct): Update the struct folding special cases
+	to handle cases where empty C++ structs, which are non-zero
+	length, are found.
+	(riscv_arg_location): Initialise the length of each location, a
+	non-zero length now indicates the location is in use.
+	(riscv_push_dummy_call): Allow for the first location having a
+	non-zero offset when setting up arguments.
+	(riscv_return_value): Likewise, but for return values.
+
 2019-04-11  Tom Tromey  <tromey@adacore.com>
 
 	* utils.c (internal_vproblem): Make "msg" const.
