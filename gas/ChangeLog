@@ -1,5 +1,29 @@
 2019-04-11  Max Filippov  <jcmvbkbc@gmail.com>
 
+	* testsuite/gas/xtensa/loop-relax-2.d: New test definition.
+	* testsuite/gas/xtensa/loop-relax.d: New test definition.
+	* testsuite/gas/xtensa/loop-relax.s: New test source.
+	* testsuite/gas/xtensa/text-section-literals-1a.d: New test
+	definition.
+	* testsuite/gas/xtensa/text-section-literals-2.d: New test
+	definition.
+	* testsuite/gas/xtensa/text-section-literals-2.s: New test
+	source.
+	* testsuite/gas/xtensa/text-section-literals-2a.d: New test
+	definition.
+	* testsuite/gas/xtensa/text-section-literals-3.d: New test
+	definition.
+	* testsuite/gas/xtensa/text-section-literals-3.s: New test
+	source.
+	* testsuite/gas/xtensa/text-section-literals-4.d: New test
+	definition.
+	* testsuite/gas/xtensa/text-section-literals-4.s: New test
+	source.
+	* testsuite/gas/xtensa/text-section-literals-4a.d: New test
+	definition.
+
+2019-04-11  Max Filippov  <jcmvbkbc@gmail.com>
+
 	* testsuite/gas/xtensa/all.exp: Remove all expect-based
 	tests and all explicit run_dump_test / run_list_test
 	invocations. Add run_dump_tests for all .d files in the
