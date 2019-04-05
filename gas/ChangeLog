@@ -1,5 +1,23 @@
 2019-04-11  Max Filippov  <jcmvbkbc@gmail.com>
 
+	* testsuite/gas/xtensa/all.exp: Remove all expect-based
+	tests and all explicit run_dump_test / run_list_test
+	invocations. Add run_dump_tests for all .d files in the
+	test subdirectory.
+	* testsuite/gas/xtensa/entry_align.d: New test definition.
+	* testsuite/gas/xtensa/entry_align.l: New test output.
+	* testsuite/gas/xtensa/entry_misalign.d: New test definition.
+	* testsuite/gas/xtensa/entry_misalign2.d: New test definition.
+	* testsuite/gas/xtensa/j_too_far.d: New test definition.
+	* testsuite/gas/xtensa/j_too_far.l: New test output.
+	* testsuite/gas/xtensa/loop_align.d: New test definition.
+	* testsuite/gas/xtensa/loop_misalign.d: New test definition.
+	* testsuite/gas/xtensa/trampoline-2.d: New test definition.
+	* testsuite/gas/xtensa/trampoline-2.l: Remove empty output.
+	* testsuite/gas/xtensa/xtensa-err.exp: Use positive logic.
+
+2019-04-11  Max Filippov  <jcmvbkbc@gmail.com>
+
 	* config/tc-xtensa.c (xtensa_literal_pseudo): Drop code that has
 	no effect.
 	(get_literal_pool_location): Only search for the literal pool
