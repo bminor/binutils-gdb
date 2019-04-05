@@ -1080,6 +1080,8 @@ static const arch_entry cpu_arch[] =
     CPU_MOVDIRI_FLAGS, 0 },
   { STRING_COMMA_LEN (".movdir64b"), PROCESSOR_UNKNOWN,
     CPU_MOVDIR64B_FLAGS, 0 },
+  { STRING_COMMA_LEN (".avx512_bf16"), PROCESSOR_UNKNOWN,
+    CPU_AVX512_BF16_FLAGS, 0 },
 };
 
 static const noarch_entry cpu_noarch[] =
@@ -1119,6 +1121,7 @@ static const noarch_entry cpu_noarch[] =
   { STRING_COMMA_LEN ("noshstk"), CPU_ANY_SHSTK_FLAGS },
   { STRING_COMMA_LEN ("nomovdiri"), CPU_ANY_MOVDIRI_FLAGS },
   { STRING_COMMA_LEN ("nomovdir64b"), CPU_ANY_MOVDIR64B_FLAGS },
+  { STRING_COMMA_LEN ("noavx512_bf16"), CPU_ANY_AVX512_BF16_FLAGS },
 };
 
 #ifdef I386COFF

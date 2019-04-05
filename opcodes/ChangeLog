@@ -1,3 +1,17 @@
+2019-04-05  Xuepeng Guo  <xuepeng.guo@intel.com>
+
+	* i386-dis-evex.h (evex_table): Updated to support BF16
+	instructions.
+	* i386-dis.c (enum): Add EVEX_W_0F3852_P_1, EVEX_W_0F3872_P_1
+	and EVEX_W_0F3872_P_3.
+	* i386-gen.c (cpu_flag_init): Add CPU_AVX512_BF16_FLAGS.
+	(cpu_flags): Add bitfield for CpuAVX512_BF16.
+	* i386-opc.h (enum): Add CpuAVX512_BF16.
+	(i386_cpu_flags): Add bitfield for cpuavx512_bf16.
+	* i386-opc.tbl: Add AVX512 BF16 instructions.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2019-04-05  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc.c (XLBH_MASK): Subtract off BH field from BB_MASK.

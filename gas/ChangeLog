@@ -1,3 +1,22 @@
+2019-04-05  Xuepeng Guo  <xuepeng.guo@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .avx512_bf16.
+	(cpu_noarch): Add noavx512_bf16.
+	* doc/c-i386.texi: Document avx512_bf16.
+	* testsuite/gas/i386/avx512_bf16.d: New file.
+	* testsuite/gas/i386/avx512_bf16.s: Likewise.
+	* testsuite/gas/i386/avx512_bf16_vl-inval.l: Likewise.
+	* testsuite/gas/i386/avx512_bf16_vl-inval.s: Likewise.
+	* testsuite/gas/i386/avx512_bf16_vl.d: Likewise.
+	* testsuite/gas/i386/avx512_bf16_vl.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx512_bf16.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512_bf16.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx512_bf16_vl-inval.l: Likesie.
+	* testsuite/gas/i386/x86-64-avx512_bf16_vl-inval.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx512_bf16_vl.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx512_bf16_vl.s: Likewise.
+	* testsuite/gas/i386/i386.exp: Add BF16 related tests.
+
 2019-04-05  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/ppc/bc.s,

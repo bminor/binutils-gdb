@@ -206,6 +206,8 @@ enum
   CpuAVX512_VNNI,
   /* Intel AVX-512 BITALG Instructions support required.  */
   CpuAVX512_BITALG,
+  /* Intel AVX-512 BF16 Instructions support required.  */
+  CpuAVX512_BF16,
   /* mwaitx instruction required */
   CpuMWAITX,
   /* Clzero instruction required */
@@ -347,6 +349,7 @@ typedef union i386_cpu_flags
       unsigned int cpuavx512_vbmi2:1;
       unsigned int cpuavx512_vnni:1;
       unsigned int cpuavx512_bitalg:1;
+      unsigned int cpuavx512_bf16:1;
       unsigned int cpumwaitx:1;
       unsigned int cpuclzero:1;
       unsigned int cpuospke:1;

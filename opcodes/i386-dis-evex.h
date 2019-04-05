@@ -2020,7 +2020,7 @@ static const struct dis386 evex_table[][256] = {
   /* PREFIX_EVEX_0F3852 */
   {
     { Bad_Opcode },
-    { Bad_Opcode },
+    { VEX_W_TABLE (EVEX_W_0F3852_P_1) },
     { "vpdpwssd",	{ XM, Vex, EXx }, 0 },
     { "vp4dpwssd",	{ XM, Vex, EXxmm }, 0 },
   },
@@ -2112,8 +2112,9 @@ static const struct dis386 evex_table[][256] = {
   /* PREFIX_EVEX_0F3872 */
   {
     { Bad_Opcode },
-    { Bad_Opcode },
+    { VEX_W_TABLE (EVEX_W_0F3872_P_1) },
     { VEX_W_TABLE (EVEX_W_0F3872_P_2) },
+    { VEX_W_TABLE (EVEX_W_0F3872_P_3) },
   },
   /* PREFIX_EVEX_0F3873 */
   {
@@ -3705,6 +3706,11 @@ static const struct dis386 evex_table[][256] = {
     { "vpmulld",	{ XM, Vex, EXx }, 0 },
     { "vpmullq",	{ XM, Vex, EXx }, 0 },
   },
+  /* EVEX_W_0F3852_P_1 */
+  {
+    { "vdpbf16ps",	{ XM, Vex, EXx }, 0 },
+    { Bad_Opcode },
+  },
   /* EVEX_W_0F3854_P_2 */
   {
     { "vpopcntb",	{ XM, EXx }, 0 },
@@ -3759,10 +3765,20 @@ static const struct dis386 evex_table[][256] = {
     { "vpshldvd",  { XM, Vex, EXx }, 0 },
     { "vpshldvq",  { XM, Vex, EXx }, 0 },
   },
+  /* EVEX_W_0F3872_P_1 */
+  {
+    { "vcvtneps2bf16%XY", { XMxmmq, EXx }, 0 },
+    { Bad_Opcode },
+  },
   /* EVEX_W_0F3872_P_2 */
   {
     { Bad_Opcode },
     { "vpshrdvw",  { XM, Vex, EXx }, 0 },
+  },
+  /* EVEX_W_0F3872_P_3 */
+  {
+    { "vcvtne2ps2bf16", { XM, Vex, EXx}, 0 },
+    { Bad_Opcode },
   },
   /* EVEX_W_0F3873_P_2 */
   {
