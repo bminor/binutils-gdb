@@ -435,6 +435,14 @@ bool thread_db_thread_handle (ptid_t ptid, gdb_byte **handle, int *handle_len);
 
 extern int have_ptrace_getregset;
 
+/* Search for the value with type MATCH in the auxv vector with
+   entries of length WORDSIZE bytes.  If found, store the value in
+   *VALP and return 1.  If not found or if there is an error, return
+   0.  */
+
+int linux_get_auxv (int wordsize, CORE_ADDR match,
+		    CORE_ADDR *valp);
+
 /* Fetch the AT_HWCAP entry from the auxv vector, where entries are length
    WORDSIZE.  If no entry was found, return zero.  */
 

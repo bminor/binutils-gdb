@@ -1,3 +1,12 @@
+2019-04-05  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* linux-low.c (linux_get_auxv): Remove static.  Return auxv entry
+	value in argument pointer, return 1 if the entry is found and 0
+	otherwise.  Move comment.
+	(linux_get_hwcap, linux_get_hwcap2): Use modified linux_get_auxv.
+	* linux-low.h (linux_get_auxv): Declare.
+	* linux-ppc-low.c (is_elfv2_inferior): Use linux_get_auxv.
+
 2019-04-05  Tom Tromey  <tromey@adacore.com>
 
 	* server.c (gdbserver_usage): Use upper-case for metasyntactic

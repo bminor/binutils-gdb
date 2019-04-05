@@ -7427,11 +7427,10 @@ linux_get_pc_64bit (struct regcache *regcache)
   return pc;
 }
 
-/* Fetch the entry MATCH from the auxv vector, where entries are length
-   WORDSIZE.  If no entry was found, return zero.  */
+/* See linux-low.h.  */
 
-static CORE_ADDR
-linux_get_auxv (int wordsize, CORE_ADDR match)
+int
+linux_get_auxv (int wordsize, CORE_ADDR match, CORE_ADDR *valp)
 {
   gdb_byte *data = (gdb_byte *) alloca (2 * wordsize);
   int offset = 0;
@@ -7442,15 +7441,21 @@ linux_get_auxv (int wordsize, CORE_ADDR match)
     {
       if (wordsize == 4)
 	{
-	  uint32_t *data_p = (uint32_t *)data;
+	  uint32_t *data_p = (uint32_t *) data;
 	  if (data_p[0] == match)
-	    return data_p[1];
+	    {
+	      *valp = data_p[1];
+	      return 1;
+	    }
 	}
       else
 	{
-	  uint64_t *data_p = (uint64_t *)data;
+	  uint64_t *data_p = (uint64_t *) data;
 	  if (data_p[0] == match)
-	    return data_p[1];
+	    {
+	      *valp = data_p[1];
+	      return 1;
+	    }
 	}
 
       offset += 2 * wordsize;
@@ -7464,7 +7469,9 @@ linux_get_auxv (int wordsize, CORE_ADDR match)
 CORE_ADDR
 linux_get_hwcap (int wordsize)
 {
-  return linux_get_auxv (wordsize, AT_HWCAP);
+  CORE_ADDR hwcap = 0;
+  linux_get_auxv (wordsize, AT_HWCAP, &hwcap);
+  return hwcap;
 }
 
 /* See linux-low.h.  */
@@ -7472,7 +7479,9 @@ linux_get_hwcap (int wordsize)
 CORE_ADDR
 linux_get_hwcap2 (int wordsize)
 {
-  return linux_get_auxv (wordsize, AT_HWCAP2);
+  CORE_ADDR hwcap2 = 0;
+  linux_get_auxv (wordsize, AT_HWCAP2, &hwcap2);
+  return hwcap2;
 }
 
 static struct target_ops linux_target_ops = {

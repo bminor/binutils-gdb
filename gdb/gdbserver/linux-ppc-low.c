@@ -1107,10 +1107,13 @@ is_elfv2_inferior (void)
 #else
   const int def_res = 0;
 #endif
-  unsigned long phdr;
+  CORE_ADDR phdr;
   Elf64_Ehdr ehdr;
 
-  if (!ppc_get_auxv (AT_PHDR, &phdr))
+  const struct target_desc *tdesc = current_process ()->tdesc;
+  int wordsize = register_size (tdesc, 0);
+
+  if (!linux_get_auxv (wordsize, AT_PHDR, &phdr))
     return def_res;
 
   /* Assume ELF header is at the beginning of the page where program headers
