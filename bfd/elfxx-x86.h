@@ -24,6 +24,7 @@
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "hashtab.h"
+#include "elf-linker-x86.h"
 
 #define PLT_CIE_LENGTH		20
 #define PLT_FDE_LENGTH		36
@@ -530,6 +531,9 @@ struct elf_x86_link_hash_table
   int dynamic_interpreter_size;
   const char *dynamic_interpreter;
   const char *tls_get_addr;
+
+  /* Options passed from the linker.  */
+  struct elf_linker_x86_params *params;
 };
 
 /* Architecture-specific backend data for x86.  */

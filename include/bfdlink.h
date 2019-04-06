@@ -482,35 +482,14 @@ struct bfd_link_info
      been opened.  */
   unsigned int check_relocs_after_open_input: 1;
 
-  /* TRUE if BND prefix in PLT entries is always generated.  */
-  unsigned int bndplt: 1;
-
-  /* TRUE if IBT-enabled PLT entries should be generated.  */
-  unsigned int ibtplt: 1;
-
-  /* TRUE if GNU_PROPERTY_X86_FEATURE_1_IBT should be generated.  */
-  unsigned int ibt: 1;
-
-  /* TRUE if GNU_PROPERTY_X86_FEATURE_1_SHSTK should be generated.  */
-  unsigned int shstk: 1;
-
   /* TRUE if generation of .interp/PT_INTERP should be suppressed.  */
   unsigned int nointerp: 1;
-
-  /* TRUE if we shouldn't check relocation overflow.  */
-  unsigned int no_reloc_overflow_check: 1;
-
-  /* TRUE if generate a 1-byte NOP as suffix for x86 call instruction.  */
-  unsigned int call_nop_as_suffix : 1;
 
   /* TRUE if common symbols should be treated as undefined.  */
   unsigned int inhibit_common_definition : 1;
 
   /* TRUE if "-Map map" is passed to linker.  */
   unsigned int has_map_file : 1;
-
-  /* The 1-byte NOP for x86 call instruction.  */
-  char call_nop_byte;
 
   /* Char that may appear as the first char of a symbol, but should be
      skipped (like symbol_leading_char) when looking up symbols in

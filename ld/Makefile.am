@@ -618,7 +618,8 @@ GENSCRIPTS = LIB_PATH='${LIB_PATH}' $(SHELL) $(srcdir)/genscripts.sh "${srcdir}"
 GEN_DEPENDS = $(srcdir)/genscripts.sh stringify.sed
 ELF_DEPS = $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/elf-generic.em $(srcdir)/scripttempl/DWARF.sc
 ELF_GEN_DEPS = $(srcdir)/emultempl/generic.em $(srcdir)/emultempl/elf-generic.em $(srcdir)/emultempl/genelf.em $(srcdir)/scripttempl/DWARF.sc
-ELF_X86_DEPS = $(ELF_DEPS) $(srcdir)/emulparams/plt_unwind.sh \
+ELF_X86_DEPS = $(ELF_DEPS) $(srcdir)/emultempl/elf-x86.em \
+	       $(srcdir)/emulparams/plt_unwind.sh \
 	       $(srcdir)/emulparams/extern_protected_data.sh \
 	       $(srcdir)/emulparams/dynamic_undefined_weak.sh \
 	       $(srcdir)/emulparams/reloc_overflow.sh \
@@ -1310,6 +1311,7 @@ eelf_i386_nacl.c: $(srcdir)/emulparams/elf_i386_nacl.sh \
 eelf_i386_sol2.c: $(srcdir)/emulparams/elf_i386_sol2.sh \
   $(srcdir)/emulparams/solaris2.sh \
   $(srcdir)/emultempl/solaris2.em \
+  $(srcdir)/emultempl/solaris2-x86.em \
   $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 eelf_i386_vxworks.c: $(srcdir)/emulparams/elf_i386_vxworks.sh \
@@ -1866,6 +1868,7 @@ eelf_x86_64_sol2.c: $(srcdir)/emulparams/elf_x86_64_sol2.sh \
   $(srcdir)/emulparams/elf_x86_64.sh \
   $(srcdir)/emulparams/solaris2.sh \
   $(srcdir)/emultempl/solaris2.em \
+  $(srcdir)/emultempl/solaris2-x86.em \
   $(ELF_X86_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 
 ehppa64linux.c: $(srcdir)/emulparams/hppa64linux.sh \

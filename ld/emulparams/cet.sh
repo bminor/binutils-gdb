@@ -8,11 +8,11 @@ PARSE_AND_LIST_OPTIONS_CET='
 '
 PARSE_AND_LIST_ARGS_CASE_Z_CET='
       else if (strcmp (optarg, "ibtplt") == 0)
-	link_info.ibtplt = TRUE;
+	params.ibtplt = TRUE;
       else if (strcmp (optarg, "ibt") == 0)
-	link_info.ibt = TRUE;
+	params.ibt = TRUE;
       else if (strcmp (optarg, "shstk") == 0)
-	link_info.shstk = TRUE;
+	params.shstk = TRUE;
 '
 
 PARSE_AND_LIST_OPTIONS="$PARSE_AND_LIST_OPTIONS $PARSE_AND_LIST_OPTIONS_CET"

@@ -1,3 +1,33 @@
+2019-04-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (ELF_X86_DEPS): Add $(srcdir)/emultempl/elf-x86.em.
+	(eelf_i386_sol2.c): Also depend on
+	$(srcdir)/emultempl/solaris2-x86.em.
+	(eelf_x86_64_sol2.c): Likewise.
+	* Makefile.in: Regenerated.
+	* emulparams/call_nop.sh: Set x86-specific linker options via
+	params.
+	* emulparams/cet.sh: Likewise.
+	* emulparams/reloc_overflow.sh: Likewise.
+	* emulparams/elf32_x86_64.sh (EXTRA_EM_FILE): New.  Set to
+	"elf-x86".
+	* emulparams/elf_i386.sh: Likewise.
+	* emulparams/elf_i386_be.sh: Likewise.
+	* emulparams/elf_i386_chaos.sh: Likewise.
+	* emulparams/elf_i386_ldso.sh: Likewise.
+	* emulparams/elf_i386_vxworks.sh: Likewise.
+	* emulparams/elf_iamcu.sh: Likewise.
+	* emulparams/elf_k1om.sh: Likewise.
+	* emulparams/elf_l1om.sh: Likewise.
+	* emulparams/elf_x86_64.sh: Likewise.
+	* emulparams/elf_i386_sol2.sh (EXTRA_EM_FILE): Changed to
+	"solaris2-x86".
+	* emulparams/elf_x86_64_sol2.sh: Likewise.
+	* emultempl/elf-x86.em: New file.
+	* emultempl/solaris2-x86.em: Likewise.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_parse): Don't
+	set link_info.call_nop_byte.
+
 2019-04-05  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/tlsexe32.d: Remove trailing spaces.

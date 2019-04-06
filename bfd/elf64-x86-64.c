@@ -1676,8 +1676,8 @@ convert:
 	    }
 	  else
 	    {
-	      nop = link_info->call_nop_byte;
-	      if (link_info->call_nop_as_suffix)
+	      nop = htab->params->call_nop_byte;
+	      if (htab->params->call_nop_as_suffix)
 		{
 		  nop_offset = irel->r_offset + 3;
 		  disp = bfd_get_32 (abfd, contents + irel->r_offset);
@@ -2149,7 +2149,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	     run-time relocation overflow.  Don't error out for
 	     sections we don't care about, such as debug sections or
 	     when relocation overflow check is disabled.  */
-	  if (!info->no_reloc_overflow_check
+	  if (!htab->params->no_reloc_overflow_check
 	      && !converted_reloc
 	      && (bfd_link_pic (info)
 		  || (bfd_link_executable (info)
@@ -3206,7 +3206,7 @@ direct:
 		     convert R_X86_64_32 to dynamic R_X86_64_RELATIVE.  */
 		  if (r_type == htab->pointer_r_type
 		      || (r_type == R_X86_64_32
-			  && info->no_reloc_overflow_check))
+			  && htab->params->no_reloc_overflow_check))
 		    {
 		      relocate = TRUE;
 		      outrel.r_info = htab->r_info (0, R_X86_64_RELATIVE);
@@ -5048,7 +5048,13 @@ elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
 
   if (get_elf_x86_backend_data (info->output_bfd)->target_os != is_nacl)
     {
-      if (info->bndplt)
+      const struct elf_backend_data *bed
+	= get_elf_backend_data (info->output_bfd);
+      struct elf_x86_link_hash_table *htab
+	= elf_x86_hash_table (info, bed->target_id);
+      if (!htab)
+	abort ();
+      if (htab->params->bndplt)
 	{
 	  init_table.lazy_plt = &elf_x86_64_lazy_bnd_plt;
 	  init_table.non_lazy_plt = &elf_x86_64_non_lazy_bnd_plt;

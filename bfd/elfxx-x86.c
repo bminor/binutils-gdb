@@ -2479,12 +2479,18 @@ _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
 	 2. If APROP is NULL, remove x86 feature.
 	 3. Otherwise, do nothing.
        */
+      const struct elf_backend_data *bed
+	= get_elf_backend_data (info->output_bfd);
+      struct elf_x86_link_hash_table *htab
+	= elf_x86_hash_table (info, bed->target_id);
+      if (!htab)
+	abort ();
       if (aprop != NULL && bprop != NULL)
 	{
 	  features = 0;
-	  if (info->ibt)
+	  if (htab->params->ibt)
 	    features = GNU_PROPERTY_X86_FEATURE_1_IBT;
-	  if (info->shstk)
+	  if (htab->params->shstk)
 	    features |= GNU_PROPERTY_X86_FEATURE_1_SHSTK;
 	  number = aprop->u.number;
 	  /* Add GNU_PROPERTY_X86_FEATURE_1_IBT and
@@ -2501,9 +2507,9 @@ _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
 	     have them.  Set IBT and SHSTK properties for -z ibt and -z
 	     shstk if needed.  */
 	  features = 0;
-	  if (info->ibt)
+	  if (htab->params->ibt)
 	    features = GNU_PROPERTY_X86_FEATURE_1_IBT;
-	  if (info->shstk)
+	  if (htab->params->shstk)
 	    features |= GNU_PROPERTY_X86_FEATURE_1_SHSTK;
 	  if (features)
 	    {
@@ -2556,12 +2562,6 @@ _bfd_x86_elf_link_setup_gnu_properties
   unsigned int class_align = ABI_64_P (info->output_bfd) ? 3 : 2;
   unsigned int got_align;
 
-  features = 0;
-  if (info->ibt)
-    features = GNU_PROPERTY_X86_FEATURE_1_IBT;
-  if (info->shstk)
-    features |= GNU_PROPERTY_X86_FEATURE_1_SHSTK;
-
   /* Find a normal input file with GNU property note.  */
   for (pbfd = info->input_bfds;
        pbfd != NULL;
@@ -2580,6 +2580,12 @@ _bfd_x86_elf_link_setup_gnu_properties
   htab = elf_x86_hash_table (info, bed->target_id);
   if (htab == NULL)
     return pbfd;
+
+  features = 0;
+  if (htab->params->ibt)
+    features = GNU_PROPERTY_X86_FEATURE_1_IBT;
+  if (htab->params->shstk)
+    features |= GNU_PROPERTY_X86_FEATURE_1_SHSTK;
 
   if (ebfd != NULL)
     {
@@ -2630,7 +2636,7 @@ error_alignment:
 
   htab->plt0_pad_byte = init_table->plt0_pad_byte;
 
-  use_ibt_plt = info->ibtplt || info->ibt;
+  use_ibt_plt = htab->params->ibtplt || htab->params->ibt;
   if (!use_ibt_plt && pbfd != NULL)
     {
       /* Check if GNU_PROPERTY_X86_FEATURE_1_IBT is on.  */
@@ -2853,7 +2859,7 @@ error_alignment:
 						  plt_alignment))
 		    goto error_alignment;
 		}
-	      else if (info->bndplt && ABI_64_P (dynobj))
+	      else if (htab->params->bndplt && ABI_64_P (dynobj))
 		{
 		  /* Create the second PLT for Intel MPX support.  MPX
 		     PLT is supported only for non-NaCl target in 64-bit
@@ -2983,4 +2989,16 @@ _bfd_x86_elf_link_fixup_gnu_properties
 	  break;
 	}
     }
+}
+
+void
+_bfd_elf_linker_x86_set_options (struct bfd_link_info * info,
+				 struct elf_linker_x86_params *params)
+{
+  const struct elf_backend_data *bed
+    = get_elf_backend_data (info->output_bfd);
+  struct elf_x86_link_hash_table *htab
+    = elf_x86_hash_table (info, bed->target_id);
+  if (htab != NULL)
+    htab->params = params;
 }

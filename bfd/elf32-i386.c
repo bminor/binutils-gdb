@@ -1343,8 +1343,8 @@ convert_branch:
 		}
 	      else
 		{
-		  nop = link_info->call_nop_byte;
-		  if (link_info->call_nop_as_suffix)
+		  nop = htab->params->call_nop_byte;
+		  if (htab->params->call_nop_as_suffix)
 		    {
 		      nop_offset = roff + 3;
 		      irel->r_offset -= 1;

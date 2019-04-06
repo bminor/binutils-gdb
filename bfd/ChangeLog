@@ -1,3 +1,18 @@
+2019-04-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-linker-x86.h: New file.
+	* elf32-i386.c (elf_i386_convert_load_reloc): Use htab->params
+	to get x86-specific linker options.
+	* elf64-x86-64.c (elf_x86_64_convert_load_reloc): Likewise.
+	(elf_x86_64_check_relocs): Likewise.
+	(elf_x86_64_relocate_section): Likewise.
+	(elf_x86_64_link_setup_gnu_properties): Likewise.
+	* elfxx-x86.c (_bfd_x86_elf_merge_gnu_properties): Likewise.
+	(_bfd_x86_elf_link_setup_gnu_properties): Likewise.
+	(_bfd_elf_linker_x86_set_options): New function.
+	* elfxx-x86.h: Include "elf-linker-x86.h".
+	(elf_x86_link_hash_table): Add params.
+
 2019-04-03  Alan Modra  <amodra@gmail.com>
 
 	* coff-i386.c, * coff-x86_64.c, * coffgen.c, * dwarf2.c,
