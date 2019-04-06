@@ -1,3 +1,8 @@
+2019-04-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/align.exp: Extend test to cover structures containing
+	only static fields.
+
 2019-04-11  Tom de Vries  <tdevries@suse.de>
 
 	* boards/cc-with-dwz-m.exp: New file.

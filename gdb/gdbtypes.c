@@ -3014,16 +3014,12 @@ type_align (struct type *type)
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
       {
-	if (TYPE_NFIELDS (type) == 0)
-	  {
-	    /* An empty struct has alignment 1.  */
-	    align = 1;
-	    break;
-	  }
+	int number_of_non_static_fields = 0;
 	for (unsigned i = 0; i < TYPE_NFIELDS (type); ++i)
 	  {
 	    if (!field_is_static (&TYPE_FIELD (type, i)))
 	      {
+		number_of_non_static_fields++;
 		ULONGEST f_align = type_align (TYPE_FIELD_TYPE (type, i));
 		if (f_align == 0)
 		  {
@@ -3035,6 +3031,10 @@ type_align (struct type *type)
 		  align = f_align;
 	      }
 	  }
+	/* A struct with no fields, or with only static fields has an
+	   alignment of 1.  */
+	if (number_of_non_static_fields == 0)
+	  align = 1;
       }
       break;
 

@@ -67,8 +67,10 @@ proc prepare_test_source_file { lang } {
     puts -nonewline $outfile "#define DEF(T,U) struct align_pair_ ## T ## _x_ ## U "
     puts $outfile "{ T one; U two; }"
     if { $lang == "c++" } {
-	puts -nonewline $outfile "#define DEF_WITH_STATIC(T,U) struct align_pair_static_ ## T ## _x_ ## U "
+	puts -nonewline $outfile "#define DEF_WITH_1_STATIC(T,U) struct align_pair_static_ ## T ## _x_ ## U "
 	puts $outfile "{ static T one; U two; }"
+	puts -nonewline $outfile "#define DEF_WITH_2_STATIC(T,U) struct align_pair_static_ ## T ## _x_static_ ## U "
+	puts $outfile "{ static T one; static U two; }"
     }
     if { $lang == "c" } {
 	puts $outfile "unsigned a_void = ${align_func} (void);"
@@ -99,11 +101,17 @@ proc prepare_test_source_file { lang } {
 	    puts $outfile "  = ${align_func} (struct align_pair_${joined});"
 
 	    if { $lang == "c++" } {
-		puts $outfile "DEF_WITH_STATIC ($utype, $uinner);"
-		set joined "${utype}_x_${uinner}"
-		puts $outfile "struct align_pair_static_$joined item_static_${joined};"
-		puts $outfile "unsigned a_static_${joined}"
-		puts $outfile "  = ${align_func} (struct align_pair_static_${joined});"
+		puts $outfile "DEF_WITH_1_STATIC ($utype, $uinner);"
+		set joined "static_${utype}_x_${uinner}"
+		puts $outfile "struct align_pair_$joined item_${joined};"
+		puts $outfile "unsigned a_${joined}"
+		puts $outfile "  = ${align_func} (struct align_pair_${joined});"
+
+		puts $outfile "DEF_WITH_2_STATIC ($utype, $uinner);"
+		set joined "static_${utype}_x_static_${uinner}"
+		puts $outfile "struct align_pair_$joined item_${joined};"
+		puts $outfile "unsigned a_${joined}"
+		puts $outfile "  = ${align_func} (struct align_pair_${joined});"
 	    }
 	}
     }
@@ -159,6 +167,10 @@ proc run_alignment_test { lang } {
 	    if { $lang == "c++" } {
 		set expected [get_integer_valueof a_static_${utype}_x_${uinner} 0]
 		gdb_test "print ${align_func}(struct align_pair_static_${utype}_x_${uinner})" \
+		    " = $expected"
+
+		set expected [get_integer_valueof a_static_${utype}_x_static_${uinner} 0]
+		gdb_test "print ${align_func}(struct align_pair_static_${utype}_x_static_${uinner})" \
 		    " = $expected"
 	    }
 	}

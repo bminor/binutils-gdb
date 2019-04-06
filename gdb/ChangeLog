@@ -1,5 +1,10 @@
 2019-04-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdbtypes.c (type_align): A struct with no non-static fields also
+	has alignment of 1.
+
+2019-04-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* riscv-tdep.c (riscv_call_arg_complex_float): Fix offset of first
 	component to 0.
 	(riscv_struct_info::riscv_struct_info): Initialise m_offsets
