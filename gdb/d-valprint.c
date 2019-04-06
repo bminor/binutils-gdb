@@ -18,12 +18,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
-#include "c-lang.h"
-#include "d-lang.h"
-#include "gdbcore.h"
 #include "gdbtypes.h"
+#include "gdbcore.h"
+#include "d-lang.h"
+#include "c-lang.h"
 
 /* Assuming that TYPE is a TYPE_CODE_STRUCT, verify that TYPE is a
    dynamic array, and then print its value to STREAM.  Return zero if

@@ -18,18 +18,16 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
-#include "block.h"
+#include "frame.h"
 #include "dwarf2-frame-tailcall.h"
-#include "dwarf2-frame.h"
 #include "dwarf2loc.h"
 #include "frame-unwind.h"
-#include "frame.h"
-#include "gdbtypes.h"
+#include "block.h"
 #include "hashtab.h"
+#include "gdbtypes.h"
 #include "regcache.h"
 #include "value.h"
+#include "dwarf2-frame.h"
 
 /* Contains struct tailcall_cache indexed by next_bottom_frame.  */
 static htab_t cache_htab;

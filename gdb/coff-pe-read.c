@@ -23,20 +23,20 @@
 
 #include "defs.h"
 
-/* Standard C includes.  */
-#include <ctype.h>
-
-/* Local non-gdb includes.  */
-#include "bfd.h"
 #include "coff-pe-read.h"
-#include "coff/internal.h"
-#include "command.h"
-#include "common/common-utils.h"
-#include "gdbcmd.h"
+
+#include "bfd.h"
 #include "gdbtypes.h"
-#include "objfiles.h"
-#include "symfile.h"
+
+#include "command.h"
+#include "gdbcmd.h"
 #include "symtab.h"
+#include "symfile.h"
+#include "objfiles.h"
+#include "common/common-utils.h"
+#include "coff/internal.h"
+
+#include <ctype.h>
 
 /* Internal section information */
 

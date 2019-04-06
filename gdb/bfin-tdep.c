@@ -20,27 +20,25 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
+#include "inferior.h"
+#include "gdbcore.h"
 #include "arch-utils.h"
-#include "bfin-tdep.h"
+#include "regcache.h"
+#include "frame.h"
+#include "frame-unwind.h"
+#include "frame-base.h"
+#include "trad-frame.h"
 #include "dis-asm.h"
+#include "sim-regno.h"
+#include "gdb/sim-bfin.h"
 #include "dwarf2-frame.h"
+#include "symtab.h"
 #include "elf-bfd.h"
 #include "elf/bfin.h"
-#include "frame-base.h"
-#include "frame-unwind.h"
-#include "frame.h"
-#include "gdb/sim-bfin.h"
-#include "gdbcore.h"
-#include "infcall.h"
-#include "inferior.h"
 #include "osabi.h"
-#include "regcache.h"
-#include "sim-regno.h"
-#include "symtab.h"
-#include "trad-frame.h"
+#include "infcall.h"
 #include "xml-syscall.h"
+#include "bfin-tdep.h"
 
 /* Macros used by prologue functions.  */
 #define P_LINKAGE			0xE800

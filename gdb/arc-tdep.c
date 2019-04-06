@@ -20,15 +20,13 @@
 
 /* GDB header files.  */
 #include "defs.h"
-
-/* Local non-gdb includes.  */
 #include "arch-utils.h"
 #include "disasm.h"
 #include "dwarf2-frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
-#include "gdbcmd.h"
 #include "gdbcore.h"
+#include "gdbcmd.h"
 #include "objfiles.h"
 #include "prologue-value.h"
 #include "trad-frame.h"

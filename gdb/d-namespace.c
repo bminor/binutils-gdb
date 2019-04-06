@@ -18,14 +18,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
+#include "symtab.h"
 #include "block.h"
-#include "d-lang.h"
-#include "gdb_obstack.h"
 #include "language.h"
 #include "namespace.h"
-#include "symtab.h"
+#include "d-lang.h"
+#include "gdb_obstack.h"
 
 /* This returns the length of first component of NAME, which should be
    the demangled name of a D variable/function/method/etc.

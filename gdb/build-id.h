@@ -20,8 +20,8 @@
 #ifndef BUILD_ID_H
 #define BUILD_ID_H
 
-#include "common/rsp-low.h"
 #include "gdb_bfd.h"
+#include "common/rsp-low.h"
 
 /* Locate NT_GNU_BUILD_ID from ABFD and return its content.  */
 

@@ -18,16 +18,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
-#include "addrmap.h"
 #include "block.h"
-#include "cp-support.h"
+#include "symtab.h"
+#include "symfile.h"
 #include "gdb_obstack.h"
+#include "cp-support.h"
+#include "addrmap.h"
 #include "gdbtypes.h"
 #include "objfiles.h"
-#include "symfile.h"
-#include "symtab.h"
 
 /* This is used by struct block to store namespace-related info for
    C++ files, namely using declarations and the current namespace in

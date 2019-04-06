@@ -20,16 +20,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
-#include "common/underlying.h"
+#include "symtab.h"
+#include "gdbtypes.h"
+#include "value.h"
+#include "gdbcore.h"
 #include "dwarf2.h"
 #include "dwarf2expr.h"
 #include "dwarf2loc.h"
-#include "gdbcore.h"
-#include "gdbtypes.h"
-#include "symtab.h"
-#include "value.h"
+#include "common/underlying.h"
 
 /* Cookie for gdbarch data.  */
 

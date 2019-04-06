@@ -18,21 +18,20 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "inferior.h"
+#include "regcache.h"
 
-/* Standard C includes.  */
+#include "alpha-tdep.h"
+#include "alpha-bsd-tdep.h"
+#include "inf-ptrace.h"
+
+#include <sys/types.h>
+#include <sys/ptrace.h>
 #include <machine/reg.h>
+
 #ifdef HAVE_SYS_PROCFS_H
 #include <sys/procfs.h>
 #endif
-#include <sys/ptrace.h>
-#include <sys/types.h>
-
-/* Local non-gdb includes.  */
-#include "alpha-bsd-tdep.h"
-#include "alpha-tdep.h"
-#include "inf-ptrace.h"
-#include "inferior.h"
-#include "regcache.h"
 
 #ifndef HAVE_GREGSET_T
 typedef struct reg gregset_t;

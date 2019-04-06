@@ -20,17 +20,15 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
-#include "csky-tdep.h"
-#include "gdbarch.h"
+#include "osabi.h"
 #include "glibc-tdep.h"
 #include "linux-tdep.h"
-#include "osabi.h"
-#include "regset.h"
+#include "gdbarch.h"
 #include "solib-svr4.h"
+#include "regset.h"
 #include "trad-frame.h"
 #include "tramp-frame.h"
+#include "csky-tdep.h"
 
 /* Functions, definitions, and data structures for C-Sky core file debug.  */
 

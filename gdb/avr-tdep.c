@@ -23,24 +23,20 @@
    by Denis Chertykov, denisc@overta.ru */
 
 #include "defs.h"
-
-/* Standard C++ includes.  */
-#include <algorithm>
-
-/* Local non-gdb includes.  */
-#include "arch-utils.h"
-#include "dis-asm.h"
-#include "frame-base.h"
-#include "frame-unwind.h"
 #include "frame.h"
+#include "frame-unwind.h"
+#include "frame-base.h"
+#include "trad-frame.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include "gdbtypes.h"
 #include "inferior.h"
-#include "objfiles.h"
-#include "regcache.h"
 #include "symfile.h"
-#include "trad-frame.h"
+#include "arch-utils.h"
+#include "regcache.h"
+#include "dis-asm.h"
+#include "objfiles.h"
+#include <algorithm>
 
 /* AVR Background:
 

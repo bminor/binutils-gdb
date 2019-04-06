@@ -16,12 +16,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
-#include "gdbthread.h"
-#include "valprint.h"
 #include "value.h"
 #include "varobj.h"
+#include "gdbthread.h"
+#include "valprint.h"
 
 static void cplus_class_num_children (struct type *type, int children[3]);
 

@@ -18,23 +18,21 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
-#include "block.h"
-#include "common/selftest.h"
-#include "dwarf2loc.h"
-#include "frame.h"
-#include "gdbcore.h"
-#include "gdbtypes.h"
-#include "inferior.h"
-#include "language.h"
-#include "objfiles.h"
-#include "regcache.h"
-#include "symfile.h"
 #include "symtab.h"
-#include "target.h"
-#include "user-regs.h"
+#include "gdbtypes.h"
+#include "frame.h"
 #include "value.h"
+#include "gdbcore.h"
+#include "inferior.h"
+#include "target.h"
+#include "symfile.h"		/* for overlay functions */
+#include "regcache.h"
+#include "user-regs.h"
+#include "block.h"
+#include "objfiles.h"
+#include "language.h"
+#include "dwarf2loc.h"
+#include "common/selftest.h"
 
 /* Basic byte-swapping routines.  All 'extract' functions return a
    host-format integer from a target-format integer at ADDR which is

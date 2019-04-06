@@ -18,22 +18,19 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Standard C includes.  */
-#include <arpa/inet.h>
-#include <sys/socket.h>
-
-/* Local non-gdb includes.  */
 #include "auxv.h"
-#include "elf-bfd.h"
-#include "fbsd-tdep.h"
 #include "gdbcore.h"
-#include "gdbthread.h"
 #include "inferior.h"
-#include "objfiles.h"
 #include "regcache.h"
 #include "regset.h"
+#include "gdbthread.h"
+#include "objfiles.h"
 #include "xml-syscall.h"
+#include <sys/socket.h>
+#include <arpa/inet.h>
+
+#include "elf-bfd.h"
+#include "fbsd-tdep.h"
 
 /* This enum is derived from FreeBSD's <sys/signal.h>.  */
 

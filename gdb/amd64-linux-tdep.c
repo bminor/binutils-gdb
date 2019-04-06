@@ -19,29 +19,28 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
-#include "amd64-linux-tdep.h"
-#include "amd64-tdep.h"
 #include "arch-utils.h"
-#include "arch/amd64.h"
-#include "common/x86-xstate.h"
 #include "frame.h"
 #include "gdbcore.h"
-#include "gdbtypes.h"
-#include "glibc-tdep.h"
-#include "i386-linux-tdep.h"
-#include "linux-tdep.h"
-#include "osabi.h"
-#include "parser-defs.h"
 #include "regcache.h"
+#include "osabi.h"
+#include "symtab.h"
+#include "gdbtypes.h"
 #include "reggroups.h"
 #include "regset.h"
-#include "solib-svr4.h"
-#include "symtab.h"
-#include "target-descriptions.h"
+#include "parser-defs.h"
 #include "user-regs.h"
+#include "amd64-linux-tdep.h"
+#include "i386-linux-tdep.h"
+#include "linux-tdep.h"
+#include "common/x86-xstate.h"
+
+#include "amd64-tdep.h"
+#include "solib-svr4.h"
 #include "xml-syscall.h"
+#include "glibc-tdep.h"
+#include "arch/amd64.h"
+#include "target-descriptions.h"
 
 /* The syscall's XML filename for i386.  */
 #define XML_SYSCALL_FILENAME_AMD64 "syscalls/amd64-linux.xml"

@@ -18,35 +18,31 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Standard C includes.  */
-#include <fcntl.h>
-#include <signal.h>
-
-/* Local non-gdb includes.  */
 #include "arch-utils.h"
-#include "bfd.h"
-#include "command.h"
-#include "common/filestuff.h"
-#include "completer.h"
-#include "exec.h"
-#include "filenames.h"
-#include "frame.h"
-#include "gdb_bfd.h"
-#include "gdbcore.h"
-#include "gdbthread.h"
+#include <signal.h>
+#include <fcntl.h>
+#include "frame.h"		/* required by inferior.h */
 #include "inferior.h"
 #include "infrun.h"
-#include "objfiles.h"
+#include "symtab.h"
+#include "command.h"
+#include "bfd.h"
+#include "target.h"
 #include "process-stratum-target.h"
-#include "progspace.h"
-#include "readline/readline.h"
+#include "gdbcore.h"
+#include "gdbthread.h"
 #include "regcache.h"
 #include "regset.h"
-#include "solib.h"
 #include "symfile.h"
-#include "symtab.h"
-#include "target.h"
+#include "exec.h"
+#include "readline/readline.h"
+#include "solib.h"
+#include "filenames.h"
+#include "progspace.h"
+#include "objfiles.h"
+#include "gdb_bfd.h"
+#include "completer.h"
+#include "common/filestuff.h"
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0

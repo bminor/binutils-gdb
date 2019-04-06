@@ -22,11 +22,10 @@
    outside of GDB (test suites, the stub, etc.)  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
 #include "ax.h"
-#include "user-regs.h"
+
 #include "value.h"
+#include "user-regs.h"
 
 static void grow_expr (struct agent_expr *x, int n);
 

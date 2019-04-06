@@ -18,18 +18,16 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Standard C includes.  */
-#include <machine/reg.h>
-#include <sys/ptrace.h>
-#include <sys/types.h>
-
-/* Local non-gdb includes.  */
-#include "arm-fbsd-tdep.h"
-#include "arm-tdep.h"
-#include "fbsd-nat.h"
-#include "inf-ptrace.h"
 #include "target.h"
+
+#include <sys/types.h>
+#include <sys/ptrace.h>
+#include <machine/reg.h>
+
+#include "fbsd-nat.h"
+#include "arm-tdep.h"
+#include "arm-fbsd-tdep.h"
+#include "inf-ptrace.h"
 
 struct arm_fbsd_nat_target : public fbsd_nat_target
 {

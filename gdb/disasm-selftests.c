@@ -18,8 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
 #include "disasm.h"
 
 #if GDB_SELF_TEST

@@ -19,23 +19,21 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
-#include "annotate.h"
-#include "bfd.h"
-#include "block.h"
-#include "command.h"
-#include "dummy-frame.h"
-#include "frame.h"
-#include "gdbcmd.h"
-#include "gdbcore.h"
-#include "inferior.h"
-#include "inline-frame.h"
-#include "objfiles.h"
-#include "regcache.h"
 #include "symtab.h"
-#include "target.h"
+#include "bfd.h"
+#include "objfiles.h"
+#include "frame.h"
+#include "gdbcore.h"
 #include "value.h"
+#include "target.h"
+#include "inferior.h"
+#include "annotate.h"
+#include "regcache.h"
+#include "dummy-frame.h"
+#include "command.h"
+#include "gdbcmd.h"
+#include "block.h"
+#include "inline-frame.h"
 
 /* Return the innermost lexical block in execution in a specified
    stack frame.  The frame address is assumed valid.

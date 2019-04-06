@@ -21,20 +21,18 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
-#include "block.h"
-#include "command.h"
-#include "dictionary.h"
+#include "symtab.h"
+#include "gdbtypes.h"
 #include "expression.h"
+#include "value.h"
+#include "valprint.h"
+#include "language.h"
 #include "f-lang.h"
 #include "frame.h"
 #include "gdbcore.h"
-#include "gdbtypes.h"
-#include "language.h"
-#include "symtab.h"
-#include "valprint.h"
-#include "value.h"
+#include "command.h"
+#include "block.h"
+#include "dictionary.h"
 
 static void f77_get_dynamic_length_of_aggregate (struct type *);
 

@@ -19,25 +19,24 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
-#include "amd64-darwin-tdep.h"
-#include "amd64-tdep.h"
-#include "common/x86-xstate.h"
-#include "dwarf2-frame.h"
 #include "frame.h"
-#include "gdbcore.h"
-#include "i386-darwin-tdep.h"
-#include "i387-tdep.h"
 #include "inferior.h"
-#include "objfiles.h"
-#include "osabi.h"
-#include "regcache.h"
-#include "solib-darwin.h"
-#include "solib.h"
-#include "symtab.h"
+#include "gdbcore.h"
 #include "target.h"
+#include "symtab.h"
+#include "regcache.h"
+#include "objfiles.h"
+
+#include "i387-tdep.h"
+#include "common/x86-xstate.h"
+#include "amd64-tdep.h"
+#include "osabi.h"
 #include "ui-out.h"
+#include "amd64-darwin-tdep.h"
+#include "i386-darwin-tdep.h"
+#include "solib.h"
+#include "solib-darwin.h"
+#include "dwarf2-frame.h"
 
 /* Offsets into the struct x86_thread_state64 where we'll find the saved regs.
    From <mach/i386/thread_status.h> and amd64-tdep.h.  */

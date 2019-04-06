@@ -18,10 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
-#include "bsd-uthread.h"
-#include "gdb_obstack.h"
 #include "gdbcore.h"
 #include "gdbthread.h"
 #include "inferior.h"
@@ -32,6 +28,10 @@
 #include "solist.h"
 #include "symfile.h"
 #include "target.h"
+
+#include "gdb_obstack.h"
+
+#include "bsd-uthread.h"
 
 static const target_info bsd_uthread_target_info = {
   "bsd-uthreads",

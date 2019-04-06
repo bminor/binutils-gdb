@@ -19,28 +19,24 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Standard C includes.  */
-#include <signal.h>
-
-/* Local non-gdb includes.  */
-#include "block.h"
-#include "common/gdb_setjmp.h"
-#include "common/selftest.h"
-#include "complaints.h"
-#include "cp-abi.h"
 #include "cp-support.h"
 #include "demangle.h"
-#include "dictionary.h"
-#include "expression.h"
-#include "frame.h"
 #include "gdbcmd.h"
-#include "gdbtypes.h"
-#include "namespace.h"
+#include "dictionary.h"
 #include "objfiles.h"
-#include "safe-ctype.h"
+#include "frame.h"
 #include "symtab.h"
+#include "block.h"
+#include "complaints.h"
+#include "gdbtypes.h"
+#include "expression.h"
 #include "value.h"
+#include "cp-abi.h"
+#include "namespace.h"
+#include <signal.h>
+#include "common/gdb_setjmp.h"
+#include "safe-ctype.h"
+#include "common/selftest.h"
 
 #define d_left(dc) (dc)->u.s_binary.left
 #define d_right(dc) (dc)->u.s_binary.right

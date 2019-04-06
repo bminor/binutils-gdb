@@ -18,8 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
 #include "inferior.h"
 #include "regcache.h"
 #include "target.h"

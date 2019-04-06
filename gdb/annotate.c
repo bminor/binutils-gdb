@@ -17,18 +17,15 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
 #include "annotate.h"
-#include "breakpoint.h"
+#include "value.h"
+#include "target.h"
 #include "gdbtypes.h"
+#include "breakpoint.h"
+#include "observable.h"
 #include "inferior.h"
 #include "infrun.h"
-#include "observable.h"
-#include "target.h"
 #include "top.h"
-#include "value.h"
-
 
 
 /* Prototypes for local functions.  */

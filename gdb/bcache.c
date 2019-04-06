@@ -20,10 +20,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
-#include "bcache.h"
 #include "gdb_obstack.h"
+#include "bcache.h"
 
 /* The type used to hold a single bcache string.  The user data is
    stored in d.data.  Since it can be any type, it needs to have the

@@ -19,24 +19,20 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Standard C++ includes.  */
-#include <string>
-
-/* Local non-gdb includes.  */
-#include "block.h"
-#include "buildsym.h"
-#include "command.h"
 #include "cp-support.h"
-#include "dictionary.h"
-#include "frame.h"
 #include "gdb_obstack.h"
+#include "symtab.h"
+#include "symfile.h"
+#include "block.h"
+#include "objfiles.h"
 #include "gdbtypes.h"
+#include "dictionary.h"
+#include "command.h"
+#include "frame.h"
+#include "buildsym.h"
 #include "language.h"
 #include "namespace.h"
-#include "objfiles.h"
-#include "symfile.h"
-#include "symtab.h"
+#include <string>
 
 static struct block_symbol
   cp_lookup_nested_symbol_1 (struct type *container_type,

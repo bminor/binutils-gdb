@@ -20,10 +20,8 @@
 #ifndef CLI_OUT_H
 #define CLI_OUT_H
 
-#include <vector>
-
-/* Local non-gdb includes.  */
 #include "ui-out.h"
+#include <vector>
 
 class cli_ui_out : public ui_out
 {

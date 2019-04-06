@@ -18,20 +18,16 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Standard C includes.  */
-#include <ctype.h>
-
-/* Local non-gdb includes.  */
-#include "arch-utils.h"
-#include "charset-list.h"
 #include "charset.h"
-#include "common/environ.h"
-#include "common/gdb_vecs.h"
-#include "common/gdb_wait.h"
-#include "common/vec.h"
-#include "gdb_obstack.h"
 #include "gdbcmd.h"
+#include "gdb_obstack.h"
+#include "common/gdb_wait.h"
+#include "charset-list.h"
+#include "common/vec.h"
+#include "common/environ.h"
+#include "arch-utils.h"
+#include "common/gdb_vecs.h"
+#include <ctype.h>
 
 #ifdef USE_WIN32API
 #include <windows.h>

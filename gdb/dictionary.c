@@ -21,19 +21,13 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Standard C includes.  */
 #include <ctype.h>
-
-/* Standard C++ includes.  */
-#include <unordered_map>
-
-/* Local non-gdb includes.  */
+#include "gdb_obstack.h"
+#include "symtab.h"
 #include "buildsym.h"
 #include "dictionary.h"
-#include "gdb_obstack.h"
 #include "safe-ctype.h"
-#include "symtab.h"
+#include <unordered_map>
 
 /* This file implements dictionaries, which are tables that associate
    symbols to names.  They are represented by an opaque type 'struct

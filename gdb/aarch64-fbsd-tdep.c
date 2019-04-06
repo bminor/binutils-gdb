@@ -19,16 +19,15 @@
 
 #include "defs.h"
 
-/* Local non-gdb includes.  */
-#include "aarch64-fbsd-tdep.h"
-#include "aarch64-tdep.h"
-#include "fbsd-tdep.h"
 #include "gdbarch.h"
+#include "fbsd-tdep.h"
+#include "aarch64-tdep.h"
+#include "aarch64-fbsd-tdep.h"
 #include "osabi.h"
 #include "solib-svr4.h"
 #include "target.h"
-#include "trad-frame.h"
 #include "tramp-frame.h"
+#include "trad-frame.h"
 
 /* Register maps.  */
 

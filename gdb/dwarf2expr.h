@@ -22,8 +22,8 @@
 #if !defined (DWARF2EXPR_H)
 #define DWARF2EXPR_H
 
-#include "gdbtypes.h"
 #include "leb128.h"
+#include "gdbtypes.h"
 
 /* The location of a value.  */
 enum dwarf_value_location

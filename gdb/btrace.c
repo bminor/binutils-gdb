@@ -20,22 +20,20 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
 #include "btrace.h"
-#include "cli/cli-utils.h"
-#include "common/rsp-low.h"
-#include "disasm.h"
-#include "filenames.h"
-#include "gdbcmd.h"
 #include "gdbthread.h"
 #include "inferior.h"
-#include "record.h"
-#include "regcache.h"
-#include "source.h"
-#include "symtab.h"
 #include "target.h"
+#include "record.h"
+#include "symtab.h"
+#include "disasm.h"
+#include "source.h"
+#include "filenames.h"
 #include "xml-support.h"
+#include "regcache.h"
+#include "common/rsp-low.h"
+#include "gdbcmd.h"
+#include "cli/cli-utils.h"
 
 /* For maintenance commands.  */
 #include "record-btrace.h"

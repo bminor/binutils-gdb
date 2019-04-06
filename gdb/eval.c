@@ -18,33 +18,29 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Standard C includes.  */
-#include <ctype.h>
-
-/* Local non-gdb includes.  */
-#include "block.h"
-#include "cp-abi.h"
-#include "cp-support.h"
-#include "expression.h"
-#include "f-lang.h"
-#include "frame.h"
-#include "gdb_obstack.h"
-#include "gdbthread.h"
-#include "gdbtypes.h"
-#include "infcall.h"
-#include "language.h"
-#include "objc-lang.h"
-#include "objfiles.h"
-#include "parser-defs.h"
-#include "regcache.h"
 #include "symtab.h"
+#include "gdbtypes.h"
+#include "value.h"
+#include "expression.h"
 #include "target.h"
-#include "typeprint.h"
+#include "frame.h"
+#include "gdbthread.h"
+#include "language.h"		/* For CAST_IS_CONVERSION.  */
+#include "f-lang.h"		/* For array bound stuff.  */
+#include "cp-abi.h"
+#include "infcall.h"
+#include "objc-lang.h"
+#include "block.h"
+#include "parser-defs.h"
+#include "cp-support.h"
 #include "ui-out.h"
+#include "regcache.h"
 #include "user-regs.h"
 #include "valprint.h"
-#include "value.h"
+#include "gdb_obstack.h"
+#include "objfiles.h"
+#include "typeprint.h"
+#include <ctype.h>
 
 /* This is defined in valops.c */
 extern int overload_resolution;

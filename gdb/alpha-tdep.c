@@ -18,33 +18,31 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Standard C++ includes.  */
-#include <algorithm>
-
-/* Local non-gdb includes.  */
-#include "alpha-tdep.h"
-#include "arch-utils.h"
-#include "block.h"
-#include "dis-asm.h"
-#include "dwarf2-frame.h"
-#include "elf-bfd.h"
-#include "frame-base.h"
-#include "frame-unwind.h"
 #include "frame.h"
+#include "frame-unwind.h"
+#include "frame-base.h"
+#include "dwarf2-frame.h"
+#include "inferior.h"
+#include "symtab.h"
+#include "value.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
-#include "infcall.h"
-#include "inferior.h"
-#include "linespec.h"
+#include "dis-asm.h"
+#include "symfile.h"
 #include "objfiles.h"
-#include "osabi.h"
+#include "linespec.h"
 #include "regcache.h"
 #include "reggroups.h"
-#include "symfile.h"
-#include "symtab.h"
+#include "arch-utils.h"
+#include "osabi.h"
+#include "block.h"
+#include "infcall.h"
 #include "trad-frame.h"
-#include "value.h"
+
+#include "elf-bfd.h"
+
+#include "alpha-tdep.h"
+#include <algorithm>
 
 /* Instruction decoding.  The notations for registers, immediates and
    opcodes are the same as the one used in Compaq's Alpha architecture

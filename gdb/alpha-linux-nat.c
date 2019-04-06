@@ -17,18 +17,17 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Standard C includes.  */
-#include <alpha/ptrace.h>
-#include <sys/procfs.h>
-
-/* Local non-gdb includes.  */
-#include "alpha-tdep.h"
-#include "gregset.h"
-#include "linux-nat-trad.h"
-#include "nat/gdb_ptrace.h"
-#include "regcache.h"
 #include "target.h"
+#include "regcache.h"
+#include "linux-nat-trad.h"
+
+#include "alpha-tdep.h"
+
+#include "nat/gdb_ptrace.h"
+#include <alpha/ptrace.h>
+
+#include <sys/procfs.h>
+#include "gregset.h"
 
 /* The address of UNIQUE for ptrace.  */
 #define ALPHA_UNIQUE_PTRACE_ADDR 65

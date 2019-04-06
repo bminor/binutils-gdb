@@ -19,18 +19,16 @@
 
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
-#include "command.h"
 #include "dummy-frame.h"
-#include "frame-unwind.h"
+#include "regcache.h"
 #include "frame.h"
+#include "inferior.h"
+#include "frame-unwind.h"
+#include "command.h"
 #include "gdbcmd.h"
+#include "observable.h"
 #include "gdbthread.h"
 #include "infcall.h"
-#include "inferior.h"
-#include "observable.h"
-#include "regcache.h"
 
 struct dummy_frame_id
 {

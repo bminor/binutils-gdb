@@ -18,18 +18,16 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
-#include "annotate.h"
-#include "breakpoint.h"
-#include "common/gdb_optional.h"
 #include "exceptions.h"
-#include "gdbthread.h"
-#include "inferior.h"
-#include "serial.h"
+#include "breakpoint.h"
 #include "target.h"
-#include "top.h"
+#include "inferior.h"
+#include "annotate.h"
 #include "ui-out.h"
+#include "serial.h"
+#include "gdbthread.h"
+#include "top.h"
+#include "common/gdb_optional.h"
 
 static void
 print_flush (void)

@@ -18,15 +18,13 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
-#include "elf-bfd.h"
 #include "frame.h"
 #include "objfiles.h"
 #include "osabi.h"
-#include "solib-target.h"
 #include "solib.h"
+#include "solib-target.h"
 #include "target.h"
+#include "elf-bfd.h"
 
 /* If PC is in a DLL import stub, return the address of the `real'
    function belonging to the stub.  */

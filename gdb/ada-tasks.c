@@ -16,17 +16,15 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
-#include "ada-lang.h"
-#include "gdbcmd.h"
-#include "gdbcore.h"
-#include "gdbthread.h"
-#include "inferior.h"
-#include "objfiles.h"
 #include "observable.h"
-#include "progspace.h"
+#include "gdbcmd.h"
 #include "target.h"
+#include "ada-lang.h"
+#include "gdbcore.h"
+#include "inferior.h"
+#include "gdbthread.h"
+#include "progspace.h"
+#include "objfiles.h"
 
 static int ada_build_task_list ();
 

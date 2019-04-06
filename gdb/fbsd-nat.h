@@ -20,10 +20,8 @@
 #ifndef FBSD_NAT_H
 #define FBSD_NAT_H
 
-#include <sys/proc.h>
-
-/* Local non-gdb includes.  */
 #include "inf-ptrace.h"
+#include <sys/proc.h>
 
 #ifdef TRAP_BRKPT
 /* MIPS does not set si_code for SIGTRAP.  sparc64 reports

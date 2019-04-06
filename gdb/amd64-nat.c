@@ -18,13 +18,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
-#include "amd64-nat.h"
-#include "amd64-tdep.h"
 #include "gdbarch.h"
-#include "i386-tdep.h"
 #include "regcache.h"
+
+#include "i386-tdep.h"
+#include "amd64-tdep.h"
+#include "amd64-nat.h"
 
 /* The following bits of code help with implementing debugging 32-bit
    code natively on AMD64.  The idea is to define two mappings between

@@ -18,23 +18,18 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Standard C includes.  */
-#include <ctype.h>
-
-/* Standard C++ includes.  */
-#include <string>
-
-/* Local non-gdb includes.  */
-#include "annotate.h"
 #include "arch-utils.h"
+#include <ctype.h>
 #include "breakpoint.h"
-#include "cli/cli-utils.h"
-#include "completer.h"
 #include "gdbcmd.h"
 #include "inferior.h"
 #include "infrun.h"
+#include "annotate.h"
 #include "valprint.h"
+#include "cli/cli-utils.h"
+#include "completer.h"
+
+#include <string>
 
 #define INTERNAL_SIGNAL(x) ((x) == GDB_SIGNAL_TRAP || (x) == GDB_SIGNAL_INT)
 

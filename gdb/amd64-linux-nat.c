@@ -19,27 +19,25 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Standard C includes.  */
+#include "inferior.h"
+#include "regcache.h"
+#include "elf/common.h"
+#include <sys/uio.h>
+#include "nat/gdb_ptrace.h"
 #include <asm/prctl.h>
 #include <sys/reg.h>
-#include <sys/uio.h>
+#include "gregset.h"
+#include "gdb_proc_service.h"
 
-/* Local non-gdb includes.  */
-#include "amd64-linux-tdep.h"
 #include "amd64-nat.h"
 #include "amd64-tdep.h"
-#include "common/x86-xstate.h"
-#include "elf/common.h"
-#include "gdb_proc_service.h"
-#include "gregset.h"
+#include "amd64-linux-tdep.h"
 #include "i386-linux-tdep.h"
-#include "inferior.h"
-#include "nat/amd64-linux-siginfo.h"
-#include "nat/gdb_ptrace.h"
-#include "nat/linux-ptrace.h"
-#include "regcache.h"
+#include "common/x86-xstate.h"
+
 #include "x86-linux-nat.h"
+#include "nat/linux-ptrace.h"
+#include "nat/amd64-linux-siginfo.h"
 
 /* This definition comes from prctl.h.  Kernels older than 2.5.64
    do not have it.  */

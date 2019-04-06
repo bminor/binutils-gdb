@@ -18,11 +18,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
-#include "common/queue.h"
 #include "event-loop.h"
 #include "event-top.h"
+#include "common/queue.h"
 #include "ser-event.h"
 
 #ifdef HAVE_POLL

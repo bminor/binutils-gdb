@@ -21,25 +21,22 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Standard C includes.  */
-#include <math.h>
-
-/* Local non-gdb includes.  */
-#include "c-lang.h"
-#include "charset.h"
-#include "cp-support.h"
-#include "expression.h"
-#include "f-lang.h"
-#include "gdbcore.h"
-#include "gdbtypes.h"
-#include "language.h"
-#include "parser-defs.h"
 #include "symtab.h"
-#include "target-float.h"
+#include "gdbtypes.h"
+#include "expression.h"
+#include "parser-defs.h"
+#include "language.h"
+#include "varobj.h"
+#include "gdbcore.h"
+#include "f-lang.h"
 #include "valprint.h"
 #include "value.h"
-#include "varobj.h"
+#include "cp-support.h"
+#include "charset.h"
+#include "c-lang.h"
+#include "target-float.h"
+
+#include <math.h>
 
 /* Local functions */
 

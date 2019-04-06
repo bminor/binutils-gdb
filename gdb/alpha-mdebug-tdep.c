@@ -17,17 +17,16 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
-#include "alpha-tdep.h"
-#include "block.h"
-#include "frame-base.h"
-#include "frame-unwind.h"
 #include "frame.h"
-#include "gdbcore.h"
-#include "mdebugread.h"
+#include "frame-unwind.h"
+#include "frame-base.h"
 #include "symtab.h"
+#include "gdbcore.h"
+#include "block.h"
 #include "trad-frame.h"
+
+#include "alpha-tdep.h"
+#include "mdebugread.h"
 
 /* FIXME: Some of this code should perhaps be merged with mips.  */
 

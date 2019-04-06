@@ -21,13 +21,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Local non-gdb includes.  */
+#include "ui-out.h"
 #include "cli-out.h"
-#include "cli/cli-style.h"
 #include "completer.h"
 #include "readline/readline.h"
-#include "ui-out.h"
+#include "cli/cli-style.h"
 
 /* These are the CLI output functions */
 

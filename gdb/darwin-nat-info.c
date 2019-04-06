@@ -28,25 +28,24 @@
    Tiger is no longer important.  */
 
 #include "defs.h"
+#include "symtab.h"
+#include "gdbtypes.h"
+#include "gdbcore.h"
+#include "value.h"
+#include "gdbcmd.h"
+#include "inferior.h"
 
-/* Standard C includes.  */
-#include <mach/mach_init.h>
-#include <mach/mach_port.h>
-#include <mach/mach_vm.h>
-#include <mach/task.h>
-#include <mach/thread_act.h>
-#include <mach/thread_info.h>
-#include <mach/vm_map.h>
 #include <sys/sysctl.h>
 
-/* Local non-gdb includes.  */
 #include "darwin-nat.h"
-#include "gdbcmd.h"
-#include "gdbcore.h"
-#include "gdbtypes.h"
-#include "inferior.h"
-#include "symtab.h"
-#include "value.h"
+
+#include <mach/thread_info.h>
+#include <mach/thread_act.h>
+#include <mach/task.h>
+#include <mach/vm_map.h>
+#include <mach/mach_port.h>
+#include <mach/mach_init.h>
+#include <mach/mach_vm.h>
 
 #define CHECK_ARGS(what, args) do { \
   if ((NULL == args) || ((args[0] != '0') && (args[1] != 'x'))) \

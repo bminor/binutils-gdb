@@ -21,8 +21,6 @@
 #define DWARF2READ_H
 
 #include <unordered_map>
-
-/* Local non-gdb includes.  */
 #include "dwarf-index-cache.h"
 #include "filename-seen-cache.h"
 #include "gdb_obstack.h"

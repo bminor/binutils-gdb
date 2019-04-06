@@ -18,38 +18,34 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Standard C includes.  */
-#include <ctype.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-
-/* Standard C++ includes.  */
-#include <algorithm>
-
-/* Local non-gdb includes.  */
-#include "arch-utils.h"
-#include "common/pathstuff.h"
-#include "completer.h"
-#include "exec.h"
-#include "filenames.h"
 #include "frame.h"
-#include "gcore.h"
-#include "gdb_bfd.h"
-#include "gdbcmd.h"
-#include "gdbcore.h"
-#include "gdbthread.h"
 #include "inferior.h"
-#include "language.h"
-#include "objfiles.h"
-#include "observable.h"
-#include "progspace.h"
-#include "readline/readline.h"
-#include "solist.h"
-#include "source.h"
-#include "symfile.h"
 #include "target.h"
+#include "gdbcmd.h"
+#include "language.h"
+#include "filenames.h"
+#include "symfile.h"
+#include "objfiles.h"
+#include "completer.h"
 #include "value.h"
+#include "exec.h"
+#include "observable.h"
+#include "arch-utils.h"
+#include "gdbthread.h"
+#include "progspace.h"
+#include "gdb_bfd.h"
+#include "gcore.h"
+#include "source.h"
+
+#include <fcntl.h>
+#include "readline/readline.h"
+#include "gdbcore.h"
+
+#include <ctype.h>
+#include <sys/stat.h>
+#include "solist.h"
+#include <algorithm>
+#include "common/pathstuff.h"
 
 void (*deprecated_file_changed_hook) (const char *);
 

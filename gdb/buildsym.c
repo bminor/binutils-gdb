@@ -17,27 +17,23 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Standard C++ includes.  */
-#include <algorithm>
-
-/* Local non-gdb includes.  */
-#include "addrmap.h"
-#include "bfd.h"
-#include "block.h"
 #include "buildsym-legacy.h"
-#include "complaints.h"
-#include "cp-support.h"
-#include "demangle.h"
-#include "dictionary.h"
-#include "expression.h"
-#include "filenames.h"
+#include "bfd.h"
 #include "gdb_obstack.h"
-#include "gdbtypes.h"
-#include "macrotab.h"
-#include "objfiles.h"
-#include "symfile.h"
 #include "symtab.h"
+#include "symfile.h"
+#include "objfiles.h"
+#include "gdbtypes.h"
+#include "complaints.h"
+#include "expression.h"		/* For "enum exp_opcode" used by...  */
+#include "filenames.h"		/* For DOSish file names.  */
+#include "macrotab.h"
+#include "demangle.h"		/* Needed by SYMBOL_INIT_DEMANGLED_NAME.  */
+#include "block.h"
+#include "cp-support.h"
+#include "dictionary.h"
+#include "addrmap.h"
+#include <algorithm>
 
 /* For cleanup_undefined_stabs_types and finish_global_stabs (somewhat
    questionable--see comment where we call them).  */

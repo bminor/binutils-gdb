@@ -20,24 +20,18 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* Standard C includes.  */
-#include <ctype.h>
-#include <sys/stat.h>
-
-/* Standard C++ includes.  */
-#include <algorithm>
-
-/* Local non-gdb includes.  */
-#include "common/filestuff.h"
-#include "completer.h"
 #include "ctf.h"
-#include "exec.h"
-#include "gdbthread.h"
-#include "inferior.h"
-#include "regcache.h"
-#include "tracefile.h"
 #include "tracepoint.h"
+#include "regcache.h"
+#include <sys/stat.h>
+#include "exec.h"
+#include "completer.h"
+#include "inferior.h"
+#include "gdbthread.h"
+#include "tracefile.h"
+#include <ctype.h>
+#include <algorithm>
+#include "common/filestuff.h"
 
 /* The CTF target.  */
 

@@ -19,22 +19,24 @@
 
 #include "defs.h"
 
-/* Local non-gdb includes.  */
 #include "arch-utils.h"
-#include "common/version.h"
-#include "dis-asm.h"
-#include "floatformat.h"
 #include "gdbcmd.h"
-#include "gdbcore.h"
-#include "inferior.h"
+#include "inferior.h"		/* enum CALL_DUMMY_LOCATION et al.  */
 #include "infrun.h"
-#include "language.h"
-#include "objfiles.h"
-#include "osabi.h"
 #include "regcache.h"
 #include "sim-regno.h"
-#include "symtab.h"
+#include "gdbcore.h"
+#include "osabi.h"
 #include "target-descriptions.h"
+#include "objfiles.h"
+#include "language.h"
+#include "symtab.h"
+
+#include "common/version.h"
+
+#include "floatformat.h"
+
+#include "dis-asm.h"
 
 int
 default_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
