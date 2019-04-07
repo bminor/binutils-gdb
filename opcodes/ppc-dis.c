@@ -720,8 +720,17 @@ print_insn_powerpc (bfd_vma memaddr,
     {
       const unsigned char *opindex;
       const struct powerpc_operand *operand;
-      int need_comma;
-      int need_paren;
+      enum {
+	need_comma = 0,
+	need_1space = 1,
+	need_2spaces = 2,
+	need_3spaces = 3,
+	need_4spaces = 4,
+	need_5spaces = 5,
+	need_6spaces = 6,
+	need_7spaces = 7,
+	need_paren
+      } op_separator;
       int skip_optional;
       int spaces;
 
@@ -732,8 +741,7 @@ print_insn_powerpc (bfd_vma memaddr,
 	spaces = 1;
 
       /* Now extract and print the operands.  */
-      need_comma = 0;
-      need_paren = 0;
+      op_separator = spaces;
       skip_optional = -1;
       for (opindex = opcode->operands; *opindex != 0; opindex++)
 	{
@@ -754,16 +762,12 @@ print_insn_powerpc (bfd_vma memaddr,
 
 	  value = operand_value_powerpc (operand, insn, dialect);
 
-	  if (spaces)
-	    {
-	      (*info->fprintf_func) (info->stream, "%*s", spaces, " ");
-	      spaces = 0;
-	    }
-	  if (need_comma)
-	    {
-	      (*info->fprintf_func) (info->stream, ",");
-	      need_comma = 0;
-	    }
+	  if (op_separator == need_comma)
+	    (*info->fprintf_func) (info->stream, ",");
+	  else if (op_separator == need_paren)
+	    (*info->fprintf_func) (info->stream, "(");
+	  else
+	    (*info->fprintf_func) (info->stream, "%*s", op_separator, " ");
 
 	  /* Print the operand as directed by the flags.  */
 	  if ((operand->flags & PPC_OPERAND_GPR) != 0
@@ -808,19 +812,12 @@ print_insn_powerpc (bfd_vma memaddr,
 	  else
 	    (*info->fprintf_func) (info->stream, "%" PRId64, value);
 
-	  if (need_paren)
-	    {
-	      (*info->fprintf_func) (info->stream, ")");
-	      need_paren = 0;
-	    }
+	  if (op_separator == need_paren)
+	    (*info->fprintf_func) (info->stream, ")");
 
-	  if ((operand->flags & PPC_OPERAND_PARENS) == 0)
-	    need_comma = 1;
-	  else
-	    {
-	      (*info->fprintf_func) (info->stream, "(");
-	      need_paren = 1;
-	    }
+	  op_separator = need_comma;
+	  if ((operand->flags & PPC_OPERAND_PARENS) != 0)
+	    op_separator = need_paren;
 	}
 
       /* We have found and printed an instruction.  */

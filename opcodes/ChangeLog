@@ -1,5 +1,11 @@
 2019-04-07  Alan Modra  <amodra@gmail.com>
 
+	* ppc-dis.c (print_insn_powerpc): Use a tiny state machine
+	op_separator to control printing of spaces, comma and parens
+	rather than need_comma, need_paren and spaces vars.
+
+2019-04-07  Alan Modra  <amodra@gmail.com>
+
 	PR 24421
 	* arm-dis.c (print_insn_coprocessor): Correct bracket placement.
 	(print_insn_neon, print_insn_arm): Likewise.
