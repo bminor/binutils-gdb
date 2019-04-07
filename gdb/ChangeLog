@@ -1,5 +1,9 @@
 2019-04-19  Tom Tromey  <tom@tromey.com>
 
+	* event-loop.c: Don't include "common/queue.h".
+
+2019-04-19  Tom Tromey  <tom@tromey.com>
+
 	* remote.c (remote_target): Use delete.
 	* remote-notif.h: Include <list>, not "common/queue.h".
 	(notif_client_p): Remove typedef.

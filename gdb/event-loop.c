@@ -20,7 +20,6 @@
 #include "defs.h"
 #include "event-loop.h"
 #include "event-top.h"
-#include "common/queue.h"
 #include "ser-event.h"
 
 #ifdef HAVE_POLL
