@@ -20,19 +20,20 @@
 #define GDBSERVER_NOTIF_H
 
 #include "target.h"
-#include "common/queue.h"
+#include <list>
 
 /* Structure holding information related to a single event.  We
    keep a queue of these to push to GDB.  It can be extended if
    the event of given notification contains more information.  */
 
-typedef struct notif_event
+struct notif_event
 {
-  /* C requires that a struct or union has at least one member.  */
-  char dummy;
-} *notif_event_p;
+  virtual ~notif_event ()
+  {
+  }
 
-DECLARE_QUEUE_P (notif_event_p);
+  /* No payload needed.  */
+};
 
 /* A type notification to GDB.  An object of 'struct notif_server'
    represents a type of notification.  */
@@ -49,7 +50,7 @@ typedef struct notif_server
   /* A queue of events to GDB.  A new notif_event can be enque'ed
      into QUEUE at any appropriate time, and the notif_reply is
      deque'ed only when the ack from GDB arrives.  */
-  QUEUE (notif_event_p) *queue;
+  std::list<notif_event *> queue;
 
   /* Write event EVENT to OWN_BUF.  */
   void (*write) (struct notif_event *event, char *own_buf);
@@ -63,7 +64,5 @@ void notif_write_event (struct notif_server *notif, char *own_buf);
 void notif_push (struct notif_server *np, struct notif_event *event);
 void notif_event_enque (struct notif_server *notif,
 			struct notif_event *event);
-
-void initialize_notif (void);
 
 #endif /* GDBSERVER_NOTIF_H */

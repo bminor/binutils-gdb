@@ -1,3 +1,26 @@
+2019-04-19  Tom Tromey  <tom@tromey.com>
+
+	* server.c (struct vstop_notif): Derive from notif_event.
+	<base>: Remove.
+	(queue_stop_reply): Update.
+	(remove_all_on_match_ptid): Change type.  Rewrite.
+	(discard_queued_stop_replies): Rewrite.
+	(in_queued_stop_replies_ptid): Change type.
+	(in_queued_stop_replies): Rewrite.
+	(notif_stop): Update.
+	(queue_stop_reply_callback): Update.
+	(captured_main): Don't call initialize_notif.
+	(push_stop_notification): Update.
+	* notif.c (notif_write_event, handle_notif_ack)
+	(notif_event_enque, notif_push): Update.
+	(notif_event_xfree, initialize_notif): Remove.
+	* notif.h (struct notif_event): Include <list>, not
+	"common/queue.h".
+	(struct notif_server) <queue>: Now a std::list.
+	(notif_event_p): Remove typedef.
+	(initialize_notif): Don't declare.
+	(struct notif_event): Add virtual destructor.
+
 2019-04-17  Alan Hayward  <alan.hayward@arm.com>
 
 	* ax.c (ax_vdebug): Call debug_printf.

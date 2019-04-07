@@ -140,10 +140,8 @@ static unsigned char *mem_buf;
    relative to a single stop reply.  We keep a queue of these to
    push to GDB in non-stop mode.  */
 
-struct vstop_notif
+struct vstop_notif : public notif_event
 {
-  struct notif_event base;
-
   /* Thread or process that got the event.  */
   ptid_t ptid;
 
@@ -154,8 +152,6 @@ struct vstop_notif
 /* The current btrace configuration.  This is gdbserver's mirror of GDB's
    btrace configuration.  */
 static struct btrace_config current_btrace_conf;
-
-DEFINE_QUEUE_P (notif_event_p);
 
 /* The client remote protocol state. */
 
@@ -174,32 +170,20 @@ get_client_state ()
 static void
 queue_stop_reply (ptid_t ptid, struct target_waitstatus *status)
 {
-  struct vstop_notif *new_notif = XNEW (struct vstop_notif);
+  struct vstop_notif *new_notif = new struct vstop_notif;
 
   new_notif->ptid = ptid;
   new_notif->status = *status;
 
-  notif_event_enque (&notif_stop, (struct notif_event *) new_notif);
+  notif_event_enque (&notif_stop, new_notif);
 }
 
-static int
-remove_all_on_match_ptid (QUEUE (notif_event_p) *q,
-			  QUEUE_ITER (notif_event_p) *iter,
-			  struct notif_event *event,
-			  void *data)
+static bool
+remove_all_on_match_ptid (struct notif_event *event, ptid_t filter_ptid)
 {
-  ptid_t filter_ptid = *(ptid_t *) data;
   struct vstop_notif *vstop_event = (struct vstop_notif *) event;
 
-  if (vstop_event->ptid.matches (filter_ptid))
-    {
-      if (q->free_func != NULL)
-	q->free_func (event);
-
-      QUEUE_remove_elem (notif_event_p, q, iter);
-    }
-
-  return 1;
+  return vstop_event->ptid.matches (filter_ptid);
 }
 
 /* See server.h.  */
@@ -207,8 +191,19 @@ remove_all_on_match_ptid (QUEUE (notif_event_p) *q,
 void
 discard_queued_stop_replies (ptid_t ptid)
 {
-  QUEUE_iterate (notif_event_p, notif_stop.queue,
-		 remove_all_on_match_ptid, &ptid);
+  std::list<notif_event *>::iterator iter, next, end;
+  end = notif_stop.queue.end ();
+  for (iter = notif_stop.queue.begin (); iter != end; iter = next)
+    {
+      next = iter;
+      ++next;
+
+      if (remove_all_on_match_ptid (*iter, ptid))
+	{
+	  delete *iter;
+	  notif_stop.queue.erase (iter);
+	}
+    }
 }
 
 static void
@@ -219,27 +214,23 @@ vstop_notif_reply (struct notif_event *event, char *own_buf)
   prepare_resume_reply (own_buf, vstop->ptid, &vstop->status);
 }
 
-/* QUEUE_iterate callback helper for in_queued_stop_replies.  */
+/* Helper for in_queued_stop_replies.  */
 
-static int
-in_queued_stop_replies_ptid (QUEUE (notif_event_p) *q,
-			     QUEUE_ITER (notif_event_p) *iter,
-			     struct notif_event *event,
-			     void *data)
+static bool
+in_queued_stop_replies_ptid (struct notif_event *event, ptid_t filter_ptid)
 {
-  ptid_t filter_ptid = *(ptid_t *) data;
   struct vstop_notif *vstop_event = (struct vstop_notif *) event;
 
   if (vstop_event->ptid.matches (filter_ptid))
-    return 0;
+    return true;
 
   /* Don't resume fork children that GDB does not know about yet.  */
   if ((vstop_event->status.kind == TARGET_WAITKIND_FORKED
        || vstop_event->status.kind == TARGET_WAITKIND_VFORKED)
       && vstop_event->status.value.related_pid.matches (filter_ptid))
-    return 0;
+    return true;
 
-  return 1;
+  return false;
 }
 
 /* See server.h.  */
@@ -247,13 +238,18 @@ in_queued_stop_replies_ptid (QUEUE (notif_event_p) *q,
 int
 in_queued_stop_replies (ptid_t ptid)
 {
-  return !QUEUE_iterate (notif_event_p, notif_stop.queue,
-			 in_queued_stop_replies_ptid, &ptid);
+  for (notif_event *event : notif_stop.queue)
+    {
+      if (in_queued_stop_replies_ptid (event, ptid))
+	return true;
+    }
+
+  return false;
 }
 
 struct notif_server notif_stop =
 {
-  "vStopped", "Stop", NULL, vstop_notif_reply,
+  "vStopped", "Stop", {}, vstop_notif_reply,
 };
 
 static int
@@ -3247,14 +3243,13 @@ queue_stop_reply_callback (thread_info *thread)
      manage the thread's last_status field.  */
   if (the_target->thread_stopped == NULL)
     {
-      struct vstop_notif *new_notif = XNEW (struct vstop_notif);
+      struct vstop_notif *new_notif = new struct vstop_notif;
 
       new_notif->ptid = thread->id;
       new_notif->status = thread->last_status;
       /* Pass the last stop reply back to GDB, but don't notify
 	 yet.  */
-      notif_event_enque (&notif_stop,
-			 (struct notif_event *) new_notif);
+      notif_event_enque (&notif_stop, new_notif);
     }
   else
     {
@@ -3789,7 +3784,6 @@ captured_main (int argc, char *argv[])
   initialize_event_loop ();
   if (target_supports_tracepoints ())
     initialize_tracepoint ();
-  initialize_notif ();
 
   mem_buf = (unsigned char *) xmalloc (PBUFSIZ);
 
@@ -4412,12 +4406,12 @@ handle_serial_event (int err, gdb_client_data client_data)
 static void
 push_stop_notification (ptid_t ptid, struct target_waitstatus *status)
 {
-  struct vstop_notif *vstop_notif = XNEW (struct vstop_notif);
+  struct vstop_notif *vstop_notif = new struct vstop_notif;
 
   vstop_notif->status = *status;
   vstop_notif->ptid = ptid;
   /* Push Stop notification.  */
-  notif_push (&notif_stop, (struct notif_event *) vstop_notif);
+  notif_push (&notif_stop, vstop_notif);
 }
 
 /* Event-loop callback for target events.  */
