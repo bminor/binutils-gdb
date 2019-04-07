@@ -1218,62 +1218,25 @@ typedef struct
 
 DEF_VEC_O (stack_item_t);
 
-/* Return the alignment (in bytes) of the given type.  */
+/* Implement the gdbarch type alignment method, overrides the generic
+   alignment algorithm for anything that is aarch64 specific.  */
 
-static int
-aarch64_type_align (struct type *t)
+static ULONGEST
+aarch64_type_align (gdbarch *gdbarch, struct type *t)
 {
-  int n;
-  int align;
-  int falign;
-
   t = check_typedef (t);
-  switch (TYPE_CODE (t))
+  if (TYPE_CODE (t) == TYPE_CODE_ARRAY && TYPE_VECTOR (t))
     {
-    default:
-      /* Should never happen.  */
-      internal_error (__FILE__, __LINE__, _("unknown type alignment"));
-      return 4;
-
-    case TYPE_CODE_PTR:
-    case TYPE_CODE_ENUM:
-    case TYPE_CODE_INT:
-    case TYPE_CODE_FLT:
-    case TYPE_CODE_SET:
-    case TYPE_CODE_RANGE:
-    case TYPE_CODE_BITSTRING:
-    case TYPE_CODE_REF:
-    case TYPE_CODE_RVALUE_REF:
-    case TYPE_CODE_CHAR:
-    case TYPE_CODE_BOOL:
-      return TYPE_LENGTH (t);
-
-    case TYPE_CODE_ARRAY:
-      if (TYPE_VECTOR (t))
-	{
-	  /* Use the natural alignment for vector types (the same for
-	     scalar type), but the maximum alignment is 128-bit.  */
-	  if (TYPE_LENGTH (t) > 16)
-	    return 16;
-	  else
-	    return TYPE_LENGTH (t);
-	}
+      /* Use the natural alignment for vector types (the same for
+	 scalar type), but the maximum alignment is 128-bit.  */
+      if (TYPE_LENGTH (t) > 16)
+	return 16;
       else
-	return aarch64_type_align (TYPE_TARGET_TYPE (t));
-    case TYPE_CODE_COMPLEX:
-      return aarch64_type_align (TYPE_TARGET_TYPE (t));
-
-    case TYPE_CODE_STRUCT:
-    case TYPE_CODE_UNION:
-      align = 1;
-      for (n = 0; n < TYPE_NFIELDS (t); n++)
-	{
-	  falign = aarch64_type_align (TYPE_FIELD_TYPE (t, n));
-	  if (falign > align)
-	    align = falign;
-	}
-      return align;
+	return TYPE_LENGTH (t);
     }
+
+  /* Allow the common code to calculate the alignment.  */
+  return 0;
 }
 
 /* Worker function for aapcs_is_vfp_call_or_return_candidate.
@@ -1540,7 +1503,7 @@ pass_on_stack (struct aarch64_call_info *info, struct type *type,
 
   info->argnum++;
 
-  align = aarch64_type_align (type);
+  align = type_align (type);
 
   /* PCS C.17 Stack should be aligned to the larger of 8 bytes or the
      Natural alignment of the argument's type.  */
@@ -3370,6 +3333,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_float_format (gdbarch, floatformats_ieee_single);
   set_gdbarch_double_format (gdbarch, floatformats_ieee_double);
   set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
+  set_gdbarch_type_align (gdbarch, aarch64_type_align);
 
   /* Internal <-> external register number maps.  */
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, aarch64_dwarf_reg_to_regnum);
