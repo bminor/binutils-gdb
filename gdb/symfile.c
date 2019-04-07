@@ -2549,7 +2549,7 @@ reread_symbols (void)
 	  objfile->sections = NULL;
 	  objfile->compunit_symtabs = NULL;
 	  objfile->template_symbols = NULL;
-	  objfile->static_links = NULL;
+	  objfile->static_links.reset (nullptr);
 
 	  /* obstack_init also initializes the obstack so it is
 	     empty.  We could use obstack_specify_allocation but

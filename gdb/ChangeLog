@@ -1,5 +1,13 @@
 2019-04-19  Tom Tromey  <tom@tromey.com>
 
+	* symfile.c (reread_symbols): Update.
+	* objfiles.c (objfile_register_static_link)
+	(objfile_lookup_static_link): Update
+	(~objfile) Don't delete static_links.
+	* objfiles.h (struct objfile) <static_links>: Now an htab_up.
+
+2019-04-19  Tom Tromey  <tom@tromey.com>
+
 	* type-stack.h (struct type_stack) <insert>: Constify string.
 	* type-stack.c (type_stack::insert): Constify string.
 	* gdbtypes.h (lookup_template_type): Update.

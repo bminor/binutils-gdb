@@ -231,14 +231,14 @@ objfile_register_static_link (struct objfile *objfile,
   struct static_link_htab_entry *entry;
 
   if (objfile->static_links == NULL)
-    objfile->static_links = htab_create_alloc
+    objfile->static_links.reset (htab_create_alloc
       (1, &static_link_htab_entry_hash, static_link_htab_entry_eq, NULL,
-       xcalloc, xfree);
+       xcalloc, xfree));
 
   /* Create a slot for the mapping, make sure it's the first mapping for this
      block and then create the mapping itself.  */
   lookup_entry.block = block;
-  slot = htab_find_slot (objfile->static_links, &lookup_entry, INSERT);
+  slot = htab_find_slot (objfile->static_links.get (), &lookup_entry, INSERT);
   gdb_assert (*slot == NULL);
 
   entry = XOBNEW (&objfile->objfile_obstack, static_link_htab_entry);
@@ -260,9 +260,8 @@ objfile_lookup_static_link (struct objfile *objfile,
   if (objfile->static_links == NULL)
     return NULL;
   lookup_entry.block = block;
-  entry
-    = (struct static_link_htab_entry *) htab_find (objfile->static_links,
-						   &lookup_entry);
+  entry = ((struct static_link_htab_entry *)
+	   htab_find (objfile->static_links.get (), &lookup_entry));
   if (entry == NULL)
     return NULL;
 
@@ -691,11 +690,6 @@ objfile::~objfile ()
 
   /* Rebuild section map next time we need it.  */
   get_objfile_pspace_data (pspace)->section_map_dirty = 1;
-
-  /* Free the map for static links.  There's no need to free static link
-     themselves since they were allocated on the objstack.  */
-  if (static_links != NULL)
-    htab_delete (static_links);
 }
 
 /* Free all the object files at once and clean up their users.  */

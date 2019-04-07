@@ -615,7 +615,7 @@ struct objfile
      Very few blocks have a static link, so it's more memory efficient to
      store these here rather than in struct block.  Static links must be
      allocated on the objfile's obstack.  */
-  htab_t static_links {};
+  htab_up static_links;
 };
 
 /* Declarations for functions defined in objfiles.c */
