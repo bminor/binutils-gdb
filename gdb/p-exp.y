@@ -620,37 +620,41 @@ block	:	BLOCKNAME
 			      $$ = SYMBOL_BLOCK_VALUE ($1.sym.symbol);
 			  else
 			    {
+			      std::string copy = copy_name ($1.stoken);
 			      struct symtab *tem =
-				  lookup_symtab (copy_name ($1.stoken));
+				  lookup_symtab (copy.c_str ());
 			      if (tem)
 				$$ = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (tem),
 							STATIC_BLOCK);
 			      else
 				error (_("No file or function \"%s\"."),
-				       copy_name ($1.stoken));
+				       copy.c_str ());
 			    }
 			}
 	;
 
 block	:	block COLONCOLON name
-			{ struct symbol *tem
-			    = lookup_symbol (copy_name ($3), $1,
+			{
+			  std::string copy = copy_name ($3);
+			  struct symbol *tem
+			    = lookup_symbol (copy.c_str (), $1,
 					     VAR_DOMAIN, NULL).symbol;
 
 			  if (!tem || SYMBOL_CLASS (tem) != LOC_BLOCK)
 			    error (_("No function \"%s\" in specified context."),
-				   copy_name ($3));
+				   copy.c_str ());
 			  $$ = SYMBOL_BLOCK_VALUE (tem); }
 	;
 
 variable:	block COLONCOLON name
 			{ struct block_symbol sym;
 
-			  sym = lookup_symbol (copy_name ($3), $1,
+			  std::string copy = copy_name ($3);
+			  sym = lookup_symbol (copy.c_str (), $1,
 					       VAR_DOMAIN, NULL);
 			  if (sym.symbol == 0)
 			    error (_("No symbol \"%s\" in specified context."),
-				   copy_name ($3));
+				   copy.c_str ());
 
 			  write_exp_elt_opcode (pstate, OP_VAR_VALUE);
 			  write_exp_elt_block (pstate, sym.block);
@@ -677,12 +681,13 @@ qualified_name:	typebase COLONCOLON name
 variable:	qualified_name
 	|	COLONCOLON name
 			{
-			  char *name = copy_name ($2);
+			  std::string name = copy_name ($2);
 			  struct symbol *sym;
 			  struct bound_minimal_symbol msymbol;
 
 			  sym =
-			    lookup_symbol (name, (const struct block *) NULL,
+			    lookup_symbol (name.c_str (),
+					   (const struct block *) NULL,
 					   VAR_DOMAIN, NULL).symbol;
 			  if (sym)
 			    {
@@ -693,7 +698,8 @@ variable:	qualified_name
 			      break;
 			    }
 
-			  msymbol = lookup_bound_minimal_symbol (name);
+			  msymbol
+			    = lookup_bound_minimal_symbol (name.c_str ());
 			  if (msymbol.minsym != NULL)
 			    write_exp_msymbol (pstate, msymbol);
 			  else if (!have_full_symbols ()
@@ -702,7 +708,7 @@ variable:	qualified_name
 				   "Use the \"file\" command."));
 			  else
 			    error (_("No symbol \"%s\" in current context."),
-				   name);
+				   name.c_str ());
 			}
 	;
 
@@ -742,17 +748,17 @@ variable:	name_not_typename
 			      if (this_type)
 				current_type = lookup_struct_elt_type (
 				  this_type,
-				  copy_name ($1.stoken), 0);
+				  copy_name ($1.stoken).c_str (), 0);
 			      else
 				current_type = NULL;
 			    }
 			  else
 			    {
 			      struct bound_minimal_symbol msymbol;
-			      char *arg = copy_name ($1.stoken);
+			      std::string arg = copy_name ($1.stoken);
 
 			      msymbol =
-				lookup_bound_minimal_symbol (arg);
+				lookup_bound_minimal_symbol (arg.c_str ());
 			      if (msymbol.minsym != NULL)
 				write_exp_msymbol (pstate, msymbol);
 			      else if (!have_full_symbols ()
@@ -761,7 +767,7 @@ variable:	name_not_typename
 				       "Use the \"file\" command."));
 			      else
 				error (_("No symbol \"%s\" in current context."),
-				       copy_name ($1.stoken));
+				       arg.c_str ());
 			    }
 			}
 	;
@@ -788,12 +794,12 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 			{ $$ = $1.type; }
 	|	STRUCT name
 			{ $$
-			    = lookup_struct (copy_name ($2),
+			    = lookup_struct (copy_name ($2).c_str (),
 					     pstate->expression_context_block);
 			}
 	|	CLASS name
 			{ $$
-			    = lookup_struct (copy_name ($2),
+			    = lookup_struct (copy_name ($2).c_str (),
 					     pstate->expression_context_block);
 			}
 	/* "const" and "volatile" are curently ignored.  A type qualifier
@@ -1508,7 +1514,7 @@ yylex (void)
      currently as names of types; NAME for other symbols.
      The caller is not constrained to care about the distinction.  */
   {
-    char *tmp = copy_name (yylval.sval);
+    std::string tmp = copy_name (yylval.sval);
     struct symbol *sym;
     struct field_of_this_result is_a_field_of_this;
     int is_a_field = 0;
@@ -1516,11 +1522,12 @@ yylex (void)
 
     is_a_field_of_this.type = NULL;
     if (search_field && current_type)
-      is_a_field = (lookup_struct_elt_type (current_type, tmp, 1) != NULL);
+      is_a_field = (lookup_struct_elt_type (current_type,
+					    tmp.c_str (), 1) != NULL);
     if (is_a_field)
       sym = NULL;
     else
-      sym = lookup_symbol (tmp, pstate->expression_context_block,
+      sym = lookup_symbol (tmp.c_str (), pstate->expression_context_block,
 			   VAR_DOMAIN, &is_a_field_of_this).symbol;
     /* second chance uppercased (as Free Pascal does).  */
     if (!sym && is_a_field_of_this.type == NULL && !is_a_field)
@@ -1531,11 +1538,12 @@ yylex (void)
              tmp[i] -= ('a'-'A');
          }
        if (search_field && current_type)
-	 is_a_field = (lookup_struct_elt_type (current_type, tmp, 1) != NULL);
+	 is_a_field = (lookup_struct_elt_type (current_type,
+					       tmp.c_str (), 1) != NULL);
        if (is_a_field)
 	 sym = NULL;
        else
-	 sym = lookup_symbol (tmp, pstate->expression_context_block,
+	 sym = lookup_symbol (tmp.c_str (), pstate->expression_context_block,
 			      VAR_DOMAIN, &is_a_field_of_this).symbol;
       }
     /* Third chance Capitalized (as GPC does).  */
@@ -1553,18 +1561,19 @@ yylex (void)
              tmp[i] -= ('A'-'a');
           }
        if (search_field && current_type)
-	 is_a_field = (lookup_struct_elt_type (current_type, tmp, 1) != NULL);
+	 is_a_field = (lookup_struct_elt_type (current_type,
+					       tmp.c_str (), 1) != NULL);
        if (is_a_field)
 	 sym = NULL;
        else
-	 sym = lookup_symbol (tmp, pstate->expression_context_block,
+	 sym = lookup_symbol (tmp.c_str (), pstate->expression_context_block,
 			      VAR_DOMAIN, &is_a_field_of_this).symbol;
       }
 
     if (is_a_field || (is_a_field_of_this.type != NULL))
       {
 	tempbuf = (char *) realloc (tempbuf, namelen + 1);
-	strncpy (tempbuf, tmp, namelen);
+	strncpy (tempbuf, tmp.c_str (), namelen);
 	tempbuf [namelen] = 0;
 	yylval.sval.ptr = tempbuf;
 	yylval.sval.length = namelen;
@@ -1581,7 +1590,7 @@ yylex (void)
        no psymtabs (coff, xcoff, or some future change to blow away the
        psymtabs once once symbols are read).  */
     if ((sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
-        || lookup_symtab (tmp))
+        || lookup_symtab (tmp.c_str ()))
       {
 	yylval.ssym.sym.symbol = sym;
 	yylval.ssym.sym.block = NULL;
@@ -1641,13 +1650,13 @@ yylex (void)
 		      /* As big as the whole rest of the expression, which is
 			 at least big enough.  */
 		      char *ncopy
-			= (char *) alloca (strlen (tmp) + strlen (namestart)
+			= (char *) alloca (tmp.size () + strlen (namestart)
 					   + 3);
 		      char *tmp1;
 
 		      tmp1 = ncopy;
-		      memcpy (tmp1, tmp, strlen (tmp));
-		      tmp1 += strlen (tmp);
+		      memcpy (tmp1, tmp.c_str (), tmp.size ());
+		      tmp1 += tmp.size ();
 		      memcpy (tmp1, "::", 2);
 		      tmp1 += 2;
 		      memcpy (tmp1, namestart, p - namestart);
@@ -1685,7 +1694,7 @@ yylex (void)
         }
     yylval.tsym.type
       = language_lookup_primitive_type (pstate->language (),
-					pstate->gdbarch (), tmp);
+					pstate->gdbarch (), tmp.c_str ());
     if (yylval.tsym.type != NULL)
       {
 	free (uptokstart);

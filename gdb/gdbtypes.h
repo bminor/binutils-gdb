@@ -1859,7 +1859,7 @@ extern struct type *make_atomic_type (struct type *);
 
 extern void replace_type (struct type *, struct type *);
 
-extern int address_space_name_to_int (struct gdbarch *, char *);
+extern int address_space_name_to_int (struct gdbarch *, const char *);
 
 extern const char *address_space_int_to_name (struct gdbarch *, int);
 
@@ -2005,7 +2005,7 @@ extern struct type *lookup_typename (const struct language_defn *,
 				     struct gdbarch *, const char *,
 				     const struct block *, int);
 
-extern struct type *lookup_template_type (char *, struct type *,
+extern struct type *lookup_template_type (const char *, struct type *,
 					  const struct block *);
 
 extern int get_vptr_fieldno (struct type *, struct type **);

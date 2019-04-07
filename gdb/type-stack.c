@@ -50,7 +50,7 @@ type_stack::insert (enum type_pieces tp)
 /* See type-stack.h.  */
 
 void
-type_stack::insert (struct expr_builder *pstate, char *string)
+type_stack::insert (struct expr_builder *pstate, const char *string)
 {
   union type_stack_elt element;
   int slot;

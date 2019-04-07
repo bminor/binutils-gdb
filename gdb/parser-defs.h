@@ -331,7 +331,7 @@ extern void write_dollar_variable (struct parser_state *, struct stoken str);
 
 extern const char *find_template_name_end (const char *);
 
-extern char *copy_name (struct stoken);
+extern std::string copy_name (struct stoken);
 
 extern int dump_subexp (struct expression *, struct ui_file *, int);
 

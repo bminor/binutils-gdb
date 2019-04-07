@@ -574,7 +574,8 @@ lookup_function_type_with_arguments (struct type *type,
    return the integer flag defined in gdbtypes.h.  */
 
 int
-address_space_name_to_int (struct gdbarch *gdbarch, char *space_identifier)
+address_space_name_to_int (struct gdbarch *gdbarch,
+			   const char *space_identifier)
 {
   int type_flags;
 
@@ -1618,7 +1619,7 @@ lookup_enum (const char *name, const struct block *block)
    visible in lexical block BLOCK.  */
 
 struct type *
-lookup_template_type (char *name, struct type *type, 
+lookup_template_type (const char *name, struct type *type, 
 		      const struct block *block)
 {
   struct symbol *sym;

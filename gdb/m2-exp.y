@@ -507,7 +507,7 @@ block	:	fblock
 
 fblock	:	BLOCKNAME
 			{ struct symbol *sym
-			    = lookup_symbol (copy_name ($1),
+			    = lookup_symbol (copy_name ($1).c_str (),
 					     pstate->expression_context_block,
 					     VAR_DOMAIN, 0).symbol;
 			  $$ = sym;}
@@ -517,11 +517,11 @@ fblock	:	BLOCKNAME
 /* GDB scope operator */
 fblock	:	block COLONCOLON BLOCKNAME
 			{ struct symbol *tem
-			    = lookup_symbol (copy_name ($3), $1,
+			    = lookup_symbol (copy_name ($3).c_str (), $1,
 					     VAR_DOMAIN, 0).symbol;
 			  if (!tem || SYMBOL_CLASS (tem) != LOC_BLOCK)
 			    error (_("No function \"%s\" in specified context."),
-				   copy_name ($3));
+				   copy_name ($3).c_str ());
 			  $$ = tem;
 			}
 	;
@@ -541,12 +541,12 @@ variable:	DOLLAR_VARIABLE
 /* GDB scope operator */
 variable:	block COLONCOLON NAME
 			{ struct block_symbol sym
-			    = lookup_symbol (copy_name ($3), $1,
+			    = lookup_symbol (copy_name ($3).c_str (), $1,
 					     VAR_DOMAIN, 0);
 
 			  if (sym.symbol == 0)
 			    error (_("No symbol \"%s\" in specified context."),
-				   copy_name ($3));
+				   copy_name ($3).c_str ());
 			  if (symbol_read_needs_frame (sym.symbol))
 			    pstate->block_tracker->update (sym);
 
@@ -562,7 +562,7 @@ variable:	NAME
 			  struct field_of_this_result is_a_field_of_this;
 
 			  sym
-			    = lookup_symbol (copy_name ($1),
+			    = lookup_symbol (copy_name ($1).c_str (),
 					     pstate->expression_context_block,
 					     VAR_DOMAIN,
 					     &is_a_field_of_this);
@@ -580,17 +580,17 @@ variable:	NAME
 			  else
 			    {
 			      struct bound_minimal_symbol msymbol;
-			      char *arg = copy_name ($1);
+			      std::string arg = copy_name ($1);
 
 			      msymbol =
-				lookup_bound_minimal_symbol (arg);
+				lookup_bound_minimal_symbol (arg.c_str ());
 			      if (msymbol.minsym != NULL)
 				write_exp_msymbol (pstate, msymbol);
 			      else if (!have_full_symbols () && !have_partial_symbols ())
 				error (_("No symbol table is loaded.  Use the \"symbol-file\" command."));
 			      else
 				error (_("No symbol \"%s\" in current context."),
-				       copy_name ($1));
+				       arg.c_str ());
 			    }
 			}
 	;
@@ -600,7 +600,7 @@ type
 			{ $$
 			    = lookup_typename (pstate->language (),
 					       pstate->gdbarch (),
-					       copy_name ($1),
+					       copy_name ($1).c_str (),
 					       pstate->expression_context_block,
 					       0);
 			}
@@ -965,20 +965,17 @@ yylex (void)
      currently as names of types; NAME for other symbols.
      The caller is not constrained to care about the distinction.  */
  {
-
-
-    char *tmp = copy_name (yylval.sval);
+    std::string tmp = copy_name (yylval.sval);
     struct symbol *sym;
 
-    if (lookup_symtab (tmp))
+    if (lookup_symtab (tmp.c_str ()))
       return BLOCKNAME;
-    sym = lookup_symbol (tmp, pstate->expression_context_block,
+    sym = lookup_symbol (tmp.c_str (), pstate->expression_context_block,
 			 VAR_DOMAIN, 0).symbol;
     if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
       return BLOCKNAME;
     if (lookup_typename (pstate->language (), pstate->gdbarch (),
-			 copy_name (yylval.sval),
-			 pstate->expression_context_block, 1))
+			 tmp.c_str (), pstate->expression_context_block, 1))
       return TYPENAME;
 
     if(sym)

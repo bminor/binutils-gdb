@@ -548,6 +548,7 @@ write_dollar_variable (struct parser_state *ps, struct stoken str)
   struct block_symbol sym;
   struct bound_minimal_symbol msym;
   struct internalvar *isym = NULL;
+  std::string copy;
 
   /* Handle the tokens $digits; also $ (short for $0) and $$ (short for $$1)
      and $$digits (equivalent to $<-digits> if you could type that).  */
@@ -588,7 +589,8 @@ write_dollar_variable (struct parser_state *ps, struct stoken str)
 
   /* Any names starting with $ are probably debugger internal variables.  */
 
-  isym = lookup_only_internalvar (copy_name (str) + 1);
+  copy = copy_name (str);
+  isym = lookup_only_internalvar (copy.c_str () + 1);
   if (isym)
     {
       write_exp_elt_opcode (ps, OP_INTERNALVAR);
@@ -600,7 +602,7 @@ write_dollar_variable (struct parser_state *ps, struct stoken str)
   /* On some systems, such as HP-UX and hppa-linux, certain system routines 
      have names beginning with $ or $$.  Check for those, first.  */
 
-  sym = lookup_symbol (copy_name (str), NULL, VAR_DOMAIN, NULL);
+  sym = lookup_symbol (copy.c_str (), NULL, VAR_DOMAIN, NULL);
   if (sym.symbol)
     {
       write_exp_elt_opcode (ps, OP_VAR_VALUE);
@@ -609,7 +611,7 @@ write_dollar_variable (struct parser_state *ps, struct stoken str)
       write_exp_elt_opcode (ps, OP_VAR_VALUE);
       return;
     }
-  msym = lookup_bound_minimal_symbol (copy_name (str));
+  msym = lookup_bound_minimal_symbol (copy.c_str ());
   if (msym.minsym)
     {
       write_exp_msymbol (ps, msym);
@@ -619,7 +621,7 @@ write_dollar_variable (struct parser_state *ps, struct stoken str)
   /* Any other names are assumed to be debugger internal variables.  */
 
   write_exp_elt_opcode (ps, OP_INTERNALVAR);
-  write_exp_elt_intern (ps, create_internalvar (copy_name (str) + 1));
+  write_exp_elt_intern (ps, create_internalvar (copy.c_str () + 1));
   write_exp_elt_opcode (ps, OP_INTERNALVAR);
   return;
 handle_last:
@@ -706,33 +708,12 @@ find_template_name_end (const char *p)
    so they can share the storage that lexptr is parsing.
    When it is necessary to pass a name to a function that expects
    a null-terminated string, the substring is copied out
-   into a separate block of storage.
+   into a separate block of storage.  */
 
-   N.B. A single buffer is reused on each call.  */
-
-char *
+std::string
 copy_name (struct stoken token)
 {
-  /* A temporary buffer for identifiers, so we can null-terminate them.
-     We allocate this with xrealloc.  parse_exp_1 used to allocate with
-     alloca, using the size of the whole expression as a conservative
-     estimate of the space needed.  However, macro expansion can
-     introduce names longer than the original expression; there's no
-     practical way to know beforehand how large that might be.  */
-  static char *namecopy;
-  static size_t namecopy_size;
-
-  /* Make sure there's enough space for the token.  */
-  if (namecopy_size < token.length + 1)
-    {
-      namecopy_size = token.length + 1;
-      namecopy = (char *) xrealloc (namecopy, token.length + 1);
-    }
-      
-  memcpy (namecopy, token.ptr, token.length);
-  namecopy[token.length] = 0;
-
-  return namecopy;
+  return std::string (token.ptr, token.length);
 }
 
 

@@ -415,12 +415,13 @@ PrimaryExpression:
 		{ /* Do nothing.  */ }
 |	IdentifierExp
 		{ struct bound_minimal_symbol msymbol;
-		  char *copy = copy_name ($1);
+		  std::string copy = copy_name ($1);
 		  struct field_of_this_result is_a_field_of_this;
 		  struct block_symbol sym;
 
 		  /* Handle VAR, which could be local or global.  */
-		  sym = lookup_symbol (copy, pstate->expression_context_block,
+		  sym = lookup_symbol (copy.c_str (),
+				       pstate->expression_context_block,
 				       VAR_DOMAIN, &is_a_field_of_this);
 		  if (sym.symbol && SYMBOL_CLASS (sym.symbol) != LOC_TYPEDEF)
 		    {
@@ -445,13 +446,14 @@ PrimaryExpression:
 		  else
 		    {
 		      /* Lookup foreign name in global static symbols.  */
-		      msymbol = lookup_bound_minimal_symbol (copy);
+		      msymbol = lookup_bound_minimal_symbol (copy.c_str ());
 		      if (msymbol.minsym != NULL)
 			write_exp_msymbol (pstate, msymbol);
 		      else if (!have_full_symbols () && !have_partial_symbols ())
 			error (_("No symbol table is loaded.  Use the \"file\" command"));
 		      else
-			error (_("No symbol \"%s\" in current context."), copy);
+			error (_("No symbol \"%s\" in current context."),
+			       copy.c_str ());
 		    }
 		  }
 |	TypeExp '.' IdentifierExp
@@ -1037,7 +1039,6 @@ lex_one_token (struct parser_state *par_state)
   unsigned int i;
   const char *tokstart;
   int saw_structop = last_was_structop;
-  char *copy;
 
   last_was_structop = 0;
 
@@ -1281,9 +1282,9 @@ lex_one_token (struct parser_state *par_state)
   yylval.sval.length = namelen;
 
   /* Catch specific keywords.  */
-  copy = copy_name (yylval.sval);
+  std::string copy = copy_name (yylval.sval);
   for (i = 0; i < sizeof ident_tokens / sizeof ident_tokens[0]; i++)
-    if (strcmp (copy, ident_tokens[i].oper) == 0)
+    if (copy == ident_tokens[i].oper)
       {
 	/* It is ok to always set this, even though we don't always
 	   strictly need to.  */
@@ -1296,7 +1297,7 @@ lex_one_token (struct parser_state *par_state)
 
   yylval.tsym.type
     = language_lookup_primitive_type (par_state->language (),
-				      par_state->gdbarch (), copy);
+				      par_state->gdbarch (), copy.c_str ());
   if (yylval.tsym.type != NULL)
     return TYPENAME;
 
@@ -1345,12 +1346,11 @@ static int
 classify_name (struct parser_state *par_state, const struct block *block)
 {
   struct block_symbol sym;
-  char *copy;
   struct field_of_this_result is_a_field_of_this;
 
-  copy = copy_name (yylval.sval);
+  std::string copy = copy_name (yylval.sval);
 
-  sym = lookup_symbol (copy, block, VAR_DOMAIN, &is_a_field_of_this);
+  sym = lookup_symbol (copy.c_str (), block, VAR_DOMAIN, &is_a_field_of_this);
   if (sym.symbol && SYMBOL_CLASS (sym.symbol) == LOC_TYPEDEF)
     {
       yylval.tsym.type = SYMBOL_TYPE (sym.symbol);
@@ -1359,9 +1359,9 @@ classify_name (struct parser_state *par_state, const struct block *block)
   else if (sym.symbol == NULL)
     {
       /* Look-up first for a module name, then a type.  */
-      sym = lookup_symbol (copy, block, MODULE_DOMAIN, NULL);
+      sym = lookup_symbol (copy.c_str (), block, MODULE_DOMAIN, NULL);
       if (sym.symbol == NULL)
-	sym = lookup_symbol (copy, block, STRUCT_DOMAIN, NULL);
+	sym = lookup_symbol (copy.c_str (), block, STRUCT_DOMAIN, NULL);
 
       if (sym.symbol != NULL)
 	{
@@ -1384,7 +1384,6 @@ classify_inner_name (struct parser_state *par_state,
 		     const struct block *block, struct type *context)
 {
   struct type *type;
-  char *copy;
 
   if (context == NULL)
     return classify_name (par_state, block);
@@ -1393,8 +1392,8 @@ classify_inner_name (struct parser_state *par_state,
   if (!type_aggregate_p (type))
     return ERROR;
 
-  copy = copy_name (yylval.ssym.stoken);
-  yylval.ssym.sym = d_lookup_nested_symbol (type, copy, block);
+  std::string copy = copy_name (yylval.ssym.stoken);
+  yylval.ssym.sym = d_lookup_nested_symbol (type, copy.c_str (), block);
 
   if (yylval.ssym.sym.symbol == NULL)
     return ERROR;

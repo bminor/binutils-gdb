@@ -538,7 +538,7 @@ variable:	name_not_typename ENTRY
 			      || !symbol_read_needs_frame (sym))
 			    error (_("@entry can be used only for function "
 				     "parameters, not for \"%s\""),
-				   copy_name ($1.stoken));
+				   copy_name ($1.stoken).c_str ());
 
 			  write_exp_elt_opcode (pstate, OP_VAR_ENTRY_VALUE);
 			  write_exp_elt_sym (pstate, sym);
@@ -568,10 +568,10 @@ variable:	name_not_typename
 			  else
 			    {
 			      struct bound_minimal_symbol msymbol;
-			      char *arg = copy_name ($1.stoken);
+			      std::string arg = copy_name ($1.stoken);
 
 			      msymbol =
-				lookup_bound_minimal_symbol (arg);
+				lookup_bound_minimal_symbol (arg.c_str ());
 			      if (msymbol.minsym != NULL)
 				write_exp_msymbol (pstate, msymbol);
 			      else if (!have_full_symbols ()
@@ -580,7 +580,7 @@ variable:	name_not_typename
 				       "Use the \"file\" command."));
 			      else
 				error (_("No symbol \"%s\" in current context."),
-				       copy_name ($1.stoken));
+				       arg.c_str ());
 			    }
 			}
 	;
@@ -1014,7 +1014,6 @@ lex_one_token (struct parser_state *par_state)
   unsigned int i;
   const char *tokstart;
   int saw_structop = last_was_structop;
-  char *copy;
 
   last_was_structop = 0;
 
@@ -1263,9 +1262,9 @@ lex_one_token (struct parser_state *par_state)
   yylval.sval.length = namelen;
 
   /* Catch specific keywords.  */
-  copy = copy_name (yylval.sval);
+  std::string copy = copy_name (yylval.sval);
   for (i = 0; i < sizeof (ident_tokens) / sizeof (ident_tokens[0]); i++)
-    if (strcmp (copy, ident_tokens[i].oper) == 0)
+    if (copy == ident_tokens[i].oper)
       {
 	/* It is ok to always set this, even though we don't always
 	   strictly need to.  */
@@ -1347,15 +1346,15 @@ package_name_p (const char *name, const struct block *block)
 static int
 classify_unsafe_function (struct stoken function_name)
 {
-  char *copy = copy_name (function_name);
+  std::string copy = copy_name (function_name);
 
-  if (strcmp (copy, "Sizeof") == 0)
+  if (copy == "Sizeof")
     {
       yylval.sval = function_name;
       return SIZEOF_KEYWORD;
     }
 
-  error (_("Unknown function in `unsafe' package: %s"), copy);
+  error (_("Unknown function in `unsafe' package: %s"), copy.c_str ());
 }
 
 /* Classify token(s) "name1.name2" where name1 is known to be a package.
@@ -1367,13 +1366,12 @@ classify_unsafe_function (struct stoken function_name)
 static int
 classify_packaged_name (const struct block *block)
 {
-  char *copy;
   struct block_symbol sym;
   struct field_of_this_result is_a_field_of_this;
 
-  copy = copy_name (yylval.sval);
+  std::string copy = copy_name (yylval.sval);
 
-  sym = lookup_symbol (copy, block, VAR_DOMAIN, &is_a_field_of_this);
+  sym = lookup_symbol (copy.c_str (), block, VAR_DOMAIN, &is_a_field_of_this);
 
   if (sym.symbol)
     {
@@ -1397,15 +1395,14 @@ classify_name (struct parser_state *par_state, const struct block *block)
 {
   struct type *type;
   struct block_symbol sym;
-  char *copy;
   struct field_of_this_result is_a_field_of_this;
 
-  copy = copy_name (yylval.sval);
+  std::string copy = copy_name (yylval.sval);
 
   /* Try primitive types first so they win over bad/weird debug info.  */
   type = language_lookup_primitive_type (par_state->language (),
 					 par_state->gdbarch (),
-					 copy);
+					 copy.c_str ());
   if (type != NULL)
     {
       /* NOTE: We take advantage of the fact that yylval coming in was a
@@ -1417,7 +1414,7 @@ classify_name (struct parser_state *par_state, const struct block *block)
 
   /* TODO: What about other types?  */
 
-  sym = lookup_symbol (copy, block, VAR_DOMAIN, &is_a_field_of_this);
+  sym = lookup_symbol (copy.c_str (), block, VAR_DOMAIN, &is_a_field_of_this);
 
   if (sym.symbol)
     {
@@ -1439,7 +1436,7 @@ classify_name (struct parser_state *par_state, const struct block *block)
 	struct stoken sval =
 	  build_packaged_name (current_package_name,
 			       strlen (current_package_name),
-			       copy, strlen (copy));
+			       copy.c_str (), copy.size ());
 
 	xfree (current_package_name);
 	sym = lookup_symbol (sval.ptr, block, VAR_DOMAIN,
@@ -1461,8 +1458,8 @@ classify_name (struct parser_state *par_state, const struct block *block)
       || (copy[0] >= 'A' && copy[0] < 'A' + input_radix - 10))
     {
       YYSTYPE newlval;	/* Its value is ignored.  */
-      int hextype = parse_number (par_state, copy, yylval.sval.length,
-				  0, &newlval);
+      int hextype = parse_number (par_state, copy.c_str (),
+				  yylval.sval.length, 0, &newlval);
       if (hextype == INT)
 	{
 	  yylval.ssym.sym.symbol = NULL;
@@ -1521,17 +1518,15 @@ yylex (void)
       if (name2.token == NAME)
 	{
 	  /* Ok, we have "name1 . name2".  */
-	  char *copy;
+	  std::string copy = copy_name (current.value.sval);
 
-	  copy = copy_name (current.value.sval);
-
-	  if (strcmp (copy, "unsafe") == 0)
+	  if (copy == "unsafe")
 	    {
 	      popping = 1;
 	      return classify_unsafe_function (name2.value.sval);
 	    }
 
-	  if (package_name_p (copy, pstate->expression_context_block))
+	  if (package_name_p (copy.c_str (), pstate->expression_context_block))
 	    {
 	      popping = 1;
 	      yylval.sval = build_packaged_name (current.value.sval.ptr,

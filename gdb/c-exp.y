@@ -474,14 +474,15 @@ exp	: 	OBJC_LBRAC TYPENAME
 			{
 			  CORE_ADDR theclass;
 
+			  std::string copy = copy_name ($2.stoken);
 			  theclass = lookup_objc_class (pstate->gdbarch (),
-						     copy_name ($2.stoken));
+							copy.c_str ());
 			  if (theclass == 0)
 			    error (_("%s is not an ObjC Class"),
-				   copy_name ($2.stoken));
+				   copy.c_str ());
 			  write_exp_elt_opcode (pstate, OP_LONG);
 			  write_exp_elt_type (pstate,
-					    parse_type (pstate)->builtin_int);
+					      parse_type (pstate)->builtin_int);
 			  write_exp_elt_longcst (pstate, (LONGEST) theclass);
 			  write_exp_elt_opcode (pstate, OP_LONG);
 			  start_msglist();
@@ -959,7 +960,7 @@ block	:	BLOCKNAME
 			    $$ = SYMBOL_BLOCK_VALUE ($1.sym.symbol);
 			  else
 			    error (_("No file or function \"%s\"."),
-				   copy_name ($1.stoken));
+				   copy_name ($1.stoken).c_str ());
 			}
 	|	FILENAME
 			{
@@ -968,13 +969,15 @@ block	:	BLOCKNAME
 	;
 
 block	:	block COLONCOLON name
-			{ struct symbol *tem
-			    = lookup_symbol (copy_name ($3), $1,
+			{
+			  std::string copy = copy_name ($3);
+			  struct symbol *tem
+			    = lookup_symbol (copy.c_str (), $1,
 					     VAR_DOMAIN, NULL).symbol;
 
 			  if (!tem || SYMBOL_CLASS (tem) != LOC_BLOCK)
 			    error (_("No function \"%s\" in specified context."),
-				   copy_name ($3));
+				   copy.c_str ());
 			  $$ = SYMBOL_BLOCK_VALUE (tem); }
 	;
 
@@ -985,7 +988,7 @@ variable:	name_not_typename ENTRY
 			      || !symbol_read_needs_frame (sym))
 			    error (_("@entry can be used only for function "
 				     "parameters, not for \"%s\""),
-				   copy_name ($1.stoken));
+				   copy_name ($1.stoken).c_str ());
 
 			  write_exp_elt_opcode (pstate, OP_VAR_ENTRY_VALUE);
 			  write_exp_elt_sym (pstate, sym);
@@ -994,13 +997,15 @@ variable:	name_not_typename ENTRY
 	;
 
 variable:	block COLONCOLON name
-			{ struct block_symbol sym
-			    = lookup_symbol (copy_name ($3), $1,
+			{
+			  std::string copy = copy_name ($3);
+			  struct block_symbol sym
+			    = lookup_symbol (copy.c_str (), $1,
 					     VAR_DOMAIN, NULL);
 
 			  if (sym.symbol == 0)
 			    error (_("No symbol \"%s\" in specified context."),
-				   copy_name ($3));
+				   copy.c_str ());
 			  if (symbol_read_needs_frame (sym.symbol))
 			    pstate->block_tracker->update (sym);
 
@@ -1049,22 +1054,23 @@ qualified_name:	TYPENAME COLONCOLON name
 			}
 	|	TYPENAME COLONCOLON name COLONCOLON name
 			{
-			  char *copy = copy_name ($3);
+			  std::string copy = copy_name ($3);
 			  error (_("No type \"%s\" within class "
 				   "or namespace \"%s\"."),
-				 copy, TYPE_SAFE_NAME ($1.type));
+				 copy.c_str (), TYPE_SAFE_NAME ($1.type));
 			}
 	;
 
 variable:	qualified_name
 	|	COLONCOLON name_not_typename
 			{
-			  char *name = copy_name ($2.stoken);
+			  std::string name = copy_name ($2.stoken);
 			  struct symbol *sym;
 			  struct bound_minimal_symbol msymbol;
 
 			  sym
-			    = lookup_symbol (name, (const struct block *) NULL,
+			    = lookup_symbol (name.c_str (),
+					     (const struct block *) NULL,
 					     VAR_DOMAIN, NULL).symbol;
 			  if (sym)
 			    {
@@ -1075,13 +1081,14 @@ variable:	qualified_name
 			      break;
 			    }
 
-			  msymbol = lookup_bound_minimal_symbol (name);
+			  msymbol = lookup_bound_minimal_symbol (name.c_str ());
 			  if (msymbol.minsym != NULL)
 			    write_exp_msymbol (pstate, msymbol);
 			  else if (!have_full_symbols () && !have_partial_symbols ())
 			    error (_("No symbol table is loaded.  Use the \"file\" command."));
 			  else
-			    error (_("No symbol \"%s\" in current context."), name);
+			    error (_("No symbol \"%s\" in current context."),
+				   name.c_str ());
 			}
 	;
 
@@ -1124,17 +1131,17 @@ variable:	name_not_typename
 			    }
 			  else
 			    {
-			      char *arg = copy_name ($1.stoken);
+			      std::string arg = copy_name ($1.stoken);
 
 			      bound_minimal_symbol msymbol
-				= lookup_bound_minimal_symbol (arg);
+				= lookup_bound_minimal_symbol (arg.c_str ());
 			      if (msymbol.minsym == NULL)
 				{
 				  if (!have_full_symbols () && !have_partial_symbols ())
 				    error (_("No symbol table is loaded.  Use the \"file\" command."));
 				  else
 				    error (_("No symbol \"%s\" in current context."),
-					   copy_name ($1.stoken));
+					   arg.c_str ());
 				}
 
 			      /* This minsym might be an alias for
@@ -1165,7 +1172,8 @@ variable:	name_not_typename
 
 space_identifier : '@' NAME
 		{
-		  cpstate->type_stack.insert (pstate, copy_name ($2.stoken));
+		  cpstate->type_stack.insert (pstate,
+					      copy_name ($2.stoken).c_str ());
 		}
 	;
 
@@ -1409,7 +1417,7 @@ typebase
 						0); }
 	|	STRUCT name
 			{ $$
-			    = lookup_struct (copy_name ($2),
+			    = lookup_struct (copy_name ($2).c_str (),
 					     pstate->expression_context_block);
 			}
 	|	STRUCT COMPLETE
@@ -1426,7 +1434,8 @@ typebase
 			}
 	|	CLASS name
 			{ $$ = lookup_struct
-			    (copy_name ($2), pstate->expression_context_block);
+			    (copy_name ($2).c_str (),
+			     pstate->expression_context_block);
 			}
 	|	CLASS COMPLETE
 			{
@@ -1442,7 +1451,7 @@ typebase
 			}
 	|	UNION name
 			{ $$
-			    = lookup_union (copy_name ($2),
+			    = lookup_union (copy_name ($2).c_str (),
 					    pstate->expression_context_block);
 			}
 	|	UNION COMPLETE
@@ -1458,7 +1467,7 @@ typebase
 			  $$ = NULL;
 			}
 	|	ENUM name
-			{ $$ = lookup_enum (copy_name ($2),
+			{ $$ = lookup_enum (copy_name ($2).c_str (),
 					    pstate->expression_context_block);
 			}
 	|	ENUM COMPLETE
@@ -1493,7 +1502,7 @@ typebase
                    in the token processing code in yylex. */
 	|	TEMPLATE name '<' type '>'
 			{ $$ = lookup_template_type
-			    (copy_name($2), $4,
+			    (copy_name($2).c_str (), $4,
 			     pstate->expression_context_block);
 			}
 	| const_or_volatile_or_space_identifier_noopt typebase
@@ -2551,7 +2560,6 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
   unsigned int i;
   const char *tokstart;
   bool saw_structop = last_was_structop;
-  char *copy;
 
   last_was_structop = false;
   *is_quoted_name = false;
@@ -2879,9 +2887,9 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
   yylval.sval.length = namelen;
 
   /* Catch specific keywords.  */
-  copy = copy_name (yylval.sval);
+  std::string copy = copy_name (yylval.sval);
   for (i = 0; i < sizeof ident_tokens / sizeof ident_tokens[0]; i++)
-    if (strcmp (copy, ident_tokens[i].oper) == 0)
+    if (copy == ident_tokens[i].oper)
       {
 	if ((ident_tokens[i].flags & FLAG_CXX) != 0
 	    && par_state->language ()->la_language != language_cplus)
@@ -2891,7 +2899,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 	  {
 	    struct field_of_this_result is_a_field_of_this;
 
-	    if (lookup_symbol (copy,
+	    if (lookup_symbol (copy.c_str (),
 			       pstate->expression_context_block,
 			       VAR_DOMAIN,
 			       (par_state->language ()->la_language
@@ -2953,16 +2961,15 @@ classify_name (struct parser_state *par_state, const struct block *block,
 	       bool is_quoted_name, bool is_after_structop)
 {
   struct block_symbol bsym;
-  char *copy;
   struct field_of_this_result is_a_field_of_this;
 
-  copy = copy_name (yylval.sval);
+  std::string copy = copy_name (yylval.sval);
 
   /* Initialize this in case we *don't* use it in this call; that way
      we can refer to it unconditionally below.  */
   memset (&is_a_field_of_this, 0, sizeof (is_a_field_of_this));
 
-  bsym = lookup_symbol (copy, block, VAR_DOMAIN,
+  bsym = lookup_symbol (copy.c_str (), block, VAR_DOMAIN,
 			par_state->language ()->la_name_of_this
 			? &is_a_field_of_this : NULL);
 
@@ -2985,7 +2992,7 @@ classify_name (struct parser_state *par_state, const struct block *block,
 	{
 	  struct field_of_this_result inner_is_a_field_of_this;
 
-	  bsym = lookup_symbol (copy, block, STRUCT_DOMAIN,
+	  bsym = lookup_symbol (copy.c_str (), block, STRUCT_DOMAIN,
 				&inner_is_a_field_of_this);
 	  if (bsym.symbol != NULL)
 	    {
@@ -3005,7 +3012,7 @@ classify_name (struct parser_state *par_state, const struct block *block,
 	  /* See if it's a file name. */
 	  struct symtab *symtab;
 
-	  symtab = lookup_symtab (copy);
+	  symtab = lookup_symtab (copy.c_str ());
 	  if (symtab)
 	    {
 	      yylval.bval = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab),
@@ -3024,13 +3031,14 @@ classify_name (struct parser_state *par_state, const struct block *block,
   /* See if it's an ObjC classname.  */
   if (par_state->language ()->la_language == language_objc && !bsym.symbol)
     {
-      CORE_ADDR Class = lookup_objc_class (par_state->gdbarch (), copy);
+      CORE_ADDR Class = lookup_objc_class (par_state->gdbarch (),
+					   copy.c_str ());
       if (Class)
 	{
 	  struct symbol *sym;
 
 	  yylval.theclass.theclass = Class;
-	  sym = lookup_struct_typedef (copy,
+	  sym = lookup_struct_typedef (copy.c_str (),
 				       par_state->expression_context_block, 1);
 	  if (sym)
 	    yylval.theclass.type = SYMBOL_TYPE (sym);
@@ -3046,7 +3054,7 @@ classify_name (struct parser_state *par_state, const struct block *block,
 	  || (copy[0] >= 'A' && copy[0] < 'A' + input_radix - 10)))
     {
       YYSTYPE newlval;	/* Its value is ignored.  */
-      int hextype = parse_number (par_state, copy, yylval.sval.length,
+      int hextype = parse_number (par_state, copy.c_str (), yylval.sval.length,
 				  0, &newlval);
 
       if (hextype == INT)
@@ -3064,7 +3072,7 @@ classify_name (struct parser_state *par_state, const struct block *block,
   if (bsym.symbol == NULL
       && par_state->language ()->la_language == language_cplus
       && is_a_field_of_this.type == NULL
-      && lookup_minimal_symbol (copy, NULL, NULL).minsym == NULL)
+      && lookup_minimal_symbol (copy.c_str (), NULL, NULL).minsym == NULL)
     return UNKNOWN_CPP_NAME;
 
   return NAME;
@@ -3079,7 +3087,6 @@ classify_inner_name (struct parser_state *par_state,
 		     const struct block *block, struct type *context)
 {
   struct type *type;
-  char *copy;
 
   if (context == NULL)
     return classify_name (par_state, block, false, false);
@@ -3088,16 +3095,18 @@ classify_inner_name (struct parser_state *par_state,
   if (!type_aggregate_p (type))
     return ERROR;
 
-  copy = copy_name (yylval.ssym.stoken);
+  std::string copy = copy_name (yylval.ssym.stoken);
   /* N.B. We assume the symbol can only be in VAR_DOMAIN.  */
-  yylval.ssym.sym = cp_lookup_nested_symbol (type, copy, block, VAR_DOMAIN);
+  yylval.ssym.sym = cp_lookup_nested_symbol (type, copy.c_str (), block,
+					     VAR_DOMAIN);
 
   /* If no symbol was found, search for a matching base class named
      COPY.  This will allow users to enter qualified names of class members
      relative to the `this' pointer.  */
   if (yylval.ssym.sym.symbol == NULL)
     {
-      struct type *base_type = cp_find_type_baseclass_by_name (type, copy);
+      struct type *base_type = cp_find_type_baseclass_by_name (type,
+							       copy.c_str ());
 
       if (base_type != NULL)
 	{
@@ -3116,7 +3125,8 @@ classify_inner_name (struct parser_state *par_state,
 	 named COPY when we really wanted a base class of the same name.
 	 Double-check this case by looking for a base class.  */
       {
-	struct type *base_type = cp_find_type_baseclass_by_name (type, copy);
+	struct type *base_type
+	  = cp_find_type_baseclass_by_name (type, copy.c_str ());
 
 	if (base_type != NULL)
 	  {
@@ -3368,13 +3378,13 @@ c_print_token (FILE *file, int type, YYSTYPE value)
 
     case NSSTRING:
     case DOLLAR_VARIABLE:
-      parser_fprintf (file, "sval<%s>", copy_name (value.sval));
+      parser_fprintf (file, "sval<%s>", copy_name (value.sval).c_str ());
       break;
 
     case TYPENAME:
       parser_fprintf (file, "tsym<type=%s, name=%s>",
 		      TYPE_SAFE_NAME (value.tsym.type),
-		      copy_name (value.tsym.stoken));
+		      copy_name (value.tsym.stoken).c_str ());
       break;
 
     case NAME:
@@ -3382,7 +3392,7 @@ c_print_token (FILE *file, int type, YYSTYPE value)
     case NAME_OR_INT:
     case BLOCKNAME:
       parser_fprintf (file, "ssym<name=%s, sym=%s, field_of_this=%d>",
-		       copy_name (value.ssym.stoken),
+		       copy_name (value.ssym.stoken).c_str (),
 		       (value.ssym.sym.symbol == NULL
 			? "(null)" : SYMBOL_PRINT_NAME (value.ssym.sym.symbol)),
 		       value.ssym.is_a_field_of_this);

@@ -490,17 +490,17 @@ variable:	name_not_typename
 			  else
 			    {
 			      struct bound_minimal_symbol msymbol;
-			      char *arg = copy_name ($1.stoken);
+			      std::string arg = copy_name ($1.stoken);
 
 			      msymbol =
-				lookup_bound_minimal_symbol (arg);
+				lookup_bound_minimal_symbol (arg.c_str ());
 			      if (msymbol.minsym != NULL)
 				write_exp_msymbol (pstate, msymbol);
 			      else if (!have_full_symbols () && !have_partial_symbols ())
 				error (_("No symbol table is loaded.  Use the \"file\" command."));
 			      else
 				error (_("No symbol \"%s\" in current context."),
-				       copy_name ($1.stoken));
+				       arg.c_str ());
 			    }
 			}
 	;
@@ -1264,7 +1264,7 @@ yylex (void)
      currently as names of types; NAME for other symbols.
      The caller is not constrained to care about the distinction.  */
   {
-    char *tmp = copy_name (yylval.sval);
+    std::string tmp = copy_name (yylval.sval);
     struct block_symbol result;
     struct field_of_this_result is_a_field_of_this;
     enum domain_enum_tag lookup_domains[] =
@@ -1281,7 +1281,7 @@ yylex (void)
 	   way we can refer to it unconditionally below.  */
 	memset (&is_a_field_of_this, 0, sizeof (is_a_field_of_this));
 
-	result = lookup_symbol (tmp, pstate->expression_context_block,
+	result = lookup_symbol (tmp.c_str (), pstate->expression_context_block,
 				lookup_domains[i],
 				pstate->language ()->la_language
 				== language_cplus
@@ -1298,7 +1298,7 @@ yylex (void)
 
     yylval.tsym.type
       = language_lookup_primitive_type (pstate->language (),
-					pstate->gdbarch (), tmp);
+					pstate->gdbarch (), tmp.c_str ());
     if (yylval.tsym.type != NULL)
       return TYPENAME;
     

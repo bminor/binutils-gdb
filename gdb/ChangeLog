@@ -1,3 +1,30 @@
+2019-04-19  Tom Tromey  <tom@tromey.com>
+
+	* type-stack.h (struct type_stack) <insert>: Constify string.
+	* type-stack.c (type_stack::insert): Constify string.
+	* gdbtypes.h (lookup_template_type): Update.
+	(address_space_name_to_int): Update.
+	* gdbtypes.c (address_space_name_to_int): Make space_identifier
+	const.
+	(lookup_template_type): Make name const.
+	* c-exp.y: Update rules.
+	(lex_one_token, classify_name, classify_inner_name)
+	(c_print_token): Update.
+	* p-exp.y: Update rules.
+	(yylex): Update.
+	* f-exp.y: Update rules.
+	(yylex): Update.
+	* d-exp.y: Update rules.
+	(lex_one_token, classify_name, classify_inner_name): Update.
+	* parse.c (write_dollar_variable, copy_name): Return std::string.
+	* parser-defs.h (copy_name): Change return type.
+	* m2-exp.y: Update rules.
+	(yylex): Update.
+	* go-exp.y (lex_one_token): Update.
+	Update rules.
+	(classify_unsafe_function, classify_packaged_name)
+	(classify_name, yylex): Update.
+
 2019-04-19  Sergei Trofimovich <siarheit@google.com>
 
 	* configure.ac: add --enable-source-highlight switch.
