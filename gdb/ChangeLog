@@ -1,5 +1,9 @@
 2019-04-19  Tom Tromey  <tom@tromey.com>
 
+	* common/queue.h: Remove.
+
+2019-04-19  Tom Tromey  <tom@tromey.com>
+
 	* event-loop.c: Don't include "common/queue.h".
 
 2019-04-19  Tom Tromey  <tom@tromey.com>
