@@ -1,5 +1,12 @@
 2019-04-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* riscv-tdep.c (riscv_type_align): New function.
+	(riscv_type_alignment): Delete.
+	(riscv_arg_location): Use 'type_align'.
+	(riscv_gdbarch_init): Register riscv_type_align gdbarch function.
+
+2019-04-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdbtypes.c (type_align): A struct with no non-static fields also
 	has alignment of 1.
 

@@ -1619,55 +1619,18 @@ riscv_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
   return sp;
 }
 
-/* Compute the alignment of the type T.  Used while setting up the
-   arguments for a dummy call.  */
+/* Implement the gdbarch type alignment method, overrides the generic
+   alignment algorithm for anything that is RISC-V specific.  */
 
-static int
-riscv_type_alignment (struct type *t)
+static ULONGEST
+riscv_type_align (gdbarch *gdbarch, type *type)
 {
-  t = check_typedef (t);
-  switch (TYPE_CODE (t))
-    {
-    default:
-      error (_("Could not compute alignment of type"));
+  type = check_typedef (type);
+  if (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type))
+    return std::min (TYPE_LENGTH (type), (ULONGEST) BIGGEST_ALIGNMENT);
 
-    case TYPE_CODE_RANGE:
-    case TYPE_CODE_RVALUE_REF:
-    case TYPE_CODE_PTR:
-    case TYPE_CODE_ENUM:
-    case TYPE_CODE_INT:
-    case TYPE_CODE_FLT:
-    case TYPE_CODE_REF:
-    case TYPE_CODE_CHAR:
-    case TYPE_CODE_BOOL:
-      return TYPE_LENGTH (t);
-
-    case TYPE_CODE_ARRAY:
-      if (TYPE_VECTOR (t))
-	return std::min (TYPE_LENGTH (t), (ULONGEST) BIGGEST_ALIGNMENT);
-      /* FALLTHROUGH */
-
-    case TYPE_CODE_COMPLEX:
-      return riscv_type_alignment (TYPE_TARGET_TYPE (t));
-
-    case TYPE_CODE_STRUCT:
-    case TYPE_CODE_UNION:
-      {
-	int i;
-	int align = 1;
-
-	for (i = 0; i < TYPE_NFIELDS (t); ++i)
-	  {
-	    if (TYPE_FIELD_LOC_KIND (t, i) == FIELD_LOC_KIND_BITPOS)
-	      {
-		int a = riscv_type_alignment (TYPE_FIELD_TYPE (t, i));
-		if (a > align)
-		  align = a;
-	      }
-	  }
-	return align;
-      }
-    }
+  /* Anything else will be aligned by the generic code.  */
+  return 0;
 }
 
 /* Holds information about a single argument either being passed to an
@@ -2288,7 +2251,7 @@ riscv_arg_location (struct gdbarch *gdbarch,
 {
   ainfo->type = type;
   ainfo->length = TYPE_LENGTH (ainfo->type);
-  ainfo->align = riscv_type_alignment (ainfo->type);
+  ainfo->align = type_align (ainfo->type);
   ainfo->is_unnamed = is_unnamed;
   ainfo->contents = nullptr;
   ainfo->argloc[0].c_length = 0;
@@ -2314,7 +2277,7 @@ riscv_arg_location (struct gdbarch *gdbarch,
 	}
 
       /* Recalculate the alignment requirement.  */
-      ainfo->align = riscv_type_alignment (ainfo->type);
+      ainfo->align = type_align (ainfo->type);
       riscv_call_arg_scalar_int (ainfo, cinfo);
       break;
 
@@ -3221,6 +3184,7 @@ riscv_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
   set_gdbarch_ptr_bit (gdbarch, riscv_isa_xlen (gdbarch) * 8);
   set_gdbarch_char_signed (gdbarch, 0);
+  set_gdbarch_type_align (gdbarch, riscv_type_align);
 
   /* Information about the target architecture.  */
   set_gdbarch_return_value (gdbarch, riscv_return_value);
