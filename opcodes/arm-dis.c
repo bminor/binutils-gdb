@@ -3569,7 +3569,7 @@ print_insn_coprocessor (bfd_vma pc,
 			info->print_address_func (offset + pc
 						  + info->bytes_per_chunk * 2
 						  - (pc & 3),
-				 		  info);
+						  info);
 		      }
 		  }
 		  break;
@@ -3836,190 +3836,190 @@ print_insn_coprocessor (bfd_vma pc,
 		      default:
 			abort ();
 		      }
-		    break;
-
-		  case 'y':
-		  case 'z':
-		    {
-		      int single = *c++ == 'y';
-		      int regno;
-
-		      switch (*c)
-			{
-			case '4': /* Sm pair */
-			case '0': /* Sm, Dm */
-			  regno = given & 0x0000000f;
-			  if (single)
-			    {
-			      regno <<= 1;
-			      regno += (given >> 5) & 1;
-			    }
-			  else
-			    regno += ((given >> 5) & 1) << 4;
-			  break;
-
-			case '1': /* Sd, Dd */
-			  regno = (given >> 12) & 0x0000000f;
-			  if (single)
-			    {
-			      regno <<= 1;
-			      regno += (given >> 22) & 1;
-			    }
-			  else
-			    regno += ((given >> 22) & 1) << 4;
-			  break;
-
-			case '2': /* Sn, Dn */
-			  regno = (given >> 16) & 0x0000000f;
-			  if (single)
-			    {
-			      regno <<= 1;
-			      regno += (given >> 7) & 1;
-			    }
-			  else
-			    regno += ((given >> 7) & 1) << 4;
-			  break;
-
-			case '3': /* List */
-			  func (stream, "{");
-			  regno = (given >> 12) & 0x0000000f;
-			  if (single)
-			    {
-			      regno <<= 1;
-			      regno += (given >> 22) & 1;
-			    }
-			  else
-			    regno += ((given >> 22) & 1) << 4;
-			  break;
-
-			default:
-			  abort ();
-			}
-
-		      func (stream, "%c%d", single ? 's' : 'd', regno);
-
-		      if (*c == '3')
-			{
-			  int count = given & 0xff;
-
-			  if (single == 0)
-			    count >>= 1;
-
-			  if (--count)
-			    {
-			      func (stream, "-%c%d",
-				    single ? 's' : 'd',
-				    regno + count);
-			    }
-
-			  func (stream, "}");
-			}
-		      else if (*c == '4')
-			func (stream, ", %c%d", single ? 's' : 'd',
-			      regno + 1);
-		    }
-		    break;
-
-		  case 'L':
-		    switch (given & 0x00400100)
-		      {
-		      case 0x00000000: func (stream, "b"); break;
-		      case 0x00400000: func (stream, "h"); break;
-		      case 0x00000100: func (stream, "w"); break;
-		      case 0x00400100: func (stream, "d"); break;
-		      default:
-			break;
-		      }
-		    break;
-
-		  case 'Z':
-		    {
-		      /* given (20, 23) | given (0, 3) */
-		      value = ((given >> 16) & 0xf0) | (given & 0xf);
-		      func (stream, "%d", (int) value);
-		    }
-		    break;
-
-		  case 'l':
-		    /* This is like the 'A' operator, except that if
-		       the width field "M" is zero, then the offset is
-		       *not* multiplied by four.  */
-		    {
-		      int offset = given & 0xff;
-		      int multiplier = (given & 0x00000100) ? 4 : 1;
-
-		      func (stream, "[%s", arm_regnames [(given >> 16) & 0xf]);
-
-		      if (multiplier > 1)
-			{
-			  value_in_comment = offset * multiplier;
-			  if (NEGATIVE_BIT_SET)
-			    value_in_comment = - value_in_comment;
-			}
-
-		      if (offset)
-			{
-			  if (PRE_BIT_SET)
-			    func (stream, ", #%s%d]%s",
-				  NEGATIVE_BIT_SET ? "-" : "",
-				  offset * multiplier,
-				  WRITEBACK_BIT_SET ? "!" : "");
-			  else
-			    func (stream, "], #%s%d",
-				  NEGATIVE_BIT_SET ? "-" : "",
-				  offset * multiplier);
-			}
-		      else
-			func (stream, "]");
-		    }
-		    break;
-
-		  case 'r':
-		    {
-		      int imm4 = (given >> 4) & 0xf;
-		      int puw_bits = ((given >> 22) & 6) | ((given >> W_BIT) & 1);
-		      int ubit = ! NEGATIVE_BIT_SET;
-		      const char *rm = arm_regnames [given & 0xf];
-		      const char *rn = arm_regnames [(given >> 16) & 0xf];
-
-		      switch (puw_bits)
-			{
-			case 1:
-			case 3:
-			  func (stream, "[%s], %c%s", rn, ubit ? '+' : '-', rm);
-			  if (imm4)
-			    func (stream, ", lsl #%d", imm4);
-			  break;
-
-			case 4:
-			case 5:
-			case 6:
-			case 7:
-			  func (stream, "[%s, %c%s", rn, ubit ? '+' : '-', rm);
-			  if (imm4 > 0)
-			    func (stream, ", lsl #%d", imm4);
-			  func (stream, "]");
-			  if (puw_bits == 5 || puw_bits == 7)
-			    func (stream, "!");
-			  break;
-
-			default:
-			  func (stream, "INVALID");
-			}
-		    }
-		    break;
-
-		  case 'i':
-		    {
-		      long imm5;
-		      imm5 = ((given & 0x100) >> 4) | (given & 0xf);
-		      func (stream, "%ld", (imm5 == 0) ? 32 : imm5);
-		    }
-		    break;
-
-		  default:
-		    abort ();
 		  }
+		  break;
+
+		case 'y':
+		case 'z':
+		  {
+		    int single = *c++ == 'y';
+		    int regno;
+
+		    switch (*c)
+		      {
+		      case '4': /* Sm pair */
+		      case '0': /* Sm, Dm */
+			regno = given & 0x0000000f;
+			if (single)
+			  {
+			    regno <<= 1;
+			    regno += (given >> 5) & 1;
+			  }
+			else
+			  regno += ((given >> 5) & 1) << 4;
+			break;
+
+		      case '1': /* Sd, Dd */
+			regno = (given >> 12) & 0x0000000f;
+			if (single)
+			  {
+			    regno <<= 1;
+			    regno += (given >> 22) & 1;
+			  }
+			else
+			  regno += ((given >> 22) & 1) << 4;
+			break;
+
+		      case '2': /* Sn, Dn */
+			regno = (given >> 16) & 0x0000000f;
+			if (single)
+			  {
+			    regno <<= 1;
+			    regno += (given >> 7) & 1;
+			  }
+			else
+			  regno += ((given >> 7) & 1) << 4;
+			break;
+
+		      case '3': /* List */
+			func (stream, "{");
+			regno = (given >> 12) & 0x0000000f;
+			if (single)
+			  {
+			    regno <<= 1;
+			    regno += (given >> 22) & 1;
+			  }
+			else
+			  regno += ((given >> 22) & 1) << 4;
+			break;
+
+		      default:
+			abort ();
+		      }
+
+		    func (stream, "%c%d", single ? 's' : 'd', regno);
+
+		    if (*c == '3')
+		      {
+			int count = given & 0xff;
+
+			if (single == 0)
+			  count >>= 1;
+
+			if (--count)
+			  {
+			    func (stream, "-%c%d",
+				  single ? 's' : 'd',
+				  regno + count);
+			  }
+
+			func (stream, "}");
+		      }
+		    else if (*c == '4')
+		      func (stream, ", %c%d", single ? 's' : 'd',
+			    regno + 1);
+		  }
+		  break;
+
+		case 'L':
+		  switch (given & 0x00400100)
+		    {
+		    case 0x00000000: func (stream, "b"); break;
+		    case 0x00400000: func (stream, "h"); break;
+		    case 0x00000100: func (stream, "w"); break;
+		    case 0x00400100: func (stream, "d"); break;
+		    default:
+		      break;
+		    }
+		  break;
+
+		case 'Z':
+		  {
+		    /* given (20, 23) | given (0, 3) */
+		    value = ((given >> 16) & 0xf0) | (given & 0xf);
+		    func (stream, "%d", (int) value);
+		  }
+		  break;
+
+		case 'l':
+		  /* This is like the 'A' operator, except that if
+		     the width field "M" is zero, then the offset is
+		     *not* multiplied by four.  */
+		  {
+		    int offset = given & 0xff;
+		    int multiplier = (given & 0x00000100) ? 4 : 1;
+
+		    func (stream, "[%s", arm_regnames [(given >> 16) & 0xf]);
+
+		    if (multiplier > 1)
+		      {
+			value_in_comment = offset * multiplier;
+			if (NEGATIVE_BIT_SET)
+			  value_in_comment = - value_in_comment;
+		      }
+
+		    if (offset)
+		      {
+			if (PRE_BIT_SET)
+			  func (stream, ", #%s%d]%s",
+				NEGATIVE_BIT_SET ? "-" : "",
+				offset * multiplier,
+				WRITEBACK_BIT_SET ? "!" : "");
+			else
+			  func (stream, "], #%s%d",
+				NEGATIVE_BIT_SET ? "-" : "",
+				offset * multiplier);
+		      }
+		    else
+		      func (stream, "]");
+		  }
+		  break;
+
+		case 'r':
+		  {
+		    int imm4 = (given >> 4) & 0xf;
+		    int puw_bits = ((given >> 22) & 6) | ((given >> W_BIT) & 1);
+		    int ubit = ! NEGATIVE_BIT_SET;
+		    const char *rm = arm_regnames [given & 0xf];
+		    const char *rn = arm_regnames [(given >> 16) & 0xf];
+
+		    switch (puw_bits)
+		      {
+		      case 1:
+		      case 3:
+			func (stream, "[%s], %c%s", rn, ubit ? '+' : '-', rm);
+			if (imm4)
+			  func (stream, ", lsl #%d", imm4);
+			break;
+
+		      case 4:
+		      case 5:
+		      case 6:
+		      case 7:
+			func (stream, "[%s, %c%s", rn, ubit ? '+' : '-', rm);
+			if (imm4 > 0)
+			  func (stream, ", lsl #%d", imm4);
+			func (stream, "]");
+			if (puw_bits == 5 || puw_bits == 7)
+			  func (stream, "!");
+			break;
+
+		      default:
+			func (stream, "INVALID");
+		      }
+		  }
+		  break;
+
+		case 'i':
+		  {
+		    long imm5;
+		    imm5 = ((given & 0x100) >> 4) | (given & 0xf);
+		    func (stream, "%ld", (imm5 == 0) ? 32 : imm5);
+		  }
+		  break;
+
+		default:
+		  abort ();
 		}
 	    }
 	  else
@@ -4584,11 +4584,11 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 			  default:
 			    abort ();
 			  }
-			break;
-
-		      default:
-			abort ();
 		      }
+		      break;
+
+		    default:
+		      abort ();
 		    }
 		}
 	      else
@@ -5123,65 +5123,65 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			  default:
 			    abort ();
 			  }
-			break;
-
-		      case 'e':
-			{
-			  int imm;
-
-			  imm = (given & 0xf) | ((given & 0xfff00) >> 4);
-			  func (stream, "%d", imm);
-			  value_in_comment = imm;
-			}
-			break;
-
-		      case 'E':
-			/* LSB and WIDTH fields of BFI or BFC.  The machine-
-			   language instruction encodes LSB and MSB.  */
-			{
-			  long msb = (given & 0x001f0000) >> 16;
-			  long lsb = (given & 0x00000f80) >> 7;
-			  long w = msb - lsb + 1;
-
-			  if (w > 0)
-			    func (stream, "#%lu, #%lu", lsb, w);
-			  else
-			    func (stream, "(invalid: %lu:%lu)", lsb, msb);
-			}
-			break;
-
-		      case 'R':
-			/* Get the PSR/banked register name.  */
-			{
-			  const char * name;
-			  unsigned sysm = (given & 0x004f0000) >> 16;
-
-			  sysm |= (given & 0x300) >> 4;
-			  name = banked_regname (sysm);
-
-			  if (name != NULL)
-			    func (stream, "%s", name);
-			  else
-			    func (stream, "(UNDEF: %lu)", (unsigned long) sysm);
-			}
-			break;
-
-		      case 'V':
-			/* 16-bit unsigned immediate from a MOVT or MOVW
-			   instruction, encoded in bits 0:11 and 15:19.  */
-			{
-			  long hi = (given & 0x000f0000) >> 4;
-			  long lo = (given & 0x00000fff);
-			  long imm16 = hi | lo;
-
-			  func (stream, "#%lu", imm16);
-			  value_in_comment = imm16;
-			}
-			break;
-
-		      default:
-			abort ();
 		      }
+		      break;
+
+		    case 'e':
+		      {
+			int imm;
+
+			imm = (given & 0xf) | ((given & 0xfff00) >> 4);
+			func (stream, "%d", imm);
+			value_in_comment = imm;
+		      }
+		      break;
+
+		    case 'E':
+		      /* LSB and WIDTH fields of BFI or BFC.  The machine-
+			 language instruction encodes LSB and MSB.  */
+		      {
+			long msb = (given & 0x001f0000) >> 16;
+			long lsb = (given & 0x00000f80) >> 7;
+			long w = msb - lsb + 1;
+
+			if (w > 0)
+			  func (stream, "#%lu, #%lu", lsb, w);
+			else
+			  func (stream, "(invalid: %lu:%lu)", lsb, msb);
+		      }
+		      break;
+
+		    case 'R':
+		      /* Get the PSR/banked register name.  */
+		      {
+			const char * name;
+			unsigned sysm = (given & 0x004f0000) >> 16;
+
+			sysm |= (given & 0x300) >> 4;
+			name = banked_regname (sysm);
+
+			if (name != NULL)
+			  func (stream, "%s", name);
+			else
+			  func (stream, "(UNDEF: %lu)", (unsigned long) sysm);
+		      }
+		      break;
+
+		    case 'V':
+		      /* 16-bit unsigned immediate from a MOVT or MOVW
+			 instruction, encoded in bits 0:11 and 15:19.  */
+		      {
+			long hi = (given & 0x000f0000) >> 4;
+			long lo = (given & 0x00000fff);
+			long imm16 = hi | lo;
+
+			func (stream, "#%lu", imm16);
+			value_in_comment = imm16;
+		      }
+		      break;
+
+		    default:
+		      abort ();
 		    }
 		}
 	      else
@@ -5342,7 +5342,7 @@ print_insn_thumb16 (bfd_vma pc, struct disassemble_info *info, long given)
 		   mask.  */
 		if ((given & (1 << ((given & 0x0700) >> 8))) == 0)
 		  func (stream, "!");
-	      	break;
+		break;
 
 	      case 'b':
 		/* Print ARM V6T2 CZB address: pc+4+6 bits.  */
