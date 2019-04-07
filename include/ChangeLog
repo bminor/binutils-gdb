@@ -1,3 +1,11 @@
+2019-04-07  Alan Modra  <amodra@gmail.com>
+
+	Merge from gcc.
+	2019-04-03  Vineet Gupta  <vgupta@synopsys.com>
+	PR89877
+	* longlong.h [__arc__] (add_ssaaaa): Add cc clobber.
+	(sub_ddmmss): Likewise.
+
 2019-04-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfdlink.h (bfd_link_info): Remove x86-specific linker options.
