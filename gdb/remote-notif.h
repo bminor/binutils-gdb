@@ -20,8 +20,8 @@
 #ifndef REMOTE_NOTIF_H
 #define REMOTE_NOTIF_H
 
+#include <list>
 #include <memory>
-#include "common/queue.h"
 
 /* An event of a type of async remote notification.  */
 
@@ -48,7 +48,7 @@ struct remote_target;
 
 /* A client to a sort of async remote notification.  */
 
-typedef struct notif_client
+struct notif_client
 {
   /* The name of notification packet.  */
   const char *name;
@@ -79,20 +79,23 @@ typedef struct notif_client
 
   /* Id of this notif_client.  */
   const enum REMOTE_NOTIF_ID id;
-} *notif_client_p;
-
-DECLARE_QUEUE_P (notif_client_p);
+};
 
 /* State on remote async notification.  */
 
 struct remote_notif_state
 {
+  remote_notif_state () = default;
+  ~remote_notif_state ();
+
+  DISABLE_COPY_AND_ASSIGN (remote_notif_state);
+
   /* The remote target.  */
   remote_target *remote;
 
   /* Notification queue.  */
 
-  QUEUE(notif_client_p) *notif_queue;
+  std::list<notif_client *> notif_queue;
 
   /* Asynchronous signal handle registered as event loop source for when
      the remote sent us a notification.  The registered callback
@@ -101,14 +104,14 @@ struct remote_notif_state
 
   struct async_event_handler *get_pending_events_token;
 
-/* One pending event for each notification client.  This is where we
-   keep it until it is acknowledged.  When there is a notification
-   packet, parse it, and create an object of 'struct notif_event' to
-   assign to it.  This field is unchanged until GDB starts to ack
-   this notification (which is done by
-   remote.c:remote_notif_pending_replies).  */
+  /* One pending event for each notification client.  This is where we
+     keep it until it is acknowledged.  When there is a notification
+     packet, parse it, and create an object of 'struct notif_event' to
+     assign to it.  This field is unchanged until GDB starts to ack
+     this notification (which is done by
+     remote.c:remote_notif_pending_replies).  */
 
-  struct notif_event *pending_event[REMOTE_NOTIF_LAST];
+  struct notif_event *pending_event[REMOTE_NOTIF_LAST] {};
 };
 
 void remote_notif_ack (remote_target *remote, notif_client *nc,
@@ -123,7 +126,6 @@ void handle_notification (struct remote_notif_state *notif_state,
 void remote_notif_process (struct remote_notif_state *state,
 			   struct notif_client *except);
 remote_notif_state *remote_notif_state_allocate (remote_target *remote);
-void remote_notif_state_xfree (struct remote_notif_state *state);
 
 extern struct notif_client notif_client_stop;
 

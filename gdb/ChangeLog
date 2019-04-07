@@ -1,5 +1,17 @@
 2019-04-19  Tom Tromey  <tom@tromey.com>
 
+	* remote.c (remote_target): Use delete.
+	* remote-notif.h: Include <list>, not "common/queue.h".
+	(notif_client_p): Remove typedef.
+	(remote_notif_state): Add constructor, destructor, initializer.
+	<notif_queue>: Now a std::list.
+	(remote_notif_state_xfree): Don't declare.
+	* remote-notif.c (remote_notif_process, handle_notification)
+	(remote_notif_state_allocate): Update.
+	(~remote_notif_state): Rename from remote_notif_state_xfree.
+
+2019-04-19  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (reread_symbols): Update.
 	* objfiles.c (objfile_register_static_link)
 	(objfile_lookup_static_link): Update

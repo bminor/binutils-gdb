@@ -4052,7 +4052,7 @@ remote_target::~remote_target ()
   if (rs->remote_async_inferior_event_token)
     delete_async_event_handler (&rs->remote_async_inferior_event_token);
 
-  remote_notif_state_xfree (rs->notif_state);
+  delete rs->notif_state;
 }
 
 /* Query the remote side for the text, data and bss offsets.  */
