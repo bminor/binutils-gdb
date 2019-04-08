@@ -1,5 +1,10 @@
 2019-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-elf/shared.exp: XFAIL PR ld/20995 tests for
+	lynxos and nto targets.
+
+2019-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* Makefile.am (ALL_EMULATION_SOURCES): Remove eelf_i386_chaos.c.
 	(eelf_i386_chaos.c): Removed.
 	* Makefile.in: Regenerated.
