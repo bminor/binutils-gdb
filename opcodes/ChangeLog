@@ -1,3 +1,8 @@
+2019-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.tbl: Consolidate AVX512 BF16 entries.
+	* i386-init.h: Regenerated.
+
 2019-04-07  Alan Modra  <amodra@gmail.com>
 
 	* ppc-dis.c (print_insn_powerpc): Use a tiny state machine
