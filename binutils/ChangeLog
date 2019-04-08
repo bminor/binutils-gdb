@@ -1,3 +1,7 @@
+2019-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/binutils-all/nm.exp: Count i386-moss as ELF.
+
 2019-03-26  Tamar Christina  <tamar.christina@arm.com>
 
 	* testsuite/binutils-all/aarch64/in-order-all.d: Update.
