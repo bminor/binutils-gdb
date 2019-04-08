@@ -1,3 +1,7 @@
+2019-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config.bfd: Remove i[3-7]86-*-kaos* and i[3-7]86-*-chaos targets.
+
 2019-04-08  Alan Modra  <amodra@gmail.com>
 
 	* configure.ac (elfxx_x86): Define and use.

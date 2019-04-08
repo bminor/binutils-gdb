@@ -1,5 +1,13 @@
 2019-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* Makefile.am (ALL_EMULATION_SOURCES): Remove eelf_i386_chaos.c.
+	(eelf_i386_chaos.c): Removed.
+	* Makefile.in: Regenerated.
+	* configure.tgt: Remove i[3-7]86-*-kaos*.
+	* emulparams/elf_i386_chaos.sh: Removed.
+
+2019-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* emulparams/elf_i386_be.sh (EXTRA_EM_FILE): New.
 	* emulparams/i386moss.sh (EXTRA_EM_FILE): Likewise.
 

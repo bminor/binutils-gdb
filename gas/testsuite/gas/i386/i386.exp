@@ -1002,8 +1002,6 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     if { ![istarget "*-*-aix*"]
       && ![istarget "*-*-beos*"]
       && ![istarget "*-*-*bsd*"]
-      && ![istarget "*-*-chaos*"]
-      && ![istarget "*-*-kaos*"]
       && ![istarget "*-*-lynx*"]
       && ![istarget "*-*-moss*"]
       && ![istarget "*-*-nto-qnx*"]

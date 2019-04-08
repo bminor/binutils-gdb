@@ -577,10 +577,6 @@ case "${targ}" in
     want64=true
     ;;
 #endif
-  i[3-7]86-*-kaos*)
-    targ_defvec=i386_elf32_vec
-    targ_selvecs=i386_elf32_vec
-    ;;
   i[3-7]86-*-nto*)
     targ_defvec=i386_elf32_vec
     targ_selvecs="iamcu_elf32_vec i386_coff_vec"
@@ -761,10 +757,6 @@ case "${targ}" in
   i[3-7]86-*-vxworks*)
     targ_defvec=i386_elf32_vxworks_vec
     targ_underscore=yes
-    ;;
-  i[3-7]86-*-chaos)
-    targ_defvec=i386_elf32_vec
-    targ_selfvecs="iamcu_elf32_vec i386chaos_vec"
     ;;
 
   ia16-*-elf)
