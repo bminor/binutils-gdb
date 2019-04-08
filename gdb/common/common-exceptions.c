@@ -184,15 +184,9 @@ void
 throw_exception (const gdb_exception &exception)
 {
   if (exception.reason == RETURN_QUIT)
-    {
-      gdb_exception_quit ex (exception);
-      throw ex;
-    }
+    throw gdb_exception_quit (exception);
   else if (exception.reason == RETURN_ERROR)
-    {
-      gdb_exception_error ex (exception);
-      throw ex;
-    }
+    throw gdb_exception_error (exception);
   else
     gdb_assert_not_reached ("invalid return reason");
 }
@@ -202,17 +196,9 @@ throw_it (enum return_reason reason, enum errors error, const char *fmt,
 	  va_list ap)
 {
   if (reason == RETURN_QUIT)
-    {
-      gdb_exception_quit ex (reason, error);
-      ex.message.reset (new std::string (string_vprintf (fmt, ap)));
-      throw ex;
-    }
+    throw gdb_exception_quit (fmt, ap);
   else if (reason == RETURN_ERROR)
-    {
-      gdb_exception_error ex (reason, error);
-      ex.message.reset (new std::string (string_vprintf (fmt, ap)));
-      throw ex;
-    }
+    throw gdb_exception_error (error, fmt, ap);
   else
     gdb_assert_not_reached ("invalid return reason");
 }

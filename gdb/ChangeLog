@@ -1,3 +1,24 @@
+2019-04-08  Pedro Alves  <palves@redhat.com>
+
+	* common/common-exceptions.c (throw_exception): Don't create
+	named object to throw; throw directly.
+	(throw_it): Likewise.  Don't initialize gdb_exception::message
+	here, with new; pass FMT and AP to the ctor instead.
+	* common/common-exceptions.h: Include <string>.
+	(gdb_exception::gdb_exception(enum return_reason, enum errors,
+	const char *, va_list)): New ctor.  Use std::make_shared.
+	(gdb_exception_error::gdb_exception_error(enum return_reason, enum
+	errors)): Delete.
+	(gdb_exception_error::gdb_exception_error(enum errors, const char
+	*, va_list)): New.
+	(gdb_exception_error::gdb_exception_error(const gdb_exception &)):
+	Add assertion.
+	(gdb_exception_quit::gdb_exception_quit(enum return_reason, enum
+	errors)): Delete.
+	(gdb_exception_quit::gdb_exception_quit(const char *, va_list)): New.
+	(gdb_exception_quit::gdb_exception_quit(const gdb_exception &)):
+	Add assertion.
+
 2019-04-08  Tom Tromey  <tom@tromey.com>
 
 	* valops.c (value_rtti_indirect_type): Replace throw_exception

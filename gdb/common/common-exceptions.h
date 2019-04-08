@@ -23,6 +23,7 @@
 #include <setjmp.h>
 #include <new>
 #include <memory>
+#include <string>
 
 /* Reasons for calling throw_exceptions().  NOTE: all reason values
    must be different from zero.  enum value 0 is reserved for internal
@@ -123,6 +124,15 @@ struct gdb_exception
   {
   }
 
+  gdb_exception (enum return_reason r, enum errors e,
+		 const char *fmt, va_list ap)
+    ATTRIBUTE_PRINTF (4, 0)
+    : reason (r),
+      error (e),
+      message (std::make_shared<std::string> (string_vprintf (fmt, ap)))
+  {
+  }
+
   /* The copy constructor exists so that we can mark it "noexcept",
      which is a good practice for any sort of exception object.  */
   gdb_exception (const gdb_exception &other) noexcept
@@ -214,27 +224,31 @@ extern int exceptions_state_mc_catch (struct gdb_exception *, int);
 
 struct gdb_exception_error : public gdb_exception
 {
-  gdb_exception_error (enum return_reason r, enum errors e)
-    : gdb_exception (r, e)
+  gdb_exception_error (enum errors e, const char *fmt, va_list ap)
+    ATTRIBUTE_PRINTF (3, 0)
+    : gdb_exception (RETURN_ERROR, e, fmt, ap)
   {
   }
 
   explicit gdb_exception_error (const gdb_exception &ex) noexcept
     : gdb_exception (ex)
   {
+    gdb_assert (ex.reason == RETURN_ERROR);
   }
 };
 
 struct gdb_exception_quit : public gdb_exception
 {
-  gdb_exception_quit (enum return_reason r, enum errors e)
-    : gdb_exception (r, e)
+  gdb_exception_quit (const char *fmt, va_list ap)
+    ATTRIBUTE_PRINTF (2, 0)
+    : gdb_exception (RETURN_QUIT, GDB_NO_ERROR, fmt, ap)
   {
   }
 
   explicit gdb_exception_quit (const gdb_exception &ex) noexcept
     : gdb_exception (ex)
   {
+    gdb_assert (ex.reason == RETURN_QUIT);
   }
 };
 
