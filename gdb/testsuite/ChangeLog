@@ -1,3 +1,10 @@
+2019-04-11  Alan Hayward  <alan.hayward@arm.com>
+
+	* gdb.server/sysroot.c: New test.
+	* gdb.server/sysroot.exp: New file.
+	* lib/gdbserver-support.exp (gdb_target_cmd): Add additional text
+	matching param.
+
 2019-04-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/align.exp: Extend test to cover structures containing

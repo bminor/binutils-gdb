@@ -42,9 +42,11 @@
 
 #
 # gdb_target_cmd
-# Send gdb the "target" command
+# Send gdb the "target" command.  Returns 0 on success, 1 on failure.
+# If specified, then ADDITIONAL_TEXT must match the text that comes after
+# the connection message in order for the procedure to succeed.
 #
-proc gdb_target_cmd { targetname serialport } {
+proc gdb_target_cmd { targetname serialport {additional_text ""} } {
     global gdb_prompt
 
     set serialport_re [string_to_regexp $serialport]
@@ -61,23 +63,23 @@ proc gdb_target_cmd { targetname serialport } {
 	    -re "Couldn't establish connection to remote.*$gdb_prompt $" {
 		verbose "Connection failed"
 	    }
-	    -re "Remote MIPS debugging.*$gdb_prompt" {
+	    -re "Remote MIPS debugging.*$additional_text.*$gdb_prompt" {
 		verbose "Set target to $targetname"
 		return 0
 	    }
-	    -re "Remote debugging using .*$serialport_re.*$gdb_prompt $" {
+	    -re "Remote debugging using .*$serialport_re.*$additional_text.*$gdb_prompt $" {
 		verbose "Set target to $targetname"
 		return 0
 	    }
-	    -re "Remote debugging using stdio.*$gdb_prompt $" {
+	    -re "Remote debugging using stdio.*$additional_text.*$gdb_prompt $" {
 		verbose "Set target to $targetname"
 		return 0
 	    }
-	    -re "Remote target $targetname connected to.*$gdb_prompt $" {
+	    -re "Remote target $targetname connected to.*$additional_text.*$gdb_prompt $" {
 		verbose "Set target to $targetname"
 		return 0
 	    }
-	    -re "Connected to.*$gdb_prompt $" { 
+	    -re "Connected to.*$additional_text.*$gdb_prompt $" {
 		verbose "Set target to $targetname"
 		return 0
 	    }
