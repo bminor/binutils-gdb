@@ -1,3 +1,9 @@
+2019-04-08  Alan Modra  <amodra@gmail.com>
+
+	* emulparams/elf64rdos.sh (EXTRA_EM_FILE): Define.
+	* emulparams/i386lynx.sh (EXTRA_EM_FILE): Define.
+	* emulparams/i386nto.sh (EXTRA_EM_FILE): Define.
+
 2019-04-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (ELF_X86_DEPS): Add $(srcdir)/emultempl/elf-x86.em.
