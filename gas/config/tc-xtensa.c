@@ -497,6 +497,7 @@ static fixS *xg_append_jump (fragS *fragP, symbolS *sym, offsetT offset);
 static void xtensa_maybe_create_literal_pool_frag (bfd_boolean, bfd_boolean);
 static bfd_boolean auto_litpools = FALSE;
 static int auto_litpool_limit = 0;
+static bfd_boolean xtensa_is_init_fini (segT seg);
 
 /* Alignment Functions.  */
 
@@ -4797,7 +4798,6 @@ xtensa_mark_literal_pool_location (void)
 {
   /* Any labels pointing to the current location need
      to be adjusted to after the literal pool.  */
-  emit_state s;
   fragS *pool_location;
 
   if (use_literal_section)
@@ -4818,19 +4818,7 @@ xtensa_mark_literal_pool_location (void)
 		RELAX_LITERAL_POOL_END, NULL, 0, NULL);
   xtensa_set_frag_assembly_state (frag_now);
 
-  /* Now put a frag into the literal pool that points to this location.  */
   set_literal_pool_location (now_seg, pool_location);
-  xtensa_switch_to_non_abs_literal_fragment (&s);
-  frag_align (2, 0, 0);
-  record_alignment (now_seg, 2);
-
-  /* Close whatever frag is there.  */
-  frag_variant (rs_fill, 0, 0, 0, NULL, 0, NULL);
-  xtensa_set_frag_assembly_state (frag_now);
-  frag_now->tc_frag_data.literal_frag = pool_location;
-  frag_variant (rs_fill, 0, 0, 0, NULL, 0, NULL);
-  xtensa_restore_emit_state (&s);
-  xtensa_set_frag_assembly_state (frag_now);
 }
 
 
@@ -5334,6 +5322,9 @@ md_begin (void)
   /* Set up the assembly state.  */
   if (!frag_now->tc_frag_data.is_assembly_state_set)
     xtensa_set_frag_assembly_state (frag_now);
+
+  if (!use_literal_section)
+    xtensa_mark_literal_pool_location ();
 }
 
 
@@ -5933,6 +5924,11 @@ xtensa_elf_section_change_hook (void)
   /* Set up the assembly state.  */
   if (!frag_now->tc_frag_data.is_assembly_state_set)
     xtensa_set_frag_assembly_state (frag_now);
+
+  if (!use_literal_section
+      && seg_info (now_seg)->tc_segment_info_data.literal_pool_loc == NULL
+      && !xtensa_is_init_fini (now_seg))
+    xtensa_mark_literal_pool_location ();
 }
 
 

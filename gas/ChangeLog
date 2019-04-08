@@ -1,3 +1,18 @@
+2019-04-11  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (xtensa_is_init_fini): Add declaration.
+	(xtensa_mark_literal_pool_location): Don't add fill frag to literal
+	section that records literal pool location.
+	(md_begin): Call xtensa_mark_literal_pool_location when text
+	section literals or auto litpools are used.
+	(xtensa_elf_section_change_hook): Call
+	xtensa_mark_literal_pool_location when text section literals or
+	auto litpools are used, there's no literal pool location defined
+	for the current section and it's not .init or .fini.
+	* testsuite/gas/xtensa/auto-litpools-first1.d: Fix up addresses.
+	* testsuite/gas/xtensa/auto-litpools-first2.d: Likewise.
+	* testsuite/gas/xtensa/auto-litpools.d: Likewise.
+
 2019-04-11  Sudakshina Das  <sudi.das@arm.com>
 
 	* config/tc-aarch64.c (process_omitted_operand): Add case for
