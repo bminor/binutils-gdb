@@ -1,6 +1,6 @@
 2019-04-09  Simon Marchi  <simon.marchi@efficios.com>
 
-	* infcmd.c (run_command_1): Pass -qualified to tbreak when usind
+	* infcmd.c (run_command_1): Pass -qualified to tbreak when using
 	the "start" command.
 
 2019-04-08  Kevin Buettner  <kevinb@redhat.com>
