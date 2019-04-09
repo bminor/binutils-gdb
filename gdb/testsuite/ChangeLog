@@ -1,3 +1,8 @@
+2019-04-09  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.base/start-cpp.exp: New file.
+	* gdb.base/start-cpp.cc: New file.
+
 2019-04-08  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.python/py-thrhandle.exp: Adjust tests to call

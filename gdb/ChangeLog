@@ -1,3 +1,8 @@
+2019-04-09  Simon Marchi  <simon.marchi@efficios.com>
+
+	* infcmd.c (run_command_1): Pass -qualified to tbreak when usind
+	the "start" command.
+
 2019-04-08  Kevin Buettner  <kevinb@redhat.com>
 
 	* python/py-inferior.c (infpy_thread_from_thread_handle):

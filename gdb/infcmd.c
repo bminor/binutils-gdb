@@ -604,7 +604,10 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
 
   /* Insert temporary breakpoint in main function if requested.  */
   if (run_how == RUN_STOP_AT_MAIN)
-    tbreak_command (main_name (), 0);
+    {
+      std::string arg = string_printf ("-qualified %s", main_name ());
+      tbreak_command (arg.c_str (), 0);
+    }
 
   exec_file = get_exec_file (0);
 
