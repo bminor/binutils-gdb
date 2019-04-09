@@ -1,3 +1,9 @@
+2019-04-19  Ilya Yu. Malakhov  <malakhov@mcst.ru>
+
+	PR symtab/24423:
+	* source.c (print_source_lines_base): Advance "iter" when a
+	control character is seen.
+
 2019-04-19  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* inferior.h (struct infcall_suspend_state_deleter):
