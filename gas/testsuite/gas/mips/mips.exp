@@ -1152,6 +1152,8 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "elf_mach_5900"
     run_dump_test "elf_mach_interaptiv-mr2"
     run_dump_test "elf_mach_p6600"
+    run_dump_test "elf_mach_i6400"
+    run_dump_test "elf_mach_i6500"
 
     run_dump_test "mips-gp32-fp32-pic"
     run_dump_test "mips-gp32-fp64-pic"

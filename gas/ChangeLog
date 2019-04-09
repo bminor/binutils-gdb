@@ -1,5 +1,14 @@
 2019-04-09  Matthew Fortune  <matthew.fortune@mips.com>
 
+	* config/tc-mips.c (mips_cpu_info_table): Add i6500.  Update
+	default ASEs for i6400.
+	* doc/c-mips.texi (-march): Document i6500.
+	* testsuite/gas/mips/elf_mach_i6400.d: New test.
+	* testsuite/gas/mips/elf_mach_i6500.d: New test.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2019-04-09  Matthew Fortune  <matthew.fortune@mips.com>
+
 	* config/tc-mips.c (mips_set_options) <init_ase>: New field.
 	(file_mips_opts, mips_opts) <init_ase>: Initialize new field.
 	(file_mips_check_options): Propagate initial ASE settings.
