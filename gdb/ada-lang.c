@@ -6961,6 +6961,10 @@ ada_is_wrapper_field (struct type *type, int field_num)
 int
 ada_is_variant_part (struct type *type, int field_num)
 {
+  /* Only Ada types are eligible.  */
+  if (!ADA_TYPE_P (type))
+    return 0;
+
   struct type *field_type = TYPE_FIELD_TYPE (type, field_num);
 
   return (TYPE_CODE (field_type) == TYPE_CODE_UNION
@@ -8258,7 +8262,7 @@ empty_record (struct type *templ)
   TYPE_CODE (type) = TYPE_CODE_STRUCT;
   TYPE_NFIELDS (type) = 0;
   TYPE_FIELDS (type) = NULL;
-  INIT_CPLUS_SPECIFIC (type);
+  INIT_NONE_SPECIFIC (type);
   TYPE_NAME (type) = "<empty>";
   TYPE_LENGTH (type) = 0;
   return type;
@@ -8312,7 +8316,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 
   rtype = alloc_type_copy (type);
   TYPE_CODE (rtype) = TYPE_CODE_STRUCT;
-  INIT_CPLUS_SPECIFIC (rtype);
+  INIT_NONE_SPECIFIC (rtype);
   TYPE_NFIELDS (rtype) = nfields;
   TYPE_FIELDS (rtype) = (struct field *)
     TYPE_ALLOC (rtype, nfields * sizeof (struct field));
@@ -8587,7 +8591,7 @@ template_to_static_fixed_type (struct type *type0)
 	    {
 	      TYPE_TARGET_TYPE (type0) = type = alloc_type_copy (type0);
 	      TYPE_CODE (type) = TYPE_CODE (type0);
-	      INIT_CPLUS_SPECIFIC (type);
+	      INIT_NONE_SPECIFIC (type);
 	      TYPE_NFIELDS (type) = nfields;
 	      TYPE_FIELDS (type) = (struct field *)
 		TYPE_ALLOC (type, nfields * sizeof (struct field));
@@ -8636,7 +8640,7 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
 
   rtype = alloc_type_copy (type);
   TYPE_CODE (rtype) = TYPE_CODE_STRUCT;
-  INIT_CPLUS_SPECIFIC (rtype);
+  INIT_NONE_SPECIFIC (rtype);
   TYPE_NFIELDS (rtype) = nfields;
   TYPE_FIELDS (rtype) =
     (struct field *) TYPE_ALLOC (rtype, nfields * sizeof (struct field));
@@ -9005,6 +9009,11 @@ ada_to_fixed_type_1 (struct type *type, const gdb_byte *valaddr,
                    CORE_ADDR address, struct value *dval, int check_tag)
 {
   type = ada_check_typedef (type);
+
+  /* Only un-fixed types need to be handled here.  */
+  if (!HAVE_GNAT_AUX_INFO (type))
+    return type;
+
   switch (TYPE_CODE (type))
     {
     default:

@@ -1,3 +1,14 @@
+2019-04-19  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (ada_is_variant_part, ada_to_fixed_type_1):
+	Check ADA_TYPE_P.
+	(empty_record, ada_template_to_fixed_record_type_1)
+	(template_to_static_fixed_type)
+	(to_record_with_fixed_variant_part): Use INIT_NONE_SPECIFIC.
+	* cp-abi.c (value_rtti_type): Check HAVE_CPLUS_STRUCT.
+	* gdbtypes.h (INIT_NONE_SPECIFIC, ADA_TYPE_P): New
+	macros.
+
 2019-04-19  Ilya Yu. Malakhov  <malakhov@mcst.ru>
 
 	PR symtab/24423:

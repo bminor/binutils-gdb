@@ -1,5 +1,10 @@
 2019-04-19  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.ada/ptype_union.c: New file.
+	* gdb.ada/ptype_union.exp: New file.
+
+2019-04-19  Tom Tromey  <tromey@adacore.com>
+
 	PR symtab/24423:
 	* gdb.base/list0.h (foo): Add a control-l character.
 

@@ -109,7 +109,8 @@ value_rtti_type (struct value *v, int *full,
 {
   struct type *ret = NULL;
 
-  if ((current_cp_abi.rtti_type) == NULL)
+  if ((current_cp_abi.rtti_type) == NULL
+      || !HAVE_CPLUS_STRUCT (check_typedef (value_type (v))))
     return NULL;
   try
     {
