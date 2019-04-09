@@ -148,6 +148,11 @@ extern int cp_is_vtbl_ptr_type (struct type *);
 
 extern int cp_is_vtbl_member (struct type *);
 
+/* Return true if TYPE is a string type.  Unlike DEFAULT_IS_STRING_TYPE_P
+   this will detect arrays of characters not just TYPE_CODE_STRING.  */
+
+extern bool c_is_string_type_p (struct type *type);
+
 /* These are in c-valprint.c.  */
 
 extern int c_textual_element_type (struct type *, char);

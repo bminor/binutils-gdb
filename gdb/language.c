@@ -723,6 +723,20 @@ default_symbol_name_matcher (const char *symbol_search_name,
 
 /* See language.h.  */
 
+bool
+default_is_string_type_p (struct type *type)
+{
+  type = check_typedef (type);
+  while (TYPE_CODE (type) == TYPE_CODE_REF)
+    {
+      type = TYPE_TARGET_TYPE (type);
+      type = check_typedef (type);
+    }
+  return (TYPE_CODE (type)  == TYPE_CODE_STRING);
+}
+
+/* See language.h.  */
+
 symbol_name_matcher_ftype *
 get_symbol_name_matcher (const language_defn *lang,
 			 const lookup_name_info &lookup_name)
@@ -877,6 +891,7 @@ const struct language_defn unknown_language_defn =
   &default_varobj_ops,
   NULL,
   NULL,
+  default_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
@@ -928,6 +943,7 @@ const struct language_defn auto_language_defn =
   &default_varobj_ops,
   NULL,
   NULL,
+  default_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
 

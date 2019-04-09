@@ -308,6 +308,17 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
   return nullptr;
 }
 
+/* Return true if TYPE is a string.  */
+
+static bool
+f_is_string_type_p (struct type *type)
+{
+  type = check_typedef (type);
+  return (TYPE_CODE (type) == TYPE_CODE_STRING
+	  || (TYPE_CODE (type) == TYPE_CODE_ARRAY
+	      && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CHAR));
+}
+
 static const char *f_extensions[] =
 {
   ".f", ".F", ".for", ".FOR", ".ftn", ".FTN", ".fpp", ".FPP",
@@ -378,6 +389,7 @@ extern const struct language_defn f_language_defn =
   &default_varobj_ops,
   NULL,
   NULL,
+  f_is_string_type_p,
   "(...)"			/* la_struct_too_deep_ellipsis */
 };
 

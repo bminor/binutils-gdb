@@ -1087,6 +1087,7 @@ extern const struct language_defn opencl_language_defn =
   &default_varobj_ops,
   NULL,
   NULL,
+  c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
 

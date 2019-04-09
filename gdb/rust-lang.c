@@ -226,6 +226,26 @@ rust_chartype_p (struct type *type)
 	  && TYPE_UNSIGNED (type));
 }
 
+/* Return true if TYPE is a string type.  */
+
+static bool
+rust_is_string_type_p (struct type *type)
+{
+  LONGEST low_bound, high_bound;
+
+  type = check_typedef (type);
+  return ((TYPE_CODE (type) == TYPE_CODE_STRING)
+	  || (TYPE_CODE (type) == TYPE_CODE_PTR
+	      && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_ARRAY
+		  && rust_u8_type_p (TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (type)))
+		  && get_array_bounds (TYPE_TARGET_TYPE (type), &low_bound,
+				       &high_bound)))
+	  || (TYPE_CODE (type) == TYPE_CODE_STRUCT
+	      && !rust_enum_p (type)
+	      && rust_slice_type_p (type)
+	      && strcmp (TYPE_NAME (type), "&str") == 0));
+}
+
 /* If VALUE represents a trait object pointer, return the underlying
    pointer with the correct (i.e., runtime) type.  Otherwise, return
    NULL.  */
@@ -2142,5 +2162,6 @@ extern const struct language_defn rust_language_defn =
   &default_varobj_ops,
   NULL,
   NULL,
+  rust_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };

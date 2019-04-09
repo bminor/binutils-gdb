@@ -174,6 +174,27 @@ m2_printstr (struct ui_file *stream, struct type *type, const gdb_byte *string,
     fputs_filtered ("...", stream);
 }
 
+/* Return true if TYPE is a string.  */
+
+static bool
+m2_is_string_type_p (struct type *type)
+{
+  type = check_typedef (type);
+  if (TYPE_CODE (type) == TYPE_CODE_ARRAY
+      && TYPE_LENGTH (type) > 0
+      && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
+    {
+      struct type *elttype = check_typedef (TYPE_TARGET_TYPE (type));
+
+      if (TYPE_LENGTH (elttype) == 1
+	  && (TYPE_CODE (elttype) == TYPE_CODE_INT
+	      || TYPE_CODE (elttype) == TYPE_CODE_CHAR))
+	return true;
+    }
+
+  return false;
+}
+
 static struct value *
 evaluate_subexp_modula2 (struct type *expect_type, struct expression *exp,
 			 int *pos, enum noside noside)
@@ -399,6 +420,7 @@ extern const struct language_defn m2_language_defn =
   &default_varobj_ops,
   NULL,
   NULL,
+  m2_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
 

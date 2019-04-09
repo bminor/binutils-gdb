@@ -715,6 +715,42 @@ c_watch_location_expression (struct type *type, CORE_ADDR addr)
     (xstrprintf ("* (%s *) %s", name.c_str (), core_addr_to_string (addr)));
 }
 
+/* See c-lang.h.  */
+
+bool
+c_is_string_type_p (struct type *type)
+{
+  type = check_typedef (type);
+  while (TYPE_CODE (type) == TYPE_CODE_REF)
+    {
+      type = TYPE_TARGET_TYPE (type);
+      type = check_typedef (type);
+    }
+
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_ARRAY:
+      {
+	/* See if target type looks like a string.  */
+	struct type *array_target_type = TYPE_TARGET_TYPE (type);
+	return (TYPE_LENGTH (type) > 0
+		&& TYPE_LENGTH (array_target_type) > 0
+		&& c_textual_element_type (array_target_type, 0));
+      }
+    case TYPE_CODE_STRING:
+      return true;
+    case TYPE_CODE_PTR:
+      {
+	struct type *element_type = TYPE_TARGET_TYPE (type);
+	return c_textual_element_type (element_type, 0);
+      }
+    default:
+      break;
+    }
+
+  return false;
+}
+
 
 /* Table mapping opcodes into strings for printing operators
    and precedences of the operators.  */
@@ -874,6 +910,7 @@ extern const struct language_defn c_language_defn =
   &c_varobj_ops,
   c_get_compile_context,
   c_compute_program,
+  c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
@@ -1019,6 +1056,7 @@ extern const struct language_defn cplus_language_defn =
   &cplus_varobj_ops,
   cplus_get_compile_context,
   cplus_compute_program,
+  c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
@@ -1073,6 +1111,7 @@ extern const struct language_defn asm_language_defn =
   &default_varobj_ops,
   NULL,
   NULL,
+  c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
@@ -1127,5 +1166,6 @@ extern const struct language_defn minimal_language_defn =
   &default_varobj_ops,
   NULL,
   NULL,
+  c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };

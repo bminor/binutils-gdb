@@ -130,6 +130,16 @@ go_classify_struct_type (struct type *type)
   return GO_TYPE_NONE;
 }
 
+/* Return true if TYPE is a string.  */
+
+static bool
+go_is_string_type_p (struct type *type)
+{
+  type = check_typedef (type);
+  return (TYPE_CODE (type) == TYPE_CODE_STRUCT
+	  && go_classify_struct_type (type) == GO_TYPE_STRING);
+}
+
 /* Subroutine of unpack_mangled_go_symbol to simplify it.
    Given "[foo.]bar.baz", store "bar" in *PACKAGEP and "baz" in *OBJECTP.
    We stomp on the last '.' to nul-terminate "bar".
@@ -612,6 +622,7 @@ extern const struct language_defn go_language_defn =
   &default_varobj_ops,
   NULL,
   NULL,
+  go_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
 

@@ -1,5 +1,33 @@
 2019-04-29  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_defn): Initialise new field.
+	* c-lang.c (c_is_string_type_p): New function.
+	(c_language_defn): Initialise new field.
+	(cplus_language_defn): Initialise new field.
+	(asm_language_defn): Initialise new field.
+	(minimal_language_defn): Initialise new field.
+	* c-lang.h (c_is_string_type_p): Declare new function.
+	* d-lang.c (d_language_defn): Initialise new field.
+	* f-lang.c (f_is_string_type_p): New function.
+	(f_language_defn): Initialise new field.
+	* go-lang.c (go_is_string_type_p): New function.
+	(go_language_defn): Initialise new field.
+	* language.c (default_is_string_type_p): New function.
+	(unknown_language_defn): Initialise new field.
+	(auto_language_defn): Initialise new field.
+	* language.h (struct language_defn) <la_is_string_type_p>: New
+	member variable.
+	(default_is_string_type_p): Declare new function.
+	* m2-lang.c (m2_language_defn): Initialise new field.
+	* objc-lang.c (objc_language_defn): Initialise new field.
+	* opencl-lang.c (opencl_language_defn): Initialise new field.
+	* p-lang.c (pascal_is_string_type_p): New function.
+	(pascal_language_defn): Initialise new field.
+	* rust-lang.c (rust_is_string_type_p): New function.
+	(rust_language_defn): Initialise new field.
+
+2019-04-29  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* language.h (struct language_defn) <la_struct_too_deep_ellipsis>:
 	New field.
 	* ada-lang.c (ada_language_defn): Initialise new field.

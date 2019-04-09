@@ -14390,6 +14390,7 @@ extern const struct language_defn ada_language_defn = {
   &ada_varobj_ops,
   NULL,
   NULL,
+  ada_is_string_type,
   "(...)"			/* la_struct_too_deep_ellipsis */
 };
 
