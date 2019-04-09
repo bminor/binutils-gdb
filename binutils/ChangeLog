@@ -1,5 +1,12 @@
 2019-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* readelf.c (decode_x86_isa): Handle
+	GNU_PROPERTY_X86_ISA_1_AVX512_BF16.
+	* testsuite/binutils-all/i386/pr21231b.d: Updated.
+	* testsuite/binutils-all/x86-64/pr21231b.d: Likewise.
+
+2019-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/binutils-all/nm.exp: Count i386-moss as ELF.
 
 2019-03-26  Tamar Christina  <tamar.christina@arm.com>

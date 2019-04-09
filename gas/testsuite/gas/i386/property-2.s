@@ -29,3 +29,4 @@
 	vpermt2b	(%ecx), %zmm0, %zmm1
 	vpcompressb	%zmm0, %zmm1
 	vpdpwssds	(%ecx), %zmm0, %zmm1
+	vcvtne2ps2bf16	(%ecx), %zmm0, %zmm1

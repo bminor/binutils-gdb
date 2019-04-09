@@ -17279,6 +17279,9 @@ decode_x86_isa (unsigned int bitmask)
 	case GNU_PROPERTY_X86_ISA_1_AVX512_VNNI:
 	  printf ("AVX512_VNNI");
 	  break;
+	case GNU_PROPERTY_X86_ISA_1_AVX512_BF16:
+	  printf ("AVX512_BF16");
+	  break;
 	default:
 	  printf (_("<unknown: %x>"), bit);
 	  break;

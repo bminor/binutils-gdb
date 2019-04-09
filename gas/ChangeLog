@@ -1,5 +1,13 @@
 2019-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (output_insn): Support
+	GNU_PROPERTY_X86_ISA_1_AVX512_BF16.
+	* testsuite/gas/i386/property-2.s: Add AVX512_BF16 test.
+	* testsuite/gas/i386/property-2.d: Updated.
+	* testsuite/gas/i386/x86-64-property-2.d: Likewise.
+
+2019-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* configure.tgt: Remove i386-*-kaos* and i386-*-chaos targets.
 	* testsuite/gas/i386/i386.exp: Remove *-*-caos* and "*-*-kaos*
 	check.
