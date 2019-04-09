@@ -1368,7 +1368,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	      char c = *iter;
 	      if (c == '\033' && skip_ansi_escape (iter, &skip_bytes))
 		iter += skip_bytes;
-	      else if (c < 040 && c != '\t')
+	      else if (c >= 0 && c < 040 && c != '\t')
 		break;
 	      else if (c == 0177)
 		break;
@@ -1397,9 +1397,13 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	    {
 	      xsnprintf (buf, sizeof (buf), "^%c", *iter + 0100);
 	      uiout->text (buf);
+	      ++iter;
 	    }
 	  else if (*iter == 0177)
-	    uiout->text ("^?");
+	    {
+	      uiout->text ("^?");
+	      ++iter;
+	    }
 	}
       uiout->text ("\n");
     }
