@@ -1610,7 +1610,7 @@ rust_parser::lex_number (YYSTYPE *lvalp)
 	    }
 	}
 
-      value = strtoul (number.c_str () + offset, NULL, radix);
+      value = strtoulst (number.c_str () + offset, NULL, radix);
       if (implicit_i32 && value >= ((uint64_t) 1) << 31)
 	type = get_type ("i64");
 
@@ -2603,7 +2603,8 @@ rust_lex_test_one (rust_parser *parser, const char *input, int expected)
 /* Test that INPUT lexes as the integer VALUE.  */
 
 static void
-rust_lex_int_test (rust_parser *parser, const char *input, int value, int kind)
+rust_lex_int_test (rust_parser *parser, const char *input,
+		   LONGEST value, int kind)
 {
   RUSTSTYPE result = rust_lex_test_one (parser, input, kind);
   SELF_CHECK (result.typed_val_int.val == value);
@@ -2781,6 +2782,7 @@ rust_lex_tests (void)
   rust_lex_int_test (&parser, "0x1_f", 0x1f, INTEGER);
   rust_lex_int_test (&parser, "0b1_101011__", 0x6b, INTEGER);
   rust_lex_int_test (&parser, "0o001177i64", 639, INTEGER);
+  rust_lex_int_test (&parser, "0x123456789u64", 0x123456789ull, INTEGER);
 
   rust_lex_test_trailing_dot (&parser);
 

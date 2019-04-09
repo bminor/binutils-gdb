@@ -1,3 +1,11 @@
+2019-04-09  Ivan Begert  <ivanbegert@gmail.com>
+	    Tom Tromey  <tromey@adacore.com>
+
+	PR rust/24414:
+	* rust-exp.y (rust_parser::lex_number): Use strtoulst.
+	(rust_lex_int_test): Change "value" to be LONGEST.
+	(rust_lex_tests): Add test for long integer literal.
+
 2019-04-09  Tom Tromey  <tromey@adacore.com>
 
 	* remote.c (remote_target::remote_add_inferior): Change fake_pid_p
