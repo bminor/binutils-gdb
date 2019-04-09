@@ -1,3 +1,10 @@
+2019-04-09  Robert Suchanek  <robert.suchanek@mips.com>
+
+	* testsuite/gas/mips/mips.exp: Run hwr-names test.
+	* testsuite/gas/mips/hwr-names.s: Add test cases for RDHWR with
+	the SEL field.
+	* testsuite/gas/mips/mipsr6@hwr-names.d: New file.
+
 2019-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (output_insn): Support

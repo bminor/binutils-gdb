@@ -1781,6 +1781,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"remu",		"d,v,t",	0,    (int) M_REMU_3,	INSN_MACRO,		0,		I1,		0,	I37 },
 {"remu",		"d,v,I",	0,    (int) M_REMU_3I,	INSN_MACRO,		0,		I1,		0,	I37 },
 {"rdhwr",		"t,K",		0x7c00003b, 0xffe007ff, WR_1,			0,		I33,		0,	0 },
+{"rdhwr",		"t,K,+O",	0x7c00003b, 0xffe0063f, WR_1,			0,		I37,		0,	0 },
 {"rdpgpr",		"d,w",		0x41400000, 0xffe007ff, WR_1,			0,		I33,		0,	0 },
 /* rfe is moved below as it now conflicts with tlbgp */
 {"rnas.qh",		"X,Q",		0x78200025, 0xfc20f83f,	WR_1|RD_2|FP_D,		RD_MACC,	0,		MX,	0 },

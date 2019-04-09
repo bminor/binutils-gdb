@@ -1342,6 +1342,8 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "hwr-names-numeric"
     run_dump_test "hwr-names-mips32r2"
     run_dump_test "hwr-names-mips64r2"
+    run_dump_test_arches "hwr-names"	[mips_arch_list_matching mips32r6 \
+					    !micromipsr6]
 
     run_dump_test "ldstla-32"
     run_dump_test "ldstla-32-mips3"

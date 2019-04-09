@@ -1,3 +1,7 @@
+2019-04-09  Robert Suchanek  <robert.suchanek@mips.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Add RDHWR rt rd sel.
+
 2019-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.tbl: Consolidate AVX512 BF16 entries.
