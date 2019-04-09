@@ -268,6 +268,12 @@ struct mips_set_options
   /* 1 if single-precision operations on odd-numbered registers are
      allowed.  */
   int oddspreg;
+
+  /* The set of ASEs that should be enabled for the user specified
+     architecture.  This cannot be inferred from 'arch' for all cores
+     as processors only have a unique 'arch' if they add architecture
+     specific instructions (UDI).  */
+  int init_ase;
 };
 
 /* Specifies whether module level options have been checked yet.  */
@@ -289,7 +295,8 @@ static struct mips_set_options file_mips_opts =
   /* noreorder */ 0,  /* at */ ATREG, /* warn_about_macros */ 0,
   /* nomove */ 0, /* nobopt */ 0, /* noautoextend */ 0, /* insn32 */ FALSE,
   /* gp */ -1, /* fp */ -1, /* arch */ CPU_UNKNOWN, /* sym32 */ FALSE,
-  /* soft_float */ FALSE, /* single_float */ FALSE, /* oddspreg */ -1
+  /* soft_float */ FALSE, /* single_float */ FALSE, /* oddspreg */ -1,
+  /* init_ase */ 0
 };
 
 /* This is similar to file_mips_opts, but for the current set of options.  */
@@ -300,7 +307,8 @@ static struct mips_set_options mips_opts =
   /* noreorder */ 0,  /* at */ ATREG, /* warn_about_macros */ 0,
   /* nomove */ 0, /* nobopt */ 0, /* noautoextend */ 0, /* insn32 */ FALSE,
   /* gp */ -1, /* fp */ -1, /* arch */ CPU_UNKNOWN, /* sym32 */ FALSE,
-  /* soft_float */ FALSE, /* single_float */ FALSE, /* oddspreg */ -1
+  /* soft_float */ FALSE, /* single_float */ FALSE, /* oddspreg */ -1,
+  /* init_ase */ 0
 };
 
 /* Which bits of file_ase were explicitly set or cleared by ASE options.  */
@@ -4086,8 +4094,6 @@ mips_check_options (struct mips_set_options *opts, bfd_boolean abi_checks)
 static void
 file_mips_check_options (void)
 {
-  const struct mips_cpu_info *arch_info = 0;
-
   if (file_mips_opts_checked)
     return;
 
@@ -4129,8 +4135,6 @@ file_mips_check_options (void)
 	/* 32-bit float registers.  */
 	file_mips_opts.fp = 32;
     }
-
-  arch_info = mips_cpu_info_from_arch (file_mips_opts.arch);
 
   /* Disable operations on odd-numbered floating-point registers by default
      when using the FPXX ABI.  */
@@ -4175,7 +4179,7 @@ file_mips_check_options (void)
 
   /* If the user didn't explicitly select or deselect a particular ASE,
      use the default setting for the CPU.  */
-  file_mips_opts.ase |= (arch_info->ase & ~file_ase_explicit);
+  file_mips_opts.ase |= (file_mips_opts.init_ase & ~file_ase_explicit);
 
   /* Set up the current options.  These may change throughout assembly.  */
   mips_opts = file_mips_opts;
@@ -15189,6 +15193,7 @@ mips_after_parse_args (void)
 
   file_mips_opts.arch = arch_info->cpu;
   file_mips_opts.isa = arch_info->isa;
+  file_mips_opts.init_ase = arch_info->ase;
 
   /* Set up initial mips_opts state.  */
   mips_opts = file_mips_opts;
@@ -16559,6 +16564,7 @@ parse_code_option (char * name)
 	      mips_opts.arch = p->cpu;
 	      mips_opts.isa = p->isa;
 	      isa_set = TRUE;
+	      mips_opts.init_ase = p->ase;
 	    }
 	}
       else if (strncmp (name, "mips", 4) == 0)
@@ -16573,6 +16579,7 @@ parse_code_option (char * name)
 	      mips_opts.arch = p->cpu;
 	      mips_opts.isa = p->isa;
 	      isa_set = TRUE;
+	      mips_opts.init_ase = p->ase;
 	    }
 	}
       else
@@ -16646,6 +16653,7 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
     {
       mips_opts.isa = file_mips_opts.isa;
       mips_opts.arch = file_mips_opts.arch;
+      mips_opts.init_ase = file_mips_opts.init_ase;
       mips_opts.gp = file_mips_opts.gp;
       mips_opts.fp = file_mips_opts.fp;
     }

@@ -1,3 +1,15 @@
+2019-04-09  Matthew Fortune  <matthew.fortune@mips.com>
+
+	* config/tc-mips.c (mips_set_options) <init_ase>: New field.
+	(file_mips_opts, mips_opts) <init_ase>: Initialize new field.
+	(file_mips_check_options): Propagate initial ASE settings.
+	(mips_after_parse_args, parse_code_option): Track the initial
+	ASE settings for a CPU.
+	(s_mipsset): Restore the initial ASE settings when reverting
+	to the default arch.
+	* testsuite/gas/mips/elf_mach_p6600.d: New test.
+	* testsuite/gas/mips/mips.exp: Run the new test.
+
 2019-04-12  John Darrington <john@darrington.wattle.id.au>
 	
 	config/tc-s12z.h: Remove definition of macro TC_M68K
