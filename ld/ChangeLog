@@ -1,5 +1,22 @@
 2019-04-10  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am (eskyelf.c, eskyelf_linux.c): Depend on cskyelf.em.
+	(ecskyelf_linux.c): Depend on cskyelf.sh.
+	(eelf32microblazeel.c): Depend on elf32microblaze.sh.
+	* Makefile.in: Regenerate.
+	* emulparams/cskyelf.sh: Comment regarding cskelf_linux.sh.
+	(PAGE_SIZE): Don't define.
+	* emulparams/cskyelf_linux.sh: Source sckyelf.sh, leaving just
+	the differing variable defs/undefs.
+	* emulparams/elf32mcore.sh (PAGE_SIZE): Don't define.
+	* emulparams/elf32microblaze.sh: Comment re. elf32microblazeel.sh.
+	(OUTPUT_FORMAT): Use BIG_OUTPUT_FORMAT.
+	(PAGE_SIZE): Don't define.
+	* emulparams/elf32microblazeel.sh: Source elf32microblaze.sh,
+	leaving just the differing OUTPUT_FORMAT.
+
+2019-04-10  Alan Modra  <amodra@gmail.com>
+
 	* po/BLD-POTFILES.in: Regenerate.
 
 2019-04-08  H.J. Lu  <hongjiu.lu@intel.com>

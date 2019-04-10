@@ -1,9 +1,10 @@
+# If you change this file, please also look at files which source this one:
+# cskyelf_linux.sh
 SCRIPT_NAME=elf
 OUTPUT_FORMAT="elf32-csky-little"
 BIG_OUTPUT_FORMAT="elf32-csky-big"
 LITTLE_OUTPUT_FORMAT="elf32-csky-little"
 NO_REL_RELOCS=yes
-PAGE_SIZE=0x1000
 TARGET_PAGE_SIZE=0x400
 MAXPAGESIZE="CONSTANT (MAXPAGESIZE)"
 TEXT_START_ADDR=0x8000
