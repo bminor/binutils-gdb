@@ -1,5 +1,16 @@
 2019-04-11  Max Filippov  <jcmvbkbc@gmail.com>
 
+	* config/tc-xtensa.c (xtensa_literal_pseudo): Drop code that has
+	no effect.
+	(get_literal_pool_location): Only search for the literal pool
+	when auto litpools is used, otherwise take one recorded in the
+	tc_segment_info_data.
+	(xtensa_assign_litpool_addresses): New function.
+	(xtensa_move_literals): Don't duplicate 'literal pool location
+	required...' error message. Call xtensa_assign_litpool_addresses.
+
+2019-04-11  Max Filippov  <jcmvbkbc@gmail.com>
+
 	* config/tc-xtensa.c (xtensa_is_init_fini): Add declaration.
 	(xtensa_mark_literal_pool_location): Don't add fill frag to literal
 	section that records literal pool location.
