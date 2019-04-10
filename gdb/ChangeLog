@@ -1,5 +1,18 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* symtab.c (struct symbol_cache): Add destructor and
+	initializers.
+	(symbol_cache_key): Move.  Change type.
+	(make_symbol_cache, free_symbol_cache): Remove.
+	(get_symbol_cache): Update.
+	(symbol_cache_cleanup): Remove.
+	(ALL_PSPACES, symbol_cache_flush)
+	(maintenance_print_symbol_cache)
+	(maintenance_print_symbol_cache_statistics, _initialize_symtab):
+	Update.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* symtab.c (struct main_info): Add destructor and initializers.
 	(main_progspace_key): Move.  Change type.
 	(get_main_info): Update.

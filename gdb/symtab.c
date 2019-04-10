@@ -119,10 +119,6 @@ struct main_info
 
 static const program_space_key<main_info> main_progspace_key;
 
-/* Program space key for finding its symbol cache.  */
-
-static const struct program_space_data *symbol_cache_key;
-
 /* The default symbol cache size.
    There is no extra cpu cost for large N (except when flushing the cache,
    which is rare).  The value here is just a first attempt.  A better default
@@ -214,9 +210,21 @@ struct block_symbol_cache
 
 struct symbol_cache
 {
-  struct block_symbol_cache *global_symbols;
-  struct block_symbol_cache *static_symbols;
+  symbol_cache () = default;
+
+  ~symbol_cache ()
+  {
+    xfree (global_symbols);
+    xfree (static_symbols);
+  }
+
+  struct block_symbol_cache *global_symbols = nullptr;
+  struct block_symbol_cache *static_symbols = nullptr;
 };
+
+/* Program space key for finding its symbol cache.  */
+
+static const program_space_key<symbol_cache> symbol_cache_key;
 
 /* When non-zero, print debugging messages related to symtab creation.  */
 unsigned int symtab_create_debug = 0;
@@ -1226,55 +1234,21 @@ resize_symbol_cache (struct symbol_cache *cache, unsigned int new_size)
     }
 }
 
-/* Make a symbol cache of size SIZE.  */
-
-static struct symbol_cache *
-make_symbol_cache (unsigned int size)
-{
-  struct symbol_cache *cache;
-
-  cache = XCNEW (struct symbol_cache);
-  resize_symbol_cache (cache, symbol_cache_size);
-  return cache;
-}
-
-/* Free the space used by CACHE.  */
-
-static void
-free_symbol_cache (struct symbol_cache *cache)
-{
-  xfree (cache->global_symbols);
-  xfree (cache->static_symbols);
-  xfree (cache);
-}
-
 /* Return the symbol cache of PSPACE.
    Create one if it doesn't exist yet.  */
 
 static struct symbol_cache *
 get_symbol_cache (struct program_space *pspace)
 {
-  struct symbol_cache *cache
-    = (struct symbol_cache *) program_space_data (pspace, symbol_cache_key);
+  struct symbol_cache *cache = symbol_cache_key.get (pspace);
 
   if (cache == NULL)
     {
-      cache = make_symbol_cache (symbol_cache_size);
-      set_program_space_data (pspace, symbol_cache_key, cache);
+      cache = symbol_cache_key.emplace (pspace);
+      resize_symbol_cache (cache, symbol_cache_size);
     }
 
   return cache;
-}
-
-/* Delete the symbol cache of PSPACE.
-   Called when PSPACE is destroyed.  */
-
-static void
-symbol_cache_cleanup (struct program_space *pspace, void *data)
-{
-  struct symbol_cache *cache = (struct symbol_cache *) data;
-
-  free_symbol_cache (cache);
 }
 
 /* Set the size of the symbol cache in all program spaces.  */
@@ -1286,8 +1260,7 @@ set_symbol_cache_size (unsigned int new_size)
 
   ALL_PSPACES (pspace)
     {
-      struct symbol_cache *cache
-	= (struct symbol_cache *) program_space_data (pspace, symbol_cache_key);
+      struct symbol_cache *cache = symbol_cache_key.get (pspace);
 
       /* The pspace could have been created but not have a cache yet.  */
       if (cache != NULL)
@@ -1443,8 +1416,7 @@ symbol_cache_mark_not_found (struct block_symbol_cache *bsc,
 static void
 symbol_cache_flush (struct program_space *pspace)
 {
-  struct symbol_cache *cache
-    = (struct symbol_cache *) program_space_data (pspace, symbol_cache_key);
+  struct symbol_cache *cache = symbol_cache_key.get (pspace);
   int pass;
 
   if (cache == NULL)
@@ -1558,8 +1530,7 @@ maintenance_print_symbol_cache (const char *args, int from_tty)
 		       : "(no object file)");
 
       /* If the cache hasn't been created yet, avoid creating one.  */
-      cache
-	= (struct symbol_cache *) program_space_data (pspace, symbol_cache_key);
+      cache = symbol_cache_key.get (pspace);
       if (cache == NULL)
 	printf_filtered ("  <empty>\n");
       else
@@ -1630,8 +1601,7 @@ maintenance_print_symbol_cache_statistics (const char *args, int from_tty)
 		       : "(no object file)");
 
       /* If the cache hasn't been created yet, avoid creating one.  */
-      cache
-	= (struct symbol_cache *) program_space_data (pspace, symbol_cache_key);
+      cache = symbol_cache_key.get (pspace);
       if (cache == NULL)
  	printf_filtered ("  empty, no stats available\n");
       else
@@ -6036,9 +6006,6 @@ void
 _initialize_symtab (void)
 {
   initialize_ordinary_address_classes ();
-
-  symbol_cache_key
-    = register_program_space_data_with_cleanup (NULL, symbol_cache_cleanup);
 
   add_info ("variables", info_variables_command,
 	    info_print_args_help (_("\
