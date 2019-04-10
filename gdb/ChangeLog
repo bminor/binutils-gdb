@@ -1,3 +1,10 @@
+2019-04-29  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_is_character_type): Change return type to bool.
+	(ada_is_string_type): Likewise.
+	* ada-lang.h (ada_is_character_type): Update declaration
+	(ada_is_string_type): Likewise.
+
 2019-04-27  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	Support style in 'frame|thread apply'

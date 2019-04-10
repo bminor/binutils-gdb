@@ -268,9 +268,9 @@ extern struct value *ada_value_primitive_packed_val (struct value *,
 
 extern struct type *ada_coerce_to_simple_array_type (struct type *);
 
-extern int ada_is_character_type (struct type *);
+extern bool ada_is_character_type (struct type *);
 
-extern int ada_is_string_type (struct type *);
+extern bool ada_is_string_type (struct type *);
 
 extern int ada_is_tagged_type (struct type *, int);
 

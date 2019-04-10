@@ -9405,7 +9405,7 @@ value_val_atr (struct type *type, struct value *arg)
    [At the moment, this is true only for Character and Wide_Character;
    It is a heuristic test that could stand improvement].  */
 
-int
+bool
 ada_is_character_type (struct type *type)
 {
   const char *name;
@@ -9413,7 +9413,7 @@ ada_is_character_type (struct type *type)
   /* If the type code says it's a character, then assume it really is,
      and don't check any further.  */
   if (TYPE_CODE (type) == TYPE_CODE_CHAR)
-    return 1;
+    return true;
   
   /* Otherwise, assume it's a character type iff it is a discrete type
      with a known character type name.  */
@@ -9429,7 +9429,7 @@ ada_is_character_type (struct type *type)
 
 /* True if TYPE appears to be an Ada string type.  */
 
-int
+bool
 ada_is_string_type (struct type *type)
 {
   type = ada_check_typedef (type);
@@ -9444,7 +9444,7 @@ ada_is_string_type (struct type *type)
       return ada_is_character_type (elttype);
     }
   else
-    return 0;
+    return false;
 }
 
 /* The compiler sometimes provides a parallel XVS type for a given
