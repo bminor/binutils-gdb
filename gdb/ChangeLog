@@ -1,3 +1,7 @@
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
+	* registry.h (DECLARE_REGISTRY): Define the _key class.
+
 2019-05-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* NEWS: Merge two 'New commands' sections.
