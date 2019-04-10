@@ -1,3 +1,7 @@
+2019-04-10  Alan Modra  <amodra@gmail.com>
+
+	* po/BLD-POTFILES.in: Regenerate.
+
 2019-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-elf/shared.exp: XFAIL PR ld/20995 tests for

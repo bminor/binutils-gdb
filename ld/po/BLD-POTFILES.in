@@ -191,7 +191,6 @@ eelf64tilegx.c
 eelf64tilegx_be.c
 eelf_i386.c
 eelf_i386_be.c
-eelf_i386_chaos.c
 eelf_i386_fbsd.c
 eelf_i386_ldso.c
 eelf_i386_nacl.c
