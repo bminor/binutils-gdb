@@ -665,6 +665,7 @@ aarch64_analyze_prologue_test (void)
     };
     instruction_reader_test reader (insns);
 
+    trad_frame_reset_saved_regs (gdbarch, cache.saved_regs);
     CORE_ADDR end = aarch64_analyze_prologue (gdbarch, 0, 128, &cache, reader);
 
     SELF_CHECK (end == 4 * 5);
@@ -707,6 +708,7 @@ aarch64_analyze_prologue_test (void)
       };
       instruction_reader_test reader (insns);
 
+      trad_frame_reset_saved_regs (gdbarch, cache.saved_regs);
       CORE_ADDR end = aarch64_analyze_prologue (gdbarch, 0, 128, &cache,
 						reader);
 

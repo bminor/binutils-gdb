@@ -1,3 +1,10 @@
+2019-04-11  Alan Hayward  <alan.hayward@arm.com>
+
+	* aarch64-tdep.c (aarch64_analyze_prologue_test): Reset saved regs.
+	* trad-frame.c (trad_frame_reset_saved_regs): New function.
+	(trad_frame_alloc_saved_regs): Call trad_frame_reset_saved_regs.
+	* trad-frame.h (trad_frame_reset_saved_regs): New declaration.
+
 2019-04-10  Kevin Buettner  <kevinb@redhat.com>
 
 	* amd64-linux-nat.c (amd64_linux_collect_native_gregset): New
