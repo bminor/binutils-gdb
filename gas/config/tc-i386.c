@@ -7787,6 +7787,12 @@ need_plt32_p (symbolS *s)
   if (!IS_ELF)
     return FALSE;
 
+#ifdef TE_SOLARIS
+  /* Don't emit PLT32 relocation on Solaris: neither native linker nor
+     krtld support it.  */
+  return FALSE;
+#endif
+
   /* Since there is no need to prepare for PLT branch on x86-64, we
      can generate R_X86_64_PLT32, instead of R_X86_64_PC32, which can
      be used as a marker for 32-bit PC-relative branches.  */

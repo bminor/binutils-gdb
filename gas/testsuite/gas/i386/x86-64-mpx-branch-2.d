@@ -1,6 +1,7 @@
 #as: -J -madd-bnd-prefix
 #objdump: -dwr
 #name: x86-64 branch with BND prefix
+#notarget: *-*-solaris*
 
 .*: +file format .*
 

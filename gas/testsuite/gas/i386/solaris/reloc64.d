@@ -1,7 +1,7 @@
 #as: -mx86-used-note=no
+#source: ../reloc64.s
 #objdump: -Drw
 #name: x86-64 relocs
-#notarget: *-*-solaris*
 
 .*: +file format .*x86-64.*
 
@@ -20,7 +20,7 @@ Disassembly of section \.text:
 .*[ 	]+R_X86_64_PC8[ 	]+xtrn\+0x0*1
 .*[ 	]+R_X86_64_PC32[ 	]+xtrn-0x0*4
 .*[ 	]+R_X86_64_PC32[ 	]+xtrn-0x0*4
-.*[ 	]+R_X86_64_PLT32[ 	]+xtrn-0x0*4
+.*[ 	]+R_X86_64_PC32[ 	]+xtrn-0x0*4
 .*[ 	]+R_X86_64_PC8[ 	]+xtrn-0x0*1
 .*[ 	]+R_X86_64_GOT64[ 	]+xtrn
 .*[ 	]+R_X86_64_GOT32[ 	]+xtrn
