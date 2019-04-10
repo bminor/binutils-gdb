@@ -1,3 +1,8 @@
+2019-04-10  Michael Forney  <mforney@mforney.org>
+
+	PR 24427
+	* doc/chew.c (free_words): Correctly free "push_text" strings.
+
 2019-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config.bfd: Remove i[3-7]86-*-kaos* and i[3-7]86-*-chaos targets.

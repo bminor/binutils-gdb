@@ -1260,11 +1260,11 @@ free_words (void)
       if (ptr->code)
 	{
 	  int i;
-	  for (i = 0; i < ptr->code_length; i ++)
+	  for (i = 0; i < ptr->code_end - 1; i ++)
 	    if (ptr->code[i] == push_text
 		&& ptr->code[i + 1])
 	      {
-		free (ptr->code[i + 1] - 1);
+		free ((char *) ptr->code[i + 1] - 1);
 		++ i;
 	      }
 	  free (ptr->code);
