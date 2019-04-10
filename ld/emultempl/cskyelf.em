@@ -116,25 +116,32 @@ EOF
 case ${target} in
     csky-*-linux-*)
 fragment <<EOF
-/* This is a convenient point to tell BFD about target specific flags.
-   After the output has been created, but before inputs are read.  */
+
 static void
-csky_elf_create_output_section_statements (void)
+csky_elf_before_parse (void)
 {
   use_branch_stub = FALSE;
+  gld${EMULATION_NAME}_before_parse ();
 }
 EOF
     ;;
-    *)
+esac
+
 fragment <<EOF
+
 /* This is a convenient point to tell BFD about target specific flags.
    After the output has been created, but before inputs are read.  */
 static void
 csky_elf_create_output_section_statements (void)
 {
+  if (!(bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour
+	&& elf_object_id (link_info.output_bfd) == CSKY_ELF_DATA))
+    use_branch_stub = FALSE;
+
   /* If don't use branch stub, just do not emit stub_file.  */
-  if (use_branch_stub == FALSE)
+  if (!use_branch_stub)
     return;
+
   stub_file = lang_add_input_file ("linker stubs",
 				   lang_input_file_is_fake_enum, NULL);
   stub_file->the_bfd = bfd_create ("linker stubs", link_info.output_bfd);
@@ -150,11 +157,7 @@ csky_elf_create_output_section_statements (void)
   stub_file->the_bfd->flags |= BFD_LINKER_CREATED;
   ldlang_add_file (stub_file);
 }
-EOF
-    ;;
-esac
 
-fragment <<EOF
 /* Call-back for elf32_csky_size_stubs.  */
 
 /* Create a new stub section, and arrange for it to be linked
@@ -304,11 +307,6 @@ EOF
 
 # This code gets inserted into the generic elf32.sc linker script
 # and allows us to define our own command line switches.
-case ${target} in
-    csky-*-linux-*)
-    ;;
-
-    *)
 PARSE_AND_LIST_PROLOGUE='
 #define OPTION_BRANCH_STUB		301
 #define OPTION_NO_BRANCH_STUB		302
@@ -347,9 +345,10 @@ PARSE_AND_LIST_ARGS_CASES='
     }
     break;
 '
-    ;;
-esac
 
+case ${target} in
+    csky-*-linux-*) LDEMUL_BEFORE_PARSE=csky_elf_before_parse ;;
+esac
 LDEMUL_AFTER_ALLOCATION=gld${EMULATION_NAME}_after_allocation
 LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=csky_elf_create_output_section_statements
 LDEMUL_FINISH=gld${EMULATION_NAME}_finish

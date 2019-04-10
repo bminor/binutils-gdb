@@ -1,5 +1,13 @@
 2019-04-10  Alan Modra  <amodra@gmail.com>
 
+	* emultempl/cskyelf.em (csk_elf_before_parse): New function,
+	setting use_branch_stub false for linux.
+	(csky_elf_create_output_section_statements): Do emit this
+	function and all others in the file for linux, plus the branch
+	option control.  Disable branch stubs when non-ELF.
+
+2019-04-10  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am (eskyelf.c, eskyelf_linux.c): Depend on cskyelf.em.
 	(ecskyelf_linux.c): Depend on cskyelf.sh.
 	(eelf32microblazeel.c): Depend on elf32microblaze.sh.
