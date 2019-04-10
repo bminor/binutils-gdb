@@ -1,5 +1,13 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* symtab.c (struct main_info): Add destructor and initializers.
+	(main_progspace_key): Move.  Change type.
+	(get_main_info): Update.
+	(main_info_cleanup): Remove.
+	(_initialize_symtab): Update.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* registry.h (DECLARE_REGISTRY): Define the _key class.
 
 2019-05-08  Andrew Burgess  <andrew.burgess@embecosm.com>

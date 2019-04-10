@@ -95,22 +95,29 @@ static struct block_symbol
   lookup_symbol_in_objfile (struct objfile *objfile, int block_index,
 			    const char *name, const domain_enum domain);
 
-/* Program space key for finding name and language of "main".  */
-
-static const struct program_space_data *main_progspace_key;
-
 /* Type of the data stored on the program space.  */
 
 struct main_info
 {
+  main_info () = default;
+
+  ~main_info ()
+  {
+    xfree (name_of_main);
+  }
+
   /* Name of "main".  */
 
-  char *name_of_main;
+  char *name_of_main = nullptr;
 
   /* Language of "main".  */
 
-  enum language language_of_main;
+  enum language language_of_main = language_unknown;
 };
+
+/* Program space key for finding name and language of "main".  */
+
+static const program_space_key<main_info> main_progspace_key;
 
 /* Program space key for finding its symbol cache.  */
 
@@ -5665,9 +5672,7 @@ make_source_files_completion_list (const char *text, const char *word)
 static struct main_info *
 get_main_info (void)
 {
-  struct main_info *info
-    = (struct main_info *) program_space_data (current_program_space,
-					       main_progspace_key);
+  struct main_info *info = main_progspace_key.get (current_program_space);
 
   if (info == NULL)
     {
@@ -5677,26 +5682,10 @@ get_main_info (void)
 	 gdb returned "main" as the name even if no function named
 	 "main" was defined the program; and this approach lets us
 	 keep compatibility.  */
-      info = XCNEW (struct main_info);
-      info->language_of_main = language_unknown;
-      set_program_space_data (current_program_space, main_progspace_key,
-			      info);
+      info = main_progspace_key.emplace (current_program_space);
     }
 
   return info;
-}
-
-/* A cleanup to destroy a struct main_info when a progspace is
-   destroyed.  */
-
-static void
-main_info_cleanup (struct program_space *pspace, void *data)
-{
-  struct main_info *info = (struct main_info *) data;
-
-  if (info != NULL)
-    xfree (info->name_of_main);
-  xfree (info);
 }
 
 static void
@@ -6047,9 +6036,6 @@ void
 _initialize_symtab (void)
 {
   initialize_ordinary_address_classes ();
-
-  main_progspace_key
-    = register_program_space_data_with_cleanup (NULL, main_info_cleanup);
 
   symbol_cache_key
     = register_program_space_data_with_cleanup (NULL, symbol_cache_cleanup);
