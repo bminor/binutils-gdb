@@ -794,6 +794,8 @@ scoped_command_stats::~scoped_command_stats ()
 
   if (m_time_enabled && per_command_time)
     {
+      print_time (_("command finished"));
+
       using namespace std::chrono;
 
       run_time_clock::duration cmd_time
@@ -867,6 +869,9 @@ scoped_command_stats::scoped_command_stats (bool msg_type)
       m_start_cpu_time = run_time_clock::now ();
       m_start_wall_time = steady_clock::now ();
       m_time_enabled = 1;
+
+      if (per_command_time)
+	print_time (_("command started"));
     }
   else
     m_time_enabled = 0;
@@ -886,6 +891,26 @@ scoped_command_stats::scoped_command_stats (bool msg_type)
 
   /* Initialize timer to keep track of how long we waited for the user.  */
   reset_prompt_for_continue_wait_time ();
+}
+
+/* See maint.h.  */
+
+void
+scoped_command_stats::print_time (const char *msg)
+{
+  using namespace std::chrono;
+
+  auto now = system_clock::now ();
+  auto ticks = now.time_since_epoch ().count () / (1000 * 1000);
+  auto millis = ticks % 1000;
+
+  std::time_t as_time = system_clock::to_time_t (now);
+  struct tm *tm = localtime (&as_time);
+
+  char out[100];
+  strftime (out, sizeof (out), "%F %H:%M:%S", tm);
+
+  printf_unfiltered ("%s.%03d - %s\n", out, (int) millis, msg);
 }
 
 /* Handle unknown "mt set per-command" arguments.

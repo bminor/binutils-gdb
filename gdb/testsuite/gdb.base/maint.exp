@@ -177,9 +177,12 @@ gdb_test_no_output "maint check-symtabs"
 
 # Test per-command stats.
 gdb_test_no_output "maint set per-command on"
+set decimal "\[0-9\]+"
+set time_fmt "${decimal}-${decimal}-${decimal} ${decimal}:${decimal}:${decimal}\\.${decimal}"
 gdb_test "pwd" \
-    "Command execution time: \[0-9.\]+ \\(cpu\\), \[0-9.\]+ \\(wall\\)\[\r\n\]+Space used: $decimal \\(\\+$decimal for this command\\)\[\r\n\]+#symtabs: $decimal \\(\\+$decimal\\), #compunits: $decimal \\(\\+$decimal\\), #blocks: $decimal \\(\\+$decimal\\)"
-gdb_test_no_output "maint set per-command off"
+    "${time_fmt} - command started\r\n.*\r\n${time_fmt} - command finished\r\nCommand execution time: \[0-9.\]+ \\(cpu\\), \[0-9.\]+ \\(wall\\)\[\r\n\]+Space used: $decimal \\(\\+$decimal for this command\\)\[\r\n\]+#symtabs: $decimal \\(\\+$decimal\\), #compunits: $decimal \\(\\+$decimal\\), #blocks: $decimal \\(\\+$decimal\\)"
+gdb_test "maint set per-command off" \
+    "${time_fmt} - command started"
 
 # The timeout value is raised, because printing all the symbols and
 # statistical information about Cygwin and Windows libraries takes a lot

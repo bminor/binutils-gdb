@@ -1,3 +1,7 @@
+2019-06-06  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.base/maint.exp: Expect command started/finished output.
+
 2019-06-05  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.arch/riscv-unwind-long-insn-6.s: Remove use of 'I' in

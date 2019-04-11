@@ -38,9 +38,10 @@ class scoped_command_stats
 
  private:
 
-  // No need for these.  They are intentionally not defined anywhere.
-  scoped_command_stats &operator= (const scoped_command_stats &);
-  scoped_command_stats (const scoped_command_stats &);
+  DISABLE_COPY_AND_ASSIGN (scoped_command_stats);
+
+  /* Print the time, along with a string.  */
+  void print_time (const char *msg);
 
   /* Zero if the saved time is from the beginning of GDB execution.
      One if from the beginning of an individual command execution.  */
