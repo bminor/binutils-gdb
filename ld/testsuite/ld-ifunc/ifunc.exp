@@ -777,6 +777,20 @@ run_ld_link_exec_tests [list \
 	"pass.out" \
 	"-fPIE -O2 -g" \
     ] \
-]}
+]
+if { $STATIC_PIE_LDFLAGS != "" } then {
+    run_ld_link_exec_tests [list \
+	[list \
+	    "Run pr23169g" \
+	    "$STATIC_PIE_LDFLAGS" \
+	    "" \
+	    { pr23169a.c pr23169b.c pr23169c.c } \
+	    "pr23169g" \
+	    "pass.out" \
+	    "-fPIE -O2 -g" \
+	] \
+]
+}
+}
 
 set ASFLAGS "$saved_ASFLAGS"

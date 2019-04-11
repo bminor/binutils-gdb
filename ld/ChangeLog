@@ -1,3 +1,11 @@
+2019-04-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/config/default.exp (STATIC_PIE_LDFLAGS): New.  Set
+	to "-static-pie" if target compiler supports it.
+	* testsuite/ld-elf/elf.exp: Run -static-pie tests if
+	$STATIC_PIE_LDFLAGS isn't empty.
+	* testsuite/ld-ifunc/ifunc.exp: Likewise.
+
 2019-04-11  Tamar Christina  <tamar.christina@arm.com>
 
 	PR ld/24302

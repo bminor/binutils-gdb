@@ -235,6 +235,56 @@ if { [istarget *-*-linux*]
      || [istarget *-*-gnu*] } {
     run_ld_link_exec_tests $array_tests_pie $xfails
 
+    if { $STATIC_PIE_LDFLAGS != "" } then {
+	run_ld_link_exec_tests [list \
+	    [list \
+		"Static PIE preinit array" \
+		"$STATIC_PIE_LDFLAGS" \
+		"" \
+		{preinit.c} \
+		"preinit-static-pie" \
+		"preinit.out" \
+		"-fPIE" \
+	    ] \
+	    [list \
+		"Static PIE init array" \
+		"$STATIC_PIE_LDFLAGS" \
+		"" \
+		{init.c} \
+		"init-static-pie" \
+		"init.out" \
+		"-fPIE" \
+	    ] \
+	    [list \
+		"Static PIE fini array" \
+		"$STATIC_PIE_LDFLAGS" \
+		"" \
+		{fini.c} \
+		"fini-static-pie" \
+		"fini.out" \
+		"-fPIE" \
+	    ] \
+	    [list \
+		"Static PIE init array mixed" \
+		"$STATIC_PIE_LDFLAGS" \
+		"" \
+		{init-mixed.c} \
+		"init-mixed-static-pie" \
+		"init-mixed.out" \
+		"-I.  -fPIE" \
+	    ] \
+	    [list \
+		"Static PIE PR ld/14525" \
+		"$STATIC_PIE_LDFLAGS" \
+		"" \
+		{pr14525.c} \
+		"pr14525-static-pie" \
+		"pr14525.out" \
+		"-fPIE" \
+	    ] \
+	]
+    }
+
     run_ld_link_exec_tests [list \
 	[list \
 	    "Run mbind2a" \
