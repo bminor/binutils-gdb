@@ -1,5 +1,6 @@
 2019-04-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/24436
 	* elf-m10300.c (mn10300_elf_check_relocs): Remove BFD_ASSERT of
 	"h != NULL".  Don't check "h != NULL" before calling.
 	bfd_elf_gc_record_vtentry.
