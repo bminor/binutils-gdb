@@ -1,3 +1,12 @@
+2019-04-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* cgen-ops.h (SUBWORDXFSI): Compare HOST_BYTE_ORDER not
+	CURRENT_TARGET_BYTE_ORDER.
+	(SUBWORDTFSI): Likewise.
+	(JOINSIDF): Likewise.
+	(JOINSIXF): Likewise.
+	(JOINSITF): Likewise.
+
 2019-03-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* sim-base.h: Add 'sim-assert.h' include.
