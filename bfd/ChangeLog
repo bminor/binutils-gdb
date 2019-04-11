@@ -1,3 +1,10 @@
+2019-04-11  Tamar Christina  <tamar.christina@arm.com>
+
+	PR ld/24302
+	* elfnn-aarch64.c (elfNN_aarch64_size_dynamic_sections): Don't emit
+	DT_TLSDESC_GOT and DT_TLSDESC_PLT when DF_BIND_NOW.
+	(elfNN_aarch64_finish_dynamic_sections): Don't write PLT if DF_BIND_NOW.
+
 2019-04-10  Michael Forney  <mforney@mforney.org>
 
 	PR 24427

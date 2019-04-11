@@ -9064,13 +9064,13 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       if (htab->root.splt->size == 0)
 	htab->root.splt->size += htab->plt_header_size;
 
-      htab->tlsdesc_plt = htab->root.splt->size;
-      htab->root.splt->size += htab->tlsdesc_plt_entry_size;
-
       /* If we're not using lazy TLS relocations, don't generate the
-	 GOT entry required.  */
+	 GOT and PLT entry required.  */
       if (!(info->flags & DF_BIND_NOW))
 	{
+	  htab->tlsdesc_plt = htab->root.splt->size;
+	  htab->root.splt->size += htab->tlsdesc_plt_entry_size;
+
 	  htab->dt_tlsdesc_got = htab->root.sgot->size;
 	  htab->root.sgot->size += GOT_ENTRY_SIZE;
 	}
@@ -9174,6 +9174,7 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	    return FALSE;
 
 	  if (htab->tlsdesc_plt
+	      && !(info->flags & DF_BIND_NOW)
 	      && (!add_dynamic_entry (DT_TLSDESC_PLT, 0)
 		  || !add_dynamic_entry (DT_TLSDESC_GOT, 0)))
 	    return FALSE;
@@ -9686,6 +9687,7 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
 
 	    case DT_TLSDESC_GOT:
 	      s = htab->root.sgot;
+	      BFD_ASSERT (htab->dt_tlsdesc_got != (bfd_vma)-1);
 	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset
 		+ htab->dt_tlsdesc_got;
 	      break;
@@ -9705,8 +9707,9 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
 	this_hdr.sh_entsize = htab->plt_entry_size;
 
 
-      if (htab->tlsdesc_plt)
+      if (htab->tlsdesc_plt && !(info->flags & DF_BIND_NOW))
 	{
+	  BFD_ASSERT (htab->dt_tlsdesc_got != (bfd_vma)-1);
 	  bfd_put_NN (output_bfd, (bfd_vma) 0,
 		      htab->root.sgot->contents + htab->dt_tlsdesc_got);
 

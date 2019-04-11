@@ -1,3 +1,9 @@
+2019-04-11  Tamar Christina  <tamar.christina@arm.com>
+
+	PR ld/24302
+	* testsuite/ld-aarch64/aarch64-elf.exp: Add new test.
+	* testsuite/ld-aarch64/tls-relax-gdesc-le-now.d: New test.
+
 2019-04-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* scripttempl/elf.sc (CREATE_PIC): New.  Set for CREATE_SHLIB or
