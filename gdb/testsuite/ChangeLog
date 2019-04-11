@@ -1,3 +1,9 @@
+2019-04-11  Tom de Vries  <tdevries@suse.de>
+
+	* boards/cc-with-dwz-m.exp: New file.
+	* boards/cc-with-dwz.exp: New file.
+	* boards/cc-with-tweaks.exp: Note that check-gdb doesn't work.
+
 2019-04-09  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdb.base/start-cpp.exp: New file.

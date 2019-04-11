@@ -19,9 +19,13 @@
 # NOTE: If using dwz, We assume it is in $PATH.
 #
 # Example usage:
+# bash$ cd $objdir/gdb
 # bash$ make check \
 #   RUNTESTFLAGS='--target_board=cc-with-tweaks' \
 #   CC_WITH_TWEAKS_FLAGS='-z'
+#
+# Note: this does not work from $objdir with make check-gdb because
+# CC_WITH_TWEAKS_FLAGS is not passed down from the top level Makefile.
 #
 # The default value of CC_WITH_TWEAKS_FLAGS is "".
 
