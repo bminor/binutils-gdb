@@ -1,3 +1,13 @@
+2019-04-16  Sudakshina Das  <sudi.das@arm.com>
+
+	Backport from mainline
+	2019-04-11  Sudakshina Das  <sudi.das@arm.com>
+
+	* testsuite/gas/aarch64/armv8_5-a-memtag.d: New tests for ldgm and stgm.
+	* testsuite/gas/aarch64/armv8_5-a-memtag.s: Likewise.
+	* testsuite/gas/aarch64/illegal-memtag.l: Likewise.
+	* testsuite/gas/aarch64/illegal-memtag.s: Likewise.
+
 2019-03-12  Andreas Krebbel  <krebbel@linux.ibm.com>
 
 	Backport from mainline

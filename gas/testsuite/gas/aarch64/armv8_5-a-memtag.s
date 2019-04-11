@@ -113,3 +113,5 @@ func:
 	ldg x0, [x0, #-4096]
 
 	expand_ldg_bulk stzgm
+	expand_ldg_bulk ldgm
+	expand_ldg_bulk stgm

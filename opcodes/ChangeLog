@@ -1,3 +1,13 @@
+2019-04-16  Sudakshina Das  <sudi.das@arm.com>
+
+	Backport from mainline.
+	2019-04-11  Sudakshina Das  <sudi.das@arm.com>
+
+	* aarch64-asm-2.c: Regenerated.
+	* aarch64-dis-2.c: Likewise.
+	* aarch64-opc-2.c: Likewise.
+	* aarch64-tbl.h (aarch64_opcode): Add new ldgm and stgm.
+
 2019-04-01  Tamar Christina  <tamar.christina@arm.com>
 
 	Backport from mainline.

@@ -3324,6 +3324,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
   RCPC_INSN ("ldaprb", 0x38bfc000, 0xfffffc00, ldstexcl, OP2 (Rt, ADDR_SIMPLE), QL_W1_LDST_EXC, 0),
   RCPC_INSN ("ldaprh", 0x78bfc000, 0xfffffc00, ldstexcl, OP2 (Rt, ADDR_SIMPLE), QL_W1_LDST_EXC, 0),
   RCPC_INSN ("ldapr", 0xb8bfc000, 0xbffffc00, ldstexcl, OP2 (Rt, ADDR_SIMPLE), QL_R1NIL, F_GPRSIZE_IN_Q),
+  MEMTAG_INSN ("ldgm", 0xd9e00000, 0xfffffc00, ldstexcl, OP2 (Rt, ADDR_SIMPLE), QL_X1NIL, 0),
+  MEMTAG_INSN ("stgm", 0xd9a00000, 0xfffffc00, ldstexcl, OP2 (Rt, ADDR_SIMPLE), QL_X1NIL, 0),
   MEMTAG_INSN ("stzgm", 0xd9200000, 0xfffffc00, ldstexcl, OP2 (Rt, ADDR_SIMPLE), QL_X1NIL, 0),
   /* Limited Ordering Regions load/store instructions.  */
   _LOR_INSN ("ldlar",  0x88df7c00, 0xbfe08000, ldstexcl, OP2 (Rt, ADDR_SIMPLE), QL_R1NIL,       F_GPRSIZE_IN_Q),
