@@ -51,10 +51,10 @@ func:
 	st2g x2, [xzr, #0]!
 	stzg x2, [xzr], #0
 	stz2g x2, [xzr, #0]
-	stg sp, [x2, #0]
-	st2g sp, [x2, #0]!
-	stzg sp, [x2], #0
-	stz2g sp, [x2, #0]
+	stg xzr, [x2, #0]
+	st2g xzr, [x2, #0]!
+	stzg xzr, [x2], #0
+	stz2g xzr, [x2, #0]
 	stgp sp, x2, [x3]
 	stgp x1, sp, [x3]
 	stgp x0, x0, [xzr]

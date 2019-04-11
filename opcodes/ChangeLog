@@ -1,5 +1,18 @@
 2019-04-11  Sudakshina Das  <sudi.das@arm.com>
 
+	* aarch64-opc.c (aarch64_print_operand): Add case for
+	AARCH64_OPND_Rt_SP.
+	(verify_constraints): Likewise.
+	* aarch64-tbl.h (QL_LDST_AT): Update to add SP qualifier.
+	(struct aarch64_opcode): Update stg, stzg, st2g, stz2g instructions
+	to accept Rt|SP as first operand.
+	(AARCH64_OPERANDS): Add new Rt_SP.
+	* aarch64-asm-2.c: Regenerated.
+	* aarch64-dis-2.c: Regenerated.
+	* aarch64-opc-2.c: Regenerated.
+
+2019-04-11  Sudakshina Das  <sudi.das@arm.com>
+
 	* aarch64-asm-2.c: Regenerated.
 	* aarch64-dis-2.c: Likewise.
 	* aarch64-opc-2.c: Likewise.

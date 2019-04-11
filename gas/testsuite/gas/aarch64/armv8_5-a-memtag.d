@@ -57,64 +57,64 @@ Disassembly of section \.text:
 .*:	badf001f 	cmpp	x0, sp
 .*:	d9200800 	stg	x0, \[x0\]
 .*:	d9200b60 	stg	x0, \[x27\]
-.*:	d920081f 	stg	xzr, \[x0\]
+.*:	d920081f 	stg	sp, \[x0\]
 .*:	d93fb81b 	stg	x27, \[x0, #-80\]
 .*:	d9200c00 	stg	x0, \[x0, #0\]!
-.*:	d9200c1f 	stg	xzr, \[x0, #0\]!
+.*:	d9200c1f 	stg	sp, \[x0, #0\]!
 .*:	d920ac1b 	stg	x27, \[x0, #160\]!
 .*:	d9200400 	stg	x0, \[x0\], #0
-.*:	d920041f 	stg	xzr, \[x0\], #0
+.*:	d920041f 	stg	sp, \[x0\], #0
 .*:	d93a641b 	stg	x27, \[x0\], #-1440
 .*:	d92ffbe0 	stg	x0, \[sp, #4080\]
-.*:	d92ffbff 	stg	xzr, \[sp, #4080\]
+.*:	d92ffbff 	stg	sp, \[sp, #4080\]
 .*:	d9300bfb 	stg	x27, \[sp, #-4096\]
 .*:	d92fffe0 	stg	x0, \[sp, #4080\]!
-.*:	d93007ff 	stg	xzr, \[sp\], #-4096
+.*:	d93007ff 	stg	sp, \[sp\], #-4096
 .*:	d9600800 	stzg	x0, \[x0\]
 .*:	d9600b60 	stzg	x0, \[x27\]
-.*:	d960081f 	stzg	xzr, \[x0\]
+.*:	d960081f 	stzg	sp, \[x0\]
 .*:	d97fb81b 	stzg	x27, \[x0, #-80\]
 .*:	d9600c00 	stzg	x0, \[x0, #0\]!
-.*:	d9600c1f 	stzg	xzr, \[x0, #0\]!
+.*:	d9600c1f 	stzg	sp, \[x0, #0\]!
 .*:	d960ac1b 	stzg	x27, \[x0, #160\]!
 .*:	d9600400 	stzg	x0, \[x0\], #0
-.*:	d960041f 	stzg	xzr, \[x0\], #0
+.*:	d960041f 	stzg	sp, \[x0\], #0
 .*:	d97a641b 	stzg	x27, \[x0\], #-1440
 .*:	d96ffbe0 	stzg	x0, \[sp, #4080\]
-.*:	d96ffbff 	stzg	xzr, \[sp, #4080\]
+.*:	d96ffbff 	stzg	sp, \[sp, #4080\]
 .*:	d9700bfb 	stzg	x27, \[sp, #-4096\]
 .*:	d96fffe0 	stzg	x0, \[sp, #4080\]!
-.*:	d97007ff 	stzg	xzr, \[sp\], #-4096
+.*:	d97007ff 	stzg	sp, \[sp\], #-4096
 .*:	d9a00800 	st2g	x0, \[x0\]
 .*:	d9a00b60 	st2g	x0, \[x27\]
-.*:	d9a0081f 	st2g	xzr, \[x0\]
+.*:	d9a0081f 	st2g	sp, \[x0\]
 .*:	d9bfb81b 	st2g	x27, \[x0, #-80\]
 .*:	d9a00c00 	st2g	x0, \[x0, #0\]!
-.*:	d9a00c1f 	st2g	xzr, \[x0, #0\]!
+.*:	d9a00c1f 	st2g	sp, \[x0, #0\]!
 .*:	d9a0ac1b 	st2g	x27, \[x0, #160\]!
 .*:	d9a00400 	st2g	x0, \[x0\], #0
-.*:	d9a0041f 	st2g	xzr, \[x0\], #0
+.*:	d9a0041f 	st2g	sp, \[x0\], #0
 .*:	d9ba641b 	st2g	x27, \[x0\], #-1440
 .*:	d9affbe0 	st2g	x0, \[sp, #4080\]
-.*:	d9affbff 	st2g	xzr, \[sp, #4080\]
+.*:	d9affbff 	st2g	sp, \[sp, #4080\]
 .*:	d9b00bfb 	st2g	x27, \[sp, #-4096\]
 .*:	d9afffe0 	st2g	x0, \[sp, #4080\]!
-.*:	d9b007ff 	st2g	xzr, \[sp\], #-4096
+.*:	d9b007ff 	st2g	sp, \[sp\], #-4096
 .*:	d9e00800 	stz2g	x0, \[x0\]
 .*:	d9e00b60 	stz2g	x0, \[x27\]
-.*:	d9e0081f 	stz2g	xzr, \[x0\]
+.*:	d9e0081f 	stz2g	sp, \[x0\]
 .*:	d9ffb81b 	stz2g	x27, \[x0, #-80\]
 .*:	d9e00c00 	stz2g	x0, \[x0, #0\]!
-.*:	d9e00c1f 	stz2g	xzr, \[x0, #0\]!
+.*:	d9e00c1f 	stz2g	sp, \[x0, #0\]!
 .*:	d9e0ac1b 	stz2g	x27, \[x0, #160\]!
 .*:	d9e00400 	stz2g	x0, \[x0\], #0
-.*:	d9e0041f 	stz2g	xzr, \[x0\], #0
+.*:	d9e0041f 	stz2g	sp, \[x0\], #0
 .*:	d9fa641b 	stz2g	x27, \[x0\], #-1440
 .*:	d9effbe0 	stz2g	x0, \[sp, #4080\]
-.*:	d9effbff 	stz2g	xzr, \[sp, #4080\]
+.*:	d9effbff 	stz2g	sp, \[sp, #4080\]
 .*:	d9f00bfb 	stz2g	x27, \[sp, #-4096\]
 .*:	d9efffe0 	stz2g	x0, \[sp, #4080\]!
-.*:	d9f007ff 	stz2g	xzr, \[sp\], #-4096
+.*:	d9f007ff 	stz2g	sp, \[sp\], #-4096
 .*:	69000000 	stgp	x0, x0, \[x0\]
 .*:	69006c00 	stgp	x0, x27, \[x0\]
 .*:	6900001b 	stgp	x27, x0, \[x0\]
