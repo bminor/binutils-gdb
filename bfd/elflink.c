@@ -13727,13 +13727,21 @@ bfd_elf_gc_record_vtinherit (bfd *abfd,
 /* Called from check_relocs to record the existence of a VTENTRY reloc.  */
 
 bfd_boolean
-bfd_elf_gc_record_vtentry (bfd *abfd ATTRIBUTE_UNUSED,
-			   asection *sec ATTRIBUTE_UNUSED,
+bfd_elf_gc_record_vtentry (bfd *abfd, asection *sec,
 			   struct elf_link_hash_entry *h,
 			   bfd_vma addend)
 {
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   unsigned int log_file_align = bed->s->log_file_align;
+
+  if (!h)
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: section '%pA': corrupt VTENTRY entry"),
+			  abfd, sec);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
 
   if (!h->u2.vtable)
     {
