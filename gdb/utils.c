@@ -300,7 +300,7 @@ internal_vproblem (struct internal_problem *problem,
 
   /* Don't allow infinite error/warning recursion.  */
   {
-    static char msg[] = "Recursive internal problem.\n";
+    static const char msg[] = "Recursive internal problem.\n";
 
     switch (dejavu)
       {

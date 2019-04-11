@@ -1,3 +1,7 @@
+2019-04-11  Tom Tromey  <tromey@adacore.com>
+
+	* utils.c (internal_vproblem): Make "msg" const.
+
 2019-04-11  Alan Hayward  <alan.hayward@arm.com>
 
 	* aarch64-tdep.c (aarch64_analyze_prologue_test): Reset saved regs.
