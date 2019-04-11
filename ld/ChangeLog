@@ -1,5 +1,44 @@
 2019-04-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld.texi: Document -z cet-report=[none|warning|error].
+	* emulparams/cet.sh: Add -z cet-report=[none|warning|error].
+	* testsuite/ld-i386/i386.exp: Run -z cet-report=[warning|error]
+	tests.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/property-x86-cet1.d: New file.
+	* testsuite/ld-i386/property-x86-cet2a.d: Likewise.
+	* testsuite/ld-i386/property-x86-cet2b.d: Likewise.
+	* testsuite/ld-i386/property-x86-cet3a.d: Likewise.
+	* testsuite/ld-i386/property-x86-cet3b.d: Likewise.
+	* testsuite/ld-i386/property-x86-cet4a.d: Likewise.
+	* testsuite/ld-i386/property-x86-cet4b.d: Likewise.
+	* testsuite/ld-i386/property-x86-cet5a.d: Likewise.
+	* testsuite/ld-i386/property-x86-cet5b.d: Likewise.
+	* testsuite/ld-i386/property-x86-cet6.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-cet.s: Likewise.
+	* testsuite/ld-x86-64/property-x86-cet1-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-cet1.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-cet2a-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-cet2a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-cet2b-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-cet2b.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-cet3a-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-cet3a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-cet3b-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-cet3b.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-cet4a-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-cet4a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-cet4b-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-cet4b.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-cet5a-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-cet5a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-cet5b-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-cet5b.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-cet6-x32.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-cet6.d: Likewise.
+
+2019-04-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/config/default.exp (STATIC_PIE_LDFLAGS): New.  Set
 	to "-static-pie" if target compiler supports it.
 	* testsuite/ld-elf/elf.exp: Run -static-pie tests if

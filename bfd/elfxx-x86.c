@@ -2583,9 +2583,17 @@ _bfd_x86_elf_link_setup_gnu_properties
 
   features = 0;
   if (htab->params->ibt)
-    features = GNU_PROPERTY_X86_FEATURE_1_IBT;
+    {
+      features = GNU_PROPERTY_X86_FEATURE_1_IBT;
+      htab->params->cet_report &= ~cet_report_ibt;
+    }
   if (htab->params->shstk)
-    features |= GNU_PROPERTY_X86_FEATURE_1_SHSTK;
+    {
+      features |= GNU_PROPERTY_X86_FEATURE_1_SHSTK;
+      htab->params->cet_report &= ~cet_report_shstk;
+    }
+  if (!(htab->params->cet_report & (cet_report_ibt | cet_report_shstk)))
+    htab->params->cet_report = cet_report_none;
 
   if (ebfd != NULL)
     {
@@ -2624,6 +2632,54 @@ error_alignment:
 
 	  elf_section_type (sec) = SHT_NOTE;
 	}
+    }
+
+  if (htab->params->cet_report)
+    {
+      /* Report missing IBT and SHSTK properties.  */
+      bfd *abfd;
+      const char *msg;
+      elf_property_list *p;
+      bfd_boolean missing_ibt, missing_shstk;
+      bfd_boolean check_ibt
+	= !!(htab->params->cet_report & cet_report_ibt);
+      bfd_boolean check_shstk
+	= !!(htab->params->cet_report & cet_report_shstk);
+
+      if ((htab->params->cet_report & cet_report_warning))
+	msg = _("%P: %pB: warning: missing %s\n");
+      else
+	msg = _("%X%P: %pB: error: missing %s\n");
+
+      for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link.next)
+	if (!(abfd->flags & (DYNAMIC | BFD_PLUGIN | BFD_LINKER_CREATED))
+	    && bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+	  {
+	    for (p = elf_properties (abfd); p; p = p->next)
+	      if (p->property.pr_type == GNU_PROPERTY_X86_FEATURE_1_AND)
+		break;
+
+	    missing_ibt = check_ibt;
+	    missing_shstk = check_shstk;
+	    if (p)
+	      {
+		missing_ibt &= !(p->property.u.number
+				 & GNU_PROPERTY_X86_FEATURE_1_IBT);
+		missing_shstk &= !(p->property.u.number
+				   & GNU_PROPERTY_X86_FEATURE_1_SHSTK);
+	      }
+	    if (missing_ibt || missing_shstk)
+	      {
+		const char *missing;
+		if (missing_ibt && missing_shstk)
+		  missing = _("IBT and SHSTK properties");
+		else if (missing_ibt)
+		  missing = _("IBT property");
+		else
+		  missing = _("SHSTK property");
+		info->callbacks->einfo (msg, abfd, missing);
+	      }
+	  }
     }
 
   pbfd = _bfd_elf_link_setup_gnu_properties (info);

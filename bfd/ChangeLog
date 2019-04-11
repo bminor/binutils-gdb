@@ -1,5 +1,12 @@
 2019-04-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf-linker-x86.h (elf_x86_cet_report): New.
+	(elf_linker_x86_params): Add cet_report.
+	* elfxx-x86.c (_bfd_x86_elf_link_setup_gnu_properties): Report
+	missing IBT and SHSTK properties if needed.
+
+2019-04-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/24436
 	* elf-m10300.c (mn10300_elf_check_relocs): Remove BFD_ASSERT of
 	"h != NULL".  Don't check "h != NULL" before calling.

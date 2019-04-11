@@ -18,6 +18,16 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+/* Missing IBT and SHSTK property report control.  */
+enum elf_x86_cet_report
+{
+  cet_report_none	= 0,	    /* Do nothing.  */
+  cet_report_warning	= 1 << 0,   /* Issue a warning.  */
+  cet_report_error	= 1 << 1,   /* Issue an error.  */
+  cet_report_ibt	= 1 << 2,   /* Report missing IBT property.  */
+  cet_report_shstk	= 1 << 3    /* Report missing SHSTK property.  */
+};
+
 /* Used to pass x86-specific linker options from ld to bfd.  */
 struct elf_linker_x86_params
 {
@@ -38,6 +48,9 @@ struct elf_linker_x86_params
 
   /* TRUE if generate a 1-byte NOP as suffix for x86 call instruction.  */
   unsigned int call_nop_as_suffix : 1;
+
+  /* Report missing IBT and SHSTK properties.  */
+  enum elf_x86_cet_report cet_report;
 
   /* The 1-byte NOP for x86 call instruction.  */
   char call_nop_byte;

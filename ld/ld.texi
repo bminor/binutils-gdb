@@ -1137,6 +1137,21 @@ to a locally defined function, foo, via its GOT slot.
 @option{call-nop=suffix-@var{byte}} generates @code{call foo @var{byte}}.
 Supported for i386 and x86_64.
 
+@item cet-report=none
+@itemx cet-report=warning
+@itemx cet-report=error
+Specify how to report the missing GNU_PROPERTY_X86_FEATURE_1_IBT and
+GNU_PROPERTY_X86_FEATURE_1_SHSTK properties in input .note.gnu.property
+section.  @option{cet-report=none}, which is the default, will make the
+linker not report missing properties in input files.
+@option{cet-report=warning} will make the linker issue a warning for
+missing properties in input files.  @option{cet-report=error} will make
+the linker issue an error for missing properties in input files.
+Note that @option{ibt} will turn off the missing
+GNU_PROPERTY_X86_FEATURE_1_IBT property report and @option{shstk} will
+turn off the missing GNU_PROPERTY_X86_FEATURE_1_SHSTK property report.
+Supported for Linux/i386 and Linux/x86_64.
+
 @item combreloc
 @itemx nocombreloc
 Combine multiple dynamic relocation sections and sort to improve
