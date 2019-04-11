@@ -1,3 +1,10 @@
+2019-04-11  Sudakshina Das  <sudi.das@arm.com>
+
+	* testsuite/gas/aarch64/armv8_5-a-memtag.d: New tests for ldgm and stgm.
+	* testsuite/gas/aarch64/armv8_5-a-memtag.s: Likewise.
+	* testsuite/gas/aarch64/illegal-memtag.l: Likewise.
+	* testsuite/gas/aarch64/illegal-memtag.s: Likewise.
+
 2019-04-10  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* config/tc-i386.c (need_plt32_p) [TE_SOLARIS]: Return FALSE.
