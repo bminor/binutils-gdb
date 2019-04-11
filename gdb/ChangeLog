@@ -1,3 +1,23 @@
+2019-04-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_language_defn): Remove use of LANG_MAGIC.
+	* c-lang.c (c_language_defn): Likewise.
+	(cplus_language_defn): Likewise.
+	(asm_language_defn): Likewise.
+	(minimal_language_defn): Likewise.
+	* d-lang.c (d_language_defn): Likewise.
+	* f-lang.c (f_language_defn): Likewise.
+	* go-lang.c (go_language_defn): Likewise.
+	* language.c (unknown_language_defn): Likewise.
+	(auto_language_defn): Likewise.
+	* language.h (struct language_defn): Remove la_magic field.
+	(LANG_MAGIC): Delete.
+	* m2-lang.c (m2_language_defn): Remove use of LANG_MAGIC.
+	* objc-lang.c (objc_language_defn): Likewise.
+	* opencl-lang.c (opencl_language_defn): Likewise.
+	* p-lang.c (pascal_language_defn): Likewise.
+	* rust-lang.c (rust_language_defn): Likewise.
+
 2019-04-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* riscv-tdep.c (riscv_type_align): New function.

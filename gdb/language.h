@@ -449,15 +449,7 @@ struct language_defn
 				       struct gdbarch *gdbarch,
 				       const struct block *expr_block,
 				       CORE_ADDR expr_pc);
-
-    /* Add fields above this point, so the magic number is always last.  */
-    /* Magic number for compat checking.  */
-
-    long la_magic;
-
   };
-
-#define LANG_MAGIC	910823L
 
 /* Pointer to the language_defn for our current language.  This pointer
    always points to *some* valid struct; it can be used without checking

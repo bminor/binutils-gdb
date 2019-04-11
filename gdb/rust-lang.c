@@ -2141,6 +2141,5 @@ extern const struct language_defn rust_language_defn =
   default_search_name_hash,
   &default_varobj_ops,
   NULL,
-  NULL,
-  LANG_MAGIC
+  NULL
 };

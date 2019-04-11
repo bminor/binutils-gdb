@@ -14380,8 +14380,7 @@ extern const struct language_defn ada_language_defn = {
   default_search_name_hash,
   &ada_varobj_ops,
   NULL,
-  NULL,
-  LANG_MAGIC
+  NULL
 };
 
 /* Command-list for the "set/show ada" prefix command.  */

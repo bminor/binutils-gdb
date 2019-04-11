@@ -250,8 +250,7 @@ extern const struct language_defn d_language_defn =
   default_search_name_hash,
   &default_varobj_ops,
   NULL,
-  NULL,
-  LANG_MAGIC
+  NULL
 };
 
 /* Build all D language types for the specified architecture.  */
