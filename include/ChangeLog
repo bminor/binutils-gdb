@@ -1,3 +1,10 @@
+2019-04-16  Sudakshina Das  <sudi.das@arm.com>
+
+	Backport from mainline.
+	2019-04-11  Sudakshina Das  <sudi.das@arm.com>
+
+	* opcode/aarch64.h (enum aarch64_opnd): Add AARCH64_OPND_Rt_SP.
+
 2019-04-01  Tamar Christina  <tamar.christina@arm.com>
 
 	Backport from mainline.
