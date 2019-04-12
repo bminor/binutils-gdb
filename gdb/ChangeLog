@@ -1,3 +1,10 @@
+2019-04-12  Eli Zaretskii  <eliz@gnu.org>
+
+	* utils.c (prompt_for_continue): Don't restore the styling at the
+	end, as applied_style has the wrong value.  This fixes styling in
+	long lists of file names that are interrupted by the "Continue?"
+	prompt.
+
 2019-04-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ada-lang.c (ada_language_defn): Remove use of LANG_MAGIC.
