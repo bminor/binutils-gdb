@@ -6362,5 +6362,12 @@ proc gdb_supported_languages {} {
 		opencl rust minimal ada]
 }
 
+# Check if debugging is enabled for gdbserver.
+
+proc gdbserver_debug_enabled { } {
+    # Always disabled for GDB only setups.
+    return 0
+}
+
 # Always load compatibility stuff.
 load_lib future.exp

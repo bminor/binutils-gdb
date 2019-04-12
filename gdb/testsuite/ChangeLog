@@ -1,3 +1,12 @@
+2019-04-25  Alan Hayward  <alan.hayward@arm.com>
+
+        * Makefile.in: Pass through GDBSERVER_DEBUG.
+        * README (Testsuite Parameters): Add GDBSERVER_DEBUG.
+        (gdbserver,debug): Add board setting.
+        * gdb.trace/tspeed.exp: Skip when debugging.
+        * lib/gdb.exp (gdbserver_debug_enabled): New procedure.
+        * lib/gdbserver-support.exp: Likewise
+
 2019-04-24  Tom Tromey  <tromey@adacore.com>
 
 	* lib/gdb.exp (gdb_compile): Don't add -fno-stack-protector for

@@ -283,10 +283,24 @@ proc gdbserver_start { options arguments } {
 	# If gdbserver_reconnect will be called $gdbserver_reconnect_p must be
 	# set to true already during gdbserver_start.
 	global gdbserver_reconnect_p
+	global srcdir
+	global subdir
 	if {![info exists gdbserver_reconnect_p] || !$gdbserver_reconnect_p} {
 	    # GDB client could accidentally connect to a stale server.
-	    # append gdbserver_command " --debug --once"
 	    append gdbserver_command " --once"
+	}
+
+	# Enable debug if set.
+	if [gdbserver_debug_enabled] {
+	    global gdbserverdebug
+	    set debugfile [standard_output_file gdbserver.debug]
+	    if { $gdbserverdebug == "debug" } {
+		append gdbserver_command " --debug --debug-file=$debugfile"
+	    } elseif { $gdbserverdebug == "remote" } {
+		append gdbserver_command " --remote-debug --debug-file=$debugfile"
+	    } elseif { $gdbserverdebug == "all" } {
+		append gdbserver_command " --debug --remote-debug --debug-file=$debugfile"
+	    }
 	}
 
 	if { $options != "" } {
@@ -560,4 +574,26 @@ proc mi_gdbserver_start_multi { } {
     set gdbserver_gdbport [lindex $res 1]
 
     return [mi_gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport]
+}
+
+# Check if debugging is enabled for gdbserver.
+
+proc gdbserver_debug_enabled { } {
+    global gdbserverdebug
+
+    # If not already read, get the debug setting from environment or board setting.
+    if ![info exists gdbserverdebug] {
+	global env
+	if [info exists env(GDBSERVER_DEBUG)] {
+	    set gdbserverdebug $env(GDBSERVER_DEBUG)
+	} elseif [target_info exists gdbserver,debug] {
+	    set gdbserverdebug [target_info gdbserver,debug]
+	} else {
+	    return 0
+	}
+    }
+
+    # Only return success on valid values.
+    return [expr { $gdbserverdebug == "debug" || $gdbserverdebug == "remote"
+		   || $gdbserverdebug == "all" }]
 }

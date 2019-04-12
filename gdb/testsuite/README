@@ -293,6 +293,17 @@ can do:
 
 	make check TS=1 TS_FORMAT='[%b %H:%S]'
 
+GDBSERVER_DEBUG
+
+When set gdbserver debug is sent to the file gdbserver.debug in the test
+output directory.  Valid values are:
+	debug  - turn on gdbserver debug.
+	remote - turn on gdbserver remote debug.
+	all - turn on all the above debug options.
+For example, to turn on all gdbserver debugging, you can do:
+
+	make check GDBSERVER_DEBUG=all
+
 Race detection
 **************
 
@@ -496,6 +507,14 @@ gdb,nopie_flag
 
   The flag required to force the compiler to produce non-position-independent
   executables.
+
+gdbserver,debug
+
+  When set gdbserver debug is sent to the file gdbserver.debug in the test
+  output directory.  Valid values are:
+  "debug"  - turn on gdbserver debug.
+  "remote" - turn on gdbserver remote debug.
+  "all" - turn on all the above debug options.
 
 Testsuite Organization
 **********************

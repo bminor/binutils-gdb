@@ -52,6 +52,8 @@ RUNTESTFLAGS =
 
 FORCE_PARALLEL =
 
+GDBSERVER_DEBUG =
+
 # Default number of iterations that we will use to run the testsuite
 # if the user does not specify the RACY_ITER environment variable
 # (e.g., when the user calls the make rule directly from the command
@@ -162,13 +164,15 @@ check-read1:
 # status.
 TIMESTAMP = $(if $(TS),| $(srcdir)/print-ts.py $(if $(TS_FORMAT),$(TS_FORMAT),),)
 
+gdbserver_debug = $(if $(GDBSERVER_DEBUG),GDBSERVER_DEBUG=$(GDBSERVER_DEBUG) ; export GDBSERVER_DEBUG ;,)
+
 # All the hair to invoke dejagnu.  A given invocation can just append
 # $(RUNTESTFLAGS)
 DO_RUNTEST = \
 	rootme=`pwd`; export rootme; \
 	srcdir=${srcdir} ; export srcdir ; \
 	EXPECT=${EXPECT} ; export EXPECT ; \
-	EXEEXT=${EXEEXT} ; export EXEEXT ; \
+	EXEEXT=${EXEEXT} ; export EXEEXT ; $(gdbserver_debug) \
         $(RPATH_ENVVAR)=$$rootme/../../expect:$$rootme/../../libstdc++:$$rootme/../../tk/unix:$$rootme/../../tcl/unix:$$rootme/../../bfd:$$rootme/../../opcodes:$$$(RPATH_ENVVAR); \
 	export $(RPATH_ENVVAR); \
 	if [ -f $${rootme}/../../expect/expect ] ; then  \

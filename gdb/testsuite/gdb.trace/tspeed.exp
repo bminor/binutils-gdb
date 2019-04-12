@@ -19,6 +19,11 @@ if {[skip_shlib_tests]} {
     return 0
 }
 
+# Do not run if gdbsever debug is enabled - the output file is many Gb.
+if [gdbserver_debug_enabled] {
+    return 0
+}
+
 standard_testfile
 set executable $testfile
 
