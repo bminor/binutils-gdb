@@ -29,8 +29,6 @@
 #include <sys/stat.h>
 #include "common/fileio.h"
 
-extern int remote_debug;
-
 struct fd_list
 {
   int fd;

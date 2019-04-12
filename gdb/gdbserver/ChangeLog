@@ -1,3 +1,13 @@
+2019-04-17  Alan Hayward  <alan.hayward@arm.com>
+
+	* debug.c (remote_debug): Add definition.
+	* debug.h (remote_debug): Add declaration.
+	* hostio.c (remote_debug): Remove declaration.
+	* remote-utils.c (struct ui_file): Likewise.
+	(remote_debug): Likewise.
+	* remote-utils.h (remote_debug): Likewise,
+	* server.c (remote_debug): Remove definition.
+
 2019-04-10  Kevin Buettner  <kevinb@redhat.com>
 
 	* linux-x86-low.c (x86_fill_gregset): Sign extend EAX value

@@ -19,6 +19,10 @@
 #include "server.h"
 #include <chrono>
 
+#if !defined (IN_PROCESS_AGENT)
+int remote_debug = 0;
+#endif
+
 /* Enable miscellaneous debugging output.  The name is historical - it
    was originally used to debug LinuxThreads support.  */
 int debug_threads;

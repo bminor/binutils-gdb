@@ -19,8 +19,6 @@
 #ifndef GDBSERVER_REMOTE_UTILS_H
 #define GDBSERVER_REMOTE_UTILS_H
 
-extern int remote_debug;
-
 int gdb_connected (void);
 
 #define STDIO_CONNECTION_NAME "stdio"

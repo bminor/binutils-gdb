@@ -108,9 +108,6 @@ struct sym_cache
   struct sym_cache *next;
 };
 
-int remote_debug = 0;
-struct ui_file *gdb_stdlog;
-
 static int remote_is_stdio = 0;
 
 static gdb_fildes_t remote_desc = INVALID_DESCRIPTOR;

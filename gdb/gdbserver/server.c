@@ -328,8 +328,6 @@ attach_inferior (int pid)
   return 0;
 }
 
-extern int remote_debug;
-
 /* Decode a qXfer read request.  Return 0 if everything looks OK,
    or -1 otherwise.  */
 

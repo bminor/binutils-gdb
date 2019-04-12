@@ -19,13 +19,10 @@
 #ifndef GDBSERVER_DEBUG_H
 #define GDBSERVER_DEBUG_H
 
-/* We declare debug format variables here, and debug_threads but no other
-   debug content variables (e.g., not remote_debug) because while this file
-   is not currently used by IPA it may be some day, and IPA may have its own
-   set of debug content variables.  It's ok to declare debug_threads here
-   because it is misnamed - a better name is debug_basic or some such,
-   which can work for any program, gdbserver or IPA.  If/when this file is
-   used with IPA it is recommended to fix debug_thread's name.  */
+#if !defined (IN_PROCESS_AGENT)
+extern int remote_debug;
+#endif
+
 extern int debug_threads;
 extern int debug_timestamp;
 
