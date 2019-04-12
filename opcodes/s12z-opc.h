@@ -34,7 +34,7 @@ struct mem_read_abstraction_base
 /* Machine code operators.
    These *roughly* correspond to opcodes.
    But describe their purpose rather than their form.  */
-enum operator
+enum optr
   {
     OP_INVALID = 0,
 
@@ -259,7 +259,7 @@ struct memory_operand
    It is the responsibility of the caller to free all operands
    when they are no longer needed.
    Returns the number of bytes read.  */
-int decode_s12z (enum operator *myoperator, short *osize,
+int decode_s12z (enum optr *myoperator, short *osize,
 		 int *n_operands, struct operand **operands,
 		 struct mem_read_abstraction_base *);
 

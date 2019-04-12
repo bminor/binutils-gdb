@@ -331,7 +331,7 @@ int
 print_insn_s12z (bfd_vma memaddr, struct disassemble_info* info)
 {
   int o;
-  enum operator operator = OP_INVALID;
+  enum optr operator = OP_INVALID;
   int n_operands = 0;
 
   /* The longest instruction in S12Z can have 6 operands.
