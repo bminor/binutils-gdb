@@ -1,5 +1,10 @@
 2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* nds32-tdep.c (nds32_type_align): Delete.
+	(nds32_push_dummy_call): Use type_align instead.
+
+2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* arm-tdep.c (arm_type_align): Only handle vector override case.
 	(arm_push_dummy_call): Use type_align.
 	(arm_gdbarch_init): Register arm_type_align gdbarch function.

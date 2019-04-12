@@ -1439,51 +1439,6 @@ nds32_check_calling_use_fpr (struct type *type)
   return typecode == TYPE_CODE_FLT;
 }
 
-/* Return the alignment (in bytes) of the given type.  */
-
-static int
-nds32_type_align (struct type *type)
-{
-  int n;
-  int align;
-  int falign;
-
-  type = check_typedef (type);
-  switch (TYPE_CODE (type))
-    {
-    default:
-      /* Should never happen.  */
-      internal_error (__FILE__, __LINE__, _("unknown type alignment"));
-      return 4;
-
-    case TYPE_CODE_PTR:
-    case TYPE_CODE_ENUM:
-    case TYPE_CODE_INT:
-    case TYPE_CODE_FLT:
-    case TYPE_CODE_SET:
-    case TYPE_CODE_RANGE:
-    case TYPE_CODE_REF:
-    case TYPE_CODE_CHAR:
-    case TYPE_CODE_BOOL:
-      return TYPE_LENGTH (type);
-
-    case TYPE_CODE_ARRAY:
-    case TYPE_CODE_COMPLEX:
-      return nds32_type_align (TYPE_TARGET_TYPE (type));
-
-    case TYPE_CODE_STRUCT:
-    case TYPE_CODE_UNION:
-      align = 1;
-      for (n = 0; n < TYPE_NFIELDS (type); n++)
-	{
-	  falign = nds32_type_align (TYPE_FIELD_TYPE (type, n));
-	  if (falign > align)
-	    align = falign;
-	}
-      return align;
-    }
-}
-
 /* Implement the "push_dummy_call" gdbarch method.  */
 
 static CORE_ADDR
@@ -1522,7 +1477,7 @@ nds32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   for (i = 0; i < nargs; i++)
     {
       struct type *type = value_type (args[i]);
-      int align = nds32_type_align (type);
+      int align = type_align (type);
 
       /* If align is zero, it may be an empty struct.
 	 Just ignore the argument of empty struct.  */
@@ -1548,7 +1503,7 @@ nds32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       type = value_type (args[i]);
       calling_use_fpr = nds32_check_calling_use_fpr (type);
       len = TYPE_LENGTH (type);
-      align = nds32_type_align (type);
+      align = type_align (type);
       val = value_contents (args[i]);
 
       /* The size of a composite type larger than 4 bytes will be rounded
