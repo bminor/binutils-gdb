@@ -17546,6 +17546,9 @@ dwarf2_init_complex_target_type (struct dwarf2_cu *cu,
   gdbarch *gdbarch = get_objfile_arch (objfile);
   struct type *tt = nullptr;
 
+  /* Try to find a suitable floating point builtin type of size BITS.
+     We're going to use the name of this type as the name for the complex
+     target type that we are about to create.  */
   switch (bits)
     {
     case 32:
@@ -17554,10 +17557,17 @@ dwarf2_init_complex_target_type (struct dwarf2_cu *cu,
     case 64:
       tt = builtin_type (gdbarch)->builtin_double;
       break;
+    case 96:	/* The x86-32 ABI specifies 96-bit long double.  */
     case 128:
       tt = builtin_type (gdbarch)->builtin_long_double;
       break;
     }
+
+  /* If the type we found doesn't match the size we were looking for, then
+     pretend we didn't find a type at all, the complex target type we
+     create will then be nameless.  */
+  if (TYPE_LENGTH (tt) * TARGET_CHAR_BIT != bits)
+    tt = nullptr;
 
   const char *name = (tt == nullptr) ? nullptr : TYPE_NAME (tt);
   return dwarf2_init_float_type (objfile, bits, name, name_hint);
