@@ -23,12 +23,47 @@
 int remote_debug = 0;
 #endif
 
+/* Output file for debugging.  Default to standard error.  */
+FILE *debug_file = stderr;
+
 /* Enable miscellaneous debugging output.  The name is historical - it
    was originally used to debug LinuxThreads support.  */
 int debug_threads;
 
 /* Include timestamps in debugging output.  */
 int debug_timestamp;
+
+#if !defined (IN_PROCESS_AGENT)
+
+/* See debug.h.  */
+
+void
+debug_set_output (const char *new_debug_file)
+{
+  /* Close any existing file and reset to standard error.  */
+  if (debug_file != stderr)
+    {
+      fclose (debug_file);
+    }
+  debug_file = stderr;
+
+  /* Catch empty filenames.  */
+  if (new_debug_file == nullptr || strlen (new_debug_file) == 0)
+    return;
+
+  FILE *fptr = fopen (new_debug_file, "w");
+
+  if (fptr == nullptr)
+    {
+      debug_printf ("Cannot open %s for writing. %s. Switching to stderr.\n",
+		    new_debug_file, strerror (errno));
+      return;
+    }
+
+  debug_file = fptr;
+}
+
+#endif
 
 /* Print a debugging message.
    If the text begins a new line it is preceded by a timestamp.
@@ -50,11 +85,11 @@ debug_vprintf (const char *format, va_list ap)
       seconds s = duration_cast<seconds> (now.time_since_epoch ());
       microseconds us = duration_cast<microseconds> (now.time_since_epoch ()) - s;
 
-      fprintf (stderr, "%ld.%06ld ", (long) s.count (), (long) us.count ());
+      fprintf (debug_file, "%ld.%06ld ", (long) s.count (), (long) us.count ());
     }
 #endif
 
-  vfprintf (stderr, format, ap);
+  vfprintf (debug_file, format, ap);
 
 #if !defined (IN_PROCESS_AGENT)
   if (*format)
@@ -69,7 +104,7 @@ debug_vprintf (const char *format, va_list ap)
 void
 debug_flush (void)
 {
-  fflush (stderr);
+  fflush (debug_file);
 }
 
 /* Notify the user that the code is entering FUNCTION_NAME.

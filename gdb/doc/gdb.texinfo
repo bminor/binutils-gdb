@@ -21332,8 +21332,12 @@ The @option{--debug} option tells @code{gdbserver} to display extra
 status information about the debugging process.
 @cindex @option{--remote-debug}, @code{gdbserver} option
 The @option{--remote-debug} option tells @code{gdbserver} to display
-remote protocol debug output.  These options are intended for
-@code{gdbserver} development and for bug reports to the developers.
+remote protocol debug output.
+@cindex @option{--debug-file}, @code{gdbserver} option
+@cindex @code{gdbserver}, send all debug output to a single file
+The @option{--debug-file=@var{filename}} option tells @code{gdbserver} to
+write any debug output to the given @var{filename}.  These options are intended
+for @code{gdbserver} development and for bug reports to the developers.
 
 @cindex @option{--debug-format}, @code{gdbserver} option
 The @option{--debug-format=option1[,option2,...]} option tells
@@ -21432,6 +21436,10 @@ Disable or enable general debugging messages.
 @itemx monitor set remote-debug 1
 Disable or enable specific debugging messages associated with the remote
 protocol (@pxref{Remote Protocol}).
+
+@item monitor set debug-file filename
+@itemx monitor set debug-file
+Send any debug output to the given file, or to stderr.
 
 @item monitor set debug-format option1@r{[},option2,...@r{]}
 Specify additional text to add to debugging messages.
@@ -44560,6 +44568,11 @@ the developers.
 
 @item --remote-debug
 Instruct @code{gdbserver} to display remote protocol debug output.
+This option is intended for @code{gdbserver} development and for bug reports to
+the developers.
+
+@item --debug-file=@var{filename}
+Instruct @code{gdbserver} to send any debug output to the given @var{filename}.
 This option is intended for @code{gdbserver} development and for bug reports to
 the developers.
 

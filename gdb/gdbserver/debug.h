@@ -21,6 +21,11 @@
 
 #if !defined (IN_PROCESS_AGENT)
 extern int remote_debug;
+
+/* Switch all debug output to DEBUG_FILE.  If DEBUG_FILE is nullptr or an
+   empty string, or if the file cannot be opened, then debug output is sent to
+   stderr.  */
+void debug_set_output (const char *debug_file);
 #endif
 
 extern int debug_threads;

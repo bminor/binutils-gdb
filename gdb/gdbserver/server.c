@@ -1403,6 +1403,10 @@ handle_monitor_command (char *mon, char *own_buf)
 	  write_enn (own_buf);
 	}
     }
+  else if (strcmp (mon, "set debug-file") == 0)
+    debug_set_output (nullptr);
+  else if (startswith (mon, "set debug-file "))
+    debug_set_output (mon + sizeof ("set debug-file ") - 1);
   else if (strcmp (mon, "help") == 0)
     monitor_show_help ();
   else if (strcmp (mon, "exit") == 0)
@@ -3649,6 +3653,8 @@ captured_main (int argc, char *argv[])
 	}
       else if (strcmp (*next_arg, "--remote-debug") == 0)
 	remote_debug = 1;
+      else if (startswith (*next_arg, "--debug-file="))
+	debug_set_output ((*next_arg) + sizeof ("--debug-file=") -1);
       else if (strcmp (*next_arg, "--disable-packet") == 0)
 	{
 	  gdbserver_show_disableable (stdout);

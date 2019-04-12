@@ -1,5 +1,14 @@
 2019-04-17  Alan Hayward  <alan.hayward@arm.com>
 
+	* debug.c (debug_set_output): New function.
+	(debug_vprintf): Send output to debug_file.
+	(debug_flush): Likewise.
+	* debug.h (debug_set_output): New declaration.
+	* server.c (handle_monitor_command): Add debug-file option.
+	(captured_main): Likewise.
+
+2019-04-17  Alan Hayward  <alan.hayward@arm.com>
+
 	* debug.c (remote_debug): Add definition.
 	* debug.h (remote_debug): Add declaration.
 	* hostio.c (remote_debug): Remove declaration.

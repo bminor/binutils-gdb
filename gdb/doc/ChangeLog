@@ -1,3 +1,9 @@
+2019-04-17  Alan Hayward  <alan.hayward@arm.com>
+
+	* gdb.texinfo (Other Command-Line Arguments for gdbserver)
+	(Monitor Commands for gdbserver)
+	(gdbserver man): Add debug-file option.
+
 2019-04-08  Kevin Buettner  <kevinb@redhat.com>
 
 	* python.texi (Inferiors In Python): Rename
