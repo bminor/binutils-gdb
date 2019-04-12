@@ -1562,10 +1562,6 @@ prompt_for_continue (void)
   reinitialize_more_filter ();
   pagination_disabled_for_command = disable_pagination;
 
-  /* Restore the current styling.  */
-  if (can_emit_style_escape (gdb_stdout))
-    emit_style_escape (applied_style);
-
   dont_repeat ();		/* Forget prev cmd -- CR won't repeat it.  */
 }
 
