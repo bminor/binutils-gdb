@@ -1,5 +1,101 @@
 2019-04-13  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am (GENSCRIPTS): Pass LIB_PATH as a parameter.  Add
+	DEPDIR parameter.
+	(ELF_DEPS, ELF_GEN_DEPS, ELF_X86_DEPS): Delete.
+	(ALL_EMULATION_SOURCES, ALL_64_EMULATION_SOURCES): Depend on
+	$GEN_DEPENDS.
+	(e*.c): Delete all dependencies, instead include dependencies
+	from $DEPDIR/*.Pc.
+	* Makefile.in: Regenerate.
+	* configure.ac (source_sh): Define and use function.
+	* configure: Regenerate.
+	* emulparams/aarch64cloudabib.sh, * emulparams/aarch64elf32b.sh,
+	* emulparams/aarch64elfb.sh, * emulparams/aarch64fbsdb.sh,
+	* emulparams/aarch64linux32b.sh, * emulparams/aarch64linuxb.sh,
+	* emulparams/arcelf.sh, * emulparams/arcelf_prof.sh,
+	* emulparams/arclinux.sh, * emulparams/arclinux_nps.sh,
+	* emulparams/arclinux_prof.sh, * emulparams/arcv2elf.sh,
+	* emulparams/arcv2elfx.sh, * emulparams/armelf_fbsd.sh,
+	* emulparams/armelf_linux_eabi.sh,
+	* emulparams/armelf_linux_fdpiceabi.sh,
+	* emulparams/armelf_nacl.sh, * emulparams/armelf_nbsd.sh,
+	* emulparams/armelf_vxworks.sh, * emulparams/armelfb.sh,
+	* emulparams/armelfb_fbsd.sh, * emulparams/armelfb_fuchsia.sh,
+	* emulparams/armelfb_linux.sh, * emulparams/armelfb_linux_eabi.sh,
+	* emulparams/armelfb_linux_fdpiceabi.sh,
+	* emulparams/armelfb_nacl.sh, * emulparams/armelfb_nbsd.sh,
+	* emulparams/armsymbian.sh, * emulparams/cskyelf_linux.sh,
+	* emulparams/elf32_sparc_sol2.sh,
+	* emulparams/elf32_sparc_vxworks.sh, * emulparams/elf32_tic6x_be.sh,
+	* emulparams/elf32_tic6x_elf_be.sh,
+	* emulparams/elf32_tic6x_elf_le.sh,
+	* emulparams/elf32_tic6x_linux_be.sh,
+	* emulparams/elf32_tic6x_linux_le.sh,
+	* emulparams/elf32_x86_64.sh, * emulparams/elf32_x86_64_nacl.sh,
+	* emulparams/elf32b4300.sh, * emulparams/elf32bfinfd.sh,
+	* emulparams/elf32bmipn32.sh, * emulparams/elf32bsmip.sh,
+	* emulparams/elf32btsmip.sh, * emulparams/elf32btsmip_fbsd.sh,
+	* emulparams/elf32btsmipn32.sh, * emulparams/elf32btsmipn32_fbsd.sh,
+	* emulparams/elf32ebmip.sh, * emulparams/elf32ebmipvxworks.sh,
+	* emulparams/elf32elmip.sh, * emulparams/elf32elmipvxworks.sh,
+	* emulparams/elf32frvfd.sh, * emulparams/elf32l4300.sh,
+	* emulparams/elf32lm32fd.sh, * emulparams/elf32lmip.sh,
+	* emulparams/elf32lppc.sh, * emulparams/elf32lppclinux.sh,
+	* emulparams/elf32lppcnto.sh, * emulparams/elf32lppcsim.sh,
+	* emulparams/elf32lr5900.sh, * emulparams/elf32lr5900n32.sh,
+	* emulparams/elf32lriscv.sh, * emulparams/elf32lriscv_ilp32.sh,
+	* emulparams/elf32lriscv_ilp32f.sh, * emulparams/elf32lsmip.sh,
+	* emulparams/elf32ltsmip.sh, * emulparams/elf32ltsmip_fbsd.sh,
+	* emulparams/elf32ltsmipn32.sh, * emulparams/elf32ltsmipn32_fbsd.sh,
+	* emulparams/elf32microblazeel.sh, * emulparams/elf32or1k_linux.sh,
+	* emulparams/elf32ppc.sh, * emulparams/elf32ppc_fbsd.sh,
+	* emulparams/elf32ppccommon.sh, * emulparams/elf32ppclinux.sh,
+	* emulparams/elf32ppcnto.sh, * emulparams/elf32ppcsim.sh,
+	* emulparams/elf32ppcvxworks.sh, * emulparams/elf32ppcwindiss.sh,
+	* emulparams/elf32tilegx_be.sh, * emulparams/elf64_ia64_fbsd.sh,
+	* emulparams/elf64_sparc_fbsd.sh, * emulparams/elf64_sparc_sol2.sh,
+	* emulparams/elf64alpha_fbsd.sh, * emulparams/elf64alpha_nbsd.sh,
+	* emulparams/elf64bmip-defs.sh, * emulparams/elf64bmip.sh,
+	* emulparams/elf64btsmip.sh, * emulparams/elf64btsmip_fbsd.sh,
+	* emulparams/elf64lppc.sh, * emulparams/elf64lriscv-defs.sh,
+	* emulparams/elf64lriscv.sh, * emulparams/elf64lriscv_lp64.sh,
+	* emulparams/elf64lriscv_lp64f.sh, * emulparams/elf64ltsmip.sh,
+	* emulparams/elf64ltsmip_fbsd.sh, * emulparams/elf64ppc.sh,
+	* emulparams/elf64ppc_fbsd.sh, * emulparams/elf64rdos.sh,
+	* emulparams/elf64tilegx_be.sh, * emulparams/elf_i386.sh,
+	* emulparams/elf_i386_be.sh, * emulparams/elf_i386_fbsd.sh,
+	* emulparams/elf_i386_ldso.sh, * emulparams/elf_i386_nacl.sh,
+	* emulparams/elf_i386_sol2.sh, * emulparams/elf_i386_vxworks.sh,
+	* emulparams/elf_iamcu.sh, * emulparams/elf_k1om.sh,
+	* emulparams/elf_k1om_fbsd.sh, * emulparams/elf_l1om.sh,
+	* emulparams/elf_l1om_fbsd.sh, * emulparams/elf_x86_64.sh,
+	* emulparams/elf_x86_64_cloudabi.sh,
+	* emulparams/elf_x86_64_fbsd.sh, * emulparams/elf_x86_64_nacl.sh,
+	* emulparams/elf_x86_64_sol2.sh, * emulparams/h8300helf.sh,
+	* emulparams/h8300helf_linux.sh, * emulparams/h8300hnelf.sh,
+	* emulparams/h8300self.sh, * emulparams/h8300self_linux.sh,
+	* emulparams/h8300snelf.sh, * emulparams/h8300sxelf.sh,
+	* emulparams/h8300sxelf_linux.sh, * emulparams/h8300sxnelf.sh,
+	* emulparams/hppanbsd.sh, * emulparams/hppaobsd.sh,
+	* emulparams/m32rlelf.sh, * emulparams/m32rlelf_linux.sh,
+	* emulparams/m68kelfnbsd.sh, * emulparams/mn10300.sh,
+	* emulparams/msp430X.sh, * emulparams/nds32belf.sh,
+	* emulparams/nds32belf16m.sh, * emulparams/nds32belf_linux.sh,
+	* emulparams/pjlelf.sh, * emulparams/ppclynx.sh,
+	* emulparams/score7_elf.sh, * emulparams/shelf_fd.sh,
+	* emulparams/shelf_linux.sh, * emulparams/shelf_nbsd.sh,
+	* emulparams/shelf_uclinux.sh, * emulparams/shelf_vxworks.sh,
+	* emulparams/shl.sh, * emulparams/shlelf.sh,
+	* emulparams/shlelf_fd.sh, * emulparams/shlelf_nbsd.sh,
+	* emulparams/shlelf_vxworks.sh: Use source_sh.
+	* genscripts.sh: Adjust for changed parameters.  Emit dependencies
+	for e*.c to .deps/*.Pc.
+	(source_sh): New function, use it throughout to source scripts.
+	* genscrba.sh (source_em): Use source_sh.
+
+2019-04-13  Alan Modra  <amodra@gmail.com>
+
 	* configure.ac (TDIRS): Build up tdirs in this variable and
 	AC_SUBST, also using AM_SUBST_NOTMAKE.
 	* configure: Regenerate.

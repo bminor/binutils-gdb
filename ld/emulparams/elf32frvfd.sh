@@ -1,4 +1,4 @@
-. ${srcdir}/emulparams/elf32frv.sh
+source_sh ${srcdir}/emulparams/elf32frv.sh
 unset STACK_ADDR
 OUTPUT_FORMAT="elf32-frvfdpic"
 MAXPAGESIZE="CONSTANT (MAXPAGESIZE)"

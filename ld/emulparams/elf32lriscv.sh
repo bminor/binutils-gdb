@@ -1,6 +1,6 @@
 # RV32 code using ILP32D ABI.
 # ABI not in emulation name to avoid breaking backward compatibility.
-. ${srcdir}/emulparams/elf32lriscv-defs.sh
+source_sh ${srcdir}/emulparams/elf32lriscv-defs.sh
 OUTPUT_FORMAT="elf32-littleriscv"
 
 # On Linux, first look for 32 bit ILP32D target libraries in /lib/ilp32d as per

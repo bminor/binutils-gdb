@@ -1,4 +1,4 @@
-. ${srcdir}/emulparams/elf32lm32.sh
+source_sh ${srcdir}/emulparams/elf32lm32.sh
 unset STACK_ADDR
 unset DYNAMIC_LINK
 OUTPUT_FORMAT="elf32-lm32fdpic"

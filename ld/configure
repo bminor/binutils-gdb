@@ -17528,7 +17528,11 @@ tdir_$i=$result"
 	    ;;
 	  esac
 	  if test "$elf_list_options" = "TRUE"; then
-	    . ${srcdir}/emulparams/${i}.sh
+	    source_sh()
+	    {
+	      . $1
+	    }
+	    source_sh ${srcdir}/emulparams/${i}.sh
 	    if test x${GENERATE_SHLIB_SCRIPT} = xyes; then
 	      elf_shlib_list_options=TRUE
 	    fi

@@ -1,7 +1,7 @@
 # If you change this file, please also look at files which source this one:
 # elf32ltsmipn32.sh
 
-. ${srcdir}/emulparams/elf32bmipn32-defs.sh
+source_sh ${srcdir}/emulparams/elf32bmipn32-defs.sh
 OUTPUT_FORMAT="elf32-ntradbigmips"
 BIG_OUTPUT_FORMAT="elf32-ntradbigmips"
 LITTLE_OUTPUT_FORMAT="elf32-ntradlittlemips"

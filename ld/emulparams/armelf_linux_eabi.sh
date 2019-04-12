@@ -1,4 +1,4 @@
-. ${srcdir}/emulparams/armelf_linux.sh
+source_sh ${srcdir}/emulparams/armelf_linux.sh
 
 # Use the ARM ABI-compliant exception-handling sections.
 OTHER_READONLY_SECTIONS="

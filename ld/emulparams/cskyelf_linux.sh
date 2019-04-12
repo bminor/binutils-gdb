@@ -1,4 +1,4 @@
-. ${srcdir}/emulparams/cskyelf.sh
+source_sh ${srcdir}/emulparams/cskyelf.sh
 
 unset EMBEDDED
 unset ENTRY

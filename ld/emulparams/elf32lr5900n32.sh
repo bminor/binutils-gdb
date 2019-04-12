@@ -1,4 +1,4 @@
-. ${srcdir}/emulparams/elf32bmipn32-defs.sh
+source_sh ${srcdir}/emulparams/elf32bmipn32-defs.sh
 
 OUTPUT_FORMAT="elf32-nlittlemips"
 BIG_OUTPUT_FORMAT="elf32-nbigmips"

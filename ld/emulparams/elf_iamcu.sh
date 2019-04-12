@@ -1,7 +1,7 @@
-. ${srcdir}/emulparams/plt_unwind.sh
-. ${srcdir}/emulparams/extern_protected_data.sh
-. ${srcdir}/emulparams/dynamic_undefined_weak.sh
-. ${srcdir}/emulparams/call_nop.sh
+source_sh ${srcdir}/emulparams/plt_unwind.sh
+source_sh ${srcdir}/emulparams/extern_protected_data.sh
+source_sh ${srcdir}/emulparams/dynamic_undefined_weak.sh
+source_sh ${srcdir}/emulparams/call_nop.sh
 SCRIPT_NAME=elf
 OUTPUT_FORMAT="elf32-iamcu"
 NO_RELA_RELOCS=yes

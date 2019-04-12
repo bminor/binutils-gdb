@@ -1,4 +1,4 @@
-. ${srcdir}/emulparams/arc-endianness.sh
+source_sh ${srcdir}/emulparams/arc-endianness.sh
 ARCH=arc
 SCRIPT_NAME=arclinux
 if [ "x${ARC_ENDIAN}" = "xbig" ]; then
