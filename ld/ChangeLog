@@ -1,3 +1,11 @@
+2019-04-13  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac (TDIRS): Build up tdirs in this variable and
+	AC_SUBST, also using AM_SUBST_NOTMAKE.
+	* configure: Regenerate.
+	* Makefile.am (DISTCLEANFILES): Remove tdirs.
+	* Makefile.in: Regenerate.
+
 2019-04-12  Nick Clifton  <nickc@redhat.com>
 
 	PR 24450

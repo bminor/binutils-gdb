@@ -1045,7 +1045,7 @@ CLEANFILES = dep.sed DEP DEPA DEP1 DEP2 spu_ovl.s spu_ovl.@OBJEXT@ spu_icache.s 
 EXTRA_DIST = ldgram.c ldgram.h ldlex.c emultempl/spu_ovl.@OBJEXT@_c \
 	     emultempl/spu_icache.@OBJEXT@_c deffilep.c deffilep.h $(man_MANS)
 
-DISTCLEANFILES = tdirs site.exp development.exp site.bak stringify.sed
+DISTCLEANFILES = site.exp development.exp site.bak stringify.sed
 all: $(BUILT_SOURCES) config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 

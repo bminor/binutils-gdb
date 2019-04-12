@@ -2013,7 +2013,7 @@ diststuff: info $(EXTRA_DIST)
 # ld.1 to support parallel build.
 info-recursive: ld.1
 
-DISTCLEANFILES = tdirs site.exp development.exp site.bak stringify.sed
+DISTCLEANFILES = site.exp development.exp site.bak stringify.sed
 distclean-local:
 	rm -rf ldscripts
 

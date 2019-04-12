@@ -319,12 +319,7 @@ EMUL=
 all_emuls=
 all_emul_extras=
 all_libpath=
-
-dnl We need to get an arbitrary number of tdir definitions into
-dnl Makefile.  We can't do it using AC_SUBST, because autoconf does
-dnl not permit literal newlines in an AC_SUBST variables.  So we use a
-dnl file.
-rm -f tdirs
+TDIRS=
 
 # If the host is 64-bit, then we enable 64-bit targets by default.
 # This is consistent with what ../bfd/configure.ac does.
@@ -376,7 +371,8 @@ do
 	  all_emuls="$all_emuls e${i}.o"
 	  eval result=\$tdir_$i
 	  test -z "$result" && result=$targ_alias
-	  echo tdir_$i=$result >> tdirs
+	  TDIRS="$TDIRS
+tdir_$i=$result"
 	  case "${i}" in
 	  *elf*)
 	    elf_list_options=TRUE
@@ -463,8 +459,8 @@ AC_SUBST(elf_shlib_list_options)
 AC_SUBST(elf_plt_unwind_list_options)
 AC_SUBST(EMUL)
 
-TDIRS=tdirs
-AC_SUBST_FILE(TDIRS)
+AC_SUBST(TDIRS)
+AM_SUBST_NOTMAKE(TDIRS)
 
 if test x${all_targets} = xtrue; then
   if test x${want64} = xtrue; then
