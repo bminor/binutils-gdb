@@ -4997,7 +4997,7 @@ like this:
 @group
 @var{section} [@var{address}] [(@var{type})] :
   [AT(@var{lma})]
-  [ALIGN(@var{section_align})]
+  [ALIGN(@var{section_align}) | ALIGN_WITH_INPUT]
   [SUBALIGN(@var{subsection_align})]
   [@var{constraint}]
   @{

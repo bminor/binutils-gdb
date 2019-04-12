@@ -1,3 +1,9 @@
+2019-04-12  Nick Clifton  <nickc@redhat.com>
+
+	PR 24450
+	* ld.texi (Output Section Attributes): Add ALIGN_WITH_INPUT to
+	example of section attributes.
+
 2019-04-11  Faraz Shahbazker  <fshahbazker@wavecomp.com>
 
 	* NEWS: Mention new option --no-print-map-discarded.
