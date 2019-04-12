@@ -20,9 +20,6 @@
 
 struct fix;
 
-/* Define TC_M68K so that we can use the MRI mode.  */
-#define TC_M68K
-
 #define TARGET_BYTES_BIG_ENDIAN 1
 
 /* Motorola assembler specs does not require '.' before pseudo-ops.  */

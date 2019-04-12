@@ -1,3 +1,7 @@
+2019-04-12  John Darrington <john@darrington.wattle.id.au>
+	
+	config/tc-s12z.h: Remove definition of macro TC_M68K
+
 2019-04-01  John Darrington <john@darrington.wattle.id.au>
 	
 	config/tc-s12z.c: Use bfd_boolean where appropriate.
