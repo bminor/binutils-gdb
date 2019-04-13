@@ -2179,7 +2179,10 @@ resolve_expression (expressionS *expressionP)
 		|| op == O_lt || op == O_le || op == O_ge || op == O_gt)
 	       && seg_left == seg_right
 	       && (finalize_syms
-		   || frag_offset_fixed_p (frag_left, frag_right, &frag_off))
+		   || frag_offset_fixed_p (frag_left, frag_right, &frag_off)
+		   || (op == O_gt
+		       && frag_gtoffset_p (left, frag_left,
+					   right, frag_right, &frag_off)))
 	       && (seg_left != reg_section || left == right)
 	       && (seg_left != undefined_section || add_symbol == op_symbol)))
 	{
