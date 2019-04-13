@@ -68,7 +68,19 @@ struct infcall_suspend_state_deleter
 {
   void operator() (struct infcall_suspend_state *state) const
   {
-    restore_infcall_suspend_state (state);
+    TRY
+      {
+	restore_infcall_suspend_state (state);
+      }
+    CATCH (e, RETURN_MASK_ALL)
+      {
+	/* If we are restoring the inferior state due to an exception,
+	   some error message will be printed.  So, only warn the user
+	   when we cannot restore during normal execution.  */
+	if (!std::uncaught_exception ())
+	  warning (_("Failed to restore inferior state: %s"), e.message);
+      }
+    END_CATCH
   }
 };
 

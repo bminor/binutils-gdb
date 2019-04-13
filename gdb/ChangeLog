@@ -1,3 +1,8 @@
+2019-04-19  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* inferior.h (struct infcall_suspend_state_deleter):
+	Catch exception in destructor to avoid crash.
+
 2019-04-12  Eli Zaretskii  <eliz@gnu.org>
 
 	* utils.c (prompt_for_continue): Don't restore the styling at the
