@@ -79,6 +79,11 @@
 
 2019-04-19  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* inferior.h (struct infcall_suspend_state_deleter):
+	Catch exception in destructor to avoid crash.
+
+2019-04-19  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* cli/cli-cmds.c (_initialize_cli_cmds): Move "shell" "!" alias
 	close to the add_com "shell".
 
