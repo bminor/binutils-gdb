@@ -10506,6 +10506,8 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
   X(_b,     e000, f000b000),			\
   X(_bcond, d000, f0008000),			\
   X(_bf,    0000, f040e001),			\
+  X(_bfx,   0000, f060e001),			\
+  X(_bflx,  0000, f070e001),			\
   X(_bic,   4380, ea200000),			\
   X(_bics,  4380, ea300000),			\
   X(_cmn,   42c0, eb100f00),			\
@@ -13360,6 +13362,11 @@ do_t_branch_future (void)
 	    inst.relocs[1].type = BFD_RELOC_ARM_THUMB_BF17;
 	    inst.relocs[1].pc_rel = 1;
 	  }
+	break;
+
+      case T_MNEM_bfx:
+      case T_MNEM_bflx:
+	inst.instruction |= inst.operands[1].reg << 16;
 	break;
 
       default: abort ();
@@ -21679,6 +21686,8 @@ static const struct asm_opcode insns[] =
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT & arm_ext_v8_1m_main
  toC("bf",     _bf,	2, (EXPs, EXPs),	     t_branch_future),
+ toC("bfx",    _bfx,	2, (EXPs, RRnpcsp),	     t_branch_future),
+ toC("bflx",   _bflx,	2, (EXPs, RRnpcsp),	     t_branch_future),
 };
 #undef ARM_VARIANT
 #undef THUMB_VARIANT

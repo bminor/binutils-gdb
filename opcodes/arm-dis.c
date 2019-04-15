@@ -2730,6 +2730,7 @@ static const struct opcode16 thumb_opcodes[] =
        %<bitfield>W	print bitfield*4 in decimal
        %<bitfield>r	print bitfield as an ARM register
        %<bitfield>R	as %<>r but r15 is UNPREDICTABLE
+       %<bitfield>S	as %<>r but r13 and r15 is UNPREDICTABLE
        %<bitfield>c	print bitfield as a condition code
 
        %<bitfield>'c	print specified char iff bitfield is all ones
@@ -2749,6 +2750,10 @@ static const struct opcode32 thumb32_opcodes[] =
   /* Armv8.1-M Mainline instructions.  */
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
     0xf040e001, 0xf860f001, "bf%c\t%G, %W"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+    0xf060e001, 0xf8f0f001, "bfx%c\t%G, %16-19S"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+    0xf070e001, 0xf8f0f001, "bflx%c\t%G, %16-19S"},
 
 
   /* ARMv8-M and ARMv8-M Security Extensions instructions.  */
@@ -6056,6 +6061,10 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		      value_in_comment = val * 4;
 		      break;
 
+		    case 'S':
+		      if (val == 13)
+			is_unpredictable = TRUE;
+		      /* Fall through.  */
 		    case 'R':
 		      if (val == 15)
 			is_unpredictable = TRUE;

@@ -1,4 +1,15 @@
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>
+
+	* config/tc-arm.c (T16_32_TAB): New entries for bfx and bflx.
+	(do_t_v8_1_branch): New switch cases for bfx and bflx.
+	(insns): New instruction for bfx and bflx.
+	* testsuite/gas/arm/armv8_1-m-bf-exchange.d: New.
+	* testsuite/gas/arm/armv8_1-m-bf-exchange.s: New.
+	* testsuite/gas/arm/armv8_1-m-bf-exchange-bad.s: New
+	* testsuite/gas/arm/armv8_1-m-bf-exchange-bad.l: New
+	* testsuite/gas/arm/armv8_1-m-bf-exchange-bad.d: New
+
+2019-04-15  Sudakshina Das  <sudi.das@arm.com>
             Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	* config/tc-arm.c (T16_32_TAB): New entries for bf.
