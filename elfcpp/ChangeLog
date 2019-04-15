@@ -1,3 +1,7 @@
+2019-04-15  Sudakshina Das  <sudi.das@arm.com>
+
+	* arm.h (R_ARM_THM_BF16): New relocation code.
+
 2018-06-24  Nick Clifton  <nickc@redhat.com>
 
 	2.32 branch created.

@@ -1,5 +1,16 @@
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>
 
+	* reloc.c (BFD_RELOC_ARM_THUMB_BF17): New enum.
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Regenerated.
+	* bfd-elf32-arm.c (elf32_arm_howto_table_1): New entry for R_ARM_THM_BF16.
+	(elf32_arm_reloc_map elf32_arm_reloc_map): Map BFD_RELOC_ARM_THUMB_BF17
+	and R_ARM_THM_BF16 together.
+	(get_value_helper): New reloc helper.
+	(elf32_arm_final_link_relocate): New switch case for R_ARM_THM_BF16.
+
+2019-04-15  Sudakshina Das  <sudi.das@arm.com>
+
 	* reloc.c (BFD_RELOC_THUMB_PCREL_BRANCH5): New enum.
 	* bfd-in2.h: Regenerate.
 	* libbfd.h: Regenerate.

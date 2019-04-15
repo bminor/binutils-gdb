@@ -1742,6 +1742,20 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 	 0x00000000,		/* src_mask.  */
 	 0x00000000,		/* dst_mask.  */
 	 FALSE),		/* pcrel_offset.  */
+  /* Relocations for Armv8.1-M Mainline.  */
+  HOWTO (R_ARM_THM_BF16,	/* type.  */
+	 0,			/* rightshift.  */
+	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 16,			/* bitsize.  */
+	 TRUE,			/* pc_relative.  */
+	 0,			/* bitpos.  */
+	 complain_overflow_dont,/* do not complain_on_overflow.  */
+	 bfd_elf_generic_reloc,	/* special_function.  */
+	 "R_ARM_THM_BF16",	/* name.  */
+	 FALSE,			/* partial_inplace.  */
+	 0x001f0ffe,		/* src_mask.  */
+	 0x001f0ffe,		/* dst_mask.  */
+	 TRUE),			/* pcrel_offset.  */
 };
 
 /* 160 onwards: */
@@ -2053,7 +2067,8 @@ static const struct elf32_arm_reloc_map elf32_arm_reloc_map[] =
     {BFD_RELOC_ARM_THUMB_ALU_ABS_G3_NC, R_ARM_THM_ALU_ABS_G3_NC},
     {BFD_RELOC_ARM_THUMB_ALU_ABS_G2_NC, R_ARM_THM_ALU_ABS_G2_NC},
     {BFD_RELOC_ARM_THUMB_ALU_ABS_G1_NC, R_ARM_THM_ALU_ABS_G1_NC},
-    {BFD_RELOC_ARM_THUMB_ALU_ABS_G0_NC, R_ARM_THM_ALU_ABS_G0_NC}
+    {BFD_RELOC_ARM_THUMB_ALU_ABS_G0_NC, R_ARM_THM_ALU_ABS_G0_NC},
+    {BFD_RELOC_ARM_THUMB_BF17, R_ARM_THM_BF16}
   };
 
 static reloc_howto_type *
@@ -10250,6 +10265,59 @@ identify_add_or_sub (bfd_vma insn)
   return 0;
 }
 
+/* Helper function to compute the Addend for Armv8.1-M Mainline relocations.  */
+static bfd_vma
+get_value_helper (bfd_vma plt_offset,
+		  asection *splt,
+		  asection *input_section,
+		  asection *sym_sec,
+		  struct elf_link_hash_entry * h,
+		  struct bfd_link_info *info,
+		  bfd *input_bfd,
+		  Elf_Internal_Rela *rel,
+		  const char *sym_name,
+		  unsigned char st_type,
+		  struct elf32_arm_link_hash_table *globals,
+		  bfd_boolean *unresolved_reloc_p)
+{
+  bfd_vma value = 0;
+  enum arm_st_branch_type branch_type;
+  enum elf32_arm_stub_type stub_type = arm_stub_none;
+  struct elf32_arm_stub_hash_entry *stub_entry;
+  struct elf32_arm_link_hash_entry *hash
+    = (struct elf32_arm_link_hash_entry *)h;
+
+
+  if (plt_offset != (bfd_vma) -1)
+    {
+      value = (splt->output_section->vma
+	       + splt->output_offset
+	       + plt_offset);
+      value -= PLT_THUMB_STUB_SIZE;
+      *unresolved_reloc_p = FALSE;
+    }
+
+  stub_type = arm_type_of_stub (info, input_section, rel,
+				st_type, &branch_type,
+				hash, value, sym_sec,
+				input_bfd, sym_name);
+
+  if (stub_type != arm_stub_none)
+    {
+      stub_entry = elf32_arm_get_stub_entry (input_section,
+					     sym_sec, h,
+					     rel, globals,
+					     stub_type);
+	    if (stub_entry != NULL)
+	      {
+		value = (stub_entry->stub_offset
+			 + stub_entry->stub_sec->output_offset
+			 + stub_entry->stub_sec->output_section->vma);
+	      }
+	  }
+  return value;
+}
+
 /* Perform a relocation as part of a final link.  */
 
 static bfd_reloc_status_type
@@ -12855,6 +12923,51 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
       }
       *unresolved_reloc_p = FALSE;
       return bfd_reloc_ok;
+
+    case R_ARM_THM_BF16:
+      {
+	bfd_vma relocation;
+	bfd_vma upper_insn = bfd_get_16 (input_bfd, hit_data);
+	bfd_vma lower_insn = bfd_get_16 (input_bfd, hit_data + 2);
+
+	if (globals->use_rel)
+	  {
+	    bfd_vma immA  = (upper_insn & 0x001f);
+	    bfd_vma immB  = (lower_insn & 0x07fe) >> 1;
+	    bfd_vma immC  = (lower_insn & 0x0800) >> 11;
+	    addend  = (immA << 12);
+	    addend |= (immB << 2);
+	    addend |= (immC << 1);
+	    addend |= 1;
+	    /* Sign extend.  */
+	    addend = (addend & 0x10000) ? addend - (1 << 17) : addend;
+	  }
+
+	value = get_value_helper (plt_offset, splt, input_section, sym_sec, h,
+				  info, input_bfd, rel, sym_name, st_type,
+				  globals, unresolved_reloc_p);
+
+	relocation  = value + addend;
+	relocation -= (input_section->output_section->vma
+		       + input_section->output_offset
+		       + rel->r_offset);
+
+	/* Put RELOCATION back into the insn.  */
+	{
+	  bfd_vma immA = (relocation & 0x0001f000) >> 12;
+	  bfd_vma immB = (relocation & 0x00000ffc) >> 2;
+	  bfd_vma immC = (relocation & 0x00000002) >> 1;
+
+	  upper_insn = (upper_insn & 0xffe0) | immA;
+	  lower_insn = (lower_insn & 0xf001) | (immC << 11) | (immB << 1);
+	}
+
+	/* Put the relocated value back in the object file:  */
+	bfd_put_16 (input_bfd, upper_insn, hit_data);
+	bfd_put_16 (input_bfd, lower_insn, hit_data + 2);
+
+	return bfd_reloc_ok;
+      }
 
     default:
       return bfd_reloc_notsupported;

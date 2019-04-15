@@ -1,5 +1,12 @@
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>
 
+	* config/tc-arm.c (md_pcrel_from_section): New switch case for
+	BFD_RELOC_ARM_THUMB_BF17.
+	(md_appdy_fix): Likewise.
+	(tc_gen_reloc): Likewise.
+
+2019-04-15  Sudakshina Das  <sudi.das@arm.com>
+
 	* config/tc-arm.c (ARM_IT_MAX_RELOCS): New macro.
 	(arm_it): Member reloc renamed relocs and updated to an array.
 	Rest: Replace all occurrences of reloc to relocs[0].

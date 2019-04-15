@@ -22853,6 +22853,7 @@ md_pcrel_from_section (fixS * fixP, segT seg)
     case BFD_RELOC_THUMB_PCREL_BRANCH12:
     case BFD_RELOC_THUMB_PCREL_BRANCH20:
     case BFD_RELOC_THUMB_PCREL_BRANCH25:
+    case BFD_RELOC_ARM_THUMB_BF17:
       return base + 4;
 
     case BFD_RELOC_THUMB_PCREL_BRANCH23:
@@ -24750,6 +24751,39 @@ md_apply_fix (fixS *	fixP,
 	}
       break;
 
+    case BFD_RELOC_ARM_THUMB_BF17:
+      if (fixP->fx_addsy
+	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
+	  && !S_FORCE_RELOC (fixP->fx_addsy, TRUE)
+	  && ARM_IS_FUNC (fixP->fx_addsy)
+	  && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v8_1m_main))
+	{
+	  /* Force a relocation for a branch 17 bits wide.  */
+	  fixP->fx_done = 0;
+	}
+
+      if (v8_1_branch_value_check (value, 17, TRUE) == FAIL)
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      BAD_BRANCH_OFF);
+
+      if (fixP->fx_done || !seg->use_rela_p)
+	{
+	  offsetT newval2;
+	  addressT immA, immB, immC;
+
+	  immA = (value & 0x0001f000) >> 12;
+	  immB = (value & 0x00000ffc) >> 2;
+	  immC = (value & 0x00000002) >> 1;
+
+	  newval   = md_chars_to_number (buf, THUMB_SIZE);
+	  newval2  = md_chars_to_number (buf + THUMB_SIZE, THUMB_SIZE);
+	  newval  |= immA;
+	  newval2 |= (immC << 11) | (immB << 1);
+	  md_number_to_chars (buf, newval, THUMB_SIZE);
+	  md_number_to_chars (buf + THUMB_SIZE, newval2, THUMB_SIZE);
+	}
+      break;
+
     case BFD_RELOC_ARM_V4BX:
       /* This will need to go in the object file.  */
       fixP->fx_done = 0;
@@ -24932,6 +24966,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
     case BFD_RELOC_ARM_GOTFUNCDESC:
     case BFD_RELOC_ARM_GOTOFFFUNCDESC:
     case BFD_RELOC_ARM_FUNCDESC:
+    case BFD_RELOC_ARM_THUMB_BF17:
       code = fixp->fx_r_type;
       break;
 
