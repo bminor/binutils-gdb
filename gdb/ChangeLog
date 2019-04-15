@@ -1,3 +1,7 @@
+2019-04-15  Alan Hayward  <alan.hayward@arm.com>
+
+	* aarch64-tdep.c (aarch64_gdbarch_init): Move gdbarch lookup.
+
 2019-04-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* dwarf2read.c (dwarf2_init_complex_target_type): Handle complex
