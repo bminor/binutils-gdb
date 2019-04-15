@@ -2717,6 +2717,8 @@ static const struct opcode16 thumb_opcodes[] =
        %W		print an offset for BF instruction
        %Y		print an offset for BFL instruction
        %Z		print an offset for BFCSEL instruction
+       %Q		print an offset for Low Overhead Loop instructions
+       %P		print an offset for Low Overhead Loop end instructions
        %b		print a conditional branch offset
        %B		print an unconditional branch offset
        %s		print the shift field of an SSAT instruction
@@ -2750,6 +2752,15 @@ static const struct opcode16 thumb_opcodes[] =
 static const struct opcode32 thumb32_opcodes[] =
 {
   /* Armv8.1-M Mainline instructions.  */
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+    0xf040c001, 0xfff0f001, "wls\tlr, %16-19S, %Q"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+    0xf040e001, 0xfff0ffff, "dls\tlr, %16-19S"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+    0xf02fc001, 0xfffff001, "le\t%P"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+    0xf00fc001, 0xfffff001, "le\tlr, %P"},
+
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
     0xf040e001, 0xf860f001, "bf%c\t%G, %W"},
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
@@ -5941,6 +5952,32 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		  unsigned int boffset   = (T == 1) ? 4 : 2;
 		  func (stream, ", ");
 		  func (stream, "%x", endoffset + boffset);
+		}
+		break;
+
+	      case 'Q':
+		{
+		  unsigned int immh = (given & 0x000007feu) >> 1;
+		  unsigned int imml = (given & 0x00000800u) >> 11;
+		  bfd_vma imm32 = 0;
+
+		  imm32 |= immh << 2;
+		  imm32 |= imml << 1;
+
+		  info->print_address_func (pc + 4 + imm32, info);
+		}
+		break;
+
+	      case 'P':
+		{
+		  unsigned int immh = (given & 0x000007feu) >> 1;
+		  unsigned int imml = (given & 0x00000800u) >> 11;
+		  bfd_vma imm32 = 0;
+
+		  imm32 |= immh << 2;
+		  imm32 |= imml << 1;
+
+		  info->print_address_func (pc + 4 - imm32, info);
 		}
 		break;
 

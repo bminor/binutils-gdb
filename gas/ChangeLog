@@ -1,6 +1,28 @@
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>
             Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
+	* config/tc-arm.c (operand_parse_code): Add OP_LR and OP_oLR
+	for the LR operand and optional LR operand.
+	(parse_operands): Add switch cases for OP_LR and OP_oLR for
+	both type checking and value checking.
+	(encode_thumb32_addr_mode): New entries for DLS, WLS and LE.
+	(v8_1_loop_reloc): New helper function for handling labels
+	for the low overhead loop instructions.
+	(do_t_loloop): New function to encode DLS, WLS and LE.
+	(insns): New entries for WLS, DLS and LE.
+	(md_pcrel_from_section): New switch case
+	for BFD_RELOC_ARM_THUMB_LOOP12.
+	(md_appdy_fix): Likewise.
+	(tc_gen_reloc): Likewise.
+	* testsuite/gas/arm/armv8_1-m-tloop.s: New.
+	* testsuite/gas/arm/armv8_1-m-tloop.d: New.
+	* testsuite/gas/arm/armv8_1-m-tloop-bad.s: New.
+	* testsuite/gas/arm/armv8_1-m-tloop-bad.d: New.
+	* testsuite/gas/arm/armv8_1-m-tloop-bad.l: New.
+
+2019-04-15  Sudakshina Das  <sudi.das@arm.com>
+            Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
 	* config/tc-arm.c (T16_32_TAB): New entriy for bfcsel.
 	(do_t_v8_1_branch): New switch case for bfcsel.
 	(toU): Define.

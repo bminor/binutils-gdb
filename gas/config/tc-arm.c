@@ -6543,6 +6543,10 @@ enum operand_parse_code
   OP_RIWG,	/* iWMMXt wCG register */
   OP_RXA,	/* XScale accumulator register */
 
+  /* New operands for Armv8.1-M Mainline.  */
+  OP_LR,	/* ARM LR register */
+  OP_RRnpcsp_I32, /* ARM register (no BadReg) or literal 1 .. 32 */
+
   OP_REGLST,	/* ARM register list */
   OP_VRSLST,	/* VFP single-precision register list */
   OP_VRDLST,	/* VFP double-precision register list */
@@ -6622,6 +6626,7 @@ enum operand_parse_code
   OP_oI255c,	 /*	  curly-brace enclosed, 0 .. 255 */
 
   OP_oRR,	 /* ARM register */
+  OP_oLR,	 /* ARM LR register */
   OP_oRRnpc,	 /* ARM register, not the PC */
   OP_oRRnpcsp,	 /* ARM register, neither the PC nor the SP (a.k.a. BadReg) */
   OP_oRRw,	 /* ARM register, not r15, optional trailing ! */
@@ -6790,6 +6795,8 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_RRnpc:
 	case OP_RRnpcsp:
 	case OP_oRR:
+	case OP_LR:
+	case OP_oLR:
 	case OP_RR:    po_reg_or_fail (REG_TYPE_RN);	  break;
 	case OP_RCP:   po_reg_or_fail (REG_TYPE_CP);	  break;
 	case OP_RCN:   po_reg_or_fail (REG_TYPE_CN);	  break;
@@ -7305,6 +7312,12 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	  if (val == FAIL)
 	    goto failure;
 	  inst.operands[i].imm = val;
+	  break;
+
+	case OP_LR:
+	case OP_oLR:
+	  if (inst.operands[i].reg != REG_LR)
+	    inst.error = _("operand must be LR register");
 	  break;
 
 	default:
@@ -10518,6 +10531,7 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
   X(_cpsid, b670, f3af8600),			\
   X(_cpy,   4600, ea4f0000),			\
   X(_dec_sp,80dd, f1ad0d00),			\
+  X(_dls,   0000, f040e001),			\
   X(_eor,   4040, ea800000),			\
   X(_eors,  4040, ea900000),			\
   X(_inc_sp,00dd, f10d0d00),			\
@@ -10530,6 +10544,7 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
   X(_ldr_pc,4800, f85f0000),			\
   X(_ldr_pc2,4800, f85f0000),			\
   X(_ldr_sp,9800, f85d0000),			\
+  X(_le,    0000, f00fc001),			\
   X(_lsl,   0000, fa00f000),			\
   X(_lsls,  0000, fa10f000),			\
   X(_lsr,   0800, fa20f000),			\
@@ -10571,6 +10586,7 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
   X(_yield, bf10, f3af8001),			\
   X(_wfe,   bf20, f3af8002),			\
   X(_wfi,   bf30, f3af8003),			\
+  X(_wls,   0000, f040c001),			\
   X(_sev,   bf40, f3af8004),                    \
   X(_sevl,  bf50, f3af8005),			\
   X(_udf,   de00, f7f0a000)
@@ -13431,6 +13447,64 @@ do_t_branch_future (void)
 	break;
 
       default: abort ();
+    }
+}
+
+/* Helper function for do_t_loloop to handle relocations.  */
+static void
+v8_1_loop_reloc (int is_le)
+{
+  if (inst.relocs[0].exp.X_op == O_constant)
+    {
+      int value = inst.relocs[0].exp.X_add_number;
+      value = (is_le) ? -value : value;
+
+      if (v8_1_branch_value_check (value, 12, FALSE) == FAIL)
+	as_bad (BAD_BRANCH_OFF);
+
+      int imml, immh;
+
+      immh = (value & 0x00000ffc) >> 2;
+      imml = (value & 0x00000002) >> 1;
+
+      inst.instruction |= (imml << 11) | (immh << 1);
+    }
+  else
+    {
+      inst.relocs[0].type = BFD_RELOC_ARM_THUMB_LOOP12;
+      inst.relocs[0].pc_rel = 1;
+    }
+}
+
+/* To handle the Scalar Low Overhead Loop instructions
+   in Armv8.1-M Mainline.  */
+static void
+do_t_loloop (void)
+{
+  unsigned long insn = inst.instruction;
+
+  set_it_insn_type (OUTSIDE_IT_INSN);
+  inst.instruction = THUMB_OP32 (inst.instruction);
+
+  switch (insn)
+    {
+    case T_MNEM_le:
+      /* le <label>.  */
+      if (!inst.operands[0].present)
+	inst.instruction |= 1 << 21;
+
+      v8_1_loop_reloc (TRUE);
+      break;
+
+    case T_MNEM_wls:
+      v8_1_loop_reloc (FALSE);
+      /* Fall through.  */
+    case T_MNEM_dls:
+      constraint (inst.operands[1].isreg != 1, BAD_ARGS);
+      inst.instruction |= (inst.operands[1].reg << 16);
+      break;
+
+    default: abort();
     }
 }
 
@@ -21756,6 +21830,10 @@ static const struct asm_opcode insns[] =
  toC("bfx",    _bfx,	2, (EXPs, RRnpcsp),	     t_branch_future),
  toC("bfl",    _bfl,	2, (EXPs, EXPs),	     t_branch_future),
  toC("bflx",   _bflx,	2, (EXPs, RRnpcsp),	     t_branch_future),
+
+ toU("dls", _dls, 2, (LR, RRnpcsp),	 t_loloop),
+ toU("wls", _wls, 3, (LR, RRnpcsp, EXP), t_loloop),
+ toU("le",  _le,  2, (oLR, EXP),	 t_loloop),
 };
 #undef ARM_VARIANT
 #undef THUMB_VARIANT
@@ -22996,6 +23074,7 @@ md_pcrel_from_section (fixS * fixP, segT seg)
     case BFD_RELOC_ARM_THUMB_BF17:
     case BFD_RELOC_ARM_THUMB_BF19:
     case BFD_RELOC_ARM_THUMB_BF13:
+    case BFD_RELOC_ARM_THUMB_LOOP12:
       return base + 4;
 
     case BFD_RELOC_THUMB_PCREL_BRANCH23:
@@ -25025,6 +25104,39 @@ md_apply_fix (fixS *	fixP,
 	}
       break;
 
+    case BFD_RELOC_ARM_THUMB_LOOP12:
+      if (fixP->fx_addsy
+	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
+	  && !S_FORCE_RELOC (fixP->fx_addsy, TRUE)
+	  && ARM_IS_FUNC (fixP->fx_addsy)
+	  && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v8_1m_main))
+	{
+	  /* Force a relocation for a branch 12 bits wide.  */
+	  fixP->fx_done = 0;
+	}
+
+      bfd_vma insn = get_thumb32_insn (buf);
+      /* le lr, <label> or le <label> */
+      if (((insn & 0xffffffff) == 0xf00fc001)
+	  || ((insn & 0xffffffff) == 0xf02fc001))
+	value = -value;
+
+      if (v8_1_branch_value_check (value, 12, FALSE) == FAIL)
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      BAD_BRANCH_OFF);
+      if (fixP->fx_done || !seg->use_rela_p)
+	{
+	  addressT imml, immh;
+
+	  immh = (value & 0x00000ffc) >> 2;
+	  imml = (value & 0x00000002) >> 1;
+
+	  newval  = md_chars_to_number (buf + THUMB_SIZE, THUMB_SIZE);
+	  newval |= (imml << 11) | (immh << 1);
+	  md_number_to_chars (buf + THUMB_SIZE, newval, THUMB_SIZE);
+	}
+      break;
+
     case BFD_RELOC_ARM_V4BX:
       /* This will need to go in the object file.  */
       fixP->fx_done = 0;
@@ -25241,6 +25353,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
 
     case BFD_RELOC_THUMB_PCREL_BRANCH5:
     case BFD_RELOC_THUMB_PCREL_BFCSEL:
+    case BFD_RELOC_ARM_THUMB_LOOP12:
       as_bad_where (fixp->fx_file, fixp->fx_line,
 		    _("%s used for a symbol not defined in the same file"),
 		    bfd_get_reloc_code_name (fixp->fx_r_type));

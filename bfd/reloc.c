@@ -3040,6 +3040,11 @@ ENUMDOC
   ARM 19-bit pc-relative branch for Branch Future Link instruction.
 
 ENUM
+  BFD_RELOC_ARM_THUMB_LOOP12
+ENUMDOC
+  ARM 12-bit pc-relative branch for Low Overhead Loop instructions.
+
+ENUM
   BFD_RELOC_THUMB_PCREL_BRANCH7
 ENUMX
   BFD_RELOC_THUMB_PCREL_BRANCH9

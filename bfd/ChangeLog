@@ -1,5 +1,11 @@
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>
 
+	* reloc.c (BFD_RELOC_ARM_THUMB_LOOP12): New.
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Regenerated.
+
+2019-04-15  Sudakshina Das  <sudi.das@arm.com>
+
 	* reloc.c (BFD_RELOC_THUMB_PCREL_BFCSEL): New relocation.
 	* bfd-in2.h: Regenerated.
 	* libbfd.h: Likewise.
