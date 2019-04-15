@@ -541,17 +541,40 @@ amd64_merge_classes (enum amd64_reg_class class1, enum amd64_reg_class class2)
 
 static void amd64_classify (struct type *type, enum amd64_reg_class theclass[2]);
 
-/* Return non-zero if TYPE is a non-POD structure or union type.  */
+/* Return true if TYPE is a structure or union with unaligned fields.  */
 
-static int
-amd64_non_pod_p (struct type *type)
+static bool
+amd64_has_unaligned_fields (struct type *type)
 {
-  /* ??? A class with a base class certainly isn't POD, but does this
-     catch all non-POD structure types?  */
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT && TYPE_N_BASECLASSES (type) > 0)
-    return 1;
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
+      || TYPE_CODE (type) == TYPE_CODE_UNION)
+    {
+      for (int i = 0; i < TYPE_NFIELDS (type); i++)
+	{
+	  struct type *subtype = check_typedef (TYPE_FIELD_TYPE (type, i));
+	  int bitpos = TYPE_FIELD_BITPOS (type, i);
+	  int align = type_align(subtype);
 
-  return 0;
+	  /* Ignore static fields, or empty fields, for example nested
+	     empty structures.  */
+	  if (field_is_static (&TYPE_FIELD (type, i))
+	      || (TYPE_FIELD_BITSIZE (type, i) == 0
+		  && TYPE_LENGTH (subtype) == 0))
+	    continue;
+
+	  if (bitpos % 8 != 0)
+	    return true;
+
+	  int bytepos = bitpos / 8;
+	  if (bytepos % align != 0)
+	    return true;
+
+	  if (amd64_has_unaligned_fields(subtype))
+	    return true;
+	}
+    }
+
+  return false;
 }
 
 /* Classify TYPE according to the rules for aggregate (structures and
@@ -560,10 +583,9 @@ amd64_non_pod_p (struct type *type)
 static void
 amd64_classify_aggregate (struct type *type, enum amd64_reg_class theclass[2])
 {
-  /* 1. If the size of an object is larger than two eightbytes, or in
-        C++, is a non-POD structure or union type, or contains
+  /* 1. If the size of an object is larger than two eightbytes, or it has
         unaligned fields, it has class memory.  */
-  if (TYPE_LENGTH (type) > 16 || amd64_non_pod_p (type))
+  if (TYPE_LENGTH (type) > 16 || amd64_has_unaligned_fields (type))
     {
       theclass[0] = theclass[1] = AMD64_MEMORY;
       return;

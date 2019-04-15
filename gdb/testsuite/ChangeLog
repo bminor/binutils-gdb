@@ -1,3 +1,8 @@
+2019-04-15  Leszek Swirski  <leszeks@google.com>
+
+	* gdb.arch/amd64-eval.cc: New file.
+	* gdb.arch/amd64-eval.exp: New file.
+
 2019-04-11  Alan Hayward  <alan.hayward@arm.com>
 
 	* gdb.server/sysroot.c: New test.
