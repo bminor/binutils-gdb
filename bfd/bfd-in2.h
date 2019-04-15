@@ -3564,6 +3564,9 @@ field in the instruction.  */
 /* ARM 26-bit pc-relative branch for B or conditional BL instruction.  */
   BFD_RELOC_ARM_PCREL_JUMP,
 
+/* ARM 5-bit pc-relative branch for Branch Future instructions.  */
+  BFD_RELOC_THUMB_PCREL_BRANCH5,
+
 /* Thumb 7-, 9-, 12-, 20-, 23-, and 25-bit pc-relative branches.
 The lowest bit must be zero and is not stored in the instruction.
 Note that the corresponding ELF R_ARM_THM_JUMPnn constant has an

@@ -235,6 +235,8 @@ static const arm_feature_set arm_ext_pan = ARM_FEATURE_CORE_HIGH (ARM_EXT2_PAN);
 static const arm_feature_set arm_ext_v8m = ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8M);
 static const arm_feature_set arm_ext_v8m_main =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8M_MAIN);
+static const arm_feature_set arm_ext_v8_1m_main =
+ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN);
 /* Instructions in ARMv8-M only found in M profile architectures.  */
 static const arm_feature_set arm_ext_v8m_m_only =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8M | ARM_EXT2_V8M_MAIN);
@@ -843,6 +845,7 @@ struct asm_opcode
 #define BAD_THUMB32	_("instruction not supported in Thumb16 mode")
 #define BAD_ADDR_MODE   _("instruction does not accept this addressing mode");
 #define BAD_BRANCH	_("branch must be last instruction in IT block")
+#define BAD_BRANCH_OFF	_("branch out of range or not a multiple of 2")
 #define BAD_NOT_IT	_("instruction not allowed in IT block")
 #define BAD_FPU		_("selected FPU does not support instruction")
 #define BAD_OUT_IT 	_("thumb conditional instruction should be in IT block")
@@ -13272,6 +13275,26 @@ do_t_usat16 (void)
   inst.instruction |= Rn << 16;
 }
 
+/* Checking the range of the branch offset (VAL) with NBITS bits
+   and IS_SIGNED signedness.  Also checks the LSB to be 0.  */
+static int
+v8_1_branch_value_check (int val, int nbits, int is_signed)
+{
+  gas_assert (nbits > 0 && nbits <= 32);
+  if (is_signed)
+    {
+      int cmp = (1 << (nbits - 1));
+      if ((val < -cmp) || (val >= cmp) || (val & 0x01))
+	return FAIL;
+    }
+  else
+    {
+      if ((val <= 0) || (val >= (1 << nbits)) || (val & 0x1))
+	return FAIL;
+    }
+    return SUCCESS;
+}
+
 /* Neon instruction encoder helpers.  */
 
 /* Encodings for the different types for various Neon opcodes.  */
@@ -22791,6 +22814,7 @@ md_pcrel_from_section (fixS * fixP, segT seg)
       return (base + 4) & ~3;
 
       /* Thumb branches are simply offset by +4.  */
+    case BFD_RELOC_THUMB_PCREL_BRANCH5:
     case BFD_RELOC_THUMB_PCREL_BRANCH7:
     case BFD_RELOC_THUMB_PCREL_BRANCH9:
     case BFD_RELOC_THUMB_PCREL_BRANCH12:
@@ -24669,6 +24693,30 @@ md_apply_fix (fixS *	fixP,
 	}
       break;
 
+    case BFD_RELOC_THUMB_PCREL_BRANCH5:
+      if (fixP->fx_addsy
+	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
+	  && !S_FORCE_RELOC (fixP->fx_addsy, TRUE)
+	  && ARM_IS_FUNC (fixP->fx_addsy)
+	  && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v8_1m_main))
+	{
+	  /* Force a relocation for a branch 5 bits wide.  */
+	  fixP->fx_done = 0;
+	}
+      if (v8_1_branch_value_check (value, 5, FALSE) == FAIL)
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      BAD_BRANCH_OFF);
+
+      if (fixP->fx_done || !seg->use_rela_p)
+	{
+	  addressT boff = value >> 1;
+
+	  newval  = md_chars_to_number (buf, THUMB_SIZE);
+	  newval |= (boff << 7);
+	  md_number_to_chars (buf, newval, THUMB_SIZE);
+	}
+      break;
+
     case BFD_RELOC_ARM_V4BX:
       /* This will need to go in the object file.  */
       fixP->fx_done = 0;
@@ -24878,6 +24926,12 @@ tc_gen_reloc (asection *section, fixS *fixp)
     case BFD_RELOC_ARM_ADRL_IMMEDIATE:
       as_bad_where (fixp->fx_file, fixp->fx_line,
 		    _("ADRL used for a symbol not defined in the same file"));
+      return NULL;
+
+    case BFD_RELOC_THUMB_PCREL_BRANCH5:
+      as_bad_where (fixp->fx_file, fixp->fx_line,
+		    _("%s used for a symbol not defined in the same file"),
+		    bfd_get_reloc_code_name (fixp->fx_r_type));
       return NULL;
 
     case BFD_RELOC_ARM_OFFSET_IMM:

@@ -2713,6 +2713,7 @@ static const struct opcode16 thumb_opcodes[] =
 
        %E		print the lsb and width fields of a bfc/bfi instruction
        %F		print the lsb and width fields of a sbfx/ubfx instruction
+       %G		print a fallback offset for Branch Future instructions
        %b		print a conditional branch offset
        %B		print an unconditional branch offset
        %s		print the shift field of an SSAT instruction
@@ -5859,6 +5860,13 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		  lsb |= (given & 0x000000c0u) >> 6;
 		  lsb |= (given & 0x00007000u) >> 10;
 		  func (stream, "#%u, #%u", lsb, width);
+		}
+		break;
+
+	      case 'G':
+		{
+		  unsigned int boff = (((given & 0x07800000) >> 23) << 1);
+		  func (stream, "%x", boff);
 		}
 		break;
 

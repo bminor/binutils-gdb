@@ -1,3 +1,13 @@
+2019-04-15  Sudakshina Das  <sudi.das@arm.com>
+
+	* config/tc-arm.c (md_pcrel_from_section): New switch case
+	for BFD_RELOC_THUMB_PCREL_BRANCH5.
+	(v8_1_branch_value_check): New function to check branch
+	offsets.
+	(md_appdy_fix): New switch case for
+	BFD_RELOC_THUMB_PCREL_BRANCH5.
+	(tc_gen_reloc): Likewise.
+
 2019-04-15  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	* config/tc-arm.c (do_neon_movhf): Remove fp-armv8 check.

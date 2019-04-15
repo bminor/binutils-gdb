@@ -3015,6 +3015,11 @@ ENUMDOC
   ARM 26-bit pc-relative branch for B or conditional BL instruction.
 
 ENUM
+  BFD_RELOC_THUMB_PCREL_BRANCH5
+ENUMDOC
+  ARM 5-bit pc-relative branch for Branch Future instructions.
+
+ENUM
   BFD_RELOC_THUMB_PCREL_BRANCH7
 ENUMX
   BFD_RELOC_THUMB_PCREL_BRANCH9
