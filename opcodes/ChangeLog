@@ -1,5 +1,11 @@
 2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* arm-dis.c (coprocessor_opcodes): Document new %C format control code.
+	Add new entries for VSCCLRM instruction.
+	(print_insn_coprocessor): Handle new %C format control code.
+
+2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* arm-dis.c (enum isa): New enum.
 	(struct sopcode32): New structure.
 	(coprocessor_opcodes): change type of entries to struct sopcode32 and

@@ -109,6 +109,7 @@ struct opcode16
                           UNPREDICTABLE if not AL in Thumb)
    %A			print address for ldc/stc/ldf/stf instruction
    %B			print vstm/vldm register list
+   %C			print vscclrm register list
    %I                   print cirrus signed shift immediate: bits 0..3|4..6
    %F			print the COUNT field of a LFM/SFM instruction.
    %P			print floating point precision in arithmetic insn
@@ -424,6 +425,12 @@ static const struct sopcode32 coprocessor_opcodes[] =
     0x0c000200, 0x0e100f00, "sfm%c\t%12-14f, %F, %A"},
   {ANY, ARM_FEATURE_COPROC (FPU_FPA_EXT_V2),
     0x0c100200, 0x0e100f00, "lfm%c\t%12-14f, %F, %A"},
+
+  /* Armv8.1-M Mainline instructions.  */
+  {T32, ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+    0xec9f0b00, 0xffbf0f01, "vscclrm%c\t%C"},
+  {T32, ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+    0xec9f0a00, 0xffbf0f00, "vscclrm%c\t%C"},
 
   /* ARMv8-M Mainline Security Extensions instructions.  */
   {ANY, ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8M_MAIN),
@@ -3639,6 +3646,31 @@ print_insn_coprocessor (bfd_vma pc,
 		      func (stream, "{d%d-<overflow reg d%d>}", regno, regno + offset - 1);
 		    else
 		      func (stream, "{d%d-d%d}", regno, regno + offset - 1);
+		  }
+		  break;
+
+		case 'C':
+		  {
+		    bfd_boolean single = ((given >> 8) & 1) == 0;
+		    char reg_prefix = single ? 's' : 'd';
+		    int Dreg = (given >> 22) & 0x1;
+		    int Vdreg = (given >> 12) & 0xf;
+		    int reg = single ? ((Vdreg << 1) | Dreg)
+				     : ((Dreg << 4) | Vdreg);
+		    int num = (given >> (single ? 0 : 1)) & 0x7f;
+		    int maxreg = single ? 31 : 15;
+		    int topreg = reg + num - 1;
+
+		    if (!num)
+		      func (stream, "{VPR}");
+		    else if (num == 1)
+		      func (stream, "{%c%d, VPR}", reg_prefix, reg);
+		    else if (topreg > maxreg)
+		      func (stream, "{%c%d-<overflow reg d%d, VPR}",
+			    reg_prefix, reg, single ? topreg >> 1 : topreg);
+		    else
+		      func (stream, "{%c%d-%c%d, VPR}", reg_prefix, reg,
+			    reg_prefix, topreg);
 		  }
 		  break;
 

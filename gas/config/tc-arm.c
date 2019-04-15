@@ -1609,7 +1609,7 @@ parse_typed_reg_or_scalar (char **ccp, enum arm_reg_type type,
   return reg->number;
 }
 
-/* Like arm_reg_parse, but allow allow the following extra features:
+/* Like arm_reg_parse, but also allow the following extra features:
     - If RTYPE is non-zero, return the (possibly restricted) type of the
       register (e.g. Neon double or quad reg when either has been requested).
     - If this is a Neon vector type with additional type information, fill
@@ -1695,7 +1695,9 @@ enum reg_list_els
   REGLIST_RN,
   REGLIST_CLRM,
   REGLIST_VFP_S,
+  REGLIST_VFP_S_VPR,
   REGLIST_VFP_D,
+  REGLIST_VFP_D_VPR,
   REGLIST_NEON_D
 };
 
@@ -1869,7 +1871,8 @@ parse_reg_list (char ** strp, enum reg_list_els etype)
    bug.  */
 
 static int
-parse_vfp_reg_list (char **ccp, unsigned int *pbase, enum reg_list_els etype)
+parse_vfp_reg_list (char **ccp, unsigned int *pbase, enum reg_list_els etype,
+		    bfd_boolean *partial_match)
 {
   char *str = *ccp;
   int base_reg;
@@ -1880,6 +1883,9 @@ parse_vfp_reg_list (char **ccp, unsigned int *pbase, enum reg_list_els etype)
   int warned = 0;
   unsigned long mask = 0;
   int i;
+  bfd_boolean vpr_seen = FALSE;
+  bfd_boolean expect_vpr =
+    (etype == REGLIST_VFP_S_VPR) || (etype == REGLIST_VFP_D_VPR);
 
   if (skip_past_char (&str, '{') == FAIL)
     {
@@ -1890,11 +1896,13 @@ parse_vfp_reg_list (char **ccp, unsigned int *pbase, enum reg_list_els etype)
   switch (etype)
     {
     case REGLIST_VFP_S:
+    case REGLIST_VFP_S_VPR:
       regtype = REG_TYPE_VFS;
       max_regs = 32;
       break;
 
     case REGLIST_VFP_D:
+    case REGLIST_VFP_D_VPR:
       regtype = REG_TYPE_VFD;
       break;
 
@@ -1906,7 +1914,7 @@ parse_vfp_reg_list (char **ccp, unsigned int *pbase, enum reg_list_els etype)
       gas_assert (0);
     }
 
-  if (etype != REGLIST_VFP_S)
+  if (etype != REGLIST_VFP_S && etype != REGLIST_VFP_S_VPR)
     {
       /* VFPv3 allows 32 D registers, except for the VFPv3-D16 variant.  */
       if (ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_d32))
@@ -1924,18 +1932,53 @@ parse_vfp_reg_list (char **ccp, unsigned int *pbase, enum reg_list_els etype)
     }
 
   base_reg = max_regs;
+  *partial_match = FALSE;
 
   do
     {
       int setmask = 1, addregs = 1;
+      const char vpr_str[] = "vpr";
+      int vpr_str_len = strlen (vpr_str);
 
       new_base = arm_typed_reg_parse (&str, regtype, &regtype, NULL);
 
-      if (new_base == FAIL)
+      if (expect_vpr)
+	{
+	  if (new_base == FAIL
+	      && !strncasecmp (str, vpr_str, vpr_str_len)
+	      && !ISALPHA (*(str + vpr_str_len))
+	      && !vpr_seen)
+	    {
+	      vpr_seen = TRUE;
+	      str += vpr_str_len;
+	      if (count == 0)
+		base_reg = 0; /* Canonicalize VPR only on d0 with 0 regs.  */
+	    }
+	  else if (vpr_seen)
+	    {
+	      first_error (_("VPR expected last"));
+	      return FAIL;
+	    }
+	  else if (new_base == FAIL)
+	    {
+	      if (regtype == REG_TYPE_VFS)
+		first_error (_("VFP single precision register or VPR "
+			       "expected"));
+	      else /* regtype == REG_TYPE_VFD.  */
+		first_error (_("VFP/Neon double precision register or VPR "
+			       "expected"));
+	      return FAIL;
+	    }
+	}
+      else if (new_base == FAIL)
 	{
 	  first_error (_(reg_expected_msgs[regtype]));
 	  return FAIL;
 	}
+
+      *partial_match = TRUE;
+      if (vpr_seen)
+	continue;
 
       if (new_base >= max_regs)
 	{
@@ -1959,7 +2002,7 @@ parse_vfp_reg_list (char **ccp, unsigned int *pbase, enum reg_list_els etype)
 	  return FAIL;
 	}
 
-      if ((mask >> new_base) != 0 && ! warned)
+      if ((mask >> new_base) != 0 && ! warned && !vpr_seen)
 	{
 	  as_tsktsk (_("register list not in ascending order"));
 	  warned = 1;
@@ -2014,10 +2057,16 @@ parse_vfp_reg_list (char **ccp, unsigned int *pbase, enum reg_list_els etype)
   str++;
 
   /* Sanity check -- should have raised a parse error above.  */
-  if (count == 0 || count > max_regs)
+  if ((!vpr_seen && count == 0) || count > max_regs)
     abort ();
 
   *pbase = base_reg;
+
+  if (expect_vpr && !vpr_seen)
+    {
+      first_error (_("VPR expected last"));
+      return FAIL;
+    }
 
   /* Final test -- the registers must be consecutive.  */
   mask >>= base_reg;
@@ -4146,8 +4195,10 @@ s_arm_unwind_save_vfp_armv6 (void)
   valueT op;
   int num_vfpv3_regs = 0;
   int num_regs_below_16;
+  bfd_boolean partial_match;
 
-  count = parse_vfp_reg_list (&input_line_pointer, &start, REGLIST_VFP_D);
+  count = parse_vfp_reg_list (&input_line_pointer, &start, REGLIST_VFP_D,
+			      &partial_match);
   if (count == FAIL)
     {
       as_bad (_("expected register list"));
@@ -4194,8 +4245,10 @@ s_arm_unwind_save_vfp (void)
   int count;
   unsigned int reg;
   valueT op;
+  bfd_boolean partial_match;
 
-  count = parse_vfp_reg_list (&input_line_pointer, &reg, REGLIST_VFP_D);
+  count = parse_vfp_reg_list (&input_line_pointer, &reg, REGLIST_VFP_D,
+			      &partial_match);
   if (count == FAIL)
     {
       as_bad (_("expected register list"));
@@ -6585,6 +6638,7 @@ enum operand_parse_code
   OP_VRSDLST,   /* VFP single or double-precision register list (& quad) */
   OP_NRDLST,    /* Neon double-precision register list (d0-d31, qN aliases) */
   OP_NSTRLST,   /* Neon element/structure list */
+  OP_VRSDVLST,  /* VFP single or double-precision register list and VPR */
 
   OP_RNDQ_I0,   /* Neon D or Q reg, or immediate zero.  */
   OP_RVSD_I0,	/* VFP S or D reg, or immediate zero.  */
@@ -6694,6 +6748,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
   enum arm_reg_type rtype;
   parse_operand_result result;
   unsigned int op_parse_code;
+  bfd_boolean partial_match;
 
 #define po_char_or_fail(chr)			\
   do						\
@@ -7218,29 +7273,43 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	  break;
 
 	case OP_VRSLST:
-	  val = parse_vfp_reg_list (&str, &inst.operands[i].reg, REGLIST_VFP_S);
+	  val = parse_vfp_reg_list (&str, &inst.operands[i].reg, REGLIST_VFP_S,
+				    &partial_match);
 	  break;
 
 	case OP_VRDLST:
-	  val = parse_vfp_reg_list (&str, &inst.operands[i].reg, REGLIST_VFP_D);
+	  val = parse_vfp_reg_list (&str, &inst.operands[i].reg, REGLIST_VFP_D,
+				    &partial_match);
 	  break;
 
 	case OP_VRSDLST:
 	  /* Allow Q registers too.  */
 	  val = parse_vfp_reg_list (&str, &inst.operands[i].reg,
-				    REGLIST_NEON_D);
+				    REGLIST_NEON_D, &partial_match);
 	  if (val == FAIL)
 	    {
 	      inst.error = NULL;
 	      val = parse_vfp_reg_list (&str, &inst.operands[i].reg,
-					REGLIST_VFP_S);
+					REGLIST_VFP_S, &partial_match);
+	      inst.operands[i].issingle = 1;
+	    }
+	  break;
+
+	case OP_VRSDVLST:
+	  val = parse_vfp_reg_list (&str, &inst.operands[i].reg,
+				    REGLIST_VFP_D_VPR, &partial_match);
+	  if (val == FAIL && !partial_match)
+	    {
+	      inst.error = NULL;
+	      val = parse_vfp_reg_list (&str, &inst.operands[i].reg,
+					REGLIST_VFP_S_VPR, &partial_match);
 	      inst.operands[i].issingle = 1;
 	    }
 	  break;
 
 	case OP_NRDLST:
 	  val = parse_vfp_reg_list (&str, &inst.operands[i].reg,
-				    REGLIST_NEON_D);
+				    REGLIST_NEON_D, &partial_match);
 	  break;
 
 	case OP_NSTRLST:
@@ -7344,6 +7413,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_VRSLST:
 	case OP_VRDLST:
 	case OP_VRSDLST:
+	case OP_VRSDVLST:
 	case OP_NRDLST:
 	case OP_NSTRLST:
 	  if (val == FAIL)
@@ -12811,6 +12881,24 @@ do_t_clrm (void)
     {
       inst.error = _("invalid register list to push/pop instruction");
       return;
+    }
+}
+
+static void
+do_t_vscclrm (void)
+{
+  if (inst.operands[0].issingle)
+    {
+      inst.instruction |= (inst.operands[0].reg & 0x1) << 22;
+      inst.instruction |= (inst.operands[0].reg & 0x1e) << 11;
+      inst.instruction |= inst.operands[0].imm;
+    }
+  else
+    {
+      inst.instruction |= (inst.operands[0].reg & 0x10) << 18;
+      inst.instruction |= (inst.operands[0].reg & 0xf) << 12;
+      inst.instruction |= 1 << 8;
+      inst.instruction |= inst.operands[0].imm << 1;
     }
 }
 
@@ -21889,7 +21977,8 @@ static const struct asm_opcode insns[] =
  toU("wls", _wls, 3, (LR, RRnpcsp, EXP), t_loloop),
  toU("le",  _le,  2, (oLR, EXP),	 t_loloop),
 
- ToC("clrm",	e89f0000, 1, (CLRMLST),  t_clrm)
+ ToC("clrm",	e89f0000, 1, (CLRMLST),  t_clrm),
+ ToC("vscclrm",	ec9f0a00, 1, (VRSDVLST), t_vscclrm)
 };
 #undef ARM_VARIANT
 #undef THUMB_VARIANT

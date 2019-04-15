@@ -1,5 +1,31 @@
 2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* config/tc-arm.c (arm_typed_reg_parse): Fix typo in comment.
+	(enum reg_list_els): New REGLIST_VFP_S_VPR and REGLIST_VFP_D_VPR
+	enumerators.
+	(parse_vfp_reg_list): Add new partial_match parameter.  Set
+	*partial_match to TRUE if at least one element in the register list has
+	matched.  Add support for REGLIST_VFP_S_VPR and REGLIST_VFP_D_VPR
+	register lists which expect VPR as last element in the list.
+	(s_arm_unwind_save_vfp_armv6): Adapt call to parse_vfp_reg_list to new
+	prototype.
+	(s_arm_unwind_save_vfp): Likewise.
+	(enum operand_parse_code): New OP_VRSDVLST enumerator.
+	(parse_operands): Adapt call to parse_vfp_reg_list to new prototype.
+	Handle new OP_VRSDVLST case.
+	(do_t_vscclrm): New function.
+	(insns): New entry for VSCCLRM instruction.
+	* testsuite/gas/arm/archv8m_1m-cmse-main-bad.s: Add invalid VSCCLRM
+	instructions.
+	* testsuite/gas/arm/archv8m_1m-cmse-main-bad.l: Add error expectations
+	for above instructions.
+	* testsuite/gas/arm/archv8m_1m-cmse-main.s: Add tests for VSCCLRM
+	instruction.
+	* testsuite/gas/arm/archv8m_1m-cmse-main.d: Add expected disassembly
+	for above instructions.
+
+2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* config/tc-arm.c (enum reg_list_els): Define earlier and add
 	REGLIST_RN and REGLIST_CLRM enumerators.
 	(parse_reg_list): Add etype parameter to distinguish between regular
