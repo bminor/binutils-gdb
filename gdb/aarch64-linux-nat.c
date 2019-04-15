@@ -46,6 +46,7 @@
 
 /* Defines ps_err_e, struct ps_prochandle.  */
 #include "gdb_proc_service.h"
+#include "arch-utils.h"
 
 #ifndef TRAP_HWBKPT
 #define TRAP_HWBKPT 0x0004
@@ -95,6 +96,8 @@ public:
   /* Add our siginfo layout converter.  */
   bool low_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
     override;
+
+  struct gdbarch *thread_architecture (ptid_t) override;
 };
 
 static aarch64_linux_nat_target the_aarch64_linux_nat_target;
@@ -937,6 +940,34 @@ int
 aarch64_linux_nat_target::can_do_single_step ()
 {
   return 1;
+}
+
+/* Implement the "thread_architecture" target_ops method.  */
+
+struct gdbarch *
+aarch64_linux_nat_target::thread_architecture (ptid_t ptid)
+{
+  /* Return the gdbarch for the current thread.  If the vector length has
+     changed since the last time this was called, then do a further lookup.  */
+
+  uint64_t vq = aarch64_sve_get_vq (ptid.lwp ());
+
+  /* Find the current gdbarch the same way as process_stratum_target.  Only
+     return it if the current vector length matches the one in the tdep.  */
+  inferior *inf = find_inferior_ptid (ptid);
+  gdb_assert (inf != NULL);
+  if (vq == gdbarch_tdep (inf->gdbarch)->vq)
+    return inf->gdbarch;
+
+  /* We reach here if the vector length for the thread is different from its
+     value at process start.  Lookup gdbarch via info (potentially creating a
+     new one), stashing the vector length inside id.  Use -1 for when SVE
+     unavailable, to distinguish from an unset value of 0.  */
+  struct gdbarch_info info;
+  gdbarch_info_init (&info);
+  info.bfd_arch_info = bfd_lookup_arch (bfd_arch_spu, bfd_mach_spu);
+  info.id = (int *) (vq == 0 ? -1 : vq);
+  return gdbarch_find_by_info (info);
 }
 
 /* Define AArch64 maintenance commands.  */

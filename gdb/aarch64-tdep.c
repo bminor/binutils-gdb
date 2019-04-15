@@ -3198,20 +3198,36 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   int i, num_regs = 0, num_pseudo_regs = 0;
   int first_pauth_regnum = -1, pauth_ra_state_offset = -1;
 
+  /* Use the vector length passed via the target info.  Here -1 is used for no
+     SVE, and 0 is unset.  If unset then use the vector length from the existing
+     tdesc.  */
+  uint64_t vq = 0;
+  if (info.id == (int *) -1)
+    vq = 0;
+  else if (info.id != 0)
+    vq = (uint64_t) info.id;
+  else
+    vq = aarch64_get_tdesc_vq (info.target_desc);
+
+  if (vq > AARCH64_MAX_SVE_VQ)
+    internal_error (__FILE__, __LINE__, _("VQ out of bounds: %ld (max %d)"),
+		    vq, AARCH64_MAX_SVE_VQ);
+
   /* If there is already a candidate, use it.  */
   for (gdbarch_list *best_arch = gdbarch_list_lookup_by_info (arches, &info);
        best_arch != nullptr;
        best_arch = gdbarch_list_lookup_by_info (best_arch->next, &info))
     {
       struct gdbarch_tdep *tdep = gdbarch_tdep (best_arch->gdbarch);
-      if (tdep)
+      if (tdep && tdep->vq == vq)
 	return best_arch->gdbarch;
     }
 
-  /* Ensure we always have a target description.  */
+  /* Ensure we always have a target descriptor, and that it is for the given VQ
+     value.  */
   const struct target_desc *tdesc = info.target_desc;
-  if (!tdesc_has_registers (tdesc))
-    tdesc = aarch64_read_description (0, false);
+  if (!tdesc_has_registers (tdesc) || vq != aarch64_get_tdesc_vq (tdesc))
+    tdesc = aarch64_read_description (vq, false);
   gdb_assert (tdesc);
 
   feature_core = tdesc_find_feature (tdesc,"org.gnu.gdb.aarch64.core");
@@ -3304,7 +3320,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->lowest_pc = 0x20;
   tdep->jb_pc = -1;		/* Longjump support not enabled by default.  */
   tdep->jb_elt_size = 8;
-  tdep->vq = aarch64_get_tdesc_vq (tdesc);
+  tdep->vq = vq;
   tdep->pauth_reg_base = first_pauth_regnum;
   tdep->pauth_ra_state_regnum = (feature_pauth == NULL) ? -1
 				: pauth_ra_state_offset + num_regs;
