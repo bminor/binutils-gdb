@@ -1,3 +1,8 @@
+2019-04-24  John Darrington  <john@darrington.wattle.id.au>
+
+        * s12z-opc.h: Add extern "C" bracketing to help
+	users who wish to use this interface in c++ code.
+
 2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* arm-dis.c (coprocessor_opcodes): Document new %J and %K format

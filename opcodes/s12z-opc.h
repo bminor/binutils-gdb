@@ -22,6 +22,11 @@
 
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 /* An abstraction used to read machine code from a source.  */
 struct mem_read_abstraction_base
 {
@@ -262,6 +267,8 @@ struct memory_operand
 int decode_s12z (enum optr *myoperator, short *osize,
 		 int *n_operands, struct operand **operands,
 		 struct mem_read_abstraction_base *);
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* S12Z_OPC_H  */
