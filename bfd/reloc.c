@@ -3025,6 +3025,11 @@ ENUMDOC
   ARM 17-bit pc-relative branch for Branch Future instructions.
 
 ENUM
+  BFD_RELOC_ARM_THUMB_BF19
+ENUMDOC
+  ARM 19-bit pc-relative branch for Branch Future Link instruction.
+
+ENUM
   BFD_RELOC_THUMB_PCREL_BRANCH7
 ENUMX
   BFD_RELOC_THUMB_PCREL_BRANCH9

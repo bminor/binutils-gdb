@@ -1,5 +1,12 @@
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>
 
+	* config/tc-arm.c (md_pcrel_from_section): New switch case for
+	BFD_RELOC_ARM_THUMB_BF19.
+	(md_appdy_fix): Likewise.
+	(tc_gen_reloc): Likewise.
+
+2019-04-15  Sudakshina Das  <sudi.das@arm.com>
+
 	* config/tc-arm.c (T16_32_TAB): New entries for bfx and bflx.
 	(do_t_v8_1_branch): New switch cases for bfx and bflx.
 	(insns): New instruction for bfx and bflx.

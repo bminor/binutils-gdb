@@ -1756,6 +1756,20 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 	 0x001f0ffe,		/* src_mask.  */
 	 0x001f0ffe,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
+  EMPTY_HOWTO (137),
+  HOWTO (R_ARM_THM_BF18,	/* type.  */
+	 0,			/* rightshift.  */
+	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 18,			/* bitsize.  */
+	 TRUE,			/* pc_relative.  */
+	 0,			/* bitpos.  */
+	 complain_overflow_dont,/* do not complain_on_overflow.  */
+	 bfd_elf_generic_reloc,	/* special_function.  */
+	 "R_ARM_THM_BF18",	/* name.  */
+	 FALSE,			/* partial_inplace.  */
+	 0x007f0ffe,		/* src_mask.  */
+	 0x007f0ffe,		/* dst_mask.  */
+	 TRUE),			/* pcrel_offset.  */
 };
 
 /* 160 onwards: */
@@ -2068,7 +2082,8 @@ static const struct elf32_arm_reloc_map elf32_arm_reloc_map[] =
     {BFD_RELOC_ARM_THUMB_ALU_ABS_G2_NC, R_ARM_THM_ALU_ABS_G2_NC},
     {BFD_RELOC_ARM_THUMB_ALU_ABS_G1_NC, R_ARM_THM_ALU_ABS_G1_NC},
     {BFD_RELOC_ARM_THUMB_ALU_ABS_G0_NC, R_ARM_THM_ALU_ABS_G0_NC},
-    {BFD_RELOC_ARM_THUMB_BF17, R_ARM_THM_BF16}
+    {BFD_RELOC_ARM_THUMB_BF17, R_ARM_THM_BF16},
+    {BFD_RELOC_ARM_THUMB_BF19, R_ARM_THM_BF18}
   };
 
 static reloc_howto_type *
@@ -12959,6 +12974,51 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 	  bfd_vma immC = (relocation & 0x00000002) >> 1;
 
 	  upper_insn = (upper_insn & 0xffe0) | immA;
+	  lower_insn = (lower_insn & 0xf001) | (immC << 11) | (immB << 1);
+	}
+
+	/* Put the relocated value back in the object file:  */
+	bfd_put_16 (input_bfd, upper_insn, hit_data);
+	bfd_put_16 (input_bfd, lower_insn, hit_data + 2);
+
+	return bfd_reloc_ok;
+      }
+
+    case R_ARM_THM_BF18:
+      {
+	bfd_vma relocation;
+	bfd_vma upper_insn = bfd_get_16 (input_bfd, hit_data);
+	bfd_vma lower_insn = bfd_get_16 (input_bfd, hit_data + 2);
+
+	if (globals->use_rel)
+	  {
+	    bfd_vma immA  = (upper_insn & 0x007f);
+	    bfd_vma immB  = (lower_insn & 0x07fe) >> 1;
+	    bfd_vma immC  = (lower_insn & 0x0800) >> 11;
+	    addend  = (immA << 12);
+	    addend |= (immB << 2);
+	    addend |= (immC << 1);
+	    addend |= 1;
+	    /* Sign extend.  */
+	    addend = (addend & 0x40000) ? addend - (1 << 19) : addend;
+	  }
+
+	value = get_value_helper (plt_offset, splt, input_section, sym_sec, h,
+				  info, input_bfd, rel, sym_name, st_type,
+				  globals, unresolved_reloc_p);
+
+	relocation  = value + addend;
+	relocation -= (input_section->output_section->vma
+		       + input_section->output_offset
+		       + rel->r_offset);
+
+	/* Put RELOCATION back into the insn.  */
+	{
+	  bfd_vma immA = (relocation & 0x0007f000) >> 12;
+	  bfd_vma immB = (relocation & 0x00000ffc) >> 2;
+	  bfd_vma immC = (relocation & 0x00000002) >> 1;
+
+	  upper_insn = (upper_insn & 0xff80) | immA;
 	  lower_insn = (lower_insn & 0xf001) | (immC << 11) | (immB << 1);
 	}
 

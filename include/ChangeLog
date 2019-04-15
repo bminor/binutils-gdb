@@ -1,5 +1,9 @@
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>
 
+	* elf/arm.h (START_RELOC_NUMBERS): New entry for R_ARM_THM_BF18.
+
+2019-04-15  Sudakshina Das  <sudi.das@arm.com>
+
 	* elf/arm.h (START_RELOC_NUMBERS): New entry for R_ARM_THM_BF16.
 
 2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>

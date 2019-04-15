@@ -1,5 +1,9 @@
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>
 
+	* arm-dis.c (print_insn_thumb32): Updated to accept new %Y pattern.
+
+2019-04-15  Sudakshina Das  <sudi.das@arm.com>
+
 	* arm-dis.c (print_insn_thumb32): Add '%<bitfield>S' to print an
 	Arm register with r13 and r15 unpredictable.
 	(thumb32_opcodes): New instructions for bfx and bflx.

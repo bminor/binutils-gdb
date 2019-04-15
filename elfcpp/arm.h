@@ -197,6 +197,7 @@ enum
   // 131 - 135			Unallocated
   // Relocations for Armv8.1-M Mainline (BF/BFL)
   R_ARM_THM_BF16 = 136,		// Static       Thumb32 ((S + A) | T) – P
+  R_ARM_THM_BF18 = 138,		// Static       Thumb32 ((S + A) | T) – P
   // 139			Unallocated
   // 140 - 159			Dynamic		Reserved for future allocation
   R_ARM_IRELATIVE = 160,	// Dynamic
