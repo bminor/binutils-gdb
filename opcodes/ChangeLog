@@ -1,5 +1,14 @@
 2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* arm-dis.c (enum isa): New enum.
+	(struct sopcode32): New structure.
+	(coprocessor_opcodes): change type of entries to struct sopcode32 and
+	set isa field of all current entries to ANY.
+	(print_insn_coprocessor): Change type of insn to struct sopcode32.
+	Only match an entry if its isa field allows the current mode.
+
+2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* arm-dis.c (thumb_opcodes): Document %n control code.  Add entry for
 	CLRM.
 	(print_insn_thumb32): Add logic to print %n CLRM register list.
