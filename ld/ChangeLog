@@ -1,3 +1,8 @@
+2019-04-15  Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+	* testsuite/ld-gc/gc.exp: Skip print-map-discarded test for non-ELF
+	targets.
+
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>
 
 	* testsuite/ld-arm/bfcsel.s: New.
