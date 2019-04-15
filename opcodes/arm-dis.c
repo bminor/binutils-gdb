@@ -2754,6 +2754,8 @@ static const struct opcode32 thumb32_opcodes[] =
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
     0xf060e001, 0xf8f0f001, "bfx%c\t%G, %16-19S"},
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+    0xf000c001, 0xf800f001, "bfl%c\t%G, %Y"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
     0xf070e001, 0xf8f0f001, "bflx%c\t%G, %16-19S"},
 
 

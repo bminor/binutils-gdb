@@ -10507,6 +10507,7 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
   X(_bcond, d000, f0008000),			\
   X(_bf,    0000, f040e001),			\
   X(_bfx,   0000, f060e001),			\
+  X(_bfl,   0000, f000c001),			\
   X(_bflx,  0000, f070e001),			\
   X(_bic,   4380, ea200000),			\
   X(_bics,  4380, ea300000),			\
@@ -13360,6 +13361,25 @@ do_t_branch_future (void)
 	else
 	  {
 	    inst.relocs[1].type = BFD_RELOC_ARM_THUMB_BF17;
+	    inst.relocs[1].pc_rel = 1;
+	  }
+	break;
+
+      case T_MNEM_bfl:
+	if (inst.operands[1].hasreloc == 0)
+	  {
+	    int val = inst.operands[1].imm;
+	    if (v8_1_branch_value_check (inst.operands[1].imm, 19, TRUE) == FAIL)
+	      as_bad (BAD_BRANCH_OFF);
+
+	    int immA = (val & 0x0007f000) >> 12;
+	    int immB = (val & 0x00000ffc) >> 2;
+	    int immC = (val & 0x00000002) >> 1;
+	    inst.instruction |= (immA << 16) | (immB << 1) | (immC << 11);
+	  }
+	  else
+	  {
+	    inst.relocs[1].type = BFD_RELOC_ARM_THUMB_BF19;
 	    inst.relocs[1].pc_rel = 1;
 	  }
 	break;
@@ -21687,6 +21707,7 @@ static const struct asm_opcode insns[] =
 #define THUMB_VARIANT & arm_ext_v8_1m_main
  toC("bf",     _bf,	2, (EXPs, EXPs),	     t_branch_future),
  toC("bfx",    _bfx,	2, (EXPs, RRnpcsp),	     t_branch_future),
+ toC("bfl",    _bfl,	2, (EXPs, EXPs),	     t_branch_future),
  toC("bflx",   _bflx,	2, (EXPs, RRnpcsp),	     t_branch_future),
 };
 #undef ARM_VARIANT

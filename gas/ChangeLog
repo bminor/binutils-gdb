@@ -1,4 +1,18 @@
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>
+            Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* config/tc-arm.c (T16_32_TAB): New entrie for bfl.
+	(do_t_v8_1_branch): New switch case for bfl.
+	(insns): New instruction for bfl.
+	* testsuite/gas/arm/armv8_1-m-bfl.d: New.
+	* testsuite/gas/arm/armv8_1-m-bfl.s: New.
+	* testsuite/gas/arm/armv8_1-m-bfl-bad.s: New.
+	* testsuite/gas/arm/armv8_1-m-bfl-bad.d: New.
+	* testsuite/gas/arm/armv8_1-m-bfl-bad.l: New.
+	* testsuite/gas/arm/armv8_1-m-bfl-rel.d: New.
+	* testsuite/gas/arm/armv8_1-m-bfl-rel.s: New.
+
+2019-04-15  Sudakshina Das  <sudi.das@arm.com>
 
 	* config/tc-arm.c (md_pcrel_from_section): New switch case for
 	BFD_RELOC_ARM_THUMB_BF19.
