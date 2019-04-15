@@ -1,5 +1,15 @@
 2019-04-15  Alan Hayward  <alan.hayward@arm.com>
 
+	* aarch64-linux-nat.c (store_sveregs_to_thread): Set vector length.
+	* nat/aarch64-sve-linux-ptrace.c (aarch64_sve_set_vq): New
+	function.
+	(aarch64_sve_regs_copy_to_reg_buf): Remove VG checks.
+	(aarch64_sve_regs_copy_from_reg_buf): Likewise.
+	* nat/aarch64-sve-linux-ptrace.h (aarch64_sve_set_vq): New
+	declaration.
+
+2019-04-15  Alan Hayward  <alan.hayward@arm.com>
+
 	* aarch64-linux-nat.c
 	(aarch64_linux_nat_target::thread_architecture): Add override.
 	* aarch64-tdep.c (aarch64_gdbarch_init): Ensure different tdesc for

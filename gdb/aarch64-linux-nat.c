@@ -412,6 +412,11 @@ store_sveregs_to_thread (struct regcache *regcache)
   struct iovec iovec;
   int tid = regcache->ptid ().lwp ();
 
+  /* First store vector length to the thread.  This is done first to ensure the
+     ptrace buffers read from the kernel are the correct size.  */
+  if (!aarch64_sve_set_vq (tid, regcache))
+    perror_with_name (_("Unable to set VG register."));
+
   /* Obtain a dump of SVE registers from ptrace.  */
   std::unique_ptr<gdb_byte[]> base = aarch64_sve_get_sveregs (tid);
 
