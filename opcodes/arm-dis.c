@@ -2716,6 +2716,7 @@ static const struct opcode16 thumb_opcodes[] =
        %G		print a fallback offset for Branch Future instructions
        %W		print an offset for BF instruction
        %Y		print an offset for BFL instruction
+       %Z		print an offset for BFCSEL instruction
        %b		print a conditional branch offset
        %B		print an unconditional branch offset
        %s		print the shift field of an SSAT instruction
@@ -5913,6 +5914,23 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		  offset |= immC << 1;
 		  /* Sign extend.  */
 		  offset = (offset & 0x40000) ? offset - (1 << 19) : offset;
+
+		  info->print_address_func (pc + 4 + offset, info);
+		}
+		break;
+
+	      case 'Z':
+		{
+		  unsigned int immA = (given & 0x00010000u) >> 16;
+		  unsigned int immB = (given & 0x000007feu) >> 1;
+		  unsigned int immC = (given & 0x00000800u) >> 11;
+		  bfd_vma offset = 0;
+
+		  offset |= immA << 12;
+		  offset |= immB << 2;
+		  offset |= immC << 1;
+		  /* Sign extend.  */
+		  offset = (offset & 0x1000) ? offset - (1 << 13) : offset;
 
 		  info->print_address_func (pc + 4 + offset, info);
 		}

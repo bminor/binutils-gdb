@@ -1,5 +1,15 @@
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>
 
+	* reloc.c (BFD_RELOC_ARM_THUMB_BF13): New.
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Regenerated.
+	* elf32-arm.c (elf32_arm_howto_table_1): New entry for R_ARM_THM_BF13.
+	(elf32_arm_reloc_map elf32_arm_reloc_map): Map BFD_RELOC_ARM_THUMB_BF13
+	and R_ARM_THM_BF12 together.
+	(elf32_arm_final_link_relocate): New switch case for R_ARM_THM_BF13.
+
+2019-04-15  Sudakshina Das  <sudi.das@arm.com>
+
 	* reloc.c (BFD_RELOC_ARM_THUMB_BF19): New
 	* libbfd.h: Regenerated.
 	* bfd-in2.h: Regenerated.

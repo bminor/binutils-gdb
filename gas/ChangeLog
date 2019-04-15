@@ -1,4 +1,11 @@
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>
+
+	* config/tc-arm.c (md_pcrel_from_section): New switch case for
+	BFD_RELOC_ARM_THUMB_BF13.
+	(md_appdy_fix): Likewise.
+	(tc_gen_reloc): Likewise.
+
+2019-04-15  Sudakshina Das  <sudi.das@arm.com>
             Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	* config/tc-arm.c (T16_32_TAB): New entrie for bfl.

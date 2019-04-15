@@ -3570,6 +3570,9 @@ field in the instruction.  */
 /* ARM 17-bit pc-relative branch for Branch Future instructions.  */
   BFD_RELOC_ARM_THUMB_BF17,
 
+/* ARM 13-bit pc-relative branch for BFCSEL instruction.  */
+  BFD_RELOC_ARM_THUMB_BF13,
+
 /* ARM 19-bit pc-relative branch for Branch Future Link instruction.  */
   BFD_RELOC_ARM_THUMB_BF19,
 
