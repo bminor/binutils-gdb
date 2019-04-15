@@ -250,6 +250,7 @@ names are recognized:
 @code{armv8.5-a},
 @code{armv8-m.base},
 @code{armv8-m.main},
+@code{armv8.1-m.main},
 @code{iwmmxt},
 @code{iwmmxt2}
 and
@@ -352,6 +353,16 @@ For @code{armv8-m.main}:
 @code{+fp}: Enables single-precision only VFPv5 instructions with 16
 double-word registers.
 @code{+fp.dp}: Enables VFPv5 instructions with 16 double-word registers.
+@code{+nofp}: Disables all FPU instructions.
+@code{+nodsp}: Disables DSP Extension.
+
+For @code{armv8.1-m.main}:
+
+@code{+dsp}: Enables DSP Extension.
+@code{+fp}: Enables single and half precision scalar Floating Point Extensions
+for Armv8.1-M Mainline with 16 double-word registers.
+@code{+fp.dp}: Enables double precision scalar Floating Point Extensions for
+Armv8.1-M Mainline, implies @code{+fp}.
 @code{+nofp}: Disables all FPU instructions.
 @code{+nodsp}: Disables DSP Extension.
 

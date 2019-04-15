@@ -1,3 +1,13 @@
+2019-04-15  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* config/tc-arm.c (do_neon_movhf): Remove fp-armv8 check.
+	(armv8_1m_main_ext_table): New extension table.
+	(arm_archs): Use the new extension table.
+	* doc/c-arm.texi: Add missing arch and document new extensions.
+	* testsuite/gas/arm/armv8.1-m.main-fp.d: New.
+	* testsuite/gas/arm/armv8.1-m.main-fp-dp.d: New.
+	* testsuite/gas/arm/armv8.1-m.main-hp.d: New.
+
 2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* config/tc-arm.c (cpu_arch_ver): Add entry for Armv8.1-M Mainline

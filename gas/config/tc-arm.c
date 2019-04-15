@@ -16809,9 +16809,6 @@ do_neon_movhf (void)
   enum neon_shape rs = neon_select_shape (NS_HH, NS_NULL);
   constraint (rs != NS_HH, _("invalid suffix"));
 
-  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_armv8),
-	      _(BAD_FPU));
-
   if (inst.cond != COND_ALWAYS)
     {
       if (thumb_mode)
@@ -26503,6 +26500,20 @@ static const struct arm_ext_table armv8m_main_ext_table[] =
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
 };
 
+static const struct arm_ext_table armv8_1m_main_ext_table[] =
+{
+  ARM_EXT ("dsp", ARM_FEATURE_CORE_LOW (ARM_EXT_V5ExP | ARM_EXT_V6_DSP),
+		  ARM_FEATURE_CORE_LOW (ARM_EXT_V5ExP | ARM_EXT_V6_DSP)),
+  ARM_EXT ("fp",
+	   ARM_FEATURE (0, ARM_EXT2_FP16_INST,
+			FPU_VFP_V5_SP_D16 | FPU_VFP_EXT_FP16 | FPU_VFP_EXT_FMA),
+	   ALL_FP),
+  ARM_ADD ("fp.dp",
+	   ARM_FEATURE (0, ARM_EXT2_FP16_INST,
+			FPU_VFP_V5D16 | FPU_VFP_EXT_FP16 | FPU_VFP_EXT_FMA)),
+  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
+};
+
 static const struct arm_ext_table armv8r_ext_table[] =
 {
   ARM_ADD ("crc", ARCH_CRC_ARMV8),
@@ -26570,7 +26581,8 @@ static const struct arm_arch_option_table arm_archs[] =
   ARM_ARCH_OPT ("armv8-m.base",	  ARM_ARCH_V8M_BASE,	FPU_ARCH_VFP),
   ARM_ARCH_OPT2 ("armv8-m.main",  ARM_ARCH_V8M_MAIN,	FPU_ARCH_VFP,
 		 armv8m_main),
-  ARM_ARCH_OPT ("armv8.1-m.main", ARM_ARCH_V8_1M_MAIN,	FPU_ARCH_VFP),
+  ARM_ARCH_OPT2 ("armv8.1-m.main", ARM_ARCH_V8_1M_MAIN,	FPU_ARCH_VFP,
+		 armv8_1m_main),
   ARM_ARCH_OPT2 ("armv8-a",	  ARM_ARCH_V8A,		FPU_ARCH_VFP, armv8a),
   ARM_ARCH_OPT2 ("armv8.1-a",	  ARM_ARCH_V8_1A,	FPU_ARCH_VFP, armv81a),
   ARM_ARCH_OPT2 ("armv8.2-a",	  ARM_ARCH_V8_2A,	FPU_ARCH_VFP, armv82a),
