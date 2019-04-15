@@ -2758,6 +2758,8 @@ static const struct opcode32 thumb32_opcodes[] =
     0xf000c001, 0xf800f001, "bfl%c\t%G, %Y"},
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
     0xf070e001, 0xf8f0f001, "bflx%c\t%G, %16-19S"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+    0xf000e001, 0xf840f001, "bfcsel\t%G, %Z, %18-21c"},
 
 
   /* ARMv8-M and ARMv8-M Security Extensions instructions.  */
@@ -5933,6 +5935,12 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		  offset = (offset & 0x1000) ? offset - (1 << 13) : offset;
 
 		  info->print_address_func (pc + 4 + offset, info);
+
+		  unsigned int T    = (given & 0x00020000u) >> 17;
+		  unsigned int endoffset = (((given & 0x07800000) >> 23) << 1);
+		  unsigned int boffset   = (T == 1) ? 4 : 2;
+		  func (stream, ", ");
+		  func (stream, "%x", endoffset + boffset);
 		}
 		break;
 

@@ -3020,6 +3020,11 @@ ENUMDOC
   ARM 5-bit pc-relative branch for Branch Future instructions.
 
 ENUM
+  BFD_RELOC_THUMB_PCREL_BFCSEL
+ENUMDOC
+  ARM 6-bit pc-relative branch for BFCSEL instruction.
+
+ENUM
   BFD_RELOC_ARM_THUMB_BF17
 ENUMDOC
   ARM 17-bit pc-relative branch for Branch Future instructions.

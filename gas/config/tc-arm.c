@@ -10506,6 +10506,7 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
   X(_b,     e000, f000b000),			\
   X(_bcond, d000, f0008000),			\
   X(_bf,    0000, f040e001),			\
+  X(_bfcsel,0000, f000e001),			\
   X(_bfx,   0000, f060e001),			\
   X(_bfl,   0000, f000c001),			\
   X(_bflx,  0000, f070e001),			\
@@ -13382,6 +13383,46 @@ do_t_branch_future (void)
 	    inst.relocs[1].type = BFD_RELOC_ARM_THUMB_BF19;
 	    inst.relocs[1].pc_rel = 1;
 	  }
+	break;
+
+      case T_MNEM_bfcsel:
+	/* Operand 1.  */
+	if (inst.operands[1].hasreloc == 0)
+	  {
+	    int val = inst.operands[1].imm;
+	    int immA = (val & 0x00001000) >> 12;
+	    int immB = (val & 0x00000ffc) >> 2;
+	    int immC = (val & 0x00000002) >> 1;
+	    inst.instruction |= (immA << 16) | (immB << 1) | (immC << 11);
+	  }
+	  else
+	  {
+	    inst.relocs[1].type = BFD_RELOC_ARM_THUMB_BF13;
+	    inst.relocs[1].pc_rel = 1;
+	  }
+
+	/* Operand 2.  */
+	if (inst.operands[2].hasreloc == 0)
+	  {
+	      constraint ((inst.operands[0].hasreloc != 0), BAD_ARGS);
+	      int val2 = inst.operands[2].imm;
+	      int val0 = inst.operands[0].imm & 0x1f;
+	      int diff = val2 - val0;
+	      if (diff == 4)
+		inst.instruction |= 1 << 17; /* T bit.  */
+	      else if (diff != 2)
+		as_bad (_("out of range label-relative fixup value"));
+	  }
+	else
+	  {
+	      constraint ((inst.operands[0].hasreloc == 0), BAD_ARGS);
+	      inst.relocs[2].type = BFD_RELOC_THUMB_PCREL_BFCSEL;
+	      inst.relocs[2].pc_rel = 1;
+	  }
+
+	/* Operand 3.  */
+	constraint (inst.cond != COND_ALWAYS, BAD_COND);
+	inst.instruction |= (inst.operands[3].imm & 0xf) << 18;
 	break;
 
       case T_MNEM_bfx:
@@ -19616,6 +19657,11 @@ static struct asm_barrier_opt barrier_opt_names[] =
   { mnem, OPS##nops ops, OT_csuffix, 0x0, T_MNEM##top, 0, THUMB_VARIANT, NULL, \
     do_##te }
 
+/* T_MNEM_xyz enumerator variants of ToU.  */
+#define toU(mnem, top, nops, ops, te) \
+  { mnem, OPS##nops ops, OT_unconditional, 0x0, T_MNEM##top, 0, THUMB_VARIANT, \
+    NULL, do_##te }
+
 /* Legacy mnemonics that always have conditional infix after the third
    character.  */
 #define CL(mnem, op, nops, ops, ae)	\
@@ -21706,6 +21752,7 @@ static const struct asm_opcode insns[] =
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT & arm_ext_v8_1m_main
  toC("bf",     _bf,	2, (EXPs, EXPs),	     t_branch_future),
+ toU("bfcsel", _bfcsel,	4, (EXPs, EXPs, EXPs, COND), t_branch_future),
  toC("bfx",    _bfx,	2, (EXPs, RRnpcsp),	     t_branch_future),
  toC("bfl",    _bfl,	2, (EXPs, EXPs),	     t_branch_future),
  toC("bflx",   _bflx,	2, (EXPs, RRnpcsp),	     t_branch_future),
@@ -21741,6 +21788,7 @@ static const struct asm_opcode insns[] =
 #undef ToC
 #undef toC
 #undef ToU
+#undef toU
 
 /* MD interface: bits in the object file.  */
 
@@ -22944,6 +22992,7 @@ md_pcrel_from_section (fixS * fixP, segT seg)
     case BFD_RELOC_THUMB_PCREL_BRANCH12:
     case BFD_RELOC_THUMB_PCREL_BRANCH20:
     case BFD_RELOC_THUMB_PCREL_BRANCH25:
+    case BFD_RELOC_THUMB_PCREL_BFCSEL:
     case BFD_RELOC_ARM_THUMB_BF17:
     case BFD_RELOC_ARM_THUMB_BF19:
     case BFD_RELOC_ARM_THUMB_BF13:
@@ -24844,6 +24893,39 @@ md_apply_fix (fixS *	fixP,
 	}
       break;
 
+    case BFD_RELOC_THUMB_PCREL_BFCSEL:
+      if (fixP->fx_addsy
+	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
+	  && !S_FORCE_RELOC (fixP->fx_addsy, TRUE)
+	  && ARM_IS_FUNC (fixP->fx_addsy)
+	  && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v8_1m_main))
+	{
+	  fixP->fx_done = 0;
+	}
+      if ((value & ~0x7f) && ((value & ~0x3f) != ~0x3f))
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("branch out of range"));
+
+      if (fixP->fx_done || !seg->use_rela_p)
+	{
+	  newval  = md_chars_to_number (buf, THUMB_SIZE);
+
+	  addressT boff = ((newval & 0x0780) >> 7) << 1;
+	  addressT diff = value - boff;
+
+	  if (diff == 4)
+	    {
+	      newval |= 1 << 1; /* T bit.  */
+	    }
+	  else if (diff != 2)
+	    {
+	      as_bad_where (fixP->fx_file, fixP->fx_line,
+			    _("out of range label-relative fixup value"));
+	    }
+	  md_number_to_chars (buf, newval, THUMB_SIZE);
+	}
+      break;
+
     case BFD_RELOC_ARM_THUMB_BF17:
       if (fixP->fx_addsy
 	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
@@ -25158,6 +25240,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
       return NULL;
 
     case BFD_RELOC_THUMB_PCREL_BRANCH5:
+    case BFD_RELOC_THUMB_PCREL_BFCSEL:
       as_bad_where (fixp->fx_file, fixp->fx_line,
 		    _("%s used for a symbol not defined in the same file"),
 		    bfd_get_reloc_code_name (fixp->fx_r_type));

@@ -1,4 +1,18 @@
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>
+            Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	* config/tc-arm.c (T16_32_TAB): New entriy for bfcsel.
+	(do_t_v8_1_branch): New switch case for bfcsel.
+	(toU): Define.
+	(insns): New instruction for bfcsel.
+	(md_pcrel_from_section): New switch case
+	for BFD_RELOC_THUMB_PCREL_BFCSEL.
+	(md_appdy_fix): Likewise
+	(tc_gen_reloc): Likewise.
+	* testsuite/gas/arm/armv8_1-m-bfcsel.d: New.
+	* testsuite/gas/arm/armv8_1-m-bfcsel.s: New.
+
+2019-04-15  Sudakshina Das  <sudi.das@arm.com>
 
 	* config/tc-arm.c (md_pcrel_from_section): New switch case for
 	BFD_RELOC_ARM_THUMB_BF13.

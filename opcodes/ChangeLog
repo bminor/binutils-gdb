@@ -1,5 +1,10 @@
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>
 
+	* arm-dis.c (thumb32_opcodes): New instruction bfcsel.
+	(print_insn_thumb32): Edit the switch case for %Z.
+
+2019-04-15  Sudakshina Das  <sudi.das@arm.com>
+
 	* arm-dis.c (print_insn_thumb32): Updated to accept new %Z pattern.
 
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>

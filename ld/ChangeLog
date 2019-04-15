@@ -1,5 +1,11 @@
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>
 
+	* testsuite/ld-arm/bfcsel.s: New.
+	* testsuite/ld-arm/bfcsel.d: New.
+	* testsuite/ld-arm/arm-elf.exp: Add above test.
+
+2019-04-15  Sudakshina Das  <sudi.das@arm.com>
+
 	* testsuite/ld-arm/bfl.s: New.
 	* testsuite/ld-arm/bfl.d: New.
 	* testsuite/ld-arm/arm-elf.exp: Add above test.
