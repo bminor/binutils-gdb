@@ -6128,6 +6128,39 @@ check_suffix:
   return FAIL;
 }
 
+static int
+parse_sys_vldr_vstr (char **str)
+{
+  unsigned i;
+  int val = FAIL;
+  struct {
+    const char *name;
+    int regl;
+    int regh;
+  } sysregs[] = {
+    {"FPSCR",		0x1, 0x0},
+    {"FPSCR_nzcvqc",	0x2, 0x0},
+    {"VPR",		0x4, 0x1},
+    {"P0",		0x5, 0x1},
+    {"FPCXTNS",		0x6, 0x1},
+    {"FPCXTS",		0x7, 0x1}
+  };
+  char *op_end = strchr (*str, ',');
+  size_t op_strlen = op_end - *str;
+
+  for (i = 0; i < sizeof (sysregs) / sizeof (sysregs[0]); i++)
+    {
+      if (!strncmp (*str, sysregs[i].name, op_strlen))
+	{
+	  val = sysregs[i].regl | (sysregs[i].regh << 3);
+	  *str = op_end;
+	  break;
+	}
+    }
+
+  return val;
+}
+
 /* Parse the flags argument to CPSI[ED].  Returns FAIL on error, or a
    value suitable for splatting into the AIF field of the instruction.	*/
 
@@ -6652,6 +6685,7 @@ enum operand_parse_code
   OP_RNDQ_Ibig,	/* Neon D or Q reg, or big immediate for logic and VMVN.  */
   OP_RNDQ_I63b, /* Neon D or Q reg, or immediate for shift.  */
   OP_RIWR_I32z, /* iWMMXt wR register, or immediate 0 .. 32 for iWMMXt2.  */
+  OP_VLDR,	/* VLDR operand.  */
 
   OP_I0,        /* immediate zero */
   OP_I7,	/* immediate value 0 .. 7 */
@@ -7225,6 +7259,13 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	  val = parse_psr (&str, op_parse_code == OP_wPSR);
 	  break;
 
+	case OP_VLDR:
+	  po_reg_or_goto (REG_TYPE_VFSD, try_sysreg);
+	  break;
+	try_sysreg:
+	  val = parse_sys_vldr_vstr (&str);
+	  break;
+
 	case OP_APSR_RR:
 	  po_reg_or_goto (REG_TYPE_RN, try_apsr);
 	  break;
@@ -7401,6 +7442,10 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	    inst.error = BAD_PC;
 	  break;
 
+	case OP_VLDR:
+	  if (inst.operands[i].isreg)
+	    break;
+	/* fall through.  */
 	case OP_CPSF:
 	case OP_ENDI:
 	case OP_oROR:
@@ -17397,6 +17442,55 @@ do_neon_ldr_str (void)
     }
 }
 
+static void
+do_t_vldr_vstr_sysreg (void)
+{
+  int fp_vldr_bitno = 20, sysreg_vldr_bitno = 20;
+  bfd_boolean is_vldr = ((inst.instruction & (1 << fp_vldr_bitno)) != 0);
+
+  /* Use of PC is UNPREDICTABLE.  */
+  if (inst.operands[1].reg == REG_PC)
+    inst.error = _("Use of PC here is UNPREDICTABLE");
+
+  if (inst.operands[1].immisreg)
+    inst.error = _("instruction does not accept register index");
+
+  if (!inst.operands[1].isreg)
+    inst.error = _("instruction does not accept PC-relative addressing");
+
+  if (abs (inst.operands[1].imm) >= (1 << 7))
+    inst.error = _("immediate value out of range");
+
+  inst.instruction = 0xec000f80;
+  if (is_vldr)
+    inst.instruction |= 1 << sysreg_vldr_bitno;
+  encode_arm_cp_address (1, TRUE, FALSE, BFD_RELOC_ARM_T32_VLDR_VSTR_OFF_IMM);
+  inst.instruction |= (inst.operands[0].imm & 0x7) << 13;
+  inst.instruction |= (inst.operands[0].imm & 0x8) << 19;
+}
+
+static void
+do_vldr_vstr (void)
+{
+  bfd_boolean sysreg_op = !inst.operands[0].isreg;
+
+  /* VLDR/VSTR (System Register).  */
+  if (sysreg_op)
+    {
+      if (!mark_feature_used (&arm_ext_v8_1m_main))
+	as_bad (_("Instruction not permitted on this architecture"));
+
+      do_t_vldr_vstr_sysreg ();
+    }
+  /* VLDR/VSTR.  */
+  else
+    {
+      if (!mark_feature_used (&fpu_vfp_ext_v1xd))
+	as_bad (_("Instruction not permitted on this architecture"));
+      do_neon_ldr_str ();
+    }
+}
+
 /* "interleave" version also handles non-interleaving register VLD1/VST1
    instructions.  */
 
@@ -21284,8 +21378,6 @@ static const struct asm_opcode insns[] =
  NCE(vstm,      c800b00, 2, (RRnpctw, VRSDLST), neon_ldm_stm),
  NCE(vstmia,    c800b00, 2, (RRnpctw, VRSDLST), neon_ldm_stm),
  NCE(vstmdb,    d000b00, 2, (RRnpctw, VRSDLST), neon_ldm_stm),
- NCE(vldr,      d100b00, 2, (RVSD, ADDRGLDC), neon_ldr_str),
- NCE(vstr,      d000b00, 2, (RVSD, ADDRGLDC), neon_ldr_str),
 
  nCEF(vcvt,     _vcvt,   3, (RNSDQ, RNSDQ, oI32z), neon_cvt),
  nCEF(vcvtr,    _vcvt,   2, (RNSDQ, RNSDQ), neon_cvtr),
@@ -21296,6 +21388,15 @@ static const struct asm_opcode insns[] =
   /* NOTE: All VMOV encoding is special-cased!  */
  NCE(vmov,      0,       1, (VMOV), neon_mov),
  NCE(vmovq,     0,       1, (VMOV), neon_mov),
+
+#undef  THUMB_VARIANT
+/* Could be either VLDR/VSTR or VLDR/VSTR (system register) which are guarded
+   by different feature bits.  Since we are setting the Thumb guard, we can
+   require Thumb-1 which makes it a nop guard and set the right feature bit in
+   do_vldr_vstr ().  */
+#define THUMB_VARIANT  & arm_ext_v4t
+ NCE(vldr,      d100b00, 2, (VLDR, ADDRGLDC), vldr_vstr),
+ NCE(vstr,      d000b00, 2, (VLDR, ADDRGLDC), vldr_vstr),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT    & arm_ext_fp16
@@ -24548,6 +24649,7 @@ md_apply_fix (fixS *	fixP,
 
     case BFD_RELOC_ARM_CP_OFF_IMM:
     case BFD_RELOC_ARM_T32_CP_OFF_IMM:
+    case BFD_RELOC_ARM_T32_VLDR_VSTR_OFF_IMM:
       if (fixP->fx_r_type == BFD_RELOC_ARM_CP_OFF_IMM)
 	newval = md_chars_to_number (buf, INSN_SIZE);
       else
@@ -24558,6 +24660,12 @@ md_apply_fix (fixS *	fixP,
 	     has permitted values that are multiples of 2, in the range 0
 	     to 510.  */
 	  if (value < -510 || value > 510 || (value & 1))
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("co-processor offset out of range"));
+	}
+      else if ((newval & 0xfe001f80) == 0xec000f80)
+	{
+	  if (value < -511 || value > 512 || (value & 3))
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("co-processor offset out of range"));
 	}
@@ -24574,10 +24682,18 @@ md_apply_fix (fixS *	fixP,
       else
 	newval = get_thumb32_insn (buf);
       if (value == 0)
-	newval &= 0xffffff00;
+	{
+	  if (fixP->fx_r_type == BFD_RELOC_ARM_T32_VLDR_VSTR_OFF_IMM)
+	    newval &= 0xffffff80;
+	  else
+	    newval &= 0xffffff00;
+	}
       else
 	{
-	  newval &= 0xff7fff00;
+	  if (fixP->fx_r_type == BFD_RELOC_ARM_T32_VLDR_VSTR_OFF_IMM)
+	    newval &= 0xff7fff80;
+	  else
+	    newval &= 0xff7fff00;
 	  if ((newval & 0x0f200f00) == 0x0d000900)
 	    {
 	      /* This is a fp16 vstr/vldr.

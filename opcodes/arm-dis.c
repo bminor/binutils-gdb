@@ -111,6 +111,8 @@ struct opcode16
    %B			print vstm/vldm register list
    %C			print vscclrm register list
    %I                   print cirrus signed shift immediate: bits 0..3|4..6
+   %J			print register for VLDR instruction
+   %K			print address for VLDR instruction
    %F			print the COUNT field of a LFM/SFM instruction.
    %P			print floating point precision in arithmetic insn
    %Q			print floating point precision in ldf/stf insn
@@ -471,6 +473,10 @@ static const struct sopcode32 coprocessor_opcodes[] =
     0x0d000a00, 0x0f300f00, "vstr%c\t%y1, %A"},
   {ANY, ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD),
     0x0d100a00, 0x0f300f00, "vldr%c\t%y1, %A"},
+  {ANY, ARM_FEATURE_COPROC (ARM_EXT2_V8_1M_MAIN),
+    0xec100f80, 0xfe101f80, "vldr%c\t%J, %K"},
+  {ANY, ARM_FEATURE_COPROC (ARM_EXT2_V8_1M_MAIN),
+    0xec000f80, 0xfe101f80, "vstr%c\t%J, %K"},
 
   {ANY, ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD),
     0x0d200b01, 0x0fb00f01, "fstmdbx%c\t%16-19r!, %z3\t;@ Deprecated"},
@@ -3462,6 +3468,8 @@ print_insn_coprocessor (bfd_vma pc,
   int cp_num;
   struct arm_private_data *private_data = info->private_data;
   arm_feature_set allowed_arches = ARM_ARCH_NONE;
+  arm_feature_set arm_ext_v8_1m_main =
+    ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN);
 
   allowed_arches = private_data->features;
 
@@ -3557,22 +3565,33 @@ print_insn_coprocessor (bfd_vma pc,
 	  /* Floating-point instructions.  */
 	  if (cp_num == 9 || cp_num == 10 || cp_num == 11)
 	    continue;
+
+	  /* Armv8.1-M Mainline FP & MVE instructions.  */
+	  if (ARM_CPU_HAS_FEATURE (arm_ext_v8_1m_main, allowed_arches)
+	      && !ARM_CPU_IS_ANY (allowed_arches)
+	      && (cp_num == 8 || cp_num == 14 || cp_num == 15))
+	    continue;
 	}
 
       for (c = insn->assembler; *c; c++)
 	{
 	  if (*c == '%')
 	    {
-	      switch (*++c)
+	      const char mod = *++c;
+	      switch (mod)
 		{
 		case '%':
 		  func (stream, "%%");
 		  break;
 
 		case 'A':
+		case 'K':
 		  {
 		    int rn = (given >> 16) & 0xf;
 		    bfd_vma offset = given & 0xff;
+
+		    if (mod == 'K')
+		      offset = given & 0x7f;
 
 		    func (stream, "[%s", arm_regnames [(given >> 16) & 0xf]);
 
@@ -3703,6 +3722,37 @@ print_insn_coprocessor (bfd_vma pc,
 		    func (stream, "%d", imm);
 		  }
 
+		  break;
+
+		case 'J':
+		  {
+		    int regno = ((given >> 19) & 0x8) | ((given >> 13) & 0x7);
+
+		    switch (regno)
+		      {
+		      case 0x1:
+			func (stream, "FPSCR");
+			break;
+		      case 0x2:
+			func (stream, "FPSCR_nzcvqc");
+			break;
+		      case 0xc:
+			func (stream, "VPR");
+			break;
+		      case 0xd:
+			func (stream, "P0");
+			break;
+		      case 0xe:
+			func (stream, "FPCXTNS");
+			break;
+		      case 0xf:
+			func (stream, "FPCXTS");
+			break;
+		      default:
+			func (stream, "<invalid reg %d>", regno);
+			break;
+		      }
+		  }
 		  break;
 
 		case 'F':

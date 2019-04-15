@@ -1,3 +1,10 @@
+2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* reloc.c (BFD_RELOC_ARM_T32_VLDR_VSTR_OFF_IMM): New internal
+	relocation.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Likewise.
+
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>
 
 	* reloc.c (BFD_RELOC_ARM_THUMB_LOOP12): New.

@@ -1,5 +1,13 @@
 2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* arm-dis.c (coprocessor_opcodes): Document new %J and %K format
+	specifier.  Add entries for VLDR and VSTR of system registers.
+	(print_insn_coprocessor): Forbid coprocessor numbers 8, 14 and 15 in
+	coprocessor instructions on Armv8.1-M Mainline targets.  Add handling
+	of %J and %K format specifier.
+
+2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* arm-dis.c (coprocessor_opcodes): Document new %C format control code.
 	Add new entries for VSCCLRM instruction.
 	(print_insn_coprocessor): Handle new %C format control code.

@@ -1,5 +1,24 @@
 2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
+	* config/tc-arm.c (parse_sys_vldr_vstr): New function.
+	(OP_VLDR): New enum operand_parse_code enumerator.
+	(parse_operands): Add logic for OP_VLDR.
+	(do_t_vldr_vstr_sysreg): New function.
+	(do_vldr_vstr): Likewise.
+	(insns): Guard VLDR and VSTR by arm_ext_v4t for Thumb mode.
+	(md_apply_fix): Add bound check for VLDR and VSTR co-processor offset.
+	Add masking logic for BFD_RELOC_ARM_T32_VLDR_VSTR_OFF_IMM relocation.
+	* testsuite/gas/arm/archv8m_1m-cmse-main-bad.s: Add examples of bad
+	uses of VLDR and VSTR.
+	* testsuite/gas/arm/archv8m_1m-cmse-main-bad.l: Add error messages for
+	above bad uses.
+	* testsuite/gas/arm/archv8m_1m-cmse-main.s: Add examples of VLDR and
+	VSTR valid uses.
+	* testsuite/gas/arm/archv8m_1m-cmse-main.d: Add disassembly for the
+	above examples.
+
+2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
 	* config/tc-arm.c (arm_typed_reg_parse): Fix typo in comment.
 	(enum reg_list_els): New REGLIST_VFP_S_VPR and REGLIST_VFP_D_VPR
 	enumerators.
