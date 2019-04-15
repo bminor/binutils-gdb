@@ -341,6 +341,7 @@ DESCRIPTION
 .#define bfd_mach_arm_8R        24
 .#define bfd_mach_arm_8M_BASE   25
 .#define bfd_mach_arm_8M_MAIN   26
+.#define bfd_mach_arm_8_1M_MAIN 27
 .  bfd_arch_nds32,     {* Andes NDS32.  *}
 .#define bfd_mach_n1		1
 .#define bfd_mach_n1h		2

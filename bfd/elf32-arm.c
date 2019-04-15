@@ -3835,13 +3835,14 @@ using_thumb_only (struct elf32_arm_link_hash_table *globals)
   arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC, Tag_CPU_arch);
 
   /* Force return logic to be reviewed for each new architecture.  */
-  BFD_ASSERT (arch <= TAG_CPU_ARCH_V8M_MAIN);
+  BFD_ASSERT (arch <= TAG_CPU_ARCH_V8_1M_MAIN);
 
   if (arch == TAG_CPU_ARCH_V6_M
       || arch == TAG_CPU_ARCH_V6S_M
       || arch == TAG_CPU_ARCH_V7E_M
       || arch == TAG_CPU_ARCH_V8M_BASE
-      || arch == TAG_CPU_ARCH_V8M_MAIN)
+      || arch == TAG_CPU_ARCH_V8M_MAIN
+      || arch == TAG_CPU_ARCH_V8_1M_MAIN)
     return TRUE;
 
   return FALSE;
@@ -3862,14 +3863,15 @@ using_thumb2 (struct elf32_arm_link_hash_table *globals)
   arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC, Tag_CPU_arch);
 
   /* Force return logic to be reviewed for each new architecture.  */
-  BFD_ASSERT (arch <= TAG_CPU_ARCH_V8M_MAIN);
+  BFD_ASSERT (arch <= TAG_CPU_ARCH_V8_1M_MAIN);
 
   return (arch == TAG_CPU_ARCH_V6T2
 	  || arch == TAG_CPU_ARCH_V7
 	  || arch == TAG_CPU_ARCH_V7E_M
 	  || arch == TAG_CPU_ARCH_V8
 	  || arch == TAG_CPU_ARCH_V8R
-	  || arch == TAG_CPU_ARCH_V8M_MAIN);
+	  || arch == TAG_CPU_ARCH_V8M_MAIN
+	  || arch == TAG_CPU_ARCH_V8_1M_MAIN);
 }
 
 /* Determine whether Thumb-2 BL instruction is available.  */
@@ -3881,7 +3883,7 @@ using_thumb2_bl (struct elf32_arm_link_hash_table *globals)
     bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC, Tag_CPU_arch);
 
   /* Force return logic to be reviewed for each new architecture.  */
-  BFD_ASSERT (arch <= TAG_CPU_ARCH_V8M_MAIN);
+  BFD_ASSERT (arch <= TAG_CPU_ARCH_V8_1M_MAIN);
 
   /* Architecture was introduced after ARMv6T2 (eg. ARMv6-M).  */
   return (arch == TAG_CPU_ARCH_V6T2
@@ -4101,7 +4103,7 @@ arch_has_arm_nop (struct elf32_arm_link_hash_table *globals)
 					     Tag_CPU_arch);
 
   /* Force return logic to be reviewed for each new architecture.  */
-  BFD_ASSERT (arch <= TAG_CPU_ARCH_V8M_MAIN);
+  BFD_ASSERT (arch <= TAG_CPU_ARCH_V8_1M_MAIN);
 
   return (arch == TAG_CPU_ARCH_V6T2
 	  || arch == TAG_CPU_ARCH_V6K
@@ -13719,6 +13721,8 @@ bfd_arm_get_mach_from_attributes (bfd * abfd)
 	return bfd_mach_arm_8M_BASE;
     case TAG_CPU_ARCH_V8M_MAIN:
 	return bfd_mach_arm_8M_MAIN;
+    case TAG_CPU_ARCH_V8_1M_MAIN:
+	return bfd_mach_arm_8_1M_MAIN;
 
     default:
       /* Force entry to be added for any new known Tag_CPU_arch value.  */
@@ -14131,6 +14135,31 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V8M_MAIN),	/* V8-M BASELINE.  */
       T(V8M_MAIN)	/* V8-M MAINLINE.  */
     };
+  const int v8_1m_mainline[] =
+    {
+      -1,		/* PRE_V4.  */
+      -1,		/* V4.  */
+      -1,		/* V4T.  */
+      -1,		/* V5T.  */
+      -1,		/* V5TE.  */
+      -1,		/* V5TEJ.  */
+      -1,		/* V6.  */
+      -1,		/* V6KZ.  */
+      -1,		/* V6T2.  */
+      -1,		/* V6K.  */
+      T(V8_1M_MAIN),	/* V7.  */
+      T(V8_1M_MAIN),	/* V6_M.  */
+      T(V8_1M_MAIN),	/* V6S_M.  */
+      T(V8_1M_MAIN),	/* V7E_M.  */
+      -1,		/* V8.  */
+      -1,		/* V8R.  */
+      T(V8_1M_MAIN),	/* V8-M BASELINE.  */
+      T(V8_1M_MAIN),	/* V8-M MAINLINE.  */
+      -1,		/* Unused (18).  */
+      -1,		/* Unused (19).  */
+      -1,		/* Unused (20).  */
+      T(V8_1M_MAIN)	/* V8.1-M MAINLINE.  */
+    };
   const int v4t_plus_v6_m[] =
     {
       -1,		/* PRE_V4.  */
@@ -14151,6 +14180,10 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       -1,		/* V8R.  */
       T(V8M_BASE),	/* V8-M BASELINE.  */
       T(V8M_MAIN),	/* V8-M MAINLINE.  */
+      -1,		/* Unused (18).  */
+      -1,		/* Unused (19).  */
+      -1,		/* Unused (20).  */
+      T(V8_1M_MAIN),	/* V8.1-M MAINLINE.  */
       T(V4T_PLUS_V6_M)	/* V4T plus V6_M.  */
     };
   const int *comb[] =
@@ -14165,6 +14198,10 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       v8r,
       v8m_baseline,
       v8m_mainline,
+      NULL,
+      NULL,
+      NULL,
+      v8_1m_mainline,
       /* Pseudo-architecture.  */
       v4t_plus_v6_m
     };

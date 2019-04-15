@@ -26570,6 +26570,7 @@ static const struct arm_arch_option_table arm_archs[] =
   ARM_ARCH_OPT ("armv8-m.base",	  ARM_ARCH_V8M_BASE,	FPU_ARCH_VFP),
   ARM_ARCH_OPT2 ("armv8-m.main",  ARM_ARCH_V8M_MAIN,	FPU_ARCH_VFP,
 		 armv8m_main),
+  ARM_ARCH_OPT ("armv8.1-m.main", ARM_ARCH_V8_1M_MAIN,	FPU_ARCH_VFP),
   ARM_ARCH_OPT2 ("armv8-a",	  ARM_ARCH_V8A,		FPU_ARCH_VFP, armv8a),
   ARM_ARCH_OPT2 ("armv8.1-a",	  ARM_ARCH_V8_1A,	FPU_ARCH_VFP, armv81a),
   ARM_ARCH_OPT2 ("armv8.2-a",	  ARM_ARCH_V8_2A,	FPU_ARCH_VFP, armv82a),
@@ -27284,30 +27285,30 @@ typedef struct
    stable when new architectures are added.  */
 static const cpu_arch_ver_table cpu_arch_ver[] =
 {
-    {TAG_CPU_ARCH_PRE_V4,   ARM_ARCH_V1},
-    {TAG_CPU_ARCH_PRE_V4,   ARM_ARCH_V2},
-    {TAG_CPU_ARCH_PRE_V4,   ARM_ARCH_V2S},
-    {TAG_CPU_ARCH_PRE_V4,   ARM_ARCH_V3},
-    {TAG_CPU_ARCH_PRE_V4,   ARM_ARCH_V3M},
-    {TAG_CPU_ARCH_V4,	    ARM_ARCH_V4xM},
-    {TAG_CPU_ARCH_V4,	    ARM_ARCH_V4},
-    {TAG_CPU_ARCH_V4T,	    ARM_ARCH_V4TxM},
-    {TAG_CPU_ARCH_V4T,	    ARM_ARCH_V4T},
-    {TAG_CPU_ARCH_V5T,	    ARM_ARCH_V5xM},
-    {TAG_CPU_ARCH_V5T,	    ARM_ARCH_V5},
-    {TAG_CPU_ARCH_V5T,	    ARM_ARCH_V5TxM},
-    {TAG_CPU_ARCH_V5T,	    ARM_ARCH_V5T},
-    {TAG_CPU_ARCH_V5TE,	    ARM_ARCH_V5TExP},
-    {TAG_CPU_ARCH_V5TE,	    ARM_ARCH_V5TE},
-    {TAG_CPU_ARCH_V5TEJ,    ARM_ARCH_V5TEJ},
-    {TAG_CPU_ARCH_V6,	    ARM_ARCH_V6},
-    {TAG_CPU_ARCH_V6KZ,	    ARM_ARCH_V6Z},
-    {TAG_CPU_ARCH_V6KZ,	    ARM_ARCH_V6KZ},
-    {TAG_CPU_ARCH_V6K,	    ARM_ARCH_V6K},
-    {TAG_CPU_ARCH_V6T2,	    ARM_ARCH_V6T2},
-    {TAG_CPU_ARCH_V6T2,	    ARM_ARCH_V6KT2},
-    {TAG_CPU_ARCH_V6T2,	    ARM_ARCH_V6ZT2},
-    {TAG_CPU_ARCH_V6T2,	    ARM_ARCH_V6KZT2},
+    {TAG_CPU_ARCH_PRE_V4,     ARM_ARCH_V1},
+    {TAG_CPU_ARCH_PRE_V4,     ARM_ARCH_V2},
+    {TAG_CPU_ARCH_PRE_V4,     ARM_ARCH_V2S},
+    {TAG_CPU_ARCH_PRE_V4,     ARM_ARCH_V3},
+    {TAG_CPU_ARCH_PRE_V4,     ARM_ARCH_V3M},
+    {TAG_CPU_ARCH_V4,	      ARM_ARCH_V4xM},
+    {TAG_CPU_ARCH_V4,	      ARM_ARCH_V4},
+    {TAG_CPU_ARCH_V4T,	      ARM_ARCH_V4TxM},
+    {TAG_CPU_ARCH_V4T,	      ARM_ARCH_V4T},
+    {TAG_CPU_ARCH_V5T,	      ARM_ARCH_V5xM},
+    {TAG_CPU_ARCH_V5T,	      ARM_ARCH_V5},
+    {TAG_CPU_ARCH_V5T,	      ARM_ARCH_V5TxM},
+    {TAG_CPU_ARCH_V5T,	      ARM_ARCH_V5T},
+    {TAG_CPU_ARCH_V5TE,	      ARM_ARCH_V5TExP},
+    {TAG_CPU_ARCH_V5TE,	      ARM_ARCH_V5TE},
+    {TAG_CPU_ARCH_V5TEJ,      ARM_ARCH_V5TEJ},
+    {TAG_CPU_ARCH_V6,	      ARM_ARCH_V6},
+    {TAG_CPU_ARCH_V6KZ,	      ARM_ARCH_V6Z},
+    {TAG_CPU_ARCH_V6KZ,	      ARM_ARCH_V6KZ},
+    {TAG_CPU_ARCH_V6K,	      ARM_ARCH_V6K},
+    {TAG_CPU_ARCH_V6T2,	      ARM_ARCH_V6T2},
+    {TAG_CPU_ARCH_V6T2,	      ARM_ARCH_V6KT2},
+    {TAG_CPU_ARCH_V6T2,	      ARM_ARCH_V6ZT2},
+    {TAG_CPU_ARCH_V6T2,	      ARM_ARCH_V6KZT2},
 
     /* When assembling a file with only ARMv6-M or ARMv6S-M instruction, GNU as
        always selected build attributes to match those of ARMv6-M
@@ -27316,25 +27317,26 @@ static const cpu_arch_ver_table cpu_arch_ver[] =
        would be selected when fully respecting chronology of architectures.
        It is thus necessary to make a special case of ARMv6-M and ARMv6S-M and
        move them before ARMv7 architectures.  */
-    {TAG_CPU_ARCH_V6_M,	    ARM_ARCH_V6M},
-    {TAG_CPU_ARCH_V6S_M,    ARM_ARCH_V6SM},
+    {TAG_CPU_ARCH_V6_M,	      ARM_ARCH_V6M},
+    {TAG_CPU_ARCH_V6S_M,      ARM_ARCH_V6SM},
 
-    {TAG_CPU_ARCH_V7,	    ARM_ARCH_V7},
-    {TAG_CPU_ARCH_V7,	    ARM_ARCH_V7A},
-    {TAG_CPU_ARCH_V7,	    ARM_ARCH_V7R},
-    {TAG_CPU_ARCH_V7,	    ARM_ARCH_V7M},
-    {TAG_CPU_ARCH_V7,	    ARM_ARCH_V7VE},
-    {TAG_CPU_ARCH_V7E_M,    ARM_ARCH_V7EM},
-    {TAG_CPU_ARCH_V8,	    ARM_ARCH_V8A},
-    {TAG_CPU_ARCH_V8,	    ARM_ARCH_V8_1A},
-    {TAG_CPU_ARCH_V8,	    ARM_ARCH_V8_2A},
-    {TAG_CPU_ARCH_V8,	    ARM_ARCH_V8_3A},
-    {TAG_CPU_ARCH_V8M_BASE, ARM_ARCH_V8M_BASE},
-    {TAG_CPU_ARCH_V8M_MAIN, ARM_ARCH_V8M_MAIN},
-    {TAG_CPU_ARCH_V8R,	    ARM_ARCH_V8R},
-    {TAG_CPU_ARCH_V8,	    ARM_ARCH_V8_4A},
-    {TAG_CPU_ARCH_V8,	    ARM_ARCH_V8_5A},
-    {-1,		    ARM_ARCH_NONE}
+    {TAG_CPU_ARCH_V7,	      ARM_ARCH_V7},
+    {TAG_CPU_ARCH_V7,	      ARM_ARCH_V7A},
+    {TAG_CPU_ARCH_V7,	      ARM_ARCH_V7R},
+    {TAG_CPU_ARCH_V7,	      ARM_ARCH_V7M},
+    {TAG_CPU_ARCH_V7,	      ARM_ARCH_V7VE},
+    {TAG_CPU_ARCH_V7E_M,      ARM_ARCH_V7EM},
+    {TAG_CPU_ARCH_V8,	      ARM_ARCH_V8A},
+    {TAG_CPU_ARCH_V8,	      ARM_ARCH_V8_1A},
+    {TAG_CPU_ARCH_V8,	      ARM_ARCH_V8_2A},
+    {TAG_CPU_ARCH_V8,	      ARM_ARCH_V8_3A},
+    {TAG_CPU_ARCH_V8M_BASE,   ARM_ARCH_V8M_BASE},
+    {TAG_CPU_ARCH_V8M_MAIN,   ARM_ARCH_V8M_MAIN},
+    {TAG_CPU_ARCH_V8R,	      ARM_ARCH_V8R},
+    {TAG_CPU_ARCH_V8,	      ARM_ARCH_V8_4A},
+    {TAG_CPU_ARCH_V8,	      ARM_ARCH_V8_5A},
+    {TAG_CPU_ARCH_V8_1M_MAIN, ARM_ARCH_V8_1M_MAIN},
+    {-1,		      ARM_ARCH_NONE}
 };
 
 /* Set an attribute if it has not already been set by the user.  */
@@ -27417,7 +27419,7 @@ get_aeabi_cpu_arch_from_fset (const arm_feature_set *arch_ext_fset,
   if (ARM_FEATURE_EQUAL (*arch_ext_fset, arm_arch_any))
     {
       /* Force revisiting of decision for each new architecture.  */
-      gas_assert (MAX_TAG_CPU_ARCH <= TAG_CPU_ARCH_V8M_MAIN);
+      gas_assert (MAX_TAG_CPU_ARCH <= TAG_CPU_ARCH_V8_1M_MAIN);
       *profile = 'A';
       return TAG_CPU_ARCH_V8;
     }
@@ -27688,7 +27690,7 @@ aeabi_set_public_attributes (void)
      by the base architecture.
 
      For new architectures we will have to check these tests.  */
-  gas_assert (arch <= TAG_CPU_ARCH_V8M_MAIN);
+  gas_assert (arch <= TAG_CPU_ARCH_V8_1M_MAIN);
   if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v8)
       || ARM_CPU_HAS_FEATURE (flags, arm_ext_v8m))
     aeabi_set_attribute_int (Tag_DIV_use, 0);

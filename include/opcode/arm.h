@@ -72,6 +72,7 @@
 #define ARM_EXT2_V8_5A	     0x00001000	/* ARM V8.5A.			     */
 #define ARM_EXT2_SB	     0x00002000	/* Speculation Barrier instruction.  */
 #define ARM_EXT2_PREDRES     0x00004000	/* Prediction Restriction insns.     */
+#define ARM_EXT2_V8_1M_MAIN  0x00008000 /* ARMv8.1-M Mainline.		     */
 
 /* Co-processor space extensions.  */
 #define ARM_CEXT_XSCALE	     0x00000001	/* Allow MIA etc.	 	   */
@@ -175,6 +176,9 @@
 #define ARM_AEXT2_V8M_MAIN_DSP	 ARM_AEXT2_V8M_MAIN
 #define ARM_AEXT_V8R		 ARM_AEXT_V8A
 #define ARM_AEXT2_V8R		 ARM_AEXT2_V8AR
+#define ARM_AEXT_V8_1M_MAIN	 ARM_AEXT_V8M_MAIN
+#define ARM_AEXT2_V8_1M_MAIN	(ARM_AEXT2_V8M_MAIN | ARM_EXT2_V8_1M_MAIN     \
+						    | ARM_EXT2_FP16_INST)
 
 /* Processors with specific extensions in the co-processor space.  */
 #define ARM_ARCH_XSCALE	ARM_FEATURE_LOW (ARM_AEXT_V5TE, ARM_CEXT_XSCALE)
@@ -353,6 +357,8 @@
 #define ARM_ARCH_V8M_MAIN_DSP  ARM_FEATURE_CORE (ARM_AEXT_V8M_MAIN_DSP,	   \
 						 ARM_AEXT2_V8M_MAIN_DSP)
 #define ARM_ARCH_V8R	       ARM_FEATURE_CORE (ARM_AEXT_V8R, ARM_AEXT2_V8R)
+#define ARM_ARCH_V8_1M_MAIN    ARM_FEATURE_CORE (ARM_AEXT_V8_1M_MAIN,	   \
+						 ARM_AEXT2_V8_1M_MAIN)
 
 /* Some useful combinations:  */
 #define ARM_ARCH_NONE	ARM_FEATURE_LOW (0, 0)

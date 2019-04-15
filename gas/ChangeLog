@@ -1,3 +1,11 @@
+2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (cpu_arch_ver): Add entry for Armv8.1-M Mainline
+	Tag_CPU_arch build attribute value.  Reindent.
+	(get_aeabi_cpu_arch_from_fset): Update assert.
+	(aeabi_set_public_attributes): Update assert for Tag_DIV_use logic.
+	* testsuite/gas/arm/attr-march-armv8_1-m.main.d: New test.
+
 2019-04-09  Matthew Fortune  <matthew.fortune@mips.com>
 
 	* config/tc-mips.c (mips_cpu_info_table): Add i6500.  Update

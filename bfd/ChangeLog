@@ -1,3 +1,16 @@
+2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* archures.c (bfd_mach_arm_8_1M_MAIN): Define.
+	* bfd-in2.h: Regenerate.
+	* cpu-arm.c (arch_info_struct): Add entry for Armv8.1-M Mainline.
+	* elf32-arm.c (using_thumb_only): Return true for Armv8.1-M Mainline
+	and update assert.
+	(using_thumb2): Likewise.
+	(using_thumb2_bl): Update assert.
+	(arch_has_arm_nop): Likewise.
+	(bfd_arm_get_mach_from_attributes): Add case for Armv8.1-M Mainline.
+	(tag_cpu_arch_combine): Add logic for Armv8.1-M Mainline merging.
+
 2019-04-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-linker-x86.h (elf_x86_cet_report): New.

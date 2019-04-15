@@ -248,6 +248,7 @@ static const bfd_arch_info_type arch_info_struct[] =
   N (bfd_mach_arm_8R,        "armv8-r",        FALSE, & arch_info_struct[24]),
   N (bfd_mach_arm_8M_BASE,   "armv8-m.base",   FALSE, & arch_info_struct[25]),
   N (bfd_mach_arm_8M_MAIN,   "armv8-m.main",   FALSE, & arch_info_struct[26]),
+  N (bfd_mach_arm_8_1M_MAIN, "armv8.1-m.main", FALSE, & arch_info_struct[27]),
   N (bfd_mach_arm_unknown,   "arm_any",        FALSE, NULL)
 };
 

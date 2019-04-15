@@ -1,3 +1,7 @@
+2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* arm-dis.c (select_arm_features): Add logic for Armv8.1-M Mainline.
+
 2019-04-12  John Darrington <john@darrington.wattle.id.au>
 
 	s12z-dis.c, s12z-opc.c, s12z-opc.h: Replace "operator" with

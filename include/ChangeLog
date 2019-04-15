@@ -1,3 +1,12 @@
+2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* elf/arm.h (TAG_CPU_ARCH_V8_1M_MAIN): new macro.
+	(MAX_TAG_CPU_ARCH): Set value to above macro.
+	* opcode/arm.h (ARM_EXT2_V8_1M_MAIN): New macro.
+	(ARM_AEXT_V8_1M_MAIN): Likewise.
+	(ARM_AEXT2_V8_1M_MAIN): Likewise.
+	(ARM_ARCH_V8_1M_MAIN): Likewise.
+
 2019-04-11  Sudakshina Das  <sudi.das@arm.com>
 
 	* opcode/aarch64.h (enum aarch64_opnd): Add AARCH64_OPND_Rt_SP.

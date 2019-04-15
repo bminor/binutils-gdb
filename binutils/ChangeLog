@@ -1,3 +1,7 @@
+2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* readelf.c (arm_attr_tag_CPU_arch): Add entry for Armv8.1-M Mainline.
+
 2019-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (decode_x86_isa): Handle

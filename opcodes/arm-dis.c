@@ -6525,6 +6525,7 @@ select_arm_features (unsigned long mach,
     case bfd_mach_arm_8R:	 ARM_SET_FEATURES (ARM_ARCH_V8R); break;
     case bfd_mach_arm_8M_BASE:	 ARM_SET_FEATURES (ARM_ARCH_V8M_BASE); break;
     case bfd_mach_arm_8M_MAIN:	 ARM_SET_FEATURES (ARM_ARCH_V8M_MAIN); break;
+    case bfd_mach_arm_8_1M_MAIN: ARM_SET_FEATURES (ARM_ARCH_V8_1M_MAIN); break;
       /* If the machine type is unknown allow all architecture types and all
 	 extensions.  */
     case bfd_mach_arm_unknown:	 ARM_SET_FEATURES (ARM_FEATURE_ALL); break;
