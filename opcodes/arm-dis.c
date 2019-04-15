@@ -2710,6 +2710,7 @@ static const struct opcode16 thumb_opcodes[] =
        %a		print the address of a plain load/store
        %w		print the width and signedness of a core load/store
        %m		print register mask for ldm/stm
+       %n		print register mask for clrm
 
        %E		print the lsb and width fields of a bfc/bfi instruction
        %F		print the lsb and width fields of a sbfx/ubfx instruction
@@ -2751,7 +2752,8 @@ static const struct opcode16 thumb_opcodes[] =
    makes heavy use of special-case bit patterns.  */
 static const struct opcode32 thumb32_opcodes[] =
 {
-  /* Armv8.1-M Mainline instructions.  */
+  /* Armv8.1-M Mainline and Armv8.1-M Mainline Security Extensions
+     instructions.  */
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
     0xf040c001, 0xfff0f001, "wls\tlr, %16-19S, %Q"},
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
@@ -2772,6 +2774,8 @@ static const struct opcode32 thumb32_opcodes[] =
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
     0xf000e001, 0xf840f001, "bfcsel\t%G, %Z, %18-21c"},
 
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+    0xe89f0000, 0xffff2000, "clrm%c\t%n"},
 
   /* ARMv8-M and ARMv8-M Security Extensions instructions.  */
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8M), 0xe97fe97f, 0xffffffff, "sg"},
@@ -5556,6 +5560,7 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
   for (insn = thumb32_opcodes; insn->assembler; insn++)
     if ((given & insn->mask) == insn->value)
       {
+	bfd_boolean is_clrm = FALSE;
 	bfd_boolean is_unpredictable = FALSE;
 	signed long value_in_comment = 0;
 	const char *c = insn->assembler;
@@ -5851,6 +5856,9 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		}
 		break;
 
+	      case 'n':
+		is_clrm = TRUE;
+		/* Fall through.  */
 	      case 'm':
 		{
 		  int started = 0;
@@ -5863,7 +5871,12 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 			if (started)
 			  func (stream, ", ");
 			started = 1;
-			func (stream, "%s", arm_regnames[reg]);
+			if (is_clrm && reg == 13)
+			  func (stream, "(invalid: %s)", arm_regnames[reg]);
+			else if (is_clrm && reg == 15)
+			  func (stream, "%s", "APSR");
+			else
+			  func (stream, "%s", arm_regnames[reg]);
 		      }
 		  func (stream, "}");
 		}

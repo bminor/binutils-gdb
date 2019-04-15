@@ -1688,14 +1688,27 @@ parse_scalar (char **ccp, int elsize, struct neon_type_el *type)
   return reg * 16 + atype.index;
 }
 
+/* Types of registers in a list.  */
+
+enum reg_list_els
+{
+  REGLIST_RN,
+  REGLIST_CLRM,
+  REGLIST_VFP_S,
+  REGLIST_VFP_D,
+  REGLIST_NEON_D
+};
+
 /* Parse an ARM register list.  Returns the bitmask, or FAIL.  */
 
 static long
-parse_reg_list (char ** strp)
+parse_reg_list (char ** strp, enum reg_list_els etype)
 {
-  char * str = * strp;
-  long	 range = 0;
-  int	 another_range;
+  char *str = *strp;
+  long range = 0;
+  int another_range;
+
+  gas_assert (etype == REGLIST_RN || etype == REGLIST_CLRM);
 
   /* We come back here if we get ranges concatenated by '+' or '|'.  */
   do
@@ -1713,11 +1726,35 @@ parse_reg_list (char ** strp)
 	  do
 	    {
 	      int reg;
+	      const char apsr_str[] = "apsr";
+	      int apsr_str_len = strlen (apsr_str);
 
-	      if ((reg = arm_reg_parse (&str, REG_TYPE_RN)) == FAIL)
+	      reg = arm_reg_parse (&str, REGLIST_RN);
+	      if (etype == REGLIST_CLRM)
 		{
-		  first_error (_(reg_expected_msgs[REG_TYPE_RN]));
-		  return FAIL;
+		  if (reg == REG_SP || reg == REG_PC)
+		    reg = FAIL;
+		  else if (reg == FAIL
+			   && !strncasecmp (str, apsr_str, apsr_str_len)
+			   && !ISALPHA (*(str + apsr_str_len)))
+		    {
+		      reg = 15;
+		      str += apsr_str_len;
+		    }
+
+		  if (reg == FAIL)
+		    {
+		      first_error (_("r0-r12, lr or APSR expected"));
+		      return FAIL;
+		    }
+		}
+	      else /* etype == REGLIST_RN.  */
+		{
+		  if (reg == FAIL)
+		    {
+		      first_error (_(reg_expected_msgs[REGLIST_RN]));
+		      return FAIL;
+		    }
 		}
 
 	      if (in_range)
@@ -1761,7 +1798,7 @@ parse_reg_list (char ** strp)
 	      return FAIL;
 	    }
 	}
-      else
+      else if (etype == REGLIST_RN)
 	{
 	  expressionS exp;
 
@@ -1816,15 +1853,6 @@ parse_reg_list (char ** strp)
   return range;
 }
 
-/* Types of registers in a list.  */
-
-enum reg_list_els
-{
-  REGLIST_VFP_S,
-  REGLIST_VFP_D,
-  REGLIST_NEON_D
-};
-
 /* Parse a VFP register list.  If the string is invalid return FAIL.
    Otherwise return the number of registers, and set PBASE to the first
    register.  Parses registers of type ETYPE.
@@ -1873,6 +1901,9 @@ parse_vfp_reg_list (char **ccp, unsigned int *pbase, enum reg_list_els etype)
     case REGLIST_NEON_D:
       regtype = REG_TYPE_NDQ;
       break;
+
+    default:
+      gas_assert (0);
     }
 
   if (etype != REGLIST_VFP_S)
@@ -3988,7 +4019,7 @@ s_arm_unwind_save_core (void)
   long range;
   int n;
 
-  range = parse_reg_list (&input_line_pointer);
+  range = parse_reg_list (&input_line_pointer, REGLIST_RN);
   if (range == FAIL)
     {
       as_bad (_("expected register list"));
@@ -6548,6 +6579,7 @@ enum operand_parse_code
   OP_RRnpcsp_I32, /* ARM register (no BadReg) or literal 1 .. 32 */
 
   OP_REGLST,	/* ARM register list */
+  OP_CLRMLST,	/* CLRM register list */
   OP_VRSLST,	/* VFP single-precision register list */
   OP_VRDLST,	/* VFP double-precision register list */
   OP_VRSDLST,   /* VFP single or double-precision register list (& quad) */
@@ -7173,12 +7205,16 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 
 	  /* Register lists.  */
 	case OP_REGLST:
-	  val = parse_reg_list (&str);
+	  val = parse_reg_list (&str, REGLIST_RN);
 	  if (*str == '^')
 	    {
 	      inst.operands[i].writeback = 1;
 	      str++;
 	    }
+	  break;
+
+	case OP_CLRMLST:
+	  val = parse_reg_list (&str, REGLIST_CLRM);
 	  break;
 
 	case OP_VRSLST:
@@ -7304,6 +7340,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_COND:
 	case OP_oBARRIER_I15:
 	case OP_REGLST:
+	case OP_CLRMLST:
 	case OP_VRSLST:
 	case OP_VRDLST:
 	case OP_VRSDLST:
@@ -11489,16 +11526,19 @@ do_t_it (void)
 
 /* Helper function used for both push/pop and ldm/stm.  */
 static void
-encode_thumb2_ldmstm (int base, unsigned mask, bfd_boolean writeback)
+encode_thumb2_multi (bfd_boolean do_io, int base, unsigned mask,
+		     bfd_boolean writeback)
 {
-  bfd_boolean load;
+  bfd_boolean load, store;
 
-  load = (inst.instruction & (1 << 20)) != 0;
+  gas_assert (base != -1 || !do_io);
+  load = do_io && ((inst.instruction & (1 << 20)) != 0);
+  store = do_io && !load;
 
   if (mask & (1 << 13))
     inst.error =  _("SP not allowed in register list");
 
-  if ((mask & (1 << base)) != 0
+  if (do_io && (mask & (1 << base)) != 0
       && writeback)
     inst.error = _("having the base register in the register list when "
 		   "using write back is UNPREDICTABLE");
@@ -11513,13 +11553,13 @@ encode_thumb2_ldmstm (int base, unsigned mask, bfd_boolean writeback)
 	    set_it_insn_type_last ();
 	}
     }
-  else
+  else if (store)
     {
       if (mask & (1 << 15))
 	inst.error = _("PC not allowed in register list");
     }
 
-  if ((mask & (mask - 1)) == 0)
+  if (do_io && ((mask & (mask - 1)) == 0))
     {
       /* Single register transfers implemented as str/ldr.  */
       if (writeback)
@@ -11548,7 +11588,8 @@ encode_thumb2_ldmstm (int base, unsigned mask, bfd_boolean writeback)
     inst.instruction |= WRITE_BACK;
 
   inst.instruction |= mask;
-  inst.instruction |= base << 16;
+  if (do_io)
+    inst.instruction |= base << 16;
 }
 
 static void
@@ -11643,8 +11684,9 @@ do_t_ldmstm (void)
 	  if (inst.instruction < 0xffff)
 	    inst.instruction = THUMB_OP32 (inst.instruction);
 
-	  encode_thumb2_ldmstm (inst.operands[0].reg, inst.operands[1].imm,
-				inst.operands[0].writeback);
+	  encode_thumb2_multi (TRUE /* do_io */, inst.operands[0].reg,
+			       inst.operands[1].imm,
+			       inst.operands[0].writeback);
 	}
     }
   else
@@ -12751,8 +12793,20 @@ do_t_push_pop (void)
   else if (unified_syntax)
     {
       inst.instruction = THUMB_OP32 (inst.instruction);
-      encode_thumb2_ldmstm (13, mask, TRUE);
+      encode_thumb2_multi (TRUE /* do_io */, 13, mask, TRUE);
     }
+  else
+    {
+      inst.error = _("invalid register list to push/pop instruction");
+      return;
+    }
+}
+
+static void
+do_t_clrm (void)
+{
+  if (unified_syntax)
+    encode_thumb2_multi (FALSE /* do_io */, -1, inst.operands[0].imm, FALSE);
   else
     {
       inst.error = _("invalid register list to push/pop instruction");
@@ -21834,6 +21888,8 @@ static const struct asm_opcode insns[] =
  toU("dls", _dls, 2, (LR, RRnpcsp),	 t_loloop),
  toU("wls", _wls, 3, (LR, RRnpcsp, EXP), t_loloop),
  toU("le",  _le,  2, (oLR, EXP),	 t_loloop),
+
+ ToC("clrm",	e89f0000, 1, (CLRMLST),  t_clrm)
 };
 #undef ARM_VARIANT
 #undef THUMB_VARIANT

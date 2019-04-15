@@ -1,3 +1,9 @@
+2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* arm-dis.c (thumb_opcodes): Document %n control code.  Add entry for
+	CLRM.
+	(print_insn_thumb32): Add logic to print %n CLRM register list.
+
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>
 
 	* arm-dis.c (print_insn_thumb32): Updated to accept new %P

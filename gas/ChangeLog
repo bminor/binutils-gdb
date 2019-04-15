@@ -1,3 +1,29 @@
+2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
+
+	* config/tc-arm.c (enum reg_list_els): Define earlier and add
+	REGLIST_RN and REGLIST_CLRM enumerators.
+	(parse_reg_list): Add etype parameter to distinguish between regular
+	core register list and CLRM register list.  Add logic to
+	recognize CLRM register list.
+	(parse_vfp_reg_list): Assert type is not for core register list.
+	(s_arm_unwind_save_core): Update call to parse_reg_list to new
+	prototype.
+	(enum operand_parse_code): Declare OP_CLRMLST enumerator.
+	(parse_operands): Update call to parse_reg_list to new prototype.  Add
+	logic for OP_CLRMLST.
+	(encode_thumb2_ldmstm): Rename into ...
+	(encode_thumb2_multi): This.  Add do_io parameter.  Add logic to
+	encode CLRM and guard LDM/STM only code by do_io.
+	(do_t_ldmstm): Adapt to use encode_thumb2_multi.
+	(do_t_push_pop): Likewise.
+	(do_t_clrm): New function.
+	(insns): Define CLRM.
+	* testsuite/gas/arm/archv8m_1m-cmse-main-bad.d: New file.
+	* testsuite/gas/arm/archv8m_1m-cmse-main-bad.l: Likewise.
+	* testsuite/gas/arm/archv8m_1m-cmse-main-bad.s: Likewise.
+	* testsuite/gas/arm/archv8m_1m-cmse-main.d: Likewise.
+	* testsuite/gas/arm/archv8m_1m-cmse-main.s: Likewise.
+
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>
             Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
