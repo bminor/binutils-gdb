@@ -8295,7 +8295,7 @@ next_instrs_are_b_retw (fragS *fragP)
   static xtensa_insnbuf insnbuf = NULL;
   static xtensa_insnbuf slotbuf = NULL;
   xtensa_isa isa = xtensa_default_isa;
-  int offset = 0;
+  unsigned int offset = 0;
   int slot;
   bfd_boolean branch_seen = FALSE;
 
@@ -8688,7 +8688,7 @@ unrelaxed_frag_min_insn_count (fragS *fragP)
   xtensa_isa isa = xtensa_default_isa;
   static xtensa_insnbuf insnbuf = NULL;
   int insn_count = 0;
-  int offset = 0;
+  unsigned int offset = 0;
 
   if (!fragP->tc_frag_data.is_insn)
     return insn_count;
@@ -8741,7 +8741,7 @@ unrelaxed_frag_has_b_j (fragS *fragP)
 {
   static xtensa_insnbuf insnbuf = NULL;
   xtensa_isa isa = xtensa_default_isa;
-  int offset = 0;
+  unsigned int offset = 0;
 
   if (!fragP->tc_frag_data.is_insn)
     return FALSE;

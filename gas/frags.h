@@ -45,7 +45,7 @@ struct frag {
   addressT last_fr_address;
 
   /* (Fixed) number of octets we know we have.  May be 0.  */
-  offsetT fr_fix;
+  valueT fr_fix;
   /* May be used for (Variable) number of octets after above.
      The generic frag handling code no longer makes any use of fr_var.  */
   offsetT fr_var;

@@ -502,8 +502,8 @@ skip_align:
       md_convert_frag (stdoutput, sec, fragP);
 
       gas_assert (fragP->fr_next == NULL
-	      || ((offsetT) (fragP->fr_next->fr_address - fragP->fr_address)
-		  == fragP->fr_fix));
+		  || (fragP->fr_next->fr_address - fragP->fr_address
+		      == fragP->fr_fix));
 
       /* After md_convert_frag, we make the frag into a ".space 0".
 	 md_convert_frag() should set up any fixSs and constants
@@ -1264,7 +1264,7 @@ write_relocs (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   for (fixp = seginfo->fix_root; fixp != (fixS *) NULL; fixp = fixp->fx_next)
     {
       int fx_size, slack;
-      offsetT loc;
+      valueT loc;
       arelent **reloc;
 #ifndef RELOC_EXPANSION_POSSIBLE
       arelent *rel;

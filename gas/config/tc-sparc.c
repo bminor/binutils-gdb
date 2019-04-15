@@ -3566,7 +3566,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT segment ATTRIBUTE_UNUSED)
              can be completely resolved here, i.e. if no undefined
              symbol is associated with it.  */
 	  if (sparc_relax && fixP->fx_addsy == NULL
-	      && fixP->fx_where + 8 <= fixP->fx_frag->fr_fix)
+	      && (valueT) fixP->fx_where + 8 <= fixP->fx_frag->fr_fix)
 	    {
 #define G0		0
 #define O7		15

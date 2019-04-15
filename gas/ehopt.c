@@ -103,7 +103,7 @@ get_cie_info (struct cie_info *info)
 {
   fragS *f;
   fixS *fix;
-  int offset;
+  unsigned int offset;
   char CIE_id;
   char augmentation[10];
   int iaug;

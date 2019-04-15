@@ -2635,8 +2635,8 @@ avr_patch_gccisr_frag (fragS *fr, int reg)
   /* Turn frag into ordinary code frag of now known size.  */
 
   fr->fr_var = 0;
-  fr->fr_fix = (offsetT) (where - fr->fr_literal);
-  gas_assert (fr->fr_fix <= fr->fr_offset);
+  fr->fr_fix = where - fr->fr_literal;
+  gas_assert (fr->fr_fix <= (valueT) fr->fr_offset);
   fr->fr_offset = 0;
   fr->fr_type = rs_fill;
   fr->fr_subtype = 0;

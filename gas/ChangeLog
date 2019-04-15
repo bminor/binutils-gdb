@@ -1,3 +1,20 @@
+2019-04-16  Alan Modra  <amodra@gmail.com>
+
+	* frags.h (struct frag <fr_fix>): Use unsigned type.
+	* frags.c (frag_new): Assert that current size exceeds
+	old_frags_var_max_size.
+	* ehopt.c (get_cie_info): Adjust for unsigned fr_fix.
+	* listing.c (calc_hex): Likewise.
+	* write.c (cvt_frag_to_fill, write_relocs): Likewise.
+	* config/tc-arc.c (md_convert_frag): Likewise.
+	* config/tc-avr.c (avr_patch_gccisr_frag): Likewise.
+	* config/tc-mips.c (md_convert_frag): Likewise.
+	* config/tc-rl78.c (md_convert_frag): Likewise.
+	* config/tc-rx.c (md_convert_frag): Likewise.
+	* config/tc-sparc.c (md_apply_fix): Likewise.
+	* config/tc-xtensa.c (next_instrs_are_b_retw): Likewise.
+	(unrelaxed_frag_min_insn_count, unrelaxed_frag_has_b_j): Likewise.
+
 2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* config/tc-arm.c (parse_sys_vldr_vstr): New function.

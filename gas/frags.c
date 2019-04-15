@@ -165,7 +165,9 @@ frag_new (size_t old_frags_var_max_size
   gas_assert (frchain_now->frch_last == frag_now);
 
   /* Fix up old frag's fr_fix.  */
-  frag_now->fr_fix = frag_now_fix_octets () - old_frags_var_max_size;
+  frag_now->fr_fix = frag_now_fix_octets ();
+  gas_assert (frag_now->fr_fix >= old_frags_var_max_size);
+  frag_now->fr_fix -= old_frags_var_max_size;
   /* Make sure its type is valid.  */
   gas_assert (frag_now->fr_type != 0);
 
