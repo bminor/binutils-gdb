@@ -1,3 +1,9 @@
+2019-04-15  Sudakshina Das  <sudi.das@arm.com>
+
+	* testsuite/ld-arm/bf.s: New.
+	* testsuite/ld-arm/bf.d: New.
+	* testsuite/ld-arm/arm-elf.exp: Add above test.
+
 2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* testsuite/ld-arm/attr-merge-13.attr: New test.

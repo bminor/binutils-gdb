@@ -10505,6 +10505,7 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
   X(_asrs,  1000, fa50f000),			\
   X(_b,     e000, f000b000),			\
   X(_bcond, d000, f0008000),			\
+  X(_bf,    0000, f040e001),			\
   X(_bic,   4380, ea200000),			\
   X(_bics,  4380, ea300000),			\
   X(_cmn,   42c0, eb100f00),			\
@@ -13318,6 +13319,51 @@ v8_1_branch_value_check (int val, int nbits, int is_signed)
 	return FAIL;
     }
     return SUCCESS;
+}
+
+/* For branches in Armv8.1-M Mainline.  */
+static void
+do_t_branch_future (void)
+{
+  unsigned long insn = inst.instruction;
+
+  inst.instruction = THUMB_OP32 (inst.instruction);
+  if (inst.operands[0].hasreloc == 0)
+    {
+      if (v8_1_branch_value_check (inst.operands[0].imm, 5, FALSE) == FAIL)
+	as_bad (BAD_BRANCH_OFF);
+
+      inst.instruction |= ((inst.operands[0].imm & 0x1f) >> 1) << 23;
+    }
+  else
+    {
+      inst.relocs[0].type = BFD_RELOC_THUMB_PCREL_BRANCH5;
+      inst.relocs[0].pc_rel = 1;
+    }
+
+  switch (insn)
+    {
+      case T_MNEM_bf:
+	if (inst.operands[1].hasreloc == 0)
+	  {
+	    int val = inst.operands[1].imm;
+	    if (v8_1_branch_value_check (inst.operands[1].imm, 17, TRUE) == FAIL)
+	      as_bad (BAD_BRANCH_OFF);
+
+	    int immA = (val & 0x0001f000) >> 12;
+	    int immB = (val & 0x00000ffc) >> 2;
+	    int immC = (val & 0x00000002) >> 1;
+	    inst.instruction |= (immA << 16) | (immB << 1) | (immC << 11);
+	  }
+	else
+	  {
+	    inst.relocs[1].type = BFD_RELOC_ARM_THUMB_BF17;
+	    inst.relocs[1].pc_rel = 1;
+	  }
+	break;
+
+      default: abort ();
+    }
 }
 
 /* Neon instruction encoder helpers.  */
@@ -19538,6 +19584,11 @@ static struct asm_barrier_opt barrier_opt_names[] =
   { mnem, OPS##nops ops, OT_unconditional, 0x0, 0x##top, 0, THUMB_VARIANT, \
     NULL, do_##te }
 
+/* T_MNEM_xyz enumerator variants of ToC.  */
+#define toC(mnem, top, nops, ops, te) \
+  { mnem, OPS##nops ops, OT_csuffix, 0x0, T_MNEM##top, 0, THUMB_VARIANT, NULL, \
+    do_##te }
+
 /* Legacy mnemonics that always have conditional infix after the third
    character.  */
 #define CL(mnem, op, nops, ops, ae)	\
@@ -21623,6 +21674,11 @@ static const struct asm_opcode insns[] =
 #define THUMB_VARIANT & arm_ext_v8m_main
  ToC("vlldm", ec300a00, 1, (RRnpc), rn),
  ToC("vlstm", ec200a00, 1, (RRnpc), rn),
+
+ /* Armv8.1-M Mainline instructions.  */
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT & arm_ext_v8_1m_main
+ toC("bf",     _bf,	2, (EXPs, EXPs),	     t_branch_future),
 };
 #undef ARM_VARIANT
 #undef THUMB_VARIANT
@@ -21633,8 +21689,10 @@ static const struct asm_opcode insns[] =
 #undef cCE
 #undef cCL
 #undef C3E
+#undef C3
 #undef CE
 #undef CM
+#undef CL
 #undef UE
 #undef UF
 #undef UT
@@ -21650,6 +21708,9 @@ static const struct asm_opcode insns[] =
 #undef OPS5
 #undef OPS6
 #undef do_0
+#undef ToC
+#undef toC
+#undef ToU
 
 /* MD interface: bits in the object file.  */
 
