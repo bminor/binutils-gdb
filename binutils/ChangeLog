@@ -1,3 +1,8 @@
+2019-04-16  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/copy-2.d: Don't run for ns32k-*-*.
+	* testsuite/binutils-all/copy-3.d: Likewise.
+
 2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* readelf.c (arm_attr_tag_CPU_arch): Add entry for Armv8.1-M Mainline.

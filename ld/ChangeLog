@@ -1,3 +1,9 @@
+2019-04-16  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-scripts/pr20302.d: Don't run for ns32k-*-*.
+	* testsuite/ld-scripts/section-match-1.d: Likewise.
+	* testsuite/ld-undefined/require-defined.exp: Likewise.
+
 2019-04-15  Faraz Shahbazker  <fshahbazker@wavecomp.com>
 
 	* testsuite/ld-gc/gc.exp: Skip print-map-discarded test for non-ELF

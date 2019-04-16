@@ -282,7 +282,6 @@ case $target_triplet in {
     default {
 	run_dump_test struct
 	run_dump_test align
-	setup_xfail "ns32k-*-*"
 	run_dump_test align2
     }
 }
@@ -407,7 +406,6 @@ case $target_triplet in {
     { *c54x*-*-* } { }
     { z80-*-* } { }
     default {
-	setup_xfail "nds32*-*-*"
 	run_dump_test weakref1
 	run_dump_test weakref1g
 	run_dump_test weakref1l

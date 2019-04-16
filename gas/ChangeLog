@@ -1,5 +1,10 @@
 2019-04-16  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/gas/all/gas.exp: Remove ns32k xfails.
+	* testsuite/gas/all/weakref1u.d: Don't run for ns32k-*-*.
+
+2019-04-16  Alan Modra  <amodra@gmail.com>
+
 	* write.h: Don't include bit_fix.h.
 	(struct fix): Rearrange some fields.  Delete fx_im_disp and
 	fx_bit_fixP.  Use bitfields for fx_size and fx_pcrel_adjust.
