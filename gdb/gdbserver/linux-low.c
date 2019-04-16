@@ -6185,10 +6185,9 @@ sigchld_handler (int signo)
     {
       do
 	{
-	  /* fprintf is not async-signal-safe, so call write
-	     directly.  */
-	  if (write (2, "sigchld_handler\n",
-		     sizeof ("sigchld_handler\n") - 1) < 0)
+	  /* Use the async signal safe debug function.  */
+	  if (debug_write ("sigchld_handler\n",
+			   sizeof ("sigchld_handler\n") - 1) < 0)
 	    break; /* just ignore */
 	} while (0);
     }

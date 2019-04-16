@@ -1,5 +1,12 @@
 2019-04-17  Alan Hayward  <alan.hayward@arm.com>
 
+	* ax.c (ax_vdebug): Call debug_printf.
+	* debug.c (debug_write): New function.
+	* debug.h (debug_write): New declaration.
+	* linux-low.c (sigchld_handler): Call debug_write.
+
+2019-04-17  Alan Hayward  <alan.hayward@arm.com>
+
 	* debug.c (debug_set_output): New function.
 	(debug_vprintf): Send output to debug_file.
 	(debug_flush): Likewise.

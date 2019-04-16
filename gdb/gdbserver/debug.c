@@ -130,3 +130,12 @@ do_debug_exit (const char *function_name)
   if (function_name != NULL)
     debug_printf ("<<<< exiting %s\n", function_name);
 }
+
+/* See debug.h.  */
+
+size_t
+debug_write (const void *buf, size_t nbyte)
+{
+  int fd = fileno (debug_file);
+  return write (fd, buf, nbyte);
+}

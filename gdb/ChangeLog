@@ -1,3 +1,7 @@
+2019-04-17  Alan Hayward  <alan.hayward@arm.com>
+
+	* nat/linux-waitpid.c (linux_debug): Call debug_vprintf.
+
 2019-04-17  Jim Wilson  <jimw@sifive.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 

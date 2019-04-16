@@ -35,6 +35,9 @@ void debug_flush (void);
 void do_debug_enter (const char *function_name);
 void do_debug_exit (const char *function_name);
 
+/* Async signal safe debug output function that calls write directly.  */
+size_t debug_write (const void *buf, size_t nbyte);
+
 /* These macros are for use in major functions that produce a lot of
    debugging output.  They help identify in the mass of debugging output
    when these functions enter and exit.  debug_enter is intended to be
