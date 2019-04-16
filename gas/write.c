@@ -143,8 +143,8 @@ static int n_fixups;
 
 static fixS *
 fix_new_internal (fragS *frag,		/* Which frag?  */
-		  int where,		/* Where in that frag?  */
-		  int size,		/* 1, 2, or 4 usually.  */
+		  unsigned long where,	/* Where in that frag?  */
+		  unsigned long size,	/* 1, 2, or 4 usually.  */
 		  symbolS *add_symbol,	/* X_add_symbol.  */
 		  symbolS *sub_symbol,	/* X_op_symbol.  */
 		  offsetT offset,	/* X_add_number.  */
@@ -164,7 +164,7 @@ fix_new_internal (fragS *frag,		/* Which frag?  */
   /* We've made fx_size a narrow field; check that it's wide enough.  */
   if (fixP->fx_size != size)
     {
-      as_bad (_("field fx_size too small to hold %d"), size);
+      as_bad (_("field fx_size too small to hold %lu"), size);
       abort ();
     }
   fixP->fx_addsy = add_symbol;
@@ -228,10 +228,10 @@ fix_new_internal (fragS *frag,		/* Which frag?  */
 /* Create a fixup relative to a symbol (plus a constant).  */
 
 fixS *
-fix_new (fragS *frag,		/* Which frag?  */
-	 int where,			/* Where in that frag?  */
-	 int size,			/* 1, 2, or 4 usually.  */
-	 symbolS *add_symbol,	/* X_add_symbol.  */
+fix_new (fragS *frag,			/* Which frag?  */
+	 unsigned long where,		/* Where in that frag?  */
+	 unsigned long size,		/* 1, 2, or 4 usually.  */
+	 symbolS *add_symbol,		/* X_add_symbol.  */
 	 offsetT offset,		/* X_add_number.  */
 	 int pcrel,			/* TRUE if PC-relative relocation.  */
 	 RELOC_ENUM r_type		/* Relocation type.  */)
@@ -246,8 +246,8 @@ fix_new (fragS *frag,		/* Which frag?  */
 
 fixS *
 fix_new_exp (fragS *frag,		/* Which frag?  */
-	     int where,			/* Where in that frag?  */
-	     int size,			/* 1, 2, or 4 usually.  */
+	     unsigned long where,	/* Where in that frag?  */
+	     unsigned long size,	/* 1, 2, or 4 usually.  */
 	     expressionS *exp,		/* Expression.  */
 	     int pcrel,			/* TRUE if PC-relative relocation.  */
 	     RELOC_ENUM r_type		/* Relocation type.  */)
@@ -313,7 +313,7 @@ fix_new_exp (fragS *frag,		/* Which frag?  */
    as for fix_new, except that WHERE is implicitly 0.  */
 
 fixS *
-fix_at_start (fragS *frag, int size, symbolS *add_symbol,
+fix_at_start (fragS *frag, unsigned long size, symbolS *add_symbol,
 	      offsetT offset, int pcrel, RELOC_ENUM r_type)
 {
   return fix_new_internal (frag, 0, size, add_symbol,

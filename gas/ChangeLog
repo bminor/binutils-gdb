@@ -1,5 +1,17 @@
 2019-04-16  Alan Modra  <amodra@gmail.com>
 
+	* write.h (struct fix <fx_where>): Make unsigned.
+	(fix_new, fix_at_start, fix_new_exp): Adjust prototypes.
+	* write.c (fix_new, fix_new_exp, fix_at_start): Make "where" and
+	"size" parameters unsigned long.
+	(fix_new_internal): Likewise.  Adjust error format string to suit.
+	* config/tc-mips.c (md_convert_frag): Remove cast of fx_where.
+	* config/tc-sparc.c (md_apply_fix): Likewise.
+	* config/tc-score.c (s3_convert_frag): Adjust for unsigned fx_where.
+	* config/tc-score7.c (s7_convert_frag): Likewise.
+
+2019-04-16  Alan Modra  <amodra@gmail.com>
+
 	* frags.h (struct frag <fr_fix>): Use unsigned type.
 	* frags.c (frag_new): Assert that current size exceeds
 	old_frags_var_max_size.

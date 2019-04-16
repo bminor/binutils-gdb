@@ -84,8 +84,8 @@ struct fix
   /* Which frag does this fix apply to?  */
   fragS *fx_frag;
 
-  /* Where is the first byte to fix up?  */
-  long fx_where;
+  /* The location within the frag where the fixup occurs.  */
+  unsigned long fx_where;
 
   /* NULL or Symbol whose value we add in.  */
   symbolS *fx_addsy;
@@ -183,15 +183,12 @@ extern long relax_frag (segT, fragS *, long);
 extern int relax_segment (struct frag *, segT, int);
 extern void number_to_chars_littleendian (char *, valueT, int);
 extern void number_to_chars_bigendian (char *, valueT, int);
-extern fixS *fix_new
-  (fragS * frag, int where, int size, symbolS * add_symbol,
-   offsetT offset, int pcrel, bfd_reloc_code_real_type r_type);
-extern fixS *fix_at_start
-  (fragS * frag, int size, symbolS * add_symbol,
-   offsetT offset, int pcrel, bfd_reloc_code_real_type r_type);
-extern fixS *fix_new_exp
-  (fragS * frag, int where, int size, expressionS *exp, int pcrel,
-   bfd_reloc_code_real_type r_type);
+extern fixS *fix_new (fragS *, unsigned long, unsigned long, symbolS *,
+		      offsetT, int, bfd_reloc_code_real_type);
+extern fixS *fix_at_start (fragS *, unsigned long, symbolS *,
+			   offsetT, int, bfd_reloc_code_real_type);
+extern fixS *fix_new_exp (fragS *, unsigned long, unsigned long,
+			  expressionS *, int, bfd_reloc_code_real_type);
 extern void write_print_statistics (FILE *);
 
 #endif /* __write_h__ */

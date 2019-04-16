@@ -19099,7 +19099,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	 sequence instead.  */
       while (fixp
 	     && fixp->fx_frag == fragp
-	     && (valueT) fixp->fx_where + second < fragp->fr_fix)
+	     && fixp->fx_where + second < fragp->fr_fix)
 	{
 	  if (subtype & RELAX_USE_SECOND)
 	    fixp->fx_done = 1;
