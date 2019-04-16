@@ -1,3 +1,7 @@
+2019-04-22  Ali Tamur  <tamur@google.com>
+
+	* MAINTAINERS (Write After Approval): Add self.
+
 2019-04-22  Simon Marchi  <simon.marchi@efficios.com>
 
 	* solib-svr4.c (get_svr4_info): Add pspace parameter.
