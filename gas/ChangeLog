@@ -1,5 +1,25 @@
 2019-04-16  Alan Modra  <amodra@gmail.com>
 
+	* write.h: Don't include bit_fix.h.
+	(struct fix): Rearrange some fields.  Delete fx_im_disp and
+	fx_bit_fixP.  Use bitfields for fx_size and fx_pcrel_adjust.
+	* write.c (fix_new_internal): Don't init fx_im_disp and fx_bit_fixP.
+	(fixup_segment): Don't exclude overflow checks on fx_bit_fixP.
+	(print_fixup): Don't print im_disp.
+	* config/tc-cris.c (md_apply_fix): Remove tests of fx_bit_fixP
+	and fx_im_disp.
+	* config/tc-dlx.c (md_apply_fix): Remove wrong debug code.  Set
+	fx_no_overflow when fx_bit_fixP.
+	* config/tc-dlx.h: Include bit_fix.h.
+	(TC_FIX_TYPE, tc_fix_data, TC_INIT_FIX_DATA): Define.
+	* config/tc-ns32k.c (fix_new_ns32k, fix_new_ns32k_exp): Set
+	fx_no_overflow when bit_fixP.
+	* config/tc-ns32k.h (TC_FIX_TYPE): Add fx_bit_fixP and fx_im_disp.
+	(fix_im_disp, fix_bit_fixP): Adjust to suit.
+	(TC_INIT_FIX_DATA, TC_FIX_DATA_PRINT): Likewise.
+
+2019-04-16  Alan Modra  <amodra@gmail.com>
+
 	* write.h (struct fix <fx_where>): Make unsigned.
 	(fix_new, fix_at_start, fix_new_exp): Adjust prototypes.
 	* write.c (fix_new, fix_new_exp, fix_at_start): Make "where" and

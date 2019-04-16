@@ -40,27 +40,20 @@
 #define FAKE_LABEL_CHAR '\001'
 #endif
 
-#include "bit_fix.h"
-
 /*
  * FixSs may be built up in any order.
  */
 
 struct fix
 {
+  /* Next fixS in linked list, or NULL.  */
+  struct fix *fx_next;
+
   /* These small fields are grouped together for compactness of
      this structure, and efficiency of access on some architectures.  */
 
   /* Is this a pc-relative relocation?  */
   unsigned fx_pcrel : 1;
-
-  /* Is this value an immediate displacement?  */
-  /* Only used on ns32k; merge it into TC_FIX_TYPE sometime.  */
-  unsigned fx_im_disp : 2;
-
-  /* Some bits for the CPU specific code.  */
-  unsigned fx_tcbit : 1;
-  unsigned fx_tcbit2 : 1;
 
   /* Has this relocation already been applied?  */
   unsigned fx_done : 1;
@@ -75,11 +68,20 @@ struct fix
   /* The value is signed when checking for overflow.  */
   unsigned fx_signed : 1;
 
+  /* Some bits for the CPU specific code.  */
+  unsigned fx_tcbit : 1;
+  unsigned fx_tcbit2 : 1;
+
+  /* Spare bits.  */
+  unsigned fx_unused : 10;
+
   /* pc-relative offset adjust (only used by some CPU specific code) */
-  signed char fx_pcrel_adjust;
+  int fx_pcrel_adjust : 8;
 
   /* How many bytes are involved? */
-  unsigned char fx_size;
+  unsigned fx_size : 8;
+
+  bfd_reloc_code_real_type fx_r_type;
 
   /* Which frag does this fix apply to?  */
   fragS *fx_frag;
@@ -101,14 +103,6 @@ struct fix
 
   /* The frag fx_dot_value is based on.  */
   fragS *fx_dot_frag;
-
-  /* Next fixS in linked list, or NULL.  */
-  struct fix *fx_next;
-
-  /* If NULL, no bitfix's to do.  */
-  bit_fixS *fx_bit_fixP;
-
-  bfd_reloc_code_real_type fx_r_type;
 
   /* This field is sort of misnamed.  It appears to be a sort of random
      scratch field, for use by the back ends.  The main gas code doesn't

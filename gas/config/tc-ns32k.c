@@ -1331,7 +1331,7 @@ fix_new_ns32k (fragS *frag,		/* Which frag? */
   fix_bsr (fixP) = bsr;
   fix_bit_fixP (fixP) = bit_fixP;
   /* We have a MD overflow check for displacements.  */
-  fixP->fx_no_overflow = (im_disp != 0);
+  fixP->fx_no_overflow = im_disp != 0 || bit_fixP != NULL;
 }
 
 static void
@@ -1359,7 +1359,7 @@ fix_new_ns32k_exp (fragS *frag,		/* Which frag? */
   fix_bsr (fixP) = bsr;
   fix_bit_fixP (fixP) = bit_fixP;
   /* We have a MD overflow check for displacements.  */
-  fixP->fx_no_overflow = (im_disp != 0);
+  fixP->fx_no_overflow = im_disp != 0 || bit_fixP != NULL;
 }
 
 /* Convert number to chars in correct order.  */

@@ -31,6 +31,12 @@
 
 #define LEX_DOLLAR 1
 
+#include "bit_fix.h"
+
+#define TC_FIX_TYPE bit_fixS *
+#define tc_fix_data fx_bit_fixP
+#define TC_INIT_FIX_DATA(FIX) do (FIX)->fx_bit_fixP = NULL; while (0)
+
 extern void dlx_pop_insert         (void);
 extern int dlx_unrecognized_line   (int);
 extern bfd_boolean md_dlx_fix_adjustable  (struct fix *);

@@ -174,9 +174,7 @@ fix_new_internal (fragS *frag,		/* Which frag?  */
   fixP->fx_dot_frag = dot_frag;
   fixP->fx_pcrel = pcrel;
   fixP->fx_r_type = r_type;
-  fixP->fx_im_disp = 0;
   fixP->fx_pcrel_adjust = 0;
-  fixP->fx_bit_fixP = 0;
   fixP->fx_addnumber = 0;
   fixP->fx_tcbit = 0;
   fixP->fx_tcbit2 = 0;
@@ -1093,7 +1091,7 @@ fixup_segment (fixS *fixP, segT this_segment)
 	    symbol_mark_used_in_reloc (fixP->fx_subsy);
 	}
 
-      if (!fixP->fx_bit_fixP && !fixP->fx_no_overflow && fixP->fx_size != 0)
+      if (!fixP->fx_no_overflow && fixP->fx_size != 0)
 	{
 	  if (fixP->fx_size < sizeof (valueT))
 	    {
@@ -1131,7 +1129,7 @@ fixup_segment (fixS *fixP, segT this_segment)
 			  (long) add_number,
 			  (long) (fragP->fr_address + fixP->fx_where));
 #endif
-	}			/* Not a bit fix.  */
+	}
 
 #ifdef TC_VALIDATE_FIX
     skip:  ATTRIBUTE_UNUSED_LABEL
@@ -3142,14 +3140,6 @@ print_fixup (fixS *fixp)
     fprintf (stderr, " pcrel");
   if (fixp->fx_pcrel_adjust)
     fprintf (stderr, " pcrel_adjust=%d", fixp->fx_pcrel_adjust);
-  if (fixp->fx_im_disp)
-    {
-#ifdef TC_NS32K
-      fprintf (stderr, " im_disp=%d", fixp->fx_im_disp);
-#else
-      fprintf (stderr, " im_disp");
-#endif
-    }
   if (fixp->fx_tcbit)
     fprintf (stderr, " tcbit");
   if (fixp->fx_done)
