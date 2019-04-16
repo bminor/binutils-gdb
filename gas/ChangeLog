@@ -1,5 +1,9 @@
 2019-04-16  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/gas/all/weakref1.d: xfail nds32.
+
+2019-04-16  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/gas/all/gas.exp: Remove ns32k xfails.
 	* testsuite/gas/all/weakref1u.d: Don't run for ns32k-*-*.
 
