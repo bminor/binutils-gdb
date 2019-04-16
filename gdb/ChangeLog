@@ -1,3 +1,7 @@
+2019-04-24  Tom Tromey  <tromey@adacore.com>
+
+	* amd64-tdep.c (amd64_has_unaligned_fields): Ignore bitfields.
+
 2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* s12z-tdep.c (s12z_unwind_pc): Delete.

@@ -1,3 +1,10 @@
+2019-04-24  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.arch/amd64-eval.exp: Test bitfield return.
+	* gdb.arch/amd64-eval.cc (struct Bitfields): New.
+	(class Foo) <return_bitfields>: New method.
+	(main): Call it.
+
 2019-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.cp/many-args.cc: New file.

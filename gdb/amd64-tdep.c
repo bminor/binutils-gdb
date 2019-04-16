@@ -555,11 +555,13 @@ amd64_has_unaligned_fields (struct type *type)
 	  int bitpos = TYPE_FIELD_BITPOS (type, i);
 	  int align = type_align(subtype);
 
-	  /* Ignore static fields, or empty fields, for example nested
-	     empty structures.  */
+	  /* Ignore static fields, empty fields (for example nested
+	     empty structures), and bitfields (these are handled by
+	     the caller).  */
 	  if (field_is_static (&TYPE_FIELD (type, i))
 	      || (TYPE_FIELD_BITSIZE (type, i) == 0
-		  && TYPE_LENGTH (subtype) == 0))
+		  && TYPE_LENGTH (subtype) == 0)
+	      || TYPE_FIELD_PACKED (type, i))
 	    continue;
 
 	  if (bitpos % 8 != 0)
@@ -569,7 +571,7 @@ amd64_has_unaligned_fields (struct type *type)
 	  if (bytepos % align != 0)
 	    return true;
 
-	  if (amd64_has_unaligned_fields(subtype))
+	  if (amd64_has_unaligned_fields (subtype))
 	    return true;
 	}
     }

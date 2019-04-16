@@ -41,3 +41,5 @@ gdb_test "call foo.return_unaligned(78, 9.25)" \
     " = {x = 78, y = 9.25}"
 gdb_test "call foo.return_unaligned_in_base(23, 4.5, 67)" \
     " = {<UnalignedFields> = {x = 23, y = 4.5}, x2 = 67}"
+gdb_test "call foo.return_bitfields(23, 74)" \
+    " = {fld = 23, fld2 = 74}"

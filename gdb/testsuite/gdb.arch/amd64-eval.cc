@@ -63,6 +63,16 @@ struct UnalignedFieldsInBase : public UnalignedFields
   int32_t x2;
 };
 
+struct Bitfields
+{
+  Bitfields(unsigned int x, unsigned int y)
+    : fld(x), fld2(y)
+  {}
+
+  unsigned fld : 7;
+  unsigned fld2 : 7;
+};
+
 class Foo
 {
 public:
@@ -101,6 +111,13 @@ public:
     return UnalignedFieldsInBase (x, y, x2);
   }
 
+  Bitfields
+  return_bitfields (unsigned int x, unsigned int y)
+  {
+    assert (this->tag == EXPECTED_TAG);
+    return Bitfields(x, y);
+  }
+
 private:
   /* Use a tag to detect if the "this" value is correct.  */
   static const int EXPECTED_TAG = 0xF00F00F0;
@@ -116,5 +133,6 @@ main (int argc, char *argv[])
   foo.return_non_trivial_destructor(3);
   foo.return_unaligned(4, 5);
   foo.return_unaligned_in_base(6, 7, 8);
+  foo.return_bitfields(23, 74);
   return 0;  // break-here
 }
