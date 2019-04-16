@@ -430,7 +430,15 @@ riscv_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 	unaligned_p = true;
       else
 	{
-	  /* Read the opcode byte to determine the instruction length.  */
+	  /* Read the opcode byte to determine the instruction length.  If
+	     the read fails this may be because we tried to set the
+	     breakpoint at an invalid address, in this case we provide a
+	     fake result which will give a breakpoint length of 4.
+	     Hopefully when we try to actually insert the breakpoint we
+	     will see a failure then too which will be reported to the
+	     user.  */
+	  if (target_read_code (*pcptr, buf, 1) == -1)
+	    buf[0] = 0;
 	  read_code (*pcptr, buf, 1);
 	}
 
