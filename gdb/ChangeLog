@@ -1,3 +1,8 @@
+2019-04-17  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2read.c (dwarf2_init_complex_target_type): Check "tt"
+	against nullptr before use.
+
 2019-04-17  Alan Hayward  <alan.hayward@arm.com>
 
 	* nat/linux-waitpid.c (linux_debug): Call debug_vprintf.

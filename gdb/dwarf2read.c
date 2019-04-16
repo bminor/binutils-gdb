@@ -17566,7 +17566,7 @@ dwarf2_init_complex_target_type (struct dwarf2_cu *cu,
   /* If the type we found doesn't match the size we were looking for, then
      pretend we didn't find a type at all, the complex target type we
      create will then be nameless.  */
-  if (TYPE_LENGTH (tt) * TARGET_CHAR_BIT != bits)
+  if (tt != nullptr && TYPE_LENGTH (tt) * TARGET_CHAR_BIT != bits)
     tt = nullptr;
 
   const char *name = (tt == nullptr) ? nullptr : TYPE_NAME (tt);
