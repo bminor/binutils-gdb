@@ -1,3 +1,16 @@
+2019-04-17  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* config/tc-msp430.c (msp430_make_init_symbols): Define __crt0_init_bss
+	symbol when .lower.bss or .either.bss sections exist.
+	Define __crt0_movedata when .lower.data or .either.data sections exist.
+	* testsuite/gas/msp430/either-data-bss-sym.d: New test.
+	* testsuite/gas/msp430/low-data-bss-sym.d: New test.
+	* testsuite/gas/msp430/either-data-bss-sym.s: New test source.
+	* testsuite/gas/msp430/low-data-bss-sym.s: New test source.
+	* testsuite/gas/msp430/msp430.exp: Run new tests.
+	Enable large code model when running -mdata-region={upper,either}
+	tests.
+
 2019-04-16  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-scripts/pr20302.d: Don't run for ns32k-*-*.

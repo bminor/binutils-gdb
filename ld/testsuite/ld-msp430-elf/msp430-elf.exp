@@ -23,15 +23,29 @@ if { ![istarget "msp430*elf*"] } {
     return
 }
 
-# List contains test-items with 3 items followed by 2 lists and one more item:
-# 0:name 1:ld early options 2:ld late options 3:assembler options
-# 4:filenames of assembler files 5: action and options. 6: name of output file
-
-# Actions:
-# objdump: Apply objdump options on result.  Compare with regex (last arg).
-# nm: Apply nm options on result.  Compare with regex (last arg).
-# readelf: Apply readelf options on result.  Compare with regex (last arg).
-
+# List contains test-items with 3 items followed by 2 lists, one item and
+# one optional item:
+#  0:name
+#  1:ld/ar leading options, placed before object files
+#  2:ld/ar trailing options, placed after object files
+#  3:assembler options
+#  4:filenames of assembler files
+#  5:list of actions, options and expected outputs.
+#  6:name of output file
+#  7:compiler flags (optional)
+#
+# Actions: { command command-line-options file-containg-expected-output-regexps }
+# Commands:
+#   objdump: Apply objdump options on result.
+#   nm: Apply nm options on result.
+#   readelf: Apply readelf options on result.
+#   ld: Don't apply anything on result.  Compare output during linking with
+#     the file containing regexps (which is the second arg, not the third).
+#     Note that this *must* be the first action if it is to be used at all;
+#     in all other cases, any output from the linker during linking is
+#     treated as a sign of an error and FAILs the test.
+#
+#
 set msp430regionprefixtests {
   {"Move main() to .upper.text" "-T msp430.ld --code-region=upper"
     "" "" {main-with-text-rodata.s} {{objdump -d main-text-upper.d}} "main-upper"}
@@ -136,6 +150,26 @@ set msp430eithershuffletests {
     {{objdump -D main-const-upper.d}} "either-to-upper-const-unique-sec"}
 }
 
+set msp430warntests {
+    {"Warn when section cannot be transformed because output section does not exist in linker script (text,data,bss,rodata)"
+        "-T msp430-no-lower.ld --code-region=lower --data-region=lower" "" "" {warn-no-lower.s}
+        {{ld warn-no-lower.r}} "warn-no-lower"}
+    {"Warn when section cannot be transformed because output section does not exist in linker script (text only)"
+        "-T msp430-no-lower.ld --code-region=lower" "" "" {warn-no-lower.s}
+        {{ld warn-no-lower-code.r}} "warn-no-lower-code"}
+    {"Warn when section cannot be transformed because output section does not exist in linker script (data,bss,rodata)"
+        "-T msp430-no-lower.ld --data-region=lower" "" "" {warn-no-lower.s}
+        {{ld warn-no-lower-data.r}} "warn-no-lower-data"}
+}
+
+# Don't run section shuffle tests when msp430 ISA is selected
+if {[string match "*-mcpu=msp430 *" [board_info [target_info name] multilib_flags]]
+  || [string match "*-mcpu=msp430" [board_info [target_info name] multilib_flags]]} {
+    return
+}
 run_ld_link_tests $msp430regionprefixtests
 run_ld_link_tests $msp430regionprefixuniquesectiontests
 run_ld_link_tests $msp430eithershuffletests
+run_ld_link_tests $msp430warntests
+
+run_dump_test valid-map

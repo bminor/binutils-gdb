@@ -215,6 +215,40 @@ scan_children (lang_statement_union_type * l)
   return amount;
 }
 
+#define WARN_UPPER 0
+#define WARN_LOWER 1
+#define WARN_TEXT 0
+#define WARN_DATA 1
+#define WARN_BSS 2
+#define WARN_RODATA 3
+
+/* Warn only once per output section.
+ * NAME starts with ".upper." or ".lower.".  */
+static void
+warn_no_output_section (const char *name)
+{
+  static bfd_boolean warned[2][4] = {{FALSE, FALSE, FALSE, FALSE},
+				     {FALSE, FALSE, FALSE, FALSE}};
+  int i = WARN_LOWER;
+
+  if (strncmp (name, ".upper.", 7) == 0)
+    i = WARN_UPPER;
+
+  if (!warned[i][WARN_TEXT] && strcmp (name + 6, ".text") == 0)
+    warned[i][WARN_TEXT] = TRUE;
+  else if (!warned[i][WARN_DATA] && strcmp (name + 6, ".data") == 0)
+    warned[i][WARN_DATA] = TRUE;
+  else if (!warned[i][WARN_BSS] && strcmp (name + 6, ".bss") == 0)
+    warned[i][WARN_BSS] = TRUE;
+  else if (!warned[i][WARN_RODATA] && strcmp (name + 6, ".rodata") == 0)
+    warned[i][WARN_RODATA] = TRUE;
+  else
+    return;
+  einfo ("%P: warning: no input section rule matches %s in linker script\n",
+	 name);
+}
+
+
 /* Place an orphan section.  We use this to put .either sections
    into either their lower or their upper equivalents.  */
 
@@ -239,6 +273,13 @@ gld${EMULATION_NAME}_place_orphan (asection * s,
   /* If constraints are involved let the linker handle the placement normally.  */
   if (constraint != 0)
     return NULL;
+
+  if (strncmp (secname, ".upper.", 7) == 0
+      || strncmp (secname, ".lower.", 7) == 0)
+    {
+      warn_no_output_section (secname);
+      return NULL;
+    }
 
   /* We only need special handling for .either sections.  */
   if (strncmp (secname, ".either.", 8) != 0)
@@ -341,51 +382,20 @@ change_output_section (lang_statement_union_type ** head,
 }
 
 static void
-move_prefixed_section (asection *s, char *new_name,
-		       lang_output_section_statement_type * new_output_sec)
-{
-  s->name = new_name;
-  if (s->output_section == NULL)
-    lang_add_section (& (new_output_sec->children), s, NULL, new_output_sec);
-  else
-    {
-      lang_output_section_statement_type * curr_output_sec
-	= lang_output_section_find (s->output_section->name);
-      change_output_section (&(curr_output_sec->children.head), s,
-			     new_output_sec);
-    }
-}
-
-static void
 add_region_prefix (bfd *abfd, asection *s,
 		   ATTRIBUTE_UNUSED void *unused)
 {
   const char *curr_name = bfd_get_section_name (abfd, s);
-  char * base_name;
-  char * new_input_sec_name = NULL;
-  char * new_output_sec_name = NULL;
   int region = REGION_NONE;
 
   if (strncmp (curr_name, ".text", 5) == 0)
-    {
-      region = code_region;
-      base_name = concat (".text", NULL);
-    }
+    region = code_region;
   else if (strncmp (curr_name, ".data", 5) == 0)
-    {
-      region = data_region;
-      base_name = concat (".data", NULL);
-    }
+    region = data_region;
   else if (strncmp (curr_name, ".bss", 4) == 0)
-    {
-      region = data_region;
-      base_name = concat (".bss", NULL);
-    }
+    region = data_region;
   else if (strncmp (curr_name, ".rodata", 7) == 0)
-    {
-      region = data_region;
-      base_name = concat (".rodata", NULL);
-    }
+    region = data_region;
   else
     return;
 
@@ -394,30 +404,10 @@ add_region_prefix (bfd *abfd, asection *s,
     case REGION_NONE:
       break;
     case REGION_UPPER:
-      new_input_sec_name = concat (".upper", curr_name, NULL);
-      new_output_sec_name = concat (".upper", base_name, NULL);
-      lang_output_section_statement_type * upper
-	= lang_output_section_find (new_output_sec_name);
-      if (upper != NULL)
-	{
-	  move_prefixed_section (s, new_input_sec_name, upper);
-	}
-      else
-	einfo (_("%P: error: no section named %s in linker script\n"),
-	       new_output_sec_name);
+      bfd_rename_section (abfd, s, concat (".upper", curr_name, NULL));
       break;
     case REGION_LOWER:
-      new_input_sec_name = concat (".lower", curr_name, NULL);
-      new_output_sec_name = concat (".lower", base_name, NULL);
-      lang_output_section_statement_type * lower
-	= lang_output_section_find (new_output_sec_name);
-      if (lower != NULL)
-	{
-	  move_prefixed_section (s, new_input_sec_name, lower);
-	}
-      else
-	einfo (_("%P: error: no section named %s in linker script\n"),
-	       new_output_sec_name);
+      bfd_rename_section (abfd, s, concat (".lower", curr_name, NULL));
       break;
     case REGION_EITHER:
       s->name = concat (".either", curr_name, NULL);
@@ -426,12 +416,6 @@ add_region_prefix (bfd *abfd, asection *s,
       /* Unreachable.  */
       FAIL ();
       break;
-    }
-  free (base_name);
-  if (new_input_sec_name)
-    {
-      free (new_input_sec_name);
-      free (new_output_sec_name);
     }
 }
 
