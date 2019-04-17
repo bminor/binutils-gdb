@@ -680,6 +680,9 @@ static bfd_boolean gen_interrupt_nops = FALSE;
 #define OPTION_WARN_INTR_NOPS 'y'
 #define OPTION_NO_WARN_INTR_NOPS 'Y'
 static bfd_boolean warn_interrupt_nops = TRUE;
+#define OPTION_UNKNOWN_INTR_NOPS 'u'
+#define OPTION_NO_UNKNOWN_INTR_NOPS 'U'
+static bfd_boolean do_unknown_interrupt_nops = TRUE;
 #define OPTION_MCPU 'c'
 #define OPTION_MOVE_DATA 'd'
 static bfd_boolean move_data = FALSE;
@@ -1454,6 +1457,13 @@ md_parse_option (int c, const char * arg)
       warn_interrupt_nops = FALSE;
       return 1;
 
+    case OPTION_UNKNOWN_INTR_NOPS:
+      do_unknown_interrupt_nops = TRUE;
+      return 1;
+    case OPTION_NO_UNKNOWN_INTR_NOPS:
+      do_unknown_interrupt_nops = FALSE;
+      return 1;
+
     case OPTION_MOVE_DATA:
       move_data = TRUE;
       return 1;
@@ -1484,13 +1494,16 @@ static void
 msp430_make_init_symbols (const char * name)
 {
   if (strncmp (name, ".bss", 4) == 0
+      || strncmp (name, ".lower.bss", 10) == 0
+      || strncmp (name, ".either.bss", 11) == 0
       || strncmp (name, ".gnu.linkonce.b.", 16) == 0)
     (void) symbol_find_or_make ("__crt0_init_bss");
 
   if (strncmp (name, ".data", 5) == 0
+      || strncmp (name, ".lower.data", 11) == 0
+      || strncmp (name, ".either.data", 12) == 0
       || strncmp (name, ".gnu.linkonce.d.", 16) == 0)
     (void) symbol_find_or_make ("__crt0_movedata");
-
   /* Note - data assigned to the .either.data section may end up being
      placed in the .upper.data section if the .lower.data section is
      full.  Hence the need to define the crt0 symbol.
@@ -1574,7 +1587,7 @@ const pseudo_typeS md_pseudo_table[] =
   {NULL, NULL, 0}
 };
 
-const char *md_shortopts = "mm:,mP,mQ,ml,mN,mn,my,mY";
+const char *md_shortopts = "mm:,mP,mQ,ml,mN,mn,my,mY,mu,mU";
 
 struct option md_longopts[] =
 {
@@ -1589,6 +1602,8 @@ struct option md_longopts[] =
   {"mn", no_argument, NULL, OPTION_INTR_NOPS},
   {"mY", no_argument, NULL, OPTION_NO_WARN_INTR_NOPS},
   {"my", no_argument, NULL, OPTION_WARN_INTR_NOPS},
+  {"mu", no_argument, NULL, OPTION_UNKNOWN_INTR_NOPS},
+  {"mU", no_argument, NULL, OPTION_NO_UNKNOWN_INTR_NOPS},
   {"md", no_argument, NULL, OPTION_MOVE_DATA},
   {"mdata-region", required_argument, NULL, OPTION_DATA_REGION},
   {NULL, no_argument, NULL, 0}
@@ -1620,6 +1635,13 @@ md_show_usage (FILE * stream)
 	   _("  -mY - do not warn about missing NOPs after changing interrupts\n"));
   fprintf (stream,
 	   _("  -my - warn about missing NOPs after changing interrupts (default)\n"));
+  fprintf (stream,
+	   _("  -mU - for an instruction which changes interrupt state, but where it is not\n"
+	     "        known how the state is changed, do not warn/insert NOPs\n"));
+  fprintf (stream,
+	   _("  -mu - for an instruction which changes interrupt state, but where it is not\n"
+	     "        known how the state is changed, warn/insert NOPs (default)\n"
+	     "        -mn and/or -my are required for this to have any effect\n"));
   fprintf (stream,
 	   _("  -md - Force copying of data from ROM to RAM at startup\n"));
   fprintf (stream,
@@ -2536,7 +2558,8 @@ static void
 warn_eint_nop (bfd_boolean prev_insn_is_nop, bfd_boolean prev_insn_is_dint)
 {
   if (prev_insn_is_nop
-      /* Prevent double warning for DINT immediately before EINT.  */
+      /* If the last insn was a DINT, we will have already warned that a NOP is
+	 required after it.  */
       || prev_insn_is_dint
       /* 430 ISA does not require a NOP before EINT.  */
       || (! target_is_430x ()))
@@ -2554,10 +2577,16 @@ warn_eint_nop (bfd_boolean prev_insn_is_nop, bfd_boolean prev_insn_is_dint)
 /* Use when unsure what effect the insn will have on the interrupt status,
    to insert/warn about adding a NOP before the current insn.  */
 static void
-warn_unsure_interrupt (void)
+warn_unsure_interrupt (bfd_boolean prev_insn_is_nop,
+		       bfd_boolean prev_insn_is_dint)
 {
-  /* Since this could enable or disable interrupts, need to add/warn about
-     adding a NOP before and after this insn.  */
+  if (prev_insn_is_nop
+      /* If the last insn was a DINT, we will have already warned that a NOP is
+	 required after it.  */
+      || prev_insn_is_dint
+      /* 430 ISA does not require a NOP before EINT or DINT.  */
+      || (! target_is_430x ()))
+    return;
   if (gen_interrupt_nops)
     {
       gen_nop ();
@@ -3646,12 +3675,12 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  else if (op1.mode == OP_REG
 		   && (op1.reg == 2 || op1.reg == 3))
 	    this_insn_is_dint = TRUE;
-	  else
+	  else if (do_unknown_interrupt_nops)
 	    {
 	      /* FIXME: Couldn't work out whether the insn is enabling or
 		 disabling interrupts, so for safety need to treat it as both
 		 a DINT and EINT.  */
-	      warn_unsure_interrupt ();
+	      warn_unsure_interrupt (prev_insn_is_nop, prev_insn_is_dint);
 	      check_for_nop |= NOP_CHECK_INTERRUPT;
 	    }
 	}

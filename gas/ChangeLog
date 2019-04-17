@@ -1,3 +1,28 @@
+2019-04-17  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* config/tc-msp430.c (options): New OPTION_UNKNOWN_INTR_NOPS,
+	OPTION_NO_UNKNOWN_INTR_NOPS and do_unknown_interrupt_nops.
+	(md_parse_option): Handle OPTION_UNKNOWN_INTR_NOPS and
+	OPTION_NO_UNKNOWN_INTR_NOPS by setting do_unknown_interrupt_nops
+	accordingly.
+	(md_show_usage): Likewise.
+	(md_shortopts): Add "mu" for OPTION_UNKNOWN_INTR_NOPS and
+	"mU" for OPTION_NO_UNKNOWN_INTR_NOPS.
+	(md_longopts): Likewise.
+	(warn_eint_nop): Update comment.
+	(warn_unsure_interrupt): Don't warn if prev_insn_is_nop or
+	prev_insn_is_dint or we are assembling for 430 ISA.
+	(msp430_operands): Only call warn_unsure_interrupt if
+	do_unknown_interrupt_nops == TRUE.
+	* testsuite/gas/msp430/nop-unknown-intr.s: New test source file.
+	* testsuite/gas/msp430/nop-unknown-intr-430.d: New test.
+	* testsuite/gas/msp430/nop-unknown-intr-430x.d: New test.
+	* testsuite/gas/msp430/nop-unknown-intr-430x-ignore.d: New test.
+	* testsuite/gas/msp430/nop-unknown-intr-430.l: Warning output for new
+	test.
+	* testsuite/gas/msp430/nop-unknown-intr-430x.l: Likewise.
+	* testsuite/gas/msp430/msp430.exp: Add new tests to driver.
+
 2019-04-16  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/all/weakref1.d: xfail nds32.
