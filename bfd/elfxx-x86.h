@@ -166,6 +166,7 @@
   ((H)->def_regular \
    || (H)->root.linker_def \
    || (H)->root.ldscript_def \
+   || ((struct elf_x86_link_hash_entry *) (H))->linker_def \
    || ELF_COMMON_DEF_P (H))
 
 /* TRUE if relative relocation should be generated.  GOT reference to
