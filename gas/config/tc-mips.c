@@ -6014,7 +6014,10 @@ match_non_zero_reg_operand (struct mips_arg_info *arg,
     return FALSE;
 
   if (regno == 0)
-    return FALSE;
+    {
+      set_insn_error (arg->argnum, _("the source register must not be $0"));
+      return FALSE;
+    }
 
   arg->last_regno = regno;
   insn_insert_operand (arg->insn, operand, regno);
