@@ -1,3 +1,15 @@
+2019-04-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/24458
+	* testsuite/ld-x86-64/x86-64.exp: Run PR ld/24458 tests.
+	* testsuite/ld-x86-64/pr24458.s: New file.
+	* testsuite/ld-x86-64/pr24458a-x32.d: Likewise.
+	* testsuite/ld-x86-64/pr24458a.d: Likewise.
+	* testsuite/ld-x86-64/pr24458b-x32.d: Likewise.
+	* testsuite/ld-x86-64/pr24458b.d: Likewise.
+	* testsuite/ld-x86-64/pr24458c-x32.d: Likewise.
+	* testsuite/ld-x86-64/pr24458c.d: Likewise.
+
 2019-04-17  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* config/tc-msp430.c (msp430_make_init_symbols): Define __crt0_init_bss

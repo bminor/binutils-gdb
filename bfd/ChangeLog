@@ -1,3 +1,9 @@
+2019-04-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/24458
+	* elfxx-x86.h (SYMBOL_DEFINED_NON_SHARED_P): Also check x86
+	linker_def.
+
 2019-04-15  Thomas Preud'homme  <thomas.preudhomme@arm.com>
 
 	* reloc.c (BFD_RELOC_ARM_T32_VLDR_VSTR_OFF_IMM): New internal
