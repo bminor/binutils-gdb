@@ -1,5 +1,27 @@
 2019-04-17  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-i386/i386.exp: Run pr18801a and pr18801b instead
+	of pr18801.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr18801.d: Removed.
+	* testsuite/ld-x86-64/pr18801.d: Likewise.
+	* testsuite/ld-i386/pr18801a.d: New file.
+	* testsuite/ld-i386/pr18801b.d: Likewise.
+	* testsuite/ld-x86-64/pr18801a.d: Likewise.
+	* testsuite/ld-x86-64/pr18801b.d: Likewise.
+	* testsuite/ld-x86-64/pie2.d: Suggest -fPIE instead of -fPIC.
+	* testsuite/ld-x86-64/pie2.d: Likewise.
+	* testsuite/ld-x86-64/pr19719.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-2a.d: Likewise.
+	* testsuite/ld-x86-64/pr19969.d: Likewise.
+	* testsuite/ld-x86-64/pr21997-1a.err: Likewise.
+	* testsuite/ld-x86-64/pr21997-1b.err: Likewise.
+	* testsuite/ld-x86-64/pr22001-1a.err: Likewise.
+	* testsuite/ld-x86-64/pr22001-1b.err: Likewise.
+	* testsuite/ld-x86-64/pr22791-1.err: Likewise.
+
+2019-04-17  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/24458
 	* testsuite/ld-x86-64/x86-64.exp: Run PR ld/24458 tests.
 	* testsuite/ld-x86-64/pr24458.s: New file.

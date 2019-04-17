@@ -1,5 +1,11 @@
 2019-04-17  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf64-x86-64.c (elf_x86_64_need_pic): Suggest -fPIE when not
+	building shared object.
+	* elfxx-x86.c (_bfd_x86_elf_size_dynamic_sections): Likewise.
+
+2019-04-17  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/24458
 	* elfxx-x86.h (SYMBOL_DEFINED_NON_SHARED_P): Also check x86
 	linker_def.

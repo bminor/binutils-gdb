@@ -1381,7 +1381,8 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
 		{
 		  info->callbacks->einfo
 		    (_("%P%X: read-only segment has dynamic IFUNC relocations;"
-		       " recompile with -fPIC\n"));
+		       " recompile with %s\n"),
+		     bfd_link_dll (info) ? "-fPIC" : "-fPIE");
 		  bfd_set_error (bfd_error_bad_value);
 		  return FALSE;
 		}

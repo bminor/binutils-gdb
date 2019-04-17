@@ -1422,7 +1422,7 @@ elf_x86_64_need_pic (struct bfd_link_info *info,
 	    v = _("protected symbol ");
 	  else
 	    v = _("symbol ");
-	  pic = _("; recompile with -fPIC");
+	  pic = NULL;
 	  break;
 	}
 
@@ -1432,15 +1432,24 @@ elf_x86_64_need_pic (struct bfd_link_info *info,
   else
     {
       name = bfd_elf_sym_name (input_bfd, symtab_hdr, isym, NULL);
-      pic = _("; recompile with -fPIC");
+      pic = NULL;
     }
 
   if (bfd_link_dll (info))
-    object = _("a shared object");
-  else if (bfd_link_pie (info))
-    object = _("a PIE object");
+    {
+      object = _("a shared object");
+      if (!pic)
+	pic = _("; recompile with -fPIC");
+    }
   else
-    object = _("a PDE object");
+    {
+      if (bfd_link_pie (info))
+	object = _("a PIE object");
+      else
+	object = _("a PDE object");
+      if (!pic)
+	pic = _("; recompile with -fPIE");
+    }
 
   /* xgettext:c-format */
   _bfd_error_handler (_("%pB: relocation %s against %s%s`%s' can "
