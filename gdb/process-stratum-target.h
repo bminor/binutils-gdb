@@ -29,7 +29,7 @@ class process_stratum_target : public target_ops
 public:
   ~process_stratum_target () override = 0;
 
-  strata stratum () const override { return process_stratum; }
+  strata stratum () const final override { return process_stratum; }
 
   /* We must default these because they must be implemented by any
      target that can run.  */
