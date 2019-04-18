@@ -1,4 +1,9 @@
 2019-04-18  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/24433
+	* boards/local-board.exp: Set sysroot to "".
+
+2019-04-18  Tom de Vries  <tdevries@suse.de>
 	    Pedro Alves  <palves@redhat.com>
 
 	PR gdb/24454
