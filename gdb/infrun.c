@@ -915,10 +915,14 @@ handle_vfork_child_exec_or_exit (int exec)
       int resume_parent = -1;
 
       /* This exec or exit marks the end of the shared memory region
-	 between the parent and the child.  If the user wanted to
-	 detach from the parent, now is the time.  */
+	 between the parent and the child.  Break the bonds.  */
+      inferior *vfork_parent = inf->vfork_parent;
+      inf->vfork_parent->vfork_child = NULL;
+      inf->vfork_parent = NULL;
 
-      if (inf->vfork_parent->pending_detach)
+      /* If the user wanted to detach from the parent, now is the
+	 time.  */
+      if (vfork_parent->pending_detach)
 	{
 	  struct thread_info *tp;
 	  struct program_space *pspace;
@@ -926,7 +930,7 @@ handle_vfork_child_exec_or_exit (int exec)
 
 	  /* follow-fork child, detach-on-fork on.  */
 
-	  inf->vfork_parent->pending_detach = 0;
+	  vfork_parent->pending_detach = 0;
 
 	  gdb::optional<scoped_restore_exited_inferior>
 	    maybe_restore_inferior;
@@ -941,7 +945,7 @@ handle_vfork_child_exec_or_exit (int exec)
 	    maybe_restore_thread.emplace ();
 
 	  /* We're letting loose of the parent.  */
-	  tp = any_live_thread_of_inferior (inf->vfork_parent);
+	  tp = any_live_thread_of_inferior (vfork_parent);
 	  switch_to_thread (tp);
 
 	  /* We're about to detach from the parent, which implicitly
@@ -964,7 +968,7 @@ handle_vfork_child_exec_or_exit (int exec)
 	  if (print_inferior_events)
 	    {
 	      std::string pidstr
-		= target_pid_to_str (ptid_t (inf->vfork_parent->pid));
+		= target_pid_to_str (ptid_t (vfork_parent->pid));
 
 	      target_terminal::ours_for_output ();
 
@@ -982,7 +986,7 @@ handle_vfork_child_exec_or_exit (int exec)
 		}
 	    }
 
-	  target_detach (inf->vfork_parent, 0);
+	  target_detach (vfork_parent, 0);
 
 	  /* Put it back.  */
 	  inf->pspace = pspace;
@@ -997,10 +1001,7 @@ handle_vfork_child_exec_or_exit (int exec)
 	  inf->removable = 1;
 	  set_current_program_space (inf->pspace);
 
-	  resume_parent = inf->vfork_parent->pid;
-
-	  /* Break the bonds.  */
-	  inf->vfork_parent->vfork_child = NULL;
+	  resume_parent = vfork_parent->pid;
 	}
       else
 	{
@@ -1030,16 +1031,12 @@ handle_vfork_child_exec_or_exit (int exec)
 	  set_current_program_space (pspace);
 	  inf->removable = 1;
 	  inf->symfile_flags = SYMFILE_NO_READ;
-	  clone_program_space (pspace, inf->vfork_parent->pspace);
+	  clone_program_space (pspace, vfork_parent->pspace);
 	  inf->pspace = pspace;
 	  inf->aspace = pspace->aspace;
 
-	  resume_parent = inf->vfork_parent->pid;
-	  /* Break the bonds.  */
-	  inf->vfork_parent->vfork_child = NULL;
+	  resume_parent = vfork_parent->pid;
 	}
-
-      inf->vfork_parent = NULL;
 
       gdb_assert (current_program_space == inf->pspace);
 
