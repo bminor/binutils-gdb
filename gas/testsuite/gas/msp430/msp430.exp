@@ -43,4 +43,7 @@ if [expr [istarget "msp430-*-*"]]  then {
     run_dump_test "nop-unknown-intr-430"
     run_dump_test "nop-unknown-intr-430x"
     run_dump_test "nop-unknown-intr-430x-ignore"
+    run_dump_test "preinit-array"
+    run_dump_test "init-array"
+    run_dump_test "fini-array"
 }

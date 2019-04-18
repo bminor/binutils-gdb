@@ -209,9 +209,9 @@ static struct hash_control *msp430_hash;
 #define CEBL	4
 
 /* Length.  */
-#define STATE_BITS10	1	/* wild guess. short jump */
-#define STATE_WORD	2	/* 2 bytes pc rel. addr. more */
-#define STATE_UNDEF	3	/* cannot handle this yet. convert to word mode */
+#define STATE_BITS10	1	/* Wild guess. short jump.  */
+#define STATE_WORD	2	/* 2 bytes pc rel. addr. more.  */
+#define STATE_UNDEF	3	/* Cannot handle this yet. convert to word mode.  */
 
 #define ENCODE_RELAX(what,length) (((what) << 2) + (length))
 #define RELAX_STATE(s)            ((s) & 3)
@@ -415,6 +415,7 @@ parse_exp (char * s, expressionS * op)
   expression (op);
   if (op->X_op == O_absent)
     as_bad (_("missing operand"));
+
   /* Our caller is likely to check that the entire expression was parsed.
      If we have found a hex constant with an 'h' suffix, ilp will be left
      pointing at the 'h', so skip it here.  */
@@ -1520,6 +1521,32 @@ msp430_make_init_symbols (const char * name)
       || strncmp (name, ".either.bss", 11) == 0
       || upper_data_region_in_use)
     (void) symbol_find_or_make ("__crt0_init_highbss");
+
+  /* The following symbols are for the crt0 functions that run through
+     the different .*_array sections and call the functions placed there.
+     - init_array stores global static C++ constructors to run before main.
+     - preinit_array is not expected to ever be used for MSP430.
+     GCC only places initialization functions for runtime "sanitizers"
+     (i.e. {a,l,t,u}san) and "virtual table verification" in preinit_array.
+     - fini_array stores global static C++ destructors to run after calling
+     exit() or returning from main.
+     __crt0_run_array is required to actually call the functions in the above
+     arrays.  */
+  if (strncmp (name, ".init_array", 11) == 0)
+    {
+      (void) symbol_find_or_make ("__crt0_run_init_array");
+      (void) symbol_find_or_make ("__crt0_run_array");
+    }
+  else if (strncmp (name, ".preinit_array", 14) == 0)
+    {
+      (void) symbol_find_or_make ("__crt0_run_preinit_array");
+      (void) symbol_find_or_make ("__crt0_run_array");
+    }
+  else if (strncmp (name, ".fini_array", 11) == 0)
+    {
+      (void) symbol_find_or_make ("__crt0_run_fini_array");
+      (void) symbol_find_or_make ("__crt0_run_array");
+    }
 }
 
 static void
@@ -2003,8 +2030,8 @@ msp430_srcoperand (struct msp430_operand_s * op,
     {
       char *h = l;
 
-      op->reg = 2;		/* reg 2 in absolute addr mode.  */
-      op->am = 1;		/* mode As == 01 bin.  */
+      op->reg = 2;		/* Reg 2 in absolute addr mode.  */
+      op->am = 1;		/* Mode As == 01 bin.  */
       op->ol = 1;		/* Immediate value followed by instruction.  */
       __tl = h + 1;
       end = parse_exp (__tl, &(op->exp));
@@ -2554,6 +2581,7 @@ gen_nop (void)
 }
 
 /* Insert/inform about adding a NOP if this insn enables interrupts.  */
+
 static void
 warn_eint_nop (bfd_boolean prev_insn_is_nop, bfd_boolean prev_insn_is_dint)
 {
@@ -2564,6 +2592,7 @@ warn_eint_nop (bfd_boolean prev_insn_is_nop, bfd_boolean prev_insn_is_dint)
       /* 430 ISA does not require a NOP before EINT.  */
       || (! target_is_430x ()))
     return;
+
   if (gen_interrupt_nops)
     {
       gen_nop ();
@@ -2576,6 +2605,7 @@ warn_eint_nop (bfd_boolean prev_insn_is_nop, bfd_boolean prev_insn_is_dint)
 
 /* Use when unsure what effect the insn will have on the interrupt status,
    to insert/warn about adding a NOP before the current insn.  */
+
 static void
 warn_unsure_interrupt (bfd_boolean prev_insn_is_nop,
 		       bfd_boolean prev_insn_is_dint)
@@ -2587,6 +2617,7 @@ warn_unsure_interrupt (bfd_boolean prev_insn_is_nop,
       /* 430 ISA does not require a NOP before EINT or DINT.  */
       || (! target_is_430x ()))
     return;
+
   if (gen_interrupt_nops)
     {
       gen_nop ();
@@ -2856,7 +2887,8 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 
   switch (fmt)
     {
-    case 0:			/* Emulated.  */
+    case 0:
+      /* Emulated.  */
       switch (opcode->insn_opnumb)
 	{
 	case 0:

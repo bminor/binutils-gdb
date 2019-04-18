@@ -1,3 +1,16 @@
+2019-04-18  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* config/tc-msp430.c (msp430_make_init_symbols): Define
+	__crt0_run_{preinit,init,fini}_array symbols if
+	.{preinit,init,fini}_array sections exist.
+	* testsuite/gas/msp430/fini-array.d: New test.
+	* testsuite/gas/msp430/init-array.d: New test.
+	* testsuite/gas/msp430/preinit-array.d: New test.
+	* testsuite/gas/msp430/fini-array.s: New test source.
+	* testsuite/gas/msp430/init-array.s: New test source.
+	* testsuite/gas/msp430/preinit-array.s: New test source.
+	* testsuite/gas/msp430/msp430.exp: Add new tests to driver.
+
 2019-04-17  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* config/tc-msp430.c (msp430_make_init_symbols): Define __crt0_init_bss
