@@ -1,3 +1,8 @@
+2019-04-19  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* cli/cli-cmds.c (_initialize_cli_cmds): Move "shell" "!" alias
+	close to the add_com "shell".
+
 2019-04-18  Tom Tromey  <tromey@adacore.com>
 
 	* process-stratum-target.h (class process_stratum_target)

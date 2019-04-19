@@ -1831,6 +1831,8 @@ Execute the rest of the line as a shell command.\n\
 With no arguments, run an inferior shell."));
   set_cmd_completer (c, filename_completer);
 
+  add_com_alias ("!", "shell", class_support, 0);
+
   c = add_com ("edit", class_files, edit_command, _("\
 Edit specified file or function.\n\
 With no argument, edits file containing most recent line listed.\n\
@@ -1894,8 +1896,6 @@ like in the \"break\" command.\n\
 So, for example, if you want to disassemble function bar in file foo.c\n\
 you must type \"disassemble 'foo.c'::bar\" and not \"disassemble foo.c:bar\"."));
   set_cmd_completer (c, location_completer);
-
-  add_com_alias ("!", "shell", class_support, 0);
 
   c = add_com ("make", class_support, make_command, _("\
 Run the ``make'' program using the rest of the line as arguments."));
