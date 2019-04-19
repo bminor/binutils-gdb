@@ -1,3 +1,8 @@
+2019-04-22  Matthew Fortune  <matthew.fortune@mips.com>
+
+	* testsuite/ld-mips-elf/mips-elf-flags.exp: Fix expected ASEs
+	for M5100.
+
 2019-04-19  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-gc/skip-map-discarded.s: Add section attributes.
