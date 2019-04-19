@@ -740,8 +740,8 @@ typedef struct rx_bytesT
   int n_relax;
   int link_relax;
   fixS *link_relax_fixP;
-  char times_grown;
-  char times_shrank;
+  unsigned long times_grown;
+  unsigned long times_shrank;
 } rx_bytesT;
 
 static rx_bytesT rx_bytes;
@@ -1558,7 +1558,7 @@ rx_next_opcode (fragS *fragP)
    fr_subtype to calculate the difference.  */
 
 int
-rx_relax_frag (segT segment ATTRIBUTE_UNUSED, fragS * fragP, long stretch)
+rx_relax_frag (segT segment ATTRIBUTE_UNUSED, fragS * fragP, long stretch, unsigned long max_iterations)
 {
   addressT addr0, sym_addr;
   addressT mypc;
@@ -1755,9 +1755,16 @@ rx_relax_frag (segT segment ATTRIBUTE_UNUSED, fragS * fragP, long stretch)
   /* This prevents infinite loops in align-heavy sources.  */
   if (newsize < oldsize)
     {
-      if (fragP->tc_frag_data->times_shrank > 10
-         && fragP->tc_frag_data->times_grown > 10)
-       newsize = oldsize;
+      /* Make sure that our iteration limit is no bigger than the one being
+	 used inside write.c:relax_segment().  Otherwise we can end up
+	 iterating for too long, and triggering a fatal error there.  See
+	 PR 24464 for more details.  */
+      unsigned long limit = max_iterations > 10 ? 10 : max_iterations;
+
+      if (fragP->tc_frag_data->times_shrank > limit
+	  && fragP->tc_frag_data->times_grown > limit)
+	newsize = oldsize;
+
       if (fragP->tc_frag_data->times_shrank < 20)
        fragP->tc_frag_data->times_shrank ++;
     }

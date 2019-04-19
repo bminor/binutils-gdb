@@ -54,8 +54,15 @@ extern int target_big_endian;
 #define md_end rx_md_end
 extern void rx_md_end (void);
 
-#define md_relax_frag rx_relax_frag
-extern int rx_relax_frag (segT, fragS *, long);
+/* Note - the definition of MD_RELAX_FRAG here includes a reference to the
+   MAX_ITERATIONS variable which is defined locally in write.c:relax_segment()
+   but which is not normally passed to target specific relaxing code.  This
+   reference is needed however as the number of iterations of the RX relaxing
+   code needs to be constrained by the maximum number of iterations allowed
+   by relax_segment().  See PR 24464 for more details.  */
+#define md_relax_frag(SEG, FRAGP, STRETCH) \
+  rx_relax_frag ((SEG), (FRAGP), (STRETCH), max_iterations)
+extern int rx_relax_frag (segT, fragS *, long, unsigned long);
 
 #define TC_FRAG_TYPE struct rx_bytesT *
 #define TC_FRAG_INIT(fragp, max_bytes) rx_frag_init (fragp)
