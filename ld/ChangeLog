@@ -1,3 +1,9 @@
+2019-04-19  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-gc/skip-map-discarded.s: Add section attributes.
+	* testsuite/lib/ld-lib.exp (check_gc_sections_available): Add
+	s12z to list of targets not supporting --gc-sections.
+
 2019-04-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-i386/i386.exp: Run pr18801a and pr18801b instead

@@ -1,3 +1,7 @@
+2019-04-19  Alan Modra  <amodra@gmail.com>
+
+	* elf32-s12z.c (elf_backend_can_gc_sections): Don't define
+
 2019-04-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_need_pic): Suggest -fPIE when not

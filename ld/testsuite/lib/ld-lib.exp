@@ -1043,6 +1043,7 @@ proc check_gc_sections_available { } {
 	    || [istarget mn10200-*-*]
 	    || [istarget pj*-*-*]
 	    || [istarget pru*-*-*]
+	    || [istarget s12z-*-*]
 	    || [istarget xgate-*-*] } {
 	    set gc_sections_available_saved 0
 	    return 0
