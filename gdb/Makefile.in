@@ -777,6 +777,7 @@ ALL_TARGET_OBS = \
 	ravenscar-thread.o \
 	riscv-fbsd-tdep.o \
 	riscv-linux-tdep.o \
+	riscv-ravenscar-thread.o \
 	riscv-tdep.o \
 	rl78-tdep.o \
 	rs6000-aix-tdep.o \
@@ -1380,6 +1381,7 @@ HFILES_NO_SRCDIR = \
 	remote-fileio.h \
 	remote-notif.h \
 	riscv-fbsd-tdep.h \
+	riscv-ravenscar-thread.h \
 	riscv-tdep.h \
 	rs6000-aix-tdep.h \
 	rs6000-tdep.h \
@@ -2299,6 +2301,7 @@ ALLDEPFILES = \
 	riscv-fbsd-tdep.c \
 	riscv-linux-nat.c \
 	riscv-linux-tdep.c \
+	riscv-ravenscar-thread.c \
 	riscv-tdep.c \
 	rl78-tdep.c \
 	rs6000-lynx178-tdep.c \

@@ -56,6 +56,7 @@
 #include "observable.h"
 #include "prologue-value.h"
 #include "arch/riscv.h"
+#include "riscv-ravenscar-thread.h"
 
 /* The stack must be 16-byte aligned.  */
 #define SP_ALIGNMENT 16
@@ -3357,6 +3358,8 @@ riscv_gdbarch_init (struct gdbarch_info info,
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
+
+  register_riscv_ravenscar_ops (gdbarch);
 
   return gdbarch;
 }

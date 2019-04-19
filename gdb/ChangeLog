@@ -1,5 +1,16 @@
 2019-12-12  Tom Tromey  <tromey@adacore.com>
 
+	* Makefile.in (ALL_TARGET_OBS): Add riscv-ravenscar-thread.o.
+	(HFILES_NO_SRCDIR): Add riscv-ravenscar-thread.h.
+	(ALLDEPFILES): Add riscv-ravenscar-thread.c.
+	* configure.tgt (riscv-*-*): Add riscv-ravenscar-thread.o.
+	* riscv-ravenscar-thread.c: New file.
+	* riscv-ravenscar-thread.h: New file.
+	* riscv-tdep.c (riscv_gdbarch_init): Call
+	register_riscv_ravenscar_ops.
+
+2019-12-12  Tom Tromey  <tromey@adacore.com>
+
 	* gdbsupport/thread-pool.c (set_thread_name): Use
 	ATTRIBUTE_UNUSED.
 
