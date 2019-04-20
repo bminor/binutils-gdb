@@ -1311,9 +1311,9 @@ find_command_name_length (const char *text)
      Note that this is larger than the character set allowed when
      creating user-defined commands.  */
 
-  /* Recognize '!' as a single character command so that, e.g., "!ls"
+  /* Recognize the single character commands so that, e.g., "!ls"
      works as expected.  */
-  if (*p == '!')
+  if (*p == '!' || *p == '|')
     return 1;
 
   while (isalnum (*p) || *p == '-' || *p == '_'

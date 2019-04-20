@@ -24,6 +24,7 @@
 #include "completer.h"
 #include "target.h"	/* For baud_rate, remote_debug and remote_timeout.  */
 #include "common/gdb_wait.h"	/* For shell escape implementation.  */
+#include "gdbcmd.h"
 #include "gdb_regex.h"	/* Used by apropos_command.  */
 #include "gdb_vfork.h"
 #include "linespec.h"
@@ -41,6 +42,7 @@
 #include "block.h"
 
 #include "ui-out.h"
+#include "interps.h"
 
 #include "top.h"
 #include "cli/cli-decode.h"
@@ -668,6 +670,25 @@ echo_command (const char *text, int from_tty)
   gdb_flush (gdb_stdout);
 }
 
+/* Sets the last launched shell command convenience variables based on
+   EXIT_STATUS.  */
+
+static void
+exit_status_set_internal_vars (int exit_status)
+{
+  struct internalvar *var_code = lookup_internalvar ("_shell_exitcode");
+  struct internalvar *var_signal = lookup_internalvar ("_shell_exitsignal");
+
+  clear_internalvar (var_code);
+  clear_internalvar (var_signal);
+  if (WIFEXITED (exit_status))
+    set_internalvar_integer (var_code, WEXITSTATUS (exit_status));
+  else if (WIFSIGNALED (exit_status))
+    set_internalvar_integer (var_signal, WTERMSIG (exit_status));
+  else
+    warning (_("unexpected shell command exit status %d\n"), exit_status);
+}
+
 static void
 shell_escape (const char *arg, int from_tty)
 {
@@ -689,6 +710,7 @@ shell_escape (const char *arg, int from_tty)
   /* Make sure to return to the directory GDB thinks it is, in case
      the shell command we just ran changed it.  */
   chdir (current_directory);
+  exit_status_set_internal_vars (rc);
 #endif
 #else /* Can fork.  */
   int status, pid;
@@ -716,6 +738,7 @@ shell_escape (const char *arg, int from_tty)
     waitpid (pid, &status, 0);
   else
     error (_("Fork failed"));
+  exit_status_set_internal_vars (status);
 #endif /* Can fork.  */
 }
 
@@ -825,6 +848,70 @@ edit_command (const char *arg, int from_tty)
   p = xstrprintf ("%s +%d \"%s\"", editor, sal.line, fn);
   shell_escape (p, from_tty);
   xfree (p);
+}
+
+/* Implementation of the "pipe" command.  */
+
+static void
+pipe_command (const char *arg, int from_tty)
+{
+  std::string delim ("|");
+
+  if (arg != nullptr && check_for_argument (&arg, "-d", 2))
+    {
+      delim = extract_arg (&arg);
+      if (delim.empty ())
+	error (_("Missing delimiter DELIM after -d"));
+    }
+
+  const char *command = arg;
+  if (command == nullptr)
+    error (_("Missing COMMAND"));
+
+  arg = strstr (arg, delim.c_str ());
+
+  if (arg == nullptr)
+    error (_("Missing delimiter before SHELL_COMMAND"));
+
+  std::string gdb_cmd (command, arg - command);
+
+  arg += delim.length (); /* Skip the delimiter.  */
+
+  if (gdb_cmd.empty ())
+    {
+      repeat_previous ();
+      gdb_cmd = skip_spaces (get_saved_command_line ());
+      if (gdb_cmd.empty ())
+	error (_("No previous command to relaunch"));
+    }
+
+  const char *shell_command = skip_spaces (arg);
+  if (*shell_command == '\0')
+    error (_("Missing SHELL_COMMAND"));
+
+  FILE *to_shell_command = popen (shell_command, "w");
+
+  if (to_shell_command == nullptr)
+    error (_("Error launching \"%s\""), shell_command);
+
+  try
+    {
+      stdio_file pipe_file (to_shell_command);
+
+      execute_command_to_ui_file (&pipe_file, gdb_cmd.c_str (), from_tty);
+    }
+  catch (...)
+    {
+      pclose (to_shell_command);
+      throw;
+    }
+
+  int exit_status = pclose (to_shell_command);
+
+  if (exit_status < 0)
+    error (_("shell command \"%s\" failed: %s"), shell_command,
+           safe_strerror (errno));
+  exit_status_set_internal_vars (exit_status);
 }
 
 static void
@@ -1817,6 +1904,23 @@ Editing targets can be specified in these ways:\n\
 Uses EDITOR environment variable contents as editor (or ex as default)."));
 
   c->completer = location_completer;
+
+  c = add_com ("pipe", class_support, pipe_command, _("\
+Send the output of a gdb command to a shell command.\n\
+Usage: | [COMMAND] | SHELL_COMMAND\n\
+Usage: | -d DELIM COMMAND DELIM SHELL_COMMAND\n\
+Usage: pipe [COMMAND] | SHELL_COMMAND\n\
+Usage: pipe -d DELIM COMMAND DELIM SHELL_COMMAND\n\
+\n\
+Executes COMMAND and sends its output to SHELL_COMMAND.\n\
+\n\
+The -d option indicates to use the string DELIM to separate COMMAND\n\
+from SHELL_COMMAND, in alternative to |.  This is useful in\n\
+case COMMAND contains a | character.\n\
+\n\
+With no COMMAND, repeat the last executed command\n\
+and send its output to SHELL_COMMAND."));
+  add_com_alias ("|", "pipe", class_support, 0);
 
   add_com ("list", class_files, list_command, _("\
 List specified function or line.\n\

@@ -1,5 +1,15 @@
 2019-05-31  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* cli/cli-cmds.c (pipe_command): New function.
+	(_initialize_cli_cmds): Call add_com for pipe_command.
+	Define | as an alias for pipe.
+	(exit_status_set_internal_vars): New function.
+	(shell_escape): Call exit_status_set_internal_vars.
+	cli/cli-decode.c (find_command_name_length): Recognize | as
+	a single character command.
+
+2019-05-31  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* gdbcmd.h (execute_command_to_ui_file): New declaration.
 	top.c (execute_command_to_ui_file): New function, mostly a copy
 	of execute_command_to_string.
