@@ -499,8 +499,6 @@ captured_main_1 (struct captured_main_args *context)
 
   notice_open_fds ();
 
-  saved_command_line = (char *) xstrdup ("");
-
 #ifdef __MINGW32__
   /* Ensure stderr is unbuffered.  A Cygwin pty or pipe is implemented
      as a Windows pipe, and Windows buffers on pipes.  */

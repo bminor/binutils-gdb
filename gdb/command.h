@@ -448,7 +448,29 @@ extern void cmd_show_list (struct cmd_list_element *, int, const char *);
 
 extern void error_no_arg (const char *) ATTRIBUTE_NORETURN;
 
-extern void dont_repeat (void);
+
+/* Command line saving and repetition.
+   Each input line executed is saved to possibly be repeated either
+   when the user types an empty line, or be repeated by a command
+   that wants to repeat the previously executed command.  The below
+   functions control command repetition.  */
+
+/* Commands call dont_repeat if they do not want to be repeated by null
+   lines or by repeat_previous ().  */
+
+extern void dont_repeat ();
+
+/* Commands call repeat_previous if they want to repeat the previous command.
+   Such commands that repeat the previous command must indicate
+   to not repeat themselves, to avoid recursive repeat.
+   repeat_previous will mark the current command as not repeating,
+   and will ensure get_saved_command_line returns the previous command,
+   so that the currently executing command can repeat it.  */
+
+extern void repeat_previous ();
+
+/* Prevent dont_repeat from working, and return a cleanup that
+   restores the previous state.  */
 
 extern scoped_restore_tmpl<int> prevent_dont_repeat (void);
 
@@ -456,6 +478,18 @@ extern scoped_restore_tmpl<int> prevent_dont_repeat (void);
    repeated.  Note that the passed-in string must be a constant.  */
 
 extern void set_repeat_arguments (const char *args);
+
+/* Returns the saved command line to repeat.
+   When a command is being executed, this is the currently executing
+   command line, unless the currently executing command has called
+   repeat_previous (): in this case, get_saved_command_line returns
+   the previously saved command line.  */
+
+extern char *get_saved_command_line ();
+
+/* Takes a copy of CMD, for possible repetition.  */
+
+extern void save_command_line (const char *cmd);
 
 /* Used to mark commands that don't do anything.  If we just leave the
    function field NULL, the command is interpreted as a help topic, or

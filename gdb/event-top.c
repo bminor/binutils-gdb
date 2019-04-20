@@ -634,11 +634,10 @@ command_line_append_input_line (struct buffer *cmd_line_buffer, const char *rl)
    If REPEAT, handle command repetitions:
 
      - If the input command line is NOT empty, the command returned is
-       copied into the global 'saved_command_line' var so that it can
-       be repeated later.
+       saved using save_command_line () so that it can be repeated later.
 
-     - OTOH, if the input command line IS empty, return the previously
-       saved command instead of the empty input line.
+     - OTOH, if the input command line IS empty, return the saved
+       command instead of the empty input line.
 */
 
 char *
@@ -673,7 +672,7 @@ handle_line_of_input (struct buffer *cmd_line_buffer,
   server_command = startswith (cmd, SERVER_COMMAND_PREFIX);
   if (server_command)
     {
-      /* Note that we don't set `saved_command_line'.  Between this
+      /* Note that we don't call `save_command_line'.  Between this
          and the check in dont_repeat, this insures that repeating
          will still do the right thing.  */
       return cmd + strlen (SERVER_COMMAND_PREFIX);
@@ -713,7 +712,7 @@ handle_line_of_input (struct buffer *cmd_line_buffer,
   for (p1 = cmd; *p1 == ' ' || *p1 == '\t'; p1++)
     ;
   if (repeat && *p1 == '\0')
-    return saved_command_line;
+    return get_saved_command_line ();
 
   /* Add command to history if appropriate.  Note: lines consisting
      solely of comments are also added to the command history.  This
@@ -728,9 +727,8 @@ handle_line_of_input (struct buffer *cmd_line_buffer,
   /* Save into global buffer if appropriate.  */
   if (repeat)
     {
-      xfree (saved_command_line);
-      saved_command_line = xstrdup (cmd);
-      return saved_command_line;
+      save_command_line (cmd);
+      return get_saved_command_line ();
     }
   else
     return cmd;

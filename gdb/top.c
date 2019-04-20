@@ -134,8 +134,26 @@ show_confirm (struct ui_file *file, int from_tty,
 char *current_directory;
 
 /* The last command line executed on the console.  Used for command
-   repetitions.  */
-char *saved_command_line;
+   repetitions when the user enters an empty line.  */
+
+static char *saved_command_line;
+
+/* If not NULL, the arguments that should be passed if
+   saved_command_line is repeated.  */
+
+static const char *repeat_arguments;
+
+/* The previous last command line executed on the console.  Used for command
+   repetitions when a command wants to relaunch the previously launched
+   command.  We need this as when a command is running, saved_command_line
+   already contains the line of the currently executing command.  */
+
+char *previous_saved_command_line;
+
+/* If not NULL, the arguments that should be passed if the
+   previous_saved_command_line is repeated.  */
+
+static const char *previous_repeat_arguments;
 
 /* Nonzero if the current command is modified by "server ".  This
    affects things like recording into the command history, commands
@@ -521,11 +539,6 @@ maybe_wait_sync_command_done (int was_sync)
     wait_sync_command_done ();
 }
 
-/* If not NULL, the arguments that should be passed if the current
-   command is repeated.  */
-
-static const char *repeat_arguments;
-
 /* See command.h.  */
 
 void
@@ -695,7 +708,7 @@ execute_command_to_string (const char *p, int from_tty,
 
 static int suppress_dont_repeat = 0;
 
-/* Commands call this if they do not want to be repeated by null lines.  */
+/* See command.h  */
 
 void
 dont_repeat (void)
@@ -709,16 +722,52 @@ dont_repeat (void)
      thing read from stdin in line and don't want to delete it.  Null
      lines won't repeat here in any case.  */
   if (ui->instream == ui->stdin_stream)
-    *saved_command_line = 0;
+    {
+      *saved_command_line = 0;
+      repeat_arguments = NULL;
+    }
 }
 
-/* Prevent dont_repeat from working, and return a cleanup that
-   restores the previous state.  */
+/* See command.h  */
+
+void
+repeat_previous ()
+{
+  /* Do not repeat this command, as this command is a repeating command.  */
+  dont_repeat ();
+
+  /* We cannot free saved_command_line, as this line is being executed,
+     so swap it with previous_saved_command_line.  */
+  std::swap (previous_saved_command_line, saved_command_line);
+  std::swap (previous_repeat_arguments, repeat_arguments);
+}
+
+/* See command.h.  */
 
 scoped_restore_tmpl<int>
 prevent_dont_repeat (void)
 {
   return make_scoped_restore (&suppress_dont_repeat, 1);
+}
+
+/* See command.h.  */
+
+char *
+get_saved_command_line ()
+{
+  return saved_command_line;
+}
+
+/* See command.h.  */
+
+void
+save_command_line (const char *cmd)
+{
+  xfree (previous_saved_command_line);
+  previous_saved_command_line = saved_command_line;
+  previous_repeat_arguments = repeat_arguments;
+  saved_command_line = xstrdup (cmd);
+  repeat_arguments = NULL;
 }
 
 
@@ -2179,6 +2228,9 @@ The second argument is the terminal the UI runs on.\n"), &cmdlist);
 void
 gdb_init (char *argv0)
 {
+  saved_command_line = xstrdup ("");
+  previous_saved_command_line = xstrdup ("");
+
   if (pre_init_ui_hook)
     pre_init_ui_hook ();
 
