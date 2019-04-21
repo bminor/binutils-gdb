@@ -1,5 +1,12 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* remote.c (remote_pspace_data): Change type.
+	(remote_pspace_data_cleanup): Remove.
+	(get_remote_exec_file, set_pspace_remote_exec_file)
+	(_initialize_remote): Update.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* breakpoint.c (breakpoint_objfile_key): Change type.
 	(get_breakpoint_objfile_data): Update.
 	(free_breakpoint_objfile_data): Remove.
