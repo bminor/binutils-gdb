@@ -1,5 +1,14 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* inflow.c (struct terminal_info): Add destructor and
+	initializers.
+	(inflow_inferior_data): Change type.
+	(~terminal_info): Rename from inflow_inferior_data_cleanup.
+	(get_inflow_inferior_data, inflow_inferior_exit)
+	(swap_terminal_info, _initialize_inflow): Update.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* target-dcache.c (target_dcache_cleanup): Remove.
 	(target_dcache_aspace_key): Change type.
 	(target_dcache_init_p, target_dcache_invalidate)
