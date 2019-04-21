@@ -1,5 +1,12 @@
 2019-08-12  Tom Tromey  <tom@tromey.com>
 
+	* configure: Rebuild.
+	* configure.ac: Check for readline 7.
+	* NEWS: Mention readline 7 requirement.
+	* README: Update.
+
+2019-08-12  Tom Tromey  <tom@tromey.com>
+
 	* mingw-hdep.c (gdb_select): Remove readline hack.
 
 2019-08-09  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>

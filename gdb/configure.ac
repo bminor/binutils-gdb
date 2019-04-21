@@ -581,6 +581,20 @@ AC_ARG_WITH([system-readline],
                   [use installed readline library])])
 
 if test "$with_system_readline" = yes; then
+   AC_CACHE_CHECK([whether system readline is new enough],
+     [gdb_cv_readline_ok],
+     [AC_TRY_COMPILE(
+       [#include <stdio.h>
+#include <readline/readline.h>],
+       [#if RL_VERSION_MAJOR < 7
+# error "readline version 7 required"
+#endif],
+    gdb_cv_readline_ok=yes,
+    gdb_cv_readline_ok=no)])
+  if test "$gdb_cv_readline_ok" != yes; then
+    AC_MSG_ERROR([system readline is not new enough])
+  fi
+
   READLINE=-lreadline
   READLINE_DEPS=
   READLINE_CFLAGS=

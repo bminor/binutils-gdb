@@ -8952,6 +8952,38 @@ fi
 
 
 if test "$with_system_readline" = yes; then
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether system readline is new enough" >&5
+$as_echo_n "checking whether system readline is new enough... " >&6; }
+if ${gdb_cv_readline_ok+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <stdio.h>
+#include <readline/readline.h>
+int
+main ()
+{
+#if RL_VERSION_MAJOR < 7
+# error "readline version 7 required"
+#endif
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gdb_cv_readline_ok=yes
+else
+  gdb_cv_readline_ok=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_readline_ok" >&5
+$as_echo "$gdb_cv_readline_ok" >&6; }
+  if test "$gdb_cv_readline_ok" != yes; then
+    as_fn_error $? "system readline is not new enough" "$LINENO" 5
+  fi
+
   READLINE=-lreadline
   READLINE_DEPS=
   READLINE_CFLAGS=

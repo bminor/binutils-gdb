@@ -439,7 +439,8 @@ more obscure GDB `configure' options are not listed here.
 
 `--with-system-readline'
      Use the readline library installed on the host, rather than the
-     library supplied as part of GDB.
+     library supplied as part of GDB.  Readline 7 or newer is required;
+     this is enforced by the build system.
 
 `--with-system-zlib
      Use the zlib library installed on the host, rather than the

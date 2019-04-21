@@ -299,6 +299,11 @@ maint show test-options-completion-result
   Using another implementation of the make program or an earlier version of
   GNU make to build GDB or GDBserver is not supported.
 
+* Building GDB now requires GNU readline >= 7.0.
+
+  GDB now bundles GNU readline 8.0, but if you choose to use
+  --with-system-readline, only readline >= 7.0 can be used.
+
 *** Changes in GDB 8.3
 
 * GDB and GDBserver now support access to additional registers on

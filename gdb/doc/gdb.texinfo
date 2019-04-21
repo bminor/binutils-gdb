@@ -36905,7 +36905,8 @@ details.
 
 @item --with-system-readline
 Use the readline library installed on the host, rather than the
-library supplied as part of @value{GDBN}.
+library supplied as part of @value{GDBN}.  Readline 7 or newer is
+required; this is enforced by the build system.
 
 @item --with-system-zlib
 Use the zlib library installed on the host, rather than the library
