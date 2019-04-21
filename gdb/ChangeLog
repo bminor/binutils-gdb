@@ -1,5 +1,14 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* target-dcache.c (target_dcache_cleanup): Remove.
+	(target_dcache_aspace_key): Change type.
+	(target_dcache_init_p, target_dcache_invalidate)
+	(target_dcache_get, target_dcache_get_or_init)
+	(_initialize_target_dcache): Update.
+	* dcache.h (struct dcache_deleter): New.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* symtab.c (struct symbol_cache): Add destructor and
 	initializers.
 	(symbol_cache_key): Move.  Change type.

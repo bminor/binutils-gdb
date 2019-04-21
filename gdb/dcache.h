@@ -34,6 +34,15 @@ DCACHE *dcache_init (void);
 /* Free a DCACHE.  */
 void dcache_free (DCACHE *);
 
+/* A deletion adapter that calls dcache_free.  */
+struct dcache_deleter
+{
+  void operator() (DCACHE *d) const
+  {
+    dcache_free (d);
+  }
+};
+
 enum target_xfer_status
   dcache_read_memory_partial (struct target_ops *ops, DCACHE *dcache,
 			      CORE_ADDR memaddr, gdb_byte *myaddr,
