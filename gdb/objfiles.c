@@ -66,30 +66,30 @@ DEFINE_REGISTRY (objfile, REGISTRY_ACCESS_FIELD)
 
 struct objfile_pspace_info
 {
-  struct obj_section **sections;
-  int num_sections;
+  objfile_pspace_info () = default;
+  ~objfile_pspace_info ();
+
+  struct obj_section **sections = nullptr;
+  int num_sections = 0;
 
   /* Nonzero if object files have been added since the section map
      was last updated.  */
-  int new_objfiles_available;
+  int new_objfiles_available = 0;
 
   /* Nonzero if the section map MUST be updated before use.  */
-  int section_map_dirty;
+  int section_map_dirty = 0;
 
   /* Nonzero if section map updates should be inhibited if possible.  */
-  int inhibit_updates;
+  int inhibit_updates = 0;
 };
 
 /* Per-program-space data key.  */
-static const struct program_space_data *objfiles_pspace_data;
+static const struct program_space_key<objfile_pspace_info>
+  objfiles_pspace_data;
 
-static void
-objfiles_pspace_data_cleanup (struct program_space *pspace, void *arg)
+objfile_pspace_info::~objfile_pspace_info ()
 {
-  struct objfile_pspace_info *info = (struct objfile_pspace_info *) arg;
-
-  xfree (info->sections);
-  xfree (info);
+  xfree (sections);
 }
 
 /* Get the current svr4 data.  If none is found yet, add it now.  This
@@ -100,13 +100,9 @@ get_objfile_pspace_data (struct program_space *pspace)
 {
   struct objfile_pspace_info *info;
 
-  info = ((struct objfile_pspace_info *)
-	  program_space_data (pspace, objfiles_pspace_data));
+  info = objfiles_pspace_data.get (pspace);
   if (info == NULL)
-    {
-      info = XCNEW (struct objfile_pspace_info);
-      set_program_space_data (pspace, objfiles_pspace_data, info);
-    }
+    info = objfiles_pspace_data.emplace (pspace);
 
   return info;
 }
@@ -115,7 +111,7 @@ get_objfile_pspace_data (struct program_space *pspace)
 
 /* Per-BFD data key.  */
 
-static const struct bfd_data *objfiles_bfd_data;
+static const struct bfd_key<objfile_per_bfd_storage> objfiles_bfd_data;
 
 objfile_per_bfd_storage::~objfile_per_bfd_storage ()
 {
@@ -133,8 +129,7 @@ get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
   struct objfile_per_bfd_storage *storage = NULL;
 
   if (abfd != NULL)
-    storage = ((struct objfile_per_bfd_storage *)
-	       bfd_data (abfd, objfiles_bfd_data));
+    storage = objfiles_bfd_data.get (abfd);
 
   if (storage == NULL)
     {
@@ -143,7 +138,7 @@ get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
 	 back to not sharing data across users.  These cases are rare
 	 enough that this seems reasonable.  */
       if (abfd != NULL && !gdb_bfd_requires_relocations (abfd))
-	set_bfd_data (abfd, objfiles_bfd_data, storage);
+	objfiles_bfd_data.set (abfd, storage);
 
       /* Look up the gdbarch associated with the BFD.  */
       if (abfd != NULL)
@@ -151,15 +146,6 @@ get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
     }
 
   return storage;
-}
-
-/* A deleter for objfile_per_bfd_storage that can be passed as a
-   cleanup function to the BFD registry.  */
-
-static void
-objfile_bfd_data_free (struct bfd *unused, void *d)
-{
-  delete (struct objfile_per_bfd_storage *) d;
 }
 
 /* See objfiles.h.  */
@@ -1510,15 +1496,4 @@ objfile_flavour_name (struct objfile *objfile)
   if (objfile->obfd != NULL)
     return bfd_flavour_name (bfd_get_flavour (objfile->obfd));
   return NULL;
-}
-
-void
-_initialize_objfiles (void)
-{
-  objfiles_pspace_data
-    = register_program_space_data_with_cleanup (NULL,
-						objfiles_pspace_data_cleanup);
-
-  objfiles_bfd_data = register_bfd_data_with_cleanup (NULL,
-						      objfile_bfd_data_free);
 }

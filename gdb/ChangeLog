@@ -1,5 +1,16 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* objfiles.c (objfile_pspace_info): Add destructor and
+	initializers.
+	(objfiles_pspace_data): Change type.
+	(~objfile_pspace_info): Rename from objfiles_pspace_data_cleanup.
+	(get_objfile_pspace_data): Update.
+	(objfiles_bfd_data): Change type.
+	(get_objfile_bfd_data): Update.
+	(objfile_bfd_data_free, _initialize_objfiles): Remove.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* break-catch-syscall.c (catch_syscall_inferior_data): Move.
 	Change type.
 	(get_catch_syscall_inferior_data): Update.
