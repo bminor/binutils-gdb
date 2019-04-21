@@ -1,5 +1,12 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* auxv.c (auxv_inferior_data): Move.  Change type.
+	(auxv_inferior_data_cleanup): Remove.
+	(invalidate_auxv_cache_inf): Rewrite.
+	(get_auxv_inferior_data, _initialize_auxv): Update.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* symfile-debug.c (struct debug_sym_fns_data): Add initializers.
 	(symfile_debug_objfile_data_key): Change type.
 	(symfile_debug_installed, debug_qf_has_symbols)
