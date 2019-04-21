@@ -183,9 +183,6 @@ get_linux_gdbarch_data (struct gdbarch *gdbarch)
 	  gdbarch_data (gdbarch, linux_gdbarch_data_handle));
 }
 
-/* Per-inferior data key.  */
-static const struct inferior_data *linux_inferior_data;
-
 /* Linux-specific cached data.  This is used by GDB for caching
    purposes for each inferior.  This helps reduce the overhead of
    transfering data from a remote target to the local host.  */
@@ -196,13 +193,16 @@ struct linux_info
      at this info requires an auxv lookup (which is itself cached),
      and looking through the inferior's mappings (which change
      throughout execution and therefore cannot be cached).  */
-  struct mem_range vsyscall_range;
+  struct mem_range vsyscall_range {};
 
   /* Zero if we haven't tried looking up the vsyscall's range before
      yet.  Positive if we tried looking it up, and found it.  Negative
      if we tried looking it up but failed.  */
-  int vsyscall_range_p;
+  int vsyscall_range_p = 0;
 };
+
+/* Per-inferior data key.  */
+static const struct inferior_key<linux_info> linux_inferior_data;
 
 /* Frees whatever allocated space there is to be freed and sets INF's
    linux cache data pointer to NULL.  */
@@ -210,24 +210,7 @@ struct linux_info
 static void
 invalidate_linux_cache_inf (struct inferior *inf)
 {
-  struct linux_info *info;
-
-  info = (struct linux_info *) inferior_data (inf, linux_inferior_data);
-  if (info != NULL)
-    {
-      xfree (info);
-      set_inferior_data (inf, linux_inferior_data, NULL);
-    }
-}
-
-/* Handles the cleanup of the linux cache for inferior INF.  ARG is
-   ignored.  Callback for the inferior_appeared and inferior_exit
-   events.  */
-
-static void
-linux_inferior_data_cleanup (struct inferior *inf, void *arg)
-{
-  invalidate_linux_cache_inf (inf);
+  linux_inferior_data.clear (inf);
 }
 
 /* Fetch the linux cache info for INF.  This function always returns a
@@ -239,12 +222,9 @@ get_linux_inferior_data (void)
   struct linux_info *info;
   struct inferior *inf = current_inferior ();
 
-  info = (struct linux_info *) inferior_data (inf, linux_inferior_data);
+  info = linux_inferior_data.get (inf);
   if (info == NULL)
-    {
-      info = XCNEW (struct linux_info);
-      set_inferior_data (inf, linux_inferior_data, info);
-    }
+    info = linux_inferior_data.emplace (inf);
 
   return info;
 }
@@ -2582,9 +2562,6 @@ _initialize_linux_tdep (void)
   linux_gdbarch_data_handle =
     gdbarch_data_register_post_init (init_linux_gdbarch_data);
 
-  /* Set a cache per-inferior.  */
-  linux_inferior_data
-    = register_inferior_data_with_cleanup (NULL, linux_inferior_data_cleanup);
   /* Observers used to invalidate the cache when needed.  */
   gdb::observers::inferior_exit.attach (invalidate_linux_cache_inf);
   gdb::observers::inferior_appeared.attach (invalidate_linux_cache_inf);

@@ -1,5 +1,13 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* linux-tdep.c (struct linux_info): Add initializers.
+	(linux_inferior_data): Move.  Change type.
+	(invalidate_linux_cache_inf): Update.
+	(linux_inferior_data_cleanup): Remove.
+	(get_linux_inferior_data, _initialize_linux_tdep): Update.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* auxv.c (auxv_inferior_data): Move.  Change type.
 	(auxv_inferior_data_cleanup): Remove.
 	(invalidate_auxv_cache_inf): Rewrite.
