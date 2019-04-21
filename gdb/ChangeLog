@@ -1,5 +1,29 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* symfile-debug.c (struct debug_sym_fns_data): Add initializers.
+	(symfile_debug_objfile_data_key): Change type.
+	(symfile_debug_installed, debug_qf_has_symbols)
+	(debug_qf_find_last_source_symtab)
+	(debug_qf_forget_cached_source_info)
+	(debug_qf_map_symtabs_matching_filename, debug_qf_lookup_symbol)
+	(debug_qf_print_stats, debug_qf_dump)
+	(debug_qf_expand_symtabs_for_function)
+	(debug_qf_expand_all_symtabs)
+	(debug_qf_expand_symtabs_with_fullname)
+	(debug_qf_map_matching_symbols)
+	(debug_qf_expand_symtabs_matching)
+	(debug_qf_find_pc_sect_compunit_symtab)
+	(debug_qf_map_symbol_filenames)
+	(debug_qf_find_compunit_symtab_by_address, debug_sym_get_probes)
+	(debug_sym_new_init, debug_sym_init, debug_sym_read)
+	(debug_sym_read_psymbols, debug_sym_finish, debug_sym_offsets)
+	(debug_sym_read_linetable, debug_sym_relocate): Update.
+	(symfile_debug_free_objfile): Remove.
+	(install_symfile_debug_logging, _initialize_symfile_debug):
+	Update.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.h (struct dwarf2_per_objfile): Don't inherit from
 	allocate_on_obstack.
 	* dwarf2read.c (dwarf2_objfile_data_key): Change type.
