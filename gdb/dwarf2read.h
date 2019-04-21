@@ -102,7 +102,7 @@ typedef struct die_info *die_info_ptr;
 /* Collection of data recorded per objfile.
    This hangs off of dwarf2_objfile_data_key.  */
 
-struct dwarf2_per_objfile : public allocate_on_obstack
+struct dwarf2_per_objfile
 {
   /* Construct a dwarf2_per_objfile for OBJFILE.  NAMES points to the
      dwarf2 section names, or is NULL if the standard ELF names are

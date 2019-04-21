@@ -1,5 +1,16 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.h (struct dwarf2_per_objfile): Don't inherit from
+	allocate_on_obstack.
+	* dwarf2read.c (dwarf2_objfile_data_key): Change type.
+	(get_dwarf2_per_objfile): Update.
+	(set_dwarf2_per_objfile): Remove.
+	(dwarf2_has_info, dwarf2_get_section_info): Update.
+	(dwarf2_free_objfile): Remove.
+	(_initialize_dwarf2_read): Update.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* auto-load.c (struct auto_load_pspace_info): Add destructor and
 	initializers.
 	<unsupported_script_warning_printed,

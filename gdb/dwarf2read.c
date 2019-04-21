@@ -108,7 +108,7 @@ static int check_physname = 0;
 /* When non-zero, do not reject deprecated .gdb_index sections.  */
 static int use_deprecated_index_sections = 0;
 
-static const struct objfile_data *dwarf2_objfile_data_key;
+static const struct objfile_key<dwarf2_per_objfile> dwarf2_objfile_data_key;
 
 /* The "aclass" indices for various kinds of computed DWARF symbols.  */
 
@@ -281,18 +281,7 @@ struct mapped_debug_names final : public mapped_index_base
 dwarf2_per_objfile *
 get_dwarf2_per_objfile (struct objfile *objfile)
 {
-  return ((struct dwarf2_per_objfile *)
-	  objfile_data (objfile, dwarf2_objfile_data_key));
-}
-
-/* Set the dwarf2_per_objfile associated to OBJFILE.  */
-
-void
-set_dwarf2_per_objfile (struct objfile *objfile,
-			struct dwarf2_per_objfile *dwarf2_per_objfile)
-{
-  gdb_assert (get_dwarf2_per_objfile (objfile) == NULL);
-  set_objfile_data (objfile, dwarf2_objfile_data_key, dwarf2_per_objfile);
+  return dwarf2_objfile_data_key.get (objfile);
 }
 
 /* Default names of the debugging sections.  */
@@ -2251,13 +2240,9 @@ dwarf2_has_info (struct objfile *objfile,
     = get_dwarf2_per_objfile (objfile);
 
   if (dwarf2_per_objfile == NULL)
-    {
-      /* Initialize per-objfile state.  */
-      dwarf2_per_objfile
-	= new (&objfile->objfile_obstack) struct dwarf2_per_objfile (objfile,
-								     names);
-      set_dwarf2_per_objfile (objfile, dwarf2_per_objfile);
-    }
+    dwarf2_per_objfile = dwarf2_objfile_data_key.emplace (objfile, objfile,
+							  names);
+
   return (!dwarf2_per_objfile->info.is_virtual
 	  && dwarf2_per_objfile->info.s.section != NULL
 	  && !dwarf2_per_objfile->abbrev.is_virtual
@@ -2589,9 +2574,7 @@ dwarf2_get_section_info (struct objfile *objfile,
                          asection **sectp, const gdb_byte **bufp,
                          bfd_size_type *sizep)
 {
-  struct dwarf2_per_objfile *data
-    = (struct dwarf2_per_objfile *) objfile_data (objfile,
-						  dwarf2_objfile_data_key);
+  struct dwarf2_per_objfile *data = dwarf2_objfile_data_key.get (objfile);
   struct dwarf2_section_info *info;
 
   /* We may see an objfile without any DWARF, in which case we just
@@ -25433,17 +25416,6 @@ free_one_cached_comp_unit (struct dwarf2_per_cu_data *target_per_cu)
     }
 }
 
-/* Cleanup function for the dwarf2_per_objfile data.  */
-
-static void
-dwarf2_free_objfile (struct objfile *objfile, void *datum)
-{
-  struct dwarf2_per_objfile *dwarf2_per_objfile
-    = static_cast<struct dwarf2_per_objfile *> (datum);
-
-  delete dwarf2_per_objfile;
-}
-
 /* A set of CU "per_cu" pointer, DIE offset, and GDB type pointer.
    We store these in a hash table separate from the DIEs, and preserve them
    when the DIEs are flushed out of cache.
@@ -25761,9 +25733,6 @@ show_check_physname (struct ui_file *file, int from_tty,
 void
 _initialize_dwarf2_read (void)
 {
-  dwarf2_objfile_data_key
-    = register_objfile_data_with_cleanup (nullptr, dwarf2_free_objfile);
-
   add_prefix_cmd ("dwarf", class_maintenance, set_dwarf_cmd, _("\
 Set DWARF specific variables.\n\
 Configure DWARF variables such as the cache size"),
