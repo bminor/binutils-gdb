@@ -3156,7 +3156,8 @@ struct breakpoint_objfile_data
   std::vector<probe *> exception_probes;
 };
 
-static const struct objfile_data *breakpoint_objfile_key;
+static const struct objfile_key<breakpoint_objfile_data>
+  breakpoint_objfile_key;
 
 /* Minimal symbol not found sentinel.  */
 static struct minimal_symbol msym_not_found;
@@ -3177,23 +3178,10 @@ get_breakpoint_objfile_data (struct objfile *objfile)
 {
   struct breakpoint_objfile_data *bp_objfile_data;
 
-  bp_objfile_data = ((struct breakpoint_objfile_data *)
-		     objfile_data (objfile, breakpoint_objfile_key));
+  bp_objfile_data = breakpoint_objfile_key.get (objfile);
   if (bp_objfile_data == NULL)
-    {
-      bp_objfile_data = new breakpoint_objfile_data ();
-      set_objfile_data (objfile, breakpoint_objfile_key, bp_objfile_data);
-    }
+    bp_objfile_data = breakpoint_objfile_key.emplace (objfile);
   return bp_objfile_data;
-}
-
-static void
-free_breakpoint_objfile_data (struct objfile *obj, void *data)
-{
-  struct breakpoint_objfile_data *bp_objfile_data
-    = (struct breakpoint_objfile_data *) data;
-
-  delete bp_objfile_data;
 }
 
 static void
@@ -15447,9 +15435,6 @@ _initialize_breakpoint (void)
   gdb::observers::solib_unloaded.attach (disable_breakpoints_in_unloaded_shlib);
   gdb::observers::free_objfile.attach (disable_breakpoints_in_freed_objfile);
   gdb::observers::memory_changed.attach (invalidate_bp_value_on_memory_change);
-
-  breakpoint_objfile_key
-    = register_objfile_data_with_cleanup (NULL, free_breakpoint_objfile_data);
 
   breakpoint_chain = 0;
   /* Don't bother to call set_breakpoint_count.  $bpnum isn't useful

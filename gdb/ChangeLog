@@ -1,5 +1,12 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* breakpoint.c (breakpoint_objfile_key): Change type.
+	(get_breakpoint_objfile_data): Update.
+	(free_breakpoint_objfile_data): Remove.
+	(_initialize_breakpoint): Update.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* linux-tdep.c (struct linux_info): Add initializers.
 	(linux_inferior_data): Move.  Change type.
 	(invalidate_linux_cache_inf): Update.
