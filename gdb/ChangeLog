@@ -1,5 +1,19 @@
 2019-05-08  Tom Tromey  <tom@tromey.com>
 
+	* auto-load.c (struct auto_load_pspace_info): Add destructor and
+	initializers.
+	<unsupported_script_warning_printed,
+	script_not_found_warning_printed>: Now bool.
+	(auto_load_pspace_data): Change type.
+	(~auto_load_pspace_info): Rename from
+	auto_load_pspace_data_cleanup.
+	(get_auto_load_pspace_data, init_loaded_scripts_info)
+	(clear_section_scripts, maybe_print_unsupported_script_warning)
+	(maybe_print_script_not_found_warning, _initialize_auto_load):
+	Update.
+
+2019-05-08  Tom Tromey  <tom@tromey.com>
+
 	* objfiles.c (objfile_pspace_info): Add destructor and
 	initializers.
 	(objfiles_pspace_data): Change type.
