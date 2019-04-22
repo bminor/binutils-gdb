@@ -1328,13 +1328,13 @@ find_command_name_length (const char *text)
    This is a stricter subset of all gdb commands,
    see find_command_name_length.  */
 
-int
+bool
 valid_user_defined_cmd_name_p (const char *name)
 {
   const char *p;
 
   if (*name == '\0')
-    return FALSE;
+    return false;
 
   /* Alas "42" is a legitimate user-defined command.
      In the interests of not breaking anything we preserve that.  */
@@ -1346,10 +1346,10 @@ valid_user_defined_cmd_name_p (const char *name)
 	  || *p == '_')
 	; /* Ok.  */
       else
-	return FALSE;
+	return false;
     }
 
-  return TRUE;
+  return true;
 }
 
 /* This routine takes a line of TEXT and a CLIST in which to start the

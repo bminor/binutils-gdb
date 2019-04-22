@@ -133,7 +133,7 @@ extern struct cli_suppress_notification cli_suppress_notification;
 
 /* API to the manipulation of command lists.  */
 
-extern int valid_user_defined_cmd_name_p (const char *name);
+extern bool valid_user_defined_cmd_name_p (const char *name);
 
 /* Const-correct variant of the above.  */
 
