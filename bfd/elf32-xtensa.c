@@ -63,6 +63,8 @@ static bfd_boolean is_alt_relocation (int);
 static bfd_boolean is_operand_relocation (int);
 static bfd_size_type insn_decode_len
   (bfd_byte *, bfd_size_type, bfd_size_type);
+static int insn_num_slots
+  (bfd_byte *, bfd_size_type, bfd_size_type);
 static xtensa_opcode insn_decode_opcode
   (bfd_byte *, bfd_size_type, bfd_size_type, int);
 static bfd_boolean check_branch_target_aligned
@@ -3857,6 +3859,33 @@ l32r_offset (bfd_vma addr, bfd_vma pc)
 }
 
 
+static xtensa_opcode
+get_rsr_lend_opcode (void)
+{
+  static xtensa_opcode rsr_lend_opcode = XTENSA_UNDEFINED;
+  static bfd_boolean done_lookup = FALSE;
+  if (!done_lookup)
+    {
+      rsr_lend_opcode = xtensa_opcode_lookup (xtensa_default_isa, "rsr.lend");
+      done_lookup = TRUE;
+    }
+  return rsr_lend_opcode;
+}
+
+static xtensa_opcode
+get_wsr_lbeg_opcode (void)
+{
+  static xtensa_opcode wsr_lbeg_opcode = XTENSA_UNDEFINED;
+  static bfd_boolean done_lookup = FALSE;
+  if (!done_lookup)
+    {
+      wsr_lbeg_opcode = xtensa_opcode_lookup (xtensa_default_isa, "wsr.lbeg");
+      done_lookup = TRUE;
+    }
+  return wsr_lbeg_opcode;
+}
+
+
 static int
 get_relocation_opnd (xtensa_opcode opcode, int r_type)
 {
@@ -4057,6 +4086,28 @@ insn_decode_len (bfd_byte *contents,
   return insn_len;
 }
 
+int
+insn_num_slots (bfd_byte *contents,
+		bfd_size_type content_len,
+		bfd_size_type offset)
+{
+  xtensa_isa isa = xtensa_default_isa;
+  xtensa_format fmt;
+  static xtensa_insnbuf ibuff = NULL;
+
+  if (offset + MIN_INSN_LENGTH > content_len)
+    return XTENSA_UNDEFINED;
+
+  if (ibuff == NULL)
+    ibuff = xtensa_insnbuf_alloc (isa);
+  xtensa_insnbuf_from_chars (isa, ibuff, &contents[offset],
+			     content_len - offset);
+  fmt = xtensa_format_decode (isa, ibuff);
+  if (fmt == XTENSA_UNDEFINED)
+    return XTENSA_UNDEFINED;
+  return xtensa_format_num_slots (isa, fmt);
+}
+
 
 /* Decode the opcode for a single slot instruction.
    Return 0 if it fails to decode or the instruction is multi-slot.  */
@@ -4136,6 +4187,20 @@ check_loop_aligned (bfd_byte *contents,
       return FALSE;
     }
 
+  /* If this is relaxed loop, analyze first instruction of the actual loop
+     body.  It must be at offset 27 from the loop instruction address.  */
+  if (insn_len == 3
+      && insn_num_slots (contents, content_length, offset + loop_len) == 1
+      && insn_decode_opcode (contents, content_length,
+			     offset + loop_len, 0) == get_rsr_lend_opcode()
+      && insn_decode_len (contents, content_length, offset + loop_len + 3) == 3
+      && insn_num_slots (contents, content_length, offset + loop_len + 3) == 1
+      && insn_decode_opcode (contents, content_length,
+			     offset + loop_len + 3, 0) == get_wsr_lbeg_opcode())
+    {
+      loop_len = 27;
+      insn_len = insn_decode_len (contents, content_length, offset + loop_len);
+    }
   return check_branch_target_aligned_address (address + loop_len, insn_len);
 }
 

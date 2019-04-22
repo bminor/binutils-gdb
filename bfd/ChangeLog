@@ -1,3 +1,10 @@
+2019-08-01  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* elf32-xtensa.c (insn_num_slots, get_rsr_lend_opcode)
+	(get_wsr_lbeg_opcode): New functions.
+	(check_loop_aligned): Detect relaxed loops and adjust loop_len
+	and insn_len for the first actual instruction of the loop.
+
 2019-07-30  Alan Modra  <amodra@gmail.com>
 
 	PR 24768
