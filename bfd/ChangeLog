@@ -1,3 +1,7 @@
+2019-04-22  Jim Wilson  <jimw@sifive.com>
+
+	* elfnn-riscv.c (PRSTATUS_SIZE) [ARCH_SIZE==32]: Change from 0 to 204.
+
 2019-04-19  Alan Modra  <amodra@gmail.com>
 
 	* elf32-s12z.c (elf_backend_can_gc_sections): Don't define
