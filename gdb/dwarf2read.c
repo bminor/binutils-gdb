@@ -16212,13 +16212,34 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 
       if (has_template_parameters)
 	{
-	  /* Make sure that the symtab is set on the new symbols.
-	     Even though they don't appear in this symtab directly,
-	     other parts of gdb assume that symbols do, and this is
-	     reasonably true.  */
-	  for (int i = 0; i < TYPE_N_TEMPLATE_ARGUMENTS (type); ++i)
-	    symbol_set_symtab (TYPE_TEMPLATE_ARGUMENT (type, i),
-			       symbol_symtab (sym));
+	  struct symtab *symtab;
+	  if (sym != nullptr)
+	    symtab = symbol_symtab (sym);
+	  else if (cu->line_header != nullptr)
+	    {
+	      /* Any related symtab will do.  */
+	      symtab
+		= cu->line_header->file_name_at (file_name_index (1))->symtab;
+	    }
+	  else
+	    {
+	      symtab = nullptr;
+	      complaint (_("could not find suitable "
+			   "symtab for template parameter"
+			   " - DIE at %s [in module %s]"),
+			 sect_offset_str (die->sect_off),
+			 objfile_name (objfile));
+	    }
+
+	  if (symtab != nullptr)
+	    {
+	      /* Make sure that the symtab is set on the new symbols.
+		 Even though they don't appear in this symtab directly,
+		 other parts of gdb assume that symbols do, and this is
+		 reasonably true.  */
+	      for (int i = 0; i < TYPE_N_TEMPLATE_ARGUMENTS (type); ++i)
+		symbol_set_symtab (TYPE_TEMPLATE_ARGUMENT (type, i), symtab);
+	    }
 	}
     }
 }
