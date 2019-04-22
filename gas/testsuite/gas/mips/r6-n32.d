@@ -499,4 +499,7 @@ Disassembly of section .text:
 0+05a0 <[^>]*> 41620024 	dvp	v0
 0+05a4 <[^>]*> 04170000 	sigrie	0x0
 0+05a8 <[^>]*> 0417ffff 	sigrie	0xffff
+0+05ac <[^>]*> 7cc52076 	llwp	a1,a0,a2
+0+05b0 <[^>]*> 7cc52066 	scwp	a1,a0,a2
+
 	\.\.\.

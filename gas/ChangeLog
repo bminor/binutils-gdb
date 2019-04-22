@@ -1,3 +1,21 @@
+2019-04-26  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+	* config/tc-mips.c (macro) <M_LLWP_AB, M_LLDP_AB, M_SCWP_AB,
+	M_SCDP_AB>: New cases and expansions for paired instructions.
+	* testsuite/gas/mips/llpscp-32.s: New test source.
+	* testsuite/gas/mips/llpscp-64.s: Likewise.
+	* testsuite/gas/mips/llpscp-32.d: New test.
+	* testsuite/gas/mips/llpscp-64.d: Likewise.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+	* testsuite/gas/mips/r6.s: Add new instructions to test source.
+	* testsuite/gas/mips/r6-64.s: Likewise.
+	* testsuite/gas/mips/r6-64-n32.d: Check new instructions.
+	* testsuite/gas/mips/r6-64-n64.d: Likewise.
+	* testsuite/gas/mips/r6-n32.d: Likewise.
+	* testsuite/gas/mips/r6-n64.d: Likwwise.
+	* testsuite/gas/mips/r6.d: Likewise.
+
 2019-04-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/24485

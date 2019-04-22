@@ -61,4 +61,6 @@ Disassembly of section .text:
 0+00a4 <[^>]*> ec9a0000 	ldpc	a0,fff000a0 <[^>]*>
 0+00a8 <[^>]*> ec99ffff 	ldpc	a0,001000a0 <[^>]*>
 0+00ac <[^>]*> ec99ffff 	ldpc	a0,001000a0 <[^>]*>
+0+00b0 <[^>]*> 7cc52077 	lldp	a1,a0,a2
+0+00b4 <[^>]*> 7cc52067 	scdp	a1,a0,a2
 	\.\.\.

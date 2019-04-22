@@ -1,3 +1,8 @@
+2019-04-26  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Add llwp, lldp, scwp, scdp.
+
 2019-04-24  John Darrington  <john@darrington.wattle.id.au>
 
         * s12z-opc.h: Add extern "C" bracketing to help

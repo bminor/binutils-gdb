@@ -1,3 +1,9 @@
+2019-04-26  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+	* opcode/mips.h (M_LLWP_AB, M_LLDP_AB): New enum values.
+	(M_SCWP_AB, M_SCDP_AB): Likewise.
+
 2019-04-25  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* opcode/mips.h: Update comment for MIPS32 CODE20 operand.

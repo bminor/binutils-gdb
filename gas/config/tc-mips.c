@@ -10279,6 +10279,7 @@ macro (struct mips_cl_insn *ip, char *str)
   int imm = 0;
   int ust = 0;
   int lp = 0;
+  int ll_sc_paired = 0;
   bfd_boolean large_offset;
   int off;
   int hold_mips_optimize;
@@ -12014,6 +12015,13 @@ macro (struct mips_cl_insn *ip, char *str)
       offbits = 12;
       lp = 1;
       goto ld;
+    case M_LLDP_AB:
+    case M_LLWP_AB:
+      s = ip->insn_mo->name;
+      fmt = "t,d,s";
+      ll_sc_paired = 1;
+      offbits = 0;
+      goto ld;
     case M_LWM_AB:
       gas_assert (mips_opts.micromips);
       s = "lwm";
@@ -12028,11 +12036,26 @@ macro (struct mips_cl_insn *ip, char *str)
       goto ld_st;
 
     ld:
-      /* We don't want to use $0 as tempreg.  */
-      if (op[2] == op[0] + lp || op[0] + lp == ZERO)
-	goto ld_st;
+      /* Try to use one the the load registers to compute the base address.
+	 We don't want to use $0 as tempreg.  */
+      if (ll_sc_paired)
+	{
+	  if ((op[0] == ZERO && op[3] == op[1])
+	      || (op[1] == ZERO && op[3] == op[0])
+	      || (op[0] == ZERO && op[1] == ZERO))
+	    goto ld_st;
+	  else if (op[0] != op[3] && op[0] != ZERO)
+	    tempreg = op[0];
+	  else
+	    tempreg = op[1];
+	}
       else
-	tempreg = op[0] + lp;
+        {
+	  if (op[2] == op[0] + lp || op[0] + lp == ZERO)
+	    goto ld_st;
+	  else
+	    tempreg = op[0] + lp;
+	}
       goto ld_noat;
 
     case M_SB_AB:
@@ -12099,6 +12122,13 @@ macro (struct mips_cl_insn *ip, char *str)
       offbits = (mips_opts.micromips ? 12
 		 : ISA_IS_R6 (mips_opts.isa) ? 9
 		 : 16);
+      goto ld_st;
+    case M_SCDP_AB:
+    case M_SCWP_AB:
+      s = ip->insn_mo->name;
+      fmt = "t,d,s";
+      ll_sc_paired = 1;
+      offbits = 0;
       goto ld_st;
     case M_CACHE_AB:
       s = "cache";
@@ -12193,7 +12223,7 @@ macro (struct mips_cl_insn *ip, char *str)
     ld_st:
       tempreg = AT;
     ld_noat:
-      breg = op[2];
+      breg = ll_sc_paired ? op[3] : op[2];
       if (small_offset_p (0, align, 16))
 	{
 	  /* The first case exists for M_LD_AB and M_SD_AB, which are
@@ -12205,7 +12235,12 @@ macro (struct mips_cl_insn *ip, char *str)
 	  else if (small_offset_p (0, align, offbits))
 	    {
 	      if (offbits == 0)
-		macro_build (NULL, s, fmt, op[0], breg);
+		{
+		  if (ll_sc_paired)
+		   macro_build (NULL, s, fmt, op[0], op[1], breg);
+		  else
+		   macro_build (NULL, s, fmt, op[0], breg);
+		}
 	      else
 		macro_build (NULL, s, fmt, op[0],
 			     (int) offset_expr.X_add_number, breg);
@@ -12218,7 +12253,12 @@ macro (struct mips_cl_insn *ip, char *str)
 			   tempreg, breg, -1, offset_reloc[0],
 			   offset_reloc[1], offset_reloc[2]);
 	      if (offbits == 0)
-		macro_build (NULL, s, fmt, op[0], tempreg);
+		{
+		  if (ll_sc_paired)
+		    macro_build (NULL, s, fmt, op[0], op[1], tempreg);
+		  else
+		    macro_build (NULL, s, fmt, op[0], tempreg);
+		}
 	      else
 		macro_build (NULL, s, fmt, op[0], 0, tempreg);
 	    }
@@ -12261,7 +12301,10 @@ macro (struct mips_cl_insn *ip, char *str)
 	      if (offset_expr.X_add_number != 0)
 		macro_build (&offset_expr, ADDRESS_ADDI_INSN,
 			     "t,r,j", tempreg, tempreg, BFD_RELOC_LO16);
-	      macro_build (NULL, s, fmt, op[0], tempreg);
+	      if (ll_sc_paired)
+		macro_build (NULL, s, fmt, op[0], op[1], tempreg);
+	      else
+		macro_build (NULL, s, fmt, op[0], tempreg);
 	    }
 	  else if (offbits == 16)
 	    macro_build (&offset_expr, s, fmt, op[0], BFD_RELOC_LO16, tempreg);
@@ -12279,7 +12322,12 @@ macro (struct mips_cl_insn *ip, char *str)
 	    macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t",
 			 tempreg, tempreg, breg);
 	  if (offbits == 0)
-	    macro_build (NULL, s, fmt, op[0], tempreg);
+	    {
+	      if (ll_sc_paired)
+		macro_build (NULL, s, fmt, op[0], op[1], tempreg);
+	      else
+		macro_build (NULL, s, fmt, op[0], tempreg);
+	    }
 	  else
 	    macro_build (NULL, s, fmt, op[0], 0, tempreg);
 	}
