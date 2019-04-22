@@ -1,3 +1,15 @@
+2019-04-22  Pedro Alves  <palves@redhat.com>
+
+	* solib-svr4.c (svr4_free_objfile_observer): New.
+	(probe_and_action::objfile): New field.
+	(probes_table_htab_remove_objfile_probes)
+	(probes_table_remove_objfile_probes): New functions.
+	(register_solib_event_probe): Add 'objfile' parameter.  Store it
+	in the new probe_and_action.  Don't store the probe in 'lookup'.
+	(svr4_create_probe_breakpoints): Pass objfile to
+	register_solib_event_probe.
+	(_initialize_svr4_solib): Register a free_objfile observer.
+
 2019-04-19  Tom Tromey  <tom@tromey.com>
 
 	* common/queue.h: Remove.

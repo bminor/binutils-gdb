@@ -50,6 +50,7 @@ static struct link_map_offsets *svr4_fetch_link_map_offsets (void);
 static int svr4_have_link_map_offsets (void);
 static void svr4_relocate_main_executable (void);
 static void svr4_free_library_list (void *p_list);
+static void probes_table_remove_objfile_probes (struct objfile *objfile);
 
 /* On SVR4 systems, a list of symbols in the dynamic linker where
    GDB can try to place a breakpoint to monitor shared library
@@ -1025,6 +1026,14 @@ struct svr4_library_list
   CORE_ADDR main_lm;
 };
 
+/* This module's 'free_objfile' observer.  */
+
+static void
+svr4_free_objfile_observer (struct objfile *objfile)
+{
+  probes_table_remove_objfile_probes (objfile);
+}
+
 /* Implementation for target_so_ops.free_so.  */
 
 static void
@@ -1636,6 +1645,9 @@ struct probe_and_action
 
   /* The action.  */
   enum probe_action action;
+
+  /* The objfile where this probe was found.  */
+  struct objfile *objfile;
 };
 
 /* Returns a hash code for the probe_and_action referenced by p.  */
@@ -1660,11 +1672,37 @@ equal_probe_and_action (const void *p1, const void *p2)
   return pa1->address == pa2->address;
 }
 
+/* Traversal function for probes_table_remove_objfile_probes.  */
+
+static int
+probes_table_htab_remove_objfile_probes (void **slot, void *info)
+{
+  probe_and_action *pa = (probe_and_action *) *slot;
+  struct objfile *objfile = (struct objfile *) info;
+
+  if (pa->objfile == objfile)
+    htab_clear_slot (get_svr4_info ()->probes_table, slot);
+
+  return 1;
+}
+
+/* Remove all probes that belong to OBJFILE from the probes table.  */
+
+static void
+probes_table_remove_objfile_probes (struct objfile *objfile)
+{
+  svr4_info *info = get_svr4_info ();
+  if (info->probes_table != nullptr)
+    htab_traverse_noresize (info->probes_table,
+			    probes_table_htab_remove_objfile_probes, objfile);
+}
+
 /* Register a solib event probe and its associated action in the
    probes table.  */
 
 static void
-register_solib_event_probe (probe *prob, CORE_ADDR address,
+register_solib_event_probe (struct objfile *objfile,
+			    probe *prob, CORE_ADDR address,
 			    enum probe_action action)
 {
   struct svr4_info *info = get_svr4_info ();
@@ -1677,7 +1715,6 @@ register_solib_event_probe (probe *prob, CORE_ADDR address,
 					    equal_probe_and_action,
 					    xfree, xcalloc, xfree);
 
-  lookup.prob = prob;
   lookup.address = address;
   slot = htab_find_slot (info->probes_table, &lookup, INSERT);
   gdb_assert (*slot == HTAB_EMPTY_ENTRY);
@@ -1686,6 +1723,7 @@ register_solib_event_probe (probe *prob, CORE_ADDR address,
   pa->prob = prob;
   pa->address = address;
   pa->action = action;
+  pa->objfile = objfile;
 
   *slot = pa;
 }
@@ -2030,7 +2068,7 @@ svr4_create_probe_breakpoints (struct gdbarch *gdbarch,
 	  CORE_ADDR address = p->get_relocated_address (objfile);
 
 	  create_solib_event_breakpoint (gdbarch, address);
-	  register_solib_event_probe (p, address, action);
+	  register_solib_event_probe (objfile, p, address, action);
 	}
     }
 
@@ -3224,4 +3262,6 @@ _initialize_svr4_solib (void)
   svr4_so_ops.keep_data_in_core = svr4_keep_data_in_core;
   svr4_so_ops.update_breakpoints = svr4_update_solib_event_breakpoints;
   svr4_so_ops.handle_event = svr4_handle_solib_event;
+
+  gdb::observers::free_objfile.attach (svr4_free_objfile_observer);
 }

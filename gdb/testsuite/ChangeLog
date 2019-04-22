@@ -1,3 +1,8 @@
+2019-04-22  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/solib-probes-nosharedlibrary.c,
+	gdb.base/solib-probes-nosharedlibrary.exp: New files.
+
 2019-04-19  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/ptype_union.c: New file.
