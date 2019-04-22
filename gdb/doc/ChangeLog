@@ -1,3 +1,11 @@
+2019-04-22  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Reverse Execution): Mention and xref process record
+	and replay.  Mention remote and system emulators.
+	(Process Record and Replay): List supported architectures.
+	Mention that "record btrace" is only supported on Intel
+	processors.
+
 2019-04-17  Alan Hayward  <alan.hayward@arm.com>
 
 	* gdb.texinfo (Other Command-Line Arguments for gdbserver)
