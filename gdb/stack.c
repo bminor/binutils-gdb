@@ -1653,7 +1653,7 @@ select_frame_command_core (struct frame_info *fi, bool ignored)
 void
 select_frame_for_mi (struct frame_info *fi)
 {
-  select_frame_command_core (fi, FALSE /* Ignored.  */);
+  select_frame_command_core (fi, false /* Ignored.  */);
 }
 
 /* The core of all the "frame" sub-commands.  Select frame FI, and if this
