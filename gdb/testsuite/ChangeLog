@@ -1,3 +1,8 @@
+2019-04-30  Tom Tromey  <tromey@adacore.com>
+
+	PR c++/24470:
+	* gdb.cp/temargs.cc: Add test code from PR.
+
 2019-04-19  Tom Tromey  <tromey@adacore.com>
 
 	PR symtab/24423:

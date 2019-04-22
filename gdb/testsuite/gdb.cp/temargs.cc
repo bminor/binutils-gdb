@@ -80,6 +80,29 @@ struct K3
   }
 };
 
+namespace pr24470
+{
+// From PR c++/24470
+// This caused a gdb crash during startup.
+
+template <int a> struct b {};
+template <typename, typename> struct c {
+  template <long d> using e = b<d>;
+  void k(e<0>);
+};
+template <typename, template <typename, typename> class, unsigned long...>
+struct m;
+template <typename g, template <typename, typename> class h, unsigned long i>
+struct m<g, h, i> {
+  using j = b<i>;
+};
+struct n {
+  template <typename g> using f = typename m<g, c, 0>::j;
+};
+
+n::f<int> l;
+}
+
 int main ()
 {
   Base<double, 23, &a_global, &S::f> base;
