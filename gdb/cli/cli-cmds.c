@@ -1355,9 +1355,9 @@ argv_to_string (char **argv, int n)
 }
 
 /* Subroutine of alias_command to simplify it.
-   Return TRUE if COMMAND exists, unambiguously.  Otherwise FALSE.  */
+   Return true if COMMAND exists, unambiguously.  Otherwise false.  */
 
-static int
+static bool
 valid_command_p (const char *command)
 {
   struct cmd_list_element *c;
@@ -1365,7 +1365,7 @@ valid_command_p (const char *command)
   c = lookup_cmd_1 (& command, cmdlist, NULL, 1);
 
   if (c == NULL || c == (struct cmd_list_element *) -1)
-    return FALSE;
+    return false;
 
   /* This is the slightly tricky part.
      lookup_cmd_1 will return a pointer to the last part of COMMAND

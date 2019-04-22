@@ -1,5 +1,9 @@
 2019-05-04  Tom Tromey  <tom@tromey.com>
 
+	* cli/cli-cmds.c (valid_command_p): Return bool.
+
+2019-05-04  Tom Tromey  <tom@tromey.com>
+
 	* cli/cli-decode.c (valid_user_defined_cmd_name_p): Return bool.
 	* command.h (valid_user_defined_cmd_name_p): Channge return type.
 
