@@ -123,6 +123,9 @@ enum
 #define	CTF_ADD_ROOT	1	/* Type visible at top-level scope.  */
 
 
+extern void ctf_setdebug (int debug);
+extern int ctf_getdebug (void);
+
 #ifdef	__cplusplus
 }
 #endif

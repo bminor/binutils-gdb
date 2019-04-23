@@ -1,5 +1,10 @@
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-api.h (ctf_setdebug): New.
+	(ctf_getdebug): Likewise.
+
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-api.h: New file.
 
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
