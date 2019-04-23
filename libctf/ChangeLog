@@ -1,5 +1,9 @@
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-error.c: New file.
+
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-util.c: New file.
 	* elf.h: Likewise.
 	* ctf-impl.h: Include it, and add declarations.

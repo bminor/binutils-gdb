@@ -122,6 +122,8 @@ enum
 #define	CTF_ADD_NONROOT	0	/* Type only visible in nested scope.  */
 #define	CTF_ADD_ROOT	1	/* Type visible at top-level scope.  */
 
+extern int ctf_errno (ctf_file_t *);
+extern const char *ctf_errmsg (int);
 
 extern void ctf_setdebug (int debug);
 extern int ctf_getdebug (void);
