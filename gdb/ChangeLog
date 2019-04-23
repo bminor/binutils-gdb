@@ -1,3 +1,13 @@
+2019-04-27  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* NEWS: Mention the new set|show may-call-functions.
+	* infcall.c (may_call_functions_p): New variable.
+	(show_may_call_functions_p): New function.
+	(call_function_by_hand_dummy): Throws an error if not
+	may-call-functions.
+	(_initialize_infcall): Call add_setshow_boolean_cmd for
+	may-call-functions.
+
 2019-04-25  Keith Seitz  <keiths@redhat.com>
 
 	PR c++/24367

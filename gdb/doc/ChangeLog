@@ -1,3 +1,8 @@
+2019-04-27  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Calling): Document the new
+	set|show may-call-functions.
+
 2019-04-22  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Reverse Execution): Mention and xref process record

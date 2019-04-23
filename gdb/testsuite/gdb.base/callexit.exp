@@ -37,6 +37,13 @@ if { ![runto_main] } {
     return 0
 }
 
+# Verify set may-call-functions behaviour.
+gdb_test_no_output "set may-call-functions off"
+gdb_test "call callexit()" \
+    "Cannot call functions in the program: may-call-functions is off." \
+    "inferior function call refused in off state"
+gdb_test_no_output "set may-call-functions on"
+
 # Call function (causing the program to exit), and see if gdb handles
 # it properly.
 gdb_test "call callexit()" \

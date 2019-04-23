@@ -18693,6 +18693,28 @@ the default C@t{++} exception handler and the inferior terminated.
 Show the current setting of stack unwinding in the functions called by
 @value{GDBN}.
 
+@item set may-call-functions
+@kindex set may-call-functions
+@cindex disabling calling functions in the program
+@cindex calling functions in the program, disabling
+Set permission to call functions in the program.
+This controls whether @value{GDBN} will attempt to call functions in
+the program, such as with expressions in the @code{print} command.  It
+defaults to @code{on}.
+
+To call a function in the program, @value{GDBN} has to temporarily
+modify the state of the inferior.  This has potentially undesired side
+effects.  Also, having @value{GDBN} call nested functions is likely to
+be erroneous and may even crash the program being debugged.  You can
+avoid such hazards by forbidding @value{GDBN} from calling functions
+in the program being debugged.  If calling functions in the program
+is forbidden, GDB will throw an error when a command (such as printing
+an expression) starts a function call in the program.
+
+@item show may-call-functions
+@kindex show may-call-functions
+Show permission to call functions in the program.
+
 @end table
 
 @subsection Calling functions with no debug info

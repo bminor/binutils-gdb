@@ -27,6 +27,18 @@
      'array_indexes', 'symbols', 'unions', 'deref_refs', 'actual_objects',
      'static_members', 'max_elements', 'repeat_threshold', and 'format'.
 
+* New commands
+
+set may-call-functions [on|off]
+show may-call-functions
+  This controls whether GDB will attempt to call functions in
+  the program, such as with expressions in the print command.  It
+  defaults to on.  Calling functions in the program being debugged
+  can have undesired side effects.  It is now possible to forbid
+  such function calls.  If function calls are forbidden, GDB will throw
+  an error when a command (such as print expression) calls a function
+  in the program.
+
 *** Changes in GDB 8.3
 
 * GDB and GDBserver now support access to additional registers on
