@@ -58,11 +58,40 @@ extern "C"
 
 #endif
 
+/* libctf in-memory state.  */
+
+typedef struct ctf_fixed_hash ctf_hash_t; /* Private to ctf-hash.c.  */
+typedef struct ctf_dynhash ctf_dynhash_t; /* Private to ctf-hash.c.  */
+
 typedef struct ctf_list
 {
   struct ctf_list *l_prev;	/* Previous pointer or tail pointer.  */
   struct ctf_list *l_next;	/* Next pointer or head pointer.  */
 } ctf_list_t;
+
+typedef unsigned int (*ctf_hash_fun) (const void *ptr);
+extern unsigned int ctf_hash_integer (const void *ptr);
+extern unsigned int ctf_hash_string (const void *ptr);
+
+typedef int (*ctf_hash_eq_fun) (const void *, const void *);
+extern int ctf_hash_eq_integer (const void *, const void *);
+extern int ctf_hash_eq_string (const void *, const void *);
+
+typedef void (*ctf_hash_free_fun) (void *);
+
+extern ctf_hash_t *ctf_hash_create (unsigned long, ctf_hash_fun, ctf_hash_eq_fun);
+extern int ctf_hash_insert_type (ctf_hash_t *, ctf_file_t *, uint32_t, uint32_t);
+extern int ctf_hash_define_type (ctf_hash_t *, ctf_file_t *, uint32_t, uint32_t);
+extern ctf_id_t ctf_hash_lookup_type (ctf_hash_t *, ctf_file_t *, const char *);
+extern uint32_t ctf_hash_size (const ctf_hash_t *);
+extern void ctf_hash_destroy (ctf_hash_t *);
+
+extern ctf_dynhash_t *ctf_dynhash_create (ctf_hash_fun, ctf_hash_eq_fun,
+					  ctf_hash_free_fun, ctf_hash_free_fun);
+extern int ctf_dynhash_insert (ctf_dynhash_t *, void *, void *);
+extern void ctf_dynhash_remove (ctf_dynhash_t *, const void *);
+extern void *ctf_dynhash_lookup (ctf_dynhash_t *, const void *);
+extern void ctf_dynhash_destroy (ctf_dynhash_t *);
 
 #define	ctf_list_prev(elem)	((void *)(((ctf_list_t *)(elem))->l_prev))
 #define	ctf_list_next(elem)	((void *)(((ctf_list_t *)(elem))->l_next))

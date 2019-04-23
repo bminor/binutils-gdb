@@ -1,5 +1,10 @@
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-hash.c: New file.
+	* ctf-impl.h: New declarations.
+
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-error.c: New file.
 
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
