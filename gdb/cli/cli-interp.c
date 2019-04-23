@@ -357,7 +357,7 @@ static struct gdb_exception
 safe_execute_command (struct ui_out *command_uiout, const char *command,
 		      int from_tty)
 {
-  struct gdb_exception e = exception_none;
+  struct gdb_exception e;
 
   /* Save and override the global ``struct ui_out'' builder.  */
   scoped_restore saved_uiout = make_scoped_restore (&current_uiout,

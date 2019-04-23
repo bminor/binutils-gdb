@@ -903,7 +903,7 @@ get_field_type (PyObject *field)
 static PyObject *
 valpy_getitem (PyObject *self, PyObject *key)
 {
-  struct gdb_exception except = exception_none;
+  struct gdb_exception except;
   value_object *self_value = (value_object *) self;
   gdb::unique_xmalloc_ptr<char> field;
   struct type *base_class_type = NULL, *field_type = NULL;
@@ -1480,7 +1480,7 @@ valpy_absolute (PyObject *self)
 static int
 valpy_nonzero (PyObject *self)
 {
-  struct gdb_exception except = exception_none;
+  struct gdb_exception except;
   value_object *self_value = (value_object *) self;
   struct type *type;
   int nonzero = 0; /* Appease GCC warning.  */

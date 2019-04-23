@@ -181,7 +181,7 @@ gdb_exception
 mi_interp::exec (const char *command)
 {
   mi_execute_command_wrapper (command);
-  return exception_none;
+  return gdb_exception ();
 }
 
 void

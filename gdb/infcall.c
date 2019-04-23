@@ -568,7 +568,7 @@ static struct gdb_exception
 run_inferior_call (struct call_thread_fsm *sm,
 		   struct thread_info *call_thread, CORE_ADDR real_pc)
 {
-  struct gdb_exception caught_error = exception_none;
+  struct gdb_exception caught_error;
   int saved_in_infcall = call_thread->control.in_infcall;
   ptid_t call_thread_ptid = call_thread->ptid;
   enum prompt_state saved_prompt_state = current_ui->prompt_state;

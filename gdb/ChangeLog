@@ -1,3 +1,30 @@
+2019-04-25  Tom Tromey  <tromey@adacore.com>
+
+	* xml-support.c (gdb_xml_parser::gdb_xml_parser): Update.
+	* python/py-value.c (valpy_getitem, valpy_nonzero): Update.
+	* python/py-inferior.c (infpy_write_memory, infpy_search_memory):
+	Update.
+	* python/py-breakpoint.c (bppy_set_condition, bppy_set_commands):
+	Update.
+	* mi/mi-interp.c (mi_interp::exec): Update.
+	* linespec.c (parse_linespec): Update.
+	* infcall.c (run_inferior_call): Update.
+	* guile/scm-value.c (gdbscm_value_to_lazy_string): Update.
+	* guile/scm-symbol.c (gdbscm_lookup_symbol)
+	(gdbscm_lookup_global_symbol): Update.
+	* guile/scm-param.c (gdbscm_parameter_value): Update.
+	* guile/scm-frame.c (gdbscm_frame_read_register)
+	(gdbscm_frame_read_var): Update.
+	* guile/scm-breakpoint.c (gdbscm_register_breakpoint_x): Update.
+	* exec.c (try_open_exec_file): Update.
+	* event-top.c (gdb_rl_callback_read_char_wrapper_noexcept)
+	(gdb_rl_callback_handler): Update.
+	* common/common-exceptions.h (exception_none): Don't declare.
+	* common/common-exceptions.c (exception_none): Don't define.
+	(struct catcher) <exception>: Update.
+	* cli/cli-interp.c (safe_execute_command): Update.
+	* breakpoint.c (insert_bp_location, location_to_sals): Update.
+
 2019-04-25  Ali Tamur  <tamur@google.com>
 
 	* dwarf2read.c (skip_one_die): Add DW_FORM_strx.

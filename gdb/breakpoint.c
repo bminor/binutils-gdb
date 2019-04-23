@@ -2434,7 +2434,7 @@ insert_bp_location (struct bp_location *bl,
 		    int *hw_breakpoint_error,
 		    int *hw_bp_error_explained_already)
 {
-  gdb_exception bp_excpt = exception_none;
+  gdb_exception bp_excpt;
 
   if (!should_be_inserted (bl) || (bl->inserted && !bl->needs_update))
     return 0;
@@ -13593,7 +13593,7 @@ static std::vector<symtab_and_line>
 location_to_sals (struct breakpoint *b, struct event_location *location,
 		  struct program_space *search_pspace, int *found)
 {
-  struct gdb_exception exception = exception_none;
+  struct gdb_exception exception;
 
   gdb_assert (b->ops != NULL);
 

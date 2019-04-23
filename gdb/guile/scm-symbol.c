@@ -614,7 +614,7 @@ gdbscm_lookup_symbol (SCM name_scm, SCM rest)
 	}
     }
 
-  struct gdb_exception except = exception_none;
+  struct gdb_exception except;
   try
     {
       symbol = lookup_symbol (name, block, (domain_enum) domain,
@@ -646,7 +646,7 @@ gdbscm_lookup_global_symbol (SCM name_scm, SCM rest)
   int domain_arg_pos = -1;
   int domain = VAR_DOMAIN;
   struct symbol *symbol = NULL;
-  struct gdb_exception except = exception_none;
+  struct gdb_exception except;
 
   gdbscm_parse_function_args (FUNC_NAME, SCM_ARG1, keywords, "s#i",
 			      name_scm, &name, rest,

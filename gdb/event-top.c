@@ -164,7 +164,7 @@ void (*after_char_processing_hook) (void);
 static struct gdb_exception
 gdb_rl_callback_read_char_wrapper_noexcept () noexcept
 {
-  struct gdb_exception gdb_expt = exception_none;
+  struct gdb_exception gdb_expt;
 
   /* C++ exceptions can't normally be thrown across readline (unless
      it is built with -fexceptions, but it won't by default on many
@@ -205,7 +205,7 @@ gdb_rl_callback_read_char_wrapper (gdb_client_data client_data)
 static void
 gdb_rl_callback_handler (char *rl) noexcept
 {
-  struct gdb_exception gdb_rl_expt = exception_none;
+  struct gdb_exception gdb_rl_expt;
   struct ui *ui = current_ui;
 
   try

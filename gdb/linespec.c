@@ -2508,7 +2508,7 @@ parse_linespec (linespec_parser *parser, const char *arg,
 		symbol_name_match_type match_type)
 {
   linespec_token token;
-  struct gdb_exception file_exception = exception_none;
+  struct gdb_exception file_exception;
 
   /* A special case to start.  It has become quite popular for
      IDEs to work around bugs in the previous parser by quoting

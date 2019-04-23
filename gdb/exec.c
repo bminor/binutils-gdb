@@ -148,7 +148,7 @@ void
 try_open_exec_file (const char *exec_file_host, struct inferior *inf,
 		    symfile_add_flags add_flags)
 {
-  struct gdb_exception prev_err = exception_none;
+  struct gdb_exception prev_err;
 
   /* exec_file_attach and symbol_file_add_main may throw an error if the file
      cannot be opened either locally or remotely.

@@ -445,7 +445,7 @@ bppy_set_condition (PyObject *self, PyObject *newvalue, void *closure)
   gdb::unique_xmalloc_ptr<char> exp_holder;
   const char *exp = NULL;
   gdbpy_breakpoint_object *self_bp = (gdbpy_breakpoint_object *) self;
-  struct gdb_exception except = exception_none;
+  struct gdb_exception except;
 
   BPPY_SET_REQUIRE_VALID (self_bp);
 
@@ -515,7 +515,7 @@ static int
 bppy_set_commands (PyObject *self, PyObject *newvalue, void *closure)
 {
   gdbpy_breakpoint_object *self_bp = (gdbpy_breakpoint_object *) self;
-  struct gdb_exception except = exception_none;
+  struct gdb_exception except;
 
   BPPY_SET_REQUIRE_VALID (self_bp);
 

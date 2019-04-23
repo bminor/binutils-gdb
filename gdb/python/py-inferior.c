@@ -546,7 +546,7 @@ infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
 static PyObject *
 infpy_write_memory (PyObject *self, PyObject *args, PyObject *kw)
 {
-  struct gdb_exception except = exception_none;
+  struct gdb_exception except;
   Py_ssize_t buf_len;
   const gdb_byte *buffer;
   CORE_ADDR addr, length;
@@ -682,7 +682,7 @@ get_char_buffer (PyObject *self, Py_ssize_t segment, char **ptrptr)
 static PyObject *
 infpy_search_memory (PyObject *self, PyObject *args, PyObject *kw)
 {
-  struct gdb_exception except = exception_none;
+  struct gdb_exception except;
   CORE_ADDR start_addr, length;
   static const char *keywords[] = { "address", "length", "pattern", NULL };
   PyObject *start_addr_obj, *length_obj;

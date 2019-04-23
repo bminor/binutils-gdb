@@ -479,7 +479,6 @@ gdb_xml_parser::gdb_xml_parser (const char *name,
 				void *user_data)
   : m_name (name),
     m_user_data (user_data),
-    m_error (exception_none),
     m_last_line (0),
     m_dtd_name (NULL),
     m_is_xinclude (false)

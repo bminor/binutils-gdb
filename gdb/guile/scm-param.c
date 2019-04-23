@@ -1056,7 +1056,7 @@ gdbscm_parameter_value (SCM self)
       struct cmd_list_element *alias, *prefix, *cmd;
       char *newarg;
       int found = -1;
-      struct gdb_exception except = exception_none;
+      struct gdb_exception except;
 
       gdb::unique_xmalloc_ptr<char> name
 	= gdbscm_scm_to_host_string (self, NULL, &except_scm);

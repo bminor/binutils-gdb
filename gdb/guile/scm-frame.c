@@ -777,7 +777,7 @@ gdbscm_frame_read_register (SCM self, SCM register_scm)
   gdbscm_parse_function_args (FUNC_NAME, SCM_ARG2, NULL, "s",
 			      register_scm, &register_str);
 
-  struct gdb_exception except = exception_none;
+  struct gdb_exception except;
 
   try
     {
@@ -864,7 +864,7 @@ gdbscm_frame_read_var (SCM self, SCM symbol_scm, SCM rest)
     }
   else if (scm_is_string (symbol_scm))
     {
-      struct gdb_exception except = exception_none;
+      struct gdb_exception except;
 
       if (! SCM_UNBNDP (block_scm))
 	{

@@ -1048,7 +1048,7 @@ gdbscm_value_to_lazy_string (SCM self, SCM rest)
   char *encoding = NULL;
   int length = -1;
   SCM result = SCM_BOOL_F; /* -Wall */
-  struct gdb_exception except = exception_none;
+  struct gdb_exception except;
 
   /* The sequencing here, as everywhere else, is important.
      We can't have existing cleanups when a Scheme exception is thrown.  */

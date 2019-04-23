@@ -21,8 +21,6 @@
 #include "common-exceptions.h"
 #include <forward_list>
 
-const struct gdb_exception exception_none;
-
 /* Possible catcher states.  */
 enum catcher_state {
   /* Initial state, a new catcher has just been created.  */
@@ -47,7 +45,7 @@ struct catcher
   /* Jump buffer pointing back at the exception handler.  */
   jmp_buf buf;
   /* Status buffer belonging to the exception handler.  */
-  struct gdb_exception exception = exception_none;
+  struct gdb_exception exception;
 };
 
 /* Where to go for throw_exception().  */
