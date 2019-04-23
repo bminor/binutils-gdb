@@ -304,6 +304,8 @@ When the time comes to actually make the release....
 	 get index.html
 	 [edit]
 	 put index.html
+         rm docs
+	 ln -s docs-2.3x docs
 	 quit
 
       Check that the new web page is correct.

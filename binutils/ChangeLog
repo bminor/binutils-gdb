@@ -1,3 +1,8 @@
+2019-04-23  Nick Clifton  <nickc@redhat.com>
+
+	* README-how-to-make-a-release: Add note to update the symbolic
+	link from "docs" to "docs-2.x" on the sourceware website.
+
 2019-04-16  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/binutils-all/copy-2.d: Don't run for ns32k-*-*.
