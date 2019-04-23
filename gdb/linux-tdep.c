@@ -586,8 +586,8 @@ mapping_is_anonymous_p (const char *filename)
 }
 
 /* Return 0 if the memory mapping (which is related to FILTERFLAGS, V,
-   MAYBE_PRIVATE_P, and MAPPING_ANONYMOUS_P) should not be dumped, or
-   greater than 0 if it should.
+   MAYBE_PRIVATE_P, MAPPING_ANONYMOUS_P, ADDR and OFFSET) should not
+   be dumped, or greater than 0 if it should.
 
    In a nutshell, this is the logic that we follow in order to decide
    if a mapping should be dumped or not.
@@ -625,12 +625,17 @@ mapping_is_anonymous_p (const char *filename)
      see 'p' in the permission flags, then we assume that the mapping
      is private, even though the presence of the 's' flag there would
      mean VM_MAYSHARE, which means the mapping could still be private.
-     This should work OK enough, however.  */
+     This should work OK enough, however.
+
+   - Even if, at the end, we decided that we should not dump the
+     mapping, we still have to check if it is something like an ELF
+     header (of a DSO or an executable, for example).  If it is, and
+     if the user is interested in dump it, then we should dump it.  */
 
 static int
 dump_mapping_p (filter_flags filterflags, const struct smaps_vmflags *v,
 		int maybe_private_p, int mapping_anon_p, int mapping_file_p,
-		const char *filename)
+		const char *filename, ULONGEST addr, ULONGEST offset)
 {
   /* Initially, we trust in what we received from our caller.  This
      value may not be very precise (i.e., it was probably gathered
@@ -640,6 +645,7 @@ dump_mapping_p (filter_flags filterflags, const struct smaps_vmflags *v,
      (assuming that the version of the Linux kernel being used
      supports it, of course).  */
   int private_p = maybe_private_p;
+  int dump_p;
 
   /* We always dump vDSO and vsyscall mappings, because it's likely that
      there'll be no file to read the contents from at core load time.
@@ -680,13 +686,13 @@ dump_mapping_p (filter_flags filterflags, const struct smaps_vmflags *v,
 	  /* This is a special situation.  It can happen when we see a
 	     mapping that is file-backed, but that contains anonymous
 	     pages.  */
-	  return ((filterflags & COREFILTER_ANON_PRIVATE) != 0
-		  || (filterflags & COREFILTER_MAPPED_PRIVATE) != 0);
+	  dump_p = ((filterflags & COREFILTER_ANON_PRIVATE) != 0
+		    || (filterflags & COREFILTER_MAPPED_PRIVATE) != 0);
 	}
       else if (mapping_anon_p)
-	return (filterflags & COREFILTER_ANON_PRIVATE) != 0;
+	dump_p = (filterflags & COREFILTER_ANON_PRIVATE) != 0;
       else
-	return (filterflags & COREFILTER_MAPPED_PRIVATE) != 0;
+	dump_p = (filterflags & COREFILTER_MAPPED_PRIVATE) != 0;
     }
   else
     {
@@ -695,14 +701,55 @@ dump_mapping_p (filter_flags filterflags, const struct smaps_vmflags *v,
 	  /* This is a special situation.  It can happen when we see a
 	     mapping that is file-backed, but that contains anonymous
 	     pages.  */
-	  return ((filterflags & COREFILTER_ANON_SHARED) != 0
-		  || (filterflags & COREFILTER_MAPPED_SHARED) != 0);
+	  dump_p = ((filterflags & COREFILTER_ANON_SHARED) != 0
+		    || (filterflags & COREFILTER_MAPPED_SHARED) != 0);
 	}
       else if (mapping_anon_p)
-	return (filterflags & COREFILTER_ANON_SHARED) != 0;
+	dump_p = (filterflags & COREFILTER_ANON_SHARED) != 0;
       else
-	return (filterflags & COREFILTER_MAPPED_SHARED) != 0;
+	dump_p = (filterflags & COREFILTER_MAPPED_SHARED) != 0;
     }
+
+  /* Even if we decided that we shouldn't dump this mapping, we still
+     have to check whether (a) the user wants us to dump mappings
+     containing an ELF header, and (b) the mapping in question
+     contains an ELF header.  If (a) and (b) are true, then we should
+     dump this mapping.
+
+     A mapping contains an ELF header if it is a private mapping, its
+     offset is zero, and its first word is ELFMAG.  */
+  if (!dump_p && private_p && offset == 0
+      && (filterflags & COREFILTER_ELF_HEADERS) != 0)
+    {
+      /* Let's check if we have an ELF header.  */
+      gdb::unique_xmalloc_ptr<char> header;
+      int errcode;
+
+      /* Useful define specifying the size of the ELF magical
+	 header.  */
+#ifndef SELFMAG
+#define SELFMAG 4
+#endif
+
+      /* Read the first SELFMAG bytes and check if it is ELFMAG.  */
+      if (target_read_string (addr, &header, SELFMAG, &errcode) == SELFMAG
+	  && errcode == 0)
+	{
+	  const char *h = header.get ();
+
+	  /* The EI_MAG* and ELFMAG* constants come from
+	     <elf/common.h>.  */
+	  if (h[EI_MAG0] == ELFMAG0 && h[EI_MAG1] == ELFMAG1
+	      && h[EI_MAG2] == ELFMAG2 && h[EI_MAG3] == ELFMAG3)
+	    {
+	      /* This mapping contains an ELF header, so we
+		 should dump it.  */
+	      dump_p = 1;
+	    }
+	}
+    }
+
+  return dump_p;
 }
 
 /* Implement the "info proc" command.  */
@@ -1306,7 +1353,7 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 	  if (has_anonymous)
 	    should_dump_p = dump_mapping_p (filterflags, &v, priv,
 					    mapping_anon_p, mapping_file_p,
-					    filename);
+					    filename, addr, offset);
 	  else
 	    {
 	      /* Older Linux kernels did not support the "Anonymous:" counter.

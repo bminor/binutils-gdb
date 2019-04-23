@@ -162,6 +162,16 @@ proc gdb_find_readelf {} {
     return $readelf
 }
 
+proc gdb_find_eu-unstrip {} {
+    global EU_UNSTRIP_FOR_TARGET
+    if [info exists EU_UNSTRIP_FOR_TARGET] {
+	set eu_unstrip $EU_UNSTRIP_FOR_TARGET
+    } else {
+	set eu_unstrip [transform eu-unstrip]
+    }
+    return $eu_unstrip
+}
+
 proc gdb_default_target_compile {source destfile type options} {
     global target_triplet
     global tool_root_dir
