@@ -17,7 +17,7 @@ load_lib trace-support.exp
 
 standard_testfile trace-unavailable.c
 
-if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug}] } {
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug nopie}] } {
     return -1
 }
 

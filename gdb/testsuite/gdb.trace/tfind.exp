@@ -29,7 +29,7 @@ if ![gdb_trace_common_supports_arch] {
 }
 
 if { [gdb_compile "$srcdir/$subdir/$srcfile" "$binfile" \
-	  executable {debug nowarnings}] != "" } {
+	  executable {debug nowarnings nopie}] != "" } {
     untested "failed to compile"
     return -1
 }

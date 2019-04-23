@@ -19,7 +19,7 @@ load_lib "trace-support.exp"
 standard_testfile
 set executable $testfile
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug nowarnings}]} {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug nowarnings nopie}]} {
     return -1
 }
 

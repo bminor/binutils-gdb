@@ -1,3 +1,18 @@
+2019-04-23  Alan Hayward  <alan.hayward@arm.com>
+
+	* gdb.trace/backtrace.exp: Use nopie flag.
+	* gdb.trace/circ.exp: Likewise.
+	* gdb.trace/collection.exp: Likewise.
+	* gdb.trace/ftrace.exp: Likewise.
+	* gdb.trace/mi-trace-unavailable.exp: Likewise.
+	* gdb.trace/mi-traceframe-changed.exp: Likewise.
+	* gdb.trace/qtro.exp: Likewise.
+	* gdb.trace/read-memory.exp: Likewise.
+	* gdb.trace/report.exp: Likewise.
+	* gdb.trace/tfile.exp: Likewise.
+	* gdb.trace/tfind.exp: Likewise.
+	* gdb.trace/unavailable.exp: Likewise.
+
 2019-04-22  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/solib-probes-nosharedlibrary.c,

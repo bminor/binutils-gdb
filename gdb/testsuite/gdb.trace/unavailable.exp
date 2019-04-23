@@ -19,7 +19,7 @@ standard_testfile unavailable.cc
 set executable $testfile
 
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
-	 {debug nowarnings c++}]} {
+	 {debug nowarnings c++ nopie}]} {
     return -1
 }
 
