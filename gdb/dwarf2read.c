@@ -1036,14 +1036,6 @@ struct line_header
     return &file_names[vec_index];
   }
 
-  /* Const version of the above.  */
-  const file_entry *file_name_at (unsigned int index) const
-  {
-    if (index >= file_names.size ())
-      return NULL;
-    return &file_names[index];
-  }
-
   /* Offset of line number information in .debug_line section.  */
   sect_offset sect_off {};
 
