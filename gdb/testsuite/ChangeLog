@@ -1,3 +1,8 @@
+2019-04-23  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/24433
+	* gdb.btrace/reconnect.exp: Fix stepi 19 pattern.
+
 2019-04-23  Alan Hayward  <alan.hayward@arm.com>
 
 	* gdb.trace/backtrace.exp: Use nopie flag.
