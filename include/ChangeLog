@@ -1,5 +1,9 @@
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-api.h: New file.
+
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf.h: New file.
 
 2019-05-24  Szabolcs Nagy  <szabolcs.nagy@arm.com>
