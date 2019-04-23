@@ -24,6 +24,13 @@
 #include <sys/errno.h>
 #include <ctf-api.h>
 #include <sys/types.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <limits.h>
+#include <ctype.h>
+#include <elf.h>
 
 #ifdef	__cplusplus
 extern "C"
@@ -51,6 +58,25 @@ extern "C"
 
 #endif
 
+typedef struct ctf_list
+{
+  struct ctf_list *l_prev;	/* Previous pointer or tail pointer.  */
+  struct ctf_list *l_next;	/* Next pointer or head pointer.  */
+} ctf_list_t;
+
+#define	ctf_list_prev(elem)	((void *)(((ctf_list_t *)(elem))->l_prev))
+#define	ctf_list_next(elem)	((void *)(((ctf_list_t *)(elem))->l_next))
+
+extern void ctf_list_append (ctf_list_t *, void *);
+extern void ctf_list_prepend (ctf_list_t *, void *);
+extern void ctf_list_delete (ctf_list_t *, void *);
+
+extern const char *ctf_strraw (ctf_file_t *, uint32_t);
+extern const char *ctf_strptr (ctf_file_t *, uint32_t);
+
+extern void *ctf_set_open_errno (int *, int);
+extern long ctf_set_errno (ctf_file_t *, int);
+
 _libctf_malloc_
 extern void *ctf_data_alloc (size_t);
 extern void ctf_data_free (void *, size_t);
@@ -65,9 +91,16 @@ _libctf_malloc_
 extern void *ctf_alloc (size_t);
 extern void ctf_free (void *);
 
+_libctf_malloc_
+extern char *ctf_strdup (const char *);
+extern char *ctf_str_append (char *, const char *);
+extern const char *ctf_strerror (int);
+
 _libctf_printflike_ (1, 2)
 extern void ctf_dprintf (const char *, ...);
 extern void libctf_init_debug (void);
+
+extern Elf64_Sym *ctf_sym_to_elf64 (const Elf32_Sym *src, Elf64_Sym *dst);
 
 extern int _libctf_debug;	/* debugging messages enabled */
 
