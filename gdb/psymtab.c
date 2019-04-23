@@ -532,10 +532,10 @@ static bool
 psymbol_name_matches (partial_symbol *psym,
 		      const lookup_name_info &lookup_name)
 {
-  const language_defn *lang = language_def (psym->language);
+  const language_defn *lang = language_def (psym->ginfo.language);
   symbol_name_matcher_ftype *name_match
     = get_symbol_name_matcher (lang, lookup_name);
-  return name_match (symbol_search_name (psym), lookup_name, NULL);
+  return name_match (symbol_search_name (&psym->ginfo), lookup_name, NULL);
 }
 
 /* Look in PST for a symbol in DOMAIN whose name matches NAME.  Search
@@ -585,11 +585,12 @@ match_partial_symbol (struct objfile *objfile,
 	  center = bottom + (top - bottom) / 2;
 	  gdb_assert (center < top);
 
-	  enum language lang = (*center)->language;
+	  enum language lang = (*center)->ginfo.language;
 	  const char *lang_ln
 	    = lookup_name.language_lookup_name (lang).c_str ();
 
-	  if (ordered_compare (symbol_search_name (*center), lang_ln) >= 0)
+	  if (ordered_compare (symbol_search_name (&(*center)->ginfo),
+			       lang_ln) >= 0)
 	    top = center;
 	  else
 	    bottom = center + 1;
@@ -599,7 +600,7 @@ match_partial_symbol (struct objfile *objfile,
       while (top <= real_top
 	     && psymbol_name_matches (*top, lookup_name))
 	{
-	  if (symbol_matches_domain ((*top)->language,
+	  if (symbol_matches_domain ((*top)->ginfo.language,
 				     (*top)->domain, domain))
 	    return *top;
 	  top++;
@@ -613,7 +614,7 @@ match_partial_symbol (struct objfile *objfile,
     {
       for (psym = start; psym < start + length; psym++)
 	{
-	  if (symbol_matches_domain ((*psym)->language,
+	  if (symbol_matches_domain ((*psym)->ginfo.language,
 				     (*psym)->domain, domain)
 	      && psymbol_name_matches (*psym, lookup_name))
 	    return *psym;
@@ -696,7 +697,7 @@ lookup_partial_symbol (struct objfile *objfile,
 	  if (!(center < top))
 	    internal_error (__FILE__, __LINE__,
 			    _("failed internal consistency check"));
-	  if (strcmp_iw_ordered (symbol_search_name (*center),
+	  if (strcmp_iw_ordered (symbol_search_name (&(*center)->ginfo),
 				 search_name.get ()) >= 0)
 	    {
 	      top = center;
@@ -712,15 +713,17 @@ lookup_partial_symbol (struct objfile *objfile,
 
       /* For `case_sensitivity == case_sensitive_off' strcmp_iw_ordered will
 	 search more exactly than what matches SYMBOL_MATCHES_SEARCH_NAME.  */
-      while (top >= start && symbol_matches_search_name (*top, lookup_name))
+      while (top >= start && symbol_matches_search_name (&(*top)->ginfo,
+							 lookup_name))
 	top--;
 
       /* Fixup to have a symbol which matches SYMBOL_MATCHES_SEARCH_NAME.  */
       top++;
 
-      while (top <= real_top && symbol_matches_search_name (*top, lookup_name))
+      while (top <= real_top && symbol_matches_search_name (&(*top)->ginfo,
+							    lookup_name))
 	{
-	  if (symbol_matches_domain ((*top)->language,
+	  if (symbol_matches_domain ((*top)->ginfo.language,
 				     (*top)->domain, domain))
 	    return *top;
 	  top++;
@@ -734,9 +737,9 @@ lookup_partial_symbol (struct objfile *objfile,
     {
       for (psym = start; psym < start + length; psym++)
 	{
-	  if (symbol_matches_domain ((*psym)->language,
+	  if (symbol_matches_domain ((*psym)->ginfo.language,
 				     (*psym)->domain, domain)
-	      && symbol_matches_search_name (*psym, lookup_name))
+	      && symbol_matches_search_name (&(*psym)->ginfo, lookup_name))
 	    return *psym;
 	}
     }
@@ -836,10 +839,11 @@ print_partial_symbols (struct gdbarch *gdbarch, struct objfile *objfile,
   while (count-- > 0)
     {
       QUIT;
-      fprintf_filtered (outfile, "    `%s'", (*p)->name);
-      if (symbol_demangled_name (*p) != NULL)
+      fprintf_filtered (outfile, "    `%s'", (*p)->ginfo.name);
+      if (symbol_demangled_name (&(*p)->ginfo) != NULL)
 	{
-	  fprintf_filtered (outfile, "  `%s'", symbol_demangled_name (*p));
+	  fprintf_filtered (outfile, "  `%s'",
+			    symbol_demangled_name (&(*p)->ginfo));
 	}
       fputs_filtered (", ", outfile);
       switch ((*p)->domain)
@@ -1309,7 +1313,8 @@ recursively_search_psymtabs
 	       || (domain == TYPES_DOMAIN
 		   && (*psym)->aclass == LOC_TYPEDEF))
 	      && psymbol_name_matches (*psym, lookup_name)
-	      && (sym_matcher == NULL || sym_matcher (symbol_search_name (*psym))))
+	      && (sym_matcher == NULL
+		  || sym_matcher (symbol_search_name (&(*psym)->ginfo))))
 	    {
 	      /* Found a match, so notify our caller.  */
 	      result = PST_SEARCHED_AND_FOUND;
@@ -1504,8 +1509,8 @@ sort_pst_symbols (struct objfile *objfile, struct partial_symtab *pst)
 
   std::sort (begin, end, [] (partial_symbol *s1, partial_symbol *s2)
     {
-      return strcmp_iw_ordered (symbol_search_name (s1),
-				symbol_search_name (s2)) < 0;
+      return strcmp_iw_ordered (symbol_search_name (&s1->ginfo),
+				symbol_search_name (&s2->ginfo)) < 0;
     });
 }
 
@@ -1552,18 +1557,18 @@ psymbol_hash (const void *addr, int length)
 {
   unsigned long h = 0;
   struct partial_symbol *psymbol = (struct partial_symbol *) addr;
-  unsigned int lang = psymbol->language;
+  unsigned int lang = psymbol->ginfo.language;
   unsigned int domain = psymbol->domain;
   unsigned int theclass = psymbol->aclass;
 
-  h = hash_continue (&psymbol->value, sizeof (psymbol->value), h);
+  h = hash_continue (&psymbol->ginfo.value, sizeof (psymbol->ginfo.value), h);
   h = hash_continue (&lang, sizeof (unsigned int), h);
   h = hash_continue (&domain, sizeof (unsigned int), h);
   h = hash_continue (&theclass, sizeof (unsigned int), h);
   /* Note that psymbol names are interned via symbol_set_names, so
      there's no need to hash the contents of the name here.  */
-  h = hash_continue (&psymbol->name,
-		     sizeof (psymbol->name), h);
+  h = hash_continue (&psymbol->ginfo.name,
+		     sizeof (psymbol->ginfo.name), h);
 
   return h;
 }
@@ -1578,15 +1583,15 @@ psymbol_compare (const void *addr1, const void *addr2, int length)
   struct partial_symbol *sym1 = (struct partial_symbol *) addr1;
   struct partial_symbol *sym2 = (struct partial_symbol *) addr2;
 
-  return (memcmp (&sym1->value, &sym2->value,
-                  sizeof (sym1->value)) == 0
-	  && sym1->language == sym2->language
+  return (memcmp (&sym1->ginfo.value, &sym2->ginfo.value,
+                  sizeof (sym1->ginfo.value)) == 0
+	  && sym1->ginfo.language == sym2->ginfo.language
           && sym1->domain == sym2->domain
           && sym1->aclass == sym2->aclass
 	  /* Note that psymbol names are interned via
 	     symbol_set_names, so there's no need to compare the
 	     contents of the name here.  */
-          && sym1->name == sym2->name);
+          && sym1->ginfo.name == sym2->ginfo.name);
 }
 
 /* Initialize a partial symbol bcache.  */
@@ -1651,17 +1656,16 @@ add_psymbol_to_bcache (const char *name, int namelength, int copy_name,
 		       int *added)
 {
   struct partial_symbol psymbol;
+  memset (&psymbol, 0, sizeof (psymbol));
 
   psymbol.set_unrelocated_address (coreaddr);
-  psymbol.section = section;
+  psymbol.ginfo.section = section;
   psymbol.domain = domain;
   psymbol.aclass = theclass;
-
-  memset (&psymbol.language_specific, 0, sizeof (psymbol.language_specific));
-  psymbol.ada_mangled = 0;
-  symbol_set_language (&psymbol, language,
+  symbol_set_language (&psymbol.ginfo, language,
 		       objfile->partial_symtabs->obstack ());
-  symbol_set_names (&psymbol, name, namelength, copy_name, objfile->per_bfd);
+  symbol_set_names (&psymbol.ginfo, name, namelength, copy_name,
+		    objfile->per_bfd);
 
   /* Stash the partial symbol away in the cache.  */
   return psymbol_bcache_full (&psymbol,
@@ -2183,13 +2187,13 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 	length = ps->n_static_syms;
 	while (length--)
 	  {
-	    sym = block_lookup_symbol (b, symbol_search_name (*psym),
+	    sym = block_lookup_symbol (b, symbol_search_name (&(*psym)->ginfo),
 				       symbol_name_match_type::SEARCH_NAME,
 				       (*psym)->domain);
 	    if (!sym)
 	      {
 		printf_filtered ("Static symbol `");
-		puts_filtered ((*psym)->name);
+		puts_filtered ((*psym)->ginfo.name);
 		printf_filtered ("' only found in ");
 		puts_filtered (ps->filename);
 		printf_filtered (" psymtab\n");
@@ -2201,13 +2205,13 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 	length = ps->n_global_syms;
 	while (length--)
 	  {
-	    sym = block_lookup_symbol (b, symbol_search_name (*psym),
+	    sym = block_lookup_symbol (b, symbol_search_name (&(*psym)->ginfo),
 				       symbol_name_match_type::SEARCH_NAME,
 				       (*psym)->domain);
 	    if (!sym)
 	      {
 		printf_filtered ("Global symbol `");
-		puts_filtered ((*psym)->name);
+		puts_filtered ((*psym)->ginfo.name);
 		printf_filtered ("' only found in ");
 		puts_filtered (ps->filename);
 		printf_filtered (" psymtab\n");

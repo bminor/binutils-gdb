@@ -1,3 +1,19 @@
+2019-05-04  Tom Tromey  <tom@tromey.com>
+
+	* psymtab.c (psymbol_name_matches, match_partial_symbol)
+	(lookup_partial_symbol, print_partial_symbols)
+	(recursively_search_psymtabs, sort_pst_symbols, psymbol_hash)
+	(psymbol_compare): Update.
+	(add_psymbol_to_bcache): Clear the entire psymbol.
+	(maintenance_check_psymtabs): Update.
+	* psympriv.h (struct partial_symbol): Don't derive from
+	general_symbol_info.
+	<obj_section, unrelocated_address, address,
+	set_unrelocated_address>: Update.
+	<ginfo>: New member.
+	* dwarf-index-write.c (write_psymbols, debug_names::insert)
+	(debug_names::write_psymbols): Update.
+
 2019-05-03  Eli Zaretskii  <eliz@gnu.org>
 
 	* windows-nat.c [_WIN32_WINNT]: Define _WIN32_WINNT to Windows XP
