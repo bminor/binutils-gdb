@@ -180,6 +180,7 @@ if [ "$want_dwz" = true ]; then
 elif [ "$want_multi" = true ]; then
     cp $output_file ${output_file}.alt
     $DWZ -m ${output_file}.dwz "$output_file" ${output_file}.alt > /dev/null 2>&1
+    rm -f ${output_file}.alt
 fi
 
 if [ "$want_dwp" = true ]; then

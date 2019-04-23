@@ -1,3 +1,9 @@
+2019-04-23  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/24438
+	* contrib/cc-with-tweaks.sh: Remove superfluous .alt file after dwz
+	invocation.
+
 
 2019-03-27  Ali Tamur  <tamur@google.com>
 
