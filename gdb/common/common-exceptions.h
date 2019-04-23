@@ -152,6 +152,8 @@ struct gdb_exception
     return *this;
   }
 
+  gdb_exception &operator= (gdb_exception &&other) noexcept = default;
+
   /* Return the contents of the exception message, as a C string.  The
      string remains owned by the exception object.  */
   const char *what () const noexcept
@@ -281,7 +283,7 @@ extern void throw_exception (const gdb_exception &exception)
    containing exception handler established using TRY_SJLJ.  Necessary
    in some cases where we need to throw GDB exceptions across
    third-party library code (e.g., readline).  */
-extern void throw_exception_sjlj (struct gdb_exception exception)
+extern void throw_exception_sjlj (const struct gdb_exception &exception)
      ATTRIBUTE_NORETURN;
 
 /* Convenience wrappers around throw_exception that throw GDB

@@ -166,14 +166,15 @@ exceptions_state_mc_action_iter_1 (void)
 /* Return EXCEPTION to the nearest containing CATCH_SJLJ block.  */
 
 void
-throw_exception_sjlj (struct gdb_exception exception)
+throw_exception_sjlj (const struct gdb_exception &exception)
 {
   /* Jump to the nearest CATCH_SJLJ block, communicating REASON to
      that call via setjmp's return value.  Note that REASON can't be
      zero, by definition in common-exceptions.h.  */
   exceptions_state_mc (CATCH_THROWING);
+  enum return_reason reason = exception.reason;
   catchers.front ().exception = exception;
-  longjmp (catchers.front ().buf, exception.reason);
+  longjmp (catchers.front ().buf, reason);
 }
 
 /* Implementation of throw_exception that uses C++ try/catch.  */

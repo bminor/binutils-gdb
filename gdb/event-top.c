@@ -178,7 +178,7 @@ gdb_rl_callback_read_char_wrapper_noexcept () noexcept
     }
   CATCH_SJLJ (ex, RETURN_MASK_ALL)
     {
-      gdb_expt = ex;
+      gdb_expt = std::move (ex);
     }
   END_CATCH_SJLJ
 
@@ -212,9 +212,9 @@ gdb_rl_callback_handler (char *rl) noexcept
     {
       ui->input_handler (gdb::unique_xmalloc_ptr<char> (rl));
     }
-  catch (const gdb_exception &ex)
+  catch (gdb_exception &ex)
     {
-      gdb_rl_expt = ex;
+      gdb_rl_expt = std::move (ex);
     }
 
   /* If we caught a GDB exception, longjmp out of the readline
