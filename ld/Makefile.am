@@ -152,6 +152,7 @@ AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
 BFDLIB = ../bfd/libbfd.la
 LIBIBERTY = ../libiberty/libiberty.a
 
+# These all start with e so 'make clean' can find them.
 ALL_EMULATION_SOURCES = \
 	eaix5ppc.c \
 	eaix5rs6.c \
@@ -611,9 +612,12 @@ ldemul-list.h: Makefile
 stringify.sed: ${srcdir}/emultempl/$(STRINGIFY)
 	  cp ${srcdir}/emultempl/$(STRINGIFY) stringify.sed
 
-# These all start with e so 'make clean' can find them.
-
-GENSCRIPTS = $(SHELL) $(srcdir)/genscripts.sh "${srcdir}" "${libdir}" "${prefix}" "${exec_prefix}" @host@ @target@ @target_alias@ "${DEPDIR}" "${LIB_PATH}" "@EMULATION_LIBPATH@" "@NATIVE_LIB_DIRS@" @use_sysroot@ @enable_initfini_array@
+if AMDEP
+  GENDEPDIR=$(DEPDIR)
+else
+  GENDEPDIR=
+endif
+GENSCRIPTS = $(SHELL) $(srcdir)/genscripts.sh "${srcdir}" "${libdir}" "${prefix}" "${exec_prefix}" @host@ @target@ @target_alias@ "$(GENDEPDIR)" "${LIB_PATH}" "@EMULATION_LIBPATH@" "@NATIVE_LIB_DIRS@" @use_sysroot@ @enable_initfini_array@
 GEN_DEPENDS = $(srcdir)/genscripts.sh stringify.sed
 
 @TDIRS@

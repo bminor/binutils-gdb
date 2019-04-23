@@ -129,11 +129,15 @@ TOOL_LIB=$2
 
 source_sh()
 {
-  echo $1 >> ${DEPDIR}/e${EMULATION_NAME}.Tc
+  if test -n "${DEPDIR}"; then
+    echo $1 >> ${DEPDIR}/e${EMULATION_NAME}.Tc
+  fi
   . $1
 }
 
-rm -f ${DEPDIR}/e${EMULATION_NAME}.Tc
+if test -n "${DEPDIR}"; then
+  rm -f ${DEPDIR}/e${EMULATION_NAME}.Tc
+fi
 
 # Include the emulation-specific parameters:
 CUSTOMIZER_SCRIPT="${srcdir}/emulparams/${EMULATION_NAME}.sh"
@@ -639,12 +643,14 @@ fi
 > e${EMULATION_NAME}.c
 source_em ${srcdir}/emultempl/${TEMPLATE_NAME-generic}.em
 
-ecdeps=
-for dep in `cat ${DEPDIR}/e${EMULATION_NAME}.Tc`; do
-  case " $ecdeps " in
-    *" $dep "*): ;;
-    *) ecdeps="$ecdeps $dep" ;;
-  esac
-done
-rm -f ${DEPDIR}/e${EMULATION_NAME}.Tc
-echo "e${EMULATION_NAME}.c:${ecdeps}" > ${DEPDIR}/e${EMULATION_NAME}.Pc
+if test -n "${DEPDIR}"; then
+  ecdeps=
+  for dep in `cat ${DEPDIR}/e${EMULATION_NAME}.Tc`; do
+    case " $ecdeps " in
+      *" $dep "*): ;;
+      *) ecdeps="$ecdeps $dep" ;;
+    esac
+  done
+  rm -f ${DEPDIR}/e${EMULATION_NAME}.Tc
+  echo "e${EMULATION_NAME}.c:${ecdeps}" > ${DEPDIR}/e${EMULATION_NAME}.Pc
+fi

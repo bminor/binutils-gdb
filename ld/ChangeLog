@@ -1,3 +1,10 @@
+2019-04-23  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (GENDEPDIR): New var, used..
+	(GENSCRIPTS): ..here.
+	* Makefile.in: Regenerate.
+	* genscripts.sh: Test for $DEPDIR set before every use.
+
 2019-04-22  Matthew Fortune  <matthew.fortune@mips.com>
 
 	* testsuite/ld-mips-elf/mips-elf-flags.exp: Fix expected ASEs
