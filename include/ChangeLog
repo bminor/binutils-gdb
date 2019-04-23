@@ -1,5 +1,52 @@
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-api.h (zlib.h): New include.
+	(ctf_sect_t): New.
+	(ctf_sect_names_t): Likewise.
+	(ctf_encoding_t): Likewise.
+	(ctf_membinfo_t): Likewise.
+	(ctf_arinfo_t): Likewise.
+	(ctf_funcinfo_t): Likewise.
+	(ctf_lblinfo_t): Likewise.
+	(ctf_snapshot_id_t): Likewise.
+	(CTF_FUNC_VARARG): Likewise.
+	(ctf_simple_open): Likewise.
+	(ctf_bufopen): Likewise.
+	(ctf_create): Likewise.
+	(ctf_add_array): Likewise.
+	(ctf_add_const): Likewise.
+	(ctf_add_enum_encoded): Likewise.
+	(ctf_add_enum): Likewise.
+	(ctf_add_float): Likewise.
+	(ctf_add_forward): Likewise.
+	(ctf_add_function): Likewise.
+	(ctf_add_integer): Likewise.
+	(ctf_add_slice): Likewise.
+	(ctf_add_pointer): Likewise.
+	(ctf_add_type): Likewise.
+	(ctf_add_typedef): Likewise.
+	(ctf_add_restrict): Likewise.
+	(ctf_add_struct): Likewise.
+	(ctf_add_union): Likewise.
+	(ctf_add_struct_sized): Likewise.
+	(ctf_add_union_sized): Likewise.
+	(ctf_add_volatile): Likewise.
+	(ctf_add_enumerator): Likewise.
+	(ctf_add_member): Likewise.
+	(ctf_add_member_offset): Likewise.
+	(ctf_add_member_encoded): Likewise.
+	(ctf_add_variable): Likewise.
+	(ctf_set_array): Likewise.
+	(ctf_update): Likewise.
+	(ctf_snapshot): Likewise.
+	(ctf_rollback): Likewise.
+	(ctf_discard): Likewise.
+	(ctf_write): Likewise.
+	(ctf_gzwrite): Likewise.
+	(ctf_compress_write): Likewise.
+
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-api.h (ctf_errno): New declaration.
 	(ctf_errmsg): Likewise.
 

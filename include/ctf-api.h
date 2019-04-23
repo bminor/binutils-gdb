@@ -27,6 +27,7 @@
 #include <sys/param.h>
 #include <sys/types.h>
 #include <ctf.h>
+#include <zlib.h>
 
 #ifdef	__cplusplus
 extern "C"
@@ -43,6 +44,81 @@ extern "C"
 typedef struct ctf_file ctf_file_t;
 typedef struct ctf_archive_internal ctf_archive_t;
 typedef long ctf_id_t;
+
+/* If the debugger needs to provide the CTF library with a set of raw buffers
+   for use as the CTF data, symbol table, and string table, it can do so by
+   filling in ctf_sect_t structures and passing them to ctf_bufopen().
+
+   The contents of this structure must always be in native endianness (no
+   byteswapping is performed).  */
+
+typedef struct ctf_sect
+{
+  const char *cts_name;		  /* Section name (if any).  */
+  unsigned long cts_type;	  /* Section type (ELF SHT_... value).  */
+  unsigned long cts_flags;	  /* Section flags (ELF SHF_... value).  */
+  const void *cts_data;		  /* Pointer to section data.  */
+  size_t cts_size;		  /* Size of data in bytes.  */
+  size_t cts_entsize;		  /* Size of each section entry (symtab only).  */
+  off64_t cts_offset;		  /* File offset of this section (if any).  */
+} ctf_sect_t;
+
+/* Symbolic names for CTF sections.  */
+
+typedef enum ctf_sect_names
+  {
+   CTF_SECT_HEADER,
+   CTF_SECT_LABEL,
+   CTF_SECT_OBJT,
+   CTF_SECT_FUNC,
+   CTF_SECT_VAR,
+   CTF_SECT_TYPE,
+   CTF_SECT_STR
+  } ctf_sect_names_t;
+
+/* Encoding information for integers, floating-point values, and certain other
+   intrinsics can be obtained by calling ctf_type_encoding(), below.  The flags
+   field will contain values appropriate for the type defined in <ctf.h>.  */
+
+typedef struct ctf_encoding
+{
+  uint32_t cte_format;		 /* Data format (CTF_INT_* or CTF_FP_* flags).  */
+  uint32_t cte_offset;		 /* Offset of value in bits.  */
+  uint32_t cte_bits;		 /* Size of storage in bits.  */
+} ctf_encoding_t;
+
+typedef struct ctf_membinfo
+{
+  ctf_id_t ctm_type;		/* Type of struct or union member.  */
+  unsigned long ctm_offset;	/* Offset of member in bits.  */
+} ctf_membinfo_t;
+
+typedef struct ctf_arinfo
+{
+  ctf_id_t ctr_contents;	/* Type of array contents.  */
+  ctf_id_t ctr_index;		/* Type of array index.  */
+  uint32_t ctr_nelems;		/* Number of elements.  */
+} ctf_arinfo_t;
+
+typedef struct ctf_funcinfo
+{
+  ctf_id_t ctc_return;		/* Function return type.  */
+  uint32_t ctc_argc;		/* Number of typed arguments to function.  */
+  uint32_t ctc_flags;		/* Function attributes (see below).  */
+} ctf_funcinfo_t;
+
+typedef struct ctf_lblinfo
+{
+  ctf_id_t ctb_type;		/* Last type associated with the label.  */
+} ctf_lblinfo_t;
+
+typedef struct ctf_snapshot_id
+{
+  unsigned long dtd_id;		/* Highest DTD ID at time of snapshot.  */
+  unsigned long snapshot_id;	/* Snapshot id at time of snapshot.  */
+} ctf_snapshot_id_t;
+
+#define	CTF_FUNC_VARARG	0x1	/* Function arguments end with varargs.  */
 
 /* Functions that return integer status or a ctf_id_t use the following value
    to indicate failure.  ctf_errno() can be used to obtain an error code.  */
@@ -122,8 +198,61 @@ enum
 #define	CTF_ADD_NONROOT	0	/* Type only visible in nested scope.  */
 #define	CTF_ADD_ROOT	1	/* Type visible at top-level scope.  */
 
+extern ctf_file_t *ctf_simple_open (const char *, size_t, const char *, size_t,
+				   size_t, const char *, size_t, int *);
+extern ctf_file_t *ctf_bufopen (const ctf_sect_t *, const ctf_sect_t *,
+				const ctf_sect_t *, int *);
+
 extern int ctf_errno (ctf_file_t *);
 extern const char *ctf_errmsg (int);
+extern ctf_id_t ctf_add_array (ctf_file_t *, uint32_t,
+			       const ctf_arinfo_t *);
+extern ctf_id_t ctf_add_const (ctf_file_t *, uint32_t, ctf_id_t);
+extern ctf_id_t ctf_add_enum_encoded (ctf_file_t *, uint32_t, const char *,
+				      const ctf_encoding_t *);
+extern ctf_id_t ctf_add_enum (ctf_file_t *, uint32_t, const char *);
+extern ctf_id_t ctf_add_float (ctf_file_t *, uint32_t,
+			       const char *, const ctf_encoding_t *);
+extern ctf_id_t ctf_add_forward (ctf_file_t *, uint32_t, const char *,
+				 uint32_t);
+extern ctf_id_t ctf_add_function (ctf_file_t *, uint32_t,
+				  const ctf_funcinfo_t *, const ctf_id_t *);
+extern ctf_id_t ctf_add_integer (ctf_file_t *, uint32_t, const char *,
+				 const ctf_encoding_t *);
+extern ctf_id_t ctf_add_slice (ctf_file_t *, uint32_t, ctf_id_t, const ctf_encoding_t *);
+extern ctf_id_t ctf_add_pointer (ctf_file_t *, uint32_t, ctf_id_t);
+extern ctf_id_t ctf_add_type (ctf_file_t *, ctf_file_t *, ctf_id_t);
+extern ctf_id_t ctf_add_typedef (ctf_file_t *, uint32_t, const char *,
+				 ctf_id_t);
+extern ctf_id_t ctf_add_restrict (ctf_file_t *, uint32_t, ctf_id_t);
+extern ctf_id_t ctf_add_struct (ctf_file_t *, uint32_t, const char *);
+extern ctf_id_t ctf_add_union (ctf_file_t *, uint32_t, const char *);
+extern ctf_id_t ctf_add_struct_sized (ctf_file_t *, uint32_t, const char *,
+				      size_t);
+extern ctf_id_t ctf_add_union_sized (ctf_file_t *, uint32_t, const char *,
+				     size_t);
+extern ctf_id_t ctf_add_volatile (ctf_file_t *, uint32_t, ctf_id_t);
+
+extern int ctf_add_enumerator (ctf_file_t *, ctf_id_t, const char *, int);
+extern int ctf_add_member (ctf_file_t *, ctf_id_t, const char *, ctf_id_t);
+extern int ctf_add_member_offset (ctf_file_t *, ctf_id_t, const char *,
+				  ctf_id_t, unsigned long);
+extern int ctf_add_member_encoded (ctf_file_t *, ctf_id_t, const char *,
+				   ctf_id_t, unsigned long,
+				   const ctf_encoding_t);
+
+extern int ctf_add_variable (ctf_file_t *, const char *, ctf_id_t);
+
+extern int ctf_set_array (ctf_file_t *, ctf_id_t, const ctf_arinfo_t *);
+
+extern ctf_file_t *ctf_create (int *);
+extern int ctf_update (ctf_file_t *);
+extern ctf_snapshot_id_t ctf_snapshot (ctf_file_t *);
+extern int ctf_rollback (ctf_file_t *, ctf_snapshot_id_t);
+extern int ctf_discard (ctf_file_t *);
+extern int ctf_write (ctf_file_t *, int);
+extern int ctf_gzwrite (ctf_file_t * fp, gzFile fd);
+extern int ctf_compress_write (ctf_file_t * fp, int fd);
 
 extern void ctf_setdebug (int debug);
 extern int ctf_getdebug (void);
