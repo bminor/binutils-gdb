@@ -540,7 +540,7 @@ write_psymbols (struct mapped_symtab *symtab,
     {
       struct partial_symbol *psym = *psymp;
 
-      if (psym->language == language_ada)
+      if (psym->ginfo.language == language_ada)
 	error (_("Ada is not currently supported by the index"));
 
       /* Only add a given psymbol once.  */
@@ -548,7 +548,7 @@ write_psymbols (struct mapped_symtab *symtab,
 	{
 	  gdb_index_symbol_kind kind = symbol_kind (psym);
 
-	  add_index_entry (symtab, symbol_search_name (psym),
+	  add_index_entry (symtab, symbol_search_name (&psym->ginfo),
 			   is_static, kind, cu_index);
 	}
     }
@@ -684,7 +684,7 @@ public:
     const int dwarf_tag = psymbol_tag (psym);
     if (dwarf_tag == 0)
       return;
-    const char *const name = symbol_search_name (psym);
+    const char *const name = symbol_search_name (&psym->ginfo);
     const auto insertpair
       = m_name_to_value_set.emplace (c_str_view (name),
 				     std::set<symbol_value> ());
@@ -1181,7 +1181,7 @@ private:
       {
 	struct partial_symbol *psym = *psymp;
 
-	if (psym->language == language_ada)
+	if (psym->ginfo.language == language_ada)
 	  error (_("Ada is not currently supported by the index"));
 
 	/* Only add a given psymbol once.  */

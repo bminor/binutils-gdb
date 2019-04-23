@@ -33,36 +33,42 @@
 /* This structure is space critical.  See space comments at the top of
    symtab.h.  */
 
-struct partial_symbol : public general_symbol_info
+struct partial_symbol
 {
   /* Return the section for this partial symbol, or nullptr if no
      section has been set.  */
   struct obj_section *obj_section (struct objfile *objfile) const
   {
-    if (section >= 0)
-      return &objfile->sections[section];
+    if (ginfo.section >= 0)
+      return &objfile->sections[ginfo.section];
     return nullptr;
   }
 
   /* Return the unrelocated address of this partial symbol.  */
   CORE_ADDR unrelocated_address () const
   {
-    return value.address;
+    return ginfo.value.address;
   }
 
   /* Return the address of this partial symbol, relocated according to
      the offsets provided in OBJFILE.  */
   CORE_ADDR address (const struct objfile *objfile) const
   {
-    return value.address + ANOFFSET (objfile->section_offsets, section);
+    return (ginfo.value.address
+	    + ANOFFSET (objfile->section_offsets, ginfo.section));
   }
 
   /* Set the address of this partial symbol.  The address must be
      unrelocated.  */
   void set_unrelocated_address (CORE_ADDR addr)
   {
-    value.address = addr;
+    ginfo.value.address = addr;
   }
+
+  /* Note that partial_symbol does not derive from general_symbol_info
+     due to the bcache.  See add_psymbol_to_bcache.  */
+
+  struct general_symbol_info ginfo;
 
   /* Name space code.  */
 
