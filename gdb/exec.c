@@ -167,12 +167,12 @@ try_open_exec_file (const char *exec_file_host, struct inferior *inf,
 	 exec_file_attach will clear state.  */
       exec_file_attach (exec_file_host, add_flags & SYMFILE_VERBOSE);
     }
-  catch (const gdb_exception_error &err)
+  catch (gdb_exception_error &err)
     {
       if (err.message != NULL)
 	warning ("%s", err.what ());
 
-      prev_err = err;
+      prev_err = std::move (err);
     }
 
   if (exec_file_host != NULL)

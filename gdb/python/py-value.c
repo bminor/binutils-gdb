@@ -1031,9 +1031,9 @@ valpy_getitem (PyObject *self, PyObject *key)
       if (res_val)
 	result = value_to_value_object (res_val);
     }
-  catch (const gdb_exception &ex)
+  catch (gdb_exception &ex)
     {
-      except = ex;
+      except = std::move (ex);
     }
 
   GDB_PY_HANDLE_EXCEPTION (except);
@@ -1498,9 +1498,9 @@ valpy_nonzero (PyObject *self)
 	/* All other values are True.  */
 	nonzero = 1;
     }
-  catch (const gdb_exception &ex)
+  catch (gdb_exception &ex)
     {
-      except = ex;
+      except = std::move (ex);
     }
 
   /* This is not documented in the Python documentation, but if this

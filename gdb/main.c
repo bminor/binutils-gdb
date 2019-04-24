@@ -339,7 +339,7 @@ captured_command_loop ()
 /* Handle command errors thrown from within catch_command_errors.  */
 
 static int
-handle_command_errors (struct gdb_exception e)
+handle_command_errors (const struct gdb_exception &e)
 {
   if (e.reason < 0)
     {

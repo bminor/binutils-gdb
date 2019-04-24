@@ -605,9 +605,9 @@ run_inferior_call (struct call_thread_fsm *sm,
 	 target supports asynchronous execution.  */
       wait_sync_command_done ();
     }
-  catch (const gdb_exception &e)
+  catch (gdb_exception &e)
     {
-      caught_error = e;
+      caught_error = std::move (e);
     }
 
   /* If GDB has the prompt blocked before, then ensure that it remains
@@ -1195,7 +1195,7 @@ When the function is done executing, GDB will silently stop."),
 		       e.what (), name);
 	case RETURN_QUIT:
 	default:
-	  throw_exception (e);
+	  throw_exception (std::move (e));
 	}
     }
 

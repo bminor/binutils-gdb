@@ -113,9 +113,9 @@ struct gdb_xml_parser
   { m_is_xinclude = is_xinclude; }
 
   /* A thrown error, if any.  */
-  void set_error (gdb_exception error)
+  void set_error (gdb_exception &&error)
   {
-    m_error = error;
+    m_error = std::move (error);
 #ifdef HAVE_XML_STOPPARSER
     XML_StopParser (m_expat_parser, XML_FALSE);
 #endif
@@ -387,9 +387,9 @@ gdb_xml_start_element_wrapper (void *data, const XML_Char *name,
     {
       parser->start_element (name, attrs);
     }
-  catch (const gdb_exception &ex)
+  catch (gdb_exception &ex)
     {
-      parser->set_error (ex);
+      parser->set_error (std::move (ex));
     }
 }
 
@@ -459,9 +459,9 @@ gdb_xml_end_element_wrapper (void *data, const XML_Char *name)
     {
       parser->end_element (name);
     }
-  catch (const gdb_exception &ex)
+  catch (gdb_exception &ex)
     {
-      parser->set_error (ex);
+      parser->set_error (std::move (ex));
     }
 }
 
@@ -603,7 +603,7 @@ gdb_xml_parser::parse (const char *buffer)
   else
     {
       gdb_assert (m_error.reason < 0);
-      throw_exception (m_error);
+      throw_exception (std::move (m_error));
     }
 
   if (m_last_line != 0)

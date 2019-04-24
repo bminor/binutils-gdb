@@ -1,5 +1,45 @@
 2019-04-25  Tom Tromey  <tromey@adacore.com>
 
+	* xml-support.c (struct gdb_xml_parser) <set_error>: Take an
+	rvalue reference.
+	(gdb_xml_start_element_wrapper, gdb_xml_end_element_wrapper)
+	(gdb_xml_parser::parse): Use std::move.
+	* python/python-internal.h (gdbpy_convert_exception): Take a const
+	reference.
+	* python/py-value.c (valpy_getitem, valpy_nonzero): Use
+	std::move.
+	* python/py-utils.c (gdbpy_convert_exception): Take a const
+	reference.
+	* python/py-inferior.c (infpy_write_memory, infpy_search_memory):
+	Use std::move.
+	* python/py-breakpoint.c (bppy_set_condition, bppy_set_commands):
+	Use std::move.
+	* mi/mi-main.c (mi_print_exception): Take a const reference.
+	* main.c (handle_command_errors): Take a const reference.
+	* linespec.c (parse_linespec): Use std::move.
+	* infcall.c (run_inferior_call): Use std::move.
+	(call_function_by_hand_dummy): Use std::move.
+	* exec.c (try_open_exec_file): Use std::move.
+	* exceptions.h (exception_print, exception_fprintf)
+	(exception_print_same): Update.
+	* exceptions.c (print_exception, exception_print)
+	(exception_fprintf, exception_print_same): Change parameters to
+	const reference.
+	* event-top.c (gdb_rl_callback_read_char_wrapper): Update.
+	* common/new-op.c: Use std::move.
+	* common/common-exceptions.h (struct gdb_exception): Add move
+	constructor.
+	(struct gdb_exception_error, struct gdb_exception_quit, struct
+	gdb_quit_bad_alloc): Change constructor to move constructor.
+	(throw_exception): Change parameter to rvalue reference.
+	* common/common-exceptions.c (throw_exception): Take rvalue
+	reference.
+	* cli/cli-interp.c (safe_execute_command): Use std::move.
+	* breakpoint.c (insert_bp_location, location_to_sals): Use
+	std::move.
+
+2019-04-25  Tom Tromey  <tromey@adacore.com>
+
 	* guile/scm-exception.c (gdbscm_scm_from_gdb_exception)
 	(gdbscm_throw_gdb_exception): Take a gdbscm_gdb_exception.
 	* guile/scm-block.c, guile/scm-breakpoint.c, guile/scm-cmd.c,

@@ -133,6 +133,10 @@ struct gdb_exception
   {
   }
 
+  /* The move constructor exists so that we can mark it "noexcept",
+     which is a good practice for any sort of exception object.  */
+  explicit gdb_exception (gdb_exception &&other) noexcept = default;
+
   /* The copy constructor exists so that we can mark it "noexcept",
      which is a good practice for any sort of exception object.  */
   gdb_exception (const gdb_exception &other) noexcept
@@ -232,8 +236,8 @@ struct gdb_exception_error : public gdb_exception
   {
   }
 
-  explicit gdb_exception_error (const gdb_exception &ex) noexcept
-    : gdb_exception (ex)
+  explicit gdb_exception_error (gdb_exception &&ex) noexcept
+    : gdb_exception (std::move (ex))
   {
     gdb_assert (ex.reason == RETURN_ERROR);
   }
@@ -247,8 +251,8 @@ struct gdb_exception_quit : public gdb_exception
   {
   }
 
-  explicit gdb_exception_quit (const gdb_exception &ex) noexcept
-    : gdb_exception (ex)
+  explicit gdb_exception_quit (gdb_exception &&ex) noexcept
+    : gdb_exception (std::move (ex))
   {
     gdb_assert (ex.reason == RETURN_QUIT);
   }
@@ -264,8 +268,8 @@ struct gdb_quit_bad_alloc
   : public gdb_exception_quit,
     public std::bad_alloc
 {
-  explicit gdb_quit_bad_alloc (const gdb_exception &ex) noexcept
-    : gdb_exception_quit (ex),
+  explicit gdb_quit_bad_alloc (gdb_exception &&ex) noexcept
+    : gdb_exception_quit (std::move (ex)),
       std::bad_alloc ()
   {
   }
@@ -276,7 +280,7 @@ struct gdb_quit_bad_alloc
 /* Throw an exception (as described by "struct gdb_exception"),
    landing in the inner most containing exception handler established
    using TRY/CATCH.  */
-extern void throw_exception (const gdb_exception &exception)
+extern void throw_exception (gdb_exception &&exception)
      ATTRIBUTE_NORETURN;
 
 /* Throw an exception by executing a LONG JUMP to the inner most

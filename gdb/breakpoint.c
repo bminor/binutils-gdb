@@ -2545,9 +2545,9 @@ insert_bp_location (struct bp_location *bl,
 	      if (val)
 		bp_excpt = gdb_exception {RETURN_ERROR, GENERIC_ERROR};
 	    }
-	  catch (const gdb_exception &e)
+	  catch (gdb_exception &e)
 	    {
-	      bp_excpt = e;
+	      bp_excpt = std::move (e);
 	    }
 	}
       else
@@ -2584,9 +2584,9 @@ insert_bp_location (struct bp_location *bl,
 			bp_excpt
 			  = gdb_exception {RETURN_ERROR, GENERIC_ERROR};
 		    }
-		  catch (const gdb_exception &e)
+		  catch (gdb_exception &e)
 		    {
-		      bp_excpt = e;
+		      bp_excpt = std::move (e);
 		    }
 
 		  if (bp_excpt.reason != 0)
@@ -2608,9 +2608,9 @@ insert_bp_location (struct bp_location *bl,
 		  if (val)
 		    bp_excpt = gdb_exception {RETURN_ERROR, GENERIC_ERROR};
 	        }
-	      catch (const gdb_exception &e)
+	      catch (gdb_exception &e)
 	        {
-		  bp_excpt = e;
+		  bp_excpt = std::move (e);
 	        }
 	    }
 	  else
@@ -13603,11 +13603,9 @@ location_to_sals (struct breakpoint *b, struct event_location *location,
     {
       sals = b->ops->decode_location (b, location, search_pspace);
     }
-  catch (const gdb_exception_error &e)
+  catch (gdb_exception_error &e)
     {
       int not_found_and_ok = 0;
-
-      exception = e;
 
       /* For pending breakpoints, it's expected that parsing will
 	 fail until the right shared library is loaded.  User has
@@ -13637,6 +13635,8 @@ location_to_sals (struct breakpoint *b, struct event_location *location,
 	  b->enable_state = bp_disabled;
 	  throw;
 	}
+
+      exception = std::move (e);
     }
 
   if (exception.reason == 0 || exception.error != NOT_FOUND_ERROR)

@@ -229,7 +229,7 @@ gdbpy_err_fetch::type_to_string () const
    This sets the Python error indicator.  */
 
 void
-gdbpy_convert_exception (struct gdb_exception exception)
+gdbpy_convert_exception (const struct gdb_exception &exception)
 {
   PyObject *exc_class;
 

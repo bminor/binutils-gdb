@@ -2613,9 +2613,9 @@ parse_linespec (linespec_parser *parser, const char *arg,
 	    = symtabs_from_filename (user_filename.get (),
 				     PARSER_STATE (parser)->search_pspace);
 	}
-      catch (const gdb_exception_error &ex)
+      catch (gdb_exception_error &ex)
 	{
-	  file_exception = ex;
+	  file_exception = std::move (ex);
 	}
 
       if (file_exception.reason >= 0)
@@ -2663,7 +2663,7 @@ parse_linespec (linespec_parser *parser, const char *arg,
       /* The linespec didn't parse.  Re-throw the file exception if
 	 there was one.  */
       if (file_exception.reason < 0)
-	throw_exception (file_exception);
+	throw_exception (std::move (file_exception));
 
       /* Otherwise, the symbol is not found.  */
       symbol_not_found_error (PARSER_EXPLICIT (parser)->function_name,

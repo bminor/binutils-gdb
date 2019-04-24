@@ -64,9 +64,9 @@ operator new (std::size_t sz)
 	{
 	  malloc_failure (sz);
 	}
-      catch (const gdb_exception &ex)
+      catch (gdb_exception &ex)
 	{
-	  throw gdb_quit_bad_alloc (ex);
+	  throw gdb_quit_bad_alloc (std::move (ex));
 	}
     }
   return p;

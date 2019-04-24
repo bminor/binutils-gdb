@@ -193,7 +193,7 @@ gdb_rl_callback_read_char_wrapper (gdb_client_data client_data)
 
   /* Rethrow using the normal EH mechanism.  */
   if (gdb_expt.reason < 0)
-    throw_exception (gdb_expt);
+    throw_exception (std::move (gdb_expt));
 }
 
 /* GDB's readline callback handler.  Calls the current INPUT_HANDLER,

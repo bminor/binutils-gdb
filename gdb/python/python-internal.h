@@ -729,7 +729,7 @@ extern PyObject *gdbpy_gdb_error;
 extern PyObject *gdbpy_gdb_memory_error;
 extern PyObject *gdbpy_gdberror_exc;
 
-extern void gdbpy_convert_exception (struct gdb_exception)
+extern void gdbpy_convert_exception (const struct gdb_exception &)
     CPYCHECKER_SETS_EXCEPTION;
 
 int get_addr_from_python (PyObject *obj, CORE_ADDR *addr)

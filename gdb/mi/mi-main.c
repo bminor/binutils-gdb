@@ -1875,7 +1875,7 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
 /* Print a gdb exception to the MI output stream.  */
 
 static void
-mi_print_exception (const char *token, struct gdb_exception exception)
+mi_print_exception (const char *token, const struct gdb_exception &exception)
 {
   struct mi_interp *mi = (struct mi_interp *) current_interpreter ();
 

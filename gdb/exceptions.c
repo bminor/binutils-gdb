@@ -74,7 +74,7 @@ print_flush (void)
 }
 
 static void
-print_exception (struct ui_file *file, struct gdb_exception e)
+print_exception (struct ui_file *file, const struct gdb_exception &e)
 {
   /* KLUGE: cagney/2005-01-13: Write the string out one line at a time
      as that way the MI's behavior is preserved.  */
@@ -110,7 +110,7 @@ print_exception (struct ui_file *file, struct gdb_exception e)
 }
 
 void
-exception_print (struct ui_file *file, struct gdb_exception e)
+exception_print (struct ui_file *file, const struct gdb_exception &e)
 {
   if (e.reason < 0 && e.message != NULL)
     {
@@ -120,7 +120,7 @@ exception_print (struct ui_file *file, struct gdb_exception e)
 }
 
 void
-exception_fprintf (struct ui_file *file, struct gdb_exception e,
+exception_fprintf (struct ui_file *file, const struct gdb_exception &e,
 		   const char *prefix, ...)
 {
   if (e.reason < 0 && e.message != NULL)
@@ -141,7 +141,8 @@ exception_fprintf (struct ui_file *file, struct gdb_exception e,
 /* See exceptions.h.  */
 
 int
-exception_print_same (struct gdb_exception e1, struct gdb_exception e2)
+exception_print_same (const struct gdb_exception &e1,
+		      const struct gdb_exception &e2)
 {
   const char *msg1 = e1.message == nullptr ? "" : e1.what ();
   const char *msg2 = e2.message == nullptr ? "" : e2.what ();

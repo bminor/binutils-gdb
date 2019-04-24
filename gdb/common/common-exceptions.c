@@ -180,12 +180,12 @@ throw_exception_sjlj (const struct gdb_exception &exception)
 /* Implementation of throw_exception that uses C++ try/catch.  */
 
 void
-throw_exception (const gdb_exception &exception)
+throw_exception (gdb_exception &&exception)
 {
   if (exception.reason == RETURN_QUIT)
-    throw gdb_exception_quit (exception);
+    throw gdb_exception_quit (std::move (exception));
   else if (exception.reason == RETURN_ERROR)
-    throw gdb_exception_error (exception);
+    throw gdb_exception_error (std::move (exception));
   else
     gdb_assert_not_reached ("invalid return reason");
 }
