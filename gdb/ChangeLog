@@ -1,5 +1,10 @@
 2019-05-04  Tom Tromey  <tom@tromey.com>
 
+	* arm-linux-nat.c (arm_linux_nat_target::can_use_hw_breakpoint):
+	Use gdb_assert_not_reached.
+
+2019-05-04  Tom Tromey  <tom@tromey.com>
+
 	* compile/compile-cplus-types.c (compile_cplus_convert_enum): Use
 	"false".
 

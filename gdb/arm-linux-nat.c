@@ -690,7 +690,7 @@ arm_linux_nat_target::can_use_hw_breakpoint (enum bptype type,
 	return -1;
     }
   else
-    gdb_assert (FALSE);
+    gdb_assert_not_reached ("unknown breakpoint type");
 
   return 1;
 }
