@@ -205,11 +205,15 @@ gdb_rl_callback_read_char_wrapper (gdb_client_data client_data)
 static void
 gdb_rl_callback_handler (char *rl) noexcept
 {
-  struct gdb_exception gdb_rl_expt;
+  /* This is static to avoid undefined behavior when calling longjmp
+     -- gdb_exception has a destructor with side effects.  */
+  static struct gdb_exception gdb_rl_expt;
   struct ui *ui = current_ui;
 
   try
     {
+      /* Ensure the exception is reset on each call.  */
+      gdb_rl_expt = {};
       ui->input_handler (gdb::unique_xmalloc_ptr<char> (rl));
     }
   catch (gdb_exception &ex)

@@ -1,5 +1,11 @@
 2019-04-25  Tom Tromey  <tromey@adacore.com>
 
+	PR gdb/24475:
+	* event-top.c (gdb_rl_callback_handler): Make "gdb_rl_expt"
+	static.
+
+2019-04-25  Tom Tromey  <tromey@adacore.com>
+
 	* xml-support.c (struct gdb_xml_parser) <set_error>: Take an
 	rvalue reference.
 	(gdb_xml_start_element_wrapper, gdb_xml_end_element_wrapper)
