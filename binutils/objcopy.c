@@ -4410,8 +4410,7 @@ strip_main (int argc, char *argv[])
   int c;
   int i;
   char *output_file = NULL;
-
-  merge_notes = TRUE;
+  bfd_boolean merge_notes_set = FALSE;
 
   while ((c = getopt_long (argc, argv, "I:O:F:K:MN:R:o:sSpdgxXHhVvwDU",
 			   strip_options, (int *) 0)) != EOF)
@@ -4452,9 +4451,11 @@ strip_main (int argc, char *argv[])
 	  break;
 	case 'M':
 	  merge_notes = TRUE;
+	  merge_notes_set = TRUE;
 	  break;
 	case OPTION_NO_MERGE_NOTES:
 	  merge_notes = FALSE;
+	  merge_notes_set = TRUE;
 	  break;
 	case 'N':
 	  add_specific_symbol (optarg, strip_specific_htab);
@@ -4505,6 +4506,16 @@ strip_main (int argc, char *argv[])
 	  strip_usage (stderr, 1);
 	}
     }
+
+  /* If the user has not expressly chosen to merge/not-merge ELF notes
+     then enable the merging unless we are stripping debug or dwo info.  */
+  if (! merge_notes_set
+      && (strip_symbols == STRIP_UNDEF
+	  || strip_symbols == STRIP_ALL
+	  || strip_symbols == STRIP_UNNEEDED
+	  || strip_symbols == STRIP_NONDEBUG
+	  || strip_symbols == STRIP_NONDWO))
+    merge_notes = TRUE;
 
   if (formats_info)
     {

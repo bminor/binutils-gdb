@@ -3313,7 +3313,7 @@ normally be stripped.  This option may be given more than once.
 @itemx --no-merge-notes
 For ELF files, attempt (or do not attempt) to reduce the size of any
 SHT_NOTE type sections by removing duplicate notes.  The default is to
-attempt this reduction.
+attempt this reduction unless stripping debug or DWO information.
 
 @item -N @var{symbolname}
 @itemx --strip-symbol=@var{symbolname}
