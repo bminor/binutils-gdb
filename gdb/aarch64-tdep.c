@@ -3173,8 +3173,8 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     vq = aarch64_get_tdesc_vq (info.target_desc);
 
   if (vq > AARCH64_MAX_SVE_VQ)
-    internal_error (__FILE__, __LINE__, _("VQ out of bounds: %ld (max %d)"),
-		    vq, AARCH64_MAX_SVE_VQ);
+    internal_error (__FILE__, __LINE__, _("VQ out of bounds: %s (max %d)"),
+		    pulongest (vq), AARCH64_MAX_SVE_VQ);
 
   /* If there is already a candidate, use it.  */
   for (gdbarch_list *best_arch = gdbarch_list_lookup_by_info (arches, &info);

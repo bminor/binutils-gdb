@@ -1,3 +1,8 @@
+2019-04-24  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* aarch64-tdep.c (aarch64_gdbarch_init): Use "pulongest" to print
+	"vq".
+
 2019-04-24  Tom Tromey  <tromey@adacore.com>
 
 	* amd64-tdep.c (amd64_has_unaligned_fields): Ignore bitfields.
