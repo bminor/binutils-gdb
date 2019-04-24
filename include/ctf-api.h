@@ -198,10 +198,23 @@ enum
 #define	CTF_ADD_NONROOT	0	/* Type only visible in nested scope.  */
 #define	CTF_ADD_ROOT	1	/* Type visible at top-level scope.  */
 
+extern ctf_sect_t ctf_getdatasect (const ctf_file_t *);
 extern ctf_file_t *ctf_simple_open (const char *, size_t, const char *, size_t,
 				   size_t, const char *, size_t, int *);
 extern ctf_file_t *ctf_bufopen (const ctf_sect_t *, const ctf_sect_t *,
 				const ctf_sect_t *, int *);
+extern void ctf_file_close (ctf_file_t *);
+
+extern ctf_file_t *ctf_parent_file (ctf_file_t *);
+extern const char *ctf_parent_name (ctf_file_t *);
+extern void ctf_parent_name_set (ctf_file_t *, const char *);
+
+extern int ctf_import (ctf_file_t *, ctf_file_t *);
+extern int ctf_setmodel (ctf_file_t *, int);
+extern int ctf_getmodel (ctf_file_t *);
+
+extern void ctf_setspecific (ctf_file_t *, void *);
+extern void *ctf_getspecific (ctf_file_t *);
 
 extern int ctf_errno (ctf_file_t *);
 extern const char *ctf_errmsg (int);

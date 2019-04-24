@@ -1,5 +1,10 @@
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-open.c: New file.
+	* swap.h: Likewise.
+
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-create.c: New file.
 	* ctf-lookup.c: New file.
 
