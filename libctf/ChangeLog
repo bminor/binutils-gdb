@@ -1,5 +1,11 @@
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (_libctf_version): New declaration.
+	* ctf-subr.c (_libctf_version): Define it.
+	(ctf_version): New.
+
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-create.c (enumcmp): New.
 	(enumadd): Likewise.
 	(membcmp): Likewise.

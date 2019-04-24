@@ -375,6 +375,7 @@ extern const char *ctf_lookup_symbol_name (ctf_file_t *fp, unsigned long symidx)
 extern const char _CTF_SECTION[];	/* name of CTF ELF section */
 extern const char _CTF_NULLSTR[];	/* empty string */
 
+extern int _libctf_version;	/* library client version */
 extern int _libctf_debug;	/* debugging messages enabled */
 
 #ifdef	__cplusplus

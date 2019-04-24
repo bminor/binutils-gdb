@@ -27,6 +27,7 @@
 #include <unistd.h>
 
 static size_t _PAGESIZE _libctf_unused_;
+int _libctf_version = CTF_VERSION;	      /* Library client version.  */
 int _libctf_debug = 0;			      /* Debugging messages enabled.  */
 
 _libctf_malloc_ void *
@@ -188,6 +189,32 @@ const char *
 ctf_strerror (int err)
 {
   return (const char *) (strerror (err));
+}
+
+/* Set the CTF library client version to the specified version.  If version is
+   zero, we just return the default library version number.  */
+int
+ctf_version (int version)
+{
+  if (version < 0)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+
+  if (version > 0)
+    {
+      /*  Dynamic version switching is not presently supported. */
+      if (version != CTF_VERSION)
+	{
+	  errno = ENOTSUP;
+	  return -1;
+	}
+      ctf_dprintf ("ctf_version: client using version %d\n", version);
+      _libctf_version = version;
+    }
+
+  return _libctf_version;
 }
 
 void

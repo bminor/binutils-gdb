@@ -269,6 +269,7 @@ extern void *ctf_getspecific (ctf_file_t *);
 
 extern int ctf_errno (ctf_file_t *);
 extern const char *ctf_errmsg (int);
+extern int ctf_version (int);
 
 extern int ctf_func_info (ctf_file_t *, unsigned long, ctf_funcinfo_t *);
 extern int ctf_func_args (ctf_file_t *, unsigned long, uint32_t, ctf_id_t *);
