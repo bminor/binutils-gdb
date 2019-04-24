@@ -1,5 +1,9 @@
 2019-05-04  Tom Tromey  <tom@tromey.com>
 
+	* arc-tdep.c (arc_tdesc_init): Return bool.
+
+2019-05-04  Tom Tromey  <tom@tromey.com>
+
 	* arm-linux-nat.c (arm_linux_nat_target::can_use_hw_breakpoint):
 	Use gdb_assert_not_reached.
 
