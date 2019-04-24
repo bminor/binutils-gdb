@@ -1152,7 +1152,8 @@ extern struct value *find_function_in_inferior (const char *,
 extern struct value *value_allocate_space_in_inferior (int);
 
 extern struct value *value_subscripted_rvalue (struct value *array,
-					       LONGEST index, int lowerbound);
+					       LONGEST index,
+					       LONGEST lowerbound);
 
 /* User function handler.  */
 
