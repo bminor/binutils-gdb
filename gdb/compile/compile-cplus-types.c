@@ -910,7 +910,7 @@ static gcc_type
 compile_cplus_convert_enum (compile_cplus_instance *instance, struct type *type,
 			    enum gcc_cp_symbol_kind nested_access)
 {
-  int scoped_enum_p = FALSE;
+  bool scoped_enum_p = false;
 
   /* Create a new scope for this type.  */
   compile_scope scope = instance->new_scope (TYPE_NAME (type), type);

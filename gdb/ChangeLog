@@ -1,5 +1,10 @@
 2019-05-04  Tom Tromey  <tom@tromey.com>
 
+	* compile/compile-cplus-types.c (compile_cplus_convert_enum): Use
+	"false".
+
+2019-05-04  Tom Tromey  <tom@tromey.com>
+
 	* arc-tdep.c (arc_tdesc_init): Use bool.
 
 2019-05-04  Tom Tromey  <tom@tromey.com>
