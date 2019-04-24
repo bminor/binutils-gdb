@@ -1572,6 +1572,14 @@ ctf_file_close (ctf_file_t *fp)
   ctf_free (fp);
 }
 
+/* The converse of ctf_open().  ctf_open() disguises whatever it opens as an
+   archive, so closing one is just like closing an archive.  */
+void
+ctf_close (ctf_archive_t *arc)
+{
+  ctf_arc_close (arc);
+}
+
 /* Get the CTF archive from which this ctf_file_t is derived.  */
 ctf_archive_t *
 ctf_get_arc (const ctf_file_t *fp)

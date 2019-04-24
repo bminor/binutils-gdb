@@ -1,5 +1,13 @@
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-api.h (struct bfd): New forward.
+	(ctf_fdopen): New.
+	(ctf_bfdopen): Likewise.
+	(ctf_open): Likewise.
+	(ctf_arc_open): Likewise.
+
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf.h (CTFA_MAGIC): New.
 	(struct ctf_archive): New.
 	(struct ctf_archive_modent): Likewise.

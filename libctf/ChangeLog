@@ -1,5 +1,16 @@
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-open-bfd.c: New file.
+	* ctf-open.c (ctf_close): New.
+	* ctf-impl.h: Include bfd.h.
+	(ctf_file): New members ctf_data_mmapped, ctf_data_mmapped_len.
+	(ctf_archive_internal): New members ctfi_abfd, ctfi_data,
+	ctfi_bfd_close.
+	(ctf_bfdopen_ctfsect): New declaration.
+	(_CTF_SECTION): likewise.
+
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-archive.c: New.
 	* ctf-impl.h (ctf_archive_internal): New type.
 	(ctf_arc_open_internal): New declaration.

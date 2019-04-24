@@ -31,6 +31,7 @@
 #include <limits.h>
 #include <ctype.h>
 #include <elf.h>
+#include <bfd.h>
 
 #ifdef	__cplusplus
 extern "C"
@@ -188,6 +189,8 @@ struct ctf_file
   ctf_sect_t ctf_data;		    /* CTF data from object file.  */
   ctf_sect_t ctf_symtab;	    /* Symbol table from object file.  */
   ctf_sect_t ctf_strtab;	    /* String table from object file.  */
+  void *ctf_data_mmapped;	    /* CTF data we mmapped, to free later.  */
+  size_t ctf_data_mmapped_len;	    /* Length of CTF data we mmapped.  */
   ctf_hash_t *ctf_structs;	    /* Hash table of struct types.  */
   ctf_hash_t *ctf_unions;	    /* Hash table of union types.  */
   ctf_hash_t *ctf_enums;	    /* Hash table of enum types.  */
@@ -240,6 +243,8 @@ struct ctf_archive_internal
   ctf_sect_t ctfi_symsect;
   ctf_sect_t ctfi_strsect;
   void *ctfi_data;
+  bfd *ctfi_abfd;		    /* Optional source of section data.  */
+  void (*ctfi_bfd_close) (struct ctf_archive_internal *);
 };
 
 /* Return x rounded up to an alignment boundary.
@@ -358,6 +363,7 @@ extern Elf64_Sym *ctf_sym_to_elf64 (const Elf32_Sym *src, Elf64_Sym *dst);
 
 /* Variables, all underscore-prepended. */
 
+extern const char _CTF_SECTION[];	/* name of CTF ELF section */
 extern const char _CTF_NULLSTR[];	/* empty string */
 
 extern int _libctf_debug;	/* debugging messages enabled */

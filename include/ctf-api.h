@@ -45,6 +45,11 @@ typedef struct ctf_file ctf_file_t;
 typedef struct ctf_archive_internal ctf_archive_t;
 typedef long ctf_id_t;
 
+/* This opaque definition allows libctf to accept BFD data structures without
+   importing all the BFD noise into users' namespaces.  */
+
+struct bfd;
+
 /* If the debugger needs to provide the CTF library with a set of raw buffers
    for use as the CTF data, symbol table, and string table, it can do so by
    filling in ctf_sect_t structures and passing them to ctf_bufopen().
@@ -205,8 +210,23 @@ typedef int ctf_archive_member_f (ctf_file_t *fp, const char *name, void *arg);
 typedef int ctf_archive_raw_member_f (const char *name, const void *content,
 				      size_t len, void *arg);
 
+/* Opening.  These mostly return an abstraction over both CTF files and CTF
+   archives: so they can be used to open both.  CTF files will appear to be an
+   archive with one member named '.ctf'.  The low-level functions
+   ctf_simple_open() and ctf_bufopen() return ctf_file_t's directly, and cannot
+   be used on CTF archives.  */
+
+extern ctf_archive_t *ctf_bfdopen (struct bfd *, int *);
+extern ctf_archive_t *ctf_bfdopen_ctfsect (struct bfd *, const ctf_sect_t *,
+					   int *);
+extern ctf_archive_t *ctf_fdopen (int fd, const char *filename,
+				  const char *target, int *errp);
+extern ctf_archive_t *ctf_open (const char *filename,
+				const char *target, int *errp);
+extern void ctf_close (ctf_archive_t *);
 extern ctf_sect_t ctf_getdatasect (const ctf_file_t *);
 extern ctf_archive_t *ctf_get_arc (const ctf_file_t *);
+extern ctf_archive_t *ctf_arc_open (const char *, int *);
 extern void ctf_arc_close (ctf_archive_t *);
 extern ctf_file_t *ctf_arc_open_by_name (const ctf_archive_t *,
 					 const char *, int *);
