@@ -1,5 +1,9 @@
 2019-05-04  Tom Tromey  <tom@tromey.com>
 
+	* arc-tdep.c (arc_tdesc_init): Use bool.
+
+2019-05-04  Tom Tromey  <tom@tromey.com>
+
 	* stack.c (select_frame_for_mi): Use "false", not "FALSE".
 
 2019-05-04  Tom Tromey  <tom@tromey.com>

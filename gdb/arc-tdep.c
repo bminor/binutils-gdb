@@ -1746,7 +1746,7 @@ arc_tdesc_init (struct gdbarch_info info, const struct target_desc **tdesc,
      tag.  */
   /* Cannot use arc_mach_is_arcv2 (), because gdbarch is not created yet.  */
   const int is_arcv2 = (info.bfd_arch_info->mach == bfd_mach_arc_arcv2);
-  int is_reduced_rf;
+  bool is_reduced_rf;
   const char *const *core_regs;
   const char *core_feature_name;
 
@@ -1806,7 +1806,7 @@ arc_tdesc_init (struct gdbarch_info info, const struct target_desc **tdesc,
 	  return FALSE;
 	}
 
-      is_reduced_rf = FALSE;
+      is_reduced_rf = false;
       core_feature_name = core_v2_feature_name;
       core_regs = core_v2_register_names;
     }
@@ -1822,7 +1822,7 @@ arc_tdesc_init (struct gdbarch_info info, const struct target_desc **tdesc,
 	      return FALSE;
 	    }
 
-	  is_reduced_rf = TRUE;
+	  is_reduced_rf = true;
 	  core_feature_name = core_reduced_v2_feature_name;
 	  core_regs = core_v2_register_names;
 	}
@@ -1839,7 +1839,7 @@ arc_tdesc_init (struct gdbarch_info info, const struct target_desc **tdesc,
 		  return FALSE;
 		}
 
-	      is_reduced_rf = FALSE;
+	      is_reduced_rf = false;
 	      core_feature_name = core_arcompact_feature_name;
 	      core_regs = core_arcompact_register_names;
 	    }
