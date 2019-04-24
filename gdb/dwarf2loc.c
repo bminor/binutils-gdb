@@ -2493,8 +2493,12 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 	struct value *val;
 
 	for (pinfo = addr_stack; pinfo != NULL; pinfo = pinfo->next)
-	  if (pinfo->type == baton->referenced_type)
-	    break;
+	  {
+	    /* This approach lets us avoid checking the qualifiers.  */
+	    if (TYPE_MAIN_TYPE (pinfo->type)
+		== TYPE_MAIN_TYPE (baton->referenced_type))
+	      break;
+	  }
 	if (pinfo == NULL)
 	  error (_("cannot find reference address for offset property"));
 	if (pinfo->valaddr != NULL)

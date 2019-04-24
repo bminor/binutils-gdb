@@ -1,3 +1,8 @@
+2019-05-08  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2loc.c (dwarf2_evaluate_property) <PROP_ADDR_OFFSET>:
+	Compare main types.
+
 2019-05-06  Tom Tromey  <tom@tromey.com>
 
 	* common/scoped_mmap.c: Include common-defs.h.
