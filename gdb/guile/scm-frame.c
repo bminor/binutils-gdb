@@ -250,7 +250,7 @@ frscm_scm_from_frame (struct frame_info *frame, struct inferior *inferior)
     }
   catch (const gdb_exception &except)
     {
-      return gdbscm_scm_from_gdb_exception (except);
+      return gdbscm_scm_from_gdb_exception (unpack (except));
     }
 
   f_scm = frscm_make_frame_smob ();
@@ -396,15 +396,17 @@ gdbscm_frame_valid_p (SCM self)
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
+  gdbscm_gdb_exception exc {};
   try
     {
       frame = frscm_frame_smob_to_frame (f_smob);
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   return scm_from_bool (frame != NULL);
 }
 
@@ -423,6 +425,7 @@ gdbscm_frame_name (SCM self)
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
+  gdbscm_gdb_exception exc {};
   try
     {
       frame = frscm_frame_smob_to_frame (f_smob);
@@ -431,9 +434,10 @@ gdbscm_frame_name (SCM self)
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   if (frame == NULL)
     {
       gdbscm_invalid_object_error (FUNC_NAME, SCM_ARG1, self,
@@ -460,6 +464,7 @@ gdbscm_frame_type (SCM self)
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
+  gdbscm_gdb_exception exc {};
   try
     {
       frame = frscm_frame_smob_to_frame (f_smob);
@@ -468,9 +473,10 @@ gdbscm_frame_type (SCM self)
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   if (frame == NULL)
     {
       gdbscm_invalid_object_error (FUNC_NAME, SCM_ARG1, self,
@@ -491,15 +497,17 @@ gdbscm_frame_arch (SCM self)
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
+  gdbscm_gdb_exception exc {};
   try
     {
       frame = frscm_frame_smob_to_frame (f_smob);
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   if (frame == NULL)
     {
       gdbscm_invalid_object_error (FUNC_NAME, SCM_ARG1, self,
@@ -521,15 +529,17 @@ gdbscm_frame_unwind_stop_reason (SCM self)
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
+  gdbscm_gdb_exception exc {};
   try
     {
       frame = frscm_frame_smob_to_frame (f_smob);
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   if (frame == NULL)
     {
       gdbscm_invalid_object_error (FUNC_NAME, SCM_ARG1, self,
@@ -553,6 +563,7 @@ gdbscm_frame_pc (SCM self)
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
+  gdbscm_gdb_exception exc {};
   try
     {
       frame = frscm_frame_smob_to_frame (f_smob);
@@ -561,9 +572,10 @@ gdbscm_frame_pc (SCM self)
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   if (frame == NULL)
     {
       gdbscm_invalid_object_error (FUNC_NAME, SCM_ARG1, self,
@@ -585,6 +597,7 @@ gdbscm_frame_block (SCM self)
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
+  gdbscm_gdb_exception exc {};
   try
     {
       frame = frscm_frame_smob_to_frame (f_smob);
@@ -593,9 +606,10 @@ gdbscm_frame_block (SCM self)
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   if (frame == NULL)
     {
       gdbscm_invalid_object_error (FUNC_NAME, SCM_ARG1, self,
@@ -635,6 +649,7 @@ gdbscm_frame_function (SCM self)
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
+  gdbscm_gdb_exception exc {};
   try
     {
       frame = frscm_frame_smob_to_frame (f_smob);
@@ -643,9 +658,10 @@ gdbscm_frame_function (SCM self)
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   if (frame == NULL)
     {
       gdbscm_invalid_object_error (FUNC_NAME, SCM_ARG1, self,
@@ -671,6 +687,7 @@ gdbscm_frame_older (SCM self)
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
+  gdbscm_gdb_exception exc {};
   try
     {
       frame = frscm_frame_smob_to_frame (f_smob);
@@ -679,9 +696,10 @@ gdbscm_frame_older (SCM self)
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   if (frame == NULL)
     {
       gdbscm_invalid_object_error (FUNC_NAME, SCM_ARG1, self,
@@ -707,6 +725,7 @@ gdbscm_frame_newer (SCM self)
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
+  gdbscm_gdb_exception exc {};
   try
     {
       frame = frscm_frame_smob_to_frame (f_smob);
@@ -715,9 +734,10 @@ gdbscm_frame_newer (SCM self)
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   if (frame == NULL)
     {
       gdbscm_invalid_object_error (FUNC_NAME, SCM_ARG1, self,
@@ -742,6 +762,7 @@ gdbscm_frame_sal (SCM self)
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
+  gdbscm_gdb_exception exc {};
   try
     {
       frame = frscm_frame_smob_to_frame (f_smob);
@@ -750,9 +771,10 @@ gdbscm_frame_sal (SCM self)
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   if (frame == NULL)
     {
       gdbscm_invalid_object_error (FUNC_NAME, SCM_ARG1, self,
@@ -777,7 +799,7 @@ gdbscm_frame_read_register (SCM self, SCM register_scm)
   gdbscm_parse_function_args (FUNC_NAME, SCM_ARG2, NULL, "s",
 			      register_scm, &register_str);
 
-  struct gdb_exception except;
+  gdbscm_gdb_exception except {};
 
   try
     {
@@ -795,7 +817,7 @@ gdbscm_frame_read_register (SCM self, SCM register_scm)
     }
   catch (const gdb_exception &ex)
     {
-      except = ex;
+      except = unpack (ex);
     }
 
   xfree (register_str);
@@ -838,15 +860,17 @@ gdbscm_frame_read_var (SCM self, SCM symbol_scm, SCM rest)
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
+  gdbscm_gdb_exception exc {};
   try
     {
       frame = frscm_frame_smob_to_frame (f_smob);
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   if (frame == NULL)
     {
       gdbscm_invalid_object_error (FUNC_NAME, SCM_ARG1, self,
@@ -864,7 +888,7 @@ gdbscm_frame_read_var (SCM self, SCM symbol_scm, SCM rest)
     }
   else if (scm_is_string (symbol_scm))
     {
-      struct gdb_exception except;
+      gdbscm_gdb_exception except {};
 
       if (! SCM_UNBNDP (block_scm))
 	{
@@ -896,7 +920,7 @@ gdbscm_frame_read_var (SCM self, SCM symbol_scm, SCM rest)
 	  }
 	catch (const gdb_exception &ex)
 	  {
-	    except = ex;
+	    except = unpack (ex);
 	  }
       }
 
@@ -919,9 +943,10 @@ gdbscm_frame_read_var (SCM self, SCM symbol_scm, SCM rest)
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   return vlscm_scm_from_value (value);
 }
 
@@ -936,6 +961,7 @@ gdbscm_frame_select (SCM self)
 
   f_smob = frscm_get_frame_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
 
+  gdbscm_gdb_exception exc {};
   try
     {
       frame = frscm_frame_smob_to_frame (f_smob);
@@ -944,9 +970,10 @@ gdbscm_frame_select (SCM self)
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   if (frame == NULL)
     {
       gdbscm_invalid_object_error (FUNC_NAME, SCM_ARG1, self,
@@ -964,15 +991,17 @@ gdbscm_newest_frame (void)
 {
   struct frame_info *frame = NULL;
 
+  gdbscm_gdb_exception exc {};
   try
     {
       frame = get_current_frame ();
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   return frscm_scm_from_frame_unsafe (frame, current_inferior ());
 }
 
@@ -984,15 +1013,17 @@ gdbscm_selected_frame (void)
 {
   struct frame_info *frame = NULL;
 
+  gdbscm_gdb_exception exc {};
   try
     {
       frame = get_selected_frame (_("No frame is currently selected"));
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   return frscm_scm_from_frame_unsafe (frame, current_inferior ());
 }
 

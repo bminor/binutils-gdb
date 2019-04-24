@@ -272,6 +272,7 @@ ioscm_write (SCM port, const void *data, size_t size)
   if (scm_is_eq (port, input_port_scm))
     return;
 
+  gdbscm_gdb_exception exc {};
   try
     {
       if (scm_is_eq (port, error_port_scm))
@@ -281,8 +282,9 @@ ioscm_write (SCM port, const void *data, size_t size)
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
 }
 
 /* Flush gdb's stdout or stderr.  */

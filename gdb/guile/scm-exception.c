@@ -428,7 +428,7 @@ gdbscm_throw (SCM exception)
 /* Convert a GDB exception to a <gdb:exception> object.  */
 
 SCM
-gdbscm_scm_from_gdb_exception (struct gdb_exception exception)
+gdbscm_scm_from_gdb_exception (const gdbscm_gdb_exception &exception)
 {
   SCM key;
 
@@ -446,7 +446,7 @@ gdbscm_scm_from_gdb_exception (struct gdb_exception exception)
 
   return gdbscm_make_error (key, NULL, "~A",
 			    scm_list_1 (gdbscm_scm_from_c_string
-					(exception.what ())),
+					(exception.message)),
 			    SCM_BOOL_F);
 }
 
@@ -454,9 +454,11 @@ gdbscm_scm_from_gdb_exception (struct gdb_exception exception)
    This function does not return.  */
 
 void
-gdbscm_throw_gdb_exception (struct gdb_exception exception)
+gdbscm_throw_gdb_exception (gdbscm_gdb_exception exception)
 {
-  gdbscm_throw (gdbscm_scm_from_gdb_exception (exception));
+  SCM scm_exception = gdbscm_scm_from_gdb_exception (exception);
+  xfree (exception.message);
+  gdbscm_throw (scm_exception);
 }
 
 /* Print the error message portion of an exception.

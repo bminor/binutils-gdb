@@ -105,6 +105,7 @@ tyscm_type_smob_type (type_smob *t_smob)
 static std::string
 tyscm_type_name (struct type *type)
 {
+  SCM excp;
   try
     {
       string_file stb;
@@ -114,11 +115,10 @@ tyscm_type_name (struct type *type)
     }
   catch (const gdb_exception &except)
     {
-      SCM excp = gdbscm_scm_from_gdb_exception (except);
-      gdbscm_throw (excp);
+      excp = gdbscm_scm_from_gdb_exception (unpack (except));
     }
 
-  gdb_assert_not_reached ("no way to get here");
+  gdbscm_throw (excp);
 }
 
 /* Administrivia for type smobs.  */
@@ -234,15 +234,17 @@ tyscm_equal_p_type_smob (SCM type1_scm, SCM type2_scm)
   type1 = type1_smob->type;
   type2 = type2_smob->type;
 
+  gdbscm_gdb_exception exc {};
   try
     {
       result = types_deeply_equal (type1, type2);
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   return scm_from_bool (result);
 }
 
@@ -650,15 +652,17 @@ gdbscm_type_strip_typedefs (SCM self)
     = tyscm_get_type_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct type *type = t_smob->type;
 
+  gdbscm_gdb_exception exc {};
   try
     {
       type = check_typedef (type);
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   return tyscm_scm_from_type (type);
 }
 
@@ -671,15 +675,17 @@ tyscm_get_composite (struct type *type)
 
   for (;;)
     {
+      gdbscm_gdb_exception exc {};
       try
 	{
 	  type = check_typedef (type);
 	}
       catch (const gdb_exception &except)
 	{
-	  GDBSCM_HANDLE_GDB_EXCEPTION (except);
+	  exc = unpack (except);
 	}
 
+      GDBSCM_HANDLE_GDB_EXCEPTION (exc);
       if (TYPE_CODE (type) != TYPE_CODE_PTR
 	  && TYPE_CODE (type) != TYPE_CODE_REF)
 	break;
@@ -725,6 +731,7 @@ tyscm_array_1 (SCM self, SCM n1_scm, SCM n2_scm, int is_vector,
 				 _("Array length must not be negative"));
     }
 
+  gdbscm_gdb_exception exc {};
   try
     {
       array = lookup_array_range_type (type, n1, n2);
@@ -733,9 +740,10 @@ tyscm_array_1 (SCM self, SCM n1_scm, SCM n2_scm, int is_vector,
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   return tyscm_scm_from_type (array);
 }
 
@@ -781,15 +789,17 @@ gdbscm_type_pointer (SCM self)
     = tyscm_get_type_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct type *type = t_smob->type;
 
+  gdbscm_gdb_exception exc {};
   try
     {
       type = lookup_pointer_type (type);
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   return tyscm_scm_from_type (type);
 }
 
@@ -842,15 +852,17 @@ gdbscm_type_reference (SCM self)
     = tyscm_get_type_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct type *type = t_smob->type;
 
+  gdbscm_gdb_exception exc {};
   try
     {
       type = lookup_lvalue_reference_type (type);
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   return tyscm_scm_from_type (type);
 }
 
@@ -879,15 +891,17 @@ gdbscm_type_const (SCM self)
     = tyscm_get_type_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct type *type = t_smob->type;
 
+  gdbscm_gdb_exception exc {};
   try
     {
       type = make_cv_type (1, 0, type, NULL);
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   return tyscm_scm_from_type (type);
 }
 
@@ -901,15 +915,17 @@ gdbscm_type_volatile (SCM self)
     = tyscm_get_type_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct type *type = t_smob->type;
 
+  gdbscm_gdb_exception exc {};
   try
     {
       type = make_cv_type (0, 1, type, NULL);
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   return tyscm_scm_from_type (type);
 }
 
@@ -923,15 +939,17 @@ gdbscm_type_unqualified (SCM self)
     = tyscm_get_type_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct type *type = t_smob->type;
 
+  gdbscm_gdb_exception exc {};
   try
     {
       type = make_cv_type (0, 0, type, NULL);
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   return tyscm_scm_from_type (type);
 }
 

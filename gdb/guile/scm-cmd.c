@@ -758,6 +758,7 @@ gdbscm_register_command_x (SCM self)
   c_smob->cmd_name = gdbscm_gc_xstrdup (cmd_name);
   xfree (cmd_name);
 
+  gdbscm_gdb_exception exc {};
   try
     {
       if (c_smob->is_prefix)
@@ -778,8 +779,9 @@ gdbscm_register_command_x (SCM self)
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
 
   /* Note: At this point the command exists in gdb.
      So no more errors after this point.  */

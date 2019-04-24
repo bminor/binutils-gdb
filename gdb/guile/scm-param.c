@@ -1006,6 +1006,7 @@ gdbscm_register_parameter_x (SCM self)
 		_("parameter exists, \"show\" command is already defined"));
     }
 
+  gdbscm_gdb_exception exc {};
   try
     {
       add_setshow_generic (p_smob->type, p_smob->cmd_class,
@@ -1020,9 +1021,10 @@ gdbscm_register_parameter_x (SCM self)
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   /* Note: At this point the parameter exists in gdb.
      So no more errors after this point.  */
 
@@ -1056,7 +1058,7 @@ gdbscm_parameter_value (SCM self)
       struct cmd_list_element *alias, *prefix, *cmd;
       char *newarg;
       int found = -1;
-      struct gdb_exception except;
+      gdbscm_gdb_exception except {};
 
       gdb::unique_xmalloc_ptr<char> name
 	= gdbscm_scm_to_host_string (self, NULL, &except_scm);
@@ -1069,7 +1071,7 @@ gdbscm_parameter_value (SCM self)
 	}
       catch (const gdb_exception &ex)
 	{
-	  except = ex;
+	  except = unpack (ex);
 	}
 
       xfree (newarg);

@@ -156,6 +156,7 @@ vlscm_print_value_smob (SCM self, SCM port, scm_print_state *pstate)
      instead of writingp.  */
   opts.raw = !!pstate->writingp;
 
+  gdbscm_gdb_exception exc {};
   try
     {
       string_file stb;
@@ -165,9 +166,10 @@ vlscm_print_value_smob (SCM self, SCM port, scm_print_state *pstate)
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   if (pstate->writingp)
     scm_puts (">", port);
 
@@ -186,15 +188,17 @@ vlscm_equal_p_value_smob (SCM v1, SCM v2)
   const value_smob *v2_smob = (value_smob *) SCM_SMOB_DATA (v2);
   int result = 0;
 
+  gdbscm_gdb_exception exc {};
   try
     {
       result = value_equal (v1_smob->value, v2_smob->value);
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   return scm_from_bool (result);
 }
 
@@ -493,6 +497,7 @@ gdbscm_value_dynamic_type (SCM self)
   if (! SCM_UNBNDP (v_smob->dynamic_type))
     return v_smob->dynamic_type;
 
+  gdbscm_gdb_exception exc {};
   try
     {
       scoped_value_mark free_values;
@@ -531,9 +536,10 @@ gdbscm_value_dynamic_type (SCM self)
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   if (type == NULL)
     v_smob->dynamic_type = gdbscm_value_type (self);
   else
@@ -680,15 +686,17 @@ gdbscm_value_call (SCM self, SCM args)
   long args_count;
   struct value **vargs = NULL;
 
+  gdbscm_gdb_exception exc {};
   try
     {
       ftype = check_typedef (value_type (function));
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   SCM_ASSERT_TYPE (TYPE_CODE (ftype) == TYPE_CODE_FUNC, self,
 		   SCM_ARG1, FUNC_NAME,
 		   _("function (value of TYPE_CODE_FUNC)"));
@@ -746,6 +754,7 @@ gdbscm_value_to_bytevector (SCM self)
 
   type = value_type (value);
 
+  gdbscm_gdb_exception exc {};
   try
     {
       type = check_typedef (type);
@@ -754,9 +763,10 @@ gdbscm_value_to_bytevector (SCM self)
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   bv = scm_c_make_bytevector (length);
   memcpy (SCM_BYTEVECTOR_CONTENTS (bv), contents, length);
 
@@ -789,15 +799,17 @@ gdbscm_value_to_bool (SCM self)
 
   type = value_type (value);
 
+  gdbscm_gdb_exception exc {};
   try
     {
       type = check_typedef (type);
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   SCM_ASSERT_TYPE (is_intlike (type, 1), self, SCM_ARG1, FUNC_NAME,
 		   _("integer-like gdb value"));
 
@@ -810,9 +822,10 @@ gdbscm_value_to_bool (SCM self)
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   return scm_from_bool (l != 0);
 }
 
@@ -830,15 +843,17 @@ gdbscm_value_to_integer (SCM self)
 
   type = value_type (value);
 
+  gdbscm_gdb_exception exc {};
   try
     {
       type = check_typedef (type);
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   SCM_ASSERT_TYPE (is_intlike (type, 1), self, SCM_ARG1, FUNC_NAME,
 		   _("integer-like gdb value"));
 
@@ -851,9 +866,10 @@ gdbscm_value_to_integer (SCM self)
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   if (TYPE_UNSIGNED (type))
     return gdbscm_scm_from_ulongest (l);
   else
@@ -875,15 +891,17 @@ gdbscm_value_to_real (SCM self)
 
   type = value_type (value);
 
+  gdbscm_gdb_exception exc {};
   try
     {
       type = check_typedef (type);
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   SCM_ASSERT_TYPE (is_intlike (type, 0) || TYPE_CODE (type) == TYPE_CODE_FLT,
 		   self, SCM_ARG1, FUNC_NAME, _("number"));
 
@@ -907,9 +925,10 @@ gdbscm_value_to_real (SCM self)
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   /* TODO: Is there a better way to check if the value fits?  */
   if (!value_equal (value, check))
     gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG1, self,
@@ -992,6 +1011,7 @@ gdbscm_value_to_string (SCM self, SCM rest)
   /* We don't assume anything about the result of scm_port_conversion_strategy.
      From this point on, if errors is not 'errors, use 'substitute.  */
 
+  gdbscm_gdb_exception exc {};
   try
     {
       gdb::unique_xmalloc_ptr<gdb_byte> buffer;
@@ -1001,8 +1021,9 @@ gdbscm_value_to_string (SCM self, SCM rest)
   catch (const gdb_exception &except)
     {
       xfree (encoding);
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
 
   /* If errors is "error", scm_from_stringn may throw a Scheme exception.
      Make sure we don't leak.  This is done via scm_dynwind_begin, et.al.  */
@@ -1048,7 +1069,7 @@ gdbscm_value_to_lazy_string (SCM self, SCM rest)
   char *encoding = NULL;
   int length = -1;
   SCM result = SCM_BOOL_F; /* -Wall */
-  struct gdb_exception except;
+  gdbscm_gdb_exception except {};
 
   /* The sequencing here, as everywhere else, is important.
      We can't have existing cleanups when a Scheme exception is thrown.  */
@@ -1121,7 +1142,7 @@ gdbscm_value_to_lazy_string (SCM self, SCM rest)
     }
   catch (const gdb_exception &ex)
     {
-      except = ex;
+      except = unpack (ex);
     }
 
   xfree (encoding);
@@ -1177,15 +1198,17 @@ gdbscm_value_print (SCM self)
 
   string_file stb;
 
+  gdbscm_gdb_exception exc {};
   try
     {
       common_val_print (value, &stb, 0, &opts, current_language);
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   /* Use SCM_FAILED_CONVERSION_QUESTION_MARK to ensure this doesn't
      throw an error if the encoding fails.
      IWBN to use scm_take_locale_string here, but we'd have to temporarily

@@ -247,6 +247,7 @@ gdbscm_arch_disassemble (SCM self, SCM start_scm, SCM rest)
       int insn_len = 0;
       string_file buf;
 
+      gdbscm_gdb_exception exc {};
       try
 	{
 	  if (using_port)
@@ -259,9 +260,10 @@ gdbscm_arch_disassemble (SCM self, SCM start_scm, SCM rest)
 	}
       catch (const gdb_exception &except)
 	{
-	  GDBSCM_HANDLE_GDB_EXCEPTION (except);
+	  exc = unpack (except);
 	}
 
+      GDBSCM_HANDLE_GDB_EXCEPTION (exc);
       result = scm_cons (dascm_make_insn (pc, buf.c_str (), insn_len),
 			 result);
 

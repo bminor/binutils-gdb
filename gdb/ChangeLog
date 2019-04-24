@@ -1,5 +1,21 @@
 2019-04-25  Tom Tromey  <tromey@adacore.com>
 
+	* guile/scm-exception.c (gdbscm_scm_from_gdb_exception)
+	(gdbscm_throw_gdb_exception): Take a gdbscm_gdb_exception.
+	* guile/scm-block.c, guile/scm-breakpoint.c, guile/scm-cmd.c,
+	guile/scm-disasm.c, guile/scm-frame.c, guile/scm-lazy-string.c,
+	guile/scm-math.c, guile/scm-param.c, guile/scm-ports.c,
+	guile/scm-symbol.c, guile/scm-symtab.c, guile/scm-type.c,
+	guile/scm-value.c: Use unpack.
+	* guile/guile-internal.h (gdbscm_scm_from_gdb_exception): Take a
+	gdbscm_gdb_exception.
+	(gdbscm_throw_gdb_exception): Likewise.
+	(struct gdbscm_gdb_exception): New.
+	(unpack): New function.
+	(gdbscm_wrap): Use unpack.
+
+2019-04-25  Tom Tromey  <tromey@adacore.com>
+
 	* event-top.c (gdb_rl_callback_read_char_wrapper_noexcept)
 	(gdb_rl_callback_handler): Use std::move.
 	* common/common-exceptions.h (struct gdb_exception): Add move

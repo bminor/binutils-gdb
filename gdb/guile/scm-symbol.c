@@ -486,15 +486,17 @@ gdbscm_symbol_needs_frame_p (SCM self)
   struct symbol *symbol = s_smob->symbol;
   int result = 0;
 
+  gdbscm_gdb_exception exc {};
   try
     {
       result = symbol_read_needs_frame (symbol);
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   return scm_from_bool (result);
 }
 
@@ -538,6 +540,7 @@ gdbscm_symbol_value (SCM self, SCM rest)
 				 _("cannot get the value of a typedef"));
     }
 
+  gdbscm_gdb_exception exc {};
   try
     {
       if (f_smob != NULL)
@@ -558,9 +561,10 @@ gdbscm_symbol_value (SCM self, SCM rest)
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
 
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
   return vlscm_scm_from_value (value);
 }
 
@@ -602,6 +606,7 @@ gdbscm_lookup_symbol (SCM name_scm, SCM rest)
     {
       struct frame_info *selected_frame;
 
+      gdbscm_gdb_exception exc {};
       try
 	{
 	  selected_frame = get_selected_frame (_("no frame selected"));
@@ -610,11 +615,12 @@ gdbscm_lookup_symbol (SCM name_scm, SCM rest)
       catch (const gdb_exception &ex)
 	{
 	  xfree (name);
-	  GDBSCM_HANDLE_GDB_EXCEPTION (ex);
+	  exc = unpack (ex);
 	}
+      GDBSCM_HANDLE_GDB_EXCEPTION (exc);
     }
 
-  struct gdb_exception except;
+  gdbscm_gdb_exception except {};
   try
     {
       symbol = lookup_symbol (name, block, (domain_enum) domain,
@@ -622,7 +628,7 @@ gdbscm_lookup_symbol (SCM name_scm, SCM rest)
     }
   catch (const gdb_exception &ex)
     {
-      except = ex;
+      except = unpack (ex);
     }
 
   xfree (name);
@@ -646,7 +652,7 @@ gdbscm_lookup_global_symbol (SCM name_scm, SCM rest)
   int domain_arg_pos = -1;
   int domain = VAR_DOMAIN;
   struct symbol *symbol = NULL;
-  struct gdb_exception except;
+  gdbscm_gdb_exception except {};
 
   gdbscm_parse_function_args (FUNC_NAME, SCM_ARG1, keywords, "s#i",
 			      name_scm, &name, rest,
@@ -658,7 +664,7 @@ gdbscm_lookup_global_symbol (SCM name_scm, SCM rest)
     }
   catch (const gdb_exception &ex)
     {
-      except = ex;
+      except = unpack (ex);
     }
 
   xfree (name);

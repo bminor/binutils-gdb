@@ -353,9 +353,11 @@ extern void gdbscm_misc_error (const char *subr, int arg_pos,
 
 extern void gdbscm_throw (SCM exception) ATTRIBUTE_NORETURN;
 
-extern SCM gdbscm_scm_from_gdb_exception (struct gdb_exception exception);
+struct gdbscm_gdb_exception;
+extern SCM gdbscm_scm_from_gdb_exception
+  (const gdbscm_gdb_exception &exception);
 
-extern void gdbscm_throw_gdb_exception (struct gdb_exception exception)
+extern void gdbscm_throw_gdb_exception (gdbscm_gdb_exception exception)
   ATTRIBUTE_NORETURN;
 
 extern void gdbscm_print_exception_with_stack (SCM port, SCM stack,
@@ -650,6 +652,33 @@ extern void gdbscm_initialize_values (void);
    with a TRY/CATCH, because the dtors won't otherwise be run when a
    Guile exceptions is thrown.  */
 
+/* This is a destructor-less clone of gdb_exception.  */
+
+struct gdbscm_gdb_exception
+{
+  enum return_reason reason;
+  enum errors error;
+  /* The message is xmalloc'd.  */
+  char *message;
+};
+
+/* Return a gdbscm_gdb_exception representing EXC.  */
+
+inline gdbscm_gdb_exception
+unpack (const gdb_exception &exc)
+{
+  gdbscm_gdb_exception result;
+  result.reason = exc.reason;
+  result.error = exc.error;
+  if (exc.message == nullptr)
+    result.message = nullptr;
+  else
+    result.message = xstrdup (exc.message->c_str ());
+  /* The message should be NULL iff the reason is zero.  */
+  gdb_assert ((result.reason == 0) == (result.message == nullptr));
+  return result;
+}
+
 /* Use this after a TRY/CATCH to throw the appropriate Scheme
    exception if a GDB error occurred.  */
 
@@ -676,6 +705,7 @@ SCM
 gdbscm_wrap (Function &&func, Args &&... args)
 {
   SCM result = SCM_BOOL_F;
+  gdbscm_gdb_exception exc {};
 
   try
     {
@@ -683,8 +713,10 @@ gdbscm_wrap (Function &&func, Args &&... args)
     }
   catch (const gdb_exception &except)
     {
-      GDBSCM_HANDLE_GDB_EXCEPTION (except);
+      exc = unpack (except);
     }
+
+  GDBSCM_HANDLE_GDB_EXCEPTION (exc);
 
   if (gdbscm_is_exception (result))
     gdbscm_throw (result);

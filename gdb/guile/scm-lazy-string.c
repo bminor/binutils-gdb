@@ -338,7 +338,7 @@ lsscm_safe_lazy_string_to_value (SCM string, int arg_pos,
     }
   catch (const gdb_exception &except)
     {
-      *except_scmp = gdbscm_scm_from_gdb_exception (except);
+      *except_scmp = gdbscm_scm_from_gdb_exception (unpack (except));
       return NULL;
     }
 

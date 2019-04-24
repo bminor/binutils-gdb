@@ -826,7 +826,7 @@ vlscm_convert_typed_value_from_scheme (const char *func_name,
     }
   catch (const gdb_exception &except)
     {
-      except_scm = gdbscm_scm_from_gdb_exception (except);
+      except_scm = gdbscm_scm_from_gdb_exception (unpack (except));
     }
 
   if (gdbscm_is_true (except_scm))
