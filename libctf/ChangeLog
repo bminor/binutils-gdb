@@ -1,5 +1,13 @@
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-create.c (enumcmp): New.
+	(enumadd): Likewise.
+	(membcmp): Likewise.
+	(membadd): Likewise.
+	(ctf_add_type): Likewise.
+
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-lookup.c (isqualifier): New.
 	(ctf_lookup_by_name): Likewise.
 	(struct ctf_lookup_var_key): Likewise.

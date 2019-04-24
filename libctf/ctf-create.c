@@ -1446,6 +1446,491 @@ ctf_add_variable (ctf_file_t *fp, const char *name, ctf_id_t ref)
   return 0;
 }
 
+static int
+enumcmp (const char *name, int value, void *arg)
+{
+  ctf_bundle_t *ctb = arg;
+  int bvalue;
+
+  if (ctf_enum_value (ctb->ctb_file, ctb->ctb_type, name, &bvalue) == CTF_ERR)
+    {
+      ctf_dprintf ("Conflict due to member %s iteration error.\n", name);
+      return 1;
+    }
+  if (value != bvalue)
+    {
+      ctf_dprintf ("Conflict due to value change: %i versus %i\n",
+		   value, bvalue);
+      return 1;
+    }
+  return 0;
+}
+
+static int
+enumadd (const char *name, int value, void *arg)
+{
+  ctf_bundle_t *ctb = arg;
+
+  return (ctf_add_enumerator (ctb->ctb_file, ctb->ctb_type,
+			      name, value) == CTF_ERR);
+}
+
+static int
+membcmp (const char *name, ctf_id_t type _libctf_unused_, unsigned long offset,
+	 void *arg)
+{
+  ctf_bundle_t *ctb = arg;
+  ctf_membinfo_t ctm;
+
+  if (ctf_member_info (ctb->ctb_file, ctb->ctb_type, name, &ctm) == CTF_ERR)
+    {
+      ctf_dprintf ("Conflict due to member %s iteration error.\n", name);
+      return 1;
+    }
+  if (ctm.ctm_offset != offset)
+    {
+      ctf_dprintf ("Conflict due to member %s offset change: "
+		   "%lx versus %lx\n", name, ctm.ctm_offset, offset);
+      return 1;
+    }
+  return 0;
+}
+
+static int
+membadd (const char *name, ctf_id_t type, unsigned long offset, void *arg)
+{
+  ctf_bundle_t *ctb = arg;
+  ctf_dmdef_t *dmd;
+  char *s = NULL;
+
+  if ((dmd = ctf_alloc (sizeof (ctf_dmdef_t))) == NULL)
+    return (ctf_set_errno (ctb->ctb_file, EAGAIN));
+
+  if (name != NULL && (s = ctf_strdup (name)) == NULL)
+    {
+      ctf_free (dmd);
+      return (ctf_set_errno (ctb->ctb_file, EAGAIN));
+    }
+
+  /* For now, dmd_type is copied as the src_fp's type; it is reset to an
+    equivalent dst_fp type by a final loop in ctf_add_type(), below.  */
+  dmd->dmd_name = s;
+  dmd->dmd_type = type;
+  dmd->dmd_offset = offset;
+  dmd->dmd_value = -1;
+
+  ctf_list_append (&ctb->ctb_dtd->dtd_u.dtu_members, dmd);
+
+  if (s != NULL)
+    ctb->ctb_file->ctf_dtvstrlen += strlen (s) + 1;
+
+  ctb->ctb_file->ctf_flags |= LCTF_DIRTY;
+  return 0;
+}
+
+/* The ctf_add_type routine is used to copy a type from a source CTF container
+   to a dynamic destination container.  This routine operates recursively by
+   following the source type's links and embedded member types.  If the
+   destination container already contains a named type which has the same
+   attributes, then we succeed and return this type but no changes occur.  */
+ctf_id_t
+ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
+{
+  ctf_id_t dst_type = CTF_ERR;
+  uint32_t dst_kind = CTF_K_UNKNOWN;
+  ctf_id_t tmp;
+
+  const char *name;
+  uint32_t kind, flag, vlen;
+
+  const ctf_type_t *src_tp, *dst_tp;
+  ctf_bundle_t src, dst;
+  ctf_encoding_t src_en, dst_en;
+  ctf_arinfo_t src_ar, dst_ar;
+
+  ctf_dtdef_t *dtd;
+  ctf_funcinfo_t ctc;
+  ssize_t size;
+
+  ctf_hash_t *hp;
+
+  if (!(dst_fp->ctf_flags & LCTF_RDWR))
+    return (ctf_set_errno (dst_fp, ECTF_RDONLY));
+
+  if ((src_tp = ctf_lookup_by_id (&src_fp, src_type)) == NULL)
+    return (ctf_set_errno (dst_fp, ctf_errno (src_fp)));
+
+  name = ctf_strptr (src_fp, src_tp->ctt_name);
+  kind = LCTF_INFO_KIND (src_fp, src_tp->ctt_info);
+  flag = LCTF_INFO_ISROOT (src_fp, src_tp->ctt_info);
+  vlen = LCTF_INFO_VLEN (src_fp, src_tp->ctt_info);
+
+  switch (kind)
+    {
+    case CTF_K_STRUCT:
+      hp = dst_fp->ctf_structs;
+      break;
+    case CTF_K_UNION:
+      hp = dst_fp->ctf_unions;
+      break;
+    case CTF_K_ENUM:
+      hp = dst_fp->ctf_enums;
+      break;
+    default:
+      hp = dst_fp->ctf_names;
+      break;
+    }
+
+  /* If the source type has a name and is a root type (visible at the
+     top-level scope), lookup the name in the destination container and
+     verify that it is of the same kind before we do anything else.  */
+
+  if ((flag & CTF_ADD_ROOT) && name[0] != '\0'
+      && (tmp = ctf_hash_lookup_type (hp, dst_fp, name)) != 0)
+    {
+      dst_type = tmp;
+      dst_kind = ctf_type_kind_unsliced (dst_fp, dst_type);
+    }
+
+  /* If an identically named dst_type exists, fail with ECTF_CONFLICT
+     unless dst_type is a forward declaration and src_type is a struct,
+     union, or enum (i.e. the definition of the previous forward decl).  */
+
+  if (dst_type != CTF_ERR && dst_kind != kind
+      && (dst_kind != CTF_K_FORWARD
+	  || (kind != CTF_K_ENUM && kind != CTF_K_STRUCT
+	      && kind != CTF_K_UNION)))
+    {
+      ctf_dprintf ("Conflict for type %s: kinds differ, new: %i; "
+		   "old (ID %lx): %i\n", name, kind, dst_type, dst_kind);
+      return (ctf_set_errno (dst_fp, ECTF_CONFLICT));
+    }
+
+  /* We take special action for an integer, float, or slice since it is
+     described not only by its name but also its encoding.  For integers,
+     bit-fields exploit this degeneracy.  */
+
+  if (kind == CTF_K_INTEGER || kind == CTF_K_FLOAT || kind == CTF_K_SLICE)
+    {
+      if (ctf_type_encoding (src_fp, src_type, &src_en) != 0)
+	return (ctf_set_errno (dst_fp, ctf_errno (src_fp)));
+
+      if (dst_type != CTF_ERR)
+	{
+	  ctf_file_t *fp = dst_fp;
+
+	  if ((dst_tp = ctf_lookup_by_id (&fp, dst_type)) == NULL)
+	    return CTF_ERR;
+
+	  if (LCTF_INFO_ISROOT (fp, dst_tp->ctt_info) & CTF_ADD_ROOT)
+	    {
+	      /* The type that we found in the hash is also root-visible.  If
+		 the two types match then use the existing one; otherwise,
+		 declare a conflict.  Note: slices are not certain to match
+		 even if there is no conflict: we must check the contained type
+		 too.  */
+
+	      if (ctf_type_encoding (dst_fp, dst_type, &dst_en) != 0)
+		return CTF_ERR;			/* errno set for us.  */
+
+	      if (memcmp (&src_en, &dst_en, sizeof (ctf_encoding_t)) == 0)
+		{
+		  if (kind != CTF_K_SLICE)
+		    return dst_type;
+		}
+	      else
+		  {
+		    return (ctf_set_errno (dst_fp, ECTF_CONFLICT));
+		  }
+	    }
+	  else
+	    {
+	      /* We found a non-root-visible type in the hash.  We reset
+	         dst_type to ensure that we continue to look for a possible
+	         conflict in the pending list.  */
+
+	      dst_type = CTF_ERR;
+	    }
+	}
+    }
+
+  /* If the non-empty name was not found in the appropriate hash, search
+     the list of pending dynamic definitions that are not yet committed.
+     If a matching name and kind are found, assume this is the type that
+     we are looking for.  This is necessary to permit ctf_add_type() to
+     operate recursively on entities such as a struct that contains a
+     pointer member that refers to the same struct type.  */
+
+  if (dst_type == CTF_ERR && name[0] != '\0')
+    {
+      for (dtd = ctf_list_prev (&dst_fp->ctf_dtdefs); dtd != NULL
+	     && LCTF_TYPE_TO_INDEX (src_fp, dtd->dtd_type) > dst_fp->ctf_dtoldid;
+	   dtd = ctf_list_prev (dtd))
+	{
+	  if (LCTF_INFO_KIND (src_fp, dtd->dtd_data.ctt_info) == kind
+	      && dtd->dtd_name != NULL && strcmp (dtd->dtd_name, name) == 0)
+	    {
+	      int sroot;	/* Is the src root-visible?  */
+	      int droot;	/* Is the dst root-visible?  */
+	      int match;	/* Do the encodings match?  */
+
+	      if (kind != CTF_K_INTEGER && kind != CTF_K_FLOAT && kind != CTF_K_SLICE)
+		return dtd->dtd_type;
+
+	      sroot = (flag & CTF_ADD_ROOT);
+	      droot = (LCTF_INFO_ISROOT (dst_fp,
+					 dtd->dtd_data.
+					 ctt_info) & CTF_ADD_ROOT);
+
+	      match = (memcmp (&src_en, &dtd->dtd_u.dtu_enc,
+			       sizeof (ctf_encoding_t)) == 0);
+
+	      /* If the types share the same encoding then return the id of the
+		 first unless one type is root-visible and the other is not; in
+		 that case the new type must get a new id if a match is never
+		 found.  Note: slices are not certain to match even if there is
+		 no conflict: we must check the contained type too. */
+
+	      if (match && sroot == droot)
+		{
+		  if (kind != CTF_K_SLICE)
+		    return dtd->dtd_type;
+		}
+	      else if (!match && sroot && droot)
+		{
+		  return (ctf_set_errno (dst_fp, ECTF_CONFLICT));
+		}
+	    }
+	}
+    }
+
+  src.ctb_file = src_fp;
+  src.ctb_type = src_type;
+  src.ctb_dtd = NULL;
+
+  dst.ctb_file = dst_fp;
+  dst.ctb_type = dst_type;
+  dst.ctb_dtd = NULL;
+
+  /* Now perform kind-specific processing.  If dst_type is CTF_ERR, then
+     we add a new type with the same properties as src_type to dst_fp.
+     If dst_type is not CTF_ERR, then we verify that dst_type has the
+     same attributes as src_type.  We recurse for embedded references.  */
+  switch (kind)
+    {
+    case CTF_K_INTEGER:
+      /*  If we found a match we will have either returned it or declared a
+	  conflict.  */
+      dst_type = ctf_add_integer (dst_fp, flag, name, &src_en);
+      break;
+
+    case CTF_K_FLOAT:
+      /* If we found a match we will have either returned it or declared a
+       conflict.  */
+      dst_type = ctf_add_float (dst_fp, flag, name, &src_en);
+      break;
+
+    case CTF_K_SLICE:
+      /* We have checked for conflicting encodings: now try to add the
+	 contained type.  */
+      src_type = ctf_type_reference (src_fp, src_type);
+      dst_type = ctf_add_type (dst_fp, src_fp, src_type);
+
+      if (src_type == CTF_ERR)
+	return CTF_ERR;				/* errno is set for us.  */
+
+      dst_type = ctf_add_slice (dst_fp, flag, src_type, &src_en);
+      break;
+
+    case CTF_K_POINTER:
+    case CTF_K_VOLATILE:
+    case CTF_K_CONST:
+    case CTF_K_RESTRICT:
+      src_type = ctf_type_reference (src_fp, src_type);
+      src_type = ctf_add_type (dst_fp, src_fp, src_type);
+
+      if (src_type == CTF_ERR)
+	return CTF_ERR;				/* errno is set for us.  */
+
+      dst_type = ctf_add_reftype (dst_fp, flag, src_type, kind);
+      break;
+
+    case CTF_K_ARRAY:
+      if (ctf_array_info (src_fp, src_type, &src_ar) == CTF_ERR)
+	return (ctf_set_errno (dst_fp, ctf_errno (src_fp)));
+
+      src_ar.ctr_contents =
+	ctf_add_type (dst_fp, src_fp, src_ar.ctr_contents);
+      src_ar.ctr_index = ctf_add_type (dst_fp, src_fp, src_ar.ctr_index);
+      src_ar.ctr_nelems = src_ar.ctr_nelems;
+
+      if (src_ar.ctr_contents == CTF_ERR || src_ar.ctr_index == CTF_ERR)
+	return CTF_ERR;				/* errno is set for us.  */
+
+      if (dst_type != CTF_ERR)
+	{
+	  if (ctf_array_info (dst_fp, dst_type, &dst_ar) != 0)
+	    return CTF_ERR;			/* errno is set for us.  */
+
+	  if (memcmp (&src_ar, &dst_ar, sizeof (ctf_arinfo_t)))
+	    {
+	      ctf_dprintf ("Conflict for type %s against ID %lx: "
+			   "array info differs, old %lx/%lx/%x; "
+			   "new: %lx/%lx/%x\n", name, dst_type,
+			   src_ar.ctr_contents, src_ar.ctr_index,
+			   src_ar.ctr_nelems, dst_ar.ctr_contents,
+			   dst_ar.ctr_index, dst_ar.ctr_nelems);
+	      return (ctf_set_errno (dst_fp, ECTF_CONFLICT));
+	    }
+	}
+      else
+	dst_type = ctf_add_array (dst_fp, flag, &src_ar);
+      break;
+
+    case CTF_K_FUNCTION:
+      ctc.ctc_return = ctf_add_type (dst_fp, src_fp, src_tp->ctt_type);
+      ctc.ctc_argc = 0;
+      ctc.ctc_flags = 0;
+
+      if (ctc.ctc_return == CTF_ERR)
+	return CTF_ERR;				/* errno is set for us.  */
+
+      dst_type = ctf_add_function (dst_fp, flag, &ctc, NULL);
+      break;
+
+    case CTF_K_STRUCT:
+    case CTF_K_UNION:
+      {
+	ctf_dmdef_t *dmd;
+	int errs = 0;
+
+	/* Technically to match a struct or union we need to check both
+	   ways (src members vs. dst, dst members vs. src) but we make
+	   this more optimal by only checking src vs. dst and comparing
+	   the total size of the structure (which we must do anyway)
+	   which covers the possibility of dst members not in src.
+	   This optimization can be defeated for unions, but is so
+	   pathological as to render it irrelevant for our purposes.  */
+
+	if (dst_type != CTF_ERR && dst_kind != CTF_K_FORWARD)
+	  {
+	    if (ctf_type_size (src_fp, src_type) !=
+		ctf_type_size (dst_fp, dst_type))
+	      {
+		ctf_dprintf ("Conflict for type %s against ID %lx: "
+			     "union size differs, old %li, new %li\n",
+			     name, dst_type, ctf_type_size (src_fp, src_type),
+			     ctf_type_size (dst_fp, dst_type));
+		return (ctf_set_errno (dst_fp, ECTF_CONFLICT));
+	      }
+
+	    if (ctf_member_iter (src_fp, src_type, membcmp, &dst))
+	      {
+		ctf_dprintf ("Conflict for type %s against ID %lx: "
+			     "members differ, see above\n", name, dst_type);
+		return (ctf_set_errno (dst_fp, ECTF_CONFLICT));
+	      }
+
+	    break;
+	  }
+
+	/* Unlike the other cases, copying structs and unions is done
+	   manually so as to avoid repeated lookups in ctf_add_member
+	   and to ensure the exact same member offsets as in src_type.  */
+
+	dst_type = ctf_add_generic (dst_fp, flag, name, &dtd);
+	if (dst_type == CTF_ERR)
+	  return CTF_ERR;			/* errno is set for us.  */
+
+	dst.ctb_type = dst_type;
+	dst.ctb_dtd = dtd;
+
+	if (ctf_member_iter (src_fp, src_type, membadd, &dst) != 0)
+	  errs++;	       /* Increment errs and fail at bottom of case.  */
+
+	if ((size = ctf_type_size (src_fp, src_type)) > CTF_MAX_SIZE)
+	  {
+	    dtd->dtd_data.ctt_size = CTF_LSIZE_SENT;
+	    dtd->dtd_data.ctt_lsizehi = CTF_SIZE_TO_LSIZE_HI (size);
+	    dtd->dtd_data.ctt_lsizelo = CTF_SIZE_TO_LSIZE_LO (size);
+	  }
+	else
+	  dtd->dtd_data.ctt_size = (uint32_t) size;
+
+	dtd->dtd_data.ctt_info = CTF_TYPE_INFO (kind, flag, vlen);
+
+	/* Make a final pass through the members changing each dmd_type (a
+	   src_fp type) to an equivalent type in dst_fp.  We pass through all
+	   members, leaving any that fail set to CTF_ERR.  */
+	for (dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
+	     dmd != NULL; dmd = ctf_list_next (dmd))
+	  {
+	    if ((dmd->dmd_type = ctf_add_type (dst_fp, src_fp,
+					       dmd->dmd_type)) == CTF_ERR)
+	      errs++;
+	  }
+
+	if (errs)
+	  return CTF_ERR;			/* errno is set for us.  */
+	break;
+      }
+
+    case CTF_K_ENUM:
+      if (dst_type != CTF_ERR && dst_kind != CTF_K_FORWARD)
+	{
+	  if (ctf_enum_iter (src_fp, src_type, enumcmp, &dst)
+	      || ctf_enum_iter (dst_fp, dst_type, enumcmp, &src))
+	    {
+	      ctf_dprintf ("Conflict for enum %s against ID %lx: "
+			   "members differ, see above\n", name, dst_type);
+	      return (ctf_set_errno (dst_fp, ECTF_CONFLICT));
+	    }
+	}
+      else
+	{
+	  dst_type = ctf_add_enum (dst_fp, flag, name);
+	  if ((dst.ctb_type = dst_type) == CTF_ERR
+	      || ctf_enum_iter (src_fp, src_type, enumadd, &dst))
+	    return CTF_ERR;			/* errno is set for us */
+	}
+      break;
+
+    case CTF_K_FORWARD:
+      if (dst_type == CTF_ERR)
+	{
+	  dst_type = ctf_add_forward (dst_fp, flag,
+				      name, CTF_K_STRUCT); /* Assume STRUCT. */
+	}
+      break;
+
+    case CTF_K_TYPEDEF:
+      src_type = ctf_type_reference (src_fp, src_type);
+      src_type = ctf_add_type (dst_fp, src_fp, src_type);
+
+      if (src_type == CTF_ERR)
+	return CTF_ERR;				/* errno is set for us.  */
+
+      /* If dst_type is not CTF_ERR at this point, we should check if
+	 ctf_type_reference(dst_fp, dst_type) != src_type and if so fail with
+	 ECTF_CONFLICT.  However, this causes problems with bitness typedefs
+	 that vary based on things like if 32-bit then pid_t is int otherwise
+	 long.  We therefore omit this check and assume that if the identically
+	 named typedef already exists in dst_fp, it is correct or
+	 equivalent.  */
+
+      if (dst_type == CTF_ERR)
+	{
+	  dst_type = ctf_add_typedef (dst_fp, flag, name, src_type);
+	}
+      break;
+
+    default:
+      return (ctf_set_errno (dst_fp, ECTF_CORRUPT));
+    }
+
+  return dst_type;
+}
+
 /* Write the compressed CTF data stream to the specified gzFile descriptor.
    This is useful for saving the results of dynamic CTF containers.  */
 int
