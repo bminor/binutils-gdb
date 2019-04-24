@@ -1,5 +1,14 @@
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-api.h (ctf_label_f): New.
+	(ctf_label_set): New.
+	(ctf_label_get): New.
+	(ctf_label_topmost): New.
+	(ctf_label_info): New.
+	(ctf_label_iter): New.
+
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-api.h (ctf_version): New.
 
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
