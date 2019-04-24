@@ -1,0 +1,31 @@
+## Process this file with automake to produce Makefile.in.
+#
+#   Copyright (C) 2019 Free Software Foundation, Inc.
+#
+# This file is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; see the file COPYING.  If not see
+# <http://www.gnu.org/licenses/>.
+#
+
+ACLOCAL_AMFLAGS = -I .. -I ../config
+
+AUTOMAKE_OPTIONS = foreign no-texinfo.tex
+
+AM_CPPFLAGS = -D_GNU_SOURCE -I$(top_srcdir) -I$(top_srcdir)/../include -I$(top_srcdir)/../bfd -I../bfd
+AM_CFLAGS = -std=gnu99 @ac_libctf_warn_cflags@ @warn@ @c_warn@ @WARN_PEDANTIC@ @WERROR@
+
+noinst_LIBRARIES = libctf.a
+
+libctf_a_SOURCES = ctf-archive.c ctf-dump.c ctf-create.c ctf-decl.c ctf-error.c \
+		   ctf-hash.c ctf-labels.c ctf-lookup.c ctf-open.c ctf-open-bfd.c \
+		   ctf-subr.c ctf-types.c ctf-util.c

@@ -1,3 +1,12 @@
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
+	* Makefile.def (host_modules): Add libctf.
+	* Makefile.def (dependencies): Likewise.
+	libctf depends on zlib, libiberty, and bfd.
+	* Makefile.in: Regenerated.
+	* configure.ac (host_libs): Add libctf.
+	* configure: Regenerated.
+
 2019-05-23  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* config.guess: Synchronize with config project master sources.

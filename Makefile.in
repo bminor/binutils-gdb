@@ -951,7 +951,8 @@ configure-host:  \
     maybe-configure-gnattools \
     maybe-configure-lto-plugin \
     maybe-configure-libcc1 \
-    maybe-configure-gotools
+    maybe-configure-gotools \
+    maybe-configure-libctf
 .PHONY: configure-target
 configure-target:  \
     maybe-configure-target-libstdc++-v3 \
@@ -1106,6 +1107,9 @@ all-host: maybe-all-lto-plugin
 @endif lto-plugin-no-bootstrap
 all-host: maybe-all-libcc1
 all-host: maybe-all-gotools
+@if libctf-no-bootstrap
+all-host: maybe-all-libctf
+@endif libctf-no-bootstrap
 
 .PHONY: all-target
 
@@ -1208,6 +1212,7 @@ info-host: maybe-info-gnattools
 info-host: maybe-info-lto-plugin
 info-host: maybe-info-libcc1
 info-host: maybe-info-gotools
+info-host: maybe-info-libctf
 
 .PHONY: info-target
 
@@ -1293,6 +1298,7 @@ dvi-host: maybe-dvi-gnattools
 dvi-host: maybe-dvi-lto-plugin
 dvi-host: maybe-dvi-libcc1
 dvi-host: maybe-dvi-gotools
+dvi-host: maybe-dvi-libctf
 
 .PHONY: dvi-target
 
@@ -1378,6 +1384,7 @@ pdf-host: maybe-pdf-gnattools
 pdf-host: maybe-pdf-lto-plugin
 pdf-host: maybe-pdf-libcc1
 pdf-host: maybe-pdf-gotools
+pdf-host: maybe-pdf-libctf
 
 .PHONY: pdf-target
 
@@ -1463,6 +1470,7 @@ html-host: maybe-html-gnattools
 html-host: maybe-html-lto-plugin
 html-host: maybe-html-libcc1
 html-host: maybe-html-gotools
+html-host: maybe-html-libctf
 
 .PHONY: html-target
 
@@ -1548,6 +1556,7 @@ TAGS-host: maybe-TAGS-gnattools
 TAGS-host: maybe-TAGS-lto-plugin
 TAGS-host: maybe-TAGS-libcc1
 TAGS-host: maybe-TAGS-gotools
+TAGS-host: maybe-TAGS-libctf
 
 .PHONY: TAGS-target
 
@@ -1633,6 +1642,7 @@ install-info-host: maybe-install-info-gnattools
 install-info-host: maybe-install-info-lto-plugin
 install-info-host: maybe-install-info-libcc1
 install-info-host: maybe-install-info-gotools
+install-info-host: maybe-install-info-libctf
 
 .PHONY: install-info-target
 
@@ -1718,6 +1728,7 @@ install-pdf-host: maybe-install-pdf-gnattools
 install-pdf-host: maybe-install-pdf-lto-plugin
 install-pdf-host: maybe-install-pdf-libcc1
 install-pdf-host: maybe-install-pdf-gotools
+install-pdf-host: maybe-install-pdf-libctf
 
 .PHONY: install-pdf-target
 
@@ -1803,6 +1814,7 @@ install-html-host: maybe-install-html-gnattools
 install-html-host: maybe-install-html-lto-plugin
 install-html-host: maybe-install-html-libcc1
 install-html-host: maybe-install-html-gotools
+install-html-host: maybe-install-html-libctf
 
 .PHONY: install-html-target
 
@@ -1888,6 +1900,7 @@ installcheck-host: maybe-installcheck-gnattools
 installcheck-host: maybe-installcheck-lto-plugin
 installcheck-host: maybe-installcheck-libcc1
 installcheck-host: maybe-installcheck-gotools
+installcheck-host: maybe-installcheck-libctf
 
 .PHONY: installcheck-target
 
@@ -1973,6 +1986,7 @@ mostlyclean-host: maybe-mostlyclean-gnattools
 mostlyclean-host: maybe-mostlyclean-lto-plugin
 mostlyclean-host: maybe-mostlyclean-libcc1
 mostlyclean-host: maybe-mostlyclean-gotools
+mostlyclean-host: maybe-mostlyclean-libctf
 
 .PHONY: mostlyclean-target
 
@@ -2058,6 +2072,7 @@ clean-host: maybe-clean-gnattools
 clean-host: maybe-clean-lto-plugin
 clean-host: maybe-clean-libcc1
 clean-host: maybe-clean-gotools
+clean-host: maybe-clean-libctf
 
 .PHONY: clean-target
 
@@ -2143,6 +2158,7 @@ distclean-host: maybe-distclean-gnattools
 distclean-host: maybe-distclean-lto-plugin
 distclean-host: maybe-distclean-libcc1
 distclean-host: maybe-distclean-gotools
+distclean-host: maybe-distclean-libctf
 
 .PHONY: distclean-target
 
@@ -2228,6 +2244,7 @@ maintainer-clean-host: maybe-maintainer-clean-gnattools
 maintainer-clean-host: maybe-maintainer-clean-lto-plugin
 maintainer-clean-host: maybe-maintainer-clean-libcc1
 maintainer-clean-host: maybe-maintainer-clean-gotools
+maintainer-clean-host: maybe-maintainer-clean-libctf
 
 .PHONY: maintainer-clean-target
 
@@ -2368,7 +2385,8 @@ check-host:  \
     maybe-check-gnattools \
     maybe-check-lto-plugin \
     maybe-check-libcc1 \
-    maybe-check-gotools
+    maybe-check-gotools \
+    maybe-check-libctf
 
 .PHONY: check-target
 check-target:  \
@@ -2500,7 +2518,8 @@ install-host-nogcc:  \
     maybe-install-gnattools \
     maybe-install-lto-plugin \
     maybe-install-libcc1 \
-    maybe-install-gotools
+    maybe-install-gotools \
+    maybe-install-libctf
 
 .PHONY: install-host
 install-host:  \
@@ -2549,7 +2568,8 @@ install-host:  \
     maybe-install-gnattools \
     maybe-install-lto-plugin \
     maybe-install-libcc1 \
-    maybe-install-gotools
+    maybe-install-gotools \
+    maybe-install-libctf
 
 .PHONY: install-target
 install-target:  \
@@ -2654,7 +2674,8 @@ install-strip-host:  \
     maybe-install-strip-gnattools \
     maybe-install-strip-lto-plugin \
     maybe-install-strip-libcc1 \
-    maybe-install-strip-gotools
+    maybe-install-strip-gotools \
+    maybe-install-strip-libctf
 
 .PHONY: install-strip-target
 install-strip-target:  \
@@ -32847,6 +32868,868 @@ maintainer-clean-gotools:
 
 
 
+.PHONY: configure-libctf maybe-configure-libctf
+maybe-configure-libctf:
+@if gcc-bootstrap
+configure-libctf: stage_current
+@endif gcc-bootstrap
+@if libctf
+maybe-configure-libctf: configure-libctf
+configure-libctf: 
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	test ! -f $(HOST_SUBDIR)/libctf/Makefile || exit 0; \
+	$(SHELL) $(srcdir)/mkinstalldirs $(HOST_SUBDIR)/libctf; \
+	$(HOST_EXPORTS)  \
+	echo Configuring in $(HOST_SUBDIR)/libctf; \
+	cd "$(HOST_SUBDIR)/libctf" || exit 1; \
+	case $(srcdir) in \
+	  /* | [A-Za-z]:[\\/]*) topdir=$(srcdir) ;; \
+	  *) topdir=`echo $(HOST_SUBDIR)/libctf/ | \
+		sed -e 's,\./,,g' -e 's,[^/]*/,../,g' `$(srcdir) ;; \
+	esac; \
+	module_srcdir=libctf; \
+	$(SHELL) \
+	  $$s/$$module_srcdir/configure \
+	  --srcdir=$${topdir}/$$module_srcdir \
+	  $(HOST_CONFIGARGS) --build=${build_alias} --host=${host_alias} \
+	  --target=${target_alias}  \
+	  || exit 1
+@endif libctf
+
+
+
+.PHONY: configure-stage1-libctf maybe-configure-stage1-libctf
+maybe-configure-stage1-libctf:
+@if libctf-bootstrap
+maybe-configure-stage1-libctf: configure-stage1-libctf
+configure-stage1-libctf:
+	@[ $(current_stage) = stage1 ] || $(MAKE) stage1-start
+	@$(SHELL) $(srcdir)/mkinstalldirs $(HOST_SUBDIR)/libctf
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	TFLAGS="$(STAGE1_TFLAGS)"; \
+	test ! -f $(HOST_SUBDIR)/libctf/Makefile || exit 0; \
+	$(HOST_EXPORTS) \
+	CFLAGS="$(STAGE1_CFLAGS)"; export CFLAGS; \
+	CXXFLAGS="$(STAGE1_CXXFLAGS)"; export CXXFLAGS; \
+	LIBCFLAGS="$(LIBCFLAGS)"; export LIBCFLAGS;  \
+	echo Configuring stage 1 in $(HOST_SUBDIR)/libctf; \
+	$(SHELL) $(srcdir)/mkinstalldirs $(HOST_SUBDIR)/libctf; \
+	cd $(HOST_SUBDIR)/libctf || exit 1; \
+	case $(srcdir) in \
+	  /* | [A-Za-z]:[\\/]*) topdir=$(srcdir) ;; \
+	  *) topdir=`echo $(HOST_SUBDIR)/libctf/ | \
+		sed -e 's,\./,,g' -e 's,[^/]*/,../,g' `$(srcdir) ;; \
+	esac; \
+	module_srcdir=libctf; \
+	$(SHELL) $$s/$$module_srcdir/configure \
+	  --srcdir=$${topdir}/$$module_srcdir \
+	  $(HOST_CONFIGARGS) --build=${build_alias} --host=${host_alias} \
+	  --target=${target_alias} \
+	   \
+	  $(STAGE1_CONFIGURE_FLAGS)
+@endif libctf-bootstrap
+
+.PHONY: configure-stage2-libctf maybe-configure-stage2-libctf
+maybe-configure-stage2-libctf:
+@if libctf-bootstrap
+maybe-configure-stage2-libctf: configure-stage2-libctf
+configure-stage2-libctf:
+	@[ $(current_stage) = stage2 ] || $(MAKE) stage2-start
+	@$(SHELL) $(srcdir)/mkinstalldirs $(HOST_SUBDIR)/libctf
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	TFLAGS="$(STAGE2_TFLAGS)"; \
+	test ! -f $(HOST_SUBDIR)/libctf/Makefile || exit 0; \
+	$(HOST_EXPORTS) \
+	$(POSTSTAGE1_HOST_EXPORTS) \
+	CFLAGS="$(STAGE2_CFLAGS)"; export CFLAGS; \
+	CXXFLAGS="$(STAGE2_CXXFLAGS)"; export CXXFLAGS; \
+	LIBCFLAGS="$(STAGE2_CFLAGS)"; export LIBCFLAGS;  \
+	echo Configuring stage 2 in $(HOST_SUBDIR)/libctf; \
+	$(SHELL) $(srcdir)/mkinstalldirs $(HOST_SUBDIR)/libctf; \
+	cd $(HOST_SUBDIR)/libctf || exit 1; \
+	case $(srcdir) in \
+	  /* | [A-Za-z]:[\\/]*) topdir=$(srcdir) ;; \
+	  *) topdir=`echo $(HOST_SUBDIR)/libctf/ | \
+		sed -e 's,\./,,g' -e 's,[^/]*/,../,g' `$(srcdir) ;; \
+	esac; \
+	module_srcdir=libctf; \
+	$(SHELL) $$s/$$module_srcdir/configure \
+	  --srcdir=$${topdir}/$$module_srcdir \
+	  $(HOST_CONFIGARGS) --build=${build_alias} --host=${host_alias} \
+	  --target=${target_alias} \
+	  --with-build-libsubdir=$(HOST_SUBDIR) \
+	  $(STAGE2_CONFIGURE_FLAGS)
+@endif libctf-bootstrap
+
+.PHONY: configure-stage3-libctf maybe-configure-stage3-libctf
+maybe-configure-stage3-libctf:
+@if libctf-bootstrap
+maybe-configure-stage3-libctf: configure-stage3-libctf
+configure-stage3-libctf:
+	@[ $(current_stage) = stage3 ] || $(MAKE) stage3-start
+	@$(SHELL) $(srcdir)/mkinstalldirs $(HOST_SUBDIR)/libctf
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	TFLAGS="$(STAGE3_TFLAGS)"; \
+	test ! -f $(HOST_SUBDIR)/libctf/Makefile || exit 0; \
+	$(HOST_EXPORTS) \
+	$(POSTSTAGE1_HOST_EXPORTS) \
+	CFLAGS="$(STAGE3_CFLAGS)"; export CFLAGS; \
+	CXXFLAGS="$(STAGE3_CXXFLAGS)"; export CXXFLAGS; \
+	LIBCFLAGS="$(STAGE3_CFLAGS)"; export LIBCFLAGS;  \
+	echo Configuring stage 3 in $(HOST_SUBDIR)/libctf; \
+	$(SHELL) $(srcdir)/mkinstalldirs $(HOST_SUBDIR)/libctf; \
+	cd $(HOST_SUBDIR)/libctf || exit 1; \
+	case $(srcdir) in \
+	  /* | [A-Za-z]:[\\/]*) topdir=$(srcdir) ;; \
+	  *) topdir=`echo $(HOST_SUBDIR)/libctf/ | \
+		sed -e 's,\./,,g' -e 's,[^/]*/,../,g' `$(srcdir) ;; \
+	esac; \
+	module_srcdir=libctf; \
+	$(SHELL) $$s/$$module_srcdir/configure \
+	  --srcdir=$${topdir}/$$module_srcdir \
+	  $(HOST_CONFIGARGS) --build=${build_alias} --host=${host_alias} \
+	  --target=${target_alias} \
+	  --with-build-libsubdir=$(HOST_SUBDIR) \
+	  $(STAGE3_CONFIGURE_FLAGS)
+@endif libctf-bootstrap
+
+.PHONY: configure-stage4-libctf maybe-configure-stage4-libctf
+maybe-configure-stage4-libctf:
+@if libctf-bootstrap
+maybe-configure-stage4-libctf: configure-stage4-libctf
+configure-stage4-libctf:
+	@[ $(current_stage) = stage4 ] || $(MAKE) stage4-start
+	@$(SHELL) $(srcdir)/mkinstalldirs $(HOST_SUBDIR)/libctf
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	TFLAGS="$(STAGE4_TFLAGS)"; \
+	test ! -f $(HOST_SUBDIR)/libctf/Makefile || exit 0; \
+	$(HOST_EXPORTS) \
+	$(POSTSTAGE1_HOST_EXPORTS) \
+	CFLAGS="$(STAGE4_CFLAGS)"; export CFLAGS; \
+	CXXFLAGS="$(STAGE4_CXXFLAGS)"; export CXXFLAGS; \
+	LIBCFLAGS="$(STAGE4_CFLAGS)"; export LIBCFLAGS;  \
+	echo Configuring stage 4 in $(HOST_SUBDIR)/libctf; \
+	$(SHELL) $(srcdir)/mkinstalldirs $(HOST_SUBDIR)/libctf; \
+	cd $(HOST_SUBDIR)/libctf || exit 1; \
+	case $(srcdir) in \
+	  /* | [A-Za-z]:[\\/]*) topdir=$(srcdir) ;; \
+	  *) topdir=`echo $(HOST_SUBDIR)/libctf/ | \
+		sed -e 's,\./,,g' -e 's,[^/]*/,../,g' `$(srcdir) ;; \
+	esac; \
+	module_srcdir=libctf; \
+	$(SHELL) $$s/$$module_srcdir/configure \
+	  --srcdir=$${topdir}/$$module_srcdir \
+	  $(HOST_CONFIGARGS) --build=${build_alias} --host=${host_alias} \
+	  --target=${target_alias} \
+	  --with-build-libsubdir=$(HOST_SUBDIR) \
+	  $(STAGE4_CONFIGURE_FLAGS)
+@endif libctf-bootstrap
+
+.PHONY: configure-stageprofile-libctf maybe-configure-stageprofile-libctf
+maybe-configure-stageprofile-libctf:
+@if libctf-bootstrap
+maybe-configure-stageprofile-libctf: configure-stageprofile-libctf
+configure-stageprofile-libctf:
+	@[ $(current_stage) = stageprofile ] || $(MAKE) stageprofile-start
+	@$(SHELL) $(srcdir)/mkinstalldirs $(HOST_SUBDIR)/libctf
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	TFLAGS="$(STAGEprofile_TFLAGS)"; \
+	test ! -f $(HOST_SUBDIR)/libctf/Makefile || exit 0; \
+	$(HOST_EXPORTS) \
+	$(POSTSTAGE1_HOST_EXPORTS) \
+	CFLAGS="$(STAGEprofile_CFLAGS)"; export CFLAGS; \
+	CXXFLAGS="$(STAGEprofile_CXXFLAGS)"; export CXXFLAGS; \
+	LIBCFLAGS="$(STAGEprofile_CFLAGS)"; export LIBCFLAGS;  \
+	echo Configuring stage profile in $(HOST_SUBDIR)/libctf; \
+	$(SHELL) $(srcdir)/mkinstalldirs $(HOST_SUBDIR)/libctf; \
+	cd $(HOST_SUBDIR)/libctf || exit 1; \
+	case $(srcdir) in \
+	  /* | [A-Za-z]:[\\/]*) topdir=$(srcdir) ;; \
+	  *) topdir=`echo $(HOST_SUBDIR)/libctf/ | \
+		sed -e 's,\./,,g' -e 's,[^/]*/,../,g' `$(srcdir) ;; \
+	esac; \
+	module_srcdir=libctf; \
+	$(SHELL) $$s/$$module_srcdir/configure \
+	  --srcdir=$${topdir}/$$module_srcdir \
+	  $(HOST_CONFIGARGS) --build=${build_alias} --host=${host_alias} \
+	  --target=${target_alias} \
+	  --with-build-libsubdir=$(HOST_SUBDIR) \
+	  $(STAGEprofile_CONFIGURE_FLAGS)
+@endif libctf-bootstrap
+
+.PHONY: configure-stagefeedback-libctf maybe-configure-stagefeedback-libctf
+maybe-configure-stagefeedback-libctf:
+@if libctf-bootstrap
+maybe-configure-stagefeedback-libctf: configure-stagefeedback-libctf
+configure-stagefeedback-libctf:
+	@[ $(current_stage) = stagefeedback ] || $(MAKE) stagefeedback-start
+	@$(SHELL) $(srcdir)/mkinstalldirs $(HOST_SUBDIR)/libctf
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	TFLAGS="$(STAGEfeedback_TFLAGS)"; \
+	test ! -f $(HOST_SUBDIR)/libctf/Makefile || exit 0; \
+	$(HOST_EXPORTS) \
+	$(POSTSTAGE1_HOST_EXPORTS) \
+	CFLAGS="$(STAGEfeedback_CFLAGS)"; export CFLAGS; \
+	CXXFLAGS="$(STAGEfeedback_CXXFLAGS)"; export CXXFLAGS; \
+	LIBCFLAGS="$(STAGEfeedback_CFLAGS)"; export LIBCFLAGS;  \
+	echo Configuring stage feedback in $(HOST_SUBDIR)/libctf; \
+	$(SHELL) $(srcdir)/mkinstalldirs $(HOST_SUBDIR)/libctf; \
+	cd $(HOST_SUBDIR)/libctf || exit 1; \
+	case $(srcdir) in \
+	  /* | [A-Za-z]:[\\/]*) topdir=$(srcdir) ;; \
+	  *) topdir=`echo $(HOST_SUBDIR)/libctf/ | \
+		sed -e 's,\./,,g' -e 's,[^/]*/,../,g' `$(srcdir) ;; \
+	esac; \
+	module_srcdir=libctf; \
+	$(SHELL) $$s/$$module_srcdir/configure \
+	  --srcdir=$${topdir}/$$module_srcdir \
+	  $(HOST_CONFIGARGS) --build=${build_alias} --host=${host_alias} \
+	  --target=${target_alias} \
+	  --with-build-libsubdir=$(HOST_SUBDIR) \
+	  $(STAGEfeedback_CONFIGURE_FLAGS)
+@endif libctf-bootstrap
+
+
+
+
+
+.PHONY: all-libctf maybe-all-libctf
+maybe-all-libctf:
+@if gcc-bootstrap
+all-libctf: stage_current
+@endif gcc-bootstrap
+@if libctf
+TARGET-libctf=all
+maybe-all-libctf: all-libctf
+all-libctf: configure-libctf
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS)  \
+	(cd $(HOST_SUBDIR)/libctf && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) $(EXTRA_HOST_FLAGS) $(STAGE1_FLAGS_TO_PASS)  \
+		$(TARGET-libctf))
+@endif libctf
+
+
+
+.PHONY: all-stage1-libctf maybe-all-stage1-libctf
+.PHONY: clean-stage1-libctf maybe-clean-stage1-libctf
+maybe-all-stage1-libctf:
+maybe-clean-stage1-libctf:
+@if libctf-bootstrap
+maybe-all-stage1-libctf: all-stage1-libctf
+all-stage1: all-stage1-libctf
+TARGET-stage1-libctf = $(TARGET-libctf)
+all-stage1-libctf: configure-stage1-libctf
+	@[ $(current_stage) = stage1 ] || $(MAKE) stage1-start
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	TFLAGS="$(STAGE1_TFLAGS)"; \
+	$(HOST_EXPORTS)  \
+	cd $(HOST_SUBDIR)/libctf && \
+	 \
+	$(MAKE) $(BASE_FLAGS_TO_PASS) \
+		CFLAGS="$(STAGE1_CFLAGS)" \
+		CXXFLAGS="$(STAGE1_CXXFLAGS)" \
+		LIBCFLAGS="$(LIBCFLAGS)" \
+		CFLAGS_FOR_TARGET="$(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS_FOR_TARGET="$(CXXFLAGS_FOR_TARGET)" \
+		LIBCFLAGS_FOR_TARGET="$(LIBCFLAGS_FOR_TARGET)" \
+		$(EXTRA_HOST_FLAGS)  \
+		$(STAGE1_FLAGS_TO_PASS)  \
+		TFLAGS="$(STAGE1_TFLAGS)"  \
+		$(TARGET-stage1-libctf)
+
+maybe-clean-stage1-libctf: clean-stage1-libctf
+clean-stage1: clean-stage1-libctf
+clean-stage1-libctf:
+	@if [ $(current_stage) = stage1 ]; then \
+	  [ -f $(HOST_SUBDIR)/libctf/Makefile ] || exit 0; \
+	else \
+	  [ -f $(HOST_SUBDIR)/stage1-libctf/Makefile ] || exit 0; \
+	  $(MAKE) stage1-start; \
+	fi; \
+	cd $(HOST_SUBDIR)/libctf && \
+	$(MAKE) $(EXTRA_HOST_FLAGS)  \
+	$(STAGE1_FLAGS_TO_PASS)  clean
+@endif libctf-bootstrap
+
+
+.PHONY: all-stage2-libctf maybe-all-stage2-libctf
+.PHONY: clean-stage2-libctf maybe-clean-stage2-libctf
+maybe-all-stage2-libctf:
+maybe-clean-stage2-libctf:
+@if libctf-bootstrap
+maybe-all-stage2-libctf: all-stage2-libctf
+all-stage2: all-stage2-libctf
+TARGET-stage2-libctf = $(TARGET-libctf)
+all-stage2-libctf: configure-stage2-libctf
+	@[ $(current_stage) = stage2 ] || $(MAKE) stage2-start
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	TFLAGS="$(STAGE2_TFLAGS)"; \
+	$(HOST_EXPORTS) \
+	$(POSTSTAGE1_HOST_EXPORTS)  \
+	cd $(HOST_SUBDIR)/libctf && \
+	 \
+	$(MAKE) $(BASE_FLAGS_TO_PASS) \
+		CFLAGS="$(STAGE2_CFLAGS)" \
+		CXXFLAGS="$(STAGE2_CXXFLAGS)" \
+		LIBCFLAGS="$(STAGE2_CFLAGS)" \
+		CFLAGS_FOR_TARGET="$(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS_FOR_TARGET="$(CXXFLAGS_FOR_TARGET)" \
+		LIBCFLAGS_FOR_TARGET="$(LIBCFLAGS_FOR_TARGET)" \
+		$(EXTRA_HOST_FLAGS) $(POSTSTAGE1_FLAGS_TO_PASS)  \
+		TFLAGS="$(STAGE2_TFLAGS)"  \
+		$(TARGET-stage2-libctf)
+
+maybe-clean-stage2-libctf: clean-stage2-libctf
+clean-stage2: clean-stage2-libctf
+clean-stage2-libctf:
+	@if [ $(current_stage) = stage2 ]; then \
+	  [ -f $(HOST_SUBDIR)/libctf/Makefile ] || exit 0; \
+	else \
+	  [ -f $(HOST_SUBDIR)/stage2-libctf/Makefile ] || exit 0; \
+	  $(MAKE) stage2-start; \
+	fi; \
+	cd $(HOST_SUBDIR)/libctf && \
+	$(MAKE) $(EXTRA_HOST_FLAGS) $(POSTSTAGE1_FLAGS_TO_PASS)  clean
+@endif libctf-bootstrap
+
+
+.PHONY: all-stage3-libctf maybe-all-stage3-libctf
+.PHONY: clean-stage3-libctf maybe-clean-stage3-libctf
+maybe-all-stage3-libctf:
+maybe-clean-stage3-libctf:
+@if libctf-bootstrap
+maybe-all-stage3-libctf: all-stage3-libctf
+all-stage3: all-stage3-libctf
+TARGET-stage3-libctf = $(TARGET-libctf)
+all-stage3-libctf: configure-stage3-libctf
+	@[ $(current_stage) = stage3 ] || $(MAKE) stage3-start
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	TFLAGS="$(STAGE3_TFLAGS)"; \
+	$(HOST_EXPORTS) \
+	$(POSTSTAGE1_HOST_EXPORTS)  \
+	cd $(HOST_SUBDIR)/libctf && \
+	 \
+	$(MAKE) $(BASE_FLAGS_TO_PASS) \
+		CFLAGS="$(STAGE3_CFLAGS)" \
+		CXXFLAGS="$(STAGE3_CXXFLAGS)" \
+		LIBCFLAGS="$(STAGE3_CFLAGS)" \
+		CFLAGS_FOR_TARGET="$(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS_FOR_TARGET="$(CXXFLAGS_FOR_TARGET)" \
+		LIBCFLAGS_FOR_TARGET="$(LIBCFLAGS_FOR_TARGET)" \
+		$(EXTRA_HOST_FLAGS) $(POSTSTAGE1_FLAGS_TO_PASS)  \
+		TFLAGS="$(STAGE3_TFLAGS)"  \
+		$(TARGET-stage3-libctf)
+
+maybe-clean-stage3-libctf: clean-stage3-libctf
+clean-stage3: clean-stage3-libctf
+clean-stage3-libctf:
+	@if [ $(current_stage) = stage3 ]; then \
+	  [ -f $(HOST_SUBDIR)/libctf/Makefile ] || exit 0; \
+	else \
+	  [ -f $(HOST_SUBDIR)/stage3-libctf/Makefile ] || exit 0; \
+	  $(MAKE) stage3-start; \
+	fi; \
+	cd $(HOST_SUBDIR)/libctf && \
+	$(MAKE) $(EXTRA_HOST_FLAGS) $(POSTSTAGE1_FLAGS_TO_PASS)  clean
+@endif libctf-bootstrap
+
+
+.PHONY: all-stage4-libctf maybe-all-stage4-libctf
+.PHONY: clean-stage4-libctf maybe-clean-stage4-libctf
+maybe-all-stage4-libctf:
+maybe-clean-stage4-libctf:
+@if libctf-bootstrap
+maybe-all-stage4-libctf: all-stage4-libctf
+all-stage4: all-stage4-libctf
+TARGET-stage4-libctf = $(TARGET-libctf)
+all-stage4-libctf: configure-stage4-libctf
+	@[ $(current_stage) = stage4 ] || $(MAKE) stage4-start
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	TFLAGS="$(STAGE4_TFLAGS)"; \
+	$(HOST_EXPORTS) \
+	$(POSTSTAGE1_HOST_EXPORTS)  \
+	cd $(HOST_SUBDIR)/libctf && \
+	 \
+	$(MAKE) $(BASE_FLAGS_TO_PASS) \
+		CFLAGS="$(STAGE4_CFLAGS)" \
+		CXXFLAGS="$(STAGE4_CXXFLAGS)" \
+		LIBCFLAGS="$(STAGE4_CFLAGS)" \
+		CFLAGS_FOR_TARGET="$(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS_FOR_TARGET="$(CXXFLAGS_FOR_TARGET)" \
+		LIBCFLAGS_FOR_TARGET="$(LIBCFLAGS_FOR_TARGET)" \
+		$(EXTRA_HOST_FLAGS) $(POSTSTAGE1_FLAGS_TO_PASS)  \
+		TFLAGS="$(STAGE4_TFLAGS)"  \
+		$(TARGET-stage4-libctf)
+
+maybe-clean-stage4-libctf: clean-stage4-libctf
+clean-stage4: clean-stage4-libctf
+clean-stage4-libctf:
+	@if [ $(current_stage) = stage4 ]; then \
+	  [ -f $(HOST_SUBDIR)/libctf/Makefile ] || exit 0; \
+	else \
+	  [ -f $(HOST_SUBDIR)/stage4-libctf/Makefile ] || exit 0; \
+	  $(MAKE) stage4-start; \
+	fi; \
+	cd $(HOST_SUBDIR)/libctf && \
+	$(MAKE) $(EXTRA_HOST_FLAGS) $(POSTSTAGE1_FLAGS_TO_PASS)  clean
+@endif libctf-bootstrap
+
+
+.PHONY: all-stageprofile-libctf maybe-all-stageprofile-libctf
+.PHONY: clean-stageprofile-libctf maybe-clean-stageprofile-libctf
+maybe-all-stageprofile-libctf:
+maybe-clean-stageprofile-libctf:
+@if libctf-bootstrap
+maybe-all-stageprofile-libctf: all-stageprofile-libctf
+all-stageprofile: all-stageprofile-libctf
+TARGET-stageprofile-libctf = $(TARGET-libctf)
+all-stageprofile-libctf: configure-stageprofile-libctf
+	@[ $(current_stage) = stageprofile ] || $(MAKE) stageprofile-start
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	TFLAGS="$(STAGEprofile_TFLAGS)"; \
+	$(HOST_EXPORTS) \
+	$(POSTSTAGE1_HOST_EXPORTS)  \
+	cd $(HOST_SUBDIR)/libctf && \
+	 \
+	$(MAKE) $(BASE_FLAGS_TO_PASS) \
+		CFLAGS="$(STAGEprofile_CFLAGS)" \
+		CXXFLAGS="$(STAGEprofile_CXXFLAGS)" \
+		LIBCFLAGS="$(STAGEprofile_CFLAGS)" \
+		CFLAGS_FOR_TARGET="$(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS_FOR_TARGET="$(CXXFLAGS_FOR_TARGET)" \
+		LIBCFLAGS_FOR_TARGET="$(LIBCFLAGS_FOR_TARGET)" \
+		$(EXTRA_HOST_FLAGS) $(POSTSTAGE1_FLAGS_TO_PASS)  \
+		TFLAGS="$(STAGEprofile_TFLAGS)"  \
+		$(TARGET-stageprofile-libctf)
+
+maybe-clean-stageprofile-libctf: clean-stageprofile-libctf
+clean-stageprofile: clean-stageprofile-libctf
+clean-stageprofile-libctf:
+	@if [ $(current_stage) = stageprofile ]; then \
+	  [ -f $(HOST_SUBDIR)/libctf/Makefile ] || exit 0; \
+	else \
+	  [ -f $(HOST_SUBDIR)/stageprofile-libctf/Makefile ] || exit 0; \
+	  $(MAKE) stageprofile-start; \
+	fi; \
+	cd $(HOST_SUBDIR)/libctf && \
+	$(MAKE) $(EXTRA_HOST_FLAGS) $(POSTSTAGE1_FLAGS_TO_PASS)  clean
+@endif libctf-bootstrap
+
+
+.PHONY: all-stagefeedback-libctf maybe-all-stagefeedback-libctf
+.PHONY: clean-stagefeedback-libctf maybe-clean-stagefeedback-libctf
+maybe-all-stagefeedback-libctf:
+maybe-clean-stagefeedback-libctf:
+@if libctf-bootstrap
+maybe-all-stagefeedback-libctf: all-stagefeedback-libctf
+all-stagefeedback: all-stagefeedback-libctf
+TARGET-stagefeedback-libctf = $(TARGET-libctf)
+all-stagefeedback-libctf: configure-stagefeedback-libctf
+	@[ $(current_stage) = stagefeedback ] || $(MAKE) stagefeedback-start
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	TFLAGS="$(STAGEfeedback_TFLAGS)"; \
+	$(HOST_EXPORTS) \
+	$(POSTSTAGE1_HOST_EXPORTS)  \
+	cd $(HOST_SUBDIR)/libctf && \
+	 \
+	$(MAKE) $(BASE_FLAGS_TO_PASS) \
+		CFLAGS="$(STAGEfeedback_CFLAGS)" \
+		CXXFLAGS="$(STAGEfeedback_CXXFLAGS)" \
+		LIBCFLAGS="$(STAGEfeedback_CFLAGS)" \
+		CFLAGS_FOR_TARGET="$(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS_FOR_TARGET="$(CXXFLAGS_FOR_TARGET)" \
+		LIBCFLAGS_FOR_TARGET="$(LIBCFLAGS_FOR_TARGET)" \
+		$(EXTRA_HOST_FLAGS) $(POSTSTAGE1_FLAGS_TO_PASS)  \
+		TFLAGS="$(STAGEfeedback_TFLAGS)"  \
+		$(TARGET-stagefeedback-libctf)
+
+maybe-clean-stagefeedback-libctf: clean-stagefeedback-libctf
+clean-stagefeedback: clean-stagefeedback-libctf
+clean-stagefeedback-libctf:
+	@if [ $(current_stage) = stagefeedback ]; then \
+	  [ -f $(HOST_SUBDIR)/libctf/Makefile ] || exit 0; \
+	else \
+	  [ -f $(HOST_SUBDIR)/stagefeedback-libctf/Makefile ] || exit 0; \
+	  $(MAKE) stagefeedback-start; \
+	fi; \
+	cd $(HOST_SUBDIR)/libctf && \
+	$(MAKE) $(EXTRA_HOST_FLAGS) $(POSTSTAGE1_FLAGS_TO_PASS)  clean
+@endif libctf-bootstrap
+
+
+
+
+
+.PHONY: check-libctf maybe-check-libctf
+maybe-check-libctf:
+@if libctf
+maybe-check-libctf: check-libctf
+
+check-libctf:
+
+@endif libctf
+
+.PHONY: install-libctf maybe-install-libctf
+maybe-install-libctf:
+@if libctf
+maybe-install-libctf: install-libctf
+
+install-libctf:
+
+@endif libctf
+
+.PHONY: install-strip-libctf maybe-install-strip-libctf
+maybe-install-strip-libctf:
+@if libctf
+maybe-install-strip-libctf: install-strip-libctf
+
+install-strip-libctf:
+
+@endif libctf
+
+# Other targets (info, dvi, pdf, etc.)
+
+.PHONY: maybe-info-libctf info-libctf
+maybe-info-libctf:
+@if libctf
+maybe-info-libctf: info-libctf
+
+info-libctf: \
+    configure-libctf 
+	@[ -f ./libctf/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing info in libctf"; \
+	(cd $(HOST_SUBDIR)/libctf && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          info) \
+	  || exit 1
+
+@endif libctf
+
+.PHONY: maybe-dvi-libctf dvi-libctf
+maybe-dvi-libctf:
+@if libctf
+maybe-dvi-libctf: dvi-libctf
+
+dvi-libctf: \
+    configure-libctf 
+	@[ -f ./libctf/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing dvi in libctf"; \
+	(cd $(HOST_SUBDIR)/libctf && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          dvi) \
+	  || exit 1
+
+@endif libctf
+
+.PHONY: maybe-pdf-libctf pdf-libctf
+maybe-pdf-libctf:
+@if libctf
+maybe-pdf-libctf: pdf-libctf
+
+pdf-libctf: \
+    configure-libctf 
+	@[ -f ./libctf/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing pdf in libctf"; \
+	(cd $(HOST_SUBDIR)/libctf && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          pdf) \
+	  || exit 1
+
+@endif libctf
+
+.PHONY: maybe-html-libctf html-libctf
+maybe-html-libctf:
+@if libctf
+maybe-html-libctf: html-libctf
+
+html-libctf: \
+    configure-libctf 
+	@[ -f ./libctf/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing html in libctf"; \
+	(cd $(HOST_SUBDIR)/libctf && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          html) \
+	  || exit 1
+
+@endif libctf
+
+.PHONY: maybe-TAGS-libctf TAGS-libctf
+maybe-TAGS-libctf:
+@if libctf
+maybe-TAGS-libctf: TAGS-libctf
+
+TAGS-libctf: \
+    configure-libctf 
+	@[ -f ./libctf/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing TAGS in libctf"; \
+	(cd $(HOST_SUBDIR)/libctf && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          TAGS) \
+	  || exit 1
+
+@endif libctf
+
+.PHONY: maybe-install-info-libctf install-info-libctf
+maybe-install-info-libctf:
+@if libctf
+maybe-install-info-libctf: install-info-libctf
+
+install-info-libctf: \
+    configure-libctf \
+    info-libctf 
+	@[ -f ./libctf/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing install-info in libctf"; \
+	(cd $(HOST_SUBDIR)/libctf && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          install-info) \
+	  || exit 1
+
+@endif libctf
+
+.PHONY: maybe-install-pdf-libctf install-pdf-libctf
+maybe-install-pdf-libctf:
+@if libctf
+maybe-install-pdf-libctf: install-pdf-libctf
+
+install-pdf-libctf: \
+    configure-libctf \
+    pdf-libctf 
+	@[ -f ./libctf/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing install-pdf in libctf"; \
+	(cd $(HOST_SUBDIR)/libctf && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          install-pdf) \
+	  || exit 1
+
+@endif libctf
+
+.PHONY: maybe-install-html-libctf install-html-libctf
+maybe-install-html-libctf:
+@if libctf
+maybe-install-html-libctf: install-html-libctf
+
+install-html-libctf: \
+    configure-libctf \
+    html-libctf 
+	@[ -f ./libctf/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing install-html in libctf"; \
+	(cd $(HOST_SUBDIR)/libctf && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          install-html) \
+	  || exit 1
+
+@endif libctf
+
+.PHONY: maybe-installcheck-libctf installcheck-libctf
+maybe-installcheck-libctf:
+@if libctf
+maybe-installcheck-libctf: installcheck-libctf
+
+installcheck-libctf: \
+    configure-libctf 
+	@[ -f ./libctf/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing installcheck in libctf"; \
+	(cd $(HOST_SUBDIR)/libctf && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          installcheck) \
+	  || exit 1
+
+@endif libctf
+
+.PHONY: maybe-mostlyclean-libctf mostlyclean-libctf
+maybe-mostlyclean-libctf:
+@if libctf
+maybe-mostlyclean-libctf: mostlyclean-libctf
+
+mostlyclean-libctf: 
+	@[ -f ./libctf/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing mostlyclean in libctf"; \
+	(cd $(HOST_SUBDIR)/libctf && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          mostlyclean) \
+	  || exit 1
+
+@endif libctf
+
+.PHONY: maybe-clean-libctf clean-libctf
+maybe-clean-libctf:
+@if libctf
+maybe-clean-libctf: clean-libctf
+
+clean-libctf: 
+	@[ -f ./libctf/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing clean in libctf"; \
+	(cd $(HOST_SUBDIR)/libctf && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          clean) \
+	  || exit 1
+
+@endif libctf
+
+.PHONY: maybe-distclean-libctf distclean-libctf
+maybe-distclean-libctf:
+@if libctf
+maybe-distclean-libctf: distclean-libctf
+
+distclean-libctf: 
+	@[ -f ./libctf/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing distclean in libctf"; \
+	(cd $(HOST_SUBDIR)/libctf && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          distclean) \
+	  || exit 1
+
+@endif libctf
+
+.PHONY: maybe-maintainer-clean-libctf maintainer-clean-libctf
+maybe-maintainer-clean-libctf:
+@if libctf
+maybe-maintainer-clean-libctf: maintainer-clean-libctf
+
+maintainer-clean-libctf: 
+	@[ -f ./libctf/Makefile ] || exit 0; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) \
+	for flag in $(EXTRA_HOST_FLAGS) ; do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	echo "Doing maintainer-clean in libctf"; \
+	(cd $(HOST_SUBDIR)/libctf && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	          maintainer-clean) \
+	  || exit 1
+
+@endif libctf
+
+
+
 # ---------------------------------------
 # Modules which run on the target machine
 # ---------------------------------------
@@ -47179,6 +48062,11 @@ stage1-start::
 	  mkdir stage1-lto-plugin; \
 	mv stage1-lto-plugin lto-plugin
 @endif lto-plugin
+@if libctf
+	@cd $(HOST_SUBDIR); [ -d stage1-libctf ] || \
+	  mkdir stage1-libctf; \
+	mv stage1-libctf libctf
+@endif libctf
 	@[ -d stage1-$(TARGET_SUBDIR) ] || \
 	  mkdir stage1-$(TARGET_SUBDIR); \
 	mv stage1-$(TARGET_SUBDIR) $(TARGET_SUBDIR)
@@ -47294,6 +48182,11 @@ stage1-end::
 	  cd $(HOST_SUBDIR); mv lto-plugin stage1-lto-plugin; \
 	fi
 @endif lto-plugin
+@if libctf
+	@if test -d $(HOST_SUBDIR)/libctf; then \
+	  cd $(HOST_SUBDIR); mv libctf stage1-libctf; \
+	fi
+@endif libctf
 	@if test -d $(TARGET_SUBDIR); then \
 	  mv $(TARGET_SUBDIR) stage1-$(TARGET_SUBDIR); \
 	fi
@@ -47474,6 +48367,12 @@ stage2-start::
 	mv stage2-lto-plugin lto-plugin; \
 	mv stage1-lto-plugin prev-lto-plugin || test -f stage1-lean 
 @endif lto-plugin
+@if libctf
+	@cd $(HOST_SUBDIR); [ -d stage2-libctf ] || \
+	  mkdir stage2-libctf; \
+	mv stage2-libctf libctf; \
+	mv stage1-libctf prev-libctf || test -f stage1-lean 
+@endif libctf
 	@[ -d stage2-$(TARGET_SUBDIR) ] || \
 	  mkdir stage2-$(TARGET_SUBDIR); \
 	mv stage2-$(TARGET_SUBDIR) $(TARGET_SUBDIR); \
@@ -47612,6 +48511,12 @@ stage2-end::
 	  mv prev-lto-plugin stage1-lto-plugin; : ; \
 	fi
 @endif lto-plugin
+@if libctf
+	@if test -d $(HOST_SUBDIR)/libctf; then \
+	  cd $(HOST_SUBDIR); mv libctf stage2-libctf; \
+	  mv prev-libctf stage1-libctf; : ; \
+	fi
+@endif libctf
 	@if test -d $(TARGET_SUBDIR); then \
 	  mv $(TARGET_SUBDIR) stage2-$(TARGET_SUBDIR); \
 	  mv prev-$(TARGET_SUBDIR) stage1-$(TARGET_SUBDIR); : ; \
@@ -47816,6 +48721,12 @@ stage3-start::
 	mv stage3-lto-plugin lto-plugin; \
 	mv stage2-lto-plugin prev-lto-plugin || test -f stage2-lean 
 @endif lto-plugin
+@if libctf
+	@cd $(HOST_SUBDIR); [ -d stage3-libctf ] || \
+	  mkdir stage3-libctf; \
+	mv stage3-libctf libctf; \
+	mv stage2-libctf prev-libctf || test -f stage2-lean 
+@endif libctf
 	@[ -d stage3-$(TARGET_SUBDIR) ] || \
 	  mkdir stage3-$(TARGET_SUBDIR); \
 	mv stage3-$(TARGET_SUBDIR) $(TARGET_SUBDIR); \
@@ -47954,6 +48865,12 @@ stage3-end::
 	  mv prev-lto-plugin stage2-lto-plugin; : ; \
 	fi
 @endif lto-plugin
+@if libctf
+	@if test -d $(HOST_SUBDIR)/libctf; then \
+	  cd $(HOST_SUBDIR); mv libctf stage3-libctf; \
+	  mv prev-libctf stage2-libctf; : ; \
+	fi
+@endif libctf
 	@if test -d $(TARGET_SUBDIR); then \
 	  mv $(TARGET_SUBDIR) stage3-$(TARGET_SUBDIR); \
 	  mv prev-$(TARGET_SUBDIR) stage2-$(TARGET_SUBDIR); : ; \
@@ -48214,6 +49131,12 @@ stage4-start::
 	mv stage4-lto-plugin lto-plugin; \
 	mv stage3-lto-plugin prev-lto-plugin || test -f stage3-lean 
 @endif lto-plugin
+@if libctf
+	@cd $(HOST_SUBDIR); [ -d stage4-libctf ] || \
+	  mkdir stage4-libctf; \
+	mv stage4-libctf libctf; \
+	mv stage3-libctf prev-libctf || test -f stage3-lean 
+@endif libctf
 	@[ -d stage4-$(TARGET_SUBDIR) ] || \
 	  mkdir stage4-$(TARGET_SUBDIR); \
 	mv stage4-$(TARGET_SUBDIR) $(TARGET_SUBDIR); \
@@ -48352,6 +49275,12 @@ stage4-end::
 	  mv prev-lto-plugin stage3-lto-plugin; : ; \
 	fi
 @endif lto-plugin
+@if libctf
+	@if test -d $(HOST_SUBDIR)/libctf; then \
+	  cd $(HOST_SUBDIR); mv libctf stage4-libctf; \
+	  mv prev-libctf stage3-libctf; : ; \
+	fi
+@endif libctf
 	@if test -d $(TARGET_SUBDIR); then \
 	  mv $(TARGET_SUBDIR) stage4-$(TARGET_SUBDIR); \
 	  mv prev-$(TARGET_SUBDIR) stage3-$(TARGET_SUBDIR); : ; \
@@ -48600,6 +49529,12 @@ stageprofile-start::
 	mv stageprofile-lto-plugin lto-plugin; \
 	mv stage1-lto-plugin prev-lto-plugin || test -f stage1-lean 
 @endif lto-plugin
+@if libctf
+	@cd $(HOST_SUBDIR); [ -d stageprofile-libctf ] || \
+	  mkdir stageprofile-libctf; \
+	mv stageprofile-libctf libctf; \
+	mv stage1-libctf prev-libctf || test -f stage1-lean 
+@endif libctf
 	@[ -d stageprofile-$(TARGET_SUBDIR) ] || \
 	  mkdir stageprofile-$(TARGET_SUBDIR); \
 	mv stageprofile-$(TARGET_SUBDIR) $(TARGET_SUBDIR); \
@@ -48738,6 +49673,12 @@ stageprofile-end::
 	  mv prev-lto-plugin stage1-lto-plugin; : ; \
 	fi
 @endif lto-plugin
+@if libctf
+	@if test -d $(HOST_SUBDIR)/libctf; then \
+	  cd $(HOST_SUBDIR); mv libctf stageprofile-libctf; \
+	  mv prev-libctf stage1-libctf; : ; \
+	fi
+@endif libctf
 	@if test -d $(TARGET_SUBDIR); then \
 	  mv $(TARGET_SUBDIR) stageprofile-$(TARGET_SUBDIR); \
 	  mv prev-$(TARGET_SUBDIR) stage1-$(TARGET_SUBDIR); : ; \
@@ -48919,6 +49860,12 @@ stagefeedback-start::
 	mv stagefeedback-lto-plugin lto-plugin; \
 	mv stageprofile-lto-plugin prev-lto-plugin || test -f stageprofile-lean 
 @endif lto-plugin
+@if libctf
+	@cd $(HOST_SUBDIR); [ -d stagefeedback-libctf ] || \
+	  mkdir stagefeedback-libctf; \
+	mv stagefeedback-libctf libctf; \
+	mv stageprofile-libctf prev-libctf || test -f stageprofile-lean 
+@endif libctf
 	@[ -d stagefeedback-$(TARGET_SUBDIR) ] || \
 	  mkdir stagefeedback-$(TARGET_SUBDIR); \
 	mv stagefeedback-$(TARGET_SUBDIR) $(TARGET_SUBDIR); \
@@ -49057,6 +50004,12 @@ stagefeedback-end::
 	  mv prev-lto-plugin stageprofile-lto-plugin; : ; \
 	fi
 @endif lto-plugin
+@if libctf
+	@if test -d $(HOST_SUBDIR)/libctf; then \
+	  cd $(HOST_SUBDIR); mv libctf stagefeedback-libctf; \
+	  mv prev-libctf stageprofile-libctf; : ; \
+	fi
+@endif libctf
 	@if test -d $(TARGET_SUBDIR); then \
 	  mv $(TARGET_SUBDIR) stagefeedback-$(TARGET_SUBDIR); \
 	  mv prev-$(TARGET_SUBDIR) stageprofile-$(TARGET_SUBDIR); : ; \
@@ -49737,6 +50690,13 @@ all-stage3-binutils: maybe-all-stage3-gas
 all-stage4-binutils: maybe-all-stage4-gas
 all-stageprofile-binutils: maybe-all-stageprofile-gas
 all-stagefeedback-binutils: maybe-all-stagefeedback-gas
+all-binutils: maybe-all-libctf
+all-stage1-binutils: maybe-all-stage1-libctf
+all-stage2-binutils: maybe-all-stage2-libctf
+all-stage3-binutils: maybe-all-stage3-libctf
+all-stage4-binutils: maybe-all-stage4-libctf
+all-stageprofile-binutils: maybe-all-stageprofile-libctf
+all-stagefeedback-binutils: maybe-all-stagefeedback-libctf
 install-binutils: maybe-install-opcodes
 install-strip-binutils: maybe-install-strip-opcodes
 install-opcodes: maybe-install-bfd
@@ -49949,6 +50909,27 @@ install-strip-sid: maybe-install-strip-tk
 all-sim: maybe-all-readline
 all-sim: maybe-configure-gdb
 all-fastjar: maybe-all-build-texinfo
+all-libctf: all-libiberty
+all-stage1-libctf: all-stage1-libiberty
+all-stage2-libctf: all-stage2-libiberty
+all-stage3-libctf: all-stage3-libiberty
+all-stage4-libctf: all-stage4-libiberty
+all-stageprofile-libctf: all-stageprofile-libiberty
+all-stagefeedback-libctf: all-stagefeedback-libiberty
+all-libctf: maybe-all-bfd
+all-stage1-libctf: maybe-all-stage1-bfd
+all-stage2-libctf: maybe-all-stage2-bfd
+all-stage3-libctf: maybe-all-stage3-bfd
+all-stage4-libctf: maybe-all-stage4-bfd
+all-stageprofile-libctf: maybe-all-stageprofile-bfd
+all-stagefeedback-libctf: maybe-all-stagefeedback-bfd
+all-libctf: maybe-all-zlib
+all-stage1-libctf: maybe-all-stage1-zlib
+all-stage2-libctf: maybe-all-stage2-zlib
+all-stage3-libctf: maybe-all-stage3-zlib
+all-stage4-libctf: maybe-all-stage4-zlib
+all-stageprofile-libctf: maybe-all-stageprofile-zlib
+all-stagefeedback-libctf: maybe-all-stagefeedback-zlib
 all-bison: maybe-all-build-texinfo
 all-flex: maybe-all-build-bison
 all-flex: maybe-all-m4

@@ -1,5 +1,13 @@
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
+	* Makefile.am: New.
+	* Makefile.in: Regenerated.
+	* config.h.in: Likewise.
+	* aclocal.m4: Likewise.
+	* configure: Likewise.
+
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-dump.c: New.
 
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
