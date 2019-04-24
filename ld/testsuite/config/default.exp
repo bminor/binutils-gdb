@@ -269,7 +269,7 @@ if { ![info exists LD_CLASS] } then {
 # Set PLT_CFLAGS to "-fplt" if target compiler supports it.
 
 if { ![info exists PLT_CFLAGS] } then {
-    if { [which $CC] != 0 } {
+    if { [check_compiler_available] } {
 	# Check if gcc supports -fplt
 	set flags ""
 	if [board_info [target_info name] exists cflags] {
@@ -307,7 +307,7 @@ if { ![info exists PLT_CFLAGS] } then {
 # target compiler supports them.
 
 if { ![info exists NOPIE_CFLAGS] || ![info exists NOPIE_LDFLAGS] } then {
-    if { [which $CC] != 0 } {
+    if { [check_compiler_available] } {
 	# Check if gcc supports -fno-PIE -no-pie.
 	set flags ""
 	if [board_info [target_info name] exists cflags] {
@@ -347,7 +347,7 @@ if { ![info exists NOPIE_CFLAGS] || ![info exists NOPIE_LDFLAGS] } then {
 # Set GNU2_CFLAGS to "-mtls-dialect=gnu2" if target compiler supports it.
 
 if { ![info exists GNU2_CFLAGS] } then {
-    if { [which $CC] != 0 } {
+    if { [check_compiler_available] } {
 	# Check if gcc supports -mtls-dialect=gnu2
 	set flags ""
 	if [board_info [target_info name] exists cflags] {
@@ -384,7 +384,7 @@ if { ![info exists GNU2_CFLAGS] } then {
 # Set INT128_CFLAGS to "-DHAS_INT128" if target compiler supports __int128.
 
 if { ![info exists INT128_CFLAGS] } then {
-    if { [which $CC] != 0 } {
+    if { [check_compiler_available] } {
 	# Check if gcc supports __int128.
 	set flags ""
 	if [board_info [target_info name] exists cflags] {
@@ -421,7 +421,7 @@ if { ![info exists INT128_CFLAGS] } then {
 # Set STATIC_LDFLAGS to "-static" if target compiler supports it.
 
 if { ![info exists STATIC_LDFLAGS] } then {
-    if { [which $CC] != 0 } {
+    if { [check_compiler_available] } {
 	# Check if gcc supports -static.
 	set flags ""
 	if [board_info [target_info name] exists cflags] {
@@ -458,7 +458,7 @@ if { ![info exists STATIC_LDFLAGS] } then {
 # Set STATIC_PIE_LDFLAGS to "-static-pie" if target compiler supports it.
 
 if { ![info exists STATIC_PIE_LDFLAGS] } then {
-    if { [which $CC] != 0 } {
+    if { [check_compiler_available] } {
 	# Check if gcc supports -static-pie.
 	set flags ""
 	if [board_info [target_info name] exists cflags] {

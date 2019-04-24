@@ -24,7 +24,7 @@ set testund "undefined"
 set testfn "undefined function"
 set testline "undefined line"
 
-if { ![is_remote host] && [which $CC] == 0 } {
+if { ![check_compiler_available] } {
     verbose "Could not find C compiler!" 1
     untested $testund
     untested $testfn

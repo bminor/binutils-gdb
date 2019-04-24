@@ -731,7 +731,7 @@ global PLT_CFLAGS
 global NOPIE_CFLAGS NOPIE_LDFLAGS
 
 # Must be native with the C compiler
-if { [isnative] && [which $CC] != 0 } {
+if { [isnative] && [check_compiler_available] } {
     run_cc_link_tests {
 	{"Helper X32 DSO from x86-64 object" "" "-m64 -fPIC -g"
 	 {simple.c} {} "libsimple.a"}

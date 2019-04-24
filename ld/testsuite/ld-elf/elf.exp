@@ -182,7 +182,7 @@ set LDFLAGS $old_ldflags
 set ASFLAGS $old_asflags
 
 # Check to see if the C compiler works
-if { [which $CC] == 0 } {
+if { ![check_compiler_available] } {
     return
 }
 

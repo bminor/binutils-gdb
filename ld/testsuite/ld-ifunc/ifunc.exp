@@ -63,7 +63,7 @@ foreach t $test_list {
 
 # We need a working compiler.  (Strictly speaking this is
 # not true, we could use target specific assembler files).
-if { [which $CC] == 0 } {
+if { ![check_compiler_available] } {
     verbose "IFUNC tests not run - no compiler available"
     return
 }

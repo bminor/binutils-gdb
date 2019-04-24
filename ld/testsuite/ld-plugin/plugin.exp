@@ -26,7 +26,7 @@ if ![check_plugin_api_available] {
 # And a compiler to be available.
 set can_compile 1
 set failure_kind "unresolved"
-if { [which $CC] == 0 } {
+if { ![check_compiler_available] } {
   # Don't fail immediately, 
   set can_compile 0
   set failure_kind "unsupported"

@@ -54,7 +54,7 @@ if {![is_pecoff_format]} {
 }
 
 # No compiler, no test.
-if { [which $CC] == 0 } {
+if { ![check_compiler_available] } {
     untested "Direct linking to dll test"
     return
 }

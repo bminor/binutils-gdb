@@ -581,7 +581,7 @@ global PLT_CFLAGS
 # Must be Linux native with the C compiler
 if { [isnative]
      && [istarget "i?86-*-linux*"]
-     && [which $CC] != 0 } {
+     && [check_compiler_available] } {
     run_cc_link_tests [list \
 	[list \
 	    "Build plt-lib.so" \
@@ -1193,7 +1193,7 @@ global NOPIE_CFLAGS NOPIE_LDFLAGS
 if { [isnative]
      && [check_ifunc_available]
      && [istarget "i?86-*-*"]
-     && [which $CC] != 0 } {
+     && [check_compiler_available] } {
     run_cc_link_tests [list \
 	[list \
 	    "Build ifunc-1a.o ifunc-1b.o ifunc-1c.o ifunc-1d.o" \
@@ -1310,7 +1310,7 @@ if { [isnative]
 # Must be native with the C compiler.
 if { [isnative]
      && [istarget "i?86-*-*"]
-     && [which $CC] != 0 } {
+     && [check_compiler_available] } {
     run_cc_link_tests [list \
 	[list \
 	    "Build pr22001-1.so" \

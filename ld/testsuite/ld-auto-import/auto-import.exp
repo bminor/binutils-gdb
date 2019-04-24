@@ -67,7 +67,7 @@ if [istarget *-pc-mingw*] {
 }
 
 # No compiler, no test.
-if { [which $CC] == 0 } {
+if { ![check_compiler_available] } {
     untested "Auto import test (compiler not found)"
     return
 }

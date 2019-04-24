@@ -26,7 +26,7 @@ if { ![istarget *-*-linux*]
 }
 
 # Check to see if the C compiler works
-if { [which $CC] == 0 } {
+if { ![check_compiler_available] } {
     return
 }
 

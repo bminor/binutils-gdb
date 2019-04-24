@@ -134,7 +134,7 @@ proc i126256-test { } {
     set tmpdir tmpdir
     set testname "Seg fault whilst linking one shared library into another when relaxation is enabled."
 
-    if {![is_remote host] && [which $CC] == 0} then {
+    if { ![check_compiler_available] } then {
 	return
     }
 

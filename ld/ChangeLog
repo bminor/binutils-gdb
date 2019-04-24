@@ -1,3 +1,50 @@
+2019-04-24  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* testsuite/config/default.exp: Use [check_compiler_available]
+	instead of [which $CC].
+	* testsuite/ld-auto-import/auto-import.exp: Likewise.
+	* testsuite/ld-cygwin/exe-export.exp: Likewise.
+	* testsuite/ld-elf/audit.exp: Likewise.
+	* testsuite/ld-elf/compress.exp: Likewise.
+	* testsuite/ld-elf/dwarf.exp: Likewise.
+	* testsuite/ld-elf/elf.exp: Likewise.
+	* testsuite/ld-elf/indirect.exp: Likewise.
+	* testsuite/ld-elf/linux-x86.exp: Likewise.
+	* testsuite/ld-elf/shared.exp: Likewise.
+	* testsuite/ld-elf/tls.exp: Likewise.
+	* testsuite/ld-elf/wrap.exp: Likewise.
+	* testsuite/ld-elfcomm/elfcomm.exp: Likewise.
+	* testsuite/ld-elfvers/vers.exp: Likewise.
+	* testsuite/ld-elfvsb/elfvsb.exp: Likewise.
+	* testsuite/ld-elfweak/elfweak.exp: Likewise.
+	* testsuite/ld-gc/gc.exp: Likewise.
+	* testsuite/ld-i386/i386.exp: Likewise.
+	* testsuite/ld-i386/no-plt.exp: Likewise.
+	* testsuite/ld-i386/tls.exp: Likewise.
+	* testsuite/ld-ifunc/ifunc.exp: Likewise.
+	* testsuite/ld-mn10300/mn10300.exp: Likewise.
+	* testsuite/ld-pe/pe-compile.exp: Likewise.
+	* testsuite/ld-pe/pe-run.exp: Likewise.
+	* testsuite/ld-pe/pe-run2.exp: Likewise.
+	* testsuite/ld-pie/pie.exp: Likewise.
+	* testsuite/ld-plugin/lto.exp: Likewise.
+	* testsuite/ld-plugin/plugin.exp: Likewise.
+	* testsuite/ld-scripts/crossref.exp: Likewise.
+	* testsuite/ld-sh/sh.exp: Likewise.
+	* testsuite/ld-shared/shared.exp: Likewise.
+	* testsuite/ld-size/size.exp: Likewise.
+	* testsuite/ld-srec/srec.exp: Likewise.
+	* testsuite/ld-undefined/undefined.exp: Likewise.
+	* testsuite/ld-unique/unique.exp: Likewise.
+	* testsuite/ld-x86-64/mpx.exp: Likewise.
+	* testsuite/ld-x86-64/no-plt.exp: Likewise.
+	* testsuite/ld-x86-64/tls.exp: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/lib/ld-lib.exp (run_ld_link_exec_tests): Call
+	check_compiler_available before trying to use the compiler.
+	(run_cc_link_tests): Likewise.
+	(check_compiler_available): New.  Use it instead of [which $CC].
+
 2019-04-23  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am (GENDEPDIR): New var, used..

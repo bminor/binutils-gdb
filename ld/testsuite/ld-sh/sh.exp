@@ -129,7 +129,7 @@ set testlink "SH relaxing"
 set testjsr "SH confirm relaxing"
 set testrun "SH relaxing execution"
 
-if { [which $CC] == 0 } {
+if { ![check_compiler_available] } {
     untested $testlink
     untested $testjsr
     untested $testrun

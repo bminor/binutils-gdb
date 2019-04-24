@@ -27,7 +27,7 @@ set test5 "NOCROSSREFS_TO 2"
 set test6 "NOCROSSREFS_TO 3"
 set test7 "NOCROSSREFS_TO 4"
 
-if { ![is_remote host] && [which $CC] == 0 } {
+if { ![check_compiler_available] } {
     untested $test1
     untested $test2
     untested $test3

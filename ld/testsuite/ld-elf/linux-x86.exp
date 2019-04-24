@@ -20,7 +20,7 @@
 #
 
 # Test very simple native Linux/x86 programs with linux-x86.S.
-if { ![isnative] || [which $CC] == 0 \
+if { ![isnative] || ![check_compiler_available] \
      || (![istarget "i?86-*-linux*"] \
          && ![istarget "x86_64-*-linux*"] \
          && ![istarget "amd64-*-linux*"]) } {

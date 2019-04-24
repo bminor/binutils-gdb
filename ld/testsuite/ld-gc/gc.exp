@@ -39,7 +39,7 @@ if { [istarget m681*-*-*] || [istarget m68hc1*-*-*] } {
     set cflags "$cflags -fomit-frame-pointer -mshort"
 }
 
-if { [is_remote host] || [which $CC] != 0 } {
+if { [check_compiler_available] } {
     ld_compile "$CC -c $CFLAGS $cflags" $srcdir/$subdir/gc.c $objfile
 }
 
@@ -130,7 +130,7 @@ if { [is_elf_format] && [check_shared_lib_support] } then {
     set LDFLAGS $old_ldflags
 }
 
-if { [is_remote host] || [which $CC] != 0 } {
+if { [check_compiler_available] } {
     if { [istarget "*-*-linux*"]
 	 || [istarget "*-*-nacl*"]
 	 || [istarget "*-*-gnu*"] } {
@@ -141,24 +141,24 @@ if { [is_remote host] || [which $CC] != 0 } {
     }
 }
 
-if { [is_remote host] || [which $CC] != 0 } {
+if { [check_compiler_available] } {
 	ld_compile "$CC $CFLAGS $cflags" $srcdir/$subdir/pr13683.c tmpdir/pr13683.o
 	run_dump_test "pr13683"
 }
 
-if { [is_remote host] || [which $CC] != 0 } {
+if { [check_compiler_available] } {
     ld_compile "$CC $CFLAGS $cflags $NOPIE_CFLAGS" $srcdir/$subdir/pr14265.c tmpdir/pr14265.o
     run_dump_test "pr14265"
 }
 
-if { [is_remote host] || [which $CC] != 0 } {
+if { [check_compiler_available] } {
     ld_compile "$CC $CFLAGS $cflags -O0" $srcdir/$subdir/pr19161-1.c tmpdir/pr19161-1.o
     ld_compile "$CC $CFLAGS $cflags -O0" $srcdir/$subdir/pr19161-2.c tmpdir/pr19161-2.o
     run_dump_test "pr19161"
 }
 
 if { [is_elf_format] && [check_shared_lib_support] \
-     && ([is_remote host] || [which $CC] != 0) } {
+     && [check_compiler_available] } {
     run_cc_link_tests [list \
 	[list \
 	    "Build libpr20306.so" \

@@ -342,7 +342,7 @@ set sizeof_headers [string match "*SIZEOF_HEADERS*" $exec_output]
 # directly to the S-record format, and require that the two files
 # contain the same data.
 
-if { ![is_remote host] && [which $CC] == 0 } {
+if { ![check_compiler_available] } {
     untested $test1
     untested $test2
     return
