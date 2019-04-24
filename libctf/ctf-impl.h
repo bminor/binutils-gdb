@@ -230,6 +230,18 @@ struct ctf_file
   void *ctf_specific;		  /* Data for ctf_get/setspecific().  */
 };
 
+/* An abstraction over both a ctf_file_t and a ctf_archive_t.  */
+
+struct ctf_archive_internal
+{
+  int ctfi_is_archive;
+  ctf_file_t *ctfi_file;
+  struct ctf_archive *ctfi_archive;
+  ctf_sect_t ctfi_symsect;
+  ctf_sect_t ctfi_strsect;
+  void *ctfi_data;
+};
+
 /* Return x rounded up to an alignment boundary.
    eg, P2ROUNDUP(0x1234, 0x100) == 0x1300 (0x13*align)
    eg, P2ROUNDUP(0x5600, 0x100) == 0x5600 (0x56*align)  */
@@ -310,6 +322,9 @@ extern ctf_dvdef_t *ctf_dvd_lookup (const ctf_file_t *, const char *);
 extern const char *ctf_strraw (ctf_file_t *, uint32_t);
 extern const char *ctf_strptr (ctf_file_t *, uint32_t);
 
+extern struct ctf_archive *ctf_arc_open_internal (const char *, int *);
+extern struct ctf_archive *ctf_arc_bufopen (const void *, size_t, int *);
+extern void ctf_arc_close_internal (struct ctf_archive *);
 extern void *ctf_set_open_errno (int *, int);
 extern long ctf_set_errno (ctf_file_t *, int);
 

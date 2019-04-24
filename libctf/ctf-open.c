@@ -1572,6 +1572,13 @@ ctf_file_close (ctf_file_t *fp)
   ctf_free (fp);
 }
 
+/* Get the CTF archive from which this ctf_file_t is derived.  */
+ctf_archive_t *
+ctf_get_arc (const ctf_file_t *fp)
+{
+  return fp->ctf_archive;
+}
+
 /* Return the ctfsect out of the core ctf_impl.  Useful for freeing the
    ctfsect's data * after ctf_file_close(), which is why we return the actual
    structure, not a pointer to it, since that is likely to become a pointer to

@@ -510,6 +510,53 @@ typedef struct ctf_enum
   int cte_value;		/* Value associated with this name.  */
 } ctf_enum_t;
 
+/* The ctf_archive is a collection of ctf_file_t's stored together. The format
+   is suitable for mmap()ing: this control structure merely describes the
+   mmap()ed archive (and overlaps the first few bytes of it), hence the
+   greater care taken with integral types.  All CTF files in an archive
+   must have the same data model.  (This is not validated.)
+
+   All integers in this structure are stored in little-endian byte order.
+
+   The code relies on the fact that everything in this header is a uint64_t
+   and thus the header needs no padding (in particular, that no padding is
+   needed between ctfa_ctfs and the unnamed ctfa_archive_modent array
+   that follows it).
+
+   This is *not* the same as the data structure returned by the ctf_arc_*()
+   functions:  this is the low-level on-disk representation.  */
+
+#define CTFA_MAGIC 0x8b47f2a4d7623eeb	/* Random.  */
+struct ctf_archive
+{
+  /* Magic number.  (In loaded files, overwritten with the file size
+     so ctf_arc_close() knows how much to munmap()).  */
+  uint64_t ctfa_magic;
+
+  /* CTF data model.  */
+  uint64_t ctfa_model;
+
+  /* Number of CTF files in the archive.  */
+  uint64_t ctfa_nfiles;
+
+  /* Offset of the name table.  */
+  uint64_t ctfa_names;
+
+  /* Offset of the CTF table.  Each element starts with a size (a uint64_t
+     in network byte order) then a ctf_file_t of that size.  */
+  uint64_t ctfa_ctfs;
+};
+
+/* An array of ctfa_nnamed of this structure lies at
+   ctf_archive[ctf_archive->ctfa_modents] and gives the ctfa_ctfs or
+   ctfa_names-relative offsets of each name or ctf_file_t.  */
+
+typedef struct ctf_archive_modent
+{
+  uint64_t name_offset;
+  uint64_t ctf_offset;
+} ctf_archive_modent_t;
+
 #ifdef	__cplusplus
 }
 #endif

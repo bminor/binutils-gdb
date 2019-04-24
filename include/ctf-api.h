@@ -198,12 +198,34 @@ enum
 #define	CTF_ADD_NONROOT	0	/* Type only visible in nested scope.  */
 #define	CTF_ADD_ROOT	1	/* Type visible at top-level scope.  */
 
+/* These typedefs are used to define the signature for callback functions
+   that can be used with the iteration and visit functions below.  */
+
+typedef int ctf_archive_member_f (ctf_file_t *fp, const char *name, void *arg);
+typedef int ctf_archive_raw_member_f (const char *name, const void *content,
+				      size_t len, void *arg);
+
 extern ctf_sect_t ctf_getdatasect (const ctf_file_t *);
+extern ctf_archive_t *ctf_get_arc (const ctf_file_t *);
+extern void ctf_arc_close (ctf_archive_t *);
+extern ctf_file_t *ctf_arc_open_by_name (const ctf_archive_t *,
+					 const char *, int *);
+extern ctf_file_t *ctf_arc_open_by_name_sections (const ctf_archive_t *,
+						  const ctf_sect_t *,
+						  const ctf_sect_t *,
+						  const char *, int *);
+
+/* The next functions return or close real CTF files, or write out CTF archives,
+   not opaque containers around either.  */
+
 extern ctf_file_t *ctf_simple_open (const char *, size_t, const char *, size_t,
 				   size_t, const char *, size_t, int *);
 extern ctf_file_t *ctf_bufopen (const ctf_sect_t *, const ctf_sect_t *,
 				const ctf_sect_t *, int *);
 extern void ctf_file_close (ctf_file_t *);
+
+extern int ctf_arc_write (const char *, ctf_file_t **, size_t,
+			  const char **, size_t);
 
 extern ctf_file_t *ctf_parent_file (ctf_file_t *);
 extern const char *ctf_parent_name (ctf_file_t *);
@@ -218,6 +240,14 @@ extern void *ctf_getspecific (ctf_file_t *);
 
 extern int ctf_errno (ctf_file_t *);
 extern const char *ctf_errmsg (int);
+extern int ctf_archive_iter (const ctf_archive_t *, ctf_archive_member_f *,
+			     void *);
+/* This function alone does not currently operate on CTF files masquerading
+   as archives, and returns -EINVAL: the raw data is no longer available.  It is
+   expected to be used only by archiving tools, in any case, which have no need
+   to deal with non-archives at all.  */
+extern int ctf_archive_raw_iter (const ctf_archive_t *,
+				 ctf_archive_raw_member_f *, void *);
 extern ctf_id_t ctf_add_array (ctf_file_t *, uint32_t,
 			       const ctf_arinfo_t *);
 extern ctf_id_t ctf_add_const (ctf_file_t *, uint32_t, ctf_id_t);

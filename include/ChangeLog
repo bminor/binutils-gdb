@@ -1,5 +1,19 @@
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf.h (CTFA_MAGIC): New.
+	(struct ctf_archive): New.
+	(struct ctf_archive_modent): Likewise.
+	* ctf-api.h (ctf_archive_member_f): New.
+	(ctf_archive_raw_member_f): Likewise.
+	(ctf_arc_write): Likewise.
+	(ctf_arc_close): Likewise.
+	(ctf_arc_open_by_name): Likewise.
+	(ctf_archive_iter): Likewise.
+	(ctf_archive_raw_iter): Likewise.
+	(ctf_get_arc): Likewise.
+
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-api.h (ctf_file_close): New declaration.
 	(ctf_getdatasect): Likewise.
 	(ctf_parent_file): Likewise.

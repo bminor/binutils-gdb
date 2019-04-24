@@ -1,5 +1,13 @@
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-archive.c: New.
+	* ctf-impl.h (ctf_archive_internal): New type.
+	(ctf_arc_open_internal): New declaration.
+	(ctf_arc_bufopen): Likewise.
+	(ctf_arc_close_internal): Likewise.
+
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-open.c: New file.
 	* swap.h: Likewise.
 
