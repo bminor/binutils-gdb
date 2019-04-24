@@ -270,6 +270,13 @@ extern void *ctf_getspecific (ctf_file_t *);
 extern int ctf_errno (ctf_file_t *);
 extern const char *ctf_errmsg (int);
 
+extern int ctf_func_info (ctf_file_t *, unsigned long, ctf_funcinfo_t *);
+extern int ctf_func_args (ctf_file_t *, unsigned long, uint32_t, ctf_id_t *);
+
+extern ctf_id_t ctf_lookup_by_name (ctf_file_t *, const char *);
+extern ctf_id_t ctf_lookup_by_symbol (ctf_file_t *, unsigned long);
+extern ctf_id_t ctf_lookup_variable (ctf_file_t *, const char *);
+
 extern ctf_id_t ctf_type_resolve (ctf_file_t *, ctf_id_t);
 extern char *ctf_type_aname (ctf_file_t *, ctf_id_t);
 extern ssize_t ctf_type_lname (ctf_file_t *, ctf_id_t, char *, size_t);

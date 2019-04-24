@@ -1,5 +1,13 @@
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-api.h (ctf_func_info): New.
+	(ctf_func_args): Likewise.
+	(ctf_lookup_by_symbol): Likewise.
+	(ctf_lookup_by_symbol): Likewise.
+	(ctf_lookup_variable): Likewise.
+
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-api.h (ctf_visit_f): New definition.
 	(ctf_member_f): Likewise.
 	(ctf_enum_f): Likewise.

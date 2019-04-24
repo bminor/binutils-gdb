@@ -1,5 +1,17 @@
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-lookup.c (isqualifier): New.
+	(ctf_lookup_by_name): Likewise.
+	(struct ctf_lookup_var_key): Likewise.
+	(ctf_lookup_var): Likewise.
+	(ctf_lookup_variable): Likewise.
+	(ctf_lookup_symbol_name): Likewise.
+	(ctf_lookup_by_symbol): Likewise.
+	(ctf_func_info): Likewise.
+	(ctf_func_args): Likewise.
+
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-decl.c: New file.
 	* ctf-types.c: Likewise.
 	* ctf-impl.h: New declarations.

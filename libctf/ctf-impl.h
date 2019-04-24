@@ -368,6 +368,7 @@ extern void ctf_dprintf (const char *, ...);
 extern void libctf_init_debug (void);
 
 extern Elf64_Sym *ctf_sym_to_elf64 (const Elf32_Sym *src, Elf64_Sym *dst);
+extern const char *ctf_lookup_symbol_name (ctf_file_t *fp, unsigned long symidx);
 
 /* Variables, all underscore-prepended. */
 
