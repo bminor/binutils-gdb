@@ -3564,7 +3564,8 @@ proc gdb_compile {source dest type options} {
     if { $getting_compiler_info == 0
 	 && [test_compiler_info {gcc-*-*}]
 	 && !([test_compiler_info {gcc-[0-3]-*}]
-	      || [test_compiler_info {gcc-4-0-*}]) } {
+	      || [test_compiler_info {gcc-4-0-*}])
+	 && [lsearch -exact $options rust] == -1} {
         # Put it at the front to not override any user-provided value.
         lappend new_options "early_flags=-fno-stack-protector"
     }

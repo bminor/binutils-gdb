@@ -1,5 +1,10 @@
 2019-04-24  Tom Tromey  <tromey@adacore.com>
 
+	* lib/gdb.exp (gdb_compile): Don't add -fno-stack-protector for
+	Rust.
+
+2019-04-24  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.arch/amd64-eval.exp: Test bitfield return.
 	* gdb.arch/amd64-eval.cc (struct Bitfields): New.
 	(class Foo) <return_bitfields>: New method.
