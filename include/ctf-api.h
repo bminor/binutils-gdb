@@ -218,6 +218,10 @@ typedef int ctf_label_f (const char *name, const ctf_lblinfo_t *info,
 typedef int ctf_archive_member_f (ctf_file_t *fp, const char *name, void *arg);
 typedef int ctf_archive_raw_member_f (const char *name, const void *content,
 				      size_t len, void *arg);
+typedef char *ctf_dump_decorate_f (ctf_sect_names_t sect,
+				   char *line, void *arg);
+
+typedef struct ctf_dump_state ctf_dump_state_t;
 
 /* Opening.  These mostly return an abstraction over both CTF files and CTF
    archives: so they can be used to open both.  CTF files will appear to be an
@@ -320,6 +324,9 @@ extern int ctf_archive_iter (const ctf_archive_t *, ctf_archive_member_f *,
    to deal with non-archives at all.  */
 extern int ctf_archive_raw_iter (const ctf_archive_t *,
 				 ctf_archive_raw_member_f *, void *);
+extern char *ctf_dump (ctf_file_t *, ctf_dump_state_t **state,
+		       ctf_sect_names_t sect, ctf_dump_decorate_f *,
+		       void *arg);
 
 extern ctf_id_t ctf_add_array (ctf_file_t *, uint32_t,
 			       const ctf_arinfo_t *);

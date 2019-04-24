@@ -1,5 +1,11 @@
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-api.h (ctf_dump_decorate_f): New.
+	(ctf_dump_state_t): new.
+	(ctf_dump): New.
+
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-api.h (ctf_label_f): New.
 	(ctf_label_set): New.
 	(ctf_label_get): New.

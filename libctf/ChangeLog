@@ -1,5 +1,9 @@
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-dump.c: New.
+
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-labels.c: New.
 
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
