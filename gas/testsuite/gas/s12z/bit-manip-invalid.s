@@ -8,4 +8,8 @@
         nop
         DC.L 0x03651201
         nop
+	dc.w 0xEC44
+	dc.w 0xEC7C
+	dc.w 0xED5D
+	dc.w 0xED7D
 

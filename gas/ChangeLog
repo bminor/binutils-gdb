@@ -1,3 +1,9 @@
+2019-04-24  John Darrington <john@darrington.wattle.id.au>
+
+	* testsuite/gas/s12z/bit-manip-invalid.s: Extend test for BSET
+	and BCLR instructions with an invalid mode.
+	* testsuite/gas/s12z/bit-manip-invalid.d: ditto.
+
 2019-04-19  Nick Clifton  <nickc@redhat.com>
 
 	PR 24464

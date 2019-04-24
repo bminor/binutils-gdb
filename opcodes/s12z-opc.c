@@ -1821,6 +1821,7 @@ bm_decode (struct mem_read_abstraction_base *mra,
   switch (mode)
     {
     case BM_REG_IMM:
+    case BM_RESERVED0:
       imm = (bm & 0x38) >> 3;
       operand[(*n_operands)++] = create_immediate_operand (imm);
       break;
@@ -1837,9 +1838,6 @@ bm_decode (struct mem_read_abstraction_base *mra,
     case BM_OPR_REG:
     case BM_RESERVED1:
       operand[(*n_operands)++] = create_register_operand ((bm & 0x70) >> 4);
-      break;
-    case BM_RESERVED0:
-      assert (0);
       break;
     }
 }
