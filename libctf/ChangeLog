@@ -1,5 +1,11 @@
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-decl.c: New file.
+	* ctf-types.c: Likewise.
+	* ctf-impl.h: New declarations.
+
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-open-bfd.c: New file.
 	* ctf-open.c (ctf_close): New.
 	* ctf-impl.h: Include bfd.h.

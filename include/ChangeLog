@@ -1,5 +1,36 @@
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-api.h (ctf_visit_f): New definition.
+	(ctf_member_f): Likewise.
+	(ctf_enum_f): Likewise.
+	(ctf_variable_f): Likewise.
+	(ctf_type_f): Likewise.
+	(ctf_type_isparent): Likewise.
+	(ctf_type_ischild): Likewise.
+	(ctf_type_resolve): Likewise.
+	(ctf_type_aname): Likewise.
+	(ctf_type_lname): Likewise.
+	(ctf_type_name): Likewise.
+	(ctf_type_sizee): Likewise.
+	(ctf_type_align): Likewise.
+	(ctf_type_kind): Likewise.
+	(ctf_type_reference): Likewise.
+	(ctf_type_pointer): Likewise.
+	(ctf_type_encoding): Likewise.
+	(ctf_type_visit): Likewise.
+	(ctf_type_cmp): Likewise.
+	(ctf_type_compat): Likewise.
+	(ctf_member_info): Likewise.
+	(ctf_array_info): Likewise.
+	(ctf_enum_name): Likewise.
+	(ctf_enum_value): Likewise.
+	(ctf_member_iter): Likewise.
+	(ctf_enum_iter): Likewise.
+	(ctf_type_iter): Likewise.
+	(ctf_variable_iter): Likewise.
+
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-api.h (struct bfd): New forward.
 	(ctf_fdopen): New.
 	(ctf_bfdopen): Likewise.

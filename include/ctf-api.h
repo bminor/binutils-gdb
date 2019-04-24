@@ -206,6 +206,13 @@ enum
 /* These typedefs are used to define the signature for callback functions
    that can be used with the iteration and visit functions below.  */
 
+typedef int ctf_visit_f (const char *name, ctf_id_t type, unsigned long offset,
+			 int depth, void *arg);
+typedef int ctf_member_f (const char *name, ctf_id_t membtype,
+			  unsigned long offset, void *arg);
+typedef int ctf_enum_f (const char *name, int val, void *arg);
+typedef int ctf_variable_f (const char *name, ctf_id_t type, void *arg);
+typedef int ctf_type_f (ctf_id_t type, void *arg);
 typedef int ctf_archive_member_f (ctf_file_t *fp, const char *name, void *arg);
 typedef int ctf_archive_raw_member_f (const char *name, const void *content,
 				      size_t len, void *arg);
@@ -250,6 +257,8 @@ extern int ctf_arc_write (const char *, ctf_file_t **, size_t,
 extern ctf_file_t *ctf_parent_file (ctf_file_t *);
 extern const char *ctf_parent_name (ctf_file_t *);
 extern void ctf_parent_name_set (ctf_file_t *, const char *);
+extern int ctf_type_isparent (ctf_file_t *, ctf_id_t);
+extern int ctf_type_ischild (ctf_file_t *, ctf_id_t);
 
 extern int ctf_import (ctf_file_t *, ctf_file_t *);
 extern int ctf_setmodel (ctf_file_t *, int);
@@ -260,6 +269,32 @@ extern void *ctf_getspecific (ctf_file_t *);
 
 extern int ctf_errno (ctf_file_t *);
 extern const char *ctf_errmsg (int);
+
+extern ctf_id_t ctf_type_resolve (ctf_file_t *, ctf_id_t);
+extern char *ctf_type_aname (ctf_file_t *, ctf_id_t);
+extern ssize_t ctf_type_lname (ctf_file_t *, ctf_id_t, char *, size_t);
+extern char *ctf_type_name (ctf_file_t *, ctf_id_t, char *, size_t);
+extern ssize_t ctf_type_size (ctf_file_t *, ctf_id_t);
+extern ssize_t ctf_type_align (ctf_file_t *, ctf_id_t);
+extern int ctf_type_kind (ctf_file_t *, ctf_id_t);
+extern ctf_id_t ctf_type_reference (ctf_file_t *, ctf_id_t);
+extern ctf_id_t ctf_type_pointer (ctf_file_t *, ctf_id_t);
+extern int ctf_type_encoding (ctf_file_t *, ctf_id_t, ctf_encoding_t *);
+extern int ctf_type_visit (ctf_file_t *, ctf_id_t, ctf_visit_f *, void *);
+extern int ctf_type_cmp (ctf_file_t *, ctf_id_t, ctf_file_t *, ctf_id_t);
+extern int ctf_type_compat (ctf_file_t *, ctf_id_t, ctf_file_t *, ctf_id_t);
+
+extern int ctf_member_info (ctf_file_t *, ctf_id_t, const char *,
+			    ctf_membinfo_t *);
+extern int ctf_array_info (ctf_file_t *, ctf_id_t, ctf_arinfo_t *);
+
+extern const char *ctf_enum_name (ctf_file_t *, ctf_id_t, int);
+extern int ctf_enum_value (ctf_file_t *, ctf_id_t, const char *, int *);
+
+extern int ctf_member_iter (ctf_file_t *, ctf_id_t, ctf_member_f *, void *);
+extern int ctf_enum_iter (ctf_file_t *, ctf_id_t, ctf_enum_f *, void *);
+extern int ctf_type_iter (ctf_file_t *, ctf_type_f *, void *);
+extern int ctf_variable_iter (ctf_file_t *, ctf_variable_f *, void *);
 extern int ctf_archive_iter (const ctf_archive_t *, ctf_archive_member_f *,
 			     void *);
 /* This function alone does not currently operate on CTF files masquerading
@@ -268,6 +303,7 @@ extern int ctf_archive_iter (const ctf_archive_t *, ctf_archive_member_f *,
    to deal with non-archives at all.  */
 extern int ctf_archive_raw_iter (const ctf_archive_t *,
 				 ctf_archive_raw_member_f *, void *);
+
 extern ctf_id_t ctf_add_array (ctf_file_t *, uint32_t,
 			       const ctf_arinfo_t *);
 extern ctf_id_t ctf_add_const (ctf_file_t *, uint32_t, ctf_id_t);
