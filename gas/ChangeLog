@@ -1,3 +1,16 @@
+2019-04-24  Alan Modra  <amodra@gmail.com>
+
+	PR 24444
+	* symbols.c (resolve_symbol_value): When handling symbols
+	marked as sy_flags.resolved, return correct value for the
+	case of expression symbols left as an O_symbol expression.
+	Merge O_symbol code handling undefined and common symbols with
+	code handling special cases of expression symbols.  Use
+	seg_left to test for undefined and common symbols.  Don't
+	leave an O_symbol expression when X_add_symbol resolves to
+	the absolute_section.  Init final_val later.
+	* testsuite/gas/mmix/basep-7.d: Adjust expected output.
+
 2019-04-24  John Darrington <john@darrington.wattle.id.au>
 
 	* testsuite/gas/s12z/bit-manip-invalid.s: Extend test for BSET
