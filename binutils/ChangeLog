@@ -1,3 +1,50 @@
+2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
+
+	* objdump.c (ctf-api.h): New include.
+	(dump_ctf_section_info): New variable.
+	(dump_ctf_section_name): Likewise.
+	(usage): Describe new options.
+	(enum option_values): Add OPTION_CTF and OPTION_CTF_PARENT.
+	(main): Use them to add --ctf and --ctf-parent.
+	(read_section_stabs): Add new parameter, entsize_ptr.
+	(find_stabs_section): Adjust accordingly.
+	(make_ctfsect): New.
+	(dump_ctf_indent_lines): New.
+	(dump_ctf_archive_member): New.
+	(dump_ctf): New.
+	(dump_bfd): Call it.  Free resources afterwards.
+	* readelf.c (ctf-api.h): New include.
+	(CTF_DUMP): New.
+	(static bfd_boolean do_ctf): Likewise.
+	(dump_ctf_parent_name): Likewise.
+	(dump_ctf_symtab_name): Likewise.
+	(dump_ctf_strtab_name): Likewise.
+	(OPTION_CTF_DUMP): Likewise.
+	(OPTION_CTF_PARENT): Likewise.
+	(OPTION_CTF_SYMBOLS): Likewise.
+	(OPTION_CTF_STRINGS): Likewise.
+	(options): Add them.
+	(usage): Likewise.
+	(parse_args): Handle the new options, requesting CTF_DUMP.
+	(process_section_contents): Handle CTF_DUMP.
+	(shdr_to_ctf_sect): New.
+	(dump_ctf_indent_lines): New.
+	(dump_section_as_ctf): New.
+	(main): Free resources.
+	* Makefile.am (LIBCTF): New variable.
+	(objdump_DEPENDENCIES): Use it.
+	(readelf_DEPENDENCIES): Likewise.
+	(objdump_LDADD): Likewise.
+	(readelf_LDADD): Likewise.
+	* aclocal.m4: Regenerated.
+	* Makefile.in: Likewise.
+
+	* doc/binutils.texi (objdump): Document the new options.
+	(readelf): Likewise.
+	* doc/ctf.options.texi: New.
+	* doc/Makefile.in: Regenerated.
+	* NEWS: Mention the new feature.
+
 2019-05-27  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (process_section_groups): Continue processing groups

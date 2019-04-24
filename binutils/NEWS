@@ -18,7 +18,10 @@
   displayed.  In addition when combined with --disassemble the --dwarf=
   follow-links option will ensure that any symbol tables in the linked
   files are read and used when disassembling code in the main file.
-  
+
+ * Add support for dumping types encoded in the Compact Type Format
+   to objdump and readelf.
+
 Changes in 2.32:
 
 * The addr2line, c++filt, nm and objdump tools now have a limit on the

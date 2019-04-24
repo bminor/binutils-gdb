@@ -2110,6 +2110,7 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{-s}|@option{--full-contents}]
         [@option{-W[lLiaprmfFsoRtUuTgAckK]}|
          @option{--dwarf}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]]
+        [@option{--ctf=}@var{section}]
         [@option{-G}|@option{--stabs}]
         [@option{-t}|@option{--syms}]
         [@option{-T}|@option{--dynamic-syms}]
@@ -2122,6 +2123,9 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{--adjust-vma=}@var{offset}]
         [@option{--dwarf-depth=@var{n}}]
         [@option{--dwarf-start=@var{n}}]
+        [@option{--ctf-parent=}@var{section}]
+        [@option{--ctf-symbols=}@var{section}]
+        [@option{--ctf-strings=}@var{section}]
         [@option{--no-recurse-limit}|@option{--recurse-limit}]
         [@option{--special-syms}]
         [@option{--prefix=}@var{prefix}]
@@ -2636,6 +2640,8 @@ instructions.
 
 @item --dwarf-check
 Enable additional checks for consistency of Dwarf information.
+
+@include ctf.options.texi
 
 @item -G
 @itemx --stabs
@@ -4636,6 +4642,10 @@ readelf [@option{-a}|@option{--all}]
          @option{--debug-dump}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]]
         [@option{--dwarf-depth=@var{n}}]
         [@option{--dwarf-start=@var{n}}]
+        [@option{--ctf=}@var{section}]
+        [@option{--ctf-parent=}@var{section}]
+        [@option{--ctf-symbols=}@var{section}]
+        [@option{--ctf-strings=}@var{section}]
         [@option{-I}|@option{--histogram}]
         [@option{-v}|@option{--version}]
         [@option{-W}|@option{--wide}]
@@ -4815,6 +4825,15 @@ command to @command{ar}, but without using the BFD library.  @xref{ar}.
 @item -w[lLiaprmfFsoRtUuTgAckK]
 @itemx --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]
 @include debug.options.texi
+
+@include ctf.options.texi
+@item --ctf-symbols=@var{section}
+@item --ctf-strings=@var{section}
+Specify the name of another section from which the CTF file can inherit
+strings and symbols.
+
+If either of @option{--ctf-symbols} or @option{--ctf-strings} is specified, the
+other must be specified as well.
 
 @item -I
 @itemx --histogram

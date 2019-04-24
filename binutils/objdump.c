@@ -56,6 +56,7 @@
 #include "bucomm.h"
 #include "elfcomm.h"
 #include "dwarf.h"
+#include "ctf-api.h"
 #include "getopt.h"
 #include "safe-ctype.h"
 #include "dis-asm.h"
@@ -98,6 +99,9 @@ static bfd_boolean with_source_code;	/* -S */
 static int show_raw_insn;		/* --show-raw-insn */
 static int dump_dwarf_section_info;	/* --dwarf */
 static int dump_stab_section_info;	/* --stabs */
+static int dump_ctf_section_info;       /* --ctf */
+static char *dump_ctf_section_name;
+static char *dump_ctf_parent_name;	/* --ctf-parent */
 static int do_demangle;			/* -C, --demangle */
 static bfd_boolean disassemble;		/* -d */
 static bfd_boolean disassemble_all;	/* -D */
@@ -225,6 +229,7 @@ usage (FILE *stream, int status)
           =gdb_index,=trace_info,=trace_abbrev,=trace_aranges,\n\
           =addr,=cu_index,=links,=follow-links]\n\
                            Display DWARF info in the file\n\
+  --ctf=SECTION            Display CTF info from SECTION\n\
   -t, --syms               Display the contents of the symbol table(s)\n\
   -T, --dynamic-syms       Display the contents of the dynamic symbol table\n\
   -r, --reloc              Display the relocation entries in the file\n\
@@ -273,7 +278,8 @@ usage (FILE *stream, int status)
       --dwarf-start=N        Display DIEs starting with N, at the same depth\n\
                              or deeper\n\
       --dwarf-check          Make additional dwarf internal consistency checks.\
-      \n\n"));
+      \n\
+      --ctf-parent=SECTION     Use SECTION as the CTF parent\n\n"));
       list_supported_targets (program_name, stream);
       list_supported_architectures (program_name, stream);
 
@@ -308,7 +314,9 @@ enum option_values
     OPTION_DWARF_START,
     OPTION_RECURSE_LIMIT,
     OPTION_NO_RECURSE_LIMIT,
-    OPTION_INLINES
+    OPTION_INLINES,
+    OPTION_CTF,
+    OPTION_CTF_PARENT
   };
 
 static struct option long_options[]=
@@ -351,6 +359,8 @@ static struct option long_options[]=
   {"special-syms", no_argument, &dump_special_syms, 1},
   {"include", required_argument, NULL, 'I'},
   {"dwarf", optional_argument, NULL, OPTION_DWARF},
+  {"ctf", required_argument, NULL, OPTION_CTF},
+  {"ctf-parent", required_argument, NULL, OPTION_CTF_PARENT},
   {"stabs", no_argument, NULL, 'G'},
   {"start-address", required_argument, NULL, OPTION_START_ADDRESS},
   {"stop-address", required_argument, NULL, OPTION_STOP_ADDRESS},
@@ -2971,7 +2981,8 @@ dump_dwarf (bfd *abfd)
    it.  Return NULL on failure.   */
 
 static bfd_byte *
-read_section_stabs (bfd *abfd, const char *sect_name, bfd_size_type *size_ptr)
+read_section_stabs (bfd *abfd, const char *sect_name, bfd_size_type *size_ptr,
+		    bfd_size_type *entsize_ptr)
 {
   asection *stabsect;
   bfd_byte *contents;
@@ -2995,6 +3006,8 @@ read_section_stabs (bfd *abfd, const char *sect_name, bfd_size_type *size_ptr)
     }
 
   *size_ptr = bfd_section_size (abfd, stabsect);
+  if (entsize_ptr)
+    *entsize_ptr = stabsect->entsize;
 
   return contents;
 }
@@ -3118,11 +3131,11 @@ find_stabs_section (bfd *abfd, asection *section, void *names)
     {
       if (strtab == NULL)
 	strtab = read_section_stabs (abfd, sought->string_section_name,
-				     &stabstr_size);
+				     &stabstr_size, NULL);
 
       if (strtab)
 	{
-	  stabs = read_section_stabs (abfd, section->name, &stab_size);
+	  stabs = read_section_stabs (abfd, section->name, &stab_size, NULL);
 	  if (stabs)
 	    print_section_stabs (abfd, section->name, &sought->string_offset);
 	}
@@ -3183,6 +3196,140 @@ dump_bfd_header (bfd *abfd)
   printf (_("\nstart address 0x"));
   bfd_printf_vma (abfd, abfd->start_address);
   printf ("\n");
+}
+
+
+/* Formatting callback function passed to ctf_dump.  Returns either the pointer
+   it is passed, or a pointer to newly-allocated storage, in which case
+   dump_ctf() will free it when it no longer needs it.  */
+
+static char *
+dump_ctf_indent_lines (ctf_sect_names_t sect ATTRIBUTE_UNUSED,
+		       char *s, void *arg)
+{
+  char *spaces = arg;
+  char *new_s;
+
+  if (asprintf (&new_s, "%s%s", spaces, s) < 0)
+    return s;
+  return new_s;
+}
+
+/* Make a ctfsect suitable for ctf_bfdopen_ctfsect().  */
+static ctf_sect_t
+make_ctfsect (const char *name, bfd_byte *data,
+	      bfd_size_type size)
+{
+  ctf_sect_t ctfsect;
+
+  ctfsect.cts_name = name;
+  ctfsect.cts_type = SHT_PROGBITS;
+  ctfsect.cts_flags = 0;
+  ctfsect.cts_entsize = 1;
+  ctfsect.cts_offset = 0;
+  ctfsect.cts_size = size;
+  ctfsect.cts_data = data;
+
+  return ctfsect;
+}
+
+/* Dump one CTF archive member.  */
+
+static int
+dump_ctf_archive_member (ctf_file_t *ctf, const char *name, void *arg)
+{
+  ctf_file_t *parent = (ctf_file_t *) arg;
+  const char *things[] = {"Labels", "Data objects", "Function objects",
+			  "Variables", "Types", "Strings", ""};
+  const char **thing;
+  size_t i;
+
+  /* Only print out the name of non-default-named archive members.
+     The name .ctf appears everywhere, even for things that aren't
+     really archives, so printing it out is liable to be confusing.  */
+  if (strcmp (name, ".ctf") != 0)
+    printf (_("\nCTF archive member: %s:\n"), sanitize_string (name));
+
+  ctf_import (ctf, parent);
+  for (i = 1, thing = things; *thing[0]; thing++, i++)
+    {
+      ctf_dump_state_t *s = NULL;
+      char *item;
+
+      printf ("\n  %s:\n", *thing);
+      while ((item = ctf_dump (ctf, &s, i, dump_ctf_indent_lines,
+			       (void *) "    ")) != NULL)
+	{
+	  printf ("%s\n", item);
+	  free (item);
+	}
+
+      if (ctf_errno (ctf))
+	{
+	  non_fatal (_("Iteration failed: %s, %s\n"), *thing,
+		   ctf_errmsg (ctf_errno (ctf)));
+	  break;
+	}
+    }
+  return 0;
+}
+
+/* Dump the CTF debugging information.  */
+
+static void
+dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
+{
+  ctf_archive_t *ctfa, *parenta = NULL;
+  bfd_byte *ctfdata, *parentdata = NULL;
+  bfd_size_type ctfsize, parentsize;
+  ctf_sect_t ctfsect;
+  ctf_file_t *parent = NULL;
+  int err;
+
+  if ((ctfdata = read_section_stabs (abfd, sect_name, &ctfsize, NULL)) == NULL)
+      bfd_fatal (bfd_get_filename (abfd));
+
+  if (parent_name
+      && (parentdata = read_section_stabs (abfd, parent_name, &parentsize,
+					   NULL)) == NULL)
+      bfd_fatal (bfd_get_filename (abfd));
+
+  /* Load the CTF file and dump it.  */
+
+  ctfsect = make_ctfsect (sect_name, ctfdata, ctfsize);
+  if ((ctfa = ctf_bfdopen_ctfsect (abfd, &ctfsect, &err)) == NULL)
+    {
+      non_fatal (_("CTF open failure: %s\n"), ctf_errmsg (err));
+      bfd_fatal (bfd_get_filename (abfd));
+    }
+
+  if (parentdata)
+    {
+      ctfsect = make_ctfsect (parent_name, parentdata, parentsize);
+      if ((parenta = ctf_bfdopen_ctfsect (abfd, &ctfsect, &err)) == NULL)
+	{
+	  non_fatal (_("CTF open failure: %s\n"), ctf_errmsg (err));
+	  bfd_fatal (bfd_get_filename (abfd));
+	}
+
+      /* Assume that the applicable parent archive member is the default one.
+	 (This is what all known implementations are expected to do, if they
+	 put CTFs and their parents in archives together.)  */
+      if ((parent = ctf_arc_open_by_name (parenta, NULL, &err)) == NULL)
+	{
+	  non_fatal (_("CTF open failure: %s\n"), ctf_errmsg (err));
+	  bfd_fatal (bfd_get_filename (abfd));
+	}
+    }
+
+  printf (_("Contents of CTF section %s:\n"), sanitize_string (sect_name));
+
+  ctf_archive_iter (ctfa, dump_ctf_archive_member, parent);
+  ctf_file_close (parent);
+  ctf_close (ctfa);
+  ctf_close (parenta);
+  free (parentdata);
+  free (ctfdata);
 }
 
 
@@ -3896,6 +4043,8 @@ dump_bfd (bfd *abfd, bfd_boolean is_mainfile)
     dump_symbols (abfd, TRUE);
   if (dump_dwarf_section_info)
     dump_dwarf (abfd);
+  if (dump_ctf_section_info)
+    dump_ctf (abfd, dump_ctf_section_name, dump_ctf_parent_name);
   if (dump_stab_section_info)
     dump_stabs (abfd);
   if (dump_reloc_info && ! disassemble)
@@ -4335,6 +4484,14 @@ main (int argc, char **argv)
 	case OPTION_DWARF_CHECK:
 	  dwarf_check = TRUE;
 	  break;
+        case OPTION_CTF:
+          dump_ctf_section_info = TRUE;
+          dump_ctf_section_name = xstrdup (optarg);
+          seenflag = TRUE;
+          break;
+	case OPTION_CTF_PARENT:
+	  dump_ctf_parent_name = xstrdup (optarg);
+	  break;
 	case 'G':
 	  dump_stab_section_info = TRUE;
 	  seenflag = TRUE;
@@ -4394,6 +4551,8 @@ main (int argc, char **argv)
     }
 
   free_only_list ();
+  free (dump_ctf_section_name);
+  free (dump_ctf_parent_name);
 
   END_PROGRESS (program_name);
 
