@@ -38,6 +38,11 @@
 /* Processor specific dynamic array tags.  */
 #define DT_AARCH64_BTI_PLT	(DT_LOPROC + 1)
 #define DT_AARCH64_PAC_PLT	(DT_LOPROC + 3)
+#define DT_AARCH64_VARIANT_PCS	(DT_LOPROC + 5)
+
+/* AArch64-specific values for st_other.  */
+#define STO_AARCH64_VARIANT_PCS	0x80  /* Symbol may follow different call
+					 convention from the base PCS.  */
 
 /* Relocation types.  */
 

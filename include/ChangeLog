@@ -1,3 +1,8 @@
+2019-05-24  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* elf/aarch64.h (DT_AARCH64_VARIANT_PCS): Define.
+	(STO_AARCH64_VARIANT_PCS): Define.
+
 2019-05-24  Alan Modra  <amodra@gmail.com>
 
 	* elf/ppc64.h (R_PPC64_PLTSEQ_NOTOC, R_PPC64_PLTCALL_NOTOC),
