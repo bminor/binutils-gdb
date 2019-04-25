@@ -384,6 +384,10 @@ run_dump_test "property-bti-pac3"
 run_dump_test "bti-plt-1"
 run_dump_test "bti-plt-2"
 
+run_dump_test_lp64 "variant_pcs-r"
+run_dump_test_lp64 "variant_pcs-shared"
+run_dump_test_lp64 "variant_pcs-now"
+
 set aarch64elflinktests {
   {"ld-aarch64/so with global symbol" "-shared" "" "" {copy-reloc-so.s}
     {} "copy-reloc-so.so"}

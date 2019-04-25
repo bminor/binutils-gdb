@@ -1,3 +1,11 @@
+2019-05-24  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_merge_symbol_attribute): New function.
+	(struct elf_aarch64_link_hash_table): Add variant_pcs member.
+	(elfNN_aarch64_allocate_dynrelocs): Update variant_pcs.
+	(elfNN_aarch64_size_dynamic_sections): Add DT_AARCH64_VARIANT_PCS.
+	(elf_backend_merge_symbol_attribute): Define.
+
 2019-05-24  Alan Modra  <amodra@gmail.com>
 
 	* po/SRC-POTFILES.in: Regenerate.

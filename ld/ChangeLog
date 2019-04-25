@@ -1,3 +1,13 @@
+2019-04-24  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* testsuite/ld-aarch64/aarch64-elf.exp: Add new tests.
+	* testsuite/ld-aarch64/variant_pcs-1.s: New asm for tests.
+	* testsuite/ld-aarch64/variant_pcs-2.s: New asm for tests.
+	* testsuite/ld-aarch64/variant_pcs-now.d: New test.
+	* testsuite/ld-aarch64/variant_pcs-r.d: New test.
+	* testsuite/ld-aarch64/variant_pcs-shared.d: New test.
+	* testsuite/ld-aarch64/variant_pcs.ld: New linker script for tests.
+
 2019-05-24  Alan Modra  <amodra@gmail.com>
 
 	* po/BLD-POTFILES.in: Regenerate.
