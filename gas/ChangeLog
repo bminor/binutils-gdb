@@ -1,3 +1,15 @@
+2019-07-05  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	Backport from mainline
+	2019-05-24  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* config/tc-aarch64.c (s_variant_pcs): New function.
+	* doc/c-aarch64.texi: Document .variant_pcs.
+	* testsuite/gas/aarch64/symbol-variant_pcs-1.d: New test.
+	* testsuite/gas/aarch64/symbol-variant_pcs-1.s: New test.
+	* testsuite/gas/aarch64/symbol-variant_pcs-2.d: New test.
+	* testsuite/gas/aarch64/symbol-variant_pcs-2.s: New test.
+
 2019-07-02  Richard Sandiford  <richard.sandiford@arm.com>
 
 	* testsuite/gas/aarch64/sve-movprfx_27.s,

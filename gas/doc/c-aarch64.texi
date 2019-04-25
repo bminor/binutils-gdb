@@ -425,6 +425,12 @@ should only be done if it is really necessary.
 
 @c VVVVVVVVVVVVVVVVVVVVVVVVVV
 
+@cindex @code{.variant_pcs} directive, AArch64
+@item .variant_pcs @var{symbol}
+This directive marks @var{symbol} referencing a function that may
+follow a variant procedure call standard with different register
+usage convention from the base procedure call standard.
+
 @c WWWWWWWWWWWWWWWWWWWWWWWWWW
 @c XXXXXXXXXXXXXXXXXXXXXXXXXX
 
