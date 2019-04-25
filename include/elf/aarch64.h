@@ -35,6 +35,12 @@
 						entry point.  */
 #define SHF_COMDEF		0x80000000   /* Section may be multiply defined
 						in the input to a link step.  */
+/* Processor specific dynamic array tags.  */
+#define DT_AARCH64_VARIANT_PCS	(DT_LOPROC + 5)
+
+/* AArch64-specific values for st_other.  */
+#define STO_AARCH64_VARIANT_PCS	0x80  /* Symbol may follow different call
+					 convention from the base PCS.  */
 
 /* Relocation types.  */
 

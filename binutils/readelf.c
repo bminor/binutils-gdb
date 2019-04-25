@@ -1797,6 +1797,17 @@ dump_relocations (Filedata *          filedata,
 }
 
 static const char *
+get_aarch64_dynamic_type (unsigned long type)
+{
+  switch (type)
+    {
+    case DT_AARCH64_VARIANT_PCS:  return "AARCH64_VARIANT_PCS";
+    default:
+      return NULL;
+    }
+}
+
+static const char *
 get_mips_dynamic_type (unsigned long type)
 {
   switch (type)
@@ -11054,6 +11065,22 @@ get_solaris_symbol_visibility (unsigned int visibility)
 }
 
 static const char *
+get_aarch64_symbol_other (unsigned int other)
+{
+  static char buf[32];
+
+  if (other & STO_AARCH64_VARIANT_PCS)
+    {
+      other &= ~STO_AARCH64_VARIANT_PCS;
+      if (other == 0)
+	return "VARIANT_PCS";
+      snprintf (buf, sizeof buf, "VARIANT_PCS | %x", other);
+      return buf;
+    }
+  return NULL;
+}
+
+static const char *
 get_mips_symbol_other (unsigned int other)
 {
   switch (other)
@@ -11164,6 +11191,9 @@ get_symbol_other (Filedata * filedata, unsigned int other)
 
   switch (filedata->file_header.e_machine)
     {
+    case EM_AARCH64:
+      result = get_aarch64_symbol_other (other);
+      break;
     case EM_MIPS:
       result = get_mips_symbol_other (other);
       break;

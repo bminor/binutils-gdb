@@ -1,3 +1,11 @@
+2019-07-05  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	Backport from mainline.
+	2019-05-24  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	* elf/aarch64.h (DT_AARCH64_VARIANT_PCS): Define.
+	(STO_AARCH64_VARIANT_PCS): Define.
+
 2019-04-16  Sudakshina Das  <sudi.das@arm.com>
 
 	Backport from mainline.
