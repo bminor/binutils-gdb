@@ -1487,7 +1487,7 @@ static ULONGEST
 read_initial_length (bfd *abfd, const gdb_byte *buf,
 		     unsigned int *bytes_read_ptr)
 {
-  LONGEST result;
+  ULONGEST result;
 
   result = bfd_get_32 (abfd, buf);
   if (result == 0xffffffff)
@@ -1788,7 +1788,7 @@ decode_frame_entry_1 (struct comp_unit *unit, const gdb_byte *start,
 {
   struct gdbarch *gdbarch = get_objfile_arch (unit->objfile);
   const gdb_byte *buf, *end;
-  LONGEST length;
+  ULONGEST length;
   unsigned int bytes_read;
   int dwarf64_p;
   ULONGEST cie_id;
@@ -1799,14 +1799,14 @@ decode_frame_entry_1 (struct comp_unit *unit, const gdb_byte *start,
   buf = start;
   length = read_initial_length (unit->abfd, buf, &bytes_read);
   buf += bytes_read;
-  end = buf + length;
-
-  /* Are we still within the section?  */
-  if (end > unit->dwarf_frame_buffer + unit->dwarf_frame_size)
-    return NULL;
+  end = buf + (size_t) length;
 
   if (length == 0)
     return end;
+
+  /* Are we still within the section?  */
+  if (end <= buf || end > unit->dwarf_frame_buffer + unit->dwarf_frame_size)
+    return NULL;
 
   /* Distinguish between 32 and 64-bit encoded frame info.  */
   dwarf64_p = (bytes_read == 12);

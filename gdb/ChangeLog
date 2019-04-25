@@ -1,3 +1,13 @@
+2019-04-25  Sandra Loosemore  <sandra@codesourcery.com>
+	    Kang Li <kanglictf@gmail.com>
+
+	PR gdb/21600
+
+	* dwarf2-frame.c (read_initial_length): Be consistent about using
+	unsigned representation of length.
+	(decode_frame_entry_1): Likewise.  Check for wraparound of
+	end pointer as well as buffer overflow.
+
 2019-04-24  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* aarch64-tdep.c (aarch64_gdbarch_init): Use "pulongest" to print
