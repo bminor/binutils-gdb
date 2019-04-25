@@ -1531,6 +1531,9 @@ static int read_1_signed_byte (bfd *, const gdb_byte *);
 
 static unsigned int read_2_bytes (bfd *, const gdb_byte *);
 
+/* Read the next three bytes (little-endian order) as an unsigned integer.  */
+static unsigned int read_3_bytes (bfd *, const gdb_byte *);
+
 static unsigned int read_4_bytes (bfd *, const gdb_byte *);
 
 static ULONGEST read_8_bytes (bfd *, const gdb_byte *);
@@ -19330,6 +19333,10 @@ read_attribute_value (const struct die_reader_specs *reader,
       info_ptr += bytes_read;
       break;
     case DW_FORM_strx:
+    case DW_FORM_strx1:
+    case DW_FORM_strx2:
+    case DW_FORM_strx3:
+    case DW_FORM_strx4:
     case DW_FORM_GNU_str_index:
       if (reader->dwo_file == NULL)
 	{
@@ -19340,12 +19347,34 @@ read_attribute_value (const struct die_reader_specs *reader,
 		 bfd_get_filename (abfd));
 	}
       {
-	ULONGEST str_index =
-	  read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
-
+	ULONGEST str_index;
+	if (form == DW_FORM_strx1)
+	  {
+	    str_index = read_1_byte (abfd, info_ptr);
+	    info_ptr += 1;
+	  }
+	else if (form == DW_FORM_strx2)
+	  {
+	    str_index = read_2_bytes (abfd, info_ptr);
+	    info_ptr += 2;
+	  }
+	else if (form == DW_FORM_strx3)
+	  {
+	    str_index = read_3_bytes (abfd, info_ptr);
+	    info_ptr += 3;
+	  }
+	else if (form == DW_FORM_strx4)
+	  {
+	    str_index = read_4_bytes (abfd, info_ptr);
+	    info_ptr += 4;
+	  }
+	else
+	  {
+	    str_index = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
+	    info_ptr += bytes_read;
+	  }
 	DW_STRING (attr) = read_str_index (reader, str_index);
 	DW_STRING_IS_CANONICAL (attr) = 0;
-	info_ptr += bytes_read;
       }
       break;
     default:
@@ -19413,6 +19442,19 @@ static int
 read_2_signed_bytes (bfd *abfd, const gdb_byte *buf)
 {
   return bfd_get_signed_16 (abfd, buf);
+}
+
+static unsigned int
+read_3_bytes (bfd *abfd, const gdb_byte *buf)
+{
+  unsigned int result = 0;
+  for (int i = 0; i < 3; ++i)
+    {
+      unsigned char byte = bfd_get_8 (abfd, buf);
+      buf++;
+      result |= ((unsigned int) byte << (i * 8));
+    }
+  return result;
 }
 
 static unsigned int

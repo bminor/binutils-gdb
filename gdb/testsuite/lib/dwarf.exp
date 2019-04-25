@@ -528,6 +528,10 @@ namespace eval Dwarf {
 	    DW_FORM_exprloc -
 
 	    DW_FORM_strx -
+	    DW_FORM_strx1 -
+	    DW_FORM_strx2 -
+	    DW_FORM_strx3 -
+	    DW_FORM_strx4 -
 
 	    DW_FORM_GNU_addr_index -
 	    DW_FORM_GNU_str_index -
