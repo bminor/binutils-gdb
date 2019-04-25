@@ -231,6 +231,9 @@ set lto_link_tests [list \
    {pr23958.c} \
    "" \
    "libpr23958.so"] \
+  [list "Build pr24406-2b.o" \
+   "" "-O2 -fno-lto" \
+   {pr24406-2b.c}] \
 ]
 
 if { [at_least_gcc_version 4 7] } {
@@ -434,6 +437,15 @@ set lto_run_tests [list \
    "-O2 -flto" "" \
    {dummy.c} "pr22751" "pass.out" "-flto -O2" "c" "" \
    "-Wl,--whole-archive tmpdir/pr22751.a -Wl,--no-whole-archive"] \
+  [list "Run pr24406-1" \
+   "-O2 -flto" "" \
+   {pr24406-1.c} "pr24406-1" "pass.out" "-flto -O2" "c" "" \
+   "-Wl,--wrap=read"] \
+  [list "Run pr24406-2" \
+   "-O2 -flto" "" \
+   {pr24406-2a.c} "pr24406-2" "pass.out" \
+   "-flto -O2" "c" "" \
+   "tmpdir/pr24406-2b.o -Wl,--wrap=cook"] \
 ]
 
 if { [at_least_gcc_version 4 7] } {

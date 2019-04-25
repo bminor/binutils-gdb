@@ -1,3 +1,14 @@
+2019-04-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/24406
+	* ld.texi: Remove LTO warning from --wrap.
+	* plugin.c (get_symbols): Update resolution for wrapper and
+	wrapped symbols.
+	* testsuite/ld-plugin/lto.exp: Run ld/24406 tests.
+	* testsuite/ld-plugin/pr24406-1.c: New file.
+	* testsuite/ld-plugin/pr24406-2a.c: Likewise.
+	* testsuite/ld-plugin/pr24406-2b.c: Likewise.
+
 2019-04-25  Sudakshina Das  <sudi.das@arm.com>
 
 	* testsuite/ld-aarch64/bti-pac-plt-1.d: Update.

@@ -741,13 +741,32 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms,
       struct bfd_link_hash_entry *blhe;
       asection *owner_sec;
       int res;
+      struct bfd_link_hash_entry *h
+	= bfd_link_hash_lookup (link_info.hash, syms[n].name,
+				FALSE, FALSE, TRUE);
+      enum { wrap_none, wrapper, wrapped } wrap_status = wrap_none;
 
-      if (syms[n].def != LDPK_UNDEF)
-	blhe = bfd_link_hash_lookup (link_info.hash, syms[n].name,
-				     FALSE, FALSE, TRUE);
+      if (syms[n].def != LDPK_UNDEF && syms[n].def != LDPK_WEAKUNDEF)
+	{
+	  blhe = h;
+	  if (blhe)
+	    {
+	      /* Check if a symbol is a wrapper symbol.  */
+	      struct bfd_link_hash_entry *unwrap
+		= unwrap_hash_lookup (&link_info, (bfd *) abfd, blhe);
+	      if (unwrap && unwrap != h)
+		wrap_status = wrapper;
+	     }
+	}
       else
-	blhe = bfd_wrapped_link_hash_lookup (link_info.output_bfd, &link_info,
-					     syms[n].name, FALSE, FALSE, TRUE);
+	{
+	  blhe = bfd_wrapped_link_hash_lookup (link_info.output_bfd,
+					       &link_info, syms[n].name,
+					       FALSE, FALSE, TRUE);
+	  /* Check if a symbol is a wrapped symbol.  */
+	  if (blhe && blhe != h)
+	    wrap_status = wrapped;
+	}
       if (!blhe)
 	{
 	  /* The plugin is called to claim symbols in an archive element
@@ -833,9 +852,11 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms,
 	  /* We need to know if the sym is referenced from non-IR files.  Or
 	     even potentially-referenced, perhaps in a future final link if
 	     this is a partial one, perhaps dynamically at load-time if the
-	     symbol is externally visible.  */
-	  if (blhe->non_ir_ref_regular)
+	     symbol is externally visible.  Also check for wrapper symbol.  */
+	  if (blhe->non_ir_ref_regular || wrap_status == wrapper)
 	    res = LDPR_PREVAILING_DEF;
+	  else if (wrap_status == wrapped)
+	    res = LDPR_RESOLVED_IR;
 	  else if (is_visible_from_outside (&syms[n], blhe))
 	    res = def_ironly_exp;
 	}
