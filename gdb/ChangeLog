@@ -1,3 +1,12 @@
+2019-04-25  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR corefiles/11608
+	PR corefiles/18187
+	* linux-tdep.c (dump_mapping_p): Add new parameters ADDR and
+	OFFSET.  Verify if current mapping contains an ELF header.
+	(linux_find_memory_regions_full): Adjust call to
+	dump_mapping_p.
+
 2019-04-25  Sandra Loosemore  <sandra@codesourcery.com>
 	    Kang Li <kanglictf@gmail.com>
 
