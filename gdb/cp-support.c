@@ -190,10 +190,20 @@ inspect_type (struct demangle_parse_info *info,
 	  /* Get the real type of the typedef.  */
 	  type = check_typedef (otype);
 
-	  /* If the symbol is a namespace and its type name is no different
+	  /* If the symbol name is the same as the original type name,
+	     don't substitute.  That would cause infinite recursion in
+	     symbol lookups, as the typedef symbol is often the first
+	     found symbol in the symbol table.
+
+	     However, this can happen in a number of situations, such as:
+
+	     If the symbol is a namespace and its type name is no different
 	     than the name we looked up, this symbol is not a namespace
-	     alias and does not need to be substituted.  */
-	  if (TYPE_CODE (otype) == TYPE_CODE_NAMESPACE
+	     alias and does not need to be substituted.
+
+	     If the symbol is typedef and its type name is the same
+	     as the symbol's name, e.g., "typedef struct foo foo;".  */
+	  if (TYPE_NAME (type) != nullptr
 	      && strcmp (TYPE_NAME (type), name) == 0)
 	    return 0;
 

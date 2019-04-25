@@ -137,6 +137,11 @@ foreach t $typedefs(_BAR_) {
     add methods "test" "$t&" {_BAR_&}
 }
 
+# Tests for c++/24367
+foreach t {int incomplete_struct another_incomplete_struct} {
+    add methods "test_incomplete" "${t}*" [string_to_regexp "${t}*"]
+}
+
 gdb_test_no_output "set listsize 1" ""
 
 # Finally, for each method in the list METHODS, check whether

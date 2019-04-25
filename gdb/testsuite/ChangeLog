@@ -1,3 +1,12 @@
+2019-04-25  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/24367
+	* gdb.cp/meth-typedefs.cc (incomplete_struct)
+	(another_incomplete_struct, test_incomplete): New definitions.
+	(main): Use new definitions.
+	* gdb.cp/meth-typedefs.exp: Add new tests for `test_incomplete'
+	functions.
+
 2019-04-25  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR corefiles/11608
