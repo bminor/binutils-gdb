@@ -1,3 +1,7 @@
+2019-04-25  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* opcode/mips.h: Update comment for MIPS32 CODE20 operand.
+
 2019-04-15  Sudakshina Das  <sudi.das@arm.com>
 
 	* elf/arm.h (START_RELOC_NUMBERS): New entry for R_ARM_THM_BF12.
