@@ -315,6 +315,13 @@ proc test_value_in_inferior {} {
   gdb_test "python print (\"---\"+st.string (length = 0)+\"---\")" "------" "test string (length = 0) is empty"
   gdb_test "python print (len(st.string (length = 0)))" "0" "test length is 0"
 
+  # We choose Ada here to test a language where c_style_arrays is
+  # false.
+  gdb_test "set lang ada" \
+      "Warning: the current language does not match this frame."
+  gdb_test "python print (st.string ())"  "divide et impera"  \
+      "Test string with no length in ada"
+  gdb_test_no_output "set lang auto"
 
   # Fetch a string that has embedded nulls.
   gdb_test "print nullst" "\"divide\\\\000et\\\\000impera\".*"
@@ -330,6 +337,12 @@ proc test_value_in_inferior {} {
   gdb_py_test_silent_cmd "python xstr = gdb.parse_and_eval('xstr')" "get xstr" 1
   gdb_test "python print(xstr\['text'\].string (length = xstr\['length'\]))" "x{100}" \
     "read string beyond declared size"
+
+  # However it shouldn't be possible to fetch past the end of a
+  # non-memory value.
+  gdb_py_test_silent_cmd "python str = '\"str\"'" "set up str variable" 1
+  gdb_test "python print (gdb.parse_and_eval (str).string (length = 10))" \
+      "gdb.error: Attempt to take address of value not located in memory.\r\nError while executing Python code."
 }
 
 proc test_inferior_function_call {} {

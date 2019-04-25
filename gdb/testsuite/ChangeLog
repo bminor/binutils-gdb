@@ -1,5 +1,9 @@
 2019-05-08  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.python/py-value.exp (test_value_in_inferior): Add Ada test.
+
+2019-05-08  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.base/ptype-offsets.exp: Update tests.
 
 2019-05-08  Tom Tromey  <tromey@adacore.com>
