@@ -17,7 +17,6 @@ Disassembly of section \.plt:
 .*:	d61f0220 	br	x17
 .*:	d503201f 	nop
 .*:	d503201f 	nop
-.*:	d503201f 	nop
 
 [0-9]+ <.*>:
 .*:	90000090 	adrp	x16, 28000 <_GLOBAL_OFFSET_TABLE_>

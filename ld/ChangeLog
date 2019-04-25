@@ -1,3 +1,13 @@
+2019-04-25  Sudakshina Das  <sudi.das@arm.com>
+
+	* testsuite/ld-aarch64/bti-pac-plt-1.d: Update.
+	* testsuite/ld-aarch64/bti-pac-plt-2.d: Update.
+	* testsuite/ld-aarch64/bti-plt-1.d: Update.
+	* testsuite/ld-aarch64/bti-plt-3.d: Update.
+	* testsuite/ld-aarch64/bti-plt-5.d: Update.
+	* testsuite/ld-aarch64/pac-plt-1.d: Update.
+	* testsuite/ld-aarch64/pac-plt-2.d: Update.
+
 2019-04-24  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* testsuite/config/default.exp: Use [check_compiler_available]

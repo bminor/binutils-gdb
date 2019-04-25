@@ -1,3 +1,19 @@
+2019-04-25  Sudakshina Das  <sudi.das@arm.com>
+
+	* elfnn-aarch64.c (PLT_BTI_ENTRY_SIZE): Remove.
+	(PLT_BTI_TLSDESC_ENTRY_SIZE): Remove.
+	(PLT_PAC_ENTRY_SIZE, PLT_BTI_PAC_ENTRY_SIZE): Remove.
+	(PLT_BTI_SMALL_ENTRY_SIZE, PLT_PAC_SMALL_ENTRY_SIZE): Update.
+	(elfNN_aarch64_small_plt0_pac_entry): Remove.
+	(elfNN_aarch64_small_plt0_bti_pac_entry): Remove.
+	(elfNN_aarch64_small_plt0_bti_entry): Update.
+	(elfNN_aarch64_small_plt_bti_entry): Update.
+	(elfNN_aarch64_small_plt_pac_entry): Update.
+	(elfNN_aarch64_tlsdesc_small_plt_bti_entry): Update.
+	(setup_plt_values): Setup new entries.
+	(elfNN_aarch64_finish_dynamic_sections): Remove size change.
+	(elfNN_aarch64_plt_sym_val): Likewise.
+
 2019-04-22  Jim Wilson  <jimw@sifive.com>
 
 	* elfnn-riscv.c (PRSTATUS_SIZE) [ARCH_SIZE==32]: Change from 0 to 204.

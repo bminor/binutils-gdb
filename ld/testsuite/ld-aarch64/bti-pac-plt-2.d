@@ -13,9 +13,7 @@ Disassembly of section \.plt:
 .*:	90000090 	adrp	x16, 28000 <_GLOBAL_OFFSET_TABLE_>
 .*:	f9400e11 	ldr	x17, \[x16, #24\]
 .*:	91006210 	add	x16, x16, #0x18
-.*:	d503219f 	autia1716
 .*:	d61f0220 	br	x17
-.*:	d503201f 	nop
 .*:	d503201f 	nop
 .*:	d503201f 	nop
 

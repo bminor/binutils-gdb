@@ -17,7 +17,6 @@ Disassembly of section \.plt:
 .*:	d61f0220 	br	x17
 .*:	d503201f 	nop
 .*:	d503201f 	nop
-.*:	d503201f 	nop
 
 [0-9]+ <.*>:
 .*:	d503245f 	bti	c
@@ -25,6 +24,7 @@ Disassembly of section \.plt:
 .*:	f9401211 	ldr	x17, \[x16, #32\]
 .*:	91008210 	add	x16, x16, #0x20
 .*:	d61f0220 	br	x17
+.*:	d503201f 	nop
 
 [0-9]+ <.*>:
 .*:	d503245f 	bti	c
@@ -32,3 +32,4 @@ Disassembly of section \.plt:
 .*:	f9401611 	ldr	x17, \[x16, #40\]
 .*:	9100a210 	add	x16, x16, #0x28
 .*:	d61f0220 	br	x17
+.*:	d503201f 	nop
