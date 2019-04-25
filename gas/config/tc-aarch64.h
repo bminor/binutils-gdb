@@ -130,6 +130,12 @@ void aarch64_copy_symbol_attributes (symbolS *, symbolS *);
   (aarch64_copy_symbol_attributes (DEST, SRC))
 #endif
 
+#ifdef OBJ_ELF
+void aarch64_elf_copy_symbol_attributes (symbolS *, symbolS *);
+#define OBJ_COPY_SYMBOL_ATTRIBUTES(DEST, SRC) \
+  aarch64_elf_copy_symbol_attributes (DEST, SRC)
+#endif
+
 #define TC_START_LABEL(STR, NUL_CHAR, NEXT_CHAR)			\
   (NEXT_CHAR == ':' || (NEXT_CHAR == '/' && aarch64_data_in_code ()))
 #define tc_canonicalize_symbol_name(str) aarch64_canonicalize_symbol_name (str);
