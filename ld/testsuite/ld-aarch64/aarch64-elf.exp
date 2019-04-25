@@ -372,6 +372,10 @@ run_dump_test_lp64 "rela-abs-relative-opt"
 
 run_dump_test_lp64 "pie-bind-locally"
 
+run_dump_test_lp64 "variant_pcs-r"
+run_dump_test_lp64 "variant_pcs-shared"
+run_dump_test_lp64 "variant_pcs-now"
+
 set aarch64elflinktests {
   {"ld-aarch64/so with global symbol" "-shared" "" "" {copy-reloc-so.s}
     {} "copy-reloc-so.so"}

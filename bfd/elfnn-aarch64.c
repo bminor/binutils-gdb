@@ -2579,6 +2579,9 @@ struct elf_aarch64_link_hash_table
   unsigned int top_index;
   asection **input_list;
 
+  /* JUMP_SLOT relocs for variant PCS symbols may be present.  */
+  int variant_pcs;
+
   /* The offset into splt of the PLT entry for the TLS descriptor
      resolver.  Special values are 0, if not necessary (or not found
      to be necessary yet), and -1 if needed but not determined
@@ -2788,6 +2791,31 @@ elfNN_aarch64_copy_indirect_symbol (struct bfd_link_info *info,
     }
 
   _bfd_elf_link_hash_copy_indirect (info, dir, ind);
+}
+
+/* Merge non-visibility st_other attributes.  */
+
+static void
+elfNN_aarch64_merge_symbol_attribute (struct elf_link_hash_entry *h,
+				      const Elf_Internal_Sym *isym,
+				      bfd_boolean definition ATTRIBUTE_UNUSED,
+				      bfd_boolean dynamic ATTRIBUTE_UNUSED)
+{
+  unsigned int isym_sto = isym->st_other & ~ELF_ST_VISIBILITY (-1);
+  unsigned int h_sto = h->other & ~ELF_ST_VISIBILITY (-1);
+
+  if (isym_sto == h_sto)
+    return;
+
+  if (isym_sto & ~STO_AARCH64_VARIANT_PCS)
+    /* Not fatal, this callback cannot fail.  */
+    _bfd_error_handler (_("unknown attribute for symbol `%s': 0x%02x"),
+			h->root.root.string, isym_sto);
+
+  /* Note: Ideally we would warn about any attribute mismatch, but
+     this api does not allow that without substantial changes.  */
+  if (isym_sto & STO_AARCH64_VARIANT_PCS)
+    h->other |= STO_AARCH64_VARIANT_PCS;
 }
 
 /* Destroy an AArch64 elf linker hash table.  */
@@ -8369,6 +8397,12 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	     updated.  */
 
 	  htab->root.srelplt->reloc_count++;
+
+	  /* Mark the DSO in case R_<CLS>_JUMP_SLOT relocs against
+	     variant PCS symbols are present.  */
+	  if (h->other & STO_AARCH64_VARIANT_PCS)
+	    htab->variant_pcs = 1;
+
 	}
       else
 	{
@@ -8956,6 +8990,10 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
 	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
 	      || !add_dynamic_entry (DT_JMPREL, 0))
+	    return FALSE;
+
+	  if (htab->variant_pcs
+	      && !add_dynamic_entry (DT_AARCH64_VARIANT_PCS, 0))
 	    return FALSE;
 
 	  if (htab->tlsdesc_plt
@@ -9710,6 +9748,9 @@ const struct elf_size_info elfNN_aarch64_size_info =
 
 #define elf_backend_copy_indirect_symbol	\
   elfNN_aarch64_copy_indirect_symbol
+
+#define elf_backend_merge_symbol_attribute	\
+  elfNN_aarch64_merge_symbol_attribute
 
 /* Create .dynbss, and .rela.bss sections in DYNOBJ, and set up shortcuts
    to them in our hash.  */
