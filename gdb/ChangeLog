@@ -1,5 +1,13 @@
 2019-05-31  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* gdbcmd.h (execute_command_to_ui_file): New declaration.
+	top.c (execute_command_to_ui_file): New function, mostly a copy
+	of execute_command_to_string.
+	(execute_command_to_string): Implement by calling
+	execute_command_to_ui_file.
+
+2019-05-31  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* top.h (saved_command_line): Remove declaration.
 	* top.c (previous_saved_command_line, previous_repeat_arguments):
 	New variables.

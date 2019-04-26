@@ -665,6 +665,38 @@ execute_command (const char *p, int from_tty)
   cleanup_if_error.release ();
 }
 
+/* Run execute_command for P and FROM_TTY.  Sends its output to FILE,
+   do not display it to the screen.  BATCH_FLAG will be
+   temporarily set to true.  */
+
+void
+execute_command_to_ui_file (struct ui_file *file, const char *p, int from_tty)
+{
+  /* GDB_STDOUT should be better already restored during these
+     restoration callbacks.  */
+  set_batch_flag_and_restore_page_info save_page_info;
+
+  scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
+
+  {
+    current_uiout->redirect (file);
+    ui_out_redirect_pop redirect_popper (current_uiout);
+
+    scoped_restore save_stdout
+      = make_scoped_restore (&gdb_stdout, file);
+    scoped_restore save_stderr
+      = make_scoped_restore (&gdb_stderr, file);
+    scoped_restore save_stdlog
+      = make_scoped_restore (&gdb_stdlog, file);
+    scoped_restore save_stdtarg
+      = make_scoped_restore (&gdb_stdtarg, file);
+    scoped_restore save_stdtargerr
+      = make_scoped_restore (&gdb_stdtargerr, file);
+
+    execute_command (p, from_tty);
+  }
+}
+
 /* Run execute_command for P and FROM_TTY.  Capture its output into the
    returned string, do not display it to the screen.  BATCH_FLAG will be
    temporarily set to true.  */
@@ -673,32 +705,9 @@ std::string
 execute_command_to_string (const char *p, int from_tty,
 			   bool term_out)
 {
-  /* GDB_STDOUT should be better already restored during these
-     restoration callbacks.  */
-  set_batch_flag_and_restore_page_info save_page_info;
-
-  scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
-
   string_file str_file (term_out);
 
-  {
-    current_uiout->redirect (&str_file);
-    ui_out_redirect_pop redirect_popper (current_uiout);
-
-    scoped_restore save_stdout
-      = make_scoped_restore (&gdb_stdout, &str_file);
-    scoped_restore save_stderr
-      = make_scoped_restore (&gdb_stderr, &str_file);
-    scoped_restore save_stdlog
-      = make_scoped_restore (&gdb_stdlog, &str_file);
-    scoped_restore save_stdtarg
-      = make_scoped_restore (&gdb_stdtarg, &str_file);
-    scoped_restore save_stdtargerr
-      = make_scoped_restore (&gdb_stdtargerr, &str_file);
-
-    execute_command (p, from_tty);
-  }
-
+  execute_command_to_ui_file (&str_file, p, from_tty);
   return std::move (str_file.string ());
 }
 

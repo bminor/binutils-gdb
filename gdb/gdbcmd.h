@@ -139,6 +139,8 @@ extern void execute_command (const char *, int);
    as cli_styling.  */
 extern std::string execute_command_to_string (const char *p, int from_tty,
 					      bool term_out);
+extern void execute_command_to_ui_file (struct ui_file *file,
+					const char *p, int from_tty);
 
 extern void print_command_line (struct command_line *, unsigned int,
 				struct ui_file *);
