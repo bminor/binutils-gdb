@@ -1,3 +1,7 @@
+2019-04-26  Nick Clifton  <nickc@redhat.com>
+
+	* po/ru.po: Updated Russian translation.
+
 2019-04-26  Christopher Yeleighton  <giecrilj@stegny.2a.pl>
 
 	* ld.texi: Properly hyphenate the word "specific".
