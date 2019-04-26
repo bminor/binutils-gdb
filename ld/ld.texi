@@ -556,7 +556,7 @@ first check whether there is a definition in the shared object
 in the filter object.  The shared object @var{name} need not exist.
 Thus the shared object @var{name} may be used to provide an alternative
 implementation of certain functions, perhaps for debugging or for
-machine specific performance.
+machine-specific performance.
 
 This option may be specified more than once.  The DT_AUXILIARY entries
 will be created in the order in which they appear on the command line.
@@ -1607,7 +1607,7 @@ entry point code that is capable of processing these relocations.
 @kindex --embedded-relocs
 @item --embedded-relocs
 This option is similar to the @option{--emit-relocs} option except
-that the relocs are stored in a target specific section.  This option
+that the relocs are stored in a target-specific section.  This option
 is only supported by the @samp{BFIN}, @samp{CR16} and @emph{M68K}
 targets.
 
@@ -1717,7 +1717,7 @@ Print a summary of the command-line options on the standard output and exit.
 
 @kindex --target-help
 @item --target-help
-Print a summary of all target specific options on the standard output and exit.
+Print a summary of all target-specific options on the standard output and exit.
 
 @kindex -Map=@var{mapfile}
 @item -Map=@var{mapfile}
@@ -1909,7 +1909,7 @@ This option is only supported on a few targets.
 @xref{PowerPC ELF32,,@command{ld} and PowerPC 32-bit ELF Support}.
 @end ifset
 
-On some platforms the @samp{--relax} option performs target specific,
+On some platforms the @samp{--relax} option performs target-specific,
 global optimizations that become possible when the linker resolves
 addressing in the program, such as relaxing address modes,
 synthesizing new instructions, selecting shorter version of current
@@ -3476,7 +3476,7 @@ the @samp{-e} @var{entry} command-line option;
 @item
 the @code{ENTRY(@var{symbol})} command in a linker script;
 @item
-the value of a target specific symbol, if it is defined;  For many
+the value of a target-specific symbol, if it is defined;  For many
 targets this is @code{start}, but PE- and BeOS-based systems for example
 check a list of possible entry symbols, matching the first one found.
 @item
@@ -5907,7 +5907,7 @@ conjunction with the base suffixes mentioned above.
 @subsection Symbolic Constants
 @cindex symbolic constants
 @kindex CONSTANT
-It is possible to refer to target specific constants via the use of
+It is possible to refer to target-specific constants via the use of
 the @code{CONSTANT(@var{name})} operator, where @var{name} is one of:
 
 @table @code
