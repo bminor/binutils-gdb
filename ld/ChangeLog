@@ -1,3 +1,11 @@
+2019-04-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/24486
+	* testsuite/ld-plugin/lto.exp: Run PR ld/24486 tests.
+	* testsuite/ld-plugin/pr24486a.c: New file.
+	* testsuite/ld-plugin/pr24486b.c: Likewise.
+	* testsuite/ld-plugin/pr24486c.c: Likewise.
+
 2019-04-26  Nick Clifton  <nickc@redhat.com>
 
 	* po/ru.po: Updated Russian translation.

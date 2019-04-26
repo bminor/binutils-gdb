@@ -9776,7 +9776,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 
       /* If we are reporting errors for this situation then do so now.  */
       if (!ignore_undef
-	  && h->ref_dynamic
+	  && h->ref_dynamic_nonweak
 	  && (!h->ref_regular || flinfo->info->gc_sections)
 	  && !elf_link_check_versioned_symbol (flinfo->info, bed, h)
 	  && flinfo->info->unresolved_syms_in_shared_libs != RM_IGNORE)
