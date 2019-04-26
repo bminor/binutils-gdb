@@ -71,3 +71,9 @@
 	jmp	0x9090:0x1010
 	jmp	0x9090,xxx
 	jmp	0x9090:xxx
+
+.code16gcc
+	iret
+
+.code16
+	iret

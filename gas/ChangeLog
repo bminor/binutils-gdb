@@ -1,3 +1,11 @@
+2019-04-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/24485
+	* config/tc-i386.c (process_suffix): Don't add DATA_PREFIX_OPCODE
+	to IRET for .code16gcc.
+	* testsuite/gas/i386/jump16.s: Add IRET tests.
+	* testsuite/gas/i386/jump16.d: Updated.
+
 2019-04-25  Alexandre Oliva  <aoliva@redhat.com>
 	    Alan Modra  <amodra@gmail.com>
 
