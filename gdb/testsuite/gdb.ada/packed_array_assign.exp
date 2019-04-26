@@ -28,3 +28,8 @@ runto "aggregates.run_test"
 gdb_test \
     "print pra := ((packed_array_assign_x => 2, packed_array_assign_y => 0, packed_array_assign_w => 17), pr, (packed_array_assign_x => 7, packed_array_assign_y => 1, packed_array_assign_w => 23))" \
     " = \\(\\(packed_array_assign_w => 17, packed_array_assign_x => 2, packed_array_assign_y => 0\\), \\(packed_array_assign_w => 104, packed_array_assign_x => 2, packed_array_assign_y => 3\\), \\(packed_array_assign_w => 23, packed_array_assign_x => 7, packed_array_assign_y => 1\\)\\)"
+
+gdb_test "print pra(1) := pr" \
+    " = \\(packed_array_assign_w => 104, packed_array_assign_x => 2, packed_array_assign_y => 3\\)"
+gdb_test "print pra(1)" \
+    " = \\(packed_array_assign_w => 104, packed_array_assign_x => 2, packed_array_assign_y => 3\\)"

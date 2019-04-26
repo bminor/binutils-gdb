@@ -1,3 +1,8 @@
+2019-05-01  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/packed_array_assign.exp: Add packed assignment
+	regression test.
+
 2019-05-01  Tom de Vries  <tdevries@suse.de>
 
 	* boards/cc-with-tweaks.exp: Generate gdb.sh, and pass it in env(GDB).

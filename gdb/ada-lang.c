@@ -2710,12 +2710,14 @@ ada_value_assign (struct value *toval, struct value *fromval)
       from_size = value_bitsize (fromval);
       if (from_size == 0)
 	from_size = TYPE_LENGTH (value_type (fromval)) * TARGET_CHAR_BIT;
-      if (gdbarch_bits_big_endian (get_type_arch (type)))
-        copy_bitwise (buffer, value_bitpos (toval),
-		      value_contents (fromval), from_size - bits, bits, 1);
-      else
-        copy_bitwise (buffer, value_bitpos (toval),
-		      value_contents (fromval), 0, bits, 0);
+
+      const int is_big_endian = gdbarch_bits_big_endian (get_type_arch (type));
+      ULONGEST from_offset = 0;
+      if (is_big_endian && is_scalar_type (value_type (fromval)))
+	from_offset = from_size - bits;
+      copy_bitwise (buffer, value_bitpos (toval),
+		    value_contents (fromval), from_offset,
+		    bits, is_big_endian);
       write_memory_with_notification (to_addr, buffer, len);
 
       val = value_copy (toval);
