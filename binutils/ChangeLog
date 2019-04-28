@@ -1,3 +1,8 @@
+2019-04-30  Alan Modra  <amodra@gmail.com>
+
+	* wrstabs.c (stab_start_class_type): Add assert to work around
+	gcc9 warning.  Tidy.
+
 2019-04-24  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (strip_main): Do not enable note merging by default if
