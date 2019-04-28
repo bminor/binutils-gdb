@@ -627,7 +627,7 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 /* See cli/cli-setshow.h.  */
 
 std::string
-get_setshow_command_value_string (cmd_list_element *c)
+get_setshow_command_value_string (const cmd_list_element *c)
 {
   string_file stb;
 

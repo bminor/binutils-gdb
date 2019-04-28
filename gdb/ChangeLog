@@ -1,3 +1,13 @@
+2019-10-31  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* cli/cli-cmds.c (setting_cmd, value_from_setting)
+	(gdb_setting_internal_fn, gdb_maint_setting_internal_fn)
+	(str_value_from_setting, gdb_setting_str_internal_fn)
+	(gdb_maint_setting_str_internal_fn): New functions.
+	(_initialize_cli_cmds): Define the new convenience functions.
+	* gdb/cli/cli-setshow.h (get_setshow_command_value_string): Constify.
+	* gdb/cli/cli-setshow.c (get_setshow_command_value_string): Constify.
+
 2019-10-31  Christian Biesinger  <cbiesinger@google.com>
 
 	* agent.c (set_can_use_agent): When the setting is turned on,
