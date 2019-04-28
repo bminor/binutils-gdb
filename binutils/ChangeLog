@@ -1,3 +1,10 @@
+2019-05-13  Alan Modra  <amodra@gmail.com>
+
+	Apply from master.
+	2019-04-30  Alan Modra  <amodra@gmail.com>
+	* wrstabs.c (stab_start_class_type): Add assert to work around
+	gcc9 warning.  Tidy.
+
 2019-04-01  Tamar Christina  <tamar.christina@arm.com>
 
 	Backport from mainline.
