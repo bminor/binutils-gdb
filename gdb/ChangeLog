@@ -1,5 +1,36 @@
 2019-04-27  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	Support style in 'frame|thread apply'
+
+	* gdbcmd.h (execute_command_to_string): New term_out parameter.
+	* record.c (record_start, record_stop): Update callers of
+	execute_command_to_string with false.
+	* guile/guile.c (gdbscm_execute_gdb_command): Likewise.
+	* ui-file.h (class ui_file): New term_out and can_emit_style_escape
+	methods.
+	(class string_file): New constructor with term_out parameter.
+	Override methods term_out and can_emit_style_escape.  New member
+	term_out.
+	(class stdio_file): Override can_emit_style_escape.
+	(class tee_file): Override term_out and can_emit_style_escape.
+	* utils.h (can_emit_style_escape): Remove.
+	* utils.c (can_emit_style_escape): Likewise.
+	Update all callers of can_emit_style_escape (SOMESTREAM) to
+	SOMESTREAM->can_emit_style_escape.
+	* source-cache.c (source_cache::get_source_lines): Likewise.
+	* stack.c (frame_apply_command_count): Call execute_command_to_string
+	passing the term_out characteristic of the current gdb_stdout.
+	* thread.c (thr_try_catch_cmd): Likewise.
+	* top.c (execute_command_to_string): pass term_out parameter
+	to construct the string_file for the command output.
+	* ui-file.c (term_cli_styling): New function (most code moved
+	from utils.c can_emit_style_escape).
+	(string_file::string_file, string_file::can_emit_style_escape,
+	stdio_file::can_emit_style_escape, tee_file::term_out,
+	tee_file::can_emit_style_escape): New functions.
+
+2019-04-27  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* NEWS: Mention the new set|show may-call-functions.
 	* infcall.c (may_call_functions_p): New variable.
 	(show_may_call_functions_p): New function.
