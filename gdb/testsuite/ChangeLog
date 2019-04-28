@@ -1,3 +1,13 @@
+2019-10-31  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.base/setshow.exp: Test $_gdb_setting and $_gdb_setting_str.
+	* gdb.base/settings.exp: Test all settings types using
+	$_gdb_maint_setting and $_gdb_maint_setting_str in proc_show_setting,
+	that now verifies that the value of "maint show" is the same as
+	returned by the settings functions.  Test the type of the
+	maintenance settings.
+	* gdb.base/default.exp: Update show_conv_list.
+
 2019-10-31  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.arch/amd64-disp-step-avx.exp: Drop superfluous 3rd argument to

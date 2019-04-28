@@ -35,11 +35,87 @@ if { ![readline_is_used] } {
 }
 
 # Test the show command SHOW_CMD.  EXPECTED_RE is the expected output.
-# This procedure exists in order to make it easier to make the test
+# Also verifies that $_gdb_maint_setting_str produces an equivalent output,
+# matching it with EXPECTED_RE.  EXPECTED_RE double quotes are escaped
+# unless EXPECTED_RE_ESCAPED is true, indicating the quotes in EXPECTED_RE
+# are already escaped.
+# The value for the setting corresponding to SHOW_CMD is then reset
+# to RESET_VALUE, then set again to the value given by $_gdb_maint_setting_str
+# and $_gdb_maint_setting.  The default value of RESET_VALUE (0) should work for
+# most settings.  Note that we do not check that RESET_VALUE differs from
+# the expected value, as we assume different values will be verified.
+# The setting value must still be the one in force before calling show_setting.
+# In other words, this verifies that
+#   maint set test-settings <some_setting> $_gdb_maint_setting_str(<some_setting>)
+#   maint set test-settings <some_setting> $_gdb_maint_setting(<some_setting>)
+# do not change the setting value.
+# This procedure makes it easier to make the test
 # name/message unique, since we test the "show" commands many times.
 # EXPECTED_RE is made part of the test name.
-proc show_setting {show_cmd expected_re} {
-    gdb_test "$show_cmd" $expected_re "$show_cmd: $expected_re"
+proc show_setting {show_cmd expected_re {expected_re_escaped 0} {reset_value 0}} {
+    global gdb_prompt
+
+    with_test_prefix "$show_cmd $expected_re" {
+	gdb_test "$show_cmd" $expected_re "show"
+
+	# Remove the first two words (such as "maint show") to have the
+	# setting name to use for $_gdb_maint_setting_str.
+	regsub "\[^ \]+ +\[^ \]+ +\(.*\)" $show_cmd "\\1" maint_setting
+	if {$expected_re_escaped} {
+	    set escaped_expected_re $expected_re
+	} else {
+	    regsub -all "\"" $expected_re "\\\\\\\"" escaped_expected_re
+	}
+	set test "print \$_gdb_maint_setting_str"
+	set setting_str_value "xxxYYYxxx"
+	gdb_test_multiple "print \$_gdb_maint_setting_str(\"$maint_setting\")" $test {
+	    -re " = \"\($escaped_expected_re\)\".*$gdb_prompt $" {
+		set setting_str_value $expect_out(1,string)
+		regsub -all "\\\\" $expect_out(1,string) "" setting_str_value
+		pass $test
+	    }
+	}
+
+	# Change the setting value to RESET_VALUE, set it back to setting_str_value
+	# and check we still have the original value.
+	gdb_test_no_output "maintenance set $maint_setting $reset_value" "str reset $reset_value"
+	gdb_test_no_output "maintenance set $maint_setting $setting_str_value" "str set again"
+	gdb_test "$show_cmd" $expected_re "str show after reset+set again"
+
+	# Same test, but with value captured from $_gdb_maint_setting.
+	set test "print \$_gdb_maint_setting"
+	set setting_value "xxxYYYxxx"
+	gdb_test_multiple "print \$_gdb_maint_setting(\"$maint_setting\")" $test {
+	    -re " = \"\(.*\)\".*$gdb_prompt $" {
+		set setting_value $expect_out(1,string)
+		regsub -all "\\\\" $expect_out(1,string) "" setting_value
+		pass $test
+	    }
+	    -re " = \(.*\)\r\n$gdb_prompt $" {
+		set setting_value $expect_out(1,string)
+		pass $test
+	    }
+	}
+
+	gdb_test_no_output "maintenance set $maint_setting $reset_value" "reset $reset_value"
+	gdb_test_no_output "maintenance set $maint_setting $setting_value" "set again"
+	gdb_test "$show_cmd" $expected_re "show after reset+set again"
+    }
+}
+
+# Verifies that $_gdb_setting (SETTING) gives a value whose ptype matches EXPECTED.
+proc check_type {setting expected} {
+    with_test_prefix "check_type $setting $expected" {
+	gdb_test "print \$_gdb_maint_setting(\"$setting\")"
+	gdb_test "ptype $" "$expected"
+
+	# Currently, GDB ptype <internal function> always tells it is type int.
+	# ptype should better report an error such as:
+	#   "No type information for GDB functions"
+	# Test 'type int', so as to make it fail if ptype is changed.
+	gdb_test "ptype \$_gdb_maint_setting(\"$setting\")" \
+            "type = int"
+    }
 }
 
 # var_Xinteger tests.  VARIANT determines which command/variant to
@@ -68,16 +144,19 @@ proc test-integer {variant} {
 	# -1 means unlimited.  Other negative values are rejected.  -1
 	# -is tested further below, along the "unlimited" tests.
 	gdb_test "$set_cmd -2" "only -1 is allowed to set as unlimited"
+	check_type "test-settings $variant" "type = int"
     } elseif {$variant == "uinteger" || $variant == "zuinteger"} {
 	# Negative values are not accepted.
 	gdb_test "$set_cmd -1" "integer -1 out of range"
 	gdb_test "$set_cmd -2" "integer -2 out of range"
+	check_type "test-settings $variant" "type = unsigned int"
     } else {
 	# Negative values are not accepted.
 	gdb_test_no_output "$set_cmd -1"
 	show_setting "$show_cmd" "-1"
 	gdb_test_no_output "$set_cmd -2"
 	show_setting "$show_cmd" "-2"
+	check_type "test-settings $variant" "type = int"
     }
 
     # Regular integer is accepted.
@@ -234,6 +313,8 @@ proc_with_prefix test-boolean {} {
 	show_setting "$show_cmd" "on"
     }
 
+    check_type "test-settings boolean" "type = int"
+
     foreach_with_prefix value {
 	"of"
 	"off"
@@ -354,6 +435,8 @@ proc_with_prefix test-auto-boolean {} {
 	show_setting "$show_cmd" "auto"
     }
 
+    check_type "test-settings auto-boolean" "type = int"
+
     # "-" is not accepted as abbreviation of "-1".
     gdb_test "$set_cmd -" \
 	"\"on\", \"off\" or \"auto\" expected\\."
@@ -409,11 +492,13 @@ proc_with_prefix test-enum {} {
     # Various valid values.  Test both full value names and
     # abbreviations.
     gdb_test_no_output "$set_cmd x"
-    show_setting "$show_cmd" "xxx"
+    show_setting "$show_cmd" "xxx" 0 "zzz"
     gdb_test_no_output "$set_cmd yy"
-    show_setting "$show_cmd" "yyy"
+    show_setting "$show_cmd" "yyy" 0 "zzz"
     gdb_test_no_output "$set_cmd zzz"
-    show_setting "$show_cmd" "zzz"
+    show_setting "$show_cmd" "zzz" 0 "yyy"
+
+    check_type "test-settings enum" "type = char \\\[3\\\]"
 
     test_gdb_complete_multiple "$set_cmd " "" "" {
 	"xxx"
@@ -458,10 +543,12 @@ proc test-string {variant} {
     gdb_test_no_output "$set_cmd hello world"
     show_setting "$show_cmd" "hello world"
 
+    check_type "test-settings $variant" "type = char \\\[\[1-9\]\[0-9\]*\\\]"
+
     # A quoted string value.
     if {$variant == "string"} {
 	gdb_test_no_output "$set_cmd \"hello world\""
-	show_setting "$show_cmd" "\\\\\"hello world\\\\\""
+	show_setting "$show_cmd" "\\\\\"hello world\\\\\"" 1
     } else {
 	gdb_test_no_output "$set_cmd \"hello world\""
 	show_setting "$show_cmd" "\"hello world\""
