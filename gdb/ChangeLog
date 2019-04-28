@@ -1,5 +1,10 @@
 2019-10-31  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* NEWS: Mention $_gdb_setting, $_gdb_setting_str, $_gdb_maint_setting
+	and $_gdb_maint_setting_str.
+
+2019-10-31  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* cli/cli-cmds.c (setting_cmd, value_from_setting)
 	(gdb_setting_internal_fn, gdb_maint_setting_internal_fn)
 	(str_value_from_setting, gdb_setting_str_internal_fn)

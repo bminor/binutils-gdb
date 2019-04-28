@@ -11987,9 +11987,98 @@ $3 = void
 $4 = 1
 @end smallexample
 
+@item $_gdb_setting_str (@var{setting})
+@findex $_gdb_setting_str@r{, convenience function}
+Return the value of the @value{GDBN} @var{setting} as a string.
+@var{setting} is any setting that can be used in a @code{set} or
+@code{show} command (@pxref{Controlling GDB}).
+
+@smallexample
+(@value{GDBP}) show print frame-arguments
+Printing of non-scalar frame arguments is "scalars".
+(@value{GDBP}) p $_gdb_setting_str("print frame-arguments")
+$1 = "scalars"
+(@value{GDBP}) p $_gdb_setting_str("height")
+$2 = "30"
+(@value{GDBP})
+@end smallexample
+
+@item $_gdb_setting (@var{setting})
+@findex $_gdb_setting@r{, convenience function}
+Return the value of the @value{GDBN} @var{setting}.
+The type of the returned value depends on the setting.
+
+The value type for boolean and auto boolean settings is @code{int}.
+The boolean values @code{off} and @code{on} are converted to
+the integer values @code{0} and @code{1}.  The value @code{auto} is
+converted to the value @code{-1}.
+
+The value type for integer settings is either @code{unsigned int}
+or @code{int}, depending on the setting.
+
+Some integer settings accept an @code{unlimited} value.
+Depending on the setting, the @code{set} command also accepts
+the value @code{0} or the value @code{@minus{}1} as a synonym for
+@code{unlimited}.
+For example, @code{set height unlimited} is equivalent to
+@code{set height 0}.
+
+Some other settings that accept the @code{unlimited} value
+use the value @code{0} to literally mean zero.
+For example, @code{set history size 0} indicates to not
+record any @value{GDBN} commands in the command history.
+For such settings, @code{@minus{}1} is the synonym
+for @code{unlimited}.
+
+See the documentation of the corresponding @code{set} command for
+the numerical value equivalent to @code{unlimited}.
+
+The @code{$_gdb_setting} function converts the unlimited value
+to a @code{0} or a @code{@minus{}1} value according to what the
+@code{set} command uses.
+
+@smallexample
+@group
+(@value{GDBP}) p $_gdb_setting_str("height")
+$1 = "30"
+(@value{GDBP}) p $_gdb_setting("height")
+$2 = 30
+(@value{GDBP}) set height unlimited
+(@value{GDBP}) p $_gdb_setting_str("height")
+$3 = "unlimited"
+(@value{GDBP}) p $_gdb_setting("height")
+$4 = 0
+@end group
+@group
+(@value{GDBP}) p $_gdb_setting_str("history size")
+$5 = "unlimited"
+(@value{GDBP}) p $_gdb_setting("history size")
+$6 = -1
+(@value{GDBP}) p $_gdb_setting_str("disassemble-next-line")
+$7 = "auto"
+(@value{GDBP}) p $_gdb_setting("disassemble-next-line")
+$8 = -1
+(@value{GDBP})
+@end group
+@end smallexample
+
+Other setting types (enum, filename, optional filename, string, string noescape)
+are returned as string values.
+
+
+@item $_gdb_maint_setting_str (@var{setting})
+@findex $_gdb_maint_setting_str@r{, convenience function}
+Like the @code{$_gdb_setting_str} function, but works with
+@code{maintenance set} variables.
+
+@item $_gdb_maint_setting (@var{setting})
+@findex $_gdb_maint_setting@r{, convenience function}
+Like the @code{$_gdb_setting} function, but works with
+@code{maintenance set} variables.
+
 @end table
 
-These functions require @value{GDBN} to be configured with
+The following functions require @value{GDBN} to be configured with
 @code{Python} support.
 
 @table @code

@@ -11,6 +11,12 @@
   scripts that should work error-free with many different versions,
   such as in system-wide init files.
 
+* New built-in convenience functions $_gdb_setting, $_gdb_setting_str,
+  $_gdb_maint_setting and $_gdb_maint_setting_str provide access to values
+  of the GDB settings and the GDB maintenance settings.  They are handy
+  for changing the logic of user defined commands depending on the
+  current GDB settings.
+
 * GDB now supports Thread Local Storage (TLS) variables on several
   FreeBSD architectures (amd64, i386, powerpc, riscv).  Other
   architectures require kernel changes.  TLS is not yet supported for

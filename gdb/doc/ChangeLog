@@ -1,3 +1,9 @@
+2019-10-31  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.texinfo (Convenience Funs): Document the new
+	$_gdb_setting_str, $_gdb_maint_setting and $_gdb_maint_setting_str
+	convenience functions.
+
 2019-10-29  Christian Biesinger  <cbiesinger@google.com>
 
 	* Makefile.in: Also set SYSTEM_GDBINIT_DIR for the info manual
