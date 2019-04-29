@@ -1,5 +1,13 @@
 2019-05-01  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.ada/packed_array_assign/aggregates.ads (Nested_Packed): New
+	record.
+	(NPR): New variable.
+	* gdb.ada/packed_array_assign.exp: Add nested packed assignment
+	test.
+
+2019-05-01  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.ada/packed_array_assign.exp: Add packed assignment
 	regression test.
 

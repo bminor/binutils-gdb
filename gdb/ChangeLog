@@ -1,5 +1,10 @@
 2019-05-01  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (ada_value_primitive_field): Treat more fields as
+	bitfields.
+
+2019-05-01  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.c (ada_value_assign): Correctly compute starting offset
 	for big-endian copies.
 

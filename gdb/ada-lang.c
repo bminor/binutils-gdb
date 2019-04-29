@@ -7189,9 +7189,10 @@ ada_value_primitive_field (struct value *arg1, int offset, int fieldno,
   arg_type = ada_check_typedef (arg_type);
   type = TYPE_FIELD_TYPE (arg_type, fieldno);
 
-  /* Handle packed fields.  */
-
-  if (TYPE_FIELD_BITSIZE (arg_type, fieldno) != 0)
+  /* Handle packed fields.  It might be that the field is not packed
+     relative to its containing structure, but the structure itself is
+     packed; in this case we must take the bit-field path.  */
+  if (TYPE_FIELD_BITSIZE (arg_type, fieldno) != 0 || value_bitpos (arg1) != 0)
     {
       int bit_pos = TYPE_FIELD_BITPOS (arg_type, fieldno);
       int bit_size = TYPE_FIELD_BITSIZE (arg_type, fieldno);

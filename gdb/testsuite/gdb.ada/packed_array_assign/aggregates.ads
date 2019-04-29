@@ -25,6 +25,12 @@ package Aggregates is
    type Packed_RecArr is array (Integer range <>) of Packed_Rec;
    pragma Pack (Packed_RecArr);
 
+   type Nested_Packed is record
+      Q000 : Int;
+      R000 : Packed_Rec;
+   end record;
+   pragma Pack (Nested_Packed);
+
    procedure Run_Test;
 
 private
@@ -32,4 +38,5 @@ private
                        Packed_Array_Assign_W => 104,
                        Packed_Array_Assign_X  => 2);
    PRA : Packed_RecArr (1 .. 3);
+   NPR : Nested_Packed := (q000 => 3, r000 => (packed_array_assign_x => 6, packed_array_assign_y => 1, packed_array_assign_w => 117));
 end Aggregates;
