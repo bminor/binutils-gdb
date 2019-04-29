@@ -1,3 +1,13 @@
+2019-05-06  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+	* mips-dis.c (mips_calculate_combination_ases): Add ISA
+	argument and set ASE_EVA_R6 appropriately.
+	(set_default_mips_dis_options): Pass ISA to above.
+	(parse_mips_dis_option): Likewise.
+	* mips-opc.c (EVAR6): New macro.
+	(mips_builtin_opcodes): Add llwpe, scwpe.
+
 2019-05-01  Sudakshina Das  <sudi.das@arm.com>
 
 	* aarch64-asm-2.c: Regenerated.

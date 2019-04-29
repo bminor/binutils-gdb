@@ -1,3 +1,9 @@
+2019-05-06  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+	* opcode/mips.h (ASE_EVA_R6): New macro.
+	(M_LLWPE_AB, M_SCWPE_AB): New enum values.
+
 2019-05-01  Sudakshina Das  <sudi.das@arm.com>
 
 	* opcode/aarch64.h (AARCH64_FEATURE_TME): New.

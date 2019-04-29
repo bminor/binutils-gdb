@@ -1,3 +1,15 @@
+2019-05-06  Andrew Bennett  <andrew.bennett@imgtec.com>
+	    Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+	* config/tc-mips.c (mips_set_ase): Handle ASE_EVA_R6.
+	(macro) <M_LLWPE_AB, M_SCWPE_AB>: New cases.
+	(mips_after_parse_args): Translate EVA to EVA_R6.
+	* testsuite/gas/mips/ase-errors-1.s: Add new instructions.
+	* testsuite/gas/mips/eva.s: Likewise.
+	* testsuite/gas/mips/ase-errors-1.l: Check errors for
+	 new instructions.
+	* testsuite/gas/mips/mipsr6@eva.d: Check new test cases.
+
 2019-05-06  Alan Modra  <amodra@gmail.com>
 
 	* symbols.c (symbol_relc_make_sym): Do not access sym->sy_value

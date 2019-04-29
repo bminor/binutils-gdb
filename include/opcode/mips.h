@@ -1308,6 +1308,9 @@ static const unsigned int mips_isa_table[] = {
 #define ASE_LOONGSON_EXT	0x00800000
 /* Loongson EXTensions R2 (EXT2) instructions.  */
 #define ASE_LOONGSON_EXT2	0x01000000
+/* The Enhanced VA Scheme (EVA) extension has instructions which are
+   only valid for the R6 ISA.  */
+#define ASE_EVA_R6		0x02000000
 
 /* MIPS ISA defines, use instead of hardcoding ISA level.  */
 
@@ -1631,6 +1634,7 @@ enum
   M_LLDP_AB,
   M_LLE_AB,
   M_LLWP_AB,
+  M_LLWPE_AB,
   M_LQ_AB,
   M_LW_AB,
   M_LWE_AB,
@@ -1684,6 +1688,7 @@ enum
   M_SCDP_AB,
   M_SCE_AB,
   M_SCWP_AB,
+  M_SCWPE_AB,
   M_SD_AB,
   M_SDC1_AB,
   M_SDC2_AB,

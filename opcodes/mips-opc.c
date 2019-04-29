@@ -392,6 +392,7 @@ decode_mips_operand (const char *p)
 
 /* MIPS Enhanced VA Scheme.  */
 #define EVA	ASE_EVA
+#define EVAR6	ASE_EVA_R6
 
 /* TLB invalidate instruction support.  */
 #define TLBINV	ASE_EVA
@@ -2638,6 +2639,8 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"lhe",			"t,A(b)",	0,    (int) M_LHE_AB,	INSN_MACRO,		0,		0,		EVA,	0 },
 {"lle",			"t,+j(b)",	0x7c00002e, 0xfc00007f, WR_1|RD_3|LM,		0,		0,		EVA,	0 },
 {"lle",			"t,A(b)",	0,    (int) M_LLE_AB,	INSN_MACRO,		0,		0,		EVA,	0 },
+{"llwpe",		"t,d,s",	0x7c00006e, 0xfc0007ff,	WR_1|WR_2|RD_3|LM,	0,		0,		EVAR6,	0 },
+{"llwpe",		"t,d,A(b)",	0,    (int) M_LLWPE_AB,	INSN_MACRO,		0,		0,		EVAR6,	0 },
 {"lwe",			"t,+j(b)",	0x7c00002f, 0xfc00007f, WR_1|RD_3|LM,		0,		0,		EVA,	0 },
 {"lwe",			"t,A(b)",	0,    (int) M_LWE_AB,	INSN_MACRO,		0,		0,		EVA,	0 },
 {"lwle",		"t,+j(b)",	0x7c000019, 0xfc00007f, WR_1|RD_3|LM,		0,		0,		EVA,	I37 },
@@ -2648,6 +2651,8 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"sbe",			"t,A(b)",	0,    (int) M_SBE_AB,	INSN_MACRO,		0,		0,		EVA,	0 },
 {"sce",			"t,+j(b)",	0x7c00001e, 0xfc00007f, MOD_1|RD_3|SM,		0,		0,		EVA,	0 },
 {"sce",			"t,A(b)",	0,    (int) M_SCE_AB,	INSN_MACRO,		0,		0,		EVA,	0 },
+{"scwpe",		"t,d,s",	0x7c00005e, 0xfc0007ff,	MOD_1|RD_2|RD_3|SM,	0,		0,		EVAR6,	0 },
+{"scwpe",		"t,d,A(b)",	0,    (int) M_SCWPE_AB,	INSN_MACRO,		0,		0,		EVAR6,	0 },
 {"she",			"t,+j(b)",	0x7c00001d, 0xfc00007f, RD_1|RD_3|SM,		0,		0,		EVA,	0 },
 {"she",			"t,A(b)",	0,    (int) M_SHE_AB,	INSN_MACRO,		0,		0,		EVA,	0 },
 {"swe",			"t,+j(b)",	0x7c00001f, 0xfc00007f, RD_1|RD_3|SM,		0,		0,		EVA,	0 },
